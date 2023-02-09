@@ -135,7 +135,7 @@ hypre_MGRSolve( void               *mgr_vdata,
          {
             hypre_ParCSRMatrixMatvec(fp_neg_one, A_array[0], U_array[0], fp_one, residual);
          }
-         resnorm = sqrt(hypre_ParVectorInnerProd(residual, residual));
+         resnorm = hypre_sqrt(hypre_ParVectorInnerProd(residual, residual));
       }
       else
       {
@@ -144,7 +144,7 @@ hypre_MGRSolve( void               *mgr_vdata,
          {
             hypre_ParCSRMatrixMatvec(fp_neg_one, A_array[0], U_array[0], fp_one, Vtemp);
          }
-         resnorm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+         resnorm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
       }
 
       /* Since it is does not diminish performance, attempt to return an error flag
@@ -175,7 +175,7 @@ hypre_MGRSolve( void               *mgr_vdata,
       }
 
       init_resnorm = resnorm;
-      rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
+      rhs_norm = hypre_sqrt(hypre_ParVectorInnerProd(f, f));
       if (rhs_norm > HYPRE_REAL_EPSILON)
       {
          rel_resnorm = init_resnorm / rhs_norm;
@@ -226,17 +226,17 @@ hypre_MGRSolve( void               *mgr_vdata,
       {
          old_resnorm = resnorm;
 
-         if ( logging > 1 )
+         if (logging > 1)
          {
             hypre_ParVectorCopy(F_array[0], residual);
             hypre_ParCSRMatrixMatvec(fp_neg_one, A_array[0], U_array[0], fp_one, residual);
-            resnorm = sqrt(hypre_ParVectorInnerProd( residual, residual ));
+            resnorm = hypre_sqrt(hypre_ParVectorInnerProd(residual, residual));
          }
          else
          {
             hypre_ParVectorCopy(F_array[0], Vtemp);
             hypre_ParCSRMatrixMatvec(fp_neg_one, A_array[0], U_array[0], fp_one, Vtemp);
-            resnorm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+            resnorm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
          }
 
          conv_factor = (old_resnorm > HYPRE_REAL_EPSILON) ? resnorm / old_resnorm : resnorm;
@@ -269,7 +269,7 @@ hypre_MGRSolve( void               *mgr_vdata,
 
    if (iter > 0 && init_resnorm)
    {
-      conv_factor = pow((resnorm / init_resnorm), (fp_one / (HYPRE_Real) iter));
+      conv_factor = hypre_pow((resnorm / init_resnorm), (fp_one / (HYPRE_Real) iter));
    }
    else
    {
@@ -545,7 +545,6 @@ hypre_MGRCycle( void              *mgr_vdata,
    hypre_ParMGRData      *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
    HYPRE_Int              local_size;
-   HYPRE_Int              ierr;
    HYPRE_Int              level;
    HYPRE_Int              coarse_grid;
    HYPRE_Int              fine_grid;
@@ -558,11 +557,11 @@ hypre_MGRCycle( void              *mgr_vdata,
    HYPRE_Int             *CF_marker_data;
 
    hypre_ParCSRMatrix   **A_array    = (mgr_data -> A_array);
-   hypre_ParCSRMatrix   **B_array    = (mgr_data -> B_array);
-   hypre_ParCSRMatrix   **B_FF_array = (mgr_data -> B_FF_array);
    hypre_ParCSRMatrix   **RT_array   = (mgr_data -> RT_array);
    hypre_ParCSRMatrix   **P_array    = (mgr_data -> P_array);
 #if defined(HYPRE_USING_GPU)
+   hypre_ParCSRMatrix   **B_array    = (mgr_data -> B_array);
+   hypre_ParCSRMatrix   **B_FF_array = (mgr_data -> B_FF_array);
    hypre_ParCSRMatrix   **P_FF_array = (mgr_data -> P_FF_array);
 #endif
    hypre_ParCSRMatrix    *RAP        = (mgr_data -> RAP);
@@ -613,8 +612,11 @@ hypre_MGRCycle( void              *mgr_vdata,
    HYPRE_Int              my_id;
    char                   region_name[1024];
    char                   msg[1024];
+
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
    HYPRE_MemoryLocation   memory_location;
    HYPRE_ExecutionPolicy  exec;
+#endif
 
    // HYPRE_Real     wall_time;
 
@@ -625,7 +627,6 @@ hypre_MGRCycle( void              *mgr_vdata,
    comm = hypre_ParCSRMatrixComm(A_array[0]);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-   ierr = 0;
    Not_Finished = 1;
    cycle_type = 1;
    level = 0;
@@ -694,8 +695,11 @@ hypre_MGRCycle( void              *mgr_vdata,
          l1_norms        = l1_norms_array[fine_grid] ?
                            hypre_VectorData(l1_norms_array[fine_grid]) : NULL;
          CF_marker_data  = hypre_IntArrayData(CF_marker[fine_grid]);
+
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
          memory_location = hypre_ParCSRMatrixMemoryLocation(A_array[fine_grid]);
          exec            = hypre_GetExecPolicy1(memory_location);
+#endif
 
          hypre_sprintf(region_name, "%s-%d", "MGR_Level", fine_grid);
          hypre_GpuProfilingPushRange(region_name);
@@ -923,9 +927,9 @@ hypre_MGRCycle( void              *mgr_vdata,
                                                   U_array[fine_grid], fp_one,
                                                   F_array[fine_grid], Vtemp);
 
-               resnorm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+               resnorm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
                init_resnorm = resnorm;
-               rhs_norm = sqrt(hypre_ParVectorInnerProd(F_array[fine_grid], F_array[fine_grid]));
+               rhs_norm = hypre_sqrt(hypre_ParVectorInnerProd(F_array[fine_grid], F_array[fine_grid]));
 
                if (rhs_norm > HYPRE_REAL_EPSILON)
                {
@@ -964,7 +968,7 @@ hypre_MGRCycle( void              *mgr_vdata,
                   hypre_ParCSRMatrixMatvecOutOfPlace(fp_neg_one, A_array[fine_grid],
                                                      U_array[fine_grid], fp_one,
                                                      F_array[fine_grid], Vtemp);
-                  resnorm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+                  resnorm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
                   conv_factor = (old_resnorm) ? (resnorm / old_resnorm) : resnorm;
                   rel_resnorm = (rhs_norm > HYPRE_REAL_EPSILON) ? (resnorm / rhs_norm) : resnorm;
 
@@ -1127,8 +1131,11 @@ hypre_MGRCycle( void              *mgr_vdata,
          l1_norms        = l1_norms_array[fine_grid] ?
                            hypre_VectorData(l1_norms_array[fine_grid]) : NULL;
          CF_marker_data  = hypre_IntArrayData(CF_marker[fine_grid]);
+
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
          memory_location = hypre_ParCSRMatrixMemoryLocation(A_array[fine_grid]);
          exec            = hypre_GetExecPolicy1(memory_location);
+#endif
 
          hypre_sprintf(region_name, "%s-%d", "MGR_Level", fine_grid);
          hypre_GpuProfilingPushRange(region_name);

@@ -18,7 +18,7 @@
  *
  */
 
-#include "ilu.h"
+#include "_hypre_blas.h"
 #include "DistributedMatrixPilutSolver.h"
 
 
@@ -31,8 +31,8 @@ HYPRE_Real hypre_p_dnrm2(DataDistType *ddist, HYPRE_Real *x, hypre_PilutSolverGl
   HYPRE_Int incx=1;
   HYPRE_Real sum;
 
-  sum = SNRM2(&(ddist->ddist_lnrows), x, &incx);
-  return sqrt(hypre_GlobalSESumDouble(sum*sum, pilut_comm));
+  sum = hypre_dnrm2(&(ddist->ddist_lnrows), x, &incx);
+  return hypre_sqrt(hypre_GlobalSESumDouble(sum*sum, pilut_comm));
 }
 
 
@@ -45,7 +45,7 @@ HYPRE_Real hypre_p_ddot(DataDistType *ddist, HYPRE_Real *x, HYPRE_Real *y,
 {
   HYPRE_Int incx=1;
 
-  return hypre_GlobalSESumDouble(SDOT(&(ddist->ddist_lnrows), x, &incx, y, &incx), 
+  return hypre_GlobalSESumDouble(hypre_ddot(&(ddist->ddist_lnrows), x, &incx, y, &incx), 
          pilut_comm );
 }
 

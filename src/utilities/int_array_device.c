@@ -39,6 +39,7 @@ hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v,
    return hypre_error_flag;
 }
 
+#if !defined(HYPRE_USING_DEVICE_OPENMP)
 /*--------------------------------------------------------------------------
  * hypreGPUKernel_IntArrayInverseMapping
  *--------------------------------------------------------------------------*/
@@ -56,6 +57,7 @@ hypreGPUKernel_IntArrayInverseMapping( hypre_DeviceItem  &item,
       w_data[v_data[i]] = i;
    }
 }
+#endif
 
 /*--------------------------------------------------------------------------
  * hypre_IntArrayInverseMappingDevice

@@ -197,13 +197,13 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
       mult = w[jr[k]]*dvalues[kk];
       w[jr[k]] = mult;
 
-      if (fabs(mult) < rtol)
+      if (hypre_abs(mult) < rtol)
          continue;/* First drop test */
 
       for (l=usrowptr[kk]; l<uerowptr[kk]; l++) {
         m = jr[ucolind[l]];
 
-        if (m == -1 && fabs(mult*uvalues[l]) < rtol*0.5)
+        if (m == -1 && hypre_abs(mult*uvalues[l]) < rtol*0.5)
           continue;  /* Don't add fill if the element is too small */
 
         if (m == -1) {  /* Create fill */
@@ -293,13 +293,13 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
       mult = w[jr[k]]*dvalues[kk];
       w[jr[k]] = mult;
 
-      if (fabs(mult) < rtol)
+      if (hypre_abs(mult) < rtol)
          continue;/* First drop test */
 
       for (l=usrowptr[kk]; l<uerowptr[kk]; l++) {
         m = jr[ucolind[l]];
 
-        if (m == -1 && fabs(mult*uvalues[l]) < rtol*0.5)
+        if (m == -1 && hypre_abs(mult*uvalues[l]) < rtol*0.5)
           continue;  /* Don't add fill if the element is too small */
 
         if (m == -1) {  /* Create fill */
@@ -512,7 +512,7 @@ void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
 
   /* First go and remove any off diagonal elements bellow the tolerance */
   for (i=0; i<lastjr;) {
-    if (fabs(w[i]) < tol) {
+    if (hypre_abs(w[i]) < tol) {
       jw[i] = jw[--lastjr];
       w[i] = w[lastjr];
     }
@@ -581,7 +581,7 @@ void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
      the QuickSplit routine above. AJC, 5/00
   for (nz=0; nz<maxnz && last>0; nz++) {
     for (max=0, j=1; j<last; j++) {
-      if (fabs(w[j]) > fabs(w[max]))
+      if (hypre_abs(w[j]) > hypre_abs(w[max]))
         max = j;
     }
 
@@ -609,7 +609,7 @@ void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
      the QuickSplit routine above. AJC, 5/00
   for (nz=0; nz<maxnz && lastjr>first; nz++) {
     for (max=first, j=first+1; j<lastjr; j++) {
-      if (fabs(w[j]) > fabs(w[max]))
+      if (hypre_abs(w[j]) > hypre_abs(w[max]))
         max = j;
     }
 
@@ -656,7 +656,7 @@ void hypre_SecondDropUpdate(HYPRE_Int maxnz, HYPRE_Int maxnzkeep, HYPRE_Real tol
 
   /* First go and remove any elements of the row bellow the tolerance */
   for (i=1; i<lastjr;) {
-    if (fabs(w[i]) < tol) {
+    if (hypre_abs(w[i]) < tol) {
       jw[i] = jw[--lastjr];
       w[i] = w[lastjr];
     }
@@ -734,7 +734,7 @@ void hypre_SecondDropUpdate(HYPRE_Int maxnz, HYPRE_Int maxnzkeep, HYPRE_Real tol
      the QuickSplit routine above. AJC, 5/00
   for (nz=0; nz<maxnz && last>1; nz++) {
     for (max=1, j=2; j<last; j++) {
-      if (fabs(w[j]) > fabs(w[max]))
+      if (hypre_abs(w[j]) > hypre_abs(w[max]))
         max = j;
     }
 
@@ -766,7 +766,7 @@ void hypre_SecondDropUpdate(HYPRE_Int maxnz, HYPRE_Int maxnzkeep, HYPRE_Real tol
   else { /* Keep large nl elements in the reduced row */
     for (nz=1; nz<nl; nz++) {
       for (max=first, j=first+1; j<lastjr; j++) {
-        if (fabs(w[j]) > fabs(w[max]))
+        if (hypre_abs(w[j]) > hypre_abs(w[max]))
           max = j;
       }
 

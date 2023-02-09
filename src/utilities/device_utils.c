@@ -49,7 +49,7 @@ hypre_DeviceDataCreate()
 
    /* hypre SpGEMM parameters */
    const HYPRE_Int  Nsamples   = 64;
-   const HYPRE_Real sigma      = 1.0 / sqrt(Nsamples - 2.0);
+   const HYPRE_Real sigma      = 1.0 / hypre_sqrt((HYPRE_Real)(Nsamples - 2.0));
    const HYPRE_Real multfactor = 1.0 / (1.0 - 3.0 * sigma);
 
    hypre_DeviceDataSpgemmAlgorithm(data)                = 1;
@@ -1413,94 +1413,6 @@ hypreDevice_GenScatterAdd( HYPRE_Real  *x,
 }
 
 /*--------------------------------------------------------------------
- * hypreGPUKernel_axpyn
- *--------------------------------------------------------------------*/
-
-template<typename T>
-__global__ void
-hypreGPUKernel_axpyn( hypre_DeviceItem &item,
-                      T                *x,
-                      size_t            n,
-                      T                *y,
-                      T                *z,
-                      T                 a )
-{
-   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
-
-   if (i < n)
-   {
-      z[i] = a * x[i] + y[i];
-   }
-}
-
-/*--------------------------------------------------------------------
- * hypreDevice_Axpyn
- *--------------------------------------------------------------------*/
-
-template<typename T>
-HYPRE_Int
-hypreDevice_Axpyn(T *d_x, size_t n, T *d_y, T *d_z, T a)
-{
-#if 0
-   HYPRE_THRUST_CALL( transform, d_x, d_x + n, d_y, d_z, a * _1 + _2 );
-#else
-   if (n <= 0)
-   {
-      return hypre_error_flag;
-   }
-
-   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
-
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_axpyn, gDim, bDim, d_x, n, d_y, d_z, a );
-#endif
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------
- * hypreDevice_ComplexAxpyn
- *--------------------------------------------------------------------*/
-
-HYPRE_Int
-hypreDevice_ComplexAxpyn( HYPRE_Complex  *d_x,
-                          size_t          n,
-                          HYPRE_Complex  *d_y,
-                          HYPRE_Complex  *d_z,
-                          HYPRE_Complex   a )
-{
-   return hypreDevice_Axpyn(d_x, n, d_y, d_z, a);
-}
-
-/*--------------------------------------------------------------------
- * hypreDevice_IntAxpyn
- *--------------------------------------------------------------------*/
-
-HYPRE_Int
-hypreDevice_IntAxpyn( HYPRE_Int *d_x,
-                      size_t     n,
-                      HYPRE_Int *d_y,
-                      HYPRE_Int *d_z,
-                      HYPRE_Int  a )
-{
-   return hypreDevice_Axpyn(d_x, n, d_y, d_z, a);
-}
-
-/*--------------------------------------------------------------------
- * hypreDevice_BigIntAxpyn
- *--------------------------------------------------------------------*/
-
-HYPRE_Int
-hypreDevice_BigIntAxpyn( HYPRE_BigInt *d_x,
-                         size_t        n,
-                         HYPRE_BigInt *d_y,
-                         HYPRE_BigInt *d_z,
-                         HYPRE_BigInt  a )
-{
-   return hypreDevice_Axpyn(d_x, n, d_y, d_z, a);
-}
-
-/*--------------------------------------------------------------------
  * hypreGPUKernel_Axpyzn
  *--------------------------------------------------------------------*/
 
@@ -1541,6 +1453,48 @@ hypreDevice_Axpyzn(HYPRE_Int n, T *d_x, T *d_y, T *d_z, T a, T b)
    HYPRE_GPU_LAUNCH( hypreGPUKernel_Axpyzn, gDim, bDim, n, d_x, d_y, d_z, a, b );
 
    return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_ComplexAxpyn
+ *--------------------------------------------------------------------*/
+
+HYPRE_Int
+hypreDevice_ComplexAxpyn( HYPRE_Complex  *d_x,
+                          size_t          n,
+                          HYPRE_Complex  *d_y,
+                          HYPRE_Complex  *d_z,
+                          HYPRE_Complex   a )
+{
+   return hypreDevice_Axpyzn((HYPRE_Int) n, d_x, d_y, d_z, a, (HYPRE_Complex) 1.0);
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_IntAxpyn
+ *--------------------------------------------------------------------*/
+
+HYPRE_Int
+hypreDevice_IntAxpyn( HYPRE_Int *d_x,
+                      size_t     n,
+                      HYPRE_Int *d_y,
+                      HYPRE_Int *d_z,
+                      HYPRE_Int  a )
+{
+   return hypreDevice_Axpyzn((HYPRE_Int) n, d_x, d_y, d_z, a, (HYPRE_Int) 1);
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_BigIntAxpyn
+ *--------------------------------------------------------------------*/
+
+HYPRE_Int
+hypreDevice_BigIntAxpyn( HYPRE_BigInt *d_x,
+                         size_t        n,
+                         HYPRE_BigInt *d_y,
+                         HYPRE_BigInt *d_z,
+                         HYPRE_BigInt  a )
+{
+   return hypreDevice_Axpyzn((HYPRE_Int) n, d_x, d_y, d_z, a, (HYPRE_BigInt) 1);
 }
 
 /*--------------------------------------------------------------------

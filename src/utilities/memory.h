@@ -174,6 +174,7 @@ hypre_GetActualMemLocation(HYPRE_MemoryLocation location)
 /* memory.c */
 HYPRE_Int hypre_GetMemoryLocationName(hypre_MemoryLocation memory_location,
                                       char *memory_location_name);
+void   hypre_CheckMemoryLocation(void *ptr, hypre_MemoryLocation location);
 void * hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_MemoryLocation location);
 void   hypre_MemPrefetch(void *ptr, size_t size, HYPRE_MemoryLocation location);
 void * hypre_MAlloc(size_t size, HYPRE_MemoryLocation location);
@@ -190,9 +191,6 @@ void   _hypre_Free(void *ptr, hypre_MemoryLocation location);
 HYPRE_ExecutionPolicy hypre_GetExecPolicy1(HYPRE_MemoryLocation location);
 HYPRE_ExecutionPolicy hypre_GetExecPolicy2(HYPRE_MemoryLocation location1,
                                            HYPRE_MemoryLocation location2);
-HYPRE_ExecutionPolicy hypre_GetExecPolicy3(HYPRE_MemoryLocation location1,
-                                           HYPRE_MemoryLocation location2,
-                                           HYPRE_MemoryLocation location3);
 
 HYPRE_Int hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location);
 HYPRE_Int hypre_SetCubMemPoolSize( hypre_uint bin_growth, hypre_uint min_bin, hypre_uint max_bin,
@@ -223,4 +221,4 @@ typedef void (*GPUMfreeFunc)(void *);
 }
 #endif
 
-#endif
+#endif /* hypre_MEMORY_HEADER */

@@ -159,7 +159,50 @@ hypre_SeqVectorSetSize( hypre_Vector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * ReadVector
+ * hypre_SeqVectorResize
+ *
+ * Resize a sequential vector when changing its number of components.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorResize( hypre_Vector *vector,
+                       HYPRE_Int     num_vectors_in )
+{
+   HYPRE_Int  method        = hypre_VectorMultiVecStorageMethod(vector);
+   HYPRE_Int  size          = hypre_VectorSize(vector);
+   HYPRE_Int  num_vectors   = hypre_VectorNumVectors(vector);
+   HYPRE_Int  total_size    = num_vectors * size;
+   HYPRE_Int  total_size_in = num_vectors_in * size;
+
+   /* Reallocate data array */
+   if (total_size_in > total_size)
+   {
+      hypre_VectorData(vector) = hypre_TReAlloc_v2(hypre_VectorData(vector),
+                                                   HYPRE_Complex,
+                                                   total_size,
+                                                   HYPRE_Complex,
+                                                   total_size_in,
+                                                   hypre_VectorMemoryLocation(vector));
+   }
+
+   /* Update vector info */
+   hypre_VectorNumVectors(vector) = num_vectors_in;
+   if (method == 0)
+   {
+      hypre_VectorVectorStride(vector) = size;
+      hypre_VectorIndexStride(vector)  = 1;
+   }
+   else if (method == 1)
+   {
+      hypre_VectorVectorStride(vector) = 1;
+      hypre_VectorIndexStride(vector)  = num_vectors;
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorRead
  *--------------------------------------------------------------------------*/
 
 hypre_Vector *
@@ -649,9 +692,8 @@ hypre_SeqVectorAxpyz( HYPRE_Complex alpha,
                       hypre_Vector *z )
 {
 #if defined(HYPRE_USING_GPU)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy3( hypre_VectorMemoryLocation(x),
-                                                      hypre_VectorMemoryLocation(y),
-                                                      hypre_VectorMemoryLocation(z) );
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_VectorMemoryLocation(x),
+                                                      hypre_VectorMemoryLocation(y));
    if (exec == HYPRE_EXEC_DEVICE)
    {
       hypre_SeqVectorAxpyzDevice(alpha, x, beta, y, z);

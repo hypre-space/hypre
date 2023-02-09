@@ -3235,7 +3235,7 @@ HYPRE_Int hypre_MGRBlockRelaxSolveDevice( hypre_ParCSRMatrix *B, hypre_ParCSRMat
                                           hypre_ParVector *f, hypre_ParVector *u,
                                           hypre_ParVector *Vtemp, HYPRE_Real relax_weight );
 HYPRE_Int hypre_MGRBlockRelaxSolve( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                    hypre_ParVector *u, HYPRE_Real blk_size,
+                                    hypre_ParVector *u, HYPRE_Int blk_size,
                                     HYPRE_Int n_block, HYPRE_Int left_size,
                                     HYPRE_Int method, HYPRE_Real *diaginv,
                                     hypre_ParVector *Vtemp );
@@ -3411,10 +3411,12 @@ HYPRE_Int hypre_ILUGetPermddPQPre(HYPRE_Int n, HYPRE_Int nLU, HYPRE_Int *A_diag_
                                   HYPRE_Int *pperm_pre, HYPRE_Int *qperm_pre, HYPRE_Int *nB);
 HYPRE_Int hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **pperm, HYPRE_Int **qperm,
                                HYPRE_Real tol, HYPRE_Int *nB, HYPRE_Int *nI, HYPRE_Int reordering_type);
-HYPRE_Int hypre_ILUGetInteriorExteriorPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU,
+HYPRE_Int hypre_ILUGetInteriorExteriorPerm(hypre_ParCSRMatrix *A,
+                                           HYPRE_MemoryLocation memory_location,
+                                           HYPRE_Int **perm, HYPRE_Int *nLU,
                                            HYPRE_Int reordering_type);
-HYPRE_Int hypre_ILUGetLocalPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU,
-                                HYPRE_Int reordering_type);
+HYPRE_Int hypre_ILUGetLocalPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm_ptr,
+                                HYPRE_Int *nLU, HYPRE_Int reordering_type);
 HYPRE_Int hypre_ILUWriteSolverParams(void *ilu_vdata);
 HYPRE_Int hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_Int **E_i,
                                           HYPRE_Int **E_j, HYPRE_Real **E_data);

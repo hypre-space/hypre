@@ -82,8 +82,10 @@ hypre_MGRSetup( void               *mgr_vdata,
 
    hypre_ParCSRMatrix  *A_FF = NULL;
    hypre_ParCSRMatrix  *A_FC = NULL;
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
    hypre_ParCSRMatrix  *A_CF = NULL;
    hypre_ParCSRMatrix  *A_CC = NULL;
+#endif
    HYPRE_Solver **aff_solver = (mgr_data -> aff_solver);
    hypre_ParCSRMatrix  **A_ff_array = (mgr_data -> A_ff_array);
    hypre_ParVector    **F_fine_array = (mgr_data -> F_fine_array);
@@ -1295,8 +1297,8 @@ hypre_MGRSetup( void               *mgr_vdata,
          {
             hypre_BoomerAMGBuildRestrDist2AIR(A_array[lev], CF_marker,
                                               ST, coarse_pnts_global, 1,
-                                              dof_func_buff_data, debug_flag,
-                                              filter_thresholdR, &RT, 1,
+                                              dof_func_buff_data, filter_thresholdR,
+                                              debug_flag, &RT, 1,
                                               is_triangular, gmres_switch);
          }
          RT_array[lev] = RT;

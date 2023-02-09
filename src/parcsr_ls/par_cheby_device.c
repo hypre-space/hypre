@@ -189,11 +189,10 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
    }
    else /* scaling! */
    {
-      /*grab 1/sqrt(diagonal) */
+      /* grab 1/sqrt(diagonal) */
       tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(tmp_vec));
 
-      /* get ds_data and get scaled residual: r = D^(-1/2)f -
-       * D^(-1/2)A*u */
+      /* get ds_data and get scaled residual: r = D^(-1/2)f - D^(-1/2)A*u */
       if (!hypre_ParVectorAllZeros(u))
       {
          hypre_ParCSRMatrixMatvec(-1.0, A, u, 0.0, tmp_vec);

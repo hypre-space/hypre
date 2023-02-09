@@ -863,76 +863,6 @@ hypre_GetExecPolicy2_core(hypre_MemoryLocation location1,
    return exec;
 }
 
-/* for binary operation */
-static inline HYPRE_ExecutionPolicy
-hypre_GetExecPolicy3_core(hypre_MemoryLocation location1,
-                          hypre_MemoryLocation location2,
-                          hypre_MemoryLocation location3)
-{
-   /* HOST_PINNED has the same exec policy as HOST */
-   if (location1 == hypre_MEMORY_HOST_PINNED)
-   {
-      location1 = hypre_MEMORY_HOST;
-   }
-
-   if (location2 == hypre_MEMORY_HOST_PINNED)
-   {
-      location2 = hypre_MEMORY_HOST;
-   }
-
-   if (location3 == hypre_MEMORY_HOST_PINNED)
-   {
-      location3 = hypre_MEMORY_HOST;
-   }
-
-   /* no policy for these combinations */
-   if ( (location1 == hypre_MEMORY_HOST && location2 == hypre_MEMORY_DEVICE) ||
-        (location2 == hypre_MEMORY_HOST && location1 == hypre_MEMORY_DEVICE) ||
-        (location2 == hypre_MEMORY_HOST && location3 == hypre_MEMORY_DEVICE) ||
-        (location3 == hypre_MEMORY_HOST && location2 == hypre_MEMORY_DEVICE) ||
-        (location1 == hypre_MEMORY_HOST && location3 == hypre_MEMORY_DEVICE) ||
-        (location3 == hypre_MEMORY_HOST && location1 == hypre_MEMORY_DEVICE) )
-   {
-      return HYPRE_EXEC_UNDEFINED;
-   }
-
-   /* this should never happen */
-   if ( (location1 == hypre_MEMORY_UNIFIED && location2 == hypre_MEMORY_DEVICE) ||
-        (location2 == hypre_MEMORY_UNIFIED && location1 == hypre_MEMORY_DEVICE) ||
-        (location2 == hypre_MEMORY_UNIFIED && location3 == hypre_MEMORY_DEVICE) ||
-        (location3 == hypre_MEMORY_UNIFIED && location2 == hypre_MEMORY_DEVICE) ||
-        (location1 == hypre_MEMORY_UNIFIED && location3 == hypre_MEMORY_DEVICE) ||
-        (location3 == hypre_MEMORY_UNIFIED && location1 == hypre_MEMORY_DEVICE) )
-   {
-      return HYPRE_EXEC_UNDEFINED;
-   }
-
-#if defined(HYPRE_USING_GPU)
-   if (location1 == hypre_MEMORY_UNIFIED &&
-       location2 == hypre_MEMORY_UNIFIED &&
-       location3 == hypre_MEMORY_UNIFIED)
-   {
-      return hypre_HandleDefaultExecPolicy(hypre_handle());
-   }
-#endif
-
-   if (location1 == hypre_MEMORY_HOST &&
-       location2 == hypre_MEMORY_HOST &&
-       location3 == hypre_MEMORY_HOST)
-   {
-      return HYPRE_EXEC_HOST;
-   }
-
-   if (location1 == hypre_MEMORY_DEVICE &&
-       location2 == hypre_MEMORY_DEVICE &&
-       location3 == hypre_MEMORY_DEVICE)
-   {
-      return HYPRE_EXEC_DEVICE;
-   }
-
-   return HYPRE_EXEC_UNDEFINED;
-}
-
 /*==========================================================================
  * Conceptual memory location (HYPRE_MemoryLocation) interface
  *==========================================================================*/
@@ -1118,17 +1048,6 @@ hypre_GetExecPolicy2(HYPRE_MemoryLocation location1,
 {
    return hypre_GetExecPolicy2_core(hypre_GetActualMemLocation(location1),
                                     hypre_GetActualMemLocation(location2));
-}
-
-/* for ternary operation */
-HYPRE_ExecutionPolicy
-hypre_GetExecPolicy3(HYPRE_MemoryLocation location1,
-                     HYPRE_MemoryLocation location2,
-                     HYPRE_MemoryLocation location3)
-{
-   return hypre_GetExecPolicy3_core(hypre_GetActualMemLocation(location1),
-                                    hypre_GetActualMemLocation(location2),
-                                    hypre_GetActualMemLocation(location3));
 }
 
 /*--------------------------------------------------------------------------

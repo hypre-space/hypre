@@ -135,7 +135,7 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
 
 #ifdef PARASAILS_CG_PRINT
       if (mype == 0 && i % 100 == 0)
-         hypre_printf("Iter (%d): rel. resid. norm: %e\n", i, sqrt(i_prod/bi_prod));
+         hypre_printf("Iter (%d): rel. resid. norm: %e\n", i, hypre_sqrt(i_prod/bi_prod));
 #endif
 
       /* check for convergence */
@@ -170,5 +170,5 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
    hypre_TFree(r, HYPRE_MEMORY_HOST);
 
    if (mype == 0)
-      hypre_printf("Iter (%4d): computed rrn    : %e\n", i, sqrt(i_prod/bi_prod));
+      hypre_printf("Iter (%4d): computed rrn    : %e\n", i, hypre_sqrt(i_prod/bi_prod));
 }
