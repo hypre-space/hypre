@@ -921,11 +921,11 @@ hypre_CSRMatrixMigrate( hypre_CSRMatrix     *A,
 
    /* Check pointer locations in debug mode */
 #if defined(HYPRE_DEBUG)
-   hypre_CheckMemoryLocation((void*) A_ri, hypre_GetActualMemLocation(old_memory_location));
-   hypre_CheckMemoryLocation((void*) A_i, hypre_GetActualMemLocation(old_memory_location));
-   hypre_CheckMemoryLocation((void*) A_j, hypre_GetActualMemLocation(old_memory_location));
+   hypre_CheckMemoryLocation((void*) A_ri,    hypre_GetActualMemLocation(old_memory_location));
+   hypre_CheckMemoryLocation((void*) A_i,     hypre_GetActualMemLocation(old_memory_location));
+   hypre_CheckMemoryLocation((void*) A_j,     hypre_GetActualMemLocation(old_memory_location));
    hypre_CheckMemoryLocation((void*) A_big_j, hypre_GetActualMemLocation(old_memory_location));
-   hypre_CheckMemoryLocation((void*) A_data, hypre_GetActualMemLocation(old_memory_location));
+   hypre_CheckMemoryLocation((void*) A_data,  hypre_GetActualMemLocation(old_memory_location));
 #endif
 
    /* Update A's memory location */
