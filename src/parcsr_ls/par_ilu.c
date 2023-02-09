@@ -1706,6 +1706,8 @@ hypre_ILUGetLocalPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU,
    HYPRE_Int            i;
    HYPRE_Int            *temp_perm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
 
+   hypre_GpuProfilingPushRange("ILUGetLocalPerm");
+
    /* set perm array */
    for ( i = 0 ; i < n ; i ++ )
    {
@@ -1728,6 +1730,8 @@ hypre_ILUGetLocalPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU,
    *nLU = n;
    if ((*perm) != NULL) { hypre_TFree(*perm, HYPRE_MEMORY_DEVICE); }
    *perm = temp_perm;
+
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }
