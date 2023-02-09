@@ -88,7 +88,7 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
 
    /* output X: 0: keep, 1: zero-out */
 #if defined(HYPRE_USING_SYCL)
-   /* WM: oneDPL currently does not have a reverse iterator */
+   /* WM: todo - oneDPL currently does not have a reverse iterator */
    /*     should be able to do this with a reverse operation defined in a struct */
    /*     instead of explicitly allocating and generating the reverse_perm, */
    /*     but I can't get that to work for some reason */
@@ -189,7 +189,7 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
 
    /* output in X0: 0: keep, 1: zero-out */
 #if defined(HYPRE_USING_SYCL)
-   /* WM: oneDPL currently does not have a reverse iterator */
+   /* WM: todo - oneDPL currently does not have a reverse iterator */
    /*     should be able to do this with a reverse operation defined in a struct */
    /*     instead of explicitly allocating and generating the reverse_perm, */
    /*     but I can't get that to work for some reason */

@@ -221,7 +221,7 @@ hypre_spgemm_compute_row_numer( hypre_DeviceItem       &item,
            warp_any_sync(item, HYPRE_WARP_FULL_MASK, k < rowB_end);
            k += blockDim_x)
       {
-         /* WM: note - have a warp_any_sync(k < rowB_end) to enter the loop directly followed by if (k < rowB_end)... do we need the any_sync above? */
+         /* WM: todo - have a warp_any_sync(k < rowB_end) to enter the loop directly followed by if (k < rowB_end)... do we need the any_sync above? */
          /*        I seem to be getting a hang here in sycl... does the use of atomics below require all threads in the group/subgroup to hit this or something? */
          if (k < rowB_end)
          {
@@ -256,7 +256,6 @@ template <HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_HASH_SIZE, bool HAS_GHASH, HYPRE
 static __device__ __forceinline__
 HYPRE_Int
 hypre_spgemm_copy_from_hash_into_C_row( hypre_DeviceItem       &item,
-                                        HYPRE_Int *jc,
                                         HYPRE_Int               lane_id,
                                         HYPRE_Int               do_shared_copy,
 #if defined(HYPRE_USING_SYCL)
@@ -283,7 +282,7 @@ hypre_spgemm_copy_from_hash_into_C_row( hypre_DeviceItem       &item,
       for (HYPRE_Int k = lane_id; k < SHMEM_HASH_SIZE; k += STEP_SIZE)
       {
          HYPRE_Int sum;
-         HYPRE_Int key = s_HashKeys ? s_HashKeys[k] : -1;
+         HYPRE_Int key = do_shared_copy ? s_HashKeys[k] : -1;
          HYPRE_Int pos = group_prefix_sum<HYPRE_Int, STEP_SIZE>(item, lane_id, (HYPRE_Int) (key != -1), sum);
 
          if (key != -1)
@@ -502,7 +501,6 @@ hypre_spgemm_numeric( hypre_DeviceItem                 &item,
          do_shared_copy = (iend_a > istart_a + 1) && (valid_ptr);
          jsum = hypre_spgemm_copy_from_hash_into_C_row<GROUP_SIZE, SHMEM_HASH_SIZE, HAS_GHASH, UNROLL_FACTOR>
                 (item,
-                 jc,
                  lane_id,
                  do_shared_copy,
                  group_s_HashKeys,
@@ -807,7 +805,7 @@ HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int  multiProcessorCount,
    const HYPRE_Int num_groups_per_block = hypre_spgemm_get_num_groups_per_block<GROUP_SIZE>();
    const HYPRE_Int block_size = num_groups_per_block * GROUP_SIZE;
    hypre_int numBlocksPerSm = 0;
-   /* WM: NOTE - for now, sycl shmem is alwasy dynamic */
+   /* WM: note - for now, sycl shmem is alwasy dynamic */
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM) || defined(HYPRE_USING_SYCL)
    const hypre_int shmem_bytes = num_groups_per_block * SHMEM_HASH_SIZE *
                                  (sizeof(HYPRE_Int) + sizeof(HYPRE_Complex));
