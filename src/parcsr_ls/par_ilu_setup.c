@@ -1670,7 +1670,7 @@ hypre_ParILUCusparseILUExtractEBFC(hypre_CSRMatrix   *A_diag,
       E_i[m] = ctrE;
       C_i[m] = ctrC;
 
-      hypre_assert((ctrB + ctrC + ctrE + ctrF) == A_diag_nnz);
+      hypre_assert((ctrB + ctrC + ctrE + ctrF) == nnz_A_diag);
 
       /* Update pointers */
       hypre_CSRMatrixJ(B)           = B_j;
