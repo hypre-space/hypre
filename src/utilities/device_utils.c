@@ -1496,7 +1496,7 @@ hypreDevice_ComplexAxpyn( HYPRE_Complex  *d_x,
                           HYPRE_Complex  *d_z,
                           HYPRE_Complex   a )
 {
-  return hypreDevice_Axpyzn((HYPRE_Int) n, d_x, d_y, d_z, a, (HYPRE_Complex) 1.0);
+   return hypreDevice_Axpyzn((HYPRE_Int) n, d_x, d_y, d_z, a, (HYPRE_Complex) 1.0);
 }
 
 /*--------------------------------------------------------------------
@@ -1510,7 +1510,7 @@ hypreDevice_IntAxpyn( HYPRE_Int *d_x,
                       HYPRE_Int *d_z,
                       HYPRE_Int  a )
 {
-  return hypreDevice_Axpyzn((HYPRE_Int) n, d_x, d_y, d_z, a, (HYPRE_Int) 1);
+   return hypreDevice_Axpyzn((HYPRE_Int) n, d_x, d_y, d_z, a, (HYPRE_Int) 1);
 }
 
 /*--------------------------------------------------------------------

@@ -1035,7 +1035,7 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
    for (i = 0; i < num_variables; i++)
    {
       rownz[i] = (HYPRE_Int)(1.2 * (RAP_diag_i[i + 1] - RAP_diag_i[i]) +
-                 1.2 * (RAP_offd_i[i + 1] - RAP_offd_i[i]));
+                             1.2 * (RAP_offd_i[i + 1] - RAP_offd_i[i]));
    }
    HYPRE_IJMatrixSetRowSizes(Pattern, rownz);
    HYPRE_IJMatrixInitialize(Pattern);
@@ -1869,7 +1869,8 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                   for (k = 0; k < diag_intersection_len; k++)
                   {
                      lump_value = lump_percent * hypre_abs(diag_intersection_data[k]) * sum_strong_neigh;
-                     diagonal_lump_value = (1.0 - lump_percent) * hypre_abs(diag_intersection_data[k]) * sum_strong_neigh;
+                     diagonal_lump_value = (1.0 - lump_percent) * hypre_abs(diag_intersection_data[k]) *
+                                           sum_strong_neigh;
                      neg_lump_value = -1.0 * lump_value;
                      cnt = diag_intersection[k] + first_col_diag_RAP;
 
@@ -1912,7 +1913,8 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                   for (k = 0; k < offd_intersection_len; k++)
                   {
                      lump_value = lump_percent * hypre_abs(offd_intersection_data[k]) * sum_strong_neigh;
-                     diagonal_lump_value = (1.0 - lump_percent) * hypre_abs(offd_intersection_data[k]) * sum_strong_neigh;
+                     diagonal_lump_value = (1.0 - lump_percent) * hypre_abs(offd_intersection_data[k]) *
+                                           sum_strong_neigh;
                      neg_lump_value = -1.0 * lump_value;
 
                      hypre_NonGalerkinIJBufferWrite( ijmatrix, &ijbuf_cnt, ijbuf_size, &ijbuf_rowcounter,
@@ -2153,7 +2155,8 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                      for (k = 0; k < diag_intersection_len; k++)
                      {
                         lump_value = lump_percent * hypre_abs(diag_intersection_data[k]) * sum_strong_neigh;
-                        diagonal_lump_value = (1.0 - lump_percent) * hypre_abs(diag_intersection_data[k]) * sum_strong_neigh;
+                        diagonal_lump_value = (1.0 - lump_percent) * hypre_abs(diag_intersection_data[k]) *
+                                              sum_strong_neigh;
                         neg_lump_value = -1.0 * lump_value;
                         cnt = diag_intersection[k] + first_col_diag_RAP;
 
@@ -2187,7 +2190,8 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                      for (k = 0; k < offd_intersection_len; k++)
                      {
                         lump_value = lump_percent * hypre_abs(offd_intersection_data[k]) * sum_strong_neigh;
-                        diagonal_lump_value = (1.0 - lump_percent) * hypre_abs(offd_intersection_data[k]) * sum_strong_neigh;
+                        diagonal_lump_value = (1.0 - lump_percent) * hypre_abs(offd_intersection_data[k]) *
+                                              sum_strong_neigh;
                         neg_lump_value = -1.0 * lump_value;
 
                         hypre_NonGalerkinIJBufferWrite( ijmatrix, &ijbuf_cnt, ijbuf_size, &ijbuf_rowcounter,

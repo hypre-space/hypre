@@ -1715,7 +1715,8 @@ hypre_AMGDDCompGridSetupLocalIndices( hypre_AMGDDCompGrid **compGrid,
                                           (HYPRE_Int)hypre_ceil(1.5 * hypre_CSRMatrixNumNonzeros(nonowned_diag)),
                                           hypre_AMGDDCompGridMemoryLocation(compGrid[current_level]));
                      hypre_CSRMatrixResize(nonowned_diag, hypre_CSRMatrixNumRows(nonowned_diag),
-                                           hypre_CSRMatrixNumCols(nonowned_diag), (HYPRE_Int)hypre_ceil(1.5 * hypre_CSRMatrixNumNonzeros(nonowned_diag)));
+                                           hypre_CSRMatrixNumCols(nonowned_diag),
+                                           (HYPRE_Int)hypre_ceil(1.5 * hypre_CSRMatrixNumNonzeros(nonowned_diag)));
                   }
                   // If we dof not found in comp grid, then mark this as a missing connection
                   hypre_AMGDDCompGridNonOwnedDiagMissingColIndices(
