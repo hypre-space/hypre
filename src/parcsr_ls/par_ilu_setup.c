@@ -395,6 +395,8 @@ hypre_ILUSetup( void               *ilu_vdata,
    /* Create perm array if necessary */
    if (!perm)
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("ComputePermArray");
+
       switch (ilu_type)
       {
          case 10: case 11: case 20: case 21: case 30: case 31: case 50:
@@ -411,10 +413,13 @@ hypre_ILUSetup( void               *ilu_vdata,
             hypre_ILUGetLocalPerm(matA, &perm, &nLU, reordering_type);
             break;
       }
+
+      HYPRE_ANNOTATE_REGION_END("ComputePermArray");
    }
 
    //   m = n - nLU;
    /* factorization */
+   HYPRE_ANNOTATE_REGION_BEGIN("Factorization");
    switch (ilu_type)
    {
       case 0:
@@ -703,6 +708,7 @@ hypre_ILUSetup( void               *ilu_vdata,
             break;
       }
    }
+   HYPRE_ANNOTATE_REGION_END("Factorization");
 
    /* setup Schur solver - TODO (VPM): merge host and device paths below */
    switch (ilu_type)
