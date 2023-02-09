@@ -26,7 +26,6 @@ hypre_ILUSolve( void               *ilu_vdata,
 {
    MPI_Comm                comm              = hypre_ParCSRMatrixComm(A);
    hypre_ParILUData       *ilu_data          = (hypre_ParILUData*) ilu_vdata;
-   HYPRE_ExecutionPolicy   exec;
 
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    /* pointers to cusparse data, note that they are not NULL only when needed */
@@ -116,12 +115,13 @@ hypre_ILUSolve( void               *ilu_vdata,
    hypre_ParVector      *rhs           = hypre_ParILUDataRhs(ilu_data);
    hypre_ParVector      *x             = hypre_ParILUDataX(ilu_data);
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                                      hypre_ParVectorMemoryLocation(f) );
+#endif
+
    /* begin */
    HYPRE_ANNOTATE_FUNC_BEGIN;
-
-   /* Set execution policy */
-   exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
-                                hypre_ParVectorMemoryLocation(f) );
 
    if (logging > 1)
    {

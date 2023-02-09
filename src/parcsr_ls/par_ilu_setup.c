@@ -115,7 +115,11 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Int             send_size;
    HYPRE_Int             recv_size;
    HYPRE_Int             num_procs, my_id;
-   HYPRE_ExecutionPolicy exec;
+
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
+                                                      hypre_ParVectorMemoryLocation(f) );
+#endif
 
    /* ----- begin -----*/
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -125,10 +129,6 @@ hypre_ILUSetup( void               *ilu_vdata,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-
-   /* Set execution policy */
-   exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
-                                hypre_ParVectorMemoryLocation(f) );
 
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
    /* create cuda and cusparse information when needed */
