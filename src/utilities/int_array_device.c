@@ -39,11 +39,11 @@ hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v,
    return hypre_error_flag;
 }
 
+#if !defined(HYPRE_USING_DEVICE_OPENMP)
 /*--------------------------------------------------------------------------
  * hypreGPUKernel_IntArrayInverseMapping
  *--------------------------------------------------------------------------*/
 
-#if !defined(HYPRE_USING_DEVICE_OPENMP)
 __global__ void
 hypreGPUKernel_IntArrayInverseMapping( hypre_DeviceItem  &item,
                                        HYPRE_Int          size,

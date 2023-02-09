@@ -2005,7 +2005,8 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
                      if (level == interp_vec_first_level )
                         /* get the old col number back to index into vector */
                      {
-                        c_col = (HYPRE_Int)((HYPRE_Int) big_new_col - hypre_floor((HYPRE_Real) big_new_col / (HYPRE_Real) num_f));
+                        c_col = (HYPRE_Int)((HYPRE_Int) big_new_col - hypre_floor((HYPRE_Real) big_new_col /
+                                                                                  (HYPRE_Real) num_f));
                      }
                      else
                      {

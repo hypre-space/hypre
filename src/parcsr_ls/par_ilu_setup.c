@@ -117,6 +117,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 
    /* ----- begin -----*/
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("hypre_ILUSetup");
 
    //num_threads = hypre_NumThreads();
 
@@ -1215,6 +1216,8 @@ hypre_ILUSetup( void               *ilu_vdata,
    }
    rel_res_norms = hypre_CTAlloc(HYPRE_Real, hypre_ParILUDataMaxIter(ilu_data), HYPRE_MEMORY_HOST);
    hypre_ParILUDataRelResNorms(ilu_data) = rel_res_norms;
+
+   hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
@@ -1386,10 +1389,10 @@ hypre_ParILUCusparseILUExtractEBFC(hypre_CSRMatrix *A_diag, HYPRE_Int nLU, hypre
       hypre_CSRMatrixInitialize(F);
 
       /* Estimate # of nonzeros */
-      capacity_B                       = (HYPRE_Int)(nLU + hypre_ceil(nnz_A_diag * 1.0 * nLU / n * nLU / n));
-      capacity_C                       = (HYPRE_Int)(m + hypre_ceil(nnz_A_diag * 1.0 * m / n * m / n));
-      capacity_E                       = (HYPRE_Int)(hypre_min(m, nLU) + hypre_ceil(nnz_A_diag * 1.0 * nLU / n * m / n));
-      capacity_F                       = capacity_E;
+      capacity_B = (HYPRE_Int) (nLU + hypre_ceil(nnz_A_diag * 1.0 * nLU / n * nLU / n));
+      capacity_C = (HYPRE_Int) (m + hypre_ceil(nnz_A_diag * 1.0 * m / n * m / n));
+      capacity_E = (HYPRE_Int) (hypre_min(m, nLU) + hypre_ceil(nnz_A_diag * 1.0 * nLU / n * m / n));
+      capacity_F = capacity_E;
 
       /* Allocate memory */
       B_i                              = hypre_CSRMatrixI(B);
