@@ -1920,7 +1920,7 @@ struct adj_functor : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
 {
    HYPRE_Int *ia_;
 
-   adj_functor(int *ia)
+   adj_functor(HYPRE_Int *ia)
    {
       ia_ = ia;
    }
