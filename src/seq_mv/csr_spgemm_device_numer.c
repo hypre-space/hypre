@@ -5,10 +5,11 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 /*
  * d_rc: input: nnz (upper bound) of each row
@@ -36,8 +37,15 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin( HYPRE_Int       m,
    const HYPRE_Int BIN = HYPRE_SPGEMM_DEFAULT_BIN;
 
 #ifdef HYPRE_SPGEMM_PRINTF
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Int max_rc = HYPRE_ONEDPL_CALL(std::reduce, d_rc, d_rc + m, 0,
+                                        sycl::maximum<HYPRE_Int>());
+   HYPRE_Int min_rc = HYPRE_ONEDPL_CALL(std::reduce, d_rc, d_rc + m, max_rc,
+                                        sycl::minimum<HYPRE_Int>());
+#else
    HYPRE_Int max_rc = HYPRE_THRUST_CALL(reduce, d_rc, d_rc + m, 0,      thrust::maximum<HYPRE_Int>());
    HYPRE_Int min_rc = HYPRE_THRUST_CALL(reduce, d_rc, d_rc + m, max_rc, thrust::minimum<HYPRE_Int>());
+#endif
    HYPRE_SPGEMM_PRINT("%s[%d]: max RC %d, min RC %d\n", __FILE__, __LINE__, max_rc, min_rc);
 #endif
 
@@ -53,6 +61,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin( HYPRE_Int       m,
 #ifdef HYPRE_SPGEMM_PRINTF
    HYPRE_SPGEMM_PRINT("%s[%d]: nnzC %d\n", __FILE__, __LINE__, nnzC);
 #endif
+
 
    /* even with exact rownnz, still may need global hash, since shared hash is smaller than symbol */
    hypre_spgemm_numerical_with_rownnz<BIN, SHMEM_HASH_SIZE, GROUP_SIZE, false>
@@ -224,5 +233,5 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
    return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
+#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
 
