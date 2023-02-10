@@ -13,7 +13,7 @@ hypre_MemoryTracker *_hypre_memory_tracker = NULL;
 
 /* accessor to the global ``_hypre_memory_tracker'' */
 hypre_MemoryTracker*
-hypre_memory_tracker()
+hypre_memory_tracker(void)
 {
    if (!_hypre_memory_tracker)
    {
@@ -31,7 +31,7 @@ hypre_Handle *_hypre_handle = NULL;
 
 /* accessor to the global ``_hypre_handle'' */
 hypre_Handle*
-hypre_handle()
+hypre_handle(void)
 {
    if (!_hypre_handle)
    {
@@ -42,7 +42,7 @@ hypre_handle()
 }
 
 hypre_Handle*
-hypre_HandleCreate()
+hypre_HandleCreate(void)
 {
    hypre_Handle *hypre_handle_ = hypre_CTAlloc(hypre_Handle, 1, HYPRE_MEMORY_HOST);
 
@@ -50,7 +50,6 @@ hypre_HandleCreate()
 
 #if defined(HYPRE_USING_GPU)
    hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
-   hypre_HandleStructExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
    hypre_HandleDeviceData(hypre_handle_) = hypre_DeviceDataCreate();
    /* Gauss-Seidel: SpTrSV */
    hypre_HandleDeviceGSMethod(hypre_handle_) = 1; /* CPU: 0; Cusparse: 1 */
@@ -248,7 +247,7 @@ hypre_GetDeviceCount(hypre_int *device_count)
 }
 
 HYPRE_Int
-hypre_GetDeviceLastError()
+hypre_GetDeviceLastError(void)
 {
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaGetLastError() );
@@ -280,7 +279,7 @@ hypre_GetDeviceLastError()
  *****************************************************************************/
 
 HYPRE_Int
-HYPRE_Init()
+HYPRE_Init(void)
 {
 #ifdef HYPRE_USING_MEMORY_TRACKER
    if (!_hypre_memory_tracker)
@@ -339,7 +338,7 @@ HYPRE_Init()
 #endif
 
    /* Check if cuda arch flags in compiling match the device */
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_DEBUG)
    hypre_CudaCompileFlagCheck();
 #endif
 
@@ -376,7 +375,7 @@ HYPRE_Init()
  *****************************************************************************/
 
 HYPRE_Int
-HYPRE_Finalize()
+HYPRE_Finalize(void)
 {
 #if defined(HYPRE_USING_UMPIRE)
    hypre_UmpireFinalize(_hypre_handle);
@@ -392,7 +391,9 @@ HYPRE_Finalize()
 #endif
 
 #ifdef HYPRE_USING_MEMORY_TRACKER
-   hypre_PrintMemoryTracker();
+   hypre_PrintMemoryTracker(hypre_total_bytes, hypre_peak_bytes, hypre_current_bytes,
+                            hypre_memory_tracker_print, hypre_memory_tracker_filename);
+
    hypre_MemoryTrackerDestroy(_hypre_memory_tracker);
 #endif
 
@@ -400,7 +401,7 @@ HYPRE_Finalize()
 }
 
 HYPRE_Int
-HYPRE_PrintDeviceInfo()
+HYPRE_PrintDeviceInfo(void)
 {
 #if defined(HYPRE_USING_CUDA)
    hypre_int dev;
@@ -653,25 +654,9 @@ HYPRE_SetExecutionPolicy(HYPRE_ExecutionPolicy exec_policy)
 }
 
 HYPRE_Int
-HYPRE_SetStructExecutionPolicy(HYPRE_ExecutionPolicy exec_policy)
-{
-   hypre_HandleStructExecPolicy(hypre_handle()) = exec_policy;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
 HYPRE_GetExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy)
 {
    *exec_policy = hypre_HandleDefaultExecPolicy(hypre_handle());
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-HYPRE_GetStructExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy)
-{
-   *exec_policy = hypre_HandleStructExecPolicy(hypre_handle());
 
    return hypre_error_flag;
 }

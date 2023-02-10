@@ -181,7 +181,7 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
    else /* scaling! */
    {
 
-      /*grab 1/sqrt(diagonal) */
+      /*grab 1/hypre_sqrt(diagonal) */
 
       tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(tmp_vec));
 

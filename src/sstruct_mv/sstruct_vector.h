@@ -56,15 +56,13 @@ typedef struct hypre_SStructVector_struct
    /* inter-part communication info */
    HYPRE_Int               nbor_ncomms;  /* num comm_pkgs with neighbor parts */
 
-   /* GEC10020902 pointer to big chunk of memory and auxiliary information   */
-
-   HYPRE_Complex           *data;        /* GEC1002 pointer to chunk data  */
-   HYPRE_Int               *dataindices; /* GEC1002 dataindices[partx] is the starting index
-                                          of vector data for the part=partx    */
-   HYPRE_Int               datasize    ;  /* GEC1002 size of all data = ghlocalsize */
+   /* GEC10020902 pointer to big chunk of memory and auxiliary information */
+   HYPRE_Complex          *data;        /* GEC1002 pointer to chunk data */
+   HYPRE_Int              *dataindices; /* GEC1002 dataindices[partx] is the starting index
+                                           of vector data for the part=partx */
+   HYPRE_Int               datasize;    /* GEC1002 size of all data = ghlocalsize */
 
    HYPRE_Int               global_size;  /* Total number coefficients */
-
    HYPRE_Int               ref_count;
 
 } hypre_SStructVector;

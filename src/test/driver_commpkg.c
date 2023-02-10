@@ -747,7 +747,7 @@ void stats_mo(HYPRE_Real array[], HYPRE_Int n, HYPRE_Real *Tavg, HYPRE_Real *Tst
    tmp = tmp / (HYPRE_Real) n;
 
    tmp = fabs(tmp - avg * avg);
-   std = sqrt(tmp);
+   std = hypre_sqrt(tmp);
 
    *Tavg = avg;
    *Tstd = std;
@@ -949,9 +949,9 @@ myBuildParLaplacian( HYPRE_Int                  argc,
       else if ( strcmp(argv[arg_index], "-c") == 0 )
       {
          arg_index++;
-         cx = atof(argv[arg_index++]);
-         cy = atof(argv[arg_index++]);
-         cz = atof(argv[arg_index++]);
+         cx = (HYPRE_Real)atof(argv[arg_index++]);
+         cy = (HYPRE_Real)atof(argv[arg_index++]);
+         cz = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else
       {

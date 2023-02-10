@@ -729,15 +729,13 @@ typedef struct hypre_SStructVector_struct
    /* inter-part communication info */
    HYPRE_Int               nbor_ncomms;  /* num comm_pkgs with neighbor parts */
 
-   /* GEC10020902 pointer to big chunk of memory and auxiliary information   */
-
-   HYPRE_Complex           *data;        /* GEC1002 pointer to chunk data  */
-   HYPRE_Int               *dataindices; /* GEC1002 dataindices[partx] is the starting index
-                                          of vector data for the part=partx    */
-   HYPRE_Int               datasize    ;  /* GEC1002 size of all data = ghlocalsize */
+   /* GEC10020902 pointer to big chunk of memory and auxiliary information */
+   HYPRE_Complex          *data;        /* GEC1002 pointer to chunk data */
+   HYPRE_Int              *dataindices; /* GEC1002 dataindices[partx] is the starting index
+                                           of vector data for the part=partx */
+   HYPRE_Int               datasize;    /* GEC1002 size of all data = ghlocalsize */
 
    HYPRE_Int               global_size;  /* Total number coefficients */
-
    HYPRE_Int               ref_count;
 
 } hypre_SStructVector;
@@ -1043,6 +1041,7 @@ HYPRE_Int hypre_SStructMatrixSetBoxValues( HYPRE_SStructMatrix matrix, HYPRE_Int
 HYPRE_Int hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix matrix, HYPRE_Int part,
                                                  hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box,
                                                  HYPRE_Complex *values, HYPRE_Int action );
+HYPRE_MemoryLocation hypre_SStructMatrixMemoryLocation(hypre_SStructMatrix *matrix);
 
 /* sstruct_matvec.c */
 HYPRE_Int hypre_SStructPMatvecCreate ( void **pmatvec_vdata_ptr );
@@ -1103,6 +1102,8 @@ HYPRE_Int hypre_SStructVectorParRestore ( hypre_SStructVector *vector, hypre_Par
 HYPRE_Int hypre_SStructPVectorInitializeShell ( hypre_SStructPVector *pvector );
 HYPRE_Int hypre_SStructVectorInitializeShell ( hypre_SStructVector *vector );
 HYPRE_Int hypre_SStructVectorClearGhostValues ( hypre_SStructVector *vector );
+HYPRE_MemoryLocation hypre_SStructVectorMemoryLocation(hypre_SStructVector *vector);
+
 
 #ifdef __cplusplus
 }

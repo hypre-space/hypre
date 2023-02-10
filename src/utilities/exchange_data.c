@@ -197,14 +197,15 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
 
 
    /* pre-allocate the max space for responding to contacts */
-   overhead = ceil((HYPRE_Real) sizeof(HYPRE_Int) / response_obj_size); /*for appending an integer*/
+   overhead = (HYPRE_Int)hypre_ceil((HYPRE_Real) sizeof(HYPRE_Int) /
+                                    response_obj_size); /*for appending an integer*/
 
    max_response_total_bytes = (max_response_size + overhead) * response_obj_size;
 
    response_obj->send_response_overhead = overhead;
    response_obj->send_response_storage = max_response_size;
 
-   /*send_response_buf = hypre_MAlloc(max_response_total_bytes);*/
+   /*send_response_buf = hypre_TAlloc(char, max_response_total_bytes);*/
    send_response_buf = hypre_CTAlloc(char, (max_response_size + overhead) * response_obj_size,
                                      HYPRE_MEMORY_HOST);
 

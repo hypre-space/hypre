@@ -109,7 +109,7 @@ hypre_IJMatrixSetRowSizesParCSR(hypre_IJMatrix  *matrix,
    }
    hypre_AuxParCSRMatrixRowSpace(aux_matrix) = row_space;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    hypre_AuxParCSRMatrixUsrOnProcElmts(aux_matrix) = 0;
    for (i = 0; i < local_num_rows; i++)
    {
@@ -180,7 +180,7 @@ HYPRE_Int
 hypre_IJMatrixSetMaxOnProcElmtsParCSR(hypre_IJMatrix *matrix,
                                       HYPRE_Int       max_on_proc_elmts)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    hypre_AuxParCSRMatrix *aux_matrix;
    HYPRE_Int local_num_rows, local_num_cols, my_id;
    HYPRE_BigInt *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
@@ -230,7 +230,7 @@ hypre_IJMatrixSetMaxOffProcElmtsParCSR(hypre_IJMatrix *matrix,
    }
    hypre_AuxParCSRMatrixMaxOffProcElmts(aux_matrix) = max_off_proc_elmts;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    hypre_AuxParCSRMatrixUsrOffProcElmts(aux_matrix) = max_off_proc_elmts;
 #endif
 
@@ -282,8 +282,7 @@ hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix, HYPRE_MemoryLocation m
       hypre_ParCSRMatrixInitialize_v2(par_matrix, memory_location);
       hypre_AuxParCSRMatrixInitialize_v2(aux_matrix, memory_location_aux);
 
-      /* WM: TODO - implement for sycl */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
       if (hypre_GetExecPolicy1(memory_location_aux) == HYPRE_EXEC_HOST)
 #endif
       {
@@ -1056,7 +1055,7 @@ hypre_IJMatrixSetConstantValuesParCSR( hypre_IJMatrix *matrix,
 {
    if (hypre_IJMatrixAssembleFlag(matrix))  /* matrix already assembled*/
    {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
       if (hypre_GetExecPolicy1(hypre_IJMatrixMemoryLocation(matrix)) == HYPRE_EXEC_DEVICE)
       {
          hypre_IJMatrixSetConstantValuesParCSRDevice(matrix, value);
@@ -2066,7 +2065,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
 
    hypre_TFree(num_elements_total, HYPRE_MEMORY_HOST);
 
-   /*void_contact_buf = hypre_MAlloc(storage*obj_size_bytes);*/
+   /*void_contact_buf = hypre_TAlloc(char, storage*obj_size_bytes);*/
    void_contact_buf = hypre_CTAlloc(char, storage * obj_size_bytes, HYPRE_MEMORY_HOST);
    index_ptr = void_contact_buf; /* step through with this index */
 
@@ -2345,7 +2344,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
       hypre_TMemcpy(off_proc_data_recv_d, off_proc_data_recv, HYPRE_Complex, off_proc_nelm_recv_cur,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
       hypre_IJMatrixSetAddValuesParCSRDevice(matrix, off_proc_nelm_recv_cur, NULL, off_proc_i_recv_d,
                                              NULL, off_proc_j_recv_d,
                                              off_proc_data_recv_d, "add");
@@ -4140,7 +4139,9 @@ hypre_IJMatrixAddToValuesOMPParCSR( hypre_IJMatrix       *matrix,
                else
                {
                   size = my_offproc_cnt[0];
-                  my_offproc_cnt = hypre_TReAlloc(my_offproc_cnt, HYPRE_Int, size + 200, HYPRE_MEMORY_HOST);
+                  my_offproc_cnt = hypre_TReAlloc(my_offproc_cnt, HYPRE_Int,
+                                                  size + 200, HYPRE_MEMORY_HOST);
+                  offproc_cnt[my_thread_num] = my_offproc_cnt;
                   my_offproc_cnt[0] += 200;
                   my_offproc_cnt[i] = ii;
                   my_offproc_cnt[i + 1] = indx;

@@ -44,6 +44,12 @@ HYPRE_BoomerAMGSetup( HYPRE_Solver solver,
                       HYPRE_ParVector b,
                       HYPRE_ParVector x      )
 {
+   if (!A)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
    return ( hypre_BoomerAMGSetup( (void *) solver,
                                   (hypre_ParCSRMatrix *) A,
                                   (hypre_ParVector *) b,
@@ -60,7 +66,23 @@ HYPRE_BoomerAMGSolve( HYPRE_Solver solver,
                       HYPRE_ParVector b,
                       HYPRE_ParVector x      )
 {
+   if (!A)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
 
+   if (!b)
+   {
+      hypre_error_in_arg(3);
+      return hypre_error_flag;
+   }
+
+   if (!x)
+   {
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
+   }
 
    return ( hypre_BoomerAMGSolve( (void *) solver,
                                   (hypre_ParCSRMatrix *) A,
@@ -78,7 +100,23 @@ HYPRE_BoomerAMGSolveT( HYPRE_Solver solver,
                        HYPRE_ParVector b,
                        HYPRE_ParVector x      )
 {
+   if (!A)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
 
+   if (!b)
+   {
+      hypre_error_in_arg(3);
+      return hypre_error_flag;
+   }
+
+   if (!x)
+   {
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
+   }
 
    return ( hypre_BoomerAMGSolveT( (void *) solver,
                                    (hypre_ParCSRMatrix *) A,
@@ -2075,3 +2113,26 @@ HYPRE_BoomerAMGSetIsolatedFPoints(HYPRE_Solver   solver,
                                       1, num_isolated_fpt,
                                       isolated_fpt_index) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetCumNnzAP
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetCumNnzAP( HYPRE_Solver  solver,
+                            HYPRE_Real    cum_nnz_AP )
+{
+   return ( hypre_BoomerAMGSetCumNnzAP( (void *) solver, cum_nnz_AP ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGGetCumNnzAP
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGGetCumNnzAP( HYPRE_Solver  solver,
+                            HYPRE_Real   *cum_nnz_AP )
+{
+   return ( hypre_BoomerAMGGetCumNnzAP( (void *) solver, cum_nnz_AP ) );
+}
+

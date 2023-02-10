@@ -22,17 +22,17 @@
  * to be used for the MaxEigEstimate
  */
 __global__ void
-hypreCUDAKernel_CSRMaxEigEstimate(hypre_DeviceItem    &item,
-                                  HYPRE_Int      nrows,
-                                  HYPRE_Int     *diag_ia,
-                                  HYPRE_Int     *diag_ja,
-                                  HYPRE_Complex *diag_aa,
-                                  HYPRE_Int     *offd_ia,
-                                  HYPRE_Int     *offd_ja,
-                                  HYPRE_Complex *offd_aa,
-                                  HYPRE_Complex *row_sum_lower,
-                                  HYPRE_Complex *row_sum_upper,
-                                  HYPRE_Int      scale)
+hypreGPUKernel_CSRMaxEigEstimate(hypre_DeviceItem    &item,
+                                 HYPRE_Int      nrows,
+                                 HYPRE_Int     *diag_ia,
+                                 HYPRE_Int     *diag_ja,
+                                 HYPRE_Complex *diag_aa,
+                                 HYPRE_Int     *offd_ia,
+                                 HYPRE_Int     *offd_ja,
+                                 HYPRE_Complex *offd_aa,
+                                 HYPRE_Complex *row_sum_lower,
+                                 HYPRE_Complex *row_sum_upper,
+                                 HYPRE_Int      scale)
 {
    HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
@@ -64,7 +64,7 @@ hypreCUDAKernel_CSRMaxEigEstimate(hypre_DeviceItem    &item,
       }
       else
       {
-         row_sum_i += fabs(aij);
+         row_sum_i += hypre_abs(aij);
       }
    }
 
@@ -78,7 +78,7 @@ hypreCUDAKernel_CSRMaxEigEstimate(hypre_DeviceItem    &item,
    for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
    {
       HYPRE_Complex aij = read_only_load(&offd_aa[j]);
-      row_sum_i += fabs(aij);
+      row_sum_i += hypre_abs(aij);
    }
 
    // Get the row_sum and diagonal value on lane 0
@@ -146,7 +146,7 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix *A,
 
    bDim = hypre_GetDefaultDeviceBlockDimension();
    gDim = hypre_GetDefaultDeviceGridDimension(A_num_rows, "warp", bDim);
-   HYPRE_GPU_LAUNCH(hypreCUDAKernel_CSRMaxEigEstimate,
+   HYPRE_GPU_LAUNCH(hypreGPUKernel_CSRMaxEigEstimate,
                     gDim,
                     bDim,
                     A_num_rows,
@@ -421,7 +421,7 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
       tridiag[i] += alphainv;
 
       trioffd[i + 1] = alphainv;
-      trioffd[i] *= sqrt(beta);
+      trioffd[i] *= hypre_sqrt(beta);
 
       /* x = x + alpha*p */
       /* don't need */

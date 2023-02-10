@@ -39,6 +39,7 @@ using hypre_DeviceItem = void*;
 #endif
 
 #define CUSPARSE_NEWAPI_VERSION 11000
+#define CUSPARSE_NEWSPMM_VERSION 11401
 #define CUDA_MALLOCASYNC_VERSION 11020
 #define THRUST_CALL_BLOCKING 1
 
@@ -106,17 +107,8 @@ using namespace thrust::placeholders;
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_SYCL)
-/* The following definitions facilitate code reuse and limits
- * if/def-ing when unifying cuda/hip code with sycl code */
-using dim3 = sycl::range<1>;
-using hypre_DeviceItem = sycl::nd_item<1>;
-#define __global__
-#define __host__
-#define __device__
-#define __forceinline__ __inline__ __attribute__((always_inline))
 
-/* WM: problems with this being inside extern C++ {} */
-/* #include <CL/sycl.hpp> */
+#include <sycl/sycl.hpp>
 #if defined(HYPRE_USING_ONEMKLSPARSE)
 #include <oneapi/mkl/spblas.hpp>
 #endif
@@ -126,11 +118,23 @@ using hypre_DeviceItem = sycl::nd_item<1>;
 #if defined(HYPRE_USING_ONEMKLRAND)
 #include <oneapi/mkl/rng.hpp>
 #endif
+
+/* The following definitions facilitate code reuse and limits
+ * if/def-ing when unifying cuda/hip code with sycl code */
+using dim3 = sycl::range<1>;
+using hypre_DeviceItem = sycl::nd_item<1>;
+#define __global__
+#define __host__
+#define __device__
+#define __forceinline__ __inline__ __attribute__((always_inline))
+
 #endif // defined(HYPRE_USING_SYCL)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      device defined values
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+#define HYPRE_MAX_NTHREADS_BLOCK 1024
 
 // HYPRE_WARP_BITSHIFT is just log2 of HYPRE_WARP_SIZE
 #if defined(HYPRE_USING_CUDA)
@@ -1226,7 +1230,6 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_lane_id(hypre_DeviceItem &item)
 {
-   sycl::sub_group SG = item.get_sub_group();
    return (hypre_int) item.get_sub_group().get_local_linear_id();
 }
 
@@ -1556,17 +1559,15 @@ HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
 HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y,
                                     char *work);
 
-#endif
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-
 template <typename T>
 HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
                                                     HYPRE_Int *d_row_ptr, T *d_row_num, T *d_row_ind);
 
-HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
+#endif
 
-void hypre_CudaCompileFlagCheck();
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
 
 #if defined(HYPRE_USING_CUDA)
 cudaError_t hypre_CachingMallocDevice(void **ptr, size_t nbytes);

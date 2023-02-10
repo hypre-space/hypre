@@ -38,7 +38,7 @@ hypre_MPI_Init( hypre_int   *argc,
 }
 
 HYPRE_Int
-hypre_MPI_Finalize( )
+hypre_MPI_Finalize( void )
 {
    return (0);
 }
@@ -51,13 +51,13 @@ hypre_MPI_Abort( hypre_MPI_Comm comm,
 }
 
 HYPRE_Real
-hypre_MPI_Wtime( )
+hypre_MPI_Wtime( void )
 {
    return (0.0);
 }
 
 HYPRE_Real
-hypre_MPI_Wtick( )
+hypre_MPI_Wtick( void )
 {
    return (0.0);
 }
@@ -257,7 +257,7 @@ hypre_MPI_Allgather( void               *sendbuf,
 
       case hypre_MPI_BYTE:
       {
-         hypre_Memcpy(recvbuf,  sendbuf,  sendcount, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(recvbuf, sendbuf, char, sendcount, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       }
       break;
 
@@ -612,7 +612,7 @@ hypre_MPI_Allreduce( void              *sendbuf,
 
       case hypre_MPI_BYTE:
       {
-         hypre_Memcpy(recvbuf,  sendbuf,  count, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(recvbuf, sendbuf, char, count, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       }
       break;
 
@@ -767,7 +767,7 @@ hypre_MPI_Init( hypre_int   *argc,
 }
 
 HYPRE_Int
-hypre_MPI_Finalize( )
+hypre_MPI_Finalize( void )
 {
    return (HYPRE_Int) MPI_Finalize();
 }
@@ -780,15 +780,15 @@ hypre_MPI_Abort( hypre_MPI_Comm comm,
 }
 
 HYPRE_Real
-hypre_MPI_Wtime( )
+hypre_MPI_Wtime( void )
 {
-   return MPI_Wtime();
+   return (HYPRE_Real)MPI_Wtime();
 }
 
 HYPRE_Real
-hypre_MPI_Wtick( )
+hypre_MPI_Wtick( void )
 {
-   return MPI_Wtick();
+   return (HYPRE_Real)MPI_Wtick();
 }
 
 HYPRE_Int

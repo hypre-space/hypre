@@ -191,6 +191,8 @@ typedef struct
    ProblemPartData *pdata;
    HYPRE_Int        max_boxsize;
 
+   HYPRE_MemoryLocation memory_location;
+
    /* for GridSetNumGhost */
    HYPRE_Int       *numghost;
 
@@ -321,7 +323,7 @@ SScanDblArray( char   *sdata_ptr,
    sdata_ptr += strspn(sdata_ptr, " \t\n[");
    for (i = 0; i < size; i++)
    {
-      array[i] = strtod(sdata_ptr, &sdata_ptr);
+      array[i] = (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
    }
    sdata_ptr += strcspn(sdata_ptr, "]") + 1;
 
@@ -420,8 +422,9 @@ ReadData( char         *filename,
    HYPRE_Int          maxline  = 250;
 
    char               key[250];
-
    HYPRE_Int          part, var, s, entry, i, j, k, il, iu;
+
+   HYPRE_MemoryLocation memory_location = data_ptr -> memory_location;
 
    /*-----------------------------------------------------------
     * Read data file from process 0, then broadcast
@@ -469,6 +472,7 @@ ReadData( char         *filename,
     * Parse the data and fill ProblemData structure
     *-----------------------------------------------------------*/
 
+   data.memory_location = memory_location;
    data.max_boxsize = 0;
    data.numghost = NULL;
    data.nstencils = 0;
@@ -696,7 +700,7 @@ ReadData( char         *filename,
                data.stencil_offsets[s][entry][i] = 0;
             }
             data.stencil_vars[s][entry] = strtol(sdata_ptr, &sdata_ptr, 10);
-            data.stencil_values[s][entry] = strtod(sdata_ptr, &sdata_ptr);
+            data.stencil_values[s][entry] = (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
          }
          else if ( strcmp(key, "RhsSet:") == 0 )
          {
@@ -704,7 +708,7 @@ ReadData( char         *filename,
             {
                data.rhs_true = 1;
             }
-            data.rhs_value = strtod(sdata_ptr, &sdata_ptr);
+            data.rhs_value = (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
          }
          else if ( strcmp(key, "FEMStencilCreate:") == 0 )
          {
@@ -741,7 +745,7 @@ ReadData( char         *filename,
             {
                data.fem_rhs_true = 1;
                data.fem_rhs_values = hypre_CTAlloc(HYPRE_Real, data.fem_nvars, HYPRE_MEMORY_HOST);
-               data.d_fem_rhs_values = hypre_CTAlloc(HYPRE_Real, data.fem_nvars, HYPRE_MEMORY_DEVICE);
+               data.d_fem_rhs_values = hypre_CTAlloc(HYPRE_Real, data.fem_nvars, memory_location);
             }
             SScanDblArray(sdata_ptr, &sdata_ptr,
                           data.fem_nvars, data.fem_rhs_values);
@@ -794,7 +798,7 @@ ReadData( char         *filename,
                   hypre_TReAlloc(pdata.graph_values,  HYPRE_Real,  size, HYPRE_MEMORY_HOST);
                pdata.d_graph_values =
                   hypre_TReAlloc_v2(pdata.d_graph_values, HYPRE_Real, pdata.graph_values_size,
-                                    HYPRE_Real, size, HYPRE_MEMORY_DEVICE);
+                                    HYPRE_Real, size, memory_location);
                pdata.graph_values_size = size;
                pdata.graph_boxsizes =
                   hypre_TReAlloc(pdata.graph_boxsizes,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
@@ -843,7 +847,7 @@ ReadData( char         *filename,
             pdata.graph_entries[pdata.graph_nboxes] =
                strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.graph_values[pdata.graph_nboxes] =
-               strtod(sdata_ptr, &sdata_ptr);
+               (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
             pdata.graph_boxsizes[pdata.graph_nboxes] = 1;
             for (i = 0; i < 3; i++)
             {
@@ -917,7 +921,7 @@ ReadData( char         *filename,
             pdata.matset_entries[pdata.matset_nboxes] =
                strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.matset_values[pdata.matset_nboxes] =
-               strtod(sdata_ptr, &sdata_ptr);
+               (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
             pdata.matset_nboxes++;
             data.pdata[part] = pdata;
          }
@@ -1026,7 +1030,7 @@ ReadData( char         *filename,
             pdata.rhsadd_vars[pdata.rhsadd_nboxes] =
                strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.rhsadd_values[pdata.rhsadd_nboxes] =
-               strtod(sdata_ptr, &sdata_ptr);
+               (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
             pdata.rhsadd_nboxes++;
             data.pdata[part] = pdata;
          }
@@ -1099,7 +1103,7 @@ ReadData( char         *filename,
       data.fem_sparsity = hypre_CTAlloc(HYPRE_Int, 2 * data.fem_nvars * data.fem_nvars,
                                         HYPRE_MEMORY_HOST);
       data.fem_values   = hypre_CTAlloc(HYPRE_Real, data.fem_nvars * data.fem_nvars, HYPRE_MEMORY_HOST);
-      data.d_fem_values = hypre_TAlloc(HYPRE_Real, data.fem_nvars * data.fem_nvars, HYPRE_MEMORY_DEVICE);
+      data.d_fem_values = hypre_TAlloc(HYPRE_Real, data.fem_nvars * data.fem_nvars, memory_location);
 
       for (i = 0; i < data.fem_nvars; i++)
       {
@@ -1186,6 +1190,7 @@ DistributeData( ProblemData   global_data,
                 HYPRE_Int     myid,
                 ProblemData  *data_ptr )
 {
+   HYPRE_MemoryLocation memory_location = global_data.memory_location;
    ProblemData      data = global_data;
    ProblemPartData  pdata;
    HYPRE_Int       *pool_procs;
@@ -1866,7 +1871,7 @@ DistributeData( ProblemData   global_data,
          hypre_TFree(pdata.graph_entries, HYPRE_MEMORY_HOST);
          pdata.graph_values_size = 0;
          hypre_TFree(pdata.graph_values, HYPRE_MEMORY_HOST);
-         hypre_TFree(pdata.d_graph_values, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(pdata.d_graph_values, memory_location);
          hypre_TFree(pdata.graph_boxsizes, HYPRE_MEMORY_HOST);
       }
 
@@ -1939,6 +1944,7 @@ DistributeData( ProblemData   global_data,
 HYPRE_Int
 DestroyData( ProblemData   data )
 {
+   HYPRE_MemoryLocation memory_location = data.memory_location;
    ProblemPartData  pdata;
    HYPRE_Int        part, box, s, i;
 
@@ -2000,7 +2006,7 @@ DestroyData( ProblemData   data )
          hypre_TFree(pdata.graph_entries, HYPRE_MEMORY_HOST);
          pdata.graph_values_size = 0;
          hypre_TFree(pdata.graph_values, HYPRE_MEMORY_HOST);
-         hypre_TFree(pdata.d_graph_values, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(pdata.d_graph_values, memory_location);
          hypre_TFree(pdata.graph_boxsizes, HYPRE_MEMORY_HOST);
       }
 
@@ -2097,13 +2103,13 @@ DestroyData( ProblemData   data )
       hypre_TFree(data.fem_ordering, HYPRE_MEMORY_HOST);
       hypre_TFree(data.fem_sparsity, HYPRE_MEMORY_HOST);
       hypre_TFree(data.fem_values, HYPRE_MEMORY_HOST);
-      hypre_TFree(data.d_fem_values, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(data.d_fem_values, memory_location);
    }
 
    if (data.fem_rhs_true > 0)
    {
       hypre_TFree(data.fem_rhs_values, HYPRE_MEMORY_HOST);
-      hypre_TFree(data.d_fem_rhs_values, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(data.d_fem_rhs_values, memory_location);
    }
 
    if (data.symmetric_num > 0)
@@ -2143,7 +2149,7 @@ SetCosineVector(HYPRE_Real  scale,
       {
          for (i = ilower[0]; i <= iupper[0]; i++)
          {
-            values[count] = scale * cos((i + j + k) / 10.0);
+            values[count] = scale * hypre_cos((i + j + k) / 10.0);
             count++;
          }
       }
@@ -2433,11 +2439,24 @@ main( hypre_int argc,
 
    /* end lobpcg */
 
+#if defined(HYPRE_USING_MEMORY_TRACKER)
+   HYPRE_Int print_mem_tracker = 0;
+   char mem_tracker_name[HYPRE_MAX_FILE_NAME_LEN] = {0};
+#endif
+
 #if defined(HYPRE_USING_GPU)
    HYPRE_Int spgemm_use_vendor = 0;
 #endif
-   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
+
+#if defined(HYPRE_TEST_USING_HOST)
+   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_HOST;
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
+#else
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
+#endif
+
+   global_data.memory_location = memory_location;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -2687,7 +2706,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-tol") == 0 )
       {
          arg_index++;
-         tol = atof(argv[arg_index++]);
+         tol = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-v") == 0 )
       {
@@ -2713,7 +2732,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-w") == 0 )
       {
          arg_index++;
-         jacobi_weight = atof(argv[arg_index++]);
+         jacobi_weight = (HYPRE_Real)atof(argv[arg_index++]);
          usr_jacobi_weight = 1; /* flag user weight */
       }
       else if ( strcmp(argv[arg_index], "-jump") == 0 )
@@ -2734,12 +2753,12 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-cf") == 0 )
       {
          arg_index++;
-         cf_tol = atof(argv[arg_index++]);
+         cf_tol = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-crtdim") == 0 )
       {
          arg_index++;
-         cycred_tdim = atof(argv[arg_index++]);
+         cycred_tdim = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-cri") == 0 )
       {
@@ -2810,7 +2829,7 @@ main( hypre_int argc,
       {
          /* lobpcg: inner pcg iterations tolerance */
          arg_index++;
-         pcgTol = atof(argv[arg_index++]);
+         pcgTol = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-pcgmode") == 0 )
       {
@@ -2826,6 +2845,16 @@ main( hypre_int argc,
          printLevel = atoi(argv[arg_index++]);
       }
 #if defined(HYPRE_USING_GPU)
+      else if ( strcmp(argv[arg_index], "-memory_host") == 0 )
+      {
+         arg_index++;
+         memory_location = HYPRE_MEMORY_HOST;
+      }
+      else if ( strcmp(argv[arg_index], "-memory_device") == 0 )
+      {
+         arg_index++;
+         memory_location = HYPRE_MEMORY_DEVICE;
+      }
       else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
       {
          arg_index++;
@@ -2842,19 +2871,34 @@ main( hypre_int argc,
          spgemm_use_vendor = atoi(argv[arg_index++]);
       }
 #endif
+#if defined(HYPRE_USING_MEMORY_TRACKER)
+      else if ( strcmp(argv[arg_index], "-print_mem_tracker") == 0 )
+      {
+         arg_index++;
+         print_mem_tracker = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mem_tracker_filename") == 0 )
+      {
+         arg_index++;
+         snprintf(mem_tracker_name, HYPRE_MAX_FILE_NAME_LEN, "%s", argv[arg_index++]);
+      }
+#endif
       else
       {
          arg_index++;
       }
    }
 
+#if defined(HYPRE_USING_MEMORY_TRACKER)
+   hypre_MemoryTrackerSetPrint(print_mem_tracker);
+   if (mem_tracker_name[0]) { hypre_MemoryTrackerSetFileName(mem_tracker_name); }
+#endif
+
    /* default memory location */
    HYPRE_SetMemoryLocation(memory_location);
 
    /* default execution policy */
    HYPRE_SetExecutionPolicy(default_exec_policy);
-
-   HYPRE_SetStructExecutionPolicy(HYPRE_EXEC_DEVICE);
 
 #if defined(HYPRE_USING_GPU)
    HYPRE_SetSpGemmUseVendor(spgemm_use_vendor);
@@ -2873,14 +2917,17 @@ main( hypre_int argc,
 
    if (myid == 0)
    {
-#ifdef HYPRE_DEVELOP_STRING
-#ifdef HYPRE_DEVELOP_BRANCH
-      hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s (main development branch %s)\n\n",
+#if defined(HYPRE_DEVELOP_STRING) && defined(HYPRE_DEVELOP_BRANCH)
+      hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s (branch %s; the develop branch)\n\n",
                    HYPRE_DEVELOP_STRING, HYPRE_DEVELOP_BRANCH);
-#else
-      hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s (not main development branch)\n\n",
-                   HYPRE_DEVELOP_STRING);
-#endif
+
+#elif defined(HYPRE_DEVELOP_STRING) && !defined(HYPRE_DEVELOP_BRANCH)
+      hypre_printf("\nUsing HYPRE_DEVELOP_STRING: %s (branch %s; not the develop branch)\n\n",
+                   HYPRE_DEVELOP_STRING, HYPRE_BRANCH_NAME);
+
+#elif defined(HYPRE_RELEASE_VERSION)
+      hypre_printf("\nUsing HYPRE_RELEASE_VERSION: %s\n\n",
+                   HYPRE_RELEASE_VERSION);
 #endif
    }
 
@@ -3119,9 +3166,10 @@ main( hypre_int argc,
        * Set up the matrix
        *-----------------------------------------------------------*/
 
-      values_size = hypre_max(data.max_boxsize, data.fem_nsparse);
+      values_size = hypre_max(data.max_boxsize, data.max_boxsize * data.fem_nsparse);
+
       values   = hypre_TAlloc(HYPRE_Real, values_size, HYPRE_MEMORY_HOST);
-      d_values = hypre_TAlloc(HYPRE_Real, values_size, HYPRE_MEMORY_DEVICE);
+      d_values = hypre_TAlloc(HYPRE_Real, values_size, memory_location);
 
       HYPRE_SStructMatrixCreate(comm, graph, &A);
 
@@ -3160,7 +3208,7 @@ main( hypre_int argc,
                   }
 
                   hypre_TMemcpy(d_values, values, HYPRE_Real, values_size,
-                                HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                                memory_location, HYPRE_MEMORY_HOST);
 
                   for (box = 0; box < pdata.nboxes; box++)
                   {
@@ -3176,11 +3224,11 @@ main( hypre_int argc,
       }
       else if (data.fem_nvars > 0)
       {
-         hypre_TMemcpy(data.d_fem_values, data.fem_values, HYPRE_Real,
-                       data.fem_nvars * data.fem_nvars,
-                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-
          /* FEMStencilSetRow: add to stencil values */
+#if 0    // Use AddFEMValues
+         hypre_TMemcpy(data.d_fem_values, data.fem_values, HYPRE_Real,
+                       data.fem_nsparse, memory_location, HYPRE_MEMORY_HOST);
+
          for (part = 0; part < data.nparts; part++)
          {
             pdata = data.pdata[part];
@@ -3202,6 +3250,24 @@ main( hypre_int argc,
                }
             }
          }
+#else    // Use AddFEMBoxValues
+         /* TODO: There is probably a smarter way to do this copy */
+         for (i = 0; i < data.max_boxsize; i++)
+         {
+            j = i * data.fem_nsparse;
+            hypre_TMemcpy(&d_values[j], data.fem_values, HYPRE_Real,
+                          data.fem_nsparse, memory_location, HYPRE_MEMORY_HOST);
+         }
+         for (part = 0; part < data.nparts; part++)
+         {
+            pdata = data.pdata[part];
+            for (box = 0; box < pdata.nboxes; box++)
+            {
+               HYPRE_SStructMatrixAddFEMBoxValues(
+                  A, part, pdata.ilowers[box], pdata.iuppers[box], d_values);
+            }
+         }
+#endif
       }
 
       /* GraphAddEntries: set non-stencil entries */
@@ -3211,7 +3277,7 @@ main( hypre_int argc,
 
          hypre_TMemcpy(pdata.d_graph_values, pdata.graph_values,
                        HYPRE_Real, pdata.graph_values_size,
-                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                       memory_location, HYPRE_MEMORY_HOST);
 
          for (box = 0; box < pdata.graph_nboxes; box++)
          {
@@ -3281,7 +3347,7 @@ main( hypre_int argc,
             }
 
             hypre_TMemcpy(d_values, values, HYPRE_Real, values_size,
-                          HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                          memory_location, HYPRE_MEMORY_HOST);
 
             HYPRE_SStructMatrixSetBoxValues(A, part,
                                             pdata.matset_ilowers[box],
@@ -3313,7 +3379,7 @@ main( hypre_int argc,
                }
 
                hypre_TMemcpy(d_values, values, HYPRE_Real, values_size,
-                             HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                             memory_location, HYPRE_MEMORY_HOST);
 
                HYPRE_SStructMatrixAddToBoxValues(A, part,
                                                  pdata.matadd_ilowers[box],
@@ -3349,7 +3415,7 @@ main( hypre_int argc,
             }
 
             hypre_TMemcpy(d_values, values, HYPRE_Real, values_size,
-                          HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                          memory_location, HYPRE_MEMORY_HOST);
 
             for (index[2] = pdata.fem_matadd_ilowers[box][2];
                  index[2] <= pdata.fem_matadd_iuppers[box][2]; index[2]++)
@@ -3420,7 +3486,7 @@ main( hypre_int argc,
       }
 
       hypre_TMemcpy(d_values, values, HYPRE_Real, values_size,
-                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                    memory_location, HYPRE_MEMORY_HOST);
 
       for (part = 0; part < data.nparts; part++)
       {
@@ -3440,8 +3506,9 @@ main( hypre_int argc,
       /* Add values for FEMRhsSet */
       if (data.fem_rhs_true)
       {
+#if 0    // Use AddFEMValues
          hypre_TMemcpy(data.d_fem_rhs_values, data.fem_rhs_values, HYPRE_Real,
-                       data.fem_nvars, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                       data.fem_nvars, memory_location, HYPRE_MEMORY_HOST);
 
          for (part = 0; part < data.nparts; part++)
          {
@@ -3464,6 +3531,24 @@ main( hypre_int argc,
                }
             }
          }
+#else    // Use AddFEMBoxValues
+         /* TODO: There is probably a smarter way to do this copy */
+         for (i = 0; i < data.max_boxsize; i++)
+         {
+            j = i * data.fem_nvars;
+            hypre_TMemcpy(&d_values[j], data.fem_rhs_values, HYPRE_Real,
+                          data.fem_nvars, memory_location, HYPRE_MEMORY_HOST);
+         }
+         for (part = 0; part < data.nparts; part++)
+         {
+            pdata = data.pdata[part];
+            for (box = 0; box < pdata.nboxes; box++)
+            {
+               HYPRE_SStructVectorAddFEMBoxValues(
+                  b, part, pdata.ilowers[box], pdata.iuppers[box], d_values);
+            }
+         }
+#endif
       }
 
       /* RhsAddToValues: add to some RHS values */
@@ -3485,7 +3570,7 @@ main( hypre_int argc,
             }
 
             hypre_TMemcpy(d_values, values, HYPRE_Real, values_size,
-                          HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                          memory_location, HYPRE_MEMORY_HOST);
 
             HYPRE_SStructVectorAddToBoxValues(b, part,
                                               pdata.rhsadd_ilowers[box],
@@ -3572,7 +3657,7 @@ main( hypre_int argc,
                   SetCosineVector(scale, ilower, iupper, values);
 
                   hypre_TMemcpy(d_values, values, HYPRE_Real, values_size,
-                                HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                                memory_location, HYPRE_MEMORY_HOST);
 
                   HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper,
                                                   var, d_values);
@@ -3737,7 +3822,7 @@ main( hypre_int argc,
                   values[j] = stencil_values[i];
                }
 
-               hypre_TMemcpy(d_values, values, HYPRE_Real, values_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(d_values, values, HYPRE_Real, values_size, memory_location, HYPRE_MEMORY_HOST);
 
                for (box = 0; box < pdata.nboxes; box++)
                {
@@ -3851,7 +3936,7 @@ main( hypre_int argc,
 #endif
 
    hypre_TFree(values, HYPRE_MEMORY_HOST);
-   hypre_TFree(d_values, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(d_values, memory_location);
 
    /*-----------------------------------------------------------
     * Solve the system using SysPFMG or Split
@@ -5992,7 +6077,7 @@ main( hypre_int argc,
       if (!read_fromfile_flag)
       {
          values   = hypre_TAlloc(HYPRE_Real, data.max_boxsize, HYPRE_MEMORY_HOST);
-         d_values = hypre_TAlloc(HYPRE_Real, data.max_boxsize, HYPRE_MEMORY_DEVICE);
+         d_values = hypre_TAlloc(HYPRE_Real, data.max_boxsize, memory_location);
          for (part = 0; part < data.nparts; part++)
          {
             pdata = data.pdata[part];
@@ -6010,8 +6095,8 @@ main( hypre_int argc,
                                  pdata.vartypes[var], ilower, iupper);
                   HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
                                                   var, d_values);
-                  hypre_TMemcpy(values, d_values, HYPRE_Real, values_size,
-                                HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+                  hypre_TMemcpy(values, d_values, HYPRE_Real, data.max_boxsize,
+                                HYPRE_MEMORY_HOST, memory_location);
                   hypre_fprintf(file, "\nBox %d:\n\n", box);
                   size = 1;
                   for (j = 0; j < data.ndim; j++)
@@ -6028,7 +6113,7 @@ main( hypre_int argc,
             }
          }
          hypre_TFree(values, HYPRE_MEMORY_HOST);
-         hypre_TFree(d_values, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(d_values, memory_location);
       }
    }
 
@@ -6098,8 +6183,8 @@ main( hypre_int argc,
          hypre_StructMatvec(-1.0, sA, sxnew, 1.0, sb);
          rnorm = hypre_StructInnerProd(sb, sb);
       }
-      bnorm = sqrt(bnorm);
-      rnorm = sqrt(rnorm);
+      bnorm = hypre_sqrt(bnorm);
+      rnorm = hypre_sqrt(rnorm);
 
       if (myid == 0)
       {
@@ -6157,6 +6242,17 @@ main( hypre_int argc,
 
    /* Finalize MPI */
    hypre_MPI_Finalize();
+
+#if defined(HYPRE_USING_MEMORY_TRACKER)
+   if (memory_location == HYPRE_MEMORY_HOST)
+   {
+      if (hypre_total_bytes[hypre_MEMORY_DEVICE] || hypre_total_bytes[hypre_MEMORY_UNIFIED])
+      {
+         hypre_printf("Error: nonzero GPU memory allocated with the HOST mode\n");
+         hypre_assert(0);
+      }
+   }
+#endif
 
    return (0);
 }

@@ -7,10 +7,38 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
+Version 2.27.0 released 2022/12/20
+
+- New SStructMatrix and SStructVector AddFEMBoxValues() routines to set finite
+  element stiffness matrices a box at a time for better performance.
+- Added environment variable HYPRE_BRANCH_NAME.
+- Added HIP support to the MGR solver.
+- Added Jacobi iterative solver approach for ILU smoothing/preconditioning.
+- Various optimizations for IJ solvers
+- Various CMake build system updates
+- Various bug fixes
+
+#====================================
+
+Version 2.26.0 released 2022/10/14
+
+- Added a new feature of BoomerAMG (L1-Jacobi and Chebyshev smoothers) and
+  Krylov subspace solvers with multiple right-hand-side vectors;
+- Optimized parallel sparse matrix/multi-component vector multiplication
+  on CPUs and GPUs.
+- Added SYCL support for the IJ interface and various AMG operators;
+- Added a runtime switch feature between CPU and GPU;
+- Added CMAKE support for CUDA;
+- Optimized the performance of AMG interpolation truncation routines with CUDA/HIP;
+- Optimized the performance of hypre's SpGEMM kernels on NVIDIA/AMD GPUs;
+- Various bug fixes
+
+#====================================
+
 Version 2.25.0 released 2022/06/15
 
 - New features in MGR: multilevel assignment of solver options, block Jacobi for
-  smoothers and integrid transfer, CPR, non-Galerkin.
+  smoothers and inter-grid transfer, CPR, non-Galerkin.
 - New factorized sparse approximate inverse (FSAI) solver/preconditioner.  Can
   also be used as a smoother in BoomerAMG.
 - Added various optimizations for Nvidia and AMD GPUs by removing synchronizations,
