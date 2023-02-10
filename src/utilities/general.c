@@ -113,31 +113,11 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
          HYPRE_Int i;
          for (i = 0; i < gpu_devices.size(); i++)
          {
-            /* WM: commenting out multi-tile GPU stuff for now as it is not yet working */
-            // multi-tile GPUs
-            /* if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) */
-            /* { */
-            /*    auto subDevicesDomainNuma = */
-            /*       gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain> */
-            /*       (sycl::info::partition_affinity_domain::numa); */
-            /*    for (auto &tile : subDevicesDomainNuma) */
-            /*    { */
-            /*       if (local_n_devices == device_id) */
-            /*       { */
-            /*          hypre_HandleDevice(hypre_handle_) = new sycl::device(tile); */
-            /*       } */
-            /*       local_n_devices++; */
-            /*    } */
-            /* } */
-            /* // single-tile GPUs */
-            /* else */
+            if (local_n_devices == device_id)
             {
-               if (local_n_devices == device_id)
-               {
-                  hypre_HandleDevice(hypre_handle_) = new sycl::device(gpu_devices[i]);
-               }
-               local_n_devices++;
+               hypre_HandleDevice(hypre_handle_) = new sycl::device(gpu_devices[i]);
             }
+            local_n_devices++;
          }
       }
       hypre_DeviceDataDeviceMaxWorkGroupSize(hypre_HandleDeviceData(hypre_handle_)) =
@@ -228,18 +208,7 @@ hypre_GetDeviceCount(hypre_int *device_count)
    HYPRE_Int i;
    for (i = 0; i < gpu_devices.size(); i++)
    {
-      /* WM: commenting out multi-tile GPU stuff for now as it is not yet working */
-      /* if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) */
-      /* { */
-      /*    auto subDevicesDomainNuma = */
-      /*       gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain> */
-      /*       (sycl::info::partition_affinity_domain::numa); */
-      /*    (*device_count) += subDevicesDomainNuma.size(); */
-      /* } */
-      /* else */
-      {
-         (*device_count)++;
-      }
+      (*device_count)++;
    }
 #endif
 
