@@ -5,12 +5,17 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
+#if defined(HYPRE_USING_SYCL)
+struct row_size
+#else
 struct row_size : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
+#endif
 {
    HYPRE_Int SHMEM_HASH_SIZE;
 
@@ -41,6 +46,22 @@ hypre_create_ija( HYPRE_Int       m,
 
    hypre_Memset(d_i, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+   if (row_id)
+   {
+      HYPRE_ONEDPL_CALL(std::inclusive_scan,
+                        oneapi::dpl::make_permutation_iterator(d_c, row_id),
+                        oneapi::dpl::make_permutation_iterator(d_c, row_id) + m,
+                        d_i + 1);
+   }
+   else
+   {
+      HYPRE_ONEDPL_CALL(std::inclusive_scan,
+                        d_c,
+                        d_c + m,
+                        d_i + 1);
+   }
+#else
    if (row_id)
    {
       HYPRE_THRUST_CALL(inclusive_scan,
@@ -55,6 +76,7 @@ hypre_create_ija( HYPRE_Int       m,
                         d_c + m,
                         d_i + 1);
    }
+#endif
 
    if (*nnz_ptr >= 0)
    {
@@ -98,6 +120,24 @@ hypre_create_ija( HYPRE_Int       SHMEM_HASH_SIZE,
 
    hypre_Memset(d_i, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+   if (row_id)
+   {
+      HYPRE_ONEDPL_CALL( std::inclusive_scan,
+                         oneapi::dpl::make_transform_iterator(oneapi::dpl::make_permutation_iterator(d_c, row_id),
+                                                              row_size(SHMEM_HASH_SIZE)),
+                         oneapi::dpl::make_transform_iterator(oneapi::dpl::make_permutation_iterator(d_c, row_id),
+                                                              row_size(SHMEM_HASH_SIZE)) + m,
+                         d_i + 1 );
+   }
+   else
+   {
+      HYPRE_ONEDPL_CALL( std::inclusive_scan,
+                         oneapi::dpl::make_transform_iterator(d_c, row_size(SHMEM_HASH_SIZE)),
+                         oneapi::dpl::make_transform_iterator(d_c, row_size(SHMEM_HASH_SIZE)) + m,
+                         d_i + 1 );
+   }
+#else
    if (row_id)
    {
       HYPRE_THRUST_CALL( inclusive_scan,
@@ -114,6 +154,7 @@ hypre_create_ija( HYPRE_Int       SHMEM_HASH_SIZE,
                          thrust::make_transform_iterator(d_c, row_size(SHMEM_HASH_SIZE)) + m,
                          d_i + 1 );
    }
+#endif
 
    hypre_TMemcpy(&nnz, d_i + m, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
@@ -237,6 +278,27 @@ HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int  m,
    /* assume there are no more than 127 = 2^7-1 bins, which should be enough */
    char *d_bin_key = hypre_TAlloc(char, m, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL( std::transform,
+                      d_rc,
+                      d_rc + m,
+                      d_bin_key,
+                      spgemm_bin_op<HYPRE_Int>(s, t, u) );
+
+   if (!d_rc_indice_in)
+   {
+      hypreSycl_sequence(d_rc_indice, d_rc_indice + m, 0);
+   }
+
+   hypreSycl_stable_sort_by_key(d_bin_key, d_bin_key + m, d_rc_indice);
+
+   HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
+                      d_bin_key,
+                      d_bin_key + m,
+                      oneapi::dpl::counting_iterator(1),
+                      oneapi::dpl::counting_iterator(num_bins + 2),
+                      d_bin_ptr );
+#else
    HYPRE_THRUST_CALL( transform,
                       d_rc,
                       d_rc + m,
@@ -256,6 +318,7 @@ HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int  m,
                       thrust::make_counting_iterator(1),
                       thrust::make_counting_iterator(num_bins + 2),
                       d_bin_ptr );
+#endif
 
    hypre_TMemcpy(h_bin_ptr, d_bin_ptr, HYPRE_Int, num_bins + 1, HYPRE_MEMORY_HOST,
                  HYPRE_MEMORY_DEVICE);
@@ -274,5 +337,5 @@ HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int  m,
    return hypre_error_flag;
 }
 
-#endif
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 

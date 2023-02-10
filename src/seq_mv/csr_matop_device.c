@@ -93,13 +93,11 @@ hypre_GpuMatDataCreate()
 }
 
 void
-hypre_GPUMatDataSetCSRData( hypre_GpuMatData *data,
-                            hypre_CSRMatrix *matrix)
+hypre_GPUMatDataSetCSRData(hypre_CSRMatrix *matrix)
 {
 
 #if defined(HYPRE_USING_ONEMKLSPARSE)
-   oneapi::mkl::sparse::matrix_handle_t mat_handle = hypre_GpuMatDataMatHandle(data);
-   HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::set_csr_data(mat_handle,
+   HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::set_csr_data(hypre_CSRMatrixGPUMatHandle(matrix),
                                                         hypre_CSRMatrixNumRows(matrix),
                                                         hypre_CSRMatrixNumCols(matrix),
                                                         oneapi::mkl::index_base::zero,
@@ -189,10 +187,6 @@ hypre_CSRMatrix*
 hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
                                hypre_CSRMatrix *B)
 {
-   /* WM: currently do not have a reliable device matmat routine for sycl */
-#if defined(HYPRE_USING_SYCL)
-   return hypre_CSRMatrixMultiplyHost(A, B);
-#endif
    HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
    HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
    hypre_CSRMatrix  *C;
@@ -767,27 +761,19 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
 
 #if defined(HYPRE_USING_SYCL)
 
-   /* WM: onedpl reduce_by_segment currently does not accept zero length input */
-   if (nnz_A > 0)
-   {
-      /* WM: better way to get around lack of constant iterator in DPL? */
-      HYPRE_Int *ones = hypre_TAlloc(HYPRE_Int, nnz_A, HYPRE_MEMORY_DEVICE);
-      HYPRE_ONEDPL_CALL( std::fill_n, ones, nnz_A, 1 );
-      auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
-                                        A_j_sorted,
-                                        A_j_sorted + nnz_A,
-                                        ones,
-                                        reduced_col_indices,
-                                        reduced_col_nnz);
+   /* WM: todo - better way to get around lack of constant iterator in DPL? */
+   HYPRE_Int *ones = hypre_TAlloc(HYPRE_Int, nnz_A, HYPRE_MEMORY_DEVICE);
+   HYPRE_ONEDPL_CALL( std::fill_n, ones, nnz_A, 1 );
+   auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
+                                     A_j_sorted,
+                                     A_j_sorted + nnz_A,
+                                     ones,
+                                     reduced_col_indices,
+                                     reduced_col_nnz);
 
-      hypre_TFree(ones, HYPRE_MEMORY_DEVICE);
-      hypre_assert(new_end.first - reduced_col_indices == new_end.second - reduced_col_nnz);
-      num_reduced_col_indices = new_end.first - reduced_col_indices;
-   }
-   else
-   {
-      num_reduced_col_indices = 0;
-   }
+   hypre_TFree(ones, HYPRE_MEMORY_DEVICE);
+   hypre_assert(new_end.first - reduced_col_indices == new_end.second - reduced_col_nnz);
+   num_reduced_col_indices = new_end.first - reduced_col_indices;
 #else
    thrust::pair<HYPRE_Int*, HYPRE_Int*> new_end =
       HYPRE_THRUST_CALL(reduce_by_key, A_j_sorted, A_j_sorted + nnz_A,
@@ -1920,7 +1906,7 @@ struct adj_functor : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
 {
    HYPRE_Int *ia_;
 
-   adj_functor(int *ia)
+   adj_functor(HYPRE_Int *ia)
    {
       ia_ = ia;
    }
