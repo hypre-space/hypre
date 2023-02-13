@@ -76,7 +76,8 @@
 #define HYPRE_SPMV_GPU_LAUNCH(kernel, nv)                                                  \
    if (avg_rownnz >= avg_rownnz_lower_bounds[0])                                           \
    {                                                                                       \
-      const dim3 gDim((num_rows + num_groups_per_block[0] - 1) / num_groups_per_block[0]); \
+      const dim3 gDim =                                                                    \
+         hypre_dim3((num_rows + num_groups_per_block[0] - 1) / num_groups_per_block[0]);   \
       HYPRE_GPU_LAUNCH( (kernel<F, group_sizes[0], nv, T>),                                \
                         gDim, bDim, num_rows, num_vectors, rowid, idxstride_x,             \
                         idxstride_y, vecstride_x, vecstride_y, alpha,                      \
@@ -84,7 +85,8 @@
    }                                                                                       \
    else if (avg_rownnz >= avg_rownnz_lower_bounds[1])                                      \
    {                                                                                       \
-      const dim3 gDim((num_rows + num_groups_per_block[1] - 1) / num_groups_per_block[1]); \
+      const dim3 gDim =                                                                    \
+         hypre_dim3((num_rows + num_groups_per_block[1] - 1) / num_groups_per_block[1]);   \
       HYPRE_GPU_LAUNCH( (kernel<F, group_sizes[1], nv, T>),                                \
                         gDim, bDim, num_rows, num_vectors, rowid, idxstride_x,             \
                         idxstride_y, vecstride_x, vecstride_y, alpha,                      \
@@ -92,7 +94,8 @@
    }                                                                                       \
    else if (avg_rownnz >= avg_rownnz_lower_bounds[2])                                      \
    {                                                                                       \
-      const dim3 gDim((num_rows + num_groups_per_block[2] - 1) / num_groups_per_block[2]); \
+      const dim3 gDim =                                                                    \
+         hypre_dim3((num_rows + num_groups_per_block[2] - 1) / num_groups_per_block[2]);   \
       HYPRE_GPU_LAUNCH( (kernel<F, group_sizes[2], nv, T>),                                \
                         gDim, bDim, num_rows, num_vectors, rowid, idxstride_x,             \
                         idxstride_y, vecstride_x, vecstride_y, alpha,                      \
@@ -100,7 +103,8 @@
    }                                                                                       \
    else if (avg_rownnz >= avg_rownnz_lower_bounds[3])                                      \
    {                                                                                       \
-      const dim3 gDim((num_rows + num_groups_per_block[3] - 1) / num_groups_per_block[3]); \
+      const dim3 gDim =                                                                    \
+         hypre_dim3((num_rows + num_groups_per_block[3] - 1) / num_groups_per_block[3]);   \
       HYPRE_GPU_LAUNCH( (kernel<F, group_sizes[3], nv, T>),                                \
                         gDim, bDim, num_rows, num_vectors, rowid, idxstride_x,             \
                         idxstride_y, vecstride_x, vecstride_y, alpha,                      \
@@ -108,7 +112,8 @@
    }                                                                                       \
    else                                                                                    \
    {                                                                                       \
-      const dim3 gDim((num_rows + num_groups_per_block[4] - 1) / num_groups_per_block[4]); \
+      const dim3 gDim =                                                                    \
+         hypre_dim3((num_rows + num_groups_per_block[4] - 1) / num_groups_per_block[4]);   \
       HYPRE_GPU_LAUNCH( (kernel<F, group_sizes[4], nv, T>),                                \
                         gDim, bDim, num_rows, num_vectors, rowid, idxstride_x,             \
                         idxstride_y, vecstride_x, vecstride_y, alpha,                      \

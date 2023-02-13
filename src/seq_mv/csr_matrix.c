@@ -1434,7 +1434,7 @@ hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix)
    if (!hypre_CSRMatrixGPUMatData(matrix))
    {
       hypre_CSRMatrixGPUMatData(matrix) = hypre_GpuMatDataCreate();
-      hypre_GPUMatDataSetCSRData(hypre_CSRMatrixGPUMatData(matrix), matrix);
+      hypre_GPUMatDataSetCSRData(matrix);
    }
 
    return hypre_CSRMatrixGPUMatData(matrix);
