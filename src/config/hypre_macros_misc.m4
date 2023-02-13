@@ -172,7 +172,7 @@ then
    esac
 fi
 
-if test "x${hypre_user_chose_fflags}" = "xno"
+if test "$hypre_using_fortran" = "yes" -a "x${hypre_user_chose_fflags}" = "xno"
 then
    case `basename ${FC}` in
       g77|gfortran|mpigfortran|mpif77)
@@ -292,7 +292,7 @@ then
    esac
 fi
 
-if test "x${hypre_user_chose_fflags}" = "xno"
+if test "$hypre_using_fortran" = "yes" -a "x${hypre_user_chose_fflags}" = "xno"
 then
    case `basename ${FC}` in
       g77|gfortran|mpigfortran|mpif77)
