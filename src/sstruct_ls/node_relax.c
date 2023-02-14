@@ -534,8 +534,8 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    }
    /* REALLY Rough Estimate = num_nodes * nvar^3 */
    (relax_data -> flops) = (HYPRE_Int)(scale * nvars * nvars * nvars *
-                           hypre_StructVectorGlobalSize(
-                              hypre_SStructPVectorSVector(x, 0) ) );
+                                       hypre_StructVectorGlobalSize(
+                                          hypre_SStructPVectorSVector(x, 0) ) );
 
    return hypre_error_flag;
 }
