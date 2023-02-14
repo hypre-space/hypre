@@ -352,6 +352,7 @@ else                                                            \
       }                                                                                               \
    }, hypre__tot, shared_sum_var);                                                                    \
    hypre_TMemcpy(&sum_var, shared_sum_var, HYPRE_Real, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);    \
+   hypre_TFree(shared_sum_var, HYPRE_MEMORY_DEVICE);                                                  \
 }
 
 /* Reduction BoxLoop2 */
@@ -376,6 +377,7 @@ else                                                            \
       }                                                                                               \
    }, hypre__tot, shared_sum_var);                                                                    \
    hypre_TMemcpy(&sum_var, shared_sum_var, HYPRE_Real, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);    \
+   hypre_TFree(shared_sum_var, HYPRE_MEMORY_DEVICE);                                                  \
 }
 
 /* Plain parallel_for loop */
