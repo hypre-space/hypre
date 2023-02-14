@@ -857,7 +857,6 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
    hypre_ParCSRMatrixDeviceColMapOffd(C) = col_map_offd_C;
 
    hypre_ParCSRMatrixCompressOffdMapDevice(C);
-
    hypre_ParCSRMatrixCopyColMapOffdToHost(C);
 
    hypre_assert(!hypre_CSRMatrixCheckDiagFirstDevice(hypre_ParCSRMatrixDiag(C)));
