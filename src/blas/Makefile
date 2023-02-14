@@ -65,13 +65,7 @@ clean_mup:
 endif
 
 ##################################################################
-# Rules
-##################################################################
-
-${OBJS}: ${BLAS_HEADERS}
-
-##################################################################
-# Multiprecision build Rules
+# Build Rules
 ##################################################################
 
 ifeq (${MP_BUILD}, 1) 
@@ -87,7 +81,7 @@ MuP_OBJDIR_longdouble = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_ldbl}
 #
 ADD_OBJS_single = ${addprefix ${MuP_OBJDIR_single}/, ${notdir ${OBJS}}}
 ${ADD_OBJS_single}: CFLAGS += -DMP_BUILD_SINGLE=1
-${MuP_OBJDIR_single}/%.o: %.c
+${MuP_OBJDIR_single}/%.o: %.c ${BLAS_HEADERS}
 #	@echo  "MuP_OBJDIR is ${ADD_OBJS_single} ... $%"
 	@echo  "processing C object $@ ..."
 	@mkdir -p ${@D}
@@ -95,14 +89,14 @@ ${MuP_OBJDIR_single}/%.o: %.c
 #
 ADD_OBJS_double = ${addprefix ${MuP_OBJDIR_double}/, ${notdir ${OBJS}}}
 ${ADD_OBJS_double}: CFLAGS += -DMP_BUILD_DOUBLE=1
-${MuP_OBJDIR_double}/%.o: %.c
+${MuP_OBJDIR_double}/%.o: %.c ${BLAS_HEADERS}
 	@echo  "processing C object $@ ..."
 	@mkdir -p ${@D}
 	${CC} ${CFLAGS} -c -o $@ $<
 #
 ADD_OBJS_longdouble = ${addprefix ${MuP_OBJDIR_longdouble}/, ${notdir ${OBJS}}}
 ${ADD_OBJS_longdouble}: CFLAGS += -DMP_BUILD_LONGDOUBLE=1
-${MuP_OBJDIR_longdouble}/%.o: %.c
+${MuP_OBJDIR_longdouble}/%.o: %.c ${BLAS_HEADERS}
 	@echo  "processing C object $@ ..."
 	@mkdir -p ${@D}
 	${CC} ${CFLAGS} -c -o $@ $<
@@ -111,6 +105,7 @@ ${MuP_OBJDIR_longdouble}/%.o: %.c
 blas_OBJS: ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
 #
 else
+${OBJS}: ${BLAS_HEADERS}
 blas_OBJS: ${OBJS}
 endif
 
