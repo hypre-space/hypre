@@ -10,7 +10,7 @@
 
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 #define COHEN_USE_SHMEM 0
 
@@ -22,12 +22,18 @@ constexpr HYPRE_Int SYMBL_HASH_SIZE[11] = { 0, 32, 64, 128, 256, 512, 1024, 2048
 constexpr HYPRE_Int NUMER_HASH_SIZE[11] = { 0, 16, 32,  64, 128, 256,  512, 1024, 2048, 4096,  8192 };
 #elif defined(HYPRE_USING_HIP)
 constexpr HYPRE_Int NUMER_HASH_SIZE[11] = { 0,  8, 16,  32,  64, 128,  256,  512, 1024, 2048,  4096 };
+/* WM: todo - what should this be for intel? */
+#elif defined(HYPRE_USING_SYCL)
+constexpr HYPRE_Int NUMER_HASH_SIZE[11] = { 0,  8, 16,  32,  64, 128,  256,  512, 1024, 2048,  4096 };
 #endif
 constexpr HYPRE_Int T_GROUP_SIZE[11]    = { 0,  2,  4,   8,  16,  32,   64,  128,  256,  512,  1024 };
 
 #if defined(HYPRE_USING_CUDA)
 #define HYPRE_SPGEMM_DEFAULT_BIN 5
 #elif defined(HYPRE_USING_HIP)
+#define HYPRE_SPGEMM_DEFAULT_BIN 6
+/* WM: todo - what should this be for intel? */
+#elif defined(HYPRE_USING_SYCL)
 #define HYPRE_SPGEMM_DEFAULT_BIN 6
 #endif
 
@@ -38,6 +44,10 @@ constexpr HYPRE_Int T_GROUP_SIZE[11]    = { 0,  2,  4,   8,  16,  32,   64,  128
 #elif defined(HYPRE_USING_HIP)
 #define HYPRE_SPGEMM_NUMER_UNROLL 256
 #define HYPRE_SPGEMM_SYMBL_UNROLL 512
+/* WM: todo - what should this be for intel? */
+#elif defined(HYPRE_USING_SYCL)
+#define HYPRE_SPGEMM_NUMER_UNROLL 256
+#define HYPRE_SPGEMM_SYMBL_UNROLL 512
 #endif
 
 //#define HYPRE_SPGEMM_TIMING
@@ -46,29 +56,42 @@ constexpr HYPRE_Int T_GROUP_SIZE[11]    = { 0,  2,  4,   8,  16,  32,   64,  128
 
 /* ----------------------------------------------------------------------------------------------- *
  * these are under the assumptions made in spgemm on block sizes: only use in csr_spgemm routines
- * where we assume CUDA block is 3D and blockDim.x * blockDim.y = GROUP_SIZE which is a multiple
- * of HYPRE_WARP_SIZE
+ * where we assume CUDA block is 3D and blockDim.x * blockDim.y = GROUP_SIZE
+ * WM: note - sycl linearizes indices differently from cuda, i.e. a cuda block with dimensions
+ * (x, y, z) is equivalent to a sycl nd_range (z, y, x)
  *------------------------------------------------------------------------------------------------ */
 
 /* the number of groups in block */
 static __device__ __forceinline__
-hypre_int get_num_groups()
+hypre_int get_num_groups(hypre_DeviceItem &item)
 {
+#if defined(HYPRE_USING_SYCL)
+   return item.get_local_range(0);
+#else
    return blockDim.z;
+#endif
 }
 
 /* the group id in the block */
 static __device__ __forceinline__
-hypre_int get_group_id()
+hypre_int get_group_id(hypre_DeviceItem &item)
 {
+#if defined(HYPRE_USING_SYCL)
+   return item.get_local_id(0);
+#else
    return threadIdx.z;
+#endif
 }
 
 /* the thread id (lane) in the group */
 static __device__ __forceinline__
 hypre_int get_group_lane_id(hypre_DeviceItem &item)
 {
+#if defined(HYPRE_USING_SYCL)
+   return item.get_local_id(1) * item.get_local_range(2) + item.get_local_id(2);
+#else
    return hypre_gpu_get_thread_id<2>(item);
+#endif
 }
 
 /* the warp id in the group */
@@ -82,7 +105,11 @@ hypre_int get_warp_in_group_id(hypre_DeviceItem &item)
    }
    else
    {
+#if defined(HYPRE_USING_SYCL)
+      return get_group_lane_id(item) >> HYPRE_WARP_BITSHIFT;
+#else
       return hypre_gpu_get_warp_id<2>(item);
+#endif
    }
 }
 
@@ -98,14 +125,18 @@ void group_read(hypre_DeviceItem &item, const HYPRE_Int *ptr, bool valid_ptr, HY
    {
       /* lane = warp_lane
        * Note: use "2" since assume HYPRE_WARP_SIZE divides (blockDim.x * blockDim.y) */
+#if defined(HYPRE_USING_SYCL)
+      const HYPRE_Int lane = get_group_lane_id(item) & (HYPRE_WARP_SIZE - 1);
+#else
       const HYPRE_Int lane = hypre_gpu_get_lane_id<2>(item);
+#endif
 
       if (lane < 2)
       {
          v1 = read_only_load(ptr + lane);
       }
-      v2 = __shfl_sync(HYPRE_WARP_FULL_MASK, v1, 1);
-      v1 = __shfl_sync(HYPRE_WARP_FULL_MASK, v1, 0);
+      v2 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, v1, 1);
+      v1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, v1, 0);
    }
    else
    {
@@ -116,8 +147,8 @@ void group_read(hypre_DeviceItem &item, const HYPRE_Int *ptr, bool valid_ptr, HY
       {
          v1 = read_only_load(ptr + lane);
       }
-      v2 = __shfl_sync(HYPRE_WARP_FULL_MASK, v1, 1, GROUP_SIZE);
-      v1 = __shfl_sync(HYPRE_WARP_FULL_MASK, v1, 0, GROUP_SIZE);
+      v2 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, v1, 1, GROUP_SIZE);
+      v1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, v1, 0, GROUP_SIZE);
    }
 }
 
@@ -132,13 +163,17 @@ void group_read(hypre_DeviceItem &item, const HYPRE_Int *ptr, bool valid_ptr, HY
    {
       /* lane = warp_lane
        * Note: use "2" since assume HYPRE_WARP_SIZE divides (blockDim.x * blockDim.y) */
+#if defined(HYPRE_USING_SYCL)
+      const HYPRE_Int lane = get_group_lane_id(item) & (HYPRE_WARP_SIZE - 1);
+#else
       const HYPRE_Int lane = hypre_gpu_get_lane_id<2>(item);
+#endif
 
       if (!lane)
       {
          v1 = read_only_load(ptr);
       }
-      v1 = __shfl_sync(HYPRE_WARP_FULL_MASK, v1, 0);
+      v1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, v1, 0);
    }
    else
    {
@@ -149,7 +184,7 @@ void group_read(hypre_DeviceItem &item, const HYPRE_Int *ptr, bool valid_ptr, HY
       {
          v1 = read_only_load(ptr);
       }
-      v1 = __shfl_sync(HYPRE_WARP_FULL_MASK, v1, 0, GROUP_SIZE);
+      v1 = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, v1, 0, GROUP_SIZE);
    }
 }
 
@@ -164,7 +199,7 @@ T group_reduce_sum(hypre_DeviceItem &item, T in)
 #pragma unroll
    for (hypre_int d = GROUP_SIZE / 2; d > 0; d >>= 1)
    {
-      in += __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d);
+      in += warp_shuffle_down_sync(item, HYPRE_WARP_FULL_MASK, in, d);
    }
 
    return in;
@@ -181,7 +216,11 @@ T group_reduce_sum(hypre_DeviceItem &item, T in, volatile T *s_WarpData)
 
    T out = warp_reduce_sum(item, in);
 
+#if defined(HYPRE_USING_SYCL)
+   const HYPRE_Int warp_lane_id = get_group_lane_id(item) & (HYPRE_WARP_SIZE - 1);
+#else
    const HYPRE_Int warp_lane_id = hypre_gpu_get_lane_id<2>(item);
+#endif
    const HYPRE_Int warp_id = hypre_gpu_get_warp_id<3>(item);
 
    if (warp_lane_id == 0)
@@ -189,7 +228,7 @@ T group_reduce_sum(hypre_DeviceItem &item, T in, volatile T *s_WarpData)
       s_WarpData[warp_id] = out;
    }
 
-   __syncthreads();
+   block_sync(item);
 
    if (get_warp_in_group_id<GROUP_SIZE>(item) == 0)
    {
@@ -197,7 +236,7 @@ T group_reduce_sum(hypre_DeviceItem &item, T in, volatile T *s_WarpData)
       out = warp_reduce_sum(item, a);
    }
 
-   __syncthreads();
+   block_sync(item);
 
    return out;
 }
@@ -205,19 +244,19 @@ T group_reduce_sum(hypre_DeviceItem &item, T in, volatile T *s_WarpData)
 /* GROUP_SIZE must <= HYPRE_WARP_SIZE */
 template <typename T, HYPRE_Int GROUP_SIZE>
 static __device__ __forceinline__
-T group_prefix_sum(hypre_int lane_id, T in, T &all_sum)
+T group_prefix_sum(hypre_DeviceItem &item, hypre_int lane_id, T in, T &all_sum)
 {
 #pragma unroll
    for (hypre_int d = 2; d <= GROUP_SIZE; d <<= 1)
    {
-      T t = __shfl_up_sync(HYPRE_WARP_FULL_MASK, in, d >> 1, GROUP_SIZE);
+      T t = warp_shuffle_up_sync(item, HYPRE_WARP_FULL_MASK, in, d >> 1, GROUP_SIZE);
       if ( (lane_id & (d - 1)) == (d - 1) )
       {
          in += t;
       }
    }
 
-   all_sum = __shfl_sync(HYPRE_WARP_FULL_MASK, in, GROUP_SIZE - 1, GROUP_SIZE);
+   all_sum = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, in, GROUP_SIZE - 1, GROUP_SIZE);
 
    if (lane_id == GROUP_SIZE - 1)
    {
@@ -227,7 +266,7 @@ T group_prefix_sum(hypre_int lane_id, T in, T &all_sum)
 #pragma unroll
    for (hypre_int d = GROUP_SIZE >> 1; d > 0; d >>= 1)
    {
-      T t = __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d, GROUP_SIZE);
+      T t = warp_shuffle_xor_sync(item, HYPRE_WARP_FULL_MASK, in, d, GROUP_SIZE);
 
       if ( (lane_id & (d - 1)) == (d - 1))
       {
@@ -246,15 +285,15 @@ T group_prefix_sum(hypre_int lane_id, T in, T &all_sum)
 
 template <HYPRE_Int GROUP_SIZE>
 static __device__ __forceinline__
-void group_sync()
+void group_sync(hypre_DeviceItem &item)
 {
    if (GROUP_SIZE <= HYPRE_WARP_SIZE)
    {
-      __syncwarp();
+      warp_sync(item);
    }
    else
    {
-      __syncthreads();
+      block_sync(item);
    }
 }
 
@@ -320,13 +359,17 @@ HYPRE_Int HashFunc(HYPRE_Int key, HYPRE_Int i, HYPRE_Int prev)
 }
 
 template<typename T>
+#if defined(HYPRE_USING_SYCL)
+struct spgemm_bin_op
+#else
 struct spgemm_bin_op : public thrust::unary_function<T, char>
+#endif
 {
    char s, t, u; /* s: base size of bins; t: lowest bin; u: highest bin */
 
    spgemm_bin_op(char s_, char t_, char u_) { s = s_; t = t_; u = u_; }
 
-   __device__ char operator()(const T &x)
+   __device__ char operator()(const T &x) const
    {
       if (x <= 0)
       {
@@ -416,6 +459,9 @@ hypre_spgemm_get_num_groups_per_block()
    return hypre_min(hypre_max(512 / GROUP_SIZE, 1), 64);
 #elif defined(HYPRE_USING_HIP)
    return hypre_max(512 / GROUP_SIZE, 1);
+   /* WM: todo - what should this be for intel? */
+#elif defined(HYPRE_USING_SYCL)
+   return hypre_max(512 / GROUP_SIZE, 1);
 #endif
 }
 
@@ -425,6 +471,6 @@ hypre_spgemm_get_num_groups_per_block()
 #define HYPRE_SPGEMM_PRINT(...)
 #endif
 
-#endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) */
+#endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
 #endif /* #ifndef CSR_SPGEMM_DEVICE_H */
 

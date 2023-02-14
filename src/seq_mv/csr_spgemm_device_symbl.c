@@ -5,10 +5,11 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 #define HYPRE_SPGEMM_ROWNNZ_BINNED(BIN, SHMEM_HASH_SIZE, GROUP_SIZE, GHASH, CAN_FAIL, RF)  \
 {                                                                                          \
@@ -130,10 +131,17 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
    }
 
    /* row nnz is exact if no row failed */
+#if defined(HYPRE_USING_SYCL)
+   *rownnz_exact_ptr = !HYPRE_ONEDPL_CALL( std::any_of,
+                                           d_rf,
+                                           d_rf + m,
+   [] (const auto & x) {return x;} );
+#else
    *rownnz_exact_ptr = !HYPRE_THRUST_CALL( any_of,
                                            d_rf,
                                            d_rf + m,
                                            thrust::identity<char>() );
+#endif
 
    hypre_TFree(d_rf, HYPRE_MEMORY_DEVICE);
 
@@ -184,10 +192,17 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
    if (can_fail)
    {
       /* row nnz is exact if no row failed */
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_Int num_failed_rows =
+         HYPRE_ONEDPL_CALL( std::reduce,
+                            oneapi::dpl::make_transform_iterator(d_rf,     type_cast<char, HYPRE_Int>()),
+                            oneapi::dpl::make_transform_iterator(d_rf + m, type_cast<char, HYPRE_Int>()) );
+#else
       HYPRE_Int num_failed_rows =
          HYPRE_THRUST_CALL( reduce,
                             thrust::make_transform_iterator(d_rf,     type_cast<char, HYPRE_Int>()),
                             thrust::make_transform_iterator(d_rf + m, type_cast<char, HYPRE_Int>()) );
+#endif
 
       if (num_failed_rows)
       {
@@ -197,6 +212,15 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
 #endif
          HYPRE_Int *d_rind = hypre_TAlloc(HYPRE_Int, num_failed_rows, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+         oneapi::dpl::counting_iterator count(0);
+         HYPRE_Int *new_end = hypreSycl_copy_if(
+                                 count,
+                                 count + m,
+                                 d_rf,
+                                 d_rind,
+         [] (const auto & x) {return x;} );
+#else
          HYPRE_Int *new_end =
             HYPRE_THRUST_CALL( copy_if,
                                thrust::make_counting_iterator(0),
@@ -204,6 +228,7 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
                                d_rf,
                                d_rind,
                                thrust::identity<char>() );
+#endif
 
          hypre_assert(new_end - d_rind == num_failed_rows);
 
@@ -249,7 +274,11 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
 #endif
 
    /* naive upper bound */
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL( std::adjacent_difference, d_ib, d_ib + k + 1, d_rind );
+#else
    HYPRE_THRUST_CALL( adjacent_difference, d_ib, d_ib + k + 1, d_rind );
+#endif
    hypre_CSRMatrixIntSpMVDevice(m, nnzA, 1, d_ia, d_ja, NULL, d_rind + 1, 0, d_rc);
 
 #ifdef HYPRE_SPGEMM_TIMING
@@ -272,10 +301,17 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
 
       HYPRE_SPGEMM_ROWNNZ_BINNED( 5, SYMBL_HASH_SIZE[5], T_GROUP_SIZE[5], false, true, d_rf);
 
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_Int num_failed_rows =
+         HYPRE_ONEDPL_CALL( std::reduce,
+                            oneapi::dpl::make_transform_iterator(d_rf,     type_cast<char, HYPRE_Int>()),
+                            oneapi::dpl::make_transform_iterator(d_rf + m, type_cast<char, HYPRE_Int>()) );
+#else
       HYPRE_Int num_failed_rows =
          HYPRE_THRUST_CALL( reduce,
                             thrust::make_transform_iterator(d_rf,     type_cast<char, HYPRE_Int>()),
                             thrust::make_transform_iterator(d_rf + m, type_cast<char, HYPRE_Int>()) );
+#endif
 
       if (num_failed_rows)
       {
@@ -283,6 +319,15 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
          HYPRE_SPGEMM_PRINT("[%s, %d]: num of failed rows %d (%.2f)\n", __FILE__, __LINE__,
                             num_failed_rows, num_failed_rows / (m + 0.0) );
 #endif
+#if defined(HYPRE_USING_SYCL)
+         oneapi::dpl::counting_iterator count(0);
+         HYPRE_Int *new_end =
+            hypreSycl_copy_if( count,
+                               count + m,
+                               d_rf,
+                               d_rind,
+         [] (const auto & x) {return x;} );
+#else
          HYPRE_Int *new_end =
             HYPRE_THRUST_CALL( copy_if,
                                thrust::make_counting_iterator(0),
@@ -290,6 +335,7 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
                                d_rf,
                                d_rind,
                                thrust::identity<char>() );
+#endif
 
          hypre_assert(new_end - d_rind == num_failed_rows);
 
@@ -369,5 +415,5 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
    return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
+#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
 

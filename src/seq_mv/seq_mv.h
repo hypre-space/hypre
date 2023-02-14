@@ -622,7 +622,7 @@ HYPRE_Int hypre_CSRMatrixIntSpMVDevice( HYPRE_Int num_rows, HYPRE_Int num_nonzer
 hypre_CsrsvData* hypre_CsrsvDataCreate();
 void hypre_CsrsvDataDestroy(hypre_CsrsvData *data);
 hypre_GpuMatData* hypre_GpuMatDataCreate();
-void hypre_GPUMatDataSetCSRData(hypre_GpuMatData *data, hypre_CSRMatrix *matrix);
+void hypre_GPUMatDataSetCSRData(hypre_CSRMatrix *matrix);
 void hypre_GpuMatDataDestroy(hypre_GpuMatData *data);
 hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
 #define hypre_CSRMatrixGPUMatDescr(matrix)       ( hypre_GpuMatDataMatDecsr(hypre_CSRMatrixGetGPUMatData(matrix)) )

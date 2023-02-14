@@ -88,8 +88,10 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
 
    /* output X: 0: keep, 1: zero-out */
 #if defined(HYPRE_USING_SYCL)
-   /* WM: TODO - exclusive_scan_by_segment() currently does not work with a permutation iterator */
-   /*            and oneDPL currently does not have a reverse iterator */
+   /* WM: todo - oneDPL currently does not have a reverse iterator */
+   /*     should be able to do this with a reverse operation defined in a struct */
+   /*     instead of explicitly allocating and generating the reverse_perm, */
+   /*     but I can't get that to work for some reason */
    HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::transform,
                       oneapi::dpl::counting_iterator(0),
@@ -97,29 +99,20 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
                       reverse_perm,
    [N0] (auto i) { return N0 - i - 1; });
 
-   HYPRE_BigInt *I0_reversed = hypre_TAlloc(HYPRE_BigInt, N0, HYPRE_MEMORY_DEVICE);
-   hypreSycl_scatter(I0, I0 + N0, reverse_perm, I0_reversed);
+   auto I0_reversed = oneapi::dpl::make_permutation_iterator(I0, reverse_perm);
+   auto X0_reversed = oneapi::dpl::make_permutation_iterator(X0, reverse_perm);
+   auto X_reversed = oneapi::dpl::make_permutation_iterator(X, reverse_perm);
 
-   char *X0_reversed = hypre_TAlloc(char, N0, HYPRE_MEMORY_DEVICE);
-   hypreSycl_scatter(X0, X0 + N0, reverse_perm, X0_reversed);
+   HYPRE_ONEDPL_CALL( oneapi::dpl::exclusive_scan_by_segment,
+                      I0_reversed,      /* key begin */
+                      I0_reversed + N0, /* key end */
+                      X0_reversed,      /* input value begin */
+                      X_reversed,       /* output value begin */
+                      char(0),          /* init */
+                      std::equal_to<HYPRE_BigInt>(),
+                      oneapi::dpl::maximum<char>() );
 
-   char *X_reversed = hypre_TAlloc(char, N0, HYPRE_MEMORY_DEVICE);
-
-   HYPRE_ONEDPL_CALL(
-      oneapi::dpl::exclusive_scan_by_segment,
-      I0_reversed,      /* key begin */
-      I0_reversed + N0, /* key end */
-      X0_reversed,      /* input value begin */
-      X_reversed,       /* output value begin */
-      char(0),          /* init */
-      std::equal_to<HYPRE_BigInt>(),
-      oneapi::dpl::maximum<char>() );
-
-   hypreSycl_scatter(X_reversed, X_reversed + N0, reverse_perm, X);
    hypre_TFree(reverse_perm, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(I0_reversed, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(X0_reversed, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(X_reversed, HYPRE_MEMORY_DEVICE);
 
    hypreSycl_transform_if(A0,
                           A0 + N0,
@@ -196,8 +189,10 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
 
    /* output in X0: 0: keep, 1: zero-out */
 #if defined(HYPRE_USING_SYCL)
-   /* WM: TODO - inclusive_scan_by_segment() currently does not work with a permutation iterator */
-   /*            and oneDPL currently does not have a reverse iterator */
+   /* WM: todo - oneDPL currently does not have a reverse iterator */
+   /*     should be able to do this with a reverse operation defined in a struct */
+   /*     instead of explicitly allocating and generating the reverse_perm, */
+   /*     but I can't get that to work for some reason */
    HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::transform,
                       oneapi::dpl::counting_iterator(0),
@@ -205,25 +200,18 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
                       reverse_perm,
    [N0] (auto i) { return N0 - i - 1; });
 
-   HYPRE_BigInt *I0_reversed = hypre_TAlloc(HYPRE_BigInt, N0, HYPRE_MEMORY_DEVICE);
-   hypreSycl_scatter(I0, I0 + N0, reverse_perm, I0_reversed);
+   auto I0_reversed = oneapi::dpl::make_permutation_iterator(I0, reverse_perm);
+   auto X0_reversed = oneapi::dpl::make_permutation_iterator(X0, reverse_perm);
 
-   char *X0_reversed = hypre_TAlloc(char, N0, HYPRE_MEMORY_DEVICE);
-   hypreSycl_scatter(X0, X0 + N0, reverse_perm, X0_reversed);
+   HYPRE_ONEDPL_CALL( oneapi::dpl::inclusive_scan_by_segment,
+                      I0_reversed,      /* key begin */
+                      I0_reversed + N0, /* key end */
+                      X0_reversed,      /* input value begin */
+                      X0_reversed,      /* output value begin */
+                      std::equal_to<HYPRE_BigInt>(),
+                      oneapi::dpl::maximum<char>() );
 
-   HYPRE_ONEDPL_CALL(
-      oneapi::dpl::inclusive_scan_by_segment,
-      I0_reversed,      /* key begin */
-      I0_reversed + N0, /* key end */
-      X0_reversed,      /* input value begin */
-      X0_reversed,      /* output value begin */
-      std::equal_to<HYPRE_BigInt>(),
-      oneapi::dpl::maximum<char>() );
-
-   hypreSycl_scatter(X0_reversed, X0_reversed + N0, reverse_perm, X0);
    hypre_TFree(reverse_perm, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(I0_reversed, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(X0_reversed, HYPRE_MEMORY_DEVICE);
 
    hypreSycl_transform_if(A0,
                           A0 + N0,
