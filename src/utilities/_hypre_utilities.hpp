@@ -95,6 +95,26 @@ using hypre_DeviceItem = void*;
 #define CUDA_MALLOCASYNC_VERSION 11020
 #define THRUST_CALL_BLOCKING 1
 
+#define CUSPARSE_SPSV_VERSION 11500
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+#define hypre_cusparseSpSVDescr         cusparseSpSVDescr_t
+#define hypre_cusparseSpSV_createDescr  cusparseSpSV_createDescr
+#define hypre_cusparseSpSV_destroyDescr cusparseSpSV_destroyDescr
+#else
+#define hypre_cusparseSpSVDescr         csrsv2Info_t
+#define hypre_cusparseSpSV_createDescr  cusparseCreateCsrsv2Info
+#define hypre_cusparseSpSV_destroyDescr cusparseDestroyCsrsv2Info
+#endif
+
+#define CUSPARSE_SPSM_VERSION 11600
+#if CUSPARSE_VERSION >= CUSPARSE_SPSM_VERSION
+#define hypre_cusparseSpSMDescr         cusparseSpSMDescr_t
+#define hypre_cusparseSpSM_createDescr  cusparseSpSM_createDescr
+#define hypre_cusparseSpSM_destroyDescr cusparseSpSM_destroyDescr
+#else
+#define hypre_cusparseSpSMDescr         csrsm2Info_t
+#endif
+
 #if defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
 #if CUDA_VERSION < CUDA_MALLOCASYNC_VERSION
 #error cudaMalloc/FreeAsync needs CUDA 11.2

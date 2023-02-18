@@ -53,12 +53,12 @@ hypre_ILUSetup( void               *ilu_vdata,
    hypre_CSRMatrix         *matSLU_d         = hypre_ParILUDataMatSILUDevice(ilu_data);
    hypre_CSRMatrix         *matE_d           = hypre_ParILUDataMatEDevice(ilu_data);
    hypre_CSRMatrix         *matF_d           = hypre_ParILUDataMatFDevice(ilu_data);
-   csrsv2Info_t            matAL_info        = hypre_ParILUDataMatALILUSolveInfo(ilu_data);
-   csrsv2Info_t            matAU_info        = hypre_ParILUDataMatAUILUSolveInfo(ilu_data);
-   csrsv2Info_t            matBL_info        = hypre_ParILUDataMatBLILUSolveInfo(ilu_data);
-   csrsv2Info_t            matBU_info        = hypre_ParILUDataMatBUILUSolveInfo(ilu_data);
-   csrsv2Info_t            matSL_info        = hypre_ParILUDataMatSLILUSolveInfo(ilu_data);
-   csrsv2Info_t            matSU_info        = hypre_ParILUDataMatSUILUSolveInfo(ilu_data);
+   hypre_cusparseSpSVDescr            matAL_info        = hypre_ParILUDataMatALILUSolveInfo(ilu_data);
+   hypre_cusparseSpSVDescr            matAU_info        = hypre_ParILUDataMatAUILUSolveInfo(ilu_data);
+   hypre_cusparseSpSVDescr            matBL_info        = hypre_ParILUDataMatBLILUSolveInfo(ilu_data);
+   hypre_cusparseSpSVDescr            matBU_info        = hypre_ParILUDataMatBUILUSolveInfo(ilu_data);
+   hypre_cusparseSpSVDescr            matSL_info        = hypre_ParILUDataMatSLILUSolveInfo(ilu_data);
+   hypre_cusparseSpSVDescr            matSU_info        = hypre_ParILUDataMatSUILUSolveInfo(ilu_data);
    HYPRE_Int               *A_diag_fake      = hypre_ParILUDataMatAFakeDiagonal(ilu_data);
    hypre_Vector            *Ftemp_upper      = NULL;
    hypre_Vector            *Utemp_lower      = NULL;
@@ -149,32 +149,32 @@ hypre_ILUSetup( void               *ilu_vdata,
    }
    if (!matAL_info)
    {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatALILUSolveInfo(ilu_data))) );
+      HYPRE_CUSPARSE_CALL( (hypre_cusparseSpSV_destroyDescr(hypre_ParILUDataMatALILUSolveInfo(ilu_data))) );
       matAL_info = NULL;
    }
    if (!matAU_info)
    {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatAUILUSolveInfo(ilu_data))) );
+      HYPRE_CUSPARSE_CALL( (hypre_cusparseSpSV_destroyDescr(hypre_ParILUDataMatAUILUSolveInfo(ilu_data))) );
       matAU_info = NULL;
    }
    if (!matBL_info)
    {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatBLILUSolveInfo(ilu_data))) );
+      HYPRE_CUSPARSE_CALL( (hypre_cusparseSpSV_destroyDescr(hypre_ParILUDataMatBLILUSolveInfo(ilu_data))) );
       matBL_info = NULL;
    }
    if (!matBU_info)
    {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatBUILUSolveInfo(ilu_data))) );
+      HYPRE_CUSPARSE_CALL( (hypre_cusparseSpSV_destroyDescr(hypre_ParILUDataMatBUILUSolveInfo(ilu_data))) );
       matBU_info = NULL;
    }
    if (!matSL_info)
    {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatSLILUSolveInfo(ilu_data))) );
+      HYPRE_CUSPARSE_CALL( (hypre_cusparseSpSV_destroyDescr(hypre_ParILUDataMatSLILUSolveInfo(ilu_data))) );
       matSL_info = NULL;
    }
    if (!matSU_info)
    {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatSUILUSolveInfo(ilu_data))) );
+      HYPRE_CUSPARSE_CALL( (hypre_cusparseSpSV_destroyDescr(hypre_ParILUDataMatSUILUSolveInfo(ilu_data))) );
       matSU_info = NULL;
    }
    if (ilu_solve_buffer)
@@ -1601,7 +1601,7 @@ HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix *A, cusparseSolvePolicy_t ilu_solv
 HYPRE_Int
 HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix *A, cusparseMatDescr_t matL_des,
                                         cusparseMatDescr_t matU_des,
-                                        cusparseSolvePolicy_t ilu_solve_policy, csrsv2Info_t *matL_infop, csrsv2Info_t *matU_infop,
+                                        cusparseSolvePolicy_t ilu_solve_policy, hypre_cusparseSpSVDescr *matL_infop, hypre_cusparseSpSVDescr *matU_infop,
                                         HYPRE_Int *buffer_sizep, void **bufferp)
 {
    if (!A)
@@ -1636,18 +1636,18 @@ HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix *A, cusparseMatDescr_t m
    HYPRE_Int               nnz_A                = A_i[n];
 
    /* pointers to cusparse data */
-   csrsv2Info_t            matL_info            = *matL_infop;
-   csrsv2Info_t            matU_info            = *matU_infop;
+   hypre_cusparseSpSVDescr            matL_info            = *matL_infop;
+   hypre_cusparseSpSVDescr            matU_info            = *matU_infop;
 
    /* clear data if already exists */
    if (matL_info)
    {
-      HYPRE_CUSPARSE_CALL( cusparseDestroyCsrsv2Info(matL_info) );
+      HYPRE_CUSPARSE_CALL( hypre_cusparseSpSV_destroyDescr(matL_info) );
       matL_info = NULL;
    }
    if (matU_info)
    {
-      HYPRE_CUSPARSE_CALL( cusparseDestroyCsrsv2Info(matU_info) );
+      HYPRE_CUSPARSE_CALL( hypre_cusparseSpSV_destroyDescr(matU_info) );
       matU_info = NULL;
    }
 
@@ -1661,10 +1661,12 @@ HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix *A, cusparseMatDescr_t m
    cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
 
    /* 1. Create info for ilu setup and solve */
-   HYPRE_CUSPARSE_CALL(cusparseCreateCsrsv2Info(&(matL_info)));
-   HYPRE_CUSPARSE_CALL(cusparseCreateCsrsv2Info(&(matU_info)));
+   HYPRE_CUSPARSE_CALL(hypre_cusparseSpSV_createDescr(&(matL_info)));
+   HYPRE_CUSPARSE_CALL(hypre_cusparseSpSV_createDescr(&(matU_info)));
 
    /* 2. Get working array size */
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+#else
    HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, n,
                                                         nnz_A,
                                                         matL_des, A_data, A_i, A_j,
@@ -1674,6 +1676,7 @@ HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix *A, cusparseMatDescr_t m
                                                         nnz_A,
                                                         matU_des, A_data, A_i, A_j,
                                                         matU_info, &matU_buffersize));
+#endif
 
    solve_buffersize = hypre_max( matL_buffersize, matU_buffersize );
    /* 3. Create working array, since they won't be visited by host, allocate on device */
@@ -1691,6 +1694,8 @@ HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix *A, cusparseMatDescr_t m
    }
 
    /* 4. Now perform the analysis */
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+#else
    HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                       n, nnz_A, matL_des,
                                                       A_data, A_i, A_j,
@@ -1700,6 +1705,7 @@ HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix *A, cusparseMatDescr_t m
                                                       n, nnz_A, matU_des,
                                                       A_data, A_i, A_j,
                                                       matU_info, ilu_solve_policy, solve_buffer));
+#endif
 
    /* Done with analysis, finishing up */
    /* Set return value */
@@ -1728,8 +1734,8 @@ HYPRE_Int
 hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYPRE_Int n,
                          HYPRE_Int nLU,
                          cusparseMatDescr_t matL_des, cusparseMatDescr_t matU_des, cusparseSolvePolicy_t ilu_solve_policy,
-                         void **bufferp, csrsv2Info_t *matBL_infop, csrsv2Info_t *matBU_infop,
-                         csrsv2Info_t *matSL_infop, csrsv2Info_t *matSU_infop,
+                         void **bufferp, hypre_cusparseSpSVDescr *matBL_infop, hypre_cusparseSpSVDescr *matBU_infop,
+                         hypre_cusparseSpSVDescr *matSL_infop, hypre_cusparseSpSVDescr *matSU_infop,
                          hypre_CSRMatrix **BLUptr, hypre_ParCSRMatrix **matSptr, hypre_CSRMatrix **Eptr,
                          hypre_CSRMatrix **Fptr,
                          HYPRE_Int **A_fake_diag_ip, HYPRE_Int tri_solve)
@@ -1760,10 +1766,10 @@ hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qper
    HYPRE_Real              *A_offd_data         = NULL;
    hypre_CSRMatrix         *SLU                 = NULL;
    /* pointers to cusparse data */
-   csrsv2Info_t            matBL_info           = NULL;
-   csrsv2Info_t            matBU_info           = NULL;
-   csrsv2Info_t            matSL_info           = NULL;
-   csrsv2Info_t            matSU_info           = NULL;
+   hypre_cusparseSpSVDescr            matBL_info           = NULL;
+   hypre_cusparseSpSVDescr            matBU_info           = NULL;
+   hypre_cusparseSpSVDescr            matSL_info           = NULL;
+   hypre_cusparseSpSVDescr            matSU_info           = NULL;
 
    HYPRE_Int               buffer_size          = 0;
    void                    *buffer              = NULL;
@@ -1988,8 +1994,8 @@ HYPRE_Int
 hypre_ILUSetupILUKDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int *qperm,
                          HYPRE_Int n, HYPRE_Int nLU,
                          cusparseMatDescr_t matL_des, cusparseMatDescr_t matU_des, cusparseSolvePolicy_t ilu_solve_policy,
-                         void **bufferp, csrsv2Info_t *matBL_infop, csrsv2Info_t *matBU_infop,
-                         csrsv2Info_t *matSL_infop, csrsv2Info_t *matSU_infop,
+                         void **bufferp, hypre_cusparseSpSVDescr *matBL_infop, hypre_cusparseSpSVDescr *matBU_infop,
+                         hypre_cusparseSpSVDescr *matSL_infop, hypre_cusparseSpSVDescr *matSU_infop,
                          hypre_CSRMatrix **BLUptr, hypre_ParCSRMatrix **matSptr, hypre_CSRMatrix **Eptr,
                          hypre_CSRMatrix **Fptr,
                          HYPRE_Int **A_fake_diag_ip, HYPRE_Int tri_solve)
@@ -2023,10 +2029,10 @@ hypre_ILUSetupILUKDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm,
    HYPRE_Real              *A_offd_data         = NULL;
    hypre_CSRMatrix         *SLU                 = NULL;
    /* pointers to cusparse data */
-   csrsv2Info_t            matBL_info           = NULL;
-   csrsv2Info_t            matBU_info           = NULL;
-   csrsv2Info_t            matSL_info           = NULL;
-   csrsv2Info_t            matSU_info           = NULL;
+   hypre_cusparseSpSVDescr            matBL_info           = NULL;
+   hypre_cusparseSpSVDescr            matBU_info           = NULL;
+   hypre_cusparseSpSVDescr            matSL_info           = NULL;
+   hypre_cusparseSpSVDescr            matSU_info           = NULL;
 
    HYPRE_Int               buffer_size          = 0;
    void                    *buffer              = NULL;
@@ -2291,8 +2297,8 @@ HYPRE_Int
 hypre_ILUSetupILUTDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol, HYPRE_Int *perm,
                          HYPRE_Int *qperm, HYPRE_Int n, HYPRE_Int nLU,
                          cusparseMatDescr_t matL_des, cusparseMatDescr_t matU_des, cusparseSolvePolicy_t ilu_solve_policy,
-                         void **bufferp, csrsv2Info_t *matBL_infop, csrsv2Info_t *matBU_infop,
-                         csrsv2Info_t *matSL_infop, csrsv2Info_t *matSU_infop,
+                         void **bufferp, hypre_cusparseSpSVDescr *matBL_infop, hypre_cusparseSpSVDescr *matBU_infop,
+                         hypre_cusparseSpSVDescr *matSL_infop, hypre_cusparseSpSVDescr *matSU_infop,
                          hypre_CSRMatrix **BLUptr, hypre_ParCSRMatrix **matSptr, hypre_CSRMatrix **Eptr,
                          hypre_CSRMatrix **Fptr,
                          HYPRE_Int **A_fake_diag_ip, HYPRE_Int tri_solve)
@@ -2326,10 +2332,10 @@ hypre_ILUSetupILUTDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    HYPRE_Real              *A_offd_data         = NULL;
    hypre_CSRMatrix         *SLU                 = NULL;
    /* pointers to cusparse data */
-   csrsv2Info_t            matBL_info           = NULL;
-   csrsv2Info_t            matBU_info           = NULL;
-   csrsv2Info_t            matSL_info           = NULL;
-   csrsv2Info_t            matSU_info           = NULL;
+   hypre_cusparseSpSVDescr            matBL_info           = NULL;
+   hypre_cusparseSpSVDescr            matBU_info           = NULL;
+   hypre_cusparseSpSVDescr            matSL_info           = NULL;
+   hypre_cusparseSpSVDescr            matSU_info           = NULL;
 
    HYPRE_Int               buffer_size          = 0;
    void                    *buffer              = NULL;
@@ -2760,8 +2766,8 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
    cusparseSolvePolicy_t   policy = CUSPARSE_SOLVE_POLICY_NO_LEVEL;
    size_t                  buffer_size, buffer_size_old;
    void                    *buffer;
-   csrsm2Info_t            malL_info = NULL;
-   HYPRE_CUSPARSE_CALL(cusparseCreateCsrsm2Info(&malL_info));
+   hypre_cusparseSpSMDescr  malL_info = NULL;
+   HYPRE_CUSPARSE_CALL(hypre_cusparseSpSM_createDescr(&malL_info));
 
    rhs = hypre_CTAlloc(HYPRE_Real, m * n, HYPRE_MEMORY_DEVICE);
 
@@ -2778,14 +2784,19 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
    }
 
    /* check buffer size and create buffer */
+#if CUSPARSE_VERSION >= CUSPARSE_SPSM_VERSION
+#else
    HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_bufferSizeExt(handle, algo,
                                                            CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                            CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                            n, m, nnz_BLUm, &alpha, matL_des, BLUm_diag_data, BLUm_diag_i,
                                                            BLUm_diag_j, rhs, n, malL_info, policy, &buffer_size));
+#endif
 
    buffer = hypre_TAlloc(char, buffer_size, HYPRE_MEMORY_DEVICE);
 
+#if CUSPARSE_VERSION >= CUSPARSE_SPSM_VERSION
+#else
    /* analysis */
    HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_analysis(handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                       CUSPARSE_OPERATION_NON_TRANSPOSE,
@@ -2797,22 +2808,25 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
                                                    CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                    n, m, nnz_BLUm, &alpha, matL_des, BLUm_diag_data, BLUm_diag_i,
                                                    BLUm_diag_j, rhs, n, malL_info, policy, buffer));
+#endif
 
    /* now P = -UB\(LB\F) -> UB*P = -(LB\F)
     */
    alpha = -1.0;
-   csrsm2Info_t            malU_info = NULL;
-   HYPRE_CUSPARSE_CALL(cusparseCreateCsrsm2Info(&malU_info));
+   hypre_cusparseSpSMDescr malU_info = NULL;
+   HYPRE_CUSPARSE_CALL(hypre_cusparseSpSM_createDescr(&malU_info));
 
    buffer_size_old = buffer_size;
 
    /* check buffer size and create buffer */
-
+#if CUSPARSE_VERSION >= CUSPARSE_SPSM_VERSION
+#else
    HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_bufferSizeExt(handle, algo,
                                                            CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                            CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                            n, m, nnz_BLUm, &alpha, matU_des, BLUm_diag_data, BLUm_diag_i,
                                                            BLUm_diag_j, rhs, n, malU_info, policy, &buffer_size));
+#endif
 
    if (buffer_size > buffer_size_old)
    {
@@ -2821,7 +2835,8 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
    }
 
    /* analysis */
-
+#if CUSPARSE_VERSION >= CUSPARSE_SPSM_VERSION
+#else
    HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_analysis(handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                       CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                       n, m, nnz_BLUm, &alpha, matU_des, BLUm_diag_data, BLUm_diag_i,
@@ -2832,6 +2847,7 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
                                                    CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                    n, m, nnz_BLUm, &alpha, matU_des, BLUm_diag_data, BLUm_diag_i,
                                                    BLUm_diag_j, rhs, n, malU_info, policy, buffer));
+#endif
 
    /* wait till GPU done to copy data */
    cudaDeviceSynchronize();
@@ -2898,8 +2914,8 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
     * first EiUB = E / UB -> UB'*EiUB'=E'
     */
    alpha = 1.0;
-   csrsm2Info_t            malU_info2 = NULL;
-   HYPRE_CUSPARSE_CALL(cusparseCreateCsrsm2Info(&malU_info2));
+   hypre_cusparseSpSMDescr malU_info2 = NULL;
+   HYPRE_CUSPARSE_CALL(hypre_cusparseSpSM_createDescr(&malU_info2));
 
    /* fill data, note that rhs is in Fortan style (col first)
     * oprating by col is slow, but
@@ -2918,11 +2934,13 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
    }
 
    /* check buffer size and create buffer */
-
+#if CUSPARSE_VERSION >= CUSPARSE_SPSM_VERSION
+#else
    HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_bufferSizeExt(handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
                                                            CUSPARSE_OPERATION_TRANSPOSE,
                                                            n, m, nnz_BLUm, &alpha, matU_des, BLUm_diag_data, BLUm_diag_i,
                                                            BLUm_diag_j, rhs, m, malU_info2, policy, &buffer_size));
+#endif
 
    if (buffer_size > buffer_size_old)
    {
@@ -2931,7 +2949,8 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
    }
 
    /* analysis */
-
+#if CUSPARSE_VERSION >= CUSPARSE_SPSM_VERSION
+#else
    HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_analysis(handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
                                                       CUSPARSE_OPERATION_TRANSPOSE,
                                                       n, m, nnz_BLUm, &alpha, matU_des, BLUm_diag_data, BLUm_diag_i,
@@ -2942,19 +2961,22 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
                                                    CUSPARSE_OPERATION_TRANSPOSE,
                                                    n, m, nnz_BLUm, &alpha, matU_des, BLUm_diag_data, BLUm_diag_i,
                                                    BLUm_diag_j, rhs, m, malU_info2, policy, buffer));
+#endif
 
    /* R = - (EiUB ) / LB -> LB'R' = -EiUB'
     */
    alpha = -1.0;
-   csrsm2Info_t            malL_info2 = NULL;
-   HYPRE_CUSPARSE_CALL(cusparseCreateCsrsm2Info(&malL_info2));
+   hypre_cusparseSpSMDescr malL_info2 = NULL;
+   HYPRE_CUSPARSE_CALL(hypre_cusparseSpSM_createDescr(&malL_info2));
 
    /* check buffer size and create buffer */
-
+#if CUSPARSE_VERSION >= CUSPARSE_SPSM_VERSION
+#else
    HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_bufferSizeExt(handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
                                                            CUSPARSE_OPERATION_TRANSPOSE,
                                                            n, m, nnz_BLUm, &alpha, matL_des, BLUm_diag_data, BLUm_diag_i,
                                                            BLUm_diag_j, rhs, m, malL_info2, policy, &buffer_size));
+#endif
 
    if (buffer_size > buffer_size_old)
    {
@@ -2963,7 +2985,8 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
    }
 
    /* analysis */
-
+#if CUSPARSE_VERSION >= CUSPARSE_SPSM_VERSION
+#else
    HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_analysis(handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
                                                       CUSPARSE_OPERATION_TRANSPOSE,
                                                       n, m, nnz_BLUm, &alpha, matL_des, BLUm_diag_data, BLUm_diag_i,
@@ -2974,6 +2997,7 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
                                                    CUSPARSE_OPERATION_TRANSPOSE,
                                                    n, m, nnz_BLUm, &alpha, matL_des, BLUm_diag_data, BLUm_diag_i,
                                                    BLUm_diag_j, rhs, m, malL_info2, policy, buffer));
+#endif
 
    cudaDeviceSynchronize();
    /* now form R, m * (n + m) */
@@ -3073,10 +3097,10 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_Pa
    *Rp = R;
    *Pp = P;
 
-   HYPRE_CUSPARSE_CALL(cusparseDestroyCsrsm2Info(malL_info));
-   HYPRE_CUSPARSE_CALL(cusparseDestroyCsrsm2Info(malU_info));
-   HYPRE_CUSPARSE_CALL(cusparseDestroyCsrsm2Info(malL_info2));
-   HYPRE_CUSPARSE_CALL(cusparseDestroyCsrsm2Info(malU_info2));
+   HYPRE_CUSPARSE_CALL(hypre_cusparseSpSM_destroyDescr(malL_info));
+   HYPRE_CUSPARSE_CALL(hypre_cusparseSpSM_destroyDescr(malU_info));
+   HYPRE_CUSPARSE_CALL(hypre_cusparseSpSM_destroyDescr(malL_info2));
+   HYPRE_CUSPARSE_CALL(hypre_cusparseSpSM_destroyDescr(malU_info2));
 
    return hypre_error_flag;
 }
@@ -3214,9 +3238,9 @@ hypre_ILUSetupRAPMILU0(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **ALUp, HYPRE_I
 HYPRE_Int
 hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n, HYPRE_Int nLU,
                             cusparseMatDescr_t matL_des, cusparseMatDescr_t matU_des, cusparseSolvePolicy_t ilu_solve_policy,
-                            void **bufferp, csrsv2Info_t *matAL_infop, csrsv2Info_t *matAU_infop,
-                            csrsv2Info_t *matBL_infop, csrsv2Info_t *matBU_infop,
-                            csrsv2Info_t *matSL_infop, csrsv2Info_t *matSU_infop,
+                            void **bufferp, hypre_cusparseSpSVDescr *matAL_infop, hypre_cusparseSpSVDescr *matAU_infop,
+                            hypre_cusparseSpSVDescr *matBL_infop, hypre_cusparseSpSVDescr *matBU_infop,
+                            hypre_cusparseSpSVDescr *matSL_infop, hypre_cusparseSpSVDescr *matSU_infop,
                             hypre_ParCSRMatrix **Apermptr, hypre_ParCSRMatrix **matSptr, hypre_CSRMatrix **ALUptr,
                             hypre_CSRMatrix **BLUptr, hypre_CSRMatrix **CLUptr,
                             hypre_CSRMatrix **Eptr, hypre_CSRMatrix **Fptr, HYPRE_Int test_opt)
@@ -3226,12 +3250,12 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n,
    MPI_Comm             comm           = hypre_ParCSRMatrixComm(A);
    HYPRE_Int            *rperm         = NULL;
 
-   csrsv2Info_t         matAL_info     = NULL;
-   csrsv2Info_t         matAU_info     = NULL;
-   csrsv2Info_t         matBL_info     = NULL;
-   csrsv2Info_t         matBU_info     = NULL;
-   csrsv2Info_t         matSL_info     = NULL;
-   csrsv2Info_t         matSU_info     = NULL;
+   hypre_cusparseSpSVDescr         matAL_info     = NULL;
+   hypre_cusparseSpSVDescr         matAU_info     = NULL;
+   hypre_cusparseSpSVDescr         matBL_info     = NULL;
+   hypre_cusparseSpSVDescr         matBU_info     = NULL;
+   hypre_cusparseSpSVDescr         matSL_info     = NULL;
+   hypre_cusparseSpSVDescr         matSU_info     = NULL;
 
    HYPRE_Int            buffer_size    = 0;
    void                 *buffer        = NULL;
