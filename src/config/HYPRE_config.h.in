@@ -253,6 +253,9 @@
 /* rocRAND being used */
 #undef HYPRE_USING_ROCRAND
 
+/* rocSOLVER being used */
+#undef HYPRE_USING_ROCSOLVER
+
 /* rocSPARSE being used */
 #undef HYPRE_USING_ROCSPARSE
 

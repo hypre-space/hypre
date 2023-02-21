@@ -130,12 +130,16 @@ hypre_DeviceDataDestroy(hypre_DeviceData *data)
    }
 #endif // #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
 
-#if defined(HYPRE_USING_CUSOLVER)
+#if defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
    if (data->vendor_solver_handle)
    {
+#if defined(HYPRE_USING_CUSOLVER)
       HYPRE_CUSOLVER_CALL(cusolverDnDestroy(data->vendor_solver_handle));
-   }
+#else
+      HYPRE_ROCBLAS_CALL(rocblas_destroy_handle(data->vendor_solver_handle));
 #endif
+   }
+#endif // #if defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
 
 #if defined(HYPRE_USING_CUDA_STREAMS)
    for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
@@ -2820,7 +2824,7 @@ hypre_DeviceDataCusparseHandle(hypre_DeviceData *data)
 }
 #endif // defined(HYPRE_USING_ROCSPARSE)
 
-#if defined(HYPRE_USING_CUSOLVER)
+#if defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
 
 /*--------------------------------------------------------------------
  * hypre_DeviceDataVendorSolverHandle
@@ -2834,16 +2838,23 @@ hypre_DeviceDataVendorSolverHandle(hypre_DeviceData *data)
       return data->vendor_solver_handle;
    }
 
+#if defined(HYPRE_USING_CUSOLVER)
    cusolverDnHandle_t handle;
 
    HYPRE_CUSOLVER_CALL( cusolverDnCreate(&handle) );
    HYPRE_CUSOLVER_CALL( cusolverDnSetStream(handle, hypre_DeviceDataComputeStream(data)) );
+#else
+   rocblas_handle handle;
+
+   HYPRE_ROCBLAS_CALL( rocblas_create_handle(&handle) );
+   HYPRE_ROCBLAS_CALL( rocblas_set_stream(handle, hypre_DeviceDataComputeStream(data)) );
+#endif
 
    data->vendor_solver_handle = handle;
 
    return handle;
 }
-#endif // defined(HYPRE_USING_CUSOLVER)
+#endif // defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
 
 #endif // #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP)
 

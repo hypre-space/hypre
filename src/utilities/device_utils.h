@@ -71,8 +71,16 @@ using hypre_DeviceItem = void*;
 using hypre_DeviceItem = void*;
 #include <hip/hip_runtime.h>
 
+#if defined(HYPRE_USING_ROCBLAS)
+#include <rocblas/rocblas.h>
+#endif
+
 #if defined(HYPRE_USING_ROCSPARSE)
-#include <rocsparse.h>
+#include <rocsparse/rocsparse.h>
+#endif
+
+#if defined(HYPRE_USING_ROCSOLVER)
+#include <rocsolver/rocsolver.h>
 #endif
 
 #if defined(HYPRE_USING_ROCRAND)
@@ -422,6 +430,14 @@ using hypre_DeviceItem = sycl::nd_item<3>;
       assert(0); exit(1);                                                                    \
    } } while(0)
 
+#define HYPRE_ROCSOLVER_CALL(call) do {                                                      \
+   rocblas_status err = call;                                                                \
+   if (rocblas_status_success != err) {                                                      \
+      printf("rocSOLVER ERROR (code = %d, %s) at %s:%d\n",                                   \
+             err, rocblas_status_to_string(err), __FILE__, __LINE__);                        \
+      assert(0); exit(1);                                                                    \
+   } } while(0)
+
 #define HYPRE_CURAND_CALL(call) do {                                                         \
    curandStatus_t err = call;                                                                \
    if (CURAND_STATUS_SUCCESS != err) {                                                       \
@@ -484,6 +500,8 @@ typedef struct hypre_cub_CachingDeviceAllocator hypre_cub_CachingDeviceAllocator
 
 #if defined(HYPRE_USING_CUSOLVER)
 typedef cusolverDnHandle_t vendorSolverHandle_t;
+#elif defined(HYPRE_USING_ROCSOLVER)
+typedef rocblas_handle     vendorSolverHandle_t;
 #endif
 
 struct hypre_DeviceData
@@ -508,7 +526,7 @@ struct hypre_DeviceData
    rocsparse_handle                  cusparse_handle;
 #endif
 
-#if defined(HYPRE_USING_CUSOLVER)
+#if defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
    vendorSolverHandle_t              vendor_solver_handle;
 #endif
 
@@ -624,7 +642,7 @@ cusparseHandle_t      hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
 rocsparse_handle      hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
 #endif
 
-#if defined(HYPRE_USING_CUSOLVER)
+#if defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
 vendorSolverHandle_t  hypre_DeviceDataVendorSolverHandle(hypre_DeviceData *data);
 #endif
 

@@ -306,7 +306,7 @@ HYPRE_Init(void)
    hypre_HandleCurandGenerator(_hypre_handle);
 #endif
 
-#if defined(HYPRE_USING_CUSOLVER)
+#if defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
    hypre_HandleVendorSolverHandle(_hypre_handle);
 #endif
 
