@@ -2830,7 +2830,7 @@ hypre_DeviceDataCusparseHandle(hypre_DeviceData *data)
  * hypre_DeviceDataVendorSolverHandle
  *--------------------------------------------------------------------*/
 
-cusolverDnHandle_t
+vendorSolverHandle_t
 hypre_DeviceDataVendorSolverHandle(hypre_DeviceData *data)
 {
    if (data->vendor_solver_handle)
