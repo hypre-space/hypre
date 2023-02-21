@@ -506,25 +506,25 @@ else
 fi
 
 dnl *********************************************************************
-dnl * Determine if user provided CUDA compiler or flags
+dnl * Determine if user provided GPU compiler or flags
 dnl *********************************************************************
 AC_ARG_VAR([CUDA_HOME], [CUDA home directory])
 AC_ARG_VAR([HYPRE_CUDA_SM], [CUDA architecture])
-AC_ARG_VAR([CUCC], [CUDA compiler command])
-AC_ARG_VAR([CUFLAGS], [CUDA compiler flags])
+AC_ARG_VAR([GPUCC], [GPU compiler command (e.g. nvcc, hipcc, icpx)])
+AC_ARG_VAR([GPUFLAGS], [GPU compiler flags])
 
-if test "x$CUCC" = "x"
+if test "x$GPUCC" = "x"
 then
-   hypre_user_chose_cudacompilers=no
+   hypre_user_chose_gpucompilers=no
 else
-   hypre_user_chose_cudacompilers=yes
+   hypre_user_chose_gpucompilers=yes
 fi
 
-if test "x$CUFLAGS" = "x"
+if test "x$GPUFLAGS" = "x"
 then
-   hypre_user_chose_cuflags=no
+   hypre_user_chose_gpuflags=no
 else
-   hypre_user_chose_cuflags=yes
+   hypre_user_chose_gpuflags=yes
 fi
 
 dnl *********************************************************************
@@ -605,11 +605,11 @@ AS_HELP_STRING([--with-extra-CXXFLAGS=ARG],
 [EXTRA_CXXFLAGS=$withval]
 )
 
-AC_ARG_WITH(extra-CUFLAGS,
-AS_HELP_STRING([--with-extra-CUFLAGS=ARG],
-               [Define extra CUDA compile flag, where ARG is a space-separated
+AC_ARG_WITH(extra-GPUFLAGS,
+AS_HELP_STRING([--with-extra-GPUFLAGS=ARG],
+               [Define extra GPU compile flag, where ARG is a space-separated
                 list (enclosed in quotes) of directories.]),
-[EXTRA_CUFLAGS=$withval]
+[EXTRA_GPUFLAGS=$withval]
 )
 
 AC_ARG_WITH(extra-BUILDFLAGS,
@@ -1695,7 +1695,7 @@ then
 fi
 
 
-if test "$hypre_user_chose_cudacompilers" = "no"
+if test "$hypre_user_chose_gpucompilers" = "no"
 then
    if test "$hypre_using_device_openmp" = "yes"
    then
@@ -1703,34 +1703,34 @@ then
       then
          if test "$hypre_using_mpi" = "no"
          then
-            AC_CHECK_PROGS(CUCC, [clang++-gpu icpx])
+            AC_CHECK_PROGS(GPUCC, [clang++-gpu icpx])
          else
-            AC_CHECK_PROGS(CUCC, [mpiclang++-gpu mpiicpx])
+            AC_CHECK_PROGS(GPUCC, [mpiclang++-gpu mpiicpx])
          fi
       else
          if test "$hypre_using_mpi" = "no"
          then
-            AC_CHECK_PROGS(CUCC, [xlc-gpu clang-gpu icx])
+            AC_CHECK_PROGS(GPUCC, [xlc-gpu clang-gpu icx])
          else
-            AC_CHECK_PROGS(CUCC, [mpixlc-gpu mpiclang-gpu mpiicx])
+            AC_CHECK_PROGS(GPUCC, [mpixlc-gpu mpiclang-gpu mpiicx])
          fi
       fi
    fi
 
    if test "$hypre_using_cuda" = "yes"
    then
-      AC_CHECK_PROGS(CUCC, nvcc, [""], ["${CUDA_HOME}/bin"])
-      CUCC="\${HYPRE_CUDA_PATH}/bin/${CUCC} -ccbin=\${CXX}"
+      AC_CHECK_PROGS(GPUCC, nvcc, [""], ["${CUDA_HOME}/bin"])
+      GPUCC="\${HYPRE_CUDA_PATH}/bin/${GPUCC} -ccbin=\${CXX}"
    fi
 
    if test "$hypre_using_hip" = "yes"
    then
-      AC_CHECK_PROGS(CUCC, hipcc)
+      AC_CHECK_PROGS(GPUCC, hipcc)
    fi
 
    if test "$hypre_using_sycl" = "yes"
    then
-      AC_CHECK_PROGS(CUCC, icpx)
+      AC_CHECK_PROGS(GPUCC, icpx)
    fi
 fi
 
@@ -2111,7 +2111,7 @@ dnl   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
    BUILD_CXX_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
    if test "$hypre_using_cuda" == "yes" || test "$hypre_using_hip" == "yes" || test "$hypre_using_kokkos" == "yes"
    then
-      dnl BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG}"
+      dnl BUILD_CC_SHARED="\${GPUCC} ${SHARED_BUILD_FLAG}"
       BUILD_CC_SHARED="\${CXX} ${SHARED_BUILD_FLAG}"
    fi
    dnl TODO HIP
@@ -2374,8 +2374,8 @@ then
 
 
    LINK_CC=${LINK_CXX}
-   dnl LINK_CC='${CUCC}'
-   dnl LINK_CXX='${CUCC}'
+   dnl LINK_CC='${GPUCC}'
+   dnl LINK_CXX='${GPUCC}'
 
    dnl CUDA SM
    if test "x$HYPRE_CUDA_SM" = "x"
@@ -2388,27 +2388,27 @@ then
       HYPRE_CUDA_GENCODE="${HYPRE_CUDA_GENCODE}-gencode arch=compute_${sm},code=sm_${sm} "
    done
 
-   if test "$hypre_user_chose_cuflags" = "no"
+   if test "$hypre_user_chose_gpuflags" = "no"
    then
-      CUFLAGS="-lineinfo -expt-extended-lambda -std=c++${hypre_cxxstd} --x cu"
+      GPUFLAGS="-lineinfo -expt-extended-lambda -std=c++${hypre_cxxstd} --x cu"
       if test "$hypre_using_debug" = "yes"
       then
-         CUFLAGS="-g -O0 ${CUFLAGS}"
+         GPUFLAGS="-g -O0 ${GPUFLAGS}"
       else
-         CUFLAGS="-O2 ${CUFLAGS}"
+         GPUFLAGS="-O2 ${GPUFLAGS}"
       fi
 
       dnl if [test "${CXX}" = "mpixlC" || test "${CXX}" = "xlC_r" || test "${CXX}" = "xlC"]
       dnl then
-      dnl   CUFLAGS="${CUFLAGS} -Xcompiler \"-Wno-deprecated-register -Wenum-compare\""
+      dnl   GPUFLAGS="${GPUFLAGS} -Xcompiler \"-Wno-deprecated-register -Wenum-compare\""
       dnl fi
 
-      CUFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
+      GPUFLAGS="${GPUFLAGS} -Xcompiler \"${CXXFLAGS}\""
    fi
 
    dnl if test "$hypre_using_shared" = "yes"
    dnl then
-   dnl   CUFLAGS="${CUFLAGS} -Xcompiler ${SHARED_COMPILE_FLAG}"
+   dnl   GPUFLAGS="${GPUFLAGS} -Xcompiler ${SHARED_COMPILE_FLAG}"
    dnl fi
 
    dnl CFLAGS=${CXXFLAGS}
@@ -2482,12 +2482,11 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         dnl by setting HIPCC_VERBOSE=7 in your environment.
         dnl AC_CHECK_PROGS(HIPCC, hipcc)
 
-        dnl (Ab)Using CUCC when compiling HIP
         dnl At this time, we need the linker to be hipcc in order to link
         dnl in device code.
         LINK_CC=${LINK_CXX}
-        dnl LINK_CC='${CUCC}'
-        dnl LINK_CXX='${CUCC}'
+        dnl LINK_CC='${GPUCC}'
+        dnl LINK_CXX='${GPUCC}'
 
 
         if test "x${HYPRE_CUDA_SM}" != "x"
@@ -2521,11 +2520,10 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
            HIPCXXFLAGS="${SHARED_COMPILE_FLAG} ${HIPCXXFLAGS}"
         fi
 
-        dnl (Ab)Use CUFLAGS to capture HIP compilation flags
         dnl Put HIPCXXFLAGS at the end so the user can override the optimization level.
-        if test "$hypre_user_chose_cuflags" = "no"
+        if test "$hypre_user_chose_gpuflags" = "no"
         then
-           CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS}"
+           GPUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS}"
         fi
 
         dnl PB: ROCm 5.2 parked all the headers in /opt/rocm-X.Y/include so we just point there.
@@ -2576,9 +2574,8 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         AC_DEFINE(HYPRE_USING_GPU,  1, [Define to 1 if executing on GPU device])
         AC_DEFINE(HYPRE_USING_SYCL, 1, [SYCL being used])
 
-        dnl (Ab)Using CUCC when compiling SYCL
-        LINK_CC=${CUCC}
-        LINK_CXX=${CUCC}
+        LINK_CC=${GPUCC}
+        LINK_CXX=${GPUCC}
 
         SYCLFLAGS="-fsycl -fsycl-unnamed-lambda"
         if test "$hypre_using_debug" = "yes"
@@ -2600,10 +2597,9 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
            LDFLAGS+=" -Xsycl-target-backend ${HYPRE_SYCL_TARGET_BACKEND}"
         fi
 
-        dnl (Ab)Use CUFLAGS to capture SYCL compilation flags
-        if test "$hypre_user_chose_cuflags" = "no"
+        if test "$hypre_user_chose_gpuflags" = "no"
         then
-           CUFLAGS="${SYCLFLAGS}"
+           GPUFLAGS="${SYCLFLAGS}"
         fi
 
         AS_IF([test x"$hypre_using_onemklsparse" == x"yes" || test x"$hypre_using_onemklblas" == x"yes" || test x"$hypre_using_onemklrand" == x"yes"],
@@ -2687,23 +2683,23 @@ then
 
    dnl AC_DEFINE(HYPRE_DEVICE_OPENMP_MAPPED, 1, [Define to 1 if using OpenMP on device [target mapped version]])
 
-   if test "$hypre_user_chose_cuflags" = "no"
+   if test "$hypre_user_chose_gpuflags" = "no"
    then
-      CUFLAGS="${CXXFLAGS} ${CUFLAGS}"
-      dnl if [test "$CUCC" = "clang-gpu" || test "$CUCC" = "mpiclang-gpu" || test "$CUCC" = "clang++-gpu" || test "$CUCC" = "mpiclang++-gpu"]
+      GPUFLAGS="${CXXFLAGS} ${GPUFLAGS}"
+      dnl if [test "$GPUCC" = "clang-gpu" || test "$GPUCC" = "mpiclang-gpu" || test "$GPUCC" = "clang++-gpu" || test "$GPUCC" = "mpiclang++-gpu"]
       dnl then
          # dnl this is too old
-         #CUFLAGS+=" -fopenmp-nonaliased-maps"
+         #GPUFLAGS+=" -fopenmp-nonaliased-maps"
       dnl fi
-      if [test "$CUCC" = "icx" || test "$CUCC" = "icpx" || test "$CUCC" = "mpiicx" || test "$CUCC" = "mpiicpx"]
+      if [test "$GPUCC" = "icx" || test "$GPUCC" = "icpx" || test "$GPUCC" = "mpiicx" || test "$GPUCC" = "mpiicpx"]
       then
-         CUFLAGS+="-qopenmp -fopenmp-targets=spir64"
+         GPUFLAGS+="-qopenmp -fopenmp-targets=spir64"
       fi
    fi
 
    if test "$hypre_user_chose_ldflags" = "no"
    then
-      if [test "$CUCC" = "icx" || test "$CUCC" = "icpx" || test "$CUCC" = "mpiicx" || test "$CUCC" = "mpiicpx"]
+      if [test "$GPUCC" = "icx" || test "$GPUCC" = "icpx" || test "$GPUCC" = "mpiicx" || test "$GPUCC" = "mpiicpx"]
       then
          LDFLAGS+="-qopenmp -fopenmp-targets=spir64"
       fi
@@ -2716,8 +2712,8 @@ then
 
    dnl let CC be CXX
    dnl CC=${CXX}
-   LINK_CC='${CUCC}'
-   LINK_CXX='${CUCC}'
+   LINK_CC='${GPUCC}'
+   LINK_CXX='${GPUCC}'
    dnl CXXFLAGS="-x c++ ${CXXFLAGS}"
    dnl CFLAGS=${CXXFLAGS}
 fi
@@ -2742,7 +2738,7 @@ then
    AC_DEFINE([HYPRE_WITH_GPU_AWARE_MPI],1,[Define to 1 if using GPU aware MPI])
 fi
 
-CUFLAGS="${CUFLAGS} ${EXTRA_CUFLAGS}"
+GPUFLAGS="${GPUFLAGS} ${EXTRA_GPUFLAGS}"
 
 dnl *********************************************************************
 dnl * Set installation directories
@@ -2878,8 +2874,8 @@ AC_SUBST(HYPRE_UMPIRE_LIB)
 dnl *********************************************************************
 dnl * CUDA stuff
 dnl *********************************************************************
-AC_SUBST(CUFLAGS)
-AC_SUBST(CUCC)
+AC_SUBST(GPUFLAGS)
+AC_SUBST(GPUCC)
 AC_SUBST(HYPRE_CUDA_GENCODE)
 AC_SUBST(HYPRE_CUDA_PATH)
 AC_SUBST(HYPRE_CUDA_INCLUDE)
