@@ -2447,7 +2447,7 @@ then
 
    if test "$hypre_using_cusolver" = "yes"
    then
-      AC_DEFINE(HYPRE_USING_CUSOLVER, 1, [Define to 1 if using cuSolver])
+      AC_DEFINE(HYPRE_USING_CUSOLVER, 1, [Define to 1 if using cuSOLVER])
       HYPRE_CUDA_LIBS+=" -lcusolver"
    fi
 

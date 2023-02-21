@@ -175,7 +175,7 @@
 /* Define to 1 if using cuRAND */
 #undef HYPRE_USING_CURAND
 
-/* Define to 1 if using cuSolver */
+/* Define to 1 if using cuSOLVER */
 #undef HYPRE_USING_CUSOLVER
 
 /* Define to 1 if using cuSPARSE */
