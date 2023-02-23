@@ -186,6 +186,14 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(comm, &num_procs );
    hypre_MPI_Comm_rank(comm, &myid );
 
+   HYPRE_Int num_threads = hypre_NumThreads();
+
+   if (!myid)
+   {
+      hypre_printf("\n\n Num MPI tasks = %d\n\n", num_procs);
+      hypre_printf(" Num OpenMP threads = %d\n\n", num_threads);
+   }
+
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
