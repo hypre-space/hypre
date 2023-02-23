@@ -232,10 +232,10 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
 
          if (logging > 0)
          {
-            norms[i] = sqrt(r_dot_r);
+            norms[i] = hypre_sqrt(r_dot_r);
             if (b_dot_b > 0)
             {
-               rel_norms[i] = sqrt(r_dot_r / b_dot_b);
+               rel_norms[i] = hypre_sqrt(r_dot_r / b_dot_b);
             }
             else
             {

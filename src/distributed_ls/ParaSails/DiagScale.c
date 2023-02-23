@@ -162,7 +162,7 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
             if (ind[j] == row)
             {
                 if (val[j] != 0.0)
-                    p->local_diags[row] = 1.0 / sqrt(ABS(val[j]));
+                    p->local_diags[row] = 1.0 / hypre_sqrt(ABS(val[j]));
                 break;
             }
         }

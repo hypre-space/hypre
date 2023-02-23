@@ -123,7 +123,7 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
          {
             hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, res);
          }
-         resid_nrm = sqrt(hypre_ParVectorInnerProd(res, res));
+         resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(res, res));
       }
       else
       {
@@ -132,7 +132,7 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
          {
             hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Vtemp);
          }
-         resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+         resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
       }
 
       /* Since it is does not diminish performance, attempt to return an error flag
@@ -166,7 +166,7 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
 
       if (0 == converge_type)
       {
-         rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
+         rhs_norm = hypre_sqrt(hypre_ParVectorInnerProd(f, f));
          if (rhs_norm)
          {
             relative_resid = resid_nrm_init / rhs_norm;
@@ -286,13 +286,13 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
          {
             hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta,
                                                F_array[0], res);
-            resid_nrm = sqrt(hypre_ParVectorInnerProd(res, res));
+            resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(res, res));
          }
          else
          {
             hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta,
                                                F_array[0], Vtemp);
-            resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+            resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
          }
 
          if (old_resid)

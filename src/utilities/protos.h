@@ -33,10 +33,10 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 HYPRE_Complex hypre_csqrt( HYPRE_Complex value );
 #else
 #define hypre_conj(value)  value
-#define hypre_cabs(value)  fabs(value)
+#define hypre_cabs(value)  hypre_abs(value)
 #define hypre_creal(value) value
 #define hypre_cimag(value) 0.0
-#define hypre_csqrt(value) sqrt(value)
+#define hypre_csqrt(value) hypre_sqrt(value)
 #endif
 
 /* general.c */
@@ -302,6 +302,8 @@ HYPRE_Int hypreDevice_IntAxpyn(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_I
                                HYPRE_Int a);
 HYPRE_Int hypreDevice_BigIntAxpyn(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt *d_y,
                                   HYPRE_BigInt *d_z, HYPRE_BigInt a);
+HYPRE_Int hypreDevice_ComplexAxpyzn(HYPRE_Int n, HYPRE_Complex *d_x, HYPRE_Complex *d_y,
+                                    HYPRE_Complex *d_z, HYPRE_Complex a, HYPRE_Complex b);
 HYPRE_Int* hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr);
 HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
                                              HYPRE_Int *d_row_ind);
@@ -384,18 +386,23 @@ HYPRE_Int hypre_IntArrayCopy( hypre_IntArray *x, hypre_IntArray *y );
 hypre_IntArray* hypre_IntArrayCloneDeep_v2( hypre_IntArray *x,
                                             HYPRE_MemoryLocation memory_location );
 hypre_IntArray* hypre_IntArrayCloneDeep( hypre_IntArray *x );
+HYPRE_Int hypre_IntArrayMigrate( hypre_IntArray *v, HYPRE_MemoryLocation memory_location );
+HYPRE_Int hypre_IntArrayPrint( MPI_Comm comm, hypre_IntArray *array, const char *filename );
+HYPRE_Int hypre_IntArrayRead( MPI_Comm comm, const char *filename, hypre_IntArray **array_ptr );
 HYPRE_Int hypre_IntArraySetConstantValuesHost( hypre_IntArray *v, HYPRE_Int value );
 HYPRE_Int hypre_IntArraySetConstantValues( hypre_IntArray *v, HYPRE_Int value );
 HYPRE_Int hypre_IntArrayCountHost( hypre_IntArray *v, HYPRE_Int value,
                                    HYPRE_Int *num_values_ptr );
 HYPRE_Int hypre_IntArrayCount( hypre_IntArray *v, HYPRE_Int value,
                                HYPRE_Int *num_values_ptr );
+HYPRE_Int hypre_IntArrayInverseMapping( hypre_IntArray *v, hypre_IntArray **w_ptr );
 
 /* int_array_device.c */
 #if defined(HYPRE_USING_GPU)
 HYPRE_Int hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v, HYPRE_Int value );
 HYPRE_Int hypre_IntArrayCountDevice ( hypre_IntArray *v, HYPRE_Int value,
                                       HYPRE_Int *num_values_ptr );
+HYPRE_Int hypre_IntArrayInverseMappingDevice( hypre_IntArray *v, hypre_IntArray *w );
 #endif
 
 /* memory_tracker.c */

@@ -20,11 +20,10 @@ extern "C" {
 /**
  * @defgroup KrylovSolvers Krylov Solvers
  *
- * These solvers support many of the matrix/vector storage schemes in hypre.
- * They should be used in conjunction with the storage-specific interfaces,
- * particularly the specific Create() and Destroy() functions.
- *
- * @memo A basic interface for Krylov solvers
+ * A basic interface for Krylov solvers. These solvers support many of the
+ * matrix/vector storage schemes in hypre.  They should be used in conjunction
+ * with the storage-specific interfaces, particularly the specific Create() and
+ * Destroy() functions.
  *
  * @{
  **/

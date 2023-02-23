@@ -292,7 +292,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
    /* Set initial residual norm */
    if (logging > 0)
    {
-      norms[0] = sqrt((*(cgnr_functions->InnerProd))(r, r));
+      norms[0] = hypre_sqrt((*(cgnr_functions->InnerProd))(r, r));
 
       /* Since it is does not diminish performance, attempt to return an error flag
          and notify users when they supply bad input. */
@@ -388,7 +388,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
       /* log norm info */
       if (logging > 0)
       {
-         norms[i]     = sqrt(i_prod);
+         norms[i]     = hypre_sqrt(i_prod);
          if (logging > 1 && my_id == 0)
          {
             hypre_printf("% 5d    %e    %f   %e\n", i, norms[i], norms[i] /
@@ -438,7 +438,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
     * Print log
     *-----------------------------------------------------------------------*/
 
-   bi_prod = sqrt(bi_prod);
+   bi_prod = hypre_sqrt(bi_prod);
 
    if (logging > 1 && my_id == 0)
    {

@@ -49,7 +49,7 @@ hypre_DeviceDataCreate()
 
    /* hypre SpGEMM parameters */
    const HYPRE_Int  Nsamples   = 64;
-   const HYPRE_Real sigma      = 1.0 / sqrt(Nsamples - 2.0);
+   const HYPRE_Real sigma      = 1.0 / hypre_sqrt((HYPRE_Real)(Nsamples - 2.0));
    const HYPRE_Real multfactor = 1.0 / (1.0 - 3.0 * sigma);
 
    hypre_DeviceDataSpgemmAlgorithm(data)                = 1;
@@ -431,7 +431,7 @@ dim3
 hypre_GetDefaultDeviceBlockDimension()
 {
 #if defined(HYPRE_USING_SYCL)
-   dim3 bDim(hypre_HandleDeviceMaxWorkGroupSize(hypre_handle()));
+   dim3 bDim(1, 1, hypre_HandleDeviceMaxWorkGroupSize(hypre_handle()));
 #else
    dim3 bDim(HYPRE_1D_BLOCK_SIZE, 1, 1);
 #endif
@@ -450,7 +450,7 @@ hypre_GetDefaultDeviceGridDimension( HYPRE_Int   n,
 {
    HYPRE_Int num_blocks = 0;
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_Int num_threads_per_block = bDim[0];
+   HYPRE_Int num_threads_per_block = bDim.get(0) * bDim.get(1) * bDim.get(2);
 #else
    HYPRE_Int num_threads_per_block = bDim.x * bDim.y * bDim.z;
 #endif
@@ -473,13 +473,48 @@ hypre_GetDefaultDeviceGridDimension( HYPRE_Int   n,
       hypre_assert(0);
    }
 
-#if defined(HYPRE_USING_SYCL)
-   dim3 gDim(num_blocks);
-#else
-   dim3 gDim(num_blocks, 1, 1);
-#endif
+   dim3 gDim = hypre_dim3(num_blocks);
 
    return gDim;
+}
+
+/*--------------------------------------------------------------------
+ * hypre_dim3
+ * NOTE: these functions are necessary due to different linearization
+ * procedures between cuda/hip and sycl
+ *--------------------------------------------------------------------*/
+
+dim3
+hypre_dim3(HYPRE_Int x)
+{
+#if defined(HYPRE_USING_SYCL)
+   dim3 d(1, 1, x);
+#else
+   dim3 d(x);
+#endif
+   return d;
+}
+
+dim3
+hypre_dim3(HYPRE_Int x, HYPRE_Int y)
+{
+#if defined(HYPRE_USING_SYCL)
+   dim3 d(1, y, x);
+#else
+   dim3 d(x, y);
+#endif
+   return d;
+}
+
+dim3
+hypre_dim3(HYPRE_Int x, HYPRE_Int y, HYPRE_Int z)
+{
+#if defined(HYPRE_USING_SYCL)
+   dim3 d(z, y, x);
+#else
+   dim3 d(x, y, z);
+#endif
+   return d;
 }
 
 /*--------------------------------------------------------------------
@@ -1174,11 +1209,6 @@ hypreDevice_ReduceByTupleKey( HYPRE_Int N,
                               T1 *keys1_out, T2 *keys2_out, T3 *vals_out )
 {
 #if defined(HYPRE_USING_SYCL)
-   /* WM: onedpl reduce_by_segment currently does not accept zero length input */
-   if (N <= 0)
-   {
-      return hypre_error_flag;
-   }
    auto begin_keys_in  = oneapi::dpl::make_zip_iterator(keys1_in,  keys2_in );
    auto begin_keys_out = oneapi::dpl::make_zip_iterator(keys1_out, keys2_out);
    std::equal_to< std::tuple<T1, T2> > pred;
@@ -1337,8 +1367,8 @@ hypreDevice_GenScatterAdd( HYPRE_Real  *x,
    if (ny <= 2)
    {
       /* trivial cases, n = 1, 2 */
-      dim3 bDim = 1;
-      dim3 gDim = 1;
+      dim3 bDim = hypre_dim3(1);
+      dim3 gDim = hypre_dim3(1);
       HYPRE_GPU_LAUNCH( hypreGPUKernel_ScatterAddTrivial, gDim, bDim, ny, x, map, y );
    }
    else
@@ -1413,37 +1443,35 @@ hypreDevice_GenScatterAdd( HYPRE_Real  *x,
 }
 
 /*--------------------------------------------------------------------
- * hypreGPUKernel_axpyn
+ * hypreGPUKernel_Axpyzn
  *--------------------------------------------------------------------*/
 
 template<typename T>
 __global__ void
-hypreGPUKernel_axpyn( hypre_DeviceItem &item,
-                      T                *x,
-                      size_t            n,
-                      T                *y,
-                      T                *z,
-                      T                 a )
+hypreGPUKernel_Axpyzn( hypre_DeviceItem &item,
+                       HYPRE_Int         n,
+                       T                *x,
+                       T                *y,
+                       T                *z,
+                       T                 a,
+                       T                 b )
 {
    HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (i < n)
    {
-      z[i] = a * x[i] + y[i];
+      z[i] = a * x[i] + b * y[i];
    }
 }
 
 /*--------------------------------------------------------------------
- * hypreDevice_Axpyn
+ * hypreDevice_Axpyzn
  *--------------------------------------------------------------------*/
 
 template<typename T>
 HYPRE_Int
-hypreDevice_Axpyn(T *d_x, size_t n, T *d_y, T *d_z, T a)
+hypreDevice_Axpyzn(HYPRE_Int n, T *d_x, T *d_y, T *d_z, T a, T b)
 {
-#if 0
-   HYPRE_THRUST_CALL( transform, d_x, d_x + n, d_y, d_z, a * _1 + _2 );
-#else
    if (n <= 0)
    {
       return hypre_error_flag;
@@ -1452,8 +1480,7 @@ hypreDevice_Axpyn(T *d_x, size_t n, T *d_y, T *d_z, T a)
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_axpyn, gDim, bDim, d_x, n, d_y, d_z, a );
-#endif
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_Axpyzn, gDim, bDim, n, d_x, d_y, d_z, a, b );
 
    return hypre_error_flag;
 }
@@ -1469,7 +1496,7 @@ hypreDevice_ComplexAxpyn( HYPRE_Complex  *d_x,
                           HYPRE_Complex  *d_z,
                           HYPRE_Complex   a )
 {
-   return hypreDevice_Axpyn(d_x, n, d_y, d_z, a);
+   return hypreDevice_Axpyzn((HYPRE_Int) n, d_x, d_y, d_z, a, (HYPRE_Complex) 1.0);
 }
 
 /*--------------------------------------------------------------------
@@ -1483,7 +1510,7 @@ hypreDevice_IntAxpyn( HYPRE_Int *d_x,
                       HYPRE_Int *d_z,
                       HYPRE_Int  a )
 {
-   return hypreDevice_Axpyn(d_x, n, d_y, d_z, a);
+   return hypreDevice_Axpyzn((HYPRE_Int) n, d_x, d_y, d_z, a, (HYPRE_Int) 1);
 }
 
 /*--------------------------------------------------------------------
@@ -1497,7 +1524,22 @@ hypreDevice_BigIntAxpyn( HYPRE_BigInt *d_x,
                          HYPRE_BigInt *d_z,
                          HYPRE_BigInt  a )
 {
-   return hypreDevice_Axpyn(d_x, n, d_y, d_z, a);
+   return hypreDevice_Axpyzn((HYPRE_Int) n, d_x, d_y, d_z, a, (HYPRE_BigInt) 1);
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_ComplexAxpyzn
+ *--------------------------------------------------------------------*/
+
+HYPRE_Int
+hypreDevice_ComplexAxpyzn( HYPRE_Int       n,
+                           HYPRE_Complex  *d_x,
+                           HYPRE_Complex  *d_y,
+                           HYPRE_Complex  *d_z,
+                           HYPRE_Complex   a,
+                           HYPRE_Complex   b )
+{
+   return hypreDevice_Axpyzn(n, d_x, d_y, d_z, a, b);
 }
 
 #if defined(HYPRE_USING_CURAND)

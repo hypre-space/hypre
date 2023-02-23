@@ -77,7 +77,7 @@ contiguous, i.e., ``iupper`` for process ``i`` must equal ``ilower``:math:`-1`
 for process ``i``:math:`+1`.  Note that this allows matrices to have 0- or
 1-based indexing.  The parameters ``jlower`` and ``jupper`` define a column
 partitioning, and should match ``ilower`` and ``iupper`` when solving square
-linear systems.  See the Reference Manual for more information.
+linear systems.  See Chapter :ref:`ch-API` for more information.
 
 The ``SetObjectType()`` routine sets the underlying matrix object type to
 ``HYPRE_PARCSR`` (this is the only object type currently supported).  The
@@ -85,7 +85,7 @@ The ``SetObjectType()`` routine sets the underlying matrix object type to
 ready to be set.  This routine may or may not involve the allocation of memory
 for the coefficient data, depending on the implementation.  The optional
 ``SetRowSizes()`` and ``SetDiagOffdSizes()`` routines mentioned later in this
-chapter and in the Reference Manual, should be called before this step.
+chapter and in Chapter :ref:`ch-API`, should be called before this step.
 
 The ``SetValues()`` routine sets matrix values for some number of rows
 (``nrows``) and some number of columns in each row (``ncols``).  The actual row

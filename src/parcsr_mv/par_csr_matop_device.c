@@ -1282,7 +1282,7 @@ hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols( hypre_DeviceItem &item,
    }
    if (type == 2)
    {
-      row_norm_i = sqrt(row_norm_i);
+      row_norm_i = hypre_sqrt(row_norm_i);
    }
 
    /* set elmt_tols_diag */
@@ -1719,6 +1719,148 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
    hypre_MatvecCommPkgCreate(C);
 
    *C_ptr = C;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixDiagScaleDevice
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixDiagScaleDevice( hypre_ParCSRMatrix *par_A,
+                                   hypre_ParVector    *par_ld,
+                                   hypre_ParVector    *par_rd )
+{
+   /* Input variables */
+   hypre_ParCSRCommPkg    *comm_pkg  = hypre_ParCSRMatrixCommPkg(par_A);
+   hypre_ParCSRCommHandle *comm_handle;
+   HYPRE_Int               num_sends;
+   HYPRE_Int              *d_send_map_elmts;
+   HYPRE_Int               send_map_num_elmts;
+
+   hypre_CSRMatrix        *A_diag        = hypre_ParCSRMatrixDiag(par_A);
+   hypre_CSRMatrix        *A_offd        = hypre_ParCSRMatrixOffd(par_A);
+   HYPRE_Int               num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
+
+   hypre_Vector          *ld             = (par_ld) ? hypre_ParVectorLocalVector(par_ld) : NULL;
+   hypre_Vector           *rd            = hypre_ParVectorLocalVector(par_rd);
+   HYPRE_Complex          *rd_data       = hypre_VectorData(rd);
+
+   /* Local variables */
+   hypre_Vector           *rdbuf;
+   HYPRE_Complex          *recv_rdbuf_data;
+   HYPRE_Complex          *send_rdbuf_data;
+   HYPRE_Int               sync_stream;
+
+   /*---------------------------------------------------------------------
+    * Setup communication info
+    *--------------------------------------------------------------------*/
+
+   hypre_GetSyncCudaCompute(&sync_stream);
+   hypre_SetSyncCudaCompute(0);
+
+   /* Create buffer vectors */
+   rdbuf = hypre_SeqVectorCreate(num_cols_offd);
+
+   /* If there exists no CommPkg for A, create it. */
+   if (!comm_pkg)
+   {
+      hypre_MatvecCommPkgCreate(par_A);
+      comm_pkg = hypre_ParCSRMatrixCommPkg(par_A);
+   }
+
+   /* Communicate a single vector component */
+   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, par_rd);
+
+   /* send_map_elmts on device */
+   hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
+
+   /* Set variables */
+   num_sends          = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   d_send_map_elmts   = hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg);
+   send_map_num_elmts = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+
+   /*---------------------------------------------------------------------
+    * Allocate/reuse receive data buffer
+    *--------------------------------------------------------------------*/
+
+   if (!hypre_ParCSRCommPkgTmpData(comm_pkg))
+   {
+      hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex,
+                                                          num_cols_offd,
+                                                          HYPRE_MEMORY_DEVICE);
+   }
+   hypre_VectorData(rdbuf) = recv_rdbuf_data = hypre_ParCSRCommPkgTmpData(comm_pkg);
+   hypre_SeqVectorSetDataOwner(rdbuf, 0);
+   hypre_SeqVectorInitialize_v2(rdbuf, HYPRE_MEMORY_DEVICE);
+
+   /*---------------------------------------------------------------------
+    * Allocate/reuse send data buffer
+    *--------------------------------------------------------------------*/
+
+   if (!hypre_ParCSRCommPkgBufData(comm_pkg))
+   {
+      hypre_ParCSRCommPkgBufData(comm_pkg) = hypre_TAlloc(HYPRE_Complex,
+                                                          send_map_num_elmts,
+                                                          HYPRE_MEMORY_DEVICE);
+   }
+   send_rdbuf_data = hypre_ParCSRCommPkgBufData(comm_pkg);
+
+   /*---------------------------------------------------------------------
+    * Pack send data
+    *--------------------------------------------------------------------*/
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_THRUST_CALL( gather,
+                      d_send_map_elmts,
+                      d_send_map_elmts + send_map_num_elmts,
+                      rd_data,
+                      send_rdbuf_data );
+
+#elif defined(HYPRE_USING_SYCL)
+   auto permuted_source = oneapi::dpl::make_permutation_iterator(rd_data,
+                                                                 d_send_map_elmts);
+   HYPRE_ONEDPL_CALL( std::copy,
+                      permuted_source,
+                      permuted_source + send_map_num_elmts,
+                      send_rdbuf_data );
+
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_Int  i;
+
+   #pragma omp target teams distribute parallel for private(i) is_device_ptr(send_rdbuf_data, rd_data, d_send_map_elmts)
+   for (i = 0; i < send_map_num_elmts; i++)
+   {
+      send_rdbuf_data[i] = rd_data[d_send_map_elmts[i]];
+   }
+#endif
+
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+   /* make sure send_rdbuf_data is ready before issuing GPU-GPU MPI */
+   hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+
+   /* A_diag = diag(ld) * A_diag * diag(rd) */
+   hypre_CSRMatrixDiagScale(A_diag, ld, rd);
+
+   /* Communication phase */
+   comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg,
+                                                 HYPRE_MEMORY_DEVICE, send_rdbuf_data,
+                                                 HYPRE_MEMORY_DEVICE, recv_rdbuf_data);
+   hypre_ParCSRCommHandleDestroy(comm_handle);
+
+   /* A_offd = diag(ld) * A_offd * diag(rd) */
+   hypre_CSRMatrixDiagScale(A_offd, ld, rdbuf);
+
+   /*---------------------------------------------------------------------
+    * Synchronize calls
+    *--------------------------------------------------------------------*/
+   hypre_SetSyncCudaCompute(sync_stream);
+   hypre_SyncComputeStream(hypre_handle());
+
+   /* Free memory */
+   hypre_SeqVectorDestroy(rdbuf);
 
    return hypre_error_flag;
 }

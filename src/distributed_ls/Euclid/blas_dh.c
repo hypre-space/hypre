@@ -144,6 +144,6 @@ HYPRE_Real Norm2(HYPRE_Int n, HYPRE_Real *x)
   } else {
     result = local_result;
   }
-  result = sqrt(result);
+  result = hypre_sqrt(result);
   END_FUNC_VAL(result)
 }

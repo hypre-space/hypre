@@ -134,66 +134,69 @@ hypre_CommInfoDestroy( hypre_CommInfo  *comm_info )
    HYPRE_Int           **transforms;
    HYPRE_Int             i, size;
 
-   size = hypre_BoxArrayArraySize(hypre_CommInfoSendBoxes(comm_info));
-   hypre_BoxArrayArrayDestroy(hypre_CommInfoSendBoxes(comm_info));
-   processes = hypre_CommInfoSendProcesses(comm_info);
-   for (i = 0; i < size; i++)
+   if (comm_info)
    {
-      hypre_TFree(processes[i], HYPRE_MEMORY_HOST);
-   }
-   hypre_TFree(processes, HYPRE_MEMORY_HOST);
-   rboxnums = hypre_CommInfoSendRBoxnums(comm_info);
-   if (rboxnums != NULL)
-   {
+      size = hypre_BoxArrayArraySize(hypre_CommInfoSendBoxes(comm_info));
+      hypre_BoxArrayArrayDestroy(hypre_CommInfoSendBoxes(comm_info));
+      processes = hypre_CommInfoSendProcesses(comm_info);
       for (i = 0; i < size; i++)
       {
-         hypre_TFree(rboxnums[i], HYPRE_MEMORY_HOST);
+         hypre_TFree(processes[i], HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(rboxnums, HYPRE_MEMORY_HOST);
-   }
-   hypre_BoxArrayArrayDestroy(hypre_CommInfoSendRBoxes(comm_info));
-   transforms = hypre_CommInfoSendTransforms(comm_info);
-   if (transforms != NULL)
-   {
-      for (i = 0; i < size; i++)
+      hypre_TFree(processes, HYPRE_MEMORY_HOST);
+      rboxnums = hypre_CommInfoSendRBoxnums(comm_info);
+      if (rboxnums != NULL)
       {
-         hypre_TFree(transforms[i], HYPRE_MEMORY_HOST);
+         for (i = 0; i < size; i++)
+         {
+            hypre_TFree(rboxnums[i], HYPRE_MEMORY_HOST);
+         }
+         hypre_TFree(rboxnums, HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(transforms, HYPRE_MEMORY_HOST);
-   }
+      hypre_BoxArrayArrayDestroy(hypre_CommInfoSendRBoxes(comm_info));
+      transforms = hypre_CommInfoSendTransforms(comm_info);
+      if (transforms != NULL)
+      {
+         for (i = 0; i < size; i++)
+         {
+            hypre_TFree(transforms[i], HYPRE_MEMORY_HOST);
+         }
+         hypre_TFree(transforms, HYPRE_MEMORY_HOST);
+      }
 
-   size = hypre_BoxArrayArraySize(hypre_CommInfoRecvBoxes(comm_info));
-   hypre_BoxArrayArrayDestroy(hypre_CommInfoRecvBoxes(comm_info));
-   processes = hypre_CommInfoRecvProcesses(comm_info);
-   for (i = 0; i < size; i++)
-   {
-      hypre_TFree(processes[i], HYPRE_MEMORY_HOST);
-   }
-   hypre_TFree(processes, HYPRE_MEMORY_HOST);
-   rboxnums = hypre_CommInfoRecvRBoxnums(comm_info);
-   if (rboxnums != NULL)
-   {
+      size = hypre_BoxArrayArraySize(hypre_CommInfoRecvBoxes(comm_info));
+      hypre_BoxArrayArrayDestroy(hypre_CommInfoRecvBoxes(comm_info));
+      processes = hypre_CommInfoRecvProcesses(comm_info);
       for (i = 0; i < size; i++)
       {
-         hypre_TFree(rboxnums[i], HYPRE_MEMORY_HOST);
+         hypre_TFree(processes[i], HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(rboxnums, HYPRE_MEMORY_HOST);
-   }
-   hypre_BoxArrayArrayDestroy(hypre_CommInfoRecvRBoxes(comm_info));
-   transforms = hypre_CommInfoRecvTransforms(comm_info);
-   if (transforms != NULL)
-   {
-      for (i = 0; i < size; i++)
+      hypre_TFree(processes, HYPRE_MEMORY_HOST);
+      rboxnums = hypre_CommInfoRecvRBoxnums(comm_info);
+      if (rboxnums != NULL)
       {
-         hypre_TFree(transforms[i], HYPRE_MEMORY_HOST);
+         for (i = 0; i < size; i++)
+         {
+            hypre_TFree(rboxnums[i], HYPRE_MEMORY_HOST);
+         }
+         hypre_TFree(rboxnums, HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(transforms, HYPRE_MEMORY_HOST);
+      hypre_BoxArrayArrayDestroy(hypre_CommInfoRecvRBoxes(comm_info));
+      transforms = hypre_CommInfoRecvTransforms(comm_info);
+      if (transforms != NULL)
+      {
+         for (i = 0; i < size; i++)
+         {
+            hypre_TFree(transforms[i], HYPRE_MEMORY_HOST);
+         }
+         hypre_TFree(transforms, HYPRE_MEMORY_HOST);
+      }
+
+      hypre_TFree(hypre_CommInfoCoords(comm_info), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_CommInfoDirs(comm_info), HYPRE_MEMORY_HOST);
+
+      hypre_TFree(comm_info, HYPRE_MEMORY_HOST);
    }
-
-   hypre_TFree(hypre_CommInfoCoords(comm_info), HYPRE_MEMORY_HOST);
-   hypre_TFree(hypre_CommInfoDirs(comm_info), HYPRE_MEMORY_HOST);
-
-   hypre_TFree(comm_info, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

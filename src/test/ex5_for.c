@@ -152,7 +152,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    }
 
    /* Preliminaries: want at least one processor per row */
-   if (n * n < num_procs) { n = sqrt(num_procs) + 1; }
+   if (n * n < num_procs) { n = hypre_sqrt(num_procs) + 1; }
    N = n * n; /* global number of rows */
    h = 1.0 / (n + 1); /* mesh size*/
    h2 = h * h;

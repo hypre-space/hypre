@@ -210,7 +210,7 @@ hypre_int main (hypre_int argc, char *argv[])
          else if ( strcmp(argv[arg_index], "-tol") == 0 )
          {
             arg_index++;
-            tol = atof(argv[arg_index++]);
+            tol = (HYPRE_Real)atof(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-type") == 0 )
          {
@@ -230,12 +230,12 @@ hypre_int main (hypre_int argc, char *argv[])
          else if ( strcmp(argv[arg_index], "-rlxw") == 0 )
          {
             arg_index++;
-            rlx_weight = atof(argv[arg_index++]);
+            rlx_weight = (HYPRE_Real)atof(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-rlxo") == 0 )
          {
             arg_index++;
-            rlx_omega = atof(argv[arg_index++]);
+            rlx_omega = (HYPRE_Real)atof(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-ctype") == 0 )
          {
@@ -290,7 +290,7 @@ hypre_int main (hypre_int argc, char *argv[])
          else if ( strcmp(argv[arg_index], "-theta") == 0 )
          {
             arg_index++;
-            theta = atof(argv[arg_index++]);
+            theta = (HYPRE_Real)atof(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-bsize") == 0 )
          {
@@ -300,7 +300,7 @@ hypre_int main (hypre_int argc, char *argv[])
          else if ( strcmp(argv[arg_index], "-rtol") == 0 )
          {
             arg_index++;
-            rtol = atof(argv[arg_index++]);
+            rtol = (HYPRE_Real)atof(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-rr") == 0 )
          {

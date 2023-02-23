@@ -79,12 +79,13 @@ HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector )
    hypre_SStructPVector **pvectors;
    HYPRE_Int              part;
    HYPRE_Int              vector_type;
-   HYPRE_MemoryLocation   memory_location = hypre_SStructVectorMemoryLocation(vector);
+   HYPRE_MemoryLocation   memory_location;
 
    /* GEC1002 destroying data indices and data in vector  */
-
    if (vector)
    {
+      memory_location = hypre_SStructVectorMemoryLocation(vector);
+
       vector_type = hypre_SStructVectorObjectType(vector);
       hypre_SStructVectorRefCount(vector) --;
       if (hypre_SStructVectorRefCount(vector) == 0)
