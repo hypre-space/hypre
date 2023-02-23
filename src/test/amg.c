@@ -136,6 +136,11 @@ main( hypre_int argc,
 #endif
 #endif
 
+#if defined(HYPRE_USING_MEMORY_TRACKER)
+   HYPRE_Int print_mem_tracker = 0;
+   char mem_tracker_name[HYPRE_MAX_FILE_NAME_LEN] = {0};
+#endif
+
    /* default execution policy and memory space */
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
@@ -158,6 +163,18 @@ main( hypre_int argc,
       {
          default_exec_policy = HYPRE_EXEC_DEVICE;
       }
+#if defined(HYPRE_USING_MEMORY_TRACKER)
+      else if ( strcmp(argv[arg_index], "-print_mem_tracker") == 0 )
+      {
+         arg_index++;
+         print_mem_tracker = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mem_tracker_filename") == 0 )
+      {
+         arg_index++;
+         snprintf(mem_tracker_name, HYPRE_MAX_FILE_NAME_LEN, "%s", argv[arg_index++]);
+      }
+#endif
    }
 
    /*-----------------------------------------------------------
@@ -325,6 +342,11 @@ main( hypre_int argc,
    hypre_GetTiming("Hypre init times", &wall_time, comm);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
+
+#if defined(HYPRE_USING_MEMORY_TRACKER)
+   HYPRE_PrintDeviceInfo();
+   hypre_MemoryTrackerSetPrint(print_mem_tracker);
+#endif
 
    /* default memory location */
    HYPRE_SetMemoryLocation(memory_location);
