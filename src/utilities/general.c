@@ -8,22 +8,6 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
-#ifdef HYPRE_USING_MEMORY_TRACKER
-hypre_MemoryTracker *_hypre_memory_tracker = NULL;
-
-/* accessor to the global ``_hypre_memory_tracker'' */
-hypre_MemoryTracker*
-hypre_memory_tracker(void)
-{
-   if (!_hypre_memory_tracker)
-   {
-      _hypre_memory_tracker = hypre_MemoryTrackerCreate();
-   }
-
-   return _hypre_memory_tracker;
-}
-#endif
-
 /* global variable _hypre_handle:
  * Outside this file, do NOT access it directly,
  * but use hypre_handle() instead (see handle.h) */
