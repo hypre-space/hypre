@@ -644,7 +644,7 @@ hypre_PointRelax( void               *relax_vdata,
       hypre_StructMatvecDestroy( matvec_data );
    }
 
-   if ( tol > 0.0 ) { (relax_data -> rresnorm) = sqrt( rsumsq / bsumsq ); }
+   if ( tol > 0.0 ) { (relax_data -> rresnorm) = hypre_sqrt( rsumsq / bsumsq ); }
    (relax_data -> num_iterations) = iter;
 
    /*-----------------------------------------------------------------------

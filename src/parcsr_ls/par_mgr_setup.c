@@ -1091,7 +1091,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          {
             hypre_BoomerAMGBuildRestrDist2AIR(A_array[lev], CF_marker,
                                               ST, coarse_pnts_global, 1,
-                                              dof_func_buff_data, debug_flag, filter_thresholdR,
+                                              dof_func_buff_data, filter_thresholdR, debug_flag,
                                               &RT,
                                               1, is_triangular, gmres_switch );
          }

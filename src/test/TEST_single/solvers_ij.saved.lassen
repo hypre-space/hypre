@@ -4,55 +4,55 @@ Final Relative Residual Norm = 3.613604e-05
 
 # Output file: solvers_ij.out.1
 Iterations = 26
-Final Relative Residual Norm = 7.193496e-05
+Final Relative Residual Norm = 7.193500e-05
 
 # Output file: solvers_ij.out.2
 GMRES Iterations = 6
-Final GMRES Relative Residual Norm = 4.895891e-05
+Final GMRES Relative Residual Norm = 4.895643e-05
 
 # Output file: solvers_ij.out.3
 GMRES Iterations = 39
-Final GMRES Relative Residual Norm = 9.043503e-05
+Final GMRES Relative Residual Norm = 9.050452e-05
 
 # Output file: solvers_ij.out.4
 Iterations = 5
-Final Relative Residual Norm = 1.712164e-05
+Final Relative Residual Norm = 1.712169e-05
 
 # Output file: solvers_ij.out.5
 Iterations = 103
-Final Relative Residual Norm = 8.784398e-05
+Final Relative Residual Norm = 8.784449e-05
 
 # Output file: solvers_ij.out.6
 GMRES Iterations = 15
-Final GMRES Relative Residual Norm = 7.133008e-05
+Final GMRES Relative Residual Norm = 7.131328e-05
 
 # Output file: solvers_ij.out.7
 Iterations = 13
-Final Relative Residual Norm = 7.750613e-05
+Final Relative Residual Norm = 7.750607e-05
 
 # Output file: solvers_ij.out.8
 Iterations = 26
 PCG_Iterations = 0
 DSCG_Iterations = 26
-Final Relative Residual Norm = 7.193497e-05
+Final Relative Residual Norm = 7.193500e-05
 
 # Output file: solvers_ij.out.9
 Iterations = 7
 PCG_Iterations = 3
 DSCG_Iterations = 4
-Final Relative Residual Norm = 7.681887e-05
+Final Relative Residual Norm = 7.681890e-05
 
 # Output file: solvers_ij.out.10
 Iterations = 6
 PCG_Iterations = 4
 DSCG_Iterations = 2
-Final Relative Residual Norm = 2.433505e-05
+Final Relative Residual Norm = 2.434462e-05
 
 # Output file: solvers_ij.out.11
 Iterations = 5
 PCG_Iterations = 2
 DSCG_Iterations = 3
-Final Relative Residual Norm = 1.168553e-05
+Final Relative Residual Norm = 1.166560e-05
 
 # Output file: solvers_ij.out.sysh
  Average Convergence Factor = 0.203884
@@ -62,7 +62,7 @@ Final Relative Residual Norm = 1.168553e-05
                    cycle = 5.296959
 
 # Output file: solvers_ij.out.sysn
- Average Convergence Factor = 0.533116
+ Average Convergence Factor = 0.533115
 
      Complexity:    grid = 1.390750
                 operator = 2.080112
@@ -77,19 +77,19 @@ Final Relative Residual Norm = 1.168553e-05
 
 # Output file: solvers_ij.out.101
 LGMRES Iterations = 39
-Final LGMRES Relative Residual Norm = 7.224995e-05
+Final LGMRES Relative Residual Norm = 7.230173e-05
 
 # Output file: solvers_ij.out.102
 LGMRES Iterations = 6
-Final LGMRES Relative Residual Norm = 4.895891e-05
+Final LGMRES Relative Residual Norm = 4.895643e-05
 
 # Output file: solvers_ij.out.103
 FlexGMRES Iterations = 39
-Final FlexGMRES Relative Residual Norm = 9.043615e-05
+Final FlexGMRES Relative Residual Norm = 9.050367e-05
 
 # Output file: solvers_ij.out.104
 FlexGMRES Iterations = 6
-Final FlexGMRES Relative Residual Norm = 4.895681e-05
+Final FlexGMRES Relative Residual Norm = 4.896337e-05
 
 # Output file: solvers_ij.out.105
 Iterations = 11

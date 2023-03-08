@@ -782,13 +782,13 @@ hypre_MPI_Abort( hypre_MPI_Comm comm,
 HYPRE_Real
 hypre_MPI_Wtime( void )
 {
-   return MPI_Wtime();
+   return (HYPRE_Real)MPI_Wtime();
 }
 
 HYPRE_Real
 hypre_MPI_Wtick( void )
 {
-   return MPI_Wtick();
+   return (HYPRE_Real)MPI_Wtick();
 }
 
 HYPRE_Int
