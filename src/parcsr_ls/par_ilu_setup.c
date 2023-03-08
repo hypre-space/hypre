@@ -115,6 +115,13 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Int            send_size;
    HYPRE_Int            recv_size;
 
+   /* Sanity check */
+   if (hypre_ParVectorNumVectors(f) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ILU doesn't support multicomponent vectors");
+      return hypre_error_flag;
+   }
+
    /* ----- begin -----*/
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
