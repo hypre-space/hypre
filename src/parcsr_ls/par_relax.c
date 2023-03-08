@@ -223,7 +223,7 @@ hypre_BoomerAMGRelaxWeightedJacobi_core( hypre_ParCSRMatrix *A,
    if (hypre_ParVectorNumVectors(f) > 1)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "Requested relaxation type doesn't support multicomponent vectors");
+                        "Jacobi relaxation doesn't support multicomponent vectors");
       return hypre_error_flag;
    }
 
@@ -400,7 +400,7 @@ hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A,
    if (hypre_ParVectorNumVectors(f) > 1)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "Requested relaxation type doesn't support multicomponent vectors");
+                        "GS (1) relaxation doesn't support multicomponent vectors");
       return hypre_error_flag;
    }
 
@@ -540,7 +540,7 @@ hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
    if (hypre_ParVectorNumVectors(f) > 1)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "Requested relaxation type doesn't support multicomponent vectors");
+                        "GS (2) relaxation doesn't support multicomponent vectors");
       return hypre_error_flag;
    }
 
@@ -722,7 +722,7 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
    if (hypre_ParVectorNumVectors(f) > 1)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "Requested relaxation type doesn't support multicomponent vectors");
+                        "Hybrid GS relaxation doesn't support multicomponent vectors");
       return hypre_error_flag;
    }
 
@@ -985,7 +985,7 @@ hypre_BoomerAMGRelax5ChaoticHybridGaussSeidel( hypre_ParCSRMatrix *A,
    if (hypre_ParVectorNumVectors(f) > 1)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "Requested relaxation type doesn't support multicomponent vectors");
+                        "Chaotic GS relaxation doesn't support multicomponent vectors");
       return hypre_error_flag;
    }
 
@@ -1303,7 +1303,7 @@ hypre_BoomerAMGRelax19GaussElim( hypre_ParCSRMatrix *A,
    if (hypre_ParVectorNumVectors(f) > 1)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "Requested relaxation type doesn't support multicomponent vectors");
+                        "Gauss Elim. relaxation doesn't support multicomponent vectors");
       return hypre_error_flag;
    }
 
@@ -1391,7 +1391,7 @@ hypre_BoomerAMGRelax98GaussElimPivot( hypre_ParCSRMatrix *A,
    if (hypre_ParVectorNumVectors(f) > 1)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "Requested relaxation type doesn't support multicomponent vectors");
+                        "Gauss Elim. (98) relaxation doesn't support multicomponent vectors");
       return hypre_error_flag;
    }
 
@@ -1493,7 +1493,7 @@ hypre_BoomerAMGRelaxKaczmarz( hypre_ParCSRMatrix *A,
    if (hypre_ParVectorNumVectors(f) > 1)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "Requested relaxation type doesn't support multicomponent vectors");
+                        "Kaczmarz relaxation doesn't support multicomponent vectors");
       return hypre_error_flag;
    }
 
@@ -1607,7 +1607,7 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelHost( hypre_ParCSRMatrix *A,
    if (hypre_ParVectorNumVectors(f) > 1)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "Requested relaxation type doesn't support multicomponent vectors");
+                        "2-stage GS relaxation (Host) doesn't support multicomponent vectors");
       return hypre_error_flag;
    }
 
