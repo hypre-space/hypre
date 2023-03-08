@@ -282,7 +282,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    if (cudaSuccess != err) {                                                                 \
       printf("CUDA ERROR (code = %d, %s) at %s:%d\n", err, cudaGetErrorString(err),          \
                    __FILE__, __LINE__);                                                      \
-      hypre_assert(0); exit(1);                                                              \
+      hypre_assert_exit(hypre_MPI_COMM_WORLD, 0);                                            \
    } } while(0)
 
 #elif defined(HYPRE_USING_HIP)
@@ -291,7 +291,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    if (hipSuccess != err) {                                                                  \
       printf("HIP ERROR (code = %d, %s) at %s:%d\n", err, hipGetErrorString(err),            \
                    __FILE__, __LINE__);                                                      \
-      hypre_assert(0); exit(1);                                                              \
+      hypre_assert_exit(hypre_MPI_COMM_WORLD, 0);                                            \
    } } while(0)
 
 #elif defined(HYPRE_USING_SYCL)
@@ -304,13 +304,13 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    {                                                                                         \
       hypre_printf("SYCL ERROR (code = %s) at %s:%d\n", ex.what(),                           \
                      __FILE__, __LINE__);                                                    \
-      assert(0); exit(1);                                                                    \
+      hypre_assert_exit(hypre_MPI_COMM_WORLD, 0);                                            \
    }                                                                                         \
    catch(std::runtime_error const& ex)                                                       \
    {                                                                                         \
       hypre_printf("STD ERROR (code = %s) at %s:%d\n", ex.what(),                            \
                    __FILE__, __LINE__);                                                      \
-      assert(0); exit(1);                                                                    \
+      hypre_assert_exit(hypre_MPI_COMM_WORLD, 0);                                            \
    }
 #endif
 
