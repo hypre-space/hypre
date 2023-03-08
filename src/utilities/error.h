@@ -30,24 +30,34 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #if defined(HYPRE_DEBUG)
 /* host assert */
 #define hypre_assert(EX) do { if (!(EX)) { fprintf(stderr, "[%s, %d] hypre_assert failed: %s\n", __FILE__, __LINE__, #EX); hypre_error(1); assert(0); } } while (0)
+
+/* host assert and exit */
+#define hypre_assert_exit(comm, EX) do { if (!(EX)) { hypre_assert(EX); hypre_MPI_Abort(comm, 1); } } while (0)
+
 /* device assert */
 #if defined(HYPRE_USING_CUDA)
 #define hypre_device_assert(EX) assert(EX)
-#elif defined(HYPRE_USING_HIP)
+
 /* FIXME: Currently, asserts in device kernels in HIP do not behave well */
+#elif defined(HYPRE_USING_HIP)
 #define hypre_device_assert(EX) do { if (0) { static_cast<void> (EX); } } while (0)
+
 #elif defined(HYPRE_USING_SYCL)
 #define hypre_device_assert(EX) assert(EX)
 #endif
+
 #else /* #ifdef HYPRE_DEBUG */
+
 /* this is to silence compiler's unused variable warnings */
 #ifdef __cplusplus
 #define hypre_assert(EX) do { if (0) { static_cast<void> (EX); } } while (0)
+#define hypre_assert_exit(comm, EX) do { if (0) { static_cast<void> (EX); static_cast<void> (comm); } } while (0)
 #else
 #define hypre_assert(EX) do { if (0) { (void) (EX); } } while (0)
+#define hypre_assert_exit(comm, EX) do { if (0) { (void) (EX); (void) (comm); } } while (0)
 #endif
+
 #define hypre_device_assert(EX)
 #endif
 
 #endif /* hypre_ERROR_HEADER */
-
