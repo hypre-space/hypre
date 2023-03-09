@@ -59,7 +59,7 @@ m4_include([config/hypre_blas_macros.m4])
 m4_include([config/hypre_lapack_macros.m4])
 m4_include([config/hypre_macros_misc.m4])
 
-AC_PREREQ(2.59)
+AC_PREREQ([2.69])
 AC_REVISION($Id$)
 AC_INIT(M4_HYPRE_NAME, M4_HYPRE_VERSION)
 AC_CONFIG_HEADERS([HYPRE_config.h:config/HYPRE_config.h.in])
@@ -2176,11 +2176,11 @@ dnl *********************************************************************
 
 if [test "$hypre_using_cuda" = "yes"]
 then
-   AC_CHECK_HEADERS(["${CUDA_HOME}/include/cuda.h"], [hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_HOME}])
+   AC_CHECK_HEADER(["${CUDA_HOME}/include/cuda.h"], [hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_HOME}])
 
    if test "x$hypre_found_cuda" != "xyes"
    then
-      AC_CHECK_HEADERS(["${CUDA_PATH}/include/cuda.h"], [hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_PATH}])
+      AC_CHECK_HEADER(["${CUDA_PATH}/include/cuda.h"], [hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_PATH}])
    fi
 
    if test "x$hypre_found_cuda" != "xyes"
@@ -2293,10 +2293,10 @@ AS_IF([ test x"$hypre_using_hip" == x"yes" ],
               [ HYPRE_ROCM_PREFIX=/opt/rocm ])
 
         AC_SUBST(HYPRE_ROCM_PREFIX)
-        AC_CHECK_HEADERS( ["${HYPRE_ROCM_PREFIX}/include/hip/hip_common.h"],
-                          [hypre_found_hip=yes],
-                          [AC_MSG_ERROR([unable to find ${HYPRE_ROCM_PREFIX}/include/hip/hip_common.h ... Ensure ROCm is installed and set ROCM_PATH environment variable to ROCm installation path.])] )],
-      [])
+        AC_CHECK_HEADER( ["${HYPRE_ROCM_PREFIX}/include/hip/hip_common.h"],
+                         [hypre_found_hip=yes],
+                         [AC_MSG_ERROR([unable to find ${HYPRE_ROCM_PREFIX}/include/hip/hip_common.h ... Ensure ROCm is installed and set ROCM_PATH environment variable to ROCm installation path.])] )],
+                         [])
 
 dnl *********************************************************************
 dnl * Set raja options
@@ -2626,9 +2626,9 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         fi
 
         AS_IF([test x"$hypre_using_onemklsparse" == x"yes" || test x"$hypre_using_onemklblas" == x"yes" || test x"$hypre_using_onemklrand" == x"yes"],
-              [AC_CHECK_HEADERS(["${MKLROOT}/include/mkl.h"],
-                                [hypre_found_mkl=yes],
-                                AC_MSG_ERROR([unable to find oneMKL ... Ensure that MKLROOT is set]))
+              [AC_CHECK_HEADER(["${MKLROOT}/include/mkl.h"],
+                               [hypre_found_mkl=yes],
+                               AC_MSG_ERROR([unable to find oneMKL ... Ensure that MKLROOT is set]))
                HYPRE_SYCL_LIBS="${HYPRE_SYCL_LIBS} -qmkl -Wl,-export-dynamic -Wl,--start-group -Wl,--end-group -lsycl -lOpenCL -lpthread -lm -ldl"
                HYPRE_SYCL_INCL="${HYPRE_SYCL_INCL} -qmkl -I${DPLROOT}/include -DMKL_ILP64 -I${MKLROOT}/include"
                ])
@@ -2950,4 +2950,4 @@ dnl * Define the files to be configured and made
 dnl *********************************************************************
 AC_CONFIG_FILES([config/Makefile.config])
 
-AC_OUTPUT()
+AC_OUTPUT
