@@ -4,6 +4,9 @@
 #ifndef hypre_UTILITIES_HPP
 #define hypre_UTILITIES_HPP
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "utilities_mup_func.h"
+#endif
 
 #ifdef __cplusplus
 extern "C++" {
