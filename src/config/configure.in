@@ -352,6 +352,25 @@ then
    AC_DEFINE(HYPRE_COMPLEX, 1, [Define to 1 if using complex values])
 fi
 
+dnl *** Mixed-precision support build option
+AC_ARG_ENABLE(mixed-precision,
+AS_HELP_STRING([--enable-mixed-precision],
+               [Enable mixed-precision build (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_fei=no
+         hypre_using_mixed_precision=yes ;;
+    no)  hypre_using_mixed_precision=no ;;
+    *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-mixed-precision]) ;;
+ esac],
+[hypre_using_mixed_precision=no]
+)
+MP_BUILD=0
+if test "$hypre_using_mixed_precision" = "yes"
+then
+   AC_DEFINE(HYPRE_MIXED_PRECISION, 1, [Define to 1 if using mixed-precision for HYPRE_Real type])
+   MP_BUILD=1
+fi
+
 AC_ARG_ENABLE(maxdim,
 AS_HELP_STRING([--enable-maxdim=MAXDIM],
                [Change max dimension size to MAXDIM (default is 3).
@@ -2914,6 +2933,11 @@ dnl * DSuperLU instrumentation
 dnl *********************************************************************
 AC_SUBST(DSUPERLU_INCLUDE)
 AC_SUBST(DSUPERLU_LIBS)
+
+dnl *********************************************************************
+dnl * Mixed precision build
+dnl *********************************************************************
+AC_SUBST(MP_BUILD)
 
 dnl *********************************************************************
 dnl * ar & ranlib substitution

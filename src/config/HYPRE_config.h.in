@@ -17,6 +17,9 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
 /* Define to 1 if using MLI */
 #undef HAVE_MLI
 
@@ -25,9 +28,6 @@
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
-
-/* Define to 1 if you have the <stdio.h> header file. */
-#undef HAVE_STDIO_H
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
@@ -120,6 +120,9 @@
 
 /* Define to 1 if using long long int for HYPRE_BigInt */
 #undef HYPRE_MIXEDINT
+
+/* Define to 1 if using mixed-precision for HYPRE_Real type */
+#undef HYPRE_MIXED_PRECISION
 
 /* Print HYPRE errors */
 #undef HYPRE_PRINT_ERRORS
@@ -301,7 +304,5 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
-/* Define to 1 if all of the C90 standard headers exist (not just the ones
-   required in a freestanding environment). This macro is provided for
-   backward compatibility; new code need not use it. */
+/* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
