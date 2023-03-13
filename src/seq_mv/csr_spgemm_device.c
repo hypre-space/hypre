@@ -78,8 +78,6 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
    }
    else
    {
-      /* WM: todo - sycl implementation when not using oneMKL sparse */
-#if !defined(HYPRE_USING_SYCL)
       d_a  = hypre_CSRMatrixPatternOnly(A) ? NULL : d_a;
       d_b  = hypre_CSRMatrixPatternOnly(B) ? NULL : d_b;
 
@@ -115,7 +113,6 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
       }
 
       hypre_TFree(d_rc, HYPRE_MEMORY_DEVICE);
-#endif /* !defined(HYPRE_USING_SYCL) */
    }
 
 #ifdef HYPRE_SPGEMM_TIMING

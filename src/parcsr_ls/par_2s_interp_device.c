@@ -14,30 +14,30 @@
 #if defined(HYPRE_USING_SYCL)
 SYCL_EXTERNAL
 #endif
-__global__ void hypreCUDAKernel_compute_weak_rowsums( hypre_DeviceItem &item, HYPRE_Int nr_of_rows,
-                                                      bool has_offd,
-                                                      HYPRE_Int *CF_marker, HYPRE_Int *A_diag_i, HYPRE_Complex *A_diag_a, HYPRE_Int *S_diag_j,
-                                                      HYPRE_Int *A_offd_i, HYPRE_Complex *A_offd_a, HYPRE_Int *S_offd_j, HYPRE_Real *rs, HYPRE_Int flag );
+__global__ void hypreGPUKernel_compute_weak_rowsums( hypre_DeviceItem &item, HYPRE_Int nr_of_rows,
+                                                     bool has_offd,
+                                                     HYPRE_Int *CF_marker, HYPRE_Int *A_diag_i, HYPRE_Complex *A_diag_a, HYPRE_Int *S_diag_j,
+                                                     HYPRE_Int *A_offd_i, HYPRE_Complex *A_offd_a, HYPRE_Int *S_offd_j, HYPRE_Real *rs, HYPRE_Int flag );
 
-__global__ void hypreCUDAKernel_MMInterpScaleAFF( hypre_DeviceItem &item, HYPRE_Int AFF_nrows,
-                                                  HYPRE_Int *AFF_diag_i,
-                                                  HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_a, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j,
-                                                  HYPRE_Complex *AFF_offd_a, HYPRE_Complex *beta_diag, HYPRE_Complex *beta_offd, HYPRE_Int *F2_to_F,
-                                                  HYPRE_Real *rsW );
+__global__ void hypreGPUKernel_MMInterpScaleAFF( hypre_DeviceItem &item, HYPRE_Int AFF_nrows,
+                                                 HYPRE_Int *AFF_diag_i,
+                                                 HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_a, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j,
+                                                 HYPRE_Complex *AFF_offd_a, HYPRE_Complex *beta_diag, HYPRE_Complex *beta_offd, HYPRE_Int *F2_to_F,
+                                                 HYPRE_Real *rsW );
 
 #if defined(HYPRE_USING_SYCL)
 SYCL_EXTERNAL
 #endif
-__global__ void hypreCUDAKernel_compute_dlam_dtmp( hypre_DeviceItem &item, HYPRE_Int nr_of_rows,
-                                                   HYPRE_Int *AFF_diag_i,
-                                                   HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i,
-                                                   HYPRE_Complex *AFF_offd_data, HYPRE_Complex *rsFC, HYPRE_Complex *dlam, HYPRE_Complex *dtmp );
+__global__ void hypreGPUKernel_compute_dlam_dtmp( hypre_DeviceItem &item, HYPRE_Int nr_of_rows,
+                                                  HYPRE_Int *AFF_diag_i,
+                                                  HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_data, HYPRE_Int *AFF_offd_i,
+                                                  HYPRE_Complex *AFF_offd_data, HYPRE_Complex *rsFC, HYPRE_Complex *dlam, HYPRE_Complex *dtmp );
 
-__global__ void hypreCUDAKernel_MMPEInterpScaleAFF( hypre_DeviceItem &item, HYPRE_Int AFF_nrows,
-                                                    HYPRE_Int *AFF_diag_i,
-                                                    HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_a, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j,
-                                                    HYPRE_Complex *AFF_offd_a, HYPRE_Complex *tmp_diag, HYPRE_Complex *tmp_offd,
-                                                    HYPRE_Complex *lam_diag, HYPRE_Complex *lam_offd, HYPRE_Int *F2_to_F, HYPRE_Real *rsW );
+__global__ void hypreGPUKernel_MMPEInterpScaleAFF( hypre_DeviceItem &item, HYPRE_Int AFF_nrows,
+                                                   HYPRE_Int *AFF_diag_i,
+                                                   HYPRE_Int *AFF_diag_j, HYPRE_Complex *AFF_diag_a, HYPRE_Int *AFF_offd_i, HYPRE_Int *AFF_offd_j,
+                                                   HYPRE_Complex *AFF_offd_a, HYPRE_Complex *tmp_diag, HYPRE_Complex *tmp_offd,
+                                                   HYPRE_Complex *lam_diag, HYPRE_Complex *lam_offd, HYPRE_Int *F2_to_F, HYPRE_Real *rsW );
 
 void hypreDevice_extendWtoP( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows, HYPRE_Int W_nr_of_cols,
                              HYPRE_Int *CF_marker, HYPRE_Int W_diag_nnz, HYPRE_Int *W_diag_i, HYPRE_Int *W_diag_j,
@@ -127,7 +127,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(A_nr_local, "warp", bDim);
 
    /* only for rows corresponding to F2 (notice flag == -1) */
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_compute_weak_rowsums,
                      gDim, bDim,
                      A_nr_local,
                      A_offd_nnz > 0,
@@ -208,7 +208,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int *As_F2F_offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(As_F2F));
    HYPRE_Int *As_F2F_offd_j = hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(As_F2F));
    HYPRE_Complex *As_F2F_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(As_F2F));
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_MMInterpScaleAFF,
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_MMInterpScaleAFF,
                      gDim, bDim,
                      AF2F_nr_local,
                      As_F2F_diag_i,
@@ -382,7 +382,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Complex *As_FF_diag_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(As_FF));
    HYPRE_Int *As_FF_offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(As_FF));
    HYPRE_Complex *As_FF_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(As_FF));
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_dlam_dtmp,
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_compute_dlam_dtmp,
                      gDim, bDim,
                      AFC_nr_local,
                      As_FF_diag_i,
@@ -467,7 +467,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    gDim = hypre_GetDefaultDeviceGridDimension(A_nr_local, "warp", bDim);
 
    /* only for rows corresponding to F2 (notice flag == -1) */
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_compute_weak_rowsums,
                      gDim, bDim,
                      A_nr_local,
                      A_offd_nnz > 0,
@@ -547,7 +547,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int *As_F2F_offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(As_F2F));
    HYPRE_Int *As_F2F_offd_j = hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(As_F2F));
    HYPRE_Complex *As_F2F_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(As_F2F));
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_MMPEInterpScaleAFF,
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_MMPEInterpScaleAFF,
                      gDim, bDim,
                      AF2F_nr_local,
                      As_F2F_diag_i,
@@ -670,18 +670,18 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
 
 //-----------------------------------------------------------------------
 __global__
-void hypreCUDAKernel_MMInterpScaleAFF( hypre_DeviceItem    &item,
-                                       HYPRE_Int      AFF_nrows,
-                                       HYPRE_Int     *AFF_diag_i,
-                                       HYPRE_Int     *AFF_diag_j,
-                                       HYPRE_Complex *AFF_diag_a,
-                                       HYPRE_Int     *AFF_offd_i,
-                                       HYPRE_Int     *AFF_offd_j,
-                                       HYPRE_Complex *AFF_offd_a,
-                                       HYPRE_Complex *beta_diag,
-                                       HYPRE_Complex *beta_offd,
-                                       HYPRE_Int     *F2_to_F,
-                                       HYPRE_Real    *rsW )
+void hypreGPUKernel_MMInterpScaleAFF( hypre_DeviceItem    &item,
+                                      HYPRE_Int      AFF_nrows,
+                                      HYPRE_Int     *AFF_diag_i,
+                                      HYPRE_Int     *AFF_diag_j,
+                                      HYPRE_Complex *AFF_diag_a,
+                                      HYPRE_Int     *AFF_offd_i,
+                                      HYPRE_Int     *AFF_offd_j,
+                                      HYPRE_Complex *AFF_offd_a,
+                                      HYPRE_Complex *beta_diag,
+                                      HYPRE_Complex *beta_offd,
+                                      HYPRE_Int     *F2_to_F,
+                                      HYPRE_Real    *rsW )
 {
    HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
@@ -801,20 +801,20 @@ void hypreCUDAKernel_MMInterpScaleAFF( hypre_DeviceItem    &item,
 
 //-----------------------------------------------------------------------
 __global__
-void hypreCUDAKernel_MMPEInterpScaleAFF( hypre_DeviceItem    &item,
-                                         HYPRE_Int      AFF_nrows,
-                                         HYPRE_Int     *AFF_diag_i,
-                                         HYPRE_Int     *AFF_diag_j,
-                                         HYPRE_Complex *AFF_diag_a,
-                                         HYPRE_Int     *AFF_offd_i,
-                                         HYPRE_Int     *AFF_offd_j,
-                                         HYPRE_Complex *AFF_offd_a,
-                                         HYPRE_Complex *tmp_diag,
-                                         HYPRE_Complex *tmp_offd,
-                                         HYPRE_Complex *lam_diag,
-                                         HYPRE_Complex *lam_offd,
-                                         HYPRE_Int     *F2_to_F,
-                                         HYPRE_Real    *rsW )
+void hypreGPUKernel_MMPEInterpScaleAFF( hypre_DeviceItem    &item,
+                                        HYPRE_Int      AFF_nrows,
+                                        HYPRE_Int     *AFF_diag_i,
+                                        HYPRE_Int     *AFF_diag_j,
+                                        HYPRE_Complex *AFF_diag_a,
+                                        HYPRE_Int     *AFF_offd_i,
+                                        HYPRE_Int     *AFF_offd_j,
+                                        HYPRE_Complex *AFF_offd_a,
+                                        HYPRE_Complex *tmp_diag,
+                                        HYPRE_Complex *tmp_offd,
+                                        HYPRE_Complex *lam_diag,
+                                        HYPRE_Complex *lam_offd,
+                                        HYPRE_Int     *F2_to_F,
+                                        HYPRE_Real    *rsW )
 {
    HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 

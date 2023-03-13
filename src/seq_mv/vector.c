@@ -159,7 +159,50 @@ hypre_SeqVectorSetSize( hypre_Vector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * ReadVector
+ * hypre_SeqVectorResize
+ *
+ * Resize a sequential vector when changing its number of components.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorResize( hypre_Vector *vector,
+                       HYPRE_Int     num_vectors_in )
+{
+   HYPRE_Int  method        = hypre_VectorMultiVecStorageMethod(vector);
+   HYPRE_Int  size          = hypre_VectorSize(vector);
+   HYPRE_Int  num_vectors   = hypre_VectorNumVectors(vector);
+   HYPRE_Int  total_size    = num_vectors * size;
+   HYPRE_Int  total_size_in = num_vectors_in * size;
+
+   /* Reallocate data array */
+   if (total_size_in > total_size)
+   {
+      hypre_VectorData(vector) = hypre_TReAlloc_v2(hypre_VectorData(vector),
+                                                   HYPRE_Complex,
+                                                   total_size,
+                                                   HYPRE_Complex,
+                                                   total_size_in,
+                                                   hypre_VectorMemoryLocation(vector));
+   }
+
+   /* Update vector info */
+   hypre_VectorNumVectors(vector) = num_vectors_in;
+   if (method == 0)
+   {
+      hypre_VectorVectorStride(vector) = size;
+      hypre_VectorIndexStride(vector)  = 1;
+   }
+   else if (method == 1)
+   {
+      hypre_VectorVectorStride(vector) = 1;
+      hypre_VectorIndexStride(vector)  = num_vectors;
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorRead
  *--------------------------------------------------------------------------*/
 
 hypre_Vector *
@@ -597,6 +640,66 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorAxpyzHost
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorAxpyzHost( HYPRE_Complex alpha,
+                          hypre_Vector *x,
+                          HYPRE_Complex beta,
+                          hypre_Vector *y,
+                          hypre_Vector *z )
+{
+   HYPRE_Complex *x_data      = hypre_VectorData(x);
+   HYPRE_Complex *y_data      = hypre_VectorData(y);
+   HYPRE_Complex *z_data      = hypre_VectorData(z);
+
+   HYPRE_Int      num_vectors = hypre_VectorNumVectors(x);
+   HYPRE_Int      size        = hypre_VectorSize(x);
+   HYPRE_Int      total_size  = size * num_vectors;
+   HYPRE_Int      i;
+
+#if defined(HYPRE_USING_OPENMP)
+   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+   for (i = 0; i < total_size; i++)
+   {
+      z_data[i] = alpha * x_data[i] + beta * y_data[i];
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorAxpyz
+ *
+ * Computes z = a*x + b*y
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorAxpyz( HYPRE_Complex alpha,
+                      hypre_Vector *x,
+                      HYPRE_Complex beta,
+                      hypre_Vector *y,
+                      hypre_Vector *z )
+{
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_VectorMemoryLocation(x),
+                                                      hypre_VectorMemoryLocation(y));
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_SeqVectorAxpyzDevice(alpha, x, beta, y, z);
+   }
+   else
+#endif
+   {
+      hypre_SeqVectorAxpyzHost(alpha, x, beta, y, z);
+   }
 
    return hypre_error_flag;
 }

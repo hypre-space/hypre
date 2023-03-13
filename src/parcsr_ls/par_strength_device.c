@@ -368,7 +368,7 @@ __global__ void hypre_BoomerAMGCreateS_rowcount( hypre_DeviceItem &item,
    }
 
    /* compute row of S */
-   HYPRE_Int all_weak = max_row_sum < 1.0 && fabs(row_sum) > fabs(diag) * max_row_sum;
+   HYPRE_Int all_weak = max_row_sum < 1.0 && hypre_abs(row_sum) > hypre_abs(diag) * max_row_sum;
    const HYPRE_Real thresh = sdiag * strength_threshold * row_scale;
 
    for (HYPRE_Int i = p_diag + lane; i < q_diag; i += HYPRE_WARP_SIZE)
@@ -539,7 +539,8 @@ __global__ void hypre_BoomerAMGCreateSabs_rowcount( hypre_DeviceItem &item,
    row_scale = warp_allreduce_max(item, row_scale);
 
    /* compute row of S */
-   HYPRE_Int all_weak = max_row_sum < 1.0 && fabs(row_sum) < fabs(diag) * (2.0 - max_row_sum);
+   HYPRE_Int all_weak = max_row_sum < 1.0 &&
+                        hypre_abs(row_sum) < hypre_abs(diag) * (2.0 - max_row_sum);
    const HYPRE_Real thresh = strength_threshold * row_scale;
 
    for (HYPRE_Int i = p_diag + lane; i < q_diag;

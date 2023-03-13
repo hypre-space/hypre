@@ -22,10 +22,8 @@ extern "C" {
 /**
  * @defgroup StructSolvers Struct Solvers
  *
- * These solvers use matrix/vector storage schemes that are tailored
- * to structured grid problems.
- *
- * @memo Linear solvers for structured grids
+ * Linear solvers for structured grids. These solvers use matrix/vector storage
+ * schemes that are tailored to structured grid problems.
  *
  * @{
  **/

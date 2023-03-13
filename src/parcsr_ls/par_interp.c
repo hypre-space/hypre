@@ -3822,14 +3822,14 @@ hypre_ParCSRMatrix *hypre_CreateC( hypre_ParCSRMatrix  *A,
       C_diag_j[index] = A_diag_j[index];
       if (w == 0)
       {
-         w_local = fabs(A_diag_data[index]);
+         w_local = hypre_abs(A_diag_data[index]);
          for (j = index + 1; j < A_diag_i[i + 1]; j++)
          {
-            w_local += fabs(A_diag_data[j]);
+            w_local += hypre_abs(A_diag_data[j]);
          }
          for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
          {
-            w_local += fabs(A_offd_data[j]);
+            w_local += hypre_abs(A_offd_data[j]);
          }
          invdiag = -1 / w_local;
          C_diag_data[index] = 1.0 - A_diag_data[index] / w_local;
@@ -4061,7 +4061,7 @@ hypre_BoomerAMGBuildInterpOnePntHost( hypre_ParCSRMatrix  *A,
       for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
       {
          i1 = A_diag_j[j];
-         vv = fabs(A_diag_data[j]);
+         vv = hypre_abs(A_diag_data[j]);
 #if 0
          /* !!! this is a hack just for code verification purpose !!!
             it basically says:
@@ -4098,7 +4098,7 @@ hypre_BoomerAMGBuildInterpOnePntHost( hypre_ParCSRMatrix  *A,
          for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
          {
             i1 = A_offd_j[j];
-            vv = fabs(A_offd_data[j]);
+            vv = hypre_abs(A_offd_data[j]);
             if (CF_marker_offd[i1] >= 0 && marker_offd[i1] == MARK && vv > max_abs_aij)
             {
                /* mark it as an 'o' */

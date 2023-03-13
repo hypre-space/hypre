@@ -266,7 +266,7 @@ hypre_BoomerAMGDD_FAC_JacobiHost( void      *amgdd_vdata,
       {
          for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i + 1]; j++)
          {
-            // hypre_AMGDDCompGridL1Norms(compGrid)[i] += fabs(hypre_CSRMatrixData(diag)[j]);
+            // hypre_AMGDDCompGridL1Norms(compGrid)[i] += hypre_abs(hypre_CSRMatrixData(diag)[j]);
             if (hypre_CSRMatrixJ(diag)[j] == i)
             {
                hypre_AMGDDCompGridL1Norms(compGrid)[i] = hypre_CSRMatrixData(diag)[j];
@@ -279,7 +279,7 @@ hypre_BoomerAMGDD_FAC_JacobiHost( void      *amgdd_vdata,
       {
          for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i + 1]; j++)
          {
-            // hypre_AMGDDCompGridL1Norms(compGrid)[i + hypre_AMGDDCompGridNumOwnedNodes(compGrid)] += fabs(hypre_CSRMatrixData(diag)[j]);
+            // hypre_AMGDDCompGridL1Norms(compGrid)[i + hypre_AMGDDCompGridNumOwnedNodes(compGrid)] += hypre_abs(hypre_CSRMatrixData(diag)[j]);
             if (hypre_CSRMatrixJ(diag)[j] == i)
             {
                hypre_AMGDDCompGridL1Norms(compGrid)[i + hypre_AMGDDCompGridNumOwnedNodes(

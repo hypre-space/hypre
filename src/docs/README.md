@@ -102,3 +102,9 @@ Breathe:
 
 - https://breathe.readthedocs.io/en/latest/index.html
 
+## Some notes on customization
+
+After compilation, the CSS style files that control the HTML formatting will be
+in the folder `usr-manual-html/_static`.  To override any of these settings, add
+the appropriate lines to the file `usr-manual/_static/custom.css`.  Use the web
+to get information on CSS.

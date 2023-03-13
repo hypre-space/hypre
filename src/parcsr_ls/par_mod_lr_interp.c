@@ -122,7 +122,7 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    n_Cpts = num_cpts_global[1] - num_cpts_global[0];
 
-   hypre_ParCSRMatrixGenerateFFFC(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
+   hypre_ParCSRMatrixGenerateFFFCHost(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
 
    As_FC_diag = hypre_ParCSRMatrixDiag(As_FC);
    As_FC_diag_i = hypre_CSRMatrixI(As_FC_diag);
@@ -706,7 +706,7 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    n_Cpts = num_cpts_global[1] - num_cpts_global[0];
 
-   hypre_ParCSRMatrixGenerateFFFC(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
+   hypre_ParCSRMatrixGenerateFFFCHost(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
 
    if (num_procs > 1)
    {
@@ -1371,7 +1371,7 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    n_Cpts = num_cpts_global[1] - num_cpts_global[0];
 
-   hypre_ParCSRMatrixGenerateFFFC(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
+   hypre_ParCSRMatrixGenerateFFFCHost(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
 
    As_FC_diag = hypre_ParCSRMatrixDiag(As_FC);
    As_FC_diag_i = hypre_CSRMatrixI(As_FC_diag);

@@ -68,13 +68,13 @@ Final COGMRES Relative Residual Norm = 8.225661e-09
 
 
 COGMRES Iterations = 93
-Final COGMRES Relative Residual Norm = 8.225661e-09
+Final COGMRES Relative Residual Norm = 8.225662e-09
 
 # Output file: solvers.out.16
 
 
 COGMRES Iterations = 93
-Final COGMRES Relative Residual Norm = 8.225661e-09
+Final COGMRES Relative Residual Norm = 8.225662e-09
 
 # Output file: solvers.out.17
 index 19 value -8.373863e-12
@@ -87,6 +87,42 @@ index 19 value -7.497267e-11
 
 GMRES Iterations = 93
 Final GMRES Relative Residual Norm = 8.225661e-09
+
+# Output file: solvers.out.19
+
+
+Iterations = 8
+Final Relative Residual Norm = 8.565049e-09
+
+# Output file: solvers.out.20
+
+
+GMRES Iterations = 7
+Final GMRES Relative Residual Norm = 1.597168e-09
+
+# Output file: solvers.out.21
+
+
+BoomerAMG Iterations = 25
+Final Relative Residual Norm = 7.139146e-09
+
+# Output file: solvers.out.22
+
+
+GMRES Iterations = 12
+Final GMRES Relative Residual Norm = 5.069641e-09
+
+# Output file: solvers.out.23
+
+
+BoomerAMG Iterations = 17
+Final Relative Residual Norm = 4.412175e-09
+
+# Output file: solvers.out.24
+
+
+GMRES Iterations = 9
+Final GMRES Relative Residual Norm = 9.074692e-09
 
 # Output file: solvers.out.sysh
  Average Convergence Factor = 0.205554
@@ -171,7 +207,7 @@ Final Relative Residual Norm = 9.839249e-09
 
 # Output file: solvers.out.116
 GMRES Iterations = 15
-Final GMRES Relative Residual Norm = 2.830234e-09
+Final GMRES Relative Residual Norm = 2.830235e-09
 
 # Output file: solvers.out.117
 GMRES Iterations = 15

@@ -165,6 +165,7 @@ HYPRE_ParVectorScale( HYPRE_Complex   value,
 /*--------------------------------------------------------------------------
  * HYPRE_ParVectorAxpy
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 HYPRE_ParVectorAxpy( HYPRE_Complex   alpha,
                      HYPRE_ParVector x,

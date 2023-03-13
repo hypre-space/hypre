@@ -1591,7 +1591,7 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( hypre_DeviceItem    &item,
       const HYPRE_Int col = read_only_load(&A_strong_diag_j[j]);
       if (col >= 0)
       {
-         const HYPRE_Complex val = fabs( read_only_load(&A_diag_a[j]) );
+         const HYPRE_Complex val = hypre_abs( read_only_load(&A_diag_a[j]) );
          if ( read_only_load(&CF_marker[col]) > 0 && val > max_diag )
          {
             max_diag = val;
@@ -1615,7 +1615,7 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( hypre_DeviceItem    &item,
       /* column indices are negative for weak connections */
       if (col >= 0)
       {
-         const HYPRE_Complex val = fabs( read_only_load(&A_offd_a[j]) );
+         const HYPRE_Complex val = hypre_abs( read_only_load(&A_offd_a[j]) );
          if ( read_only_load(&CF_marker_offd[col]) > 0 && val > max_offd )
          {
             max_offd = val;

@@ -55,6 +55,9 @@ extern "C" {
 #define MPI_CHAR            hypre_MPI_CHAR
 #define MPI_LONG            hypre_MPI_LONG
 #define MPI_BYTE            hypre_MPI_BYTE
+
+#define MPI_C_FLOAT_COMPLEX hypre_MPI_COMPLEX
+#define MPI_C_LONG_DOUBLE_COMPLEX hypre_MPI_COMPLEX
 #define MPI_C_DOUBLE_COMPLEX hypre_MPI_COMPLEX
 
 #define MPI_SUM             hypre_MPI_SUM
@@ -139,7 +142,7 @@ typedef HYPRE_Int hypre_MPI_Comm;
 typedef HYPRE_Int hypre_MPI_Group;
 typedef HYPRE_Int hypre_MPI_Request;
 typedef HYPRE_Int hypre_MPI_Datatype;
-typedef void (hypre_MPI_User_function) ();
+typedef void (hypre_MPI_User_function) (void);
 
 typedef struct
 {

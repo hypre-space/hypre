@@ -329,13 +329,13 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
    /* map from all points (i.e, F+C) to F/C indices */
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_ONEDPL_CALL( oneapi::dpl::exclusive_scan,
+   HYPRE_ONEDPL_CALL( std::exclusive_scan,
                       oneapi::dpl::make_transform_iterator(CF_marker,           is_negative<HYPRE_Int>()),
                       oneapi::dpl::make_transform_iterator(CF_marker + n_local, is_negative<HYPRE_Int>()),
                       map2FC, /* F */
                       HYPRE_Int(0) );
 
-   HYPRE_ONEDPL_CALL( oneapi::dpl::exclusive_scan,
+   HYPRE_ONEDPL_CALL( std::exclusive_scan,
                       oneapi::dpl::make_transform_iterator(CF_marker,           is_nonnegative<HYPRE_Int>()),
                       oneapi::dpl::make_transform_iterator(CF_marker + n_local, is_nonnegative<HYPRE_Int>()),
                       itmp, /* C */
@@ -374,7 +374,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    {
       map2F2 = hypre_TAlloc(HYPRE_Int, n_local, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
-      HYPRE_ONEDPL_CALL( oneapi::dpl::exclusive_scan,
+      HYPRE_ONEDPL_CALL( std::exclusive_scan,
                          oneapi::dpl::make_transform_iterator(CF_marker,           equal<HYPRE_Int>(-2)),
                          oneapi::dpl::make_transform_iterator(CF_marker + n_local, equal<HYPRE_Int>(-2)),
                          map2F2, /* F2 */
@@ -477,7 +477,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                         option == 1 ? map2FC : map2F2,
                         AFF_diag_ii );
 
-      hypre_assert( std::get<0>(new_end.base()) == AFF_diag_ii + AFF_diag_nnz );
 #else
       /* Notice that we cannot use Soc_diag_j in the first two arguments since the diagonal is marked as -2 */
       auto new_end = HYPRE_THRUST_CALL( copy_if,
@@ -575,7 +574,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                          num_cols_A_offd,
                          0 );
       hypreDevice_ScatterConstant(offd_mark, num_cols_AFF_offd, tmp_j, 1);
-      HYPRE_ONEDPL_CALL( oneapi::dpl::exclusive_scan,
+      HYPRE_ONEDPL_CALL( std::exclusive_scan,
                          offd_mark,
                          offd_mark + num_cols_A_offd,
                          tmp_j,
@@ -1346,6 +1345,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerateFFFCDevice
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_ParCSRMatrixGenerateFFFCDevice( hypre_ParCSRMatrix  *A,
                                       HYPRE_Int           *CF_marker,
@@ -1354,9 +1357,14 @@ hypre_ParCSRMatrixGenerateFFFCDevice( hypre_ParCSRMatrix  *A,
                                       hypre_ParCSRMatrix **AFC_ptr,
                                       hypre_ParCSRMatrix **AFF_ptr )
 {
-   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S, AFC_ptr, AFF_ptr,
+   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S,
+                                                    AFC_ptr, AFF_ptr,
                                                     NULL, NULL, 1);
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerateFFFC3Device
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParCSRMatrixGenerateFFFC3Device( hypre_ParCSRMatrix  *A,
@@ -1366,9 +1374,14 @@ hypre_ParCSRMatrixGenerateFFFC3Device( hypre_ParCSRMatrix  *A,
                                        hypre_ParCSRMatrix **AFC_ptr,
                                        hypre_ParCSRMatrix **AFF_ptr)
 {
-   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S, AFC_ptr, AFF_ptr,
+   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S,
+                                                    AFC_ptr, AFF_ptr,
                                                     NULL, NULL, 2);
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerateFFCFDevice
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParCSRMatrixGenerateFFCFDevice( hypre_ParCSRMatrix  *A,
@@ -1378,10 +1391,14 @@ hypre_ParCSRMatrixGenerateFFCFDevice( hypre_ParCSRMatrix  *A,
                                       hypre_ParCSRMatrix **ACF_ptr,
                                       hypre_ParCSRMatrix **AFF_ptr )
 {
-   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S, NULL, AFF_ptr,
+   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S,
+                                                    NULL, AFF_ptr,
                                                     ACF_ptr, NULL, 1);
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerateCFDevice
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParCSRMatrixGenerateCFDevice( hypre_ParCSRMatrix  *A,
@@ -1390,9 +1407,14 @@ hypre_ParCSRMatrixGenerateCFDevice( hypre_ParCSRMatrix  *A,
                                     hypre_ParCSRMatrix  *S,
                                     hypre_ParCSRMatrix **ACF_ptr)
 {
-   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S, NULL, NULL, ACF_ptr,
-                                                    NULL, 1);
+   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S,
+                                                    NULL, NULL,
+                                                    ACF_ptr, NULL, 1);
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerateCCDevice
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParCSRMatrixGenerateCCDevice( hypre_ParCSRMatrix  *A,
@@ -1401,9 +1423,14 @@ hypre_ParCSRMatrixGenerateCCDevice( hypre_ParCSRMatrix  *A,
                                     hypre_ParCSRMatrix  *S,
                                     hypre_ParCSRMatrix **ACC_ptr)
 {
-   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S, NULL, NULL, NULL,
-                                                    ACC_ptr, 1);
+   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S,
+                                                    NULL, NULL,
+                                                    NULL, ACC_ptr, 1);
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerate1DCFDevice
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
