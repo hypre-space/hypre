@@ -755,4 +755,4 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P,
    return hypre_error_flag;
 }
 
-#endif /* #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
+#endif /* #if defined(HYPRE_USING_GPU) */

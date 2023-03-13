@@ -93,7 +93,7 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
    else
 #endif // defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) ...
    {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
       hypre_CSRMatrixSpMVDevice(trans, alpha, A, x, beta, y, 0);
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
