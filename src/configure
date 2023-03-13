@@ -10897,15 +10897,7 @@ printf "%s\n" "#define HYPRE_USING_DEVICE_OPENMP 1" >>confdefs.h
 
 
 
-<<<<<<< HEAD
-$as_echo "#define HYPRE_DEVICE_OPENMP_ALLOC 1" >>confdefs.h
-=======
-printf "%s\n" "#define HYPRE_USING_GPU 1" >>confdefs.h
-
-
-
 printf "%s\n" "#define HYPRE_DEVICE_OPENMP_ALLOC 1" >>confdefs.h
->>>>>>> master
 
 
 
