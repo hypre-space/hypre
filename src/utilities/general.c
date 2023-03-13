@@ -35,8 +35,8 @@ hypre_handle(void)
 {
    if (!_hypre_handle)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR - _hypre_handle is not initialized. All HYPRE_* or hypre_* function calls should occur between HYPRE_Init() and HYPRE_Finalize().\n");
-      hypre_assert(0);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR - _hypre_handle is not initialized. Calling HYPRE_Init(). All HYPRE_* or hypre_* function calls should occur between HYPRE_Init() and HYPRE_Finalize().\n");
+      HYPRE_Init();
    }
 
    return _hypre_handle;
