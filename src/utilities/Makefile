@@ -27,6 +27,7 @@ HEADERS =\
  int_array.h\
  memory.h\
  memory_tracker.h\
+ multiprecision.h\
  HYPRE_utilities.h\
  mpistubs.h\
  threading.h\
@@ -90,12 +91,14 @@ all: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/_hypre_utilities.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_utilities.hpp $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/multiprecision.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/_hypre_utilities.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/fortran*.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/multiprecision.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean: clean_mup
