@@ -875,14 +875,17 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
           case 1: 
           	method = 1;
           	break;
-         case 10:
-         	method = 10;
-         	break;
-         case 11:
-         	method = 11;
-         	break;
-         default:
-         	method = 0;         	
+          case 2: 
+          	method = 2;
+            break;
+          case 10:
+          	method = 10;
+          	break;
+          case 11:
+          	method = 11;
+          	break;
+          default:
+          	method = 0;         	
        }
        if(my_id == 0 && amg_print_level > 1)
           hypre_printf("\n\nUsing Auxilliary matrix for computing strength matrix: method %d \n",method);
@@ -910,6 +913,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
     *-----------------------------------------------------*/   
    while (not_finished_coarsening)
    {
+      /* WM: debug - hack to get rid of zeros in A, which can screw with the sparseity pattern of S_aux */
+      hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(A_array[level]), 1.0e-12);
+      if (delete_zeros)
+      {
+         hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(A_array[level]));
+         hypre_ParCSRMatrixDiag(A_array[level]) = delete_zeros;
+      }
       /* only do nodal coarsening on a fixed number of levels */
       if (level >= nodal_levels)
       {
@@ -1047,13 +1057,22 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             {
                if (!useSabs)
                {
-                  if(use_aux_strength_mat == 0)
+                  if(use_aux_strength_mat == 0 || use_aux_strength_mat == 2)
                   {
                      /* Build auxilliary matrix for strength */
-                     hypre_BoomerAMGCreateAuxS(A_array[level], NULL, &S_aux, 0);      
+                     hypre_BoomerAMGCreateAuxS(A_array[level], NULL, &S_aux, use_aux_strength_mat);
                      /* build strength matrix */              
                      hypre_BoomerAMGCreateS(S_aux, strong_threshold, max_row_sum,
                                          num_functions, dof_func_data, &S);
+                     /* WM: debug - print out S and S_aux */
+                     if (amg_print_level == 3)
+                     {
+                        char file[256];
+                        hypre_sprintf(file, "matrices/S_aux_str%.2f_auxs%d_%d", strong_threshold, use_aux_strength_mat, level);
+                        hypre_ParCSRMatrixPrintIJ(S_aux, 0, 0, file);
+                        hypre_sprintf(file, "matrices/S_str%.2f_auxs%d_%d", strong_threshold, use_aux_strength_mat, level);
+                        hypre_ParCSRMatrixPrintIJ(S, 0, 0, file);
+                     }
                      /* destroy auxilliary matrix */                    
                      hypre_ParCSRMatrixDestroy(S_aux);
                      S_aux = NULL;
@@ -1076,13 +1095,29 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   }
                   else if(use_aux_strength_mat == 10 || use_aux_strength_mat == 11)
                   {
-                      hypre_BoomerAMGCreateS(S_aux, strong_threshold, max_row_sum,
+                     hypre_BoomerAMGCreateS(S_aux, strong_threshold, max_row_sum,
                                          num_functions, dof_func_data, &S); 
+                     /* WM: debug - print out S and S_aux */
+                     if (amg_print_level == 3)
+                     {
+                        char file[256];
+                        hypre_sprintf(file, "matrices/S_aux_str%.2f_auxs%d_%d", strong_threshold, use_aux_strength_mat, level);
+                        hypre_ParCSRMatrixPrintIJ(S_aux, 0, 0, file);
+                        hypre_sprintf(file, "matrices/S_str%.2f_auxs%d_%d", strong_threshold, use_aux_strength_mat, level);
+                        hypre_ParCSRMatrixPrintIJ(S, 0, 0, file);
+                     }
                   }
                   else
                   {
                      hypre_BoomerAMGCreateS(A_array[level], strong_threshold, max_row_sum,
                                          num_functions, dof_func_data, &S);                  
+                     /* WM: debug - print out S and S_aux */
+                     if (amg_print_level == 3)
+                     {
+                        char file[256];
+                        hypre_sprintf(file, "matrices/S_str%.2f_auxs%d_%d", strong_threshold, use_aux_strength_mat, level);
+                        hypre_ParCSRMatrixPrintIJ(S, 0, 0, file);
+                     }
                   }
                }
                else
@@ -3000,6 +3035,21 @@ hypre_printf("Building RAP here ... nongal \n");
          }
       }
 
+      /* WM: debug - use my own naming and just get P out once... */
+      if (amg_print_level == 3)
+      {
+         char file[256];
+         if (level == 0)
+         {
+            hypre_sprintf(file, "matrices/A_str%.2f_auxs%d_%d", strong_threshold, use_aux_strength_mat, 0);
+            hypre_ParCSRMatrixPrintIJ(A_array[0], 0, 0, file);
+         }
+         hypre_sprintf(file, "matrices/A_str%.2f_auxs%d_%d", strong_threshold, use_aux_strength_mat, level + 1);
+         hypre_ParCSRMatrixPrintIJ(A_H, 0, 0, file);
+
+         hypre_sprintf(file, "matrices/P_str%.2f_auxs%d_%d", strong_threshold, use_aux_strength_mat, level);
+         hypre_ParCSRMatrixPrintIJ(P_array[level], 0, 0, file);
+      } 
 #if DEBUG_SAVE_ALL_OPS
       if (level == 0)
       {

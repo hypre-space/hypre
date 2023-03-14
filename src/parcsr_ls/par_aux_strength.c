@@ -35,7 +35,8 @@
 
 HYPRE_Int
 hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
-                           hypre_ParCSRMatrix   **S_aux_ptr)
+                                hypre_ParCSRMatrix   **S_aux_ptr,
+                                HYPRE_Int              method)
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_CREATES] -= hypre_MPI_Wtime();
@@ -112,12 +113,14 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
    HYPRE_Int          *int_buf_data;
    HYPRE_Int           index, start;
 
-   HYPRE_Int          *P_i = NULL;
-   HYPRE_Int          *P_n = NULL;   
-   HYPRE_BigInt          *N_i = NULL;
-   HYPRE_Int          *N_n = NULL;   
-   HYPRE_BigInt          *B_i = NULL;   
-   HYPRE_Int          *B_n = NULL;   
+   HYPRE_Int          *P_i     = NULL;
+   HYPRE_Int          *P_n     = NULL;   
+   HYPRE_BigInt       *N_i     = NULL;
+   HYPRE_Int          *N_n     = NULL;   
+   HYPRE_BigInt       *B_i     = NULL;   
+   HYPRE_Int          *B_n     = NULL;   
+   HYPRE_Complex      *B_a     = NULL;   
+   HYPRE_Complex      *B_a_sum = NULL;   
    
    HYPRE_Complex pval, bval;
    
@@ -255,8 +258,13 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
    }
    hypre_CSRMatrixDestroy(A_ext);   
    /* 2. Loop to compute intersections of strong (negative) neighbors of common weak (positive) entry */
-   B_i    = hypre_CTAlloc(HYPRE_BigInt, (N_n_max * P_n[num_variables]), memory_location);
-   B_n    = hypre_CTAlloc(HYPRE_Int, (P_n_max * num_variables + 1), memory_location);   
+   B_i     = hypre_CTAlloc(HYPRE_BigInt, (N_n_max * P_n[num_variables]), memory_location);
+   B_n     = hypre_CTAlloc(HYPRE_Int, P_n[num_variables] + 1, memory_location);   
+   if (method % 10 == 2)
+   {
+      B_a     = hypre_CTAlloc(HYPRE_Complex, (N_n_max * P_n[num_variables]), memory_location);   
+      B_a_sum = hypre_CTAlloc(HYPRE_Complex, P_n[num_variables], memory_location);   
+   }
    kn = 0;
    kp = 0;
    for(i = 0; i<num_variables; i++)
@@ -282,6 +290,61 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
          // update position of intersection of strong neighbors
          kn += kp;         
          B_n[j + 1] = kn;            
+
+
+
+
+         // WM: get sum of entries in A for the intersection
+         // WM: todo - switching around variables to use as my indices, which is kind of ugly...
+         // want the connection from positive connection to each column marked in B_i
+         if (method % 10 == 2)
+         {
+            m = k;
+            // if positive connection, m, is local
+            if ( m < num_variables )
+            {
+               for (k = B_n[j]; k < B_n[j+1]; k++)
+               {
+                  HYPRE_BigInt big_col = B_i[k];
+                  if( big_col >= A_col_starts[0] && big_col < A_col_starts[1])
+                  {
+                     // neighbor of positive entry is in diag part
+                     jA = A_diag_i[m];
+                     HYPRE_Int col = (HYPRE_Int) (big_col - A_col_starts[0]);
+                     while (A_diag_j[jA] != col) { jA++; }
+                     B_a[k] = A_diag_data[jA];
+                     B_a_sum[j] += A_diag_data[jA];
+                  }
+                  else
+                  {
+                     // neighbor of positive entry is in offd part
+                     jA = A_offd_i[m];
+                     HYPRE_Int col = hypre_BigBinarySearch( A_offd_colmap, big_col, num_cols_A_offd);
+                     while (A_offd_j[jA] != col) { jA++; }
+                     B_a[k] = A_offd_data[jA];
+                     B_a_sum[j] += A_offd_data[jA];
+                  }
+               }
+            }
+            else
+            {
+               m -= num_variables;
+               /* m is now a row index for A_ext? */
+               /* it's a col index for A_offd, so I think these correspond to rows of A_ext, right? */
+               for (k = B_n[j]; k < B_n[j+1]; k++)
+               {
+                  HYPRE_BigInt big_col = B_i[k];
+                  jA = A_ext_i[m];
+                  while (A_ext_j[jA] != big_col) { jA++; }
+                  B_a[k] = A_ext_data[jA];
+                  B_a_sum[j] += A_ext_data[jA];
+               }
+            }
+         }
+            
+
+
+
       }
    }
    hypre_TFree(N_i, memory_location);
@@ -338,7 +401,14 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
          // Loop over negative connections to positive neighbor and distribute 
          for(k = B_n[ j ]; k<B_n[ j+1 ]; k++)
          {         
-           HYPRE_BigInt big_col = B_i[k];
+            HYPRE_BigInt big_col = B_i[k];
+
+            // WM: compute bval weigthed by connections in A
+            if (method % 10 == 2)
+            {
+               bval = -2.0 * pval * B_a[k] / B_a_sum[j]; 
+            }
+
             if( big_col >= A_col_starts[0] && big_col < A_col_starts[1])
             {
                // neighbor is in diag part
@@ -377,6 +447,11 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
    hypre_TFree(P_n, memory_location);
    hypre_TFree(B_i, memory_location);
    hypre_TFree(B_n, memory_location);
+   if (method % 10 == 2)
+   {
+      hypre_TFree(B_a, memory_location);
+      hypre_TFree(B_a_sum, memory_location);
+   }
    
    return (ierr);
 }
@@ -772,7 +847,7 @@ HYPRE_Int hypre_BoomerAMGCreateAuxS(hypre_ParCSRMatrix    *A, hypre_ParCSRMatrix
    int ierr;
    if(method == 0)
    {
-       ierr = hypre_BoomerAMGCreateAuxMMatrix(A, S_aux_ptr);      
+       ierr = hypre_BoomerAMGCreateAuxMMatrix(A, S_aux_ptr, method);
    }
    else if (method == 1)
    {
@@ -780,7 +855,7 @@ HYPRE_Int hypre_BoomerAMGCreateAuxS(hypre_ParCSRMatrix    *A, hypre_ParCSRMatrix
    }
    else // default
    {
-       ierr = hypre_BoomerAMGCreateAuxMMatrix(A, S_aux_ptr);         
+       ierr = hypre_BoomerAMGCreateAuxMMatrix(A, S_aux_ptr, method);
    }
    
    return (ierr);
