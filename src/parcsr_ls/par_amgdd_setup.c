@@ -64,7 +64,7 @@ hypre_BoomerAMGDDSetup( void               *amgdd_vdata,
    HYPRE_Int               request_counter;
 
    /* Sanity check */
-   if (hypre_ParVectorNumVectors(f) > 1)
+   if (hypre_ParVectorNumVectors(b) > 1)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "BoomerAMGDD doesn't support multicomponent vectors");
       return hypre_error_flag;
