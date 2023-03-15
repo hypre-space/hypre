@@ -474,6 +474,31 @@ main( hypre_int argc,
    char mem_tracker_name[HYPRE_MAX_FILE_NAME_LEN] = {0};
 #endif
 
+   /* Initialize MPI */
+   hypre_MPI_Init(&argc, &argv);
+
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------------
+    * GPU Device binding
+    * Must be done before HYPRE_Init() and should not be changed after
+    *-----------------------------------------------------------------*/
+   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+
+   time_index = hypre_InitializeTiming("Hypre init");
+   hypre_BeginTiming(time_index);
+
+   /*-----------------------------------------------------------
+    * Initialize : must be the first HYPRE function to call
+    *-----------------------------------------------------------*/
+   HYPRE_Init();
+
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
+
    /* default execution policy and memory space */
 #if defined(HYPRE_TEST_USING_HOST)
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_HOST;
@@ -527,12 +552,6 @@ main( hypre_int argc,
               mempool_max_bin      = 9;
    size_t mempool_max_cached_bytes = 2000LL * 1024 * 1024;
 #endif
-
-   /* Initialize MPI */
-   hypre_MPI_Init(&argc, &argv);
-
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
    /*-----------------------------------------------------------
     * Set defaults
@@ -2421,25 +2440,6 @@ main( hypre_int argc,
       hypre_printf("Running with these driver parameters:\n");
       hypre_printf("  solver ID    = %d\n\n", solver_id);
    }
-
-   /*-----------------------------------------------------------------
-    * GPU Device binding
-    * Must be done before HYPRE_Init() and should not be changed after
-    *-----------------------------------------------------------------*/
-   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
-
-   time_index = hypre_InitializeTiming("Hypre init");
-   hypre_BeginTiming(time_index);
-
-   /*-----------------------------------------------------------
-    * Initialize : must be the first HYPRE function to call
-    *-----------------------------------------------------------*/
-   HYPRE_Init();
-
-   hypre_EndTiming(time_index);
-   hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
-   hypre_FinalizeTiming(time_index);
-   hypre_ClearTiming();
 
 #ifdef HYPRE_USING_DEVICE_POOL
    /* To be effective, hypre_SetCubMemPoolSize must immediately follow HYPRE_Init */
