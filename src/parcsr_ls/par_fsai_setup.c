@@ -952,6 +952,13 @@ hypre_FSAISetup( void               *fsai_vdata,
    HYPRE_Int                max_nnzrow_diag_G;   /* Max. number of nonzeros per row in G_diag */
    HYPRE_Int                max_nonzeros_diag_G; /* Max. number of nonzeros in G_diag */
 
+   /* Sanity check */
+   if (hypre_ParVectorNumVectors(f) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "FSAI doesn't support multicomponent vectors");
+      return hypre_error_flag;
+   }
+
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* Create and initialize work vectors used in the solve phase */

@@ -421,6 +421,14 @@ hypre_ParCSRRelax_Cheby_Solve(hypre_ParCSRMatrix *A, /* matrix to relax with */
 #endif
    HYPRE_Int             ierr = 0;
 
+   /* Sanity check */
+   if (hypre_ParVectorNumVectors(f) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Requested relaxation type doesn't support multicomponent vectors");
+      return hypre_error_flag;
+   }
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
    if (exec == HYPRE_EXEC_DEVICE)

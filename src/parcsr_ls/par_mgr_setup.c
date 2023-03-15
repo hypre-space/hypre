@@ -226,6 +226,15 @@ hypre_MGRSetup( void               *mgr_vdata,
       return hypre_error_flag;
    }
 
+   /* Sanity check */
+   if (hypre_ParVectorNumVectors(f) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "MGR doesn't support multicomponent vectors");
+      HYPRE_ANNOTATE_FUNC_END;
+
+      return hypre_error_flag;
+   }
+
    /* If we reduce the reserved C-points, increase one level */
    if (lvl_to_keep_cpoints > 0)
    {
