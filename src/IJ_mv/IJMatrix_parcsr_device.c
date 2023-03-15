@@ -101,9 +101,9 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       hypre_IJMatrixTranslator(matrix) = aux_matrix;
    }
 
-   HYPRE_Int      stack_elmts_max      = hypre_AuxParCSRMatrixMaxStackElmts(aux_matrix);
-   HYPRE_Int      stack_elmts_current  = hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix);
-   HYPRE_Int      stack_elmts_required = stack_elmts_current + nelms;
+   HYPRE_BigInt   stack_elmts_max      = hypre_AuxParCSRMatrixMaxStackElmts(aux_matrix);
+   HYPRE_BigInt   stack_elmts_current  = hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix);
+   HYPRE_BigInt   stack_elmts_required = stack_elmts_current + (HYPRE_BigInt) nelms;
    HYPRE_BigInt  *stack_i              = hypre_AuxParCSRMatrixStackI(aux_matrix);
    HYPRE_BigInt  *stack_j              = hypre_AuxParCSRMatrixStackJ(aux_matrix);
    HYPRE_Complex *stack_data           = hypre_AuxParCSRMatrixStackData(aux_matrix);
@@ -111,8 +111,10 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
 
    if ( stack_elmts_max < stack_elmts_required )
    {
-      HYPRE_Int stack_elmts_max_new = hypre_max(hypre_AuxParCSRMatrixUsrOnProcElmts (aux_matrix), 0) +
-                                      hypre_max(hypre_AuxParCSRMatrixUsrOffProcElmts(aux_matrix), 0);
+      HYPRE_BigInt stack_elmts_max_new =
+         hypre_max(hypre_AuxParCSRMatrixUsrOnProcElmts (aux_matrix), 0) +
+         hypre_max(hypre_AuxParCSRMatrixUsrOffProcElmts(aux_matrix), 0);
+
       if ( hypre_AuxParCSRMatrixUsrOnProcElmts (aux_matrix) < 0 ||
            hypre_AuxParCSRMatrixUsrOffProcElmts(aux_matrix) < 0 )
       {
@@ -205,7 +207,7 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
                     HYPRE_MEMORY_DEVICE);
    }
 
-   hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix) += nelms;
+   hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix) += (HYPRE_BigInt) nelms;
 
    hypre_TFree(row_ptr, HYPRE_MEMORY_DEVICE);
 
