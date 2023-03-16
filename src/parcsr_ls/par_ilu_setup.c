@@ -496,7 +496,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          {
             if (fill_level == 0)
             {
-               /* BJ + cusparse_ilu0() - Only support ILU0 */
+               /* GMRES + cusparse_ilu0() - Only support ILU0 */
                hypre_ILUSetupILU0Device(matA, perm, perm, n, nLU, matL_des, matU_des,
                                         ilu_solve_policy, &ilu_solve_buffer,
                                         &matBL_info, &matBU_info, &matSL_info,
@@ -511,7 +511,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                return hypre_error_flag;
 #endif
 
-               /* BJ + cusparse_ilu0() */
+               /* GMRES + hypre_iluk() */
                hypre_ILUSetupILUKDevice(matA, fill_level, perm, perm,
                                         n, nLU, matL_des, matU_des,
                                         ilu_solve_policy, &ilu_solve_buffer,
@@ -539,7 +539,7 @@ hypre_ILUSetup( void               *ilu_vdata,
             return hypre_error_flag;
 #endif
 
-            /* BJ + cusparse_ilu0() */
+            /* GMRES + hypre_ilut() */
             hypre_ILUSetupILUTDevice(matA, max_row_elmts, droptol, perm, perm,
                                      n, nLU, matL_des, matU_des,
                                      ilu_solve_policy, &ilu_solve_buffer,
