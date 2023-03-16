@@ -92,6 +92,7 @@ all: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/_hypre_utilities.hpp $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/multiprecision.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/utilities_mup_func.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
@@ -99,6 +100,7 @@ install: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/_hypre_utilities.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/fortran*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/multiprecision.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/utilities_mup_func.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean: clean_mup
@@ -141,9 +143,9 @@ MuP_OBJDIR_single = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_flt}
 MuP_OBJDIR_double = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_dbl}
 MuP_OBJDIR_longdouble = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_ldbl}
 #
-MKDIR_P = mkdir -p
-mkmpdir: 
-	${MKDIR_P} ${MuP_OBJDIR}
+#MKDIR_P = mkdir -p
+#mkmpdir: 
+#	${MKDIR_P} ${MuP_OBJDIR}
 #
 ADD_OBJS_single = ${addprefix ${MuP_OBJDIR_single}/, ${notdir ${OBJS}}}
 ${ADD_OBJS_single}: CFLAGS += -DMP_BUILD_SINGLE=1

@@ -23,9 +23,15 @@ SSTRUCTLSFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.o
 SSTRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.o
 STRUCTLSFILES = ${HYPRE_SRC_TOP_DIR}/struct_ls/*.o
 STRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o
+ifeq (${MP_BUILD}, 1) 
+UTILITIESFILES = ${HYPRE_SRC_TOP_DIR}/utilities/MuP_obj.dir/utilities_*/*.o
+BLASFILES = ${HYPRE_SRC_TOP_DIR}/blas/MuP_obj.dir/blas_*/*.o
+LAPACKFILES = ${HYPRE_SRC_TOP_DIR}/lapack/MuP_obj.dir/lapack_*/*.o
+else
 UTILITIESFILES = ${HYPRE_SRC_TOP_DIR}/utilities/*.o
 BLASFILES = ${HYPRE_SRC_TOP_DIR}/blas/*.o
 LAPACKFILES = ${HYPRE_SRC_TOP_DIR}/lapack/*.o
+endif
 
 IJMVOBJFILES = ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.obj
 PARCSRLSOBJFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.obj
@@ -35,7 +41,11 @@ SSTRUCTLSOBJFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.obj
 SSTRUCTMVOBJFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.obj
 STRUCTLSOBJFILES = ${HYPRE_SRC_TOP_DIR}/struct_ls/*.obj
 STRUCTMVOBJFILES = ${HYPRE_SRC_TOP_DIR}/struct_mv/*.obj
+ifeq (${MP_BUILD}, 1) 
+UTILITIESOBJFILES = ${HYPRE_SRC_TOP_DIR}/utilities/MuP_obj.dir/utilities_*/*.obj
+else
 UTILITIESOBJFILES = ${HYPRE_SRC_TOP_DIR}/utilities/*.obj
+endif
 
 FILES_HYPRE = \
 $(FEIHYPREFILES)\
