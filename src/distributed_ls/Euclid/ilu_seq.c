@@ -37,7 +37,7 @@ void compute_scaling_private(HYPRE_Int row, HYPRE_Int len, HYPRE_Real *AVAL, Euc
   HYPRE_Real tmp = 0.0;
   HYPRE_Int j;
 
-  for (j=0; j<len; ++j) tmp = MAX( tmp, fabs(AVAL[j]) );
+  for (j=0; j<len; ++j) tmp = MAX( tmp, hypre_abs(AVAL[j]) );
   if (tmp) {
     ctx->scale[row] = 1.0/tmp;
   }
@@ -57,7 +57,7 @@ HYPRE_Real fixPivot_private(HYPRE_Int row, HYPRE_Int len, float *vals)
   bool debug = false;
 
   for (i=0; i<len; ++i) {
-    float tmp = fabs(vals[i]);
+    float tmp = hypre_abs(vals[i]);
     max = MAX(max, tmp);
   }
   END_FUNC_VAL(max* ctxPrivate->pivotFix)
@@ -482,7 +482,7 @@ HYPRE_Int symbolic_row_private(HYPRE_Int localRow,
     val = *AVAL++;
     val *= scale;       /* scale the value */
 
-    if (fabs(val) > thresh || col == localRow) {  /* sparsification */
+    if (hypre_abs(val) > thresh || col == localRow) {  /* sparsification */
       ++count;
       while (col > list[tmp]) tmp = list[tmp];
       list[col]   = list[tmp];
@@ -623,7 +623,7 @@ hypre_fprintf(stderr, "pv= %g; pc= %g\n", pv, pc);
 
   /* check for zero or too small of a pivot */
 #if 0
-  if (fabs(work[i]) <= pivotTol) {
+  if (hypre_abs(work[i]) <= pivotTol) {
     /* yuck! assume row scaling, and just stick in a value */
     aval[diag[i]] = pivotFix;
   }
@@ -718,7 +718,7 @@ void ilut_seq(Euclid_dh ctx)
     col = list[m];
     while (count--) {
       val = work[col];
-      if (col == i || fabs(val) > droptol) {
+      if (col == i || hypre_abs(val) > droptol) {
         cval[idx] = col;   
         aval[idx++] = val;
         work[col] = 0.0;
@@ -790,7 +790,7 @@ HYPRE_Int ilut_row_private(HYPRE_Int localRow, HYPRE_Int *list, HYPRE_Int *o2n_c
     val = *AVAL++;
     val *= scale;       /* scale the value */
 
-    if (fabs(val) > thresh || col == localRow) {  /* sparsification */
+    if (hypre_abs(val) > thresh || col == localRow) {  /* sparsification */
       ++count;
       while (col > list[tmp]) tmp = list[tmp];
       list[col]   = list[tmp];
@@ -822,7 +822,7 @@ HYPRE_Int ilut_row_private(HYPRE_Int localRow, HYPRE_Int *list, HYPRE_Int *o2n_c
       mult = pc / pv;
 
       /* update localRow from previously factored "row" */
-      if (fabs(mult) > droptol) {
+      if (hypre_abs(mult) > droptol) {
         work[row] = mult;
 
         for (j=diag[row]+1; j<rp[row+1]; ++j) {

@@ -61,11 +61,11 @@ GeneratePlaneRotation(HYPRE_Real dx, HYPRE_Real dy, HYPRE_Real *cs, HYPRE_Real *
     *sn = 0.0;
   } else if (ABS(dy) > ABS(dx)) {
     HYPRE_Real temp = dx / dy;
-    *sn = 1.0 / sqrt( 1.0 + temp*temp );
+    *sn = 1.0 / hypre_sqrt( 1.0 + temp*temp );
     *cs = temp * *sn;
   } else {
     HYPRE_Real temp = dy / dx;
-    *cs = 1.0 / sqrt( 1.0 + temp*temp );
+    *cs = 1.0 / hypre_sqrt( 1.0 + temp*temp );
     *sn = temp * *cs;
   }
 }
@@ -109,7 +109,7 @@ void FGMRES_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
         /* compute initial residual and its norm */
         MatrixMatvec(mat, x, V(0));                      /* V(0) = A*x        */
         Axpy(n, -1.0, b, V(0));                          /* V(0) = V(0) - b   */
-        beta = sqrt(InnerProd(n, V(0), V(0), comm));     /* beta = norm(V(0)) */
+        beta = hypre_sqrt(InnerProd(n, V(0), V(0), comm));     /* beta = norm(V(0)) */
         ScaleVector(n, -1.0/beta, V(0));                 /* V(0) = -V(0)/beta */
 
         /* save very first residual norm */
@@ -140,7 +140,7 @@ void FGMRES_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
                 Axpy(n, -H(k,i), V(k), V(i+1));
             }
 
-            H(i+1, i) = sqrt(InnerProd(n, V(i+1), V(i+1), comm));
+            H(i+1, i) = hypre_sqrt(InnerProd(n, V(i+1), V(i+1), comm));
             /* V(i+1) = V(i+1) / H(i+1, i) */
             ScaleVector(n, 1.0 / H(i+1, i), V(i+1));
 
@@ -181,7 +181,7 @@ void FGMRES_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
     /* compute exact residual norm reduction */
     MatrixMatvec(mat, x, V(0));                         /* V(0) = A*x        */
     Axpy(n, -1.0, b, V(0));                             /* V(0) = V(0) - b   */
-    beta = sqrt(InnerProd(n, V(0), V(0), comm));        /* beta = norm(V(0)) */
+    beta = hypre_sqrt(InnerProd(n, V(0), V(0), comm));        /* beta = norm(V(0)) */
     rel_resid = beta / resid0;
 
     if (mype == 0)
