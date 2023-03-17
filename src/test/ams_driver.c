@@ -95,29 +95,31 @@ void AMSDriverVectorRead(const char *file, HYPRE_ParVector *x)
    fclose(test);
 }
 
-hypre_int main (hypre_int argc, char *argv[])
+hypre_int
+main (hypre_int argc, char *argv[])
 {
-   HYPRE_Int num_procs, myid;
-   HYPRE_Int time_index;
+   HYPRE_Int           num_procs, myid;
+   HYPRE_Int           time_index;
 
-   HYPRE_Int solver_id;
-   HYPRE_Int maxit, cycle_type, rlx_type, coarse_rlx_type, rlx_sweeps, dim;
-   HYPRE_Real rlx_weight, rlx_omega;
-   HYPRE_Int amg_coarsen_type, amg_rlx_type, amg_agg_levels, amg_interp_type, amg_Pmax;
-   HYPRE_Int h1_method, singular_problem, coordinates;
-   HYPRE_Real tol, theta;
-   HYPRE_Real rtol;
-   HYPRE_Int rr;
-   HYPRE_Int zero_cond;
-   HYPRE_Int blockSize;
-   HYPRE_Solver solver, precond;
+   HYPRE_Int           solver_id;
+   HYPRE_Int           maxit, cycle_type, rlx_type, coarse_rlx_type, rlx_sweeps, dim;
+   HYPRE_Real          rlx_weight, rlx_omega;
+   HYPRE_Int           cheby_order;
+   HYPRE_Real          cheby_fraction;
+   HYPRE_Int           amg_coarsen_type, amg_rlx_type, amg_agg_levels, amg_interp_type, amg_Pmax;
+   HYPRE_Int           h1_method, singular_problem, coordinates;
+   HYPRE_Real          tol, theta;
+   HYPRE_Real          rtol;
+   HYPRE_Int           rr;
+   HYPRE_Int           zero_cond;
+   HYPRE_Int           blockSize;
+   HYPRE_Solver        solver, precond;
 
-   HYPRE_ParCSRMatrix A = 0, G = 0, Aalpha = 0, Abeta = 0, M = 0;
-   HYPRE_ParVector x0 = 0, b = 0;
-   HYPRE_ParVector Gx = 0, Gy = 0, Gz = 0;
-   HYPRE_ParVector x = 0, y = 0, z = 0;
-
-   HYPRE_ParVector interior_nodes = 0;
+   HYPRE_ParCSRMatrix  A = NULL, G = NULL, Aalpha = NULL, Abeta = NULL, M = NULL;
+   HYPRE_ParVector     x0 = NULL, b = NULL;
+   HYPRE_ParVector     Gx = NULL, Gy = NULL, Gz = NULL;
+   HYPRE_ParVector     x = NULL, y = NULL, z = NULL;
+   HYPRE_ParVector     interior_nodes = NULL;
 
    /* default execution policy and memory space */
 #if defined(HYPRE_TEST_USING_HOST)
@@ -166,7 +168,11 @@ hypre_int main (hypre_int argc, char *argv[])
    h1_method = 0;
    singular_problem = 0;
    rlx_sweeps = 1;
-   rlx_weight = 1.0; rlx_omega = 1.0;
+   rlx_weight = 1.0;
+   rlx_omega = 1.0;
+   cheby_order = 2;
+   cheby_fraction = 0.3;
+
    if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
       cycle_type = 1; amg_coarsen_type =  8; amg_agg_levels = 1; amg_rlx_type = 8;
@@ -236,6 +242,16 @@ hypre_int main (hypre_int argc, char *argv[])
          {
             arg_index++;
             rlx_omega = (HYPRE_Real)atof(argv[arg_index++]);
+         }
+         else if ( strcmp(argv[arg_index], "-cheby_order") == 0 )
+         {
+            arg_index++;
+            cheby_order = atoi(argv[arg_index++]);
+         }
+         else if ( strcmp(argv[arg_index], "-cheby_fraction") == 0 )
+         {
+            arg_index++;
+            cheby_fraction = (HYPRE_Real)atof(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-ctype") == 0 )
          {
@@ -538,6 +554,10 @@ hypre_int main (hypre_int argc, char *argv[])
 
       /* Smoothing and AMG options */
       HYPRE_AMSSetSmoothingOptions(solver, rlx_type, rlx_sweeps, rlx_weight, rlx_omega);
+      if (rlx_type == 16)
+      {
+         HYPRE_AMSSetChebySmoothingOptions(solver, cheby_order, cheby_fraction);
+      }
       HYPRE_AMSSetAlphaAMGOptions(solver, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta,
                                   amg_interp_type, amg_Pmax);
       HYPRE_AMSSetBetaAMGOptions(solver, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta,
@@ -667,6 +687,10 @@ hypre_int main (hypre_int argc, char *argv[])
 
          /* Smoothing and AMG options */
          HYPRE_AMSSetSmoothingOptions(precond, rlx_type, rlx_sweeps, rlx_weight, rlx_omega);
+         if (rlx_type == 16)
+         {
+            HYPRE_AMSSetChebySmoothingOptions(precond, cheby_order, cheby_fraction);
+         }
          HYPRE_AMSSetAlphaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta,
                                      amg_interp_type, amg_Pmax);
          HYPRE_AMSSetBetaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta,
@@ -790,6 +814,10 @@ hypre_int main (hypre_int argc, char *argv[])
 
       /* Smoothing and AMG options */
       HYPRE_AMSSetSmoothingOptions(precond, rlx_type, rlx_sweeps, rlx_weight, rlx_omega);
+      if (rlx_type == 16)
+      {
+         HYPRE_AMSSetChebySmoothingOptions(precond, cheby_order, cheby_fraction);
+      }
       HYPRE_AMSSetAlphaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta,
                                   amg_interp_type, amg_Pmax);
       HYPRE_AMSSetBetaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta,
