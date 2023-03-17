@@ -192,10 +192,12 @@ HYPRE_Int hypre_ParVectorBlockSplit(hypre_ParVector *x,
 #endif
    {
       for (i = 0; i < size_; i++)
+      {
          for (d = 0; d < dim; d++)
          {
             x_data_[d][i] = x_data[dim * i + d];
          }
+      }
    }
 
    return hypre_error_flag;
@@ -239,10 +241,12 @@ HYPRE_Int hypre_ParVectorBlockGather(hypre_ParVector *x,
 #endif
    {
       for (i = 0; i < size_; i++)
+      {
          for (d = 0; d < dim; d++)
          {
             x_data[dim * i + d] = x_data_[d][i];
          }
+      }
    }
 
    return hypre_error_flag;
