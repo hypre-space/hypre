@@ -68,9 +68,9 @@ In addition to the above quantities, AMS can utilize the following (optional)
 information:
 
 * The Poisson matrices :math:`A_\alpha` and :math:`A_\beta`, corresponding to
-  assembling of the forms :math:`(\alpha\, \nabla u, \nabla v)+(\beta\, \nabla
-  u, \nabla v)` and :math:`(\beta\, \nabla u, \nabla v)` using standard linear
-  finite elements on the same mesh.
+  assembling of the forms :math:`(\alpha\, \nabla u, \nabla v)+(\beta\, u, v)`
+  and :math:`(\beta\, \nabla u, \nabla v)` using standard linear finite elements
+  on the same mesh.
 
 Internally, AMS proceeds with the construction of the following additional objects:
 
