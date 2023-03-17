@@ -373,13 +373,20 @@ hypre_ILUSetup( void               *ilu_vdata,
       }
       (hypre_ParILUDataSchurSolver(ilu_data)) = NULL;
    }
-   if (hypre_ParILUDataSchurPrecond(ilu_data)  &&
-       hypre_ParILUDataIluType(ilu_data) != 10 &&
-       hypre_ParILUDataIluType(ilu_data) != 11)
+   if ( hypre_ParILUDataSchurPrecond(ilu_data)  &&
+#if !defined(HYPRE_USING_CUDA) || !defined(HYPRE_USING_CUSPARSE)
+        hypre_ParILUDataIluType(ilu_data) != 10 &&
+        hypre_ParILUDataIluType(ilu_data) != 11 &&
+#endif
+       (hypre_ParILUDataIluType(ilu_data) == 10 ||
+        hypre_ParILUDataIluType(ilu_data) == 11 ||
+        hypre_ParILUDataIluType(ilu_data) == 40 ||
+        hypre_ParILUDataIluType(ilu_data) == 41) )
    {
       HYPRE_ILUDestroy(hypre_ParILUDataSchurPrecond(ilu_data)); //ILU as precond for Schur
       hypre_ParILUDataSchurPrecond(ilu_data) = NULL;
    }
+
    /* start to create working vectors */
    Utemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                  hypre_ParCSRMatrixGlobalNumRows(A),
