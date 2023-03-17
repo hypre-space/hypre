@@ -2267,10 +2267,10 @@ HYPRE_Int HYPRE_AMSSetPrintLevel(HYPRE_Solver solver,
  *
  * The available options for \e relax_type are:
  *
- *    - 1 : \f$\ell_1\f$-scaled Jacobi
- *    - 2 : \f$\ell_1\f$-scaled block symmetric Gauss-Seidel/SSOR
- *    - 3 : Kaczmarz
- *    - 4 : truncated version of \f$\ell_1\f$-scaled block symmetric Gauss-Seidel/SSOR
+ *    - 1  : \f$\ell_1\f$-scaled Jacobi
+ *    - 2  : \f$\ell_1\f$-scaled block symmetric Gauss-Seidel/SSOR
+ *    - 3  : Kaczmarz
+ *    - 4  : truncated version of \f$\ell_1\f$-scaled block symmetric Gauss-Seidel/SSOR
  *    - 16 : Chebyshev
  **/
 HYPRE_Int HYPRE_AMSSetSmoothingOptions(HYPRE_Solver solver,
@@ -2278,6 +2278,14 @@ HYPRE_Int HYPRE_AMSSetSmoothingOptions(HYPRE_Solver solver,
                                        HYPRE_Int    relax_times,
                                        HYPRE_Real   relax_weight,
                                        HYPRE_Real   omega);
+
+/**
+ * (Optional) Sets parameters for Chebyshev relaxation.
+ * The defaults are 2, 0.3.
+ **/
+HYPRE_Int HYPRE_AMSSetChebySmoothingOptions(HYPRE_Solver solver,
+                                            HYPRE_Int    cheby_order,
+                                            HYPRE_Real   cheby_fraction);
 
 /**
  * (Optional) Sets AMG parameters for \f$B_\Pi\f$.

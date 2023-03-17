@@ -226,7 +226,7 @@ HYPRE_Int HYPRE_AMSSetSmoothingOptions(HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_AMSSetChebyOptions
+ * HYPRE_AMSSetChebySmoothingOptions
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSetChebySmoothingOptions(HYPRE_Solver solver,
