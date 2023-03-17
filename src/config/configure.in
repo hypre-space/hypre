@@ -510,6 +510,9 @@ dnl *********************************************************************
 dnl * Determine if user provided GPU compiler or flags
 dnl *********************************************************************
 AC_ARG_VAR([CUDA_HOME], [CUDA home directory])
+AC_ARG_VAR([ROCM_PATH], [ROCm home directory])
+AC_ARG_VAR([MKLROOT], [oneMKL home directory])
+AC_ARG_VAR([DPLROOT], [oneDPL home directory])
 AC_ARG_VAR([GPU_ARCH], [GPU architecture (e.g. CUDA/HIP SM number or Intel GPU device number)])
 AC_ARG_VAR([GPUCC], [GPU compiler command (e.g. nvcc, hipcc, icpx)])
 AC_ARG_VAR([GPUFLAGS], [GPU compiler flags])
@@ -2584,12 +2587,14 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         dnl AOT compilation for specific devices
         if test "x${GPU_ARCH}" != "x"
         then
-           HYPRE_GPU_GENCODE="-fsycl-targets=spir64_gen -Xs '-device '"
-           for sm in ${GPU_ARCH}; do
-              HYPRE_GPU_GENCODE="${HYPRE_GPU_GENCODE}${sm},"
+           HYPRE_SYCL_TARGET="-fsycl-targets=spir64_gen -Xs '-device "
+           for dev in ${GPU_ARCH}; do
+              HYPRE_SYCL_TARGET="${HYPRE_SYCL_TARGET}${dev},"
            done
-           HYPRE_GPU_GENCODE="`echo ${HYPRE_GPU_GENCODE}|sed 's/,$//'`"
+           HYPRE_SYCL_TARGET="`echo ${HYPRE_SYCL_TARGET}|sed 's/,$//'`"
+           HYPRE_SYCL_TARGET=" ${HYPRE_SYCL_TARGET}'"
         fi
+        LDFLAGS+=${HYPRE_SYCL_TARGET}
 
         if test "$hypre_user_chose_gpuflags" = "no"
         then
@@ -2866,11 +2871,15 @@ AC_SUBST(HYPRE_UMPIRE_INCLUDE)
 AC_SUBST(HYPRE_UMPIRE_LIB)
 
 dnl *********************************************************************
-dnl * CUDA stuff
+dnl * Generic GPU stuff
 dnl *********************************************************************
 AC_SUBST(GPUFLAGS)
 AC_SUBST(GPUCC)
 AC_SUBST(HYPRE_GPU_GENCODE)
+
+dnl *********************************************************************
+dnl * CUDA stuff
+dnl *********************************************************************
 AC_SUBST(HYPRE_CUDA_PATH)
 AC_SUBST(HYPRE_CUDA_INCLUDE)
 AC_SUBST(HYPRE_CUDA_LIBS)

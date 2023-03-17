@@ -10744,12 +10744,14 @@ printf "%s\n" "#define HYPRE_USING_SYCL 1" >>confdefs.h
 
                 if test "x${GPU_ARCH}" != "x"
         then
-           HYPRE_GPU_GENCODE="-fsycl-targets=spir64_gen -Xs '-device '"
+           HYPRE_SYCL_TARGET="-fsycl-targets=spir64_gen -Xs '-device "
            for sm in ${GPU_ARCH}; do
-              HYPRE_GPU_GENCODE="${HYPRE_GPU_GENCODE}${sm},"
+              HYPRE_SYCL_TARGET="${HYPRE_SYCL_TARGET}${sm},"
            done
-           HYPRE_GPU_GENCODE="`echo ${HYPRE_GPU_GENCODE}|sed 's/,$//'`"
+           HYPRE_SYCL_TARGET="`echo ${HYPRE_SYCL_TARGET}|sed 's/,$//'`"
+           HYPRE_SYCL_TARGET=" ${HYPRE_SYCL_TARGET}'"
         fi
+        LDFLAGS+=${HYPRE_SYCL_TARGET}
 
         if test "$hypre_user_chose_gpuflags" = "no"
         then
