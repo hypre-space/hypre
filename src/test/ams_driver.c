@@ -373,43 +373,43 @@ hypre_int main (hypre_int argc, char *argv[])
       }
    }
 
-   AMSDriverMatrixRead("mfem.A", &A);
-   AMSDriverVectorRead("mfem.x0", &x0);
-   AMSDriverVectorRead("mfem.b", &b);
-   AMSDriverMatrixRead("mfem.G", &G);
+   AMSDriverMatrixRead("data/mfem.A", &A);
+   AMSDriverVectorRead("data/mfem.x0", &x0);
+   AMSDriverVectorRead("data/mfem.b", &b);
+   AMSDriverMatrixRead("data/mfem.G", &G);
 
    /* Vectors Gx, Gy and Gz */
    if (!coordinates)
    {
-      AMSDriverVectorRead("mfem.Gx", &Gx);
-      AMSDriverVectorRead("mfem.Gy", &Gy);
+      AMSDriverVectorRead("data/mfem.Gx", &Gx);
+      AMSDriverVectorRead("data/mfem.Gy", &Gy);
       if (dim == 3)
       {
-         AMSDriverVectorRead("mfem.Gz", &Gz);
+         AMSDriverVectorRead("data/mfem.Gz", &Gz);
       }
    }
 
    /* Vectors x, y and z */
    if (coordinates)
    {
-      AMSDriverVectorRead("mfem.x", &x);
-      AMSDriverVectorRead("mfem.y", &y);
+      AMSDriverVectorRead("data/mfem.x", &x);
+      AMSDriverVectorRead("data/mfem.y", &y);
       if (dim == 3)
       {
-         AMSDriverVectorRead("mfem.z", &z);
+         AMSDriverVectorRead("data/mfem.z", &z);
       }
    }
 
    /* Poisson matrices */
    if (h1_method)
    {
-      AMSDriverMatrixRead("mfem.Aalpha", &Aalpha);
-      AMSDriverMatrixRead("mfem.Abeta", &Abeta);
+      AMSDriverMatrixRead("data/mfem.Aalpha", &Aalpha);
+      AMSDriverMatrixRead("data/mfem.Abeta", &Abeta);
    }
 
    if (zero_cond)
    {
-      AMSDriverVectorRead("mfem.inodes", &interior_nodes);
+      AMSDriverVectorRead("data/mfem.inodes", &interior_nodes);
    }
 
    if (!myid)
@@ -748,7 +748,7 @@ hypre_int main (hypre_int argc, char *argv[])
 
    if (solver_id == 5)
    {
-      AMSDriverMatrixRead("mfem.M", &M);
+      AMSDriverMatrixRead("data/mfem.M", &M);
 
       hypre_ParCSRMatrixMigrate(M, hypre_HandleMemoryLocation(hypre_handle()));
 
