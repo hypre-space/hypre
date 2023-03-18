@@ -405,10 +405,10 @@ hypre_ILUDestroy( void *data )
            hypre_ParILUDataIluType(ilu_data) != 10 &&
            hypre_ParILUDataIluType(ilu_data) != 11 &&
 #endif
-          (hypre_ParILUDataIluType(ilu_data) == 10 ||
-           hypre_ParILUDataIluType(ilu_data) == 11 ||
-           hypre_ParILUDataIluType(ilu_data) == 40 ||
-           hypre_ParILUDataIluType(ilu_data) == 41) )
+           (hypre_ParILUDataIluType(ilu_data) == 10 ||
+            hypre_ParILUDataIluType(ilu_data) == 11 ||
+            hypre_ParILUDataIluType(ilu_data) == 40 ||
+            hypre_ParILUDataIluType(ilu_data) == 41) )
       {
          HYPRE_ILUDestroy(hypre_ParILUDataSchurPrecond(ilu_data)); //ILU as precond for Schur
          hypre_ParILUDataSchurPrecond(ilu_data) = NULL;
@@ -1534,7 +1534,7 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix   *A,
 
    /* Set/Move A_diag to host memory */
    h_A_diag = (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE) ?
-               hypre_CSRMatrixClone_v2(A_diag, 1, HYPRE_MEMORY_HOST) : A_diag;
+              hypre_CSRMatrixClone_v2(A_diag, 1, HYPRE_MEMORY_HOST) : A_diag;
    A_diag_i = hypre_CSRMatrixI(h_A_diag);
    A_diag_j = hypre_CSRMatrixJ(h_A_diag);
    A_diag_data = hypre_CSRMatrixData(h_A_diag);
@@ -4335,7 +4335,7 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
          }
          hypre_TMemcpy(new_j + ctrA, idx, HYPRE_Int, drop_len, memory_location, memory_location);
          hypre_TMemcpy(new_data + ctrA, data, HYPRE_Real, drop_len, memory_location,
-                        memory_location);
+                       memory_location);
          ctrA += drop_len;
          new_i[i + 1] = ctrA;
       }
@@ -4378,7 +4378,7 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
          }
          hypre_TMemcpy(new_j + ctrA, idx, HYPRE_Int, drop_len, memory_location, memory_location);
          hypre_TMemcpy(new_data + ctrA, data, HYPRE_Real, drop_len, memory_location,
-                        memory_location);
+                       memory_location);
          ctrA += drop_len;
          new_i[i + 1] = ctrA;
       }

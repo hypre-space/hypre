@@ -378,10 +378,10 @@ hypre_ILUSetup( void               *ilu_vdata,
         hypre_ParILUDataIluType(ilu_data) != 10 &&
         hypre_ParILUDataIluType(ilu_data) != 11 &&
 #endif
-       (hypre_ParILUDataIluType(ilu_data) == 10 ||
-        hypre_ParILUDataIluType(ilu_data) == 11 ||
-        hypre_ParILUDataIluType(ilu_data) == 40 ||
-        hypre_ParILUDataIluType(ilu_data) == 41) )
+        (hypre_ParILUDataIluType(ilu_data) == 10 ||
+         hypre_ParILUDataIluType(ilu_data) == 11 ||
+         hypre_ParILUDataIluType(ilu_data) == 40 ||
+         hypre_ParILUDataIluType(ilu_data) == 41) )
    {
       HYPRE_ILUDestroy(hypre_ParILUDataSchurPrecond(ilu_data)); //ILU as precond for Schur
       hypre_ParILUDataSchurPrecond(ilu_data) = NULL;
@@ -420,7 +420,8 @@ hypre_ILUSetup( void               *ilu_vdata,
             hypre_ILUGetPermddPQ(matA, &perm, &qperm, tol_ddPQ, &nLU, &nI, reordering_type);
             break;
 
-         case 0: case 1: default:
+         case 0: case 1:
+         default:
             hypre_ILUGetLocalPerm(matA, &perm, &nLU, reordering_type);
             break;
       }
