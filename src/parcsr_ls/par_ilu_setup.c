@@ -116,7 +116,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Int             recv_size;
    HYPRE_Int             num_procs, my_id;
 
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined (HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
 #endif
 
@@ -373,13 +373,20 @@ hypre_ILUSetup( void               *ilu_vdata,
       }
       (hypre_ParILUDataSchurSolver(ilu_data)) = NULL;
    }
-   if (hypre_ParILUDataSchurPrecond(ilu_data)  &&
-       hypre_ParILUDataIluType(ilu_data) != 10 &&
-       hypre_ParILUDataIluType(ilu_data) != 11)
+   if ( hypre_ParILUDataSchurPrecond(ilu_data)  &&
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
+        hypre_ParILUDataIluType(ilu_data) != 10 &&
+        hypre_ParILUDataIluType(ilu_data) != 11 &&
+#endif
+        (hypre_ParILUDataIluType(ilu_data) == 10 ||
+         hypre_ParILUDataIluType(ilu_data) == 11 ||
+         hypre_ParILUDataIluType(ilu_data) == 40 ||
+         hypre_ParILUDataIluType(ilu_data) == 41) )
    {
       HYPRE_ILUDestroy(hypre_ParILUDataSchurPrecond(ilu_data)); //ILU as precond for Schur
       hypre_ParILUDataSchurPrecond(ilu_data) = NULL;
    }
+
    /* start to create working vectors */
    Utemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                  hypre_ParCSRMatrixGlobalNumRows(A),
@@ -415,7 +422,8 @@ hypre_ILUSetup( void               *ilu_vdata,
             hypre_ILUGetPermddPQ(matA, &perm, &qperm, tol_ddPQ, &nLU, &nI, reordering_type);
             break;
 
-         case 0: case 1: default:
+         case 0: case 1:
+         default:
             hypre_ILUGetLocalPerm(matA, &perm, &nLU, reordering_type);
             break;
       }
@@ -501,7 +509,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          {
             if (fill_level == 0)
             {
-               /* BJ + cusparse_ilu0() - Only support ILU0 */
+               /* GMRES + cusparse_ilu0() - Only support ILU0 */
                hypre_ILUSetupILU0Device(matA, perm, perm, n, nLU, matL_des, matU_des,
                                         ilu_solve_policy, &ilu_solve_buffer,
                                         &matBL_info, &matBU_info, &matSL_info,
@@ -516,7 +524,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                return hypre_error_flag;
 #endif
 
-               /* BJ + cusparse_ilu0() */
+               /* GMRES + hypre_iluk() */
                hypre_ILUSetupILUKDevice(matA, fill_level, perm, perm,
                                         n, nLU, matL_des, matU_des,
                                         ilu_solve_policy, &ilu_solve_buffer,
@@ -544,7 +552,7 @@ hypre_ILUSetup( void               *ilu_vdata,
             return hypre_error_flag;
 #endif
 
-            /* BJ + cusparse_ilu0() */
+            /* GMRES + hypre_ilut() */
             hypre_ILUSetupILUTDevice(matA, max_row_elmts, droptol, perm, perm,
                                      n, nLU, matL_des, matU_des,
                                      ilu_solve_policy, &ilu_solve_buffer,

@@ -68,9 +68,9 @@ In addition to the above quantities, AMS can utilize the following (optional)
 information:
 
 * The Poisson matrices :math:`A_\alpha` and :math:`A_\beta`, corresponding to
-  assembling of the forms :math:`(\alpha\, \nabla u, \nabla v)+(\beta\, \nabla
-  u, \nabla v)` and :math:`(\beta\, \nabla u, \nabla v)` using standard linear
-  finite elements on the same mesh.
+  assembling of the forms :math:`(\alpha\, \nabla u, \nabla v)+(\beta\, u, v)`
+  and :math:`(\beta\, \nabla u, \nabla v)` using standard linear finite elements
+  on the same mesh.
 
 Internally, AMS proceeds with the construction of the following additional objects:
 
@@ -105,7 +105,7 @@ code ``ex15.c`` for a complete implementation.  We start with the allocation of
 the ``HYPRE_Solver`` object:
 
 .. code-block:: c
-   
+
    HYPRE_Solver solver;
    HYPRE_AMSCreate(&solver);
 
@@ -118,7 +118,7 @@ with the function given below.  We note that a 3D solver will still work for a
 2D problem, but it will be slower and will require more memory than necessary.
 
 .. code-block:: c
-   
+
    HYPRE_AMSSetDimension(solver, dim);
 
 The user is required to provide the discrete gradient matrix :math:`G`.  AMS
@@ -129,7 +129,7 @@ excluded. It is essential to **not** impose any boundary conditions on
 the following function.
 
 .. code-block:: c
-   
+
    HYPRE_AMSSetDiscreteGradient(solver, G);
 
 In addition to :math:`G`, we need one additional piece of information in order
@@ -140,13 +140,13 @@ vectors should be provided.  For 2D problems, the user can set the third vector
 to NULL.  The corresponding function calls read:
 
 .. code-block:: c
-   
+
    HYPRE_AMSSetCoordinateVectors(solver,x,y,z);
 
 or
 
 .. code-block:: c
-   
+
    HYPRE_AMSSetEdgeConstantVectors(solver, one_zero_zero, zero_one_zero, zero_zero_one);
 
 The vectors ``one_zero_zero``, ``zero_one_zero`` and ``zero_zero_one`` above
@@ -157,7 +157,7 @@ The remaining solver parameters are optional.  For example, the user can choose
 a different cycle type by calling
 
 .. code-block:: c
-   
+
    HYPRE_AMSSetCycleType(solver, cycle_type); /* default value: 1 */
 
 The available cycle types in AMS are:
@@ -195,7 +195,7 @@ Additional solver parameters, such as the maximum number of iterations, the
 convergence tolerance and the output level, can be set with
 
 .. code-block:: c
-   
+
    HYPRE_AMSSetMaxIter(solver, maxit);     /* default value: 20 */
    HYPRE_AMSSetTol(solver, tol);           /* default value: 1e-6 */
    HYPRE_AMSSetPrintLevel(solver, print);  /* default value: 1 */
@@ -204,7 +204,7 @@ More advanced parameters, affecting the smoothing and the internal AMG solvers,
 can be set with the following three functions:
 
 .. code-block:: c
-   
+
    HYPRE_AMSSetSmoothingOptions(solver, 2, 1, 1.0, 1.0);
    HYPRE_AMSSetAlphaAMGOptions(solver, 10, 1, 3, 0.25, 0, 0);
    HYPRE_AMSSetBetaAMGOptions(solver, 10, 1, 3, 0.25, 0, 0);
@@ -214,7 +214,7 @@ For (singular) problems where :math:`\beta = 0` in the whole domain, different
 simplification, use the following hypre call
 
 .. code-block:: c
-   
+
    HYPRE_AMSSetBetaPoissonMatrix(solver, NULL);
 
 If :math:`\beta` is zero only in parts of the domain, the problem is still
@@ -226,7 +226,7 @@ the list of nodes which are interior to a zero-conductivity region provided by
 the function
 
 .. code-block:: c
-   
+
    HYPRE_AMSSetInteriorNodes(solver, HYPRE_ParVector interior_nodes);
 
 A node is interior, if its entry in the ``interior_nodes`` array is :math:`1.0`.
@@ -238,7 +238,7 @@ is advantageous to project on the compatible subspace :math:`Ker(G_0^T)`. This
 can be done periodically, or manually through the functions
 
 .. code-block:: c
-   
+
    HYPRE_AMSSetProjectionFrequency(solver, int projection_frequency);
    HYPRE_AMSProjectOutGradients(solver, HYPRE_ParVector x);
 
@@ -250,7 +250,7 @@ Poisson matrix with coefficient :math:`\beta` (denoted by ``Abeta``) is
 available then one can avoid one matrix construction by calling
 
 .. code-block:: c
-   
+
    HYPRE_AMSSetBetaPoissonMatrix(solver, Abeta);
 
 Similarly, if the Poisson matrix with coefficient :math:`\alpha` is available
@@ -258,7 +258,7 @@ Similarly, if the Poisson matrix with coefficient :math:`\alpha` is available
 calling
 
 .. code-block:: c
-   
+
    HYPRE_AMSSetAlphaPoissonMatrix(solver, Aalpha);
 
 Note the following regarding these functions:
@@ -282,7 +282,7 @@ hypre parallel vectors :math:`{\mathbf b}` and :math:`{\mathbf x}`. (The vectors
 are actually not used in the current AMS setup.) The setup call reads,
 
 .. code-block:: c
-   
+
    HYPRE_AMSSetup(solver, A, b, x);
 
 It is important to note the order of the calling sequence. For example, do
@@ -293,13 +293,13 @@ and one of the functions ``HYPRE_AMSSetCoordinateVectors`` or
 Once the setup has completed, we can solve the linear system by calling
 
 .. code-block:: c
-   
+
    HYPRE_AMSSolve(solver, A, b, x);
 
 Finally, the solver can be destroyed with
 
 .. code-block:: c
-   
+
    HYPRE_AMSDestroy(&solver);
 
 More details can be found in the files ``ams.h`` and ``ams.c`` located in the
@@ -342,7 +342,7 @@ basis functions and degrees of freedom.
 With these matrices, the high-order setup procedure is simply
 
 .. code-block:: c
-   
+
    HYPRE_AMSSetDimension(solver, dim);
    HYPRE_AMSSetDiscreteGradient(solver, G);
    HYPRE_AMSSetInterpolations(solver, Pi, NULL, NULL, NULL);
@@ -358,7 +358,7 @@ options to those less than 10. Alternatively one can separately specify the
 :math:`x`, :math:`y` and :math:`z` components of :math:`\mathbf \Pi`:
 
 .. code-block:: c
-   
+
    HYPRE_AMSSetInterpolations(solver, NULL, Pix, Piy, Piz);
 
 which enables the use of AMS cycle types with index greater than 10. By
@@ -370,7 +370,7 @@ the coordinates of the mesh vertices.
 Finally, both :math:`{\mathbf \Pi}` and its components can be passed to the solver:
 
 .. code-block:: c
-   
+
    HYPRE_AMSSetInterpolations(solver, Pi, Pix, Piy, Piz);
 
 which will duplicate some memory, but allows for experimentation with all
@@ -436,4 +436,3 @@ with :math:`{\mathbf \Pi}_{nc}` computed element-wise as in the previous
 subsection. Note that in the low-order case, :math:`{\mathbf \Pi}_{c}` can be
 computed internally in AMS based only :math:`G_c` and the conforming coordinates
 of the vertices :math:`x_c`/:math:`y_c`/:math:`z_c`, see [GrKo2015]_.
-
