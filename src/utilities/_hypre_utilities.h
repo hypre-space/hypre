@@ -795,6 +795,7 @@ hypre_GetActualMemLocation(HYPRE_MemoryLocation location)
 /* memory.c */
 HYPRE_Int hypre_GetMemoryLocationName(hypre_MemoryLocation memory_location,
                                       char *memory_location_name);
+void   hypre_CheckMemoryLocation(void *ptr, hypre_MemoryLocation location);
 void * hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_MemoryLocation location);
 void   hypre_MemPrefetch(void *ptr, size_t size, HYPRE_MemoryLocation location);
 void * hypre_MAlloc(size_t size, HYPRE_MemoryLocation location);
@@ -841,7 +842,7 @@ typedef void (*GPUMfreeFunc)(void *);
 }
 #endif
 
-#endif
+#endif /* hypre_MEMORY_HEADER */
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
