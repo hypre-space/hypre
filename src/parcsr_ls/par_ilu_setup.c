@@ -116,7 +116,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Int             recv_size;
    HYPRE_Int             num_procs, my_id;
 
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined (HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
 #endif
 
