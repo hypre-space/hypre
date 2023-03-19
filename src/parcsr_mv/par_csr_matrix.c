@@ -829,15 +829,15 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
    HYPRE_BigInt          ilower, iupper, jlower, jupper;
    HYPRE_Complex         val;
 
-   /* MPI variables */
-   hypre_MPI_Comm_rank(comm, &myid);
-
    /* Exit if trying to write from big-endian machine */
    if ((*(char*)&one) == 0)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Support to big-endian machines is incomplete!\n");
       return hypre_error_flag;
    }
+
+   /* MPI variables */
+   hypre_MPI_Comm_rank(comm, &myid);
 
    /* Create temporary matrix on host memory if needed */
    h_matrix = (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE) ?
@@ -875,7 +875,7 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
    hypre_sprintf(new_filename, "%s.%05d.bin", filename, myid);
    if ((fp = fopen(new_filename, "wb")) == NULL)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not open output file\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not open output file!");
       return hypre_error_flag;
    }
 
