@@ -361,7 +361,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    /* compute initial residual */
    (*(gmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, p[0]);
 
-   b_norm = sqrt((*(gmres_functions->InnerProd))(b, b));
+   b_norm = hypre_sqrt((*(gmres_functions->InnerProd))(b, b));
    real_r_norm_old = b_norm;
 
    /* Since it is does not diminish performance, attempt to return an error flag
@@ -391,7 +391,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
       return hypre_error_flag;
    }
 
-   r_norm = sqrt((*(gmres_functions->InnerProd))(p[0], p[0]));
+   r_norm = hypre_sqrt((*(gmres_functions->InnerProd))(p[0], p[0]));
    r_norm_0 = r_norm;
 
    /* Since it is does not diminish performance, attempt to return an error flag
@@ -506,7 +506,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
          {
             (*(gmres_functions->CopyVector))(b, r);
             (*(gmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
-            r_norm = sqrt((*(gmres_functions->InnerProd))(r, r));
+            r_norm = hypre_sqrt((*(gmres_functions->InnerProd))(r, r));
             if (r_norm  <= epsilon)
             {
                if ( print_level > 1 && my_id == 0)
@@ -544,7 +544,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
             hh[j][i - 1] = (*(gmres_functions->InnerProd))(p[j], p[i]);
             (*(gmres_functions->Axpy))(-hh[j][i - 1], p[j], p[i]);
          }
-         t = sqrt((*(gmres_functions->InnerProd))(p[i], p[i]));
+         t = hypre_sqrt((*(gmres_functions->InnerProd))(p[i], p[i]));
          hh[i][i - 1] = t;
          if (t != 0.0)
          {
@@ -561,7 +561,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
          }
          t = hh[i][i - 1] * hh[i][i - 1];
          t += hh[i - 1][i - 1] * hh[i - 1][i - 1];
-         gamma = sqrt(t);
+         gamma = hypre_sqrt(t);
          if (gamma == 0.0)
          {
             gamma = epsmac;
@@ -573,7 +573,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
          rs[i - 1] = c[i - 1] * rs[i - 1];
          /* determine residual norm */
          hh[i - 1][i - 1] = s[i - 1] * hh[i][i - 1] + c[i - 1] * hh[i - 1][i - 1];
-         r_norm = fabs(rs[i]);
+         r_norm = hypre_abs(rs[i]);
 
          /* print ? */
          if ( print_level > 0 )
@@ -598,9 +598,9 @@ hypre_GMRESSolve(void  *gmres_vdata,
          if (cf_tol > 0.0)
          {
             cf_ave_0 = cf_ave_1;
-            cf_ave_1 = pow( r_norm / r_norm_0, 1.0 / (2.0 * iter));
+            cf_ave_1 = hypre_pow( r_norm / r_norm_0, 1.0 / (2.0 * iter));
 
-            weight   = fabs(cf_ave_1 - cf_ave_0);
+            weight   = hypre_abs(cf_ave_1 - cf_ave_0);
             weight   = weight / hypre_max(cf_ave_1, cf_ave_0);
             weight   = 1.0 - weight;
 #if 0
@@ -667,7 +667,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
                (*(gmres_functions->Axpy))(1.0, r, w);
 
                /* now w is the approx solution  - get the norm*/
-               x_norm = sqrt( (*(gmres_functions->InnerProd))(w, w) );
+               x_norm = hypre_sqrt( (*(gmres_functions->InnerProd))(w, w) );
 
                if ( !(x_norm <= guard_zero_residual ))
                   /* don't divide by zero */
@@ -707,7 +707,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
                      /* now r contains x_i - x_i-1 */
                   }
                   /* find the norm of x_i - x_i-1 */
-                  w_norm = sqrt( (*(gmres_functions->InnerProd))(r, r) );
+                  w_norm = hypre_sqrt( (*(gmres_functions->InnerProd))(r, r) );
                   relative_error = w_norm / x_norm;
                   if (relative_error <= r_tol)
                   {
@@ -775,14 +775,14 @@ hypre_GMRESSolve(void  *gmres_vdata,
          /* calculate actual residual norm*/
          (*(gmres_functions->CopyVector))(b, r);
          (*(gmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
-         real_r_norm_new = r_norm = sqrt( (*(gmres_functions->InnerProd))(r, r) );
+         real_r_norm_new = r_norm = hypre_sqrt( (*(gmres_functions->InnerProd))(r, r) );
 
          if (r_norm <= epsilon)
          {
             if (rel_change && !rel_change_passed) /* calculate the relative change */
             {
                /* calculate the norm of the solution */
-               x_norm = sqrt( (*(gmres_functions->InnerProd))(x, x) );
+               x_norm = hypre_sqrt( (*(gmres_functions->InnerProd))(x, x) );
 
                if ( !(x_norm <= guard_zero_residual ))
                   /* don't divide by zero */
@@ -799,7 +799,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
                   /* apply the preconditioner */
                   precond(precond_data, A, w, r);
                   /* find the norm of x_i - x_i-1 */
-                  w_norm = sqrt( (*(gmres_functions->InnerProd))(r, r) );
+                  w_norm = hypre_sqrt( (*(gmres_functions->InnerProd))(r, r) );
                   relative_error = w_norm / x_norm;
                   if ( relative_error < r_tol )
                   {

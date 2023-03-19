@@ -434,7 +434,7 @@ hypre_FSAISetupNative( void               *fsai_vdata,
 
    /* Local variables */
    char                     msg[512];    /* Warning message */
-   HYPRE_Complex           *twspace;     /* shared work space for omp threads */
+   HYPRE_Int           *twspace;     /* shared work space for omp threads */
 
    /* Initalize some variables */
    avg_nnzrow_diag_A = (num_rows_diag_A > 0) ? num_nnzs_diag_A / num_rows_diag_A : 0;
@@ -447,7 +447,7 @@ hypre_FSAISetupNative( void               *fsai_vdata,
    G_j = hypre_CSRMatrixJ(G_diag);
 
    /* Allocate shared work space array for OpenMP threads */
-   twspace = hypre_CTAlloc(HYPRE_Complex, hypre_NumThreads() + 1, HYPRE_MEMORY_HOST);
+   twspace = hypre_CTAlloc(HYPRE_Int, hypre_NumThreads() + 1, HYPRE_MEMORY_HOST);
 
    /**********************************************************************
    * Start of Adaptive FSAI algorithm
@@ -952,6 +952,13 @@ hypre_FSAISetup( void               *fsai_vdata,
    HYPRE_Int                max_nnzrow_diag_G;   /* Max. number of nonzeros per row in G_diag */
    HYPRE_Int                max_nonzeros_diag_G; /* Max. number of nonzeros in G_diag */
 
+   /* Sanity check */
+   if (hypre_ParVectorNumVectors(f) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "FSAI doesn't support multicomponent vectors");
+      return hypre_error_flag;
+   }
+
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* Create and initialize work vectors used in the solve phase */
@@ -1111,7 +1118,7 @@ hypre_FSAIComputeOmega( void *fsai_vdata,
    for (i = 0; i < eig_max_iters; i++)
    {
       norm = hypre_ParVectorInnerProd(eigvec, eigvec);
-      invnorm = 1.0 / sqrt(norm);
+      invnorm = 1.0 / hypre_sqrt(norm);
       hypre_ParVectorScale(invnorm, eigvec);
 
       if (i == (eig_max_iters - 1))
@@ -1125,7 +1132,7 @@ hypre_FSAIComputeOmega( void *fsai_vdata,
       hypre_ParCSRMatrixMatvec(1.0, GT, z_work, 0.0, eigvec);
    }
    norm = hypre_ParVectorInnerProd(eigvec, eigvec_old);
-   lambda = sqrt(norm);
+   lambda = hypre_sqrt(norm);
 
    /* Free memory */
    hypre_ParVectorDestroy(eigvec_old);

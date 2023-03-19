@@ -1009,7 +1009,7 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
     HYPRE_Real *ahat, *ahatp;
     HYPRE_Int i, j, len2, *ind2, loc;
     HYPRE_Real *val2, temp;
-    HYPRE_Real error = 0;
+    HYPRE_Int error = 0;
 
 #ifdef PARASAILS_DEBUG
     HYPRE_Real time0, time1;
@@ -1178,7 +1178,7 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
 #endif
 
         /* Scale the result */
-        temp = 1.0 / sqrt(ABS(val[loc]));
+        temp = 1.0 / hypre_sqrt(ABS(val[loc]));
         for (i=0; i<len; i++)
             val[i] = val[i] * temp;
     }
@@ -1598,7 +1598,7 @@ static void Rescale(Matrix *M, StoredRows *stored_rows, HYPRE_Int num_ind)
         }
 
         /* Scale the row */
-        accum = 1./sqrt(accum);
+        accum = 1./hypre_sqrt(accum);
         for (j=0; j<len; j++)
             val[j] *= accum;
     }

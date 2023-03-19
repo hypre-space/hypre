@@ -31,7 +31,7 @@ hypre_FSAISolve( void               *fsai_vdata,
    hypre_ParCSRMatrix  *GT          = hypre_ParFSAIDataGTmat(fsai_data);
    hypre_ParVector     *z_work      = hypre_ParFSAIDataZWork(fsai_data);
    hypre_ParVector     *r_work      = hypre_ParFSAIDataRWork(fsai_data);
-   HYPRE_Int            tol         = hypre_ParFSAIDataTolerance(fsai_data);
+   HYPRE_Real            tol         = hypre_ParFSAIDataTolerance(fsai_data);
    HYPRE_Int            zero_guess  = hypre_ParFSAIDataZeroGuess(fsai_data);
    HYPRE_Int            max_iter    = hypre_ParFSAIDataMaxIterations(fsai_data);
    HYPRE_Int            print_level = hypre_ParFSAIDataPrintLevel(fsai_data);

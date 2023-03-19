@@ -487,7 +487,7 @@ hypre_MGRDestroyGSElimData( void *data )
    {
       hypre_MPI_Comm_free (&new_comm);
    }
-   
+
    hypre_TFree(gsdata, HYPRE_MEMORY_HOST);
    return hypre_error_flag;
 }
@@ -3729,7 +3729,7 @@ void hypre_blas_smat_inv_n4 (HYPRE_Real *a)
    const HYPRE_Real det = a11 * M11 + a12 * M21 + a13 * M31 + a14 * M41;
    HYPRE_Real det_inv;
 
-   //if ( fabs(det) < 1e-22 ) {
+   //if ( hypre_abs(det) < 1e-22 ) {
    //hypre_printf("### WARNING: Matrix is nearly singular! det = %e\n", det);
    /*
    printf("##----------------------------------------------\n");
@@ -3783,7 +3783,7 @@ void hypre_blas_mat_inv(HYPRE_Real *a,
          kn = k * n;
          l  = kn + k;
 
-         //if (fabs(a[l]) < HYPRE_REAL_MIN) {
+         //if (hypre_abs(a[l]) < HYPRE_REAL_MIN) {
          //   printf("### WARNING: Diagonal entry is close to zero!");
          //   printf("### WARNING: diag_%d=%e\n", k, a[l]);
          //   a[l] = HYPRE_REAL_MIN;
@@ -4006,7 +4006,7 @@ HYPRE_Int hypre_block_jacobi_solve(hypre_ParCSRMatrix *A,
 HYPRE_Int hypre_MGRBlockRelaxSolve (hypre_ParCSRMatrix *A,
                                     hypre_ParVector    *f,
                                     hypre_ParVector    *u,
-                                    HYPRE_Real         blk_size,
+                                    HYPRE_Int         blk_size,
                                     HYPRE_Int           n_block,
                                     HYPRE_Int           left_size,
                                     HYPRE_Int          method,
@@ -4323,7 +4323,7 @@ hypre_ParCSRMatrixExtractBlockDiag(hypre_ParCSRMatrix   *A,
             for (ii = A_diag_i[bidxm1 + j]; ii < A_diag_i[bidxm1 + j + 1]; ii++)
             {
                jj = A_diag_j[ii];
-               if (jj >= bidxm1 && jj < bidxp1 && fabs(A_diag_data[ii]) > HYPRE_REAL_MIN)
+               if (jj >= bidxm1 && jj < bidxp1 && hypre_abs(A_diag_data[ii]) > HYPRE_REAL_MIN)
                {
                   bidx = j * blk_size + jj - bidxm1;
                   diag[i * bs2 + bidx] = A_diag_data[ii];
@@ -4341,7 +4341,7 @@ hypre_ParCSRMatrixExtractBlockDiag(hypre_ParCSRMatrix   *A,
             for (ii = A_diag_i[bidxm1 + j]; ii < A_diag_i[bidxm1 + j + 1]; ii++)
             {
                jj = A_diag_j[ii];
-               if (jj >= bidxm1 && jj < bidxp1 && fabs(A_diag_data[ii]) > HYPRE_REAL_MIN)
+               if (jj >= bidxm1 && jj < bidxp1 && hypre_abs(A_diag_data[ii]) > HYPRE_REAL_MIN)
                {
                   bidx = j * left_size + jj - bidxm1;
                   diag[bstart + bidx] = A_diag_data[ii];
@@ -4368,7 +4368,8 @@ hypre_ParCSRMatrixExtractBlockDiag(hypre_ParCSRMatrix   *A,
                jj = A_diag_j[ii];
                if (CF_marker[jj] == point_type)
                {
-                  if (jj - row_offset >= bidxm1 && jj - row_offset < bidxp1 && fabs(A_diag_data[ii]) > HYPRE_REAL_MIN)
+                  if (jj - row_offset >= bidxm1 && jj - row_offset < bidxp1 &&
+                      hypre_abs(A_diag_data[ii]) > HYPRE_REAL_MIN)
                   {
                      didx = bidx * bs2 + ridx * blk_size + jj - bidxm1 - row_offset;
                      diag[didx] = A_diag_data[ii];
@@ -4396,7 +4397,8 @@ hypre_ParCSRMatrixExtractBlockDiag(hypre_ParCSRMatrix   *A,
                jj = A_diag_j[ii];
                if (CF_marker[jj] == point_type)
                {
-                  if (jj - row_offset >= bidxm1 && jj - row_offset < bidxp1 && fabs(A_diag_data[ii]) > HYPRE_REAL_MIN)
+                  if (jj - row_offset >= bidxm1 && jj - row_offset < bidxp1 &&
+                      hypre_abs(A_diag_data[ii]) > HYPRE_REAL_MIN)
                   {
                      didx = bstart + ridx * left_size + jj - bidxm1 - row_offset;
                      diag[didx] = A_diag_data[ii];
@@ -4427,7 +4429,7 @@ hypre_ParCSRMatrixExtractBlockDiag(hypre_ParCSRMatrix   *A,
       {
          for (i = 0; i < num_points; i++)
          {
-            if (fabs(diag[i]) < HYPRE_REAL_MIN)
+            if (hypre_abs(diag[i]) < HYPRE_REAL_MIN)
             {
                diag[i] = 0.0;
             }
@@ -4744,7 +4746,7 @@ hypre_MGRBlockRelaxSetup(hypre_ParCSRMatrix *A,
       for (i = 0; i < n; i++)
       {
          // FIX-ME: zero-diagonal should be tested previously
-         if (fabs(diaginv[i]) < HYPRE_REAL_MIN)
+         if (hypre_abs(diaginv[i]) < HYPRE_REAL_MIN)
          {
             diaginv[i] = 0.0;
          }
@@ -4829,7 +4831,7 @@ hypre_blockRelax(hypre_ParCSRMatrix *A,
          {
             jj = A_diag_j[ii];
 
-            if (jj >= bidxm1 && jj < bidxp1 && fabs(A_diag_data[ii]) > HYPRE_REAL_MIN)
+            if (jj >= bidxm1 && jj < bidxp1 && hypre_abs(A_diag_data[ii]) > HYPRE_REAL_MIN)
             {
                bidx = i * nb2 + k * blk_size + jj - bidxm1;
                //printf("jj = %d,val = %e, bidx = %d\n",jj,A_diag_data[ii],bidx);
@@ -4905,7 +4907,7 @@ hypre_blockRelax(hypre_ParCSRMatrix *A,
       for (i = 0; i < n; i++)
       {
          // FIX-ME: zero-diagonal should be tested previously
-         if (fabs(diaginv[i]) < HYPRE_REAL_MIN)
+         if (hypre_abs(diaginv[i]) < HYPRE_REAL_MIN)
          {
             diaginv[i] = 0.0;
          }

@@ -2547,7 +2547,7 @@ HYPRE_Int HYPRE_ADSSetSmoothingOptions(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_ADSSetChebySmoothingOptions(HYPRE_Solver solver,
                                             HYPRE_Int    cheby_order,
-                                            HYPRE_Int    cheby_fraction);
+                                            HYPRE_Real   cheby_fraction);
 
 /**
  * (Optional) Sets AMS parameters for \f$B_C\f$.

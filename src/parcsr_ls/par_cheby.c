@@ -108,8 +108,8 @@ hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A,         /* matrix to relax 
 
    if (variant == 1)
    {
-      switch ( cheby_order ) /* these are the corresponding cheby polynomials: u = u_o + s(A)r_0  - so order is
-                                one less that  resid poly: r(t) = 1 - t*s(t) */
+      switch (cheby_order) /* these are the corresponding cheby polynomials: u = u_o + s(A)r_0  - so order is
+                               one less that  resid poly: r(t) = 1 - t*s(t) */
       {
          case 0:
             coefs[0] = 1.0 / theta;
@@ -125,22 +125,28 @@ hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A,         /* matrix to relax 
             break;
 
          case 2:  /* (4*del*th - del^2 - t*(2*del + 6*th) + 2*t^2 + 6*th^2)/(2*del*th^2 - del^2*th - del^3 + 2*th^3)*/
-            den = 2 * delta * theta * theta - delta * delta * theta - pow(delta, 3) + 2 * pow(theta, 3);
+            den = 2 * delta * theta * theta - delta * delta * theta -
+                  hypre_pow(delta, 3) + 2 * hypre_pow(theta, 3);
 
-            coefs[0] = (4 * delta * theta - pow(delta, 2) +  6 * pow(theta, 2)) / den;
+            coefs[0] = (4 * delta * theta - hypre_pow(delta, 2) + 6 * hypre_pow(theta, 2)) / den;
             coefs[1] = -(2 * delta + 6 * theta) / den;
             coefs[2] =  2 / den;
 
             break;
 
          case 3: /* -(6*del^2*th - 12*del*th^2 - t^2*(4*del + 16*th) + t*(12*del*th - 3*del^2 + 24*th^2) + 3*del^3 + 4*t^3 - 16*th^3)/(4*del*th^3 - 3*del^2*th^2 - 3*del^3*th + 4*th^4)*/
-            den = - (4 * delta * pow(theta, 3) - 3 * pow(delta, 2) * pow(theta, 2) - 3 * pow(delta,
-                                                                                             3) * theta + 4 * pow(theta,
-                                                                                                   4) );
+            den = - 4 * delta * hypre_pow(theta, 3) +
+                  3 * hypre_pow(delta, 2) * hypre_pow(theta, 2) +
+                  3 * hypre_pow(delta, 3) * theta -
+                  4 * hypre_pow(theta, 4);
 
-            coefs[0] = (6 * pow(delta, 2) * theta - 12 * delta * pow(theta, 2) + 3 * pow(delta,
-                                                                                         3) - 16 * pow(theta, 3)   ) / den;
-            coefs[1] = (12 * delta * theta - 3 * pow(delta, 2) + 24 * pow(theta, 2)) / den;
+            coefs[0] = (6 * hypre_pow(delta, 2) * theta -
+                        12 * delta * hypre_pow(theta, 2) +
+                        3 * hypre_pow(delta, 3) -
+                        16 * hypre_pow(theta, 3) ) / den;
+            coefs[1] = (12 * delta * theta -
+                        3 * hypre_pow(delta, 2) +
+                        24 * hypre_pow(theta, 2)) / den;
             coefs[2] =  -( 4 * delta + 16 * theta) / den;
             coefs[3] = 4 / den;
 
@@ -151,8 +157,8 @@ hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A,         /* matrix to relax 
    else /* standard chebyshev */
    {
 
-      switch ( cheby_order ) /* these are the corresponding cheby polynomials: u = u_o + s(A)r_0  - so order is
-                                one less thatn resid poly: r(t) = 1 - t*s(t) */
+      switch (cheby_order) /* these are the corresponding cheby polynomials: u = u_o + s(A)r_0  - so order is
+                              one less thatn resid poly: r(t) = 1 - t*s(t) */
       {
          case 0:
             coefs[0] = 1.0 / theta;
@@ -176,9 +182,9 @@ hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A,         /* matrix to relax 
             break;
 
          case 3: /*(t*(8*del^2 - 48*th^2) - 16*del^2*th + 32*t^2*th - 8*t^3 + 32*th^3)/(del^4 - 8*del^2*th^2 + 8*th^4)*/
-            den = pow(delta, 4) - 8 * delta * delta * theta * theta + 8 * pow(theta, 4);
+            den = hypre_pow(delta, 4) - 8 * delta * delta * theta * theta + 8 * hypre_pow(theta, 4);
 
-            coefs[0] = (32 * pow(theta, 3) - 16 * delta * delta * theta) / den;
+            coefs[0] = (32 * hypre_pow(theta, 3) - 16 * delta * delta * theta) / den;
             coefs[1] = (8 * delta * delta - 48 * theta * theta) / den;
             coefs[2] = 32 * theta / den;
             coefs[3] = -8 / den;
@@ -190,7 +196,7 @@ hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A,         /* matrix to relax 
 
    if (scale)
    {
-      /*grab 1/sqrt(abs(diagonal)) */
+      /*grab 1/hypre_sqrt(abs(diagonal)) */
       ds_data = hypre_CTAlloc(HYPRE_Real, num_rows, hypre_ParCSRMatrixMemoryLocation(A));
       hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A), ds_data, 4);
    } /* end of scaling code */
@@ -302,7 +308,7 @@ hypre_ParCSRRelax_Cheby_SolveHost(hypre_ParCSRMatrix *A, /* matrix to relax with
    else /* scaling! */
    {
 
-      /*grab 1/sqrt(diagonal) */
+      /*grab 1/hypre_sqrt(diagonal) */
       tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(tmp_vec));
 
       /* get ds_data and get scaled residual: r = D^(-1/2)f -
@@ -412,6 +418,14 @@ hypre_ParCSRRelax_Cheby_Solve(hypre_ParCSRMatrix *A, /* matrix to relax with */
    hypre_GpuProfilingPushRange("ParCSRRelaxChebySolve");
 #endif
    HYPRE_Int             ierr = 0;
+
+   /* Sanity check */
+   if (hypre_ParVectorNumVectors(f) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Requested relaxation type doesn't support multicomponent vectors");
+      return hypre_error_flag;
+   }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));

@@ -202,6 +202,15 @@ hypre_MGRSetup( void               *mgr_vdata,
       return hypre_error_flag;
    }
 
+   /* Sanity check */
+   if (hypre_ParVectorNumVectors(f) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "MGR doesn't support multicomponent vectors");
+      HYPRE_ANNOTATE_FUNC_END;
+
+      return hypre_error_flag;
+   }
+
    /* If we reduce the reserved C-points, increase one level */
    if (lvl_to_keep_cpoints > 0) { max_num_coarse_levels++; }
    /* Initialize local indexes of coarse sets at different levels */
@@ -1082,7 +1091,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          {
             hypre_BoomerAMGBuildRestrDist2AIR(A_array[lev], CF_marker,
                                               ST, coarse_pnts_global, 1,
-                                              dof_func_buff_data, debug_flag, filter_thresholdR,
+                                              dof_func_buff_data, filter_thresholdR, debug_flag,
                                               &RT,
                                               1, is_triangular, gmres_switch );
          }

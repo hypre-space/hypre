@@ -3522,6 +3522,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       if ((smooth_type == 6 || smooth_type == 16) && smooth_num_levels > j)
       {
+         /* Sanity check */
+         if (hypre_ParVectorNumVectors(f) > 1)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "Schwarz smoothing doesn't support multicomponent vectors");
+            return hypre_error_flag;
+         }
+
          schwarz_relax_wt = hypre_ParAMGDataSchwarzRlxWeight(amg_data);
 
          HYPRE_SchwarzCreate(&smoother[j]);
@@ -3559,10 +3567,20 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       else if ((smooth_type == 9 || smooth_type == 19) && smooth_num_levels > j)
       {
+         /* Sanity checks */
 #ifdef HYPRE_MIXEDINT
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid smoothing is not available in mixedint mode!");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "Euclid smoothing is not available in mixedint mode!");
          return hypre_error_flag;
 #endif
+
+         if (hypre_ParVectorNumVectors(f) > 1)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "Euclid smoothing doesn't support multicomponent vectors");
+            return hypre_error_flag;
+         }
+
          HYPRE_EuclidCreate(comm, &smoother[j]);
          if (euclidfile)
          {
@@ -3584,6 +3602,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       else if ((smooth_type == 4 || smooth_type == 14) && smooth_num_levels > j)
       {
+         /* Sanity check */
+         if (hypre_ParVectorNumVectors(f) > 1)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "FSAI smoothing doesn't support multicomponent vectors");
+            return hypre_error_flag;
+         }
+
          HYPRE_FSAICreate(&smoother[j]);
          HYPRE_FSAISetMaxSteps(smoother[j], fsai_max_steps);
          HYPRE_FSAISetMaxStepSize(smoother[j], fsai_max_step_size);
@@ -3601,13 +3627,22 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #if DEBUG_SAVE_ALL_OPS
          char file[256];
          hypre_sprintf(file, "G_%02d.IJ.out", j);
-         hypre_ParCSRMatrixPrintIJ(hypre_ParFSAIDataGmat((hypre_ParFSAIData*) smoother[j]), 0, 0, file);
+         hypre_ParCSRMatrixPrintIJ(hypre_ParFSAIDataGmat((hypre_ParFSAIData*) smoother[j]),
+                                   0, 0, file);
 #endif
       }
       else if ((smooth_type == 5 || smooth_type == 15) && smooth_num_levels > j)
       {
-         HYPRE_ILUCreate( &smoother[j]);
-         HYPRE_ILUSetType( smoother[j], ilu_type);
+         /* Sanity check */
+         if (hypre_ParVectorNumVectors(f) > 1)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "ILU smoothing doesn't support multicomponent vectors");
+            return hypre_error_flag;
+         }
+
+         HYPRE_ILUCreate(&smoother[j]);
+         HYPRE_ILUSetType(smoother[j], ilu_type);
          HYPRE_ILUSetLocalReordering( smoother[j], ilu_reordering_type);
          HYPRE_ILUSetMaxIter(smoother[j], ilu_max_iter);
          HYPRE_ILUSetTriSolve(smoother[j], ilu_tri_solve);
@@ -3626,10 +3661,20 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       else if ((smooth_type == 8 || smooth_type == 18) && smooth_num_levels > j)
       {
+         /* Sanity checks */
 #ifdef HYPRE_MIXEDINT
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails smoothing is not available in mixedint mode!");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "ParaSails smoothing is not available in mixedint mode!");
          return hypre_error_flag;
 #endif
+
+         if (hypre_ParVectorNumVectors(f) > 1)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "ParaSails smoothing doesn't support multicomponent vectors");
+            return hypre_error_flag;
+         }
+
          HYPRE_ParCSRParaSailsCreate(comm, &smoother[j]);
          HYPRE_ParCSRParaSailsSetParams(smoother[j], thresh, nlevel);
          HYPRE_ParCSRParaSailsSetFilter(smoother[j], filter);
@@ -3641,10 +3686,20 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       else if ((smooth_type == 7 || smooth_type == 17) && smooth_num_levels > j)
       {
+         /* Sanity checks */
 #ifdef HYPRE_MIXEDINT
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "pilut smoothing is not available in mixedint mode!");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "Pilut smoothing is not available in mixedint mode!");
          return hypre_error_flag;
 #endif
+
+         if (hypre_ParVectorNumVectors(f) > 1)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "Pilut smoothing doesn't support multicomponent vectors");
+            return hypre_error_flag;
+         }
+
          HYPRE_ParCSRPilutCreate(comm, &smoother[j]);
          HYPRE_ParCSRPilutSetup(smoother[j],
                                 (HYPRE_ParCSRMatrix) A_array[j],
@@ -3653,9 +3708,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          HYPRE_ParCSRPilutSetDropTolerance(smoother[j], drop_tol);
          HYPRE_ParCSRPilutSetFactorRowSize(smoother[j], max_nz_per_row);
       }
-      else if ( (j < num_levels - 1) || ((j == num_levels - 1) &&
-                                         (grid_relax_type[3] !=  9 && grid_relax_type[3] != 99  &&
-                                          grid_relax_type[3] != 19 && grid_relax_type[3] != 98) && coarse_size > 9) )
+      else if ( (j < num_levels - 1) ||
+                ((j == num_levels - 1) &&
+                 (grid_relax_type[3] !=  9 && grid_relax_type[3] != 99  &&
+                  grid_relax_type[3] != 19 && grid_relax_type[3] != 98) && coarse_size > 9) )
       {
          if (relax_weight[j] < 0)
          {
@@ -3893,7 +3949,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                  relax_weight[level], omega[level], l1_norms[level],
                                  u_vec, Vtemp, Ztemp);
             rho1 = hypre_ParVectorInnerProd(u_vec, u_vec);
-            rho = sqrt(rho1 / rho0);
+            rho = hypre_sqrt(rho1 / rho0);
             if (rho < 0.01)
             {
                break;

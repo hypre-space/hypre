@@ -81,16 +81,16 @@ typedef struct
    HYPRE_MemoryLocation memory_location;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
-   HYPRE_Int            max_stack_elmts;
-   HYPRE_Int            current_stack_elmts;
+   HYPRE_BigInt         max_stack_elmts;
+   HYPRE_BigInt         current_stack_elmts;
    HYPRE_BigInt        *stack_i;
    HYPRE_BigInt        *stack_j;
    HYPRE_Complex       *stack_data;
    char                *stack_sora;              /* Set (1) or Add (0) */
    HYPRE_Int            usr_on_proc_elmts;       /* user given num elmt on-proc */
    HYPRE_Int            usr_off_proc_elmts;      /* user given num elmt off-proc */
-   HYPRE_Real           init_alloc_factor;
-   HYPRE_Real           grow_factor;
+   HYPRE_BigInt         init_alloc_factor;
+   HYPRE_BigInt         grow_factor;
 #endif
 } hypre_AuxParCSRMatrix;
 

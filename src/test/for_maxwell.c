@@ -456,7 +456,7 @@ ReadData( char         *filename,
                data.stencil_offsets[s][entry][i] = 0;
             }
             data.stencil_vars[s][entry] = strtol(sdata_ptr, &sdata_ptr, 10);
-            data.stencil_values[s][entry] = strtod(sdata_ptr, &sdata_ptr);
+            data.stencil_values[s][entry] = (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
          }
          else if ( strcmp(key, "GraphSetStencil:") == 0 )
          {
@@ -551,7 +551,7 @@ ReadData( char         *filename,
             pdata.graph_entries[pdata.graph_nentries] =
                strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.graph_values[pdata.graph_nentries] =
-               strtod(sdata_ptr, &sdata_ptr);
+               (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
             pdata.graph_boxsizes[pdata.graph_nentries] = 1;
             for (i = 0; i < 3; i++)
             {
@@ -625,7 +625,7 @@ ReadData( char         *filename,
             pdata.matrix_entries[pdata.matrix_nentries] =
                strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.matrix_values[pdata.matrix_nentries] =
-               strtod(sdata_ptr, &sdata_ptr);
+               (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
             pdata.matrix_nentries++;
             data.pdata[part] = pdata;
          }
@@ -1927,7 +1927,7 @@ main( HYPRE_Int   argc,
 
    for (j = 0; j < data.max_boxsize; j++)
    {
-      values[j] = sin((HYPRE_Real)(j + 1));
+      values[j] = hypre_sin((HYPRE_Real)(j + 1));
       values[j] = (HYPRE_Real) hypre_Rand();
       values[j] = (HYPRE_Real) j;
    }

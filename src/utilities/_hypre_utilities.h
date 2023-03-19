@@ -33,6 +33,7 @@ extern "C" {
 /* #include <stdio.h> */
 /* #include <stdlib.h> */
 #include <stdint.h>
+#include <math.h>
 
 /* This allows us to consistently avoid 'int' throughout hypre */
 typedef int                    hypre_int;
@@ -68,6 +69,106 @@ typedef double                 hypre_double;
 
 #ifndef hypre_pow2
 #define hypre_pow2(i)  ( 1 << (i) )
+#endif
+
+#ifndef hypre_sqrt
+#if defined(HYPRE_SINGLE)
+#define hypre_sqrt sqrtf
+#elif defined(HYPRE_LONG_DOUBLE)
+#define hypre_sqrt sqrtl
+#else
+#define hypre_sqrt sqrt
+#endif
+#endif
+
+#ifndef hypre_pow
+#if defined(HYPRE_SINGLE)
+#define hypre_pow powf
+#elif defined(HYPRE_LONG_DOUBLE)
+#define hypre_pow powl
+#else
+#define hypre_pow pow
+#endif
+#endif
+
+#ifndef hypre_ceil
+#if defined(HYPRE_SINGLE)
+#define hypre_ceil ceilf
+#elif defined(HYPRE_LONG_DOUBLE)
+#define hypre_ceil ceill
+#else
+#define hypre_ceil ceil
+#endif
+#endif
+
+#ifndef hypre_floor
+#if defined(HYPRE_SINGLE)
+#define hypre_floor floorf
+#elif defined(HYPRE_LONG_DOUBLE)
+#define hypre_floor floorl
+#else
+#define hypre_floor floor
+#endif
+#endif
+
+#ifndef hypre_log
+#if defined(HYPRE_SINGLE)
+#define hypre_log logf
+#elif defined(HYPRE_LONG_DOUBLE)
+#define hypre_log logl
+#else
+#define hypre_log log
+#endif
+#endif
+
+#ifndef hypre_exp
+#if defined(HYPRE_SINGLE)
+#define hypre_exp expf
+#elif defined(HYPRE_LONG_DOUBLE)
+#define hypre_exp expl
+#else
+#define hypre_exp exp
+#endif
+#endif
+
+#ifndef hypre_sin
+#if defined(HYPRE_SINGLE)
+#define hypre_sin sinf
+#elif defined(HYPRE_LONG_DOUBLE)
+#define hypre_sin sinl
+#else
+#define hypre_sin sin
+#endif
+#endif
+
+#ifndef hypre_cos
+#if defined(HYPRE_SINGLE)
+#define hypre_cos cosf
+#elif defined(HYPRE_LONG_DOUBLE)
+#define hypre_cos cosl
+#else
+#define hypre_cos cos
+#endif
+#endif
+
+#ifndef hypre_atan
+#if defined(HYPRE_SINGLE)
+#define hypre_atan atanf
+#elif defined(HYPRE_LONG_DOUBLE)
+#define hypre_atan atanl
+#else
+#define hypre_atan atan
+#endif
+#endif
+
+#ifndef hypre_fmod
+#if defined(HYPRE_SINGLE)
+#define hypre_fmod fmodf
+#elif defined(HYPRE_LONG_DOUBLE)
+#define hypre_fmod fmodl
+#else
+#define hypre_fmod fmod
+#endif
 #endif
 
 #endif /* hypre_GENERAL_HEADER */
@@ -213,6 +314,9 @@ extern "C" {
 #define MPI_CHAR            hypre_MPI_CHAR
 #define MPI_LONG            hypre_MPI_LONG
 #define MPI_BYTE            hypre_MPI_BYTE
+
+#define MPI_C_FLOAT_COMPLEX hypre_MPI_COMPLEX
+#define MPI_C_LONG_DOUBLE_COMPLEX hypre_MPI_COMPLEX
 #define MPI_C_DOUBLE_COMPLEX hypre_MPI_COMPLEX
 
 #define MPI_SUM             hypre_MPI_SUM
@@ -696,6 +800,7 @@ hypre_GetActualMemLocation(HYPRE_MemoryLocation location)
 /* memory.c */
 HYPRE_Int hypre_GetMemoryLocationName(hypre_MemoryLocation memory_location,
                                       char *memory_location_name);
+void   hypre_CheckMemoryLocation(void *ptr, hypre_MemoryLocation location);
 void * hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_MemoryLocation location);
 void   hypre_MemPrefetch(void *ptr, size_t size, HYPRE_MemoryLocation location);
 void * hypre_MAlloc(size_t size, HYPRE_MemoryLocation location);
@@ -742,8 +847,7 @@ typedef void (*GPUMfreeFunc)(void *);
 }
 #endif
 
-#endif
-
+#endif /* hypre_MEMORY_HEADER */
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -1413,6 +1517,7 @@ typedef struct
 #define hypre_HandleCurandGenerator(hypre_handle)                hypre_DeviceDataCurandGenerator(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCublasHandle(hypre_handle)                   hypre_DeviceDataCublasHandle(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCusparseHandle(hypre_handle)                 hypre_DeviceDataCusparseHandle(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleVendorSolverHandle(hypre_handle)             hypre_DeviceDataVendorSolverHandle(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleComputeStream(hypre_handle)                  hypre_DeviceDataComputeStream(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCubBinGrowth(hypre_handle)                   hypre_DeviceDataCubBinGrowth(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCubMinBin(hypre_handle)                      hypre_DeviceDataCubMinBin(hypre_HandleDeviceData(hypre_handle))
@@ -1605,10 +1710,10 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 HYPRE_Complex hypre_csqrt( HYPRE_Complex value );
 #else
 #define hypre_conj(value)  value
-#define hypre_cabs(value)  fabs(value)
+#define hypre_cabs(value)  hypre_abs(value)
 #define hypre_creal(value) value
 #define hypre_cimag(value) 0.0
-#define hypre_csqrt(value) sqrt(value)
+#define hypre_csqrt(value) hypre_sqrt(value)
 #endif
 
 /* general.c */
@@ -1874,6 +1979,8 @@ HYPRE_Int hypreDevice_IntAxpyn(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_I
                                HYPRE_Int a);
 HYPRE_Int hypreDevice_BigIntAxpyn(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt *d_y,
                                   HYPRE_BigInt *d_z, HYPRE_BigInt a);
+HYPRE_Int hypreDevice_ComplexAxpyzn(HYPRE_Int n, HYPRE_Complex *d_x, HYPRE_Complex *d_y,
+                                    HYPRE_Complex *d_z, HYPRE_Complex a, HYPRE_Complex b);
 HYPRE_Int* hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr);
 HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
                                              HYPRE_Int *d_row_ind);

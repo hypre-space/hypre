@@ -71,7 +71,7 @@ void Hash_dhInit_private(Hash_dh h, HYPRE_Int s)
   /* want table size to be a power of 2: */
   while (size < s) size *= 2;
   /* rule-of-thumb: ensure there's some padding */
-  if ( (size-s) < (.1 * size) ) { size *= 2.0; }
+  if ( (size-s) < (.1 * size) ) { size *= 2; }
   h->size = size;
 
 /*

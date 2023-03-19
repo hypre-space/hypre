@@ -426,6 +426,7 @@ main( hypre_int argc,
    /* hypre_ILU options */
    HYPRE_Int ilu_type = 0;
    HYPRE_Int ilu_lfil = 0;
+   HYPRE_Int ilu_reordering = 1;
    HYPRE_Int ilu_sm_max_iter = 1;
    HYPRE_Real ilu_droptol = 1.0e-02;
    HYPRE_Int ilu_max_row_nnz = 1000;
@@ -948,12 +949,12 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-crth") == 0 )
       {
          arg_index++;
-         CR_rate = atof(argv[arg_index++]);
+         CR_rate = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-crst") == 0 )
       {
          arg_index++;
-         CR_strong_th = atof(argv[arg_index++]);
+         CR_strong_th = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-rlx") == 0 )
       {
@@ -1049,7 +1050,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-dt") == 0 )
       {
          arg_index++;
-         dt = atof(argv[arg_index++]);
+         dt = (HYPRE_Real)atof(argv[arg_index++]);
          build_rhs_type = -1;
          if ( build_src_type == -1 ) { build_src_type = 2; }
       }
@@ -1133,7 +1134,7 @@ main( hypre_int argc,
       {
          /* lobpcg: inner pcg iterations */
          arg_index++;
-         pcgTol = atof(argv[arg_index++]);
+         pcgTol = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-pcgmode") == 0 )
       {
@@ -1241,11 +1242,17 @@ main( hypre_int argc,
          arg_index++;
          ilu_lfil = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-ilu_reordering") == 0 )
+      {
+         /* local reordering type */
+         arg_index++;
+         ilu_reordering = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-ilu_droptol") == 0 )
       {
          /* drop tolerance */
          arg_index++;
-         ilu_droptol = atof(argv[arg_index++]);
+         ilu_droptol = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-ilu_max_row_nnz") == 0 )
       {
@@ -1263,7 +1270,7 @@ main( hypre_int argc,
       {
          /* Max number of iterations for schur system solver */
          arg_index++;
-         ilu_nsh_droptol = atof(argv[arg_index++]);
+         ilu_nsh_droptol = (HYPRE_Real)atof(argv[arg_index++]);
       }
       /* end ilu options */
       /* begin FSAI options*/
@@ -1290,7 +1297,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-fs_kap_tol") == 0 )
       {
          arg_index++;
-         fsai_kap_tolerance = atof(argv[arg_index++]);
+         fsai_kap_tolerance = (HYPRE_Real)atof(argv[arg_index++]);
       }
       /* end FSAI options */
 #if defined(HYPRE_USING_GPU)
@@ -1327,7 +1334,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-spgemm_rowestmult") == 0 )
       {
          arg_index++;
-         spgemm_rowest_mult  = atof(argv[arg_index++]);
+         spgemm_rowest_mult  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-spgemm_rowestnsamples") == 0 )
       {
@@ -1501,39 +1508,39 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-w") == 0 )
       {
          arg_index++;
-         relax_wt = atof(argv[arg_index++]);
+         relax_wt = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-wl") == 0 )
       {
          arg_index++;
-         relax_wt_level = atof(argv[arg_index++]);
+         relax_wt_level = (HYPRE_Real)atof(argv[arg_index++]);
          level_w = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-ow") == 0 )
       {
          arg_index++;
-         outer_wt = atof(argv[arg_index++]);
+         outer_wt = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-owl") == 0 )
       {
          arg_index++;
-         outer_wt_level = atof(argv[arg_index++]);
+         outer_wt_level = (HYPRE_Real)atof(argv[arg_index++]);
          level_ow = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-sw") == 0 )
       {
          arg_index++;
-         schwarz_rlx_weight = atof(argv[arg_index++]);
+         schwarz_rlx_weight = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-coarse_th") == 0 )
       {
          arg_index++;
-         coarse_threshold  = atof(argv[arg_index++]);
+         coarse_threshold  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-adroptol") == 0 )
       {
          arg_index++;
-         A_drop_tol  = atof(argv[arg_index++]);
+         A_drop_tol  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-adroptype") == 0 )
       {
@@ -1543,17 +1550,17 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-min_cs") == 0 )
       {
          arg_index++;
-         min_coarse_size  = atof(argv[arg_index++]);
+         min_coarse_size  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-seq_th") == 0 )
       {
          arg_index++;
-         seq_threshold  = atof(argv[arg_index++]);
+         seq_threshold  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-red") == 0 )
       {
          arg_index++;
-         redundant  = atof(argv[arg_index++]);
+         redundant  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-cutf") == 0 )
       {
@@ -1563,17 +1570,17 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-th") == 0 )
       {
          arg_index++;
-         strong_threshold  = atof(argv[arg_index++]);
+         strong_threshold  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-thR") == 0 )
       {
          arg_index++;
-         strong_thresholdR  = atof(argv[arg_index++]);
+         strong_thresholdR  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-fltr_thR") == 0 )
       {
          arg_index++;
-         filter_thresholdR  = atof(argv[arg_index++]);
+         filter_thresholdR  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-CF") == 0 )
       {
@@ -1583,12 +1590,12 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-cf") == 0 )
       {
          arg_index++;
-         cf_tol  = atof(argv[arg_index++]);
+         cf_tol  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-tol") == 0 )
       {
          arg_index++;
-         tol  = atof(argv[arg_index++]);
+         tol  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-conv_type") == 0 )
       {
@@ -1598,27 +1605,27 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-atol") == 0 )
       {
          arg_index++;
-         atol  = atof(argv[arg_index++]);
+         atol  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-mxrs") == 0 )
       {
          arg_index++;
-         max_row_sum  = atof(argv[arg_index++]);
+         max_row_sum  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-sai_th") == 0 )
       {
          arg_index++;
-         sai_threshold  = atof(argv[arg_index++]);
+         sai_threshold  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-sai_filt") == 0 )
       {
          arg_index++;
-         sai_filter  = atof(argv[arg_index++]);
+         sai_filter  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-drop_tol") == 0 )
       {
          arg_index++;
-         drop_tol  = atof(argv[arg_index++]);
+         drop_tol  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-nonzeros_to_keep") == 0 )
       {
@@ -1628,12 +1635,12 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-ilut") == 0 )
       {
          arg_index++;
-         eu_ilut  = atof(argv[arg_index++]);
+         eu_ilut  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-sparseA") == 0 )
       {
          arg_index++;
-         eu_sparse_A  = atof(argv[arg_index++]);
+         eu_sparse_A  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-rowScale") == 0 )
       {
@@ -1663,7 +1670,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-tr") == 0 )
       {
          arg_index++;
-         trunc_factor  = atof(argv[arg_index++]);
+         trunc_factor  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-Pmx") == 0 )
       {
@@ -1678,7 +1685,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-Qtr") == 0 )
       {
          arg_index++;
-         Q_trunc  = atof(argv[arg_index++]);
+         Q_trunc  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-Qmx") == 0 )
       {
@@ -1688,12 +1695,12 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-jtr") == 0 )
       {
          arg_index++;
-         jacobi_trunc_threshold  = atof(argv[arg_index++]);
+         jacobi_trunc_threshold  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-Ssw") == 0 )
       {
          arg_index++;
-         S_commpkg_switch = atof(argv[arg_index++]);
+         S_commpkg_switch = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-solver_type") == 0 )
       {
@@ -1782,12 +1789,12 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-agg_tr") == 0 )
       {
          arg_index++;
-         agg_trunc_factor  = atof(argv[arg_index++]);
+         agg_trunc_factor  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-agg_P12_tr") == 0 )
       {
          arg_index++;
-         agg_P12_trunc_factor  = atof(argv[arg_index++]);
+         agg_P12_trunc_factor  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-postinterptype") == 0 )
       {
@@ -1837,7 +1844,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-cheby_fraction") == 0 )
       {
          arg_index++;
-         cheby_fraction = atof(argv[arg_index++]);
+         cheby_fraction = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-additive") == 0 )
       {
@@ -1867,7 +1874,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-add_tr") == 0 )
       {
          arg_index++;
-         add_trunc_factor  = atof(argv[arg_index++]);
+         add_trunc_factor  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-add_rlx") == 0 )
       {
@@ -1877,7 +1884,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-add_w") == 0 )
       {
          arg_index++;
-         add_relax_wt = atof(argv[arg_index++]);
+         add_relax_wt = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-rap") == 0 )
       {
@@ -1908,7 +1915,7 @@ main( hypre_int argc,
          nongalerk_tol = hypre_CTAlloc(HYPRE_Real,  nongalerk_num_tol, HYPRE_MEMORY_HOST);
          for (i = 0; i < nongalerk_num_tol; i++)
          {
-            nongalerk_tol[i] = atof(argv[arg_index++]);
+            nongalerk_tol[i] = (HYPRE_Real)atof(argv[arg_index++]);
          }
       }
       else if ( strcmp(argv[arg_index], "-print") == 0 )
@@ -3160,7 +3167,7 @@ main( hypre_int argc,
 
       HYPRE_ParVectorSetRandomValues(b, 22775);
       HYPRE_ParVectorInnerProd(b, b, &norm);
-      norm = 1. / sqrt(norm);
+      norm = 1. / hypre_sqrt(norm);
       ierr = HYPRE_ParVectorScale(norm, b);
 
       /* Initial guess */
@@ -6651,6 +6658,7 @@ main( hypre_int argc,
          HYPRE_ILUCreate(&pcg_precond);
          HYPRE_ILUSetType(pcg_precond, ilu_type);
          HYPRE_ILUSetLevelOfFill(pcg_precond, ilu_lfil);
+         HYPRE_ILUSetLocalReordering(pcg_precond, ilu_reordering);
          /* set print level */
          HYPRE_ILUSetPrintLevel(pcg_precond, 1);
          /* set max iterations */
@@ -7294,6 +7302,7 @@ main( hypre_int argc,
          HYPRE_ILUCreate(&pcg_precond);
          HYPRE_ILUSetType(pcg_precond, ilu_type);
          HYPRE_ILUSetLevelOfFill(pcg_precond, ilu_lfil);
+         HYPRE_ILUSetLocalReordering(pcg_precond, ilu_reordering);
          /* set print level */
          HYPRE_ILUSetPrintLevel(pcg_precond, 1);
          /* set max iterations */
@@ -8575,6 +8584,8 @@ main( hypre_int argc,
       HYPRE_ILUSetType(ilu_solver, ilu_type);
       /* set level of fill */
       HYPRE_ILUSetLevelOfFill(ilu_solver, ilu_lfil);
+      /* set local reordering type */
+      HYPRE_ILUSetLocalReordering(ilu_solver, ilu_reordering);
       /* set print level */
       HYPRE_ILUSetPrintLevel(ilu_solver, 2);
       /* set max iterations */
@@ -8946,9 +8957,9 @@ BuildParLaplacian( HYPRE_Int                  argc,
       else if ( strcmp(argv[arg_index], "-c") == 0 )
       {
          arg_index++;
-         cx = atof(argv[arg_index++]);
-         cy = atof(argv[arg_index++]);
-         cz = atof(argv[arg_index++]);
+         cx = (HYPRE_Real)atof(argv[arg_index++]);
+         cy = (HYPRE_Real)atof(argv[arg_index++]);
+         cz = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-sysL") == 0 )
       {
@@ -8974,7 +8985,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
       else if ( strcmp(argv[arg_index], "-ep") == 0 )
       {
          arg_index++;
-         ep = atof(argv[arg_index++]);
+         ep = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else
       {
@@ -9427,16 +9438,16 @@ BuildParDifConv( HYPRE_Int                  argc,
       else if ( strcmp(argv[arg_index], "-c") == 0 )
       {
          arg_index++;
-         cx = atof(argv[arg_index++]);
-         cy = atof(argv[arg_index++]);
-         cz = atof(argv[arg_index++]);
+         cx = (HYPRE_Real)atof(argv[arg_index++]);
+         cy = (HYPRE_Real)atof(argv[arg_index++]);
+         cz = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-a") == 0 )
       {
          arg_index++;
-         ax = atof(argv[arg_index++]);
-         ay = atof(argv[arg_index++]);
-         az = atof(argv[arg_index++]);
+         ax = (HYPRE_Real)atof(argv[arg_index++]);
+         ay = (HYPRE_Real)atof(argv[arg_index++]);
+         az = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-atype") == 0 )
       {
@@ -10374,12 +10385,12 @@ BuildParRotate7pt( HYPRE_Int            argc,
       else if ( strcmp(argv[arg_index], "-alpha") == 0 )
       {
          arg_index++;
-         alpha  = atof(argv[arg_index++]);
+         alpha  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-eps") == 0 )
       {
          arg_index++;
-         eps  = atof(argv[arg_index++]);
+         eps  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else
       {
@@ -10503,7 +10514,7 @@ BuildParVarDifConv( HYPRE_Int            argc,
       else if ( strcmp(argv[arg_index], "-eps") == 0 )
       {
          arg_index++;
-         eps  = atof(argv[arg_index++]);
+         eps  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-vardifconvRS") == 0 )
       {
