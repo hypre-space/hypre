@@ -178,7 +178,7 @@
 /* Define to 1 if using cuRAND */
 #undef HYPRE_USING_CURAND
 
-/* Define to 1 if using cuSolver */
+/* Define to 1 if using cuSOLVER */
 #undef HYPRE_USING_CUSOLVER
 
 /* Define to 1 if using cuSPARSE */
@@ -255,6 +255,9 @@
 
 /* rocRAND being used */
 #undef HYPRE_USING_ROCRAND
+
+/* rocSOLVER being used */
+#undef HYPRE_USING_ROCSOLVER
 
 /* rocSPARSE being used */
 #undef HYPRE_USING_ROCSPARSE

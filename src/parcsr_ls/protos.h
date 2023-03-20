@@ -23,7 +23,7 @@ HYPRE_Int hypre_ADSSetPrintLevel ( void *solver, HYPRE_Int print_level );
 HYPRE_Int hypre_ADSSetSmoothingOptions ( void *solver, HYPRE_Int A_relax_type,
                                          HYPRE_Int A_relax_times, HYPRE_Real A_relax_weight, HYPRE_Real A_omega );
 HYPRE_Int hypre_ADSSetChebySmoothingOptions ( void *solver, HYPRE_Int A_cheby_order,
-                                              HYPRE_Int A_cheby_fraction );
+                                              HYPRE_Real A_cheby_fraction );
 HYPRE_Int hypre_ADSSetAMSOptions ( void *solver, HYPRE_Int B_C_cycle_type,
                                    HYPRE_Int B_C_coarsen_type, HYPRE_Int B_C_agg_levels, HYPRE_Int B_C_relax_type,
                                    HYPRE_Real B_C_theta, HYPRE_Int B_C_interp_type, HYPRE_Int B_C_Pmax );
@@ -182,7 +182,7 @@ HYPRE_Int hypre_AMSSetPrintLevel ( void *solver, HYPRE_Int print_level );
 HYPRE_Int hypre_AMSSetSmoothingOptions ( void *solver, HYPRE_Int A_relax_type,
                                          HYPRE_Int A_relax_times, HYPRE_Real A_relax_weight, HYPRE_Real A_omega );
 HYPRE_Int hypre_AMSSetChebySmoothingOptions ( void *solver, HYPRE_Int A_cheby_order,
-                                              HYPRE_Int A_cheby_fraction );
+                                              HYPRE_Real A_cheby_fraction );
 HYPRE_Int hypre_AMSSetAlphaAMGOptions ( void *solver, HYPRE_Int B_Pi_coarsen_type,
                                         HYPRE_Int B_Pi_agg_levels, HYPRE_Int B_Pi_relax_type, HYPRE_Real B_Pi_theta,
                                         HYPRE_Int B_Pi_interp_type, HYPRE_Int B_Pi_Pmax );
@@ -303,7 +303,7 @@ HYPRE_Int HYPRE_ADSSetPrintLevel ( HYPRE_Solver solver, HYPRE_Int print_level );
 HYPRE_Int HYPRE_ADSSetSmoothingOptions ( HYPRE_Solver solver, HYPRE_Int relax_type,
                                          HYPRE_Int relax_times, HYPRE_Real relax_weight, HYPRE_Real omega );
 HYPRE_Int HYPRE_ADSSetChebySmoothingOptions ( HYPRE_Solver solver, HYPRE_Int cheby_order,
-                                              HYPRE_Int cheby_fraction );
+                                              HYPRE_Real cheby_fraction );
 HYPRE_Int HYPRE_ADSSetAMSOptions ( HYPRE_Solver solver, HYPRE_Int cycle_type,
                                    HYPRE_Int coarsen_type, HYPRE_Int agg_levels, HYPRE_Int relax_type, HYPRE_Real strength_threshold,
                                    HYPRE_Int interp_type, HYPRE_Int Pmax );
@@ -354,7 +354,7 @@ HYPRE_Int HYPRE_AMSSetPrintLevel ( HYPRE_Solver solver, HYPRE_Int print_level );
 HYPRE_Int HYPRE_AMSSetSmoothingOptions ( HYPRE_Solver solver, HYPRE_Int relax_type,
                                          HYPRE_Int relax_times, HYPRE_Real relax_weight, HYPRE_Real omega );
 HYPRE_Int HYPRE_AMSSetChebySmoothingOptions ( HYPRE_Solver solver, HYPRE_Int cheby_order,
-                                              HYPRE_Int cheby_fraction );
+                                              HYPRE_Real cheby_fraction );
 HYPRE_Int HYPRE_AMSSetAlphaAMGOptions ( HYPRE_Solver solver, HYPRE_Int alpha_coarsen_type,
                                         HYPRE_Int alpha_agg_levels, HYPRE_Int alpha_relax_type, HYPRE_Real alpha_strength_threshold,
                                         HYPRE_Int alpha_interp_type, HYPRE_Int alpha_Pmax );
@@ -2233,10 +2233,12 @@ HYPRE_Int hypre_ILUGetPermddPQPre(HYPRE_Int n, HYPRE_Int nLU, HYPRE_Int *A_diag_
                                   HYPRE_Int *pperm_pre, HYPRE_Int *qperm_pre, HYPRE_Int *nB);
 HYPRE_Int hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **pperm, HYPRE_Int **qperm,
                                HYPRE_Real tol, HYPRE_Int *nB, HYPRE_Int *nI, HYPRE_Int reordering_type);
-HYPRE_Int hypre_ILUGetInteriorExteriorPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU,
+HYPRE_Int hypre_ILUGetInteriorExteriorPerm(hypre_ParCSRMatrix *A,
+                                           HYPRE_MemoryLocation memory_location,
+                                           HYPRE_Int **perm, HYPRE_Int *nLU,
                                            HYPRE_Int reordering_type);
-HYPRE_Int hypre_ILUGetLocalPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU,
-                                HYPRE_Int reordering_type);
+HYPRE_Int hypre_ILUGetLocalPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm_ptr,
+                                HYPRE_Int *nLU, HYPRE_Int reordering_type);
 HYPRE_Int hypre_ILUWriteSolverParams(void *ilu_vdata);
 HYPRE_Int hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_Int **E_i,
                                           HYPRE_Int **E_j, HYPRE_Real **E_data);

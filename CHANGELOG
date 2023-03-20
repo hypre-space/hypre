@@ -7,6 +7,16 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
+Version 2.28.0 released 2023/03/17
+
+- Added new Gaussian elimination options for F-relaxation in MGR.
+- Switched to read-the-docs theme for documentation.
+- Using autoconf 2.71 now to generate 'configure' script.
+- Improved error handling for multi-component vectors.
+- Various bug fixes
+
+#====================================
+
 Version 2.27.0 released 2022/12/20
 
 - New SStructMatrix and SStructVector AddFEMBoxValues() routines to set finite

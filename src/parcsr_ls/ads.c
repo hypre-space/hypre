@@ -438,7 +438,7 @@ HYPRE_Int hypre_ADSSetSmoothingOptions(void *solver,
 
 HYPRE_Int hypre_ADSSetChebySmoothingOptions(void *solver,
                                             HYPRE_Int A_cheby_order,
-                                            HYPRE_Int A_cheby_fraction)
+                                            HYPRE_Real A_cheby_fraction)
 {
    hypre_ADSData *ads_data = (hypre_ADSData *) solver;
    ads_data -> A_cheby_order =  A_cheby_order;
