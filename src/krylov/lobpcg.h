@@ -7,6 +7,13 @@
 
 #include "multivector.h"
 #include "_hypre_utilities.h"
+#include "fortran_matrix.h"
+#include "HYPRE_MatvecFunctions.h"
+#include "HYPRE_krylov.h"
+
+#ifdef HYPRE_MIXED_PRECISION
+#include "krylov_mup_func.h"
+#endif
 
 #ifndef LOCALLY_OPTIMAL_BLOCK_PRECONDITIONED_CONJUGATE_GRADIENTS
 #define LOCALLY_OPTIMAL_BLOCK_PRECONDITIONED_CONJUGATE_GRADIENTS
@@ -27,6 +34,59 @@ typedef struct
    HYPRE_Real   relative;
 
 } lobpcg_Tolerance;
+
+typedef struct
+{
+   HYPRE_Int    (*Precond)(void*, void*, void*, void*);
+   HYPRE_Int    (*PrecondSetup)(void*, void*, void*, void*);
+
+} hypre_LOBPCGPrecond;
+
+typedef struct
+{
+   lobpcg_Tolerance              tolerance;
+   HYPRE_Int                           maxIterations;
+   HYPRE_Int                           verbosityLevel;
+   HYPRE_Int                           precondUsageMode;
+   HYPRE_Int                           iterationNumber;
+   utilities_FortranMatrix*      eigenvaluesHistory;
+   utilities_FortranMatrix*      residualNorms;
+   utilities_FortranMatrix*      residualNormsHistory;
+
+} lobpcg_Data;
+
+#define lobpcg_tolerance(data)            ((data).tolerance)
+#define lobpcg_absoluteTolerance(data)    ((data).tolerance.absolute)
+#define lobpcg_relativeTolerance(data)    ((data).tolerance.relative)
+#define lobpcg_maxIterations(data)        ((data).maxIterations)
+#define lobpcg_verbosityLevel(data)       ((data).verbosityLevel)
+#define lobpcg_precondUsageMode(data)     ((data).precondUsageMode)
+#define lobpcg_iterationNumber(data)      ((data).iterationNumber)
+#define lobpcg_eigenvaluesHistory(data)   ((data).eigenvaluesHistory)
+#define lobpcg_residualNorms(data)        ((data).residualNorms)
+#define lobpcg_residualNormsHistory(data) ((data).residualNormsHistory)
+
+typedef struct
+{
+
+   lobpcg_Data                   lobpcgData;
+
+   mv_InterfaceInterpreter*      interpreter;
+
+   void*                         A;
+   void*                         matvecData;
+   void*                         precondData;
+
+   void*                         B;
+   void*                         matvecDataB;
+   void*                         T;
+   void*                         matvecDataT;
+
+   hypre_LOBPCGPrecond           precondFunctions;
+
+   HYPRE_MatvecFunctions*        matvecFunctions;
+
+} hypre_LOBPCGData;
 
 typedef struct
 {
@@ -82,6 +142,69 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
               HYPRE_Int residualNormsHistory_gh
 
             );
+
+HYPRE_Int
+lobpcg_initialize( lobpcg_Data* data );
+HYPRE_Int
+lobpcg_clean( lobpcg_Data* data );
+HYPRE_Int
+hypre_LOBPCGDestroy( void *pcg_vdata );
+HYPRE_Int
+hypre_LOBPCGSetup( void *pcg_vdata, void *A, void *b, void *x );
+HYPRE_Int
+hypre_LOBPCGSetupB( void *pcg_vdata, void *B, void *x );
+HYPRE_Int
+hypre_LOBPCGSetupT( void *pcg_vdata, void *T, void *x );
+HYPRE_Int
+hypre_LOBPCGSetTol( void* pcg_vdata, HYPRE_Real tol );
+HYPRE_Int
+hypre_LOBPCGSetRTol( void* pcg_vdata, HYPRE_Real tol );
+HYPRE_Int
+hypre_LOBPCGSetMaxIter( void* pcg_vdata, HYPRE_Int max_iter  );
+HYPRE_Int
+hypre_LOBPCGSetPrecondUsageMode( void* pcg_vdata, HYPRE_Int mode  );
+HYPRE_Int
+hypre_LOBPCGGetPrecond( void         *pcg_vdata,
+                        HYPRE_Solver *precond_data_ptr );
+HYPRE_Int
+hypre_LOBPCGSetPrecond( void  *pcg_vdata,
+                        HYPRE_Int  (*precond)(void*, void*, void*, void*),
+                        HYPRE_Int  (*precond_setup)(void*, void*, void*, void*),
+                        void  *precond_data );
+HYPRE_Int
+hypre_LOBPCGSetPrintLevel( void *pcg_vdata, HYPRE_Int level );
+void
+hypre_LOBPCGPreconditioner( void *vdata, void* x, void* y );
+void
+hypre_LOBPCGOperatorA( void *pcg_vdata, void* x, void* y );
+void
+hypre_LOBPCGOperatorB( void *pcg_vdata, void* x, void* y );
+void
+hypre_LOBPCGMultiPreconditioner( void *data, void * x, void*  y );
+void
+hypre_LOBPCGMultiOperatorA( void *data, void * x, void*  y );
+void
+hypre_LOBPCGMultiOperatorB( void *data, void * x, void*  y );
+HYPRE_Int
+hypre_LOBPCGSolve( void *vdata,
+                   mv_MultiVectorPtr con,
+                   mv_MultiVectorPtr vec,
+                   HYPRE_Real* val );
+utilities_FortranMatrix*
+hypre_LOBPCGResidualNorms( void *vdata );
+utilities_FortranMatrix*
+hypre_LOBPCGResidualNormsHistory( void *vdata );
+utilities_FortranMatrix*
+hypre_LOBPCGEigenvaluesHistory( void *vdata );
+HYPRE_Int
+hypre_LOBPCGIterations( void* vdata );
+void hypre_LOBPCGMultiOperatorB(void *data,
+                                void *x,
+                                void *y);
+
+//void lobpcg_MultiVectorByMultiVector(mv_MultiVectorPtr        x,
+//                                     mv_MultiVectorPtr        y,
+//                                     utilities_FortranMatrix *xy);
 
 #ifdef __cplusplus
 }

@@ -182,14 +182,6 @@ HYPRE_LOBPCGEigenvaluesHistory(HYPRE_Solver solver);
 /* Returns the number of iterations performed by LOBPCG */
 HYPRE_Int HYPRE_LOBPCGIterations(HYPRE_Solver solver);
 
-void hypre_LOBPCGMultiOperatorB(void *data,
-                                void *x,
-                                void *y);
-
-void lobpcg_MultiVectorByMultiVector(mv_MultiVectorPtr        x,
-                                     mv_MultiVectorPtr        y,
-                                     utilities_FortranMatrix *xy);
-
 /**@}*/
 
 /*--------------------------------------------------------------------------
