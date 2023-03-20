@@ -10,6 +10,10 @@
 
 #include "HYPRE_utilities.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "multivector_mup_func.h"
+#endif
+
 typedef struct
 {
    /* vector operations */

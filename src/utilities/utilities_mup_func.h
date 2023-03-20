@@ -14,7 +14,7 @@
 #ifndef UTILITIES_MUP_FUNC_HEADER
 #define UTILITIES_MUP_FUNC_HEADER
 
-#include "HYPRE_utilities.h"
+#include "multiprecision.h"
 
 #define hypre_checkerror HYPRE_MULTIPRECISION_FUNC ( hypre_checkerror )
 #define hypre_clearallerrors HYPRE_MULTIPRECISION_FUNC ( hypre_clearallerrors )

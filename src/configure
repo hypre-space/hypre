@@ -3595,14 +3595,15 @@ printf "%s\n" "#define HYPRE_COMPLEX 1" >>confdefs.h
 fi
 
 # Check whether --enable-mixed-precision was given.
-if test "${enable_mixed_precision+set}" = set; then :
+if test ${enable_mixed_precision+y}
+then :
   enableval=$enable_mixed_precision; case "${enableval}" in
     yes) hypre_using_fei=no
          hypre_using_mixed_precision=yes ;;
     no)  hypre_using_mixed_precision=no ;;
     *)   as_fn_error $? "Bad value ${enableval} for --enable-mixed-precision" "$LINENO" 5 ;;
  esac
-else
+else $as_nop
   hypre_using_mixed_precision=no
 
 fi
@@ -3611,7 +3612,7 @@ MP_BUILD=0
 if test "$hypre_using_mixed_precision" = "yes"
 then
 
-$as_echo "#define HYPRE_MIXED_PRECISION 1" >>confdefs.h
+printf "%s\n" "#define HYPRE_MIXED_PRECISION 1" >>confdefs.h
 
    MP_BUILD=1
 fi

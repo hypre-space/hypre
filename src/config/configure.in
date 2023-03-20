@@ -353,7 +353,7 @@ then
    AC_DEFINE(HYPRE_COMPLEX, 1, [Define to 1 if using complex values])
 fi
 
-dnl *** Mixed-precision option
+dnl *** Mixed-precision support build option
 AC_ARG_ENABLE(mixed-precision,
 AS_HELP_STRING([--enable-mixed-precision],
                [Enable mixed-precision build (default is NO).]),
