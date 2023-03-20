@@ -32,6 +32,7 @@
 #include <time.h>
 
 #include "HYPRE_lobpcg.h"
+#include "lobpcg.h"
 
 /* end lobpcg */
 

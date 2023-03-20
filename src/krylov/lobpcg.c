@@ -101,20 +101,6 @@ lobpcg_solveGEVP(
 }
 
 static void
-lobpcg_MultiVectorByMultiVector(
-   mv_MultiVectorPtr x,
-   mv_MultiVectorPtr y,
-   utilities_FortranMatrix* xy
-)
-{
-   mv_MultiVectorByMultiVector( x, y,
-                                utilities_FortranMatrixGlobalHeight( xy ),
-                                utilities_FortranMatrixHeight( xy ),
-                                utilities_FortranMatrixWidth( xy ),
-                                utilities_FortranMatrixValues( xy ) );
-}
-
-static void
 lobpcg_MultiVectorByMatrix(
    mv_MultiVectorPtr x,
    utilities_FortranMatrix* r,
@@ -1184,6 +1170,20 @@ hypre_LOBPCGSetup( void *pcg_vdata, void *A, void *b, void *x )
    }
 
    return hypre_error_flag;
+}
+
+void
+lobpcg_MultiVectorByMultiVector(
+   mv_MultiVectorPtr x,
+   mv_MultiVectorPtr y,
+   utilities_FortranMatrix* xy
+)
+{
+   mv_MultiVectorByMultiVector( x, y,
+                                utilities_FortranMatrixGlobalHeight( xy ),
+                                utilities_FortranMatrixHeight( xy ),
+                                utilities_FortranMatrixWidth( xy ),
+                                utilities_FortranMatrixValues( xy ) );
 }
 
 HYPRE_Int
