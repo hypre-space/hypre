@@ -16,6 +16,10 @@
 
 #include "_hypre_utilities.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "krylov_mup_func.h"
+#endif
+
 #define hypre_CTAllocF(type, count, funcs, location) \
   ( (type *)(*(funcs->CAlloc))((size_t)(count), (size_t)sizeof(type), location) )
 
