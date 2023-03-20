@@ -891,10 +891,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
           hypre_printf("\n\nUsing Auxilliary matrix for computing strength matrix: method %d \n",method);
        use_aux_strength_mat = method;
    }
-   if(use_aux_strength_mat == 10)
+   if(use_aux_strength_mat == 10 || use_aux_strength_mat == 12)
    {
       /* Build auxilliary matrix for strength */
-      hypre_BoomerAMGCreateAuxS(A, NULL, &S_aux, 0); 
+      hypre_BoomerAMGCreateAuxS(A, NULL, &S_aux, use_aux_strength_mat);
    }
    else if(use_aux_strength_mat == 11)
    {
@@ -1093,7 +1093,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                      hypre_ParCSRMatrixDestroy(S_aux);
                      S_aux = NULL;
                   }
-                  else if(use_aux_strength_mat == 10 || use_aux_strength_mat == 11)
+                  else if(use_aux_strength_mat == 10 || use_aux_strength_mat == 11 || use_aux_strength_mat == 12)
                   {
                      hypre_BoomerAMGCreateS(S_aux, strong_threshold, max_row_sum,
                                          num_functions, dof_func_data, &S); 
@@ -3015,7 +3015,7 @@ hypre_printf("Building RAP here ... nongal \n");
                hypre_BoomerAMGBuildCoarseOperatorKT(P_array[level], A_array[level],
                                                     P_array[level], keepTranspose, &A_H);
                
-               if(use_aux_strength_mat == 10 || use_aux_strength_mat == 11)
+               if(use_aux_strength_mat == 10 || use_aux_strength_mat == 11 || use_aux_strength_mat == 12)
                {
                   hypre_BoomerAMGBuildCoarseOperatorKT(P_array[level], S_aux,
                                        P_array[level], keepTranspose, &S_H);
