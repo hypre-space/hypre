@@ -310,8 +310,8 @@ if (HYPRE_WITH_CUDA)
     endif ()
 
     # Default to cuda sm 70 if not specified
-    if (!GPU_ARCH)
-      set(GPU_ARCH ON CACHE BOOL "70" FORCE)
+    if (GPU_ARCH STREQUAL "")
+       set(GPU_ARCH "70" CACHE STRING "" FORCE)
     endif ()
     if (CMAKE_VERSION VERSION_LESS 3.18.0)
       add_compile_options("$<$<COMPILE_LANGUAGE:CUDA>:-arch=sm_${GPU_ARCH}>")
