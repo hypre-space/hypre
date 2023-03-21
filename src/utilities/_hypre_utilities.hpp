@@ -457,7 +457,6 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csr2csc                rocsparse_dcsr2csc
 #endif
 
-
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \
    cublasStatus_t err = call;                                                                \
    if (CUBLAS_STATUS_SUCCESS != err) {                                                       \

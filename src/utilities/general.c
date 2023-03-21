@@ -338,6 +338,10 @@ HYPRE_Init(void)
    hypre_UmpireInit(_hypre_handle);
 #endif
 
+#if defined(HYPRE_USING_MAGMA)
+   hypre_MagmaInit(_hypre_handle);
+#endif
+
    return hypre_error_flag;
 }
 
@@ -352,6 +356,10 @@ HYPRE_Finalize(void)
 {
 #if defined(HYPRE_USING_UMPIRE)
    hypre_UmpireFinalize(_hypre_handle);
+#endif
+
+#if defined(HYPRE_USING_MAGMA)
+   hypre_MagmaFinalize();
 #endif
 
    hypre_HandleDestroy(_hypre_handle);

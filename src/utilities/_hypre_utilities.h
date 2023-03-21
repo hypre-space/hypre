@@ -1469,6 +1469,8 @@ static char hypre__markname[1024];
 #ifndef HYPRE_HANDLE_H
 #define HYPRE_HANDLE_H
 
+#include "magma.h"
+
 struct hypre_DeviceData;
 typedef struct hypre_DeviceData hypre_DeviceData;
 
@@ -1477,11 +1479,16 @@ typedef struct
    HYPRE_Int              hypre_error;
    HYPRE_MemoryLocation   memory_location;
    HYPRE_ExecutionPolicy  default_exec_policy;
+
 #if defined(HYPRE_USING_GPU)
    hypre_DeviceData      *device_data;
-   /* device G-S options */
-   HYPRE_Int              device_gs_method;
+   HYPRE_Int              device_gs_method; /* device G-S options */
 #endif
+
+   /* user malloc/free function pointers */
+   GPUMallocFunc          user_device_malloc;
+   GPUMfreeFunc           user_device_free;
+
 #if defined(HYPRE_USING_UMPIRE)
    char                   umpire_device_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
    char                   umpire_um_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
@@ -1498,14 +1505,16 @@ typedef struct
    HYPRE_Int              own_umpire_pinned_pool;
    umpire_resourcemanager umpire_rm;
 #endif
-   /* user malloc/free function pointers */
-   GPUMallocFunc          user_device_malloc;
-   GPUMfreeFunc           user_device_free;
+
+#if defined(HYPRE_USING_MAGMA)
+   magma_queue_t          magma_queue;
+#endif
 } hypre_Handle;
 
 /* accessor macros to hypre_Handle */
 #define hypre_HandleMemoryLocation(hypre_handle)                 ((hypre_handle) -> memory_location)
 #define hypre_HandleDefaultExecPolicy(hypre_handle)              ((hypre_handle) -> default_exec_policy)
+
 #define hypre_HandleDeviceData(hypre_handle)                     ((hypre_handle) -> device_data)
 #define hypre_HandleDeviceGSMethod(hypre_handle)                 ((hypre_handle) -> device_gs_method)
 
@@ -1560,6 +1569,8 @@ typedef struct
 #define hypre_HandleOwnUmpireUMPool(hypre_handle)                ((hypre_handle) -> own_umpire_um_pool)
 #define hypre_HandleOwnUmpireHostPool(hypre_handle)              ((hypre_handle) -> own_umpire_host_pool)
 #define hypre_HandleOwnUmpirePinnedPool(hypre_handle)            ((hypre_handle) -> own_umpire_pinned_pool)
+
+#define hypre_HandleMagmaQueue(hypre_handle)                     ((hypre_handle) -> magma_queue)
 
 #endif
 /******************************************************************************
@@ -1670,6 +1681,42 @@ typedef struct
 #define hypre_IntArrayMemoryLocation(array)        ((array) -> memory_location)
 
 #endif
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+#ifndef HYPRE_MAGMA_HEADER
+#define HYPRE_MAGMA_HEADER
+
+#if defined(HYPRE_USING_MAGMA)
+
+#include "error.h"
+
+#ifdef __cplusplus
+extern "C++"
+{
+#endif
+
+#include <magma_v2.h>
+#include <magma_lapack.h>
+
+#ifdef __cplusplus
+}
+#endif
+
+#define HYPRE_MAGMA_CALL(call) do {                   \
+   magma_int_t err = call;                            \
+   if (MAGMA_SUCCESS != err) {                        \
+      printf("MAGMA ERROR (code = %d) at %s:%d\n",    \
+            err, __FILE__, __LINE__);                 \
+      hypre_assert(0);                                \
+   } } while(0)
+
+#endif /* HYPRE_USING_MAGMA */
+#endif /* HYPRE_MAGMA_HEADER */
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -2093,6 +2140,12 @@ HYPRE_Int hypre_PrintMemoryTracker( size_t *totl_bytes_o, size_t *peak_bytes_o,
                                     size_t *curr_bytes_o, HYPRE_Int do_print, const char *fname );
 HYPRE_Int hypre_MemoryTrackerSetPrint(HYPRE_Int do_print);
 HYPRE_Int hypre_MemoryTrackerSetFileName(const char *file_name);
+#endif
+
+/* magma.c */
+#if defined(HYPRE_USING_MAGMA)
+HYPRE_Int hypre_MagmaInit(hypre_Handle *hypre_handle_);
+HYPRE_Int hypre_MagmaFinalize(void);
 #endif
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
