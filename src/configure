@@ -740,6 +740,9 @@ CC
 GPUFLAGS
 GPUCC
 GPU_ARCH
+DPLROOT
+MKLROOT
+ROCM_PATH
 CUDA_HOME
 host_os
 host_vendor
@@ -901,6 +904,9 @@ with_lapack
 host_alias
 target_alias
 CUDA_HOME
+ROCM_PATH
+MKLROOT
+DPLROOT
 GPU_ARCH
 GPUCC
 GPUFLAGS
@@ -1782,6 +1788,9 @@ Optional Packages:
 
 Some influential environment variables:
   CUDA_HOME   CUDA home directory
+  ROCM_PATH   ROCm home directory
+  MKLROOT     oneMKL home directory
+  DPLROOT     oneDPL home directory
   GPU_ARCH    GPU architecture (e.g. CUDA/HIP SM number or Intel GPU device
               number)
   GPUCC       GPU compiler command (e.g. nvcc, hipcc, icpx)
@@ -3750,6 +3759,9 @@ then
 else
    hypre_user_chose_cxxflags=yes
 fi
+
+
+
 
 
 
@@ -10745,8 +10757,8 @@ printf "%s\n" "#define HYPRE_USING_SYCL 1" >>confdefs.h
                 if test "x${GPU_ARCH}" != "x"
         then
            HYPRE_SYCL_TARGET="-fsycl-targets=spir64_gen -Xs '-device "
-           for sm in ${GPU_ARCH}; do
-              HYPRE_SYCL_TARGET="${HYPRE_SYCL_TARGET}${sm},"
+           for dev in ${GPU_ARCH}; do
+              HYPRE_SYCL_TARGET="${HYPRE_SYCL_TARGET}${dev},"
            done
            HYPRE_SYCL_TARGET="`echo ${HYPRE_SYCL_TARGET}|sed 's/,$//'`"
            HYPRE_SYCL_TARGET=" ${HYPRE_SYCL_TARGET}'"
@@ -11053,6 +11065,7 @@ printf "%s\n" "#define HYPRE_LINUX 1" >>confdefs.h
          fi
          ;;
    esac
+
 
 
 
