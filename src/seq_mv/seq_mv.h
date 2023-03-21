@@ -14,6 +14,10 @@
 
 #include "_hypre_utilities.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "seq_mv_mup_func.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -96,6 +100,10 @@ typedef struct
 #define hypre_CSRMatrixSortedData(matrix)           ((matrix) -> sorted_data)
 #define hypre_CSRMatrixCsrsvData(matrix)            ((matrix) -> csrsv_data)
 #define hypre_CSRMatrixGPUMatData(matrix)           ((matrix) -> mat_data)
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+#include "seq_mv_mup_func.h"
 #endif
 
 HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin( hypre_CSRMatrix *A );

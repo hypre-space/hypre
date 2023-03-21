@@ -78,6 +78,10 @@ typedef struct
 #define hypre_CSRMatrixGPUMatData(matrix)           ((matrix) -> mat_data)
 #endif
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "seq_mv_mup_func.h"
+#endif
+
 HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin( hypre_CSRMatrix *A );
 HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd( hypre_CSRMatrix *A );
 
