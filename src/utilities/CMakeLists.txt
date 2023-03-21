@@ -31,6 +31,7 @@ set(SRCS
   int_array.c
   int_array_device.c
   hopscotch_hash.c
+  magma.c
   memory.c
   memory_tracker.c
   merge_sort.c
