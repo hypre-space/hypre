@@ -220,6 +220,9 @@
 /* Define to 1 if executing on host/device with KOKKOS */
 #undef HYPRE_USING_KOKKOS
 
+/* Define to 1 if MAGMA is enabled */
+#undef HYPRE_USING_MAGMA
+
 /* Define to 1 if want to track memory operations in hypre */
 #undef HYPRE_USING_MEMORY_TRACKER
 
