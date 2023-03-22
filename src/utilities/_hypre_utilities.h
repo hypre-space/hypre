@@ -1700,6 +1700,9 @@ extern "C++"
 {
 #endif
 
+#if !defined(MAGMA_GLOBAL)
+#define ADD_
+#endif
 #include <magma_v2.h>
 #include <magma_lapack.h>
 
@@ -3568,4 +3571,3 @@ HYPRE_Int hypre_mm_read_mtx_crd_size(FILE *f, HYPRE_Int *M, HYPRE_Int *N, HYPRE_
 #endif
 
 #endif
-
