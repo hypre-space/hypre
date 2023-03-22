@@ -9,6 +9,10 @@
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "IJ_mv_mup_func.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -374,6 +378,10 @@ hypre_IJVectorMemoryLocation(hypre_IJVector *vector)
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
+
+#ifdef HYPRE_MIXED_PRECISION
+#include "IJ_mv_mup_func.h"
+#endif
 
 /* aux_parcsr_matrix.c */
 HYPRE_Int hypre_AuxParCSRMatrixCreate ( hypre_AuxParCSRMatrix **aux_matrix,

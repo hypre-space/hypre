@@ -5,6 +5,10 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "IJ_mv_mup_func.h"
+#endif
+
 /* aux_parcsr_matrix.c */
 HYPRE_Int hypre_AuxParCSRMatrixCreate ( hypre_AuxParCSRMatrix **aux_matrix,
                                         HYPRE_Int local_num_rows, HYPRE_Int local_num_cols, HYPRE_Int *sizes );

@@ -22,6 +22,10 @@ cat > $INTERNAL_HEADER <<@
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "IJ_mv_mup_func.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
