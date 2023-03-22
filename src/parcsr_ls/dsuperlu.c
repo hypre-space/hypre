@@ -36,17 +36,16 @@ hypre_DSLUData;
 HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE_Int print_level)
 {
    /* Par Data Structure variables */
-   HYPRE_BigInt global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_BigInt       global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
    MPI_Comm           comm = hypre_ParCSRMatrixComm(A);
-   hypre_CSRMatrix *A_local;
-   HYPRE_Int num_rows;
-   HYPRE_Int num_procs, my_id;
-   HYPRE_Int pcols = 1, prows = 1;
-   HYPRE_BigInt *big_rowptr = NULL;
-   hypre_DSLUData *dslu_data = NULL;
-
-   HYPRE_Int info = 0;
-   HYPRE_Int nrhs = 0;
+   hypre_CSRMatrix   *A_local_, *A_local;
+   HYPRE_Int          num_rows;
+   HYPRE_Int          num_procs, my_id;
+   HYPRE_Int          pcols = 1, prows = 1;
+   HYPRE_BigInt      *big_rowptr = NULL;
+   hypre_DSLUData    *dslu_data = NULL;
+   HYPRE_Int          info = 0;
+   HYPRE_Int          nrhs = 0;
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -57,7 +56,17 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
    dslu_data = hypre_CTAlloc(hypre_DSLUData, 1, HYPRE_MEMORY_HOST);
 
    /* Merge diag and offd into one matrix (global ids) */
-   A_local = hypre_MergeDiagAndOffd(A);
+   A_local_ = hypre_MergeDiagAndOffd(A);
+
+   if (hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A_local_)) != hypre_MEMORY_HOST)
+   {
+      A_local = hypre_CSRMatrixClone_v2(A_local_, 1, HYPRE_MEMORY_HOST);
+      hypre_CSRMatrixDestroy(A_local_);
+   }
+   else
+   {
+      A_local = A_local_;
+   }
 
    num_rows = hypre_CSRMatrixNumRows(A_local);
    /* Now convert hypre matrix to a SuperMatrix */
@@ -134,6 +143,7 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
 
    dslu_data->dslu_options.Fact = FACTORED;
    *solver = (HYPRE_Solver) dslu_data;
+
    return hypre_error_flag;
 }
 
