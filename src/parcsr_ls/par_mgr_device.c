@@ -12,7 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
-#include "seq_mv/protos.h"
+#include "seq_mv/seq_mv.h"
 #include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)

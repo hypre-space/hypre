@@ -8,7 +8,6 @@ include ../config/Makefile.config
 FEIHYPREFILES = ${HYPRE_FEI_HYPRE_FILES}
 FEMLIFILES = ${HYPRE_FEI_FEMLI_FILES}
 MATMATFILES = ${HYPRE_SRC_TOP_DIR}/matrix_matrix/*.o
-PARCSRLSFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.o
 SSTRUCTLSFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.o
 SSTRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.o
 STRUCTLSFILES = ${HYPRE_SRC_TOP_DIR}/struct_ls/*.o
@@ -23,6 +22,7 @@ KRYLOVFILES = ${HYPRE_SRC_TOP_DIR}/krylov/MuP_obj.dir/krylov_*/*.o
 SEQMVFILES = ${HYPRE_SRC_TOP_DIR}/seq_mv/MuP_obj.dir/seq_mv_*/*.o
 PARCSRMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_mv/MuP_obj.dir/parcsr_mv_*/*.o
 PARCSRBLOCKMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/MuP_obj.dir/parcsr_block_mv_*/*.o
+PARCSRLSFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_ls/MuP_obj.dir/parcsr_ls_*/*.o
 MULTIVECFILES = ${HYPRE_SRC_TOP_DIR}/multivector/MuP_obj.dir/multivector_*/*.o
 UTILITIESFILES = ${HYPRE_SRC_TOP_DIR}/utilities/MuP_obj.dir/utilities_*/*.o
 BLASFILES = ${HYPRE_SRC_TOP_DIR}/blas/MuP_obj.dir/blas_*/*.o
@@ -37,23 +37,26 @@ KRYLOVFILES = ${HYPRE_SRC_TOP_DIR}/krylov/*.o
 SEQMVFILES = ${HYPRE_SRC_TOP_DIR}/seq_mv/*.o
 PARCSRMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.o
 PARCSRBLOCKMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/*.o
+PARCSRLSFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.o
 MULTIVECFILES = ${HYPRE_SRC_TOP_DIR}/multivector/*.o
 UTILITIESFILES = ${HYPRE_SRC_TOP_DIR}/utilities/*.o
 BLASFILES = ${HYPRE_SRC_TOP_DIR}/blas/*.o
 LAPACKFILES = ${HYPRE_SRC_TOP_DIR}/lapack/*.o
 endif
 
-PARCSRLSOBJFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.obj
+
 SSTRUCTLSOBJFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.obj
 SSTRUCTMVOBJFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.obj
 STRUCTLSOBJFILES = ${HYPRE_SRC_TOP_DIR}/struct_ls/*.obj
 STRUCTMVOBJFILES = ${HYPRE_SRC_TOP_DIR}/struct_mv/*.obj
 ifeq (${MP_BUILD}, 1) 
+PARCSRLSOBJFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_ls/MuP_obj.dir/parcsr_ls_*/*.obj
 IJMVOBJFILES = ${HYPRE_SRC_TOP_DIR}/IJ_mv/MuP_obj.dir/IJ_mv_*/*.obj
 SEQMVOBJFILES = ${HYPRE_SRC_TOP_DIR}/seq_mv/MuP_obj.dir/seq_mv_*/*.obj
 PARCSRMVOBJFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_mv/MuP_obj.dir/parcsr_mv_*/*.obj
 UTILITIESOBJFILES = ${HYPRE_SRC_TOP_DIR}/utilities/MuP_obj.dir/utilities_*/*.obj
 else
+PARCSRLSOBJFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.obj
 IJMVOBJFILES = ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.obj
 SEQMVOBJFILES = ${HYPRE_SRC_TOP_DIR}/seq_mv/*.obj
 PARCSRMVOBJFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.obj
