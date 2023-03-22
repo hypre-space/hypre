@@ -14,7 +14,6 @@ PILUTFILES = ${HYPRE_PILUT_FILES}
 DISTMATRIXFILES = ${HYPRE_SRC_TOP_DIR}/distributed_matrix/*.o
 MATMATFILES = ${HYPRE_SRC_TOP_DIR}/matrix_matrix/*.o
 PARCSRLSFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.o
-PARCSRBLOCKMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/*.o
 SSTRUCTLSFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.o
 SSTRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.o
 STRUCTLSFILES = ${HYPRE_SRC_TOP_DIR}/struct_ls/*.o
@@ -23,6 +22,7 @@ ifeq (${MP_BUILD}, 1)
 KRYLOVFILES = ${HYPRE_SRC_TOP_DIR}/krylov/MuP_obj.dir/krylov_*/*.o
 SEQMVFILES = ${HYPRE_SRC_TOP_DIR}/seq_mv/MuP_obj.dir/seq_mv_*/*.o
 PARCSRMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_mv/MuP_obj.dir/parcsr_mv_*/*.o
+PARCSRBLOCKMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/MuP_obj.dir/parcsr_block_mv_*/*.o
 MULTIVECFILES = ${HYPRE_SRC_TOP_DIR}/multivector/MuP_obj.dir/multivector_*/*.o
 UTILITIESFILES = ${HYPRE_SRC_TOP_DIR}/utilities/MuP_obj.dir/utilities_*/*.o
 BLASFILES = ${HYPRE_SRC_TOP_DIR}/blas/MuP_obj.dir/blas_*/*.o
@@ -31,6 +31,7 @@ else
 KRYLOVFILES = ${HYPRE_SRC_TOP_DIR}/krylov/*.o
 SEQMVFILES = ${HYPRE_SRC_TOP_DIR}/seq_mv/*.o
 PARCSRMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.o
+PARCSRBLOCKMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/*.o
 MULTIVECFILES = ${HYPRE_SRC_TOP_DIR}/multivector/*.o
 UTILITIESFILES = ${HYPRE_SRC_TOP_DIR}/utilities/*.o
 BLASFILES = ${HYPRE_SRC_TOP_DIR}/blas/*.o
