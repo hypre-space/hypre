@@ -18,6 +18,10 @@
 #include "RowPatt.h"
 #include "LoadBal.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "ParaSails_mup_func.h"
+#endif
+
 #ifndef _PARASAILS_H
 #define _PARASAILS_H
 

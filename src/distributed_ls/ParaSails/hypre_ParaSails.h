@@ -14,6 +14,10 @@
 #include "HYPRE_distributed_matrix_protos.h"
 #include "../../IJ_mv/HYPRE_IJ_mv.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "ParaSails_mup_func.h"
+#endif
+
 typedef void *hypre_ParaSails;
 
 HYPRE_Int hypre_ParaSailsCreate(MPI_Comm comm, hypre_ParaSails *obj);

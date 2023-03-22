@@ -15,6 +15,10 @@
 #include "Mem.h"
 #include "Matrix.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "ParaSails_mup_func.h"
+#endif
+
 #ifndef _STOREDROWS_H
 #define _STOREDROWS_H
 

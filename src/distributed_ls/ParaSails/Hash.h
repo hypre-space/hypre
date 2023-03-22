@@ -12,6 +12,9 @@
  *****************************************************************************/
 
 #include <stdio.h>
+#ifdef HYPRE_MIXED_PRECISION
+#include "ParaSails_mup_func.h"
+#endif
 
 #ifndef _HASH_H
 #define _HASH_H

@@ -16,6 +16,10 @@
 
 #include "_hypre_utilities.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "ParaSails_mup_func.h"
+#endif
+
 HYPRE_Real randomized_select(HYPRE_Real *a, HYPRE_Int p, HYPRE_Int r, HYPRE_Int i);
 void hypre_shell_sort(const HYPRE_Int n, HYPRE_Int x[]);
 

@@ -7,9 +7,6 @@ include ../config/Makefile.config
 
 FEIHYPREFILES = ${HYPRE_FEI_HYPRE_FILES}
 FEMLIFILES = ${HYPRE_FEI_FEMLI_FILES}
-EUCLIDFILES = ${HYPRE_EUCLID_FILES}
-PARASAILSFILES = ${HYPRE_PARASAILS_FILES}
-PILUTFILES = ${HYPRE_PILUT_FILES}
 MATMATFILES = ${HYPRE_SRC_TOP_DIR}/matrix_matrix/*.o
 PARCSRLSFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.o
 SSTRUCTLSFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.o
@@ -17,6 +14,9 @@ SSTRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.o
 STRUCTLSFILES = ${HYPRE_SRC_TOP_DIR}/struct_ls/*.o
 STRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o
 ifeq (${MP_BUILD}, 1) 
+PILUTFILES =  ${HYPRE_SRC_TOP_DIR}/distributed_ls/pilut/MuP_obj.dir/pilut_*/*.o
+EUCLIDFILES = ${HYPRE_SRC_TOP_DIR}/distributed_ls/Euclid/MuP_obj.dir/Euclid_*/*.o
+PARASAILSFILES = ${HYPRE_SRC_TOP_DIR}/distributed_ls/ParaSails/MuP_obj.dir/ParaSails_*/*.o
 IJMVFILES = ${HYPRE_SRC_TOP_DIR}/IJ_mv/MuP_obj.dir/IJ_mv_*/*.o
 DISTMATRIXFILES = ${HYPRE_SRC_TOP_DIR}/distributed_matrix/MuP_obj.dir/distributed_matrix_*/*.o
 KRYLOVFILES = ${HYPRE_SRC_TOP_DIR}/krylov/MuP_obj.dir/krylov_*/*.o
@@ -28,6 +28,9 @@ UTILITIESFILES = ${HYPRE_SRC_TOP_DIR}/utilities/MuP_obj.dir/utilities_*/*.o
 BLASFILES = ${HYPRE_SRC_TOP_DIR}/blas/MuP_obj.dir/blas_*/*.o
 LAPACKFILES = ${HYPRE_SRC_TOP_DIR}/lapack/MuP_obj.dir/lapack_*/*.o
 else
+PILUTFILES = ${HYPRE_PILUT_FILES}
+EUCLIDFILES = ${HYPRE_EUCLID_FILES}
+PARASAILSFILES = ${HYPRE_PARASAILS_FILES}
 IJMVFILES = ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o
 DISTMATRIXFILES = ${HYPRE_SRC_TOP_DIR}/distributed_matrix/*.o
 KRYLOVFILES = ${HYPRE_SRC_TOP_DIR}/krylov/*.o

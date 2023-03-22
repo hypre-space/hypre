@@ -16,6 +16,10 @@
 #include "Matrix.h"
 #include "Hash.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "ParaSails_mup_func.h"
+#endif
+
 #ifndef _NUMBERING_H
 #define _NUMBERING_H
 

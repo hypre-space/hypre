@@ -15,6 +15,10 @@
 #include "Mem.h"
 #include "DiagScale.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "ParaSails_mup_func.h"
+#endif
+
 #ifndef _PRUNEDROWS_H
 #define _PRUNEDROWS_H
 
