@@ -14,6 +14,10 @@
 #include "_hypre_struct_mv.h"
 #include "_hypre_IJ_mv.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "sstruct_mv_mup_func.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
