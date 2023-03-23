@@ -8,22 +8,6 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
-#ifdef HYPRE_USING_MEMORY_TRACKER
-hypre_MemoryTracker *_hypre_memory_tracker = NULL;
-
-/* accessor to the global ``_hypre_memory_tracker'' */
-hypre_MemoryTracker*
-hypre_memory_tracker(void)
-{
-   if (!_hypre_memory_tracker)
-   {
-      _hypre_memory_tracker = hypre_MemoryTrackerCreate();
-   }
-
-   return _hypre_memory_tracker;
-}
-#endif
-
 /* global variable _hypre_handle:
  * Outside this file, do NOT access it directly,
  * but use hypre_handle() instead (see handle.h) */
@@ -35,7 +19,8 @@ hypre_handle(void)
 {
    if (!_hypre_handle)
    {
-      _hypre_handle = hypre_HandleCreate();
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ERROR - _hypre_handle is not initialized. Calling HYPRE_Init(). All HYPRE_* or hypre_* function calls should occur between HYPRE_Init() and HYPRE_Finalize().\n");
+      HYPRE_Init();
    }
 
    return _hypre_handle;
@@ -354,12 +339,16 @@ HYPRE_Finalize(void)
    hypre_UmpireFinalize(_hypre_handle);
 #endif
 
+#if defined(HYPRE_USING_SYCL)
+   /* With sycl, cannot call hypre_GetDeviceLastError() after destroying the handle, so do it here */
+   hypre_GetDeviceLastError();
+#endif
+
    hypre_HandleDestroy(_hypre_handle);
 
    _hypre_handle = NULL;
 
 #if !defined(HYPRE_USING_SYCL)
-   /* With sycl, cannot call hypre_GetDeviceLastError() after destroying the handle */
    hypre_GetDeviceLastError();
 #endif
 
