@@ -650,8 +650,16 @@ struct hypre_CsrsvData
    char info_L;
    char info_U;
 #endif
-   hypre_int    BufferSize;
-   char        *Buffer;
+#if defined(HYPRE_USING_CUSPARSE)
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+   size_t BufferSize;
+#else
+   hypre_int BufferSize;
+#endif
+#else
+   hypre_int BufferSize;
+#endif
+   char *Buffer;
 };
 
 #define hypre_CsrsvDataInfoL(data)      ((data) -> info_L)
