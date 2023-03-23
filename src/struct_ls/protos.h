@@ -640,3 +640,8 @@ HYPRE_Int hypre_SparseMSGSetupRAPOp ( hypre_StructMatrix *R, hypre_StructMatrix 
 /* sparse_msg_solve.c */
 HYPRE_Int hypre_SparseMSGSolve ( void *smsg_vdata, hypre_StructMatrix *A, hypre_StructVector *b,
                                  hypre_StructVector *x );
+/* setrandom.c */
+HYPRE_Int hypre_StructVectorSetRandomValues( hypre_StructVector *vector, HYPRE_Int seed );
+HYPRE_Int hypre_StructSetRandomValues( void* v, HYPRE_Int seed ); 
+/* diagscale.c */
+HYPRE_Int hypre_StructDiagScale( hypre_StructMatrix   *A, hypre_StructVector   *y, hypre_StructVector   *x );                                                               
