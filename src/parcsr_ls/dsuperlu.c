@@ -58,12 +58,14 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
    /* Merge diag and offd into one matrix (global ids) */
    A_local_ = hypre_MergeDiagAndOffd(A);
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
    if (hypre_GetActualMemLocation(hypre_CSRMatrixMemoryLocation(A_local_)) != hypre_MEMORY_HOST)
    {
       A_local = hypre_CSRMatrixClone_v2(A_local_, 1, HYPRE_MEMORY_HOST);
       hypre_CSRMatrixDestroy(A_local_);
    }
    else
+#endif
    {
       A_local = A_local_;
    }
@@ -149,18 +151,39 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
 
 HYPRE_Int hypre_SLUDistSolve( void* solver, hypre_ParVector *b, hypre_ParVector *x)
 {
-   hypre_DSLUData *dslu_data = (hypre_DSLUData *) solver;
-   HYPRE_Int info = 0;
-   HYPRE_Real *B = hypre_VectorData(hypre_ParVectorLocalVector(x));
-   HYPRE_Int size = hypre_VectorSize(hypre_ParVectorLocalVector(x));
-   HYPRE_Int nrhs = 1;
+   hypre_DSLUData  *dslu_data = (hypre_DSLUData *) solver;
+   HYPRE_Int        info = 0;
+   HYPRE_Real      *x_data;
+   hypre_ParVector *x_host = NULL;
+   HYPRE_Int        size = hypre_VectorSize(hypre_ParVectorLocalVector(x));
+   HYPRE_Int        nrhs = 1;
 
    hypre_ParVectorCopy(b, x);
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+   if (hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(x)) != hypre_MEMORY_HOST)
+   {
+      x_host = hypre_ParVectorCloneDeep_v2(x, HYPRE_MEMORY_HOST);
+      x_data = hypre_VectorData(hypre_ParVectorLocalVector(x_host));
+   }
+   else
+#endif
+   {
+      x_data = hypre_VectorData(hypre_ParVectorLocalVector(x));
+   }
+
    pdgssvx(&(dslu_data->dslu_options), &(dslu_data->A_dslu),
-           &(dslu_data->dslu_ScalePermstruct), B, size, nrhs,
+           &(dslu_data->dslu_ScalePermstruct), x_data, size, nrhs,
            &(dslu_data->dslu_data_grid), &(dslu_data->dslu_data_LU),
            &(dslu_data->dslu_solve), dslu_data->berr, &(dslu_data->dslu_data_stat), &info);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+   if (x_host)
+   {
+      hypre_ParVectorCopy(x_host, x);
+      hypre_ParVectorDestroy(x_host);
+   }
+#endif
 
    return hypre_error_flag;
 }
