@@ -34,9 +34,9 @@ hypre_DSLUData;
 #endif
 */
 HYPRE_Int
-hypre_SLUDistSetup( HYPRE_Solver       *solver,
-                    hypre_ParCSRMatrix *A,
-                    HYPRE_Int           print_level)
+hypre_SLUDistSetup(HYPRE_Solver       *solver,
+                   hypre_ParCSRMatrix *A,
+                   HYPRE_Int           print_level)
 {
    /* Par Data Structure variables */
    HYPRE_BigInt       global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
