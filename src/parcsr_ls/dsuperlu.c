@@ -33,7 +33,10 @@ hypre_DSLUData;
 
 #endif
 */
-HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE_Int print_level)
+HYPRE_Int
+hypre_SLUDistSetup( HYPRE_Solver       *solver,
+                    hypre_ParCSRMatrix *A,
+                    HYPRE_Int           print_level)
 {
    /* Par Data Structure variables */
    HYPRE_BigInt       global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
@@ -145,7 +148,10 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
    return hypre_error_flag;
 }
 
-HYPRE_Int hypre_SLUDistSolve( void* solver, hypre_ParVector *b, hypre_ParVector *x)
+HYPRE_Int
+hypre_SLUDistSolve(void            *solver,
+                   hypre_ParVector *b,
+                   hypre_ParVector *x)
 {
    hypre_DSLUData  *dslu_data = (hypre_DSLUData *) solver;
    HYPRE_Int        info = 0;
@@ -184,7 +190,8 @@ HYPRE_Int hypre_SLUDistSolve( void* solver, hypre_ParVector *b, hypre_ParVector 
    return hypre_error_flag;
 }
 
-HYPRE_Int hypre_SLUDistDestroy( void* solver)
+HYPRE_Int
+hypre_SLUDistDestroy(void* solver)
 {
    hypre_DSLUData *dslu_data = (hypre_DSLUData *) solver;
 
@@ -200,6 +207,8 @@ HYPRE_Int hypre_SLUDistDestroy( void* solver)
    superlu_gridexit(&(dslu_data->dslu_data_grid));
    hypre_TFree(dslu_data->berr, HYPRE_MEMORY_HOST);
    hypre_TFree(dslu_data, HYPRE_MEMORY_HOST);
+
    return hypre_error_flag;
 }
+
 #endif
