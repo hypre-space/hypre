@@ -41,7 +41,7 @@ using hypre_DeviceItem = void*;
 #define CUSPARSE_NEWAPI_VERSION 11000
 #define CUSPARSE_NEWSPMM_VERSION 11401
 #define CUDA_MALLOCASYNC_VERSION 11020
-#define THRUST_CALL_BLOCKING 1
+#define CUDA_THRUST_NOSYNC_VERSION 12000
 
 #define CUSPARSE_SPSV_VERSION 11500
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
@@ -68,6 +68,16 @@ using hypre_DeviceItem = void*;
 #error cudaMalloc/FreeAsync needs CUDA 11.2
 #endif
 #endif
+
+#if defined(HYPRE_USING_THRUST_NOSYNC)
+#if CUDA_VERSION < CUDA_THRUST_NOSYNC_VERSION
+#error thrust::cuda::par_nosync needs CUDA 12
+#endif
+#define HYPRE_THRUST_EXECUTION thrust::cuda::par_nosync
+#else
+#define HYPRE_THRUST_EXECUTION thrust::cuda::par
+#endif
+
 #endif // defined(HYPRE_USING_CUDA)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -464,7 +474,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 
 #if defined(HYPRE_USING_CUDA)
 #define HYPRE_THRUST_CALL(func_name, ...) \
-   thrust::func_name(thrust::cuda::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
+   thrust::func_name(HYPRE_THRUST_EXECUTION(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
 #elif defined(HYPRE_USING_HIP)
 #define HYPRE_THRUST_CALL(func_name, ...) \
    thrust::func_name(thrust::hip::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
@@ -630,8 +640,8 @@ sycl::queue*        hypre_DeviceDataComputeStream(hypre_DeviceData *data);
 struct hypre_CsrsvData
 {
 #if defined(HYPRE_USING_CUSPARSE)
-   csrsv2Info_t info_L;
-   csrsv2Info_t info_U;
+   hypre_cusparseSpSVDescr info_L;
+   hypre_cusparseSpSVDescr info_U;
 #elif defined(HYPRE_USING_ROCSPARSE)
    rocsparse_mat_info info_L;
    rocsparse_mat_info info_U;
