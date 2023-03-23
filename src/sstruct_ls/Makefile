@@ -38,6 +38,29 @@ HEADERS =\
  sys_pfmg.h
 
 FILES =\
+ HYPRE_sstruct_bicgstab.c\
+ HYPRE_sstruct_gmres.c\
+ HYPRE_sstruct_flexgmres.c\
+ HYPRE_sstruct_lgmres.c\
+ HYPRE_sstruct_InterFAC.c\
+ HYPRE_sstruct_int.c\
+ HYPRE_sstruct_maxwell.c\
+ HYPRE_sstruct_pcg.c\
+ HYPRE_sstruct_split.c\
+ HYPRE_sstruct_sys_pfmg.c
+
+CUFILES =\
+ fac_amr_fcoarsen.c\
+ fac_amr_rap.c\
+ fac_restrict2.c\
+ fac_setup2.c\
+ fac_zero_stencilcoef.c\
+ node_relax.c\
+
+#######################
+# Multiprecision files
+#######################
+MuP_FILES = \
  F90_HYPRE_sstruct_bicgstab.c\
  F90_HYPRE_sstruct_gmres.c\
  F90_HYPRE_sstruct_flexgmres.c\
@@ -48,16 +71,6 @@ FILES =\
  F90_HYPRE_sstruct_pcg.c\
  F90_HYPRE_sstruct_split.c\
  F90_HYPRE_sstruct_sys_pfmg.c\
- HYPRE_sstruct_bicgstab.c\
- HYPRE_sstruct_gmres.c\
- HYPRE_sstruct_flexgmres.c\
- HYPRE_sstruct_lgmres.c\
- HYPRE_sstruct_InterFAC.c\
- HYPRE_sstruct_int.c\
- HYPRE_sstruct_maxwell.c\
- HYPRE_sstruct_pcg.c\
- HYPRE_sstruct_split.c\
- HYPRE_sstruct_sys_pfmg.c\
  bsearch.c\
  fac.c\
  fac_amr_zero_data.c\
@@ -96,17 +109,14 @@ FILES =\
  sys_semi_interp.c\
  sys_semi_restrict.c
 
-CUFILES =\
- fac_amr_fcoarsen.c\
- fac_amr_rap.c\
- fac_restrict2.c\
- fac_setup2.c\
- fac_zero_stencilcoef.c\
- node_relax.c\
-
-COBJS = ${FILES:.c=.o}
-CUOBJS = ${CUFILES:.c=.obj}
-OBJS = ${COBJS} ${CUOBJS}
+ifeq (${MP_BUILD}, 1) 
+   COBJS = ${FILES:.c=.o}
+   CUOBJS = ${CUFILES:.c=.obj}
+   MuP_COBJS = ${MuP_FILES:.c=.o}
+else
+   COBJS = ${FILES:.c=.o} ${MuP_FILES:.c=.o}
+   CUOBJS = ${CUFILES:.c=.obj}
+endif
 
 SONAME = libHYPRE_sstruct_ls-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
@@ -117,23 +127,66 @@ SONAME = libHYPRE_sstruct_ls-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 all: libHYPRE_sstruct_ls${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_sstruct_ls.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/sstruct_ls_mup_func.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_sstruct_ls${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/_hypre_sstruct_ls.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/sstruct_ls_mup_func.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
-clean:
+clean: clean_mup
 	rm -f *.o *.obj libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 
+ifeq (${MP_BUILD}, 1) 
+clean_mup:
+	rm -rf ${MuP_OBJDIR}	
+else
+clean_mup:
+endif
+
 ##################################################################
-# Rules
+# Build Rules
 ##################################################################
 
+ifeq (${MP_BUILD}, 1) 
+
+MuP_OBJDIR = MuP_obj.dir
+MuP_OBJDIR_single = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_flt}
+MuP_OBJDIR_double = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_dbl}
+MuP_OBJDIR_longdouble = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_ldbl}
+#
+ADD_OBJS_single = ${addprefix ${MuP_OBJDIR_single}/, ${notdir ${MuP_COBJS} ${CUOBJS}}}
+${ADD_OBJS_single}: CFLAGS += -DMP_BUILD_SINGLE=1
+${MuP_OBJDIR_single}/%.o ${MuP_OBJDIR_single}/%.obj: %.c
+	@echo  "processing C object $@ ..."
+	@mkdir -p ${@D}
+	${CC} ${CFLAGS} -c -o $@ $<
+#
+ADD_OBJS_double = ${addprefix ${MuP_OBJDIR_double}/, ${notdir ${MuP_COBJS} ${CUOBJS}}}
+${ADD_OBJS_double}: CFLAGS += -DMP_BUILD_DOUBLE=1
+${MuP_OBJDIR_double}/%.o ${MuP_OBJDIR_double}/%.obj: %.c
+	@echo  "processing C object $@ ..."
+	@mkdir -p ${@D}
+	${CC} ${CFLAGS} -c -o $@ $<
+#
+ADD_OBJS_longdouble = ${addprefix ${MuP_OBJDIR_longdouble}/, ${notdir ${MuP_COBJS} ${CUOBJS}}}
+${ADD_OBJS_longdouble}: CFLAGS += -DMP_BUILD_LONGDOUBLE=1
+${MuP_OBJDIR_longdouble}/%.o ${MuP_OBJDIR_longdouble}/%.obj: %.c
+	@echo  "processing C object $@ ..."
+	@mkdir -p ${@D}
+	${CC} ${CFLAGS} -c -o $@ $<
+
+OBJS = ${COBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
+
+else
+OBJS = ${COBJS} ${CUOBJS}
+endif
+#
 libHYPRE_sstruct_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}

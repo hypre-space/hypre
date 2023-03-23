@@ -8,6 +8,10 @@
 #ifndef hypre_ND1_AMGE_INTERPOLATION
 #define hypre_ND1_AMGE_INTERPOLATION
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "sstruct_ls_mup_func.h"
+#endif
+
 /*
   Function:  hypre_ND1AMGeInterpolation
 

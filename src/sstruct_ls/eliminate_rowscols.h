@@ -8,6 +8,10 @@
 #ifndef hypre_PARCSR_ELIMINATE_ROWSCOLS
 #define hypre_PARCSR_ELIMINATE_ROWSCOLS
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "sstruct_ls_mup_func.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
