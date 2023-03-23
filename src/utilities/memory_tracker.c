@@ -23,7 +23,7 @@ hypre_MemoryTracker*
 hypre_memory_tracker(void)
 {
 #ifdef HYPRE_USING_OPENMP
-#pragma omp critical
+   #pragma omp critical
 #endif
    {
       if (!_hypre_memory_tracker)
@@ -272,7 +272,7 @@ hypre_MemoryTrackerInsert2(const char           *action,
    hypre_MemoryTrackerQueue *queue = &tracker->queue[q];
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp critical
+   #pragma omp critical
 #endif
    {
       /* resize if not enough space */
@@ -281,7 +281,7 @@ hypre_MemoryTrackerInsert2(const char           *action,
       {
          queue->alloced_size = 2 * queue->alloced_size + 1;
          queue->data = (hypre_MemoryTrackerEntry *) realloc(queue->data,
-               queue->alloced_size * sizeof(hypre_MemoryTrackerEntry));
+                                                            queue->alloced_size * sizeof(hypre_MemoryTrackerEntry));
       }
 
       hypre_assert(queue->actual_size < queue->alloced_size);
