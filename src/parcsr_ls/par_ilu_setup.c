@@ -2981,14 +2981,14 @@ hypre_ILUSetupLDUtoCusparse(hypre_ParCSRMatrix *L, HYPRE_Real *D, hypre_ParCSRMa
 
    /* create matrix */
 
-   LDU = hypre_ParCSRMatrixCreate(  comm,
-                                    hypre_ParCSRMatrixGlobalNumRows(L),
-                                    hypre_ParCSRMatrixGlobalNumRows(L),
-                                    hypre_ParCSRMatrixRowStarts(L),
-                                    hypre_ParCSRMatrixColStarts(L),
-                                    0,
-                                    nnz_LDU,
-                                    0);
+   LDU = hypre_ParCSRMatrixCreate(comm,
+                                  hypre_ParCSRMatrixGlobalNumRows(L),
+                                  hypre_ParCSRMatrixGlobalNumRows(L),
+                                  hypre_ParCSRMatrixRowStarts(L),
+                                  hypre_ParCSRMatrixColStarts(L),
+                                  0,
+                                  nnz_LDU,
+                                  0);
 
    LDU_diag = hypre_ParCSRMatrixDiag(LDU);
    LDU_diag_i = hypre_TAlloc(HYPRE_Int, n + 1, HYPRE_MEMORY_DEVICE);

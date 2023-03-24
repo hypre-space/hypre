@@ -136,9 +136,7 @@ hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A,
       hypre_CSRMatrixPermute(hypre_ParCSRMatrixDiag(A), perm_data, rqperm_data, &A_diag);
 
       /* Apply ILU factorization to the entire A_diag */
-
-      /* TODO (VPM): Change to hypre_ILUSetupILU0LocalDevice*/
-      HYPRE_ILUSetupDeviceCSRILU0(A_diag);
+      hypre_ILUSetupILU0LocalDevice(A_diag);
 
       /* | L \ U (B) L^{-1}F  |
        * | EU^{-1}   L \ U (S)|
@@ -351,159 +349,130 @@ hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
 
 /*--------------------------------------------------------------------------
- * HYPRE_ILUSetupDeviceCSRILU0
+ * hypre_ILUSetupILU0LocalDevice
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_ILUSetupDeviceCSRILU0(hypre_CSRMatrix *A)
+hypre_ILUSetupILU0LocalDevice(hypre_CSRMatrix *A)
 {
-    /* TODO (VPM): Refactor the functions below */
+
+   /* Input matrix data */
+   HYPRE_Int               num_rows     = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int               num_cols     = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int               num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Complex          *A_data       = hypre_CSRMatrixData(A);
+   HYPRE_Int              *A_i          = hypre_CSRMatrixI(A);
+   HYPRE_Int              *A_j          = hypre_CSRMatrixJ(A);
+
+   /* pointers to vendor math libraries data */
 #if defined(HYPRE_USING_CUSPARSE)
-    HYPRE_ILUSetupCusparseCSRILU0(A,
-                                  CUSPARSE_SOLVE_POLICY_USE_LEVEL);
+   csrilu02Info_t          matA_info    = NULL;
+   cusparseHandle_t        handle       = hypre_HandleCusparseHandle(hypre_handle());
+   cusparseMatDescr_t      descr        = hypre_CSRMatrixGPUMatDescr(A);
 
 #elif defined(HYPRE_USING_ROCSPARSE)
-    HYPRE_ILUSetupRocsparseCSRILU0(A,
-                                   rocsparse_analysis_policy_reuse,
-                                   rocsparse_solve_policy_auto);
+   rocsparse_mat_info      matA_info    = NULL;
+   rocsparse_handle        handle       = hypre_HandleCusparseHandle(hypre_handle());
+   rocsparse_mat_descr     descr        = hypre_CSRMatrixGPUMatDescr(A);
 #endif
-
-   return hypre_error_flag;
-}
-
-#if defined(HYPRE_USING_CUSPARSE)
-
-/* Wrapper for ILU0 with cusparse on a matrix, csr sort was done in this function */
-HYPRE_Int
-HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix *A,
-                              cusparseSolvePolicy_t ilu_solve_policy)
-{
-
-   /* data objects for A */
-   HYPRE_Int               n                    = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int               m                    = hypre_CSRMatrixNumCols(A);
-
-   hypre_assert(n == m);
-
-   HYPRE_Real              *A_data              = hypre_CSRMatrixData(A);
-   HYPRE_Int               *A_i                 = hypre_CSRMatrixI(A);
-   HYPRE_Int               *A_j                 = hypre_CSRMatrixJ(A);
-   HYPRE_Int               nnz_A                = hypre_CSRMatrixNumNonzeros(A);
-
-   /* pointers to cusparse data */
-   csrilu02Info_t          matA_info            = NULL;
 
    /* variables and working arrays used during the ilu */
    HYPRE_Int               zero_pivot;
    HYPRE_Int               matA_buffersize;
-   void                    *matA_buffer         = NULL;
+   void                   *matA_buffer  = NULL;
 
-   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
-   cusparseMatDescr_t descr = hypre_CSRMatrixGPUMatDescr(A);
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("SetupILU0LocalDevice");
+
+   /* Sanity check */
+   hypre_assert(num_rows == num_cols);
 
    /* 1. Sort columns inside each row first, we can't assume that's sorted */
-   hypre_SortCSRCusparse(n, m, nnz_A, descr, A_i, A_j, A_data);
+   hypre_CSRMatrixSortRow(A);
 
    /* 2. Create info for ilu setup and solve */
+#if defined(HYPRE_USING_CUSPARSE)
    HYPRE_CUSPARSE_CALL(cusparseCreateCsrilu02Info(&matA_info));
 
+#elif defined(HYPRE_USING_ROCSPARSE)
+   HYPRE_ROCSPARSE_CALL(rocsparse_create_mat_info(&matA_info));
+#endif
+
    /* 3. Get working array size */
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02_bufferSize(handle, n, nnz_A, descr,
-                                                          A_data, A_i, A_j,
+#if defined(HYPRE_USING_CUSPARSE)
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02_bufferSize(handle, num_rows, num_nonzeros,
+                                                          descr, A_data, A_i, A_j,
                                                           matA_info, &matA_buffersize));
+#elif defined(HYPRE_USING_ROCSPARSE)
+   HYPRE_ROCSPARSE_CALL(hypre_rocsparse_csrilu0_buffer_size(handle, num_rows, num_nonzeros,
+                                                            descr, A_data, A_i, A_j,
+                                                            matA_info, &matA_buffersize));
+#endif
 
    /* 4. Create working array, since they won't be visited by host, allocate on device */
-   matA_buffer                                  = hypre_MAlloc(matA_buffersize, HYPRE_MEMORY_DEVICE);
+   matA_buffer = hypre_MAlloc(matA_buffersize, HYPRE_MEMORY_DEVICE);
 
    /* 5. Now perform the analysis */
+#if defined(HYPRE_USING_CUSPARSE)
    /* 5-1. Analysis */
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02_analysis(handle, n, nnz_A, descr,
-                                                        A_data, A_i, A_j,
-                                                        matA_info, ilu_solve_policy, matA_buffer));
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02_analysis(handle, num_rows, num_nonzeros,
+                                                        descr, A_data, A_i, A_j,
+                                                        matA_info,
+                                                        CUSPARSE_SOLVE_POLICY_USE_LEVEL,
+                                                        matA_buffer));
 
    /* 5-2. Check for zero pivot */
    HYPRE_CUSPARSE_CALL(cusparseXcsrilu02_zeroPivot(handle, matA_info, &zero_pivot));
 
    /* 6. Apply the factorization */
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02(handle, n, nnz_A, descr,
-                                               A_data, A_i, A_j,
-                                               matA_info, ilu_solve_policy, matA_buffer));
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02(handle, num_rows, num_nonzeros,
+                                               descr, A_data, A_i, A_j,
+                                               matA_info,
+                                               CUSPARSE_SOLVE_POLICY_USE_LEVEL,
+                                               matA_buffer));
 
    /* Check for zero pivot */
    HYPRE_CUSPARSE_CALL(cusparseXcsrilu02_zeroPivot(handle, matA_info, &zero_pivot));
+
+   /* Free info */
+   HYPRE_CUSPARSE_CALL(cusparseDestroyCsrilu02Info(matA_info));
+
+#elif defined(HYPRE_USING_ROCSPARSE)
+   /* 5-1. Analysis */
+   HYPRE_ROCSPARSE_CALL(hypre_rocsparse_csrilu0_analysis(handle, num_rows, num_nonzeros,
+                                                         descr, A_data, A_i, A_j,
+                                                         matA_info,
+                                                         rocsparse_analysis_policy_reuse,
+                                                         rocsparse_solve_policy_auto,
+                                                         matA_buffer));
+
+   /* 5-2. Check for zero pivot */
+   HYPRE_ROCSPARSE_CALL(rocsparse_csrsv_zero_pivot(handle, descr, info, &zero_pivot));
+
+   /* 6. Apply the factorization */
+   HYPRE_ROCSPARSE_CALL(hypre_rocsparse_csrilu0(handle, num_rows, num_nonzeros,
+                                                descr, A_data, A_i, A_j,
+                                                matA_info,
+                                                rocsparse_solve_policy_auto,
+                                                matA_buffer));
+
+   /* Check for zero pivot */
+   HYPRE_ROCSPARSE_CALL(rocsparse_csrsv_zero_pivot(handle, descr, info, &zero_pivot));
+
+   /* Free info */
+   HYPRE_ROCSPARSE_CALL(rocsparse_destroy_mat_info(matA_info));
+#endif
 
    /* Done with factorization, finishing up */
    hypre_TFree(matA_buffer, HYPRE_MEMORY_DEVICE);
-   HYPRE_CUSPARSE_CALL(cusparseDestroyCsrilu02Info(matA_info));
+
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
-}
-
-#endif
-
-#if defined(HYPRE_USING_ROCSPARSE)
-
-HYPRE_Int
-HYPRE_ILUSetupRocsparseCSRILU0(hypre_CSRMatrix *A, rocsparse_analysis_policy analysis_policy, rocsparse_solve_policy solve_policy)
-{
-   /* data objects for A */
-   HYPRE_Int               n                    = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int               m                    = hypre_CSRMatrixNumCols(A);
-
-   hypre_assert(n == m);
-
-   HYPRE_Real              *A_data              = hypre_CSRMatrixData(A);
-   HYPRE_Int               *A_i                 = hypre_CSRMatrixI(A);
-   HYPRE_Int               *A_j                 = hypre_CSRMatrixJ(A);
-   HYPRE_Int               nnz_A                = hypre_CSRMatrixNumNonzeros(A);
-
-   /* pointers to cusparse data */
-   rocsparse_mat_info info;
-
-   /* variables and working arrays used during the ilu */
-   HYPRE_Int               zero_pivot;
-   size_t                  buffer_size;
-   void                    *buffer         = NULL;
-
-   rocsparse_handle handle = hypre_HandleCusparseHandle(hypre_handle());
-   rocsparse_mat_descr descr = hypre_CSRMatrixGPUMatDescr(A);
-
-   /* 1. Sort columns inside each row first, we can't assume that's sorted */
-   hypre_SortCSRRocsparse(n, m, nnz_A, descr, A_i, A_j, A_data);
-
-   /* 2. Create info for ilu setup and solve */
-   HYPRE_ROCSPARSE_CALL(rocsparse_create_mat_info(&info));
-
-   /* 3. Get working array size */
-   HYPRE_ROCSPARSE_CALL(hypre_rocsparse_csrilu0_buffer_size(handle, n, nnz_A, descr, A_data, A_i, A_j,
-                                                            info, &buffer_size));
-
-   /* 4. Create working array, since they won't be visited by host, allocate on device */
-   buffer = hypre_MAlloc(buffer_size, HYPRE_MEMORY_DEVICE);
-
-   /* 5. Now perform the analysis */
-   /* 5-1. Analysis */
-   HYPRE_ROCSPARSE_CALL(hypre_rocsparse_csrilu0_analysis(handle,  n, nnz_A, descr, A_data, A_i, A_j,
-                                                         info, analysis_policy, solve_policy, buffer));
-
-   /* 5-2. Check for zero pivot */
-   HYPRE_ROCSPARSE_CALL(rocsparse_csrsv_zero_pivot(handle, descr, info, &zero_pivot));
-
-   /* 6. Apply the factorization */
-   HYPRE_ROCSPARSE_CALL(hypre_rocsparse_csrilu0(handle, n, nnz_A, descr, A_data, A_i, A_j,
-                                                info, solve_policy, buffer));
-
-   /* Check for zero pivot */
-   HYPRE_ROCSPARSE_CALL(rocsparse_csrsv_zero_pivot(handle, descr, info, &zero_pivot));
-
-   /* Done with factorization, finishing up */
-   hypre_TFree(buffer, HYPRE_MEMORY_DEVICE);
-   HYPRE_ROCSPARSE_CALL(rocsparse_destroy_mat_info(info));
-
-   return hypre_error_flag;
-
 }
 
 #endif

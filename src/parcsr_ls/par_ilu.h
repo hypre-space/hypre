@@ -398,7 +398,7 @@ HYPRE_Int hypre_ILUSetupILUTDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_
                                    hypre_CSRMatrix **Eptr, hypre_CSRMatrix **Fptr, HYPRE_Int **A_fake_diag_ip, HYPRE_Int tri_solve);
 HYPRE_Int hypre_ParILUDeviceILUExtractEBFC(hypre_CSRMatrix *A_diag, HYPRE_Int nLU,
                                            hypre_CSRMatrix **Bp, hypre_CSRMatrix **Cp, hypre_CSRMatrix **Ep, hypre_CSRMatrix **Fp);
-HYPRE_Int HYPRE_ILUSetupDeviceCSRILU0(hypre_CSRMatrix *A);
+HYPRE_Int hypre_ILUSetupILU0LocalDevice(hypre_CSRMatrix *A);
 HYPRE_Int HYPRE_ILUSetupDeviceCSRILU0SetupSolve(hypre_CSRMatrix *A, hypre_GpuMatData * matL_des,
                                                   hypre_GpuMatData * matU_des, hypre_CsrsvData ** matLU_csrsvdata_ptr);
 HYPRE_Int hypre_ILUSolveDeviceSchurGMRESIter(hypre_ParCSRMatrix *A, hypre_ParVector *f,
@@ -434,7 +434,6 @@ HYPRE_Int hypre_ParILUDeviceSchurGMRESMatvecDestroy(void *matvec_data );
 #endif
 
 #ifdef HYPRE_USING_ROCSPARSE
-HYPRE_Int HYPRE_ILUSetupRocsparseCSRILU0(hypre_CSRMatrix *A, rocsparse_analysis_policy analysis_policy, rocsparse_solve_policy solve_policy);
 HYPRE_Int HYPRE_ILUSetupRocsparseCSRILU0SetupSolve(hypre_CSRMatrix *A, hypre_GpuMatData * matL_des,
                                                   hypre_GpuMatData * matU_des, hypre_CsrsvData ** matLU_csrsvdata_ptr);
 HYPRE_Int hypre_ILUSolveRocsparseLU(hypre_ParCSRMatrix *A, hypre_GpuMatData * matL_des,
@@ -477,7 +476,6 @@ HYPRE_Int hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypr
                                  hypre_ParCSRMatrix *Aperm, hypre_CSRMatrix *matALU_d,
                                  hypre_CSRMatrix *matBLU_d, hypre_CSRMatrix *matE_d, hypre_CSRMatrix *matF_d,
                                  HYPRE_Int test_opt);
-HYPRE_Int HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix *A, cusparseSolvePolicy_t ilu_solve_policy);
 
 HYPRE_Int HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix *A, hypre_GpuMatData * matL_des,
                                                   hypre_GpuMatData * matU_des, hypre_CsrsvData ** matLU_csrsvdata_ptr);
