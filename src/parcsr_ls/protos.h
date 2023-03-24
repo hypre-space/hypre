@@ -2274,7 +2274,7 @@ HYPRE_Int hypre_ILUSolveLU(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParV
                            hypre_ParVector *utemp, hypre_ParVector *ftemp);
 HYPRE_Int hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u,
                                HYPRE_Int *perm, HYPRE_Int nLU, hypre_ParCSRMatrix *L, HYPRE_Real* D, hypre_ParCSRMatrix *U,
-                               hypre_ParVector *utemp, hypre_ParVector *ftemp, hypre_Vector *xtemp, HYPRE_Int lower_jacobi_iters,
+                               hypre_ParVector *utemp, hypre_ParVector *ftemp, hypre_ParVector *xtemp, HYPRE_Int lower_jacobi_iters,
                                HYPRE_Int upper_jacobi_iters);
 HYPRE_Int hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u,
                                    HYPRE_Int *perm, HYPRE_Int *qperm, HYPRE_Int nLU, hypre_ParCSRMatrix *L, HYPRE_Real* D,
@@ -2307,6 +2307,11 @@ void *hypre_ParILURAPSchurGMRESMatvecCreateH(void *ilu_vdata, void *x);
 HYPRE_Int hypre_ParILURAPSchurGMRESMatvecH(void *matvec_data, HYPRE_Complex alpha, void *ilu_vdata,
                                            void *x, HYPRE_Complex beta, void *y);
 HYPRE_Int hypre_ParILURAPSchurGMRESMatvecDestroyH(void *matvec_data );
+HYPRE_Int hypre_ILULocalRCMBuildG( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end,
+				   HYPRE_Int **permp, HYPRE_Int **qpermp, hypre_CSRMatrix **G);
+HYPRE_Int hypre_ILULocalRCMBuildFinalPerm( HYPRE_Int start, HYPRE_Int end,
+					   HYPRE_Int * G_perm, HYPRE_Int *perm, HYPRE_Int *qperm,
+					   HYPRE_Int **permp, HYPRE_Int **qpermp);
 HYPRE_Int hypre_ILULocalRCM( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end, HYPRE_Int **permp,
                              HYPRE_Int **qpermp, HYPRE_Int sym);
 HYPRE_Int hypre_ILULocalRCMNumbering(hypre_CSRMatrix *A, HYPRE_Int root, HYPRE_Int *marker,
