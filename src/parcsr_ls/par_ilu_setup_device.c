@@ -450,7 +450,7 @@ hypre_ILUSetupILU0LocalDevice(hypre_CSRMatrix *A)
                                                          matA_buffer));
 
    /* 5-2. Check for zero pivot */
-   HYPRE_ROCSPARSE_CALL(rocsparse_csrsv_zero_pivot(handle, descr, info, &zero_pivot));
+   HYPRE_ROCSPARSE_CALL(rocsparse_csrsv_zero_pivot(handle, descr, matA_info, &zero_pivot));
 
    /* 6. Apply the factorization */
    HYPRE_ROCSPARSE_CALL(hypre_rocsparse_csrilu0(handle, num_rows, num_nonzeros,
@@ -460,7 +460,7 @@ hypre_ILUSetupILU0LocalDevice(hypre_CSRMatrix *A)
                                                 matA_buffer));
 
    /* Check for zero pivot */
-   HYPRE_ROCSPARSE_CALL(rocsparse_csrsv_zero_pivot(handle, descr, info, &zero_pivot));
+   HYPRE_ROCSPARSE_CALL(rocsparse_csrsv_zero_pivot(handle, descr, matA_info, &zero_pivot));
 
    /* Free info */
    HYPRE_ROCSPARSE_CALL(rocsparse_destroy_mat_info(matA_info));
