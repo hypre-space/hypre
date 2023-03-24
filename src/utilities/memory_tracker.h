@@ -69,6 +69,8 @@ typedef struct
    hypre_MemoryTrackerQueue queue[HYPRE_MEMORY_NUM_EVENTS];
 } hypre_MemoryTracker;
 
+extern hypre_MemoryTracker *_hypre_memory_tracker;
+
 #define hypre_TAlloc(type, count, location)                                                         \
 (                                                                                                   \
 {                                                                                                   \
