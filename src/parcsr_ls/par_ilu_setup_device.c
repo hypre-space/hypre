@@ -372,16 +372,17 @@ hypre_ILUSetupILU0LocalDevice(hypre_CSRMatrix *A)
    csrilu02Info_t          matA_info    = NULL;
    cusparseHandle_t        handle       = hypre_HandleCusparseHandle(hypre_handle());
    cusparseMatDescr_t      descr        = hypre_CSRMatrixGPUMatDescr(A);
+   HYPRE_Int               matA_buffersize;
 
 #elif defined(HYPRE_USING_ROCSPARSE)
    rocsparse_mat_info      matA_info    = NULL;
    rocsparse_handle        handle       = hypre_HandleCusparseHandle(hypre_handle());
    rocsparse_mat_descr     descr        = hypre_CSRMatrixGPUMatDescr(A);
+   size_t                  matA_buffersize;
 #endif
 
    /* variables and working arrays used during the ilu */
    HYPRE_Int               zero_pivot;
-   HYPRE_Int               matA_buffersize;
    void                   *matA_buffer  = NULL;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
