@@ -48,9 +48,9 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([M4_HYPRE_NAME],    [hypre])
-m4_define([M4_HYPRE_VERSION], [2.27.0])
-m4_define([M4_HYPRE_NUMBER],  [22700])
-m4_define([M4_HYPRE_DATE],    [2022/12/20])
+m4_define([M4_HYPRE_VERSION], [2.28.0])
+m4_define([M4_HYPRE_NUMBER],  [22800])
+m4_define([M4_HYPRE_DATE],    [2023/03/17])
 m4_define([M4_HYPRE_TIME],    [00:00:00])
 m4_define([M4_HYPRE_BUGS],    [https://github.com/hypre-space/hypre/issues])
 m4_define([M4_HYPRE_SRCDIR],  [`pwd`])
@@ -205,6 +205,7 @@ dnl *********************************************************************
 hypre_using_hip=no
 hypre_using_rocsparse=no
 hypre_using_rocblas=no
+hypre_using_rocsolver=no
 hypre_using_rocrand=no
 
 hypre_found_hip=no
@@ -1153,13 +1154,17 @@ AS_HELP_STRING([--with-hip],
 
 AC_ARG_ENABLE(rocsparse,
 AS_HELP_STRING([--enable-rocsparse],
-               [Use rocSPARSE (default is YES).]),
+               [Use rocSPARSE (default is YES with HIP, otherwise NO).]),
 [case "${enableval}" in
     yes) hypre_using_rocsparse=yes ;;
     no)  hypre_using_rocsparse=no ;;
     *)   hypre_using_rocsparse=yes ;;
  esac],
-[hypre_using_rocsparse=yes]
+[case "$hypre_using_hip" in
+    yes) hypre_using_rocsparse=yes ;;
+    no)  hypre_using_rocsparse=no ;;
+    *)   hypre_using_rocsparse=no ;;
+ esac]
 )
 
 AC_ARG_ENABLE(rocblas,
@@ -1173,15 +1178,30 @@ AS_HELP_STRING([--enable-rocblas],
 [hypre_using_rocblas=no]
 )
 
+AC_ARG_ENABLE(rocsolver,
+AS_HELP_STRING([--enable-rocsolver],
+               [Use rocSOLVER (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_rocsolver=yes; hypre_using_rocblas=yes ;;
+    no)  hypre_using_rocsolver=no  ;;
+    *)   hypre_using_rocsolver=no  ;;
+ esac],
+[hypre_using_rocsolver=no]
+)
+
 AC_ARG_ENABLE(rocrand,
 AS_HELP_STRING([--enable-rocrand],
-               [Use rocRAND (default is YES).]),
+               [Use rocRAND (default is YES with HIP, otherwise NO).]),
 [case "${enableval}" in
     yes) hypre_using_rocrand=yes ;;
     no)  hypre_using_rocrand=no ;;
     *)   hypre_using_rocrand=yes ;;
  esac],
-[hypre_using_rocrand=yes]
+[case "$hypre_using_hip" in
+    yes) hypre_using_rocrand=yes ;;
+    no)  hypre_using_rocrand=no ;;
+    *)   hypre_using_rocrand=no ;;
+ esac]
 )
 
 dnl ***** SYCL
@@ -1224,7 +1244,7 @@ AS_HELP_STRING([--with-gpu-arch=ARG],
 
 AC_ARG_ENABLE(cublas,
 AS_HELP_STRING([--enable-cublas],
-               [Use cuBLAS (default is YES with CUDA, otherwise is NO).]),
+               [Use cuBLAS (default is YES with CUDA, otherwise NO).]),
 [case "${enableval}" in
     yes) hypre_using_cublas=yes ;;
     no)  hypre_using_cublas=no ;;
@@ -1239,7 +1259,7 @@ AS_HELP_STRING([--enable-cublas],
 
 AC_ARG_ENABLE(curand,
 AS_HELP_STRING([--enable-curand],
-               [Use cuRAND (default is YES with CUDA, otherwise is NO).]),
+               [Use cuRAND (default is YES with CUDA, otherwise NO).]),
 [case "${enableval}" in
     yes) hypre_using_curand=yes ;;
     no)  hypre_using_curand=no ;;
@@ -1254,7 +1274,7 @@ AS_HELP_STRING([--enable-curand],
 
 AC_ARG_ENABLE(cuda-streams,
 AS_HELP_STRING([--enable-cuda-streams],
-               [Use CUDA streams (default is YES with CUDA, otherwise is NO).]),
+               [Use CUDA streams (default is YES with CUDA, otherwise NO).]),
 [case "${enableval}" in
     yes) hypre_using_cuda_streams=yes ;;
     no)  hypre_using_cuda_streams=no  ;;
@@ -1269,7 +1289,7 @@ AS_HELP_STRING([--enable-cuda-streams],
 
 AC_ARG_ENABLE(cusparse,
 AS_HELP_STRING([--enable-cusparse],
-               [Use cuSPARSE (default is YES with CUDA, otherwise is NO).]),
+               [Use cuSPARSE (default is YES with CUDA, otherwise NO).]),
 [case "${enableval}" in
     yes) hypre_using_cusparse=yes ;;
     no)  hypre_using_cusparse=no ;;
@@ -2459,7 +2479,7 @@ then
 
    if test "$hypre_using_cusolver" = "yes"
    then
-      AC_DEFINE(HYPRE_USING_CUSOLVER, 1, [Define to 1 if using cuSolver])
+      AC_DEFINE(HYPRE_USING_CUSOLVER, 1, [Define to 1 if using cuSOLVER])
       HYPRE_CUDA_LIBS+=" -lcusolver"
    fi
 
@@ -2556,26 +2576,31 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         dnl rocSPARSE, for things like dcsrmv on AMD GPUs
         AS_IF([test x"$hypre_using_rocsparse" == x"yes"],
               [AC_DEFINE(HYPRE_USING_ROCSPARSE, 1, [rocSPARSE being used])
-               HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocsparse"
+               HYPRE_HIP_LIBS+=" -lrocsparse"
                ])
 
-        dnl Note rocSPARSE requires rocBLAS, so this is only controlling
-        dnl whether HYPRE explicitly uses rocBLAS in other places or not.
-        dnl So we don't need to add any extra libs or anything.
+        dnl rocBLAS: basic linear algebra operations on AMD GPUs
         AS_IF([test x"$hypre_using_rocblas" == x"yes"],
               [AC_DEFINE(HYPRE_USING_ROCBLAS, 1, [rocBLAS being used])
+               HYPRE_HIP_LIBS+=" -lrocblas"
               ])
+
+        dnl rocSOLVER: dense linear solvers on AMD GPUs (requires rocBLAS)
+        AS_IF([test x"$hypre_using_rocsolver" == x"yes"],
+              [AC_DEFINE(HYPRE_USING_ROCSOLVER, 1, [rocSOLVER being used])
+               HYPRE_HIP_LIBS+=" -lrocsolver"
+               ])
 
         dnl rocRAND: random number generation on AMD GPUs
         AS_IF([test x"$hypre_using_rocrand" == x"yes"],
               [AC_DEFINE(HYPRE_USING_ROCRAND, 1, [rocRAND being used])
-               HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lrocrand"
+               HYPRE_HIP_LIBS+=" -lrocrand"
                ])
 
         dnl rocTX tracing API
         AS_IF([test x"$hypre_using_gpu_profiling" == x"yes"],
               [AC_DEFINE(HYPRE_USING_ROCTX, 1, [Define to 1 if using AMD rocTX profiling])
-               HYPRE_HIP_LIBS="${HYPRE_HIP_LIBS} -lroctx64"
+               HYPRE_HIP_LIBS+=" -lroctx64"
                ])
 
         AS_IF([test x"$hypre_using_cuda_streams" == x"yes"],
