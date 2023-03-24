@@ -216,7 +216,6 @@ hypre_ILUSolveRocsparseLU(hypre_ParCSRMatrix *A, hypre_GpuMatData * matL_des,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    }
 
-
    /* L solve - Forward solve */
    HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrsv_solve(handle, rocsparse_operation_none, n, nnz,
                                                      &beta, hypre_GpuMatDataMatDescr(matL_des),
@@ -408,16 +407,30 @@ hypre_ILUSolveDeviceLUIter(hypre_ParCSRMatrix *A,
    hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, u, beta, f, ftemp);
 
    /* apply permutation */
-   HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
+   if (perm)
+   {
+      HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
+   }
+   else
+   {
+      hypre_TMemcpy(utemp_data, ftemp_data, HYPRE_Complex, n,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   }
 
    /* apply the iterative solve to L and U */
    hypre_ILUSolveLUJacobiIter(matLU_d, ftemp_local, xtemp_local, utemp_local, *Adiag_diag,
                               lower_jacobi_iters, upper_jacobi_iters, my_id);
 
    /* apply reverse permutation */
-
-   /* TODO (VPM): Add conditional on perm */
-   HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + n, perm, ftemp_data);
+   if (perm)
+   {
+      HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + n, perm, ftemp_data);
+   }
+   else
+   {
+      hypre_TMemcpy(ftemp_data, utemp_data, HYPRE_Complex, n,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   }
 
    /* Update solution */
    hypre_ParVectorAxpy(beta, ftemp, u);

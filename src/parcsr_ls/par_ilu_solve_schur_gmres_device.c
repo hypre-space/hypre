@@ -387,7 +387,15 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
    /* apply permutation before we can start our solve */
 
    /* TODO (VPM): Refactor the following */
-   HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
+   if (perm)
+   {
+      HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
+   }
+   else
+   {
+      hypre_TMemcpy(utemp_data, ftemp_data, HYPRE_Complex, n,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   }
 
    if (nLU > 0)
    {
@@ -470,9 +478,15 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
    hypre_TMemcpy(utemp_data + nLU, x_data, HYPRE_Real, m, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
    /* perm back */
-
-   /* TODO (VPM): Refactor the following */
-   HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + n, perm, ftemp_data);
+   if (perm)
+   {
+      HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + n, perm, ftemp_data);
+   }
+   else
+   {
+      hypre_TMemcpy(ftemp_data, utemp_data, HYPRE_Complex, n,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   }
 
    /* done, now everything are in u_temp, update solution */
    hypre_ParVectorAxpy(beta, ftemp, u);
@@ -574,7 +588,15 @@ hypre_ILUSolveRocsparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
     */
 
    /* apply permutation before we can start our solve */
-   HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
+   if (perm)
+   {
+      HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
+   }
+   else
+   {
+      hypre_TMemcpy(utemp_data, ftemp_data, HYPRE_Complex, n,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   }
 
    if (nLU > 0)
    {
@@ -656,7 +678,15 @@ hypre_ILUSolveRocsparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
    hypre_TMemcpy(utemp_data + nLU, x_data, HYPRE_Real, m, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
    /* perm back */
-   HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + n, perm, ftemp_data);
+   if (perm)
+   {
+      HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + n, perm, ftemp_data);
+   }
+   else
+   {
+      hypre_TMemcpy(ftemp_data, utemp_data, HYPRE_Complex, n,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   }
 
    /* done, now everything are in u_temp, update solution */
    hypre_ParVectorAxpy(beta, ftemp, u);
@@ -777,7 +807,15 @@ hypre_ILUSolveDeviceSchurGMRESIter(hypre_ParCSRMatrix *A, hypre_ParVector *f,
     */
 
    /* apply permutation before we can start our solve */
-   HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
+   if (perm)
+   {
+      HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
+   }
+   else
+   {
+      hypre_TMemcpy(utemp_data, ftemp_data, HYPRE_Complex, n,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   }
 
    if (nLU > 0)
    {
@@ -850,7 +888,15 @@ hypre_ILUSolveDeviceSchurGMRESIter(hypre_ParCSRMatrix *A, hypre_ParVector *f,
    hypre_TMemcpy(utemp_data + nLU, x_data, HYPRE_Real, m, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
    /* perm back */
-   HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + n, perm, ftemp_data);
+   if (perm)
+   {
+      HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + n, perm, ftemp_data);
+   }
+   else
+   {
+      hypre_TMemcpy(ftemp_data, utemp_data, HYPRE_Complex, n,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   }
 
    /* done, now everything are in u_temp, update solution */
    hypre_ParVectorAxpy(beta, ftemp, u);
