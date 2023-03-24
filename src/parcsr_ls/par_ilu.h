@@ -11,15 +11,14 @@
 /*--------------------------------------------------------------------------
  * hypre_ParILUData
  *--------------------------------------------------------------------------*/
+
 typedef struct hypre_ParILUData_struct
 {
 #ifdef HYPRE_USING_GPU
-   /* on GPU, we have to form E and F explicitly, since we don't have much control to it
-    *
-    */
-   hypre_CSRMatrix         *matALU_d;//the matrix holding ILU of A (for A-smoothing)
-   hypre_CSRMatrix         *matBLU_d;//the matrix holding ILU of B
-   hypre_CSRMatrix         *matSLU_d;//the matrix holding ILU of S
+   /* on GPU, we have to form E and F explicitly, since we don't have much */
+   hypre_CSRMatrix         *matALU_d; /* The matrix holding ILU of A (for A-smoothing) */
+   hypre_CSRMatrix         *matBLU_d; /* The matrix holding ILU of B */
+   hypre_CSRMatrix         *matSLU_d; /* The matrix holding ILU of S */
    hypre_CSRMatrix         *matE_d;
    hypre_CSRMatrix         *matF_d;
    hypre_ParCSRMatrix      *Aperm;
@@ -30,7 +29,7 @@ typedef struct hypre_ParILUData_struct
    hypre_Vector            *Sdiag_diag;
    hypre_Vector            *Ftemp_upper;
    hypre_Vector            *Utemp_lower;
-   HYPRE_Int               *A_diag_fake;//fake diagonal, pretend the diagonal matrix is empty
+   HYPRE_Int               *A_diag_fake; /* fake diagonal, pretend the diagonal matrix is empty */
 
    hypre_GpuMatData        *matL_des;
    hypre_GpuMatData        *matU_des;
@@ -52,7 +51,8 @@ typedef struct hypre_ParILUData_struct
    // This is moved into csrsvData
    //cusparseSolvePolicy_t   ilu_solve_policy;//Use/Don't use level
 #endif
-   //general data
+
+   /* General data */
    HYPRE_Int            global_solver;
    hypre_ParCSRMatrix   *matA;
    hypre_ParCSRMatrix   *matL;
@@ -62,8 +62,7 @@ typedef struct hypre_ParILUData_struct
    HYPRE_Real           *matmD;
    hypre_ParCSRMatrix   *matmU;
    hypre_ParCSRMatrix   *matS;
-   HYPRE_Real
-   *droptol;/* should be an array of 3 element, for B, (E and F), S respectively */
+   HYPRE_Real           *droptol; /* should be an array of 3 element, for B, (E and F), S respectively */
    HYPRE_Int            lfil;
    HYPRE_Int            maxRowNnz;
    HYPRE_Int            *CF_marker_array;
@@ -398,7 +397,7 @@ HYPRE_Int hypre_ILUSetupILUTDevice(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_
                                    hypre_CSRMatrix **BLUptr, hypre_ParCSRMatrix **matSptr,
                                    hypre_CSRMatrix **Eptr, hypre_CSRMatrix **Fptr, HYPRE_Int **A_fake_diag_ip, HYPRE_Int tri_solve);
 HYPRE_Int hypre_ParILUDeviceILUExtractEBFC(hypre_CSRMatrix *A_diag, HYPRE_Int nLU,
-                                             hypre_CSRMatrix **Bp, hypre_CSRMatrix **Cp, hypre_CSRMatrix **Ep, hypre_CSRMatrix **Fp);
+                                           hypre_CSRMatrix **Bp, hypre_CSRMatrix **Cp, hypre_CSRMatrix **Ep, hypre_CSRMatrix **Fp);
 HYPRE_Int HYPRE_ILUSetupDeviceCSRILU0(hypre_CSRMatrix *A);
 HYPRE_Int HYPRE_ILUSetupDeviceCSRILU0SetupSolve(hypre_CSRMatrix *A, hypre_GpuMatData * matL_des,
                                                   hypre_GpuMatData * matU_des, hypre_CsrsvData ** matLU_csrsvdata_ptr);
@@ -435,8 +434,6 @@ HYPRE_Int hypre_ParILUDeviceSchurGMRESMatvecDestroy(void *matvec_data );
 #endif
 
 #ifdef HYPRE_USING_ROCSPARSE
-HYPRE_Int hypre_ParILURocsparseILUExtractEBFC(hypre_CSRMatrix *A_diag, HYPRE_Int nLU,
-                                             hypre_CSRMatrix **Bp, hypre_CSRMatrix **Cp, hypre_CSRMatrix **Ep, hypre_CSRMatrix **Fp);
 HYPRE_Int HYPRE_ILUSetupRocsparseCSRILU0(hypre_CSRMatrix *A, rocsparse_analysis_policy analysis_policy, rocsparse_solve_policy solve_policy);
 HYPRE_Int HYPRE_ILUSetupRocsparseCSRILU0SetupSolve(hypre_CSRMatrix *A, hypre_GpuMatData * matL_des,
                                                   hypre_GpuMatData * matU_des, hypre_CsrsvData ** matLU_csrsvdata_ptr);
@@ -480,9 +477,6 @@ HYPRE_Int hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypr
                                  hypre_ParCSRMatrix *Aperm, hypre_CSRMatrix *matALU_d,
                                  hypre_CSRMatrix *matBLU_d, hypre_CSRMatrix *matE_d, hypre_CSRMatrix *matF_d,
                                  HYPRE_Int test_opt);
-HYPRE_Int hypre_ParILUDeviceILUExtractEBFC(hypre_CSRMatrix *A_diag, HYPRE_Int nLU,
-                                           hypre_CSRMatrix **Bp, hypre_CSRMatrix **Cp,
-                                           hypre_CSRMatrix **Ep, hypre_CSRMatrix **Fp);
 HYPRE_Int HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix *A, cusparseSolvePolicy_t ilu_solve_policy);
 
 HYPRE_Int HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix *A, hypre_GpuMatData * matL_des,

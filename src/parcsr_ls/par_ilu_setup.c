@@ -1035,7 +1035,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
 
       case 50:
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+#if defined(HYPRE_USING_CUSPARSE)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             if (matS)
@@ -1214,13 +1214,13 @@ hypre_ILUSetup( void               *ilu_vdata,
                      hypre_ParKrylovAxpy,
                      hypre_ParKrylovIdentitySetup, //parCSR A -- inactive
                      hypre_ParKrylovIdentity ); //parCSR A -- inactive
-               schur_solver = ( (HYPRE_Solver) hypre_GMRESCreate( gmres_functions ) );
+               schur_solver = (HYPRE_Solver) hypre_GMRESCreate(gmres_functions);
 
                /* setup GMRES parameters */
                /* at least should apply 1 solve */
                if (hypre_ParILUDataSchurGMRESKDim(ilu_data) == 0)
                {
-                  hypre_ParILUDataSchurGMRESKDim(ilu_data) ++;
+                  hypre_ParILUDataSchurGMRESKDim(ilu_data)++;
                }
                HYPRE_GMRESSetKDim            (schur_solver, hypre_ParILUDataSchurGMRESKDim(ilu_data));
                HYPRE_GMRESSetMaxIter         (schur_solver,
@@ -1449,8 +1449,6 @@ hypre_ILUSetup( void               *ilu_vdata,
 
    return hypre_error_flag;
 }
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_ROCSPARSE)
 
 /*--------------------------------------------------------------------------
  * hypre_ParILUDeviceILUExtractEBFC
@@ -1734,6 +1732,8 @@ hypre_ParILUDeviceILUExtractEBFC(hypre_CSRMatrix   *A_diag,
 
    return hypre_error_flag;
 }
+
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
 
 /*--------------------------------------------------------------------------
  * hypre_ILUSetupILUKDevice

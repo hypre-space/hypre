@@ -372,7 +372,7 @@ hypre_ILUSolve( void               *ilu_vdata,
 
          case 50:
             /* GMRES-RAP */
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
             if (exec == HYPRE_EXEC_DEVICE)
             {
                test_opt = hypre_ParILUDataTestOption(ilu_data);
@@ -399,8 +399,8 @@ hypre_ILUSolve( void               *ilu_vdata,
                /* Apply GPU-accelerated LU solve - BJ-ilu */
                if (tri_solve == 1)
                {
-                  hypre_ILUSolveCusparseLU(matA, matL_des, matU_des, matBLU_csrsvdata,
-                                           matBLU_d, F_array, U_array, perm, n, Utemp, Ftemp);
+                  hypre_ILUSolveDeviceLU(matA, matL_des, matU_des, matBLU_csrsvdata,
+                                         matBLU_d, F_array, U_array, perm, n, Utemp, Ftemp);
                }
                else
                {
@@ -1271,7 +1271,7 @@ hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
 
 /* Permutation function (for GPU version, can just call thrust)
  * option 00: perm integer array
