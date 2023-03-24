@@ -6625,7 +6625,7 @@ main( hypre_int argc,
          HYPRE_ILUSetLevelOfFill(pcg_precond, ilu_lfil);
          HYPRE_ILUSetLocalReordering(pcg_precond, ilu_reordering);
          /* set print level */
-         HYPRE_ILUSetPrintLevel(pcg_precond, 1);
+         HYPRE_ILUSetPrintLevel(pcg_precond, poutdat);
          /* set max iterations */
          HYPRE_ILUSetMaxIter(pcg_precond, 1);
          HYPRE_ILUSetTol(pcg_precond, pc_tol);
@@ -7269,7 +7269,7 @@ main( hypre_int argc,
          HYPRE_ILUSetLevelOfFill(pcg_precond, ilu_lfil);
          HYPRE_ILUSetLocalReordering(pcg_precond, ilu_reordering);
          /* set print level */
-         HYPRE_ILUSetPrintLevel(pcg_precond, 1);
+         HYPRE_ILUSetPrintLevel(pcg_precond, poutdat);
          /* set max iterations */
          HYPRE_ILUSetMaxIter(pcg_precond, 1);
          HYPRE_ILUSetTol(pcg_precond, pc_tol);
