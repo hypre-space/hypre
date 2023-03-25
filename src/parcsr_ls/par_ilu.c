@@ -2380,10 +2380,11 @@ hypre_ILUSortOffdColmap(hypre_ParCSRMatrix *A)
    return hypre_error_flag;
 }
 
+#if 0
 /*--------------------------------------------------------------------------
  * hypre_ILULocalRCMBuildG
  *
- * TODO (VPM): Refactor this function
+ * TODO (VPM): Remove this function?
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -2493,7 +2494,7 @@ hypre_ILULocalRCMBuildG( hypre_CSRMatrix *A, HYPRE_Int start, HYPRE_Int end,
 #endif
    return hypre_error_flag;
 }
-
+#endif
 
 HYPRE_Int
 hypre_ILULocalRCMBuildFinalPerm( HYPRE_Int start, HYPRE_Int end,

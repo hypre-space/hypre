@@ -299,6 +299,7 @@ hypre_ILUSolveDeviceSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
 
 #if defined(HYPRE_USING_CUSPARSE)
 
+/* TODO (VPM): Refactor the following */
 HYPRE_Int
 hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                hypre_ParVector *u, HYPRE_Int *perm,
@@ -314,8 +315,8 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
    if (!S)
    {
       /* Just call BJ cusparse and return */
-      return hypre_ILUSolveCusparseLU(A, matL_des, matU_des, matBLU_csrsvdata, matBLU_d,
-                                      f, u, perm, nLU, ftemp, utemp);
+      return hypre_ILUSolveDeviceLU(A, matL_des, matU_des, matBLU_csrsvdata, matBLU_d,
+                                    f, u, perm, nLU, ftemp, utemp);
    }
 
    /* data objects for communication */
@@ -385,8 +386,6 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
     */
 
    /* apply permutation before we can start our solve */
-
-   /* TODO (VPM): Refactor the following */
    if (perm)
    {
       HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
@@ -517,8 +516,8 @@ hypre_ILUSolveRocsparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
    if (!S)
    {
       /* Just call BJ cusparse and return */
-      return hypre_ILUSolveRocsparseLU(A, matL_des, matU_des, matBLU_csrsvdata, matBLU_d,
-                                       f, u, perm, nLU, ftemp, utemp);
+      return hypre_ILUSolveDeviceLU(A, matL_des, matU_des, matBLU_csrsvdata, matBLU_d,
+                                    f, u, perm, nLU, ftemp, utemp);
    }
 
    /* data objects for communication */

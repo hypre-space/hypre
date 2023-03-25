@@ -246,7 +246,7 @@ hypre_ILUSolve( void               *ilu_vdata,
    while ((rel_resnorm >= tol || iter < 1)
           && iter < max_iter)
    {
-      /* Do one solve on LUe=r */
+      /* Do one solve on LU*e = r */
       switch (ilu_type)
       {
          case 0: case 1:
