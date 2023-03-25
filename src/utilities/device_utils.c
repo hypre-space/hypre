@@ -2841,28 +2841,6 @@ hypre_DeviceDataCusparseHandle(hypre_DeviceData *data)
 }
 #endif // defined(HYPRE_USING_CUSPARSE)
 
-
-#if defined(HYPRE_USING_CUSOLVER)
-cusolverSpHandle_t
-hypre_DeviceDataCusolverSpHandle(hypre_DeviceData *data)
-{
-   if (data->cusolverSp_handle)
-   {
-      return data->cusolverSp_handle;
-   }
-
-   cusolverSpHandle_t handle;
-   HYPRE_CUSOLVER_CALL( cusolverSpCreate(&handle) );
-
-   HYPRE_CUSOLVER_CALL( cusolverSpSetStream(handle, hypre_DeviceDataComputeStream(data)) );
-
-   data->cusolverSp_handle = handle;
-
-   return handle;
-}
-#endif // defined(HYPRE_USING_CUSOLVER)
-
-
 #if defined(HYPRE_USING_ROCSPARSE)
 
 /*--------------------------------------------------------------------

@@ -588,10 +588,6 @@ struct hypre_DeviceData
    cusparseHandle_t                  cusparse_handle;
 #endif
 
-#if defined(HYPRE_USING_CUSOLVER)
-   cusolverSpHandle_t                cusolverSp_handle;
-#endif
-
 #if defined(HYPRE_USING_ROCSPARSE)
    rocsparse_handle                  cusparse_handle;
 #endif
@@ -706,10 +702,6 @@ cublasHandle_t        hypre_DeviceDataCublasHandle(hypre_DeviceData *data);
 
 #if defined(HYPRE_USING_CUSPARSE)
 cusparseHandle_t      hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
-#endif
-
-#if defined(HYPRE_USING_CUSOLVER)
-cusolverSpHandle_t  hypre_DeviceDataCusolverSpHandle(hypre_DeviceData *data);
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
