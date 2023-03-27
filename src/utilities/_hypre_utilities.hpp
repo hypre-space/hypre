@@ -108,7 +108,7 @@ using hypre_DeviceItem = void*;
 #define CUDA_MALLOCASYNC_VERSION 11020
 #define CUDA_THRUST_NOSYNC_VERSION 12000
 
-#define CUSPARSE_SPSV_VERSION 11500
+#define CUSPARSE_SPSV_VERSION 11600
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
 #define hypre_cusparseSpSVDescr         cusparseSpSVDescr_t
 #define hypre_cusparseSpSV_createDescr  cusparseSpSV_createDescr
@@ -126,6 +126,8 @@ using hypre_DeviceItem = void*;
 #define hypre_cusparseSpSM_destroyDescr cusparseSpSM_destroyDescr
 #else
 #define hypre_cusparseSpSMDescr         csrsm2Info_t
+#define hypre_cusparseSpSM_createDescr  cusparseCreateCsrsm2Info
+#define hypre_cusparseSpSM_destroyDescr cusparseDestroyCsrsm2Info
 #endif
 
 #if defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
@@ -761,8 +763,16 @@ struct hypre_CsrsvData
    char info_L;
    char info_U;
 #endif
-   hypre_int    BufferSize;
-   char        *Buffer;
+#if defined(HYPRE_USING_CUSPARSE)
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+   size_t BufferSize;
+#else
+   hypre_int BufferSize;
+#endif
+#else
+   hypre_int BufferSize;
+#endif
+   char *Buffer;
 };
 
 #define hypre_CsrsvDataInfoL(data)      ((data) -> info_L)

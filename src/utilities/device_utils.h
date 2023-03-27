@@ -56,7 +56,7 @@ using hypre_DeviceItem = void*;
 #define CUDA_MALLOCASYNC_VERSION 11020
 #define CUDA_THRUST_NOSYNC_VERSION 12000
 
-#define CUSPARSE_SPSV_VERSION 11500
+#define CUSPARSE_SPSV_VERSION 11600
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
 #define hypre_cusparseSpSVDescr         cusparseSpSVDescr_t
 #define hypre_cusparseSpSV_createDescr  cusparseSpSV_createDescr
@@ -74,6 +74,8 @@ using hypre_DeviceItem = void*;
 #define hypre_cusparseSpSM_destroyDescr cusparseSpSM_destroyDescr
 #else
 #define hypre_cusparseSpSMDescr         csrsm2Info_t
+#define hypre_cusparseSpSM_createDescr  cusparseCreateCsrsm2Info
+#define hypre_cusparseSpSM_destroyDescr cusparseDestroyCsrsm2Info
 #endif
 
 #if defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
