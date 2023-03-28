@@ -357,26 +357,24 @@ typedef struct hypre_ParNSHData_struct
 #define hypre_ParNSHDataNSHTol(nsh_data)                 ((nsh_data) -> nsh_tol)
 #define hypre_ParNSHDataNSHMaxRowNnz(nsh_data)           ((nsh_data) -> nsh_max_row_nnz)
 
-//#define DIVIDE_TOL 1e-32
-
 /* TODO (VPM): move these function prototypes to protos.h */
 
 #ifdef HYPRE_USING_GPU
-HYPRE_Int hypre_ILUSolveDeviceLUIter(hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU_d,
+HYPRE_Int hypre_ILUSolveLUIterDevice(hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU,
                                      hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int *perm,
-                                     HYPRE_Int n, hypre_ParVector *ftemp, hypre_ParVector *utemp,
-                                     hypre_ParVector *xtemp, hypre_Vector **Adiag_diag,
+                                     hypre_ParVector *ftemp, hypre_ParVector *utemp,
+                                     hypre_ParVector *xtemp, hypre_Vector **diag_ptr,
                                      HYPRE_Int lower_jacobi_iters, HYPRE_Int upper_jacobi_iters);
-HYPRE_Int hypre_ILUSolveLUJacobiIter(hypre_CSRMatrix *A, hypre_Vector *work1_local,
-                                     hypre_Vector *work2_local, hypre_Vector *inout_local,
-                                     hypre_Vector *diag_diag, HYPRE_Int lower_jacobi_iters,
-                                     HYPRE_Int upper_jacobi_iters, HYPRE_Int my_id);
-HYPRE_Int hypre_ILUSolveLJacobiIter(hypre_CSRMatrix *A, hypre_Vector *input_local,
-                                    hypre_Vector *work_local, hypre_Vector *output_local,
-                                    HYPRE_Int lower_jacobi_iters);
-HYPRE_Int hypre_ILUSolveUJacobiIter(hypre_CSRMatrix *A, hypre_Vector *input_local,
-                                    hypre_Vector *work_local, hypre_Vector *output_local,
-                                    hypre_Vector *diag_diag, HYPRE_Int upper_jacobi_iters);
+HYPRE_Int hypre_ILUApplyLowerUpperJacIterDevice(hypre_CSRMatrix *A, hypre_Vector *work1,
+                                                hypre_Vector *work2, hypre_Vector *inout,
+                                                hypre_Vector *diag, HYPRE_Int lower_jacobi_iters,
+                                                HYPRE_Int upper_jacobi_iters);
+HYPRE_Int hypre_ILUApplyLowerJacIterDevice(hypre_CSRMatrix *A, hypre_Vector *input,
+                                           hypre_Vector *work, hypre_Vector *output,
+                                           HYPRE_Int lower_jacobi_iters);
+HYPRE_Int hypre_ILUApplyUpperJacIterDevice(hypre_CSRMatrix *A, hypre_Vector *input,
+                                           hypre_Vector *work, hypre_Vector *output,
+                                           hypre_Vector *diag, HYPRE_Int upper_jacobi_iters);
 HYPRE_Int hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm,
                                    HYPRE_Int n, HYPRE_Int nLU, hypre_GpuMatData *matL_des,
                                    hypre_GpuMatData *matU_des,
@@ -418,13 +416,12 @@ HYPRE_Int hypre_ILUSolveDeviceSchurGMRESIter(hypre_ParCSRMatrix *A, hypre_ParVec
                                              hypre_CSRMatrix *matBLU_d, hypre_CSRMatrix *matE_d,
                                              hypre_CSRMatrix *matF_d, hypre_ParVector *ztemp,
                                              hypre_Vector **Adiag_diag, hypre_Vector **Sdiag_diag,
-                                             HYPRE_Int lower_jacobi_iters, HYPRE_Int upper_jacobi_iters);
-HYPRE_Int hypre_ILUSolveDeviceLU(hypre_ParCSRMatrix *A, hypre_GpuMatData * matL_des,
+                                             HYPRE_Int lower_jacobi_iters,
+                                             HYPRE_Int upper_jacobi_iters);
+HYPRE_Int hypre_ILUSolveLUDevice(hypre_ParCSRMatrix *A, hypre_GpuMatData * matL_des,
                                  hypre_GpuMatData *matU_des, hypre_CsrsvData *matLU_csrsvdata,
                                  hypre_CSRMatrix *matLU_d, hypre_ParVector *f, hypre_ParVector *u,
-                                 HYPRE_Int *perm, HYPRE_Int n, hypre_ParVector *ftemp,
-                                 hypre_ParVector *utemp);
-
+                                 HYPRE_Int *perm, hypre_ParVector *ftemp, hypre_ParVector *utemp);
 HYPRE_Int hypre_ILUSolveDeviceSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                          hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int nLU,
                                          hypre_ParCSRMatrix *S, hypre_ParVector *ftemp,

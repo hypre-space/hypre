@@ -91,27 +91,30 @@ hypre_ILUApplyLowerUpperDevice(hypre_GpuMatData  *matL_des,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ILUSolveDeviceLU
+ * hypre_ILUSolveLUDevice
  *
  * Incomplete LU solve (GPU)
  * L, D and U factors only have local scope (no off-diagonal processor terms)
  * so apart from the residual calculation (which uses A), the solves with the
  * L and U factors are local.
+ *
+ * TODO (VPM): Merge this function with hypre_ILUSolveLUIterDevice
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ILUSolveDeviceLU(hypre_ParCSRMatrix *A,
-                       hypre_GpuMatData *matL_des,
-                       hypre_GpuMatData *matU_des,
-                       hypre_CsrsvData *matLU_csrsvdata,
-                       hypre_CSRMatrix *matLU_d,
-                       hypre_ParVector *f,
-                       hypre_ParVector *u,
-                       HYPRE_Int *perm,
-                       HYPRE_Int n,
-                       hypre_ParVector *ftemp,
-                       hypre_ParVector *utemp)
+hypre_ILUSolveLUDevice(hypre_ParCSRMatrix *A,
+                       hypre_GpuMatData   *matL_des,
+                       hypre_GpuMatData   *matU_des,
+                       hypre_CsrsvData    *matLU_csrsvdata,
+                       hypre_CSRMatrix    *matLU,
+                       hypre_ParVector    *f,
+                       hypre_ParVector    *u,
+                       HYPRE_Int          *perm,
+                       hypre_ParVector    *ftemp,
+                       hypre_ParVector    *utemp)
 {
+   HYPRE_Int            num_rows      = hypre_ParCSRMatrixNumRows(A);
+
    hypre_Vector        *utemp_local   = hypre_ParVectorLocalVector(utemp);
    HYPRE_Complex       *utemp_data    = hypre_VectorData(utemp_local);
    hypre_Vector        *ftemp_local   = hypre_ParVectorLocalVector(ftemp);
@@ -121,7 +124,7 @@ hypre_ILUSolveDeviceLU(hypre_ParCSRMatrix *A,
    HYPRE_Complex        beta  = 1.0;
 
    /* Sanity check */
-   if (n == 0)
+   if (num_rows == 0)
    {
       return hypre_error_flag;
    }
@@ -135,26 +138,26 @@ hypre_ILUSolveDeviceLU(hypre_ParCSRMatrix *A,
    /* Apply permutation */
    if (perm)
    {
-      HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
+      HYPRE_THRUST_CALL(gather, perm, perm + num_rows, ftemp_data, utemp_data);
    }
    else
    {
-      hypre_TMemcpy(utemp_data, ftemp_data, HYPRE_Complex, n,
+      hypre_TMemcpy(utemp_data, ftemp_data, HYPRE_Complex, num_rows,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    }
 
    /* Apply preconditioner (u = U^{-1} * L^{-1} * f) */
    hypre_ILUApplyLowerUpperDevice(matL_des, matU_des, matLU_csrsvdata,
-                                  matLU_d, ftemp_data, utemp_data);
+                                  matLU, ftemp_data, utemp_data);
 
    /* Apply reverse permutation */
    if (perm)
    {
-      HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + n, perm, ftemp_data);
+      HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + num_rows, perm, ftemp_data);
    }
    else
    {
-      hypre_TMemcpy(ftemp_data, utemp_data, HYPRE_Complex, n,
+      hypre_TMemcpy(ftemp_data, utemp_data, HYPRE_Complex, num_rows,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    }
 
@@ -167,34 +170,29 @@ hypre_ILUSolveDeviceLU(hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
-/*********************************************************************************/
-/*                   hypre_ILUSolveDeviceLUIter                                  */
-/*********************************************************************************/
-/* Incomplete LU solve (GPU) using Jacobi iterative approach
- * L, D and U factors only have local scope (no off-diagonal processor terms)
- * so apart from the residual calculation (which uses A), the solves with the
- * L and U factors are local.
-*/
-
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+/*--------------------------------------------------------------------------
+ * hypre_ILUApplyLowerJacIterDevice
+ *
+ * Incomplete L solve (Forward) of u^{k+1} = L^{-1}u^k on the GPU using the
+ * Jacobi iterative approach.
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ILUSolveLJacobiIter(hypre_CSRMatrix *A,
-                          hypre_Vector *input_local,
-                          hypre_Vector *work_local,
-                          hypre_Vector *output_local,
-                          HYPRE_Int lower_jacobi_iters)
+hypre_ILUApplyLowerJacIterDevice(hypre_CSRMatrix *A,
+                                 hypre_Vector    *input,
+                                 hypre_Vector    *work,
+                                 hypre_Vector    *output,
+                                 HYPRE_Int        lower_jacobi_iters)
 {
-   HYPRE_Real              *input_data          = hypre_VectorData(input_local);
-   HYPRE_Real              *work_data           = hypre_VectorData(work_local);
-   HYPRE_Real              *output_data         = hypre_VectorData(output_local);
-   HYPRE_Int               num_rows             = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int kk = 0;
+   HYPRE_Complex   *input_data  = hypre_VectorData(input);
+   HYPRE_Complex   *work_data   = hypre_VectorData(work);
+   HYPRE_Complex   *output_data = hypre_VectorData(output);
+   HYPRE_Int        num_rows    = hypre_CSRMatrixNumRows(A);
 
-   /* L solve - Forward solve ; u^{k+1} = f - Lu^k*/
-   /* Jacobi iteration loop */
+   HYPRE_Int        kk = 0;
 
-   /* Since the initial guess to the jacobi iteration is 0, the result of the first L SpMV is 0, so no need to compute
+   /* Since the initial guess to the jacobi iteration is 0, the result of
+      the first L SpMV is 0, so no need to compute.
       However, we still need to compute the transformation */
    hypreDevice_ComplexAxpyn(work_data, num_rows, input_data, output_data, 0.0);
 
@@ -202,7 +200,7 @@ hypre_ILUSolveLJacobiIter(hypre_CSRMatrix *A,
    for (kk = 1; kk < lower_jacobi_iters; kk++)
    {
       /* apply SpMV */
-      hypre_CSRMatrixSpMVDevice(0, 1.0, A, output_local, 0.0, work_local, -2);
+      hypre_CSRMatrixSpMVDevice(0, 1.0, A, output, 0.0, work, -2);
 
       /* transform */
       hypreDevice_ComplexAxpyn(work_data, num_rows, input_data, output_data, -1.0);
@@ -211,104 +209,127 @@ hypre_ILUSolveLJacobiIter(hypre_CSRMatrix *A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_ILUApplyUpperJacIterDevice
+ *
+ * Incomplete U solve (Backward) of u^{k+1} = U^{-1}u^k on the GPU using the
+ * Jacobi iterative approach.
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_ILUSolveUJacobiIter(hypre_CSRMatrix *A, hypre_Vector *input_local, hypre_Vector *work_local,
-                          hypre_Vector *output_local, hypre_Vector *diag_diag, HYPRE_Int upper_jacobi_iters)
+hypre_ILUApplyUpperJacIterDevice(hypre_CSRMatrix *A,
+                                 hypre_Vector    *input,
+                                 hypre_Vector    *work,
+                                 hypre_Vector    *output,
+                                 hypre_Vector    *diag,
+                                 HYPRE_Int        upper_jacobi_iters)
 {
-   HYPRE_Real              *output_data         = hypre_VectorData(output_local);
-   HYPRE_Real              *work_data           = hypre_VectorData(work_local);
-   HYPRE_Real              *input_data          = hypre_VectorData(input_local);
-   HYPRE_Real              *diag_diag_data      = hypre_VectorData(diag_diag);
-   HYPRE_Int               num_rows             = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int kk = 0;
+   HYPRE_Complex   *output_data    = hypre_VectorData(output);
+   HYPRE_Complex   *work_data      = hypre_VectorData(work);
+   HYPRE_Complex   *input_data     = hypre_VectorData(input);
+   HYPRE_Complex   *diag_data      = hypre_VectorData(diag);
+   HYPRE_Int        num_rows       = hypre_CSRMatrixNumRows(A);
 
-   /* U solve - Backward solve :  u^{k+1} = f - Uu^k */
-   /* Jacobi iteration loop */
+   HYPRE_Int        kk = 0;
 
-   /* Since the initial guess to the jacobi iteration is 0, the result of the first U SpMV is 0, so no need to compute
+   /* Since the initial guess to the jacobi iteration is 0,
+      the result of the first U SpMV is 0, so no need to compute.
       However, we still need to compute the transformation */
-   hypreDevice_zeqxmydd(num_rows, input_data, 0.0, work_data, output_data, diag_diag_data);
+   hypreDevice_zeqxmydd(num_rows, input_data, 0.0, work_data, output_data, diag_data);
 
    /* Do the remaining iterations */
    for (kk = 1; kk < upper_jacobi_iters; kk++)
    {
-       /* apply SpMV */
-       hypre_CSRMatrixSpMVDevice(0, 1.0, A, output_local, 0.0, work_local, 2);
+      /* apply SpMV */
+      hypre_CSRMatrixSpMVDevice(0, 1.0, A, output, 0.0, work, 2);
 
-       /* transform */
-       hypreDevice_zeqxmydd(num_rows, input_data, -1.0, work_data, output_data, diag_diag_data);
+      /* transform */
+      hypreDevice_zeqxmydd(num_rows, input_data, -1.0, work_data, output_data, diag_data);
    }
 
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_ILUApplyLowerUpperJacIterDevice
+ *
+ * Incomplete LU solve of u^{k+1} = U^{-1} L^{-1} u^k on the GPU using the
+ * Jacobi iterative approach.
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_ILUSolveLUJacobiIter(hypre_CSRMatrix *A, hypre_Vector *work1_local,
-                           hypre_Vector *work2_local, hypre_Vector *inout_local, hypre_Vector *diag_diag,
-                           HYPRE_Int lower_jacobi_iters, HYPRE_Int upper_jacobi_iters, HYPRE_Int my_id)
+hypre_ILUApplyLowerUpperJacIterDevice(hypre_CSRMatrix *A,
+                                      hypre_Vector    *work1,
+                                      hypre_Vector    *work2,
+                                      hypre_Vector    *inout,
+                                      hypre_Vector    *diag,
+                                      HYPRE_Int        lower_jacobi_iters,
+                                      HYPRE_Int        upper_jacobi_iters)
 {
    /* apply the iterative solve to L */
-   hypre_ILUSolveLJacobiIter(A, inout_local, work1_local, work2_local, lower_jacobi_iters);
+   hypre_ILUApplyLowerJacIterDevice(A, inout, work1, work2, lower_jacobi_iters);
 
    /* apply the iterative solve to U */
-   hypre_ILUSolveUJacobiIter(A, work2_local, work1_local, inout_local, diag_diag, upper_jacobi_iters);
+   hypre_ILUApplyUpperJacIterDevice(A, work2, work1, inout, diag, upper_jacobi_iters);
 
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_ILUSolveLUIterDevice
+ *
+ * Incomplete LU solve using jacobi iterations on GPU.
+ * L, D and U factors only have local scope (no off-diagonal processor terms).
+ *
+ * TODO (VPM): Merge this function with hypre_ILUSolveLUDevice
+ *--------------------------------------------------------------------------*/
 
-/* Incomplete LU solve using jacobi iterations on GPU
- * L, D and U factors only have local scope (no off-diagonal processor terms)
- * so apart from the residual calculation (which uses A), the solves with the
- * L and U factors are local.
-*/
 HYPRE_Int
-hypre_ILUSolveDeviceLUIter(hypre_ParCSRMatrix *A,
-                           hypre_CSRMatrix *matLU_d,
-                           hypre_ParVector *f,
-                           hypre_ParVector *u,
-                           HYPRE_Int *perm,
-                           HYPRE_Int n,
-                           hypre_ParVector *ftemp,
-                           hypre_ParVector *utemp,
-                           hypre_ParVector *xtemp,
-                           hypre_Vector **Adiag_diag,
-                           HYPRE_Int lower_jacobi_iters,
-                           HYPRE_Int upper_jacobi_iters)
+hypre_ILUSolveLUIterDevice(hypre_ParCSRMatrix *A,
+                           hypre_CSRMatrix    *matLU,
+                           hypre_ParVector    *f,
+                           hypre_ParVector    *u,
+                           HYPRE_Int          *perm,
+                           hypre_ParVector    *ftemp,
+                           hypre_ParVector    *utemp,
+                           hypre_ParVector    *xtemp,
+                           hypre_Vector      **diag_ptr,
+                           HYPRE_Int           lower_jacobi_iters,
+                           HYPRE_Int           upper_jacobi_iters)
 {
-   /* Only solve when we have stuffs to be solved */
-   if (n == 0)
+   HYPRE_Int        num_rows    = hypre_ParCSRMatrixNumRows(A);
+
+   hypre_Vector    *diag        = *diag_ptr;
+   hypre_Vector    *xtemp_local = hypre_ParVectorLocalVector(xtemp);
+   hypre_Vector    *utemp_local = hypre_ParVectorLocalVector(utemp);
+   HYPRE_Complex   *utemp_data  = hypre_VectorData(utemp_local);
+   hypre_Vector    *ftemp_local = hypre_ParVectorLocalVector(ftemp);
+   HYPRE_Complex   *ftemp_data  = hypre_VectorData(ftemp_local);
+
+   HYPRE_Complex    alpha = -1.0;
+   HYPRE_Complex    beta  = 1.0;
+
+   /* Sanity check */
+   if (num_rows == 0)
    {
       return hypre_error_flag;
    }
 
-   MPI_Comm             comm = hypre_ParCSRMatrixComm(A);
-   HYPRE_Int my_id;
-   hypre_MPI_Comm_rank(comm, &my_id);
-
-   hypre_Vector            *xtemp_local         = hypre_ParVectorLocalVector(xtemp);
-   hypre_Vector            *utemp_local         = hypre_ParVectorLocalVector(utemp);
-   HYPRE_Real              *utemp_data          = hypre_VectorData(utemp_local);
-
-   hypre_Vector            *ftemp_local         = hypre_ParVectorLocalVector(ftemp);
-   HYPRE_Real              *ftemp_data          = hypre_VectorData(ftemp_local);
-
-   HYPRE_Real              alpha;
-   HYPRE_Real              beta;
-
-   /* begin */
-   alpha = -1.0;
-   beta = 1.0;
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("ILUSolveLUIter");
 
    /* Grab the main diagonal from the diagonal block. Only do this once */
-   if (!(*Adiag_diag))
+   if (!diag)
    {
       /* Storage for the diagonal */
-      *Adiag_diag = hypre_SeqVectorCreate(n);
-      hypre_SeqVectorInitialize(*Adiag_diag);
+      diag = hypre_SeqVectorCreate(num_rows);
+      hypre_SeqVectorInitialize(diag);
 
       /* extract with device kernel */
-      hypre_CSRMatrixExtractDiagonalDevice(matLU_d, hypre_VectorData(*Adiag_diag), 2);
+      hypre_CSRMatrixExtractDiagonalDevice(matLU, hypre_VectorData(diag), 2);
+
+      /* Save output pointer */
+      *diag_ptr = diag;
    }
 
    /* compute residual */
@@ -317,34 +338,36 @@ hypre_ILUSolveDeviceLUIter(hypre_ParCSRMatrix *A,
    /* apply permutation */
    if (perm)
    {
-      HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
+      HYPRE_THRUST_CALL(gather, perm, perm + num_rows, ftemp_data, utemp_data);
    }
    else
    {
-      hypre_TMemcpy(utemp_data, ftemp_data, HYPRE_Complex, n,
+      hypre_TMemcpy(utemp_data, ftemp_data, HYPRE_Complex, num_rows,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    }
 
    /* apply the iterative solve to L and U */
-   hypre_ILUSolveLUJacobiIter(matLU_d, ftemp_local, xtemp_local, utemp_local, *Adiag_diag,
-                              lower_jacobi_iters, upper_jacobi_iters, my_id);
+   hypre_ILUApplyLowerUpperJacIterDevice(matLU, ftemp_local, xtemp_local, utemp_local,
+                                         diag, lower_jacobi_iters, upper_jacobi_iters);
 
    /* apply reverse permutation */
    if (perm)
    {
-      HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + n, perm, ftemp_data);
+      HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + num_rows, perm, ftemp_data);
    }
    else
    {
-      hypre_TMemcpy(ftemp_data, utemp_data, HYPRE_Complex, n,
+      hypre_TMemcpy(ftemp_data, utemp_data, HYPRE_Complex, num_rows,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    }
 
    /* Update solution */
    hypre_ParVectorAxpy(beta, ftemp, u);
 
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_FUNC_END;
+
    return hypre_error_flag;
 }
-#endif
 
 #endif /* defined(HYPRE_USING_GPU) */

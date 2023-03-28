@@ -258,15 +258,15 @@ hypre_ILUSolve( void               *ilu_vdata,
                if (tri_solve == 1)
                {
                   /* Apply GPU-accelerated LU solve */
-                  hypre_ILUSolveDeviceLU(matA, matL_des, matU_des,
+                  hypre_ILUSolveLUDevice(matA, matL_des, matU_des,
                                          matBLU_csrsvdata, matBLU_d,
-                                         F_array, U_array, perm, n,
+                                         F_array, U_array, perm,
                                          Utemp, Ftemp);
                }
                else
                {
-                  hypre_ILUSolveDeviceLUIter(matA, matBLU_d, F_array, U_array, perm,
-                                             n, Utemp, Ftemp, Ztemp, &Adiag_diag,
+                  hypre_ILUSolveLUIterDevice(matA, matBLU_d, F_array, U_array, perm,
+                                             Utemp, Ftemp, Ztemp, &Adiag_diag,
                                              lower_jacobi_iters, upper_jacobi_iters);
 
                   /* Assign this now, in case it was set in method above */
@@ -399,13 +399,13 @@ hypre_ILUSolve( void               *ilu_vdata,
                /* Apply GPU-accelerated LU solve - BJ-ilu */
                if (tri_solve == 1)
                {
-                  hypre_ILUSolveDeviceLU(matA, matL_des, matU_des, matBLU_csrsvdata,
-                                         matBLU_d, F_array, U_array, perm, n, Utemp, Ftemp);
+                  hypre_ILUSolveLUDevice(matA, matL_des, matU_des, matBLU_csrsvdata,
+                                         matBLU_d, F_array, U_array, perm, Utemp, Ftemp);
                }
                else
                {
-                  hypre_ILUSolveDeviceLUIter(matA, matBLU_d, F_array, U_array, perm,
-                                             n, Utemp, Ftemp, Ztemp, &Adiag_diag,
+                  hypre_ILUSolveLUIterDevice(matA, matBLU_d, F_array, U_array, perm,
+                                             Utemp, Ftemp, Ztemp, &Adiag_diag,
                                              lower_jacobi_iters, upper_jacobi_iters);
 
                   /* Assign this now, in case it was set in method above */

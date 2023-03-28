@@ -10,6 +10,8 @@
 #include "par_ilu.h"
 #include "seq_mv.hpp"
 
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+
 /*--------------------------------------------------------------------------
  * hypre_ParILUDeviceSchurGMRESMatvec
  *
@@ -31,15 +33,13 @@
  * |IS_3^{-1}E_31 IS_3^{-1}E_32       I      |
  *--------------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
-
 HYPRE_Int
-hypre_ParILUDeviceSchurGMRESMatvec( void   *matvec_data,
-                                      HYPRE_Complex  alpha,
-                                      void   *ilu_vdata,
-                                      void   *x,
-                                      HYPRE_Complex  beta,
-                                      void   *y           )
+hypre_ParILUDeviceSchurGMRESMatvec( void          *matvec_data,
+                                    HYPRE_Complex  alpha,
+                                    void          *ilu_vdata,
+                                    void          *x,
+                                    HYPRE_Complex  beta,
+                                    void          *y)
 {
    /* TODO (VPM): Refactor this function */
 
@@ -118,7 +118,7 @@ hypre_ParILUCusparseSchurGMRESMatvec( void   *matvec_data,
     *         |IS_3^{-1}E_31 IS_3^{-1}E_32       O      |
     * store in xtemp
     */
-   if ( A_diag_n > 0 )
+   if (A_diag_n > 0)
    {
 	   /* L solve - Forward solve */
 	   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
@@ -315,8 +315,8 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
    if (!S)
    {
       /* Just call BJ cusparse and return */
-      return hypre_ILUSolveDeviceLU(A, matL_des, matU_des, matBLU_csrsvdata, matBLU_d,
-                                    f, u, perm, nLU, ftemp, utemp);
+      return hypre_ILUSolveLUDevice(A, matL_des, matU_des, matBLU_csrsvdata, matBLU_d,
+                                    f, u, perm, ftemp, utemp);
    }
 
    /* data objects for communication */
@@ -730,8 +730,8 @@ hypre_ILUSolveDeviceSchurGMRESIter(hypre_ParCSRMatrix *A, hypre_ParVector *f,
    if (!S)
    {
       /* Just call BJ cusparse and return */
-      return hypre_ILUSolveDeviceLUIter(A, matBLU_d,
-                                        f, u, perm, nLU, ftemp, utemp, ztemp, Adiag_diag,
+      return hypre_ILUSolveLUIterDevice(A, matBLU_d, f, u, perm,
+                                        ftemp, utemp, ztemp, Adiag_diag,
                                         lower_jacobi_iters, upper_jacobi_iters);
    }
 
@@ -819,7 +819,8 @@ hypre_ILUSolveDeviceSchurGMRESIter(hypre_ParCSRMatrix *A, hypre_ParVector *f,
    if (nLU > 0)
    {
       /* apply the iterative solve to L */
-      hypre_ILUSolveLJacobiIter(matBLU_d, utemp_local, ztemp_local, ftemp_local, lower_jacobi_iters);
+      hypre_ILUApplyLowerJacIterDevice(matBLU_d, utemp_local, ztemp_local,
+                                       ftemp_local, lower_jacobi_iters);
 
       /* 2nd need to compute g'i = gi - Ei*UBi^{-1}*xi
        * Ei*UBi^{-1} is exactly the matE_d here
@@ -852,9 +853,11 @@ hypre_ILUSolveDeviceSchurGMRESIter(hypre_ParCSRMatrix *A, hypre_ParVector *f,
       }
 
       /* apply the iterative solve to L */
-      hypre_ILUSolveLJacobiIter(matSLU_d, utemp_shift, rhs_local, ftemp_shift, lower_jacobi_iters);
+      hypre_ILUApplyLowerJacIterDevice(matSLU_d, utemp_shift, rhs_local,
+                                       ftemp_shift, lower_jacobi_iters);
 
-      hypre_ILUSolveUJacobiIter(matSLU_d, ftemp_shift, utemp_shift, rhs_local, *Sdiag_diag, upper_jacobi_iters);
+      hypre_ILUApplyUpperJacIterDevice(matSLU_d, ftemp_shift, utemp_shift,
+                                       rhs_local, *Sdiag_diag, upper_jacobi_iters);
 
       /* apply the iterative solve to L and U */
       //hypre_ILUSolveLUJacobiIter(matSLU_d, utemp_shift, ftemp_shift, rhs_local, *Sdiag_diag,
@@ -880,11 +883,13 @@ hypre_ILUSolveDeviceSchurGMRESIter(hypre_ParCSRMatrix *A, hypre_ParVector *f,
       /* put result in u_temp upper */
 
       /* apply the iterative solve to U */
-      hypre_ILUSolveUJacobiIter(matBLU_d, ftemp_local, ztemp_local, utemp_local, *Adiag_diag, upper_jacobi_iters);
+      hypre_ILUApplyUpperJacIterDevice(matBLU_d, ftemp_local, ztemp_local,
+                                       utemp_local, *Adiag_diag, upper_jacobi_iters);
    }
 
    /* copy lower part solution into u_temp as well */
-   hypre_TMemcpy(utemp_data + nLU, x_data, HYPRE_Real, m, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(utemp_data + nLU, x_data, HYPRE_Real, m,
+                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
    /* perm back */
    if (perm)
@@ -900,6 +905,7 @@ hypre_ILUSolveDeviceSchurGMRESIter(hypre_ParCSRMatrix *A, hypre_ParVector *f,
    /* done, now everything are in u_temp, update solution */
    hypre_ParVectorAxpy(beta, ftemp, u);
 
+   /* Free memory */
    hypre_SeqVectorDestroy(ftemp_shift);
    hypre_SeqVectorDestroy(utemp_shift);
    hypre_SeqVectorDestroy(ftemp_upper);
@@ -937,8 +943,11 @@ hypre_ParILUDeviceSchurGMRESMatvecJacobiIter(void           *matvec_data,
                                              void          *y)
 {
    /* get matrix information first */
-   hypre_ParILUData *ilu_data                   = (hypre_ParILUData*) ilu_vdata;
+   hypre_ParILUData   *ilu_data                 = (hypre_ParILUData*) ilu_vdata;
    hypre_ParCSRMatrix *A                        = hypre_ParILUDataMatS(ilu_data);
+   HYPRE_Int           lower_jacobi_iters       = hypre_ParILUDataLowerJacobiIters(ilu_data);
+   HYPRE_Int           upper_jacobi_iters       = hypre_ParILUDataUpperJacobiIters(ilu_data);
+
 
    /* fist step, apply matvec on empty diagonal slot */
    hypre_CSRMatrix   *A_diag                    = hypre_ParCSRMatrixDiag(A);
@@ -999,20 +1008,19 @@ hypre_ParILUDeviceSchurGMRESMatvecJacobiIter(void           *matvec_data,
       }
 
       /* apply the iterative solve to L and U */
-      hypre_ILUSolveLUJacobiIter(A_diag, ytemp_local, ztemp_local, xtemp_local, SchurMatVec_diag,
-                                 hypre_ParILUDataLowerJacobiIters(ilu_data),
-                                 hypre_ParILUDataUpperJacobiIters(ilu_data), 0);
+      hypre_ILUApplyLowerUpperJacIterDevice(A_diag, ytemp_local, ztemp_local,
+                                            xtemp_local, SchurMatVec_diag,
+                                            lower_jacobi_iters, upper_jacobi_iters);
    }
 
    /* now add the original x onto it */
    hypre_ParVectorAxpy(alpha, (hypre_ParVector *) x, (hypre_ParVector *) xtemp);
 
-   /* finall, add that into y and get final result */
+   /* finally, add that into y and get final result */
    hypre_ParVectorScale(beta, (hypre_ParVector *) y );
    hypre_ParVectorAxpy(one, xtemp, (hypre_ParVector *) y);
 
    return hypre_error_flag;
 }
-
 
 #endif

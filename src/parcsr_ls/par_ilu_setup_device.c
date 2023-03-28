@@ -33,21 +33,21 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ILUSetupILU0Device(hypre_ParCSRMatrix *A,
-                         HYPRE_Int *perm_data,
-                         HYPRE_Int *qperm_data,
-                         HYPRE_Int n,
-                         HYPRE_Int nLU,
-                         hypre_GpuMatData  *matL_des,
-                         hypre_GpuMatData  *matU_des,
-                         hypre_CsrsvData  **matBLU_csrsvdata_ptr,
-                         hypre_CsrsvData  **matSLU_csrsvdata_ptr,
-                         hypre_CSRMatrix  **BLUptr,
+hypre_ILUSetupILU0Device(hypre_ParCSRMatrix  *A,
+                         HYPRE_Int           *perm_data,
+                         HYPRE_Int           *qperm_data,
+                         HYPRE_Int            n,
+                         HYPRE_Int            nLU,
+                         hypre_GpuMatData    *matL_des,
+                         hypre_GpuMatData    *matU_des,
+                         hypre_CsrsvData    **matBLU_csrsvdata_ptr,
+                         hypre_CsrsvData    **matSLU_csrsvdata_ptr,
+                         hypre_CSRMatrix    **BLUptr,
                          hypre_ParCSRMatrix **matSptr,
-                         hypre_CSRMatrix **Eptr,
-                         hypre_CSRMatrix **Fptr,
-                         HYPRE_Int **A_fake_diag_ip,
-                         HYPRE_Int tri_solve)
+                         hypre_CSRMatrix    **Eptr,
+                         hypre_CSRMatrix    **Fptr,
+                         HYPRE_Int          **A_fake_diag_ip,
+                         HYPRE_Int            tri_solve)
 {
    /* Input matrix data */
    MPI_Comm                 comm            = hypre_ParCSRMatrixComm(A);
@@ -512,8 +512,7 @@ HYPRE_Int
 HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix *A, hypre_GpuMatData * matL_des, hypre_GpuMatData * matU_des,
                                         hypre_CsrsvData ** matLU_csrsvdata_ptr)
 {
-
-    if (!A)
+   if (!A)
    {
       /* return if A is NULL */
       *matLU_csrsvdata_ptr    = NULL;
