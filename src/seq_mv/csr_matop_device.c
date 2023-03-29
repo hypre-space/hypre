@@ -663,15 +663,16 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int      job,
 
 HYPRE_Int
 hypre_CSRMatrixTriLowerUpperSolveDevice(char             uplo,
+                                        HYPRE_Int        unit_diag,
                                         hypre_CSRMatrix *A,
                                         HYPRE_Real      *l1_norms,
                                         hypre_Vector    *f,
                                         hypre_Vector    *u )
 {
 #if defined(HYPRE_USING_CUSPARSE)
-   hypre_CSRMatrixTriLowerUpperSolveCusparse(uplo, A, l1_norms, f, u);
+   hypre_CSRMatrixTriLowerUpperSolveCusparse(uplo, unit_diag, A, l1_norms, f, u);
 #elif defined(HYPRE_USING_ROCSPARSE)
-   hypre_CSRMatrixTriLowerUpperSolveRocsparse(uplo, A, l1_norms, f, u);
+   hypre_CSRMatrixTriLowerUpperSolveRocsparse(uplo, unit_diag, A, l1_norms, f, u);
 #else
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                      "hypre_CSRMatrixTriLowerUpperSolveDevice requires configuration with either cusparse or rocsparse\n");
@@ -2129,6 +2130,7 @@ hypre_SortCSRCusparse( HYPRE_Int            n,
 
 HYPRE_Int
 hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
+                                          HYPRE_Int        unit_diag,
                                           hypre_CSRMatrix *A,
                                           HYPRE_Real      *l1_norms,
                                           hypre_Vector    *f,
@@ -2148,11 +2150,11 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
    size_t         buffer_size;
    cusparseFillMode_t LFillMode = CUSPARSE_FILL_MODE_LOWER;
    cusparseFillMode_t UFillMode = CUSPARSE_FILL_MODE_UPPER;
-   cusparseDiagType_t DiagType = CUSPARSE_DIAG_TYPE_NON_UNIT;
 #else
    hypre_int      buffer_size;
    hypre_int      structural_zero;
 #endif
+   cusparseDiagType_t DiagType = unit_diag ? CUSPARSE_DIAG_TYPE_UNIT: CUSPARSE_DIAG_TYPE_NON_UNIT;
 
    if (nrow != ncol)
    {
@@ -2222,14 +2224,13 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
       hypre_CSRMatrixData(A) = A_a;
    }
 
-
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
    cusparseSpMatDescr_t matA = hypre_CSRMatrixToCusparseSpMat_core(nrow, ncol, 0, nnzA, A_i, A_sj, A_sa);
    HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(matA, CUSPARSE_SPMAT_DIAG_TYPE, &DiagType,
                                                   sizeof(cusparseDiagType_t)) );
 #else
    cusparseMatDescr_t descr = hypre_CSRMatrixGPUMatDescr(A);
-   HYPRE_CUSPARSE_CALL( cusparseSetMatDiagType(descr, CUSPARSE_DIAG_TYPE_NON_UNIT) );
+   HYPRE_CUSPARSE_CALL( cusparseSetMatDiagType(descr, DiagType) );
 #endif
 
    if (!hypre_CSRMatrixCsrsvData(A))
@@ -2421,6 +2422,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
 #if defined(HYPRE_USING_ROCSPARSE)
 HYPRE_Int
 hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
+                                           HYPRE_Int         unit_diag,
                                            hypre_CSRMatrix * A,
                                            HYPRE_Real      * l1_norms,
                                            hypre_Vector    * f,
@@ -2439,6 +2441,7 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
    HYPRE_Complex  alpha  = 1.0;
    size_t         buffer_size;
    hypre_int      structural_zero;
+   rocsparse_diag_type diag_type = unit_diag ? rocsparse_diag_type_unit: rocsparse_diag_type_non_unit;
 
    if (nrow != ncol)
    {
@@ -2491,7 +2494,7 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
       hypre_SortCSRRocsparse(nrow, ncol, nnzA, descr, A_i, A_sj, A_sa);
    }
 
-   HYPRE_ROCSPARSE_CALL( rocsparse_set_mat_diag_type(descr, rocsparse_diag_type_non_unit) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_set_mat_diag_type(descr, diag_type) );
 
    if (!hypre_CSRMatrixCsrsvData(A))
    {
