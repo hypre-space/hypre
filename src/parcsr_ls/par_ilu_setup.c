@@ -762,8 +762,8 @@ hypre_ILUSetup( void               *ilu_vdata,
                      hypre_ParKrylovDestroyVector,
                      hypre_ParILUDeviceSchurGMRESMatvecCreate, //parCSR A -- inactive
                      ((tri_solve == 1) ?
-                        hypre_ParILUDeviceSchurGMRESMatvec :
-                        hypre_ParILUDeviceSchurGMRESMatvecJacobiIter), //parCSR A -> ilu_data
+                        hypre_ParILUSchurGMRESMatvecDevice :
+                        hypre_ParILUSchurGMRESMatvecJacIterDevice), //parCSR A -> ilu_data
                      hypre_ParILUDeviceSchurGMRESMatvecDestroy, //parCSR A -- inactive
                      hypre_ParKrylovInnerProd,
                      hypre_ParKrylovCopyVector,

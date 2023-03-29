@@ -306,11 +306,11 @@ hypre_ILUSolve( void               *ilu_vdata,
                }
                else
                {
-                  hypre_ILUSolveDeviceSchurGMRESIter(matA, F_array, U_array, perm, nLU, matS,
-                                                     Utemp, Ftemp, schur_solver, schur_precond,
-                                                     rhs, x, u_end, matBLU_d, matE_d, matF_d,
-                                                     Ztemp, &Adiag_diag, &Sdiag_diag,
-                                                     lower_jacobi_iters, upper_jacobi_iters);
+                  hypre_ILUSolveSchurGMRESJacIterDevice(matA, F_array, U_array, perm, nLU, matS,
+                                                        Utemp, Ftemp, schur_solver, schur_precond,
+                                                        rhs, x, u_end, matBLU_d, matE_d, matF_d,
+                                                        Ztemp, &Adiag_diag, &Sdiag_diag,
+                                                        lower_jacobi_iters, upper_jacobi_iters);
 
                   /* Assign this now, in case it was set in method above */
                   hypre_ParILUDataADiagDiag(ilu_data) = Adiag_diag;

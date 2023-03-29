@@ -365,6 +365,9 @@ HYPRE_Int hypre_ILUSolveLUIterDevice(hypre_ParCSRMatrix *A, hypre_CSRMatrix *mat
                                      hypre_ParVector *ftemp, hypre_ParVector *utemp,
                                      hypre_ParVector *xtemp, hypre_Vector **diag_ptr,
                                      HYPRE_Int lower_jacobi_iters, HYPRE_Int upper_jacobi_iters);
+HYPRE_Int hypre_ILUApplyLowerUpperDevice(hypre_GpuMatData *matL_des, hypre_GpuMatData *matU_des,
+                                         hypre_CsrsvData *matLU_csrsvdata, hypre_CSRMatrix *LU,
+                                         HYPRE_Complex *ftemp_data, HYPRE_Complex *utemp_data);
 HYPRE_Int hypre_ILUApplyLowerUpperJacIterDevice(hypre_CSRMatrix *A, hypre_Vector *work1,
                                                 hypre_Vector *work2, hypre_Vector *inout,
                                                 hypre_Vector *diag, HYPRE_Int lower_jacobi_iters,
@@ -407,17 +410,17 @@ HYPRE_Int hypre_ILUSetupILU0LocalDevice(hypre_CSRMatrix *A);
 HYPRE_Int HYPRE_ILUSetupDeviceCSRILU0SetupSolve(hypre_CSRMatrix *A, hypre_GpuMatData *matL_des,
                                                 hypre_GpuMatData *matU_des,
                                                 hypre_CsrsvData **matLU_csrsvdata_ptr);
-HYPRE_Int hypre_ILUSolveDeviceSchurGMRESIter(hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                             hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int nLU,
-                                             hypre_ParCSRMatrix *S, hypre_ParVector *ftemp,
-                                             hypre_ParVector *utemp, HYPRE_Solver schur_solver,
-                                             HYPRE_Solver schur_precond, hypre_ParVector *rhs,
-                                             hypre_ParVector *x, HYPRE_Int *u_end,
-                                             hypre_CSRMatrix *matBLU_d, hypre_CSRMatrix *matE_d,
-                                             hypre_CSRMatrix *matF_d, hypre_ParVector *ztemp,
-                                             hypre_Vector **Adiag_diag, hypre_Vector **Sdiag_diag,
-                                             HYPRE_Int lower_jacobi_iters,
-                                             HYPRE_Int upper_jacobi_iters);
+HYPRE_Int hypre_ILUSolveSchurGMRESJacIterDevice(hypre_ParCSRMatrix *A, hypre_ParVector *f,
+                                                hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int nLU,
+                                                hypre_ParCSRMatrix *S, hypre_ParVector *ftemp,
+                                                hypre_ParVector *utemp, HYPRE_Solver schur_solver,
+                                                HYPRE_Solver schur_precond, hypre_ParVector *rhs,
+                                                hypre_ParVector *x, HYPRE_Int *u_end,
+                                                hypre_CSRMatrix *matBLU_d, hypre_CSRMatrix *matE_d,
+                                                hypre_CSRMatrix *matF_d, hypre_ParVector *ztemp,
+                                                hypre_Vector **Adiag_diag, hypre_Vector **Sdiag_diag,
+                                                HYPRE_Int lower_jacobi_iters,
+                                                HYPRE_Int upper_jacobi_iters);
 HYPRE_Int hypre_ILUSolveLUDevice(hypre_ParCSRMatrix *A, hypre_GpuMatData * matL_des,
                                  hypre_GpuMatData *matU_des, hypre_CsrsvData *matLU_csrsvdata,
                                  hypre_CSRMatrix *matLU_d, hypre_ParVector *f, hypre_ParVector *u,
@@ -439,12 +442,12 @@ HYPRE_Int hypre_ParILUDeviceSchurGMRESDummySolve(void *ilu_vdata, void *ilu_vdat
 HYPRE_Int hypre_ParILUDeviceSchurGMRESCommInfo(void *ilu_vdata, HYPRE_Int *my_id,
                                                HYPRE_Int *num_procs);
 void *hypre_ParILUDeviceSchurGMRESMatvecCreate(void *ilu_vdata, void *x);
-HYPRE_Int hypre_ParILUDeviceSchurGMRESMatvec(void *matvec_data, HYPRE_Complex alpha,
-                                             void *ilu_vdata, void *x,
-                                             HYPRE_Complex beta, void *y);
-HYPRE_Int hypre_ParILUDeviceSchurGMRESMatvecJacobiIter(void *matvec_data, HYPRE_Complex alpha,
-                                                       void *ilu_vdata, void *x,
-                                                       HYPRE_Complex beta, void *y);
+HYPRE_Int hypre_ParILUSchurGMRESMatvecDevice(void *matvec_data, HYPRE_Complex alpha,
+                                             void *ilu_vdata, void *x, HYPRE_Complex beta,
+                                             void *y);
+HYPRE_Int hypre_ParILUSchurGMRESMatvecJacIterDevice(void *matvec_data, HYPRE_Complex alpha,
+                                                    void *ilu_vdata, void *x,
+                                                    HYPRE_Complex beta, void *y);
 HYPRE_Int hypre_ParILUDeviceSchurGMRESMatvecDestroy(void *matvec_data );
 #endif
 
@@ -464,16 +467,10 @@ HYPRE_Int hypre_ILUSolveRocsparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVect
                                             hypre_CsrsvData *matSLU_csrsvdata,
                                             hypre_CSRMatrix *matBLU_d, hypre_CSRMatrix *matE_d,
                                             hypre_CSRMatrix *matF_d);
-HYPRE_Int hypre_ParILURocsparseSchurGMRESMatvec(void *matvec_data, HYPRE_Complex alpha,
-                                                void *ilu_vdata, void *x, HYPRE_Complex beta,
-                                                void *y);
 #endif
 
 
 #ifdef HYPRE_USING_CUDA
-HYPRE_Int hypre_ParILUCusparseSchurGMRESMatvec(void *matvec_data, HYPRE_Complex alpha,
-                                               void *ilu_vdata, void *x, HYPRE_Complex beta,
-                                               void *y);
 HYPRE_Int hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                            hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int nLU,
                                            hypre_ParCSRMatrix *S, hypre_ParVector *ftemp,
