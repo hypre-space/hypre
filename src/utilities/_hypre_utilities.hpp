@@ -763,22 +763,29 @@ struct hypre_CsrsvData
    char info_L;
    char info_U;
 #endif
-#if defined(HYPRE_USING_CUSPARSE)
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-   size_t BufferSize;
+
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+   size_t BufferSizeL;
+   size_t BufferSizeU;
+   char *BufferL;
+   char *BufferU;
 #else
    hypre_int BufferSize;
-#endif
-#else
-   hypre_int BufferSize;
-#endif
    char *Buffer;
+#endif
 };
 
-#define hypre_CsrsvDataInfoL(data)      ((data) -> info_L)
-#define hypre_CsrsvDataInfoU(data)      ((data) -> info_U)
-#define hypre_CsrsvDataBufferSize(data) ((data) -> BufferSize)
-#define hypre_CsrsvDataBuffer(data)     ((data) -> Buffer)
+#define hypre_CsrsvDataInfoL(data)       ((data) -> info_L)
+#define hypre_CsrsvDataInfoU(data)       ((data) -> info_U)
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+#define hypre_CsrsvDataBufferSizeL(data) ((data) -> BufferSizeL)
+#define hypre_CsrsvDataBufferSizeU(data) ((data) -> BufferSizeU)
+#define hypre_CsrsvDataBufferL(data)     ((data) -> BufferL)
+#define hypre_CsrsvDataBufferU(data)     ((data) -> BufferU)
+#else
+#define hypre_CsrsvDataBufferSize(data)  ((data) -> BufferSize)
+#define hypre_CsrsvDataBuffer(data)      ((data) -> Buffer)
+#endif
 
 struct hypre_GpuMatData
 {

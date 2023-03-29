@@ -51,10 +51,12 @@ hypre_CsrsvDataDestroy(hypre_CsrsvData* data)
 #endif
    }
 
-   if ( hypre_CsrsvDataBuffer(data) )
-   {
-      hypre_TFree(hypre_CsrsvDataBuffer(data), HYPRE_MEMORY_DEVICE);
-   }
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+   hypre_TFree(hypre_CsrsvDataBufferL(data), HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_CsrsvDataBufferU(data), HYPRE_MEMORY_DEVICE);
+#else
+   hypre_TFree(hypre_CsrsvDataBuffer(data), HYPRE_MEMORY_DEVICE);
+#endif
 
    hypre_TFree(data, HYPRE_MEMORY_HOST);
 }
@@ -2223,9 +2225,6 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
 
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
    cusparseSpMatDescr_t matA = hypre_CSRMatrixToCusparseSpMat_core(nrow, ncol, 0, nnzA, A_i, A_sj, A_sa);
-   //hypre_CSRMatrix *A_copy = hypre_CSRMatrixClone_v2(A, 1, HYPRE_MEMORY_DEVICE);
-   //hypre_CSRMatrixSortRow(A_copy);
-   //cusparseSpMatDescr_t matA = hypre_CSRMatrixToCusparseSpMat(A_copy, 0);
    HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(matA, CUSPARSE_SPMAT_DIAG_TYPE, &DiagType,
                                                   sizeof(cusparseDiagType_t)) );
 #else
@@ -2264,6 +2263,16 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                                                hypre_CsrsvDataInfoL(csrsv_data), &buffer_size) );
 #endif
 
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+         if (hypre_CsrsvDataBufferSizeL(csrsv_data) < buffer_size)
+         {
+            hypre_CsrsvDataBufferL(csrsv_data) = hypre_TReAlloc_v2(hypre_CsrsvDataBufferL(csrsv_data),
+                                                                   char, hypre_CsrsvDataBufferSizeL(csrsv_data),
+                                                                   char, buffer_size,
+                                                                   HYPRE_MEMORY_DEVICE);
+            hypre_CsrsvDataBufferSizeL(csrsv_data) = buffer_size;
+         }
+#else
          if (hypre_CsrsvDataBufferSize(csrsv_data) < buffer_size)
          {
             hypre_CsrsvDataBuffer(csrsv_data) = hypre_TReAlloc_v2(hypre_CsrsvDataBuffer(csrsv_data),
@@ -2272,13 +2281,14 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                                                   HYPRE_MEMORY_DEVICE);
             hypre_CsrsvDataBufferSize(csrsv_data) = buffer_size;
          }
+#endif
 
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
          HYPRE_CUSPARSE_CALL( cusparseSpSV_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                     &alpha, matA, vecF, vecU, data_type,
                                                     CUSPARSE_SPSV_ALG_DEFAULT,
                                                     hypre_CsrsvDataInfoL(csrsv_data),
-                                                    hypre_CsrsvDataBuffer(csrsv_data)) );
+                                                    hypre_CsrsvDataBufferL(csrsv_data)) );
 #else
          HYPRE_CUSPARSE_CALL( hypre_cusparse_csrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                              nrow, nnzA, descr, A_sa, A_i, A_sj,
@@ -2337,6 +2347,16 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                                                hypre_CsrsvDataInfoU(csrsv_data), &buffer_size) );
 #endif
 
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+         if (hypre_CsrsvDataBufferSizeU(csrsv_data) < buffer_size)
+         {
+            hypre_CsrsvDataBufferU(csrsv_data) = hypre_TReAlloc_v2(hypre_CsrsvDataBufferU(csrsv_data),
+                                                                   char, hypre_CsrsvDataBufferSizeU(csrsv_data),
+                                                                   char, buffer_size,
+                                                                   HYPRE_MEMORY_DEVICE);
+            hypre_CsrsvDataBufferSizeU(csrsv_data) = buffer_size;
+         }
+#else
          if (hypre_CsrsvDataBufferSize(csrsv_data) < buffer_size)
          {
             hypre_CsrsvDataBuffer(csrsv_data) = hypre_TReAlloc_v2(hypre_CsrsvDataBuffer(csrsv_data),
@@ -2345,13 +2365,14 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                                                   HYPRE_MEMORY_DEVICE);
             hypre_CsrsvDataBufferSize(csrsv_data) = buffer_size;
          }
+#endif
 
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
          HYPRE_CUSPARSE_CALL( cusparseSpSV_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                     &alpha, matA, vecF, vecU, data_type,
                                                     CUSPARSE_SPSV_ALG_DEFAULT,
                                                     hypre_CsrsvDataInfoU(csrsv_data),
-                                                    hypre_CsrsvDataBuffer(csrsv_data)) );
+                                                    hypre_CsrsvDataBufferU(csrsv_data)) );
 #else
          HYPRE_CUSPARSE_CALL( hypre_cusparse_csrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                                                              nrow, nnzA, descr, A_sa, A_i, A_sj,
@@ -2384,8 +2405,6 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                                        hypre_CsrsvDataBuffer(csrsv_data)) );
 #endif
    }
-
-   //hypre_CSRMatrixDestroy(A_copy);
 
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
    HYPRE_CUSPARSE_CALL( cusparseDestroySpMat(matA) );
