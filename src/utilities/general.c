@@ -8,6 +8,10 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
+#if defined(HYPRE_USING_MAGMA)
+#include <magma_v2.h>
+#endif
+
 #ifdef HYPRE_USING_MEMORY_TRACKER
 hypre_MemoryTracker *_hypre_memory_tracker = NULL;
 
@@ -321,6 +325,10 @@ HYPRE_Init()
    hypre_HandleComputeStream(_hypre_handle);
 #endif
 
+#if defined(HYPRE_USING_MAGMA)
+   magma_init();
+#endif
+
    /* A separate stream for prefetching */
    //hypre_HandleCudaPrefetchStream(_hypre_handle);
 #endif // HYPRE_USING_GPU
@@ -399,6 +407,10 @@ HYPRE_Finalize()
                             hypre_memory_tracker_print, hypre_memory_tracker_filename);
 
    hypre_MemoryTrackerDestroy(_hypre_memory_tracker);
+#endif
+
+#if defined(HYPRE_USING_MAGMA)
+   magma_finalize();
 #endif
 
    return hypre_error_flag;

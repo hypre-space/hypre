@@ -11,7 +11,6 @@
 
 #if defined(HYPRE_USING_MAGMA)
 #include <magma_v2.h>
-#include <magma_lapack.h>
 #endif
 
 #if defined(HYPRE_USING_GPU)
@@ -951,7 +950,6 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 #endif
 
 #if defined(HYPRE_USING_MAGMA)
-      magma_init();
       const magma_uplo_t uplo = MagmaLower;
       magma_queue_t queue = NULL;
       magma_int_t dev = 0;
@@ -1006,8 +1004,6 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
                                             max_nnz_row,
                                             num_rows,
                                             queue));
-      magma_finalize();
-
 #else
       HYPRE_CUSOLVER_CALL(cusolverDnDpotrsBatched(hypre_HandleVendorSolverHandle(hypre_handle()),
                                                   uplo,
