@@ -3033,9 +3033,8 @@ hypre_ParILUCusparseSchurGMRESMatvec( void   *matvec_data,
    hypre_ParCSRMatrix *A                        = hypre_ParILUDataMatS(ilu_data);
    /* fist step, apply matvec on empty diagonal slot */
    hypre_CSRMatrix    *A_diag                   = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Int          *A_diag_i                 = hypre_CSRMatrixI(A_diag);
    HYPRE_Int           A_diag_n                 = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int          *A_diag_fake_i            = hypre_ParILUDataMatAFakeDiagonal(ilu_data);
+   HYPRE_Int           A_diag_nnz               = hypre_CSRMatrixNumNonzeros(A_diag);
    hypre_ParVector    *xtemp                    = hypre_ParILUDataXTemp(ilu_data);
    hypre_Vector       *xtemp_local              = hypre_ParVectorLocalVector(xtemp);
    hypre_ParVector    *ytemp                    = hypre_ParILUDataYTemp(ilu_data);
@@ -3043,17 +3042,17 @@ hypre_ParILUCusparseSchurGMRESMatvec( void   *matvec_data,
    HYPRE_Real          zero                     = 0.0;
    HYPRE_Real          one                      = 1.0;
 
-   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
-
    /* Matvec with
     *         |  O  E_12 E_13|
     * alpha * |E_21   O  E_23|
     *         |E_31 E_32   O |
     * store in xtemp
     */
-   hypre_CSRMatrixI(A_diag)                     = A_diag_fake_i;
+   /* RL: temp. set Adiag's nnz = 0 to skip the matvec (based on the assumption in seq_mv/csr_matvec impl.) */
+   hypre_CSRMatrixNumNonzeros(A_diag) = 0;
    hypre_ParCSRMatrixMatvec( alpha, (hypre_ParCSRMatrix *) A, (hypre_ParVector *) x, zero, xtemp );
-   hypre_CSRMatrixI(A_diag)                     = A_diag_i;
+   /* recover A_diag's nnz */
+   hypre_CSRMatrixNumNonzeros(A_diag) = A_diag_nnz;
 
    /* Compute U^{-1}*L^{-1}*(A_offd * x)
     * Or in another word, matvec with
