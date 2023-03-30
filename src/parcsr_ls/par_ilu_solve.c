@@ -14,7 +14,6 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 #include "par_ilu.h"
-#include "seq_mv.hpp"
 
 /*--------------------------------------------------------------------
  * hypre_ILUSolve
@@ -1354,31 +1353,10 @@ hypre_ILUSolveCusparseLU(hypre_ParCSRMatrix   *A,
    /* ILU data */
    hypre_Vector            *utemp_local         = hypre_ParVectorLocalVector(utemp);
    HYPRE_Real              *utemp_data          = hypre_VectorData(utemp_local);
-
    hypre_Vector            *ftemp_local         = hypre_ParVectorLocalVector(ftemp);
    HYPRE_Real              *ftemp_data          = hypre_VectorData(ftemp_local);
-
-   HYPRE_Real               alpha;
-   HYPRE_Real               beta;
-
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-   cusparseSpMatDescr_t     MatLU               = hypre_CSRMatrixToCusparseSpMat(matLU_d, 0);
-   cudaDataType             data_type           = hypre_HYPREComplexToCudaDataType();
-   cusparseDnVecDescr_t     vecX                = hypre_VectorToCusparseDnVec(utemp_local, 0, n);
-   cusparseDnVecDescr_t     vecY                = hypre_VectorToCusparseDnVec(ftemp_local, 0, n);
-   cusparseFillMode_t       LFillMode           = CUSPARSE_FILL_MODE_LOWER;
-   cusparseFillMode_t       UFillMode           = CUSPARSE_FILL_MODE_UPPER;
-   cusparseDiagType_t       DiagType;
-#else
-   HYPRE_Real              *LU_data             = hypre_CSRMatrixData(matLU_d);
-   HYPRE_Int               *LU_i                = hypre_CSRMatrixI(matLU_d);
-   HYPRE_Int               *LU_j                = hypre_CSRMatrixJ(matLU_d);
-   HYPRE_Int                nnz                 = hypre_CSRMatrixNumNonzeros(matLU_d);
-#endif
-
-   /* begin */
-   alpha = -1.0;
-   beta = 1.0;
+   HYPRE_Real               alpha               = -1.0;
+   HYPRE_Real               beta                = 1.0;
 
    cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
 
@@ -1403,54 +1381,11 @@ hypre_ILUSolveCusparseLU(hypre_ParCSRMatrix   *A,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    }
 
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-   DiagType = cusparseGetMatDiagType(matL_des);
-   HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatLU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                  &DiagType, sizeof(cusparseDiagType_t)) );
-
-   HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatLU, CUSPARSE_SPMAT_FILL_MODE,
-                                                  &LFillMode, sizeof(cusparseFillMode_t)) );
-
-   hypre_GpuProfilingPushRange("Forward");
-   HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                           &beta, MatLU, vecX, vecY, data_type,
-                                           CUSPARSE_SPSV_ALG_DEFAULT,
-                                           matL_info) );
-   hypre_GpuProfilingPopRange();
-
-   DiagType = cusparseGetMatDiagType(matU_des);
-   HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatLU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                  &DiagType, sizeof(cusparseDiagType_t)) );
-
-   HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatLU, CUSPARSE_SPMAT_FILL_MODE,
-                                                  &UFillMode, sizeof(cusparseFillMode_t)) );
-
-   hypre_GpuProfilingPushRange("Backward");
-   HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                           &beta, MatLU, vecY, vecX, data_type,
-                                           CUSPARSE_SPSV_ALG_DEFAULT,
-                                           matU_info) );
-   hypre_GpuProfilingPopRange();
-
-#else
    /* L solve - Forward solve */
-   hypre_GpuProfilingPushRange("Forward");
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                   n, nnz, &beta, matL_des,
-                                                   LU_data, LU_i, LU_j, matL_info,
-                                                   utemp_data, ftemp_data, ilu_solve_policy,
-                                                   ilu_solve_buffer));
-   hypre_GpuProfilingPopRange();
+   hypre_CSRMatrixTriLowerUpperSolveDevice('L', 1, matLU_d, NULL, utemp_local, ftemp_local);
 
    /* U solve - Backward substitution */
-   hypre_GpuProfilingPushRange("Backward");
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                   n, nnz, &beta, matU_des,
-                                                   LU_data, LU_i, LU_j, matU_info,
-                                                   ftemp_data, utemp_data, ilu_solve_policy,
-                                                   ilu_solve_buffer));
-   hypre_GpuProfilingPopRange();
-#endif
+   hypre_CSRMatrixTriLowerUpperSolveDevice('U', 0, matLU_d, NULL, ftemp_local, utemp_local);
 
    /* Apply reverse permutation */
    if (perm)
@@ -1465,12 +1400,6 @@ hypre_ILUSolveCusparseLU(hypre_ParCSRMatrix   *A,
 
    /* Update solution */
    hypre_ParVectorAxpy(beta, ftemp, u);
-
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-   HYPRE_CUSPARSE_CALL( cusparseDestroySpMat(MatLU) );
-   HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecX) );
-   HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecY) );
-#endif
 
    hypre_GpuProfilingPopRange();
 
@@ -1534,11 +1463,8 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix   *A,
    hypre_Vector      *rhs_local   = hypre_ParVectorLocalVector(rhs);
    hypre_Vector      *x_local     = hypre_ParVectorLocalVector(x);
    HYPRE_Real        *x_data      = hypre_VectorData(x_local);
-
-   HYPRE_Real        alpha;
-   HYPRE_Real        beta;
-   //HYPRE_Real        gamma;
-   //HYPRE_Int         i, j, k1, k2, col;
+   HYPRE_Real         alpha       = -1.0;
+   HYPRE_Real         beta        = 1.0;
 
    /* problem size */
    hypre_CSRMatrix   *matSLU_d   = hypre_ParCSRMatrixDiag(S);
@@ -1553,42 +1479,6 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix   *A,
    hypre_VectorData(utemp_lower)       = utemp_data + nLU;
    hypre_SeqVectorInitialize(ftemp_upper);
    hypre_SeqVectorInitialize(utemp_lower);
-
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-   cusparseSpMatDescr_t     MatBLU              = hypre_CSRMatrixToCusparseSpMat(matBLU_d, 0);
-   cusparseSpMatDescr_t     MatSLU              = hypre_CSRMatrixToCusparseSpMat(matSLU_d, 0);
-   cudaDataType             data_type           = hypre_HYPREComplexToCudaDataType();
-   cusparseDnVecDescr_t     vecX                = hypre_VectorToCusparseDnVec(utemp_local, 0, nLU);
-   cusparseDnVecDescr_t     vecY                = hypre_VectorToCusparseDnVec(ftemp_local, 0, nLU);
-   cusparseDnVecDescr_t     vecXS               = hypre_VectorToCusparseDnVec(utemp_local, nLU, m);
-   cusparseDnVecDescr_t     vecYS               = hypre_VectorToCusparseDnVec(ftemp_local, nLU, m);
-   cusparseDnVecDescr_t     vecRhs              = hypre_VectorToCusparseDnVec(rhs_local, 0, m);
-   cusparseFillMode_t       LFillMode           = CUSPARSE_FILL_MODE_LOWER;
-   cusparseFillMode_t       UFillMode           = CUSPARSE_FILL_MODE_UPPER;
-   cusparseDiagType_t       DiagType;
-#else
-   HYPRE_Real        *rhs_data   = hypre_VectorData(rhs_local);
-   HYPRE_Int         *BLU_i      = NULL;
-   HYPRE_Int         *BLU_j      = NULL;
-   HYPRE_Real        *BLU_data   = NULL;
-   HYPRE_Int          BLU_nnz    = 0;
-   if ( nLU > 0)
-   {
-      BLU_i                      = hypre_CSRMatrixI(matBLU_d);
-      BLU_j                      = hypre_CSRMatrixJ(matBLU_d);
-      BLU_data                   = hypre_CSRMatrixData(matBLU_d);
-      BLU_nnz                    = hypre_CSRMatrixNumNonzeros(matBLU_d);
-   }
-   HYPRE_Int         *SLU_i      = hypre_CSRMatrixI(matSLU_d);
-   HYPRE_Int         *SLU_j      = hypre_CSRMatrixJ(matSLU_d);
-   HYPRE_Real        *SLU_data   = hypre_CSRMatrixData(matSLU_d);
-   HYPRE_Int         SLU_nnz     = hypre_CSRMatrixNumNonzeros(matSLU_d);
-#endif
-
-   /* begin */
-   beta = 1.0;
-   alpha = -1.0;
-   //gamma = 0.0;
 
    cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
 
@@ -1607,24 +1497,7 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix   *A,
 
       /* This solve won't touch data in utemp, thus, gi is still in utemp_lower */
       /* L solve - Forward solve */
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-      DiagType = cusparseGetMatDiagType(matL_des);
-      HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatBLU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                     &DiagType, sizeof(cusparseDiagType_t)) );
-
-      HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatBLU, CUSPARSE_SPMAT_FILL_MODE,
-                                                     &LFillMode, sizeof(cusparseFillMode_t)) );
-
-      HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                              &beta, MatBLU, vecX, vecY, data_type,
-                                              CUSPARSE_SPSV_ALG_DEFAULT,
-                                              matBL_info) );
-#else
-      HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                      nLU, BLU_nnz, &beta, matL_des,
-                                                      BLU_data, BLU_i, BLU_j, matBL_info,
-                                                      utemp_data, ftemp_data, ilu_solve_policy, ilu_solve_buffer));
-#endif
+      hypre_CSRMatrixTriLowerUpperSolveDevice('L', 1, matBLU_d, NULL, utemp_local, ftemp_local);
 
       /* 2nd need to compute g'i = gi - Ei*UBi^{-1}*xi
        * Ei*UBi^{-1} is exactly the matE_d here
@@ -1648,46 +1521,10 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix   *A,
 
    if (m > 0)
    {
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
       /* L solve */
-      DiagType = cusparseGetMatDiagType(matL_des);
-      HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatSLU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                     &DiagType, sizeof(cusparseDiagType_t)) );
-
-      HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatSLU, CUSPARSE_SPMAT_FILL_MODE,
-                                                     &LFillMode, sizeof(cusparseFillMode_t)) );
-
-      HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                              &beta, MatSLU, vecXS, vecYS, data_type,
-                                              CUSPARSE_SPSV_ALG_DEFAULT,
-                                              matSL_info) );
-
+      hypre_CSRMatrixTriLowerUpperSolveDevice_core('L', 1, matSLU_d, NULL, utemp_local, nLU, ftemp_local, nLU);
       /* U solve */
-      DiagType = cusparseGetMatDiagType(matU_des);
-      HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatSLU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                     &DiagType, sizeof(cusparseDiagType_t)) );
-
-      HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatSLU, CUSPARSE_SPMAT_FILL_MODE,
-                                                     &UFillMode, sizeof(cusparseFillMode_t)) );
-
-      HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                              &beta, MatSLU, vecYS, vecRhs, data_type,
-                                              CUSPARSE_SPSV_ALG_DEFAULT,
-                                              matSU_info) );
-#else
-      /* L solve */
-      HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                      m, SLU_nnz, &beta, matL_des,
-                                                      SLU_data, SLU_i, SLU_j, matSL_info,
-                                                      utemp_data + nLU, ftemp_data + nLU, ilu_solve_policy,
-                                                      ilu_solve_buffer));
-
-      /* U solve */
-      HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                      m, SLU_nnz, &beta, matU_des,
-                                                      SLU_data, SLU_i, SLU_j, matSU_info,
-                                                      ftemp_data + nLU, rhs_data, ilu_solve_policy, ilu_solve_buffer));
-#endif
+      hypre_CSRMatrixTriLowerUpperSolveDevice_core('U', 0, matSLU_d, NULL, ftemp_local, nLU, rhs_local, 0);
    }
 
 
@@ -1710,24 +1547,7 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix   *A,
       /* put result in u_temp upper */
 
       /* U solve - Forward solve */
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-      DiagType = cusparseGetMatDiagType(matU_des);
-      HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatBLU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                     &DiagType, sizeof(cusparseDiagType_t)) );
-
-      HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatBLU, CUSPARSE_SPMAT_FILL_MODE,
-                                                     &UFillMode, sizeof(cusparseFillMode_t)) );
-
-      HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                              &beta, MatBLU, vecY, vecX, data_type,
-                                              CUSPARSE_SPSV_ALG_DEFAULT,
-                                              matBU_info) );
-#else
-      HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                      nLU, BLU_nnz, &beta, matU_des,
-                                                      BLU_data, BLU_i, BLU_j, matBU_info,
-                                                      ftemp_data, utemp_data, ilu_solve_policy, ilu_solve_buffer));
-#endif
+      hypre_CSRMatrixTriLowerUpperSolveDevice('U', 0, matBLU_d, NULL, ftemp_local, utemp_local);
    }
 
    /* copy lower part solution into u_temp as well */
@@ -1741,16 +1561,6 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix   *A,
 
    hypre_SeqVectorDestroy(ftemp_upper);
    hypre_SeqVectorDestroy(utemp_lower);
-
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-   HYPRE_CUSPARSE_CALL( cusparseDestroySpMat(MatBLU) );
-   HYPRE_CUSPARSE_CALL( cusparseDestroySpMat(MatSLU) );
-   HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecX) );
-   HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecY) );
-   HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecXS) );
-   HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecYS) );
-   HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecRhs) );
-#endif
 
    return hypre_error_flag;
 }
@@ -1799,9 +1609,6 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix   *A,
                        void                 *ilu_solve_buffer,
                        HYPRE_Int             test_opt)
 {
-   /* data objects for communication */
-   //   MPI_Comm          comm = hypre_ParCSRMatrixComm(A);
-
    /* data objects for temp vector */
    hypre_Vector      *utemp_local = hypre_ParVectorLocalVector(utemp);
    HYPRE_Real        *utemp_data  = hypre_VectorData(utemp_local);
@@ -1809,19 +1616,16 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix   *A,
    HYPRE_Real        *ftemp_data  = hypre_VectorData(ftemp_local);
    hypre_Vector      *xtemp_local = hypre_ParVectorLocalVector(xtemp);
    HYPRE_Real        *xtemp_data  = hypre_VectorData(xtemp_local);
-   //hypre_Vector      *ytemp_local = hypre_ParVectorLocalVector(ytemp);
-   //HYPRE_Real        *ytemp_data  = hypre_VectorData(ytemp_local);
    hypre_Vector      *rhs_local   = hypre_ParVectorLocalVector(rhs);
    HYPRE_Real        *rhs_data    = hypre_VectorData(rhs_local);
    hypre_Vector      *x_local     = hypre_ParVectorLocalVector(x);
    HYPRE_Real        *x_data      = hypre_VectorData(x_local);
-
-   //HYPRE_Int         i, j, k1, k2, col;
-
-   /* problem size */
-   hypre_CSRMatrix   *matSLU_d   = hypre_ParCSRMatrixDiag(S);
-   HYPRE_Int         m           = hypre_CSRMatrixNumRows(matSLU_d);
-   HYPRE_Int         n           = nLU + m;
+   hypre_CSRMatrix   *matSLU_d    = hypre_ParCSRMatrixDiag(S);
+   HYPRE_Int          m           = hypre_CSRMatrixNumRows(matSLU_d);
+   HYPRE_Int          n           = nLU + m;
+   HYPRE_Real         one         = 1.0;
+   HYPRE_Real         mone        = -1.0;
+   HYPRE_Real         zero        = 0.0;
 
    hypre_Vector *ftemp_upper           = hypre_SeqVectorCreate(nLU);
    hypre_Vector *utemp_lower           = hypre_SeqVectorCreate(m);
@@ -1831,41 +1635,6 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix   *A,
    hypre_VectorData(utemp_lower)       = utemp_data + nLU;
    hypre_SeqVectorInitialize(ftemp_upper);
    hypre_SeqVectorInitialize(utemp_lower);
-
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-   cusparseSpMatDescr_t     MatALU              = hypre_CSRMatrixToCusparseSpMat(matALU_d, 0);
-   cusparseSpMatDescr_t     MatBLU              = hypre_CSRMatrixToCusparseSpMat(matBLU_d, 0);
-   cusparseSpMatDescr_t     MatSLU              = hypre_CSRMatrixToCusparseSpMat(matSLU_d, 0);
-   cusparseDnVecDescr_t     vecU                = hypre_VectorToCusparseDnVec(utemp_local, 0, n);
-   cusparseDnVecDescr_t     vecF                = hypre_VectorToCusparseDnVec(ftemp_local, 0, n);
-   cusparseDnVecDescr_t     vecX                = hypre_VectorToCusparseDnVec(xtemp_local, 0, n);
-   cusparseDnVecDescr_t     vecUB               = hypre_VectorToCusparseDnVec(utemp_local, 0, nLU);
-   cusparseDnVecDescr_t     vecFB               = hypre_VectorToCusparseDnVec(ftemp_local, 0, nLU);
-   cusparseDnVecDescr_t     vecXS               = hypre_VectorToCusparseDnVec(xtemp_local, 0, m);
-   cusparseDnVecDescr_t     vecRhs              = hypre_VectorToCusparseDnVec(rhs_local, 0, m);
-   cudaDataType             data_type           = hypre_HYPREComplexToCudaDataType();
-   cusparseFillMode_t       LFillMode           = CUSPARSE_FILL_MODE_LOWER;
-   cusparseFillMode_t       UFillMode           = CUSPARSE_FILL_MODE_UPPER;
-   cusparseDiagType_t       DiagType;
-#else
-   HYPRE_Int         *ALU_i      = hypre_CSRMatrixI(matALU_d);
-   HYPRE_Int         *ALU_j      = hypre_CSRMatrixJ(matALU_d);
-   HYPRE_Real        *ALU_data   = hypre_CSRMatrixData(matALU_d);
-   HYPRE_Int          ALU_nnz    = ALU_i[n];
-   HYPRE_Int         *BLU_i      = hypre_CSRMatrixI(matBLU_d);
-   HYPRE_Int         *BLU_j      = hypre_CSRMatrixJ(matBLU_d);
-   HYPRE_Real        *BLU_data   = hypre_CSRMatrixData(matBLU_d);
-   HYPRE_Int          BLU_nnz    = BLU_i[nLU];
-   HYPRE_Int         *SLU_i      = hypre_CSRMatrixI(matSLU_d);
-   HYPRE_Int         *SLU_j      = hypre_CSRMatrixJ(matSLU_d);
-   HYPRE_Real        *SLU_data   = hypre_CSRMatrixData(matSLU_d);
-   HYPRE_Int          SLU_nnz    = SLU_i[m];
-#endif
-
-   /* begin */
-   HYPRE_Real one = 1.0;
-   HYPRE_Real mone = -1.0;
-   HYPRE_Real zero = 0.0;
 
    cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
 
@@ -1887,44 +1656,11 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix   *A,
           */
          if (n > 0)
          {
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
             /* L solve - Forward solve */
-            DiagType = cusparseGetMatDiagType(matL_des);
-            HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatALU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                           &DiagType, sizeof(cusparseDiagType_t)) );
+            hypre_CSRMatrixTriLowerUpperSolveDevice('L', 1, matALU_d, NULL, ftemp_local, utemp_local);
 
-            HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatALU, CUSPARSE_SPMAT_FILL_MODE,
-                                                           &LFillMode, sizeof(cusparseFillMode_t)) );
-
-            HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                    &one, MatALU, vecF, vecU, data_type,
-                                                    CUSPARSE_SPSV_ALG_DEFAULT,
-                                                    matAL_info) );
-
-            /* U solve - Forward solve */
-            DiagType = cusparseGetMatDiagType(matU_des);
-            HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatALU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                           &DiagType, sizeof(cusparseDiagType_t)) );
-
-            HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatALU, CUSPARSE_SPMAT_FILL_MODE,
-                                                           &UFillMode, sizeof(cusparseFillMode_t)) );
-
-            HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                    &one, MatALU, vecU, vecX, data_type,
-                                                    CUSPARSE_SPSV_ALG_DEFAULT,
-                                                    matAU_info) );
-#else
-            /* L solve - Forward solve */
-            HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                            n, ALU_nnz, &one, matL_des,
-                                                            ALU_data, ALU_i, ALU_j, matAL_info,
-                                                            ftemp_data, utemp_data, ilu_solve_policy, ilu_solve_buffer));
-            /* U solve - Forward solve */
-            HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                            n, ALU_nnz, &one, matU_des,
-                                                            ALU_data, ALU_i, ALU_j, matAU_info,
-                                                            utemp_data, xtemp_data, ilu_solve_policy, ilu_solve_buffer));
-#endif
+            /* U solve - Backward solve */
+            hypre_CSRMatrixTriLowerUpperSolveDevice('U', 0, matALU_d, NULL, utemp_local, xtemp_local);
          }
          /* residual, we should not touch xtemp for now
           * r = R*(f-PAQx)
@@ -1934,49 +1670,14 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix   *A,
          /* copy partial data in */
          hypre_TMemcpy( rhs_data, ftemp_data + nLU, HYPRE_Real, m, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-         /* solve L^{-1} */
          if (nLU > 0)
          {
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+            /* solve L^{-1} */
             /* L solve */
-            DiagType = cusparseGetMatDiagType(matL_des);
-            HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatBLU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                           &DiagType, sizeof(cusparseDiagType_t)) );
-
-            HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatBLU, CUSPARSE_SPMAT_FILL_MODE,
-                                                           &LFillMode, sizeof(cusparseFillMode_t)) );
-
-            HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                    &one, MatBLU, vecFB, vecUB, data_type,
-                                                    CUSPARSE_SPSV_ALG_DEFAULT,
-                                                    matBL_info) );
-
-            /* U solve */
-            DiagType = cusparseGetMatDiagType(matU_des);
-            HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatBLU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                           &DiagType, sizeof(cusparseDiagType_t)) );
-
-            HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatBLU, CUSPARSE_SPMAT_FILL_MODE,
-                                                           &UFillMode, sizeof(cusparseFillMode_t)) );
-
-            HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                    &one, MatBLU, vecUB, vecFB, data_type,
-                                                    CUSPARSE_SPSV_ALG_DEFAULT,
-                                                    matBU_info) );
-#else
-            /* L solve */
-            HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                            nLU, BLU_nnz, &one, matL_des,
-                                                            BLU_data, BLU_i, BLU_j, matBL_info,
-                                                            ftemp_data, utemp_data, ilu_solve_policy, ilu_solve_buffer));
-
+            hypre_CSRMatrixTriLowerUpperSolveDevice('L', 1, matBLU_d, NULL, ftemp_local, utemp_local);
             /* -U^{-1}L^{-1} */
             /* U solve */
-            HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                            nLU, BLU_nnz, &one, matU_des,
-                                                            BLU_data, BLU_i, BLU_j, matBU_info,
-                                                            utemp_data, ftemp_data, ilu_solve_policy, ilu_solve_buffer));
-#endif
+            hypre_CSRMatrixTriLowerUpperSolveDevice('U', 0, matBLU_d, NULL, utemp_local, ftemp_local);
          }
          /* -EU^{-1}L^{-1} */
          hypre_CSRMatrixMatvec(mone, matE_d, ftemp_upper, one, rhs_local);
@@ -1993,49 +1694,14 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix   *A,
             /* u = xtemp + P*x */
             /* -Fx */
             hypre_CSRMatrixMatvec(mone, matF_d, x_local, zero, ftemp_upper);
-            /* -L^{-1}Fx */
             if (nLU > 0)
             {
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+               /* -L^{-1}Fx */
                /* L solve */
-               DiagType = cusparseGetMatDiagType(matL_des);
-               HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatBLU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                              &DiagType, sizeof(cusparseDiagType_t)) );
-
-               HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatBLU, CUSPARSE_SPMAT_FILL_MODE,
-                                                              &LFillMode, sizeof(cusparseFillMode_t)) );
-
-               HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                       &one, MatBLU, vecFB, vecUB, data_type,
-                                                       CUSPARSE_SPSV_ALG_DEFAULT,
-                                                       matBL_info) );
-
-               /* U solve */
-               DiagType = cusparseGetMatDiagType(matU_des);
-               HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatBLU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                              &DiagType, sizeof(cusparseDiagType_t)) );
-
-               HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatBLU, CUSPARSE_SPMAT_FILL_MODE,
-                                                              &UFillMode, sizeof(cusparseFillMode_t)) );
-
-               HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                       &one, MatBLU, vecUB, vecFB, data_type,
-                                                       CUSPARSE_SPSV_ALG_DEFAULT,
-                                                       matBU_info) );
-#else
-               /* L solve */
-               HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                               nLU, BLU_nnz, &one, matL_des,
-                                                               BLU_data, BLU_i, BLU_j, matBL_info,
-                                                               ftemp_data, utemp_data, ilu_solve_policy, ilu_solve_buffer));
-
+               hypre_CSRMatrixTriLowerUpperSolveDevice('L', 1, matBLU_d, NULL, ftemp_local, utemp_local);
                /* -U{-1}L^{-1}Fx */
                /* U solve */
-               HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                               nLU, BLU_nnz, &one, matU_des,
-                                                               BLU_data, BLU_i, BLU_j, matBU_info,
-                                                               utemp_data, ftemp_data, ilu_solve_policy, ilu_solve_buffer));
-#endif
+               hypre_CSRMatrixTriLowerUpperSolveDevice('U', 0, matBLU_d, NULL, utemp_local, ftemp_local);
             }
             /* now copy data to y_lower */
             hypre_TMemcpy( ftemp_data + nLU, x_data, HYPRE_Real, m, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
@@ -2049,93 +1715,26 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix   *A,
             /* otherwise just apply triangular solves */
             if (m > 0)
             {
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
                /* L solve - Forward solve */
-               DiagType = cusparseGetMatDiagType(matL_des);
-               HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatSLU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                              &DiagType, sizeof(cusparseDiagType_t)) );
-
-               HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatSLU, CUSPARSE_SPMAT_FILL_MODE,
-                                                              &LFillMode, sizeof(cusparseFillMode_t)) );
-
-               HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                       &one, MatSLU, vecRhs, vecXS, data_type,
-                                                       CUSPARSE_SPSV_ALG_DEFAULT,
-                                                       matSL_info) );
+               hypre_CSRMatrixTriLowerUpperSolveDevice('L', 1, matSLU_d, NULL, rhs_local, x_local);
 
                /* U solve - Backward solve */
-               DiagType = cusparseGetMatDiagType(matU_des);
-               HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatSLU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                              &DiagType, sizeof(cusparseDiagType_t)) );
-
-               HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatSLU, CUSPARSE_SPMAT_FILL_MODE,
-                                                              &UFillMode, sizeof(cusparseFillMode_t)) );
-
-               HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                       &one, MatSLU, vecXS, vecRhs, data_type,
-                                                       CUSPARSE_SPSV_ALG_DEFAULT,
-                                                       matSU_info) );
-#else
-               /* L solve - Forward solve */
-               HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                               m, SLU_nnz, &one, matL_des,
-                                                               SLU_data, SLU_i, SLU_j, matSL_info,
-                                                               rhs_data, x_data, ilu_solve_policy, ilu_solve_buffer));
-
-               /* U solve - Backward solve */
-               HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                               m, SLU_nnz, &one, matU_des,
-                                                               SLU_data, SLU_i, SLU_j, matSU_info,
-                                                               x_data, rhs_data, ilu_solve_policy, ilu_solve_buffer));
-#endif
+               hypre_CSRMatrixTriLowerUpperSolveDevice('U', 0, matSLU_d, NULL, x_local, rhs_local);
             }
 
             /* u = xtemp + P*x */
             /* -Fx */
             hypre_CSRMatrixMatvec(mone, matF_d, rhs_local, zero, ftemp_upper);
-            /* -L^{-1}Fx */
+
             if (nLU > 0)
             {
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+               /* -L^{-1}Fx */
                /* L solve */
-               DiagType = cusparseGetMatDiagType(matL_des);
-               HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatBLU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                              &DiagType, sizeof(cusparseDiagType_t)) );
-
-               HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatBLU, CUSPARSE_SPMAT_FILL_MODE,
-                                                              &LFillMode, sizeof(cusparseFillMode_t)) );
-
-               HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                       &one, MatBLU, vecFB, vecUB, data_type,
-                                                       CUSPARSE_SPSV_ALG_DEFAULT,
-                                                       matBL_info) );
-
-               /* U solve */
-               DiagType = cusparseGetMatDiagType(matU_des);
-               HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatBLU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                              &DiagType, sizeof(cusparseDiagType_t)) );
-
-               HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatBLU, CUSPARSE_SPMAT_FILL_MODE,
-                                                              &UFillMode, sizeof(cusparseFillMode_t)) );
-
-               HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                       &one, MatBLU, vecUB, vecFB, data_type,
-                                                       CUSPARSE_SPSV_ALG_DEFAULT,
-                                                       matBU_info) );
-#else
-               /* L solve */
-               HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                               nLU, BLU_nnz, &one, matL_des,
-                                                               BLU_data, BLU_i, BLU_j, matBL_info,
-                                                               ftemp_data, utemp_data, ilu_solve_policy, ilu_solve_buffer));
+               hypre_CSRMatrixTriLowerUpperSolveDevice('L', 1, matBLU_d, NULL, ftemp_local, utemp_local);
 
                /* -U{-1}L^{-1}Fx */
                /* U solve */
-               HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                               nLU, BLU_nnz, &one, matU_des,
-                                                               BLU_data, BLU_i, BLU_j, matBU_info,
-                                                               utemp_data, ftemp_data, ilu_solve_policy, ilu_solve_buffer));
-#endif
+               hypre_CSRMatrixTriLowerUpperSolveDevice('U', 0, matBLU_d, NULL, utemp_local, ftemp_local);
             }
             /* now copy data to y_lower */
             hypre_TMemcpy( ftemp_data + nLU, rhs_data, HYPRE_Real, m, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
@@ -2166,44 +1765,11 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix   *A,
           */
          if (n > 0)
          {
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
             /* L solve - Forward solve */
-            DiagType = cusparseGetMatDiagType(matL_des);
-            HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatALU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                           &DiagType, sizeof(cusparseDiagType_t)) );
-
-            HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatALU, CUSPARSE_SPMAT_FILL_MODE,
-                                                           &LFillMode, sizeof(cusparseFillMode_t)) );
-
-            HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                    &one, MatALU, vecU, vecF, data_type,
-                                                    CUSPARSE_SPSV_ALG_DEFAULT,
-                                                    matAL_info) );
+            hypre_CSRMatrixTriLowerUpperSolveDevice('L', 1, matALU_d, NULL, utemp_local, ftemp_local);
 
             /* U solve - Backward solve */
-            DiagType = cusparseGetMatDiagType(matU_des);
-            HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatALU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                           &DiagType, sizeof(cusparseDiagType_t)) );
-
-            HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatALU, CUSPARSE_SPMAT_FILL_MODE,
-                                                           &UFillMode, sizeof(cusparseFillMode_t)) );
-
-            HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                    &one, MatALU, vecF, vecX, data_type,
-                                                    CUSPARSE_SPSV_ALG_DEFAULT,
-                                                    matAU_info) );
-#else
-            /* L solve - Forward solve */
-            HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                            n, ALU_nnz, &one, matL_des,
-                                                            ALU_data, ALU_i, ALU_j, matAL_info,
-                                                            utemp_data, ftemp_data, ilu_solve_policy, ilu_solve_buffer));
-            /* U solve - Backward solve */
-            HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                            n, ALU_nnz, &one, matU_des,
-                                                            ALU_data, ALU_i, ALU_j, matAU_info,
-                                                            ftemp_data, xtemp_data, ilu_solve_policy, ilu_solve_buffer));
-#endif
+            hypre_CSRMatrixTriLowerUpperSolveDevice('U', 0, matALU_d, NULL, ftemp_local, xtemp_local);
          }
          /* residual, we should not touch xtemp for now
           * r = R*(f-PAQx)
@@ -2216,26 +1782,7 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix   *A,
          /* solve L^{-1} */
          if (nLU > 0)
          {
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-            DiagType = cusparseGetMatDiagType(matL_des);
-            HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatALU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                           &DiagType, sizeof(cusparseDiagType_t)) );
-
-            HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatALU, CUSPARSE_SPMAT_FILL_MODE,
-                                                           &LFillMode, sizeof(cusparseFillMode_t)) );
-
-            HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                    &one, MatBLU, vecUB, vecFB, data_type,
-                                                    CUSPARSE_SPSV_ALG_DEFAULT,
-                                                    matBL_info) );
-
-#else
-            /* L solve */
-            HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                            nLU, BLU_nnz, &one, matL_des,
-                                                            BLU_data, BLU_i, BLU_j, matBL_info,
-                                                            utemp_data, ftemp_data, ilu_solve_policy, ilu_solve_buffer));
-#endif
+            hypre_CSRMatrixTriLowerUpperSolveDevice('L', 1, matBLU_d, NULL, utemp_local, ftemp_local);
          }
          /* -EU^{-1}L^{-1} */
          hypre_CSRMatrixMatvec(mone, matE_d, ftemp_upper, one, rhs_local);
@@ -2255,25 +1802,7 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix   *A,
             /* -U{-1}L^{-1}Fx */
             if (nLU > 0)
             {
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-               DiagType = cusparseGetMatDiagType(matU_des);
-               HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatBLU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                              &DiagType, sizeof(cusparseDiagType_t)) );
-
-               HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatBLU, CUSPARSE_SPMAT_FILL_MODE,
-                                                              &UFillMode, sizeof(cusparseFillMode_t)) );
-
-               HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                       &one, MatBLU, vecFB, vecUB, data_type,
-                                                       CUSPARSE_SPSV_ALG_DEFAULT,
-                                                       matBU_info) );
-#else
-               /* U solve */
-               HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                               nLU, BLU_nnz, &one, matU_des,
-                                                               BLU_data, BLU_i, BLU_j, matBU_info,
-                                                               ftemp_data, utemp_data, ilu_solve_policy, ilu_solve_buffer));
-#endif
+               hypre_CSRMatrixTriLowerUpperSolveDevice('U', 0, matBLU_d, NULL, ftemp_local, utemp_local);
             }
             /* now copy data to y_lower */
             hypre_TMemcpy( utemp_data + nLU, x_data, HYPRE_Real, m, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
@@ -2286,44 +1815,8 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix   *A,
             /* otherwise just apply triangular solves */
             if (m > 0)
             {
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-               /* L solve - Forward solve */
-               DiagType = cusparseGetMatDiagType(matL_des);
-               HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatSLU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                              &DiagType, sizeof(cusparseDiagType_t)) );
-
-               HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatSLU, CUSPARSE_SPMAT_FILL_MODE,
-                                                              &LFillMode, sizeof(cusparseFillMode_t)) );
-
-               HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                       &one, MatSLU, vecRhs, vecXS, data_type,
-                                                       CUSPARSE_SPSV_ALG_DEFAULT,
-                                                       matSL_info) );
-
-               /* U solve - Backward solve */
-               DiagType = cusparseGetMatDiagType(matU_des);
-               HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatSLU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                              &DiagType, sizeof(cusparseDiagType_t)) );
-
-               HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatSLU, CUSPARSE_SPMAT_FILL_MODE,
-                                                              &UFillMode, sizeof(cusparseFillMode_t)) );
-
-               HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                       &one, MatSLU, vecXS, vecRhs, data_type,
-                                                       CUSPARSE_SPSV_ALG_DEFAULT,
-                                                       matSU_info) );
-#else
-               /* L solve - Forward solve */
-               HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                               m, SLU_nnz, &one, matL_des,
-                                                               SLU_data, SLU_i, SLU_j, matSL_info,
-                                                               rhs_data, x_data, ilu_solve_policy, ilu_solve_buffer));
-               /* U solve - Backward solve */
-               HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                               m, SLU_nnz, &one, matU_des,
-                                                               SLU_data, SLU_i, SLU_j, matSU_info,
-                                                               x_data, rhs_data, ilu_solve_policy, ilu_solve_buffer));
-#endif
+               hypre_CSRMatrixTriLowerUpperSolveDevice('L', 1, matSLU_d, NULL, rhs_local, x_local);
+               hypre_CSRMatrixTriLowerUpperSolveDevice('U', 0, matSLU_d, NULL, x_local, rhs_local);
             }
             /* u = xtemp + P*x */
             /* -L^{-1}Fx */
@@ -2331,25 +1824,7 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix   *A,
             /* -U{-1}L^{-1}Fx */
             if (nLU > 0)
             {
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-               DiagType = cusparseGetMatDiagType(matU_des);
-               HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatBLU, CUSPARSE_SPMAT_DIAG_TYPE,
-                                                              &DiagType, sizeof(cusparseDiagType_t)) );
-
-               HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(MatBLU, CUSPARSE_SPMAT_FILL_MODE,
-                                                              &UFillMode, sizeof(cusparseFillMode_t)) );
-
-               HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                       &one, MatBLU, vecFB, vecUB, data_type,
-                                                       CUSPARSE_SPSV_ALG_DEFAULT,
-                                                       matBU_info) );
-#else
-               /* U solve */
-               HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                               nLU, BLU_nnz, &one, matU_des,
-                                                               BLU_data, BLU_i, BLU_j, matBU_info,
-                                                               ftemp_data, utemp_data, ilu_solve_policy, ilu_solve_buffer));
-#endif
+               hypre_CSRMatrixTriLowerUpperSolveDevice('U', 0, matBLU_d, NULL, ftemp_local, utemp_local);
             }
             /* now copy data to y_lower */
             hypre_TMemcpy( utemp_data + nLU, rhs_data, HYPRE_Real, m, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
@@ -2369,19 +1844,6 @@ hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix   *A,
 
    hypre_SeqVectorDestroy(ftemp_upper);
    hypre_SeqVectorDestroy(utemp_lower);
-
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-   HYPRE_CUSPARSE_CALL( cusparseDestroySpMat(MatALU) );
-   HYPRE_CUSPARSE_CALL( cusparseDestroySpMat(MatBLU) );
-   HYPRE_CUSPARSE_CALL( cusparseDestroySpMat(MatSLU) );
-   HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecU) );
-   HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecF) );
-   HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecX) );
-   HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecUB) );
-   HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecFB) );
-   HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecXS) );
-   HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecRhs) );
-#endif
 
    return hypre_error_flag;
 }
@@ -2724,7 +2186,7 @@ hypre_NSHSolve( void               *nsh_vdata,
 
    if (my_id == 0 && print_level > 1 && tol > 0.)
    {
-      hypre_printf("\n\n Newton–Schulz–Hotelling SOLVER SOLUTION INFO:\n");
+      hypre_printf("\n\n Newton-Schulz-Hotelling SOLVER SOLUTION INFO:\n");
    }
 
 
@@ -2938,3 +2400,4 @@ hypre_NSHSolveInverse(hypre_ParCSRMatrix *A,
    hypre_ParVectorAxpy(beta, utemp, u);
    return hypre_error_flag;
 }
+

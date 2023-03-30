@@ -1799,6 +1799,7 @@ HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix         *A,
                                         HYPRE_Int               *buffer_sizep,
                                         void                   **bufferp)
 {
+#if 0
    if (!A)
    {
       /* return if A is NULL */
@@ -2007,7 +2008,7 @@ HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix         *A,
    *bufferp       = solve_buffer;
 
    hypre_GpuProfilingPopRange();
-
+#endif
    return hypre_error_flag;
 }
 
@@ -3353,6 +3354,7 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix  *A,
    buffer = hypre_TAlloc(char, buffer_size, HYPRE_MEMORY_DEVICE);
 
 #if CUSPARSE_VERSION >= CUSPARSE_SPSM_VERSION
+   /* analysis */
    HYPRE_CUSPARSE_CALL(cusparseSpSM_analysis(handle,
                                              CUSPARSE_OPERATION_NON_TRANSPOSE,
                                              CUSPARSE_OPERATION_NON_TRANSPOSE,
@@ -3365,6 +3367,7 @@ hypre_ParILURAPBuildRP(hypre_ParCSRMatrix  *A,
                                              malL_info,
                                              buffer));
 
+   /* solve phase */
    HYPRE_CUSPARSE_CALL(cusparseSpSM_solve(handle,
                                           CUSPARSE_OPERATION_NON_TRANSPOSE,
                                           CUSPARSE_OPERATION_NON_TRANSPOSE,
