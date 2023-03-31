@@ -17,124 +17,109 @@
 void *
 hypre_ILUCreate( void )
 {
-   hypre_ParILUData                       *ilu_data;
-
-   ilu_data                               = hypre_CTAlloc(hypre_ParILUData,  1, HYPRE_MEMORY_HOST);
+   hypre_ParILUData *ilu_data;
+   ilu_data = hypre_CTAlloc(hypre_ParILUData,  1, HYPRE_MEMORY_HOST);
 
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
-   hypre_ParILUDataAperm(ilu_data) = NULL;
-   hypre_ParILUDataMatBILUDevice(ilu_data) = NULL;
-   hypre_ParILUDataMatSILUDevice(ilu_data) = NULL;
-   hypre_ParILUDataMatEDevice(ilu_data) = NULL;
-   hypre_ParILUDataMatFDevice(ilu_data) = NULL;
-   hypre_ParILUDataR(ilu_data) = NULL;
-   hypre_ParILUDataP(ilu_data) = NULL;
-   hypre_ParILUDataFTempUpper(ilu_data) = NULL;
-   hypre_ParILUDataUTempLower(ilu_data) = NULL;
-   hypre_ParILUDataADiagDiag(ilu_data) = NULL;
+   hypre_ParILUDataAperm(ilu_data)                        = NULL;
+   hypre_ParILUDataMatBILUDevice(ilu_data)                = NULL;
+   hypre_ParILUDataMatSILUDevice(ilu_data)                = NULL;
+   hypre_ParILUDataMatEDevice(ilu_data)                   = NULL;
+   hypre_ParILUDataMatFDevice(ilu_data)                   = NULL;
+   hypre_ParILUDataR(ilu_data)                            = NULL;
+   hypre_ParILUDataP(ilu_data)                            = NULL;
+   hypre_ParILUDataFTempUpper(ilu_data)                   = NULL;
+   hypre_ParILUDataUTempLower(ilu_data)                   = NULL;
+   hypre_ParILUDataADiagDiag(ilu_data)                    = NULL;
 #endif
 
    /* general data */
-   hypre_ParILUDataGlobalSolver(ilu_data) = 0;
-   hypre_ParILUDataMatA(ilu_data) = NULL;
-   hypre_ParILUDataMatL(ilu_data) = NULL;
-   hypre_ParILUDataMatD(ilu_data) = NULL;
-   hypre_ParILUDataMatU(ilu_data) = NULL;
-   hypre_ParILUDataMatS(ilu_data) = NULL;
-   hypre_ParILUDataSchurSolver(ilu_data) = NULL;
-   hypre_ParILUDataSchurPrecond(ilu_data) = NULL;
-   hypre_ParILUDataRhs(ilu_data) = NULL;
-   hypre_ParILUDataX(ilu_data) = NULL;
+   hypre_ParILUDataGlobalSolver(ilu_data)                 = 0;
+   hypre_ParILUDataMatA(ilu_data)                         = NULL;
+   hypre_ParILUDataMatL(ilu_data)                         = NULL;
+   hypre_ParILUDataMatD(ilu_data)                         = NULL;
+   hypre_ParILUDataMatU(ilu_data)                         = NULL;
+   hypre_ParILUDataMatS(ilu_data)                         = NULL;
+   hypre_ParILUDataSchurSolver(ilu_data)                  = NULL;
+   hypre_ParILUDataSchurPrecond(ilu_data)                 = NULL;
+   hypre_ParILUDataRhs(ilu_data)                          = NULL;
+   hypre_ParILUDataX(ilu_data)                            = NULL;
 
    hypre_ParILUDataDroptol(ilu_data) = hypre_TAlloc(HYPRE_Real, 3, HYPRE_MEMORY_HOST);
-   hypre_ParILUDataDroptol(ilu_data)[0] = 1.0e-02;/* droptol for B */
-   hypre_ParILUDataDroptol(ilu_data)[1] = 1.0e-02;/* droptol for E and F */
-   hypre_ParILUDataDroptol(ilu_data)[2] = 1.0e-02;/* droptol for S */
-   hypre_ParILUDataLfil(ilu_data) = 0;
-   hypre_ParILUDataMaxRowNnz(ilu_data) = 1000;
-   hypre_ParILUDataCFMarkerArray(ilu_data) = NULL;
-   hypre_ParILUDataPerm(ilu_data) = NULL;
-   hypre_ParILUDataQPerm(ilu_data) = NULL;
-   hypre_ParILUDataTolDDPQ(ilu_data) = 1.0e-01;
 
-   hypre_ParILUDataF(ilu_data) = NULL;
-   hypre_ParILUDataU(ilu_data) = NULL;
-   hypre_ParILUDataFTemp(ilu_data) = NULL;
-   hypre_ParILUDataUTemp(ilu_data) = NULL;
-   hypre_ParILUDataXTemp(ilu_data) = NULL;
-   hypre_ParILUDataYTemp(ilu_data) = NULL;
-   hypre_ParILUDataZTemp(ilu_data) = NULL;
-   hypre_ParILUDataUExt(ilu_data) = NULL;
-   hypre_ParILUDataFExt(ilu_data) = NULL;
-   hypre_ParILUDataResidual(ilu_data) = NULL;
-   hypre_ParILUDataRelResNorms(ilu_data) = NULL;
-
-   hypre_ParILUDataNumIterations(ilu_data) = 0;
-
-   hypre_ParILUDataMaxIter(ilu_data) = 20;
-   hypre_ParILUDataTriSolve(ilu_data) = 1;
-   hypre_ParILUDataLowerJacobiIters(ilu_data) = 5;
-   hypre_ParILUDataUpperJacobiIters(ilu_data) = 5;
-   hypre_ParILUDataTol(ilu_data) = 1.0e-7;
-
-   hypre_ParILUDataLogging(ilu_data) = 0;
-   hypre_ParILUDataPrintLevel(ilu_data) = 0;
-
-   hypre_ParILUDataL1Norms(ilu_data) = NULL;
-
-   hypre_ParILUDataOperatorComplexity(ilu_data) = 0.;
-
-   hypre_ParILUDataIluType(ilu_data) = 0;
-   hypre_ParILUDataNLU(ilu_data) = 0;
-   hypre_ParILUDataNI(ilu_data) = 0;
-   hypre_ParILUDataUEnd(ilu_data) = NULL;
-
+   hypre_ParILUDataDroptol(ilu_data)[0]                   = 1.0e-02; /* droptol for B */
+   hypre_ParILUDataDroptol(ilu_data)[1]                   = 1.0e-02; /* droptol for E and F */
+   hypre_ParILUDataDroptol(ilu_data)[2]                   = 1.0e-02; /* droptol for S */
+   hypre_ParILUDataLfil(ilu_data)                         = 0;
+   hypre_ParILUDataMaxRowNnz(ilu_data)                    = 1000;
+   hypre_ParILUDataCFMarkerArray(ilu_data)                = NULL;
+   hypre_ParILUDataPerm(ilu_data)                         = NULL;
+   hypre_ParILUDataQPerm(ilu_data)                        = NULL;
+   hypre_ParILUDataTolDDPQ(ilu_data)                      = 1.0e-01;
+   hypre_ParILUDataF(ilu_data)                            = NULL;
+   hypre_ParILUDataU(ilu_data)                            = NULL;
+   hypre_ParILUDataFTemp(ilu_data)                        = NULL;
+   hypre_ParILUDataUTemp(ilu_data)                        = NULL;
+   hypre_ParILUDataXTemp(ilu_data)                        = NULL;
+   hypre_ParILUDataYTemp(ilu_data)                        = NULL;
+   hypre_ParILUDataZTemp(ilu_data)                        = NULL;
+   hypre_ParILUDataUExt(ilu_data)                         = NULL;
+   hypre_ParILUDataFExt(ilu_data)                         = NULL;
+   hypre_ParILUDataResidual(ilu_data)                     = NULL;
+   hypre_ParILUDataRelResNorms(ilu_data)                  = NULL;
+   hypre_ParILUDataNumIterations(ilu_data)                = 0;
+   hypre_ParILUDataMaxIter(ilu_data)                      = 20;
+   hypre_ParILUDataTriSolve(ilu_data)                     = 1;
+   hypre_ParILUDataLowerJacobiIters(ilu_data)             = 5;
+   hypre_ParILUDataUpperJacobiIters(ilu_data)             = 5;
+   hypre_ParILUDataTol(ilu_data)                          = 1.0e-7;
+   hypre_ParILUDataLogging(ilu_data)                      = 0;
+   hypre_ParILUDataPrintLevel(ilu_data)                   = 0;
+   hypre_ParILUDataL1Norms(ilu_data)                      = NULL;
+   hypre_ParILUDataOperatorComplexity(ilu_data)           = 0.;
+   hypre_ParILUDataIluType(ilu_data)                      = 0;
+   hypre_ParILUDataNLU(ilu_data)                          = 0;
+   hypre_ParILUDataNI(ilu_data)                           = 0;
+   hypre_ParILUDataUEnd(ilu_data)                         = NULL;
    /* reordering_type default to use local RCM */
-   hypre_ParILUDataReorderingType(ilu_data) = 1;
-
+   hypre_ParILUDataReorderingType(ilu_data)               = 1;
    /* see hypre_ILUSetType for more default values */
-   hypre_ParILUDataTestOption(ilu_data) = 0;
-
+   hypre_ParILUDataTestOption(ilu_data)                   = 0;
    /* -> GENERAL-SLOTS */
-   hypre_ParILUDataSchurSolverLogging(ilu_data) = 0;
-   hypre_ParILUDataSchurSolverPrintLevel(ilu_data) = 0;
-
+   hypre_ParILUDataSchurSolverLogging(ilu_data)           = 0;
+   hypre_ParILUDataSchurSolverPrintLevel(ilu_data)        = 0;
    /* -> SCHUR-GMRES */
-   hypre_ParILUDataSchurGMRESKDim(ilu_data) = 5;
-   hypre_ParILUDataSchurGMRESMaxIter(ilu_data) = 5;
-   hypre_ParILUDataSchurGMRESTol(ilu_data) = 0.0;
-   hypre_ParILUDataSchurGMRESAbsoluteTol(ilu_data) = 0.0;
-   hypre_ParILUDataSchurGMRESRelChange(ilu_data) = 0;
-
+   hypre_ParILUDataSchurGMRESKDim(ilu_data)               = 5;
+   hypre_ParILUDataSchurGMRESMaxIter(ilu_data)            = 5;
+   hypre_ParILUDataSchurGMRESTol(ilu_data)                = 0.0;
+   hypre_ParILUDataSchurGMRESAbsoluteTol(ilu_data)        = 0.0;
+   hypre_ParILUDataSchurGMRESRelChange(ilu_data)          = 0;
    /* schur precond data */
-   hypre_ParILUDataSchurPrecondIluType(ilu_data) = 0;
-   hypre_ParILUDataSchurPrecondIluLfil(ilu_data) = 0;
-   hypre_ParILUDataSchurPrecondIluMaxRowNnz(ilu_data) = 100;
-   hypre_ParILUDataSchurPrecondIluDroptol(ilu_data) =
-      NULL;/* this is not the default option, set it only when switched to */
-   hypre_ParILUDataSchurPrecondPrintLevel(ilu_data) = 0;
-   hypre_ParILUDataSchurPrecondMaxIter(ilu_data) = 1;
-   hypre_ParILUDataSchurPrecondTriSolve(ilu_data) = 1;
+   hypre_ParILUDataSchurPrecondIluType(ilu_data)          = 0;
+   hypre_ParILUDataSchurPrecondIluLfil(ilu_data)          = 0;
+   hypre_ParILUDataSchurPrecondIluMaxRowNnz(ilu_data)     = 100;
+   /* this is not the default option, set it only when switched to */
+   hypre_ParILUDataSchurPrecondIluDroptol(ilu_data)       = NULL;
+   hypre_ParILUDataSchurPrecondPrintLevel(ilu_data)       = 0;
+   hypre_ParILUDataSchurPrecondMaxIter(ilu_data)          = 1;
+   hypre_ParILUDataSchurPrecondTriSolve(ilu_data)         = 1;
    hypre_ParILUDataSchurPrecondLowerJacobiIters(ilu_data) = 5;
    hypre_ParILUDataSchurPrecondUpperJacobiIters(ilu_data) = 5;
-   hypre_ParILUDataSchurPrecondTol(ilu_data) = 0.0;
-
+   hypre_ParILUDataSchurPrecondTol(ilu_data)              = 0.0;
    /* -> SCHUR-NSH */
-   hypre_ParILUDataSchurNSHSolveMaxIter(ilu_data) = 5;
-   hypre_ParILUDataSchurNSHSolveTol(ilu_data) = 0.0;
-   hypre_ParILUDataSchurNSHDroptol(ilu_data) =
-      NULL;/* this is not the default option, set it only when switched to */
+   hypre_ParILUDataSchurNSHSolveMaxIter(ilu_data)         = 5;
+   hypre_ParILUDataSchurNSHSolveTol(ilu_data)             = 0.0;
+   /* this is not the default option, set it only when switched to */
+   hypre_ParILUDataSchurNSHDroptol(ilu_data)              = NULL;
+   hypre_ParILUDataSchurNSHMaxNumIter(ilu_data)           = 2;
+   hypre_ParILUDataSchurNSHMaxRowNnz(ilu_data)            = 1000;
+   hypre_ParILUDataSchurNSHTol(ilu_data)                  = 1e-09;
+   hypre_ParILUDataSchurMRMaxIter(ilu_data)               = 2;
+   hypre_ParILUDataSchurMRColVersion(ilu_data)            = 0;
+   hypre_ParILUDataSchurMRMaxRowNnz(ilu_data)             = 200;
+   hypre_ParILUDataSchurMRTol(ilu_data)                   = 1e-09;
 
-   hypre_ParILUDataSchurNSHMaxNumIter(ilu_data) = 2;
-   hypre_ParILUDataSchurNSHMaxRowNnz(ilu_data) = 1000;
-   hypre_ParILUDataSchurNSHTol(ilu_data) = 1e-09;
-
-   hypre_ParILUDataSchurMRMaxIter(ilu_data) = 2;
-   hypre_ParILUDataSchurMRColVersion(ilu_data) = 0;
-   hypre_ParILUDataSchurMRMaxRowNnz(ilu_data) = 200;
-   hypre_ParILUDataSchurMRTol(ilu_data) = 1e-09;
-
-   return (void *)                        ilu_data;
+   return ilu_data;
 }
 
 /*--------------------------------------------------------------------------
@@ -647,7 +632,7 @@ hypre_ILUSetSchurNSHDropThreshold( void *ilu_vdata, HYPRE_Real threshold)
 
 /* Set tolorance array for NSH for Schur System
  *    - threshold[0] : threshold for Minimal Residual iteration (initial guess for NSH).
- *    - threshold[1] : threshold for Newton–Schulz–Hotelling iteration.
+ *    - threshold[1] : threshold for Newton-Schulz-Hotelling iteration.
 */
 HYPRE_Int
 hypre_ILUSetSchurNSHDropThresholdArray( void *ilu_vdata, HYPRE_Real *threshold)
@@ -1649,316 +1634,6 @@ hypre_ILUGetLocalPerm(hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
-#if 0
-/* Build the expanded matrix for RAS-1
- * A: input ParCSR matrix
- * E_i, E_j, E_data: information for external matrix
- * rperm: reverse permutation to build real index, rperm[old] = new
- *
- * NOTE: Modified to avoid communicating BigInt arrays - DOK
- */
-HYPRE_Int
-hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_Int **E_i,
-                                HYPRE_Int **E_j, HYPRE_Real **E_data)
-{
-   HYPRE_Int                i, i1, i2, j, jj, k, row, k1, k2, k3, lend, leno, col, l1, l2;
-   HYPRE_BigInt    big_col;
-
-   /* data objects for communication */
-   MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
-   hypre_ParCSRCommPkg      *comm_pkg;
-   hypre_ParCSRCommPkg      *comm_pkg_tmp = NULL;
-   hypre_ParCSRCommHandle   *comm_handle_count;
-   hypre_ParCSRCommHandle   *comm_handle_marker;
-   hypre_ParCSRCommHandle   *comm_handle_j;
-   hypre_ParCSRCommHandle   *comm_handle_data;
-   HYPRE_BigInt                *col_starts;
-   HYPRE_Int                total_rows;
-   HYPRE_Int                num_sends;
-   HYPRE_Int                num_recvs;
-   HYPRE_Int                begin, end;
-   HYPRE_Int                my_id, num_procs, proc_id;
-
-   /* data objects for buffers in communication */
-   HYPRE_Int                *send_map;
-   HYPRE_Int                *send_count = NULL, *send_disp = NULL;
-   HYPRE_Int                *send_count_offd = NULL;
-   HYPRE_Int                *recv_count = NULL, *recv_disp = NULL, *recv_marker = NULL;
-   HYPRE_Int                *send_buf_int = NULL;
-   HYPRE_Int                *recv_buf_int = NULL;
-   HYPRE_Real               *send_buf_real = NULL, *recv_buf_real = NULL;
-   HYPRE_Int                *send_disp_comm = NULL, *recv_disp_comm = NULL;
-
-   /* data objects for A */
-   hypre_CSRMatrix          *A_diag = hypre_ParCSRMatrixDiag(A);
-   hypre_CSRMatrix          *A_offd = hypre_ParCSRMatrixOffd(A);
-   HYPRE_BigInt             *A_col_starts = hypre_ParCSRMatrixColStarts(A);
-   HYPRE_BigInt             *A_offd_colmap = hypre_ParCSRMatrixColMapOffd(A);
-   HYPRE_Real               *A_diag_data = hypre_CSRMatrixData(A_diag);
-   HYPRE_Int                *A_diag_i = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int                *A_diag_j = hypre_CSRMatrixJ(A_diag);
-   HYPRE_Int                *A_offd_i = hypre_CSRMatrixI(A_offd);
-   HYPRE_Int                *A_offd_j = hypre_CSRMatrixJ(A_offd);
-   HYPRE_Real               *A_offd_data = hypre_CSRMatrixData(A_offd);
-
-   /* size */
-   HYPRE_Int                n = hypre_CSRMatrixNumCols(A_diag);
-   HYPRE_Int                m = hypre_CSRMatrixNumCols(A_offd);
-
-   /* 1: setup part
-    * allocate memory and setup working array
-    */
-
-   /* MPI stuff */
-   hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm_rank(comm, &my_id);
-
-   /* now check communication package */
-   comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-   /* create if not yet built */
-   if (!comm_pkg)
-   {
-      hypre_MatvecCommPkgCreate(A);
-      comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-   }
-
-   /* get communication information */
-   send_map          = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
-   num_sends         = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   send_disp_comm    = hypre_TAlloc(HYPRE_Int, num_sends + 1, HYPRE_MEMORY_HOST);
-   begin             = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
-   end               = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
-   total_rows        = end - begin;
-   num_recvs         = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
-   recv_disp_comm    = hypre_TAlloc(HYPRE_Int, num_recvs + 1, HYPRE_MEMORY_HOST);
-
-   /* create buffers */
-   send_count        = hypre_TAlloc(HYPRE_Int, total_rows, HYPRE_MEMORY_HOST);
-   send_disp         = hypre_TAlloc(HYPRE_Int, total_rows + 1, HYPRE_MEMORY_HOST);
-   send_count_offd   = hypre_CTAlloc(HYPRE_Int, total_rows, HYPRE_MEMORY_HOST);
-   recv_count        = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_HOST);
-   recv_marker       = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_HOST);
-   recv_disp         = hypre_TAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_HOST);
-
-   /* 2: communication part 1 to get amount of send and recv */
-
-   /* first we need to know the global start */
-   col_starts        = hypre_TAlloc(HYPRE_BigInt, num_procs + 1, HYPRE_MEMORY_HOST);
-   hypre_MPI_Allgather(A_col_starts + 1, 1, HYPRE_MPI_BIG_INT, col_starts + 1, 1, HYPRE_MPI_BIG_INT,
-                       comm);
-   col_starts[0]     = 0;
-
-   send_disp[0]      = 0;
-   send_disp_comm[0] = 0;
-   /* now loop to know how many to send per row */
-   for ( i = 0 ; i < num_sends ; i ++ )
-   {
-      /* update disp for comm package */
-      send_disp_comm[i + 1] = send_disp_comm[i];
-      /* get the proc we are sending to */
-      proc_id = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
-      /* set start end of this proc */
-      l1 = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-      l2 = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1);
-      /* loop through rows we need to send */
-      for ( j = l1 ; j < l2 ; j ++ )
-      {
-         /* reset length */
-         leno = lend = 0;
-         /* we need to send out this row */
-         row = hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j);
-
-         /* check how many we need to send from diagonal first */
-         k1 = A_diag_i[row], k2 = A_diag_i[row + 1];
-         for ( k = k1 ; k < k2 ; k ++ )
-         {
-            col = A_diag_j[k];
-            if (hypre_BinarySearch(send_map + l1, col, l2 - l1) >= 0 )
-            {
-               lend++;
-            }
-         }
-
-         /* check how many we need to send from offdiagonal */
-         k1 = A_offd_i[row], k2 = A_offd_i[row + 1];
-         for ( k = k1 ; k < k2 ; k ++ )
-         {
-            /* get real column number of this offdiagonal column */
-            big_col = A_offd_colmap[A_offd_j[k]];
-            if (big_col >= col_starts[proc_id] && big_col < col_starts[proc_id + 1])
-            {
-               /* this column is in diagonal range of proc_id
-                * everything in diagonal range need to be in the factorization
-                */
-               leno++;
-            }
-         }
-         send_count_offd[j]   = leno;
-         send_count[j]        = leno + lend;
-         send_disp[j + 1]       = send_disp[j] + send_count[j];
-         send_disp_comm[i + 1] += send_count[j];
-      }
-   }
-
-   /* 3: new communication to know how many we need to receive for each external row
-    * main communication, 11 is integer
-    */
-   comm_handle_count    = hypre_ParCSRCommHandleCreate(11, comm_pkg, send_count, recv_count);
-   comm_handle_marker   = hypre_ParCSRCommHandleCreate(11, comm_pkg, send_count_offd, recv_marker);
-   hypre_ParCSRCommHandleDestroy(comm_handle_count);
-   hypre_ParCSRCommHandleDestroy(comm_handle_marker);
-
-   recv_disp[0] = 0;
-   recv_disp_comm[0] = 0;
-   /* now build the recv disp array */
-   for (i = 0 ; i < num_recvs ; i ++)
-   {
-      recv_disp_comm[i + 1] = recv_disp_comm[i];
-      k1 = hypre_ParCSRCommPkgRecvVecStart( comm_pkg, i );
-      k2 = hypre_ParCSRCommPkgRecvVecStart( comm_pkg, i + 1 );
-      for (j = k1 ; j < k2 ; j ++)
-      {
-         recv_disp[j + 1] = recv_disp[j] + recv_count[j];
-         recv_disp_comm[i + 1] += recv_count[j];
-      }
-   }
-
-   /* 4: ready to start real communication
-    * now we know how many we need to send out, create send/recv buffers
-    */
-   send_buf_int   = hypre_TAlloc(HYPRE_Int, send_disp[total_rows], HYPRE_MEMORY_HOST);
-   send_buf_real  = hypre_TAlloc(HYPRE_Real, send_disp[total_rows], HYPRE_MEMORY_HOST);
-   recv_buf_int   = hypre_TAlloc(HYPRE_Int, recv_disp[m], HYPRE_MEMORY_HOST);
-   recv_buf_real  = hypre_TAlloc(HYPRE_Real, recv_disp[m], HYPRE_MEMORY_HOST);
-
-   /* fill send buffer */
-   for ( i = 0 ; i < num_sends ; i ++ )
-   {
-      /* get the proc we are sending to */
-      proc_id = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
-      /* set start end of this proc */
-      l1 = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-      l2 = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1);
-      /* loop through rows we need to apply communication */
-      for ( j = l1 ; j < l2 ; j ++ )
-      {
-         /* reset length
-          * one remark here, the diagonal we send becomes
-          *    off diagonal part for reciver
-          */
-         leno = send_disp[j];
-         lend = leno + send_count_offd[j];
-         /* we need to send out this row */
-         row = hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j);
-
-         /* fill diagonal first */
-         k1 = A_diag_i[row], k2 = A_diag_i[row + 1];
-         for ( k = k1 ; k < k2 ; k ++ )
-         {
-            col = A_diag_j[k];
-            if (hypre_BinarySearch(send_map + l1, col, l2 - l1) >= 0)
-            {
-               send_buf_real[lend] = A_diag_data[k];
-               /* the diag part becomes offd for recv part, so update index
-                * set up to global index
-                * set it to be negative
-                */
-               send_buf_int[lend++] = col;// + col_starts[my_id];
-            }
-         }
-
-         /* fill offdiagonal */
-         k1 = A_offd_i[row], k2 = A_offd_i[row + 1];
-         for ( k = k1 ; k < k2 ; k ++ )
-         {
-            /* get real column number of this offdiagonal column */
-            big_col = A_offd_colmap[A_offd_j[k]];
-            if (big_col >= col_starts[proc_id] && big_col < col_starts[proc_id + 1])
-            {
-               /* this column is in diagonal range of proc_id
-                * everything in diagonal range need to be in the factorization
-                */
-               send_buf_real[leno] = A_offd_data[k];
-               /* the offd part becomes diagonal for recv part, so update index */
-               send_buf_int[leno++] = (HYPRE_Int)(big_col - col_starts[proc_id]);
-            }
-         }
-      }
-   }
-
-   /* now build new comm_pkg for this communication */
-   hypre_ParCSRCommPkgCreateAndFill(comm,
-                                    num_recvs,
-                                    hypre_ParCSRCommPkgRecvProcs(comm_pkg),
-                                    recv_disp_comm,
-                                    num_sends,
-                                    hypre_ParCSRCommPkgSendProcs(comm_pkg),
-                                    send_disp_comm,
-                                    NULL,
-                                    &comm_pkg_tmp);
-
-   /* communication */
-   comm_handle_j = hypre_ParCSRCommHandleCreate(11, comm_pkg_tmp, send_buf_int, recv_buf_int);
-   comm_handle_data = hypre_ParCSRCommHandleCreate(1, comm_pkg_tmp, send_buf_real, recv_buf_real);
-   hypre_ParCSRCommHandleDestroy(comm_handle_j);
-   hypre_ParCSRCommHandleDestroy(comm_handle_data);
-
-   /* Update the index to be real index */
-   /* Dealing with diagonal part */
-   for (i = 0 ; i < m ; i++ )
-   {
-      k1 = recv_disp[i];
-      k2 = recv_disp[i] + recv_marker[i];
-      k3 = recv_disp[i + 1];
-      for (j = k1 ; j < k2 ; j ++ )
-      {
-         recv_buf_int[j] = rperm[recv_buf_int[j]];
-      }
-   }
-
-   /* Dealing with off-diagonal part */
-   for (i = 0 ; i < num_recvs ; i ++)
-   {
-      proc_id = hypre_ParCSRCommPkgRecvProc( comm_pkg_tmp, i);
-      i1 = hypre_ParCSRCommPkgRecvVecStart( comm_pkg_tmp, i );
-      i2 = hypre_ParCSRCommPkgRecvVecStart( comm_pkg_tmp, i + 1 );
-      for (j = i1 ; j < i2 ; j++)
-      {
-         k1 = recv_disp[j] + recv_marker[j];
-         k2 = recv_disp[j + 1];
-
-         for (jj = k1 ; jj < k2 ; jj++)
-         {
-            /* Correct index to get actual global index */
-            big_col = recv_buf_int[jj] + col_starts[proc_id];
-            recv_buf_int[jj] = hypre_BigBinarySearch( A_offd_colmap, big_col, m) + n;
-         }
-      }
-   }
-
-   /* Assign data */
-   *E_i     = recv_disp;
-   *E_j     = recv_buf_int;
-   *E_data  = recv_buf_real;
-
-   /* 5: finish and free
-    */
-
-   hypre_TFree(send_disp_comm, HYPRE_MEMORY_HOST);
-   hypre_TFree(recv_disp_comm, HYPRE_MEMORY_HOST);
-   hypre_TFree(comm_pkg_tmp, HYPRE_MEMORY_HOST);
-   hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
-   hypre_TFree(send_count, HYPRE_MEMORY_HOST);
-   hypre_TFree(send_disp, HYPRE_MEMORY_HOST);
-   hypre_TFree(send_count_offd, HYPRE_MEMORY_HOST);
-   hypre_TFree(recv_count, HYPRE_MEMORY_HOST);
-   hypre_TFree(send_buf_int, HYPRE_MEMORY_HOST);
-   hypre_TFree(send_buf_real, HYPRE_MEMORY_HOST);
-   hypre_TFree(recv_marker, HYPRE_MEMORY_HOST);
-
-   return hypre_error_flag;
-}
-#else
 /* Build the expanded matrix for RAS-1
  * A: input ParCSR matrix
  * E_i, E_j, E_data: information for external matrix
@@ -2110,7 +1785,6 @@ hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_I
    return hypre_error_flag;
 
 }
-#endif
 
 /*--------------------------------------------------------------------------
  * hypre_ILUSortOffdColmap
@@ -2708,7 +2382,6 @@ hypre_ILULocalRCMNumbering(hypre_CSRMatrix *A, HYPRE_Int root, HYPRE_Int *marker
 HYPRE_Int
 hypre_ILULocalRCMQsort(HYPRE_Int *perm, HYPRE_Int start, HYPRE_Int end, HYPRE_Int *degree)
 {
-
    HYPRE_Int i, mid;
    if (start >= end)
    {
@@ -3542,7 +3215,7 @@ HYPRE_Int
 hypre_NSHWriteSolverParams( void *nsh_vdata )
 {
    hypre_ParNSHData  *nsh_data = (hypre_ParNSHData*) nsh_vdata;
-   hypre_printf("Newton–Schulz–Hotelling Setup parameters: \n");
+   hypre_printf("Newton-Schulz-Hotelling Setup parameters: \n");
    hypre_printf("NSH max iterations = %d \n", hypre_ParNSHDataNSHMaxIter(nsh_data));
    hypre_printf("NSH drop tolerance = %e \n", hypre_ParNSHDataDroptol(nsh_data)[1]);
    hypre_printf("NSH max nnz per row = %d \n", hypre_ParNSHDataNSHMaxRowNnz(nsh_data));
@@ -3551,7 +3224,7 @@ hypre_NSHWriteSolverParams( void *nsh_vdata )
    hypre_printf("MR max nnz per row = %d \n", hypre_ParNSHDataMRMaxRowNnz(nsh_data));
    hypre_printf("Operator Complexity (Fill factor) = %f \n",
                 hypre_ParNSHDataOperatorComplexity(nsh_data));
-   hypre_printf("\n Newton–Schulz–Hotelling Solver Parameters: \n");
+   hypre_printf("\n Newton-Schulz-Hotelling Solver Parameters: \n");
    hypre_printf("Max number of iterations: %d\n", hypre_ParNSHDataMaxIter(nsh_data));
    hypre_printf("Stopping tolerance: %e\n", hypre_ParNSHDataTol(nsh_data));
 
@@ -4357,3 +4030,4 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
 
    return hypre_error_flag;
 }
+
