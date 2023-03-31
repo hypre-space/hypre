@@ -1180,7 +1180,9 @@ hypre_ILUSeqVectorPerm(void      *vectori,
                        HYPRE_Int *perm,
                        HYPRE_Int  option)
 {
-   cudaDeviceSynchronize();
+   /* RL: why need sync */
+   hypre_SyncCudaDevice(hypre_handle());
+
    HYPRE_Int i;
    switch (option)
    {

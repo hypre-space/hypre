@@ -2462,7 +2462,9 @@ hypre_ParILUCusparseSchurGMRESDummySolve( void               *ilu_vdata,
    hypre_Vector            *f_local          = hypre_ParVectorLocalVector(f);
    HYPRE_Real              *f_data           = hypre_VectorData(f_local);
 
-   cudaDeviceSynchronize();
+   /* RL: why need sync */
+   hypre_SyncCudaDevice(hypre_handle());
+
    hypre_TMemcpy(u_data, f_data, HYPRE_Real, n_local, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
