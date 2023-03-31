@@ -2530,11 +2530,11 @@ hypre_ParILUCusparseSchurGMRESMatvec( void   *matvec_data,
 
    /* get matrix information first */
    hypre_ParILUData   *ilu_data                 = (hypre_ParILUData*) ilu_vdata;
-   hypre_ParCSRMatrix *A                        = hypre_ParILUDataMatS(ilu_data);
+   hypre_ParCSRMatrix *S                        = hypre_ParILUDataMatS(ilu_data);
    /* fist step, apply matvec on empty diagonal slot */
-   hypre_CSRMatrix    *A_diag                   = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Int           A_diag_n                 = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int           A_diag_nnz               = hypre_CSRMatrixNumNonzeros(A_diag);
+   hypre_CSRMatrix    *S_diag                   = hypre_ParCSRMatrixDiag(S);
+   HYPRE_Int           S_diag_n                 = hypre_CSRMatrixNumRows(S_diag);
+   HYPRE_Int           S_diag_nnz               = hypre_CSRMatrixNumNonzeros(S_diag);
    hypre_ParVector    *xtemp                    = hypre_ParILUDataXTemp(ilu_data);
    hypre_Vector       *xtemp_local              = hypre_ParVectorLocalVector(xtemp);
    hypre_ParVector    *ytemp                    = hypre_ParILUDataYTemp(ilu_data);
@@ -2548,26 +2548,26 @@ hypre_ParILUCusparseSchurGMRESMatvec( void   *matvec_data,
     *         |E_31 E_32   O |
     * store in xtemp
     */
-   /* RL: temp. set Adiag's nnz = 0 to skip the matvec (based on the assumption in seq_mv/csr_matvec impl.) */
-   hypre_CSRMatrixNumNonzeros(A_diag) = 0;
-   hypre_ParCSRMatrixMatvec( alpha, (hypre_ParCSRMatrix *) A, (hypre_ParVector *) x, zero, xtemp );
-   /* recover A_diag's nnz */
-   hypre_CSRMatrixNumNonzeros(A_diag) = A_diag_nnz;
+   /* RL: temp. set S_diag's nnz = 0 to skip the matvec (based on the assumption in seq_mv/csr_matvec impl.) */
+   hypre_CSRMatrixNumNonzeros(S_diag) = 0;
+   hypre_ParCSRMatrixMatvec( alpha, (hypre_ParCSRMatrix *) S, (hypre_ParVector *) x, zero, xtemp );
+   /* recover S_diag's nnz */
+   hypre_CSRMatrixNumNonzeros(S_diag) = S_diag_nnz;
 
-   /* Compute U^{-1}*L^{-1}*(A_offd * x)
+   /* Compute U^{-1}*L^{-1}*(S_offd * x)
     * Or in another word, matvec with
     *         |      O       IS_1^{-1}E_12 IS_1^{-1}E_13|
     * alpha * |IS_2^{-1}E_21       O       IS_2^{-1}E_23|
     *         |IS_3^{-1}E_31 IS_3^{-1}E_32       O      |
     * store in xtemp
     */
-   if ( A_diag_n > 0 )
+   if ( S_diag_n > 0 )
    {
       /* L solve - Forward solve */
-      hypre_CSRMatrixTriLowerUpperSolveDevice('L', 1, A_diag, NULL, xtemp_local, ytemp_local);
+      hypre_CSRMatrixTriLowerUpperSolveDevice('L', 1, S_diag, NULL, xtemp_local, ytemp_local);
 
       /* U solve - Backward substitution */
-      hypre_CSRMatrixTriLowerUpperSolveDevice('U', 0, A_diag, NULL, ytemp_local, xtemp_local);
+      hypre_CSRMatrixTriLowerUpperSolveDevice('U', 0, S_diag, NULL, ytemp_local, xtemp_local);
    }
 
    /* now add the original x onto it */
