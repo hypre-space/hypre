@@ -12,9 +12,6 @@
  *****************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
-#include "_hypre_utilities.hpp"
-#include "par_ilu.h"
-#include "seq_mv.hpp"
 
 /* Create */
 void *
@@ -25,14 +22,6 @@ hypre_ILUCreate( void )
    ilu_data                               = hypre_CTAlloc(hypre_ParILUData,  1, HYPRE_MEMORY_HOST);
 
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
-   hypre_ParILUDataMatLMatrixDescription(ilu_data) = NULL;
-   hypre_ParILUDataMatUMatrixDescription(ilu_data) = NULL;
-   hypre_ParILUDataMatBLILUSolveInfo(ilu_data) = NULL;
-   hypre_ParILUDataMatBUILUSolveInfo(ilu_data) = NULL;
-   hypre_ParILUDataMatSLILUSolveInfo(ilu_data) = NULL;
-   hypre_ParILUDataMatSUILUSolveInfo(ilu_data) = NULL;
-   hypre_ParILUDataILUSolveBuffer(ilu_data) = NULL;
-   hypre_ParILUDataILUSolvePolicy(ilu_data) = CUSPARSE_SOLVE_POLICY_USE_LEVEL;
    hypre_ParILUDataAperm(ilu_data) = NULL;
    hypre_ParILUDataMatBILUDevice(ilu_data) = NULL;
    hypre_ParILUDataMatSILUDevice(ilu_data) = NULL;
@@ -42,7 +31,6 @@ hypre_ILUCreate( void )
    hypre_ParILUDataP(ilu_data) = NULL;
    hypre_ParILUDataFTempUpper(ilu_data) = NULL;
    hypre_ParILUDataUTempLower(ilu_data) = NULL;
-   hypre_ParILUDataMatAFakeDiagonal(ilu_data) = NULL;
    hypre_ParILUDataADiagDiag(ilu_data) = NULL;
 #endif
 
@@ -172,220 +160,46 @@ hypre_ILUDestroy( void *data )
       }
 
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
-      if (hypre_ParILUDataILUSolveBuffer(ilu_data))
-      {
-         hypre_TFree(hypre_ParILUDataILUSolveBuffer(ilu_data), HYPRE_MEMORY_DEVICE);
-         hypre_ParILUDataILUSolveBuffer(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataMatLMatrixDescription(ilu_data))
-      {
-         HYPRE_CUSPARSE_CALL( (cusparseDestroyMatDescr(hypre_ParILUDataMatLMatrixDescription(ilu_data))) );
-         hypre_ParILUDataMatLMatrixDescription(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataMatUMatrixDescription(ilu_data))
-      {
-         HYPRE_CUSPARSE_CALL( (cusparseDestroyMatDescr(hypre_ParILUDataMatUMatrixDescription(ilu_data))) );
-         hypre_ParILUDataMatUMatrixDescription(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataMatALILUSolveInfo(ilu_data))
-      {
-      HYPRE_CUSPARSE_CALL( (hypre_cusparseSpSV_destroyDescr(hypre_ParILUDataMatALILUSolveInfo(ilu_data))) );
-         hypre_ParILUDataMatALILUSolveInfo(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataMatAUILUSolveInfo(ilu_data))
-      {
-      HYPRE_CUSPARSE_CALL( (hypre_cusparseSpSV_destroyDescr(hypre_ParILUDataMatAUILUSolveInfo(ilu_data))) );
-         hypre_ParILUDataMatAUILUSolveInfo(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataMatBLILUSolveInfo(ilu_data))
-      {
-      HYPRE_CUSPARSE_CALL( (hypre_cusparseSpSV_destroyDescr(hypre_ParILUDataMatBLILUSolveInfo(ilu_data))) );
-         hypre_ParILUDataMatBLILUSolveInfo(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataMatBUILUSolveInfo(ilu_data))
-      {
-      HYPRE_CUSPARSE_CALL( (hypre_cusparseSpSV_destroyDescr(hypre_ParILUDataMatBUILUSolveInfo(ilu_data))) );
-         hypre_ParILUDataMatBUILUSolveInfo(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataMatSLILUSolveInfo(ilu_data))
-      {
-      HYPRE_CUSPARSE_CALL( (hypre_cusparseSpSV_destroyDescr(hypre_ParILUDataMatSLILUSolveInfo(ilu_data))) );
-         hypre_ParILUDataMatSLILUSolveInfo(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataMatSUILUSolveInfo(ilu_data))
-      {
-      HYPRE_CUSPARSE_CALL( (hypre_cusparseSpSV_destroyDescr(hypre_ParILUDataMatSUILUSolveInfo(ilu_data))) );
-         hypre_ParILUDataMatSUILUSolveInfo(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataMatAILUDevice(ilu_data))
-      {
-         hypre_CSRMatrixDestroy( hypre_ParILUDataMatAILUDevice(ilu_data) );
-         hypre_ParILUDataMatAILUDevice(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataMatBILUDevice(ilu_data))
-      {
-         hypre_CSRMatrixDestroy( hypre_ParILUDataMatBILUDevice(ilu_data) );
-         hypre_ParILUDataMatBILUDevice(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataMatSILUDevice(ilu_data))
-      {
-         hypre_CSRMatrixDestroy( hypre_ParILUDataMatSILUDevice(ilu_data) );
-         hypre_ParILUDataMatSILUDevice(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataMatEDevice(ilu_data))
-      {
-         hypre_CSRMatrixDestroy( hypre_ParILUDataMatEDevice(ilu_data) );
-         hypre_ParILUDataMatEDevice(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataMatFDevice(ilu_data))
-      {
-         hypre_CSRMatrixDestroy( hypre_ParILUDataMatFDevice(ilu_data) );
-         hypre_ParILUDataMatFDevice(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataAperm(ilu_data))
-      {
-         hypre_ParCSRMatrixDestroy( hypre_ParILUDataAperm(ilu_data) );
-         hypre_ParILUDataAperm(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataR(ilu_data))
-      {
-         hypre_ParCSRMatrixDestroy( hypre_ParILUDataR(ilu_data) );
-         hypre_ParILUDataR(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataP(ilu_data))
-      {
-         hypre_ParCSRMatrixDestroy( hypre_ParILUDataP(ilu_data) );
-         hypre_ParILUDataP(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataFTempUpper(ilu_data))
-      {
-         hypre_SeqVectorDestroy( hypre_ParILUDataFTempUpper(ilu_data) );
-         hypre_ParILUDataFTempUpper(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataUTempLower(ilu_data))
-      {
-         hypre_SeqVectorDestroy( hypre_ParILUDataUTempLower(ilu_data) );
-         hypre_ParILUDataUTempLower(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataMatAFakeDiagonal(ilu_data))
-      {
-         hypre_TFree( hypre_ParILUDataMatAFakeDiagonal(ilu_data), HYPRE_MEMORY_DEVICE);
-         hypre_ParILUDataMatAFakeDiagonal(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataADiagDiag(ilu_data))
-      {
-         hypre_SeqVectorDestroy(hypre_ParILUDataADiagDiag(ilu_data));
-         hypre_ParILUDataADiagDiag(ilu_data) = NULL;
-      }
+      hypre_CSRMatrixDestroy( hypre_ParILUDataMatAILUDevice(ilu_data) );
+      hypre_CSRMatrixDestroy( hypre_ParILUDataMatBILUDevice(ilu_data) );
+      hypre_CSRMatrixDestroy( hypre_ParILUDataMatSILUDevice(ilu_data) );
+      hypre_CSRMatrixDestroy( hypre_ParILUDataMatEDevice(ilu_data) );
+      hypre_CSRMatrixDestroy( hypre_ParILUDataMatFDevice(ilu_data) );
+      hypre_ParCSRMatrixDestroy( hypre_ParILUDataAperm(ilu_data) );
+      hypre_ParCSRMatrixDestroy( hypre_ParILUDataR(ilu_data) );
+      hypre_ParCSRMatrixDestroy( hypre_ParILUDataP(ilu_data) );
+      hypre_SeqVectorDestroy( hypre_ParILUDataFTempUpper(ilu_data) );
+      hypre_SeqVectorDestroy( hypre_ParILUDataUTempLower(ilu_data) );
+      hypre_SeqVectorDestroy(hypre_ParILUDataADiagDiag(ilu_data));
 #endif
 
       /* final residual vector */
-      if (hypre_ParILUDataResidual(ilu_data))
-      {
-         hypre_ParVectorDestroy( hypre_ParILUDataResidual(ilu_data) );
-         hypre_ParILUDataResidual(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataRelResNorms(ilu_data))
-      {
-         hypre_TFree( hypre_ParILUDataRelResNorms(ilu_data), HYPRE_MEMORY_HOST);
-         hypre_ParILUDataRelResNorms(ilu_data) = NULL;
-      }
+      hypre_ParVectorDestroy( hypre_ParILUDataResidual(ilu_data) );
+
+      hypre_TFree( hypre_ParILUDataRelResNorms(ilu_data), HYPRE_MEMORY_HOST);
       /* temp vectors for solve phase */
-      if (hypre_ParILUDataUTemp(ilu_data))
-      {
-         hypre_ParVectorDestroy( hypre_ParILUDataUTemp(ilu_data) );
-         hypre_ParILUDataUTemp(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataFTemp(ilu_data))
-      {
-         hypre_ParVectorDestroy( hypre_ParILUDataFTemp(ilu_data) );
-         hypre_ParILUDataFTemp(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataXTemp(ilu_data))
-      {
-         hypre_ParVectorDestroy( hypre_ParILUDataXTemp(ilu_data) );
-         hypre_ParILUDataXTemp(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataYTemp(ilu_data))
-      {
-         hypre_ParVectorDestroy( hypre_ParILUDataYTemp(ilu_data) );
-         hypre_ParILUDataYTemp(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataZTemp(ilu_data))
-      {
-         hypre_SeqVectorDestroy(hypre_ParILUDataZTemp(ilu_data));
-         hypre_ParILUDataZTemp(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataUExt(ilu_data))
-      {
-         hypre_TFree(hypre_ParILUDataUExt(ilu_data), HYPRE_MEMORY_HOST);
-         hypre_ParILUDataUExt(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataFExt(ilu_data))
-      {
-         hypre_TFree(hypre_ParILUDataFExt(ilu_data), HYPRE_MEMORY_HOST);
-         hypre_ParILUDataFExt(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataRhs(ilu_data))
-      {
-         hypre_ParVectorDestroy( hypre_ParILUDataRhs(ilu_data) );
-         hypre_ParILUDataRhs(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataX(ilu_data))
-      {
-         hypre_ParVectorDestroy( hypre_ParILUDataX(ilu_data) );
-         hypre_ParILUDataX(ilu_data) = NULL;
-      }
+      hypre_ParVectorDestroy( hypre_ParILUDataUTemp(ilu_data) );
+      hypre_ParVectorDestroy( hypre_ParILUDataFTemp(ilu_data) );
+      hypre_ParVectorDestroy( hypre_ParILUDataXTemp(ilu_data) );
+      hypre_ParVectorDestroy( hypre_ParILUDataYTemp(ilu_data) );
+      hypre_SeqVectorDestroy(hypre_ParILUDataZTemp(ilu_data));
+      hypre_TFree(hypre_ParILUDataUExt(ilu_data), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParILUDataFExt(ilu_data), HYPRE_MEMORY_HOST);
+      hypre_ParVectorDestroy( hypre_ParILUDataRhs(ilu_data) );
+      hypre_ParVectorDestroy( hypre_ParILUDataX(ilu_data) );
       /* l1_norms */
-      if (hypre_ParILUDataL1Norms(ilu_data))
-      {
-         hypre_TFree(hypre_ParILUDataL1Norms(ilu_data), HYPRE_MEMORY_HOST);
-         hypre_ParILUDataL1Norms(ilu_data) = NULL;
-      }
-
+      hypre_TFree(hypre_ParILUDataL1Norms(ilu_data), HYPRE_MEMORY_HOST);
       /* u_end */
-      if (hypre_ParILUDataUEnd(ilu_data))
-      {
-         hypre_TFree(hypre_ParILUDataUEnd(ilu_data), HYPRE_MEMORY_HOST);
-         hypre_ParILUDataUEnd(ilu_data) = NULL;
-      }
-
+      hypre_TFree(hypre_ParILUDataUEnd(ilu_data), HYPRE_MEMORY_HOST);
       /* Factors */
-      if (hypre_ParILUDataMatD(ilu_data))
-      {
-         hypre_TFree(hypre_ParILUDataMatD(ilu_data), memory_location);
-         hypre_ParILUDataMatD(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataMatL(ilu_data))
-      {
-         hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatL(ilu_data));
-         hypre_ParILUDataMatL(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataMatU(ilu_data))
-      {
-         hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatU(ilu_data));
-         hypre_ParILUDataMatU(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataMatLModified(ilu_data))
-      {
-         hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatLModified(ilu_data));
-         hypre_ParILUDataMatLModified(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataMatUModified(ilu_data))
-      {
-         hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatUModified(ilu_data));
-         hypre_ParILUDataMatUModified(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataMatDModified(ilu_data))
-      {
-         hypre_TFree(hypre_ParILUDataMatDModified(ilu_data), memory_location);
-         hypre_ParILUDataMatDModified(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataMatS(ilu_data))
-      {
-         hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatS(ilu_data));
-         hypre_ParILUDataMatS(ilu_data) = NULL;
-      }
+      hypre_TFree(hypre_ParILUDataMatD(ilu_data), memory_location);
+      hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatL(ilu_data));
+      hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatU(ilu_data));
+      hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatLModified(ilu_data));
+      hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatUModified(ilu_data));
+      hypre_TFree(hypre_ParILUDataMatDModified(ilu_data), memory_location);
+      hypre_ParCSRMatrixDestroy(hypre_ParILUDataMatS(ilu_data));
+
       if (hypre_ParILUDataSchurSolver(ilu_data))
       {
          switch (hypre_ParILUDataIluType(ilu_data))
@@ -399,8 +213,8 @@ hypre_ILUDestroy( void *data )
             default:
                break;
          }
-         hypre_ParILUDataSchurSolver(ilu_data) = NULL;
       }
+
       if ( hypre_ParILUDataSchurPrecond(ilu_data)  &&
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
            hypre_ParILUDataIluType(ilu_data) != 10 &&
@@ -412,41 +226,19 @@ hypre_ILUDestroy( void *data )
             hypre_ParILUDataIluType(ilu_data) == 41) )
       {
          HYPRE_ILUDestroy(hypre_ParILUDataSchurPrecond(ilu_data)); //ILU as precond for Schur
-         hypre_ParILUDataSchurPrecond(ilu_data) = NULL;
       }
+
       /* CF marker array */
-      if (hypre_ParILUDataCFMarkerArray(ilu_data))
-      {
-         hypre_TFree(hypre_ParILUDataCFMarkerArray(ilu_data), HYPRE_MEMORY_HOST);
-         hypre_ParILUDataCFMarkerArray(ilu_data) = NULL;
-      }
+      hypre_TFree(hypre_ParILUDataCFMarkerArray(ilu_data), HYPRE_MEMORY_HOST);
+
       /* permutation array */
-      if (hypre_ParILUDataPerm(ilu_data))
-      {
-         hypre_TFree(hypre_ParILUDataPerm(ilu_data), memory_location);
-         hypre_ParILUDataPerm(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataQPerm(ilu_data))
-      {
-         hypre_TFree(hypre_ParILUDataQPerm(ilu_data), memory_location);
-         hypre_ParILUDataQPerm(ilu_data) = NULL;
-      }
+      hypre_TFree(hypre_ParILUDataPerm(ilu_data), memory_location);
+      hypre_TFree(hypre_ParILUDataQPerm(ilu_data), memory_location);
+
       /* droptol array */
-      if (hypre_ParILUDataDroptol(ilu_data))
-      {
-         hypre_TFree(hypre_ParILUDataDroptol(ilu_data), HYPRE_MEMORY_HOST);
-         hypre_ParILUDataDroptol(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataSchurPrecondIluDroptol(ilu_data))
-      {
-         hypre_TFree(hypre_ParILUDataSchurPrecondIluDroptol(ilu_data), HYPRE_MEMORY_HOST);
-         hypre_ParILUDataSchurPrecondIluDroptol(ilu_data) = NULL;
-      }
-      if (hypre_ParILUDataSchurNSHDroptol(ilu_data))
-      {
-         hypre_TFree(hypre_ParILUDataSchurNSHDroptol(ilu_data), HYPRE_MEMORY_HOST);
-         hypre_ParILUDataSchurNSHDroptol(ilu_data) = NULL;
-      }
+      hypre_TFree(hypre_ParILUDataDroptol(ilu_data), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParILUDataSchurPrecondIluDroptol(ilu_data), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParILUDataSchurNSHDroptol(ilu_data), HYPRE_MEMORY_HOST);
    }
 
    /* ilu data */
@@ -454,6 +246,7 @@ hypre_ILUDestroy( void *data )
 
    return hypre_error_flag;
 }
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 /* set fill level (for ilu(k)) */
@@ -464,6 +257,7 @@ hypre_ILUSetLevelOfFill( void *ilu_vdata, HYPRE_Int lfil )
    hypre_ParILUDataLfil(ilu_data) = lfil;
    return hypre_error_flag;
 }
+
 /* set max non-zeros per row in factors (for ilut) */
 HYPRE_Int
 hypre_ILUSetMaxNnzPerRow( void *ilu_vdata, HYPRE_Int nzmax )
@@ -472,6 +266,7 @@ hypre_ILUSetMaxNnzPerRow( void *ilu_vdata, HYPRE_Int nzmax )
    hypre_ParILUDataMaxRowNnz(ilu_data) = nzmax;
    return hypre_error_flag;
 }
+
 /* set threshold for dropping in LU factors (for ilut) */
 HYPRE_Int
 hypre_ILUSetDropThreshold( void *ilu_vdata, HYPRE_Real threshold )
@@ -486,6 +281,7 @@ hypre_ILUSetDropThreshold( void *ilu_vdata, HYPRE_Real threshold )
    hypre_ParILUDataDroptol(ilu_data)[2] = threshold;
    return hypre_error_flag;
 }
+
 /* set array of threshold for dropping in LU factors (for ilut) */
 HYPRE_Int
 hypre_ILUSetDropThresholdArray( void *ilu_vdata, HYPRE_Real *threshold )
@@ -499,6 +295,7 @@ hypre_ILUSetDropThresholdArray( void *ilu_vdata, HYPRE_Real *threshold )
                   HYPRE_MEMORY_HOST);
    return hypre_error_flag;
 }
+
 /* set ILU factorization type */
 HYPRE_Int
 hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type )
@@ -578,6 +375,7 @@ hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type )
 
    return hypre_error_flag;
 }
+
 /* Set max number of iterations for ILU solver */
 HYPRE_Int
 hypre_ILUSetMaxIter( void *ilu_vdata, HYPRE_Int max_iter )
@@ -586,6 +384,7 @@ hypre_ILUSetMaxIter( void *ilu_vdata, HYPRE_Int max_iter )
    hypre_ParILUDataMaxIter(ilu_data) = max_iter;
    return hypre_error_flag;
 }
+
 /* Set ILU triangular solver type */
 HYPRE_Int
 hypre_ILUSetTriSolve( void *ilu_vdata, HYPRE_Int tri_solve )
@@ -594,6 +393,7 @@ hypre_ILUSetTriSolve( void *ilu_vdata, HYPRE_Int tri_solve )
    hypre_ParILUDataTriSolve(ilu_data) = tri_solve;
    return hypre_error_flag;
 }
+
 /* Set Lower Jacobi iterations for iterative triangular solver */
 HYPRE_Int
 hypre_ILUSetLowerJacobiIters( void *ilu_vdata, HYPRE_Int lower_jacobi_iters )
@@ -602,6 +402,7 @@ hypre_ILUSetLowerJacobiIters( void *ilu_vdata, HYPRE_Int lower_jacobi_iters )
    hypre_ParILUDataLowerJacobiIters(ilu_data) = lower_jacobi_iters;
    return hypre_error_flag;
 }
+
 /* Set Upper Jacobi iterations for iterative triangular solver */
 HYPRE_Int
 hypre_ILUSetUpperJacobiIters( void *ilu_vdata, HYPRE_Int upper_jacobi_iters )
@@ -610,6 +411,7 @@ hypre_ILUSetUpperJacobiIters( void *ilu_vdata, HYPRE_Int upper_jacobi_iters )
    hypre_ParILUDataUpperJacobiIters(ilu_data) = upper_jacobi_iters;
    return hypre_error_flag;
 }
+
 /* Set convergence tolerance for ILU solver */
 HYPRE_Int
 hypre_ILUSetTol( void *ilu_vdata, HYPRE_Real tol )
@@ -618,6 +420,7 @@ hypre_ILUSetTol( void *ilu_vdata, HYPRE_Real tol )
    hypre_ParILUDataTol(ilu_data) = tol;
    return hypre_error_flag;
 }
+
 /* Set print level for ilu solver */
 HYPRE_Int
 hypre_ILUSetPrintLevel( void *ilu_vdata, HYPRE_Int print_level )
@@ -626,6 +429,7 @@ hypre_ILUSetPrintLevel( void *ilu_vdata, HYPRE_Int print_level )
    hypre_ParILUDataPrintLevel(ilu_data) = print_level;
    return hypre_error_flag;
 }
+
 /* Set print level for ilu solver */
 HYPRE_Int
 hypre_ILUSetLogging( void *ilu_vdata, HYPRE_Int logging )
@@ -634,6 +438,7 @@ hypre_ILUSetLogging( void *ilu_vdata, HYPRE_Int logging )
    hypre_ParILUDataLogging(ilu_data) = logging;
    return hypre_error_flag;
 }
+
 /* Set type of reordering for local matrix */
 HYPRE_Int
 hypre_ILUSetLocalReordering( void *ilu_vdata, HYPRE_Int ordering_type )
@@ -651,6 +456,7 @@ hypre_ILUSetSchurSolverKDIM( void *ilu_vdata, HYPRE_Int ss_kDim )
    hypre_ParILUDataSchurGMRESKDim(ilu_data) = ss_kDim;
    return hypre_error_flag;
 }
+
 /* Set max iteration for Solver of Schur System */
 HYPRE_Int
 hypre_ILUSetSchurSolverMaxIter( void *ilu_vdata, HYPRE_Int ss_max_iter )
@@ -665,6 +471,7 @@ hypre_ILUSetSchurSolverMaxIter( void *ilu_vdata, HYPRE_Int ss_max_iter )
 
    return hypre_error_flag;
 }
+
 /* Set convergence tolerance for Solver of Schur System */
 HYPRE_Int
 hypre_ILUSetSchurSolverTol( void *ilu_vdata, HYPRE_Real ss_tol )
@@ -673,6 +480,7 @@ hypre_ILUSetSchurSolverTol( void *ilu_vdata, HYPRE_Real ss_tol )
    hypre_ParILUDataSchurGMRESTol(ilu_data) = ss_tol;
    return hypre_error_flag;
 }
+
 /* Set absolute tolerance for Solver of Schur System */
 HYPRE_Int
 hypre_ILUSetSchurSolverAbsoluteTol( void *ilu_vdata, HYPRE_Real ss_absolute_tol )
@@ -681,6 +489,7 @@ hypre_ILUSetSchurSolverAbsoluteTol( void *ilu_vdata, HYPRE_Real ss_absolute_tol 
    hypre_ParILUDataSchurGMRESAbsoluteTol(ilu_data) = ss_absolute_tol;
    return hypre_error_flag;
 }
+
 /* Set logging for Solver of Schur System */
 HYPRE_Int
 hypre_ILUSetSchurSolverLogging( void *ilu_vdata, HYPRE_Int ss_logging )
@@ -689,6 +498,7 @@ hypre_ILUSetSchurSolverLogging( void *ilu_vdata, HYPRE_Int ss_logging )
    hypre_ParILUDataSchurSolverLogging(ilu_data) = ss_logging;
    return hypre_error_flag;
 }
+
 /* Set print level for Solver of Schur System */
 HYPRE_Int
 hypre_ILUSetSchurSolverPrintLevel( void *ilu_vdata, HYPRE_Int ss_print_level )
@@ -697,6 +507,7 @@ hypre_ILUSetSchurSolverPrintLevel( void *ilu_vdata, HYPRE_Int ss_print_level )
    hypre_ParILUDataSchurSolverPrintLevel(ilu_data) = ss_print_level;
    return hypre_error_flag;
 }
+
 /* Set rel change (for GMRES) for Solver of Schur System */
 HYPRE_Int
 hypre_ILUSetSchurSolverRelChange( void *ilu_vdata, HYPRE_Int ss_rel_change )
@@ -705,6 +516,7 @@ hypre_ILUSetSchurSolverRelChange( void *ilu_vdata, HYPRE_Int ss_rel_change )
    hypre_ParILUDataSchurGMRESRelChange(ilu_data) = ss_rel_change;
    return hypre_error_flag;
 }
+
 /* Set ILU type for Precond of Schur System */
 HYPRE_Int
 hypre_ILUSetSchurPrecondILUType( void *ilu_vdata, HYPRE_Int sp_ilu_type )
@@ -713,6 +525,7 @@ hypre_ILUSetSchurPrecondILUType( void *ilu_vdata, HYPRE_Int sp_ilu_type )
    hypre_ParILUDataSchurPrecondIluType(ilu_data) = sp_ilu_type;
    return hypre_error_flag;
 }
+
 /* Set ILU level of fill for Precond of Schur System */
 HYPRE_Int
 hypre_ILUSetSchurPrecondILULevelOfFill( void *ilu_vdata, HYPRE_Int sp_ilu_lfil )
@@ -721,6 +534,7 @@ hypre_ILUSetSchurPrecondILULevelOfFill( void *ilu_vdata, HYPRE_Int sp_ilu_lfil )
    hypre_ParILUDataSchurPrecondIluLfil(ilu_data) = sp_ilu_lfil;
    return hypre_error_flag;
 }
+
 /* Set ILU max nonzeros per row for Precond of Schur System */
 HYPRE_Int
 hypre_ILUSetSchurPrecondILUMaxNnzPerRow( void *ilu_vdata, HYPRE_Int sp_ilu_max_row_nnz )
@@ -729,6 +543,7 @@ hypre_ILUSetSchurPrecondILUMaxNnzPerRow( void *ilu_vdata, HYPRE_Int sp_ilu_max_r
    hypre_ParILUDataSchurPrecondIluMaxRowNnz(ilu_data) = sp_ilu_max_row_nnz;
    return hypre_error_flag;
 }
+
 /* Set ILU drop threshold for ILUT for Precond of Schur System
  * We don't want to influence the original ILU, so create new array if not own data
  */
@@ -745,6 +560,7 @@ hypre_ILUSetSchurPrecondILUDropThreshold( void *ilu_vdata, HYPRE_Real sp_ilu_dro
    hypre_ParILUDataSchurPrecondIluDroptol(ilu_data)[2]   = sp_ilu_droptol;
    return hypre_error_flag;
 }
+
 /* Set array of ILU drop threshold for ILUT for Precond of Schur System */
 HYPRE_Int
 hypre_ILUSetSchurPrecondILUDropThresholdArray( void *ilu_vdata, HYPRE_Real *sp_ilu_droptol )
@@ -758,6 +574,7 @@ hypre_ILUSetSchurPrecondILUDropThresholdArray( void *ilu_vdata, HYPRE_Real *sp_i
                   HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
    return hypre_error_flag;
 }
+
 /* Set print level for Precond of Schur System */
 HYPRE_Int
 hypre_ILUSetSchurPrecondPrintLevel( void *ilu_vdata, HYPRE_Int sp_print_level )
@@ -766,6 +583,7 @@ hypre_ILUSetSchurPrecondPrintLevel( void *ilu_vdata, HYPRE_Int sp_print_level )
    hypre_ParILUDataSchurPrecondPrintLevel(ilu_data) = sp_print_level;
    return hypre_error_flag;
 }
+
 /* Set max number of iterations for Precond of Schur System */
 HYPRE_Int
 hypre_ILUSetSchurPrecondMaxIter( void *ilu_vdata, HYPRE_Int sp_max_iter )
@@ -774,6 +592,7 @@ hypre_ILUSetSchurPrecondMaxIter( void *ilu_vdata, HYPRE_Int sp_max_iter )
    hypre_ParILUDataSchurPrecondMaxIter(ilu_data) = sp_max_iter;
    return hypre_error_flag;
 }
+
 /* Set triangular solver type for Precond of Schur System */
 HYPRE_Int
 hypre_ILUSetSchurPrecondTriSolve( void *ilu_vdata, HYPRE_Int sp_tri_solve )
@@ -782,6 +601,7 @@ hypre_ILUSetSchurPrecondTriSolve( void *ilu_vdata, HYPRE_Int sp_tri_solve )
    hypre_ParILUDataSchurPrecondTriSolve(ilu_data) = sp_tri_solve;
    return hypre_error_flag;
 }
+
 /* Set Lower Jacobi iterations for Precond of Schur System */
 HYPRE_Int
 hypre_ILUSetSchurPrecondLowerJacobiIters( void *ilu_vdata, HYPRE_Int sp_lower_jacobi_iters )
@@ -790,6 +610,7 @@ hypre_ILUSetSchurPrecondLowerJacobiIters( void *ilu_vdata, HYPRE_Int sp_lower_ja
    hypre_ParILUDataSchurPrecondLowerJacobiIters(ilu_data) = sp_lower_jacobi_iters;
    return hypre_error_flag;
 }
+
 /* Set Upper Jacobi iterations for Precond of Schur System */
 HYPRE_Int
 hypre_ILUSetSchurPrecondUpperJacobiIters( void *ilu_vdata, HYPRE_Int sp_upper_jacobi_iters )
@@ -798,6 +619,7 @@ hypre_ILUSetSchurPrecondUpperJacobiIters( void *ilu_vdata, HYPRE_Int sp_upper_ja
    hypre_ParILUDataSchurPrecondUpperJacobiIters(ilu_data) = sp_upper_jacobi_iters;
    return hypre_error_flag;
 }
+
 /* Set onvergence tolerance for Precond of Schur System */
 HYPRE_Int
 hypre_ILUSetSchurPrecondTol( void *ilu_vdata, HYPRE_Int sp_tol )
@@ -806,6 +628,7 @@ hypre_ILUSetSchurPrecondTol( void *ilu_vdata, HYPRE_Int sp_tol )
    hypre_ParILUDataSchurPrecondTol(ilu_data) = sp_tol;
    return hypre_error_flag;
 }
+
 /* Set tolorance for dropping in NSH for Schur System
  * We don't want to influence the original ILU, so create new array if not own data
  */
@@ -821,6 +644,7 @@ hypre_ILUSetSchurNSHDropThreshold( void *ilu_vdata, HYPRE_Real threshold)
    hypre_ParILUDataSchurNSHDroptol(ilu_data)[1]           = threshold;
    return hypre_error_flag;
 }
+
 /* Set tolorance array for NSH for Schur System
  *    - threshold[0] : threshold for Minimal Residual iteration (initial guess for NSH).
  *    - threshold[1] : threshold for Newton–Schulz–Hotelling iteration.
@@ -853,6 +677,7 @@ hypre_ILUGetNumIterations( void *ilu_vdata, HYPRE_Int *num_iterations )
 
    return hypre_error_flag;
 }
+
 /* Get residual norms for ILU solver */
 HYPRE_Int
 hypre_ILUGetFinalRelativeResidualNorm( void *ilu_vdata, HYPRE_Real *res_norm )
@@ -868,6 +693,7 @@ hypre_ILUGetFinalRelativeResidualNorm( void *ilu_vdata, HYPRE_Real *res_norm )
 
    return hypre_error_flag;
 }
+
 /*
  * Quicksort of the elements in a from low to high.
  * The elements in b are permuted according to the sorted a.
@@ -904,6 +730,7 @@ hypre_quickSortIR (HYPRE_Int *a, HYPRE_Real *b, HYPRE_Int *iw, const HYPRE_Int l
    return hypre_error_flag;
 }
 */
+
 /* Print solver params */
 HYPRE_Int
 hypre_ILUWriteSolverParams(void *ilu_vdata)
@@ -3113,7 +2940,6 @@ hypre_ParILURAPSchurGMRESSolve( void               *ilu_vdata,
 {
    /* Unit GMRES preconditioner, just copy data from one slot to another */
    hypre_ParILUData        *ilu_data            = (hypre_ParILUData*) ilu_vdata;
-   cusparseHandle_t         handle              = hypre_HandleCusparseHandle(hypre_handle());
    hypre_ParCSRMatrix      *S                   = hypre_ParILUDataMatS(ilu_data);
    hypre_CSRMatrix         *SLU                 = hypre_ParCSRMatrixDiag(S);
    HYPRE_Int                m                   = hypre_CSRMatrixNumRows(SLU);
