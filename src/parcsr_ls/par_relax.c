@@ -1313,7 +1313,7 @@ hypre_BoomerAMGRelax19GaussElim( hypre_ParCSRMatrix *A,
 
    /* all processors are needed for these routines */
    A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A, HYPRE_MEMORY_HOST);
-   f_vector = hypre_ParVectorToVectorAll(f);
+   f_vector = hypre_ParVectorToVectorAll(f, HYPRE_MEMORY_HOST);
    if (num_rows)
    {
       A_CSR_i = hypre_CSRMatrixI(A_CSR);
@@ -1401,7 +1401,7 @@ hypre_BoomerAMGRelax98GaussElimPivot( hypre_ParCSRMatrix *A,
 
    /* all processors are needed for these routines */
    A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A, HYPRE_MEMORY_HOST);
-   f_vector = hypre_ParVectorToVectorAll(f);
+   f_vector = hypre_ParVectorToVectorAll(f, HYPRE_MEMORY_HOST);
    if (num_rows)
    {
       A_CSR_i = hypre_CSRMatrixI(A_CSR);
@@ -1409,8 +1409,8 @@ hypre_BoomerAMGRelax98GaussElimPivot( hypre_ParCSRMatrix *A,
       A_CSR_data = hypre_CSRMatrixData(A_CSR);
       f_vector_data = hypre_VectorData(f_vector);
 
-      A_mat = hypre_CTAlloc(HYPRE_Real,  n_global * n_global, HYPRE_MEMORY_HOST);
-      b_vec = hypre_CTAlloc(HYPRE_Real,  n_global, HYPRE_MEMORY_HOST);
+      A_mat = hypre_CTAlloc(HYPRE_Real, n_global * n_global, HYPRE_MEMORY_HOST);
+      b_vec = hypre_CTAlloc(HYPRE_Real, n_global, HYPRE_MEMORY_HOST);
 
       /*---------------------------------------------------------------
        *  Load CSR matrix into A_mat.

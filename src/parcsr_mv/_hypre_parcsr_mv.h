@@ -1225,7 +1225,8 @@ HYPRE_Int hypre_ParVectorMassDotpTwo ( hypre_ParVector *x, hypre_ParVector *y, h
                                        HYPRE_Int k, HYPRE_Int unroll, HYPRE_Real *prod_x, HYPRE_Real *prod_y );
 hypre_ParVector *hypre_VectorToParVector ( MPI_Comm comm, hypre_Vector *v,
                                            HYPRE_BigInt *vec_starts );
-hypre_Vector *hypre_ParVectorToVectorAll ( hypre_ParVector *par_v );
+hypre_Vector *hypre_ParVectorToVectorAll ( hypre_ParVector *par_v,
+                                           HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_ParVectorPrintIJ ( hypre_ParVector *vector, HYPRE_Int base_j,
                                    const char *filename );
 HYPRE_Int hypre_ParVectorReadIJ ( MPI_Comm comm, const char *filename, HYPRE_Int *base_j_ptr,
