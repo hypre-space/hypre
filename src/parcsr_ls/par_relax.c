@@ -1434,27 +1434,20 @@ hypre_BoomerAMGRelax98GaussElimPivot( hypre_ParCSRMatrix *A,
       /*now b_vec = inv(A)*b_vec  */
       hypre_dgetrs("N", &n_global, &one_i, A_mat, &n_global, piv, b_vec, &n_global, &info);
 
+      /* Copy solution vector b_vec to u */
+      hypre_TMemcpy(u_data, b_vec + first_index, HYPRE_Complex, num_rows,
+                    hypre_ParVectorMemoryLocation(u),
+                    HYPRE_MEMORY_HOST);
+
+      /* Free memory */
       hypre_TFree(piv, HYPRE_MEMORY_HOST);
-
-      for (i = 0; i < num_rows; i++)
-      {
-         u_data[i] = b_vec[first_index + i];
-      }
-
       hypre_TFree(A_mat, HYPRE_MEMORY_HOST);
       hypre_TFree(b_vec, HYPRE_MEMORY_HOST);
-      hypre_CSRMatrixDestroy(A_CSR);
-      A_CSR = NULL;
-      hypre_SeqVectorDestroy(f_vector);
-      f_vector = NULL;
    }
-   else
-   {
-      hypre_CSRMatrixDestroy(A_CSR);
-      A_CSR = NULL;
-      hypre_SeqVectorDestroy(f_vector);
-      f_vector = NULL;
-   }
+
+   /* Free memory */
+   hypre_CSRMatrixDestroy(A_CSR);
+   hypre_SeqVectorDestroy(f_vector);
 
    return relax_error;
 }
