@@ -504,24 +504,20 @@ struct l1_norm_op1 : public thrust::binary_function<HYPRE_Complex, HYPRE_Complex
 };
 #endif
 
-/*--------------------------------------------------------------------------
- * hypre_ParCSRComputeL1Norms
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
-                           HYPRE_Int            option,
-                           HYPRE_Int           *cf_marker,
-                           HYPRE_Real         **l1_norm_ptr)
+HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
+                                     HYPRE_Int            option,
+                                     HYPRE_Int           *cf_marker,
+                                     HYPRE_Real         **l1_norm_ptr)
 {
-   hypre_CSRMatrix      *A_diag             = hypre_ParCSRMatrixDiag(A);
-   hypre_CSRMatrix      *A_offd             = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Int             num_rows           = hypre_ParCSRMatrixNumRows(A);
-   HYPRE_Int             num_cols_offd      = hypre_CSRMatrixNumCols(A_offd);
-   HYPRE_MemoryLocation  memory_location_l1 = hypre_ParCSRMatrixMemoryLocation(A);
-
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location_l1);
    HYPRE_Int i;
+   HYPRE_Int num_rows = hypre_ParCSRMatrixNumRows(A);
+   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
+   HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
+
+   HYPRE_MemoryLocation memory_location_l1 = hypre_ParCSRMatrixMemoryLocation(A);
+
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( memory_location_l1 );
 
    if (exec == HYPRE_EXEC_HOST)
    {
@@ -532,19 +528,22 @@ hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       }
    }
 
-   HYPRE_Real  *l1_norm = hypre_TAlloc(HYPRE_Real, num_rows, memory_location_l1);
+   HYPRE_Real *l1_norm = hypre_TAlloc(HYPRE_Real, num_rows, memory_location_l1);
+
    HYPRE_MemoryLocation memory_location_tmp =
       exec == HYPRE_EXEC_HOST ? HYPRE_MEMORY_HOST : HYPRE_MEMORY_DEVICE;
 
-   HYPRE_Real  *diag_tmp = NULL;
-   HYPRE_Int   *cf_marker_offd = NULL;
+   HYPRE_Real *diag_tmp = NULL;
+
+   HYPRE_Int *cf_marker_offd = NULL;
 
    /* collect the cf marker data from other procs */
    if (cf_marker != NULL)
    {
-      HYPRE_Int               num_sends;
-      HYPRE_Int              *int_buf_data = NULL;
-      hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+      HYPRE_Int num_sends;
+      HYPRE_Int *int_buf_data = NULL;
+
+      hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
       hypre_ParCSRCommHandle *comm_handle;
 
       if (num_cols_offd)
@@ -554,8 +553,7 @@ hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       if (hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends))
       {
-         int_buf_data = hypre_CTAlloc(HYPRE_Int,
-                                      hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+         int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                       memory_location_tmp);
       }
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
@@ -564,15 +562,15 @@ hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
          hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 #if defined(HYPRE_USING_SYCL)
          hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
-                           hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
-                             hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                           hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+                                                                                                             num_sends),
                            cf_marker,
                            int_buf_data );
 #else
          HYPRE_THRUST_CALL( gather,
                             hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
-                            hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) +
-                              hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                            hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+                                  num_sends),
                             cf_marker,
                             int_buf_data );
 #endif
@@ -598,9 +596,8 @@ hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
          }
       }
 
-      comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, memory_location_tmp,
-                                                    int_buf_data, memory_location_tmp,
-                                                    cf_marker_offd);
+      comm_handle = hypre_ParCSRCommHandleCreate_v2(11, comm_pkg, memory_location_tmp, int_buf_data,
+                                                    memory_location_tmp, cf_marker_offd);
       hypre_ParCSRCommHandleDestroy(comm_handle);
       hypre_TFree(int_buf_data, memory_location_tmp);
    }
@@ -620,7 +617,6 @@ hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
    {
       /* Set the abs(diag) element */
       hypre_CSRMatrixExtractDiagonal(A_diag, l1_norm, 1);
-
       /* Add the l1 norm of the offd part */
       if (num_cols_offd)
       {
@@ -631,7 +627,6 @@ hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
    {
       /* Set the CF l2 norm of the diag part */
       hypre_CSRMatrixComputeRowSum(A_diag, NULL, NULL, l1_norm, 2, 1.0, "set");
-
       /* Add the CF l2 norm of the offd part */
       if (num_cols_offd)
       {
@@ -644,8 +639,7 @@ hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixExtractDiagonal(A_diag, l1_norm, 1);
 
       diag_tmp = hypre_TAlloc(HYPRE_Real, num_rows, memory_location_tmp);
-      hypre_TMemcpy(diag_tmp, l1_norm, HYPRE_Real, num_rows,
-                    memory_location_tmp, memory_location_l1);
+      hypre_TMemcpy(diag_tmp, l1_norm, HYPRE_Real, num_rows, memory_location_tmp, memory_location_l1);
 
       /* Add the scaled l1 norm of the offd part */
       if (num_cols_offd)
@@ -658,11 +652,9 @@ hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       if (exec == HYPRE_EXEC_DEVICE)
       {
 #if defined(HYPRE_USING_SYCL)
-         HYPRE_ONEDPL_CALL( std::transform, l1_norm, l1_norm + num_rows,
-                            diag_tmp, l1_norm, l1_norm_op1() );
+         HYPRE_ONEDPL_CALL( std::transform, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, l1_norm_op1() );
 #else
-         HYPRE_THRUST_CALL( transform, l1_norm, l1_norm + num_rows,
-                            diag_tmp, l1_norm, l1_norm_op1() );
+         HYPRE_THRUST_CALL( transform, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, l1_norm_op1() );
 #endif
       }
       else
@@ -681,40 +673,32 @@ hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
    {
       /* Set the diag element */
       hypre_CSRMatrixExtractDiagonal(A_diag, l1_norm, 0);
-   }
 
-   /* Substitute zero values with 1.0 */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
-   if (exec == HYPRE_EXEC_DEVICE)
-   {
-#if defined(HYPRE_USING_SYCL)
-      HYPRE_ONEDPL_CALL( std::replace_if, l1_norm, l1_norm + num_rows,
-                         [] (const auto & x) {return !x;}, 1.0 );
-#else
-      thrust::identity<HYPRE_Complex> identity;
-      HYPRE_THRUST_CALL( replace_if, l1_norm, l1_norm + num_rows,
-                         thrust::not1(identity), 1.0 );
-#endif
-   }
-   else
-#endif
-   {
-#ifdef HYPRE_USING_OPENMP
-      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-      for (i = 0; i < num_rows; i++)
+      if ( exec == HYPRE_EXEC_DEVICE)
       {
-         if (l1_norm[i] < HYPRE_REAL_MIN || -l1_norm[i] < HYPRE_REAL_MIN)
+#if defined(HYPRE_USING_SYCL)
+         HYPRE_ONEDPL_CALL( std::replace_if, l1_norm, l1_norm + num_rows, [] (const auto & x) {return !x;},
+         1.0 );
+#else
+         thrust::identity<HYPRE_Complex> identity;
+         HYPRE_THRUST_CALL( replace_if, l1_norm, l1_norm + num_rows, thrust::not1(identity), 1.0 );
+#endif
+      }
+      else
+#endif
+      {
+         for (i = 0; i < num_rows; i++)
          {
-            l1_norm[i] = 1.0;
+            if (l1_norm[i] == 0.0)
+            {
+               l1_norm[i] = 1.0;
+            }
          }
       }
-   }
 
-   /* Exit now in case of option 5 */
-   if (option == 5)
-   {
       *l1_norm_ptr = l1_norm;
+
       return hypre_error_flag;
    }
 
@@ -744,7 +728,7 @@ hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       bool any_zero = 0.0 == HYPRE_THRUST_CALL( reduce, l1_norm, l1_norm + num_rows, 1.0,
                                                 thrust::minimum<HYPRE_Real>() );
 #endif
-      if (any_zero)
+      if ( any_zero )
       {
          hypre_error_in_arg(1);
       }
@@ -4399,11 +4383,14 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
       hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
       hypre_ParCSRCommHandle *comm_handle;
 
-      cf_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
+      if (num_cols_offd)
+      {
+         cf_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
+      }
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      int_buf_data = hypre_CTAlloc(HYPRE_Int,
-                                   hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
-                                   HYPRE_MEMORY_HOST);
+      if (hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends))
+         int_buf_data = hypre_CTAlloc(HYPRE_Int,
+                                      hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
       index = 0;
       for (i = 0; i < num_sends; i++)
       {
@@ -4449,7 +4436,6 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
                {
                   l1_norm[i] += hypre_abs(A_diag_data[j]);
                }
-
                /* Add the l1 norm of the offd part of the ith row */
                if (num_cols_offd)
                {
@@ -4464,23 +4450,18 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
                cf_diag = cf_marker[i];
                /* Add the CF l1 norm of the diag part of the ith row */
                for (j = A_diag_I[i]; j < A_diag_I[i + 1]; j++)
-               {
                   if (cf_diag == cf_marker[A_diag_J[j]])
                   {
                      l1_norm[i] += hypre_abs(A_diag_data[j]);
                   }
-               }
-
                /* Add the CF l1 norm of the offd part of the ith row */
                if (num_cols_offd)
                {
                   for (j = A_offd_I[i]; j < A_offd_I[i + 1]; j++)
-                  {
                      if (cf_diag == cf_marker_offd[A_offd_J[j]])
                      {
                         l1_norm[i] += hypre_abs(A_offd_data[j]);
                      }
-                  }
                }
             }
          }
@@ -4501,7 +4482,6 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
                      l1_norm[i] += hypre_abs(A_diag_data[j]);
                   }
                }
-
                /* Add the l1 norm of the offd part of the ith row */
                if (num_cols_offd)
                {
@@ -4514,7 +4494,6 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
             else
             {
                cf_diag = cf_marker[i];
-
                /* Add the diagonal and the local off-thread part of the ith row */
                for (j = A_diag_I[i]; j < A_diag_I[i + 1]; j++)
                {
@@ -4525,17 +4504,14 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
                      l1_norm[i] += hypre_abs(A_diag_data[j]);
                   }
                }
-
                /* Add the CF l1 norm of the offd part of the ith row */
                if (num_cols_offd)
                {
                   for (j = A_offd_I[i]; j < A_offd_I[i + 1]; j++)
-                  {
                      if (cf_diag == cf_marker_offd[A_offd_J[j]])
                      {
                         l1_norm[i] += hypre_abs(A_offd_data[j]);
                      }
-                  }
                }
             }
          }
@@ -4549,14 +4525,11 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
             {
                l1_norm[i] += A_diag_data[j] * A_diag_data[j];
             }
-
             if (num_cols_offd)
-            {
                for (j = A_offd_I[i]; j < A_offd_I[i + 1]; j++)
                {
                   l1_norm[i] += A_offd_data[j] * A_offd_data[j];
                }
-            }
          }
       }
       else if (option == 4)
@@ -4583,7 +4556,6 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
                      }
                   }
                }
-
                /* Add the l1 norm of the offd part of the ith row */
                if (num_cols_offd)
                {
@@ -4596,7 +4568,6 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
             else
             {
                cf_diag = cf_marker[i];
-
                /* Add the diagonal and the local off-thread part of the ith row */
                for (j = A_diag_I[i]; j < A_diag_I[i + 1]; j++)
                {
@@ -4615,17 +4586,14 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
                      }
                   }
                }
-
                /* Add the CF l1 norm of the offd part of the ith row */
                if (num_cols_offd)
                {
                   for (j = A_offd_I[i]; j < A_offd_I[i + 1]; j++)
-                  {
                      if (cf_diag == cf_marker_offd[A_offd_J[j]])
                      {
                         l1_norm[i] += 0.5 * hypre_abs(A_offd_data[j]);
                      }
-                  }
                }
             }
 
@@ -4642,11 +4610,8 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
          /* Set the diag element */
          for (i = ns; i < ne; i++)
          {
-            l1_norm[i] = A_diag_data[A_diag_I[i]];
-            if (l1_norm[i] == 0)
-            {
-               l1_norm[i] = 1.0;
-            }
+            l1_norm[i] =  A_diag_data[A_diag_I[i]];
+            if (l1_norm[i] == 0) { l1_norm[i] = 1.0; }
          }
       }
 
@@ -4654,23 +4619,20 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
       {
          /* Handle negative definite matrices */
          for (i = ns; i < ne; i++)
-         {
             if (A_diag_data[A_diag_I[i]] < 0)
             {
                l1_norm[i] = -l1_norm[i];
             }
-         }
 
          for (i = ns; i < ne; i++)
-         {
             /* if (hypre_abs(l1_norm[i]) < DBL_EPSILON) */
             if (hypre_abs(l1_norm[i]) == 0.0)
             {
                hypre_error_in_arg(1);
                break;
             }
-         }
       }
+
    }
 
    hypre_TFree(cf_marker_offd, HYPRE_MEMORY_HOST);
