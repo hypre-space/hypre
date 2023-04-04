@@ -87,6 +87,7 @@ HYPRE_Int hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A, HYPRE_Real 
 HYPRE_Int hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix *A, HYPRE_Int *perm,
                                         HYPRE_Int *rqperm, hypre_CSRMatrix *B );
 HYPRE_Int hypre_CSRMatrixSortRow(hypre_CSRMatrix *A);
+HYPRE_Int hypre_CSRMatrixSortRowOutOfPlace(hypre_CSRMatrix *A);
 HYPRE_Int hypre_CSRMatrixTriLowerUpperSolveDevice_core(char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, HYPRE_Real *l1_norms, hypre_Vector *f, HYPRE_Int offset_f, hypre_Vector *u, HYPRE_Int offset_u);
 HYPRE_Int hypre_CSRMatrixTriLowerUpperSolveDevice(char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, HYPRE_Real *l1_norms, hypre_Vector *f, hypre_Vector *u );
 HYPRE_Int hypre_CSRMatrixTriLowerUpperSolveRocsparse(char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, HYPRE_Real *l1_norms, HYPRE_Complex *f, HYPRE_Complex *u );

@@ -756,23 +756,25 @@ struct hypre_CsrsvData
    hypre_cusparseSpSVDescr info_L;
    hypre_cusparseSpSVDescr info_U;
 #elif defined(HYPRE_USING_ROCSPARSE)
-   rocsparse_mat_info info_L;
-   rocsparse_mat_info info_U;
+   rocsparse_mat_info      info_L;
+   rocsparse_mat_info      info_U;
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
    /* WM: todo - placeholders */
-   char info_L;
-   char info_U;
+   char                    info_L;
+   char                    info_U;
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-   size_t BufferSizeL;
-   size_t BufferSizeU;
-   char *BufferL;
-   char *BufferU;
+   size_t                  BufferSizeL;
+   size_t                  BufferSizeU;
+   char                   *BufferL;
+   char                   *BufferU;
 #else
-   hypre_int BufferSize;
-   char *Buffer;
+   hypre_int               BufferSize;
+   char                   *Buffer;
 #endif
+   /* to save matrix values with modified diagonal */
+   HYPRE_Complex          *matdata;
 };
 
 #define hypre_CsrsvDataInfoL(data)       ((data) -> info_L)
@@ -786,6 +788,7 @@ struct hypre_CsrsvData
 #define hypre_CsrsvDataBufferSize(data)  ((data) -> BufferSize)
 #define hypre_CsrsvDataBuffer(data)      ((data) -> Buffer)
 #endif
+#define hypre_CsrsvDataMatData(data)     ((data) -> matdata)
 
 struct hypre_GpuMatData
 {

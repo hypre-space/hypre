@@ -57,6 +57,7 @@ hypre_CsrsvDataDestroy(hypre_CsrsvData* data)
 #else
    hypre_TFree(hypre_CsrsvDataBuffer(data), HYPRE_MEMORY_DEVICE);
 #endif
+   hypre_TFree(hypre_CsrsvDataMatData(data), HYPRE_MEMORY_DEVICE);
 
    hypre_TFree(data, HYPRE_MEMORY_HOST);
 }
@@ -1476,12 +1477,18 @@ hypreGPUKernel_CSRMatrixReplaceDiagDevice( hypre_DeviceItem    &item,
 
       if (find_diag)
       {
-         HYPRE_Complex d = read_only_load(&new_diag[row]);
-         if (hypre_abs(d) <= tol)
+         if (new_diag)
          {
-            d = v;
+            HYPRE_Complex d = read_only_load(&new_diag[row]);
+            data[j] = hypre_abs(d) <= tol ? v : d;
          }
-         data[j] = d;
+         else
+         {
+            if (hypre_abs(data[j]) <= tol)
+            {
+               data[j] = v;
+            }
+         }
       }
 
       if ( warp_any_sync(item, HYPRE_WARP_FULL_MASK, find_diag) )
@@ -2105,6 +2112,41 @@ hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
    return hypre_error_flag;
 }
 
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+HYPRE_Int
+hypre_CSRMatrixSortRowOutOfPlace(hypre_CSRMatrix *A)
+{
+   HYPRE_Int     *A_j  = hypre_CSRMatrixJ(A);
+   HYPRE_Complex *A_a  = hypre_CSRMatrixData(A);
+   HYPRE_Int      nnzA = hypre_CSRMatrixNumNonzeros(A);
+
+   /* if both exist, we assume A has been sorted */
+   if (hypre_CSRMatrixSortedJ(A) && hypre_CSRMatrixSortedData(A))
+   {
+      return hypre_error_flag;
+   }
+
+   hypre_TFree(hypre_CSRMatrixSortedJ(A), HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_CSRMatrixSortedData(A), HYPRE_MEMORY_DEVICE);
+
+   hypre_CSRMatrixSortedJ(A) = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
+   hypre_CSRMatrixSortedData(A) = hypre_TAlloc(HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE);
+
+   hypre_TMemcpy(hypre_CSRMatrixSortedJ(A), A_j, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(hypre_CSRMatrixSortedData(A), A_a, HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+
+   hypre_CSRMatrixJ(A) = hypre_CSRMatrixSortedJ(A);
+   hypre_CSRMatrixData(A) = hypre_CSRMatrixSortedData(A);
+
+   hypre_CSRMatrixSortRow(A);
+
+   hypre_CSRMatrixJ(A) = A_j;
+   hypre_CSRMatrixData(A) = A_a;
+
+   return hypre_error_flag;
+}
+#endif
+
 #if defined(HYPRE_USING_CUSPARSE)
 /* @brief This functions sorts values and column indices in each row in ascending order INPLACE
  * @param[in] n Number of rows
@@ -2156,23 +2198,22 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                           HYPRE_Complex   *f_data,
                                           HYPRE_Complex   *u_data )
 {
-   HYPRE_Int      nrow   = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int      ncol   = hypre_CSRMatrixNumCols(A);
-   HYPRE_Int      nnzA   = hypre_CSRMatrixNumNonzeros(A);
-   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
-   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
-   HYPRE_Complex *A_a    = hypre_CSRMatrixData(A);
-   HYPRE_Int     *A_sj   = hypre_CSRMatrixSortedJ(A);
-   HYPRE_Complex *A_sa   = hypre_CSRMatrixSortedData(A);
-   HYPRE_Complex  alpha  = 1.0;
+   HYPRE_Int          nrow      = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int          ncol      = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int          nnzA      = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int         *A_i       = hypre_CSRMatrixI(A);
+   HYPRE_Int         *A_j       = hypre_CSRMatrixJ(A);
+   HYPRE_Complex     *A_a       = hypre_CSRMatrixData(A);
+   HYPRE_Complex      alpha     = 1.0;
+   HYPRE_Int          err       = 0;
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-   cudaDataType   data_type = hypre_HYPREComplexToCudaDataType();
-   size_t         buffer_size;
+   cudaDataType       data_type = hypre_HYPREComplexToCudaDataType();
+   size_t             buffer_size;
    cusparseFillMode_t LFillMode = CUSPARSE_FILL_MODE_LOWER;
    cusparseFillMode_t UFillMode = CUSPARSE_FILL_MODE_UPPER;
 #else
-   hypre_int      buffer_size;
-   hypre_int      structural_zero;
+   hypre_int          buffer_size;
+   hypre_int          structural_zero;
 #endif
    cusparseDiagType_t DiagType = unit_diag ? CUSPARSE_DIAG_TYPE_UNIT: CUSPARSE_DIAG_TYPE_NON_UNIT;
 
@@ -2195,66 +2236,59 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
       return hypre_error_flag;
    }
 
-   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
-
-#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-   cusparseDnVecDescr_t vecF = hypre_VectorToCusparseDnVec_core(f_data, nrow);
-   cusparseDnVecDescr_t vecU = hypre_VectorToCusparseDnVec_core(u_data, ncol);
+#if CUSPARSE_VERSION < CUSPARSE_SPSV_VERSION
+   /* cusparse (legacy API) requires sorted rows. Sort and save in CSR's (sj, sa) */
+   hypre_CSRMatrixSortRowOutOfPlace(A);
 #endif
 
-   if ( !A_sj && !A_sa )
+   /* setup csrsvdata in CSR: modify the diagonal (once) */
+   if (!hypre_CSRMatrixCsrsvData(A))
    {
-      HYPRE_Int err = 0;
+      hypre_CSRMatrixCsrsvData(A) = hypre_CsrsvDataCreate();
+      hypre_CsrsvData *csrsv_data = hypre_CSRMatrixCsrsvData(A);
 
-      /* make copies of J and Data for sorted A */
-      hypre_CSRMatrixSortedJ(A) = A_sj = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
-      hypre_CSRMatrixSortedData(A) = A_sa = hypre_TAlloc(HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(A_sj, A_j, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(A_sa, A_a, HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypre_CsrsvDataMatData(csrsv_data) = hypre_TAlloc(HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE);
 
-      /* make adjustment to the diagonal */
-      hypre_CSRMatrixData(A) = A_sa;
+      hypre_CSRMatrixData(A) = hypre_CsrsvDataMatData(csrsv_data);
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+      hypre_TMemcpy(hypre_CsrsvDataMatData(csrsv_data), A_a, HYPRE_Complex, nnzA,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+#else
+      hypre_TMemcpy(hypre_CsrsvDataMatData(csrsv_data), hypre_CSRMatrixSortedData(A), HYPRE_Complex, nnzA,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypre_CSRMatrixJ(A) = hypre_CSRMatrixSortedJ(A);
+#endif
 
-#if defined(HYPRE_USING_CUDA)
-      if (l1_norms)
-      {
-         err = hypre_CSRMatrixReplaceDiagDevice(A, l1_norms, INFINITY, 0.0);
-      }
-      else
-      {
-         /* replace zero diag with inf. so as to skip relaxation for this unknown */
-         err = hypre_CSRMatrixFixZeroDiagDevice(A, INFINITY, 0.0);
-      }
+      /* if (l1_norms), replace A's diag with l1_norm, and
+       * replace zero diag with inf. so as to skip relaxation for this unknown */
+      err = hypre_CSRMatrixReplaceDiagDevice(A, l1_norms, INFINITY, 0.0);
 
       if (err)
       {
          hypre_error_w_msg(1, "structural zero in hypre_CSRMatrixTriLowerUpperSolveCusparse");
       }
-#endif
 
-      /* sort A */
-      hypre_CSRMatrixJ(A) = A_sj;
-      hypre_CSRMatrixSortRow(A);
-
-      /* recover the pointers */
-      hypre_CSRMatrixJ(A) = A_j;
       hypre_CSRMatrixData(A) = A_a;
+#if CUSPARSE_VERSION < CUSPARSE_SPSV_VERSION
+      hypre_CSRMatrixJ(A) = A_j;
+#endif
    }
 
+   /* analysis and solve */
+   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
+   hypre_CsrsvData *csrsv_data = hypre_CSRMatrixCsrsvData(A);
+   HYPRE_Complex *A_ma = hypre_CsrsvDataMatData(csrsv_data);
+
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-   cusparseSpMatDescr_t matA = hypre_CSRMatrixToCusparseSpMat_core(nrow, ncol, 0, nnzA, A_i, A_sj, A_sa);
-   HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(matA, CUSPARSE_SPMAT_DIAG_TYPE, &DiagType,
-                                                  sizeof(cusparseDiagType_t)) );
+   cusparseSpMatDescr_t matA = hypre_CSRMatrixToCusparseSpMat_core(nrow, ncol, 0, nnzA, A_i, A_j, A_ma);
+   HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(matA, CUSPARSE_SPMAT_DIAG_TYPE, &DiagType, sizeof(cusparseDiagType_t)) );
+   cusparseDnVecDescr_t vecF = hypre_VectorToCusparseDnVec_core(f_data, nrow);
+   cusparseDnVecDescr_t vecU = hypre_VectorToCusparseDnVec_core(u_data, ncol);
 #else
+   HYPRE_Int *A_sj = hypre_CSRMatrixSortedJ(A);
    cusparseMatDescr_t descr = hypre_CSRMatrixGPUMatDescr(A);
    HYPRE_CUSPARSE_CALL( cusparseSetMatDiagType(descr, DiagType) );
 #endif
-
-   if (!hypre_CSRMatrixCsrsvData(A))
-   {
-      hypre_CSRMatrixCsrsvData(A) = hypre_CsrsvDataCreate();
-   }
-   hypre_CsrsvData *csrsv_data = hypre_CSRMatrixCsrsvData(A);
 
    if (uplo == 'L')
    {
@@ -2277,7 +2311,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                                       &buffer_size) );
 #else
          HYPRE_CUSPARSE_CALL( hypre_cusparse_csrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                               nrow, nnzA, descr, A_sa, A_i, A_sj,
+                                                               nrow, nnzA, descr, A_ma, A_i, A_sj,
                                                                hypre_CsrsvDataInfoL(csrsv_data), &buffer_size) );
 #endif
 
@@ -2309,7 +2343,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                                     hypre_CsrsvDataBufferL(csrsv_data)) );
 #else
          HYPRE_CUSPARSE_CALL( hypre_cusparse_csrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                             nrow, nnzA, descr, A_sa, A_i, A_sj,
+                                                             nrow, nnzA, descr, A_ma, A_i, A_sj,
                                                              hypre_CsrsvDataInfoL(csrsv_data),
                                                              CUSPARSE_SOLVE_POLICY_USE_LEVEL,
                                                              hypre_CsrsvDataBuffer(csrsv_data)) );
@@ -2334,7 +2368,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                               hypre_CsrsvDataInfoL(csrsv_data)) );
 #else
       HYPRE_CUSPARSE_CALL( hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                       nrow, nnzA, &alpha, descr, A_sa, A_i, A_sj,
+                                                       nrow, nnzA, &alpha, descr, A_ma, A_i, A_sj,
                                                        hypre_CsrsvDataInfoL(csrsv_data), f_data, u_data,
                                                        CUSPARSE_SOLVE_POLICY_USE_LEVEL,
                                                        hypre_CsrsvDataBuffer(csrsv_data)) );
@@ -2361,7 +2395,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                                       &buffer_size) );
 #else
          HYPRE_CUSPARSE_CALL( hypre_cusparse_csrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                               nrow, nnzA, descr, A_sa, A_i, A_sj,
+                                                               nrow, nnzA, descr, A_ma, A_i, A_sj,
                                                                hypre_CsrsvDataInfoU(csrsv_data), &buffer_size) );
 #endif
 
@@ -2393,7 +2427,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                                     hypre_CsrsvDataBufferU(csrsv_data)) );
 #else
          HYPRE_CUSPARSE_CALL( hypre_cusparse_csrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                             nrow, nnzA, descr, A_sa, A_i, A_sj,
+                                                             nrow, nnzA, descr, A_ma, A_i, A_sj,
                                                              hypre_CsrsvDataInfoU(csrsv_data),
                                                              CUSPARSE_SOLVE_POLICY_USE_LEVEL,
                                                              hypre_CsrsvDataBuffer(csrsv_data)) );
@@ -2417,7 +2451,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                               hypre_CsrsvDataInfoU(csrsv_data)) );
 #else
       HYPRE_CUSPARSE_CALL( hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                       nrow, nnzA, &alpha, descr, A_sa, A_i, A_sj,
+                                                       nrow, nnzA, &alpha, descr, A_ma, A_i, A_sj,
                                                        hypre_CsrsvDataInfoU(csrsv_data), f_data, u_data,
                                                        CUSPARSE_SOLVE_POLICY_USE_LEVEL,
                                                        hypre_CsrsvDataBuffer(csrsv_data)) );
