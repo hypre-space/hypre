@@ -1312,7 +1312,7 @@ hypre_BoomerAMGRelax19GaussElim( hypre_ParCSRMatrix *A,
     *-----------------------------------------------------------------*/
 
    /* all processors are needed for these routines */
-   A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
+   A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A, HYPRE_MEMORY_HOST);
    f_vector = hypre_ParVectorToVectorAll(f);
    if (num_rows)
    {
@@ -1400,7 +1400,7 @@ hypre_BoomerAMGRelax98GaussElimPivot( hypre_ParCSRMatrix *A,
     *-----------------------------------------------------------------*/
 
    /* all processors are needed for these routines */
-   A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
+   A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A, HYPRE_MEMORY_HOST);
    f_vector = hypre_ParVectorToVectorAll(f);
    if (num_rows)
    {
