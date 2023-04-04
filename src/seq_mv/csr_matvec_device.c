@@ -93,7 +93,7 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
    else
 #endif // defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) ...
    {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) ||defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
       hypre_CSRMatrixSpMVDevice(trans, alpha, A, x, beta, y, 0);
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
@@ -478,10 +478,12 @@ hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
    sycl::queue *compute_queue = hypre_HandleComputeStream(hypre_handle());
    hypre_CSRMatrix *AT;
    oneapi::mkl::sparse::matrix_handle_t matA_handle = hypre_CSRMatrixGPUMatHandle(A);
+   hypre_GPUMatDataSetCSRData(A);
 
    if (trans)
    {
       hypre_CSRMatrixTransposeDevice(A, &AT, 1);
+      hypre_GPUMatDataSetCSRData(AT);
       matA_handle = hypre_CSRMatrixGPUMatHandle(AT);
    }
 

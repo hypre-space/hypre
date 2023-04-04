@@ -255,7 +255,7 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
             hypre_ParCSRRelax(A_array[fine_grid], F_array[fine_grid],
                               1, 1,
                               l1_norms[fine_grid] ? hypre_VectorData(l1_norms[fine_grid]) : NULL,
-                              1.0, 1.0, 0, 0, 0, 0,
+                              1.0, 1.0, 0.0, 0.0, 0, 0.0,
                               U_array[fine_grid], Vtemp, Ztemp);
          else
             hypre_BoomerAMGRelaxIF(A_array[fine_grid], F_array[fine_grid],
@@ -316,11 +316,13 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
          }
          else
             for (j = 0; j < num_grid_sweeps[2]; j++)
+            {
                hypre_ParCSRRelax(A_array[fine_grid], F_array[fine_grid],
                                  1, 1,
                                  l1_norms[fine_grid] ? hypre_VectorData(l1_norms[fine_grid]) : NULL,
-                                 1.0, 1.0, 0, 0, 0, 0,
+                                 1.0, 1.0, 0.0, 0.0, 0, 0.0,
                                  U_array[fine_grid], Vtemp, Ztemp);
+            }
       }
       else /* additive version */
       {

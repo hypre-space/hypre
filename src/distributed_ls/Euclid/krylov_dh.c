@@ -132,7 +132,7 @@ void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, HYPR
 
     /* monitor convergence */
     if (monitor && myid_dh == 0) {
-      hypre_fprintf(stderr, "[it = %i] %e\n", its, sqrt(r_iprod/b_iprod));
+      hypre_fprintf(stderr, "[it = %i] %e\n", its, hypre_sqrt(r_iprod/b_iprod));
     }
 
     /* prepare for next iteration */
@@ -223,7 +223,7 @@ void cg_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, HYPRE_Int 
     i_prod = InnerProd(m, r, r); CHECK_V_ERROR;
 
     if (monitor && myid_dh == 0) {
-      hypre_fprintf(stderr, "iter = %i  rel. resid. norm: %e\n", its, sqrt(i_prod/bi_prod));
+      hypre_fprintf(stderr, "iter = %i  rel. resid. norm: %e\n", its, hypre_sqrt(i_prod/bi_prod));
     }
 
     /* check for convergence */

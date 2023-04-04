@@ -30,7 +30,7 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_SparseMSGInterpCreate( )
+hypre_SparseMSGInterpCreate( void )
 {
    hypre_SparseMSGInterpData *interp_data;
 

@@ -4,10 +4,6 @@
 #ifndef hypre_UTILITIES_HPP
 #define hypre_UTILITIES_HPP
 
-/* WM: todo - I have a problem where I need to include this outside the extern "C++" {} block, so I'm doing this manually here for now */
-#if defined(HYPRE_USING_SYCL)
-#include <CL/sycl.hpp>
-#endif
 
 #ifdef __cplusplus
 extern "C++" {
@@ -108,7 +104,7 @@ using hypre_DeviceItem = void*;
 #endif
 
 #define CUSPARSE_NEWAPI_VERSION 11000
-#define CUSPARSE_NEWSPMM_VERSION 11201
+#define CUSPARSE_NEWSPMM_VERSION 11401
 #define CUDA_MALLOCASYNC_VERSION 11020
 #define THRUST_CALL_BLOCKING 1
 
@@ -127,8 +123,16 @@ using hypre_DeviceItem = void*;
 using hypre_DeviceItem = void*;
 #include <hip/hip_runtime.h>
 
+#if defined(HYPRE_USING_ROCBLAS)
+#include <rocblas/rocblas.h>
+#endif
+
 #if defined(HYPRE_USING_ROCSPARSE)
-#include <rocsparse.h>
+#include <rocsparse/rocsparse.h>
+#endif
+
+#if defined(HYPRE_USING_ROCSOLVER)
+#include <rocsolver/rocsolver.h>
 #endif
 
 #if defined(HYPRE_USING_ROCRAND)
@@ -176,17 +180,8 @@ using namespace thrust::placeholders;
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_SYCL)
-/* The following definitions facilitate code reuse and limits
- * if/def-ing when unifying cuda/hip code with sycl code */
-using dim3 = sycl::range<1>;
-using hypre_DeviceItem = sycl::nd_item<1>;
-#define __global__
-#define __host__
-#define __device__
-#define __forceinline__ __inline__ __attribute__((always_inline))
 
-/* WM: problems with this being inside extern C++ {} */
-/* #include <CL/sycl.hpp> */
+#include <sycl/sycl.hpp>
 #if defined(HYPRE_USING_ONEMKLSPARSE)
 #include <oneapi/mkl/spblas.hpp>
 #endif
@@ -196,6 +191,16 @@ using hypre_DeviceItem = sycl::nd_item<1>;
 #if defined(HYPRE_USING_ONEMKLRAND)
 #include <oneapi/mkl/rng.hpp>
 #endif
+
+/* The following definitions facilitate code reuse and limits
+ * if/def-ing when unifying cuda/hip code with sycl code */
+using dim3 = sycl::range<3>;
+using hypre_DeviceItem = sycl::nd_item<3>;
+#define __global__
+#define __host__
+#define __device__
+#define __forceinline__ __inline__ __attribute__((always_inline))
+
 #endif // defined(HYPRE_USING_SYCL)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -212,8 +217,8 @@ using hypre_DeviceItem = sycl::nd_item<1>;
 #define HYPRE_WARP_SIZE       64
 #define HYPRE_WARP_BITSHIFT   6
 #elif defined(HYPRE_USING_SYCL)
-#define HYPRE_WARP_SIZE       16
-#define HYPRE_WARP_BITSHIFT   4
+#define HYPRE_WARP_SIZE       32
+#define HYPRE_WARP_BITSHIFT   5
 #endif
 
 #define HYPRE_WARP_FULL_MASK  0xFFFFFFFF
@@ -258,9 +263,9 @@ using hypre_DeviceItem = sycl::nd_item<1>;
 
 /* sycl version */
 #if defined(HYPRE_USING_SYCL)
-#define HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)                 \
+#define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...)                              \
 {                                                                                            \
-   if ( gridsize[0] == 0 || blocksize[0] == 0 )                                              \
+   if ( gridsize[2] == 0 || blocksize[2] == 0 )                                              \
    {                                                                                         \
      /* hypre_printf("Warning %s %d: Zero SYCL 1D launch parameters grid/block (%d) (%d)\n", \
                   __FILE__, __LINE__,                                                        \
@@ -269,16 +274,37 @@ using hypre_DeviceItem = sycl::nd_item<1>;
    else                                                                                      \
    {                                                                                         \
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
-         cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize),                  \
+         cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
             [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item, __VA_ARGS__);                                           \
          });                                                                                 \
       }).wait_and_throw();                                                                   \
    }                                                                                         \
 }
+#define HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)                 \
+{                                                                                            \
+   if ( gridsize[2] == 0 || blocksize[2] == 0 )                                              \
+   {                                                                                         \
+     /* hypre_printf("Warning %s %d: Zero SYCL 1D launch parameters grid/block (%d) (%d)\n", \
+                  __FILE__, __LINE__,                                                        \
+                  gridsize[0], blocksize[0]); */                                             \
+   }                                                                                         \
+   else                                                                                      \
+   {                                                                                         \
+      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
+         sycl::range<1> shmem_range(shmem_size);                                             \
+         sycl::accessor<char, 1, sycl::access_mode::read_write,                              \
+            sycl::target::local> shmem_accessor(shmem_range, cgh);                           \
+         cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
+            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+               { (kernel_name)(item, shmem_accessor.get_pointer(), __VA_ARGS__);             \
+         });                                                                                 \
+      }).wait_and_throw();                                                                   \
+   }                                                                                         \
+}
 #define HYPRE_GPU_DEBUG_LAUNCH(kernel_name, gridsize, blocksize, ...)                        \
 {                                                                                            \
-   if ( gridsize[0] == 0 || blocksize[0] == 0 )                                              \
+   if ( gridsize[2] == 0 || blocksize[2] == 0 )                                              \
    {                                                                                         \
      /* hypre_printf("Warning %s %d: Zero SYCL 1D launch parameters grid/block (%d) (%d)\n", \
                   __FILE__, __LINE__,                                                        \
@@ -288,15 +314,35 @@ using hypre_DeviceItem = sycl::nd_item<1>;
    {                                                                                         \
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
          auto debug_stream = sycl::stream(4096, 1024, cgh);                                  \
-         cgh.parallel_for(sycl::nd_range<1>(gridsize*blocksize, blocksize),                  \
-            [=] (sycl::nd_item<1> item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+         cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
+            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item, debug_stream, __VA_ARGS__);                             \
          });                                                                                 \
       }).wait_and_throw();                                                                   \
    }                                                                                         \
 }
-
-#define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...) HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, 0, __VA_ARGS__)
+#define HYPRE_GPU_DEBUG_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)           \
+{                                                                                            \
+   if ( gridsize[2] == 0 || blocksize[2] == 0 )                                              \
+   {                                                                                         \
+     /* hypre_printf("Warning %s %d: Zero SYCL 1D launch parameters grid/block (%d) (%d)\n", \
+                  __FILE__, __LINE__,                                                        \
+                  gridsize[0], blocksize[0]); */                                             \
+   }                                                                                         \
+   else                                                                                      \
+   {                                                                                         \
+      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
+         auto debug_stream = sycl::stream(4096, 1024, cgh);                                  \
+         sycl::range<1> shmem_range(shmem_size);                                             \
+         sycl::accessor<char, 1, sycl::access_mode::read_write,                              \
+            sycl::target::local> shmem_accessor(shmem_range, cgh);                           \
+         cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
+            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+               { (kernel_name)(item, debug_stream, shmem_accessor.get_pointer(), __VA_ARGS__);\
+         });                                                                                 \
+      }).wait_and_throw();                                                                   \
+   }                                                                                         \
+}
 #endif // defined(HYPRE_USING_SYCL)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -427,6 +473,14 @@ using hypre_DeviceItem = sycl::nd_item<1>;
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
+#define HYPRE_ROCBLAS_CALL(call) do {                                                        \
+   rocblas_status err = call;                                                                \
+   if (rocblas_status_success != err) {                                                      \
+      printf("rocBLAS ERROR (code = %d, %s) at %s:%d\n",                                     \
+             err, rocblas_status_to_string(err), __FILE__, __LINE__);                        \
+      hypre_assert(0); exit(1);                                                              \
+   } } while(0)
+
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
    cusparseStatus_t err = call;                                                              \
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
@@ -440,6 +494,22 @@ using hypre_DeviceItem = sycl::nd_item<1>;
    if (rocsparse_status_success != err) {                                                    \
       printf("rocSPARSE ERROR (code = %d) at %s:%d\n",                                       \
             err, __FILE__, __LINE__);                                                        \
+      assert(0); exit(1);                                                                    \
+   } } while(0)
+
+#define HYPRE_CUSOLVER_CALL(call) do {                                                       \
+   cusolverStatus_t err = call;                                                              \
+   if (CUSOLVER_STATUS_SUCCESS != err) {                                                     \
+      printf("cuSOLVER ERROR (code = %d) at %s:%d\n",                                        \
+            err, __FILE__, __LINE__);                                                        \
+      hypre_assert(0); exit(1);                                                              \
+   } } while(0)
+
+#define HYPRE_ROCSOLVER_CALL(call) do {                                                      \
+   rocblas_status err = call;                                                                \
+   if (rocblas_status_success != err) {                                                      \
+      printf("rocSOLVER ERROR (code = %d, %s) at %s:%d\n",                                   \
+             err, rocblas_status_to_string(err), __FILE__, __LINE__);                        \
       assert(0); exit(1);                                                                    \
    } } while(0)
 
@@ -505,6 +575,12 @@ using hypre_DeviceItem = sycl::nd_item<1>;
 struct hypre_cub_CachingDeviceAllocator;
 typedef struct hypre_cub_CachingDeviceAllocator hypre_cub_CachingDeviceAllocator;
 
+#if defined(HYPRE_USING_CUSOLVER)
+typedef cusolverDnHandle_t vendorSolverHandle_t;
+#elif defined(HYPRE_USING_ROCSOLVER)
+typedef rocblas_handle     vendorSolverHandle_t;
+#endif
+
 struct hypre_DeviceData
 {
 #if defined(HYPRE_USING_CURAND)
@@ -527,8 +603,8 @@ struct hypre_DeviceData
    rocsparse_handle                  cusparse_handle;
 #endif
 
-#if defined(HYPRE_USING_CUSOLVER)
-   cusolverDnHandle_t                vendor_solver_handle;
+#if defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
+   vendorSolverHandle_t              vendor_solver_handle;
 #endif
 
 #if defined(HYPRE_USING_CUDA_STREAMS)
@@ -621,26 +697,30 @@ struct hypre_DeviceData
 #define hypre_DeviceDataUseGpuRand(data)                     ((data) -> use_gpu_rand)
 
 hypre_DeviceData*     hypre_DeviceDataCreate();
-void                hypre_DeviceDataDestroy(hypre_DeviceData* data);
+void                  hypre_DeviceDataDestroy(hypre_DeviceData* data);
 
 #if defined(HYPRE_USING_CURAND)
-curandGenerator_t   hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
+curandGenerator_t     hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
 #endif
 
 #if defined(HYPRE_USING_ROCRAND)
-rocrand_generator   hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
+rocrand_generator     hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
 #endif
 
 #if defined(HYPRE_USING_CUBLAS)
-cublasHandle_t      hypre_DeviceDataCublasHandle(hypre_DeviceData *data);
+cublasHandle_t        hypre_DeviceDataCublasHandle(hypre_DeviceData *data);
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE)
-cusparseHandle_t    hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
+cusparseHandle_t      hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
-rocsparse_handle    hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
+rocsparse_handle      hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
+#endif
+
+#if defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
+vendorSolverHandle_t  hypre_DeviceDataVendorSolverHandle(hypre_DeviceData *data);
 #endif
 
 #if defined(HYPRE_USING_CUSOLVER)
@@ -648,14 +728,14 @@ cusolverDnHandle_t  hypre_DeviceDataVendorSolverHandle(hypre_DeviceData *data);
 #endif
 
 #if defined(HYPRE_USING_CUDA)
-cudaStream_t        hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
-cudaStream_t        hypre_DeviceDataComputeStream(hypre_DeviceData *data);
+cudaStream_t          hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
+cudaStream_t          hypre_DeviceDataComputeStream(hypre_DeviceData *data);
 #elif defined(HYPRE_USING_HIP)
-hipStream_t         hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
-hipStream_t         hypre_DeviceDataComputeStream(hypre_DeviceData *data);
+hipStream_t           hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
+hipStream_t           hypre_DeviceDataComputeStream(hypre_DeviceData *data);
 #elif defined(HYPRE_USING_SYCL)
-sycl::queue*        hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
-sycl::queue*        hypre_DeviceDataComputeStream(hypre_DeviceData *data);
+sycl::queue*          hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
+sycl::queue*          hypre_DeviceDataComputeStream(hypre_DeviceData *data);
 #endif
 
 // Data structure and accessor routines for Cuda Sparse Triangular Matrices
@@ -720,6 +800,32 @@ T read_only_load( const T *ptr )
    return *ptr;
 #endif
 }
+
+static __device__ __forceinline__
+hypre_int next_power_of_2(hypre_int n)
+{
+   if (n <= 0)
+   {
+      return 0;
+   }
+
+   /* if n is power of 2, return itself */
+   if ( (n & (n - 1)) == 0 )
+   {
+      return n;
+   }
+
+   n |= (n >>  1);
+   n |= (n >>  2);
+   n |= (n >>  4);
+   n |= (n >>  8);
+   n |= (n >> 16);
+   n ^= (n >>  1);
+   n  = (n <<  1);
+
+   return n;
+}
+
 #endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -792,7 +898,7 @@ hypre_int hypre_gpu_get_lane_id(hypre_DeviceItem &item)
 /* return the num of blocks in grid */
 template <hypre_int dim>
 static __device__ __forceinline__
-hypre_int hypre_cuda_get_num_blocks()
+hypre_int hypre_gpu_get_num_blocks()
 {
    switch (dim)
    {
@@ -810,7 +916,7 @@ hypre_int hypre_cuda_get_num_blocks()
 /* return the flattened block id in grid */
 template <hypre_int dim>
 static __device__ __forceinline__
-hypre_int hypre_cuda_get_block_id()
+hypre_int hypre_gpu_get_block_id(hypre_DeviceItem &item)
 {
    switch (dim)
    {
@@ -831,7 +937,7 @@ template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_grid_num_threads(hypre_DeviceItem &item)
 {
-   return hypre_cuda_get_num_blocks<gdim>() * hypre_gpu_get_num_threads<bdim>(item);
+   return hypre_gpu_get_num_blocks<gdim>() * hypre_gpu_get_num_threads<bdim>(item);
 }
 
 /* return the flattened thread id in grid */
@@ -839,7 +945,7 @@ template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_grid_thread_id(hypre_DeviceItem &item)
 {
-   return hypre_cuda_get_block_id<gdim>() * hypre_gpu_get_num_threads<bdim>(item) +
+   return hypre_gpu_get_block_id<gdim>(item) * hypre_gpu_get_num_threads<bdim>(item) +
           hypre_gpu_get_thread_id<bdim>(item);
 }
 
@@ -848,7 +954,7 @@ template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_grid_num_warps(hypre_DeviceItem &item)
 {
-   return hypre_cuda_get_num_blocks<gdim>() * hypre_gpu_get_num_warps<bdim>(item);
+   return hypre_gpu_get_num_blocks<gdim>() * hypre_gpu_get_num_warps<bdim>(item);
 }
 
 /* return the flattened warp id in grid */
@@ -856,7 +962,7 @@ template <hypre_int bdim, hypre_int gdim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_grid_warp_id(hypre_DeviceItem &item)
 {
-   return hypre_cuda_get_block_id<gdim>() * hypre_gpu_get_num_warps<bdim>(item) +
+   return hypre_gpu_get_block_id<gdim>(item) * hypre_gpu_get_num_warps<bdim>(item) +
           hypre_gpu_get_warp_id<bdim>(item);
 }
 
@@ -936,6 +1042,20 @@ hypre_int __ballot_sync(unsigned mask, hypre_int predicate)
    return __ballot(predicate);
 }
 #endif
+
+/* sync the thread block */
+static __device__ __forceinline__
+void block_sync(hypre_DeviceItem &item)
+{
+   __syncthreads();
+}
+
+/* sync the warp */
+static __device__ __forceinline__
+void warp_sync(hypre_DeviceItem &item)
+{
+   __syncwarp();
+}
 
 /* exclusive prefix scan */
 template <typename T>
@@ -1087,31 +1207,6 @@ T warp_allreduce_min(hypre_DeviceItem &item, T in)
       in = min(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
    }
    return in;
-}
-
-static __device__ __forceinline__
-hypre_int next_power_of_2(hypre_int n)
-{
-   if (n <= 0)
-   {
-      return 0;
-   }
-
-   /* if n is power of 2, return itself */
-   if ( (n & (n - 1)) == 0 )
-   {
-      return n;
-   }
-
-   n |= (n >>  1);
-   n |= (n >>  2);
-   n |= (n >>  4);
-   n |= (n >>  8);
-   n |= (n >> 16);
-   n ^= (n >>  1);
-   n  = (n <<  1);
-
-   return n;
 }
 
 template<typename T1, typename T2>
@@ -1283,12 +1378,11 @@ struct print_functor
 #if defined(HYPRE_USING_SYCL)
 
 /* return the number of threads in block */
-/* WM: todo - only supports bdim = gdim = 1 DOUBLE CHECK THIS */
 template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_num_threads(hypre_DeviceItem &item)
 {
-   return static_cast<HYPRE_Int>(item.get_group().get_group_range().get(0));
+   return static_cast<hypre_int>(item.get_local_range().size());
 }
 
 /* return the flattened thread id in block */
@@ -1296,26 +1390,23 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_thread_id(hypre_DeviceItem &item)
 {
-   return static_cast<HYPRE_Int>(item.get_local_linear_id());
+   return static_cast<hypre_int>(item.get_local_linear_id());
 }
 
-/* return the flattened thread id in grid */
-/* WM: todo - only supports bdim = gdim = 1 */
-template <hypre_int bdim, hypre_int gdim>
+/* return the number of warps in block */
+template <hypre_int dim>
 static __device__ __forceinline__
-hypre_int hypre_gpu_get_grid_thread_id(hypre_DeviceItem &item)
+hypre_int hypre_gpu_get_num_warps(hypre_DeviceItem &item)
 {
-   return static_cast<HYPRE_Int>(item.get_global_linear_id());
+   return hypre_gpu_get_num_threads<dim>(item) >> HYPRE_WARP_BITSHIFT;
 }
 
-/* return the flattened warp id in nd_range */
-/* WM: todo - only supports bdim = gdim = 1 */
-template <hypre_int bdim, hypre_int gdim>
+/* return the warp id in block */
+template <hypre_int dim>
 static __device__ __forceinline__
-hypre_int hypre_gpu_get_grid_warp_id(hypre_DeviceItem &item)
+hypre_int hypre_gpu_get_warp_id(hypre_DeviceItem &item)
 {
-   return item.get_group_linear_id() * item.get_sub_group().get_group_range().get(0) +
-          item.get_sub_group().get_group_linear_id();
+   return hypre_gpu_get_thread_id<dim>(item) >> HYPRE_WARP_BITSHIFT;
 }
 
 /* return the thread lane id in warp */
@@ -1323,7 +1414,71 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_lane_id(hypre_DeviceItem &item)
 {
-   return (hypre_int) item.get_sub_group().get_local_linear_id();
+   return static_cast<hypre_int>(item.get_sub_group().get_local_linear_id());
+}
+
+/* return the num of blocks in grid */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_gpu_get_num_blocks(hypre_DeviceItem &item)
+{
+   return static_cast<hypre_int>(item.get_group_range().size());
+}
+
+/* return the flattened block id in grid */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_gpu_get_block_id(hypre_DeviceItem &item)
+{
+   return item.get_group_linear_id();
+}
+
+/* return the number of threads in grid */
+template <hypre_int bdim, hypre_int gdim>
+static __device__ __forceinline__
+hypre_int hypre_gpu_get_grid_num_threads(hypre_DeviceItem &item)
+{
+   return hypre_gpu_get_num_blocks<gdim>(item) * hypre_gpu_get_num_threads<bdim>(item);
+}
+
+/* return the flattened thread id in grid */
+template <hypre_int bdim, hypre_int gdim>
+static __device__ __forceinline__
+hypre_int hypre_gpu_get_grid_thread_id(hypre_DeviceItem &item)
+{
+   return hypre_gpu_get_block_id<gdim>(item) * hypre_gpu_get_num_threads<bdim>(item) +
+          hypre_gpu_get_thread_id<bdim>(item);
+}
+
+/* return the number of warps in grid */
+template <hypre_int bdim, hypre_int gdim>
+static __device__ __forceinline__
+hypre_int hypre_gpu_get_grid_num_warps(hypre_DeviceItem &item)
+{
+   return hypre_gpu_get_num_blocks<gdim>(item) * hypre_gpu_get_num_warps<bdim>(item);
+}
+
+/* return the flattened warp id in nd_range */
+template <hypre_int bdim, hypre_int gdim>
+static __device__ __forceinline__
+hypre_int hypre_gpu_get_grid_warp_id(hypre_DeviceItem &item)
+{
+   return hypre_gpu_get_block_id<gdim>(item) * hypre_gpu_get_num_warps<bdim>(item) +
+          hypre_gpu_get_warp_id<bdim>(item);
+}
+
+/* sync the thread block */
+static __device__ __forceinline__
+void block_sync(hypre_DeviceItem &item)
+{
+   item.barrier();
+}
+
+/* sync the warp */
+static __device__ __forceinline__
+void warp_sync(hypre_DeviceItem &item)
+{
+   item.get_sub_group().barrier();
 }
 
 /* exclusive prefix scan */
@@ -1334,14 +1489,14 @@ T warp_prefix_sum(hypre_DeviceItem &item, hypre_int lane_id, T in, T &all_sum)
 #pragma unroll
    for (hypre_int d = 2; d <= HYPRE_WARP_SIZE; d <<= 1)
    {
-      T t = item.get_sub_group().shuffle_up(in, d >> 1);
+      T t = sycl::shift_group_right(item.get_sub_group(), in, d >> 1);
       if ( (lane_id & (d - 1)) == (d - 1) )
       {
          in += t;
       }
    }
 
-   all_sum = item.get_sub_group().shuffle(in, HYPRE_WARP_SIZE - 1);
+   all_sum = sycl::group_broadcast(item.get_sub_group(), in, HYPRE_WARP_SIZE - 1);
 
    if (lane_id == HYPRE_WARP_SIZE - 1)
    {
@@ -1351,7 +1506,7 @@ T warp_prefix_sum(hypre_DeviceItem &item, hypre_int lane_id, T in, T &all_sum)
 #pragma unroll
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      T t = item.get_sub_group().shuffle_xor(in, d);
+      T t = sycl::permute_group_by_xor(item.get_sub_group(), in, d);
 
       if ( (lane_id & (d - 1)) == (d - 1))
       {
@@ -1378,7 +1533,7 @@ template <typename T>
 static __device__ __forceinline__
 T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_line)
 {
-   /* WM: todo - try removing barrier with new implementation */
+   /* WM: todo - I'm still getting bad results if I try to remove this barrier. Needs investigation. */
    item.get_sub_group().barrier();
    return sycl::group_broadcast(item.get_sub_group(), val, src_line);
 }
@@ -1390,7 +1545,7 @@ T warp_shuffle_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int src_
 {
    hypre_int lane_id = hypre_gpu_get_lane_id<1>(item);
    hypre_int group_start = (lane_id / width) * width;
-   hypre_int src_in_warp = group_start + src_line;
+   hypre_int src_in_warp = group_start + (src_line % width);
    return sycl::select_from_group(item.get_sub_group(), val, src_in_warp);
 }
 
@@ -1408,7 +1563,7 @@ T warp_shuffle_up_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int d
 {
    hypre_int lane_id = hypre_gpu_get_lane_id<1>(item);
    hypre_int group_start = (lane_id / width) * width;
-   hypre_int src_in_warp = sycl::max(group_start, lane_id - delta);
+   hypre_int src_in_warp = lane_id - delta >= group_start ? lane_id - delta : lane_id;
    return sycl::select_from_group(item.get_sub_group(), val, src_in_warp);
 }
 
@@ -1426,7 +1581,7 @@ T warp_shuffle_down_sync(hypre_DeviceItem &item, unsigned mask, T val, hypre_int
 {
    hypre_int lane_id = hypre_gpu_get_lane_id<1>(item);
    hypre_int group_end = ((lane_id / width) + 1) * width - 1;
-   hypre_int src_in_warp = sycl::min(group_end, lane_id + delta);
+   hypre_int src_in_warp = lane_id + delta <= group_end ? lane_id + delta : lane_id;
    return sycl::select_from_group(item.get_sub_group(), val, src_in_warp);
 }
 
@@ -1455,7 +1610,7 @@ T warp_reduce_sum(hypre_DeviceItem &item, T in)
 {
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      in += item.get_sub_group().shuffle_down(in, d);
+      in += sycl::shift_group_left(item.get_sub_group(), in, d);
    }
    return in;
 }
@@ -1466,7 +1621,7 @@ T warp_allreduce_sum(hypre_DeviceItem &item, T in)
 {
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      in += item.get_sub_group().shuffle_xor(in, d);
+      in += sycl::permute_group_by_xor(item.get_sub_group(), in, d);
    }
    return in;
 }
@@ -1477,7 +1632,7 @@ T warp_reduce_max(hypre_DeviceItem &item, T in)
 {
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      in = std::max(in, item.get_sub_group().shuffle_down(in, d));
+      in = std::max(in, sycl::shift_group_left(item.get_sub_group(), in, d));
    }
    return in;
 }
@@ -1488,7 +1643,7 @@ T warp_allreduce_max(hypre_DeviceItem &item, T in)
 {
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      in = std::max(in, item.get_sub_group().shuffle_xor(in, d));
+      in = std::max(in, sycl::permute_group_by_xor(item.get_sub_group(), in, d));
    }
    return in;
 }
@@ -1499,7 +1654,7 @@ T warp_reduce_min(hypre_DeviceItem &item, T in)
 {
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      in = std::min(in, item.get_sub_group().shuffle_down(in, d));
+      in = std::min(in, sycl::shift_group_left(item.get_sub_group(), in, d));
    }
    return in;
 }
@@ -1510,7 +1665,7 @@ T warp_allreduce_min(hypre_DeviceItem &item, T in)
 {
    for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
    {
-      in = std::min(in, item.get_sub_group().shuffle_xor(in, d));
+      in = std::min(in, sycl::permute_group_by_xor(item.get_sub_group(), in, d));
    }
    return in;
 }
@@ -1584,6 +1739,12 @@ struct equal
    constexpr bool operator()(const T &x) const { return (x == val); }
 };
 
+template<typename T1, typename T2>
+struct type_cast
+{
+   constexpr T2 operator()(const T1 &x) const { return (T2) x; }
+};
+
 template<typename... T>
 struct TupleComp2
 {
@@ -1635,6 +1796,10 @@ struct TupleComp3
 dim3 hypre_GetDefaultDeviceBlockDimension();
 
 dim3 hypre_GetDefaultDeviceGridDimension( HYPRE_Int n, const char *granularity, dim3 bDim );
+
+dim3 hypre_dim3(HYPRE_Int x);
+dim3 hypre_dim3(HYPRE_Int x, HYPRE_Int y);
+dim3 hypre_dim3(HYPRE_Int x, HYPRE_Int y, HYPRE_Int z);
 
 template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_StableSortByTupleKey(
    HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt);
@@ -2834,4 +2999,3 @@ struct hypre_cub_CachingDeviceAllocator
 #endif
 
 #endif
-

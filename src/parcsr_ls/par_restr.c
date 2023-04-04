@@ -870,7 +870,7 @@ void hypre_fgmresT(HYPRE_Int n,
    /* XXX: x_0 is all ZERO !!! so r0 = b */
    v = V;
    hypre_TMemcpy(v, b, HYPRE_Complex, n, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   normr0 = sqrt(hypre_ddot(&n, v, &one, v, &one));
+   normr0 = hypre_sqrt(hypre_ddot(&n, v, &one, v, &one));
 
    if (normr0 < EPSIMAC)
    {
@@ -902,8 +902,8 @@ void hypre_fgmresT(HYPRE_Int n,
          t = -t;
          hypre_daxpy(&n, &t, v, &one, w, &one);
       }
-      H[i + (i - 1)*kdim] = t = sqrt(hypre_ddot(&n, w, &one, w, &one));
-      if (fabs(t) > EPSILON)
+      H[i + (i - 1)*kdim] = t = hypre_sqrt(hypre_ddot(&n, w, &one, w, &one));
+      if (hypre_abs(t) > EPSILON)
       {
          t = 1.0 / t;
          hypre_dscal(&n, &t, w, &one);
@@ -917,9 +917,9 @@ void hypre_fgmresT(HYPRE_Int n,
       }
       HYPRE_Complex hii  = H[i - 1 + (i - 1) * kdim];
       HYPRE_Complex hii1 = H[i + (i - 1) * kdim];
-      HYPRE_Complex gam = sqrt(hii * hii + hii1 * hii1);
+      HYPRE_Complex gam = hypre_sqrt(hii * hii + hii1 * hii1);
 
-      if (fabs(gam) < EPSILON)
+      if (hypre_cabs(gam) < EPSILON)
       {
          gam = EPSIMAC;
       }
@@ -929,7 +929,7 @@ void hypre_fgmresT(HYPRE_Int n,
       rs[i - 1] =  c[i - 1] * rs[i - 1];
       // residue norm
       H[i - 1 + (i - 1)*kdim] = c[i - 1] * hii + s[i - 1] * hii1;
-      normr = fabs(rs[i]);
+      normr = hypre_cabs(rs[i]);
       if (normr <= tolr)
       {
          break;
@@ -983,7 +983,7 @@ void hypre_ordered_GS(const HYPRE_Complex L[],
          }
       }
       HYPRE_Complex diag = L[row * n + row];
-      if (fabs(diag) < 1e-12)
+      if (hypre_cabs(diag) < 1e-12)
       {
          x[row] = 0.0;
       }

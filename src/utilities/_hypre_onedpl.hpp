@@ -246,23 +246,6 @@ void hypreSycl_stable_sort_by_key(Iter1 keys_first, Iter1 keys_last, Iter2 value
    [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
 }
 
-template <class Iter1, class Iter2, class Pred>
-void hypreSycl_stable_sort_by_key(Iter1 keys_first, Iter1 keys_last, Iter2 values_first, Pred pred)
-{
-   static_assert(
-      std::is_same<typename std::iterator_traits<Iter1>::iterator_category,
-      std::random_access_iterator_tag>::value &&
-      std::is_same<typename std::iterator_traits<Iter2>::iterator_category,
-      std::random_access_iterator_tag>::value,
-      "Iterators passed to algorithms must be random-access iterators.");
-   const auto n = std::distance(keys_first, keys_last);
-   auto zipped_begin = oneapi::dpl::make_zip_iterator(keys_first, values_first);
-   HYPRE_ONEDPL_CALL( std::stable_sort,
-                      zipped_begin,
-                      zipped_begin + n,
-                      pred );
-}
-
 #endif
 
 #endif

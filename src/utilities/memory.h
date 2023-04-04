@@ -221,4 +221,3 @@ typedef void (*GPUMfreeFunc)(void *);
 #endif
 
 #endif
-

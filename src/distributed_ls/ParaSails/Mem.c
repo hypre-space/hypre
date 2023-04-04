@@ -38,7 +38,7 @@
  * MemCreate - Return (a pointer to) a memory pool object.
  *--------------------------------------------------------------------------*/
 
-Mem *MemCreate()
+Mem *MemCreate(void)
 {
     Mem *m = hypre_TAlloc(Mem, 1, HYPRE_MEMORY_HOST);
 

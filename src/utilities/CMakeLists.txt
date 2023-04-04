@@ -29,6 +29,7 @@ set(SRCS
   general.c
   handle.c
   int_array.c
+  int_array_device.c
   hopscotch_hash.c
   memory.c
   memory_tracker.c
@@ -56,10 +57,10 @@ target_sources(${PROJECT_NAME}
 
 if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
   set(GPU_SRCS
+    int_array_device.c
     HYPRE_handle.c
     device_utils.c
     handle.c
-    int_array.c
     general.c
     memory.c
     memory_tracker.c
