@@ -1602,7 +1602,7 @@ AC_ARG_WITH(magma,
 AS_HELP_STRING([--with-magma],
                [Use MAGMA (Matrix Algebra for GPUs and Multicore Architectures).]),
 [case "${withval}" in
-    yes) hypre_using_magma=yes;
+    yes) hypre_using_magma=yes;;
     no)  hypre_using_magma=no ;;
     *)   hypre_using_magma=no ;;
  esac],

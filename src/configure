@@ -5150,7 +5150,7 @@ fi
 if test ${with_magma+y}
 then :
   withval=$with_magma; case "${withval}" in
-    yes) hypre_using_magma=yes;
+    yes) hypre_using_magma=yes;;
     no)  hypre_using_magma=no ;;
     *)   hypre_using_magma=no ;;
  esac
