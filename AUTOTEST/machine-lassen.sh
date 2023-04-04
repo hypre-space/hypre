@@ -137,6 +137,7 @@ co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_
 ## latest CUDA build (only) tests ##
 ####################################
 
+# CUDA 11
 module -q load cuda/11
 module list cuda/11 |& grep "None found"
 
@@ -144,6 +145,18 @@ module list cuda/11 |& grep "None found"
 co="--with-cuda --enable-unified-memory --enable-device-malloc-async --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda11
+
+# CUDA 12
+module -q load cuda/12
+module list cuda/12 |& grep "None found"
+module load gcc
+
+# CUDA with UM in debug mode [ij, ams, struct, sstruct]
+co="--with-cuda --enable-unified-memory --enable-debug --with-gpu-arch=70 CC=mpicc CXX=mpicxx"
+ro="-ij-gpu -ams -struct -sstruct -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
+eo="-gpu -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
+./renametest.sh basic $output_dir/basic-cuda12
 
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )
