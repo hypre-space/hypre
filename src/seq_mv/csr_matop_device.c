@@ -69,7 +69,7 @@ hypre_GpuMatDataCreate()
    HYPRE_CUSPARSE_CALL( cusparseCreateMatDescr(&mat_descr) );
    HYPRE_CUSPARSE_CALL( cusparseSetMatType(mat_descr, CUSPARSE_MATRIX_TYPE_GENERAL) );
    HYPRE_CUSPARSE_CALL( cusparseSetMatIndexBase(mat_descr, CUSPARSE_INDEX_BASE_ZERO) );
-   hypre_GpuMatDataMatDecsr(data) = mat_descr;
+   hypre_GpuMatDataMatDescr(data) = mat_descr;
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
@@ -117,7 +117,7 @@ hypre_GpuMatDataDestroy(hypre_GpuMatData *data)
    }
 
 #if defined(HYPRE_USING_CUSPARSE)
-   HYPRE_CUSPARSE_CALL( cusparseDestroyMatDescr(hypre_GpuMatDataMatDecsr(data)) );
+   HYPRE_CUSPARSE_CALL( cusparseDestroyMatDescr(hypre_GpuMatDataMatDescr(data)) );
    hypre_TFree(hypre_GpuMatDataSpMVBuffer(data), HYPRE_MEMORY_DEVICE);
 #endif
 
