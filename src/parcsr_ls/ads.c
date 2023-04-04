@@ -33,7 +33,7 @@ __global__ void hypreGPUKernel_AMSComputePixyz_copy(hypre_DeviceItem &item, HYPR
  * Allocate the ADS solver structure.
  *--------------------------------------------------------------------------*/
 
-void * hypre_ADSCreate()
+void * hypre_ADSCreate(void)
 {
    hypre_ADSData *ads_data;
 
@@ -438,7 +438,7 @@ HYPRE_Int hypre_ADSSetSmoothingOptions(void *solver,
 
 HYPRE_Int hypre_ADSSetChebySmoothingOptions(void *solver,
                                             HYPRE_Int A_cheby_order,
-                                            HYPRE_Int A_cheby_fraction)
+                                            HYPRE_Real A_cheby_fraction)
 {
    hypre_ADSData *ads_data = (hypre_ADSData *) solver;
    ads_data -> A_cheby_order =  A_cheby_order;
@@ -1548,9 +1548,9 @@ HYPRE_Int hypre_ADSSolve(void *solver,
       {
          hypre_ParVectorCopy(b, ads_data -> r0);
          hypre_ParCSRMatrixMatvec(-1.0, ads_data -> A, x, 1.0, ads_data -> r0);
-         r_norm = sqrt(hypre_ParVectorInnerProd(ads_data -> r0, ads_data -> r0));
+         r_norm = hypre_sqrt(hypre_ParVectorInnerProd(ads_data -> r0, ads_data -> r0));
          r0_norm = r_norm;
-         b_norm = sqrt(hypre_ParVectorInnerProd(b, b));
+         b_norm = hypre_sqrt(hypre_ParVectorInnerProd(b, b));
          if (b_norm)
          {
             relative_resid = r_norm / b_norm;
@@ -1593,7 +1593,7 @@ HYPRE_Int hypre_ADSSolve(void *solver,
          old_resid = r_norm;
          hypre_ParVectorCopy(b, ads_data -> r0);
          hypre_ParCSRMatrixMatvec(-1.0, ads_data -> A, x, 1.0, ads_data -> r0);
-         r_norm = sqrt(hypre_ParVectorInnerProd(ads_data -> r0, ads_data -> r0));
+         r_norm = hypre_sqrt(hypre_ParVectorInnerProd(ads_data -> r0, ads_data -> r0));
          if (b_norm)
          {
             relative_resid = r_norm / b_norm;
@@ -1616,7 +1616,7 @@ HYPRE_Int hypre_ADSSolve(void *solver,
 
    if (my_id == 0 && ads_data -> print_level > 0 && ads_data -> maxit > 1)
       hypre_printf("\n\n Average Convergence Factor = %f\n\n",
-                   pow((r_norm / r0_norm), (1.0 / (HYPRE_Real) i)));
+                   hypre_pow((r_norm / r0_norm), (1.0 / (HYPRE_Real) i)));
 
    ads_data -> num_iterations = i;
    ads_data -> rel_resid_norm = relative_resid;

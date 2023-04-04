@@ -225,7 +225,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
          }
          for (i = 0; i < AN_num_nonzeros_diag; i++)
          {
-            AN_diag_data[i] = sqrt(AN_diag_data[i]);
+            AN_diag_data[i] = hypre_sqrt(AN_diag_data[i]);
          }
 
       }
@@ -244,12 +244,12 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
                   {
                      counter[k_map] = index;
                      AN_diag_j[index] = k_map;
-                     AN_diag_data[index] = fabs(A_diag_data[k]);
+                     AN_diag_data[index] = hypre_abs(A_diag_data[k]);
                      index++;
                   }
                   else
                   {
-                     AN_diag_data[counter[k_map]] += fabs(A_diag_data[k]);
+                     AN_diag_data[counter[k_map]] += hypre_abs(A_diag_data[k]);
                   }
                }
                row++;
@@ -282,8 +282,8 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
                   }
                   else
                   {
-                     if (fabs(A_diag_data[k]) >
-                         fabs(AN_diag_data[counter[k_map]]))
+                     if (hypre_abs(A_diag_data[k]) >
+                         hypre_abs(AN_diag_data[counter[k_map]]))
                      {
                         AN_diag_data[counter[k_map]] = A_diag_data[k];
                      }
@@ -312,12 +312,12 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
                   {
                      counter[k_map] = index;
                      AN_diag_j[index] = k_map;
-                     data[index * num_functions + j] = fabs(A_diag_data[k]);
+                     data[index * num_functions + j] = hypre_abs(A_diag_data[k]);
                      index++;
                   }
                   else
                   {
-                     data[(counter[k_map])*num_functions + j] += fabs(A_diag_data[k]);
+                     data[(counter[k_map])*num_functions + j] += hypre_abs(A_diag_data[k]);
                   }
                }
                row++;
@@ -575,7 +575,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
             }
             for (i = 0; i < AN_num_nonzeros_offd; i++)
             {
-               AN_offd_data[i] = sqrt(AN_offd_data[i]);
+               AN_offd_data[i] = hypre_sqrt(AN_offd_data[i]);
             }
          }
          break;
@@ -593,12 +593,12 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
                      {
                         counter[k_map] = index;
                         AN_offd_j[index] = k_map;
-                        AN_offd_data[index] = fabs(A_offd_data[k]);
+                        AN_offd_data[index] = hypre_abs(A_offd_data[k]);
                         index++;
                      }
                      else
                      {
-                        AN_offd_data[counter[k_map]] += fabs(A_offd_data[k]);
+                        AN_offd_data[counter[k_map]] += hypre_abs(A_offd_data[k]);
                      }
                   }
                   row++;
@@ -630,8 +630,8 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
                      }
                      else
                      {
-                        if (fabs(A_offd_data[k]) >
-                            fabs(AN_offd_data[counter[k_map]]))
+                        if (hypre_abs(A_offd_data[k]) >
+                            hypre_abs(AN_offd_data[counter[k_map]]))
                         {
                            AN_offd_data[counter[k_map]] = A_offd_data[k];
                         }
@@ -660,12 +660,12 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
                      {
                         counter[k_map] = index;
                         AN_offd_j[index] = k_map;
-                        data[index * num_functions + j] = fabs(A_offd_data[k]);
+                        data[index * num_functions + j] = hypre_abs(A_offd_data[k]);
                         index++;
                      }
                      else
                      {
-                        data[(counter[k_map])*num_functions + j] += fabs(A_offd_data[k]);
+                        data[(counter[k_map])*num_functions + j] += hypre_abs(A_offd_data[k]);
                      }
                   }
                   row++;

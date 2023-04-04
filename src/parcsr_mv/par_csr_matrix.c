@@ -299,7 +299,7 @@ hypre_ParCSRMatrixMigrate(hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixMigrate(hypre_ParCSRMatrixDiag(A), memory_location);
    hypre_CSRMatrixMigrate(hypre_ParCSRMatrixOffd(A), memory_location);
 
-   /* VM: Why do we need to free those here? */
+   /* Free buffers */
    if ( hypre_GetActualMemLocation(memory_location) !=
         hypre_GetActualMemLocation(old_memory_location) )
    {
@@ -2461,7 +2461,7 @@ hypre_ParCSRMatrixTruncate(hypre_ParCSRMatrix *A,
                   HYPRE_Complex v = A_offd_data[j];
                   row_nrm += v * v;
                }
-               row_nrm  = sqrt(row_nrm);
+               row_nrm  = hypre_sqrt(row_nrm);
             }
             drop_coeff = tol * row_nrm;
 

@@ -269,7 +269,7 @@ The ``Create()`` routine creates an empty matrix object.  The ``Initialize()``
 routine indicates that the matrix coefficients (or values) are ready to be set.
 This routine may or may not involve the allocation of memory for the coefficient
 data, depending on the implementation.  The optional ``Set`` routines mentioned
-later in this chapter and in the Reference Manual, should be called before this
+later in this chapter and in Chapter :ref:`ch-API`, should be called before this
 step.  The ``SetBoxValues()`` routine sets the matrix coefficients for some set
 of stencil entries over the gridpoints in some box.  Note that the box need not
 correspond to any of the boxes used to create the grid, but values should be set

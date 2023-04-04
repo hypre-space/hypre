@@ -154,7 +154,7 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
          hypre_assert(info == 0);
          hypre_dgetri(&global_num_rows, AT_mat, &global_num_rows, ipiv, &lwork_opt, &query, &info);
          hypre_assert(info == 0);
-         lwork = lwork_opt;
+         lwork = (HYPRE_Int)lwork_opt;
          work = hypre_TAlloc(HYPRE_Real, lwork, HYPRE_MEMORY_HOST);
          hypre_dgetri(&global_num_rows, AT_mat, &global_num_rows, ipiv, work, &lwork, &info);
          hypre_assert(info == 0);

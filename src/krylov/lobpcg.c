@@ -154,7 +154,7 @@ lobpcg_sqrtVector( HYPRE_Int n, HYPRE_Int* mask, HYPRE_Real* v )
    for ( i = 0; i < n; i++ )
       if ( mask == NULL || mask[i] )
       {
-         v[i] = sqrt(v[i]);
+         v[i] = hypre_sqrt(v[i]);
       }
 }
 

@@ -3,4 +3,9 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-breathe
+sphinx>=5.3
+breathe>=4.34
+sphinx-rtd-theme>=1.1.1
+docutils>=0.17.1
+
+

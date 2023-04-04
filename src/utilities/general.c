@@ -8,22 +8,6 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
-#ifdef HYPRE_USING_MEMORY_TRACKER
-hypre_MemoryTracker *_hypre_memory_tracker = NULL;
-
-/* accessor to the global ``_hypre_memory_tracker'' */
-hypre_MemoryTracker*
-hypre_memory_tracker()
-{
-   if (!_hypre_memory_tracker)
-   {
-      _hypre_memory_tracker = hypre_MemoryTrackerCreate();
-   }
-
-   return _hypre_memory_tracker;
-}
-#endif
-
 /* global variable _hypre_handle:
  * Outside this file, do NOT access it directly,
  * but use hypre_handle() instead (see handle.h) */
@@ -31,18 +15,20 @@ hypre_Handle *_hypre_handle = NULL;
 
 /* accessor to the global ``_hypre_handle'' */
 hypre_Handle*
-hypre_handle()
+hypre_handle(void)
 {
    if (!_hypre_handle)
    {
-      _hypre_handle = hypre_HandleCreate();
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "ERROR - _hypre_handle is not initialized. Calling HYPRE_Init(). All HYPRE_* or hypre_* function calls should occur between HYPRE_Init() and HYPRE_Finalize().\n");
+      HYPRE_Init();
    }
 
    return _hypre_handle;
 }
 
 hypre_Handle*
-hypre_HandleCreate()
+hypre_HandleCreate(void)
 {
    hypre_Handle *hypre_handle_ = hypre_CTAlloc(hypre_Handle, 1, HYPRE_MEMORY_HOST);
 
@@ -113,31 +99,11 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
          HYPRE_Int i;
          for (i = 0; i < gpu_devices.size(); i++)
          {
-            /* WM: commenting out multi-tile GPU stuff for now as it is not yet working */
-            // multi-tile GPUs
-            /* if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) */
-            /* { */
-            /*    auto subDevicesDomainNuma = */
-            /*       gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain> */
-            /*       (sycl::info::partition_affinity_domain::numa); */
-            /*    for (auto &tile : subDevicesDomainNuma) */
-            /*    { */
-            /*       if (local_n_devices == device_id) */
-            /*       { */
-            /*          hypre_HandleDevice(hypre_handle_) = new sycl::device(tile); */
-            /*       } */
-            /*       local_n_devices++; */
-            /*    } */
-            /* } */
-            /* // single-tile GPUs */
-            /* else */
+            if (local_n_devices == device_id)
             {
-               if (local_n_devices == device_id)
-               {
-                  hypre_HandleDevice(hypre_handle_) = new sycl::device(gpu_devices[i]);
-               }
-               local_n_devices++;
+               hypre_HandleDevice(hypre_handle_) = new sycl::device(gpu_devices[i]);
             }
+            local_n_devices++;
          }
       }
       hypre_DeviceDataDeviceMaxWorkGroupSize(hypre_HandleDeviceData(hypre_handle_)) =
@@ -228,18 +194,7 @@ hypre_GetDeviceCount(hypre_int *device_count)
    HYPRE_Int i;
    for (i = 0; i < gpu_devices.size(); i++)
    {
-      /* WM: commenting out multi-tile GPU stuff for now as it is not yet working */
-      /* if (gpu_devices[i].get_info<sycl::info::device::partition_max_sub_devices>() > 0) */
-      /* { */
-      /*    auto subDevicesDomainNuma = */
-      /*       gpu_devices[i].create_sub_devices<sycl::info::partition_property::partition_by_affinity_domain> */
-      /*       (sycl::info::partition_affinity_domain::numa); */
-      /*    (*device_count) += subDevicesDomainNuma.size(); */
-      /* } */
-      /* else */
-      {
-         (*device_count)++;
-      }
+      (*device_count)++;
    }
 #endif
 
@@ -247,7 +202,7 @@ hypre_GetDeviceCount(hypre_int *device_count)
 }
 
 HYPRE_Int
-hypre_GetDeviceLastError()
+hypre_GetDeviceLastError(void)
 {
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaGetLastError() );
@@ -279,7 +234,7 @@ hypre_GetDeviceLastError()
  *****************************************************************************/
 
 HYPRE_Int
-HYPRE_Init()
+HYPRE_Init(void)
 {
 #ifdef HYPRE_USING_MEMORY_TRACKER
    if (!_hypre_memory_tracker)
@@ -337,6 +292,10 @@ HYPRE_Init()
    hypre_HandleCurandGenerator(_hypre_handle);
 #endif
 
+#if defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
+   hypre_HandleVendorSolverHandle(_hypre_handle);
+#endif
+
    /* Check if cuda arch flags in compiling match the device */
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_DEBUG)
    hypre_CudaCompileFlagCheck();
@@ -375,10 +334,15 @@ HYPRE_Init()
  *****************************************************************************/
 
 HYPRE_Int
-HYPRE_Finalize()
+HYPRE_Finalize(void)
 {
 #if defined(HYPRE_USING_UMPIRE)
    hypre_UmpireFinalize(_hypre_handle);
+#endif
+
+#if defined(HYPRE_USING_SYCL)
+   /* With sycl, cannot call hypre_GetDeviceLastError() after destroying the handle, so do it here */
+   hypre_GetDeviceLastError();
 #endif
 
    hypre_HandleDestroy(_hypre_handle);
@@ -386,7 +350,6 @@ HYPRE_Finalize()
    _hypre_handle = NULL;
 
 #if !defined(HYPRE_USING_SYCL)
-   /* With sycl, cannot call hypre_GetDeviceLastError() after destroying the handle */
    hypre_GetDeviceLastError();
 #endif
 
@@ -401,7 +364,7 @@ HYPRE_Finalize()
 }
 
 HYPRE_Int
-HYPRE_PrintDeviceInfo()
+HYPRE_PrintDeviceInfo(void)
 {
 #if defined(HYPRE_USING_CUDA)
    hypre_int dev;
@@ -660,4 +623,3 @@ HYPRE_GetExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy)
 
    return hypre_error_flag;
 }
-
