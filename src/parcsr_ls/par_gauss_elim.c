@@ -245,7 +245,7 @@ hypre_GaussElimAllSetup(hypre_ParAMGData *amg_data,
    HYPRE_Int           *A_CSR_j;
    HYPRE_Complex       *A_CSR_data;
    HYPRE_Int            i, j, col;
-   HYPRE_Int            info;
+   HYPRE_Int            info = 0;
 
    /*-----------------------------------------------------------------
     *  Sanity checks
@@ -307,12 +307,15 @@ hypre_GaussElimAllSetup(hypre_ParAMGData *amg_data,
       else
 #endif
       {
-         /* Set pointer to A_mat */
-         A_inv = A_mat;
+         if (relax_type == 98)
+         {
+            /* Set pointer to A_mat */
+            A_inv = A_mat;
 
-         /* Compute LU factorization on host */
-         hypre_dgetrf(&global_num_rows, &global_num_rows, A_inv,
-                      &global_num_rows, A_piv, &info);
+            /* Compute LU factorization on host */
+            hypre_dgetrf(&global_num_rows, &global_num_rows, A_inv,
+                         &global_num_rows, A_piv, &info);
+         }
       }
 
       if (info != 0)
@@ -326,6 +329,7 @@ hypre_GaussElimAllSetup(hypre_ParAMGData *amg_data,
 
    /* Save data */
    hypre_ParAMGDataAPiv(amg_data)  = A_piv;
+   hypre_ParAMGDataAMat(amg_data)  = A_mat;
    hypre_ParAMGDataAInv(amg_data)  = A_inv;
    hypre_ParAMGDataDAInv(amg_data) = d_A_inv;
 
@@ -517,6 +521,7 @@ hypre_GaussElimAllSolve(hypre_ParAMGData *amg_data,
 
    /* Coarse solver data */
    HYPRE_Int            *A_piv           = hypre_ParAMGDataAPiv(amg_data);
+   HYPRE_Real           *A_mat           = hypre_ParAMGDataAMat(amg_data);
    HYPRE_Real           *A_inv           = hypre_ParAMGDataAInv(amg_data);
    HYPRE_Real           *d_A_inv         = hypre_ParAMGDataDAInv(amg_data);
 
@@ -535,8 +540,6 @@ hypre_GaussElimAllSolve(hypre_ParAMGData *amg_data,
 
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         hypre_MemoryLocation location[2];
-
          /* Gather RHS */
          f_vector = hypre_ParVectorToVectorAll(par_f, HYPRE_MEMORY_DEVICE);
          f_data   = hypre_VectorData(f_vector);
@@ -545,9 +548,6 @@ hypre_GaussElimAllSolve(hypre_ParAMGData *amg_data,
          HYPRE_MAGMA_CALL(magma_dgetrs_gpu(MagmaNoTrans, global_num_rows, 1, d_A_inv,
                                            global_num_rows, A_piv, f_data,
                                            global_num_rows, &info));
-
-         hypre_GetPointerLocation((void*) f_data, &location[0]);
-         hypre_GetPointerLocation((void*) u_data, &location[1]);
 
          /* Copy solution vector b_vec to u */
          hypre_TMemcpy(u_data, f_data + first_index, HYPRE_Complex, num_rows,
@@ -561,9 +561,16 @@ hypre_GaussElimAllSolve(hypre_ParAMGData *amg_data,
          f_data   = hypre_VectorData(f_vector);
 
          /* f_data = inv(U)*inv(L)*f_data */
-         hypre_dgetrs("N", &global_num_rows, &one_i, A_inv,
-                       &global_num_rows, A_piv, f_data,
-                       &global_num_rows, &info);
+         if (relax_type == 19)
+         {
+            hypre_gselim(A_mat, f_data, global_num_rows, info);
+         }
+         else
+         {
+            hypre_dgetrs("N", &global_num_rows, &one_i, A_inv,
+                         &global_num_rows, A_piv, f_data,
+                         &global_num_rows, &info);
+         }
 
          /* Copy solution vector b_vec to u */
          hypre_TMemcpy(u_data, f_data + first_index, HYPRE_Complex, num_rows,
@@ -573,7 +580,14 @@ hypre_GaussElimAllSolve(hypre_ParAMGData *amg_data,
 
    if (info != 0)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with dgetrf!");
+      if (relax_type == 19)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with gselim!");
+      }
+      else
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with dgetrs!");
+      }
    }
 
    /* Free memory */
