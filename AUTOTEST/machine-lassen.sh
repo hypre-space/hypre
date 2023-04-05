@@ -149,7 +149,7 @@ co="--with-cuda --enable-unified-memory --enable-device-malloc-async --with-gpu-
 # CUDA 12
 module -q load cuda/12
 module list cuda/12 |& grep "None found"
-module load gcc/8.3.1
+module -q load gcc/8.3.1
 atol="1e-6"
 
 # CUDA with UM in debug mode [ij, ams, struct, sstruct]
