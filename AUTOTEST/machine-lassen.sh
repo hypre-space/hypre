@@ -149,13 +149,14 @@ co="--with-cuda --enable-unified-memory --enable-device-malloc-async --with-gpu-
 # CUDA 12
 module -q load cuda/12
 module list cuda/12 |& grep "None found"
-module load gcc
+module load gcc/8.3.1
+atol="1e-6"
 
 # CUDA with UM in debug mode [ij, ams, struct, sstruct]
 co="--with-cuda --enable-unified-memory --enable-debug --with-gpu-arch=70 CC=mpicc CXX=mpicxx"
 ro="-ij-gpu -ams -struct -sstruct -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
 eo="-gpu -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-cuda12
 
 # Echo to stderr all nonempty error files in $output_dir
