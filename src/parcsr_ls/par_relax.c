@@ -71,7 +71,6 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
     *     relax_type = 21 -> the same as 8 except forcing serialization on CPU (#OMP-thread = 1)
     *     relax_type = 29 -> Direct solve: use Gaussian elimination & BLAS
     *                        (with pivoting) (old version)
-    *     relax_type = 98 -> Direct solve, Gaussian elimination
     *     relax_type = 99 -> Direct solve, Gaussian elimination
     *     relax_type = 199-> Direct solve, Gaussian elimination
     *-------------------------------------------------------------------------------------*/
@@ -168,10 +167,6 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
       case 20: /* Kaczmarz */
          hypre_BoomerAMGRelaxKaczmarz(A, f, omega, l1_norms, u);
-         break;
-
-      case 98: /* Direct solve: use gaussian elimination & BLAS (with pivoting) */
-         relax_error = hypre_BoomerAMGRelax98GaussElimPivot(A, f, u);
          break;
    }
 
@@ -1367,147 +1362,6 @@ hypre_BoomerAMGRelax98GaussElimPivot( hypre_ParCSRMatrix *A,
                                       hypre_ParVector    *f,
                                       hypre_ParVector    *u )
 {
-   HYPRE_BigInt         global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
-   HYPRE_Int            num_rows        = hypre_ParCSRMatrixNumRows(A);
-   HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
-
-   HYPRE_BigInt         first_ind       = hypre_ParVectorFirstIndex(u);
-   HYPRE_Int            n_global        = (HYPRE_Int) global_num_rows;
-   HYPRE_Int            first_index     = (HYPRE_Int) first_ind;
-   hypre_Vector        *u_local         = hypre_ParVectorLocalVector(u);
-   HYPRE_Complex       *u_data          = hypre_VectorData(u_local);
-
-   hypre_CSRMatrix     *A_CSR;
-   HYPRE_Int           *A_CSR_i;
-   HYPRE_Int           *A_CSR_j;
-   HYPRE_Real          *A_CSR_data;
-
-   hypre_Vector        *f_vector;
-   HYPRE_Real          *f_data;
-
-   HYPRE_Int           *piv;
-   HYPRE_Real          *A_mat;
-   HYPRE_Int            i, jj, column;
-   HYPRE_Int            info;
-
-   /*-----------------------------------------------------------------
-    *  Sanity checks
-    *-----------------------------------------------------------------*/
-
-   /* Check for multi-component vector */
-   if (hypre_ParVectorNumVectors(f) > 1)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "Gauss Elim. (98) relaxation doesn't support multicomponent vectors");
-      return hypre_error_flag;
-   }
-
-   /* Check memory location of vector f */
-   if (hypre_ParVectorMemoryLocation(f) != memory_location)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "Vector f is stored in a different memory location than matrix A");
-      return hypre_error_flag;
-   }
-
-   /* Check memory location of vector u */
-   if (hypre_ParVectorMemoryLocation(f) != memory_location)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "Vector f is stored in a different memory location than matrix A");
-      return hypre_error_flag;
-   }
-
-   /*-----------------------------------------------------------------
-    *  Generate CSR matrix from ParCSRMatrix A
-    *-----------------------------------------------------------------*/
-
-   /* All processors are needed for these routines */
-   A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A, HYPRE_MEMORY_HOST);
-   f_vector = hypre_ParVectorToVectorAll(f, HYPRE_MEMORY_HOST);
-   if (num_rows)
-   {
-      A_CSR_i = hypre_CSRMatrixI(A_CSR);
-      A_CSR_j = hypre_CSRMatrixJ(A_CSR);
-      A_CSR_data = hypre_CSRMatrixData(A_CSR);
-      A_mat = hypre_CTAlloc(HYPRE_Real, n_global * n_global, HYPRE_MEMORY_HOST);
-
-      /*---------------------------------------------------------------
-       *  Load CSR matrix into A_mat.
-       *---------------------------------------------------------------*/
-
-      /* TODO (VPM): Add OpenMP support */
-      for (i = 0; i < n_global; i++)
-      {
-         for (jj = A_CSR_i[i]; jj < A_CSR_i[i + 1]; jj++)
-         {
-            /* need col major */
-            column = A_CSR_j[jj];
-            A_mat[i + n_global * column] = A_CSR_data[jj];
-         }
-      }
-
-      /* Allocate data */
-      piv = hypre_CTAlloc(HYPRE_Int, n_global, HYPRE_MEMORY_HOST);
-
-#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_MAGMA)
-      HYPRE_ExecutionPolicy  exec = hypre_GetExecPolicy1(memory_location);
-      HYPRE_Real            *d_A;
-
-      if (exec == HYPRE_EXEC_DEVICE)
-      {
-         /* Allocate data */
-         d_A = hypre_CTAlloc(HYPRE_Real, n_global * n_global, HYPRE_MEMORY_DEVICE);
-
-         /* Move RHS to device */
-         hypre_SeqVectorMigrate(f_vector, HYPRE_MEMORY_DEVICE);
-         f_data = hypre_VectorData(f_vector);
-
-         /* Copy matrix coefficients to device */
-         hypre_TMemcpy(d_A, A_mat, HYPRE_Real, n_global * n_global,
-                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
-
-         /* write over A with LU */
-         HYPRE_MAGMA_CALL(magma_dgetrf_gpu(n_global, n_global, d_A, n_global, piv, &info));
-
-         /* f_data = inv(U)*inv(L)*f_data */
-         HYPRE_MAGMA_CALL(magma_dgetrs_gpu(MagmaNoTrans, n_global, 1, d_A, n_global, piv,
-                                           f_data, n_global, &info));
-
-         /* Copy solution vector b_vec to u */
-         hypre_TMemcpy(u_data, f_data + first_index, HYPRE_Complex, num_rows,
-                       memory_location, HYPRE_MEMORY_DEVICE);
-
-         /* Free memory */
-         hypre_TFree(d_A, HYPRE_MEMORY_DEVICE);
-      }
-      else
-#else
-      {
-         /* Load RHS data */
-         f_data = hypre_VectorData(f_vector);
-
-         /* write over A with LU */
-         hypre_dgetrf(&n_global, &n_global, A_mat, &n_global, piv, &info);
-
-         /* f_data = inv(U)*inv(L)*f_data */
-         hypre_dgetrs("N", &n_global, &one_i, A_mat, &n_global, piv, f_data, &n_global, &info);
-
-         /* Copy solution vector b_vec to u */
-         hypre_TMemcpy(u_data, f_data + first_index, HYPRE_Complex, num_rows,
-                       memory_location, HYPRE_MEMORY_HOST);
-      }
-#endif
-
-      /* Free memory */
-      hypre_TFree(A_mat, HYPRE_MEMORY_HOST);
-      hypre_TFree(piv, HYPRE_MEMORY_HOST);
-   }
-
-   /* Free memory */
-   hypre_CSRMatrixDestroy(A_CSR);
-   hypre_SeqVectorDestroy(f_vector);
-
    return hypre_error_flag;
 }
 

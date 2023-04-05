@@ -513,8 +513,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          hypre_ParAMGDataFCoarse(amg_data) = NULL;
       }
 
+      hypre_TFree(hypre_ParAMGDataAPiv(amg_data), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParAMGDataAMat(amg_data), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParAMGDataAInv(amg_data), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParAMGDataDAInv(amg_data), HYPRE_MEMORY_DEVICE);
       hypre_TFree(hypre_ParAMGDataBVec(amg_data), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParAMGDataCommInfo(amg_data), HYPRE_MEMORY_HOST);
 
@@ -3138,8 +3140,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #endif
    else if (grid_relax_type[3] == 9  ||
             grid_relax_type[3] == 99 ||
-            grid_relax_type[3] == 199 ) /*use of Gaussian elimination on coarsest level */
+            grid_relax_type[3] == 199 )
    {
+      /* Use of Gaussian elimination on coarsest level with local
+         matrices/vectors formed via MPI collectives defined on
+         new sub-communicators */
       if (coarse_size <= coarse_threshold)
       {
          hypre_GaussElimSetup(amg_data, level, grid_relax_type[3]);
@@ -3150,9 +3155,15 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
    }
    else if (grid_relax_type[3] == 19 ||
-            grid_relax_type[3] == 98)  /*use of Gaussian elimination on coarsest level */
+            grid_relax_type[3] == 98)
    {
-      if (coarse_size > coarse_threshold)
+      /* Use of Gaussian elimination on coarsest level with local
+         matrices/vectors formed via hypre_DataExchange*/
+      if (coarse_size <= coarse_threshold)
+      {
+         hypre_GaussElimAllSetup(amg_data, level, grid_relax_type[3]);
+      }
+      else
       {
          grid_relax_type[3] = grid_relax_type[1];
       }

@@ -227,7 +227,8 @@ typedef struct
 
    /* store matrix, vector and communication info for Gaussian elimination */
    HYPRE_Int   gs_setup;
-   HYPRE_Real *A_mat, *A_inv;
+   HYPRE_Int  *A_piv;
+   HYPRE_Real *A_mat, *A_inv, *d_A_inv;
    HYPRE_Real *b_vec;
    HYPRE_Int  *comm_info;
 
@@ -482,6 +483,8 @@ typedef struct
 #define hypre_ParAMGDataGSSetup(amg_data) ((amg_data)->gs_setup)
 #define hypre_ParAMGDataAMat(amg_data) ((amg_data)->A_mat)
 #define hypre_ParAMGDataAInv(amg_data) ((amg_data)->A_inv)
+#define hypre_ParAMGDataAPiv(amg_data) ((amg_data)->A_piv)
+#define hypre_ParAMGDataDAInv(amg_data) ((amg_data)->d_A_inv)
 #define hypre_ParAMGDataBVec(amg_data) ((amg_data)->b_vec)
 #define hypre_ParAMGDataCommInfo(amg_data) ((amg_data)->comm_info)
 

@@ -511,6 +511,11 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   /* Gaussian elimination */
                   hypre_GaussElimSolve(amg_data, level, relax_type);
                }
+               else if (relax_type == 19 || relax_type == 98)
+               {
+                  /* Gaussian elimination */
+                  hypre_GaussElimAllSolve(amg_data, level, relax_type);
+               }
                else if (relax_type == 18)
                {
                   /* L1 - Jacobi*/

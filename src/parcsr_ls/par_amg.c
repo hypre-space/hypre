@@ -488,10 +488,12 @@ hypre_BoomerAMGCreate( void )
    hypre_ParAMGDataNewComm(amg_data) = hypre_MPI_COMM_NULL;
 
    /* for Gaussian elimination coarse grid solve */
-   hypre_ParAMGDataGSSetup(amg_data) = 0;
-   hypre_ParAMGDataAMat(amg_data) = NULL;
-   hypre_ParAMGDataAInv(amg_data) = NULL;
-   hypre_ParAMGDataBVec(amg_data) = NULL;
+   hypre_ParAMGDataGSSetup(amg_data)  = 0;
+   hypre_ParAMGDataAMat(amg_data)     = NULL;
+   hypre_ParAMGDataAInv(amg_data)     = NULL;
+   hypre_ParAMGDataAPiv(amg_data)     = NULL;
+   hypre_ParAMGDataDAInv(amg_data)    = NULL;
+   hypre_ParAMGDataBVec(amg_data)     = NULL;
    hypre_ParAMGDataCommInfo(amg_data) = NULL;
 
    hypre_ParAMGDataNonGalerkinTol(amg_data) = nongalerkin_tol;
@@ -857,8 +859,10 @@ hypre_BoomerAMGDestroy( void *data )
       hypre_TFree(hypre_ParAMGDataCPointsLocalMarker(amg_data), memory_location);
       hypre_TFree(hypre_ParAMGDataFPointsMarker(amg_data), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParAMGDataIsolatedFPointsMarker(amg_data), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParAMGDataAPiv(amg_data), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParAMGDataAMat(amg_data), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParAMGDataAInv(amg_data), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParAMGDataDAInv(amg_data), HYPRE_MEMORY_DEVICE);
       hypre_TFree(hypre_ParAMGDataBVec(amg_data), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParAMGDataCommInfo(amg_data), HYPRE_MEMORY_HOST);
 
@@ -4989,4 +4993,3 @@ hypre_BoomerAMGGetCumNnzAP( void       *data,
 
    return hypre_error_flag;
 }
-

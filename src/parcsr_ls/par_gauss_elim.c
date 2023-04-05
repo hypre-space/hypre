@@ -206,8 +206,149 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
    return hypre_error_flag;
 }
 
-/* relax_type = 9, 99, 199, see par_relax.c for 19 and 98 */
-HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYPRE_Int relax_type)
+/*--------------------------------------------------------------------------
+ * hypre_GaussElimAllSetup
+ *
+ * Gaussian elimination setup with local matrices and vectors generated via
+ * hypre_ParCSRMatrixToCSRMatrixAll and hypre_ParVectorToVectorAll.
+ * These functions do not create or use new sub-communicators, but rely on
+ * the scalable hypre_DataExchangeList to form local matrices/vectors.
+ *
+ * This function is valid for relax_type:
+ *   - 19: computes a gaussian elimination on the host via hypre's internal
+ *         implementation.
+ *   - 98: computes LU factorization via LAPACK on the host or via MAGMA on
+ *         the device.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GaussElimAllSetup(hypre_ParAMGData *amg_data,
+                        HYPRE_Int         level,
+                        HYPRE_Int         relax_type)
+{
+   /* Input data */
+   hypre_ParCSRMatrix  *par_A           = hypre_ParAMGDataAArray(amg_data)[level];
+   HYPRE_Int            global_num_rows = (HYPRE_Int) hypre_ParCSRMatrixGlobalNumRows(par_A);
+   HYPRE_Int            num_rows        = hypre_ParCSRMatrixNumRows(par_A);
+   HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(par_A);
+
+   /* Direct solver variables */
+   HYPRE_Int            size = global_num_rows * global_num_rows;
+   HYPRE_Int           *A_piv;
+   HYPRE_Real          *A_mat;
+   HYPRE_Real          *A_inv = NULL;
+   HYPRE_Real          *d_A_inv = NULL;
+
+   /* Local variables */
+   hypre_CSRMatrix     *A_CSR;
+   HYPRE_Int           *A_CSR_i;
+   HYPRE_Int           *A_CSR_j;
+   HYPRE_Complex       *A_CSR_data;
+   HYPRE_Int            i, j, col;
+   HYPRE_Int            info;
+
+   /*-----------------------------------------------------------------
+    *  Sanity checks
+    *-----------------------------------------------------------------*/
+
+   /* Check for relaxation type */
+   if (!(relax_type == 19 || relax_type == 98))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Wrong relaxation type!");
+      return hypre_error_flag;
+   }
+
+   /*-----------------------------------------------------------------
+    * Generate CSR matrix from ParCSRMatrix A and factorize
+    *-----------------------------------------------------------------*/
+
+   A_piv = hypre_CTAlloc(HYPRE_Int, global_num_rows, HYPRE_MEMORY_HOST);
+   A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(par_A, HYPRE_MEMORY_HOST);
+
+   if (num_rows)
+   {
+      A_CSR_i = hypre_CSRMatrixI(A_CSR);
+      A_CSR_j = hypre_CSRMatrixJ(A_CSR);
+      A_CSR_data = hypre_CSRMatrixData(A_CSR);
+      A_mat = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_HOST);
+
+      /*---------------------------------------------------------------
+       *  Load CSR matrix into A_mat.
+       *---------------------------------------------------------------*/
+
+      /* TODO (VPM): Add OpenMP support */
+      for (i = 0; i < global_num_rows; i++)
+      {
+         for (j = A_CSR_i[i]; j < A_CSR_i[i + 1]; j++)
+         {
+            /* need col major */
+            col = A_CSR_j[j];
+            A_mat[i + global_num_rows * col] = (HYPRE_Real) A_CSR_data[j];
+         }
+      }
+
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_MAGMA)
+      HYPRE_ExecutionPolicy  exec = hypre_GetExecPolicy1(memory_location);
+
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         /* Move matrix to device */
+         d_A_inv = hypre_CTAlloc(HYPRE_Real, size, HYPRE_MEMORY_DEVICE);
+         hypre_TMemcpy(d_A_inv, A_mat, HYPRE_Real, size,
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+
+         /* Compute LU factorization on device */
+         HYPRE_MAGMA_CALL(magma_dgetrf_gpu(global_num_rows, global_num_rows, d_A_inv,
+                                           global_num_rows, A_piv, &info));
+
+         /* Free memory */
+         hypre_TFree(A_mat, HYPRE_MEMORY_HOST);
+      }
+      else
+#endif
+      {
+         /* Set pointer to A_mat */
+         A_inv = A_mat;
+
+         /* Compute LU factorization on host */
+         hypre_dgetrf(&global_num_rows, &global_num_rows, A_inv,
+                      &global_num_rows, A_piv, &info);
+      }
+
+      if (info != 0)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with dgetrf!");
+      }
+   }
+
+   /* Free memory */
+   hypre_CSRMatrixDestroy(A_CSR);
+
+   /* Save data */
+   hypre_ParAMGDataAPiv(amg_data)  = A_piv;
+   hypre_ParAMGDataAInv(amg_data)  = A_inv;
+   hypre_ParAMGDataDAInv(amg_data) = d_A_inv;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GaussElimSolve
+ *
+ * Gaussian elimination setup with local matrices and vectors generated via
+ * MPI collective calls on a sub-communicator containing only the ranks with
+ * nonzero info.
+ *
+ * This function is valid for relax_type:
+ *   - 9: hypre's internal Gaussian elimination.
+ *   - 99: LU factorization with pivoting via LAPACK.
+ *   - 199: explicit inverse A_inv = U^{-1}*L^{-1}.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
+                     HYPRE_Int         level,
+                     HYPRE_Int         relax_type)
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SOLVE] -= hypre_MPI_Wtime();
@@ -346,7 +487,100 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_GaussElimAllSolve
+ *
+ * Gaussian elimination solve. See hypre_GaussElimAllSetup for comments.
+ *--------------------------------------------------------------------------*/
 
+HYPRE_Int
+hypre_GaussElimAllSolve(hypre_ParAMGData *amg_data,
+                        HYPRE_Int         level,
+                        HYPRE_Int         relax_type)
+{
+   /* Matrix data */
+   hypre_ParCSRMatrix   *par_A           = hypre_ParAMGDataAArray(amg_data)[level];
+   HYPRE_Int             global_num_rows = (HYPRE_Int) hypre_ParCSRMatrixGlobalNumRows(par_A);
+   HYPRE_Int             num_rows        = hypre_ParCSRMatrixNumRows(par_A);
+   HYPRE_MemoryLocation  memory_location = hypre_ParCSRMatrixMemoryLocation(par_A);
+
+   /* RHS data */
+   hypre_ParVector      *par_f           = hypre_ParAMGDataFArray(amg_data)[level];
+   hypre_Vector         *f_vector;
+   HYPRE_Complex        *f_data;
+
+   /* Solution data */
+   hypre_ParVector      *par_u           = hypre_ParAMGDataUArray(amg_data)[level];
+   hypre_Vector         *u_vector        = hypre_ParVectorLocalVector(par_u);
+   HYPRE_Complex        *u_data          = hypre_VectorData(u_vector);
+   HYPRE_Int             first_index     = (HYPRE_Int) hypre_ParVectorFirstIndex(par_u);
+
+   /* Coarse solver data */
+   HYPRE_Int            *A_piv           = hypre_ParAMGDataAPiv(amg_data);
+   HYPRE_Real           *A_inv           = hypre_ParAMGDataAInv(amg_data);
+   HYPRE_Real           *d_A_inv         = hypre_ParAMGDataDAInv(amg_data);
+
+   /* Local variables */
+   HYPRE_Int             one_i = 1;
+   HYPRE_Int             info = 0;
+
+   /*-----------------------------------------------------------------
+    *  Compute uvec = U^{-1} L^{-1} fvec
+    *-----------------------------------------------------------------*/
+
+   if (num_rows)
+   {
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_MAGMA)
+      HYPRE_ExecutionPolicy  exec = hypre_GetExecPolicy1(memory_location);
+
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         hypre_MemoryLocation location[2];
+
+         /* Gather RHS */
+         f_vector = hypre_ParVectorToVectorAll(par_f, HYPRE_MEMORY_DEVICE);
+         f_data   = hypre_VectorData(f_vector);
+
+         /* f_data = inv(U)*inv(L)*f_data */
+         HYPRE_MAGMA_CALL(magma_dgetrs_gpu(MagmaNoTrans, global_num_rows, 1, d_A_inv,
+                                           global_num_rows, A_piv, f_data,
+                                           global_num_rows, &info));
+
+         hypre_GetPointerLocation((void*) f_data, &location[0]);
+         hypre_GetPointerLocation((void*) u_data, &location[1]);
+
+         /* Copy solution vector b_vec to u */
+         hypre_TMemcpy(u_data, f_data + first_index, HYPRE_Complex, num_rows,
+                       memory_location, HYPRE_MEMORY_DEVICE);
+      }
+      else
+#endif
+      {
+         /* Gather RHS  */
+         f_vector = hypre_ParVectorToVectorAll(par_f, HYPRE_MEMORY_HOST);
+         f_data   = hypre_VectorData(f_vector);
+
+         /* f_data = inv(U)*inv(L)*f_data */
+         hypre_dgetrs("N", &global_num_rows, &one_i, A_inv,
+                       &global_num_rows, A_piv, f_data,
+                       &global_num_rows, &info);
+
+         /* Copy solution vector b_vec to u */
+         hypre_TMemcpy(u_data, f_data + first_index, HYPRE_Complex, num_rows,
+                       memory_location, HYPRE_MEMORY_HOST);
+      }
+   }
+
+   if (info != 0)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with dgetrf!");
+   }
+
+   /* Free memory */
+   hypre_SeqVectorDestroy(f_vector);
+
+   return hypre_error_flag;
+}
 
 
 
