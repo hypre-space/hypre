@@ -21,11 +21,11 @@ HEADERS =\
 
 FILES =\
  direct_solver.c\
- direct_custom.c
+ ubatched_direct_custom.c
 
 CUFILES =\
- direct_vendor.c\
- direct_magma.c
+ ubatched_direct_vendor.c\
+ ubatched_direct_magma.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}

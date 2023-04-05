@@ -529,6 +529,64 @@ hypre_dim3(HYPRE_Int x, HYPRE_Int y, HYPRE_Int z)
 }
 
 /*--------------------------------------------------------------------
+ * hypreGPUKernel_ArrayToArrayOfPtrs
+ *--------------------------------------------------------------------*/
+
+template <typename T>
+__global__ void
+hypreGPUKernel_ArrayToArrayOfPtrs( hypre_DeviceItem  &item,
+                                   HYPRE_Int          num_blocks,
+                                   HYPRE_Int          block_size,
+                                   T                 *data,
+                                   T                **data_aop )
+{
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+
+   if (i < num_blocks)
+   {
+      data_aop[i] = &data[i * block_size];
+   }
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_ArrayToArrayOfPtrs
+ *--------------------------------------------------------------------*/
+
+HYPRE_Int
+hypreDevice_ArrayToArrayOfPtrs( HYPRE_Int      num_blocks,
+                                HYPRE_Int      block_size,
+                                T             *data,
+                                T            **data_aop )
+{
+   /* Sanity check */
+   if (num_blocks <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_blocks, "thread", bDim);
+
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_ArrayToArrayOfPtrs, gDim, bDim,
+                     num_blocks, block_size, data, data_aop );
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_ComplexArrayToArrayOfPtrs
+ *--------------------------------------------------------------------*/
+
+HYPRE_Int
+hypreDevice_ComplexArrayToArrayOfPtrs( HYPRE_Int       num_blocks,
+                                       HYPRE_Int       block_size,
+                                       HYPRE_Complex  *data,
+                                       HYPRE_Complex **data_aop )
+{
+   return hypreDevice_ArrayToArrayOfPtrs(num_blocks, block_size, data, data_aop);
+}
+
+/*--------------------------------------------------------------------
  * hypreGPUKernel_IVAXPY
  *--------------------------------------------------------------------*/
 

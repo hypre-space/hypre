@@ -9,6 +9,8 @@ set(HDRS
 )
 
 set(SRCS
+  ubatched_dense_matrix.c
+  ubatched_csr_matrix.c
   csr_matop.c
   csr_matrix.c
   csr_matvec.c

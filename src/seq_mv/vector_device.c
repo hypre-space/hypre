@@ -55,6 +55,27 @@ hypre_SeqVectorSetConstantValuesDevice( hypre_Vector *v,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SeqVectorDataToArrayOfPointersDevice
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorDataToArrayOfPointersDevice( hypre_Vector   *x,
+                                            HYPRE_Int       num_blocks,
+                                            HYPRE_Complex **aop )
+{
+   HYPRE_Complex *data = hypre_VectorData(x);
+   HYPRE_Int      size = hypre_VectorSize(x);
+
+   HYPRE_Int      i, block_size;
+
+   /* Compute block size */
+   block_size = 1 + ((size - 1) / num_blocks);
+
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SeqVectorScaleDevice
  *--------------------------------------------------------------------------*/
 

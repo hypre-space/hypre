@@ -517,6 +517,44 @@ hypre_SeqVectorCloneShallow( hypre_Vector *x )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SeqVectorDataToArrayOfPointers
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorDataToArrayOfPointers( hypre_Vector   *x,
+                                      HYPRE_Int       num_blocks,
+                                      HYPRE_Complex **aop )
+{
+   HYPRE_Complex          *data = hypre_VectorData(x);
+   HYPRE_Int               size = hypre_VectorSize(x);
+   HYPRE_Int               i, block_size;
+
+   /* Compute block size */
+   block_size = 1 + ((size - 1) / num_blocks);
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy   exec = hypre_GetExecPolicy1(hypre_VectorMemoryLocation(x));
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypreDevice_ComplexArrayToArrayOfPtrs(num_blocks, block_size, x, aop);
+   }
+   else
+#endif
+   {
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < num_blocks; i++)
+      {
+         aop[i] = &data[i * block_size];
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SeqVectorScaleHost
  *--------------------------------------------------------------------------*/
 

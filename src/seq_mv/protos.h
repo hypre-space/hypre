@@ -97,17 +97,35 @@ HYPRE_Int hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A, hypre_CSRMatrix *B
                                           HYPRE_Int diag_option);
 HYPRE_Int hypre_CSRMatrixDiagScaleDevice( hypre_CSRMatrix *A, hypre_Vector *ld, hypre_Vector *rd);
 
-/* dense_matrix.c */
-hypre_DenseMatrix* hypre_DenseMatrixCreate( HYPRE_Int num_rows, HYPRE_Int num_cols );
-HYPRE_Int hypre_DenseMatrixDestroy( hypre_DenseMatrix *matrix );
-HYPRE_Int hypre_DenseMatrixSetBatchedUniform( hypre_DenseMatrix *matrix, HYPRE_Int num_batches );
-HYPRE_Int hypre_DenseMatrixSetBatchedVariable( hypre_DenseMatrix *matrix, HYPRE_Int num_batches,
-                                               HYPRE_Int *vbatch_num_rows,
-                                               HYPRE_Int *vbatch_num_cols,
-                                               HYPRE_Int *vbatch_num_coefs );
-HYPRE_Int hypre_DenseMatrixInitialize_v2( hypre_DenseMatrix *matrix,
-                                          HYPRE_MemoryLocation memory_location );
-HYPRE_Int hypre_DenseMatrixInitialize( hypre_DenseMatrix *matrix );
+/* ubatched_dense_matrix.c */
+hypre_UBatchedDenseMatrix* hypre_UBatchedDenseMatrixCreate( HYPRE_Int row_major,
+                                                            HYPRE_Int num_batches,
+                                                            HYPRE_Int num_rows_total,
+                                                            HYPRE_Int num_cols_total );
+HYPRE_Int hypre_UBatchedDenseMatrixDestroy( hypre_UBatchedDenseMatrix *A );
+HYPRE_Int hypre_UBatchedDenseMatrixInitialize_v2( hypre_UBatchedDenseMatrix *A,
+                                                  HYPRE_MemoryLocation memory_location );
+HYPRE_Int hypre_UBatchedDenseMatrixInitialize( hypre_UBatchedDenseMatrix *A );
+HYPRE_Int hypre_UBatchedDenseMatrixCopy( hypre_UBatchedDenseMatrix *A,
+                                         hypre_UBatchedDenseMatrix *B );
+hypre_UBatchedDenseMatrix* hypre_UBatchedDenseMatrixClone( hypre_UBatchedDenseMatrix *A,
+                                                           HYPRE_Int copy_data );
+HYPRE_Int hypre_UBatchedDenseMatrixToCSRMatrix( hypre_UBatchedDenseMatrix *A,
+                                                hypre_CSRMatrix *B );
+
+/* ubatched_csr_matrix.c */
+hypre_UBatchedCSRMatrix* hypre_UBatchedCSRMatrixCreate( HYPRE_Int num_batches,
+                                                        HYPRE_Int num_rows_total,
+                                                        HYPRE_Int num_cols_total,
+                                                        HYPRE_Int num_coefs_total );
+HYPRE_Int hypre_UBatchedCSRMatrixDestroy( hypre_UBatchedCSRMatrix *A );
+HYPRE_Int hypre_UBatchedCSRMatrixInitialize_v2( hypre_UBatchedCSRMatrix *A,
+                                                HYPRE_MemoryLocation memory_location );
+HYPRE_Int hypre_UBatchedCSRMatrixInitialize( hypre_UBatchedCSRMatrix *A );
+HYPRE_Int hypre_UBatchedCSRMatrixCopy( hypre_UBatchedCSRMatrix *A,
+                                       hypre_UBatchedCSRMatrix *B );
+hypre_UBatchedCSRMatrix* hypre_UBatchedCSRMatrixClone( hypre_UBatchedCSRMatrix *A,
+                                                       HYPRE_Int copy_data );
 
 /* csr_matrix.c */
 hypre_CSRMatrix *hypre_CSRMatrixCreate ( HYPRE_Int num_rows, HYPRE_Int num_cols,
@@ -272,6 +290,8 @@ HYPRE_Int hypre_SeqVectorCopy ( hypre_Vector *x, hypre_Vector *y );
 hypre_Vector *hypre_SeqVectorCloneDeep ( hypre_Vector *x );
 hypre_Vector *hypre_SeqVectorCloneDeep_v2( hypre_Vector *x, HYPRE_MemoryLocation memory_location );
 hypre_Vector *hypre_SeqVectorCloneShallow ( hypre_Vector *x );
+HYPRE_Int hypre_SeqVectorDataToArrayOfPointers( hypre_Vector *x, HYPRE_Int num_blocks,
+                                                HYPRE_Complex **aop );
 HYPRE_Int hypre_SeqVectorScale( HYPRE_Complex alpha, hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorScaleHost( HYPRE_Complex alpha, hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorScaleDevice( HYPRE_Complex alpha, hypre_Vector *y );

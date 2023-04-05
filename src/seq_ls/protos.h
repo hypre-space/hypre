@@ -6,41 +6,54 @@
  ******************************************************************************/
 
 /* direct_solver.c */
-void* hypre_DirectSolverCreate( hypre_DirectSolverBackend backend, hypre_DirectSolverMethod method,
-                                HYPRE_Int info_size, HYPRE_MemoryLocation memory_location );
-HYPRE_Int hypre_DirectSolverDestroy ( void *vdata );
-HYPRE_Int hypre_DirectSolverInitialize ( void* vdata );
-HYPRE_Int hypre_DirectSolverSetup ( void *vdata, hypre_DenseMatrix *A,
-                                    hypre_Vector *f, hypre_Vector *u );
-HYPRE_Int hypre_DirectSolverSolve ( void *vdata, hypre_DenseMatrix *A,
-                                    hypre_Vector *f, hypre_Vector *u );
-HYPRE_Int hypre_DirectSolverInvert ( void *vdata, hypre_DenseMatrix *A,
-                                     hypre_DenseMatrix *Ainv );
+hypre_DirectSolverData* hypre_DirectSolverCreate( hypre_DirectSolverBackend backend,
+                                                  hypre_DirectSolverMethod method,
+                                                  hypre_MatrixType mat_type, HYPRE_Int size,
+                                                  HYPRE_MemoryLocation memory_location );
+HYPRE_Int hypre_DirectSolverDestroy( hypre_DirectSolverData *data );
+HYPRE_Int hypre_DirectSolverInitialize( hypre_DirectSolverData *data );
+HYPRE_Int hypre_DirectSolverSetup( hypre_DirectSolverData *data,
+                                   void *vA, hypre_Vector *f, hypre_Vector *u );
+HYPRE_Int hypre_DirectSolverSolve( hypre_DirectSolverData *data,
+                                   void *vA, hypre_Vector *f, hypre_Vector *u );
+HYPRE_Int hypre_DirectSolverInvert( hypre_DirectSolverData *data,
+                                    void *vA, void **vAinv_ptr );
 
-/* direct_vendor.c */
-#if defined (HYPRE_USING_CUDA)
-HYPRE_Int hypre_DirectSolverSetupVendor ( hypre_DirectSolverData *data, hypre_DenseMatrix *A,
-                                          hypre_Vector *f, hypre_Vector *u );
-HYPRE_Int hypre_DirectSolverSolveVendor ( hypre_DirectSolverData *data, hypre_DenseMatrix *A,
-                                          hypre_Vector *f, hypre_Vector *u );
-HYPRE_Int hypre_DirectSolverInvertVendor ( hypre_DirectSolverData *data, hypre_DenseMatrix *A,
-                                           hypre_DenseMatrix *Ainv );
+/* ubatched_direct_vendor.c */
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+HYPRE_Int hypre_UBatchedDenseDirectVendorSetup( hypre_DirectSolverData *data,
+                                                hypre_UBatchedDenseMatrix *A,
+                                                hypre_Vector *f, hypre_Vector *u );
+HYPRE_Int hypre_UBatchedDenseDirectVendorSolve( hypre_DirectSolverData *data,
+                                                hypre_UBatchedDenseMatrix *A,
+                                                hypre_Vector *f, hypre_Vector *u );
+HYPRE_Int hypre_UBatchedDenseDirectVendorInvert( hypre_DirectSolverData *data,
+                                                 hypre_UBatchedDenseMatrix *A,
+                                                 hypre_UBatchedDenseMatrix **Ainv_ptr );
 #endif
 
-/* direct_custom.c */
-HYPRE_Int hypre_DirectSolverSetupCustom ( hypre_DirectSolverData *data, hypre_DenseMatrix *A,
-                                          hypre_Vector *f, hypre_Vector *u );
-HYPRE_Int hypre_DirectSolverSolveCustom ( hypre_DirectSolverData *data, hypre_DenseMatrix *A,
-                                          hypre_Vector *f, hypre_Vector *u );
-HYPRE_Int hypre_DirectSolverInvertCustom ( hypre_DirectSolverData *data, hypre_DenseMatrix *A,
-                                           hypre_DenseMatrix *Ainv );
+/* ubatched_direct_custom.c */
+HYPRE_Int hypre_UBatchedDenseDirectCustomSetup( hypre_DirectSolverData *data,
+                                                hypre_UBatchedDenseMatrix *A,
+                                                hypre_Vector *f, hypre_Vector *u );
+HYPRE_Int hypre_UBatchedDenseDirectCustomSolve( hypre_DirectSolverData *data,
+                                                hypre_UBatchedDenseMatrix *A,
+                                                hypre_Vector *f, hypre_Vector *u );
+HYPRE_Int hypre_UBatchedDenseDirectCustomInvert( hypre_DirectSolverData *data,
+                                                 hypre_UBatchedDenseMatrix *A,
+                                                 hypre_UBatchedDenseMatrix **Ainv_ptr );
 
-/* direct_magma.c */
+/* ubatched_direct_magma.c */
 #if defined (HYPRE_USING_MAGMA)
-void*     hypre_DirectSolverCreateMagma ( void );
-HYPRE_Int hypre_DirectSolverDestroyMagma ( void *direct_vdata );
-HYPRE_Int hypre_DirectSolverSetupMagma ( void *direct_vdata, hypre_DenseMatrix *A,
-                                         hypre_Vector *f, hypre_Vector *u );
-HYPRE_Int hypre_DirectSolverSolveMagma ( void *direct_vdata, hypre_DenseMatrix *A,
-                                         hypre_Vector *f, hypre_Vector *u );
+void*     hypre_UBatchedDenseDirectMagmaCreate( void );
+HYPRE_Int hypre_UBatchedDenseDirectMagmaDestroy( hypre_DirectSolverData *data );
+HYPRE_Int hypre_UBatchedDenseDirectMagmaSetup( hypre_DirectSolverData *data,
+                                               hypre_UBatchedDenseMatrix *A,
+                                               hypre_Vector *f, hypre_Vector *u );
+HYPRE_Int hypre_UBatchedDenseDirectMagmaSolve( void *vdata,
+                                               hypre_UBatchedDenseMatrix *A,
+                                               hypre_Vector *f, hypre_Vector *u );
+HYPRE_Int hypre_UBatchedDenseDirectMagmaInvert( void *vdata,
+                                                hypre_UBatchedDenseMatrix *A,
+                                                hypre_UBatchedDenseMatrix **Ainv_ptr );
 #endif

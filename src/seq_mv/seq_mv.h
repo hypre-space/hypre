@@ -25,70 +25,107 @@ extern "C" {
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#ifndef hypre_DENSE_MATRIX_HEADER
-#define hypre_DENSE_MATRIX_HEADER
+#ifndef hypre_UBATCHED_DENSE_MATRIX_HEADER
+#define hypre_UBATCHED_DENSE_MATRIX_HEADER
 
 /*--------------------------------------------------------------------------
- * hypre_DenseMatrixType
+ * Uniform batched dense matrix data structure
  *--------------------------------------------------------------------------*/
 
-typedef enum hypre_DenseMatrixType_enum
+typedef struct hypre_UBatchedDenseMatrix_struct
 {
-  HYPRE_DENSE_MATRIX_STANDARD = 0,
-  HYPRE_DENSE_MATRIX_UBATCHED = 1,
-  HYPRE_DENSE_MATRIX_VBATCHED = 2
-} hypre_DenseMatrixType;
+   HYPRE_Int             row_major;          /* Flag indicating storage format (false: col major)*/
+   HYPRE_Int             num_rows_total;     /* Number of rows of entire matrix */
+   HYPRE_Int             num_cols_total;     /* Number of columns of entire matrix */
+   HYPRE_Int             num_coefs_total;    /* Number of coefficients of entire matrix */
 
-/*--------------------------------------------------------------------------
- * Dense Matrix data structure
- *--------------------------------------------------------------------------*/
+   /* Local info for a individual batch (sub-matrix) */
+   HYPRE_Int             num_batches;        /* Number of sub-matrices (batch size) */
+   HYPRE_Int             num_rows;           /* Number of rows per batch */
+   HYPRE_Int             num_cols;           /* Number of columns per batch */
+   HYPRE_Int             num_coefs;          /* Number of coefficients per batch */
 
-typedef struct hypre_DenseMatrix_struct
-{
-   hypre_DenseMatrixType type;               /* Dense matrix type */
-   HYPRE_Int             row_major;          /* Flag indicating storage format */
-   HYPRE_Int             num_rows;           /* Number of rows of entire matrix */
-   HYPRE_Int             num_cols;           /* Number of columns of entire matrix */
-   HYPRE_Int             num_coefs;          /* Number of coefficients of entire matrix */
+   /* Matrix coefficients array */
    HYPRE_Int             owns_data;          /* Flag indicating ownership of the data array */
    HYPRE_Complex        *data;               /* Matrix coefficients */
-   HYPRE_MemoryLocation  memory_location;    /* Memory location of data array */
-
-   /* Uniform batched dense matrices info */
-   HYPRE_Int             num_batches;        /* Number of sub-matrices (batch size) */
-   HYPRE_Int             ubatch_num_rows;    /* Number of rows of a sub-matrix */
-   HYPRE_Int             ubatch_num_cols;    /* Number of columns of a sub-matrix */
-   HYPRE_Int             ubatch_num_coefs;   /* Number of coefficients of a sub-matrix */
-
-   /* Variable batched dense matrices info */
-   HYPRE_Int            *vbatch_num_rows;    /* Number of rows of each sub-matrix */
-   HYPRE_Int            *vbatch_num_cols;    /* Number of columns of each sub-matrix */
-   HYPRE_Int            *vbatch_num_coefs;   /* Number of coefficients of each sub-matrix */
-   HYPRE_Int             vbatch_owns_arrays; /* Flag indicating ownership of the arrays above */
    HYPRE_Complex       **data_aop;           /* Array of pointers to data */
-} hypre_DenseMatrix;
+   HYPRE_MemoryLocation  memory_location;    /* Memory location of data array */
+} hypre_UBatchedDenseMatrix;
 
 /*--------------------------------------------------------------------------
- * Accessor functions for the Dense Matrix structure
+ * Accessor functions for the uniform batched matrix structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_DenseMatrixType(matrix)                 ((matrix) -> type)
-#define hypre_DenseMatrixRowMajor(matrix)             ((matrix) -> row_major)
-#define hypre_DenseMatrixNumRows(matrix)              ((matrix) -> num_rows)
-#define hypre_DenseMatrixNumCols(matrix)              ((matrix) -> num_cols)
-#define hypre_DenseMatrixNumCoefs(matrix)             ((matrix) -> num_coefs)
-#define hypre_DenseMatrixOwnsData(matrix)             ((matrix) -> owns_data)
-#define hypre_DenseMatrixData(matrix)                 ((matrix) -> data)
-#define hypre_DenseMatrixMemoryLocation(matrix)       ((matrix) -> memory_location)
-#define hypre_DenseMatrixNumBatches(matrix)           ((matrix) -> num_batches)
-#define hypre_DenseMatrixUBatchNumRows(matrix)        ((matrix) -> ubatch_num_rows)
-#define hypre_DenseMatrixUBatchNumCols(matrix)        ((matrix) -> ubatch_num_cols)
-#define hypre_DenseMatrixUBatchNumCoefs(matrix)       ((matrix) -> ubatch_num_coefs)
-#define hypre_DenseMatrixVBatchNumRows(matrix)        ((matrix) -> vbatch_num_rows)
-#define hypre_DenseMatrixVBatchNumCols(matrix)        ((matrix) -> vbatch_num_cols)
-#define hypre_DenseMatrixVBatchNumCoefs(matrix)       ((matrix) -> vbatch_num_coefs)
-#define hypre_DenseMatrixVBatchOwnsArrays(matrix)     ((matrix) -> vbatch_owns_arrays)
-#define hypre_DenseMatrixDataAOP(matrix)              ((matrix) -> data_aop)
+#define hypre_UBatchedDenseMatrixRowMajor(matrix)        ((matrix) -> row_major)
+#define hypre_UBatchedDenseMatrixNumRowsTotal(matrix)    ((matrix) -> num_rows_total)
+#define hypre_UBatchedDenseMatrixNumColsTotal(matrix)    ((matrix) -> num_cols_total)
+#define hypre_UBatchedDenseMatrixNumCoefsTotal(matrix)   ((matrix) -> num_coefs_total)
+
+#define hypre_UBatchedDenseMatrixNumBatches(matrix)      ((matrix) -> num_batches)
+#define hypre_UBatchedDenseMatrixNumRows(matrix)         ((matrix) -> num_rows)
+#define hypre_UBatchedDenseMatrixNumCols(matrix)         ((matrix) -> num_cols)
+#define hypre_UBatchedDenseMatrixNumCoefs(matrix)        ((matrix) -> num_coefs)
+
+#define hypre_UBatchedDenseMatrixOwnsData(matrix)        ((matrix) -> owns_data)
+#define hypre_UBatchedDenseMatrixData(matrix)            ((matrix) -> data)
+#define hypre_UBatchedDenseMatrixDataAOP(matrix)         ((matrix) -> data_aop)
+#define hypre_UBatchedDenseMatrixMemoryLocation(matrix)  ((matrix) -> memory_location)
+
+#endif
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+#ifndef hypre_UBATCHED_CSR_MATRIX_HEADER
+#define hypre_UBATCHED_CSR_MATRIX_HEADER
+
+/*--------------------------------------------------------------------------
+ * Uniform batched CSR matrix data structure
+ *--------------------------------------------------------------------------*/
+
+typedef struct hypre_UBatchedCSRMatrix_struct
+{
+   HYPRE_Int             num_rows_total;     /* Number of rows of entire matrix */
+   HYPRE_Int             num_cols_total;     /* Number of columns of entire matrix */
+   HYPRE_Int             num_coefs_total;    /* Number of coefficients of entire matrix */
+
+   /* Local info for a individual batch (sub-matrix) */
+   HYPRE_Int             num_batches;        /* Number of sub-matrices (batch size) */
+   HYPRE_Int             num_rows;           /* Number of rows per batch */
+   HYPRE_Int             num_cols;           /* Number of columns per batch */
+   HYPRE_Int             num_coefs;          /* Number of coefficients per batch */
+   HYPRE_Int            *i;                  /* row pointer per batch */
+   HYPRE_Int            *j;                  /* column indices per batch */
+
+   /* Matrix coefficients array */
+   HYPRE_Int             owns_data;          /* Flag indicating ownership of the data array */
+   HYPRE_Complex        *data;               /* Matrix coefficients */
+   HYPRE_Complex       **data_aop;           /* Array of pointers to data */
+   HYPRE_MemoryLocation  memory_location;    /* Memory location of data array */
+} hypre_UBatchedCSRMatrix;
+
+/*--------------------------------------------------------------------------
+ * Accessor functions for the uniform batched CSR matrix structure
+ *--------------------------------------------------------------------------*/
+
+#define hypre_UBatchedCSRMatrixNumRowsTotal(matrix)     ((matrix) -> num_rows_total)
+#define hypre_UBatchedCSRMatrixNumColsTotal(matrix)     ((matrix) -> num_cols_total)
+#define hypre_UBatchedCSRMatrixNumCoefsTotal(matrix)    ((matrix) -> num_coefs_total)
+
+#define hypre_UBatchedCSRMatrixNumBatches(matrix)       ((matrix) -> num_batches)
+#define hypre_UBatchedCSRMatrixNumRows(matrix)          ((matrix) -> num_rows)
+#define hypre_UBatchedCSRMatrixNumCols(matrix)          ((matrix) -> num_cols)
+#define hypre_UBatchedCSRMatrixNumCoefs(matrix)         ((matrix) -> num_coefs)
+#define hypre_UBatchedCSRMatrixI(matrix)                ((matrix) -> i)
+#define hypre_UBatchedCSRMatrixJ(matrix)                ((matrix) -> j)
+
+#define hypre_UBatchedCSRMatrixOwnsData(matrix)         ((matrix) -> owns_data)
+#define hypre_UBatchedCSRMatrixData(matrix)             ((matrix) -> data)
+#define hypre_UBatchedCSRMatrixDataAOP(matrix)          ((matrix) -> data_aop)
+#define hypre_UBatchedCSRMatrixMemoryLocation(matrix)   ((matrix) -> memory_location)
 
 #endif
 /******************************************************************************
@@ -442,17 +479,33 @@ HYPRE_Int hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A, hypre_CSRMatrix *B
                                           HYPRE_Int diag_option);
 HYPRE_Int hypre_CSRMatrixDiagScaleDevice( hypre_CSRMatrix *A, hypre_Vector *ld, hypre_Vector *rd);
 
-/* dense_matrix.c */
-hypre_DenseMatrix* hypre_DenseMatrixCreate( HYPRE_Int num_rows, HYPRE_Int num_cols );
-HYPRE_Int hypre_DenseMatrixDestroy( hypre_DenseMatrix *matrix );
-HYPRE_Int hypre_DenseMatrixSetBatchedUniform( hypre_DenseMatrix *matrix, HYPRE_Int num_batches );
-HYPRE_Int hypre_DenseMatrixSetBatchedVariable( hypre_DenseMatrix *matrix, HYPRE_Int num_batches,
-                                               HYPRE_Int *vbatch_num_rows,
-                                               HYPRE_Int *vbatch_num_cols,
-                                               HYPRE_Int *vbatch_num_coefs );
-HYPRE_Int hypre_DenseMatrixInitialize_v2( hypre_DenseMatrix *matrix,
-                                          HYPRE_MemoryLocation memory_location );
-HYPRE_Int hypre_DenseMatrixInitialize( hypre_DenseMatrix *matrix );
+/* ubatched_dense_matrix.c */
+hypre_UBatchedDenseMatrix* hypre_UBatchedDenseMatrixCreate( HYPRE_Int row_major,
+                                                            HYPRE_Int num_batches,
+                                                            HYPRE_Int num_rows_total,
+                                                            HYPRE_Int num_cols_total );
+HYPRE_Int hypre_UBatchedDenseMatrixDestroy( hypre_UBatchedDenseMatrix *A );
+HYPRE_Int hypre_UBatchedDenseMatrixInitialize_v2( hypre_UBatchedDenseMatrix *A,
+                                                  HYPRE_MemoryLocation memory_location );
+HYPRE_Int hypre_UBatchedDenseMatrixInitialize( hypre_UBatchedDenseMatrix *A );
+HYPRE_Int hypre_UBatchedDenseMatrixCopy( hypre_UBatchedDenseMatrix *A,
+                                         hypre_UBatchedDenseMatrix *B );
+hypre_UBatchedDenseMatrix* hypre_UBatchedDenseMatrixClone( hypre_UBatchedDenseMatrix *A,
+                                                           HYPRE_Int copy_data );
+
+/* ubatched_csr_matrix.c */
+hypre_UBatchedCSRMatrix* hypre_UBatchedCSRMatrixCreate( HYPRE_Int num_batches,
+                                                        HYPRE_Int num_rows_total,
+                                                        HYPRE_Int num_cols_total,
+                                                        HYPRE_Int num_coefs_total );
+HYPRE_Int hypre_UBatchedCSRMatrixDestroy( hypre_UBatchedCSRMatrix *A );
+HYPRE_Int hypre_UBatchedCSRMatrixInitialize_v2( hypre_UBatchedCSRMatrix *A,
+                                                HYPRE_MemoryLocation memory_location );
+HYPRE_Int hypre_UBatchedCSRMatrixInitialize( hypre_UBatchedCSRMatrix *A );
+HYPRE_Int hypre_UBatchedCSRMatrixCopy( hypre_UBatchedCSRMatrix *A,
+                                       hypre_UBatchedCSRMatrix *B );
+hypre_UBatchedCSRMatrix* hypre_UBatchedCSRMatrixClone( hypre_UBatchedCSRMatrix *A,
+                                                       HYPRE_Int copy_data );
 
 /* csr_matrix.c */
 hypre_CSRMatrix *hypre_CSRMatrixCreate ( HYPRE_Int num_rows, HYPRE_Int num_cols,
@@ -617,6 +670,8 @@ HYPRE_Int hypre_SeqVectorCopy ( hypre_Vector *x, hypre_Vector *y );
 hypre_Vector *hypre_SeqVectorCloneDeep ( hypre_Vector *x );
 hypre_Vector *hypre_SeqVectorCloneDeep_v2( hypre_Vector *x, HYPRE_MemoryLocation memory_location );
 hypre_Vector *hypre_SeqVectorCloneShallow ( hypre_Vector *x );
+HYPRE_Int hypre_SeqVectorDataToArrayOfPointers( hypre_Vector *x, HYPRE_Int num_blocks,
+                                                HYPRE_Complex **aop );
 HYPRE_Int hypre_SeqVectorScale( HYPRE_Complex alpha, hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorScaleHost( HYPRE_Complex alpha, hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorScaleDevice( HYPRE_Complex alpha, hypre_Vector *y );
