@@ -44,11 +44,11 @@ Final Relative Residual Norm = 6.699477e-09
 
 # Output file: solvers.out.311
 hypre_ILU Iterations = 35
-Final Relative Residual Norm = 8.236857e-09
+Final Relative Residual Norm = 6.392185e-09
 
 # Output file: solvers.out.312
 hypre_ILU Iterations = 23
-Final Relative Residual Norm = 8.226180e-09
+Final Relative Residual Norm = 5.953652e-09
 
 # Output file: solvers.out.313
 GMRES Iterations = 25
@@ -88,7 +88,7 @@ Final FlexGMRES Relative Residual Norm = 4.489256e-09
 
 # Output file: solvers.out.322
 FlexGMRES Iterations = 9
-Final FlexGMRES Relative Residual Norm = 4.095675e-09
+Final FlexGMRES Relative Residual Norm = 3.082447e-09
 
 # Output file: solvers.out.323
 FlexGMRES Iterations = 18

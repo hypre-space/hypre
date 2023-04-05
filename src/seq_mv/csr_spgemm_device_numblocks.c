@@ -6,7 +6,7 @@
  ******************************************************************************/
 #include "seq_mv.h"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
 
 #include "csr_spgemm_device.h"
 
@@ -26,6 +26,12 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetBlockNumDim()
 #if defined(HYPRE_USING_HIP)
    hipDeviceGetAttribute(&multiProcessorCount, hipDeviceAttributeMultiprocessorCount,
                          hypre_HandleDevice(hypre_handle()));
+#endif
+
+#if defined(HYPRE_USING_SYCL)
+   /* WM: todo - is this right? */
+   multiProcessorCount = hypre_HandleDevice(
+                            hypre_handle())->get_info<sycl::info::device::max_compute_units>();
 #endif
 
    typedef HYPRE_Int arrType[4][HYPRE_SPGEMM_MAX_NBIN + 1];
@@ -138,5 +144,5 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetBlockNumDim()
    return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
+#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
 

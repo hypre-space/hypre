@@ -78,9 +78,9 @@ void MatGenFD_Create(MatGenFD *mg)
   Parser_dhReadDouble(parser_dh,"-cy",&tmp->e);
   Parser_dhReadDouble(parser_dh,"-cz",&tmp->f);
 
-  tmp->a = -1*fabs(tmp->a);
-  tmp->b = -1*fabs(tmp->b);
-  tmp->c = -1*fabs(tmp->c);
+  tmp->a = -1*hypre_abs(tmp->a);
+  tmp->b = -1*hypre_abs(tmp->b);
+  tmp->c = -1*hypre_abs(tmp->c);
 
   tmp->allocateMem = true;
 
@@ -495,7 +495,7 @@ HYPRE_Real konstant(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z)
 {  return coeff; }
 
 HYPRE_Real e2_xy(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z)
-{ return exp(coeff*x*y); }
+{ return hypre_exp(coeff*x*y); }
 
 HYPRE_Real boxThreeD(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);
 

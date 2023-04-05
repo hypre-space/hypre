@@ -21,3 +21,19 @@ API
    api-sol-parcsr
    api-sol-krylov
    api-sol-eigen
+
+.. Add blank lines to help with navigation pane formatting
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|

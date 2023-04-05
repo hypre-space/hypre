@@ -28,9 +28,11 @@
 
 #include <signal.h>
 
+#include "_hypre_utilities.h"
 #include "macros.h"
 #include "struct.h"
 #include "const.h"
+
 
 
 #endif

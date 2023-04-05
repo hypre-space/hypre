@@ -50,6 +50,13 @@ mpirun -np 2 ./ij -solver 17 -rhsrand -unroll 4 > solvers.out.16
 mpirun -np 2 ./ij -solver 3 -rhsrand -check_residual > solvers.out.17
 mpirun -np 2 ./ij -solver 4 -rhsrand -check_residual > solvers.out.18
 
+mpirun -np 3 ./ij -n 23 29 31 -solver 1 -rhsrand -precon_cycles 2 -rlx 18 > solvers.out.19
+mpirun -np 4 ./ij -n 23 29 31 -solver 3 -rhsrand -precon_cycles 3 -rlx 18 > solvers.out.20
+mpirun -np 2 ./ij -n 23 29 31 -solver 0 -rhsrand -mu 2            -rlx 18 > solvers.out.21
+mpirun -np 2 ./ij -n 23 29 31 -solver 3 -rhsrand -mu 2            -rlx 18 > solvers.out.22
+mpirun -np 2 ./ij -n 23 29 31 -solver 0 -rhsrand -fmg             -rlx 18 > solvers.out.23
+mpirun -np 2 ./ij -n 23 29 31 -solver 3 -rhsrand -fmg             -rlx 18 > solvers.out.24
+
 #systems AMG run ...unknown approach, hybrid approach, nodal approach
 mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 > solvers.out.sysu
 mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 -nodal 1 -smtype 6 -smlv 10 -dom 1 -ov 0 > solvers.out.sysh

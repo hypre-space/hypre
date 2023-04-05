@@ -13,9 +13,6 @@
 
 #define HYPRE_INTERPTRUNC_ALGORITHM_SWITCH 8
 
-/* WM: todo - how to do shared memory in sycl? */
-#if !defined(HYPRE_USING_SYCL)
-
 /* special case for max_elmts = 0, i.e. no max_elmts limit */
 __global__ void
 hypreGPUKernel_InterpTruncationPass0_v1( hypre_DeviceItem &item,
@@ -57,14 +54,14 @@ hypreGPUKernel_InterpTruncationPass0_v1( hypre_DeviceItem &item,
    {
       HYPRE_Real v = P_diag_a[i];
       row_sum += v;
-      row_max = hypre_max(row_max, fabs(v));
+      row_max = hypre_max(row_max, hypre_abs(v));
    }
 
    for (HYPRE_Int i = p_offd + lane; i < q_offd; i += HYPRE_WARP_SIZE)
    {
       HYPRE_Real v = P_offd_a[i];
       row_sum += v;
-      row_max = hypre_max(row_max, fabs(v));
+      row_max = hypre_max(row_max, hypre_abs(v));
    }
 
    row_max = warp_allreduce_max(item, row_max) * trunc_factor;
@@ -83,7 +80,7 @@ hypreGPUKernel_InterpTruncationPass0_v1( hypre_DeviceItem &item,
       {
          v = P_diag_a[i];
 
-         if (fabs(v) >= row_max)
+         if (hypre_abs(v) >= row_max)
          {
             j = P_diag_j[i];
             row_scal += v;
@@ -112,7 +109,7 @@ hypreGPUKernel_InterpTruncationPass0_v1( hypre_DeviceItem &item,
       {
          v = P_offd_a[i];
 
-         if (fabs(v) >= row_max)
+         if (hypre_abs(v) >= row_max)
          {
             j = P_offd_j[i];
             row_scal += v;
@@ -166,12 +163,12 @@ void hypre_smallest_abs_val( HYPRE_Int   n,
                              HYPRE_Real &min_v,
                              HYPRE_Int  &min_j )
 {
-   min_v = fabs(v[0]);
+   min_v = hypre_abs(v[0]);
    min_j = 0;
 
    for (HYPRE_Int j = 1; j < n; j++)
    {
-      const HYPRE_Real vj = fabs(v[j]);
+      const HYPRE_Real vj = hypre_abs(v[j]);
       if (vj < min_v)
       {
          min_v = vj;
@@ -183,6 +180,9 @@ void hypre_smallest_abs_val( HYPRE_Int   n,
 /* TODO: using 1 thread per row, which can be suboptimal */
 __global__ void
 hypreGPUKernel_InterpTruncationPass1_v1( hypre_DeviceItem &item,
+#if defined(HYPRE_USING_SYCL)
+                                         char *shmem_ptr,
+#endif
                                          HYPRE_Int   nrows,
                                          HYPRE_Real  trunc_factor,
                                          HYPRE_Int   max_elmts,
@@ -214,14 +214,14 @@ hypreGPUKernel_InterpTruncationPass1_v1( hypre_DeviceItem &item,
    {
       HYPRE_Real v = P_diag_a[i];
       row_sum += v;
-      row_max = hypre_max(row_max, fabs(v));
+      row_max = hypre_max(row_max, hypre_abs(v));
    }
 
    for (HYPRE_Int i = p_offd; i < q_offd; i++)
    {
       HYPRE_Real v = P_offd_a[i];
       row_sum += v;
-      row_max = hypre_max(row_max, fabs(v));
+      row_max = hypre_max(row_max, hypre_abs(v));
    }
 
    row_max *= trunc_factor;
@@ -229,7 +229,11 @@ hypreGPUKernel_InterpTruncationPass1_v1( hypre_DeviceItem &item,
    /* 2. save the largest max_elmts entries in sh_val/pos */
    const HYPRE_Int nt = hypre_gpu_get_num_threads<1>(item);
    const HYPRE_Int tid = hypre_gpu_get_thread_id<1>(item);
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Int *shared_mem = (HYPRE_Int*) shmem_ptr;
+#else
    extern __shared__ HYPRE_Int shared_mem[];
+#endif
    HYPRE_Int *sh_pos = &shared_mem[tid * max_elmts];
    HYPRE_Real *sh_val = &((HYPRE_Real *) &shared_mem[nt * max_elmts])[tid * max_elmts];
    HYPRE_Int cnt = 0;
@@ -238,7 +242,7 @@ hypreGPUKernel_InterpTruncationPass1_v1( hypre_DeviceItem &item,
    {
       const HYPRE_Real v = P_diag_a[i];
 
-      if (fabs(v) < row_max) { continue; }
+      if (hypre_abs(v) < row_max) { continue; }
 
       if (cnt < max_elmts)
       {
@@ -252,7 +256,7 @@ hypreGPUKernel_InterpTruncationPass1_v1( hypre_DeviceItem &item,
 
          hypre_smallest_abs_val(max_elmts, sh_val, min_v, min_j);
 
-         if (fabs(v) > min_v)
+         if (hypre_abs(v) > min_v)
          {
             sh_val[min_j] = v;
             sh_pos[min_j] = i;
@@ -264,7 +268,7 @@ hypreGPUKernel_InterpTruncationPass1_v1( hypre_DeviceItem &item,
    {
       const HYPRE_Real v = P_offd_a[i];
 
-      if (fabs(v) < row_max) { continue; }
+      if (hypre_abs(v) < row_max) { continue; }
 
       if (cnt < max_elmts)
       {
@@ -278,7 +282,7 @@ hypreGPUKernel_InterpTruncationPass1_v1( hypre_DeviceItem &item,
 
          hypre_smallest_abs_val(max_elmts, sh_val, min_v, min_j);
 
-         if (fabs(v) > min_v)
+         if (hypre_abs(v) > min_v)
          {
             sh_val[min_j] = v;
             sh_pos[min_j] = i + q_diag;
@@ -433,9 +437,13 @@ hypre_BoomerAMGInterpTruncationDevice_v1( hypre_ParCSRMatrix *P,
    }
    else
    {
-      dim3 bDim(256);
+      dim3 bDim = hypre_dim3(256);
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "thread", bDim);
+#if defined(HYPRE_USING_SYCL)
+      size_t shmem_bytes = bDim.get(2) * max_elmts * (sizeof(HYPRE_Int) + sizeof(HYPRE_Real));
+#else
       size_t shmem_bytes = bDim.x * max_elmts * (sizeof(HYPRE_Int) + sizeof(HYPRE_Real));
+#endif
       HYPRE_GPU_LAUNCH2( hypreGPUKernel_InterpTruncationPass1_v1,
                          gDim, bDim, shmem_bytes,
                          nrows, trunc_factor, max_elmts,
@@ -492,8 +500,6 @@ hypre_BoomerAMGInterpTruncationDevice_v1( hypre_ParCSRMatrix *P,
    return hypre_error_flag;
 }
 
-#endif
-
 __global__ void
 hypreGPUKernel_InterpTruncation_v2( hypre_DeviceItem &item,
                                     HYPRE_Int   nrows,
@@ -524,7 +530,7 @@ hypreGPUKernel_InterpTruncation_v2( hypre_DeviceItem &item,
    for (HYPRE_Int i = p + lane; i < q; i += HYPRE_WARP_SIZE)
    {
       HYPRE_Real v = read_only_load(&P_a[i]);
-      row_max = hypre_max(row_max, fabs(v));
+      row_max = hypre_max(row_max, hypre_abs(v));
       row_sum += v;
    }
 
@@ -547,7 +553,7 @@ hypreGPUKernel_InterpTruncation_v2( hypre_DeviceItem &item,
          {
             v = read_only_load(&P_a[i]);
          }
-         cond = cond && fabs(v) >= row_max;
+         cond = cond && hypre_abs(v) >= row_max;
 
          if (cond)
          {
@@ -731,14 +737,11 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P,
 #endif
    hypre_GpuProfilingPushRange("Interp-Truncation");
 
-   /* WM: todo - sycl */
-#if !defined(HYPRE_USING_SYCL)
    if (max_elmts <= HYPRE_INTERPTRUNC_ALGORITHM_SWITCH)
    {
       hypre_BoomerAMGInterpTruncationDevice_v1(P, trunc_factor, max_elmts);
    }
    else
-#endif
    {
       hypre_BoomerAMGInterpTruncationDevice_v2(P, trunc_factor, max_elmts);
    }

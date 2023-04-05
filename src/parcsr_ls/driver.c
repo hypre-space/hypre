@@ -504,7 +504,7 @@ main( HYPRE_Int   argc,
       HYPRE_ParVectorInitialize(b);
       HYPRE_ParVectorSetRandomValues(b, 22775);
       HYPRE_ParVectorInnerProd(b, b, &norm);
-      norm = 1.0 / sqrt(norm);
+      norm = 1.0 / hypre_sqrt(norm);
       ierr = HYPRE_ParVectorScale(norm, b);
 
       HYPRE_ParVectorCreate(hypre_MPI_COMM_WORLD, global_n, partitioning, &x);
