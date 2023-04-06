@@ -436,10 +436,14 @@ hypre_CSRMatrixSpMVDevice( HYPRE_Int        trans,
    d_ia = hypre_CSRMatrixI(A);
    d_ja = hypre_CSRMatrixJ(A);
    d_a  = hypre_CSRMatrixData(A);
+
    if (hypre_CSRMatrixRownnz(A))
    {
       num_rows   = hypre_CSRMatrixNumRownnz(A);
       d_rownnz_A = hypre_CSRMatrixRownnz(A);
+
+      hypre_SeqVectorScale(beta, y);
+      beta = beta ? 1.0 : 0.0;
    }
 
    /* Choose matrix fill mode */
