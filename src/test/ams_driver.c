@@ -95,7 +95,9 @@ void AMSDriverVectorRead(const char *file, HYPRE_ParVector *x)
    fclose(test);
 }
 
-hypre_int main (hypre_int argc, char *argv[])
+hypre_int
+main (hypre_int argc,
+      char *argv[])
 {
    HYPRE_Int num_procs, myid;
    HYPRE_Int time_index;
@@ -151,6 +153,10 @@ hypre_int main (hypre_int argc, char *argv[])
    HYPRE_SetExecutionPolicy(default_exec_policy);
 
 #if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
+   /* CUSPARSE_SPMV_ALG_DEFAULT doesn't provide deterministic results */
+   HYPRE_SetSpMVUseVendor(0);
+#endif
    /* use vendor implementation for SpGEMM */
    HYPRE_SetSpGemmUseVendor(0);
    /* use cuRand for PMIS */
