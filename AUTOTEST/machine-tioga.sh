@@ -49,7 +49,7 @@ save="tioga"
 ## HIP  ##
 ##########
 
-module -q load rocm/5.1.1
+module -q load rocm/5.2.0
 
 # HIP without UM [benchmark, struct]
 co="--with-hip --with-MPI-include=${MPICH_DIR}/include --with-MPI-lib-dirs=${MPICH_DIR}/lib --with-MPI-libs=mpi --with-gpu-arch='gfx90a' CC=cc CXX=CC"
