@@ -683,13 +683,13 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
       }
 
       /* Compute LU factorization */
-      HYPRE_CUBLAS_CALL(cublasDgetrfBatched(hypre_HandleCublasHandle(hypre_handle()),
-                                            blk_size,
-                                            tmpdiag_aop,
-                                            blk_size,
-                                            pivots,
-                                            infos,
-                                            num_blocks));
+      HYPRE_CUBLAS_CALL(hypre_cublas_getrfBatched(hypre_HandleCublasHandle(hypre_handle()),
+                                                  blk_size,
+                                                  tmpdiag_aop,
+                                                  blk_size,
+                                                  pivots,
+                                                  infos,
+                                                  num_blocks));
 #if defined (HYPRE_DEBUG)
       hypre_TMemcpy(h_infos, infos, HYPRE_Int, num_rows, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
       for (k = 0; k < num_rows; k++)
@@ -711,15 +711,15 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
 #endif
 
       /* Compute sub-blocks inverses */
-      HYPRE_CUBLAS_CALL(cublasDgetriBatched(hypre_HandleCublasHandle(hypre_handle()),
-                                            blk_size,
-                                            tmpdiag_aop,
-                                            blk_size,
-                                            pivots,
-                                            diag_aop,
-                                            blk_size,
-                                            infos,
-                                            num_blocks));
+      HYPRE_CUBLAS_CALL(hypre_cublas_getriBatched(hypre_HandleCublasHandle(hypre_handle()),
+                                                  blk_size,
+                                                  tmpdiag_aop,
+                                                  blk_size,
+                                                  pivots,
+                                                  diag_aop,
+                                                  blk_size,
+                                                  infos,
+                                                  num_blocks));
 
       /* Free memory */
       hypre_TFree(diag_aop, HYPRE_MEMORY_DEVICE);
