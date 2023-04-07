@@ -26,6 +26,27 @@ extern "C++"
 }
 #endif
 
+/*--------------------------------------------------------------------------
+ * Wrappers to MAGMA functions according to hypre's precision
+ *--------------------------------------------------------------------------*/
+
+#if defined(HYPRE_COMPLEX) || defined(HYPRE_LONG_DOUBLE)
+#error MAGMA interface does not support complex and long double numbers
+
+#elif defined(HYPRE_SINGLE)
+#define hypre_magma_getrf_gpu              magma_sgetrf_gpu
+#define hypre_magma_getrs_gpu              magma_sgetrs_gpu
+
+#else /* Double precision */
+#define hypre_magma_getrf_gpu              magma_dgetrf_gpu
+#define hypre_magma_getrs_gpu              magma_dgetrs_gpu
+
+#endif
+
+/*--------------------------------------------------------------------------
+ * General wrapper call to MAGMA functions
+ *--------------------------------------------------------------------------*/
+
 #define HYPRE_MAGMA_CALL(call) do {                   \
    magma_int_t err = call;                            \
    if (MAGMA_SUCCESS != err) {                        \

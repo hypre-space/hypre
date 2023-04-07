@@ -319,8 +319,8 @@ hypre_GaussElimAllSetup(hypre_ParAMGData *amg_data,
                        HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
          /* Compute LU factorization on device */
-         HYPRE_MAGMA_CALL(magma_dgetrf_gpu(global_num_rows, global_num_rows, d_A_inv,
-                                           global_num_rows, A_piv, &info));
+         HYPRE_MAGMA_CALL(hypre_magma_getrf_gpu(global_num_rows, global_num_rows, d_A_inv,
+                                                global_num_rows, A_piv, &info));
 
          /* Free memory */
          hypre_TFree(A_mat, HYPRE_MEMORY_HOST);
@@ -561,9 +561,9 @@ hypre_GaussElimAllSolve(hypre_ParAMGData *amg_data,
          f_data   = hypre_VectorData(f_vector);
 
          /* f_data = inv(U)*inv(L)*f_data */
-         HYPRE_MAGMA_CALL(magma_dgetrs_gpu(MagmaNoTrans, global_num_rows, 1, d_A_inv,
-                                           global_num_rows, A_piv, f_data,
-                                           global_num_rows, &info));
+         HYPRE_MAGMA_CALL(hypre_magma_getrs_gpu(MagmaNoTrans, global_num_rows, 1, d_A_inv,
+                                                global_num_rows, A_piv, f_data,
+                                                global_num_rows, &info));
 
          /* Copy solution vector b_vec to u */
          hypre_TMemcpy(u_data, f_data + first_index, HYPRE_Complex, num_rows,
