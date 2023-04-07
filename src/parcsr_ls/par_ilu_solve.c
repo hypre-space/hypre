@@ -96,7 +96,7 @@ hypre_ILUSolve( void               *ilu_vdata,
    hypre_ParVector      *rhs                = hypre_ParILUDataRhs(ilu_data);
    hypre_ParVector      *x                  = hypre_ParILUDataX(ilu_data);
 
-#if defined(HYPRE_USING_GPU)
+#if (defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)) || (defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY))
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
                                                       hypre_ParVectorMemoryLocation(f) );
 #endif
