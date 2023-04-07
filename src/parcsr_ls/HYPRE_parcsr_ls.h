@@ -3782,7 +3782,8 @@ HYPRE_Int HYPRE_MGRDirectSolverCreate( HYPRE_Solver *solver );
 HYPRE_Int HYPRE_MGRDirectSolverDestroy( HYPRE_Solver solver );
 
 /**
- * Setup the MGR direct solver using DSUPERLU
+ * Setup the MGR direct solver using SuperLU_dist
+ *
  * @param solver [IN] object to be set up.
  * @param A [IN] ParCSR matrix used to construct the solver/preconditioner.
  * @param b right-hand-side of the linear system to be solved (Ignored by this function).
@@ -3791,10 +3792,10 @@ HYPRE_Int HYPRE_MGRDirectSolverDestroy( HYPRE_Solver solver );
 HYPRE_Int HYPRE_MGRDirectSolverSetup( HYPRE_Solver solver,
                                       HYPRE_ParCSRMatrix A,
                                       HYPRE_ParVector b,
-                                      HYPRE_ParVector x      );
+                                      HYPRE_ParVector x );
 
 /**
-* Solve the system using DSUPERLU.
+* Solve the system using SuperLU_dist.
 *
 * @param solver [IN] solver or preconditioner object to be applied.
 * @param A [IN] ParCSR matrix, matrix of the linear system to be solved (Ignored by this function).
@@ -3804,7 +3805,7 @@ HYPRE_Int HYPRE_MGRDirectSolverSetup( HYPRE_Solver solver,
 HYPRE_Int HYPRE_MGRDirectSolverSolve( HYPRE_Solver solver,
                                       HYPRE_ParCSRMatrix A,
                                       HYPRE_ParVector b,
-                                      HYPRE_ParVector x      );
+                                      HYPRE_ParVector x );
 #endif
 
 /**
@@ -3830,7 +3831,7 @@ HYPRE_Int HYPRE_MGRDestroy( HYPRE_Solver solver );
 HYPRE_Int HYPRE_MGRSetup( HYPRE_Solver solver,
                           HYPRE_ParCSRMatrix A,
                           HYPRE_ParVector b,
-                          HYPRE_ParVector x      );
+                          HYPRE_ParVector x );
 
 /**
 * Solve the system or apply MGR as a preconditioner.
@@ -3845,7 +3846,7 @@ HYPRE_Int HYPRE_MGRSetup( HYPRE_Solver solver,
 HYPRE_Int HYPRE_MGRSolve( HYPRE_Solver solver,
                           HYPRE_ParCSRMatrix A,
                           HYPRE_ParVector b,
-                          HYPRE_ParVector x      );
+                          HYPRE_ParVector x );
 
 /**
  * Set the block data assuming that the physical variables are ordered contiguously,
@@ -4132,7 +4133,7 @@ HYPRE_MGRSetBlockJacobiBlockSize( HYPRE_Solver solver,
  * @param solver [IN] MGR solver/preconditioner object
  * @param fine_grid_solver_solve [IN] solve routine
  * @param fine_grid_solver_setup [IN] setup routine
- * @param fine_grid_solver [OUT] fine grid solver object
+ * @param fine_grid_solver [IN] fine grid solver object
  **/
 HYPRE_Int HYPRE_MGRSetFSolver(HYPRE_Solver             solver,
                               HYPRE_PtrToParSolverFcn  fine_grid_solver_solve,
@@ -4157,7 +4158,7 @@ HYPRE_Int HYPRE_MGRBuildAff(HYPRE_ParCSRMatrix A,
  * @param solver [IN] MGR solver/preconditioner object
  * @param coarse_grid_solver_solve [IN] solve routine for BoomerAMG
  * @param coarse_grid_solver_setup [IN] setup routine for BoomerAMG
- * @param coarse_grid_solver [OUT] coarse grid solver object
+ * @param coarse_grid_solver [IN] coarse grid solver object
  **/
 HYPRE_Int HYPRE_MGRSetCoarseSolver(HYPRE_Solver             solver,
                                    HYPRE_PtrToParSolverFcn  coarse_grid_solver_solve,

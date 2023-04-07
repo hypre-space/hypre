@@ -31,7 +31,6 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_Int    block_jacobi_bsize;
    HYPRE_Int    *blk_size = mgr_data -> blk_size;
    HYPRE_Int    level_blk_size;
-   //  HYPRE_Int  num_threads;
 
    hypre_ParCSRMatrix  *RT = NULL;
    hypre_ParCSRMatrix  *P = NULL;
@@ -56,6 +55,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_Int  logging = (mgr_data -> logging);
    HYPRE_Int  print_level = (mgr_data -> print_level);
    HYPRE_Int  relax_type = (mgr_data -> relax_type);
+   HYPRE_Int  relax_order = (mgr_data -> relax_order);
    HYPRE_Int  *interp_type = (mgr_data -> interp_type);
    HYPRE_Int  *restrict_type = (mgr_data -> restrict_type);
    HYPRE_Int  *num_relax_sweeps = (mgr_data -> num_relax_sweeps);
@@ -151,9 +151,8 @@ hypre_MGRSetup( void               *mgr_vdata,
 
    /* ----- begin -----*/
    HYPRE_ANNOTATE_FUNC_BEGIN;
-   hypre_GpuProfilingPushRange("hypre_MGRSetup");
+   hypre_GpuProfilingPushRange("MGRSetup");
    hypre_GpuProfilingPushRange("MGRSetup-Init");
-   //  num_threads = hypre_NumThreads();
 
    block_size = (mgr_data -> block_size);
    block_jacobi_bsize = (mgr_data -> block_jacobi_bsize);
@@ -1803,7 +1802,8 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
          /* Compute l1_norms according to relaxation type */
          hypre_BoomerAMGRelaxComputeL1Norms(A_array[j], Frelax_type[j],
-                                            0, 0, NULL, &l1_norms_data);
+                                            relax_order, 0, CF_marker_array[j],
+                                            &l1_norms_data);
          if (l1_norms_data)
          {
             nloc = hypre_ParCSRMatrixNumRows(A_array[j]);
