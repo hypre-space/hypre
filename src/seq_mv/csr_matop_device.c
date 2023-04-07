@@ -1343,105 +1343,6 @@ hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix *A )
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-
-__global__ void
-hypreGPUKernel_CSRMatrixFixZeroDiagDevice( hypre_DeviceItem    &item,
-                                           HYPRE_Complex  v,
-                                           HYPRE_Int      nrows,
-                                           HYPRE_Int     *ia,
-                                           HYPRE_Int     *ja,
-                                           HYPRE_Complex *data,
-                                           HYPRE_Real     tol,
-                                           HYPRE_Int     *result )
-{
-   const HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
-
-   if (row >= nrows)
-   {
-      return;
-   }
-
-   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int p = 0, q = 0;
-   bool has_diag = false;
-
-   if (lane < 2)
-   {
-      p = read_only_load(ia + row + lane);
-   }
-   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
-   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
-
-   for (HYPRE_Int j = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
-   {
-      hypre_int find_diag = j < q && read_only_load(&ja[j]) == row;
-
-      if (find_diag)
-      {
-         if (hypre_abs(data[j]) <= tol)
-         {
-            data[j] = v;
-         }
-      }
-
-      if ( warp_any_sync(item, HYPRE_WARP_FULL_MASK, find_diag) )
-      {
-         has_diag = true;
-         break;
-      }
-   }
-
-   if (result && !has_diag && lane == 0)
-   {
-      result[row] = 1;
-   }
-}
-
-/* For square A, find numerical zeros (absolute values <= tol) on its diagonal and replace with v
- * Does NOT assume diagonal is the first entry of each row of A
- * In debug mode:
- *    Returns the number of rows that do not have diag in the pattern
- *    (i.e., structural zeroes on the diagonal)
- */
-HYPRE_Int
-hypre_CSRMatrixFixZeroDiagDevice( hypre_CSRMatrix *A,
-                                  HYPRE_Complex    v,
-                                  HYPRE_Real       tol )
-{
-   HYPRE_Int ierr = 0;
-
-   if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
-   {
-      return ierr;
-   }
-
-   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-   dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "warp", bDim);
-
-#if HYPRE_DEBUG
-   HYPRE_Int *result = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
-#else
-   HYPRE_Int *result = NULL;
-#endif
-
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixFixZeroDiagDevice, gDim, bDim,
-                     v, hypre_CSRMatrixNumRows(A),
-                     hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A),
-                     tol, result );
-
-#if HYPRE_DEBUG
-   ierr = HYPRE_THRUST_CALL( reduce,
-                             result,
-                             result + hypre_CSRMatrixNumRows(A) );
-
-   hypre_TFree(result, HYPRE_MEMORY_DEVICE);
-#endif
-
-   hypre_SyncComputeStream(hypre_handle());
-
-   return ierr;
-}
-
 __global__ void
 hypreGPUKernel_CSRMatrixReplaceDiagDevice( hypre_DeviceItem    &item,
                                            HYPRE_Complex *new_diag,
@@ -1510,11 +1411,9 @@ hypre_CSRMatrixReplaceDiagDevice( hypre_CSRMatrix *A,
                                   HYPRE_Complex    v,
                                   HYPRE_Real       tol )
 {
-   HYPRE_Int ierr = 0;
-
    if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
    {
-      return ierr;
+      return hypre_error_flag;
    }
 
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
@@ -1532,16 +1431,22 @@ hypre_CSRMatrixReplaceDiagDevice( hypre_CSRMatrix *A,
                      tol, result );
 
 #if HYPRE_DEBUG
-   ierr = HYPRE_THRUST_CALL( reduce,
-                             result,
-                             result + hypre_CSRMatrixNumRows(A) );
+   /* the number of structural zero in A */
+   HYPRE_Int num_zeros = HYPRE_THRUST_CALL( reduce,
+                                            result,
+                                            result + hypre_CSRMatrixNumRows(A) );
 
    hypre_TFree(result, HYPRE_MEMORY_DEVICE);
+
+   if (num_zeros)
+   {
+      hypre_error_w_msg(num_zeros, "structural zero in hypre_CSRMatrixReplaceDiagDevice");
+   }
 #endif
 
    hypre_SyncComputeStream(hypre_handle());
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
@@ -2205,7 +2110,6 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
    HYPRE_Int         *A_j       = hypre_CSRMatrixJ(A);
    HYPRE_Complex     *A_a       = hypre_CSRMatrixData(A);
    HYPRE_Complex      alpha     = 1.0;
-   HYPRE_Int          err       = 0;
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
    cudaDataType       data_type = hypre_HYPREComplexToCudaDataType();
    size_t             buffer_size;
@@ -2261,12 +2165,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
 
       /* if (l1_norms), replace A's diag with l1_norm, and
        * replace zero diag with inf. so as to skip relaxation for this unknown */
-      err = hypre_CSRMatrixReplaceDiagDevice(A, l1_norms, INFINITY, 0.0);
-
-      if (err)
-      {
-         hypre_error_w_msg(1, "structural zero in hypre_CSRMatrixTriLowerUpperSolveCusparse");
-      }
+      hypre_CSRMatrixReplaceDiagDevice(A, l1_norms, INFINITY, 0.0);
 
       hypre_CSRMatrixData(A) = A_a;
 #if CUSPARSE_VERSION < CUSPARSE_SPSV_VERSION
@@ -2544,7 +2443,6 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
    HYPRE_Int           *A_j    = hypre_CSRMatrixJ(A);
    HYPRE_Complex       *A_a    = hypre_CSRMatrixData(A);
    HYPRE_Complex        alpha  = 1.0;
-   HYPRE_Int            err    = 0;
    size_t               buffer_size;
    hypre_int            structural_zero;
    rocsparse_diag_type  diag_type = unit_diag ? rocsparse_diag_type_unit: rocsparse_diag_type_non_unit;
@@ -2586,12 +2484,7 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
 
       /* if (l1_norms), replace A's diag with l1_norm, and
        * replace zero diag with inf. so as to skip relaxation for this unknown */
-      err = hypre_CSRMatrixReplaceDiagDevice(A, l1_norms, INFINITY, 0.0);
-
-      if (err)
-      {
-         hypre_error_w_msg(1, "structural zero in hypre_CSRMatrixTriLowerUpperSolveRocsparse");
-      }
+      hypre_CSRMatrixReplaceDiagDevice(A, l1_norms, INFINITY, 0.0);
 
       hypre_CSRMatrixData(A) = A_a;
       hypre_CSRMatrixJ(A) = A_j;
