@@ -2721,6 +2721,7 @@ hypre_HYPREComplexToCudaDataType()
 #endif // #if defined(HYPRE_COMPLEX)
 }
 
+#if CUSPARSE_VERSION >= 10300
 /*--------------------------------------------------------------------
  * hypre_HYPREIntToCusparseIndexType
  *
@@ -2746,6 +2747,8 @@ hypre_HYPREIntToCusparseIndexType()
    return CUSPARSE_INDEX_32I;
 #endif
 }
+#endif
+
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
 #if defined(HYPRE_USING_CUBLAS)
