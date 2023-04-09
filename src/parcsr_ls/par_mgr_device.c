@@ -683,6 +683,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
       }
 
       /* Compute LU factorization */
+#if defined(HYPRE_USING_CUBLAS)
       HYPRE_CUBLAS_CALL(hypre_cublas_getrfBatched(hypre_HandleCublasHandle(hypre_handle()),
                                                   blk_size,
                                                   tmpdiag_aop,
@@ -690,6 +691,10 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                   pivots,
                                                   infos,
                                                   num_blocks));
+#else
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Block inversion not available!");
+#endif
+
 #if defined (HYPRE_DEBUG)
       hypre_TMemcpy(h_infos, infos, HYPRE_Int, num_rows, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
       for (k = 0; k < num_rows; k++)
@@ -711,6 +716,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
 #endif
 
       /* Compute sub-blocks inverses */
+#if defined(HYPRE_USING_CUBLAS)
       HYPRE_CUBLAS_CALL(hypre_cublas_getriBatched(hypre_HandleCublasHandle(hypre_handle()),
                                                   blk_size,
                                                   tmpdiag_aop,
@@ -720,6 +726,9 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                   blk_size,
                                                   infos,
                                                   num_blocks));
+#else
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Block inversion not available!");
+#endif
 
       /* Free memory */
       hypre_TFree(diag_aop, HYPRE_MEMORY_DEVICE);
