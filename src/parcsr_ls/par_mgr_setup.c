@@ -1135,7 +1135,6 @@ hypre_MGRSetup( void               *mgr_vdata,
 #endif
 
       /* Extract A_FF and A_FC when needed by MGR's interpolation/relaxation strategies */
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
       if ((Frelax_type[lev] == 2)   ||
           (Frelax_type[lev] == 9)   ||
           (Frelax_type[lev] == 99)  ||
@@ -1146,7 +1145,6 @@ hypre_MGRSetup( void               *mgr_vdata,
          hypre_ParCSRMatrixGenerateFFFC(A_array[lev], CF_marker, coarse_pnts_global,
                                         NULL, &A_FC, &A_FF);
       }
-#endif
 
       /* Build MGR interpolation */
 #if MGR_DEBUG_LEVEL == 2
@@ -1704,6 +1702,11 @@ hypre_MGRSetup( void               *mgr_vdata,
           Frelax_type[lev] == 199 )
       {
          use_GSElimSmoother = 1;
+
+         /* TODO (VPM): Fow now, we enforce relax_type = 9, which supports GPUs. Fix this! */
+#if defined (HYPRE_USING_GPU)
+         Frelax_type[lev] = 9;
+#endif
       }
 
 #if MGR_DEBUG_LEVEL == 2
