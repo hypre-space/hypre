@@ -16,6 +16,25 @@
 
 #if defined(HYPRE_USING_MEMORY_TRACKER)
 
+hypre_MemoryTracker *_hypre_memory_tracker = NULL;
+
+/* accessor to the global ``_hypre_memory_tracker'' */
+hypre_MemoryTracker*
+hypre_memory_tracker(void)
+{
+#ifdef HYPRE_USING_OPENMP
+   #pragma omp critical
+#endif
+   {
+      if (!_hypre_memory_tracker)
+      {
+         _hypre_memory_tracker = hypre_MemoryTrackerCreate();
+      }
+   }
+
+   return _hypre_memory_tracker;
+}
+
 size_t hypre_total_bytes[hypre_NUM_MEMORY_LOCATION];
 size_t hypre_peak_bytes[hypre_NUM_MEMORY_LOCATION];
 size_t hypre_current_bytes[hypre_NUM_MEMORY_LOCATION];
@@ -252,44 +271,49 @@ hypre_MemoryTrackerInsert2(const char           *action,
 
    hypre_MemoryTrackerQueue *queue = &tracker->queue[q];
 
-   /* resize if not enough space */
-
-   if (queue->alloced_size <= queue->actual_size)
+#ifdef HYPRE_USING_OPENMP
+   #pragma omp critical
+#endif
    {
-      queue->alloced_size = 2 * queue->alloced_size + 1;
-      queue->data = (hypre_MemoryTrackerEntry *) realloc(queue->data,
-                                                         queue->alloced_size * sizeof(hypre_MemoryTrackerEntry));
-   }
+      /* resize if not enough space */
 
-   hypre_assert(queue->actual_size < queue->alloced_size);
+      if (queue->alloced_size <= queue->actual_size)
+      {
+         queue->alloced_size = 2 * queue->alloced_size + 1;
+         queue->data = (hypre_MemoryTrackerEntry *) realloc(queue->data,
+                                                            queue->alloced_size * sizeof(hypre_MemoryTrackerEntry));
+      }
 
-   /* insert an entry */
-   hypre_MemoryTrackerEntry *entry = queue->data + queue->actual_size;
+      hypre_assert(queue->actual_size < queue->alloced_size);
 
-   entry->index = queue->actual_size;
-   entry->time_step = tracker->curr_time_step;
-   sprintf(entry->action, "%s", action);
-   entry->ptr = ptr;
-   entry->ptr2 = ptr2;
-   entry->nbytes = nbytes;
-   entry->memory_location = memory_location;
-   entry->memory_location2 = memory_location2;
-   sprintf(entry->filename, "%s", filename);
-   sprintf(entry->function, "%s", function);
-   entry->line = line;
-   entry->pair = (size_t) -1;
+      /* insert an entry */
+      hypre_MemoryTrackerEntry *entry = queue->data + queue->actual_size;
+
+      entry->index = queue->actual_size;
+      entry->time_step = tracker->curr_time_step;
+      sprintf(entry->action, "%s", action);
+      entry->ptr = ptr;
+      entry->ptr2 = ptr2;
+      entry->nbytes = nbytes;
+      entry->memory_location = memory_location;
+      entry->memory_location2 = memory_location2;
+      sprintf(entry->filename, "%s", filename);
+      sprintf(entry->function, "%s", function);
+      entry->line = line;
+      entry->pair = (size_t) -1;
 
 #if 0
-   HYPRE_Int myid;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-   if (myid == 0 && entry->time_step == 28111) {assert(0);}
+      HYPRE_Int myid;
+      hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+      if (myid == 0 && entry->time_step == 28111) {assert(0);}
 #endif
 
-   /* increase the time step */
-   tracker->curr_time_step ++;
+      /* increase the time step */
+      tracker->curr_time_step ++;
 
-   /* increase the queue length by 1 */
-   queue->actual_size ++;
+      /* increase the queue length by 1 */
+      queue->actual_size ++;
+   }
 }
 
 HYPRE_Int
