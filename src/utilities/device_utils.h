@@ -347,7 +347,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_COMPLEX) /* Double Complex */
-#error GPU build does not support complex numbers!
+#error "GPU build does not support complex numbers!"
 
 #elif defined(HYPRE_SINGLE) /* Single */
 /* cuBLAS */
@@ -385,7 +385,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csr2csc                rocsparse_scsr2csc
 
 #elif defined(HYPRE_LONG_DOUBLE) /* Long Double */
-#error GPU build does not support long double numbers!
+#error "GPU build does not support Long Double numbers!"
 
 #else /* Double */
 /* cuBLAS */

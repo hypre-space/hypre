@@ -540,8 +540,7 @@ hypreGPUKernel_ComplexMatrixBatchedTranspose( hypre_DeviceItem  &item,
  *
  * TODOs (VPM):
  *   1) Allow other local solver choices. Design an interface for that.
- *   2) Extend to HYPRE_Real != double
- *   3) Move this to par_csr_matop_device.c
+ *   2) Move this to par_csr_matop_device.c
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
