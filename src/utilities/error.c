@@ -85,4 +85,3 @@ HYPRE_Int HYPRE_ClearError(HYPRE_Int hypre_error_code)
    hypre_error_flag &= ~hypre_error_code;
    return (hypre_error_flag & hypre_error_code);
 }
-

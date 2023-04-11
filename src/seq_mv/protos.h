@@ -121,8 +121,6 @@ HYPRE_Int hypre_CSRMatrixMigrate( hypre_CSRMatrix *A, HYPRE_MemoryLocation memor
 hypre_CSRMatrix *hypre_CSRMatrixClone ( hypre_CSRMatrix *A, HYPRE_Int copy_data );
 hypre_CSRMatrix *hypre_CSRMatrixClone_v2( hypre_CSRMatrix *A, HYPRE_Int copy_data,
                                           HYPRE_MemoryLocation memory_location );
-HYPRE_Int hypre_CSRMatrixPermuteHost( hypre_CSRMatrix *A, HYPRE_Int *perm,
-                                      HYPRE_Int *rqperm, hypre_CSRMatrix *B );
 HYPRE_Int hypre_CSRMatrixPermute( hypre_CSRMatrix *A, HYPRE_Int *perm,
                                   HYPRE_Int *rqperm, hypre_CSRMatrix **B_ptr );
 hypre_CSRMatrix *hypre_CSRMatrixUnion( hypre_CSRMatrix *A,

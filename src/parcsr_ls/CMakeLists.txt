@@ -91,6 +91,7 @@ set(SRCS
   par_laplace.c
   par_lr_interp.c
   par_mgr.c
+  par_mgr_coarsen.c
   par_mgr_setup.c
   par_mgr_solve.c
   par_nongalerkin.c
