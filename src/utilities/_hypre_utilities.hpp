@@ -607,7 +607,7 @@ struct hypre_DeviceData
    vendorSolverHandle_t              vendor_solver_handle;
 #endif
 
-/* TODO (VPM): Change to HYPRE_USING_GPU_STREAMS*/
+   /* TODO (VPM): Change to HYPRE_USING_GPU_STREAMS*/
 #if defined(HYPRE_USING_CUDA_STREAMS)
 #if defined(HYPRE_USING_CUDA)
    cudaStream_t                      streams[HYPRE_MAX_NUM_STREAMS];

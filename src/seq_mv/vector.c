@@ -874,8 +874,8 @@ hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
 
    if (!hypre_VectorSize(x))
    {
-     /* VPM: Do not throw an error message here since this can happen for idle processors */
-     return hypre_error_flag;
+      /* VPM: Do not throw an error message here since this can happen for idle processors */
+      return hypre_error_flag;
    }
 
    if (!hypre_VectorData(x))
