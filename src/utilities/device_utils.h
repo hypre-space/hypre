@@ -19,9 +19,22 @@ using hypre_DeviceItem = void*;
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <cuda_profiler_api.h>
+
+#if defined(HYPRE_USING_CURAND)
 #include <curand.h>
+#endif
+
+#if defined(HYPRE_USING_CUBLAS)
 #include <cublas_v2.h>
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE)
 #include <cusparse.h>
+#endif
+
+#if defined(HYPRE_USING_CUSOLVER)
+#include <cusolverDn.h>
+#endif
 
 #ifndef CUDART_VERSION
 #error CUDART_VERSION Undefined!
@@ -58,8 +71,16 @@ using hypre_DeviceItem = void*;
 using hypre_DeviceItem = void*;
 #include <hip/hip_runtime.h>
 
+#if defined(HYPRE_USING_ROCBLAS)
+#include <rocblas/rocblas.h>
+#endif
+
 #if defined(HYPRE_USING_ROCSPARSE)
-#include <rocsparse.h>
+#include <rocsparse/rocsparse.h>
+#endif
+
+#if defined(HYPRE_USING_ROCSOLVER)
+#include <rocsolver/rocsolver.h>
 #endif
 
 #if defined(HYPRE_USING_ROCRAND)
@@ -393,6 +414,14 @@ using hypre_DeviceItem = sycl::nd_item<3>;
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
+#define HYPRE_ROCBLAS_CALL(call) do {                                                        \
+   rocblas_status err = call;                                                                \
+   if (rocblas_status_success != err) {                                                      \
+      printf("rocBLAS ERROR (code = %d, %s) at %s:%d\n",                                     \
+             err, rocblas_status_to_string(err), __FILE__, __LINE__);                        \
+      hypre_assert(0); exit(1);                                                              \
+   } } while(0)
+
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
    cusparseStatus_t err = call;                                                              \
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
@@ -406,6 +435,22 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    if (rocsparse_status_success != err) {                                                    \
       printf("rocSPARSE ERROR (code = %d) at %s:%d\n",                                       \
             err, __FILE__, __LINE__);                                                        \
+      assert(0); exit(1);                                                                    \
+   } } while(0)
+
+#define HYPRE_CUSOLVER_CALL(call) do {                                                       \
+   cusolverStatus_t err = call;                                                              \
+   if (CUSOLVER_STATUS_SUCCESS != err) {                                                     \
+      printf("cuSOLVER ERROR (code = %d) at %s:%d\n",                                        \
+            err, __FILE__, __LINE__);                                                        \
+      hypre_assert(0); exit(1);                                                              \
+   } } while(0)
+
+#define HYPRE_ROCSOLVER_CALL(call) do {                                                      \
+   rocblas_status err = call;                                                                \
+   if (rocblas_status_success != err) {                                                      \
+      printf("rocSOLVER ERROR (code = %d, %s) at %s:%d\n",                                   \
+             err, rocblas_status_to_string(err), __FILE__, __LINE__);                        \
       assert(0); exit(1);                                                                    \
    } } while(0)
 
@@ -461,6 +506,12 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 struct hypre_cub_CachingDeviceAllocator;
 typedef struct hypre_cub_CachingDeviceAllocator hypre_cub_CachingDeviceAllocator;
 
+#if defined(HYPRE_USING_CUSOLVER)
+typedef cusolverDnHandle_t vendorSolverHandle_t;
+#elif defined(HYPRE_USING_ROCSOLVER)
+typedef rocblas_handle     vendorSolverHandle_t;
+#endif
+
 struct hypre_DeviceData
 {
 #if defined(HYPRE_USING_CURAND)
@@ -481,6 +532,10 @@ struct hypre_DeviceData
 
 #if defined(HYPRE_USING_ROCSPARSE)
    rocsparse_handle                  cusparse_handle;
+#endif
+
+#if defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
+   vendorSolverHandle_t              vendor_solver_handle;
 #endif
 
 #if defined(HYPRE_USING_CUDA_STREAMS)
@@ -573,37 +628,41 @@ struct hypre_DeviceData
 #define hypre_DeviceDataUseGpuRand(data)                     ((data) -> use_gpu_rand)
 
 hypre_DeviceData*     hypre_DeviceDataCreate();
-void                hypre_DeviceDataDestroy(hypre_DeviceData* data);
+void                  hypre_DeviceDataDestroy(hypre_DeviceData* data);
 
 #if defined(HYPRE_USING_CURAND)
-curandGenerator_t   hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
+curandGenerator_t     hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
 #endif
 
 #if defined(HYPRE_USING_ROCRAND)
-rocrand_generator   hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
+rocrand_generator     hypre_DeviceDataCurandGenerator(hypre_DeviceData *data);
 #endif
 
 #if defined(HYPRE_USING_CUBLAS)
-cublasHandle_t      hypre_DeviceDataCublasHandle(hypre_DeviceData *data);
+cublasHandle_t        hypre_DeviceDataCublasHandle(hypre_DeviceData *data);
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE)
-cusparseHandle_t    hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
+cusparseHandle_t      hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
-rocsparse_handle    hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
+rocsparse_handle      hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
+#endif
+
+#if defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
+vendorSolverHandle_t  hypre_DeviceDataVendorSolverHandle(hypre_DeviceData *data);
 #endif
 
 #if defined(HYPRE_USING_CUDA)
-cudaStream_t        hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
-cudaStream_t        hypre_DeviceDataComputeStream(hypre_DeviceData *data);
+cudaStream_t          hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
+cudaStream_t          hypre_DeviceDataComputeStream(hypre_DeviceData *data);
 #elif defined(HYPRE_USING_HIP)
-hipStream_t         hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
-hipStream_t         hypre_DeviceDataComputeStream(hypre_DeviceData *data);
+hipStream_t           hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
+hipStream_t           hypre_DeviceDataComputeStream(hypre_DeviceData *data);
 #elif defined(HYPRE_USING_SYCL)
-sycl::queue*        hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
-sycl::queue*        hypre_DeviceDataComputeStream(hypre_DeviceData *data);
+sycl::queue*          hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
+sycl::queue*          hypre_DeviceDataComputeStream(hypre_DeviceData *data);
 #endif
 
 // Data structure and accessor routines for Cuda Sparse Triangular Matrices
@@ -646,7 +705,7 @@ struct hypre_GpuMatData
 #endif
 };
 
-#define hypre_GpuMatDataMatDecsr(data)    ((data) -> mat_descr)
+#define hypre_GpuMatDataMatDescr(data)    ((data) -> mat_descr)
 #define hypre_GpuMatDataMatInfo(data)     ((data) -> mat_info)
 #define hypre_GpuMatDataMatHandle(data)   ((data) -> mat_handle)
 #define hypre_GpuMatDataSpMVBuffer(data)  ((data) -> spmv_buffer)

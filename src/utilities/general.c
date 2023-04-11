@@ -19,7 +19,9 @@ hypre_handle(void)
 {
    if (!_hypre_handle)
    {
-      _hypre_handle = hypre_HandleCreate();
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "ERROR - _hypre_handle is not initialized. Calling HYPRE_Init(). All HYPRE_* or hypre_* function calls should occur between HYPRE_Init() and HYPRE_Finalize().\n");
+      HYPRE_Init();
    }
 
    return _hypre_handle;
@@ -290,6 +292,10 @@ HYPRE_Init(void)
    hypre_HandleCurandGenerator(_hypre_handle);
 #endif
 
+#if defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
+   hypre_HandleVendorSolverHandle(_hypre_handle);
+#endif
+
    /* Check if cuda arch flags in compiling match the device */
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_DEBUG)
    hypre_CudaCompileFlagCheck();
@@ -334,12 +340,16 @@ HYPRE_Finalize(void)
    hypre_UmpireFinalize(_hypre_handle);
 #endif
 
+#if defined(HYPRE_USING_SYCL)
+   /* With sycl, cannot call hypre_GetDeviceLastError() after destroying the handle, so do it here */
+   hypre_GetDeviceLastError();
+#endif
+
    hypre_HandleDestroy(_hypre_handle);
 
    _hypre_handle = NULL;
 
 #if !defined(HYPRE_USING_SYCL)
-   /* With sycl, cannot call hypre_GetDeviceLastError() after destroying the handle */
    hypre_GetDeviceLastError();
 #endif
 
@@ -613,4 +623,3 @@ HYPRE_GetExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy)
 
    return hypre_error_flag;
 }
-
