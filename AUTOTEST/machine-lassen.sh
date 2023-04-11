@@ -45,9 +45,13 @@ atol="3e-15"
 #save=`echo $(hostname) | sed 's/[0-9]\+$//'`
 save="lassen"
 
-##########
-## CUDA ##
-##########
+######################
+##   DEFAULT CUDA   ##
+##  (cuda/10.1.243) ##
+######################
+
+module -q load cuda
+module -q load xl
 
 # CUDA with UM in debug mode [ij, ams, struct, sstruct]
 co="--with-cuda --enable-unified-memory --enable-persistent --enable-debug --with-gpu-arch=70 --with-memory-tracker --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
@@ -56,7 +60,7 @@ eo="-gpu -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
 ./renametest.sh basic $output_dir/basic-cuda-um
 
-#CUDA with UM and mixed-int
+# CUDA with UM and mixed-int
 co="--with-cuda --enable-unified-memory --enable-mixedint --enable-debug --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 ro="-ij-mixed -ams -struct -sstruct-mixed -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
@@ -68,7 +72,7 @@ ro="-gpumemcheck -rt -mpibind -cudamemcheck -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-cuda-um-shared
 
-#CUDA with UM and single precision
+# CUDA with UM and single precision
 co="--with-cuda --enable-unified-memory --enable-single --enable-debug --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 ro="-single -rt -mpibind -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: ${ro}
@@ -134,34 +138,119 @@ co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_
 ./test.sh cmake.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-cuda-nonum-struct
 
-####################################
-## latest CUDA build (only) tests ##
-####################################
-
-# CUDA 11
-module -q load cuda/11
-module list cuda/11 |& grep "None found"
+############################################
+## Various CUDA verion build (only) tests ##
+############################################
 
 mo="-j test"
 
-# CUDA with UM with async malloc [no run]
+# CUDA 9.0 with UM [no run]
+module -q load cuda/9.0
+module list cuda/9.0 |& grep "None found"
+co="--with-cuda --enable-unified-memory --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic-cuda9_0
+
+# CUDA 9.1 with UM [no run]
+module -q load cuda/9.1
+module list cuda/9.1 |& grep "None found"
+co="--with-cuda --enable-unified-memory --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic-cuda9_1
+
+# CUDA 9.2 with UM [no run]
+module -q load cuda/9.2
+module list cuda/9.2 |& grep "None found"
+co="--with-cuda --enable-unified-memory --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic-cuda9_2
+
+# CUDA 10.2 with UM [no run]
+module -q load cuda/10.2
+module list cuda/10.2 |& grep "None found"
+co="--with-cuda --enable-unified-memory --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic-cuda10_2
+
+# CUDA 11.0 with UM with async malloc [no run]
+module -q load cuda/11.0
+module list cuda/11.0 |& grep "None found"
 co="--with-cuda --enable-unified-memory --enable-device-malloc-async --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
-./renametest.sh basic $output_dir/basic-cuda11
+./renametest.sh basic $output_dir/basic-cuda11_0
 
-# CUDA 12
-module -q load cuda/12
-module list cuda/12 |& grep "None found"
-module -q load gcc/8.3.1
+# CUDA 11.1 with UM with async malloc [no run]
+module -q load cuda/11.1
+module list cuda/11.1 |& grep "None found"
+co="--with-cuda --enable-unified-memory --enable-device-malloc-async --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic-cuda11_1
+
+# CUDA 11.2 with UM with async malloc [no run]
+module -q load cuda/11.2
+module list cuda/11.2 |& grep "None found"
+co="--with-cuda --enable-unified-memory --enable-device-malloc-async --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic-cuda11_2
+
+# CUDA 11.3 with UM with async malloc [no run]
+module -q load cuda/11.3
+module list cuda/11.3 |& grep "None found"
+co="--with-cuda --enable-unified-memory --enable-device-malloc-async --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic-cuda11_3
+
+# CUDA 11.4 with UM with async malloc [no run]
+module -q load cuda/11.4
+module list cuda/11.4 |& grep "None found"
+co="--with-cuda --enable-unified-memory --enable-device-malloc-async --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic-cuda11_4
+
+# CUDA 11.5 with UM with async malloc [no run]
+module -q load cuda/11.5
+module list cuda/11.5 |& grep "None found"
+co="--with-cuda --enable-unified-memory --enable-device-malloc-async --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic-cuda11_5
+
+# CUDA 11.6 with UM with async malloc [no run]
+module -q load cuda/11.6
+module list cuda/11.6 |& grep "None found"
+co="--with-cuda --enable-unified-memory --enable-device-malloc-async --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic-cuda11_6
+
+# CUDA 11.7 with UM with async malloc [no run]
+module -q load cuda/11.7
+module list cuda/11.7 |& grep "None found"
+co="--with-cuda --enable-unified-memory --enable-device-malloc-async --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic-cuda11_7
+
+# CUDA 11.8 with UM with async malloc [no run]
+module -q load cuda/11.8
+module list cuda/11.8 |& grep "None found"
+co="--with-cuda --enable-unified-memory --enable-device-malloc-async --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic-cuda11_8
+
+#######################
+## latest CUDA tests ##
+##    cuda/12.0.0    ##
+#######################
 
 rtol="1e-2"
 atol="1e-6"
 
-# CUDA with UM in debug mode [ij, ams, struct, sstruct]
+# CUDA 12.0 + GCC with UM in debug mode, thrust nosync [ij, ams, struct, sstruct]
+module -q load gcc/8.3.1
+module -q load cuda/12.0
+module list cuda/12.0 |& grep "None found"
 co="--with-cuda --enable-unified-memory --enable-thrust-nosync --enable-debug --with-gpu-arch=70 CC=mpicc CXX=mpicxx"
 ro="-ij-gpu -ams -struct -sstruct -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
-./renametest.sh basic $output_dir/basic-cuda12
+./renametest.sh basic $output_dir/basic-cuda12_0
 
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )
