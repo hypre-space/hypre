@@ -683,22 +683,24 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
       }
 
-      /* When running on the device and using Jacobi relaxation, switch to GPU-supported Jacobi */
-#if defined(HYPRE_USING_GPU)
-      for (i = 0; i < max_num_coarse_levels; i++)
-      {
-         if (Frelax_type[i] == 0 && interp_type && interp_type[i] != 12)
-         {
-            Frelax_type[i] = 7;
-            if (print_level)
-            {
-               hypre_ParPrintf(comm, "Changing F-relaxation type to 7 at MGR level %d\n", i);
-            }
-         }
-      }
-#endif
       (mgr_data -> Frelax_type) = Frelax_type;
    }
+
+   /* When running on the device and using Jacobi relaxation, switch to GPU-supported Jacobi */
+#if defined(HYPRE_USING_GPU)
+   for (i = 0; i < max_num_coarse_levels; i++)
+   {
+      if (Frelax_type[i] == 0 && interp_type && interp_type[i] != 12)
+      {
+         Frelax_type[i] = 7;
+         if (print_level)
+         {
+            hypre_ParPrintf(comm, "Changing F-relaxation type to 7 at MGR level %d\n", i);
+         }
+      }
+   }
+#endif
+
    /* Set default for using non-Galerkin coarse grid */
    if (mgr_coarse_grid_method == NULL)
    {
