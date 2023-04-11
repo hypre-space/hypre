@@ -120,13 +120,6 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
 #endif
 
-   /* Sanity check */
-   if (hypre_ParVectorNumVectors(f) > 1)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ILU doesn't support multicomponent vectors");
-      return hypre_error_flag;
-   }
-
    /* ----- begin -----*/
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("hypre_ILUSetup");

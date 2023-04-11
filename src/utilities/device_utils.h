@@ -61,13 +61,14 @@ using hypre_DeviceItem = void*;
 #error cudaMalloc/FreeAsync needs CUDA 11.2
 #endif
 #endif
-#endif // defined(HYPRE_USING_CUDA)
+#endif /* defined(HYPRE_USING_CUDA) */
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *                          hip includes
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_HIP)
+
 using hypre_DeviceItem = void*;
 #include <hip/hip_runtime.h>
 
@@ -86,13 +87,15 @@ using hypre_DeviceItem = void*;
 #if defined(HYPRE_USING_ROCRAND)
 #include <rocrand/rocrand.h>
 #endif
-#endif // defined(HYPRE_USING_HIP)
+
+#endif /* defined(HYPRE_USING_HIP) */
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *                          thrust includes
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
 #include <thrust/execution_policy.h>
 #if defined(HYPRE_USING_CUDA)
 #include <thrust/system/cuda/execution_policy.h>
@@ -121,7 +124,7 @@ using hypre_DeviceItem = void*;
 #include <thrust/remove.h>
 
 using namespace thrust::placeholders;
-#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *                          sycl includes
@@ -149,7 +152,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define __device__
 #define __forceinline__ __inline__ __attribute__((always_inline))
 
-#endif // defined(HYPRE_USING_SYCL)
+#endif /* defined(HYPRE_USING_SYCL) */
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      device defined values
@@ -207,10 +210,11 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 }
 
 #define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...) HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, 0, __VA_ARGS__)
-#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
 /* sycl version */
 #if defined(HYPRE_USING_SYCL)
+
 #define HYPRE_GPU_LAUNCH(kernel_name, gridsize, blocksize, ...)                              \
 {                                                                                            \
    if ( gridsize[2] == 0 || blocksize[2] == 0 )                                              \
@@ -229,6 +233,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
       }).wait_and_throw();                                                                   \
    }                                                                                         \
 }
+
 #define HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)                 \
 {                                                                                            \
    if ( gridsize[2] == 0 || blocksize[2] == 0 )                                              \
@@ -250,6 +255,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
       }).wait_and_throw();                                                                   \
    }                                                                                         \
 }
+
 #define HYPRE_GPU_DEBUG_LAUNCH(kernel_name, gridsize, blocksize, ...)                        \
 {                                                                                            \
    if ( gridsize[2] == 0 || blocksize[2] == 0 )                                              \
@@ -269,6 +275,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
       }).wait_and_throw();                                                                   \
    }                                                                                         \
 }
+
 #define HYPRE_GPU_DEBUG_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)           \
 {                                                                                            \
    if ( gridsize[2] == 0 || blocksize[2] == 0 )                                              \
@@ -291,7 +298,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
       }).wait_and_throw();                                                                   \
    }                                                                                         \
 }
-#endif // defined(HYPRE_USING_SYCL)
+#endif /* defined(HYPRE_USING_SYCL) */
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      macros for wrapping cuda/hip/sycl calls for error reporting
@@ -340,13 +347,17 @@ using hypre_DeviceItem = sycl::nd_item<3>;
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_COMPLEX) /* Double Complex */
-/* TODO */
+#error "GPU build does not support complex numbers!"
+
 #elif defined(HYPRE_SINGLE) /* Single */
-/* cublas */
+/* cuBLAS */
 #define hypre_cublas_scal                      cublasSscal
 #define hypre_cublas_axpy                      cublasSaxpy
 #define hypre_cublas_dot                       cublasSdot
-/* cusparse */
+#define hypre_cublas_getrfBatched              cublasSgetrfBatched
+#define hypre_cublas_getriBatched              cublasSgetriBatched
+
+/* cuSPARSE */
 #define hypre_cusparse_csru2csr_bufferSizeExt  cusparseScsru2csr_bufferSizeExt
 #define hypre_cusparse_csru2csr                cusparseScsru2csr
 #define hypre_cusparse_csrsv2_bufferSize       cusparseScsrsv2_bufferSize
@@ -361,7 +372,8 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_cusparse_csrsm2_bufferSizeExt    cusparseScsrsm2_bufferSizeExt
 #define hypre_cusparse_csrsm2_analysis         cusparseScsrsm2_analysis
 #define hypre_cusparse_csrsm2_solve            cusparseScsrsm2_solve
-/* rocsparse */
+
+/* rocSPARSE */
 #define hypre_rocsparse_csrsv_buffer_size      rocsparse_scsrsv_buffer_size
 #define hypre_rocsparse_csrsv_analysis         rocsparse_scsrsv_analysis
 #define hypre_rocsparse_csrsv_solve            rocsparse_scsrsv_solve
@@ -371,14 +383,19 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csrgemm_buffer_size    rocsparse_scsrgemm_buffer_size
 #define hypre_rocsparse_csrgemm                rocsparse_scsrgemm
 #define hypre_rocsparse_csr2csc                rocsparse_scsr2csc
+
 #elif defined(HYPRE_LONG_DOUBLE) /* Long Double */
-/* ... */
+#error "GPU build does not support Long Double numbers!"
+
 #else /* Double */
-/* cublas */
+/* cuBLAS */
 #define hypre_cublas_scal                      cublasDscal
 #define hypre_cublas_axpy                      cublasDaxpy
 #define hypre_cublas_dot                       cublasDdot
-/* cusparse */
+#define hypre_cublas_getrfBatched              cublasDgetrfBatched
+#define hypre_cublas_getriBatched              cublasDgetriBatched
+
+/* cuSPARSE */
 #define hypre_cusparse_csru2csr_bufferSizeExt  cusparseDcsru2csr_bufferSizeExt
 #define hypre_cusparse_csru2csr                cusparseDcsru2csr
 #define hypre_cusparse_csrsv2_bufferSize       cusparseDcsrsv2_bufferSize
@@ -393,7 +410,8 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_cusparse_csrsm2_bufferSizeExt    cusparseDcsrsm2_bufferSizeExt
 #define hypre_cusparse_csrsm2_analysis         cusparseDcsrsm2_analysis
 #define hypre_cusparse_csrsm2_solve            cusparseDcsrsm2_solve
-/* rocsparse */
+
+/* rocSPARSE */
 #define hypre_rocsparse_csrsv_buffer_size      rocsparse_dcsrsv_buffer_size
 #define hypre_rocsparse_csrsv_analysis         rocsparse_dcsrsv_analysis
 #define hypre_rocsparse_csrsv_solve            rocsparse_dcsrsv_solve
@@ -404,7 +422,6 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csrgemm                rocsparse_dcsrgemm
 #define hypre_rocsparse_csr2csc                rocsparse_dcsr2csc
 #endif
-
 
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \
    cublasStatus_t err = call;                                                                \
@@ -538,6 +555,7 @@ struct hypre_DeviceData
    vendorSolverHandle_t              vendor_solver_handle;
 #endif
 
+   /* TODO (VPM): Change to HYPRE_USING_GPU_STREAMS*/
 #if defined(HYPRE_USING_CUDA_STREAMS)
 #if defined(HYPRE_USING_CUDA)
    cudaStream_t                      streams[HYPRE_MAX_NUM_STREAMS];
@@ -710,7 +728,7 @@ struct hypre_GpuMatData
 #define hypre_GpuMatDataMatHandle(data)   ((data) -> mat_handle)
 #define hypre_GpuMatDataSpMVBuffer(data)  ((data) -> spmv_buffer)
 
-#endif //#if defined(HYPRE_USING_GPU)
+#endif /* if defined(HYPRE_USING_GPU) */
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      generic device functions (cuda/hip/sycl)
