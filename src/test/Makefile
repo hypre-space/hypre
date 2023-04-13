@@ -62,6 +62,7 @@ LFLAGS =\
 
 HYPRE_DRIVERS =\
  ij.c\
+ simple.c\
  ij_assembly.c\
  sstruct.c\
  struct.c\
@@ -133,6 +134,10 @@ distclean: clean
 # C
 
 ij: ij.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+simple: simple.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 

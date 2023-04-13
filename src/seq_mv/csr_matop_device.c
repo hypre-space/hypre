@@ -201,6 +201,14 @@ hypre_CSRMatrixMultiplyDevice( hypre_CSRMatrix *A,
 
    hypre_GpuProfilingPushRange("CSRMatrixMultiply");
 
+   /* WM: debug */
+   hypre_CSRMatrix *host_mat = hypre_CSRMatrixClone_v2(A, 1, HYPRE_MEMORY_HOST);
+   hypre_CSRMatrixPrint(host_mat, "A");
+   hypre_CSRMatrixDestroy(host_mat);
+   host_mat = hypre_CSRMatrixClone_v2(B, 1, HYPRE_MEMORY_HOST);
+   hypre_CSRMatrixPrint(host_mat, "B");
+   hypre_CSRMatrixDestroy(host_mat);
+
    hypreDevice_CSRSpGemm(A, B, &C);
 
    hypre_SyncComputeStream(hypre_handle());
