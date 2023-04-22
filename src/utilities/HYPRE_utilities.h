@@ -122,8 +122,29 @@ typedef HYPRE_Int MPI_Comm;
  * HYPRE init/finalize
  *--------------------------------------------------------------------------*/
 
+/**
+ * Initializes the hypre library.
+ **/
+
 HYPRE_Int HYPRE_Init(void);
+
+/**
+ * Finalizes the hypre library.
+ **/
+
 HYPRE_Int HYPRE_Finalize(void);
+
+/**
+ * (Optional) Returns true if the hypre library has been initialized but not finalized yet.
+ **/
+
+HYPRE_Int HYPRE_Initialized(void);
+
+/**
+ * (Optional) Returns true if the hypre library has been finalized but not re-initialized yet.
+ **/
+
+HYPRE_Int HYPRE_Finalized(void);
 
 /*--------------------------------------------------------------------------
  * HYPRE error user functions
