@@ -34,6 +34,7 @@ src/test/ams_driver
 src/test/ij
 src/test/ij_assembly
 src/test/ij_mv
+src/test/ij_mm
 src/test/maxwell_unscaled
 src/test/sstruct
 src/test/sstruct_fac
