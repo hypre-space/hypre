@@ -126,6 +126,13 @@ typedef HYPRE_Int MPI_Comm;
  * Initializes the hypre library.
  **/
 
+HYPRE_Int HYPRE_Initialize(void);
+
+/**
+ * Initializes the hypre library. This function is provided for backwards compatibility.
+ * Please, use HYPRE_Initialize instead.
+ **/
+
 HYPRE_Int HYPRE_Init(void);
 
 /**

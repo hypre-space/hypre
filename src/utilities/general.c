@@ -21,7 +21,7 @@ hypre_handle(void)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                         "ERROR - _hypre_handle is not initialized. Calling HYPRE_Init(). All HYPRE_* or hypre_* function calls should occur between HYPRE_Init() and HYPRE_Finalize().\n");
-      HYPRE_Init();
+      HYPRE_Initialize();
    }
 
    return _hypre_handle;
@@ -235,6 +235,12 @@ hypre_GetDeviceLastError(void)
 
 HYPRE_Int
 HYPRE_Init(void)
+{
+   return HYPRE_Initialize();
+}
+
+HYPRE_Int
+HYPRE_Initialize(void)
 {
    /* Return if the hypre library is in initialized state */
    if (hypre_Initialized())
