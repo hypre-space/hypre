@@ -13,24 +13,48 @@ hypre_State hypre__global_state = HYPRE_STATE_NONE;
 /*--------------------------------------------------------------------------
  * HYPRE_Initialized
  *
- * This function returns True when the library has been initialized, but not
- * finalized yet.
+ * Public function for hypre_Initialized
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_Initialized( void )
 {
-   return (hypre__global_state == HYPRE_STATE_INITIALIZED);
+   return hypre_Initialized();
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_Finalized
  *
- * This function returns True when the library is in finalized state;
+ * Public function for hypre_Finalized
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_Finalized( void )
+{
+   return hypre_Finalized();
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_Initialized
+ *
+ * This function returns True when the library has been initialized, but not
+ * finalized yet.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_Initialized( void )
+{
+   return (hypre__global_state == HYPRE_STATE_INITIALIZED);
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_Finalized
+ *
+ * This function returns True when the library is in finalized state;
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_Finalized( void )
 {
    return (hypre__global_state == HYPRE_STATE_FINALIZED);
 }

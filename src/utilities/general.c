@@ -237,7 +237,7 @@ HYPRE_Int
 HYPRE_Init(void)
 {
    /* Return if the hypre library is in initialized state */
-   if (HYPRE_Initialized())
+   if (hypre_Initialized())
    {
       return hypre_error_flag;
    }
@@ -352,7 +352,7 @@ HYPRE_Int
 HYPRE_Finalize(void)
 {
    /* Return if the hypre library has already been finalized */
-   if (HYPRE_Finalized())
+   if (hypre_Finalized())
    {
       return hypre_error_flag;
    }

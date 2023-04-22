@@ -1742,8 +1742,8 @@ HYPRE_Complex hypre_csqrt( HYPRE_Complex value );
 #endif
 
 /* state.c */
-HYPRE_Int HYPRE_Initialized( void );
-HYPRE_Int HYPRE_Finalized( void );
+HYPRE_Int hypre_Initialized( void );
+HYPRE_Int hypre_Finalized( void );
 HYPRE_Int hypre_SetInitialized( void );
 HYPRE_Int hypre_SetFinalized( void );
 
