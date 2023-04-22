@@ -133,7 +133,7 @@ HYPRE_Int HYPRE_Initialize(void);
  * Please, use HYPRE_Initialize instead.
  **/
 
-HYPRE_Int HYPRE_Init(void);
+#define HYPRE_Init(...) HYPRE_DEPRECATED("GCC warning \"Use HYPRE_Initialize() instead.\"") HYPRE_Initialize(__VA_ARGS__)
 
 /**
  * Finalizes the hypre library.

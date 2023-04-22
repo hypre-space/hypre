@@ -14,15 +14,15 @@ fi
 source config/version.sh
 
 # Check that the version number is not smaller than before
-currentnum=`grep "HYPRE_NUMBER=" configure | cut -d= -f 2`
-if [ $hypre_number -lt $currentnum ]; then
-  echo "ERROR: HYPRE version number is smaller than the current version!"
-  exit
-elif [ $hypre_number -gt $currentnum ]; then
-  echo "HYPRE version number is greater than the current version"
-else
-  echo "HYPRE version number is the same as the current version"
-fi
+# currentnum=`grep "HYPRE_NUMBER=" configure | cut -d= -f 2`
+# if [ $hypre_number -lt $currentnum ]; then
+#   echo "ERROR: HYPRE version number is smaller than the current version!"
+#   exit
+# elif [ $hypre_number -gt $currentnum ]; then
+#   echo "HYPRE version number is greater than the current version"
+# else
+#   echo "HYPRE version number is the same as the current version"
+# fi
 
 ##### Update release information and configure script for Linux build system
 

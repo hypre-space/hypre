@@ -234,12 +234,6 @@ hypre_GetDeviceLastError(void)
  *****************************************************************************/
 
 HYPRE_Int
-HYPRE_Init(void)
-{
-   return HYPRE_Initialize();
-}
-
-HYPRE_Int
 HYPRE_Initialize(void)
 {
    /* Return if the hypre library is in initialized state */
