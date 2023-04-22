@@ -20,7 +20,7 @@ hypre_handle(void)
    if (!_hypre_handle)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "ERROR - _hypre_handle is not initialized. Calling HYPRE_Init(). All HYPRE_* or hypre_* function calls should occur between HYPRE_Init() and HYPRE_Finalize().\n");
+                        "ERROR - _hypre_handle is not initialized. Calling HYPRE_Initialize(). All HYPRE_* or hypre_* function calls should occur between HYPRE_Initialize() and HYPRE_Finalize().\n");
       HYPRE_Initialize();
    }
 
@@ -321,8 +321,8 @@ HYPRE_Initialize(void)
 #endif
 
 #if defined(HYPRE_USING_DEVICE_POOL)
-      /* Keep this check here at the end of HYPRE_Init()
-       * Make sure that device pool allocator has not been setup in HYPRE_Init,
+      /* Keep this check here at the end of HYPRE_Initialize()
+       * Make sure that device pool allocator has not been setup in HYPRE_Initialize,
        * otherwise users are not able to set all the parameters
        */
       if ( hypre_HandleCubDevAllocator(_hypre_handle) ||
