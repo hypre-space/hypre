@@ -15,7 +15,7 @@
 #include "_hypre_utilities.hpp"
 #include "seq_mv.hpp"
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 #if CUSPARSE_VERSION >= CUSPARSE_NEWSPMM_VERSION
 #define HYPRE_CUSPARSE_SPMV_ALG CUSPARSE_SPMV_CSR_ALG2
@@ -93,7 +93,7 @@ hypre_CSRMatrixMatvecDevice2( HYPRE_Int        trans,
    else
 #endif // defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) ...
    {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
       hypre_CSRMatrixSpMVDevice(trans, alpha, A, x, beta, y, 0);
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
@@ -164,7 +164,9 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Int        trans,
       hypre_CSRMatrixMatvecDevice2(trans, alpha, A, x, beta, y, offset);
    }
 
+#if defined(HYPRE_USING_GPU)
    hypre_SyncComputeStream(hypre_handle());
+#endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    //hypre_GpuProfilingPopRange();
@@ -316,7 +318,9 @@ hypre_CSRMatrixMatvecCusparseNewAPI( HYPRE_Int        trans,
                                         dBuffer) );
    }
 
+#if defined(HYPRE_USING_GPU)
    hypre_SyncComputeStream(hypre_handle());
+#endif
 
    /* Free memory */
    HYPRE_CUSPARSE_CALL( cusparseDestroySpMat(matA) );
@@ -504,4 +508,4 @@ hypre_CSRMatrixMatvecOnemklsparse( HYPRE_Int        trans,
 }
 #endif // #if defined(HYPRE_USING_ROCSPARSE)
 
-#endif // #if defined(HYPRE_USING_GPU)
+#endif // #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)

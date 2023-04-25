@@ -1036,7 +1036,7 @@ hypre_ParCSRCommPkgCreateAndFill( MPI_Comm              comm,
    /* Set default info */
    hypre_ParCSRCommPkgNumComponents(comm_pkg)      = 1;
    hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) = NULL;
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_ParCSRCommPkgTmpData(comm_pkg)            = NULL;
    hypre_ParCSRCommPkgBufData(comm_pkg)            = NULL;
    hypre_ParCSRCommPkgMatrixE(comm_pkg)            = NULL;
@@ -1155,7 +1155,7 @@ hypre_ParCSRCommPkgUpdateVecStarts( hypre_ParCSRCommPkg *comm_pkg,
       /* Free memory */
       hypre_TFree(send_map_elmts, HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg), HYPRE_MEMORY_DEVICE);
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
       hypre_CSRMatrixDestroy(hypre_ParCSRCommPkgMatrixE(comm_pkg));
       hypre_ParCSRCommPkgMatrixE(comm_pkg) = NULL;
 #endif
@@ -1255,7 +1255,7 @@ hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
    /* if (hypre_ParCSRCommPkgRecvMPITypes(comm_pkg))
       hypre_TFree(hypre_ParCSRCommPkgRecvMPITypes(comm_pkg), HYPRE_MEMORY_HOST); */
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_TFree(hypre_ParCSRCommPkgTmpData(comm_pkg), HYPRE_MEMORY_DEVICE);
    hypre_TFree(hypre_ParCSRCommPkgBufData(comm_pkg), HYPRE_MEMORY_DEVICE);
    hypre_CSRMatrixDestroy(hypre_ParCSRCommPkgMatrixE(comm_pkg));

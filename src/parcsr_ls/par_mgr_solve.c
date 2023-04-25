@@ -128,7 +128,7 @@ hypre_MGRSolve( void               *mgr_vdata,
       if (logging > 1)
       {
          hypre_ParVectorCopy(F_array[0], residual );
-         if (tol > fp_zero)
+         if (tol > hypre_cabs(fp_zero))
          {
             hypre_ParCSRMatrixMatvec(fp_neg_one, A_array[0], U_array[0], fp_one, residual);
          }
@@ -137,7 +137,7 @@ hypre_MGRSolve( void               *mgr_vdata,
       else
       {
          hypre_ParVectorCopy(F_array[0], Vtemp);
-         if (tol > fp_zero)
+         if (tol > hypre_cabs(fp_zero))
          {
             hypre_ParCSRMatrixMatvec(fp_neg_one, A_array[0], U_array[0], fp_one, Vtemp);
          }
@@ -646,7 +646,7 @@ hypre_MGRCycle( void              *mgr_vdata,
             HYPRE_Real convergence_factor_cg;
             hypre_BoomerAMGGetRelResidualNorm(cg_solver, &convergence_factor_cg);
             (mgr_data -> cg_convergence_factor) = convergence_factor_cg;
-            if ((print_level) > 1 && my_id == 0 && convergence_factor_cg > fp_one)
+            if ((print_level) > 1 && my_id == 0 && convergence_factor_cg > hypre_cabs(fp_one))
             {
                hypre_printf("Warning!!! Coarse grid solve diverges. Factor = %1.2e\n",
                             convergence_factor_cg);

@@ -365,7 +365,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_VectorMemoryLocation(v));
 
    if (exec == HYPRE_EXEC_DEVICE)

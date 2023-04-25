@@ -2844,7 +2844,6 @@ main( hypre_int argc,
          arg_index++;
          printLevel = atoi(argv[arg_index++]);
       }
-#if defined(HYPRE_USING_GPU)
       else if ( strcmp(argv[arg_index], "-memory_host") == 0 )
       {
          arg_index++;
@@ -2865,6 +2864,7 @@ main( hypre_int argc,
          arg_index++;
          default_exec_policy = HYPRE_EXEC_DEVICE;
       }
+#if defined(HYPRE_USING_GPU)
       else if ( strcmp(argv[arg_index], "-mm_vendor") == 0 )
       {
          arg_index++;
