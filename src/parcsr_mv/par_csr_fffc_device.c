@@ -279,6 +279,8 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    HYPRE_Int          *map2FC, *map2F2 = NULL, *itmp, *A_diag_ii, *A_offd_ii, *offd_mark;
    HYPRE_BigInt       *send_buf, *recv_buf;
 
+   hypre_GpuProfilingPushRange("ParCSRMatrixGenerateFFFC");
+
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
@@ -1342,6 +1344,8 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    hypre_TFree(map2F2,    HYPRE_MEMORY_DEVICE);
    hypre_TFree(recv_buf,  HYPRE_MEMORY_DEVICE);
 
+   hypre_GpuProfilingPopRange();
+
    return hypre_error_flag;
 }
 
@@ -1426,6 +1430,23 @@ hypre_ParCSRMatrixGenerateCCDevice( hypre_ParCSRMatrix  *A,
    return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S,
                                                     NULL, NULL,
                                                     NULL, ACC_ptr, 1);
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerateCCCFDevice
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixGenerateCCCFDevice( hypre_ParCSRMatrix  *A,
+                                      HYPRE_Int           *CF_marker,
+                                      HYPRE_BigInt        *cpts_starts,
+                                      hypre_ParCSRMatrix  *S,
+                                      hypre_ParCSRMatrix **ACF_ptr,
+                                      hypre_ParCSRMatrix **ACC_ptr)
+{
+   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S,
+                                                    NULL, NULL,
+                                                    ACF_ptr, ACC_ptr, 1);
 }
 
 /*--------------------------------------------------------------------------

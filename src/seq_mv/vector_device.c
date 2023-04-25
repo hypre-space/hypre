@@ -64,6 +64,7 @@ hypre_SeqVectorScaleDevice( HYPRE_Complex alpha,
    HYPRE_Int      size        = hypre_VectorSize(y);
    HYPRE_Int      total_size  = size * num_vectors;
 
+   hypre_GpuProfilingPushRange("SeqVectorScale");
    //hypre_SeqVectorPrefetch(y, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_GPU)
@@ -90,6 +91,9 @@ hypre_SeqVectorScaleDevice( HYPRE_Complex alpha,
       y_data[i] *= alpha;
    }
 #endif
+
+   hypre_SyncComputeStream(hypre_handle());
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }
@@ -194,6 +198,8 @@ hypre_SeqVectorElmdivpyDevice( hypre_Vector *x,
    HYPRE_Int       num_vectors_b = hypre_VectorNumVectors(b);
    HYPRE_Int       size          = hypre_VectorSize(b);
 
+   hypre_GpuProfilingPushRange("SeqVectorElmdivpyDevice");
+
 #if defined(HYPRE_USING_GPU)
    if (num_vectors_b == 1)
    {
@@ -238,6 +244,7 @@ hypre_SeqVectorElmdivpyDevice( hypre_Vector *x,
    }
 
    hypre_SyncComputeStream(hypre_handle());
+   hypre_GpuProfilingPopRange();
 
 #endif
 
