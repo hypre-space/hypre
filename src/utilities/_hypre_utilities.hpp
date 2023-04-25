@@ -1742,6 +1742,12 @@ struct type_cast
    constexpr T2 operator()(const T1 &x) const { return (T2) x; }
 };
 
+template<typename T>
+struct absolute_value
+{
+   constexpr T operator()(const T &x) const { return x < T(0) ? -x : x; }
+};
+
 template<typename... T>
 struct TupleComp2
 {
