@@ -5225,9 +5225,7 @@ main( hypre_int argc,
       hypre_ParVectorCopy(par_x2, par_x);
 #endif
 
-#if defined(HYPRE_USING_NVTX)
       hypre_GpuProfilingPushRange("HybridSolve");
-#endif
       //cudaProfilerStart();
 
       HYPRE_ParCSRHybridSetup(par_solver, par_A, par_b, par_x);
@@ -5262,9 +5260,7 @@ main( hypre_int argc,
 
       HYPRE_ParCSRHybridDestroy(par_solver);
 
-#if defined(HYPRE_USING_NVTX)
       hypre_GpuProfilingPopRange();
-#endif
       //cudaProfilerStop();
 
 #if SECOND_TIME

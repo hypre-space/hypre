@@ -474,9 +474,7 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
                        hypre_ParCSRMatrix  *B,
                        HYPRE_Int            keep_transpose)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("Mat-T-Mat");
-#endif
 
    hypre_ParCSRMatrix *C = NULL;
 
@@ -494,9 +492,7 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
       C = hypre_ParCSRTMatMatKTHost(A, B, keep_transpose);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return C;
 }

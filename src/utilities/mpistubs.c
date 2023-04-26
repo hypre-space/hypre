@@ -1267,16 +1267,12 @@ hypre_MPI_Allreduce( void              *sendbuf,
                      hypre_MPI_Op       op,
                      hypre_MPI_Comm     comm )
 {
-#if defined(HYPRE_USING_NVTX)
    hypre_GpuProfilingPushRange("MPI_Allreduce");
-#endif
 
    HYPRE_Int result = MPI_Allreduce(sendbuf, recvbuf, (hypre_int)count,
                                     datatype, op, comm);
 
-#if defined(HYPRE_USING_NVTX)
    hypre_GpuProfilingPopRange();
-#endif
 
    return result;
 }

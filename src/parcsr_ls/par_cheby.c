@@ -414,9 +414,7 @@ hypre_ParCSRRelax_Cheby_Solve(hypre_ParCSRMatrix *A, /* matrix to relax with */
                               hypre_ParVector    *orig_u_vec, /*another temp vector */
                               hypre_ParVector    *tmp_vec) /*another temp vector */
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("ParCSRRelaxChebySolve");
-#endif
    HYPRE_Int             ierr = 0;
 
    /* Sanity check */
@@ -441,8 +439,6 @@ hypre_ParCSRRelax_Cheby_Solve(hypre_ParCSRMatrix *A, /* matrix to relax with */
                                                orig_u_vec, tmp_vec);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
    return ierr;
 }

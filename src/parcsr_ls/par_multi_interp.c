@@ -2133,9 +2133,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                                HYPRE_Int            weight_option,
                                hypre_ParCSRMatrix **P_ptr )
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("MultipassInterp");
-#endif
 
    HYPRE_Int ierr = 0;
 
@@ -2159,9 +2157,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                                                 P_ptr );
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }
