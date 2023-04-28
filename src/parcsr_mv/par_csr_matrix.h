@@ -31,6 +31,9 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_BigInt          global_num_rows;
    HYPRE_BigInt          global_num_cols;
    HYPRE_BigInt          global_num_rownnz;
+   HYPRE_BigInt          num_nonzeros;
+   HYPRE_Real            d_num_nonzeros;
+
    HYPRE_BigInt          first_row_index;
    HYPRE_BigInt          first_col_diag;
    /* need to know entire local range in case row_starts and col_starts
@@ -57,9 +60,6 @@ typedef struct hypre_ParCSRMatrix_struct
 
    /* Does the ParCSRMatrix create/destroy `diag', `offd', `col_map_offd'? */
    HYPRE_Int             owns_data;
-
-   HYPRE_BigInt          num_nonzeros;
-   HYPRE_Real            d_num_nonzeros;
 
    /* Buffers used by GetRow to hold row currently being accessed. AJC, 4/99 */
    HYPRE_BigInt         *rowindices;
@@ -93,6 +93,8 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixGlobalNumRows(matrix)          ((matrix) -> global_num_rows)
 #define hypre_ParCSRMatrixGlobalNumCols(matrix)          ((matrix) -> global_num_cols)
 #define hypre_ParCSRMatrixGlobalNumRownnz(matrix)        ((matrix) -> global_num_rownnz)
+#define hypre_ParCSRMatrixNumNonzeros(matrix)            ((matrix) -> num_nonzeros)
+#define hypre_ParCSRMatrixDNumNonzeros(matrix)           ((matrix) -> d_num_nonzeros)
 #define hypre_ParCSRMatrixFirstRowIndex(matrix)          ((matrix) -> first_row_index)
 #define hypre_ParCSRMatrixFirstColDiag(matrix)           ((matrix) -> first_col_diag)
 #define hypre_ParCSRMatrixLastRowIndex(matrix)           ((matrix) -> last_row_index)
@@ -108,8 +110,6 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixCommPkg(matrix)                ((matrix) -> comm_pkg)
 #define hypre_ParCSRMatrixCommPkgT(matrix)               ((matrix) -> comm_pkgT)
 #define hypre_ParCSRMatrixOwnsData(matrix)               ((matrix) -> owns_data)
-#define hypre_ParCSRMatrixNumNonzeros(matrix)            ((matrix) -> num_nonzeros)
-#define hypre_ParCSRMatrixDNumNonzeros(matrix)           ((matrix) -> d_num_nonzeros)
 #define hypre_ParCSRMatrixRowindices(matrix)             ((matrix) -> rowindices)
 #define hypre_ParCSRMatrixRowvalues(matrix)              ((matrix) -> rowvalues)
 #define hypre_ParCSRMatrixGetrowactive(matrix)           ((matrix) -> getrowactive)
