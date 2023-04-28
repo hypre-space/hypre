@@ -795,6 +795,7 @@ hypre_GetActualMemLocation(HYPRE_MemoryLocation location)
 /* memory.c */
 HYPRE_Int hypre_GetMemoryLocationName(hypre_MemoryLocation memory_location,
                                       char *memory_location_name);
+void   hypre_CheckMemoryLocation(void *ptr, hypre_MemoryLocation location);
 void * hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_MemoryLocation location);
 void   hypre_MemPrefetch(void *ptr, size_t size, HYPRE_MemoryLocation location);
 void * hypre_MAlloc(size_t size, HYPRE_MemoryLocation location);
@@ -841,7 +842,7 @@ typedef void (*GPUMfreeFunc)(void *);
 }
 #endif
 
-#endif
+#endif /* hypre_MEMORY_HEADER */
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -912,6 +913,8 @@ typedef struct
    size_t                   curr_time_step;
    hypre_MemoryTrackerQueue queue[HYPRE_MEMORY_NUM_EVENTS];
 } hypre_MemoryTracker;
+
+extern hypre_MemoryTracker *_hypre_memory_tracker;
 
 #define hypre_TAlloc(type, count, location)                                                         \
 (                                                                                                   \
@@ -1405,9 +1408,6 @@ extern "C++"
 }
 #endif
 
-static char hypre__levelname[16];
-static char hypre__markname[1024];
-
 #define HYPRE_ANNOTATE_FUNC_BEGIN          CALI_MARK_FUNCTION_BEGIN
 #define HYPRE_ANNOTATE_FUNC_END            CALI_MARK_FUNCTION_END
 #define HYPRE_ANNOTATE_LOOP_BEGIN(id, str) CALI_MARK_LOOP_BEGIN(id, str)
@@ -1416,21 +1416,25 @@ static char hypre__markname[1024];
 #define HYPRE_ANNOTATE_ITER_END(id)        CALI_MARK_ITERATION_END(id)
 #define HYPRE_ANNOTATE_REGION_BEGIN(...)\
 {\
+   char hypre__markname[1024];\
    hypre_sprintf(hypre__markname, __VA_ARGS__);\
    CALI_MARK_BEGIN(hypre__markname);\
 }
 #define HYPRE_ANNOTATE_REGION_END(...)\
 {\
+   char hypre__markname[1024];\
    hypre_sprintf(hypre__markname, __VA_ARGS__);\
    CALI_MARK_END(hypre__markname);\
 }
 #define HYPRE_ANNOTATE_MGLEVEL_BEGIN(lvl)\
 {\
+   char hypre__levelname[16];\
    hypre_sprintf(hypre__levelname, "MG level %d", lvl);\
    CALI_MARK_BEGIN(hypre__levelname);\
 }
 #define HYPRE_ANNOTATE_MGLEVEL_END(lvl)\
 {\
+   char hypre__levelname[16];\
    hypre_sprintf(hypre__levelname, "MG level %d", lvl);\
    CALI_MARK_END(hypre__levelname);\
 }
@@ -1969,12 +1973,12 @@ HYPRE_Int hypreDevice_ComplexScalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex 
                                     HYPRE_Complex v);
 HYPRE_Int hypreDevice_ComplexAxpyn(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y,
                                    HYPRE_Complex *d_z, HYPRE_Complex a);
+HYPRE_Int hypreDevice_ComplexAxpyzn(HYPRE_Int n, HYPRE_Complex *d_x, HYPRE_Complex *d_y,
+                                    HYPRE_Complex *d_z, HYPRE_Complex a, HYPRE_Complex b);
 HYPRE_Int hypreDevice_IntAxpyn(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int *d_z,
                                HYPRE_Int a);
 HYPRE_Int hypreDevice_BigIntAxpyn(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt *d_y,
                                   HYPRE_BigInt *d_z, HYPRE_BigInt a);
-HYPRE_Int hypreDevice_ComplexAxpyzn(HYPRE_Int n, HYPRE_Complex *d_x, HYPRE_Complex *d_y,
-                                    HYPRE_Complex *d_z, HYPRE_Complex a, HYPRE_Complex b);
 HYPRE_Int* hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr);
 HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
                                              HYPRE_Int *d_row_ind);
@@ -2071,6 +2075,7 @@ HYPRE_Int hypre_IntArrayInverseMapping( hypre_IntArray *v, hypre_IntArray **w_pt
 /* int_array_device.c */
 #if defined(HYPRE_USING_GPU)
 HYPRE_Int hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v, HYPRE_Int value );
+HYPRE_Int hypre_IntArrayReverseMappingDevice( hypre_IntArray *v, hypre_IntArray *w );
 HYPRE_Int hypre_IntArrayCountDevice ( hypre_IntArray *v, HYPRE_Int value,
                                       HYPRE_Int *num_values_ptr );
 HYPRE_Int hypre_IntArrayInverseMappingDevice( hypre_IntArray *v, hypre_IntArray *w );
@@ -2085,7 +2090,8 @@ void hypre_MemoryTrackerInsert1(const char *action, void *ptr, size_t nbytes,
                                 hypre_MemoryLocation memory_location, const char *filename,
                                 const char *function, HYPRE_Int line);
 void hypre_MemoryTrackerInsert2(const char *action, void *ptr, void *ptr2, size_t nbytes,
-                                hypre_MemoryLocation memory_location, hypre_MemoryLocation memory_location2,
+                                hypre_MemoryLocation memory_location,
+                                hypre_MemoryLocation memory_location2,
                                 const char *filename,
                                 const char *function, HYPRE_Int line);
 HYPRE_Int hypre_PrintMemoryTracker( size_t *totl_bytes_o, size_t *peak_bytes_o,
@@ -2304,9 +2310,9 @@ first_lsb_bit_indx( hypre_uint x )
 static inline HYPRE_BigInt
 hypre_BigHash( HYPRE_BigInt input )
 {
-   hypre_ulongint h64 = HYPRE_XXH_PRIME64_5 + sizeof(input);
+   hypre_ulonglongint h64 = HYPRE_XXH_PRIME64_5 + sizeof(input);
 
-   hypre_ulongint k1 = input;
+   hypre_ulonglongint k1 = input;
    k1 *= HYPRE_XXH_PRIME64_2;
    k1 = HYPRE_XXH_rotl64(k1, 31);
    k1 *= HYPRE_XXH_PRIME64_1;
@@ -2358,9 +2364,9 @@ hypre_BigHash(HYPRE_Int input)
 static inline HYPRE_Int
 hypre_Hash(HYPRE_Int input)
 {
-   hypre_ulongint h64 = HYPRE_XXH_PRIME64_5 + sizeof(input);
+   hypre_ulonglongint h64 = HYPRE_XXH_PRIME64_5 + sizeof(input);
 
-   hypre_ulongint k1 = input;
+   hypre_ulonglongint k1 = input;
    k1 *= HYPRE_XXH_PRIME64_2;
    k1 = HYPRE_XXH_rotl64(k1, 31);
    k1 *= HYPRE_XXH_PRIME64_1;

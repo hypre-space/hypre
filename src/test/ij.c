@@ -427,6 +427,7 @@ main( hypre_int argc,
    /* hypre_ILU options */
    HYPRE_Int ilu_type = 0;
    HYPRE_Int ilu_lfil = 0;
+   HYPRE_Int ilu_reordering = 1;
    HYPRE_Int ilu_sm_max_iter = 1;
    HYPRE_Real ilu_droptol = 1.0e-02;
    HYPRE_Int ilu_max_row_nnz = 1000;
@@ -478,6 +479,31 @@ main( hypre_int argc,
    HYPRE_Int print_mem_tracker = 0;
    char mem_tracker_name[HYPRE_MAX_FILE_NAME_LEN] = {0};
 #endif
+
+   /* Initialize MPI */
+   hypre_MPI_Init(&argc, &argv);
+
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------------
+    * GPU Device binding
+    * Must be done before HYPRE_Init() and should not be changed after
+    *-----------------------------------------------------------------*/
+   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+
+   time_index = hypre_InitializeTiming("Hypre init");
+   hypre_BeginTiming(time_index);
+
+   /*-----------------------------------------------------------
+    * Initialize : must be the first HYPRE function to call
+    *-----------------------------------------------------------*/
+   HYPRE_Init();
+
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
 
    /* default execution policy and memory space */
 #if defined(HYPRE_TEST_USING_HOST)
@@ -538,12 +564,6 @@ main( hypre_int argc,
    size_t umpire_pinned_pool_size = 4294967296; // 4 GiB
    size_t umpire_host_pool_size   = 4294967296; // 4 GiB
 #endif
-
-   /* Initialize MPI */
-   hypre_MPI_Init(&argc, &argv);
-
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
    /*-----------------------------------------------------------
     * Set defaults
@@ -1250,6 +1270,12 @@ main( hypre_int argc,
          /* level of fill */
          arg_index++;
          ilu_lfil = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ilu_reordering") == 0 )
+      {
+         /* local reordering type */
+         arg_index++;
+         ilu_reordering = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-ilu_droptol") == 0 )
       {
@@ -2490,25 +2516,6 @@ main( hypre_int argc,
       hypre_printf("  solver ID    = %d\n\n", solver_id);
    }
 
-   /*-----------------------------------------------------------------
-    * GPU Device binding
-    * Must be done before HYPRE_Init() and should not be changed after
-    *-----------------------------------------------------------------*/
-   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
-
-   time_index = hypre_InitializeTiming("Hypre init");
-   hypre_BeginTiming(time_index);
-
-   /*-----------------------------------------------------------
-    * Initialize : must be the first HYPRE function to call
-    *-----------------------------------------------------------*/
-   HYPRE_Init();
-
-   hypre_EndTiming(time_index);
-   hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
-   hypre_FinalizeTiming(time_index);
-   hypre_ClearTiming();
-
 #if defined(HYPRE_USING_DEVICE_POOL)
    /* To be effective, hypre_SetCubMemPoolSize must immediately follow HYPRE_Init */
    HYPRE_SetGPUMemoryPoolSize( mempool_bin_growth, mempool_min_bin,
@@ -2529,7 +2536,10 @@ main( hypre_int argc,
 
 #if defined(HYPRE_USING_MEMORY_TRACKER)
    hypre_MemoryTrackerSetPrint(print_mem_tracker);
-   if (mem_tracker_name[0]) { hypre_MemoryTrackerSetFileName(mem_tracker_name); }
+   if (mem_tracker_name[0])
+   {
+      hypre_MemoryTrackerSetFileName(mem_tracker_name);
+   }
 #endif
 
    /* default memory location */
@@ -6737,6 +6747,7 @@ main( hypre_int argc,
          HYPRE_ILUCreate(&pcg_precond);
          HYPRE_ILUSetType(pcg_precond, ilu_type);
          HYPRE_ILUSetLevelOfFill(pcg_precond, ilu_lfil);
+         HYPRE_ILUSetLocalReordering(pcg_precond, ilu_reordering);
          /* set print level */
          HYPRE_ILUSetPrintLevel(pcg_precond, 1);
          /* set max iterations */
@@ -7388,6 +7399,7 @@ main( hypre_int argc,
          HYPRE_ILUCreate(&pcg_precond);
          HYPRE_ILUSetType(pcg_precond, ilu_type);
          HYPRE_ILUSetLevelOfFill(pcg_precond, ilu_lfil);
+         HYPRE_ILUSetLocalReordering(pcg_precond, ilu_reordering);
          /* set print level */
          HYPRE_ILUSetPrintLevel(pcg_precond, 1);
          /* set max iterations */
@@ -8677,6 +8689,8 @@ main( hypre_int argc,
       HYPRE_ILUSetType(ilu_solver, ilu_type);
       /* set level of fill */
       HYPRE_ILUSetLevelOfFill(ilu_solver, ilu_lfil);
+      /* set local reordering type */
+      HYPRE_ILUSetLocalReordering(ilu_solver, ilu_reordering);
       /* set print level */
       HYPRE_ILUSetPrintLevel(ilu_solver, 2);
       /* set max iterations */

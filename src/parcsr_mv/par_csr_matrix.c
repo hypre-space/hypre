@@ -217,7 +217,8 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location )
+hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix   *matrix,
+                                 HYPRE_MemoryLocation  memory_location )
 {
    if (!matrix)
    {

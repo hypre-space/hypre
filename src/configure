@@ -12476,4 +12476,3 @@ fi
 mv HYPRE_config.h HYPRE_config.h.tmp
 sed 's/FC_FUNC/HYPRE_FC_FUNC/g' < HYPRE_config.h.tmp > HYPRE_config.h
 rm -f HYPRE_config.h.tmp
-

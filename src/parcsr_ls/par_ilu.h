@@ -381,8 +381,6 @@ HYPRE_Int hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypr
                                  csrsv2Info_t matSU_info, hypre_ParCSRMatrix *Aperm, hypre_CSRMatrix *matALU_d,
                                  hypre_CSRMatrix *matBLU_d, hypre_CSRMatrix *matE_d, hypre_CSRMatrix *matF_d,
                                  cusparseSolvePolicy_t ilu_solve_policy, void *ilu_solve_buffer, HYPRE_Int test_opt);
-HYPRE_Int hypre_ParILUCusparseExtractDiagonalCSR(hypre_ParCSRMatrix *A, HYPRE_Int *perm,
-                                                 HYPRE_Int *rqperm, hypre_CSRMatrix **A_diagp);
 HYPRE_Int hypre_ParILUCusparseILUExtractEBFC(hypre_CSRMatrix *A_diag, HYPRE_Int nLU,
                                              hypre_CSRMatrix **Bp, hypre_CSRMatrix **Cp, hypre_CSRMatrix **Ep, hypre_CSRMatrix **Fp);
 HYPRE_Int HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix *A, cusparseSolvePolicy_t ilu_solve_policy);
@@ -442,4 +440,3 @@ HYPRE_Int hypre_ParILURAPSchurGMRESMatvecDestroy(void *matvec_data );
 #endif
 
 #endif /* #ifndef hypre_ParILU_DATA_HEADER */
-

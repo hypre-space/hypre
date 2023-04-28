@@ -1328,9 +1328,15 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
    HYPRE_Real      *elmt_tols_diag = NULL;
    HYPRE_Real      *elmt_tols_offd = NULL;
 
-   hypre_GpuProfilingPushRange("hypre_ParCSRMatrixDropSmallEntries");
+   /* Exit if tolerance is zero */
+   if (tol < HYPRE_REAL_MIN)
+   {
+      return hypre_error_flag;
+   }
 
-   if ((col_map_offd_A == NULL) && (num_cols_A_offd > 0))
+   hypre_GpuProfilingPushRange("ParCSRMatrixDropSmallEntries");
+
+   if (col_map_offd_A == NULL)
    {
       col_map_offd_A = hypre_TAlloc(HYPRE_BigInt, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(col_map_offd_A, h_col_map_offd_A, HYPRE_BigInt, num_cols_A_offd,
@@ -1434,6 +1440,7 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
       hypre_TFree(elmt_tols_offd, HYPRE_MEMORY_DEVICE);
    }
    hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
+   hypre_GpuProfilingPopRange();
 
    hypre_GpuProfilingPopRange();
 
@@ -1615,6 +1622,7 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
    HYPRE_Int        num_procs;
 
    hypre_MPI_Comm_size(hypre_ParCSRMatrixComm(A), &num_procs);
+   hypre_GpuProfilingPushRange("hypre_ParCSRMatrixAdd");
 
    hypre_CSRMatrix *C_diag = hypre_CSRMatrixAddDevice(alpha, A_diag, beta, B_diag);
    hypre_CSRMatrix *C_offd;
@@ -1627,12 +1635,14 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
 
       HYPRE_BigInt *tmp = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_A + num_cols_offd_B,
                                        HYPRE_MEMORY_DEVICE);
+
       hypre_TMemcpy(tmp,                   hypre_ParCSRMatrixDeviceColMapOffd(A), HYPRE_BigInt,
                     num_cols_offd_A, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(tmp + num_cols_offd_A, hypre_ParCSRMatrixDeviceColMapOffd(B), HYPRE_BigInt,
                     num_cols_offd_B, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
       HYPRE_THRUST_CALL( sort, tmp, tmp + num_cols_offd_A + num_cols_offd_B );
-      HYPRE_BigInt *new_end = HYPRE_THRUST_CALL( unique, tmp, tmp + num_cols_offd_A + num_cols_offd_B );
+      HYPRE_BigInt *new_end = HYPRE_THRUST_CALL( unique, tmp,
+                                                 tmp + num_cols_offd_A + num_cols_offd_B );
       num_cols_offd_C = new_end - tmp;
       d_col_map_offd_C = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(d_col_map_offd_C, tmp, HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE,
@@ -1711,8 +1721,11 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
    {
       hypre_ParCSRMatrixDeviceColMapOffd(C) = d_col_map_offd_C;
 
-      hypre_ParCSRMatrixColMapOffd(C) = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(C), d_col_map_offd_C, HYPRE_BigInt, num_cols_offd_C,
+      hypre_ParCSRMatrixColMapOffd(C) = hypre_TAlloc(HYPRE_BigInt,
+                                                     num_cols_offd_C,
+                                                     HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(C), d_col_map_offd_C,
+                    HYPRE_BigInt, num_cols_offd_C,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
 
@@ -1723,6 +1736,8 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
    hypre_MatvecCommPkgCreate(C);
 
    *C_ptr = C;
+
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }

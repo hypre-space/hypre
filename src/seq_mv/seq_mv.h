@@ -36,12 +36,12 @@ extern "C" {
 #ifndef hypre_CSR_MATRIX_HEADER
 #define hypre_CSR_MATRIX_HEADER
 
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE) ||\
+    defined(HYPRE_USING_ONEMKLSPARSE)
 struct hypre_CsrsvData;
 typedef struct hypre_CsrsvData hypre_CsrsvData;
-#endif
 
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
 struct hypre_GpuMatData;
 typedef struct hypre_GpuMatData hypre_GpuMatData;
 #endif
@@ -61,12 +61,15 @@ typedef struct
    hypre_int            *i_short;
    hypre_int            *j_short;
    HYPRE_Int             owns_data;       /* Does the CSRMatrix create/destroy `data', `i', `j'? */
-   HYPRE_Int             pattern_only;    /* if 1, data array is ignored, and assumed to be all 1's */
+   HYPRE_Int             pattern_only;    /* 1: data array is ignored, and assumed to be all 1's */
    HYPRE_Complex        *data;
    HYPRE_Int            *rownnz;          /* for compressing rows in matrix multiplication  */
    HYPRE_Int             num_rownnz;
    HYPRE_MemoryLocation  memory_location; /* memory location of arrays i, j, data */
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
+
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE) ||\
+    defined(HYPRE_USING_ONEMKLSPARSE)
    HYPRE_Int            *sorted_j;        /* some cusparse routines require sorted CSR */
    HYPRE_Complex        *sorted_data;
    hypre_CsrsvData      *csrsv_data;
@@ -91,7 +94,9 @@ typedef struct
 #define hypre_CSRMatrixPatternOnly(matrix)          ((matrix) -> pattern_only)
 #define hypre_CSRMatrixMemoryLocation(matrix)       ((matrix) -> memory_location)
 
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE) ||\
+    defined(HYPRE_USING_ONEMKLSPARSE)
 #define hypre_CSRMatrixSortedJ(matrix)              ((matrix) -> sorted_j)
 #define hypre_CSRMatrixSortedData(matrix)           ((matrix) -> sorted_data)
 #define hypre_CSRMatrixCsrsvData(matrix)            ((matrix) -> csrsv_data)
@@ -130,7 +135,6 @@ typedef struct
 #define hypre_CSRBooleanMatrix_Get_OwnsData(matrix) ((matrix)->owns_data)
 
 #endif
-
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -394,8 +398,6 @@ HYPRE_Int hypre_CSRMatrixMigrate( hypre_CSRMatrix *A, HYPRE_MemoryLocation memor
 hypre_CSRMatrix *hypre_CSRMatrixClone ( hypre_CSRMatrix *A, HYPRE_Int copy_data );
 hypre_CSRMatrix *hypre_CSRMatrixClone_v2( hypre_CSRMatrix *A, HYPRE_Int copy_data,
                                           HYPRE_MemoryLocation memory_location );
-HYPRE_Int hypre_CSRMatrixPermuteHost( hypre_CSRMatrix *A, HYPRE_Int *perm,
-                                      HYPRE_Int *rqperm, hypre_CSRMatrix *B );
 HYPRE_Int hypre_CSRMatrixPermute( hypre_CSRMatrix *A, HYPRE_Int *perm,
                                   HYPRE_Int *rqperm, hypre_CSRMatrix **B_ptr );
 hypre_CSRMatrix *hypre_CSRMatrixUnion( hypre_CSRMatrix *A,
@@ -624,7 +626,7 @@ hypre_GpuMatData* hypre_GpuMatDataCreate();
 void hypre_GPUMatDataSetCSRData(hypre_CSRMatrix *matrix);
 void hypre_GpuMatDataDestroy(hypre_GpuMatData *data);
 hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
-#define hypre_CSRMatrixGPUMatDescr(matrix)       ( hypre_GpuMatDataMatDecsr(hypre_CSRMatrixGetGPUMatData(matrix)) )
+#define hypre_CSRMatrixGPUMatDescr(matrix)       ( hypre_GpuMatDataMatDescr(hypre_CSRMatrixGetGPUMatData(matrix)) )
 #define hypre_CSRMatrixGPUMatInfo(matrix)        ( hypre_GpuMatDataMatInfo (hypre_CSRMatrixGetGPUMatData(matrix)) )
 #define hypre_CSRMatrixGPUMatHandle(matrix)      ( hypre_GpuMatDataMatHandle (hypre_CSRMatrixGetGPUMatData(matrix)) )
 #define hypre_CSRMatrixGPUMatSpMVBuffer(matrix)  ( hypre_GpuMatDataSpMVBuffer (hypre_CSRMatrixGetGPUMatData(matrix)) )
