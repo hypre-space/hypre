@@ -438,8 +438,12 @@ void hypre_ParCSRMatrixDropEntries ( hypre_ParCSRMatrix *C, hypre_ParCSRMatrix *
 
 /* par_csr_matrix.c */
 hypre_ParCSRMatrix *hypre_ParCSRMatrixCreate ( MPI_Comm comm, HYPRE_BigInt global_num_rows,
-                                               HYPRE_BigInt global_num_cols, HYPRE_BigInt *row_starts_in, HYPRE_BigInt *col_starts_in,
-                                               HYPRE_Int num_cols_offd, HYPRE_Int num_nonzeros_diag, HYPRE_Int num_nonzeros_offd );
+                                               HYPRE_BigInt global_num_cols,
+                                               HYPRE_BigInt *row_starts_in,
+                                               HYPRE_BigInt *col_starts_in,
+                                               HYPRE_Int num_cols_offd,
+                                               HYPRE_Int num_nonzeros_diag,
+                                               HYPRE_Int num_nonzeros_offd );
 HYPRE_Int hypre_ParCSRMatrixDestroy ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix *matrix,
                                            HYPRE_MemoryLocation memory_location );
@@ -484,6 +488,11 @@ HYPRE_Int hypre_ParCSRMatrixTruncate(hypre_ParCSRMatrix *A, HYPRE_Real tol,
 HYPRE_Int hypre_ParCSRMatrixMigrate(hypre_ParCSRMatrix *A, HYPRE_MemoryLocation memory_location);
 HYPRE_Int hypre_ParCSRMatrixSetConstantValues( hypre_ParCSRMatrix *A, HYPRE_Complex value );
 void hypre_ParCSRMatrixCopyColMapOffdToDevice(hypre_ParCSRMatrix *A);
+
+/* par_csr_matrix_stats.c */
+HYPRE_Int hypre_ParCSRMatrixStatsArrayCompute( HYPRE_Int num_matrices,
+                                               hypre_ParCSRMatrix **matrices,
+                                               hypre_MatrixStatsArray *stats_array );
 
 /* par_csr_matvec.c */
 // y = alpha*A*x + beta*b

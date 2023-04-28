@@ -45,6 +45,7 @@ FILES =\
  par_csr_communication.c\
  par_csr_matop.c\
  par_csr_matrix.c\
+ par_csr_matrix_stats.c\
  par_csr_matvec.c\
  par_csr_matop_marked.c\
  par_csr_triplemat.c\
