@@ -446,9 +446,19 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
 
             hypre_printf("\n");
             HYPRE_PRINT_INDENT(shift);
-            if (i == num_levels[0])
+            if (square)
             {
-               HYPRE_PRINT_MID_DIVISOR(3, divisors, messages[1]);
+               if (i == num_levels[0])
+               {
+                  HYPRE_PRINT_MID_DIVISOR(3, divisors, messages[1]);
+               }
+            }
+            else
+            {
+               if (i == (num_levels[0] - 1))
+               {
+                  HYPRE_PRINT_MID_DIVISOR(3, divisors, messages[1]);
+               }
             }
          }
          else
