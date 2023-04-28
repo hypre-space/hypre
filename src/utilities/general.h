@@ -50,7 +50,7 @@ typedef double                 hypre_double;
 #endif
 
 #ifndef hypre_squared
-#define hypre_squared(i)  (i * i)
+#define hypre_squared(i)  ((i) * (i))
 #endif
 
 #ifndef hypre_sqrt
