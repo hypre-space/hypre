@@ -102,7 +102,7 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
             bitmask = hypre_ballot_sync(HYPRE_WARP_FULL_MASK, A_col == P_col);
             if (bitmask > 0)
             {
-               if (lane == (__ffs(bitmask) - 1))
+               if (lane == (hypre_ffs(bitmask) - 1))
                {
                   rhs_(ldim, i, j - pj) = - read_only_load(A_a + k);
                }
@@ -146,7 +146,7 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
                bitmask = hypre_ballot_sync(HYPRE_WARP_FULL_MASK, A_col == P_col);
                if (bitmask > 0)
                {
-                  if (lane == (__ffs(bitmask) - 1))
+                  if (lane == (hypre_ffs(bitmask) - 1))
                   {
                      val = read_only_load(A_a + k);
                      mat_(ldim, i, j - pj, jj - pj) = val;
@@ -360,7 +360,7 @@ hypreGPUKernel_FSAITruncateCandidateOrdered( hypre_DeviceItem &item,
             for (kk = 0; kk < cnt; kk++)
             {
                __syncwarp();
-               max_lane = __ffs(bitmask) - 1;
+               max_lane = hypre_ffs(bitmask) - 1;
                if (lane == max_lane)
                {
                   col = K_j[p + k + kk];
@@ -491,7 +491,7 @@ hypreGPUKernel_FSAITruncateCandidateUnordered( hypre_DeviceItem &item,
             for (kk = 0; kk < cnt; kk++)
             {
                __syncwarp();
-               max_lane = __ffs(bitmask) - 1;
+               max_lane = hypre_ffs(bitmask) - 1;
                if (lane == max_lane)
                {
                   colK = K_j[p + k + kk];

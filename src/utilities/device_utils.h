@@ -999,10 +999,8 @@ hypre_mask hypre_ballot_sync(unsigned mask, hypre_int predicate)
 {
 #if defined(HYPRE_USING_CUDA)
    return __ballot_sync(mask, predicate);
-
 #else
    return __ballot(predicate);
-
 #endif
 }
 
@@ -1013,6 +1011,16 @@ HYPRE_Int hypre_popc(hypre_mask mask)
    return (HYPRE_Int) __popc(mask);
 #else
    return (HYPRE_Int) __popcll(mask);
+#endif
+}
+
+static __device__ __forceinline__
+HYPRE_Int hypre_ffs(hypre_mask mask)
+{
+#if defined(HYPRE_USING_CUDA)
+   return (HYPRE_Int) __ffs(mask);
+#else
+   return (HYPRE_Int) __ffsll(mask);
 #endif
 }
 
