@@ -4202,9 +4202,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCoordinates (amg_solver, coordinates);
       }
 
-#if defined (HYPRE_USING_GPU)
       hypre_GpuProfilingPushRange("AMG-Setup-1");
-#endif
       if (solver_id == 0)
       {
          HYPRE_BoomerAMGSetup(amg_solver, parcsr_M, b, x);
@@ -4214,9 +4212,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGDDSetup(amgdd_solver, parcsr_M, b, x);
       }
 
-#if defined (HYPRE_USING_GPU)
       hypre_GpuProfilingPopRange();
-#endif
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
@@ -4233,9 +4229,7 @@ main( hypre_int argc,
       }
       hypre_BeginTiming(time_index);
 
-#if defined (HYPRE_USING_GPU)
       hypre_GpuProfilingPushRange("AMG-Solve-1");
-#endif
 
       if (solver_id == 0)
       {
@@ -4246,9 +4240,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGDDSolve(amgdd_solver, parcsr_A, b, x);
       }
 
-#if defined (HYPRE_USING_GPU)
       hypre_GpuProfilingPopRange();
-#endif
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
@@ -4273,9 +4265,7 @@ main( hypre_int argc,
          time_index = hypre_InitializeTiming("BoomerAMG/AMG-DD Setup2");
          hypre_BeginTiming(time_index);
 
-#if defined (HYPRE_USING_GPU)
          hypre_GpuProfilingPushRange("AMG-Setup-2");
-#endif
 
          if (solver_id == 0)
          {
@@ -4286,9 +4276,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGDDSetup(amgdd_solver, parcsr_M, b, x);
          }
 
-#if defined (HYPRE_USING_GPU)
          hypre_GpuProfilingPopRange();
-#endif
 
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
@@ -4298,9 +4286,7 @@ main( hypre_int argc,
          time_index = hypre_InitializeTiming("BoomerAMG/AMG-DD Solve2");
          hypre_BeginTiming(time_index);
 
-#if defined (HYPRE_USING_GPU)
          hypre_GpuProfilingPushRange("AMG-Solve-2");
-#endif
 
          if (solver_id == 0)
          {
@@ -4311,9 +4297,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGDDSolve(amgdd_solver, parcsr_A, b, x);
          }
 
-#if defined (HYPRE_USING_GPU)
          hypre_GpuProfilingPopRange();
-#endif
 
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
@@ -5048,14 +5032,10 @@ main( hypre_int argc,
          hypre_printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
       }
 
-#if defined (HYPRE_USING_GPU)
       hypre_GpuProfilingPushRange("PCG-Setup-1");
-#endif
       HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix) parcsr_M,
                      (HYPRE_Vector) b, (HYPRE_Vector) x);
-#if defined (HYPRE_USING_GPU)
       hypre_GpuProfilingPopRange();
-#endif
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
@@ -5063,14 +5043,10 @@ main( hypre_int argc,
 
       time_index = hypre_InitializeTiming("PCG Solve");
       hypre_BeginTiming(time_index);
-#if defined (HYPRE_USING_GPU)
       hypre_GpuProfilingPushRange("PCG-Solve-1");
-#endif
       HYPRE_PCGSolve(pcg_solver, (HYPRE_Matrix)parcsr_A,
                      (HYPRE_Vector)b, (HYPRE_Vector)x);
-#if defined (HYPRE_USING_GPU)
       hypre_GpuProfilingPopRange();
-#endif
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
@@ -5094,16 +5070,12 @@ main( hypre_int argc,
          time_index = hypre_InitializeTiming("PCG Setup");
          hypre_BeginTiming(time_index);
 
-#if defined (HYPRE_USING_GPU)
          hypre_GpuProfilingPushRange("PCG-Setup-2");
-#endif
 
          HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix) parcsr_M,
                         (HYPRE_Vector) b, (HYPRE_Vector) x);
 
-#if defined (HYPRE_USING_GPU)
          hypre_GpuProfilingPopRange();
-#endif
 
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
@@ -5113,16 +5085,12 @@ main( hypre_int argc,
          time_index = hypre_InitializeTiming("PCG Solve");
          hypre_BeginTiming(time_index);
 
-#if defined (HYPRE_USING_GPU)
          hypre_GpuProfilingPushRange("PCG-Solve-2");
-#endif
 
          HYPRE_PCGSolve(pcg_solver, (HYPRE_Matrix)parcsr_A,
                         (HYPRE_Vector)b, (HYPRE_Vector)x);
 
-#if defined (HYPRE_USING_GPU)
          hypre_GpuProfilingPopRange();
-#endif
 
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
