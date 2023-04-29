@@ -12,7 +12,7 @@
 #include "ads.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 #if defined(HYPRE_USING_SYCL)
 SYCL_EXTERNAL
 #endif
@@ -535,7 +535,7 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
                              hypre_ParCSRMatrix *PiNDz,
                              hypre_ParCSRMatrix **Pi_ptr)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 #endif
 
@@ -573,7 +573,7 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
       /* Each component of Pi has the sparsity pattern of the topological
          face-to-vertex matrix. */
       hypre_ParCSRMatrix *F2V;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          F2V = hypre_ParCSRMatMat(C, G);
@@ -630,7 +630,7 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
          HYPRE_Int *Pi_diag_J = hypre_CSRMatrixJ(Pi_diag);
          HYPRE_Real *Pi_diag_data = hypre_CSRMatrixData(Pi_diag);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             hypreDevice_IntScalen( F2V_diag_I, F2V_diag_nrows + 1, Pi_diag_I, 3);
@@ -689,7 +689,7 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
          HYPRE_BigInt *F2V_cmap = hypre_ParCSRMatrixColMapOffd(F2V);
          HYPRE_BigInt *Pi_cmap = hypre_ParCSRMatrixColMapOffd(Pi);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             if (F2V_offd_ncols)
@@ -781,7 +781,7 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
 {
    hypre_ParCSRMatrix *Pix, *Piy, *Piz;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 #endif
 
@@ -818,7 +818,7 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
          face-to-vertex matrix. */
       hypre_ParCSRMatrix *F2V;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          F2V = hypre_ParCSRMatMat(C, G);
@@ -898,7 +898,7 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
          HYPRE_Int *Piz_diag_J = hypre_CSRMatrixJ(Piz_diag);
          HYPRE_Real *Piz_diag_data = hypre_CSRMatrixData(Piz_diag);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
 #if defined(HYPRE_USING_SYCL)
@@ -987,7 +987,7 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
          HYPRE_BigInt *Piy_cmap = hypre_ParCSRMatrixColMapOffd(Piy);
          HYPRE_BigInt *Piz_cmap = hypre_ParCSRMatrixColMapOffd(Piz);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
 #if defined(HYPRE_USING_SYCL)
@@ -1097,7 +1097,7 @@ HYPRE_Int hypre_ADSSetup(void *solver,
                          hypre_ParVector *b,
                          hypre_ParVector *x)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 #endif
 
@@ -1200,7 +1200,7 @@ HYPRE_Int hypre_ADSSetup(void *solver,
             hypre_MatvecCommPkgCreate(ads_data -> A);
          }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             ads_data -> A_C = hypre_ParCSRMatrixRAPKT(ads_data -> C,
@@ -1309,7 +1309,7 @@ HYPRE_Int hypre_ADSSetup(void *solver,
          hypre_MatvecCommPkgCreate(ads_data -> Pix);
       }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          ads_data -> A_Pix = hypre_ParCSRMatrixRAPKT(ads_data -> Pix,
@@ -1334,7 +1334,7 @@ HYPRE_Int hypre_ADSSetup(void *solver,
          hypre_MatvecCommPkgCreate(ads_data -> Piy);
       }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          ads_data -> A_Piy = hypre_ParCSRMatrixRAPKT(ads_data -> Piy,
@@ -1359,7 +1359,7 @@ HYPRE_Int hypre_ADSSetup(void *solver,
          hypre_MatvecCommPkgCreate(ads_data -> Piz);
       }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          ads_data -> A_Piz = hypre_ParCSRMatrixRAPKT(ads_data -> Piz,
@@ -1413,7 +1413,7 @@ HYPRE_Int hypre_ADSSetup(void *solver,
             hypre_MatvecCommPkgCreate(ads_data -> A);
          }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             ads_data -> A_Pi = hypre_ParCSRMatrixRAPKT(ads_data -> Pi,
@@ -1503,12 +1503,12 @@ HYPRE_Int hypre_ADSSolve(void *solver,
    ri[3] = ads_data -> r2;     gi[3] = ads_data -> g2;
    ri[4] = ads_data -> r2;     gi[4] = ads_data -> g2;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 #endif
 
    /* may need to create an additional temporary vector for relaxation */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    if (exec == HYPRE_EXEC_DEVICE)
    {
       needZ = ads_data -> A_relax_type == 2 || ads_data -> A_relax_type == 4 ||
