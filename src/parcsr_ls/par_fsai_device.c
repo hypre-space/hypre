@@ -344,12 +344,7 @@ hypreGPUKernel_FSAITruncateCandidateOrdered( hypre_DeviceItem &item,
          }
 
          /* Find maximum coefficient in absolute value in the warp */
-         warp_max_val = max_val;
-         #pragma unroll
-         for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
-         {
-            warp_max_val = max(warp_max_val, __shfl_xor_sync(0xFFFFFFFFU, warp_max_val, d));
-         }
+         warp_max_val = warp_allreduce_max(item, max_val);
 
          /* Reorder col/val entries associated with warp_max_val */
          bitmask = hypre_ballot_sync(HYPRE_WARP_FULL_MASK, warp_max_val == max_val);
@@ -475,12 +470,7 @@ hypreGPUKernel_FSAITruncateCandidateUnordered( hypre_DeviceItem &item,
          }
 
          /* Find maximum coefficient in absolute value in the warp */
-         warp_max_val = max_val;
-         #pragma unroll
-         for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
-         {
-            warp_max_val = max(warp_max_val, __shfl_xor_sync(0xFFFFFFFFU, warp_max_val, d));
-         }
+         warp_max_val = warp_allreduce_max(item, max_val);
 
          /* Reorder col/val entries associated with warp_max_val */
          bitmask = hypre_ballot_sync(HYPRE_WARP_FULL_MASK, warp_max_val == max_val);
