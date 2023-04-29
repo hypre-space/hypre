@@ -355,7 +355,7 @@ hypreGPUKernel_FSAITruncateCandidateOrdered( hypre_DeviceItem &item,
          bitmask = hypre_ballot_sync(HYPRE_WARP_FULL_MASK, warp_max_val == max_val);
          if (warp_max_val > 0.0)
          {
-            cnt = min((HYPRE_Int) __popc(bitmask), max_nonzeros_row - k);
+            cnt = min(hypre_popc(bitmask), max_nonzeros_row - k);
 
             for (kk = 0; kk < cnt; kk++)
             {
@@ -486,7 +486,7 @@ hypreGPUKernel_FSAITruncateCandidateUnordered( hypre_DeviceItem &item,
          bitmask = hypre_ballot_sync(HYPRE_WARP_FULL_MASK, warp_max_val == max_val);
          if (warp_max_val > 0.0)
          {
-            cnt = min((HYPRE_Int) __popc(bitmask), max_nonzeros_row - k);
+            cnt = min(hypre_popc(bitmask), max_nonzeros_row - k);
 
             for (kk = 0; kk < cnt; kk++)
             {
