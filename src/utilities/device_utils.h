@@ -1069,7 +1069,7 @@ T warp_prefix_sum(hypre_DeviceItem &item, hypre_int lane_id, T in, T &all_sum)
    }
 
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       T t = __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
 
@@ -1131,7 +1131,7 @@ static __device__ __forceinline__
 T warp_reduce_sum(hypre_DeviceItem &item, T in)
 {
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in += __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d);
    }
@@ -1143,7 +1143,7 @@ static __device__ __forceinline__
 T warp_allreduce_sum(hypre_DeviceItem &item, T in)
 {
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in += __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
    }
@@ -1155,7 +1155,7 @@ static __device__ __forceinline__
 T warp_reduce_max(hypre_DeviceItem &item, T in)
 {
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in = max(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
    }
@@ -1167,7 +1167,7 @@ static __device__ __forceinline__
 T warp_allreduce_max(hypre_DeviceItem &item, T in)
 {
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in = max(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
    }
@@ -1179,7 +1179,7 @@ static __device__ __forceinline__
 T warp_reduce_min(hypre_DeviceItem &item, T in)
 {
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in = min(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
    }
@@ -1191,7 +1191,7 @@ static __device__ __forceinline__
 T warp_allreduce_min(hypre_DeviceItem &item, T in)
 {
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in = min(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
    }
@@ -1493,7 +1493,7 @@ T warp_prefix_sum(hypre_DeviceItem &item, hypre_int lane_id, T in, T &all_sum)
    }
 
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       T t = sycl::permute_group_by_xor(item.get_sub_group(), in, d);
 
@@ -1597,7 +1597,7 @@ template <typename T>
 static __forceinline__
 T warp_reduce_sum(hypre_DeviceItem &item, T in)
 {
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in += sycl::shift_group_left(item.get_sub_group(), in, d);
    }
@@ -1608,7 +1608,7 @@ template <typename T>
 static __forceinline__
 T warp_allreduce_sum(hypre_DeviceItem &item, T in)
 {
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in += sycl::permute_group_by_xor(item.get_sub_group(), in, d);
    }
@@ -1619,7 +1619,7 @@ template <typename T>
 static __forceinline__
 T warp_reduce_max(hypre_DeviceItem &item, T in)
 {
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in = std::max(in, sycl::shift_group_left(item.get_sub_group(), in, d));
    }
@@ -1630,7 +1630,7 @@ template <typename T>
 static __forceinline__
 T warp_allreduce_max(hypre_DeviceItem &item, T in)
 {
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in = std::max(in, sycl::permute_group_by_xor(item.get_sub_group(), in, d));
    }
@@ -1641,7 +1641,7 @@ template <typename T>
 static __forceinline__
 T warp_reduce_min(hypre_DeviceItem &item, T in)
 {
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in = std::min(in, sycl::shift_group_left(item.get_sub_group(), in, d));
    }
@@ -1652,7 +1652,7 @@ template <typename T>
 static __forceinline__
 T warp_allreduce_min(hypre_DeviceItem &item, T in)
 {
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in = std::min(in, sycl::permute_group_by_xor(item.get_sub_group(), in, d));
    }
