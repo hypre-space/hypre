@@ -528,6 +528,61 @@ hypre_dim3(HYPRE_Int x, HYPRE_Int y, HYPRE_Int z)
    return d;
 }
 
+/*--------------------------------------------------------------------------
+ * hypreGPUKernel_ArrayToArrayOfPtrs
+ *--------------------------------------------------------------------------*/
+
+template <typename T>
+__global__ void
+hypreGPUKernel_ArrayToArrayOfPtrs( hypre_DeviceItem  &item,
+                                   HYPRE_Int          n,
+                                   HYPRE_Int          m,
+                                   T                 *data,
+                                   T                **data_aop )
+{
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+
+   if (i < n)
+   {
+      data_aop[i] = &data[i * m];
+   }
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_ArrayToArrayOfPtrs
+ *--------------------------------------------------------------------*/
+
+template <typename T>
+HYPRE_Int
+hypreDevice_ArrayToArrayOfPtrs(HYPRE_Int n, HYPRE_Int m, T *data, T **data_aop)
+{
+   /* Trivial case */
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
+
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_ArrayToArrayOfPtrs, gDim, bDim, n, m, data, data_aop);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_ComplexArrayToArrayOfPtrs
+ *--------------------------------------------------------------------*/
+
+HYPRE_Int
+hypreDevice_ComplexArrayToArrayOfPtrs(HYPRE_Int       n,
+                                      HYPRE_Int       m,
+                                      HYPRE_Complex  *data,
+                                      HYPRE_Complex **data_aop)
+{
+   return hypreDevice_ArrayToArrayOfPtrs(n, m, data, data_aop);
+}
+
 /*--------------------------------------------------------------------
  * hypreGPUKernel_IVAXPY
  *--------------------------------------------------------------------*/
@@ -544,7 +599,7 @@ hypreGPUKernel_IVAXPY( hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Complex *a, HY
 }
 
 /*--------------------------------------------------------------------
- * hypreGPUKernel_IVAXPY
+ * hypreDevice_IVAXPY
  *
  * Inverse Vector AXPY: y[i] = x[i] / a[i] + y[i]
  *--------------------------------------------------------------------*/

@@ -320,29 +320,6 @@ hypre_MGRRelaxL1JacobiDevice( hypre_ParCSRMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_ComplexArrayToArrayOfPtrs
- *
- * TODO:
- *   1) data as template arg.
- *   2) Move this to device_utils?
- *--------------------------------------------------------------------------*/
-
-__global__ void
-hypreGPUKernel_ComplexArrayToArrayOfPtrs( hypre_DeviceItem  &item,
-                                          HYPRE_Int          num_rows,
-                                          HYPRE_Int          ldim,
-                                          HYPRE_Complex     *data,
-                                          HYPRE_Complex    **data_aop )
-{
-   HYPRE_Int i = threadIdx.x + blockIdx.x * blockDim.x;
-
-   if (i < num_rows)
-   {
-      data_aop[i] = &data[i * ldim];
-   }
-}
-
-/*--------------------------------------------------------------------------
  * hypreGPUKernel_CSRMatrixExtractBlockDiag
  *
  * Fills vector diag with the block diagonals from the input matrix.
@@ -670,16 +647,8 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
       /* Set array of pointers */
-      {
-         dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-         dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "thread", bDim);
-
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_ComplexArrayToArrayOfPtrs, gDim, bDim,
-                           num_rows, bs2, B_diag_data, diag_aop );
-
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_ComplexArrayToArrayOfPtrs, gDim, bDim,
-                           num_rows, bs2, tmpdiag, tmpdiag_aop );
-      }
+      hypreDevice_ComplexArrayToArrayOfPtrs(num_rows, bs2, B_diag_data, diag_aop);
+      hypreDevice_ComplexArrayToArrayOfPtrs(num_rows, bs2, tmpdiag, tmpdiag_aop);
 
       /* Compute LU factorization */
 #if defined(HYPRE_USING_CUBLAS)

@@ -17,25 +17,6 @@
 
 #define HYPRE_THRUST_ZIP3(A, B, C) thrust::make_zip_iterator(thrust::make_tuple(A, B, C))
 
-/*--------------------------------------------------------------------------
- * hypreGPUKernel_ComplexArrayToArrayOfPtrs
- *--------------------------------------------------------------------------*/
-
-__global__ void
-hypreGPUKernel_ComplexArrayToArrayOfPtrs( hypre_DeviceItem  &item,
-                                          HYPRE_Int          num_rows,
-                                          HYPRE_Int          ldim,
-                                          HYPRE_Complex     *data,
-                                          HYPRE_Complex    **data_aop )
-{
-   HYPRE_Int i = threadIdx.x + blockIdx.x * blockDim.x;
-
-   if (i < num_rows)
-   {
-      data_aop[i] = &data[i * ldim];
-   }
-}
-
 /*--------------------------------------------------------------------
  * hypreGPUKernel_FSAIExtractSubSystems
  *
@@ -919,26 +900,15 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    hypre_GpuProfilingPopRange();
 
    hypre_GpuProfilingPushRange("FormAOP");
-   {
-      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-      dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "thread", bDim);
-
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_ComplexArrayToArrayOfPtrs, gDim, bDim,
-                        num_rows, max_nnz_row * max_nnz_row, mat_data, mat_aop );
-
-      HYPRE_GPU_LAUNCH( hypreGPUKernel_ComplexArrayToArrayOfPtrs, gDim, bDim,
-                        num_rows, max_nnz_row, sol_data, sol_aop );
-
-      hypre_SyncComputeStream(hypre_handle());
-      hypre_GetDeviceLastError();
-   }
+   hypreDevice_ComplexArrayToArrayOfPtrs(num_rows, max_nnz_row * max_nnz_row,
+                                         mat_data, mat_aop);
+   hypreDevice_ComplexArrayToArrayOfPtrs(num_rows, max_nnz_row, sol_data, sol_aop);
    hypre_GpuProfilingPopRange();
 
    /*-----------------------------------------------------
     *  Solve local linear systems
     *-----------------------------------------------------*/
 
-   /* TODO */
    hypre_GpuProfilingPushRange("SolveLS");
    {
 #if HYPRE_DEBUG
