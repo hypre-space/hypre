@@ -87,7 +87,7 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
          P_col = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, P_col, 0, HYPRE_WARP_SIZE);
 
          for (k = pk + lane;
-              __any_sync(HYPRE_WARP_FULL_MASK, k < qk);
+              warp_any_sync(item, HYPRE_WARP_FULL_MASK, k < qk);
               k += HYPRE_WARP_SIZE)
          {
             if (k < qk)
@@ -131,7 +131,7 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
             P_col = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, P_col, 0, HYPRE_WARP_SIZE);
 
             for (k = pk + lane;
-                 __any_sync(HYPRE_WARP_FULL_MASK, k < qk);
+                 warp_any_sync(item, HYPRE_WARP_FULL_MASK, k < qk);
                  k += HYPRE_WARP_SIZE)
             {
                if (k < qk)
