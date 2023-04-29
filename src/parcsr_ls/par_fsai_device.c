@@ -48,8 +48,8 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
    HYPRE_Int      pj, qj;
    HYPRE_Int      pk, qk;
    HYPRE_Int      A_col, P_col;
-   hypre_int      bitmask;
    HYPRE_Complex  val;
+   hypre_mask     bitmask;
 
    /* Grid-stride loop over matrix rows */
    for (i = (blockIdx.x * blockDim.x + threadIdx.x) / HYPRE_WARP_SIZE;
@@ -99,7 +99,7 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
                A_col = -1;
             }
 
-            bitmask = __ballot_sync(0xFFFFFFFFU, A_col == P_col);
+            bitmask = hypre_ballot_sync(HYPRE_WARP_FULL_MASK, A_col == P_col);
             if (bitmask > 0)
             {
                if (lane == (__ffs(bitmask) - 1))
@@ -143,7 +143,7 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
                   A_col = -1;
                }
 
-               bitmask = __ballot_sync(0xFFFFFFFFU, A_col == P_col);
+               bitmask = hypre_ballot_sync(HYPRE_WARP_FULL_MASK, A_col == P_col);
                if (bitmask > 0)
                {
                   if (lane == (__ffs(bitmask) - 1))
@@ -293,7 +293,7 @@ hypreGPUKernel_FSAITruncateCandidateOrdered( hypre_DeviceItem &item,
    HYPRE_Int      q = 0;
    HYPRE_Int      i, j, k, kk, cnt;
    HYPRE_Int      col;
-   hypre_int      bitmask;
+   hypre_mask     bitmask;
    HYPRE_Complex  val;
    HYPRE_Int      max_lane;
    HYPRE_Int      max_idx;
@@ -352,7 +352,7 @@ hypreGPUKernel_FSAITruncateCandidateOrdered( hypre_DeviceItem &item,
          }
 
          /* Reorder col/val entries associated with warp_max_val */
-         bitmask = __ballot_sync(0xFFFFFFFFU, warp_max_val == max_val);
+         bitmask = hypre_ballot_sync(HYPRE_WARP_FULL_MASK, warp_max_val == max_val);
          if (warp_max_val > 0.0)
          {
             cnt = min((HYPRE_Int) __popc(bitmask), max_nonzeros_row - k);
@@ -421,7 +421,7 @@ hypreGPUKernel_FSAITruncateCandidateUnordered( hypre_DeviceItem &item,
    HYPRE_Int      p = 0;
    HYPRE_Int      q = 0;
    HYPRE_Int      ee, e, i, j, k, kk, cnt;
-   hypre_int      bitmask;
+   hypre_mask     bitmask;
    HYPRE_Complex  val;
    HYPRE_Int      max_lane;
    HYPRE_Int      max_idx;
@@ -483,7 +483,7 @@ hypreGPUKernel_FSAITruncateCandidateUnordered( hypre_DeviceItem &item,
          }
 
          /* Reorder col/val entries associated with warp_max_val */
-         bitmask = __ballot_sync(0xFFFFFFFFU, warp_max_val == max_val);
+         bitmask = hypre_ballot_sync(HYPRE_WARP_FULL_MASK, warp_max_val == max_val);
          if (warp_max_val > 0.0)
          {
             cnt = min((HYPRE_Int) __popc(bitmask), max_nonzeros_row - k);

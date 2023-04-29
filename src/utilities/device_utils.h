@@ -10,6 +10,15 @@
 
 #if defined(HYPRE_USING_GPU)
 
+/* Data types depending on GPU architecture */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_SYCL)
+typedef hypre_int hypre_mask;
+
+#elif defined(HYPRE_USING_HIP)
+typedef hypre_ulonglongint hypre_mask;
+
+#endif
+
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *                          cuda includes
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -985,20 +994,23 @@ void __syncwarp()
 
 #endif // #if defined(HYPRE_USING_HIP) || (CUDA_VERSION < 9000)
 
+static __device__ __forceinline__
+hypre_mask hypre_ballot_sync(unsigned mask, hypre_int predicate)
+{
+#if defined(HYPRE_USING_CUDA)
+   return __ballot_sync(mask, predicate);
 
-// __any and __ballot were technically deprecated in CUDA 7 so we don't bother
-// with these overloads for CUDA, just for HIP.
+#elif defined(HYPRE_USING_HIP)
+   return __ballot(predicate);
+
+#endif
+}
+
 #if defined(HYPRE_USING_HIP)
 static __device__ __forceinline__
 hypre_int __any_sync(unsigned mask, hypre_int predicate)
 {
    return __any(predicate);
-}
-
-static __device__ __forceinline__
-hypre_int __ballot_sync(unsigned mask, hypre_int predicate)
-{
-   return __ballot(predicate);
 }
 #endif
 
