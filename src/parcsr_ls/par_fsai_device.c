@@ -67,15 +67,15 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
          pj = read_only_load(P_i + i);
          qj = read_only_load(P_e + i);
       }
-      qj = __shfl_sync(HYPRE_WARP_FULL_MASK, qj, 0);
-      pj = __shfl_sync(HYPRE_WARP_FULL_MASK, pj, 0);
+      qj = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, qj, 0, HYPRE_WARP_SIZE);
+      pj = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pj, 0, HYPRE_WARP_SIZE);
 
       if (lane < 2)
       {
          pk = read_only_load(A_i + i + lane);
       }
-      qk = __shfl_sync(HYPRE_WARP_FULL_MASK, pk, 1);
-      pk = __shfl_sync(HYPRE_WARP_FULL_MASK, pk, 0);
+      qk = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pk, 1, HYPRE_WARP_SIZE);
+      pk = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pk, 0, HYPRE_WARP_SIZE);
 
       /* Set right hand side vector */
       for (j = pj; j < qj; j++)
@@ -84,7 +84,7 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
          {
             P_col = read_only_load(P_j + j);
          }
-         P_col = __shfl_sync(HYPRE_WARP_FULL_MASK, P_col, 0);
+         P_col = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, P_col, 0, HYPRE_WARP_SIZE);
 
          for (k = pk + lane;
               __any_sync(HYPRE_WARP_FULL_MASK, k < qk);
@@ -118,8 +118,8 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
          {
             pk = read_only_load(A_i + P_j[j] + lane);
          }
-         qk = __shfl_sync(HYPRE_WARP_FULL_MASK, pk, 1);
-         pk = __shfl_sync(HYPRE_WARP_FULL_MASK, pk, 0);
+         qk = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pk, 1, HYPRE_WARP_SIZE);
+         pk = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pk, 0, HYPRE_WARP_SIZE);
 
          /* Visit only the lower triangular part */
          for (jj = pj; jj <= j; jj++)
@@ -128,7 +128,7 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
             {
                P_col = read_only_load(P_j + jj);
             }
-            P_col = __shfl_sync(HYPRE_WARP_FULL_MASK, P_col, 0);
+            P_col = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, P_col, 0, HYPRE_WARP_SIZE);
 
             for (k = pk + lane;
                  __any_sync(HYPRE_WARP_FULL_MASK, k < qk);
@@ -309,8 +309,8 @@ hypreGPUKernel_FSAITruncateCandidateOrdered( hypre_DeviceItem &item,
       {
          p = read_only_load(K_i + i + lane);
       }
-      q = __shfl_sync(0xFFFFFFFFU, p, 1);
-      p = __shfl_sync(0xFFFFFFFFU, p, 0);
+      q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1, HYPRE_WARP_SIZE);
+      p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0, HYPRE_WARP_SIZE);
 
       k = 0;
       while (k < max_nonzeros_row)
@@ -440,8 +440,8 @@ hypreGPUKernel_FSAITruncateCandidateUnordered( hypre_DeviceItem &item,
       {
          p = read_only_load(K_i + i + lane);
       }
-      q = __shfl_sync(0xFFFFFFFFU, p, 1);
-      p = __shfl_sync(0xFFFFFFFFU, p, 0);
+      q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1, HYPRE_WARP_SIZE);
+      p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0, HYPRE_WARP_SIZE);
 
       k = 0;
       while (k < max_nonzeros_row)
@@ -672,8 +672,6 @@ hypreDevice_FSAIGatherEntries( HYPRE_Int       num_rows,
 
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "thread", bDim);
-   /* dim3 bDim = {1, 1, 1}; */
-   /* dim3 gDim = {1, 1, 1}; */
 
    HYPRE_GPU_LAUNCH( hypreGPUKernel_FSAIGatherEntries, gDim, bDim,
                      num_rows, ldim, sol_data, scaling, K_i, K_e, K_j, G_i, G_j, G_a );
@@ -741,6 +739,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 
    hypre_CSRMatrix     *A_diag      = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int            num_rows    = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int            block_size  = max_nnz_row * max_nnz_row;
    HYPRE_Int            num_nonzeros_G;
 
    hypre_ParCSRMatrix  *Atilde;
@@ -864,7 +863,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    /* Allocate storage */
    hypre_GpuProfilingPushRange("Storage1");
    HYPRE_Complex  *mat_data = hypre_CTAlloc(HYPRE_Complex,
-                                            max_nnz_row * max_nnz_row * num_rows,
+                                            block_size * num_rows,
                                             HYPRE_MEMORY_DEVICE);
    HYPRE_Complex  *rhs_data = hypre_CTAlloc(HYPRE_Complex, max_nnz_row * num_rows,
                                             HYPRE_MEMORY_DEVICE);
@@ -900,8 +899,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    hypre_GpuProfilingPopRange();
 
    hypre_GpuProfilingPushRange("FormAOP");
-   hypreDevice_ComplexArrayToArrayOfPtrs(num_rows, max_nnz_row * max_nnz_row,
-                                         mat_data, mat_aop);
+   hypreDevice_ComplexArrayToArrayOfPtrs(num_rows, block_size, mat_data, mat_aop);
    hypreDevice_ComplexArrayToArrayOfPtrs(num_rows, max_nnz_row, sol_data, sol_aop);
    hypre_GpuProfilingPopRange();
 
