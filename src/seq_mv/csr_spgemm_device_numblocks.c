@@ -6,7 +6,7 @@
  ******************************************************************************/
 #include "seq_mv.h"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 #include "csr_spgemm_device.h"
 
@@ -144,5 +144,5 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetBlockNumDim()
    return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
+#endif /* defined(HYPRE_USING_GPU) */
 

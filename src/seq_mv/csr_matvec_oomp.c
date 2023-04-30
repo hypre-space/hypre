@@ -34,7 +34,7 @@ hypre_CSRMatrixMatvecOMPOffload( HYPRE_Int        trans,
 
    if (trans)
    {
-      hypre_CSRMatrixTransposeDevice(A, &B, 1);
+      hypre_CSRMatrixTranspose(A, &B, 1);
 
       /* HYPRE_CUDA_CALL(cudaDeviceSynchronize()); */
    }
