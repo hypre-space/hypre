@@ -34,8 +34,11 @@ hypre_HandleCreate(void)
 
    hypre_HandleMemoryLocation(hypre_handle_) = HYPRE_MEMORY_DEVICE;
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
+#endif
+
+#if defined(HYPRE_USING_GPU)
    hypre_HandleDeviceData(hypre_handle_) = hypre_DeviceDataCreate();
    /* Gauss-Seidel: SpTrSV */
    hypre_HandleDeviceGSMethod(hypre_handle_) = 1; /* CPU: 0; Cusparse: 1 */
@@ -52,6 +55,8 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
       return hypre_error_flag;
    }
 
+   hypre_TFree(hypre_HandleStructCommRecvBuffer(hypre_handle_), HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_HandleStructCommSendBuffer(hypre_handle_), HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_GPU)
    hypre_DeviceDataDestroy(hypre_HandleDeviceData(hypre_handle_));
    hypre_HandleDeviceData(hypre_handle_) = NULL;
@@ -78,10 +83,9 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
    HYPRE_HIP_CALL( hipSetDevice(device_id) );
 #endif
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_SYCL)
    if (hypre_handle_)
    {
-#if defined(HYPRE_USING_SYCL)
       if (!hypre_HandleDevice(hypre_handle_))
       {
          /* Note: this enforces "explicit scaling," i.e. we treat each tile of a multi-tile GPU as a separate device */
@@ -109,11 +113,8 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
       hypre_DeviceDataDeviceMaxWorkGroupSize(hypre_HandleDeviceData(hypre_handle_)) =
          hypre_DeviceDataDevice(hypre_HandleDeviceData(
                                    hypre_handle_))->get_info<sycl::info::device::max_work_group_size>();
-#else
-      hypre_HandleDevice(hypre_handle_) = device_id;
-#endif // #if defined(HYPRE_USING_SYCL)
    }
-#endif // # if defined(HYPRE_USING_GPU)
+#endif // #if defined(HYPRE_USING_SYCL)
 
    return hypre_error_flag;
 }
@@ -248,7 +249,7 @@ HYPRE_Init(void)
       _hypre_handle = hypre_HandleCreate();
    }
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 #if !defined(HYPRE_USING_SYCL)
    /* With sycl, cannot call hypre_GetDeviceLastError() until after device and queue setup */
    hypre_GetDeviceLastError();
@@ -278,7 +279,7 @@ HYPRE_Init(void)
 
    /* A separate stream for prefetching */
    //hypre_HandleCudaPrefetchStream(_hypre_handle);
-#endif // HYPRE_USING_GPU
+#endif // #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 #if defined(HYPRE_USING_CUBLAS)
    hypre_HandleCublasHandle(_hypre_handle);

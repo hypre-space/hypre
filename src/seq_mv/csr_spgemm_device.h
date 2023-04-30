@@ -10,7 +10,7 @@
 
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 #define COHEN_USE_SHMEM 0
 
@@ -471,6 +471,6 @@ hypre_spgemm_get_num_groups_per_block()
 #define HYPRE_SPGEMM_PRINT(...)
 #endif
 
-#endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
+#endif /* defined(HYPRE_USING_GPU) */
 #endif /* #ifndef CSR_SPGEMM_DEVICE_H */
 

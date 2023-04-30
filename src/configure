@@ -5793,9 +5793,24 @@ then
    as_fn_error $? "--with-cuda and --with-hip are mutually exclusive" "$LINENO" 5
 fi
 
+if test "x$hypre_using_cuda" = "xyes" && test "x$hypre_using_sycl" = "xyes"
+then
+   as_fn_error $? "--with-cuda and --with-sycl are mutually exclusive" "$LINENO" 5
+fi
+
 if test "x$hypre_using_hip" = "xyes" && test "x$hypre_using_device_openmp" = "xyes"
 then
    as_fn_error $? "--with-hip and --with-device-openmp are mutually exclusive" "$LINENO" 5
+fi
+
+if test "x$hypre_using_hip" = "xyes" && test "x$hypre_using_sycl" = "xyes"
+then
+   as_fn_error $? "--with-hip and --with-sycl are mutually exclusive" "$LINENO" 5
+fi
+
+if test "x$hypre_using_sycl" = "xyes" && test "x$hypre_using_device_openmp" = "xyes"
+then
+   as_fn_error $? "--with-sycl and --with-device-openmp are mutually exclusive" "$LINENO" 5
 fi
 
 
@@ -10913,10 +10928,6 @@ if test "$hypre_using_device_openmp" = "yes"
 then
 
 printf "%s\n" "#define HYPRE_USING_DEVICE_OPENMP 1" >>confdefs.h
-
-
-
-printf "%s\n" "#define HYPRE_USING_GPU 1" >>confdefs.h
 
 
 

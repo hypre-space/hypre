@@ -1717,11 +1717,9 @@ hypre_MGRSetup( void               *mgr_vdata,
                       lev, my_id, wall_time_lev);
 #endif
 
-#if defined (HYPRE_USING_NVTX) || defined (HYPRE_USING_ROCTX) || defined (HYPRE_USING_CALIPER)
       hypre_sprintf(region_name, "%s-%d", "MGR_Level", lev);
       hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_REGION_END("%s", region_name);
-#endif
 
       /* check if last level */
       if (last_level)
