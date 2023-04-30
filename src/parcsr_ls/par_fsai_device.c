@@ -576,11 +576,11 @@ hypreGPUKernel_FSAITruncateCandidateUnordered( hypre_DeviceItem &item,
 }
 
 /*--------------------------------------------------------------------------
- * hypreDevice_FSAIExtractSubSystems
+ * hypre_FSAIExtractSubSystemsDevice
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypreDevice_FSAIExtractSubSystems( HYPRE_Int       num_rows,
+hypre_FSAIExtractSubSystemsDevice( HYPRE_Int       num_rows,
                                    HYPRE_Int      *A_i,
                                    HYPRE_Int      *A_j,
                                    HYPRE_Complex  *A_a,
@@ -610,11 +610,11 @@ hypreDevice_FSAIExtractSubSystems( HYPRE_Int       num_rows,
 }
 
 /*--------------------------------------------------------------------------
- * hypreDevice_FSAIScaling
+ * hypre_FSAIScalingDevice
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypreDevice_FSAIScaling( HYPRE_Int       num_rows,
+hypre_FSAIScalingDevice( HYPRE_Int       num_rows,
                          HYPRE_Int       ldim,
                          HYPRE_Complex  *sol_data,
                          HYPRE_Complex  *rhs_data,
@@ -639,11 +639,11 @@ hypreDevice_FSAIScaling( HYPRE_Int       num_rows,
 }
 
 /*--------------------------------------------------------------------------
- * hypreDevice_FSAIGatherEntries
+ * hypre_FSAIGatherEntriesDevice
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypreDevice_FSAIGatherEntries( HYPRE_Int       num_rows,
+hypre_FSAIGatherEntriesDevice( HYPRE_Int       num_rows,
                                HYPRE_Int       ldim,
                                HYPRE_Complex  *sol_data,
                                HYPRE_Complex  *scaling,
@@ -863,7 +863,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 
    /* Gather dense linear subsystems */
    hypre_GpuProfilingPushRange("ExtractLS");
-   hypreDevice_FSAIExtractSubSystems(num_rows,
+   hypre_FSAIExtractSubSystemsDevice(num_rows,
                                      hypre_CSRMatrixI(A_diag),
                                      hypre_CSRMatrixJ(A_diag),
                                      hypre_CSRMatrixData(A_diag),
@@ -968,7 +968,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    hypre_GpuProfilingPushRange("BuildFSAI");
 
    /* Update scaling factor */
-   hypreDevice_FSAIScaling(num_rows, max_nnz_row, sol_data, rhs_data, scaling, info);
+   hypre_FSAIScalingDevice(num_rows, max_nnz_row, sol_data, rhs_data, scaling, info);
 
    /* Compute the row pointer G_i */
    hypreDevice_IntegerInclusiveScan(num_rows + 1, hypre_CSRMatrixI(G_diag));
@@ -981,7 +981,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    hypre_CSRMatrixNumNonzeros(G_diag) = num_nonzeros_G;
 
    /* Set column indices and coefficients of G */
-   hypreDevice_FSAIGatherEntries(num_rows,
+   hypre_FSAIGatherEntriesDevice(num_rows,
                                  max_nnz_row,
                                  sol_data,
                                  scaling,
