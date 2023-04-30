@@ -43,7 +43,7 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
                                       HYPRE_Complex    *rhs_data,
                                       HYPRE_Int        *G_r )
 {
-   HYPRE_Int      lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
+   HYPRE_Int      lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int      i, j, jj, k;
    HYPRE_Int      pj, qj;
    HYPRE_Int      pk, qk;
@@ -52,9 +52,9 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
    hypre_mask     bitmask;
 
    /* Grid-stride loop over matrix rows */
-   for (i = (blockIdx.x * blockDim.x + threadIdx.x) / HYPRE_WARP_SIZE;
+   for (i = hypre_gpu_get_grid_warp_id<1, 1>(item);
         i < num_rows;
-        i += (gridDim.x * blockDim.x) / HYPRE_WARP_SIZE)
+        i += hypre_gpu_get_grid_num_warps<1, 1>(item))
    {
       /* Set identity matrix */
       for (j = lane; j < ldim; j += HYPRE_WARP_SIZE)
@@ -288,7 +288,7 @@ hypreGPUKernel_FSAITruncateCandidateOrdered( hypre_DeviceItem &item,
                                              HYPRE_Int        *K_j,
                                              HYPRE_Complex    *K_a )
 {
-   HYPRE_Int      lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
+   HYPRE_Int      lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int      p = 0;
    HYPRE_Int      q = 0;
    HYPRE_Int      i, j, k, kk, cnt;
@@ -301,9 +301,9 @@ hypreGPUKernel_FSAITruncateCandidateOrdered( hypre_DeviceItem &item,
    HYPRE_Complex  warp_max_val;
 
    /* Grid-stride loop over matrix rows */
-   for (i = (blockDim.x * blockIdx.x + threadIdx.x) / HYPRE_WARP_SIZE;
+   for (i = hypre_gpu_get_grid_warp_id<1, 1>(item);
         i < num_rows;
-        i += (gridDim.x * blockDim.x) / HYPRE_WARP_SIZE )
+        i += hypre_gpu_get_grid_num_warps<1, 1>(item))
    {
       if (lane < 2)
       {
@@ -412,7 +412,7 @@ hypreGPUKernel_FSAITruncateCandidateUnordered( hypre_DeviceItem &item,
                                                HYPRE_Int        *K_j,
                                                HYPRE_Complex    *K_a )
 {
-   HYPRE_Int      lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
+   HYPRE_Int      lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int      p = 0;
    HYPRE_Int      q = 0;
    HYPRE_Int      ee, e, i, j, k, kk, cnt;
@@ -427,9 +427,9 @@ hypreGPUKernel_FSAITruncateCandidateUnordered( hypre_DeviceItem &item,
    HYPRE_Complex  warp_max_val;
 
    /* Grid-stride loop over matrix rows */
-   for (i = (blockDim.x * blockIdx.x + threadIdx.x) / HYPRE_WARP_SIZE;
+   for (i = hypre_gpu_get_grid_warp_id<1, 1>(item);
         i < num_rows;
-        i += (gridDim.x * blockDim.x) / HYPRE_WARP_SIZE )
+        i += hypre_gpu_get_grid_num_warps<1, 1>(item))
    {
       if (lane < 2)
       {
