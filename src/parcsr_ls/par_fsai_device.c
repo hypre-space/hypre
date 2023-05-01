@@ -746,6 +746,14 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    /* Error code array for FSAI */
    info = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
 
+   /* Sanity check */
+#if !defined (HYPRE_USING_CUSOLVER) || !defined(HYPRE_USING_ROCSOLVER)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "FSAI requires cuSOLVER (CUDA) or rocSOLVER (HIP)\n");
+      return hypre_error_flag;
+   }
+#endif
+
    /*-----------------------------------------------------
     *  Compute candidate pattern
     *-----------------------------------------------------*/
@@ -902,16 +910,31 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 #if HYPRE_DEBUG
       HYPRE_Int *h_info = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
 #endif
-      const cublasFillMode_t uplo = CUBLAS_FILL_MODE_LOWER;
+
+#if defined (HYPRE_USING_CUSOLVER) || defined (HYPRE_USING_ROCSOLVER)
+      vendorSolverHandle_t vs_handle = hypre_HandleVendorSolverHandle(hypre_handle());
+#endif
 
       hypre_GpuProfilingPushRange("Factorization");
-      HYPRE_CUSOLVER_CALL(cusolverDnDpotrfBatched(hypre_HandleVendorSolverHandle(hypre_handle()),
+#if defined (HYPRE_USING_CUSOLVER)
+      const cublasFillMode_t uplo = CUBLAS_FILL_MODE_LOWER;
+      HYPRE_CUSOLVER_CALL(cusolverDnDpotrfBatched(vs_handle,
                                                   uplo,
                                                   max_nnz_row,
                                                   mat_aop,
                                                   max_nnz_row,
                                                   info,
                                                   num_rows));
+#elif defined(HYPRE_USING_ROCSOLVER)
+      const rocblas_fill uplo = rocblas_fill_lower;
+      HYPRE_ROCSOLVER_CALL(rocsolver_dpotrf_batched(vs_handle,
+                                                    uplo,
+                                                    max_nnz_row,
+                                                    mat_aop,
+                                                    max_nnz_row,
+                                                    info,
+                                                    num_rows));
+#endif
       hypre_GpuProfilingPopRange();
 
 #if HYPRE_DEBUG
@@ -929,7 +952,8 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 #endif
 
       hypre_GpuProfilingPushRange("Solve");
-      HYPRE_CUSOLVER_CALL(cusolverDnDpotrsBatched(hypre_HandleVendorSolverHandle(hypre_handle()),
+#if defined (HYPRE_USING_CUSOLVER)
+      HYPRE_CUSOLVER_CALL(cusolverDnDpotrsBatched(vs_handle,
                                                   uplo,
                                                   max_nnz_row,
                                                   1,
@@ -939,6 +963,17 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
                                                   max_nnz_row,
                                                   info,
                                                   num_rows));
+#elif defined(HYPRE_USING_ROCSOLVER)
+      HYPRE_ROCSOLVER_CALL(rocsolver_dpotrs_batched(vs_handle,
+                                                    uplo,
+                                                    max_nnz_row,
+                                                    1,
+                                                    mat_aop,
+                                                    max_nnz_row,
+                                                    sol_aop,
+                                                    max_nnz_row,
+                                                    num_rows));
+#endif
       hypre_GpuProfilingPopRange();
 
 #if HYPRE_DEBUG
