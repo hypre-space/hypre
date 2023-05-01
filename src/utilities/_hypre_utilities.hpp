@@ -734,10 +734,6 @@ rocsparse_handle      hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
 vendorSolverHandle_t  hypre_DeviceDataVendorSolverHandle(hypre_DeviceData *data);
 #endif
 
-#if defined(HYPRE_USING_CUSOLVER)
-cusolverDnHandle_t  hypre_DeviceDataVendorSolverHandle(hypre_DeviceData *data);
-#endif
-
 #if defined(HYPRE_USING_CUDA)
 cudaStream_t          hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
 cudaStream_t          hypre_DeviceDataComputeStream(hypre_DeviceData *data);
