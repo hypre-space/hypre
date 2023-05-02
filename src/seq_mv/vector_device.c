@@ -92,7 +92,6 @@ hypre_SeqVectorScaleDevice( HYPRE_Complex alpha,
    }
 #endif
 
-   hypre_SyncComputeStream(hypre_handle());
    hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
