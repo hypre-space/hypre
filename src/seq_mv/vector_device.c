@@ -189,6 +189,7 @@ hypre_SeqVectorElmdivpyDevice( hypre_Vector *x,
                                HYPRE_Int    *marker,
                                HYPRE_Int     marker_val )
 {
+#if defined(HYPRE_USING_GPU)
    HYPRE_Complex  *x_data        = hypre_VectorData(x);
    HYPRE_Complex  *b_data        = hypre_VectorData(b);
    HYPRE_Complex  *y_data        = hypre_VectorData(y);
@@ -198,8 +199,6 @@ hypre_SeqVectorElmdivpyDevice( hypre_Vector *x,
    HYPRE_Int       size          = hypre_VectorSize(b);
 
    hypre_GpuProfilingPushRange("SeqVectorElmdivpyDevice");
-
-#if defined(HYPRE_USING_GPU)
    if (num_vectors_b == 1)
    {
       if (num_vectors_x == 1)
@@ -245,6 +244,8 @@ hypre_SeqVectorElmdivpyDevice( hypre_Vector *x,
    hypre_SyncComputeStream(hypre_handle());
    hypre_GpuProfilingPopRange();
 
+#elif defined(HYPRE_USING_OPENMP)
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented for device OpenMP!\n");
 #endif
 
    return hypre_error_flag;
