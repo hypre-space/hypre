@@ -171,7 +171,7 @@ hypre_SeqVectorAxpyzDevice( HYPRE_Complex  alpha,
    #pragma omp target teams distribute parallel for private(i) is_device_ptr(z_data, y_data, x_data)
    for (i = 0; i < total_size; i++)
    {
-      z_data[i] = alpha * x_data[i] + beta * z_data[i];
+      z_data[i] = alpha * x_data[i] + beta * y_data[i];
    }
 #endif
 
