@@ -169,14 +169,14 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
 
    hypre_BinaryTree tree;
 
-   hypre_MPI_Request *response_requests, *contact_requests;
-   hypre_MPI_Status  *response_statuses, *contact_statuses;
+   hypre_MPI_Request *response_requests = NULL, *contact_requests = NULL;
+   hypre_MPI_Status  *response_statuses = NULL, *contact_statuses = NULL;
 
    hypre_MPI_Request  *post_send_requests = NULL, *post_recv_requests = NULL;
    hypre_MPI_Status   *post_send_statuses = NULL, *post_recv_statuses = NULL;
 
-   hypre_MPI_Request *term_requests, term_request1, request_parent;
-   hypre_MPI_Status  *term_statuses, term_status1, status_parent;
+   hypre_MPI_Request *term_requests = NULL, term_request1, request_parent;
+   hypre_MPI_Status  *term_statuses = NULL, term_status1, status_parent;
    hypre_MPI_Status  status, fill_status;
 
    const HYPRE_Int contact_tag = 1000 * rnum;
@@ -229,7 +229,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
       pre-post receives to wait for their response*/
 
    responses_complete = 1;
-   if (num_contacts > 0 )
+   if (num_contacts > 0)
    {
       responses_complete = 0;
       response_requests = hypre_CTAlloc(hypre_MPI_Request,  num_contacts, HYPRE_MEMORY_HOST);
@@ -291,10 +291,9 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
       }
 
       terminate = 0;
-
       children_complete = 0;
    }
-   else if (num_procs == 1 && num_contacts > 0 ) /* added 11/08 */
+   else if (num_procs == 1 && num_contacts > 0) /* added 11/08 */
    {
       terminate = 0;
    }
