@@ -1327,7 +1327,7 @@ HYPRE_Int hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
    HYPRE_Complex   *B_ext_offd_data = NULL;
    HYPRE_Int       *my_diag_array;
    HYPRE_Int       *my_offd_array;
-   HYPRE_BigInt    *temp;
+   HYPRE_BigInt    *temp = NULL;
    HYPRE_Int        max_num_threads;
    HYPRE_Int        cnt = 0;
    hypre_CSRMatrix *Bext_diag = NULL;
