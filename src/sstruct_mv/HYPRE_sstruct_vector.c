@@ -597,7 +597,7 @@ HYPRE_SStructVectorAddFEMBoxValues(HYPRE_SStructVector  vector,
          viupper[d] = iupper[d] + hypre_IndexD(fem_offsets[i], d);
       }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
       if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
       {
          hypreDevice_ComplexStridedCopy(nelts, fem_nvars, values + i, tvalues);
