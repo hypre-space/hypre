@@ -11,7 +11,7 @@ case $1 in
    -h|-help)
       cat <<EOF
 
-   **** Only run this script on JLSE florentia nodes ****
+   **** Only run this script on sunspot nodes ****
    **** Last tested with modules:                    ****
    ****     oneapi/eng-compiler/2022.10.15.006       ****
    ****     intel_compute_runtime/release/pvc-prq-66 ****
@@ -46,11 +46,13 @@ rtol="0.0"
 atol="3e-15"
 
 #save=`echo $(hostname) | sed 's/[0-9]\+$//'`
-save="florentia"
+save="sunspot"
 
 ##########
 ## SYCL ##
 ##########
+#
+module load oneapi/eng-compiler/2022.12.30.005
 
 # SYCL with UM in debug mode [ij, struct]
 # WM: I suppress all warnings for sycl files for now since JLSE can throw a lot of warnings
