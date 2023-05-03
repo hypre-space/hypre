@@ -2268,6 +2268,9 @@ HYPRE_Int hypre_MGRComputeNonGalerkinCGDevice( hypre_ParCSRMatrix *A_FF, hypre_P
                                                HYPRE_Complex threshold,
                                                hypre_ParCSRMatrix **A_H_ptr );
 
+/* par_mgr_stats.c */
+HYPRE_Int hypre_MGRSetupStats( void *mgr_vdata );
+
 /* par_ilu.c */
 void *hypre_ILUCreate ( void );
 HYPRE_Int hypre_ILUDestroy ( void *ilu_vdata );

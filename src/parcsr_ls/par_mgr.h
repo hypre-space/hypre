@@ -120,7 +120,7 @@ typedef struct
    HYPRE_Int            *Frelax_num_functions;
 
    /* Non-Galerkin coarse grid */
-   HYPRE_Int            *mgr_coarse_grid_method;
+   HYPRE_Int            *mgr_coarse_grid_method; /* TODO (VPM): Change name? remove mgr_?*/
 
    /* V-cycle F relaxation method */
    hypre_ParAMGData    **FrelaxVcycleData;
@@ -161,13 +161,13 @@ typedef struct
    hypre_ParCSRMatrix   *A;
    hypre_ParVector      *b;
 
-   // for hypre's smoother options
+   /* for hypre's smoother options */
    HYPRE_Int            *CF_marker;
 
-   // for block Jacobi/GS option
+   /* for block Jacobi/GS option */
    HYPRE_Complex        *diaginv;
 
-   // for ILU option
+   /* for ILU option */
    HYPRE_Solver          frelax_solver;
 } hypre_MGRRelaxData;
 
@@ -183,10 +183,41 @@ typedef struct
  * Acessor macros
  *--------------------------------------------------------------------------*/
 
-/* TODO: add remaining acessor macros */
+/* TODO (VPM): add remaining acessor macros */
+#define hypre_ParMGRDataNumCoarseLevels(data)       ((data) -> num_coarse_levels)     /* TODO (VPM): change to num_levels ? */
+#define hypre_ParMGRDataMaxCoarseLevels(data)       ((data) -> max_num_coarse_levels) /* TODO (VPM): change to max_levels ? */
+
+#define hypre_ParMGRDataAArray(data)                ((data) -> A_array)
+#define hypre_ParMGRDataA(data, i)                  ((data) -> A_array[i])
 #define hypre_ParMGRDataBArray(data)                ((data) -> B_array)
 #define hypre_ParMGRDataB(data, i)                  ((data) -> B_array[i])
+#define hypre_ParMGRDataPArray(data)                ((data) -> P_array)
+#define hypre_ParMGRDataP(data, i)                  ((data) -> P_array[i])
+#define hypre_ParMGRDataRTArray(data)               ((data) -> RT_array)
+#define hypre_ParMGRDataRT(data, i)                 ((data) -> RT_array[i])
 #define hypre_ParMGRDataBFFArray(data)              ((data) -> B_FF_array)
 #define hypre_ParMGRDataBFF(data, i)                ((data) -> B_FF_array[i])
+#define hypre_ParMGRDataRAP(data)                   ((data) -> RAP)
+
+#define hypre_ParMGRDataInterpType(data)            ((data) -> interp_type)
+#define hypre_ParMGRDataInterpTypeI(data, i)        ((data) -> interp_type[i])
+#define hypre_ParMGRDataRestrictType(data)          ((data) -> restrict_type)
+#define hypre_ParMGRDataRestrictTypeI(data, i)      ((data) -> restrict_type[i])
+
+#define hypre_ParMGRDataLevelSmoothType(data)       ((data) -> level_smooth_type)
+#define hypre_ParMGRDataLevelSmoothTypeI(data, i)   ((data) -> level_smooth_type[i])
+#define hypre_ParMGRDataLevelSmoother(data)         ((data) -> level_smoother)
+#define hypre_ParMGRDataLevelSmootherI(data, i)     ((data) -> level_smoother[i])
+
+#define hypre_ParMGRDataRelaxType(data)             ((data) -> relax_type)
+#define hypre_ParMGRDataFRelaxType(data)            ((data) -> Frelax_type)
+#define hypre_ParMGRDataFRelaxTypeI(data, i)        ((data) -> Frelax_type[i])
+#define hypre_ParMGRDataAFFsolver(data)             ((data) -> aff_solver) /* TODO (VPM): does aff_solver need to be a double pointer? */
+#define hypre_ParMGRDataAFFsolverI(data)            ((data) -> aff_solver[i])
+
+#define hypre_ParMGRDataCoarseGridMethod(data)      ((data) -> mgr_coarse_grid_method)
+#define hypre_ParMGRDataCoarseGridMethodI(data, i)  ((data) -> mgr_coarse_grid_method[i])
+#define hypre_ParMGRDataCoarseGridSolver(data)      ((data) -> coarse_grid_solver)
+#define hypre_ParMGRDataCoarseGridSolverSetup(data) ((data) -> coarse_grid_solver_setup)
 
 #endif
