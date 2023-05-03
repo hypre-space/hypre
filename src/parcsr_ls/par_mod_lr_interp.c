@@ -550,9 +550,7 @@ hypre_BoomerAMGBuildModExtInterp(hypre_ParCSRMatrix  *A,
                                  HYPRE_Int            max_elmts,
                                  hypre_ParCSRMatrix **P_ptr)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("ModExtInterp");
-#endif
 
    HYPRE_Int ierr = 0;
 
@@ -571,9 +569,7 @@ hypre_BoomerAMGBuildModExtInterp(hypre_ParCSRMatrix  *A,
                                                   debug_flag, trunc_factor, max_elmts, P_ptr);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }
@@ -1223,9 +1219,7 @@ hypre_BoomerAMGBuildModExtPIInterp(hypre_ParCSRMatrix  *A,
                                    HYPRE_Int            max_elmts,
                                    hypre_ParCSRMatrix **P_ptr)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("ModExtPIInterp");
-#endif
 
    HYPRE_Int ierr = 0;
 
@@ -1244,9 +1238,7 @@ hypre_BoomerAMGBuildModExtPIInterp(hypre_ParCSRMatrix  *A,
                                                     trunc_factor, max_elmts, P_ptr);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }
@@ -1864,9 +1856,7 @@ hypre_BoomerAMGBuildModExtPEInterp(hypre_ParCSRMatrix  *A,
                                    HYPRE_Int            max_elmts,
                                    hypre_ParCSRMatrix **P_ptr)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("ModExtPEInterp");
-#endif
 
    HYPRE_Int ierr = 0;
 
@@ -1885,9 +1875,7 @@ hypre_BoomerAMGBuildModExtPEInterp(hypre_ParCSRMatrix  *A,
                                                     debug_flag, trunc_factor, max_elmts, P_ptr);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }

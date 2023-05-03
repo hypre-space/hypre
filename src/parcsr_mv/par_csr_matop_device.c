@@ -996,6 +996,7 @@ hypre_ParCSRCommPkgCreateMatrixE( hypre_ParCSRCommPkg  *comm_pkg,
 
    return hypre_error_flag;
 }
+
 /* Get element-wise tolerances based on row norms for ParCSRMatrix
  * NOTE: Keep the diagonal, i.e. elmt_tol = 0.0 for diagonals
  * Output vectors have size nnz:

@@ -535,9 +535,7 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
                        HYPRE_Int             *dof_func,
                        hypre_ParCSRMatrix   **S_ptr)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("CreateS");
-#endif
 
    HYPRE_Int ierr = 0;
 
@@ -556,9 +554,7 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
                                         S_ptr);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }
@@ -1511,9 +1507,7 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
                           HYPRE_Int             *dof_func,
                           hypre_ParCSRMatrix   **S_ptr)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("CreateSabs");
-#endif
 
    HYPRE_Int ierr = 0;
 
@@ -1532,9 +1526,7 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
                                            S_ptr);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }
@@ -3031,9 +3023,7 @@ hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
                            HYPRE_BigInt        *coarse_row_starts,
                            hypre_ParCSRMatrix **C_ptr)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("Create2ndS");
-#endif
 
    HYPRE_Int ierr = 0;
 
@@ -3050,9 +3040,7 @@ hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
       ierr = hypre_BoomerAMGCreate2ndSHost( S, CF_marker, num_paths, coarse_row_starts, C_ptr );
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }
@@ -3121,9 +3109,7 @@ HYPRE_Int
 hypre_BoomerAMGCorrectCFMarker(hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker)
 {
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("CorrectCFMarker");
-#endif
 
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_IntArrayMemoryLocation(CF_marker),
@@ -3139,9 +3125,7 @@ hypre_BoomerAMGCorrectCFMarker(hypre_IntArray *CF_marker, hypre_IntArray *new_CF
       hypre_BoomerAMGCorrectCFMarkerHost(CF_marker, new_CF_marker);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return hypre_error_flag;
 }
@@ -3153,9 +3137,7 @@ HYPRE_Int
 hypre_BoomerAMGCorrectCFMarker2(hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker)
 {
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("CorrectCFMarker2");
-#endif
 
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_IntArrayMemoryLocation(CF_marker),
@@ -3171,9 +3153,7 @@ hypre_BoomerAMGCorrectCFMarker2(hypre_IntArray *CF_marker, hypre_IntArray *new_C
       hypre_BoomerAMGCorrectCFMarker2Host(CF_marker, new_CF_marker);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return hypre_error_flag;
 }
