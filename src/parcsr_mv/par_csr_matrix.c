@@ -653,7 +653,7 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
    HYPRE_Int           *diag_i;
    HYPRE_Int           *diag_j;
    HYPRE_Complex       *offd_data;
-   HYPRE_Int           *offd_i;
+   HYPRE_Int           *offd_i = NULL;
    HYPRE_Int           *offd_j;
    HYPRE_Int            myid, num_procs, i, j;
    HYPRE_BigInt         I, J;
@@ -805,10 +805,10 @@ hypre_ParCSRMatrixReadIJ( MPI_Comm             comm,
    HYPRE_Complex      *diag_data;
    HYPRE_Int          *diag_i;
    HYPRE_Int          *diag_j;
-   HYPRE_Complex      *offd_data;
+   HYPRE_Complex      *offd_data = NULL;
    HYPRE_Int          *offd_i;
-   HYPRE_Int          *offd_j;
-   HYPRE_BigInt       *tmp_j;
+   HYPRE_Int          *offd_j = NULL;
+   HYPRE_BigInt       *tmp_j = NULL;
    HYPRE_BigInt       *aux_offd_j;
    HYPRE_BigInt        I, J;
    HYPRE_Int           myid, num_procs, i, i2, j;
@@ -1240,9 +1240,9 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
    HYPRE_BigInt        col_starts[2];
 
    hypre_CSRMatrix    *local_A;
-   HYPRE_Complex      *A_data;
-   HYPRE_Int          *A_i;
-   HYPRE_Int          *A_j;
+   HYPRE_Complex      *A_data = NULL;
+   HYPRE_Int          *A_i = NULL;
+   HYPRE_Int          *A_j = NULL;
 
    hypre_MPI_Request  *requests;
    hypre_MPI_Status   *status, status0;

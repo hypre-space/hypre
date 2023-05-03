@@ -576,7 +576,7 @@ hypre_VectorToParVector ( MPI_Comm      comm,
    HYPRE_Int           global_vecstride, vecstride, idxstride;
    hypre_ParVector    *par_vector;
    hypre_Vector       *local_vector;
-   HYPRE_Complex      *v_data;
+   HYPRE_Complex      *v_data = NULL;
    HYPRE_Complex      *local_data;
    hypre_MPI_Request  *requests;
    hypre_MPI_Status   *status, status0;
