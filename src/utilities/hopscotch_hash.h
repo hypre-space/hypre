@@ -209,9 +209,9 @@ first_lsb_bit_indx( hypre_uint x )
 static inline HYPRE_BigInt
 hypre_BigHash( HYPRE_BigInt input )
 {
-   hypre_ulongint h64 = HYPRE_XXH_PRIME64_5 + sizeof(input);
+   hypre_ulonglongint h64 = HYPRE_XXH_PRIME64_5 + sizeof(input);
 
-   hypre_ulongint k1 = input;
+   hypre_ulonglongint k1 = input;
    k1 *= HYPRE_XXH_PRIME64_2;
    k1 = HYPRE_XXH_rotl64(k1, 31);
    k1 *= HYPRE_XXH_PRIME64_1;
@@ -263,9 +263,9 @@ hypre_BigHash(HYPRE_Int input)
 static inline HYPRE_Int
 hypre_Hash(HYPRE_Int input)
 {
-   hypre_ulongint h64 = HYPRE_XXH_PRIME64_5 + sizeof(input);
+   hypre_ulonglongint h64 = HYPRE_XXH_PRIME64_5 + sizeof(input);
 
-   hypre_ulongint k1 = input;
+   hypre_ulonglongint k1 = input;
    k1 *= HYPRE_XXH_PRIME64_2;
    k1 = HYPRE_XXH_rotl64(k1, 31);
    k1 *= HYPRE_XXH_PRIME64_1;

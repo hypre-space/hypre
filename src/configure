@@ -5897,9 +5897,24 @@ then
    as_fn_error $? "--with-cuda and --with-hip are mutually exclusive" "$LINENO" 5
 fi
 
+if test "x$hypre_using_cuda" = "xyes" && test "x$hypre_using_sycl" = "xyes"
+then
+   as_fn_error $? "--with-cuda and --with-sycl are mutually exclusive" "$LINENO" 5
+fi
+
 if test "x$hypre_using_hip" = "xyes" && test "x$hypre_using_device_openmp" = "xyes"
 then
    as_fn_error $? "--with-hip and --with-device-openmp are mutually exclusive" "$LINENO" 5
+fi
+
+if test "x$hypre_using_hip" = "xyes" && test "x$hypre_using_sycl" = "xyes"
+then
+   as_fn_error $? "--with-hip and --with-sycl are mutually exclusive" "$LINENO" 5
+fi
+
+if test "x$hypre_using_sycl" = "xyes" && test "x$hypre_using_device_openmp" = "xyes"
+then
+   as_fn_error $? "--with-sycl and --with-device-openmp are mutually exclusive" "$LINENO" 5
 fi
 
 
@@ -11056,10 +11071,6 @@ printf "%s\n" "#define HYPRE_USING_DEVICE_OPENMP 1" >>confdefs.h
 
 
 
-printf "%s\n" "#define HYPRE_USING_GPU 1" >>confdefs.h
-
-
-
 printf "%s\n" "#define HYPRE_DEVICE_OPENMP_ALLOC 1" >>confdefs.h
 
 
@@ -12620,4 +12631,3 @@ fi
 mv HYPRE_config.h HYPRE_config.h.tmp
 sed 's/FC_FUNC/HYPRE_FC_FUNC/g' < HYPRE_config.h.tmp > HYPRE_config.h
 rm -f HYPRE_config.h.tmp
-

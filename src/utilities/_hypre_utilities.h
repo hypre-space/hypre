@@ -594,7 +594,7 @@ HYPRE_Int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
 HYPRE_Int hypre_MPI_Op_free( hypre_MPI_Op *op );
 HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function, hypre_int commute,
                                hypre_MPI_Op *op );
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int hypre_MPI_Comm_split_type(hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
                                     hypre_MPI_Info info, hypre_MPI_Comm *newcomm);
 HYPRE_Int hypre_MPI_Info_create(hypre_MPI_Info *info);
@@ -1408,9 +1408,6 @@ extern "C++"
 }
 #endif
 
-static char hypre__levelname[16];
-static char hypre__markname[1024];
-
 #define HYPRE_ANNOTATE_FUNC_BEGIN          CALI_MARK_FUNCTION_BEGIN
 #define HYPRE_ANNOTATE_FUNC_END            CALI_MARK_FUNCTION_END
 #define HYPRE_ANNOTATE_LOOP_BEGIN(id, str) CALI_MARK_LOOP_BEGIN(id, str)
@@ -1419,21 +1416,25 @@ static char hypre__markname[1024];
 #define HYPRE_ANNOTATE_ITER_END(id)        CALI_MARK_ITERATION_END(id)
 #define HYPRE_ANNOTATE_REGION_BEGIN(...)\
 {\
+   char hypre__markname[1024];\
    hypre_sprintf(hypre__markname, __VA_ARGS__);\
    CALI_MARK_BEGIN(hypre__markname);\
 }
 #define HYPRE_ANNOTATE_REGION_END(...)\
 {\
+   char hypre__markname[1024];\
    hypre_sprintf(hypre__markname, __VA_ARGS__);\
    CALI_MARK_END(hypre__markname);\
 }
 #define HYPRE_ANNOTATE_MGLEVEL_BEGIN(lvl)\
 {\
+   char hypre__levelname[16];\
    hypre_sprintf(hypre__levelname, "MG level %d", lvl);\
    CALI_MARK_BEGIN(hypre__levelname);\
 }
 #define HYPRE_ANNOTATE_MGLEVEL_END(lvl)\
 {\
+   char hypre__levelname[16];\
    hypre_sprintf(hypre__levelname, "MG level %d", lvl);\
    CALI_MARK_END(hypre__levelname);\
 }
@@ -1482,6 +1483,12 @@ typedef struct
    HYPRE_MemoryLocation   memory_location;
    HYPRE_ExecutionPolicy  default_exec_policy;
 
+   /* the device buffers needed to do MPI communication for struct comm */
+   HYPRE_Complex         *struct_comm_recv_buffer;
+   HYPRE_Complex         *struct_comm_send_buffer;
+   HYPRE_Int              struct_comm_recv_buffer_size;
+   HYPRE_Int              struct_comm_send_buffer_size;
+
 #if defined(HYPRE_USING_GPU)
    hypre_DeviceData      *device_data;
    HYPRE_Int              device_gs_method; /* device G-S options */
@@ -1517,6 +1524,11 @@ typedef struct
 #define hypre_HandleMemoryLocation(hypre_handle)                 ((hypre_handle) -> memory_location)
 #define hypre_HandleDefaultExecPolicy(hypre_handle)              ((hypre_handle) -> default_exec_policy)
 
+#define hypre_HandleStructCommRecvBuffer(hypre_handle)           ((hypre_handle) -> struct_comm_recv_buffer)
+#define hypre_HandleStructCommSendBuffer(hypre_handle)           ((hypre_handle) -> struct_comm_send_buffer)
+#define hypre_HandleStructCommRecvBufferSize(hypre_handle)       ((hypre_handle) -> struct_comm_recv_buffer_size)
+#define hypre_HandleStructCommSendBufferSize(hypre_handle)       ((hypre_handle) -> struct_comm_send_buffer_size)
+
 #define hypre_HandleDeviceData(hypre_handle)                     ((hypre_handle) -> device_data)
 #define hypre_HandleDeviceGSMethod(hypre_handle)                 ((hypre_handle) -> device_gs_method)
 
@@ -1536,10 +1548,6 @@ typedef struct
 #define hypre_HandleDeviceMaxShmemPerBlock(hypre_handle)         hypre_DeviceDataDeviceMaxShmemPerBlock(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleComputeStreamNum(hypre_handle)               hypre_DeviceDataComputeStreamNum(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleReduceBuffer(hypre_handle)                   hypre_DeviceDataReduceBuffer(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleStructCommRecvBuffer(hypre_handle)           hypre_DeviceDataStructCommRecvBuffer(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleStructCommSendBuffer(hypre_handle)           hypre_DeviceDataStructCommSendBuffer(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleStructCommRecvBufferSize(hypre_handle)       hypre_DeviceDataStructCommRecvBufferSize(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleStructCommSendBufferSize(hypre_handle)       hypre_DeviceDataStructCommSendBufferSize(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmUseVendor(hypre_handle)                hypre_DeviceDataSpgemmUseVendor(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpMVUseVendor(hypre_handle)                  hypre_DeviceDataSpMVUseVendor(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpTransUseVendor(hypre_handle)               hypre_DeviceDataSpTransUseVendor(hypre_HandleDeviceData(hypre_handle))
@@ -2021,12 +2029,12 @@ HYPRE_Int hypreDevice_ComplexScalen(HYPRE_Complex *d_x, size_t n, HYPRE_Complex 
                                     HYPRE_Complex v);
 HYPRE_Int hypreDevice_ComplexAxpyn(HYPRE_Complex *d_x, size_t n, HYPRE_Complex *d_y,
                                    HYPRE_Complex *d_z, HYPRE_Complex a);
+HYPRE_Int hypreDevice_ComplexAxpyzn(HYPRE_Int n, HYPRE_Complex *d_x, HYPRE_Complex *d_y,
+                                    HYPRE_Complex *d_z, HYPRE_Complex a, HYPRE_Complex b);
 HYPRE_Int hypreDevice_IntAxpyn(HYPRE_Int *d_x, size_t n, HYPRE_Int *d_y, HYPRE_Int *d_z,
                                HYPRE_Int a);
 HYPRE_Int hypreDevice_BigIntAxpyn(HYPRE_BigInt *d_x, size_t n, HYPRE_BigInt *d_y,
                                   HYPRE_BigInt *d_z, HYPRE_BigInt a);
-HYPRE_Int hypreDevice_ComplexAxpyzn(HYPRE_Int n, HYPRE_Complex *d_x, HYPRE_Complex *d_y,
-                                    HYPRE_Complex *d_z, HYPRE_Complex a, HYPRE_Complex b);
 HYPRE_Int* hypreDevice_CsrRowPtrsToIndices(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr);
 HYPRE_Int hypreDevice_CsrRowPtrsToIndices_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYPRE_Int *d_row_ptr,
                                              HYPRE_Int *d_row_ind);
@@ -2081,7 +2089,6 @@ char *hypre_strcpy(char *destination, const char *source);
 HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
 HYPRE_Int hypre_RestoreSyncCudaCompute(void);
 HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
-HYPRE_Int hypre_SyncComputeStream(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle);
 
 /* handle.c */
@@ -2123,6 +2130,7 @@ HYPRE_Int hypre_IntArrayInverseMapping( hypre_IntArray *v, hypre_IntArray **w_pt
 /* int_array_device.c */
 #if defined(HYPRE_USING_GPU)
 HYPRE_Int hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v, HYPRE_Int value );
+HYPRE_Int hypre_IntArrayReverseMappingDevice( hypre_IntArray *v, hypre_IntArray *w );
 HYPRE_Int hypre_IntArrayCountDevice ( hypre_IntArray *v, HYPRE_Int value,
                                       HYPRE_Int *num_values_ptr );
 HYPRE_Int hypre_IntArrayInverseMappingDevice( hypre_IntArray *v, hypre_IntArray *w );
@@ -2137,7 +2145,8 @@ void hypre_MemoryTrackerInsert1(const char *action, void *ptr, size_t nbytes,
                                 hypre_MemoryLocation memory_location, const char *filename,
                                 const char *function, HYPRE_Int line);
 void hypre_MemoryTrackerInsert2(const char *action, void *ptr, void *ptr2, size_t nbytes,
-                                hypre_MemoryLocation memory_location, hypre_MemoryLocation memory_location2,
+                                hypre_MemoryLocation memory_location,
+                                hypre_MemoryLocation memory_location2,
                                 const char *filename,
                                 const char *function, HYPRE_Int line);
 HYPRE_Int hypre_PrintMemoryTracker( size_t *totl_bytes_o, size_t *peak_bytes_o,
@@ -2362,9 +2371,9 @@ first_lsb_bit_indx( hypre_uint x )
 static inline HYPRE_BigInt
 hypre_BigHash( HYPRE_BigInt input )
 {
-   hypre_ulongint h64 = HYPRE_XXH_PRIME64_5 + sizeof(input);
+   hypre_ulonglongint h64 = HYPRE_XXH_PRIME64_5 + sizeof(input);
 
-   hypre_ulongint k1 = input;
+   hypre_ulonglongint k1 = input;
    k1 *= HYPRE_XXH_PRIME64_2;
    k1 = HYPRE_XXH_rotl64(k1, 31);
    k1 *= HYPRE_XXH_PRIME64_1;
@@ -2416,9 +2425,9 @@ hypre_BigHash(HYPRE_Int input)
 static inline HYPRE_Int
 hypre_Hash(HYPRE_Int input)
 {
-   hypre_ulongint h64 = HYPRE_XXH_PRIME64_5 + sizeof(input);
+   hypre_ulonglongint h64 = HYPRE_XXH_PRIME64_5 + sizeof(input);
 
-   hypre_ulongint k1 = input;
+   hypre_ulonglongint k1 = input;
    k1 *= HYPRE_XXH_PRIME64_2;
    k1 = HYPRE_XXH_rotl64(k1, 31);
    k1 *= HYPRE_XXH_PRIME64_1;
@@ -3572,3 +3581,4 @@ HYPRE_Int hypre_mm_read_mtx_crd_size(FILE *f, HYPRE_Int *M, HYPRE_Int *N, HYPRE_
 #endif
 
 #endif
+
