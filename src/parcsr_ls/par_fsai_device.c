@@ -9,7 +9,7 @@
 #include "_hypre_utilities.hpp"
 #include "par_fsai.h"
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 #define mat_(ldim, k, i, j) mat_data[ldim * (ldim * k + i) + j]
 #define rhs_(ldim, i, j)    rhs_data[ldim * i + j]
@@ -369,7 +369,7 @@ hypreGPUKernel_FSAITruncateCandidateOrdered( hypre_DeviceItem &item,
                }
 
                /* Update bitmask */
-               bitmask ^= (1 << max_lane);
+               bitmask = hypre_mask_flip_at(bitmask, max_lane);
             }
 
             /* Update number of nonzeros per row */
@@ -555,7 +555,7 @@ hypreGPUKernel_FSAITruncateCandidateUnordered( hypre_DeviceItem &item,
                }
 
                /* Update bitmask */
-               bitmask ^= (1 << max_lane);
+               bitmask = hypre_mask_flip_at(bitmask, max_lane);
             }
 
             /* Update number of nonzeros per row */
@@ -577,10 +577,13 @@ hypreGPUKernel_FSAITruncateCandidateUnordered( hypre_DeviceItem &item,
 
 /*--------------------------------------------------------------------------
  * hypre_FSAIExtractSubSystemsDevice
+ *
+ * TODO (VPM): This could be a hypre_CSRMatrix routine
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_FSAIExtractSubSystemsDevice( HYPRE_Int       num_rows,
+                                   HYPRE_Int       num_nonzeros,
                                    HYPRE_Int      *A_i,
                                    HYPRE_Int      *A_j,
                                    HYPRE_Complex  *A_a,
@@ -701,8 +704,6 @@ hypre_FSAITruncateCandidateDevice( hypre_CSRMatrix *matrix,
    hypre_GpuProfilingPushRange("TruncCand");
    HYPRE_GPU_LAUNCH(hypreGPUKernel_FSAITruncateCandidateUnordered, gDim, bDim,
                     max_nonzeros_row, num_rows, mat_i, mat_e, mat_j, mat_a );
-   hypre_SyncComputeStream(hypre_handle());
-   hypre_GetDeviceLastError();
    hypre_GpuProfilingPopRange();
 
    *matrix_e = mat_e;
@@ -747,7 +748,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    info = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
 
    /* Sanity check */
-#if !defined (HYPRE_USING_CUSOLVER) || !defined(HYPRE_USING_ROCSOLVER)
+#if !(defined (HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER))
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "FSAI requires cuSOLVER (CUDA) or rocSOLVER (HIP)\n");
       return hypre_error_flag;
@@ -872,6 +873,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    /* Gather dense linear subsystems */
    hypre_GpuProfilingPushRange("ExtractLS");
    hypre_FSAIExtractSubSystemsDevice(num_rows,
+                                     hypre_CSRMatrixNumNonzeros(A_diag),
                                      hypre_CSRMatrixI(A_diag),
                                      hypre_CSRMatrixJ(A_diag),
                                      hypre_CSRMatrixData(A_diag),
@@ -1053,6 +1055,9 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    return hypre_error_flag;
 }
 
+#endif /* if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+#if defined(HYPRE_USING_GPU)
+
 /*--------------------------------------------------------------------------
  * hypre_FSAISetupDevice
  *--------------------------------------------------------------------------*/
@@ -1098,6 +1103,7 @@ hypre_FSAISetupDevice( void               *fsai_vdata,
    }
    else
    {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       /* Initialize matrix G */
       hypre_ParCSRMatrixInitialize(G);
 
@@ -1105,6 +1111,9 @@ hypre_FSAISetupDevice( void               *fsai_vdata,
       {
          hypre_FSAISetupStaticPowerDevice(fsai_vdata, A, f, u);
       }
+#else
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Device FSAI not implemented for SYCL!\n");
+#endif
    }
 
    hypre_GpuProfilingPopRange();

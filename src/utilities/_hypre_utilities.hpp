@@ -65,9 +65,11 @@ struct hypre_device_allocator
 /* Data types depending on GPU architecture */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_SYCL)
 typedef hypre_uint          hypre_mask;
+#define hypre_mask_one      1U
 
 #elif defined(HYPRE_USING_HIP)
 typedef hypre_ulonglongint  hypre_mask;
+#define hypre_mask_one      1ULL
 
 #endif
 
@@ -1032,7 +1034,7 @@ void __syncwarp()
 #endif // #if defined(HYPRE_USING_HIP) || (CUDA_VERSION < 9000)
 
 static __device__ __forceinline__
-hypre_mask hypre_ballot_sync(unsigned mask, hypre_int predicate)
+hypre_mask hypre_ballot_sync(hypre_mask mask, hypre_int predicate)
 {
 #if defined(HYPRE_USING_CUDA)
    return __ballot_sync(mask, predicate);
@@ -1059,6 +1061,13 @@ HYPRE_Int hypre_ffs(hypre_mask mask)
 #else
    return (HYPRE_Int) __ffsll(mask);
 #endif
+}
+
+/* Flip n-th bit of bitmask (0 becomes 1. 1 becomes 0) */
+static __device__ __forceinline__
+hypre_mask hypre_mask_flip_at(hypre_mask bitmask, hypre_int n)
+{
+   return bitmask ^ (hypre_mask_one << n);
 }
 
 #if defined(HYPRE_USING_HIP)
