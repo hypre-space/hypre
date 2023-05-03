@@ -315,7 +315,7 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
    HYPRE_Int  break_value = 0;
    HYPRE_Int  i, j, k;
    /*KS: rv is the norm history */
-   HYPRE_Real *rs, *hh, *uu, *c, *s, *rs_2, *rv;
+   HYPRE_Real *rs, *hh, *uu, *c, *s, *rs_2 = NULL, *rv;
    //, *tmp;
    HYPRE_Int  iter;
    HYPRE_Int  my_id, num_procs;
