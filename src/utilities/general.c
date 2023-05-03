@@ -330,7 +330,7 @@ HYPRE_Initialize(void)
       }
 #endif
    }
-#endif /* HYPRE_USING_GPU || HYPRE_USING_DEVICE_OPENMP */
+#endif /* if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP) */
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_OMPOffloadOn();
