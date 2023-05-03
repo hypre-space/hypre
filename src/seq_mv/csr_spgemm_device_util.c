@@ -19,7 +19,7 @@ struct row_size : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
 {
    HYPRE_Int SHMEM_HASH_SIZE;
 
-   row_size(HYPRE_Int SHMEM_HASH_SIZE_) { SHMEM_HASH_SIZE = SHMEM_HASH_SIZE_; }
+   row_size(HYPRE_Int SHMEM_HASH_SIZE_ = HYPRE_Int()) { SHMEM_HASH_SIZE = SHMEM_HASH_SIZE_; }
 
    __device__ HYPRE_Int operator()(const HYPRE_Int &x) const
    {
