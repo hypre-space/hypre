@@ -1,0 +1,13 @@
+# Output file: state.out.1
+hypre library has not been initialized or finalized yet
+hypre library has been initialized
+hypre library has been finalized
+hypre library has been re-initialized
+hypre library has been finalized
+
+# Output file: state.out.100
+hypre library has not been initialized or finalized yet
+hypre library has been initialized
+hypre library has been finalized
+hypre library has been re-initialized
+hypre library has been finalized

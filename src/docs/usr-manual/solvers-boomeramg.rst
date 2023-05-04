@@ -170,7 +170,7 @@ GPU-supported Options
 
 In general, CUDA unified memory is required for running BoomerAMG solvers on GPUs.
 However, hypre can also be built without ``--enable-unified-memory`` if
-all the selected parameters have GPU-support. 
+all the selected parameters have GPU-support.
 The currently available  GPU-supported BoomerAMG options include:
 
 * Coarsening: PMIS (8)
@@ -187,7 +187,7 @@ on GPUs is shown below.
 
  cudaSetDevice(device_id); /* GPU binding */
  ...
- HYPRE_Init(); /* must be the first HYPRE function call */
+ HYPRE_Initialize(); /* must be the first HYPRE function call */
  ...
  /* AMG in GPU memory (default) */
  HYPRE_SetMemoryLocation(HYPRE_MEMORY_DEVICE);
@@ -238,7 +238,7 @@ on GPUs is shown below.
  ...
  HYPRE_Finalize(); /* must be the last HYPRE function call */
 
-``HYPRE_Init()`` must be called and precede all the other ``HYPRE_`` functions, and
+``HYPRE_Initialize()`` must be called and precede all the other ``HYPRE_`` functions, and
 ``HYPRE_Finalize()`` must be called before exiting.
 
 Miscellaneous
@@ -253,4 +253,3 @@ algorithms.  For 3-dimensional problems a better choice appears to be 0.5, when
 using the default coarsening algorithm. However, the choice of the strength
 threshold is problem dependent and therefore there could be better choices than
 the two suggested ones.
-

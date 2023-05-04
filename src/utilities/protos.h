@@ -39,6 +39,12 @@ HYPRE_Complex hypre_csqrt( HYPRE_Complex value );
 #define hypre_csqrt(value) hypre_sqrt(value)
 #endif
 
+/* state.c */
+HYPRE_Int hypre_Initialized( void );
+HYPRE_Int hypre_Finalized( void );
+HYPRE_Int hypre_SetInitialized( void );
+HYPRE_Int hypre_SetFinalized( void );
+
 /* general.c */
 hypre_Handle* hypre_handle(void);
 hypre_Handle* hypre_HandleCreate(void);
