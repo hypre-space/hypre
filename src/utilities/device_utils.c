@@ -95,8 +95,6 @@ hypre_DeviceDataDestroy(hypre_DeviceData *data)
    }
 
    hypre_TFree(hypre_DeviceDataReduceBuffer(data),         HYPRE_MEMORY_DEVICE);
-   hypre_TFree(hypre_DeviceDataStructCommRecvBuffer(data), HYPRE_MEMORY_DEVICE);
-   hypre_TFree(hypre_DeviceDataStructCommSendBuffer(data), HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_CURAND)
    if (data->curand_generator)
@@ -345,7 +343,7 @@ hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle)
  *      generic device functions (cuda/hip/sycl)
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 /*--------------------------------------------------------------------
  * hypre_DeviceDataComputeStream
@@ -2157,7 +2155,7 @@ template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_BigI
                                                          HYPRE_BigInt *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
 #endif
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#endif // #if defined(HYPRE_USING_GPU)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *      cuda/hip functions
@@ -2192,7 +2190,7 @@ hypreGPUKernel_CompileFlagSafetyCheck( hypre_DeviceItem &item,
 /*--------------------------------------------------------------------
  * hypre_CudaCompileFlagCheck
  *
- * Assume this function is called inside HYPRE_Init(), at a place
+ * Assume this function is called inside HYPRE_Initialize(), at a place
  * where we do not want to activate memory pooling, so we do not use
  * hypre's memory model to Alloc and Free.
  *
@@ -2916,7 +2914,7 @@ hypre_bind_device( HYPRE_Int myid,
                    HYPRE_Int nproc,
                    MPI_Comm  comm )
 {
-#ifdef HYPRE_USING_GPU
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* proc id (rank) on the running node */
    HYPRE_Int myNodeid;
    /* num of procs (size) on the node */
@@ -2945,7 +2943,7 @@ hypre_bind_device( HYPRE_Int myid,
                 myid, nproc, myNodeid, NodeSize, nDevices, device_id);
 #endif
 
-#endif /* #ifdef HYPRE_USING_GPU */
+#endif // #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 
    return hypre_error_flag;
 }

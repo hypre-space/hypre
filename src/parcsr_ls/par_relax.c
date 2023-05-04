@@ -1081,12 +1081,10 @@ hypre_BoomerAMGRelaxHybridSOR( hypre_ParCSRMatrix *A,
       exec = HYPRE_EXEC_HOST;
    }
 
-#if defined(HYPRE_USING_GPU)
    if (hypre_HandleDeviceGSMethod(hypre_handle()) == 0)
    {
       exec = HYPRE_EXEC_HOST;
    }
-#endif
 
    if (exec == HYPRE_EXEC_DEVICE)
    {

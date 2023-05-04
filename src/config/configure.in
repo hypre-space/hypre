@@ -89,6 +89,8 @@ HYPRE_TIME="M4_HYPRE_TIME"
 HYPRE_BUGS="M4_HYPRE_BUGS"
 HYPRE_SRCDIR="M4_HYPRE_SRCDIR"
 
+AC_DEFINE(HYPRE_DEPRECATED(reason), _Pragma(reason), [Deprecated function macro])
+
 AC_DEFINE_UNQUOTED(HYPRE_RELEASE_NAME,    ["$HYPRE_NAME"],    [Release name])
 AC_DEFINE_UNQUOTED(HYPRE_RELEASE_VERSION, ["$HYPRE_VERSION"], [Release version])
 AC_DEFINE_UNQUOTED(HYPRE_RELEASE_NUMBER,  [$HYPRE_NUMBER],    [Release number])
@@ -1721,9 +1723,24 @@ then
    AC_MSG_ERROR([--with-cuda and --with-hip are mutually exclusive])
 fi
 
+if [test "x$hypre_using_cuda" = "xyes" && test "x$hypre_using_sycl" = "xyes"]
+then
+   AC_MSG_ERROR([--with-cuda and --with-sycl are mutually exclusive])
+fi
+
 if [test "x$hypre_using_hip" = "xyes" && test "x$hypre_using_device_openmp" = "xyes"]
 then
    AC_MSG_ERROR([--with-hip and --with-device-openmp are mutually exclusive])
+fi
+
+if [test "x$hypre_using_hip" = "xyes" && test "x$hypre_using_sycl" = "xyes"]
+then
+   AC_MSG_ERROR([--with-hip and --with-sycl are mutually exclusive])
+fi
+
+if [test "x$hypre_using_sycl" = "xyes" && test "x$hypre_using_device_openmp" = "xyes"]
+then
+   AC_MSG_ERROR([--with-sycl and --with-device-openmp are mutually exclusive])
 fi
 
 
@@ -2722,8 +2739,6 @@ dnl *********************************************************************
 if test "$hypre_using_device_openmp" = "yes"
 then
    AC_DEFINE(HYPRE_USING_DEVICE_OPENMP, 1, [Define to 1 if executing on device with OpenMP])
-
-   AC_DEFINE(HYPRE_USING_GPU, 1, [Define to 1 if executing on GPU device])
 
    AC_DEFINE(HYPRE_DEVICE_OPENMP_ALLOC, 1, [Define to 1 if using OpenMP on device [target alloc version]])
 

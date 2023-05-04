@@ -4511,7 +4511,7 @@ hypre_ParCSRMatrixExtractBlockDiagHost( hypre_ParCSRMatrix   *par_A,
                jj = A_diag_j[ii];
                if ((jj >= bidxm1) &&
                    (jj < bidxp1)  &&
-                   hypre_abs(A_diag_data[ii]) > HYPRE_REAL_MIN)
+                   hypre_cabs(A_diag_data[ii]) > HYPRE_REAL_MIN)
                {
                   bidx = j * blk_size + jj - bidxm1;
                   diag_data[i * bs2 + bidx] = A_diag_data[ii];
@@ -4532,7 +4532,7 @@ hypre_ParCSRMatrixExtractBlockDiagHost( hypre_ParCSRMatrix   *par_A,
                jj = A_diag_j[ii];
                if ((jj >= bidxm1) &&
                    (jj < bidxp1)  &&
-                   hypre_abs(A_diag_data[ii]) > HYPRE_REAL_MIN)
+                   hypre_cabs(A_diag_data[ii]) > HYPRE_REAL_MIN)
                {
                   bidx = j * left_size + jj - bidxm1;
                   diag_data[bstart + bidx] = A_diag_data[ii];
@@ -4561,7 +4561,7 @@ hypre_ParCSRMatrixExtractBlockDiagHost( hypre_ParCSRMatrix   *par_A,
                {
                   if ((jj - row_offset >= bidxm1) &&
                       (jj - row_offset < bidxp1)  &&
-                      (hypre_abs(A_diag_data[ii]) > HYPRE_REAL_MIN))
+                      (hypre_cabs(A_diag_data[ii]) > HYPRE_REAL_MIN))
                   {
                      didx = bidx * bs2 + ridx * blk_size + jj - bidxm1 - row_offset;
                      diag_data[didx] = A_diag_data[ii];
@@ -4595,7 +4595,7 @@ hypre_ParCSRMatrixExtractBlockDiagHost( hypre_ParCSRMatrix   *par_A,
                {
                   if ((jj - row_offset >= bidxm1) &&
                       (jj - row_offset < bidxp1)  &&
-                      (hypre_abs(A_diag_data[ii]) > HYPRE_REAL_MIN))
+                      (hypre_cabs(A_diag_data[ii]) > HYPRE_REAL_MIN))
                   {
                      didx = bstart + ridx * left_size + jj - bidxm1 - row_offset;
                      diag_data[didx] = A_diag_data[ii];
@@ -4627,7 +4627,7 @@ hypre_ParCSRMatrixExtractBlockDiagHost( hypre_ParCSRMatrix   *par_A,
       {
          for (i = 0; i < num_points; i++)
          {
-            if (hypre_abs(diag_data[i]) < HYPRE_REAL_MIN)
+            if (hypre_cabs(diag_data[i]) < HYPRE_REAL_MIN)
             {
                diag_data[i] = 0.0;
             }
@@ -5009,8 +5009,8 @@ hypre_MGRBlockRelaxSetup( hypre_ParCSRMatrix *A,
    {
       for (i = 0; i < n; i++)
       {
-         // FIX-ME: zero-diagonal should be tested previously
-         if (hypre_abs(diaginv[i]) < HYPRE_REAL_MIN)
+         /* TODO: zero-diagonal should be tested previously */
+         if (hypre_cabs(diaginv[i]) < HYPRE_REAL_MIN)
          {
             diaginv[i] = 0.0;
          }
