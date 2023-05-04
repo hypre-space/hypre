@@ -112,7 +112,7 @@ hypre_BoomerAMGCoarseParms(MPI_Comm         comm,
                            hypre_IntArray **coarse_dof_func_ptr,
                            HYPRE_BigInt    *coarse_pnts_global)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec;
 
    if (num_functions > 1)

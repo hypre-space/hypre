@@ -10,7 +10,7 @@
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_SYCL)
 namespace thrust = std;
@@ -2028,4 +2028,4 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#endif // #if defined(HYPRE_USING_GPU)

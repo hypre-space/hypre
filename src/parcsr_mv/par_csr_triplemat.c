@@ -204,7 +204,7 @@ hypre_ParCSRMatMat( hypre_ParCSRMatrix  *A,
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("Mat-Mat");
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
                                                       hypre_ParCSRMatrixMemoryLocation(B) );
 
@@ -474,13 +474,11 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
                        hypre_ParCSRMatrix  *B,
                        HYPRE_Int            keep_transpose)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("Mat-T-Mat");
-#endif
 
    hypre_ParCSRMatrix *C = NULL;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
                                                       hypre_ParCSRMatrixMemoryLocation(B) );
 
@@ -494,9 +492,7 @@ hypre_ParCSRTMatMatKT( hypre_ParCSRMatrix  *A,
       C = hypre_ParCSRTMatMatKTHost(A, B, keep_transpose);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return C;
 }
@@ -949,7 +945,7 @@ hypre_ParCSRMatrixRAPKT( hypre_ParCSRMatrix  *R,
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("TripleMat-RAP");
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(R),
                                                       hypre_ParCSRMatrixMemoryLocation(A) );
 

@@ -9,7 +9,7 @@
 #include "csr_spgemm_device.h"
 #include "seq_mv.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 HYPRE_Int
 hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
@@ -133,5 +133,5 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
    return hypre_error_flag;
 }
 
-#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
+#endif /* defined(HYPRE_USING_GPU) */
 

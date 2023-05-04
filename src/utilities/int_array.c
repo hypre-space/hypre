@@ -303,7 +303,7 @@ hypre_IntArraySetConstantValues( hypre_IntArray *v,
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_IntArrayMemoryLocation(v));
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -361,7 +361,7 @@ hypre_IntArrayCount( hypre_IntArray *v,
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_IntArrayMemoryLocation(v));
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -428,7 +428,7 @@ hypre_IntArrayInverseMapping( hypre_IntArray  *v,
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
 
    if (exec == HYPRE_EXEC_DEVICE)

@@ -129,14 +129,16 @@ typedef HYPRE_Int MPI_Comm;
 HYPRE_Int HYPRE_Initialize(void);
 
 /**
- * Initializes the hypre library. This function is provided for backwards compatibility.
+ * (Required) Initializes the hypre library. This function is provided for backward compatibility.
  * Please, use HYPRE_Initialize instead.
  **/
 
-#define HYPRE_Init(...) HYPRE_DEPRECATED("GCC warning \"Use HYPRE_Initialize() instead.\"") HYPRE_Initialize(__VA_ARGS__)
+#define HYPRE_Init() \
+   HYPRE_DEPRECATED("GCC warning \"HYPRE_Init is deprecated. Use HYPRE_Initialize() instead.\"")  \
+   HYPRE_Initialize()
 
 /**
- * Finalizes the hypre library.
+ * (Required) Finalizes the hypre library.
  **/
 
 HYPRE_Int HYPRE_Finalize(void);
