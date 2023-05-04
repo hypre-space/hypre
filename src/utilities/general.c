@@ -246,7 +246,7 @@ HYPRE_Initialize(void)
    /* Update library state */
    hypre_SetInitialized();
 
-#ifdef HYPRE_USING_MEMORY_TRACKER
+#if defined(HYPRE_USING_MEMORY_TRACKER)
    if (!_hypre_memory_tracker)
    {
       _hypre_memory_tracker = hypre_MemoryTrackerCreate();
@@ -310,7 +310,7 @@ HYPRE_Initialize(void)
       hypre_HandleVendorSolverHandle(_hypre_handle);
 #endif
 
-   /* Check if cuda arch flags in compiling match the device */
+      /* Check if cuda arch flags in compiling match the device */
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_DEBUG)
       hypre_CudaCompileFlagCheck();
 #endif
@@ -378,7 +378,7 @@ HYPRE_Finalize(void)
    hypre_GetDeviceLastError();
 #endif
 
-#ifdef HYPRE_USING_MEMORY_TRACKER
+#if defined(HYPRE_USING_MEMORY_TRACKER)
    hypre_PrintMemoryTracker(hypre_total_bytes, hypre_peak_bytes, hypre_current_bytes,
                             hypre_memory_tracker_print, hypre_memory_tracker_filename);
 
