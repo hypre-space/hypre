@@ -310,7 +310,7 @@ HYPRE_Initialize(void)
       hypre_HandleVendorSolverHandle(_hypre_handle);
 #endif
 
-   /* Check if cuda arch flags in compiling match the device */
+      /* Check if cuda arch flags in compiling match the device */
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_DEBUG)
       hypre_CudaCompileFlagCheck();
 #endif
