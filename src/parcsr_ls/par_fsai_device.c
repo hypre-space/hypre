@@ -688,11 +688,18 @@ hypre_FSAITruncateCandidateDevice( hypre_CSRMatrix *matrix,
 
    HYPRE_Int     *mat_e;
 
+   /* Sanity check */
+   if (num_rows <= 0)
+   {
+      *matrix_e = NULL;
+      return hypre_error_flag;
+   }
+
    /*-----------------------------------------------------
     * Keep only the largest coefficients in absolute value
     *-----------------------------------------------------*/
 
-   /* Allocate memory for row indices array*/
+   /* Allocate memory for row indices array */
    hypre_GpuProfilingPushRange("Storage1");
    mat_e = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
    hypre_GpuProfilingPopRange();
@@ -908,6 +915,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
     *-----------------------------------------------------*/
 
    hypre_GpuProfilingPushRange("SolveLS");
+   if (num_rows)
    {
 #if HYPRE_DEBUG
       HYPRE_Int *h_info = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
@@ -1042,7 +1050,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
       hypre_ParCSRMatrixDestroy(Atilde);
    }
 
-   /* TODO: can we free some of these earlier?*/
+   /* TODO: can we free some of these earlier? */
    hypre_TFree(K_e, HYPRE_MEMORY_DEVICE);
    hypre_TFree(rhs_data, HYPRE_MEMORY_DEVICE);
    hypre_TFree(sol_data, HYPRE_MEMORY_DEVICE);
@@ -1104,8 +1112,8 @@ hypre_FSAISetupDevice( void               *fsai_vdata,
    else
    {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-      /* Initialize matrix G */
-      hypre_ParCSRMatrixInitialize(G);
+      /* Initialize matrix G on device */
+      hypre_ParCSRMatrixInitialize_v2(G, HYPRE_MEMORY_DEVICE);
 
       if (algo_type == 3)
       {
