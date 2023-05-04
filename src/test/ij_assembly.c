@@ -115,7 +115,7 @@ main( hypre_int  argc,
 
    /*-----------------------------------------------------------------
     * GPU Device binding
-    * Must be done before HYPRE_Init() and should not be changed after
+    * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
    hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
 
@@ -123,7 +123,7 @@ main( hypre_int  argc,
    /* Initialize Hypre: must be the first Hypre function to call */
    time_index = hypre_InitializeTiming("Hypre init");
    hypre_BeginTiming(time_index);
-   HYPRE_Init();
+   HYPRE_Initialize();
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
