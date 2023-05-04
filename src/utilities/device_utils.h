@@ -477,7 +477,6 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    if (rocblas_status_success != err) {                                                      \
       printf("rocSOLVER ERROR (code = %d, %s) at %s:%d\n",                                   \
              err, rocblas_status_to_string(err), __FILE__, __LINE__);                        \
-      assert(0); exit(1);                                                                    \
    } } while(0)
 
 #define HYPRE_CURAND_CALL(call) do {                                                         \
