@@ -91,7 +91,7 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
          /* Note: this enforces "explicit scaling," i.e. we treat each tile of a multi-tile GPU as a separate device */
          sycl::platform platform(sycl::gpu_selector{});
          auto gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
-         HYPRE_Int n_devices = 0;
+         hypre_int n_devices = 0;
          hypre_GetDeviceCount(&n_devices);
          if (device_id >= n_devices)
          {
@@ -99,8 +99,8 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
                               "ERROR: SYCL device-ID exceed the number of devices on-node\n");
          }
 
-         HYPRE_Int local_n_devices = 0;
-         HYPRE_Int i;
+         hypre_int local_n_devices = 0;
+         hypre_int i;
          for (i = 0; i < gpu_devices.size(); i++)
          {
             if (local_n_devices == device_id)
@@ -164,7 +164,8 @@ hypre_GetDevice(hypre_int *device_id)
 #if defined(HYPRE_USING_SYCL)
    /* WM: note - no sycl call to get which device is setup for use (if the user has already setup a device at all)
     * Assume the rank/device binding below */
-   HYPRE_Int n_devices, my_id;
+   HYPRE_Int my_id;
+   hypre_int n_devices;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
    hypre_GetDeviceCount(&n_devices);
    (*device_id) = my_id % n_devices;
