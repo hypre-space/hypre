@@ -123,7 +123,7 @@ typedef HYPRE_Int MPI_Comm;
  *--------------------------------------------------------------------------*/
 
 /**
- * Initializes the hypre library.
+ * (Required) Initializes the hypre library.
  **/
 
 HYPRE_Int HYPRE_Initialize(void);
@@ -133,9 +133,7 @@ HYPRE_Int HYPRE_Initialize(void);
  * Please, use HYPRE_Initialize instead.
  **/
 
-#define HYPRE_Init() \
-   HYPRE_DEPRECATED("GCC warning \"HYPRE_Init is deprecated. Use HYPRE_Initialize() instead.\"")  \
-   HYPRE_Initialize()
+#define HYPRE_Init() HYPRE_Initialize()
 
 /**
  * (Required) Finalizes the hypre library.
