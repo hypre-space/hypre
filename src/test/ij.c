@@ -209,6 +209,7 @@ main( hypre_int argc,
    HYPRE_Real          Q_trunc = 0;
 
    /* Specific tests */
+   HYPRE_Int           test_init = 0;
    HYPRE_Int           test_ij = 0;
    HYPRE_Int           test_multivec = 0;
    HYPRE_Int           test_scaling = 0;
@@ -481,19 +482,75 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
+   /* Should we test library initialization? */
+   for (arg_index = 1; arg_index < argc; arg_index ++)
+   {
+      if (strcmp(argv[arg_index], "-test_init") == 0)
+      {
+         test_init = 1;
+         break;
+      }
+   }
+
    /*-----------------------------------------------------------------
     * GPU Device binding
-    * Must be done before HYPRE_Init() and should not be changed after
+    * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
    hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
-
-   time_index = hypre_InitializeTiming("Hypre init");
-   hypre_BeginTiming(time_index);
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
-   HYPRE_Init();
+
+   if (test_init)
+   {
+      /* The library should not be initialized or finalized */
+      if (!HYPRE_Initialized() && !HYPRE_Finalized())
+      {
+         hypre_ParPrintf(hypre_MPI_COMM_WORLD, "hypre library has not been initialized or finalized yet\n");
+      }
+
+      HYPRE_Initialize();
+
+      /* Check if the library is in initialized state */
+      if (HYPRE_Initialized() && !HYPRE_Finalized())
+      {
+         hypre_ParPrintf(hypre_MPI_COMM_WORLD, "hypre library has been initialized\n");
+      }
+
+      HYPRE_Finalize();
+
+      /* Check if the library is in finalized state */
+      if (!HYPRE_Initialized() && HYPRE_Finalized())
+      {
+         hypre_ParPrintf(hypre_MPI_COMM_WORLD, "hypre library has been finalized\n");
+      }
+
+      HYPRE_Initialize();
+
+      /* Check if the library is in initialized state */
+      if (HYPRE_Initialized() && !HYPRE_Finalized())
+      {
+         hypre_ParPrintf(hypre_MPI_COMM_WORLD, "hypre library has been re-initialized\n");
+      }
+
+      HYPRE_Finalize();
+
+      /* Check if the library is in finalized state */
+      if (!HYPRE_Initialized() && HYPRE_Finalized())
+      {
+         hypre_ParPrintf(hypre_MPI_COMM_WORLD, "hypre library has been finalized\n");
+      }
+
+      hypre_MPI_Finalize();
+
+      return 0;
+   }
+
+   time_index = hypre_InitializeTiming("Hypre init");
+   hypre_BeginTiming(time_index);
+
+   HYPRE_Initialize();
 
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);

@@ -21,6 +21,30 @@ extern "C" {
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#ifndef hypre_STATE_HEADER
+#define hypre_STATE_HEADER
+
+/*--------------------------------------------------------------------------
+ * hypre library state
+ *--------------------------------------------------------------------------*/
+
+typedef enum hypre_State_enum
+{
+   HYPRE_STATE_NONE        = 0,
+   HYPRE_STATE_INITIALIZED = 1,
+   HYPRE_STATE_FINALIZED   = 2
+} hypre_State;
+
+extern hypre_State hypre__global_state;
+
+#endif /* hypre_STATE_HEADER */
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /******************************************************************************
  *
  * General structures and values
@@ -31,6 +55,10 @@ extern "C" {
 #define hypre_GENERAL_HEADER
 
 #include <math.h>
+
+/*--------------------------------------------------------------------------
+ * typedefs
+ *--------------------------------------------------------------------------*/
 
 /* This allows us to consistently avoid 'int' throughout hypre */
 typedef int                    hypre_int;
@@ -166,7 +194,6 @@ typedef double                 hypre_double;
 #endif
 
 #endif /* hypre_GENERAL_HEADER */
-
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -1769,6 +1796,12 @@ HYPRE_Complex hypre_csqrt( HYPRE_Complex value );
 #define hypre_cimag(value) 0.0
 #define hypre_csqrt(value) hypre_sqrt(value)
 #endif
+
+/* state.c */
+HYPRE_Int hypre_Initialized( void );
+HYPRE_Int hypre_Finalized( void );
+HYPRE_Int hypre_SetInitialized( void );
+HYPRE_Int hypre_SetFinalized( void );
 
 /* general.c */
 hypre_Handle* hypre_handle(void);

@@ -63,6 +63,7 @@ FILES =\
  mpistubs.c\
  qsplit.c\
  random.c\
+ state.c\
  threading.c\
  timer.c\
  timing.c

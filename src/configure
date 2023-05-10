@@ -3239,6 +3239,10 @@ HYPRE_BUGS="https://github.com/hypre-space/hypre/issues"
 HYPRE_SRCDIR="`pwd`"
 
 
+printf "%s\n" "#define HYPRE_DEPRECATED(reason) _Pragma(reason)" >>confdefs.h
+
+
+
 printf "%s\n" "#define HYPRE_RELEASE_NAME \"$HYPRE_NAME\"" >>confdefs.h
 
 
@@ -12631,3 +12635,4 @@ fi
 mv HYPRE_config.h HYPRE_config.h.tmp
 sed 's/FC_FUNC/HYPRE_FC_FUNC/g' < HYPRE_config.h.tmp > HYPRE_config.h
 rm -f HYPRE_config.h.tmp
+
