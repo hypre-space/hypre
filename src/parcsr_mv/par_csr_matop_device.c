@@ -1427,11 +1427,8 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
       hypre_TFree(elmt_tols_diag, HYPRE_MEMORY_DEVICE);
       hypre_TFree(elmt_tols_offd, HYPRE_MEMORY_DEVICE);
    }
-<<<<<<< HEAD
-=======
-   hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
+
    hypre_GpuProfilingPopRange();
->>>>>>> master
 
    return hypre_error_flag;
 }
