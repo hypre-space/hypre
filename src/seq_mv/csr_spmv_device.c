@@ -54,7 +54,8 @@ hypreGPUKernel_CSRMatvecShuffleGT8(hypre_DeviceItem &item,
 {
 #if defined (HYPRE_USING_SYCL)
    const HYPRE_Int  grid_ngroups  = item.get_group_range(2) * (HYPRE_SPMV_BLOCKDIM / K);
-   HYPRE_Int        grid_group_id = (item.get_group(2) * HYPRE_SPMV_BLOCKDIM + item.get_local_id(2)) / K;
+   HYPRE_Int        grid_group_id = (item.get_group(2) * HYPRE_SPMV_BLOCKDIM + item.get_local_id(
+                                        2)) / K;
    const HYPRE_Int  group_lane    = item.get_local_id(2) & (K - 1);
 #else
    const HYPRE_Int  grid_ngroups  = gridDim.x * (HYPRE_SPMV_BLOCKDIM / K);
@@ -598,4 +599,4 @@ hypre_CSRMatrixIntSpMVDevice( HYPRE_Int  num_rows,
 
    return hypre_error_flag;
 }
-#endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
+#endif /* #if defined(HYPRE_USING_GPU) */

@@ -219,6 +219,14 @@ hypre_BoomerAMGRelaxWeightedJacobi_core( hypre_ParCSRMatrix *A,
    HYPRE_Int num_procs, my_id, i, j, ii, jj, index, num_sends, start;
    hypre_ParCSRCommHandle *comm_handle;
 
+   /* Sanity check */
+   if (hypre_ParVectorNumVectors(f) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Jacobi relaxation doesn't support multicomponent vectors");
+      return hypre_error_flag;
+   }
+
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
@@ -388,6 +396,14 @@ hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A,
    hypre_MPI_Status *status;
    hypre_MPI_Request *requests;
 
+   /* Sanity check */
+   if (hypre_ParVectorNumVectors(f) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "GS (1) relaxation doesn't support multicomponent vectors");
+      return hypre_error_flag;
+   }
+
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
@@ -519,6 +535,14 @@ hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
    HYPRE_Int num_procs, my_id, i, j, ii, jj, p, jr, ip, num_sends, num_recvs, vec_start, vec_len;
    hypre_MPI_Status *status;
    hypre_MPI_Request *requests;
+
+   /* Sanity check */
+   if (hypre_ParVectorNumVectors(f) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "GS (2) relaxation doesn't support multicomponent vectors");
+      return hypre_error_flag;
+   }
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -693,6 +717,14 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
    num_threads = forced_seq ? 1 : hypre_NumThreads();
+
+   /* Sanity check */
+   if (hypre_ParVectorNumVectors(f) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Hybrid GS relaxation doesn't support multicomponent vectors");
+      return hypre_error_flag;
+   }
 
    /* GS order: forward or backward */
    const HYPRE_Int gs_order = GS_order > 0 ? 1 : -1;
@@ -949,6 +981,14 @@ hypre_BoomerAMGRelax5ChaoticHybridGaussSeidel( hypre_ParCSRMatrix *A,
    HYPRE_Int num_procs, my_id, i, j, ii, jj, index, num_sends, start;
    hypre_ParCSRCommHandle *comm_handle;
 
+   /* Sanity check */
+   if (hypre_ParVectorNumVectors(f) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Chaotic GS relaxation doesn't support multicomponent vectors");
+      return hypre_error_flag;
+   }
+
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
@@ -1041,12 +1081,10 @@ hypre_BoomerAMGRelaxHybridSOR( hypre_ParCSRMatrix *A,
       exec = HYPRE_EXEC_HOST;
    }
 
-#if defined(HYPRE_USING_GPU)
    if (hypre_HandleDeviceGSMethod(hypre_handle()) == 0)
    {
       exec = HYPRE_EXEC_HOST;
    }
-#endif
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -1088,13 +1126,11 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
                              hypre_ParVector    *u,
                              hypre_ParVector    *Vtemp )
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_GpuProfilingPushRange("Relax7Jacobi");
-#endif
-
    HYPRE_Int       num_rows = hypre_ParCSRMatrixNumRows(A);
    hypre_Vector    l1_norms_vec;
    hypre_ParVector l1_norms_parvec;
+
+   hypre_GpuProfilingPushRange("Relax7Jacobi");
 
    hypre_VectorNumVectors(&l1_norms_vec) = 1;
    hypre_VectorMultiVecStorageMethod(&l1_norms_vec) = 0;
@@ -1154,9 +1190,7 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
    hypre_SyncComputeStream(hypre_handle());
 #endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return hypre_error_flag;
 }
@@ -1259,9 +1293,18 @@ hypre_BoomerAMGRelax19GaussElim( hypre_ParCSRMatrix *A,
    HYPRE_Real      *b_vec;
    HYPRE_Int        i, jj, column, relax_error = 0;
 
+   /* Sanity check */
+   if (hypre_ParVectorNumVectors(f) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Gauss Elim. relaxation doesn't support multicomponent vectors");
+      return hypre_error_flag;
+   }
+
    /*-----------------------------------------------------------------
     *  Generate CSR matrix from ParCSRMatrix A
     *-----------------------------------------------------------------*/
+
    /* all processors are needed for these routines */
    A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
    f_vector = hypre_ParVectorToVectorAll(f);
@@ -1338,9 +1381,18 @@ hypre_BoomerAMGRelax98GaussElimPivot( hypre_ParCSRMatrix *A,
    HYPRE_Int        one_i = 1;
    HYPRE_Int       *piv;
 
+   /* Sanity check */
+   if (hypre_ParVectorNumVectors(f) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Gauss Elim. (98) relaxation doesn't support multicomponent vectors");
+      return hypre_error_flag;
+   }
+
    /*-----------------------------------------------------------------
     *  Generate CSR matrix from ParCSRMatrix A
     *-----------------------------------------------------------------*/
+
    /* all processors are needed for these routines */
    A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
    f_vector = hypre_ParVectorToVectorAll(f);
@@ -1430,6 +1482,14 @@ hypre_BoomerAMGRelaxKaczmarz( hypre_ParCSRMatrix *A,
 
    HYPRE_Int num_procs, my_id, i, j, index, num_sends, start;
    hypre_ParCSRCommHandle *comm_handle;
+
+   /* Sanity check */
+   if (hypre_ParVectorNumVectors(f) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Kaczmarz relaxation doesn't support multicomponent vectors");
+      return hypre_error_flag;
+   }
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -1536,6 +1596,14 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelHost( hypre_ParCSRMatrix *A,
 
    HYPRE_Complex    multiplier  = 1.0;
    HYPRE_Int        i, k, jj, ii;
+
+   /* Sanity check */
+   if (hypre_ParVectorNumVectors(f) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "2-stage GS relaxation (Host) doesn't support multicomponent vectors");
+      return hypre_error_flag;
+   }
 
    /* Need to check that EVERY diagonal is nonzero first. If any are, throw exception */
    for (i = 0; i < num_rows; i++)
@@ -1658,3 +1726,44 @@ hypre_BoomerAMGRelax12TwoStageGaussSeidel( hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_BoomerAMGRelaxComputeL1Norms
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGRelaxComputeL1Norms( hypre_ParCSRMatrix *A,
+                                    HYPRE_Int           relax_type,
+                                    HYPRE_Int           relax_order,
+                                    HYPRE_Int           coarsest_lvl,
+                                    hypre_IntArray     *CF_marker,
+                                    HYPRE_Real        **l1_norms_data_ptr )
+{
+   HYPRE_Int     *CF_marker_data;
+   HYPRE_Real    *l1_norms_data = NULL;
+
+   /* Relax according to F/C points ordering? */
+   CF_marker_data = (relax_order && CF_marker) ? hypre_IntArrayData(CF_marker) : NULL;
+
+   /* Are we in the coarsest level? */
+   CF_marker_data = (coarsest_lvl) ? NULL : CF_marker_data;
+
+   if (relax_type == 18)
+   {
+      /* l1_norm = sum(|A_ij|)_j */
+      hypre_ParCSRComputeL1Norms(A, 1, CF_marker_data, &l1_norms_data);
+   }
+   else if (relax_type == 8 || relax_type == 13 || relax_type == 14)
+   {
+      /* l1_norm = sum(|D_ij| + 0.5*|A_offd_ij|)_j */
+      hypre_ParCSRComputeL1Norms(A, 4, CF_marker_data, &l1_norms_data);
+   }
+   else if (relax_type == 7 || relax_type == 11 || relax_type == 12)
+   {
+      /* l1_norm = |D_ii| */
+      hypre_ParCSRComputeL1Norms(A, 5, NULL, &l1_norms_data);
+   }
+
+   *l1_norms_data_ptr = l1_norms_data;
+
+   return hypre_error_flag;
+}

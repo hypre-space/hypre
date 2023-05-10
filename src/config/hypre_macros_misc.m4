@@ -15,15 +15,15 @@ dnl   if it is not found. If ACTION-IF-FOUND is not specified,
 dnl   the default action will define HAVE_MPI.
 dnl **********************************************************************
 AC_DEFUN([AC_HYPRE_CHECK_MPI],
-[AC_PREREQ(2.57)dnl
-AC_PREREQ(2.50) dnl for AC_LANG_CASE
+[AC_PREREQ([2.69])dnl
+AC_PREREQ([2.69]) dnl for AC_LANG_CASE
 
 if test x = x"$MPILIBS"; then
   AC_LANG_CASE([C], [AC_CHECK_FUNC(MPI_Init, [MPILIBS=" "])],
     [C++], [AC_CHECK_FUNC(MPI_Init, [MPILIBS=" "])],
     [Fortran 77], [AC_MSG_CHECKING([for MPI_Init])
-      AC_TRY_LINK([],[      call MPI_Init], [MPILIBS=" "
-        AC_MSG_RESULT(yes)], [AC_MSG_RESULT(no)])])
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[      call MPI_Init]])],[MPILIBS=" "
+        AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])])
 fi
 
 if test x = x"$MPILIBS"; then
@@ -34,16 +34,16 @@ if test x = x"$MPILIBS"; then
   AC_CHECK_LIB(mpich, MPI_Init, [MPILIBS="-lmpich"])
 fi
 
-dnl We have to use AC_TRY_COMPILE and not AC_CHECK_HEADER because the
-dnl latter uses $CPP, not $CC (which may be mpicc).
+dnl We have to use AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[]])],[],[]) and not
+dnl AC_CHECK_HEADER because the latter uses $CPP, not $CC (which may be mpicc).
 AC_LANG_CASE([C], [if test x != x"$MPILIBS"; then
   AC_MSG_CHECKING([for mpi.h])
-  AC_TRY_COMPILE([#include <mpi.h>],[],[AC_MSG_RESULT(yes)], [MPILIBS=""
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <mpi.h>]], [[]])],[AC_MSG_RESULT(yes)],[MPILIBS=""
                      AC_MSG_RESULT(no)])
 fi],
 [C++], [if test x != x"$MPILIBS"; then
   AC_MSG_CHECKING([for mpi.h])
-  AC_TRY_COMPILE([#include <mpi.h>],[],[AC_MSG_RESULT(yes)], [MPILIBS=""
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <mpi.h>]], [[]])],[AC_MSG_RESULT(yes)],[MPILIBS=""
                      AC_MSG_RESULT(no)])
 fi])
 
@@ -94,11 +94,11 @@ dnl *
 dnl * Set compile FLAGS for optimization
 dnl **********************************************************************
 AC_DEFUN([AC_HYPRE_OPTIMIZATION_FLAGS],
-[AC_PREREQ(2.57)dnl
+[AC_PREREQ([2.69])dnl
 
 if test "x${hypre_user_chose_cflags}" = "xno"
 then
-   case `basename "${CC}"` in
+   case `basename ${CC}` in
       gcc|mpigcc|mpicc)
         CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -138,7 +138,7 @@ fi
 
 if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
-   case `basename "${CXX}"` in
+   case `basename ${CXX}` in
       g++|gCC|mpig++|mpicxx|mpic++|mpiCC)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -172,9 +172,9 @@ then
    esac
 fi
 
-if test "x${hypre_user_chose_fflags}" = "xno"
+if test "$hypre_using_fortran" = "yes" -a "x${hypre_user_chose_fflags}" = "xno"
 then
-   case `basename "${FC}"` in
+   case `basename ${FC}` in
       g77|gfortran|mpigfortran|mpif77)
         FFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -214,11 +214,11 @@ dnl *
 dnl * Set compile FLAGS for debug
 dnl **********************************************************************
 AC_DEFUN([AC_HYPRE_DEBUG_FLAGS],
-[AC_PREREQ(2.57)dnl
+[AC_PREREQ([2.69])dnl
 
 if test "x${hypre_user_chose_cflags}" = "xno"
 then
-   case `basename "${CC}"` in
+   case `basename ${CC}` in
       gcc|mpigcc|mpicc)
         CFLAGS="-g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -258,7 +258,7 @@ fi
 
 if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
-   case `basename "${CXX}"` in
+   case `basename ${CXX}` in
       g++|gCC|mpig++|mpicxx|mpic++|mpiCC)
         CXXFLAGS="-g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -292,9 +292,9 @@ then
    esac
 fi
 
-if test "x${hypre_user_chose_fflags}" = "xno"
+if test "$hypre_using_fortran" = "yes" -a "x${hypre_user_chose_fflags}" = "xno"
 then
-   case `basename "${FC}"` in
+   case `basename ${FC}` in
       g77|gfortran|mpigfortran|mpif77)
         FFLAGS="-g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then

@@ -2816,13 +2816,11 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
                             HYPRE_Int              debug_flag,
                             hypre_IntArray       **CF_marker_ptr)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("PMIS");
-#endif
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -2835,9 +2833,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
       ierr = hypre_BoomerAMGCoarsenPMISHost( S, A, CF_init, debug_flag, CF_marker_ptr );
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }

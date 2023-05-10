@@ -9,7 +9,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 #define HYPRE_INTERPTRUNC_ALGORITHM_SWITCH 8
 
@@ -181,19 +181,19 @@ void hypre_smallest_abs_val( HYPRE_Int   n,
 __global__ void
 hypreGPUKernel_InterpTruncationPass1_v1( hypre_DeviceItem &item,
 #if defined(HYPRE_USING_SYCL)
-                                          char *shmem_ptr,
+                                         char *shmem_ptr,
 #endif
-                                          HYPRE_Int   nrows,
-                                          HYPRE_Real  trunc_factor,
-                                          HYPRE_Int   max_elmts,
-                                          HYPRE_Int  *P_diag_i,
-                                          HYPRE_Int  *P_diag_j,
-                                          HYPRE_Real *P_diag_a,
-                                          HYPRE_Int  *P_offd_i,
-                                          HYPRE_Int  *P_offd_j,
-                                          HYPRE_Real *P_offd_a,
-                                          HYPRE_Int  *P_diag_i_new,
-                                          HYPRE_Int  *P_offd_i_new )
+                                         HYPRE_Int   nrows,
+                                         HYPRE_Real  trunc_factor,
+                                         HYPRE_Int   max_elmts,
+                                         HYPRE_Int  *P_diag_i,
+                                         HYPRE_Int  *P_diag_j,
+                                         HYPRE_Real *P_diag_a,
+                                         HYPRE_Int  *P_offd_i,
+                                         HYPRE_Int  *P_offd_j,
+                                         HYPRE_Real *P_offd_a,
+                                         HYPRE_Int  *P_diag_i_new,
+                                         HYPRE_Int  *P_offd_i_new )
 {
    const HYPRE_Int row = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
@@ -755,4 +755,4 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P,
    return hypre_error_flag;
 }
 
-#endif /* #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
+#endif /* #if defined(HYPRE_USING_GPU) */

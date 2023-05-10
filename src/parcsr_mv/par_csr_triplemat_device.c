@@ -11,7 +11,7 @@
 
 #define PARCSRGEMM_TIMING 0
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 /* option == 1, T = HYPRE_BigInt
  * option == 2, T = HYPRE_Int,
@@ -1256,4 +1256,4 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#endif /* #if defined(HYPRE_USING_GPU) */

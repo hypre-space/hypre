@@ -75,7 +75,7 @@ void
 hypre_CheckMemoryLocation(void *ptr, hypre_MemoryLocation location)
 {
 #if defined(HYPRE_DEBUG)
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    if (!ptr)
    {
       return;
@@ -796,7 +796,7 @@ hypre_GetExecPolicy1_core(hypre_MemoryLocation location)
          exec = HYPRE_EXEC_DEVICE;
          break;
       case hypre_MEMORY_UNIFIED :
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
          exec = hypre_HandleDefaultExecPolicy(hypre_handle());
 #endif
          break;
@@ -843,7 +843,7 @@ hypre_GetExecPolicy2_core(hypre_MemoryLocation location1,
 
    if (location1 == hypre_MEMORY_UNIFIED && location2 == hypre_MEMORY_UNIFIED)
    {
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
       exec = hypre_HandleDefaultExecPolicy(hypre_handle());
 #endif
    }

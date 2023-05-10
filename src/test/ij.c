@@ -209,6 +209,7 @@ main( hypre_int argc,
    HYPRE_Real          Q_trunc = 0;
 
    /* Specific tests */
+   HYPRE_Int           test_init = 0;
    HYPRE_Int           test_ij = 0;
    HYPRE_Int           test_multivec = 0;
    HYPRE_Int           test_scaling = 0;
@@ -425,6 +426,7 @@ main( hypre_int argc,
    /* hypre_ILU options */
    HYPRE_Int ilu_type = 0;
    HYPRE_Int ilu_lfil = 0;
+   HYPRE_Int ilu_reordering = 1;
    HYPRE_Int ilu_sm_max_iter = 1;
    HYPRE_Real ilu_droptol = 1.0e-02;
    HYPRE_Int ilu_max_row_nnz = 1000;
@@ -473,6 +475,87 @@ main( hypre_int argc,
    HYPRE_Int print_mem_tracker = 0;
    char mem_tracker_name[HYPRE_MAX_FILE_NAME_LEN] = {0};
 #endif
+
+   /* Initialize MPI */
+   hypre_MPI_Init(&argc, &argv);
+
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   /* Should we test library initialization? */
+   for (arg_index = 1; arg_index < argc; arg_index ++)
+   {
+      if (strcmp(argv[arg_index], "-test_init") == 0)
+      {
+         test_init = 1;
+         break;
+      }
+   }
+
+   /*-----------------------------------------------------------------
+    * GPU Device binding
+    * Must be done before HYPRE_Initialize() and should not be changed after
+    *-----------------------------------------------------------------*/
+   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+
+   /*-----------------------------------------------------------
+    * Initialize : must be the first HYPRE function to call
+    *-----------------------------------------------------------*/
+
+   if (test_init)
+   {
+      /* The library should not be initialized or finalized */
+      if (!HYPRE_Initialized() && !HYPRE_Finalized())
+      {
+         hypre_ParPrintf(hypre_MPI_COMM_WORLD, "hypre library has not been initialized or finalized yet\n");
+      }
+
+      HYPRE_Initialize();
+
+      /* Check if the library is in initialized state */
+      if (HYPRE_Initialized() && !HYPRE_Finalized())
+      {
+         hypre_ParPrintf(hypre_MPI_COMM_WORLD, "hypre library has been initialized\n");
+      }
+
+      HYPRE_Finalize();
+
+      /* Check if the library is in finalized state */
+      if (!HYPRE_Initialized() && HYPRE_Finalized())
+      {
+         hypre_ParPrintf(hypre_MPI_COMM_WORLD, "hypre library has been finalized\n");
+      }
+
+      HYPRE_Initialize();
+
+      /* Check if the library is in initialized state */
+      if (HYPRE_Initialized() && !HYPRE_Finalized())
+      {
+         hypre_ParPrintf(hypre_MPI_COMM_WORLD, "hypre library has been re-initialized\n");
+      }
+
+      HYPRE_Finalize();
+
+      /* Check if the library is in finalized state */
+      if (!HYPRE_Initialized() && HYPRE_Finalized())
+      {
+         hypre_ParPrintf(hypre_MPI_COMM_WORLD, "hypre library has been finalized\n");
+      }
+
+      hypre_MPI_Finalize();
+
+      return 0;
+   }
+
+   time_index = hypre_InitializeTiming("Hypre init");
+   hypre_BeginTiming(time_index);
+
+   HYPRE_Initialize();
+
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
 
    /* default execution policy and memory space */
 #if defined(HYPRE_TEST_USING_HOST)
@@ -527,12 +610,6 @@ main( hypre_int argc,
               mempool_max_bin      = 9;
    size_t mempool_max_cached_bytes = 2000LL * 1024 * 1024;
 #endif
-
-   /* Initialize MPI */
-   hypre_MPI_Init(&argc, &argv);
-
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
    /*-----------------------------------------------------------
     * Set defaults
@@ -1233,6 +1310,12 @@ main( hypre_int argc,
          /* level of fill */
          arg_index++;
          ilu_lfil = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ilu_reordering") == 0 )
+      {
+         /* local reordering type */
+         arg_index++;
+         ilu_reordering = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-ilu_droptol") == 0 )
       {
@@ -2421,25 +2504,6 @@ main( hypre_int argc,
       hypre_printf("Running with these driver parameters:\n");
       hypre_printf("  solver ID    = %d\n\n", solver_id);
    }
-
-   /*-----------------------------------------------------------------
-    * GPU Device binding
-    * Must be done before HYPRE_Init() and should not be changed after
-    *-----------------------------------------------------------------*/
-   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
-
-   time_index = hypre_InitializeTiming("Hypre init");
-   hypre_BeginTiming(time_index);
-
-   /*-----------------------------------------------------------
-    * Initialize : must be the first HYPRE function to call
-    *-----------------------------------------------------------*/
-   HYPRE_Init();
-
-   hypre_EndTiming(time_index);
-   hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
-   hypre_FinalizeTiming(time_index);
-   hypre_ClearTiming();
 
 #ifdef HYPRE_USING_DEVICE_POOL
    /* To be effective, hypre_SetCubMemPoolSize must immediately follow HYPRE_Init */
@@ -4195,9 +4259,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCoordinates (amg_solver, coordinates);
       }
 
-#if defined (HYPRE_USING_GPU)
       hypre_GpuProfilingPushRange("AMG-Setup-1");
-#endif
       if (solver_id == 0)
       {
          HYPRE_BoomerAMGSetup(amg_solver, parcsr_M, b, x);
@@ -4207,9 +4269,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGDDSetup(amgdd_solver, parcsr_M, b, x);
       }
 
-#if defined (HYPRE_USING_GPU)
       hypre_GpuProfilingPopRange();
-#endif
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
@@ -4226,9 +4286,7 @@ main( hypre_int argc,
       }
       hypre_BeginTiming(time_index);
 
-#if defined (HYPRE_USING_GPU)
       hypre_GpuProfilingPushRange("AMG-Solve-1");
-#endif
 
       if (solver_id == 0)
       {
@@ -4239,9 +4297,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGDDSolve(amgdd_solver, parcsr_A, b, x);
       }
 
-#if defined (HYPRE_USING_GPU)
       hypre_GpuProfilingPopRange();
-#endif
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
@@ -4266,9 +4322,7 @@ main( hypre_int argc,
          time_index = hypre_InitializeTiming("BoomerAMG/AMG-DD Setup2");
          hypre_BeginTiming(time_index);
 
-#if defined (HYPRE_USING_GPU)
          hypre_GpuProfilingPushRange("AMG-Setup-2");
-#endif
 
          if (solver_id == 0)
          {
@@ -4279,9 +4333,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGDDSetup(amgdd_solver, parcsr_M, b, x);
          }
 
-#if defined (HYPRE_USING_GPU)
          hypre_GpuProfilingPopRange();
-#endif
 
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
@@ -4291,9 +4343,7 @@ main( hypre_int argc,
          time_index = hypre_InitializeTiming("BoomerAMG/AMG-DD Solve2");
          hypre_BeginTiming(time_index);
 
-#if defined (HYPRE_USING_GPU)
          hypre_GpuProfilingPushRange("AMG-Solve-2");
-#endif
 
          if (solver_id == 0)
          {
@@ -4304,9 +4354,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGDDSolve(amgdd_solver, parcsr_A, b, x);
          }
 
-#if defined (HYPRE_USING_GPU)
          hypre_GpuProfilingPopRange();
-#endif
 
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
@@ -5041,14 +5089,10 @@ main( hypre_int argc,
          hypre_printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
       }
 
-#if defined (HYPRE_USING_GPU)
       hypre_GpuProfilingPushRange("PCG-Setup-1");
-#endif
       HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix) parcsr_M,
                      (HYPRE_Vector) b, (HYPRE_Vector) x);
-#if defined (HYPRE_USING_GPU)
       hypre_GpuProfilingPopRange();
-#endif
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
@@ -5056,14 +5100,10 @@ main( hypre_int argc,
 
       time_index = hypre_InitializeTiming("PCG Solve");
       hypre_BeginTiming(time_index);
-#if defined (HYPRE_USING_GPU)
       hypre_GpuProfilingPushRange("PCG-Solve-1");
-#endif
       HYPRE_PCGSolve(pcg_solver, (HYPRE_Matrix)parcsr_A,
                      (HYPRE_Vector)b, (HYPRE_Vector)x);
-#if defined (HYPRE_USING_GPU)
       hypre_GpuProfilingPopRange();
-#endif
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
@@ -5087,16 +5127,12 @@ main( hypre_int argc,
          time_index = hypre_InitializeTiming("PCG Setup");
          hypre_BeginTiming(time_index);
 
-#if defined (HYPRE_USING_GPU)
          hypre_GpuProfilingPushRange("PCG-Setup-2");
-#endif
 
          HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix) parcsr_M,
                         (HYPRE_Vector) b, (HYPRE_Vector) x);
 
-#if defined (HYPRE_USING_GPU)
          hypre_GpuProfilingPopRange();
-#endif
 
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
@@ -5106,16 +5142,12 @@ main( hypre_int argc,
          time_index = hypre_InitializeTiming("PCG Solve");
          hypre_BeginTiming(time_index);
 
-#if defined (HYPRE_USING_GPU)
          hypre_GpuProfilingPushRange("PCG-Solve-2");
-#endif
 
          HYPRE_PCGSolve(pcg_solver, (HYPRE_Matrix)parcsr_A,
                         (HYPRE_Vector)b, (HYPRE_Vector)x);
 
-#if defined (HYPRE_USING_GPU)
          hypre_GpuProfilingPopRange();
-#endif
 
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
@@ -6616,6 +6648,7 @@ main( hypre_int argc,
          HYPRE_ILUCreate(&pcg_precond);
          HYPRE_ILUSetType(pcg_precond, ilu_type);
          HYPRE_ILUSetLevelOfFill(pcg_precond, ilu_lfil);
+         HYPRE_ILUSetLocalReordering(pcg_precond, ilu_reordering);
          /* set print level */
          HYPRE_ILUSetPrintLevel(pcg_precond, 1);
          /* set max iterations */
@@ -7259,6 +7292,7 @@ main( hypre_int argc,
          HYPRE_ILUCreate(&pcg_precond);
          HYPRE_ILUSetType(pcg_precond, ilu_type);
          HYPRE_ILUSetLevelOfFill(pcg_precond, ilu_lfil);
+         HYPRE_ILUSetLocalReordering(pcg_precond, ilu_reordering);
          /* set print level */
          HYPRE_ILUSetPrintLevel(pcg_precond, 1);
          /* set max iterations */
@@ -8540,6 +8574,8 @@ main( hypre_int argc,
       HYPRE_ILUSetType(ilu_solver, ilu_type);
       /* set level of fill */
       HYPRE_ILUSetLevelOfFill(ilu_solver, ilu_lfil);
+      /* set local reordering type */
+      HYPRE_ILUSetLocalReordering(ilu_solver, ilu_reordering);
       /* set print level */
       HYPRE_ILUSetPrintLevel(ilu_solver, 2);
       /* set max iterations */

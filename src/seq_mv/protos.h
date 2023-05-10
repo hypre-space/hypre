@@ -123,8 +123,6 @@ HYPRE_Int hypre_CSRMatrixMigrate( hypre_CSRMatrix *A, HYPRE_MemoryLocation memor
 hypre_CSRMatrix *hypre_CSRMatrixClone ( hypre_CSRMatrix *A, HYPRE_Int copy_data );
 hypre_CSRMatrix *hypre_CSRMatrixClone_v2( hypre_CSRMatrix *A, HYPRE_Int copy_data,
                                           HYPRE_MemoryLocation memory_location );
-HYPRE_Int hypre_CSRMatrixPermuteHost( hypre_CSRMatrix *A, HYPRE_Int *perm,
-                                      HYPRE_Int *rqperm, hypre_CSRMatrix *B );
 HYPRE_Int hypre_CSRMatrixPermute( hypre_CSRMatrix *A, HYPRE_Int *perm,
                                   HYPRE_Int *rqperm, hypre_CSRMatrix **B_ptr );
 hypre_CSRMatrix *hypre_CSRMatrixUnion( hypre_CSRMatrix *A,
@@ -353,7 +351,7 @@ hypre_GpuMatData* hypre_GpuMatDataCreate();
 void hypre_GPUMatDataSetCSRData(hypre_CSRMatrix *matrix);
 void hypre_GpuMatDataDestroy(hypre_GpuMatData *data);
 hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
-#define hypre_CSRMatrixGPUMatDescr(matrix)       ( hypre_GpuMatDataMatDecsr(hypre_CSRMatrixGetGPUMatData(matrix)) )
+#define hypre_CSRMatrixGPUMatDescr(matrix)       ( hypre_GpuMatDataMatDescr(hypre_CSRMatrixGetGPUMatData(matrix)) )
 #define hypre_CSRMatrixGPUMatInfo(matrix)        ( hypre_GpuMatDataMatInfo (hypre_CSRMatrixGetGPUMatData(matrix)) )
 #define hypre_CSRMatrixGPUMatHandle(matrix)      ( hypre_GpuMatDataMatHandle (hypre_CSRMatrixGetGPUMatData(matrix)) )
 #define hypre_CSRMatrixGPUMatSpMVBuffer(matrix)  ( hypre_GpuMatDataSpMVBuffer (hypre_CSRMatrixGetGPUMatData(matrix)) )
