@@ -84,19 +84,19 @@ Final Relative Residual Norm = 4.476621e-09
 
 # Output file: benchmark_ij.out.22
 Iterations = 13
-Final Relative Residual Norm = 1.703911e-09
+Final Relative Residual Norm = 1.810780e-09
 
 # Output file: benchmark_ij.out.23
 Iterations = 13
-Final Relative Residual Norm = 5.943877e-09
+Final Relative Residual Norm = 6.103525e-09
 
 # Output file: benchmark_ij.out.24
 Iterations = 14
-Final Relative Residual Norm = 3.250031e-09
+Final Relative Residual Norm = 3.116077e-09
 
 # Output file: benchmark_ij.out.25
 Iterations = 15
-Final Relative Residual Norm = 5.483580e-09
+Final Relative Residual Norm = 5.382858e-09
 
 # Output file: benchmark_ij.out.26
 Iterations = 37
@@ -105,4 +105,3 @@ Final Relative Residual Norm = 6.305999e-09
 # Output file: benchmark_ij.out.27
 Iterations = 22
 Final Relative Residual Norm = 8.787135e-09
-
