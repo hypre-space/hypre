@@ -82,7 +82,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
    hypre_ParCSRMatrix  *A_FF = NULL;
    hypre_ParCSRMatrix  *A_FC = NULL;
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined (HYPRE_USING_GPU)
    hypre_ParCSRMatrix  *A_CF = NULL;
    hypre_ParCSRMatrix  *A_CC = NULL;
 #endif
@@ -1024,7 +1024,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          if (level_smooth_type[lev] == 0 || level_smooth_type[lev] == 1)
          {
             /* TODO (VPM): move this to hypre_MGRBlockRelaxSetup and change its declaration */
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined (HYPRE_USING_GPU)
             if (exec == HYPRE_EXEC_DEVICE)
             {
                if (!B_array[lev])
@@ -1199,7 +1199,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       if (interp_type[lev] == 12 && (mgr_data -> num_relax_sweeps)[lev] > 0)
       {
          /* TODO: refactor the following block (VPM) */
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined (HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             hypre_ParCSRMatrixBlockDiagMatrixDevice(A_FF, block_jacobi_bsize,
@@ -1355,7 +1355,7 @@ hypre_MGRSetup( void               *mgr_vdata,
             hypre_GpuProfilingPushRange(region_name);
             HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
 
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined (HYPRE_USING_GPU)
             if (exec == HYPRE_EXEC_DEVICE)
             {
                hypre_ParCSRMatrixGenerateCCCFDevice(RAP_ptr, CF_marker,
@@ -1448,7 +1448,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          {
             hypre_ParCSRMatrixTruncate(RAP_ptr, truncate_cg_threshold, 0, 0, 0);
          }
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined (HYPRE_USING_GPU)
          else
          {
             hypre_ParCSRMatrixDropSmallEntriesDevice(RAP_ptr, truncate_cg_threshold, -1);
@@ -1551,7 +1551,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 #endif
 
          /* TODO: refactor this block. Add hypre_IntArrayScale (VPM) */
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined (HYPRE_USING_GPU)
          hypre_IntArray *F_marker = hypre_IntArrayCreate(nloc);
          hypre_IntArrayInitialize(F_marker);
 
