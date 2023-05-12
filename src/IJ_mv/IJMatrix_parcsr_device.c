@@ -300,8 +300,8 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
                           A0 + N0,
                           X,
                           A0,
-   [] (const auto & x) {return x;},
-   [] (const auto & x) {return 0.0;} );
+   [] (const auto & x) {return 0.0;},
+   [] (const auto & x) {return x;} );
 
    auto I0_J0_zip = oneapi::dpl::make_zip_iterator(I0, J0);
    auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
@@ -469,8 +469,8 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
                           A0 + N0,
                           X0,
                           A0,
-   [] (const auto & x) {return x;},
-   [] (const auto & x) {return 0.0;} );
+   [] (const auto & x) {return 0.0;},
+   [] (const auto & x) {return x;} );
 
    auto I0_J0_zip = oneapi::dpl::make_zip_iterator(I0, J0);
 

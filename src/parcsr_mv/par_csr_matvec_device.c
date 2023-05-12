@@ -176,22 +176,7 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
     * Pack send data
     *--------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_THRUST_CALL( gather,
-                      d_send_map_elmts,
-                      d_send_map_elmts + send_map_num_elmts,
-                      x_local_data,
-                      x_buf_data );
-
-#elif defined(HYPRE_USING_SYCL)
-   auto permuted_source = oneapi::dpl::make_permutation_iterator(x_local_data,
-                                                                 d_send_map_elmts);
-   HYPRE_ONEDPL_CALL( std::copy,
-                      permuted_source,
-                      permuted_source + send_map_num_elmts,
-                      x_buf_data );
-
-#elif defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int  i;
 
    #pragma omp target teams distribute parallel for private(i) is_device_ptr(x_buf_data, x_local_data, d_send_map_elmts)
@@ -199,6 +184,21 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
    {
       x_buf_data[i] = x_local_data[d_send_map_elmts[i]];
    }
+#else
+#if defined(HYPRE_USING_SYCL)
+   auto permuted_source = oneapi::dpl::make_permutation_iterator(x_local_data,
+                                                                 d_send_map_elmts);
+   HYPRE_ONEDPL_CALL( std::copy,
+                      permuted_source,
+                      permuted_source + send_map_num_elmts,
+                      x_buf_data );
+#else
+   HYPRE_THRUST_CALL( gather,
+                      d_send_map_elmts,
+                      d_send_map_elmts + send_map_num_elmts,
+                      x_local_data,
+                      x_buf_data );
+#endif
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -466,14 +466,7 @@ hypre_ParCSRMatrixMatvecTDevice( HYPRE_Complex       alpha,
     * Unpack receive data
     *--------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_CUDA) ||\
-    defined(HYPRE_USING_HIP)  ||\
-    defined(HYPRE_USING_SYCL)
-
-   /* Use SpMV to unpack data */
-   hypre_ParCSRMatrixMatvecT_unpack(comm_pkg, num_cols_diag, y_buf_data, y_local_data);
-
-#elif defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int  *d_send_map_elmts = hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg);
    HYPRE_Int   i, j;
 
@@ -488,6 +481,9 @@ hypre_ParCSRMatrixMatvecTDevice( HYPRE_Complex       alpha,
          y_local_data[d_send_map_elmts[j]] += y_buf_data[j];
       }
    }
+#else
+   /* Use SpMV to unpack data */
+   hypre_ParCSRMatrixMatvecT_unpack(comm_pkg, num_cols_diag, y_buf_data, y_local_data);
 #endif
 
    /*---------------------------------------------------------------------
@@ -520,9 +516,6 @@ hypre_ParCSRMatrixMatvecTDevice( HYPRE_Complex       alpha,
    return ierr;
 }
 
-#if defined(HYPRE_USING_CUDA) ||\
-    defined(HYPRE_USING_HIP)  ||\
-    defined(HYPRE_USING_SYCL)
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatvecT_unpack
  *
@@ -599,6 +592,5 @@ hypre_ParCSRMatrixMatvecT_unpack( hypre_ParCSRCommPkg *comm_pkg,
 
    return hypre_error_flag;
 }
-#endif
 
 #endif /* #if defined(HYPRE_USING_GPU) */

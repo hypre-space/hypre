@@ -247,7 +247,7 @@ HYPRE_Int hypre_AMESetPrintLevel(void *esolver,
  * - hypre_AMESetAMSSolver()
  * - hypre_AMESetMassMatrix()
  *--------------------------------------------------------------------------*/
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 __global__ void
 hypreGPUKernel_GtEliminateBoundary( hypre_DeviceItem    &item,
                                     HYPRE_Int      nrows,
@@ -348,7 +348,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
    ame_data -> t3 = ams_data -> r0;
 
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(ams_data -> A);
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
 #endif
 
@@ -378,27 +378,43 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          /* A row (edge) is boundary if its off-diag l1 norm is less than eps */
          HYPRE_Real eps = DBL_EPSILON * 1e+4;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             HYPRE_Real *l1norm_arr = hypre_TAlloc(HYPRE_Real, ne, memory_location);
             hypre_CSRMatrixExtractDiagonalDevice(Ad, l1norm_arr, 1);
+#if defined(HYPRE_USING_SYCL)
+            HYPRE_ONEDPL_CALL( std::transform,
+                               l1norm_arr,
+                               l1norm_arr + ne,
+                               l1norm_arr,
+                               std::negate<HYPRE_Real>() );
+#else
             HYPRE_THRUST_CALL( transform,
                                l1norm_arr,
                                l1norm_arr + ne,
                                l1norm_arr,
                                thrust::negate<HYPRE_Real>() );
+#endif
             hypre_CSRMatrixComputeRowSumDevice(Ad, NULL, NULL, l1norm_arr, 1, 1.0, "add");
             if (AoA)
             {
                hypre_CSRMatrixComputeRowSumDevice(Ao, NULL, NULL, l1norm_arr, 1, 1.0, "add");
             }
+#if defined(HYPRE_USING_SYCL)
+            hypreSycl_transform_if( edge_bc,
+                                    edge_bc + ne,
+                                    l1norm_arr,
+                                    [] (const auto & x) {return 1;},
+                                    less_than<HYPRE_Real>(eps) );
+#else
             HYPRE_THRUST_CALL( replace_if,
                                edge_bc,
                                edge_bc + ne,
                                l1norm_arr,
                                less_than<HYPRE_Real>(eps),
                                1 );
+#endif
             hypre_TFree(l1norm_arr, memory_location);
          }
          else
@@ -448,7 +464,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          int_buf_data = hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                      memory_location );
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
@@ -500,7 +516,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
 
          HYPRE_Int bdr;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
@@ -557,7 +573,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          hypre_MatvecCommPkgCreate(ame_data -> M);
       }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          ame_data -> A_G = hypre_ParCSRMatrixRAPKT(ame_data -> G, ame_data -> M, ame_data -> G, 1);
@@ -640,15 +656,23 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          {
             vi = (hypre_ParVector*) v[i];
             data = hypre_VectorData(hypre_ParVectorLocalVector(vi));
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
             if (exec == HYPRE_EXEC_DEVICE)
             {
+#if defined(HYPRE_USING_SYCL)
+               hypreSycl_transform_if( data,
+                                       data + ne,
+                                       edge_bc,
+                                       [] (const auto & x) {return 0.0;},
+                                       [] (const auto & x) {return x;} );
+#else
                HYPRE_THRUST_CALL( replace_if,
                                   data,
                                   data + ne,
                                   edge_bc,
                                   thrust::identity<HYPRE_Int>(),
                                   0.0 );
+#endif
             }
             else
 #endif

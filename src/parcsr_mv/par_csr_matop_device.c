@@ -1281,11 +1281,6 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
-
-#endif // defined(HYPRE_USING_GPU)
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-
 hypre_CSRMatrix*
 hypre_MergeDiagAndOffdDevice(hypre_ParCSRMatrix *A)
 {
@@ -1502,12 +1497,20 @@ hypre_ParCSRMatrixTransposeDevice( hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixBigJ(A_offdT) = hypre_TAlloc(HYPRE_BigInt, hypre_CSRMatrixNumNonzeros(A_offdT),
                                                   HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::transform,
+                         hypre_CSRMatrixJ(A_offdT),
+                         hypre_CSRMatrixJ(A_offdT) + hypre_CSRMatrixNumNonzeros(A_offdT),
+                         hypre_CSRMatrixBigJ(A_offdT),
+      [y = hypre_ParCSRMatrixFirstRowIndex(A)] (const auto & x) {return x + y;} );
+#else
       HYPRE_THRUST_CALL( transform,
                          hypre_CSRMatrixJ(A_offdT),
                          hypre_CSRMatrixJ(A_offdT) + hypre_CSRMatrixNumNonzeros(A_offdT),
                          thrust::make_constant_iterator(hypre_ParCSRMatrixFirstRowIndex(A)),
                          hypre_CSRMatrixBigJ(A_offdT),
                          thrust::plus<HYPRE_BigInt>() );
+#endif
 
 #if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
       /* RL: make sure A_offdT is ready before issuing GPU-GPU MPI */
@@ -1534,16 +1537,32 @@ hypre_ParCSRMatrixTransposeDevice( hypre_ParCSRMatrix  *A,
 
       hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRMatrixCommPkg(A));
 
+#if defined(HYPRE_USING_SYCL)
+      hypreSycl_gather( Aext_ii,
+                        Aext_ii + Aext_nnz,
+                        hypre_ParCSRCommPkgDeviceSendMapElmts(hypre_ParCSRMatrixCommPkg(A)),
+                        Aext_ii );
+#else
       HYPRE_THRUST_CALL( gather,
                          Aext_ii,
                          Aext_ii + Aext_nnz,
                          hypre_ParCSRCommPkgDeviceSendMapElmts(hypre_ParCSRMatrixCommPkg(A)),
                          Aext_ii );
+#endif
 
       tmp_bigj = hypre_TAlloc(HYPRE_BigInt, Aext_nnz, HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(tmp_bigj, hypre_CSRMatrixBigJ(Aext), HYPRE_BigInt, Aext_nnz, HYPRE_MEMORY_DEVICE,
                     HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::sort,
+                         tmp_bigj,
+                         tmp_bigj + Aext_nnz );
+
+      HYPRE_BigInt *new_end = HYPRE_ONEDPL_CALL( std::unique,
+                                                 tmp_bigj,
+                                                 tmp_bigj + Aext_nnz );
+#else
       HYPRE_THRUST_CALL( sort,
                          tmp_bigj,
                          tmp_bigj + Aext_nnz );
@@ -1551,6 +1570,7 @@ hypre_ParCSRMatrixTransposeDevice( hypre_ParCSRMatrix  *A,
       HYPRE_BigInt *new_end = HYPRE_THRUST_CALL( unique,
                                                  tmp_bigj,
                                                  tmp_bigj + Aext_nnz );
+#endif
 
       num_cols_offd_AT = new_end - tmp_bigj;
       col_map_offd_AT = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_AT, HYPRE_MEMORY_DEVICE);
@@ -1561,12 +1581,21 @@ hypre_ParCSRMatrixTransposeDevice( hypre_ParCSRMatrix  *A,
 
       Aext_j = hypre_TAlloc(HYPRE_Int, Aext_nnz, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
+                         col_map_offd_AT,
+                         col_map_offd_AT + num_cols_offd_AT,
+                         hypre_CSRMatrixBigJ(Aext),
+                         hypre_CSRMatrixBigJ(Aext) + Aext_nnz,
+                         Aext_j );
+#else
       HYPRE_THRUST_CALL( lower_bound,
                          col_map_offd_AT,
                          col_map_offd_AT + num_cols_offd_AT,
                          hypre_CSRMatrixBigJ(Aext),
                          hypre_CSRMatrixBigJ(Aext) + Aext_nnz,
                          Aext_j );
+#endif
 
       Aext_data = hypre_CSRMatrixData(Aext);
       hypre_CSRMatrixData(Aext) = NULL;
@@ -1578,9 +1607,15 @@ hypre_ParCSRMatrixTransposeDevice( hypre_ParCSRMatrix  *A,
       }
       else
       {
+#if defined(HYPRE_USING_SYCL)
+         HYPRE_ONEDPL_CALL( std::stable_sort,
+                            oneapi::dpl::make_zip_iterator(Aext_ii, Aext_j),
+                            oneapi::dpl::make_zip_iterator(Aext_ii, Aext_j) + Aext_nnz );
+#else
          HYPRE_THRUST_CALL( stable_sort,
                             thrust::make_zip_iterator(thrust::make_tuple(Aext_ii, Aext_j)),
                             thrust::make_zip_iterator(thrust::make_tuple(Aext_ii, Aext_j)) + Aext_nnz );
+#endif
       }
 
       AT_offd = hypre_CSRMatrixCreate(hypre_ParCSRMatrixNumCols(A), num_cols_offd_AT, Aext_nnz);
@@ -1663,9 +1698,15 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
                     num_cols_offd_A, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(tmp + num_cols_offd_A, hypre_ParCSRMatrixDeviceColMapOffd(B), HYPRE_BigInt,
                     num_cols_offd_B, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::sort, tmp, tmp + num_cols_offd_A + num_cols_offd_B );
+      HYPRE_BigInt *new_end = HYPRE_ONEDPL_CALL( std::unique, tmp,
+                                                 tmp + num_cols_offd_A + num_cols_offd_B );
+#else
       HYPRE_THRUST_CALL( sort, tmp, tmp + num_cols_offd_A + num_cols_offd_B );
       HYPRE_BigInt *new_end = HYPRE_THRUST_CALL( unique, tmp,
                                                  tmp + num_cols_offd_A + num_cols_offd_B );
+#endif
       num_cols_offd_C = new_end - tmp;
       d_col_map_offd_C = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(d_col_map_offd_C, tmp, HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE,
@@ -1674,6 +1715,20 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
       /* reuse memory of tmp */
       HYPRE_Int *offd_A2C = (HYPRE_Int *) tmp;
       HYPRE_Int *offd_B2C = offd_A2C + num_cols_offd_A;
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
+                         d_col_map_offd_C,
+                         d_col_map_offd_C + num_cols_offd_C,
+                         hypre_ParCSRMatrixDeviceColMapOffd(A),
+                         hypre_ParCSRMatrixDeviceColMapOffd(A) + num_cols_offd_A,
+                         offd_A2C );
+      HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
+                         d_col_map_offd_C,
+                         d_col_map_offd_C + num_cols_offd_C,
+                         hypre_ParCSRMatrixDeviceColMapOffd(B),
+                         hypre_ParCSRMatrixDeviceColMapOffd(B) + num_cols_offd_B,
+                         offd_B2C );
+#else
       HYPRE_THRUST_CALL( lower_bound,
                          d_col_map_offd_C,
                          d_col_map_offd_C + num_cols_offd_C,
@@ -1686,6 +1741,7 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
                          hypre_ParCSRMatrixDeviceColMapOffd(B),
                          hypre_ParCSRMatrixDeviceColMapOffd(B) + num_cols_offd_B,
                          offd_B2C );
+#endif
 
       HYPRE_Int *C_offd_i, *C_offd_j, nnzC_offd;
       HYPRE_Complex *C_offd_a;
@@ -1764,6 +1820,10 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
 
    return hypre_error_flag;
 }
+
+#endif // #if defined(HYPRE_USING_GPU)
+
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixDiagScaleDevice
@@ -1853,22 +1913,7 @@ hypre_ParCSRMatrixDiagScaleDevice( hypre_ParCSRMatrix *par_A,
     * Pack send data
     *--------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_THRUST_CALL( gather,
-                      d_send_map_elmts,
-                      d_send_map_elmts + send_map_num_elmts,
-                      rd_data,
-                      send_rdbuf_data );
-
-#elif defined(HYPRE_USING_SYCL)
-   auto permuted_source = oneapi::dpl::make_permutation_iterator(rd_data,
-                                                                 d_send_map_elmts);
-   HYPRE_ONEDPL_CALL( std::copy,
-                      permuted_source,
-                      permuted_source + send_map_num_elmts,
-                      send_rdbuf_data );
-
-#elif defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int  i;
 
    #pragma omp target teams distribute parallel for private(i) is_device_ptr(send_rdbuf_data, rd_data, d_send_map_elmts)
@@ -1876,7 +1921,23 @@ hypre_ParCSRMatrixDiagScaleDevice( hypre_ParCSRMatrix *par_A,
    {
       send_rdbuf_data[i] = rd_data[d_send_map_elmts[i]];
    }
+#else
+#if defined(HYPRE_USING_SYCL)
+   auto permuted_source = oneapi::dpl::make_permutation_iterator(rd_data,
+                                                                 d_send_map_elmts);
+   HYPRE_ONEDPL_CALL( std::copy,
+                      permuted_source,
+                      permuted_source + send_map_num_elmts,
+                      send_rdbuf_data );
+#else
+   HYPRE_THRUST_CALL( gather,
+                      d_send_map_elmts,
+                      d_send_map_elmts + send_map_num_elmts,
+                      rd_data,
+                      send_rdbuf_data );
 #endif
+#endif
+
 
 #if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
    /* make sure send_rdbuf_data is ready before issuing GPU-GPU MPI */
@@ -1906,10 +1967,6 @@ hypre_ParCSRMatrixDiagScaleDevice( hypre_ParCSRMatrix *par_A,
 
    return hypre_error_flag;
 }
-
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-
-#if defined(HYPRE_USING_GPU)
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRDiagScaleVectorDevice
@@ -1947,10 +2004,7 @@ hypre_ParCSRDiagScaleVectorDevice( hypre_ParCSRMatrix *par_A,
    hypre_assert(y_vecstride == y_size);
    hypre_assert(x_num_vectors == y_num_vectors);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypreDevice_DiagScaleVector(x_num_vectors, num_rows, A_i, A_data, y_data, 0.0, x_data);
-
-#elif defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
 
    #pragma omp target teams distribute parallel for private(i) is_device_ptr(x_data,y_data,A_data,A_i)
@@ -1958,11 +2012,13 @@ hypre_ParCSRDiagScaleVectorDevice( hypre_ParCSRMatrix *par_A,
    {
       x_data[i] = y_data[i] / A_data[A_i[i]];
    }
-#endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+#else
+   hypreDevice_DiagScaleVector(x_num_vectors, num_rows, A_i, A_data, y_data, 0.0, x_data);
+#endif // #if defined(HYPRE_USING_DEVICE_OPENMP)
 
    //hypre_SyncComputeStream(hypre_handle());
 
    return hypre_error_flag;
 }
 
-#endif
+#endif // #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)

@@ -7,7 +7,7 @@
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 
 HYPRE_Int
 hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
@@ -39,16 +39,40 @@ hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
       are to be retrieved from block starting at vec_start */
    if (indices)
    {
+#if defined(HYPRE_USING_SYCL)
+      ierr = HYPRE_ONEDPL_CALL( std::count_if,
+                                indices,
+                                indices + num_values,
+                                out_of_range<HYPRE_BigInt>(first_index + base, last_index + base) );
+#else
       ierr = HYPRE_THRUST_CALL( count_if,
                                 indices,
                                 indices + num_values,
                                 out_of_range<HYPRE_BigInt>(first_index + base, last_index + base) );
+#endif
       if (ierr)
       {
          hypre_error_in_arg(3);
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Index out of range! -- hypre_ParVectorGetValues.");
          hypre_printf(" error: %d indices out of range! -- hypre_ParVectorGetValues\n", ierr);
 
+#if defined(HYPRE_USING_SYCL)
+         auto trans_it = oneapi::dpl::make_transform_iterator(indices, [base, first_index] (const auto & x) {return x - base - first_index} );
+         hypreSycl_gather_if( trans_it,
+                              trans_it + num_values,
+                              indices,
+                              data + vecoffset,
+                              values,
+                              in_range<HYPRE_BigInt>(first_index + base, last_index + base) );
+      }
+      else
+      {
+         auto trans_it = oneapi::dpl::make_transform_iterator(indices, [base, first_index] (const auto & x) {return x - base - first_index} );
+         hypreSycl_gather( trans_it,
+                           trans_it + num_values,
+                           data + vecoffset,
+                           values);
+#else
          HYPRE_THRUST_CALL( gather_if,
                             thrust::make_transform_iterator(indices, _1 - base - first_index),
                             thrust::make_transform_iterator(indices, _1 - base - first_index) + num_values,
@@ -64,6 +88,7 @@ hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
                             thrust::make_transform_iterator(indices, _1 - base - first_index) + num_values,
                             data + vecoffset,
                             values);
+#endif
       }
    }
    else
@@ -81,4 +106,4 @@ hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#endif // #if defined(HYPRE_USING_GPU)
