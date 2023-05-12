@@ -70,8 +70,7 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix *A,
 
    HYPRE_Int             *CF_marker_offd = NULL;
 
-   hypre_CSRBlockMatrix  *A_ext;
-
+   hypre_CSRBlockMatrix  *A_ext = NULL;
    HYPRE_Real            *A_ext_data = NULL;
    HYPRE_Int             *A_ext_i = NULL;
    HYPRE_BigInt          *A_ext_j = NULL;
@@ -1636,8 +1635,7 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
 
    HYPRE_Int             *CF_marker_offd = NULL;
 
-   hypre_CSRBlockMatrix  *A_ext;
-
+   hypre_CSRBlockMatrix  *A_ext = NULL;
    HYPRE_Real            *A_ext_data = NULL;
    HYPRE_Int             *A_ext_i = NULL;
    HYPRE_BigInt          *A_ext_j = NULL;
@@ -2760,8 +2758,7 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix    *A,
 
    HYPRE_Int             *CF_marker_offd = NULL;
 
-   hypre_CSRBlockMatrix  *A_ext;
-
+   hypre_CSRBlockMatrix  *A_ext = NULL;
    HYPRE_Real            *A_ext_data = NULL;
    HYPRE_Int             *A_ext_i = NULL;
    HYPRE_BigInt          *A_ext_j = NULL;
@@ -3812,8 +3809,7 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
 
    HYPRE_Int             *CF_marker_offd = NULL;
 
-   hypre_CSRBlockMatrix *A_ext;
-
+   hypre_CSRBlockMatrix  *A_ext = NULL;
    HYPRE_Real            *A_ext_data = NULL;
    HYPRE_Int             *A_ext_i = NULL;
    HYPRE_BigInt          *A_ext_j = NULL;
