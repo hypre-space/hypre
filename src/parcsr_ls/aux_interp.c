@@ -512,8 +512,8 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
                if (got_loc > -1)
                {
                   loc_col = got_loc + num_cols_A_offd;
+                  Sop_j[kk] = (HYPRE_BigInt)(-loc_col - 1);
                }
-               Sop_j[kk] = (HYPRE_BigInt)(-loc_col - 1);
             }
          }
          for (kk = A_ext_i[i]; kk < A_ext_i[i + 1]; kk++)
@@ -522,8 +522,11 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_BigInt **found, HYPRE_Int num_cols_A
             if (big_k1 > -1 && (big_k1 < col_1 || big_k1 >= col_n))
             {
                got_loc = hypre_BigBinarySearch(tmp_found, big_k1, newoff);
-               loc_col = got_loc + num_cols_A_offd;
-               A_ext_j[kk] = (HYPRE_BigInt)(-loc_col - 1);
+               if (got_loc > -1)
+               {
+                  loc_col = got_loc + num_cols_A_offd;
+                  A_ext_j[kk] = (HYPRE_BigInt)(-loc_col - 1);
+               }
             }
          }
       }

@@ -350,8 +350,8 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    HYPRE_Int       Not_Finished;
    HYPRE_Int       num_sweep;
    HYPRE_Int       relax_type;
-   HYPRE_Int       relax_points;
-   HYPRE_Real   *relax_weight;
+   HYPRE_Int       relax_points = 0;
+   HYPRE_Real     *relax_weight;
 
    HYPRE_Int       old_version = 0;
 
@@ -441,7 +441,11 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    {
       num_sweep = num_grid_sweeps[cycle_param];
       relax_type = grid_relax_type[cycle_param];
-      if (relax_type != 7 && relax_type != 9) { relax_type = 7; }
+      if (relax_type != 7 && relax_type != 9)
+      {
+         relax_type = 7;
+      }
+
       /*------------------------------------------------------------------
        * Do the relaxation num_sweep times
        *-----------------------------------------------------------------*/

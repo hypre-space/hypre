@@ -40,7 +40,7 @@ hypre_FSAISolve( void               *fsai_vdata,
 
    /* Local variables */
    HYPRE_Int            iter, my_id;
-   HYPRE_Real           old_resnorm, resnorm, rel_resnorm;
+   HYPRE_Real           old_resnorm, resnorm = 0.0, rel_resnorm;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 

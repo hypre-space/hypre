@@ -73,7 +73,7 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
       HYPRE_Int *info = NULL;
       HYPRE_Int *displs = NULL;
       HYPRE_Int *displs2 = NULL;
-      HYPRE_Int i, j, size, num_nonzeros, total_nnz, cnt;
+      HYPRE_Int i, j, size, num_nonzeros, total_nnz = 0, cnt;
 
       hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
       hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);

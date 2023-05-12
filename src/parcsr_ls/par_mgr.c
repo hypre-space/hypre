@@ -2106,7 +2106,7 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 
    hypre_ParCSRMatrix    *P;
    HYPRE_BigInt    *col_map_offd_P;
-   HYPRE_Int       *tmp_map_offd;
+   HYPRE_Int       *tmp_map_offd = NULL;
 
    HYPRE_Int       *CF_marker_offd = NULL;
 
@@ -4024,7 +4024,7 @@ hypre_block_jacobi_solve( hypre_ParCSRMatrix *A,
    hypre_Vector    *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
    HYPRE_Real      *Vtemp_data = hypre_VectorData(Vtemp_local);
    HYPRE_Real      *Vext_data = NULL;
-   HYPRE_Real      *v_buf_data;
+   HYPRE_Real      *v_buf_data = NULL;
 
    HYPRE_Int        i, j, k;
    HYPRE_Int        ii, jj;
@@ -4242,7 +4242,7 @@ hypre_MGRBlockRelaxSolve( hypre_ParCSRMatrix *A,
    hypre_Vector    *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
    HYPRE_Real      *Vtemp_data = hypre_VectorData(Vtemp_local);
    HYPRE_Real      *Vext_data = NULL;
-   HYPRE_Real      *v_buf_data;
+   HYPRE_Real      *v_buf_data = NULL;
 
    HYPRE_Int        i, j, k;
    HYPRE_Int        ii, jj;

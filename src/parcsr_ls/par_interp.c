@@ -56,7 +56,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix      *A,
    HYPRE_Int         *CF_marker_offd = NULL;
    HYPRE_Int         *dof_func_offd = NULL;
 
-   hypre_CSRMatrix   *A_ext;
+   hypre_CSRMatrix   *A_ext = NULL;
 
    HYPRE_Real        *A_ext_data = NULL;
    HYPRE_Int         *A_ext_i = NULL;
@@ -960,7 +960,6 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix      *A,
 
    hypre_GetCommPkgRTFromCommPkgA(P, A, fine_to_coarse, tmp_map_offd);
 
-
    *P_ptr = P;
 
    hypre_TFree(tmp_map_offd, HYPRE_MEMORY_HOST);
@@ -972,12 +971,10 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix      *A,
    hypre_TFree(coarse_counter, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count_offd, HYPRE_MEMORY_HOST);
-
-   if (num_procs > 1) { hypre_CSRMatrixDestroy(A_ext); }
+   hypre_CSRMatrixDestroy(A_ext);
 
    return hypre_error_flag;
 }
-
 
 /*---------------------------------------------------------------------------
  * hypre_BoomerAMGBuildInterpHE
@@ -1029,7 +1026,7 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
    HYPRE_Int          *CF_marker_offd = NULL;
    HYPRE_Int          *dof_func_offd = NULL;
 
-   hypre_CSRMatrix *A_ext;
+   hypre_CSRMatrix *A_ext = NULL;
 
    HYPRE_Real      *A_ext_data = NULL;
    HYPRE_Int       *A_ext_i = NULL;
@@ -1862,11 +1859,7 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
    hypre_TFree(coarse_counter, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count_offd, HYPRE_MEMORY_HOST);
-
-   if (num_procs > 1)
-   {
-      hypre_CSRMatrixDestroy(A_ext);
-   }
+   hypre_CSRMatrixDestroy(A_ext);
 
    return hypre_error_flag;
 }
@@ -2695,12 +2688,12 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
 
    hypre_ParCSRMatrix *P;
    HYPRE_BigInt       *col_map_offd_P;
-   HYPRE_Int          *tmp_map_offd;
+   HYPRE_Int          *tmp_map_offd = NULL;
 
    HYPRE_Int          *CF_marker_offd = NULL;
    HYPRE_Int          *dof_func_offd = NULL;
 
-   hypre_CSRMatrix *A_ext;
+   hypre_CSRMatrix *A_ext = NULL;
 
    HYPRE_Real      *A_ext_data = NULL;
    HYPRE_Int       *A_ext_i = NULL;
@@ -3636,11 +3629,9 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
    hypre_TFree(coarse_counter, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count_offd, HYPRE_MEMORY_HOST);
-
-   if (num_procs > 1) { hypre_CSRMatrixDestroy(A_ext); }
+   hypre_CSRMatrixDestroy(A_ext);
 
    return hypre_error_flag;
-
 }
 
 /*---------------------------------------------------------------------------

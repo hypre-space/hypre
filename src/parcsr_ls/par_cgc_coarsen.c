@@ -54,7 +54,7 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
    HYPRE_Int              num_variables = hypre_CSRMatrixNumRows(S_diag);
    HYPRE_Int              num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
 
-   hypre_CSRMatrix *S_ext;
+   hypre_CSRMatrix       *S_ext = NULL;
    HYPRE_Int             *S_ext_i;
    HYPRE_BigInt          *S_ext_j;
 
@@ -93,9 +93,9 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
    HYPRE_Int              nabor, nabor_two;
 
    HYPRE_Int              use_commpkg_A = 0;
-   HYPRE_Real             wall_time;
+   HYPRE_Real             wall_time = 0.0;
 
-   HYPRE_Int              measure_max; /* BM Aug 30, 2006: maximal measure, needed for CGC */
+   HYPRE_Int              measure_max = 0; /* BM Aug 30, 2006: maximal measure, needed for CGC */
 
    if (coarsen_type < 0) { coarsen_type = -coarsen_type; }
 
