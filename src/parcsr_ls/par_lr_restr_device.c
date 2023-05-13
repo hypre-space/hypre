@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
@@ -307,7 +308,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
    HYPRE_ONEDPL_CALL( std::transform,
                       Z_diag_i,
                       Z_diag_i + n_cpts + 1,
-                      oneapi::dpl::make_counting_iterator(0),
+                      count,
                       R_diag_i,
                       std::plus<HYPRE_Int>() );
 #else
@@ -459,7 +460,7 @@ hypre_BoomerAMGCFMarkerTo1minus1Device( HYPRE_Int *CF_marker,
                       CF_marker,
                       CF_marker + size,
                       CF_marker,
-   [] (const auto & x) {return -x > 0 ? 1 : -1;} );
+   [] (const auto & x) {return x > 0 ? 1 : -1;} );
 #else
    HYPRE_THRUST_CALL( transform,
                       CF_marker,

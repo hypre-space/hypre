@@ -194,7 +194,7 @@ void hypreSycl_scatter(InputIter1 first, InputIter1 last,
 template <typename InputIter1, typename InputIter2,
           typename InputIter3, typename OutputIter, typename Predicate>
 void hypreSycl_gather_if(InputIter1 map_first, InputIter1 map_last,
-                          InputIter2 input_first, InputIter3 mask, OutputIter result,
+                          InputIter2 mask, InputIter3 input_first, OutputIter result,
                           Predicate pred)
 {
    static_assert(

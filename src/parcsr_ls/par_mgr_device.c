@@ -763,6 +763,19 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                   pivots,
                                                   infos,
                                                   num_blocks));
+#elif defined(HYPRE_USING_ONEMKLBLAS)
+      /* HYPRE_ONEMKL_CALL( oneapi::mkl::lapack::getrf_batch( *hypre_HandleComputeStream(hypre_handle()), */
+      /*                                                      std::int64_t m, */
+      /*                                                      std::int64_t n, */
+      /*                                                      T *a, */
+      /*                                                      std::int64_t lda, */
+      /*                                                      std::int64_t stride_a, */
+      /*                                                      std::int64_t *ipiv, */
+      /*                                                      std::int64_t stride_ipiv, */
+      /*                                                      std::int64_t batch_size, */
+      /*                                                      T *scratchpad, */
+      /*                                                      std::int64_t scratchpad_size, */
+      /*                                                      const std::vector<cl::sycl::event> &events = {} ) ) */
 #else
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Block inversion not available!");
 #endif

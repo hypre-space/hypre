@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "_hypre_parcsr_ls.h"
 #include "float.h"
 #include "ams.h"
@@ -405,6 +406,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
             hypreSycl_transform_if( edge_bc,
                                     edge_bc + ne,
                                     l1norm_arr,
+                                    edge_bc,
                                     [] (const auto & x) {return 1;},
                                     less_than<HYPRE_Real>(eps) );
 #else
@@ -469,12 +471,20 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          {
             hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
 
+#if defined(HYPRE_USING_SYCL)
+            hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
+                              hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+                                    num_sends),
+                              edge_bc,
+                              int_buf_data );
+#else
             HYPRE_THRUST_CALL( gather,
                                hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                                hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                      num_sends),
                                edge_bc,
                                int_buf_data );
+#endif
 
 #if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
             /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
@@ -663,6 +673,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
                hypreSycl_transform_if( data,
                                        data + ne,
                                        edge_bc,
+                                       data,
                                        [] (const auto & x) {return 0.0;},
                                        [] (const auto & x) {return x;} );
 #else
