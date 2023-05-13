@@ -389,8 +389,8 @@ hypre_spgemm_symbolic( hypre_DeviceItem             &item,
          }
          else
          {
-            failed = (char) group_reduce_sum<hypre_int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(item,
-                                                                                          (hypre_int) failed,
+            failed = (char) group_reduce_sum<HYPRE_Int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(item,
+                                                                                          (HYPRE_Int) failed,
                                                                                           s_HashKeys);
          }
       }
