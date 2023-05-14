@@ -5,11 +5,11 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#include "_hypre_onedpl.hpp"
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
+#include "_hypre_onedpl.hpp"
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 /*--------------------------------------------------------------------------
  * hypre_IntArraySetConstantValuesDevice
@@ -39,7 +39,7 @@ hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v,
    return hypre_error_flag;
 }
 
-#if !defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
 /*--------------------------------------------------------------------------
  * hypreGPUKernel_IntArrayInverseMapping
  *--------------------------------------------------------------------------*/
@@ -113,6 +113,31 @@ hypre_IntArrayCountDevice( hypre_IntArray *v,
                                         array_data,
                                         array_data + size,
                                         value );
+
+#elif defined (HYPRE_USING_DEVICE_OPENMP)
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Function not implemented for Device OpenMP");
+   *num_values_ptr = 0;
+#endif
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IntArrayNegateDevice
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArrayNegateDevice( hypre_IntArray *v )
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_THRUST_CALL( transform,
+                      hypre_IntArrayData(v),
+                      hypre_IntArrayData(v) + hypre_IntArraySize(v),
+                      hypre_IntArrayData(v),
+                      thrust::negate<HYPRE_Int>() );
+
+#elif defined(HYPRE_USING_SYCL)
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented yet!");
 
 #elif defined (HYPRE_USING_DEVICE_OPENMP)
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Function not implemented for Device OpenMP");
