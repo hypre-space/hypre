@@ -1166,26 +1166,32 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A_diag), "warp", bDim);
 
+   HYPRE_Int A_diag_nrows = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int *A_diag_i = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int *A_diag_j = hypre_CSRMatrixJ(A_diag);
+   HYPRE_Complex *A_diag_data = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int *A_offd_i = hypre_CSRMatrixI(A_offd);
+   HYPRE_Complex *A_offd_data = hypre_CSRMatrixData(A_offd);
    if (type == -1)
    {
       HYPRE_GPU_LAUNCH( hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols < -1 >, gDim, bDim,
-                        hypre_CSRMatrixNumRows(A_diag), tol, hypre_CSRMatrixI(A_diag),
-                        hypre_CSRMatrixJ(A_diag), hypre_CSRMatrixData(A_diag), hypre_CSRMatrixI(A_offd),
-                        hypre_CSRMatrixData(A_offd), elmt_tols_diag, elmt_tols_offd);
+                        A_diag_nrows, tol, A_diag_i,
+                        A_diag_j, A_diag_data, A_offd_i,
+                        A_offd_data, elmt_tols_diag, elmt_tols_offd);
    }
    if (type == 1)
    {
       HYPRE_GPU_LAUNCH( hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols<1>, gDim, bDim,
-                        hypre_CSRMatrixNumRows(A_diag), tol, hypre_CSRMatrixI(A_diag),
-                        hypre_CSRMatrixJ(A_diag), hypre_CSRMatrixData(A_diag), hypre_CSRMatrixI(A_offd),
-                        hypre_CSRMatrixData(A_offd), elmt_tols_diag, elmt_tols_offd);
+                        A_diag_nrows, tol, A_diag_i,
+                        A_diag_j, A_diag_data, A_offd_i,
+                        A_offd_data, elmt_tols_diag, elmt_tols_offd);
    }
    if (type == 2)
    {
       HYPRE_GPU_LAUNCH( hypre_ParCSRMatrixDropSmallEntriesDevice_getElmtTols<2>, gDim, bDim,
-                        hypre_CSRMatrixNumRows(A_diag), tol, hypre_CSRMatrixI(A_diag),
-                        hypre_CSRMatrixJ(A_diag), hypre_CSRMatrixData(A_diag), hypre_CSRMatrixI(A_offd),
-                        hypre_CSRMatrixData(A_offd), elmt_tols_diag, elmt_tols_offd);
+                        A_diag_nrows, tol, A_diag_i,
+                        A_diag_j, A_diag_data, A_offd_i,
+                        A_offd_data, elmt_tols_diag, elmt_tols_offd);
    }
 
    /* drop entries from diag and offd CSR matrices */
@@ -1228,8 +1234,9 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
                                                       HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-      hypreSycl_scatter( oneapi::dpl::counting_iterator<HYPRE_Int>(0),
-                         oneapi::dpl::counting_iterator<HYPRE_Int>(num_cols_A_offd_new),
+      oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
+      hypreSycl_scatter( count,
+                         count + num_cols_A_offd_new,
                          tmp_j,
                          offd_mark );
       hypreSycl_gather( hypre_CSRMatrixJ(A_offd),

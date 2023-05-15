@@ -199,6 +199,7 @@ using namespace thrust::placeholders;
 #endif
 #if defined(HYPRE_USING_ONEMKLBLAS)
 #include <oneapi/mkl/blas.hpp>
+#include <oneapi/mkl/lapack.hpp>
 #endif
 #if defined(HYPRE_USING_ONEMKLRAND)
 #include <oneapi/mkl/rng.hpp>
