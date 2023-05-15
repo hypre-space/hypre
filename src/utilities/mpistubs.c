@@ -1267,16 +1267,12 @@ hypre_MPI_Allreduce( void              *sendbuf,
                      hypre_MPI_Op       op,
                      hypre_MPI_Comm     comm )
 {
-#if defined(HYPRE_USING_NVTX)
    hypre_GpuProfilingPushRange("MPI_Allreduce");
-#endif
 
    HYPRE_Int result = MPI_Allreduce(sendbuf, recvbuf, (hypre_int)count,
                                     datatype, op, comm);
 
-#if defined(HYPRE_USING_NVTX)
    hypre_GpuProfilingPopRange();
-#endif
 
    return result;
 }
@@ -1403,7 +1399,7 @@ hypre_MPI_Op_create( hypre_MPI_User_function *function, hypre_int commute, hypre
    return (HYPRE_Int) MPI_Op_create(function, commute, op);
 }
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int
 hypre_MPI_Comm_split_type( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
                            hypre_MPI_Info info, hypre_MPI_Comm *newcomm )

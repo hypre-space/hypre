@@ -9,7 +9,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 #define HYPRE_INTERPTRUNC_ALGORITHM_SWITCH 8
 
@@ -755,4 +755,4 @@ hypre_BoomerAMGInterpTruncationDevice( hypre_ParCSRMatrix *P,
    return hypre_error_flag;
 }
 
-#endif /* #if defined(HYPRE_USING_CUDA)  || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
+#endif /* #if defined(HYPRE_USING_GPU) */

@@ -87,7 +87,7 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
    HYPRE_Real   *S_vec;
 #endif
 
-#if !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
+#if !defined(HYPRE_USING_GPU)
    HYPRE_Int num_threads = hypre_NumThreads();
 #endif
 
@@ -123,7 +123,7 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
       l1_norms = hypre_ParAMGDataL1Norms(amg_data)[level];
    }
 
-#if !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
+#if !defined(HYPRE_USING_GPU)
    if (num_threads > 1)
 #endif
    {

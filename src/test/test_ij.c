@@ -2259,7 +2259,7 @@ main( HYPRE_Int   argc,
 
          HYPRE_EuclidCreate(hypre_MPI_COMM_WORLD, &pcg_precond);
 
-         /* note: There are three three methods of setting run-time
+         /* note: There are three methods of setting run-time
             parameters for Euclid: (see HYPRE_parcsr_ls.h); here
             we'll use what I think is simplest: let Euclid internally
             parse the command line.
@@ -2651,7 +2651,7 @@ main( HYPRE_Int   argc,
 
             HYPRE_EuclidCreate(hypre_MPI_COMM_WORLD, &pcg_precond);
 
-            /* note: There are three three methods of setting run-time
+            /* note: There are three methods of setting run-time
                parameters for Euclid: (see HYPRE_parcsr_ls.h); here
                we'll use what I think is simplest: let Euclid internally
                parse the command line.
@@ -3087,7 +3087,7 @@ main( HYPRE_Int   argc,
 
             HYPRE_EuclidCreate(hypre_MPI_COMM_WORLD, &pcg_precond);
 
-            /* note: There are three three methods of setting run-time
+            /* note: There are three methods of setting run-time
                parameters for Euclid: (see HYPRE_parcsr_ls.h); here
                we'll use what I think is simplest: let Euclid internally
                parse the command line.
@@ -3512,7 +3512,7 @@ main( HYPRE_Int   argc,
 
          HYPRE_EuclidCreate(hypre_MPI_COMM_WORLD, &pcg_precond);
 
-         /* note: There are three three methods of setting run-time
+         /* note: There are three methods of setting run-time
             parameters for Euclid: (see HYPRE_parcsr_ls.h); here
             we'll use what I think is simplest: let Euclid internally
             parse the command line.
@@ -3690,7 +3690,7 @@ main( HYPRE_Int   argc,
 
          HYPRE_EuclidCreate(hypre_MPI_COMM_WORLD, &pcg_precond);
 
-         /* note: There are three three methods of setting run-time
+         /* note: There are three methods of setting run-time
             parameters for Euclid: (see HYPRE_parcsr_ls.h); here
             we'll use what I think is simplest: let Euclid internally
             parse the command line.

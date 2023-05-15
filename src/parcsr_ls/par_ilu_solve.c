@@ -118,6 +118,13 @@ hypre_ILUSolve( void               *ilu_vdata,
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
                                                       hypre_ParVectorMemoryLocation(f) );
+
+   /* VPM: Placeholder check to avoid -Wunused-variable warning. TODO: remove this */
+   if (exec != HYPRE_EXEC_DEVICE && exec != HYPRE_EXEC_HOST)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Need to run either on host or device!");
+      return hypre_error_flag;
+   }
 #endif
 
    /* begin */

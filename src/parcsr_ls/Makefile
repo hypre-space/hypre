@@ -153,6 +153,7 @@ MuP_FILES = \
  par_laplace_9pt.c\
  par_lr_interp.c\
  par_mgr.c\
+ par_mgr_coarsen.c\
  par_mgr_setup.c\
  par_mgr_solve.c\
  par_nongalerkin.c\

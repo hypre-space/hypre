@@ -118,14 +118,14 @@ hypre_ILUSetup( void               *ilu_vdata,
 
 #if defined (HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
-#endif
 
-   /* Sanity check */
-   if (hypre_ParVectorNumVectors(f) > 1)
+   /* VPM: Placeholder check to avoid -Wunused-variable warning. TODO: remove this */
+   if (exec != HYPRE_EXEC_DEVICE && exec != HYPRE_EXEC_HOST)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ILU doesn't support multicomponent vectors");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Need to run either on host or device!");
       return hypre_error_flag;
    }
+#endif
 
    /* ----- begin -----*/
    HYPRE_ANNOTATE_FUNC_BEGIN;

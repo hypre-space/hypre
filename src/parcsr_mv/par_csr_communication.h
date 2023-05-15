@@ -66,7 +66,7 @@ typedef struct _hypre_ParCSRCommPkg
 #ifdef HYPRE_USING_PERSISTENT_COMM
    hypre_ParCSRPersistentCommHandle *persistent_comm_handles[NUM_OF_COMM_PKG_JOB_TYPE];
 #endif
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* temporary memory for matvec. cudaMalloc is expensive. alloc once and reuse */
    HYPRE_Complex                    *tmp_data;
    HYPRE_Complex                    *buf_data;
@@ -99,7 +99,7 @@ typedef struct _hypre_ParCSRCommPkg
 #define hypre_ParCSRCommPkgRecvMPITypes(comm_pkg)        (comm_pkg -> recv_mpi_types)
 #define hypre_ParCSRCommPkgRecvMPIType(comm_pkg,i)       (comm_pkg -> recv_mpi_types[i])
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 #define hypre_ParCSRCommPkgTmpData(comm_pkg)             ((comm_pkg) -> tmp_data)
 #define hypre_ParCSRCommPkgBufData(comm_pkg)             ((comm_pkg) -> buf_data)
 #define hypre_ParCSRCommPkgMatrixE(comm_pkg)             ((comm_pkg) -> matrix_E)
@@ -108,7 +108,7 @@ typedef struct _hypre_ParCSRCommPkg
 static inline void
 hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRCommPkg *comm_pkg)
 {
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
    if (hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) == NULL)

@@ -108,7 +108,7 @@
       call MPI_COMM_SIZE(MPI_COMM_WORLD, num_procs, ierr)
       mpi_comm = MPI_COMM_WORLD
 
-      call HYPRE_Init(ierr)
+      call HYPRE_Initialize(ierr)
 
       call HYPRE_SetMemoryLocation(HYPRE_MEMORY_DEVICE, ierr)
       call HYPRE_SetExecutionPolicy(HYPRE_EXEC_DEVICE, ierr)

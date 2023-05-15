@@ -2470,14 +2470,14 @@ main( hypre_int argc,
 
    /*-----------------------------------------------------------------
     * GPU Device binding
-    * Must be done before HYPRE_Init() and should not be changed after
+    * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
    hypre_bind_device(myid, num_procs, comm);
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
-   HYPRE_Init();
+   HYPRE_Initialize();
 
    /*-----------------------------------------------------------
     * Set defaults
@@ -2845,7 +2845,6 @@ main( hypre_int argc,
          arg_index++;
          printLevel = atoi(argv[arg_index++]);
       }
-#if defined(HYPRE_USING_GPU)
       else if ( strcmp(argv[arg_index], "-memory_host") == 0 )
       {
          arg_index++;
@@ -2866,6 +2865,7 @@ main( hypre_int argc,
          arg_index++;
          default_exec_policy = HYPRE_EXEC_DEVICE;
       }
+#if defined(HYPRE_USING_GPU)
       else if ( strcmp(argv[arg_index], "-mm_vendor") == 0 )
       {
          arg_index++;
@@ -5226,9 +5226,7 @@ main( hypre_int argc,
       hypre_ParVectorCopy(par_x2, par_x);
 #endif
 
-#if defined(HYPRE_USING_NVTX)
       hypre_GpuProfilingPushRange("HybridSolve");
-#endif
       //cudaProfilerStart();
 
       HYPRE_ParCSRHybridSetup(par_solver, par_A, par_b, par_x);
@@ -5263,9 +5261,7 @@ main( hypre_int argc,
 
       HYPRE_ParCSRHybridDestroy(par_solver);
 
-#if defined(HYPRE_USING_NVTX)
       hypre_GpuProfilingPopRange();
-#endif
       //cudaProfilerStop();
 
 #if SECOND_TIME
