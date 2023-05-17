@@ -170,8 +170,8 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          hypre_BoomerAMGRelaxKaczmarz(A, f, omega, l1_norms, u);
          break;
 
-      case 28: /* hybrid L1 Symm. Gauss-Seidel */
-         hypre_BoomerAMGRelax28HybridL1SSOR(A, f, cf_marker, relax_points,
+      case 88: /* hybrid L1 Symm. Gauss-Seidel */
+         hypre_BoomerAMGRelax88HybridL1SSOR(A, f, cf_marker, relax_points,
                                             relax_weight, omega, l1_norms, u,
                                             Vtemp, Ztemp);
          break;
@@ -1367,7 +1367,7 @@ hypre_BoomerAMGRelax19GaussElim( hypre_ParCSRMatrix *A,
 
 /* l1 hybrid symmetric G-S */
 HYPRE_Int
-hypre_BoomerAMGRelax28HybridL1SSOR( hypre_ParCSRMatrix *A,
+hypre_BoomerAMGRelax88HybridL1SSOR( hypre_ParCSRMatrix *A,
                                     hypre_ParVector    *f,
                                     HYPRE_Int          *cf_marker,
                                     HYPRE_Int           relax_points,

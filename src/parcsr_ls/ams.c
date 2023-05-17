@@ -538,7 +538,6 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
    HYPRE_Int *cf_marker_offd = NULL;
 
    /* collect the cf marker data from other procs */
-   printf("cf_marker %p\n", cf_marker);
    if (cf_marker != NULL)
    {
       HYPRE_Int num_sends;
@@ -704,7 +703,6 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
    }
    else if (option == 6)
    {
-      printf("6 begin\n");
       /* Set the abs(diag) element */
       hypre_CSRMatrixExtractDiagonal(A_diag, l1_norm, 1);
 #if 0
@@ -720,7 +718,6 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
          hypre_TFree(tmp, memory_location_tmp);
       }
       #endif
-      printf("6 Done\n");
    }
 
    /* Handle negative definite matrices */

@@ -363,7 +363,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    /* probably should disable stuff like smooth num levels at some point */
 
 
-   if (grid_relax_type[0] >= 20) /* block relaxation choosen */
+   if (grid_relax_type[0] >= 20 && grid_relax_type[0] < 29) /* block relaxation choosen */
    {
 
       if (!((interp_type >= 20 && interp_type != 100) || interp_type == 11 || interp_type == 10 ) )
@@ -3216,7 +3216,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
        grid_relax_type[1] == 13 || grid_relax_type[2] == 13 || grid_relax_type[3] == 13 ||
        grid_relax_type[1] == 14 || grid_relax_type[2] == 14 || grid_relax_type[3] == 14 ||
        grid_relax_type[1] == 18 || grid_relax_type[2] == 18 || grid_relax_type[3] == 18 ||
-       grid_relax_type[1] == 28 || grid_relax_type[2] == 28 || grid_relax_type[3] == 28)
+       grid_relax_type[1] == 88 || grid_relax_type[2] == 88 || grid_relax_type[3] == 88)
    {
       l1_norms = hypre_CTAlloc(hypre_Vector*, num_levels, HYPRE_MEMORY_HOST);
       hypre_ParAMGDataL1Norms(amg_data) = l1_norms;
@@ -3280,7 +3280,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norm_data);
       }
 
-      if (j < num_levels - 1 && (grid_relax_type[1] == 28 || grid_relax_type[2] == 28 ))
+      if (j < num_levels - 1 && (grid_relax_type[1] == 88 || grid_relax_type[2] == 88 ))
       {
          if (relax_order)
          {
@@ -3288,12 +3288,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
          else
          {
-            printf("START j %d\n", j);
             hypre_ParCSRComputeL1Norms(A_array[j], 6, NULL, &l1_norm_data);
-            printf("END j %d\n", j);
          }
       }
-      else if (j == num_levels - 1 && (grid_relax_type[3] == 28))
+      else if (j == num_levels - 1 && (grid_relax_type[3] == 88))
       {
          hypre_ParCSRComputeL1Norms(A_array[j], 6, NULL, &l1_norm_data);
       }
@@ -3321,16 +3319,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          hypre_SeqVectorInitialize_v2(l1_norms[j], hypre_ParCSRMatrixMemoryLocation(A_array[j]));
       }
 
-      printf("j %d, %p\n", j, l1_norms);
-
       HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
       HYPRE_ANNOTATE_MGLEVEL_END(j);
       hypre_GpuProfilingPopRange();
       hypre_GpuProfilingPopRange();
    }
-
-   printf("here\n");
-   exit(0);
 
    for (j = addlvl; j < hypre_min(add_end + 1, num_levels) ; j++)
    {
