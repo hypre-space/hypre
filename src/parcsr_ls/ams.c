@@ -705,7 +705,6 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
    {
       /* Set the abs(diag) element */
       hypre_CSRMatrixExtractDiagonal(A_diag, l1_norm, 1);
-#if 0
       /* Add the scaled l1 norm of the offd part */
       if (num_cols_offd)
       {
@@ -717,7 +716,6 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
          }
          hypre_TFree(tmp, memory_location_tmp);
       }
-      #endif
    }
 
    /* Handle negative definite matrices */
