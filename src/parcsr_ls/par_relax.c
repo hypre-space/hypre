@@ -170,6 +170,12 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          hypre_BoomerAMGRelaxKaczmarz(A, f, omega, l1_norms, u);
          break;
 
+      case 28: /* hybrid L1 Symm. Gauss-Seidel */
+         hypre_BoomerAMGRelax28HybridL1SSOR(A, f, cf_marker, relax_points,
+                                            relax_weight, omega, l1_norms, u,
+                                            Vtemp, Ztemp);
+         break;
+
       case 98: /* Direct solve: use gaussian elimination & BLAS (with pivoting) */
          relax_error = hypre_BoomerAMGRelax98GaussElimPivot(A, f, u);
          break;
@@ -1195,7 +1201,7 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
-/* symmetric l1 hybrid G-S */
+/* l1 symmetric hybrid G-S */
 HYPRE_Int
 hypre_BoomerAMGRelax8HybridL1SSOR( hypre_ParCSRMatrix *A,
                                    hypre_ParVector    *f,
@@ -1208,10 +1214,13 @@ hypre_BoomerAMGRelax8HybridL1SSOR( hypre_ParCSRMatrix *A,
                                    hypre_ParVector    *Vtemp,
                                    hypre_ParVector    *Ztemp )
 {
-   const HYPRE_Int skip_diag = relax_weight == 1.0 && omega == 1.0 ? 0 : 1;
+   hypre_BoomerAMGRelax13HybridL1GaussSeidel(A, f, cf_marker, relax_points, relax_weight,
+                                             omega, l1_norms, u, Vtemp, Ztemp);
 
-   return hypre_BoomerAMGRelaxHybridSOR(A, f, cf_marker, relax_points, relax_weight,
-                                        omega, l1_norms, u, Vtemp, Ztemp, 1, 1, skip_diag, 0);
+   hypre_BoomerAMGRelax14HybridL1GaussSeidel(A, f, cf_marker, relax_points, relax_weight,
+                                             omega, l1_norms, u, Vtemp, Ztemp);
+
+   return hypre_error_flag;
 }
 
 /* forward hybrid topology ordered G-S */
@@ -1354,6 +1363,25 @@ hypre_BoomerAMGRelax19GaussElim( hypre_ParCSRMatrix *A,
    }
 
    return relax_error;
+}
+
+/* l1 hybrid symmetric G-S */
+HYPRE_Int
+hypre_BoomerAMGRelax28HybridL1SSOR( hypre_ParCSRMatrix *A,
+                                    hypre_ParVector    *f,
+                                    HYPRE_Int          *cf_marker,
+                                    HYPRE_Int           relax_points,
+                                    HYPRE_Real          relax_weight,
+                                    HYPRE_Real          omega,
+                                    HYPRE_Real         *l1_norms,
+                                    hypre_ParVector    *u,
+                                    hypre_ParVector    *Vtemp,
+                                    hypre_ParVector    *Ztemp )
+{
+   const HYPRE_Int skip_diag = relax_weight == 1.0 && omega == 1.0 ? 0 : 1;
+
+   return hypre_BoomerAMGRelaxHybridSOR(A, f, cf_marker, relax_points, relax_weight,
+                                        omega, l1_norms, u, Vtemp, Ztemp, 1, 1, skip_diag, 0);
 }
 
 HYPRE_Int
