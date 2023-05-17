@@ -363,7 +363,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    /* probably should disable stuff like smooth num levels at some point */
 
 
-   if (grid_relax_type[0] >= 20 && grid_relax_type[0] < 29) /* block relaxation choosen */
+   if (grid_relax_type[0] >= 20 && grid_relax_type[0] != 88) /* block relaxation choosen */
    {
 
       if (!((interp_type >= 20 && interp_type != 100) || interp_type == 11 || interp_type == 10 ) )
