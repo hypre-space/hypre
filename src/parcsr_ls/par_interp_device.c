@@ -366,7 +366,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
       num_cols_P_offd = new_end - P_colids;
 
       hypreDevice_IntFilln(P_marker, num_cols_A_offd, 0);
-      hypreDevice_ScatterConstant(P_marker, num_cols_P_offd, P_colids, 1);
+      hypreDevice_ScatterConstant(P_marker, num_cols_P_offd, P_colids, (HYPRE_Int) 1);
 
       /* Because P's columns correspond to P_marker[i]=1 (and =0 otherwise), the scan below will return  */
       /* an enumeration of P's columns 0,1,... at the corresponding locations in P_marker. */

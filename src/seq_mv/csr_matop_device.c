@@ -97,6 +97,15 @@ hypre_GPUMatDataSetCSRData(hypre_CSRMatrix *matrix)
 {
 
 #if defined(HYPRE_USING_ONEMKLSPARSE)
+#if defined(HYPRE_BIGINT)
+   HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::set_csr_data(hypre_CSRMatrixGPUMatHandle(matrix),
+                                                        hypre_CSRMatrixNumRows(matrix),
+                                                        hypre_CSRMatrixNumCols(matrix),
+                                                        oneapi::mkl::index_base::zero,
+                                                        reinterpret_cast<std::int64_t*>(hypre_CSRMatrixI(matrix)),
+                                                        reinterpret_cast<std::int64_t*>(hypre_CSRMatrixJ(matrix)),
+                                                        hypre_CSRMatrixData(matrix)) );
+#else
    HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::set_csr_data(hypre_CSRMatrixGPUMatHandle(matrix),
                                                         hypre_CSRMatrixNumRows(matrix),
                                                         hypre_CSRMatrixNumCols(matrix),
@@ -104,6 +113,7 @@ hypre_GPUMatDataSetCSRData(hypre_CSRMatrix *matrix)
                                                         hypre_CSRMatrixI(matrix),
                                                         hypre_CSRMatrixJ(matrix),
                                                         hypre_CSRMatrixData(matrix)) );
+#endif
 #endif
 
 }

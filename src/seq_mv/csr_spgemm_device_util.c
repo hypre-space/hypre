@@ -295,8 +295,8 @@ HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int  m,
    HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
                       d_bin_key,
                       d_bin_key + m,
-                      oneapi::dpl::counting_iterator(1),
-                      oneapi::dpl::counting_iterator(num_bins + 2),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(1),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(num_bins + 2),
                       d_bin_ptr );
 #else
    HYPRE_THRUST_CALL( transform,
