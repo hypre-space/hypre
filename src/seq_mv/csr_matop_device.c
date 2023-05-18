@@ -36,7 +36,7 @@ hypre_CsrsvDataDestroy(hypre_CsrsvData* data)
    if ( hypre_CsrsvDataInfoL(data) )
    {
 #if defined(HYPRE_USING_CUSPARSE)
-      HYPRE_CUSPARSE_CALL( cusparseDestroyCsrsv2Info( hypre_CsrsvDataInfoL(data) ) );
+      HYPRE_CUSPARSE_CALL( hypre_cusparseSpSV_destroyDescr( hypre_CsrsvDataInfoL(data) ) );
 #elif defined(HYPRE_USING_ROCSPARSE)
       HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_info( hypre_CsrsvDataInfoL(data) ) );
 #endif
@@ -45,16 +45,19 @@ hypre_CsrsvDataDestroy(hypre_CsrsvData* data)
    if ( hypre_CsrsvDataInfoU(data) )
    {
 #if defined(HYPRE_USING_CUSPARSE)
-      HYPRE_CUSPARSE_CALL( cusparseDestroyCsrsv2Info( hypre_CsrsvDataInfoU(data) ) );
+      HYPRE_CUSPARSE_CALL( hypre_cusparseSpSV_destroyDescr( hypre_CsrsvDataInfoU(data) ) );
 #elif defined(HYPRE_USING_ROCSPARSE)
       HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_info( hypre_CsrsvDataInfoU(data) ) );
 #endif
    }
 
-   if ( hypre_CsrsvDataBuffer(data) )
-   {
-      hypre_TFree(hypre_CsrsvDataBuffer(data), HYPRE_MEMORY_DEVICE);
-   }
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+   hypre_TFree(hypre_CsrsvDataBufferL(data), HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_CsrsvDataBufferU(data), HYPRE_MEMORY_DEVICE);
+#else
+   hypre_TFree(hypre_CsrsvDataBuffer(data), HYPRE_MEMORY_DEVICE);
+#endif
+   hypre_TFree(hypre_CsrsvDataMatData(data), HYPRE_MEMORY_DEVICE);
 
    hypre_TFree(data, HYPRE_MEMORY_HOST);
 }
@@ -768,21 +771,42 @@ hypre_CSRMatrixCompressColumnsDevice(hypre_CSRMatrix  *A,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
 HYPRE_Int
-hypre_CSRMatrixTriLowerUpperSolveDevice(char             uplo,
-                                        hypre_CSRMatrix *A,
-                                        HYPRE_Real      *l1_norms,
-                                        hypre_Vector    *f,
-                                        hypre_Vector    *u )
+hypre_CSRMatrixTriLowerUpperSolveDevice_core(char             uplo,
+                                             HYPRE_Int        unit_diag,
+                                             hypre_CSRMatrix *A,
+                                             HYPRE_Real      *l1_norms,
+                                             hypre_Vector    *f,
+                                             HYPRE_Int        offset_f,
+                                             hypre_Vector    *u,
+                                             HYPRE_Int        offset_u)
 {
 #if defined(HYPRE_USING_CUSPARSE)
-   hypre_CSRMatrixTriLowerUpperSolveCusparse(uplo, A, l1_norms, f, u);
+   hypre_CSRMatrixTriLowerUpperSolveCusparse(uplo, unit_diag, A,
+                                             l1_norms,
+                                             hypre_VectorData(f) + offset_f,
+                                             hypre_VectorData(u) + offset_u);
 #elif defined(HYPRE_USING_ROCSPARSE)
-   hypre_CSRMatrixTriLowerUpperSolveRocsparse(uplo, A, l1_norms, f, u);
+   hypre_CSRMatrixTriLowerUpperSolveRocsparse(uplo, unit_diag, A,
+                                              l1_norms,
+                                              hypre_VectorData(f) + offset_f,
+                                              hypre_VectorData(u) + offset_u);
 #else
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                      "hypre_CSRMatrixTriLowerUpperSolveDevice requires configuration with either cusparse or rocsparse\n");
 #endif
    return hypre_error_flag;
+}
+
+
+HYPRE_Int
+hypre_CSRMatrixTriLowerUpperSolveDevice(char             uplo,
+                                        HYPRE_Int        unit_diag,
+                                        hypre_CSRMatrix *A,
+                                        HYPRE_Real      *l1_norms,
+                                        hypre_Vector    *f,
+                                        hypre_Vector    *u )
+{
+   return hypre_CSRMatrixTriLowerUpperSolveDevice_core(uplo, unit_diag, A, l1_norms, f, 0, u, 0);
 }
 
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
@@ -1427,105 +1451,6 @@ hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix *A )
 #endif /* defined(HYPRE_USING_GPU) */
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-
-__global__ void
-hypreGPUKernel_CSRMatrixFixZeroDiagDevice( hypre_DeviceItem    &item,
-                                           HYPRE_Complex  v,
-                                           HYPRE_Int      nrows,
-                                           HYPRE_Int     *ia,
-                                           HYPRE_Int     *ja,
-                                           HYPRE_Complex *data,
-                                           HYPRE_Real     tol,
-                                           HYPRE_Int     *result )
-{
-   const HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
-
-   if (row >= nrows)
-   {
-      return;
-   }
-
-   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int p = 0, q = 0;
-   bool has_diag = false;
-
-   if (lane < 2)
-   {
-      p = read_only_load(ia + row + lane);
-   }
-   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
-   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
-
-   for (HYPRE_Int j = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
-   {
-      hypre_int find_diag = j < q && read_only_load(&ja[j]) == row;
-
-      if (find_diag)
-      {
-         if (hypre_abs(data[j]) <= tol)
-         {
-            data[j] = v;
-         }
-      }
-
-      if ( warp_any_sync(item, HYPRE_WARP_FULL_MASK, find_diag) )
-      {
-         has_diag = true;
-         break;
-      }
-   }
-
-   if (result && !has_diag && lane == 0)
-   {
-      result[row] = 1;
-   }
-}
-
-/* For square A, find numerical zeros (absolute values <= tol) on its diagonal and replace with v
- * Does NOT assume diagonal is the first entry of each row of A
- * In debug mode:
- *    Returns the number of rows that do not have diag in the pattern
- *    (i.e., structural zeroes on the diagonal)
- */
-HYPRE_Int
-hypre_CSRMatrixFixZeroDiagDevice( hypre_CSRMatrix *A,
-                                  HYPRE_Complex    v,
-                                  HYPRE_Real       tol )
-{
-   HYPRE_Int ierr = 0;
-
-   if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
-   {
-      return ierr;
-   }
-
-   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-   dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "warp", bDim);
-
-#if HYPRE_DEBUG
-   HYPRE_Int *result = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A), HYPRE_MEMORY_DEVICE);
-#else
-   HYPRE_Int *result = NULL;
-#endif
-
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixFixZeroDiagDevice, gDim, bDim,
-                     v, hypre_CSRMatrixNumRows(A),
-                     hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A),
-                     tol, result );
-
-#if HYPRE_DEBUG
-   ierr = HYPRE_THRUST_CALL( reduce,
-                             result,
-                             result + hypre_CSRMatrixNumRows(A) );
-
-   hypre_TFree(result, HYPRE_MEMORY_DEVICE);
-#endif
-
-   hypre_SyncComputeStream(hypre_handle());
-
-   return ierr;
-}
-
 __global__ void
 hypreGPUKernel_CSRMatrixReplaceDiagDevice( hypre_DeviceItem    &item,
                                            HYPRE_Complex *new_diag,
@@ -1561,12 +1486,18 @@ hypreGPUKernel_CSRMatrixReplaceDiagDevice( hypre_DeviceItem    &item,
 
       if (find_diag)
       {
-         HYPRE_Complex d = read_only_load(&new_diag[row]);
-         if (hypre_abs(d) <= tol)
+         if (new_diag)
          {
-            d = v;
+            HYPRE_Complex d = read_only_load(&new_diag[row]);
+            data[j] = hypre_abs(d) <= tol ? v : d;
          }
-         data[j] = d;
+         else
+         {
+            if (hypre_abs(data[j]) <= tol)
+            {
+               data[j] = v;
+            }
+         }
       }
 
       if ( warp_any_sync(item, HYPRE_WARP_FULL_MASK, find_diag) )
@@ -1588,11 +1519,9 @@ hypre_CSRMatrixReplaceDiagDevice( hypre_CSRMatrix *A,
                                   HYPRE_Complex    v,
                                   HYPRE_Real       tol )
 {
-   HYPRE_Int ierr = 0;
-
    if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
    {
-      return ierr;
+      return hypre_error_flag;
    }
 
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
@@ -1610,16 +1539,22 @@ hypre_CSRMatrixReplaceDiagDevice( hypre_CSRMatrix *A,
                      tol, result );
 
 #if HYPRE_DEBUG
-   ierr = HYPRE_THRUST_CALL( reduce,
-                             result,
-                             result + hypre_CSRMatrixNumRows(A) );
+   /* the number of structural zero in A */
+   HYPRE_Int num_zeros = HYPRE_THRUST_CALL( reduce,
+                                            result,
+                                            result + hypre_CSRMatrixNumRows(A) );
 
    hypre_TFree(result, HYPRE_MEMORY_DEVICE);
+
+   if (num_zeros)
+   {
+      hypre_error_w_msg(num_zeros, "structural zero in hypre_CSRMatrixReplaceDiagDevice");
+   }
 #endif
 
    hypre_SyncComputeStream(hypre_handle());
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
@@ -2190,6 +2125,41 @@ hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
    return hypre_error_flag;
 }
 
+#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
+HYPRE_Int
+hypre_CSRMatrixSortRowOutOfPlace(hypre_CSRMatrix *A)
+{
+   HYPRE_Int     *A_j  = hypre_CSRMatrixJ(A);
+   HYPRE_Complex *A_a  = hypre_CSRMatrixData(A);
+   HYPRE_Int      nnzA = hypre_CSRMatrixNumNonzeros(A);
+
+   /* if both exist, we assume A has been sorted */
+   if (hypre_CSRMatrixSortedJ(A) && hypre_CSRMatrixSortedData(A))
+   {
+      return hypre_error_flag;
+   }
+
+   hypre_TFree(hypre_CSRMatrixSortedJ(A), HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_CSRMatrixSortedData(A), HYPRE_MEMORY_DEVICE);
+
+   hypre_CSRMatrixSortedJ(A) = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
+   hypre_CSRMatrixSortedData(A) = hypre_TAlloc(HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE);
+
+   hypre_TMemcpy(hypre_CSRMatrixSortedJ(A), A_j, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(hypre_CSRMatrixSortedData(A), A_a, HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+
+   hypre_CSRMatrixJ(A) = hypre_CSRMatrixSortedJ(A);
+   hypre_CSRMatrixData(A) = hypre_CSRMatrixSortedData(A);
+
+   hypre_CSRMatrixSortRow(A);
+
+   hypre_CSRMatrixJ(A) = A_j;
+   hypre_CSRMatrixData(A) = A_a;
+
+   return hypre_error_flag;
+}
+#endif
+
 #if defined(HYPRE_USING_CUSPARSE)
 /* @brief This functions sorts values and column indices in each row in ascending order INPLACE
  * @param[in] n Number of rows
@@ -2200,10 +2170,10 @@ hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
  * @param[in,out] *d_a_sorted On Start: Unsorted values. On Return: Sorted values corresponding with column indices
  */
 void
-hypre_SortCSRCusparse( HYPRE_Int           n,
-                       HYPRE_Int           m,
-                       HYPRE_Int           nnzA,
-                       cusparseMatDescr_t  descrA,
+hypre_SortCSRCusparse( HYPRE_Int            n,
+                       HYPRE_Int            m,
+                       HYPRE_Int            nnzA,
+                       cusparseMatDescr_t   descrA,
                        const HYPRE_Int     *d_ia,
                        HYPRE_Int           *d_ja_sorted,
                        HYPRE_Complex       *d_a_sorted )
@@ -2235,24 +2205,29 @@ hypre_SortCSRCusparse( HYPRE_Int           n,
 
 HYPRE_Int
 hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
+                                          HYPRE_Int        unit_diag,
                                           hypre_CSRMatrix *A,
                                           HYPRE_Real      *l1_norms,
-                                          hypre_Vector    *f,
-                                          hypre_Vector    *u )
+                                          HYPRE_Complex   *f_data,
+                                          HYPRE_Complex   *u_data )
 {
-   HYPRE_Int      nrow   = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int      ncol   = hypre_CSRMatrixNumCols(A);
-   HYPRE_Int      nnzA   = hypre_CSRMatrixNumNonzeros(A);
-   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
-   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
-   HYPRE_Complex *A_a    = hypre_CSRMatrixData(A);
-   HYPRE_Int     *A_sj   = hypre_CSRMatrixSortedJ(A);
-   HYPRE_Complex *A_sa   = hypre_CSRMatrixSortedData(A);
-   HYPRE_Complex *f_data = hypre_VectorData(f);
-   HYPRE_Complex *u_data = hypre_VectorData(u);
-   HYPRE_Complex  alpha  = 1.0;
-   hypre_int      buffer_size;
-   hypre_int      structural_zero;
+   HYPRE_Int          nrow      = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int          ncol      = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int          nnzA      = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int         *A_i       = hypre_CSRMatrixI(A);
+   HYPRE_Int         *A_j       = hypre_CSRMatrixJ(A);
+   HYPRE_Complex     *A_a       = hypre_CSRMatrixData(A);
+   HYPRE_Complex      alpha     = 1.0;
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+   cudaDataType       data_type = hypre_HYPREComplexToCudaDataType();
+   size_t             buffer_size;
+   cusparseFillMode_t LFillMode = CUSPARSE_FILL_MODE_LOWER;
+   cusparseFillMode_t UFillMode = CUSPARSE_FILL_MODE_UPPER;
+#else
+   hypre_int          buffer_size;
+   hypre_int          structural_zero;
+#endif
+   cusparseDiagType_t DiagType = unit_diag ? CUSPARSE_DIAG_TYPE_UNIT: CUSPARSE_DIAG_TYPE_NON_UNIT;
 
    if (nrow != ncol)
    {
@@ -2273,57 +2248,90 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
       return hypre_error_flag;
    }
 
-   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
-   cusparseMatDescr_t descr = hypre_CSRMatrixGPUMatDescr(A);
-
-   if ( !A_sj && !A_sa )
-   {
-      hypre_CSRMatrixSortedJ(A) = A_sj = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
-      hypre_CSRMatrixSortedData(A) = A_sa = hypre_TAlloc(HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(A_sj, A_j, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(A_sa, A_a, HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-
-#if defined(HYPRE_USING_CUDA)
-      hypre_CSRMatrixData(A) = A_sa;
-      HYPRE_Int err = 0;
-      if (l1_norms)
-      {
-         err = hypre_CSRMatrixReplaceDiagDevice(A, l1_norms, INFINITY, 0.0);
-      }
-      else
-      {
-         err = hypre_CSRMatrixFixZeroDiagDevice(A, INFINITY, 0.0);
-      }
-      hypre_CSRMatrixData(A) = A_a;
-      if (err)
-      {
-         hypre_error_w_msg(1, "structural zero in hypre_CSRMatrixTriLowerUpperSolveCusparse");
-         //hypre_assert(0);
-      }
+#if CUSPARSE_VERSION < CUSPARSE_SPSV_VERSION
+   /* cusparse (legacy API) requires sorted rows. Sort and save in CSR's (sj, sa) */
+   hypre_CSRMatrixSortRowOutOfPlace(A);
 #endif
 
-      hypre_SortCSRCusparse(nrow, ncol, nnzA, descr, A_i, A_sj, A_sa);
-   }
-
-   HYPRE_CUSPARSE_CALL( cusparseSetMatDiagType(descr, CUSPARSE_DIAG_TYPE_NON_UNIT) );
-
+   /* setup csrsvdata in CSR: modify the diagonal (once) */
    if (!hypre_CSRMatrixCsrsvData(A))
    {
       hypre_CSRMatrixCsrsvData(A) = hypre_CsrsvDataCreate();
+      hypre_CsrsvData *csrsv_data = hypre_CSRMatrixCsrsvData(A);
+
+      hypre_CsrsvDataMatData(csrsv_data) = hypre_TAlloc(HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE);
+
+      hypre_CSRMatrixData(A) = hypre_CsrsvDataMatData(csrsv_data);
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+      hypre_TMemcpy(hypre_CsrsvDataMatData(csrsv_data), A_a, HYPRE_Complex, nnzA,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+#else
+      hypre_TMemcpy(hypre_CsrsvDataMatData(csrsv_data), hypre_CSRMatrixSortedData(A), HYPRE_Complex, nnzA,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypre_CSRMatrixJ(A) = hypre_CSRMatrixSortedJ(A);
+#endif
+
+      /* if (l1_norms), replace A's diag with l1_norm, and
+       * replace zero diag with inf. so as to skip relaxation for this unknown */
+      hypre_CSRMatrixReplaceDiagDevice(A, l1_norms, INFINITY, 0.0);
+
+      hypre_CSRMatrixData(A) = A_a;
+#if CUSPARSE_VERSION < CUSPARSE_SPSV_VERSION
+      hypre_CSRMatrixJ(A) = A_j;
+#endif
    }
+
+   /* analysis and solve */
+   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
    hypre_CsrsvData *csrsv_data = hypre_CSRMatrixCsrsvData(A);
+   HYPRE_Complex *A_ma = hypre_CsrsvDataMatData(csrsv_data);
+
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+   cusparseSpMatDescr_t matA = hypre_CSRMatrixToCusparseSpMat_core(nrow, ncol, 0, nnzA, A_i, A_j, A_ma);
+   HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(matA, CUSPARSE_SPMAT_DIAG_TYPE, &DiagType, sizeof(cusparseDiagType_t)) );
+   cusparseDnVecDescr_t vecF = hypre_VectorToCusparseDnVec_core(f_data, nrow);
+   cusparseDnVecDescr_t vecU = hypre_VectorToCusparseDnVec_core(u_data, ncol);
+#else
+   HYPRE_Int *A_sj = hypre_CSRMatrixSortedJ(A);
+   cusparseMatDescr_t descr = hypre_CSRMatrixGPUMatDescr(A);
+   HYPRE_CUSPARSE_CALL( cusparseSetMatDiagType(descr, DiagType) );
+#endif
 
    if (uplo == 'L')
    {
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+      HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(matA, CUSPARSE_SPMAT_FILL_MODE,
+                                                     &LFillMode, sizeof(cusparseFillMode_t)) );
+#else
       HYPRE_CUSPARSE_CALL( cusparseSetMatFillMode(descr, CUSPARSE_FILL_MODE_LOWER) );
+#endif
 
       if (!hypre_CsrsvDataInfoL(csrsv_data))
       {
-         HYPRE_CUSPARSE_CALL( cusparseCreateCsrsv2Info(&hypre_CsrsvDataInfoL(csrsv_data)) );
+         HYPRE_CUSPARSE_CALL( hypre_cusparseSpSV_createDescr(&hypre_CsrsvDataInfoL(csrsv_data)) );
 
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+         HYPRE_CUSPARSE_CALL( cusparseSpSV_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                      &alpha, matA, vecF, vecU, data_type,
+                                                      CUSPARSE_SPSV_ALG_DEFAULT,
+                                                      hypre_CsrsvDataInfoL(csrsv_data),
+                                                      &buffer_size) );
+#else
          HYPRE_CUSPARSE_CALL( hypre_cusparse_csrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                               nrow, nnzA, descr, A_sa, A_i, A_sj, hypre_CsrsvDataInfoL(csrsv_data), &buffer_size) );
+                                                               nrow, nnzA, descr, A_ma, A_i, A_sj,
+                                                               hypre_CsrsvDataInfoL(csrsv_data), &buffer_size) );
+#endif
 
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+         if (hypre_CsrsvDataBufferSizeL(csrsv_data) < buffer_size)
+         {
+            hypre_CsrsvDataBufferL(csrsv_data) = hypre_TReAlloc_v2(hypre_CsrsvDataBufferL(csrsv_data),
+                                                                   char, hypre_CsrsvDataBufferSizeL(csrsv_data),
+                                                                   char, buffer_size,
+                                                                   HYPRE_MEMORY_DEVICE);
+            hypre_CsrsvDataBufferSizeL(csrsv_data) = buffer_size;
+         }
+#else
          if (hypre_CsrsvDataBufferSize(csrsv_data) < buffer_size)
          {
             hypre_CsrsvDataBuffer(csrsv_data) = hypre_TReAlloc_v2(hypre_CsrsvDataBuffer(csrsv_data),
@@ -2332,10 +2340,19 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                                                   HYPRE_MEMORY_DEVICE);
             hypre_CsrsvDataBufferSize(csrsv_data) = buffer_size;
          }
+#endif
 
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+         HYPRE_CUSPARSE_CALL( cusparseSpSV_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                    &alpha, matA, vecF, vecU, data_type,
+                                                    CUSPARSE_SPSV_ALG_DEFAULT,
+                                                    hypre_CsrsvDataInfoL(csrsv_data),
+                                                    hypre_CsrsvDataBufferL(csrsv_data)) );
+#else
          HYPRE_CUSPARSE_CALL( hypre_cusparse_csrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                             nrow, nnzA, descr, A_sa, A_i, A_sj,
-                                                             hypre_CsrsvDataInfoL(csrsv_data), CUSPARSE_SOLVE_POLICY_USE_LEVEL,
+                                                             nrow, nnzA, descr, A_ma, A_i, A_sj,
+                                                             hypre_CsrsvDataInfoL(csrsv_data),
+                                                             CUSPARSE_SOLVE_POLICY_USE_LEVEL,
                                                              hypre_CsrsvDataBuffer(csrsv_data)) );
 
          cusparseStatus_t status = cusparseXcsrsv2_zeroPivot(handle, hypre_CsrsvDataInfoL(csrsv_data),
@@ -2346,27 +2363,58 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
             hypre_sprintf(msg, "hypre_CSRMatrixTriLowerUpperSolveCusparse A(%d,%d) is missing\n",
                           structural_zero, structural_zero);
             hypre_error_w_msg(1, msg);
-            //hypre_assert(0);
          }
+#endif
       }
 
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+      HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                              &alpha, matA, vecF, vecU, data_type,
+                                              CUSPARSE_SPSV_ALG_DEFAULT,
+                                              hypre_CsrsvDataInfoL(csrsv_data)) );
+#else
       HYPRE_CUSPARSE_CALL( hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                       nrow, nnzA, &alpha, descr, A_sa, A_i, A_sj,
+                                                       nrow, nnzA, &alpha, descr, A_ma, A_i, A_sj,
                                                        hypre_CsrsvDataInfoL(csrsv_data), f_data, u_data,
                                                        CUSPARSE_SOLVE_POLICY_USE_LEVEL,
                                                        hypre_CsrsvDataBuffer(csrsv_data)) );
+#endif
    }
    else
    {
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+      HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(matA, CUSPARSE_SPMAT_FILL_MODE,
+                                                     &UFillMode, sizeof(cusparseFillMode_t)) );
+#else
       HYPRE_CUSPARSE_CALL( cusparseSetMatFillMode(descr, CUSPARSE_FILL_MODE_UPPER) );
+#endif
 
       if (!hypre_CsrsvDataInfoU(csrsv_data))
       {
-         HYPRE_CUSPARSE_CALL( cusparseCreateCsrsv2Info(&hypre_CsrsvDataInfoU(csrsv_data)) );
+         HYPRE_CUSPARSE_CALL( hypre_cusparseSpSV_createDescr(&hypre_CsrsvDataInfoU(csrsv_data)) );
 
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+         HYPRE_CUSPARSE_CALL( cusparseSpSV_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                      &alpha, matA, vecF, vecU, data_type,
+                                                      CUSPARSE_SPSV_ALG_DEFAULT,
+                                                      hypre_CsrsvDataInfoU(csrsv_data),
+                                                      &buffer_size) );
+#else
          HYPRE_CUSPARSE_CALL( hypre_cusparse_csrsv2_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                               nrow, nnzA, descr, A_sa, A_i, A_sj, hypre_CsrsvDataInfoU(csrsv_data), &buffer_size) );
+                                                               nrow, nnzA, descr, A_ma, A_i, A_sj,
+                                                               hypre_CsrsvDataInfoU(csrsv_data), &buffer_size) );
+#endif
 
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+         if (hypre_CsrsvDataBufferSizeU(csrsv_data) < buffer_size)
+         {
+            hypre_CsrsvDataBufferU(csrsv_data) = hypre_TReAlloc_v2(hypre_CsrsvDataBufferU(csrsv_data),
+                                                                   char, hypre_CsrsvDataBufferSizeU(csrsv_data),
+                                                                   char, buffer_size,
+                                                                   HYPRE_MEMORY_DEVICE);
+            hypre_CsrsvDataBufferSizeU(csrsv_data) = buffer_size;
+         }
+#else
          if (hypre_CsrsvDataBufferSize(csrsv_data) < buffer_size)
          {
             hypre_CsrsvDataBuffer(csrsv_data) = hypre_TReAlloc_v2(hypre_CsrsvDataBuffer(csrsv_data),
@@ -2375,10 +2423,19 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                                                   HYPRE_MEMORY_DEVICE);
             hypre_CsrsvDataBufferSize(csrsv_data) = buffer_size;
          }
+#endif
 
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+         HYPRE_CUSPARSE_CALL( cusparseSpSV_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                                    &alpha, matA, vecF, vecU, data_type,
+                                                    CUSPARSE_SPSV_ALG_DEFAULT,
+                                                    hypre_CsrsvDataInfoU(csrsv_data),
+                                                    hypre_CsrsvDataBufferU(csrsv_data)) );
+#else
          HYPRE_CUSPARSE_CALL( hypre_cusparse_csrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                             nrow, nnzA, descr, A_sa, A_i, A_sj,
-                                                             hypre_CsrsvDataInfoU(csrsv_data), CUSPARSE_SOLVE_POLICY_USE_LEVEL,
+                                                             nrow, nnzA, descr, A_ma, A_i, A_sj,
+                                                             hypre_CsrsvDataInfoU(csrsv_data),
+                                                             CUSPARSE_SOLVE_POLICY_USE_LEVEL,
                                                              hypre_CsrsvDataBuffer(csrsv_data)) );
 
          cusparseStatus_t status = cusparseXcsrsv2_zeroPivot(handle, hypre_CsrsvDataInfoU(csrsv_data),
@@ -2390,14 +2447,87 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                           structural_zero, structural_zero);
             hypre_error_w_msg(1, msg);
          }
+#endif
       }
 
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+      HYPRE_CUSPARSE_CALL( cusparseSpSV_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                              &alpha, matA, vecF, vecU, data_type,
+                                              CUSPARSE_SPSV_ALG_DEFAULT,
+                                              hypre_CsrsvDataInfoU(csrsv_data)) );
+#else
       HYPRE_CUSPARSE_CALL( hypre_cusparse_csrsv2_solve(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                       nrow, nnzA, &alpha, descr, A_sa, A_i, A_sj,
+                                                       nrow, nnzA, &alpha, descr, A_ma, A_i, A_sj,
                                                        hypre_CsrsvDataInfoU(csrsv_data), f_data, u_data,
                                                        CUSPARSE_SOLVE_POLICY_USE_LEVEL,
                                                        hypre_CsrsvDataBuffer(csrsv_data)) );
+#endif
    }
+
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+   HYPRE_CUSPARSE_CALL( cusparseDestroySpMat(matA) );
+   HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecF) );
+   HYPRE_CUSPARSE_CALL( cusparseDestroyDnVec(vecU) );
+#endif
+
+   return hypre_error_flag;
+}
+
+
+HYPRE_Int
+hypre_CSRMatrixILU0(hypre_CSRMatrix *A)
+{
+   HYPRE_Int             n                = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int             m                = hypre_CSRMatrixNumCols(A);
+   HYPRE_Complex        *A_data           = hypre_CSRMatrixData(A);
+   HYPRE_Int            *A_i              = hypre_CSRMatrixI(A);
+   HYPRE_Int            *A_j              = hypre_CSRMatrixJ(A);
+   HYPRE_Int             nnz_A            = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int             zero_pivot;
+   HYPRE_Int             matA_buffersize;
+   void                 *matA_buffer            = NULL;
+   csrilu02Info_t        matA_info        = NULL;
+   cusparseHandle_t      handle           = hypre_HandleCusparseHandle(hypre_handle());
+   cusparseSolvePolicy_t ilu_solve_policy = CUSPARSE_SOLVE_POLICY_USE_LEVEL;
+   cusparseMatDescr_t    descr            = hypre_CSRMatrixGPUMatDescr(A);
+
+   hypre_assert(n == m);
+
+   /* 1. Sort columns inside each row first, we can't assume that's sorted */
+   hypre_SortCSRCusparse(n, m, nnz_A, descr, A_i, A_j, A_data);
+
+   /* 2. Create info for ilu setup and solve */
+   HYPRE_CUSPARSE_CALL(cusparseCreateCsrilu02Info(&matA_info));
+
+   /* 3. Get working array size */
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02_bufferSize(handle, n, nnz_A, descr,
+                                                          A_data, A_i, A_j,
+                                                          matA_info, &matA_buffersize));
+
+   /* 4. Create working array, since they won't be visited by host, allocate on device */
+   matA_buffer = hypre_TAlloc(char, matA_buffersize, HYPRE_MEMORY_DEVICE);
+
+   /* 5. Now perform the analysis */
+   /* 5-1. Analysis */
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02_analysis(handle, n, nnz_A, descr,
+                                                        A_data, A_i, A_j,
+                                                        matA_info, ilu_solve_policy, matA_buffer));
+
+   /* 5-2. Check for zero pivot */
+   HYPRE_CUSPARSE_CALL(cusparseXcsrilu02_zeroPivot(handle, matA_info, &zero_pivot));
+
+   /* 6. Apply the factorization */
+   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02(handle, n, nnz_A, descr,
+                                               A_data, A_i, A_j,
+                                               matA_info, ilu_solve_policy, matA_buffer));
+
+   /* Check for zero pivot */
+   HYPRE_CUSPARSE_CALL(cusparseXcsrilu02_zeroPivot(handle, matA_info, &zero_pivot));
+
+   /* Done with factorization, finishing up */
+   hypre_TFree(matA_buffer, HYPRE_MEMORY_DEVICE);
+
+   HYPRE_CUSPARSE_CALL(cusparseDestroyCsrilu02Info(matA_info));
 
    return hypre_error_flag;
 }
@@ -2408,24 +2538,22 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
 #if defined(HYPRE_USING_ROCSPARSE)
 HYPRE_Int
 hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
-                                           hypre_CSRMatrix * A,
-                                           HYPRE_Real      * l1_norms,
-                                           hypre_Vector    * f,
-                                           hypre_Vector    * u )
+                                           HYPRE_Int         unit_diag,
+                                           hypre_CSRMatrix  *A,
+                                           HYPRE_Real       *l1_norms,
+                                           HYPRE_Complex    *f_data,
+                                           HYPRE_Complex    *u_data )
 {
-   HYPRE_Int      nrow   = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int      ncol   = hypre_CSRMatrixNumCols(A);
-   HYPRE_Int      nnzA   = hypre_CSRMatrixNumNonzeros(A);
-   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
-   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
-   HYPRE_Complex *A_a    = hypre_CSRMatrixData(A);
-   HYPRE_Int     *A_sj   = hypre_CSRMatrixSortedJ(A);
-   HYPRE_Complex *A_sa   = hypre_CSRMatrixSortedData(A);
-   HYPRE_Complex *f_data = hypre_VectorData(f);
-   HYPRE_Complex *u_data = hypre_VectorData(u);
-   HYPRE_Complex  alpha  = 1.0;
-   size_t         buffer_size;
-   hypre_int      structural_zero;
+   HYPRE_Int            nrow   = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int            ncol   = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int            nnzA   = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int           *A_i    = hypre_CSRMatrixI(A);
+   HYPRE_Int           *A_j    = hypre_CSRMatrixJ(A);
+   HYPRE_Complex       *A_a    = hypre_CSRMatrixData(A);
+   HYPRE_Complex        alpha  = 1.0;
+   size_t               buffer_size;
+   hypre_int            structural_zero;
+   rocsparse_diag_type  diag_type = unit_diag ? rocsparse_diag_type_unit: rocsparse_diag_type_non_unit;
 
    if (nrow != ncol)
    {
@@ -2446,45 +2574,38 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
       return hypre_error_flag;
    }
 
-   rocsparse_handle handle = hypre_HandleCusparseHandle(hypre_handle());
-   rocsparse_mat_descr descr = hypre_CSRMatrixGPUMatDescr(A);
+   /* rocsparse requires sorted rows. Sort and save in CSR's (sj, sa) */
+   hypre_CSRMatrixSortRowOutOfPlace(A);
 
-   if ( !A_sj && !A_sa )
-   {
-      hypre_CSRMatrixSortedJ(A) = A_sj = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
-      hypre_CSRMatrixSortedData(A) = A_sa = hypre_TAlloc(HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(A_sj, A_j, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(A_sa, A_a, HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-
-#if defined(HYPRE_USING_HIP)
-      hypre_CSRMatrixData(A) = A_sa;
-      HYPRE_Int err = 0;
-      if (l1_norms)
-      {
-         err = hypre_CSRMatrixReplaceDiagDevice(A, l1_norms, INFINITY, 0.0);
-      }
-      else
-      {
-         err = hypre_CSRMatrixFixZeroDiagDevice(A, INFINITY, 0.0);
-      }
-      hypre_CSRMatrixData(A) = A_a;
-      if (err)
-      {
-         hypre_error_w_msg(1, "structural zero in hypre_CSRMatrixTriLowerUpperSolveRocsparse");
-         //hypre_assert(0);
-      }
-#endif
-
-      hypre_SortCSRRocsparse(nrow, ncol, nnzA, descr, A_i, A_sj, A_sa);
-   }
-
-   HYPRE_ROCSPARSE_CALL( rocsparse_set_mat_diag_type(descr, rocsparse_diag_type_non_unit) );
-
+   /* setup csrsvdata in CSR: modify the diagonal (once) */
    if (!hypre_CSRMatrixCsrsvData(A))
    {
       hypre_CSRMatrixCsrsvData(A) = hypre_CsrsvDataCreate();
+      hypre_CsrsvData *csrsv_data = hypre_CSRMatrixCsrsvData(A);
+
+      hypre_CsrsvDataMatData(csrsv_data) = hypre_TAlloc(HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE);
+
+      hypre_CSRMatrixData(A) = hypre_CsrsvDataMatData(csrsv_data);
+      hypre_TMemcpy(hypre_CsrsvDataMatData(csrsv_data), hypre_CSRMatrixSortedData(A), HYPRE_Complex, nnzA,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypre_CSRMatrixJ(A) = hypre_CSRMatrixSortedJ(A);
+
+      /* if (l1_norms), replace A's diag with l1_norm, and
+       * replace zero diag with inf. so as to skip relaxation for this unknown */
+      hypre_CSRMatrixReplaceDiagDevice(A, l1_norms, INFINITY, 0.0);
+
+      hypre_CSRMatrixData(A) = A_a;
+      hypre_CSRMatrixJ(A) = A_j;
    }
+
+   /* analysis and solve */
+   rocsparse_handle handle = hypre_HandleCusparseHandle(hypre_handle());
    hypre_CsrsvData *csrsv_data = hypre_CSRMatrixCsrsvData(A);
+   HYPRE_Complex *A_ma = hypre_CsrsvDataMatData(csrsv_data);
+   HYPRE_Int *A_sj = hypre_CSRMatrixSortedJ(A);
+
+   rocsparse_mat_descr descr = hypre_CSRMatrixGPUMatDescr(A);
+   HYPRE_ROCSPARSE_CALL( rocsparse_set_mat_diag_type(descr, diag_type) );
 
    if (uplo == 'L')
    {
@@ -2495,7 +2616,8 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
          HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_info(&hypre_CsrsvDataInfoL(csrsv_data)) );
 
          HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrsv_buffer_size(handle, rocsparse_operation_none,
-                                                                 nrow, nnzA, descr, A_sa, A_i, A_sj, hypre_CsrsvDataInfoL(csrsv_data), &buffer_size) );
+                                                                 nrow, nnzA, descr, A_ma, A_i, A_sj,
+                                                                 hypre_CsrsvDataInfoL(csrsv_data), &buffer_size) );
 
          if (hypre_CsrsvDataBufferSize(csrsv_data) < buffer_size)
          {
@@ -2507,7 +2629,7 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
          }
 
          HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrsv_analysis(handle, rocsparse_operation_none,
-                                                              nrow, nnzA, descr, A_sa, A_i, A_sj,
+                                                              nrow, nnzA, descr, A_ma, A_i, A_sj,
                                                               hypre_CsrsvDataInfoL(csrsv_data), rocsparse_analysis_policy_reuse,
                                                               rocsparse_solve_policy_auto, hypre_CsrsvDataBuffer(csrsv_data)) );
 
@@ -2519,12 +2641,11 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
             hypre_sprintf(msg, "hypre_CSRMatrixTriLowerUpperSolveRocsparse A(%d,%d) is missing\n",
                           structural_zero, structural_zero);
             hypre_error_w_msg(1, msg);
-            //hypre_assert(0);
          }
       }
 
       HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrsv_solve(handle, rocsparse_operation_none,
-                                                        nrow, nnzA, &alpha, descr, A_sa, A_i, A_sj,
+                                                        nrow, nnzA, &alpha, descr, A_ma, A_i, A_sj,
                                                         hypre_CsrsvDataInfoL(csrsv_data), f_data, u_data,
                                                         rocsparse_solve_policy_auto,
                                                         hypre_CsrsvDataBuffer(csrsv_data)) );
@@ -2538,7 +2659,8 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
          HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_info(&hypre_CsrsvDataInfoU(csrsv_data)) );
 
          HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrsv_buffer_size(handle, rocsparse_operation_none,
-                                                                 nrow, nnzA, descr, A_sa, A_i, A_sj, hypre_CsrsvDataInfoU(csrsv_data), &buffer_size) );
+                                                                 nrow, nnzA, descr, A_ma, A_i, A_sj,
+                                                                 hypre_CsrsvDataInfoU(csrsv_data), &buffer_size) );
 
          if (hypre_CsrsvDataBufferSize(csrsv_data) < buffer_size)
          {
@@ -2550,7 +2672,7 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
          }
 
          HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrsv_analysis(handle, rocsparse_operation_none,
-                                                              nrow, nnzA, descr, A_sa, A_i, A_sj,
+                                                              nrow, nnzA, descr, A_ma, A_i, A_sj,
                                                               hypre_CsrsvDataInfoU(csrsv_data), rocsparse_analysis_policy_reuse,
                                                               rocsparse_solve_policy_auto, hypre_CsrsvDataBuffer(csrsv_data)) );
 
@@ -2562,12 +2684,11 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
             hypre_sprintf(msg, "hypre_CSRMatrixTriLowerUpperSolveRocsparse A(%d,%d) is missing\n",
                           structural_zero, structural_zero);
             hypre_error_w_msg(1, msg);
-            //hypre_assert(0);
          }
       }
 
       HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrsv_solve(handle, rocsparse_operation_none,
-                                                        nrow, nnzA, &alpha, descr, A_sa, A_i, A_sj,
+                                                        nrow, nnzA, &alpha, descr, A_ma, A_i, A_sj,
                                                         hypre_CsrsvDataInfoU(csrsv_data), f_data, u_data,
                                                         rocsparse_solve_policy_auto,
                                                         hypre_CsrsvDataBuffer(csrsv_data)) );

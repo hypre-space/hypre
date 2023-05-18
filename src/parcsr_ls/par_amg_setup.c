@@ -3514,7 +3514,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       if ((smooth_type == 6 || smooth_type == 16) && smooth_num_levels > j)
       {
          /* Sanity check */
-         if (hypre_ParVectorNumVectors(f) > 1)
+         if (num_vectors > 1)
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "Schwarz smoothing doesn't support multicomponent vectors");
@@ -3565,7 +3565,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          return hypre_error_flag;
 #endif
 
-         if (hypre_ParVectorNumVectors(f) > 1)
+         if (num_vectors > 1)
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "Euclid smoothing doesn't support multicomponent vectors");
@@ -3594,7 +3594,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       else if ((smooth_type == 4 || smooth_type == 14) && smooth_num_levels > j)
       {
          /* Sanity check */
-         if (hypre_ParVectorNumVectors(f) > 1)
+         if (num_vectors > 1)
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "FSAI smoothing doesn't support multicomponent vectors");
@@ -3625,7 +3625,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       else if ((smooth_type == 5 || smooth_type == 15) && smooth_num_levels > j)
       {
          /* Sanity check */
-         if (hypre_ParVectorNumVectors(f) > 1)
+         if (num_vectors > 1)
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "ILU smoothing doesn't support multicomponent vectors");
@@ -3659,7 +3659,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          return hypre_error_flag;
 #endif
 
-         if (hypre_ParVectorNumVectors(f) > 1)
+         if (num_vectors > 1)
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "ParaSails smoothing doesn't support multicomponent vectors");
@@ -3684,7 +3684,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          return hypre_error_flag;
 #endif
 
-         if (hypre_ParVectorNumVectors(f) > 1)
+         if (num_vectors > 1)
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "Pilut smoothing doesn't support multicomponent vectors");

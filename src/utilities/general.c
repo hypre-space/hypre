@@ -371,7 +371,6 @@ HYPRE_Finalize(void)
 #endif
 
    hypre_HandleDestroy(_hypre_handle);
-
    _hypre_handle = NULL;
 
 #if !defined(HYPRE_USING_SYCL)
@@ -383,6 +382,7 @@ HYPRE_Finalize(void)
                             hypre_memory_tracker_print, hypre_memory_tracker_filename);
 
    hypre_MemoryTrackerDestroy(_hypre_memory_tracker);
+   _hypre_memory_tracker = NULL;
 #endif
 
    return hypre_error_flag;
