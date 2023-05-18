@@ -3262,8 +3262,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_GpuProfilingPushRange(nvtx_name);
 
       if (j < num_levels - 1 &&
-          (grid_relax_type[1] == 8 || grid_relax_type[1] == 13 || grid_relax_type[1] == 14 ||
-           grid_relax_type[2] == 8 || grid_relax_type[2] == 13 || grid_relax_type[2] == 14))
+          (grid_relax_type[1] == 88 || grid_relax_type[1] == 13 || grid_relax_type[1] == 14 ||
+           grid_relax_type[2] == 88 || grid_relax_type[2] == 13 || grid_relax_type[2] == 14))
       {
          if (relax_order)
          {
@@ -3275,12 +3275,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
       }
       else if (j == num_levels - 1 &&
-               (grid_relax_type[3] == 8 || grid_relax_type[3] == 13 || grid_relax_type[3] == 14))
+               (grid_relax_type[3] == 88 || grid_relax_type[3] == 13 || grid_relax_type[3] == 14))
       {
          hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norm_data);
       }
 
-      if (j < num_levels - 1 && (grid_relax_type[1] == 88 || grid_relax_type[2] == 88 ))
+      if (j < num_levels - 1 && (grid_relax_type[1] == 8 || grid_relax_type[2] == 8 ))
       {
          if (relax_order)
          {
@@ -3291,7 +3291,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParCSRComputeL1Norms(A_array[j], 6, NULL, &l1_norm_data);
          }
       }
-      else if (j == num_levels - 1 && (grid_relax_type[3] == 88))
+      else if (j == num_levels - 1 && (grid_relax_type[3] == 8))
       {
          hypre_ParCSRComputeL1Norms(A_array[j], 6, NULL, &l1_norm_data);
       }
