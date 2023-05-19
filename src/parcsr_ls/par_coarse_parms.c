@@ -112,27 +112,28 @@ hypre_BoomerAMGCoarseParms(MPI_Comm         comm,
                            hypre_IntArray **coarse_dof_func_ptr,
                            HYPRE_BigInt    *coarse_pnts_global)
 {
-   HYPRE_Int ierr = 0;
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_IntArrayMemoryLocation(CF_marker));
    if (num_functions > 1)
    {
       exec = hypre_GetExecPolicy2(hypre_IntArrayMemoryLocation(CF_marker),
                                   hypre_IntArrayMemoryLocation(dof_func));
    }
+   else
+   {
+      exec = hypre_GetExecPolicy1(hypre_IntArrayMemoryLocation(CF_marker));
+   }
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      ierr = hypre_BoomerAMGCoarseParmsDevice(comm, local_num_variables, num_functions, dof_func,
+      return hypre_BoomerAMGCoarseParmsDevice(comm, local_num_variables, num_functions, dof_func,
                                               CF_marker, coarse_dof_func_ptr, coarse_pnts_global);
    }
    else
 #endif
    {
-      ierr = hypre_BoomerAMGCoarseParmsHost(comm, local_num_variables, num_functions, dof_func,
+      return hypre_BoomerAMGCoarseParmsHost(comm, local_num_variables, num_functions, dof_func,
                                             CF_marker, coarse_dof_func_ptr, coarse_pnts_global);
    }
-
-   return ierr;
 }

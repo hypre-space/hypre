@@ -2133,13 +2133,11 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                                HYPRE_Int            weight_option,
                                hypre_ParCSRMatrix **P_ptr )
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("MultipassInterp");
-#endif
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
                                                       hypre_ParCSRMatrixMemoryLocation(S) );
    if (exec == HYPRE_EXEC_DEVICE)
@@ -2159,9 +2157,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                                                 P_ptr );
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }
