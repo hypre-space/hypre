@@ -52,7 +52,8 @@ co="--with-cuda --enable-unified-memory --with-gpu-arch=70 --with-extra-CFLAGS=\
 # CUDA 9.1 with UM [no run]
 module -q load cuda/9.1
 module list cuda/9.1 |& grep "None found"
-co="--with-cuda --enable-unified-memory --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
+module -q load gcc
+co="--with-cuda --enable-unified-memory --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\' CC=mpicc CXX=mpicxx"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-cuda9_1
 
