@@ -23,7 +23,7 @@ cat >> $MUP_HEADER <<@
 #ifndef UTILITIES_MUP_FUNC_HEADER
 #define UTILITIES_MUP_FUNC_HEADER
 
-#include "HYPRE_utilities.h"
+#include "multiprecision.h"
 
 @
 

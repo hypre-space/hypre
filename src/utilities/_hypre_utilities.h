@@ -1225,8 +1225,9 @@ extern "C" {
 /* timer.c */
 hypre_double time_getWallclockSeconds( void );
 hypre_double time_getCPUSeconds( void );
-hypre_double time_get_wallclock_seconds_( void );
-hypre_double time_get_cpu_seconds_( void );
+/* These functions are not called anywhere else. Should we be ending with underscore?? - DOK */
+//hypre_double time_get_wallclock_seconds_( void );
+//hypre_double time_get_cpu_seconds_( void );
 
 /*--------------------------------------------------------------------------
  * With timing off

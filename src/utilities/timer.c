@@ -46,7 +46,8 @@ hypre_double time_getCPUSeconds(void)
    return (0.0);
 #endif
 }
-
+/* These functions are not called anywhere else. Should we be ending with underscore?? - DOK */
+/*
 hypre_double time_get_wallclock_seconds_(void)
 {
    return (time_getWallclockSeconds());
@@ -56,3 +57,4 @@ hypre_double time_get_cpu_seconds_(void)
 {
    return (time_getCPUSeconds());
 }
+*/
