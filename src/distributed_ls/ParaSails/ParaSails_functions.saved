@@ -10,6 +10,14 @@ HashLookup
 HashPrint
 HashRehash
 HashReset
+hypre_ParaSailsApply
+hypre_ParaSailsApplyTrans
+hypre_ParaSailsBuildIJMatrix
+hypre_ParaSailsCreate
+hypre_ParaSailsDestroy
+hypre_ParaSailsSetup
+hypre_ParaSailsSetupPattern
+hypre_ParaSailsSetupValues
 LoadBalDonate
 LoadBalDonorRecv
 LoadBalDonorSend
@@ -70,11 +78,3 @@ StoredRowsCreate
 StoredRowsDestroy
 StoredRowsGet
 StoredRowsPut
-hypre_ParaSailsApply
-hypre_ParaSailsApplyTrans
-hypre_ParaSailsBuildIJMatrix
-hypre_ParaSailsCreate
-hypre_ParaSailsDestroy
-hypre_ParaSailsSetup
-hypre_ParaSailsSetupPattern
-hypre_ParaSailsSetupValues

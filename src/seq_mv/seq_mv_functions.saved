@@ -1,3 +1,5 @@
+hypre_CSRMatrixGpuSpMVAnalysis
+hypre_CSRMatrixSortRow
 hypre_CSRMatrixAdd
 hypre_CSRMatrixAddFirstPass
 hypre_CSRMatrixAddHost
@@ -21,8 +23,6 @@ hypre_CSRMatrixSplit
 hypre_CSRMatrixSumElts
 hypre_CSRMatrixTranspose
 hypre_CSRMatrixTransposeHost
-hypre_CSRMatrixGpuSpMVAnalysis
-hypre_CSRMatrixSortRow
 hypre_CSRMatrixBigInitialize
 hypre_CSRMatrixBigJtoJ
 hypre_CSRMatrixCheckSetNumNonzeros
@@ -52,11 +52,11 @@ hypre_CSRMatrixSetRownnz
 hypre_CSRMatrixSetRownnzHost
 hypre_CSRMatrixUnion
 hypre_CSRMatrixMatvec
+hypre_CSRMatrixMatvec_FF
 hypre_CSRMatrixMatvecOutOfPlace
 hypre_CSRMatrixMatvecOutOfPlaceHost
 hypre_CSRMatrixMatvecT
 hypre_CSRMatrixMatvecTHost
-hypre_CSRMatrixMatvec_FF
 hypre_GenerateLocalPartitioning
 hypre_GeneratePartitioning
 hypre_MappedMatrixAssemble
@@ -79,6 +79,15 @@ hypre_MultiblockMatrixPrint
 hypre_MultiblockMatrixSetNumSubmatrices
 hypre_MultiblockMatrixSetSubmatrix
 hypre_MultiblockMatrixSetSubmatrixType
+hypre_SeqVectorMassAxpy
+hypre_SeqVectorMassAxpy4
+hypre_SeqVectorMassAxpy8
+hypre_SeqVectorMassDotpTwo
+hypre_SeqVectorMassDotpTwo4
+hypre_SeqVectorMassDotpTwo8
+hypre_SeqVectorMassInnerProd
+hypre_SeqVectorMassInnerProd4
+hypre_SeqVectorMassInnerProd8
 hypre_SeqMultiVectorCreate
 hypre_SeqVectorAxpy
 hypre_SeqVectorAxpyHost
@@ -109,12 +118,3 @@ hypre_SeqVectorSetRandomValues
 hypre_SeqVectorSetSize
 hypre_SeqVectorSumElts
 hypre_SeqVectorSumEltsHost
-hypre_SeqVectorMassAxpy
-hypre_SeqVectorMassAxpy4
-hypre_SeqVectorMassAxpy8
-hypre_SeqVectorMassDotpTwo
-hypre_SeqVectorMassDotpTwo4
-hypre_SeqVectorMassDotpTwo8
-hypre_SeqVectorMassInnerProd
-hypre_SeqVectorMassInnerProd4
-hypre_SeqVectorMassInnerProd8

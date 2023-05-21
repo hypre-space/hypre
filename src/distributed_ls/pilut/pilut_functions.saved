@@ -62,8 +62,8 @@ hypre_DecKeyValueCmp
 hypre_ExtractMinLR
 hypre_IdxIncSort
 hypre_PrintIdxVal
-hypre_SortKeyValueNodesDec
-hypre_ValDecSort
 hypre_sasum
 hypre_sdecsort
 hypre_sincsort
+hypre_SortKeyValueNodesDec
+hypre_ValDecSort

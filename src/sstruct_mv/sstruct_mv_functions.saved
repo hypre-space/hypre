@@ -60,8 +60,8 @@ hypre_sstructvectorsetvalues
 hypre_SStructAxpy
 hypre_SStructPAxpy
 hypre_SStructCopy
-hypre_SStructPCopy
 hypre_SStructPartialPCopy
+hypre_SStructPCopy
 hypre_SStructGraphFindBoxEndpt
 hypre_SStructGraphFindSGridEndpts
 hypre_SStructGraphGetUVEntryRank
@@ -102,8 +102,8 @@ hypre_SStructPGridSetCellSGrid
 hypre_SStructPGridSetExtents
 hypre_SStructPGridSetPNeighbor
 hypre_SStructPGridSetVariables
-hypre_SStructVarToNborVar
 hypre_SStructVariableGetOffset
+hypre_SStructVarToNborVar
 hypre_SStructInnerProd
 hypre_SStructPInnerProd
 hypre_SStructMatrixMemoryLocation
