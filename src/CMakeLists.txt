@@ -422,6 +422,11 @@ endif ()
 # Create the HYPRE library object
 add_library(${PROJECT_NAME})
 
+set_target_properties(${PROJECT_NAME} PROPERTIES
+  VERSION "${HYPRE_VERSION}"
+  SOVERSION "${HYPRE_VERSION_MAJOR}.${HYPRE_VERSION_MINOR}"
+  )
+
 # Headers and sources
 set(HYPRE_HEADERS "")
 
