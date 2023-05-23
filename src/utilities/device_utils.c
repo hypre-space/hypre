@@ -2190,7 +2190,7 @@ hypreGPUKernel_CompileFlagSafetyCheck( hypre_DeviceItem &item,
 /*--------------------------------------------------------------------
  * hypre_CudaCompileFlagCheck
  *
- * Assume this function is called inside HYPRE_Init(), at a place
+ * Assume this function is called inside HYPRE_Initialize(), at a place
  * where we do not want to activate memory pooling, so we do not use
  * hypre's memory model to Alloc and Free.
  *
