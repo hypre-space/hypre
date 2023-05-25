@@ -636,9 +636,9 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
 #endif
    HYPRE_Int            *infos;
    HYPRE_Int            *blk_row_indices;
-   HYPRE_Real           *tmpdiag;
-   HYPRE_Real          **diag_aop;
-   HYPRE_Real          **tmpdiag_aop;
+   HYPRE_Complex        *tmpdiag;
+   HYPRE_Complex       **diag_aop;
+   HYPRE_Complex       **tmpdiag_aop;
 
    /* Local variables */
    HYPRE_Int             bs2 = blk_size * blk_size;
@@ -859,7 +859,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                            (std::int64_t) num_blocks, // std::int64_t batch_size,
                                                            scratchpad, // T *scratchpad,
                                                            scratchpad_size // std::int64_t scratchpad_size
-                                                            ) );
+                                                            ).wait() );
       hypre_TFree(scratchpad, HYPRE_MEMORY_DEVICE);
 #else
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Block inversion not available!");
