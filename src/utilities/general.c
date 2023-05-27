@@ -257,10 +257,15 @@ HYPRE_Initialize(void)
    }
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_SYCL)
+   /* WM: note that for sycl, we need to do device setup again if reinitializing */
+   if (!HYPRE_Initialized())
+#else
    /* If the library has not been initialized or finalized yet,
       meaning that it is the first time HYPRE_Init is being called,
       then perform the initialization of device structures below */
    if (!HYPRE_Initialized() && !HYPRE_Finalized())
+#endif
    {
 #if !defined(HYPRE_USING_SYCL)
       /* With sycl, cannot call hypre_GetDeviceLastError() until after device and queue setup */
