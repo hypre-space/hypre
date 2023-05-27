@@ -243,9 +243,6 @@ HYPRE_Initialize(void)
       return hypre_error_flag;
    }
 
-   /* Update library state */
-   hypre_SetInitialized();
-
 #if defined(HYPRE_USING_MEMORY_TRACKER)
    if (!_hypre_memory_tracker)
    {
@@ -340,6 +337,9 @@ HYPRE_Initialize(void)
    hypre_UmpireInit(_hypre_handle);
 #endif
 
+   /* Update library state */
+   hypre_SetInitialized();
+
    return hypre_error_flag;
 }
 
@@ -357,9 +357,6 @@ HYPRE_Finalize(void)
    {
       return hypre_error_flag;
    }
-
-   /* Update library state */
-   hypre_SetFinalized();
 
 #if defined(HYPRE_USING_UMPIRE)
    hypre_UmpireFinalize(_hypre_handle);
@@ -384,6 +381,9 @@ HYPRE_Finalize(void)
    hypre_MemoryTrackerDestroy(_hypre_memory_tracker);
    _hypre_memory_tracker = NULL;
 #endif
+
+   /* Update library state */
+   hypre_SetFinalized();
 
    return hypre_error_flag;
 }
