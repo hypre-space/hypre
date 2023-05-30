@@ -163,7 +163,7 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
    /*------------------------------------------------------------------
     * Initialize IS_marker by putting all nodes in the IS (marked by 1)
     *------------------------------------------------------------------*/
-   hypreDevice_ScatterConstant(IS_marker_diag, graph_diag_size, graph_diag, 1);
+   hypreDevice_ScatterConstant(IS_marker_diag, graph_diag_size, graph_diag, (HYPRE_Int) 1);
 
    /*-------------------------------------------------------
     * Remove nodes from the initial independent set

@@ -36,6 +36,7 @@ cat par_amgdd_comp_grid.h >> $INTERNAL_HEADER
 cat par_amgdd.h           >> $INTERNAL_HEADER
 cat par_fsai.h            >> $INTERNAL_HEADER
 cat ams.h                 >> $INTERNAL_HEADER
+cat par_ilu.h             >> $INTERNAL_HEADER
 cat protos.h              >> $INTERNAL_HEADER
 
 #===========================================================================
