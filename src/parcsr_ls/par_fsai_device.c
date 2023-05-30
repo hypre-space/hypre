@@ -944,17 +944,17 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
       hypre_GpuProfilingPopRange();
 
 #if HYPRE_DEBUG
-     hypre_TMemcpy(h_info, info, HYPRE_Int, num_rows,
-                   HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-     for (HYPRE_Int k = 0; k < num_rows; k++)
-     {
-        if (h_info[k] != 0)
-        {
-           hypre_ParPrintf(hypre_ParCSRMatrixComm(A),
-                           "Cholesky factorization failed at system #%d, row %d\n",
-                           k, h_info[k]);
-        }
-     }
+      hypre_TMemcpy(h_info, info, HYPRE_Int, num_rows,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      for (HYPRE_Int k = 0; k < num_rows; k++)
+      {
+         if (h_info[k] != 0)
+         {
+            hypre_ParPrintf(hypre_ParCSRMatrixComm(A),
+                            "Cholesky factorization failed at system #%d, row %d\n",
+                            k, h_info[k]);
+         }
+      }
 #endif
 
       hypre_GpuProfilingPushRange("Solve");
@@ -983,17 +983,17 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
       hypre_GpuProfilingPopRange();
 
 #if HYPRE_DEBUG
-     hypre_TMemcpy(h_info, info, HYPRE_Int, num_rows,
-                   HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-     for (HYPRE_Int k = 0; k < num_rows; k++)
-     {
-        if (h_info[k] != 0)
-        {
-           hypre_ParPrintf(hypre_ParCSRMatrixComm(A),
-                           "Cholesky solution failed at system #%d with code %d\n",
-                           k, h_info[k]);
-        }
-     }
+      hypre_TMemcpy(h_info, info, HYPRE_Int, num_rows,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      for (HYPRE_Int k = 0; k < num_rows; k++)
+      {
+         if (h_info[k] != 0)
+         {
+            hypre_ParPrintf(hypre_ParCSRMatrixComm(A),
+                            "Cholesky solution failed at system #%d with code %d\n",
+                            k, h_info[k]);
+         }
+      }
 #endif
 
 #if HYPRE_DEBUG

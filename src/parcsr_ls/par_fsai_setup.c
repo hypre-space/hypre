@@ -1041,7 +1041,7 @@ hypre_FSAISetup( void               *fsai_vdata,
 
 #if defined (DEBUG_FSAI)
 #if !defined (HYPRE_USING_GPU) ||
-    (defined (HYPRE_USING_GPU) && defined (HYPRE_USING_UNIFIED_MEMORY))
+   (defined (HYPRE_USING_GPU) && defined (HYPRE_USING_UNIFIED_MEMORY))
    hypre_FSAIDumpLocalLSDense(fsai_vdata, "fsai_dense_ls.out", A);
 #endif
 #endif
@@ -1312,13 +1312,13 @@ hypre_FSAIDumpLocalLSDense( void               *fsai_vdata,
       {
          for (jj = 0; jj < n; jj++)
          {
-            hypre_fprintf(fp, "%*.*f ", width, prec, data[ii*n + jj]);
+            hypre_fprintf(fp, "%*.*f ", width, prec, data[ii * n + jj]);
          }
          hypre_fprintf(fp, "\n");
       }
       for (jj = 0; jj < n; jj++)
       {
-         hypre_fprintf(fp, "%*.*f ", width, prec, data[ii*n + jj]);
+         hypre_fprintf(fp, "%*.*f ", width, prec, data[ii * n + jj]);
       }
       hypre_fprintf(fp, "\n");
 
