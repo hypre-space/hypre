@@ -603,8 +603,6 @@ hypre_FSAIExtractSubSystemsDevice( HYPRE_Int       num_rows,
 
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "warp", bDim);
-   /* dim3 bDim = {1, 1, 1}; */
-   /* dim3 gDim = {1, 1, 1}; */
 
    HYPRE_GPU_LAUNCH( hypreGPUKernel_FSAIExtractSubSystems, gDim, bDim, num_rows,
                      A_i, A_j, A_a, P_i, P_e, P_j, ldim, mat_data, rhs_data, G_r );
@@ -632,8 +630,6 @@ hypre_FSAIScalingDevice( HYPRE_Int       num_rows,
 
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "thread", bDim);
-   /* dim3 bDim = {1, 1, 1}; */
-   /* dim3 gDim = {1, 1, 1}; */
 
    HYPRE_GPU_LAUNCH( hypreGPUKernel_FSAIScaling, gDim, bDim,
                      num_rows, ldim, sol_data, rhs_data, scaling, info );

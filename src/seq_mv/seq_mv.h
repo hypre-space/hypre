@@ -347,7 +347,6 @@ hypre_CSRMatrix* hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A, hypre_CSRM
 HYPRE_Int hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix *A, HYPRE_Real *colnnz);
 HYPRE_Int hypre_CSRMatrixMoveDiagFirstDevice( hypre_CSRMatrix  *A );
 HYPRE_Int hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix  *A );
-HYPRE_Int hypre_CSRMatrixFixZeroDiagDevice( hypre_CSRMatrix *A, HYPRE_Complex v, HYPRE_Real tol );
 HYPRE_Int hypre_CSRMatrixReplaceDiagDevice( hypre_CSRMatrix *A, HYPRE_Complex *new_diag,
                                             HYPRE_Complex v, HYPRE_Real tol );
 void hypre_CSRMatrixComputeRowSumDevice( hypre_CSRMatrix *A, HYPRE_Int *CF_i, HYPRE_Int *CF_j,
@@ -363,15 +362,15 @@ HYPRE_Int hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A, HYPRE_Real 
 HYPRE_Int hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix *A, HYPRE_Int *perm,
                                         HYPRE_Int *rqperm, hypre_CSRMatrix *B );
 HYPRE_Int hypre_CSRMatrixSortRow(hypre_CSRMatrix *A);
-HYPRE_Int hypre_CSRMatrixTriLowerUpperSolveDevice(char uplo, hypre_CSRMatrix *A,
-                                                  HYPRE_Real *l1_norms, hypre_Vector *f, hypre_Vector *u );
-HYPRE_Int hypre_CSRMatrixTriLowerUpperSolveRocsparse(char uplo, hypre_CSRMatrix *A,
-                                                     HYPRE_Real *l1_norms, hypre_Vector *f, hypre_Vector *u );
-HYPRE_Int hypre_CSRMatrixTriLowerUpperSolveCusparse(char uplo, hypre_CSRMatrix *A,
-                                                    HYPRE_Real *l1_norms, hypre_Vector *f, hypre_Vector *u );
+HYPRE_Int hypre_CSRMatrixSortRowOutOfPlace(hypre_CSRMatrix *A);
+HYPRE_Int hypre_CSRMatrixTriLowerUpperSolveDevice_core(char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, HYPRE_Real *l1_norms, hypre_Vector *f, HYPRE_Int offset_f, hypre_Vector *u, HYPRE_Int offset_u);
+HYPRE_Int hypre_CSRMatrixTriLowerUpperSolveDevice(char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, HYPRE_Real *l1_norms, hypre_Vector *f, hypre_Vector *u );
+HYPRE_Int hypre_CSRMatrixTriLowerUpperSolveRocsparse(char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, HYPRE_Real *l1_norms, HYPRE_Complex *f, HYPRE_Complex *u );
+HYPRE_Int hypre_CSRMatrixTriLowerUpperSolveCusparse(char uplo, HYPRE_Int unit_diag, hypre_CSRMatrix *A, HYPRE_Real *l1_norms, HYPRE_Complex *f, HYPRE_Complex *u );
 HYPRE_Int hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int *markA,
                                           HYPRE_Int diag_option);
 HYPRE_Int hypre_CSRMatrixDiagScaleDevice( hypre_CSRMatrix *A, hypre_Vector *ld, hypre_Vector *rd);
+HYPRE_Int hypre_CSRMatrixILU0(hypre_CSRMatrix *A);
 
 /* csr_matrix.c */
 hypre_CSRMatrix *hypre_CSRMatrixCreate ( HYPRE_Int num_rows, HYPRE_Int num_cols,
