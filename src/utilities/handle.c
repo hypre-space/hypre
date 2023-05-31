@@ -95,7 +95,7 @@ hypre_SetSpGemmRownnzEstimateNSamples( HYPRE_Int value )
 }
 
 HYPRE_Int
-hypre_SetSpGemmRownnzEstimateMultFactor( HYPRE_Real value )
+hypre_SetSpGemmRownnzEstimateMultFactor( hypre_float value )
 {
 #if defined(HYPRE_USING_GPU)
    if (value > 0.0)

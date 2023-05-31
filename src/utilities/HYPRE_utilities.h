@@ -24,6 +24,10 @@
 #include <omp.h>
 #endif
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "utilities_mup_func.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -56,6 +60,9 @@ typedef int HYPRE_Int;
  *--------------------------------------------------------------------------*/
 
 #include <float.h>
+
+/* Include multiprecision header */
+//#include "multiprecision.h"
 
 #if defined(HYPRE_SINGLE)
 typedef float HYPRE_Real;
@@ -99,6 +106,11 @@ typedef HYPRE_Real HYPRE_Complex;
 #define HYPRE_MPI_COMPLEX HYPRE_MPI_REAL
 #endif
 
+/* This allows us to consistently avoid 'float, double and longdouble' throughout hypre */
+typedef double            hypre_double;
+typedef float            hypre_float;
+typedef long double            hypre_long_double;
+
 /*--------------------------------------------------------------------------
  * Sequential MPI stuff
  *--------------------------------------------------------------------------*/
@@ -117,6 +129,8 @@ typedef HYPRE_Int MPI_Comm;
 /* bits 4-8 are reserved for the index of the argument error */
 #define HYPRE_ERROR_CONV          256   /* method did not converge as expected */
 #define HYPRE_MAX_FILE_NAME_LEN  1024   /* longest filename length used in hypre */
+
+
 
 /*--------------------------------------------------------------------------
  * HYPRE init/finalize

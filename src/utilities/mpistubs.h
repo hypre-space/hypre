@@ -252,8 +252,8 @@ typedef MPI_User_function    hypre_MPI_User_function;
 HYPRE_Int hypre_MPI_Init( hypre_int *argc, char ***argv );
 HYPRE_Int hypre_MPI_Finalize( void );
 HYPRE_Int hypre_MPI_Abort( hypre_MPI_Comm comm, HYPRE_Int errorcode );
-HYPRE_Real hypre_MPI_Wtime( void );
-HYPRE_Real hypre_MPI_Wtick( void );
+hypre_double hypre_MPI_Wtime( void );
+hypre_double hypre_MPI_Wtick( void );
 HYPRE_Int hypre_MPI_Barrier( hypre_MPI_Comm comm );
 HYPRE_Int hypre_MPI_Comm_create( hypre_MPI_Comm comm, hypre_MPI_Group group,
                                  hypre_MPI_Comm *newcomm );
