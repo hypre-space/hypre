@@ -451,6 +451,16 @@ hypre_BoomerAMGBuildRestrNeumannAIR_assembleRdiag( hypre_DeviceItem    &item,
    }
 }
 
+#if !defined(HYPRE_USING_SYCL)
+struct setTo1minus1 : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
+{
+   __host__ __device__ HYPRE_Int operator()(const HYPRE_Int &x) const
+   {
+      return x > 0 ? 1 : -1;
+   }
+};
+#endif
+
 HYPRE_Int
 hypre_BoomerAMGCFMarkerTo1minus1Device( HYPRE_Int *CF_marker,
                                         HYPRE_Int size )
@@ -466,7 +476,7 @@ hypre_BoomerAMGCFMarkerTo1minus1Device( HYPRE_Int *CF_marker,
                       CF_marker,
                       CF_marker + size,
                       CF_marker,
-                      _1 > 0 ? 1 : -1 );
+                      setTo1minus1() );
 #endif
 
    return hypre_error_flag;
