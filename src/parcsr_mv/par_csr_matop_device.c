@@ -1976,11 +1976,13 @@ hypre_ParCSRMatrixDiagScaleDevice( hypre_ParCSRMatrix *par_A,
    /* A_offd = diag(ld) * A_offd * diag(rd) */
    hypre_CSRMatrixDiagScale(A_offd, ld, rdbuf);
 
+#if defined(HYPRE_USING_GPU)
    /*---------------------------------------------------------------------
     * Synchronize calls
     *--------------------------------------------------------------------*/
    hypre_SetSyncCudaCompute(sync_stream);
    hypre_SyncComputeStream(hypre_handle());
+#endif
 
    /* Free memory */
    hypre_SeqVectorDestroy(rdbuf);
