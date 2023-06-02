@@ -2294,7 +2294,7 @@ hypre_CSRMatrixSortRowOutOfPlace(hypre_CSRMatrix *A)
  *   d_a_sorted: coefficients [in/out]
  *--------------------------------------------------------------------------*/
 
-void
+HYPRE_Int
 hypre_SortCSRCusparse( HYPRE_Int            n,
                        HYPRE_Int            m,
                        HYPRE_Int            nnzA,
@@ -2326,6 +2326,8 @@ hypre_SortCSRCusparse( HYPRE_Int            n,
    HYPRE_CUSPARSE_CALL(cusparseDestroyCsru2csrInfo(sortInfoA));
 
    hypre_GpuProfilingPopRange();
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -2887,7 +2889,7 @@ hypre_SortCSRRocsparse( HYPRE_Int            n,
 
    hypre_TFree(d_a_tmp, HYPRE_MEMORY_DEVICE);
 
-   return hypre_error_flag
+   return hypre_error_flag;
 }
 #endif // #if defined(HYPRE_USING_CUSPARSE) #elif defined(HYPRE_USING_ROCSPARSE)
 
