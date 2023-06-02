@@ -15,7 +15,7 @@
 #include "_hypre_IJ_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 /*--------------------------------------------------------------------
  * hypre_IJVectorAssembleFunctor
@@ -94,8 +94,8 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
    /*     but I can't get that to work for some reason */
    HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::transform,
-                      oneapi::dpl::counting_iterator(0),
-                      oneapi::dpl::counting_iterator(N0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(N0),
                       reverse_perm,
    [N0] (auto i) { return N0 - i - 1; });
 
@@ -195,8 +195,8 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
    /*     but I can't get that to work for some reason */
    HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::transform,
-                      oneapi::dpl::counting_iterator(0),
-                      oneapi::dpl::counting_iterator(N0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(N0),
                       reverse_perm,
    [N0] (auto i) { return N0 - i - 1; });
 

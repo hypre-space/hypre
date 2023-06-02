@@ -44,7 +44,7 @@ hypre_BoomerAMGRelaxHybridGaussSeidelDevice( hypre_ParCSRMatrix *A,
       hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, u, 1.0, f, w1);
 
       /* Z = L^{-1}*V */
-      hypre_CSRMatrixTriLowerUpperSolveDevice('L', hypre_ParCSRMatrixDiag(A), l1_norms,
+      hypre_CSRMatrixTriLowerUpperSolveDevice('L', 0, hypre_ParCSRMatrixDiag(A), l1_norms,
                                               hypre_ParVectorLocalVector(w1),
                                               hypre_ParVectorLocalVector(w2));
 
@@ -57,7 +57,7 @@ hypre_BoomerAMGRelaxHybridGaussSeidelDevice( hypre_ParCSRMatrix *A,
                             hypre_ParVectorLocalVector(w1));
 
       /* Z = U^{-1}*V */
-      hypre_CSRMatrixTriLowerUpperSolveDevice('U', hypre_ParCSRMatrixDiag(A), l1_norms,
+      hypre_CSRMatrixTriLowerUpperSolveDevice('U', 0, hypre_ParCSRMatrixDiag(A), l1_norms,
                                               hypre_ParVectorLocalVector(w1),
                                               hypre_ParVectorLocalVector(w2));
 
@@ -71,7 +71,7 @@ hypre_BoomerAMGRelaxHybridGaussSeidelDevice( hypre_ParCSRMatrix *A,
       hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A, u, 1.0, f, w1);
 
       /* Z = L^{-1}*V or Z = U^{-1}*V */
-      hypre_CSRMatrixTriLowerUpperSolveDevice(uplo, hypre_ParCSRMatrixDiag(A), l1_norms,
+      hypre_CSRMatrixTriLowerUpperSolveDevice(uplo, 0, hypre_ParCSRMatrixDiag(A), l1_norms,
                                               hypre_ParVectorLocalVector(w1),
                                               hypre_ParVectorLocalVector(w2));
 

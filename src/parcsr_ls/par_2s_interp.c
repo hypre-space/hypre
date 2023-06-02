@@ -628,13 +628,11 @@ hypre_BoomerAMGBuildModPartialExtInterp( hypre_ParCSRMatrix  *A,
                                          HYPRE_Int            max_elmts,
                                          hypre_ParCSRMatrix **P_ptr )
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("PartialExtInterp");
-#endif
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -651,9 +649,7 @@ hypre_BoomerAMGBuildModPartialExtInterp( hypre_ParCSRMatrix  *A,
                                                          debug_flag, trunc_factor, max_elmts, P_ptr);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }
@@ -1333,13 +1329,11 @@ hypre_BoomerAMGBuildModPartialExtPEInterp( hypre_ParCSRMatrix  *A,
                                            HYPRE_Int            max_elmts,
                                            hypre_ParCSRMatrix **P_ptr )
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("PartialExtPEInterp");
-#endif
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -1356,9 +1350,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterp( hypre_ParCSRMatrix  *A,
                                                            debug_flag, trunc_factor, max_elmts, P_ptr);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }
