@@ -86,7 +86,7 @@ hypre_ILUSolve( void               *ilu_vdata,
    hypre_ParVector      *Ytemp         = hypre_ParILUDataYTemp(ilu_data);
    HYPRE_Real           *fext          = hypre_ParILUDataFExt(ilu_data);
    HYPRE_Real           *uext          = hypre_ParILUDataUExt(ilu_data);
-   hypre_ParVector      *residual;
+   hypre_ParVector      *residual      = NULL;
 
    HYPRE_Real           alpha          = -1;
    HYPRE_Real           beta           = 1;
@@ -2067,7 +2067,7 @@ hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A,
    //HYPRE_Real        *f_data;
    hypre_Vector      *rhs_local;
    HYPRE_Real        *rhs_data;
-   hypre_Vector      *x_local;
+   hypre_Vector      *x_local = NULL;
    HYPRE_Real        *x_data;
 
    /* begin */
@@ -2081,7 +2081,6 @@ hypre_ILUSolveRAPGMRESHOST(hypre_ParCSRMatrix *A,
       rhs_data    = hypre_VectorData(rhs_local);
       x_local     = hypre_ParVectorLocalVector(x);
       x_data      = hypre_VectorData(x_local);
-
    }
 
    /* only support RAP with partial factorized W and Z */
@@ -2279,7 +2278,7 @@ hypre_NSHSolve( void               *nsh_vdata,
    HYPRE_Real           *norms = hypre_ParNSHDataRelResNorms(nsh_data);
    hypre_ParVector      *Ftemp = hypre_ParNSHDataFTemp(nsh_data);
    hypre_ParVector      *Utemp = hypre_ParNSHDataUTemp(nsh_data);
-   hypre_ParVector      *residual;
+   hypre_ParVector      *residual = NULL;
 
    HYPRE_Real           alpha = -1.0;
    HYPRE_Real           beta = 1.0;
@@ -2508,6 +2507,7 @@ hypre_NSHSolve( void               *nsh_vdata,
          hypre_printf("                operator = %f\n", operat_cmplxty);
       }
    }
+
    return hypre_error_flag;
 }
 

@@ -261,7 +261,7 @@ hypre_BoomerAMG_MyCreateS(hypre_ParCSRMatrix  *A,
    hypre_CSRMatrix         *S_offd;
    HYPRE_Int               *S_offd_i = NULL;
    HYPRE_Int               *S_offd_j = NULL;
-   HYPRE_Real              *S_offd_data;
+   HYPRE_Real              *S_offd_data = NULL;
 
    HYPRE_Real               diag, row_scale, row_sum;
    HYPRE_Int                i, jA, jS;

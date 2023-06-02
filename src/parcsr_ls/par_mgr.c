@@ -3400,7 +3400,7 @@ hypre_MGRBuildInterpApproximateInverse(hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrix   *W;
    MPI_Comm        comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRMatrix    *P;
-   HYPRE_BigInt         *col_map_offd_P;
+   HYPRE_BigInt         *col_map_offd_P = NULL;
    HYPRE_Real      *P_diag_data;
    HYPRE_Int             *P_diag_i;
    HYPRE_Int             *P_diag_j;
@@ -4010,7 +4010,7 @@ hypre_block_jacobi_solve( hypre_ParCSRMatrix *A,
    HYPRE_Real      *A_offd_data  = hypre_CSRMatrixData(A_offd);
    HYPRE_Int       *A_offd_j     = hypre_CSRMatrixJ(A_offd);
    hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-   hypre_ParCSRCommHandle *comm_handle;
+   hypre_ParCSRCommHandle *comm_handle = NULL;
 
    HYPRE_Int        n       = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Int        num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
@@ -4228,7 +4228,7 @@ hypre_MGRBlockRelaxSolve( hypre_ParCSRMatrix *A,
    HYPRE_Real      *A_offd_data  = hypre_CSRMatrixData(A_offd);
    HYPRE_Int       *A_offd_j     = hypre_CSRMatrixJ(A_offd);
    hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-   hypre_ParCSRCommHandle *comm_handle;
+   hypre_ParCSRCommHandle *comm_handle = NULL;
 
    HYPRE_Int        n       = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Int        num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
@@ -4391,6 +4391,7 @@ hypre_BlockDiagInvLapack(HYPRE_Real *diag, HYPRE_Int N, HYPRE_Int blk_size)
 
    nblock = N / blk_size;
    left_size = N - blk_size * nblock;
+   i = nblock;
    HYPRE_Int *IPIV = hypre_CTAlloc(HYPRE_Int, blk_size, HYPRE_MEMORY_HOST);
 
    wall_time = time_getWallclockSeconds();

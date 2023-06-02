@@ -169,10 +169,10 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
    HYPRE_Int       *dof_func_offd = NULL;
    HYPRE_BigInt    *fine_to_coarse_offd;
 
-   hypre_CSRMatrix *P_ext;
-   HYPRE_Real      *P_ext_data;
-   HYPRE_Int       *P_ext_i;
-   HYPRE_BigInt    *P_ext_j;
+   hypre_CSRMatrix *P_ext = NULL;
+   HYPRE_Real      *P_ext_data = NULL;
+   HYPRE_Int       *P_ext_i = NULL;
+   HYPRE_BigInt    *P_ext_j = NULL;
    HYPRE_Int        num_sends_A, index, start;
    HYPRE_Int        myid = 0, num_procs = 1;
 
@@ -1701,7 +1701,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
                      found = 0;
                      for (pp = P_ext_i[j_ext_index]; pp < P_ext_i[j_ext_index + 1]; pp++)
                      {
-                        p_point  = (HYPRE_Int)P_ext_j[pp];
+                        p_point = (HYPRE_Int) P_ext_j[pp];
                         if (p_point > -1) /* diag part */
                         {
                            if (p_point == kk_point)
@@ -2131,10 +2131,8 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
       P_diag_i_new[i + 1] = P_diag_i_new[i] + num_new_p_diag;
       P_offd_i_new[i + 1] = P_offd_i_new[i] + num_new_p_offd;
 
-
       /* adjust p_count_offd to not include diag*/
       p_count_offd = p_count_offd - p_count_diag;
-
 
       if (p_count_diag != num_new_p_diag)
       {
@@ -2146,11 +2144,10 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error offd p_count in hypre_BoomerAMG_LNExpandInterp!\n");
       }
 
-
       /* NOW TRUNCATE Q ?*/
-      if ( add_q && q_count > 0  && (q_max > 0 || abs_trunc > 0.0))
+      if (add_q && q_count > 0  && (q_max > 0 || abs_trunc > 0.0))
       {
-         HYPRE_Real value, lost_value, q_dist_value;
+         HYPRE_Real value, lost_value, q_dist_value = 0.0;
          HYPRE_Int q_count_k, num_lost, p_count_tot;
          HYPRE_Int lost_counter_diag, lost_counter_offd, j_counter;
          HYPRE_Int new_num_q, new_j_counter, new_diag_pos, new_offd_pos;
@@ -2173,6 +2170,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
             {
                /* find out if any will be dropped */
                j_counter = 0;
+
                /* diag loop */
                for (j =  P_diag_i_new[i]; j <  P_diag_i_new[i] + p_count_diag; j++)
                {
@@ -2188,6 +2186,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
                   }
                   j_counter++;
                }
+
                /* offd loop  - don't reset j_counter*/
                for (j =  P_offd_i_new[i]; j <  P_offd_i_new[i] + p_count_offd; j++)
                {
@@ -2203,6 +2202,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
                   }
                   j_counter++;
                }
+
                /* now drop and adjust values of other entries in Q */
                if (num_lost)
                {
@@ -2219,9 +2219,9 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
                         hypre_printf("Warning: dropping all of Q; level = %d, i = %d, num = %d\n", level, i, num_lost);*/
                   }
                }
+
                if (num_lost)
                {
-
                   new_j_counter = 0;
                   lost_counter_diag = 0;
                   q_dist_value = 0.0;
@@ -2298,7 +2298,6 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
 
                   p_count_offd -= lost_counter_offd;
                   j_offd_pos -= lost_counter_offd;
-
                } /* end if num_lost */
             }
 
@@ -2329,9 +2328,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
                   aux_data[j_counter] = P_diag_data_new[j];
                   is_diag[j_counter] = 1;
                   j_counter++;
-
                }
-
 
                /* offd loop  - don't reset j_counter*/
                for (j = P_offd_i_new[i]; j < P_offd_i_new[i] + p_count_offd; j++)
@@ -2345,7 +2342,6 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
                   aux_data[j_counter] = P_offd_data_new[j];
                   is_diag[j_counter] = 0;
                   j_counter++;
-
                }
 
                new_num_q = q_count_k;
@@ -2353,7 +2349,6 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
 
                if (num_lost > 0)
                {
-
                   p_count_tot = p_count_diag + p_count_offd;
 
                   /* only keep loop_q_max elements - get rid of smallest */
@@ -2374,11 +2369,9 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
                   /* have to do diag and offd together because of sorting*/
                   for (j =  0; j < p_count_tot; j++)
                   {
-
                      if ((is_q[j_counter] == (k + 1)) && (lost_counter_q < num_lost))
                      {
-
-                        /*drop*/
+                        /* drop */
                         lost_value += aux_data[j_counter];
                         lost_counter_q++;
 
@@ -2424,7 +2417,6 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
                         }
                      }
                      j_counter++;
-
                   }/* end element loop */
                   /* adjust p_count and j_pos */
                   p_count_diag -= lost_counter_diag;
@@ -2432,19 +2424,13 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
 
                   j_diag_pos -= lost_counter_diag;
                   j_offd_pos -= lost_counter_offd;
-
-
                } /* end num lost > 0 */
-
             } /* end loop_q_max > 0  - element truncation */
-
-
-         }/* end of loop through smoothvecs */
+         } /* end of loop through smoothvecs */
 
          P_diag_i_new[i + 1] = P_diag_i_new[i] + p_count_diag;
          P_offd_i_new[i + 1] = P_offd_i_new[i] + p_count_offd;
-
-      }/* end of truncation*/
+      } /* end of truncation*/
 
       if (j_diag_pos != P_diag_i_new[i + 1])
       {
@@ -2628,7 +2614,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
    hypre_TFree(smooth_vec_offd, HYPRE_MEMORY_HOST);
    hypre_TFree(smooth_vec_offd_P, HYPRE_MEMORY_HOST);
 
-   if (num_procs > 1) { hypre_CSRMatrixDestroy(P_ext); }
+   hypre_CSRMatrixDestroy(P_ext);
 
    return hypre_error_flag;
 }

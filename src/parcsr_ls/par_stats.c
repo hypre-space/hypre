@@ -137,7 +137,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    HYPRE_Real   tol;
 
    HYPRE_Int block_mode;
-   HYPRE_Int block_size, bnnz;
+   HYPRE_Int block_size = 1;
+   HYPRE_Int bnnz = 1;
 
    HYPRE_Real tmp_norm;
 
@@ -1474,4 +1475,3 @@ HYPRE_Int    hypre_BoomerAMGWriteSolverParams(void* data)
 
    return 0;
 }
-

@@ -69,7 +69,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    hypre_CSRMatrix    *AN_offd;
    HYPRE_Int          *AN_offd_i;
    HYPRE_Int          *AN_offd_j;
-   HYPRE_Real         *AN_offd_data;
+   HYPRE_Real         *AN_offd_data = NULL;
    HYPRE_BigInt       *col_map_offd_AN;
    HYPRE_BigInt       *new_col_map_offd;
    HYPRE_BigInt        row_starts_AN[2];
@@ -79,21 +79,21 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    HYPRE_Int           new_num_cols_offd;
 
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-   HYPRE_Int            num_sends;
-   HYPRE_Int            num_recvs;
+   HYPRE_Int            num_sends = 0;
+   HYPRE_Int            num_recvs = 0;
    HYPRE_Int           *send_procs;
-   HYPRE_Int           *send_map_starts;
-   HYPRE_Int           *send_map_elmts = NULL;
+   HYPRE_Int           *send_map_starts = NULL;
+   HYPRE_Int           *send_map_elmts  = NULL;
    HYPRE_Int           *new_send_map_elmts;
    HYPRE_Int           *recv_procs;
-   HYPRE_Int           *recv_vec_starts;
+   HYPRE_Int           *recv_vec_starts = NULL;
 
    hypre_ParCSRCommPkg *comm_pkg_AN;
    HYPRE_Int           *send_procs_AN;
-   HYPRE_Int           *send_map_starts_AN;
-   HYPRE_Int           *send_map_elmts_AN;
+   HYPRE_Int           *send_map_starts_AN = NULL;
+   HYPRE_Int           *send_map_elmts_AN = NULL;
    HYPRE_Int           *recv_procs_AN;
-   HYPRE_Int           *recv_vec_starts_AN;
+   HYPRE_Int           *recv_vec_starts_AN = NULL;
 
    HYPRE_Int           i, j, k, k_map;
 

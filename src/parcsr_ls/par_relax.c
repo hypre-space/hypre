@@ -217,7 +217,7 @@ hypre_BoomerAMGRelaxWeightedJacobi_core( hypre_ParCSRMatrix *A,
    HYPRE_Complex        res;
 
    HYPRE_Int num_procs, my_id, i, j, ii, jj, index, num_sends, start;
-   hypre_ParCSRCommHandle *comm_handle;
+   hypre_ParCSRCommHandle *comm_handle = NULL;
 
    /* Sanity check */
    if (hypre_ParVectorNumVectors(f) > 1)
@@ -392,9 +392,12 @@ hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A,
    HYPRE_Complex        zero          = 0.0;
    HYPRE_Complex        res;
 
-   HYPRE_Int num_procs, my_id, i, j, ii, jj, p, jr, ip, num_sends, num_recvs, vec_start, vec_len;
-   hypre_MPI_Status *status;
-   hypre_MPI_Request *requests;
+   hypre_MPI_Status    *status        = NULL;
+   hypre_MPI_Request   *requests      = NULL;
+   HYPRE_Int            num_procs, my_id, i, j, ii, jj, p, jr, ip;
+   HYPRE_Int            vec_start, vec_len;
+   HYPRE_Int            num_sends = 0;
+   HYPRE_Int            num_recvs = 0;
 
    /* Sanity check */
    if (hypre_ParVectorNumVectors(f) > 1)
@@ -469,7 +472,8 @@ hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A,
              * nonzero, relax point i; otherwise, skip it.
              * Relax only C or F points as determined by relax_points.
              *-----------------------------------------------------------*/
-            if ( (relax_points == 0 || cf_marker[i] == relax_points) && A_diag_data[A_diag_i[i]] != zero )
+            if ( (relax_points == 0 || cf_marker[i] == relax_points) &&
+                  A_diag_data[A_diag_i[i]] != zero )
             {
                res = f_data[i];
                for (jj = A_diag_i[i] + 1; jj < A_diag_i[i + 1]; jj++)
@@ -532,9 +536,12 @@ hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
    HYPRE_Complex        zero          = 0.0;
    HYPRE_Complex        res;
 
-   HYPRE_Int num_procs, my_id, i, j, ii, jj, p, jr, ip, num_sends, num_recvs, vec_start, vec_len;
-   hypre_MPI_Status *status;
-   hypre_MPI_Request *requests;
+   HYPRE_Int            num_procs, my_id, i, j, ii, jj, p, jr, ip;
+   HYPRE_Int            num_sends = 0;
+   HYPRE_Int            num_recvs = 0;
+   HYPRE_Int            vec_start, vec_len;
+   hypre_MPI_Status    *status = NULL;
+   hypre_MPI_Request   *requests = NULL;
 
    /* Sanity check */
    if (hypre_ParVectorNumVectors(f) > 1)
@@ -564,14 +571,16 @@ hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
    /*-----------------------------------------------------------------
     * Relax interior points first
     *-----------------------------------------------------------------*/
+
    for (i = 0; i < num_rows; i++)
    {
       /*-----------------------------------------------------------
        * If i is of the right type ( C or F or All ) and diagonal is
        * nonzero, relax point i; otherwise, skip it.
        *-----------------------------------------------------------*/
-      if ( (relax_points == 0 || cf_marker[i] == relax_points) && A_offd_i[i + 1] - A_offd_i[i] == zero &&
-           A_diag_data[A_diag_i[i]] != zero )
+      if ( (relax_points == 0 || cf_marker[i] == relax_points) &&
+           (A_offd_i[i + 1] - A_offd_i[i] == zero) &&
+           (A_diag_data[A_diag_i[i]] != zero) )
       {
          res = f_data[i];
          for (jj = A_diag_i[i] + 1; jj < A_diag_i[i + 1]; jj++)
@@ -620,6 +629,7 @@ hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
             }
             hypre_MPI_Waitall(jr, requests, status);
          }
+
          for (i = 0; i < num_rows; i++)
          {
             /*-----------------------------------------------------------
@@ -627,8 +637,9 @@ hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
              * nonzero, relax point i; otherwise, skip it.
              * Relax only C or F points as determined by relax_points.
              *-----------------------------------------------------------*/
-            if ( (relax_points == 0 || cf_marker[i] == relax_points) && A_offd_i[i + 1] - A_offd_i[i] != zero &&
-                 A_diag_data[A_diag_i[i]] != zero)
+            if ( (relax_points == 0 || cf_marker[i] == relax_points) &&
+                 (A_offd_i[i + 1] - A_offd_i[i] != zero) &&
+                 (A_diag_data[A_diag_i[i]] != zero) )
             {
                res = f_data[i];
                for (jj = A_diag_i[i] + 1; jj < A_diag_i[i + 1]; jj++)

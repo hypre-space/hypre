@@ -4421,7 +4421,7 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
                                              HYPRE_Int print_level )
 {
    HYPRE_Int         i, k1, k2;
-   HYPRE_Real        value, trace1, trace2, alpha, r_norm;
+   HYPRE_Real        value, trace1, trace2, alpha, r_norm = 1.0;
 
    /* matrix A */
    HYPRE_Int         *A_i = hypre_CSRMatrixI(matA);
@@ -4431,7 +4431,7 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
 
    /* complexity */
    HYPRE_Real        nnzA = hypre_CSRMatrixNumNonzeros(matA);
-   HYPRE_Real        nnzM;
+   HYPRE_Real        nnzM = 1.0;
 
    /* inverse matrix */
    hypre_CSRMatrix   *inM = *M;
@@ -4453,7 +4453,7 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
    hypre_CSRMatrix   *matC;
    hypre_CSRMatrix   *matW;
 
-   HYPRE_Real        time_s, time_e;
+   HYPRE_Real        time_s = 0.0, time_e = 0.0;
 
    HYPRE_Int         n = hypre_CSRMatrixNumRows(matA);
 
@@ -4574,8 +4574,7 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
       hypre_CSRMatrixDestroy(matW);
       hypre_CSRMatrixDestroy(matC);
       hypre_CSRMatrixDestroy(matR_temp);
-
-   }/* end of main loop i for compute inverse matrix */
+   } /* end of main loop i for compute inverse matrix */
 
    /* time if we need to print */
    if (print_level > 1)
@@ -4597,7 +4596,6 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
    *M = matM;
 
    return hypre_error_flag;
-
 }
 
 /* Compute inverse with NSH method
