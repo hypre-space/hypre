@@ -408,6 +408,12 @@ hypre_ILUSolveSchurGMRESDevice(hypre_ParCSRMatrix  *A,
                                hypre_CSRMatrix     *matE_d,
                                hypre_CSRMatrix     *matF_d)
 {
+   /* If we don't have S block, just do one L solve and one U solve */
+   if (!S)
+   {
+      return hypre_ILUSolveLUDevice(A, matBLU_d, f, u, perm, ftemp, utemp);
+   }
+
    /* Data objects for temp vector */
    hypre_Vector      *utemp_local      = hypre_ParVectorLocalVector(utemp);
    HYPRE_Real        *utemp_data       = hypre_VectorData(utemp_local);
@@ -427,12 +433,6 @@ hypre_ILUSolveSchurGMRESDevice(hypre_ParCSRMatrix  *A,
    HYPRE_Real         beta             = 1.0;
    hypre_Vector      *ftemp_upper;
    hypre_Vector      *utemp_lower;
-
-   /* If we don't have S block, just do one L solve and one U solve */
-   if (!S)
-   {
-      return hypre_ILUSolveLUDevice(A, matBLU_d, f, u, perm, ftemp, utemp);
-   }
 
    /* Temporary vectors */
    ftemp_upper = hypre_SeqVectorCreate(nLU);
@@ -572,6 +572,14 @@ hypre_ILUSolveSchurGMRESJacIterDevice(hypre_ParCSRMatrix *A,
                                       HYPRE_Int           lower_jacobi_iters,
                                       HYPRE_Int           upper_jacobi_iters)
 {
+   /* If we don't have S block, just do one L solve and one U solve */
+   if (!S)
+   {
+      return hypre_ILUSolveLUIterDevice(A, matBLU_d, f, u, perm,
+                                        ftemp, utemp, ztemp, Adiag_diag,
+                                        lower_jacobi_iters, upper_jacobi_iters);
+   }
+
    /* Data objects for work vectors */
    hypre_Vector      *utemp_local = hypre_ParVectorLocalVector(utemp);
    hypre_Vector      *ftemp_local = hypre_ParVectorLocalVector(ftemp);
@@ -595,14 +603,6 @@ hypre_ILUSolveSchurGMRESJacIterDevice(hypre_ParCSRMatrix *A,
    hypre_Vector      *utemp_lower;
    hypre_Vector      *ftemp_shift;
    hypre_Vector      *utemp_shift;
-
-   /* If we don't have S block, just do one L solve and one U solve */
-   if (!S)
-   {
-      return hypre_ILUSolveLUIterDevice(A, matBLU_d, f, u, perm,
-                                        ftemp, utemp, ztemp, Adiag_diag,
-                                        lower_jacobi_iters, upper_jacobi_iters);
-   }
 
    /* Set work vectors */
    ftemp_upper = hypre_SeqVectorCreate(nLU);
@@ -779,11 +779,11 @@ hypre_ParILUSchurGMRESMatvecJacIterDevice(void          *matvec_data,
                                           void          *y)
 {
    /* get matrix information first */
-   hypre_ParILUData   *ilu_data           = (hypre_ParILUData*) ilu_vdata;
-   hypre_ParCSRMatrix *S                  = hypre_ParILUDataMatS(ilu_data);
-   hypre_Vector       *Sdiag_diag         = hypre_ParILUDataSDiagDiag(ilu_data);
-   HYPRE_Int           lower_jacobi_iters = hypre_ParILUDataLowerJacobiIters(ilu_data);
-   HYPRE_Int           upper_jacobi_iters = hypre_ParILUDataUpperJacobiIters(ilu_data);
+   hypre_ParILUData    *ilu_data           = (hypre_ParILUData*) ilu_vdata;
+   hypre_ParCSRMatrix  *S                  = hypre_ParILUDataMatS(ilu_data);
+   hypre_Vector        *Sdiag_diag         = hypre_ParILUDataSDiagDiag(ilu_data);
+   HYPRE_Int            lower_jacobi_iters = hypre_ParILUDataLowerJacobiIters(ilu_data);
+   HYPRE_Int            upper_jacobi_iters = hypre_ParILUDataUpperJacobiIters(ilu_data);
 
    /* fist step, apply matvec on empty diagonal slot */
    hypre_CSRMatrix     *S_diag            = hypre_ParCSRMatrixDiag(S);
@@ -813,6 +813,20 @@ hypre_ParILUSchurGMRESMatvecJacIterDevice(void          *matvec_data,
    hypre_ParCSRMatrixMatvec(alpha, (hypre_ParCSRMatrix *) S, (hypre_ParVector *) x, zero, xtemp);
    hypre_CSRMatrixNumRows(S_diag)     = S_diag_n;
    hypre_CSRMatrixNumNonzeros(S_diag) = S_diag_nnz;
+
+   /* Grab the main diagonal from the diagonal block. Only do this once */
+   if (!Sdiag_diag)
+   {
+      /* Storage for the diagonal */
+      Sdiag_diag = hypre_SeqVectorCreate(S_diag_n);
+      hypre_SeqVectorInitialize(Sdiag_diag);
+
+      /* Extract with device kernel */
+      hypre_CSRMatrixExtractDiagonalDevice(S_diag, hypre_VectorData(Sdiag_diag), 2);
+
+      /* Save Schur diagonal */
+      hypre_ParILUDataSDiagDiag(ilu_data) = Sdiag_diag;
+   }
 
    /* Compute U^{-1}*L^{-1}*(A_offd * x)
     * Or in another words, matvec with
