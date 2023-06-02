@@ -136,12 +136,9 @@ hypre_IntArrayNegateDevice( hypre_IntArray *v )
                       hypre_IntArrayData(v),
                       thrust::negate<HYPRE_Int>() );
 
-#elif defined(HYPRE_USING_SYCL)
+#elif defined(HYPRE_USING_SYCL) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented yet!");
 
-#elif defined (HYPRE_USING_DEVICE_OPENMP)
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Function not implemented for Device OpenMP");
-   *num_values_ptr = 0;
 #endif
 
    return hypre_error_flag;
