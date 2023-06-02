@@ -1113,10 +1113,17 @@ hypre_ILUWriteSolverParams(void *ilu_vdata)
 
    hypre_printf("\n ILU Solver Parameters: \n");
    hypre_printf("Max number of iterations: %d\n", hypre_ParILUDataMaxIter(ilu_data));
-   hypre_printf("Triangular solver type: %d\n", hypre_ParILUDataTriSolve(ilu_data));
-   hypre_printf("Lower Jacobi Iterations: %d\n", hypre_ParILUDataLowerJacobiIters(ilu_data));
-   hypre_printf("Upper Jacobi Iterations: %d\n", hypre_ParILUDataUpperJacobiIters(ilu_data));
-   hypre_printf("Stopping tolerance: %e\n", hypre_ParILUDataTol(ilu_data));
+   if (hypre_ParILUDataTriSolve(ilu_data))
+   {
+      hypre_printf("  Triangular solver type: exact (1)\n");
+   }
+   else
+   {
+      hypre_printf("  Triangular solver type: iterative (0)\n");
+      hypre_printf(" Lower Jacobi Iterations: %d\n", hypre_ParILUDataLowerJacobiIters(ilu_data));
+      hypre_printf(" Upper Jacobi Iterations: %d\n", hypre_ParILUDataUpperJacobiIters(ilu_data));
+   }
+   hypre_printf("      Stopping tolerance: %e\n", hypre_ParILUDataTol(ilu_data));
 
    return hypre_error_flag;
 }
@@ -3386,6 +3393,7 @@ hypre_ParILURAPSchurGMRESMatvecHost( void          *matvec_data,
  *
  * NSH create and solve and help functions.
  *
+ * TODO (VPM): Move NSH code to separate files?
  *****************************************************************************/
 
 /*--------------------------------------------------------------------------

@@ -91,7 +91,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Solver          schur_precond        = NULL;
    HYPRE_Solver          schur_precond_gotten = NULL;
 
-   /* Whether or not to use direct or iterative triangular solve */
+   /* Whether or not to use exact (direct) triangular solves */
    HYPRE_Int             tri_solve            = hypre_ParILUDataTriSolve(ilu_data);
 
    /* help to build external */
@@ -1786,18 +1786,10 @@ hypre_ILUSetupRAPMILU0(hypre_ParCSRMatrix  *A,
 
    hypre_ILUSetupLDUtoCusparse(L, D, U, &ALU);
 
-   if (L)
-   {
-      hypre_ParCSRMatrixDestroy(L);
-   }
-   if (D)
-   {
-      hypre_TFree(D, HYPRE_MEMORY_DEVICE);
-   }
-   if (U)
-   {
-      hypre_ParCSRMatrixDestroy(U);
-   }
+   /* Free memory */
+   hypre_ParCSRMatrixDestroy(L);
+   hypre_TFree(D, HYPRE_MEMORY_DEVICE);
+   hypre_ParCSRMatrixDestroy(U);
 
    *ALUp = ALU;
 
@@ -1809,7 +1801,6 @@ hypre_ILUSetupRAPMILU0(hypre_ParCSRMatrix  *A,
  *
  * Modified ILU(0) with RAP like solve
  * A = input matrix
- * Not explicitly forming the matrix, the previous version was abondoned
  *
  * TODO (VPM): Move this function to par_setup_device.c?
  *--------------------------------------------------------------------------*/
@@ -1834,12 +1825,12 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix  *A,
    HYPRE_Int            i;
    HYPRE_Int            num_procs,  my_id;
 
-   hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm_rank(comm, &my_id);
-
    /* Matrix Structure */
    hypre_ParCSRMatrix   *Apq, *ALU, *ALUm, *S;
    hypre_CSRMatrix      *Amd, *Ad, *SLU, *Apq_diag;
+
+   hypre_MPI_Comm_size(comm, &num_procs);
+   hypre_MPI_Comm_rank(comm, &my_id);
 
    rperm = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
 
@@ -1978,6 +1969,7 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix  *A,
  * hypre_ILUSetupRAPILU0
  *
  * Modified ILU(0) with RAP like solve
+ *
  * A = input matrix
  * Not explicitly forming the matrix
  *--------------------------------------------------------------------------*/
@@ -1995,45 +1987,49 @@ hypre_ILUSetupRAPILU0(hypre_ParCSRMatrix  *A,
                       hypre_ParCSRMatrix **mUptr,
                       HYPRE_Int          **u_end)
 {
-   HYPRE_Int            i;
    hypre_ParCSRMatrix   *S_temp = NULL;
    HYPRE_Int            *u_temp = NULL;
 
-   /* standard ILU0 factorization */
+   HYPRE_Int            *u_end_array;
+
+   hypre_CSRMatrix      *L_diag, *U_diag;
+   HYPRE_Int            *L_diag_i, *U_diag_i;
+   HYPRE_Int            *L_diag_j, *U_diag_j;
+   HYPRE_Complex        *L_diag_data, *U_diag_data;
+
+   hypre_CSRMatrix      *mL_diag, *mU_diag;
+   HYPRE_Int            *mL_diag_i, *mU_diag_i;
+   HYPRE_Int            *mL_diag_j, *mU_diag_j;
+   HYPRE_Complex        *mL_diag_data, *mU_diag_data;
+
+   HYPRE_Int            i;
+
+   /* Standard ILU0 factorization */
    hypre_ILUSetupMILU0(A, perm, perm, n, n, Lptr, Dptr, Uptr, &S_temp, &u_temp, 0);
-   if (S_temp)
-   {
-      hypre_ParCSRMatrixDestroy(S_temp);
-   }
-   if (u_temp)
-   {
-      hypre_TFree( u_temp, HYPRE_MEMORY_HOST);
-   }
-   /* modified ILU0 factorization */
+
+   /* Free memory */
+   hypre_ParCSRMatrixDestroy(S_temp);
+   hypre_TFree(u_temp, HYPRE_MEMORY_HOST);
+
+   /* Modified ILU0 factorization */
    hypre_ILUSetupMILU0(A, perm, perm, n, n, mLptr, mDptr, mUptr, &S_temp, &u_temp, 1);
-   if (S_temp)
-   {
-      hypre_ParCSRMatrixDestroy(S_temp);
-   }
-   if (u_temp)
-   {
-      hypre_TFree( u_temp, HYPRE_MEMORY_HOST);
-   }
 
-   /* pointer to the start location */
-   HYPRE_Int *u_end_array;
-   u_end_array = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   /* Free memory */
+   hypre_ParCSRMatrixDestroy(S_temp);
+   hypre_TFree(u_temp, HYPRE_MEMORY_HOST);
 
-   hypre_CSRMatrix   *U_diag       = hypre_ParCSRMatrixDiag(*Uptr);
-   HYPRE_Int         *U_diag_i     = hypre_CSRMatrixI(U_diag);
-   HYPRE_Int         *U_diag_j     = hypre_CSRMatrixJ(U_diag);
-   HYPRE_Real        *U_diag_data  = hypre_CSRMatrixData(U_diag);
-   hypre_CSRMatrix   *mU_diag      = hypre_ParCSRMatrixDiag(*mUptr);
-   HYPRE_Int         *mU_diag_i    = hypre_CSRMatrixI(mU_diag);
-   HYPRE_Int         *mU_diag_j    = hypre_CSRMatrixJ(mU_diag);
-   HYPRE_Real        *mU_diag_data = hypre_CSRMatrixData(mU_diag);
+   /* Pointer to the start location */
+   u_end_array  = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   U_diag       = hypre_ParCSRMatrixDiag(*Uptr);
+   U_diag_i     = hypre_CSRMatrixI(U_diag);
+   U_diag_j     = hypre_CSRMatrixJ(U_diag);
+   U_diag_data  = hypre_CSRMatrixData(U_diag);
+   mU_diag      = hypre_ParCSRMatrixDiag(*mUptr);
+   mU_diag_i    = hypre_CSRMatrixI(mU_diag);
+   mU_diag_j    = hypre_CSRMatrixJ(mU_diag);
+   mU_diag_data = hypre_CSRMatrixData(mU_diag);
 
-   // first sort the Upper part U
+   /* first sort the Upper part U */
    for (i = 0; i < nLU; i++)
    {
       hypre_qsort1(U_diag_j, U_diag_data, U_diag_i[i], U_diag_i[i + 1] - 1);
@@ -2041,16 +2037,16 @@ hypre_ILUSetupRAPILU0(hypre_ParCSRMatrix  *A,
       hypre_BinarySearch2(U_diag_j, nLU, U_diag_i[i], U_diag_i[i + 1] - 1, u_end_array + i);
    }
 
-   hypre_CSRMatrix   *L_diag       = hypre_ParCSRMatrixDiag(*Lptr);
-   HYPRE_Int         *L_diag_i     = hypre_CSRMatrixI(L_diag);
-   HYPRE_Int         *L_diag_j     = hypre_CSRMatrixJ(L_diag);
-   HYPRE_Real        *L_diag_data  = hypre_CSRMatrixData(L_diag);
-   hypre_CSRMatrix   *mL_diag      = hypre_ParCSRMatrixDiag(*mLptr);
-   HYPRE_Int         *mL_diag_i    = hypre_CSRMatrixI(mL_diag);
-   HYPRE_Int         *mL_diag_j    = hypre_CSRMatrixJ(mL_diag);
-   HYPRE_Real        *mL_diag_data = hypre_CSRMatrixData(mL_diag);
+   L_diag       = hypre_ParCSRMatrixDiag(*Lptr);
+   L_diag_i     = hypre_CSRMatrixI(L_diag);
+   L_diag_j     = hypre_CSRMatrixJ(L_diag);
+   L_diag_data  = hypre_CSRMatrixData(L_diag);
+   mL_diag      = hypre_ParCSRMatrixDiag(*mLptr);
+   mL_diag_i    = hypre_CSRMatrixI(mL_diag);
+   mL_diag_j    = hypre_CSRMatrixJ(mL_diag);
+   mL_diag_data = hypre_CSRMatrixData(mL_diag);
 
-   // now sort the Lower part L
+   /* now sort the Lower part L */
    for (i = nLU; i < n; i++)
    {
       hypre_qsort1(L_diag_j, L_diag_data, L_diag_i[i], L_diag_i[i + 1] - 1);
@@ -2093,7 +2089,7 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix  *A,
                    hypre_ParCSRMatrix **Sptr,
                    HYPRE_Int          **u_end)
 {
-   return hypre_ILUSetupMILU0( A, perm, qperm, nLU, nI, Lptr, Dptr, Uptr, Sptr, u_end, 0);
+   return hypre_ILUSetupMILU0(A, perm, qperm, nLU, nI, Lptr, Dptr, Uptr, Sptr, u_end, 0);
 }
 
 /*--------------------------------------------------------------------------
