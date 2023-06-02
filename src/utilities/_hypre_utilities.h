@@ -2190,7 +2190,7 @@ HYPRE_Int hypre_MemoryTrackerSetFileName(const char *file_name);
 
 /* magma.c */
 #if defined(HYPRE_USING_MAGMA)
-HYPRE_Int hypre_MagmaInit(hypre_Handle *hypre_handle_);
+HYPRE_Int hypre_MagmaInitialize(void);
 HYPRE_Int hypre_MagmaFinalize(void);
 #endif
 /******************************************************************************

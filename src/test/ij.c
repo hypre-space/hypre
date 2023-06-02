@@ -29,6 +29,9 @@
 #if defined (HYPRE_USING_CUDA)
 #include <cuda_profiler_api.h>
 #endif
+#if defined(HYPRE_USING_CUSPARSE)
+#include <cusparse.h>
+#endif
 
 /* begin lobpcg */
 
@@ -290,7 +293,12 @@ main( hypre_int argc,
    HYPRE_Real cheby_fraction = .3;
 
 #if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= 11000
+   /* CUSPARSE_SPMV_ALG_DEFAULT doesn't provide deterministic results */
+   HYPRE_Int  spmv_use_vendor = 0;
+#else
    HYPRE_Int  spmv_use_vendor = 1;
+#endif
    HYPRE_Int  use_curand = 1;
 #if defined(HYPRE_USING_CUDA)
    HYPRE_Int  spgemm_use_vendor = 0;

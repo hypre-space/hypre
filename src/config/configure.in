@@ -181,6 +181,7 @@ hypre_using_curand=no
 hypre_using_cusolver=no
 hypre_using_device_pool=no
 hypre_using_device_malloc_async=no
+hypre_using_thrust_nosync=no
 hypre_using_umpire=no
 hypre_using_umpire_host=no
 hypre_using_umpire_device=no
@@ -446,6 +447,17 @@ AS_HELP_STRING([--enable-device-malloc-async],
     *)   hypre_using_device_malloc_async=no ;;
  esac],
 [hypre_using_device_malloc_async=no]
+)
+
+AC_ARG_ENABLE(thrust-nosync,
+AS_HELP_STRING([--enable-thrust-nosync],
+               [Use thrust par_nosync policy (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_thrust_nosync=yes ;;
+    no)  hypre_using_thrust_nosync=no ;;
+    *)   hypre_using_thrust_nosync=no ;;
+ esac],
+[hypre_using_thrust_nosync=no]
 )
 
 AC_ARG_ENABLE(gpu-profiling,
@@ -2596,6 +2608,11 @@ then
    if test "$hypre_using_device_malloc_async" = "yes"
    then
       AC_DEFINE(HYPRE_USING_DEVICE_MALLOC_ASYNC, 1, [Define to 1 if using device async malloc])
+   fi
+
+   if test "$hypre_using_thrust_nosync" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_THRUST_NOSYNC, 1, [Define to 1 if using thrust par_nosync policy])
    fi
 
    if test "x$hypre_using_cuda_streams" = "xyes"
