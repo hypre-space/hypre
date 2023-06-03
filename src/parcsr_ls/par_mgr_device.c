@@ -690,8 +690,20 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                   pivots,
                                                   infos,
                                                   num_blocks));
+#elif defined(HYPRE_USING_ROCSOLVER)
+      HYPRE_ROCSOLVER_CALL(rocsolver_dgetrf_batched(hypre_HandleCublasHandle(hypre_handle()),
+                                                    blk_size,
+                                                    blk_size,
+                                                    tmpdiag_aop,
+                                                    blk_size,
+                                                    pivots,
+                                                    blk_size,
+                                                    infos,
+                                                    num_blocks));
+
 #else
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Block inversion not available!");
+      return hypre_error_flag;
 #endif
 
 #if defined (HYPRE_DEBUG)
@@ -725,8 +737,18 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                   blk_size,
                                                   infos,
                                                   num_blocks));
+#elif defined(HYPRE_USING_ROCSOLVER)
+      HYPRE_ROCSOLVER_CALL(rocsolver_dgetri_batched(hypre_HandleCublasHandle(hypre_handle()),
+                                                    blk_size,
+                                                    tmpdiag_aop,
+                                                    blk_size,
+                                                    pivots,
+                                                    blk_size,
+                                                    infos,
+                                                    num_blocks));
 #else
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Block inversion not available!");
+      return hypre_error_flag;
 #endif
 
       /* Free memory */
