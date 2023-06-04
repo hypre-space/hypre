@@ -34,7 +34,7 @@ hypre_spgemm_hash_insert_symbl(
    HYPRE_Int old = -1;
 
 #if defined(HYPRE_USING_HIP) && (HIP_VERSION == 50422804)
-/* VPM: see https://github.com/hypre-space/hypre/issues/875 */
+   /* VPM: see https://github.com/hypre-space/hypre/issues/875 */
 #pragma unroll 8
 #else
 #pragma unroll UNROLL_FACTOR

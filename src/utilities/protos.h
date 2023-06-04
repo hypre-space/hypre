@@ -393,14 +393,15 @@ HYPRE_Int hypre_IntArrayCountHost( hypre_IntArray *v, HYPRE_Int value,
 HYPRE_Int hypre_IntArrayCount( hypre_IntArray *v, HYPRE_Int value,
                                HYPRE_Int *num_values_ptr );
 HYPRE_Int hypre_IntArrayInverseMapping( hypre_IntArray *v, hypre_IntArray **w_ptr );
+HYPRE_Int hypre_IntArrayNegate( hypre_IntArray *v );
 
 /* int_array_device.c */
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v, HYPRE_Int value );
-HYPRE_Int hypre_IntArrayReverseMappingDevice( hypre_IntArray *v, hypre_IntArray *w );
 HYPRE_Int hypre_IntArrayCountDevice ( hypre_IntArray *v, HYPRE_Int value,
                                       HYPRE_Int *num_values_ptr );
 HYPRE_Int hypre_IntArrayInverseMappingDevice( hypre_IntArray *v, hypre_IntArray *w );
+HYPRE_Int hypre_IntArrayNegateDevice( hypre_IntArray *v );
 #endif
 
 /* memory_tracker.c */
