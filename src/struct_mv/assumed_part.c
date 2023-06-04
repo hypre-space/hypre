@@ -87,6 +87,9 @@ hypre_APSubdivideRegion( hypre_Box      *region,
    hypre_Index  isize, index, div;
    hypre_Box   *box;
 
+   /* Initialize div */
+   hypre_SetIndex(div, 0);
+
    /* if level = 0 then no dividing */
    if (!level)
    {
