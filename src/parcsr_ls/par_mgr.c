@@ -871,7 +871,8 @@ hypre_MGRCoarsen(hypre_ParCSRMatrix *S,
    HYPRE_Int   *CF_marker = NULL;
    HYPRE_Int *cindexes = fixed_coarse_indexes;
    HYPRE_Int    i, row, nc;
-   HYPRE_Int nloc =  hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Int nloc =  hypre_ParCSRMatrixNumRows(A);
+   HYPRE_MemoryLocation memory_location;
 
    /* If this is the last level, coarsen onto fixed coarse set */
    if (cflag)
@@ -883,6 +884,12 @@ hypre_MGRCoarsen(hypre_ParCSRMatrix *S,
       *CF_marker_ptr = hypre_IntArrayCreate(nloc);
       hypre_IntArrayInitialize(*CF_marker_ptr);
       hypre_IntArraySetConstantValues(*CF_marker_ptr, FMRK);
+      memory_location = hypre_IntArrayMemoryLocation(*CF_marker_ptr);
+
+      if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE)
+      {
+         hypre_IntArrayMigrate(*CF_marker_ptr, HYPRE_MEMORY_HOST);
+      }
       CF_marker = hypre_IntArrayData(*CF_marker_ptr);
 
       /* first mark fixed coarse set */
@@ -890,6 +897,11 @@ hypre_MGRCoarsen(hypre_ParCSRMatrix *S,
       for (i = 0; i < nc; i++)
       {
          CF_marker[cindexes[i]] = CMRK;
+      }
+
+      if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE)
+      {
+         hypre_IntArrayMigrate(*CF_marker_ptr, HYPRE_MEMORY_DEVICE);
       }
    }
    else

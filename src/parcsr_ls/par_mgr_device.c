@@ -780,6 +780,17 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                   pivots,
                                                   infos,
                                                   num_blocks));
+#elif defined(HYPRE_USING_ROCSOLVER)
+      HYPRE_ROCSOLVER_CALL(rocsolver_dgetrf_batched(hypre_HandleCublasHandle(hypre_handle()),
+                                                    blk_size,
+                                                    blk_size,
+                                                    tmpdiag_aop,
+                                                    blk_size,
+                                                    pivots,
+                                                    blk_size,
+                                                    infos,
+                                                    num_blocks));
+
 #elif defined(HYPRE_USING_ONEMKLBLAS)
       std::int64_t scratchpad_size;
       HYPRE_ONEMKL_CALL( scratchpad_size =
@@ -806,6 +817,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
       hypre_TFree(scratchpad, HYPRE_MEMORY_DEVICE);
 #else
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Block inversion not available!");
+      return hypre_error_flag;
 #endif
 
 #if defined (HYPRE_DEBUG) && !defined(HYPRE_USING_ONEMKLBLAS)
@@ -839,6 +851,15 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                   blk_size,
                                                   infos,
                                                   num_blocks));
+#elif defined(HYPRE_USING_ROCSOLVER)
+      HYPRE_ROCSOLVER_CALL(rocsolver_dgetri_batched(hypre_HandleCublasHandle(hypre_handle()),
+                                                    blk_size,
+                                                    tmpdiag_aop,
+                                                    blk_size,
+                                                    pivots,
+                                                    blk_size,
+                                                    infos,
+                                                    num_blocks));
 #elif defined(HYPRE_USING_ONEMKLBLAS)
       HYPRE_ONEMKL_CALL( scratchpad_size =
             oneapi::mkl::lapack:: getri_batch_scratchpad_size<HYPRE_Complex>( *hypre_HandleComputeStream(hypre_handle()),
@@ -863,6 +884,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
       hypre_TFree(scratchpad, HYPRE_MEMORY_DEVICE);
 #else
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Block inversion not available!");
+      return hypre_error_flag;
 #endif
 
       /* Free memory */

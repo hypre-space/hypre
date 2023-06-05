@@ -2100,8 +2100,10 @@ hypre_CSRMatrixSortRowOutOfPlace(hypre_CSRMatrix *A)
    hypre_CSRMatrixSortedJ(A) = hypre_TAlloc(HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE);
    hypre_CSRMatrixSortedData(A) = hypre_TAlloc(HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE);
 
-   hypre_TMemcpy(hypre_CSRMatrixSortedJ(A), A_j, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(hypre_CSRMatrixSortedData(A), A_a, HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(hypre_CSRMatrixSortedJ(A), A_j, HYPRE_Int, nnzA, HYPRE_MEMORY_DEVICE,
+                 HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(hypre_CSRMatrixSortedData(A), A_a, HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE,
+                 HYPRE_MEMORY_DEVICE);
 
    hypre_CSRMatrixJ(A) = hypre_CSRMatrixSortedJ(A);
    hypre_CSRMatrixData(A) = hypre_CSRMatrixSortedData(A);
@@ -2182,7 +2184,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
    hypre_int          buffer_size;
    hypre_int          structural_zero;
 #endif
-   cusparseDiagType_t DiagType = unit_diag ? CUSPARSE_DIAG_TYPE_UNIT: CUSPARSE_DIAG_TYPE_NON_UNIT;
+   cusparseDiagType_t DiagType = unit_diag ? CUSPARSE_DIAG_TYPE_UNIT : CUSPARSE_DIAG_TYPE_NON_UNIT;
 
    if (nrow != ncol)
    {
@@ -2242,8 +2244,10 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
    HYPRE_Complex *A_ma = hypre_CsrsvDataMatData(csrsv_data);
 
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-   cusparseSpMatDescr_t matA = hypre_CSRMatrixToCusparseSpMat_core(nrow, ncol, 0, nnzA, A_i, A_j, A_ma);
-   HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(matA, CUSPARSE_SPMAT_DIAG_TYPE, &DiagType, sizeof(cusparseDiagType_t)) );
+   cusparseSpMatDescr_t matA = hypre_CSRMatrixToCusparseSpMat_core(nrow, ncol, 0, nnzA, A_i, A_j,
+                                                                   A_ma);
+   HYPRE_CUSPARSE_CALL( cusparseSpMatSetAttribute(matA, CUSPARSE_SPMAT_DIAG_TYPE, &DiagType,
+                                                  sizeof(cusparseDiagType_t)) );
    cusparseDnVecDescr_t vecF = hypre_VectorToCusparseDnVec_core(f_data, nrow);
    cusparseDnVecDescr_t vecU = hypre_VectorToCusparseDnVec_core(u_data, ncol);
 #else
@@ -2508,7 +2512,8 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
    HYPRE_Complex        alpha  = 1.0;
    size_t               buffer_size;
    hypre_int            structural_zero;
-   rocsparse_diag_type  diag_type = unit_diag ? rocsparse_diag_type_unit: rocsparse_diag_type_non_unit;
+   rocsparse_diag_type  diag_type = unit_diag ? rocsparse_diag_type_unit :
+                                    rocsparse_diag_type_non_unit;
 
    if (nrow != ncol)
    {
