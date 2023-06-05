@@ -29,8 +29,8 @@ hypre_CsrsvDataCreate()
 {
    hypre_CsrsvData *data = hypre_CTAlloc(hypre_CsrsvData, 1, HYPRE_MEMORY_HOST);
 #if defined(HYPRE_USING_CUSPARSE)
-	HYPRE_CUSPARSE_CALL( hypre_cusparseSpSV_createDescr(&hypre_CsrsvDataInfoL(csrsv_data)) );
-	HYPRE_CUSPARSE_CALL( hypre_cusparseSpSV_createDescr(&hypre_CsrsvDataInfoU(csrsv_data)) );
+   HYPRE_CUSPARSE_CALL( hypre_cusparseSpSV_createDescr(&hypre_CsrsvDataInfoL(csrsv_data)) );
+   HYPRE_CUSPARSE_CALL( hypre_cusparseSpSV_createDescr(&hypre_CsrsvDataInfoU(csrsv_data)) );
 #elif defined(HYPRE_USING_ROCSPARSE)
    HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_info(&(hypre_CsrsvDataInfoL(data)) ) );
    HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_info(&(hypre_CsrsvDataInfoU(data)) ) );
