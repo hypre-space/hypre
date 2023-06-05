@@ -28,7 +28,15 @@ hypre_CsrsvData*
 hypre_CsrsvDataCreate()
 {
    hypre_CsrsvData *data = hypre_CTAlloc(hypre_CsrsvData, 1, HYPRE_MEMORY_HOST);
-
+#if defined(HYPRE_USING_CUSPARSE)
+	HYPRE_CUSPARSE_CALL( hypre_cusparseSpSV_createDescr(&hypre_CsrsvDataInfoL(csrsv_data)) );
+	HYPRE_CUSPARSE_CALL( hypre_cusparseSpSV_createDescr(&hypre_CsrsvDataInfoU(csrsv_data)) );
+#elif defined(HYPRE_USING_ROCSPARSE)
+   HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_info(&(hypre_CsrsvDataInfoL(data)) ) );
+   HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_info(&(hypre_CsrsvDataInfoU(data)) ) );
+#endif
+   hypre_CsrsvDataLAnalyzed(data)=0;
+   hypre_CsrsvDataUAnalyzed(data)=0;
    return data;
 }
 
@@ -2442,10 +2450,8 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
       HYPRE_CUSPARSE_CALL( cusparseSetMatFillMode(descr, fill_mode_L) );
 #endif
 
-      if (!hypre_CsrsvDataInfoL(csrsv_data))
+      if (!hypre_CsrsvDataInfoLAnalyzed(csrsv_data))
       {
-         HYPRE_CUSPARSE_CALL( hypre_cusparseSpSV_createDescr(&hypre_CsrsvDataInfoL(csrsv_data)) );
-
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
          HYPRE_CUSPARSE_CALL( cusparseSpSV_bufferSize(handle, operation,
                                                       &alpha, matA, vecF, vecU, data_type,
@@ -2514,6 +2520,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                           structural_zero, structural_zero);
             hypre_error_w_msg(1, msg);
          }
+			hypre_CsrsvDataInfoLAnalyzed(csrsv_data)=1;
 #endif
       }
 
@@ -2542,10 +2549,8 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
       HYPRE_CUSPARSE_CALL( cusparseSetMatFillMode(descr, fill_mode_U) );
 #endif
 
-      if (!hypre_CsrsvDataInfoU(csrsv_data))
+      if (!hypre_CsrsvDataInfoUAnalyzed(csrsv_data))
       {
-         HYPRE_CUSPARSE_CALL( hypre_cusparseSpSV_createDescr(&hypre_CsrsvDataInfoU(csrsv_data)) );
-
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
          HYPRE_CUSPARSE_CALL( cusparseSpSV_bufferSize(handle, operation,
                                                       &alpha, matA, vecF, vecU, data_type,
@@ -2614,6 +2619,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                           structural_zero, structural_zero);
             hypre_error_w_msg(1, msg);
          }
+			hypre_CsrsvDataInfoUAnalyzed(csrsv_data)=1;
 #endif
       }
 
@@ -2714,10 +2720,8 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
    {
       HYPRE_ROCSPARSE_CALL( rocsparse_set_mat_fill_mode(descr, rocsparse_fill_mode_lower) );
 
-      if (!hypre_CsrsvDataInfoL(csrsv_data))
+      if (!hypre_CsrsvDataLAnalyzed(csrsv_data))
       {
-         HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_info(&hypre_CsrsvDataInfoL(csrsv_data)) );
-
          HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrsv_buffer_size(handle,
                                                                  rocsparse_operation_none,
                                                                  num_rows, num_nonzeros, descr,
@@ -2758,6 +2762,7 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
                           structural_zero, structural_zero);
             hypre_error_w_msg(1, msg);
          }
+         hypre_CsrsvDataLAnalyzed(csrsv_data)=1;
       }
 
       HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrsv_solve(handle, rocsparse_operation_none,
@@ -2772,10 +2777,8 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
    {
       HYPRE_ROCSPARSE_CALL( rocsparse_set_mat_fill_mode(descr, rocsparse_fill_mode_upper) );
 
-      if (!hypre_CsrsvDataInfoU(csrsv_data))
+      if (!hypre_CsrsvDataUAnalyzed(csrsv_data))
       {
-         HYPRE_ROCSPARSE_CALL( rocsparse_create_mat_info(&hypre_CsrsvDataInfoU(csrsv_data)) );
-
          HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrsv_buffer_size(handle,
                                                                  rocsparse_operation_none,
                                                                  num_rows, num_nonzeros, descr,
@@ -2816,6 +2819,7 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
                           structural_zero, structural_zero);
             hypre_error_w_msg(1, msg);
          }
+         hypre_CsrsvDataUAnalyzed(csrsv_data) = 1;
       }
 
       HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrsv_solve(handle, rocsparse_operation_none,

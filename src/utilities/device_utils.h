@@ -754,10 +754,14 @@ struct hypre_CsrsvData
 
    /* to save matrix values with modified diagonal */
    HYPRE_Complex            *mat_data;
+   hypre_int                 L_analyzed;
+   hypre_int                 U_analyzed;
 };
 
 #define hypre_CsrsvDataInfoL(data)          ((data) -> info_L)
 #define hypre_CsrsvDataInfoU(data)          ((data) -> info_U)
+#define hypre_CsrsvDataLAnalyzed(data)      ((data) -> L_analyzed)
+#define hypre_CsrsvDataUAnalyzed(data)      ((data) -> U_analyzed)
 #define hypre_CsrsvDataSolvePolicy(data)    ((data) -> solve_policy)
 #define hypre_CsrsvDataAnalysisPolicy(data) ((data) -> analysis_policy)
 #if defined(HYPRE_USING_CUSPARSE) && (CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION)
