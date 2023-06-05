@@ -2520,7 +2520,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                           structural_zero, structural_zero);
             hypre_error_w_msg(1, msg);
          }
-			hypre_CsrsvDataInfoLAnalyzed(csrsv_data)=1;
+         hypre_CsrsvDataInfoLAnalyzed(csrsv_data)=1;
 #endif
       }
 
@@ -2619,7 +2619,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                           structural_zero, structural_zero);
             hypre_error_w_msg(1, msg);
          }
-			hypre_CsrsvDataInfoUAnalyzed(csrsv_data)=1;
+         hypre_CsrsvDataInfoUAnalyzed(csrsv_data)=1;
 #endif
       }
 
