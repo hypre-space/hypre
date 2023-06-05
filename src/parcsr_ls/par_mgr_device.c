@@ -691,7 +691,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                   infos,
                                                   num_blocks));
 #elif defined(HYPRE_USING_ROCSOLVER)
-      HYPRE_ROCSOLVER_CALL(rocsolver_dgetrf_batched(hypre_HandleCublasHandle(hypre_handle()),
+      HYPRE_ROCSOLVER_CALL(rocsolver_dgetrf_batched(hypre_HandleVendorSolverHandle(hypre_handle()),
                                                     blk_size,
                                                     blk_size,
                                                     tmpdiag_aop,
@@ -738,7 +738,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                   infos,
                                                   num_blocks));
 #elif defined(HYPRE_USING_ROCSOLVER)
-      HYPRE_ROCSOLVER_CALL(rocsolver_dgetri_batched(hypre_HandleCublasHandle(hypre_handle()),
+      HYPRE_ROCSOLVER_CALL(rocsolver_dgetri_batched(hypre_HandleVendorSolverHandle(hypre_handle()),
                                                     blk_size,
                                                     tmpdiag_aop,
                                                     blk_size,
