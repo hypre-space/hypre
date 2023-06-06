@@ -146,6 +146,7 @@
 #define hypre_IntArrayInverseMapping HYPRE_MULTIPRECISION_FUNC ( hypre_IntArrayInverseMapping )
 #define hypre_IntArrayInverseMappingHost HYPRE_MULTIPRECISION_FUNC ( hypre_IntArrayInverseMappingHost )
 #define hypre_IntArrayMigrate HYPRE_MULTIPRECISION_FUNC ( hypre_IntArrayMigrate )
+#define hypre_IntArrayNegate HYPRE_MULTIPRECISION_FUNC ( hypre_IntArrayNegate )
 #define hypre_IntArrayPrint HYPRE_MULTIPRECISION_FUNC ( hypre_IntArrayPrint )
 #define hypre_IntArrayRead HYPRE_MULTIPRECISION_FUNC ( hypre_IntArrayRead )
 #define hypre_IntArraySetConstantValues HYPRE_MULTIPRECISION_FUNC ( hypre_IntArraySetConstantValues )

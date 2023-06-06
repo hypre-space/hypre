@@ -118,6 +118,7 @@ hypre_IntArrayInitialize_v2
 hypre_IntArrayInverseMapping
 hypre_IntArrayInverseMappingHost
 hypre_IntArrayMigrate
+hypre_IntArrayNegate
 hypre_IntArrayPrint
 hypre_IntArrayRead
 hypre_IntArraySetConstantValues

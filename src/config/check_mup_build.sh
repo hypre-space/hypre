@@ -21,8 +21,8 @@
 # Suggested next steps:
 # 1. Inspect .saved and .new files in directories that need updating. It helps 
 #    if the files are sorted first. So do:
-#    sort -c new.srt <directory_name>_functions.new
-#    sort -c sav.srt <directory_name>_functions.saved
+#    sort -o new.srt <directory_name>_functions.new
+#    sort -o sav.srt <directory_name>_functions.saved
 #    <your-favorite-diff-tool> sav.srt new.srt (eg. meld sav.srt new.srt)
 # 2. If new changes are all acceptable, you can do:
 #    cp <directory_name>_functions.new to <directory_name>_functions.saved
