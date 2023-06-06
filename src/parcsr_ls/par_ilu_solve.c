@@ -26,17 +26,10 @@ hypre_ILUSolve( void               *ilu_vdata,
                 hypre_ParVector    *f,
                 hypre_ParVector    *u )
 {
-   MPI_Comm                comm             = hypre_ParCSRMatrixComm(A);
-   hypre_ParILUData       *ilu_data         = (hypre_ParILUData*) ilu_vdata;
+   MPI_Comm              comm               = hypre_ParCSRMatrixComm(A);
+   hypre_ParILUData     *ilu_data           = (hypre_ParILUData*) ilu_vdata;
 
    /* Matrices */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_CSRMatrix      *matALU_d           = hypre_ParILUDataMatAILUDevice(ilu_data);
-   hypre_CSRMatrix      *matBLU_d           = hypre_ParILUDataMatBILUDevice(ilu_data);
-   hypre_CSRMatrix      *matE_d             = hypre_ParILUDataMatEDevice(ilu_data);
-   hypre_CSRMatrix      *matF_d             = hypre_ParILUDataMatFDevice(ilu_data);
-   hypre_ParCSRMatrix   *Aperm              = hypre_ParILUDataAperm(ilu_data);
-#endif
    hypre_ParCSRMatrix   *matmL              = hypre_ParILUDataMatLModified(ilu_data);
    hypre_ParCSRMatrix   *matmU              = hypre_ParILUDataMatUModified(ilu_data);
    hypre_ParCSRMatrix   *matA               = hypre_ParILUDataMatA(ilu_data);
@@ -47,18 +40,26 @@ hypre_ILUSolve( void               *ilu_vdata,
    HYPRE_Real           *matmD              = hypre_ParILUDataMatDModified(ilu_data);
 
    /* Vectors */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_Vector         *Adiag_diag         = hypre_ParILUDataADiagDiag(ilu_data);
-   hypre_Vector         *Sdiag_diag         = hypre_ParILUDataSDiagDiag(ilu_data);
-#endif
    HYPRE_Int             ilu_type           = hypre_ParILUDataIluType(ilu_data);
    HYPRE_Int            *perm               = hypre_ParILUDataPerm(ilu_data);
    HYPRE_Int            *qperm              = hypre_ParILUDataQPerm(ilu_data);
    hypre_ParVector      *F_array            = hypre_ParILUDataF(ilu_data);
    hypre_ParVector      *U_array            = hypre_ParILUDataU(ilu_data);
 
+   /* Device data */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_CSRMatrix      *matALU_d           = hypre_ParILUDataMatAILUDevice(ilu_data);
+   hypre_CSRMatrix      *matBLU_d           = hypre_ParILUDataMatBILUDevice(ilu_data);
+   hypre_CSRMatrix      *matE_d             = hypre_ParILUDataMatEDevice(ilu_data);
+   hypre_CSRMatrix      *matF_d             = hypre_ParILUDataMatFDevice(ilu_data);
+   hypre_ParCSRMatrix   *Aperm              = hypre_ParILUDataAperm(ilu_data);
+   hypre_Vector         *Adiag_diag         = hypre_ParILUDataADiagDiag(ilu_data);
+   hypre_Vector         *Sdiag_diag         = hypre_ParILUDataSDiagDiag(ilu_data);
+   hypre_ParVector      *Ztemp              = hypre_ParILUDataZTemp(ilu_data);
+   HYPRE_Int             test_opt           = hypre_ParILUDataTestOption(ilu_data);
+#endif
+
    /* Solver settings */
-   HYPRE_Int             iter, num_procs, my_id;
    HYPRE_Real            tol                = hypre_ParILUDataTol(ilu_data);
    HYPRE_Int             logging            = hypre_ParILUDataLogging(ilu_data);
    HYPRE_Int             print_level        = hypre_ParILUDataPrintLevel(ilu_data);
@@ -71,7 +72,6 @@ hypre_ILUSolve( void               *ilu_vdata,
    hypre_ParVector      *Utemp              = hypre_ParILUDataUTemp(ilu_data);
    hypre_ParVector      *Xtemp              = hypre_ParILUDataXTemp(ilu_data);
    hypre_ParVector      *Ytemp              = hypre_ParILUDataYTemp(ilu_data);
-   hypre_ParVector      *Ztemp              = hypre_ParILUDataZTemp(ilu_data);
    HYPRE_Real           *fext               = hypre_ParILUDataFExt(ilu_data);
    HYPRE_Real           *uext               = hypre_ParILUDataUExt(ilu_data);
    hypre_ParVector      *residual;
@@ -86,9 +86,7 @@ hypre_ILUSolve( void               *ilu_vdata,
    HYPRE_Real            ieee_check         = 0.0;
    HYPRE_Real            operat_cmplxty     = hypre_ParILUDataOperatorComplexity(ilu_data);
    HYPRE_Int             Solve_err_flag;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_Int             test_opt;
-#endif
+   HYPRE_Int             iter, num_procs, my_id;
 
    /* problem size */
    HYPRE_Int             n                  = hypre_ParCSRMatrixNumRows(A);
@@ -367,8 +365,6 @@ hypre_ILUSolve( void               *ilu_vdata,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
             if (exec == HYPRE_EXEC_DEVICE)
             {
-               test_opt = hypre_ParILUDataTestOption(ilu_data);
-
                hypre_ILUSolveRAPGMRESDevice(matA, F_array, U_array, perm, nLU, matS, Utemp, Ftemp,
                                             Xtemp, Ytemp, schur_solver, schur_precond, rhs, x,
                                             u_end, Aperm, matALU_d, matBLU_d, matE_d, matF_d,
