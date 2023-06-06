@@ -63,13 +63,45 @@ using hypre_DeviceItem = void*;
 #define CUSPARSE_NEWAPI_VERSION 11000
 #define CUSPARSE_NEWSPMM_VERSION 11401
 #define CUDA_MALLOCASYNC_VERSION 11020
-#define THRUST_CALL_BLOCKING 1
+#define CUDA_THRUST_NOSYNC_VERSION 12000
+
+#define CUSPARSE_SPSV_VERSION 11600
+#if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+#define hypre_cusparseSpSVDescr         cusparseSpSVDescr_t
+#define hypre_cusparseSpSV_createDescr  cusparseSpSV_createDescr
+#define hypre_cusparseSpSV_destroyDescr cusparseSpSV_destroyDescr
+#else
+#define hypre_cusparseSpSVDescr         csrsv2Info_t
+#define hypre_cusparseSpSV_createDescr  cusparseCreateCsrsv2Info
+#define hypre_cusparseSpSV_destroyDescr cusparseDestroyCsrsv2Info
+#endif
+
+#define CUSPARSE_SPSM_VERSION 11600
+#if CUSPARSE_VERSION >= CUSPARSE_SPSM_VERSION
+#define hypre_cusparseSpSMDescr         cusparseSpSMDescr_t
+#define hypre_cusparseSpSM_createDescr  cusparseSpSM_createDescr
+#define hypre_cusparseSpSM_destroyDescr cusparseSpSM_destroyDescr
+#else
+#define hypre_cusparseSpSMDescr         csrsm2Info_t
+#define hypre_cusparseSpSM_createDescr  cusparseCreateCsrsm2Info
+#define hypre_cusparseSpSM_destroyDescr cusparseDestroyCsrsm2Info
+#endif
 
 #if defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
 #if CUDA_VERSION < CUDA_MALLOCASYNC_VERSION
 #error cudaMalloc/FreeAsync needs CUDA 11.2
 #endif
 #endif
+
+#if defined(HYPRE_USING_THRUST_NOSYNC)
+#if CUDA_VERSION < CUDA_THRUST_NOSYNC_VERSION
+#error thrust::cuda::par_nosync needs CUDA 12
+#endif
+#define HYPRE_THRUST_EXECUTION thrust::cuda::par_nosync
+#else
+#define HYPRE_THRUST_EXECUTION thrust::cuda::par
+#endif
+
 #endif /* defined(HYPRE_USING_CUDA) */
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -513,7 +545,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 
 #if defined(HYPRE_USING_CUDA)
 #define HYPRE_THRUST_CALL(func_name, ...) \
-   thrust::func_name(thrust::cuda::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
+   thrust::func_name(HYPRE_THRUST_EXECUTION(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
 #elif defined(HYPRE_USING_HIP)
 #define HYPRE_THRUST_CALL(func_name, ...) \
    thrust::func_name(thrust::hip::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
@@ -685,24 +717,42 @@ sycl::queue*          hypre_DeviceDataComputeStream(hypre_DeviceData *data);
 struct hypre_CsrsvData
 {
 #if defined(HYPRE_USING_CUSPARSE)
-   csrsv2Info_t info_L;
-   csrsv2Info_t info_U;
+   hypre_cusparseSpSVDescr info_L;
+   hypre_cusparseSpSVDescr info_U;
 #elif defined(HYPRE_USING_ROCSPARSE)
-   rocsparse_mat_info info_L;
-   rocsparse_mat_info info_U;
+   rocsparse_mat_info      info_L;
+   rocsparse_mat_info      info_U;
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
    /* WM: todo - placeholders */
-   char info_L;
-   char info_U;
+   char                    info_L;
+   char                    info_U;
 #endif
-   hypre_int    BufferSize;
-   char        *Buffer;
+
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+   size_t                  BufferSizeL;
+   size_t                  BufferSizeU;
+   char                   *BufferL;
+   char                   *BufferU;
+#else
+   hypre_int               BufferSize;
+   char                   *Buffer;
+#endif
+   /* to save matrix values with modified diagonal */
+   HYPRE_Complex          *matdata;
 };
 
-#define hypre_CsrsvDataInfoL(data)      ((data) -> info_L)
-#define hypre_CsrsvDataInfoU(data)      ((data) -> info_U)
-#define hypre_CsrsvDataBufferSize(data) ((data) -> BufferSize)
-#define hypre_CsrsvDataBuffer(data)     ((data) -> Buffer)
+#define hypre_CsrsvDataInfoL(data)       ((data) -> info_L)
+#define hypre_CsrsvDataInfoU(data)       ((data) -> info_U)
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+#define hypre_CsrsvDataBufferSizeL(data) ((data) -> BufferSizeL)
+#define hypre_CsrsvDataBufferSizeU(data) ((data) -> BufferSizeU)
+#define hypre_CsrsvDataBufferL(data)     ((data) -> BufferL)
+#define hypre_CsrsvDataBufferU(data)     ((data) -> BufferU)
+#else
+#define hypre_CsrsvDataBufferSize(data)  ((data) -> BufferSize)
+#define hypre_CsrsvDataBuffer(data)      ((data) -> Buffer)
+#endif
+#define hypre_CsrsvDataMatData(data)     ((data) -> matdata)
 
 struct hypre_GpuMatData
 {
@@ -1618,7 +1668,7 @@ struct is_negative
 {
    is_negative() {}
 
-   constexpr bool operator()(const T &x) const { return (x < 0); }
+   constexpr bool operator()(const T &x = T()) const { return (x < 0); }
 };
 
 template<typename T>
@@ -1626,7 +1676,7 @@ struct is_positive
 {
    is_positive() {}
 
-   constexpr bool operator()(const T &x) const { return (x > 0); }
+   constexpr bool operator()(const T &x = T()) const { return (x > 0); }
 };
 
 template<typename T>
@@ -1634,14 +1684,14 @@ struct is_nonnegative
 {
    is_nonnegative() {}
 
-   constexpr bool operator()(const T &x) const { return (x >= 0); }
+   constexpr bool operator()(const T &x = T()) const { return (x >= 0); }
 };
 
 template<typename T>
 struct in_range
 {
    T low, high;
-   in_range(T low_, T high_) { low = low_; high = high_; }
+   in_range(T low_ = T(), T high_ = T()) { low = low_; high = high_; }
 
    constexpr bool operator()(const T &x) const { return (x >= low && x <= high); }
 };
@@ -1650,7 +1700,7 @@ template<typename T>
 struct out_of_range
 {
    T low, high;
-   out_of_range(T low_, T high_) { low = low_; high = high_; }
+   out_of_range(T low_ = T(), T high_ = T()) { low = low_; high = high_; }
 
    constexpr bool operator()(const T &x) const { return (x < low || x > high); }
 };
@@ -1659,7 +1709,7 @@ template<typename T>
 struct less_than
 {
    T val;
-   less_than(T val_) { val = val_; }
+   less_than(T val_ = T()) { val = val_; }
 
    constexpr bool operator()(const T &x) const { return (x < val); }
 };
@@ -1668,7 +1718,7 @@ template<typename T>
 struct modulo
 {
    T val;
-   modulo(T val_) { val = val_; }
+   modulo(T val_ = T()) { val = val_; }
 
    constexpr T operator()(const T &x) const { return (x % val); }
 };
@@ -1677,7 +1727,7 @@ template<typename T>
 struct equal
 {
    T val;
-   equal(T val_) { val = val_; }
+   equal(T val_ = T()) { val = val_; }
 
    constexpr bool operator()(const T &x) const { return (x == val); }
 };
@@ -1685,7 +1735,7 @@ struct equal
 template<typename T1, typename T2>
 struct type_cast
 {
-   constexpr T2 operator()(const T1 &x) const { return (T2) x; }
+   constexpr T2 operator()(const T1 &x = T1()) const { return (T2) x; }
 };
 
 template<typename... T>
