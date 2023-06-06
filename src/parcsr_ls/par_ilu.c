@@ -3476,9 +3476,12 @@ hypre_NSHDestroy( void *data )
    hypre_ParNSHDataMatM(nsh_data) = NULL;
 
    /* droptol array */
-   hypre_TFree(hypre_ParNSHDataDroptol(nsh_data), HYPRE_MEMORY_HOST);
-   hypre_ParNSHDataOwnDroptolData(nsh_data) = 0;
-   hypre_ParNSHDataDroptol(nsh_data) = NULL;
+   if (hypre_ParNSHDataOwnDroptolData(nsh_data))
+   {
+      hypre_TFree(hypre_ParNSHDataDroptol(nsh_data), HYPRE_MEMORY_HOST);
+      hypre_ParNSHDataOwnDroptolData(nsh_data) = 0;
+      hypre_ParNSHDataDroptol(nsh_data) = NULL;
+   }
 
    /* nsh data */
    hypre_TFree(nsh_data, HYPRE_MEMORY_HOST);
