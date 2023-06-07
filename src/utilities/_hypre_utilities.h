@@ -212,6 +212,7 @@ HYPRE_Int hypre_ndigits( HYPRE_BigInt number );
 HYPRE_Int hypre_printf( const char *format, ... );
 HYPRE_Int hypre_fprintf( FILE *stream, const char *format, ... );
 HYPRE_Int hypre_sprintf( char *s, const char *format, ... );
+HYPRE_Int hypre_snprintf( char *s, size_t size, const char *format, ...);
 HYPRE_Int hypre_scanf( const char *format, ... );
 HYPRE_Int hypre_fscanf( FILE *stream, const char *format, ... );
 HYPRE_Int hypre_sscanf( char *s, const char *format, ... );
@@ -242,8 +243,18 @@ HYPRE_Int hypre_ParPrintf(MPI_Comm comm, const char *format, ...);
  * Global variable used in hypre error checking
  *--------------------------------------------------------------------------*/
 
-extern HYPRE_Int hypre__global_error;
-#define hypre_error_flag  hypre__global_error
+typedef struct
+{
+   HYPRE_Int  error_flag;
+   HYPRE_Int  print_to_memory;
+   char      *memory;
+   HYPRE_Int  mem_sz;
+   HYPRE_Int  msg_sz;
+
+} hypre_Error;
+
+extern hypre_Error hypre__global_error;
+#define hypre_error_flag  hypre__global_error.error_flag
 
 /*--------------------------------------------------------------------------
  * HYPRE error macros
