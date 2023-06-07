@@ -359,6 +359,12 @@ HYPRE_Int HYPRE_GMRESSetKDim(HYPRE_Solver solver,
                              HYPRE_Int    k_dim);
 
 /**
+ * (Optional) Set whether or not to use classical (CGS) or modified Gram-Shmidt (MGS). Default is MGS.
+ **/
+HYPRE_Int HYPRE_GMRESSetCGS(HYPRE_Solver solver,
+                            HYPRE_Int    cgs);
+
+/**
  * (Optional) Additionally require that the relative difference in
  * successive iterates be small.
  **/

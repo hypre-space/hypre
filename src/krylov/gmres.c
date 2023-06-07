@@ -36,6 +36,8 @@ hypre_GMRESFunctionsCreate(
    HYPRE_Int    (*ClearVector)   ( void *x ),
    HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x ),
    HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y ),
+   HYPRE_Int    (*MassInnerProd) ( void *x, void **p, HYPRE_Int k, HYPRE_Int unroll, void *result),
+   HYPRE_Int    (*MassAxpy)      ( HYPRE_Complex *alpha, void **x, void *y, HYPRE_Int k, HYPRE_Int unroll),
    HYPRE_Int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
    HYPRE_Int    (*Precond)       ( void *vdata, void *A, void *b, void *x )
 )
@@ -58,6 +60,8 @@ hypre_GMRESFunctionsCreate(
    gmres_functions->ClearVector = ClearVector;
    gmres_functions->ScaleVector = ScaleVector;
    gmres_functions->Axpy = Axpy;
+   gmres_functions->MassInnerProd = MassInnerProd;
+   gmres_functions->MassAxpy = MassAxpy;
    /* default preconditioner must be set here but can be changed later... */
    gmres_functions->precond_setup = PrecondSetup;
    gmres_functions->precond       = Precond;
@@ -81,6 +85,7 @@ hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions )
 
    /* set defaults */
    (gmres_data -> k_dim)          = 5;
+   (gmres_data -> cgs)        = 0;
    (gmres_data -> tol)            = 1.0e-06; /* relative residual tol */
    (gmres_data -> cf_tol)         = 0.0;
    (gmres_data -> a_tol)          = 0.0; /* abs. residual tol */
@@ -350,13 +355,19 @@ hypre_GMRESSolve(void  *gmres_vdata,
    {
       rs_2 = hypre_CTAllocF(HYPRE_Real, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
    }
-   hh = hypre_CTAllocF(HYPRE_Real*, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
-   for (i = 0; i < k_dim + 1; i++)
+
+   HYPRE_Real * HH;
+   if (gmres_data->cgs)
+   {
+      HH = hypre_CTAllocF(HYPRE_Real,k_dim+1,gmres_functions, HYPRE_MEMORY_HOST);
+   }
+   hh = hypre_CTAllocF(HYPRE_Real*,k_dim+1,gmres_functions, HYPRE_MEMORY_HOST);
+   for (i=0; i < k_dim+1; i++)
    {
       hh[i] = hypre_CTAllocF(HYPRE_Real, k_dim, gmres_functions, HYPRE_MEMORY_HOST);
    }
 
-   (*(gmres_functions->CopyVector))(b, p[0]);
+   (*(gmres_functions->CopyVector))(b,p[0]);
 
    /* compute initial residual */
    (*(gmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, p[0]);
@@ -539,18 +550,42 @@ hypre_GMRESSolve(void  *gmres_vdata,
          precond(precond_data, A, p[i - 1], r);
          (*(gmres_functions->Matvec))(matvec_data, 1.0, A, r, 0.0, p[i]);
          /* modified Gram_Schmidt */
-         for (j = 0; j < i; j++)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         hypre_GpuProfilingPushRange("GMRES-GramSchmidt");
+#endif
+         if (gmres_data->cgs)
          {
-            hh[j][i - 1] = (*(gmres_functions->InnerProd))(p[j], p[i]);
-            (*(gmres_functions->Axpy))(-hh[j][i - 1], p[j], p[i]);
+            /* classical Gram_Schmidt */
+            (*(gmres_functions->MassInnerProd))((void *) p[i], p, i, 1, HH);
+            for (j=0; j<i; j++)
+            {
+               hh[j][i-1] = HH[j];
+               HH[j] *= -1.0;
+            }
+            (*(gmres_functions->MassAxpy))(HH, p, p[i], i, 1);
          }
-         t = hypre_sqrt((*(gmres_functions->InnerProd))(p[i], p[i]));
-         hh[i][i - 1] = t;
+         else
+         {
+            /* modified Gram_Schmidt */
+            for (j=0; j < i; j++)
+            {
+               hh[j][i-1] = (*(gmres_functions->InnerProd))(p[j],p[i]);
+               (*(gmres_functions->Axpy))(-hh[j][i-1],p[j],p[i]);
+            }
+         }
+         t = sqrt((*(gmres_functions->InnerProd))(p[i],p[i]));
+
+         hh[i][i-1] = t;
          if (t != 0.0)
          {
             t = 1.0 / t;
             (*(gmres_functions->ScaleVector))(t, p[i]);
          }
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         hypre_GpuProfilingPopRange();
+#endif
+
          /* done with modified Gram_schmidt and Arnoldi step.
             update factorization of hh */
          for (j = 1; j < i; j++)
@@ -918,7 +953,10 @@ hypre_GMRESSolve(void  *gmres_vdata,
    }
 
    hypre_TFreeF(hh, gmres_functions);
-
+   if (gmres_data->cgs)
+   {
+      hypre_TFreeF(HH, gmres_functions);
+   }
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
@@ -949,6 +987,36 @@ hypre_GMRESGetKDim( void      *gmres_vdata,
 
 
    *k_dim = (gmres_data -> k_dim);
+
+   return hypre_error_flag;
+}
+
+
+/*--------------------------------------------------------------------------
+ * hypre_GMRESSetCGS, hypre_GMRESGetCGS
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GMRESSetCGS( void     *gmres_vdata,
+                   HYPRE_Int cgs )
+{
+   hypre_GMRESData *gmres_data =(hypre_GMRESData *) gmres_vdata;
+
+
+   (gmres_data -> cgs) = cgs;
+
+   return hypre_error_flag;
+
+}
+
+HYPRE_Int
+hypre_GMRESGetCGS( void      *gmres_vdata,
+                   HYPRE_Int *cgs )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+
+   *cgs = (gmres_data -> cgs);
 
    return hypre_error_flag;
 }

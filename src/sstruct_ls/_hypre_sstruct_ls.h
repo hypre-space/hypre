@@ -595,9 +595,11 @@ HYPRE_Int hypre_SStructKrylovMatvecDestroy ( void *matvec_data );
 HYPRE_Real hypre_SStructKrylovInnerProd ( void *x, void *y );
 HYPRE_Int hypre_SStructKrylovCopyVector ( void *x, void *y );
 HYPRE_Int hypre_SStructKrylovClearVector ( void *x );
-HYPRE_Int hypre_SStructKrylovScaleVector ( HYPRE_Complex alpha, void *x );
-HYPRE_Int hypre_SStructKrylovAxpy ( HYPRE_Complex alpha, void *x, void *y );
-HYPRE_Int hypre_SStructKrylovCommInfo ( void *A, HYPRE_Int *my_id, HYPRE_Int *num_procs );
+HYPRE_Int hypre_SStructKrylovScaleVector ( HYPRE_Complex alpha , void *x );
+HYPRE_Int hypre_SStructKrylovAxpy ( HYPRE_Complex alpha , void *x , void *y );
+HYPRE_Int hypre_SStructKrylovCommInfo ( void *A , HYPRE_Int *my_id , HYPRE_Int *num_procs );
+HYPRE_Int hypre_SStructKrylovMassAxpy ( HYPRE_Complex *alpha, void **x, void *y, HYPRE_Int k, HYPRE_Int unroll );
+HYPRE_Int hypre_SStructKrylovMassInnerProd ( void *x , void **y, HYPRE_Int k, HYPRE_Int unroll, void *result );
 
 /* maxwell_grad.c */
 hypre_ParCSRMatrix *hypre_Maxwell_Grad ( hypre_SStructGrid *grid );

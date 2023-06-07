@@ -215,7 +215,30 @@ hypre_SeqVectorMassAxpy( HYPRE_Complex *alpha,
 {
    HYPRE_Complex  *x_data = hypre_VectorData(x[0]);
    HYPRE_Complex  *y_data = hypre_VectorData(y);
-   HYPRE_Int       size   = hypre_VectorSize(x[0]);
+   HYPRE_Int       size   = hypre_VectorSize(x[0])*hypre_VectorNumVectors(x[0]);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+   HYPRE_Complex * d_alpha = hypre_CTAlloc(HYPRE_Complex,k,hypre_VectorMemoryLocation(y));
+   hypre_TMemcpy(d_alpha, alpha, HYPRE_Complex, k, hypre_VectorMemoryLocation(y), HYPRE_MEMORY_HOST);
+
+#if defined(HYPRE_USING_CUBLAS)
+
+   // This works but it's not as fast as the Maxpy kernel below.
+   double a = 1.0, b = 1.0;
+   HYPRE_CUBLAS_CALL( cublasDgemv(hypre_HandleCublasHandle(hypre_handle()), CUBLAS_OP_N, size, k, &a,
+				  x_data, size, d_alpha, 1, &b, y_data, 1));
+
+#else
+
+   hypreDevice_MassAxpy(k, size, d_alpha, x_data, y_data);
+
+#endif
+
+   hypre_TFree(d_alpha,hypre_VectorMemoryLocation(y));
+
+
+#else
 
    HYPRE_Int      i, j, jstart;
 
@@ -244,6 +267,8 @@ hypre_SeqVectorMassAxpy( HYPRE_Complex *alpha,
       }
    }
 
+#endif
+
    return hypre_error_flag;
 }
 
@@ -255,7 +280,7 @@ HYPRE_Int hypre_SeqVectorMassInnerProd8( hypre_Vector *x,
 {
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y[0]);
-   HYPRE_Int      size   = hypre_VectorSize(x);
+   HYPRE_Int      size   = hypre_VectorSize(x)*hypre_VectorNumVectors(x);
 
    HYPRE_Int      i, j, restk;
    HYPRE_Real res1;
@@ -1124,9 +1149,31 @@ HYPRE_Int hypre_SeqVectorMassInnerProd( hypre_Vector *x,
 {
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y[0]);
-   HYPRE_Real res;
-   HYPRE_Int      size   = hypre_VectorSize(x);
+   HYPRE_Int      size   = hypre_VectorSize(x)*hypre_VectorNumVectors(x);
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+#if defined(HYPRE_USING_CUBLAS)
+
+   HYPRE_Real * d_result = hypre_CTAlloc(HYPRE_Real,k,hypre_VectorMemoryLocation(x));
+
+   double alpha = 1.0, beta = 0.0;
+   HYPRE_CUBLAS_CALL( cublasDgemv(hypre_HandleCublasHandle(hypre_handle()), CUBLAS_OP_T, size, k, &alpha,
+                                                           y_data, size, x_data, 1, &beta, d_result, 1));
+
+   hypre_TMemcpy(result, d_result, HYPRE_Real, k, HYPRE_MEMORY_HOST, hypre_VectorMemoryLocation(x));
+   hypre_TFree(d_result,hypre_VectorMemoryLocation(x));
+
+#else
+
+   hypreDevice_MassInnerProd(k, size, x_data, y_data, result);
+
+#endif
+
+
+#else
+
+   HYPRE_Real res;
    HYPRE_Int      i, j, jstart;
 
    if (unroll == 8)
@@ -1156,6 +1203,8 @@ HYPRE_Int hypre_SeqVectorMassInnerProd( hypre_Vector *x,
       }
    }
 
+#endif
+
    return hypre_error_flag;
 }
 
@@ -1170,8 +1219,15 @@ HYPRE_Int hypre_SeqVectorMassDotpTwo( hypre_Vector *x, hypre_Vector *y,
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Complex *z_data = hypre_VectorData(z[0]);
-   HYPRE_Real res_x, res_y;
    HYPRE_Int      size   = hypre_VectorSize(x);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+   hypreDevice_MassDotpTwo(k, size, x_data, y_data, z_data, result_x, result_y);
+
+#else
+
+   HYPRE_Real res_x, res_y;
 
    HYPRE_Int      i, j, jstart;
 
@@ -1204,6 +1260,9 @@ HYPRE_Int hypre_SeqVectorMassDotpTwo( hypre_Vector *x, hypre_Vector *y,
          result_y[j] = res_y;
       }
    }
+
+#endif
+
    return hypre_error_flag;
 }
 

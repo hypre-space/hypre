@@ -31,6 +31,7 @@ HYPRE_ParCSRGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
          hypre_ParKrylovInnerProd, hypre_ParKrylovCopyVector,
          hypre_ParKrylovClearVector,
          hypre_ParKrylovScaleVector, hypre_ParKrylovAxpy,
+         hypre_ParKrylovMassInnerProd, hypre_ParKrylovMassAxpy,
          hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
    *solver = ( (HYPRE_Solver) hypre_GMRESCreate( gmres_functions ) );
 
@@ -88,6 +89,17 @@ HYPRE_ParCSRGMRESSetKDim( HYPRE_Solver solver,
                           HYPRE_Int             k_dim    )
 {
    return ( HYPRE_GMRESSetKDim( solver, k_dim ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRGMRESSetCGS
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRGMRESSetCGS( HYPRE_Solver solver,
+                         HYPRE_Int             cgs    )
+{
+   return( HYPRE_GMRESSetCGS( solver, cgs ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -69,6 +69,24 @@ HYPRE_GMRESGetKDim( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_GMRESSetCGS, HYPRE_GMRESGetCGS
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_GMRESSetCGS( HYPRE_Solver solver,
+                   HYPRE_Int             cgs    )
+{
+   return( hypre_GMRESSetCGS( (void *) solver, cgs ) );
+}
+
+HYPRE_Int
+HYPRE_GMRESGetCGS( HYPRE_Solver solver,
+                   HYPRE_Int           * cgs    )
+{
+   return( hypre_GMRESGetCGS( (void *) solver, cgs ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_GMRESSetTol, HYPRE_GMRESGetTol
  *--------------------------------------------------------------------------*/
 

@@ -105,6 +105,22 @@ hypre_F90_IFACE(hypre_parcsrgmressetkdim, HYPRE_PARCSRGMRESSETKDIM)
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRGMRESSetCGS
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrgmressetcgs, HYPRE_PARCSRGMRESSETCGS)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *cgs,
+     hypre_F90_Int *ierr    )
+{
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_ParCSRGMRESSetCGS(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassInt (cgs)    ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRGMRESSetTol
  *--------------------------------------------------------------------------*/
 

@@ -501,6 +501,7 @@ hypre_HybridSolveUseGMRES( hypre_HybridData  *hybrid_data )
          hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
          hypre_StructKrylovClearVector,
          hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
+         hypre_StructKrylovMassInnerProd, hypre_StructKrylovMassAxpy,
          hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
    krylov_solver = hypre_GMRESCreate( gmres_functions );
 

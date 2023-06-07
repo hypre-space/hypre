@@ -1950,6 +1950,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
                   hypre_ParKrylovInnerProd, hypre_ParKrylovCopyVector,
                   hypre_ParKrylovClearVector,
                   hypre_ParKrylovScaleVector, hypre_ParKrylovAxpy,
+                  hypre_ParKrylovMassInnerProd, hypre_ParKrylovMassAxpy,
                   hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
             pcg_solver = hypre_GMRESCreate( gmres_functions );
 
