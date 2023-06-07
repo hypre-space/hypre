@@ -16,7 +16,7 @@ hypre_Error hypre__global_error = {0, 0, NULL, 0, 0};
 
 void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const char *msg)
 {
-   /* Copy global struct into a short name copy changes back before exiting */
+   /* Copy global struct into a short name and copy changes back before exiting */
    hypre_Error err = hypre__global_error;
 
    /* Store the error code */

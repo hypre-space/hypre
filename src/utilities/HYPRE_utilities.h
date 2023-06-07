@@ -179,10 +179,10 @@ HYPRE_Int HYPRE_ClearError(HYPRE_Int hypre_error_code);
 /* Set behavior for printing errors: mode 0 = stderr, mode 1 = memory buffer */
 HYPRE_Int HYPRE_SetPrintErrorMode(HYPRE_Int mode);
 
-/* Return a buffer of error messages and clear them from hypre */
+/* Return a buffer of error messages and clear them in hypre */
 HYPRE_Int HYPRE_GetErrorMessages(char **buffer, HYPRE_Int *bufsz);
 
-/* Print the error messages and clear them from hypre */
+/* Print the error messages and clear them in hypre */
 HYPRE_Int HYPRE_PrintErrorMessages(MPI_Comm comm);
 
 /* Print GPU information */
