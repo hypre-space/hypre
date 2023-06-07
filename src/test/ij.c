@@ -8738,14 +8738,15 @@ final:
    if (test_error == 1)
    {
       /* Test GetErrorMessages() */
-      char      *buffer;
+      char      *buffer, *msg;
       HYPRE_Int  bufsz;
       HYPRE_GetErrorMessages(&buffer, &bufsz);
       hypre_MPI_Barrier(comm);
-      if (bufsz > 0)
+      for (msg = buffer; msg < (buffer + bufsz); msg += strlen(msg) + 1)
       {
-         hypre_fprintf(stderr, "bufsz = %d, first error = %s", bufsz, buffer);
+         hypre_fprintf(stderr, "%d: %s", myid, msg);
       }
+      hypre_TFree(buffer, HYPRE_MEMORY_HOST);
    }
    else
    {

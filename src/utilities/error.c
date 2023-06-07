@@ -187,14 +187,15 @@ HYPRE_Int HYPRE_PrintErrorMessages(MPI_Comm comm)
 {
    hypre_Error err = hypre__global_error;
 
-   char *msg = err.memory;
+   HYPRE_Int myid;
+   char *msg;
 
    hypre_MPI_Barrier(comm);
 
-   while (msg < (err.memory + err.msg_sz))
+   hypre_MPI_Comm_rank(comm, &myid);
+   for (msg = err.memory; msg < (err.memory + err.msg_sz); msg += strlen(msg) + 1)
    {
-      hypre_fprintf(stderr, "%s", msg);
-      msg += strlen(msg) + 1;
+      hypre_fprintf(stderr, "%d: %s", myid, msg);
    }
 
    hypre_TFree(err.memory, HYPRE_MEMORY_HOST);
