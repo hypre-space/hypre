@@ -28,9 +28,9 @@ do
 done > ${TNAME}.out
 
 # Remove the "hypre error" lines from '.err' file and append them to '.out'
-mv ${TNAME}.err ${TNAME}.err.orig
-egrep    "hypre error" ${TNAME}.err.orig | sort >> ${TNAME}.out
-egrep -v "hypre error" ${TNAME}.err.orig        >  ${TNAME}.err
+mv ${TNAME}.err ${TNAME}.tmp
+egrep    "hypre error" ${TNAME}.tmp | sort >> ${TNAME}.out
+egrep -v "hypre error" ${TNAME}.tmp        >  ${TNAME}.err
 
 #=============================================================================
 # remove temporary files
