@@ -2534,8 +2534,8 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                           structural_zero, structural_zero);
             hypre_error_w_msg(1, msg);
          }
-         hypre_CsrsvDataAnalyzedL(csrsv_data) = 1;
 #endif
+         hypre_CsrsvDataAnalyzedL(csrsv_data) = 1;
       }
 
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
@@ -2633,8 +2633,8 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                           structural_zero, structural_zero);
             hypre_error_w_msg(1, msg);
          }
-         hypre_CsrsvDataAnalyzedU(csrsv_data) = 1;
 #endif
+         hypre_CsrsvDataAnalyzedU(csrsv_data) = 1;
       }
 
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
