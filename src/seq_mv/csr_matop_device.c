@@ -41,6 +41,17 @@ hypre_CsrsvDataCreate()
    hypre_CsrsvDataAnalyzedL(data) = 0;
    hypre_CsrsvDataAnalyzedU(data) = 0;
 
+#if defined(hypre_CsrsvDataBuffer)
+   hypre_CsrsvDataBuffer(data)    = NULL;
+#endif
+#if defined(hypre_CsrsvDataBufferL)
+   hypre_CsrsvDataBufferL(data)   = NULL;
+#endif
+#if defined(hypre_CsrsvDataBufferU)
+   hypre_CsrsvDataBufferU(data)   = NULL;
+#endif
+   hypre_CsrsvDataMatData(data)   = NULL;
+
    return data;
 }
 
@@ -2355,7 +2366,6 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
                                           HYPRE_Complex   *u_data )
 {
    HYPRE_Int              num_rows     = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int              num_cols     = hypre_CSRMatrixNumCols(A);
    HYPRE_Int              num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
    HYPRE_Int             *A_i          = hypre_CSRMatrixI(A);
    HYPRE_Int             *A_j          = hypre_CSRMatrixJ(A);
@@ -2373,6 +2383,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
    HYPRE_Complex          alpha        = 1.0;
 
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
+   HYPRE_Int              num_cols     = hypre_CSRMatrixNumCols(A);
    cusparseSpMatDescr_t   matA;
    cusparseDnVecDescr_t   vecF;
    cusparseDnVecDescr_t   vecU;
@@ -2667,7 +2678,6 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
                                            HYPRE_Complex    *u_data )
 {
    HYPRE_Int            num_rows      = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int            num_cols      = hypre_CSRMatrixNumCols(A);
    HYPRE_Int            num_nonzeros  = hypre_CSRMatrixNumNonzeros(A);
    HYPRE_Int           *A_i           = hypre_CSRMatrixI(A);
    HYPRE_Int           *A_j           = hypre_CSRMatrixJ(A);
@@ -2716,8 +2726,9 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
    }
 
    /* Analysis and Solve */
-   A_ma = hypre_CsrsvDataMatData(csrsv_data);
-   A_sj = hypre_CSRMatrixSortedJ(A);
+   buffer = hypre_CsrsvDataBuffer(csrsv_data);
+   A_ma   = hypre_CsrsvDataMatData(csrsv_data);
+   A_sj   = hypre_CSRMatrixSortedJ(A);
 
    /* Set matrix diagonal type */
    HYPRE_ROCSPARSE_CALL( rocsparse_set_mat_diag_type(descr, diag_type) );
@@ -2745,10 +2756,6 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
 
             hypre_CsrsvDataBuffer(csrsv_data)     = buffer;
             hypre_CsrsvDataBufferSize(csrsv_data) = buffer_size;
-         }
-         else
-         {
-            buffer = hypre_CsrsvDataBuffer(csrsv_data);
          }
 
          HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrsv_analysis(handle, rocsparse_operation_none,
@@ -2803,10 +2810,6 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
 
             hypre_CsrsvDataBuffer(csrsv_data) = buffer;
             hypre_CsrsvDataBufferSize(csrsv_data) = buffer_size;
-         }
-         else
-         {
-            buffer = hypre_CsrsvDataBuffer(csrsv_data);
          }
 
          HYPRE_ROCSPARSE_CALL( hypre_rocsparse_csrsv_analysis(handle, rocsparse_operation_none,
