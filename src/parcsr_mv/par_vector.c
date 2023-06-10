@@ -988,30 +988,28 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
 
 HYPRE_Int
 hypre_ParVectorPrintBinaryIJ( hypre_ParVector *par_vector,
-                              HYPRE_Int        base_j,
                               const char      *filename )
 {
-   MPI_Comm               comm = hypre_ParVectorComm(vector);
-   HYPRE_BigInt           global_size = hypre_ParVectorGlobalSize(vector);
-   HYPRE_BigInt          *partitioning = hypre_ParVectorPartitioning(vector);
-   HYPRE_MemoryLocation   memory_location = hypre_ParVectorMemoryLocation(matrix);
+   MPI_Comm               comm = hypre_ParVectorComm(par_vector);
+   HYPRE_BigInt           global_size = hypre_ParVectorGlobalSize(par_vector);
+   HYPRE_BigInt          *partitioning = hypre_ParVectorPartitioning(par_vector);
+   HYPRE_MemoryLocation   memory_location = hypre_ParVectorMemoryLocation(par_vector);
 
    hypre_ParVector       *h_parvector;
    hypre_Vector          *h_vector;
    HYPRE_Int              size;
    HYPRE_Int              num_vectors;
+   HYPRE_Int              total_size;
    HYPRE_Int              storage_method;
 
-   /* Local buffers */
-   hypre_float           *f32buffer = NULL;
-   hypre_double          *f64buffer = NULL;
-
-   size_t                 count;
-   HYPRE_BigInt           i;
-   HYPRE_Complex         *data;
-   HYPRE_Int              myid;
+   /* Local variables */
    char                   new_filename[HYPRE_MAX_FILE_NAME_LEN];
    FILE                  *fp;
+   size_t                 count;
+   hypre_uint64           header[8];
+   HYPRE_Int              one = 1;
+   HYPRE_Complex         *data;
+   HYPRE_Int              myid;
 
    /* Exit if trying to write from big-endian machine */
    if ((*(char*)&one) == 0)
@@ -1025,7 +1023,8 @@ hypre_ParVectorPrintBinaryIJ( hypre_ParVector *par_vector,
 
    /* Create temporary vector on host memory if needed */
    h_parvector = (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE) ?
-                 hypre_ParVectorClone_v2(par_vector, 1, HYPRE_MEMORY_HOST) : par_vector;
+                 hypre_ParVectorCloneDeep_v2(par_vector, HYPRE_MEMORY_HOST) : par_vector;
+
 
    /* Local vector variables */
    h_vector = hypre_ParVectorLocalVector(h_parvector);
@@ -1033,6 +1032,7 @@ hypre_ParVectorPrintBinaryIJ( hypre_ParVector *par_vector,
    storage_method = hypre_VectorMultiVecStorageMethod(h_vector);
    data = hypre_VectorData(h_vector);
    size = hypre_VectorSize(h_vector);
+   total_size = size * num_vectors;
 
    /* Open binary file */
    hypre_sprintf(new_filename, "%s.%05d.bin", filename, myid);
@@ -1065,20 +1065,22 @@ hypre_ParVectorPrintBinaryIJ( hypre_ParVector *par_vector,
     * Write vector coefficients
     *---------------------------------------------*/
 
-   hypre_fprintf(file, "%b \n", global_size);
-   for (i = 0; i < 2; i++)
+   count = fwrite((const void*) data, sizeof(HYPRE_Complex), total_size, fp);
+   if (count != total_size)
    {
-      hypre_fprintf(file, "%b ", partitioning[i] + base_j);
-   }
-   hypre_fprintf(file, "\n");
-
-   part0 = partitioning[0];
-   for (j = part0; j < partitioning[1]; j++)
-   {
-      hypre_fprintf(file, "%b %.14e\n", j + base_j, local_data[(HYPRE_Int)(j - part0)]);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not write all entries\n");
+      return hypre_error_flag;
    }
 
-   fclose(file);
+   /*---------------------------------------------
+    * Finalize
+    *---------------------------------------------*/
+
+   fclose(fp);
+   if (h_parvector != par_vector)
+   {
+      hypre_ParVectorDestroy(h_parvector);
+   }
 
    return hypre_error_flag;
 }

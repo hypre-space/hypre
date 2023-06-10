@@ -3710,7 +3710,6 @@ main( hypre_int argc,
       else if (parcsr_A)
       {
          hypre_ParCSRMatrixPrintIJ(parcsr_A, 0, 0, "IJ.out.A");
-         hypre_ParCSRMatrixPrintBinaryIJ(parcsr_A, 0, 0, "IJ.out.A");
       }
       else
       {
@@ -3761,6 +3760,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Migrate the system to the wanted memory space
     *-----------------------------------------------------------*/
+
    hypre_ParCSRMatrixMigrate(parcsr_A, hypre_HandleMemoryLocation(hypre_handle()));
    hypre_ParVectorMigrate(b, hypre_HandleMemoryLocation(hypre_handle()));
    hypre_ParVectorMigrate(x, hypre_HandleMemoryLocation(hypre_handle()));

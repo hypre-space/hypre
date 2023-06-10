@@ -732,6 +732,7 @@ HYPRE_Int HYPRE_ParVectorDestroy ( HYPRE_ParVector vector );
 HYPRE_Int HYPRE_ParVectorInitialize ( HYPRE_ParVector vector );
 HYPRE_Int HYPRE_ParVectorRead ( MPI_Comm comm, const char *file_name, HYPRE_ParVector *vector );
 HYPRE_Int HYPRE_ParVectorPrint ( HYPRE_ParVector vector, const char *file_name );
+HYPRE_Int HYPRE_ParVectorPrintBinaryIJ ( HYPRE_ParVector vector, const char *file_name );
 HYPRE_Int HYPRE_ParVectorSetConstantValues ( HYPRE_ParVector vector, HYPRE_Complex value );
 HYPRE_Int HYPRE_ParVectorSetRandomValues ( HYPRE_ParVector vector, HYPRE_Int seed );
 HYPRE_Int HYPRE_ParVectorCopy ( HYPRE_ParVector x, HYPRE_ParVector y );
@@ -1209,7 +1210,6 @@ HYPRE_Int hypre_ParVectorSetNumVectors ( hypre_ParVector *vector, HYPRE_Int num_
 HYPRE_Int hypre_ParVectorSetComponent ( hypre_ParVector *vector, HYPRE_Int component );
 HYPRE_Int hypre_ParVectorResize ( hypre_ParVector *vector, HYPRE_Int num_vectors );
 hypre_ParVector *hypre_ParVectorRead ( MPI_Comm comm, const char *file_name );
-HYPRE_Int hypre_ParVectorPrint ( hypre_ParVector *vector, const char *file_name );
 HYPRE_Int hypre_ParVectorSetConstantValues ( hypre_ParVector *v, HYPRE_Complex value );
 HYPRE_Int hypre_ParVectorSetZeros( hypre_ParVector *v );
 HYPRE_Int hypre_ParVectorSetRandomValues ( hypre_ParVector *v, HYPRE_Int seed );
@@ -1233,8 +1233,10 @@ HYPRE_Int hypre_ParVectorMassDotpTwo ( hypre_ParVector *x, hypre_ParVector *y, h
 hypre_ParVector *hypre_VectorToParVector ( MPI_Comm comm, hypre_Vector *v,
                                            HYPRE_BigInt *vec_starts );
 hypre_Vector *hypre_ParVectorToVectorAll ( hypre_ParVector *par_v );
+HYPRE_Int hypre_ParVectorPrint ( hypre_ParVector *vector, const char *file_name );
 HYPRE_Int hypre_ParVectorPrintIJ ( hypre_ParVector *vector, HYPRE_Int base_j,
                                    const char *filename );
+HYPRE_Int hypre_ParVectorPrintBinaryIJ ( hypre_ParVector *par_vector, const char *filename );
 HYPRE_Int hypre_ParVectorReadIJ ( MPI_Comm comm, const char *filename, HYPRE_Int *base_j_ptr,
                                   hypre_ParVector **vector_ptr );
 HYPRE_Int hypre_FillResponseParToVectorAll ( void *p_recv_contact_buf, HYPRE_Int contact_size,
@@ -1261,3 +1263,4 @@ HYPRE_Int hypre_ParVectorGetValuesDevice(hypre_ParVector *vector, HYPRE_Int num_
 #endif
 
 #endif
+
