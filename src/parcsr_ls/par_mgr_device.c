@@ -11,11 +11,12 @@
  *
  *****************************************************************************/
 
+#include "seq_mv/seq_mv.h"
 #include "_hypre_parcsr_ls.h"
-#include "seq_mv/protos.h"
 #include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
 template<typename T>
 struct functor : public thrust::binary_function<T, T, T>
 {
@@ -30,10 +31,89 @@ struct functor : public thrust::binary_function<T, T, T>
    }
 };
 
-void hypreDevice_extendWtoP( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows, HYPRE_Int W_nr_of_cols,
-                             HYPRE_Int *CF_marker, HYPRE_Int W_diag_nnz, HYPRE_Int *W_diag_i, HYPRE_Int *W_diag_j,
-                             HYPRE_Complex *W_diag_data, HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j, HYPRE_Complex *P_diag_data,
-                             HYPRE_Int *W_offd_i, HYPRE_Int *P_offd_i );
+/*--------------------------------------------------------------------------
+ * hypre_MGRBuildPFromWpDevice
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRBuildPFromWpDevice( hypre_ParCSRMatrix   *A,
+                             hypre_ParCSRMatrix   *Wp,
+                             HYPRE_Int            *CF_marker,
+                             hypre_ParCSRMatrix  **P_ptr)
+{
+   /* Wp info */
+   hypre_CSRMatrix     *Wp_diag = hypre_ParCSRMatrixDiag(Wp);
+   hypre_CSRMatrix     *Wp_offd = hypre_ParCSRMatrixOffd(Wp);
+
+   /* Local variables */
+   hypre_ParCSRMatrix  *P;
+   hypre_CSRMatrix     *P_diag;
+   hypre_CSRMatrix     *P_offd;
+   HYPRE_Int            P_diag_nnz;
+
+   hypre_GpuProfilingPushRange("MGRBuildPFromWp");
+
+   /* Set local variables */
+   P_diag_nnz = hypre_CSRMatrixNumNonzeros(Wp_diag) +
+                hypre_CSRMatrixNumCols(Wp_diag);
+
+   /* Create interpolation matrix */
+   P = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A),
+                                hypre_ParCSRMatrixGlobalNumRows(A),
+                                hypre_ParCSRMatrixGlobalNumCols(Wp),
+                                hypre_ParCSRMatrixRowStarts(A),
+                                hypre_ParCSRMatrixColStarts(Wp),
+                                hypre_CSRMatrixNumCols(Wp_offd),
+                                P_diag_nnz,
+                                hypre_CSRMatrixNumNonzeros(Wp_offd));
+
+   /* Initialize interpolation matrix */
+   hypre_ParCSRMatrixInitialize_v2(P, HYPRE_MEMORY_DEVICE);
+   hypre_ParCSRMatrixDNumNonzeros(P) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P);
+   P_diag = hypre_ParCSRMatrixDiag(P);
+   P_offd = hypre_ParCSRMatrixOffd(P);
+
+   /* Copy contents from W to P and set identity matrix for the mapping between coarse points */
+   hypreDevice_extendWtoP(hypre_ParCSRMatrixNumRows(A),
+                          hypre_ParCSRMatrixNumRows(Wp),
+                          hypre_CSRMatrixNumCols(Wp_diag),
+                          CF_marker,
+                          hypre_CSRMatrixNumNonzeros(Wp_diag),
+                          hypre_CSRMatrixI(Wp_diag),
+                          hypre_CSRMatrixJ(Wp_diag),
+                          hypre_CSRMatrixData(Wp_diag),
+                          hypre_CSRMatrixI(P_diag),
+                          hypre_CSRMatrixJ(P_diag),
+                          hypre_CSRMatrixData(P_diag),
+                          hypre_CSRMatrixI(Wp_offd),
+                          hypre_CSRMatrixI(P_offd));
+
+   /* Swap some pointers to avoid data copies */
+   hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(P))    = hypre_CSRMatrixJ(Wp_offd);
+   hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(P)) = hypre_CSRMatrixData(Wp_offd);
+   hypre_CSRMatrixJ(Wp_offd)    = NULL;
+   hypre_CSRMatrixData(Wp_offd) = NULL;
+   /* hypre_ParCSRMatrixDeviceColMapOffd(P)    = hypre_ParCSRMatrixDeviceColMapOffd(Wp); */
+   /* hypre_ParCSRMatrixColMapOffd(P)          = hypre_ParCSRMatrixColMapOffd(Wp); */
+   /* hypre_ParCSRMatrixDeviceColMapOffd(Wp)   = NULL; */
+   /* hypre_ParCSRMatrixColMapOffd(Wp)         = NULL; */
+
+   /* Create communication package */
+   hypre_MatvecCommPkgCreate(P);
+
+   /* Set output pointer to the interpolation matrix */
+   *P_ptr = P;
+
+   hypre_GpuProfilingPopRange();
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_MGRBuildPDevice
+ *
+ * TODO: make use of hypre_MGRBuildPFromWpDevice
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
@@ -55,11 +135,12 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_GpuProfilingPushRange("MGRBuildP");
 
-   nfpoints = HYPRE_THRUST_CALL( count,
-                                 CF_marker,
-                                 CF_marker + A_nr_of_rows,
-                                 -1);
+   nfpoints = HYPRE_THRUST_CALL(count,
+                                CF_marker,
+                                CF_marker + A_nr_of_rows,
+                                -1);
 
    if (method > 0)
    {
@@ -68,19 +149,35 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
       if (method == 1)
       {
          // extract diag inverse sqrt
-         //        hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(A_FF), diag, 3);
+         // hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(A_FF), diag, 3);
 
          // L1-Jacobi-type interpolation
          HYPRE_Complex scal = 1.0;
+
          diag1 = hypre_CTAlloc(HYPRE_Complex, nfpoints, HYPRE_MEMORY_DEVICE);
          hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(A_FF), diag, 0);
-         hypre_CSRMatrixComputeRowSumDevice(hypre_ParCSRMatrixDiag(A_FF), NULL, NULL, diag1, 1, 1.0, "set");
-         hypre_CSRMatrixComputeRowSumDevice(hypre_ParCSRMatrixDiag(A_FC), NULL, NULL, diag1, 1, 1.0, "add");
-         hypre_CSRMatrixComputeRowSumDevice(hypre_ParCSRMatrixOffd(A_FF), NULL, NULL, diag1, 1, 1.0, "add");
-         hypre_CSRMatrixComputeRowSumDevice(hypre_ParCSRMatrixOffd(A_FC), NULL, NULL, diag1, 1, 1.0, "add");
 
-         HYPRE_THRUST_CALL( transform, diag, diag + nfpoints, diag1, diag, functor<HYPRE_Complex>(scal));
-         HYPRE_THRUST_CALL( transform, diag, diag + nfpoints, diag, 1.0 / _1);
+         hypre_CSRMatrixComputeRowSumDevice(hypre_ParCSRMatrixDiag(A_FF), NULL, NULL,
+                                            diag1, 1, 1.0, "set");
+         hypre_CSRMatrixComputeRowSumDevice(hypre_ParCSRMatrixDiag(A_FC), NULL, NULL,
+                                            diag1, 1, 1.0, "add");
+         hypre_CSRMatrixComputeRowSumDevice(hypre_ParCSRMatrixOffd(A_FF), NULL, NULL,
+                                            diag1, 1, 1.0, "add");
+         hypre_CSRMatrixComputeRowSumDevice(hypre_ParCSRMatrixOffd(A_FC), NULL, NULL,
+                                            diag1, 1, 1.0, "add");
+
+         HYPRE_THRUST_CALL(transform,
+                           diag,
+                           diag + nfpoints,
+                           diag1,
+                           diag,
+                           functor<HYPRE_Complex>(scal));
+
+         HYPRE_THRUST_CALL(transform,
+                           diag,
+                           diag + nfpoints,
+                           diag,
+                           1.0 / _1);
 
          hypre_TFree(diag1, HYPRE_MEMORY_DEVICE);
       }
@@ -125,7 +222,6 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
    P_diag_data = hypre_TAlloc(HYPRE_Complex, P_diag_nnz,     HYPRE_MEMORY_DEVICE);
    P_offd_i    = hypre_TAlloc(HYPRE_Int,     A_nr_of_rows + 1, HYPRE_MEMORY_DEVICE);
 
-   //hypre_NvtxPushRangeColor("Extend matrix", 4);
    hypreDevice_extendWtoP( A_nr_of_rows,
                            W_nr_of_rows,
                            hypre_CSRMatrixNumCols(W_diag),
@@ -139,7 +235,6 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
                            P_diag_data,
                            hypre_CSRMatrixI(W_offd),
                            P_offd_i );
-   //hypre_NvtxPopRange();
 
    // final P
    P = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A),
@@ -170,8 +265,8 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
       hypre_ParCSRMatrixColMapOffd(P)          = hypre_ParCSRMatrixColMapOffd(A_FC);
       hypre_ParCSRMatrixDeviceColMapOffd(A_FC) = NULL;
       hypre_ParCSRMatrixColMapOffd(A_FC)       = NULL;
-      hypre_ParCSRMatrixNumNonzeros(P)         = hypre_ParCSRMatrixNumNonzeros(
-                                                    A_FC) + hypre_ParCSRMatrixGlobalNumCols(A_FC);
+      hypre_ParCSRMatrixNumNonzeros(P)         = hypre_ParCSRMatrixNumNonzeros(A_FC) +
+                                                 hypre_ParCSRMatrixGlobalNumCols(A_FC);
    }
    else
    {
@@ -198,8 +293,14 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixDestroy(W_offd);
    }
 
+   hypre_GpuProfilingPopRange();
+
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_MGRRelaxL1JacobiDevice
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_MGRRelaxL1JacobiDevice( hypre_ParCSRMatrix *A,
@@ -211,8 +312,705 @@ hypre_MGRRelaxL1JacobiDevice( hypre_ParCSRMatrix *A,
                               hypre_ParVector    *u,
                               hypre_ParVector    *Vtemp )
 {
-   hypre_BoomerAMGRelax(A, f, CF_marker, 18, relax_points, relax_weight, 1.0, l1_norms, u, Vtemp,
-                        NULL);
+   hypre_BoomerAMGRelax(A, f, CF_marker, 18,
+                        relax_points, relax_weight, 1.0,
+                        l1_norms, u, Vtemp, NULL);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypreGPUKernel_ComplexArrayToArrayOfPtrs
+ *
+ * TODO:
+ *   1) data as template arg.
+ *   2) Move this to device_utils?
+ *--------------------------------------------------------------------------*/
+
+__global__ void
+hypreGPUKernel_ComplexArrayToArrayOfPtrs( hypre_DeviceItem  &item,
+                                          HYPRE_Int          num_rows,
+                                          HYPRE_Int          ldim,
+                                          HYPRE_Complex     *data,
+                                          HYPRE_Complex    **data_aop )
+{
+   HYPRE_Int i = threadIdx.x + blockIdx.x * blockDim.x;
+
+   if (i < num_rows)
+   {
+      data_aop[i] = &data[i * ldim];
+   }
+}
+
+/*--------------------------------------------------------------------------
+ * hypreGPUKernel_CSRMatrixExtractBlockDiag
+ *
+ * Fills vector diag with the block diagonals from the input matrix.
+ * This function uses column-major storage for diag.
+ *
+ * TODOs:
+ *    1) Move this to csr_matop_device.c
+ *    2) Use sub-warps?
+ *    3) blk_size as template arg.
+ *    4) Choose diag storage between row and column-major?
+ *    5) Should we build flat arrays, arrays of pointers, or allow both?
+ *--------------------------------------------------------------------------*/
+
+__global__ void
+hypreGPUKernel_CSRMatrixExtractBlockDiag( hypre_DeviceItem  &item,
+                                          HYPRE_Int          blk_size,
+                                          HYPRE_Int          num_rows,
+                                          HYPRE_Int         *A_i,
+                                          HYPRE_Int         *A_j,
+                                          HYPRE_Complex     *A_a,
+                                          HYPRE_Int         *B_i,
+                                          HYPRE_Int         *B_j,
+                                          HYPRE_Complex     *B_a )
+{
+   HYPRE_Int   lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
+   HYPRE_Int   bs2  = blk_size * blk_size;
+   HYPRE_Int   bidx;
+   HYPRE_Int   lidx;
+   HYPRE_Int   i, ii, j, pj, qj;
+   HYPRE_Int   col;
+
+   /* Grid-stride loop over block matrix rows */
+   for (bidx = (blockIdx.x * blockDim.x + threadIdx.x) / HYPRE_WARP_SIZE;
+        bidx < num_rows / blk_size;
+        bidx += (gridDim.x * blockDim.x) * blk_size / HYPRE_WARP_SIZE)
+   {
+      ii = bidx * blk_size;
+
+      /* Set output row pointer and column indices */
+      for (i = lane; i < blk_size; i += HYPRE_WARP_SIZE)
+      {
+         B_i[ii + i + 1] = (ii + i + 1) * blk_size;
+      }
+
+      /* Set output column indices (row major) */
+      for (j = lane; j < bs2; j += HYPRE_WARP_SIZE)
+      {
+         B_j[ii * blk_size + j] = ii + j % blk_size;
+      }
+
+      /* TODO: unroll this loop */
+      for (lidx = 0; lidx < blk_size; lidx++)
+      {
+         i = ii + lidx;
+
+         if (lane < 2)
+         {
+            pj = read_only_load(A_i + i + lane);
+         }
+         qj = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pj, 1);
+         pj = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pj, 0);
+
+         /* Loop over columns */
+         for (j = pj + lane; j < qj; j += HYPRE_WARP_SIZE)
+         {
+            col = read_only_load(A_j + j);
+
+            if ((col >= ii) &&
+                (col <  ii + blk_size) &&
+                (fabs(A_a[j]) > HYPRE_REAL_MIN))
+            {
+               /* batch offset + column offset + row offset */
+               B_a[ii * blk_size + (col - ii) * blk_size + lidx] = A_a[j];
+            }
+         }
+      } /* Local block loop */
+   } /* Grid-stride loop */
+}
+
+/*--------------------------------------------------------------------------
+ * hypreGPUKernel_CSRMatrixExtractBlockDiagMarked
+ *
+ * Fills vector diag with the block diagonals from the input matrix.
+ * This function uses column-major storage for diag.
+ *
+ * TODOs:
+ *    1) Move this to csr_matop_device.c
+ *    2) Use sub-warps?
+ *    3) blk_size as template arg.
+ *    4) Choose diag storage between row and column-major?
+ *    5) Should we build flat arrays, arrays of pointers, or allow both?
+ *--------------------------------------------------------------------------*/
+
+__global__ void
+hypreGPUKernel_CSRMatrixExtractBlockDiagMarked( hypre_DeviceItem  &item,
+                                                HYPRE_Int          blk_size,
+                                                HYPRE_Int          num_rows,
+                                                HYPRE_Int          marker_val,
+                                                HYPRE_Int         *marker,
+                                                HYPRE_Int         *marker_indices,
+                                                HYPRE_Int         *A_i,
+                                                HYPRE_Int         *A_j,
+                                                HYPRE_Complex     *A_a,
+                                                HYPRE_Int         *B_i,
+                                                HYPRE_Int         *B_j,
+                                                HYPRE_Complex     *B_a )
+{
+   HYPRE_Int   lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
+   //HYPRE_Int   bs2  = blk_size * blk_size;
+   HYPRE_Int   bidx;
+   HYPRE_Int   lidx;
+   HYPRE_Int   i, ii, j, pj, qj, k;
+   HYPRE_Int   col;
+
+   /* Grid-stride loop over block matrix rows */
+   for (bidx = (blockIdx.x * blockDim.x + threadIdx.x) / HYPRE_WARP_SIZE;
+        bidx < num_rows / blk_size;
+        bidx += (gridDim.x * blockDim.x) * blk_size / HYPRE_WARP_SIZE)
+   {
+      /* TODO: unroll this loop */
+      for (lidx = 0; lidx < blk_size; lidx++)
+      {
+         ii = bidx * blk_size;
+         i  = ii + lidx;
+
+         if (marker[i] == marker_val)
+         {
+            if (lane < 2)
+            {
+               pj = read_only_load(A_i + i + lane);
+            }
+            qj = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pj, 1);
+            pj = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, pj, 0);
+
+            /* Loop over columns */
+            for (j = pj + lane; j < qj; j += HYPRE_WARP_SIZE)
+            {
+               k = read_only_load(A_j + j);
+               col = A_j[k];
+
+               if (marker[col] == marker_val)
+               {
+                  if ((col >= ii) &&
+                      (col <  ii + blk_size) &&
+                      (fabs(A_a[k]) > HYPRE_REAL_MIN))
+                  {
+                     /* batch offset + column offset + row offset */
+                     B_a[marker_indices[ii] * blk_size + (col - ii) * blk_size + lidx] = A_a[k];
+                  }
+               }
+            }
+         } /* row check */
+      } /* Local block loop */
+   } /* Grid-stride loop */
+}
+
+/*--------------------------------------------------------------------------
+ * hypreGPUKernel_ComplexMatrixBatchedTranspose
+ *
+ * Transposes a group of dense matrices. Assigns one warp per block (batch).
+ * Naive implementation.
+ *
+ * TODOs (VPM):
+ *    1) Move to proper file.
+ *    2) Use template argument for other data types
+ *    3) Implement in-place transpose.
+ *--------------------------------------------------------------------------*/
+
+__global__ void
+hypreGPUKernel_ComplexMatrixBatchedTranspose( hypre_DeviceItem  &item,
+                                              HYPRE_Int          num_blocks,
+                                              HYPRE_Int          block_size,
+                                              HYPRE_Complex     *A_data,
+                                              HYPRE_Complex     *B_data )
+{
+   HYPRE_Int   lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
+   HYPRE_Int   bs2  = block_size * block_size;
+   HYPRE_Int   bidx, lidx;
+
+   /* Grid-stride loop over block matrix rows */
+   for (bidx = (blockIdx.x * blockDim.x + threadIdx.x) / HYPRE_WARP_SIZE;
+        bidx < num_blocks;
+        bidx += (gridDim.x * blockDim.x) / HYPRE_WARP_SIZE)
+   {
+      for (lidx = lane; lidx < bs2; lidx += HYPRE_WARP_SIZE)
+      {
+         B_data[bidx * bs2 + lidx] = A_data[bidx * bs2 + (lidx / block_size + (lidx % block_size) *
+                                                          block_size)];
+      }
+   } /* Grid-stride loop */
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixExtractBlockDiagDevice
+ *
+ * TODOs (VPM):
+ *   1) Allow other local solver choices. Design an interface for that.
+ *   2) Move this to par_csr_matop_device.c
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
+                                          HYPRE_Int             blk_size,
+                                          HYPRE_Int             num_points,
+                                          HYPRE_Int             point_type,
+                                          HYPRE_Int            *CF_marker,
+                                          HYPRE_Int             diag_size,
+                                          HYPRE_Int             diag_type,
+                                          HYPRE_Int            *B_diag_i,
+                                          HYPRE_Int            *B_diag_j,
+                                          HYPRE_Complex        *B_diag_data )
+{
+   /* Matrix variables */
+   HYPRE_BigInt          num_rows_A   = hypre_ParCSRMatrixGlobalNumRows(A);
+   hypre_CSRMatrix      *A_diag       = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Int             num_rows     = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int            *A_diag_j     = hypre_CSRMatrixJ(A_diag);
+   HYPRE_Complex        *A_diag_data  = hypre_CSRMatrixData(A_diag);
+
+   /* Local LS variables */
+   HYPRE_Int            *pivots;
+   HYPRE_Int            *infos;
+   HYPRE_Int            *blk_row_indices;
+   HYPRE_Real           *tmpdiag;
+   HYPRE_Real          **diag_aop;
+   HYPRE_Real          **tmpdiag_aop;
+
+   /* Local variables */
+   HYPRE_Int             bs2 = blk_size * blk_size;
+   HYPRE_Int             num_blocks;
+   HYPRE_Int             bdiag_size;
+
+   /* Additional variables for debugging */
+#if HYPRE_DEBUG
+   HYPRE_Int            *h_infos;
+   HYPRE_Int             k, myid;
+
+   hypre_MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &myid);
+#endif
+
+   hypre_GpuProfilingPushRange("ParCSRMatrixExtractBlockDiag");
+
+   /* Sanity check */
+   if ((num_rows_A > 0) && (num_rows_A < blk_size))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error!!! Input matrix is smaller than block size.");
+      hypre_GpuProfilingPopRange();
+
+      return hypre_error_flag;
+   }
+
+   /* Count the number of points matching point_type in CF_marker */
+   if (CF_marker)
+   {
+      /* Compute block row indices */
+      blk_row_indices = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
+      hypreDevice_IntFilln(blk_row_indices, (size_t) num_rows, 1);
+      HYPRE_THRUST_CALL(exclusive_scan_by_key,
+                        CF_marker,
+                        CF_marker + num_rows,
+                        blk_row_indices,
+                        blk_row_indices);
+   }
+   else
+   {
+      blk_row_indices = NULL;
+   }
+
+   /* Compute block info */
+   num_blocks = (num_points - 1) / blk_size + 1;
+   bdiag_size = num_blocks * bs2;
+
+   if (num_points % blk_size)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "TODO! num_points % blk_size != 0");
+      hypre_GpuProfilingPopRange();
+
+      return hypre_error_flag;
+   }
+
+   /*-----------------------------------------------------------------
+    * Extract diagonal sub-blocks (pattern and coefficients)
+    *-----------------------------------------------------------------*/
+   {
+      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "warp", bDim);
+
+      if (CF_marker)
+      {
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixExtractBlockDiagMarked, gDim, bDim,
+                           blk_size, num_rows, point_type, CF_marker, blk_row_indices,
+                           A_diag_i, A_diag_j, A_diag_data,
+                           B_diag_i, B_diag_j, B_diag_data );
+      }
+      else
+      {
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixExtractBlockDiag, gDim, bDim,
+                           blk_size, num_rows,
+                           A_diag_i, A_diag_j, A_diag_data,
+                           B_diag_i, B_diag_j, B_diag_data );
+      }
+   }
+
+   /*-----------------------------------------------------------------
+    * Invert diagonal sub-blocks
+    *-----------------------------------------------------------------*/
+
+   if (diag_type == 1)
+   {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "InvertDiagSubBlocks");
+
+      /* Memory allocation */
+      diag_aop    = hypre_TAlloc(HYPRE_Complex *, num_rows, HYPRE_MEMORY_DEVICE);
+      tmpdiag_aop = hypre_TAlloc(HYPRE_Complex *, num_rows, HYPRE_MEMORY_DEVICE);
+      tmpdiag     = hypre_TAlloc(HYPRE_Complex, bdiag_size, HYPRE_MEMORY_DEVICE);
+      pivots      = hypre_CTAlloc(HYPRE_Int, num_rows * blk_size, HYPRE_MEMORY_DEVICE);
+      infos       = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
+#if defined (HYPRE_DEBUG)
+      h_infos = hypre_TAlloc(HYPRE_Int,  num_rows, HYPRE_MEMORY_HOST);
+#endif
+
+      /* Memory copy */
+      hypre_TMemcpy(tmpdiag, B_diag_data, HYPRE_Complex, bdiag_size,
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+
+      /* Set array of pointers */
+      {
+         dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+         dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "thread", bDim);
+
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_ComplexArrayToArrayOfPtrs, gDim, bDim,
+                           num_rows, bs2, B_diag_data, diag_aop );
+
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_ComplexArrayToArrayOfPtrs, gDim, bDim,
+                           num_rows, bs2, tmpdiag, tmpdiag_aop );
+      }
+
+      /* Compute LU factorization */
+#if defined(HYPRE_USING_CUBLAS)
+      HYPRE_CUBLAS_CALL(hypre_cublas_getrfBatched(hypre_HandleCublasHandle(hypre_handle()),
+                                                  blk_size,
+                                                  tmpdiag_aop,
+                                                  blk_size,
+                                                  pivots,
+                                                  infos,
+                                                  num_blocks));
+#elif defined(HYPRE_USING_ROCSOLVER)
+      HYPRE_ROCSOLVER_CALL(rocsolver_dgetrf_batched(hypre_HandleVendorSolverHandle(hypre_handle()),
+                                                    blk_size,
+                                                    blk_size,
+                                                    tmpdiag_aop,
+                                                    blk_size,
+                                                    pivots,
+                                                    blk_size,
+                                                    infos,
+                                                    num_blocks));
+
+#else
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Block inversion not available!");
+      return hypre_error_flag;
+#endif
+
+#if defined (HYPRE_DEBUG)
+      hypre_TMemcpy(h_infos, infos, HYPRE_Int, num_rows, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      for (k = 0; k < num_rows; k++)
+      {
+         if (h_infos[k] != 0)
+         {
+            if (h_infos[k] < 0)
+            {
+               hypre_printf("[%d]: LU fact. failed at system %d, parameter %d ",
+                            myid, k, h_infos[k]);
+            }
+            else
+            {
+               hypre_printf("[%d]: Singular U(%d, %d) at system %d",
+                            myid, h_infos[k], h_infos[k], k);
+            }
+         }
+      }
+#endif
+
+      /* Compute sub-blocks inverses */
+#if defined(HYPRE_USING_CUBLAS)
+      HYPRE_CUBLAS_CALL(hypre_cublas_getriBatched(hypre_HandleCublasHandle(hypre_handle()),
+                                                  blk_size,
+                                                  tmpdiag_aop,
+                                                  blk_size,
+                                                  pivots,
+                                                  diag_aop,
+                                                  blk_size,
+                                                  infos,
+                                                  num_blocks));
+#elif defined(HYPRE_USING_ROCSOLVER)
+      HYPRE_ROCSOLVER_CALL(rocsolver_dgetri_batched(hypre_HandleVendorSolverHandle(hypre_handle()),
+                                                    blk_size,
+                                                    tmpdiag_aop,
+                                                    blk_size,
+                                                    pivots,
+                                                    blk_size,
+                                                    infos,
+                                                    num_blocks));
+#else
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Block inversion not available!");
+      return hypre_error_flag;
+#endif
+
+      /* Free memory */
+      hypre_TFree(diag_aop, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(tmpdiag_aop, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(infos, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(pivots, HYPRE_MEMORY_DEVICE);
+#if defined (HYPRE_DEBUG)
+      hypre_TFree(h_infos, HYPRE_MEMORY_HOST);
+#endif
+
+      /* Transpose data to row-major format */
+      {
+         dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+         dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_blocks, "warp", bDim);
+
+         /* Memory copy */
+         hypre_TMemcpy(tmpdiag, B_diag_data, HYPRE_Complex, bdiag_size,
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+
+         HYPRE_GPU_LAUNCH( hypreGPUKernel_ComplexMatrixBatchedTranspose, gDim, bDim,
+                           num_blocks, blk_size, tmpdiag, B_diag_data );
+      }
+
+      /* Free memory */
+      hypre_TFree(tmpdiag, HYPRE_MEMORY_DEVICE);
+
+      HYPRE_ANNOTATE_REGION_END("%s", "InvertDiagSubBlocks");
+   }
+
+   /* Free memory */
+   hypre_TFree(blk_row_indices, HYPRE_MEMORY_DEVICE);
+   hypre_GpuProfilingPopRange();
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixBlockDiagMatrixDevice
+ *
+ * TODO: Move this to par_csr_matop_device.c (VPM)
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix  *A,
+                                         HYPRE_Int            blk_size,
+                                         HYPRE_Int            point_type,
+                                         HYPRE_Int           *CF_marker,
+                                         HYPRE_Int            diag_type,
+                                         hypre_ParCSRMatrix **B_ptr )
+{
+   /* Input matrix info */
+   MPI_Comm              comm            = hypre_ParCSRMatrixComm(A);
+   HYPRE_BigInt         *row_starts_A    = hypre_ParCSRMatrixRowStarts(A);
+   HYPRE_BigInt          num_rows_A      = hypre_ParCSRMatrixGlobalNumRows(A);
+   hypre_CSRMatrix      *A_diag          = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Int             A_diag_num_rows = hypre_CSRMatrixNumRows(A_diag);
+
+   /* Global block matrix info */
+   hypre_ParCSRMatrix   *par_B;
+   HYPRE_BigInt          num_rows_B;
+   HYPRE_BigInt          row_starts_B[2];
+
+   /* Diagonal block matrix info */
+   hypre_CSRMatrix      *B_diag;
+   HYPRE_Int             B_diag_num_rows;
+   HYPRE_Int             B_diag_size;
+   HYPRE_Int            *B_diag_i;
+   HYPRE_Int            *B_diag_j;
+   HYPRE_Complex        *B_diag_data;
+
+   /* Local variables */
+   HYPRE_BigInt          num_rows_big;
+   HYPRE_BigInt          scan_recv;
+   HYPRE_Int             num_procs, my_id;
+   HYPRE_Int             num_blocks;
+
+   hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm_size(comm, &num_procs);
+
+   /*-----------------------------------------------------------------
+    * Count the number of points matching point_type in CF_marker
+    *-----------------------------------------------------------------*/
+
+   if (!CF_marker)
+   {
+      B_diag_num_rows = A_diag_num_rows;
+   }
+   else
+   {
+      B_diag_num_rows = HYPRE_THRUST_CALL( count,
+                                           CF_marker,
+                                           CF_marker + A_diag_num_rows,
+                                           point_type );
+   }
+   num_blocks  = 1 + (B_diag_num_rows - 1) / blk_size;
+   B_diag_size = blk_size * (blk_size * num_blocks);
+
+   /*-----------------------------------------------------------------
+    * Compute global number of rows and partitionings
+    *-----------------------------------------------------------------*/
+
+   if (CF_marker)
+   {
+      num_rows_big = (HYPRE_BigInt) B_diag_num_rows;
+      hypre_MPI_Scan(&num_rows_big, &scan_recv, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+
+      /* first point in my range */
+      row_starts_B[0] = scan_recv - num_rows_big;
+
+      /* first point in next proc's range */
+      row_starts_B[1] = scan_recv;
+      if (my_id == (num_procs - 1))
+      {
+         num_rows_B = row_starts_B[1];
+      }
+      hypre_MPI_Bcast(&num_rows_B, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+   }
+   else
+   {
+      row_starts_B[0] = row_starts_A[0];
+      row_starts_B[1] = row_starts_A[1];
+      num_rows_B = num_rows_A;
+   }
+
+   /* Create matrix B */
+   par_B = hypre_ParCSRMatrixCreate(comm,
+                                    num_rows_B,
+                                    num_rows_B,
+                                    row_starts_B,
+                                    row_starts_B,
+                                    0,
+                                    B_diag_size,
+                                    0);
+   hypre_ParCSRMatrixInitialize_v2(par_B, HYPRE_MEMORY_DEVICE);
+   B_diag      = hypre_ParCSRMatrixDiag(par_B);
+   B_diag_i    = hypre_CSRMatrixI(B_diag);
+   B_diag_j    = hypre_CSRMatrixJ(B_diag);
+   B_diag_data = hypre_CSRMatrixData(B_diag);
+
+   /*-----------------------------------------------------------------------
+    * Extract coefficients
+    *-----------------------------------------------------------------------*/
+
+   hypre_ParCSRMatrixExtractBlockDiagDevice(A, blk_size, B_diag_num_rows,
+                                            point_type, CF_marker,
+                                            B_diag_size, diag_type,
+                                            B_diag_i, B_diag_j, B_diag_data);
+
+   /* Set output pointer */
+   *B_ptr = par_B;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_MGRComputeNonGalerkinCGDevice
+ *
+ * Available methods:
+ *   1: inv(A_FF) approximated by its (block) diagonal inverse
+ *   2: CPR-like approx. with inv(A_FF) approx. by its diagonal inverse
+ *   3: CPR-like approx. with inv(A_FF) approx. by its block diagonal inverse
+ *   4: inv(A_FF) approximated by sparse approximate inverse
+ *
+ * TODO (VPM): Can we have a single function that works for host and device?
+ *             inv(A_FF)*A_FC might have been computed before. Reuse it!
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_FF,
+                                    hypre_ParCSRMatrix    *A_FC,
+                                    hypre_ParCSRMatrix    *A_CF,
+                                    hypre_ParCSRMatrix    *A_CC,
+                                    HYPRE_Int              blk_size,
+                                    HYPRE_Int              method,
+                                    HYPRE_Complex          threshold,
+                                    hypre_ParCSRMatrix   **A_H_ptr)
+{
+   /* Local variables */
+   hypre_ParCSRMatrix   *A_H;
+   hypre_ParCSRMatrix   *A_Hc;
+   hypre_ParCSRMatrix   *A_CF_trunc;
+   hypre_ParCSRMatrix   *Wp;
+   HYPRE_Complex         alpha = -1.0;
+
+   hypre_GpuProfilingPushRange("MGRComputeNonGalerkinCG");
+
+   /* Truncate A_CF according to the method */
+   if (method == 2 || method == 3)
+   {
+      hypre_MGRTruncateAcfCPRDevice(A_CF, &A_CF_trunc);
+   }
+   else
+   {
+      A_CF_trunc = A_CF;
+   }
+
+   /* Compute Wp */
+   if (method == 1 || method == 2)
+   {
+      hypre_Vector         *D_FF_inv;
+      HYPRE_Complex        *data;
+
+      /* Create vector to store A_FF's diagonal inverse  */
+      D_FF_inv = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_FF));
+      hypre_SeqVectorInitialize_v2(D_FF_inv, HYPRE_MEMORY_DEVICE);
+      data = hypre_VectorData(D_FF_inv);
+
+      /* Compute the inverse of A_FF and compute its inverse */
+      hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(A_FF), data, 2);
+
+      /* Compute D_FF_inv*A_FC */
+      Wp = hypre_ParCSRMatrixClone(A_FC, 1);
+      hypre_CSRMatrixDiagScaleDevice(hypre_ParCSRMatrixDiag(Wp), D_FF_inv, NULL);
+      hypre_CSRMatrixDiagScaleDevice(hypre_ParCSRMatrixOffd(Wp), D_FF_inv, NULL);
+
+      /* Free memory */
+      hypre_SeqVectorDestroy(D_FF_inv);
+   }
+   else if (method == 3)
+   {
+      hypre_ParCSRMatrix  *B_FF_inv;
+
+      /* Compute the block diagonal inverse of A_FF */
+      hypre_ParCSRMatrixBlockDiagMatrixDevice(A_FF, blk_size, -1, NULL, 1, &B_FF_inv);
+
+      /* Compute Wp = A_FF_inv * A_FC */
+      Wp = hypre_ParCSRMatMat(B_FF_inv, A_FC);
+
+      /* Free memory */
+      hypre_ParCSRMatrixDestroy(B_FF_inv);
+   }
+   else
+   {
+      /* Use approximate inverse for ideal interploation */
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: feature not implemented yet!");
+      hypre_GpuProfilingPopRange();
+
+      return hypre_error_flag;
+   }
+
+   /* Compute A_Hc (the correction for A_H) */
+   A_Hc = hypre_ParCSRMatMat(A_CF_trunc, Wp);
+
+   /* Drop small entries from A_Hc */
+   hypre_ParCSRMatrixDropSmallEntriesDevice(A_Hc, threshold, -1);
+
+   /* Coarse grid (Schur complement) computation */
+   hypre_ParCSRMatrixAdd(1.0, A_CC, alpha, A_Hc, &A_H);
+
+   /* Free memory */
+   hypre_ParCSRMatrixDestroy(A_Hc);
+   hypre_ParCSRMatrixDestroy(Wp);
+   if (method == 2 || method == 3)
+   {
+      hypre_ParCSRMatrixDestroy(A_CF_trunc);
+   }
+
+   /* Set output pointer to coarse grid matrix */
+   *A_H_ptr = A_H;
+
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }

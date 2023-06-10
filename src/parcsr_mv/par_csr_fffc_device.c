@@ -10,7 +10,7 @@
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_SYCL)
 namespace thrust = std;
@@ -279,6 +279,8 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    HYPRE_Int          *map2FC, *map2F2 = NULL, *itmp, *A_diag_ii, *A_offd_ii, *offd_mark;
    HYPRE_BigInt       *send_buf, *recv_buf;
 
+   hypre_GpuProfilingPushRange("ParCSRMatrixGenerateFFFC");
+
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
@@ -409,7 +411,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                       send_buf );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
    hypre_ForceSyncComputeStream(hypre_handle());
 #endif
@@ -573,7 +575,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                          offd_mark,
                          num_cols_A_offd,
                          0 );
-      hypreDevice_ScatterConstant(offd_mark, num_cols_AFF_offd, tmp_j, 1);
+      hypreDevice_ScatterConstant(offd_mark, num_cols_AFF_offd, tmp_j, (HYPRE_Int) 1);
       HYPRE_ONEDPL_CALL( std::exclusive_scan,
                          offd_mark,
                          offd_mark + num_cols_A_offd,
@@ -604,7 +606,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                               tmp_j + AFF_offd_nnz );
       num_cols_AFF_offd = tmp_end - tmp_j;
       hypreDevice_IntFilln( offd_mark, num_cols_A_offd, 0 );
-      hypreDevice_ScatterConstant(offd_mark, num_cols_AFF_offd, tmp_j, 1);
+      hypreDevice_ScatterConstant(offd_mark, num_cols_AFF_offd, tmp_j, (HYPRE_Int) 1);
       HYPRE_THRUST_CALL( exclusive_scan,
                          offd_mark,
                          offd_mark + num_cols_A_offd,
@@ -801,7 +803,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                          offd_mark,
                          num_cols_A_offd,
                          0 );
-      hypreDevice_ScatterConstant(offd_mark, num_cols_AFC_offd, tmp_j, 1);
+      hypreDevice_ScatterConstant(offd_mark, num_cols_AFC_offd, tmp_j, (HYPRE_Int) 1);
       HYPRE_ONEDPL_CALL( std::exclusive_scan,
                          offd_mark,
                          offd_mark + num_cols_A_offd,
@@ -826,7 +828,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                               tmp_j + AFC_offd_nnz );
       num_cols_AFC_offd = tmp_end - tmp_j;
       hypreDevice_IntFilln( offd_mark, num_cols_A_offd, 0 );
-      hypreDevice_ScatterConstant(offd_mark, num_cols_AFC_offd, tmp_j, 1);
+      hypreDevice_ScatterConstant(offd_mark, num_cols_AFC_offd, tmp_j, (HYPRE_Int) 1);
       HYPRE_THRUST_CALL( exclusive_scan,
                          offd_mark,
                          offd_mark + num_cols_A_offd,
@@ -1024,7 +1026,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                          offd_mark,
                          num_cols_A_offd,
                          0 );
-      hypreDevice_ScatterConstant(offd_mark, num_cols_ACF_offd, tmp_j, 1);
+      hypreDevice_ScatterConstant(offd_mark, num_cols_ACF_offd, tmp_j, (HYPRE_Int) 1);
       HYPRE_ONEDPL_CALL( std::exclusive_scan,
                          offd_mark,
                          offd_mark + num_cols_A_offd,
@@ -1054,7 +1056,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                               tmp_j + ACF_offd_nnz );
       num_cols_ACF_offd = tmp_end - tmp_j;
       hypreDevice_IntFilln( offd_mark, num_cols_A_offd, 0 );
-      hypreDevice_ScatterConstant(offd_mark, num_cols_ACF_offd, tmp_j, 1);
+      hypreDevice_ScatterConstant(offd_mark, num_cols_ACF_offd, tmp_j, (HYPRE_Int) 1);
       HYPRE_THRUST_CALL( exclusive_scan,
                          offd_mark,
                          offd_mark + num_cols_A_offd,
@@ -1253,7 +1255,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                          offd_mark,
                          num_cols_A_offd,
                          0 );
-      hypreDevice_ScatterConstant(offd_mark, num_cols_ACC_offd, tmp_j, 1);
+      hypreDevice_ScatterConstant(offd_mark, num_cols_ACC_offd, tmp_j, (HYPRE_Int) 1);
       HYPRE_ONEDPL_CALL( std::exclusive_scan,
                          offd_mark,
                          offd_mark + num_cols_A_offd,
@@ -1278,7 +1280,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                                               tmp_j + ACC_offd_nnz );
       num_cols_ACC_offd = tmp_end - tmp_j;
       hypreDevice_IntFilln( offd_mark, num_cols_A_offd, 0 );
-      hypreDevice_ScatterConstant(offd_mark, num_cols_ACC_offd, tmp_j, 1);
+      hypreDevice_ScatterConstant(offd_mark, num_cols_ACC_offd, tmp_j, (HYPRE_Int) 1);
       HYPRE_THRUST_CALL( exclusive_scan,
                          offd_mark,
                          offd_mark + num_cols_A_offd,
@@ -1341,6 +1343,8 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    hypre_TFree(map2FC,    HYPRE_MEMORY_DEVICE);
    hypre_TFree(map2F2,    HYPRE_MEMORY_DEVICE);
    hypre_TFree(recv_buf,  HYPRE_MEMORY_DEVICE);
+
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }
@@ -1426,6 +1430,23 @@ hypre_ParCSRMatrixGenerateCCDevice( hypre_ParCSRMatrix  *A,
    return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S,
                                                     NULL, NULL,
                                                     NULL, ACC_ptr, 1);
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixGenerateCCCFDevice
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixGenerateCCCFDevice( hypre_ParCSRMatrix  *A,
+                                      HYPRE_Int           *CF_marker,
+                                      HYPRE_BigInt        *cpts_starts,
+                                      hypre_ParCSRMatrix  *S,
+                                      hypre_ParCSRMatrix **ACF_ptr,
+                                      hypre_ParCSRMatrix **ACC_ptr)
+{
+   return hypre_ParCSRMatrixGenerateFFFCDevice_core(A, CF_marker, cpts_starts, S,
+                                                    NULL, NULL,
+                                                    ACF_ptr, ACC_ptr, 1);
 }
 
 /*--------------------------------------------------------------------------
@@ -1572,7 +1593,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                       send_buf );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
    hypre_ForceSyncComputeStream(hypre_handle());
 #endif
@@ -1725,7 +1746,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
 #endif
       num_cols_ACX_offd = tmp_end - tmp_j;
       hypreDevice_IntFilln( offd_mark, num_cols_A_offd, 0 );
-      hypreDevice_ScatterConstant(offd_mark, num_cols_ACX_offd, tmp_j, 1);
+      hypreDevice_ScatterConstant(offd_mark, num_cols_ACX_offd, tmp_j, (HYPRE_Int) 1);
 #if defined(HYPRE_USING_SYCL)
       HYPRE_ONEDPL_CALL( std::exclusive_scan,
                          offd_mark,
@@ -1924,7 +1945,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
 #endif
       num_cols_AXC_offd = tmp_end - tmp_j;
       hypreDevice_IntFilln( offd_mark, num_cols_A_offd, 0 );
-      hypreDevice_ScatterConstant(offd_mark, num_cols_AXC_offd, tmp_j, 1);
+      hypreDevice_ScatterConstant(offd_mark, num_cols_AXC_offd, tmp_j, (HYPRE_Int) 1);
 #if defined(HYPRE_USING_SYCL)
       HYPRE_ONEDPL_CALL( std::exclusive_scan,
                          offd_mark,
@@ -2007,4 +2028,4 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#endif // #if defined(HYPRE_USING_GPU)

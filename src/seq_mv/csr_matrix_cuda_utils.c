@@ -87,19 +87,27 @@ hypre_CSRMatrixToCusparseSpMat(const hypre_CSRMatrix *A,
  * @warning Assumes CSRMatrix uses doubles for values
  */
 cusparseDnVecDescr_t
-hypre_VectorToCusparseDnVec(const hypre_Vector *x,
-                            HYPRE_Int     offset,
-                            HYPRE_Int     size_override)
+hypre_VectorToCusparseDnVec_core(HYPRE_Complex *x_data,
+                                 HYPRE_Int      n)
 {
    const cudaDataType data_type = hypre_HYPREComplexToCudaDataType();
 
    cusparseDnVecDescr_t vecX;
 
    HYPRE_CUSPARSE_CALL( cusparseCreateDnVec(&vecX,
-                                            size_override >= 0 ? size_override : hypre_VectorSize(x) - offset,
-                                            hypre_VectorData(x) + offset,
+                                            n,
+                                            x_data,
                                             data_type) );
    return vecX;
+}
+
+cusparseDnVecDescr_t
+hypre_VectorToCusparseDnVec(const hypre_Vector *x,
+                            HYPRE_Int           offset,
+                            HYPRE_Int           size_override)
+{
+   return hypre_VectorToCusparseDnVec_core(hypre_VectorData(x) + offset,
+                                           size_override >= 0 ? size_override : hypre_VectorSize(x) - offset);
 }
 
 /*
@@ -109,26 +117,33 @@ hypre_VectorToCusparseDnVec(const hypre_Vector *x,
  * @warning Assumes CSRMatrix uses doubles for values
  */
 cusparseDnMatDescr_t
-hypre_VectorToCusparseDnMat(const hypre_Vector *x)
+hypre_VectorToCusparseDnMat_core(HYPRE_Complex *x_data,
+                                 HYPRE_Int      nrow,
+                                 HYPRE_Int      ncol,
+                                 HYPRE_Int      order)
 {
-   HYPRE_Int             storage = hypre_VectorMultiVecStorageMethod(x);
-   HYPRE_Int             num_vectors = hypre_VectorNumVectors(x);
-   HYPRE_Int             size = hypre_VectorSize(x);
-   HYPRE_Complex        *data = hypre_VectorData(x);
 
    cudaDataType          data_type = hypre_HYPREComplexToCudaDataType();
    cusparseDnMatDescr_t  matX;
 
    HYPRE_CUSPARSE_CALL( cusparseCreateDnMat(&matX,
-                                            size,
-                                            num_vectors,
-                                            (storage == 0) ? size : num_vectors,
-                                            data,
+                                            nrow,
+                                            ncol,
+                                            (order == 0) ? nrow : ncol,
+                                            x_data,
                                             data_type,
-                                            (storage == 0) ? CUSPARSE_ORDER_COL : CUSPARSE_ORDER_ROW) );
+                                            (order == 0) ? CUSPARSE_ORDER_COL : CUSPARSE_ORDER_ROW) );
    return matX;
 }
 
+cusparseDnMatDescr_t
+hypre_VectorToCusparseDnMat(const hypre_Vector *x)
+{
+   return hypre_VectorToCusparseDnMat_core(hypre_VectorData(x),
+                                           hypre_VectorSize(x),
+                                           hypre_VectorNumVectors(x),
+                                           hypre_VectorMultiVecStorageMethod(x));
+}
 
 #endif // #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
 #endif // #if defined(HYPRE_USING_CUSPARSE)

@@ -12,7 +12,7 @@
                 Symbolic Multiplication
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 /* HashKeys: assumed to be initialized as all -1's
  * Key:      assumed to be nonnegative
@@ -23,7 +23,7 @@ static __device__ __forceinline__
 HYPRE_Int
 hypre_spgemm_hash_insert_symbl(
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_Int *HashKeys,
+   HYPRE_Int          *HashKeys,
 #else
    volatile HYPRE_Int *HashKeys,
 #endif
@@ -33,7 +33,12 @@ hypre_spgemm_hash_insert_symbl(
    HYPRE_Int j = 0;
    HYPRE_Int old = -1;
 
+#if defined(HYPRE_USING_HIP) && (HIP_VERSION == 50422804)
+   /* VPM: see https://github.com/hypre-space/hypre/issues/875 */
+#pragma unroll 8
+#else
 #pragma unroll UNROLL_FACTOR
+#endif
    for (HYPRE_Int i = 0; i < SHMEM_HASH_SIZE; i++)
    {
       /* compute the hash value of key */
@@ -75,7 +80,7 @@ static __device__ __forceinline__
 HYPRE_Int
 hypre_spgemm_hash_insert_symbl( HYPRE_Int           HashSize,
 #if defined(HYPRE_USING_SYCL)
-                                HYPRE_Int *HashKeys,
+                                HYPRE_Int          *HashKeys,
 #else
                                 volatile HYPRE_Int *HashKeys,
 #endif
@@ -133,7 +138,7 @@ hypre_spgemm_compute_row_symbl( hypre_DeviceItem   &item,
                                 const HYPRE_Int    *ib,
                                 const HYPRE_Int    *jb,
 #if defined(HYPRE_USING_SYCL)
-                                HYPRE_Int *s_HashKeys,
+                                HYPRE_Int          *s_HashKeys,
 #else
                                 volatile HYPRE_Int *s_HashKeys,
 #endif
@@ -226,7 +231,7 @@ template <HYPRE_Int NUM_GROUPS_PER_BLOCK, HYPRE_Int GROUP_SIZE, HYPRE_Int SHMEM_
 __global__ void
 hypre_spgemm_symbolic( hypre_DeviceItem             &item,
 #if defined(HYPRE_USING_SYCL)
-                       char                             *shmem_ptr,
+                       char                         *shmem_ptr,
 #endif
                        const HYPRE_Int               M,
                        const HYPRE_Int* __restrict__ rind,
@@ -389,8 +394,8 @@ hypre_spgemm_symbolic( hypre_DeviceItem             &item,
          }
          else
          {
-            failed = (char) group_reduce_sum<hypre_int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(item,
-                                                                                          (hypre_int) failed,
+            failed = (char) group_reduce_sum<HYPRE_Int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(item,
+                                                                                          (HYPRE_Int) failed,
                                                                                           s_HashKeys);
          }
       }
@@ -617,4 +622,4 @@ HYPRE_Int hypre_spgemm_symbolic_max_num_blocks( HYPRE_Int  multiProcessorCount,
    return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
+#endif /* defined(HYPRE_USING_GPU) */
