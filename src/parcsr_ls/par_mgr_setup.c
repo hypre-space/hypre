@@ -1913,6 +1913,9 @@ hypre_MGRSetup( void               *mgr_vdata,
       (mgr_data -> num_coarse_per_level) = NULL;
    }
 
+   /* Print statistics - TODO (VPM): add print level */
+   hypre_MGRSetupStats(mgr_vdata);
+
    HYPRE_ANNOTATE_FUNC_END;
    hypre_GpuProfilingPopRange();
 
