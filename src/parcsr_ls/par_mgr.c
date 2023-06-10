@@ -92,7 +92,7 @@ hypre_MGRCreate(void)
    (mgr_data -> trunc_factor) = 0.0;
    (mgr_data -> max_row_sum) = 0.9;
    (mgr_data -> strong_threshold) = 0.25;
-   (mgr_data -> P_max_elmts) = 0;
+   (mgr_data -> P_max_elmts) = 0; // Positive turns on post-filtering when computing coarse lvls.
 
    (mgr_data -> coarse_grid_solver) = NULL;
    (mgr_data -> coarse_grid_solver_setup) = NULL;
@@ -3799,14 +3799,7 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
    }
 
    /* Compute R^T so it can be used in the solve phase */
-   if (!hypre_ParCSRMatrixDiagT(R))
-   {
-      hypre_CSRMatrixTranspose(hypre_ParCSRMatrixDiag(R), &hypre_ParCSRMatrixDiagT(R), 1);
-   }
-   if (!hypre_ParCSRMatrixOffdT(R))
-   {
-      hypre_CSRMatrixTranspose(hypre_ParCSRMatrixOffd(R), &hypre_ParCSRMatrixOffdT(R), 1);
-   }
+   hypre_ParCSRMatrixLocalTranspose(R);
 
    /* Set pointer to R */
    *R_ptr = R;
