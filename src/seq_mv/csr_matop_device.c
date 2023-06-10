@@ -41,17 +41,6 @@ hypre_CsrsvDataCreate()
    hypre_CsrsvDataAnalyzedL(data) = 0;
    hypre_CsrsvDataAnalyzedU(data) = 0;
 
-#if defined(hypre_CsrsvDataBuffer)
-   hypre_CsrsvDataBuffer(data)    = NULL;
-#endif
-#if defined(hypre_CsrsvDataBufferL)
-   hypre_CsrsvDataBufferL(data)   = NULL;
-#endif
-#if defined(hypre_CsrsvDataBufferU)
-   hypre_CsrsvDataBufferU(data)   = NULL;
-#endif
-   hypre_CsrsvDataMatData(data)   = NULL;
-
    return data;
 }
 
@@ -2450,7 +2439,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
 #else
    A_sj  = hypre_CSRMatrixSortedJ(A);
    descr = hypre_CSRMatrixGPUMatDescr(A);
-   HYPRE_CUSPARSE_CALL( cusparseSetMatDiagType(descr, DiagType) );
+   HYPRE_CUSPARSE_CALL( cusparseSetMatDiagType(descr, diag_type) );
 #endif
 
    if (uplo == 'L')
