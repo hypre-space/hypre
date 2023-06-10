@@ -983,6 +983,107 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_ParVectorPrintBinaryIJ
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorPrintBinaryIJ( hypre_ParVector *par_vector,
+                              HYPRE_Int        base_j,
+                              const char      *filename )
+{
+   MPI_Comm               comm = hypre_ParVectorComm(vector);
+   HYPRE_BigInt           global_size = hypre_ParVectorGlobalSize(vector);
+   HYPRE_BigInt          *partitioning = hypre_ParVectorPartitioning(vector);
+   HYPRE_MemoryLocation   memory_location = hypre_ParVectorMemoryLocation(matrix);
+
+   hypre_ParVector       *h_parvector;
+   hypre_Vector          *h_vector;
+   HYPRE_Int              size;
+   HYPRE_Int              num_vectors;
+   HYPRE_Int              storage_method;
+
+   /* Local buffers */
+   hypre_float           *f32buffer = NULL;
+   hypre_double          *f64buffer = NULL;
+
+   size_t                 count;
+   HYPRE_BigInt           i;
+   HYPRE_Complex         *data;
+   HYPRE_Int              myid;
+   char                   new_filename[HYPRE_MAX_FILE_NAME_LEN];
+   FILE                  *fp;
+
+   /* Exit if trying to write from big-endian machine */
+   if ((*(char*)&one) == 0)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Support to big-endian machines is incomplete!\n");
+      return hypre_error_flag;
+   }
+
+   /* MPI variables */
+   hypre_MPI_Comm_rank(comm, &myid);
+
+   /* Create temporary vector on host memory if needed */
+   h_parvector = (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE) ?
+                 hypre_ParVectorClone_v2(par_vector, 1, HYPRE_MEMORY_HOST) : par_vector;
+
+   /* Local vector variables */
+   h_vector = hypre_ParVectorLocalVector(h_parvector);
+   num_vectors = hypre_VectorNumVectors(h_vector);
+   storage_method = hypre_VectorMultiVecStorageMethod(h_vector);
+   data = hypre_VectorData(h_vector);
+   size = hypre_VectorSize(h_vector);
+
+   /* Open binary file */
+   hypre_sprintf(new_filename, "%s.%05d.bin", filename, myid);
+   if ((fp = fopen(new_filename, "wb")) == NULL)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not open output file!");
+      return hypre_error_flag;
+   }
+
+   /*---------------------------------------------
+    * Write header (64 bytes)
+    *---------------------------------------------*/
+
+   count = 8;
+   header[0] = (hypre_uint64) sizeof(HYPRE_BigInt);
+   header[1] = (hypre_uint64) partitioning[0];
+   header[2] = (hypre_uint64) partitioning[1];
+   header[3] = (hypre_uint64) global_size;
+   header[4] = (hypre_uint64) size;
+   header[5] = (hypre_uint64) num_vectors;
+   header[6] = (hypre_uint64) storage_method;
+   header[7] = (hypre_uint64) 1;
+   if (fwrite((const void*) header, sizeof(hypre_uint64), count, fp) != count)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not write all header entries\n");
+      return hypre_error_flag;
+   }
+
+   /*---------------------------------------------
+    * Write vector coefficients
+    *---------------------------------------------*/
+
+   hypre_fprintf(file, "%b \n", global_size);
+   for (i = 0; i < 2; i++)
+   {
+      hypre_fprintf(file, "%b ", partitioning[i] + base_j);
+   }
+   hypre_fprintf(file, "\n");
+
+   part0 = partitioning[0];
+   for (j = part0; j < partitioning[1]; j++)
+   {
+      hypre_fprintf(file, "%b %.14e\n", j + base_j, local_data[(HYPRE_Int)(j - part0)]);
+   }
+
+   fclose(file);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ParVectorReadIJ
  * Warning: wrong base for assumed partition if base > 0
  *--------------------------------------------------------------------------*/
