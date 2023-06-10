@@ -238,7 +238,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
    hypre_Box              *Ac_dbox;
 
    HYPRE_Real             *a_cc, *a_cw, *a_ce;
-   HYPRE_Real             *ac_cc, *ac_cw, *ac_ce;
+   HYPRE_Real             *ac_cc, *ac_cw, *ac_ce = NULL;
 
    HYPRE_Int               offsetA;
 

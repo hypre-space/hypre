@@ -22,7 +22,7 @@ hypre_SMGCreateRAPOp( hypre_StructMatrix *R,
                       hypre_StructMatrix *PT,
                       hypre_StructGrid   *coarse_grid )
 {
-   hypre_StructMatrix    *RAP;
+   hypre_StructMatrix    *RAP = NULL;
    hypre_StructStencil   *stencil;
 
 #if NEWRAP
@@ -204,4 +204,3 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
 #endif
    return hypre_error_flag;
 }
-

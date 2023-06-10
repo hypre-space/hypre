@@ -69,7 +69,7 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
    HYPRE_Int            *restrict_count;
 
    HYPRE_Real            b_dot_b, r_dot_r, eps;
-   HYPRE_Real            e_dot_e, x_dot_x;
+   HYPRE_Real            e_dot_e = 1.0, x_dot_x = 1.0;
 
    HYPRE_Int             i, l, lx, ly, lz;
    HYPRE_Int             lymin, lymax, lzmin, lzmax;
@@ -462,4 +462,3 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
 
    return ierr;
 }
-
