@@ -1550,19 +1550,14 @@ hypre_MGRSetup( void               *mgr_vdata,
          hypre_ParPrintf(comm, "Lev = %d, proc = %d - SetupAFF: %f\n", lev, my_id, wall_time);
 #endif
 
-         /* TODO: refactor this block. Add hypre_IntArrayScale (VPM) */
+         /* TODO: refactor this block (VPM) */
 #if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
-         hypre_IntArray *F_marker = hypre_IntArrayCreate(nloc);
-         hypre_IntArrayInitialize(F_marker);
+         hypre_ParCSRMatrix  *P_FF_ptr;
+         hypre_IntArray      *F_marker = hypre_IntArrayCloneDeep(CF_marker_array[lev]);
 
-         HYPRE_Int *F_marker_data = hypre_IntArrayData(F_marker);
-         for (j = 0; j < nloc; j++)
-         {
-            F_marker_data[j] = -CF_marker[j];
-         }
-
-         hypre_ParCSRMatrix *P_FF_ptr;
-         hypre_MGRBuildPDevice(A_array[lev], F_marker_data, row_starts_fpts, 0, &P_FF_ptr);
+         hypre_IntArrayNegate(F_marker);
+         hypre_MGRBuildPDevice(A_array[lev], hypre_IntArrayData(F_marker),
+                               row_starts_fpts, 0, &P_FF_ptr);
          P_FF_array[lev] = P_FF_ptr;
 
          hypre_IntArrayDestroy(F_marker);
@@ -1631,6 +1626,13 @@ hypre_MGRSetup( void               *mgr_vdata,
        * skip if we reduce the reserved C-points before the coarse grid solve */
       if (mgr_data -> lvl_to_keep_cpoints == 0)
       {
+         memory_location = hypre_IntArrayMemoryLocation(CF_marker_array[lev]);
+         if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE)
+         {
+            hypre_IntArrayMigrate(CF_marker_array[lev], HYPRE_MEMORY_HOST);
+         }
+         CF_marker = hypre_IntArrayData(CF_marker_array[lev]);
+
          for (i = 0; i < reserved_coarse_size; i++)
          {
             CF_marker[reserved_Cpoint_local_indexes[i]] = S_CMRK;
@@ -1652,6 +1654,11 @@ hypre_MGRSetup( void               *mgr_vdata,
                /* reset modified CF marker array indexes */
                CF_marker[i] = CMRK;
             }
+         }
+
+         if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE)
+         {
+            hypre_IntArrayMigrate(CF_marker_array[lev], HYPRE_MEMORY_DEVICE);
          }
       }
 
@@ -1717,11 +1724,9 @@ hypre_MGRSetup( void               *mgr_vdata,
                       lev, my_id, wall_time_lev);
 #endif
 
-#if defined (HYPRE_USING_NVTX) || defined (HYPRE_USING_ROCTX) || defined (HYPRE_USING_CALIPER)
       hypre_sprintf(region_name, "%s-%d", "MGR_Level", lev);
       hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_REGION_END("%s", region_name);
-#endif
 
       /* check if last level */
       if (last_level)

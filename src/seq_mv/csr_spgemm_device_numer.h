@@ -15,7 +15,7 @@
                 Numerical Multiplication
  *- - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 /* HashKeys: assumed to be initialized as all -1's
  * HashVals: assumed to be initialized as all 0's
@@ -26,8 +26,8 @@ static __device__ __forceinline__
 HYPRE_Int
 hypre_spgemm_hash_insert_numer(
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_Int     *HashKeys,
-   HYPRE_Complex *HashVals,
+   HYPRE_Int              *HashKeys,
+   HYPRE_Complex          *HashVals,
 #else
    volatile HYPRE_Int     *HashKeys,
    volatile HYPRE_Complex *HashVals,
@@ -38,7 +38,12 @@ hypre_spgemm_hash_insert_numer(
    HYPRE_Int j = 0;
    HYPRE_Int old = -1;
 
+#if defined(HYPRE_USING_HIP) && (HIP_VERSION == 50422804)
+   /* VPM: see https://github.com/hypre-space/hypre/issues/875 */
+#pragma unroll 8
+#else
 #pragma unroll UNROLL_FACTOR
+#endif
    for (HYPRE_Int i = 0; i < SHMEM_HASH_SIZE; i++)
    {
       /* compute the hash value of key */
@@ -87,8 +92,8 @@ static __device__ __forceinline__
 HYPRE_Int
 hypre_spgemm_hash_insert_numer( HYPRE_Int               HashSize,
 #if defined(HYPRE_USING_SYCL)
-                                HYPRE_Int     *HashKeys,
-                                HYPRE_Complex *HashVals,
+                                HYPRE_Int              *HashKeys,
+                                HYPRE_Complex          *HashVals,
 #else
                                 volatile HYPRE_Int     *HashKeys,
                                 volatile HYPRE_Complex *HashVals,
@@ -160,8 +165,8 @@ hypre_spgemm_compute_row_numer( hypre_DeviceItem       &item,
                                 HYPRE_Int              *jc,
                                 HYPRE_Complex          *ac,
 #if defined(HYPRE_USING_SYCL)
-                                HYPRE_Int     *s_HashKeys,
-                                HYPRE_Complex *s_HashVals,
+                                HYPRE_Int              *s_HashKeys,
+                                HYPRE_Complex          *s_HashVals,
 #else
                                 volatile HYPRE_Int     *s_HashKeys,
                                 volatile HYPRE_Complex *s_HashVals,
@@ -259,8 +264,8 @@ hypre_spgemm_copy_from_hash_into_C_row( hypre_DeviceItem       &item,
                                         HYPRE_Int               lane_id,
                                         HYPRE_Int               do_shared_copy,
 #if defined(HYPRE_USING_SYCL)
-                                        HYPRE_Int     *s_HashKeys,
-                                        HYPRE_Complex *s_HashVals,
+                                        HYPRE_Int              *s_HashKeys,
+                                        HYPRE_Complex          *s_HashVals,
 #else
                                         volatile HYPRE_Int     *s_HashKeys,
                                         volatile HYPRE_Complex *s_HashVals,
@@ -691,13 +696,13 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
 template <HYPRE_Int GROUP_SIZE>
 __global__ void
 hypre_spgemm_copy_from_Cext_into_C( hypre_DeviceItem    &item,
-                                    HYPRE_Int      M,
-                                    HYPRE_Int     *ix,
-                                    HYPRE_Int     *jx,
-                                    HYPRE_Complex *ax,
-                                    HYPRE_Int     *ic,
-                                    HYPRE_Int     *jc,
-                                    HYPRE_Complex *ac )
+                                    HYPRE_Int            M,
+                                    HYPRE_Int           *ix,
+                                    HYPRE_Int           *jx,
+                                    HYPRE_Complex       *ax,
+                                    HYPRE_Int           *ic,
+                                    HYPRE_Int           *jc,
+                                    HYPRE_Complex       *ac )
 {
    /* number of groups in the grid */
 #if defined(HYPRE_USING_SYCL)
@@ -870,4 +875,4 @@ HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int  multiProcessorCount,
    return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
+#endif /* defined(HYPRE_USING_GPU) */

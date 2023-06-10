@@ -812,6 +812,7 @@ enable_fortran
 enable_unified_memory
 enable_device_memory_pool
 enable_device_malloc_async
+enable_thrust_nosync
 enable_gpu_profiling
 enable_gpu_aware_mpi
 with_cxxstandard
@@ -1561,6 +1562,7 @@ Optional Features:
                           Use device pooling allocator (default is NO).
   --enable-device-malloc-async
                           Use device async malloc (default is NO).
+  --enable-thrust-nosync  Use thrust par_nosync policy (default is NO).
   --enable-gpu-profiling  Use NVTX on CUDA, rocTX on HIP (default is NO).
   --enable-gpu-aware-mpi  Use GPU memory aware MPI
   --enable-rocsparse      Use rocSPARSE (default is YES with HIP, otherwise
@@ -3212,6 +3214,10 @@ HYPRE_BUGS="https://github.com/hypre-space/hypre/issues"
 HYPRE_SRCDIR="`pwd`"
 
 
+printf "%s\n" "#define HYPRE_DEPRECATED(reason) _Pragma(reason)" >>confdefs.h
+
+
+
 printf "%s\n" "#define HYPRE_RELEASE_NAME \"$HYPRE_NAME\"" >>confdefs.h
 
 
@@ -3326,6 +3332,7 @@ hypre_using_curand=no
 hypre_using_cusolver=no
 hypre_using_device_pool=no
 hypre_using_device_malloc_async=no
+hypre_using_thrust_nosync=no
 hypre_using_umpire=no
 hypre_using_umpire_host=no
 hypre_using_umpire_device=no
@@ -3695,6 +3702,20 @@ then :
  esac
 else $as_nop
   hypre_using_device_malloc_async=no
+
+fi
+
+
+# Check whether --enable-thrust-nosync was given.
+if test ${enable_thrust_nosync+y}
+then :
+  enableval=$enable_thrust_nosync; case "${enableval}" in
+    yes) hypre_using_thrust_nosync=yes ;;
+    no)  hypre_using_thrust_nosync=no ;;
+    *)   hypre_using_thrust_nosync=no ;;
+ esac
+else $as_nop
+  hypre_using_thrust_nosync=no
 
 fi
 
@@ -5793,9 +5814,24 @@ then
    as_fn_error $? "--with-cuda and --with-hip are mutually exclusive" "$LINENO" 5
 fi
 
+if test "x$hypre_using_cuda" = "xyes" && test "x$hypre_using_sycl" = "xyes"
+then
+   as_fn_error $? "--with-cuda and --with-sycl are mutually exclusive" "$LINENO" 5
+fi
+
 if test "x$hypre_using_hip" = "xyes" && test "x$hypre_using_device_openmp" = "xyes"
 then
    as_fn_error $? "--with-hip and --with-device-openmp are mutually exclusive" "$LINENO" 5
+fi
+
+if test "x$hypre_using_hip" = "xyes" && test "x$hypre_using_sycl" = "xyes"
+then
+   as_fn_error $? "--with-hip and --with-sycl are mutually exclusive" "$LINENO" 5
+fi
+
+if test "x$hypre_using_sycl" = "xyes" && test "x$hypre_using_device_openmp" = "xyes"
+then
+   as_fn_error $? "--with-sycl and --with-device-openmp are mutually exclusive" "$LINENO" 5
 fi
 
 
@@ -10654,6 +10690,13 @@ printf "%s\n" "#define HYPRE_USING_DEVICE_MALLOC_ASYNC 1" >>confdefs.h
 
    fi
 
+   if test "$hypre_using_thrust_nosync" = "yes"
+   then
+
+printf "%s\n" "#define HYPRE_USING_THRUST_NOSYNC 1" >>confdefs.h
+
+   fi
+
    if test "x$hypre_using_cuda_streams" = "xyes"
    then
 
@@ -10913,10 +10956,6 @@ if test "$hypre_using_device_openmp" = "yes"
 then
 
 printf "%s\n" "#define HYPRE_USING_DEVICE_OPENMP 1" >>confdefs.h
-
-
-
-printf "%s\n" "#define HYPRE_USING_GPU 1" >>confdefs.h
 
 
 
@@ -12476,3 +12515,4 @@ fi
 mv HYPRE_config.h HYPRE_config.h.tmp
 sed 's/FC_FUNC/HYPRE_FC_FUNC/g' < HYPRE_config.h.tmp > HYPRE_config.h
 rm -f HYPRE_config.h.tmp
+
