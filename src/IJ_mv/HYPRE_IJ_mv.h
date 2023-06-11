@@ -555,6 +555,14 @@ HYPRE_Int HYPRE_IJVectorRead(const char     *filename,
                              HYPRE_IJVector *vector);
 
 /**
+ * Read the vector from binary file.  This is mainly for debugging purposes.
+ **/
+HYPRE_Int HYPRE_IJVectorReadBinary(const char     *filename,
+                                   MPI_Comm        comm,
+                                   HYPRE_Int       type,
+                                   HYPRE_IJVector *vector);
+
+/**
  * Print the vector to file.  This is mainly for debugging purposes.
  **/
 HYPRE_Int HYPRE_IJVectorPrint(HYPRE_IJVector  vector,

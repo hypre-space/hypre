@@ -698,6 +698,19 @@ HYPRE_IJVectorRead( const char     *filename,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJVectorReadBinary
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorReadBinary( const char     *filename,
+                          MPI_Comm        comm,
+                          HYPRE_Int       type,
+                          HYPRE_IJVector *vector_ptr )
+{
+   return hypre_IJVectorReadBinary(comm, filename, type, vector_ptr);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJVectorPrint
  *--------------------------------------------------------------------------*/
 
