@@ -1,0 +1,53 @@
+#!/bin/sh
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#=============================================================================
+# IJ input/output tests - Sequential
+#=============================================================================
+
+mpirun -np 1 ./ij -solver 2 -tol 1e-2 \
+ -frombinfile data/poisson_10x10x10_np1/IJ.out.i4f8.A \
+ -rhsfrombinfile data/poisson_10x10x10_np1/IJ.out.i4f8.b \
+ -x0frombinfile data/poisson_10x10x10_np1/IJ.out.i4f8.x0 > io.out.0
+
+mpirun -np 1 ./ij -solver 2 -tol 1e-2 \
+ -frombinfile data/poisson_10x10x10_np1/IJ.out.i8f8.A \
+ -rhsfrombinfile data/poisson_10x10x10_np1/IJ.out.i8f8.b \
+ -x0frombinfile data/poisson_10x10x10_np1/IJ.out.i8f8.x0 > io.out.1
+
+mpirun -np 1 ./ij -solver 2 -tol 1e-2 \
+ -frombinfile data/poisson_10x10x10_np1/IJ.out.i4f4.A \
+ -rhsfrombinfile data/poisson_10x10x10_np1/IJ.out.i4f4.b \
+ -x0frombinfile data/poisson_10x10x10_np1/IJ.out.i4f4.x0 > io.out.2
+
+mpirun -np 1 ./ij -solver 2 -tol 1e-2 \
+ -frombinfile data/poisson_10x10x10_np1/IJ.out.i8f4.A \
+ -rhsfrombinfile data/poisson_10x10x10_np1/IJ.out.i8f4.b \
+ -x0frombinfile data/poisson_10x10x10_np1/IJ.out.i8f4.x0 > io.out.3
+
+#=============================================================================
+# IJ input/output tests - Parallel
+#=============================================================================
+
+mpirun -np 4 ./ij -solver 2 -tol 1e-2 \
+ -frombinfile data/poisson_10x10x10_np4/IJ.out.i4f8.A \
+ -rhsfrombinfile data/poisson_10x10x10_np4/IJ.out.i4f8.b \
+ -x0frombinfile data/poisson_10x10x10_np4/IJ.out.i4f8.x0 > io.out.100
+
+mpirun -np 4 ./ij -solver 2 -tol 1e-2 \
+ -frombinfile data/poisson_10x10x10_np4/IJ.out.i8f8.A \
+ -rhsfrombinfile data/poisson_10x10x10_np4/IJ.out.i8f8.b \
+ -x0frombinfile data/poisson_10x10x10_np4/IJ.out.i8f8.x0 > io.out.101
+
+mpirun -np 4 ./ij -solver 2 -tol 1e-2 \
+ -frombinfile data/poisson_10x10x10_np4/IJ.out.i4f4.A \
+ -rhsfrombinfile data/poisson_10x10x10_np4/IJ.out.i4f4.b \
+ -x0frombinfile data/poisson_10x10x10_np4/IJ.out.i4f4.x0 > io.out.102
+
+mpirun -np 4 ./ij -solver 2 -tol 1e-2 \
+ -frombinfile data/poisson_10x10x10_np4/IJ.out.i8f4.A \
+ -rhsfrombinfile data/poisson_10x10x10_np4/IJ.out.i8f4.b \
+ -x0frombinfile data/poisson_10x10x10_np4/IJ.out.i8f4.x0 > io.out.103
