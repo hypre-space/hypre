@@ -561,6 +561,12 @@ HYPRE_Int HYPRE_IJVectorPrint(HYPRE_IJVector  vector,
                               const char     *filename);
 
 /**
+ * Print the vector to binary file.  This is mainly for debugging purposes.
+ **/
+HYPRE_Int HYPRE_IJVectorPrintBinary(HYPRE_IJVector  vector,
+                                    const char     *filename);
+
+/**
  * Computes the inner product between two vectors
  **/
 HYPRE_Int HYPRE_IJVectorInnerProd(HYPRE_IJVector  x,

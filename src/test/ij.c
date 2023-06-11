@@ -3755,6 +3755,24 @@ main( hypre_int argc,
       {
          hypre_ParCSRMatrixPrintBinaryIJ(parcsr_A, 0, 0, "IJ.out.A");
       }
+
+      if (ij_b)
+      {
+         HYPRE_IJVectorPrintBinary(ij_b, "IJ.out.b");
+      }
+      else if (b)
+      {
+         HYPRE_ParVectorPrintBinaryIJ(b, "IJ.out.b");
+      }
+
+      if (ij_x)
+      {
+         HYPRE_IJVectorPrintBinary(ij_x, "IJ.out.x0");
+      }
+      else if (x)
+      {
+         HYPRE_ParVectorPrintBinaryIJ(x, "IJ.out.x0");
+      }
    }
 
    /*-----------------------------------------------------------
@@ -8692,6 +8710,18 @@ main( hypre_int argc,
    if (print_system)
    {
       HYPRE_IJVectorPrint(ij_x, "IJ.out.x");
+   }
+
+   if (print_system_binary)
+   {
+      if (ij_x)
+      {
+         HYPRE_IJVectorPrintBinary(ij_x, "IJ.out.x");
+      }
+      else if (x)
+      {
+         HYPRE_ParVectorPrintBinaryIJ(x, "IJ.out.x");
+      }
    }
 
    /*-----------------------------------------------------------

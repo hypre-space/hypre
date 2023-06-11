@@ -227,4 +227,5 @@ HYPRE_Int HYPRE_IJVectorGetObject ( HYPRE_IJVector vector, void **object );
 HYPRE_Int HYPRE_IJVectorRead ( const char *filename, MPI_Comm comm, HYPRE_Int type,
                                HYPRE_IJVector *vector_ptr );
 HYPRE_Int HYPRE_IJVectorPrint ( HYPRE_IJVector vector, const char *filename );
+HYPRE_Int HYPRE_IJVectorPrintBinary ( HYPRE_IJVector vector, const char *filename );
 HYPRE_Int HYPRE_IJVectorInnerProd ( HYPRE_IJVector x, HYPRE_IJVector y, HYPRE_Real *prod );

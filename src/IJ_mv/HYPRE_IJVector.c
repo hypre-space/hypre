@@ -768,6 +768,34 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJVectorPrintBinary
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorPrintBinary( HYPRE_IJVector  vector,
+                           const char     *filename )
+{
+   if (!vector)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (hypre_IJVectorObjectType(vector) == HYPRE_PARCSR)
+   {
+      hypre_ParVectorPrintBinaryIJ((hypre_ParVector*) hypre_IJVectorObject(vector),
+                                   filename);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJVectorInnerProd
  *--------------------------------------------------------------------------*/
 
