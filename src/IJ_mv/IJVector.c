@@ -132,7 +132,7 @@ hypre_IJVectorReadBinary( MPI_Comm         comm,
     *---------------------------------------------*/
 
    count = 8;
-   if (fread(header, sizeof(hypre_uint64), count, fp) != count)
+   if (fread((void*) header, sizeof(hypre_uint64), count, fp) != count)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read header entries\n");
       return hypre_error_flag;
@@ -165,24 +165,12 @@ hypre_IJVectorReadBinary( MPI_Comm         comm,
    /* Allocate memory for buffers */
    count  = total_size;
    buffer = hypre_TAlloc(HYPRE_Complex, total_size, HYPRE_MEMORY_HOST);
-   if (header[0] == sizeof(hypre_float))
-   {
-      f32buffer = hypre_TAlloc(hypre_float, header[0], HYPRE_MEMORY_HOST);
-   }
-   else if (header[0] == sizeof(hypre_double))
-   {
-      f64buffer = hypre_TAlloc(hypre_double, header[0], HYPRE_MEMORY_HOST);
-   }
-   else
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported data type for matrix coefficients");
-      return hypre_error_flag;
-   }
 
    /* Read data */
-   if (f32buffer)
+   if (header[0] == sizeof(hypre_float))
    {
-      if (fread(f32buffer, sizeof(hypre_float), count, fp) != count)
+      f32buffer = hypre_TAlloc(hypre_float, total_size, HYPRE_MEMORY_HOST);
+      if (fread((void*) f32buffer, sizeof(hypre_float), count, fp) != count)
       {
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all matrix coefficients");
          return hypre_error_flag;
@@ -196,9 +184,10 @@ hypre_IJVectorReadBinary( MPI_Comm         comm,
          buffer[i] = (HYPRE_Complex) f32buffer[i];
       }
    }
-   else if (f64buffer)
+   else if (header[0] == sizeof(hypre_double))
    {
-      if (fread(f64buffer, sizeof(hypre_double), count, fp) != count)
+      f64buffer = hypre_TAlloc(hypre_double, total_size, HYPRE_MEMORY_HOST);
+      if (fread((void*) f64buffer, sizeof(hypre_double), count, fp) != count)
       {
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all matrix coefficients");
          return hypre_error_flag;

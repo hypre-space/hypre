@@ -1047,7 +1047,7 @@ hypre_ParVectorPrintBinaryIJ( hypre_ParVector *par_vector,
     *---------------------------------------------*/
 
    count = 8;
-   header[0] = (hypre_uint64) sizeof(HYPRE_BigInt);
+   header[0] = (hypre_uint64) sizeof(HYPRE_Complex);
    header[1] = (hypre_uint64) partitioning[0];
    header[2] = (hypre_uint64) partitioning[1];
    header[3] = (hypre_uint64) global_size;
@@ -1065,7 +1065,7 @@ hypre_ParVectorPrintBinaryIJ( hypre_ParVector *par_vector,
     * Write vector coefficients
     *---------------------------------------------*/
 
-   count = fwrite((const void*) data, sizeof(HYPRE_Complex), total_size, fp);
+   count = fwrite((const void*) data, header[0], total_size, fp);
    if (count != total_size)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not write all entries\n");

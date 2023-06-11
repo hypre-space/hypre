@@ -819,6 +819,12 @@ main( hypre_int argc,
          build_rhs_type      = 0;
          build_rhs_arg_index = arg_index;
       }
+      else if ( strcmp(argv[arg_index], "-rhsfrombinfile") == 0 )
+      {
+         arg_index++;
+         build_rhs_type      = -2;
+         build_rhs_arg_index = arg_index;
+      }
       else if ( strcmp(argv[arg_index], "-rhsfromonefile") == 0 )
       {
          arg_index++;
@@ -2137,6 +2143,8 @@ main( hypre_int argc,
          hypre_printf("\n");
          hypre_printf("  -fromfile <filename>       : ");
          hypre_printf("matrix read from multiple files (IJ format)\n");
+         hypre_printf("  -frombinfile <filename>    : ");
+         hypre_printf("matrix read from multiple binary files (IJ format)\n");
          hypre_printf("  -fromparcsrfile <filename> : ");
          hypre_printf("matrix read from multiple files (ParCSR format)\n");
          hypre_printf("  -fromonecsrfile <filename> : ");
@@ -2163,6 +2171,8 @@ main( hypre_int argc,
          hypre_printf("  -nc <val>              : number of components of a vector (multivector)\n");
          hypre_printf("  -rhsfromfile           : ");
          hypre_printf("rhs read from multiple files (IJ format)\n");
+         hypre_printf("  -rhsfrombinfile        : ");
+         hypre_printf("rhs read from multiple binary files (IJ format)\n");
          hypre_printf("  -rhsfromonefile        : ");
          hypre_printf("rhs read from a single file (CSR format)\n");
          hypre_printf("  -rhsparcsrfile        :  ");
@@ -3112,7 +3122,7 @@ main( hypre_int argc,
       hypre_MPI_Abort(comm, 1);
    }
 
-   if (build_rhs_type == 0)
+   if (build_rhs_type == 0 || build_rhs_type == -2)
    {
       if (myid == 0)
       {
@@ -3121,8 +3131,19 @@ main( hypre_int argc,
       }
 
       /* RHS */
-      ierr = HYPRE_IJVectorRead( argv[build_rhs_arg_index], hypre_MPI_COMM_WORLD,
-                                 HYPRE_PARCSR, &ij_b );
+      if (!build_rhs_type)
+      {
+         ierr = HYPRE_IJVectorRead(argv[build_rhs_arg_index],
+                                   hypre_MPI_COMM_WORLD,
+                                   HYPRE_PARCSR, &ij_b);
+      }
+      else
+      {
+         ierr = HYPRE_IJVectorReadBinary(argv[build_rhs_arg_index],
+                                         hypre_MPI_COMM_WORLD,
+                                         HYPRE_PARCSR, &ij_b);
+      }
+
       if (ierr)
       {
          hypre_printf("ERROR: Problem reading in the right-hand-side!\n");
