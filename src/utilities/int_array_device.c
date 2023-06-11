@@ -25,6 +25,8 @@ hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v,
 #if defined(HYPRE_USING_GPU)
    hypreDevice_IntFilln( array_data, size, value );
 
+   hypre_SyncComputeStream(hypre_handle());
+
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
    #pragma omp target teams distribute parallel for private(i) is_device_ptr(array_data)
@@ -33,8 +35,6 @@ hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v,
       array_data[i] = value;
    }
 #endif
-
-   hypre_SyncComputeStream(hypre_handle());
 
    return hypre_error_flag;
 }

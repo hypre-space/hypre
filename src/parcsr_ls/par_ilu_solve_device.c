@@ -883,6 +883,12 @@ hypre_ILUSolveRAPGMRESDevice(hypre_ParCSRMatrix   *A,
                              hypre_CSRMatrix      *matF_d,
                              HYPRE_Int             test_opt)
 {
+   /* If we don't have S block, just do one L/U solve */
+   if (!S)
+   {
+      return hypre_ILUSolveLUDevice(A, matBLU_d, f, u, perm, ftemp, utemp);
+   }
+
    /* data objects for vectors */
    hypre_Vector      *utemp_local = hypre_ParVectorLocalVector(utemp);
    hypre_Vector      *ftemp_local = hypre_ParVectorLocalVector(ftemp);

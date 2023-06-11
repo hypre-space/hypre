@@ -3112,7 +3112,7 @@ hypre_CSRMatrixILU0(hypre_CSRMatrix *A)
 #endif
 
    /* Free buffer */
-   hypre_Free(buffer, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(buffer, HYPRE_MEMORY_DEVICE);
 
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;

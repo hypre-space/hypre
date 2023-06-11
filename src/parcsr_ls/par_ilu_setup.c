@@ -950,6 +950,12 @@ hypre_ILUSetup( void               *ilu_vdata,
             //hypre_Vector      *rhs_local = hypre_ParVectorLocalVector(rhs);
             //HYPRE_Real        *Xtemp_data  = hypre_VectorData(Xtemp_local);
             //hypre_SeqVectorSetConstantValues(rhs_local, 1.0);
+
+            /* Update ilu_data */
+            hypre_ParILUDataSchurSolver(ilu_data)  = schur_solver;
+            hypre_ParILUDataSchurPrecond(ilu_data) = schur_precond;
+            hypre_ParILUDataRhs(ilu_data)          = rhs;
+            hypre_ParILUDataX(ilu_data)            = x;
          }
          else
 #endif
@@ -1411,7 +1417,7 @@ hypre_ParILUExtractEBFC(hypre_CSRMatrix   *A_diag,
             {
                HYPRE_Int tmp;
                tmp = capacity_B;
-               capacity_B = capacity_B * EXPAND_FACT + 1;
+               capacity_B = (HYPRE_Int)(capacity_B * EXPAND_FACT + 1);
                B_j = hypre_TReAlloc_v2(B_j, HYPRE_Int, tmp, HYPRE_Int,
                                        capacity_B, HYPRE_MEMORY_HOST);
                B_data = hypre_TReAlloc_v2(B_data, HYPRE_Complex, tmp, HYPRE_Complex,
@@ -1428,7 +1434,7 @@ hypre_ParILUExtractEBFC(hypre_CSRMatrix   *A_diag,
             {
                HYPRE_Int tmp;
                tmp = capacity_F;
-               capacity_F = capacity_F * EXPAND_FACT + 1;
+               capacity_F = (HYPRE_Int)(capacity_F * EXPAND_FACT + 1);
                F_j = hypre_TReAlloc_v2(F_j, HYPRE_Int, tmp, HYPRE_Int,
                                        capacity_F, HYPRE_MEMORY_HOST);
                F_data = hypre_TReAlloc_v2(F_data, HYPRE_Complex, tmp, HYPRE_Complex,
@@ -1459,7 +1465,7 @@ hypre_ParILUExtractEBFC(hypre_CSRMatrix   *A_diag,
             {
                HYPRE_Int tmp;
                tmp = capacity_E;
-               capacity_E = capacity_E * EXPAND_FACT + 1;
+               capacity_E = (HYPRE_Int)(capacity_E * EXPAND_FACT + 1);
                E_j = hypre_TReAlloc_v2(E_j, HYPRE_Int, tmp, HYPRE_Int,
                                        capacity_E, HYPRE_MEMORY_HOST);
                E_data = hypre_TReAlloc_v2(E_data, HYPRE_Complex, tmp, HYPRE_Complex,
@@ -1476,7 +1482,7 @@ hypre_ParILUExtractEBFC(hypre_CSRMatrix   *A_diag,
             {
                HYPRE_Int tmp;
                tmp = capacity_C;
-               capacity_C = capacity_C * EXPAND_FACT + 1;
+               capacity_C = (HYPRE_Int)(capacity_C * EXPAND_FACT + 1);
                C_j = hypre_TReAlloc_v2(C_j, HYPRE_Int, tmp, HYPRE_Int,
                                        capacity_C, HYPRE_MEMORY_HOST);
                C_data = hypre_TReAlloc_v2(C_data, HYPRE_Complex, tmp, HYPRE_Complex,
@@ -1784,7 +1790,7 @@ hypre_ILUSetupRAPMILU0(hypre_ParCSRMatrix  *A,
                        hypre_ParCSRMatrix **ALUp,
                        HYPRE_Int            modified)
 {
-   HYPRE_Int            n = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Int             n = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
 
    /* Get necessary slots */
    hypre_ParCSRMatrix   *L, *U, *S, *ALU;
@@ -1793,9 +1799,10 @@ hypre_ILUSetupRAPMILU0(hypre_ParCSRMatrix  *A,
 
    /* u_end is the end position of the upper triangular part
      (if we need E and F implicitly), not used here */
-   hypre_ILUSetupMILU0( A, NULL, NULL, n, n, &L, &D, &U, &S, &u_end, modified);
+   hypre_ILUSetupMILU0(A, NULL, NULL, n, n, &L, &D, &U, &S, &u_end, modified);
    hypre_TFree(u_end, HYPRE_MEMORY_HOST);
 
+   /* TODO (VPM): Change this function's name */
    hypre_ILUSetupLDUtoCusparse(L, D, U, &ALU);
 
    /* Free memory */
@@ -1968,9 +1975,14 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(S));
       hypre_ParCSRMatrixDiag(S) = SLU;
    }
+   else
+   {
+      S = NULL;
+      hypre_CSRMatrixDestroy(SLU);
+   }
 
-   *matSptr       = S;
-   *Apermptr      = Apq;
+   *matSptr  = S;
+   *Apermptr = Apq;
 
    hypre_TFree(rperm, HYPRE_MEMORY_HOST);
 
