@@ -896,6 +896,12 @@ main( hypre_int argc,
          build_rhs_type      = -1;
          build_src_arg_index = arg_index;
       }
+      else if ( strcmp(argv[arg_index], "-x0frombinfile") == 0 )
+      {
+         arg_index++;
+         build_x0_type       = -2;
+         build_x0_arg_index  = arg_index;
+      }
       else if ( strcmp(argv[arg_index], "-x0fromfile") == 0 )
       {
          arg_index++;
@@ -3606,20 +3612,33 @@ main( hypre_int argc,
    }
 
    /* initial guess */
-   if ( build_x0_type == 0 )
+   if (build_x0_type == 0 || build_x0_type == -2)
    {
       /* from file */
       if (myid == 0)
       {
          hypre_printf("  Initial guess vector read from file %s\n", argv[build_x0_arg_index]);
       }
+
       /* x0 */
       if (ij_x)
       {
          HYPRE_IJVectorDestroy(ij_x);
       }
-      ierr = HYPRE_IJVectorRead( argv[build_x0_arg_index], hypre_MPI_COMM_WORLD,
-                                 HYPRE_PARCSR, &ij_x );
+
+      if (!build_x0_type)
+      {
+         ierr = HYPRE_IJVectorRead(argv[build_x0_arg_index],
+                                   hypre_MPI_COMM_WORLD,
+                                   HYPRE_PARCSR, &ij_x);
+      }
+      else
+      {
+         ierr = HYPRE_IJVectorReadBinary(argv[build_x0_arg_index],
+                                         hypre_MPI_COMM_WORLD,
+                                         HYPRE_PARCSR, &ij_x);
+      }
+
       if (ierr)
       {
          hypre_printf("ERROR: Problem reading in x0!\n");
