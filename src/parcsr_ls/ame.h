@@ -34,6 +34,7 @@ typedef struct
    HYPRE_Real *eigenvalues;
 
    /* Eigensolver (LOBPCG) options */
+   HYPRE_Int pcg_maxit;
    HYPRE_Int maxit;
    HYPRE_Real atol;
    HYPRE_Real rtol;

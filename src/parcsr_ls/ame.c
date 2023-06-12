@@ -28,6 +28,7 @@ void * hypre_AMECreate(void)
    /* Default parameters */
 
    ame_data -> block_size = 1;  /* compute 1 eigenvector */
+   ame_data -> pcg_maxit = 20;  /* perform at most 20 PCG-AMG */
    ame_data -> maxit = 100;     /* perform at most 100 iterations */
    ame_data -> atol = 1e-6;     /* absolute convergence tolerance */
    ame_data -> rtol = 1e-6;     /* relative convergence tolerance */
@@ -192,6 +193,20 @@ HYPRE_Int hypre_AMESetMaxIter(void *esolver,
 {
    hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
    ame_data -> maxit = maxit;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMESetMaxPCGIter
+ *
+ * Set the maximum number of iterations. The default value is 20.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_AMESetMaxPCGIter(void *esolver,
+                                 HYPRE_Int maxit)
+{
+   hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
+   ame_data -> pcg_maxit = maxit;
    return hypre_error_flag;
 }
 
@@ -594,7 +609,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
                             &ame_data -> B2_G);
       HYPRE_PCGSetPrintLevel(ame_data -> B2_G, 0);
       HYPRE_PCGSetTol(ame_data -> B2_G, 1e-12);
-      HYPRE_PCGSetMaxIter(ame_data -> B2_G, 20);
+      HYPRE_PCGSetMaxIter(ame_data -> B2_G, ame_data -> pcg_maxit);
 
       HYPRE_PCGSetPrecond(ame_data -> B2_G,
                           (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
