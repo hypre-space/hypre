@@ -8,6 +8,8 @@
 #ifndef HYPRE_MAGMA_HEADER
 #define HYPRE_MAGMA_HEADER
 
+#include "HYPRE_config.h"
+
 #if defined(HYPRE_USING_MAGMA)
 
 #include "error.h"
