@@ -2075,7 +2075,9 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
          }
       }
 
-      //iter++;
+#if 0 /* debugging */
+      iter++;
+#endif
       /*------------------------------------------------
        * Set C-pts and F-pts.
        *------------------------------------------------*/
@@ -2685,7 +2687,9 @@ hypre_BoomerAMGIndepPMISa( hypre_ParCSRMatrix    *S,
          }
       }
 
-      //iter++;
+#if 0 /* debugging */
+      iter++;
+#endif
       /*------------------------------------------------
        * Set C-pts and F-pts.
        *------------------------------------------------*/
