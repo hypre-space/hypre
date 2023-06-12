@@ -1420,9 +1420,11 @@ hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix   *A,
    if (m > 0)
    {
       /* L solve */
-      hypre_CSRMatrixTriLowerUpperSolveDevice_core('L', 1, matSLU_d, NULL, utemp_local, nLU, ftemp_local, nLU);
+      hypre_CSRMatrixTriLowerUpperSolveDevice_core('L', 1, matSLU_d, NULL, utemp_local, nLU, ftemp_local,
+                                                   nLU);
       /* U solve */
-      hypre_CSRMatrixTriLowerUpperSolveDevice_core('U', 0, matSLU_d, NULL, ftemp_local, nLU, rhs_local, 0);
+      hypre_CSRMatrixTriLowerUpperSolveDevice_core('U', 0, matSLU_d, NULL, ftemp_local, nLU, rhs_local,
+                                                   0);
    }
 
 
