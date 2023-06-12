@@ -1650,7 +1650,6 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
 
 
    HYPRE_Real       wall_time;
-   HYPRE_Int   iter = 0;
 
 
 
@@ -2076,7 +2075,7 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
          }
       }
 
-      iter++;
+      //iter++;
       /*------------------------------------------------
        * Set C-pts and F-pts.
        *------------------------------------------------*/
@@ -2267,7 +2266,6 @@ hypre_BoomerAMGIndepPMISa( hypre_ParCSRMatrix    *S,
 
 
    HYPRE_Real       wall_time;
-   HYPRE_Int   iter = 0;
 
 
 
@@ -2687,7 +2685,7 @@ hypre_BoomerAMGIndepPMISa( hypre_ParCSRMatrix    *S,
          }
       }
 
-      iter++;
+      //iter++;
       /*------------------------------------------------
        * Set C-pts and F-pts.
        *------------------------------------------------*/
