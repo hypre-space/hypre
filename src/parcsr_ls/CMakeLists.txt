@@ -75,6 +75,7 @@ set(SRCS
   par_add_cycle.c
   par_difconv.c
   par_fsai.c
+  par_fsai_device.c
   par_fsai_setup.c
   par_fsai_solve.c
   par_gauss_elim.c
