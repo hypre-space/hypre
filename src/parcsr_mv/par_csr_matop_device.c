@@ -1285,8 +1285,6 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
    hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
    hypre_GpuProfilingPopRange();
 
-   hypre_GpuProfilingPopRange();
-
    return hypre_error_flag;
 }
 
