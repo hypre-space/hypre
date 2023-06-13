@@ -213,10 +213,6 @@ endif ()
 
 if (HYPRE_WITH_MAGMA)
   set(HYPRE_USING_MAGMA ON CACHE BOOL "" FORCE)
-
-  # TODO: Use MAGMA instead of hypre's internal BLAS and LAPACK implementations?
-  # set(HYPRE_USING_HYPRE_BLAS OFF CACHE BOOL "" FORCE)
-  # set(HYPRE_USING_HYPRE_LAPACK OFF CACHE BOOL "" FORCE)
 endif ()
 
 if (HYPRE_ENABLE_FEI)
@@ -546,15 +542,9 @@ if (HYPRE_USING_MAGMA)
     set(CMAKE_C_FLAGS "-I${dir} ${CMAKE_C_FLAGS}")
   endforeach ()
   message(STATUS "Enabled support for using MAGMA.")
-  set(MAGMA_FOUND TRUE)
   target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_MAGMA_LIBRARIES} stdc++)
   target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_MAGMA_INCLUDE_DIRS})
 endif (HYPRE_USING_MAGMA)
-
-# FIXME This has already been set, o.w. we wouldn't try looking for MAGMA!!
-if (MAGMA_FOUND)
-  set(HYPRE_USING_MAGMA TRUE)
-endif ()
 
 # Find FEI, if requested
 if (HYPRE_USING_FEI)

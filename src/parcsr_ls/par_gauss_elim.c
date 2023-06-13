@@ -376,11 +376,11 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
    HYPRE_Real          *b_vec           = hypre_ParAMGDataBVec(amg_data);
    hypre_ParVector     *f               = hypre_ParAMGDataFArray(amg_data)[level];
    HYPRE_Real          *f_data          = hypre_VectorData(hypre_ParVectorLocalVector(f));
-   HYPRE_Real          *f_data_host;
+   HYPRE_Real          *f_data_h;
 
    hypre_ParVector     *u               = hypre_ParAMGDataUArray(amg_data)[level];
    HYPRE_Real          *u_data          = hypre_VectorData(hypre_ParVectorLocalVector(u));
-   HYPRE_Real          *u_data_host;
+   HYPRE_Real          *u_data_h;
 
    MPI_Comm             new_comm        = hypre_ParAMGDataNewComm(amg_data);
    HYPRE_Int           *comm_info       = hypre_ParAMGDataCommInfo(amg_data);
@@ -412,31 +412,32 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
 
       if (hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(f)) != hypre_MEMORY_HOST)
       {
-         f_data_host = hypre_TAlloc(HYPRE_Real, num_rows, HYPRE_MEMORY_HOST);
+         f_data_h = hypre_TAlloc(HYPRE_Real, num_rows, HYPRE_MEMORY_HOST);
 
-         hypre_TMemcpy(f_data_host, f_data, HYPRE_Real, num_rows, HYPRE_MEMORY_HOST,
+         hypre_TMemcpy(f_data_h, f_data, HYPRE_Real, num_rows, HYPRE_MEMORY_HOST,
                        hypre_ParVectorMemoryLocation(f));
       }
       else
       {
-         f_data_host = f_data;
+         f_data_h = f_data;
       }
 
       if (hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(u)) != hypre_MEMORY_HOST)
       {
-         u_data_host = hypre_TAlloc(HYPRE_Real, num_rows, HYPRE_MEMORY_HOST);
+         u_data_h = hypre_TAlloc(HYPRE_Real, num_rows, HYPRE_MEMORY_HOST);
       }
       else
       {
-         u_data_host = u_data;
+         u_data_h = u_data;
       }
 
-      hypre_MPI_Allgatherv(f_data_host, num_rows, HYPRE_MPI_REAL, b_vec, info,
+      /* TODO (VPM): Add GPU-aware MPI support to buffers */
+      hypre_MPI_Allgatherv(f_data_h, num_rows, HYPRE_MPI_REAL, b_vec, info,
                            displs, HYPRE_MPI_REAL, new_comm);
 
-      if (f_data_host != f_data)
+      if (f_data_h != f_data)
       {
-         hypre_TFree(f_data_host, HYPRE_MEMORY_HOST);
+         hypre_TFree(f_data_h, HYPRE_MEMORY_HOST);
       }
 
       if (relax_type == 9 || relax_type == 99)
@@ -468,7 +469,7 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
             hypre_TFree(piv, HYPRE_MEMORY_HOST);
          }
 
-         hypre_TMemcpy(u_data_host, b_vec + first_row_index, HYPRE_Real, num_rows,
+         hypre_TMemcpy(u_data_h, b_vec + first_row_index, HYPRE_Real, num_rows,
                        HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
          hypre_TFree(A_tmp, HYPRE_MEMORY_HOST);
@@ -481,14 +482,14 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
 
          hypre_dgemv(&cN, &num_rows, &num_rows_global, &one,
                      Ainv, &num_rows, b_vec, &one_i, &zero,
-                     u_data_host, &one_i);
+                     u_data_h, &one_i);
       }
 
-      if (u_data_host != u_data)
+      if (u_data_h != u_data)
       {
-         hypre_TMemcpy(u_data, u_data_host, HYPRE_Real, num_rows,
+         hypre_TMemcpy(u_data, u_data_h, HYPRE_Real, num_rows,
                        hypre_ParVectorMemoryLocation(u), HYPRE_MEMORY_HOST);
-         hypre_TFree(u_data_host, HYPRE_MEMORY_HOST);
+         hypre_TFree(u_data_h, HYPRE_MEMORY_HOST);
       }
    }
 

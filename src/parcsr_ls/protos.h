@@ -1460,28 +1460,49 @@ HYPRE_ParCSRMatrix GenerateSysLaplacianVCoef ( MPI_Comm comm, HYPRE_BigInt nx, H
                                                HYPRE_Int num_fun, HYPRE_Real *mtrx, HYPRE_Real *value );
 
 /* par_lr_interp.c */
+HYPRE_Int hypreDevice_extendWtoP ( HYPRE_Int P_nr_of_rows, HYPRE_Int W_nr_of_rows,
+                                   HYPRE_Int W_nr_of_cols, HYPRE_Int *CF_marker,
+                                   HYPRE_Int  W_diag_nnz, HYPRE_Int *W_diag_i,
+                                   HYPRE_Int *W_diag_j, HYPRE_Complex *W_diag_data,
+                                   HYPRE_Int *P_diag_i, HYPRE_Int *P_diag_j,
+                                   HYPRE_Complex *P_diag_data, HYPRE_Int *W_offd_i,
+                                   HYPRE_Int *P_offd_i );
 HYPRE_Int hypre_BoomerAMGBuildStdInterp ( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
-                                          hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func,
-                                          HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Int sep_weight,
+                                          hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global,
+                                          HYPRE_Int num_functions, HYPRE_Int *dof_func,
+                                          HYPRE_Int debug_flag, HYPRE_Real trunc_factor,
+                                          HYPRE_Int max_elmts, HYPRE_Int sep_weight,
                                           hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_BoomerAMGBuildExtPIInterp ( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
-                                            hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func,
-                                            HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
+                                            hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global,
+                                            HYPRE_Int num_functions, HYPRE_Int *dof_func,
+                                            HYPRE_Int debug_flag, HYPRE_Real trunc_factor,
+                                            HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_BoomerAMGBuildExtPIInterpHost ( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
-                                                hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func,
-                                                HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
+                                                hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global,
+                                                HYPRE_Int num_functions, HYPRE_Int *dof_func,
+                                                HYPRE_Int debug_flag, HYPRE_Real trunc_factor,
+                                                HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_BoomerAMGBuildExtPICCInterp ( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
-                                              hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func,
-                                              HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
+                                              hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global,
+                                              HYPRE_Int num_functions, HYPRE_Int *dof_func,
+                                              HYPRE_Int debug_flag, HYPRE_Real trunc_factor,
+                                              HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_BoomerAMGBuildFFInterp ( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
-                                         hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func,
-                                         HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
+                                         hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global,
+                                         HYPRE_Int num_functions, HYPRE_Int *dof_func,
+                                         HYPRE_Int debug_flag, HYPRE_Real trunc_factor,
+                                         HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_BoomerAMGBuildFF1Interp ( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
-                                          hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func,
-                                          HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
+                                          hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global,
+                                          HYPRE_Int num_functions, HYPRE_Int *dof_func,
+                                          HYPRE_Int debug_flag, HYPRE_Real trunc_factor,
+                                          HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_BoomerAMGBuildExtInterp ( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
-                                          hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func,
-                                          HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
+                                          hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global,
+                                          HYPRE_Int num_functions, HYPRE_Int *dof_func,
+                                          HYPRE_Int debug_flag, HYPRE_Real trunc_factor,
+                                          HYPRE_Int max_elmts, hypre_ParCSRMatrix **P_ptr );
 
 /* par_lr_interp_device.c */
 HYPRE_Int hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
@@ -1731,7 +1752,12 @@ HYPRE_Int hypre_BoomerAMGRelax12TwoStageGaussSeidel( hypre_ParCSRMatrix *A, hypr
                                                      HYPRE_Real *A_diag_diag, hypre_ParVector *u,
                                                      hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
 
-/* par_realx_device.c */
+HYPRE_Int hypre_BoomerAMGRelaxComputeL1Norms( hypre_ParCSRMatrix *A, HYPRE_Int relax_type,
+                                              HYPRE_Int relax_order, HYPRE_Int coarsest_lvl,
+                                              hypre_IntArray *CF_marker,
+                                              HYPRE_Real **l1_norms_data_ptr );
+
+/* par_relax_device.c */
 HYPRE_Int hypre_BoomerAMGRelaxHybridGaussSeidelDevice( hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                                        HYPRE_Int *cf_marker, HYPRE_Int relax_points,
                                                        HYPRE_Real relax_weight, HYPRE_Real omega,
@@ -2037,93 +2063,135 @@ HYPRE_Int hypre_MGRDestroyFrelaxVcycleData( void *mgr_vdata );
 void *hypre_MGRCreateGSElimData( void );
 HYPRE_Int hypre_MGRDestroyGSElimData( void *mgr_vdata );
 HYPRE_Int hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata, hypre_ParCSRMatrix *A,
-                                          hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int level);
+                                          hypre_ParVector *f, hypre_ParVector *u,
+                                          HYPRE_Int level );
 HYPRE_Int hypre_MGRFrelaxVcycle ( void *mgr_vdata, hypre_ParVector *f, hypre_ParVector *u );
 HYPRE_Int hypre_MGRSetCpointsByBlock( void *mgr_vdata, HYPRE_Int  block_size,
-                                      HYPRE_Int  max_num_levels, HYPRE_Int *block_num_coarse_points, HYPRE_Int  **block_coarse_indexes);
-HYPRE_Int hypre_MGRSetCpointsByContiguousBlock( void *mgr_vdata, HYPRE_Int  block_size,
-                                                HYPRE_Int  max_num_levels, HYPRE_BigInt *begin_idx_array, HYPRE_Int *block_num_coarse_points,
-                                                HYPRE_Int  **block_coarse_indexes);
-HYPRE_Int hypre_MGRSetCpointsByPointMarkerArray( void *mgr_vdata, HYPRE_Int  block_size,
-                                                 HYPRE_Int  max_num_levels, HYPRE_Int *block_num_coarse_points, HYPRE_Int  **block_coarse_indexes,
-                                                 HYPRE_Int *point_marker_array);
-HYPRE_Int hypre_MGRCoarsen(hypre_ParCSRMatrix *S,  hypre_ParCSRMatrix *A,
-                           HYPRE_Int final_coarse_size, HYPRE_Int *final_coarse_indexes, HYPRE_Int debug_flag,
-                           hypre_IntArray **CF_marker, HYPRE_Int last_level);
-HYPRE_Int hypre_MGRSetReservedCoarseNodes(void      *mgr_vdata, HYPRE_Int reserved_coarse_size,
-                                          HYPRE_BigInt *reserved_coarse_nodes);
-HYPRE_Int hypre_MGRSetReservedCpointsLevelToKeep( void      *mgr_vdata, HYPRE_Int level);
+                                      HYPRE_Int  max_num_levels,
+                                      HYPRE_Int *block_num_coarse_points,
+                                      HYPRE_Int  **block_coarse_indexes );
+HYPRE_Int hypre_MGRSetCpointsByContiguousBlock( void *mgr_vdata, HYPRE_Int block_size,
+                                                HYPRE_Int  max_num_levels,
+                                                HYPRE_BigInt *begin_idx_array,
+                                                HYPRE_Int *block_num_coarse_points,
+                                                HYPRE_Int **block_coarse_indexes );
+HYPRE_Int hypre_MGRSetCpointsByPointMarkerArray( void *mgr_vdata, HYPRE_Int block_size,
+                                                 HYPRE_Int  max_num_levels,
+                                                 HYPRE_Int *block_num_coarse_points,
+                                                 HYPRE_Int **block_coarse_indexes,
+                                                 HYPRE_Int *point_marker_array );
+HYPRE_Int hypre_MGRCoarsen( hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A,
+                            HYPRE_Int final_coarse_size, HYPRE_Int *final_coarse_indexes,
+                            HYPRE_Int debug_flag, hypre_IntArray **CF_marker,
+                            HYPRE_Int last_level );
+HYPRE_Int hypre_MGRSetReservedCoarseNodes( void *mgr_vdata, HYPRE_Int reserved_coarse_size,
+                                           HYPRE_BigInt *reserved_coarse_nodes );
+HYPRE_Int hypre_MGRSetReservedCpointsLevelToKeep( void *mgr_vdata, HYPRE_Int level );
 HYPRE_Int hypre_MGRSetMaxGlobalSmoothIters( void *mgr_vdata, HYPRE_Int max_iter );
 HYPRE_Int hypre_MGRSetGlobalSmoothType( void *mgr_vdata, HYPRE_Int iter_type );
-HYPRE_Int hypre_MGRSetNonCpointsToFpoints( void      *mgr_vdata, HYPRE_Int nonCptToFptFlag);
-
+HYPRE_Int hypre_MGRSetNonCpointsToFpoints( void *mgr_vdata, HYPRE_Int nonCptToFptFlag );
 //HYPRE_Int hypre_MGRInitCFMarker(HYPRE_Int num_variables, HYPRE_Int *CF_marker, HYPRE_Int initial_coarse_size,HYPRE_Int *initial_coarse_indexes);
 //HYPRE_Int hypre_MGRUpdateCoarseIndexes(HYPRE_Int num_variables, HYPRE_Int *CF_marker, HYPRE_Int initial_coarse_size,HYPRE_Int *initial_coarse_indexes);
-HYPRE_Int hypre_MGRRelaxL1JacobiDevice( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                        HYPRE_Int *CF_marker_host, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real *l1_norms,
-                                        hypre_ParVector *u, hypre_ParVector *Vtemp );
-HYPRE_Int hypre_MGRBuildPDevice(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker_host,
-                                HYPRE_BigInt *num_cpts_global, HYPRE_Int method, hypre_ParCSRMatrix **P_ptr);
-HYPRE_Int hypre_MGRBuildP(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
-                          HYPRE_BigInt *num_cpts_global, HYPRE_Int method, HYPRE_Int debug_flag, hypre_ParCSRMatrix **P_ptr);
-HYPRE_Int hypre_MGRBuildInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S,
-                               HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag,
-                               HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Int block_jacobi_bsize, hypre_ParCSRMatrix  **P,
-                               HYPRE_Int method, HYPRE_Int numsweeps);
-HYPRE_Int hypre_MGRBuildRestrict(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
-                                 HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag,
-                                 HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Real strong_threshold, HYPRE_Real max_row_sum,
-                                 HYPRE_Int blk_size, hypre_ParCSRMatrix  **RT, HYPRE_Int method, HYPRE_Int numsweeps);
-//HYPRE_Int hypre_MGRBuildRestrictionToper(hypre_ParCSRMatrix *AT, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *ST, HYPRE_Int *num_cpts_global,HYPRE_Int num_functions,HYPRE_Int *dof_func,HYPRE_Int debug_flag,HYPRE_Real trunc_factor, HYPRE_Int max_elmts, hypre_ParCSRMatrix  **RT,HYPRE_Int last_level,HYPRE_Int level, HYPRE_Int numsweeps);
-//HYPRE_Int hypre_BoomerAMGBuildInjectionInterp( hypre_ParCSRMatrix   *A, HYPRE_Int *CF_marker, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int debug_flag,HYPRE_Int init_data,hypre_ParCSRMatrix  **P_ptr);
-HYPRE_Int hypre_MGRBuildBlockJacobiWp( hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
-                                       HYPRE_Int *CF_marker, HYPRE_BigInt *cpts_starts_in,
-                                       hypre_ParCSRMatrix **Wp_ptr);
-HYPRE_Int hypre_ParCSRMatrixExtractBlockDiag(hypre_ParCSRMatrix   *A, HYPRE_Int blk_size,
+HYPRE_Int hypre_MGRBuildP( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
+                           HYPRE_BigInt *num_cpts_global, HYPRE_Int method,
+                           HYPRE_Int debug_flag, hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_MGRBuildInterp( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
+                                hypre_ParCSRMatrix *A_FC, HYPRE_Int *CF_marker,
+                                hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global,
+                                HYPRE_Int num_functions, HYPRE_Int *dof_func,
+                                HYPRE_Int debug_flag, HYPRE_Real trunc_factor,
+                                HYPRE_Int max_elmts, HYPRE_Int block_jacobi_bsize,
+                                hypre_ParCSRMatrix  **P, HYPRE_Int method,
+                                HYPRE_Int numsweeps );
+HYPRE_Int hypre_MGRBuildPFromWp( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *Wp,
+                                 HYPRE_Int *CF_marker, HYPRE_Int debug_flag,
+                                 hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_MGRBuildPFromWpHost( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *Wp,
+                                     HYPRE_Int *CF_marker, HYPRE_Int debug_flag,
+                                     hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_MGRBuildPBlockJacobi( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
+                                      hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *Wp,
+                                      HYPRE_Int blk_size, HYPRE_Int *CF_marker,
+                                      HYPRE_BigInt *cpts_starts, HYPRE_Int debug_flag,
+                                      hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_MGRBuildBlockJacobiWp( hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC,
+                                       HYPRE_Int blk_size, HYPRE_Int *CF_marker,
+                                       HYPRE_BigInt *cpts_starts_in,
+                                       hypre_ParCSRMatrix **Wp_ptr );
+HYPRE_Int hypre_MGRBuildRestrict( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
+                                  hypre_ParCSRMatrix *A_FC, HYPRE_Int *CF_marker,
+                                  HYPRE_BigInt *num_cpts_global, HYPRE_Int num_functions,
+                                  HYPRE_Int *dof_func, HYPRE_Int debug_flag,
+                                  HYPRE_Real trunc_factor, HYPRE_Int max_elmts,
+                                  HYPRE_Real strong_threshold, HYPRE_Real max_row_sum,
+                                  HYPRE_Int blk_size, hypre_ParCSRMatrix **RT,
+                                  HYPRE_Int method, HYPRE_Int numsweeps );
+HYPRE_Int hypre_ParCSRMatrixExtractBlockDiagHost( hypre_ParCSRMatrix *par_A, HYPRE_Int blk_size,
+                                                  HYPRE_Int num_points, HYPRE_Int point_type,
+                                                  HYPRE_Int *CF_marker, HYPRE_Int diag_size,
+                                                  HYPRE_Int diag_type, HYPRE_Real *diag_data );
+HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrix( hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
                                              HYPRE_Int point_type, HYPRE_Int *CF_marker,
-                                             HYPRE_Int *inv_size_ptr, HYPRE_Real **diaginv_ptr, HYPRE_Int diag_type);
-HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrix(  hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
-                                              HYPRE_Int point_type, HYPRE_Int *CF_marker,
-                                              hypre_ParCSRMatrix **B_ptr, HYPRE_Int diag_type);
-HYPRE_Int hypre_MGRSetCoarseSolver( void  *mgr_vdata, HYPRE_Int  (*coarse_grid_solver_solve)(void*,
-                                                                                             void*, void*, void*), HYPRE_Int  (*coarse_grid_solver_setup)(void*, void*, void*, void*),
-                                    void  *coarse_grid_solver );
-HYPRE_Int hypre_MGRSetFSolver( void  *mgr_vdata, HYPRE_Int  (*fine_grid_solver_solve)(void*, void*,
-                                                                                      void*, void*), HYPRE_Int  (*fine_grid_solver_setup)(void*, void*, void*, void*), void  *fsolver );
-HYPRE_Int hypre_MGRSetup( void *mgr_vdata, hypre_ParCSRMatrix *A, hypre_ParVector    *f,
-                          hypre_ParVector    *u );
-HYPRE_Int hypre_MGRSolve( void *mgr_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                          hypre_ParVector  *u );
-HYPRE_Int hypre_block_jacobi_scaling(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **B_ptr,
-                                     void               *mgr_vdata, HYPRE_Int             debug_flag);
-HYPRE_Int hypre_MGRBlockRelaxSolve(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u,
-                                   HYPRE_Int blk_size, HYPRE_Int n_block, HYPRE_Int left_size, HYPRE_Int method, HYPRE_Real *diaginv,
-                                   hypre_ParVector *Vtemp);
-HYPRE_Int hypre_MGRBlockRelaxSetup(hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
-                                   HYPRE_Real **diaginvptr);
+                                             HYPRE_Int diag_type, hypre_ParCSRMatrix **B_ptr );
+HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrixHost( hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
+                                                 HYPRE_Int point_type, HYPRE_Int *CF_marker,
+                                                 HYPRE_Int diag_type,
+                                                 hypre_ParCSRMatrix **B_ptr );
+HYPRE_Int hypre_MGRSetCoarseSolver( void *mgr_vdata,
+                                    HYPRE_Int (*cgrid_solver_solve)(void*, void*, void*, void*),
+                                    HYPRE_Int (*cgrid_solver_setup)(void*, void*, void*, void*),
+                                    void *coarse_grid_solver );
+HYPRE_Int hypre_MGRSetFSolver( void *mgr_vdata,
+                               HYPRE_Int (*fine_grid_solver_solve)(void*, void*, void*, void*),
+                               HYPRE_Int (*fine_grid_solver_setup)(void*, void*, void*, void*),
+                               void *fsolver );
+HYPRE_Int hypre_MGRSetup( void *mgr_vdata, hypre_ParCSRMatrix *A,
+                          hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int hypre_MGRSolve( void *mgr_vdata, hypre_ParCSRMatrix *A,
+                          hypre_ParVector *f, hypre_ParVector  *u );
+HYPRE_Int hypre_block_jacobi_scaling( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **B_ptr,
+                                      void *mgr_vdata, HYPRE_Int debug_flag );
+HYPRE_Int hypre_MGRBlockRelaxSolveDevice( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A,
+                                          hypre_ParVector *f, hypre_ParVector *u,
+                                          hypre_ParVector *Vtemp, HYPRE_Real relax_weight );
+HYPRE_Int hypre_MGRBlockRelaxSolve( hypre_ParCSRMatrix *A, hypre_ParVector *f,
+                                    hypre_ParVector *u, HYPRE_Int blk_size,
+                                    HYPRE_Int n_block, HYPRE_Int left_size,
+                                    HYPRE_Int method, HYPRE_Real *diaginv,
+                                    hypre_ParVector *Vtemp );
+HYPRE_Int hypre_MGRBlockRelaxSetup( hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
+                                    HYPRE_Real **diaginvptr );
 //HYPRE_Int hypre_blockRelax(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u,
 //                           HYPRE_Int blk_size, HYPRE_Int reserved_coarse_size, HYPRE_Int method, hypre_ParVector *Vtemp,
 //                           hypre_ParVector *Ztemp);
-HYPRE_Int hypre_block_jacobi_solve(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u,
-                                   HYPRE_Int blk_size, HYPRE_Int method,
-                                   HYPRE_Real *diaginv, hypre_ParVector    *Vtemp);
+HYPRE_Int hypre_block_jacobi_solve( hypre_ParCSRMatrix *A, hypre_ParVector *f,
+                                    hypre_ParVector *u, HYPRE_Int blk_size,
+                                    HYPRE_Int method, HYPRE_Real *diaginv,
+                                    hypre_ParVector *Vtemp );
 //HYPRE_Int hypre_MGRBuildAffRAP( MPI_Comm comm, HYPRE_Int local_num_variables, HYPRE_Int num_functions,
 //HYPRE_Int *dof_func, HYPRE_Int *CF_marker, HYPRE_Int **coarse_dof_func_ptr, HYPRE_BigInt **coarse_pnts_global_ptr,
 //hypre_ParCSRMatrix *A, HYPRE_Int debug_flag, hypre_ParCSRMatrix **P_f_ptr, hypre_ParCSRMatrix **A_ff_ptr );
 HYPRE_Int hypre_MGRGetSubBlock( hypre_ParCSRMatrix *A, HYPRE_Int *row_cf_marker,
-                                HYPRE_Int *col_cf_marker, HYPRE_Int debug_flag, hypre_ParCSRMatrix **A_ff_ptr );
+                                HYPRE_Int *col_cf_marker, HYPRE_Int debug_flag,
+                                hypre_ParCSRMatrix **A_ff_ptr );
 HYPRE_Int hypre_MGRBuildAff( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, HYPRE_Int debug_flag,
                              hypre_ParCSRMatrix **A_ff_ptr );
-HYPRE_Int hypre_MGRApproximateInverse(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **A_inv);
-HYPRE_Int hypre_MGRAddVectorP ( hypre_IntArray *CF_marker, HYPRE_Int point_type, HYPRE_Real a,
-                                hypre_ParVector *fromVector, HYPRE_Real b, hypre_ParVector **toVector );
-HYPRE_Int hypre_MGRAddVectorR ( hypre_IntArray *CF_marker, HYPRE_Int point_type, HYPRE_Real a,
-                                hypre_ParVector *fromVector, HYPRE_Real b, hypre_ParVector **toVector );
-HYPRE_Int hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P,
-                                                hypre_ParCSRMatrix *RT, HYPRE_Int bsize, HYPRE_Int ordering, HYPRE_Int method, HYPRE_Int Pmax,
-                                                HYPRE_Int *CF_marker, hypre_ParCSRMatrix **A_h_ptr);
-
-HYPRE_Int hypre_MGRWriteSolverParams(void *mgr_vdata);
+HYPRE_Int hypre_MGRApproximateInverse( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **A_inv );
+HYPRE_Int hypre_MGRAddVectorP( hypre_IntArray *CF_marker, HYPRE_Int point_type, HYPRE_Real a,
+                               hypre_ParVector *fromVector, HYPRE_Real b,
+                               hypre_ParVector **toVector );
+HYPRE_Int hypre_MGRAddVectorR( hypre_IntArray *CF_marker, HYPRE_Int point_type, HYPRE_Real a,
+                               hypre_ParVector *fromVector, HYPRE_Real b,
+                               hypre_ParVector **toVector );
+HYPRE_Int hypre_MGRTruncateAcfCPRDevice( hypre_ParCSRMatrix  *A_CF,
+                                         hypre_ParCSRMatrix **A_CF_new_ptr );
+HYPRE_Int hypre_MGRTruncateAcfCPR( hypre_ParCSRMatrix *A_CF, hypre_ParCSRMatrix **A_CF_new_ptr );
+HYPRE_Int hypre_MGRComputeNonGalerkinCoarseGrid( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P,
+                                                 hypre_ParCSRMatrix *RT, HYPRE_Int bsize,
+                                                 HYPRE_Int ordering, HYPRE_Int method,
+                                                 HYPRE_Int Pmax, HYPRE_Int *CF_marker,
+                                                 hypre_ParCSRMatrix **A_H_ptr );
+HYPRE_Int hypre_MGRWriteSolverParams( void *mgr_vdata );
 HYPRE_Int hypre_MGRSetAffSolverType( void *systg_vdata, HYPRE_Int *aff_solver_type );
 HYPRE_Int hypre_MGRSetCoarseSolverType( void *systg_vdata, HYPRE_Int coarse_solver_type );
 HYPRE_Int hypre_MGRSetCoarseSolverIter( void *systg_vdata, HYPRE_Int coarse_solver_iter );
@@ -2132,43 +2200,73 @@ HYPRE_Int hypre_MGRSetFineSolverMaxLevels( void *systg_vdata, HYPRE_Int fine_sol
 HYPRE_Int hypre_MGRSetMaxCoarseLevels( void *mgr_vdata, HYPRE_Int maxlev );
 HYPRE_Int hypre_MGRSetBlockSize( void *mgr_vdata, HYPRE_Int bsize );
 HYPRE_Int hypre_MGRSetRelaxType( void *mgr_vdata, HYPRE_Int relax_type );
-HYPRE_Int hypre_MGRSetFRelaxMethod( void *mgr_vdata, HYPRE_Int relax_method);
-HYPRE_Int hypre_MGRSetLevelFRelaxMethod( void *mgr_vdata, HYPRE_Int *relax_method);
-HYPRE_Int hypre_MGRSetLevelFRelaxType( void *mgr_vdata, HYPRE_Int *relax_type);
-HYPRE_Int hypre_MGRSetLevelFRelaxNumFunctions( void *mgr_vdata, HYPRE_Int *num_functions);
-HYPRE_Int hypre_MGRSetCoarseGridMethod( void *mgr_vdata, HYPRE_Int *cg_method);
-HYPRE_Int hypre_MGRSetRestrictType( void *mgr_vdata, HYPRE_Int restrictType);
-HYPRE_Int hypre_MGRSetLevelRestrictType( void *mgr_vdata, HYPRE_Int *restrictType);
-HYPRE_Int hypre_MGRSetInterpType( void *mgr_vdata, HYPRE_Int interpType);
-HYPRE_Int hypre_MGRSetLevelInterpType( void *mgr_vdata, HYPRE_Int *interpType);
+HYPRE_Int hypre_MGRSetFRelaxMethod( void *mgr_vdata, HYPRE_Int relax_method );
+HYPRE_Int hypre_MGRSetLevelFRelaxMethod( void *mgr_vdata, HYPRE_Int *relax_method );
+HYPRE_Int hypre_MGRSetLevelFRelaxType( void *mgr_vdata, HYPRE_Int *relax_type );
+HYPRE_Int hypre_MGRSetLevelFRelaxNumFunctions( void *mgr_vdata, HYPRE_Int *num_functions );
+HYPRE_Int hypre_MGRSetCoarseGridMethod( void *mgr_vdata, HYPRE_Int *cg_method );
+HYPRE_Int hypre_MGRSetRestrictType( void *mgr_vdata, HYPRE_Int restrictType );
+HYPRE_Int hypre_MGRSetLevelRestrictType( void *mgr_vdata, HYPRE_Int *restrictType );
+HYPRE_Int hypre_MGRSetInterpType( void *mgr_vdata, HYPRE_Int interpType );
+HYPRE_Int hypre_MGRSetLevelInterpType( void *mgr_vdata, HYPRE_Int *interpType );
 HYPRE_Int hypre_MGRSetNumRelaxSweeps( void *mgr_vdata, HYPRE_Int nsweeps );
 HYPRE_Int hypre_MGRSetLevelNumRelaxSweeps( void *mgr_vdata, HYPRE_Int *nsweeps );
 HYPRE_Int hypre_MGRSetNumInterpSweeps( void *mgr_vdata, HYPRE_Int nsweeps );
 HYPRE_Int hypre_MGRSetNumRestrictSweeps( void *mgr_vdata, HYPRE_Int nsweeps );
-HYPRE_Int hypre_MGRSetLevelSmoothType( void *mgr_vdata, HYPRE_Int *level_smooth_type);
-HYPRE_Int hypre_MGRSetLevelSmoothIters( void *mgr_vdata, HYPRE_Int *level_smooth_iters);
+HYPRE_Int hypre_MGRSetLevelSmoothType( void *mgr_vdata, HYPRE_Int *level_smooth_type );
+HYPRE_Int hypre_MGRSetLevelSmoothIters( void *mgr_vdata, HYPRE_Int *level_smooth_iters );
 HYPRE_Int hypre_MGRSetGlobalSmoothCycle( void *mgr_vdata, HYPRE_Int global_smooth_cycle );
 HYPRE_Int hypre_MGRSetPrintLevel( void *mgr_vdata, HYPRE_Int print_level );
 HYPRE_Int hypre_MGRSetFrelaxPrintLevel( void *mgr_vdata, HYPRE_Int print_level );
 HYPRE_Int hypre_MGRSetCoarseGridPrintLevel( void *mgr_vdata, HYPRE_Int print_level );
-HYPRE_Int hypre_MGRSetTruncateCoarseGridThreshold( void *mgr_vdata, HYPRE_Real threshold);
-HYPRE_Int hypre_MGRSetBlockJacobiBlockSize( void *mgr_vdata, HYPRE_Int blk_size);
+HYPRE_Int hypre_MGRSetTruncateCoarseGridThreshold( void *mgr_vdata, HYPRE_Real threshold );
+HYPRE_Int hypre_MGRSetBlockJacobiBlockSize( void *mgr_vdata, HYPRE_Int blk_size );
 HYPRE_Int hypre_MGRSetLogging( void *mgr_vdata, HYPRE_Int logging );
 HYPRE_Int hypre_MGRSetMaxIter( void *mgr_vdata, HYPRE_Int max_iter );
-HYPRE_Int hypre_MGRSetPMaxElmts( void *mgr_vdata, HYPRE_Int P_max_elmts);
+HYPRE_Int hypre_MGRSetPMaxElmts( void *mgr_vdata, HYPRE_Int P_max_elmts );
 HYPRE_Int hypre_MGRSetTol( void *mgr_vdata, HYPRE_Real tol );
 #ifdef HYPRE_USING_DSUPERLU
 void *hypre_MGRDirectSolverCreate( void );
-HYPRE_Int hypre_MGRDirectSolverSetup( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                      hypre_ParVector *u);
-HYPRE_Int hypre_MGRDirectSolverSolve( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                      hypre_ParVector *u);
+HYPRE_Int hypre_MGRDirectSolverSetup( void *solver, hypre_ParCSRMatrix *A,
+                                      hypre_ParVector *f, hypre_ParVector *u );
+HYPRE_Int hypre_MGRDirectSolverSolve( void *solver, hypre_ParCSRMatrix *A,
+                                      hypre_ParVector *f, hypre_ParVector *u );
 HYPRE_Int hypre_MGRDirectSolverDestroy( void *solver );
 #endif
 // Accessor functions
 HYPRE_Int hypre_MGRGetNumIterations( void *mgr_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *res_norm );
 HYPRE_Int hypre_MGRGetCoarseGridConvergenceFactor( void *mgr_data, HYPRE_Real *conv_factor );
+
+/* par_mgr_coarsen.c */
+HYPRE_Int hypre_MGRCoarseParms( MPI_Comm comm, HYPRE_Int num_rows, hypre_IntArray *CF_marker,
+                                HYPRE_BigInt *row_starts_cpts, HYPRE_BigInt *row_starts_fpts );
+
+/* par_mgr_device.c */
+HYPRE_Int hypre_MGRRelaxL1JacobiDevice( hypre_ParCSRMatrix *A, hypre_ParVector *f,
+                                        HYPRE_Int *CF_marker_host, HYPRE_Int relax_points,
+                                        HYPRE_Real relax_weight, HYPRE_Real *l1_norms,
+                                        hypre_ParVector *u, hypre_ParVector *Vtemp );
+HYPRE_Int hypre_MGRBuildPFromWpDevice( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *Wp,
+                                       HYPRE_Int *CF_marker, hypre_ParCSRMatrix **P_ptr);
+HYPRE_Int hypre_MGRBuildPDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
+                                 HYPRE_BigInt *num_cpts_global, HYPRE_Int method,
+                                 hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
+                                                    HYPRE_Int num_points, HYPRE_Int point_type,
+                                                    HYPRE_Int *CF_marker, HYPRE_Int diag_size,
+                                                    HYPRE_Int diag_type, HYPRE_Int *B_diag_i,
+                                                    HYPRE_Int *B_diag_j,
+                                                    HYPRE_Complex *B_diag_data );
+HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix *A, HYPRE_Int blk_size,
+                                                   HYPRE_Int point_type, HYPRE_Int *CF_marker,
+                                                   HYPRE_Int diag_type,
+                                                   hypre_ParCSRMatrix **B_ptr );
+HYPRE_Int hypre_MGRComputeNonGalerkinCGDevice( hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC,
+                                               hypre_ParCSRMatrix *A_CF, hypre_ParCSRMatrix *A_CC,
+                                               HYPRE_Int blk_size, HYPRE_Int method,
+                                               HYPRE_Complex threshold,
+                                               hypre_ParCSRMatrix **A_H_ptr );
 
 /* par_ilu.c */
 void *hypre_ILUCreate ( void );
@@ -2551,3 +2649,27 @@ void hypre_qsort2_ci ( HYPRE_Complex *v, HYPRE_Int *w, HYPRE_Int left, HYPRE_Int
 /* par_fsai_solve.c */
 HYPRE_Int hypre_FSAISolve ( void *fsai_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *b,
                             hypre_ParVector *x );
+
+/* par_ilu.c */
+HYPRE_Int hypre_ILUSolveCusparseLU(hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU_d, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int n, hypre_ParVector *ftemp, hypre_ParVector *utemp);
+HYPRE_Int hypre_ILUSolveCusparseSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int nLU, hypre_ParCSRMatrix *S, hypre_ParVector *ftemp, hypre_ParVector *utemp, HYPRE_Solver schur_solver, HYPRE_Solver schur_precond, hypre_ParVector *rhs, hypre_ParVector *x, HYPRE_Int *u_end, hypre_CSRMatrix *matBLU_d, hypre_CSRMatrix *matE_d, hypre_CSRMatrix *matF_d);
+HYPRE_Int hypre_ILUSolveRAPGMRES(hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int nLU, hypre_ParCSRMatrix *S, hypre_ParVector *ftemp, hypre_ParVector *utemp, hypre_ParVector *xtemp, hypre_ParVector *ytemp, HYPRE_Solver schur_solver, HYPRE_Solver schur_precond, hypre_ParVector *rhs, hypre_ParVector *x, HYPRE_Int *u_end, hypre_ParCSRMatrix *Aperm, hypre_CSRMatrix *matALU_d, hypre_CSRMatrix *matBLU_d, hypre_CSRMatrix *matE_d, hypre_CSRMatrix *matF_d, HYPRE_Int test_opt);
+HYPRE_Int hypre_ParILUCusparseILUExtractEBFC(hypre_CSRMatrix *A_diag, HYPRE_Int nLU, hypre_CSRMatrix **Bp, hypre_CSRMatrix **Cp, hypre_CSRMatrix **Ep, hypre_CSRMatrix **Fp);
+HYPRE_Int hypre_ParILURAPReorder(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *rqperm, hypre_ParCSRMatrix **A_pq);
+HYPRE_Int hypre_ILUSetupLDUtoCusparse(hypre_ParCSRMatrix *L, HYPRE_Real *D, hypre_ParCSRMatrix *U, hypre_ParCSRMatrix **LDUp);
+HYPRE_Int hypre_ILUSetupRAPMILU0(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **ALUp, HYPRE_Int modified);
+HYPRE_Int hypre_ParILUCusparseSchurGMRESDummySetup(void *a, void *b, void *c, void *d);
+HYPRE_Int hypre_ParILUCusparseSchurGMRESDummySolve(void *ilu_vdata, void *ilu_vdata2, hypre_ParVector *f, hypre_ParVector *u);
+HYPRE_Int hypre_ParILUCusparseSchurGMRESCommInfo(void *ilu_vdata, HYPRE_Int *my_id, HYPRE_Int *num_procs);
+void *hypre_ParILUCusparseSchurGMRESMatvecCreate(void *ilu_vdata, void *x);
+HYPRE_Int hypre_ParILUCusparseSchurGMRESMatvec(void *matvec_data, HYPRE_Complex alpha, void *ilu_vdata, void *x, HYPRE_Complex beta, void *y);
+HYPRE_Int hypre_ParILUCusparseSchurGMRESMatvecDestroy(void *matvec_data ); HYPRE_Int hypre_ParILURAPSchurGMRESDummySetup(void *a, void *b, void *c, void *d);
+HYPRE_Int hypre_ParILURAPSchurGMRESSolve(void *ilu_vdata, void *ilu_vdata2, hypre_ParVector *f, hypre_ParVector *u); void *hypre_ParILURAPSchurGMRESMatvecCreate(void *ilu_vdata, void *x);
+HYPRE_Int hypre_ParILURAPSchurGMRESMatvec(void *matvec_data, HYPRE_Complex alpha, void *ilu_vdata, void *x, HYPRE_Complex beta, void *y);
+HYPRE_Int hypre_ParILURAPSchurGMRESMatvecDestroy(void *matvec_data );
+HYPRE_Int hypre_ILUSetupILUDevice(HYPRE_Int ilu_type, hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol, HYPRE_Int *perm_data, HYPRE_Int *qperm_data, HYPRE_Int n, HYPRE_Int nLU, hypre_CSRMatrix **BLUptr, hypre_ParCSRMatrix **matSptr, hypre_CSRMatrix **Eptr, hypre_CSRMatrix **Fptr, HYPRE_Int tri_solve);
+HYPRE_Int hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n, HYPRE_Int nLU, hypre_ParCSRMatrix **Apermptr, hypre_ParCSRMatrix **matSptr, hypre_CSRMatrix **ALUptr, hypre_CSRMatrix **BLUptr, hypre_CSRMatrix **CLUptr, hypre_CSRMatrix **Eptr, hypre_CSRMatrix **Fptr, HYPRE_Int test_opt);
+HYPRE_Int hypre_ILUSolveDeviceLUIter(hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU_d, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int n, hypre_ParVector *ftemp, hypre_ParVector *utemp, hypre_Vector *xtemp_local, hypre_Vector **Adiag_diag, HYPRE_Int lower_jacobi_iters, HYPRE_Int upper_jacobi_iters);
+HYPRE_Int hypre_ILUSolveLUJacobiIter(hypre_CSRMatrix *A, hypre_Vector *work1_local, hypre_Vector *work2_local, hypre_Vector *inout_local, hypre_Vector *diag_diag, HYPRE_Int lower_jacobi_iters, HYPRE_Int upper_jacobi_iters, HYPRE_Int my_id);
+HYPRE_Int hypre_ILUSolveLJacobiIter(hypre_CSRMatrix *A, hypre_Vector *input_local, hypre_Vector *work_local, hypre_Vector *output_local, HYPRE_Int lower_jacobi_iters);
+HYPRE_Int hypre_ILUSolveUJacobiIter(hypre_CSRMatrix *A, hypre_Vector *input_local, hypre_Vector *work_local, hypre_Vector *output_local, hypre_Vector *diag_diag, HYPRE_Int upper_jacobi_iters);

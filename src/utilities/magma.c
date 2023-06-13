@@ -6,14 +6,15 @@
  ******************************************************************************/
 
 #include "_hypre_utilities.h"
+
 #if defined(HYPRE_USING_MAGMA)
 
 /*--------------------------------------------------------------------------
- * hypre_MagmaInit
+ * hypre_MagmaInitialize
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MagmaInit(hypre_Handle *hypre_handle_)
+hypre_MagmaInitialize(void)
 {
    /* Initialize MAGMA */
    magma_init();
@@ -23,7 +24,7 @@ hypre_MagmaInit(hypre_Handle *hypre_handle_)
    hypre_int device_id;
 
    hypre_GetDevice(&device_id);
-   magma_queue_create((magma_int_t) device_id, &hypre_HandleMagmaQueue(hypre_handle_));
+   magma_queue_create((magma_int_t) device_id, &hypre_HandleMagmaQueue(hypre_handle()));
 #endif
 
    return hypre_error_flag;

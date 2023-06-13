@@ -33,7 +33,9 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
+cat state.h                    >> $INTERNAL_HEADER
 cat general.h                  >> $INTERNAL_HEADER
+cat magma.h                    >> $INTERNAL_HEADER
 cat printf.h                   >> $INTERNAL_HEADER
 cat error.h                    >> $INTERNAL_HEADER
 cat mpistubs.h                 >> $INTERNAL_HEADER
@@ -49,7 +51,6 @@ cat caliper_instrumentation.h  >> $INTERNAL_HEADER
 cat handle.h                   >> $INTERNAL_HEADER
 cat gselim.h                   >> $INTERNAL_HEADER
 cat int_array.h                >> $INTERNAL_HEADER
-cat magma.h                    >> $INTERNAL_HEADER
 cat protos.h                   >> $INTERNAL_HEADER
 cat hopscotch_hash.h           >> $INTERNAL_HEADER
 cat mmio.h                     >> $INTERNAL_HEADER
