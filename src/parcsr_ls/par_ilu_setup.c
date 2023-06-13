@@ -342,8 +342,8 @@ hypre_ILUSetup( void               *ilu_vdata,
 #endif
 
                /* GMRES + hypre_iluk() */
-               hypre_ILUSetupILUDevice(1, matA, fill_level, NULL, perm, perm, n, nLU,
-                                       &matBLU_d, &matS, &matE_d, &matF_d, 1);
+               hypre_ILUSetupILUDevice(1, matA, fill_level, NULL, perm, perm,
+                                       n, nLU, &matBLU_d, &matS, &matE_d, &matF_d, 1);
             }
          }
          else
