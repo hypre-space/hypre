@@ -2098,7 +2098,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                HYPRE_Int is_triangular = hypre_ParAMGDataIsTriangular(amg_data);
                HYPRE_Int gmres_switch = hypre_ParAMGDataGMRESSwitchR(amg_data);
                /* !!! RL: ensure that CF_marker contains -1 or 1 !!! */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
                HYPRE_MemoryLocation memory_location = hypre_IntArrayMemoryLocation(CF_marker_array[level]);
                HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
                if (exec == HYPRE_EXEC_DEVICE)
