@@ -24,11 +24,11 @@ Final Relative Residual Norm = 4.233149e-01
 
 # Output file: matrix.out.6
 Iterations = 5
-Final Relative Residual Norm = 4.233149e-01
+Final Relative Residual Norm = 3.515462e-01
 
 # Output file: matrix.out.7
 Iterations = 5
-Final Relative Residual Norm = 4.233149e-01
+Final Relative Residual Norm = 3.515462e-01
 
 # Output file: matrix.out.8
 Iterations = 5
@@ -73,3 +73,4 @@ Final GMRES Relative Residual Norm = 8.909955e-01
 # Output file: matrix.out.112
 GMRES Iterations = 6
 Final GMRES Relative Residual Norm = 8.963555e-01
+
