@@ -54,6 +54,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    */
    HYPRE_Real      cycle_op_count;
    HYPRE_Int       cycle_type;
+   HYPRE_Int       kcycle, kcycle_val;
    HYPRE_Int       fcycle, fcycle_lev;
    HYPRE_Int       num_levels;
    HYPRE_Int       max_levels;
@@ -66,6 +67,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    /* Local variables  */
    HYPRE_Int      *lev_counter;
+   HYPRE_Int      *cycle_counter;
    HYPRE_Int       Solve_err_flag;
    HYPRE_Int       k;
    HYPRE_Int       i, j, jj;
@@ -154,6 +156,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
    lev_counter = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+   if (kcycle)
+      cycle_counter = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
 
    if (hypre_ParAMGDataParticipate(amg_data))
    {
@@ -224,6 +228,13 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    level = 0;
    cycle_param = 1;
+   if (kcycle)
+   {
+      for (k=0; k<num_levels;++k)
+      {
+         cycle_counter[k] = kcycle_val;
+      }
+   }
 
    smoother = hypre_ParAMGDataSmoother(amg_data);
 
@@ -707,7 +718,20 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          hypre_GpuProfilingPopRange();
 
          ++level;
-         lev_counter[level] = hypre_max(lev_counter[level], cycle_type);
+
+         if (kcycle)
+         {
+            cycle_counter[level]=cycle_counter[level-1];
+            if (cycle_counter[level]>1)
+               lev_counter[level]=2; 
+            else
+               lev_counter[level]=1;
+         }
+         else
+         {
+            lev_counter[level] = hypre_max(lev_counter[level], cycle_type);
+         }
+
          cycle_param = 1;
          if (level == num_levels - 1)
          {
@@ -758,6 +782,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          hypre_GpuProfilingPopRange();
 
          --level;
+         if (kcycle && lev_counter[level]>0)
+            cycle_counter[level]--;
+
          cycle_param = 2;
          if (fcycle && fcycle_lev == level)
          {
