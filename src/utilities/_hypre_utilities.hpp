@@ -231,6 +231,7 @@ using namespace thrust::placeholders;
 #endif
 #if defined(HYPRE_USING_ONEMKLBLAS)
 #include <oneapi/mkl/blas.hpp>
+#include <oneapi/mkl/lapack.hpp>
 #endif
 #if defined(HYPRE_USING_ONEMKLRAND)
 #include <oneapi/mkl/rng.hpp>
@@ -1811,6 +1812,12 @@ struct type_cast
    constexpr T2 operator()(const T1 &x = T1()) const { return (T2) x; }
 };
 
+template<typename T>
+struct absolute_value
+{
+   constexpr T operator()(const T &x) const { return x < T(0) ? -x : x; }
+};
+
 template<typename... T>
 struct TupleComp2
 {
@@ -1867,21 +1874,24 @@ dim3 hypre_dim3(HYPRE_Int x);
 dim3 hypre_dim3(HYPRE_Int x, HYPRE_Int y);
 dim3 hypre_dim3(HYPRE_Int x, HYPRE_Int y, HYPRE_Int z);
 
-template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_StableSortByTupleKey(
-   HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt);
+template <typename T1, typename T2, typename T3>
+HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2,
+                                           T3 *vals, HYPRE_Int opt);
 
-template <typename T1, typename T2, typename T3, typename T4> HYPRE_Int
-hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals1, T4 *vals2,
-                                      HYPRE_Int opt);
+template <typename T1, typename T2, typename T3, typename T4>
+HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2,
+                                                T3 *vals1, T4 *vals2, HYPRE_Int opt);
 
-template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N,
-                                                                                        T1 *keys1_in,  T2 *keys2_in,  T3 *vals_in, T1 *keys1_out, T2 *keys2_out, T3 *vals_out);
+template <typename T1, typename T2, typename T3>
+HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in, T2 *keys2_in,
+                                       T3 *vals_in, T1 *keys1_out, T2 *keys2_out,
+                                       T3 *vals_out);
 
 template <typename T>
 HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
 
-HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y,
-                                    char *work);
+HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map,
+                                    HYPRE_Real *y, char *work);
 
 template <typename T>
 HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
@@ -1890,8 +1900,6 @@ HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int n
 #endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-
-HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
 
 #if defined(HYPRE_USING_CUDA)
 cudaError_t hypre_CachingMallocDevice(void **ptr, size_t nbytes);

@@ -135,10 +135,14 @@ hypre_IntArrayNegateDevice( hypre_IntArray *v )
                       hypre_IntArrayData(v) + hypre_IntArraySize(v),
                       hypre_IntArrayData(v),
                       thrust::negate<HYPRE_Int>() );
-
-#elif defined(HYPRE_USING_SYCL) || defined(HYPRE_USING_DEVICE_OPENMP)
+#elif defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL( std::transform,
+                      hypre_IntArrayData(v),
+                      hypre_IntArrayData(v) + hypre_IntArraySize(v),
+                      hypre_IntArrayData(v),
+                      std::negate<HYPRE_Int>() );
+#else
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented yet!");
-
 #endif
 
    return hypre_error_flag;

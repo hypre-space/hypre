@@ -422,3 +422,9 @@ HYPRE_Int hypre_PrintMemoryTracker( size_t *totl_bytes_o, size_t *peak_bytes_o,
 HYPRE_Int hypre_MemoryTrackerSetPrint(HYPRE_Int do_print);
 HYPRE_Int hypre_MemoryTrackerSetFileName(const char *file_name);
 #endif
+
+/* magma.c */
+#if defined(HYPRE_USING_MAGMA)
+HYPRE_Int hypre_MagmaInitialize(void);
+HYPRE_Int hypre_MagmaFinalize(void);
+#endif
