@@ -607,7 +607,7 @@ hypre_MGRCycle( void              *mgr_vdata,
    char                   region_name[1024];
    char                   msg[1024];
 
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_MemoryLocation   memory_location;
    HYPRE_ExecutionPolicy  exec;
 #endif
@@ -687,7 +687,7 @@ hypre_MGRCycle( void              *mgr_vdata,
                            hypre_VectorData(l1_norms_array[fine_grid]) : NULL;
          CF_marker_data  = hypre_IntArrayData(CF_marker[fine_grid]);
 
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          memory_location = hypre_ParCSRMatrixMemoryLocation(A_array[fine_grid]);
          exec            = hypre_GetExecPolicy1(memory_location);
 #endif
@@ -707,7 +707,7 @@ hypre_MGRCycle( void              *mgr_vdata,
                 (level_smooth_type[fine_grid]) == 1)
             {
                /* Block Jacobi/Gauss-Seidel smoother */
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
                if (exec == HYPRE_EXEC_DEVICE)
                {
                   for (i = 0; i < level_smooth_iters[fine_grid]; i++)
@@ -821,7 +821,7 @@ hypre_MGRCycle( void              *mgr_vdata,
                                                      F_array[fine_grid], Vtemp);
 
                   /* Restrict to F points */
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
                   if (exec == HYPRE_EXEC_DEVICE)
                   {
                      hypre_ParCSRMatrixMatvecT(fp_one, P_FF_array[fine_grid], Vtemp,
@@ -837,7 +837,7 @@ hypre_MGRCycle( void              *mgr_vdata,
                   /* Set initial guess to zero */
                   hypre_ParVectorSetZeros(U_fine_array[coarse_grid]);
 
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
                   if (exec == HYPRE_EXEC_DEVICE)
                   {
                      hypre_MGRBlockRelaxSolveDevice(B_FF_array[fine_grid],
@@ -856,7 +856,7 @@ hypre_MGRCycle( void              *mgr_vdata,
                   }
 
                   /* Interpolate the solution back to the fine grid level */
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
                   if (exec == HYPRE_EXEC_DEVICE)
                   {
                      hypre_ParCSRMatrixMatvec(fp_one, P_FF_array[fine_grid],
@@ -876,7 +876,7 @@ hypre_MGRCycle( void              *mgr_vdata,
             {
                if (relax_type == 18)
                {
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
                   for (i = 0; i < nsweeps[fine_grid]; i++)
                   {
                      hypre_MGRRelaxL1JacobiDevice(A_array[fine_grid], F_array[fine_grid],
@@ -1089,7 +1089,7 @@ hypre_MGRCycle( void              *mgr_vdata,
          }
          else
          {
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
             if (restrict_type[fine_grid] > 0 || (exec == HYPRE_EXEC_DEVICE))
 #else
             if (restrict_type[fine_grid] > 0)
@@ -1130,7 +1130,7 @@ hypre_MGRCycle( void              *mgr_vdata,
                            hypre_VectorData(l1_norms_array[fine_grid]) : NULL;
          CF_marker_data  = hypre_IntArrayData(CF_marker[fine_grid]);
 
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          memory_location = hypre_ParCSRMatrixMemoryLocation(A_array[fine_grid]);
          exec            = hypre_GetExecPolicy1(memory_location);
 #endif
@@ -1144,7 +1144,7 @@ hypre_MGRCycle( void              *mgr_vdata,
          hypre_GpuProfilingPushRange(region_name);
          HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
 
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (interp_type[fine_grid] > 0 || (exec == HYPRE_EXEC_DEVICE))
 #else
          if (interp_type[fine_grid] > 0)
@@ -1175,7 +1175,7 @@ hypre_MGRCycle( void              *mgr_vdata,
             if ((level_smooth_type[fine_grid] == 0) ||
                 (level_smooth_type[fine_grid] == 1))
             {
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
                if (exec == HYPRE_EXEC_DEVICE)
                {
                   for (i = 0; i < level_smooth_iters[fine_grid]; i++)

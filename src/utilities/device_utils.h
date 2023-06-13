@@ -181,6 +181,7 @@ using namespace thrust::placeholders;
 #endif
 #if defined(HYPRE_USING_ONEMKLBLAS)
 #include <oneapi/mkl/blas.hpp>
+#include <oneapi/mkl/lapack.hpp>
 #endif
 #if defined(HYPRE_USING_ONEMKLRAND)
 #include <oneapi/mkl/rng.hpp>
@@ -1774,6 +1775,12 @@ template<typename T1, typename T2>
 struct type_cast
 {
    constexpr T2 operator()(const T1 &x = T1()) const { return (T2) x; }
+};
+
+template<typename T>
+struct absolute_value
+{
+   constexpr T operator()(const T &x) const { return x < T(0) ? -x : x; }
 };
 
 template<typename... T>
