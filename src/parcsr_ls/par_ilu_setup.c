@@ -259,7 +259,8 @@ hypre_ILUSetup( void               *ilu_vdata,
             hypre_ILUGetPermddPQ(matA, &perm, &qperm, tol_ddPQ, &nLU, &nI, reordering_type);
             break;
 
-         case 0: case 1: default:
+         case 0: case 1:
+         default:
             /* RCM or none */
             hypre_ILUGetLocalPerm(matA, &perm, &nLU, reordering_type);
             break;
@@ -522,7 +523,8 @@ hypre_ILUSetup( void               *ilu_vdata,
    /* setup Schur solver - TODO (VPM): merge host and device paths below */
    switch (ilu_type)
    {
-      case 0: case 1: default:
+      case 0: case 1:
+      default:
          break;
 
       case 10: case 11:
@@ -545,13 +547,13 @@ hypre_ILUSetup( void               *ilu_vdata,
                Ftemp_upper = hypre_SeqVectorCreate(nLU);
                hypre_VectorOwnsData(Ftemp_upper)   = 0;
                hypre_VectorData(Ftemp_upper)       = hypre_VectorData(
-                                                       hypre_ParVectorLocalVector(Ftemp));
+                                                        hypre_ParVectorLocalVector(Ftemp));
                hypre_SeqVectorInitialize(Ftemp_upper);
 
                Utemp_lower = hypre_SeqVectorCreate(n - nLU);
                hypre_VectorOwnsData(Utemp_lower)   = 0;
                hypre_VectorData(Utemp_lower)       = hypre_VectorData(
-                                                       hypre_ParVectorLocalVector(Utemp)) + nLU;
+                                                        hypre_ParVectorLocalVector(Utemp)) + nLU;
                hypre_SeqVectorInitialize(Utemp_lower);
 
                /* create GMRES */
@@ -569,8 +571,8 @@ hypre_ILUSetup( void               *ilu_vdata,
                      hypre_ParKrylovDestroyVector,
                      hypre_ParKrylovMatvecCreate, //parCSR A -- inactive
                      ((tri_solve == 1) ?
-                        hypre_ParILUSchurGMRESMatvecDevice :
-                        hypre_ParILUSchurGMRESMatvecJacIterDevice), //parCSR A -> ilu_data
+                      hypre_ParILUSchurGMRESMatvecDevice :
+                      hypre_ParILUSchurGMRESMatvecJacIterDevice), //parCSR A -> ilu_data
                      hypre_ParKrylovMatvecDestroy, //parCSR A -- inactive
                      hypre_ParKrylovInnerProd,
                      hypre_ParKrylovCopyVector,
@@ -665,8 +667,10 @@ hypre_ILUSetup( void               *ilu_vdata,
                HYPRE_ILUSetPrintLevel        (schur_precond, hypre_ParILUDataSchurPrecondPrintLevel(ilu_data));
                HYPRE_ILUSetTriSolve          (schur_precond, hypre_ParILUDataSchurPrecondTriSolve(ilu_data));
                HYPRE_ILUSetMaxIter           (schur_precond, hypre_ParILUDataSchurPrecondMaxIter(ilu_data));
-               HYPRE_ILUSetLowerJacobiIters  (schur_precond, hypre_ParILUDataSchurPrecondLowerJacobiIters(ilu_data));
-               HYPRE_ILUSetUpperJacobiIters  (schur_precond, hypre_ParILUDataSchurPrecondUpperJacobiIters(ilu_data));
+               HYPRE_ILUSetLowerJacobiIters  (schur_precond,
+                                              hypre_ParILUDataSchurPrecondLowerJacobiIters(ilu_data));
+               HYPRE_ILUSetUpperJacobiIters  (schur_precond,
+                                              hypre_ParILUDataSchurPrecondUpperJacobiIters(ilu_data));
                HYPRE_ILUSetTol               (schur_precond, hypre_ParILUDataSchurPrecondTol(ilu_data));
 
                /* add preconditioner to solver */
@@ -800,8 +804,10 @@ hypre_ILUSetup( void               *ilu_vdata,
             HYPRE_ILUSetPrintLevel        (schur_precond, hypre_ParILUDataSchurPrecondPrintLevel(ilu_data));
             HYPRE_ILUSetMaxIter           (schur_precond, hypre_ParILUDataSchurPrecondMaxIter(ilu_data));
             HYPRE_ILUSetTriSolve          (schur_precond, hypre_ParILUDataSchurPrecondTriSolve(ilu_data));
-            HYPRE_ILUSetLowerJacobiIters  (schur_precond, hypre_ParILUDataSchurPrecondLowerJacobiIters(ilu_data));
-            HYPRE_ILUSetUpperJacobiIters  (schur_precond, hypre_ParILUDataSchurPrecondUpperJacobiIters(ilu_data));
+            HYPRE_ILUSetLowerJacobiIters  (schur_precond,
+                                           hypre_ParILUDataSchurPrecondLowerJacobiIters(ilu_data));
+            HYPRE_ILUSetUpperJacobiIters  (schur_precond,
+                                           hypre_ParILUDataSchurPrecondUpperJacobiIters(ilu_data));
             HYPRE_ILUSetTol               (schur_precond, hypre_ParILUDataSchurPrecondTol(ilu_data));
 
             /* add preconditioner to solver */
@@ -1220,7 +1226,7 @@ hypre_ILUSetup( void               *ilu_vdata,
       hypre_ParILUDataOperatorComplexity(ilu_data) = ((HYPRE_Real)size_C + nnzS +
                                                       hypre_ParCSRMatrixDNumNonzeros(matL) +
                                                       hypre_ParCSRMatrixDNumNonzeros(matU)) /
-                                                      hypre_ParCSRMatrixDNumNonzeros(matA);
+                                                     hypre_ParCSRMatrixDNumNonzeros(matA);
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    }
 #endif
@@ -1933,7 +1939,8 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix  *A,
          break;
       }
 
-      case 0: default:
+      case 0:
+      default:
       {
          /* RAP where we save EU^{-1}, L^{-1}F as sparse matrices */
          hypre_ParILUExtractEBFC(Amd, nLU, BLUptr, &SLU, Eptr, Fptr);

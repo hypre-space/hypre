@@ -489,7 +489,7 @@ hypre_ILUSolveSchurGMRESDevice(hypre_ParCSRMatrix  *A,
 
    /* U solve */
    hypre_CSRMatrixTriLowerUpperSolveDevice_core('U', 0, matSLU_d, NULL, ftemp_local,
-                                                 nLU, rhs_local, 0);
+                                                nLU, rhs_local, 0);
 
    /* Solve with tricky initial guess */
    HYPRE_GMRESSolve(schur_solver,
@@ -956,7 +956,7 @@ hypre_ILUSolveRAPGMRESDevice(hypre_ParCSRMatrix   *A,
 
          /* U solve - Backward solve */
          hypre_CSRMatrixTriLowerUpperSolveDevice('U', 0, matALU_d, NULL,
-                                                  utemp_local, xtemp_local);
+                                                 utemp_local, xtemp_local);
 
          /* residual, we should not touch xtemp for now
           * r = R*(f-PAQx)
@@ -1024,7 +1024,7 @@ hypre_ILUSolveRAPGMRESDevice(hypre_ParCSRMatrix   *A,
 
             /* -U{-1}L^{-1}Fx */
             hypre_CSRMatrixTriLowerUpperSolveDevice('U', 0, matBLU_d, NULL,
-                                                     utemp_local, ftemp_local);
+                                                    utemp_local, ftemp_local);
 
             /* now copy data to y_lower */
             hypre_TMemcpy(ftemp_data + nLU, rhs_data, HYPRE_Real, m,

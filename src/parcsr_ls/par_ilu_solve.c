@@ -245,7 +245,7 @@ hypre_ILUSolve( void               *ilu_vdata,
       /* Do one solve on LU*e = r */
       switch (ilu_type)
       {
-         case 0: case 1: default:
+      case 0: case 1: default:
             /* TODO (VPM): Encapsulate host and device functions into a single one */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
             if (exec == HYPRE_EXEC_DEVICE)

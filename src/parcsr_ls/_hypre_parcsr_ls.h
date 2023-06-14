@@ -3728,7 +3728,7 @@ HYPRE_Int hypre_ILUGetInteriorExteriorPerm( hypre_ParCSRMatrix *A,
 HYPRE_Int hypre_ILUGetLocalPerm( hypre_ParCSRMatrix *A, HYPRE_Int **perm_ptr,
                                  HYPRE_Int *nLU, HYPRE_Int reordering_type );
 HYPRE_Int hypre_ILUBuildRASExternalMatrix( hypre_ParCSRMatrix *A, HYPRE_Int *rperm,
-                                          HYPRE_Int **E_i, HYPRE_Int **E_j, HYPRE_Real **E_data );
+                                           HYPRE_Int **E_i, HYPRE_Int **E_j, HYPRE_Real **E_data );
 HYPRE_Int hypre_ILUSortOffdColmap( hypre_ParCSRMatrix *A );
 HYPRE_Int hypre_ILULocalRCMBuildFinalPerm( HYPRE_Int start, HYPRE_Int end,
                                            HYPRE_Int * G_perm, HYPRE_Int *perm, HYPRE_Int *qperm,

@@ -1989,22 +1989,22 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
    if (elmt_tols == NULL)
    {
       auto new_end = HYPRE_THRUST_CALL( copy_if,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)) + nnz,
-                                   A_data,
-                                   thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j, new_data)),
-                                   thrust::not1(less_than<HYPRE_Complex>(tol)) );
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)) + nnz,
+                                        A_data,
+                                        thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j, new_data)),
+                                        thrust::not1(less_than<HYPRE_Complex>(tol)) );
 
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == new_ii + new_nnz );
    }
    else
    {
       auto new_end = HYPRE_THRUST_CALL( copy_if,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)) + nnz,
-                                   thrust::make_zip_iterator(thrust::make_tuple(A_data, elmt_tols)),
-                                   thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j, new_data)),
-                                   cabsfirst_greaterthan_second_pred() );
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)) + nnz,
+                                        thrust::make_zip_iterator(thrust::make_tuple(A_data, elmt_tols)),
+                                        thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j, new_data)),
+                                        cabsfirst_greaterthan_second_pred() );
 
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == new_ii + new_nnz );
    }
@@ -2420,7 +2420,7 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
 
    cusparseHandle_t       handle       = hypre_HandleCusparseHandle(hypre_handle());
    cusparseDiagType_t     diag_type    = unit_diag ? CUSPARSE_DIAG_TYPE_UNIT :
-                                                     CUSPARSE_DIAG_TYPE_NON_UNIT;
+                                         CUSPARSE_DIAG_TYPE_NON_UNIT;
    cusparseFillMode_t     fill_mode_L  = CUSPARSE_FILL_MODE_LOWER;
    cusparseFillMode_t     fill_mode_U  = CUSPARSE_FILL_MODE_UPPER;
    cusparseOperation_t    operation    = CUSPARSE_OPERATION_NON_TRANSPOSE;
@@ -2736,7 +2736,7 @@ hypre_CSRMatrixTriLowerUpperSolveRocsparse(char              uplo,
 
    rocsparse_status     status;
    rocsparse_diag_type  diag_type     = unit_diag ? rocsparse_diag_type_unit :
-                                                    rocsparse_diag_type_non_unit;
+                                        rocsparse_diag_type_non_unit;
    HYPRE_Complex        alpha         = 1.0;
    hypre_int            structural_zero;
    size_t               buffer_size;
