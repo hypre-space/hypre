@@ -765,6 +765,7 @@ hypre_NodeRelax(  void                 *relax_vdata,
                    *----------------------------------------------*/
                   hypre_gselim(A_loc, x_loc, nvars, err);
                   (void) err;
+                  /* TODO (VPM): need a way to check error codes on device */
 
                   /*------------------------------------------------
                    * Copy solution from local storage.
