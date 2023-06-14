@@ -764,10 +764,8 @@ hypre_NodeRelax(  void                 *relax_vdata,
                    * Invert intra-nodal coupling
                    *----------------------------------------------*/
                   hypre_gselim(A_loc, x_loc, nvars, err);
-                  if (err)
-                  {
-                     hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error in gselim!\n");
-                  }
+                  (void) err;
+
                   /*------------------------------------------------
                    * Copy solution from local storage.
                    *----------------------------------------------*/
@@ -971,10 +969,8 @@ hypre_NodeRelax(  void                 *relax_vdata,
                    * Invert intra-nodal coupling
                    *----------------------------------------------*/
                   hypre_gselim(A_loc, x_loc, nvars, err);
-                  if (err)
-                  {
-                     hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error in gselim!\n");
-                  }
+                  (void) err;
+
                   /*------------------------------------------------
                    * Copy solution from local storage.
                    *----------------------------------------------*/
@@ -1170,4 +1166,3 @@ hypre_NodeRelaxSetTempVec( void                 *relax_vdata,
 
    return hypre_error_flag;
 }
-
