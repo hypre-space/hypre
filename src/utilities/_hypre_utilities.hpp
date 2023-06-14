@@ -239,6 +239,7 @@ using namespace thrust::placeholders;
 #endif
 #if defined(HYPRE_USING_ONEMKLBLAS)
 #include <oneapi/mkl/blas.hpp>
+#include <oneapi/mkl/lapack.hpp>
 #endif
 #if defined(HYPRE_USING_ONEMKLRAND)
 #include <oneapi/mkl/rng.hpp>
@@ -1738,7 +1739,7 @@ struct is_negative
 {
    is_negative() {}
 
-   constexpr bool operator()(const T &x) const { return (x < 0); }
+   constexpr bool operator()(const T &x = T()) const { return (x < 0); }
 };
 
 template<typename T>
@@ -1746,7 +1747,7 @@ struct is_positive
 {
    is_positive() {}
 
-   constexpr bool operator()(const T &x) const { return (x > 0); }
+   constexpr bool operator()(const T &x = T()) const { return (x > 0); }
 };
 
 template<typename T>
@@ -1754,14 +1755,14 @@ struct is_nonnegative
 {
    is_nonnegative() {}
 
-   constexpr bool operator()(const T &x) const { return (x >= 0); }
+   constexpr bool operator()(const T &x = T()) const { return (x >= 0); }
 };
 
 template<typename T>
 struct in_range
 {
    T low, high;
-   in_range(T low_, T high_) { low = low_; high = high_; }
+   in_range(T low_ = T(), T high_ = T()) { low = low_; high = high_; }
 
    constexpr bool operator()(const T &x) const { return (x >= low && x <= high); }
 };
@@ -1770,7 +1771,7 @@ template<typename T>
 struct out_of_range
 {
    T low, high;
-   out_of_range(T low_, T high_) { low = low_; high = high_; }
+   out_of_range(T low_ = T(), T high_ = T()) { low = low_; high = high_; }
 
    constexpr bool operator()(const T &x) const { return (x < low || x > high); }
 };
@@ -1779,7 +1780,7 @@ template<typename T>
 struct less_than
 {
    T val;
-   less_than(T val_) { val = val_; }
+   less_than(T val_ = T()) { val = val_; }
 
    constexpr bool operator()(const T &x) const { return (x < val); }
 };
@@ -1788,7 +1789,7 @@ template<typename T>
 struct modulo
 {
    T val;
-   modulo(T val_) { val = val_; }
+   modulo(T val_ = T()) { val = val_; }
 
    constexpr T operator()(const T &x) const { return (x % val); }
 };
@@ -1797,7 +1798,7 @@ template<typename T>
 struct equal
 {
    T val;
-   equal(T val_) { val = val_; }
+   equal(T val_ = T()) { val = val_; }
 
    constexpr bool operator()(const T &x) const { return (x == val); }
 };
@@ -1805,7 +1806,13 @@ struct equal
 template<typename T1, typename T2>
 struct type_cast
 {
-   constexpr T2 operator()(const T1 &x) const { return (T2) x; }
+   constexpr T2 operator()(const T1 &x = T1()) const { return (T2) x; }
+};
+
+template<typename T>
+struct absolute_value
+{
+   constexpr T operator()(const T &x) const { return x < T(0) ? -x : x; }
 };
 
 template<typename... T>

@@ -82,7 +82,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
    hypre_ParCSRMatrix  *A_FF = NULL;
    hypre_ParCSRMatrix  *A_FC = NULL;
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined (HYPRE_USING_GPU)
    hypre_ParCSRMatrix  *A_CF = NULL;
    hypre_ParCSRMatrix  *A_CC = NULL;
 #endif
@@ -1024,7 +1024,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          if (level_smooth_type[lev] == 0 || level_smooth_type[lev] == 1)
          {
             /* TODO (VPM): move this to hypre_MGRBlockRelaxSetup and change its declaration */
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined (HYPRE_USING_GPU)
             if (exec == HYPRE_EXEC_DEVICE)
             {
                if (!B_array[lev])
@@ -1199,7 +1199,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       if (interp_type[lev] == 12 && (mgr_data -> num_relax_sweeps)[lev] > 0)
       {
          /* TODO: refactor the following block (VPM) */
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined (HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             hypre_ParCSRMatrixBlockDiagMatrixDevice(A_FF, block_jacobi_bsize,
@@ -1355,7 +1355,7 @@ hypre_MGRSetup( void               *mgr_vdata,
             hypre_GpuProfilingPushRange(region_name);
             HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
 
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+#if defined (HYPRE_USING_GPU)
             if (exec == HYPRE_EXEC_DEVICE)
             {
                hypre_ParCSRMatrixGenerateCCCFDevice(RAP_ptr, CF_marker,
@@ -1448,7 +1448,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          {
             hypre_ParCSRMatrixTruncate(RAP_ptr, truncate_cg_threshold, 0, 0, 0);
          }
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined (HYPRE_USING_GPU)
          else
          {
             hypre_ParCSRMatrixDropSmallEntriesDevice(RAP_ptr, truncate_cg_threshold, -1);
@@ -1550,19 +1550,14 @@ hypre_MGRSetup( void               *mgr_vdata,
          hypre_ParPrintf(comm, "Lev = %d, proc = %d - SetupAFF: %f\n", lev, my_id, wall_time);
 #endif
 
-         /* TODO: refactor this block. Add hypre_IntArrayScale (VPM) */
-#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
-         hypre_IntArray *F_marker = hypre_IntArrayCreate(nloc);
-         hypre_IntArrayInitialize(F_marker);
+         /* TODO: refactor this block (VPM) */
+#if defined (HYPRE_USING_GPU)
+         hypre_ParCSRMatrix  *P_FF_ptr;
+         hypre_IntArray      *F_marker = hypre_IntArrayCloneDeep(CF_marker_array[lev]);
 
-         HYPRE_Int *F_marker_data = hypre_IntArrayData(F_marker);
-         for (j = 0; j < nloc; j++)
-         {
-            F_marker_data[j] = -CF_marker[j];
-         }
-
-         hypre_ParCSRMatrix *P_FF_ptr;
-         hypre_MGRBuildPDevice(A_array[lev], F_marker_data, row_starts_fpts, 0, &P_FF_ptr);
+         hypre_IntArrayNegate(F_marker);
+         hypre_MGRBuildPDevice(A_array[lev], hypre_IntArrayData(F_marker),
+                               row_starts_fpts, 0, &P_FF_ptr);
          P_FF_array[lev] = P_FF_ptr;
 
          hypre_IntArrayDestroy(F_marker);
@@ -1631,6 +1626,13 @@ hypre_MGRSetup( void               *mgr_vdata,
        * skip if we reduce the reserved C-points before the coarse grid solve */
       if (mgr_data -> lvl_to_keep_cpoints == 0)
       {
+         memory_location = hypre_IntArrayMemoryLocation(CF_marker_array[lev]);
+         if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE)
+         {
+            hypre_IntArrayMigrate(CF_marker_array[lev], HYPRE_MEMORY_HOST);
+         }
+         CF_marker = hypre_IntArrayData(CF_marker_array[lev]);
+
          for (i = 0; i < reserved_coarse_size; i++)
          {
             CF_marker[reserved_Cpoint_local_indexes[i]] = S_CMRK;
@@ -1652,6 +1654,11 @@ hypre_MGRSetup( void               *mgr_vdata,
                /* reset modified CF marker array indexes */
                CF_marker[i] = CMRK;
             }
+         }
+
+         if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE)
+         {
+            hypre_IntArrayMigrate(CF_marker_array[lev], HYPRE_MEMORY_DEVICE);
          }
       }
 

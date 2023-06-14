@@ -34,7 +34,7 @@ hypre_spgemm_hash_insert_symbl(
    HYPRE_Int old = -1;
 
 #if defined(HYPRE_USING_HIP) && (HIP_VERSION == 50422804)
-/* VPM: see https://github.com/hypre-space/hypre/issues/875 */
+   /* VPM: see https://github.com/hypre-space/hypre/issues/875 */
 #pragma unroll 8
 #else
 #pragma unroll UNROLL_FACTOR
@@ -394,8 +394,8 @@ hypre_spgemm_symbolic( hypre_DeviceItem             &item,
          }
          else
          {
-            failed = (char) group_reduce_sum<hypre_int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(item,
-                                                                                          (hypre_int) failed,
+            failed = (char) group_reduce_sum<HYPRE_Int, NUM_GROUPS_PER_BLOCK, GROUP_SIZE>(item,
+                                                                                          (HYPRE_Int) failed,
                                                                                           s_HashKeys);
          }
       }

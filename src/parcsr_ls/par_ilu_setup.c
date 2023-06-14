@@ -95,7 +95,8 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Int             num_procs, my_id;
 
 #if defined (HYPRE_USING_GPU)
-   HYPRE_ExecutionPolicy exec                 = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
+   HYPRE_ExecutionPolicy exec                 = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(
+                                                                        A));
 
    /* VPM: Placeholder check to avoid -Wunused-variable warning. TODO: remove this */
    if (exec != HYPRE_EXEC_DEVICE && exec != HYPRE_EXEC_HOST)
@@ -407,7 +408,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 
                /* GMRES + hypre_iluk() */
                hypre_ILUSetupILUDevice(1, matA, fill_level, NULL, perm, perm,
-                                        n, nLU, &matBLU_d, &matS, &matE_d, &matF_d, 1);
+                                       n, nLU, &matBLU_d, &matS, &matE_d, &matF_d, 1);
             }
          }
          else
