@@ -343,6 +343,10 @@ HYPRE_Initialize(void)
    hypre_UmpireInit(_hypre_handle);
 #endif
 
+#if defined(HYPRE_USING_MAGMA)
+   hypre_MagmaInitialize();
+#endif
+
    /* Update library state */
    hypre_SetInitialized();
 
@@ -366,6 +370,10 @@ HYPRE_Finalize(void)
 
 #if defined(HYPRE_USING_UMPIRE)
    hypre_UmpireFinalize(_hypre_handle);
+#endif
+
+#if defined(HYPRE_USING_MAGMA)
+   hypre_MagmaFinalize();
 #endif
 
 #if defined(HYPRE_USING_SYCL)
