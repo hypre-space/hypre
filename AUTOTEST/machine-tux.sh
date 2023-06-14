@@ -144,7 +144,7 @@ RO="-ams -ij-mixed -sstruct-mixed -struct -lobpcg-mixed"
 ./renametest.sh basic $output_dir/basic--enable-mixedint
 
 co="--enable-debug --with-print-errors"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -error -rt -valgrind
 ./renametest.sh basic $output_dir/basic--valgrind
 
 # CMake build and run tests
