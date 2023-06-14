@@ -1436,6 +1436,7 @@ HYPRE_Int hypre_AMESetAMSSolver ( void *esolver, void *ams_solver );
 HYPRE_Int hypre_AMESetMassMatrix ( void *esolver, hypre_ParCSRMatrix *M );
 HYPRE_Int hypre_AMESetBlockSize ( void *esolver, HYPRE_Int block_size );
 HYPRE_Int hypre_AMESetMaxIter ( void *esolver, HYPRE_Int maxit );
+HYPRE_Int hypre_AMESetMaxPCGIter ( void *esolver, HYPRE_Int maxit );
 HYPRE_Int hypre_AMESetTol ( void *esolver, HYPRE_Real tol );
 HYPRE_Int hypre_AMESetRTol ( void *esolver, HYPRE_Real tol );
 HYPRE_Int hypre_AMESetPrintLevel ( void *esolver, HYPRE_Int print_level );
@@ -1707,6 +1708,7 @@ HYPRE_Int HYPRE_AMESetAMSSolver ( HYPRE_Solver esolver, HYPRE_Solver ams_solver 
 HYPRE_Int HYPRE_AMESetMassMatrix ( HYPRE_Solver esolver, HYPRE_ParCSRMatrix M );
 HYPRE_Int HYPRE_AMESetBlockSize ( HYPRE_Solver esolver, HYPRE_Int block_size );
 HYPRE_Int HYPRE_AMESetMaxIter ( HYPRE_Solver esolver, HYPRE_Int maxit );
+HYPRE_Int HYPRE_AMESetMaxPCGIter ( HYPRE_Solver esolver, HYPRE_Int maxit );
 HYPRE_Int HYPRE_AMESetTol ( HYPRE_Solver esolver, HYPRE_Real tol );
 HYPRE_Int HYPRE_AMESetRTol ( HYPRE_Solver esolver, HYPRE_Real tol );
 HYPRE_Int HYPRE_AMESetPrintLevel ( HYPRE_Solver esolver, HYPRE_Int print_level );
