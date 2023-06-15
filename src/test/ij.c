@@ -218,6 +218,7 @@ main( hypre_int argc,
    HYPRE_Int           test_ij = 0;
    HYPRE_Int           test_multivec = 0;
    HYPRE_Int           test_scaling = 0;
+   HYPRE_Int           test_error = 0;
 
    const HYPRE_Real    dt_inf = DT_INF;
    HYPRE_Real          dt = dt_inf;
@@ -630,6 +631,8 @@ main( hypre_int argc,
    size_t umpire_host_pool_size   = 4294967296; // 4 GiB
 #endif
 
+   HYPRE_SetPrintErrorMode(1);
+
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
@@ -744,6 +747,11 @@ main( hypre_int argc,
       {
          arg_index++;
          test_scaling = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-test_error") == 0 )
+      {
+         arg_index++;
+         test_error = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-funcsfromonefile") == 0 )
       {
@@ -8869,6 +8877,24 @@ final:
    /*
       hypre_FinalizeMemoryDebug();
    */
+
+   if (test_error == 1)
+   {
+      /* Test GetErrorMessages() */
+      char      *buffer, *msg;
+      HYPRE_Int  bufsz;
+      HYPRE_GetErrorMessages(&buffer, &bufsz);
+      hypre_MPI_Barrier(comm);
+      for (msg = buffer; msg < (buffer + bufsz); msg += strlen(msg) + 1)
+      {
+         hypre_fprintf(stderr, "%d: %s", myid, msg);
+      }
+      hypre_TFree(buffer, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      HYPRE_PrintErrorMessages(comm);
+   }
 
    /* Finalize Hypre */
    HYPRE_Finalize();
