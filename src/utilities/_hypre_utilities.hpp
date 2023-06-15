@@ -112,6 +112,14 @@ using hypre_DeviceItem = void*;
 #define CUB_IGNORE_DEPRECATED_CPP_DIALECT
 #endif
 
+#ifndef CUSPARSE_VERSION
+#if defined(CUSPARSE_VER_MAJOR) && defined(CUSPARSE_VER_MINOR) && defined(CUSPARSE_VER_PATCH)
+#define CUSPARSE_VERSION (CUSPARSE_VER_MAJOR * 1000 + CUSPARSE_VER_MINOR *  100 + CUSPARSE_VER_PATCH)
+#else
+#define CUSPARSE_VERSION CUDA_VERSION
+#endif
+#endif
+
 #define CUSPARSE_NEWAPI_VERSION 11000
 #define CUSPARSE_NEWSPMM_VERSION 11401
 #define CUDA_MALLOCASYNC_VERSION 11020
@@ -537,6 +545,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
+#if CUSPARSE_VERSION >= 10300
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
    cusparseStatus_t err = call;                                                              \
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
@@ -544,6 +553,15 @@ using hypre_DeviceItem = sycl::nd_item<3>;
             err, cusparseGetErrorString(err), __FILE__, __LINE__);                           \
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
+#else
+#define HYPRE_CUSPARSE_CALL(call) do {                                                       \
+   cusparseStatus_t err = call;                                                              \
+   if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
+      printf("CUSPARSE ERROR (code = %d) at %s:%d\n",                                        \
+            err, __FILE__, __LINE__);                                                        \
+      hypre_assert(0); exit(1);                                                              \
+   } } while(0)
+#endif
 
 #define HYPRE_ROCSPARSE_CALL(call) do {                                                      \
    rocsparse_status err = call;                                                              \
@@ -1923,7 +1941,9 @@ void hypre_DeviceDataCubCachingAllocatorDestroy(hypre_DeviceData *data);
 
 cudaDataType hypre_HYPREComplexToCudaDataType();
 
+#if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
 cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
+#endif
 
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
