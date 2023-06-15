@@ -529,7 +529,7 @@ void init_mpi_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
   t1 = hypre_MPI_Wtime();
   if (!bj) {
       HYPRE_Int *interiorNodes, *bdryNodes;
-      HYPRE_Int interiorCount, bdryCount;
+      HYPRE_Int interiorCount = 0, bdryCount;
       HYPRE_Int *o2n = s->o2n_col, idx;
       HYPRE_Int i;
 

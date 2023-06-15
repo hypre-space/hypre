@@ -1504,7 +1504,7 @@ void profileMat(Mat_dh A)
   HYPRE_Int m;
   HYPRE_Int i, j;
   HYPRE_Int *work1=NULL;
-  HYPRE_Real *work2;
+  HYPRE_Real *work2=NULL;
   bool isStructurallySymmetric = true;
   bool isNumericallySymmetric = true;
   bool is_Triangular = false;
