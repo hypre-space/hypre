@@ -1132,7 +1132,6 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                hypre_BoxGetSize(int_box, loop_size);
 
 #if defined(HYPRE_USING_GPU)
-               if ( hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE )
                {
                   hypre_assert(ndim <= 3);
 
@@ -1197,8 +1196,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 #undef DEVICE_VAR
 #define DEVICE_VAR
                }
-               else
-#endif
+#else
                {
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       box,       start, stride, mi,
@@ -1225,6 +1223,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                   }
                   hypre_BoxLoop2End(mi, vi);
                }
+#endif
             } /* end loop through boxman to entries */
 
             hypre_TFree(boxman_to_entries, HYPRE_MEMORY_HOST);

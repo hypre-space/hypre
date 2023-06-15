@@ -779,7 +779,9 @@ hypre_PCGSolve( void *pcg_vdata,
 
    if (i >= max_iter && (i_prod / bi_prod) >= eps && eps > 0 && hybrid != -1)
    {
-      hypre_error_w_msg(HYPRE_ERROR_CONV, "Reached max iterations in PCG before convergence");
+      char msg[1024];
+      hypre_sprintf(msg, "Reached max iterations %d in PCG before convergence", max_iter);
+      hypre_error_w_msg(HYPRE_ERROR_CONV, msg);
    }
 
    (pcg_data -> num_iterations) = i;
