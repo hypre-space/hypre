@@ -6,7 +6,6 @@
  ******************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
-#include "Common.h"
 #include "_hypre_blas.h"
 #include "_hypre_lapack.h"
 
@@ -545,6 +544,17 @@ hypre_GaussElimAllSolve(hypre_ParAMGData *amg_data,
    /* Local variables */
    HYPRE_Int             one_i = 1;
    HYPRE_Int             info = 0;
+
+   /*-----------------------------------------------------------------
+    *  Sanity checks
+    *-----------------------------------------------------------------*/
+
+   /* Check for relaxation type */
+   if (!(relax_type == 19 || relax_type == 98))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Wrong relaxation type!");
+      return hypre_error_flag;
+   }
 
    /*-----------------------------------------------------------------
     *  Compute uvec = U^{-1} L^{-1} fvec
