@@ -401,14 +401,15 @@ HYPRE_Int hypre_IntArrayCountHost( hypre_IntArray *v, HYPRE_Int value,
 HYPRE_Int hypre_IntArrayCount( hypre_IntArray *v, HYPRE_Int value,
                                HYPRE_Int *num_values_ptr );
 HYPRE_Int hypre_IntArrayInverseMapping( hypre_IntArray *v, hypre_IntArray **w_ptr );
+HYPRE_Int hypre_IntArrayNegate( hypre_IntArray *v );
 
 /* int_array_device.c */
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v, HYPRE_Int value );
-HYPRE_Int hypre_IntArrayReverseMappingDevice( hypre_IntArray *v, hypre_IntArray *w );
 HYPRE_Int hypre_IntArrayCountDevice ( hypre_IntArray *v, HYPRE_Int value,
                                       HYPRE_Int *num_values_ptr );
 HYPRE_Int hypre_IntArrayInverseMappingDevice( hypre_IntArray *v, hypre_IntArray *w );
+HYPRE_Int hypre_IntArrayNegateDevice( hypre_IntArray *v );
 #endif
 
 /* memory_tracker.c */
@@ -428,4 +429,10 @@ HYPRE_Int hypre_PrintMemoryTracker( size_t *totl_bytes_o, size_t *peak_bytes_o,
                                     size_t *curr_bytes_o, HYPRE_Int do_print, const char *fname );
 HYPRE_Int hypre_MemoryTrackerSetPrint(HYPRE_Int do_print);
 HYPRE_Int hypre_MemoryTrackerSetFileName(const char *file_name);
+#endif
+
+/* magma.c */
+#if defined(HYPRE_USING_MAGMA)
+HYPRE_Int hypre_MagmaInitialize(void);
+HYPRE_Int hypre_MagmaFinalize(void);
 #endif

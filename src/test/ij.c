@@ -29,6 +29,9 @@
 #if defined (HYPRE_USING_CUDA)
 #include <cuda_profiler_api.h>
 #endif
+#if defined(HYPRE_USING_CUSPARSE)
+#include <cusparse.h>
+#endif
 
 /* begin lobpcg */
 
@@ -213,6 +216,7 @@ main( hypre_int argc,
    HYPRE_Int           test_ij = 0;
    HYPRE_Int           test_multivec = 0;
    HYPRE_Int           test_scaling = 0;
+   HYPRE_Int           test_error = 0;
 
    const HYPRE_Real    dt_inf = DT_INF;
    HYPRE_Real          dt = dt_inf;
@@ -290,7 +294,12 @@ main( hypre_int argc,
    HYPRE_Real cheby_fraction = .3;
 
 #if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= 11000
+   /* CUSPARSE_SPMV_ALG_DEFAULT doesn't provide deterministic results */
+   HYPRE_Int  spmv_use_vendor = 0;
+#else
    HYPRE_Int  spmv_use_vendor = 1;
+#endif
    HYPRE_Int  use_curand = 1;
 #if defined(HYPRE_USING_CUDA)
    HYPRE_Int  spgemm_use_vendor = 0;
@@ -611,6 +620,8 @@ main( hypre_int argc,
    size_t mempool_max_cached_bytes = 2000LL * 1024 * 1024;
 #endif
 
+   HYPRE_SetPrintErrorMode(1);
+
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
@@ -719,6 +730,11 @@ main( hypre_int argc,
       {
          arg_index++;
          test_scaling = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-test_error") == 0 )
+      {
+         arg_index++;
+         test_error = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-funcsfromonefile") == 0 )
       {
@@ -8718,6 +8734,24 @@ final:
    /*
       hypre_FinalizeMemoryDebug();
    */
+
+   if (test_error == 1)
+   {
+      /* Test GetErrorMessages() */
+      char      *buffer, *msg;
+      HYPRE_Int  bufsz;
+      HYPRE_GetErrorMessages(&buffer, &bufsz);
+      hypre_MPI_Barrier(comm);
+      for (msg = buffer; msg < (buffer + bufsz); msg += strlen(msg) + 1)
+      {
+         hypre_fprintf(stderr, "%d: %s", myid, msg);
+      }
+      hypre_TFree(buffer, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      HYPRE_PrintErrorMessages(comm);
+   }
 
    /* Finalize Hypre */
    HYPRE_Finalize();

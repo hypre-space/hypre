@@ -55,6 +55,7 @@ hypre_GetMemoryLocationName(hypre_MemoryLocation  memory_location,
 /*--------------------------------------------------------------------------
  * hypre_OutOfMemory
  *--------------------------------------------------------------------------*/
+
 static inline void
 hypre_OutOfMemory(size_t size)
 {
@@ -74,8 +75,7 @@ hypre_WrongMemoryLocation(void)
 void
 hypre_CheckMemoryLocation(void *ptr, hypre_MemoryLocation location)
 {
-#if defined(HYPRE_DEBUG)
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_DEBUG) && defined(HYPRE_USING_GPU)
    if (!ptr)
    {
       return;
@@ -86,7 +86,6 @@ hypre_CheckMemoryLocation(void *ptr, hypre_MemoryLocation location)
    /* do not use hypre_assert, which has alloc and free;
     * will create an endless loop otherwise */
    assert(location == location_ptr);
-#endif
 #endif
 }
 

@@ -658,6 +658,9 @@ DSUPERLU_LIBS
 DSUPERLU_INCLUDE
 SUPERLU_LIBS
 SUPERLU_INCLUDE
+HYPRE_MAGMA_LIB
+HYPRE_MAGMA_INCLUDE
+HYPRE_MAGMA_LIB_DIR
 CALIPER_LIBS
 CALIPER_INCLUDE
 HYPRE_SYCL_LIBS
@@ -812,6 +815,7 @@ enable_fortran
 enable_unified_memory
 enable_device_memory_pool
 enable_device_malloc_async
+enable_thrust_nosync
 enable_gpu_profiling
 enable_gpu_aware_mpi
 with_cxxstandard
@@ -893,6 +897,11 @@ with_umpire_include
 with_umpire_lib
 with_umpire_libs
 with_umpire_lib_dirs
+with_magma
+with_magma_include
+with_magma_lib
+with_magma_libs
+with_magma_lib_dirs
 with_caliper
 with_caliper_include
 with_caliper_lib
@@ -1561,6 +1570,7 @@ Optional Features:
                           Use device pooling allocator (default is NO).
   --enable-device-malloc-async
                           Use device async malloc (default is NO).
+  --enable-thrust-nosync  Use thrust par_nosync policy (default is NO).
   --enable-gpu-profiling  Use NVTX on CUDA, rocTX on HIP (default is NO).
   --enable-gpu-aware-mpi  Use GPU memory aware MPI
   --enable-rocsparse      Use rocSPARSE (default is YES with HIP, otherwise
@@ -1783,6 +1793,25 @@ Optional Packages:
                           --with-umpire-libs, e.g "usr/lib /usr/local/lib".
                           The options --with-umpire-libs and
                           --with-umpire-dirs must be used together.
+  --with-magma            Use MAGMA (Matrix Algebra for GPUs and Multicore
+                          Architectures).
+  --with-magma-include=DIR
+                          User specifies that MAGMA headers are in DIR. The
+                          options --with-magma-include --with-magma-libs and
+                          --with-magma-dirs must be used together.
+  --with-magma-lib=LIBS   LIBS is space-separated linkable list (enclosed in
+                          quotes) of libraries needed for MAGMA. OK to use -L
+                          and -l flags in the list
+  --with-magma-libs=LIBS  LIBS is space-separated list (enclosed in quotes) of
+                          libraries needed for MAGMA (base name only). The
+                          options --with-magma-libs and --with-magma-lib-dirs
+                          must be used together.
+  --with-magma-lib-dirs=DIRS
+                          DIRS is space-separated list (enclosed in quotes) of
+                          directories containing the libraries specified by
+                          --with-magma-libs, e.g "usr/lib /usr/local/lib". The
+                          options --with-magma-libs and --with-magma-lib-dirs
+                          must be used together.
   --with-caliper          Use Caliper instrumentation (default is NO).
   --with-caliper-include=DIR
                           Directory where Caliper is installed.
@@ -3330,6 +3359,7 @@ hypre_using_curand=no
 hypre_using_cusolver=no
 hypre_using_device_pool=no
 hypre_using_device_malloc_async=no
+hypre_using_thrust_nosync=no
 hypre_using_umpire=no
 hypre_using_umpire_host=no
 hypre_using_umpire_device=no
@@ -3348,6 +3378,12 @@ hypre_using_memory_tracker=no
 hypre_test_using_host=no
 
 hypre_cxxstd=11
+
+hypre_using_magma=no
+hypre_user_gave_magma_inc=no
+hypre_user_gave_magma_lib=no
+hypre_user_gave_magma_libs=no
+hypre_user_gave_magma_lib_dirs=no
 
 hypre_using_hip=no
 hypre_using_rocsparse=no
@@ -3699,6 +3735,20 @@ then :
  esac
 else $as_nop
   hypre_using_device_malloc_async=no
+
+fi
+
+
+# Check whether --enable-thrust-nosync was given.
+if test ${enable_thrust_nosync+y}
+then :
+  enableval=$enable_thrust_nosync; case "${enableval}" in
+    yes) hypre_using_thrust_nosync=yes ;;
+    no)  hypre_using_thrust_nosync=no ;;
+    *)   hypre_using_thrust_nosync=no ;;
+ esac
+else $as_nop
+  hypre_using_thrust_nosync=no
 
 fi
 
@@ -5111,6 +5161,77 @@ then :
     HYPRE_UMPIRE_LIB_DIR="-L$umpire_lib_dir $HYPRE_UMPIRE_LIB_DIR"
  done;
 
+
+fi
+
+
+
+
+# Check whether --with-magma was given.
+if test ${with_magma+y}
+then :
+  withval=$with_magma; case "${withval}" in
+    yes) hypre_using_magma=yes;;
+    no)  hypre_using_magma=no ;;
+    *)   hypre_using_magma=no ;;
+ esac
+else $as_nop
+  hypre_using_magma=no
+
+fi
+
+
+if test "x$with_magma" = "xyes"
+then :
+
+printf "%s\n" "#define HYPRE_USING_MAGMA 1" >>confdefs.h
+
+fi
+
+
+# Check whether --with-magma-include was given.
+if test ${with_magma_include+y}
+then :
+  withval=$with_magma_include; for magma_dir in $withval; do
+    HYPRE_MAGMA_INCLUDE="-I$magma_dir $HYPRE_MAGMA_INCLUDE"
+done;
+hypre_user_gave_magma_inc=yes
+
+fi
+
+
+
+# Check whether --with-magma-lib was given.
+if test ${with_magma_lib+y}
+then :
+  withval=$with_magma_lib; for magma_lib in $withval; do
+    HYPRE_MAGMA_LIB="$magma_lib $HYPRE_MAGMA_LIB"
+ done;
+hypre_user_gave_magma_lib=yes
+
+fi
+
+
+
+# Check whether --with-magma-libs was given.
+if test ${with_magma_libs+y}
+then :
+  withval=$with_magma_libs; for magma_lib in $withval; do
+    HYPRE_MAGMA_LIB="-l$magma_lib $HYPRE_MAGMA_LIB"
+ done;
+hypre_user_gave_magma_libs=yes
+
+fi
+
+
+
+# Check whether --with-magma-lib-dirs was given.
+if test ${with_magma_lib_dirs+y}
+then :
+  withval=$with_magma_lib_dirs; for magma_lib_dir in $withval; do
+    HYPRE_MAGMA_LIB_DIR="-L$magma_lib_dir $HYPRE_MAGMA_LIB_DIR"
+ done;
+hypre_user_gave_magma_lib_dirs=yes
 
 fi
 
@@ -10077,6 +10198,41 @@ printf "%s\n" "$as_me: WARNING: ************************************************
    fi
 fi
 
+if test "x$hypre_using_magma" = "xyes"
+then
+   if test "x$hypre_user_gave_magma_inc" != "xyes"
+   then
+       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: *******************************************************" >&5
+printf "%s\n" "$as_me: WARNING: *******************************************************" >&2;}
+       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Configuring with --with-magma=yes without providing" >&5
+printf "%s\n" "$as_me: WARNING: Configuring with --with-magma=yes without providing" >&2;}
+       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: --with-magma-include=<path-to-magma-include>." >&5
+printf "%s\n" "$as_me: WARNING: --with-magma-include=<path-to-magma-include>." >&2;}
+       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Using default user include path." >&5
+printf "%s\n" "$as_me: WARNING: Using default user include path." >&2;}
+       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: NOTE: MAGMA may not work." >&5
+printf "%s\n" "$as_me: WARNING: NOTE: MAGMA may not work." >&2;}
+       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: *******************************************************" >&5
+printf "%s\n" "$as_me: WARNING: *******************************************************" >&2;}
+   fi
+   if test "x$hypre_user_gave_magma_lib" != "xyes"
+   then
+       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: *******************************************************" >&5
+printf "%s\n" "$as_me: WARNING: *******************************************************" >&2;}
+       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Configuring with --with-magma=yes without providing" >&5
+printf "%s\n" "$as_me: WARNING: Configuring with --with-magma=yes without providing" >&2;}
+       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: --with-magma-lib=<path-to-magma-lib>." >&5
+printf "%s\n" "$as_me: WARNING: --with-magma-lib=<path-to-magma-lib>." >&2;}
+       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Using default user library path." >&5
+printf "%s\n" "$as_me: WARNING: Using default user library path." >&2;}
+       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: NOTE: MAGMA may not work." >&5
+printf "%s\n" "$as_me: WARNING: NOTE: MAGMA may not work." >&2;}
+       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: *******************************************************" >&5
+printf "%s\n" "$as_me: WARNING: *******************************************************" >&2;}
+   fi
+fi
+
+
 if test "x$hypre_using_um" = "xyes"
 then
    if test "x$hypre_using_cuda" != "xyes" && test "x$hypre_using_device_openmp" != "xyes" && test "x$hypre_using_hip" != "xyes" && test "x$hypre_using_sycl" != "xyes"
@@ -10084,6 +10240,7 @@ then
       as_fn_error $? "Asked for unified memory, but not using CUDA, HIP, SYCL, or device OpenMP!" "$LINENO" 5
    fi
 fi
+
 
 if test "$hypre_using_cuda" = "yes"
 then
@@ -10673,6 +10830,13 @@ printf "%s\n" "#define HYPRE_USING_DEVICE_MALLOC_ASYNC 1" >>confdefs.h
 
    fi
 
+   if test "$hypre_using_thrust_nosync" = "yes"
+   then
+
+printf "%s\n" "#define HYPRE_USING_THRUST_NOSYNC 1" >>confdefs.h
+
+   fi
+
    if test "x$hypre_using_cuda_streams" = "xyes"
    then
 
@@ -11112,6 +11276,10 @@ printf "%s\n" "#define HYPRE_LINUX 1" >>confdefs.h
          fi
          ;;
    esac
+
+
+
+
 
 
 
