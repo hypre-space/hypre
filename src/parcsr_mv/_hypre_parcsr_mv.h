@@ -1268,3 +1268,4 @@ HYPRE_Int hypre_ParVectorGetValuesDevice(hypre_ParVector *vector, HYPRE_Int num_
 #endif
 
 #endif
+

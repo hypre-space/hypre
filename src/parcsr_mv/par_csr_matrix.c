@@ -1176,7 +1176,7 @@ hypre_ParCSRMatrixGetRow( hypre_ParCSRMatrix  *mat,
                           HYPRE_BigInt       **col_ind,
                           HYPRE_Complex      **values )
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(mat) );
 
    if (exec == HYPRE_EXEC_DEVICE)
