@@ -12,6 +12,7 @@ extern "C" {
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE)
+#if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION
 cusparseSpMatDescr_t hypre_CSRMatrixToCusparseSpMat(const hypre_CSRMatrix *A, HYPRE_Int offset);
 
 cusparseSpMatDescr_t hypre_CSRMatrixToCusparseSpMat_core( HYPRE_Int n, HYPRE_Int m,
@@ -26,6 +27,7 @@ cusparseDnMatDescr_t hypre_VectorToCusparseDnMat_core(HYPRE_Complex *x_data, HYP
                                                       HYPRE_Int ncol, HYPRE_Int order);
 
 cusparseDnMatDescr_t hypre_VectorToCusparseDnMat(const hypre_Vector *x);
+#endif
 
 HYPRE_Int hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
                                               cusparseMatDescr_t descr_A, HYPRE_Int nnzA, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex *d_a,

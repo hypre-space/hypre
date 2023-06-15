@@ -1392,7 +1392,7 @@ HYPRE_Int hypre_AmgCGCBoundaryFix (hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker,
    HYPRE_Int *S_offd_j = NULL;
    HYPRE_Int num_variables = hypre_CSRMatrixNumRows (S_diag);
    HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols (S_offd);
-   HYPRE_Int added_cpts = 0;
+   //HYPRE_Int added_cpts = 0;
    MPI_Comm comm = hypre_ParCSRMatrixComm(S);
 
    hypre_MPI_Comm_rank (comm, &mpirank);
@@ -1419,8 +1419,8 @@ HYPRE_Int hypre_AmgCGCBoundaryFix (hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker,
       CF_marker[i] = C_PT;
 #if 0
       hypre_printf ("Processor %d: added point %d in hypre_AmgCGCBoundaryFix\n", mpirank, i);
-#endif
       added_cpts++;
+#endif
    }
 #if 0
    if (added_cpts) { hypre_printf ("Processor %d: added %d points in hypre_AmgCGCBoundaryFix\n", mpirank, added_cpts); }
