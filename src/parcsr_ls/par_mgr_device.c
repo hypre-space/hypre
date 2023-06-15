@@ -844,7 +844,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
 #if defined(HYPRE_USING_CUBLAS)
       HYPRE_CUBLAS_CALL(hypre_cublas_getriBatched(hypre_HandleCublasHandle(hypre_handle()),
                                                   blk_size,
-                                                  tmpdiag_aop,
+                                                  (const HYPRE_Real **) tmpdiag_aop,
                                                   blk_size,
                                                   pivots,
                                                   diag_aop,
