@@ -151,6 +151,7 @@ co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_
 
 rtol="1e-2"
 atol="1e-6"
+mo="-j test"
 
 # CUDA 12.0 + GCC with UM in debug mode, thrust nosync [ij, ams, struct, sstruct]
 module -q load gcc/8.3.1
