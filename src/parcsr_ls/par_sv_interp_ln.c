@@ -2150,7 +2150,8 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
          HYPRE_Real value, lost_value, q_dist_value = 0.0;
          HYPRE_Int q_count_k, num_lost, p_count_tot;
          HYPRE_Int lost_counter_diag, lost_counter_offd, j_counter;
-         HYPRE_Int new_num_q, new_j_counter, new_diag_pos, new_offd_pos;
+         HYPRE_Int new_j_counter, new_diag_pos, new_offd_pos;
+         //HYPRE_Int new_num_q;
          HYPRE_Int i_qmax, lost_counter_q;
          /* loop through the smooth vectors - we have to do the q
             with each smooth vec separately
@@ -2344,7 +2345,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
                   j_counter++;
                }
 
-               new_num_q = q_count_k;
+               //new_num_q = q_count_k;
                num_lost = q_count_k - loop_q_max;
 
                if (num_lost > 0)
@@ -2384,7 +2385,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
                         {
                            lost_counter_offd++;
                         }
-                        new_num_q--;
+                        //new_num_q--;
 
                         /* technically only need to do this the last time */
                         q_dist_value = lost_value / loop_q_max;

@@ -21,6 +21,30 @@ extern "C" {
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#ifndef hypre_STATE_HEADER
+#define hypre_STATE_HEADER
+
+/*--------------------------------------------------------------------------
+ * hypre library state
+ *--------------------------------------------------------------------------*/
+
+typedef enum hypre_State_enum
+{
+   HYPRE_STATE_NONE        = 0,
+   HYPRE_STATE_INITIALIZED = 1,
+   HYPRE_STATE_FINALIZED   = 2
+} hypre_State;
+
+extern hypre_State hypre__global_state;
+
+#endif /* hypre_STATE_HEADER */
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /******************************************************************************
  *
  * General structures and values
@@ -31,6 +55,10 @@ extern "C" {
 #define hypre_GENERAL_HEADER
 
 #include <math.h>
+
+/*--------------------------------------------------------------------------
+ * typedefs
+ *--------------------------------------------------------------------------*/
 
 /* This allows us to consistently avoid 'int' throughout hypre */
 typedef int                    hypre_int;
@@ -166,7 +194,46 @@ typedef double                 hypre_double;
 #endif
 
 #endif /* hypre_GENERAL_HEADER */
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
+#ifndef HYPRE_MAGMA_HEADER
+#define HYPRE_MAGMA_HEADER
+
+#include "HYPRE_config.h"
+
+#if defined(HYPRE_USING_MAGMA)
+
+#include "error.h"
+
+#ifdef __cplusplus
+extern "C++"
+{
+#endif
+
+#if !defined(MAGMA_GLOBAL)
+#define ADD_
+#endif
+#include <magma_v2.h>
+
+#ifdef __cplusplus
+}
+#endif
+
+#define HYPRE_MAGMA_CALL(call) do {                   \
+   magma_int_t err = call;                            \
+   if (MAGMA_SUCCESS != err) {                        \
+      printf("MAGMA ERROR (code = %d) at %s:%d\n",    \
+            err, __FILE__, __LINE__);                 \
+      hypre_assert(0);                                \
+   } } while(0)
+
+#endif /* HYPRE_USING_MAGMA */
+#endif /* HYPRE_MAGMA_HEADER */
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -185,6 +252,7 @@ HYPRE_Int hypre_ndigits( HYPRE_BigInt number );
 HYPRE_Int hypre_printf( const char *format, ... );
 HYPRE_Int hypre_fprintf( FILE *stream, const char *format, ... );
 HYPRE_Int hypre_sprintf( char *s, const char *format, ... );
+HYPRE_Int hypre_snprintf( char *s, size_t size, const char *format, ...);
 HYPRE_Int hypre_scanf( const char *format, ... );
 HYPRE_Int hypre_fscanf( FILE *stream, const char *format, ... );
 HYPRE_Int hypre_sscanf( char *s, const char *format, ... );
@@ -215,8 +283,18 @@ HYPRE_Int hypre_ParPrintf(MPI_Comm comm, const char *format, ...);
  * Global variable used in hypre error checking
  *--------------------------------------------------------------------------*/
 
-extern HYPRE_Int hypre__global_error;
-#define hypre_error_flag  hypre__global_error
+typedef struct
+{
+   HYPRE_Int  error_flag;
+   HYPRE_Int  print_to_memory;
+   char      *memory;
+   HYPRE_Int  mem_sz;
+   HYPRE_Int  msg_sz;
+
+} hypre_Error;
+
+extern hypre_Error hypre__global_error;
+#define hypre_error_flag  hypre__global_error.error_flag
 
 /*--------------------------------------------------------------------------
  * HYPRE error macros
@@ -1480,16 +1558,22 @@ typedef struct
    HYPRE_Int              hypre_error;
    HYPRE_MemoryLocation   memory_location;
    HYPRE_ExecutionPolicy  default_exec_policy;
+
    /* the device buffers needed to do MPI communication for struct comm */
-   HYPRE_Complex*         struct_comm_recv_buffer;
-   HYPRE_Complex*         struct_comm_send_buffer;
+   HYPRE_Complex         *struct_comm_recv_buffer;
+   HYPRE_Complex         *struct_comm_send_buffer;
    HYPRE_Int              struct_comm_recv_buffer_size;
    HYPRE_Int              struct_comm_send_buffer_size;
+
 #if defined(HYPRE_USING_GPU)
    hypre_DeviceData      *device_data;
-   /* device G-S options */
-   HYPRE_Int              device_gs_method;
+   HYPRE_Int              device_gs_method; /* device G-S options */
 #endif
+
+   /* user malloc/free function pointers */
+   GPUMallocFunc          user_device_malloc;
+   GPUMfreeFunc           user_device_free;
+
 #if defined(HYPRE_USING_UMPIRE)
    char                   umpire_device_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
    char                   umpire_um_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
@@ -1506,18 +1590,21 @@ typedef struct
    HYPRE_Int              own_umpire_pinned_pool;
    umpire_resourcemanager umpire_rm;
 #endif
-   /* user malloc/free function pointers */
-   GPUMallocFunc          user_device_malloc;
-   GPUMfreeFunc           user_device_free;
+
+#if defined(HYPRE_USING_MAGMA)
+   magma_queue_t          magma_queue;
+#endif
 } hypre_Handle;
 
 /* accessor macros to hypre_Handle */
 #define hypre_HandleMemoryLocation(hypre_handle)                 ((hypre_handle) -> memory_location)
 #define hypre_HandleDefaultExecPolicy(hypre_handle)              ((hypre_handle) -> default_exec_policy)
+
 #define hypre_HandleStructCommRecvBuffer(hypre_handle)           ((hypre_handle) -> struct_comm_recv_buffer)
 #define hypre_HandleStructCommSendBuffer(hypre_handle)           ((hypre_handle) -> struct_comm_send_buffer)
 #define hypre_HandleStructCommRecvBufferSize(hypre_handle)       ((hypre_handle) -> struct_comm_recv_buffer_size)
 #define hypre_HandleStructCommSendBufferSize(hypre_handle)       ((hypre_handle) -> struct_comm_send_buffer_size)
+
 #define hypre_HandleDeviceData(hypre_handle)                     ((hypre_handle) -> device_data)
 #define hypre_HandleDeviceGSMethod(hypre_handle)                 ((hypre_handle) -> device_gs_method)
 
@@ -1568,6 +1655,8 @@ typedef struct
 #define hypre_HandleOwnUmpireUMPool(hypre_handle)                ((hypre_handle) -> own_umpire_um_pool)
 #define hypre_HandleOwnUmpireHostPool(hypre_handle)              ((hypre_handle) -> own_umpire_host_pool)
 #define hypre_HandleOwnUmpirePinnedPool(hypre_handle)            ((hypre_handle) -> own_umpire_pinned_pool)
+
+#define hypre_HandleMagmaQueue(hypre_handle)                     ((hypre_handle) -> magma_queue)
 
 #endif
 /******************************************************************************
@@ -1718,6 +1807,12 @@ HYPRE_Complex hypre_csqrt( HYPRE_Complex value );
 #define hypre_cimag(value) 0.0
 #define hypre_csqrt(value) hypre_sqrt(value)
 #endif
+
+/* state.c */
+HYPRE_Int hypre_Initialized( void );
+HYPRE_Int hypre_Finalized( void );
+HYPRE_Int hypre_SetInitialized( void );
+HYPRE_Int hypre_SetFinalized( void );
 
 /* general.c */
 hypre_Handle* hypre_handle(void);
@@ -2075,14 +2170,15 @@ HYPRE_Int hypre_IntArrayCountHost( hypre_IntArray *v, HYPRE_Int value,
 HYPRE_Int hypre_IntArrayCount( hypre_IntArray *v, HYPRE_Int value,
                                HYPRE_Int *num_values_ptr );
 HYPRE_Int hypre_IntArrayInverseMapping( hypre_IntArray *v, hypre_IntArray **w_ptr );
+HYPRE_Int hypre_IntArrayNegate( hypre_IntArray *v );
 
 /* int_array_device.c */
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v, HYPRE_Int value );
-HYPRE_Int hypre_IntArrayReverseMappingDevice( hypre_IntArray *v, hypre_IntArray *w );
 HYPRE_Int hypre_IntArrayCountDevice ( hypre_IntArray *v, HYPRE_Int value,
                                       HYPRE_Int *num_values_ptr );
 HYPRE_Int hypre_IntArrayInverseMappingDevice( hypre_IntArray *v, hypre_IntArray *w );
+HYPRE_Int hypre_IntArrayNegateDevice( hypre_IntArray *v );
 #endif
 
 /* memory_tracker.c */
@@ -2102,6 +2198,12 @@ HYPRE_Int hypre_PrintMemoryTracker( size_t *totl_bytes_o, size_t *peak_bytes_o,
                                     size_t *curr_bytes_o, HYPRE_Int do_print, const char *fname );
 HYPRE_Int hypre_MemoryTrackerSetPrint(HYPRE_Int do_print);
 HYPRE_Int hypre_MemoryTrackerSetFileName(const char *file_name);
+#endif
+
+/* magma.c */
+#if defined(HYPRE_USING_MAGMA)
+HYPRE_Int hypre_MagmaInitialize(void);
+HYPRE_Int hypre_MagmaFinalize(void);
 #endif
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other

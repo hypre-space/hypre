@@ -2989,7 +2989,7 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
 
    HYPRE_Int print_level = hypre_IJMatrixPrintLevel(matrix);
    //HYPRE_Int max_num_threads;
-   HYPRE_Int error_flag = 0;
+   //HYPRE_Int error_flag = 0;
 
    /*HYPRE_Complex *off_proc_data;*/
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -3096,10 +3096,12 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
                if (n > size)
                {
                   hypre_error(HYPRE_ERROR_GENERIC);
+#if 0 /* error_flag is currently not used anywhere */
 #ifdef HYPRE_USING_OPENMP
                   #pragma omp atomic
 #endif
                   error_flag++;
+#endif
                   if (print_level)
                   {
                      hypre_printf (" row %b too long! \n", row);
@@ -3124,10 +3126,12 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
                      if (j_offd == -1)
                      {
                         hypre_error(HYPRE_ERROR_GENERIC);
+#if 0 /* error_flag is currently not used anywhere */
 #ifdef HYPRE_USING_OPENMP
                         #pragma omp atomic
 #endif
                         error_flag++;
+#endif
                         if (print_level)
                         {
                            hypre_printf (" Error, element %b %b does not exist\n",
@@ -3148,10 +3152,12 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
                      if (not_found)
                      {
                         hypre_error(HYPRE_ERROR_GENERIC);
+#if 0 /* error_flag is currently not used anywhere */
 #ifdef HYPRE_USING_OPENMP
                         #pragma omp atomic
 #endif
                         error_flag++;
+#endif
                         if (print_level)
                         {
                            hypre_printf (" Error, element %b %b does not exist\n",
@@ -3168,10 +3174,12 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
                      if (diag_j[pos_diag] != row_local)
                      {
                         hypre_error(HYPRE_ERROR_GENERIC);
+#if 0 /* error_flag is currently not used anywhere */
 #ifdef HYPRE_USING_OPENMP
                         #pragma omp atomic
 #endif
                         error_flag++;
+#endif
                         if (print_level)
                         {
                            hypre_printf (" Error, element %b %b does not exist\n",
@@ -3196,10 +3204,12 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
                      if (not_found)
                      {
                         hypre_error(HYPRE_ERROR_GENERIC);
+#if 0 /* error_flag is currently not used anywhere */
 #ifdef HYPRE_USING_OPENMP
                         #pragma omp atomic
 #endif
                         error_flag++;
+#endif
                         if (print_level)
                         {
                            hypre_printf (" Error, element %b %b does not exist\n",
@@ -3455,10 +3465,12 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
                            else
                            {
                               hypre_error(HYPRE_ERROR_GENERIC);
+#if 0 /* error_flag is currently not used anywhere */
 #ifdef HYPRE_USING_OPENMP
                               #pragma omp atomic
 #endif
                               error_flag++;
+#endif
                               if (print_level)
                               {
                                  hypre_printf("Error in row %b ! Too many elements!\n",
@@ -3491,10 +3503,12 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
                            else
                            {
                               hypre_error(HYPRE_ERROR_GENERIC);
+#if 0 /* error_flag is currently not used anywhere */
 #ifdef HYPRE_USING_OPENMP
                               #pragma omp atomic
 #endif
                               error_flag++;
+#endif
                               if (print_level)
                               {
                                  hypre_printf("Error in row %b ! Too many elements !\n",

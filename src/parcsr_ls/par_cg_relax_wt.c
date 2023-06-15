@@ -15,7 +15,7 @@
 #include "par_amg.h"
 
 /*--------------------------------------------------------------------------
- * hypre_BoomerAMGCycle
+ * hypre_BoomerAMGCGRelaxWt
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -42,7 +42,7 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
    hypre_ParVector    *Ztemp;
    hypre_ParVector    *Qtemp = NULL;
 
-   HYPRE_Int    *CF_marker = hypre_IntArrayData(hypre_ParAMGDataCFMarkerArray(amg_data)[level]);
+   HYPRE_Int    *CF_marker;
    HYPRE_Real   *Ptemp_data;
    HYPRE_Real   *Ztemp_data;
 
@@ -130,9 +130,11 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
       needQ = 1;
    }
 
-   grid_relax_type     = hypre_ParAMGDataGridRelaxType(amg_data);
-   smooth_type         = hypre_ParAMGDataSmoothType(amg_data);
-   smooth_num_levels   = hypre_ParAMGDataSmoothNumLevels(amg_data);
+   grid_relax_type   = hypre_ParAMGDataGridRelaxType(amg_data);
+   smooth_type       = hypre_ParAMGDataSmoothType(amg_data);
+   smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
+   CF_marker         = (hypre_ParAMGDataCFMarkerArray(amg_data)[level] != NULL) ?
+                       hypre_IntArrayData(hypre_ParAMGDataCFMarkerArray(amg_data)[level]) : NULL;
 
    /* Initialize */
 

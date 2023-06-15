@@ -67,7 +67,7 @@ int main (int argc, char *argv[])
    }
 
    /* Initialize HYPRE */
-   HYPRE_Init();
+   HYPRE_Initialize();
 
    /* Print GPU info */
    /* HYPRE_PrintDeviceInfo(); */

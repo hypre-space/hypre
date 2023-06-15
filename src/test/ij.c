@@ -29,6 +29,9 @@
 #if defined (HYPRE_USING_CUDA)
 #include <cuda_profiler_api.h>
 #endif
+#if defined(HYPRE_USING_CUSPARSE)
+#include <cusparse.h>
+#endif
 
 /* begin lobpcg */
 
@@ -209,9 +212,11 @@ main( hypre_int argc,
    HYPRE_Real          Q_trunc = 0;
 
    /* Specific tests */
+   HYPRE_Int           test_init = 0;
    HYPRE_Int           test_ij = 0;
    HYPRE_Int           test_multivec = 0;
    HYPRE_Int           test_scaling = 0;
+   HYPRE_Int           test_error = 0;
 
    const HYPRE_Real    dt_inf = DT_INF;
    HYPRE_Real          dt = dt_inf;
@@ -289,7 +294,12 @@ main( hypre_int argc,
    HYPRE_Real cheby_fraction = .3;
 
 #if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= 11000
+   /* CUSPARSE_SPMV_ALG_DEFAULT doesn't provide deterministic results */
+   HYPRE_Int  spmv_use_vendor = 0;
+#else
    HYPRE_Int  spmv_use_vendor = 1;
+#endif
    HYPRE_Int  use_curand = 1;
 #if defined(HYPRE_USING_CUDA)
    HYPRE_Int  spgemm_use_vendor = 0;
@@ -481,19 +491,75 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
+   /* Should we test library initialization? */
+   for (arg_index = 1; arg_index < argc; arg_index ++)
+   {
+      if (strcmp(argv[arg_index], "-test_init") == 0)
+      {
+         test_init = 1;
+         break;
+      }
+   }
+
    /*-----------------------------------------------------------------
     * GPU Device binding
-    * Must be done before HYPRE_Init() and should not be changed after
+    * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
    hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
-
-   time_index = hypre_InitializeTiming("Hypre init");
-   hypre_BeginTiming(time_index);
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
-   HYPRE_Init();
+
+   if (test_init)
+   {
+      /* The library should not be initialized or finalized */
+      if (!HYPRE_Initialized() && !HYPRE_Finalized())
+      {
+         hypre_ParPrintf(hypre_MPI_COMM_WORLD, "hypre library has not been initialized or finalized yet\n");
+      }
+
+      HYPRE_Initialize();
+
+      /* Check if the library is in initialized state */
+      if (HYPRE_Initialized() && !HYPRE_Finalized())
+      {
+         hypre_ParPrintf(hypre_MPI_COMM_WORLD, "hypre library has been initialized\n");
+      }
+
+      HYPRE_Finalize();
+
+      /* Check if the library is in finalized state */
+      if (!HYPRE_Initialized() && HYPRE_Finalized())
+      {
+         hypre_ParPrintf(hypre_MPI_COMM_WORLD, "hypre library has been finalized\n");
+      }
+
+      HYPRE_Initialize();
+
+      /* Check if the library is in initialized state */
+      if (HYPRE_Initialized() && !HYPRE_Finalized())
+      {
+         hypre_ParPrintf(hypre_MPI_COMM_WORLD, "hypre library has been re-initialized\n");
+      }
+
+      HYPRE_Finalize();
+
+      /* Check if the library is in finalized state */
+      if (!HYPRE_Initialized() && HYPRE_Finalized())
+      {
+         hypre_ParPrintf(hypre_MPI_COMM_WORLD, "hypre library has been finalized\n");
+      }
+
+      hypre_MPI_Finalize();
+
+      return 0;
+   }
+
+   time_index = hypre_InitializeTiming("Hypre init");
+   hypre_BeginTiming(time_index);
+
+   HYPRE_Initialize();
 
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
@@ -553,6 +619,8 @@ main( hypre_int argc,
               mempool_max_bin      = 9;
    size_t mempool_max_cached_bytes = 2000LL * 1024 * 1024;
 #endif
+
+   HYPRE_SetPrintErrorMode(1);
 
    /*-----------------------------------------------------------
     * Set defaults
@@ -662,6 +730,11 @@ main( hypre_int argc,
       {
          arg_index++;
          test_scaling = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-test_error") == 0 )
+      {
+         arg_index++;
+         test_error = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-funcsfromonefile") == 0 )
       {
@@ -8661,6 +8734,24 @@ final:
    /*
       hypre_FinalizeMemoryDebug();
    */
+
+   if (test_error == 1)
+   {
+      /* Test GetErrorMessages() */
+      char      *buffer, *msg;
+      HYPRE_Int  bufsz;
+      HYPRE_GetErrorMessages(&buffer, &bufsz);
+      hypre_MPI_Barrier(comm);
+      for (msg = buffer; msg < (buffer + bufsz); msg += strlen(msg) + 1)
+      {
+         hypre_fprintf(stderr, "%d: %s", myid, msg);
+      }
+      hypre_TFree(buffer, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      HYPRE_PrintErrorMessages(comm);
+   }
 
    /* Finalize Hypre */
    HYPRE_Finalize();

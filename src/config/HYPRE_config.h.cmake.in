@@ -140,6 +140,9 @@
 /* Use SuperLU_Dist */
 #cmakedefine HYPRE_USING_DSUPERLU 1
 
+/* Use MAGMA */
+#cmakedefine HYPRE_USING_MAGMA 1
+
 /* Use SuperLU */
 #cmakedefine HAVE_SUPERLU 1
 
@@ -169,6 +172,9 @@
 
 /* As F77_FUNC, but for C identifiers containing underscores. */
 #define HYPRE_F77_FUNC_(name,NAME) name ## __
+
+/* Deprecated function macro */
+#define HYPRE_DEPRECATED(reason) _Pragma(reason)
 
 /* Define to 1 if using host memory only */
 #cmakedefine HYPRE_USING_HOST_MEMORY 1

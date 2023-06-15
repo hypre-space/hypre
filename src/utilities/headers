@@ -33,7 +33,9 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
+cat state.h                    >> $INTERNAL_HEADER
 cat general.h                  >> $INTERNAL_HEADER
+cat magma.h                    >> $INTERNAL_HEADER
 cat printf.h                   >> $INTERNAL_HEADER
 cat error.h                    >> $INTERNAL_HEADER
 cat mpistubs.h                 >> $INTERNAL_HEADER
@@ -110,4 +112,3 @@ cat >> $INTERNAL_HEADER <<@
 #endif
 
 @
-

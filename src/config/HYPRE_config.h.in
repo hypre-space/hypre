@@ -65,6 +65,9 @@
 /* Define to 1 if in debug mode */
 #undef HYPRE_DEBUG
 
+/* Deprecated function macro */
+#undef HYPRE_DEPRECATED
+
 /* Main development branch? */
 #undef HYPRE_DEVELOP_BRANCH
 
@@ -220,6 +223,9 @@
 /* Define to 1 if executing on host/device with KOKKOS */
 #undef HYPRE_USING_KOKKOS
 
+/* Define to 1 if MAGMA is enabled */
+#undef HYPRE_USING_MAGMA
+
 /* Define to 1 if want to track memory operations in hypre */
 #undef HYPRE_USING_MEMORY_TRACKER
 
@@ -264,6 +270,9 @@
 
 /* SYCL being used */
 #undef HYPRE_USING_SYCL
+
+/* Define to 1 if using thrust par_nosync policy */
+#undef HYPRE_USING_THRUST_NOSYNC
 
 /* Define to 1 if using UMPIRE */
 #undef HYPRE_USING_UMPIRE

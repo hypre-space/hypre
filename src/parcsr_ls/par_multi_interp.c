@@ -130,7 +130,6 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    HYPRE_Int        n_coarse = 0;
    HYPRE_Int        n_coarse_offd = 0;
    HYPRE_Int        n_SF = 0;
-   HYPRE_Int        n_SF_offd = 0;
 
    HYPRE_Int       *fine_to_coarse = NULL;
    HYPRE_BigInt    *fine_to_coarse_offd = NULL;
@@ -327,13 +326,11 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    }
 
    n_coarse_offd = 0;
-   n_SF_offd = 0;
 #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel for private(i) reduction(+:n_coarse_offd,n_SF_offd) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i) reduction(+:n_coarse_offd) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < num_cols_offd; i++)
       if (CF_marker_offd[i] == 1) { n_coarse_offd++; }
-      else if (CF_marker_offd[i] == -3) { n_SF_offd++; }
 
    if (num_cols_offd)
    {

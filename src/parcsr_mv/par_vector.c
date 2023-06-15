@@ -1207,7 +1207,7 @@ hypre_ParVectorGetValues2(hypre_ParVector *vector,
                           HYPRE_BigInt     base,
                           HYPRE_Complex   *values)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    if (HYPRE_EXEC_DEVICE == hypre_GetExecPolicy1( hypre_ParVectorMemoryLocation(vector) ))
    {
       hypre_ParVectorGetValuesDevice(vector, num_values, indices, base, values);
