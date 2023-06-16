@@ -70,9 +70,9 @@ hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
          /*                      data + vecoffset, */
          /*                      values, */
          /*                      in_range<HYPRE_BigInt>(first_index + base, last_index + base) ); */
-      /* } */
-      /* else */
-      /* { */
+         /* } */
+         /* else */
+         /* { */
          /* /1* WM: todo - why can't I combine transform iterator and gather? *1/ */
          /* HYPRE_ONEDPL_CALL( std::transform, */
          /*                    indices, */
@@ -83,7 +83,8 @@ hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
          /*                   indices+ num_values, */
          /*                   data + vecoffset, */
          /*                   values); */
-         auto trans_it = oneapi::dpl::make_transform_iterator(indices, [base, first_index] (const auto & x) {return x - base - first_index;} );
+         auto trans_it = oneapi::dpl::make_transform_iterator(indices, [base,
+         first_index] (const auto & x) {return x - base - first_index;} );
          hypreSycl_gather_if( trans_it,
                               trans_it + num_values,
                               indices,
@@ -93,7 +94,8 @@ hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
       }
       else
       {
-         auto trans_it = oneapi::dpl::make_transform_iterator(indices, [base, first_index] (const auto & x) {return x - base - first_index;} );
+         auto trans_it = oneapi::dpl::make_transform_iterator(indices, [base,
+         first_index] (const auto & x) {return x - base - first_index;} );
          hypreSycl_gather( trans_it,
                            trans_it + num_values,
                            data + vecoffset,
