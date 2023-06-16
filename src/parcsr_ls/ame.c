@@ -422,8 +422,8 @@ HYPRE_Int hypre_AMESetup(void *esolver)
                                     edge_bc + ne,
                                     l1norm_arr,
                                     edge_bc,
-                                    [] (const auto & x) {return 1;},
-                                    less_than<HYPRE_Real>(eps) );
+            [] (const auto & x) {return 1;},
+            less_than<HYPRE_Real>(eps) );
 #else
             HYPRE_THRUST_CALL( replace_if,
                                edge_bc,
@@ -489,7 +489,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
 #if defined(HYPRE_USING_SYCL)
             hypreSycl_gather( hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg),
                               hypre_ParCSRCommPkgDeviceSendMapElmts(comm_pkg) + hypre_ParCSRCommPkgSendMapStart(comm_pkg,
-                                    num_sends),
+                                                                                                                num_sends),
                               edge_bc,
                               int_buf_data );
 #else
@@ -689,8 +689,8 @@ HYPRE_Int hypre_AMESetup(void *esolver)
                                        data + ne,
                                        edge_bc,
                                        data,
-                                       [] (const auto & x) {return 0.0;},
-                                       [] (const auto & x) {return x;} );
+               [] (const auto & x) {return 0.0;},
+               [] (const auto & x) {return x;} );
 #else
                HYPRE_THRUST_CALL( replace_if,
                                   data,
