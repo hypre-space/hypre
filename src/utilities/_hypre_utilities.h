@@ -252,6 +252,7 @@ HYPRE_Int hypre_ndigits( HYPRE_BigInt number );
 HYPRE_Int hypre_printf( const char *format, ... );
 HYPRE_Int hypre_fprintf( FILE *stream, const char *format, ... );
 HYPRE_Int hypre_sprintf( char *s, const char *format, ... );
+HYPRE_Int hypre_snprintf( char *s, size_t size, const char *format, ...);
 HYPRE_Int hypre_scanf( const char *format, ... );
 HYPRE_Int hypre_fscanf( FILE *stream, const char *format, ... );
 HYPRE_Int hypre_sscanf( char *s, const char *format, ... );
@@ -282,8 +283,18 @@ HYPRE_Int hypre_ParPrintf(MPI_Comm comm, const char *format, ...);
  * Global variable used in hypre error checking
  *--------------------------------------------------------------------------*/
 
-extern HYPRE_Int hypre__global_error;
-#define hypre_error_flag  hypre__global_error
+typedef struct
+{
+   HYPRE_Int  error_flag;
+   HYPRE_Int  print_to_memory;
+   char      *memory;
+   HYPRE_Int  mem_sz;
+   HYPRE_Int  msg_sz;
+
+} hypre_Error;
+
+extern hypre_Error hypre__global_error;
+#define hypre_error_flag  hypre__global_error.error_flag
 
 /*--------------------------------------------------------------------------
  * HYPRE error macros
@@ -2044,6 +2055,8 @@ HYPRE_Int hypreDevice_DiagScaleVector2(HYPRE_Int num_vectors, HYPRE_Int num_rows
                                        HYPRE_Complex *diag, HYPRE_Complex *x,
                                        HYPRE_Complex beta, HYPRE_Complex *y,
                                        HYPRE_Complex *z, HYPRE_Int computeY);
+HYPRE_Int hypreDevice_zeqxmydd(HYPRE_Int n, HYPRE_Complex *x, HYPRE_Complex alpha,
+                               HYPRE_Complex *y, HYPRE_Complex *z, HYPRE_Complex *d);
 HYPRE_Int hypreDevice_IVAXPY(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x, HYPRE_Complex *y);
 HYPRE_Int hypreDevice_IVAXPYMarked(HYPRE_Int n, HYPRE_Complex *a, HYPRE_Complex *x,
                                    HYPRE_Complex *y, HYPRE_Int *marker, HYPRE_Int marker_val);
@@ -2076,7 +2089,6 @@ HYPRE_Int hypreDevice_CsrRowIndicesToPtrs_v2(HYPRE_Int nrows, HYPRE_Int nnz, HYP
                                              HYPRE_Int *d_row_ptr);
 HYPRE_Int hypreDevice_GetRowNnz(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int *d_diag_ia,
                                 HYPRE_Int *d_offd_ia, HYPRE_Int *d_rownnz);
-
 HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, HYPRE_Int job,
                                      HYPRE_Int has_offd, HYPRE_BigInt first_col,
                                      HYPRE_BigInt *d_col_map_offd_A, HYPRE_Int *d_diag_i,
@@ -2084,20 +2096,11 @@ HYPRE_Int hypreDevice_CopyParCSRRows(HYPRE_Int nrows, HYPRE_Int *d_row_indices, 
                                      HYPRE_Int *d_offd_i, HYPRE_Int *d_offd_j,
                                      HYPRE_Complex *d_offd_a, HYPRE_Int *d_ib,
                                      HYPRE_BigInt *d_jb, HYPRE_Complex *d_ab);
-
 HYPRE_Int hypreDevice_IntegerReduceSum(HYPRE_Int m, HYPRE_Int *d_i);
-
 HYPRE_Complex hypreDevice_ComplexReduceSum(HYPRE_Int m, HYPRE_Complex *d_x);
-
 HYPRE_Int hypreDevice_IntegerInclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
-
 HYPRE_Int hypreDevice_IntegerExclusiveScan(HYPRE_Int n, HYPRE_Int *d_i);
-
 HYPRE_Int hypre_CudaCompileFlagCheck(void);
-
-HYPRE_Int hypreDevice_zeqxmydd(HYPRE_Int n, HYPRE_Complex *x, HYPRE_Complex alpha, HYPRE_Complex *y,
-                               HYPRE_Complex *z, HYPRE_Complex *d);
-
 #endif
 
 HYPRE_Int hypre_CurandUniform( HYPRE_Int n, HYPRE_Real *urand, HYPRE_Int set_seed,

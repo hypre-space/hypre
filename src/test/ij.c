@@ -216,6 +216,7 @@ main( hypre_int argc,
    HYPRE_Int           test_ij = 0;
    HYPRE_Int           test_multivec = 0;
    HYPRE_Int           test_scaling = 0;
+   HYPRE_Int           test_error = 0;
 
    const HYPRE_Real    dt_inf = DT_INF;
    HYPRE_Real          dt = dt_inf;
@@ -435,6 +436,9 @@ main( hypre_int argc,
    HYPRE_Int ilu_type = 0;
    HYPRE_Int ilu_lfil = 0;
    HYPRE_Int ilu_reordering = 1;
+   HYPRE_Int ilu_tri_solve = 1;
+   HYPRE_Int ilu_ljac_iters = 5;
+   HYPRE_Int ilu_ujac_iters = 5;
    HYPRE_Int ilu_sm_max_iter = 1;
    HYPRE_Real ilu_droptol = 1.0e-02;
    HYPRE_Int ilu_max_row_nnz = 1000;
@@ -619,6 +623,8 @@ main( hypre_int argc,
    size_t mempool_max_cached_bytes = 2000LL * 1024 * 1024;
 #endif
 
+   HYPRE_SetPrintErrorMode(1);
+
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
@@ -727,6 +733,11 @@ main( hypre_int argc,
       {
          arg_index++;
          test_scaling = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-test_error") == 0 )
+      {
+         arg_index++;
+         test_error = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-funcsfromonefile") == 0 )
       {
@@ -1324,6 +1335,24 @@ main( hypre_int argc,
          /* local reordering type */
          arg_index++;
          ilu_reordering = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ilu_trisolve") == 0 )
+      {
+         /* Triangular solver type */
+         arg_index++;
+         ilu_tri_solve = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ilu_ljac_iters") == 0 )
+      {
+         /* Lower Jacobi Iterations */
+         arg_index++;
+         ilu_ljac_iters = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ilu_ujac_iters") == 0 )
+      {
+         /* Upper Jacobi Iterations */
+         arg_index++;
+         ilu_ujac_iters = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-ilu_droptol") == 0 )
       {
@@ -2598,7 +2627,7 @@ main( hypre_int argc,
    {
       BuildParLaplacian27pt(argc, argv, build_matrix_arg_index, &parcsr_A);
 
-      hypre_CSRMatrixGpuSpMVAnalysis(hypre_ParCSRMatrixDiag(parcsr_A));
+      hypre_CSRMatrixSpMVAnalysisDevice(hypre_ParCSRMatrixDiag(parcsr_A));
    }
    else if ( build_matrix_type == 5 )
    {
@@ -6657,8 +6686,11 @@ main( hypre_int argc,
          HYPRE_ILUSetType(pcg_precond, ilu_type);
          HYPRE_ILUSetLevelOfFill(pcg_precond, ilu_lfil);
          HYPRE_ILUSetLocalReordering(pcg_precond, ilu_reordering);
+         HYPRE_ILUSetTriSolve(pcg_precond, ilu_tri_solve);
+         HYPRE_ILUSetLowerJacobiIters(pcg_precond, ilu_ljac_iters);
+         HYPRE_ILUSetUpperJacobiIters(pcg_precond, ilu_ujac_iters);
          /* set print level */
-         HYPRE_ILUSetPrintLevel(pcg_precond, 1);
+         HYPRE_ILUSetPrintLevel(pcg_precond, poutdat);
          /* set max iterations */
          HYPRE_ILUSetMaxIter(pcg_precond, 1);
          HYPRE_ILUSetTol(pcg_precond, pc_tol);
@@ -7301,8 +7333,11 @@ main( hypre_int argc,
          HYPRE_ILUSetType(pcg_precond, ilu_type);
          HYPRE_ILUSetLevelOfFill(pcg_precond, ilu_lfil);
          HYPRE_ILUSetLocalReordering(pcg_precond, ilu_reordering);
+         HYPRE_ILUSetTriSolve(pcg_precond, ilu_tri_solve);
+         HYPRE_ILUSetLowerJacobiIters(pcg_precond, ilu_ljac_iters);
+         HYPRE_ILUSetUpperJacobiIters(pcg_precond, ilu_ujac_iters);
          /* set print level */
-         HYPRE_ILUSetPrintLevel(pcg_precond, 1);
+         HYPRE_ILUSetPrintLevel(pcg_precond, poutdat);
          /* set max iterations */
          HYPRE_ILUSetMaxIter(pcg_precond, 1);
          HYPRE_ILUSetTol(pcg_precond, pc_tol);
@@ -8726,6 +8761,24 @@ final:
    /*
       hypre_FinalizeMemoryDebug();
    */
+
+   if (test_error == 1)
+   {
+      /* Test GetErrorMessages() */
+      char      *buffer, *msg;
+      HYPRE_Int  bufsz;
+      HYPRE_GetErrorMessages(&buffer, &bufsz);
+      hypre_MPI_Barrier(comm);
+      for (msg = buffer; msg < (buffer + bufsz); msg += strlen(msg) + 1)
+      {
+         hypre_fprintf(stderr, "%d: %s", myid, msg);
+      }
+      hypre_TFree(buffer, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      HYPRE_PrintErrorMessages(comm);
+   }
 
    /* Finalize Hypre */
    HYPRE_Finalize();
