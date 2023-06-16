@@ -1406,7 +1406,8 @@ hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix  *mat,
       hypre_TMemcpy(size, row_nnz + local_row, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-      max_row_nnz = HYPRE_ONEDPL_CALL(std::reduce, row_nnz, row_nnz + nrows, 0, oneapi::dpl::maximum<HYPRE_Int>());
+      max_row_nnz = HYPRE_ONEDPL_CALL(std::reduce, row_nnz, row_nnz + nrows, 0,
+                                      oneapi::dpl::maximum<HYPRE_Int>());
 #else
       max_row_nnz = HYPRE_THRUST_CALL(reduce, row_nnz, row_nnz + nrows, 0, thrust::maximum<HYPRE_Int>());
 #endif
@@ -1622,7 +1623,7 @@ hypre_ParCSRMatrixTransposeDevice( hypre_ParCSRMatrix  *A,
          HYPRE_ONEDPL_CALL( std::stable_sort,
                             oneapi::dpl::make_zip_iterator(Aext_ii, Aext_j),
                             oneapi::dpl::make_zip_iterator(Aext_ii, Aext_j) + Aext_nnz,
-                            [] (const auto & x, const auto & y) {return std::get<0>(x) < std::get<0>(y);} );
+         [] (const auto & x, const auto & y) {return std::get<0>(x) < std::get<0>(y);} );
 #else
          HYPRE_THRUST_CALL( stable_sort,
                             thrust::make_zip_iterator(thrust::make_tuple(Aext_ii, Aext_j)),
