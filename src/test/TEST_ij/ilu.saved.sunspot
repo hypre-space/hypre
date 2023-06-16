@@ -32,7 +32,7 @@ Final Relative Residual Norm = 6.866281e-09
 
 # Output file: ilu.out.308
 hypre_ILU Iterations = 27
-Final Relative Residual Norm = 9.107680e-09
+Final Relative Residual Norm = 9.107681e-09
 
 # Output file: ilu.out.309
 hypre_ILU Iterations = 49
@@ -96,7 +96,7 @@ Final FlexGMRES Relative Residual Norm = 4.133851e-09
 
 # Output file: ilu.out.324
 BoomerAMG Iterations = 10
-Final Relative Residual Norm = 7.351928e-09
+Final Relative Residual Norm = 7.351929e-09
 
 # Output file: ilu.out.325
 BoomerAMG Iterations = 9

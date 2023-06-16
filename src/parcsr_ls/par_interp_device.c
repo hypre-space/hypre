@@ -11,6 +11,8 @@
 
 #if defined(HYPRE_USING_GPU)
 
+/* TODO (VPM): Rename to hypreGPUKernel_. Also, do we need these prototypes? */
+
 __global__ void hypre_BoomerAMGBuildDirInterp_getnnz( hypre_DeviceItem &item, HYPRE_Int nr_of_rows,
                                                       HYPRE_Int *S_diag_i,
                                                       HYPRE_Int *S_diag_j, HYPRE_Int *S_offd_i, HYPRE_Int *S_offd_j, HYPRE_Int *CF_marker,
@@ -340,9 +342,8 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
 
    hypre_CSRMatrixCompressColumnsDevice(P_offd, NULL, &P_colids, NULL);
    P_colids_h = hypre_TAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(P_offd), HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(P_colids_h, P_colids, HYPRE_Int, hypre_CSRMatrixNumCols(P_offd), HYPRE_MEMORY_HOST,
-                 HYPRE_MEMORY_DEVICE);
-
+   hypre_TMemcpy(P_colids_h, P_colids, HYPRE_Int, hypre_CSRMatrixNumCols(P_offd),
+                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    hypre_TFree(P_colids, HYPRE_MEMORY_DEVICE);
 
    /* 8. P_offd_j now has a 0,1,2,3... local column index enumeration. */

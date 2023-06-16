@@ -246,7 +246,7 @@ void iluk_seq_block(Euclid_dh ctx)
   Factor_dh F = ctx->F;
   SubdomainGraph_dh sg = ctx->sg;
   bool bj = false, constrained = false;
-  HYPRE_Int discard = 0;
+  //HYPRE_Int discard = 0;
   HYPRE_Int gr = -1;  /* globalRow */
   bool debug = false;
 
@@ -359,7 +359,7 @@ void iluk_seq_block(Euclid_dh ctx)
             fill[idx] = tmpFill[col];
             ++idx;
           } else {
-            ++discard; 
+             //++discard; 
           }
         }
         col = list[col];
@@ -372,7 +372,7 @@ void iluk_seq_block(Euclid_dh ctx)
           fill[idx] = tmpFill[col];
           ++idx;
         } else { 
-          ++discard; 
+           //++discard; 
         }
         col = list[col];
       }
