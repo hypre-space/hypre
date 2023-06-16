@@ -504,6 +504,21 @@ struct l1_norm_op1 : public thrust::binary_function<HYPRE_Complex, HYPRE_Complex
 };
 #endif
 
+#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_SYCL)
+struct l1_norm_op6
+#else
+struct l1_norm_op6 : public thrust::binary_function<HYPRE_Complex, HYPRE_Complex, HYPRE_Complex>
+#endif
+{
+   __host__ __device__
+   HYPRE_Complex operator()(const HYPRE_Complex &d, const HYPRE_Complex &l) const
+   {
+      return (l + d + sqrt(l * l + d * d)) * 0.5;
+   }
+};
+#endif
+
 HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
                                      HYPRE_Int            option,
                                      HYPRE_Int           *cf_marker,
@@ -708,13 +723,25 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       /* Add the scaled l1 norm of the offd part */
       if (num_cols_offd)
       {
-         HYPRE_Real *tmp = hypre_TAlloc(HYPRE_Real, num_rows, memory_location_tmp);
-         hypre_CSRMatrixComputeRowSum(A_offd, cf_marker, cf_marker_offd, tmp, 1, 1.0, "set");
-         for (i = 0; i < num_rows; i++)
+         diag_tmp = hypre_TAlloc(HYPRE_Real, num_rows, memory_location_tmp);
+         hypre_CSRMatrixComputeRowSum(A_offd, cf_marker, cf_marker_offd, diag_tmp, 1, 1.0, "set");
+#if defined(HYPRE_USING_GPU)
+         if (exec == HYPRE_EXEC_DEVICE)
          {
-            l1_norm[i] += (tmp[i] - l1_norm[i] + hypre_sqrt(tmp[i] * tmp[i] + l1_norm[i] * l1_norm[i])) * 0.5;
+#if defined(HYPRE_USING_SYCL)
+            HYPRE_ONEDPL_CALL( std::transform, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, l1_norm_op6() );
+#else
+            HYPRE_THRUST_CALL( transform, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm, l1_norm_op6() );
+#endif
          }
-         hypre_TFree(tmp, memory_location_tmp);
+         else
+#endif
+         {
+            for (i = 0; i < num_rows; i++)
+            {
+               l1_norm[i] += (diag_tmp[i] - l1_norm[i] + hypre_sqrt(diag_tmp[i] * diag_tmp[i] + l1_norm[i] * l1_norm[i])) * 0.5;
+            }
+         }
       }
    }
 

@@ -871,7 +871,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
          if (grid_relax_type[j] ==  3 || grid_relax_type[j] ==  4 || grid_relax_type[j] ==  6 ||
              grid_relax_type[j] ==  8 || grid_relax_type[j] == 13 || grid_relax_type[j] == 14 ||
-             grid_relax_type[j] == 11 || grid_relax_type[j] == 12)
+             grid_relax_type[j] == 11 || grid_relax_type[j] == 12 || grid_relax_type[j] == 88)
          {
             needZ = hypre_max(needZ, 1);
             break;
