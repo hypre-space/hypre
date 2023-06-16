@@ -2569,19 +2569,20 @@ hypreDevice_DiagScaleVector2( HYPRE_Int       num_vectors,
    return hypre_error_flag;
 }
 
-
-/*****************************************************************
- z[i] = (x[i] + alpha*y[i])*d[i]
- ******************************************************************/
+/*--------------------------------------------------------------------
+ * hypreGPUKernel_zeqxmydd
+ *
+ * z[i] = (x[i] + alpha*y[i])*d[i]
+ *--------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_zeqxmydd(hypre_DeviceItem &item,
-                        HYPRE_Int         n,
-                        HYPRE_Complex    *x,
-                        HYPRE_Complex     alpha,
-                        HYPRE_Complex    *y,
-                        HYPRE_Complex    *z,
-                        HYPRE_Complex    *d)
+hypreGPUKernel_zeqxmydd(hypre_DeviceItem             &item,
+                        HYPRE_Int                    n,
+                        HYPRE_Complex* __restrict__  x,
+                        HYPRE_Complex                alpha,
+                        HYPRE_Complex* __restrict__  y,
+                        HYPRE_Complex* __restrict__  z,
+                        HYPRE_Complex* __restrict__  d)
 {
    HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
@@ -2591,15 +2592,17 @@ hypreGPUKernel_zeqxmydd(hypre_DeviceItem &item,
    }
 }
 
-/*
- */
+/*--------------------------------------------------------------------
+ * hypreDevice_zeqxmydd
+ *--------------------------------------------------------------------*/
+
 HYPRE_Int
-hypreDevice_zeqxmydd(HYPRE_Int      n,
-                     HYPRE_Complex *x,
-                     HYPRE_Complex  alpha,
-                     HYPRE_Complex *y,
-                     HYPRE_Complex *z,
-                     HYPRE_Complex *d)
+hypreDevice_zeqxmydd(HYPRE_Int       n,
+                     HYPRE_Complex  *x,
+                     HYPRE_Complex   alpha,
+                     HYPRE_Complex  *y,
+                     HYPRE_Complex  *z,
+                     HYPRE_Complex  *d)
 {
    /* trivial case */
    if (n <= 0)
@@ -2611,41 +2614,6 @@ hypreDevice_zeqxmydd(HYPRE_Int      n,
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
 
    HYPRE_GPU_LAUNCH( hypreGPUKernel_zeqxmydd, gDim, bDim, n, x, alpha, y, z, d);
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------
- * hypreGPUKernel_BigToSmallCopy
- *--------------------------------------------------------------------*/
-
-__global__ void
-hypreGPUKernel_BigToSmallCopy( hypre_DeviceItem                &item,
-                               HYPRE_Int*          __restrict__ tgt,
-                               const HYPRE_BigInt* __restrict__ src,
-                               HYPRE_Int                        size )
-{
-   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
-
-   if (i < size)
-   {
-      tgt[i] = src[i];
-   }
-}
-
-/*--------------------------------------------------------------------
- * hypreDevice_BigToSmallCopy
- *--------------------------------------------------------------------*/
-
-HYPRE_Int
-hypreDevice_BigToSmallCopy( HYPRE_Int          *tgt,
-                            const HYPRE_BigInt *src,
-                            HYPRE_Int           size )
-{
-   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-   dim3 gDim = hypre_GetDefaultDeviceGridDimension(size, "thread", bDim);
-
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_BigToSmallCopy, gDim, bDim, tgt, src, size);
 
    return hypre_error_flag;
 }
@@ -2864,7 +2832,6 @@ hypre_DeviceDataCusparseHandle(hypre_DeviceData *data)
    return handle;
 }
 #endif // defined(HYPRE_USING_CUSPARSE)
-
 
 #if defined(HYPRE_USING_ROCSPARSE)
 

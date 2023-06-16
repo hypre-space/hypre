@@ -376,7 +376,8 @@ hypreGPUKernel_CSRMatrixExtractBlockDiag( hypre_DeviceItem  &item,
                                           HYPRE_Complex     *B_a )
 {
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_Int   lane = (item.get_local_range(2) * item.get_group(2) + item.get_local_id(2)) & (HYPRE_WARP_SIZE - 1);
+   HYPRE_Int   lane = (item.get_local_range(2) * item.get_group(2) + item.get_local_id(2)) &
+                      (HYPRE_WARP_SIZE - 1);
 #else
    HYPRE_Int   lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
 #endif
@@ -469,7 +470,8 @@ hypreGPUKernel_CSRMatrixExtractBlockDiagMarked( hypre_DeviceItem  &item,
                                                 HYPRE_Complex     *B_a )
 {
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_Int   lane = (item.get_local_range(2) * item.get_group(2) + item.get_local_id(2)) & (HYPRE_WARP_SIZE - 1);
+   HYPRE_Int   lane = (item.get_local_range(2) * item.get_group(2) + item.get_local_id(2)) &
+                      (HYPRE_WARP_SIZE - 1);
 #else
    HYPRE_Int   lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
 #endif
@@ -547,7 +549,8 @@ hypreGPUKernel_ComplexMatrixBatchedTranspose( hypre_DeviceItem  &item,
                                               HYPRE_Complex     *B_data )
 {
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_Int   lane = (item.get_local_range(2) * item.get_group(2) + item.get_local_id(2)) & (HYPRE_WARP_SIZE - 1);
+   HYPRE_Int   lane = (item.get_local_range(2) * item.get_group(2) + item.get_local_id(2)) &
+                      (HYPRE_WARP_SIZE - 1);
 #else
    HYPRE_Int   lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
 #endif

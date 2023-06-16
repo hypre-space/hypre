@@ -438,6 +438,9 @@ main( hypre_int argc,
    HYPRE_Int ilu_type = 0;
    HYPRE_Int ilu_lfil = 0;
    HYPRE_Int ilu_reordering = 1;
+   HYPRE_Int ilu_tri_solve = 1;
+   HYPRE_Int ilu_ljac_iters = 5;
+   HYPRE_Int ilu_ujac_iters = 5;
    HYPRE_Int ilu_sm_max_iter = 1;
    HYPRE_Real ilu_droptol = 1.0e-02;
    HYPRE_Int ilu_max_row_nnz = 1000;
@@ -1349,6 +1352,24 @@ main( hypre_int argc,
          /* local reordering type */
          arg_index++;
          ilu_reordering = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ilu_trisolve") == 0 )
+      {
+         /* Triangular solver type */
+         arg_index++;
+         ilu_tri_solve = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ilu_ljac_iters") == 0 )
+      {
+         /* Lower Jacobi Iterations */
+         arg_index++;
+         ilu_ljac_iters = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ilu_ujac_iters") == 0 )
+      {
+         /* Upper Jacobi Iterations */
+         arg_index++;
+         ilu_ujac_iters = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-ilu_droptol") == 0 )
       {
@@ -2676,12 +2697,14 @@ main( hypre_int argc,
    else if ( build_matrix_type == 4 )
    {
       BuildParLaplacian27pt(argc, argv, build_matrix_arg_index, &parcsr_A);
-      hypre_CSRMatrixGpuSpMVAnalysis(hypre_ParCSRMatrixDiag(parcsr_A));
+
+      hypre_CSRMatrixSpMVAnalysisDevice(hypre_ParCSRMatrixDiag(parcsr_A));
    }
    else if ( build_matrix_type == 5 )
    {
       BuildParLaplacian125pt(argc, argv, build_matrix_arg_index, &parcsr_A);
-      hypre_CSRMatrixGpuSpMVAnalysis(hypre_ParCSRMatrixDiag(parcsr_A));
+
+      hypre_CSRMatrixSpMVAnalysisDevice(hypre_ParCSRMatrixDiag(parcsr_A));
    }
    else if ( build_matrix_type == 6 )
    {
@@ -6789,8 +6812,11 @@ main( hypre_int argc,
          HYPRE_ILUSetType(pcg_precond, ilu_type);
          HYPRE_ILUSetLevelOfFill(pcg_precond, ilu_lfil);
          HYPRE_ILUSetLocalReordering(pcg_precond, ilu_reordering);
+         HYPRE_ILUSetTriSolve(pcg_precond, ilu_tri_solve);
+         HYPRE_ILUSetLowerJacobiIters(pcg_precond, ilu_ljac_iters);
+         HYPRE_ILUSetUpperJacobiIters(pcg_precond, ilu_ujac_iters);
          /* set print level */
-         HYPRE_ILUSetPrintLevel(pcg_precond, 1);
+         HYPRE_ILUSetPrintLevel(pcg_precond, poutdat);
          /* set max iterations */
          HYPRE_ILUSetMaxIter(pcg_precond, 1);
          HYPRE_ILUSetTol(pcg_precond, pc_tol);
@@ -7441,8 +7467,11 @@ main( hypre_int argc,
          HYPRE_ILUSetType(pcg_precond, ilu_type);
          HYPRE_ILUSetLevelOfFill(pcg_precond, ilu_lfil);
          HYPRE_ILUSetLocalReordering(pcg_precond, ilu_reordering);
+         HYPRE_ILUSetTriSolve(pcg_precond, ilu_tri_solve);
+         HYPRE_ILUSetLowerJacobiIters(pcg_precond, ilu_ljac_iters);
+         HYPRE_ILUSetUpperJacobiIters(pcg_precond, ilu_ujac_iters);
          /* set print level */
-         HYPRE_ILUSetPrintLevel(pcg_precond, 1);
+         HYPRE_ILUSetPrintLevel(pcg_precond, poutdat);
          /* set max iterations */
          HYPRE_ILUSetMaxIter(pcg_precond, 1);
          HYPRE_ILUSetTol(pcg_precond, pc_tol);

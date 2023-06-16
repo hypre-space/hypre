@@ -433,6 +433,9 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csrgemm_buffer_size    rocsparse_scsrgemm_buffer_size
 #define hypre_rocsparse_csrgemm                rocsparse_scsrgemm
 #define hypre_rocsparse_csr2csc                rocsparse_scsr2csc
+#define hypre_rocsparse_csrilu0_buffer_size    rocsparse_scsrilu0_buffer_size
+#define hypre_rocsparse_csrilu0_analysis       rocsparse_scsrilu0_analysis
+#define hypre_rocsparse_csrilu0                rocsparse_scsrilu0
 
 #elif defined(HYPRE_LONG_DOUBLE) /* Long Double */
 #error "GPU build does not support Long Double numbers!"
@@ -471,6 +474,9 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csrgemm_buffer_size    rocsparse_dcsrgemm_buffer_size
 #define hypre_rocsparse_csrgemm                rocsparse_dcsrgemm
 #define hypre_rocsparse_csr2csc                rocsparse_dcsr2csc
+#define hypre_rocsparse_csrilu0_buffer_size    rocsparse_dcsrilu0_buffer_size
+#define hypre_rocsparse_csrilu0_analysis       rocsparse_dcsrilu0_analysis
+#define hypre_rocsparse_csrilu0                rocsparse_dcsrilu0
 #endif
 
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \
@@ -742,60 +748,75 @@ sycl::queue*          hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i
 sycl::queue*          hypre_DeviceDataComputeStream(hypre_DeviceData *data);
 #endif
 
-// Data structure and accessor routines for Cuda Sparse Triangular Matrices
+/* Data structure and accessor routines for Sparse Triangular Matrices */
 struct hypre_CsrsvData
 {
 #if defined(HYPRE_USING_CUSPARSE)
-   hypre_cusparseSpSVDescr info_L;
-   hypre_cusparseSpSVDescr info_U;
+   hypre_cusparseSpSVDescr   info_L;
+   hypre_cusparseSpSVDescr   info_U;
+   cusparseSolvePolicy_t     analysis_policy;
+   cusparseSolvePolicy_t     solve_policy;
+
 #elif defined(HYPRE_USING_ROCSPARSE)
-   rocsparse_mat_info      info_L;
-   rocsparse_mat_info      info_U;
+   rocsparse_mat_info        info_L;
+   rocsparse_mat_info        info_U;
+   rocsparse_analysis_policy analysis_policy;
+   rocsparse_solve_policy    solve_policy;
+
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
    /* WM: todo - placeholders */
-   char                    info_L;
-   char                    info_U;
+   char                      info_L;
+   char                      info_U;
+   char                      analysis_policy;
+   char                      solve_policy;
 #endif
 
-#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-   size_t                  BufferSizeL;
-   size_t                  BufferSizeU;
-   char                   *BufferL;
-   char                   *BufferU;
+#if defined(HYPRE_USING_CUSPARSE) && (CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION)
+   size_t                    buffer_size_L;
+   size_t                    buffer_size_U;
+   char                     *buffer_L;
+   char                     *buffer_U;
 #else
-   hypre_int               BufferSize;
-   char                   *Buffer;
+   hypre_int                 buffer_size;
+   char                     *buffer;
 #endif
-   /* to save matrix values with modified diagonal */
-   HYPRE_Complex          *matdata;
+
+   /* Temporary array to save matrix values with modified diagonal */
+   HYPRE_Complex            *mat_data;
+
+   /* Flags for checking whether the analysis phase has been executed or not */
+   HYPRE_Int                 analyzed_L;
+   HYPRE_Int                 analyzed_U;
 };
 
-#define hypre_CsrsvDataInfoL(data)       ((data) -> info_L)
-#define hypre_CsrsvDataInfoU(data)       ((data) -> info_U)
-#if defined(HYPRE_USING_CUSPARSE) && CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
-#define hypre_CsrsvDataBufferSizeL(data) ((data) -> BufferSizeL)
-#define hypre_CsrsvDataBufferSizeU(data) ((data) -> BufferSizeU)
-#define hypre_CsrsvDataBufferL(data)     ((data) -> BufferL)
-#define hypre_CsrsvDataBufferU(data)     ((data) -> BufferU)
+#define hypre_CsrsvDataInfoL(data)          ((data) -> info_L)
+#define hypre_CsrsvDataInfoU(data)          ((data) -> info_U)
+#define hypre_CsrsvDataAnalyzedL(data)      ((data) -> analyzed_L)
+#define hypre_CsrsvDataAnalyzedU(data)      ((data) -> analyzed_U)
+#define hypre_CsrsvDataSolvePolicy(data)    ((data) -> solve_policy)
+#define hypre_CsrsvDataAnalysisPolicy(data) ((data) -> analysis_policy)
+#if defined(HYPRE_USING_CUSPARSE) && (CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION)
+#define hypre_CsrsvDataBufferSizeL(data)    ((data) -> buffer_size_L)
+#define hypre_CsrsvDataBufferSizeU(data)    ((data) -> buffer_size_U)
+#define hypre_CsrsvDataBufferL(data)        ((data) -> buffer_L)
+#define hypre_CsrsvDataBufferU(data)        ((data) -> buffer_U)
 #else
-#define hypre_CsrsvDataBufferSize(data)  ((data) -> BufferSize)
-#define hypre_CsrsvDataBuffer(data)      ((data) -> Buffer)
+#define hypre_CsrsvDataBufferSize(data)     ((data) -> buffer_size)
+#define hypre_CsrsvDataBuffer(data)         ((data) -> buffer)
 #endif
-#define hypre_CsrsvDataMatData(data)     ((data) -> matdata)
+#define hypre_CsrsvDataMatData(data)        ((data) -> mat_data)
 
 struct hypre_GpuMatData
 {
 #if defined(HYPRE_USING_CUSPARSE)
-   cusparseMatDescr_t    mat_descr;
-   char                 *spmv_buffer;
-#endif
+   cusparseMatDescr_t                   mat_descr;
+   char                                *spmv_buffer;
 
-#if defined(HYPRE_USING_ROCSPARSE)
-   rocsparse_mat_descr   mat_descr;
-   rocsparse_mat_info    mat_info;
-#endif
+#elif defined(HYPRE_USING_ROCSPARSE)
+   rocsparse_mat_descr                  mat_descr;
+   rocsparse_mat_info                   mat_info;
 
-#if defined(HYPRE_USING_ONEMKLSPARSE)
+#elif defined(HYPRE_USING_ONEMKLSPARSE)
    oneapi::mkl::sparse::matrix_handle_t mat_handle;
 #endif
 };
@@ -1857,21 +1878,24 @@ dim3 hypre_dim3(HYPRE_Int x);
 dim3 hypre_dim3(HYPRE_Int x, HYPRE_Int y);
 dim3 hypre_dim3(HYPRE_Int x, HYPRE_Int y, HYPRE_Int z);
 
-template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_StableSortByTupleKey(
-   HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals, HYPRE_Int opt);
+template <typename T1, typename T2, typename T3>
+HYPRE_Int hypreDevice_StableSortByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2,
+                                           T3 *vals, HYPRE_Int opt);
 
-template <typename T1, typename T2, typename T3, typename T4> HYPRE_Int
-hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2, T3 *vals1, T4 *vals2,
-                                      HYPRE_Int opt);
+template <typename T1, typename T2, typename T3, typename T4>
+HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, T1 *keys1, T2 *keys2,
+                                                T3 *vals1, T4 *vals2, HYPRE_Int opt);
 
-template <typename T1, typename T2, typename T3> HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N,
-                                                                                        T1 *keys1_in,  T2 *keys2_in,  T3 *vals_in, T1 *keys1_out, T2 *keys2_out, T3 *vals_out);
+template <typename T1, typename T2, typename T3>
+HYPRE_Int hypreDevice_ReduceByTupleKey(HYPRE_Int N, T1 *keys1_in, T2 *keys2_in,
+                                       T3 *vals_in, T1 *keys1_out, T2 *keys2_out,
+                                       T3 *vals_out);
 
 template <typename T>
 HYPRE_Int hypreDevice_ScatterConstant(T *x, HYPRE_Int n, HYPRE_Int *map, T v);
 
-HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map, HYPRE_Real *y,
-                                    char *work);
+HYPRE_Int hypreDevice_GenScatterAdd(HYPRE_Real *x, HYPRE_Int ny, HYPRE_Int *map,
+                                    HYPRE_Real *y, char *work);
 
 template <typename T>
 HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int nnz,
@@ -1880,8 +1904,6 @@ HYPRE_Int hypreDevice_CsrRowPtrsToIndicesWithRowNum(HYPRE_Int nrows, HYPRE_Int n
 #endif
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-
-HYPRE_Int hypreDevice_BigToSmallCopy(HYPRE_Int *tgt, const HYPRE_BigInt *src, HYPRE_Int size);
 
 #if defined(HYPRE_USING_CUDA)
 cudaError_t hypre_CachingMallocDevice(void **ptr, size_t nbytes);
