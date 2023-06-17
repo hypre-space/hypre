@@ -43,9 +43,26 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
    MPI_Comm              new_comm;
 
    /* Local variables */
-   HYPRE_Real           *AT_mat;
-   HYPRE_Real           *Ainv;
+   HYPRE_Complex        *A_mat = NULL;
+   HYPRE_Complex        *AT_mat;
+   HYPRE_Complex        *Ainv;
    HYPRE_Int             global_size;
+   HYPRE_Int             i, jj;
+
+   /*-----------------------------------------------------------------
+    *  Sanity checks
+    *-----------------------------------------------------------------*/
+
+   /* Check for relaxation type */
+   if (!(relax_type == 9 || relax_type == 99 || relax_type == 199))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Wrong relaxation type!");
+      return hypre_error_flag;
+   }
+
+   /*-----------------------------------------------------------------
+    *  Gaussian elimination setup
+    *-----------------------------------------------------------------*/
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SETUP] -= hypre_MPI_Wtime();
@@ -71,10 +88,10 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
       HYPRE_Complex  *A_diag_data = hypre_CSRMatrixData(A_diag_host);
       HYPRE_Complex  *A_offd_data = hypre_CSRMatrixData(A_offd_host);
 
-      HYPRE_Complex  *A_mat, *A_mat_local;
+      HYPRE_Complex  *A_mat_local;
       HYPRE_Int      *comm_info, *info, *displs;
       HYPRE_Int      *mat_info, *mat_displs;
-      HYPRE_Int       new_num_procs, A_mat_local_size, i, jj, column;
+      HYPRE_Int       new_num_procs, A_mat_local_size, column;
 
       hypre_MPI_Comm_size(new_comm, &new_num_procs);
 
@@ -94,9 +111,6 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
          mat_displs[i + 1] = global_num_rows * displs[i + 1];
          mat_info[i] = global_num_rows * info[i];
       }
-
-      hypre_ParAMGDataBVec(amg_data) = hypre_CTAlloc(HYPRE_Real, global_num_rows,
-                                                     HYPRE_MEMORY_HOST);
 
       A_mat_local_size = global_num_rows * num_rows;
       global_size = global_num_rows * global_num_rows;
@@ -124,11 +138,12 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
       hypre_MPI_Allgatherv(A_mat_local, A_mat_local_size, HYPRE_MPI_REAL, A_mat, mat_info,
                            mat_displs, HYPRE_MPI_REAL, new_comm);
 
+      /* Set dense matrix */
       if (relax_type == 9)
       {
          hypre_ParAMGDataAMat(amg_data) = A_mat;
       }
-      else if (relax_type == 99)
+      else
       {
          AT_mat = hypre_CTAlloc(HYPRE_Real, global_size, HYPRE_MEMORY_HOST);
          for (i = 0; i < global_num_rows; i++)
@@ -141,64 +156,11 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
          hypre_ParAMGDataAMat(amg_data) = AT_mat;
          hypre_TFree(A_mat, HYPRE_MEMORY_HOST);
       }
-      else if (relax_type == 199)
-      {
-         AT_mat = hypre_TAlloc(HYPRE_Real, global_size, HYPRE_MEMORY_HOST);
-         Ainv   = hypre_TAlloc(HYPRE_Real, num_rows * global_num_rows, HYPRE_MEMORY_HOST);
-
-         for (i = 0; i < global_num_rows; i++)
-         {
-            for (jj = 0; jj < global_num_rows; jj++)
-            {
-               AT_mat[i * global_num_rows + jj] = A_mat[i + jj * global_num_rows];
-            }
-         }
-
-         HYPRE_Int  *ipiv, info, query = -1, lwork;
-         HYPRE_Real  lwork_opt, *work;
-
-         ipiv = hypre_TAlloc(HYPRE_Int, global_num_rows, HYPRE_MEMORY_HOST);
-         hypre_dgetrf(&global_num_rows, &global_num_rows, AT_mat, &global_num_rows, ipiv, &info);
-         if (info != 0)
-         {
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with dgetrf!");
-            hypre_assert(0);
-         }
-
-         hypre_dgetri(&global_num_rows, AT_mat, &global_num_rows, ipiv, &lwork_opt, &query, &info);
-         if (info != 0)
-         {
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with dgetri (query)!");
-            hypre_assert(0);
-         }
-
-         lwork = (HYPRE_Int) lwork_opt;
-         work = hypre_TAlloc(HYPRE_Real, lwork, HYPRE_MEMORY_HOST);
-         hypre_dgetri(&global_num_rows, AT_mat, &global_num_rows, ipiv, work, &lwork, &info);
-         if (info != 0)
-         {
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with dgetri!");
-            hypre_assert(0);
-         }
-
-         for (i = 0; i < global_num_rows; i++)
-         {
-            for (jj = 0; jj < num_rows; jj++)
-            {
-               Ainv[i * num_rows + jj] = AT_mat[i * global_num_rows + jj + first_row_index];
-            }
-         }
-
-         hypre_TFree(ipiv,   HYPRE_MEMORY_HOST);
-         hypre_TFree(A_mat,  HYPRE_MEMORY_HOST);
-         hypre_TFree(AT_mat, HYPRE_MEMORY_HOST);
-         hypre_TFree(work,   HYPRE_MEMORY_HOST);
-
-         hypre_ParAMGDataAInv(amg_data) = Ainv;
-      }
 
       hypre_ParAMGDataCommInfo(amg_data) = comm_info;
       hypre_ParAMGDataNewComm(amg_data)  = new_comm;
+      hypre_ParAMGDataBVec(amg_data)     = hypre_CTAlloc(HYPRE_Real, global_num_rows,
+                                                         HYPRE_MEMORY_HOST);
 
       hypre_TFree(mat_info,    HYPRE_MEMORY_HOST);
       hypre_TFree(mat_displs,  HYPRE_MEMORY_HOST);
@@ -214,6 +176,70 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
          hypre_CSRMatrixDestroy(A_offd_host);
       }
    }
+
+   /*-----------------------------------------------------------------
+    *  Factorization phase
+    *-----------------------------------------------------------------*/
+
+   if (num_rows)
+   {
+      if (relax_type == 99)
+      {
+         /* TODO (VPM): Factorization phase */
+      }
+      else
+      {
+         /* if (relax_type == 199) */
+         HYPRE_Int    *ipiv, info, query = -1, lwork;
+         HYPRE_Real    lwork_opt, *work;
+
+         Ainv = hypre_TAlloc(HYPRE_Real, num_rows * global_num_rows, HYPRE_MEMORY_HOST);
+         ipiv = hypre_TAlloc(HYPRE_Int, global_num_rows, HYPRE_MEMORY_HOST);
+
+         hypre_dgetrf(&global_num_rows, &global_num_rows, AT_mat, &global_num_rows, ipiv, &info);
+         if (info != 0)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with dgetrf!");
+            return hypre_error_flag;
+         }
+
+         /* hypre_dgetri query phase */
+         hypre_dgetri(&global_num_rows, AT_mat, &global_num_rows, ipiv, &lwork_opt, &query, &info);
+         if (info != 0)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with dgetri (query)!");
+            return hypre_error_flag;
+         }
+
+         lwork = (HYPRE_Int) lwork_opt;
+         work  = hypre_TAlloc(HYPRE_Real, lwork, HYPRE_MEMORY_HOST);
+         hypre_dgetri(&global_num_rows, AT_mat, &global_num_rows, ipiv, work, &lwork, &info);
+         if (info != 0)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with dgetri!");
+            return hypre_error_flag;
+         }
+
+         /* Store explicit dense inverse in Ainv */
+         for (i = 0; i < global_num_rows; i++)
+         {
+            for (jj = 0; jj < num_rows; jj++)
+            {
+               Ainv[i * num_rows + jj] = AT_mat[i * global_num_rows + jj + first_row_index];
+            }
+         }
+         hypre_ParAMGDataAInv(amg_data) = Ainv;
+
+         hypre_TFree(ipiv,   HYPRE_MEMORY_HOST);
+         hypre_TFree(A_mat,  HYPRE_MEMORY_HOST);
+         hypre_TFree(AT_mat, HYPRE_MEMORY_HOST);
+         hypre_TFree(work,   HYPRE_MEMORY_HOST);
+      }
+   }
+
+   /*-----------------------------------------------------------------
+    *  Finalize
+    *-----------------------------------------------------------------*/
 
    hypre_ParAMGDataGSSetup(amg_data) = 1;
 
@@ -321,6 +347,11 @@ hypre_GaussElimAllSetup(hypre_ParAMGData *amg_data,
          HYPRE_MAGMA_CALL(hypre_magma_getrf_gpu(global_num_rows, global_num_rows, d_A_inv,
                                                 global_num_rows, A_piv, &info));
 
+         if (info != 0)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with MAGMA's getrf!");
+         }
+
          /* Free memory */
          hypre_TFree(A_mat, HYPRE_MEMORY_HOST);
       }
@@ -335,12 +366,12 @@ hypre_GaussElimAllSetup(hypre_ParAMGData *amg_data,
             /* Compute LU factorization on host */
             hypre_dgetrf(&global_num_rows, &global_num_rows, A_inv,
                          &global_num_rows, A_piv, &info);
-         }
-      }
 
-      if (info != 0)
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with dgetrf!");
+            if (info != 0)
+            {
+               hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with hypre_dgetrf!");
+            }
+         }
       }
    }
 
@@ -360,6 +391,8 @@ hypre_GaussElimAllSetup(hypre_ParAMGData *amg_data,
  * hypre_GaussElimSolve
  *
  * Gaussian elimination solve. See hypre_GaussElimSetup for comments.
+ *
+ * TODO (VPM): remove (u/f)_data_h. Communicate device buffers instead.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -451,6 +484,11 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
          if (relax_type == 9)
          {
             hypre_gselim(A_tmp, b_vec, num_rows_global, ierr);
+
+            if (ierr != 0)
+            {
+               hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with hypre_gselim!");
+            }
          }
          else if (relax_type == 99) /* use pivoting */
          {
@@ -464,6 +502,11 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
             hypre_dgetrs("N", &num_rows_global, &one_i, A_tmp,
                          &num_rows_global, piv, b_vec,
                          &num_rows_global, &ierr);
+
+            if (ierr != 0)
+            {
+               hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with hypre_dgetrs!");
+            }
 
             hypre_TFree(piv, HYPRE_MEMORY_HOST);
          }
@@ -490,11 +533,6 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
                        hypre_ParVectorMemoryLocation(u), HYPRE_MEMORY_HOST);
          hypre_TFree(u_data_h, HYPRE_MEMORY_HOST);
       }
-   }
-
-   if (ierr)
-   {
-      hypre_error(HYPRE_ERROR_GENERIC);
    }
 
 #ifdef HYPRE_PROFILE
@@ -591,29 +629,27 @@ hypre_GaussElimAllSolve(hypre_ParAMGData *amg_data,
          if (relax_type == 19)
          {
             hypre_gselim(A_mat, f_data, global_num_rows, info);
+
+            if (info != 0)
+            {
+               hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with gselim!");
+            }
          }
          else
          {
             hypre_dgetrs("N", &global_num_rows, &one_i, A_inv,
                          &global_num_rows, A_piv, f_data,
                          &global_num_rows, &info);
+
+            if (info != 0)
+            {
+               hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with dgetrs!");
+            }
          }
 
          /* Copy solution vector b_vec to u */
          hypre_TMemcpy(u_data, f_data + first_index, HYPRE_Complex, num_rows,
                        memory_location, HYPRE_MEMORY_HOST);
-      }
-   }
-
-   if (info != 0)
-   {
-      if (relax_type == 19)
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with gselim!");
-      }
-      else
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with dgetrs!");
       }
    }
 
