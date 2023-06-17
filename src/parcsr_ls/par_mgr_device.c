@@ -375,12 +375,7 @@ hypreGPUKernel_CSRMatrixExtractBlockDiag( hypre_DeviceItem  &item,
                                           HYPRE_Int         *B_j,
                                           HYPRE_Complex     *B_a )
 {
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_Int   lane = (item.get_local_range(2) * item.get_group(2) + item.get_local_id(2)) &
-                      (HYPRE_WARP_SIZE - 1);
-#else
-   HYPRE_Int   lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
-#endif
+   HYPRE_Int   lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int   bs2  = blk_size * blk_size;
    HYPRE_Int   bidx;
    HYPRE_Int   lidx;
@@ -388,15 +383,9 @@ hypreGPUKernel_CSRMatrixExtractBlockDiag( hypre_DeviceItem  &item,
    HYPRE_Int   col;
 
    /* Grid-stride loop over block matrix rows */
-#if defined(HYPRE_USING_SYCL)
-   for (bidx = (item.get_group(2) * item.get_local_range(2) + item.get_local_id(2)) / HYPRE_WARP_SIZE;
+   for (bidx = hypre_gpu_get_grid_warp_id<1, 1>(item);
         bidx < num_rows / blk_size;
-        bidx += (item.get_group_range(2) * item.get_local_range(2)) * blk_size / HYPRE_WARP_SIZE)
-#else
-   for (bidx = (blockIdx.x * blockDim.x + threadIdx.x) / HYPRE_WARP_SIZE;
-        bidx < num_rows / blk_size;
-        bidx += (gridDim.x * blockDim.x) * blk_size / HYPRE_WARP_SIZE)
-#endif
+        bidx += hypre_gpu_get_grid_num_warps<1, 1>(item))
    {
       ii = bidx * blk_size;
 
@@ -469,28 +458,16 @@ hypreGPUKernel_CSRMatrixExtractBlockDiagMarked( hypre_DeviceItem  &item,
                                                 HYPRE_Int         *B_j,
                                                 HYPRE_Complex     *B_a )
 {
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_Int   lane = (item.get_local_range(2) * item.get_group(2) + item.get_local_id(2)) &
-                      (HYPRE_WARP_SIZE - 1);
-#else
-   HYPRE_Int   lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
-#endif
-   //HYPRE_Int   bs2  = blk_size * blk_size;
+   HYPRE_Int   lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int   bidx;
    HYPRE_Int   lidx;
    HYPRE_Int   i, ii, j, pj, qj, k;
    HYPRE_Int   col;
 
    /* Grid-stride loop over block matrix rows */
-#if defined(HYPRE_USING_SYCL)
-   for (bidx = (item.get_group(2) * item.get_local_range(2) + item.get_local_id(2)) / HYPRE_WARP_SIZE;
+   for (bidx = hypre_gpu_get_grid_warp_id<1, 1>(item);
         bidx < num_rows / blk_size;
-        bidx += (item.get_group_range(2) * item.get_local_range(2)) * blk_size / HYPRE_WARP_SIZE)
-#else
-   for (bidx = (blockIdx.x * blockDim.x + threadIdx.x) / HYPRE_WARP_SIZE;
-        bidx < num_rows / blk_size;
-        bidx += (gridDim.x * blockDim.x) * blk_size / HYPRE_WARP_SIZE)
-#endif
+        bidx += hypre_gpu_get_grid_num_warps<1, 1>(item))
    {
       /* TODO: unroll this loop */
       for (lidx = 0; lidx < blk_size; lidx++)
@@ -548,30 +525,19 @@ hypreGPUKernel_ComplexMatrixBatchedTranspose( hypre_DeviceItem  &item,
                                               HYPRE_Complex     *A_data,
                                               HYPRE_Complex     *B_data )
 {
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_Int   lane = (item.get_local_range(2) * item.get_group(2) + item.get_local_id(2)) &
-                      (HYPRE_WARP_SIZE - 1);
-#else
-   HYPRE_Int   lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
-#endif
+   HYPRE_Int   lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int   bs2  = block_size * block_size;
    HYPRE_Int   bidx, lidx;
 
    /* Grid-stride loop over block matrix rows */
-#if defined(HYPRE_USING_SYCL)
-   for (bidx = (item.get_group(2) * item.get_local_range(2) + item.get_local_id(2)) / HYPRE_WARP_SIZE;
+   for (bidx = hypre_gpu_get_grid_warp_id<1, 1>(item);
         bidx < num_blocks;
-        bidx += (item.get_group_range(2) * item.get_local_range(2)) / HYPRE_WARP_SIZE)
-#else
-   for (bidx = (blockIdx.x * blockDim.x + threadIdx.x) / HYPRE_WARP_SIZE;
-        bidx < num_blocks;
-        bidx += (gridDim.x * blockDim.x) / HYPRE_WARP_SIZE)
-#endif
+        bidx += hypre_gpu_get_grid_num_warps<1, 1>(item))
    {
       for (lidx = lane; lidx < bs2; lidx += HYPRE_WARP_SIZE)
       {
-         B_data[bidx * bs2 + lidx] = A_data[bidx * bs2 + (lidx / block_size + (lidx % block_size) *
-                                                          block_size)];
+         B_data[bidx * bs2 + lidx] =
+            A_data[bidx * bs2 + (lidx / block_size + (lidx % block_size) * block_size)];
       }
    } /* Grid-stride loop */
 }
@@ -632,16 +598,29 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
    hypre_MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &myid);
 #endif
 
-   hypre_GpuProfilingPushRange("ParCSRMatrixExtractBlockDiag");
+   /*-----------------------------------------------------------------
+    * Sanity checks
+    *-----------------------------------------------------------------*/
 
-   /* Sanity check */
-   if ((num_rows_A > 0) && (num_rows_A < blk_size))
+   if (blk_size < 1)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error!!! Input matrix is smaller than block size.");
-      hypre_GpuProfilingPopRange();
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid block size!");
 
       return hypre_error_flag;
    }
+
+   if ((num_rows_A > 0) && (num_rows_A < blk_size))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Input matrix is smaller than block size!");
+
+      return hypre_error_flag;
+   }
+
+   /*-----------------------------------------------------------------
+    * Initial
+    *-----------------------------------------------------------------*/
+
+   hypre_GpuProfilingPushRange("ParCSRMatrixExtractBlockDiag");
 
    /* Count the number of points matching point_type in CF_marker */
    if (CF_marker)
@@ -685,7 +664,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
     *-----------------------------------------------------------------*/
    {
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-      dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "warp", bDim);
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows / blk_size, "warp", bDim);
 
       if (CF_marker)
       {
