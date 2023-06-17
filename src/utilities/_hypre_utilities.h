@@ -1571,8 +1571,6 @@ extern "C++"
 #ifndef HYPRE_HANDLE_H
 #define HYPRE_HANDLE_H
 
-#include "magma.h"
-
 struct hypre_DeviceData;
 typedef struct hypre_DeviceData hypre_DeviceData;
 
