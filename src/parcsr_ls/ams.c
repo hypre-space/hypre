@@ -738,7 +738,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
          {
             for (i = 0; i < num_rows; i++)
             {
-               l1_norm[i] += (diag_tmp[i] - l1_norm[i] + hypre_sqrt(diag_tmp[i] * diag_tmp[i] + l1_norm[i] * l1_norm[i])) * 0.5;
+               l1_norm[i] = (diag_tmp[i] + l1_norm[i] + hypre_sqrt(diag_tmp[i] * diag_tmp[i] + l1_norm[i] * l1_norm[i])) * 0.5;
             }
          }
       }
@@ -4748,7 +4748,6 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
             }
          }
       }
-
       else if (option == 5) /*stores diagonal of A for Jacobi using matvec, rlx 7 */
       {
          /* Set the diag element */
@@ -4756,6 +4755,77 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
          {
             l1_norm[i] =  A_diag_data[A_diag_I[i]];
             if (l1_norm[i] == 0) { l1_norm[i] = 1.0; }
+         }
+      }
+      else if (option == 6)
+      {
+         for (i = ns; i < ne; i++)
+         {
+            l1_norm[i] = 0.0;
+
+            if (cf_marker == NULL)
+            {
+               /* Add the diagonal and the local off-thread part of the ith row */
+               for (j = A_diag_I[i]; j < A_diag_I[i + 1]; j++)
+               {
+                  ii = A_diag_J[j];
+                  if (ii == i || ii < ns || ii >= ne)
+                  {
+                     if (ii == i)
+                     {
+                        diag = hypre_abs(A_diag_data[j]);
+                     }
+                     else
+                     {
+                        l1_norm[i] += 0.5 * hypre_abs(A_diag_data[j]);
+                     }
+                  }
+               }
+               /* Add the l1 norm of the offd part of the ith row */
+               if (num_cols_offd)
+               {
+                  for (j = A_offd_I[i]; j < A_offd_I[i + 1]; j++)
+                  {
+                     l1_norm[i] += 0.5 * hypre_abs(A_offd_data[j]);
+                  }
+               }
+
+               l1_norm[i] = (diag + l1_norm[i] + hypre_sqrt(diag * diag + l1_norm[i] * l1_norm[i])) * 0.5;
+            }
+            else
+            {
+               cf_diag = cf_marker[i];
+               /* Add the diagonal and the local off-thread part of the ith row */
+               for (j = A_diag_I[i]; j < A_diag_I[i + 1]; j++)
+               {
+                  ii = A_diag_J[j];
+                  if ((ii == i || ii < ns || ii >= ne) &&
+                      (cf_diag == cf_marker[A_diag_J[j]]))
+                  {
+                     if (ii == i)
+                     {
+                        diag = hypre_abs(A_diag_data[j]);
+                     }
+                     else
+                     {
+                        l1_norm[i] += 0.5 * hypre_abs(A_diag_data[j]);
+                     }
+                  }
+               }
+               /* Add the CF l1 norm of the offd part of the ith row */
+               if (num_cols_offd)
+               {
+                  for (j = A_offd_I[i]; j < A_offd_I[i + 1]; j++)
+                  {
+                     if (cf_diag == cf_marker_offd[A_offd_J[j]])
+                     {
+                        l1_norm[i] += 0.5 * hypre_abs(A_offd_data[j]);
+                     }
+                  }
+               }
+
+               l1_norm[i] = (diag + l1_norm[i] + hypre_sqrt(diag * diag + l1_norm[i] * l1_norm[i])) * 0.5;
+            }
          }
       }
 
