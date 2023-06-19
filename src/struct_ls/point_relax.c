@@ -356,7 +356,7 @@ hypre_PointRelax( void               *relax_vdata,
    HYPRE_Int              iter, p, compute_i, i, j;
    HYPRE_Int              pointset;
 
-   HYPRE_Real             bsumsq, rsumsq;
+   HYPRE_Real             bsumsq = 1.0, rsumsq;
 
    /*----------------------------------------------------------
     * Initialize some things and deal with special cases
