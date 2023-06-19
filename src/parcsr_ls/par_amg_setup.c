@@ -3102,7 +3102,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       {
          HYPRE_Int max_thresh = hypre_max(coarse_threshold, seq_threshold);
-#ifdef HYPRE_USING_DSUPERLU
+#if defined(HYPRE_USING_DSUPERLU)
          max_thresh = hypre_max(max_thresh, dslu_threshold);
 #endif
          if ( (level == max_levels - 1) || (coarse_size <= (HYPRE_BigInt) max_thresh) )
@@ -3121,7 +3121,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    {
       hypre_seqAMGSetup(amg_data, level, coarse_threshold);
    }
-#ifdef HYPRE_USING_DSUPERLU
+#if defined(HYPRE_USING_DSUPERLU)
    else if ((dslu_threshold >= coarse_threshold) &&
             (coarse_size > (HYPRE_BigInt)coarse_threshold) &&
             (level != max_levels - 1))
@@ -3132,29 +3132,15 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    }
 #endif
    else if (grid_relax_type[3] == 9  ||
+            grid_relax_type[3] == 19 ||
+            grid_relax_type[3] == 98 ||
             grid_relax_type[3] == 99 ||
             grid_relax_type[3] == 199 )
    {
-      /* Use of Gaussian elimination on coarsest level with local
-         matrices/vectors formed via MPI collectives defined on
-         new sub-communicators */
+      /* Gaussian elimination on the coarsest level */
       if (coarse_size <= coarse_threshold)
       {
          hypre_GaussElimSetup(amg_data, level, grid_relax_type[3]);
-      }
-      else
-      {
-         grid_relax_type[3] = grid_relax_type[1];
-      }
-   }
-   else if (grid_relax_type[3] == 19 ||
-            grid_relax_type[3] == 98)
-   {
-      /* Use of Gaussian elimination on coarsest level with local
-         matrices/vectors formed via hypre_DataExchange*/
-      if (coarse_size <= coarse_threshold)
-      {
-         hypre_GaussElimAllSetup(amg_data, level, grid_relax_type[3]);
       }
       else
       {
