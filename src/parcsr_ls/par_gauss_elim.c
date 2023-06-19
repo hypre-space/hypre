@@ -409,8 +409,50 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
    }
 
    /*-----------------------------------------------------------------
-    *  TODO (VPM): Gather RHS phase
+    *  Gather RHS phase
     *-----------------------------------------------------------------*/
+
+   if (relax_type == 9 || relax_type == 99 || relax_type == 199)
+   {
+      hypre_MPI_Comm_size(new_comm, &new_num_procs);
+      info   = &comm_info[0];
+      displs = &comm_info[new_num_procs];
+
+      if (hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(f)) != hypre_MEMORY_HOST)
+      {
+         f_data_h = hypre_TAlloc(HYPRE_Real, num_rows, HYPRE_MEMORY_HOST);
+
+         hypre_TMemcpy(f_data_h, f_data, HYPRE_Real, num_rows, HYPRE_MEMORY_HOST,
+                       hypre_ParVectorMemoryLocation(f));
+      }
+      else
+      {
+         f_data_h = f_data;
+      }
+
+      if (hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(u)) != hypre_MEMORY_HOST)
+      {
+         u_data_h = hypre_TAlloc(HYPRE_Real, num_rows, HYPRE_MEMORY_HOST);
+      }
+      else
+      {
+         u_data_h = u_data;
+      }
+
+      /* TODO (VPM): Add GPU-aware MPI support to buffers */
+      hypre_MPI_Allgatherv(f_data_h, num_rows, HYPRE_MPI_REAL, b_vec, info,
+                           displs, HYPRE_MPI_REAL, new_comm);
+
+      if (f_data_h != f_data)
+      {
+         hypre_TFree(f_data_h, HYPRE_MEMORY_HOST);
+      }
+   }
+   else /* if (relax_type == 19 || relax_type == 99) */
+   {
+      f_vector = hypre_ParVectorToVectorAll(f, HYPRE_MEMORY_HOST);
+      f_data   = hypre_VectorData(f_vector);
+   }
 
    /*-----------------------------------------------------------------
     *  Gaussian elimination solve
@@ -434,40 +476,6 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
    {
       if (relax_type == 9 || relax_type == 99 || relax_type == 199)
       {
-         hypre_MPI_Comm_size(new_comm, &new_num_procs);
-         info   = &comm_info[0];
-         displs = &comm_info[new_num_procs];
-
-         if (hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(f)) != hypre_MEMORY_HOST)
-         {
-            f_data_h = hypre_TAlloc(HYPRE_Real, num_rows, HYPRE_MEMORY_HOST);
-
-            hypre_TMemcpy(f_data_h, f_data, HYPRE_Real, num_rows, HYPRE_MEMORY_HOST,
-                          hypre_ParVectorMemoryLocation(f));
-         }
-         else
-         {
-            f_data_h = f_data;
-         }
-
-         if (hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(u)) != hypre_MEMORY_HOST)
-         {
-            u_data_h = hypre_TAlloc(HYPRE_Real, num_rows, HYPRE_MEMORY_HOST);
-         }
-         else
-         {
-            u_data_h = u_data;
-         }
-
-         /* TODO (VPM): Add GPU-aware MPI support to buffers */
-         hypre_MPI_Allgatherv(f_data_h, num_rows, HYPRE_MPI_REAL, b_vec, info,
-                              displs, HYPRE_MPI_REAL, new_comm);
-
-         if (f_data_h != f_data)
-         {
-            hypre_TFree(f_data_h, HYPRE_MEMORY_HOST);
-         }
-
          if (relax_type == 9)
          {
             hypre_TMemcpy(A_inv, A_mat, HYPRE_Real, global_size,
@@ -502,21 +510,9 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
                         A_inv, &num_rows, b_vec, &one_i, &zero,
                         u_data_h, &one_i);
          }
-
-         if (u_data_h != u_data)
-         {
-            hypre_TMemcpy(u_data, u_data_h, HYPRE_Real, num_rows,
-                          hypre_ParVectorMemoryLocation(u), HYPRE_MEMORY_HOST);
-            hypre_TFree(u_data_h, HYPRE_MEMORY_HOST);
-         }
       }
       else /* if (relax_type == 19 || relax_type = 98) */
       {
-         /* Gather RHS  */
-         f_vector = hypre_ParVectorToVectorAll(f, HYPRE_MEMORY_HOST);
-         f_data   = hypre_VectorData(f_vector);
-
-         /* f_data = inv(U)*inv(L)*f_data */
          if (relax_type == 19)
          {
             /* Update work space with A */
@@ -544,15 +540,28 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
          /* Copy solution vector b_vec to u */
          hypre_TMemcpy(u_data, f_data + first_index, HYPRE_Complex, num_rows,
                        memory_location, HYPRE_MEMORY_HOST);
-
-         /* Free memory - TODO (VPM): do we need to create and destroy this at every solve call? */
-         hypre_SeqVectorDestroy(f_vector);
       }
    }
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SOLVE] += hypre_MPI_Wtime();
 #endif
+
+   /* Free memory */
+   if (relax_type == 9 || relax_type == 99 || relax_type == 199)
+   {
+      if (u_data_h != u_data)
+      {
+         hypre_TMemcpy(u_data, u_data_h, HYPRE_Real, num_rows,
+                       hypre_ParVectorMemoryLocation(u), HYPRE_MEMORY_HOST);
+         hypre_TFree(u_data_h, HYPRE_MEMORY_HOST);
+      }
+   }
+   else
+   {
+      /* Free memory - TODO (VPM): do we need to create and destroy this at every solve call? */
+      hypre_SeqVectorDestroy(f_vector);
+   }
 
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
