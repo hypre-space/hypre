@@ -1665,10 +1665,6 @@ HYPRE_Int hypre_GaussElimSetup ( hypre_ParAMGData *amg_data, HYPRE_Int level,
                                  HYPRE_Int relax_type );
 HYPRE_Int hypre_GaussElimSolve ( hypre_ParAMGData *amg_data, HYPRE_Int level,
                                  HYPRE_Int relax_type );
-HYPRE_Int hypre_GaussElimAllSetup ( hypre_ParAMGData *amg_data, HYPRE_Int level,
-                                    HYPRE_Int relax_type );
-HYPRE_Int hypre_GaussElimAllSolve ( hypre_ParAMGData *amg_data, HYPRE_Int level,
-                                    HYPRE_Int relax_type );
 
 /* par_relax.c */
 HYPRE_Int hypre_BoomerAMGRelax ( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker,
