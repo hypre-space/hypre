@@ -859,6 +859,8 @@ hypre_BoomerAMGDestroy( void *data )
       hypre_TFree(hypre_ParAMGDataCPointsLocalMarker(amg_data), memory_location);
       hypre_TFree(hypre_ParAMGDataFPointsMarker(amg_data), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParAMGDataIsolatedFPointsMarker(amg_data), HYPRE_MEMORY_HOST);
+
+      /* Direct solver for the coarsest level */
       hypre_TFree(hypre_ParAMGDataAPiv(amg_data), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParAMGDataAMat(amg_data), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParAMGDataAInv(amg_data), HYPRE_MEMORY_HOST);
