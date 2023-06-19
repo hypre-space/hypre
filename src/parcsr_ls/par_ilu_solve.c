@@ -69,7 +69,7 @@ hypre_ILUSolve( void               *ilu_vdata,
    hypre_ParVector      *Ytemp              = hypre_ParILUDataYTemp(ilu_data);
    HYPRE_Real           *fext               = hypre_ParILUDataFExt(ilu_data);
    HYPRE_Real           *uext               = hypre_ParILUDataUExt(ilu_data);
-   hypre_ParVector      *residual;
+   hypre_ParVector      *residual           = NULL;
    HYPRE_Real            alpha              = -1.0;
    HYPRE_Real            beta               = 1.0;
    HYPRE_Real            conv_factor        = 0.0;
@@ -155,7 +155,7 @@ hypre_ILUSolve( void               *ilu_vdata,
          {
             hypre_ParCSRMatrixMatvec(alpha, A, u, beta, residual);
          }
-         resnorm = hypre_sqrt(hypre_ParVectorInnerProd( residual, residual ));
+         resnorm = hypre_sqrt(hypre_ParVectorInnerProd(residual, residual));
       }
       else
       {
@@ -2003,7 +2003,7 @@ hypre_NSHSolve( void               *nsh_vdata,
    HYPRE_Real           *norms          = hypre_ParNSHDataRelResNorms(nsh_data);
    hypre_ParVector      *Ftemp          = hypre_ParNSHDataFTemp(nsh_data);
    hypre_ParVector      *Utemp          = hypre_ParNSHDataUTemp(nsh_data);
-   hypre_ParVector      *residual;
+   hypre_ParVector      *residual       = NULL;
 
    HYPRE_Real            alpha          = -1.0;
    HYPRE_Real            beta           = 1.0;
@@ -2057,14 +2057,14 @@ hypre_NSHSolve( void               *nsh_vdata,
     *-----------------------------------------------------------------------*/
    if (print_level > 1 || logging > 1 || tol > 0.)
    {
-      if ( logging > 1 )
+      if (logging > 1)
       {
-         hypre_ParVectorCopy(f, residual );
+         hypre_ParVectorCopy(f, residual);
          if (tol > 0.0)
          {
-            hypre_ParCSRMatrixMatvec(alpha, A, u, beta, residual );
+            hypre_ParCSRMatrixMatvec(alpha, A, u, beta, residual);
          }
-         resnorm = hypre_sqrt(hypre_ParVectorInnerProd( residual, residual ));
+         resnorm = hypre_sqrt(hypre_ParVectorInnerProd(residual, residual));
       }
       else
       {
