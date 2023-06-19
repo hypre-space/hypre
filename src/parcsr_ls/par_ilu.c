@@ -1452,15 +1452,16 @@ hypre_ILUMaxrHeapRemoveRabsI(HYPRE_Real *heap, HYPRE_Int *I1, HYPRE_Int len)
  *
  * Split based on quick sort algorithm (avoid sorting the entire array)
  * find the largest k elements out of original array
- * array: input array for compare
- * I: integer array bind with array
+ *
+ * arrayR: input array for compare
+ * arrayI: integer array bind with array
  * k: largest k elements
  * len: length of the array
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ILUMaxQSplitRabsI(HYPRE_Real *array,
-                        HYPRE_Int  *I,
+hypre_ILUMaxQSplitRabsI(HYPRE_Real *arrayR,
+                        HYPRE_Int  *arrayI,
                         HYPRE_Int   left,
                         HYPRE_Int   bound,
                         HYPRE_Int   right)
@@ -1472,21 +1473,21 @@ hypre_ILUMaxQSplitRabsI(HYPRE_Real *array,
       return hypre_error_flag;
    }
 
-   hypre_swap2(I, array, left, (left + right) / 2);
+   hypre_swap2(arrayI, arrayR, left, (left + right) / 2);
    last = left;
    for (i = left + 1 ; i <= right ; i ++)
    {
-      if (hypre_abs(array[i]) > hypre_abs(array[left]))
+      if (hypre_abs(arrayR[i]) > hypre_abs(arrayR[left]))
       {
-         hypre_swap2(I, array, ++last, i);
+         hypre_swap2(arrayI, arrayR, ++last, i);
       }
    }
 
-   hypre_swap2(I, array, left, last);
-   hypre_ILUMaxQSplitRabsI(array, I, left, bound, last - 1);
+   hypre_swap2(arrayI, arrayR, left, last);
+   hypre_ILUMaxQSplitRabsI(arrayR, arrayI, left, bound, last - 1);
    if (bound > last)
    {
-      hypre_ILUMaxQSplitRabsI(array, I, last + 1, bound, right);
+      hypre_ILUMaxQSplitRabsI(arrayR, arrayI, last + 1, bound, right);
    }
 
    return hypre_error_flag;
