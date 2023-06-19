@@ -351,7 +351,7 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
                      HYPRE_Int         relax_type)
 {
    hypre_ParCSRMatrix  * A               = hypre_ParAMGDataAArray(amg_data)[level];
-   HYPRE_Int             first_index     = (HYPRE_Int) hypre_ParCSRMatrixFirstRowIndex(A);
+   HYPRE_Int             first_row_index = (HYPRE_Int) hypre_ParCSRMatrixFirstRowIndex(A);
    HYPRE_Int             global_num_rows = (HYPRE_Int) hypre_ParCSRMatrixGlobalNumRows(A);
    HYPRE_Int             num_rows        = hypre_ParCSRMatrixNumRows(A);
    HYPRE_MemoryLocation  memory_location = hypre_ParCSRMatrixMemoryLocation(A);
@@ -359,12 +359,12 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
    HYPRE_Real           *b_vec           = hypre_ParAMGDataBVec(amg_data);
    hypre_ParVector      *f               = hypre_ParAMGDataFArray(amg_data)[level];
    HYPRE_Real           *f_data          = hypre_VectorData(hypre_ParVectorLocalVector(f));
-   HYPRE_Real           *f_data_h;
-   hypre_Vector         *f_vector;
+   HYPRE_Real           *f_data_h        = NULL;
+   hypre_Vector         *f_vector        = NULL;
 
    hypre_ParVector      *u               = hypre_ParAMGDataUArray(amg_data)[level];
    HYPRE_Real           *u_data          = hypre_VectorData(hypre_ParVectorLocalVector(u));
-   HYPRE_Real           *u_data_h;
+   HYPRE_Real           *u_data_h        = NULL;
 
    /* Coarse solver data */
    HYPRE_Int            *A_piv           = hypre_ParAMGDataAPiv(amg_data);
@@ -430,13 +430,17 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
          f_data_h = f_data;
       }
 
-      if (hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(u)) != hypre_MEMORY_HOST)
+      /* relax_type 199 needs a work space for the solution vector */
+      if (relax_type == 199)
       {
-         u_data_h = hypre_TAlloc(HYPRE_Real, num_rows, HYPRE_MEMORY_HOST);
-      }
-      else
-      {
-         u_data_h = u_data;
+         if (hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(f)) != hypre_MEMORY_HOST)
+         {
+            u_data_h = hypre_TAlloc(HYPRE_Real, num_rows, HYPRE_MEMORY_HOST);
+         }
+         else
+         {
+            u_data_h = u_data;
+         }
       }
 
       /* TODO (VPM): Add GPU-aware MPI support to buffers */
@@ -474,72 +478,49 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
    else
 #endif
    {
-      if (relax_type == 9 || relax_type == 99 || relax_type == 199)
+      if (relax_type == 9 || relax_type == 19)
       {
-         if (relax_type == 9)
-         {
-            hypre_TMemcpy(A_inv, A_mat, HYPRE_Real, global_size,
-                          HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(A_inv, A_mat, HYPRE_Real, global_size,
+                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         b_vec = (relax_type == 9) ? b_vec : f_data;
 
-            hypre_gselim(A_inv, b_vec, global_num_rows, ierr);
-            if (ierr != 0)
-            {
-               hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with hypre_gselim!");
-            }
-
-            hypre_TMemcpy(u_data_h, b_vec + first_index, HYPRE_Real, num_rows,
-                          HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-         }
-         else if (relax_type == 99)
+         /* Run hypre's internal gaussian elimination */
+         hypre_gselim(A_inv, b_vec, global_num_rows, ierr);
+         if (ierr != 0)
          {
-            /* b_vec = inv(A)*b_vec */
-            hypre_dgetrs("N", &global_num_rows, &one_i, A_mat,
-                         &global_num_rows, A_piv, b_vec,
-                         &global_num_rows, &ierr);
-            if (ierr != 0)
-            {
-               hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with hypre_dgetrs!");
-            }
-
-            hypre_TMemcpy(u_data_h, b_vec + first_index, HYPRE_Real, num_rows,
-                          HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-         }
-         else if (relax_type == 199)
-         {
-            hypre_dgemv("N", &num_rows, &global_num_rows, &one,
-                        A_inv, &num_rows, b_vec, &one_i, &zero,
-                        u_data_h, &one_i);
-         }
-      }
-      else /* if (relax_type == 19 || relax_type = 98) */
-      {
-         if (relax_type == 19)
-         {
-            /* Update work space with A */
-            hypre_TMemcpy(A_inv, A_mat, HYPRE_Complex, global_size,
-                          HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-
-            hypre_gselim(A_inv, f_data, global_num_rows, ierr);
-            if (ierr != 0)
-            {
-               hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with gselim!");
-            }
-         }
-         else
-         {
-            hypre_dgetrs("N", &global_num_rows, &one_i, A_mat,
-                         &global_num_rows, A_piv, f_data,
-                         &global_num_rows, &ierr);
-
-            if (ierr != 0)
-            {
-               hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with dgetrs!");
-            }
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with hypre_gselim!");
          }
 
-         /* Copy solution vector b_vec to u */
-         hypre_TMemcpy(u_data, f_data + first_index, HYPRE_Complex, num_rows,
+         hypre_TMemcpy(u_data, b_vec + first_row_index, HYPRE_Real, num_rows,
                        memory_location, HYPRE_MEMORY_HOST);
+      }
+      else if (relax_type == 98 || relax_type == 99)
+      {
+         b_vec = (relax_type == 99) ? b_vec : f_data;
+
+         /* Run LAPACK's triangular solver */
+         hypre_dgetrs("N", &global_num_rows, &one_i, A_mat,
+                      &global_num_rows, A_piv, b_vec,
+                      &global_num_rows, &ierr);
+         if (ierr != 0)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with hypre_dgetrs!");
+         }
+
+         hypre_TMemcpy(u_data, b_vec + first_row_index, HYPRE_Real, num_rows,
+                       memory_location, HYPRE_MEMORY_HOST);
+      }
+      else /* if (relax_type == 199)*/
+      {
+         hypre_dgemv("N", &num_rows, &global_num_rows, &one,
+                     A_inv, &num_rows, b_vec, &one_i, &zero,
+                     u_data_h, &one_i);
+
+         if (u_data_h != u_data)
+         {
+            hypre_TMemcpy(u_data, u_data_h + first_row_index, HYPRE_Real, num_rows,
+                          memory_location, HYPRE_MEMORY_HOST);
+         }
       }
    }
 
@@ -547,20 +528,11 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SOLVE] += hypre_MPI_Wtime();
 #endif
 
-   /* Free memory */
-   if (relax_type == 9 || relax_type == 99 || relax_type == 199)
+   /* Free memory - TODO (VPM): do we need to create and destroy f_vector at every solve call? */
+   hypre_SeqVectorDestroy(f_vector);
+   if (u_data_h != u_data)
    {
-      if (u_data_h != u_data)
-      {
-         hypre_TMemcpy(u_data, u_data_h, HYPRE_Real, num_rows,
-                       hypre_ParVectorMemoryLocation(u), HYPRE_MEMORY_HOST);
-         hypre_TFree(u_data_h, HYPRE_MEMORY_HOST);
-      }
-   }
-   else
-   {
-      /* Free memory - TODO (VPM): do we need to create and destroy this at every solve call? */
-      hypre_SeqVectorDestroy(f_vector);
+      hypre_TFree(u_data_h, HYPRE_MEMORY_HOST);
    }
 
    hypre_GpuProfilingPopRange();
