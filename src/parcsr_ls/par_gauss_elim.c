@@ -30,7 +30,7 @@
 HYPRE_Int
 hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
                      HYPRE_Int         level,
-                     HYPRE_Int         relax_type)
+                     HYPRE_Int         solver_type)
 {
    /* Par Data Structure variables */
    hypre_ParCSRMatrix   *A               = hypre_ParAMGDataAArray(amg_data)[level];
@@ -57,8 +57,8 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
     *-----------------------------------------------------------------*/
 
    /* Check for relaxation type */
-   if (relax_type != 9  && relax_type != 99 && relax_type != 199 &&
-       relax_type != 19 && relax_type != 98)
+   if (solver_type != 9  && solver_type != 99 && solver_type != 199 &&
+       solver_type != 19 && solver_type != 98)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Wrong relaxation type!");
       return hypre_error_flag;
@@ -75,7 +75,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("GaussElimSetup");
 
-   if (relax_type == 9 || relax_type == 99 || relax_type == 199)
+   if (solver_type == 9 || solver_type == 99 || solver_type == 199)
    {
       hypre_CSRMatrix      *A_diag_host;
       hypre_CSRMatrix      *A_offd_host;
@@ -156,7 +156,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
                               mat_displs, HYPRE_MPI_REAL, new_comm);
 
          /* Set dense matrix */
-         if (relax_type == 9)
+         if (solver_type == 9)
          {
             hypre_ParAMGDataAMat(amg_data) = A_mat;
          }
@@ -195,7 +195,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
          return hypre_error_flag;
       }
    }
-   else /* if (relax_type == 19 || relax_type = 98) */
+   else /* if (solver_type == 19 || solver_type = 98) */
    {
       /* Generate CSR matrix from ParCSRMatrix A */
       hypre_CSRMatrix   *A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A, HYPRE_MEMORY_HOST);
@@ -254,7 +254,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
    else
 #endif
    {
-      if (relax_type != 9 && relax_type != 19)
+      if (solver_type != 9 && solver_type != 19)
       {
          /* Create array to store pivots */
          Apiv = hypre_TAlloc(HYPRE_Int, global_num_rows, HYPRE_MEMORY_HOST);
@@ -271,7 +271,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
          }
 
          /* Compute explicit inverse */
-         if (relax_type == 199)
+         if (solver_type == 199)
          {
             HYPRE_Int     query = -1, lwork;
             HYPRE_Real    lwork_opt, *work;
@@ -314,7 +314,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
             hypre_ParAMGDataAMat(amg_data) = NULL;
          }
       }
-      else if (relax_type == 9 || relax_type == 19)
+      else if (solver_type == 9 || solver_type == 19)
       {
          /* Work space for performing gaussian elimination */
          Ainv = hypre_TAlloc(HYPRE_Real, global_size, HYPRE_MEMORY_HOST);
@@ -348,7 +348,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
 HYPRE_Int
 hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
                      HYPRE_Int         level,
-                     HYPRE_Int         relax_type)
+                     HYPRE_Int         solver_type)
 {
    hypre_ParCSRMatrix  * A               = hypre_ParAMGDataAArray(amg_data)[level];
    HYPRE_Int             first_row_index = (HYPRE_Int) hypre_ParCSRMatrixFirstRowIndex(A);
@@ -391,12 +391,12 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
    /* Call setup if not done before */
    if (hypre_ParAMGDataGSSetup(amg_data) == 0)
    {
-      hypre_GaussElimSetup(amg_data, level, relax_type);
+      hypre_GaussElimSetup(amg_data, level, solver_type);
    }
 
    /* Check for relaxation type */
-   if (relax_type != 9  && relax_type != 99 && relax_type != 199 &&
-       relax_type != 19 && relax_type != 98)
+   if (solver_type != 9  && solver_type != 99 && solver_type != 199 &&
+       solver_type != 19 && solver_type != 98)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Wrong relaxation type!");
       return hypre_error_flag;
@@ -412,7 +412,7 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
     *  Gather RHS phase
     *-----------------------------------------------------------------*/
 
-   if (relax_type == 9 || relax_type == 99 || relax_type == 199)
+   if (solver_type == 9 || solver_type == 99 || solver_type == 199)
    {
       hypre_MPI_Comm_size(new_comm, &new_num_procs);
       info   = &comm_info[0];
@@ -430,8 +430,8 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
          f_data_h = f_data;
       }
 
-      /* relax_type 199 needs a work space for the solution vector */
-      if (relax_type == 199)
+      /* solver_type 199 needs a work space for the solution vector */
+      if (solver_type == 199)
       {
          if (hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(f)) != hypre_MEMORY_HOST)
          {
@@ -452,7 +452,7 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
          hypre_TFree(f_data_h, HYPRE_MEMORY_HOST);
       }
    }
-   else /* if (relax_type == 19 || relax_type == 99) */
+   else /* if (solver_type == 19 || solver_type == 99) */
    {
       f_vector = hypre_ParVectorToVectorAll(f, HYPRE_MEMORY_HOST);
       f_data   = hypre_VectorData(f_vector);
@@ -471,18 +471,18 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy  exec = hypre_GetExecPolicy1(memory_location);
 
-   if (exec == HYPRE_EXEC_DEVICE && (relax_type != 9 && relax_type != 19))
+   if (exec == HYPRE_EXEC_DEVICE && (solver_type != 9 && solver_type != 19))
    {
       /* TODO (VPM) */
    }
    else
 #endif
    {
-      if (relax_type == 9 || relax_type == 19)
+      if (solver_type == 9 || solver_type == 19)
       {
          hypre_TMemcpy(A_inv, A_mat, HYPRE_Real, global_size,
                        HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-         b_vec = (relax_type == 9) ? b_vec : f_data;
+         b_vec = (solver_type == 9) ? b_vec : f_data;
 
          /* Run hypre's internal gaussian elimination */
          hypre_gselim(A_inv, b_vec, global_num_rows, ierr);
@@ -494,9 +494,9 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
          hypre_TMemcpy(u_data, b_vec + first_row_index, HYPRE_Real, num_rows,
                        memory_location, HYPRE_MEMORY_HOST);
       }
-      else if (relax_type == 98 || relax_type == 99)
+      else if (solver_type == 98 || solver_type == 99)
       {
-         b_vec = (relax_type == 99) ? b_vec : f_data;
+         b_vec = (solver_type == 99) ? b_vec : f_data;
 
          /* Run LAPACK's triangular solver */
          hypre_dgetrs("N", &global_num_rows, &one_i, A_mat,
@@ -510,7 +510,7 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
          hypre_TMemcpy(u_data, b_vec + first_row_index, HYPRE_Real, num_rows,
                        memory_location, HYPRE_MEMORY_HOST);
       }
-      else /* if (relax_type == 199)*/
+      else /* if (solver_type == 199)*/
       {
          hypre_dgemv("N", &num_rows, &global_num_rows, &one,
                      A_inv, &num_rows, b_vec, &one_i, &zero,

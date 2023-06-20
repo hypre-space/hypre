@@ -3048,11 +3048,17 @@ HYPRE_Int hypre_GetCommPkgRTFromCommPkgA ( hypre_ParCSRMatrix *RT, hypre_ParCSRM
 HYPRE_Int hypre_GenerateSendMapAndCommPkg ( MPI_Comm comm, HYPRE_Int num_sends, HYPRE_Int num_recvs,
                                             HYPRE_Int *recv_procs, HYPRE_Int *send_procs, HYPRE_Int *recv_vec_starts, hypre_ParCSRMatrix *A );
 
+/* par_ge_device.c */
+HYPRE_Int hypre_GaussElimSetupDevice ( hypre_ParAMGData *amg_data, HYPRE_Int level,
+                                       HYPRE_Int solver_type );
+HYPRE_Int hypre_GaussElimSolveDevice ( hypre_ParAMGData *amg_data, HYPRE_Int level,
+                                       HYPRE_Int solver_type );
+
 /* par_gauss_elim.c */
 HYPRE_Int hypre_GaussElimSetup ( hypre_ParAMGData *amg_data, HYPRE_Int level,
-                                 HYPRE_Int relax_type );
+                                 HYPRE_Int solver_type );
 HYPRE_Int hypre_GaussElimSolve ( hypre_ParAMGData *amg_data, HYPRE_Int level,
-                                 HYPRE_Int relax_type );
+                                 HYPRE_Int solver_type );
 
 /* par_relax.c */
 HYPRE_Int hypre_BoomerAMGRelax ( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker,
