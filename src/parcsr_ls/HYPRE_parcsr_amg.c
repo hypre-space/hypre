@@ -588,6 +588,26 @@ HYPRE_BoomerAMGGetKappaCycleVal( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetCycleStruct, HYPRE_BoomerAMGGetCycleStruct
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetCycleStruct( HYPRE_Solver solver,
+                              HYPRE_Int      *cycle_struct,
+                              HYPRE_Int      cycle_num_nodes )
+{
+   return ( hypre_BoomerAMGSetCycleStruct( (void *) solver, cycle_struct, cycle_num_nodes ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetCycleStruct( HYPRE_Solver solver,
+                             HYPRE_Int        **cycle_struct,
+                             HYPRE_Int      *cycle_num_nodes  )
+{
+   return ( hypre_BoomerAMGGetCycleStruct( (void *) solver, cycle_struct,cycle_num_nodes ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetFCycle, HYPRE_BoomerAMGGetFCycle
  *--------------------------------------------------------------------------*/
 
@@ -665,6 +685,24 @@ HYPRE_BoomerAMGSetNumSweeps( HYPRE_Solver  solver,
                              HYPRE_Int          num_sweeps  )
 {
    return ( hypre_BoomerAMGSetNumSweeps( (void *) solver, num_sweeps ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetNodeNumSweeps, HYPRE_BoomerAMGGetnodNumSweeps
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetNodeNumSweeps( HYPRE_Solver  solver,
+                             HYPRE_Int          *node_num_sweeps  )
+{
+   return ( hypre_BoomerAMGSetNodeNumSweeps( (void *) solver, node_num_sweeps ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetNodeNumSweeps( HYPRE_Solver  solver,
+                             HYPRE_Int          **node_num_sweeps  )
+{
+   return ( hypre_BoomerAMGGetNodeNumSweeps( (void *) solver, node_num_sweeps ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -804,6 +842,24 @@ HYPRE_BoomerAMGSetRelaxType( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetRelaxNodeTypes, HYPRE_BoomerAMGGetRelaxNodeTypes
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetRelaxNodeTypes( HYPRE_Solver  solver,
+                             HYPRE_Int          *relax_node_types  )
+{
+   return ( hypre_BoomerAMGSetRelaxNodeTypes( (void *) solver, relax_node_types ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetRelaxNodeTypes( HYPRE_Solver  solver,
+                             HYPRE_Int          **relax_node_types  )
+{
+   return ( hypre_BoomerAMGGetRelaxNodeTypes( (void *) solver, relax_node_types ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetCycleRelaxType, HYPRE_BoomerAMGetCycleRelaxType
  *--------------------------------------------------------------------------*/
 
@@ -858,6 +914,24 @@ HYPRE_BoomerAMGSetRelaxWeight( HYPRE_Solver  solver,
                                HYPRE_Real   *relax_weight  )
 {
    return ( hypre_BoomerAMGSetRelaxWeight( (void *) solver, relax_weight ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetRelaxNodeWeights, HYPRE_BoomerAMGGetRelaxNodeWeights
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetRelaxNodeWeights( HYPRE_Solver  solver,
+                               HYPRE_Real   *relax_node_weights  )
+{
+   return ( hypre_BoomerAMGSetRelaxNodeWeights( (void *) solver, relax_node_weights ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetRelaxNodeWeights( HYPRE_Solver  solver,
+                               HYPRE_Real   **relax_node_weights  )
+{
+   return ( hypre_BoomerAMGGetRelaxNodeWeights( (void *) solver, relax_node_weights ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -577,9 +577,13 @@ HYPRE_Int HYPRE_BoomerAMGSetGSMG(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetNumSamples(HYPRE_Solver solver,
                                        HYPRE_Int    num_samples);
 /**
- * (Optional) Defines the type of cycle.
- * For a V-cycle, set \e cycle_type to 1, for a W-cycle
- *  set \e cycle_type to 2. The default is 1.
+ * (Optional) Defines the type of cycle. For a V-cycle, 
+ * set \e cycle_type to 1, for a W-cycle set \e cycle_type 
+ * to 2, for \e kappa cycles set \e cycle_type to 3, to 
+ * define arbitrary cycle structures set \e cycle_type 
+ * to 4. 
+ * 
+ * The default is 1.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCycleType(HYPRE_Solver solver,
                                       HYPRE_Int    cycle_type);
@@ -589,6 +593,22 @@ HYPRE_Int HYPRE_BoomerAMGSetCycleType(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetKappaCycleVal(HYPRE_Solver solver,
                                       HYPRE_Int    kappa);
+
+/**
+ * (Optional) Defines the cycle stucture of the AMG solver. 
+ * The AMG cycle is represented by a graph with nodes for 
+ * smoothing operations, and edges for inter-grid transfers.
+ * Here we pass edge information and the number of nodes. 
+ * This is represented by an array of length equal to the 
+ * number of cycling edges with the following values:
+ * 
+ * -1 for restriction to the coarser level.
+ * 1 for interpolation to the finer level.
+ * 0 for staying on the same level.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetCycleStruct(HYPRE_Solver solver,
+                                      HYPRE_Int    *cycle_struct,
+                                      HYPRE_Int     cycle_num_nodes);
 /**
  * (Optional) Specifies the use of Full multigrid cycle.
  * The default is 0.
@@ -710,6 +730,17 @@ HYPRE_Int HYPRE_BoomerAMGSetNumSweeps(HYPRE_Solver  solver,
                                       HYPRE_Int     num_sweeps);
 
 /**
+ * (Optional) Defines the number of relaxation sweeps at each 
+ * cycling node for an user-defined arbitrary cycle. Pass an 
+ * array of length equal to the number of cycling nodes. 
+ * 
+ * Note: The AMG cycle is represented by a graph with nodes 
+ * for smoothing operations, and edges for inter-grid transfers.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetNodeNumSweeps(HYPRE_Solver  solver,
+                                      HYPRE_Int     *node_num_sweeps);
+
+/**
  * (Optional) Sets the number of sweeps at a specified cycle.
  * There are the following options for \e k:
  *
@@ -730,6 +761,17 @@ HYPRE_Int HYPRE_BoomerAMGSetCycleNumSweeps(HYPRE_Solver  solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetGridRelaxType(HYPRE_Solver  solver,
                                           HYPRE_Int    *grid_relax_type);
+
+/**
+ * (Optional) Defines the relaxation type at each cycling node
+ * for an user-defined arbitrary cycle. Pass an array of length 
+ * equal to the number of cycling nodes. 
+ * 
+ * Note: The AMG cycle is represented by a graph with nodes 
+ * for smoothing operations, and edges for inter-grid transfers.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetRelaxNodeTypes(HYPRE_Solver  solver,
+                                          HYPRE_Int    *relax_node_types);
 
 /**
  * (Optional) Defines the smoother to be used. It uses the given
@@ -805,6 +847,16 @@ HYPRE_Int HYPRE_BoomerAMGSetGridRelaxPoints(HYPRE_Solver   solver,
 HYPRE_Int HYPRE_BoomerAMGSetRelaxWeight(HYPRE_Solver  solver,
                                         HYPRE_Real   *relax_weight);
 
+/**
+ * (Optional) Defines the relaxation weight at each cycling node
+ * for an user-defined arbitrary cycle. Pass an array of length 
+ * equal to the number of cycling nodes. 
+ * 
+ * Note: The AMG cycle is represented by a graph with nodes 
+ * for smoothing operations, and edges for inter-grid transfers.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetRelaxNodeWeights(HYPRE_Solver  solver,
+                                          HYPRE_Real    *relax_node_weights);
 /**
  * (Optional) Defines the relaxation weight for smoothed Jacobi and hybrid SOR
  * on all levels.
