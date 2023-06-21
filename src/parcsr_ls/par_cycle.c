@@ -57,7 +57,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Int       kappa;
    HYPRE_Int       fcycle, fcycle_lev;
    HYPRE_Int      *cycle_struct,*relax_node_types,*node_num_sweeps,cycle_num_nodes;
-   HYPRE_Real     *relax_node_weights;
+   HYPRE_Real     *relax_node_weights,*relax_edge_weights;
    HYPRE_Int       num_levels;
    HYPRE_Int       max_levels;
    HYPRE_Real     *num_coeffs;
@@ -96,7 +96,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Int       smooth_num_levels;
    HYPRE_Int       my_id;
    HYPRE_Int       restri_type;
-   HYPRE_Real      alpha;
+   HYPRE_Real      alpha, cgc_relaxwt;
    hypre_Vector  **l1_norms = NULL;
    hypre_Vector   *l1_norms_level;
    hypre_Vector  **ds = hypre_ParAMGDataChebyDS(amg_data);
@@ -145,6 +145,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    relax_order         = hypre_ParAMGDataRelaxOrder(amg_data);
    relax_node_types    = hypre_ParAMGDataRelaxNodeTypes(amg_data);
    relax_node_weights  = hypre_ParAMGDataRelaxNodeWeights(amg_data);
+   relax_edge_weights  = hypre_ParAMGDataRelaxEdgeWeights(amg_data);
    relax_weight        = hypre_ParAMGDataRelaxWeight(amg_data);
    omega               = hypre_ParAMGDataOmega(amg_data);
    smooth_type         = hypre_ParAMGDataSmoothType(amg_data);
@@ -404,9 +405,13 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          * Do the relaxation num_sweep times
          *-----------------------------------------------------------------*/
 
-         // set relaxation type and weights for user-defined arbitrary cycles
          if (cycle_type==4)
+         
          {
+            /*------------------------------------------------------------------
+            * override relaxation type, relaxation weights and number of sweeps 
+            * for user-defined arbitrary cycles.
+            *-----------------------------------------------------------------*/
             relax_type=relax_node_types[edge_index];
             relax_weight[level] =relax_node_weights[edge_index];
             num_sweep = node_num_sweeps[edge_index];
@@ -669,22 +674,29 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
        * Decrement the control counter and determine which grid to visit next
        *-----------------------------------------------------------------*/
 
-      --lev_counter[level];
-
-      /*---------------------------------------------------------------------------
-      * Override lev_counter according to user input for arbitrary cycle structures
-      *--------------------------------------------------------------------------*/ 
-     
+      --lev_counter[level];     
       if (cycle_type==4)
       {
+         /*---------------------------------------------------------------------------
+         * Override lev_counter according to user input for arbitrary cycle structures
+         *--------------------------------------------------------------------------*/ 
          if (edge_index==cycle_num_nodes-1)
-            {Not_Finished=0; continue;}
+            {
+               Not_Finished=0; 
+               continue;
+            }
          else if (cycle_struct[edge_index]==-1)
             lev_counter[level]=0;
-         else if (cycle_struct[edge_index==1])
-            lev_counter[level]=-1;
+         else if (cycle_struct[edge_index]==1)
+            {
+               cgc_relaxwt=relax_edge_weights[edge_index]; 
+               lev_counter[level]=-1;
+            }
          else if (cycle_struct[level]==0)
-            {edge_index++; continue;} 
+            {
+               edge_index++; 
+               continue;
+            } 
          edge_index++;
       }
 
@@ -794,6 +806,12 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          coarse_grid = level;
          alpha = 1.0;
          beta = 1.0;
+         
+         if (cycle_type==4)
+         {
+            // override alpha to specify relaxation factor for each correction step individually.
+            alpha=cgc_relaxwt;
+         }
 
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
          hypre_GpuProfilingPushRange("Interpolation");
