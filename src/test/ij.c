@@ -241,7 +241,7 @@ main( hypre_int argc,
    HYPRE_Int      cycle_type;
    HYPRE_Int      kappa;
    HYPRE_Int      *cycle_struct,*relax_node_types,*node_num_sweeps,cycle_num_nodes;
-   HYPRE_Real     *relax_node_weights;
+   HYPRE_Real     *relax_node_weights,*relax_edge_weights;
    HYPRE_Int      fcycle;
    HYPRE_Int      coarsen_type = 10;
    HYPRE_Int      measure_type = 0;
@@ -1545,33 +1545,43 @@ main( hypre_int argc,
       kappa=1; 
       cycle_type = 4;
       if (cycle_type==4)
-      {
-
-         cycle_num_nodes = 9; // V-cycle with 5 levels
-         HYPRE_Int icycling[] = {-1,-1,-1,-1,1,1,1,1};
+      {   
+         /*------------------------------------------------------------------------------------
+         * Create a V-cycle solver providing cycle structure / smoothing operations explicitly.
+         --------------------------------------------------------------------------------------*/
+         /*--------------USER_INPUTS------------------------*/
+         // 1. number of cycling nodes in the AMG cycle
+         cycle_num_nodes = 9; 
+         // 2. specify edge types connecting the nodes (-1->restriction; 1->interpolation; 0->same_level)
+         HYPRE_Int icycling[] = {-1,-1,-1,-1,1,1,1,1};  
+         // 3. smoothing inputs at each cycling node 
          HYPRE_Int irelaxtypes[] = {13,13,13,13,9,14,14,14,14};
          HYPRE_Int inumsweeps[] = {1,1,1,1,1,1,1,1,1};
          HYPRE_Real irelaxwts[] = {1,1,1,1,1,1,1,1,1};
+         // 4. relaxation factor at each cycling edge (meant for under/over relaxation of cgc steps)
+         HYPRE_Real iedgewts[] = {1,1,1,1,1,1,1,1};
+         /*------------END_USER_INPUTS-----------------------*/
 
          // allocate memory
          cycle_struct = hypre_CTAlloc(HYPRE_Int,  cycle_num_nodes-1, HYPRE_MEMORY_HOST);
          relax_node_types = hypre_CTAlloc(HYPRE_Int,  cycle_num_nodes, HYPRE_MEMORY_HOST);
          relax_node_weights = hypre_CTAlloc(HYPRE_Real,  cycle_num_nodes, HYPRE_MEMORY_HOST);
+         relax_edge_weights = hypre_CTAlloc(HYPRE_Real,  cycle_num_nodes-1, HYPRE_MEMORY_HOST);
          node_num_sweeps = hypre_CTAlloc(HYPRE_Int,  cycle_num_nodes, HYPRE_MEMORY_HOST);
-
          // set inputs
-         for(int i=0;i<cycle_num_nodes;i++)
+         for(i=0;i<cycle_num_nodes;i++)
             {
                relax_node_types[i] = irelaxtypes[i];
                node_num_sweeps[i] = inumsweeps[i];
                relax_node_weights[i] = irelaxwts[i];
-
                if (i<cycle_num_nodes-1)
+               {
                   cycle_struct[i]=icycling[i];
+                  relax_edge_weights[i]=iedgewts[i];
+               }
             }
       }
 
-      
       fcycle = 0;
       relax_wt = 1.;
       outer_wt = 1.;
@@ -4191,6 +4201,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCycleStruct(amg_solver,cycle_struct,cycle_num_nodes);
          HYPRE_BoomerAMGSetRelaxNodeTypes(amg_solver,relax_node_types);
          HYPRE_BoomerAMGSetRelaxNodeWeights(amg_solver,relax_node_weights);
+         HYPRE_BoomerAMGSetRelaxEdgeWeights(amg_solver,relax_edge_weights);
          HYPRE_BoomerAMGSetNodeNumSweeps(amg_solver,node_num_sweeps);
       }
    
