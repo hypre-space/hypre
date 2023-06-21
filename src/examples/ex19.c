@@ -128,6 +128,10 @@ int main (int argc, char *argv[])
          }
       }
 
+      if (!restriction)
+         // Do classical modified interpolation if not doing AIR
+         interp_type = 0;
+
       if ((print_usage) && (myid == 0))
       {
          printf("\n");
@@ -303,7 +307,6 @@ int main (int argc, char *argv[])
 
    /* Set some parameters (See Reference Manual for more parameters) */
    HYPRE_BoomerAMGSetPrintLevel(solver, 3);  /* print solve info + parameters */
-   HYPRE_BoomerAMGSetOldDefault(solver); /* Falgout coarsening with modified classical interpolaiton */
    HYPRE_BoomerAMGSetRelaxType(solver, 0);   /* Jacobi */
    HYPRE_BoomerAMGSetRelaxOrder(solver, 1);   /* uses C/F relaxation */
    HYPRE_BoomerAMGSetCycleNumSweeps(solver, ns_down, 1);
