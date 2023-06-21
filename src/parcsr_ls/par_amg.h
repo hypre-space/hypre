@@ -75,6 +75,7 @@ typedef struct
    HYPRE_Int    **grid_relax_points;
    HYPRE_Int      *relax_node_types;
    HYPRE_Real     *relax_node_weights;
+   HYPRE_Real     *relax_edge_weights;
    HYPRE_Int      *node_num_sweeps;
    HYPRE_Int      relax_order;
    HYPRE_Int      user_coarse_relax_type;
@@ -337,6 +338,7 @@ typedef struct
 #define hypre_ParAMGDataCycleNumNodes(amg_data) ((amg_data)->cycle_num_nodes)
 #define hypre_ParAMGDataRelaxNodeTypes(amg_data) ((amg_data)->relax_node_types)
 #define hypre_ParAMGDataRelaxNodeWeights(amg_data) ((amg_data)->relax_node_weights)
+#define hypre_ParAMGDataRelaxEdgeWeights(amg_data) ((amg_data)->relax_edge_weights)
 #define hypre_ParAMGDataNodeNumSweeps(amg_data) ((amg_data)->node_num_sweeps)
 #define hypre_ParAMGDataConvergeType(amg_data) ((amg_data)->converge_type)
 #define hypre_ParAMGDataTol(amg_data) ((amg_data)->tol)

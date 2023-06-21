@@ -2610,6 +2610,51 @@ hypre_BoomerAMGGetRelaxNodeWeights( void  *data,
 }
 
 HYPRE_Int
+hypre_BoomerAMGSetRelaxEdgeWeights( void  *data,
+                             HYPRE_Real    *relax_edge_weights )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (!relax_edge_weights)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   if (hypre_ParAMGDataRelaxEdgeWeights(amg_data))
+   {
+      hypre_TFree(hypre_ParAMGDataRelaxEdgeWeights(amg_data), HYPRE_MEMORY_HOST);
+   }
+
+   hypre_ParAMGDataRelaxEdgeWeights(amg_data) = relax_edge_weights;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGGetRelaxEdgeWeights( void  *data,
+                             HYPRE_Real    **relax_edge_weights )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *relax_edge_weights=hypre_ParAMGDataRelaxEdgeWeights(amg_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypre_BoomerAMGSetRelaxWt( void     *data,
                            HYPRE_Real    relax_weight )
 {

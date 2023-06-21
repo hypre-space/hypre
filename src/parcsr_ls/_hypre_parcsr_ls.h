@@ -93,6 +93,7 @@ typedef struct
    HYPRE_Int    **grid_relax_points;
    HYPRE_Int      *relax_node_types;
    HYPRE_Real     *relax_node_weights;
+   HYPRE_Real     *relax_edge_weights;
    HYPRE_Int      *node_num_sweeps;
    HYPRE_Int      relax_order;
    HYPRE_Int      user_coarse_relax_type;
@@ -355,6 +356,7 @@ typedef struct
 #define hypre_ParAMGDataCycleNumNodes(amg_data) ((amg_data)->cycle_num_nodes)
 #define hypre_ParAMGDataRelaxNodeTypes(amg_data) ((amg_data)->relax_node_types)
 #define hypre_ParAMGDataRelaxNodeWeights(amg_data) ((amg_data)->relax_node_weights)
+#define hypre_ParAMGDataRelaxEdgeWeights(amg_data) ((amg_data)->relax_edge_weights)
 #define hypre_ParAMGDataNodeNumSweeps(amg_data) ((amg_data)->node_num_sweeps)
 #define hypre_ParAMGDataConvergeType(amg_data) ((amg_data)->converge_type)
 #define hypre_ParAMGDataTol(amg_data) ((amg_data)->tol)
@@ -1857,6 +1859,8 @@ HYPRE_Int HYPRE_BoomerAMGSetGridRelaxPoints ( HYPRE_Solver solver, HYPRE_Int **g
 HYPRE_Int HYPRE_BoomerAMGSetRelaxWeight ( HYPRE_Solver solver, HYPRE_Real *relax_weight );
 HYPRE_Int HYPRE_BoomerAMGSetRelaxNodeWeights ( HYPRE_Solver solver, HYPRE_Real *relax_node_weights );
 HYPRE_Int HYPRE_BoomerAMGGetRelaxNodeWeights ( HYPRE_Solver solver, HYPRE_Real **relax_node_weights );
+HYPRE_Int HYPRE_BoomerAMGSetRelaxEdgeWeights ( HYPRE_Solver solver, HYPRE_Real *relax_edge_weights );
+HYPRE_Int HYPRE_BoomerAMGGetRelaxEdgeWeights ( HYPRE_Solver solver, HYPRE_Real **relax_edge_weights );
 HYPRE_Int HYPRE_BoomerAMGSetRelaxWt ( HYPRE_Solver solver, HYPRE_Real relax_wt );
 HYPRE_Int HYPRE_BoomerAMGSetLevelRelaxWt ( HYPRE_Solver solver, HYPRE_Real relax_wt,
                                            HYPRE_Int level );
@@ -2476,6 +2480,8 @@ HYPRE_Int hypre_BoomerAMGSetRelaxWeight ( void *data, HYPRE_Real *relax_weight )
 HYPRE_Int hypre_BoomerAMGGetRelaxWeight ( void *data, HYPRE_Real **relax_weight );
 HYPRE_Int hypre_BoomerAMGSetRelaxNodeWeights ( void *data, HYPRE_Real *relax_node_weights );
 HYPRE_Int hypre_BoomerAMGGetRelaxNodeWeights ( void *data, HYPRE_Real **relax_node_weights );
+HYPRE_Int hypre_BoomerAMGSetRelaxEdgeWeights ( void *data, HYPRE_Real *relax_edge_weights );
+HYPRE_Int hypre_BoomerAMGGetRelaxEdgeWeights ( void *data, HYPRE_Real **relax_edge_weights );
 HYPRE_Int hypre_BoomerAMGSetRelaxWt ( void *data, HYPRE_Real relax_weight );
 HYPRE_Int hypre_BoomerAMGSetLevelRelaxWt ( void *data, HYPRE_Real relax_weight, HYPRE_Int level );
 HYPRE_Int hypre_BoomerAMGGetLevelRelaxWt ( void *data, HYPRE_Real *relax_weight, HYPRE_Int level );

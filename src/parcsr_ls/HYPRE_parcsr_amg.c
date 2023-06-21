@@ -935,6 +935,24 @@ HYPRE_BoomerAMGGetRelaxNodeWeights( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetRelaxEdgeWeights, HYPRE_BoomerAMGGetRelaxEdgeWeights
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetRelaxEdgeWeights( HYPRE_Solver  solver,
+                               HYPRE_Real   *relax_edge_weights  )
+{
+   return ( hypre_BoomerAMGSetRelaxEdgeWeights( (void *) solver, relax_edge_weights ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetRelaxEdgeWeights( HYPRE_Solver  solver,
+                               HYPRE_Real   **relax_edge_weights  )
+{
+   return ( hypre_BoomerAMGGetRelaxEdgeWeights( (void *) solver, relax_edge_weights ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetRelaxWt
  *--------------------------------------------------------------------------*/
 

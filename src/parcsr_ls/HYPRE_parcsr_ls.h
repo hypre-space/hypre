@@ -858,6 +858,17 @@ HYPRE_Int HYPRE_BoomerAMGSetRelaxWeight(HYPRE_Solver  solver,
 HYPRE_Int HYPRE_BoomerAMGSetRelaxNodeWeights(HYPRE_Solver  solver,
                                           HYPRE_Real    *relax_node_weights);
 /**
+ * (Optional) Defines the relaxation weight at each cycling edge
+ * for an user-defined arbitrary cycle. Pass an array of length 
+ * equal to the number of cycling edges. Use this for under/over
+ * relaxation of coarse-grid correction. 
+ * 
+ * Note: The AMG cycle is represented by a graph with nodes 
+ * for smoothing operations, and edges for inter-grid transfers.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetRelaxEdgeWeights(HYPRE_Solver  solver,
+                                          HYPRE_Real    *relax_edge_weights);
+/**
  * (Optional) Defines the relaxation weight for smoothed Jacobi and hybrid SOR
  * on all levels.
  *
