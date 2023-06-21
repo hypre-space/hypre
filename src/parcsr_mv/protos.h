@@ -65,6 +65,9 @@ HYPRE_Int HYPRE_CSRMatrixToParCSRMatrix ( MPI_Comm comm, HYPRE_CSRMatrix A_CSR,
                                           HYPRE_BigInt *row_partitioning, HYPRE_BigInt *col_partitioning, HYPRE_ParCSRMatrix *matrix );
 HYPRE_Int HYPRE_CSRMatrixToParCSRMatrix_WithNewPartitioning ( MPI_Comm comm, HYPRE_CSRMatrix A_CSR,
                                                               HYPRE_ParCSRMatrix *matrix );
+/**
+ * Performs y <- alpha * A * x + beta * y
+ */
 HYPRE_Int HYPRE_ParCSRMatrixMatvec ( HYPRE_Complex alpha, HYPRE_ParCSRMatrix A, HYPRE_ParVector x,
                                      HYPRE_Complex beta, HYPRE_ParVector y );
 HYPRE_Int HYPRE_ParCSRMatrixMatvecT ( HYPRE_Complex alpha, HYPRE_ParCSRMatrix A, HYPRE_ParVector x,
