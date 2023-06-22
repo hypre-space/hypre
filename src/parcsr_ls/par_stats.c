@@ -1327,23 +1327,24 @@ HYPRE_Int    hypre_BoomerAMGWriteSolverParams(void* data)
    HYPRE_Int      max_iter;
    HYPRE_Int      cycle_type;
    HYPRE_Int      kappa;
+   HYPRE_Int      cycle_type,cycle_num_nodes,*cycle_struct;
    HYPRE_Int      fcycle;
-   HYPRE_Int     *num_grid_sweeps;
-   HYPRE_Int     *grid_relax_type;
+   HYPRE_Int     *num_grid_sweeps,*node_num_sweeps;
+   HYPRE_Int     *grid_relax_type,*relax_node_types;
    HYPRE_Int    **grid_relax_points;
    HYPRE_Int      relax_order;
-   HYPRE_Real  *relax_weight;
+   HYPRE_Real  *relax_weight,*relax_node_weights,*relax_edge_weights;
    HYPRE_Real  *omega;
    HYPRE_Real   tol;
    HYPRE_Int      smooth_type;
    HYPRE_Int      smooth_num_levels;
    /* amg output params */
    HYPRE_Int      amg_print_level;
-
-   HYPRE_Int      j;
    HYPRE_Int      one = 1;
    HYPRE_Int      minus_one = -1;
    HYPRE_Int      zero = 0;
+   /* local params */
+   HYPRE_Int      i,j,sum,*bool_print;
 
 
    /*----------------------------------------------------------
@@ -1367,6 +1368,25 @@ HYPRE_Int    hypre_BoomerAMGWriteSolverParams(void* data)
    tol = hypre_ParAMGDataTol(amg_data);
 
    amg_print_level = hypre_ParAMGDataPrintLevel(amg_data);
+   if (cycle_type==4)
+   {
+      cycle_struct = hypre_ParAMGDataCycleStruct(amg_data);
+      relax_node_types = hypre_ParAMGDataRelaxNodeTypes(amg_data);
+      node_num_sweeps = hypre_ParAMGDataNodeNumSweeps(amg_data);
+      relax_node_weights = hypre_ParAMGDataRelaxNodeWeights(amg_data);
+      relax_edge_weights = hypre_ParAMGDataRelaxEdgeWeights(amg_data);
+      cycle_num_nodes = hypre_ParAMGDataCycleNumNodes(amg_data);
+   }
+
+   /*--------------------------------------------------------
+   * allocate memory and initalize local variables
+   *--------------------------------------------------------*/
+  if (cycle_type==4)
+  {
+   bool_print =  hypre_CTAlloc(HYPRE_Int,  cycle_num_nodes, HYPRE_MEMORY_HOST);
+   for(i=0;i<cycle_num_nodes;i++)
+      bool_print[i]=0;
+  }
 
    /*----------------------------------------------------------
     * AMG info
@@ -1386,6 +1406,63 @@ HYPRE_Int    hypre_BoomerAMGWriteSolverParams(void* data)
          hypre_printf( "  Cycle type (1 = V, 2 = W, etc.):  %d\n\n", cycle_type);
          if (cycle_type==3)
             hypre_printf(" Kappa Cycle Value:  %d\n\n",kappa);
+         else if (cycle_type==4)
+         {
+            /*---------------VISUALIZE THE USER-DEFINED CYCLE STRUCTURE----------------------------------------
+            * I. iterate through the node array
+            *     0. continue to the next loop if the node has already been printed. 
+            *     1. print all node info on the same level as the current iterate
+            *     2. print edge connection info for the corresponding nodes.
+            *        i. look for cycle_struct[] = 0 left/right connections: print on the same line.
+            *       ii. look for cycle_struct[] =-1 right connections: print on the next line.
+            *      iii. look for cycle_struct[] = 1 left connections: print on the next line.
+            *     3. if the edge connection leading to the next node is an interpolation i.e. cycle_struct[]=1,
+            *         terminate loop.          
+            *     4. go to next line (or next coarser level).
+            *----------------------------------------------------------------------------------------------------=*/
+            for(i=0;i<cycle_num_nodes;i++)
+            {
+               if (bool_print[i])
+                  continue;
+               // add horizontal spaces for alignment with the current node.
+               for (j=0;j<i;j++)
+                  printf("\t\t\t");
+               // print all nodes on the same level.
+               sum = 0;
+               for (j=i;j<cycle_num_nodes;j++)
+               {
+                  if (!sum)
+                     {
+                        printf("N(%d,%d,%.2f)",relax_node_types[j],node_num_sweeps[j],relax_node_weights[j]);
+                        bool_print[j]=1;
+                        if (j!=cycle_num_nodes-1 && !cycle_struct[j]) // print edge connections that connects nodes on the same level.
+                           printf("  %.2f  ",relax_edge_weights[j]);
+                        else
+                           printf("\t");          
+                     }
+                  else
+                     printf("\t\t\t");
+                  sum += cycle_struct[j];
+               }
+               // print restricting/interpolating edge connections (cycle_struct[]=1,-1).
+               sum = 0;
+               printf("\n");
+               for (j=0;j<i;j++)
+                  printf("\t\t\t");
+               for (j=i;j<cycle_num_nodes-1;j++)
+               {
+                  printf("\t\t");
+                  if (cycle_struct[j]==-1 && !sum && bool_print[j]) 
+                     printf("  %.2f  ",relax_edge_weights[j]);
+                  else if (cycle_struct[j]==1 && sum+cycle_struct[j]==0 && bool_print[j+1])
+                     printf("  %.2f  ",relax_edge_weights[j]);
+                  else
+                     printf("\t");
+                  sum+=cycle_struct[j];
+               }
+               printf("\n\n\n\n");
+            }
+         }
       }
       hypre_printf( "  Relaxation Parameters:\n");
       hypre_printf( "   Visiting Grid:                     down   up  coarse\n");
