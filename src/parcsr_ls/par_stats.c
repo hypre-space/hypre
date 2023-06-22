@@ -1420,6 +1420,9 @@ HYPRE_Int    hypre_BoomerAMGWriteSolverParams(void* data)
             *         terminate loop.          
             *     4. go to next line (or next coarser level).
             *----------------------------------------------------------------------------------------------------=*/
+            printf("\nCYCLE STRUCTURE");
+            printf("\n*Cycling Node -> N(relaxation type, number of sweeps, relaxation weight)");
+            printf("\n*Cycling Edge -> relaxation weight for correction\n\n");
             for(i=0;i<cycle_num_nodes;i++)
             {
                if (bool_print[i])
