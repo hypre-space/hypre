@@ -14,9 +14,9 @@ Version 2.29.0 released 2023/06/22
 - Enabled more support with SYCL: MGR, AMS/ADS/ADE, AIR, ...
 - Added MAGMA support
 - Added support for CUDA 12
-- Added HYPRE_Finalized function
-- Added new MGR features: Non-Galerkin options, block diagonal interpolation,
-  block Jacobi relaxation
+- Added HYPRE_Initialized/HYPRE_Finalized functions
+- Ported MGR features to CUDA and HIP: Non-Galerkin options, block diagonal
+  interpolation, and block Jacobi relaxation
 - Added non-UVM device support for ILU and MGR
 - Added cuSOLVER and rocSOLVER support
 - Various bug fixes
