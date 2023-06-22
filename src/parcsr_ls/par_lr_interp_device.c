@@ -965,7 +965,8 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    hypre_GpuProfilingPushRange("Truncation");
    if (trunc_factor != 0.0 || max_elmts > 0)
    {
-      hypre_BoomerAMGInterpTruncationDevice(P, trunc_factor, max_elmts );
+      hypre_BoomerAMGInterpTruncationDevice(P, trunc_factor, max_elmts);
+      hypre_ParCSRMatrixCompressOffdMapDevice(P);
    }
    hypre_GpuProfilingPopRange();
 
@@ -1234,7 +1235,8 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    hypre_GpuProfilingPushRange("Truncation");
    if (trunc_factor != 0.0 || max_elmts > 0)
    {
-      hypre_BoomerAMGInterpTruncationDevice(P, trunc_factor, max_elmts );
+      hypre_BoomerAMGInterpTruncationDevice(P, trunc_factor, max_elmts);
+      hypre_ParCSRMatrixCompressOffdMapDevice(P);
    }
    hypre_GpuProfilingPopRange();
 
@@ -1502,7 +1504,8 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    hypre_GpuProfilingPushRange("Truncation");
    if (trunc_factor != 0.0 || max_elmts > 0)
    {
-      hypre_BoomerAMGInterpTruncationDevice(P, trunc_factor, max_elmts );
+      hypre_BoomerAMGInterpTruncationDevice(P, trunc_factor, max_elmts);
+      hypre_ParCSRMatrixCompressOffdMapDevice(P);
    }
    hypre_GpuProfilingPopRange();
 

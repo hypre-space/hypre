@@ -4325,7 +4325,7 @@ HYPRE_MGRSetGlobalSmoothCycle( HYPRE_Solver solver,
  * Options for \e smooth_type are:
  *
  *    -  0 : block Jacobi (default)
- *    -  1 : block Gauss-Siedel
+ *    -  1 : block Gauss-Seidel
  *    -  2 : Jacobi
  *    -  3 : Gauss-Seidel, sequential (very slow!)
  *    -  4 : Gauss-Seidel, interior points in parallel, boundary sequential (slow!)
@@ -4434,8 +4434,10 @@ HYPRE_Int
 HYPRE_ILUSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter );
 
 /**
- * (Optional) Set triangular solver type (0) direct (1) iterative
- * Set this to 1 Jacobi iterations. The default is 0 direct method.
+ * (Optional) Set triangular solver type. Options are:
+ *
+ *    -  0 : iterative
+ *    -  1 : direct (default)
  **/
 HYPRE_Int
 HYPRE_ILUSetTriSolve( HYPRE_Solver solver, HYPRE_Int tri_solve );
