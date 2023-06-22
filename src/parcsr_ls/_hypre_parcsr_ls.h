@@ -85,6 +85,7 @@ typedef struct
    HYPRE_Int      min_iter;
    HYPRE_Int      fcycle;
    HYPRE_Int      cycle_type;
+   HYPRE_Int      kappa;
    HYPRE_Int     *num_grid_sweeps;
    HYPRE_Int     *grid_relax_type;
    HYPRE_Int    **grid_relax_points;
@@ -344,6 +345,7 @@ typedef struct
 #define hypre_ParAMGDataMaxIter(amg_data) ((amg_data)->max_iter)
 #define hypre_ParAMGDataFCycle(amg_data) ((amg_data)->fcycle)
 #define hypre_ParAMGDataCycleType(amg_data) ((amg_data)->cycle_type)
+#define hypre_ParAMGDataKappaCycleVal(amg_data) ((amg_data)->kappa)
 #define hypre_ParAMGDataConvergeType(amg_data) ((amg_data)->converge_type)
 #define hypre_ParAMGDataTol(amg_data) ((amg_data)->tol)
 #define hypre_ParAMGDataPartialCycleCoarsestLevel(amg_data) ((amg_data)->partial_cycle_coarsest_level)
@@ -1813,6 +1815,8 @@ HYPRE_Int HYPRE_BoomerAMGSetFCycle ( HYPRE_Solver solver, HYPRE_Int fcycle );
 HYPRE_Int HYPRE_BoomerAMGGetFCycle ( HYPRE_Solver solver, HYPRE_Int *fcycle );
 HYPRE_Int HYPRE_BoomerAMGSetCycleType ( HYPRE_Solver solver, HYPRE_Int cycle_type );
 HYPRE_Int HYPRE_BoomerAMGGetCycleType ( HYPRE_Solver solver, HYPRE_Int *cycle_type );
+HYPRE_Int HYPRE_BoomerAMGSetKappaCycleVal( HYPRE_Solver solver, HYPRE_Int kappa );
+HYPRE_Int HYPRE_BoomerAMGGetKappaCycleVal( HYPRE_Solver solver, HYPRE_Int *kappa );
 HYPRE_Int HYPRE_BoomerAMGSetConvergeType ( HYPRE_Solver solver, HYPRE_Int type );
 HYPRE_Int HYPRE_BoomerAMGGetConvergeType ( HYPRE_Solver solver, HYPRE_Int *type );
 HYPRE_Int HYPRE_BoomerAMGSetTol ( HYPRE_Solver solver, HYPRE_Real tol );
@@ -2424,6 +2428,8 @@ HYPRE_Int hypre_BoomerAMGSetFCycle ( void *data, HYPRE_Int fcycle );
 HYPRE_Int hypre_BoomerAMGGetFCycle ( void *data, HYPRE_Int *fcycle );
 HYPRE_Int hypre_BoomerAMGSetCycleType ( void *data, HYPRE_Int cycle_type );
 HYPRE_Int hypre_BoomerAMGGetCycleType ( void *data, HYPRE_Int *cycle_type );
+HYPRE_Int hypre_BoomerAMGSetKappaCycleVal( void *data, HYPRE_Int kappa );
+HYPRE_Int hypre_BoomerAMGGetKappaCycleVal( void *data, HYPRE_Int *kappa );
 HYPRE_Int hypre_BoomerAMGSetConvergeType ( void *data, HYPRE_Int type );
 HYPRE_Int hypre_BoomerAMGGetConvergeType ( void *data, HYPRE_Int *type );
 HYPRE_Int hypre_BoomerAMGSetTol ( void *data, HYPRE_Real tol );

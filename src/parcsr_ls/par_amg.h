@@ -67,6 +67,7 @@ typedef struct
    HYPRE_Int      min_iter;
    HYPRE_Int      fcycle;
    HYPRE_Int      cycle_type;
+   HYPRE_Int      kappa;
    HYPRE_Int     *num_grid_sweeps;
    HYPRE_Int     *grid_relax_type;
    HYPRE_Int    **grid_relax_points;
@@ -326,6 +327,7 @@ typedef struct
 #define hypre_ParAMGDataMaxIter(amg_data) ((amg_data)->max_iter)
 #define hypre_ParAMGDataFCycle(amg_data) ((amg_data)->fcycle)
 #define hypre_ParAMGDataCycleType(amg_data) ((amg_data)->cycle_type)
+#define hypre_ParAMGDataKappaCycleVal(amg_data) ((amg_data)->kappa)
 #define hypre_ParAMGDataConvergeType(amg_data) ((amg_data)->converge_type)
 #define hypre_ParAMGDataTol(amg_data) ((amg_data)->tol)
 #define hypre_ParAMGDataPartialCycleCoarsestLevel(amg_data) ((amg_data)->partial_cycle_coarsest_level)

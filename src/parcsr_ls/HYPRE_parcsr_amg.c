@@ -570,6 +570,24 @@ HYPRE_BoomerAMGGetCycleType( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetKappaCycleVal, HYPRE_BoomerAMGGetKappaCycleVal
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetKappaCycleVal( HYPRE_Solver solver,
+                             HYPRE_Int          kappa  )
+{
+   return ( hypre_BoomerAMGSetKappaCycleVal( (void *) solver, kappa ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetKappaCycleVal( HYPRE_Solver solver,
+                             HYPRE_Int        * kappa  )
+{
+   return ( hypre_BoomerAMGGetKappaCycleVal( (void *) solver, kappa ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetFCycle, HYPRE_BoomerAMGGetFCycle
  *--------------------------------------------------------------------------*/
 

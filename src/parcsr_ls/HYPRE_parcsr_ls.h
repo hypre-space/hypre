@@ -584,6 +584,12 @@ HYPRE_Int HYPRE_BoomerAMGSetNumSamples(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetCycleType(HYPRE_Solver solver,
                                       HYPRE_Int    cycle_type);
 /**
+ * (Optional) Set kappa value for \e cycle_type=3 i.e. kappa cycles.
+ * kappa should be an integer greater than 0. 
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetKappaCycleVal(HYPRE_Solver solver,
+                                      HYPRE_Int    kappa);
+/**
  * (Optional) Specifies the use of Full multigrid cycle.
  * The default is 0.
  **/

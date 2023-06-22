@@ -1805,13 +1805,59 @@ hypre_BoomerAMGSetCycleType( void  *data,
       return hypre_error_flag;
    }
 
-   if (cycle_type < 0 || cycle_type > 2)
+   if (cycle_type < 0 || cycle_type > 4)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
    }
 
    hypre_ParAMGDataCycleType(amg_data) = cycle_type;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetKappaCycleVal( void  *data,
+                             HYPRE_Int    kappa )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (kappa <= 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_ParAMGDataKappaCycleVal(amg_data) = kappa;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGGetKappaCycleVal( void  *data,
+                             HYPRE_Int    *kappa )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (!kappa)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   *kappa = hypre_ParAMGDataKappaCycleVal(amg_data);
 
    return hypre_error_flag;
 }
