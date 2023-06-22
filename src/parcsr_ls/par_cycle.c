@@ -54,7 +54,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    */
    HYPRE_Real      cycle_op_count;
    HYPRE_Int       cycle_type;
-   HYPRE_Int       kcycle, kcycle_val;
+   HYPRE_Int       kappa;
    HYPRE_Int       fcycle, fcycle_lev;
    HYPRE_Int       num_levels;
    HYPRE_Int       max_levels;
@@ -126,7 +126,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    max_levels        = hypre_ParAMGDataMaxLevels(amg_data);
    cycle_type        = hypre_ParAMGDataCycleType(amg_data);
    fcycle            = hypre_ParAMGDataFCycle(amg_data);
-
+   if (cycle_type==3)
+      kappa=hypre_ParAMGDataKappaCycleVal(amg_data);
    A_block_array     = hypre_ParAMGDataABlockArray(amg_data);
    P_block_array     = hypre_ParAMGDataPBlockArray(amg_data);
    R_block_array     = hypre_ParAMGDataRBlockArray(amg_data);
@@ -156,7 +157,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
    lev_counter = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
-   if (kcycle)
+   if (cycle_type==3)
       cycle_counter = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
 
    if (hypre_ParAMGDataParticipate(amg_data))
@@ -228,11 +229,11 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    level = 0;
    cycle_param = 1;
-   if (kcycle)
+   if (cycle_type==3)
    {
       for (k=0; k<num_levels;++k)
       {
-         cycle_counter[k] = kcycle_val;
+         cycle_counter[k] = kappa;
       }
    }
 
@@ -719,8 +720,11 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
          ++level;
 
-         if (kcycle)
+         if (cycle_type==3) // kappa cycle
          {
+            /*-----------------------------------------------------------
+            * set lev_counter for the coarser level according to kappa 
+            ------------------------------------------------------------*/
             cycle_counter[level]=cycle_counter[level-1];
             if (cycle_counter[level]>1)
                lev_counter[level]=2; 
@@ -782,8 +786,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          hypre_GpuProfilingPopRange();
 
          --level;
-         if (kcycle && lev_counter[level]>0)
-            cycle_counter[level]--;
+         if (cycle_type==3 && lev_counter[level]>0) 
+            cycle_counter[level]--; // kappa -> kappa-1 for the subsequent "recursive" call from finer level. 
 
          cycle_param = 2;
          if (fcycle && fcycle_lev == level)
