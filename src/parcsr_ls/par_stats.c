@@ -1326,6 +1326,7 @@ HYPRE_Int    hypre_BoomerAMGWriteSolverParams(void* data)
    HYPRE_Int      num_levels;
    HYPRE_Int      max_iter;
    HYPRE_Int      cycle_type;
+   HYPRE_Int      kappa;
    HYPRE_Int      fcycle;
    HYPRE_Int     *num_grid_sweeps;
    HYPRE_Int     *grid_relax_type;
@@ -1352,6 +1353,8 @@ HYPRE_Int    hypre_BoomerAMGWriteSolverParams(void* data)
    num_levels = hypre_ParAMGDataNumLevels(amg_data);
    max_iter   = hypre_ParAMGDataMaxIter(amg_data);
    cycle_type = hypre_ParAMGDataCycleType(amg_data);
+   if (cycle_type==3)
+      kappa=hypre_ParAMGDataKappaCycleVal(amg_data);
    fcycle     = hypre_ParAMGDataFCycle(amg_data);
    num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);
    grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
@@ -1381,6 +1384,8 @@ HYPRE_Int    hypre_BoomerAMGWriteSolverParams(void* data)
       else
       {
          hypre_printf( "  Cycle type (1 = V, 2 = W, etc.):  %d\n\n", cycle_type);
+         if (cycle_type==3)
+            hypre_printf(" Kappa Cycle Value:  %d\n\n",kappa);
       }
       hypre_printf( "  Relaxation Parameters:\n");
       hypre_printf( "   Visiting Grid:                     down   up  coarse\n");
