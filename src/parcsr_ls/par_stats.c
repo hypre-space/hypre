@@ -1412,13 +1412,8 @@ HYPRE_Int    hypre_BoomerAMGWriteSolverParams(void* data)
             * I. iterate through the node array
             *     0. continue to the next loop if the node has already been printed. 
             *     1. print all node info on the same level as the current iterate
-            *     2. print edge connection info for the corresponding nodes.
-            *        i. look for cycle_struct[] = 0 left/right connections: print on the same line.
-            *       ii. look for cycle_struct[] =-1 right connections: print on the next line.
-            *      iii. look for cycle_struct[] = 1 left connections: print on the next line.
-            *     3. if the edge connection leading to the next node is an interpolation i.e. cycle_struct[]=1,
-            *         terminate loop.          
-            *     4. go to next line (or next coarser level).
+            *     2. print relaxation weights for interpolating edge connections (cycle_struct[]=1)         
+            *     3. go to next line (or next coarser level).
             *----------------------------------------------------------------------------------------------------=*/
             printf("\nCYCLE STRUCTURE");
             printf("\n*Cycling Node -> N(relaxation type, number of sweeps, relaxation weight)");
@@ -1436,18 +1431,14 @@ HYPRE_Int    hypre_BoomerAMGWriteSolverParams(void* data)
                {
                   if (!sum)
                      {
-                        printf("N(%d,%d,%.2f)",relax_node_types[j],node_num_sweeps[j],relax_node_weights[j]);
-                        bool_print[j]=1;
-                        if (j!=cycle_num_nodes-1 && !cycle_struct[j]) // print edge connections that connects nodes on the same level.
-                           printf("  %.2f  ",relax_edge_weights[j]);
-                        else
-                           printf("\t");          
+                        printf("    N(%d,%d,%.2f)\t",relax_node_types[j],node_num_sweeps[j],relax_node_weights[j]);
+                        bool_print[j]=1;        
                      }
                   else
                      printf("\t\t\t");
                   sum += cycle_struct[j];
                }
-               // print restricting/interpolating edge connections (cycle_struct[]=1,-1).
+               // print relaxation weights for interpolating edge connections (cycle_struct[]=1).
                sum = 0;
                printf("\n");
                for (j=0;j<i;j++)
@@ -1455,9 +1446,7 @@ HYPRE_Int    hypre_BoomerAMGWriteSolverParams(void* data)
                for (j=i;j<cycle_num_nodes-1;j++)
                {
                   printf("\t\t");
-                  if (cycle_struct[j]==-1 && !sum && bool_print[j]) 
-                     printf("  %.2f  ",relax_edge_weights[j]);
-                  else if (cycle_struct[j]==1 && sum+cycle_struct[j]==0 && bool_print[j+1])
+                  if (cycle_struct[j]==1 && sum+cycle_struct[j]==0 && bool_print[j+1])
                      printf("  %.2f  ",relax_edge_weights[j]);
                   else
                      printf("\t");
