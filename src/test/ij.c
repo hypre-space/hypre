@@ -239,6 +239,7 @@ main( hypre_int argc,
    HYPRE_Int      CR_use_CG = 0;
    HYPRE_Int      P_max_elmts = 4;
    HYPRE_Int      cycle_type;
+   HYPRE_Int      kappa;
    HYPRE_Int      fcycle;
    HYPRE_Int      coarsen_type = 10;
    HYPRE_Int      measure_type = 0;
@@ -1533,7 +1534,14 @@ main( hypre_int argc,
       filter_thresholdR = 0.00;
       trunc_factor = 0.;
       jacobi_trunc_threshold = 0.01;
-      cycle_type = 1;
+      cycle_type = 3;
+      /* -------------------------------------------
+      * KAPPA CYCLES (cycle_type=3)
+      * Set kappa=1 for V-cycle.
+      * Set kappa=2 for F-cycle.
+      * Set kappa to large number for W-cycle.
+      *--------------------------------------------*/
+      kappa=1; 
       fcycle = 0;
       relax_wt = 1.;
       outer_wt = 1.;
@@ -4147,6 +4155,7 @@ main( hypre_int argc,
       //HYPRE_BoomerAMGSetLogging(amg_solver, 2);
       HYPRE_BoomerAMGSetPrintFileName(amg_solver, "driver.out.log");
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
+      HYPRE_BoomerAMGSetKappaCycleVal(amg_solver, kappa);
       HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
       HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
       HYPRE_BoomerAMGSetISType(amg_solver, IS_type);
