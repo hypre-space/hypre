@@ -1325,7 +1325,6 @@ HYPRE_Int    hypre_BoomerAMGWriteSolverParams(void* data)
    /* amg solve params */
    HYPRE_Int      num_levels;
    HYPRE_Int      max_iter;
-   HYPRE_Int      cycle_type;
    HYPRE_Int      kappa;
    HYPRE_Int      cycle_type,cycle_num_nodes,*cycle_struct;
    HYPRE_Int      fcycle;
