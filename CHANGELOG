@@ -7,6 +7,22 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
+Version 2.29.0 released 2023/06/22
+
+- Added ILU support for AMD GPUs
+- Added new error handling feature to print messages to a memory buffer
+- Enabled more support with SYCL: MGR, AMS/ADS/ADE, AIR, ...
+- Added MAGMA support
+- Added support for CUDA 12
+- Added HYPRE_Initialized/HYPRE_Finalized functions
+- Ported MGR features to CUDA and HIP: Non-Galerkin options, block diagonal
+  interpolation, and block Jacobi relaxation
+- Added non-UVM device support for ILU and MGR
+- Added cuSOLVER and rocSOLVER support
+- Various bug fixes
+
+#====================================
+
 Version 2.28.0 released 2023/03/17
 
 - Added new Gaussian elimination options for F-relaxation in MGR.
