@@ -124,6 +124,7 @@ set(SRCS
   par_mgr_solve.c
   par_ilu.c
   par_ilu_setup.c
+  par_ilu_setup_device.c
   par_ilu_solve.c
   par_ilu_solve_device.c
   par_coarsen_device.c
@@ -158,6 +159,7 @@ if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
     par_amg_setup.c
     par_ilu.c
     par_ilu_setup.c
+    par_ilu_setup_device.c
     par_ilu_solve.c
     par_ilu_solve_device.c
     par_coarsen_device.c
