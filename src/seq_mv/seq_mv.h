@@ -377,6 +377,8 @@ HYPRE_Int hypre_CSRMatrixTriLowerUpperSolveCusparse(char uplo, HYPRE_Int unit_di
 HYPRE_Int hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int *markA,
                                           HYPRE_Int diag_option);
 HYPRE_Int hypre_CSRMatrixDiagScaleDevice( hypre_CSRMatrix *A, hypre_Vector *ld, hypre_Vector *rd);
+HYPRE_Int hypre_CSRMatrixCompressColumnsDevice(hypre_CSRMatrix *A, HYPRE_BigInt *col_map,
+                                               HYPRE_Int **col_idx_new_ptr, HYPRE_BigInt **col_map_new_ptr);
 HYPRE_Int hypre_CSRMatrixILU0(hypre_CSRMatrix *A);
 
 /* csr_matrix.c */
