@@ -9,9 +9,11 @@
 PILUT: Parallel Incomplete Factorization
 ==============================================================================
 
-**Note:** this code is no longer supported by the hypre team. We recommend to
-use Euclid instead, which is more versatile and in general more efficient,
-especially when used with many processors.
+.. warning::
+   PILUT is not actively supported by the hypre development team. We recommend using
+   :ref:`hypre-ilu` for parallel ILU algorithms. This new ILU implementation includes
+   64-bit integers support (for linear systems with more than 2,147,483,647 global
+   unknowns) and NVIDIA/AMD GPUs support through the CUDA/HIP backends.
 
 PILUT is a parallel preconditioner based on Saad's dual-threshold incomplete
 factorization algorithm. The original version of PILUT was done by Karypis and
@@ -22,10 +24,10 @@ matrix implementations, including hypre's ParCSR format, PETSc's matrices, and
 ISIS++ RowMatrix. The algorithm produces an approximate factorization :math:`L U`,
 with the preconditioner :math:`M` defined by :math:`M = L U`.
 
-**Note:** PILUT produces a nonsymmetric preconditioner even when the original
-matrix is symmetric. Thus, it is generally inappropriate for preconditioning
-symmetric methods such as Conjugate Gradient.
-
+.. note::
+   PILUT produces a nonsymmetric preconditioner even when the original matrix is
+   symmetric. Thus, it is generally inappropriate for preconditioning symmetric methods
+   such as Conjugate Gradient.
 
 Parameters:
 ------------------------------------------------------------------------------
