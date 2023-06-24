@@ -11,23 +11,10 @@
 /*--------------------------------------------------------------------------
  * hypre_ParILUData
  *--------------------------------------------------------------------------*/
+
 typedef struct hypre_ParILUData_struct
 {
-#ifdef HYPRE_USING_CUDA
-   /* on GPU, we have to form E and F explicitly, since we don't have much control to it */
-   hypre_CSRMatrix      *matALU_d; //the matrix holding ILU of A (for A-smoothing)
-   hypre_CSRMatrix      *matBLU_d; //the matrix holding ILU of B
-   hypre_CSRMatrix      *matSLU_d; //the matrix holding ILU of S
-   hypre_CSRMatrix      *matE_d;
-   hypre_CSRMatrix      *matF_d;
-   hypre_ParCSRMatrix   *Aperm;
-   hypre_ParCSRMatrix   *R;
-   hypre_ParCSRMatrix   *P;
-   hypre_Vector         *Ftemp_upper;
-   hypre_Vector         *Utemp_lower;
-   hypre_Vector         *Adiag_diag;
-#endif
-   //general data
+   /* General data */
    HYPRE_Int             global_solver;
    hypre_ParCSRMatrix   *matA;
    hypre_ParCSRMatrix   *matL;
@@ -37,8 +24,7 @@ typedef struct hypre_ParILUData_struct
    HYPRE_Real           *matmD;
    hypre_ParCSRMatrix   *matmU;
    hypre_ParCSRMatrix   *matS;
-   /* should be an array of 3 element, for B, (E and F), S respectively */
-   HYPRE_Real           *droptol;
+   HYPRE_Real           *droptol; /* Array of 3 elements, for B, (E and F), S respectively */
    HYPRE_Int             lfil;
    HYPRE_Int             maxRowNnz;
    HYPRE_Int            *CF_marker_array;
@@ -63,30 +49,50 @@ typedef struct hypre_ParILUData_struct
    HYPRE_Int             ilu_type;
    HYPRE_Int             nLU;
    HYPRE_Int             nI;
-   /* used when schur block is formed */
-   HYPRE_Int            *u_end;
+   HYPRE_Int            *u_end; /* used when schur block is formed */
+
    /* temp vectors for solve phase */
    hypre_ParVector      *Utemp;
    hypre_ParVector      *Ftemp;
    hypre_ParVector      *Xtemp;
    hypre_ParVector      *Ytemp;
-   hypre_Vector         *Ztemp;
+   hypre_ParVector      *Ztemp;
    HYPRE_Real           *uext;
    HYPRE_Real           *fext;
+
+   /* On GPU, we have to form E and F explicitly, since we don't have much control to it */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_CSRMatrix      *matALU_d; /* Matrix holding ILU of A (for A-smoothing) */
+   hypre_CSRMatrix      *matBLU_d; /* Matrix holding ILU of B */
+   hypre_CSRMatrix      *matSLU_d; /* Matrix holding ILU of S */
+   hypre_CSRMatrix      *matE_d;
+   hypre_CSRMatrix      *matF_d;
+   hypre_ParCSRMatrix   *Aperm;
+   hypre_ParCSRMatrix   *R;
+   hypre_ParCSRMatrix   *P;
+   hypre_Vector         *Ftemp_upper;
+   hypre_Vector         *Utemp_lower;
+   hypre_Vector         *Adiag_diag;
+   hypre_Vector         *Sdiag_diag;
+#endif
+
    /* data structure sor solving Schur System */
    HYPRE_Solver          schur_solver;
    HYPRE_Solver          schur_precond;
    hypre_ParVector      *rhs;
    hypre_ParVector      *x;
+
    /* Schur solver data */
    HYPRE_Int             ss_logging;
    HYPRE_Int             ss_print_level;
+
    /* Schur-GMRES */
    HYPRE_Int             ss_kDim;               /* max number of iterations for GMRES */
    HYPRE_Int             ss_max_iter;           /* max number of iterations for GMRES solve */
    HYPRE_Real            ss_tol;                /* stop iteration tol for GMRES */
    HYPRE_Real            ss_absolute_tol;       /* absolute tol for GMRES or tol for NSH solve */
    HYPRE_Int             ss_rel_change;
+
    /* Schur-NSH */
    HYPRE_Int             ss_nsh_setup_max_iter; /* number of iterations for NSH inverse */
    HYPRE_Int             ss_nsh_solve_max_iter; /* max number of iterations for NSH solve */
@@ -98,6 +104,7 @@ typedef struct hypre_ParILUData_struct
    HYPRE_Real           *ss_nsh_droptol;        /* droptol array for NSH */
    HYPRE_Int             ss_nsh_mr_max_iter;    /* max MR iteration */
    HYPRE_Real            ss_nsh_mr_tol;
+
    /* Schur precond data */
    HYPRE_Int             sp_ilu_type;           /* ilu type is use ILU */
    HYPRE_Int             sp_ilu_lfil;           /* level of fill in for ILUK */
@@ -113,15 +120,15 @@ typedef struct hypre_ParILUData_struct
    HYPRE_Int             sp_lower_jacobi_iters;
    HYPRE_Int             sp_upper_jacobi_iters;
    HYPRE_Real            sp_tol;
-   HYPRE_Int             test_opt;
+   HYPRE_Int             test_opt; /* TODO (VPM): change this to something more descriptive*/
+
    /* local reordering */
    HYPRE_Int             reordering_type;
-
 } hypre_ParILUData;
 
 #define hypre_ParILUDataTestOption(ilu_data)                   ((ilu_data) -> test_opt)
 
-#ifdef HYPRE_USING_CUDA
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 #define hypre_ParILUDataMatAILUDevice(ilu_data)                ((ilu_data) -> matALU_d)
 #define hypre_ParILUDataMatBILUDevice(ilu_data)                ((ilu_data) -> matBLU_d)
 #define hypre_ParILUDataMatSILUDevice(ilu_data)                ((ilu_data) -> matSLU_d)
@@ -133,6 +140,7 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataFTempUpper(ilu_data)                   ((ilu_data) -> Ftemp_upper)
 #define hypre_ParILUDataUTempLower(ilu_data)                   ((ilu_data) -> Utemp_lower)
 #define hypre_ParILUDataADiagDiag(ilu_data)                    ((ilu_data) -> Adiag_diag)
+#define hypre_ParILUDataSDiagDiag(ilu_data)                    ((ilu_data) -> Sdiag_diag)
 #endif
 
 #define hypre_ParILUDataGlobalSolver(ilu_data)                 ((ilu_data) -> global_solver)
@@ -171,11 +179,11 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataNLU(ilu_data)                          ((ilu_data) -> nLU)
 #define hypre_ParILUDataNI(ilu_data)                           ((ilu_data) -> nI)
 #define hypre_ParILUDataUEnd(ilu_data)                         ((ilu_data) -> u_end)
+#define hypre_ParILUDataUTemp(ilu_data)                        ((ilu_data) -> Utemp)
+#define hypre_ParILUDataFTemp(ilu_data)                        ((ilu_data) -> Ftemp)
 #define hypre_ParILUDataXTemp(ilu_data)                        ((ilu_data) -> Xtemp)
 #define hypre_ParILUDataYTemp(ilu_data)                        ((ilu_data) -> Ytemp)
 #define hypre_ParILUDataZTemp(ilu_data)                        ((ilu_data) -> Ztemp)
-#define hypre_ParILUDataUTemp(ilu_data)                        ((ilu_data) -> Utemp)
-#define hypre_ParILUDataFTemp(ilu_data)                        ((ilu_data) -> Ftemp)
 #define hypre_ParILUDataUExt(ilu_data)                         ((ilu_data) -> uext)
 #define hypre_ParILUDataFExt(ilu_data)                         ((ilu_data) -> fext)
 #define hypre_ParILUDataSchurSolver(ilu_data)                  ((ilu_data) -> schur_solver)
@@ -183,6 +191,7 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataRhs(ilu_data)                          ((ilu_data) -> rhs)
 #define hypre_ParILUDataX(ilu_data)                            ((ilu_data) -> x)
 #define hypre_ParILUDataReorderingType(ilu_data)               ((ilu_data) -> reordering_type)
+
 /* Schur System */
 #define hypre_ParILUDataSchurGMRESKDim(ilu_data)               ((ilu_data) -> ss_kDim)
 #define hypre_ParILUDataSchurGMRESMaxIter(ilu_data)            ((ilu_data) -> ss_max_iter)
@@ -245,20 +254,21 @@ typedef struct hypre_ParNSHData_struct
    HYPRE_Int              logging;
    HYPRE_Int              print_level;
    HYPRE_Int              max_iter;
+
    /* common data slots */
-   /* droptol[0]: droptol for MR
-    * droptol[1]: droptol for NSH
-    */
-   HYPRE_Real            *droptol;
+   HYPRE_Real            *droptol; /* 2 drop torelances for {MR, NSH}*/
    HYPRE_Int              own_droptol_data;
+
    /* temp vectors for solve phase */
    hypre_ParVector       *Utemp;
    hypre_ParVector       *Ftemp;
+
    /* data slots for local MR */
    HYPRE_Int              mr_max_iter;
    HYPRE_Real             mr_tol;
    HYPRE_Int              mr_max_row_nnz;
    HYPRE_Int              mr_col_version; /* global version or column version MR */
+
    /* data slots for global NSH */
    HYPRE_Int              nsh_max_iter;
    HYPRE_Real             nsh_tol;
@@ -293,4 +303,3 @@ typedef struct hypre_ParNSHData_struct
 #define hypre_ParNSHDataNSHMaxRowNnz(nsh_data)           ((nsh_data) -> nsh_max_row_nnz)
 
 #endif /* #ifndef hypre_ParILU_DATA_HEADER */
-
