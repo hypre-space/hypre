@@ -13,10 +13,14 @@ FILES="\
  ${TNAME}.out.1\
  ${TNAME}.out.2\
  ${TNAME}.out.3\
+ ${TNAME}.out.50\
+ ${TNAME}.out.51\
  ${TNAME}.out.100\
  ${TNAME}.out.101\
  ${TNAME}.out.102\
  ${TNAME}.out.103\
+ ${TNAME}.out.150\
+ ${TNAME}.out.151\
 "
 
 for i in $FILES
@@ -35,3 +39,5 @@ fi
 #=============================================================================
 # remove temporary files
 #=============================================================================
+
+rm -rf IJ.out.A.0000?.bin IJ.out.b.0000?.bin IJ.out.x0.0000?.bin IJ.out.x.0000?.bin

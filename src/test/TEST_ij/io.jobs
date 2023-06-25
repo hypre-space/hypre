@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 #=============================================================================
-# IJ input/output tests - Sequential
+# IJ input tests - Sequential
 #=============================================================================
 
 mpirun -np 1 ./ij -solver 2 -tol 1e-2 \
@@ -29,7 +29,16 @@ mpirun -np 1 ./ij -solver 2 -tol 1e-2 \
  -x0frombinfile data/poisson_10x10x10_np1/IJ.out.i8f4.x0 > io.out.3
 
 #=============================================================================
-# IJ input/output tests - Parallel
+# IJ output tests - Sequential
+#=============================================================================
+
+mpirun -np 1 ./ij -solver 2 -tol 1e-2 -printbin > io.out.50
+mpirun -np 1 ./ij -solver 2 -tol 1e-2 -printbin \
+ -frombinfile IJ.out.A -rhsfrombinfile IJ.out.b \
+ -x0frombinfile IJ.out.x0 > io.out.51
+
+#=============================================================================
+# IJ input tests - Parallel
 #=============================================================================
 
 mpirun -np 4 ./ij -solver 2 -tol 1e-2 \
@@ -51,3 +60,12 @@ mpirun -np 4 ./ij -solver 2 -tol 1e-2 \
  -frombinfile data/poisson_10x10x10_np4/IJ.out.i8f4.A \
  -rhsfrombinfile data/poisson_10x10x10_np4/IJ.out.i8f4.b \
  -x0frombinfile data/poisson_10x10x10_np4/IJ.out.i8f4.x0 > io.out.103
+
+#=============================================================================
+# IJ output tests - Sequential
+#=============================================================================
+
+mpirun -np 4 ./ij -solver 2 -tol 1e-2 -printbin > io.out.150
+mpirun -np 4 ./ij -solver 2 -tol 1e-2 -printbin \
+ -frombinfile IJ.out.A -rhsfrombinfile IJ.out.b \
+ -x0frombinfile IJ.out.x0 > io.out.151
