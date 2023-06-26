@@ -90,8 +90,8 @@ A short explanation for each of those functions and its parameters is given next
   * 11: GMRES with ILUT (GMRES-ILUT).
   * 20: NSH with ILUK (NSH-ILUK).
   * 21: NSH with ILUT (NSH-ILUT).
-  * 30: RAS with ILUK (GMRES-ILUK).
-  * 31: RAS with ILUT (GMRES-ILUT).
+  * 30: RAS with ILUK (RAS-ILUK).
+  * 31: RAS with ILUT (RAS-ILUT).
   * 40: ddPQ-GMRES with ILUK (ddPQ-GMRES-ILUK).
   * 41: ddPQ-GMRES with ILUT (ddPQ-GMRES-ILUT).
   * 50: GMRES with RAP-ILU0 with modified ILU0 (GMRES-RAP-ILU0).
