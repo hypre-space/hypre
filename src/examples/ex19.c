@@ -54,16 +54,16 @@ int main (int argc, char *argv[])
    HYPRE_ParVector par_work;
 
    HYPRE_Solver solver;
-   /* AMG */
-   int num_iterations;
-   double final_res_norm;
-   HYPRE_Int interp_type = 100; /* 1-pt Interp */
-   HYPRE_Int ns_coarse = 1, ns_down = 0, ns_up = 1;
-   HYPRE_Int **grid_relax_points = NULL;
-   HYPRE_Int coarse_threshold = 20;
-   HYPRE_Int agg_num_levels = 0; /* AIR does not support aggressive coarsening */
-   HYPRE_Int restriction = 1;
 
+   /* AMG */
+   int      num_iterations;
+   double   final_res_norm;
+   int      interp_type = 100; /* 1-pt Interp */
+   int      ns_coarse = 1, ns_down = 0, ns_up = 1;
+   int    **grid_relax_points = NULL;
+   int      coarse_threshold = 20;
+   int      agg_num_levels = 0; /* AIR does not support aggressive coarsening */
+   int      restriction = 1;
 
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
@@ -281,7 +281,7 @@ int main (int argc, char *argv[])
    }
 
    /* this is a 2-D 4-by-k array using Double pointers */
-   grid_relax_points = hypre_CTAlloc(HYPRE_Int*, 4, HYPRE_MEMORY_HOST);
+   grid_relax_points = hypre_CTAlloc(int*, 4, HYPRE_MEMORY_HOST);
    grid_relax_points[0] = NULL;
    grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int, ns_down, HYPRE_MEMORY_HOST);
    grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int, ns_up, HYPRE_MEMORY_HOST);
