@@ -128,9 +128,11 @@ int main (int argc, char *argv[])
          }
       }
 
+      /* Do classical modified interpolation if not doing AIR */
       if (!restriction)
-         // Do classical modified interpolation if not doing AIR
+      {
          interp_type = 0;
+      }
 
       if ((print_usage) && (myid == 0))
       {
@@ -200,20 +202,20 @@ int main (int argc, char *argv[])
 
       for (i = ilower; i <= iupper; i++)
       {
-        if (i == 0)
-        {
-          nnz = 1;
-          cols[0] = 0;
-          values[0] = 1;
-        }
-        else
-        {
-          nnz = 2;
-          cols[0] = i - 1;
-          cols[1] = i;
-          values[0] = -1;
-          values[1] = 1;
-        }
+         if (i == 0)
+         {
+            nnz = 1;
+            cols[0] = 0;
+            values[0] = 1;
+         }
+         else
+         {
+            nnz = 2;
+            cols[0] = i - 1;
+            cols[1] = i;
+            values[0] = -1;
+            values[1] = 1;
+         }
 
          /* Set the values for row i */
          tmp[0] = nnz;
@@ -270,7 +272,6 @@ int main (int argc, char *argv[])
    HYPRE_ParVectorSetConstantValues(par_b, 0);
    HYPRE_ParCSRMatrixMatvec(1, parcsr_A, par_work, 0, par_b);
 
-
    /*  Print out the system  - files names will be IJ.out.A.XXXXX
         and IJ.out.b.XXXXX, where XXXXX = processor id */
    if (print_system)
@@ -280,7 +281,8 @@ int main (int argc, char *argv[])
       HYPRE_IJVectorPrint(b, "IJ.out.b");
    }
 
-   /* this is a 2-D 4-by-k array using Double pointers */
+   /* This is a 2-D 4-by-k array. Hypre takes ownership of this pointer,
+      so users do not need to free it */
    grid_relax_points = hypre_CTAlloc(int*, 4, HYPRE_MEMORY_HOST);
    grid_relax_points[0] = NULL;
    grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int, ns_down, HYPRE_MEMORY_HOST);
@@ -292,7 +294,7 @@ int main (int argc, char *argv[])
      grid_relax_points[1][i] = 1; // C
    }
    /* up cycle: F */
-   for (i=0; i<ns_up; i++)
+   for (i = 0; i < ns_up; i++)
    {
      grid_relax_points[2][0] = -1; // F
    }
@@ -321,7 +323,6 @@ int main (int argc, char *argv[])
    HYPRE_BoomerAMGSetInterpType(solver, interp_type);
    HYPRE_BoomerAMGSetMaxIter(solver, 100);
 
-
    /* Now setup and solve! */
    HYPRE_BoomerAMGSetup(solver, parcsr_A, par_b, par_x);
    HYPRE_BoomerAMGSolve(solver, parcsr_A, par_b, par_x);
@@ -342,7 +343,9 @@ int main (int argc, char *argv[])
 
    /* Print solution */
    if (print_system)
+   {
       HYPRE_IJVectorPrint(x, "IJ.out.x");
+   }
 
    /* Clean up */
    HYPRE_IJMatrixDestroy(A);
@@ -353,7 +356,7 @@ int main (int argc, char *argv[])
    /* Finalize HYPRE */
    HYPRE_Finalize();
 
-   /* Finalize MPI*/
+   /* Finalize MPI */
    MPI_Finalize();
 
    return (0);
