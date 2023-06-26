@@ -11,7 +11,8 @@ Euclid
    Euclid is not actively supported by the hypre development team. We recommend using
    :ref:`hypre-ilu` for parallel ILU algorithms. This new ILU implementation includes
    64-bit integers support (for linear systems with more than 2,147,483,647 global
-   unknowns) and NVIDIA/AMD GPUs support through the CUDA/HIP backends.
+   unknowns) through both *mixedint* and *bigint* builds of hypre and NVIDIA/AMD GPUs
+   support through the CUDA/HIP backends.
 
 The Euclid library is a scalable implementation of the Parallel ILU algorithm
 that was presented at SC99 [HyPo1999]_, and published in expanded form in the
