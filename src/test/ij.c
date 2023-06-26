@@ -381,6 +381,7 @@ main( hypre_int argc,
    HYPRE_Int  checkOrtho = 0;
    HYPRE_Int  printLevel = 0; /* also c.f. poutdat */
    HYPRE_Int  two_norm = 1;
+   HYPRE_Int  skip_break = 0;
    HYPRE_Int  pcgIterations = 0;
    HYPRE_Int  pcgMode = 1;
    HYPRE_Real pcgTol = 1e-2;
@@ -1799,6 +1800,11 @@ main( hypre_int argc,
          arg_index++;
          poutdat  = atoi(argv[arg_index++]);
          poutusr = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-skipbreak") == 0 )
+      {
+         arg_index++;
+         skip_break  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-var") == 0 )
       {
@@ -4611,6 +4617,7 @@ main( hypre_int argc,
       HYPRE_PCGSetMaxIter(pcg_solver, max_iter);
       HYPRE_PCGSetTol(pcg_solver, tol);
       HYPRE_PCGSetTwoNorm(pcg_solver, 1);
+      HYPRE_PCGSetSkipBreak(pcg_solver, skip_break);
       HYPRE_PCGSetRelChange(pcg_solver, rel_change);
       HYPRE_PCGSetPrintLevel(pcg_solver, ioutdat);
       HYPRE_PCGSetAbsoluteTol(pcg_solver, atol);

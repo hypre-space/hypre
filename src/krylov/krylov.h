@@ -1122,6 +1122,7 @@ typedef struct
    HYPRE_Int      stop_crit;
    HYPRE_Int      converged;
    HYPRE_Int      hybrid;
+   HYPRE_Int      skip_break;
 
    void    *A;
    void    *p;
@@ -1588,6 +1589,8 @@ HYPRE_Int HYPRE_PCGSetRecomputeResidual ( HYPRE_Solver solver, HYPRE_Int recompu
 HYPRE_Int HYPRE_PCGGetRecomputeResidual ( HYPRE_Solver solver, HYPRE_Int *recompute_residual );
 HYPRE_Int HYPRE_PCGSetRecomputeResidualP ( HYPRE_Solver solver, HYPRE_Int recompute_residual_p );
 HYPRE_Int HYPRE_PCGGetRecomputeResidualP ( HYPRE_Solver solver, HYPRE_Int *recompute_residual_p );
+HYPRE_Int HYPRE_PCGSetSkipBreak ( HYPRE_Solver solver, HYPRE_Int skip_break );
+HYPRE_Int HYPRE_PCGGetSkipBreak ( HYPRE_Solver solver, HYPRE_Int *skip_break );
 HYPRE_Int HYPRE_PCGSetPrecond ( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond,
                                 HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver );
 HYPRE_Int HYPRE_PCGGetPrecond ( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
@@ -1628,6 +1631,8 @@ HYPRE_Int hypre_PCGSetRecomputeResidualP ( void *pcg_vdata, HYPRE_Int recompute_
 HYPRE_Int hypre_PCGGetRecomputeResidualP ( void *pcg_vdata, HYPRE_Int *recompute_residual_p );
 HYPRE_Int hypre_PCGSetStopCrit ( void *pcg_vdata, HYPRE_Int stop_crit );
 HYPRE_Int hypre_PCGGetStopCrit ( void *pcg_vdata, HYPRE_Int *stop_crit );
+HYPRE_Int hypre_PCGSetSkipBreak ( void *pcg_vdata, HYPRE_Int skip_break );
+HYPRE_Int hypre_PCGGetSkipBreak ( void *pcg_vdata, HYPRE_Int *skip_break );
 HYPRE_Int hypre_PCGGetPrecond ( void *pcg_vdata, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int hypre_PCGSetPrecond ( void *pcg_vdata, HYPRE_Int (*precond )(void*, void*, void*, void*),
                                 HYPRE_Int (*precond_setup )(void*, void*, void*, void*), void *precond_data );

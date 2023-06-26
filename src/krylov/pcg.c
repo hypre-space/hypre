@@ -99,6 +99,7 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
    (pcg_data -> recompute_residual) = 0;
    (pcg_data -> recompute_residual_p) = 0;
    (pcg_data -> stop_crit)    = 0;
+   (pcg_data -> skip_break)   = 0;
    (pcg_data -> converged)    = 0;
    (pcg_data -> hybrid)       = 0;
    (pcg_data -> owns_matvec_data ) = 1;
@@ -300,6 +301,7 @@ hypre_PCGSolve( void *pcg_vdata,
    HYPRE_Int       recompute_residual_p = (pcg_data -> recompute_residual_p);
    HYPRE_Int       stop_crit    = (pcg_data -> stop_crit);
    HYPRE_Int       hybrid       = (pcg_data -> hybrid);
+   HYPRE_Int       skip_break   = (pcg_data -> skip_break);
    /*
       HYPRE_Int             converged    = (pcg_data -> converged);
    */
@@ -540,11 +542,26 @@ hypre_PCGSolve( void *pcg_vdata,
          break;
       }
       alpha = gamma / sdotp;
+      /* alpha should always be greater zero for spd A  and nonzero p*/
       if (! (alpha > HYPRE_REAL_MIN) )
       {
          hypre_error_w_msg(HYPRE_ERROR_CONV, "Subnormal alpha value in PCG");
          if (i == 1) { i_prod = i_prod_0; }
-         break;
+         if (!skip_break)
+         {
+            break;
+         }
+         else if (! (alpha  >= HYPRE_TRUE_MIN))
+         {
+            hypre_error_w_msg(HYPRE_ERROR_CONV, "alpha value less than TRUE_MIN in PCG");
+            if (skip_break == 1) break;
+         }
+         else if (alpha <=0.0)
+         {
+            hypre_printf("alpha %e", alpha);
+            hypre_error_w_msg(HYPRE_ERROR_CONV, "Negative or zero alpha value in PCG");
+            if (skip_break == 2) break;
+         }
       }
 
       gamma_old = gamma;
@@ -703,12 +720,27 @@ hypre_PCGSolve( void *pcg_vdata,
          (pcg_data -> converged) = 1;
          break;
       }
-
+      /* gamma should generally be greater than 0 for spd A and symmetric prec and nonzero p ,
+       * this is more tricky , since occasionally CG works for slightly nonsymmetric As and smoothing
+       * can have strange side effects; not all smoothers gurantee convergence */
       if (! (gamma > HYPRE_REAL_MIN) )
       {
          hypre_error_w_msg(HYPRE_ERROR_CONV, "Subnormal gamma value in PCG");
-
-         break;
+         if (!skip_break)
+         {
+            break;
+         }
+         else if (! (gamma >= HYPRE_TRUE_MIN))
+         {
+            hypre_error_w_msg(HYPRE_ERROR_CONV, "gamma value less than TRUE_MIN in PCG");
+            if (skip_break == 1) break;
+         }
+         else if (gamma < 0.0)
+         {
+            hypre_printf("gamma %e", gamma);
+            hypre_error_w_msg(HYPRE_ERROR_CONV, "Negative gamma value in PCG");
+            if (skip_break == 2) break;
+         }
       }
       /* ... gamma should be >=0.  IEEE subnormal numbers are < 2**(-1022)=2.2e-308
          (and >= 2**(-1074)=4.9e-324).  So a gamma this small means we're getting
@@ -735,7 +767,20 @@ hypre_PCGSolve( void *pcg_vdata,
                next step, which will be a divide by zero (or close to it). */
             hypre_error_w_msg(HYPRE_ERROR_CONV, "Subnormal i_prod value in PCG");
 
-            break;
+            if (!skip_break)
+            {
+               break;
+            }
+            else if (! (i_prod_0  >= HYPRE_TRUE_MIN))
+            {
+               hypre_error_w_msg(HYPRE_ERROR_CONV, "iprod_0 value less than TRUE_MIN in PCG");
+               if (skip_break == 1) break;
+            }
+            else if (i_prod_0 <=0.0)
+            {
+               hypre_error_w_msg(HYPRE_ERROR_CONV, "Negative or zero iprod_0 value in PCG");
+               if (skip_break == 2) break;
+            }
          }
          cf_ave_1 = hypre_pow( i_prod / i_prod_0, 1.0 / (2.0 * i) );
 
@@ -1087,6 +1132,34 @@ hypre_PCGGetStopCrit( void *pcg_vdata,
 
 
    *stop_crit = (pcg_data -> stop_crit);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_PCGSetSkipBreak, hypre_PCGGetSkipBreak
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_PCGSetSkipBreak( void *pcg_vdata,
+                     HYPRE_Int   skip_break  )
+{
+   hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
+
+
+   (pcg_data -> skip_break) = skip_break;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_PCGGetSkipBreak( void *pcg_vdata,
+                     HYPRE_Int * skip_break  )
+{
+   hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
+
+
+   *skip_break = (pcg_data -> skip_break);
 
    return hypre_error_flag;
 }

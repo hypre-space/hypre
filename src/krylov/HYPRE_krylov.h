@@ -178,6 +178,12 @@ HYPRE_Int HYPRE_PCGSetRecomputeResidualP(HYPRE_Solver solver,
                                          HYPRE_Int    recompute_residual_p);
 
 /**
+ * (Optional) Skips submormal alpha and gamma values in CG.
+ **/
+HYPRE_Int HYPRE_PCGSetSkipBreak(HYPRE_Solver solver,
+                                HYPRE_Int    skip_break);
+
+/**
  * (Optional) Set the preconditioner to use.
  **/
 HYPRE_Int HYPRE_PCGSetPrecond(HYPRE_Solver         solver,
