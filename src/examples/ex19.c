@@ -283,11 +283,11 @@ int main (int argc, char *argv[])
 
    /* This is a 2-D 4-by-k array. Hypre takes ownership of this pointer,
       so users do not need to free it */
-   grid_relax_points = hypre_CTAlloc(int*, 4, HYPRE_MEMORY_HOST);
+   grid_relax_points = (int**) malloc(4 * sizeof(int*));
    grid_relax_points[0] = NULL;
-   grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int, ns_down, HYPRE_MEMORY_HOST);
-   grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int, ns_up, HYPRE_MEMORY_HOST);
-   grid_relax_points[3] = hypre_CTAlloc(HYPRE_Int, ns_coarse, HYPRE_MEMORY_HOST);
+   grid_relax_points[1] = (int*) malloc(ns_down * sizeof(int));
+   grid_relax_points[2] = (int*) malloc(ns_up * sizeof(int));
+   grid_relax_points[3] = (int*) malloc(ns_coarse * sizeof(int));
    /* down cycle: C */
    for (i = 0; i < ns_down; i++)
    {
