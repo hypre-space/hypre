@@ -1060,15 +1060,16 @@ hypre_FSAIPrintStats( void *fsai_vdata,
                       hypre_ParCSRMatrix *A )
 {
    /* Data structure variables */
-   hypre_ParFSAIData      *fsai_data     = (hypre_ParFSAIData*) fsai_vdata;
-   HYPRE_Int               algo_type     = hypre_ParFSAIDataAlgoType(fsai_data);
-   HYPRE_Real              kap_tolerance = hypre_ParFSAIDataKapTolerance(fsai_data);
-   HYPRE_Int               max_steps     = hypre_ParFSAIDataMaxSteps(fsai_data);
-   HYPRE_Int               max_step_size = hypre_ParFSAIDataMaxStepSize(fsai_data);
-   HYPRE_Int               max_nnz_row   = hypre_ParFSAIDataMaxNnzRow(fsai_data);
-   HYPRE_Int               num_levels    = hypre_ParFSAIDataNumLevels(fsai_data);
-   HYPRE_Real              threshold     = hypre_ParFSAIDataThreshold(fsai_data);
-   HYPRE_Int               eig_max_iters = hypre_ParFSAIDataEigMaxIters(fsai_data);
+   hypre_ParFSAIData      *fsai_data        = (hypre_ParFSAIData*) fsai_vdata;
+   HYPRE_Int               algo_type        = hypre_ParFSAIDataAlgoType(fsai_data);
+   HYPRE_Int               local_solve_type = hypre_ParFSAIDataLocalSolveType(fsai_data);
+   HYPRE_Real              kap_tolerance    = hypre_ParFSAIDataKapTolerance(fsai_data);
+   HYPRE_Int               max_steps        = hypre_ParFSAIDataMaxSteps(fsai_data);
+   HYPRE_Int               max_step_size    = hypre_ParFSAIDataMaxStepSize(fsai_data);
+   HYPRE_Int               max_nnz_row      = hypre_ParFSAIDataMaxNnzRow(fsai_data);
+   HYPRE_Int               num_levels       = hypre_ParFSAIDataNumLevels(fsai_data);
+   HYPRE_Real              threshold        = hypre_ParFSAIDataThreshold(fsai_data);
+   HYPRE_Int               eig_max_iters    = hypre_ParFSAIDataEigMaxIters(fsai_data);
    HYPRE_Real              density;
 
    hypre_ParCSRMatrix     *G = hypre_ParFSAIDataGmat(fsai_data);
@@ -1097,6 +1098,7 @@ hypre_FSAIPrintStats( void *fsai_vdata,
       hypre_printf("| No. MPI tasks:     %6d |\n", nprocs);
       hypre_printf("| No. threads:       %6d |\n", hypre_NumThreads());
       hypre_printf("| Algorithm type:    %6d |\n", algo_type);
+      hypre_printf("| Local solve type:  %6d |\n", local_solve_type);
       if (algo_type == 1 || algo_type == 2)
       {
          hypre_printf("| Max no. steps:     %6d |\n", max_steps);

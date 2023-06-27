@@ -19,6 +19,7 @@ hypre_FSAICreate( void )
 
    /* setup params */
    HYPRE_Int            algo_type;
+   HYPRE_Int            local_solve_type;
    HYPRE_Int            max_steps;
    HYPRE_Int            max_step_size;
    HYPRE_Int            max_nnz_row;
@@ -49,6 +50,7 @@ hypre_FSAICreate( void )
 #else
    algo_type = hypre_NumThreads() > 4 ? 2 : 1;
 #endif
+   local_solve_type = 1;
    max_steps = 3;
    max_step_size = 5;
    max_nnz_row = max_steps * max_step_size;
@@ -81,6 +83,7 @@ hypre_FSAICreate( void )
    hypre_ParFSAIDataZeroGuess(fsai_data) = 0;
 
    hypre_FSAISetAlgoType(fsai_data, algo_type);
+   hypre_FSAISetLocalSolveType(fsai_data, local_solve_type);
    hypre_FSAISetMaxSteps(fsai_data, max_steps);
    hypre_FSAISetMaxStepSize(fsai_data, max_step_size);
    hypre_FSAISetMaxNnzRow(fsai_data, max_nnz_row);
@@ -159,6 +162,29 @@ hypre_FSAISetAlgoType( void      *data,
    }
 
    hypre_ParFSAIDataAlgoType(fsai_data) = algo_type;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_FSAISetLocalSolveType( void      *data,
+                             HYPRE_Int  local_solve_type )
+{
+   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
+
+   if (!fsai_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (local_solve_type < 0 || local_solve_type > 2)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_ParFSAIDataLocalSolveType(fsai_data) = local_solve_type;
 
    return hypre_error_flag;
 }
@@ -503,6 +529,23 @@ hypre_FSAIGetAlgoType( void      *data,
    }
 
    *algo_type = hypre_ParFSAIDataAlgoType(fsai_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_FSAIGetLocalSolveType( void      *data,
+                             HYPRE_Int *local_solve_type )
+{
+   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
+
+   if (!fsai_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *local_solve_type = hypre_ParFSAIDataLocalSolveType(fsai_data);
 
    return hypre_error_flag;
 }

@@ -1612,6 +1612,16 @@ HYPRE_Int HYPRE_FSAISetAlgoType( HYPRE_Solver solver,
                                  HYPRE_Int    algo_type );
 
 /**
+ * (Optional) Sets the solver type for solving local linear systems in FSAI. This
+ * option makes sense only for GPU runs.
+ *
+ *      - 1: Vendor solver (cuSOLVER/rocSOLVER)
+ *      - 2: MAGMA solver
+ **/
+HYPRE_Int HYPRE_FSAISetLocalSolveType( HYPRE_Solver solver,
+                                       HYPRE_Int    local_solve_type );
+
+/**
  * (Optional) Sets the maximum number of steps for computing the sparsity
  * pattern of G. This input parameter makes sense when using adaptive FSAI,
  * i.e., algorithm type 1 or 2.

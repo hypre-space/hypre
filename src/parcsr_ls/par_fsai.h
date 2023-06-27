@@ -17,31 +17,32 @@
 typedef struct hypre_ParFSAIData_struct
 {
    /* FSAI Setup input data */
-   HYPRE_Int             algo_type;       /* FSAI algorithm type */
-   HYPRE_Int             max_steps;       /* Max. iterations run per row */
-   HYPRE_Int             max_step_size;   /* Max. number of nonzeros added to a row of G per step */
-   HYPRE_Int             max_nnz_row;     /* Max. number of nonzeros per row of G */
-   HYPRE_Int             num_levels;      /* Number of levels for computing the candidate pattern */
-   HYPRE_Real            threshold;       /* Filtering threshold for the candidate pattern */
-   HYPRE_Real            kap_tolerance;   /* Min. amount of change between two steps */
+   HYPRE_Int             algo_type;        /* FSAI algorithm type */
+   HYPRE_Int             local_solve_type; /* Local linear solver type */
+   HYPRE_Int             max_steps;        /* Max. iterations run per row */
+   HYPRE_Int             max_step_size;    /* Max. number of nonzeros added to a row of G per step */
+   HYPRE_Int             max_nnz_row;      /* Max. number of nonzeros per row of G */
+   HYPRE_Int             num_levels;       /* Number of levels for computing the candidate pattern */
+   HYPRE_Real            threshold;        /* Filtering threshold for the candidate pattern */
+   HYPRE_Real            kap_tolerance;    /* Min. amount of change between two steps */
 
    /* FSAI Setup data */
-   HYPRE_Real            density;         /* Density of matrix G wrt. A */
-   hypre_ParCSRMatrix   *Gmat;            /* Matrix holding FSAI factor. M^(-1) = G'G */
-   hypre_ParCSRMatrix   *GTmat;           /* Matrix holding the transpose of the FSAI factor */
+   HYPRE_Real            density;          /* Density of matrix G wrt. A */
+   hypre_ParCSRMatrix   *Gmat;             /* Matrix holding FSAI factor. M^(-1) = G'G */
+   hypre_ParCSRMatrix   *GTmat;            /* Matrix holding the transpose of the FSAI factor */
 
    /* Solver data */
-   HYPRE_Int             zero_guess;      /* Flag indicating x0 = 0 */
-   HYPRE_Int             eig_max_iters;   /* Iters for computing max. eigenvalue of G^T*G*A */
-   HYPRE_Int             max_iterations;  /* Maximum iterations run for the solver */
-   HYPRE_Int             num_iterations;  /* Number of iterations the solver ran */
-   HYPRE_Real            omega;           /* Step size for Preconditioned Richardson Solver */
-   HYPRE_Real            tolerance;       /* Tolerance for the solver */
-   HYPRE_Real            rel_resnorm;     /* available if logging > 1 */
+   HYPRE_Int             zero_guess;       /* Flag indicating x0 = 0 */
+   HYPRE_Int             eig_max_iters;    /* Iters for computing max. eigenvalue of G^T*G*A */
+   HYPRE_Int             max_iterations;   /* Maximum iterations run for the solver */
+   HYPRE_Int             num_iterations;   /* Number of iterations the solver ran */
+   HYPRE_Real            omega;            /* Step size for Preconditioned Richardson Solver */
+   HYPRE_Real            tolerance;        /* Tolerance for the solver */
+   HYPRE_Real            rel_resnorm;      /* available if logging > 1 */
 
    /* Work data */
-   hypre_ParVector      *r_work;          /* work vector used to compute the residual */
-   hypre_ParVector      *z_work;          /* work vector used for applying FSAI */
+   hypre_ParVector      *r_work;           /* work vector used to compute the residual */
+   hypre_ParVector      *z_work;           /* work vector used for applying FSAI */
 
    /* Log info data */
    HYPRE_Int             logging;
@@ -54,6 +55,7 @@ typedef struct hypre_ParFSAIData_struct
 
 /* FSAI Setup input data */
 #define hypre_ParFSAIDataAlgoType(fsai_data)                ((fsai_data) -> algo_type)
+#define hypre_ParFSAIDataLocalSolveType(fsai_data)          ((fsai_data) -> local_solve_type)
 #define hypre_ParFSAIDataMaxSteps(fsai_data)                ((fsai_data) -> max_steps)
 #define hypre_ParFSAIDataMaxStepSize(fsai_data)             ((fsai_data) -> max_step_size)
 #define hypre_ParFSAIDataMaxNnzRow(fsai_data)               ((fsai_data) -> max_nnz_row)

@@ -724,39 +724,68 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
                                   hypre_ParVector    *f,
                                   hypre_ParVector    *u )
 {
-   hypre_ParFSAIData   *fsai_data   = (hypre_ParFSAIData*) fsai_vdata;
-   hypre_ParCSRMatrix  *G           = hypre_ParFSAIDataGmat(fsai_data);
-   hypre_CSRMatrix     *G_diag      = hypre_ParCSRMatrixDiag(G);
-   HYPRE_Int            max_nnz_row = hypre_ParFSAIDataMaxNnzRow(fsai_data);
-   HYPRE_Int            num_levels  = hypre_ParFSAIDataNumLevels(fsai_data);
-   HYPRE_Real           threshold   = hypre_ParFSAIDataThreshold(fsai_data);
+   hypre_ParFSAIData      *fsai_data        = (hypre_ParFSAIData*) fsai_vdata;
+   hypre_ParCSRMatrix     *G                = hypre_ParFSAIDataGmat(fsai_data);
+   hypre_CSRMatrix        *G_diag           = hypre_ParCSRMatrixDiag(G);
+   HYPRE_Int               local_solve_type = hypre_ParFSAIDataLocalSolveType(fsai_data);
+   HYPRE_Int               max_nnz_row      = hypre_ParFSAIDataMaxNnzRow(fsai_data);
+   HYPRE_Int               num_levels       = hypre_ParFSAIDataNumLevels(fsai_data);
+   HYPRE_Real              threshold        = hypre_ParFSAIDataThreshold(fsai_data);
 
-   hypre_CSRMatrix     *A_diag      = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Int            num_rows    = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int            block_size  = max_nnz_row * max_nnz_row;
-   HYPRE_Int            num_nonzeros_G;
+   hypre_CSRMatrix        *A_diag           = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Int               num_rows         = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int               block_size       = max_nnz_row * max_nnz_row;
+   HYPRE_Int               num_nonzeros_G;
 
-   hypre_ParCSRMatrix  *Atilde;
-   hypre_ParCSRMatrix  *B;
-   hypre_ParCSRMatrix  *Ktilde;
-   hypre_CSRMatrix     *K_diag;
-   HYPRE_Int           *K_e = NULL;
-   HYPRE_Int            i;
+   hypre_ParCSRMatrix     *Atilde;
+   hypre_ParCSRMatrix     *B;
+   hypre_ParCSRMatrix     *Ktilde;
+   hypre_CSRMatrix        *K_diag;
+   HYPRE_Int              *K_e = NULL;
+   HYPRE_Int               i;
+
+   /* Local linear solve data */
+#if defined (HYPRE_USING_MAGMA)
+    magma_queue_t          queue     = hypre_HandleMagmaQueue(hypre_handle());
+#endif
+
+#if defined (HYPRE_USING_CUSOLVER) || defined (HYPRE_USING_ROCSOLVER)
+    vendorSolverHandle_t   vs_handle = hypre_HandleVendorSolverHandle(hypre_handle());
+#endif
 
    /* TODO: Move to fsai_data? */
-   HYPRE_Complex       *scaling;
-   HYPRE_Int           *info;
+   HYPRE_Complex          *scaling;
+   HYPRE_Int              *info;
+   HYPRE_Int              *h_info;
 
    /* Error code array for FSAI */
-   info = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
+   info   = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
+   h_info = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
 
-   /* Sanity check */
-#if !(defined (HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER))
+   /*-----------------------------------------------------
+    *  Sanity checks
+    *-----------------------------------------------------*/
+
+   /* Check local linear solve algorithm */
+   if (local_solve_type == 1)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "FSAI requires cuSOLVER (CUDA) or rocSOLVER (HIP)\n");
+#if !(defined (HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER))
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "local_solve_type == 1 requires cuSOLVER (CUDA) or rocSOLVER (HIP)\n");
+      return hypre_error_flag;
+#endif
+   }
+   else if (local_solve_type == 2)
+   {
+#if !defined (HYPRE_USING_MAGMA)
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "local_solve_type == 2 requires MAGMA\n");
+      return hypre_error_flag;
+#endif
+   }
+   else
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown local linear solve type!\n");
       return hypre_error_flag;
    }
-#endif
 
    /*-----------------------------------------------------
     *  Compute candidate pattern
@@ -913,46 +942,41 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    hypre_GpuProfilingPushRange("BatchedSolve");
    if (num_rows)
    {
-#if defined(HYPRE_DEBUG)
-      HYPRE_Int *h_info = hypre_TAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
-#endif
-
       hypre_GpuProfilingPushRange("Factorization");
-#if defined (HYPRE_USING_MAGMA)
-      const magma_uplo_t     uplo  = MagmaLower;
-      magma_queue_t          queue = hypre_HandleMagmaQueue(hypre_handle());
 
-      HYPRE_MAGMA_CALL(magma_dpotrf_batched(uplo,
-                                            max_nnz_row,
-                                            mat_aop,
-                                            max_nnz_row,
-                                            info,
-                                            num_rows,
-                                            queue));
-#elif defined (HYPRE_USING_CUSOLVER)
-      const cublasFillMode_t uplo      = CUBLAS_FILL_MODE_LOWER;
-      vendorSolverHandle_t   vs_handle = hypre_HandleVendorSolverHandle(hypre_handle());
-
-      HYPRE_CUSOLVER_CALL(cusolverDnDpotrfBatched(vs_handle,
-                                                  uplo,
-                                                  max_nnz_row,
-                                                  mat_aop,
-                                                  max_nnz_row,
-                                                  info,
-                                                  num_rows));
+      if (local_solve_type == 1)
+      {
+#if defined (HYPRE_USING_CUSOLVER)
+         HYPRE_CUSOLVER_CALL(cusolverDnDpotrfBatched(vs_handle,
+                                                     CUBLAS_FILL_MODE_LOWER,
+                                                     max_nnz_row,
+                                                     mat_aop,
+                                                     max_nnz_row,
+                                                     info,
+                                                     num_rows));
 
 #elif defined (HYPRE_USING_ROCSOLVER)
-      const rocblas_fill     uplo      = rocblas_fill_lower;
-      vendorSolverHandle_t   vs_handle = hypre_HandleVendorSolverHandle(hypre_handle());
-
-      HYPRE_ROCSOLVER_CALL(rocsolver_dpotrf_batched(vs_handle,
-                                                    uplo,
-                                                    max_nnz_row,
-                                                    mat_aop,
-                                                    max_nnz_row,
-                                                    info,
-                                                    num_rows));
+         HYPRE_ROCSOLVER_CALL(rocsolver_dpotrf_batched(vs_handle,
+                                                       rocblas_fill_lower,
+                                                       max_nnz_row,
+                                                       mat_aop,
+                                                       max_nnz_row,
+                                                       info,
+                                                       num_rows));
 #endif
+      }
+      else if (local_solve_type == 2)
+      {
+#if defined (HYPRE_USING_MAGMA)
+         HYPRE_MAGMA_CALL(magma_dpotrf_batched(MagmaLower,
+                                               max_nnz_row,
+                                               mat_aop,
+                                               max_nnz_row,
+                                               info,
+                                               num_rows,
+                                               queue));
+#endif
+      }
       hypre_GpuProfilingPopRange(); /* Factorization */
 
 #if defined (HYPRE_DEBUG)
@@ -970,38 +994,45 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 
       hypre_GpuProfilingPushRange("Solve");
 
-#if defined (HYPRE_USING_MAGMA)
-      HYPRE_MAGMA_CALL(magma_dpotrs_batched(uplo,
-                                            max_nnz_row,
-                                            1,
-                                            mat_aop,
-                                            max_nnz_row,
-                                            sol_aop,
-                                            max_nnz_row,
-                                            num_rows,
-                                            queue));
-#elif defined (HYPRE_USING_CUSOLVER)
-      HYPRE_CUSOLVER_CALL(cusolverDnDpotrsBatched(vs_handle,
-                                                  uplo,
-                                                  max_nnz_row,
-                                                  1,
-                                                  mat_aop,
-                                                  max_nnz_row,
-                                                  sol_aop,
-                                                  max_nnz_row,
-                                                  info,
-                                                  num_rows));
+      if (local_solve_type == 1)
+      {
+#if defined (HYPRE_USING_CUSOLVER)
+         HYPRE_CUSOLVER_CALL(cusolverDnDpotrsBatched(vs_handle,
+                                                     CUBLAS_FILL_MODE_LOWER,
+                                                     max_nnz_row,
+                                                     1,
+                                                     mat_aop,
+                                                     max_nnz_row,
+                                                     sol_aop,
+                                                     max_nnz_row,
+                                                     info,
+                                                     num_rows));
 #elif defined (HYPRE_USING_ROCSOLVER)
-      HYPRE_ROCSOLVER_CALL(rocsolver_dpotrs_batched(vs_handle,
-                                                    uplo,
-                                                    max_nnz_row,
-                                                    1,
-                                                    mat_aop,
-                                                    max_nnz_row,
-                                                    sol_aop,
-                                                    max_nnz_row,
-                                                    num_rows));
+         HYPRE_ROCSOLVER_CALL(rocsolver_dpotrs_batched(vs_handle,
+                                                       rocblas_fill_lower,
+                                                       max_nnz_row,
+                                                       1,
+                                                       mat_aop,
+                                                       max_nnz_row,
+                                                       sol_aop,
+                                                       max_nnz_row,
+                                                       num_rows));
 #endif
+      }
+      else if (local_solve_type == 2)
+      {
+#if defined (HYPRE_USING_MAGMA)
+         HYPRE_MAGMA_CALL(magma_dpotrs_batched(MagmaLower,
+                                               max_nnz_row,
+                                               1,
+                                               mat_aop,
+                                               max_nnz_row,
+                                               sol_aop,
+                                               max_nnz_row,
+                                               num_rows,
+                                               queue));
+#endif
+      }
       hypre_GpuProfilingPopRange(); /* Solve */
 
 #if defined (HYPRE_DEBUG)
@@ -1015,10 +1046,6 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
                          k, h_info[k]);
          }
       }
-#endif
-
-#if defined(HYPRE_DEBUG)
-      hypre_TFree(h_info, HYPRE_MEMORY_HOST);
 #endif
    }
    hypre_GpuProfilingPopRange(); /* BatchedSolve */
@@ -1076,6 +1103,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    hypre_TFree(mat_aop, HYPRE_MEMORY_DEVICE);
    hypre_TFree(scaling, HYPRE_MEMORY_DEVICE);
    hypre_TFree(info, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(h_info, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

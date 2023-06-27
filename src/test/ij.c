@@ -450,6 +450,7 @@ main( hypre_int argc,
 
    /* hypre_FSAI options */
    HYPRE_Int  fsai_algo_type = 1;
+   HYPRE_Int  fsai_ls_type = 1;
    HYPRE_Int  fsai_max_steps = 10;
    HYPRE_Int  fsai_max_step_size = 1;
    HYPRE_Int  fsai_max_nnz_row = 10;
@@ -1401,6 +1402,11 @@ main( hypre_int argc,
       {
          arg_index++;
          fsai_algo_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-fs_ls_type") == 0 )
+      {
+         arg_index++;
+         fsai_ls_type = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-fs_max_steps") == 0 )
       {
@@ -2550,6 +2556,7 @@ main( hypre_int argc,
          /* end ILU options */
          /* hypre FSAI options */
          hypre_printf("  -fs_algo_type <val>              : FSAI algorithm type\n");
+         hypre_printf("  -fs_ls_type <val>                : FSAI local solve type\n");
          hypre_printf("  -fs_max_steps <val>              : Max. number of steps (adaptive)\n");
          hypre_printf("  -fs_max_step_size <val>          : Max. step size (adaptive)\n");
          hypre_printf("  -fs_max_nnz_row <val>            : Max. nonzeros per row (static)\n");
@@ -5068,6 +5075,7 @@ main( hypre_int argc,
          HYPRE_FSAICreate(&pcg_precond);
 
          HYPRE_FSAISetAlgoType(pcg_precond, fsai_algo_type);
+         HYPRE_FSAISetLocalSolveType(pcg_precond, fsai_ls_type);
          HYPRE_FSAISetMaxSteps(pcg_precond, fsai_max_steps);
          HYPRE_FSAISetMaxStepSize(pcg_precond, fsai_max_step_size);
          HYPRE_FSAISetMaxNnzRow(pcg_precond, fsai_max_nnz_row);

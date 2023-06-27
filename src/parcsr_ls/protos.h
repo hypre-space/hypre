@@ -920,6 +920,8 @@ HYPRE_Int HYPRE_FSAISolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_Par
                             HYPRE_ParVector x );
 HYPRE_Int HYPRE_FSAISetAlgoType ( HYPRE_Solver solver, HYPRE_Int algo_type );
 HYPRE_Int HYPRE_FSAIGetAlgoType ( HYPRE_Solver solver, HYPRE_Int *algo_type );
+HYPRE_Int HYPRE_FSAISetLocalSolveType ( HYPRE_Solver solver, HYPRE_Int local_solve_type );
+HYPRE_Int HYPRE_FSAIGetLocalSolveType ( HYPRE_Solver solver, HYPRE_Int *local_solve_type );
 HYPRE_Int HYPRE_FSAISetMaxSteps ( HYPRE_Solver solver, HYPRE_Int max_steps );
 HYPRE_Int HYPRE_FSAIGetMaxSteps ( HYPRE_Solver solver, HYPRE_Int *max_steps );
 HYPRE_Int HYPRE_FSAISetMaxStepSize ( HYPRE_Solver solver, HYPRE_Int max_step_size );
@@ -2766,6 +2768,7 @@ HYPRE_Int hypre_BoomerAMGDD_FixUpRecvMaps ( hypre_AMGDDCompGrid **compGrid,
 void* hypre_FSAICreate( void );
 HYPRE_Int hypre_FSAIDestroy ( void *data );
 HYPRE_Int hypre_FSAISetAlgoType ( void *data, HYPRE_Int algo_type );
+HYPRE_Int hypre_FSAISetLocalSolveType ( void *data, HYPRE_Int local_solve_type );
 HYPRE_Int hypre_FSAISetMaxSteps ( void *data, HYPRE_Int max_steps );
 HYPRE_Int hypre_FSAISetMaxStepSize ( void *data, HYPRE_Int max_step_size );
 HYPRE_Int hypre_FSAISetMaxNnzRow ( void *data, HYPRE_Int max_nnz_row );
@@ -2781,6 +2784,7 @@ HYPRE_Int hypre_FSAISetLogging ( void *data, HYPRE_Int logging );
 HYPRE_Int hypre_FSAISetNumIterations ( void *data, HYPRE_Int num_iterations );
 HYPRE_Int hypre_FSAISetPrintLevel ( void *data, HYPRE_Int print_level );
 HYPRE_Int hypre_FSAIGetAlgoType ( void *data, HYPRE_Int *algo_type );
+HYPRE_Int hypre_FSAIGetLocalSolveType ( void *data, HYPRE_Int *local_solve_type );
 HYPRE_Int hypre_FSAIGetMaxSteps ( void *data, HYPRE_Int *max_steps );
 HYPRE_Int hypre_FSAIGetMaxStepSize ( void *data, HYPRE_Int *max_step_size );
 HYPRE_Int hypre_FSAIGetMaxNnzRow ( void *data, HYPRE_Int *max_nnz_row );
