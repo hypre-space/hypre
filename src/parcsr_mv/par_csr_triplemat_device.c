@@ -11,7 +11,7 @@
 
 #define PARCSRGEMM_TIMING 0
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 /* option == 1, T = HYPRE_BigInt
  * option == 2, T = HYPRE_Int,
@@ -297,11 +297,9 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
    if (num_cols_offd_C)
    {
       hypre_ParCSRMatrixDeviceColMapOffd(C) = col_map_offd_C;
-
-      hypre_ParCSRMatrixColMapOffd(C) = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(C), col_map_offd_C, HYPRE_BigInt, num_cols_offd_C,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
+
+   hypre_ParCSRMatrixCopyColMapOffdToHost(C);
 
 #if PARCSRGEMM_TIMING > 0
    hypre_ForceSyncComputeStream(hypre_handle());
@@ -494,7 +492,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
                          func1 );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure Cint is ready before issuing GPU-GPU MPI */
       hypre_ForceSyncComputeStream(hypre_handle());
 #endif
@@ -594,14 +592,11 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(C));
    hypre_ParCSRMatrixOffd(C) = C_offd;
 
-   if (num_cols_offd_C)
-   {
-      hypre_ParCSRMatrixDeviceColMapOffd(C) = col_map_offd_C;
+   hypre_ParCSRMatrixDeviceColMapOffd(C) = col_map_offd_C;
 
-      hypre_ParCSRMatrixColMapOffd(C) = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(C), col_map_offd_C, HYPRE_BigInt, num_cols_offd_C,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   }
+   hypre_ParCSRMatrixCompressOffdMapDevice(C);
+
+   hypre_ParCSRMatrixCopyColMapOffdToHost(C);
 
    hypre_assert(!hypre_CSRMatrixCheckDiagFirstDevice(hypre_ParCSRMatrixDiag(C)));
 
@@ -772,7 +767,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                          func1 );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure Cint is ready before issuing GPU-GPU MPI */
       hypre_ForceSyncComputeStream(hypre_handle());
 #endif
@@ -859,16 +854,10 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(C));
    hypre_ParCSRMatrixOffd(C) = C_offd;
 
-   if (num_cols_offd_C)
-   {
-      hypre_ParCSRMatrixDeviceColMapOffd(C) = col_map_offd_C;
+   hypre_ParCSRMatrixDeviceColMapOffd(C) = col_map_offd_C;
 
-      hypre_ParCSRMatrixColMapOffd(C) = hypre_TAlloc(HYPRE_BigInt,
-                                                     num_cols_offd_C,
-                                                     HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(C), col_map_offd_C, HYPRE_BigInt,
-                    num_cols_offd_C, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   }
+   hypre_ParCSRMatrixCompressOffdMapDevice(C);
+   hypre_ParCSRMatrixCopyColMapOffdToHost(C);
 
    hypre_assert(!hypre_CSRMatrixCheckDiagFirstDevice(hypre_ParCSRMatrixDiag(C)));
 
@@ -1267,5 +1256,4 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
-
+#endif /* #if defined(HYPRE_USING_GPU) */

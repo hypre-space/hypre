@@ -28,7 +28,7 @@ hypre_FSAISolve( void               *fsai_vdata,
 
    /* Data structure variables */
    hypre_ParVector     *r_work      = hypre_ParFSAIDataRWork(fsai_data);
-   HYPRE_Real            tol         = hypre_ParFSAIDataTolerance(fsai_data);
+   HYPRE_Real           tol         = hypre_ParFSAIDataTolerance(fsai_data);
    HYPRE_Int            zero_guess  = hypre_ParFSAIDataZeroGuess(fsai_data);
    HYPRE_Int            max_iter    = hypre_ParFSAIDataMaxIterations(fsai_data);
    HYPRE_Int            print_level = hypre_ParFSAIDataPrintLevel(fsai_data);
@@ -40,6 +40,13 @@ hypre_FSAISolve( void               *fsai_vdata,
    HYPRE_Complex        one = 1.0;
    HYPRE_Complex        neg_one = -1.0;
    HYPRE_Complex        zero = 0.0;
+
+   /* Sanity check */
+   if (hypre_ParVectorNumVectors(b) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "FSAI doesn't support multicomponent vectors");
+      return hypre_error_flag;
+   }
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("FSAISolve");

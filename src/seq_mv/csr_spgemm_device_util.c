@@ -9,7 +9,7 @@
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_SYCL)
 struct row_size
@@ -19,7 +19,7 @@ struct row_size : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
 {
    HYPRE_Int SHMEM_HASH_SIZE;
 
-   row_size(HYPRE_Int SHMEM_HASH_SIZE_) { SHMEM_HASH_SIZE = SHMEM_HASH_SIZE_; }
+   row_size(HYPRE_Int SHMEM_HASH_SIZE_ = HYPRE_Int()) { SHMEM_HASH_SIZE = SHMEM_HASH_SIZE_; }
 
    __device__ HYPRE_Int operator()(const HYPRE_Int &x) const
    {
@@ -295,8 +295,8 @@ HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int  m,
    HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
                       d_bin_key,
                       d_bin_key + m,
-                      oneapi::dpl::counting_iterator(1),
-                      oneapi::dpl::counting_iterator(num_bins + 2),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(1),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(num_bins + 2),
                       d_bin_ptr );
 #else
    HYPRE_THRUST_CALL( transform,
@@ -337,5 +337,5 @@ HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int  m,
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#endif // #if defined(HYPRE_USING_GPU)
 

@@ -12,9 +12,9 @@ else ()
 endif ()
 
 # The version number.
-set(HYPRE_VERSION 2.28.0)
-set(HYPRE_NUMBER  22800)
-set(HYPRE_DATE    2023/03/17)
+set(HYPRE_VERSION 2.29.0)
+set(HYPRE_NUMBER  22900)
+set(HYPRE_DATE    2023/06/22)
 set(HYPRE_TIME    00:00:00)
 set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -213,8 +213,6 @@ endif ()
 
 if (HYPRE_WITH_MAGMA)
   set(HYPRE_USING_MAGMA ON CACHE BOOL "" FORCE)
-  set(HYPRE_USING_HYPRE_BLAS OFF CACHE BOOL "" FORCE)
-  set(HYPRE_USING_HYPRE_LAPACK OFF CACHE BOOL "" FORCE)
 endif ()
 
 if (HYPRE_ENABLE_FEI)
@@ -526,7 +524,7 @@ if (DSUPERLU_FOUND)
   set(HYPRE_USING_DSUPERLU TRUE)
 endif ()
 
-# FIXME Check for case if MAGMA without CUDA/HIP
+# TODO: Check for case if MAGMA without CUDA/HIP
 # Find MAGMA, if requested
 if (HYPRE_USING_MAGMA)
   if (NOT TPL_MAGMA_LIBRARIES)
@@ -544,15 +542,9 @@ if (HYPRE_USING_MAGMA)
     set(CMAKE_C_FLAGS "-I${dir} ${CMAKE_C_FLAGS}")
   endforeach ()
   message(STATUS "Enabled support for using MAGMA.")
-  set(MAGMA_FOUND TRUE)
   target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_MAGMA_LIBRARIES} stdc++)
   target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_MAGMA_INCLUDE_DIRS})
 endif (HYPRE_USING_MAGMA)
-
-# FIXME This has already been set, o.w. we wouldn't try looking for MAGMA!!
-if (MAGMA_FOUND)
-  set(HYPRE_USING_MAGMA TRUE)
-endif ()
 
 # Find FEI, if requested
 if (HYPRE_USING_FEI)

@@ -122,8 +122,36 @@ typedef HYPRE_Int MPI_Comm;
  * HYPRE init/finalize
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_Init(void);
+/**
+ * (Required) Initializes the hypre library.
+ **/
+
+HYPRE_Int HYPRE_Initialize(void);
+
+/**
+ * (Required) Initializes the hypre library. This function is provided for backward compatibility.
+ * Please, use HYPRE_Initialize instead.
+ **/
+
+#define HYPRE_Init() HYPRE_Initialize()
+
+/**
+ * (Required) Finalizes the hypre library.
+ **/
+
 HYPRE_Int HYPRE_Finalize(void);
+
+/**
+ * (Optional) Returns true if the hypre library has been initialized but not finalized yet.
+ **/
+
+HYPRE_Int HYPRE_Initialized(void);
+
+/**
+ * (Optional) Returns true if the hypre library has been finalized but not re-initialized yet.
+ **/
+
+HYPRE_Int HYPRE_Finalized(void);
 
 /*--------------------------------------------------------------------------
  * HYPRE error user functions
@@ -147,6 +175,15 @@ HYPRE_Int HYPRE_ClearAllErrors(void);
 
 /* Clears the given error code from the hypre error flag */
 HYPRE_Int HYPRE_ClearError(HYPRE_Int hypre_error_code);
+
+/* Set behavior for printing errors: mode 0 = stderr, mode 1 = memory buffer */
+HYPRE_Int HYPRE_SetPrintErrorMode(HYPRE_Int mode);
+
+/* Return a buffer of error messages and clear them in hypre */
+HYPRE_Int HYPRE_GetErrorMessages(char **buffer, HYPRE_Int *bufsz);
+
+/* Print the error messages and clear them in hypre */
+HYPRE_Int HYPRE_PrintErrorMessages(MPI_Comm comm);
 
 /* Print GPU information */
 HYPRE_Int HYPRE_PrintDeviceInfo(void);

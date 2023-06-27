@@ -75,6 +75,7 @@ set(SRCS
   par_add_cycle.c
   par_difconv.c
   par_fsai.c
+  par_fsai_device.c
   par_fsai_setup.c
   par_fsai_solve.c
   par_fsai_device.c
@@ -92,6 +93,7 @@ set(SRCS
   par_laplace.c
   par_lr_interp.c
   par_mgr.c
+  par_mgr_coarsen.c
   par_mgr_setup.c
   par_mgr_solve.c
   par_nongalerkin.c
@@ -124,6 +126,7 @@ set(SRCS
   par_mgr_solve.c
   par_ilu.c
   par_ilu_setup.c
+  par_ilu_setup_device.c
   par_ilu_solve.c
   par_ilu_solve_device.c
   par_coarsen_device.c
@@ -158,6 +161,7 @@ if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
     par_amg_setup.c
     par_ilu.c
     par_ilu_setup.c
+    par_ilu_setup_device.c
     par_ilu_solve.c
     par_ilu_solve_device.c
     par_coarsen_device.c

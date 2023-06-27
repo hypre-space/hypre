@@ -9,7 +9,9 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
+
+/* TODO (VPM): Rename to hypreGPUKernel_. Also, do we need these prototypes? */
 
 __global__ void hypre_BoomerAMGBuildDirInterp_getnnz( hypre_DeviceItem &item, HYPRE_Int nr_of_rows,
                                                       HYPRE_Int *S_diag_i,
@@ -73,7 +75,6 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    HYPRE_Int       *A_offd_i    = hypre_CSRMatrixI(A_offd);
    HYPRE_Int       *A_offd_j    = hypre_CSRMatrixJ(A_offd);
    HYPRE_Int        num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
-   //   HYPRE_BigInt   *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
 
    HYPRE_Int        n_fine = hypre_CSRMatrixNumRows(A_diag);
 
@@ -87,15 +88,13 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    HYPRE_Int       *S_offd_i = hypre_CSRMatrixI(S_offd);
    HYPRE_Int       *S_offd_j = hypre_CSRMatrixJ(S_offd);
 
-   HYPRE_Int *Soc_diag_j = hypre_ParCSRMatrixSocDiagJ(S);
-   HYPRE_Int *Soc_offd_j = hypre_ParCSRMatrixSocOffdJ(S);
-
-   hypre_ParCSRMatrix *P;
-   HYPRE_Int          *tmp_map_offd_h = NULL;
+   HYPRE_Int       *Soc_diag_j = hypre_ParCSRMatrixSocDiagJ(S);
+   HYPRE_Int       *Soc_offd_j = hypre_ParCSRMatrixSocOffdJ(S);
 
    HYPRE_Int       *CF_marker_offd = NULL;
    HYPRE_Int       *dof_func_offd = NULL;
 
+   hypre_ParCSRMatrix *P;
    hypre_CSRMatrix *P_diag;
    hypre_CSRMatrix *P_offd;
    HYPRE_Real      *P_diag_data;
@@ -109,7 +108,6 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    HYPRE_Int       *fine_to_coarse_d;
    HYPRE_Int       *fine_to_coarse_h;
    HYPRE_BigInt     total_global_cpts;
-   HYPRE_Int        num_cols_P_offd = 0;
 
    HYPRE_Int        my_id;
    HYPRE_Int        num_procs;
@@ -164,7 +162,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
                       int_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
    /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
    hypre_ForceSyncComputeStream(hypre_handle());
 #endif
@@ -196,7 +194,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
                          int_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
       hypre_ForceSyncComputeStream(hypre_handle());
 #endif
@@ -309,7 +307,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
                                 total_global_cpts,
                                 hypre_ParCSRMatrixColStarts(A),
                                 num_cpts_global,
-                                0,
+                                num_cols_A_offd,
                                 P_diag_size,
                                 P_offd_size);
 
@@ -332,87 +330,21 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    if (trunc_factor != 0.0 || max_elmts > 0)
    {
       hypre_BoomerAMGInterpTruncationDevice(P, trunc_factor, max_elmts);
-
-      P_offd_i    = hypre_CSRMatrixI(P_offd);
-      P_offd_j    = hypre_CSRMatrixJ(P_offd);
-      P_offd_size = hypre_CSRMatrixNumNonzeros(P_offd);
-      /* hypre_TMemcpy(&P_offd_size, &P_offd_i[n_fine], HYPRE_Int, 1, HYPRE_MEMORY_HOST, memory_location); */
    }
 
    /* 7. Translate P_offd's column indices from the values inherited from A_offd to a 0,1,2,3,... enumeration, */
    /*    and construct the col_map array that translates these into the global 0..c-1 enumeration */
-   if (P_offd_size)
-   {
-      /* Array P_marker has length equal to the number of A's offd columns+1, and will */
-      /* store a translation code from A_offd's local column numbers to P_offd's local column numbers */
-      /* Example: if A_offd has 6 columns, locally 0,1,..,5, and points 1 and 4 are coarse points, then
-         P_marker=[0,1,0,0,1,0,0], */
 
-      /* First,  set P_marker[i] to 1 if A's column i is also present in P, otherwise P_marker[i] is 0 */
-      HYPRE_Int *P_marker = hypre_TAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
-      HYPRE_Int *P_colids = hypre_TAlloc(HYPRE_Int, hypre_max(P_offd_size, num_cols_A_offd),
-                                         HYPRE_MEMORY_DEVICE);
+   /* Array P_marker has length equal to the number of A's offd columns+1, and will */
+   /* store a translation code from A_offd's local column numbers to P_offd's local column numbers */
+   HYPRE_Int *P_colids;
+   HYPRE_Int *P_colids_h = NULL;
 
-      hypre_TMemcpy(P_colids, P_offd_j, HYPRE_Int, P_offd_size, HYPRE_MEMORY_DEVICE, memory_location);
-      /* sort and unique */
-#if defined(HYPRE_USING_SYCL)
-      HYPRE_ONEDPL_CALL(std::sort, P_colids, P_colids + P_offd_size);
-      HYPRE_Int *new_end = HYPRE_ONEDPL_CALL(std::unique, P_colids, P_colids + P_offd_size);
-#else
-      HYPRE_THRUST_CALL(sort, P_colids, P_colids + P_offd_size);
-      HYPRE_Int *new_end = HYPRE_THRUST_CALL(unique, P_colids, P_colids + P_offd_size);
-#endif
-
-      num_cols_P_offd = new_end - P_colids;
-
-      hypreDevice_IntFilln(P_marker, num_cols_A_offd, 0);
-      hypreDevice_ScatterConstant(P_marker, num_cols_P_offd, P_colids, 1);
-
-      /* Because P's columns correspond to P_marker[i]=1 (and =0 otherwise), the scan below will return  */
-      /* an enumeration of P's columns 0,1,... at the corresponding locations in P_marker. */
-      /* P_marker[num_cols_A_offd] will contain num_cols_P_offd, so sum reduction above could  */
-      /* have been replaced by reading the last element of P_marker. */
-#if defined(HYPRE_USING_SYCL)
-      HYPRE_ONEDPL_CALL(std::exclusive_scan, P_marker, P_marker + num_cols_A_offd, P_colids, 0);
-#else
-      HYPRE_THRUST_CALL(exclusive_scan, P_marker, P_marker + num_cols_A_offd, P_colids);
-#endif
-      /* Example: P_marker becomes [0,0,1,1,1,2] so that P_marker[1]=0, P_marker[4]=1  */
-
-      /* Do the re-enumeration, P_offd_j are mapped, using P_marker as map  */
-#if defined(HYPRE_USING_SYCL)
-      hypreSycl_gather(P_offd_j, P_offd_j + P_offd_size, P_colids, P_offd_j);
-#else
-      HYPRE_THRUST_CALL(gather, P_offd_j, P_offd_j + P_offd_size, P_colids, P_offd_j);
-#endif
-
-      /* Create and define array tmp_map_offd. This array is the inverse of the P_marker mapping, */
-      /* Example: num_cols_P_offd=2, tmp_map_offd[0] = 1, tmp_map_offd[1]=4  */
-      /* P_colids is large enough to hold */
-#if defined(HYPRE_USING_SYCL)
-      oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
-      new_end = hypreSycl_copy_if( count,
-                                   count + num_cols_A_offd,
-                                   P_marker,
-                                   P_colids,
-      [] (const auto & x) { return x; } );
-#else
-      new_end = HYPRE_THRUST_CALL(copy_if,
-                                  thrust::make_counting_iterator(0),
-                                  thrust::make_counting_iterator(num_cols_A_offd),
-                                  P_marker,
-                                  P_colids,
-                                  thrust::identity<HYPRE_Int>());
-#endif
-      hypre_assert(new_end - P_colids == num_cols_P_offd);
-
-      tmp_map_offd_h = hypre_TAlloc(HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(tmp_map_offd_h, P_colids, HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_HOST,
-                    HYPRE_MEMORY_DEVICE);
-
-      hypre_TFree(P_colids, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(P_marker, HYPRE_MEMORY_DEVICE);
-   }
+   hypre_CSRMatrixCompressColumnsDevice(P_offd, NULL, &P_colids, NULL);
+   P_colids_h = hypre_TAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(P_offd), HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(P_colids_h, P_colids, HYPRE_Int, hypre_CSRMatrixNumCols(P_offd),
+                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(P_colids, HYPRE_MEMORY_DEVICE);
 
    /* 8. P_offd_j now has a 0,1,2,3... local column index enumeration. */
    /*    tmp_map_offd contains the index mapping from P's offd local columns to A's offd local columns.*/
@@ -423,10 +355,10 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    hypre_TMemcpy(fine_to_coarse_h, fine_to_coarse_d, HYPRE_Int, n_fine, HYPRE_MEMORY_HOST,
                  HYPRE_MEMORY_DEVICE);
 
-   hypre_ParCSRMatrixColMapOffd(P) = hypre_CTAlloc(HYPRE_BigInt, num_cols_P_offd, HYPRE_MEMORY_HOST);
-   hypre_CSRMatrixNumCols(P_offd)  = num_cols_P_offd;
+   hypre_ParCSRMatrixColMapOffd(P) = hypre_CTAlloc(HYPRE_BigInt, hypre_CSRMatrixNumCols(P_offd),
+                                                   HYPRE_MEMORY_HOST);
 
-   hypre_GetCommPkgRTFromCommPkgA(P, A, fine_to_coarse_h, tmp_map_offd_h);
+   hypre_GetCommPkgRTFromCommPkgA(P, A, fine_to_coarse_h, P_colids_h);
 
    *P_ptr = P;
 
@@ -435,7 +367,7 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    hypre_TFree(int_buf_data,     HYPRE_MEMORY_DEVICE);
    hypre_TFree(fine_to_coarse_d, HYPRE_MEMORY_DEVICE);
    hypre_TFree(fine_to_coarse_h, HYPRE_MEMORY_HOST);
-   hypre_TFree(tmp_map_offd_h,   HYPRE_MEMORY_HOST);
+   hypre_TFree(P_colids_h,       HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -1217,7 +1149,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                       int_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
    /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
    hypre_ForceSyncComputeStream(hypre_handle());
 #endif
@@ -1284,7 +1216,7 @@ hypre_BoomerAMGBuildInterpOnePntDevice( hypre_ParCSRMatrix  *A,
                       thrust::plus<HYPRE_BigInt>() );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
    /* RL: make sure big_int_buf_data is ready before issuing GPU-GPU MPI */
    hypre_ForceSyncComputeStream(hypre_handle());
 #endif
@@ -1669,4 +1601,4 @@ hypre_BoomerAMGBuildInterpOnePnt_getnnz( hypre_DeviceItem    &item,
    }
 }
 
-#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#endif // defined(HYPRE_USING_GPU)

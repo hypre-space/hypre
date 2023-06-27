@@ -31,6 +31,7 @@ HEADERS =\
  mpistubs.h\
  threading.h\
  timing.h\
+ magma.h\
  _hypre_onedpl.hpp\
  _hypre_utilities.h\
  _hypre_utilities.hpp
@@ -50,6 +51,7 @@ FILES =\
  error.c\
  int_array.c\
  hopscotch_hash.c\
+ magma.c\
  memory_tracker.c\
  merge_sort.c\
  mmio.c\
@@ -61,6 +63,7 @@ FILES =\
  mpistubs.c\
  qsplit.c\
  random.c\
+ state.c\
  threading.c\
  timer.c\
  timing.c
