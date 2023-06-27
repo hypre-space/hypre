@@ -1,6 +1,6 @@
 # Output file: solvers_ij.out.0
 Iterations = 6
-Final Relative Residual Norm = 3.613604e-05
+Final Relative Residual Norm = 3.613601e-05
 
 # Output file: solvers_ij.out.1
 Iterations = 26
@@ -8,7 +8,7 @@ Final Relative Residual Norm = 7.193500e-05
 
 # Output file: solvers_ij.out.2
 GMRES Iterations = 6
-Final GMRES Relative Residual Norm = 4.895643e-05
+Final GMRES Relative Residual Norm = 4.896914e-05
 
 # Output file: solvers_ij.out.3
 GMRES Iterations = 39
@@ -16,7 +16,7 @@ Final GMRES Relative Residual Norm = 9.050452e-05
 
 # Output file: solvers_ij.out.4
 Iterations = 5
-Final Relative Residual Norm = 1.712169e-05
+Final Relative Residual Norm = 1.712168e-05
 
 # Output file: solvers_ij.out.5
 Iterations = 103
@@ -40,22 +40,22 @@ Final Relative Residual Norm = 7.193500e-05
 Iterations = 7
 PCG_Iterations = 3
 DSCG_Iterations = 4
-Final Relative Residual Norm = 7.681890e-05
+Final Relative Residual Norm = 7.681891e-05
 
 # Output file: solvers_ij.out.10
 Iterations = 6
 PCG_Iterations = 4
 DSCG_Iterations = 2
-Final Relative Residual Norm = 2.434462e-05
+Final Relative Residual Norm = 2.434455e-05
 
 # Output file: solvers_ij.out.11
 Iterations = 5
 PCG_Iterations = 2
 DSCG_Iterations = 3
-Final Relative Residual Norm = 1.166560e-05
+Final Relative Residual Norm = 1.169034e-05
 
 # Output file: solvers_ij.out.sysh
- Average Convergence Factor = 0.203884
+ Average Convergence Factor = 0.203827
 
      Complexity:    grid = 1.393625
                 operator = 2.648489
@@ -69,7 +69,7 @@ Final Relative Residual Norm = 1.166560e-05
                    cycle = 10.160150
 
 # Output file: solvers_ij.out.sysu
- Average Convergence Factor = 0.738378
+ Average Convergence Factor = 0.738372
 
      Complexity:    grid = 1.392063
                 operator = 2.742309
@@ -81,7 +81,7 @@ Final LGMRES Relative Residual Norm = 7.230173e-05
 
 # Output file: solvers_ij.out.102
 LGMRES Iterations = 6
-Final LGMRES Relative Residual Norm = 4.895643e-05
+Final LGMRES Relative Residual Norm = 4.896914e-05
 
 # Output file: solvers_ij.out.103
 FlexGMRES Iterations = 39
@@ -89,23 +89,23 @@ Final FlexGMRES Relative Residual Norm = 9.050367e-05
 
 # Output file: solvers_ij.out.104
 FlexGMRES Iterations = 6
-Final FlexGMRES Relative Residual Norm = 4.896337e-05
+Final FlexGMRES Relative Residual Norm = 4.896621e-05
 
 # Output file: solvers_ij.out.105
 Iterations = 11
-Final Relative Residual Norm = 4.008464e-05
+Final Relative Residual Norm = 4.008465e-05
 
 # Output file: solvers_ij.out.106
 Iterations = 11
-Final Relative Residual Norm = 4.008464e-05
+Final Relative Residual Norm = 4.008465e-05
 
 # Output file: solvers_ij.out.107
 Iterations = 16
-Final Relative Residual Norm = 6.769224e-05
+Final Relative Residual Norm = 6.769226e-05
 
 # Output file: solvers_ij.out.108
 Iterations = 16
-Final Relative Residual Norm = 6.769232e-05
+Final Relative Residual Norm = 6.769227e-05
 
 # Output file: solvers_ij.out.109
 Iterations = 11
@@ -121,7 +121,7 @@ Final Relative Residual Norm = 7.756725e-05
 
 # Output file: solvers_ij.out.112
 GMRES Iterations = 21
-Final GMRES Relative Residual Norm = 7.630413e-05
+Final GMRES Relative Residual Norm = 7.666739e-05
 
 # Output file: solvers_ij.out.113
 GMRES Iterations = 14
@@ -129,17 +129,16 @@ Final GMRES Relative Residual Norm = 9.871667e-05
 
 # Output file: solvers_ij.out.114
 BoomerAMG Iterations = 17
-Final Relative Residual Norm = 8.288371e-05
+Final Relative Residual Norm = 8.277244e-05
 
 # Output file: solvers_ij.out.115
 BoomerAMG Iterations = 17
-Final Relative Residual Norm = 8.941909e-05
+Final Relative Residual Norm = 8.935363e-05
 
 # Output file: solvers_ij.out.116
 GMRES Iterations = 8
-Final GMRES Relative Residual Norm = 8.277353e-05
+Final GMRES Relative Residual Norm = 8.291898e-05
 
 # Output file: solvers_ij.out.117
 GMRES Iterations = 8
-Final GMRES Relative Residual Norm = 8.288901e-05
-
+Final GMRES Relative Residual Norm = 8.290723e-05

@@ -997,6 +997,43 @@ hypre_ParCSRCommPkgCreateMatrixE( hypre_ParCSRCommPkg  *comm_pkg,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixCompressOffdMapDevice
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixCompressOffdMapDevice(hypre_ParCSRMatrix *A)
+{
+   hypre_ParCSRMatrixCopyColMapOffdToDevice(A);
+
+   hypre_CSRMatrix *A_offd          = hypre_ParCSRMatrixOffd(A);
+   HYPRE_Int        num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
+   HYPRE_BigInt    *col_map_offd_A  = hypre_ParCSRMatrixDeviceColMapOffd(A);
+   HYPRE_BigInt    *col_map_offd_A_new;
+   HYPRE_Int        num_cols_A_offd_new;
+
+   hypre_CSRMatrixCompressColumnsDevice(A_offd, col_map_offd_A, NULL, &col_map_offd_A_new);
+
+   num_cols_A_offd_new = hypre_CSRMatrixNumCols(A_offd);
+
+   if (num_cols_A_offd_new < num_cols_A_offd)
+   {
+      hypre_TFree(col_map_offd_A, HYPRE_MEMORY_DEVICE);
+      hypre_ParCSRMatrixDeviceColMapOffd(A) = col_map_offd_A_new;
+
+      hypre_ParCSRMatrixColMapOffd(A) = hypre_TReAlloc(hypre_ParCSRMatrixColMapOffd(A),
+                                                       HYPRE_BigInt, num_cols_A_offd_new,
+                                                       HYPRE_MEMORY_HOST);
+
+      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(A),
+                    hypre_ParCSRMatrixDeviceColMapOffd(A),
+                    HYPRE_BigInt, num_cols_A_offd_new,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   }
+
+   return hypre_error_flag;
+}
+
 /* Get element-wise tolerances based on row norms for ParCSRMatrix
  * NOTE: Keep the diagonal, i.e. elmt_tol = 0.0 for diagonals
  * Output vectors have size nnz:
@@ -1202,87 +1239,14 @@ hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A,
    hypre_ParCSRMatrixDNumNonzeros(A) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(A);
 
    /* squeeze out zero columns of A_offd */
-   HYPRE_Int *tmp_j, *tmp_end, num_cols_A_offd_new;
-   tmp_j = hypre_TAlloc(HYPRE_Int, hypre_CSRMatrixNumNonzeros(A_offd), HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(tmp_j, hypre_CSRMatrixJ(A_offd), HYPRE_Int, hypre_CSRMatrixNumNonzeros(A_offd),
-                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_ONEDPL_CALL( std::sort,
-                      tmp_j,
-                      tmp_j + hypre_CSRMatrixNumNonzeros(A_offd) );
-   tmp_end = HYPRE_ONEDPL_CALL( std::unique,
-                                tmp_j,
-                                tmp_j + hypre_CSRMatrixNumNonzeros(A_offd) );
-#else
-   HYPRE_THRUST_CALL( sort,
-                      tmp_j,
-                      tmp_j + hypre_CSRMatrixNumNonzeros(A_offd) );
-   tmp_end = HYPRE_THRUST_CALL( unique,
-                                tmp_j,
-                                tmp_j + hypre_CSRMatrixNumNonzeros(A_offd) );
-#endif
-   num_cols_A_offd_new = tmp_end - tmp_j;
-
-   hypre_assert(num_cols_A_offd_new <= num_cols_A_offd);
-
-   if (num_cols_A_offd_new < num_cols_A_offd)
-   {
-      hypre_CSRMatrixNumCols(A_offd) = num_cols_A_offd_new;
-
-      HYPRE_Int *offd_mark = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_DEVICE);
-      HYPRE_BigInt *col_map_offd_A_new = hypre_TAlloc(HYPRE_BigInt, num_cols_A_offd_new,
-                                                      HYPRE_MEMORY_DEVICE);
-
-#if defined(HYPRE_USING_SYCL)
-      oneapi::dpl::counting_iterator<HYPRE_Int> count(0);
-      hypreSycl_scatter( count,
-                         count + num_cols_A_offd_new,
-                         tmp_j,
-                         offd_mark );
-      hypreSycl_gather( hypre_CSRMatrixJ(A_offd),
-                        hypre_CSRMatrixJ(A_offd) + hypre_CSRMatrixNumNonzeros(A_offd),
-                        offd_mark,
-                        hypre_CSRMatrixJ(A_offd) );
-      hypreSycl_gather( tmp_j,
-                        tmp_j + num_cols_A_offd_new,
-                        col_map_offd_A,
-                        col_map_offd_A_new );
-#else
-      HYPRE_THRUST_CALL( scatter,
-                         thrust::counting_iterator<HYPRE_Int>(0),
-                         thrust::counting_iterator<HYPRE_Int>(num_cols_A_offd_new),
-                         tmp_j,
-                         offd_mark );
-      HYPRE_THRUST_CALL( gather,
-                         hypre_CSRMatrixJ(A_offd),
-                         hypre_CSRMatrixJ(A_offd) + hypre_CSRMatrixNumNonzeros(A_offd),
-                         offd_mark,
-                         hypre_CSRMatrixJ(A_offd) );
-      HYPRE_THRUST_CALL( gather,
-                         tmp_j,
-                         tmp_j + num_cols_A_offd_new,
-                         col_map_offd_A,
-                         col_map_offd_A_new );
-#endif
-
-      hypre_TFree(offd_mark, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(col_map_offd_A, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(h_col_map_offd_A, HYPRE_MEMORY_HOST);
-
-      hypre_ParCSRMatrixDeviceColMapOffd(A) = col_map_offd_A_new;
-      hypre_ParCSRMatrixColMapOffd(A) = hypre_TAlloc(HYPRE_BigInt, num_cols_A_offd_new,
-                                                     HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(A), col_map_offd_A_new, HYPRE_BigInt,
-                    num_cols_A_offd_new,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   }
+   hypre_ParCSRMatrixCompressOffdMapDevice(A);
 
    if (type != 0)
    {
       hypre_TFree(elmt_tols_diag, HYPRE_MEMORY_DEVICE);
       hypre_TFree(elmt_tols_offd, HYPRE_MEMORY_DEVICE);
    }
-   hypre_TFree(tmp_j, HYPRE_MEMORY_DEVICE);
+
    hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
