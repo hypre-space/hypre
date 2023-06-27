@@ -110,6 +110,7 @@ hypre_BoomerAMGCreate( void )
    HYPRE_Int    ilu_reordering_type;
 
    HYPRE_Int    fsai_algo_type;
+   HYPRE_Int    fsai_local_solve_type;
    HYPRE_Int    fsai_max_steps;
    HYPRE_Int    fsai_max_step_size;
    HYPRE_Int    fsai_max_nnz_row;
@@ -232,6 +233,7 @@ hypre_BoomerAMGCreate( void )
 #else
    fsai_algo_type = hypre_NumThreads() > 4 ? 2 : 1;
 #endif
+   fsai_local_solve_type = 1;
    fsai_max_steps = 5;
    fsai_max_step_size = 3;
    fsai_max_nnz_row = fsai_max_steps * fsai_max_step_size;
@@ -382,6 +384,7 @@ hypre_BoomerAMGCreate( void )
    hypre_BoomerAMGSetILUMaxIter(amg_data, ilu_max_iter);
    hypre_BoomerAMGSetILULocalReordering(amg_data, ilu_reordering_type);
    hypre_BoomerAMGSetFSAIAlgoType(amg_data, fsai_algo_type);
+   hypre_BoomerAMGSetFSAILocalSolveType(amg_data, fsai_local_solve_type);
    hypre_BoomerAMGSetFSAIMaxSteps(amg_data, fsai_max_steps);
    hypre_BoomerAMGSetFSAIMaxStepSize(amg_data, fsai_max_step_size);
    hypre_BoomerAMGSetFSAIMaxNnzRow(amg_data, fsai_max_nnz_row);
@@ -4293,6 +4296,22 @@ hypre_BoomerAMGSetFSAIAlgoType( void      *data,
 }
 
 HYPRE_Int
+hypre_BoomerAMGSetFSAILocalSolveType( void      *data,
+                                      HYPRE_Int  fsai_local_solve_type)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataFSAILocalSolveType(amg_data) = fsai_local_solve_type;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypre_BoomerAMGSetFSAIMaxSteps( void      *data,
                                 HYPRE_Int  fsai_max_steps)
 {
@@ -5069,4 +5088,3 @@ hypre_BoomerAMGGetCumNnzAP( void       *data,
 
    return hypre_error_flag;
 }
-

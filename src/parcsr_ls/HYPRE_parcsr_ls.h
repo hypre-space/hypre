@@ -1107,6 +1107,13 @@ HYPRE_Int HYPRE_BoomerAMGSetFSAIAlgoType(HYPRE_Solver solver,
                                          HYPRE_Int    algo_type);
 
 /**
+ * (Optional) Sets the solver type for solving local linear systems in FSAI.
+ * For further explanation see HYPRE_FSAISetLocalSolveType.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAILocalSolveType( HYPRE_Solver solver,
+                                                HYPRE_Int    local_solve_type );
+
+/**
  * (Optional) Defines maximum number of steps for FSAI.
  * For further explanation see HYPRE_FSAISetMaxSteps.
  **/

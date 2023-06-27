@@ -4321,6 +4321,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetILUMaxRowNnz(amg_solver, ilu_max_row_nnz);
       HYPRE_BoomerAMGSetILUMaxIter(amg_solver, ilu_sm_max_iter);
       HYPRE_BoomerAMGSetFSAIAlgoType(amg_solver, fsai_algo_type);
+      HYPRE_BoomerAMGSetFSAILocalSolveType(amg_solver, fsai_ls_type);
       HYPRE_BoomerAMGSetFSAIMaxSteps(amg_solver, fsai_max_steps);
       HYPRE_BoomerAMGSetFSAIMaxStepSize(amg_solver, fsai_max_step_size);
       HYPRE_BoomerAMGSetFSAIMaxNnzRow(amg_solver, fsai_max_nnz_row);
@@ -4627,6 +4628,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetEuBJ(amg_solver, eu_bj);
       HYPRE_BoomerAMGSetEuSparseA(amg_solver, eu_sparse_A);
       HYPRE_BoomerAMGSetFSAIAlgoType(amg_solver, fsai_algo_type);
+      HYPRE_BoomerAMGSetFSAILocalSolveType(amg_solver, fsai_ls_type);
       HYPRE_BoomerAMGSetFSAIMaxSteps(amg_solver, fsai_max_steps);
       HYPRE_BoomerAMGSetFSAIMaxStepSize(amg_solver, fsai_max_step_size);
       HYPRE_BoomerAMGSetFSAIMaxNnzRow(amg_solver, fsai_max_nnz_row);
@@ -4841,6 +4843,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
          HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetFSAIAlgoType(pcg_precond, fsai_algo_type);
+         HYPRE_BoomerAMGSetFSAILocalSolveType(pcg_precond, fsai_ls_type);
          HYPRE_BoomerAMGSetFSAIMaxSteps(pcg_precond, fsai_max_steps);
          HYPRE_BoomerAMGSetFSAIMaxStepSize(pcg_precond, fsai_max_step_size);
          HYPRE_BoomerAMGSetFSAIMaxNnzRow(pcg_precond, fsai_max_nnz_row);
@@ -5016,6 +5019,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
          HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetFSAIAlgoType(pcg_precond, fsai_algo_type);
+         HYPRE_BoomerAMGSetFSAILocalSolveType(pcg_precond, fsai_ls_type);
          HYPRE_BoomerAMGSetFSAIMaxSteps(pcg_precond, fsai_max_steps);
          HYPRE_BoomerAMGSetFSAIMaxStepSize(pcg_precond, fsai_max_step_size);
          HYPRE_BoomerAMGSetFSAIMaxNnzRow(pcg_precond, fsai_max_nnz_row);
@@ -6536,6 +6540,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetEuBJ(amg_precond, eu_bj);
          HYPRE_BoomerAMGSetEuSparseA(amg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetFSAIAlgoType(amg_precond, fsai_algo_type);
+         HYPRE_BoomerAMGSetFSAILocalSolveType(amg_precond, fsai_ls_type);
          HYPRE_BoomerAMGSetFSAIMaxSteps(amg_precond, fsai_max_steps);
          HYPRE_BoomerAMGSetFSAIMaxStepSize(amg_precond, fsai_max_step_size);
          HYPRE_BoomerAMGSetFSAIMaxNnzRow(amg_precond, fsai_max_nnz_row);
@@ -6722,6 +6727,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
          HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetFSAIAlgoType(pcg_precond, fsai_algo_type);
+         HYPRE_BoomerAMGSetFSAILocalSolveType(pcg_precond, fsai_ls_type);
          HYPRE_BoomerAMGSetFSAIMaxSteps(pcg_precond, fsai_max_steps);
          HYPRE_BoomerAMGSetFSAIMaxStepSize(pcg_precond, fsai_max_step_size);
          HYPRE_BoomerAMGSetFSAIMaxNnzRow(pcg_precond, fsai_max_nnz_row);
@@ -7089,6 +7095,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
          HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetFSAIAlgoType(pcg_precond, fsai_algo_type);
+         HYPRE_BoomerAMGSetFSAILocalSolveType(pcg_precond, fsai_ls_type);
          HYPRE_BoomerAMGSetFSAIMaxSteps(pcg_precond, fsai_max_steps);
          HYPRE_BoomerAMGSetFSAIMaxStepSize(pcg_precond, fsai_max_step_size);
          HYPRE_BoomerAMGSetFSAIMaxNnzRow(pcg_precond, fsai_max_nnz_row);
@@ -7298,6 +7305,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
          HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetFSAIAlgoType(pcg_precond, fsai_algo_type);
+         HYPRE_BoomerAMGSetFSAILocalSolveType(pcg_precond, fsai_ls_type);
          HYPRE_BoomerAMGSetFSAIMaxSteps(pcg_precond, fsai_max_steps);
          HYPRE_BoomerAMGSetFSAIMaxStepSize(pcg_precond, fsai_max_step_size);
          HYPRE_BoomerAMGSetFSAIMaxNnzRow(pcg_precond, fsai_max_nnz_row);
@@ -7713,6 +7721,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
          HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetFSAIAlgoType(pcg_precond, fsai_algo_type);
+         HYPRE_BoomerAMGSetFSAILocalSolveType(pcg_precond, fsai_ls_type);
          HYPRE_BoomerAMGSetFSAIMaxSteps(pcg_precond, fsai_max_steps);
          HYPRE_BoomerAMGSetFSAIMaxStepSize(pcg_precond, fsai_max_step_size);
          HYPRE_BoomerAMGSetFSAIMaxNnzRow(pcg_precond, fsai_max_nnz_row);
@@ -8117,6 +8126,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
          HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetFSAIAlgoType(pcg_precond, fsai_algo_type);
+         HYPRE_BoomerAMGSetFSAILocalSolveType(pcg_precond, fsai_ls_type);
          HYPRE_BoomerAMGSetFSAIMaxSteps(pcg_precond, fsai_max_steps);
          HYPRE_BoomerAMGSetFSAIMaxStepSize(pcg_precond, fsai_max_step_size);
          HYPRE_BoomerAMGSetFSAIMaxNnzRow(pcg_precond, fsai_max_nnz_row);

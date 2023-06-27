@@ -1374,6 +1374,17 @@ HYPRE_BoomerAMGSetFSAIAlgoType( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetFSAILocalSolveType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFSAILocalSolveType( HYPRE_Solver  solver,
+                                      HYPRE_Int     local_solve_type )
+{
+   return ( hypre_BoomerAMGSetFSAILocalSolveType( (void *) solver, local_solve_type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetFSAIMaxSteps
  *--------------------------------------------------------------------------*/
 
@@ -2179,4 +2190,3 @@ HYPRE_BoomerAMGGetCumNnzAP( HYPRE_Solver  solver,
 {
    return ( hypre_BoomerAMGGetCumNnzAP( (void *) solver, cum_nnz_AP ) );
 }
-
