@@ -14,6 +14,9 @@ decomposition framework for achieving distributed parallelism. It can be used as
 standalone iterative solver, preconditioner for Krylov subspace methods, or smoother for
 multigrid methods such as BoomerAMG and MGR.
 
+.. note::
+   The hypre-ILU method is currently only supported by the IJ interface.
+
 Overview
 ------------------------------------------------------------------------------
 
@@ -170,7 +173,7 @@ where:
 * ``HYPRE_BoomerAMGSetSmoothNumLevels`` Enable smoothing in the first ``num_levels``
   levels of AMG.
 * ``HYPRE_BoomerAMGSetILUType`` Set the type of ILU factorization. See ``HYPRE_ILUSetType``.
-* ``HYPRE_BoomerAMGSetILUMaxIter`` Set the maximum number of ILU smoother sweeps.
+* ``HYPRE_BoomerAMGSetILUMaxIter`` Set the number of ILU smoother sweeps.
 * ``HYPRE_BoomerAMGSetILULocalReordering`` Set the local matrix reordering algorithm.
 * ``HYPRE_BoomerAMGSetILULevel`` Set ILUK's fill level.
 * ``HYPRE_BoomerAMGSetILUDroptol`` Set ILUT's threshold.
@@ -233,4 +236,5 @@ configuration.
      - None
 
 .. note::
-   The hypre-ILU method is currently only supported by the IJ interface.
+   hypre must be built with ``cuSPARSE`` support when running ILU on NVIDIA
+   GPUs. Similarly, ``rocSPARSE`` is required when running ILU on AMD GPUs.
