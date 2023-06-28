@@ -44,6 +44,11 @@ hypre_HandleCreate(void)
    hypre_HandleDeviceGSMethod(hypre_handle_) = 1; /* CPU: 0; Cusparse: 1 */
 #endif
 
+#if defined(HYPRE_USING_NODE_AWARE_MPI)
+   hypre_HandleUsingNodeAwareMPI(hypre_handle_) = 1;
+   hypre_HandleNodeAwareSwitchoverThreshold(hypre_handle_) = 0;
+#endif
+
    return hypre_handle_;
 }
 
