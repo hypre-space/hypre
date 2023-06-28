@@ -1650,6 +1650,13 @@ main( hypre_int argc,
          arg_index++;
          gpu_aware_mpi = atoi(argv[arg_index++]);
       }
+#if defined(HYPRE_USING_NODE_AWARE_MPI)
+      else if ( strcmp(argv[arg_index], "-node_aware_lvl_threshold") == 0 )
+      {
+         arg_index++;
+         hypre_HandleNodeAwareSwitchoverThreshold(hypre_handle()) = atoi(argv[arg_index++]);
+      }
+#endif
       else
       {
          arg_index++;
@@ -2708,6 +2715,9 @@ main( hypre_int argc,
          hypre_printf("  -umpire_pinned_pool_size <val>   : pinned memory pool size (GiB)\n");
          hypre_printf("  -umpire_host_pool_size <val>     : host memory pool size (GiB)\n");
          /* end umpire options */
+#endif
+#if defined(HYPRE_USING_NODE_AWARE_MPI)
+         hypre_printf(" -node_aware_lvl_threshold <val>   : Min. level in AMG hierarchy to use node-aware MPI\n");
 #endif
       }
 
