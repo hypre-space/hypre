@@ -235,6 +235,10 @@ configuration.
      - UVM-Setup and Solve
      - None
 
+.. hint::
+   For better setup performance on GPUs, disable local reordering by passing option
+   zero to ``HYPRE_ILUSetLocalReordering`` or ``HYPRE_BoomerAMGSetILULocalReordering``.
+
 .. note::
    hypre must be built with ``cuSPARSE`` support when running ILU on NVIDIA
    GPUs. Similarly, ``rocSPARSE`` is required when running ILU on AMD GPUs.
