@@ -106,7 +106,7 @@ main (hypre_int argc,
    HYPRE_Int time_index;
 
    HYPRE_Int solver_id;
-   HYPRE_Int maxit, cycle_type, rlx_type, coarse_rlx_type, rlx_sweeps, dim;
+   HYPRE_Int maxit, pcg_maxit, cycle_type, rlx_type, coarse_rlx_type, rlx_sweeps, dim;
    HYPRE_Real rlx_weight, rlx_omega;
    HYPRE_Int amg_coarsen_type, amg_rlx_type, amg_agg_levels, amg_interp_type, amg_Pmax;
    HYPRE_Int h1_method, singular_problem, coordinates;
@@ -168,7 +168,8 @@ main (hypre_int argc,
 
    /* Set defaults */
    solver_id = 3;
-   maxit = 100;
+   maxit = 200;
+   pcg_maxit = 50;
    tol = 1e-6;
    dim = 3;
    coordinates = 0;
@@ -178,8 +179,8 @@ main (hypre_int argc,
    rlx_weight = 1.0; rlx_omega = 1.0;
    if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
-      cycle_type = 1; amg_coarsen_type =  8; amg_agg_levels = 1; amg_rlx_type = 8;
-      coarse_rlx_type = 8, rlx_type = 2; /* PMIS */
+      cycle_type = 1; amg_coarsen_type = 8; amg_agg_levels = 1; amg_rlx_type = 18;
+      coarse_rlx_type = 18, rlx_type = 1; /* PMIS */
    }
    else
    {
@@ -215,6 +216,11 @@ main (hypre_int argc,
          {
             arg_index++;
             maxit = atoi(argv[arg_index++]);
+         }
+         else if ( strcmp(argv[arg_index], "-pcg_maxit") == 0 )
+         {
+            arg_index++;
+            pcg_maxit = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-tol") == 0 )
          {
@@ -339,40 +345,41 @@ main (hypre_int argc,
 
       if ((print_usage) && (myid == 0))
       {
-         hypre_printf("\n");
-         hypre_printf("Usage: mpirun -np <np> %s [<options>]\n", argv[0]);
-         hypre_printf("\n");
-         hypre_printf("  Hypre solvers options:                                       \n");
-         hypre_printf("    -solver <ID>         : solver ID                           \n");
-         hypre_printf("                           0  - AMG                            \n");
-         hypre_printf("                           1  - AMG-PCG                        \n");
-         hypre_printf("                           2  - AMS                            \n");
-         hypre_printf("                           3  - AMS-PCG (default)              \n");
-         hypre_printf("                           4  - DS-PCG                         \n");
-         hypre_printf("                           5  - AME eigensolver                \n");
-         hypre_printf("    -maxit <num>         : maximum number of iterations (100)  \n");
-         hypre_printf("    -tol <num>           : convergence tolerance (1e-6)        \n");
-         hypre_printf("\n");
-         hypre_printf("  AMS solver options:                                          \n");
-         hypre_printf("    -dim <num>           : space dimension                     \n");
-         hypre_printf("    -type <num>          : 3-level cycle type (0-8, 11-14)     \n");
-         hypre_printf("    -theta <num>         : BoomerAMG threshold (0.25)          \n");
-         hypre_printf("    -ctype <num>         : BoomerAMG coarsening type           \n");
-         hypre_printf("    -agg <num>           : Levels of BoomerAMG agg. coarsening \n");
-         hypre_printf("    -amgrlx <num>        : BoomerAMG relaxation type           \n");
-         hypre_printf("    -itype <num>         : BoomerAMG interpolation type        \n");
-         hypre_printf("    -pmax <num>          : BoomerAMG interpolation truncation  \n");
-         hypre_printf("    -rlx <num>           : relaxation type                     \n");
-         hypre_printf("    -rlxn <num>          : number of relaxation sweeps         \n");
-         hypre_printf("    -rlxw <num>          : damping parameter (usually <=1)     \n");
-         hypre_printf("    -rlxo <num>          : SOR parameter (usuallyin (0,2))     \n");
-         hypre_printf("    -coord               : use coordinate vectors              \n");
-         hypre_printf("    -h1                  : use block-diag Poisson solves       \n");
-         hypre_printf("    -sing                : curl-curl only (singular) problem   \n");
-         hypre_printf("\n");
-         hypre_printf("  AME eigensolver options:                                     \n");
-         hypre_printf("    -bsize<num>          : number of eigenvalues to compute    \n");
-         hypre_printf("\n");
+         hypre_printf("                                                                 \n");
+         hypre_printf("Usage: mpirun -np <np> %s [<options>]                            \n", argv[0]);
+         hypre_printf("                                                                 \n");
+         hypre_printf("  Hypre solvers options:                                         \n");
+         hypre_printf("    -solver <ID>         : solver ID                             \n");
+         hypre_printf("                           0  - AMG                              \n");
+         hypre_printf("                           1  - AMG-PCG                          \n");
+         hypre_printf("                           2  - AMS                              \n");
+         hypre_printf("                           3  - AMS-PCG (default)                \n");
+         hypre_printf("                           4  - DS-PCG                           \n");
+         hypre_printf("                           5  - AME eigensolver                  \n");
+         hypre_printf("    -maxit <num>         : maximum number of iterations (200)    \n");
+         hypre_printf("    -pcg_maxit <num>     : maximum number of PCG iterations (50) \n");
+         hypre_printf("    -tol <num>           : convergence tolerance (1e-6)          \n");
+         hypre_printf("                                                                 \n");
+         hypre_printf("  AMS solver options:                                            \n");
+         hypre_printf("    -dim <num>           : space dimension                       \n");
+         hypre_printf("    -type <num>          : 3-level cycle type (0-8, 11-14)       \n");
+         hypre_printf("    -theta <num>         : BoomerAMG threshold (0.25)            \n");
+         hypre_printf("    -ctype <num>         : BoomerAMG coarsening type             \n");
+         hypre_printf("    -agg <num>           : Levels of BoomerAMG agg. coarsening   \n");
+         hypre_printf("    -amgrlx <num>        : BoomerAMG relaxation type             \n");
+         hypre_printf("    -itype <num>         : BoomerAMG interpolation type          \n");
+         hypre_printf("    -pmax <num>          : BoomerAMG interpolation truncation    \n");
+         hypre_printf("    -rlx <num>           : relaxation type                       \n");
+         hypre_printf("    -rlxn <num>          : number of relaxation sweeps           \n");
+         hypre_printf("    -rlxw <num>          : damping parameter (usually <=1)       \n");
+         hypre_printf("    -rlxo <num>          : SOR parameter (usuallyin (0,2))       \n");
+         hypre_printf("    -coord               : use coordinate vectors                \n");
+         hypre_printf("    -h1                  : use block-diag Poisson solves         \n");
+         hypre_printf("    -sing                : curl-curl only (singular) problem     \n");
+         hypre_printf("                                                                 \n");
+         hypre_printf("  AME eigensolver options:                                       \n");
+         hypre_printf("    -bsize<num>          : number of eigenvalues to compute      \n");
+         hypre_printf("                                                                 \n");
       }
 
       if (print_usage)
@@ -380,6 +387,13 @@ main (hypre_int argc,
          hypre_MPI_Finalize();
          return (0);
       }
+   }
+
+   /* RL: XXX force to use l1-jac for GPU
+    * TODO: change it back when GPU SpTrSV is fixed */
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      amg_rlx_type = 18;
    }
 
    AMSDriverMatrixRead("mfem.A", &A);
@@ -819,6 +833,7 @@ main (hypre_int argc,
 
       /* Set additional parameters */
       HYPRE_AMESetMaxIter(solver, maxit); /* max iterations */
+      HYPRE_AMESetMaxPCGIter(solver, pcg_maxit); /* max iterations */
       HYPRE_AMESetTol(solver, tol); /* conv. tolerance */
       if (myid == 0)
       {
