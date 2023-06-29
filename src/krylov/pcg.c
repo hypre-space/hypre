@@ -472,7 +472,7 @@ hypre_PCGSolve( void *pcg_vdata,
    (*(pcg_functions->ClearVector))(p);
    precond(precond_data, A, r, p);
 
-   /* gamma = <r,p> */
+   /* gamma = <r,p> = <r,Cr> */
    gamma = (*(pcg_functions->InnerProd))(r, p);
 
    /* Since it does not diminish performance, attempt to return an error flag
@@ -562,7 +562,9 @@ hypre_PCGSolve( void *pcg_vdata,
          break;
       }
       alpha = gamma / sdotp;
-      /* alpha should always be greater zero for spd A  and nonzero p*/
+      /* alpha should always be greater zero for spd A, spd precond. and nonzero p, r*/
+      /* alpha = <r, Cr> / <p, Ap> */
+      /* for alpha close to 0 x and r will not change much unless x and/or r are close to 0 */
       if (! (alpha >= HYPRE_REAL_MIN) )
       {
          hypre_error_w_msg(HYPRE_ERROR_CONV, "Subnormal alpha value in PCG");
@@ -578,7 +580,10 @@ hypre_PCGSolve( void *pcg_vdata,
          }
          else if (alpha <=0.0)
          {
-            hypre_printf("alpha %e", alpha);
+            if (print_level > 1 && my_id == 0)
+	    {
+               hypre_printf("alpha %e", alpha);
+	    }
             hypre_error_w_msg(HYPRE_ERROR_CONV, "Negative or zero alpha value in PCG");
             if (skip_break == 2) break;
          }
@@ -600,12 +605,12 @@ hypre_PCGSolve( void *pcg_vdata,
          {
             hypre_printf("Recomputing the residual...\n");
          }
-         (*(pcg_functions->CopyVector))(r, s);
+         (*(pcg_functions->CopyVector))(r, s); /*save old residual */
          (*(pcg_functions->CopyVector))(b, r);
          (*(pcg_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
          if (rtol)
          {
-            /* compute s = r_new-r_old */
+            /* compute s = r_old-r_new */
             (*(pcg_functions->Axpy))(-1.0, s, r);
             if (two_norm)
             /* residual-based stopping criteria: ||r_new-r_old|| < rtol ||b|| */
@@ -624,7 +629,7 @@ hypre_PCGSolve( void *pcg_vdata,
             /* residual-based stopping criteria: ||r_new-r_old||_C < rtol ||b||_C */
             {
                HYPRE_Real r2ob2;
-               /* v = C*s */
+               /* v = C*s = C*(r_old-r_new) */
                (*(pcg_functions->ClearVector))(v);
                precond(precond_data, A, s, v);
                /* <s,v> */
@@ -670,7 +675,7 @@ hypre_PCGSolve( void *pcg_vdata,
       {
          if (!recompute_true_residual)
          {
-            /* The following assumes that residuals are C-ortogonal: */
+            /* The following assumes that residuals are C-orthogonal: */
             /* use that ||r_new-r_old||_C^2 = (r_new ,C r_new) + (r_old, C r_old) */
             HYPRE_Real r2ob2 = (gamma + gamma_old) / bi_prod;
             if ( r2ob2 < rtol * rtol)
@@ -744,7 +749,7 @@ hypre_PCGSolve( void *pcg_vdata,
       }
       if ( tentatively_converged && recompute_residual )
          /* At user request, don't trust the convergence test until we've recomputed
-            the residual from scratch.  This is expensive in the usual case where an
+            the residual from scratch.  This is expensive in the usual case where 
             the norm is the energy norm.
             This calculation is coded on the assumption that r's accuracy is only a
             concern for problems where CG takes many iterations. */
@@ -784,9 +789,7 @@ hypre_PCGSolve( void *pcg_vdata,
          (pcg_data -> converged) = 1;
          break;
       }
-      /* gamma should generally be greater than 0 for spd A and symmetric prec and nonzero p ,
-       * this is more tricky , since occasionally CG works for slightly nonsymmetric As and smoothing
-       * can have strange side effects; not all smoothers gurantee convergence */
+      /* gamma should generally be greater than 0 for spd prec and nonzero r */
       if (! (gamma > HYPRE_REAL_MIN) )
       {
          hypre_error_w_msg(HYPRE_ERROR_CONV, "Subnormal gamma value in PCG");
@@ -801,7 +804,10 @@ hypre_PCGSolve( void *pcg_vdata,
          }
          else if (gamma < 0.0)
          {
-            hypre_printf("gamma %e", gamma);
+            if (print_level > 1 && my_id == 0)
+	    {
+               hypre_printf("gamma %e", gamma);
+	    }
             hypre_error_w_msg(HYPRE_ERROR_CONV, "Negative gamma value in PCG");
             if (skip_break == 2) break;
          }
