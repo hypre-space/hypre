@@ -1129,6 +1129,7 @@ typedef struct
    void    *s;
    void    *r; /* ...contains the residual.  This is currently kept permanently.
                    If that is ever changed, it still must be kept if logging>1 */
+   void    *v; /* work vector; only needed if recompute_residual_p is set */
 
    HYPRE_Int      owns_matvec_data;  /* normally 1; if 0, don't delete it */
    void    *matvec_data;

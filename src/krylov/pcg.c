@@ -98,6 +98,8 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
    (pcg_data -> rel_change)   = 0;
    (pcg_data -> recompute_residual) = 0;
    (pcg_data -> recompute_residual_p) = 0;
+   (pcg_data -> rtol)         = 0.0;
+   (pcg_data -> two_norm)     = 0;
    (pcg_data -> stop_crit)    = 0;
    (pcg_data -> skip_break)   = 0;
    (pcg_data -> converged)    = 0;
@@ -112,6 +114,7 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
    (pcg_data -> p)            = NULL;
    (pcg_data -> s)            = NULL;
    (pcg_data -> r)            = NULL;
+   (pcg_data -> v)            = NULL;
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -162,6 +165,11 @@ hypre_PCGDestroy( void *pcg_vdata )
          (*(pcg_functions->DestroyVector))(pcg_data -> r);
          pcg_data -> r = NULL;
       }
+      if ( pcg_data -> v != NULL )
+      {
+         (*(pcg_functions->DestroyVector))(pcg_data -> v);
+         pcg_data -> v = NULL;
+      }
       hypre_TFreeF( pcg_data, pcg_functions );
       hypre_TFreeF( pcg_functions, pcg_functions );
    }
@@ -197,6 +205,9 @@ hypre_PCGSetup( void *pcg_vdata,
    hypre_PCGData *pcg_data =  (hypre_PCGData *)pcg_vdata;
    hypre_PCGFunctions *pcg_functions = pcg_data->functions;
    HYPRE_Int            max_iter         = (pcg_data -> max_iter);
+   HYPRE_Int            recompute_residual_p = (pcg_data -> recompute_residual_p);
+   HYPRE_Int            rtol = (pcg_data -> rtol);
+   HYPRE_Int            two_norm = (pcg_data -> two_norm);
    HYPRE_Int          (*precond_setup)(void*, void*, void*, void*) = (pcg_functions -> precond_setup);
    void          *precond_data     = (pcg_data -> precond_data);
 
@@ -234,6 +245,14 @@ hypre_PCGSetup( void *pcg_vdata,
    }
    (pcg_data -> matvec_data) = (*(pcg_functions->MatvecCreate))(A, x);
 
+   if (rtol && recompute_residual_p && (!two_norm))
+   {
+      if ( pcg_data -> v != NULL )
+      {
+         (*(pcg_functions->DestroyVector))(pcg_data -> v);
+      }
+      (pcg_data -> v) = (*(pcg_functions->CreateVector))(b);
+   }
    precond_setup(precond_data, A, b, x);
 
    /*-----------------------------------------------------
@@ -308,6 +327,7 @@ hypre_PCGSolve( void *pcg_vdata,
    void           *p            = (pcg_data -> p);
    void           *s            = (pcg_data -> s);
    void           *r            = (pcg_data -> r);
+   void           *v            = (pcg_data -> v);
    void           *matvec_data  = (pcg_data -> matvec_data);
    HYPRE_Int     (*precond)(void*, void*, void*, void*)   = (pcg_functions -> precond);
    void           *precond_data = (pcg_data -> precond_data);
@@ -543,7 +563,7 @@ hypre_PCGSolve( void *pcg_vdata,
       }
       alpha = gamma / sdotp;
       /* alpha should always be greater zero for spd A  and nonzero p*/
-      if (! (alpha > HYPRE_REAL_MIN) )
+      if (! (alpha >= HYPRE_REAL_MIN) )
       {
          hypre_error_w_msg(HYPRE_ERROR_CONV, "Subnormal alpha value in PCG");
          if (i == 1) { i_prod = i_prod_0; }
@@ -580,22 +600,61 @@ hypre_PCGSolve( void *pcg_vdata,
          {
             hypre_printf("Recomputing the residual...\n");
          }
+         (*(pcg_functions->CopyVector))(r, s);
          (*(pcg_functions->CopyVector))(b, r);
          (*(pcg_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
+         if (rtol)
+         {
+            /* compute s = r_new-r_old */
+            (*(pcg_functions->Axpy))(-1.0, s, r);
+            if (two_norm)
+            /* residual-based stopping criteria: ||r_new-r_old|| < rtol ||b|| */
+            {
+               HYPRE_Real drob2 = (*(pcg_functions->InnerProd))(s, s) / bi_prod;
+               if ( drob2 < rtol * rtol )
+               {
+                  if (print_level > 1 && my_id == 0)
+                  {
+                     hypre_printf("\n\n||r_old-r_new||/||b||: %e\n", hypre_sqrt(drob2));
+                  }
+                  break;
+               }
+            }
+	    else
+            /* residual-based stopping criteria: ||r_new-r_old||_C < rtol ||b||_C */
+            {
+               HYPRE_Real r2ob2;
+               /* v = C*s */
+               (*(pcg_functions->ClearVector))(v);
+               precond(precond_data, A, s, v);
+               /* <s,v> */
+               r2ob2 = (*(pcg_functions->InnerProd))(s, v) / bi_prod;
+               if ( r2ob2 < rtol * rtol )
+               {
+                  if (print_level > 1 && my_id == 0)
+                  {
+                     hypre_printf("\n\n||r_old-r_new||_C/||b||_C: %e\n", hypre_sqrt(r2ob2));
+                  }
+                  break;
+               }
+            }
+         }
       }
 
-      /* residual-based stopping criteria: ||r_new-r_old|| < rtol ||b|| */
       if (rtol && two_norm)
       {
-         /* use that r_new-r_old = alpha * s */
-         HYPRE_Real drob2 = alpha * alpha * (*(pcg_functions->InnerProd))(s, s) / bi_prod;
-         if ( drob2 < rtol * rtol )
+         if (!recompute_true_residual)
          {
-            if (print_level > 1 && my_id == 0)
+            /* use that r_new-r_old = alpha * s */
+            HYPRE_Real drob2 = alpha * alpha * (*(pcg_functions->InnerProd))(s, s) / bi_prod;
+            if ( drob2 < rtol * rtol )
             {
-               hypre_printf("\n\n||r_old-r_new||/||b||: %e\n", hypre_sqrt(drob2));
+               if (print_level > 1 && my_id == 0)
+               {
+                  hypre_printf("\n\n||r_old-r_new||/||b||: %e\n", hypre_sqrt(drob2));
+               }
+               break;
             }
-            break;
          }
       }
 
@@ -609,15 +668,19 @@ hypre_PCGSolve( void *pcg_vdata,
       /* residual-based stopping criteria: ||r_new-r_old||_C < rtol ||b||_C */
       if (rtol && !two_norm)
       {
-         /* use that ||r_new-r_old||_C^2 = (r_new ,C r_new) + (r_old, C r_old) */
-         HYPRE_Real r2ob2 = (gamma + gamma_old) / bi_prod;
-         if ( r2ob2 < rtol * rtol)
+         if (!recompute_true_residual)
          {
-            if (print_level > 1 && my_id == 0)
+            /* The following assumes that residuals are C-ortogonal: */
+            /* use that ||r_new-r_old||_C^2 = (r_new ,C r_new) + (r_old, C r_old) */
+            HYPRE_Real r2ob2 = (gamma + gamma_old) / bi_prod;
+            if ( r2ob2 < rtol * rtol)
             {
-               hypre_printf("\n\n||r_old-r_new||_C/||b||_C: %e\n", hypre_sqrt(r2ob2));
+               if (print_level > 1 && my_id == 0)
+               {
+                  hypre_printf("\n\n||r_old-r_new||_C/||b||_C: %e\n", hypre_sqrt(r2ob2));
+               }
+               break;
             }
-            break;
          }
       }
 
@@ -702,6 +765,7 @@ hypre_PCGSolve( void *pcg_vdata,
             precond(precond_data, A, r, s);
             /* iprod = gamma = <r,s> */
             i_prod = (*(pcg_functions->InnerProd))(r, s);
+            gamma = i_prod;
          }
          if (i_prod / bi_prod >= eps) { tentatively_converged = 0; }
       }
