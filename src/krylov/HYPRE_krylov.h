@@ -178,7 +178,18 @@ HYPRE_Int HYPRE_PCGSetRecomputeResidualP(HYPRE_Solver solver,
                                          HYPRE_Int    recompute_residual_p);
 
 /**
- * (Optional) Skips submormal alpha and gamma values in CG.
+ * (Optional) Setting this to 1 allows use of Polak-Ribiere Method (flexible)
+ * this incrceases robustness, but adds an additional dot product per iteration
+ **/
+HYPRE_Int HYPRE_PCGSetPRUpdate(HYPRE_Solver solver,
+                               HYPRE_Int    PR_update);
+
+/**
+ * (Optional) Skips subnormal alpha, gamma and iprod values in CG.
+ *  If set to 0 (default): will always break for subnormal values
+ *  If set to 1: will break if values are <= 0.
+ *  If set to 2: will break if values are below HYPRE_REAL_TRUE_MIN
+ *  If set to 3: will break if values are below HYPRE_REAL_MIN
  **/
 HYPRE_Int HYPRE_PCGSetSkipBreak(HYPRE_Solver solver,
                                 HYPRE_Int    skip_break);
@@ -266,8 +277,18 @@ HYPRE_Int HYPRE_PCGGetRelChange(HYPRE_Solver  solver,
 
 /**
  **/
-HYPRE_Int HYPRE_GMRESGetSkipRealResidualCheck(HYPRE_Solver solver,
+HYPRE_Int HYPRE_PCGGetSkipRealResidualCheck(HYPRE_Solver solver,
                                               HYPRE_Int   *skip_real_r_check);
+
+/**
+ **/
+HYPRE_Int HYPRE_PCGGetSkipBreak(HYPRE_Solver solver,
+                                  HYPRE_Int   *skip_break);
+
+/**
+ **/
+HYPRE_Int HYPRE_PCGGetPRUpdate(HYPRE_Solver solver,
+                                 HYPRE_Int   *PR_update);
 
 /**
  **/

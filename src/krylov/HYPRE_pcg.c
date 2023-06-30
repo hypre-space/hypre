@@ -265,6 +265,24 @@ HYPRE_PCGGetSkipBreak( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_PCGSetPRUpdate, HYPRE_PCGGetPRUpdate
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_PCGSetPRUpdate( HYPRE_Solver solver,
+                     HYPRE_Int    PR_update )
+{
+   return ( hypre_PCGSetPRUpdate( (void *) solver, PR_update ) );
+}
+
+HYPRE_Int
+HYPRE_PCGGetPRUpdate( HYPRE_Solver  solver,
+                     HYPRE_Int    *PR_update )
+{
+   return ( hypre_PCGGetPRUpdate( (void *) solver, PR_update ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_PCGSetPrecond
  *--------------------------------------------------------------------------*/
 

@@ -1123,12 +1123,14 @@ typedef struct
    HYPRE_Int      converged;
    HYPRE_Int      hybrid;
    HYPRE_Int      skip_break;
+   HYPRE_Int      PR_update;
 
    void    *A;
    void    *p;
    void    *s;
    void    *r; /* ...contains the residual.  This is currently kept permanently.
                    If that is ever changed, it still must be kept if logging>1 */
+   void    *r_old; /* only needed for flexible CG */
    void    *v; /* work vector; only needed if recompute_residual_p is set */
 
    HYPRE_Int      owns_matvec_data;  /* normally 1; if 0, don't delete it */
@@ -1592,6 +1594,8 @@ HYPRE_Int HYPRE_PCGSetRecomputeResidualP ( HYPRE_Solver solver, HYPRE_Int recomp
 HYPRE_Int HYPRE_PCGGetRecomputeResidualP ( HYPRE_Solver solver, HYPRE_Int *recompute_residual_p );
 HYPRE_Int HYPRE_PCGSetSkipBreak ( HYPRE_Solver solver, HYPRE_Int skip_break );
 HYPRE_Int HYPRE_PCGGetSkipBreak ( HYPRE_Solver solver, HYPRE_Int *skip_break );
+HYPRE_Int HYPRE_PCGSetPRUpdate ( HYPRE_Solver solver, HYPRE_Int PR_update );
+HYPRE_Int HYPRE_PCGGetPRUpdate ( HYPRE_Solver solver, HYPRE_Int *PR_update );
 HYPRE_Int HYPRE_PCGSetPrecond ( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond,
                                 HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver );
 HYPRE_Int HYPRE_PCGGetPrecond ( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
@@ -1634,6 +1638,8 @@ HYPRE_Int hypre_PCGSetStopCrit ( void *pcg_vdata, HYPRE_Int stop_crit );
 HYPRE_Int hypre_PCGGetStopCrit ( void *pcg_vdata, HYPRE_Int *stop_crit );
 HYPRE_Int hypre_PCGSetSkipBreak ( void *pcg_vdata, HYPRE_Int skip_break );
 HYPRE_Int hypre_PCGGetSkipBreak ( void *pcg_vdata, HYPRE_Int *skip_break );
+HYPRE_Int hypre_PCGSetPRUpdate ( void *pcg_vdata, HYPRE_Int PR_update );
+HYPRE_Int hypre_PCGGetPRUpdate ( void *pcg_vdata, HYPRE_Int *PR_update );
 HYPRE_Int hypre_PCGGetPrecond ( void *pcg_vdata, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int hypre_PCGSetPrecond ( void *pcg_vdata, HYPRE_Int (*precond )(void*, void*, void*, void*),
                                 HYPRE_Int (*precond_setup )(void*, void*, void*, void*), void *precond_data );
