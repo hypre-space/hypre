@@ -10,8 +10,8 @@ hypre-ILU
 
 hypre-ILU is a suite of parallel incomplete LU factorization algorithms featuring dual
 threshold (ILUT) and level-based (ILUK) variants. Its implementation is based on a domain
-decomposition framework for achieving distributed parallelism. It can be used as a
-standalone iterative solver, preconditioner for Krylov subspace methods, or smoother for
+decomposition framework for achieving distributed parallelism. It can be used as
+preconditioners for Krylov subspace methods, or smoothers for
 multigrid methods such as BoomerAMG and MGR.
 
 .. note::
@@ -20,16 +20,16 @@ multigrid methods such as BoomerAMG and MGR.
 Overview
 ------------------------------------------------------------------------------
 
-The domain decomposition framework in hypre-ILU consists of two main approaches. The first
-is based on an inexact block-Jacobi method where blocks (domains) are formed by local
-unknowns (owned by the current MPI task), and ILU is employed to solve approximately the
-local block systems. The second approach consists of splitting the matrix graph into
-interior and interface nodes, where an interface node separates two interior nodes from
-adjacent domains. In the purely algebraic setting, this is equivalent to partitioning the
-matrix row data into local (processor-owned) and external (off-processor-owned) data. The
-final parallel ILU strategy is a two-level method composed of a local block factorization
-and a global Schur complement solve. Several strategies are provided to solve the Schur
-complement (reduced) system efficiently.
+hypre-ILU utilizes a domain decomposition framework.
+A basic block-Jacobi approach involves performing inexact solves within the local domains owned by the processes,
+using parallel local ILU factorizations.
+In a more advanced approach, the unknowns are partitioned into interior and interface points,
+where the interface points separate the interior points in adjacent domains.
+In an algebraic context, this is equivalent to dividing the matrix rows into local (processor-owned) and
+external (off-processor-owned) blocks.
+The overall parallel ILU strategy is a two-level method that consists of ILU solves within the local blocks
+and a global solve involving the Schur complement system.
+Various iterative approaches are available for solving the Schur complement system.
 
 User-level functions
 ------------------------------------------------------------------------------
