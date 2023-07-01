@@ -9,8 +9,8 @@ hypre-ILU
 ==============================================================================
 
 hypre-ILU is a suite of parallel incomplete LU factorization algorithms featuring dual
-threshold (ILUT) and level-based (ILUK) variants. Its implementation is based on a domain
-decomposition framework for achieving distributed parallelism. It can be used as
+threshold (ILUT) and level-based (ILUK) variants. The implementation is based on a domain
+decomposition framework for achieving distributed parallelism. hypre-ILU can be used as
 preconditioners for Krylov subspace methods, or smoothers for
 multigrid methods such as BoomerAMG and MGR.
 
