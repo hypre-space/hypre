@@ -134,5 +134,5 @@ mpirun -np 4 ./ij -solver 3 -cheby_eig_est 0 -cheby_order 3 -cheby_variant 1 -ch
 mpirun -np 4 ./ij -solver 3 -cheby_eig_est 0 -cheby_order 3 -cheby_variant 1 -cheby_scale 1 -rlx 16 -negA 1 > solvers.out.403.n
 
 ##
-mpirun -np 4 ./ij -fromfile Tucker21935 -solver 1 -rlx 8 > solvers.out.404
-mpirun -np 4 ./ij -fromfile Tucker21935 -solver 1 -rlx 88 > solvers.out.405
+mpirun -np 4 ./ij -fromfile Tucker21935 -solver 1 -rlx 88 > solvers.out.404
+mpirun -np 4 ./ij -fromfile Tucker21935 -solver 1 -rlx 89 > solvers.out.405
