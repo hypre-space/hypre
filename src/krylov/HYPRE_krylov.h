@@ -181,8 +181,8 @@ HYPRE_Int HYPRE_PCGSetRecomputeResidualP(HYPRE_Solver solver,
  * (Optional) Setting this to 1 allows use of Polak-Ribiere Method (flexible)
  * this incrceases robustness, but adds an additional dot product per iteration
  **/
-HYPRE_Int HYPRE_PCGSetPRUpdate(HYPRE_Solver solver,
-                               HYPRE_Int    PR_update);
+HYPRE_Int HYPRE_PCGSetFlex(HYPRE_Solver solver,
+                           HYPRE_Int    flex);
 
 /**
  * (Optional) Skips subnormal alpha, gamma and iprod values in CG.
@@ -287,8 +287,8 @@ HYPRE_Int HYPRE_PCGGetSkipBreak(HYPRE_Solver solver,
 
 /**
  **/
-HYPRE_Int HYPRE_PCGGetPRUpdate(HYPRE_Solver solver,
-                                 HYPRE_Int   *PR_update);
+HYPRE_Int HYPRE_PCGGetFlex(HYPRE_Solver solver,
+                           HYPRE_Int   *flex);
 
 /**
  **/

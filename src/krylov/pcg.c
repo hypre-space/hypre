@@ -212,7 +212,7 @@ hypre_PCGSetup( void *pcg_vdata,
    HYPRE_Int            recompute_residual_p = (pcg_data -> recompute_residual_p);
    HYPRE_Int            rtol = (pcg_data -> rtol);
    HYPRE_Int            two_norm = (pcg_data -> two_norm);
-   HYPRE_Int            PR_update = (pcg_data -> PR_update);
+   HYPRE_Int            flex = (pcg_data -> flex);
    HYPRE_Int          (*precond_setup)(void*, void*, void*, void*) = (pcg_functions -> precond_setup);
    void          *precond_data     = (pcg_data -> precond_data);
 
@@ -250,7 +250,7 @@ hypre_PCGSetup( void *pcg_vdata,
    }
    (pcg_data -> matvec_data) = (*(pcg_functions->MatvecCreate))(A, x);
 
-   if (PR_update)
+   if (flex)
    {
       if ( pcg_data -> v != NULL )
       {
@@ -336,8 +336,8 @@ hypre_PCGSolve( void *pcg_vdata,
    HYPRE_Int       stop_crit    = (pcg_data -> stop_crit);
    HYPRE_Int       hybrid       = (pcg_data -> hybrid);
    HYPRE_Int       skip_break   = (pcg_data -> skip_break);
-   HYPRE_Int       PR_update    = (pcg_data -> PR_update);
-   /* PR_update replaces the generally used Fletcher-Reeves method for the
+   HYPRE_Int       flex    = (pcg_data -> flex);
+   /* flex replaces the generally used Fletcher-Reeves method for the
     * parameter used to update the direction vector p, beta=<r,Cr>/<r_old,Cr_old>
     * with the Polak-Ribiere method, which is more flexible, can be more stable,
     * and llows varying preconditioners, but requires an extra dot product
@@ -633,7 +633,7 @@ hypre_PCGSolve( void *pcg_vdata,
       /* x = x + alpha*p */
       (*(pcg_functions->Axpy))(alpha, p, x);
 
-      if (PR_update) (*(pcg_functions->CopyVector))(r, r_old); /*save old residual */
+      if (flex) (*(pcg_functions->CopyVector))(r, r_old); /*save old residual */
 
       /* r = r - alpha*s */
       if ( !recompute_true_residual )
@@ -647,7 +647,7 @@ hypre_PCGSolve( void *pcg_vdata,
             hypre_printf("Recomputing the residual...\n");
          }
          (*(pcg_functions->CopyVector))(r, s); /*save old residual */
-         if (PR_update) (*(pcg_functions->CopyVector))(r, r_old); /*save old residual */
+         if (flex) (*(pcg_functions->CopyVector))(r, r_old); /*save old residual */
          (*(pcg_functions->CopyVector))(b, r);
          (*(pcg_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
          if (rtol)
@@ -711,7 +711,7 @@ hypre_PCGSolve( void *pcg_vdata,
 
       /* gamma = <r,s> */
       gamma = (*(pcg_functions->InnerProd))(r, s);
-      if (PR_update) delta = gamma - (*(pcg_functions->InnerProd))(r_old, s);
+      if (flex) delta = gamma - (*(pcg_functions->InnerProd))(r_old, s);
 
       /* residual-based stopping criteria: ||r_new-r_old||_C < rtol ||b||_C */
       if (rtol && !two_norm)
@@ -946,7 +946,7 @@ hypre_PCGSolve( void *pcg_vdata,
        *--------------------------------------------------------------------*/
 
       /* beta = gamma / gamma_old */
-      if (!PR_update)
+      if (!flex)
       { 
          beta = gamma / gamma_old;
       } 
@@ -1321,29 +1321,29 @@ hypre_PCGGetSkipBreak( void *pcg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGSetPRUpdate, hypre_PCGGetPRUpdate
+ * hypre_PCGSetFlex, hypre_PCGGetFlex
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PCGSetPRUpdate( void *pcg_vdata,
-                     HYPRE_Int   PR_update  )
+hypre_PCGSetFlex( void *pcg_vdata,
+                     HYPRE_Int   flex  )
 {
    hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
 
 
-   (pcg_data -> PR_update) = PR_update;
+   (pcg_data -> flex) = flex;
 
    return hypre_error_flag;
 }
 
 HYPRE_Int
-hypre_PCGGetPRUpdate( void *pcg_vdata,
-                     HYPRE_Int * PR_update  )
+hypre_PCGGetFlex( void *pcg_vdata,
+                     HYPRE_Int * flex  )
 {
    hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
 
 
-   *PR_update = (pcg_data -> PR_update);
+   *flex = (pcg_data -> flex);
 
    return hypre_error_flag;
 }

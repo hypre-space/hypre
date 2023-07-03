@@ -121,7 +121,7 @@ typedef struct
    HYPRE_Int    converged;
    HYPRE_Int    hybrid;
    HYPRE_Int    skip_break;
-   HYPRE_Int    PR_update;
+   HYPRE_Int    flex;
 
    void    *A;
    void    *p;

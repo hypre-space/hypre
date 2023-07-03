@@ -265,21 +265,21 @@ HYPRE_PCGGetSkipBreak( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_PCGSetPRUpdate, HYPRE_PCGGetPRUpdate
+ * HYPRE_PCGSetFlex, HYPRE_PCGGetFlex
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGSetPRUpdate( HYPRE_Solver solver,
-                     HYPRE_Int    PR_update )
+HYPRE_PCGSetFlex( HYPRE_Solver solver,
+                  HYPRE_Int    flex )
 {
-   return ( hypre_PCGSetPRUpdate( (void *) solver, PR_update ) );
+   return ( hypre_PCGSetFlex( (void *) solver, flex ) );
 }
 
 HYPRE_Int
-HYPRE_PCGGetPRUpdate( HYPRE_Solver  solver,
-                     HYPRE_Int    *PR_update )
+HYPRE_PCGGetFlex( HYPRE_Solver  solver,
+                  HYPRE_Int    *flex )
 {
-   return ( hypre_PCGGetPRUpdate( (void *) solver, PR_update ) );
+   return ( hypre_PCGGetFlex( (void *) solver, flex ) );
 }
 
 /*--------------------------------------------------------------------------
