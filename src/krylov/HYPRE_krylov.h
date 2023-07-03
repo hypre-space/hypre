@@ -190,6 +190,7 @@ HYPRE_Int HYPRE_PCGSetFlex(HYPRE_Solver solver,
  *  If set to 1: will break if values are <= 0.
  *  If set to 2: will break if values are below HYPRE_REAL_TRUE_MIN
  *  If set to 3: will break if values are below HYPRE_REAL_MIN
+ *  If set to 4 or larger: will not break at all
  **/
 HYPRE_Int HYPRE_PCGSetSkipBreak(HYPRE_Solver solver,
                                 HYPRE_Int    skip_break);
