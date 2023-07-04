@@ -125,6 +125,7 @@ hypre_ParcsrGetExternalRowsWait
 hypre_ParCSRMatrixAdd
 hypre_ParCSRMatrixAddHost
 hypre_ParCSRMatrixAminvDB
+hypre_ParCSRMatrixCompressOffdMap
 hypre_ParCSRMatrixDiagScale
 hypre_ParCSRMatrixDiagScaleHost
 hypre_ParCSRMatrixDropSmallEntries
@@ -157,6 +158,7 @@ hypre_ParCSRMatrixClone
 hypre_ParCSRMatrixClone_v2
 hypre_ParCSRMatrixCopy
 hypre_ParCSRMatrixCopyColMapOffdToDevice
+hypre_ParCSRMatrixCopyColMapOffdToHost
 hypre_ParCSRMatrixCreate
 hypre_ParCSRMatrixDestroy
 hypre_ParCSRMatrixGetLocalRange

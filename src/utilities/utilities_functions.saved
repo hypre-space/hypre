@@ -21,6 +21,9 @@ HYPRE_DescribeError
 hypre_error_handler
 HYPRE_GetError
 HYPRE_GetErrorArg
+HYPRE_GetErrorMessages
+HYPRE_PrintErrorMessages
+HYPRE_SetPrintErrorMode
 hypre_CreateBinaryTree
 hypre_DataExchangeList
 hypre_DestroyBinaryTree
@@ -217,6 +220,7 @@ hypre_ndigits
 hypre_ParPrintf
 hypre_printf
 hypre_scanf
+hypre_snprintf
 hypre_sprintf
 hypre_sscanf
 new_format

@@ -1,5 +1,5 @@
-hypre_CSRMatrixGpuSpMVAnalysis
 hypre_CSRMatrixSortRow
+hypre_CSRMatrixSpMVAnalysisDevice
 hypre_CSRMatrixAdd
 hypre_CSRMatrixAddFirstPass
 hypre_CSRMatrixAddHost
