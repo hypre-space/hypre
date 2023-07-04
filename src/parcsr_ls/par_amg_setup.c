@@ -1854,6 +1854,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
                   hypre_BoomerAMGInterpTruncation(P, agg_trunc_factor, agg_P_max_elmts);
 
+                  if (agg_trunc_factor != 0.0 || agg_P_max_elmts > 0 ||
+                      agg_P12_trunc_factor != 0.0 || agg_P12_max_elmts > 0)
+                  {
+                     hypre_ParCSRMatrixCompressOffdMap(P);
+                  }
+
                   hypre_MatvecCommPkgCreate(P);
                   hypre_ParCSRMatrixDestroy(P1);
                   hypre_ParCSRMatrixDestroy(P2);
@@ -2038,8 +2044,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   {
                      P = hypre_ParMatmul(P1, P2);
                   }
+
                   hypre_BoomerAMGInterpTruncation(P, agg_trunc_factor,
                                                   agg_P_max_elmts);
+
+                  if (agg_trunc_factor != 0.0 || agg_P_max_elmts > 0 ||
+                      agg_P12_trunc_factor != 0.0 || agg_P12_max_elmts > 0)
+                  {
+                     hypre_ParCSRMatrixCompressOffdMap(P);
+                  }
+
                   hypre_MatvecCommPkgCreate(P);
                   hypre_ParCSRMatrixDestroy(P1);
                   hypre_ParCSRMatrixDestroy(P2);
@@ -2096,7 +2110,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                HYPRE_Int is_triangular = hypre_ParAMGDataIsTriangular(amg_data);
                HYPRE_Int gmres_switch = hypre_ParAMGDataGMRESSwitchR(amg_data);
                /* !!! RL: ensure that CF_marker contains -1 or 1 !!! */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
                HYPRE_MemoryLocation memory_location = hypre_IntArrayMemoryLocation(CF_marker_array[level]);
                HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
                if (exec == HYPRE_EXEC_DEVICE)

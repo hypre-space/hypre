@@ -118,8 +118,8 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
                           A0 + N0,
                           X,
                           A0,
-   [] (const auto & x) {return x;},
-   [] (const auto & x) {return 0.0;} );
+   [] (const auto & x) {return 0.0;},
+   [] (const auto & x) {return x;} );
 
    auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
                                      I0,                                                         /* keys_first */
@@ -217,8 +217,8 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
                           A0 + N0,
                           X0,
                           A0,
-   [] (const auto & x) {return x;},
-   [] (const auto & x) {return 0.0;} );
+   [] (const auto & x) {return 0.0;},
+   [] (const auto & x) {return x;} );
 
    /* WM: todo - why don't I use the HYPRE_ONEDPL_CALL macro here? Compile issue? */
    auto new_end = oneapi::dpl::reduce_by_segment(

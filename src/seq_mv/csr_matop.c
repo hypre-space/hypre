@@ -2130,7 +2130,7 @@ hypre_CSRMatrixDiagScale( hypre_CSRMatrix *A,
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec;
 
    if (ld && rd)

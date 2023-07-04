@@ -2155,102 +2155,6 @@ template HYPRE_Int hypreDevice_StableSortTupleByTupleKey(HYPRE_Int N, HYPRE_BigI
                                                          HYPRE_BigInt *keys2, char *vals1, HYPRE_Complex *vals2, HYPRE_Int opt);
 #endif
 
-#endif // #if defined(HYPRE_USING_GPU)
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *      cuda/hip functions
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-
-/*--------------------------------------------------------------------
- * hypreGPUKernel_CompileFlagSafetyCheck
- *
- * The architecture identification macro __CUDA_ARCH__ is assigned a
- * three-digit value string xy0 (ending in a literal 0) during each
- * nvcc compilation stage 1 that compiles for compute_xy.
- *
- * This macro can be used in the implementation of GPU functions for
- * determining the virtual architecture for which it is currently being
- * compiled. The host code (the non-GPU code) must not depend on it.
- *
- * Note that compute_XX refers to a PTX version and sm_XX refers to
- * a cubin version.
- *--------------------------------------------------------------------*/
-
-__global__ void
-hypreGPUKernel_CompileFlagSafetyCheck( hypre_DeviceItem &item,
-                                       hypre_int        *cuda_arch_compile )
-{
-#if defined(__CUDA_ARCH__)
-   cuda_arch_compile[0] = __CUDA_ARCH__;
-#endif
-}
-
-/*--------------------------------------------------------------------
- * hypre_CudaCompileFlagCheck
- *
- * Assume this function is called inside HYPRE_Initialize(), at a place
- * where we do not want to activate memory pooling, so we do not use
- * hypre's memory model to Alloc and Free.
- *
- * See commented out code below (and do not delete)
- *
- * This is really only defined for CUDA and not for HIP
- *--------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_CudaCompileFlagCheck()
-{
-#if defined(HYPRE_USING_CUDA)
-   HYPRE_Int device;
-   hypre_GetDevice(&device);
-
-   struct cudaDeviceProp props;
-   cudaGetDeviceProperties(&props, device);
-   hypre_int cuda_arch_actual = props.major * 100 + props.minor * 10;
-   hypre_int cuda_arch_compile = -1;
-   dim3 gDim(1, 1, 1), bDim(1, 1, 1);
-
-   hypre_int *cuda_arch_compile_d = NULL;
-   //cuda_arch_compile_d = hypre_TAlloc(hypre_int, 1, HYPRE_MEMORY_DEVICE);
-   HYPRE_CUDA_CALL( cudaMalloc(&cuda_arch_compile_d, sizeof(hypre_int)) );
-   HYPRE_CUDA_CALL( cudaMemcpy(cuda_arch_compile_d, &cuda_arch_compile, sizeof(hypre_int),
-                               cudaMemcpyHostToDevice) );
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch_compile_d );
-   HYPRE_CUDA_CALL( cudaMemcpy(&cuda_arch_compile, cuda_arch_compile_d, sizeof(hypre_int),
-                               cudaMemcpyDeviceToHost) );
-   //hypre_TFree(cuda_arch_compile_d, HYPRE_MEMORY_DEVICE);
-   HYPRE_CUDA_CALL( cudaFree(cuda_arch_compile_d) );
-
-   /* HYPRE_CUDA_CALL(cudaDeviceSynchronize()); */
-
-   if (cuda_arch_actual != cuda_arch_compile)
-   {
-      char msg[256];
-
-      if (-1 == cuda_arch_compile)
-      {
-         hypre_sprintf(msg, "hypre error: no proper cuda_arch found");
-      }
-      else
-      {
-         hypre_sprintf(msg,
-                       "hypre error: Compile arch %d ('--generate-code arch=compute_%d') does not match device arch %d",
-                       cuda_arch_compile, cuda_arch_compile / 10, cuda_arch_actual);
-      }
-
-      hypre_error_w_msg(1, msg);
-#if defined(HYPRE_DEBUG)
-      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "%s\n", msg);
-#endif
-      hypre_assert(0);
-   }
-#endif // defined(HYPRE_USING_CUDA)
-
-   return hypre_error_flag;
-}
-
 /*--------------------------------------------------------------------
  * hypreGPUKernel_DiagScaleVector
  *--------------------------------------------------------------------*/
@@ -2599,19 +2503,20 @@ hypreDevice_DiagScaleVector2( HYPRE_Int       num_vectors,
    return hypre_error_flag;
 }
 
-
-/*****************************************************************
- z[i] = (x[i] + alpha*y[i])*d[i]
- ******************************************************************/
+/*--------------------------------------------------------------------
+ * hypreGPUKernel_zeqxmydd
+ *
+ * z[i] = (x[i] + alpha*y[i])*d[i]
+ *--------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_zeqxmydd(hypre_DeviceItem &item,
-                        HYPRE_Int         n,
-                        HYPRE_Complex    *x,
-                        HYPRE_Complex     alpha,
-                        HYPRE_Complex    *y,
-                        HYPRE_Complex    *z,
-                        HYPRE_Complex    *d)
+hypreGPUKernel_zeqxmydd(hypre_DeviceItem             &item,
+                        HYPRE_Int                    n,
+                        HYPRE_Complex* __restrict__  x,
+                        HYPRE_Complex                alpha,
+                        HYPRE_Complex* __restrict__  y,
+                        HYPRE_Complex* __restrict__  z,
+                        HYPRE_Complex* __restrict__  d)
 {
    HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
@@ -2621,15 +2526,17 @@ hypreGPUKernel_zeqxmydd(hypre_DeviceItem &item,
    }
 }
 
-/*
- */
+/*--------------------------------------------------------------------
+ * hypreDevice_zeqxmydd
+ *--------------------------------------------------------------------*/
+
 HYPRE_Int
-hypreDevice_zeqxmydd(HYPRE_Int      n,
-                     HYPRE_Complex *x,
-                     HYPRE_Complex  alpha,
-                     HYPRE_Complex *y,
-                     HYPRE_Complex *z,
-                     HYPRE_Complex *d)
+hypreDevice_zeqxmydd(HYPRE_Int       n,
+                     HYPRE_Complex  *x,
+                     HYPRE_Complex   alpha,
+                     HYPRE_Complex  *y,
+                     HYPRE_Complex  *z,
+                     HYPRE_Complex  *d)
 {
    /* trivial case */
    if (n <= 0)
@@ -2645,37 +2552,98 @@ hypreDevice_zeqxmydd(HYPRE_Int      n,
    return hypre_error_flag;
 }
 
+#endif // #if defined(HYPRE_USING_GPU)
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ *      cuda/hip functions
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
 /*--------------------------------------------------------------------
- * hypreGPUKernel_BigToSmallCopy
+ * hypreGPUKernel_CompileFlagSafetyCheck
+ *
+ * The architecture identification macro __CUDA_ARCH__ is assigned a
+ * three-digit value string xy0 (ending in a literal 0) during each
+ * nvcc compilation stage 1 that compiles for compute_xy.
+ *
+ * This macro can be used in the implementation of GPU functions for
+ * determining the virtual architecture for which it is currently being
+ * compiled. The host code (the non-GPU code) must not depend on it.
+ *
+ * Note that compute_XX refers to a PTX version and sm_XX refers to
+ * a cubin version.
  *--------------------------------------------------------------------*/
 
 __global__ void
-hypreGPUKernel_BigToSmallCopy( hypre_DeviceItem                &item,
-                               HYPRE_Int*          __restrict__ tgt,
-                               const HYPRE_BigInt* __restrict__ src,
-                               HYPRE_Int                        size )
+hypreGPUKernel_CompileFlagSafetyCheck( hypre_DeviceItem &item,
+                                       hypre_int        *cuda_arch_compile )
 {
-   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
-
-   if (i < size)
-   {
-      tgt[i] = src[i];
-   }
+#if defined(__CUDA_ARCH__)
+   cuda_arch_compile[0] = __CUDA_ARCH__;
+#endif
 }
 
 /*--------------------------------------------------------------------
- * hypreDevice_BigToSmallCopy
+ * hypre_CudaCompileFlagCheck
+ *
+ * Assume this function is called inside HYPRE_Init(), at a place
+ * where we do not want to activate memory pooling, so we do not use
+ * hypre's memory model to Alloc and Free.
+ *
+ * See commented out code below (and do not delete)
+ *
+ * This is really only defined for CUDA and not for HIP
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypreDevice_BigToSmallCopy( HYPRE_Int          *tgt,
-                            const HYPRE_BigInt *src,
-                            HYPRE_Int           size )
+hypre_CudaCompileFlagCheck()
 {
-   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-   dim3 gDim = hypre_GetDefaultDeviceGridDimension(size, "thread", bDim);
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_Int device;
+   hypre_GetDevice(&device);
 
-   HYPRE_GPU_LAUNCH( hypreGPUKernel_BigToSmallCopy, gDim, bDim, tgt, src, size);
+   struct cudaDeviceProp props;
+   cudaGetDeviceProperties(&props, device);
+   hypre_int cuda_arch_actual = props.major * 100 + props.minor * 10;
+   hypre_int cuda_arch_compile = -1;
+   dim3 gDim(1, 1, 1), bDim(1, 1, 1);
+
+   hypre_int *cuda_arch_compile_d = NULL;
+   //cuda_arch_compile_d = hypre_TAlloc(hypre_int, 1, HYPRE_MEMORY_DEVICE);
+   HYPRE_CUDA_CALL( cudaMalloc(&cuda_arch_compile_d, sizeof(hypre_int)) );
+   HYPRE_CUDA_CALL( cudaMemcpy(cuda_arch_compile_d, &cuda_arch_compile, sizeof(hypre_int),
+                               cudaMemcpyHostToDevice) );
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_CompileFlagSafetyCheck, gDim, bDim, cuda_arch_compile_d );
+   HYPRE_CUDA_CALL( cudaMemcpy(&cuda_arch_compile, cuda_arch_compile_d, sizeof(hypre_int),
+                               cudaMemcpyDeviceToHost) );
+   //hypre_TFree(cuda_arch_compile_d, HYPRE_MEMORY_DEVICE);
+   HYPRE_CUDA_CALL( cudaFree(cuda_arch_compile_d) );
+
+   /* HYPRE_CUDA_CALL(cudaDeviceSynchronize()); */
+
+   if (cuda_arch_actual != cuda_arch_compile)
+   {
+      char msg[256];
+
+      if (-1 == cuda_arch_compile)
+      {
+         hypre_sprintf(msg, "hypre error: no proper cuda_arch found");
+      }
+      else
+      {
+         hypre_sprintf(msg,
+                       "hypre error: Compile arch %d ('--generate-code arch=compute_%d') does not match device arch %d",
+                       cuda_arch_compile, cuda_arch_compile / 10, cuda_arch_actual);
+      }
+
+      hypre_error_w_msg(1, msg);
+#if defined(HYPRE_DEBUG)
+      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "%s\n", msg);
+#endif
+      hypre_assert(0);
+   }
+#endif // defined(HYPRE_USING_CUDA)
 
    return hypre_error_flag;
 }
@@ -2719,6 +2687,7 @@ hypre_HYPREComplexToCudaDataType()
 #endif // #if defined(HYPRE_COMPLEX)
 }
 
+#if CUSPARSE_VERSION >= 10300
 /*--------------------------------------------------------------------
  * hypre_HYPREIntToCusparseIndexType
  *
@@ -2744,6 +2713,8 @@ hypre_HYPREIntToCusparseIndexType()
    return CUSPARSE_INDEX_32I;
 #endif
 }
+#endif
+
 #endif // #if defined(HYPRE_USING_CUSPARSE)
 
 #if defined(HYPRE_USING_CUBLAS)
@@ -2795,7 +2766,6 @@ hypre_DeviceDataCusparseHandle(hypre_DeviceData *data)
    return handle;
 }
 #endif // defined(HYPRE_USING_CUSPARSE)
-
 
 #if defined(HYPRE_USING_ROCSPARSE)
 

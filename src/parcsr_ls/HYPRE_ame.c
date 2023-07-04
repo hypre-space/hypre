@@ -87,6 +87,16 @@ HYPRE_Int HYPRE_AMESetMaxIter(HYPRE_Solver esolver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_AMESetMaxPCGIter
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_AMESetMaxPCGIter(HYPRE_Solver esolver,
+                                 HYPRE_Int maxit)
+{
+   return hypre_AMESetMaxPCGIter((void *) esolver, maxit);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_AMESetTol
  *--------------------------------------------------------------------------*/
 
