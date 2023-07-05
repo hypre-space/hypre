@@ -100,6 +100,10 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
    d_ic = hypre_TAlloc(std::int64_t, m + 1, HYPRE_MEMORY_DEVICE);
 #else
    d_ic = hypre_TAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_DEVICE);
+   /* WM: debug */
+   HYPRE_Int my_id;
+   hypre_MPI_Comm_rank(MPI_COMM_WORLD, &my_id);
+   hypre_printf("WM: debug - rank %d - alloc %p with size %d\n", my_id, d_ic, m + 1);
 #endif
    HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::set_csr_data(handle_C, m, n, oneapi::mkl::index_base::zero,
                                                         d_ic, d_jc, d_c) );

@@ -618,6 +618,12 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                                hypre_ParCSRMatrix *P,
                                HYPRE_Int           keep_transpose )
 {
+   /* WM: debug */
+   HYPRE_Int my_id;
+   hypre_MPI_Comm_rank(MPI_COMM_WORLD, &my_id);
+   MPI_Barrier(MPI_COMM_WORLD);
+   hypre_printf("WM: debug - rank %d - %s : %d - START\n", my_id, __FILE__, __LINE__);
+   MPI_Barrier(MPI_COMM_WORLD);
    MPI_Comm             comm   = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix     *R_diag = hypre_ParCSRMatrixDiag(R);
    hypre_CSRMatrix     *R_offd = hypre_ParCSRMatrixOffd(R);
@@ -780,9 +786,18 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       hypre_TFree(hypre_CSRMatrixBigJ(Cint), HYPRE_MEMORY_DEVICE);
       hypre_TFree(Cint, HYPRE_MEMORY_HOST);
 
+      /* WM: debug */
+      MPI_Barrier(MPI_COMM_WORLD);
+      hypre_printf("WM: debug - rank %d - %s : %d\n", my_id, __FILE__, __LINE__);
+      hypre_printf("WM: debug - rank %d - Cbar_i = %p, Cbar num rows = %d, R num cols = %d\n", my_id, hypre_CSRMatrixI(Cbar), hypre_CSRMatrixNumRows(Cbar), hypre_ParCSRMatrixNumCols(R));
+      MPI_Barrier(MPI_COMM_WORLD);
       hypre_TMemcpy(hypre_CSRMatrixI(Cbar) + hypre_ParCSRMatrixNumCols(R),
                     &local_nnz_Cbar, HYPRE_Int, 1,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      /* WM: debug */
+      MPI_Barrier(MPI_COMM_WORLD);
+      hypre_printf("WM: debug - rank %d - %s : %d\n", my_id, __FILE__, __LINE__);
+      MPI_Barrier(MPI_COMM_WORLD);
 
       /* add Cext to local part of Cbar */
       hypre_ParCSRTMatMatPartialAddDevice(hypre_ParCSRMatrixCommPkg(R),
@@ -863,6 +878,9 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
 
    hypre_SyncComputeStream(hypre_handle());
 
+   MPI_Barrier(MPI_COMM_WORLD);
+   hypre_printf("WM: debug - rank %d - %s : %d - END\n", my_id, __FILE__, __LINE__);
+   MPI_Barrier(MPI_COMM_WORLD);
    return C;
 }
 
