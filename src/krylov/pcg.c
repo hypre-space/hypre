@@ -210,7 +210,7 @@ hypre_PCGSetup( void *pcg_vdata,
    hypre_PCGFunctions *pcg_functions = pcg_data->functions;
    HYPRE_Int            max_iter         = (pcg_data -> max_iter);
    HYPRE_Int            recompute_residual_p = (pcg_data -> recompute_residual_p);
-   HYPRE_Int            rtol = (pcg_data -> rtol);
+   HYPRE_Real           rtol = (pcg_data -> rtol);
    HYPRE_Int            two_norm = (pcg_data -> two_norm);
    HYPRE_Int            flex = (pcg_data -> flex);
    HYPRE_Int          (*precond_setup)(void*, void*, void*, void*) = (pcg_functions -> precond_setup);

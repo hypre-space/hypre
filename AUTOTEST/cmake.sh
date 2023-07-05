@@ -81,7 +81,7 @@ rm -fr hypre
 
 # Configure
 cd $src_dir/cmbuild
-eval cmake $copts ..
+eval cmake3 $copts ..
 make $mopts install
 
 # Make
