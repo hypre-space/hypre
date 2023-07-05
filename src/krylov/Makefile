@@ -31,14 +31,6 @@ HEADERS =\
  lobpcg.h
 
 FILES =\
- HYPRE_bicgstab.c\
- HYPRE_cgnr.c\
- HYPRE_gmres.c\
- HYPRE_cogmres.c\
- HYPRE_lgmres.c\
- HYPRE_flexgmres.c\
- HYPRE_pcg.c\
- HYPRE_lobpcg.c
 
 #######################
 # Multiprecision files
@@ -51,7 +43,15 @@ MuP_FILES = \
  flexgmres.c\
  lgmres.c\
  pcg.c\
- lobpcg.c
+ lobpcg.c\
+ HYPRE_bicgstab.c\
+ HYPRE_cgnr.c\
+ HYPRE_gmres.c\
+ HYPRE_cogmres.c\
+ HYPRE_lgmres.c\
+ HYPRE_flexgmres.c\
+ HYPRE_pcg.c\
+ HYPRE_lobpcg.c
 
 ifeq (${MP_BUILD}, 1) 
    COBJS = ${FILES:.c=.o}

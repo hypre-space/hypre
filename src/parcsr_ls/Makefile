@@ -41,28 +41,6 @@ HEADERS =\
  schwarz.h
 
 FILES =\
- HYPRE_parcsr_amg.c\
- HYPRE_parcsr_amgdd.c\
- HYPRE_parcsr_bicgstab.c\
- HYPRE_parcsr_block.c\
- HYPRE_parcsr_cgnr.c\
- HYPRE_parcsr_Euclid.c\
- HYPRE_parcsr_gmres.c\
- HYPRE_parcsr_cogmres.c\
- HYPRE_parcsr_flexgmres.c\
- HYPRE_parcsr_lgmres.c\
- HYPRE_parcsr_hybrid.c\
- HYPRE_parcsr_int.c\
- HYPRE_parcsr_mgr.c\
- HYPRE_parcsr_ilu.c \
- HYPRE_parcsr_fsai.c \
- HYPRE_parcsr_ParaSails.c\
- HYPRE_parcsr_pcg.c\
- HYPRE_parcsr_pilut.c\
- HYPRE_parcsr_schwarz.c\
- HYPRE_ams.c\
- HYPRE_ads.c\
- HYPRE_ame.c
 
 CUFILES =\
  ads.c\
@@ -178,7 +156,29 @@ MuP_FILES = \
  block_tridiag.c\
  par_restr.c\
  par_lr_restr.c\
- dsuperlu.c
+ dsuperlu.c\
+ HYPRE_parcsr_amg.c\
+ HYPRE_parcsr_amgdd.c\
+ HYPRE_parcsr_bicgstab.c\
+ HYPRE_parcsr_block.c\
+ HYPRE_parcsr_cgnr.c\
+ HYPRE_parcsr_Euclid.c\
+ HYPRE_parcsr_gmres.c\
+ HYPRE_parcsr_cogmres.c\
+ HYPRE_parcsr_flexgmres.c\
+ HYPRE_parcsr_lgmres.c\
+ HYPRE_parcsr_hybrid.c\
+ HYPRE_parcsr_int.c\
+ HYPRE_parcsr_mgr.c\
+ HYPRE_parcsr_ilu.c \
+ HYPRE_parcsr_fsai.c \
+ HYPRE_parcsr_ParaSails.c\
+ HYPRE_parcsr_pcg.c\
+ HYPRE_parcsr_pilut.c\
+ HYPRE_parcsr_schwarz.c\
+ HYPRE_ams.c\
+ HYPRE_ads.c\
+ HYPRE_ame.c
 
 ifeq (${MP_BUILD}, 1) 
    COBJS = ${FILES:.c=.o}

@@ -12,6 +12,10 @@
 #include "HYPRE_struct_mv.h"
 #include "HYPRE_lobpcg.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "struct_ls_mup_func.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

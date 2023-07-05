@@ -37,10 +37,10 @@ rootname="${rootdir##*/}"
 
 ## extract function names and **remove** trailing underscores, if any
 ## To include local functions (static functions) test on $2=="t" as well (use: $2=="t|T"{print $3})
-if [ ${rootname} == "utilities" ]
-then
+#if [ ${rootname} == "utilities" ]
+#then
    nm -A --defined-only *.o* | awk -F'[ ]' '$2=="T"{print $3}' | sed 's/_*$//' > ${rootname}_functions.new
-else
+#else
 ## NOTE: This will exclude functions beginning with HYPRE_
-   nm -A --defined-only *.o* | awk -F'[ ]' '$2=="T"{print $3}' | sed 's/_*$//' | sed -n '/^HYPRE_/ !p' > ${rootname}_functions.new
-fi
+#   nm -A --defined-only *.o* | awk -F'[ ]' '$2=="T"{print $3}' | sed 's/_*$//' | sed -n '/^HYPRE_/ !p' > ${rootname}_functions.new
+#fi

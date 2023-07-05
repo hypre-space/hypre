@@ -28,8 +28,6 @@ HEADERS =\
  par_vector.h
 
 FILES =\
- HYPRE_parcsr_matrix.c\
- HYPRE_parcsr_vector.c
 
 CUFILES =\
  par_csr_matvec_device.c\
@@ -75,7 +73,9 @@ MuP_FILES = \
  par_csr_triplemat.c\
  par_make_system.c\
  par_vector.c\
- par_vector_batched.c
+ par_vector_batched.c\
+ HYPRE_parcsr_matrix.c\
+ HYPRE_parcsr_vector.c
 
 ifeq (${MP_BUILD}, 1) 
    COBJS = ${FILES:.c=.o}

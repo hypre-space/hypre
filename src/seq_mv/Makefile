@@ -24,10 +24,6 @@ HEADERS =\
  vector.h
 
 FILES =\
- HYPRE_csr_matrix.c\
- HYPRE_mapped_matrix.c\
- HYPRE_multiblock_matrix.c\
- HYPRE_vector.c
 
 CUFILES =\
  csr_matop_device.c\
@@ -79,7 +75,11 @@ MuP_FILES = \
  mapped_matrix.c\
  multiblock_matrix.c\
  vector.c\
- vector_batched.c
+ vector_batched.c\
+ HYPRE_csr_matrix.c\
+ HYPRE_mapped_matrix.c\
+ HYPRE_multiblock_matrix.c\
+ HYPRE_vector.c 
 
 ifeq (${MP_BUILD}, 1) 
    COBJS = ${FILES:.c=.o}

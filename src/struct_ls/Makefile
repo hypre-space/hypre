@@ -26,18 +26,6 @@ HEADERS =\
  sparse_msg.h
 
 FILES =\
- HYPRE_struct_int.c\
- HYPRE_struct_pcg.c\
- HYPRE_struct_bicgstab.c\
- HYPRE_struct_cycred.c\
- HYPRE_struct_flexgmres.c\
- HYPRE_struct_gmres.c\
- HYPRE_struct_hybrid.c\
- HYPRE_struct_jacobi.c\
- HYPRE_struct_lgmres.c\
- HYPRE_struct_pfmg.c\
- HYPRE_struct_smg.c\
- HYPRE_struct_sparse_msg.c
 
 CUFILES =\
  cyclic_reduction.c\
@@ -100,7 +88,19 @@ MuP_FILES = \
  sparse_msg.c\
  sparse_msg_setup.c\
  sparse_msg_setup_rap.c\
- sparse_msg_solve.c
+ sparse_msg_solve.c\
+ HYPRE_struct_int.c\
+ HYPRE_struct_pcg.c\
+ HYPRE_struct_bicgstab.c\
+ HYPRE_struct_cycred.c\
+ HYPRE_struct_flexgmres.c\
+ HYPRE_struct_gmres.c\
+ HYPRE_struct_hybrid.c\
+ HYPRE_struct_jacobi.c\
+ HYPRE_struct_lgmres.c\
+ HYPRE_struct_pfmg.c\
+ HYPRE_struct_smg.c\
+ HYPRE_struct_sparse_msg.c
 
 ifeq (${MP_BUILD}, 1) 
    COBJS = ${FILES:.c=.o}

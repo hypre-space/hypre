@@ -28,11 +28,6 @@ HEADERS =\
  sstruct_vector.h
 
 FILES =\
- HYPRE_sstruct_graph.c\
- HYPRE_sstruct_grid.c\
- HYPRE_sstruct_matrix.c\
- HYPRE_sstruct_stencil.c\
- HYPRE_sstruct_vector.c
 
 CUFILES =\
  sstruct_matrix.c\
@@ -54,7 +49,12 @@ MuP_FILES = \
  sstruct_innerprod.c\
  sstruct_matvec.c\
  sstruct_scale.c\
- sstruct_stencil.c
+ sstruct_stencil.c\
+ HYPRE_sstruct_graph.c\
+ HYPRE_sstruct_grid.c\
+ HYPRE_sstruct_matrix.c\
+ HYPRE_sstruct_stencil.c\
+ HYPRE_sstruct_vector.c
 
 ifeq (${MP_BUILD}, 1) 
    COBJS = ${FILES:.c=.o}

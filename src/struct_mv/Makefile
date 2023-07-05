@@ -29,10 +29,6 @@ HEADERS =\
  struct_vector.h
 
 FILES =\
- HYPRE_struct_grid.c\
- HYPRE_struct_matrix.c\
- HYPRE_struct_stencil.c\
- HYPRE_struct_vector.c
 
 CUFILES =\
  struct_axpy.c\
@@ -63,7 +59,11 @@ MuP_FILES = \
  struct_grid.c\
  struct_io.c\
  struct_matrix_mask.c\
- struct_stencil.c
+ struct_stencil.c\
+ HYPRE_struct_grid.c\
+ HYPRE_struct_matrix.c\
+ HYPRE_struct_stencil.c\
+ HYPRE_struct_vector.c
 
 ifeq (${MP_BUILD}, 1) 
    COBJS = ${FILES:.c=.o}

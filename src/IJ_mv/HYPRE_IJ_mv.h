@@ -11,6 +11,10 @@
 #include "HYPRE_config.h"
 #include "HYPRE_utilities.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "IJ_mv_mup_func.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

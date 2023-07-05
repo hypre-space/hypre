@@ -27,7 +27,6 @@ HEADERS = \
  struct.h
 
 FILES =\
- HYPRE_DistributedMatrixPilutSolver.c
 
 #######################
 # Multiprecision files
@@ -43,7 +42,8 @@ MuP_FILES = \
  pblas1.c\
  serilut.c\
  trifactor.c\
- util.c
+ util.c\
+ HYPRE_DistributedMatrixPilutSolver.c 
 
 ifeq (${MP_BUILD}, 1) 
    COBJS = ${FILES:.c=.o}

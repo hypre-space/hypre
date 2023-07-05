@@ -38,16 +38,6 @@ HEADERS =\
  sys_pfmg.h
 
 FILES =\
- HYPRE_sstruct_bicgstab.c\
- HYPRE_sstruct_gmres.c\
- HYPRE_sstruct_flexgmres.c\
- HYPRE_sstruct_lgmres.c\
- HYPRE_sstruct_InterFAC.c\
- HYPRE_sstruct_int.c\
- HYPRE_sstruct_maxwell.c\
- HYPRE_sstruct_pcg.c\
- HYPRE_sstruct_split.c\
- HYPRE_sstruct_sys_pfmg.c
 
 CUFILES =\
  fac_amr_fcoarsen.c\
@@ -107,7 +97,17 @@ MuP_FILES = \
  sys_pfmg_setup_rap.c\
  sys_pfmg_solve.c\
  sys_semi_interp.c\
- sys_semi_restrict.c
+ sys_semi_restrict.c\
+ HYPRE_sstruct_bicgstab.c\
+ HYPRE_sstruct_gmres.c\
+ HYPRE_sstruct_flexgmres.c\
+ HYPRE_sstruct_lgmres.c\
+ HYPRE_sstruct_InterFAC.c\
+ HYPRE_sstruct_int.c\
+ HYPRE_sstruct_maxwell.c\
+ HYPRE_sstruct_pcg.c\
+ HYPRE_sstruct_split.c\
+ HYPRE_sstruct_sys_pfmg.c
 
 ifeq (${MP_BUILD}, 1) 
    COBJS = ${FILES:.c=.o}

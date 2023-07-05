@@ -30,8 +30,6 @@ EXTRA_FILES =\
  IJMatrix_petsc.c
 
 FILES =\
- HYPRE_IJMatrix.c\
- HYPRE_IJVector.c
 
 CUFILES =\
  IJMatrix_parcsr_device.c\
@@ -50,7 +48,9 @@ MuP_FILES = \
  IJMatrix.c\
  IJMatrix_parcsr.c\
  IJVector.c\
- IJVector_parcsr.c
+ IJVector_parcsr.c\
+ HYPRE_IJMatrix.c\
+ HYPRE_IJVector.c 
 
 ifeq (${MP_BUILD}, 1) 
    COBJS = ${FILES:.c=.o}

@@ -24,7 +24,6 @@ HEADERS =\
  HYPRE_distributed_matrix_types.h
 
 FILES =\
- HYPRE_distributed_matrix.c
 
 #######################
 # Multiprecision files
@@ -33,7 +32,8 @@ MuP_FILES = \
  distributed_matrix.c\
  distributed_matrix_ISIS.c\
  distributed_matrix_PETSc.c\
- distributed_matrix_parcsr.c
+ distributed_matrix_parcsr.c\
+ HYPRE_distributed_matrix.c 
  
 ifeq (${MP_BUILD}, 1)
    COBJS = ${FILES:.c=.o}
