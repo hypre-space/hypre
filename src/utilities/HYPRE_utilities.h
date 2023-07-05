@@ -61,7 +61,11 @@ typedef int HYPRE_Int;
 typedef float HYPRE_Real;
 #define HYPRE_REAL_MAX FLT_MAX
 #define HYPRE_REAL_MIN FLT_MIN
+#if defined(FLT_TRUE_MIN)
 #define HYPRE_REAL_TRUE_MIN FLT_TRUE_MIN
+#else
+#define HYPRE_REAL_TRUE_MIN FLT_MIN
+#endif
 #define HYPRE_REAL_EPSILON FLT_EPSILON
 #define HYPRE_REAL_MIN_EXP FLT_MIN_EXP
 #define HYPRE_MPI_REAL MPI_FLOAT
@@ -70,7 +74,11 @@ typedef float HYPRE_Real;
 typedef long double HYPRE_Real;
 #define HYPRE_REAL_MAX LDBL_MAX
 #define HYPRE_REAL_MIN LDBL_MIN
+#if defined(LDBL_TRUE_MIN)
 #define HYPRE_REAL_TRUE_MIN LDBL_TRUE_MIN
+#else
+#define HYPRE_REAL_TRUE_MIN LDBL_MIN
+#endif
 #define HYPRE_REAL_EPSILON LDBL_EPSILON
 #define HYPRE_REAL_MIN_EXP DBL_MIN_EXP
 #define HYPRE_MPI_REAL MPI_LONG_DOUBLE
@@ -79,7 +87,11 @@ typedef long double HYPRE_Real;
 typedef double HYPRE_Real;
 #define HYPRE_REAL_MAX DBL_MAX
 #define HYPRE_REAL_MIN DBL_MIN
+#if defined(DBL_TRUE_MIN)
 #define HYPRE_REAL_TRUE_MIN DBL_TRUE_MIN
+#else
+#define HYPRE_REAL_TRUE_MIN DBL_MIN
+#endif
 #define HYPRE_REAL_EPSILON DBL_EPSILON
 #define HYPRE_REAL_MIN_EXP DBL_MIN_EXP
 #define HYPRE_MPI_REAL MPI_DOUBLE
