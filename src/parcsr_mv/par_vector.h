@@ -42,6 +42,9 @@ typedef struct hypre_ParVector_struct
 
    hypre_IJAssumedPart  *assumed_partition; /* only populated if this partition needed
                                               (for setting off-proc elements, for example)*/
+#if defined(HYPRE_MIXED_PRECISION)   
+   HYPRE_Precision vector_precision;
+#endif
 } hypre_ParVector;
 
 /*--------------------------------------------------------------------------
@@ -60,6 +63,10 @@ typedef struct hypre_ParVector_struct
 #define hypre_ParVectorNumVectors(vector)       (hypre_VectorNumVectors(hypre_ParVectorLocalVector(vector)))
 
 #define hypre_ParVectorAssumedPartition(vector) ((vector) -> assumed_partition)
+
+#if defined(HYPRE_MIXED_PRECISION)   
+#define hypre_ParVectorPrecision(vector)          ((vector) -> vector_precision)
+#endif
 
 static inline HYPRE_MemoryLocation
 hypre_ParVectorMemoryLocation(hypre_ParVector *vector)

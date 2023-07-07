@@ -46,6 +46,7 @@ cat mapped_matrix.h         >> $INTERNAL_HEADER
 cat multiblock_matrix.h     >> $INTERNAL_HEADER
 cat vector.h                >> $INTERNAL_HEADER
 cat protos.h                >> $INTERNAL_HEADER
+cat hypre_seq_mv_mp.h       >> $INTERNAL_HEADER
 
 #../utilities/protos *.c               >> $INTERNAL_HEADER
 

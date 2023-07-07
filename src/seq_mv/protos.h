@@ -137,6 +137,8 @@ hypre_CSRMatrix *hypre_CSRMatrixUnion( hypre_CSRMatrix *A,
                                        HYPRE_BigInt *col_map_offd_A,
                                        HYPRE_BigInt *col_map_offd_B,
                                        HYPRE_BigInt **col_map_offd_C );
+HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin( hypre_CSRMatrix *A );
+HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd( hypre_CSRMatrix *A );
 HYPRE_Int hypre_CSRMatrixPrefetch( hypre_CSRMatrix *A, HYPRE_MemoryLocation memory_location);
 HYPRE_Int hypre_CSRMatrixCheckSetNumNonzeros( hypre_CSRMatrix *matrix );
 HYPRE_Int hypre_CSRMatrixResize( hypre_CSRMatrix *matrix, HYPRE_Int new_num_rows,

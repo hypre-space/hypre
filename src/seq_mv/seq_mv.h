@@ -79,6 +79,10 @@ typedef struct
    hypre_CsrsvData      *csrsv_data;
    hypre_GpuMatData     *mat_data;
 #endif
+
+#if defined(HYPRE_MIXED_PRECISION)   
+   HYPRE_Precision matrix_precision;
+#endif
 } hypre_CSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -108,11 +112,8 @@ typedef struct
 #endif
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "seq_mv_mup_func.h"
+#define hypre_CSRMatrixPrecision(vector)          ((matrix) -> matrix_precision)
 #endif
-
-HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin( hypre_CSRMatrix *A );
-HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd( hypre_CSRMatrix *A );
 
 /*--------------------------------------------------------------------------
  * CSR Boolean Matrix
@@ -265,6 +266,11 @@ typedef struct
       With rowwise storage, vj[i] = data[ j + num_vectors*i] */
    HYPRE_Int  vecstride, idxstride;
    /* ... so vj[i] = data[ j*vecstride + i*idxstride ] regardless of row_storage.*/
+
+#if defined(HYPRE_MIXED_PRECISION)   
+   HYPRE_Precision vector_precision;
+#endif 
+
 } hypre_Vector;
 
 /*--------------------------------------------------------------------------
@@ -280,6 +286,10 @@ typedef struct
 #define hypre_VectorMultiVecStorageMethod(vector) ((vector) -> multivec_storage_method)
 #define hypre_VectorVectorStride(vector)          ((vector) -> vecstride)
 #define hypre_VectorIndexStride(vector)           ((vector) -> idxstride)
+
+#if defined(HYPRE_MIXED_PRECISION)   
+#define hypre_VectorPrecision(vector)          ((vector) -> vector_precision)
+#endif
 
 #endif
 /******************************************************************************
@@ -421,6 +431,8 @@ hypre_CSRMatrix *hypre_CSRMatrixUnion( hypre_CSRMatrix *A,
                                        HYPRE_BigInt *col_map_offd_A,
                                        HYPRE_BigInt *col_map_offd_B,
                                        HYPRE_BigInt **col_map_offd_C );
+HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin( hypre_CSRMatrix *A );
+HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd( hypre_CSRMatrix *A );
 HYPRE_Int hypre_CSRMatrixPrefetch( hypre_CSRMatrix *A, HYPRE_MemoryLocation memory_location);
 HYPRE_Int hypre_CSRMatrixCheckSetNumNonzeros( hypre_CSRMatrix *matrix );
 HYPRE_Int hypre_CSRMatrixResize( hypre_CSRMatrix *matrix, HYPRE_Int new_num_rows,
@@ -652,6 +664,28 @@ hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
 #endif
 
 HYPRE_Int hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix);
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+
+/* Mixed precision function protos */
+/* hypre_seq_mv_mp.h */
+
+#ifdef HYPRE_MIXED_PRECISION
+HYPRE_Int
+hypre_SeqVectorCopy_mp( hypre_Vector *x,
+                     hypre_Vector *y );
+
+HYPRE_Int
+hypre_SeqVectorAxpy_mp( hypre_double alpha,
+                     hypre_Vector *x,
+                     hypre_Vector *y     );
+
+#endif
 
 #ifdef __cplusplus
 }

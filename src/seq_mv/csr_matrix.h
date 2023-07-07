@@ -55,6 +55,10 @@ typedef struct
    hypre_CsrsvData      *csrsv_data;
    hypre_GpuMatData     *mat_data;
 #endif
+
+#if defined(HYPRE_MIXED_PRECISION)   
+   HYPRE_Precision matrix_precision;
+#endif
 } hypre_CSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -84,11 +88,8 @@ typedef struct
 #endif
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "seq_mv_mup_func.h"
+#define hypre_CSRMatrixPrecision(vector)          ((matrix) -> matrix_precision)
 #endif
-
-HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin( hypre_CSRMatrix *A );
-HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd( hypre_CSRMatrix *A );
 
 /*--------------------------------------------------------------------------
  * CSR Boolean Matrix

@@ -36,6 +36,11 @@ typedef struct
       With rowwise storage, vj[i] = data[ j + num_vectors*i] */
    HYPRE_Int  vecstride, idxstride;
    /* ... so vj[i] = data[ j*vecstride + i*idxstride ] regardless of row_storage.*/
+
+#if defined(HYPRE_MIXED_PRECISION)   
+   HYPRE_Precision vector_precision;
+#endif 
+
 } hypre_Vector;
 
 /*--------------------------------------------------------------------------
@@ -51,5 +56,9 @@ typedef struct
 #define hypre_VectorMultiVecStorageMethod(vector) ((vector) -> multivec_storage_method)
 #define hypre_VectorVectorStride(vector)          ((vector) -> vecstride)
 #define hypre_VectorIndexStride(vector)           ((vector) -> idxstride)
+
+#if defined(HYPRE_MIXED_PRECISION)   
+#define hypre_VectorPrecision(vector)          ((vector) -> vector_precision)
+#endif
 
 #endif

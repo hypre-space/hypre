@@ -255,6 +255,9 @@ typedef struct hypre_ParVector_struct
 
    hypre_IJAssumedPart  *assumed_partition; /* only populated if this partition needed
                                               (for setting off-proc elements, for example)*/
+#if defined(HYPRE_MIXED_PRECISION)   
+   HYPRE_Precision vector_precision;
+#endif
 } hypre_ParVector;
 
 /*--------------------------------------------------------------------------
@@ -273,6 +276,10 @@ typedef struct hypre_ParVector_struct
 #define hypre_ParVectorNumVectors(vector)       (hypre_VectorNumVectors(hypre_ParVectorLocalVector(vector)))
 
 #define hypre_ParVectorAssumedPartition(vector) ((vector) -> assumed_partition)
+
+#if defined(HYPRE_MIXED_PRECISION)   
+#define hypre_ParVectorPrecision(vector)          ((vector) -> vector_precision)
+#endif
 
 static inline HYPRE_MemoryLocation
 hypre_ParVectorMemoryLocation(hypre_ParVector *vector)
@@ -366,6 +373,10 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_Int            *soc_offd_j;
 #endif
 
+#if defined(HYPRE_MIXED_PRECISION)   
+   HYPRE_Precision matrix_precision;
+#endif
+
 } hypre_ParCSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -406,6 +417,10 @@ typedef struct hypre_ParCSRMatrix_struct
 
 #define hypre_ParCSRMatrixNumRows(matrix) hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixNumCols(matrix) hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
+
+#if defined(HYPRE_MIXED_PRECISION)   
+#define hypre_ParCSRMatrixPrecision(matrix)          ((matrix) -> matrix_precision)
+#endif
 
 static inline HYPRE_MemoryLocation
 hypre_ParCSRMatrixMemoryLocation(hypre_ParCSRMatrix *matrix)
@@ -1260,6 +1275,28 @@ HYPRE_Int hypre_ParVectorElmdivpyMarked( hypre_ParVector *x, hypre_ParVector *b,
 HYPRE_Int hypre_ParVectorGetValuesDevice(hypre_ParVector *vector, HYPRE_Int num_values,
                                          HYPRE_BigInt *indices, HYPRE_BigInt base,
                                          HYPRE_Complex *values);
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+
+/* Mixed precision function protos */
+/* hypre_parcsr_mv_mp.h */
+
+#ifdef HYPRE_MIXED_PRECISION
+HYPRE_Int
+hypre_ParVectorCopy_mp( hypre_ParVector *x,
+                     hypre_ParVector *y );
+
+HYPRE_Int
+hypre_ParVectorAxpy_mp( HYPRE_Complex    alpha,
+                     hypre_ParVector *x,
+                     hypre_ParVector *y );
+
+#endif
 
 #ifdef __cplusplus
 }

@@ -24,6 +24,7 @@ HEADERS =\
  vector.h
 
 FILES =\
+ hypre_seq_mv_mp.c
 
 CUFILES =\
  csr_matop_device.c\

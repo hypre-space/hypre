@@ -28,6 +28,7 @@ HEADERS =\
  par_vector.h
 
 FILES =\
+ hypre_parcsr_mv_mp.c
 
 CUFILES =\
  par_csr_matvec_device.c\
