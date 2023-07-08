@@ -740,41 +740,33 @@ hypre_PointRelax_core0( void               *relax_vdata,
       {
          case 7:
             Ap6 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[6]);
-            xoff6 = hypre_BoxOffsetDistance(
-                       x_data_box, stencil_shape[ssi[6]]);
+            xoff6 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[6]]);
 
          case 6:
             Ap5 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[5]);
-            xoff5 = hypre_BoxOffsetDistance(
-                       x_data_box, stencil_shape[ssi[5]]);
+            xoff5 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[5]]);
 
          case 5:
             Ap4 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[4]);
-            xoff4 = hypre_BoxOffsetDistance(
-                       x_data_box, stencil_shape[ssi[4]]);
+            xoff4 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[4]]);
 
          case 4:
             Ap3 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[3]);
-            xoff3 = hypre_BoxOffsetDistance(
-                       x_data_box, stencil_shape[ssi[3]]);
+            xoff3 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[3]]);
 
          case 3:
             Ap2 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[2]);
-            xoff2 = hypre_BoxOffsetDistance(
-                       x_data_box, stencil_shape[ssi[2]]);
+            xoff2 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[2]]);
 
          case 2:
             Ap1 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[1]);
-            xoff1 = hypre_BoxOffsetDistance(
-                       x_data_box, stencil_shape[ssi[1]]);
+            xoff1 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[1]]);
 
          case 1:
             Ap0 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[0]);
-            xoff0 = hypre_BoxOffsetDistance(
-                       x_data_box, stencil_shape[ssi[0]]);
+            xoff0 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[0]]);
 
          case 0:
-
             break;
       }
 
@@ -1026,41 +1018,33 @@ hypre_PointRelax_core12( void               *relax_vdata,
       {
          case 7:
             Ap6 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[6]);
-            xoff6 = hypre_BoxOffsetDistance(
-                       x_data_box, stencil_shape[ssi[6]]);
+            xoff6 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[6]]);
 
          case 6:
             Ap5 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[5]);
-            xoff5 = hypre_BoxOffsetDistance(
-                       x_data_box, stencil_shape[ssi[5]]);
+            xoff5 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[5]]);
 
          case 5:
             Ap4 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[4]);
-            xoff4 = hypre_BoxOffsetDistance(
-                       x_data_box, stencil_shape[ssi[4]]);
+            xoff4 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[4]]);
 
          case 4:
             Ap3 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[3]);
-            xoff3 = hypre_BoxOffsetDistance(
-                       x_data_box, stencil_shape[ssi[3]]);
+            xoff3 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[3]]);
 
          case 3:
             Ap2 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[2]);
-            xoff2 = hypre_BoxOffsetDistance(
-                       x_data_box, stencil_shape[ssi[2]]);
+            xoff2 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[2]]);
 
          case 2:
             Ap1 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[1]);
-            xoff1 = hypre_BoxOffsetDistance(
-                       x_data_box, stencil_shape[ssi[1]]);
+            xoff1 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[1]]);
 
          case 1:
             Ap0 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[0]);
-            xoff0 = hypre_BoxOffsetDistance(
-                       x_data_box, stencil_shape[ssi[0]]);
+            xoff0 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[0]]);
 
          case 0:
-
             break;
       }
 
@@ -1516,8 +1500,10 @@ HYPRE_Int hypre_relax_wtx( void *relax_vdata, HYPRE_Int pointset,
  * vector copy on specified pointsets.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_relax_copy( void *relax_vdata, HYPRE_Int pointset,
-                            hypre_StructVector *t, hypre_StructVector *x )
+HYPRE_Int hypre_relax_copy( void               *relax_vdata,
+                            HYPRE_Int           pointset,
+                            hypre_StructVector *t,
+                            hypre_StructVector *x )
 /* Sets x to t, x=t, but only in the specified pointset. */
 {
    hypre_PointRelaxData  *relax_data = (hypre_PointRelaxData *)relax_vdata;
