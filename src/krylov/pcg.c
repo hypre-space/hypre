@@ -375,7 +375,7 @@ hypre_PCGSolve( void *pcg_vdata,
       }
    };
 
-   /* Since it is does not diminish performance, attempt to return an error flag
+   /* Since it does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
    if (bi_prod != 0.) { ieee_check = bi_prod / bi_prod; } /* INF -> NaN conversion */
    if (ieee_check != ieee_check)
@@ -453,7 +453,7 @@ hypre_PCGSolve( void *pcg_vdata,
    /* gamma = <r,p> */
    gamma = (*(pcg_functions->InnerProd))(r, p);
 
-   /* Since it is does not diminish performance, attempt to return an error flag
+   /* Since it does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
    if (gamma != 0.) { ieee_check = gamma / gamma; } /* INF -> NaN conversion */
    if (ieee_check != ieee_check)
