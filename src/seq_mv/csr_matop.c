@@ -219,7 +219,6 @@ hypre_CSRMatrixAddFirstPass( HYPRE_Int              firstrow,
 HYPRE_Int
 hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
                               HYPRE_Int          lastrow,
-                              HYPRE_Int         *twspace,
                               HYPRE_Int         *marker,
                               HYPRE_Int         *map_A2C,
                               HYPRE_Int         *map_B2C,
@@ -431,7 +430,7 @@ hypre_CSRMatrixAddHost ( HYPRE_Complex    alpha,
                                   A, B, nrows_A, nnzrows_C, ncols_A, rownnz_C,
                                   memory_location_C, C_i, &C);
 
-      hypre_CSRMatrixAddSecondPass(ns, ne, twspace, marker, NULL, NULL,
+      hypre_CSRMatrixAddSecondPass(ns, ne, marker, NULL, NULL,
                                    rownnz_C, alpha, beta, A, B, C);
 
       hypre_TFree(marker, HYPRE_MEMORY_HOST);
