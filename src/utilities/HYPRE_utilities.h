@@ -90,9 +90,17 @@ typedef double HYPRE_Real;
 #endif
 
 #if defined(HYPRE_COMPLEX)
+/* support for float double and long double complex types */
+#if defined(HYPRE_SINGLE)
+typedef float _Complex HYPRE_Complex;
+#define HYPRE_MPI_COMPLEX MPI_C_FLOAT_COMPLEX
+#elif defined(HYPRE_LONG_DOUBLE)
+typedef long double _Complex HYPRE_Complex;
+#define HYPRE_MPI_COMPLEX MPI_C_LONG_DOUBLE_COMPLEX
+#else /* default */
 typedef double _Complex HYPRE_Complex;
 #define HYPRE_MPI_COMPLEX MPI_C_DOUBLE_COMPLEX  /* or MPI_LONG_DOUBLE ? */
-
+#endif
 #else  /* default */
 typedef HYPRE_Real HYPRE_Complex;
 #define HYPRE_MPI_COMPLEX HYPRE_MPI_REAL
@@ -115,39 +123,77 @@ typedef HYPRE_Int MPI_Comm;
 #define HYPRE_ERROR_ARG             4   /* argument error */
 /* bits 4-8 are reserved for the index of the argument error */
 #define HYPRE_ERROR_CONV          256   /* method did not converge as expected */
+#define HYPRE_MAX_FILE_NAME_LEN  1024   /* longest filename length used in hypre */
 
 /*--------------------------------------------------------------------------
  * HYPRE init/finalize
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_Init();
-HYPRE_Int HYPRE_Finalize();
+/**
+ * (Required) Initializes the hypre library.
+ **/
+
+HYPRE_Int HYPRE_Initialize(void);
+
+/**
+ * (Required) Initializes the hypre library. This function is provided for backward compatibility.
+ * Please, use HYPRE_Initialize instead.
+ **/
+
+#define HYPRE_Init() HYPRE_Initialize()
+
+/**
+ * (Required) Finalizes the hypre library.
+ **/
+
+HYPRE_Int HYPRE_Finalize(void);
+
+/**
+ * (Optional) Returns true if the hypre library has been initialized but not finalized yet.
+ **/
+
+HYPRE_Int HYPRE_Initialized(void);
+
+/**
+ * (Optional) Returns true if the hypre library has been finalized but not re-initialized yet.
+ **/
+
+HYPRE_Int HYPRE_Finalized(void);
 
 /*--------------------------------------------------------------------------
  * HYPRE error user functions
  *--------------------------------------------------------------------------*/
 
 /* Return the current hypre error flag */
-HYPRE_Int HYPRE_GetError();
+HYPRE_Int HYPRE_GetError(void);
 
 /* Check if the given error flag contains the given error code */
 HYPRE_Int HYPRE_CheckError(HYPRE_Int hypre_ierr, HYPRE_Int hypre_error_code);
 
 /* Return the index of the argument (counting from 1) where
    argument error (HYPRE_ERROR_ARG) has occured */
-HYPRE_Int HYPRE_GetErrorArg();
+HYPRE_Int HYPRE_GetErrorArg(void);
 
 /* Describe the given error flag in the given string */
 void HYPRE_DescribeError(HYPRE_Int hypre_ierr, char *descr);
 
 /* Clears the hypre error flag */
-HYPRE_Int HYPRE_ClearAllErrors();
+HYPRE_Int HYPRE_ClearAllErrors(void);
 
 /* Clears the given error code from the hypre error flag */
 HYPRE_Int HYPRE_ClearError(HYPRE_Int hypre_error_code);
 
+/* Set behavior for printing errors: mode 0 = stderr, mode 1 = memory buffer */
+HYPRE_Int HYPRE_SetPrintErrorMode(HYPRE_Int mode);
+
+/* Return a buffer of error messages and clear them in hypre */
+HYPRE_Int HYPRE_GetErrorMessages(char **buffer, HYPRE_Int *bufsz);
+
+/* Print the error messages and clear them in hypre */
+HYPRE_Int HYPRE_PrintErrorMessages(MPI_Comm comm);
+
 /* Print GPU information */
-HYPRE_Int HYPRE_PrintDeviceInfo();
+HYPRE_Int HYPRE_PrintDeviceInfo(void);
 
 /*--------------------------------------------------------------------------
  * HYPRE Version routines
@@ -178,7 +224,7 @@ HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
  *--------------------------------------------------------------------------*/
 
 /*Checks whether the AP is on */
-HYPRE_Int HYPRE_AssumedPartitionCheck();
+HYPRE_Int HYPRE_AssumedPartitionCheck(void);
 
 /*--------------------------------------------------------------------------
  * HYPRE memory location
@@ -209,8 +255,6 @@ typedef enum _HYPRE_ExecutionPolicy
 
 HYPRE_Int HYPRE_SetExecutionPolicy(HYPRE_ExecutionPolicy exec_policy);
 HYPRE_Int HYPRE_GetExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy);
-HYPRE_Int HYPRE_SetStructExecutionPolicy(HYPRE_ExecutionPolicy exec_policy);
-HYPRE_Int HYPRE_GetStructExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy);
 
 /*--------------------------------------------------------------------------
  * HYPRE UMPIRE

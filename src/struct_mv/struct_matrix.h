@@ -50,50 +50,51 @@ typedef struct hypre_StructMatrix_struct
 {
    MPI_Comm              comm;
 
-   hypre_StructGrid     *grid;          /* Base grid */
-   HYPRE_Int             ran_ghsize;    /* Number of vars in range grid including ghosts */
-   HYPRE_Int             ran_nboxes;    /* Range grid number of boxes */
-   HYPRE_Int            *ran_boxnums;   /* Range grid boxnums in base grid */
-   hypre_Index           ran_stride;    /* Range grid coarsening stride */
-   HYPRE_Int             dom_ghsize;    /* Number of vars in domain grid including ghosts */
-   HYPRE_Int             dom_nboxes;    /* Domain grid number of boxes */
-   HYPRE_Int            *dom_boxnums;   /* Domain grid boxnums in base grid */
-   hypre_Index           dom_stride;    /* Domain grid coarsening stride */
+   hypre_StructGrid     *grid;             /* Base grid */
+   HYPRE_Int             ran_ghsize;       /* Number of vars in range grid including ghosts */
+   HYPRE_Int             ran_nboxes;       /* Range grid number of boxes */
+   HYPRE_Int            *ran_boxnums;      /* Range grid boxnums in base grid */
+   hypre_Index           ran_stride;       /* Range grid coarsening stride */
+   HYPRE_Int             dom_ghsize;       /* Number of vars in domain grid including ghosts */
+   HYPRE_Int             dom_nboxes;       /* Domain grid number of boxes */
+   HYPRE_Int            *dom_boxnums;      /* Domain grid boxnums in base grid */
+   hypre_Index           dom_stride;       /* Domain grid coarsening stride */
 
    hypre_StructStencil  *user_stencil;
    hypre_StructStencil  *stencil;
-   HYPRE_Int            *constant;      /* Which stencil entries are constant? */
+   HYPRE_Int            *constant;         /* Which stencil entries are constant? */
 
-   HYPRE_Complex        *data;          /* Pointer to matrix data */
-   hypre_BoxArray       *data_space;    /* Layout of data (coarse index space) */
-   hypre_BoxArray       *data_boxes;    /* Data extents on fine index space */
-   HYPRE_Int             data_alloced;  /* Boolean used for freeing data */
-   HYPRE_Int             data_size;     /* Size of matrix data */
-   HYPRE_Int           **data_indices;  /* Array of indices into the data array.
-                                           data_indices[b][s] is the starting
-                                           index of data for boxnum b and
-                                           stencil coefficient s */
-   HYPRE_Int            *const_indices; /* Indices into the data array for constant data */
-   HYPRE_Int             vdata_offset;  /* Offset to variable-coeff matrix data */
-   HYPRE_Int             num_values;    /* Number of "stored" variable coeffs */
-   HYPRE_Int             num_cvalues;   /* Number of "stored" constant coeffs */
-   HYPRE_Int             range_is_coarse;   /* 1 -> the range is coarse */
-   HYPRE_Int             domain_is_coarse;  /* 1 -> the domain is coarse */
+   HYPRE_MemoryLocation  memory_location;  /* Memory location of the data array */
+   HYPRE_Complex        *data;             /* Pointer to matrix data */
+   hypre_BoxArray       *data_space;       /* Layout of data (coarse index space) */
+   hypre_BoxArray       *data_boxes;       /* Data extents on fine index space */
+   HYPRE_Int           **data_indices;     /* Array of indices into the data array.
+                                              data_indices[b][s] is the starting
+                                              index of data for boxnum b and
+                                              stencil coefficient s */
+   HYPRE_Int             data_alloced;     /* Boolean used for freeing data */
+   HYPRE_Int             data_size;        /* Size of matrix data */
+   HYPRE_BigInt          global_size;      /* Total number of nonzero coeffs */
+   HYPRE_Int            *const_indices;    /* Indices into the data array for constant data */
+   HYPRE_Int             vdata_offset;     /* Offset to variable-coeff matrix data */
+   HYPRE_Int             num_values;       /* Number of "stored" variable coeffs */
+   HYPRE_Int             num_cvalues;      /* Number of "stored" constant coeffs */
+   HYPRE_Int             range_is_coarse;  /* 1 -> the range is coarse */
+   HYPRE_Int             domain_is_coarse; /* 1 -> the domain is coarse */
    HYPRE_Int             constant_coefficient;  /* RDF: Phase this out in favor
                                                    of 'constant' array above.
                                                    Values can be {0, 1, 2} ->
                                                    {variable, constant, constant
                                                    with variable diagonal} */
-   HYPRE_Int             symmetric;      /* Is the matrix symmetric */
-   HYPRE_Int            *symm_entries;   /* Which entries are "symmetric" */
-   HYPRE_Int             transpose;      /* Transpose stored also? */
+   HYPRE_Int             symmetric;        /* Is the matrix symmetric */
+   HYPRE_Int            *symm_entries;     /* Which entries are "symmetric" */
+   HYPRE_Int             transpose;        /* Transpose stored also? */
+   hypre_CommPkg        *comm_pkg;         /* Info on how to update ghost data */
+   HYPRE_Int             ref_count;        /* Reference counter */
+
    HYPRE_Int             num_ghost[2 * HYPRE_MAXDIM]; /* Min num ghost layers */
    HYPRE_Int             sym_ghost[2 * HYPRE_MAXDIM]; /* Ghost layers for symmetric */
    HYPRE_Int             trn_ghost[2 * HYPRE_MAXDIM]; /* Ghost layers for transpose */
-
-   HYPRE_BigInt          global_size;  /* Total number of nonzero coeffs */
-
-   HYPRE_Int             ref_count;
 
    /* Information needed to Restore() after Resize() */
    HYPRE_Complex        *save_data;
@@ -106,47 +107,49 @@ typedef struct hypre_StructMatrix_struct
  * Accessor macros: hypre_StructMatrix
  *--------------------------------------------------------------------------*/
 
-#define hypre_StructMatrixComm(matrix)          ((matrix) -> comm)
-#define hypre_StructMatrixGrid(matrix)          ((matrix) -> grid)
-#define hypre_StructMatrixRanGhsize(matrix)     ((matrix) -> ran_ghsize)
-#define hypre_StructMatrixRanNBoxes(matrix)     ((matrix) -> ran_nboxes)
-#define hypre_StructMatrixRanBoxnums(matrix)    ((matrix) -> ran_boxnums)
-#define hypre_StructMatrixRanBoxnum(matrix, i)  ((matrix) -> ran_boxnums[i])
-#define hypre_StructMatrixRanStride(matrix)     ((matrix) -> ran_stride)
-#define hypre_StructMatrixDomGhsize(matrix)     ((matrix) -> dom_ghsize)
-#define hypre_StructMatrixDomNBoxes(matrix)     ((matrix) -> dom_nboxes)
-#define hypre_StructMatrixDomBoxnums(matrix)    ((matrix) -> dom_boxnums)
-#define hypre_StructMatrixDomBoxnum(matrix, i)  ((matrix) -> dom_boxnums[i])
-#define hypre_StructMatrixDomStride(matrix)     ((matrix) -> dom_stride)
-#define hypre_StructMatrixUserStencil(matrix)   ((matrix) -> user_stencil)
-#define hypre_StructMatrixStencil(matrix)       ((matrix) -> stencil)
-#define hypre_StructMatrixConstant(matrix)      ((matrix) -> constant)
-#define hypre_StructMatrixConstEntry(matrix, s) ((matrix) -> constant[s])
-#define hypre_StructMatrixData(matrix)          ((matrix) -> data)
-#define hypre_StructMatrixDataSpace(matrix)     ((matrix) -> data_space)
-#define hypre_StructMatrixDataBoxes(matrix)     ((matrix) -> data_boxes)
-#define hypre_StructMatrixDataAlloced(matrix)   ((matrix) -> data_alloced)
-#define hypre_StructMatrixDataSize(matrix)      ((matrix) -> data_size)
-#define hypre_StructMatrixDataIndices(matrix)   ((matrix) -> data_indices)
-#define hypre_StructMatrixConstIndices(matrix)  ((matrix) -> const_indices)
-#define hypre_StructMatrixVDataOffset(matrix)   ((matrix) -> vdata_offset)
-#define hypre_StructMatrixNumValues(matrix)     ((matrix) -> num_values)
-#define hypre_StructMatrixNumCValues(matrix)    ((matrix) -> num_cvalues)
-#define hypre_StructMatrixRangeIsCoarse(matrix) ((matrix) -> range_is_coarse)
-#define hypre_StructMatrixDomainIsCoarse(matrix)((matrix) -> domain_is_coarse)
-#define hypre_StructMatrixConstantCoefficient(matrix) ((matrix) -> constant_coefficient)
-#define hypre_StructMatrixSymmetric(matrix)     ((matrix) -> symmetric)
-#define hypre_StructMatrixSymmEntries(matrix)   ((matrix) -> symm_entries)
-#define hypre_StructMatrixTranspose(matrix)     ((matrix) -> transpose)
-#define hypre_StructMatrixNumGhost(matrix)      ((matrix) -> num_ghost)
-#define hypre_StructMatrixSymGhost(matrix)      ((matrix) -> sym_ghost)
-#define hypre_StructMatrixTrnGhost(matrix)      ((matrix) -> trn_ghost)
-#define hypre_StructMatrixGlobalSize(matrix)    ((matrix) -> global_size)
-#define hypre_StructMatrixRefCount(matrix)      ((matrix) -> ref_count)
 
-#define hypre_StructMatrixSaveData(matrix)      ((matrix) -> save_data)
-#define hypre_StructMatrixSaveDataSpace(matrix) ((matrix) -> save_data_space)
-#define hypre_StructMatrixSaveDataSize(matrix)  ((matrix) -> save_data_size)
+#define hypre_StructMatrixComm(matrix)                ((matrix) -> comm)
+#define hypre_StructMatrixGrid(matrix)                ((matrix) -> grid)
+#define hypre_StructMatrixRanGhsize(matrix)           ((matrix) -> ran_ghsize)
+#define hypre_StructMatrixRanNBoxes(matrix)           ((matrix) -> ran_nboxes)
+#define hypre_StructMatrixRanBoxnums(matrix)          ((matrix) -> ran_boxnums)
+#define hypre_StructMatrixRanBoxnum(matrix, i)        ((matrix) -> ran_boxnums[i])
+#define hypre_StructMatrixRanStride(matrix)           ((matrix) -> ran_stride)
+#define hypre_StructMatrixDomGhsize(matrix)           ((matrix) -> dom_ghsize)
+#define hypre_StructMatrixDomNBoxes(matrix)           ((matrix) -> dom_nboxes)
+#define hypre_StructMatrixDomBoxnums(matrix)          ((matrix) -> dom_boxnums)
+#define hypre_StructMatrixDomBoxnum(matrix, i)        ((matrix) -> dom_boxnums[i])
+#define hypre_StructMatrixDomStride(matrix)           ((matrix) -> dom_stride)
+#define hypre_StructMatrixUserStencil(matrix)         ((matrix) -> user_stencil)
+#define hypre_StructMatrixStencil(matrix)             ((matrix) -> stencil)
+#define hypre_StructMatrixConstant(matrix)            ((matrix) -> constant)
+#define hypre_StructMatrixConstEntry(matrix, s)       ((matrix) -> constant[s])
+#define hypre_StructMatrixMemoryLocation(matrix)      ((matrix) -> memory_location)
+#define hypre_StructMatrixData(matrix)                ((matrix) -> data)
+#define hypre_StructMatrixDataSpace(matrix)           ((matrix) -> data_space)
+#define hypre_StructMatrixDataBoxes(matrix)           ((matrix) -> data_boxes)
+#define hypre_StructMatrixDataIndices(matrix)         ((matrix) -> data_indices)
+#define hypre_StructMatrixDataAlloced(matrix)         ((matrix) -> data_alloced)
+#define hypre_StructMatrixDataSize(matrix)            ((matrix) -> data_size)
+#define hypre_StructMatrixGlobalSize(matrix)          ((matrix) -> global_size)
+#define hypre_StructMatrixConstIndices(matrix)        ((matrix) -> const_indices)
+#define hypre_StructMatrixVDataOffset(matrix)         ((matrix) -> vdata_offset)
+#define hypre_StructMatrixNumValues(matrix)           ((matrix) -> num_values)
+#define hypre_StructMatrixNumCValues(matrix)          ((matrix) -> num_cvalues)
+#define hypre_StructMatrixRangeIsCoarse(matrix)       ((matrix) -> range_is_coarse)
+#define hypre_StructMatrixDomainIsCoarse(matrix)      ((matrix) -> domain_is_coarse)
+#define hypre_StructMatrixConstantCoefficient(matrix) ((matrix) -> constant_coefficient)
+#define hypre_StructMatrixSymmetric(matrix)           ((matrix) -> symmetric)
+#define hypre_StructMatrixSymmEntries(matrix)         ((matrix) -> symm_entries)
+#define hypre_StructMatrixTranspose(matrix)           ((matrix) -> transpose)
+#define hypre_StructMatrixCommPkg(matrix)             ((matrix) -> comm_pkg)
+#define hypre_StructMatrixRefCount(matrix)            ((matrix) -> ref_count)
+#define hypre_StructMatrixNumGhost(matrix)            ((matrix) -> num_ghost)
+#define hypre_StructMatrixSymGhost(matrix)            ((matrix) -> sym_ghost)
+#define hypre_StructMatrixTrnGhost(matrix)            ((matrix) -> trn_ghost)
+#define hypre_StructMatrixSaveData(matrix)            ((matrix) -> save_data)
+#define hypre_StructMatrixSaveDataSpace(matrix)       ((matrix) -> save_data_space)
+#define hypre_StructMatrixSaveDataSize(matrix)        ((matrix) -> save_data_size)
 
 #define hypre_StructMatrixNDim(matrix) \
 hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))
@@ -156,6 +159,9 @@ hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))
 
 #define hypre_StructMatrixBoxData(matrix, b, s) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixDataIndices(matrix)[b][s])
+
+#define hypre_StructMatrixBoxDataValue(matrix, b, s, data_box, index) \
+(hypre_StructMatrixBoxData(matrix, b, s) + hypre_BoxIndexRank(data_box, index))
 
 #define hypre_StructMatrixConstData(matrix, s) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixConstIndices(matrix)[s])

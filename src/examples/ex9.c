@@ -88,7 +88,7 @@ int main (int argc, char *argv[])
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
    /* Initialize HYPRE */
-   HYPRE_Init();
+   HYPRE_Initialize();
 
    /* Print GPU info */
    /* HYPRE_PrintDeviceInfo(); */
@@ -624,6 +624,7 @@ int main (int argc, char *argv[])
          HYPRE_SStructGMRESGetNumIterations(solver, &its);
 
          /* clean up */
+         HYPRE_SStructSysPFMGDestroy(precond);
          HYPRE_SStructGMRESDestroy(solver);
       }
       else if (solver_id == 1) /* SysPFMG */

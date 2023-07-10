@@ -125,7 +125,7 @@ hypre_ParCSRMatrixCreate( MPI_Comm      comm,
    matrix->bdiaginv_comm_pkg = NULL;
    matrix->bdiag_size = -1;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    hypre_ParCSRMatrixSocDiagJ(matrix) = NULL;
    hypre_ParCSRMatrixSocOffdJ(matrix) = NULL;
 #endif
@@ -201,7 +201,7 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
          hypre_MatvecCommPkgDestroy(matrix->bdiaginv_comm_pkg);
       }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
       hypre_TFree(hypre_ParCSRMatrixSocDiagJ(matrix), HYPRE_MEMORY_DEVICE);
       hypre_TFree(hypre_ParCSRMatrixSocOffdJ(matrix), HYPRE_MEMORY_DEVICE);
 #endif
@@ -217,7 +217,8 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix *matrix, HYPRE_MemoryLocation memory_location )
+hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix   *matrix,
+                                 HYPRE_MemoryLocation  memory_location )
 {
    if (!matrix)
    {
@@ -289,24 +290,15 @@ hypre_ParCSRMatrixMigrate(hypre_ParCSRMatrix *A, HYPRE_MemoryLocation memory_loc
 
    HYPRE_MemoryLocation old_memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
-   if ( hypre_GetActualMemLocation(memory_location) != hypre_GetActualMemLocation(
-           old_memory_location) )
+   hypre_CSRMatrixMigrate(hypre_ParCSRMatrixDiag(A), memory_location);
+   hypre_CSRMatrixMigrate(hypre_ParCSRMatrixOffd(A), memory_location);
+
+   /* Free buffers */
+   if ( hypre_GetActualMemLocation(memory_location) !=
+        hypre_GetActualMemLocation(old_memory_location) )
    {
-      hypre_CSRMatrix *A_diag = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixDiag(A), 1, memory_location);
-      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(A));
-      hypre_ParCSRMatrixDiag(A) = A_diag;
-
-      hypre_CSRMatrix *A_offd = hypre_CSRMatrixClone_v2(hypre_ParCSRMatrixOffd(A), 1, memory_location);
-      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(A));
-      hypre_ParCSRMatrixOffd(A) = A_offd;
-
       hypre_TFree(hypre_ParCSRMatrixRowindices(A), old_memory_location);
       hypre_TFree(hypre_ParCSRMatrixRowvalues(A), old_memory_location);
-   }
-   else
-   {
-      hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(A)) = memory_location;
-      hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(A)) = memory_location;
    }
 
    return hypre_error_flag;
@@ -1182,7 +1174,7 @@ hypre_ParCSRMatrixGetRow( hypre_ParCSRMatrix  *mat,
                           HYPRE_BigInt       **col_ind,
                           HYPRE_Complex      **values )
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(mat) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -2422,7 +2414,7 @@ hypre_ParCSRMatrixTruncate(hypre_ParCSRMatrix *A,
                   HYPRE_Complex v = A_offd_data[j];
                   row_nrm += v * v;
                }
-               row_nrm  = sqrt(row_nrm);
+               row_nrm  = hypre_sqrt(row_nrm);
             }
             drop_coeff = tol * row_nrm;
 
@@ -2873,7 +2865,7 @@ hypre_ParCSRMatrixSetConstantValues( hypre_ParCSRMatrix *A,
 void
 hypre_ParCSRMatrixCopyColMapOffdToDevice(hypre_ParCSRMatrix *A)
 {
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    if (hypre_ParCSRMatrixDeviceColMapOffd(A) == NULL)
    {
       const HYPRE_Int num_cols_A_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
@@ -2882,6 +2874,22 @@ hypre_ParCSRMatrixCopyColMapOffdToDevice(hypre_ParCSRMatrix *A)
       hypre_TMemcpy(hypre_ParCSRMatrixDeviceColMapOffd(A), hypre_ParCSRMatrixColMapOffd(A), HYPRE_BigInt,
                     num_cols_A_offd,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   }
+#endif
+}
+
+void
+hypre_ParCSRMatrixCopyColMapOffdToHost(hypre_ParCSRMatrix *A)
+{
+#if defined(HYPRE_USING_GPU)
+   if (hypre_ParCSRMatrixColMapOffd(A) == NULL)
+   {
+      const HYPRE_Int num_cols_A_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
+      hypre_ParCSRMatrixColMapOffd(A) = hypre_TAlloc(HYPRE_BigInt, num_cols_A_offd,
+                                                     HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(A), hypre_ParCSRMatrixDeviceColMapOffd(A), HYPRE_BigInt,
+                    num_cols_A_offd,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
 #endif
 }

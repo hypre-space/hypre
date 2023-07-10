@@ -41,11 +41,11 @@ HYPRE_Int hypre_DoubleQuickSplit(HYPRE_Real *values, HYPRE_Int *indices,
    for ( ; !done; )
    {
       mid = first;
-      abskey = fabs( values[ mid ]);
+      abskey = hypre_abs( values[ mid ]);
 
       for ( j = first + 1; j <= last; j ++)
       {
-         if ( fabs( values[ j ]) > abskey )
+         if ( hypre_abs( values[ j ]) > abskey )
          {
             mid ++;
             /* interchange values */

@@ -268,8 +268,8 @@ hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
 }
 
 
-
-
+/* TODO (VPM): Incorporate the specialized code below for computing prolongation */
+#if 0
 
 /*--------------------------------------------------------------------------
  * RDF: OLD STUFF TO PHASE OUT
@@ -474,40 +474,61 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
 }
 
 HYPRE_Int
-hypre_PFMGSetupInterpOp_CC0
-( HYPRE_Int           i, /* box index */
-  hypre_StructMatrix *A,
-  hypre_Box          *A_dbox,
-  HYPRE_Int           cdir,
-  hypre_Index         stride,
-  hypre_Index         stridec,
-  hypre_Index         start,
-  hypre_IndexRef      startc,
-  hypre_Index         loop_size,
-  hypre_Box          *P_dbox,
-  HYPRE_Int           Pstenc0,
-  HYPRE_Int           Pstenc1,
-  HYPRE_Real         *Pp0,
-  HYPRE_Real         *Pp1,
-  HYPRE_Int           rap_type,
-  HYPRE_Int           si0,
-  HYPRE_Int           si1 )
+hypre_PFMGSetupInterpOp_CC0( HYPRE_Int           i, /* box index */
+                             hypre_StructMatrix *A,
+                             hypre_Box          *A_dbox,
+                             HYPRE_Int           cdir,
+                             hypre_Index         stride,
+                             hypre_Index         stridec,
+                             hypre_Index         start,
+                             hypre_IndexRef      startc,
+                             hypre_Index         loop_size,
+                             hypre_Box          *P_dbox,
+                             HYPRE_Int           Pstenc0,
+                             HYPRE_Int           Pstenc1,
+                             HYPRE_Real         *Pp0,
+                             HYPRE_Real         *Pp1,
+                             HYPRE_Int           rap_type,
+                             HYPRE_Int           si0,
+                             HYPRE_Int           si1 )
 {
-   HYPRE_Int              si;
-   HYPRE_Real            *Ap;
-   HYPRE_Real             center;
-   HYPRE_Int              Astenc;
-   HYPRE_Int              mrk0, mrk1;
-   hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
-   hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-   HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
-   HYPRE_Int              warning_cnt = 0;
+   HYPRE_Int            **data_indices    = hypre_StructMatrixDataIndices(A);
+   HYPRE_Complex         *matrixA_data    = hypre_StructMatrixData(A);
+   HYPRE_MemoryLocation   memory_location = hypre_StructMatrixMemoryLocation(A);
+   hypre_StructStencil   *stencil         = hypre_StructMatrixStencil(A);
+   hypre_Index           *stencil_shape   = hypre_StructStencilShape(stencil);
+   HYPRE_Int              stencil_size    = hypre_StructStencilSize(stencil);
 
-#define DEVICE_VAR is_device_ptr(Pp0,Pp1,matrixA_data,stencil_shape_d,data_indices_boxi_d)
+   HYPRE_Int              warning_cnt     = 0;
+   HYPRE_Int             *data_indices_boxi_d;
+   hypre_Index           *stencil_shape_d;
+
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      data_indices_boxi_d = hypre_TAlloc(HYPRE_Int, stencil_size, memory_location);
+      stencil_shape_d     = hypre_TAlloc(hypre_Index, stencil_size, memory_location);
+
+      hypre_TMemcpy(data_indices_boxi_d, data_indices[i], HYPRE_Int, stencil_size,
+                    memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(stencil_shape_d, stencil_shape, hypre_Index, stencil_size,
+                    memory_location, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      data_indices_boxi_d = data_indices[i];
+      stencil_shape_d     = stencil_shape;
+   }
+
+#define DEVICE_VAR is_device_ptr(Pp0, Pp1, matrixA_data, stencil_shape_d, data_indices_boxi_d)
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                        A_dbox, start, stride, Ai,
                        P_dbox, startc, stridec, Pi);
    {
+      HYPRE_Int      si, mrk0, mrk1;
+      HYPRE_Int      Astenc;
+      HYPRE_Real     center;
+      HYPRE_Real    *Ap;
+
       center  = 0.0;
       Pp0[Pi] = 0.0;
       Pp1[Pi] = 0.0;
@@ -573,13 +594,131 @@ hypre_PFMGSetupInterpOp_CC0
 
    if (warning_cnt)
    {
-      hypre_error_w_msg(
-         HYPRE_ERROR_GENERIC,
-         "Warning 0 center in interpolation. Setting interp = 0.");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Warning 0 center in interpolation. Setting interp = 0.");
+   }
+
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_TFree(data_indices_boxi_d, memory_location);
+      hypre_TFree(stencil_shape_d, memory_location);
    }
 
    return hypre_error_flag;
 }
+
+#if CC0_IMPLEMENTATION == 1
+
+HYPRE_Int
+hypre_PFMGSetupInterpOp_CC0
+( HYPRE_Int           i, /* box index */
+  hypre_StructMatrix *A,
+  hypre_Box          *A_dbox,
+  HYPRE_Int           cdir,
+  hypre_Index         stride,
+  hypre_Index         stridec,
+  hypre_Index         start,
+  hypre_IndexRef      startc,
+  hypre_Index         loop_size,
+  hypre_Box          *P_dbox,
+  HYPRE_Int           Pstenc0,
+  HYPRE_Int           Pstenc1,
+  HYPRE_Real         *Pp0,
+  HYPRE_Real         *Pp1,
+  HYPRE_Int           rap_type,
+  HYPRE_Int           si0,
+  HYPRE_Int           si1 )
+{
+   hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
+   hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
+   HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
+   HYPRE_Int              warning_cnt = 0;
+   HYPRE_Int              dim, si, loop_length = 1, Astenc;
+   HYPRE_Real            *Ap, *center, *Ap0, *Ap1;
+   HYPRE_MemoryLocation   memory_location = hypre_StructMatrixMemoryLocation(A);
+
+   for (dim = 0; dim < hypre_StructMatrixNDim(A); dim++)
+   {
+      loop_length *= loop_size[dim];
+   }
+   center = hypre_CTAlloc(HYPRE_Real, loop_length, memory_location);
+
+   for (si = 0; si < stencil_size; si++)
+   {
+      Ap     = hypre_StructMatrixBoxData(A, i, si);
+      Astenc = hypre_IndexD(stencil_shape[si], cdir);
+
+      if (Astenc == 0)
+      {
+#define DEVICE_VAR is_device_ptr(center, Ap)
+         hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
+                             A_dbox, start,  stride,  Ai,
+                             P_dbox, startc, stridec, Pi)
+         center[idx] += Ap[Ai];
+         hypre_BoxLoop2End(Ai, Pi)
+#undef DEVICE_VAR
+      }
+      else if (Astenc == Pstenc0)
+      {
+#define DEVICE_VAR is_device_ptr(Pp0, Ap)
+         hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
+                             A_dbox, start,  stride,  Ai,
+                             P_dbox, startc, stridec, Pi)
+         Pp0[Pi] -= Ap[Ai];
+         hypre_BoxLoop2End(Ai, Pi)
+#undef DEVICE_VAR
+      }
+      else if (Astenc == Pstenc1)
+      {
+#define DEVICE_VAR is_device_ptr(Pp1, Ap)
+         hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
+                             A_dbox, start,  stride,  Ai,
+                             P_dbox, startc, stridec, Pi)
+         Pp1[Pi] -= Ap[Ai];
+         hypre_BoxLoop2End(Ai, Pi)
+#undef DEVICE_VAR
+      }
+   }
+
+   Ap0 = hypre_StructMatrixBoxData(A, i, si0);
+   Ap1 = hypre_StructMatrixBoxData(A, i, si1);
+#define DEVICE_VAR is_device_ptr(center, Pp0, Pp1, Ap0, Ap1)
+   hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
+                       A_dbox, start,  stride,  Ai,
+                       P_dbox, startc, stridec, Pi)
+   HYPRE_Real cval = center[idx];
+   if (Ap0[Ai] == 0.0 || cval == 0.0)
+   {
+      Pp0[Pi] = 0.0;
+   }
+   else
+   {
+      Pp0[Pi] /= cval;
+   }
+
+   if (Ap1[Ai] == 0.0 || cval == 0.0)
+   {
+      Pp1[Pi] = 0.0;
+   }
+   else
+   {
+      Pp1[Pi] /= cval;
+   }
+   hypre_BoxLoop2End(Ai, Pi)
+#undef DEVICE_VAR
+
+   if (warning_cnt)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Warning 0 center in interpolation. Setting interp = 0.");
+   }
+
+   hypre_TFree(center, memory_location);
+
+   return hypre_error_flag;
+}
+
+#endif /* #if CC0_IMPLEMENTATION == 1 */
 
 HYPRE_Int
 hypre_PFMGSetupInterpOp_CC1
@@ -843,3 +982,5 @@ hypre_PFMGSetupInterpOp_CC2
 
    return hypre_error_flag;
 }
+
+#endif

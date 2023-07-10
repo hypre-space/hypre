@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1049,6 +1049,7 @@ DistributeData( MPI_Comm      comm,
    ProblemIndex     ilower, iupper, int_ilower, int_iupper;
    HYPRE_Int        myid, num_procs;
 
+   /* Set MPI variables */
    hypre_MPI_Comm_rank(comm, &myid);
    hypre_MPI_Comm_size(comm, &num_procs);
 

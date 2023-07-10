@@ -24,10 +24,8 @@ extern "C" {
 /**
  * @defgroup ParCSRSolvers ParCSR Solvers
  *
- * These solvers use matrix/vector storage schemes that are taylored
- * for general sparse matrix systems.
- *
- * @memo Linear solvers for sparse matrix systems
+ * Linear solvers for sparse matrix systems. These solvers use matrix/vector
+ * storage schemes that are taylored for general sparse matrix systems.
  *
  * @{
  **/
@@ -154,6 +152,19 @@ HYPRE_Int HYPRE_BoomerAMGGetResidual(HYPRE_Solver     solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGGetNumIterations(HYPRE_Solver  solver,
                                           HYPRE_Int          *num_iterations);
+
+/**
+ * Returns cumulative num of nonzeros for A and P operators
+ **/
+HYPRE_Int HYPRE_BoomerAMGGetCumNnzAP(HYPRE_Solver  solver,
+                                     HYPRE_Real   *cum_nnz_AP);
+
+/**
+ * Activates cumulative num of nonzeros for A and P operators.
+ * Needs to be set to a positive number for activation.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetCumNnzAP(HYPRE_Solver  solver,
+                                     HYPRE_Real    cum_nnz_AP);
 
 /**
  * Returns the norm of the final relative residual.
@@ -774,8 +785,7 @@ HYPRE_Int HYPRE_BoomerAMGSetRelaxOrder(HYPRE_Solver  solver,
 /**
  * (Optional) Defines in which order the points are relaxed.
  *
- * Note: This routine will be phased out!!!!
- * Use HYPRE_BoomerAMGSetRelaxOrder instead.
+ * See also HYPRE_BoomerAMGSetRelaxOrder.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetGridRelaxPoints(HYPRE_Solver   solver,
                                             HYPRE_Int    **grid_relax_points);
@@ -2536,7 +2546,7 @@ HYPRE_Int HYPRE_ADSSetSmoothingOptions(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_ADSSetChebySmoothingOptions(HYPRE_Solver solver,
                                             HYPRE_Int    cheby_order,
-                                            HYPRE_Int    cheby_fraction);
+                                            HYPRE_Real   cheby_fraction);
 
 /**
  * (Optional) Sets AMS parameters for \f$B_C\f$.
@@ -2675,13 +2685,17 @@ HYPRE_Int HYPRE_ParCSRDiagScale(HYPRE_Solver       solver,
                                 HYPRE_ParVector    Hy,
                                 HYPRE_ParVector    Hx);
 
-/* Setup routine for on-processor triangular solve as preconditioning. */
+/**
+ * Setup routine for on-processor triangular solve as preconditioning.
+ **/
 HYPRE_Int HYPRE_ParCSROnProcTriSetup(HYPRE_Solver       solver,
                                      HYPRE_ParCSRMatrix HA,
                                      HYPRE_ParVector    Hy,
                                      HYPRE_ParVector    Hx);
 
-/* Solve routine for on-processor triangular solve as preconditioning. */
+/**
+ * Solve routine for on-processor triangular solve as preconditioning.
+ **/
 HYPRE_Int HYPRE_ParCSROnProcTriSolve(HYPRE_Solver       solver,
                                      HYPRE_ParCSRMatrix HA,
                                      HYPRE_ParVector    Hy,
@@ -3537,7 +3551,7 @@ HYPRE_Int
 HYPRE_ParCSRHybridSetAggNumLevels(HYPRE_Solver solver,
                                   HYPRE_Int    agg_num_levels);
 
-/*
+/**
  * (Optional) Defines the interpolation used on levels of aggressive coarsening
  * The default is 4, i.e. multipass interpolation.
  * The following options exist:
@@ -3767,7 +3781,8 @@ HYPRE_Int HYPRE_MGRDirectSolverCreate( HYPRE_Solver *solver );
 HYPRE_Int HYPRE_MGRDirectSolverDestroy( HYPRE_Solver solver );
 
 /**
- * Setup the MGR direct solver using DSUPERLU
+ * Setup the MGR direct solver using SuperLU_dist
+ *
  * @param solver [IN] object to be set up.
  * @param A [IN] ParCSR matrix used to construct the solver/preconditioner.
  * @param b right-hand-side of the linear system to be solved (Ignored by this function).
@@ -3776,10 +3791,10 @@ HYPRE_Int HYPRE_MGRDirectSolverDestroy( HYPRE_Solver solver );
 HYPRE_Int HYPRE_MGRDirectSolverSetup( HYPRE_Solver solver,
                                       HYPRE_ParCSRMatrix A,
                                       HYPRE_ParVector b,
-                                      HYPRE_ParVector x      );
+                                      HYPRE_ParVector x );
 
 /**
-* Solve the system using DSUPERLU.
+* Solve the system using SuperLU_dist.
 *
 * @param solver [IN] solver or preconditioner object to be applied.
 * @param A [IN] ParCSR matrix, matrix of the linear system to be solved (Ignored by this function).
@@ -3789,7 +3804,7 @@ HYPRE_Int HYPRE_MGRDirectSolverSetup( HYPRE_Solver solver,
 HYPRE_Int HYPRE_MGRDirectSolverSolve( HYPRE_Solver solver,
                                       HYPRE_ParCSRMatrix A,
                                       HYPRE_ParVector b,
-                                      HYPRE_ParVector x      );
+                                      HYPRE_ParVector x );
 #endif
 
 /**
@@ -3815,7 +3830,7 @@ HYPRE_Int HYPRE_MGRDestroy( HYPRE_Solver solver );
 HYPRE_Int HYPRE_MGRSetup( HYPRE_Solver solver,
                           HYPRE_ParCSRMatrix A,
                           HYPRE_ParVector b,
-                          HYPRE_ParVector x      );
+                          HYPRE_ParVector x );
 
 /**
 * Solve the system or apply MGR as a preconditioner.
@@ -3830,7 +3845,7 @@ HYPRE_Int HYPRE_MGRSetup( HYPRE_Solver solver,
 HYPRE_Int HYPRE_MGRSolve( HYPRE_Solver solver,
                           HYPRE_ParCSRMatrix A,
                           HYPRE_ParVector b,
-                          HYPRE_ParVector x      );
+                          HYPRE_ParVector x );
 
 /**
  * Set the block data assuming that the physical variables are ordered contiguously,
@@ -3865,9 +3880,6 @@ HYPRE_Int HYPRE_MGRSetCpointsByBlock( HYPRE_Solver solver,
                                       HYPRE_Int *num_block_coarse_points,
                                       HYPRE_Int  **block_coarse_indexes);
 
-/*--------------------------------------------------------------------------
- * HYPRE_Int HYPRE_MGRSetCpointsByPointMarkerArray
- *--------------------------------------------------------------------------*/
 /**
  * Set the coarse indices for the levels using an array of tags for all the
  * local degrees of freedom.
@@ -3932,15 +3944,17 @@ HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver,
                                  HYPRE_Int reserved_coarse_size,
                                  HYPRE_BigInt *reserved_coarse_nodes );
 
-/* (Optional) Set the level for reducing the reserved Cpoints before the coarse
+/**
+ * (Optional) Set the level for reducing the reserved Cpoints before the coarse
  * grid solve. This is necessary for some applications, such as phase transitions.
  * The default is 0 (no reduction, i.e. keep the reserved cpoints in the coarse grid solve).
+ *
  * The default setup for the reduction is as follows:
- * interp_type = 2
- * restrict_type = 0
- * F-relax method = 99
- * Galerkin coarse grid
-**/
+ *    interp_type = 2
+ *    restrict_type = 0
+ *    F-relax method = 99
+ *    Galerkin coarse grid
+ **/
 HYPRE_Int
 HYPRE_MGRSetReservedCpointsLevelToKeep( HYPRE_Solver solver, HYPRE_Int level);
 
@@ -3948,7 +3962,8 @@ HYPRE_MGRSetReservedCpointsLevelToKeep( HYPRE_Solver solver, HYPRE_Int level);
  * (Optional) Set the relaxation type for F-relaxation.
  * Currently supports the following flavors of relaxation types
  * as described in the \e BoomerAMGSetRelaxType:
- * \e relax_type 0 - 8, 13, 14, 18, 19, 98.
+ * \e relax_type 0, 3 - 8, 13, 14, 18. Also supports AMG (options 1 and 2)
+ *    and direct solver variants (9, 99, 199). See HYPRE_MGRSetLevelFRelaxType for details.
  **/
 HYPRE_Int
 HYPRE_MGRSetRelaxType(HYPRE_Solver solver,
@@ -3961,14 +3976,19 @@ HYPRE_MGRSetRelaxType(HYPRE_Solver solver,
  *    - 0 : Single-level relaxation sweeps for F-relaxation as prescribed by \e MGRSetRelaxType
  *    - 1 : Multi-level relaxation strategy for F-relaxation (V(1,0) cycle currently supported).
  *
- *    NOTE: This function will be removed in favor of /e HYPRE_MGRSetFLevelRelaxType!!
+ *    NOTE: This function will be removed in favor of /e HYPRE_MGRSetLevelFRelaxType!!
  **/
 HYPRE_Int
 HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver,
                          HYPRE_Int relax_method );
 
+/**
+ * (Optional) This function is an extension of HYPRE_MGRSetFRelaxMethod. It allows setting
+ * the F-relaxation strategy for each MGR level.
+ **/
 HYPRE_Int
-HYPRE_MGRSetLevelFRelaxMethod(HYPRE_Solver solver, HYPRE_Int *relax_method );
+HYPRE_MGRSetLevelFRelaxMethod(HYPRE_Solver solver,
+                              HYPRE_Int *relax_method );
 
 /**
  * (Optional) Set the relaxation type for F-relaxation at each level.
@@ -3978,10 +3998,11 @@ HYPRE_MGRSetLevelFRelaxMethod(HYPRE_Solver solver, HYPRE_Int *relax_method );
  *
  *    - 0, 3 - 8, 13, 14, 18: (as described in \e BoomerAMGSetRelaxType)
  *    - 1 : Multi-level relaxation strategy for F-relaxation (V(1,0) cycle currently supported).
- *    - 2 : AMG.
+ *    - 2 : AMG
+ *    - 9, 99, 199 : Gaussian Elimination variants (GE, GE with pivoting, direct inversion respectively)
  **/
 HYPRE_Int
-HYPRE_MGRSetFLevelRelaxType(HYPRE_Solver solver,
+HYPRE_MGRSetLevelFRelaxType(HYPRE_Solver solver,
                             HYPRE_Int *relax_type );
 
 /**
@@ -3996,7 +4017,8 @@ HYPRE_MGRSetFLevelRelaxType(HYPRE_Solver solver,
  *         - 4: inv(A_FF) approximated by sparse approximate inverse
  **/
 HYPRE_Int
-HYPRE_MGRSetCoarseGridMethod(HYPRE_Solver solver, HYPRE_Int *cg_method );
+HYPRE_MGRSetCoarseGridMethod(HYPRE_Solver solver,
+                             HYPRE_Int *cg_method );
 
 /**
  * (Optional) Set the number of functions for F-relaxation V-cycle.
@@ -4005,7 +4027,8 @@ HYPRE_MGRSetCoarseGridMethod(HYPRE_Solver solver, HYPRE_Int *cg_method );
  * to the number of scalar PDEs in the system.
  **/
 HYPRE_Int
-HYPRE_MGRSetLevelFRelaxNumFunctions(HYPRE_Solver solver, HYPRE_Int *num_functions);
+HYPRE_MGRSetLevelFRelaxNumFunctions(HYPRE_Solver solver,
+                                    HYPRE_Int *num_functions);
 
 /**
  * (Optional) Set the strategy for computing the MGR restriction operator.
@@ -4028,6 +4051,10 @@ HYPRE_Int
 HYPRE_MGRSetRestrictType( HYPRE_Solver solver,
                           HYPRE_Int restrict_type);
 
+/**
+ * (Optional) This function is an extension of HYPRE_MGRSetRestrictType. It allows setting
+ * the restriction operator strategy for each MGR level.
+ **/
 HYPRE_Int
 HYPRE_MGRSetLevelRestrictType( HYPRE_Solver solver,
                                HYPRE_Int *restrict_type);
@@ -4058,6 +4085,10 @@ HYPRE_Int
 HYPRE_MGRSetInterpType( HYPRE_Solver solver,
                         HYPRE_Int interp_type );
 
+/**
+ * (Optional) This function is an extension of HYPRE_MGRSetInterpType. It allows setting
+ * the prolongation (interpolation) operator strategy for each MGR level.
+ **/
 HYPRE_Int
 HYPRE_MGRSetLevelInterpType( HYPRE_Solver solver,
                              HYPRE_Int *interp_type );
@@ -4070,6 +4101,10 @@ HYPRE_Int
 HYPRE_MGRSetNumRelaxSweeps( HYPRE_Solver solver,
                             HYPRE_Int nsweeps );
 
+/**
+ * (Optional) This function is an extension of HYPRE_MGRSetNumRelaxSweeps. It allows setting
+ * the number of single-level relaxation sweeps for each MGR level.
+ **/
 HYPRE_Int
 HYPRE_MGRSetLevelNumRelaxSweeps( HYPRE_Solver solver,
                                  HYPRE_Int *nsweeps );
@@ -4091,11 +4126,24 @@ HYPRE_Int
 HYPRE_MGRSetBlockJacobiBlockSize( HYPRE_Solver solver,
                                   HYPRE_Int blk_size );
 
-HYPRE_Int HYPRE_MGRSetFSolver(HYPRE_Solver          solver,
+/**
+ * (Optional) Set the fine grid solver.
+ *
+ * @param solver [IN] MGR solver/preconditioner object
+ * @param fine_grid_solver_solve [IN] solve routine
+ * @param fine_grid_solver_setup [IN] setup routine
+ * @param fine_grid_solver [IN] fine grid solver object
+ **/
+HYPRE_Int HYPRE_MGRSetFSolver(HYPRE_Solver             solver,
                               HYPRE_PtrToParSolverFcn  fine_grid_solver_solve,
                               HYPRE_PtrToParSolverFcn  fine_grid_solver_setup,
-                              HYPRE_Solver          fsolver );
+                              HYPRE_Solver             fsolver );
 
+/**
+ * (Optional) Extract A_FF block from matrix A.
+ *
+ * TODO (VPM): Does this need to be exposed? Move to parcsr_mv?
+ **/
 HYPRE_Int HYPRE_MGRBuildAff(HYPRE_ParCSRMatrix A,
                             HYPRE_Int *CF_marker,
                             HYPRE_Int debug_flag,
@@ -4106,15 +4154,15 @@ HYPRE_Int HYPRE_MGRBuildAff(HYPRE_ParCSRMatrix A,
  * Currently uses BoomerAMG.
  * The default, if not set, is BoomerAMG with default options.
  *
- * @param solver [IN] solver or preconditioner object
+ * @param solver [IN] MGR solver/preconditioner object
  * @param coarse_grid_solver_solve [IN] solve routine for BoomerAMG
  * @param coarse_grid_solver_setup [IN] setup routine for BoomerAMG
- * @param coarse_grid_solver [IN] BoomerAMG solver
+ * @param coarse_grid_solver [IN] coarse grid solver object
  **/
-HYPRE_Int HYPRE_MGRSetCoarseSolver(HYPRE_Solver          solver,
+HYPRE_Int HYPRE_MGRSetCoarseSolver(HYPRE_Solver             solver,
                                    HYPRE_PtrToParSolverFcn  coarse_grid_solver_solve,
                                    HYPRE_PtrToParSolverFcn  coarse_grid_solver_setup,
-                                   HYPRE_Solver          coarse_grid_solver );
+                                   HYPRE_Solver             coarse_grid_solver );
 
 /**
  * (Optional) Set the print level to print setup and solve information.
@@ -4128,10 +4176,16 @@ HYPRE_Int
 HYPRE_MGRSetPrintLevel( HYPRE_Solver solver,
                         HYPRE_Int print_level );
 
+/**
+ * (Optional) Set the print level of the F-relaxation solver
+ **/
 HYPRE_Int
 HYPRE_MGRSetFrelaxPrintLevel( HYPRE_Solver solver,
                               HYPRE_Int print_level );
 
+/**
+ * (Optional) Set the print level of the coarse grid solver
+ **/
 HYPRE_Int
 HYPRE_MGRSetCoarseGridPrintLevel( HYPRE_Solver solver,
                                   HYPRE_Int print_level );
@@ -4145,7 +4199,6 @@ HYPRE_MGRSetCoarseGridPrintLevel( HYPRE_Solver solver,
 HYPRE_Int
 HYPRE_MGRSetTruncateCoarseGridThreshold( HYPRE_Solver solver,
                                          HYPRE_Real threshold);
-
 
 /**
  * (Optional) Requests logging of solver diagnostics.
@@ -4191,26 +4244,27 @@ HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver solver,
 /**
  * (Optional) Set the smoothing order for global smoothing at each level.
  * Options for \e level_smooth_order are:
- *    - 1 : Pre-smoothing (default)
- *    - 2 : Post-smoothing
+ *    - 1 : Pre-smoothing - Down cycle (default)
+ *    - 2 : Post-smoothing - Up cycle
  **/
 HYPRE_Int
-HYPRE_MGRSetLevelSmoothOrder( HYPRE_Solver solver,
-                              HYPRE_Int level_smooth_order );
+HYPRE_MGRSetGlobalSmoothCycle( HYPRE_Solver solver,
+                               HYPRE_Int global_smooth_cycle );
 
 /**
  * (Optional) Determines type of global smoother.
  * Options for \e smooth_type are:
  *
- *    - 0 : block Jacobi (default)
- *    - 1 : block Gauss-Siedel
- *    - 2 : Jacobi
- *    - 3 : Gauss-Seidel, sequential (very slow!)
- *    - 4 : Gauss-Seidel, interior points in parallel, boundary sequential (slow!)
- *    - 5 : hybrid Gauss-Seidel or SOR, forward solve
- *    - 6 : hybrid Gauss-Seidel or SOR, backward solve
- *    - 8 : Euclid (ILU)
+ *    -  0 : block Jacobi (default)
+ *    -  1 : block Gauss-Seidel
+ *    -  2 : Jacobi
+ *    -  3 : Gauss-Seidel, sequential (very slow!)
+ *    -  4 : Gauss-Seidel, interior points in parallel, boundary sequential (slow!)
+ *    -  5 : hybrid Gauss-Seidel or SOR, forward solve
+ *    -  6 : hybrid Gauss-Seidel or SOR, backward solve
+ *    -  8 : Euclid (ILU)
  *    - 16 : HYPRE_ILU
+ *    - 18 : L1-Jacobi
  **/
 HYPRE_Int
 HYPRE_MGRSetGlobalSmoothType( HYPRE_Solver solver,
@@ -4231,21 +4285,26 @@ HYPRE_Int
 HYPRE_MGRGetNumIterations( HYPRE_Solver solver,
                            HYPRE_Int *num_iterations );
 
+/**
+ * (Optional) Return the relative residual for the coarse level system.
+ **/
 HYPRE_Int
-HYPRE_MGRGetCoarseGridConvergenceFactor (HYPRE_Solver solver, HYPRE_Real *conv_factor );
+HYPRE_MGRGetCoarseGridConvergenceFactor( HYPRE_Solver solver,
+                                         HYPRE_Real *conv_factor );
 
 /**
  * (Optional) Set the number of maximum points for interpolation operator.
  **/
 HYPRE_Int
-HYPRE_MGRSetPMaxElmts( HYPRE_Solver solver, HYPRE_Int P_max_elmts);
+HYPRE_MGRSetPMaxElmts( HYPRE_Solver solver,
+                       HYPRE_Int P_max_elmts );
 
 /**
  * (Optional) Return the norm of the final relative residual.
  **/
 HYPRE_Int
-HYPRE_MGRGetFinalRelativeResidualNorm(  HYPRE_Solver solver,
-                                        HYPRE_Real *res_norm );
+HYPRE_MGRGetFinalRelativeResidualNorm( HYPRE_Solver solver,
+                                       HYPRE_Real *res_norm );
 
 /**@}*/
 
@@ -4306,8 +4365,10 @@ HYPRE_Int
 HYPRE_ILUSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter );
 
 /**
- * (Optional) Set triangular solver type (0) direct (1) iterative
- * Set this to 1 Jacobi iterations. The default is 0 direct method.
+ * (Optional) Set triangular solver type. Options are:
+ *
+ *    -  0 : iterative
+ *    -  1 : direct (default)
  **/
 HYPRE_Int
 HYPRE_ILUSetTriSolve( HYPRE_Solver solver, HYPRE_Int tri_solve );
@@ -4570,47 +4631,47 @@ GenerateCoordinates(MPI_Comm  comm,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-/*
+/**
  * (Optional) Switches on use of Jacobi interpolation after computing
  * an original interpolation
  **/
 HYPRE_Int HYPRE_BoomerAMGSetPostInterpType(HYPRE_Solver solver,
                                            HYPRE_Int    post_interp_type);
 
-/*
+/**
  * (Optional) Sets a truncation threshold for Jacobi interpolation.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetJacobiTruncThreshold(HYPRE_Solver solver,
                                                  HYPRE_Real   jacobi_trunc_threshold);
 
-/*
+/**
  * (Optional) Defines the number of relaxation steps for CR
  * The default is 2.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetNumCRRelaxSteps(HYPRE_Solver solver,
                                             HYPRE_Int    num_CR_relax_steps);
 
-/*
+/**
  * (Optional) Defines convergence rate for CR
  * The default is 0.7.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCRRate(HYPRE_Solver solver,
                                    HYPRE_Real   CR_rate);
 
-/*
+/**
  * (Optional) Defines strong threshold for CR
  * The default is 0.0.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCRStrongTh(HYPRE_Solver solver,
                                        HYPRE_Real   CR_strong_th);
 
-/*
+/**
  * (Optional) Defines whether to use CG
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCRUseCG(HYPRE_Solver solver,
                                     HYPRE_Int    CR_use_CG);
 
-/*
+/**
  * (Optional) Defines the Type of independent set algorithm used for CR
  **/
 HYPRE_Int HYPRE_BoomerAMGSetISType(HYPRE_Solver solver,

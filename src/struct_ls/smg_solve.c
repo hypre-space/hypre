@@ -170,10 +170,10 @@ hypre_SMGSolve( void               *smg_vdata,
          r_dot_r = hypre_StructInnerProd(r_l[0], r_l[0]);
          if (logging > 0)
          {
-            norms[i] = sqrt(r_dot_r);
+            norms[i] = hypre_sqrt(r_dot_r);
             if (b_dot_b > 0)
             {
-               rel_norms[i] = sqrt(r_dot_r / b_dot_b);
+               rel_norms[i] = hypre_sqrt(r_dot_r / b_dot_b);
             }
             else
             {

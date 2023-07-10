@@ -933,7 +933,7 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
 {
    hypre_CSRMatrix *C = NULL;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(A),
                                                       hypre_CSRMatrixMemoryLocation(B) );
 
@@ -1280,7 +1280,7 @@ hypre_CSRMatrixTranspose(hypre_CSRMatrix  *A,
 {
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -1586,7 +1586,7 @@ hypre_CSRMatrixReorder(hypre_CSRMatrix *A)
 {
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -1822,7 +1822,7 @@ hypre_CSRMatrixFnorm( hypre_CSRMatrix *A )
       sum += v * v;
    }
 
-   return sqrt(sum);
+   return hypre_sqrt(sum);
 }
 
 /*--------------------------------------------------------------------------
@@ -1893,7 +1893,7 @@ hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A,
 {
    hypre_assert( (CF_i && CF_j) || (!CF_i && !CF_j) );
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -1949,11 +1949,11 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
             }
             else if (type == 3)
             {
-               d_i = 1.0 / (sqrt(A_data[j]));
+               d_i = 1.0 / (hypre_sqrt(A_data[j]));
             }
             else if (type == 4)
             {
-               d_i = 1.0 / (sqrt(hypre_cabs(A_data[j])));
+               d_i = 1.0 / (hypre_sqrt(hypre_cabs(A_data[j])));
             }
             break;
          }
@@ -1976,7 +1976,7 @@ hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
                                 HYPRE_Complex   *d,
                                 HYPRE_Int        type)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -1990,8 +1990,12 @@ hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
    }
 }
 
-/* Scale CSR matrix A = scalar * A
- */
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixScale
+ *
+ * Scales CSR matrix: A = scalar * A.
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_CSRMatrixScale( hypre_CSRMatrix *A,
                       HYPRE_Complex    scalar)
@@ -2019,23 +2023,134 @@ hypre_CSRMatrixScale( hypre_CSRMatrix *A,
    return hypre_error_flag;
 }
 
-/* diagonal scaling A := diag(ld) * A * diag(rd) */
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixDiagScaleHost
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixDiagScaleHost( hypre_CSRMatrix *A,
+                              hypre_Vector    *ld,
+                              hypre_Vector    *rd)
+{
+
+   HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
+   HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
+
+   HYPRE_Complex *ldata  = ld ? hypre_VectorData(ld) : NULL;
+   HYPRE_Complex *rdata  = rd ? hypre_VectorData(rd) : NULL;
+   HYPRE_Int      lsize  = ld ? hypre_VectorSize(ld) : 0;
+   HYPRE_Int      rsize  = rd ? hypre_VectorSize(rd) : 0;
+
+   HYPRE_Int      i, j;
+   HYPRE_Complex  sl;
+   HYPRE_Complex  sr;
+
+   if (ldata && rdata)
+   {
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel for private(i, j, sl, sr) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < nrows; i++)
+      {
+         sl = ldata[i];
+         for (j = A_i[i]; j < A_i[i + 1]; j++)
+         {
+            sr = rdata[A_j[j]];
+            A_data[j] = sl * A_data[j] * sr;
+         }
+      }
+   }
+   else if (ldata && !rdata)
+   {
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel for private(i, j, sl) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < nrows; i++)
+      {
+         sl = ldata[i];
+         for (j = A_i[i]; j < A_i[i + 1]; j++)
+         {
+            A_data[j] = sl * A_data[j];
+         }
+      }
+   }
+   else if (!ldata && rdata)
+   {
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel for private(i, j, sr) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < nrows; i++)
+      {
+         for (j = A_i[i]; j < A_i[i + 1]; j++)
+         {
+            sr = rdata[A_j[j]];
+            A_data[j] = A_data[j] * sr;
+         }
+      }
+   }
+   else
+   {
+      /* Throw an error if the scaling factors should have a size different than zero */
+      if (lsize || rsize)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Scaling matrices are not set!\n");
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixDiagScale
+ *
+ * Computes A = diag(ld) * A * diag(rd), where the diagonal matrices
+ * "diag(ld)" and "diag(rd)" are stored as local vectors.
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_CSRMatrixDiagScale( hypre_CSRMatrix *A,
                           hypre_Vector    *ld,
                           hypre_Vector    *rd)
 {
-   HYPRE_Complex *ldata  = ld ? hypre_VectorData(ld) : NULL;
-   HYPRE_Complex *rdata  = rd ? hypre_VectorData(rd) : NULL;
+   /* Sanity checks */
+   if (ld && hypre_VectorSize(ld) && !hypre_VectorData(ld))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ld scaling coefficients are not set\n");
+      return hypre_error_flag;
+   }
 
-   if (!ldata && !rdata)
+   if (rd && hypre_VectorSize(rd) && !hypre_VectorData(rd))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "rd scaling coefficients are not set\n");
+      return hypre_error_flag;
+   }
+
+   if (!rd && !ld)
    {
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_CSRMatrixMemoryLocation(A),
-                                                      hypre_VectorMemoryLocation(ld) );
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec;
+
+   if (ld && rd)
+   {
+      /* TODO (VPM): replace with GetExecPolicy3 */
+      exec = hypre_GetExecPolicy2(hypre_CSRMatrixMemoryLocation(A),
+                                  hypre_VectorMemoryLocation(ld));
+   }
+   else if (ld)
+   {
+      exec = hypre_GetExecPolicy2(hypre_CSRMatrixMemoryLocation(A),
+                                  hypre_VectorMemoryLocation(ld));
+   }
+   else
+   {
+      exec = hypre_GetExecPolicy2(hypre_CSRMatrixMemoryLocation(A),
+                                  hypre_VectorMemoryLocation(rd));
+   }
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -2044,25 +2159,15 @@ hypre_CSRMatrixDiagScale( hypre_CSRMatrix *A,
    else
 #endif
    {
-      HYPRE_Int      nrows  = hypre_CSRMatrixNumRows(A);
-      HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
-      HYPRE_Int     *A_i    = hypre_CSRMatrixI(A);
-      HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
-      HYPRE_Int      i, j;
-
-      for (i = 0; i < nrows; i++)
-      {
-         HYPRE_Complex sl = ldata ? ldata[i] : 1.0;
-         for (j = A_i[i]; j < A_i[i + 1]; j++)
-         {
-            HYPRE_Complex sr = rdata ? rdata[A_j[j]] : 1.0;
-            A_data[j] = sl * A_data[j] * sr;
-         }
-      }
+      hypre_CSRMatrixDiagScaleHost(A, ld, rd);
    }
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixSetConstantValues
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A,
@@ -2076,7 +2181,7 @@ hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A,
       hypre_CSRMatrixData(A) = hypre_TAlloc(HYPRE_Complex, nnz, hypre_CSRMatrixMemoryLocation(A));
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)

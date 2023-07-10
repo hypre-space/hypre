@@ -26,10 +26,8 @@ extern "C" {
 /**
  * @defgroup SStructSolvers SStruct Solvers
  *
- * These solvers use matrix/vector storage schemes that are taylored
- * to semi-structured grid problems.
- *
- * @memo Linear solvers for semi-structured grids
+ * Linear solvers for semi-structured grids. These solvers use matrix/vector
+ * storage schemes that are taylored to semi-structured grid problems.
  *
  * @{
  **/

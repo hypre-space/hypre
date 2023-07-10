@@ -22,9 +22,7 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SETUP] -= hypre_MPI_Wtime();
 #endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("GaussElimSetup");
-#endif
 
    /* Par Data Structure variables */
    hypre_ParCSRMatrix *A      = hypre_ParAMGDataAArray(amg_data)[level];
@@ -154,7 +152,7 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
          hypre_assert(info == 0);
          hypre_dgetri(&global_num_rows, AT_mat, &global_num_rows, ipiv, &lwork_opt, &query, &info);
          hypre_assert(info == 0);
-         lwork = lwork_opt;
+         lwork = (HYPRE_Int)lwork_opt;
          work = hypre_TAlloc(HYPRE_Real, lwork, HYPRE_MEMORY_HOST);
          hypre_dgetri(&global_num_rows, AT_mat, &global_num_rows, ipiv, work, &lwork, &info);
          hypre_assert(info == 0);
@@ -195,9 +193,7 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 
    hypre_ParAMGDataGSSetup(amg_data) = 1;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SETUP] += hypre_MPI_Wtime();
@@ -213,9 +209,7 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SOLVE] -= hypre_MPI_Wtime();
 #endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("GaussElimSolve");
-#endif
 
    hypre_ParCSRMatrix *A = hypre_ParAMGDataAArray(amg_data)[level];
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -339,9 +333,7 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SOLVE] += hypre_MPI_Wtime();
 #endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return hypre_error_flag;
 }
@@ -384,18 +376,18 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 #include "_hypre_utilities.h"
 #include "_hypre_blas.h"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 
 #define BLOCK_SIZE 512
 
 __global__ void
-hypreCUDAKernel_dgemv(hypre_DeviceItem &item,
-                      HYPRE_Int   m,
-                      HYPRE_Int   n,
-                      HYPRE_Int   lda,
-                      HYPRE_Real *a,
-                      HYPRE_Real *x,
-                      HYPRE_Real *y)
+hypreGPUKernel_dgemv(hypre_DeviceItem &item,
+                     HYPRE_Int   m,
+                     HYPRE_Int   n,
+                     HYPRE_Int   lda,
+                     HYPRE_Real *a,
+                     HYPRE_Real *x,
+                     HYPRE_Real *y)
 {
    __shared__ HYPRE_Real sh_x[BLOCK_SIZE];
 
@@ -441,10 +433,10 @@ HYPRE_Int hypre_dgemv_device(HYPRE_Int m, HYPRE_Int n, HYPRE_Int lda, HYPRE_Real
    dim3 bDim(BLOCK_SIZE, 1, 1);
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(m, "thread", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_dgemv, gDim, bDim, m, n, lda, a, x, y );
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_dgemv, gDim, bDim, m, n, lda, a, x, y );
 
    return hypre_error_flag;
 }
 
-#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#endif // defined(HYPRE_USING_GPU)
 #endif

@@ -27,7 +27,7 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_SemiRestrictCreate( )
+hypre_SemiRestrictCreate( void )
 {
    hypre_SemiRestrictData *restrict_data;
 

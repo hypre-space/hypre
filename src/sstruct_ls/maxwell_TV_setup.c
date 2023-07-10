@@ -158,6 +158,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    /*char                  filename[255];*/
 #endif
 
+   HYPRE_MemoryLocation   memory_location = hypre_ParCSRMatrixMemoryLocation(Aee);
+
    hypre_MPI_Comm_rank(comm, &myproc);
 
    (maxwell_TV_data -> ndim) = ndim;
@@ -311,8 +313,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                                    &first_local_row, &last_local_row,
                                    &first_local_col, &last_local_col);
 
-   size_ptr  = hypre_TAlloc(HYPRE_Int,    1, HYPRE_MEMORY_DEVICE);
-   big_i_ptr = hypre_TAlloc(HYPRE_BigInt, 1, HYPRE_MEMORY_DEVICE);
+   size_ptr  = hypre_TAlloc(HYPRE_Int,    1, memory_location);
+   big_i_ptr = hypre_TAlloc(HYPRE_BigInt, 1, memory_location);
 
    for (big_i = first_local_row; big_i <= last_local_row; big_i++)
    {
@@ -358,8 +360,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    }
    hypre_ParCSRMatrixDestroy(parcsr_mat);
 
-   hypre_TFree(size_ptr,  HYPRE_MEMORY_DEVICE);
-   hypre_TFree(big_i_ptr, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(size_ptr,  memory_location);
+   hypre_TFree(big_i_ptr, memory_location);
 
    /* set the physical boundary points to identity */
    nrows = 0;
@@ -432,10 +434,10 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
       }
    }
 
-   inode = hypre_CTAlloc(HYPRE_BigInt, j, HYPRE_MEMORY_DEVICE);
-   ncols = hypre_CTAlloc(HYPRE_Int,    j, HYPRE_MEMORY_DEVICE);
-   jnode = hypre_CTAlloc(HYPRE_BigInt, j, HYPRE_MEMORY_DEVICE);
-   vals = hypre_TAlloc(HYPRE_Real,    j, HYPRE_MEMORY_DEVICE);
+   inode = hypre_CTAlloc(HYPRE_BigInt, j, memory_location);
+   ncols = hypre_CTAlloc(HYPRE_Int,    j, memory_location);
+   jnode = hypre_CTAlloc(HYPRE_BigInt, j, memory_location);
+   vals = hypre_TAlloc(HYPRE_Real,    j, memory_location);
 
    j = 0;
    for (i = 0; i < nrows; i++)
@@ -455,10 +457,10 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    HYPRE_IJMatrixSetValues(hypre_SStructMatrixIJMatrix(Ann),
                            j, ncols, (const HYPRE_BigInt*) inode,
                            (const HYPRE_BigInt*) jnode, (const HYPRE_Real*) vals);
-   hypre_TFree(ncols, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(inode, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(jnode, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(vals,  HYPRE_MEMORY_DEVICE);
+   hypre_TFree(ncols, memory_location);
+   hypre_TFree(inode, memory_location);
+   hypre_TFree(jnode, memory_location);
+   hypre_TFree(vals,  memory_location);
 
    HYPRE_SStructMatrixAssemble(Ann);
 #if DEBUG

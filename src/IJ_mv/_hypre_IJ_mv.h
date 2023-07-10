@@ -80,17 +80,17 @@ typedef struct
 
    HYPRE_MemoryLocation memory_location;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_Int            max_stack_elmts;
-   HYPRE_Int            current_stack_elmts;
+#if defined(HYPRE_USING_GPU)
+   HYPRE_BigInt         max_stack_elmts;
+   HYPRE_BigInt         current_stack_elmts;
    HYPRE_BigInt        *stack_i;
    HYPRE_BigInt        *stack_j;
    HYPRE_Complex       *stack_data;
    char                *stack_sora;              /* Set (1) or Add (0) */
    HYPRE_Int            usr_on_proc_elmts;       /* user given num elmt on-proc */
    HYPRE_Int            usr_off_proc_elmts;      /* user given num elmt off-proc */
-   HYPRE_Real           init_alloc_factor;
-   HYPRE_Real           grow_factor;
+   HYPRE_BigInt         init_alloc_factor;
+   HYPRE_BigInt         grow_factor;
 #endif
 } hypre_AuxParCSRMatrix;
 
@@ -124,7 +124,7 @@ typedef struct
 
 #define hypre_AuxParCSRMatrixMemoryLocation(matrix)       ((matrix) -> memory_location)
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 #define hypre_AuxParCSRMatrixMaxStackElmts(matrix)        ((matrix) -> max_stack_elmts)
 #define hypre_AuxParCSRMatrixCurrentStackElmts(matrix)    ((matrix) -> current_stack_elmts)
 #define hypre_AuxParCSRMatrixStackI(matrix)               ((matrix) -> stack_i)
@@ -170,7 +170,7 @@ typedef struct
 
    HYPRE_MemoryLocation memory_location;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_Int            max_stack_elmts;      /* length of stash for SetValues and AddToValues*/
    HYPRE_Int            current_stack_elmts;  /* current no. of elements stored in stash */
    HYPRE_BigInt        *stack_i;              /* contains row indices */
@@ -194,7 +194,7 @@ typedef struct
 
 #define hypre_AuxParVectorMemoryLocation(vector)       ((vector) -> memory_location)
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 #define hypre_AuxParVectorMaxStackElmts(vector)        ((vector) -> max_stack_elmts)
 #define hypre_AuxParVectorCurrentStackElmts(vector)    ((vector) -> current_stack_elmts)
 #define hypre_AuxParVectorStackI(vector)               ((vector) -> stack_i)
@@ -528,6 +528,9 @@ HYPRE_Int hypre_IJVectorAssembleOffProcValsPar ( hypre_IJVector *vector,
 HYPRE_Int hypre_IJVectorSetAddValuesParDevice(hypre_IJVector *vector, HYPRE_Int num_values,
                                               const HYPRE_BigInt *indices, const HYPRE_Complex *values, const char *action);
 HYPRE_Int hypre_IJVectorAssembleParDevice(hypre_IJVector *vector);
+
+HYPRE_Int hypre_IJVectorUpdateValuesDevice( hypre_IJVector *vector, HYPRE_Int num_values,
+                                            const HYPRE_BigInt *indices, const HYPRE_Complex *values, HYPRE_Int action);
 
 /* HYPRE_IJMatrix.c */
 HYPRE_Int HYPRE_IJMatrixCreate ( MPI_Comm comm, HYPRE_BigInt ilower, HYPRE_BigInt iupper,

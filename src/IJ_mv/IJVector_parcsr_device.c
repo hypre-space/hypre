@@ -15,32 +15,38 @@
 #include "_hypre_IJ_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
-
-#if defined(HYPRE_USING_SYCL)
-namespace thrust = std;
-#endif
+#if defined(HYPRE_USING_GPU)
 
 /*--------------------------------------------------------------------
  * hypre_IJVectorAssembleFunctor
  *--------------------------------------------------------------------*/
 
-template<typename T1, typename T2>
 #if defined(HYPRE_USING_SYCL)
+template<typename T1, typename T2>
 struct hypre_IJVectorAssembleFunctor
+{
+   typedef std::tuple<T1, T2> Tuple;
+
+   __device__ Tuple operator() (const Tuple& x, const Tuple& y ) const
+   {
+      return std::make_tuple( hypre_max(std::get<0>(x), std::get<0>(y)),
+                              std::get<1>(x) + std::get<1>(y) );
+   }
+};
 #else
+template<typename T1, typename T2>
 struct hypre_IJVectorAssembleFunctor : public
    thrust::binary_function< thrust::tuple<T1, T2>, thrust::tuple<T1, T2>, thrust::tuple<T1, T2> >
-#endif
 {
    typedef thrust::tuple<T1, T2> Tuple;
 
-   __device__ Tuple operator() (const Tuple& x, const Tuple& y ) const
+   __device__ Tuple operator() (const Tuple& x, const Tuple& y )
    {
       return thrust::make_tuple( hypre_max(thrust::get<0>(x), thrust::get<0>(y)),
                                  thrust::get<1>(x) + thrust::get<1>(y) );
    }
 };
+#endif
 
 /*--------------------------------------------------------------------
  * hypre_IJVectorAssembleSortAndReduce1
@@ -68,7 +74,7 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
    auto zipped_begin = oneapi::dpl::make_zip_iterator(I0, X0, A0);
    HYPRE_ONEDPL_CALL( std::stable_sort,
                       zipped_begin, zipped_begin + N0,
-                      std::less< std::tuple<HYPRE_BigInt, char, HYPRE_Complex> >() );
+   [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
 #else
    HYPRE_THRUST_CALL( stable_sort_by_key,
                       I0,
@@ -82,45 +88,38 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
 
    /* output X: 0: keep, 1: zero-out */
 #if defined(HYPRE_USING_SYCL)
-   /* WM: TODO - exclusive_scan_by_segment() currently does not work with a permutation iterator */
-   /*            and oneDPL currently does not have a reverse iterator */
+   /* WM: todo - oneDPL currently does not have a reverse iterator */
+   /*     should be able to do this with a reverse operation defined in a struct */
+   /*     instead of explicitly allocating and generating the reverse_perm, */
+   /*     but I can't get that to work for some reason */
    HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::transform,
-                      oneapi::dpl::counting_iterator(0),
-                      oneapi::dpl::counting_iterator(N0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(N0),
                       reverse_perm,
    [N0] (auto i) { return N0 - i - 1; });
 
-   HYPRE_BigInt *I0_reversed = hypre_TAlloc(HYPRE_BigInt, N0, HYPRE_MEMORY_DEVICE);
-   hypreSycl_scatter(I0, I0 + N0, reverse_perm, I0_reversed);
+   auto I0_reversed = oneapi::dpl::make_permutation_iterator(I0, reverse_perm);
+   auto X0_reversed = oneapi::dpl::make_permutation_iterator(X0, reverse_perm);
+   auto X_reversed = oneapi::dpl::make_permutation_iterator(X, reverse_perm);
 
-   char *X0_reversed = hypre_TAlloc(char, N0, HYPRE_MEMORY_DEVICE);
-   hypreSycl_scatter(X0, X0 + N0, reverse_perm, X0_reversed);
+   HYPRE_ONEDPL_CALL( oneapi::dpl::exclusive_scan_by_segment,
+                      I0_reversed,      /* key begin */
+                      I0_reversed + N0, /* key end */
+                      X0_reversed,      /* input value begin */
+                      X_reversed,       /* output value begin */
+                      char(0),          /* init */
+                      std::equal_to<HYPRE_BigInt>(),
+                      oneapi::dpl::maximum<char>() );
 
-   char *X_reversed = hypre_TAlloc(char, N0, HYPRE_MEMORY_DEVICE);
-
-   HYPRE_ONEDPL_CALL(
-      oneapi::dpl::exclusive_scan_by_segment,
-      I0_reversed,      /* key begin */
-      I0_reversed + N0, /* key end */
-      X0_reversed,      /* input value begin */
-      X_reversed,       /* output value begin */
-      char(0),          /* init */
-      std::equal_to<HYPRE_BigInt>(),
-      oneapi::dpl::maximum<char>() );
-
-   hypreSycl_scatter(X_reversed, X_reversed + N0, reverse_perm, X);
    hypre_TFree(reverse_perm, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(I0_reversed, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(X0_reversed, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(X_reversed, HYPRE_MEMORY_DEVICE);
 
    hypreSycl_transform_if(A0,
                           A0 + N0,
                           X,
                           A0,
-   [] (const auto & x) {return x;},
-   [] (const auto & x) {return 0.0;} );
+   [] (const auto & x) {return 0.0;},
+   [] (const auto & x) {return x;} );
 
    auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
                                      I0,                                                         /* keys_first */
@@ -177,7 +176,7 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
    auto zipped_begin = oneapi::dpl::make_zip_iterator(I0, X0, A0);
    HYPRE_ONEDPL_CALL( std::stable_sort,
                       zipped_begin, zipped_begin + N0,
-                      std::less< std::tuple<HYPRE_BigInt, char, HYPRE_Complex> >() );
+   [](auto lhs, auto rhs) { return std::get<0>(lhs) < std::get<0>(rhs); } );
 #else
    HYPRE_THRUST_CALL( stable_sort_by_key,
                       I0,
@@ -190,42 +189,38 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
 
    /* output in X0: 0: keep, 1: zero-out */
 #if defined(HYPRE_USING_SYCL)
-   /* WM: TODO - inclusive_scan_by_segment() currently does not work with a permutation iterator */
-   /*            and oneDPL currently does not have a reverse iterator */
+   /* WM: todo - oneDPL currently does not have a reverse iterator */
+   /*     should be able to do this with a reverse operation defined in a struct */
+   /*     instead of explicitly allocating and generating the reverse_perm, */
+   /*     but I can't get that to work for some reason */
    HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::transform,
-                      oneapi::dpl::counting_iterator(0),
-                      oneapi::dpl::counting_iterator(N0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(N0),
                       reverse_perm,
    [N0] (auto i) { return N0 - i - 1; });
 
-   HYPRE_BigInt *I0_reversed = hypre_TAlloc(HYPRE_BigInt, N0, HYPRE_MEMORY_DEVICE);
-   hypreSycl_scatter(I0, I0 + N0, reverse_perm, I0_reversed);
+   auto I0_reversed = oneapi::dpl::make_permutation_iterator(I0, reverse_perm);
+   auto X0_reversed = oneapi::dpl::make_permutation_iterator(X0, reverse_perm);
 
-   char *X0_reversed = hypre_TAlloc(char, N0, HYPRE_MEMORY_DEVICE);
-   hypreSycl_scatter(X0, X0 + N0, reverse_perm, X0_reversed);
+   HYPRE_ONEDPL_CALL( oneapi::dpl::inclusive_scan_by_segment,
+                      I0_reversed,      /* key begin */
+                      I0_reversed + N0, /* key end */
+                      X0_reversed,      /* input value begin */
+                      X0_reversed,      /* output value begin */
+                      std::equal_to<HYPRE_BigInt>(),
+                      oneapi::dpl::maximum<char>() );
 
-   HYPRE_ONEDPL_CALL(
-      oneapi::dpl::inclusive_scan_by_segment,
-      I0_reversed,      /* key begin */
-      I0_reversed + N0, /* key end */
-      X0_reversed,      /* input value begin */
-      X0_reversed,      /* output value begin */
-      std::equal_to<HYPRE_BigInt>(),
-      oneapi::dpl::maximum<char>() );
-
-   hypreSycl_scatter(X0_reversed, X0_reversed + N0, reverse_perm, X0);
    hypre_TFree(reverse_perm, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(I0_reversed, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(X0_reversed, HYPRE_MEMORY_DEVICE);
 
    hypreSycl_transform_if(A0,
                           A0 + N0,
                           X0,
                           A0,
-   [] (const auto & x) {return x;},
-   [] (const auto & x) {return 0.0;} );
+   [] (const auto & x) {return 0.0;},
+   [] (const auto & x) {return x;} );
 
+   /* WM: todo - why don't I use the HYPRE_ONEDPL_CALL macro here? Compile issue? */
    auto new_end = oneapi::dpl::reduce_by_segment(
                      oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream(
                                                                                    hypre_handle())),
@@ -288,20 +283,20 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
 }
 
 /*--------------------------------------------------------------------
- * hypreCUDAKernel_IJVectorAssemblePar
+ * hypreGPUKernel_IJVectorAssemblePar
  *
  * y[map[i]-offset] = x[i] or y[map[i]] += x[i] depending on SorA,
  * same index cannot appear more than once in map
  *--------------------------------------------------------------------*/
 
 __global__ void
-hypreCUDAKernel_IJVectorAssemblePar( hypre_DeviceItem &item,
-                                     HYPRE_Int         n,
-                                     HYPRE_Complex    *x,
-                                     HYPRE_BigInt     *map,
-                                     HYPRE_BigInt      offset,
-                                     char             *SorA,
-                                     HYPRE_Complex    *y )
+hypreGPUKernel_IJVectorAssemblePar( hypre_DeviceItem &item,
+                                    HYPRE_Int         n,
+                                    HYPRE_Complex    *x,
+                                    HYPRE_BigInt     *map,
+                                    HYPRE_BigInt      offset,
+                                    char             *SorA,
+                                    HYPRE_Complex    *y )
 {
    HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
@@ -507,7 +502,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
                                             zip_in + nelms, /* last */
                                             is_on_proc, /* stencil */
                                             zip_out, /* result */
-         [] (const auto & x) {return x;} );
+         [] (const auto & x) {return !x;} );
 
          hypre_assert(std::get<0>(new_end1.base()) - off_proc_i == nelms_off);
 
@@ -515,7 +510,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
          auto new_end2 = hypreSycl_remove_if( zip_in,         /* first */
                                               zip_in + nelms, /* last */
                                               is_on_proc,     /* stencil */
-         [] (const auto & x) {return x;} );
+         [] (const auto & x) {return !x;} );
 
          hypre_assert(std::get<0>(new_end2.base()) - stack_i == nelms_on);
 #else
@@ -603,7 +598,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
       /* set/add to local vector */
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(new_nnz, "thread", bDim);
-      HYPRE_GPU_LAUNCH( hypreCUDAKernel_IJVectorAssemblePar, gDim, bDim,
+      HYPRE_GPU_LAUNCH( hypreGPUKernel_IJVectorAssemblePar, gDim, bDim,
                         new_nnz, new_data, new_i,
                         vec_start, new_sora,
                         data );
@@ -619,4 +614,84 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
    return hypre_error_flag;
 }
 
+__global__ void
+hypreCUDAKernel_IJVectorUpdateValues( hypre_DeviceItem    &item,
+                                      HYPRE_Int            n,
+                                      const HYPRE_Complex *x,
+                                      const HYPRE_BigInt  *indices,
+                                      HYPRE_BigInt         start,
+                                      HYPRE_BigInt         stop,
+                                      HYPRE_Int            action,
+                                      HYPRE_Complex       *y )
+{
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+
+   if (i >= n)
+   {
+      return;
+   }
+
+   HYPRE_Int j;
+
+   if (indices)
+   {
+      j = (HYPRE_Int) (read_only_load(&indices[i]) - start);
+   }
+   else
+   {
+      j = i;
+   }
+
+   if (j < 0 || j > (HYPRE_Int) (stop - start))
+   {
+      return;
+   }
+
+   if (action)
+   {
+      y[j] = x[i];
+   }
+   else
+   {
+      y[j] += x[i];
+   }
+}
+
+HYPRE_Int
+hypre_IJVectorUpdateValuesDevice( hypre_IJVector      *vector,
+                                  HYPRE_Int            num_values,
+                                  const HYPRE_BigInt  *indices,
+                                  const HYPRE_Complex *values,
+                                  HYPRE_Int            action)
+{
+   HYPRE_BigInt *IJpartitioning = hypre_IJVectorPartitioning(vector);
+   HYPRE_BigInt  vec_start = IJpartitioning[0];
+   HYPRE_BigInt  vec_stop  = IJpartitioning[1] - 1;
+
+   if (!indices)
+   {
+      num_values = vec_stop - vec_start + 1;
+   }
+
+   if (num_values <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   /* set/add to local vector */
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_values, "thread", bDim);
+
+   hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
+
+   HYPRE_GPU_LAUNCH( hypreCUDAKernel_IJVectorUpdateValues,
+                     gDim, bDim,
+                     num_values, values, indices,
+                     vec_start, vec_stop, action,
+                     hypre_VectorData(hypre_ParVectorLocalVector(par_vector)) );
+
+   return hypre_error_flag;
+}
+
 #endif
+

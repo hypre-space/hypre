@@ -33,12 +33,15 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
+cat state.h                    >> $INTERNAL_HEADER
 cat general.h                  >> $INTERNAL_HEADER
+cat magma.h                    >> $INTERNAL_HEADER
 cat printf.h                   >> $INTERNAL_HEADER
 cat error.h                    >> $INTERNAL_HEADER
 cat mpistubs.h                 >> $INTERNAL_HEADER
 cat smp.h                      >> $INTERNAL_HEADER
 cat memory.h                   >> $INTERNAL_HEADER
+cat memory_tracker.h           >> $INTERNAL_HEADER
 cat omp_device.h               >> $INTERNAL_HEADER
 cat threading.h                >> $INTERNAL_HEADER
 cat timing.h                   >> $INTERNAL_HEADER
@@ -80,10 +83,6 @@ cat > $INTERNAL_HEADER <<@
 #ifndef hypre_UTILITIES_HPP
 #define hypre_UTILITIES_HPP
 
-/* WM: todo - I have a problem where I need to include this outside the extern "C++" {} block, so I'm doing this manually here for now */
-#if defined(HYPRE_USING_SYCL)
-#include <CL/sycl.hpp>
-#endif
 
 #ifdef __cplusplus
 extern "C++" {
@@ -113,4 +112,3 @@ cat >> $INTERNAL_HEADER <<@
 #endif
 
 @
-

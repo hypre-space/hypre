@@ -21,11 +21,9 @@ extern "C" {
 /**
  * @defgroup IJSystemInterface IJ System Interface
  *
- * This interface represents a linear-algebraic conceptual view of a
- * linear system.  The 'I' and 'J' in the name are meant to be
- * mnemonic for the traditional matrix notation A(I,J).
- *
- * @memo A linear-algebraic conceptual interface
+ * A linear-algebraic conceptual interface. This interface represents a
+ * linear-algebraic conceptual view of a linear system.  The 'I' and 'J' in the
+ * name are meant to be mnemonic for the traditional matrix notation A(I,J).
  *
  * @{
  **/
@@ -491,6 +489,20 @@ HYPRE_Int HYPRE_IJVectorAddToValues(HYPRE_IJVector       vector,
  * Finalize the construction of the vector before using.
  **/
 HYPRE_Int HYPRE_IJVectorAssemble(HYPRE_IJVector vector);
+
+/**
+ * Update vectors by setting (action 1) or
+ * adding to (action 0) values in 'vector'.
+ * Note that this function cannot update values owned by other processes
+ * and does not allow repeated index values in 'indices'.
+ *
+ * Not collective.
+ **/
+HYPRE_Int HYPRE_IJVectorUpdateValues(HYPRE_IJVector       vector,
+                                     HYPRE_Int            nvalues,
+                                     const HYPRE_BigInt  *indices,
+                                     const HYPRE_Complex *values,
+                                     HYPRE_Int            action);
 
 /**
  * Gets values in vector.  Usage details are analogous to

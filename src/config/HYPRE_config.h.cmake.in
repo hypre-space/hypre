@@ -15,6 +15,7 @@
 #cmakedefine HYPRE_DEVELOP_STRING  "@HYPRE_DEVELOP_STRING@"
 #cmakedefine HYPRE_DEVELOP_NUMBER   @HYPRE_DEVELOP_NUMBER@
 #cmakedefine HYPRE_DEVELOP_BRANCH  "@HYPRE_DEVELOP_BRANCH@"
+#cmakedefine HYPRE_BRANCH_NAME     "@HYPRE_BRANCH_NAME@"
 
 /* Use long long int for HYPRE_BigInt */
 #cmakedefine HYPRE_MIXEDINT 1
@@ -33,6 +34,9 @@
 
 /* Use cudaMallocAsync */
 #cmakedefine HYPRE_USING_DEVICE_MALLOC_ASYNC 1
+
+/* Use GPU-aware MPI */
+#cmakedefine HYPRE_WITH_GPU_AWARE_MPI 1
 
 /* Debug mode */
 #cmakedefine HYPRE_DEBUG 1
@@ -66,6 +70,21 @@
 
 /* Use Caliper instrumentation */
 #cmakedefine HYPRE_USING_CALIPER 1
+
+/* Use UMPIRE */
+#cmakedefine HYPRE_USING_UMPIRE 1
+
+/* Use UMPIRE for device memory */
+#cmakedefine HYPRE_USING_UMPIRE_DEVICE 1
+
+/* Use UMPIRE for host memory */
+#cmakedefine HYPRE_USING_UMPIRE_HOST 1
+
+/* Use UMPIRE for pinned memory */
+#cmakedefine HYPRE_USING_UMPIRE_PINNED 1
+
+/* Use UMPIRE for unified memory */
+#cmakedefine HYPRE_USING_UMPIRE_UM 1
 
 /* Use if executing on device with CUDA */
 #cmakedefine HYPRE_USING_CUDA 1
@@ -121,6 +140,9 @@
 /* Use SuperLU_Dist */
 #cmakedefine HYPRE_USING_DSUPERLU 1
 
+/* Use MAGMA */
+#cmakedefine HYPRE_USING_MAGMA 1
+
 /* Use SuperLU */
 #cmakedefine HAVE_SUPERLU 1
 
@@ -150,6 +172,9 @@
 
 /* As F77_FUNC, but for C identifiers containing underscores. */
 #define HYPRE_F77_FUNC_(name,NAME) name ## __
+
+/* Deprecated function macro */
+#define HYPRE_DEPRECATED(reason) _Pragma(reason)
 
 /* Define to 1 if using host memory only */
 #cmakedefine HYPRE_USING_HOST_MEMORY 1

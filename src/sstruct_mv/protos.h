@@ -314,6 +314,7 @@ HYPRE_Int hypre_SStructMatrixBoundaryToUMatrix ( hypre_SStructMatrix *A, hypre_S
                                                  hypre_IJMatrix **ij_Ahat_ptr );
 HYPRE_Int hypre_SStructMatrixGetDiagonal ( hypre_SStructMatrix *matrix,
                                            hypre_SStructVector **diag_ptr );
+HYPRE_MemoryLocation hypre_SStructMatrixMemoryLocation(hypre_SStructMatrix *matrix);
 
 /* sstruct_matvec.c */
 HYPRE_Int hypre_SStructPMatvecCreate ( void **pmatvec_vdata_ptr );
@@ -409,3 +410,4 @@ HYPRE_Int hypre_SStructPVectorInitializeShell ( hypre_SStructPVector *pvector );
 HYPRE_Int hypre_SStructVectorInitializeShell ( hypre_SStructVector *vector );
 HYPRE_Int hypre_SStructVectorClearGhostValues ( hypre_SStructVector *vector );
 HYPRE_Int hypre_SStructVectorPrintGLVis ( hypre_SStructVector *vector, const char *fileprefix );
+HYPRE_MemoryLocation hypre_SStructVectorMemoryLocation(hypre_SStructVector *vector);

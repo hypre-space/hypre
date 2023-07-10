@@ -108,6 +108,7 @@ HYPRE_Int hypre_StructKrylovMatvecDestroy ( void *matvec_data );
 HYPRE_Real hypre_StructKrylovInnerProd ( void *x, void *y );
 HYPRE_Int hypre_StructKrylovCopyVector ( void *x, void *y );
 HYPRE_Int hypre_StructKrylovClearVector ( void *x );
+HYPRE_Int hypre_StructKrylovSetRandomValues ( void *x, HYPRE_Int seed );
 HYPRE_Int hypre_StructKrylovScaleVector ( HYPRE_Complex alpha, void *x );
 HYPRE_Int hypre_StructKrylovAxpy ( HYPRE_Complex alpha, void *x, void *y );
 HYPRE_Int hypre_StructKrylovIdentitySetup ( void *vdata, void *A, void *b, void *x );

@@ -85,4 +85,3 @@ HYPRE_Int HYPRE_ParVectorGetValues( HYPRE_ParVector vector, HYPRE_Int num_values
 #endif
 
 #endif
-

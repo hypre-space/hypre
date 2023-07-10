@@ -35,7 +35,7 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_StructMatvecCreate( )
+hypre_StructMatvecCreate( void )
 {
    hypre_StructMatvecData *matvec_data;
 

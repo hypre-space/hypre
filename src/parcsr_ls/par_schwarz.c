@@ -19,7 +19,7 @@
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_SchwarzCreate()
+hypre_SchwarzCreate( void )
 {
    hypre_SchwarzData *schwarz_data;
 

@@ -901,6 +901,7 @@ hypre_SStructVectorClearGhostValues(hypre_SStructVector *vector)
  * Print vector to a format readable by GLVis.
  * This is mainly for debugging purposes.
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SStructVectorPrintGLVis( hypre_SStructVector  *vector,
                                const char           *fileprefix )
@@ -1056,4 +1057,36 @@ hypre_SStructVectorPrintGLVis( hypre_SStructVector  *vector,
    }
 
    return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructVectorMemoryLocation
+ *--------------------------------------------------------------------------*/
+
+HYPRE_MemoryLocation
+hypre_SStructVectorMemoryLocation(hypre_SStructVector *vector)
+{
+   HYPRE_Int type = hypre_SStructVectorObjectType(vector);
+
+   if (type == HYPRE_SSTRUCT)
+   {
+      hypre_ParVector *parvector;
+      hypre_SStructVectorConvert(vector, &parvector);
+      return hypre_ParVectorMemoryLocation(parvector);
+   }
+
+   void *object;
+   HYPRE_SStructVectorGetObject(vector, &object);
+
+   if (type == HYPRE_PARCSR)
+   {
+      return hypre_ParVectorMemoryLocation((hypre_ParVector *) object);
+   }
+
+   if (type == HYPRE_STRUCT)
+   {
+      return hypre_StructVectorMemoryLocation((hypre_StructVector *) object);
+   }
+
+   return HYPRE_MEMORY_UNDEFINED;
 }

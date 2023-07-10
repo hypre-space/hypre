@@ -22,30 +22,28 @@ hypre_PFMGCreate( MPI_Comm  comm )
    (pfmg_data -> time_index) = hypre_InitializeTiming("PFMG");
 
    /* set defaults */
-   (pfmg_data -> tol)              = 1.0e-06;
-   (pfmg_data -> max_iter)         = 200;
-   (pfmg_data -> rel_change)       = 0;
-   (pfmg_data -> zero_guess)       = 0;
-   (pfmg_data -> max_levels)       = 0;
-   (pfmg_data -> dxyz)[0]          = 0.0;
-   (pfmg_data -> dxyz)[1]          = 0.0;
-   (pfmg_data -> dxyz)[2]          = 0.0;
-   (pfmg_data -> relax_type)       = 1;     /* weighted Jacobi */
-   (pfmg_data -> jacobi_weight)    = 0.0;
-   (pfmg_data -> usr_jacobi_weight) = 0;    /* no user Jacobi weight */
-   (pfmg_data -> rap_type)         = 0;
-   (pfmg_data -> num_pre_relax)    = 1;
-   (pfmg_data -> num_post_relax)   = 1;
-   (pfmg_data -> skip_relax)       = 1;
-   (pfmg_data -> logging)          = 0;
-   (pfmg_data -> print_level)      = 0;
-   (pfmg_data -> print_freq)       = 1;
+   (pfmg_data -> tol)               = 1.0e-06;
+   (pfmg_data -> max_iter)          = 200;
+   (pfmg_data -> rel_change)        = 0;
+   (pfmg_data -> zero_guess)        = 0;
+   (pfmg_data -> max_levels)        = 0;
+   (pfmg_data -> dxyz)[0]           = 0.0;
+   (pfmg_data -> dxyz)[1]           = 0.0;
+   (pfmg_data -> dxyz)[2]           = 0.0;
+   (pfmg_data -> relax_type)        = 1;   /* weighted Jacobi */
+   (pfmg_data -> jacobi_weight)     = 0.0;
+   (pfmg_data -> usr_jacobi_weight) = 0;   /* no user Jacobi weight */
+   (pfmg_data -> rap_type)          = 0;
+   (pfmg_data -> num_pre_relax)     = 1;
+   (pfmg_data -> num_post_relax)    = 1;
+   (pfmg_data -> skip_relax)        = 1;
+   (pfmg_data -> logging)           = 0;
+   (pfmg_data -> print_level)       = 0;
+   (pfmg_data -> print_freq)        = 1;
 
    /* initialize */
-   (pfmg_data -> num_levels)  = -1;
-#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   (pfmg_data -> devicelevel) = 200;
-#endif
+   (pfmg_data -> num_levels)        = -1;
+
    return (void *) pfmg_data;
 }
 

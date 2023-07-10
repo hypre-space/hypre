@@ -66,9 +66,6 @@ hypre_StructGridCreate( MPI_Comm           comm,
       hypre_StructGridNumGhost(grid)[2*i+1] = 0;
    }
 
-#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_StructGridDataLocation(grid) = HYPRE_MEMORY_DEVICE;
-#endif
    *grid_ptr = grid;
 
    return hypre_error_flag;

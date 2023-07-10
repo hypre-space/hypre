@@ -246,7 +246,8 @@ hypre_ParBooleanMatmul( hypre_ParCSRBooleanMatrix *A,
 
    hypre_ParMatmul_RowSizes(
       /*&C_diag_i, &C_offd_i, &B_marker,*/
-      HYPRE_MEMORY_DEVICE, /* RL: XXX */
+      /* BooleanMatrix only uses HOST memory for now */
+      HYPRE_MEMORY_HOST,
       &C_diag_i, &C_offd_i, NULL,
       A_diag_i, A_diag_j, A_offd_i, A_offd_j,
       B_diag_i, B_diag_j, B_offd_i, B_offd_j,
@@ -1113,9 +1114,12 @@ hypre_BooleanMatTCommPkgCreate ( hypre_ParCSRBooleanMatrix *A)
    HYPRE_BigInt  *col_map_offd = hypre_ParCSRBooleanMatrix_Get_ColMapOffd(A);
    HYPRE_BigInt   first_col_diag = hypre_ParCSRBooleanMatrix_Get_FirstColDiag(A);
    HYPRE_BigInt  *col_starts = hypre_ParCSRBooleanMatrix_Get_ColStarts(A);
-   HYPRE_Int      num_rows_diag = hypre_CSRBooleanMatrix_Get_NRows(hypre_ParCSRBooleanMatrix_Get_Diag(A));
-   HYPRE_Int      num_cols_diag = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Diag(A));
-   HYPRE_Int      num_cols_offd = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Offd(A));
+   HYPRE_Int      num_rows_diag = hypre_CSRBooleanMatrix_Get_NRows(hypre_ParCSRBooleanMatrix_Get_Diag(
+                                                                      A));
+   HYPRE_Int      num_cols_diag = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Diag(
+                                                                      A));
+   HYPRE_Int      num_cols_offd = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Offd(
+                                                                      A));
    HYPRE_BigInt  *row_starts = hypre_ParCSRBooleanMatrix_Get_RowStarts(A);
 
    HYPRE_Int      num_sends;
@@ -1169,8 +1173,10 @@ hypre_BooleanMatvecCommPkgCreate ( hypre_ParCSRBooleanMatrix *A)
    HYPRE_BigInt   *col_map_offd = hypre_ParCSRBooleanMatrix_Get_ColMapOffd(A);
    HYPRE_BigInt    first_col_diag = hypre_ParCSRBooleanMatrix_Get_FirstColDiag(A);
    HYPRE_BigInt   *col_starts = hypre_ParCSRBooleanMatrix_Get_ColStarts(A);
-   HYPRE_Int       num_cols_diag = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Diag(A));
-   HYPRE_Int       num_cols_offd = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Offd(A));
+   HYPRE_Int       num_cols_diag = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Diag(
+                                                                       A));
+   HYPRE_Int       num_cols_offd = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Offd(
+                                                                       A));
 
    HYPRE_Int       num_sends;
    HYPRE_Int      *send_procs;

@@ -22,17 +22,17 @@
  * to be used for the MaxEigEstimate
  */
 __global__ void
-hypreCUDAKernel_CSRMaxEigEstimate(hypre_DeviceItem    &item,
-                                  HYPRE_Int      nrows,
-                                  HYPRE_Int     *diag_ia,
-                                  HYPRE_Int     *diag_ja,
-                                  HYPRE_Complex *diag_aa,
-                                  HYPRE_Int     *offd_ia,
-                                  HYPRE_Int     *offd_ja,
-                                  HYPRE_Complex *offd_aa,
-                                  HYPRE_Complex *row_sum_lower,
-                                  HYPRE_Complex *row_sum_upper,
-                                  HYPRE_Int      scale)
+hypreGPUKernel_CSRMaxEigEstimate(hypre_DeviceItem    &item,
+                                 HYPRE_Int      nrows,
+                                 HYPRE_Int     *diag_ia,
+                                 HYPRE_Int     *diag_ja,
+                                 HYPRE_Complex *diag_aa,
+                                 HYPRE_Int     *offd_ia,
+                                 HYPRE_Int     *offd_ja,
+                                 HYPRE_Complex *offd_aa,
+                                 HYPRE_Complex *row_sum_lower,
+                                 HYPRE_Complex *row_sum_upper,
+                                 HYPRE_Int      scale)
 {
    HYPRE_Int row_i = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
@@ -64,7 +64,7 @@ hypreCUDAKernel_CSRMaxEigEstimate(hypre_DeviceItem    &item,
       }
       else
       {
-         row_sum_i += fabs(aij);
+         row_sum_i += hypre_abs(aij);
       }
    }
 
@@ -78,7 +78,7 @@ hypreCUDAKernel_CSRMaxEigEstimate(hypre_DeviceItem    &item,
    for (HYPRE_Int j = p + lane; j < q; j += HYPRE_WARP_SIZE)
    {
       HYPRE_Complex aij = read_only_load(&offd_aa[j]);
-      row_sum_i += fabs(aij);
+      row_sum_i += hypre_abs(aij);
    }
 
    // Get the row_sum and diagonal value on lane 0
@@ -146,7 +146,7 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix *A,
 
    bDim = hypre_GetDefaultDeviceBlockDimension();
    gDim = hypre_GetDefaultDeviceGridDimension(A_num_rows, "warp", bDim);
-   HYPRE_GPU_LAUNCH(hypreCUDAKernel_CSRMaxEigEstimate,
+   HYPRE_GPU_LAUNCH(hypreGPUKernel_CSRMaxEigEstimate,
                     gDim,
                     bDim,
                     A_num_rows,
@@ -212,9 +212,7 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
                                    HYPRE_Real         *max_eig,
                                    HYPRE_Real         *min_eig)
 {
-#if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPushRange("ParCSRMaxEigEstimate_Setup");
-#endif
    HYPRE_Int        i, err;
    hypre_ParVector *p;
    hypre_ParVector *s;
@@ -239,9 +237,7 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
       max_iter = (HYPRE_Int)size;
    }
 
-#if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPushRange("ParCSRMaxEigEstimate_Setup_DataAlloc");
-#endif
    /* create some temp vectors: p, s, r , ds, u*/
    r = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                              hypre_ParCSRMatrixGlobalNumRows(A),
@@ -276,40 +272,26 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
    u_data = hypre_VectorData(hypre_ParVectorLocalVector(u));
    r_data = hypre_VectorData(hypre_ParVectorLocalVector(r));
 
-#if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPopRange(); /*Setup Data Alloc*/
-#endif
 
-#if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPushRange("ParCSRMaxEigEstimate_Setup_CPUAlloc_Setup");
-#endif
 
-#if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPushRange("ParCSRMaxEigEstimate_Setup_CPUAlloc_Setup_Alloc");
-#endif
 
    /* make room for tri-diag matrix */
    tridiag = hypre_CTAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
    trioffd = hypre_CTAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
-#if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPopRange(); /*SETUP_Alloc*/
-#endif
 
-#if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPushRange("ParCSRMaxEigEstimate_Setup_CPUAlloc_Zeroing");
-#endif
    for (i = 0; i < max_iter + 1; i++)
    {
       tridiag[i] = 0;
       trioffd[i] = 0;
    }
-#if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPopRange(); /*Zeroing */
-#endif
 
-#if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPushRange("ParCSRMaxEigEstimate_Setup_CPUAlloc_Random");
-#endif
 
    /* set residual to random */
    hypre_CurandUniform(local_size, r_data, 0, 0, 0, 0);
@@ -320,13 +302,9 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
                      r_data, r_data + local_size, r_data,
                      2.0 * _1 - 1.0);
 
-#if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPopRange(); /*CPUAlloc_Random*/
-#endif
 
-#if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPushRange("ParCSRMaxEigEstimate_Setup_CPUAlloc_Diag");
-#endif
 
    if (scale)
    {
@@ -338,19 +316,10 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
       hypre_ParVectorSetConstantValues(ds, 1.0);
    }
 
-#if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPopRange(); /*Setup_CPUAlloc__Diag */
-#endif
-#if defined(HYPRE_USING_CUDA) /*CPUAlloc_Setup */
-   hypre_GpuProfilingPopRange();
-#endif
-
-#if defined(HYPRE_USING_CUDA)
+   hypre_GpuProfilingPopRange(); /*CPUAlloc_Setup */
    hypre_GpuProfilingPopRange(); /* Setup */
-#endif
-#if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPushRange("ParCSRMaxEigEstimate_Iter");
-#endif
 
    /* gamma = <r,Cr> */
    gamma = hypre_ParVectorInnerProd(r, p);
@@ -421,7 +390,7 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
       tridiag[i] += alphainv;
 
       trioffd[i + 1] = alphainv;
-      trioffd[i] *= sqrt(beta);
+      trioffd[i] *= hypre_sqrt(beta);
 
       /* x = x + alpha*p */
       /* don't need */
@@ -445,21 +414,15 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
     * but I am not certain, nor do I have the legal knowledge to know if the
     * license is compatible with that which HYPRE is released under.
     */
-#if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPopRange();
-#endif
-#if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPushRange("ParCSRMaxEigEstimate_TriDiagEigenSolve");
-#endif
 
    /* eispack routine - eigenvalues return in tridiag and ordered*/
    hypre_LINPACKcgtql1(&i, tridiag, trioffd, &err);
 
    lambda_max = tridiag[i - 1];
    lambda_min = tridiag[0];
-#if defined(HYPRE_USING_CUDA)
    hypre_GpuProfilingPopRange();
-#endif
    /* hypre_printf("linpack max eig est = %g\n", lambda_max);*/
    /* hypre_printf("linpack min eig est = %g\n", lambda_min);*/
 

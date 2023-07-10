@@ -195,7 +195,7 @@ hypre_FinalizeTiming( HYPRE_Int time_index )
 }
 
 HYPRE_Int
-hypre_FinalizeAllTimings()
+hypre_FinalizeAllTimings( void )
 {
    HYPRE_Int time_index, ierr = 0;
 
@@ -279,8 +279,11 @@ hypre_EndTiming( HYPRE_Int time_index )
    if (hypre_TimingState(time_index) == 0)
    {
 #if defined(HYPRE_USING_GPU)
-      /* hypre_ForceSyncComputeStream(hypre_handle()); */
-      hypre_SyncCudaDevice(hypre_handle());
+      hypre_Handle *hypre_handle_ = hypre_handle();
+      if (hypre_HandleDefaultExecPolicy(hypre_handle_) == HYPRE_EXEC_DEVICE)
+      {
+         hypre_SyncCudaDevice(hypre_handle_);
+      }
 #endif
       hypre_StopTiming();
       hypre_TimingWallTime(time_index) += hypre_TimingWallCount;
@@ -297,7 +300,7 @@ hypre_EndTiming( HYPRE_Int time_index )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ClearTiming( )
+hypre_ClearTiming( void )
 {
    HYPRE_Int  ierr = 0;
    HYPRE_Int  i;
@@ -394,5 +397,59 @@ hypre_PrintTiming( const char     *heading,
       }
    }
 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GetTiming
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GetTiming( const char     *heading,
+                 HYPRE_Real     *wall_time_ptr,
+                 MPI_Comm        comm  )
+{
+   HYPRE_Int  ierr = 0;
+
+   HYPRE_Real  local_wall_time;
+   HYPRE_Real  wall_time;
+
+   HYPRE_Int     i;
+   HYPRE_Int     myrank;
+
+   if (hypre_global_timing == NULL)
+   {
+      return ierr;
+   }
+
+   hypre_MPI_Comm_rank(comm, &myrank );
+
+   /* print heading */
+   if (myrank == 0)
+   {
+      hypre_printf("=============================================\n");
+      hypre_printf("%s:\n", heading);
+      hypre_printf("=============================================\n");
+   }
+
+   for (i = 0; i < (hypre_global_timing -> size); i++)
+   {
+      if (hypre_TimingNumRegs(i) > 0)
+      {
+         local_wall_time = hypre_TimingWallTime(i);
+         hypre_MPI_Allreduce(&local_wall_time, &wall_time, 1,
+                             hypre_MPI_REAL, hypre_MPI_MAX, comm);
+
+         if (myrank == 0)
+         {
+            hypre_printf("%s:\n", hypre_TimingName(i));
+
+            /* print wall clock info */
+            hypre_printf("  wall clock time = %f seconds\n", wall_time);
+         }
+      }
+   }
+
+   *wall_time_ptr = wall_time;
    return ierr;
 }

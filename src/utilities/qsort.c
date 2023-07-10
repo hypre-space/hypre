@@ -463,7 +463,7 @@ void hypre_qsort2_abs( HYPRE_Int  *v,
    last = left;
    for (i = left + 1; i <= right; i++)
    {
-      if (fabs(w[i]) > fabs(w[left]))
+      if (hypre_abs(w[i]) > hypre_abs(w[left]))
       {
          hypre_swap2(v, w, ++last, i);
       }
@@ -581,7 +581,7 @@ void hypre_qsort3_abs(HYPRE_Real *v,
    last = left;
    for (i = left + 1; i <= right; i++)
    {
-      if (fabs(v[i]) < fabs(v[left]))
+      if (hypre_abs(v[i]) < hypre_abs(v[left]))
       {
          hypre_swap3_d(v, w, z, ++last, i);
       }
@@ -613,7 +613,7 @@ void hypre_BigQsort4_abs( HYPRE_Real   *v,
    last = left;
    for (i = left + 1; i <= right; i++)
    {
-      if (fabs(v[i]) < fabs(v[left]))
+      if (hypre_abs(v[i]) < hypre_abs(v[left]))
       {
          hypre_BigSwap4_d(v, w, z, y, ++last, i);
       }
@@ -641,7 +641,7 @@ void hypre_qsort_abs( HYPRE_Real *w,
    last = left;
    for (i = left + 1; i <= right; i++)
    {
-      if (fabs(w[i]) < fabs(w[left]))
+      if (hypre_abs(w[i]) < hypre_abs(w[left]))
       {
          hypre_swap_d(w, ++last, i);
       }

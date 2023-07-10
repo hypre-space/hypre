@@ -10,7 +10,7 @@
 #include "aux_interp.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 #define MAX_C_CONNECTIONS 100
 #define HAVE_COMMON_C 1
@@ -20,18 +20,18 @@
 // -1: weak, -2: diag, >=0 (== A_diag_j) : strong
 // add weak and the diagonal entries of F-rows
 __global__
-void hypreCUDAKernel_compute_weak_rowsums( hypre_DeviceItem    &item,
-                                           HYPRE_Int      nr_of_rows,
-                                           bool           has_offd,
-                                           HYPRE_Int     *CF_marker,
-                                           HYPRE_Int     *A_diag_i,
-                                           HYPRE_Complex *A_diag_a,
-                                           HYPRE_Int     *Soc_diag_j,
-                                           HYPRE_Int     *A_offd_i,
-                                           HYPRE_Complex *A_offd_a,
-                                           HYPRE_Int     *Soc_offd_j,
-                                           HYPRE_Real    *rs,
-                                           HYPRE_Int      flag)
+void hypreGPUKernel_compute_weak_rowsums( hypre_DeviceItem    &item,
+                                          HYPRE_Int      nr_of_rows,
+                                          bool           has_offd,
+                                          HYPRE_Int     *CF_marker,
+                                          HYPRE_Int     *A_diag_i,
+                                          HYPRE_Complex *A_diag_a,
+                                          HYPRE_Int     *Soc_diag_j,
+                                          HYPRE_Int     *A_offd_i,
+                                          HYPRE_Complex *A_offd_a,
+                                          HYPRE_Int     *Soc_offd_j,
+                                          HYPRE_Real    *rs,
+                                          HYPRE_Int      flag)
 {
    HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
@@ -93,19 +93,19 @@ void hypreCUDAKernel_compute_weak_rowsums( hypre_DeviceItem    &item,
 
 //-----------------------------------------------------------------------
 __global__
-void hypreCUDAKernel_compute_aff_afc( hypre_DeviceItem    &item,
-                                      HYPRE_Int      nr_of_rows,
-                                      HYPRE_Int     *AFF_diag_i,
-                                      HYPRE_Int     *AFF_diag_j,
-                                      HYPRE_Complex *AFF_diag_data,
-                                      HYPRE_Int     *AFF_offd_i,
-                                      HYPRE_Complex *AFF_offd_data,
-                                      HYPRE_Int     *AFC_diag_i,
-                                      HYPRE_Complex *AFC_diag_data,
-                                      HYPRE_Int     *AFC_offd_i,
-                                      HYPRE_Complex *AFC_offd_data,
-                                      HYPRE_Complex *rsW,
-                                      HYPRE_Complex *rsFC )
+void hypreGPUKernel_compute_aff_afc( hypre_DeviceItem    &item,
+                                     HYPRE_Int      nr_of_rows,
+                                     HYPRE_Int     *AFF_diag_i,
+                                     HYPRE_Int     *AFF_diag_j,
+                                     HYPRE_Complex *AFF_diag_data,
+                                     HYPRE_Int     *AFF_offd_i,
+                                     HYPRE_Complex *AFF_offd_data,
+                                     HYPRE_Int     *AFC_diag_i,
+                                     HYPRE_Complex *AFC_diag_data,
+                                     HYPRE_Int     *AFC_offd_i,
+                                     HYPRE_Complex *AFC_offd_data,
+                                     HYPRE_Complex *rsW,
+                                     HYPRE_Complex *rsFC )
 {
    HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
@@ -197,7 +197,7 @@ void hypreCUDAKernel_compute_aff_afc( hypre_DeviceItem    &item,
 
 
 //-----------------------------------------------------------------------
-void
+HYPRE_Int
 hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
                         HYPRE_Int      W_nr_of_rows,
                         HYPRE_Int      W_nr_of_cols,
@@ -212,6 +212,8 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
                         HYPRE_Int     *W_offd_i,
                         HYPRE_Int     *P_offd_i )
 {
+   hypre_GpuProfilingPushRange("extendWtoP");
+
    // row index shift P --> W
    HYPRE_Int *PWoffset = hypre_TAlloc(HYPRE_Int, P_nr_of_rows + 1, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
@@ -257,12 +259,7 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
                      W_diag_i,
                      P_diag_i );
 
-   HYPRE_ONEDPL_CALL( std::transform,
-                      P_diag_i,
-                      P_diag_i + P_nr_of_rows + 1,
-                      PWoffset,
-                      P_diag_i,
-                      std::plus<HYPRE_Int>() );
+   hypreDevice_IntAxpyn( P_diag_i, P_nr_of_rows + 1, PWoffset, P_diag_i, 1 );
 
    // P_offd_i
    if (W_offd_i && P_offd_i)
@@ -402,27 +399,31 @@ hypreDevice_extendWtoP( HYPRE_Int      P_nr_of_rows,
    hypreDevice_ScatterConstant(P_diag_data, W_nr_of_cols, PC_i, (HYPRE_Complex) 1.0);
 
    hypre_TFree(PC_i, HYPRE_MEMORY_DEVICE);
+
+   hypre_GpuProfilingPopRange();
+
+   return hypre_error_flag;
 }
 
 //-----------------------------------------------------------------------
 // For Ext+i Interp, scale AFF from the left and the right
 __global__
-void hypreCUDAKernel_compute_twiaff_w( hypre_DeviceItem    &item,
-                                       HYPRE_Int      nr_of_rows,
-                                       HYPRE_BigInt   first_index,
-                                       HYPRE_Int     *AFF_diag_i,
-                                       HYPRE_Int     *AFF_diag_j,
-                                       HYPRE_Complex *AFF_diag_data,
-                                       HYPRE_Complex *AFF_diag_data_old,
-                                       HYPRE_Int     *AFF_offd_i,
-                                       HYPRE_Int     *AFF_offd_j,
-                                       HYPRE_Complex *AFF_offd_data,
-                                       HYPRE_Int     *AFF_ext_i,
-                                       HYPRE_BigInt  *AFF_ext_j,
-                                       HYPRE_Complex *AFF_ext_data,
-                                       HYPRE_Complex *rsW,
-                                       HYPRE_Complex *rsFC,
-                                       HYPRE_Complex *rsFC_offd )
+void hypreGPUKernel_compute_twiaff_w( hypre_DeviceItem    &item,
+                                      HYPRE_Int      nr_of_rows,
+                                      HYPRE_BigInt   first_index,
+                                      HYPRE_Int     *AFF_diag_i,
+                                      HYPRE_Int     *AFF_diag_j,
+                                      HYPRE_Complex *AFF_diag_data,
+                                      HYPRE_Complex *AFF_diag_data_old,
+                                      HYPRE_Int     *AFF_offd_i,
+                                      HYPRE_Int     *AFF_offd_j,
+                                      HYPRE_Complex *AFF_offd_data,
+                                      HYPRE_Int     *AFF_ext_i,
+                                      HYPRE_BigInt  *AFF_ext_j,
+                                      HYPRE_Complex *AFF_ext_data,
+                                      HYPRE_Complex *rsW,
+                                      HYPRE_Complex *rsFC,
+                                      HYPRE_Complex *rsFC_offd )
 {
    HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
@@ -594,22 +595,22 @@ void hypreCUDAKernel_compute_twiaff_w( hypre_DeviceItem    &item,
 
 //-----------------------------------------------------------------------
 __global__
-void hypreCUDAKernel_compute_aff_afc_epe( hypre_DeviceItem    &item,
-                                          HYPRE_Int      nr_of_rows,
-                                          HYPRE_Int     *AFF_diag_i,
-                                          HYPRE_Int     *AFF_diag_j,
-                                          HYPRE_Complex *AFF_diag_data,
-                                          HYPRE_Int     *AFF_offd_i,
-                                          HYPRE_Int     *AFF_offd_j,
-                                          HYPRE_Complex *AFF_offd_data,
-                                          HYPRE_Int     *AFC_diag_i,
-                                          HYPRE_Complex *AFC_diag_data,
-                                          HYPRE_Int     *AFC_offd_i,
-                                          HYPRE_Complex *AFC_offd_data,
-                                          HYPRE_Complex *rsW,
-                                          HYPRE_Complex *dlam,
-                                          HYPRE_Complex *dtmp,
-                                          HYPRE_Complex *dtmp_offd )
+void hypreGPUKernel_compute_aff_afc_epe( hypre_DeviceItem    &item,
+                                         HYPRE_Int      nr_of_rows,
+                                         HYPRE_Int     *AFF_diag_i,
+                                         HYPRE_Int     *AFF_diag_j,
+                                         HYPRE_Complex *AFF_diag_data,
+                                         HYPRE_Int     *AFF_offd_i,
+                                         HYPRE_Int     *AFF_offd_j,
+                                         HYPRE_Complex *AFF_offd_data,
+                                         HYPRE_Int     *AFC_diag_i,
+                                         HYPRE_Complex *AFC_diag_data,
+                                         HYPRE_Int     *AFC_offd_i,
+                                         HYPRE_Complex *AFC_offd_data,
+                                         HYPRE_Complex *rsW,
+                                         HYPRE_Complex *dlam,
+                                         HYPRE_Complex *dtmp,
+                                         HYPRE_Complex *dtmp_offd )
 {
    HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
@@ -709,16 +710,16 @@ void hypreCUDAKernel_compute_aff_afc_epe( hypre_DeviceItem    &item,
 //-----------------------------------------------------------------------
 // For Ext+e Interp, compute D_lambda and D_tmp = D_mu / D_lambda
 __global__
-void hypreCUDAKernel_compute_dlam_dtmp( hypre_DeviceItem    &item,
-                                        HYPRE_Int      nr_of_rows,
-                                        HYPRE_Int     *AFF_diag_i,
-                                        HYPRE_Int     *AFF_diag_j,
-                                        HYPRE_Complex *AFF_diag_data,
-                                        HYPRE_Int     *AFF_offd_i,
-                                        HYPRE_Complex *AFF_offd_data,
-                                        HYPRE_Complex *rsFC,
-                                        HYPRE_Complex *dlam,
-                                        HYPRE_Complex *dtmp )
+void hypreGPUKernel_compute_dlam_dtmp( hypre_DeviceItem    &item,
+                                       HYPRE_Int      nr_of_rows,
+                                       HYPRE_Int     *AFF_diag_i,
+                                       HYPRE_Int     *AFF_diag_j,
+                                       HYPRE_Complex *AFF_diag_data,
+                                       HYPRE_Int     *AFF_offd_i,
+                                       HYPRE_Complex *AFF_offd_data,
+                                       HYPRE_Complex *rsFC,
+                                       HYPRE_Complex *dlam,
+                                       HYPRE_Complex *dtmp )
 {
    HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
@@ -822,7 +823,7 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(A_nr_of_rows, "warp", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_compute_weak_rowsums,
                      gDim, bDim,
                      A_nr_of_rows,
                      A_offd_nnz > 0,
@@ -880,7 +881,7 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    HYPRE_Complex *AFC_diag_a = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFC));
    HYPRE_Int *AFC_offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(AFC));
    HYPRE_Complex *AFC_offd_a = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(AFC));
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_aff_afc,
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_compute_aff_afc,
                      gDim, bDim,
                      W_nr_of_rows,
                      AFF_diag_i,
@@ -915,7 +916,6 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    P_diag_data = hypre_TAlloc(HYPRE_Complex, P_diag_nnz,     HYPRE_MEMORY_DEVICE);
    P_offd_i    = hypre_TAlloc(HYPRE_Int,     A_nr_of_rows + 1, HYPRE_MEMORY_DEVICE);
 
-   hypre_GpuProfilingPushRange("Extend matrix");
    hypreDevice_extendWtoP( A_nr_of_rows,
                            W_nr_of_rows,
                            hypre_ParCSRMatrixNumCols(W),
@@ -929,7 +929,6 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
                            P_diag_data,
                            hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(W)),
                            P_offd_i );
-   hypre_GpuProfilingPopRange();
 
    // final P
    P = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A),
@@ -966,7 +965,8 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
    hypre_GpuProfilingPushRange("Truncation");
    if (trunc_factor != 0.0 || max_elmts > 0)
    {
-      hypre_BoomerAMGInterpTruncationDevice(P, trunc_factor, max_elmts );
+      hypre_BoomerAMGInterpTruncationDevice(P, trunc_factor, max_elmts);
+      hypre_ParCSRMatrixCompressOffdMapDevice(P);
    }
    hypre_GpuProfilingPopRange();
 
@@ -1029,7 +1029,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(A_nr_of_rows, "warp",   bDim);
 
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_compute_weak_rowsums,
                      gDim, bDim,
                      A_nr_of_rows,
                      A_offd_nnz > 0,
@@ -1101,7 +1101,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
                       send_buf );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
    hypre_ForceSyncComputeStream(hypre_handle());
 #endif
@@ -1145,7 +1145,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
       AFF_ext_bigj = hypre_CSRMatrixBigJ(AFF_ext);
       AFF_ext_a = hypre_CSRMatrixData(AFF_ext);
    }
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_twiaff_w,
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_compute_twiaff_w,
                      gDim, bDim,
                      W_nr_of_rows,
                      AFF_first_row_idx,
@@ -1186,7 +1186,6 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    P_diag_data = hypre_TAlloc(HYPRE_Complex, P_diag_nnz,     HYPRE_MEMORY_DEVICE);
    P_offd_i    = hypre_TAlloc(HYPRE_Int,     A_nr_of_rows + 1, HYPRE_MEMORY_DEVICE);
 
-   hypre_GpuProfilingPushRange("Extend matrix");
    hypreDevice_extendWtoP( A_nr_of_rows,
                            W_nr_of_rows,
                            hypre_ParCSRMatrixNumCols(W),
@@ -1200,7 +1199,6 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
                            P_diag_data,
                            hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(W)),
                            P_offd_i );
-   hypre_GpuProfilingPopRange();
 
    // final P
    P = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A),
@@ -1237,7 +1235,8 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    hypre_GpuProfilingPushRange("Truncation");
    if (trunc_factor != 0.0 || max_elmts > 0)
    {
-      hypre_BoomerAMGInterpTruncationDevice(P, trunc_factor, max_elmts );
+      hypre_BoomerAMGInterpTruncationDevice(P, trunc_factor, max_elmts);
+      hypre_ParCSRMatrixCompressOffdMapDevice(P);
    }
    hypre_GpuProfilingPopRange();
 
@@ -1299,7 +1298,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(A_nr_of_rows, "warp", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_weak_rowsums,
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_compute_weak_rowsums,
                      gDim, bDim,
                      A_nr_of_rows,
                      A_offd_nnz > 0,
@@ -1360,7 +1359,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    HYPRE_Complex *AFC_diag_a = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFC));
    HYPRE_Int *AFC_offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(AFC));
    HYPRE_Complex *AFC_offd_a = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(AFC));
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_dlam_dtmp,
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_compute_dlam_dtmp,
                      gDim, bDim,
                      W_nr_of_rows,
                      AFF_diag_i,
@@ -1399,7 +1398,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
                       send_buf );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
    hypre_ForceSyncComputeStream(hypre_handle());
 #endif
@@ -1415,7 +1414,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    /* 6. Form matrix ~{A_FC}, (return twAFC in AFC data structure) */
    hypre_GpuProfilingPushRange("Compute interp matrix");
    gDim = hypre_GetDefaultDeviceGridDimension(W_nr_of_rows, "warp", bDim);
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_compute_aff_afc_epe,
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_compute_aff_afc_epe,
                      gDim, bDim,
                      W_nr_of_rows,
                      AFF_diag_i,
@@ -1456,7 +1455,6 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    P_diag_data = hypre_TAlloc(HYPRE_Complex, P_diag_nnz,     HYPRE_MEMORY_DEVICE);
    P_offd_i    = hypre_TAlloc(HYPRE_Int,     A_nr_of_rows + 1, HYPRE_MEMORY_DEVICE);
 
-   hypre_GpuProfilingPushRange("Extend matrix");
    hypreDevice_extendWtoP( A_nr_of_rows,
                            W_nr_of_rows,
                            hypre_ParCSRMatrixNumCols(W),
@@ -1470,7 +1468,6 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
                            P_diag_data,
                            hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(W)),
                            P_offd_i );
-   hypre_GpuProfilingPopRange();
 
    // final P
    P = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A),
@@ -1507,7 +1504,8 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    hypre_GpuProfilingPushRange("Truncation");
    if (trunc_factor != 0.0 || max_elmts > 0)
    {
-      hypre_BoomerAMGInterpTruncationDevice(P, trunc_factor, max_elmts );
+      hypre_BoomerAMGInterpTruncationDevice(P, trunc_factor, max_elmts);
+      hypre_ParCSRMatrixCompressOffdMapDevice(P);
    }
    hypre_GpuProfilingPopRange();
 
@@ -1527,4 +1525,4 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    return hypre_error_flag;
 }
 
-#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#endif // defined(HYPRE_USING_GPU)

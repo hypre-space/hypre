@@ -26,10 +26,12 @@ HEADERS =\
  general.h\
  int_array.h\
  memory.h\
+ memory_tracker.h\
  HYPRE_utilities.h\
  mpistubs.h\
  threading.h\
  timing.h\
+ magma.h\
  _hypre_onedpl.hpp\
  _hypre_utilities.h\
  _hypre_utilities.hpp
@@ -47,7 +49,10 @@ FILES =\
  log.c\
  complex.c\
  error.c\
+ int_array.c\
  hopscotch_hash.c\
+ magma.c\
+ memory_tracker.c\
  merge_sort.c\
  mmio.c\
  mpi_comm_f2c.c\
@@ -59,6 +64,7 @@ FILES =\
  mpistubs.c\
  qsplit.c\
  random.c\
+ state.c\
  threading.c\
  timer.c\
  timing.c\
@@ -68,7 +74,7 @@ CUFILES=\
  device_utils.c\
  general.c\
  handle.c\
- int_array.c\
+ int_array_device.c\
  memory.c\
  omp_device.c\
  nvtx.c
@@ -109,7 +115,7 @@ distclean: clean
 
 libHYPRE_utilities.a: ${OBJS}
 	@echo  "Building $@ ... "
-	${AR} $@ *.o
+	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
 libHYPRE_utilities.so libHYPRE_utilities.dylib: ${OBJS}

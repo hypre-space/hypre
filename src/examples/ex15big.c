@@ -237,7 +237,7 @@ int main (int argc, char *argv[])
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
    /* Initialize HYPRE */
-   HYPRE_Init();
+   HYPRE_Initialize();
 
    /* Print GPU info */
    /* HYPRE_PrintDeviceInfo(); */

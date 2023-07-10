@@ -21,7 +21,7 @@
 HYPRE_Int buildMatrixEntries(MPI_Comm comm,
                              HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
                              HYPRE_Int Px, HYPRE_Int Py, HYPRE_Int Pz,
-                             HYPRE_Int cx, HYPRE_Int cy, HYPRE_Int cz,
+                             HYPRE_Real cx, HYPRE_Real cy, HYPRE_Real cz,
                              HYPRE_BigInt *ilower, HYPRE_BigInt *iupper,
                              HYPRE_BigInt *jlower, HYPRE_BigInt *jupper,
                              HYPRE_Int *nrows, HYPRE_BigInt *num_nonzeros,
@@ -80,7 +80,7 @@ main( hypre_int  argc,
    HYPRE_Int                 time_index;
    HYPRE_Int                 print_usage;
    HYPRE_MemoryLocation      memory_location;
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_ExecutionPolicy    default_exec_policy;
 #endif
    char                      memory_location_name[8];
@@ -115,7 +115,7 @@ main( hypre_int  argc,
 
    /*-----------------------------------------------------------------
     * GPU Device binding
-    * Must be done before HYPRE_Init() and should not be changed after
+    * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
    hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
 
@@ -123,7 +123,7 @@ main( hypre_int  argc,
    /* Initialize Hypre: must be the first Hypre function to call */
    time_index = hypre_InitializeTiming("Hypre init");
    hypre_BeginTiming(time_index);
-   HYPRE_Init();
+   HYPRE_Initialize();
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
@@ -144,7 +144,7 @@ main( hypre_int  argc,
    cy = 2.0;
    cz = 3.0;
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    default_exec_policy = HYPRE_EXEC_DEVICE;
 #endif
    memory_location     = HYPRE_MEMORY_DEVICE;
@@ -183,9 +183,9 @@ main( hypre_int  argc,
       else if ( strcmp(argv[arg_index], "-c") == 0 )
       {
          arg_index++;
-         cx = atof(argv[arg_index++]);
-         cy = atof(argv[arg_index++]);
-         cz = atof(argv[arg_index++]);
+         cx = (HYPRE_Real)atof(argv[arg_index++]);
+         cy = (HYPRE_Real)atof(argv[arg_index++]);
+         cz = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-mode") == 0 )
       {
@@ -289,7 +289,7 @@ main( hypre_int  argc,
       hypre_printf("\n");
    }
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_HandleDefaultExecPolicy(hypre_handle()) = default_exec_policy;
 #endif
 
@@ -451,9 +451,9 @@ buildMatrixEntries(MPI_Comm            comm,
                    HYPRE_Int           Px,
                    HYPRE_Int           Py,
                    HYPRE_Int           Pz,
-                   HYPRE_Int           cx,
-                   HYPRE_Int           cy,
-                   HYPRE_Int           cz,
+                   HYPRE_Real           cx,
+                   HYPRE_Real           cy,
+                   HYPRE_Real           cz,
                    HYPRE_BigInt       *ilower_ptr,
                    HYPRE_BigInt       *iupper_ptr,
                    HYPRE_BigInt       *jlower_ptr,

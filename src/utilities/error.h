@@ -14,8 +14,18 @@
  * Global variable used in hypre error checking
  *--------------------------------------------------------------------------*/
 
-extern HYPRE_Int hypre__global_error;
-#define hypre_error_flag  hypre__global_error
+typedef struct
+{
+   HYPRE_Int  error_flag;
+   HYPRE_Int  print_to_memory;
+   char      *memory;
+   HYPRE_Int  mem_sz;
+   HYPRE_Int  msg_sz;
+
+} hypre_Error;
+
+extern hypre_Error hypre__global_error;
+#define hypre_error_flag  hypre__global_error.error_flag
 
 /*--------------------------------------------------------------------------
  * HYPRE error macros
@@ -36,6 +46,8 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #elif defined(HYPRE_USING_HIP)
 /* FIXME: Currently, asserts in device kernels in HIP do not behave well */
 #define hypre_device_assert(EX) do { if (0) { static_cast<void> (EX); } } while (0)
+#elif defined(HYPRE_USING_SYCL)
+#define hypre_device_assert(EX) assert(EX)
 #endif
 #else /* #ifdef HYPRE_DEBUG */
 /* this is to silence compiler's unused variable warnings */

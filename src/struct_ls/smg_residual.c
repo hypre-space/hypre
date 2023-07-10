@@ -32,7 +32,7 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_SMGResidualCreate( )
+hypre_SMGResidualCreate( void )
 {
    hypre_SMGResidualData *residual_data;
 

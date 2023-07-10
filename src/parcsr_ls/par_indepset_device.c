@@ -12,20 +12,20 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 __global__ void
-hypreCUDAKernel_IndepSetMain(hypre_DeviceItem &item,
-                             HYPRE_Int   graph_diag_size,
-                             HYPRE_Int  *graph_diag,
-                             HYPRE_Real *measure_diag,
-                             HYPRE_Real *measure_offd,
-                             HYPRE_Int  *S_diag_i,
-                             HYPRE_Int  *S_diag_j,
-                             HYPRE_Int  *S_offd_i,
-                             HYPRE_Int  *S_offd_j,
-                             HYPRE_Int  *IS_marker_diag,
-                             HYPRE_Int  *IS_marker_offd,
-                             HYPRE_Int   IS_offd_temp_mark)
+hypreGPUKernel_IndepSetMain(hypre_DeviceItem &item,
+                            HYPRE_Int   graph_diag_size,
+                            HYPRE_Int  *graph_diag,
+                            HYPRE_Real *measure_diag,
+                            HYPRE_Real *measure_offd,
+                            HYPRE_Int  *S_diag_i,
+                            HYPRE_Int  *S_diag_j,
+                            HYPRE_Int  *S_offd_i,
+                            HYPRE_Int  *S_offd_j,
+                            HYPRE_Int  *IS_marker_diag,
+                            HYPRE_Int  *IS_marker_offd,
+                            HYPRE_Int   IS_offd_temp_mark)
 {
    HYPRE_Int warp_id = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
@@ -107,12 +107,12 @@ hypreCUDAKernel_IndepSetMain(hypre_DeviceItem &item,
 }
 
 __global__ void
-hypreCUDAKernel_IndepSetFixMarker(hypre_DeviceItem &item,
-                                  HYPRE_Int  *IS_marker_diag,
-                                  HYPRE_Int   num_elmts_send,
-                                  HYPRE_Int  *send_map_elmts,
-                                  HYPRE_Int  *int_send_buf,
-                                  HYPRE_Int   IS_offd_temp_mark)
+hypreGPUKernel_IndepSetFixMarker(hypre_DeviceItem &item,
+                                 HYPRE_Int  *IS_marker_diag,
+                                 HYPRE_Int   num_elmts_send,
+                                 HYPRE_Int  *send_map_elmts,
+                                 HYPRE_Int  *int_send_buf,
+                                 HYPRE_Int   IS_offd_temp_mark)
 {
    HYPRE_Int thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
@@ -163,7 +163,7 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
    /*------------------------------------------------------------------
     * Initialize IS_marker by putting all nodes in the IS (marked by 1)
     *------------------------------------------------------------------*/
-   hypreDevice_ScatterConstant(IS_marker_diag, graph_diag_size, graph_diag, 1);
+   hypreDevice_ScatterConstant(IS_marker_diag, graph_diag_size, graph_diag, (HYPRE_Int) 1);
 
    /*-------------------------------------------------------
     * Remove nodes from the initial independent set
@@ -171,7 +171,7 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(graph_diag_size, "warp", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_IndepSetMain, gDim, bDim,
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_IndepSetMain, gDim, bDim,
                      graph_diag_size, graph_diag, measure_diag, measure_offd,
                      S_diag_i, S_diag_j, S_offd_i, S_offd_j,
                      IS_marker_diag, IS_marker_offd, IS_offd_temp_mark );
@@ -192,7 +192,7 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
    /* adjust IS_marker_diag from the received */
    gDim = hypre_GetDefaultDeviceGridDimension(num_elmts_send, "thread", bDim);
 
-   HYPRE_GPU_LAUNCH( hypreCUDAKernel_IndepSetFixMarker, gDim, bDim,
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_IndepSetFixMarker, gDim, bDim,
                      IS_marker_diag, num_elmts_send, send_map_elmts,
                      int_send_buf, IS_offd_temp_mark );
 
@@ -252,4 +252,4 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#endif // #if defined(HYPRE_USING_GPU)

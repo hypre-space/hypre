@@ -173,7 +173,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    /* Figure out the processor grid (N x N).  The local problem
       size for the interior nodes is indicated by n (n x n).
       pi and pj indicate position in the processor grid. */
-   N  = sqrt(num_procs);
+   N  = hypre_sqrt(num_procs);
    h  = 1.0 / (N * n + 1); /* note that when calculating h we must
                           remember to count the bounday nodes */
    h2 = h * h;

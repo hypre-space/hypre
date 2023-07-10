@@ -644,7 +644,7 @@ utilities_FortranMatrixFNorm( utilities_FortranMatrix* mtx )
       p += jump;
    }
 
-   norm = sqrt(norm);
+   norm = hypre_sqrt(norm);
    return norm;
 }
 

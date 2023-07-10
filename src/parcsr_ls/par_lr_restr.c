@@ -1692,7 +1692,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    HYPRE_Complex   *R_diag_a;
    HYPRE_Int       *R_diag_i;
    HYPRE_Int       *R_diag_j;
-   HYPRE_Complex      *R_offd_a;
+   HYPRE_Complex   *R_offd_a;
    HYPRE_Int       *R_offd_i;
    HYPRE_Int       *R_offd_j;
    HYPRE_BigInt    *col_map_offd_R;
@@ -1702,7 +1702,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    HYPRE_Int        my_id, num_procs;
    HYPRE_BigInt     total_global_cpts/*, my_first_cpt*/;
    HYPRE_Int        nnz_diag, nnz_offd, cnt_diag, cnt_offd;
-   HYPRE_BigInt       *send_buf_i;
+   HYPRE_BigInt    *send_buf_i;
 
    /* local size */
    HYPRE_Int n_fine = hypre_CSRMatrixNumRows(A_diag);
@@ -1711,6 +1711,8 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+
+   HYPRE_MemoryLocation memory_location_R = hypre_ParCSRMatrixMemoryLocation(A);
 
    /*-------------- global number of C points and my start position */
    /*my_first_cpt = num_cpts_global[0];*/
@@ -1921,15 +1923,15 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
    nnz_offd = hypre_CSRMatrixNumNonzeros(Z_offd);
 
    /*------------- allocate arrays */
-   R_diag_i = hypre_CTAlloc(HYPRE_Int,  n_cpts + 1, HYPRE_MEMORY_DEVICE);
-   R_diag_j = hypre_CTAlloc(HYPRE_Int,  nnz_diag, HYPRE_MEMORY_DEVICE);
-   R_diag_a = hypre_CTAlloc(HYPRE_Complex, nnz_diag, HYPRE_MEMORY_DEVICE);
+   R_diag_i = hypre_CTAlloc(HYPRE_Int,  n_cpts + 1, memory_location_R);
+   R_diag_j = hypre_CTAlloc(HYPRE_Int,  nnz_diag, memory_location_R);
+   R_diag_a = hypre_CTAlloc(HYPRE_Complex, nnz_diag, memory_location_R);
 
    /* not in ``if num_procs > 1'',
     * allocation needed even for empty CSR */
-   R_offd_i = hypre_CTAlloc(HYPRE_Int,  n_cpts + 1, HYPRE_MEMORY_DEVICE);
-   R_offd_j = hypre_CTAlloc(HYPRE_Int,  nnz_offd, HYPRE_MEMORY_DEVICE);
-   R_offd_a = hypre_CTAlloc(HYPRE_Complex, nnz_offd, HYPRE_MEMORY_DEVICE);
+   R_offd_i = hypre_CTAlloc(HYPRE_Int,  n_cpts + 1, memory_location_R);
+   R_offd_j = hypre_CTAlloc(HYPRE_Int,  nnz_offd, memory_location_R);
+   R_offd_a = hypre_CTAlloc(HYPRE_Complex, nnz_offd, memory_location_R);
 
    /* redundant */
    R_diag_i[0] = 0;
@@ -2035,13 +2037,11 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
                                      HYPRE_Int             debug_flag,
                                      hypre_ParCSRMatrix  **R_ptr)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("RestrNeumannAIR");
-#endif
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -2060,9 +2060,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
                                                      debug_flag, R_ptr);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }

@@ -37,3 +37,16 @@ considered too slow when
 When this condition is fulfilled the hybrid solver switches from a diagonally
 scaled Krylov solver to a preconditioned solver.
 
+.. Add blank lines to help with navigation pane formatting
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|

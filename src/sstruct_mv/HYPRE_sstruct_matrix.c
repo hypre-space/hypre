@@ -139,19 +139,23 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
       }
    }
 
-   hypre_SStructMatrixIJMatrix(matrix)       = NULL;
-   hypre_SStructMatrixParCSRMatrix(matrix)   = NULL;
-   hypre_SStructMatrixSEntries(matrix)       = hypre_TAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
-   hypre_SStructMatrixUEntries(matrix)       = hypre_TAlloc(HYPRE_Int, usize, HYPRE_MEMORY_HOST);
-   hypre_SStructMatrixEntriesSize(matrix)    = usize;
-   hypre_SStructMatrixTmpColCoords(matrix)   = NULL;
-   hypre_SStructMatrixTmpCoeffs(matrix)      = NULL;
-   hypre_SStructMatrixNSSymmetric(matrix)    = 0;
-   hypre_SStructMatrixGlobalSize(matrix)     = 0;
-   hypre_SStructMatrixRefCount(matrix)       = 1;
+   hypre_SStructMatrixIJMatrix(matrix)           = NULL;
+   hypre_SStructMatrixParCSRMatrix(matrix)       = NULL;
+   hypre_SStructMatrixSEntries(matrix)           = hypre_TAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
+   hypre_SStructMatrixUEntries(matrix)           = hypre_TAlloc(HYPRE_Int, usize, HYPRE_MEMORY_HOST);
+   hypre_SStructMatrixEntriesSize(matrix)        = usize;
+   hypre_SStructMatrixTmpRowCoords(matrix)       = NULL;
+   hypre_SStructMatrixTmpColCoords(matrix)       = NULL;
+   hypre_SStructMatrixTmpCoeffs(matrix)          = NULL;
+   hypre_SStructMatrixTmpRowCoordsDevice(matrix) = NULL;
+   hypre_SStructMatrixTmpColCoordsDevice(matrix) = NULL;
+   hypre_SStructMatrixTmpCoeffsDevice(matrix)    = NULL;
+   hypre_SStructMatrixNSSymmetric(matrix)        = 0;
+   hypre_SStructMatrixGlobalSize(matrix)         = 0;
+   hypre_SStructMatrixRefCount(matrix)           = 1;
 
    /* GEC0902 setting the default of the object_type to HYPRE_SSTRUCT */
-   hypre_SStructMatrixObjectType(matrix) = HYPRE_SSTRUCT;
+   hypre_SStructMatrixObjectType(matrix)         = HYPRE_SSTRUCT;
 
    *matrix_ptr = matrix;
 
@@ -173,14 +177,15 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
    HYPRE_Int           ****centries;
    hypre_Index            *dom_stride;
    hypre_Index            *ran_stride;
-   HYPRE_BigInt           *tmp_col_coords;
-   HYPRE_Complex          *tmp_coeffs;
 
    HYPRE_Int               nvars;
    HYPRE_Int               part, vi, vj;
+   HYPRE_MemoryLocation    memory_location;
 
    if (matrix)
    {
+      memory_location = hypre_SStructMatrixMemoryLocation(matrix);
+
       hypre_SStructMatrixRefCount(matrix) --;
       if (hypre_SStructMatrixRefCount(matrix) == 0)
       {
@@ -193,8 +198,6 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
          centries       = hypre_SStructMatrixCEntries(matrix);
          dom_stride     = hypre_SStructMatrixDomainStride(matrix);
          ran_stride     = hypre_SStructMatrixRangeStride(matrix);
-         tmp_col_coords = hypre_SStructMatrixTmpColCoords(matrix);
-         tmp_coeffs     = hypre_SStructMatrixTmpCoeffs(matrix);
 
          for (part = 0; part < nparts; part++)
          {
@@ -217,6 +220,7 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
             hypre_SStructPMatrixDestroy(pmatrices[part]);
          }
          HYPRE_SStructGraphDestroy(graph);
+
          hypre_TFree(splits, HYPRE_MEMORY_HOST);
          hypre_TFree(pmatrices, HYPRE_MEMORY_HOST);
          hypre_TFree(symmetric, HYPRE_MEMORY_HOST);
@@ -224,11 +228,16 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
          hypre_TFree(centries, HYPRE_MEMORY_HOST);
          hypre_TFree(dom_stride, HYPRE_MEMORY_HOST);
          hypre_TFree(ran_stride, HYPRE_MEMORY_HOST);
-         hypre_TFree(tmp_col_coords, HYPRE_MEMORY_HOST);
-         hypre_TFree(tmp_coeffs, HYPRE_MEMORY_HOST);
-         HYPRE_IJMatrixDestroy(hypre_SStructMatrixIJMatrix(matrix));
          hypre_TFree(hypre_SStructMatrixSEntries(matrix), HYPRE_MEMORY_HOST);
          hypre_TFree(hypre_SStructMatrixUEntries(matrix), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_SStructMatrixTmpRowCoords(matrix), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_SStructMatrixTmpColCoords(matrix), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_SStructMatrixTmpCoeffs(matrix), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_SStructMatrixTmpRowCoordsDevice(matrix), memory_location);
+         hypre_TFree(hypre_SStructMatrixTmpColCoordsDevice(matrix), memory_location);
+         hypre_TFree(hypre_SStructMatrixTmpCoeffsDevice(matrix), memory_location);
+         HYPRE_IJMatrixDestroy(hypre_SStructMatrixIJMatrix(matrix));
+
          hypre_TFree(matrix, HYPRE_MEMORY_HOST);
       }
    }
@@ -454,7 +463,7 @@ HYPRE_SStructMatrixAddToValues( HYPRE_SStructMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-/* ONLY3D */
+/* ONLY3D - RDF: Why? */
 
 HYPRE_Int
 HYPRE_SStructMatrixAddFEMValues( HYPRE_SStructMatrix  matrix,
@@ -470,8 +479,9 @@ HYPRE_SStructMatrixAddFEMValues( HYPRE_SStructMatrix  matrix,
    HYPRE_Int          *fem_entries  = hypre_SStructGraphFEMPEntries(graph, part);
    HYPRE_Int          *fem_vars     = hypre_SStructGridFEMPVars(grid, part);
    hypre_Index        *fem_offsets  = hypre_SStructGridFEMPOffsets(grid, part);
-   HYPRE_Int           s, i, d, vindex[3];
+   HYPRE_Int           s, i, d, vindex[HYPRE_MAXDIM];
 
+   /* Set one coefficient at a time */
    for (s = 0; s < fem_nsparse; s++)
    {
       i = fem_sparse_i[s];
@@ -508,7 +518,7 @@ HYPRE_SStructMatrixGetValues( HYPRE_SStructMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-/* ONLY3D */
+/* ONLY3D - RDF: Why? */
 
 HYPRE_Int
 HYPRE_SStructMatrixGetFEMValues( HYPRE_SStructMatrix  matrix,
@@ -524,7 +534,7 @@ HYPRE_SStructMatrixGetFEMValues( HYPRE_SStructMatrix  matrix,
    HYPRE_Int          *fem_entries  = hypre_SStructGraphFEMPEntries(graph, part);
    HYPRE_Int          *fem_vars     = hypre_SStructGridFEMPVars(grid, part);
    hypre_Index        *fem_offsets  = hypre_SStructGridFEMPOffsets(grid, part);
-   HYPRE_Int           s, i, d, vindex[3];
+   HYPRE_Int           s, i, d, vindex[HYPRE_MAXDIM];
 
    for (s = 0; s < fem_nsparse; s++)
    {
@@ -719,6 +729,75 @@ HYPRE_SStructMatrixGetBoxValues2( HYPRE_SStructMatrix  matrix,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructMatrixAddFEMBoxValues(HYPRE_SStructMatrix  matrix,
+                                   HYPRE_Int            part,
+                                   HYPRE_Int           *ilower,
+                                   HYPRE_Int           *iupper,
+                                   HYPRE_Complex       *values)
+{
+   HYPRE_Int             ndim            = hypre_SStructMatrixNDim(matrix);
+   hypre_SStructGraph   *graph           = hypre_SStructMatrixGraph(matrix);
+   hypre_SStructGrid    *grid            = hypre_SStructGraphGrid(graph);
+   HYPRE_MemoryLocation  memory_location = hypre_SStructMatrixMemoryLocation(matrix);
+
+   HYPRE_Int             fem_nsparse     = hypre_SStructGraphFEMPNSparse(graph, part);
+   HYPRE_Int            *fem_sparse_i    = hypre_SStructGraphFEMPSparseI(graph, part);
+   HYPRE_Int            *fem_entries     = hypre_SStructGraphFEMPEntries(graph, part);
+   HYPRE_Int            *fem_vars        = hypre_SStructGridFEMPVars(grid, part);
+   hypre_Index          *fem_offsets     = hypre_SStructGridFEMPOffsets(grid, part);
+
+   HYPRE_Complex        *tvalues;
+   hypre_Box            *box;
+
+   HYPRE_Int             s, i, d, vilower[HYPRE_MAXDIM], viupper[HYPRE_MAXDIM];
+   HYPRE_Int             ei, vi, nelts;
+
+   /* Set one coefficient at a time */
+   box = hypre_BoxCreate(ndim);
+   hypre_BoxSetExtents(box, ilower, iupper);
+   nelts = hypre_BoxVolume(box);
+   tvalues = hypre_TAlloc(HYPRE_Complex, nelts, memory_location);
+
+   for (s = 0; s < fem_nsparse; s++)
+   {
+      i = fem_sparse_i[s];
+      for (d = 0; d < ndim; d++)
+      {
+         /* note: these offsets are different from what the user passes in */
+         vilower[d] = ilower[d] + hypre_IndexD(fem_offsets[i], d);
+         viupper[d] = iupper[d] + hypre_IndexD(fem_offsets[i], d);
+      }
+
+#if defined(HYPRE_USING_GPU)
+      if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+      {
+         hypreDevice_ComplexStridedCopy(nelts, fem_nsparse, values + s, tvalues);
+      }
+      else
+#endif
+      {
+         for (ei = 0, vi = s; ei < nelts; ei ++, vi += fem_nsparse)
+         {
+            tvalues[ei] = values[vi];
+         }
+      }
+
+      HYPRE_SStructMatrixAddToBoxValues(matrix, part, vilower, viupper,
+                                        fem_vars[i], 1, &fem_entries[s],
+                                        tvalues);
+   }
+
+   /* Free memory */
+   hypre_TFree(tvalues, memory_location);
+   hypre_BoxDestroy(box);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
 {
    HYPRE_Int               ndim            = hypre_SStructMatrixNDim(matrix);
@@ -731,6 +810,7 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
 
    HYPRE_Int               part;
 
+   void                   *par_u;
    hypre_CommInfo         *comm_info;
    HYPRE_Int               send_part,    recv_part;
    HYPRE_Int               send_var,     recv_var;
@@ -903,6 +983,10 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
 
    /* U-matrix */
    hypre_SStructUMatrixAssemble(matrix);
+
+   /* Update ParCSRMatrix pointer */
+   HYPRE_IJMatrixGetObject(hypre_SStructMatrixIJMatrix(matrix), &par_u);
+   hypre_SStructMatrixParCSRMatrix(matrix) = (hypre_ParCSRMatrix*) par_u;
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -1365,6 +1449,8 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
    HYPRE_Int               num_symm_calls;
    char                    new_filename[255];
 
+   HYPRE_MemoryLocation memory_location = hypre_HandleMemoryLocation(hypre_handle());
+
    hypre_MPI_Comm_rank(comm, &myid);
 
    /*-----------------------------------------------------------
@@ -1468,9 +1554,9 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
    h_parmatrix = (hypre_ParCSRMatrix*) hypre_IJMatrixObject(h_umatrix);
 
    /* Move ParCSRMatrix to device memory if necessary */
-   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
-      parmatrix = hypre_ParCSRMatrixClone_v2(h_parmatrix, 1, HYPRE_MEMORY_DEVICE);
+      parmatrix = hypre_ParCSRMatrixClone_v2(h_parmatrix, 1, memory_location);
    }
    else
    {
@@ -1486,6 +1572,7 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
    umatrix = hypre_SStructMatrixIJMatrix(matrix);
    hypre_IJMatrixDestroyParCSR(umatrix);
    hypre_IJMatrixObject(umatrix) = (void*) parmatrix;
+   hypre_SStructMatrixParCSRMatrix(matrix) = (hypre_ParCSRMatrix*) parmatrix;
    hypre_IJMatrixAssembleFlag(umatrix) = 1;
 
    /* Assemble SStructMatrix */

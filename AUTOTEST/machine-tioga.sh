@@ -49,11 +49,11 @@ save="tioga"
 ## HIP  ##
 ##########
 
-module -q load rocm/5.1.1
+module -q load rocm/5.2.0
 
-# HIP without UM [benchmark, struct]
+# HIP without UM [benchmark, struct, ams]
 co="--with-hip --with-MPI-include=${MPICH_DIR}/include --with-MPI-lib-dirs=${MPICH_DIR}/lib --with-MPI-libs=mpi --with-gpu-arch='gfx90a' CC=cc CXX=CC"
-ro="-bench -struct -rt -mpibind -save ${save}"
+ro="-ams -bench -struct -rt -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-hip-nonum
 
@@ -62,9 +62,14 @@ co="--with-hip --enable-unified-memory --enable-single --enable-debug --with-MPI
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-hip-um-single
 
+# run on CPU
+co="--with-hip --with-test-using-host --with-memory-tracker --enable-debug --with-MPI-include=${MPICH_DIR}/include --with-MPI-lib-dirs=${MPICH_DIR}/lib --with-MPI-libs=mpi --with-gpu-arch='gfx90a' CC=cc CXX=CC"
+ro="-ij-noilu -ams -struct -sstruct -rt -D HYPRE_NO_SAVED"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh basic $output_dir/basic-hip-cpu
+
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do
    echo $errfile >&2
 done
-

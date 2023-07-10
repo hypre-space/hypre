@@ -17,7 +17,7 @@ hypre_SMGCreate( MPI_Comm  comm )
 {
    hypre_SMGData *smg_data;
 
-   smg_data = hypre_CTAlloc(hypre_SMGData,  1, HYPRE_MEMORY_HOST);
+   smg_data = hypre_CTAlloc(hypre_SMGData, 1, HYPRE_MEMORY_HOST);
 
    (smg_data -> comm)        = comm;
    (smg_data -> time_index)  = hypre_InitializeTiming("SMG");
@@ -37,11 +37,11 @@ hypre_SMGCreate( MPI_Comm  comm )
    (smg_data -> logging) = 0;
    (smg_data -> print_level) = 0;
 
+   (smg_data -> memory_location) = hypre_HandleMemoryLocation(hypre_handle());
+
    /* initialize */
    (smg_data -> num_levels) = -1;
-#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   (smg_data -> devicelevel) = 200;
-#endif
+
    return (void *) smg_data;
 }
 
@@ -64,6 +64,8 @@ hypre_SMGDestroy( void *smg_vdata )
          hypre_TFree(smg_data -> norms, HYPRE_MEMORY_HOST);
          hypre_TFree(smg_data -> rel_norms, HYPRE_MEMORY_HOST);
       }
+
+      HYPRE_MemoryLocation memory_location = smg_data -> memory_location;
 
       if ((smg_data -> num_levels) > -1)
       {
@@ -109,7 +111,7 @@ hypre_SMGDestroy( void *smg_vdata )
             hypre_StructVectorDestroy(smg_data -> tb_l[l + 1]);
             hypre_StructVectorDestroy(smg_data -> tx_l[l + 1]);
          }
-         hypre_TFree(smg_data -> data, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(smg_data -> data, memory_location);
          hypre_TFree(smg_data -> grid_l, HYPRE_MEMORY_HOST);
          hypre_TFree(smg_data -> PT_grid_l, HYPRE_MEMORY_HOST);
          hypre_TFree(smg_data -> A_l, HYPRE_MEMORY_HOST);

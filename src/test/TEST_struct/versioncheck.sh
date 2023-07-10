@@ -19,10 +19,10 @@ if [ -d ../../../.git ]; then
   DEVBRANCH=`git rev-parse --abbrev-ref HEAD`
   if [ -n "$DEVSTRING" ]; then
     if [ "$DEVBRANCH" != "master" ]; then
-      echo "Using HYPRE_DEVELOP_STRING: $DEVSTRING (not main development branch)" \
+      echo "Using HYPRE_DEVELOP_STRING: $DEVSTRING (branch $DEVBRANCH; not the develop branch)" \
        > ${TNAME}.testdatacheck
     else
-      echo "Using HYPRE_DEVELOP_STRING: $DEVSTRING (main development branch $DEVBRANCH)" \
+      echo "Using HYPRE_DEVELOP_STRING: $DEVSTRING (branch $DEVBRANCH; the develop branch)" \
        > ${TNAME}.testdatacheck
     fi
   fi

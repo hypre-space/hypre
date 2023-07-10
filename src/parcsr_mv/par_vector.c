@@ -18,11 +18,11 @@ HYPRE_Int hypre_FillResponseParToVectorAll(void*, HYPRE_Int, HYPRE_Int, void*, M
 
 /*--------------------------------------------------------------------------
  * hypre_ParVectorCreate
+ *
+ * If create is called and partitioning is NOT null, then it is assumed that it
+ * is array of length 2 containing the start row of the calling processor
+ * followed by the start row of the next processor - AHB 6/05
  *--------------------------------------------------------------------------*/
-
-/* If create is called and partitioning is NOT null, then it is assumed that it
-   is array of length 2 containing the start row of the calling processor
-   followed by the start row of the next processor - AHB 6/05 */
 
 hypre_ParVector *
 hypre_ParVectorCreate( MPI_Comm      comm,
@@ -213,6 +213,22 @@ hypre_ParVectorSetNumVectors( hypre_ParVector *vector,
 #endif
 
 /*--------------------------------------------------------------------------
+ * hypre_ParVectorResize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorResize( hypre_ParVector *vector,
+                       HYPRE_Int        num_vectors )
+{
+   if (vector)
+   {
+      hypre_SeqVectorResize(hypre_ParVectorLocalVector(vector), num_vectors);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ParVectorRead
  *--------------------------------------------------------------------------*/
 
@@ -312,6 +328,18 @@ hypre_ParVectorSetConstantValues( hypre_ParVector *v,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_ParVectorSetZeros
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorSetZeros( hypre_ParVector *v )
+{
+   hypre_ParVectorAllZeros(v) = 1;
+
+   return hypre_ParVectorSetConstantValues(v, 0.0);
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ParVectorSetRandomValues
  *--------------------------------------------------------------------------*/
 
@@ -340,12 +368,14 @@ hypre_ParVectorCopy( hypre_ParVector *x,
 {
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
+
    return hypre_SeqVectorCopy(x_local, y_local);
 }
 
 /*--------------------------------------------------------------------------
  * hypre_ParVectorCloneShallow
- * returns a complete copy of a hypre_ParVector x - a shallow copy, re-using
+ *
+ * Returns a complete copy of a hypre_ParVector x - a shallow copy, re-using
  * the partitioning and data arrays of x
  *--------------------------------------------------------------------------*/
 
@@ -366,6 +396,10 @@ hypre_ParVectorCloneShallow( hypre_ParVector *x )
    return y;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_ParVectorCloneDeep_v2
+ *--------------------------------------------------------------------------*/
+
 hypre_ParVector *
 hypre_ParVectorCloneDeep_v2( hypre_ParVector *x, HYPRE_MemoryLocation memory_location )
 {
@@ -381,6 +415,10 @@ hypre_ParVectorCloneDeep_v2( hypre_ParVector *x, HYPRE_MemoryLocation memory_loc
 
    return y;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_ParVectorMigrate
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_ParVectorMigrate(hypre_ParVector *x, HYPRE_MemoryLocation memory_location)
@@ -404,7 +442,6 @@ hypre_ParVectorMigrate(hypre_ParVector *x, HYPRE_MemoryLocation memory_location)
 
    return hypre_error_flag;
 }
-
 
 /*--------------------------------------------------------------------------
  * hypre_ParVectorScale
@@ -432,6 +469,24 @@ hypre_ParVectorAxpy( HYPRE_Complex    alpha,
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
 
    return hypre_SeqVectorAxpy(alpha, x_local, y_local);
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParVectorAxpyz
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorAxpyz( HYPRE_Complex    alpha,
+                      hypre_ParVector *x,
+                      HYPRE_Complex    beta,
+                      hypre_ParVector *y,
+                      hypre_ParVector *z )
+{
+   hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
+   hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
+   hypre_Vector *z_local = hypre_ParVectorLocalVector(z);
+
+   return hypre_SeqVectorAxpyz(alpha, x_local, beta, y_local, z_local);
 }
 
 /*--------------------------------------------------------------------------
@@ -463,6 +518,7 @@ hypre_ParVectorInnerProd( hypre_ParVector *x,
 
 /*--------------------------------------------------------------------------
  * hypre_ParVectorElmdivpy
+ *
  * y = y + x ./ b [MATLAB Notation]
  *--------------------------------------------------------------------------*/
 
@@ -480,6 +536,7 @@ hypre_ParVectorElmdivpy( hypre_ParVector *x,
 
 /*--------------------------------------------------------------------------
  * hypre_ParVectorElmdivpyMarked
+ *
  * y[i] += x[i] / b[i] where marker[i] == marker_val
  *--------------------------------------------------------------------------*/
 
@@ -498,8 +555,9 @@ hypre_ParVectorElmdivpyMarked( hypre_ParVector *x,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_VectorToParVector:
- * generates a ParVector from a Vector on proc 0 and distributes the pieces
+ * hypre_VectorToParVector
+ *
+ * Generates a ParVector from a Vector on proc 0 and distributes the pieces
  * to the other procs in comm
  *--------------------------------------------------------------------------*/
 
@@ -535,7 +593,7 @@ hypre_VectorToParVector ( MPI_Comm      comm,
       global_vecstride = hypre_VectorVectorStride(v);
    }
 
-   hypre_MPI_Bcast(&global_size, 1, HYPRE_MPI_INT, 0, comm);
+   hypre_MPI_Bcast(&global_size, 1, HYPRE_MPI_BIG_INT, 0, comm);
    hypre_MPI_Bcast(&num_vectors, 1, HYPRE_MPI_INT, 0, comm);
    hypre_MPI_Bcast(&global_vecstride, 1, HYPRE_MPI_INT, 0, comm);
 
@@ -621,8 +679,9 @@ hypre_VectorToParVector ( MPI_Comm      comm,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParVectorToVectorAll:
- * generates a Vector on every proc which has a piece of the data
+ * hypre_ParVectorToVectorAll
+ *
+ * Generates a Vector on every proc which has a piece of the data
  * from a ParVector on several procs in comm,
  * vec_starts needs to contain the partitioning across all procs in comm
  *--------------------------------------------------------------------------*/
@@ -1148,7 +1207,7 @@ hypre_ParVectorGetValues2(hypre_ParVector *vector,
                           HYPRE_BigInt     base,
                           HYPRE_Complex   *values)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    if (HYPRE_EXEC_DEVICE == hypre_GetExecPolicy1( hypre_ParVectorMemoryLocation(vector) ))
    {
       hypre_ParVectorGetValuesDevice(vector, num_values, indices, base, values);

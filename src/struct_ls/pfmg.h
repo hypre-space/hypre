@@ -18,7 +18,7 @@
 //#define DEBUG_SOLVE
 
 /*--------------------------------------------------------------------------
- * hypre_PFMGData:
+ * hypre_PFMGData
  *--------------------------------------------------------------------------*/
 
 typedef struct
@@ -49,8 +49,6 @@ typedef struct
 
    hypre_StructGrid    **grid_l;
    hypre_StructGrid    **P_grid_l;
-
-   HYPRE_Real           *data;
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **P_l;
    hypre_StructMatrix  **RT_l;
@@ -70,9 +68,9 @@ typedef struct
    /* log info (always logged) */
    HYPRE_Int             num_iterations;
    HYPRE_Int             time_index;
-
    HYPRE_Int             print_level;
    HYPRE_Int             print_freq;
+
    /* additional log info (logged when `logging' > 0) */
    HYPRE_Int             logging;
    HYPRE_Real           *norms;
@@ -80,7 +78,6 @@ typedef struct
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int             devicelevel;
 #endif
-
 } hypre_PFMGData;
 
 #endif

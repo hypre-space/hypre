@@ -8,9 +8,6 @@
 #ifndef MACROS_H
 #define MACROS_H
 
-#include "../../utilities/general.h"
-#include "../../utilities/fortran.h"
-
 /*
  * macros.h
  *
@@ -62,6 +59,8 @@
 
 /* Macros for names of Fortran BLAS routines */
 /* AJC: added HYPRE_Real precision prototypes using MACHINE_IS_ */
+/* DOK: We can include _hypre_blas.h and use hypre_<dnrm2, ddot, dcopy> directly instead */
+/*
 #ifdef MACHINE_IS_CRAY
 #ifdef USE_SHORT
 #define SNRM2 SNRM2
@@ -96,7 +95,7 @@
 #endif
 #endif
 #endif
-
+*/
 /*********************************************************************
 * Utility Macros
 **********************************************************************/

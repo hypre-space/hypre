@@ -38,17 +38,7 @@ MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS}
 LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
 LIBFLAGS = ${LDFLAGS} ${LIBS}
-
-# WM: currently have to add the absolute path to libHYPRE.a when building sycl code; RL: reorg
-ifeq ($(notdir $(firstword ${LINK_CC})), dpcpp)
-   LIBHYPRE = ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
-else ifeq ($(notdir $(firstword ${LINK_CC})), mpiicx)
-   LIBHYPRE = ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
-else ifeq ($(notdir $(firstword ${LINK_CC})), mpiicpx)
-   LIBHYPRE = ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
-else
-   LIBHYPRE = -L${HYPRE_BUILD_DIR}/lib -lHYPRE
-endif
+LIBHYPRE = -L${HYPRE_BUILD_DIR}/lib -lHYPRE
 
 ifeq ($(notdir $(firstword ${LINK_CC})), nvcc)
    XLINK = -Xlinker=-rpath,${HYPRE_BUILD_DIR}/lib
@@ -116,7 +106,7 @@ all++: ${HYPRE_DRIVER_CXX_EXECS}
 install:
 
 clean:
-	rm -f *.o *.obj
+	rm -f *.o *.obj *.csv
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -154,7 +144,12 @@ ij_assembly: ij_assembly.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-sstruct: sstruct_helpers.o sstruct.o
+# TODO (VPM): Update data structures on sstruct_helpers for GPUs
+# sstruct: sstruct_helpers.o sstruct.o
+# 	@echo  "Building" $@ "... "
+# 	${LINK_CC} -o $@ $^ ${LFLAGS}
+
+sstruct: sstruct.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $^ ${LFLAGS}
 
@@ -166,7 +161,7 @@ struct: struct.obj
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-structmat: structmat.o
+structmat: struct.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
@@ -178,7 +173,7 @@ maxwell_unscaled: maxwell_unscaled.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-struct_migrate: struct_migrate.obj
+struct_migrate: struct_migrate.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 

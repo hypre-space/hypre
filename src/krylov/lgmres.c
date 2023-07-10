@@ -415,9 +415,9 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
    /* compute initial residual */
    (*(lgmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, p[0]);
 
-   b_norm = sqrt((*(lgmres_functions->InnerProd))(b, b));
+   b_norm = hypre_sqrt((*(lgmres_functions->InnerProd))(b, b));
 
-   /* Since it is does not diminish performance, attempt to return an error flag
+   /* Since it does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
    if (b_norm != 0.) { ieee_check = b_norm / b_norm; } /* INF -> NaN conversion */
    if (ieee_check != ieee_check)
@@ -441,10 +441,10 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
       return hypre_error_flag;
    }
 
-   r_norm = sqrt((*(lgmres_functions->InnerProd))(p[0], p[0]));
+   r_norm = hypre_sqrt((*(lgmres_functions->InnerProd))(p[0], p[0]));
    r_norm_0 = r_norm;
 
-   /* Since it is does not diminish performance, attempt to return an error flag
+   /* Since it does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
    if (r_norm != 0.) { ieee_check = r_norm / r_norm; } /* INF -> NaN conversion */
    if (ieee_check != ieee_check)
@@ -564,7 +564,7 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
       {
          (*(lgmres_functions->CopyVector))(b, r);
          (*(lgmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
-         r_norm = sqrt((*(lgmres_functions->InnerProd))(r, r));
+         r_norm = hypre_sqrt((*(lgmres_functions->InnerProd))(r, r));
          if (r_norm  <= epsilon)
          {
             if ( print_level > 1 && my_id == 0)
@@ -644,7 +644,7 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
             hh[j][i - 1] = (*(lgmres_functions->InnerProd))(p[j], p[i]);
             (*(lgmres_functions->Axpy))(-hh[j][i - 1], p[j], p[i]);
          }
-         t = sqrt((*(lgmres_functions->InnerProd))(p[i], p[i]));
+         t = hypre_sqrt((*(lgmres_functions->InnerProd))(p[i], p[i]));
          hh[i][i - 1] = t;
          if (t != 0.0)
          {
@@ -663,7 +663,7 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
          }
          t = hh[i][i - 1] * hh[i][i - 1];
          t += hh[i - 1][i - 1] * hh[i - 1][i - 1];
-         gamma = sqrt(t);
+         gamma = hypre_sqrt(t);
          if (gamma == 0.0) { gamma = epsmac; }
          c[i - 1] = hh[i - 1][i - 1] / gamma;
          s[i - 1] = hh[i][i - 1] / gamma;
@@ -672,7 +672,7 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
          rs[i - 1] = c[i - 1] * rs[i - 1];
          /* determine residual norm */
          hh[i - 1][i - 1] = s[i - 1] * hh[i][i - 1] + c[i - 1] * hh[i - 1][i - 1];
-         r_norm = fabs(rs[i]);
+         r_norm = hypre_abs(rs[i]);
 
          /* print ? */
          if ( print_level > 0 )
@@ -693,9 +693,9 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
          if (cf_tol > 0.0)
          {
             cf_ave_0 = cf_ave_1;
-            cf_ave_1 = pow( r_norm / r_norm_0, 1.0 / (2.0 * iter));
+            cf_ave_1 = hypre_pow( r_norm / r_norm_0, 1.0 / (2.0 * iter));
 
-            weight   = fabs(cf_ave_1 - cf_ave_0);
+            weight   = hypre_abs(cf_ave_1 - cf_ave_0);
             weight   = weight / hypre_max(cf_ave_1, cf_ave_0);
             weight   = 1.0 - weight;
 #if 0
@@ -797,7 +797,7 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
          /* calculate actual residual norm*/
          (*(lgmres_functions->CopyVector))(b, r);
          (*(lgmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
-         r_norm = sqrt( (*(lgmres_functions->InnerProd))(r, r) );
+         r_norm = hypre_sqrt( (*(lgmres_functions->InnerProd))(r, r) );
 
          if (r_norm <= epsilon)
          {
@@ -875,7 +875,7 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
          /* aug_vecs[aug_dim] contains new aug vector */
          (*(lgmres_functions->CopyVector))(aug_vecs[aug_dim], aug_vecs[spot]);
          /*need to normalize */
-         tmp_norm = sqrt((*(lgmres_functions->InnerProd))(aug_vecs[spot], aug_vecs[spot]));
+         tmp_norm = hypre_sqrt((*(lgmres_functions->InnerProd))(aug_vecs[spot], aug_vecs[spot]));
 
          tmp_norm = 1.0 / tmp_norm;
          (*(lgmres_functions->ScaleVector))(tmp_norm, aug_vecs[spot]);

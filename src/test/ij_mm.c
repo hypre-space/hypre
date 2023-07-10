@@ -215,6 +215,7 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
    hypre_ParCSRMatrixDestroy(parcsr_A_host);
    hypre_ParCSRMatrixDestroy(parcsr_B_host);
    hypre_ParCSRMatrixDestroy(parcsr_B_host2);
+   hypre_ParCSRMatrixDestroy(parcsr_error_host);
 }
 
 void runjob2( HYPRE_ParCSRMatrix parcsr_A,
@@ -341,6 +342,7 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
    hypre_ParCSRMatrixDestroy(parcsr_A_host);
    hypre_ParCSRMatrixDestroy(parcsr_B_host);
    hypre_ParCSRMatrixDestroy(parcsr_B_host2);
+   hypre_ParCSRMatrixDestroy(parcsr_error_host);
 }
 
 void runjob3( HYPRE_ParCSRMatrix parcsr_A,
@@ -378,8 +380,15 @@ void runjob3( HYPRE_ParCSRMatrix parcsr_A,
    hypre_assert(hypre_ParCSRMatrixMemoryLocation(parcsr_A) == HYPRE_MEMORY_DEVICE);
    hypre_assert(hypre_ParCSRMatrixMemoryLocation(parcsr_P) == HYPRE_MEMORY_DEVICE);
 
-   hypre_MatvecCommPkgCreate(parcsr_A);
-   hypre_MatvecCommPkgCreate(parcsr_P);
+   if (!hypre_ParCSRMatrixCommPkg(parcsr_A))
+   {
+      hypre_MatvecCommPkgCreate(parcsr_A);
+   }
+
+   if (!hypre_ParCSRMatrixCommPkg(parcsr_P))
+   {
+      hypre_MatvecCommPkgCreate(parcsr_P);
+   }
 
    hypre_ParCSRMatrixSetPatternOnly(parcsr_P, boolean_P);
 
@@ -729,6 +738,7 @@ void runjob5( HYPRE_ParCSRMatrix parcsr_A,
    hypre_ParCSRMatrixDestroy(parcsr_A_host);
    hypre_ParCSRMatrixDestroy(parcsr_B_host);
    hypre_ParCSRMatrixDestroy(parcsr_D);
+   hypre_ParCSRMatrixDestroy(parcsr_error_host);
 #endif
 }
 
@@ -777,14 +787,14 @@ main( hypre_int argc,
 
    /*-----------------------------------------------------------------
     * GPU Device binding
-    * Must be done before HYPRE_Init() and should not be changed after
+    * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
    hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
-   HYPRE_Init();
+   HYPRE_Initialize();
 
    if (myid == 0)
    {
@@ -928,7 +938,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-rowestmult") == 0 )
       {
          arg_index++;
-         rowest_mult = atof(argv[arg_index++]);
+         rowest_mult = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-rowestnsamples") == 0 )
       {
@@ -1399,9 +1409,9 @@ BuildParLaplacian( HYPRE_Int            argc,
       else if ( strcmp(argv[arg_index], "-c") == 0 )
       {
          arg_index++;
-         cx = atof(argv[arg_index++]);
-         cy = atof(argv[arg_index++]);
-         cz = atof(argv[arg_index++]);
+         cx = (HYPRE_Real)atof(argv[arg_index++]);
+         cy = (HYPRE_Real)atof(argv[arg_index++]);
+         cz = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-sysL") == 0 )
       {
@@ -1427,7 +1437,7 @@ BuildParLaplacian( HYPRE_Int            argc,
       else if ( strcmp(argv[arg_index], "-ep") == 0 )
       {
          arg_index++;
-         ep = atof(argv[arg_index++]);
+         ep = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else
       {
@@ -1893,16 +1903,16 @@ BuildParDifConv( HYPRE_Int            argc,
       else if ( strcmp(argv[arg_index], "-c") == 0 )
       {
          arg_index++;
-         cx = atof(argv[arg_index++]);
-         cy = atof(argv[arg_index++]);
-         cz = atof(argv[arg_index++]);
+         cx = (HYPRE_Real)atof(argv[arg_index++]);
+         cy = (HYPRE_Real)atof(argv[arg_index++]);
+         cz = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-a") == 0 )
       {
          arg_index++;
-         ax = atof(argv[arg_index++]);
-         ay = atof(argv[arg_index++]);
-         az = atof(argv[arg_index++]);
+         ax = (HYPRE_Real)atof(argv[arg_index++]);
+         ay = (HYPRE_Real)atof(argv[arg_index++]);
+         az = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-atype") == 0 )
       {
@@ -2409,12 +2419,12 @@ BuildParRotate7pt( HYPRE_Int                  argc,
       else if ( strcmp(argv[arg_index], "-alpha") == 0 )
       {
          arg_index++;
-         alpha  = atof(argv[arg_index++]);
+         alpha  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-eps") == 0 )
       {
          arg_index++;
-         eps  = atof(argv[arg_index++]);
+         eps  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else
       {
@@ -2538,7 +2548,7 @@ BuildParVarDifConv( HYPRE_Int                  argc,
       else if ( strcmp(argv[arg_index], "-eps") == 0 )
       {
          arg_index++;
-         eps  = atof(argv[arg_index++]);
+         eps  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-vardifconvRS") == 0 )
       {
