@@ -2670,7 +2670,7 @@ hypre_UnorderedIntMapFindCloserFreeBucket( hypre_UnorderedIntMap  *m,
                                            hypre_HopscotchBucket **free_bucket,
                                            HYPRE_Int *free_dist)
 {
-   (void) m; /* Silence "unused paremeter" warning */
+   (void) m; /* Silence "unused parameter" warning */
    hypre_HopscotchBucket* move_bucket = *free_bucket - (HYPRE_HOPSCOTCH_HASH_HOP_RANGE - 1);
    HYPRE_Int move_free_dist;
    for (move_free_dist = HYPRE_HOPSCOTCH_HASH_HOP_RANGE - 1; move_free_dist > 0; --move_free_dist)
@@ -2747,6 +2747,7 @@ hypre_UnorderedBigIntMapFindCloserFreeBucket( hypre_UnorderedBigIntMap   *m,
                                               hypre_BigHopscotchBucket **free_bucket,
                                               HYPRE_Int *free_dist)
 {
+   (void) m; /* Silence "unused parameter" warning */
    hypre_BigHopscotchBucket* move_bucket = *free_bucket - (HYPRE_HOPSCOTCH_HASH_HOP_RANGE - 1);
    HYPRE_Int move_free_dist;
    for (move_free_dist = HYPRE_HOPSCOTCH_HASH_HOP_RANGE - 1; move_free_dist > 0; --move_free_dist)
