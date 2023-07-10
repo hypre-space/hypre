@@ -173,6 +173,9 @@
 /* As F77_FUNC, but for C identifiers containing underscores. */
 #define HYPRE_F77_FUNC_(name,NAME) name ## __
 
+/* Macro for silencing unused variable warnings */
+#define HYPRE_UNUSED_VAR(var) ((void) var)
+
 /* Deprecated function macro */
 #define HYPRE_DEPRECATED(reason) _Pragma(reason)
 

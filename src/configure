@@ -3244,6 +3244,9 @@ HYPRE_SRCDIR="`pwd`"
 printf "%s\n" "#define HYPRE_DEPRECATED(reason) _Pragma(reason)" >>confdefs.h
 
 
+printf "%s\n" "#define HYPRE_UNUSED_VAR(var) ((void) var)" >>confdefs.h
+
+
 
 printf "%s\n" "#define HYPRE_RELEASE_NAME \"$HYPRE_NAME\"" >>confdefs.h
 

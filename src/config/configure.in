@@ -90,6 +90,7 @@ HYPRE_BUGS="M4_HYPRE_BUGS"
 HYPRE_SRCDIR="M4_HYPRE_SRCDIR"
 
 AC_DEFINE(HYPRE_DEPRECATED(reason), _Pragma(reason), [Deprecated function macro])
+AC_DEFINE(HYPRE_UNUSED_VAR(var), ((void) var), [Macro for silencing unused variable warnings])
 
 AC_DEFINE_UNQUOTED(HYPRE_RELEASE_NAME,    ["$HYPRE_NAME"],    [Release name])
 AC_DEFINE_UNQUOTED(HYPRE_RELEASE_VERSION, ["$HYPRE_VERSION"], [Release version])
