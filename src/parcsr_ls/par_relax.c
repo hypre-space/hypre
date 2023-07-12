@@ -786,7 +786,6 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
 #if defined(HYPRE_USING_PERSISTENT_COMM)
       hypre_ParCSRPersistentCommHandleStart(persistent_comm_handle, HYPRE_MEMORY_HOST, v_buf_data);
 #else
-      hypre_ParCSRCommHandle *comm_handle;
       comm_handle = hypre_ParCSRCommHandleCreate(1, comm_pkg, v_buf_data, v_ext_data);
 #endif
 
