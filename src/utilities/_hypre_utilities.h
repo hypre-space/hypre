@@ -233,11 +233,17 @@ extern "C++"
 
 #elif defined(HYPRE_SINGLE)
 #define hypre_magma_getrf_gpu              magma_sgetrf_gpu
+#define hypre_magma_getrf_nat              magma_sgetrf_native
 #define hypre_magma_getrs_gpu              magma_sgetrs_gpu
+#define hypre_magma_getri_gpu              magma_sgetri_gpu
+#define hypre_magma_gemv                   magma_sgemv
 
 #else /* Double precision */
 #define hypre_magma_getrf_gpu              magma_dgetrf_gpu
+#define hypre_magma_getrf_nat              magma_dgetrf_native
 #define hypre_magma_getrs_gpu              magma_dgetrs_gpu
+#define hypre_magma_getri_gpu              magma_dgetri_gpu
+#define hypre_magma_gemv                   magma_dgemv
 
 #endif
 
