@@ -236,6 +236,7 @@ extern "C++"
 #define hypre_magma_getrf_nat              magma_sgetrf_native
 #define hypre_magma_getrs_gpu              magma_sgetrs_gpu
 #define hypre_magma_getri_gpu              magma_sgetri_gpu
+#define hypre_magma_getri_nb               magma_get_dgetri_nb
 #define hypre_magma_gemv                   magma_sgemv
 
 #else /* Double precision */
@@ -243,6 +244,7 @@ extern "C++"
 #define hypre_magma_getrf_nat              magma_dgetrf_native
 #define hypre_magma_getrs_gpu              magma_dgetrs_gpu
 #define hypre_magma_getri_gpu              magma_dgetri_gpu
+#define hypre_magma_getri_nb               magma_get_sgetri_nb
 #define hypre_magma_gemv                   magma_dgemv
 
 #endif
