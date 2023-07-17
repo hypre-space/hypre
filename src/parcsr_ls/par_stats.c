@@ -1300,7 +1300,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          }
       }
 #if defined(HYPRE_USING_MAGMA)
-      if (grid_relax_type[3] == 98)
+      if (grid_relax_type[3] ==  98 || grid_relax_type[3] ==  99 ||
+          grid_relax_type[3] == 198 || grid_relax_type[3] == 199)
       {
          hypre_printf( "   Using MAGMA's LU factorization on coarse level\n");
       }
