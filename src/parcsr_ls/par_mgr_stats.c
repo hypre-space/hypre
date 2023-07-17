@@ -752,7 +752,10 @@ hypre_MGRSetupStats(void *mgr_vdata)
          amg_solver = (hypre_ParAMGData *) A_FF_solver[i];
 
          /* General AMG info */
-         hypre_BoomerAMGPrintGeneralInfo(amg_solver, 3);
+         if (my_id == 0)
+         {
+            hypre_BoomerAMGPrintGeneralInfo(amg_solver, 3);
+         }
 
          /* Gather A matrices */
          for (k = 0; k < num_sublevels_amg[i]; k++)
