@@ -3,41 +3,40 @@
 
    SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-.. _hypre-ilu:
+.. _ilu:
 
-hypre-ILU
+ILU
 ==============================================================================
 
-hypre-ILU is a suite of parallel incomplete LU factorization algorithms featuring dual
-threshold (ILUT) and level-based (ILUK) variants. The implementation is based on a domain
-decomposition framework for achieving distributed parallelism. hypre-ILU can be used as
-preconditioners for Krylov subspace methods, or smoothers for
-multigrid methods such as BoomerAMG and MGR.
+ILU is a suite of parallel incomplete LU factorization algorithms featuring dual threshold
+(ILUT) and level-based (ILUK) variants. The implementation is based on a domain
+decomposition framework for achieving distributed parallelism. ILU can be used as a
+standalone iterative solver (this is not recommended), preconditioner for Krylov subspace
+methods, or smoother for multigrid methods such as BoomerAMG and MGR.
 
 .. note::
-   The hypre-ILU method is currently only supported by the IJ interface.
+   ILU is currently only supported by the IJ interface.
 
 Overview
 ------------------------------------------------------------------------------
 
-hypre-ILU utilizes a domain decomposition framework.
-A basic block-Jacobi approach involves performing inexact solves within the local domains owned by the processes,
-using parallel local ILU factorizations.
-In a more advanced approach, the unknowns are partitioned into interior and interface points,
-where the interface points separate the interior points in adjacent domains.
-In an algebraic context, this is equivalent to dividing the matrix rows into local (processor-owned) and
-external (off-processor-owned) blocks.
-The overall parallel ILU strategy is a two-level method that consists of ILU solves within the local blocks
-and a global solve involving the Schur complement system.
-Various iterative approaches are available for solving the Schur complement system.
+ILU utilizes a domain decomposition framework. A basic block-Jacobi approach involves
+performing inexact solutions within the local domains owned by the processes, using
+parallel local ILU factorizations. In a more advanced approach, the unknowns are
+partitioned into interior and interface points, where the interface points separate the
+interior points in adjacent domains. In an algebraic context, this is equivalent to
+dividing the matrix rows into local (processor-owned) and external (off-processor-owned)
+blocks. The overall parallel ILU strategy is a two-level method that consists of ILU
+solves within the local blocks and a global solve involving the Schur complement system,
+which various iterative approaches in this framework can solve.
 
 User-level functions
 ------------------------------------------------------------------------------
 
-A list of user-level functions for configuring hypre-ILU is given below, where each block
+A list of user-level functions for configuring ILU is given below, where each block
 of functions is marked as *Required*, *Recommended*, *Optional*, or *Exclusively
 required*. Note that the last two blocks of function calls are exclusively required, i.e.,
-the first block should be called only when hypre-ILU is used as a standalone solver, while
+the first block should be called only when ILU is used as a standalone solver, while
 the second block should be called only when it is used as a preconditioner to GMRES. In
 the last case, other Krylov methods can be chosen. We refer the reader to
 :ref:`ch-Solvers` for more information.
@@ -135,7 +134,7 @@ A short explanation for each of those functions and its parameters is given next
 * ``HYPRE_ILUDestroy`` Destroy the hypre_ILU solver object.
 
 .. note::
-   For more details about hypre-ILU options and parameters, including their default
+   For more details about ILU options and parameters, including their default
    values, we refer the reader to hypre's reference manual or section :ref:`sec-ParCSR-Solvers`.
 
 .. _ilu-amg-smoother:
@@ -143,7 +142,7 @@ A short explanation for each of those functions and its parameters is given next
 ILU as Smoother for BoomerAMG
 ------------------------------------------------------------------------------
 
-The following functions can be used to configure hypre-ILU as a smoother to BoomerAMG:
+The following functions can be used to configure ILU as a smoother to BoomerAMG:
 
 .. code-block:: c
 
@@ -185,14 +184,13 @@ where:
 GPU support
 ------------------------------------------------------------------------------
 
-The addition of GPU support to hypre-ILU is ongoing work. A few ILU algorithm types have
-already been fully ported to the CUDA and HIP backends, i.e., both their setup
-(factorization) and solve phases are executed on the device. Below is a detailed list of
-which phases (setup and solve) of the various ILU algorithms have been ported to GPUs. In
-the table, *UVM-Setup* indicates that the setup phase is executed on the CPU (host); at
-the same time, the triangular factors are stored in a memory space that is accessible from
-the GPU (device) via unified memory. This feature must be enabled during hypre's
-configuration.
+The addition of GPU support to ILU is ongoing work. A few algorithm types have already
+been fully ported to the CUDA and HIP backends, i.e., both their setup (factorization) and
+solve phases are executed on the device. Below is a detailed list of which phases (setup
+and solve) of the various ILU algorithms have been ported to GPUs. In the table,
+*UVM-Setup* indicates that the setup phase is executed on the CPU (host); at the same
+time, the triangular factors are stored in a memory space that is accessible from the GPU
+(device) via unified memory. This feature must be enabled during hypre's configuration.
 
 .. list-table::
    :widths: 20 20 20 20
@@ -237,7 +235,9 @@ configuration.
 
 .. hint::
    For better setup performance on GPUs, disable local reordering by passing option
-   zero to ``HYPRE_ILUSetLocalReordering`` or ``HYPRE_BoomerAMGSetILULocalReordering``.
+   zero to ``HYPRE_ILUSetLocalReordering`` or
+   ``HYPRE_BoomerAMGSetILULocalReordering``. This may degrade convergence of the iterative
+   solver.
 
 .. note::
    hypre must be built with ``cuSPARSE`` support when running ILU on NVIDIA

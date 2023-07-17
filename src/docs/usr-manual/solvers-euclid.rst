@@ -9,7 +9,7 @@ Euclid
 
 .. warning::
    Euclid is not actively supported by the hypre development team. We recommend using
-   :ref:`hypre-ilu` for parallel ILU algorithms. This new ILU implementation includes
+   :ref:`ilu` for parallel ILU algorithms. This new ILU implementation includes
    64-bit integers support (for linear systems with more than 2,147,483,647 global
    unknowns) through both *mixedint* and *bigint* builds of hypre and NVIDIA/AMD GPUs
    support through the CUDA/HIP backends.
