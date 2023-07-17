@@ -15,14 +15,14 @@
  * Gaussian elimination setup routine.
  *
  * Solver options for which local matrices/vectors are formed via MPI
- * collectives defined on new sub-communicators:
+ * collectives on a sub-communicator defined with active ranks:
  *
  *   - 9: hypre's internal Gaussian elimination on the host.
  *   - 99: LU factorization with pivoting.
  *   - 199: explicit (dense) inverse A_inv = U^{-1}*L^{-1}.
  *
  * Solver options for which local matrices/vectors are formed via
- * hypre_DataExchange:
+ * hypre_DataExchangeList:
  *
  *   - 19: hypre's internal Gaussian elimination on the host.
  *   - 98: LU factorization with pivoting.
