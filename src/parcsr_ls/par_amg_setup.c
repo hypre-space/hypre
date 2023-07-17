@@ -511,11 +511,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          hypre_ParAMGDataFCoarse(amg_data) = NULL;
       }
 
-      hypre_TFree(hypre_ParAMGDataAPiv(amg_data), HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_ParAMGDataAMat(amg_data), HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_ParAMGDataAInv(amg_data), HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_ParAMGDataDAInv(amg_data), HYPRE_MEMORY_DEVICE);
-      hypre_TFree(hypre_ParAMGDataBVec(amg_data), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParAMGDataAPiv(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataAMat(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataAInv(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataBVec(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataUVec(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
       hypre_TFree(hypre_ParAMGDataCommInfo(amg_data), HYPRE_MEMORY_HOST);
 
       if (new_comm != hypre_MPI_COMM_NULL)
@@ -3131,11 +3131,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_ParAMGDataDSLUSolver(amg_data) = dslu_solver;
    }
 #endif
-   else if (grid_relax_type[3] == 9  ||
-            grid_relax_type[3] == 19 ||
-            grid_relax_type[3] == 98 ||
-            grid_relax_type[3] == 99 ||
-            grid_relax_type[3] == 199 )
+   else if (grid_relax_type[3] == 9   ||
+            grid_relax_type[3] == 19  ||
+            grid_relax_type[3] == 98  ||
+            grid_relax_type[3] == 99  ||
+            grid_relax_type[3] == 198 ||
+            grid_relax_type[3] == 199)
    {
       /* Gaussian elimination on the coarsest level */
       if (coarse_size <= coarse_threshold)
