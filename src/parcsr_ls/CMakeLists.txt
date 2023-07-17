@@ -78,6 +78,7 @@ set(SRCS
   par_fsai_setup.c
   par_fsai_solve.c
   par_gauss_elim.c
+  par_ge_device.c
   par_gsmg.c
   par_indepset.c
   par_interp.c
@@ -157,6 +158,7 @@ if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
     ads.c
     ame.c
     par_amg_setup.c
+    par_ge_device.c
     par_ilu.c
     par_ilu_setup.c
     par_ilu_setup_device.c
