@@ -489,7 +489,7 @@ hypre_MGRCreateGSElimData( void )
 
    hypre_ParAMGDataGSSetup(gsdata)          = 0;
    hypre_ParAMGDataGEMemoryLocation(gsdata) = HYPRE_MEMORY_UNDEFINED;
-   hypre_ParAMGDataNewComm(amg_data)        = hypre_MPI_COMM_NULL;
+   hypre_ParAMGDataNewComm(gsdata)          = hypre_MPI_COMM_NULL;
    hypre_ParAMGDataCommInfo(gsdata)         = NULL;
    hypre_ParAMGDataAMat(gsdata)             = NULL;
    hypre_ParAMGDataAInv(gsdata)             = NULL;
@@ -512,12 +512,12 @@ hypre_MGRDestroyGSElimData( void *data )
    hypre_ParAMGData  *gsdata   = (hypre_ParAMGData*) data;
    MPI_Comm           new_comm = hypre_ParAMGDataNewComm(gsdata);
 
-   hypre_TFree(hypre_ParAMGDataAPiv(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
-   hypre_TFree(hypre_ParAMGDataAMat(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
-   hypre_TFree(hypre_ParAMGDataAInv(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
-   hypre_TFree(hypre_ParAMGDataBVec(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
-   hypre_TFree(hypre_ParAMGDataUVec(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
-   hypre_TFree(hypre_ParAMGDataCommInfo(amg_data), HYPRE_MEMORY_HOST);
+   hypre_TFree(hypre_ParAMGDataAPiv(gsdata), hypre_ParAMGDataGEMemoryLocation(gsdata));
+   hypre_TFree(hypre_ParAMGDataAMat(gsdata), hypre_ParAMGDataGEMemoryLocation(gsdata));
+   hypre_TFree(hypre_ParAMGDataAInv(gsdata), hypre_ParAMGDataGEMemoryLocation(gsdata));
+   hypre_TFree(hypre_ParAMGDataBVec(gsdata), hypre_ParAMGDataGEMemoryLocation(gsdata));
+   hypre_TFree(hypre_ParAMGDataUVec(gsdata), hypre_ParAMGDataGEMemoryLocation(gsdata));
+   hypre_TFree(hypre_ParAMGDataCommInfo(gsdata), HYPRE_MEMORY_HOST);
 
    if (new_comm != hypre_MPI_COMM_NULL)
    {
