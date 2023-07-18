@@ -476,40 +476,56 @@ hypre_MGRDestroy( void *data )
    return hypre_error_flag;
 }
 
-/* create data for Gaussian Elim. for F-relaxation */
+/*--------------------------------------------------------------------------
+ * hypre_MGRCreateGSElimData
+ *
+ * Create data for Gaussian Elimination for F-relaxation.
+ *--------------------------------------------------------------------------*/
+
 void *
 hypre_MGRCreateGSElimData( void )
 {
    hypre_ParAMGData  *gsdata = hypre_CTAlloc(hypre_ParAMGData,  1, HYPRE_MEMORY_HOST);
 
-   hypre_ParAMGDataGSSetup(gsdata) = 0;
-   hypre_ParAMGDataAMat(gsdata) = NULL;
-   hypre_ParAMGDataAInv(gsdata) = NULL;
-   hypre_ParAMGDataBVec(gsdata) = NULL;
-   hypre_ParAMGDataCommInfo(gsdata) = NULL;
-   hypre_ParAMGDataNewComm(gsdata) = hypre_MPI_COMM_NULL;
+   hypre_ParAMGDataGSSetup(gsdata)          = 0;
+   hypre_ParAMGDataGEMemoryLocation(gsdata) = HYPRE_MEMORY_UNDEFINED;
+   hypre_ParAMGDataNewComm(amg_data)        = hypre_MPI_COMM_NULL;
+   hypre_ParAMGDataCommInfo(gsdata)         = NULL;
+   hypre_ParAMGDataAMat(gsdata)             = NULL;
+   hypre_ParAMGDataAInv(gsdata)             = NULL;
+   hypre_ParAMGDataAPiv(gsdata)             = NULL;
+   hypre_ParAMGDataBVec(gsdata)             = NULL;
+   hypre_ParAMGDataUVec(gsdata)             = NULL;
 
    return (void *) gsdata;
 }
 
-/* Destroy data for Gaussian Elim. for F-relaxation */
+/*--------------------------------------------------------------------------
+ * hypre_MGRDestroyGSElimData
+ *
+ * Destroy data for Gaussian Elimination for F-relaxation.
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_MGRDestroyGSElimData( void *data )
 {
-   hypre_ParAMGData * gsdata = (hypre_ParAMGData*) data;
-   MPI_Comm new_comm = hypre_ParAMGDataNewComm(gsdata);
+   hypre_ParAMGData  *gsdata   = (hypre_ParAMGData*) data;
+   MPI_Comm           new_comm = hypre_ParAMGDataNewComm(gsdata);
 
-   if (hypre_ParAMGDataAMat(gsdata)) { hypre_TFree(hypre_ParAMGDataAMat(gsdata), HYPRE_MEMORY_HOST); }
-   if (hypre_ParAMGDataAInv(gsdata)) { hypre_TFree(hypre_ParAMGDataAInv(gsdata), HYPRE_MEMORY_HOST); }
-   if (hypre_ParAMGDataBVec(gsdata)) { hypre_TFree(hypre_ParAMGDataBVec(gsdata), HYPRE_MEMORY_HOST); }
-   if (hypre_ParAMGDataCommInfo(gsdata)) { hypre_TFree(hypre_ParAMGDataCommInfo(gsdata), HYPRE_MEMORY_HOST); }
+   hypre_TFree(hypre_ParAMGDataAPiv(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
+   hypre_TFree(hypre_ParAMGDataAMat(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
+   hypre_TFree(hypre_ParAMGDataAInv(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
+   hypre_TFree(hypre_ParAMGDataBVec(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
+   hypre_TFree(hypre_ParAMGDataUVec(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
+   hypre_TFree(hypre_ParAMGDataCommInfo(amg_data), HYPRE_MEMORY_HOST);
 
    if (new_comm != hypre_MPI_COMM_NULL)
    {
-      hypre_MPI_Comm_free (&new_comm);
+      hypre_MPI_Comm_free(&new_comm);
    }
 
    hypre_TFree(gsdata, HYPRE_MEMORY_HOST);
+
    return hypre_error_flag;
 }
 
