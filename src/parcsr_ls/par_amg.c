@@ -492,7 +492,7 @@ hypre_BoomerAMGCreate( void )
    hypre_ParAMGDataGEMemoryLocation(amg_data) = HYPRE_MEMORY_UNDEFINED;
    hypre_ParAMGDataCommInfo(amg_data)         = NULL;
    hypre_ParAMGDataAMat(amg_data)             = NULL;
-   hypre_ParAMGDataAInv(amg_data)             = NULL;
+   hypre_ParAMGDataAWork(amg_data)            = NULL;
    hypre_ParAMGDataAPiv(amg_data)             = NULL;
    hypre_ParAMGDataBVec(amg_data)             = NULL;
    hypre_ParAMGDataUVec(amg_data)             = NULL;
@@ -862,11 +862,11 @@ hypre_BoomerAMGDestroy( void *data )
       hypre_TFree(hypre_ParAMGDataIsolatedFPointsMarker(amg_data), HYPRE_MEMORY_HOST);
 
       /* Direct solver for the coarsest level */
-      hypre_TFree(hypre_ParAMGDataAPiv(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
-      hypre_TFree(hypre_ParAMGDataAMat(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
-      hypre_TFree(hypre_ParAMGDataAInv(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
-      hypre_TFree(hypre_ParAMGDataBVec(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
-      hypre_TFree(hypre_ParAMGDataUVec(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataAPiv(amg_data),  hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataAMat(amg_data),  hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataAWork(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataBVec(amg_data),  hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataUVec(amg_data),  hypre_ParAMGDataGEMemoryLocation(amg_data));
       hypre_TFree(hypre_ParAMGDataCommInfo(amg_data), HYPRE_MEMORY_HOST);
 
       if (new_comm != hypre_MPI_COMM_NULL)

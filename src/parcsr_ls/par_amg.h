@@ -231,7 +231,7 @@ typedef struct
    HYPRE_Int  *comm_info;
    HYPRE_Int  *A_piv;
    HYPRE_Real *A_mat;
-   HYPRE_Real *A_inv;
+   HYPRE_Real *A_work;
    HYPRE_Real *b_vec;
    HYPRE_Real *u_vec;
 
@@ -486,7 +486,7 @@ typedef struct
 #define hypre_ParAMGDataGSSetup(amg_data) ((amg_data)->gs_setup)
 #define hypre_ParAMGDataGEMemoryLocation(amg_data) ((amg_data)->ge_memory_location)
 #define hypre_ParAMGDataAMat(amg_data) ((amg_data)->A_mat)
-#define hypre_ParAMGDataAInv(amg_data) ((amg_data)->A_inv)
+#define hypre_ParAMGDataAWork(amg_data) ((amg_data)->A_work)
 #define hypre_ParAMGDataAPiv(amg_data) ((amg_data)->A_piv)
 #define hypre_ParAMGDataBVec(amg_data) ((amg_data)->b_vec)
 #define hypre_ParAMGDataUVec(amg_data) ((amg_data)->u_vec)

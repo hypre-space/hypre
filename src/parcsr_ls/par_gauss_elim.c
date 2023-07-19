@@ -83,15 +83,15 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
    /* Allocate dense linear system data */
    if (num_rows)
    {
-      hypre_ParAMGDataAMat(amg_data) = hypre_CTAlloc(HYPRE_Real,
-                                                     global_size,
-                                                     ge_memory_location);
-      hypre_ParAMGDataAInv(amg_data) = hypre_CTAlloc(HYPRE_Real,
-                                                     global_size,
-                                                     ge_memory_location);
-      hypre_ParAMGDataBVec(amg_data) = hypre_CTAlloc(HYPRE_Real,
-                                                     global_num_rows,
-                                                     ge_memory_location);
+      hypre_ParAMGDataAMat(amg_data)  = hypre_CTAlloc(HYPRE_Real,
+                                                      global_size,
+                                                      ge_memory_location);
+      hypre_ParAMGDataAWork(amg_data) = hypre_CTAlloc(HYPRE_Real,
+                                                      global_size,
+                                                      ge_memory_location);
+      hypre_ParAMGDataBVec(amg_data)  = hypre_CTAlloc(HYPRE_Real,
+                                                      global_num_rows,
+                                                      ge_memory_location);
 
       /* solver types 198 and 199 need a work space for the solution vector */
       if (solver_type == 198 || solver_type == 199)
@@ -207,7 +207,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
          {
             AT_mat = (hypre_GetActualMemLocation(ge_memory_location) == hypre_MEMORY_DEVICE) ?
                      hypre_CTAlloc(HYPRE_Real, global_size, HYPRE_MEMORY_HOST) :
-                     hypre_ParAMGDataAInv(amg_data);
+                     hypre_ParAMGDataAWork(amg_data);
 
             /* Compute A transpose, i.e., store A in column-major format */
             for (i = 0; i < global_num_rows; i++)
@@ -218,7 +218,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
                }
             }
 
-            if (hypre_ParAMGDataAInv(amg_data) != AT_mat)
+            if (hypre_ParAMGDataAWork(amg_data) != AT_mat)
             {
                /* Copy A^T to destination variable */
                hypre_TMemcpy(hypre_ParAMGDataAMat(amg_data), AT_mat, HYPRE_Real, global_size,
@@ -228,7 +228,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
             else
             {
                /* Swap pointers */
-               hypre_ParAMGDataAInv(amg_data) = hypre_ParAMGDataAMat(amg_data);
+               hypre_ParAMGDataAWork(amg_data) = hypre_ParAMGDataAMat(amg_data);
                hypre_ParAMGDataAMat(amg_data) = AT_mat;
             }
          }
@@ -420,7 +420,7 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
    /* Coarse solver data */
    HYPRE_Int            *A_piv              = hypre_ParAMGDataAPiv(amg_data);
    HYPRE_Real           *A_mat              = hypre_ParAMGDataAMat(amg_data);
-   HYPRE_Real           *A_inv              = hypre_ParAMGDataAInv(amg_data);
+   HYPRE_Real           *A_work             = hypre_ParAMGDataAWork(amg_data);
 
    /* Constants */
    HYPRE_Int             one_i              = 1;
@@ -545,11 +545,11 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
       if (solver_type == 9 || solver_type == 19)
       {
          /* Copy matrix to work space */
-         hypre_TMemcpy(A_inv, A_mat, HYPRE_Real, global_size,
+         hypre_TMemcpy(A_work, A_mat, HYPRE_Real, global_size,
                        HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
          /* Run hypre's internal gaussian elimination */
-         hypre_gselim(A_inv, b_vec, global_num_rows, ierr);
+         hypre_gselim(A_work, b_vec, global_num_rows, ierr);
          if (ierr != 0)
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with hypre_gselim!");

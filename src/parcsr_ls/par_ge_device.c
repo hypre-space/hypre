@@ -31,7 +31,7 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
    HYPRE_Int            num_rows        = hypre_ParCSRMatrixNumRows(par_A);
    HYPRE_Int           *A_piv           = hypre_ParAMGDataAPiv(amg_data);
    HYPRE_Real          *A_mat           = hypre_ParAMGDataAMat(amg_data);
-   HYPRE_Real          *A_inv           = hypre_ParAMGDataAInv(amg_data);
+   HYPRE_Real          *A_work          = hypre_ParAMGDataAWork(amg_data);
    HYPRE_Int            global_size     = global_num_rows * global_num_rows;
 
    /* Local variables */
@@ -76,12 +76,12 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
                                                  global_num_rows,
                                                  &buffer_size));
 
-   /* We use A_inv as workspace */
+   /* We use A_work as workspace */
    if (buffer_size > global_size)
    {
-      A_inv = hypre_TReAlloc_v2(A_inv, HYPRE_Real, global_size, HYPRE_Real, buffer_size,
-                                HYPRE_MEMORY_DEVICE);
-      hypre_ParAMGDataAInv(amg_data) = A_inv;
+      A_work = hypre_TReAlloc_v2(A_work, HYPRE_Real, global_size, HYPRE_Real, buffer_size,
+                                 HYPRE_MEMORY_DEVICE);
+      hypre_ParAMGDataAWork(amg_data) = A_work;
    }
 
    /* Factorize */
@@ -90,7 +90,7 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
                                               global_num_rows,
                                               A_mat,
                                               global_num_rows,
-                                              A_inv,
+                                              A_work,
                                               A_piv,
                                               d_ierr));
 
@@ -131,31 +131,31 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
       /* Determine workspace size */
       buffer_size = global_num_rows * hypre_magma_getri_nb(global_num_rows);
 
-      /* We use A_inv as workspace */
+      /* We use A_work as workspace */
       if (buffer_size > global_size)
       {
-         A_inv = hypre_TReAlloc_v2(A_inv, HYPRE_Real, global_size, HYPRE_Real, buffer_size,
-                                   HYPRE_MEMORY_DEVICE);
-         hypre_ParAMGDataAInv(amg_data) = A_inv;
+         A_work = hypre_TReAlloc_v2(A_work, HYPRE_Real, global_size, HYPRE_Real, buffer_size,
+                                    HYPRE_MEMORY_DEVICE);
+         hypre_ParAMGDataAWork(amg_data) = A_work;
       }
 
       HYPRE_MAGMA_CALL(hypre_magma_getri_gpu(global_num_rows,
                                              A_mat,
                                              global_num_rows,
                                              A_piv,
-                                             A_inv,
+                                             A_work,
                                              buffer_size,
                                              &ierr));
 
 #elif defined(HYPRE_USING_CUSOLVER)
       /* Create identity dense matrix */
-      hypre_Memset((void*) A_inv, 0,
+      hypre_Memset((void*) A_work, 0,
                    (size_t) global_size * sizeof(HYPRE_Real),
                    HYPRE_MEMORY_DEVICE);
       HYPRE_THRUST_CALL(for_each,
                         thrust::make_counting_iterator(0),
                         thrust::make_counting_iterator(global_num_rows),
-                        hypreFunctor_DenseMatrixIdentity(global_num_rows, A_inv));
+                        hypreFunctor_DenseMatrixIdentity(global_num_rows, A_work));
 
       /* Compute inverse */
       HYPRE_CUSOLVER_CALL(hypre_cusolver_dngetrs(hypre_HandleVendorSolverHandle(hypre_handle()),
@@ -165,12 +165,12 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
                                                  A_mat,
                                                  global_num_rows,
                                                  A_piv,
-                                                 A_inv,
+                                                 A_work,
                                                  global_num_rows,
                                                  d_ierr));
 
-      /* Store the inverse in A_mat - TODO - remove this!! */
-      hypre_TMemcpy(A_mat, A_inv, HYPRE_Real, global_size,
+      /* Store the inverse in A_mat */
+      hypre_TMemcpy(A_mat, A_work, HYPRE_Real, global_size,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
 #elif defined(HYPRE_USING_ROCSOLVER)
