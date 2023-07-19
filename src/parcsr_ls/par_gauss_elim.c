@@ -48,7 +48,6 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
    /* Local variables */
    HYPRE_Int             global_size     = global_num_rows * global_num_rows;
    HYPRE_Real           *A_mat           = NULL;
-   HYPRE_Real           *A_inv           = NULL;
    HYPRE_Real           *AT_mat;
    HYPRE_Int            *A_piv;
    HYPRE_MemoryLocation  ge_memory_location;
@@ -109,8 +108,6 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
                                                         global_num_rows,
                                                         ge_memory_location);
       }
-
-      A_inv = hypre_ParAMGDataAInv(amg_data);
       A_piv = hypre_ParAMGDataAPiv(amg_data);
    }
 
@@ -345,6 +342,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
          {
             HYPRE_Int     query = -1, lwork;
             HYPRE_Real    lwork_opt;
+            HYPRE_Real   *work;
 
             /* Compute buffer size */
             hypre_dgetri(&global_num_rows, hypre_ParAMGDataAMat(amg_data),
@@ -355,22 +353,19 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
                return hypre_error_flag;
             }
 
-            /* We use A_inv as work space */
+            /* Allocate work space */
             lwork = (HYPRE_Int) lwork_opt;
-            if (lwork > global_size)
-            {
-               A_inv = hypre_TReAlloc(A_inv, HYPRE_Real, lwork, HYPRE_MEMORY_HOST);
-               hypre_ParAMGDataAInv(amg_data) = A_inv;
-            }
+            work = hypre_TAlloc(HYPRE_Real, lwork, HYPRE_MEMORY_HOST);
 
             /* Compute dense inverse */
             hypre_dgetri(&global_num_rows, hypre_ParAMGDataAMat(amg_data),
-                         &global_num_rows, A_piv, A_inv, &lwork, &ierr);
+                         &global_num_rows, A_piv, work, &lwork, &ierr);
             if (ierr != 0)
             {
                hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem with dgetri!");
                return hypre_error_flag;
             }
+            hypre_TFree(work, HYPRE_MEMORY_HOST);
          }
       }
    }
