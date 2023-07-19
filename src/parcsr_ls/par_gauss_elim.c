@@ -210,7 +210,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
          {
             AT_mat = (hypre_GetActualMemLocation(ge_memory_location) == hypre_MEMORY_DEVICE) ?
                      hypre_CTAlloc(HYPRE_Real, global_size, HYPRE_MEMORY_HOST) :
-                     hypre_ParAMGDataAMat(amg_data);
+                     hypre_ParAMGDataAInv(amg_data);
 
             /* Compute A transpose, i.e., store A in column-major format */
             for (i = 0; i < global_num_rows; i++)
@@ -221,11 +221,18 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
                }
             }
 
-            if (hypre_ParAMGDataAMat(amg_data) != AT_mat)
+            if (hypre_ParAMGDataAInv(amg_data) != AT_mat)
             {
+               /* Copy A^T to destination variable */
                hypre_TMemcpy(hypre_ParAMGDataAMat(amg_data), AT_mat, HYPRE_Real, global_size,
                              ge_memory_location, HYPRE_MEMORY_HOST);
                hypre_TFree(AT_mat, HYPRE_MEMORY_HOST);
+            }
+            else
+            {
+               /* Swap pointers */
+               hypre_ParAMGDataAInv(amg_data) = hypre_ParAMGDataAMat(amg_data);
+               hypre_ParAMGDataAMat(amg_data) = AT_mat;
             }
          }
 
@@ -233,7 +240,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
          hypre_TFree(mat_displs,  HYPRE_MEMORY_HOST);
          hypre_TFree(A_mat_local, HYPRE_MEMORY_HOST);
 
-         if (A_mat != hypre_ParAMGDataAMat(amg_data))
+         if (hypre_GetActualMemLocation(ge_memory_location) == hypre_MEMORY_DEVICE)
          {
             hypre_TFree(A_mat, HYPRE_MEMORY_HOST);
          }
@@ -352,7 +359,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
             lwork = (HYPRE_Int) lwork_opt;
             if (lwork > global_size)
             {
-               A_inv = hypre_TReAlloc(A_inv, HYPRE_Real, global_size, HYPRE_MEMORY_HOST);
+               A_inv = hypre_TReAlloc(A_inv, HYPRE_Real, lwork, HYPRE_MEMORY_HOST);
                hypre_ParAMGDataAInv(amg_data) = A_inv;
             }
 
