@@ -227,11 +227,14 @@ hypre_BoomerAMGCreate( void )
    ilu_reordering_type = 1;
 
    /* FSAI smoother params */
-#if defined (HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   fsai_algo_type = 3;
-#else
-   fsai_algo_type = hypre_NumThreads() > 4 ? 2 : 1;
-#endif
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      fsai_algo_type = 3;
+   }
+   else
+   {
+      fsai_algo_type = hypre_NumThreads() > 4 ? 2 : 1;
+   }
    fsai_max_steps = 5;
    fsai_max_step_size = 3;
    fsai_max_nnz_row = fsai_max_steps * fsai_max_step_size;
@@ -5069,4 +5072,3 @@ hypre_BoomerAMGGetCumNnzAP( void       *data,
 
    return hypre_error_flag;
 }
-
