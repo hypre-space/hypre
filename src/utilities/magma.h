@@ -65,5 +65,7 @@ extern "C++"
       hypre_assert(0);                                \
    } } while(0)
 
+#define HYPRE_MAGMA_VCALL(call) call
+
 #endif /* HYPRE_USING_MAGMA */
 #endif /* HYPRE_MAGMA_HEADER */

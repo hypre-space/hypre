@@ -250,18 +250,18 @@ hypre_GaussElimSolveDevice(hypre_ParAMGData *amg_data,
    }
    else if (solver_type == 198 || solver_type == 199)
    {
-      HYPRE_MAGMA_CALL(hypre_magma_gemv(MagmaNoTrans,
-                                        global_num_rows,
-                                        global_num_rows,
-                                        d_one,
-                                        A_mat,
-                                        global_num_rows,
-                                        b_vec,
-                                        i_one,
-                                        zero,
-                                        u_vec,
-                                        i_one,
-                                        hypre_HandleMagmaQueue(hypre_handle())));
+      HYPRE_MAGMA_VCALL(hypre_magma_gemv(MagmaNoTrans,
+                                         global_num_rows,
+                                         global_num_rows,
+                                         d_one,
+                                         A_mat,
+                                         global_num_rows,
+                                         b_vec,
+                                         i_one,
+                                         zero,
+                                         u_vec,
+                                         i_one,
+                                         hypre_HandleMagmaQueue(hypre_handle())));
    }
 
 #elif defined(HYPRE_USING_CUSOLVER) && defined(HYPRE_USING_CUBLAS)

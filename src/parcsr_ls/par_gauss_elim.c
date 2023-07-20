@@ -104,9 +104,16 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
       /* solver types other than 9 and 19 need an array for storing pivots */
       if (solver_type != 9 && solver_type != 19)
       {
+#if defined(HYPRE_USING_MAGMA)
+         /* MAGMA's getrf/getrs expect Apiv to be on the host */
+         hypre_ParAMGDataAPiv(amg_data) = hypre_CTAlloc(HYPRE_Int,
+                                                        global_num_rows,
+                                                        HYPRE_MEMORY_HOST);
+#else
          hypre_ParAMGDataAPiv(amg_data) = hypre_CTAlloc(HYPRE_Int,
                                                         global_num_rows,
                                                         ge_memory_location);
+#endif
       }
       A_piv = hypre_ParAMGDataAPiv(amg_data);
    }
