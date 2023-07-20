@@ -118,7 +118,8 @@ A good overview of parallel smoothers and their properties can be found in
 * l1-Gauss-Seidel or Jacobi,
 * Chebyshev smoothers,
 * hybrid block and Schwarz smoothers [Yang2004]_,
-* ILU and approximate inverse smoothers.
+* Incomplete LU factorization, see :ref:`ilu-amg-smoother`.
+* Factorized Sparse Approximate Inverse (FSAI), see :ref:`fsai-amg-smoother`.
 
 Point relaxation schemes can be set using ``HYPRE_BoomerAMGSetRelaxType`` or, if
 one wants to specifically set the up cycle, down cycle or the coarsest grid,
