@@ -147,8 +147,12 @@ typedef struct
    HYPRE_Int            ilu_upper_jacobi_iters;
    HYPRE_Int            ilu_reordering_type;
 
+   HYPRE_Int            fsai_algo_type;
    HYPRE_Int            fsai_max_steps;
    HYPRE_Int            fsai_max_step_size;
+   HYPRE_Int            fsai_max_nnz_row;
+   HYPRE_Int            fsai_num_levels;
+   HYPRE_Real           fsai_threshold;
    HYPRE_Int            fsai_eig_max_iters;
    HYPRE_Real           fsai_kap_tolerance;
 
@@ -398,8 +402,12 @@ typedef struct
 #define hypre_ParAMGDataILUUpperJacobiIters(amg_data) ((amg_data)->ilu_upper_jacobi_iters)
 #define hypre_ParAMGDataILUMaxIter(amg_data) ((amg_data)->ilu_max_iter)
 #define hypre_ParAMGDataILULocalReordering(amg_data) ((amg_data)->ilu_reordering_type)
+#define hypre_ParAMGDataFSAIAlgoType(amg_data) ((amg_data)->fsai_algo_type)
 #define hypre_ParAMGDataFSAIMaxSteps(amg_data) ((amg_data)->fsai_max_steps)
 #define hypre_ParAMGDataFSAIMaxStepSize(amg_data) ((amg_data)->fsai_max_step_size)
+#define hypre_ParAMGDataFSAIMaxNnzRow(amg_data) ((amg_data)->fsai_max_nnz_row)
+#define hypre_ParAMGDataFSAINumLevels(amg_data) ((amg_data)->fsai_num_levels)
+#define hypre_ParAMGDataFSAIThreshold(amg_data) ((amg_data)->fsai_threshold)
 #define hypre_ParAMGDataFSAIEigMaxIters(amg_data) ((amg_data)->fsai_eig_max_iters)
 #define hypre_ParAMGDataFSAIKapTolerance(amg_data) ((amg_data)->fsai_kap_tolerance)
 

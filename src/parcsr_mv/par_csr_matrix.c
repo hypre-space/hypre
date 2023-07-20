@@ -250,10 +250,13 @@ hypre_ParCSRMatrixInitialize( hypre_ParCSRMatrix *matrix )
  *--------------------------------------------------------------------------*/
 
 hypre_ParCSRMatrix*
-hypre_ParCSRMatrixClone_v2(hypre_ParCSRMatrix *A, HYPRE_Int copy_data,
-                           HYPRE_MemoryLocation memory_location)
+hypre_ParCSRMatrixClone_v2(hypre_ParCSRMatrix   *A,
+                           HYPRE_Int             copy_data,
+                           HYPRE_MemoryLocation  memory_location)
 {
    hypre_ParCSRMatrix *S;
+
+   hypre_GpuProfilingPushRange("hypre_ParCSRMatrixClone");
 
    S = hypre_ParCSRMatrixCreate( hypre_ParCSRMatrixComm(A),
                                  hypre_ParCSRMatrixGlobalNumRows(A),
@@ -270,6 +273,8 @@ hypre_ParCSRMatrixClone_v2(hypre_ParCSRMatrix *A, HYPRE_Int copy_data,
    hypre_ParCSRMatrixInitialize_v2(S, memory_location);
 
    hypre_ParCSRMatrixCopy(A, S, copy_data);
+
+   hypre_GpuProfilingPopRange();
 
    return S;
 }
