@@ -89,6 +89,28 @@ HYPRE_FSAIGetAlgoType( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_FSAISetLocalSolveType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FSAISetLocalSolveType( HYPRE_Solver solver,
+                             HYPRE_Int    local_solve_type  )
+{
+   return ( hypre_FSAISetLocalSolveType( (void *) solver, local_solve_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_FSAIGetLocalSolveType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FSAIGetLocalSolveType( HYPRE_Solver  solver,
+                             HYPRE_Int    *local_solve_type  )
+{
+   return ( hypre_FSAIGetLocalSolveType( (void *) solver, local_solve_type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_FSAISetMaxSteps
  *--------------------------------------------------------------------------*/
 
