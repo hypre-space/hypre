@@ -986,7 +986,7 @@ hypre_FSAISetup( void               *fsai_vdata,
    hypre_ParFSAIDataGmat(fsai_data) = G;
 
    /* Initialize and compute lower triangular factor G */
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_MemoryLocation  memloc_A = hypre_ParCSRMatrixMemoryLocation(A);
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memloc_A);
 
@@ -1131,16 +1131,16 @@ hypre_FSAIPrintStats( void *fsai_vdata,
  ******************************************************************************/
 
 HYPRE_Int
-hypre_FSAIComputeOmega( void *fsai_vdata,
+hypre_FSAIComputeOmega( void               *fsai_vdata,
                         hypre_ParCSRMatrix *A )
 {
-   hypre_ParFSAIData    *fsai_data = (hypre_ParFSAIData*) fsai_vdata;
-
-   hypre_ParCSRMatrix   *G  =  hypre_ParFSAIDataGmat(fsai_data);
-   hypre_ParCSRMatrix   *GT =  hypre_ParFSAIDataGTmat(fsai_data);
-   hypre_ParVector      *r_work = hypre_ParFSAIDataRWork(fsai_data);
-   hypre_ParVector      *z_work = hypre_ParFSAIDataZWork(fsai_data);
-   HYPRE_Int             eig_max_iters = hypre_ParFSAIDataEigMaxIters(fsai_data);
+   hypre_ParFSAIData    *fsai_data       = (hypre_ParFSAIData*) fsai_vdata;
+   hypre_ParCSRMatrix   *G               = hypre_ParFSAIDataGmat(fsai_data);
+   hypre_ParCSRMatrix   *GT              = hypre_ParFSAIDataGTmat(fsai_data);
+   hypre_ParVector      *r_work          = hypre_ParFSAIDataRWork(fsai_data);
+   hypre_ParVector      *z_work          = hypre_ParFSAIDataZWork(fsai_data);
+   HYPRE_Int             eig_max_iters   = hypre_ParFSAIDataEigMaxIters(fsai_data);
+   HYPRE_MemoryLocation  memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
    hypre_ParVector      *eigvec;
    hypre_ParVector      *eigvec_old;
@@ -1151,22 +1151,27 @@ hypre_FSAIComputeOmega( void *fsai_vdata,
    eigvec_old = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                       hypre_ParCSRMatrixGlobalNumRows(A),
                                       hypre_ParCSRMatrixRowStarts(A));
-   hypre_ParVectorInitialize(eigvec_old);
    eigvec = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                   hypre_ParCSRMatrixGlobalNumRows(A),
                                   hypre_ParCSRMatrixRowStarts(A));
-   hypre_ParVectorInitialize(eigvec);
+   hypre_ParVectorInitialize_v2(eigvec, memory_location);
+   hypre_ParVectorInitialize_v2(eigvec_old, memory_location);
 
-   /* VPM: temporary hack for improving random number generation */
-#if defined (HYPRE_USING_GPU)
-   hypre_Vector  *eigvec_local = hypre_ParVectorLocalVector(eigvec);
-   HYPRE_Complex *eigvec_data  = hypre_VectorData(eigvec_local);
-   HYPRE_Int      eigvec_size  = hypre_VectorSize(eigvec_local);
+#if defined(HYPRE_USING_GPU)
+   /* Make random number generation faster on GPUs */
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_Vector  *eigvec_local = hypre_ParVectorLocalVector(eigvec);
+      HYPRE_Complex *eigvec_data  = hypre_VectorData(eigvec_local);
+      HYPRE_Int      eigvec_size  = hypre_VectorSize(eigvec_local);
 
-   hypre_CurandUniform(eigvec_size, eigvec_data, 0, 0, 0, 0);
-#else
-   hypre_ParVectorSetRandomValues(eigvec, 256);
+      hypre_CurandUniform(eigvec_size, eigvec_data, 0, 0, 0, 0);
+   }
+   else
 #endif
+   {
+      hypre_ParVectorSetRandomValues(eigvec, 256);
+   }
 
    /* Power method iteration */
    for (i = 0; i < eig_max_iters; i++)
@@ -1187,6 +1192,13 @@ hypre_FSAIComputeOmega( void *fsai_vdata,
    }
    norm = hypre_ParVectorInnerProd(eigvec, eigvec_old);
    lambda = hypre_sqrt(norm);
+
+   /* Check lambda */
+   if (lambda < HYPRE_REAL_EPSILON)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Found small lambda. Reseting it to one!");
+      lambda = 1.0;
+   }
 
    /* Free memory */
    hypre_ParVectorDestroy(eigvec_old);

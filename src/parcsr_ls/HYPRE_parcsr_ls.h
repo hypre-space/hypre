@@ -1069,35 +1069,63 @@ HYPRE_Int HYPRE_BoomerAMGSetEuBJ(HYPRE_Solver solver,
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILUType( HYPRE_Solver  solver,
-                                     HYPRE_Int         ilu_type);
+                                     HYPRE_Int     ilu_type);
 
 /**
  * Defines level k for ILU(k) smoother
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILULevel( HYPRE_Solver  solver,
-                                      HYPRE_Int         ilu_lfil);
+                                      HYPRE_Int     ilu_lfil);
 
 /**
  * Defines max row nonzeros for ILUT smoother
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILUMaxRowNnz( HYPRE_Solver  solver,
-                                          HYPRE_Int         ilu_max_row_nnz);
+                                          HYPRE_Int     ilu_max_row_nnz);
 
 /**
  * Defines number of iterations for ILU smoother on each level
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILUMaxIter( HYPRE_Solver  solver,
-                                        HYPRE_Int         ilu_max_iter);
+                                        HYPRE_Int     ilu_max_iter);
 
 /**
  * Defines drop tolorance for iLUT smoother
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILUDroptol( HYPRE_Solver  solver,
-                                        HYPRE_Real        ilu_droptol);
+                                        HYPRE_Real    ilu_droptol);
+
+/**
+ * (Optional) Defines triangular solver for ILU(k,T) smoother: 0-iterative, 1-direct (default)
+ * For further explanation see description of ILU.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILUTriSolve( HYPRE_Solver  solver,
+                                         HYPRE_Int     ilu_tri_solve);
+
+/**
+ * (Optional) Defines number of lower Jacobi iterations for ILU(k,T) smoother triangular solve.
+ * For further explanation see description of ILU.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILULowerJacobiIters( HYPRE_Solver  solver,
+                                                 HYPRE_Int     ilu_lower_jacobi_iters);
+
+/**
+ * (Optional) Defines number of upper Jacobi iterations for ILU(k,T) smoother triangular solve.
+ * For further explanation see description of ILU.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILUUpperJacobiIters( HYPRE_Solver  solver,
+                                                 HYPRE_Int     ilu_upper_jacobi_iters);
+
+/**
+ * Set Local Reordering paramter (1==RCM, 0==None)
+ * For further explanation see description of ILU.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILULocalReordering( HYPRE_Solver solver,
+                                                HYPRE_Int    ilu_reordering_type);
 
 /**
  * (Optional) Defines the algorithm type for setting up FSAI
@@ -1162,34 +1190,6 @@ HYPRE_Int HYPRE_BoomerAMGSetFSAIEigMaxIters(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFSAIKapTolerance(HYPRE_Solver solver,
                                              HYPRE_Real   kap_tolerance);
-
-/**
- * (Optional) Defines triangular solver for ILU(k,T) smoother: 0-iterative, 1-direct (default)
- * For further explanation see description of ILU.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetILUTriSolve( HYPRE_Solver  solver,
-                                         HYPRE_Int     ilu_tri_solve);
-
-/**
- * (Optional) Defines number of lower Jacobi iterations for ILU(k,T) smoother triangular solve.
- * For further explanation see description of ILU.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetILULowerJacobiIters( HYPRE_Solver  solver,
-                                                 HYPRE_Int     ilu_lower_jacobi_iters);
-
-/**
- * (Optional) Defines number of upper Jacobi iterations for ILU(k,T) smoother triangular solve.
- * For further explanation see description of ILU.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetILUUpperJacobiIters( HYPRE_Solver  solver,
-                                                 HYPRE_Int     ilu_upper_jacobi_iters);
-
-/**
- * Set Local Reordering paramter (1==RCM, 0==None)
- * For further explanation see description of ILU.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetILULocalReordering( HYPRE_Solver solver,
-                                                HYPRE_Int    ilu_reordering_type);
 
 /**
  * (Optional) Defines which parallel restriction operator is used.
@@ -4391,7 +4391,7 @@ HYPRE_MGRGetFinalRelativeResidualNorm( HYPRE_Solver solver,
 /**
  * @name ParCSR ILU Solver
  *
- * (Parallel) ILU smoother
+ * (Parallel) Incomplete LU factorization.
  *
  * @{
  **/
@@ -4399,12 +4399,14 @@ HYPRE_MGRGetFinalRelativeResidualNorm( HYPRE_Solver solver,
 /**
  * Create a solver object
  **/
-HYPRE_Int HYPRE_ILUCreate( HYPRE_Solver *solver );
+HYPRE_Int
+HYPRE_ILUCreate( HYPRE_Solver *solver );
 
 /**
  * Destroy a solver object
  **/
-HYPRE_Int HYPRE_ILUDestroy( HYPRE_Solver solver );
+HYPRE_Int
+HYPRE_ILUDestroy( HYPRE_Solver solver );
 
 /**
  * Setup the ILU solver or preconditioner.
@@ -4416,10 +4418,11 @@ HYPRE_Int HYPRE_ILUDestroy( HYPRE_Solver solver );
  * @param b right-hand-side of the linear system to be solved (Ignored by this function).
  * @param x approximate solution of the linear system to be solved (Ignored by this function).
  **/
-HYPRE_Int HYPRE_ILUSetup( HYPRE_Solver solver,
-                          HYPRE_ParCSRMatrix A,
-                          HYPRE_ParVector b,
-                          HYPRE_ParVector x      );
+HYPRE_Int
+HYPRE_ILUSetup( HYPRE_Solver solver,
+                HYPRE_ParCSRMatrix A,
+                HYPRE_ParVector b,
+                HYPRE_ParVector x      );
 /**
 * Solve the system or apply ILU as a preconditioner.
 * If used as a preconditioner, this function should be passed
@@ -4430,10 +4433,11 @@ HYPRE_Int HYPRE_ILUSetup( HYPRE_Solver solver,
 * @param b [IN] right hand side of the linear system to be solved
 * @param x [OUT] approximated solution of the linear system to be solved
 **/
-HYPRE_Int HYPRE_ILUSolve( HYPRE_Solver solver,
-                          HYPRE_ParCSRMatrix A,
-                          HYPRE_ParVector b,
-                          HYPRE_ParVector x      );
+HYPRE_Int
+HYPRE_ILUSolve( HYPRE_Solver solver,
+                HYPRE_ParCSRMatrix A,
+                HYPRE_ParVector b,
+                HYPRE_ParVector x      );
 
 /**
  * (Optional) Set maximum number of iterations if used as a solver.
@@ -4466,7 +4470,7 @@ HYPRE_Int
 HYPRE_ILUSetUpperJacobiIters( HYPRE_Solver solver, HYPRE_Int upper_jacobi_iterations );
 
 /**
- * (Optional) Set the convergence tolerance for the ILU smoother.
+ * (Optional) Set the convergence tolerance for ILU.
  * Use tol = 0.0 if ILU is used as a preconditioner. The default is 1.e-7.
  **/
 HYPRE_Int
@@ -4508,7 +4512,7 @@ HYPRE_Int
 HYPRE_ILUSetDropThresholdArray( HYPRE_Solver solver, HYPRE_Real *threshold );
 
 /**
- * (Optional) Set the threshold for dropping in Newton–Schulz–Hotelling iteration (NHS-ILU).
+ * (Optional) Set the threshold for dropping in Newton–Schulz–Hotelling iteration (NSH-ILU).
  * Any entries less than this threshold are dropped when forming the approximate inverse matrix.
  * The default is 1.0e-2.
  **/
@@ -4517,7 +4521,7 @@ HYPRE_ILUSetNSHDropThreshold( HYPRE_Solver solver, HYPRE_Real threshold );
 
 /**
  * (Optional) Set the array of thresholds for dropping in Newton–Schulz–Hotelling
- * iteration (for NHS-ILU).  Any fill-in less than thresholds is dropped when
+ * iteration (for NSH-ILU).  Any fill-in less than thresholds is dropped when
  * forming the approximate inverse matrix.
  *
  *    - threshold[0] : threshold for Minimal Residual iteration (initial guess for NSH).

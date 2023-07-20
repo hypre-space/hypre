@@ -736,22 +736,24 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
 
 #elif defined(HYPRE_USING_ONEMKLBLAS)
       HYPRE_ONEMKL_CALL( work_sizes[0] =
-            oneapi::mkl::lapack::getrf_batch_scratchpad_size<HYPRE_Complex>( *hypre_HandleComputeStream(hypre_handle()),
-                                                              blk_size, // std::int64_t m,
-                                                              blk_size, // std::int64_t n,
-                                                              blk_size, // std::int64_t lda,
-                                                              bs2, // std::int64_t stride_a,
-                                                              blk_size, // std::int64_t stride_ipiv,
-                                                              num_blocks ) ); // std::int64_t batch_size
+                            oneapi::mkl::lapack::getrf_batch_scratchpad_size<HYPRE_Complex>( *hypre_HandleComputeStream(
+                                                                                                hypre_handle()),
+                                                                                             blk_size, // std::int64_t m,
+                                                                                             blk_size, // std::int64_t n,
+                                                                                             blk_size, // std::int64_t lda,
+                                                                                             bs2, // std::int64_t stride_a,
+                                                                                             blk_size, // std::int64_t stride_ipiv,
+                                                                                             num_blocks ) ); // std::int64_t batch_size
 
       HYPRE_ONEMKL_CALL( work_sizes[1] =
-            oneapi::mkl::lapack::getri_batch_scratchpad_size<HYPRE_Complex>( *hypre_HandleComputeStream(hypre_handle()),
-                                                               (std::int64_t) blk_size, // std::int64_t n,
-                                                               (std::int64_t) blk_size, // std::int64_t lda,
-                                                               (std::int64_t) bs2, // std::int64_t stride_a,
-                                                               (std::int64_t) blk_size, // std::int64_t stride_ipiv,
-                                                               (std::int64_t) num_blocks // std::int64_t batch_size
-                                                                ) );
+                            oneapi::mkl::lapack::getri_batch_scratchpad_size<HYPRE_Complex>( *hypre_HandleComputeStream(
+                                                                                                hypre_handle()),
+                                                                                             (std::int64_t) blk_size, // std::int64_t n,
+                                                                                             (std::int64_t) blk_size, // std::int64_t lda,
+                                                                                             (std::int64_t) bs2, // std::int64_t stride_a,
+                                                                                             (std::int64_t) blk_size, // std::int64_t stride_ipiv,
+                                                                                             (std::int64_t) num_blocks // std::int64_t batch_size
+                                                                                           ) );
       work_size  = hypre_max(work_sizes[0], work_sizes[1]);
       scratchpad = hypre_TAlloc(HYPRE_Complex, work_size, HYPRE_MEMORY_DEVICE);
 
@@ -766,7 +768,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                            (std::int64_t) num_blocks, // std::int64_t batch_size,
                                                            scratchpad, // T *scratchpad,
                                                            (std::int64_t) work_size // std::int64_t scratchpad_size,
-                                                            ).wait() ); // const std::vector<cl::sycl::event> &events = {} ) );
+                                                         ).wait() ); // const std::vector<cl::sycl::event> &events = {} ) );
 #else
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Block inversion not available!");
       return hypre_error_flag;
@@ -823,7 +825,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                            (std::int64_t) num_blocks, // std::int64_t batch_size,
                                                            scratchpad, // T *scratchpad,
                                                            work_size // std::int64_t scratchpad_size
-                                                            ).wait() );
+                                                         ).wait() );
 #else
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Block inversion not available!");
       return hypre_error_flag;
