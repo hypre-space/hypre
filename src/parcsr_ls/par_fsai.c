@@ -39,9 +39,6 @@ hypre_FSAICreate( void )
    /* output params */
    HYPRE_Int            print_level;
 
-   /* Local variables */
-   HYPRE_MemoryLocation memory_location = hypre_HandleMemoryLocation(hypre_handle());
-
    /*-----------------------------------------------------------------------
     * Setup default values for parameters
     *-----------------------------------------------------------------------*/
@@ -57,6 +54,8 @@ hypre_FSAICreate( void )
 
    /* parameters that depend on the execution policy */
 #if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+   HYPRE_MemoryLocation memory_location = hypre_HandleMemoryLocation(hypre_handle());
+
    if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
       algo_type = 3;
