@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#PBS -l select=32
+#PBS -A CSC250STML12_CNDA
+#PBS -l walltime=00:30:00
+#PBS -q workq-route
+#PBS -e output
+#PBS -o output
+
+module load oneapi/eng-compiler/2023.05.15.003
+module load mpich/52.2/icc-all-pmix-gpu
+export DPLROOT=/home/mitchell82/oneDPL
+cd /home/mitchell82/hypreNonUnified/src/test
+
+MPI_RUN_CMD='mpiexec -n 384 --ppn 12 --cpu-bind list:1:2:3:4:5:6:52:53:54:55:56:57 gpu_tile_compact.sh'
+${MPI_RUN_CMD} ./ij -pout 0 -solver 1 -rlx 18 -w 0.85 -pmis -n 3200 2400 3200 -P 8 6 8

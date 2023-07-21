@@ -999,6 +999,9 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
                                        HYPRE_Int            max_elmts,
                                        hypre_ParCSRMatrix **P_ptr)
 {
+   /* WM: debug */
+   HYPRE_Int my_id;
+   hypre_MPI_Comm_rank(MPI_COMM_WORLD, &my_id);
    HYPRE_Int           A_nr_of_rows = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);
@@ -1121,12 +1124,20 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Complex *AFF_diag_data_old = hypre_TAlloc(HYPRE_Complex,
                                                    hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(AFF)),
                                                    HYPRE_MEMORY_DEVICE);
+   /* WM: debug */
+   MPI_Barrier(MPI_COMM_WORLD);
+   hypre_printf("WM: debug - rank %d - %s : %d\n", my_id, __FILE__, __LINE__);
+   MPI_Barrier(MPI_COMM_WORLD);
    hypre_TMemcpy( AFF_diag_data_old,
                   hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(AFF)),
                   HYPRE_Complex,
                   hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(AFF)),
                   HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
+   /* WM: debug */
+   MPI_Barrier(MPI_COMM_WORLD);
+   hypre_printf("WM: debug - rank %d - %s : %d\n", my_id, __FILE__, __LINE__);
+   MPI_Barrier(MPI_COMM_WORLD);
    hypre_GpuProfilingPushRange("Compute interp matrix");
    gDim = hypre_GetDefaultDeviceGridDimension(W_nr_of_rows, "warp", bDim);
    HYPRE_BigInt AFF_first_row_idx = hypre_ParCSRMatrixFirstRowIndex(AFF);
