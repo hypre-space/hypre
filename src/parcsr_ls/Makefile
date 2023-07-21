@@ -174,7 +174,8 @@ CUFILES =\
  par_2s_interp_device.c\
  par_relax_device.c\
  par_mod_multi_interp_device.c\
- par_mgr_device.c
+ par_mgr_device.c\
+ par_fsai_device.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}

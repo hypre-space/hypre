@@ -103,9 +103,11 @@ struct hypre_device_allocator
 /* Data types depending on GPU architecture */
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_SYCL)
 typedef hypre_uint          hypre_mask;
+#define hypre_mask_one      1U
 
 #elif defined(HYPRE_USING_HIP)
 typedef hypre_ulonglongint  hypre_mask;
+#define hypre_mask_one      1ULL
 
 #endif
 
@@ -653,7 +655,6 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    if (rocblas_status_success != err) {                                                      \
       printf("rocSOLVER ERROR (code = %d, %s) at %s:%d\n",                                   \
              err, rocblas_status_to_string(err), __FILE__, __LINE__);                        \
-      assert(0); exit(1);                                                                    \
    } } while(0)
 
 #define HYPRE_CURAND_CALL(call) do {                                                         \
@@ -695,6 +696,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #elif defined(HYPRE_USING_HIP)
 #define HYPRE_THRUST_CALL(func_name, ...) \
    thrust::func_name(thrust::hip::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
+
 #elif defined(HYPRE_USING_SYCL)
 #define HYPRE_ONEDPL_CALL(func_name, ...)                                                    \
   func_name(oneapi::dpl::execution::make_device_policy(                                      \
@@ -848,6 +850,7 @@ rocsparse_handle      hypre_DeviceDataCusparseHandle(hypre_DeviceData *data);
 vendorSolverHandle_t  hypre_DeviceDataVendorSolverHandle(hypre_DeviceData *data);
 #endif
 
+/* TODO (VPM): Create a deviceStream_t to encapsulate all stream types below */
 #if defined(HYPRE_USING_CUDA)
 cudaStream_t          hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i);
 cudaStream_t          hypre_DeviceDataComputeStream(hypre_DeviceData *data);
@@ -1180,20 +1183,48 @@ void __syncwarp()
 
 #endif // #if defined(HYPRE_USING_HIP) || (CUDA_VERSION < 9000)
 
-
-// __any and __ballot were technically deprecated in CUDA 7 so we don't bother
-// with these overloads for CUDA, just for HIP.
-#if defined(HYPRE_USING_HIP)
 static __device__ __forceinline__
-hypre_int __any_sync(hypre_mask mask, hypre_int predicate)
+hypre_mask hypre_ballot_sync(hypre_mask mask, hypre_int predicate)
 {
-   return __any(predicate);
+#if defined(HYPRE_USING_CUDA)
+   return __ballot_sync(mask, predicate);
+#else
+   return __ballot(predicate);
+#endif
 }
 
 static __device__ __forceinline__
-hypre_int __ballot_sync(hypre_mask mask, hypre_int predicate)
+HYPRE_Int hypre_popc(hypre_mask mask)
 {
-   return __ballot(predicate);
+#if defined(HYPRE_USING_CUDA)
+   return (HYPRE_Int) __popc(mask);
+#else
+   return (HYPRE_Int) __popcll(mask);
+#endif
+}
+
+static __device__ __forceinline__
+HYPRE_Int hypre_ffs(hypre_mask mask)
+{
+#if defined(HYPRE_USING_CUDA)
+   return (HYPRE_Int) __ffs(mask);
+#else
+   return (HYPRE_Int) __ffsll(mask);
+#endif
+}
+
+/* Flip n-th bit of bitmask (0 becomes 1. 1 becomes 0) */
+static __device__ __forceinline__
+hypre_mask hypre_mask_flip_at(hypre_mask bitmask, hypre_int n)
+{
+   return bitmask ^ (hypre_mask_one << n);
+}
+
+#if defined(HYPRE_USING_HIP)
+static __device__ __forceinline__
+hypre_int __any_sync(unsigned mask, hypre_int predicate)
+{
+   return __any(predicate);
 }
 #endif
 
@@ -1234,7 +1265,7 @@ T warp_prefix_sum(hypre_DeviceItem &item, hypre_int lane_id, T in, T &all_sum)
    }
 
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       T t = __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
 
@@ -1296,7 +1327,7 @@ static __device__ __forceinline__
 T warp_reduce_sum(hypre_DeviceItem &item, T in)
 {
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in += __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d);
    }
@@ -1308,7 +1339,7 @@ static __device__ __forceinline__
 T warp_allreduce_sum(hypre_DeviceItem &item, T in)
 {
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in += __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d);
    }
@@ -1320,7 +1351,7 @@ static __device__ __forceinline__
 T warp_reduce_max(hypre_DeviceItem &item, T in)
 {
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in = max(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
    }
@@ -1332,7 +1363,7 @@ static __device__ __forceinline__
 T warp_allreduce_max(hypre_DeviceItem &item, T in)
 {
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in = max(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
    }
@@ -1344,7 +1375,7 @@ static __device__ __forceinline__
 T warp_reduce_min(hypre_DeviceItem &item, T in)
 {
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in = min(in, __shfl_down_sync(HYPRE_WARP_FULL_MASK, in, d));
    }
@@ -1356,7 +1387,7 @@ static __device__ __forceinline__
 T warp_allreduce_min(hypre_DeviceItem &item, T in)
 {
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in = min(in, __shfl_xor_sync(HYPRE_WARP_FULL_MASK, in, d));
    }
@@ -1658,7 +1689,7 @@ T warp_prefix_sum(hypre_DeviceItem &item, hypre_int lane_id, T in, T &all_sum)
    }
 
 #pragma unroll
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       T t = sycl::permute_group_by_xor(item.get_sub_group(), in, d);
 
@@ -1762,7 +1793,7 @@ template <typename T>
 static __forceinline__
 T warp_reduce_sum(hypre_DeviceItem &item, T in)
 {
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in += sycl::shift_group_left(item.get_sub_group(), in, d);
    }
@@ -1773,7 +1804,7 @@ template <typename T>
 static __forceinline__
 T warp_allreduce_sum(hypre_DeviceItem &item, T in)
 {
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in += sycl::permute_group_by_xor(item.get_sub_group(), in, d);
    }
@@ -1784,7 +1815,7 @@ template <typename T>
 static __forceinline__
 T warp_reduce_max(hypre_DeviceItem &item, T in)
 {
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in = std::max(in, sycl::shift_group_left(item.get_sub_group(), in, d));
    }
@@ -1795,7 +1826,7 @@ template <typename T>
 static __forceinline__
 T warp_allreduce_max(hypre_DeviceItem &item, T in)
 {
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in = std::max(in, sycl::permute_group_by_xor(item.get_sub_group(), in, d));
    }
@@ -1806,7 +1837,7 @@ template <typename T>
 static __forceinline__
 T warp_reduce_min(hypre_DeviceItem &item, T in)
 {
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in = std::min(in, sycl::shift_group_left(item.get_sub_group(), in, d));
    }
@@ -1817,7 +1848,7 @@ template <typename T>
 static __forceinline__
 T warp_allreduce_min(hypre_DeviceItem &item, T in)
 {
-   for (hypre_int d = HYPRE_WARP_SIZE / 2; d > 0; d >>= 1)
+   for (hypre_int d = HYPRE_WARP_SIZE >> 1; d > 0; d >>= 1)
    {
       in = std::min(in, sycl::permute_group_by_xor(item.get_sub_group(), in, d));
    }
