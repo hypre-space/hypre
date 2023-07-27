@@ -190,6 +190,33 @@ void hypreSycl_scatter(InputIter1 first, InputIter1 last,
    HYPRE_ONEDPL_CALL( oneapi::dpl::copy, first, last, perm_result);
 }
 
+// Equivalent of thrust::gather_if
+template <typename InputIter1, typename InputIter2,
+          typename InputIter3, typename OutputIter, typename Predicate>
+void hypreSycl_gather_if(InputIter1 map_first, InputIter1 map_last,
+                          InputIter2 mask, InputIter3 input_first, OutputIter result,
+                          Predicate pred)
+{
+   static_assert(
+      std::is_same<typename std::iterator_traits<InputIter1>::iterator_category,
+      std::random_access_iterator_tag>::value &&
+      std::is_same <
+      typename std::iterator_traits<InputIter2>::iterator_category,
+      std::random_access_iterator_tag >::value &&
+      std::is_same <
+      typename std::iterator_traits<InputIter3>::iterator_category,
+      std::random_access_iterator_tag >::value &&
+      std::is_same <
+      typename std::iterator_traits<OutputIter>::iterator_category,
+      std::random_access_iterator_tag >::value,
+      "Iterators passed to algorithms must be random-access iterators.");
+   auto perm_begin =
+      oneapi::dpl::make_permutation_iterator(input_first, map_first);
+   const auto n = std::distance(map_first, map_last);
+   hypreSycl_copy_if(perm_begin, perm_begin + n, mask, result,
+   [ = ](auto &&m) { return pred(m); } );
+}
+
 // Equivalent of thrust::gather
 template <typename InputIter1, typename InputIter2,
           typename OutputIter>
@@ -208,7 +235,7 @@ OutputIter hypreSycl_gather(InputIter1 map_first, InputIter1 map_last,
       "Iterators passed to algorithms must be random-access iterators.");
    auto perm_begin =
       oneapi::dpl::make_permutation_iterator(input_first, map_first);
-   const auto n = ::std::distance(map_first, map_last);
+   const auto n = std::distance(map_first, map_last);
    return HYPRE_ONEDPL_CALL( oneapi::dpl::copy, perm_begin, perm_begin + n, result);
 }
 

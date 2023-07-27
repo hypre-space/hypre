@@ -91,7 +91,7 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
          /* Note: this enforces "explicit scaling," i.e. we treat each tile of a multi-tile GPU as a separate device */
          sycl::platform platform(sycl::gpu_selector{});
          auto gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
-         HYPRE_Int n_devices = 0;
+         hypre_int n_devices = 0;
          hypre_GetDeviceCount(&n_devices);
          if (device_id >= n_devices)
          {
@@ -99,8 +99,8 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
                               "ERROR: SYCL device-ID exceed the number of devices on-node\n");
          }
 
-         HYPRE_Int local_n_devices = 0;
-         HYPRE_Int i;
+         hypre_int local_n_devices = 0;
+         hypre_int i;
          for (i = 0; i < gpu_devices.size(); i++)
          {
             if (local_n_devices == device_id)
@@ -164,7 +164,8 @@ hypre_GetDevice(hypre_int *device_id)
 #if defined(HYPRE_USING_SYCL)
    /* WM: note - no sycl call to get which device is setup for use (if the user has already setup a device at all)
     * Assume the rank/device binding below */
-   HYPRE_Int n_devices, my_id;
+   HYPRE_Int my_id;
+   hypre_int n_devices;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
    hypre_GetDeviceCount(&n_devices);
    (*device_id) = my_id % n_devices;
@@ -243,9 +244,6 @@ HYPRE_Initialize(void)
       return hypre_error_flag;
    }
 
-   /* Update library state */
-   hypre_SetInitialized();
-
 #if defined(HYPRE_USING_MEMORY_TRACKER)
    if (!_hypre_memory_tracker)
    {
@@ -259,10 +257,15 @@ HYPRE_Initialize(void)
    }
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_SYCL)
+   /* WM: note that for sycl, we need to do device setup again if reinitializing */
+   if (!HYPRE_Initialized())
+#else
    /* If the library has not been initialized or finalized yet,
       meaning that it is the first time HYPRE_Init is being called,
       then perform the initialization of device structures below */
    if (!HYPRE_Initialized() && !HYPRE_Finalized())
+#endif
    {
 #if !defined(HYPRE_USING_SYCL)
       /* With sycl, cannot call hypre_GetDeviceLastError() until after device and queue setup */
@@ -340,6 +343,13 @@ HYPRE_Initialize(void)
    hypre_UmpireInit(_hypre_handle);
 #endif
 
+#if defined(HYPRE_USING_MAGMA)
+   hypre_MagmaInitialize();
+#endif
+
+   /* Update library state */
+   hypre_SetInitialized();
+
    return hypre_error_flag;
 }
 
@@ -358,11 +368,12 @@ HYPRE_Finalize(void)
       return hypre_error_flag;
    }
 
-   /* Update library state */
-   hypre_SetFinalized();
-
 #if defined(HYPRE_USING_UMPIRE)
    hypre_UmpireFinalize(_hypre_handle);
+#endif
+
+#if defined(HYPRE_USING_MAGMA)
+   hypre_MagmaFinalize();
 #endif
 
 #if defined(HYPRE_USING_SYCL)
@@ -371,7 +382,6 @@ HYPRE_Finalize(void)
 #endif
 
    hypre_HandleDestroy(_hypre_handle);
-
    _hypre_handle = NULL;
 
 #if !defined(HYPRE_USING_SYCL)
@@ -383,7 +393,11 @@ HYPRE_Finalize(void)
                             hypre_memory_tracker_print, hypre_memory_tracker_filename);
 
    hypre_MemoryTrackerDestroy(_hypre_memory_tracker);
+   _hypre_memory_tracker = NULL;
 #endif
+
+   /* Update library state */
+   hypre_SetFinalized();
 
    return hypre_error_flag;
 }

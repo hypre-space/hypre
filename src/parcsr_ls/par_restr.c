@@ -554,6 +554,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
             memcpy(TMPA, DAi, local_size * local_size * sizeof(HYPRE_Complex));
             memcpy(TMPb, Dbi, local_size * sizeof(HYPRE_Complex));
 #endif
+            lapack_info = 0;
             hypre_dgetrf(&local_size, &local_size, DAi, &local_size, Ipi,
                          &lapack_info);
 

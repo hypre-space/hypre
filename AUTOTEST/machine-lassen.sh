@@ -45,9 +45,13 @@ atol="3e-15"
 #save=`echo $(hostname) | sed 's/[0-9]\+$//'`
 save="lassen"
 
-##########
-## CUDA ##
-##########
+######################
+##   DEFAULT CUDA   ##
+##  (cuda/10.1.243) ##
+######################
+
+module -q load cuda
+module -q load xl
 
 # CUDA with UM in debug mode [ij, ams, struct, sstruct]
 co="--with-cuda --enable-unified-memory --enable-persistent --enable-debug --with-gpu-arch=70 --with-memory-tracker --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
@@ -56,7 +60,13 @@ eo="-gpu -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
 ./renametest.sh basic $output_dir/basic-cuda-um
 
-#CUDA with UM and mixed-int
+# CUDA with UM in debug mode [ij, ams, struct, sstruct]
+co="--with-cuda --enable-unified-memory --enable-persistent --enable-debug --with-print-errors --with-gpu-arch=70 --with-memory-tracker --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
+ro="-error -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh basic $output_dir/basic-cuda-um-with-errors
+
+# CUDA with UM and mixed-int
 co="--with-cuda --enable-unified-memory --enable-mixedint --enable-debug --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 ro="-ij-mixed -ams -struct -sstruct-mixed -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
@@ -68,7 +78,7 @@ ro="-gpumemcheck -rt -mpibind -cudamemcheck -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-cuda-um-shared
 
-#CUDA with UM and single precision
+# CUDA with UM and single precision
 co="--with-cuda --enable-unified-memory --enable-single --enable-debug --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 ro="-single -rt -mpibind -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: ${ro}
@@ -118,6 +128,7 @@ ro="-struct -rt -mpibind -save ${save}"
 #####################################
 
 mo="-j"
+
 # CUDA with UM + CMake
 co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_CUDA_COMPILER=$(which nvcc) -DMPI_C_COMPILER=$(which mpicc) -DMPI_CXX_COMPILER=$(which mpicxx) -DHYPRE_WITH_CUDA=ON -DHYPRE_ENABLE_UNIFIED_MEMORY=ON -DCMAKE_BUILD_TYPE=Debug -DHYPRE_ENABLE_PERSISTENT_COMM=ON -DHYPRE_ENABLE_DEVICE_POOL=ON -DHYPRE_WITH_EXTRA_CFLAGS="\'"-qmaxmem=-1 -qsuppress=1500-029"\'" -DHYPRE_WITH_EXTRA_CXXFLAGS="\'"-qmaxmem=-1 -qsuppress=1500-029"\'" -DHYPRE_CUDA_SM=70"
 ./test.sh cmake.sh $src_dir -co: $co -mo: $mo
@@ -133,17 +144,23 @@ co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_
 ./test.sh cmake.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-cuda-nonum-struct
 
-####################################
-## latest CUDA build (only) tests ##
-####################################
+#######################
+## latest CUDA tests ##
+##    cuda/12.0.0    ##
+#######################
 
-module -q load cuda/11
-module list cuda/11 |& grep "None found"
+rtol="1e-2"
+atol="1e-6"
+mo="-j test"
 
-# CUDA with UM with async malloc [no run]
-co="--with-cuda --enable-unified-memory --enable-device-malloc-async --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CUFLAGS=\\'--Wno-deprecated-declarations\\'"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo
-./renametest.sh basic $output_dir/basic-cuda11
+# CUDA 12.0 + GCC with UM in debug mode, thrust nosync [ij, ams, struct, sstruct]
+module -q load gcc/8.3.1
+module -q load cuda/12.0
+module list cuda/12.0 |& grep "None found"
+co="--with-cuda --enable-unified-memory --enable-thrust-nosync --enable-debug --with-gpu-arch=70 CC=mpicc CXX=mpicxx"
+ro="-ij-gpu -ams -struct -sstruct -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh basic $output_dir/basic-cuda12_0
 
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )

@@ -250,10 +250,13 @@ hypre_ParCSRMatrixInitialize( hypre_ParCSRMatrix *matrix )
  *--------------------------------------------------------------------------*/
 
 hypre_ParCSRMatrix*
-hypre_ParCSRMatrixClone_v2(hypre_ParCSRMatrix *A, HYPRE_Int copy_data,
-                           HYPRE_MemoryLocation memory_location)
+hypre_ParCSRMatrixClone_v2(hypre_ParCSRMatrix   *A,
+                           HYPRE_Int             copy_data,
+                           HYPRE_MemoryLocation  memory_location)
 {
    hypre_ParCSRMatrix *S;
+
+   hypre_GpuProfilingPushRange("hypre_ParCSRMatrixClone");
 
    S = hypre_ParCSRMatrixCreate( hypre_ParCSRMatrixComm(A),
                                  hypre_ParCSRMatrixGlobalNumRows(A),
@@ -270,6 +273,8 @@ hypre_ParCSRMatrixClone_v2(hypre_ParCSRMatrix *A, HYPRE_Int copy_data,
    hypre_ParCSRMatrixInitialize_v2(S, memory_location);
 
    hypre_ParCSRMatrixCopy(A, S, copy_data);
+
+   hypre_GpuProfilingPopRange();
 
    return S;
 }
@@ -1174,7 +1179,7 @@ hypre_ParCSRMatrixGetRow( hypre_ParCSRMatrix  *mat,
                           HYPRE_BigInt       **col_ind,
                           HYPRE_Complex      **values )
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(mat) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -2874,6 +2879,22 @@ hypre_ParCSRMatrixCopyColMapOffdToDevice(hypre_ParCSRMatrix *A)
       hypre_TMemcpy(hypre_ParCSRMatrixDeviceColMapOffd(A), hypre_ParCSRMatrixColMapOffd(A), HYPRE_BigInt,
                     num_cols_A_offd,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   }
+#endif
+}
+
+void
+hypre_ParCSRMatrixCopyColMapOffdToHost(hypre_ParCSRMatrix *A)
+{
+#if defined(HYPRE_USING_GPU)
+   if (hypre_ParCSRMatrixColMapOffd(A) == NULL)
+   {
+      const HYPRE_Int num_cols_A_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
+      hypre_ParCSRMatrixColMapOffd(A) = hypre_TAlloc(HYPRE_BigInt, num_cols_A_offd,
+                                                     HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(A), hypre_ParCSRMatrixDeviceColMapOffd(A), HYPRE_BigInt,
+                    num_cols_A_offd,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
 #endif
 }

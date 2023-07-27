@@ -785,8 +785,7 @@ HYPRE_Int HYPRE_BoomerAMGSetRelaxOrder(HYPRE_Solver  solver,
 /**
  * (Optional) Defines in which order the points are relaxed.
  *
- * Note: This routine will be phased out!!!!
- * Use HYPRE_BoomerAMGSetRelaxOrder instead.
+ * See also HYPRE_BoomerAMGSetRelaxOrder.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetGridRelaxPoints(HYPRE_Solver   solver,
                                             HYPRE_Int    **grid_relax_points);
@@ -1070,64 +1069,35 @@ HYPRE_Int HYPRE_BoomerAMGSetEuBJ(HYPRE_Solver solver,
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILUType( HYPRE_Solver  solver,
-                                     HYPRE_Int         ilu_type);
+                                     HYPRE_Int     ilu_type);
 
 /**
  * Defines level k for ILU(k) smoother
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILULevel( HYPRE_Solver  solver,
-                                      HYPRE_Int         ilu_lfil);
+                                      HYPRE_Int     ilu_lfil);
 
 /**
  * Defines max row nonzeros for ILUT smoother
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILUMaxRowNnz( HYPRE_Solver  solver,
-                                          HYPRE_Int         ilu_max_row_nnz);
+                                          HYPRE_Int     ilu_max_row_nnz);
 
 /**
  * Defines number of iterations for ILU smoother on each level
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILUMaxIter( HYPRE_Solver  solver,
-                                        HYPRE_Int         ilu_max_iter);
+                                        HYPRE_Int     ilu_max_iter);
 
 /**
  * Defines drop tolorance for iLUT smoother
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILUDroptol( HYPRE_Solver  solver,
-                                        HYPRE_Real        ilu_droptol);
-
-/**
- * (Optional) Defines maximum number of steps for FSAI.
- * For further explanation see description of FSAI.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxSteps(HYPRE_Solver solver,
-                                         HYPRE_Int    max_steps);
-
-/**
- * (Optional) Defines maximum step size for FSAI.
- * For further explanation see description of FSAI.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxStepSize(HYPRE_Solver solver,
-                                            HYPRE_Int    max_step_size);
-
-/**
- * (Optional) Defines maximum number of iterations for estimating the
- * largest eigenvalue of the FSAI preconditioned matrix (G^T * G * A).
- * For further explanation see description of FSAI.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetFSAIEigMaxIters(HYPRE_Solver solver,
-                                            HYPRE_Int    eig_max_iters);
-
-/**
- * (Optional) Defines the kaporin dropping tolerance.
- * For further explanation see description of FSAI.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetFSAIKapTolerance(HYPRE_Solver solver,
-                                             HYPRE_Real   kap_tolerance);
+                                        HYPRE_Real    ilu_droptol);
 
 /**
  * (Optional) Defines triangular solver for ILU(k,T) smoother: 0-iterative, 1-direct (default)
@@ -1156,6 +1126,70 @@ HYPRE_Int HYPRE_BoomerAMGSetILUUpperJacobiIters( HYPRE_Solver  solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILULocalReordering( HYPRE_Solver solver,
                                                 HYPRE_Int    ilu_reordering_type);
+
+/**
+ * (Optional) Defines the algorithm type for setting up FSAI
+ * For further explanation see HYPRE_FSAISetAlgoType.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAIAlgoType(HYPRE_Solver solver,
+                                         HYPRE_Int    algo_type);
+
+/**
+ * (Optional) Sets the solver type for solving local linear systems in FSAI.
+ * For further explanation see HYPRE_FSAISetLocalSolveType.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAILocalSolveType( HYPRE_Solver solver,
+                                                HYPRE_Int    local_solve_type );
+
+/**
+ * (Optional) Defines maximum number of steps for FSAI.
+ * For further explanation see HYPRE_FSAISetMaxSteps.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxSteps(HYPRE_Solver solver,
+                                         HYPRE_Int    max_steps);
+
+/**
+ * (Optional) Defines maximum step size for FSAI.
+ * For further explanation see HYPRE_FSAISetMaxStepSize.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxStepSize(HYPRE_Solver solver,
+                                            HYPRE_Int    max_step_size);
+
+/**
+ * (Optional) Defines maximum number of nonzero entries per row for FSAI.
+ * For further explanation see HYPRE_FSAISetMaxNnzRow.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxNnzRow(HYPRE_Solver solver,
+                                          HYPRE_Int    max_nnz_row);
+
+/**
+ * (Optional) Defines number of levels for computing the candidate pattern for FSAI
+ * For further explanation see HYPRE_FSAISetNumLevels.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAINumLevels(HYPRE_Solver solver,
+                                          HYPRE_Int    num_levels);
+
+/**
+ * (Optional) Defines the threshold for computing the candidate pattern for FSAI
+ * For further explanation see HYPRE_FSAISetThreshold.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAIThreshold(HYPRE_Solver solver,
+                                          HYPRE_Real   threshold);
+
+/**
+ * (Optional) Defines maximum number of iterations for estimating the
+ * largest eigenvalue of the FSAI preconditioned matrix (G^T * G * A).
+ * For further explanation see HYPRE_FSAISetEigMaxIters.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAIEigMaxIters(HYPRE_Solver solver,
+                                            HYPRE_Int    eig_max_iters);
+
+/**
+ * (Optional) Defines the kaporin dropping tolerance.
+ * For further explanation see HYPRE_FSAISetKapTolerance.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFSAIKapTolerance(HYPRE_Solver solver,
+                                             HYPRE_Real   kap_tolerance);
 
 /**
  * (Optional) Defines which parallel restriction operator is used.
@@ -1577,55 +1611,98 @@ HYPRE_Int HYPRE_FSAISolve( HYPRE_Solver       solver,
 /**
  * (Optional) Sets the algorithm type used to compute the lower triangular factor G
  *
- *      - 1: Native (can use OpenMP with static scheduling)
- *      - 2: OpenMP with dynamic scheduling
+ *      - 1: Adaptive (can use OpenMP with static scheduling)
+ *      - 2: Adaptive OpenMP with dynamic scheduling
+ *      - 3: Static - power pattern
  **/
 HYPRE_Int HYPRE_FSAISetAlgoType( HYPRE_Solver solver,
                                  HYPRE_Int    algo_type );
 
 /**
- * (Optional) Sets the maximum number of steps for computing the sparsity
- * pattern of G
+ * (Optional) Sets the solver type for solving local linear systems in FSAI. This
+ * option makes sense only for GPU runs.
+ *
+ *      - 1: Vendor solver (cuSOLVER/rocSOLVER)
+ *      - 2: MAGMA solver
  **/
-HYPRE_Int HYPRE_FSAISetMaxSteps( HYPRE_Solver solver,
-                                 HYPRE_Int    max_steps  );
+HYPRE_Int HYPRE_FSAISetLocalSolveType( HYPRE_Solver solver,
+                                       HYPRE_Int    local_solve_type );
 
 /**
- * (Optional) Sets the maximum step size for computing the sparsity pattern of G
+ * (Optional) Sets the maximum number of steps for computing the sparsity
+ * pattern of G. This input parameter makes sense when using adaptive FSAI,
+ * i.e., algorithm type 1 or 2.
+ **/
+HYPRE_Int HYPRE_FSAISetMaxSteps( HYPRE_Solver solver,
+                                 HYPRE_Int    max_steps );
+
+/**
+ * (Optional) Sets the maximum step size for computing the sparsity pattern of G.
+ * This input parameter makes sense when using adaptive FSAI, i.e., algorithm
+ * type 1 or 2.
  **/
 HYPRE_Int HYPRE_FSAISetMaxStepSize( HYPRE_Solver solver,
-                                    HYPRE_Int    max_step_size  );
+                                    HYPRE_Int    max_step_size );
+
+/**
+ * (Optional) Sets the maximum number of off-diagonal entries per row of G.
+ * This input parameter makes sense when using static FSAI, i.e., algorithm
+ * type 3.
+ **/
+HYPRE_Int HYPRE_FSAISetMaxNnzRow( HYPRE_Solver solver,
+                                  HYPRE_Int    max_nnz_row );
+
+/**
+ * (Optional) Sets the number of levels for computing the candidate pattern of G.
+ * This input parameter makes sense when using static FSAI, i.e., algorithm
+ * type 3.
+ **/
+HYPRE_Int HYPRE_FSAISetNumLevels( HYPRE_Solver solver,
+                                  HYPRE_Int    num_levels );
+
+/**
+ * (Optional) Sets the threshold for computing the candidate pattern of G
+ * This input parameter makes sense when using static FSAI, i.e., algorithm
+ * type 3.
+ **/
+HYPRE_Int HYPRE_FSAISetThreshold( HYPRE_Solver solver,
+                                  HYPRE_Real   threshold );
 
 /**
  * (Optional) Sets the kaporin gradient reduction factor for computing the
- *  sparsity pattern of G
+ * sparsity pattern of G. This input parameter makes sense when using adaptive
+ * FSAI, i.e., algorithm types 1 or 2.
  **/
 HYPRE_Int HYPRE_FSAISetKapTolerance( HYPRE_Solver solver,
-                                     HYPRE_Real   kap_tolerance  );
+                                     HYPRE_Real   kap_tolerance );
 
 /**
- * (Optional) Sets the relaxation factor for FSAI
+ * (Optional) Sets the relaxation factor for FSAI. This input parameter makes
+ * sense to all algorithm types for setting up FSAI.
  **/
 HYPRE_Int HYPRE_FSAISetOmega( HYPRE_Solver solver,
                               HYPRE_Real   omega );
 
 /**
- * (Optional) Sets the maximum number of iterations (sweeps) for FSAI
+ * (Optional) Sets the maximum number of iterations (sweeps) for FSAI. This
+ * input parameter makes sense to all algorithm types for setting up FSAI.
  **/
 HYPRE_Int HYPRE_FSAISetMaxIterations( HYPRE_Solver solver,
                                       HYPRE_Int    max_iterations );
 
 /**
  * (Optional) Set number of iterations for computing maximum
- * eigenvalue of the preconditioned operator.
+ * eigenvalue of the preconditioned operator. This input parameter makes
+ * sense to all algorithm types for setting up FSAI.
  **/
 HYPRE_Int HYPRE_FSAISetEigMaxIters( HYPRE_Solver solver,
                                     HYPRE_Int    eig_max_iters );
 
 /**
  * (Optional) Set the convergence tolerance, if FSAI is used
- * as a solver. When using FSAI as a preconditioner, set the tolerance
- * to 0.0. The default is \f$10^{-6}\f$.
+ * as a solver. This input parameter makes sense to all algorithm types
+ * for setting up FSAI. When using FSAI as a preconditioner, set the
+ * tolerance to 0.0. The default is \f$10^{-6}\f$.
  **/
 HYPRE_Int HYPRE_FSAISetTolerance( HYPRE_Solver solver,
                                   HYPRE_Real   tolerance );
@@ -4257,7 +4334,7 @@ HYPRE_MGRSetGlobalSmoothCycle( HYPRE_Solver solver,
  * Options for \e smooth_type are:
  *
  *    -  0 : block Jacobi (default)
- *    -  1 : block Gauss-Siedel
+ *    -  1 : block Gauss-Seidel
  *    -  2 : Jacobi
  *    -  3 : Gauss-Seidel, sequential (very slow!)
  *    -  4 : Gauss-Seidel, interior points in parallel, boundary sequential (slow!)
@@ -4314,7 +4391,7 @@ HYPRE_MGRGetFinalRelativeResidualNorm( HYPRE_Solver solver,
 /**
  * @name ParCSR ILU Solver
  *
- * (Parallel) ILU smoother
+ * (Parallel) Incomplete LU factorization.
  *
  * @{
  **/
@@ -4322,12 +4399,14 @@ HYPRE_MGRGetFinalRelativeResidualNorm( HYPRE_Solver solver,
 /**
  * Create a solver object
  **/
-HYPRE_Int HYPRE_ILUCreate( HYPRE_Solver *solver );
+HYPRE_Int
+HYPRE_ILUCreate( HYPRE_Solver *solver );
 
 /**
  * Destroy a solver object
  **/
-HYPRE_Int HYPRE_ILUDestroy( HYPRE_Solver solver );
+HYPRE_Int
+HYPRE_ILUDestroy( HYPRE_Solver solver );
 
 /**
  * Setup the ILU solver or preconditioner.
@@ -4339,10 +4418,11 @@ HYPRE_Int HYPRE_ILUDestroy( HYPRE_Solver solver );
  * @param b right-hand-side of the linear system to be solved (Ignored by this function).
  * @param x approximate solution of the linear system to be solved (Ignored by this function).
  **/
-HYPRE_Int HYPRE_ILUSetup( HYPRE_Solver solver,
-                          HYPRE_ParCSRMatrix A,
-                          HYPRE_ParVector b,
-                          HYPRE_ParVector x      );
+HYPRE_Int
+HYPRE_ILUSetup( HYPRE_Solver solver,
+                HYPRE_ParCSRMatrix A,
+                HYPRE_ParVector b,
+                HYPRE_ParVector x      );
 /**
 * Solve the system or apply ILU as a preconditioner.
 * If used as a preconditioner, this function should be passed
@@ -4353,10 +4433,11 @@ HYPRE_Int HYPRE_ILUSetup( HYPRE_Solver solver,
 * @param b [IN] right hand side of the linear system to be solved
 * @param x [OUT] approximated solution of the linear system to be solved
 **/
-HYPRE_Int HYPRE_ILUSolve( HYPRE_Solver solver,
-                          HYPRE_ParCSRMatrix A,
-                          HYPRE_ParVector b,
-                          HYPRE_ParVector x      );
+HYPRE_Int
+HYPRE_ILUSolve( HYPRE_Solver solver,
+                HYPRE_ParCSRMatrix A,
+                HYPRE_ParVector b,
+                HYPRE_ParVector x      );
 
 /**
  * (Optional) Set maximum number of iterations if used as a solver.
@@ -4366,8 +4447,10 @@ HYPRE_Int
 HYPRE_ILUSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter );
 
 /**
- * (Optional) Set triangular solver type (0) direct (1) iterative
- * Set this to 1 Jacobi iterations. The default is 0 direct method.
+ * (Optional) Set triangular solver type. Options are:
+ *
+ *    -  0 : iterative
+ *    -  1 : direct (default)
  **/
 HYPRE_Int
 HYPRE_ILUSetTriSolve( HYPRE_Solver solver, HYPRE_Int tri_solve );
@@ -4387,7 +4470,7 @@ HYPRE_Int
 HYPRE_ILUSetUpperJacobiIters( HYPRE_Solver solver, HYPRE_Int upper_jacobi_iterations );
 
 /**
- * (Optional) Set the convergence tolerance for the ILU smoother.
+ * (Optional) Set the convergence tolerance for ILU.
  * Use tol = 0.0 if ILU is used as a preconditioner. The default is 1.e-7.
  **/
 HYPRE_Int
@@ -4429,7 +4512,7 @@ HYPRE_Int
 HYPRE_ILUSetDropThresholdArray( HYPRE_Solver solver, HYPRE_Real *threshold );
 
 /**
- * (Optional) Set the threshold for dropping in Newton–Schulz–Hotelling iteration (NHS-ILU).
+ * (Optional) Set the threshold for dropping in Newton–Schulz–Hotelling iteration (NSH-ILU).
  * Any entries less than this threshold are dropped when forming the approximate inverse matrix.
  * The default is 1.0e-2.
  **/
@@ -4438,7 +4521,7 @@ HYPRE_ILUSetNSHDropThreshold( HYPRE_Solver solver, HYPRE_Real threshold );
 
 /**
  * (Optional) Set the array of thresholds for dropping in Newton–Schulz–Hotelling
- * iteration (for NHS-ILU).  Any fill-in less than thresholds is dropped when
+ * iteration (for NSH-ILU).  Any fill-in less than thresholds is dropped when
  * forming the approximate inverse matrix.
  *
  *    - threshold[0] : threshold for Minimal Residual iteration (initial guess for NSH).

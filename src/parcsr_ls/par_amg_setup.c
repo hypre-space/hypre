@@ -170,8 +170,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int     ilu_upper_jacobi_iters;
    HYPRE_Real    ilu_droptol;
    HYPRE_Int     ilu_reordering_type;
+   HYPRE_Int     fsai_algo_type;
+   HYPRE_Int     fsai_local_solve_type;
    HYPRE_Int     fsai_max_steps;
    HYPRE_Int     fsai_max_step_size;
+   HYPRE_Int     fsai_max_nnz_row;
+   HYPRE_Int     fsai_num_levels;
+   HYPRE_Real    fsai_threshold;
    HYPRE_Int     fsai_eig_max_iters;
    HYPRE_Real    fsai_kap_tolerance;
    HYPRE_Int     needZ = 0;
@@ -266,8 +271,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    ilu_upper_jacobi_iters = hypre_ParAMGDataILUUpperJacobiIters(amg_data);
    ilu_max_iter = hypre_ParAMGDataILUMaxIter(amg_data);
    ilu_reordering_type = hypre_ParAMGDataILULocalReordering(amg_data);
+   fsai_algo_type = hypre_ParAMGDataFSAIAlgoType(amg_data);
+   fsai_local_solve_type = hypre_ParAMGDataFSAILocalSolveType(amg_data);
    fsai_max_steps = hypre_ParAMGDataFSAIMaxSteps(amg_data);
    fsai_max_step_size = hypre_ParAMGDataFSAIMaxStepSize(amg_data);
+   fsai_max_nnz_row = hypre_ParAMGDataFSAIMaxNnzRow(amg_data);
+   fsai_num_levels = hypre_ParAMGDataFSAINumLevels(amg_data);
+   fsai_threshold = hypre_ParAMGDataFSAIThreshold(amg_data);
    fsai_eig_max_iters = hypre_ParAMGDataFSAIEigMaxIters(amg_data);
    fsai_kap_tolerance = hypre_ParAMGDataFSAIKapTolerance(amg_data);
    interp_type = hypre_ParAMGDataInterpType(amg_data);
@@ -1854,6 +1864,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
                   hypre_BoomerAMGInterpTruncation(P, agg_trunc_factor, agg_P_max_elmts);
 
+                  if (agg_trunc_factor != 0.0 || agg_P_max_elmts > 0 ||
+                      agg_P12_trunc_factor != 0.0 || agg_P12_max_elmts > 0)
+                  {
+                     hypre_ParCSRMatrixCompressOffdMap(P);
+                  }
+
                   hypre_MatvecCommPkgCreate(P);
                   hypre_ParCSRMatrixDestroy(P1);
                   hypre_ParCSRMatrixDestroy(P2);
@@ -2038,8 +2054,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   {
                      P = hypre_ParMatmul(P1, P2);
                   }
+
                   hypre_BoomerAMGInterpTruncation(P, agg_trunc_factor,
                                                   agg_P_max_elmts);
+
+                  if (agg_trunc_factor != 0.0 || agg_P_max_elmts > 0 ||
+                      agg_P12_trunc_factor != 0.0 || agg_P12_max_elmts > 0)
+                  {
+                     hypre_ParCSRMatrixCompressOffdMap(P);
+                  }
+
                   hypre_MatvecCommPkgCreate(P);
                   hypre_ParCSRMatrixDestroy(P1);
                   hypre_ParCSRMatrixDestroy(P2);
@@ -2096,7 +2120,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                HYPRE_Int is_triangular = hypre_ParAMGDataIsTriangular(amg_data);
                HYPRE_Int gmres_switch = hypre_ParAMGDataGMRESSwitchR(amg_data);
                /* !!! RL: ensure that CF_marker contains -1 or 1 !!! */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
                HYPRE_MemoryLocation memory_location = hypre_IntArrayMemoryLocation(CF_marker_array[level]);
                HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
                if (exec == HYPRE_EXEC_DEVICE)
@@ -3500,7 +3524,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       if ((smooth_type == 6 || smooth_type == 16) && smooth_num_levels > j)
       {
          /* Sanity check */
-         if (hypre_ParVectorNumVectors(f) > 1)
+         if (num_vectors > 1)
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "Schwarz smoothing doesn't support multicomponent vectors");
@@ -3551,7 +3575,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          return hypre_error_flag;
 #endif
 
-         if (hypre_ParVectorNumVectors(f) > 1)
+         if (num_vectors > 1)
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "Euclid smoothing doesn't support multicomponent vectors");
@@ -3580,7 +3604,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       else if ((smooth_type == 4 || smooth_type == 14) && smooth_num_levels > j)
       {
          /* Sanity check */
-         if (hypre_ParVectorNumVectors(f) > 1)
+         if (num_vectors > 1)
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "FSAI smoothing doesn't support multicomponent vectors");
@@ -3588,13 +3612,18 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
 
          HYPRE_FSAICreate(&smoother[j]);
+         HYPRE_FSAISetAlgoType(smoother[j], fsai_algo_type);
+         HYPRE_FSAISetLocalSolveType(smoother[j], fsai_local_solve_type);
          HYPRE_FSAISetMaxSteps(smoother[j], fsai_max_steps);
          HYPRE_FSAISetMaxStepSize(smoother[j], fsai_max_step_size);
+         HYPRE_FSAISetMaxNnzRow(smoother[j], fsai_max_nnz_row);
+         HYPRE_FSAISetNumLevels(smoother[j], fsai_num_levels);
+         HYPRE_FSAISetThreshold(smoother[j], fsai_threshold);
          HYPRE_FSAISetKapTolerance(smoother[j], fsai_kap_tolerance);
          HYPRE_FSAISetTolerance(smoother[j], 0.0);
          HYPRE_FSAISetOmega(smoother[j], relax_weight[level]);
          HYPRE_FSAISetEigMaxIters(smoother[j], fsai_eig_max_iters);
-         HYPRE_FSAISetPrintLevel(smoother[j], 1);
+         HYPRE_FSAISetPrintLevel(smoother[j], (amg_print_level >= 1) ? 1 : 0);
 
          HYPRE_FSAISetup(smoother[j],
                          (HYPRE_ParCSRMatrix) A_array[j],
@@ -3602,16 +3631,18 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                          (HYPRE_ParVector) U_array[j]);
 
 #if DEBUG_SAVE_ALL_OPS
-         char file[256];
-         hypre_sprintf(file, "G_%02d.IJ.out", j);
-         hypre_ParCSRMatrixPrintIJ(hypre_ParFSAIDataGmat((hypre_ParFSAIData*) smoother[j]),
-                                   0, 0, file);
+         {
+            char filename[256];
+            hypre_sprintf(file, "G_%02d.IJ.out", j);
+            hypre_ParCSRMatrixPrintIJ(hypre_ParFSAIDataGmat((hypre_ParFSAIData*) smoother[j]),
+                                      0, 0, filename);
+         }
 #endif
       }
       else if ((smooth_type == 5 || smooth_type == 15) && smooth_num_levels > j)
       {
          /* Sanity check */
-         if (hypre_ParVectorNumVectors(f) > 1)
+         if (num_vectors > 1)
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "ILU smoothing doesn't support multicomponent vectors");
@@ -3645,7 +3676,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          return hypre_error_flag;
 #endif
 
-         if (hypre_ParVectorNumVectors(f) > 1)
+         if (num_vectors > 1)
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "ParaSails smoothing doesn't support multicomponent vectors");
@@ -3670,7 +3701,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          return hypre_error_flag;
 #endif
 
-         if (hypre_ParVectorNumVectors(f) > 1)
+         if (num_vectors > 1)
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "Pilut smoothing doesn't support multicomponent vectors");

@@ -37,7 +37,7 @@ shift
 
 # Basic build and run tests
 mo="-j test"
-ro="-ams -ij -sstruct -struct -lobpcg"
+ro="-ams -ij -sstruct -struct -lobpcg -rt -rtol 0.0 -atol 1e-3"
 
 co=""
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
