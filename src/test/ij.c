@@ -224,6 +224,21 @@ main( hypre_int argc,
    /* solve -Ax = b, for testing SND matrices */
    HYPRE_Int           negA = 0;
 
+   /* input configurations (from evostencils) */
+   struct Config {
+   // constructor
+   HYPRE_Int *cycle_struct;
+   HYPRE_Int *relax_node_types;
+   HYPRE_Int *node_num_sweeps;
+   HYPRE_Int cycle_num_nodes;
+   HYPRE_Real *relax_node_weights;
+   HYPRE_Real *relax_edge_weights;
+   } *iconfig_ptr;
+
+   HYPRE_Int n_configs=1;
+   char *token[6], *subtoken;
+   char *config_str;
+
    /* parameters for BoomerAMG */
    HYPRE_Real     A_drop_tol = 0.0;
    HYPRE_Int      A_drop_type = -1;
@@ -238,7 +253,7 @@ main( hypre_int argc,
    HYPRE_Real     CR_strong_th = 0.0;
    HYPRE_Int      CR_use_CG = 0;
    HYPRE_Int      P_max_elmts = 4;
-   HYPRE_Int      cycle_type;
+   HYPRE_Int      cycle_type = 1;
    HYPRE_Int      kappa;
    HYPRE_Int      *cycle_struct,*relax_node_types,*node_num_sweeps,cycle_num_nodes;
    HYPRE_Real     *relax_node_weights,*relax_edge_weights;
@@ -667,6 +682,86 @@ main( hypre_int argc,
          arg_index++;
          build_matrix_type      = -1;
          build_matrix_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-amgusrinputs") == 0 )
+      {
+         arg_index++;
+         cycle_type=4;
+         n_configs = atoi(argv[arg_index++]);
+         hypre_printf("n_configs: %d\n", n_configs);
+
+         // check if the number of input configurations is valid
+         if (n_configs < 1)
+         {
+            hypre_printf("Error: Invalid number of input configurations!\n");
+            exit(1);
+         }
+
+         // allocate memory for the input configurations
+         iconfig_ptr = hypre_CTAlloc(struct Config,  n_configs, HYPRE_MEMORY_HOST);
+
+         // parse the input configurations
+         for (i=0;i<n_configs;i++)
+         {
+            
+            // check if this is a argument value and not a switch
+            if (argv[arg_index][0] == '-')
+            {
+               hypre_printf("Error: Invalid input configuration!\n");
+               exit(1);
+            }
+            // read the input configuration
+            config_str = argv[arg_index++];
+            hypre_printf("Input configuration %d: %s\n", i+1, config_str);
+            token[0] = strtok(config_str, "|");
+            for (j=1;j<6;j++)
+               token[j] = strtok(NULL, "|");
+            iconfig_ptr[i].cycle_num_nodes = atoi(token[0]);
+            hypre_printf("cycle_num_nodes: %d\n", iconfig_ptr[i].cycle_num_nodes);
+            // allocate memory for the member variables
+            iconfig_ptr[i].cycle_struct = hypre_CTAlloc(HYPRE_Int,  iconfig_ptr[i].cycle_num_nodes-1, HYPRE_MEMORY_HOST);
+            iconfig_ptr[i].relax_node_types = hypre_CTAlloc(HYPRE_Int,  iconfig_ptr[i].cycle_num_nodes, HYPRE_MEMORY_HOST);
+            iconfig_ptr[i].node_num_sweeps = hypre_CTAlloc(HYPRE_Int,  iconfig_ptr[i].cycle_num_nodes, HYPRE_MEMORY_HOST);
+            iconfig_ptr[i].relax_node_weights = hypre_CTAlloc(HYPRE_Real,  iconfig_ptr[i].cycle_num_nodes, HYPRE_MEMORY_HOST);
+            iconfig_ptr[i].relax_edge_weights = hypre_CTAlloc(HYPRE_Real,  iconfig_ptr[i].cycle_num_nodes-1, HYPRE_MEMORY_HOST);
+            
+            // parse the cycle structure array values
+            subtoken = strtok(token[1], ",");
+            for (j=0;j<iconfig_ptr[i].cycle_num_nodes-1;j++)
+            {
+               iconfig_ptr[i].cycle_struct[j] = atoi(subtoken);
+               subtoken = strtok(NULL, ",");
+            }
+            // parse the relaxation types array values
+            subtoken = strtok(token[2], ",");
+            for (j=0;j<iconfig_ptr[i].cycle_num_nodes;j++)
+            {
+               iconfig_ptr[i].relax_node_types[j] = atoi(subtoken);
+               subtoken = strtok(NULL, ",");
+            }
+            // parse the number of sweeps array values
+            subtoken = strtok(token[3], ",");
+            for (j=0;j<iconfig_ptr[i].cycle_num_nodes;j++)
+            {
+               iconfig_ptr[i].node_num_sweeps[j] = atoi(subtoken);
+               subtoken = strtok(NULL, ",");
+            }
+            // parse the relaxation smoother weights array values
+            subtoken = strtok(token[4], ",");
+            for (j=0;j<iconfig_ptr[i].cycle_num_nodes;j++)
+            {
+               iconfig_ptr[i].relax_node_weights[j] = atof(subtoken);
+               subtoken = strtok(NULL, ",");
+            }
+            // parse the relaxation cgc weights array values
+            subtoken = strtok(token[5], ",");
+            for (j=0;j<iconfig_ptr[i].cycle_num_nodes-1;j++)
+            {
+               iconfig_ptr[i].relax_edge_weights[j] = atof(subtoken);
+               subtoken = strtok(NULL, ",");
+            }
+
+         }
       }
       else if ( strcmp(argv[arg_index], "-auxfromfile") == 0 )
       {
@@ -1564,45 +1659,6 @@ main( hypre_int argc,
       * Set kappa to large number for W-cycle.
       *--------------------------------------------*/
       kappa=1; 
-      cycle_type = 4;
-      if (cycle_type==4)
-      {   
-         /*------------------------------------------------------------------------------------
-         * Create a V-cycle solver providing cycle structure / smoothing operations explicitly.
-         --------------------------------------------------------------------------------------*/
-         /*--------------USER_INPUTS------------------------*/
-         // 1. number of cycling nodes in the AMG cycle
-         cycle_num_nodes = 9; 
-         // 2. specify edge types connecting the nodes (-1->restriction; 1->interpolation; 0->same_level)
-         HYPRE_Int icycling[] = {-1,-1,-1,-1,1,1,1,1};  
-         // 3. smoothing inputs at each cycling node 
-         HYPRE_Int irelaxtypes[] = {13,13,13,13,9,14,14,14,14};
-         HYPRE_Int inumsweeps[] = {1,1,1,1,1,1,1,1,1};
-         HYPRE_Real irelaxwts[] = {1,1,1,1,1,1,1,1,1};
-         // 4. relaxation factor at each cycling edge (meant for under/over relaxation of cgc steps)
-         HYPRE_Real iedgewts[] = {1,1,1,1,1,1,1,1};
-         /*------------END_USER_INPUTS-----------------------*/
-
-         // allocate memory
-         cycle_struct = hypre_CTAlloc(HYPRE_Int,  cycle_num_nodes-1, HYPRE_MEMORY_HOST);
-         relax_node_types = hypre_CTAlloc(HYPRE_Int,  cycle_num_nodes, HYPRE_MEMORY_HOST);
-         relax_node_weights = hypre_CTAlloc(HYPRE_Real,  cycle_num_nodes, HYPRE_MEMORY_HOST);
-         relax_edge_weights = hypre_CTAlloc(HYPRE_Real,  cycle_num_nodes-1, HYPRE_MEMORY_HOST);
-         node_num_sweeps = hypre_CTAlloc(HYPRE_Int,  cycle_num_nodes, HYPRE_MEMORY_HOST);
-         // set inputs
-         for(i=0;i<cycle_num_nodes;i++)
-            {
-               relax_node_types[i] = irelaxtypes[i];
-               node_num_sweeps[i] = inumsweeps[i];
-               relax_node_weights[i] = irelaxwts[i];
-               if (i<cycle_num_nodes-1)
-               {
-                  cycle_struct[i]=icycling[i];
-                  relax_edge_weights[i]=iedgewts[i];
-               }
-            }
-      }
-
       fcycle = 0;
       relax_wt = 1.;
       outer_wt = 1.;
@@ -4217,15 +4273,6 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetPrintFileName(amg_solver, "driver.out.log");
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_BoomerAMGSetKappaCycleVal(amg_solver, kappa);
-      if (cycle_type==4)
-      {
-         HYPRE_BoomerAMGSetCycleStruct(amg_solver,cycle_struct,cycle_num_nodes);
-         HYPRE_BoomerAMGSetRelaxNodeTypes(amg_solver,relax_node_types);
-         HYPRE_BoomerAMGSetRelaxNodeWeights(amg_solver,relax_node_weights);
-         HYPRE_BoomerAMGSetRelaxEdgeWeights(amg_solver,relax_edge_weights);
-         HYPRE_BoomerAMGSetNodeNumSweeps(amg_solver,node_num_sweeps);
-      }
-   
       HYPRE_BoomerAMGSetFCycle(amg_solver, fcycle);
       HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
       HYPRE_BoomerAMGSetISType(amg_solver, IS_type);
@@ -4354,71 +4401,31 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCoordinates (amg_solver, coordinates);
       }
 
-      hypre_GpuProfilingPushRange("AMG-Setup-1");
-      if (solver_id == 0)
-      {
-         HYPRE_BoomerAMGSetup(amg_solver, parcsr_M, b, x);
-      }
-      else if (solver_id == 90)
-      {
-         HYPRE_BoomerAMGDDSetup(amgdd_solver, parcsr_M, b, x);
-      }
+      // loop over input configurations (from evostencils)
+      for (i = 0; i < n_configs; i++)
+      {     
+         if (i>0)
+            {
+               // initialize the setup phase timer for the subsequent configurations. 
+               time_index = hypre_InitializeTiming("BoomerAMG Setup");
+               hypre_BeginTiming(time_index);
 
-      hypre_GpuProfilingPopRange();
+               // reset the initial guess
+               if (build_x0_type == -1)
+                  HYPRE_ParVectorSetConstantValues(x,0);
+               else if (build_x0_type == 1)
+                  HYPRE_ParVectorSetRandomValues(x,i*iconfig_ptr[i].cycle_num_nodes);
+            }
 
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-
-      if (solver_id == 0)
-      {
-         time_index = hypre_InitializeTiming("BoomerAMG Solve");
-      }
-      else if (solver_id == 90)
-      {
-         time_index = hypre_InitializeTiming("BoomerAMG-DD Solve");
-      }
-      hypre_BeginTiming(time_index);
-
-      hypre_GpuProfilingPushRange("AMG-Solve-1");
-
-      if (solver_id == 0)
-      {
-         HYPRE_BoomerAMGSolve(amg_solver, parcsr_A, b, x);
-      }
-      else if (solver_id == 90)
-      {
-         HYPRE_BoomerAMGDDSolve(amgdd_solver, parcsr_A, b, x);
-      }
-
-      hypre_GpuProfilingPopRange();
-
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-
-      if (second_time)
-      {
-         HYPRE_SetExecutionPolicy(exec2_policy);
-
-         /* run a second time [for timings, to check for memory leaks] */
-         HYPRE_ParVectorSetRandomValues(x, 775);
-#if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
-         hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
-#endif
-         hypre_ParVectorCopy(x0_save, x);
-
-#if defined(HYPRE_USING_CUDA)
-         cudaProfilerStart();
-#endif
-
-         time_index = hypre_InitializeTiming("BoomerAMG/AMG-DD Setup2");
-         hypre_BeginTiming(time_index);
-
-         hypre_GpuProfilingPushRange("AMG-Setup-2");
-
+         hypre_GpuProfilingPushRange("AMG-Setup-1");
+         if (cycle_type==4)
+         {
+            HYPRE_BoomerAMGSetCycleStruct(amg_solver,iconfig_ptr[i].cycle_struct,iconfig_ptr[i].cycle_num_nodes);
+            HYPRE_BoomerAMGSetRelaxNodeTypes(amg_solver,iconfig_ptr[i].relax_node_types);
+            HYPRE_BoomerAMGSetRelaxNodeWeights(amg_solver,iconfig_ptr[i].relax_node_weights);
+            HYPRE_BoomerAMGSetRelaxEdgeWeights(amg_solver,iconfig_ptr[i].relax_edge_weights);
+            HYPRE_BoomerAMGSetNodeNumSweeps(amg_solver,iconfig_ptr[i].node_num_sweeps);
+         }
          if (solver_id == 0)
          {
             HYPRE_BoomerAMGSetup(amg_solver, parcsr_M, b, x);
@@ -4435,10 +4442,17 @@ main( hypre_int argc,
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
 
-         time_index = hypre_InitializeTiming("BoomerAMG/AMG-DD Solve2");
+         if (solver_id == 0)
+         {
+            time_index = hypre_InitializeTiming("BoomerAMG Solve");
+         }
+         else if (solver_id == 90)
+         {
+            time_index = hypre_InitializeTiming("BoomerAMG-DD Solve");
+         }
          hypre_BeginTiming(time_index);
 
-         hypre_GpuProfilingPushRange("AMG-Solve-2");
+         hypre_GpuProfilingPushRange("AMG-Solve-1");
 
          if (solver_id == 0)
          {
@@ -4456,37 +4470,94 @@ main( hypre_int argc,
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
 
-#if defined(HYPRE_USING_CUDA)
-         cudaProfilerStop();
-#endif
-      }
+         if (second_time)
+         {
+            HYPRE_SetExecutionPolicy(exec2_policy);
 
-      if (solver_id == 0)
-      {
-         HYPRE_BoomerAMGGetNumIterations(amg_solver, &num_iterations);
-         HYPRE_BoomerAMGGetFinalRelativeResidualNorm(amg_solver, &final_res_norm);
-      }
-      else if (solver_id == 90)
-      {
-         HYPRE_BoomerAMGDDGetNumIterations(amgdd_solver, &num_iterations);
-         HYPRE_BoomerAMGDDGetFinalRelativeResidualNorm(amgdd_solver, &final_res_norm);
-      }
+            /* run a second time [for timings, to check for memory leaks] */
+            HYPRE_ParVectorSetRandomValues(x, 775);
+   #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
+            hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
+   #endif
+            hypre_ParVectorCopy(x0_save, x);
 
-      if (myid == 0)
-      {
-         hypre_printf("\n");
+   #if defined(HYPRE_USING_CUDA)
+            cudaProfilerStart();
+   #endif
+
+            time_index = hypre_InitializeTiming("BoomerAMG/AMG-DD Setup2");
+            hypre_BeginTiming(time_index);
+
+            hypre_GpuProfilingPushRange("AMG-Setup-2");
+
+            if (solver_id == 0)
+            {
+               HYPRE_BoomerAMGSetup(amg_solver, parcsr_M, b, x);
+            }
+            else if (solver_id == 90)
+            {
+               HYPRE_BoomerAMGDDSetup(amgdd_solver, parcsr_M, b, x);
+            }
+
+            hypre_GpuProfilingPopRange();
+
+            hypre_EndTiming(time_index);
+            hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+            hypre_FinalizeTiming(time_index);
+            hypre_ClearTiming();
+
+            time_index = hypre_InitializeTiming("BoomerAMG/AMG-DD Solve2");
+            hypre_BeginTiming(time_index);
+
+            hypre_GpuProfilingPushRange("AMG-Solve-2");
+
+            if (solver_id == 0)
+            {
+               HYPRE_BoomerAMGSolve(amg_solver, parcsr_A, b, x);
+            }
+            else if (solver_id == 90)
+            {
+               HYPRE_BoomerAMGDDSolve(amgdd_solver, parcsr_A, b, x);
+            }
+
+            hypre_GpuProfilingPopRange();
+
+            hypre_EndTiming(time_index);
+            hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+            hypre_FinalizeTiming(time_index);
+            hypre_ClearTiming();
+
+   #if defined(HYPRE_USING_CUDA)
+            cudaProfilerStop();
+   #endif
+         }
+
          if (solver_id == 0)
          {
-            hypre_printf("BoomerAMG Iterations = %d\n", num_iterations);
+            HYPRE_BoomerAMGGetNumIterations(amg_solver, &num_iterations);
+            HYPRE_BoomerAMGGetFinalRelativeResidualNorm(amg_solver, &final_res_norm);
          }
          else if (solver_id == 90)
          {
-            hypre_printf("BoomerAMG-DD Iterations = %d\n", num_iterations);
+            HYPRE_BoomerAMGDDGetNumIterations(amgdd_solver, &num_iterations);
+            HYPRE_BoomerAMGDDGetFinalRelativeResidualNorm(amgdd_solver, &final_res_norm);
          }
-         hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
-         hypre_printf("\n");
-      }
 
+         if (myid == 0)
+         {
+            hypre_printf("\n");
+            if (solver_id == 0)
+            {
+               hypre_printf("BoomerAMG Iterations = %d\n", num_iterations);
+            }
+            else if (solver_id == 90)
+            {
+               hypre_printf("BoomerAMG-DD Iterations = %d\n", num_iterations);
+            }
+            hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+            hypre_printf("\n");
+         }
+      }
       if (solver_id == 0)
       {
          HYPRE_BoomerAMGDestroy(amg_solver);
@@ -4495,6 +4566,8 @@ main( hypre_int argc,
       {
          HYPRE_BoomerAMGDDDestroy(amgdd_solver);
       }
+      if (cycle_type==4)
+         hypre_TFree(iconfig_ptr, HYPRE_MEMORY_HOST);
    }
 
    /*-----------------------------------------------------------
