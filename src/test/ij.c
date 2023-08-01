@@ -713,9 +713,9 @@ main( hypre_int argc,
             // read the input configuration
             config_str = argv[arg_index++];
             hypre_printf("Input configuration %d: %s\n", i+1, config_str);
-            token[0] = strtok(config_str, "|");
+            token[0] = strtok(config_str, "/");
             for (j=1;j<6;j++)
-               token[j] = strtok(NULL, "|");
+               token[j] = strtok(NULL, "/");
             iconfig_ptr[i].cycle_num_nodes = atoi(token[0]);
             hypre_printf("cycle_num_nodes: %d\n", iconfig_ptr[i].cycle_num_nodes);
             // allocate memory for the member variables
