@@ -215,6 +215,7 @@ main( hypre_int argc,
    HYPRE_Int      A_drop_type = -1;
    HYPRE_Int      coarsen_cut_factor = 0;
    HYPRE_Real     strong_threshold;
+   HYPRE_Int      use_aux_strength_matrix = -1;
    HYPRE_Real     strong_thresholdR;
    HYPRE_Real     filter_thresholdR;
    HYPRE_Real     trunc_factor;
@@ -1453,6 +1454,11 @@ main( hypre_int argc,
       {
          arg_index++;
          strong_threshold  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-use_aux_str") == 0 )
+      {
+         arg_index++;
+         use_aux_strength_matrix  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-thR") == 0 )
       {
@@ -3662,6 +3668,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetConvergeType(amg_solver, converge_type);
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
+      HYPRE_BoomerAMGSetUseAuxStrengthMatrix(amg_precond, use_aux_strength_matrix);
       HYPRE_BoomerAMGSetSeqThreshold(amg_solver, seq_threshold);
       HYPRE_BoomerAMGSetRedundant(amg_solver, redundant);
       HYPRE_BoomerAMGSetMaxCoarseSize(amg_solver, coarse_threshold);
@@ -4009,6 +4016,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
+      HYPRE_BoomerAMGSetUseAuxStrengthMatrix(amg_precond, use_aux_strength_matrix);
       HYPRE_BoomerAMGSetSeqThreshold(amg_solver, seq_threshold);
       HYPRE_BoomerAMGSetRedundant(amg_solver, redundant);
       HYPRE_BoomerAMGSetMaxCoarseSize(amg_solver, coarse_threshold);
@@ -4199,6 +4207,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetFPoints(pcg_precond, num_fpt, fpt_index);
          HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetUseAuxStrengthMatrix(pcg_precond, use_aux_strength_matrix);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
          HYPRE_BoomerAMGSetRedundant(pcg_precond, redundant);
          HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
@@ -4385,6 +4394,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetFPoints(pcg_precond, num_fpt, fpt_index);
          HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetUseAuxStrengthMatrix(pcg_precond, use_aux_strength_matrix);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
          HYPRE_BoomerAMGSetRedundant(pcg_precond, redundant);
          HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
@@ -4932,6 +4942,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
             HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
             HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+            HYPRE_BoomerAMGSetUseAuxStrengthMatrix(pcg_precond, use_aux_strength_matrix);
             HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
             HYPRE_BoomerAMGSetPMaxElmts(pcg_precond, P_max_elmts);
             HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
@@ -5049,6 +5060,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
             HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
             HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+            HYPRE_BoomerAMGSetUseAuxStrengthMatrix(pcg_precond, use_aux_strength_matrix);
             HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
             HYPRE_BoomerAMGSetPMaxElmts(pcg_precond, P_max_elmts);
             HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
@@ -5358,6 +5370,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
             HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
             HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+            HYPRE_BoomerAMGSetUseAuxStrengthMatrix(pcg_precond, use_aux_strength_matrix);
             HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
             HYPRE_BoomerAMGSetPMaxElmts(pcg_precond, P_max_elmts);
             HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
@@ -5486,6 +5499,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
             HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
             HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+            HYPRE_BoomerAMGSetUseAuxStrengthMatrix(pcg_precond, use_aux_strength_matrix);
             HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
             HYPRE_BoomerAMGSetPMaxElmts(pcg_precond, P_max_elmts);
             HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
@@ -5830,6 +5844,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetIsolatedFPoints(amg_precond, num_isolated_fpt, isolated_fpt_index);
          HYPRE_BoomerAMGSetMeasureType(amg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(amg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetUseAuxStrengthMatrix(amg_precond, use_aux_strength_matrix);
          HYPRE_BoomerAMGSetSeqThreshold(amg_precond, seq_threshold);
          HYPRE_BoomerAMGSetRedundant(amg_precond, redundant);
          HYPRE_BoomerAMGSetMaxCoarseSize(amg_precond, coarse_threshold);
@@ -6025,6 +6040,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetUseAuxStrengthMatrix(pcg_precond, use_aux_strength_matrix);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
          HYPRE_BoomerAMGSetRedundant(pcg_precond, redundant);
          HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
@@ -6365,6 +6381,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetUseAuxStrengthMatrix(pcg_precond, use_aux_strength_matrix);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
          HYPRE_BoomerAMGSetRedundant(pcg_precond, redundant);
          HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
@@ -6570,6 +6587,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetUseAuxStrengthMatrix(pcg_precond, use_aux_strength_matrix);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
          HYPRE_BoomerAMGSetRedundant(pcg_precond, redundant);
          HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
@@ -6973,6 +6991,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetUseAuxStrengthMatrix(pcg_precond, use_aux_strength_matrix);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
          HYPRE_BoomerAMGSetRedundant(pcg_precond, redundant);
          HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
@@ -7363,6 +7382,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetUseAuxStrengthMatrix(pcg_precond, use_aux_strength_matrix);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
          HYPRE_BoomerAMGSetRedundant(pcg_precond, redundant);
          HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
@@ -7705,6 +7725,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetIsolatedFPoints(pcg_precond, num_isolated_fpt, isolated_fpt_index);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetUseAuxStrengthMatrix(pcg_precond, use_aux_strength_matrix);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
          HYPRE_BoomerAMGSetRedundant(pcg_precond, redundant);
          HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);

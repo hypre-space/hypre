@@ -287,6 +287,11 @@ typedef struct
    /* use auxilliary strength matrix */
    HYPRE_Int use_aux_strength_matrix;
 
+   /* store complexity info */
+   HYPRE_Real grid_complexity;
+   HYPRE_Real operator_complexity;
+   HYPRE_Real memory_complexity;
+
 } hypre_ParAMGData;
 
 /*--------------------------------------------------------------------------
@@ -543,6 +548,11 @@ typedef struct
 
 /* use auxilliary matrix for defining strength */
 #define hypre_ParAMGDataUseAuxStrengthMatrix(amg_data) ((amg_data)->use_aux_strength_matrix)
+
+/* store complexity info */
+#define hypre_ParAMGDataGridComplexity(amg_data) ((amg_data)->grid_complexity)
+#define hypre_ParAMGDataOperatorComplexity(amg_data) ((amg_data)->operator_complexity)
+#define hypre_ParAMGDataMemoryComplexity(amg_data) ((amg_data)->memory_complexity)
 
 #endif
 /******************************************************************************

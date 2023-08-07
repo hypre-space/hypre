@@ -884,6 +884,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
           case 11:
           	method = 11;
           	break;
+          case 12:
+            method = 12;
+            break;
           default:
           	method = 0;         	
        }

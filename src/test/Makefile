@@ -73,6 +73,7 @@ LFLAGS =\
 HYPRE_DRIVERS =\
  ij.c\
  ij_assembly.c\
+ cogent_proxy_2d_RIPS.c\
  sstruct.c\
  struct.c\
  ams_driver.c\
@@ -140,6 +141,10 @@ distclean: clean
 ##################################################################
 
 # C
+#
+cogent_proxy_2d_RIPS: cogent_proxy_2d_RIPS.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
 
 ij: ij.o
 	@echo  "Building" $@ "... "

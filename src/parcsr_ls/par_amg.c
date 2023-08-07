@@ -506,6 +506,11 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataDSLUSolver(amg_data) = NULL;
 #endif
 
+   /* init complexity info */
+   hypre_ParAMGDataGridComplexity(amg_data) = -1.0;
+   hypre_ParAMGDataOperatorComplexity(amg_data) = -1.0;
+   hypre_ParAMGDataMemoryComplexity(amg_data) = -1.0;
+
    HYPRE_ANNOTATE_FUNC_END;
 
    return (void *) amg_data;

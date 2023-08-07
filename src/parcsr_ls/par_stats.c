@@ -991,6 +991,10 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       hypre_printf("                operator = %f\n", operat_cmplxty);
       hypre_printf("                memory = %f\n", memory_cmplxty);
       hypre_printf("\n\n");
+
+      hypre_ParAMGDataGridComplexity(amg_data) = grid_cmplxty;
+      hypre_ParAMGDataOperatorComplexity(amg_data) = operat_cmplxty;
+      hypre_ParAMGDataMemoryComplexity(amg_data) = memory_cmplxty;
    }
 
    if (my_id == 0)
