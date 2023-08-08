@@ -758,10 +758,10 @@ HYPRE_Int HYPRE_BoomerAMGSetGridRelaxType(HYPRE_Solver  solver,
  *    - 17 : FCF-Jacobi
  *    - 18 : \f$\ell_1\f$-scaled jacobi
  *    - 19 : Gaussian elimination (old version)
- *    - 20 : Kaczmarz
  *    - 21 : The same as 8 except forcing serialization on CPU (#OMP-thread = 1)
  *    - 29 : Direct solve: use Gaussian elimination & BLAS
  *                        (with pivoting) (old version)
+ *    - 30 : Kaczmarz
  *    - 88:  The same methods as 8 with a convergent l1-term
  *    - 89:  Symmetric l1-hybrid Gauss-Seidel (i.e., 13 followed by 14)
  *    - 98 : LU with pivoting
