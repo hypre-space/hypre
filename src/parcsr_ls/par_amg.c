@@ -536,6 +536,7 @@ hypre_BoomerAMGDestroy( void *data )
    if (amg_data)
    {
       HYPRE_Int     num_levels = hypre_ParAMGDataNumLevels(amg_data);
+      HYPRE_Int     cycle_type = hypre_ParAMGDataCycleType(amg_data);
       HYPRE_Int     smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
       HYPRE_Solver *smoother = hypre_ParAMGDataSmoother(amg_data);
       void         *amg = hypre_ParAMGDataCoarseSolver(amg_data);
@@ -867,6 +868,15 @@ hypre_BoomerAMGDestroy( void *data )
          hypre_MPI_Comm_free(&new_comm);
       }
 
+      /* destroy inputs for user defined cycle structures */
+      if (cycle_type==4)
+      {
+         hypre_TFree(hypre_ParAMGDataCycleStruct(amg_data), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_ParAMGDataRelaxNodeTypes(amg_data), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_ParAMGDataRelaxNodeWeights(amg_data), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_ParAMGDataRelaxEdgeWeights(amg_data), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_ParAMGDataNodeNumSweeps(amg_data), HYPRE_MEMORY_HOST);
+      }
       hypre_TFree(amg_data, HYPRE_MEMORY_HOST);
    }
    HYPRE_ANNOTATE_FUNC_END;
