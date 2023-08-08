@@ -67,7 +67,7 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
     *     relax_type = 17 -> FCF-Jacobi
     *     relax_type = 18 -> L1-Jacobi [GPU-supported through call to relax7Jacobi]
     *     relax_type = 19 -> Direct Solve, (old version)
-    *     relax_type = 20 -> Kaczmarz
+    *     relax_type = 30 -> Kaczmarz
     *     relax_type = 21 -> the same as 8 except forcing serialization on CPU (#OMP-thread = 1)
     *     relax_type = 29 -> Direct solve: use Gaussian elimination & BLAS
     *                        (with pivoting) (old version)
@@ -167,7 +167,7 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          relax_error = hypre_BoomerAMGRelax19GaussElim(A, f, u);
          break;
 
-      case 20: /* Kaczmarz */
+      case 30: /* Kaczmarz */
          hypre_BoomerAMGRelaxKaczmarz(A, f, omega, l1_norms, u);
          break;
 
