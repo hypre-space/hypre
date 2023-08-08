@@ -688,7 +688,6 @@ main( hypre_int argc,
          arg_index++;
          cycle_type=4;
          n_configs = atoi(argv[arg_index++]);
-         hypre_printf("n_configs: %d\n", n_configs);
 
          // check if the number of input configurations is valid
          if (n_configs < 1)
@@ -712,12 +711,10 @@ main( hypre_int argc,
             }
             // read the input configuration
             config_str = argv[arg_index++];
-            hypre_printf("Input configuration %d: %s\n", i+1, config_str);
             token[0] = strtok(config_str, "/");
             for (j=1;j<6;j++)
                token[j] = strtok(NULL, "/");
             iconfig_ptr[i].cycle_num_nodes = atoi(token[0]);
-            hypre_printf("cycle_num_nodes: %d\n", iconfig_ptr[i].cycle_num_nodes);
             // allocate memory for the member variables
             iconfig_ptr[i].cycle_struct = hypre_CTAlloc(HYPRE_Int,  iconfig_ptr[i].cycle_num_nodes-1, HYPRE_MEMORY_HOST);
             iconfig_ptr[i].relax_node_types = hypre_CTAlloc(HYPRE_Int,  iconfig_ptr[i].cycle_num_nodes, HYPRE_MEMORY_HOST);
@@ -4401,47 +4398,41 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCoordinates (amg_solver, coordinates);
       }
 
+      hypre_GpuProfilingPushRange("AMG-Setup-1");
+      if (solver_id == 0)
+      {
+         HYPRE_BoomerAMGSetup(amg_solver, parcsr_M, b, x);
+      }
+      else if (solver_id == 90)
+      {
+         HYPRE_BoomerAMGDDSetup(amgdd_solver, parcsr_M, b, x);
+      }
+
+      hypre_GpuProfilingPopRange();
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
       // loop over input configurations (from evostencils)
       for (i = 0; i < n_configs; i++)
       {     
-         if (i>0)
-            {
-               // initialize the setup phase timer for the subsequent configurations. 
-               time_index = hypre_InitializeTiming("BoomerAMG Setup");
-               hypre_BeginTiming(time_index);
-
-               // reset the initial guess
-               if (build_x0_type == -1)
-                  HYPRE_ParVectorSetConstantValues(x,0);
-               else if (build_x0_type == 1)
-                  HYPRE_ParVectorSetRandomValues(x,i*iconfig_ptr[i].cycle_num_nodes);
-            }
-
-         hypre_GpuProfilingPushRange("AMG-Setup-1");
          if (cycle_type==4)
          {
+            // reset the initial guess
+            if (build_x0_type == -1)
+               HYPRE_ParVectorSetConstantValues(x,0);
+            else if (build_x0_type == 1)
+               HYPRE_ParVectorSetRandomValues(x,0);
+
+            // set cycle structure from usr inputs 
             HYPRE_BoomerAMGSetCycleStruct(amg_solver,iconfig_ptr[i].cycle_struct,iconfig_ptr[i].cycle_num_nodes);
             HYPRE_BoomerAMGSetRelaxNodeTypes(amg_solver,iconfig_ptr[i].relax_node_types);
             HYPRE_BoomerAMGSetRelaxNodeWeights(amg_solver,iconfig_ptr[i].relax_node_weights);
             HYPRE_BoomerAMGSetRelaxEdgeWeights(amg_solver,iconfig_ptr[i].relax_edge_weights);
             HYPRE_BoomerAMGSetNodeNumSweeps(amg_solver,iconfig_ptr[i].node_num_sweeps);
          }
-         if (solver_id == 0)
-         {
-            HYPRE_BoomerAMGSetup(amg_solver, parcsr_M, b, x);
-         }
-         else if (solver_id == 90)
-         {
-            HYPRE_BoomerAMGDDSetup(amgdd_solver, parcsr_M, b, x);
-         }
-
-         hypre_GpuProfilingPopRange();
-
-         hypre_EndTiming(time_index);
-         hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
-         hypre_FinalizeTiming(time_index);
-         hypre_ClearTiming();
-
          if (solver_id == 0)
          {
             time_index = hypre_InitializeTiming("BoomerAMG Solve");
