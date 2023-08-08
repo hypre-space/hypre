@@ -146,6 +146,9 @@
 /* Use SuperLU */
 #cmakedefine HAVE_SUPERLU 1
 
+/* Use MAGMA */
+#cmakedefine HYPRE_USING_MAGMA 1
+
 /* Use MPI */
 #cmakedefine HYPRE_HAVE_MPI 1
 

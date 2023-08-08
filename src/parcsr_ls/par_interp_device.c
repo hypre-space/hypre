@@ -355,7 +355,8 @@ hypre_BoomerAMGBuildDirInterpDevice( hypre_ParCSRMatrix   *A,
    hypre_TMemcpy(fine_to_coarse_h, fine_to_coarse_d, HYPRE_Int, n_fine, HYPRE_MEMORY_HOST,
                  HYPRE_MEMORY_DEVICE);
 
-   hypre_ParCSRMatrixColMapOffd(P) = hypre_CTAlloc(HYPRE_BigInt, hypre_CSRMatrixNumCols(P_offd), HYPRE_MEMORY_HOST);
+   hypre_ParCSRMatrixColMapOffd(P) = hypre_CTAlloc(HYPRE_BigInt, hypre_CSRMatrixNumCols(P_offd),
+                                                   HYPRE_MEMORY_HOST);
 
    hypre_GetCommPkgRTFromCommPkgA(P, A, fine_to_coarse_h, P_colids_h);
 
