@@ -15,7 +15,7 @@
 #include "_hypre_IJ_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 __global__ void
 hypreGPUKernel_IJMatrixValues_dev1(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Int *rowind,
@@ -275,8 +275,8 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    /*     but I can't get that to work for some reason */
    HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::transform,
-                      oneapi::dpl::counting_iterator(0),
-                      oneapi::dpl::counting_iterator(N0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(N0),
                       reverse_perm,
    [N0] (auto i) { return N0 - i - 1; });
 
@@ -300,8 +300,8 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
                           A0 + N0,
                           X,
                           A0,
-   [] (const auto & x) {return x;},
-   [] (const auto & x) {return 0.0;} );
+   [] (const auto & x) {return 0.0;},
+   [] (const auto & x) {return x;} );
 
    auto I0_J0_zip = oneapi::dpl::make_zip_iterator(I0, J0);
    auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
@@ -446,8 +446,8 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    /*     but I can't get that to work for some reason */
    HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::transform,
-                      oneapi::dpl::counting_iterator(0),
-                      oneapi::dpl::counting_iterator(N0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(N0),
                       reverse_perm,
    [N0] (auto i) { return N0 - i - 1; });
 
@@ -469,8 +469,8 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
                           A0 + N0,
                           X0,
                           A0,
-   [] (const auto & x) {return x;},
-   [] (const auto & x) {return 0.0;} );
+   [] (const auto & x) {return 0.0;},
+   [] (const auto & x) {return x;} );
 
    auto I0_J0_zip = oneapi::dpl::make_zip_iterator(I0, J0);
 

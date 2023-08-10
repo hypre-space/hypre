@@ -123,7 +123,7 @@ hypre_ParVector *hypre_ParVectorInDomainOf(hypre_ParCSRMatrix *A)
  * Extract the dim sub-vectors x_0,...,x_{dim-1} composing a parallel
  * block vector x. It is assumed that &x[i] = [x_0[i],...,x_{dim-1}[i]].
  *--------------------------------------------------------------------------*/
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 template<HYPRE_Int dir>
 __global__ void
 hypreGPUKernel_ParVectorBlockSplitGather(hypre_DeviceItem &item,
@@ -168,7 +168,7 @@ HYPRE_Int hypre_ParVectorBlockSplit(hypre_ParVector *x,
    HYPRE_Int i, d, size_;
    HYPRE_Real *x_data, *x_data_[3];
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParVectorMemoryLocation(x) );
 #endif
 
@@ -180,7 +180,7 @@ HYPRE_Int hypre_ParVectorBlockSplit(hypre_ParVector *x,
       x_data_[d] = hypre_VectorData(hypre_ParVectorLocalVector(x_[d]));
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    if (exec == HYPRE_EXEC_DEVICE)
    {
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
@@ -215,7 +215,7 @@ HYPRE_Int hypre_ParVectorBlockGather(hypre_ParVector *x,
    HYPRE_Int i, d, size_;
    HYPRE_Real *x_data, *x_data_[3];
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParVectorMemoryLocation(x) );
 #endif
 
@@ -227,7 +227,7 @@ HYPRE_Int hypre_ParVectorBlockGather(hypre_ParVector *x,
       x_data_[d] = hypre_VectorData(hypre_ParVectorLocalVector(x_[d]));
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    if (exec == HYPRE_EXEC_DEVICE)
    {
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
@@ -359,7 +359,7 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRowsHost(hypre_ParCSRMatrix *A)
    return hypre_error_flag;
 }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 __global__ void
 hypreGPUKernel_ParCSRMatrixFixZeroRows( hypre_DeviceItem    &item,
                                         HYPRE_Int      nrows,
@@ -443,10 +443,9 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRowsDevice(hypre_ParCSRMatrix *A)
    HYPRE_Real      *A_offd_data   = hypre_CSRMatrixData(A_offd);
    HYPRE_Int       *A_offd_i      = hypre_CSRMatrixI(A_offd);
    HYPRE_Int        num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
-   dim3             bDim, gDim;
 
-   bDim = hypre_GetDefaultDeviceBlockDimension();
-   gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(nrows, "warp", bDim);
 
    HYPRE_GPU_LAUNCH(hypreGPUKernel_ParCSRMatrixFixZeroRows, gDim, bDim,
                     nrows, A_diag_i, A_diag_j, A_diag_data, A_offd_i, A_offd_data, num_cols_offd);
@@ -459,7 +458,7 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRowsDevice(hypre_ParCSRMatrix *A)
 
 HYPRE_Int hypre_ParCSRMatrixFixZeroRows(hypre_ParCSRMatrix *A)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -489,7 +488,7 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRows(hypre_ParCSRMatrix *A)
  * cf_marker is not NULL.
  *--------------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 #if defined(HYPRE_USING_SYCL)
 struct l1_norm_op1
 #else
@@ -556,7 +555,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
          int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                       memory_location_tmp);
       }
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
@@ -575,7 +574,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
                             int_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
          /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
          hypre_ForceSyncComputeStream(hypre_handle());
 #endif
@@ -648,7 +647,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       }
 
       /* Truncate according to Remark 6.2 */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
 #if defined(HYPRE_USING_SYCL)
@@ -674,7 +673,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       /* Set the diag element */
       hypre_CSRMatrixExtractDiagonal(A_diag, l1_norm, 0);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
       if ( exec == HYPRE_EXEC_DEVICE)
       {
 #if defined(HYPRE_USING_SYCL)
@@ -711,7 +710,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
    /* Set the diag element */
    hypre_CSRMatrixExtractDiagonal(A_diag, diag_tmp, 0);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    if (exec == HYPRE_EXEC_DEVICE)
    {
 #if defined(HYPRE_USING_SYCL)
@@ -768,7 +767,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
  *
  * For every row containing only a diagonal element: set it to d.
  *--------------------------------------------------------------------------*/
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 __global__ void
 hypreGPUKernel_ParCSRMatrixSetDiagRows(hypre_DeviceItem    &item,
                                        HYPRE_Int      nrows,
@@ -809,7 +808,7 @@ HYPRE_Int hypre_ParCSRMatrixSetDiagRows(hypre_ParCSRMatrix *A, HYPRE_Real d)
    HYPRE_Int *A_offd_I = hypre_CSRMatrixI(A_offd);
    HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -1486,7 +1485,7 @@ HYPRE_Int hypre_AMSSetBetaAMGCoarseRelaxType(void *solver,
  * can be computed from the vectors Gx, Gy, Gz.
  *--------------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 __global__ void
 hypreGPUKernel_AMSComputePi_copy1(hypre_DeviceItem &item,
                                   HYPRE_Int  nnz,
@@ -1622,7 +1621,7 @@ HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
          Gz_data = hypre_VectorData(hypre_ParVectorLocalVector(Gz));
       }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
       HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(G),
                                                          hypre_ParCSRMatrixMemoryLocation(Pi) );
 #endif
@@ -1642,7 +1641,7 @@ HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
          HYPRE_Int *Pi_diag_J = hypre_CSRMatrixJ(Pi_diag);
          HYPRE_Real *Pi_diag_data = hypre_CSRMatrixData(Pi_diag);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             hypreDevice_IntScalen( G_diag_I, G_diag_nrows + 1, Pi_diag_I, dim );
@@ -1708,7 +1707,7 @@ HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
          HYPRE_BigInt *G_cmap = hypre_ParCSRMatrixColMapOffd(G);
          HYPRE_BigInt *Pi_cmap = hypre_ParCSRMatrixColMapOffd(Pi);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             if (G_offd_ncols)
@@ -1783,7 +1782,7 @@ HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
  * Gx, Gy, Gz.
  *--------------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 __global__ void
 hypreGPUKernel_AMSComputePixyz_copy(hypre_DeviceItem &item,
                                     HYPRE_Int   nrows,
@@ -1858,7 +1857,7 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
 {
    hypre_ParCSRMatrix *Pix, *Piy, *Piz;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(G) );
 #endif
 
@@ -1952,9 +1951,20 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
          HYPRE_Int *Piz_diag_J = hypre_CSRMatrixJ(Piz_diag);
          HYPRE_Real *Piz_diag_data = hypre_CSRMatrixData(Piz_diag);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
+#if defined(HYPRE_USING_SYCL)
+            HYPRE_ONEDPL_CALL( std::copy_n,
+                               oneapi::dpl::make_zip_iterator(G_diag_I, G_diag_I, G_diag_I),
+                               G_diag_nrows + 1,
+                               oneapi::dpl::make_zip_iterator(Pix_diag_I, Piy_diag_I, Piz_diag_I) );
+
+            HYPRE_ONEDPL_CALL( std::copy_n,
+                               oneapi::dpl::make_zip_iterator(G_diag_J, G_diag_J, G_diag_J),
+                               G_diag_nnz,
+                               oneapi::dpl::make_zip_iterator(Pix_diag_J, Piy_diag_J, Piz_diag_J) );
+#else
             HYPRE_THRUST_CALL( copy_n,
                                thrust::make_zip_iterator(thrust::make_tuple(G_diag_I, G_diag_I, G_diag_I)),
                                G_diag_nrows + 1,
@@ -1964,6 +1974,7 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
                                thrust::make_zip_iterator(thrust::make_tuple(G_diag_J, G_diag_J, G_diag_J)),
                                G_diag_nnz,
                                thrust::make_zip_iterator(thrust::make_tuple(Pix_diag_J, Piy_diag_J, Piz_diag_J)) );
+#endif
 
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(G_diag_nrows, "warp", bDim);
@@ -2018,9 +2029,20 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
          HYPRE_Int *Piy_diag_J = hypre_CSRMatrixJ(Piy_diag);
          HYPRE_Real *Piy_diag_data = hypre_CSRMatrixData(Piy_diag);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
+#if defined(HYPRE_USING_SYCL)
+            HYPRE_ONEDPL_CALL( std::copy_n,
+                               oneapi::dpl::make_zip_iterator(G_diag_I, G_diag_I),
+                               G_diag_nrows + 1,
+                               oneapi::dpl::make_zip_iterator(Pix_diag_I, Piy_diag_I) );
+
+            HYPRE_ONEDPL_CALL( std::copy_n,
+                               oneapi::dpl::make_zip_iterator(G_diag_J, G_diag_J),
+                               G_diag_nnz,
+                               oneapi::dpl::make_zip_iterator(Pix_diag_J, Piy_diag_J) );
+#else
             HYPRE_THRUST_CALL( copy_n,
                                thrust::make_zip_iterator(thrust::make_tuple(G_diag_I, G_diag_I)),
                                G_diag_nrows + 1,
@@ -2030,6 +2052,7 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
                                thrust::make_zip_iterator(thrust::make_tuple(G_diag_J, G_diag_J)),
                                G_diag_nnz,
                                thrust::make_zip_iterator(thrust::make_tuple(Pix_diag_J, Piy_diag_J)) );
+#endif
 
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(G_diag_nrows, "warp", bDim);
@@ -2076,9 +2099,20 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
          HYPRE_Int *Pix_diag_J = hypre_CSRMatrixJ(Pix_diag);
          HYPRE_Real *Pix_diag_data = hypre_CSRMatrixData(Pix_diag);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
+#if defined(HYPRE_USING_SYCL)
+            HYPRE_ONEDPL_CALL( std::copy_n,
+                               G_diag_I,
+                               G_diag_nrows + 1,
+                               Pix_diag_I );
+
+            HYPRE_ONEDPL_CALL( std::copy_n,
+                               G_diag_J,
+                               G_diag_nnz,
+                               Pix_diag_J );
+#else
             HYPRE_THRUST_CALL( copy_n,
                                G_diag_I,
                                G_diag_nrows + 1,
@@ -2088,6 +2122,7 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
                                G_diag_J,
                                G_diag_nnz,
                                Pix_diag_J );
+#endif
 
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(G_diag_nrows, "warp", bDim);
@@ -2150,9 +2185,23 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
          HYPRE_BigInt *Piy_cmap = hypre_ParCSRMatrixColMapOffd(Piy);
          HYPRE_BigInt *Piz_cmap = hypre_ParCSRMatrixColMapOffd(Piz);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
+#if defined(HYPRE_USING_SYCL)
+            if (G_offd_ncols)
+            {
+               HYPRE_ONEDPL_CALL( std::copy_n,
+                                  oneapi::dpl::make_zip_iterator(G_offd_I, G_offd_I, G_offd_I),
+                                  G_offd_nrows + 1,
+                                  oneapi::dpl::make_zip_iterator(Pix_offd_I, Piy_offd_I, Piz_offd_I) );
+            }
+
+            HYPRE_ONEDPL_CALL( std::copy_n,
+                               oneapi::dpl::make_zip_iterator(G_offd_J, G_offd_J, G_offd_J),
+                               G_offd_nnz,
+                               oneapi::dpl::make_zip_iterator(Pix_offd_J, Piy_offd_J, Piz_offd_J) );
+#else
             if (G_offd_ncols)
             {
                HYPRE_THRUST_CALL( copy_n,
@@ -2165,6 +2214,7 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
                                thrust::make_zip_iterator(thrust::make_tuple(G_offd_J, G_offd_J, G_offd_J)),
                                G_offd_nnz,
                                thrust::make_zip_iterator(thrust::make_tuple(Pix_offd_J, Piy_offd_J, Piz_offd_J)) );
+#endif
 
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(G_offd_nrows, "warp", bDim);
@@ -2232,9 +2282,23 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
          HYPRE_BigInt *Pix_cmap = hypre_ParCSRMatrixColMapOffd(Pix);
          HYPRE_BigInt *Piy_cmap = hypre_ParCSRMatrixColMapOffd(Piy);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
+#if defined(HYPRE_USING_SYCL)
+            if (G_offd_ncols)
+            {
+               HYPRE_ONEDPL_CALL( std::copy_n,
+                                  oneapi::dpl::make_zip_iterator(G_offd_I, G_offd_I),
+                                  G_offd_nrows + 1,
+                                  oneapi::dpl::make_zip_iterator(Pix_offd_I, Piy_offd_I) );
+            }
+
+            HYPRE_ONEDPL_CALL( std::copy_n,
+                               oneapi::dpl::make_zip_iterator(G_offd_J, G_offd_J),
+                               G_offd_nnz,
+                               oneapi::dpl::make_zip_iterator(Pix_offd_J, Piy_offd_J) );
+#else
             if (G_offd_ncols)
             {
                HYPRE_THRUST_CALL( copy_n,
@@ -2247,6 +2311,7 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
                                thrust::make_zip_iterator(thrust::make_tuple(G_offd_J, G_offd_J)),
                                G_offd_nnz,
                                thrust::make_zip_iterator(thrust::make_tuple(Pix_offd_J, Piy_offd_J)) );
+#endif
 
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(G_offd_nrows, "warp", bDim);
@@ -2304,9 +2369,23 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
          HYPRE_BigInt *G_cmap = hypre_ParCSRMatrixColMapOffd(G);
          HYPRE_BigInt *Pix_cmap = hypre_ParCSRMatrixColMapOffd(Pix);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
+#if defined(HYPRE_USING_SYCL)
+            if (G_offd_ncols)
+            {
+               HYPRE_ONEDPL_CALL( std::copy_n,
+                                  G_offd_I,
+                                  G_offd_nrows + 1,
+                                  Pix_offd_I );
+            }
+
+            HYPRE_ONEDPL_CALL( std::copy_n,
+                               G_offd_J,
+                               G_offd_nnz,
+                               Pix_offd_J );
+#else
             if (G_offd_ncols)
             {
                HYPRE_THRUST_CALL( copy_n,
@@ -2319,6 +2398,7 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
                                G_offd_J,
                                G_offd_nnz,
                                Pix_offd_J );
+#endif
 
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
             dim3 gDim = hypre_GetDefaultDeviceGridDimension(G_offd_nrows, "warp", bDim);
@@ -2368,7 +2448,7 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 __global__ void
 hypreGPUKernel_AMSComputeGPi_copy2(hypre_DeviceItem &item,
                                    HYPRE_Int   nrows,
@@ -2494,7 +2574,7 @@ HYPRE_Int hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
          Gz_data = hypre_VectorData(hypre_ParVectorLocalVector(Gz));
       }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
       HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(G),
                                                          hypre_ParCSRMatrixMemoryLocation(GPi) );
 #endif
@@ -2514,7 +2594,7 @@ HYPRE_Int hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
          HYPRE_Int *GPi_diag_J = hypre_CSRMatrixJ(GPi_diag);
          HYPRE_Real *GPi_diag_data = hypre_CSRMatrixData(GPi_diag);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             hypreDevice_IntScalen( G_diag_I, G_diag_nrows + 1, GPi_diag_I, dim );
@@ -2581,7 +2661,7 @@ HYPRE_Int hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
          HYPRE_BigInt *G_cmap = hypre_ParCSRMatrixColMapOffd(G);
          HYPRE_BigInt *GPi_cmap = hypre_ParCSRMatrixColMapOffd(GPi);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             if (G_offd_ncols)
@@ -2656,7 +2736,7 @@ HYPRE_Int hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
  * - hypre_AMSSetDiscreteGradient()
  * - hypre_AMSSetCoordinateVectors() or hypre_AMSSetEdgeConstantVectors
  *--------------------------------------------------------------------------*/
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 __global__ void
 hypreGPUKernel_FixInterNodes( hypre_DeviceItem    &item,
                               HYPRE_Int      nrows,
@@ -2793,7 +2873,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                          hypre_ParVector *b,
                          hypre_ParVector *x)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 #endif
 
@@ -2829,7 +2909,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
          HYPRE_Real *interior_nodes_data = hypre_VectorData(
                                               hypre_ParVectorLocalVector((hypre_ParVector*) ams_data -> interior_nodes));
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
@@ -2860,7 +2940,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
       hypre_ParCSRMatrixTranspose(G0t, & ams_data -> G0, 1);
 
       /* Construct the subspace matrix A_G0 = G0^T G0 */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          ams_data -> A_G0 = hypre_ParCSRMatMat(G0t, ams_data -> G0);
@@ -2895,7 +2975,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
          NOTE: this can be optimized significantly by taking into account that
          the sparsity pattern of A is subset of the sparsity pattern of G0 G0^T */
       {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          hypre_ParCSRMatrix *A;
          if (exec == HYPRE_EXEC_DEVICE)
          {
@@ -2919,7 +2999,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
             HYPRE_Int *B_diag_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(B));
             HYPRE_Int *B_offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(B));
             lfactor = -1;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
             if (exec == HYPRE_EXEC_DEVICE)
             {
                HYPRE_Int nnz_diag = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(B));
@@ -2931,6 +3011,26 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                hypre_TMemcpy(&nnz, &B_offd_i[B_num_rows], HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
                hypre_assert(nnz == nnz_offd);
 #endif
+#if defined(HYPRE_USING_SYCL)
+               if (nnz_diag)
+               {
+                  lfactor = HYPRE_ONEDPL_CALL( std::reduce,
+                                               oneapi::dpl::make_transform_iterator(B_diag_data,            absolute_value<HYPRE_Real>()),
+                                               oneapi::dpl::make_transform_iterator(B_diag_data + nnz_diag, absolute_value<HYPRE_Real>()),
+                                               -1.0,
+                                               sycl::maximum<HYPRE_Real>() );
+               }
+
+               if (nnz_offd)
+               {
+                  lfactor = HYPRE_ONEDPL_CALL( std::reduce,
+                                               oneapi::dpl::make_transform_iterator(B_offd_data,            absolute_value<HYPRE_Real>()),
+                                               oneapi::dpl::make_transform_iterator(B_offd_data + nnz_offd, absolute_value<HYPRE_Real>()),
+                                               lfactor,
+                                               sycl::maximum<HYPRE_Real>() );
+
+               }
+#else
                if (nnz_diag)
                {
                   lfactor = HYPRE_THRUST_CALL( reduce,
@@ -2949,6 +3049,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                                                thrust::maximum<HYPRE_Real>() );
 
                }
+#endif
             }
             else
 #endif
@@ -3178,7 +3279,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
             hypre_MatvecCommPkgCreate(ams_data -> A);
          }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             ams_data -> A_G = hypre_ParCSRMatrixRAPKT(ams_data -> G,
@@ -3265,7 +3366,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
          hypre_MatvecCommPkgCreate(ams_data -> Pix);
       }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
          ams_data -> A_Pix = hypre_ParCSRMatrixRAPKT(ams_data -> Pix, ams_data -> A, ams_data -> Pix, 1);
@@ -3294,7 +3395,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
             hypre_MatvecCommPkgCreate(ams_data -> Piy);
          }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             ams_data -> A_Piy = hypre_ParCSRMatrixRAPKT(ams_data -> Piy,
@@ -3326,7 +3427,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
             hypre_MatvecCommPkgCreate(ams_data -> Piz);
          }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             ams_data -> A_Piz = hypre_ParCSRMatrixRAPKT(ams_data -> Piz,
@@ -3415,7 +3516,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                   HYPRE_Real *Gy_data = hypre_VectorData(hypre_ParVectorLocalVector(ams_data -> Gy));
                   HYPRE_Real *Gz_data = hypre_VectorData(hypre_ParVectorLocalVector(ams_data -> Gz));
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
                   if (exec == HYPRE_EXEC_DEVICE)
                   {
                      dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
@@ -3469,7 +3570,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                   }
                }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
                if (exec == HYPRE_EXEC_DEVICE)
                {
                   GGt = hypre_ParCSRMatMat(ams_data -> G, Gt);
@@ -3529,7 +3630,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
 
                hypre_ParCSRMatrixDestroy(GGt);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
                if (exec == HYPRE_EXEC_DEVICE)
                {
                   ams_data -> A_Pi = hypre_ParCSRMatrixRAPKT(ams_data -> Pi, ApGGt, ams_data -> Pi, 1);
@@ -3546,7 +3647,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
          }
          else
          {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
             if (exec == HYPRE_EXEC_DEVICE)
             {
                ams_data -> A_Pi = hypre_ParCSRMatrixRAPKT(ams_data -> Pi, ams_data -> A, ams_data -> Pi, 1);
@@ -3649,7 +3750,7 @@ HYPRE_Int hypre_AMSSolve(void *solver,
    ri[4] = ams_data -> r1;     gi[4] = ams_data -> g1;
 
    /* may need to create an additional temporary vector for relaxation */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)

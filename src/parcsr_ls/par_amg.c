@@ -105,8 +105,13 @@ hypre_BoomerAMGCreate( void )
    HYPRE_Int    ilu_upper_jacobi_iters;
    HYPRE_Int    ilu_reordering_type;
 
+   HYPRE_Int    fsai_algo_type;
+   HYPRE_Int    fsai_local_solve_type;
    HYPRE_Int    fsai_max_steps;
    HYPRE_Int    fsai_max_step_size;
+   HYPRE_Int    fsai_max_nnz_row;
+   HYPRE_Int    fsai_num_levels;
+   HYPRE_Real   fsai_threshold;
    HYPRE_Int    fsai_eig_maxiter;
    HYPRE_Real   fsai_kap_tolerance;
 
@@ -219,8 +224,22 @@ hypre_BoomerAMGCreate( void )
    ilu_reordering_type = 1;
 
    /* FSAI smoother params */
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      fsai_algo_type = 3;
+   }
+   else
+#endif
+   {
+      fsai_algo_type = hypre_NumThreads() > 4 ? 2 : 1;
+   }
+   fsai_local_solve_type = 1;
    fsai_max_steps = 5;
    fsai_max_step_size = 3;
+   fsai_max_nnz_row = fsai_max_steps * fsai_max_step_size;
+   fsai_num_levels = 2;
+   fsai_threshold = 0.01;
    fsai_eig_maxiter = 5;
    fsai_kap_tolerance = 0.001;
 
@@ -365,8 +384,13 @@ hypre_BoomerAMGCreate( void )
    hypre_BoomerAMGSetILUUpperJacobiIters(amg_data, ilu_upper_jacobi_iters);
    hypre_BoomerAMGSetILUMaxIter(amg_data, ilu_max_iter);
    hypre_BoomerAMGSetILULocalReordering(amg_data, ilu_reordering_type);
+   hypre_BoomerAMGSetFSAIAlgoType(amg_data, fsai_algo_type);
+   hypre_BoomerAMGSetFSAILocalSolveType(amg_data, fsai_local_solve_type);
    hypre_BoomerAMGSetFSAIMaxSteps(amg_data, fsai_max_steps);
    hypre_BoomerAMGSetFSAIMaxStepSize(amg_data, fsai_max_step_size);
+   hypre_BoomerAMGSetFSAIMaxNnzRow(amg_data, fsai_max_nnz_row);
+   hypre_BoomerAMGSetFSAINumLevels(amg_data, fsai_num_levels);
+   hypre_BoomerAMGSetFSAIThreshold(amg_data, fsai_threshold);
    hypre_BoomerAMGSetFSAIEigMaxIters(amg_data, fsai_eig_maxiter);
    hypre_BoomerAMGSetFSAIKapTolerance(amg_data, fsai_kap_tolerance);
 
@@ -4257,6 +4281,38 @@ hypre_BoomerAMGSetILULocalReordering( void     *data,
 }
 
 HYPRE_Int
+hypre_BoomerAMGSetFSAIAlgoType( void      *data,
+                                HYPRE_Int  fsai_algo_type)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataFSAIAlgoType(amg_data) = fsai_algo_type;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetFSAILocalSolveType( void      *data,
+                                      HYPRE_Int  fsai_local_solve_type)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataFSAILocalSolveType(amg_data) = fsai_local_solve_type;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypre_BoomerAMGSetFSAIMaxSteps( void      *data,
                                 HYPRE_Int  fsai_max_steps)
 {
@@ -4284,6 +4340,54 @@ hypre_BoomerAMGSetFSAIMaxStepSize( void      *data,
       return hypre_error_flag;
    }
    hypre_ParAMGDataFSAIMaxStepSize(amg_data) = fsai_max_step_size;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetFSAIMaxNnzRow( void      *data,
+                                 HYPRE_Int  fsai_max_nnz_row)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataFSAIMaxNnzRow(amg_data) = fsai_max_nnz_row;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetFSAINumLevels( void      *data,
+                                 HYPRE_Int  fsai_num_levels)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataFSAINumLevels(amg_data) = fsai_num_levels;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetFSAIThreshold( void      *data,
+                                 HYPRE_Real fsai_threshold)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataFSAIThreshold(amg_data) = fsai_threshold;
 
    return hypre_error_flag;
 }
@@ -4985,4 +5089,3 @@ hypre_BoomerAMGGetCumNnzAP( void       *data,
 
    return hypre_error_flag;
 }
-

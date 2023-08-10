@@ -16,6 +16,10 @@
 
 #include <math.h>
 
+/*--------------------------------------------------------------------------
+ * typedefs
+ *--------------------------------------------------------------------------*/
+
 /* This allows us to consistently avoid 'int' throughout hypre */
 typedef int                    hypre_int;
 typedef long int               hypre_longint;
@@ -150,4 +154,3 @@ typedef double                 hypre_double;
 #endif
 
 #endif /* hypre_GENERAL_HEADER */
-

@@ -5,11 +5,11 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#include "_hypre_onedpl.hpp"
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
+#include "_hypre_onedpl.hpp"
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 /*--------------------------------------------------------------------------
  * hypre_IntArraySetConstantValuesDevice
@@ -22,8 +22,10 @@ hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v,
    HYPRE_Int *array_data = hypre_IntArrayData(v);
    HYPRE_Int  size       = hypre_IntArraySize(v);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    hypreDevice_IntFilln( array_data, size, value );
+
+   hypre_SyncComputeStream(hypre_handle());
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
@@ -34,12 +36,10 @@ hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v,
    }
 #endif
 
-   hypre_SyncComputeStream(hypre_handle());
-
    return hypre_error_flag;
 }
 
-#if !defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_GPU)
 /*--------------------------------------------------------------------------
  * hypreGPUKernel_IntArrayInverseMapping
  *--------------------------------------------------------------------------*/
@@ -71,7 +71,7 @@ hypre_IntArrayInverseMappingDevice( hypre_IntArray  *v,
    HYPRE_Int  *v_data  = hypre_IntArrayData(v);
    HYPRE_Int  *w_data  = hypre_IntArrayData(w);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(size, "thread", bDim);
 
@@ -117,6 +117,32 @@ hypre_IntArrayCountDevice( hypre_IntArray *v,
 #elif defined (HYPRE_USING_DEVICE_OPENMP)
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Function not implemented for Device OpenMP");
    *num_values_ptr = 0;
+#endif
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IntArrayNegateDevice
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArrayNegateDevice( hypre_IntArray *v )
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_THRUST_CALL( transform,
+                      hypre_IntArrayData(v),
+                      hypre_IntArrayData(v) + hypre_IntArraySize(v),
+                      hypre_IntArrayData(v),
+                      thrust::negate<HYPRE_Int>() );
+#elif defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL( std::transform,
+                      hypre_IntArrayData(v),
+                      hypre_IntArrayData(v) + hypre_IntArraySize(v),
+                      hypre_IntArrayData(v),
+                      std::negate<HYPRE_Int>() );
+#else
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented yet!");
 #endif
 
    return hypre_error_flag;

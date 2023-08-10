@@ -22,11 +22,22 @@ typedef struct
    HYPRE_Int              hypre_error;
    HYPRE_MemoryLocation   memory_location;
    HYPRE_ExecutionPolicy  default_exec_policy;
+
+   /* the device buffers needed to do MPI communication for struct comm */
+   HYPRE_Complex         *struct_comm_recv_buffer;
+   HYPRE_Complex         *struct_comm_send_buffer;
+   HYPRE_Int              struct_comm_recv_buffer_size;
+   HYPRE_Int              struct_comm_send_buffer_size;
+
 #if defined(HYPRE_USING_GPU)
    hypre_DeviceData      *device_data;
-   /* device G-S options */
-   HYPRE_Int              device_gs_method;
+   HYPRE_Int              device_gs_method; /* device G-S options */
 #endif
+
+   /* user malloc/free function pointers */
+   GPUMallocFunc          user_device_malloc;
+   GPUMfreeFunc           user_device_free;
+
 #if defined(HYPRE_USING_UMPIRE)
    char                   umpire_device_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
    char                   umpire_um_pool_name[HYPRE_UMPIRE_POOL_NAME_MAX_LEN];
@@ -43,14 +54,21 @@ typedef struct
    HYPRE_Int              own_umpire_pinned_pool;
    umpire_resourcemanager umpire_rm;
 #endif
-   /* user malloc/free function pointers */
-   GPUMallocFunc          user_device_malloc;
-   GPUMfreeFunc           user_device_free;
+
+#if defined(HYPRE_USING_MAGMA)
+   magma_queue_t          magma_queue;
+#endif
 } hypre_Handle;
 
 /* accessor macros to hypre_Handle */
 #define hypre_HandleMemoryLocation(hypre_handle)                 ((hypre_handle) -> memory_location)
 #define hypre_HandleDefaultExecPolicy(hypre_handle)              ((hypre_handle) -> default_exec_policy)
+
+#define hypre_HandleStructCommRecvBuffer(hypre_handle)           ((hypre_handle) -> struct_comm_recv_buffer)
+#define hypre_HandleStructCommSendBuffer(hypre_handle)           ((hypre_handle) -> struct_comm_send_buffer)
+#define hypre_HandleStructCommRecvBufferSize(hypre_handle)       ((hypre_handle) -> struct_comm_recv_buffer_size)
+#define hypre_HandleStructCommSendBufferSize(hypre_handle)       ((hypre_handle) -> struct_comm_send_buffer_size)
+
 #define hypre_HandleDeviceData(hypre_handle)                     ((hypre_handle) -> device_data)
 #define hypre_HandleDeviceGSMethod(hypre_handle)                 ((hypre_handle) -> device_gs_method)
 
@@ -70,10 +88,6 @@ typedef struct
 #define hypre_HandleDeviceMaxShmemPerBlock(hypre_handle)         hypre_DeviceDataDeviceMaxShmemPerBlock(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleComputeStreamNum(hypre_handle)               hypre_DeviceDataComputeStreamNum(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleReduceBuffer(hypre_handle)                   hypre_DeviceDataReduceBuffer(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleStructCommRecvBuffer(hypre_handle)           hypre_DeviceDataStructCommRecvBuffer(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleStructCommSendBuffer(hypre_handle)           hypre_DeviceDataStructCommSendBuffer(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleStructCommRecvBufferSize(hypre_handle)       hypre_DeviceDataStructCommRecvBufferSize(hypre_HandleDeviceData(hypre_handle))
-#define hypre_HandleStructCommSendBufferSize(hypre_handle)       hypre_DeviceDataStructCommSendBufferSize(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmUseVendor(hypre_handle)                hypre_DeviceDataSpgemmUseVendor(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpMVUseVendor(hypre_handle)                  hypre_DeviceDataSpMVUseVendor(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpTransUseVendor(hypre_handle)               hypre_DeviceDataSpTransUseVendor(hypre_HandleDeviceData(hypre_handle))
@@ -105,5 +119,7 @@ typedef struct
 #define hypre_HandleOwnUmpireUMPool(hypre_handle)                ((hypre_handle) -> own_umpire_um_pool)
 #define hypre_HandleOwnUmpireHostPool(hypre_handle)              ((hypre_handle) -> own_umpire_host_pool)
 #define hypre_HandleOwnUmpirePinnedPool(hypre_handle)            ((hypre_handle) -> own_umpire_pinned_pool)
+
+#define hypre_HandleMagmaQueue(hypre_handle)                     ((hypre_handle) -> magma_queue)
 
 #endif

@@ -8,22 +8,6 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
-#ifdef HYPRE_USING_MEMORY_TRACKER
-hypre_MemoryTracker *_hypre_memory_tracker = NULL;
-
-/* accessor to the global ``_hypre_memory_tracker'' */
-hypre_MemoryTracker*
-hypre_memory_tracker(void)
-{
-   if (!_hypre_memory_tracker)
-   {
-      _hypre_memory_tracker = hypre_MemoryTrackerCreate();
-   }
-
-   return _hypre_memory_tracker;
-}
-#endif
-
 /* global variable _hypre_handle:
  * Outside this file, do NOT access it directly,
  * but use hypre_handle() instead (see handle.h) */
@@ -35,7 +19,9 @@ hypre_handle(void)
 {
    if (!_hypre_handle)
    {
-      _hypre_handle = hypre_HandleCreate();
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "ERROR - _hypre_handle is not initialized. Calling HYPRE_Initialize(). All HYPRE_* or hypre_* function calls should occur between HYPRE_Initialize() and HYPRE_Finalize().\n");
+      HYPRE_Initialize();
    }
 
    return _hypre_handle;
@@ -48,8 +34,11 @@ hypre_HandleCreate(void)
 
    hypre_HandleMemoryLocation(hypre_handle_) = HYPRE_MEMORY_DEVICE;
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_HandleDefaultExecPolicy(hypre_handle_) = HYPRE_EXEC_DEVICE;
+#endif
+
+#if defined(HYPRE_USING_GPU)
    hypre_HandleDeviceData(hypre_handle_) = hypre_DeviceDataCreate();
    /* Gauss-Seidel: SpTrSV */
    hypre_HandleDeviceGSMethod(hypre_handle_) = 1; /* CPU: 0; Cusparse: 1 */
@@ -66,6 +55,8 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
       return hypre_error_flag;
    }
 
+   hypre_TFree(hypre_HandleStructCommRecvBuffer(hypre_handle_), HYPRE_MEMORY_DEVICE);
+   hypre_TFree(hypre_HandleStructCommSendBuffer(hypre_handle_), HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_GPU)
    hypre_DeviceDataDestroy(hypre_HandleDeviceData(hypre_handle_));
    hypre_HandleDeviceData(hypre_handle_) = NULL;
@@ -92,16 +83,15 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
    HYPRE_HIP_CALL( hipSetDevice(device_id) );
 #endif
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_SYCL)
    if (hypre_handle_)
    {
-#if defined(HYPRE_USING_SYCL)
       if (!hypre_HandleDevice(hypre_handle_))
       {
          /* Note: this enforces "explicit scaling," i.e. we treat each tile of a multi-tile GPU as a separate device */
          sycl::platform platform(sycl::gpu_selector{});
          auto gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
-         HYPRE_Int n_devices = 0;
+         hypre_int n_devices = 0;
          hypre_GetDeviceCount(&n_devices);
          if (device_id >= n_devices)
          {
@@ -109,8 +99,8 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
                               "ERROR: SYCL device-ID exceed the number of devices on-node\n");
          }
 
-         HYPRE_Int local_n_devices = 0;
-         HYPRE_Int i;
+         hypre_int local_n_devices = 0;
+         hypre_int i;
          for (i = 0; i < gpu_devices.size(); i++)
          {
             if (local_n_devices == device_id)
@@ -123,11 +113,8 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
       hypre_DeviceDataDeviceMaxWorkGroupSize(hypre_HandleDeviceData(hypre_handle_)) =
          hypre_DeviceDataDevice(hypre_HandleDeviceData(
                                    hypre_handle_))->get_info<sycl::info::device::max_work_group_size>();
-#else
-      hypre_HandleDevice(hypre_handle_) = device_id;
-#endif // #if defined(HYPRE_USING_SYCL)
    }
-#endif // # if defined(HYPRE_USING_GPU)
+#endif // #if defined(HYPRE_USING_SYCL)
 
    return hypre_error_flag;
 }
@@ -177,7 +164,8 @@ hypre_GetDevice(hypre_int *device_id)
 #if defined(HYPRE_USING_SYCL)
    /* WM: note - no sycl call to get which device is setup for use (if the user has already setup a device at all)
     * Assume the rank/device binding below */
-   HYPRE_Int n_devices, my_id;
+   HYPRE_Int my_id;
+   hypre_int n_devices;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
    hypre_GetDeviceCount(&n_devices);
    (*device_id) = my_id % n_devices;
@@ -248,9 +236,15 @@ hypre_GetDeviceLastError(void)
  *****************************************************************************/
 
 HYPRE_Int
-HYPRE_Init(void)
+HYPRE_Initialize(void)
 {
-#ifdef HYPRE_USING_MEMORY_TRACKER
+   /* Return if the hypre library is in initialized state */
+   if (hypre_Initialized())
+   {
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_USING_MEMORY_TRACKER)
    if (!_hypre_memory_tracker)
    {
       _hypre_memory_tracker = hypre_MemoryTrackerCreate();
@@ -262,81 +256,99 @@ HYPRE_Init(void)
       _hypre_handle = hypre_HandleCreate();
    }
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_SYCL)
+   /* WM: note that for sycl, we need to do device setup again if reinitializing */
+   if (!HYPRE_Initialized())
+#else
+   /* If the library has not been initialized or finalized yet,
+      meaning that it is the first time HYPRE_Init is being called,
+      then perform the initialization of device structures below */
+   if (!HYPRE_Initialized() && !HYPRE_Finalized())
+#endif
+   {
 #if !defined(HYPRE_USING_SYCL)
-   /* With sycl, cannot call hypre_GetDeviceLastError() until after device and queue setup */
-   hypre_GetDeviceLastError();
+      /* With sycl, cannot call hypre_GetDeviceLastError() until after device and queue setup */
+      hypre_GetDeviceLastError();
 #endif
 
-   /* Notice: the cudaStream created is specific to the device
-    * that was in effect when you created the stream.
-    * So, we should first set the device and create the streams
-    */
-   hypre_int device_id;
-   hypre_GetDevice(&device_id);
-   hypre_SetDevice(device_id, _hypre_handle);
-   hypre_GetDeviceMaxShmemSize(device_id, _hypre_handle);
+      /* Notice: the cudaStream created is specific to the device
+       * that was in effect when you created the stream.
+       * So, we should first set the device and create the streams
+       */
+      hypre_int device_id;
+      hypre_GetDevice(&device_id);
+      hypre_SetDevice(device_id, _hypre_handle);
+      hypre_GetDeviceMaxShmemSize(device_id, _hypre_handle);
 
 #if defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
-   cudaMemPool_t mempool;
-   cudaDeviceGetDefaultMemPool(&mempool, device_id);
-   uint64_t threshold = UINT64_MAX;
-   cudaMemPoolSetAttribute(mempool, cudaMemPoolAttrReleaseThreshold, &threshold);
+      cudaMemPool_t mempool;
+      cudaDeviceGetDefaultMemPool(&mempool, device_id);
+      uint64_t threshold = UINT64_MAX;
+      cudaMemPoolSetAttribute(mempool, cudaMemPoolAttrReleaseThreshold, &threshold);
 #endif
 
-   /* To include the cost of creating streams/cudahandles in HYPRE_Init */
-   /* If not here, will be done at the first use */
+      /* To include the cost of creating streams/cudahandles in HYPRE_Init */
+      /* If not here, will be done at the first use */
 #if defined(HYPRE_USING_CUDA_STREAMS)
-   hypre_HandleComputeStream(_hypre_handle);
+      hypre_HandleComputeStream(_hypre_handle);
 #endif
 
-   /* A separate stream for prefetching */
-   //hypre_HandleCudaPrefetchStream(_hypre_handle);
-#endif // HYPRE_USING_GPU
+      /* A separate stream for prefetching */
+      //hypre_HandleCudaPrefetchStream(_hypre_handle);
 
 #if defined(HYPRE_USING_CUBLAS)
-   hypre_HandleCublasHandle(_hypre_handle);
+      hypre_HandleCublasHandle(_hypre_handle);
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
-   hypre_HandleCusparseHandle(_hypre_handle);
+      hypre_HandleCusparseHandle(_hypre_handle);
 #endif
 
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
-   hypre_HandleCurandGenerator(_hypre_handle);
+      hypre_HandleCurandGenerator(_hypre_handle);
 #endif
 
 #if defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
-   hypre_HandleVendorSolverHandle(_hypre_handle);
+      hypre_HandleVendorSolverHandle(_hypre_handle);
 #endif
 
-   /* Check if cuda arch flags in compiling match the device */
+      /* Check if cuda arch flags in compiling match the device */
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_DEBUG)
-   hypre_CudaCompileFlagCheck();
+      hypre_CudaCompileFlagCheck();
 #endif
+
+#if defined(HYPRE_USING_DEVICE_POOL)
+      /* Keep this check here at the end of HYPRE_Initialize()
+       * Make sure that device pool allocator has not been setup in HYPRE_Initialize,
+       * otherwise users are not able to set all the parameters
+       */
+      if ( hypre_HandleCubDevAllocator(_hypre_handle) ||
+           hypre_HandleCubUvmAllocator(_hypre_handle) )
+      {
+         char msg[256];
+         hypre_sprintf(msg, "%s %s", "ERROR: device pool allocators have been created in", __func__);
+         hypre_fprintf(stderr, "%s\n", msg);
+         hypre_error_w_msg(-1, msg);
+      }
+#endif
+   }
+#endif /* if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP) */
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_OMPOffloadOn();
 #endif
 
-#if defined(HYPRE_USING_DEVICE_POOL)
-   /* Keep this check here at the end of HYPRE_Init()
-    * Make sure that device pool allocator has not been setup in HYPRE_Init,
-    * otherwise users are not able to set all the parameters
-    */
-   if ( hypre_HandleCubDevAllocator(_hypre_handle) ||
-        hypre_HandleCubUvmAllocator(_hypre_handle) )
-   {
-      char msg[256];
-      hypre_sprintf(msg, "%s %s", "ERROR: device pool allocators have been created in", __func__);
-      hypre_fprintf(stderr, "%s\n", msg);
-      hypre_error_w_msg(-1, msg);
-   }
-#endif
-
 #if defined(HYPRE_USING_UMPIRE)
    hypre_UmpireInit(_hypre_handle);
 #endif
+
+#if defined(HYPRE_USING_MAGMA)
+   hypre_MagmaInitialize();
+#endif
+
+   /* Update library state */
+   hypre_SetInitialized();
 
    return hypre_error_flag;
 }
@@ -350,25 +362,42 @@ HYPRE_Init(void)
 HYPRE_Int
 HYPRE_Finalize(void)
 {
+   /* Return if the hypre library has already been finalized */
+   if (hypre_Finalized())
+   {
+      return hypre_error_flag;
+   }
+
 #if defined(HYPRE_USING_UMPIRE)
    hypre_UmpireFinalize(_hypre_handle);
 #endif
 
-   hypre_HandleDestroy(_hypre_handle);
+#if defined(HYPRE_USING_MAGMA)
+   hypre_MagmaFinalize();
+#endif
 
-   _hypre_handle = NULL;
-
-#if !defined(HYPRE_USING_SYCL)
-   /* With sycl, cannot call hypre_GetDeviceLastError() after destroying the handle */
+#if defined(HYPRE_USING_SYCL)
+   /* With sycl, cannot call hypre_GetDeviceLastError() after destroying the handle, so do it here */
    hypre_GetDeviceLastError();
 #endif
 
-#ifdef HYPRE_USING_MEMORY_TRACKER
+   hypre_HandleDestroy(_hypre_handle);
+   _hypre_handle = NULL;
+
+#if !defined(HYPRE_USING_SYCL)
+   hypre_GetDeviceLastError();
+#endif
+
+#if defined(HYPRE_USING_MEMORY_TRACKER)
    hypre_PrintMemoryTracker(hypre_total_bytes, hypre_peak_bytes, hypre_current_bytes,
                             hypre_memory_tracker_print, hypre_memory_tracker_filename);
 
    hypre_MemoryTrackerDestroy(_hypre_memory_tracker);
+   _hypre_memory_tracker = NULL;
 #endif
+
+   /* Update library state */
+   hypre_SetFinalized();
 
    return hypre_error_flag;
 }

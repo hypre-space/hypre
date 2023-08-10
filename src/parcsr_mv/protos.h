@@ -332,11 +332,17 @@ HYPRE_Int hypre_ExchangeExternalRowsDeviceInit( hypre_CSRMatrix *B_ext,
                                                 hypre_ParCSRCommPkg *comm_pkg_A, HYPRE_Int want_data, void **request_ptr);
 hypre_CSRMatrix* hypre_ExchangeExternalRowsDeviceWait(void *vrequest);
 HYPRE_Int hypre_ParCSRMatrixGenerateFFFCDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
-                                                HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **A_FC_ptr,
+                                                HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S,
+                                                hypre_ParCSRMatrix **A_FC_ptr,
                                                 hypre_ParCSRMatrix **A_FF_ptr );
 HYPRE_Int hypre_ParCSRMatrixGenerateFFCFDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
-                                                HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S, hypre_ParCSRMatrix **A_CF_ptr,
+                                                HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S,
+                                                hypre_ParCSRMatrix **A_CF_ptr,
                                                 hypre_ParCSRMatrix **A_FF_ptr );
+HYPRE_Int hypre_ParCSRMatrixGenerateCCCFDevice( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
+                                                HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix *S,
+                                                hypre_ParCSRMatrix **A_CF_ptr,
+                                                hypre_ParCSRMatrix **A_CC_ptr );
 hypre_CSRMatrix* hypre_ConcatDiagAndOffdDevice(hypre_ParCSRMatrix *A);
 HYPRE_Int hypre_ConcatDiagOffdAndExtDevice(hypre_ParCSRMatrix *A, hypre_CSRMatrix *E,
                                            hypre_CSRMatrix **B_ptr, HYPRE_Int *num_cols_offd_ptr, HYPRE_BigInt **cols_map_offd_ptr);
@@ -401,6 +407,8 @@ HYPRE_Int hypre_ParCSRMatrixAddDevice( HYPRE_Complex alpha, hypre_ParCSRMatrix *
 /* par_csr_matop_device.c */
 HYPRE_Int hypre_ParCSRMatrixDiagScaleDevice ( hypre_ParCSRMatrix *par_A, hypre_ParVector *par_ld,
                                               hypre_ParVector *par_rd );
+HYPRE_Int hypre_ParCSRMatrixCompressOffdMapDevice(hypre_ParCSRMatrix *A);
+HYPRE_Int hypre_ParCSRMatrixCompressOffdMap(hypre_ParCSRMatrix *A);
 
 /* par_csr_matop_marked.c */
 void hypre_ParMatmul_RowSizes_Marked ( HYPRE_Int **C_diag_i, HYPRE_Int **C_offd_i,
@@ -478,6 +486,7 @@ HYPRE_Int hypre_ParCSRMatrixTruncate(hypre_ParCSRMatrix *A, HYPRE_Real tol,
 HYPRE_Int hypre_ParCSRMatrixMigrate(hypre_ParCSRMatrix *A, HYPRE_MemoryLocation memory_location);
 HYPRE_Int hypre_ParCSRMatrixSetConstantValues( hypre_ParCSRMatrix *A, HYPRE_Complex value );
 void hypre_ParCSRMatrixCopyColMapOffdToDevice(hypre_ParCSRMatrix *A);
+void hypre_ParCSRMatrixCopyColMapOffdToHost(hypre_ParCSRMatrix *A);
 
 /* par_csr_matvec.c */
 // y = alpha*A*x + beta*b

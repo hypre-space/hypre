@@ -48,9 +48,9 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([M4_HYPRE_NAME],    [hypre])
-m4_define([M4_HYPRE_VERSION], [2.28.0])
-m4_define([M4_HYPRE_NUMBER],  [22800])
-m4_define([M4_HYPRE_DATE],    [2023/03/17])
+m4_define([M4_HYPRE_VERSION], [2.29.0])
+m4_define([M4_HYPRE_NUMBER],  [22900])
+m4_define([M4_HYPRE_DATE],    [2023/06/22])
 m4_define([M4_HYPRE_TIME],    [00:00:00])
 m4_define([M4_HYPRE_BUGS],    [https://github.com/hypre-space/hypre/issues])
 m4_define([M4_HYPRE_SRCDIR],  [`pwd`])
@@ -88,6 +88,8 @@ HYPRE_DATE="M4_HYPRE_DATE"
 HYPRE_TIME="M4_HYPRE_TIME"
 HYPRE_BUGS="M4_HYPRE_BUGS"
 HYPRE_SRCDIR="M4_HYPRE_SRCDIR"
+
+AC_DEFINE(HYPRE_DEPRECATED(reason), _Pragma(reason), [Deprecated function macro])
 
 AC_DEFINE_UNQUOTED(HYPRE_RELEASE_NAME,    ["$HYPRE_NAME"],    [Release name])
 AC_DEFINE_UNQUOTED(HYPRE_RELEASE_VERSION, ["$HYPRE_VERSION"], [Release version])
@@ -179,6 +181,7 @@ hypre_using_curand=no
 hypre_using_cusolver=no
 hypre_using_device_pool=no
 hypre_using_device_malloc_async=no
+hypre_using_thrust_nosync=no
 hypre_using_umpire=no
 hypre_using_umpire_host=no
 hypre_using_umpire_device=no
@@ -197,6 +200,15 @@ hypre_using_memory_tracker=no
 hypre_test_using_host=no
 
 hypre_cxxstd=11
+
+dnl *********************************************************************
+dnl * Initialize hypre-MAGMA variables
+dnl *********************************************************************
+hypre_using_magma=no
+hypre_user_gave_magma_inc=no
+hypre_user_gave_magma_lib=no
+hypre_user_gave_magma_libs=no
+hypre_user_gave_magma_lib_dirs=no
 
 dnl *********************************************************************
 dnl * Initialize hypre-HIP variables
@@ -435,6 +447,17 @@ AS_HELP_STRING([--enable-device-malloc-async],
     *)   hypre_using_device_malloc_async=no ;;
  esac],
 [hypre_using_device_malloc_async=no]
+)
+
+AC_ARG_ENABLE(thrust-nosync,
+AS_HELP_STRING([--enable-thrust-nosync],
+               [Use thrust par_nosync policy (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_thrust_nosync=yes ;;
+    no)  hypre_using_thrust_nosync=no ;;
+    *)   hypre_using_thrust_nosync=no ;;
+ esac],
+[hypre_using_thrust_nosync=no]
 )
 
 AC_ARG_ENABLE(gpu-profiling,
@@ -1587,6 +1610,68 @@ AS_HELP_STRING([--with-umpire-lib-dirs=DIRS],
 ]
 )
 
+dnl ***** MAGMA
+
+AC_ARG_WITH(magma,
+AS_HELP_STRING([--with-magma],
+               [Use MAGMA (Matrix Algebra for GPUs and Multicore Architectures).]),
+[case "${withval}" in
+    yes) hypre_using_magma=yes;;
+    no)  hypre_using_magma=no ;;
+    *)   hypre_using_magma=no ;;
+ esac],
+[hypre_using_magma=no]
+)
+
+AS_IF([test "x$with_magma" = "xyes"],
+      [AC_DEFINE(HYPRE_USING_MAGMA, 1, [Define to 1 if MAGMA is enabled])],
+      [])
+
+AC_ARG_WITH(magma-include,
+AS_HELP_STRING([--with-magma-include=DIR],
+               [User specifies that MAGMA headers are in DIR.  The options
+                --with-magma-include --with-magma-libs and
+                --with-magma-dirs must be used together.]),
+[for magma_dir in $withval; do
+    HYPRE_MAGMA_INCLUDE="-I$magma_dir $HYPRE_MAGMA_INCLUDE"
+done;
+hypre_user_gave_magma_inc=yes]
+)
+
+AC_ARG_WITH(magma-lib,
+AS_HELP_STRING([--with-magma-lib=LIBS],
+               [LIBS is space-separated linkable list (enclosed in quotes) of libraries
+                needed for MAGMA. OK to use -L and -l flags in the list]),
+[for magma_lib in $withval; do
+    HYPRE_MAGMA_LIB="$magma_lib $HYPRE_MAGMA_LIB"
+ done;
+hypre_user_gave_magma_lib=yes]
+)
+
+AC_ARG_WITH(magma-libs,
+AS_HELP_STRING([--with-magma-libs=LIBS],
+               [LIBS is space-separated list (enclosed in quotes) of libraries
+                needed for MAGMA (base name only). The options --with-magma-libs and
+                --with-magma-lib-dirs must be used together.]),
+[for magma_lib in $withval; do
+    HYPRE_MAGMA_LIB="-l$magma_lib $HYPRE_MAGMA_LIB"
+ done;
+hypre_user_gave_magma_libs=yes]
+)
+
+AC_ARG_WITH(magma-lib-dirs,
+AS_HELP_STRING([--with-magma-lib-dirs=DIRS],
+               [DIRS is space-separated list (enclosed in quotes) of
+                directories containing the libraries specified by
+                --with-magma-libs, e.g "usr/lib /usr/local/lib".
+                The  options --with-magma-libs and --with-magma-lib-dirs
+                must be used together.]),
+[for magma_lib_dir in $withval; do
+    HYPRE_MAGMA_LIB_DIR="-L$magma_lib_dir $HYPRE_MAGMA_LIB_DIR"
+ done;
+hypre_user_gave_magma_lib_dirs=yes]
+)
+
 dnl ***** Caliper
 
 AC_ARG_WITH(caliper,
@@ -1709,9 +1794,24 @@ then
    AC_MSG_ERROR([--with-cuda and --with-hip are mutually exclusive])
 fi
 
+if [test "x$hypre_using_cuda" = "xyes" && test "x$hypre_using_sycl" = "xyes"]
+then
+   AC_MSG_ERROR([--with-cuda and --with-sycl are mutually exclusive])
+fi
+
 if [test "x$hypre_using_hip" = "xyes" && test "x$hypre_using_device_openmp" = "xyes"]
 then
    AC_MSG_ERROR([--with-hip and --with-device-openmp are mutually exclusive])
+fi
+
+if [test "x$hypre_using_hip" = "xyes" && test "x$hypre_using_sycl" = "xyes"]
+then
+   AC_MSG_ERROR([--with-hip and --with-sycl are mutually exclusive])
+fi
+
+if [test "x$hypre_using_sycl" = "xyes" && test "x$hypre_using_device_openmp" = "xyes"]
+then
+   AC_MSG_ERROR([--with-sycl and --with-device-openmp are mutually exclusive])
 fi
 
 
@@ -2163,13 +2263,42 @@ then
    fi
 fi
 
+dnl *********************************************************************
+dnl * Warn if MAGMA options are incomplete
+dnl *********************************************************************
+if test "x$hypre_using_magma" = "xyes"
+then
+   if test "x$hypre_user_gave_magma_inc" != "xyes"
+   then
+       AC_MSG_WARN([*******************************************************])
+       AC_MSG_WARN([Configuring with --with-magma=yes without providing])
+       AC_MSG_WARN([--with-magma-include=<path-to-magma-include>.])
+       AC_MSG_WARN([Using default user include path.])
+       AC_MSG_WARN([NOTE: MAGMA may not work.])
+       AC_MSG_WARN([*******************************************************])
+   fi
+   if [test "x$hypre_user_gave_magma_lib" != "xyes"]
+   then
+       AC_MSG_WARN([*******************************************************])
+       AC_MSG_WARN([Configuring with --with-magma=yes without providing])
+       AC_MSG_WARN([--with-magma-lib=<path-to-magma-lib>.])
+       AC_MSG_WARN([Using default user library path.])
+       AC_MSG_WARN([NOTE: MAGMA may not work.])
+       AC_MSG_WARN([*******************************************************])
+   fi
+fi
+
+dnl *********************************************************************
+dnl * Check for unified memory
+dnl *********************************************************************
+
 if [test "x$hypre_using_um" = "xyes"]
 then
    if [test "x$hypre_using_cuda" != "xyes" && test "x$hypre_using_device_openmp" != "xyes" && test "x$hypre_using_hip" != "xyes" && test "x$hypre_using_sycl" != "xyes"]
    then
       AC_MSG_ERROR([Asked for unified memory, but not using CUDA, HIP, SYCL, or device OpenMP!])
    fi
-fi dnl hypre_using_um
+fi
 
 dnl *********************************************************************
 dnl * Check for CUDA header
@@ -2481,6 +2610,11 @@ then
       AC_DEFINE(HYPRE_USING_DEVICE_MALLOC_ASYNC, 1, [Define to 1 if using device async malloc])
    fi
 
+   if test "$hypre_using_thrust_nosync" = "yes"
+   then
+      AC_DEFINE(HYPRE_USING_THRUST_NOSYNC, 1, [Define to 1 if using thrust par_nosync policy])
+   fi
+
    if test "x$hypre_using_cuda_streams" = "xyes"
    then
       AC_DEFINE([HYPRE_USING_CUDA_STREAMS], 1, [Define to 1 if using streams])
@@ -2706,8 +2840,6 @@ if test "$hypre_using_device_openmp" = "yes"
 then
    AC_DEFINE(HYPRE_USING_DEVICE_OPENMP, 1, [Define to 1 if executing on device with OpenMP])
 
-   AC_DEFINE(HYPRE_USING_GPU, 1, [Define to 1 if executing on GPU device])
-
    AC_DEFINE(HYPRE_DEVICE_OPENMP_ALLOC, 1, [Define to 1 if using OpenMP on device [target alloc version]])
 
    dnl AC_DEFINE(HYPRE_DEVICE_OPENMP_MAPPED, 1, [Define to 1 if using OpenMP on device [target mapped version]])
@@ -2929,13 +3061,20 @@ AC_SUBST(CALIPER_INCLUDE)
 AC_SUBST(CALIPER_LIBS)
 
 dnl *********************************************************************
-dnl * SuperLU instrumentation
+dnl * MAGMA
+dnl *********************************************************************
+AC_SUBST(HYPRE_MAGMA_LIB_DIR)
+AC_SUBST(HYPRE_MAGMA_INCLUDE)
+AC_SUBST(HYPRE_MAGMA_LIB)
+
+dnl *********************************************************************
+dnl * SuperLU
 dnl *********************************************************************
 AC_SUBST(SUPERLU_INCLUDE)
 AC_SUBST(SUPERLU_LIBS)
 
 dnl *********************************************************************
-dnl * DSuperLU instrumentation
+dnl * DSuperLU
 dnl *********************************************************************
 AC_SUBST(DSUPERLU_INCLUDE)
 AC_SUBST(DSUPERLU_LIBS)

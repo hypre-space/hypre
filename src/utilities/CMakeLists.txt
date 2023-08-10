@@ -31,6 +31,7 @@ set(SRCS
   int_array.c
   int_array_device.c
   hopscotch_hash.c
+  magma.c
   memory.c
   memory_tracker.c
   merge_sort.c
@@ -45,6 +46,7 @@ set(SRCS
   mpistubs.c
   qsplit.c
   random.c
+  state.c
   threading.c
   timer.c
   timing.c
@@ -57,15 +59,15 @@ target_sources(${PROJECT_NAME}
 
 if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
   set(GPU_SRCS
-    int_array_device.c
-    HYPRE_handle.c
     device_utils.c
-    handle.c
     general.c
+    handle.c
+    int_array_device.c
     memory.c
     memory_tracker.c
-    omp_device.c
     nvtx.c
+    omp_device.c
+    HYPRE_handle.c
   )
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)

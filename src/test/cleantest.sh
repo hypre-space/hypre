@@ -38,9 +38,9 @@ $RESET                     # Restore nullglob setting
 
 for testdir in $testdirs
 do
-   rm -f $testdir/*err*
-   rm -f $testdir/*out*
-   rm -f $testdir/*log*
+   rm -f $testdir/*.err*
+   rm -f $testdir/*.out*
+   rm -f $testdir/*.log*
    rm -f $testdir/*.fil
    rm -f $testdir/*.core
 done

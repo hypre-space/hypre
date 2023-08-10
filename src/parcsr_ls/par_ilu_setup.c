@@ -4,12 +4,13 @@
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
-#include "_hypre_parcsr_ls.h"
-#include "_hypre_utilities.hpp"
-#include "par_ilu.h"
-#include "seq_mv.hpp"
 
-/* Setup ILU data */
+#include "_hypre_parcsr_ls.h"
+
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetup
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_ILUSetup( void               *ilu_vdata,
                 hypre_ParCSRMatrix *A,
@@ -22,49 +23,35 @@ hypre_ILUSetup( void               *ilu_vdata,
    hypre_ParILUData     *schur_precond_ilu;
    hypre_ParNSHData     *schur_solver_nsh;
 
-   HYPRE_Int            i;
-   // HYPRE_Int            num_threads;
-   // HYPRE_Int            debug_flag           = 0;
-
-   /* pointers to ilu data */
-   HYPRE_Int            logging              = hypre_ParILUDataLogging(ilu_data);
-   HYPRE_Int            print_level          = hypre_ParILUDataPrintLevel(ilu_data);
-   HYPRE_Int            ilu_type             = hypre_ParILUDataIluType(ilu_data);
-   HYPRE_Int            nLU                  = hypre_ParILUDataNLU(ilu_data);
-   HYPRE_Int            nI                   = hypre_ParILUDataNI(ilu_data);
-   HYPRE_Int            fill_level           = hypre_ParILUDataLfil(ilu_data);
-   HYPRE_Int            max_row_elmts        = hypre_ParILUDataMaxRowNnz(ilu_data);
+   /* Pointers to ilu data */
+   HYPRE_Int             logging             = hypre_ParILUDataLogging(ilu_data);
+   HYPRE_Int             print_level         = hypre_ParILUDataPrintLevel(ilu_data);
+   HYPRE_Int             ilu_type            = hypre_ParILUDataIluType(ilu_data);
+   HYPRE_Int             nLU                 = hypre_ParILUDataNLU(ilu_data);
+   HYPRE_Int             nI                  = hypre_ParILUDataNI(ilu_data);
+   HYPRE_Int             fill_level          = hypre_ParILUDataLfil(ilu_data);
+   HYPRE_Int             max_row_elmts       = hypre_ParILUDataMaxRowNnz(ilu_data);
    HYPRE_Real           *droptol             = hypre_ParILUDataDroptol(ilu_data);
    HYPRE_Int            *CF_marker_array     = hypre_ParILUDataCFMarkerArray(ilu_data);
    HYPRE_Int            *perm                = hypre_ParILUDataPerm(ilu_data);
    HYPRE_Int            *qperm               = hypre_ParILUDataQPerm(ilu_data);
-   HYPRE_Real           tol_ddPQ             = hypre_ParILUDataTolDDPQ(ilu_data);
+   HYPRE_Real            tol_ddPQ            = hypre_ParILUDataTolDDPQ(ilu_data);
 
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
-   /* pointers to cusparse data, note that they are not NULL only when needed */
-   cusparseMatDescr_t      matL_des          = hypre_ParILUDataMatLMatrixDescription(ilu_data);
-   cusparseMatDescr_t      matU_des          = hypre_ParILUDataMatUMatrixDescription(ilu_data);
-   void                    *ilu_solve_buffer = hypre_ParILUDataILUSolveBuffer(ilu_data);//device memory
-   cusparseSolvePolicy_t   ilu_solve_policy  = hypre_ParILUDataILUSolvePolicy(ilu_data);
-   hypre_ParCSRMatrix      *Aperm            = hypre_ParILUDataAperm(ilu_data);
-   hypre_ParCSRMatrix      *R                = hypre_ParILUDataR(ilu_data);
-   hypre_ParCSRMatrix      *P                = hypre_ParILUDataP(ilu_data);
-   hypre_CSRMatrix         *matALU_d         = hypre_ParILUDataMatAILUDevice(ilu_data);
-   hypre_CSRMatrix         *matBLU_d         = hypre_ParILUDataMatBILUDevice(ilu_data);
-   hypre_CSRMatrix         *matSLU_d         = hypre_ParILUDataMatSILUDevice(ilu_data);
-   hypre_CSRMatrix         *matE_d           = hypre_ParILUDataMatEDevice(ilu_data);
-   hypre_CSRMatrix         *matF_d           = hypre_ParILUDataMatFDevice(ilu_data);
-   csrsv2Info_t            matAL_info        = hypre_ParILUDataMatALILUSolveInfo(ilu_data);
-   csrsv2Info_t            matAU_info        = hypre_ParILUDataMatAUILUSolveInfo(ilu_data);
-   csrsv2Info_t            matBL_info        = hypre_ParILUDataMatBLILUSolveInfo(ilu_data);
-   csrsv2Info_t            matBU_info        = hypre_ParILUDataMatBUILUSolveInfo(ilu_data);
-   csrsv2Info_t            matSL_info        = hypre_ParILUDataMatSLILUSolveInfo(ilu_data);
-   csrsv2Info_t            matSU_info        = hypre_ParILUDataMatSUILUSolveInfo(ilu_data);
-   HYPRE_Int               *A_diag_fake      = hypre_ParILUDataMatAFakeDiagonal(ilu_data);
-   hypre_Vector            *Ftemp_upper      = NULL;
-   hypre_Vector            *Utemp_lower      = NULL;
-   HYPRE_Int               test_opt;
-   hypre_Vector            *Adiag_diag       = NULL;
+   /* Pointers to device data, note that they are not NULL only when needed */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int             test_opt            = hypre_ParILUDataTestOption(ilu_data);
+   hypre_ParCSRMatrix   *Aperm               = hypre_ParILUDataAperm(ilu_data);
+   hypre_ParCSRMatrix   *R                   = hypre_ParILUDataR(ilu_data);
+   hypre_ParCSRMatrix   *P                   = hypre_ParILUDataP(ilu_data);
+   hypre_CSRMatrix      *matALU_d            = hypre_ParILUDataMatAILUDevice(ilu_data);
+   hypre_CSRMatrix      *matBLU_d            = hypre_ParILUDataMatBILUDevice(ilu_data);
+   hypre_CSRMatrix      *matSLU_d            = hypre_ParILUDataMatSILUDevice(ilu_data);
+   hypre_CSRMatrix      *matE_d              = hypre_ParILUDataMatEDevice(ilu_data);
+   hypre_CSRMatrix      *matF_d              = hypre_ParILUDataMatFDevice(ilu_data);
+   hypre_Vector         *Ftemp_upper         = NULL;
+   hypre_Vector         *Utemp_lower         = NULL;
+   hypre_Vector         *Adiag_diag          = NULL;
+   hypre_Vector         *Sdiag_diag          = NULL;
 #endif
 
    hypre_ParCSRMatrix   *matA                = hypre_ParILUDataMatA(ilu_data);
@@ -75,26 +62,24 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Real           *matmD               = hypre_ParILUDataMatDModified(ilu_data);
    hypre_ParCSRMatrix   *matmU               = hypre_ParILUDataMatUModified(ilu_data);
    hypre_ParCSRMatrix   *matS                = hypre_ParILUDataMatS(ilu_data);
-   //   hypre_ParCSRMatrix   *matM                = NULL;
-   //   HYPRE_Int            nnzG;/* g stands for global */
-   HYPRE_Real            nnzS;/* total nnz in S */
-   HYPRE_Int             nnzS_offd;
-   HYPRE_Int             size_C/* total size of coarse grid */;
-
    HYPRE_Int             n                   = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
-   //   HYPRE_Int            m;/* m = n-LU */
-   /* reordering option */
    HYPRE_Int             reordering_type     = hypre_ParILUDataReorderingType(ilu_data);
+   HYPRE_Real            nnzS;  /* Total nnz in S */
+   HYPRE_Real            nnzS_offd_local;
+   HYPRE_Real            nnzS_offd;
+   HYPRE_Int             size_C /* Total size of coarse grid */;
 
    hypre_ParVector      *Utemp               = NULL;
    hypre_ParVector      *Ftemp               = NULL;
    hypre_ParVector      *Xtemp               = NULL;
    hypre_ParVector      *Ytemp               = NULL;
-   hypre_Vector         *Ztemp               = NULL;
+   hypre_ParVector      *Ztemp               = NULL;
    HYPRE_Real           *uext                = NULL;
    HYPRE_Real           *fext                = NULL;
    hypre_ParVector      *rhs                 = NULL;
    hypre_ParVector      *x                   = NULL;
+
+   /* TODO (VPM): Change F_array and U_array variable names */
    hypre_ParVector      *F_array             = hypre_ParILUDataF(ilu_data);
    hypre_ParVector      *U_array             = hypre_ParILUDataU(ilu_data);
    hypre_ParVector      *residual            = hypre_ParILUDataResidual(ilu_data);
@@ -106,258 +91,108 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Solver          schur_precond        = NULL;
    HYPRE_Solver          schur_precond_gotten = NULL;
 
-   /* Whether or not to use direct or iterative triangular solve */
+   /* Whether or not to use exact (direct) triangular solves */
    HYPRE_Int             tri_solve            = hypre_ParILUDataTriSolve(ilu_data);
 
    /* help to build external */
    hypre_ParCSRCommPkg  *comm_pkg;
    HYPRE_Int             buffer_size;
+   HYPRE_Int             num_sends;
    HYPRE_Int             send_size;
    HYPRE_Int             recv_size;
    HYPRE_Int             num_procs, my_id;
 
 #if defined (HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
-#endif
 
-   /* Sanity check */
-   if (hypre_ParVectorNumVectors(f) > 1)
+   /* TODO (VPM): Placeholder check to avoid -Wunused-variable warning. Remove this! */
+   if (exec != HYPRE_EXEC_DEVICE && exec != HYPRE_EXEC_HOST)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ILU doesn't support multicomponent vectors");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Need to run either on host or device!");
       return hypre_error_flag;
    }
+#endif
+
+   /* Sanity checks */
+#if defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_CUSPARSE)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ILU CUDA build requires cuSPARSE!");
+      return hypre_error_flag;
+   }
+#elif defined(HYPRE_USING_HIP) && !defined(HYPRE_USING_ROCSPARSE)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ILU HIP build requires rocSPARSE!");
+      return hypre_error_flag;
+   }
+#endif
 
    /* ----- begin -----*/
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("hypre_ILUSetup");
 
-   //num_threads = hypre_NumThreads();
-
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
-   /* create cuda and cusparse information when needed */
-   /* Use most of them from global information */
-   /* set matrix L descripter, L is a lower triangular matrix with unit diagonal entries */
-   if (!matL_des)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseCreateMatDescr(&(hypre_ParILUDataMatLMatrixDescription(ilu_data))));
-      matL_des = hypre_ParILUDataMatLMatrixDescription(ilu_data);
-      HYPRE_CUSPARSE_CALL(cusparseSetMatIndexBase(matL_des, CUSPARSE_INDEX_BASE_ZERO));
-      HYPRE_CUSPARSE_CALL(cusparseSetMatType(matL_des, CUSPARSE_MATRIX_TYPE_GENERAL));
-      HYPRE_CUSPARSE_CALL(cusparseSetMatFillMode(matL_des, CUSPARSE_FILL_MODE_LOWER));
-      HYPRE_CUSPARSE_CALL(cusparseSetMatDiagType(matL_des, CUSPARSE_DIAG_TYPE_UNIT));
-   }
-   /* set matrix U descripter, U is a upper triangular matrix with non-unit diagonal entries */
-   if (!matU_des)
-   {
-      HYPRE_CUSPARSE_CALL(cusparseCreateMatDescr(&(hypre_ParILUDataMatUMatrixDescription(ilu_data))));
-      matU_des = hypre_ParILUDataMatUMatrixDescription(ilu_data);
-      HYPRE_CUSPARSE_CALL(cusparseSetMatIndexBase(matU_des, CUSPARSE_INDEX_BASE_ZERO));
-      HYPRE_CUSPARSE_CALL(cusparseSetMatType(matU_des, CUSPARSE_MATRIX_TYPE_GENERAL));
-      HYPRE_CUSPARSE_CALL(cusparseSetMatFillMode(matU_des, CUSPARSE_FILL_MODE_UPPER));
-      HYPRE_CUSPARSE_CALL(cusparseSetMatDiagType(matU_des, CUSPARSE_DIAG_TYPE_NON_UNIT));
-   }
-   if (!matAL_info)
-   {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatALILUSolveInfo(ilu_data))) );
-      matAL_info = NULL;
-   }
-   if (!matAU_info)
-   {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatAUILUSolveInfo(ilu_data))) );
-      matAU_info = NULL;
-   }
-   if (!matBL_info)
-   {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatBLILUSolveInfo(ilu_data))) );
-      matBL_info = NULL;
-   }
-   if (!matBU_info)
-   {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatBUILUSolveInfo(ilu_data))) );
-      matBU_info = NULL;
-   }
-   if (!matSL_info)
-   {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatSLILUSolveInfo(ilu_data))) );
-      matSL_info = NULL;
-   }
-   if (!matSU_info)
-   {
-      HYPRE_CUSPARSE_CALL( (cusparseDestroyCsrsv2Info(hypre_ParILUDataMatSUILUSolveInfo(ilu_data))) );
-      matSU_info = NULL;
-   }
-   if (ilu_solve_buffer)
-   {
-      hypre_TFree(ilu_solve_buffer, HYPRE_MEMORY_DEVICE);
-      ilu_solve_buffer = NULL;
-   }
-   if (matALU_d)
-   {
-      hypre_CSRMatrixDestroy( matALU_d );
-      matALU_d = NULL;
-   }
-   if (matSLU_d)
-   {
-      hypre_CSRMatrixDestroy( matSLU_d );
-      matSLU_d = NULL;
-   }
-   if (matBLU_d)
-   {
-      hypre_CSRMatrixDestroy( matBLU_d );
-      matBLU_d = NULL;
-   }
-   if (matE_d)
-   {
-      hypre_CSRMatrixDestroy( matE_d );
-      matE_d = NULL;
-   }
-   if (matF_d)
-   {
-      hypre_CSRMatrixDestroy( matF_d );
-      matF_d = NULL;
-   }
-   if (Aperm)
-   {
-      hypre_ParCSRMatrixDestroy( Aperm );
-      Aperm = NULL;
-   }
-   if (R)
-   {
-      hypre_ParCSRMatrixDestroy( R );
-      R = NULL;
-   }
-   if (P)
-   {
-      hypre_ParCSRMatrixDestroy( P );
-      P = NULL;
-   }
-   if (hypre_ParILUDataXTemp(ilu_data))
-   {
-      hypre_ParVectorDestroy(hypre_ParILUDataXTemp(ilu_data));
-      hypre_ParILUDataXTemp(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataYTemp(ilu_data))
-   {
-      hypre_ParVectorDestroy(hypre_ParILUDataYTemp(ilu_data));
-      hypre_ParILUDataYTemp(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataFTempUpper(ilu_data))
-   {
-      hypre_SeqVectorDestroy(hypre_ParILUDataFTempUpper(ilu_data));
-      hypre_ParILUDataFTempUpper(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataUTempLower(ilu_data))
-   {
-      hypre_SeqVectorDestroy(hypre_ParILUDataUTempLower(ilu_data));
-      hypre_ParILUDataUTempLower(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataMatAFakeDiagonal(ilu_data))
-   {
-      hypre_TFree(hypre_ParILUDataMatAFakeDiagonal(ilu_data), HYPRE_MEMORY_DEVICE);
-      hypre_ParILUDataMatAFakeDiagonal(ilu_data) = NULL;
-   }
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_CSRMatrixDestroy(matALU_d); matALU_d = NULL;
+   hypre_CSRMatrixDestroy(matSLU_d); matSLU_d = NULL;
+   hypre_CSRMatrixDestroy(matBLU_d); matBLU_d = NULL;
+   hypre_CSRMatrixDestroy(matE_d);   matE_d   = NULL;
+   hypre_CSRMatrixDestroy(matF_d);   matF_d   = NULL;
+   hypre_ParCSRMatrixDestroy(Aperm); Aperm    = NULL;
+   hypre_ParCSRMatrixDestroy(R);     R        = NULL;
+   hypre_ParCSRMatrixDestroy(P);     P        = NULL;
+
+   hypre_SeqVectorDestroy(hypre_ParILUDataFTempUpper(ilu_data));
+   hypre_SeqVectorDestroy(hypre_ParILUDataUTempLower(ilu_data));
+   hypre_ParVectorDestroy(hypre_ParILUDataXTemp(ilu_data));
+   hypre_ParVectorDestroy(hypre_ParILUDataYTemp(ilu_data));
+   hypre_ParVectorDestroy(hypre_ParILUDataZTemp(ilu_data));
+   hypre_SeqVectorDestroy(hypre_ParILUDataADiagDiag(ilu_data));
+   hypre_SeqVectorDestroy(hypre_ParILUDataSDiagDiag(ilu_data));
+
+   hypre_ParILUDataFTempUpper(ilu_data) = NULL;
+   hypre_ParILUDataUTempLower(ilu_data) = NULL;
+   hypre_ParILUDataXTemp(ilu_data)      = NULL;
+   hypre_ParILUDataYTemp(ilu_data)      = NULL;
+   hypre_ParILUDataZTemp(ilu_data)      = NULL;
+   hypre_ParILUDataADiagDiag(ilu_data)  = NULL;
+   hypre_ParILUDataSDiagDiag(ilu_data)  = NULL;
 #endif
 
-   /* Free Previously allocated data, if any not destroyed */
-   if (matL)
-   {
-      hypre_ParCSRMatrixDestroy(matL);
-      matL = NULL;
-   }
-   if (matU)
-   {
-      hypre_ParCSRMatrixDestroy(matU);
-      matU = NULL;
-   }
-   if (matmL)
-   {
-      hypre_ParCSRMatrixDestroy(matmL);
-      matmL = NULL;
-   }
-   if (matmU)
-   {
-      hypre_ParCSRMatrixDestroy(matmU);
-      matmU = NULL;
-   }
-   if (matS)
-   {
-      hypre_ParCSRMatrixDestroy(matS);
-      matS = NULL;
-   }
-   if (matD)
-   {
-      hypre_TFree(matD, HYPRE_MEMORY_DEVICE);
-      matD = NULL;
-   }
-   if (matmD)
-   {
-      hypre_TFree(matmD, HYPRE_MEMORY_DEVICE);
-      matmD = NULL;
-   }
-   if (CF_marker_array)
-   {
-      hypre_TFree(CF_marker_array, HYPRE_MEMORY_HOST);
-      CF_marker_array = NULL;
-   }
+   /* Free previously allocated data, if any not destroyed */
+   hypre_ParCSRMatrixDestroy(matL);  matL  = NULL;
+   hypre_ParCSRMatrixDestroy(matU);  matU  = NULL;
+   hypre_ParCSRMatrixDestroy(matmL); matmL = NULL;
+   hypre_ParCSRMatrixDestroy(matmU); matmU = NULL;
+   hypre_ParCSRMatrixDestroy(matS);  matS  = NULL;
+
+   hypre_TFree(matD, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(matmD, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(CF_marker_array, HYPRE_MEMORY_HOST);
 
    /* clear old l1_norm data, if created */
-   if (hypre_ParILUDataL1Norms(ilu_data))
-   {
-      hypre_TFree(hypre_ParILUDataL1Norms(ilu_data), HYPRE_MEMORY_HOST);
-      hypre_ParILUDataL1Norms(ilu_data) = NULL;
-   }
+   hypre_TFree(hypre_ParILUDataL1Norms(ilu_data), HYPRE_MEMORY_HOST);
 
    /* setup temporary storage
     * first check is they've already here
     */
-   if (hypre_ParILUDataUTemp(ilu_data))
-   {
-      hypre_ParVectorDestroy(hypre_ParILUDataUTemp(ilu_data));
-      hypre_ParILUDataUTemp(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataFTemp(ilu_data))
-   {
-      hypre_ParVectorDestroy(hypre_ParILUDataFTemp(ilu_data));
-      hypre_ParILUDataFTemp(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataUExt(ilu_data))
-   {
-      hypre_TFree(hypre_ParILUDataUExt(ilu_data), HYPRE_MEMORY_HOST);
-      hypre_ParILUDataUExt(ilu_data) = NULL;
-   }
-   if ( hypre_ParILUDataFExt(ilu_data))
-   {
-      hypre_TFree(hypre_ParILUDataFExt(ilu_data), HYPRE_MEMORY_HOST);
-      hypre_ParILUDataFExt(ilu_data) = NULL;
-   }
-   if ( hypre_ParILUDataUEnd(ilu_data))
-   {
-      hypre_TFree(hypre_ParILUDataUEnd(ilu_data), HYPRE_MEMORY_HOST);
-      hypre_ParILUDataUEnd(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataRhs(ilu_data))
-   {
-      hypre_ParVectorDestroy(hypre_ParILUDataRhs(ilu_data));
-      hypre_ParILUDataRhs(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataX(ilu_data))
-   {
-      hypre_ParVectorDestroy(hypre_ParILUDataX(ilu_data));
-      hypre_ParILUDataX(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataResidual(ilu_data))
-   {
-      hypre_ParVectorDestroy(hypre_ParILUDataResidual(ilu_data));
-      hypre_ParILUDataResidual(ilu_data) = NULL;
-   }
-   if (hypre_ParILUDataRelResNorms(ilu_data))
-   {
-      hypre_TFree(hypre_ParILUDataRelResNorms(ilu_data), HYPRE_MEMORY_HOST);
-      hypre_ParILUDataRelResNorms(ilu_data) = NULL;
-   }
+   hypre_ParVectorDestroy(hypre_ParILUDataUTemp(ilu_data));
+   hypre_ParVectorDestroy(hypre_ParILUDataFTemp(ilu_data));
+   hypre_ParVectorDestroy(hypre_ParILUDataRhs(ilu_data));
+   hypre_ParVectorDestroy(hypre_ParILUDataX(ilu_data));
+   hypre_ParVectorDestroy(hypre_ParILUDataResidual(ilu_data));
+   hypre_TFree(hypre_ParILUDataUExt(ilu_data), HYPRE_MEMORY_HOST);
+   hypre_TFree(hypre_ParILUDataFExt(ilu_data), HYPRE_MEMORY_HOST);
+   hypre_TFree(hypre_ParILUDataUEnd(ilu_data), HYPRE_MEMORY_HOST);
+   hypre_TFree(hypre_ParILUDataRelResNorms(ilu_data), HYPRE_MEMORY_HOST);
+
+   hypre_ParILUDataUTemp(ilu_data) = NULL;
+   hypre_ParILUDataFTemp(ilu_data) = NULL;
+   hypre_ParILUDataRhs(ilu_data) = NULL;
+   hypre_ParILUDataX(ilu_data) = NULL;
+   hypre_ParILUDataResidual(ilu_data) = NULL;
+
    if (hypre_ParILUDataSchurSolver(ilu_data))
    {
       switch (ilu_type)
@@ -365,16 +200,20 @@ hypre_ILUSetup( void               *ilu_vdata,
          case 10: case 11: case 40: case 41: case 50:
             HYPRE_ParCSRGMRESDestroy(hypre_ParILUDataSchurSolver(ilu_data)); //GMRES for Schur
             break;
+
          case 20: case 21:
             hypre_NSHDestroy(hypre_ParILUDataSchurSolver(ilu_data)); //NSH for Schur
             break;
+
          default:
             break;
       }
       (hypre_ParILUDataSchurSolver(ilu_data)) = NULL;
    }
+
+   /* ILU as precond for Schur */
    if ( hypre_ParILUDataSchurPrecond(ilu_data)  &&
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
         hypre_ParILUDataIluType(ilu_data) != 10 &&
         hypre_ParILUDataIluType(ilu_data) != 11 &&
 #endif
@@ -383,11 +222,11 @@ hypre_ILUSetup( void               *ilu_vdata,
          hypre_ParILUDataIluType(ilu_data) == 40 ||
          hypre_ParILUDataIluType(ilu_data) == 41) )
    {
-      HYPRE_ILUDestroy(hypre_ParILUDataSchurPrecond(ilu_data)); //ILU as precond for Schur
+      HYPRE_ILUDestroy(hypre_ParILUDataSchurPrecond(ilu_data));
       hypre_ParILUDataSchurPrecond(ilu_data) = NULL;
    }
 
-   /* start to create working vectors */
+   /* Create work vectors */
    Utemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                  hypre_ParCSRMatrixGlobalNumRows(A),
                                  hypre_ParCSRMatrixRowStarts(A));
@@ -401,7 +240,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    hypre_ParILUDataFTemp(ilu_data) = Ftemp;
 
    /* set matrix, solution and rhs pointers */
-   matA = A;
+   matA    = A;
    F_array = f;
    U_array = u;
 
@@ -422,29 +261,24 @@ hypre_ILUSetup( void               *ilu_vdata,
 
          case 0: case 1:
          default:
+            /* RCM or none */
             hypre_ILUGetLocalPerm(matA, &perm, &nLU, reordering_type);
             break;
       }
    }
 
-   //   m = n - nLU;
-   /* factorization */
+   /* Factorization */
    switch (ilu_type)
    {
       case 0:
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-            /* only apply the setup of ILU0 with cusparse */
             if (fill_level == 0)
             {
-               /* BJ + cusparse_ilu0() */
-               hypre_ILUSetupILU0Device(matA, perm, perm,
-                                        n, n, matL_des, matU_des,
-                                        ilu_solve_policy, &ilu_solve_buffer,
-                                        &matBL_info, &matBU_info, &matSL_info,
-                                        &matSU_info, &matBLU_d, &matS, &matE_d,
-                                        &matF_d, &A_diag_fake, tri_solve);
+               /* BJ + device_ilu0() */
+               hypre_ILUSetupILUDevice(0, matA, 0, NULL, perm, perm, n, n, &matBLU_d,
+                                       &matS, &matE_d, &matF_d, tri_solve);
             }
             else
             {
@@ -455,12 +289,8 @@ hypre_ILUSetup( void               *ilu_vdata,
 #endif
 
                /* BJ + hypre_iluk(), setup the device solve */
-               hypre_ILUSetupILUKDevice(matA, fill_level, perm, perm,
-                                        n, n, matL_des, matU_des,
-                                        ilu_solve_policy, &ilu_solve_buffer,
-                                        &matBL_info, &matBU_info, &matSL_info,
-                                        &matSU_info, &matBLU_d, &matS, &matE_d,
-                                        &matF_d, &A_diag_fake, tri_solve);
+               hypre_ILUSetupILUDevice(1, matA, fill_level, NULL, perm, perm, n, n,
+                                       &matBLU_d, &matS, &matE_d, &matF_d, tri_solve);
             }
          }
          else
@@ -473,7 +303,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
 
       case 1:
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (exec == HYPRE_EXEC_DEVICE)
          {
 #if !defined(HYPRE_USING_UNIFIED_MEMORY)
@@ -482,12 +312,8 @@ hypre_ILUSetup( void               *ilu_vdata,
             return hypre_error_flag;
 #endif
             /* BJ + hypre_ilut(), setup the device solve */
-            hypre_ILUSetupILUTDevice(matA, max_row_elmts, droptol, perm, perm,
-                                     n, n, matL_des, matU_des,
-                                     ilu_solve_policy, &ilu_solve_buffer,
-                                     &matBL_info, &matBU_info, &matSL_info,
-                                     &matSU_info, &matBLU_d, &matS, &matE_d,
-                                     &matF_d, &A_diag_fake, tri_solve);
+            hypre_ILUSetupILUDevice(2, matA, max_row_elmts, droptol, perm, perm, n, n,
+                                    &matBLU_d, &matS, &matE_d, &matF_d, tri_solve);
          }
          else
 #endif
@@ -499,17 +325,14 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
 
       case 10:
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             if (fill_level == 0)
             {
-               /* GMRES + cusparse_ilu0() - Only support ILU0 */
-               hypre_ILUSetupILU0Device(matA, perm, perm, n, nLU, matL_des, matU_des,
-                                        ilu_solve_policy, &ilu_solve_buffer,
-                                        &matBL_info, &matBU_info, &matSL_info,
-                                        &matSU_info, &matBLU_d, &matS, &matE_d,
-                                        &matF_d, &A_diag_fake, 1);
+               /* GMRES + device_ilu0() - Only support ILU0 */
+               hypre_ILUSetupILUDevice(0, matA, 0, NULL, perm, perm, n, nLU,
+                                       &matBLU_d, &matS, &matE_d, &matF_d, 1);
             }
             else
             {
@@ -520,12 +343,8 @@ hypre_ILUSetup( void               *ilu_vdata,
 #endif
 
                /* GMRES + hypre_iluk() */
-               hypre_ILUSetupILUKDevice(matA, fill_level, perm, perm,
-                                        n, nLU, matL_des, matU_des,
-                                        ilu_solve_policy, &ilu_solve_buffer,
-                                        &matBL_info, &matBU_info, &matSL_info,
-                                        &matSU_info, &matBLU_d, &matS, &matE_d,
-                                        &matF_d, &A_diag_fake, 1);
+               hypre_ILUSetupILUDevice(1, matA, fill_level, NULL, perm, perm,
+                                       n, nLU, &matBLU_d, &matS, &matE_d, &matF_d, 1);
             }
          }
          else
@@ -538,7 +357,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
 
       case 11:
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (exec == HYPRE_EXEC_DEVICE)
          {
 #if !defined(HYPRE_USING_UNIFIED_MEMORY)
@@ -548,12 +367,8 @@ hypre_ILUSetup( void               *ilu_vdata,
 #endif
 
             /* GMRES + hypre_ilut() */
-            hypre_ILUSetupILUTDevice(matA, max_row_elmts, droptol, perm, perm,
-                                     n, nLU, matL_des, matU_des,
-                                     ilu_solve_policy, &ilu_solve_buffer,
-                                     &matBL_info, &matBU_info, &matSL_info,
-                                     &matSU_info, &matBLU_d, &matS, &matE_d,
-                                     &matF_d, &A_diag_fake, 1);
+            hypre_ILUSetupILUDevice(2, matA, max_row_elmts, droptol, perm, perm, n, nLU,
+                                    &matBLU_d, &matS, &matE_d, &matF_d, 1);
          }
          else
 #endif
@@ -655,7 +470,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
 
       case 50:
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (exec == HYPRE_EXEC_DEVICE)
          {
 #if !defined(HYPRE_USING_UNIFIED_MEMORY)
@@ -665,11 +480,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 #endif
 
             /* RAP + hypre_modified_ilu0 */
-            test_opt = hypre_ParILUDataTestOption(ilu_data);
-            hypre_ILUSetupRAPILU0Device(matA, perm, n, nLU, matL_des, matU_des,
-                                        ilu_solve_policy, &ilu_solve_buffer,
-                                        &matAL_info, &matAU_info, &matBL_info,
-                                        &matBU_info, &matSL_info, &matSU_info,
+            hypre_ILUSetupRAPILU0Device(matA, perm, n, nLU,
                                         &Aperm, &matS, &matALU_d, &matBLU_d,
                                         &matSLU_d, &matE_d, &matF_d, test_opt);
          }
@@ -683,15 +494,12 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
 
       default:
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-            /* BJ + cusparse_ilu0() */
-            hypre_ILUSetupILU0Device(matA, perm, perm, n, n, matL_des, matU_des,
-                                     ilu_solve_policy, &ilu_solve_buffer,
-                                     &matBL_info, &matBU_info, &matSL_info,
-                                     &matSU_info, &matBLU_d, &matS, &matE_d,
-                                     &matF_d, &A_diag_fake, tri_solve);
+            /* BJ + device_ilu0() */
+            hypre_ILUSetupILUDevice(0, matA, 0, NULL, perm, perm, n, n,
+                                    &matBLU_d, &matS, &matE_d, &matF_d, tri_solve);
          }
          else
 #endif
@@ -703,29 +511,27 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
    }
 
-   /* Create temporary for iterative triangular solve */
+   /* Create additional temporary vector for iterative triangular solve */
    if (!tri_solve)
    {
-      switch (ilu_type)
-      {
-         case 0:
-         case 1:
-         default:
-            /* create working vectors */
-            Ztemp = hypre_SeqVectorCreate(n > nLU ? n : nLU);
-            hypre_SeqVectorInitialize(Ztemp);
-            break;
-      }
+      Ztemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                    hypre_ParCSRMatrixGlobalNumRows(A),
+                                    hypre_ParCSRMatrixRowStarts(A));
+      hypre_ParVectorInitialize(Ztemp);
    }
 
    /* setup Schur solver - TODO (VPM): merge host and device paths below */
    switch (ilu_type)
    {
+      case 0: case 1:
+      default:
+         break;
+
       case 10: case 11:
          if (matS)
          {
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
-            /* create working vectors */
+            /* Create work vectors */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
             if (exec == HYPRE_EXEC_DEVICE)
             {
                Xtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(matS),
@@ -740,12 +546,14 @@ hypre_ILUSetup( void               *ilu_vdata,
 
                Ftemp_upper = hypre_SeqVectorCreate(nLU);
                hypre_VectorOwnsData(Ftemp_upper)   = 0;
-               hypre_VectorData(Ftemp_upper)       = hypre_VectorData(hypre_ParVectorLocalVector(Ftemp));
+               hypre_VectorData(Ftemp_upper)       = hypre_VectorData(
+                                                        hypre_ParVectorLocalVector(Ftemp));
                hypre_SeqVectorInitialize(Ftemp_upper);
 
                Utemp_lower = hypre_SeqVectorCreate(n - nLU);
                hypre_VectorOwnsData(Utemp_lower)   = 0;
-               hypre_VectorData(Utemp_lower)       = hypre_VectorData(hypre_ParVectorLocalVector(Utemp)) + nLU;
+               hypre_VectorData(Utemp_lower)       = hypre_VectorData(
+                                                        hypre_ParVectorLocalVector(Utemp)) + nLU;
                hypre_SeqVectorInitialize(Utemp_lower);
 
                /* create GMRES */
@@ -757,13 +565,15 @@ hypre_ILUSetup( void               *ilu_vdata,
                   hypre_GMRESFunctionsCreate(
                      hypre_ParKrylovCAlloc,
                      hypre_ParKrylovFree,
-                     hypre_ParILUCusparseSchurGMRESCommInfo, //parCSR A -> ilu_data
+                     hypre_ParILUSchurGMRESCommInfoDevice, //parCSR A -> ilu_data
                      hypre_ParKrylovCreateVector,
                      hypre_ParKrylovCreateVectorArray,
                      hypre_ParKrylovDestroyVector,
-                     hypre_ParILUCusparseSchurGMRESMatvecCreate, //parCSR A -- inactive
-                     hypre_ParILUCusparseSchurGMRESMatvec, //parCSR A -> ilu_data
-                     hypre_ParILUCusparseSchurGMRESMatvecDestroy, //parCSR A -- inactive
+                     hypre_ParKrylovMatvecCreate, //parCSR A -- inactive
+                     ((tri_solve == 1) ?
+                      hypre_ParILUSchurGMRESMatvecDevice :
+                      hypre_ParILUSchurGMRESMatvecJacIterDevice), //parCSR A -> ilu_data
+                     hypre_ParKrylovMatvecDestroy, //parCSR A -- inactive
                      hypre_ParKrylovInnerProd,
                      hypre_ParKrylovCopyVector,
                      hypre_ParKrylovClearVector,
@@ -790,9 +600,10 @@ hypre_ILUSetup( void               *ilu_vdata,
 
                /* add preconditioner to solver */
                HYPRE_GMRESSetPrecond(schur_solver,
-                                     (HYPRE_PtrToSolverFcn) hypre_ParILUCusparseSchurGMRESDummySolve,
-                                     (HYPRE_PtrToSolverFcn) hypre_ParILUCusparseSchurGMRESDummySetup,
+                                     (HYPRE_PtrToSolverFcn) hypre_ParILUSchurGMRESDummySolveDevice,
+                                     (HYPRE_PtrToSolverFcn) hypre_ParKrylovIdentitySetup,
                                      schur_precond);
+
                HYPRE_GMRESGetPrecond(schur_solver, &schur_precond_gotten);
                if (schur_precond_gotten != (schur_precond))
                {
@@ -854,7 +665,12 @@ hypre_ILUSetup( void               *ilu_vdata,
                HYPRE_ILUSetMaxNnzPerRow      (schur_precond, hypre_ParILUDataSchurPrecondIluMaxRowNnz(ilu_data));
                HYPRE_ILUSetDropThresholdArray(schur_precond, hypre_ParILUDataSchurPrecondIluDroptol(ilu_data));
                HYPRE_ILUSetPrintLevel        (schur_precond, hypre_ParILUDataSchurPrecondPrintLevel(ilu_data));
+               HYPRE_ILUSetTriSolve          (schur_precond, hypre_ParILUDataSchurPrecondTriSolve(ilu_data));
                HYPRE_ILUSetMaxIter           (schur_precond, hypre_ParILUDataSchurPrecondMaxIter(ilu_data));
+               HYPRE_ILUSetLowerJacobiIters  (schur_precond,
+                                              hypre_ParILUDataSchurPrecondLowerJacobiIters(ilu_data));
+               HYPRE_ILUSetUpperJacobiIters  (schur_precond,
+                                              hypre_ParILUDataSchurPrecondUpperJacobiIters(ilu_data));
                HYPRE_ILUSetTol               (schur_precond, hypre_ParILUDataSchurPrecondTol(ilu_data));
 
                /* add preconditioner to solver */
@@ -862,6 +678,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                                      (HYPRE_PtrToSolverFcn) HYPRE_ILUSolve,
                                      (HYPRE_PtrToSolverFcn) HYPRE_ILUSetup,
                                      schur_precond);
+
                HYPRE_GMRESGetPrecond(schur_solver, &schur_precond_gotten);
                if (schur_precond_gotten != (schur_precond))
                {
@@ -884,9 +701,9 @@ hypre_ILUSetup( void               *ilu_vdata,
 
                /* setup solver */
                HYPRE_GMRESSetup(schur_solver,
-                                (HYPRE_Matrix)matS,
-                                (HYPRE_Vector)rhs,
-                                (HYPRE_Vector)x);
+                                (HYPRE_Matrix) matS,
+                                (HYPRE_Vector) rhs,
+                                (HYPRE_Vector) x);
 
                /* update ilu_data */
                hypre_ParILUDataSchurSolver   (ilu_data) = schur_solver;
@@ -896,6 +713,7 @@ hypre_ILUSetup( void               *ilu_vdata,
             }
          }
          break;
+
       case 20: case 21:
          if (matS)
          {
@@ -936,20 +754,26 @@ hypre_ILUSetup( void               *ilu_vdata,
             hypre_ParILUDataX          (ilu_data) = x;
          }
          break;
+
       case 30 : case 31:
          /* now check communication package */
          comm_pkg = hypre_ParCSRMatrixCommPkg(matA);
+
          /* create if not yet built */
          if (!comm_pkg)
          {
             hypre_MatvecCommPkgCreate(matA);
             comm_pkg = hypre_ParCSRMatrixCommPkg(matA);
          }
+
          /* create uext and fext */
-         send_size =  hypre_ParCSRCommPkgSendMapStart(comm_pkg, hypre_ParCSRCommPkgNumSends(comm_pkg))
-                      - hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
+         num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+         send_size = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends) -
+                     hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
          recv_size = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(matA));
          buffer_size = send_size > recv_size ? send_size : recv_size;
+
+         /* TODO (VPM): Check these memory locations */
          fext = hypre_TAlloc(HYPRE_Real, buffer_size, HYPRE_MEMORY_HOST);
          uext = hypre_TAlloc(HYPRE_Real, buffer_size, HYPRE_MEMORY_HOST);
          break;
@@ -979,6 +803,11 @@ hypre_ILUSetup( void               *ilu_vdata,
             HYPRE_ILUSetDropThresholdArray(schur_precond, hypre_ParILUDataSchurPrecondIluDroptol(ilu_data));
             HYPRE_ILUSetPrintLevel        (schur_precond, hypre_ParILUDataSchurPrecondPrintLevel(ilu_data));
             HYPRE_ILUSetMaxIter           (schur_precond, hypre_ParILUDataSchurPrecondMaxIter(ilu_data));
+            HYPRE_ILUSetTriSolve          (schur_precond, hypre_ParILUDataSchurPrecondTriSolve(ilu_data));
+            HYPRE_ILUSetLowerJacobiIters  (schur_precond,
+                                           hypre_ParILUDataSchurPrecondLowerJacobiIters(ilu_data));
+            HYPRE_ILUSetUpperJacobiIters  (schur_precond,
+                                           hypre_ParILUDataSchurPrecondUpperJacobiIters(ilu_data));
             HYPRE_ILUSetTol               (schur_precond, hypre_ParILUDataSchurPrecondTol(ilu_data));
 
             /* add preconditioner to solver */
@@ -986,6 +815,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                                   (HYPRE_PtrToSolverFcn) HYPRE_ILUSolve,
                                   (HYPRE_PtrToSolverFcn) HYPRE_ILUSetup,
                                   schur_precond);
+
             HYPRE_GMRESGetPrecond(schur_solver, &schur_precond_gotten);
             if (schur_precond_gotten != (schur_precond))
             {
@@ -1007,7 +837,10 @@ hypre_ILUSetup( void               *ilu_vdata,
             hypre_ParVectorInitialize(x);
 
             /* setup solver */
-            HYPRE_GMRESSetup(schur_solver, (HYPRE_Matrix)matS, (HYPRE_Vector)rhs, (HYPRE_Vector)x);
+            HYPRE_GMRESSetup(schur_solver,
+                             (HYPRE_Matrix) matS,
+                             (HYPRE_Vector) rhs,
+                             (HYPRE_Vector) x);
 
             /* update ilu_data */
             hypre_ParILUDataSchurSolver   (ilu_data) = schur_solver;
@@ -1016,132 +849,132 @@ hypre_ILUSetup( void               *ilu_vdata,
             hypre_ParILUDataX             (ilu_data) = x;
          }
          break;
+
       case 50:
-      {
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
-         if (exec == HYPRE_EXEC_DEVICE)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         if (matS && exec == HYPRE_EXEC_DEVICE)
          {
-            if (matS)
+            Xtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(matA),
+                                          hypre_ParCSRMatrixGlobalNumRows(matA),
+                                          hypre_ParCSRMatrixRowStarts(matA));
+            hypre_ParVectorInitialize(Xtemp);
+
+            Ytemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(matA),
+                                          hypre_ParCSRMatrixGlobalNumRows(matA),
+                                          hypre_ParCSRMatrixRowStarts(matA));
+            hypre_ParVectorInitialize(Ytemp);
+
+            Ftemp_upper = hypre_SeqVectorCreate(nLU);
+            hypre_VectorOwnsData(Ftemp_upper) = 0;
+            hypre_VectorData(Ftemp_upper) = hypre_VectorData(hypre_ParVectorLocalVector(Ftemp));
+            hypre_SeqVectorInitialize(Ftemp_upper);
+
+            Utemp_lower = hypre_SeqVectorCreate(n - nLU);
+            hypre_VectorOwnsData(Utemp_lower) = 0;
+            hypre_VectorData(Utemp_lower) = nLU +
+                                            hypre_VectorData(hypre_ParVectorLocalVector(Utemp));
+            hypre_SeqVectorInitialize(Utemp_lower);
+
+            /* create GMRES */
+            //            HYPRE_ParCSRGMRESCreate(comm, &schur_solver);
+
+            hypre_GMRESFunctions * gmres_functions;
+
+            gmres_functions =
+               hypre_GMRESFunctionsCreate(
+                  hypre_ParKrylovCAlloc,
+                  hypre_ParKrylovFree,
+                  hypre_ParILUSchurGMRESCommInfoDevice, //parCSR A -> ilu_data
+                  hypre_ParKrylovCreateVector,
+                  hypre_ParKrylovCreateVectorArray,
+                  hypre_ParKrylovDestroyVector,
+                  hypre_ParKrylovMatvecCreate, //parCSR A -- inactive
+                  hypre_ParILURAPSchurGMRESMatvecDevice, //parCSR A -> ilu_data
+                  hypre_ParKrylovMatvecDestroy, //parCSR A -- inactive
+                  hypre_ParKrylovInnerProd,
+                  hypre_ParKrylovCopyVector,
+                  hypre_ParKrylovClearVector,
+                  hypre_ParKrylovScaleVector,
+                  hypre_ParKrylovAxpy,
+                  hypre_ParKrylovIdentitySetup, //parCSR A -- inactive
+                  hypre_ParKrylovIdentity ); //parCSR A -- inactive
+            schur_solver = (HYPRE_Solver) hypre_GMRESCreate(gmres_functions);
+
+            /* setup GMRES parameters */
+            /* at least should apply 1 solve */
+            if (hypre_ParILUDataSchurGMRESKDim(ilu_data) == 0)
             {
-               /* create working vectors */
-               Xtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(matA),
-                                             hypre_ParCSRMatrixGlobalNumRows(matA),
-                                             hypre_ParCSRMatrixRowStarts(matA));
-               hypre_ParVectorInitialize(Xtemp);
-
-               Ytemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(matA),
-                                             hypre_ParCSRMatrixGlobalNumRows(matA),
-                                             hypre_ParCSRMatrixRowStarts(matA));
-               hypre_ParVectorInitialize(Ytemp);
-
-               Ftemp_upper = hypre_SeqVectorCreate(nLU);
-               hypre_VectorOwnsData(Ftemp_upper)   = 0;
-               hypre_VectorData(Ftemp_upper)       = hypre_VectorData(hypre_ParVectorLocalVector(Ftemp));
-               hypre_SeqVectorInitialize(Ftemp_upper);
-
-               Utemp_lower = hypre_SeqVectorCreate(n - nLU);
-               hypre_VectorOwnsData(Utemp_lower)   = 0;
-               hypre_VectorData(Utemp_lower)       = hypre_VectorData(hypre_ParVectorLocalVector(Utemp)) + nLU;
-               hypre_SeqVectorInitialize(Utemp_lower);
-
-               /* create GMRES */
-               //            HYPRE_ParCSRGMRESCreate(comm, &schur_solver);
-
-               hypre_GMRESFunctions * gmres_functions;
-
-               gmres_functions =
-                  hypre_GMRESFunctionsCreate(
-                     hypre_ParKrylovCAlloc,
-                     hypre_ParKrylovFree,
-                     hypre_ParILUCusparseSchurGMRESCommInfo, //parCSR A -> ilu_data
-                     hypre_ParKrylovCreateVector,
-                     hypre_ParKrylovCreateVectorArray,
-                     hypre_ParKrylovDestroyVector,
-                     hypre_ParILURAPSchurGMRESMatvecCreate, //parCSR A -- inactive
-                     hypre_ParILURAPSchurGMRESMatvec, //parCSR A -> ilu_data
-                     hypre_ParILURAPSchurGMRESMatvecDestroy, //parCSR A -- inactive
-                     hypre_ParKrylovInnerProd,
-                     hypre_ParKrylovCopyVector,
-                     hypre_ParKrylovClearVector,
-                     hypre_ParKrylovScaleVector,
-                     hypre_ParKrylovAxpy,
-                     hypre_ParKrylovIdentitySetup, //parCSR A -- inactive
-                     hypre_ParKrylovIdentity ); //parCSR A -- inactive
-               schur_solver = ( (HYPRE_Solver) hypre_GMRESCreate( gmres_functions ) );
-
-               /* setup GMRES parameters */
-               /* at least should apply 1 solve */
-               if (hypre_ParILUDataSchurGMRESKDim(ilu_data) == 0)
-               {
-                  hypre_ParILUDataSchurGMRESKDim(ilu_data) ++;
-               }
-               HYPRE_GMRESSetKDim            (schur_solver, hypre_ParILUDataSchurGMRESKDim(ilu_data));
-               HYPRE_GMRESSetMaxIter         (schur_solver,
-                                              hypre_ParILUDataSchurGMRESMaxIter(ilu_data));/* we don't need that many solves */
-               HYPRE_GMRESSetTol             (schur_solver, hypre_ParILUDataSchurGMRESTol(ilu_data));
-               HYPRE_GMRESSetAbsoluteTol     (schur_solver, hypre_ParILUDataSchurGMRESAbsoluteTol(ilu_data));
-               HYPRE_GMRESSetLogging         (schur_solver, hypre_ParILUDataSchurSolverLogging(ilu_data));
-               HYPRE_GMRESSetPrintLevel      (schur_solver,
-                                              hypre_ParILUDataSchurSolverPrintLevel(ilu_data));/* set to zero now, don't print */
-               HYPRE_GMRESSetRelChange       (schur_solver, hypre_ParILUDataSchurGMRESRelChange(ilu_data));
-
-               /* setup preconditioner parameters */
-               /* create Schur precond */
-               schur_precond = (HYPRE_Solver) ilu_vdata;
-
-               /* add preconditioner to solver */
-               HYPRE_GMRESSetPrecond(schur_solver,
-                                     (HYPRE_PtrToSolverFcn) hypre_ParILURAPSchurGMRESSolve,
-                                     //(HYPRE_PtrToSolverFcn) hypre_ParILUCusparseSchurGMRESDummySolve,
-                                     (HYPRE_PtrToSolverFcn) hypre_ParILURAPSchurGMRESDummySetup,
-                                     schur_precond);
-               HYPRE_GMRESGetPrecond(schur_solver, &schur_precond_gotten);
-               if (schur_precond_gotten != (schur_precond))
-               {
-                  hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Schur complement got bad precond!");
-                  hypre_GpuProfilingPopRange();
-                  HYPRE_ANNOTATE_FUNC_END;
-
-                  return hypre_error_flag;
-               }
-
-               /* need to create working vector rhs and x for Schur System */
-               rhs = hypre_ParVectorCreate(comm,
-                                           hypre_ParCSRMatrixGlobalNumRows(matS),
-                                           hypre_ParCSRMatrixRowStarts(matS));
-               hypre_ParVectorInitialize(rhs);
-               x = hypre_ParVectorCreate(comm,
-                                         hypre_ParCSRMatrixGlobalNumRows(matS),
-                                         hypre_ParCSRMatrixRowStarts(matS));
-               hypre_ParVectorInitialize(x);
-
-               /* setup solver */
-               HYPRE_GMRESSetup(schur_solver, (HYPRE_Matrix)ilu_vdata, (HYPRE_Vector)rhs, (HYPRE_Vector)x);
-
-               /* solve for right-hand-side consists of only 1 */
-               //hypre_Vector      *rhs_local = hypre_ParVectorLocalVector(rhs);
-               //HYPRE_Real        *Xtemp_data  = hypre_VectorData(Xtemp_local);
-               //hypre_SeqVectorSetConstantValues(rhs_local, 1.0);
-
-               /* update ilu_data */
-               hypre_ParILUDataSchurSolver   (ilu_data) = schur_solver;
-               hypre_ParILUDataSchurPrecond  (ilu_data) = schur_precond;
-               hypre_ParILUDataRhs           (ilu_data) = rhs;
-               hypre_ParILUDataX             (ilu_data) = x;
+               hypre_ParILUDataSchurGMRESKDim(ilu_data)++;
             }
+            HYPRE_GMRESSetKDim            (schur_solver, hypre_ParILUDataSchurGMRESKDim(ilu_data));
+            HYPRE_GMRESSetMaxIter         (schur_solver,
+                                           hypre_ParILUDataSchurGMRESMaxIter(ilu_data));/* we don't need that many solves */
+            HYPRE_GMRESSetTol             (schur_solver, hypre_ParILUDataSchurGMRESTol(ilu_data));
+            HYPRE_GMRESSetAbsoluteTol     (schur_solver, hypre_ParILUDataSchurGMRESAbsoluteTol(ilu_data));
+            HYPRE_GMRESSetLogging         (schur_solver, hypre_ParILUDataSchurSolverLogging(ilu_data));
+            HYPRE_GMRESSetPrintLevel      (schur_solver,
+                                           hypre_ParILUDataSchurSolverPrintLevel(ilu_data));/* set to zero now, don't print */
+            HYPRE_GMRESSetRelChange       (schur_solver, hypre_ParILUDataSchurGMRESRelChange(ilu_data));
+
+            /* setup preconditioner parameters */
+            /* create Schur precond */
+            schur_precond = (HYPRE_Solver) ilu_vdata;
+
+            /* add preconditioner to solver */
+            HYPRE_GMRESSetPrecond(schur_solver,
+                                  (HYPRE_PtrToSolverFcn) hypre_ParILURAPSchurGMRESSolveDevice,
+                                  (HYPRE_PtrToSolverFcn) hypre_ParKrylovIdentitySetup,
+                                  schur_precond);
+            HYPRE_GMRESGetPrecond(schur_solver, &schur_precond_gotten);
+
+            if (schur_precond_gotten != (schur_precond))
+            {
+               hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Schur complement got bad precond!");
+               hypre_GpuProfilingPopRange();
+               HYPRE_ANNOTATE_FUNC_END;
+
+               return hypre_error_flag;
+            }
+
+            /* need to create working vector rhs and x for Schur System */
+            rhs = hypre_ParVectorCreate(comm,
+                                        hypre_ParCSRMatrixGlobalNumRows(matS),
+                                        hypre_ParCSRMatrixRowStarts(matS));
+            hypre_ParVectorInitialize(rhs);
+            x = hypre_ParVectorCreate(comm,
+                                      hypre_ParCSRMatrixGlobalNumRows(matS),
+                                      hypre_ParCSRMatrixRowStarts(matS));
+            hypre_ParVectorInitialize(x);
+
+            /* setup solver */
+            HYPRE_GMRESSetup(schur_solver,
+                             (HYPRE_Matrix) ilu_vdata,
+                             (HYPRE_Vector) rhs,
+                             (HYPRE_Vector) x);
+
+            /* solve for right-hand-side consists of only 1 */
+            //hypre_Vector      *rhs_local = hypre_ParVectorLocalVector(rhs);
+            //HYPRE_Real        *Xtemp_data  = hypre_VectorData(Xtemp_local);
+            //hypre_SeqVectorSetConstantValues(rhs_local, 1.0);
+
+            /* Update ilu_data */
+            hypre_ParILUDataSchurSolver(ilu_data)  = schur_solver;
+            hypre_ParILUDataSchurPrecond(ilu_data) = schur_precond;
+            hypre_ParILUDataRhs(ilu_data)          = rhs;
+            hypre_ParILUDataX(ilu_data)            = x;
          }
          else
 #endif
          {
-            /* need to create working vector rhs and x for Schur System */
+            /* Need to create working vector rhs and x for Schur System */
             HYPRE_Int      m = n - nLU;
-            HYPRE_BigInt   S_total_rows, S_row_starts[2];
-            HYPRE_BigInt   big_m = (HYPRE_BigInt)m;
+            HYPRE_BigInt   global_start, S_total_rows, S_row_starts[2];
+            HYPRE_BigInt   big_m = (HYPRE_BigInt) m;
+
             hypre_MPI_Allreduce(&big_m, &S_total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
 
             if (S_total_rows > 0)
             {
-               /* create working vectors */
                Xtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(matA),
                                              hypre_ParCSRMatrixGlobalNumRows(matA),
                                              hypre_ParCSRMatrixRowStarts(matA));
@@ -1152,13 +985,9 @@ hypre_ILUSetup( void               *ilu_vdata,
                                              hypre_ParCSRMatrixRowStarts(matA));
                hypre_ParVectorInitialize(Ytemp);
 
-               /* only do so when we hae the Schur Complement */
-               {
-                  HYPRE_BigInt global_start;
-                  hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
-                  S_row_starts[0] = global_start - big_m;
-                  S_row_starts[1] = global_start;
-               }
+               hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+               S_row_starts[0] = global_start - big_m;
+               S_row_starts[1] = global_start;
 
                rhs = hypre_ParVectorCreate(comm,
                                            S_total_rows,
@@ -1170,7 +999,6 @@ hypre_ILUSetup( void               *ilu_vdata,
                                          S_row_starts);
                hypre_ParVectorInitialize(x);
 
-               /* add when necessary */
                /* create GMRES */
                //            HYPRE_ParCSRGMRESCreate(comm, &schur_solver);
 
@@ -1180,13 +1008,13 @@ hypre_ILUSetup( void               *ilu_vdata,
                   hypre_GMRESFunctionsCreate(
                      hypre_ParKrylovCAlloc,
                      hypre_ParKrylovFree,
-                     hypre_ParILURAPSchurGMRESCommInfoH, //parCSR A -> ilu_data
+                     hypre_ParILURAPSchurGMRESCommInfoHost, //parCSR A -> ilu_data
                      hypre_ParKrylovCreateVector,
                      hypre_ParKrylovCreateVectorArray,
                      hypre_ParKrylovDestroyVector,
-                     hypre_ParILURAPSchurGMRESMatvecCreateH, //parCSR A -- inactive
-                     hypre_ParILURAPSchurGMRESMatvecH, //parCSR A -> ilu_data
-                     hypre_ParILURAPSchurGMRESMatvecDestroyH, //parCSR A -- inactive
+                     hypre_ParKrylovMatvecCreate, //parCSR A -- inactive
+                     hypre_ParILURAPSchurGMRESMatvecHost, //parCSR A -> ilu_data
+                     hypre_ParKrylovMatvecDestroy, //parCSR A -- inactive
                      hypre_ParKrylovInnerProd,
                      hypre_ParKrylovCopyVector,
                      hypre_ParKrylovClearVector,
@@ -1194,13 +1022,13 @@ hypre_ILUSetup( void               *ilu_vdata,
                      hypre_ParKrylovAxpy,
                      hypre_ParKrylovIdentitySetup, //parCSR A -- inactive
                      hypre_ParKrylovIdentity ); //parCSR A -- inactive
-               schur_solver = ( (HYPRE_Solver) hypre_GMRESCreate( gmres_functions ) );
+               schur_solver = (HYPRE_Solver) hypre_GMRESCreate(gmres_functions);
 
                /* setup GMRES parameters */
                /* at least should apply 1 solve */
                if (hypre_ParILUDataSchurGMRESKDim(ilu_data) == 0)
                {
-                  hypre_ParILUDataSchurGMRESKDim(ilu_data) ++;
+                  hypre_ParILUDataSchurGMRESKDim(ilu_data)++;
                }
                HYPRE_GMRESSetKDim            (schur_solver, hypre_ParILUDataSchurGMRESKDim(ilu_data));
                HYPRE_GMRESSetMaxIter         (schur_solver,
@@ -1215,11 +1043,11 @@ hypre_ILUSetup( void               *ilu_vdata,
                /* setup preconditioner parameters */
                /* create Schur precond */
                schur_precond = (HYPRE_Solver) ilu_vdata;
+
                /* add preconditioner to solver */
                HYPRE_GMRESSetPrecond(schur_solver,
-                                     (HYPRE_PtrToSolverFcn) hypre_ParILURAPSchurGMRESSolveH,
-                                     //(HYPRE_PtrToSolverFcn) hypre_ParILUCusparseSchurGMRESDummySolve,
-                                     (HYPRE_PtrToSolverFcn) hypre_ParILURAPSchurGMRESDummySetupH,
+                                     (HYPRE_PtrToSolverFcn) hypre_ParILURAPSchurGMRESSolveHost,
+                                     (HYPRE_PtrToSolverFcn) hypre_ParKrylovIdentitySetup,
                                      schur_precond);
                HYPRE_GMRESGetPrecond(schur_solver, &schur_precond_gotten);
                if (schur_precond_gotten != (schur_precond))
@@ -1232,82 +1060,78 @@ hypre_ILUSetup( void               *ilu_vdata,
                }
 
                /* setup solver */
-               HYPRE_GMRESSetup(schur_solver, (HYPRE_Matrix)ilu_vdata, (HYPRE_Vector)rhs, (HYPRE_Vector)x);
+               HYPRE_GMRESSetup(schur_solver,
+                                (HYPRE_Matrix) ilu_vdata,
+                                (HYPRE_Vector) rhs,
+                                (HYPRE_Vector) x);
 
                /* solve for right-hand-side consists of only 1 */
                //hypre_Vector      *rhs_local = hypre_ParVectorLocalVector(rhs);
                //HYPRE_Real        *Xtemp_data  = hypre_VectorData(Xtemp_local);
                //hypre_SeqVectorSetConstantValues(rhs_local, 1.0);
-            }
+            } /* if (S_total_rows > 0) */
 
-            /* update ilu_data */
-            hypre_ParILUDataSchurSolver   (ilu_data) = schur_solver;
-            hypre_ParILUDataSchurPrecond  (ilu_data) = schur_precond;
-            hypre_ParILUDataRhs           (ilu_data) = rhs;
-            hypre_ParILUDataX             (ilu_data) = x;
+            /* Update ilu_data */
+            hypre_ParILUDataSchurSolver(ilu_data)  = schur_solver;
+            hypre_ParILUDataSchurPrecond(ilu_data) = schur_precond;
+            hypre_ParILUDataRhs(ilu_data)          = rhs;
+            hypre_ParILUDataX(ilu_data)            = x;
          }
-         break;
-      }
-      default:
          break;
    }
 
    /* set pointers to ilu data */
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
-   /* set cusparse pointers */
-   //hypre_ParILUDataILUSolveBuffer(ilu_data)  = ilu_solve_buffer;
-   hypre_ParILUDataMatAILUDevice(ilu_data)      = matALU_d;
-   hypre_ParILUDataMatBILUDevice(ilu_data)      = matBLU_d;
-   hypre_ParILUDataMatSILUDevice(ilu_data)      = matSLU_d;
-   hypre_ParILUDataMatEDevice(ilu_data)         = matE_d;
-   hypre_ParILUDataMatFDevice(ilu_data)         = matF_d;
-   hypre_ParILUDataILUSolveBuffer(ilu_data)     = ilu_solve_buffer;
-   hypre_ParILUDataMatALILUSolveInfo(ilu_data)  = matAL_info;
-   hypre_ParILUDataMatAUILUSolveInfo(ilu_data)  = matAU_info;
-   hypre_ParILUDataMatBLILUSolveInfo(ilu_data)  = matBL_info;
-   hypre_ParILUDataMatBUILUSolveInfo(ilu_data)  = matBU_info;
-   hypre_ParILUDataMatSLILUSolveInfo(ilu_data)  = matSL_info;
-   hypre_ParILUDataMatSUILUSolveInfo(ilu_data)  = matSU_info;
-   hypre_ParILUDataAperm(ilu_data)              = Aperm;
-   hypre_ParILUDataR(ilu_data)                  = R;
-   hypre_ParILUDataP(ilu_data)                  = P;
-   hypre_ParILUDataFTempUpper(ilu_data)         = Ftemp_upper;
-   hypre_ParILUDataUTempLower(ilu_data)         = Utemp_lower;
-   hypre_ParILUDataMatAFakeDiagonal(ilu_data)   = A_diag_fake;
-   hypre_ParILUDataADiagDiag(ilu_data)          = Adiag_diag;
+   /* set device data pointers */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_ParILUDataMatAILUDevice(ilu_data) = matALU_d;
+   hypre_ParILUDataMatBILUDevice(ilu_data) = matBLU_d;
+   hypre_ParILUDataMatSILUDevice(ilu_data) = matSLU_d;
+   hypre_ParILUDataMatEDevice(ilu_data)    = matE_d;
+   hypre_ParILUDataMatFDevice(ilu_data)    = matF_d;
+   hypre_ParILUDataAperm(ilu_data)         = Aperm;
+   hypre_ParILUDataR(ilu_data)             = R;
+   hypre_ParILUDataP(ilu_data)             = P;
+   hypre_ParILUDataFTempUpper(ilu_data)    = Ftemp_upper;
+   hypre_ParILUDataUTempLower(ilu_data)    = Utemp_lower;
+   hypre_ParILUDataADiagDiag(ilu_data)     = Adiag_diag;
+   hypre_ParILUDataSDiagDiag(ilu_data)     = Sdiag_diag;
 #endif
-   hypre_ParILUDataMatA(ilu_data)               = matA;
-   hypre_ParILUDataXTemp(ilu_data)              = Xtemp;
-   hypre_ParILUDataYTemp(ilu_data)              = Ytemp;
-   hypre_ParILUDataZTemp(ilu_data)              = Ztemp;
-   hypre_ParILUDataF(ilu_data)                  = F_array;
-   hypre_ParILUDataU(ilu_data)                  = U_array;
-   hypre_ParILUDataMatL(ilu_data)               = matL;
-   hypre_ParILUDataMatD(ilu_data)               = matD;
-   hypre_ParILUDataMatU(ilu_data)               = matU;
-   hypre_ParILUDataMatLModified(ilu_data)       = matmL;
-   hypre_ParILUDataMatDModified(ilu_data)       = matmD;
-   hypre_ParILUDataMatUModified(ilu_data)       = matmU;
-   hypre_ParILUDataMatS(ilu_data)               = matS;
-   hypre_ParILUDataCFMarkerArray(ilu_data)      = CF_marker_array;
-   hypre_ParILUDataPerm(ilu_data)               = perm;
-   hypre_ParILUDataQPerm(ilu_data)              = qperm;
-   hypre_ParILUDataNLU(ilu_data)                = nLU;
-   hypre_ParILUDataNI(ilu_data)                 = nI;
-   hypre_ParILUDataUEnd(ilu_data)               = u_end;
-   hypre_ParILUDataUExt(ilu_data)               = uext;
-   hypre_ParILUDataFExt(ilu_data)               = fext;
+
+   /* Set pointers to ilu data */
+   hypre_ParILUDataMatA(ilu_data)          = matA;
+   hypre_ParILUDataXTemp(ilu_data)         = Xtemp;
+   hypre_ParILUDataYTemp(ilu_data)         = Ytemp;
+   hypre_ParILUDataZTemp(ilu_data)         = Ztemp;
+   hypre_ParILUDataF(ilu_data)             = F_array;
+   hypre_ParILUDataU(ilu_data)             = U_array;
+   hypre_ParILUDataMatL(ilu_data)          = matL;
+   hypre_ParILUDataMatD(ilu_data)          = matD;
+   hypre_ParILUDataMatU(ilu_data)          = matU;
+   hypre_ParILUDataMatLModified(ilu_data)  = matmL;
+   hypre_ParILUDataMatDModified(ilu_data)  = matmD;
+   hypre_ParILUDataMatUModified(ilu_data)  = matmU;
+   hypre_ParILUDataMatS(ilu_data)          = matS;
+   hypre_ParILUDataCFMarkerArray(ilu_data) = CF_marker_array;
+   hypre_ParILUDataPerm(ilu_data)          = perm;
+   hypre_ParILUDataQPerm(ilu_data)         = qperm;
+   hypre_ParILUDataNLU(ilu_data)           = nLU;
+   hypre_ParILUDataNI(ilu_data)            = nI;
+   hypre_ParILUDataUEnd(ilu_data)          = u_end;
+   hypre_ParILUDataUExt(ilu_data)          = uext;
+   hypre_ParILUDataFExt(ilu_data)          = fext;
 
    /* compute operator complexity */
    hypre_ParCSRMatrixSetDNumNonzeros(matA);
    nnzS = 0.0;
+
    /* size_C is the size of global coarse grid, upper left part */
    size_C = hypre_ParCSRMatrixGlobalNumRows(matA);
-   /* switch to compute complexity */
 
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
+   /* switch to compute complexity */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int nnzBEF = 0;
-   HYPRE_Int nnzG;/* Global nnz */
+   HYPRE_Int nnzG; /* Global nnz */
+
    if (ilu_type == 0 && fill_level == 0)
    {
       /* The nnz is for sure 1.0 in this case */
@@ -1373,32 +1197,37 @@ hypre_ILUSetup( void               *ilu_vdata,
       {
          hypre_ParCSRMatrixSetDNumNonzeros(matS);
          nnzS = hypre_ParCSRMatrixDNumNonzeros(matS);
-         /* if we have Schur system need to reduce it from size_C */
+
+         /* If we have Schur system need to reduce it from size_C */
          size_C -= hypre_ParCSRMatrixGlobalNumRows(matS);
          switch (ilu_type)
          {
             case 10: case 11: case 40: case 41: case 50:
-               /* now we need to compute the preconditioner */
+               /* Now we need to compute the preconditioner */
                schur_precond_ilu = (hypre_ParILUData*) (hypre_ParILUDataSchurPrecond(ilu_data));
+
                /* borrow i for local nnz of S */
-               i = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(matS));
-               hypre_MPI_Allreduce(&i, &nnzS_offd, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+               nnzS_offd_local = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(matS));
+               hypre_MPI_Allreduce(&nnzS_offd_local, &nnzS_offd, 1, HYPRE_MPI_REAL,
+                                   hypre_MPI_SUM, comm);
                nnzS = nnzS * hypre_ParILUDataOperatorComplexity(schur_precond_ilu) + nnzS_offd;
                break;
+
             case 20: case 21:
                schur_solver_nsh = (hypre_ParNSHData*) hypre_ParILUDataSchurSolver(ilu_data);
-               nnzS = nnzS * (hypre_ParNSHDataOperatorComplexity(schur_solver_nsh));
+               nnzS *= hypre_ParNSHDataOperatorComplexity(schur_solver_nsh);
                break;
+
             default:
                break;
          }
       }
 
-      hypre_ParILUDataOperatorComplexity(ilu_data) =  ((HYPRE_Real)size_C + nnzS +
-                                                       hypre_ParCSRMatrixDNumNonzeros(matL) +
-                                                       hypre_ParCSRMatrixDNumNonzeros(matU)) /
-                                                      hypre_ParCSRMatrixDNumNonzeros(matA);
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
+      hypre_ParILUDataOperatorComplexity(ilu_data) = ((HYPRE_Real)size_C + nnzS +
+                                                      hypre_ParCSRMatrixDNumNonzeros(matL) +
+                                                      hypre_ParCSRMatrixDNumNonzeros(matU)) /
+                                                     hypre_ParCSRMatrixDNumNonzeros(matA);
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    }
 #endif
    if ((my_id == 0) && (print_level > 0))
@@ -1431,17 +1260,13 @@ hypre_ILUSetup( void               *ilu_vdata,
    return hypre_error_flag;
 }
 
-#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
-
 /*--------------------------------------------------------------------------
- * hypre_ParILUCusparseILUExtractEBFC
+ * hypre_ParILUExtractEBFC
  *
- * Extract submatrix from diagonal part of A into a
- * | B F |
- * | E C |
- * Struct in order to do ILU with cusparse.
- * WARNING: Cusparse requires each row been sorted by column
- *          This function only works when rows are sorted!.
+ * Extract submatrix from diagonal part of A into
+ *    | B F |
+ *    | E C |
+ *
  * A = input matrix
  * perm = permutation array indicating ordering of rows. Perm could come from a
  *    CF_marker array or a reordering routine.
@@ -1453,12 +1278,12 @@ hypre_ILUSetup( void               *ilu_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParILUCusparseILUExtractEBFC(hypre_CSRMatrix   *A_diag,
-                                   HYPRE_Int          nLU,
-                                   hypre_CSRMatrix  **Bp,
-                                   hypre_CSRMatrix  **Cp,
-                                   hypre_CSRMatrix  **Ep,
-                                   hypre_CSRMatrix  **Fp)
+hypre_ParILUExtractEBFC(hypre_CSRMatrix   *A_diag,
+                        HYPRE_Int          nLU,
+                        hypre_CSRMatrix  **Bp,
+                        hypre_CSRMatrix  **Cp,
+                        hypre_CSRMatrix  **Ep,
+                        hypre_CSRMatrix  **Fp)
 {
    /* Get necessary slots */
    HYPRE_Int            n                = hypre_CSRMatrixNumRows(A_diag);
@@ -1469,7 +1294,6 @@ hypre_ParILUCusparseILUExtractEBFC(hypre_CSRMatrix   *A_diag,
    hypre_CSRMatrix     *C = NULL;
    hypre_CSRMatrix     *E = NULL;
    hypre_CSRMatrix     *F = NULL;
-
    HYPRE_Int            i, j, row, col;
 
    hypre_assert(nLU >= 0 && nLU <= n);
@@ -1599,7 +1423,7 @@ hypre_ParILUCusparseILUExtractEBFC(hypre_CSRMatrix   *A_diag,
             {
                HYPRE_Int tmp;
                tmp = capacity_B;
-               capacity_B = capacity_B * EXPAND_FACT + 1;
+               capacity_B = (HYPRE_Int)(capacity_B * EXPAND_FACT + 1);
                B_j = hypre_TReAlloc_v2(B_j, HYPRE_Int, tmp, HYPRE_Int,
                                        capacity_B, HYPRE_MEMORY_HOST);
                B_data = hypre_TReAlloc_v2(B_data, HYPRE_Complex, tmp, HYPRE_Complex,
@@ -1616,7 +1440,7 @@ hypre_ParILUCusparseILUExtractEBFC(hypre_CSRMatrix   *A_diag,
             {
                HYPRE_Int tmp;
                tmp = capacity_F;
-               capacity_F = capacity_F * EXPAND_FACT + 1;
+               capacity_F = (HYPRE_Int)(capacity_F * EXPAND_FACT + 1);
                F_j = hypre_TReAlloc_v2(F_j, HYPRE_Int, tmp, HYPRE_Int,
                                        capacity_F, HYPRE_MEMORY_HOST);
                F_data = hypre_TReAlloc_v2(F_data, HYPRE_Complex, tmp, HYPRE_Complex,
@@ -1647,7 +1471,7 @@ hypre_ParILUCusparseILUExtractEBFC(hypre_CSRMatrix   *A_diag,
             {
                HYPRE_Int tmp;
                tmp = capacity_E;
-               capacity_E = capacity_E * EXPAND_FACT + 1;
+               capacity_E = (HYPRE_Int)(capacity_E * EXPAND_FACT + 1);
                E_j = hypre_TReAlloc_v2(E_j, HYPRE_Int, tmp, HYPRE_Int,
                                        capacity_E, HYPRE_MEMORY_HOST);
                E_data = hypre_TReAlloc_v2(E_data, HYPRE_Complex, tmp, HYPRE_Complex,
@@ -1664,7 +1488,7 @@ hypre_ParILUCusparseILUExtractEBFC(hypre_CSRMatrix   *A_diag,
             {
                HYPRE_Int tmp;
                tmp = capacity_C;
-               capacity_C = capacity_C * EXPAND_FACT + 1;
+               capacity_C = (HYPRE_Int)(capacity_C * EXPAND_FACT + 1);
                C_j = hypre_TReAlloc_v2(C_j, HYPRE_Int, tmp, HYPRE_Int,
                                        capacity_C, HYPRE_MEMORY_HOST);
                C_data = hypre_TReAlloc_v2(C_data, HYPRE_Complex, tmp, HYPRE_Complex,
@@ -1716,1312 +1540,25 @@ hypre_ParILUCusparseILUExtractEBFC(hypre_CSRMatrix   *A_diag,
    return hypre_error_flag;
 }
 
-/* Wrapper for ILU0 with cusparse on a matrix, csr sort was done in this function */
-HYPRE_Int
-HYPRE_ILUSetupCusparseCSRILU0(hypre_CSRMatrix       *A,
-                              cusparseSolvePolicy_t  ilu_solve_policy)
-{
-
-   /* data objects for A */
-   HYPRE_Int               n                    = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int               m                    = hypre_CSRMatrixNumCols(A);
-
-   hypre_assert(n == m);
-
-   HYPRE_Real              *A_data              = hypre_CSRMatrixData(A);
-   HYPRE_Int               *A_i                 = hypre_CSRMatrixI(A);
-   HYPRE_Int               *A_j                 = hypre_CSRMatrixJ(A);
-   HYPRE_Int               nnz_A                = hypre_CSRMatrixNumNonzeros(A);
-
-   /* pointers to cusparse data */
-   csrilu02Info_t          matA_info            = NULL;
-
-   /* variables and working arrays used during the ilu */
-   HYPRE_Int               zero_pivot;
-   HYPRE_Int               matA_buffersize;
-   void                    *matA_buffer         = NULL;
-
-   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
-   cusparseMatDescr_t descr = hypre_CSRMatrixGPUMatDescr(A);
-
-   /* 1. Sort columns inside each row first, we can't assume that's sorted */
-   hypre_SortCSRCusparse(n, m, nnz_A, descr, A_i, A_j, A_data);
-
-   /* 2. Create info for ilu setup and solve */
-   HYPRE_CUSPARSE_CALL(cusparseCreateCsrilu02Info(&matA_info));
-
-   /* 3. Get working array size */
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02_bufferSize(handle, n, nnz_A, descr,
-                                                          A_data, A_i, A_j,
-                                                          matA_info, &matA_buffersize));
-
-   /* 4. Create working array, since they won't be visited by host, allocate on device */
-   matA_buffer                                  = hypre_TAlloc(char, matA_buffersize,
-                                                               HYPRE_MEMORY_DEVICE);
-
-   /* 5. Now perform the analysis */
-   /* 5-1. Analysis */
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02_analysis(handle, n, nnz_A, descr,
-                                                        A_data, A_i, A_j,
-                                                        matA_info, ilu_solve_policy, matA_buffer));
-
-   /* 5-2. Check for zero pivot */
-   HYPRE_CUSPARSE_CALL(cusparseXcsrilu02_zeroPivot(handle, matA_info, &zero_pivot));
-
-   /* 6. Apply the factorization */
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrilu02(handle, n, nnz_A, descr,
-                                               A_data, A_i, A_j,
-                                               matA_info, ilu_solve_policy, matA_buffer));
-
-   /* Check for zero pivot */
-   HYPRE_CUSPARSE_CALL(cusparseXcsrilu02_zeroPivot(handle, matA_info, &zero_pivot));
-
-   /* Done with factorization, finishing up */
-   hypre_TFree(matA_buffer, HYPRE_MEMORY_DEVICE);
-   HYPRE_CUSPARSE_CALL(cusparseDestroyCsrilu02Info(matA_info));
-
-   return hypre_error_flag;
-}
-
 /*--------------------------------------------------------------------------
- * HYPRE_ILUSetupCusparseCSRILU0SetupSolve
+ * hypre_ParILURAPReorder
  *
- * Wrapper for ILU0 solve analysis phase with cusparse on a matrix
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_ILUSetupCusparseCSRILU0SetupSolve(hypre_CSRMatrix       *A,
-                                        cusparseMatDescr_t     matL_des,
-                                        cusparseMatDescr_t     matU_des,
-                                        cusparseSolvePolicy_t  ilu_solve_policy,
-                                        csrsv2Info_t          *matL_infop,
-                                        csrsv2Info_t          *matU_infop,
-                                        HYPRE_Int             *buffer_sizep,
-                                        void                 **bufferp)
-{
-   if (!A)
-   {
-      /* return if A is NULL */
-      *matL_infop    = NULL;
-      *matU_infop    = NULL;
-      *buffer_sizep  = 0;
-      *bufferp       = NULL;
-      return hypre_error_flag;
-   }
-
-   /* data objects for A */
-   HYPRE_Int               n                    = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int               m                    = hypre_CSRMatrixNumCols(A);
-
-   hypre_assert(n == m);
-
-   if (n == 0)
-   {
-      /* return if A is 0 by 0 */
-      *matL_infop    = NULL;
-      *matU_infop    = NULL;
-      *buffer_sizep  = 0;
-      *bufferp       = NULL;
-      return hypre_error_flag;
-   }
-
-   HYPRE_Real              *A_data              = hypre_CSRMatrixData(A);
-   HYPRE_Int               *A_i                 = hypre_CSRMatrixI(A);
-   HYPRE_Int               *A_j                 = hypre_CSRMatrixJ(A);
-   HYPRE_Int               nnz_A                = hypre_CSRMatrixNumNonzeros(A);
-
-   /* pointers to cusparse data */
-   csrsv2Info_t            matL_info            = *matL_infop;
-   csrsv2Info_t            matU_info            = *matU_infop;
-
-   /* clear data if already exists */
-   if (matL_info)
-   {
-      HYPRE_CUSPARSE_CALL( cusparseDestroyCsrsv2Info(matL_info) );
-      matL_info = NULL;
-   }
-   if (matU_info)
-   {
-      HYPRE_CUSPARSE_CALL( cusparseDestroyCsrsv2Info(matU_info) );
-      matU_info = NULL;
-   }
-
-   /* variables and working arrays used during the ilu */
-   HYPRE_Int               matL_buffersize;
-   HYPRE_Int               matU_buffersize;
-   HYPRE_Int               solve_buffersize;
-   HYPRE_Int               solve_oldbuffersize  = *buffer_sizep;
-   void                    *solve_buffer        = *bufferp;
-
-   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
-
-   /* Sanity checks */
-   if (n <= 0)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Non-positive number of rows!");
-      return hypre_error_flag;
-   }
-   else if (nnz_A <= 0)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Non-positive number of coefficients!");
-      return hypre_error_flag;
-   }
-
-   hypre_GpuProfilingPushRange("ILU0SolveAnalysis");
-
-   /* 1. Create info for ilu setup and solve */
-   HYPRE_CUSPARSE_CALL(cusparseCreateCsrsv2Info(&(matL_info)));
-   HYPRE_CUSPARSE_CALL(cusparseCreateCsrsv2Info(&(matU_info)));
-
-   /* 2. Get working array size */
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_bufferSize(handle,
-                                                        CUSPARSE_OPERATION_NON_TRANSPOSE, n,
-                                                        nnz_A,
-                                                        matL_des, A_data, A_i, A_j,
-                                                        matL_info, &matL_buffersize));
-
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_bufferSize(handle,
-                                                        CUSPARSE_OPERATION_NON_TRANSPOSE, n,
-                                                        nnz_A,
-                                                        matU_des, A_data, A_i, A_j,
-                                                        matU_info, &matU_buffersize));
-
-   solve_buffersize = hypre_max( matL_buffersize, matU_buffersize );
-
-   /* 3. Create working array, since they won't be visited by host, allocate on device */
-   if (solve_buffersize > solve_oldbuffersize)
-   {
-      if (solve_buffer)
-      {
-         solve_buffer = hypre_TReAlloc_v2(solve_buffer,
-                                          char, solve_oldbuffersize,
-                                          char, solve_buffersize,
-                                          HYPRE_MEMORY_DEVICE);
-      }
-      else
-      {
-         solve_buffer = hypre_TAlloc(char, solve_buffersize, HYPRE_MEMORY_DEVICE);
-      }
-   }
-
-   /* 4. Now perform the analysis */
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                      n, nnz_A, matL_des,
-                                                      A_data, A_i, A_j,
-                                                      matL_info, ilu_solve_policy, solve_buffer));
-
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsv2_analysis(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                      n, nnz_A, matU_des,
-                                                      A_data, A_i, A_j,
-                                                      matU_info, ilu_solve_policy, solve_buffer));
-
-   /* Done with analysis, finishing up */
-   /* Set return value */
-   *matL_infop    = matL_info;
-   *matU_infop    = matU_info;
-   *buffer_sizep  = solve_buffersize;
-   *bufferp       = solve_buffer;
-
-   hypre_GpuProfilingPopRange();
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_ILUSetupILU0Device
+ * Reorder matrix A based on local permutation, i.e., combine local
+ * permutation into global permutation)
  *
- * ILU(0) setup on the device
- *
- * Arguments:
- *    A = input matrix
- *    perm_data  = permutation array indicating ordering of rows.
- *                 Could come from a CF_marker array or a reordering routine.
- *    qperm_data = permutation array indicating ordering of columns
- *    nI  = number of internal unknowns
- *    nLU = size of incomplete factorization, nLU should obey nLU <= nI.
- *          Schur complement is formed if nLU < n
- *    A_fake_diagp = fake diagonal for matvec
- *
- * This function will form the global Schur Matrix if nLU < n
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ILUSetupILU0Device( hypre_ParCSRMatrix     *A,
-                          HYPRE_Int              *perm_data,
-                          HYPRE_Int              *qperm_data,
-                          HYPRE_Int               n,
-                          HYPRE_Int               nLU,
-                          cusparseMatDescr_t      matL_des,
-                          cusparseMatDescr_t      matU_des,
-                          cusparseSolvePolicy_t   ilu_solve_policy,
-                          void                  **bufferp,
-                          csrsv2Info_t           *matBL_infop,
-                          csrsv2Info_t           *matBU_infop,
-                          csrsv2Info_t           *matSL_infop,
-                          csrsv2Info_t           *matSU_infop,
-                          hypre_CSRMatrix       **BLUptr,
-                          hypre_ParCSRMatrix    **matSptr,
-                          hypre_CSRMatrix       **Eptr,
-                          hypre_CSRMatrix       **Fptr,
-                          HYPRE_Int             **A_fake_diag_ip,
-                          HYPRE_Int               tri_solve )
-{
-   /* Input matrix data */
-   MPI_Comm                 comm            = hypre_ParCSRMatrixComm(A);
-   HYPRE_MemoryLocation     memory_location = hypre_ParCSRMatrixMemoryLocation(A);
-
-   hypre_ParCSRCommPkg     *comm_pkg;
-   hypre_ParCSRCommHandle  *comm_handle;
-   HYPRE_Int                num_sends, begin, end;
-   HYPRE_BigInt            *send_buf      = NULL;
-
-   hypre_ParCSRMatrix      *matS          = NULL;
-   hypre_CSRMatrix         *A_diag        = NULL;
-   HYPRE_Int               *A_fake_diag_i = NULL;
-   hypre_CSRMatrix         *A_offd        = hypre_ParCSRMatrixOffd(A);
-   hypre_CSRMatrix         *h_A_offd      = NULL;
-   HYPRE_Int               *A_offd_i      = NULL;
-   HYPRE_Int               *A_offd_j      = NULL;
-   HYPRE_Real              *A_offd_data   = NULL;
-   hypre_CSRMatrix         *SLU           = NULL;
-
-   /* Pointers to cusparse data */
-   csrsv2Info_t            matBL_info     = NULL;
-   csrsv2Info_t            matBU_info     = NULL;
-   csrsv2Info_t            matSL_info     = NULL;
-   csrsv2Info_t            matSU_info     = NULL;
-   HYPRE_Int               buffer_size    = 0;
-   void                   *buffer         = NULL;
-
-   /* Permutation arrays */
-   HYPRE_Int               *rperm_data    = NULL;
-   HYPRE_Int               *rqperm_data   = NULL;
-   hypre_IntArray          *perm          = NULL;
-   hypre_IntArray          *rperm         = NULL;
-   hypre_IntArray          *qperm         = NULL;
-   hypre_IntArray          *rqperm        = NULL;
-   hypre_IntArray          *h_perm        = NULL;
-   hypre_IntArray          *h_rperm       = NULL;
-
-   /* Variables for matS */
-   HYPRE_Int               m              = n - nLU;
-   HYPRE_Int               nI             = nLU; //use default
-   HYPRE_Int               e              = 0;
-   HYPRE_Int               m_e            = m;
-   HYPRE_Int              *S_diag_i       = NULL;
-   hypre_CSRMatrix        *S_offd         = NULL;
-   HYPRE_Int              *S_offd_i       = NULL;
-   HYPRE_Int              *S_offd_j       = NULL;
-   HYPRE_Real             *S_offd_data    = NULL;
-   HYPRE_BigInt           *S_offd_colmap  = NULL;
-   HYPRE_Int               S_offd_nnz;
-   HYPRE_Int               S_offd_ncols;
-   HYPRE_Int               S_diag_nnz;
-
-   /* Local variables */
-   HYPRE_BigInt            total_rows, col_starts[2];
-   HYPRE_Int               i, j, k1, k2, k3, col;
-   HYPRE_Int               my_id, num_procs;
-
-   hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm_rank(comm, &my_id);
-
-   /* Build the inverse permutation arrays */
-   if (perm_data && qperm_data)
-   {
-      /* Create arrays */
-      perm   = hypre_IntArrayCreate(n);
-      qperm  = hypre_IntArrayCreate(n);
-
-      /* Set existing data */
-      hypre_IntArrayData(perm)  = perm_data;
-      hypre_IntArrayData(qperm) = qperm_data;
-
-      /* Initialize arrays */
-      hypre_IntArrayInitialize_v2(perm, memory_location);
-      hypre_IntArrayInitialize_v2(qperm, memory_location);
-
-      /* Compute inverse permutation arrays */
-      hypre_IntArrayInverseMapping(perm, &rperm);
-      hypre_IntArrayInverseMapping(qperm, &rqperm);
-
-      rqperm_data = hypre_IntArrayData(rqperm);
-   }
-
-   /* Only call ILU when we really have a matrix on this processor */
-   if (n > 0)
-   {
-      /* Copy diagonal matrix into a new place with permutation
-       * That is, A_diag = A_diag(perm,qperm);
-       */
-      hypre_CSRMatrixPermute(hypre_ParCSRMatrixDiag(A), perm_data, rqperm_data, &A_diag);
-
-      /* Apply ILU factorization to the entile A_diag */
-      HYPRE_ILUSetupCusparseCSRILU0(A_diag, ilu_solve_policy);
-
-      /* | L \ U (B) L^{-1}F  |
-       * | EU^{-1}   L \ U (S)|
-       * Extract submatrix L_B U_B, L_S U_S, EU_B^{-1}, L_B^{-1}F
-       * Note that in this function after ILU, all rows are sorted
-       * in a way different than HYPRE. Diagonal is not listed in the front
-       */
-      hypre_ParILUCusparseILUExtractEBFC(A_diag, nLU, BLUptr, &SLU, Eptr, Fptr);
-   }
-   else
-   {
-      *BLUptr = NULL;
-      *Eptr = NULL;
-      *Fptr = NULL;
-      SLU = NULL;
-   }
-
-   /* create B */
-   /* only analyse when nacessary */
-   if ((nLU > 0) && tri_solve)
-   {
-      /* Analysis of BILU */
-      HYPRE_ILUSetupCusparseCSRILU0SetupSolve(*BLUptr, matL_des, matU_des,
-                                              ilu_solve_policy, &matBL_info, &matBU_info,
-                                              &buffer_size, &buffer);
-   }
-
-   HYPRE_BigInt big_m = (HYPRE_BigInt) m;
-   hypre_MPI_Allreduce(&big_m, &total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
-
-   /* only form when total_rows > 0 */
-   if (total_rows > 0)
-   {
-      /* now create S */
-      /* need to get new column start */
-      {
-         HYPRE_BigInt global_start;
-         hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
-         col_starts[0] = global_start - m;
-         col_starts[1] = global_start;
-      }
-
-      A_fake_diag_i = hypre_CTAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_DEVICE);
-      if (SLU)
-      {
-         if (tri_solve)
-         {
-            /* Analysis of SILU */
-            HYPRE_ILUSetupCusparseCSRILU0SetupSolve(SLU, matL_des, matU_des,
-                                                    ilu_solve_policy, &matSL_info, &matSU_info,
-                                                    &buffer_size, &buffer);
-         }
-      }
-      else
-      {
-         SLU = hypre_CSRMatrixCreate(0, 0, 0);
-         hypre_CSRMatrixInitialize(SLU);
-      }
-
-      S_diag_i = hypre_CSRMatrixI(SLU);
-      hypre_TMemcpy(&S_diag_nnz, S_diag_i + m, HYPRE_Int, 1,
-                    HYPRE_MEMORY_HOST, hypre_CSRMatrixMemoryLocation(SLU));
-
-      /* Build ParCSRMatrix matS
-       * For example when np == 3 the new matrix takes the following form
-       * |IS_1 E_12 E_13|
-       * |E_21 IS_2 E_22| = S
-       * |E_31 E_32 IS_3|
-       * In which IS_i is the cusparse ILU factorization of S_i in one matrix
-       * */
-
-      /* We did nothing to A_offd, so all the data kept, just reorder them
-       * The create function takes comm, global num rows/cols,
-       *    row/col start, num cols offd, nnz diag, nnz offd
-       */
-      S_offd_nnz = hypre_CSRMatrixNumNonzeros(A_offd);
-      S_offd_ncols = hypre_CSRMatrixNumCols(A_offd);
-
-      matS = hypre_ParCSRMatrixCreate(comm,
-                                      total_rows,
-                                      total_rows,
-                                      col_starts,
-                                      col_starts,
-                                      S_offd_ncols,
-                                      S_diag_nnz,
-                                      S_offd_nnz);
-
-      /* first put diagonal data in */
-      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(matS));
-      hypre_ParCSRMatrixDiag(matS) = SLU;
-
-      /* now start to construct offdiag of S */
-      S_offd = hypre_ParCSRMatrixOffd(matS);
-      hypre_CSRMatrixInitialize_v2(S_offd, 0, HYPRE_MEMORY_HOST);
-      S_offd_i = hypre_CSRMatrixI(S_offd);
-      S_offd_j = hypre_CSRMatrixJ(S_offd);
-      S_offd_data = hypre_CSRMatrixData(S_offd);
-      S_offd_colmap = hypre_CTAlloc(HYPRE_BigInt, S_offd_ncols, HYPRE_MEMORY_HOST);
-
-      /* Set/Move A_offd to host */
-      h_A_offd = (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE) ?
-                 hypre_CSRMatrixClone_v2(A_offd, 1, HYPRE_MEMORY_HOST) : A_offd;
-      A_offd_i    = hypre_CSRMatrixI(h_A_offd);
-      A_offd_j    = hypre_CSRMatrixJ(h_A_offd);
-      A_offd_data = hypre_CSRMatrixData(h_A_offd);
-
-      /* Clone permutation arrays on the host */
-      if (rperm && perm)
-      {
-         h_perm  = hypre_IntArrayCloneDeep_v2(perm, HYPRE_MEMORY_HOST);
-         h_rperm = hypre_IntArrayCloneDeep_v2(rperm, HYPRE_MEMORY_HOST);
-
-         perm_data  = hypre_IntArrayData(h_perm);
-         rperm_data = hypre_IntArrayData(h_rperm);
-      }
-
-      /* simply use a loop to copy data from A_offd */
-      S_offd_i[0] = 0;
-      k3 = 0;
-      for (i = 1; i <= e; i++)
-      {
-         S_offd_i[i] = k3;
-      }
-      for (i = 0; i < m_e; i++)
-      {
-         col = (perm_data) ? perm_data[i + nI] : i + nI;
-         k1 = A_offd_i[col];
-         k2 = A_offd_i[col + 1];
-         for (j = k1; j < k2; j++)
-         {
-            S_offd_j[k3] = A_offd_j[j];
-            S_offd_data[k3++] = A_offd_data[j];
-         }
-         S_offd_i[i + 1 + e] = k3;
-      }
-
-      /* give I, J, DATA to S_offd */
-      hypre_CSRMatrixI(S_offd) = S_offd_i;
-      hypre_CSRMatrixJ(S_offd) = S_offd_j;
-      hypre_CSRMatrixData(S_offd) = S_offd_data;
-
-      /* now we need to update S_offd_colmap */
-      comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-
-      /* setup comm_pkg if not yet built */
-      if (!comm_pkg)
-      {
-         hypre_MatvecCommPkgCreate(A);
-         comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-      }
-
-      /* get total num of send */
-      num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
-      end = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
-      send_buf = hypre_TAlloc(HYPRE_BigInt, end - begin, HYPRE_MEMORY_HOST);
-
-      /* copy new index into send_buf */
-      for (i = 0; i < (end - begin); i++)
-      {
-         send_buf[i] = (rperm_data) ?
-                       rperm_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i + begin)] -
-                       nLU + col_starts[0] :
-                       hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i + begin) -
-                       nLU + col_starts[0];
-      }
-
-      /* main communication */
-      comm_handle = hypre_ParCSRCommHandleCreate(21, comm_pkg, send_buf, S_offd_colmap);
-      hypre_ParCSRCommHandleDestroy(comm_handle);
-
-      /* setup index */
-      hypre_ParCSRMatrixColMapOffd(matS) = S_offd_colmap;
-
-      hypre_ILUSortOffdColmap(matS);
-
-      /* Move S_offd to final memory location */
-      hypre_CSRMatrixMigrate(S_offd, memory_location);
-
-      /* Free memory */
-      hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
-      if (h_A_offd != A_offd)
-      {
-         hypre_CSRMatrixDestroy(h_A_offd);
-      }
-   } /* end of forming S */
-   else
-   {
-      hypre_CSRMatrixDestroy(SLU);
-   }
-
-   *matSptr       = matS;
-   *bufferp       = buffer;
-   *matBL_infop   = matBL_info;
-   *matBU_infop   = matBU_info;
-   *matSL_infop   = matSL_info;
-   *matSU_infop   = matSU_info;
-   *A_fake_diag_ip = A_fake_diag_i;
-
-   /* Do not free perm_data/qperm_data */
-   if (perm)
-   {
-      hypre_IntArrayData(perm)  = NULL;
-   }
-   if (qperm)
-   {
-      hypre_IntArrayData(qperm) = NULL;
-   }
-
-   /* Free memory */
-   hypre_CSRMatrixDestroy(A_diag);
-   hypre_IntArrayDestroy(perm);
-   hypre_IntArrayDestroy(qperm);
-   hypre_IntArrayDestroy(rperm);
-   hypre_IntArrayDestroy(rqperm);
-   hypre_IntArrayDestroy(h_perm);
-   hypre_IntArrayDestroy(h_rperm);
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_ILUSetupILUKDevice
- *
- * ILU(K) setup on the device
- *
- * TODO (VPM): This function replicates code from hypre_ILUSetupILU0Device.
- *             This needs refactoring.
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ILUSetupILUKDevice(hypre_ParCSRMatrix       *A,
-                         HYPRE_Int                lfil,
-                         HYPRE_Int               *perm_data,
-                         HYPRE_Int               *qperm_data,
-                         HYPRE_Int                n,
-                         HYPRE_Int                nLU,
-                         cusparseMatDescr_t       matL_des,
-                         cusparseMatDescr_t       matU_des,
-                         cusparseSolvePolicy_t    ilu_solve_policy,
-                         void                   **bufferp,
-                         csrsv2Info_t            *matBL_infop,
-                         csrsv2Info_t            *matBU_infop,
-                         csrsv2Info_t            *matSL_infop,
-                         csrsv2Info_t            *matSU_infop,
-                         hypre_CSRMatrix        **BLUptr,
-                         hypre_ParCSRMatrix     **matSptr,
-                         hypre_CSRMatrix        **Eptr,
-                         hypre_CSRMatrix        **Fptr,
-                         HYPRE_Int              **A_fake_diag_ip,
-                         HYPRE_Int                tri_solve)
-{
-   /* GPU-accelerated ILU0 with cusparse */
-   HYPRE_Int               i, j, k1, k2, k3, col;
-
-   /* communication stuffs for S */
-   MPI_Comm                comm                 = hypre_ParCSRMatrixComm(A);
-   HYPRE_MemoryLocation    memory_location      = hypre_ParCSRMatrixMemoryLocation(A);
-   HYPRE_Int               my_id, num_procs;
-   hypre_ParCSRCommPkg     *comm_pkg;
-   hypre_ParCSRCommHandle  *comm_handle;
-   HYPRE_Int               num_sends, begin, end;
-   HYPRE_BigInt            *send_buf            = NULL;
-
-   hypre_ParCSRMatrix      *Apq                 = NULL;
-   hypre_ParCSRMatrix      *ALU                 = NULL;
-
-   hypre_ParCSRMatrix      *matS                = NULL;
-   hypre_CSRMatrix         *A_diag              = NULL;
-   HYPRE_Int               *A_fake_diag_i       = NULL;
-   hypre_CSRMatrix         *A_offd              = hypre_ParCSRMatrixOffd(A);
-   hypre_CSRMatrix         *h_A_offd            = NULL;
-   HYPRE_Int               *A_offd_i            = NULL;
-   HYPRE_Int               *A_offd_j            = NULL;
-   HYPRE_Real              *A_offd_data         = NULL;
-   hypre_CSRMatrix         *SLU                 = NULL;
-   /* pointers to cusparse data */
-   csrsv2Info_t            matBL_info           = NULL;
-   csrsv2Info_t            matBU_info           = NULL;
-   csrsv2Info_t            matSL_info           = NULL;
-   csrsv2Info_t            matSU_info           = NULL;
-
-   HYPRE_Int               buffer_size          = 0;
-   void                    *buffer              = NULL;
-
-   /* Permutation arrays */
-   HYPRE_Int               *rperm_data          = NULL;
-   HYPRE_Int               *rqperm_data         = NULL;
-   hypre_IntArray          *perm                = NULL;
-   hypre_IntArray          *rperm               = NULL;
-   hypre_IntArray          *qperm               = NULL;
-   hypre_IntArray          *rqperm              = NULL;
-   hypre_IntArray          *h_perm              = NULL;
-   hypre_IntArray          *h_rperm             = NULL;
-
-   /* variables for matS */
-   HYPRE_Int               m                    = n - nLU;
-   HYPRE_Int               nI                   = nLU;//use default
-   HYPRE_Int               e                    = 0;
-   HYPRE_Int               m_e                  = m;
-   HYPRE_BigInt            total_rows;
-   HYPRE_BigInt            col_starts[2];
-   HYPRE_Int               *S_diag_i            = NULL;
-   HYPRE_Int               S_diag_nnz;
-   hypre_CSRMatrix         *S_offd              = NULL;
-   HYPRE_Int               *S_offd_i            = NULL;
-   HYPRE_Int               *S_offd_j            = NULL;
-   HYPRE_Real              *S_offd_data         = NULL;
-   HYPRE_BigInt            *S_offd_colmap       = NULL;
-   HYPRE_Int               S_offd_nnz;
-   HYPRE_Int               S_offd_ncols;
-
-   hypre_ParCSRMatrix      *parL = NULL;
-   hypre_ParCSRMatrix      *parU = NULL;
-   hypre_ParCSRMatrix      *parS = NULL;
-   HYPRE_Real              *parD = NULL;
-   HYPRE_Int               *uend = NULL;
-
-   hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm_rank(comm, &my_id);
-
-   /* Build the inverse permutation arrays */
-   if (perm_data && qperm_data)
-   {
-      /* Create arrays */
-      perm   = hypre_IntArrayCreate(n);
-      qperm  = hypre_IntArrayCreate(n);
-
-      /* Set existing data */
-      hypre_IntArrayData(perm)  = perm_data;
-      hypre_IntArrayData(qperm) = qperm_data;
-
-      /* Initialize arrays */
-      hypre_IntArrayInitialize_v2(perm, memory_location);
-      hypre_IntArrayInitialize_v2(qperm, memory_location);
-
-      /* Compute inverse permutation arrays */
-      hypre_IntArrayInverseMapping(perm, &rperm);
-      hypre_IntArrayInverseMapping(qperm, &rqperm);
-
-      rqperm_data = hypre_IntArrayData(rqperm);
-   }
-
-   /* Only call ILU when we really have a matrix on this processor */
-   if (n > 0)
-   {
-      /* Copy diagonal matrix into a new place with permutation
-       * That is, A_diag = A_diag(perm,qperm);
-       */
-      hypre_ParILURAPReorder(A, perm_data, rqperm_data, &Apq);
-
-      /* Apply ILU factorization to the entile A_diag */
-      hypre_ILUSetupILUK(Apq, lfil, NULL, NULL, n, n, &parL, &parD, &parU, &parS, &uend);
-
-      /* Free memory */
-      hypre_TFree(uend, HYPRE_MEMORY_HOST);
-      hypre_ParCSRMatrixDestroy(parS);
-
-      /* | L \ U (B) L^{-1}F  |
-       * | EU^{-1}   L \ U (S)|
-       * Extract submatrix L_B U_B, L_S U_S, EU_B^{-1}, L_B^{-1}F
-       * Note that in this function after ILU, all rows are sorted
-       * in a way different than HYPRE. Diagonal is not listed in the front
-       */
-      hypre_ILUSetupLDUtoCusparse( parL, parD, parU, &ALU);
-
-      /* Free memory */
-      hypre_ParCSRMatrixDestroy(parL);
-      hypre_TFree(parD, HYPRE_MEMORY_DEVICE);
-      hypre_ParCSRMatrixDestroy(parU);
-
-      A_diag = hypre_ParCSRMatrixDiag(ALU);
-      hypre_ParILUCusparseILUExtractEBFC(A_diag, nLU, BLUptr, &SLU, Eptr, Fptr);
-
-      /* Free memory */
-      hypre_ParCSRMatrixDestroy(Apq);
-   }
-   else
-   {
-      *BLUptr = NULL;
-      *Eptr = NULL;
-      *Fptr = NULL;
-      SLU = NULL;
-   }
-
-   /* create B */
-   /* only analyse when nacessary */
-   if ( nLU > 0 )
-   {
-      if (tri_solve)
-      {
-         /* Analysis of BILU */
-         HYPRE_ILUSetupCusparseCSRILU0SetupSolve(*BLUptr, matL_des, matU_des,
-                                                 ilu_solve_policy, &matBL_info, &matBU_info,
-                                                 &buffer_size, &buffer);
-      }
-   }
-
-   HYPRE_BigInt big_m = (HYPRE_BigInt)m;
-   hypre_MPI_Allreduce(&big_m, &total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
-   /* only form when total_rows > 0 */
-   if ( total_rows > 0 )
-   {
-      /* now create S */
-      /* need to get new column start */
-      {
-         HYPRE_BigInt global_start;
-         hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
-         col_starts[0] = global_start - m;
-         col_starts[1] = global_start;
-      }
-
-      A_fake_diag_i = hypre_CTAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_DEVICE);
-      if (SLU)
-      {
-         if (tri_solve)
-         {
-            /* Analysis of SILU */
-            HYPRE_ILUSetupCusparseCSRILU0SetupSolve(SLU, matL_des, matU_des,
-                                                    ilu_solve_policy, &matSL_info, &matSU_info,
-                                                    &buffer_size, &buffer);
-         }
-      }
-      else
-      {
-         SLU = hypre_CSRMatrixCreate(0, 0, 0);
-         hypre_CSRMatrixInitialize(SLU);
-      }
-      S_diag_i = hypre_CSRMatrixI(SLU);
-      S_diag_nnz = S_diag_i[m];
-      /* Build ParCSRMatrix matS
-       * For example when np == 3 the new matrix takes the following form
-       * |IS_1 E_12 E_13|
-       * |E_21 IS_2 E_22| = S
-       * |E_31 E_32 IS_3|
-       * In which IS_i is the cusparse ILU factorization of S_i in one matrix
-       * */
-
-      /* We did nothing to A_offd, so all the data kept, just reorder them
-       * The create function takes comm, global num rows/cols,
-       *    row/col start, num cols offd, nnz diag, nnz offd
-       */
-      S_offd_nnz = hypre_CSRMatrixNumNonzeros(A_offd);
-      S_offd_ncols = hypre_CSRMatrixNumCols(A_offd);
-
-      matS = hypre_ParCSRMatrixCreate( comm,
-                                       total_rows,
-                                       total_rows,
-                                       col_starts,
-                                       col_starts,
-                                       S_offd_ncols,
-                                       S_diag_nnz,
-                                       S_offd_nnz);
-
-      /* first put diagonal data in */
-      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(matS));
-      hypre_ParCSRMatrixDiag(matS) = SLU;
-
-      /* now start to construct offdiag of S */
-      S_offd = hypre_ParCSRMatrixOffd(matS);
-      hypre_CSRMatrixInitialize_v2(S_offd, 0, HYPRE_MEMORY_HOST);
-      S_offd_i = hypre_CSRMatrixI(S_offd);
-      S_offd_j = hypre_CSRMatrixJ(S_offd);
-      S_offd_data = hypre_CSRMatrixData(S_offd);
-      S_offd_colmap = hypre_CTAlloc(HYPRE_BigInt, S_offd_ncols, HYPRE_MEMORY_HOST);
-
-      /* Set/Move A_offd to host */
-      h_A_offd = (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE) ?
-                 hypre_CSRMatrixClone_v2(A_offd, 1, HYPRE_MEMORY_HOST) : A_offd;
-      A_offd_i    = hypre_CSRMatrixI(h_A_offd);
-      A_offd_j    = hypre_CSRMatrixJ(h_A_offd);
-      A_offd_data = hypre_CSRMatrixData(h_A_offd);
-
-      /* Clone permutation arrays on the host */
-      if (rperm && perm)
-      {
-         h_perm  = hypre_IntArrayCloneDeep_v2(perm, HYPRE_MEMORY_HOST);
-         h_rperm = hypre_IntArrayCloneDeep_v2(rperm, HYPRE_MEMORY_HOST);
-
-         perm_data  = hypre_IntArrayData(h_perm);
-         rperm_data = hypre_IntArrayData(h_rperm);
-      }
-
-      /* simply use a loop to copy data from A_offd */
-      S_offd_i[0] = 0;
-      k3 = 0;
-      for (i = 1; i <= e; i++)
-      {
-         S_offd_i[i] = k3;
-      }
-      for (i = 0; i < m_e; i++)
-      {
-         col = (perm_data) ? perm_data[i + nI] : i + nI;
-         k1 = A_offd_i[col];
-         k2 = A_offd_i[col + 1];
-         for (j = k1; j < k2; j++)
-         {
-            S_offd_j[k3] = A_offd_j[j];
-            S_offd_data[k3++] = A_offd_data[j];
-         }
-         S_offd_i[i + 1 + e] = k3;
-      }
-
-      /* give I, J, DATA to S_offd */
-      hypre_CSRMatrixI(S_offd) = S_offd_i;
-      hypre_CSRMatrixJ(S_offd) = S_offd_j;
-      hypre_CSRMatrixData(S_offd) = S_offd_data;
-
-      /* now we need to update S_offd_colmap */
-      comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-
-      /* setup comm_pkg if not yet built */
-      if (!comm_pkg)
-      {
-         hypre_MatvecCommPkgCreate(A);
-         comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-      }
-
-      /* get total num of send */
-      num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
-      end = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
-      send_buf = hypre_TAlloc(HYPRE_BigInt, end - begin, HYPRE_MEMORY_HOST);
-
-      /* copy new index into send_buf */
-      for (i = begin; i < end; i++)
-      {
-         send_buf[i - begin] = (rperm_data) ?
-                               rperm_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i)] -
-                               nLU + col_starts[0] :
-                               hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i) -
-                               nLU + col_starts[0];
-      }
-
-      /* main communication */
-      comm_handle = hypre_ParCSRCommHandleCreate(21, comm_pkg, send_buf, S_offd_colmap);
-      hypre_ParCSRCommHandleDestroy(comm_handle);
-
-      /* setup index */
-      hypre_ParCSRMatrixColMapOffd(matS) = S_offd_colmap;
-
-      hypre_ILUSortOffdColmap(matS);
-
-      /* Move S_offd to final memory location */
-      hypre_CSRMatrixMigrate(S_offd, memory_location);
-
-      /* Free memory */
-      hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
-      if (h_A_offd != A_offd)
-      {
-         hypre_CSRMatrixDestroy(h_A_offd);
-      }
-   } /* end of forming S */
-   else
-   {
-      hypre_CSRMatrixDestroy(SLU);
-   }
-
-   *matSptr       = matS;
-   *bufferp       = buffer;
-   *matBL_infop   = matBL_info;
-   *matBU_infop   = matBU_info;
-   *matSL_infop   = matSL_info;
-   *matSU_infop   = matSU_info;
-   *A_fake_diag_ip = A_fake_diag_i;
-
-   /* Do not free perm_data/qperm_data */
-   if (perm)
-   {
-      hypre_IntArrayData(perm)  = NULL;
-   }
-   if (qperm)
-   {
-      hypre_IntArrayData(qperm) = NULL;
-   }
-
-   /* Free memory */
-   hypre_ParCSRMatrixDestroy(ALU);
-   hypre_IntArrayDestroy(perm);
-   hypre_IntArrayDestroy(qperm);
-   hypre_IntArrayDestroy(rperm);
-   hypre_IntArrayDestroy(rqperm);
-   hypre_IntArrayDestroy(h_perm);
-   hypre_IntArrayDestroy(h_rperm);
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_ILUSetupILUTDevice
- *
- * TODO (VPM): This function replicates code from hypre_ILUSetupILU0Device.
- *             This needs refactoring.
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ILUSetupILUTDevice(hypre_ParCSRMatrix     *A,
-                         HYPRE_Int               lfil,
-                         HYPRE_Real             *tol,
-                         HYPRE_Int              *perm_data,
-                         HYPRE_Int              *qperm_data,
-                         HYPRE_Int               n,
-                         HYPRE_Int               nLU,
-                         cusparseMatDescr_t      matL_des,
-                         cusparseMatDescr_t      matU_des,
-                         cusparseSolvePolicy_t   ilu_solve_policy,
-                         void                  **bufferp,
-                         csrsv2Info_t           *matBL_infop,
-                         csrsv2Info_t           *matBU_infop,
-                         csrsv2Info_t           *matSL_infop,
-                         csrsv2Info_t           *matSU_infop,
-                         hypre_CSRMatrix       **BLUptr,
-                         hypre_ParCSRMatrix    **matSptr,
-                         hypre_CSRMatrix       **Eptr,
-                         hypre_CSRMatrix       **Fptr,
-                         HYPRE_Int             **A_fake_diag_ip,
-                         HYPRE_Int               tri_solve)
-{
-   /* GPU-accelerated ILU0 with cusparse */
-   HYPRE_Int                i, j, k1, k2, k3, col;
-
-   /* communication stuffs for S */
-   MPI_Comm                 comm                = hypre_ParCSRMatrixComm(A);
-   HYPRE_MemoryLocation     memory_location     = hypre_ParCSRMatrixMemoryLocation(A);
-
-   hypre_ParCSRCommPkg     *comm_pkg;
-   hypre_ParCSRCommHandle  *comm_handle;
-   HYPRE_Int                num_sends, begin, end;
-   HYPRE_BigInt            *send_buf            = NULL;
-
-   /* Permutation arrays */
-   HYPRE_Int               *rperm_data          = NULL;
-   HYPRE_Int               *rqperm_data         = NULL;
-   hypre_IntArray          *perm                = NULL;
-   hypre_IntArray          *rperm               = NULL;
-   hypre_IntArray          *qperm               = NULL;
-   hypre_IntArray          *rqperm              = NULL;
-   hypre_IntArray          *h_perm              = NULL;
-   hypre_IntArray          *h_rperm             = NULL;
-
-   hypre_ParCSRMatrix      *Apq                 = NULL;
-   hypre_ParCSRMatrix      *ALU                 = NULL;
-
-   hypre_ParCSRMatrix      *matS                = NULL;
-   hypre_CSRMatrix         *A_diag              = NULL;
-   HYPRE_Int               *A_fake_diag_i       = NULL;
-   hypre_CSRMatrix         *h_A_offd            = NULL;
-   hypre_CSRMatrix         *A_offd              = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Int               *A_offd_i            = NULL;
-   HYPRE_Int               *A_offd_j            = NULL;
-   HYPRE_Real              *A_offd_data         = NULL;
-   hypre_CSRMatrix         *SLU                 = NULL;
-   /* pointers to cusparse data */
-   csrsv2Info_t            matBL_info           = NULL;
-   csrsv2Info_t            matBU_info           = NULL;
-   csrsv2Info_t            matSL_info           = NULL;
-   csrsv2Info_t            matSU_info           = NULL;
-
-   HYPRE_Int               buffer_size          = 0;
-   void                    *buffer              = NULL;
-
-   /* variables for matS */
-   HYPRE_Int               m                    = n - nLU;
-   HYPRE_Int               nI                   = nLU;//use default
-   HYPRE_Int               e                    = 0;
-   HYPRE_Int               m_e                  = m;
-   HYPRE_BigInt            total_rows;
-   HYPRE_BigInt            col_starts[2];
-   HYPRE_Int               *S_diag_i            = NULL;
-   HYPRE_Int               S_diag_nnz;
-   hypre_CSRMatrix         *S_offd              = NULL;
-   HYPRE_Int               *S_offd_i            = NULL;
-   HYPRE_Int               *S_offd_j            = NULL;
-   HYPRE_Real              *S_offd_data         = NULL;
-   HYPRE_BigInt            *S_offd_colmap       = NULL;
-   HYPRE_Int               S_offd_nnz;
-   HYPRE_Int               S_offd_ncols;
-
-   hypre_ParCSRMatrix      *parL = NULL;
-   hypre_ParCSRMatrix      *parU = NULL;
-   hypre_ParCSRMatrix      *parS = NULL;
-   HYPRE_Real              *parD = NULL;
-   HYPRE_Int               *uend = NULL;
-   HYPRE_Int                my_id, num_procs;
-
-   hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm_rank(comm, &my_id);
-
-   /* Build the inverse permutation arrays */
-   if (perm_data && qperm_data)
-   {
-      /* Create arrays */
-      perm   = hypre_IntArrayCreate(n);
-      qperm  = hypre_IntArrayCreate(n);
-
-      /* Set existing data */
-      hypre_IntArrayData(perm)  = perm_data;
-      hypre_IntArrayData(qperm) = qperm_data;
-
-      /* Initialize arrays */
-      hypre_IntArrayInitialize_v2(perm, memory_location);
-      hypre_IntArrayInitialize_v2(qperm, memory_location);
-
-      /* Compute inverse permutation arrays */
-      hypre_IntArrayInverseMapping(perm, &rperm);
-      hypre_IntArrayInverseMapping(qperm, &rqperm);
-
-      rqperm_data = hypre_IntArrayData(rqperm);
-   }
-
-   /* Only call ILU when we really have a matrix on this processor */
-   if (n > 0)
-   {
-      /* Copy diagonal matrix into a new place with permutation
-       * That is, A_diag = A_diag(perm,qperm);
-       */
-      hypre_ParILURAPReorder(A, perm_data, rqperm_data, &Apq);
-
-      /* Apply ILU factorization to the entire A_diag */
-      hypre_ILUSetupILUT(Apq, lfil, tol, NULL, NULL, n, n, &parL, &parD, &parU, &parS, &uend);
-
-      /* Free memory */
-      hypre_TFree(uend, HYPRE_MEMORY_HOST);
-      hypre_ParCSRMatrixDestroy(parS);
-
-      /* | L \ U (B) L^{-1}F  |
-       * | EU^{-1}   L \ U (S)|
-       * Extract submatrix L_B U_B, L_S U_S, EU_B^{-1}, L_B^{-1}F
-       * Note that in this function after ILU, all rows are sorted
-       * in a way different than HYPRE. Diagonal is not listed in the front
-       */
-      hypre_ILUSetupLDUtoCusparse(parL, parD, parU, &ALU);
-
-      /* Free memory */
-      hypre_ParCSRMatrixDestroy(parL);
-      hypre_TFree(parD, HYPRE_MEMORY_DEVICE);
-      hypre_ParCSRMatrixDestroy(parU);
-
-      A_diag = hypre_ParCSRMatrixDiag(ALU);
-      hypre_ParILUCusparseILUExtractEBFC(A_diag, nLU, BLUptr, &SLU, Eptr, Fptr);
-
-      /* Free memory */
-      hypre_ParCSRMatrixDestroy(Apq);
-   }
-   else
-   {
-      *BLUptr = NULL;
-      *Eptr = NULL;
-      *Fptr = NULL;
-      SLU = NULL;
-   }
-
-   /* create B */
-   /* only analyse when nacessary */
-   if (nLU > 0)
-   {
-      if (tri_solve)
-      {
-         /* Analysis of BILU */
-         HYPRE_ILUSetupCusparseCSRILU0SetupSolve(*BLUptr, matL_des, matU_des,
-                                                 ilu_solve_policy, &matBL_info, &matBU_info,
-                                                 &buffer_size, &buffer);
-      }
-   }
-
-   HYPRE_BigInt big_m = (HYPRE_BigInt)m;
-   hypre_MPI_Allreduce(&big_m, &total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
-   /* only form when total_rows > 0 */
-   if ( total_rows > 0 )
-   {
-      /* now create S */
-      /* need to get new column start */
-      {
-         HYPRE_BigInt global_start;
-         hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
-         col_starts[0] = global_start - m;
-         col_starts[1] = global_start;
-      }
-
-      A_fake_diag_i = hypre_CTAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_DEVICE);
-      if (SLU)
-      {
-         if (tri_solve)
-         {
-            /* Analysis of SILU */
-            HYPRE_ILUSetupCusparseCSRILU0SetupSolve(SLU, matL_des, matU_des,
-                                                    ilu_solve_policy, &matSL_info, &matSU_info,
-                                                    &buffer_size, &buffer);
-         }
-      }
-      else
-      {
-         SLU = hypre_CSRMatrixCreate(0, 0, 0);
-         hypre_CSRMatrixInitialize(SLU);
-      }
-      S_diag_i = hypre_CSRMatrixI(SLU);
-      S_diag_nnz = S_diag_i[m];
-      /* Build ParCSRMatrix matS
-       * For example when np == 3 the new matrix takes the following form
-       * |IS_1 E_12 E_13|
-       * |E_21 IS_2 E_22| = S
-       * |E_31 E_32 IS_3|
-       * In which IS_i is the cusparse ILU factorization of S_i in one matrix
-       * */
-
-      /* We did nothing to A_offd, so all the data kept, just reorder them
-       * The create function takes comm, global num rows/cols,
-       *    row/col start, num cols offd, nnz diag, nnz offd
-       */
-      S_offd_nnz = hypre_CSRMatrixNumNonzeros(A_offd);
-      S_offd_ncols = hypre_CSRMatrixNumCols(A_offd);
-
-      matS = hypre_ParCSRMatrixCreate( comm,
-                                       total_rows,
-                                       total_rows,
-                                       col_starts,
-                                       col_starts,
-                                       S_offd_ncols,
-                                       S_diag_nnz,
-                                       S_offd_nnz);
-
-      /* first put diagonal data in */
-      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(matS));
-      hypre_ParCSRMatrixDiag(matS) = SLU;
-
-      /* now start to construct offdiag of S */
-      S_offd = hypre_ParCSRMatrixOffd(matS);
-      hypre_CSRMatrixInitialize_v2(S_offd, 0, HYPRE_MEMORY_HOST);
-      S_offd_i = hypre_CSRMatrixI(S_offd);
-      S_offd_j = hypre_CSRMatrixJ(S_offd);
-      S_offd_data = hypre_CSRMatrixData(S_offd);
-      S_offd_colmap = hypre_CTAlloc(HYPRE_BigInt, S_offd_ncols, HYPRE_MEMORY_HOST);
-
-      /* Set/Move A_offd to host */
-      h_A_offd = (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE) ?
-                 hypre_CSRMatrixClone_v2(A_offd, 1, HYPRE_MEMORY_HOST) : A_offd;
-      A_offd_i    = hypre_CSRMatrixI(h_A_offd);
-      A_offd_j    = hypre_CSRMatrixJ(h_A_offd);
-      A_offd_data = hypre_CSRMatrixData(h_A_offd);
-
-      /* Clone permutation arrays on the host */
-      if (rperm && perm)
-      {
-         h_perm  = hypre_IntArrayCloneDeep_v2(perm, HYPRE_MEMORY_HOST);
-         h_rperm = hypre_IntArrayCloneDeep_v2(rperm, HYPRE_MEMORY_HOST);
-
-         perm_data  = hypre_IntArrayData(h_perm);
-         rperm_data = hypre_IntArrayData(h_rperm);
-      }
-
-      /* simply use a loop to copy data from A_offd */
-      S_offd_i[0] = 0;
-      k3 = 0;
-      for (i = 1; i <= e; i++)
-      {
-         S_offd_i[i] = k3;
-      }
-      for (i = 0; i < m_e; i++)
-      {
-         col = (perm_data) ? perm_data[i + nI] : i + nI;
-         k1 = A_offd_i[col];
-         k2 = A_offd_i[col + 1];
-         for (j = k1; j < k2; j++)
-         {
-            S_offd_j[k3] = A_offd_j[j];
-            S_offd_data[k3++] = A_offd_data[j];
-         }
-         S_offd_i[i + 1 + e] = k3;
-      }
-
-      /* give I, J, DATA to S_offd */
-      hypre_CSRMatrixI(S_offd) = S_offd_i;
-      hypre_CSRMatrixJ(S_offd) = S_offd_j;
-      hypre_CSRMatrixData(S_offd) = S_offd_data;
-
-      /* now we need to update S_offd_colmap */
-      comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-
-      /* setup comm_pkg if not yet built */
-      if (!comm_pkg)
-      {
-         hypre_MatvecCommPkgCreate(A);
-         comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-      }
-      /* get total num of send */
-      num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
-      end = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
-      send_buf = hypre_TAlloc(HYPRE_BigInt, end - begin, HYPRE_MEMORY_HOST);
-
-      /* copy new index into send_buf */
-      for (i = 0; i < (end - begin); i++)
-      {
-         send_buf[i] = (rperm_data) ?
-                       rperm_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i + begin)] -
-                       nLU + col_starts[0] :
-                       hypre_ParCSRCommPkgSendMapElmt(comm_pkg, i + begin) -
-                       nLU + col_starts[0];
-      }
-
-      /* main communication */
-      comm_handle = hypre_ParCSRCommHandleCreate(21, comm_pkg, send_buf, S_offd_colmap);
-      hypre_ParCSRCommHandleDestroy(comm_handle);
-
-      /* setup index */
-      hypre_ParCSRMatrixColMapOffd(matS) = S_offd_colmap;
-
-      hypre_ILUSortOffdColmap(matS);
-
-      /* Move S_offd to final memory location */
-      hypre_CSRMatrixMigrate(S_offd, memory_location);
-
-      /* free */
-      hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
-      if (h_A_offd != A_offd)
-      {
-         hypre_CSRMatrixDestroy(h_A_offd);
-      }
-   } /* end of forming S */
-   else
-   {
-      hypre_CSRMatrixDestroy(SLU);
-   }
-
-   *matSptr       = matS;
-   *bufferp       = buffer;
-   *matBL_infop   = matBL_info;
-   *matBU_infop   = matBU_info;
-   *matSL_infop   = matSL_info;
-   *matSU_infop   = matSU_info;
-   *A_fake_diag_ip = A_fake_diag_i;
-
-   /* Do not free perm_data/qperm_data */
-   if (perm)
-   {
-      hypre_IntArrayData(perm)  = NULL;
-   }
-   if (qperm)
-   {
-      hypre_IntArrayData(qperm) = NULL;
-   }
-
-   /* Free memory */
-   hypre_ParCSRMatrixDestroy(ALU);
-   hypre_IntArrayDestroy(perm);
-   hypre_IntArrayDestroy(qperm);
-   hypre_IntArrayDestroy(rperm);
-   hypre_IntArrayDestroy(rqperm);
-   hypre_IntArrayDestroy(h_perm);
-   hypre_IntArrayDestroy(h_rperm);
-
-   return hypre_error_flag;
-}
-
-/* Reorder matrix A based on local permutation (combine local permutation into global permutation)
  * WARNING: We don't put diagonal to the first entry of each row
+ *
  * A = input matrix
- * perm = permutation array indicating ordering of rows. Perm could come from a
- *    CF_marker array or a reordering routine.
+ * perm = permutation array indicating ordering of rows.
+ *        Perm could come from a CF_marker array or a reordering routine.
  * rqperm = reverse permutation array indicating ordering of columns
  * A_pq = pointer to the output par CSR matrix.
- */
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_ParILURAPReorder(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *rqperm,
+hypre_ParILURAPReorder(hypre_ParCSRMatrix  *A,
+                       HYPRE_Int           *perm,
+                       HYPRE_Int           *rqperm,
                        hypre_ParCSRMatrix **A_pq)
 {
    /* Get necessary slots */
@@ -3148,387 +1685,19 @@ hypre_ParILURAPReorder(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *rqperm
    return hypre_error_flag;
 }
 
-/* Convert the L, D, U style to the cusparse style
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetupLDUtoCusparse
+ *
+ * Convert the L, D, U style to the cusparse style
  * Assume the diagonal of L and U are the ilu factorization, directly combine them
- */
+ *
+ * TODO (VPM): Check this function's name
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_ParILURAPBuildRP(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BLUm, hypre_ParCSRMatrix* E,
-                       hypre_ParCSRMatrix *F,
-                       cusparseMatDescr_t matL_des, cusparseMatDescr_t matU_des, hypre_ParCSRMatrix **Rp,
-                       hypre_ParCSRMatrix **Pp)
-{
-   /* declare variables */
-   HYPRE_Int            j, row, col;
-   HYPRE_Real           val;
-   hypre_ParCSRMatrix   *R, *P;
-   hypre_CSRMatrix      *R_diag, *P_diag;
-
-   hypre_CSRMatrix      *BLUm_diag           = hypre_ParCSRMatrixDiag(BLUm);
-   HYPRE_Int            *BLUm_diag_i         = hypre_CSRMatrixI(BLUm_diag);
-   HYPRE_Int            *BLUm_diag_j         = hypre_CSRMatrixJ(BLUm_diag);
-   HYPRE_Real           *BLUm_diag_data      = hypre_CSRMatrixData(BLUm_diag);
-
-   hypre_CSRMatrix      *E_diag              = hypre_ParCSRMatrixDiag(E);
-   HYPRE_Int            *E_diag_i            = hypre_CSRMatrixI(E_diag);
-   HYPRE_Int            *E_diag_j            = hypre_CSRMatrixJ(E_diag);
-   HYPRE_Real           *E_diag_data         = hypre_CSRMatrixData(E_diag);
-   hypre_CSRMatrix      *F_diag              = hypre_ParCSRMatrixDiag(F);
-   HYPRE_Int            *F_diag_i            = hypre_CSRMatrixI(F_diag);
-   HYPRE_Int            *F_diag_j            = hypre_CSRMatrixJ(F_diag);
-   HYPRE_Real           *F_diag_data         = hypre_CSRMatrixData(F_diag);
-
-   HYPRE_Int            n                    = hypre_CSRMatrixNumRows(F_diag);
-   HYPRE_Int            m                    = hypre_CSRMatrixNumCols(F_diag);
-
-   HYPRE_Int            nnz_BLUm             = BLUm_diag_i[n];
-
-   /* MPI */
-   MPI_Comm             comm                 = hypre_ParCSRMatrixComm(A);
-   HYPRE_Int            num_procs,  my_id;
-
-   hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm_rank(comm, &my_id);
-
-   /* cusparse */
-   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
-
-   /* compute P = -UB\(LB\F)
-    * op(A) * op(X) = \alpha op(B)
-    * first iLF = LB\F -> LB*iLF = F
-    */
-
-   HYPRE_Int               algo = 0;
-   HYPRE_Real              alpha = 1.0;
-   HYPRE_Real              *rhs;
-   cusparseSolvePolicy_t   policy = CUSPARSE_SOLVE_POLICY_NO_LEVEL;
-   size_t                  buffer_size, buffer_size_old;
-   void                    *buffer;
-   csrsm2Info_t            malL_info = NULL;
-   HYPRE_CUSPARSE_CALL(cusparseCreateCsrsm2Info(&malL_info));
-
-   rhs = hypre_CTAlloc(HYPRE_Real, m * n, HYPRE_MEMORY_DEVICE);
-
-   /* fill data, note that rhs is in Fortan style (col first)
-    * oprating by col is slow, but
-    */
-   for (row = 0; row < n; row++)
-   {
-      for (j = F_diag_i[row]; j < F_diag_i[row + 1]; j++)
-      {
-         col = F_diag_j[j];
-         *(rhs + col * n + row) = F_diag_data[j];
-      }
-   }
-
-   /* check buffer size and create buffer */
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_bufferSizeExt(handle, algo,
-                                                           CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                           CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                           n, m, nnz_BLUm, &alpha, matL_des, BLUm_diag_data, BLUm_diag_i,
-                                                           BLUm_diag_j, rhs, n, malL_info, policy, &buffer_size));
-
-   buffer = hypre_TAlloc(char, buffer_size, HYPRE_MEMORY_DEVICE);
-
-   /* analysis */
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_analysis(handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                      CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                      n, m, nnz_BLUm, &alpha, matL_des, BLUm_diag_data, BLUm_diag_i,
-                                                      BLUm_diag_j, rhs, n, malL_info, policy, buffer));
-
-   /* solve phase */
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_solve(handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                   CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                   n, m, nnz_BLUm, &alpha, matL_des, BLUm_diag_data, BLUm_diag_i,
-                                                   BLUm_diag_j, rhs, n, malL_info, policy, buffer));
-
-   /* now P = -UB\(LB\F) -> UB*P = -(LB\F)
-    */
-   alpha = -1.0;
-   csrsm2Info_t            malU_info = NULL;
-   HYPRE_CUSPARSE_CALL(cusparseCreateCsrsm2Info(&malU_info));
-
-   buffer_size_old = buffer_size;
-
-   /* check buffer size and create buffer */
-
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_bufferSizeExt(handle, algo,
-                                                           CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                           CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                           n, m, nnz_BLUm, &alpha, matU_des, BLUm_diag_data, BLUm_diag_i,
-                                                           BLUm_diag_j, rhs, n, malU_info, policy, &buffer_size));
-
-   if (buffer_size > buffer_size_old)
-   {
-      buffer = hypre_TReAlloc_v2(buffer, char, buffer_size_old, char, buffer_size, HYPRE_MEMORY_DEVICE);
-      buffer_size_old = buffer_size;
-   }
-
-   /* analysis */
-
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_analysis(handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                      CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                      n, m, nnz_BLUm, &alpha, matU_des, BLUm_diag_data, BLUm_diag_i,
-                                                      BLUm_diag_j, rhs, n, malU_info, policy, buffer));
-
-   /* solve phase */
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_solve(handle, algo, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                   CUSPARSE_OPERATION_NON_TRANSPOSE,
-                                                   n, m, nnz_BLUm, &alpha, matU_des, BLUm_diag_data, BLUm_diag_i,
-                                                   BLUm_diag_j, rhs, n, malU_info, policy, buffer));
-
-   /* wait till GPU done to copy data */
-   cudaDeviceSynchronize();
-   /* now form P, (n + m) * m */
-   HYPRE_Real           drop_tol = 1e-06;
-   HYPRE_Int            ctrP = 0;
-   HYPRE_Int            *P_diag_i;
-   HYPRE_Int            *P_offd_i;
-   HYPRE_Int            *P_diag_j;
-   HYPRE_Real           *P_diag_data;
-
-   HYPRE_Int             capacity_P = nnz_BLUm + m;
-
-   P_diag_i       = hypre_TAlloc(HYPRE_Int, n + m + 1, HYPRE_MEMORY_DEVICE);
-   P_offd_i       = hypre_CTAlloc(HYPRE_Int, n + m + 1, HYPRE_MEMORY_DEVICE);
-   P_diag_j       = hypre_TAlloc(HYPRE_Int, capacity_P, HYPRE_MEMORY_DEVICE);
-   P_diag_data    = hypre_TAlloc(HYPRE_Real, capacity_P, HYPRE_MEMORY_DEVICE);
-
-   for (row = 0; row < n; row++)
-   {
-      P_diag_i[row] = ctrP;
-      for (col = 0; col < m; col++)
-      {
-         val = *(rhs + col * n + row);
-         if (hypre_abs(val) > drop_tol)
-         {
-            if (ctrP >= capacity_P)
-            {
-               HYPRE_Int tmp;
-               tmp = capacity_P;
-               capacity_P = capacity_P * EXPAND_FACT;
-               P_diag_j       = hypre_TReAlloc_v2(P_diag_j, HYPRE_Int, tmp, HYPRE_Int, capacity_P,
-                                                  HYPRE_MEMORY_DEVICE);
-               P_diag_data    = hypre_TReAlloc_v2(P_diag_data, HYPRE_Real, tmp, HYPRE_Real, capacity_P,
-                                                  HYPRE_MEMORY_DEVICE);
-            }
-            P_diag_j[ctrP] = col;
-            P_diag_data[ctrP++] = val;
-         }
-      }
-   }
-
-   if (ctrP + m >= capacity_P)
-   {
-      HYPRE_Int tmp;
-      tmp = capacity_P;
-      capacity_P = ctrP + m;
-      P_diag_j       = hypre_TReAlloc_v2(P_diag_j, HYPRE_Int, tmp, HYPRE_Int, capacity_P,
-                                         HYPRE_MEMORY_DEVICE);
-      P_diag_data    = hypre_TReAlloc_v2(P_diag_data, HYPRE_Real, tmp, HYPRE_Real, capacity_P,
-                                         HYPRE_MEMORY_DEVICE);
-   }
-
-   for (row = 0; row < m; row++)
-   {
-      P_diag_i[row + n] = ctrP;
-      P_diag_j[ctrP] = row;
-      P_diag_data[ctrP++] = 1.0;
-   }
-
-   P_diag_i[m + n] = ctrP;
-
-   /* now start to form R = - (E / UB ) / LB
-    * first EiUB = E / UB -> UB'*EiUB'=E'
-    */
-   alpha = 1.0;
-   csrsm2Info_t            malU_info2 = NULL;
-   HYPRE_CUSPARSE_CALL(cusparseCreateCsrsm2Info(&malU_info2));
-
-   /* fill data, note that rhs is in Fortan style (col first)
-    * oprating by col is slow, but
-    */
-
-   hypre_TFree(rhs, HYPRE_MEMORY_DEVICE);
-   rhs = hypre_CTAlloc(HYPRE_Real, m * n, HYPRE_MEMORY_DEVICE);
-
-   for (row = 0; row < m; row++)
-   {
-      for (j = E_diag_i[row]; j < E_diag_i[row + 1]; j++)
-      {
-         col = E_diag_j[j];
-         *(rhs + col * m + row) = E_diag_data[j];
-      }
-   }
-
-   /* check buffer size and create buffer */
-
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_bufferSizeExt(handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
-                                                           CUSPARSE_OPERATION_TRANSPOSE,
-                                                           n, m, nnz_BLUm, &alpha, matU_des, BLUm_diag_data, BLUm_diag_i,
-                                                           BLUm_diag_j, rhs, m, malU_info2, policy, &buffer_size));
-
-   if (buffer_size > buffer_size_old)
-   {
-      buffer = hypre_TReAlloc_v2(buffer, char, buffer_size_old, char, buffer_size, HYPRE_MEMORY_DEVICE);
-      buffer_size_old = buffer_size;
-   }
-
-   /* analysis */
-
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_analysis(handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
-                                                      CUSPARSE_OPERATION_TRANSPOSE,
-                                                      n, m, nnz_BLUm, &alpha, matU_des, BLUm_diag_data, BLUm_diag_i,
-                                                      BLUm_diag_j, rhs, m, malU_info2, policy, buffer));
-
-   /* solve phase */
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_solve(handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
-                                                   CUSPARSE_OPERATION_TRANSPOSE,
-                                                   n, m, nnz_BLUm, &alpha, matU_des, BLUm_diag_data, BLUm_diag_i,
-                                                   BLUm_diag_j, rhs, m, malU_info2, policy, buffer));
-
-   /* R = - (EiUB ) / LB -> LB'R' = -EiUB'
-    */
-   alpha = -1.0;
-   csrsm2Info_t            malL_info2 = NULL;
-   HYPRE_CUSPARSE_CALL(cusparseCreateCsrsm2Info(&malL_info2));
-
-   /* check buffer size and create buffer */
-
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_bufferSizeExt(handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
-                                                           CUSPARSE_OPERATION_TRANSPOSE,
-                                                           n, m, nnz_BLUm, &alpha, matL_des, BLUm_diag_data, BLUm_diag_i,
-                                                           BLUm_diag_j, rhs, m, malL_info2, policy, &buffer_size));
-
-   if (buffer_size > buffer_size_old)
-   {
-      buffer = hypre_TReAlloc_v2(buffer, char, buffer_size_old, char, buffer_size, HYPRE_MEMORY_DEVICE);
-      buffer_size_old = buffer_size;
-   }
-
-   /* analysis */
-
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_analysis(handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
-                                                      CUSPARSE_OPERATION_TRANSPOSE,
-                                                      n, m, nnz_BLUm, &alpha, matL_des, BLUm_diag_data, BLUm_diag_i,
-                                                      BLUm_diag_j, rhs, m, malL_info2, policy, buffer));
-
-   /* solve phase */
-   HYPRE_CUSPARSE_CALL(hypre_cusparse_csrsm2_solve(handle, algo, CUSPARSE_OPERATION_TRANSPOSE,
-                                                   CUSPARSE_OPERATION_TRANSPOSE,
-                                                   n, m, nnz_BLUm, &alpha, matL_des, BLUm_diag_data, BLUm_diag_i,
-                                                   BLUm_diag_j, rhs, m, malL_info2, policy, buffer));
-
-   cudaDeviceSynchronize();
-   /* now form R, m * (n + m) */
-   HYPRE_Int            ctrR = 0;
-   HYPRE_Int            *R_diag_i;
-   HYPRE_Int            *R_offd_i;
-   HYPRE_Int            *R_diag_j;
-   HYPRE_Real           *R_diag_data;
-
-   HYPRE_Int       capacity_R = nnz_BLUm + m;
-   R_diag_i       = hypre_TAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_DEVICE);
-   R_offd_i       = hypre_CTAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_DEVICE);
-   R_diag_j       = hypre_TAlloc(HYPRE_Int, capacity_R, HYPRE_MEMORY_DEVICE);
-   R_diag_data    = hypre_TAlloc(HYPRE_Real, capacity_R, HYPRE_MEMORY_DEVICE);
-
-   for (row = 0; row < m; row++)
-   {
-      R_diag_i[row] = ctrR;
-      for (col = 0; col < n; col++)
-      {
-         val = *(rhs + col * m + row);
-         if (hypre_abs(val) > drop_tol)
-         {
-            if (ctrR >= capacity_R)
-            {
-               HYPRE_Int tmp;
-               tmp = capacity_R;
-               capacity_R = capacity_R * EXPAND_FACT;
-               R_diag_j       = hypre_TReAlloc_v2(R_diag_j, HYPRE_Int, tmp, HYPRE_Int, capacity_R,
-                                                  HYPRE_MEMORY_DEVICE);
-               R_diag_data    = hypre_TReAlloc_v2(R_diag_data, HYPRE_Real, tmp, HYPRE_Real, capacity_R,
-                                                  HYPRE_MEMORY_DEVICE);
-            }
-            R_diag_j[ctrR] = col;
-            R_diag_data[ctrR++] = val;
-         }
-      }
-      if (ctrR >= capacity_R)
-      {
-         HYPRE_Int tmp;
-         tmp = capacity_R;
-         capacity_R = capacity_R * EXPAND_FACT;
-         R_diag_j       = hypre_TReAlloc_v2(R_diag_j, HYPRE_Int, tmp, HYPRE_Int, capacity_R,
-                                            HYPRE_MEMORY_DEVICE);
-         R_diag_data    = hypre_TReAlloc_v2(R_diag_data, HYPRE_Real, tmp, HYPRE_Real, capacity_R,
-                                            HYPRE_MEMORY_DEVICE);
-      }
-      R_diag_j[ctrR] = n + row;
-      R_diag_data[ctrR++] = 1.0;
-   }
-
-   R_diag_i[m] = ctrR;
-
-   hypre_TFree(buffer, HYPRE_MEMORY_DEVICE);
-
-   /* create ParCSR matrices */
-
-   R = hypre_ParCSRMatrixCreate( hypre_ParCSRMatrixComm(A),
-                                 hypre_ParCSRMatrixGlobalNumRows(E),
-                                 hypre_ParCSRMatrixGlobalNumCols(A),
-                                 hypre_ParCSRMatrixRowStarts(E),
-                                 hypre_ParCSRMatrixColStarts(A),
-                                 0,
-                                 ctrR,
-                                 0);
-
-   P = hypre_ParCSRMatrixCreate( hypre_ParCSRMatrixComm(A),
-                                 hypre_ParCSRMatrixGlobalNumRows(A),
-                                 hypre_ParCSRMatrixGlobalNumCols(F),
-                                 hypre_ParCSRMatrixRowStarts(A),
-                                 hypre_ParCSRMatrixColStarts(F),
-                                 0,
-                                 ctrP,
-                                 0);
-
-   /* Assign value to diagonal data */
-
-   R_diag = hypre_ParCSRMatrixDiag(R);
-   hypre_CSRMatrixI(R_diag) = R_diag_i;
-   hypre_CSRMatrixJ(R_diag) = R_diag_j;
-   hypre_CSRMatrixData(R_diag) = R_diag_data;
-   hypre_CSRMatrixSetDataOwner(R_diag, 1);
-
-   P_diag = hypre_ParCSRMatrixDiag(P);
-   hypre_CSRMatrixI(P_diag) = P_diag_i;
-   hypre_CSRMatrixJ(P_diag) = P_diag_j;
-   hypre_CSRMatrixData(P_diag) = P_diag_data;
-   hypre_CSRMatrixSetDataOwner(P_diag, 1);
-
-   /* Assign value to off diagonal data */
-
-   R_diag = hypre_ParCSRMatrixOffd(R);
-   hypre_CSRMatrixI(R_diag) = R_offd_i;
-   P_diag = hypre_ParCSRMatrixOffd(P);
-   hypre_CSRMatrixI(P_diag) = P_offd_i;
-
-   *Rp = R;
-   *Pp = P;
-
-   HYPRE_CUSPARSE_CALL(cusparseDestroyCsrsm2Info(malL_info));
-   HYPRE_CUSPARSE_CALL(cusparseDestroyCsrsm2Info(malU_info));
-   HYPRE_CUSPARSE_CALL(cusparseDestroyCsrsm2Info(malL_info2));
-   HYPRE_CUSPARSE_CALL(cusparseDestroyCsrsm2Info(malU_info2));
-
-   return hypre_error_flag;
-}
-
-/* Convert the L, D, U style to the cusparse style
- * Assume the diagonal of L and U are the ilu factorization, directly combine them
- */
-HYPRE_Int
-hypre_ILUSetupLDUtoCusparse(hypre_ParCSRMatrix *L, HYPRE_Real *D, hypre_ParCSRMatrix *U,
+hypre_ILUSetupLDUtoCusparse(hypre_ParCSRMatrix  *L,
+                            HYPRE_Real          *D,
+                            hypre_ParCSRMatrix  *U,
                             hypre_ParCSRMatrix **LDUp)
 {
    /* data slots */
@@ -3565,14 +1734,14 @@ hypre_ILUSetupLDUtoCusparse(hypre_ParCSRMatrix *L, HYPRE_Real *D, hypre_ParCSRMa
 
    /* create matrix */
 
-   LDU = hypre_ParCSRMatrixCreate(  comm,
-                                    hypre_ParCSRMatrixGlobalNumRows(L),
-                                    hypre_ParCSRMatrixGlobalNumRows(L),
-                                    hypre_ParCSRMatrixRowStarts(L),
-                                    hypre_ParCSRMatrixColStarts(L),
-                                    0,
-                                    nnz_LDU,
-                                    0);
+   LDU = hypre_ParCSRMatrixCreate(comm,
+                                  hypre_ParCSRMatrixGlobalNumRows(L),
+                                  hypre_ParCSRMatrixGlobalNumRows(L),
+                                  hypre_ParCSRMatrixRowStarts(L),
+                                  hypre_ParCSRMatrixColStarts(L),
+                                  0,
+                                  nnz_LDU,
+                                  0);
 
    LDU_diag = hypre_ParCSRMatrixDiag(LDU);
    LDU_diag_i = hypre_TAlloc(HYPRE_Int, n + 1, HYPRE_MEMORY_DEVICE);
@@ -3612,88 +1781,81 @@ hypre_ILUSetupLDUtoCusparse(hypre_ParCSRMatrix *L, HYPRE_Real *D, hypre_ParCSRMa
    return hypre_error_flag;
 }
 
-/* Apply the (modified) ILU factorization to the diagonal block of A only.
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetupRAPMILU0
+ *
+ * Apply the (modified) ILU factorization to the diagonal block of A only.
+ *
  * A: matrix
  * ALUp: pointer to the result, factorization stroed on the diagonal
  * modified: set to 0 to use classical ILU0
- */
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_ILUSetupRAPMILU0(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **ALUp, HYPRE_Int modified)
+hypre_ILUSetupRAPMILU0(hypre_ParCSRMatrix  *A,
+                       hypre_ParCSRMatrix **ALUp,
+                       HYPRE_Int            modified)
 {
-   HYPRE_Int            n              = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Int             n = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+
    /* Get necessary slots */
    hypre_ParCSRMatrix   *L, *U, *S, *ALU;
    HYPRE_Real           *D;
    HYPRE_Int            *u_end;
 
-   /* u_end is the end position of the upper triangular part (if we need E and F implicitly), not used here */
-   hypre_ILUSetupMILU0( A, NULL, NULL, n, n, &L, &D, &U, &S, &u_end, modified);
+   /* u_end is the end position of the upper triangular part
+     (if we need E and F implicitly), not used here */
+   hypre_ILUSetupMILU0(A, NULL, NULL, n, n, &L, &D, &U, &S, &u_end, modified);
    hypre_TFree(u_end, HYPRE_MEMORY_HOST);
 
+   /* TODO (VPM): Change this function's name */
    hypre_ILUSetupLDUtoCusparse(L, D, U, &ALU);
 
-   if (L)
-   {
-      hypre_ParCSRMatrixDestroy(L);
-   }
-   if (D)
-   {
-      hypre_TFree(D, HYPRE_MEMORY_DEVICE);
-   }
-   if (U)
-   {
-      hypre_ParCSRMatrixDestroy(U);
-   }
+   /* Free memory */
+   hypre_ParCSRMatrixDestroy(L);
+   hypre_TFree(D, HYPRE_MEMORY_DEVICE);
+   hypre_ParCSRMatrixDestroy(U);
 
    *ALUp = ALU;
 
    return hypre_error_flag;
 }
 
-/* Modified ILU(0) with RAP like solve
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetupRAPILU0Device
+ *
+ * Modified ILU(0) with RAP like solve
  * A = input matrix
- * Not explicitly forming the matrix, the previous version was abondoned
- */
+ *
+ * TODO (VPM): Move this function to par_setup_device.c?
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n, HYPRE_Int nLU,
-                            cusparseMatDescr_t matL_des, cusparseMatDescr_t matU_des, cusparseSolvePolicy_t ilu_solve_policy,
-                            void **bufferp, csrsv2Info_t *matAL_infop, csrsv2Info_t *matAU_infop,
-                            csrsv2Info_t *matBL_infop, csrsv2Info_t *matBU_infop,
-                            csrsv2Info_t *matSL_infop, csrsv2Info_t *matSU_infop,
-                            hypre_ParCSRMatrix **Apermptr, hypre_ParCSRMatrix **matSptr, hypre_CSRMatrix **ALUptr,
-                            hypre_CSRMatrix **BLUptr, hypre_CSRMatrix **CLUptr,
-                            hypre_CSRMatrix **Eptr, hypre_CSRMatrix **Fptr, HYPRE_Int test_opt)
+hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix  *A,
+                            HYPRE_Int           *perm,
+                            HYPRE_Int            n,
+                            HYPRE_Int            nLU,
+                            hypre_ParCSRMatrix **Apermptr,
+                            hypre_ParCSRMatrix **matSptr,
+                            hypre_CSRMatrix    **ALUptr,
+                            hypre_CSRMatrix    **BLUptr,
+                            hypre_CSRMatrix    **CLUptr,
+                            hypre_CSRMatrix    **Eptr,
+                            hypre_CSRMatrix    **Fptr,
+                            HYPRE_Int            test_opt)
 {
-
-   /* params */
-   MPI_Comm             comm           = hypre_ParCSRMatrixComm(A);
-   HYPRE_Int            *rperm         = NULL;
-
-   csrsv2Info_t         matAL_info     = NULL;
-   csrsv2Info_t         matAU_info     = NULL;
-   csrsv2Info_t         matBL_info     = NULL;
-   csrsv2Info_t         matBU_info     = NULL;
-   csrsv2Info_t         matSL_info     = NULL;
-   csrsv2Info_t         matSU_info     = NULL;
-
-   HYPRE_Int            buffer_size    = 0;
-   void                 *buffer        = NULL;
-
-   //hypre_CSRMatrix      *A_diag        = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Int            m              = n - nLU;
-
-   //printf("Size of local Schur: %d\n",m);
-
+   MPI_Comm             comm          = hypre_ParCSRMatrixComm(A);
+   HYPRE_Int           *rperm         = NULL;
+   HYPRE_Int            m             = n - nLU;
    HYPRE_Int            i;
-
-   /* MPI */
    HYPRE_Int            num_procs,  my_id;
-   hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm_rank(comm, &my_id);
 
    /* Matrix Structure */
    hypre_ParCSRMatrix   *Apq, *ALU, *ALUm, *S;
    hypre_CSRMatrix      *Amd, *Ad, *SLU, *Apq_diag;
+
+   hypre_MPI_Comm_size(comm, &num_procs);
+   hypre_MPI_Comm_rank(comm, &my_id);
 
    rperm = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
 
@@ -3717,7 +1879,7 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n,
 
    /* get modified and extract LU factorization */
    Amd = hypre_ParCSRMatrixDiag(ALUm);
-   Ad = hypre_ParCSRMatrixDiag(ALU);
+   Ad  = hypre_ParCSRMatrixDiag(ALU);
    switch (test_opt)
    {
       case 1:
@@ -3725,53 +1887,66 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n,
          /* RAP where we save E and F */
          Apq_diag = hypre_ParCSRMatrixDiag(Apq);
          hypre_CSRMatrixSortRow(Apq_diag);
-         hypre_ParILUCusparseILUExtractEBFC(Apq_diag, nLU, &dB, &dS, Eptr, Fptr);
+         hypre_ParILUExtractEBFC(Apq_diag, nLU, &dB, &dS, Eptr, Fptr);
+
          /* get modified ILU of B */
-         hypre_ParILUCusparseILUExtractEBFC(Amd, nLU, BLUptr, &SLU, &dE, &dF);
+         hypre_ParILUExtractEBFC(Amd, nLU, BLUptr, &SLU, &dE, &dF);
          hypre_CSRMatrixDestroy(dB);
          hypre_CSRMatrixDestroy(dS);
          hypre_CSRMatrixDestroy(dE);
          hypre_CSRMatrixDestroy(dF);
+
+         break;
       }
-      break;
+
       case 2:
       {
          /* C-EB^{-1}F where we save EU^{-1}, L^{-1}F as sparse matrices */
          Apq_diag = hypre_ParCSRMatrixDiag(Apq);
          hypre_CSRMatrixSortRow(Apq_diag);
-         hypre_ParILUCusparseILUExtractEBFC(Apq_diag, nLU, &dB, CLUptr, &dE, &dF);
+         hypre_ParILUExtractEBFC(Apq_diag, nLU, &dB, CLUptr, &dE, &dF);
+
          /* get modified ILU of B */
-         hypre_ParILUCusparseILUExtractEBFC(Amd, nLU, BLUptr, &SLU, Eptr, Fptr);
+         hypre_ParILUExtractEBFC(Amd, nLU, BLUptr, &SLU, Eptr, Fptr);
          hypre_CSRMatrixDestroy(dB);
          hypre_CSRMatrixDestroy(dE);
          hypre_CSRMatrixDestroy(dF);
+
+         break;
       }
-      break;
+
       case 3:
       {
          /* C-EB^{-1}F where we save E and F */
          Apq_diag = hypre_ParCSRMatrixDiag(Apq);
          hypre_CSRMatrixSortRow(Apq_diag);
-         hypre_ParILUCusparseILUExtractEBFC(Apq_diag, nLU, &dB, CLUptr, Eptr, Fptr);
+         hypre_ParILUExtractEBFC(Apq_diag, nLU, &dB, CLUptr, Eptr, Fptr);
+
          /* get modified ILU of B */
-         hypre_ParILUCusparseILUExtractEBFC(Amd, nLU, BLUptr, &SLU, &dE, &dF);
+         hypre_ParILUExtractEBFC(Amd, nLU, BLUptr, &SLU, &dE, &dF);
          hypre_CSRMatrixDestroy(dB);
          hypre_CSRMatrixDestroy(dE);
          hypre_CSRMatrixDestroy(dF);
+
+         break;
       }
-      break;
+
       case 4:
       {
          /* RAP where we save EU^{-1}, L^{-1}F as sparse matrices */
-         hypre_ParILUCusparseILUExtractEBFC(Ad, nLU, BLUptr, &SLU, Eptr, Fptr);
+         hypre_ParILUExtractEBFC(Ad, nLU, BLUptr, &SLU, Eptr, Fptr);
+
+         break;
       }
-      break;
-   case 0: default:
+
+      case 0:
+      default:
       {
          /* RAP where we save EU^{-1}, L^{-1}F as sparse matrices */
-         hypre_ParILUCusparseILUExtractEBFC(Amd, nLU, BLUptr, &SLU, Eptr, Fptr);
+         hypre_ParILUExtractEBFC(Amd, nLU, BLUptr, &SLU, Eptr, Fptr);
+
+         break;
       }
-      break;
    }
 
    *ALUptr = hypre_ParCSRMatrixDiag(ALU);
@@ -3779,21 +1954,6 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n,
    hypre_ParCSRMatrixDiag(ALU) = NULL; /* not a good practice to manipulate parcsr's csr */
    hypre_ParCSRMatrixDestroy(ALU);
    hypre_ParCSRMatrixDestroy(ALUm);
-
-   /* Analysis of BILU */
-   HYPRE_ILUSetupCusparseCSRILU0SetupSolve(*ALUptr, matL_des, matU_des,
-                                           ilu_solve_policy, &matAL_info, &matAU_info,
-                                           &buffer_size, &buffer);
-
-   /* Analysis of BILU */
-   HYPRE_ILUSetupCusparseCSRILU0SetupSolve(*BLUptr, matL_des, matU_des,
-                                           ilu_solve_policy, &matBL_info, &matBU_info,
-                                           &buffer_size, &buffer);
-
-   /* Analysis of SILU */
-   HYPRE_ILUSetupCusparseCSRILU0SetupSolve(SLU, matL_des, matU_des,
-                                           ilu_solve_policy, &matSL_info, &matSU_info,
-                                           &buffer_size, &buffer);
 
    /* start forming parCSR matrix S */
 
@@ -3822,72 +1982,85 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n,
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(S));
       hypre_ParCSRMatrixDiag(S) = SLU;
    }
+   else
+   {
+      S = NULL;
+      hypre_CSRMatrixDestroy(SLU);
+   }
 
-   *matSptr       = S;
-   *Apermptr      = Apq;
-   *bufferp       = buffer;
-   *matAL_infop   = matAL_info;
-   *matAU_infop   = matAU_info;
-   *matBL_infop   = matBL_info;
-   *matBU_infop   = matBU_info;
-   *matSL_infop   = matSL_info;
-   *matSU_infop   = matSU_info;
+   *matSptr  = S;
+   *Apermptr = Apq;
 
    hypre_TFree(rperm, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
 
-#endif
-
-/* Modified ILU(0) with RAP like solve
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetupRAPILU0
+ *
+ * Modified ILU(0) with RAP like solve
+ *
  * A = input matrix
  * Not explicitly forming the matrix
- */
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_ILUSetupRAPILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n, HYPRE_Int nLU,
-                      hypre_ParCSRMatrix **Lptr, HYPRE_Real **Dptr, hypre_ParCSRMatrix **Uptr,
-                      hypre_ParCSRMatrix **mLptr, HYPRE_Real **mDptr, hypre_ParCSRMatrix **mUptr, HYPRE_Int **u_end)
+hypre_ILUSetupRAPILU0(hypre_ParCSRMatrix  *A,
+                      HYPRE_Int           *perm,
+                      HYPRE_Int            n,
+                      HYPRE_Int            nLU,
+                      hypre_ParCSRMatrix **Lptr,
+                      HYPRE_Real         **Dptr,
+                      hypre_ParCSRMatrix **Uptr,
+                      hypre_ParCSRMatrix **mLptr,
+                      HYPRE_Real         **mDptr,
+                      hypre_ParCSRMatrix **mUptr,
+                      HYPRE_Int          **u_end)
 {
-   HYPRE_Int            i;
    hypre_ParCSRMatrix   *S_temp = NULL;
    HYPRE_Int            *u_temp = NULL;
 
-   /* standard ILU0 factorization */
+   HYPRE_Int            *u_end_array;
+
+   hypre_CSRMatrix      *L_diag, *U_diag;
+   HYPRE_Int            *L_diag_i, *U_diag_i;
+   HYPRE_Int            *L_diag_j, *U_diag_j;
+   HYPRE_Complex        *L_diag_data, *U_diag_data;
+
+   hypre_CSRMatrix      *mL_diag, *mU_diag;
+   HYPRE_Int            *mL_diag_i, *mU_diag_i;
+   HYPRE_Int            *mL_diag_j, *mU_diag_j;
+   HYPRE_Complex        *mL_diag_data, *mU_diag_data;
+
+   HYPRE_Int            i;
+
+   /* Standard ILU0 factorization */
    hypre_ILUSetupMILU0(A, perm, perm, n, n, Lptr, Dptr, Uptr, &S_temp, &u_temp, 0);
-   if (S_temp)
-   {
-      hypre_ParCSRMatrixDestroy(S_temp);
-   }
-   if (u_temp)
-   {
-      hypre_TFree( u_temp, HYPRE_MEMORY_HOST);
-   }
-   /* modified ILU0 factorization */
+
+   /* Free memory */
+   hypre_ParCSRMatrixDestroy(S_temp);
+   hypre_TFree(u_temp, HYPRE_MEMORY_HOST);
+
+   /* Modified ILU0 factorization */
    hypre_ILUSetupMILU0(A, perm, perm, n, n, mLptr, mDptr, mUptr, &S_temp, &u_temp, 1);
-   if (S_temp)
-   {
-      hypre_ParCSRMatrixDestroy(S_temp);
-   }
-   if (u_temp)
-   {
-      hypre_TFree( u_temp, HYPRE_MEMORY_HOST);
-   }
 
-   /* pointer to the start location */
-   HYPRE_Int *u_end_array;
-   u_end_array = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   /* Free memory */
+   hypre_ParCSRMatrixDestroy(S_temp);
+   hypre_TFree(u_temp, HYPRE_MEMORY_HOST);
 
-   hypre_CSRMatrix   *U_diag = hypre_ParCSRMatrixDiag(*Uptr);
-   HYPRE_Int         *U_diag_i = hypre_CSRMatrixI(U_diag);
-   HYPRE_Int         *U_diag_j = hypre_CSRMatrixJ(U_diag);
-   HYPRE_Real        *U_diag_data = hypre_CSRMatrixData(U_diag);
-   hypre_CSRMatrix   *mU_diag = hypre_ParCSRMatrixDiag(*mUptr);
-   HYPRE_Int         *mU_diag_i = hypre_CSRMatrixI(mU_diag);
-   HYPRE_Int         *mU_diag_j = hypre_CSRMatrixJ(mU_diag);
-   HYPRE_Real        *mU_diag_data = hypre_CSRMatrixData(mU_diag);
+   /* Pointer to the start location */
+   u_end_array  = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   U_diag       = hypre_ParCSRMatrixDiag(*Uptr);
+   U_diag_i     = hypre_CSRMatrixI(U_diag);
+   U_diag_j     = hypre_CSRMatrixJ(U_diag);
+   U_diag_data  = hypre_CSRMatrixData(U_diag);
+   mU_diag      = hypre_ParCSRMatrixDiag(*mUptr);
+   mU_diag_i    = hypre_CSRMatrixI(mU_diag);
+   mU_diag_j    = hypre_CSRMatrixJ(mU_diag);
+   mU_diag_data = hypre_CSRMatrixData(mU_diag);
 
-   // first sort the Upper part U
+   /* first sort the Upper part U */
    for (i = 0; i < nLU; i++)
    {
       hypre_qsort1(U_diag_j, U_diag_data, U_diag_i[i], U_diag_i[i + 1] - 1);
@@ -3895,16 +2068,16 @@ hypre_ILUSetupRAPILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n, HYPRE
       hypre_BinarySearch2(U_diag_j, nLU, U_diag_i[i], U_diag_i[i + 1] - 1, u_end_array + i);
    }
 
-   hypre_CSRMatrix   *L_diag = hypre_ParCSRMatrixDiag(*Lptr);
-   HYPRE_Int         *L_diag_i = hypre_CSRMatrixI(L_diag);
-   HYPRE_Int         *L_diag_j = hypre_CSRMatrixJ(L_diag);
-   HYPRE_Real        *L_diag_data = hypre_CSRMatrixData(L_diag);
-   hypre_CSRMatrix   *mL_diag = hypre_ParCSRMatrixDiag(*mLptr);
-   HYPRE_Int         *mL_diag_i = hypre_CSRMatrixI(mL_diag);
-   HYPRE_Int         *mL_diag_j = hypre_CSRMatrixJ(mL_diag);
-   HYPRE_Real        *mL_diag_data = hypre_CSRMatrixData(mL_diag);
+   L_diag       = hypre_ParCSRMatrixDiag(*Lptr);
+   L_diag_i     = hypre_CSRMatrixI(L_diag);
+   L_diag_j     = hypre_CSRMatrixJ(L_diag);
+   L_diag_data  = hypre_CSRMatrixData(L_diag);
+   mL_diag      = hypre_ParCSRMatrixDiag(*mLptr);
+   mL_diag_i    = hypre_CSRMatrixI(mL_diag);
+   mL_diag_j    = hypre_CSRMatrixJ(mL_diag);
+   mL_diag_data = hypre_CSRMatrixData(mL_diag);
 
-   // now sort the Lower part L
+   /* now sort the Lower part L */
    for (i = nLU; i < n; i++)
    {
       hypre_qsort1(L_diag_j, L_diag_data, L_diag_i[i], L_diag_i[i + 1] - 1);
@@ -3917,58 +2090,85 @@ hypre_ILUSetupRAPILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int n, HYPRE
    return hypre_error_flag;
 }
 
-/* ILU(0)
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetupILU0
+ *
+ * Setup ILU(0)
+ *
  * A = input matrix
- * perm = permutation array indicating ordering of rows. Perm could come from a
- *    CF_marker array or a reordering routine. When set to NULL, indentity permutation is used.
- * qperm = permutation array indicating ordering of columns. When set to NULL, indentity permutation is used.
+ * perm = permutation array indicating ordering of rows.
+ *        Perm could come from a CF_marker array or a reordering routine.
+ *         When set to NULL, identity permutation is used.
+ * qperm = permutation array indicating ordering of columns.
+ *         When set to NULL, identity permutation is used.
  * nI = number of interial unknowns
  * nLU = size of incomplete factorization, nLU should obey nLU <= nI.
- *    Schur complement is formed if nLU < n
+ *       Schur complement is formed if nLU < n
  * Lptr, Dptr, Uptr, Sptr = L, D, U, S factors.
  * will form global Schur Matrix if nLU < n
- */
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int *qperm, HYPRE_Int nLU,
-                   HYPRE_Int nI,
-                   hypre_ParCSRMatrix **Lptr, HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr, hypre_ParCSRMatrix **Sptr,
-                   HYPRE_Int **u_end)
+hypre_ILUSetupILU0(hypre_ParCSRMatrix  *A,
+                   HYPRE_Int           *perm,
+                   HYPRE_Int           *qperm,
+                   HYPRE_Int            nLU,
+                   HYPRE_Int            nI,
+                   hypre_ParCSRMatrix **Lptr,
+                   HYPRE_Real         **Dptr,
+                   hypre_ParCSRMatrix **Uptr,
+                   hypre_ParCSRMatrix **Sptr,
+                   HYPRE_Int          **u_end)
 {
-   return hypre_ILUSetupMILU0( A, perm, qperm, nLU, nI, Lptr, Dptr, Uptr, Sptr, u_end, 0);
+   return hypre_ILUSetupMILU0(A, perm, qperm, nLU, nI, Lptr, Dptr, Uptr, Sptr, u_end, 0);
 }
 
-/* (modified) ILU(0)
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetupILU0
+ *
+ * Setup modified ILU(0)
+ *
  * A = input matrix
- * perm = permutation array indicating ordering of rows. Perm could come from a
- *    CF_marker array or a reordering routine. When set to NULL, indentity permutation is used.
- * qperm = permutation array indicating ordering of columns When set to NULL, identity permutation is used.
+ * perm = permutation array indicating ordering of rows.
+ *        Perm could come from a CF_marker array or a reordering routine.
+ *        When set to NULL, indentity permutation is used.
+ * qperm = permutation array indicating ordering of columns.
+ *         When set to NULL, identity permutation is used.
  * nI = number of interior unknowns
  * nLU = size of incomplete factorization, nLU should obey nLU <= nI.
- *    Schur complement is formed if nLU < n
+ *       Schur complement is formed if nLU < n
  * Lptr, Dptr, Uptr, Sptr = L, D, U, S factors.
  * modified set to 0 to use classical ILU
  * will form global Schur Matrix if nLU < n
- */
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_ILUSetupMILU0(hypre_ParCSRMatrix *A, HYPRE_Int *permp, HYPRE_Int *qpermp, HYPRE_Int nLU,
-                    HYPRE_Int nI,
-                    hypre_ParCSRMatrix **Lptr, HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr, hypre_ParCSRMatrix **Sptr,
-                    HYPRE_Int **u_end,
-                    HYPRE_Int modified)
+hypre_ILUSetupMILU0(hypre_ParCSRMatrix  *A,
+                    HYPRE_Int           *permp,
+                    HYPRE_Int           *qpermp,
+                    HYPRE_Int            nLU,
+                    HYPRE_Int            nI,
+                    hypre_ParCSRMatrix **Lptr,
+                    HYPRE_Real         **Dptr,
+                    hypre_ParCSRMatrix **Uptr,
+                    hypre_ParCSRMatrix **Sptr,
+                    HYPRE_Int          **u_end,
+                    HYPRE_Int            modified)
 {
-   HYPRE_Int                i, ii, j, k, k1, k2, k3, ctrU, ctrL, ctrS, lenl, lenu, jpiv, col, jpos;
+   HYPRE_Int                i, ii, j, k, k1, k2, k3, ctrU, ctrL, ctrS;
+   HYPRE_Int                lenl, lenu, jpiv, col, jpos;
    HYPRE_Int                *iw, *iL, *iU;
    HYPRE_Real               dd, t, dpiv, lxu, *wU, *wL;
    HYPRE_Real               drop;
 
    /* communication stuffs for S */
-   MPI_Comm                 comm             = hypre_ParCSRMatrixComm(A);
-   HYPRE_Int                S_offd_nnz, S_offd_ncols;
+   MPI_Comm                  comm = hypre_ParCSRMatrixComm(A);
+   HYPRE_Int                 S_offd_nnz, S_offd_ncols;
    hypre_ParCSRCommPkg      *comm_pkg;
    hypre_ParCSRCommHandle   *comm_handle;
-   HYPRE_Int                num_sends, begin, end;
-   HYPRE_BigInt                *send_buf        = NULL;
-   HYPRE_Int                num_procs, my_id;
+   HYPRE_Int                 num_sends, begin, end;
+   HYPRE_BigInt             *send_buf        = NULL;
+   HYPRE_Int                 num_procs, my_id;
 
    /* data objects for A */
    hypre_CSRMatrix          *A_diag          = hypre_ParCSRMatrixDiag(A);
@@ -4033,6 +2233,7 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix *A, HYPRE_Int *permp, HYPRE_Int *qpermp, 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
    comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+
    /* setup if not yet built */
    if (!comm_pkg)
    {
@@ -4625,22 +2826,38 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix *A, HYPRE_Int *permp, HYPRE_Int *qpermp, 
    return hypre_error_flag;
 }
 
-/* ILU(k) symbolic factorization
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetupILUKSymbolic
+ *
+ * Setup ILU(k) symbolic factorization
+ *
  * n = total rows of input
  * lfil = level of fill-in, the k in ILU(k)
- * perm = permutation array indicating ordering of factorization. Perm could come from a
+ * perm = permutation array indicating ordering of factorization.
  * rperm = reverse permutation array, used here to avoid duplicate memory allocation
  * iw = working array, used here to avoid duplicate memory allocation
  * nLU = size of computed LDU factorization.
  * A/L/U/S_diag_i = the I slot of A, L, U and S
  * A/L/U/S_diag_j = the J slot of A, L, U and S
- * will form global Schur Matrix if nLU < n
- */
+ *
+ * Will form global Schur Matrix if nLU < n
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j, HYPRE_Int lfil,
-                           HYPRE_Int *perm,
-                           HYPRE_Int *rperm,   HYPRE_Int *iw,   HYPRE_Int nLU, HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i,
-                           HYPRE_Int *S_diag_i, HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j, HYPRE_Int **S_diag_j,
+hypre_ILUSetupILUKSymbolic(HYPRE_Int   n,
+                           HYPRE_Int  *A_diag_i,
+                           HYPRE_Int  *A_diag_j,
+                           HYPRE_Int   lfil,
+                           HYPRE_Int  *perm,
+                           HYPRE_Int  *rperm,
+                           HYPRE_Int  *iw,
+                           HYPRE_Int   nLU,
+                           HYPRE_Int  *L_diag_i,
+                           HYPRE_Int  *U_diag_i,
+                           HYPRE_Int  *S_diag_i,
+                           HYPRE_Int **L_diag_j,
+                           HYPRE_Int **U_diag_j,
+                           HYPRE_Int **S_diag_j,
                            HYPRE_Int **u_end)
 {
    /*
@@ -5037,22 +3254,34 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j
    return hypre_error_flag;
 }
 
-/* ILU(k)
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetupILUK
+ *
+ * Setup ILU(k) numeric factorization
+ *
  * A: input matrix
  * lfil: level of fill-in, the k in ILU(k)
- * permp: permutation array indicating ordering of factorization. Perm could come from a
- *    CF_marker: array or a reordering routine.
+ * permp: permutation array indicating ordering of factorization.
+ *        Perm could come from a CF_marker array or a reordering routine.
  * qpermp: column permutation array.
  * nLU: size of computed LDU factorization.
  * nI: number of interial unknowns, nI should obey nI >= nLU
  * Lptr, Dptr, Uptr: L, D, U factors.
- * Sprt: Schur Complement, if no Schur Complement is needed it will be set to NULL
- */
+ * Sprt: Schur Complement, if no Schur Complement, it will be set to NULL
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *permp, HYPRE_Int *qpermp,
-                   HYPRE_Int nLU, HYPRE_Int nI,
-                   hypre_ParCSRMatrix **Lptr, HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr, hypre_ParCSRMatrix **Sptr,
-                   HYPRE_Int **u_end)
+hypre_ILUSetupILUK(hypre_ParCSRMatrix  *A,
+                   HYPRE_Int            lfil,
+                   HYPRE_Int           *permp,
+                   HYPRE_Int           *qpermp,
+                   HYPRE_Int            nLU,
+                   HYPRE_Int            nI,
+                   hypre_ParCSRMatrix **Lptr,
+                   HYPRE_Real         **Dptr,
+                   hypre_ParCSRMatrix **Uptr,
+                   hypre_ParCSRMatrix **Sptr,
+                   HYPRE_Int          **u_end)
 {
    /*
     * 1: Setup and create buffers
@@ -5070,6 +3299,7 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *permp, HYPR
    {
       return hypre_ILUSetupILU0( A, permp, qpermp, nLU, nI, Lptr, Dptr, Uptr, Sptr, u_end);
    }
+
    HYPRE_Real              local_nnz, total_nnz;
    HYPRE_Int               i, ii, j, k, k1, k2, k3, kl, ku, jpiv, col, icol;
    HYPRE_Int               *iw;
@@ -5322,7 +3552,7 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *permp, HYPR
       /* diagonal part (we store the inverse) */
       if (hypre_abs(D_data[ii]) < MAT_TOL)
       {
-         D_data[ii] = 1e-06;
+         D_data[ii] = 1.0e-06;
       }
       D_data[ii] = 1. / D_data[ii];
    }
@@ -5489,6 +3719,7 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *permp, HYPR
       HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
       HYPRE_Int end = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
       send_buf = hypre_TAlloc(HYPRE_BigInt, end - begin, HYPRE_MEMORY_HOST);
+
       /* copy new index into send_buf */
       for (i = begin; i < end; i++)
       {
@@ -5594,28 +3825,43 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *permp, HYPR
    return hypre_error_flag;
 }
 
-/* ILUT
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetupILUT
+ *
+ * Setup ILU(t) numeric factorization
+ *
  * A: input matrix
  * lfil: maximum nnz per row in L and U
  * tol: droptol array in ILUT
  *    tol[0]: matrix B
  *    tol[1]: matrix E and F
  *    tol[2]: matrix S
- * perm: permutation array indicating ordering of factorization. Perm could come from a
- *    CF_marker: array or a reordering routine.
+ * perm: permutation array indicating ordering of factorization.
+ *       Perm could come from a CF_marker array or a reordering routine.
  * qperm: permutation array for column
- * nLU: size of computed LDU factorization. If nLU < n, Schur compelemnt will be formed
+ * nLU: size of computed LDU factorization.
+ *      If nLU < n, Schur complement will be formed
  * nI: number of interial unknowns. nLU should obey nLU <= nI.
  * Lptr, Dptr, Uptr: L, D, U factors.
  * Sptr: Schur complement
  *
  * Keep the largest lfil entries that is greater than some tol relative
  *    to the input tol and the norm of that row in both L and U
- */
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
-                   HYPRE_Int *permp, HYPRE_Int *qpermp, HYPRE_Int nLU, HYPRE_Int nI, hypre_ParCSRMatrix **Lptr,
-                   HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr, hypre_ParCSRMatrix **Sptr, HYPRE_Int **u_end)
+hypre_ILUSetupILUT(hypre_ParCSRMatrix  *A,
+                   HYPRE_Int            lfil,
+                   HYPRE_Real          *tol,
+                   HYPRE_Int           *permp,
+                   HYPRE_Int           *qpermp,
+                   HYPRE_Int            nLU,
+                   HYPRE_Int            nI,
+                   hypre_ParCSRMatrix **Lptr,
+                   HYPRE_Real         **Dptr,
+                   hypre_ParCSRMatrix **Uptr,
+                   hypre_ParCSRMatrix **Sptr,
+                   HYPRE_Int          **u_end)
 {
    /*
     * 1: Setup and create buffers
@@ -5742,7 +3988,8 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    nnz_A = A_diag_i[nLU];
    if (n > 0)
    {
-      initial_alloc = (HYPRE_Int)(hypre_min(nLU + hypre_ceil((nnz_A / 2.0) * nLU / n), nLU * lfil));
+      initial_alloc = (HYPRE_Int)(hypre_min(nLU + hypre_ceil((nnz_A / 2.0) * nLU / n),
+                                            nLU * lfil));
    }
    capacity_L = initial_alloc;
    capacity_U = initial_alloc;
@@ -5761,6 +4008,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    ctrS = 0;
    S_diag_i = hypre_CTAlloc(HYPRE_Int, (m + 1), memory_location);
    S_diag_i[0] = 0;
+
    /* only setup S part when n > nLU */
    if (m > 0)
    {
@@ -5957,7 +4205,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
 
       if (hypre_abs(w[ii]) < MAT_TOL)
       {
-         w[ii] = 1e-06;
+         w[ii] = 1.0e-06;
       }
       D_data[ii] = 1. / w[ii];
       iw[ii] = -1;
@@ -5976,11 +4224,13 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          {
             HYPRE_Int tmp = capacity_L;
             capacity_L = (HYPRE_Int)(capacity_L * EXPAND_FACT + 1);
-            L_diag_j = hypre_TReAlloc_v2(L_diag_j, HYPRE_Int, tmp, HYPRE_Int, capacity_L, memory_location);
-            L_diag_data = hypre_TReAlloc_v2(L_diag_data, HYPRE_Real, tmp, HYPRE_Real, capacity_L,
-                                            memory_location);
+            L_diag_j = hypre_TReAlloc_v2(L_diag_j, HYPRE_Int, tmp, HYPRE_Int,
+                                         capacity_L, memory_location);
+            L_diag_data = hypre_TReAlloc_v2(L_diag_data, HYPRE_Real, tmp, HYPRE_Real,
+                                            capacity_L, memory_location);
          }
          ctrL += lenl;
+
          /* copy large data in */
          for (j = L_diag_i[ii]; j < ctrL; j++)
          {
@@ -6021,9 +4271,10 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
          {
             HYPRE_Int tmp = capacity_U;
             capacity_U = (HYPRE_Int)(capacity_U * EXPAND_FACT + 1);
-            U_diag_j = hypre_TReAlloc_v2(U_diag_j, HYPRE_Int, tmp, HYPRE_Int, capacity_U, memory_location);
-            U_diag_data = hypre_TReAlloc_v2(U_diag_data, HYPRE_Real, tmp, HYPRE_Real, capacity_U,
-                                            memory_location);
+            U_diag_j = hypre_TReAlloc_v2(U_diag_j, HYPRE_Int, tmp, HYPRE_Int,
+                                         capacity_U, memory_location);
+            U_diag_data = hypre_TReAlloc_v2(U_diag_data, HYPRE_Real, tmp, HYPRE_Real,
+                                            capacity_U, memory_location);
          }
          ctrU += lenhu;
          /* copy large data in */
@@ -6139,7 +4390,8 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
             lxu = - dpiv * U_diag_data[j];
             /* we don't want to fill small number to empty place */
             if ((icol == -1) &&
-                ((col < nLU && hypre_abs(lxu) < itolef) || ( col >= nLU && hypre_abs(lxu) < itols )))
+                ((col < nLU  && hypre_abs(lxu) < itolef) ||
+                 (col >= nLU && hypre_abs(lxu) < itols )))
             {
                continue;
             }
@@ -6205,6 +4457,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
                                             capacity_L, memory_location);
          }
          ctrL += lenl;
+
          /* copy large data in */
          for (j = L_diag_i[ii]; j < ctrL; j++)
          {
@@ -6264,6 +4517,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
     */
    HYPRE_BigInt big_m = (HYPRE_BigInt)m;
    hypre_MPI_Allreduce(&big_m, &total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+
    /* only form when total_rows > 0 */
    if ( total_rows > 0 )
    {
@@ -6449,9 +4703,10 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_NSHSetup
+ *--------------------------------------------------------------------------*/
 
-/* NSH setup */
-/* Setup NSH data */
 HYPRE_Int
 hypre_NSHSetup( void               *nsh_vdata,
                 hypre_ParCSRMatrix *A,
@@ -6461,20 +4716,11 @@ hypre_NSHSetup( void               *nsh_vdata,
    MPI_Comm             comm              = hypre_ParCSRMatrixComm(A);
    hypre_ParNSHData     *nsh_data         = (hypre_ParNSHData*) nsh_vdata;
 
-   //   HYPRE_Int            i;
-   // HYPRE_Int            num_threads;
-   // HYPRE_Int            debug_flag = 0;
-
-   /* pointers to NSH data */
-   HYPRE_Int            logging           = hypre_ParNSHDataLogging(nsh_data);
-   HYPRE_Int            print_level       = hypre_ParNSHDataPrintLevel(nsh_data);
-
+   /* Pointers to NSH data */
+   HYPRE_Int             logging          = hypre_ParNSHDataLogging(nsh_data);
+   HYPRE_Int             print_level      = hypre_ParNSHDataPrintLevel(nsh_data);
    hypre_ParCSRMatrix   *matA             = hypre_ParNSHDataMatA(nsh_data);
    hypre_ParCSRMatrix   *matM             = hypre_ParNSHDataMatM(nsh_data);
-
-   //   HYPRE_Int            n                 = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
-   HYPRE_Int            num_procs,  my_id;
-
    hypre_ParVector      *Utemp;
    hypre_ParVector      *Ftemp;
    hypre_ParVector      *F_array          = hypre_ParNSHDataF(nsh_data);
@@ -6482,60 +4728,34 @@ hypre_NSHSetup( void               *nsh_vdata,
    hypre_ParVector      *residual         = hypre_ParNSHDataResidual(nsh_data);
    HYPRE_Real           *rel_res_norms    = hypre_ParNSHDataRelResNorms(nsh_data);
 
-   /* solver setting */
+   /* Solver setting */
    HYPRE_Real           *droptol          = hypre_ParNSHDataDroptol(nsh_data);
-   HYPRE_Real           mr_tol            = hypre_ParNSHDataMRTol(nsh_data);
-   HYPRE_Int            mr_max_row_nnz    = hypre_ParNSHDataMRMaxRowNnz(nsh_data);
-   HYPRE_Int            mr_max_iter       = hypre_ParNSHDataMRMaxIter(nsh_data);
-   HYPRE_Int            mr_col_version    = hypre_ParNSHDataMRColVersion(nsh_data);
-   HYPRE_Real           nsh_tol           = hypre_ParNSHDataNSHTol(nsh_data);
-   HYPRE_Int            nsh_max_row_nnz   = hypre_ParNSHDataNSHMaxRowNnz(nsh_data);
-   HYPRE_Int            nsh_max_iter      = hypre_ParNSHDataNSHMaxIter(nsh_data);
-
-   /* ----- begin -----*/
-
-   //num_threads = hypre_NumThreads();
+   HYPRE_Real            mr_tol           = hypre_ParNSHDataMRTol(nsh_data);
+   HYPRE_Int             mr_max_row_nnz   = hypre_ParNSHDataMRMaxRowNnz(nsh_data);
+   HYPRE_Int             mr_max_iter      = hypre_ParNSHDataMRMaxIter(nsh_data);
+   HYPRE_Int             mr_col_version   = hypre_ParNSHDataMRColVersion(nsh_data);
+   HYPRE_Real            nsh_tol          = hypre_ParNSHDataNSHTol(nsh_data);
+   HYPRE_Int             nsh_max_row_nnz  = hypre_ParNSHDataNSHMaxRowNnz(nsh_data);
+   HYPRE_Int             nsh_max_iter     = hypre_ParNSHDataNSHMaxIter(nsh_data);
+   HYPRE_Int             num_procs,  my_id;
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
    /* Free Previously allocated data, if any not destroyed */
-   if (matM)
-   {
-      hypre_TFree(matM, HYPRE_MEMORY_HOST);
-      matM = NULL;
-   }
+   hypre_TFree(matM, HYPRE_MEMORY_HOST);
+   hypre_TFree(hypre_ParNSHDataL1Norms(nsh_data), HYPRE_MEMORY_HOST);
+   hypre_ParVectorDestroy(hypre_ParNSHDataUTemp(nsh_data));
+   hypre_ParVectorDestroy(hypre_ParNSHDataFTemp(nsh_data));
+   hypre_ParVectorDestroy(hypre_ParNSHDataResidual(nsh_data));
+   hypre_TFree(hypre_ParNSHDataRelResNorms(nsh_data), HYPRE_MEMORY_HOST);
 
-   /* clear old l1_norm data, if created */
-   if (hypre_ParNSHDataL1Norms(nsh_data))
-   {
-      hypre_TFree(hypre_ParNSHDataL1Norms(nsh_data), HYPRE_MEMORY_HOST);
-      hypre_ParNSHDataL1Norms(nsh_data) = NULL;
-   }
-
-   /* setup temporary storage
-    * first check is they've already here
-    */
-   if (hypre_ParNSHDataUTemp(nsh_data))
-   {
-      hypre_ParVectorDestroy(hypre_ParNSHDataUTemp(nsh_data));
-      hypre_ParNSHDataUTemp(nsh_data) = NULL;
-   }
-   if (hypre_ParNSHDataFTemp(nsh_data))
-   {
-      hypre_ParVectorDestroy(hypre_ParNSHDataFTemp(nsh_data));
-      hypre_ParNSHDataFTemp(nsh_data) = NULL;
-   }
-   if (hypre_ParNSHDataResidual(nsh_data))
-   {
-      hypre_ParVectorDestroy(hypre_ParNSHDataResidual(nsh_data));
-      hypre_ParNSHDataResidual(nsh_data) = NULL;
-   }
-   if (hypre_ParNSHDataRelResNorms(nsh_data))
-   {
-      hypre_TFree(hypre_ParNSHDataRelResNorms(nsh_data), HYPRE_MEMORY_HOST);
-      hypre_ParNSHDataRelResNorms(nsh_data) = NULL;
-   }
+   matM = NULL;
+   hypre_ParNSHDataL1Norms(nsh_data)     = NULL;
+   hypre_ParNSHDataUTemp(nsh_data)       = NULL;
+   hypre_ParNSHDataFTemp(nsh_data)       = NULL;
+   hypre_ParNSHDataResidual(nsh_data)    = NULL;
+   hypre_ParNSHDataRelResNorms(nsh_data) = NULL;
 
    /* start to create working vectors */
    Utemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
@@ -6549,39 +4769,41 @@ hypre_NSHSetup( void               *nsh_vdata,
                                  hypre_ParCSRMatrixRowStarts(A));
    hypre_ParVectorInitialize(Ftemp);
    hypre_ParNSHDataFTemp(nsh_data) = Ftemp;
-   /* set matrix, solution and rhs pointers */
+
+   /* Set matrix, solution and rhs pointers */
    matA = A;
    F_array = f;
    U_array = u;
 
    /* NSH compute approximate inverse, see par_ilu.c */
-   hypre_ILUParCSRInverseNSH(matA, &matM, droptol, mr_tol, nsh_tol, HYPRE_REAL_MIN, mr_max_row_nnz,
-                             nsh_max_row_nnz, mr_max_iter, nsh_max_iter, mr_col_version, print_level);
+   hypre_ILUParCSRInverseNSH(matA, &matM, droptol, mr_tol, nsh_tol, HYPRE_REAL_MIN,
+                             mr_max_row_nnz, nsh_max_row_nnz, mr_max_iter, nsh_max_iter,
+                             mr_col_version, print_level);
 
-   /* set pointers to NSH data */
+   /* Set pointers to NSH data */
    hypre_ParNSHDataMatA(nsh_data) = matA;
-   hypre_ParNSHDataF(nsh_data) = F_array;
-   hypre_ParNSHDataU(nsh_data) = U_array;
+   hypre_ParNSHDataF(nsh_data)    = F_array;
+   hypre_ParNSHDataU(nsh_data)    = U_array;
    hypre_ParNSHDataMatM(nsh_data) = matM;
 
-   /* compute operator complexity */
+   /* Compute operator complexity */
    hypre_ParCSRMatrixSetDNumNonzeros(matA);
    hypre_ParCSRMatrixSetDNumNonzeros(matM);
-   /* compute complexity */
-   hypre_ParNSHDataOperatorComplexity(nsh_data) =  hypre_ParCSRMatrixDNumNonzeros(
-                                                      matM) / hypre_ParCSRMatrixDNumNonzeros(matA);
-   if (my_id == 0)
+
+   /* Compute complexity */
+   hypre_ParNSHDataOperatorComplexity(nsh_data) = hypre_ParCSRMatrixDNumNonzeros(matM) /
+                                                  hypre_ParCSRMatrixDNumNonzeros(matA);
+   if (my_id == 0 && print_level > 0)
    {
       hypre_printf("NSH SETUP: operator complexity = %f  \n",
                    hypre_ParNSHDataOperatorComplexity(nsh_data));
    }
 
-   if ( logging > 1 )
+   if (logging > 1)
    {
-      residual =
-         hypre_ParVectorCreate(hypre_ParCSRMatrixComm(matA),
-                               hypre_ParCSRMatrixGlobalNumRows(matA),
-                               hypre_ParCSRMatrixRowStarts(matA) );
+      residual = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(matA),
+                                       hypre_ParCSRMatrixGlobalNumRows(matA),
+                                       hypre_ParCSRMatrixRowStarts(matA));
       hypre_ParVectorInitialize(residual);
       hypre_ParNSHDataResidual(nsh_data) = residual;
    }
@@ -6589,37 +4811,39 @@ hypre_NSHSetup( void               *nsh_vdata,
    {
       hypre_ParNSHDataResidual(nsh_data) = NULL;
    }
-   rel_res_norms = hypre_CTAlloc(HYPRE_Real, hypre_ParNSHDataMaxIter(nsh_data), HYPRE_MEMORY_HOST);
+
+   rel_res_norms = hypre_CTAlloc(HYPRE_Real, hypre_ParNSHDataMaxIter(nsh_data),
+                                 HYPRE_MEMORY_HOST);
    hypre_ParNSHDataRelResNorms(nsh_data) = rel_res_norms;
 
    return hypre_error_flag;
 }
 
-
-/* ILU(0) for RAS, has some external rows
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetupILU0RAS
+ *
+ * ILU(0) for RAS, has some external rows
+ *
  * A = input matrix
- * perm = permutation array indicating ordering of factorization. Perm could come from a
- *    CF_marker array or a reordering routine.
+ * perm = permutation array indicating ordering of factorization.
+ *        Perm could come from a CF_marker array or a reordering routine.
  * nLU = size of computed LDU factorization.
  * Lptr, Dptr, Uptr, Sptr = L, D, U, S factors.
  * will form global Schur Matrix if nLU < n
- */
-HYPRE_Int
-hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
-                      hypre_ParCSRMatrix **Lptr, HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr)
-{
-   HYPRE_Int                i, ii, j, k, k1, k2, ctrU, ctrL, lenl, lenu, jpiv, col, jpos;
-   HYPRE_Int                *iw, *iL, *iU;
-   HYPRE_Real               dd, t, dpiv, lxu, *wU, *wL;
+ *--------------------------------------------------------------------------*/
 
+HYPRE_Int
+hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix  *A,
+                      HYPRE_Int           *perm,
+                      HYPRE_Int            nLU,
+                      hypre_ParCSRMatrix **Lptr,
+                      HYPRE_Real         **Dptr,
+                      hypre_ParCSRMatrix **Uptr)
+{
    /* communication stuffs for S */
    MPI_Comm                 comm          = hypre_ParCSRMatrixComm(A);
    HYPRE_Int                num_procs;
-   //   HYPRE_Int                S_offd_nnz, S_offd_ncols;
    hypre_ParCSRCommPkg      *comm_pkg;
-   //   hypre_ParCSRCommHandle   *comm_handle;
-   //   HYPRE_Int                num_sends, begin, end;
-   //   HYPRE_Int                *send_buf     = NULL;
 
    /* data objects for A */
    hypre_CSRMatrix          *A_diag       = hypre_ParCSRMatrixDiag(A);
@@ -6634,7 +4858,6 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
 
    /* size of problem and external matrix */
    HYPRE_Int                n             =  hypre_CSRMatrixNumRows(A_diag);
-   //   HYPRE_Int                m             = n - nLU;
    HYPRE_Int                ext           = hypre_CSRMatrixNumCols(A_offd);
    HYPRE_Int                total_rows    = n + ext;
    HYPRE_BigInt             col_starts[2];
@@ -6667,15 +4890,21 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
 
    /* reverse permutation array */
    HYPRE_Int                *rperm;
+
    /* the original permutation array */
    HYPRE_Int                *perm_old;
+
+   HYPRE_Int                i, ii, j, k, k1, k2, ctrU, ctrL, lenl, lenu, jpiv, col, jpos;
+   HYPRE_Int                *iw, *iL, *iU;
+   HYPRE_Real               dd, t, dpiv, lxu, *wU, *wL;
 
    /* start setup
     * get communication stuffs first
     */
    hypre_MPI_Comm_size(comm, &num_procs);
    comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-   /* setup if not yet built */
+
+   /* Setup if not yet built */
    if (!comm_pkg)
    {
       hypre_MatvecCommPkgCreate(A);
@@ -6713,6 +4942,7 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
    wL          = hypre_TAlloc(HYPRE_Real, total_rows, HYPRE_MEMORY_HOST);
    ctrU = ctrL = 0;
    L_diag_i[0] = U_diag_i[0] = 0;
+
    /* set marker array iw to -1 */
    for (i = 0; i < total_rows; i++)
    {
@@ -6849,12 +5079,8 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
          L_diag_data = hypre_TReAlloc_v2(L_diag_data, HYPRE_Real, tmp,
                                          HYPRE_Real, capacity_L, memory_location);
       }
-      //hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, memory_location, HYPRE_MEMORY_HOST);
-      //hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, memory_location, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl,
-                    memory_location, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl,
-                    memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, memory_location, HYPRE_MEMORY_HOST);
       L_diag_i[ii + 1] = (ctrL += lenl);
 
       /* diagonal part (we store the inverse) */
@@ -6875,12 +5101,8 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
          U_diag_data = hypre_TReAlloc_v2(U_diag_data, HYPRE_Real, tmp,
                                          HYPRE_Real, capacity_U, memory_location);
       }
-      //hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu, memory_location, HYPRE_MEMORY_HOST);
-      //hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu, memory_location, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu,
-                    memory_location, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu,
-                    memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu, memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu, memory_location, HYPRE_MEMORY_HOST);
       U_diag_i[ii + 1] = (ctrU += lenu);
    }
 
@@ -7006,12 +5228,8 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
          L_diag_data = hypre_TReAlloc_v2(L_diag_data, HYPRE_Real, tmp,
                                          HYPRE_Real, capacity_L, memory_location);
       }
-      //hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, memory_location, HYPRE_MEMORY_HOST);
-      //hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, memory_location, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl,
-                    memory_location, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl,
-                    memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, memory_location, HYPRE_MEMORY_HOST);
       L_diag_i[ii + 1] = (ctrL += lenl);
 
       /* diagonal part (we store the inverse) */
@@ -7032,12 +5250,8 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
          U_diag_data = hypre_TReAlloc_v2(U_diag_data, HYPRE_Real, tmp,
                                          HYPRE_Real, capacity_U, memory_location);
       }
-      //hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu, memory_location, HYPRE_MEMORY_HOST);
-      //hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu, memory_location, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu,
-                    memory_location, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu,
-                    memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu, memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu, memory_location, HYPRE_MEMORY_HOST);
       U_diag_i[ii + 1] = (ctrU += lenu);
    }
 
@@ -7150,12 +5364,8 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
          L_diag_data = hypre_TReAlloc_v2(L_diag_data, HYPRE_Real, tmp,
                                          HYPRE_Real, capacity_L, memory_location);
       }
-      //hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, memory_location, HYPRE_MEMORY_HOST);
-      //hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, memory_location, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl,
-                    memory_location, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl,
-                    memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&(L_diag_j)[ctrL], iL, HYPRE_Int, lenl, memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&(L_diag_data)[ctrL], wL, HYPRE_Real, lenl, memory_location, HYPRE_MEMORY_HOST);
       L_diag_i[ii + 1] = (ctrL += lenl);
 
       /* diagonal part (we store the inverse) */
@@ -7176,12 +5386,8 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
          U_diag_data = hypre_TReAlloc_v2(U_diag_data, HYPRE_Real, tmp,
                                          HYPRE_Real, capacity_U, memory_location);
       }
-      //hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu, memory_location, HYPRE_MEMORY_HOST);
-      //hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu, memory_location, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu,
-                    memory_location, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu,
-                    memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&(U_diag_j)[ctrU], iU, HYPRE_Int, lenu, memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&(U_diag_data)[ctrU], wU, HYPRE_Real, lenu, memory_location, HYPRE_MEMORY_HOST);
       U_diag_i[ii + 1] = (ctrU += lenu);
    }
 
@@ -7272,27 +5478,41 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
    return hypre_error_flag;
 }
 
-
-
-/* ILU(k) symbolic factorization for RAS
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetupILUKRASSymbolic
+ *
+ * ILU(k) symbolic factorization for RAS
+ *
  * n = total rows of input
  * lfil = level of fill-in, the k in ILU(k)
- * perm = permutation array indicating ordering of factorization. Perm could come from a
+ * perm = permutation array indicating ordering of factorization.
  * rperm = reverse permutation array, used here to avoid duplicate memory allocation
  * iw = working array, used here to avoid duplicate memory allocation
  * nLU = size of computed LDU factorization.
  * A/L/U/E_i = the I slot of A, L, U and E
  * A/L/U/E_j = the J slot of A, L, U and E
- * will form global Schur Matrix if nLU < n
- */
+ *
+ * Will form global Schur Matrix if nLU < n
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_diag_j,
-                              HYPRE_Int *A_offd_i, HYPRE_Int *A_offd_j,
-                              HYPRE_Int *E_i, HYPRE_Int *E_j, HYPRE_Int ext,
-                              HYPRE_Int lfil, HYPRE_Int *perm,
-                              HYPRE_Int *rperm,   HYPRE_Int *iw,   HYPRE_Int nLU,
-                              HYPRE_Int *L_diag_i, HYPRE_Int *U_diag_i,
-                              HYPRE_Int **L_diag_j, HYPRE_Int **U_diag_j)
+hypre_ILUSetupILUKRASSymbolic(HYPRE_Int   n,
+                              HYPRE_Int  *A_diag_i,
+                              HYPRE_Int  *A_diag_j,
+                              HYPRE_Int  *A_offd_i,
+                              HYPRE_Int  *A_offd_j,
+                              HYPRE_Int  *E_i,
+                              HYPRE_Int  *E_j,
+                              HYPRE_Int   ext,
+                              HYPRE_Int   lfil,
+                              HYPRE_Int  *perm,
+                              HYPRE_Int  *rperm,
+                              HYPRE_Int  *iw,
+                              HYPRE_Int   nLU,
+                              HYPRE_Int  *L_diag_i,
+                              HYPRE_Int  *U_diag_i,
+                              HYPRE_Int **L_diag_j,
+                              HYPRE_Int **U_diag_j)
 {
    /*
     * 1: Setup and create buffers
@@ -7651,11 +5871,8 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
                                               memory_location);
             u_levels = hypre_TReAlloc_v2(u_levels, HYPRE_Int, tmp, HYPRE_Int, capacity_U, HYPRE_MEMORY_HOST);
          }
-         //hypre_TMemcpy(temp_U_diag_j+ctrU,iL+ii,HYPRE_Int,k,memory_location,HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(temp_U_diag_j + ctrU, iL + ii, HYPRE_Int, k,
-                       memory_location, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(u_levels + ctrU, iLev + ii, HYPRE_Int, k,
-                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(temp_U_diag_j + ctrU, iL + ii, HYPRE_Int, k, memory_location, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(u_levels + ctrU, iLev + ii, HYPRE_Int, k, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          ctrU += k;
       }
 
@@ -7800,11 +6017,8 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
                                               memory_location);
             u_levels = hypre_TReAlloc_v2(u_levels, HYPRE_Int, tmp, HYPRE_Int, capacity_U, HYPRE_MEMORY_HOST);
          }
-         //hypre_TMemcpy(temp_U_diag_j+ctrU,iL+ii,HYPRE_Int,k,memory_location,HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(temp_U_diag_j + ctrU, iL + ii, HYPRE_Int, k,
-                       memory_location, HYPRE_MEMORY_HOST);
-         hypre_TMemcpy(u_levels + ctrU, iLev + ii, HYPRE_Int, k,
-                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(temp_U_diag_j + ctrU, iL + ii, HYPRE_Int, k, memory_location, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(u_levels + ctrU, iLev + ii, HYPRE_Int, k, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          ctrU += k;
       }
 
@@ -7827,17 +6041,27 @@ hypre_ILUSetupILUKRASSymbolic(HYPRE_Int n, HYPRE_Int *A_diag_i, HYPRE_Int *A_dia
    return hypre_error_flag;
 }
 
-/* ILU(k) for RAS
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetupILUKRAS
+ *
+ * ILU(k) numeric factorization for RAS
+ *
  * A: input matrix
  * lfil: level of fill-in, the k in ILU(k)
- * perm: permutation array indicating ordering of factorization. Perm could come from a
- * CF_marker: array or a reordering routine.
+ * perm: permutation array indicating ordering of factorization.
+ *       Perm could come from a CF_marker array or a reordering routine.
  * nLU: size of computed LDU factorization.
  * Lptr, Dptr, Uptr: L, D, U factors.
- */
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE_Int nLU,
-                      hypre_ParCSRMatrix **Lptr, HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr)
+hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix  *A,
+                      HYPRE_Int            lfil,
+                      HYPRE_Int           *perm,
+                      HYPRE_Int            nLU,
+                      hypre_ParCSRMatrix **Lptr,
+                      HYPRE_Real         **Dptr,
+                      hypre_ParCSRMatrix **Uptr)
 {
    /*
     * 1: Setup and create buffers
@@ -7855,6 +6079,7 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
    {
       return hypre_ILUSetupILU0RAS(A, perm, nLU, Lptr, Dptr, Uptr);
    }
+
    HYPRE_Int               i, ii, j, k, k1, k2, kl, ku, jpiv, col, icol;
    HYPRE_Int               *iw;
    MPI_Comm                comm           = hypre_ParCSRMatrixComm(A);
@@ -7886,7 +6111,6 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
 
    /* size of problem and external matrix */
    HYPRE_Int               n              = hypre_CSRMatrixNumRows(A_diag);
-   //   HYPRE_Int               m              = n - nLU;
    HYPRE_Int               ext            = hypre_CSRMatrixNumCols(A_offd);
    HYPRE_Int               total_rows     = n + ext;
    HYPRE_BigInt            global_num_rows;
@@ -7901,8 +6125,6 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
    /* communication */
    hypre_ParCSRCommPkg     *comm_pkg;
    hypre_MPI_Comm_size(comm, &num_procs);
-   //   hypre_ParCSRCommHandle  *comm_handle;
-   //   HYPRE_Int               *send_buf      = NULL;
 
    /* reverse permutation array */
    HYPRE_Int               *rperm;
@@ -8073,7 +6295,7 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
       /* diagonal part (we store the inverse) */
       if (hypre_abs(D_data[ii]) < MAT_TOL)
       {
-         D_data[ii] = 1e-06;
+         D_data[ii] = 1.0e-06;
       }
       D_data[ii] = 1. / D_data[ii];
 
@@ -8181,7 +6403,7 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
       /* diagonal part (we store the inverse) */
       if (hypre_abs(D_data[ii]) < MAT_TOL)
       {
-         D_data[ii] = 1e-06;
+         D_data[ii] = 1.0e-06;
       }
       D_data[ii] = 1. / D_data[ii];
 
@@ -8279,7 +6501,7 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
       /* diagonal part (we store the inverse) */
       if (hypre_abs(D_data[ii]) < MAT_TOL)
       {
-         D_data[ii] = 1e-06;
+         D_data[ii] = 1.0e-06;
       }
       D_data[ii] = 1. / D_data[ii];
 
@@ -8373,26 +6595,36 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HY
    return hypre_error_flag;
 }
 
-/* ILUT for RAS
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetupILUTRAS
+ *
+ * ILUT for RAS
+ *
  * A: input matrix
  * lfil: level of fill-in, the k in ILU(k)
  * tol: droptol array in ILUT
  *    tol[0]: matrix B
  *    tol[1]: matrix E and F
  *    tol[2]: matrix S
- * perm: permutation array indicating ordering of factorization. Perm could come from a
- * CF_marker: array or a reordering routine.
+ * perm: permutation array indicating ordering of factorization.
+ *       Perm could come from a CF_marker: array or a reordering routine.
  * nLU: size of computed LDU factorization. If nLU < n, Schur compelemnt will be formed
  * Lptr, Dptr, Uptr: L, D, U factors.
  * Sptr: Schur complement
  *
  * Keep the largest lfil entries that is greater than some tol relative
  *    to the input tol and the norm of that row in both L and U
- */
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
-                      HYPRE_Int *perm, HYPRE_Int nLU, hypre_ParCSRMatrix **Lptr,
-                      HYPRE_Real** Dptr, hypre_ParCSRMatrix **Uptr)
+hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix  *A,
+                      HYPRE_Int            lfil,
+                      HYPRE_Real          *tol,
+                      HYPRE_Int           *perm,
+                      HYPRE_Int            nLU,
+                      hypre_ParCSRMatrix **Lptr,
+                      HYPRE_Real         **Dptr,
+                      hypre_ParCSRMatrix **Uptr)
 {
    /*
     * 1: Setup and create buffers
@@ -8423,10 +6655,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    MPI_Comm                 comm          = hypre_ParCSRMatrixComm(A);
    HYPRE_Int                num_procs;
    hypre_ParCSRCommPkg      *comm_pkg;
-   //   hypre_ParCSRCommHandle   *comm_handle;
    HYPRE_BigInt             col_starts[2];
-   //   HYPRE_Int                num_sends;
-   //   HYPRE_Int                begin, end;
 
    /* data objects for A */
    hypre_CSRMatrix          *A_diag       = hypre_ParCSRMatrixDiag(A);
@@ -8454,7 +6683,6 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
 
    /* size of problem and external matrix */
    HYPRE_Int                n             = hypre_CSRMatrixNumRows(A_diag);
-   //   HYPRE_Int                m             = n - nLU;
    HYPRE_Int                ext           = hypre_CSRMatrixNumCols(A_offd);
    HYPRE_Int                total_rows    = n + ext;
    HYPRE_BigInt              global_num_rows;
@@ -8625,24 +6853,29 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
           * we don't need this iw anymore
           */
          iw[jrow] = -1;
+
          /* need to keep this one, move to the end of the heap */
          /* no longer need to maintain iw */
          hypre_swap2(iL, w, lenhll, kl - lenhlr);
          lenhlr++;
          hypre_ILUMaxrHeapAddRabsI(w + kl, iL + kl, lenhlr);
+
          /* loop for elimination */
          ku = U_diag_i[jrow + 1];
          for (j = U_diag_i[jrow]; j < ku; j++)
          {
-            col = U_diag_j[j];
+            col  = U_diag_j[j];
             icol = iw[col];
-            lxu = - dpiv * U_diag_data[j];
+            lxu  = - dpiv * U_diag_data[j];
+
             /* we don't want to fill small number to empty place */
             if ((icol == -1) &&
-                ((col < nLU && hypre_abs(lxu) < itolb) || (col >= nLU && hypre_abs(lxu) < itolef)))
+                ((col <  nLU && hypre_abs(lxu) < itolb) ||
+                 (col >= nLU && hypre_abs(lxu) < itolef)))
             {
                continue;
             }
+
             if (icol == -1)
             {
                if (col < ii)
@@ -8684,7 +6917,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
 
       if (hypre_abs(w[ii]) < MAT_TOL)
       {
-         w[ii] = 1e-06;
+         w[ii] = 1.0e-06;
       }
       D_data[ii] = 1. / w[ii];
       iw[ii] = -1;
@@ -8919,7 +7152,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
 
       if (hypre_abs(w[ii]) < MAT_TOL)
       {
-         w[ii] = 1e-06;
+         w[ii] = 1.0e-06;
       }
       D_data[ii] = 1. / w[ii];
       iw[ii] = -1;
@@ -9136,7 +7369,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
 
       if (hypre_abs(w[ii]) < MAT_TOL)
       {
-         w[ii] = 1e-06;
+         w[ii] = 1.0e-06;
       }
       D_data[ii] = 1. / w[ii];
       iw[ii] = -1;

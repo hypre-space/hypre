@@ -956,7 +956,7 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    HYPRE_Int        jj_begin_row, jj_end_row;
    HYPRE_Int        jj_begin_row_offd = 0;
    HYPRE_Int        jj_end_row_offd = 0;
-   HYPRE_Int        coarse_counter;
+   //HYPRE_Int        coarse_counter;
    HYPRE_Int        n_coarse_old;
    HYPRE_BigInt     total_old_global_cpts;
 
@@ -1071,7 +1071,7 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
 
    jj_counter = start_indexing;
    jj_counter_offd = start_indexing;
-   coarse_counter = 0;
+   //coarse_counter = 0;
 
    cnt = 0;
    old_cnt = 0;
@@ -1104,7 +1104,7 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
       if (CF_marker[i] > 0)
       {
          jj_counter++;
-         coarse_counter++;
+         //coarse_counter++;
       }
 
       /*--------------------------------------------------------------------
@@ -1973,7 +1973,7 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    HYPRE_Int        jj_begin_row, jj_end_row;
    HYPRE_Int        jj_begin_row_offd = 0;
    HYPRE_Int        jj_end_row_offd = 0;
-   HYPRE_Int        coarse_counter;
+   //HYPRE_Int        coarse_counter;
    HYPRE_Int        n_coarse_old;
    HYPRE_BigInt     total_old_global_cpts;
 
@@ -2074,7 +2074,7 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
 
    jj_counter = start_indexing;
    jj_counter_offd = start_indexing;
-   coarse_counter = 0;
+   //coarse_counter = 0;
 
    cnt = 0;
    old_cnt = 0;
@@ -2107,7 +2107,7 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
       if (CF_marker[i] > 0)
       {
          jj_counter++;
-         coarse_counter++;
+         //coarse_counter++;
       }
 
       /*--------------------------------------------------------------------
