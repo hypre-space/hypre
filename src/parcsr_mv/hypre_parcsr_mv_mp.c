@@ -13,6 +13,8 @@
 
 #include "_hypre_parcsr_mv.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+
 /******************************************************************************
  *
  * Member functions for hypre_ParVector class.
@@ -46,3 +48,5 @@ hypre_ParVectorAxpy_mp( HYPRE_Complex    alpha,
            
    return hypre_SeqVectorAxpy_mp( alpha, x_local, y_local);
 }
+
+#endif

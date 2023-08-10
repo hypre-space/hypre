@@ -13,7 +13,7 @@
 # Assumes hypre has been built (non-multiprecision) to generate object files
 ###
 #  * make distclean
-#  * ./configure –enable-debug --enable-complex --with-timing
+#  * ./configure --enable-debug --enable-complex --with-timing
 #  * make -s 
 ###
 

@@ -13,6 +13,8 @@
 
 #include "seq_mv.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+
 /******************************************************************************
  *
  * Member functions for hypre_Vector class.
@@ -130,3 +132,5 @@ hypre_SeqVectorAxpy_mp( hypre_double alpha,
 
    return hypre_error_flag;
 }
+
+#endif
