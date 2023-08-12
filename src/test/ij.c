@@ -4546,6 +4546,7 @@ main( hypre_int argc,
                hypre_printf("BoomerAMG-DD Iterations = %d\n", num_iterations);
             }
             hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+            hypre_printf("Average Convergence Factor = %f\n", hypre_pow(final_res_norm, (1.0 / (HYPRE_Real) num_iterations)));
             hypre_printf("\n");
          }
       }
