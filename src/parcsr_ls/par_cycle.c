@@ -692,7 +692,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                cgc_relaxwt=relax_edge_weights[edge_index]; 
                lev_counter[level]=-1;
             }
-         else if (cycle_struct[level]==0)
+         else if (cycle_struct[edge_index]==0)
             {
                edge_index++; 
                continue;
