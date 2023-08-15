@@ -152,6 +152,7 @@ main( hypre_int argc,
    HYPRE_Real          cf_tol = 0.9;
    HYPRE_Real          norm;
    HYPRE_Real          b_dot_b;
+   HYPRE_Real          init_res_norm=1.0;
    HYPRE_Real          final_res_norm;
    void               *object;
 
@@ -4425,6 +4426,17 @@ main( hypre_int argc,
                HYPRE_ParVectorSetConstantValues(x,0);
             else if (build_x0_type == 1)
                HYPRE_ParVectorSetRandomValues(x,0);
+            
+            // get the initial residual norm
+            if (i==0)
+            {
+               residual = hypre_ParVectorCloneDeep_v2(b, hypre_ParVectorMemoryLocation(b));
+               hypre_ParVectorCopy(b, residual);
+               HYPRE_ParCSRMatrixMatvec(1.0, parcsr_A, x, -1.0, residual);
+               init_res_norm = hypre_sqrt(hypre_ParVectorInnerProd( residual, residual ));
+               hypre_printf("Initial residual norm: %e\n", init_res_norm);
+            }
+            
 
             // set cycle structure from usr inputs 
             HYPRE_BoomerAMGSetCycleStruct(amg_solver,iconfig_ptr[i].cycle_struct,iconfig_ptr[i].cycle_num_nodes);
@@ -4546,7 +4558,7 @@ main( hypre_int argc,
                hypre_printf("BoomerAMG-DD Iterations = %d\n", num_iterations);
             }
             hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
-            hypre_printf("Average Convergence Factor = %f\n", hypre_pow(final_res_norm, (1.0 / (HYPRE_Real) num_iterations)));
+            hypre_printf("Average Convergence Factor = %f\n", hypre_pow(final_res_norm/init_res_norm, (1.0 / (HYPRE_Real) num_iterations)));
             hypre_printf("\n");
          }
       }
