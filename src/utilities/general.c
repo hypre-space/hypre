@@ -236,35 +236,17 @@ hypre_GetDeviceLastError(void)
  *****************************************************************************/
 
 HYPRE_Int
-HYPRE_Initialize(void)
+HYPRE_DeviceInitialize(void)
 {
-   /* Return if the hypre library is in initialized state */
-   if (hypre_Initialized())
-   {
-      return hypre_error_flag;
-   }
-
-#if defined(HYPRE_USING_MEMORY_TRACKER)
-   if (!_hypre_memory_tracker)
-   {
-      _hypre_memory_tracker = hypre_MemoryTrackerCreate();
-   }
-#endif
-
-   if (!_hypre_handle)
-   {
-      _hypre_handle = hypre_HandleCreate();
-   }
-
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 #if defined(HYPRE_USING_SYCL)
    /* WM: note that for sycl, we need to do device setup again if reinitializing */
-   if (!HYPRE_Initialized())
+   //if (!HYPRE_Initialized())
 #else
    /* If the library has not been initialized or finalized yet,
       meaning that it is the first time HYPRE_Init is being called,
       then perform the initialization of device structures below */
-   if (!HYPRE_Initialized() && !HYPRE_Finalized())
+   //if (!HYPRE_Initialized() && !HYPRE_Finalized())
 #endif
    {
 #if !defined(HYPRE_USING_SYCL)
@@ -328,12 +310,35 @@ HYPRE_Initialize(void)
       {
          char msg[256];
          hypre_sprintf(msg, "%s %s", "ERROR: device pool allocators have been created in", __func__);
-         hypre_fprintf(stderr, "%s\n", msg);
          hypre_error_w_msg(-1, msg);
       }
 #endif
    }
 #endif /* if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP) */
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+HYPRE_Initialize(void)
+{
+   /* Return if the hypre library is in initialized state */
+   if (hypre_Initialized())
+   {
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_USING_MEMORY_TRACKER)
+   if (!_hypre_memory_tracker)
+   {
+      _hypre_memory_tracker = hypre_MemoryTrackerCreate();
+   }
+#endif
+
+   if (!_hypre_handle)
+   {
+      _hypre_handle = hypre_HandleCreate();
+   }
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_OMPOffloadOn();

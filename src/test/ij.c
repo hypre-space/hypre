@@ -569,6 +569,7 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
 
    HYPRE_Initialize();
+   HYPRE_DeviceInitialize();
 
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
