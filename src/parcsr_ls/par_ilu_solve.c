@@ -47,7 +47,7 @@ hypre_ILUSolve( void               *ilu_vdata,
    hypre_ParVector      *U_array            = hypre_ParILUDataU(ilu_data);
 
    /* Device data */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    hypre_CSRMatrix      *matALU_d           = hypre_ParILUDataMatAILUDevice(ilu_data);
    hypre_CSRMatrix      *matBLU_d           = hypre_ParILUDataMatBILUDevice(ilu_data);
    hypre_CSRMatrix      *matE_d             = hypre_ParILUDataMatEDevice(ilu_data);
@@ -247,7 +247,7 @@ hypre_ILUSolve( void               *ilu_vdata,
       {
       case 0: case 1: default:
             /* TODO (VPM): Encapsulate host and device functions into a single one */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
             if (exec == HYPRE_EXEC_DEVICE)
             {
                /* Apply GPU-accelerated LU solve - BJ-ILU0 */
@@ -284,7 +284,7 @@ hypre_ILUSolve( void               *ilu_vdata,
             break;
 
          case 10: case 11:
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
             if (exec == HYPRE_EXEC_DEVICE)
             {
                /* Apply GPU-accelerated GMRES-ILU solve */
@@ -362,7 +362,7 @@ hypre_ILUSolve( void               *ilu_vdata,
 
          case 50:
             /* GMRES-RAP */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
             if (exec == HYPRE_EXEC_DEVICE)
             {
                hypre_ILUSolveRAPGMRESDevice(matA, F_array, U_array, perm, nLU, matS, Utemp, Ftemp,

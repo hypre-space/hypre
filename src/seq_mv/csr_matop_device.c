@@ -852,10 +852,6 @@ hypre_CSRMatrixCompressColumnsDevice(hypre_CSRMatrix  *A,
    return hypre_error_flag;
 }
 
-#endif /* defined(HYPRE_USING_GPU) */
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixTriLowerUpperSolveDevice_core
  *
@@ -905,6 +901,11 @@ hypre_CSRMatrixTriLowerUpperSolveDevice_core(char             uplo,
                                               l1_norms,
                                               hypre_VectorData(f) + offset_f,
                                               hypre_VectorData(u) + offset_u);
+#elif defined(HYPRE_USING_ONEMKLSPARSE)
+   hypre_CSRMatrixTriLowerUpperSolveOnemklsparse(uplo, unit_diag, A,
+                                                 l1_norms,
+                                                 hypre_VectorData(f) + offset_f,
+                                                 hypre_VectorData(u) + offset_u);
 #else
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                      "hypre_CSRMatrixTriLowerUpperSolveDevice requires configuration with either cuSPARSE or rocSPARSE\n");
@@ -927,10 +928,6 @@ hypre_CSRMatrixTriLowerUpperSolveDevice(char             uplo,
 {
    return hypre_CSRMatrixTriLowerUpperSolveDevice_core(uplo, unit_diag, A, l1_norms, f, 0, u, 0);
 }
-
-#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
-
-#if defined(HYPRE_USING_GPU)
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixAddPartial
@@ -3056,6 +3053,55 @@ hypre_SortCSRRocsparse( HYPRE_Int            n,
                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
    hypre_TFree(d_a_tmp, HYPRE_MEMORY_DEVICE);
+
+   return hypre_error_flag;
+}
+
+#elif defined(HYPRE_USING_ONEMKLSPARSE)
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixTriLowerUpperSolveOnemklsparse
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixTriLowerUpperSolveOnemklsparse(char              uplo,
+                                           HYPRE_Int         unit_diag,
+                                           hypre_CSRMatrix  *A,
+                                           HYPRE_Real       *l1_norms,
+                                           HYPRE_Complex    *f_data,
+                                           HYPRE_Complex    *u_data )
+{
+   oneapi::mkl::sparse::matrix_handle_t handle_A = hypre_CSRMatrixGPUMatHandle(A);
+   hypre_CsrsvData     *csrsv_data    = hypre_CSRMatrixCsrsvData(A);
+
+   /* Generate csrsv data if necessary */
+   if (!csrsv_data)
+   {
+      hypre_CSRMatrixCsrsvData(A) = hypre_CsrsvDataCreate();
+      csrsv_data = hypre_CSRMatrixCsrsvData(A);
+   }
+
+   /* Do optimization the first time */
+   if ( (!hypre_CsrsvDataAnalyzedL(csrsv_data) && uplo == 'L') ||
+        (!hypre_CsrsvDataAnalyzedU(csrsv_data) && uplo == 'U') )
+   {
+      HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::optimize_trsv( *hypre_HandleComputeStream(hypre_handle()),
+                         (uplo == 'L') ? oneapi::mkl::uplo::L : oneapi::mkl::uplo::U,
+                         oneapi::mkl::transpose::N,
+                         unit_diag ? oneapi::mkl::diag::U : oneapi::mkl::diag::N,
+                         handle_A,
+                         {} ).wait() );
+   }
+
+   /* Do the triangular solve */
+   HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::trsv( *hypre_HandleComputeStream(hypre_handle()),
+                     (uplo == 'L') ? oneapi::mkl::uplo::L : oneapi::mkl::uplo::U,
+                     oneapi::mkl::transpose::N,
+                     unit_diag ? oneapi::mkl::diag::U : oneapi::mkl::diag::N,
+                     handle_A,
+                     f_data,
+                     u_data,
+                     {} ).wait() );
 
    return hypre_error_flag;
 }

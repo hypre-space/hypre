@@ -98,6 +98,8 @@ HYPRE_Int hypre_CSRMatrixTriLowerUpperSolveRocsparse(char uplo, HYPRE_Int unit_d
                                                      hypre_CSRMatrix *A, HYPRE_Real *l1_norms, HYPRE_Complex *f, HYPRE_Complex *u );
 HYPRE_Int hypre_CSRMatrixTriLowerUpperSolveCusparse(char uplo, HYPRE_Int unit_diag,
                                                     hypre_CSRMatrix *A, HYPRE_Real *l1_norms, HYPRE_Complex *f, HYPRE_Complex *u );
+HYPRE_Int hypre_CSRMatrixTriLowerUpperSolveOnemklsparse(char uplo, HYPRE_Int unit_diag,
+                                                        hypre_CSRMatrix *A, HYPRE_Real *l1_norms, HYPRE_Complex *f, HYPRE_Complex *u );
 HYPRE_Int hypre_CSRMatrixIntersectPattern(hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int *markA,
                                           HYPRE_Int diag_option);
 HYPRE_Int hypre_CSRMatrixDiagScaleDevice( hypre_CSRMatrix *A, hypre_Vector *ld, hypre_Vector *rd);

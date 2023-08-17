@@ -19,7 +19,6 @@
 #if defined(HYPRE_USING_GPU)
 #include "_hypre_utilities.hpp"
 
-/* WM: debug - try */
 #if defined(HYPRE_USING_SYCL)
 namespace thrust = std;
 #endif
