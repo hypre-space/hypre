@@ -1463,7 +1463,7 @@ hypre_BoomerAMGWriteSolverParams(void* data)
          {
             hypre_printf("  %2d", grid_relax_points[3][j]);
          }
-         hypre_printf( "\n");
+         hypre_printf( "\n\n");
       }
       else if (relax_order == 1)
       {
@@ -1484,7 +1484,7 @@ hypre_BoomerAMGWriteSolverParams(void* data)
          {
             hypre_printf("  %2d", zero);
          }
-         hypre_printf( "\n");
+         hypre_printf( "\n\n");
       }
       else
       {
@@ -1505,17 +1505,7 @@ hypre_BoomerAMGWriteSolverParams(void* data)
          {
             hypre_printf("  %2d", zero);
          }
-         hypre_printf( "\n");
-      }
-
-#if defined(HYPRE_USING_MAGMA)
-      if (grid_relax_type[3] == 98)
-      {
-           hypre_printf( "   Using MAGMA's LU factorization on coarse level\n");
-      }
-#endif
-      {
-         hypre_printf( "\n");
+         hypre_printf( "\n\n");
       }
 
       if (smooth_type == 6)
