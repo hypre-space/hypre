@@ -55,6 +55,8 @@ parameters of FSAI can be set via the following calls:
    HYPRE_FSAISetMaxStepSize(HYPRE_Solver solver, HYPRE_Int max_step_size);
    HYPRE_FSAISetKapTolerance(HYPRE_Solver solver, HYPRE_Real kap_tolerance);
 
+.. _fsai-amg-smoother:
+
 FSAI as Smoother to BoomerAMG
 ------------------------------------------------------------------------------
 

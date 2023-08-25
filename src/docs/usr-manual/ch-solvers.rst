@@ -32,7 +32,7 @@ interfaces:
    MGR                                        X
    FSAI                                       X
    ParaSails                X        X        X
-   hypre-ILU                                  X
+   ILU                                        X
    Euclid                   X        X        X
    PILUT                    X        X        X
    PCG             X        X        X        X
@@ -155,7 +155,7 @@ be found in Chapter :ref:`ch-API`.
    solvers-mgr
    solvers-fsai
    solvers-parasails
-   solvers-hypre-ilu
+   solvers-ilu
    solvers-euclid
    solvers-pilut
    solvers-lobpcg
