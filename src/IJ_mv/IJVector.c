@@ -168,7 +168,7 @@ hypre_IJVectorReadBinary( MPI_Comm         comm,
    /* Sanity checks */
    if (storage_method == 1)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Does not support row-wise ordering!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "row-wise ordering is not supported!\n");
       return hypre_error_flag;
    }
 
@@ -192,7 +192,7 @@ hypre_IJVectorReadBinary( MPI_Comm         comm,
       f32buffer = hypre_TAlloc(hypre_float, total_size, HYPRE_MEMORY_HOST);
       if (fread((void*) f32buffer, sizeof(hypre_float), count, fp) != count)
       {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all matrix coefficients");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all vector coefficients");
          return hypre_error_flag;
       }
 
@@ -209,7 +209,7 @@ hypre_IJVectorReadBinary( MPI_Comm         comm,
       f64buffer = hypre_TAlloc(hypre_double, total_size, HYPRE_MEMORY_HOST);
       if (fread((void*) f64buffer, sizeof(hypre_double), count, fp) != count)
       {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all matrix coefficients");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read all vector coefficients");
          return hypre_error_flag;
       }
 

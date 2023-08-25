@@ -986,7 +986,7 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
    {
       count = fwrite((const void*) i32buffer, sizeof(hypre_uint32), k, fp);
    }
-   else
+   else if (i64buffer)
    {
       count = fwrite((const void*) i64buffer, sizeof(hypre_uint64), k, fp);
    }
@@ -1037,7 +1037,7 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
    {
       count = fwrite((const void*) i32buffer, sizeof(hypre_uint32), k, fp);
    }
-   else
+   else if (i64buffer)
    {
       count = fwrite((const void*) i64buffer, sizeof(hypre_uint64), k, fp);
    }
@@ -1090,7 +1090,7 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
       {
          count = fwrite((const void*) f32buffer, sizeof(hypre_float), k, fp);
       }
-      else
+      else if (f64buffer)
       {
          count = fwrite((const void*) f64buffer, sizeof(hypre_double), k, fp);
       }
