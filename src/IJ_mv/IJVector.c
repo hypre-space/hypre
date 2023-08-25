@@ -86,8 +86,9 @@ hypre_IJVectorZeroValues( HYPRE_IJVector vector )
 /*--------------------------------------------------------------------------
  * hypre_IJVectorReadBinary
  *
- * Reads a vector from file stored in binary format.
- * The resulting IJMatrix is stored on host memory.
+ * Reads a vector from file stored in binary format. The resulting IJVector
+ * is stored on host memory. For information about the metadata contents
+ * contained in the file header, see hypre_ParVectorPrintBinaryIJ.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -113,10 +114,19 @@ hypre_IJVectorReadBinary( MPI_Comm         comm,
    /* Local variables */
    FILE                  *fp;
    char                   new_filename[HYPRE_MAX_FILE_NAME_LEN];
+   char                   msg[HYPRE_MAX_MSG_LEN];
    hypre_uint64           header[8];
    HYPRE_Int              myid;
    size_t                 count;
    HYPRE_Int              i, c;
+   HYPRE_Int              one = 1;
+
+   /* Exit if trying to read from big-endian machine */
+   if ((*(char*)&one) == 0)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Support to big-endian machines is incomplete!");
+      return hypre_error_flag;
+   }
 
    /* Open binary file */
    hypre_MPI_Comm_rank(comm, &myid);
@@ -137,13 +147,23 @@ hypre_IJVectorReadBinary( MPI_Comm         comm,
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read header entries\n");
       return hypre_error_flag;
    }
-   partitioning[0] = (HYPRE_BigInt) header[1];
-   partitioning[1] = (HYPRE_BigInt) header[2];
-   global_size     = (HYPRE_BigInt) header[3];
-   size            = (HYPRE_Int) header[4];
-   num_components  = (HYPRE_Int) header[5];
+
+   /* Check for header version */
+   if (header[0] != 1)
+   {
+      hypre_sprintf(msg, "Unsupported header version: %d", header[0]);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+      return hypre_error_flag;
+   }
+
+   /* Set local variables */
+   partitioning[0] = (HYPRE_BigInt) header[2];
+   partitioning[1] = (HYPRE_BigInt) header[3];
+   global_size     = (HYPRE_BigInt) header[4];
+   size            = (HYPRE_Int) header[5];
+   num_components  = (HYPRE_Int) header[6];
+   storage_method  = (HYPRE_Int) header[7];
    total_size      = size * num_components;
-   storage_method  = (HYPRE_Int) header[6];
 
    /* Sanity checks */
    if (storage_method == 1)
@@ -167,7 +187,7 @@ hypre_IJVectorReadBinary( MPI_Comm         comm,
    buffer = hypre_TAlloc(HYPRE_Complex, total_size, HYPRE_MEMORY_HOST);
 
    /* Read data */
-   if (header[0] == sizeof(hypre_float))
+   if (header[1] == sizeof(hypre_float))
    {
       f32buffer = hypre_TAlloc(hypre_float, total_size, HYPRE_MEMORY_HOST);
       if (fread((void*) f32buffer, sizeof(hypre_float), count, fp) != count)
@@ -184,7 +204,7 @@ hypre_IJVectorReadBinary( MPI_Comm         comm,
          buffer[i] = (HYPRE_Complex) f32buffer[i];
       }
    }
-   else if (header[0] == sizeof(hypre_double))
+   else if (header[1] == sizeof(hypre_double))
    {
       f64buffer = hypre_TAlloc(hypre_double, total_size, HYPRE_MEMORY_HOST);
       if (fread((void*) f64buffer, sizeof(hypre_double), count, fp) != count)

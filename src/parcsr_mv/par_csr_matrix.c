@@ -786,6 +786,26 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixPrintBinaryIJ
+ *
+ * Prints a ParCSRMatrix in binary format. The data from each process is
+ * printed to a separate file. Metadata info about the matrix is printed in
+ * the header section of every file, and it is followed by the raw data, i.e.,
+ * row, column, and coefficients.
+ *
+ * The header section is composed by 11 entries stored in 88 bytes (8 bytes
+ * each) and their meanings are:
+ *
+ *    0) Header version
+ *    1) Number of bytes for storing an integer type (row and columns)
+ *    2) Number of bytes for storing a real type (coefficients)
+ *    3) Number of rows in the matrix
+ *    4) Number of columns in the matrix
+ *    5) Number of nonzero coefficients in the matrix
+ *    6) Number of local nonzero coefficients in the current matrix block
+ *    7) Global index of the first row of the current matrix block
+ *    8) Global index of the last row of the current matrix block
+ *    9) Global index of the first column in the diagonal matrix block
+ *   10) Global index of the last column in the diagonal matrix block
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -822,7 +842,7 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
    /* Local variables */
    char                  new_filename[HYPRE_MAX_FILE_NAME_LEN];
    FILE                 *fp;
-   hypre_uint64          header[8];
+   hypre_uint64          header[11];
    size_t                count;
    HYPRE_Int             one = 1;
    HYPRE_Int             myid, i, j, k;
@@ -843,6 +863,9 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
    /* Create temporary matrix on host memory if needed */
    h_matrix = (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE) ?
               hypre_ParCSRMatrixClone_v2(matrix, 1, HYPRE_MEMORY_HOST) : matrix;
+
+   /* Update global number of nonzeros */
+   hypre_ParCSRMatrixSetDNumNonzeros(h_matrix);
 
    /* Matrix variables */
    first_row_index = hypre_ParCSRMatrixFirstRowIndex(h_matrix);
@@ -881,18 +904,21 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
    }
 
    /*---------------------------------------------
-    * Write header (64 bytes)
+    * Write header (88 bytes)
     *---------------------------------------------*/
 
-   count = 8;
-   header[0] = (hypre_uint64) sizeof(HYPRE_BigInt);
-   header[1] = (hypre_uint64) sizeof(HYPRE_Complex);
-   header[2] = (hypre_uint64) diag_nnz + offd_nnz;
-   header[3] = (hypre_uint64) ilower;
-   header[4] = (hypre_uint64) iupper;
-   header[5] = (hypre_uint64) jlower;
-   header[6] = (hypre_uint64) jupper;
-   header[7] = (hypre_uint64) 1;
+   count = 11;
+   header[0]  = (hypre_uint64) 1; /* Header version */
+   header[1]  = (hypre_uint64) sizeof(HYPRE_BigInt);
+   header[2]  = (hypre_uint64) sizeof(HYPRE_Complex);
+   header[3]  = (hypre_uint64) hypre_ParCSRMatrixGlobalNumRows(h_matrix);;
+   header[4]  = (hypre_uint64) hypre_ParCSRMatrixGlobalNumCols(h_matrix);;
+   header[5]  = (hypre_uint64) hypre_ParCSRMatrixDNumNonzeros(h_matrix);
+   header[6]  = (hypre_uint64) diag_nnz + offd_nnz; /* local number of nonzeros*/
+   header[7]  = (hypre_uint64) ilower;
+   header[8]  = (hypre_uint64) iupper;
+   header[9]  = (hypre_uint64) jlower;
+   header[10] = (hypre_uint64) jupper;
    if (fwrite((const void*) header, sizeof(hypre_uint64), count, fp) != count)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not write all header entries\n");
@@ -902,11 +928,11 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
    /* Allocate memory for buffers */
    if (sizeof(HYPRE_BigInt) == sizeof(hypre_uint32))
    {
-      i32buffer = hypre_TAlloc(hypre_uint32, header[2], HYPRE_MEMORY_HOST);
+      i32buffer = hypre_TAlloc(hypre_uint32, header[6], HYPRE_MEMORY_HOST);
    }
    else if (sizeof(HYPRE_BigInt) == sizeof(hypre_uint64))
    {
-      i64buffer = hypre_TAlloc(hypre_uint64, header[2], HYPRE_MEMORY_HOST);
+      i64buffer = hypre_TAlloc(hypre_uint64, header[6], HYPRE_MEMORY_HOST);
    }
    else
    {
@@ -917,11 +943,11 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
    /* Allocate memory for buffers */
    if (sizeof(HYPRE_Complex) == sizeof(hypre_float))
    {
-      f32buffer = hypre_TAlloc(hypre_float, header[2], HYPRE_MEMORY_HOST);
+      f32buffer = hypre_TAlloc(hypre_float, header[6], HYPRE_MEMORY_HOST);
    }
    else if (sizeof(HYPRE_Complex) == sizeof(hypre_double))
    {
-      f64buffer = hypre_TAlloc(hypre_double, header[2], HYPRE_MEMORY_HOST);
+      f64buffer = hypre_TAlloc(hypre_double, header[6], HYPRE_MEMORY_HOST);
    }
    else
    {

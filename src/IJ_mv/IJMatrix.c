@@ -246,7 +246,8 @@ hypre_IJMatrixRead( const char     *filename,
  * hypre_IJMatrixReadBinary
  *
  * Reads a matrix from file stored in binary format. The resulting IJMatrix
- * is stored on host memory.
+ * is stored on host memory. For information about the metadata contents
+ * contained in the file header, see hypre_ParCSRMatrixPrintBinaryIJ.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -264,18 +265,26 @@ hypre_IJMatrixReadBinary( const char      *prefixname,
    hypre_double   *f64buffer = NULL;
 
    /* Matrix buffers */
-   HYPRE_Int       nrows;
+   HYPRE_Int       num_nonzeros;
    HYPRE_BigInt   *rows;
    HYPRE_BigInt   *cols;
    HYPRE_Complex  *vals;
 
    /* Local variables */
+   HYPRE_Int       one = 1;
    HYPRE_Int       myid;
-   char            filename[1024];
+   char            filename[1024], msg[1024];
    HYPRE_BigInt    ilower, iupper, jlower, jupper;
    size_t          i, count;
-   hypre_uint64    header[8];
+   hypre_uint64    header[11];
    FILE           *fp;
+
+   /* Exit if trying to read from big-endian machine */
+   if ((*(char*)&one) == 0)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Support to big-endian machines is incomplete!");
+      return hypre_error_flag;
+   }
 
    /* Set filename */
    hypre_MPI_Comm_rank(comm, &myid);
@@ -289,45 +298,46 @@ hypre_IJMatrixReadBinary( const char      *prefixname,
    }
 
    /*---------------------------------------------
-    * Read header (64 bytes) from file
+    * Read header (88 bytes) from file
     *---------------------------------------------*/
 
-   count = 8;
+   count = 11;
    if (fread(header, sizeof(hypre_uint64), count, fp) != count)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not read header entries\n");
       return EXIT_FAILURE;
    }
 
-   /* Exit if trying to read from big-endian machine */
-   if ((*(char*)&header[7]) == 0)
+   /* Check for header version */
+   if (header[0] != 1)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Support to big-endian machines is incomplete!");
+      hypre_sprintf(msg, "Unsupported header version: %d", header[0]);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
       return hypre_error_flag;
    }
 
    /* Check for integer overflow */
-   if (header[2] > HYPRE_INT_MAX)
+   if (header[6] > HYPRE_INT_MAX)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Detected integer overflow!");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Detected integer overflow at 7th header entry");
       return hypre_error_flag;
    }
-   nrows = (HYPRE_Int) header[2];
+   num_nonzeros = (HYPRE_Int) header[6];
 
    /* Set variables */
-   ilower = (HYPRE_BigInt) header[3];
-   iupper = (HYPRE_BigInt) header[4];
-   jlower = (HYPRE_BigInt) header[5];
-   jupper = (HYPRE_BigInt) header[6];
+   ilower = (HYPRE_BigInt) header[7];
+   iupper = (HYPRE_BigInt) header[8];
+   jlower = (HYPRE_BigInt) header[9];
+   jupper = (HYPRE_BigInt) header[10];
 
    /* Allocate memory for row/col buffers */
-   if (header[0] == sizeof(hypre_uint32))
+   if (header[1] == sizeof(hypre_uint32))
    {
-      i32buffer = hypre_TAlloc(hypre_uint32, header[2], HYPRE_MEMORY_HOST);
+      i32buffer = hypre_TAlloc(hypre_uint32, num_nonzeros, HYPRE_MEMORY_HOST);
    }
-   else if (header[0] == sizeof(hypre_uint64))
+   else if (header[1] == sizeof(hypre_uint64))
    {
-      i64buffer = hypre_TAlloc(hypre_uint64, header[2], HYPRE_MEMORY_HOST);
+      i64buffer = hypre_TAlloc(hypre_uint64, num_nonzeros, HYPRE_MEMORY_HOST);
    }
    else
    {
@@ -336,13 +346,13 @@ hypre_IJMatrixReadBinary( const char      *prefixname,
    }
 
    /* Allocate memory for buffers */
-   if (header[1] == sizeof(hypre_float))
+   if (header[2] == sizeof(hypre_float))
    {
-      f32buffer = hypre_TAlloc(hypre_float, header[2], HYPRE_MEMORY_HOST);
+      f32buffer = hypre_TAlloc(hypre_float, num_nonzeros, HYPRE_MEMORY_HOST);
    }
-   else if (header[1] == sizeof(hypre_double))
+   else if (header[2] == sizeof(hypre_double))
    {
-      f64buffer = hypre_TAlloc(hypre_double, header[2], HYPRE_MEMORY_HOST);
+      f64buffer = hypre_TAlloc(hypre_double, num_nonzeros, HYPRE_MEMORY_HOST);
    }
    else
    {
@@ -354,8 +364,8 @@ hypre_IJMatrixReadBinary( const char      *prefixname,
     * Read indices from file
     *---------------------------------------------*/
 
-   count = (size_t) header[2];
-   rows = hypre_TAlloc(HYPRE_BigInt, count, HYPRE_MEMORY_HOST);
+   count = (size_t) num_nonzeros;
+   rows = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_HOST);
    if (i32buffer)
    {
       if (fread(i32buffer, sizeof(hypre_uint32), count, fp) != count)
@@ -367,7 +377,7 @@ hypre_IJMatrixReadBinary( const char      *prefixname,
 #ifdef HYPRE_USING_OPENMP
       #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-      for (i = 0; i < count; i++)
+      for (i = 0; i < num_nonzeros; i++)
       {
          rows[i] = (HYPRE_BigInt) i32buffer[i];
       }
@@ -383,7 +393,7 @@ hypre_IJMatrixReadBinary( const char      *prefixname,
 #ifdef HYPRE_USING_OPENMP
       #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-      for (i = 0; i < count; i++)
+      for (i = 0; i < num_nonzeros; i++)
       {
          rows[i] = (HYPRE_BigInt) i64buffer[i];
       }
@@ -393,8 +403,8 @@ hypre_IJMatrixReadBinary( const char      *prefixname,
     * Read column indices from file
     *---------------------------------------------*/
 
-   count = (size_t) header[2];
-   cols = hypre_TAlloc(HYPRE_BigInt, count, HYPRE_MEMORY_HOST);
+   count = (size_t) num_nonzeros;
+   cols = hypre_TAlloc(HYPRE_BigInt, num_nonzeros, HYPRE_MEMORY_HOST);
    if (i32buffer)
    {
       if (fread(i32buffer, sizeof(hypre_uint32), count, fp) != count)
@@ -406,7 +416,7 @@ hypre_IJMatrixReadBinary( const char      *prefixname,
 #ifdef HYPRE_USING_OPENMP
       #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-      for (i = 0; i < count; i++)
+      for (i = 0; i < num_nonzeros; i++)
       {
          cols[i] = (HYPRE_BigInt) i32buffer[i];
       }
@@ -422,7 +432,7 @@ hypre_IJMatrixReadBinary( const char      *prefixname,
 #ifdef HYPRE_USING_OPENMP
       #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-      for (i = 0; i < count; i++)
+      for (i = 0; i < num_nonzeros; i++)
       {
          cols[i] = (HYPRE_BigInt) i64buffer[i];
       }
@@ -436,8 +446,7 @@ hypre_IJMatrixReadBinary( const char      *prefixname,
     * Read matrix coefficients from file
     *---------------------------------------------*/
 
-   count = (size_t) header[2];
-   vals = hypre_TAlloc(HYPRE_Complex, count, HYPRE_MEMORY_HOST);
+   vals = hypre_TAlloc(HYPRE_Complex, num_nonzeros, HYPRE_MEMORY_HOST);
    if (f32buffer)
    {
       if (fread(f32buffer, sizeof(hypre_float), count, fp) != count)
@@ -449,7 +458,7 @@ hypre_IJMatrixReadBinary( const char      *prefixname,
 #ifdef HYPRE_USING_OPENMP
       #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-      for (i = 0; i < count; i++)
+      for (i = 0; i < num_nonzeros; i++)
       {
          vals[i] = (HYPRE_Complex) f32buffer[i];
       }
@@ -465,7 +474,7 @@ hypre_IJMatrixReadBinary( const char      *prefixname,
 #ifdef HYPRE_USING_OPENMP
       #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-      for (i = 0; i < count; i++)
+      for (i = 0; i < num_nonzeros; i++)
       {
          vals[i] = (HYPRE_Complex) f64buffer[i];
       }
@@ -485,7 +494,7 @@ hypre_IJMatrixReadBinary( const char      *prefixname,
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &matrix);
    HYPRE_IJMatrixSetObjectType(matrix, type);
    HYPRE_IJMatrixInitialize_v2(matrix, HYPRE_MEMORY_HOST);
-   HYPRE_IJMatrixSetValues(matrix, nrows, NULL, rows, cols, vals);
+   HYPRE_IJMatrixSetValues(matrix, num_nonzeros, NULL, rows, cols, vals);
    HYPRE_IJMatrixAssemble(matrix);
 
    /* Set output pointer */
