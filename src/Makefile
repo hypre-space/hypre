@@ -158,6 +158,7 @@ test: all
 check:
 	@ \
 	echo "Checking the library ..."; \
+	set -e; \
 	(cd test; $(MAKE) all); \
 	(cd test; $(CHECKRUN) ./ij $(PARMS) 2> ij.err); \
 	(cd test; $(CHECKRUN) ./struct $(PARMS) 2> struct.err); \
@@ -167,6 +168,7 @@ check:
 checkpar:
 	@ \
         echo "Checking the library ..."; \
+        set -e; \
         (cd test; $(MAKE) all); \
         echo "Testing IJ ..."; \
         (cd test; ./runtest.sh -tol 1.e-06 -mpi "$(CHECKRUN)" TEST_ij/solvers.sh); \
