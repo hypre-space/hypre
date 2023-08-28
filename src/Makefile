@@ -8,6 +8,10 @@ default: all
 # Include all variables defined by configure
 include config/Makefile.config
 
+# Tolerance level for checkpar tests
+# The value of the variable can be set when calling `make checkpar`
+HYPRE_CHECKPAR_TOL ?= 1e-6
+
 # These are the directories for internal blas, lapack and general utilities
 HYPRE_BASIC_DIRS =\
  blas\
@@ -171,15 +175,15 @@ checkpar:
         set -e; \
         (cd test; $(MAKE) all); \
         echo "Testing IJ ..."; \
-        (cd test; ./runtest.sh -atol 1.e-06 -mpi "$(CHECKRUN)" TEST_ij/solvers.sh); \
+        (cd test; ./runtest.sh -atol $(HYPRE_CHECKPAR_TOL) -mpi "$(CHECKRUN)" TEST_ij/solvers.sh); \
         (cd test; ./checktest.sh); \
         (cd test; ./cleantest.sh); \
         echo "Testing Struct ..."; \
-        (cd test; ./runtest.sh -atol 1.e-06 -mpi "$(CHECKRUN)" TEST_struct/solvers.sh); \
+        (cd test; ./runtest.sh -atol $(HYPRE_CHECKPAR_TOL) -mpi "$(CHECKRUN)" TEST_struct/solvers.sh); \
         (cd test; ./checktest.sh); \
         (cd test; ./cleantest.sh); \
         echo "Testing SStruct ..."; \
-        (cd test; ./runtest.sh -atol 1.e-06 -mpi "$(CHECKRUN)" TEST_sstruct/solvers.sh); \
+        (cd test; ./runtest.sh -atol $(HYPRE_CHECKPAR_TOL) -mpi "$(CHECKRUN)" TEST_sstruct/solvers.sh); \
         (cd test; ./checktest.sh); \
         (cd test; ./cleantest.sh); 
 
