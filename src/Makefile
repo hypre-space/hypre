@@ -171,15 +171,15 @@ checkpar:
         set -e; \
         (cd test; $(MAKE) all); \
         echo "Testing IJ ..."; \
-        (cd test; ./runtest.sh -tol 1.e-06 -mpi "$(CHECKRUN)" TEST_ij/solvers.sh); \
+        (cd test; ./runtest.sh -atol 1.e-06 -mpi "$(CHECKRUN)" TEST_ij/solvers.sh); \
         (cd test; ./checktest.sh); \
         (cd test; ./cleantest.sh); \
         echo "Testing Struct ..."; \
-        (cd test; ./runtest.sh -tol 1.e-06 -mpi "$(CHECKRUN)" TEST_struct/solvers.sh); \
+        (cd test; ./runtest.sh -atol 1.e-06 -mpi "$(CHECKRUN)" TEST_struct/solvers.sh); \
         (cd test; ./checktest.sh); \
         (cd test; ./cleantest.sh); \
         echo "Testing SStruct ..."; \
-        (cd test; ./runtest.sh -tol 1.e-06 -mpi "$(CHECKRUN)" TEST_sstruct/solvers.sh); \
+        (cd test; ./runtest.sh -atol 1.e-06 -mpi "$(CHECKRUN)" TEST_sstruct/solvers.sh); \
         (cd test; ./checktest.sh); \
         (cd test; ./cleantest.sh); 
 
