@@ -146,6 +146,20 @@ typedef struct
 
    /* Data for Gaussian elimination F-relaxation */
    hypre_ParAMGData    **GSElimData;
+
+   /* HYPRE_ILU options */
+   HYPRE_Int            ilu_lfil;
+   HYPRE_Int            *level_ilu_lfil;
+   HYPRE_Int            ilu_type;
+   HYPRE_Int            *level_ilu_type;
+   HYPRE_Int            ilu_max_row_nnz;
+   HYPRE_Int            *level_ilu_max_rownnz;
+   HYPRE_Int            ilu_max_iter;
+   HYPRE_Int            *level_ilu_maxiter;
+   HYPRE_Real           ilu_droptol;
+   HYPRE_Real           *level_ilu_droptol;
+   HYPRE_Int            ilu_reordering_type;
+   HYPRE_Int            *level_ilu_local_reordering;
 } hypre_ParMGRData;
 
 /*--------------------------------------------------------------------------
@@ -188,5 +202,10 @@ typedef struct
 #define hypre_ParMGRDataB(data, i)                  ((data) -> B_array[i])
 #define hypre_ParMGRDataBFFArray(data)              ((data) -> B_FF_array)
 #define hypre_ParMGRDataBFF(data, i)                ((data) -> B_FF_array[i])
-
+#define hypre_ParMGRDataILUType(data) ((data)->ilu_type)
+#define hypre_ParMGRDataILUFillLevel(data) ((data)->ilu_lfil)
+#define hypre_ParMGRDataILUMaxRowNnz(data) ((data)->ilu_max_row_nnz)
+#define hypre_ParMGRDataILUDroptol(data) ((data)->ilu_droptol)
+#define hypre_ParMGRDataILUMaxIter(data) ((data)->ilu_max_iter)
+#define hypre_ParMGRDataILULocalReordering(data) ((data)->ilu_reordering_type)
 #endif

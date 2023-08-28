@@ -533,9 +533,9 @@ HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver solver,
  * HYPRE_MGRSetGlobalsmoothType
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetGlobalSmoothType( HYPRE_Solver solver, HYPRE_Int iter_type )
+HYPRE_MGRSetGlobalSmoothType( HYPRE_Solver solver, HYPRE_Int smooth_type )
 {
-   return hypre_MGRSetGlobalSmoothType(solver, iter_type);
+   return hypre_MGRSetGlobalSmoothType(solver, smooth_type);
 }
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetLevelsmoothType
@@ -594,4 +594,136 @@ HYPRE_Int
 HYPRE_MGRGetFinalRelativeResidualNorm( HYPRE_Solver solver, HYPRE_Real *res_norm )
 {
    return hypre_MGRGetFinalRelativeResidualNorm(solver, res_norm);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetILUType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetILUType( HYPRE_Solver  solver,
+                           HYPRE_Int         ilu_type)
+{
+   return ( hypre_MGRSetILUType( (void *) solver, ilu_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetLevelILUType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetLevelILUType( HYPRE_Solver  solver,
+                           HYPRE_Int         *ilu_type)
+{
+   return ( hypre_MGRSetLevelILUType( (void *) solver, ilu_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetILULevel
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetILULevel( HYPRE_Solver  solver,
+                            HYPRE_Int         ilu_lfil)
+{
+   return ( hypre_MGRSetILULevel( (void *) solver, ilu_lfil ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetLevelILULevel
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetLevelILULevel( HYPRE_Solver  solver,
+                            HYPRE_Int         *ilu_lfil)
+{
+   return ( hypre_MGRSetLevelILULevel( (void *) solver, ilu_lfil ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetILUMaxRowNnz
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetILUMaxRowNnz( HYPRE_Solver  solver,
+                                HYPRE_Int         ilu_max_row_nnz)
+{
+   return ( hypre_MGRSetILUMaxRowNnz( (void *) solver, ilu_max_row_nnz ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetLevelILUMaxRowNnz
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetLevelILUMaxRowNnz( HYPRE_Solver  solver,
+                                HYPRE_Int        * ilu_max_row_nnz)
+{
+   return ( hypre_MGRsetLevelILUMaxRowNnz( (void *) solver, ilu_max_row_nnz ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetILUMaxIter
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetILUMaxIter( HYPRE_Solver  solver,
+                              HYPRE_Int         ilu_max_iter)
+{
+   return ( hypre_MGRSetILUMaxIter( (void *) solver, ilu_max_iter ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetLevelILUMaxIter
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetLevelILUMaxIter( HYPRE_Solver  solver,
+                              HYPRE_Int         *ilu_max_iter)
+{
+   return ( hypre_MGRSetLevelILUMaxIter( (void *) solver, ilu_max_iter ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetILUDroptol
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetILUDroptol( HYPRE_Solver  solver,
+                              HYPRE_Real        ilu_droptol)
+{
+   return ( hypre_MGRSetILUDroptol( (void *) solver, ilu_droptol ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetLevelILUDroptol
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetLevelILUDroptol( HYPRE_Solver  solver,
+                              HYPRE_Real        *ilu_droptol)
+{
+   return ( hypre_MGRSetLevelILUDroptol( (void *) solver, ilu_droptol ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetILULocalReordering
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetILULocalReordering( HYPRE_Solver  solver,
+                                      HYPRE_Int         ilu_reordering_type)
+{
+   return ( hypre_MGRSetILULocalReordering( (void *) solver, ilu_reordering_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetLevelILULocalReordering
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetLevelILULocalReordering( HYPRE_Solver  solver,
+                                      HYPRE_Int         *ilu_reordering_type)
+{
+   return ( hypre_MGRSetILULocalReordering( (void *) solver, ilu_reordering_type ) );
 }

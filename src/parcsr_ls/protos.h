@@ -2246,6 +2246,18 @@ HYPRE_Int hypre_MGRSetLogging( void *mgr_vdata, HYPRE_Int logging );
 HYPRE_Int hypre_MGRSetMaxIter( void *mgr_vdata, HYPRE_Int max_iter );
 HYPRE_Int hypre_MGRSetPMaxElmts( void *mgr_vdata, HYPRE_Int P_max_elmts );
 HYPRE_Int hypre_MGRSetTol( void *mgr_vdata, HYPRE_Real tol );
+HYPRE_Int hypre_MGRSetILUType( void *vdata, HYPRE_Int ilu_type );
+HYPRE_Int hypre_MGRSetLevelILUType( void *vdata, HYPRE_Int *ilu_type );
+HYPRE_Int hypre_MGRSetILULevel( void *data, HYPRE_Int ilu_lfil );
+HYPRE_Int hypre_MGRSetLevelILULevel( void *data, HYPRE_Int *ilu_lfil );
+HYPRE_Int hypre_MGRSetILUDroptol( void *data, HYPRE_Real ilu_droptol );
+HYPRE_Int hypre_MGRSetLevelILUDroptol( void *data, HYPRE_Real *ilu_droptol );
+HYPRE_Int hypre_MGRSetMaxIter( void *data, HYPRE_Int ilu_max_iter );
+HYPRE_Int hypre_MGRSetLevelMaxIter( void *data, HYPRE_Int *ilu_max_iter );
+HYPRE_Int hypre_MGRSetILUMaxRowNnz( void *data, HYPRE_Int ilu_max_row_nnz );
+HYPRE_Int hypre_MGRSetLevelILUMaxRowNnz( void *data, HYPRE_Int *ilu_max_row_nnz );
+HYPRE_Int hypre_MGRSetILULocalReordering( void *data,  HYPRE_Int ilu_reordering_type );                           
+HYPRE_Int hypre_MGRSetLevelILULocalReordering( void *data,  HYPRE_Int *ilu_reordering_type );                           
 #ifdef HYPRE_USING_DSUPERLU
 void *hypre_MGRDirectSolverCreate( void );
 HYPRE_Int hypre_MGRDirectSolverSetup( void *solver, hypre_ParCSRMatrix *A,
