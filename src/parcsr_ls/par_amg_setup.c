@@ -364,16 +364,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                         "WARNING: Changing to node-based coarsening because LN of GM interpolation has been specified via HYPRE_BoomerAMGSetInterpVecVariant.\n");
    }
 
-   /* Verify that settings are correct for solving systmes */
+   /* Verify that settings are correct for solving systems */
    /* If the user has specified either a block interpolation or a block relaxation then
-      we need to make sure the other has been choosen as well  - so we can be
+      we need to make sure the other has been chosen as well  - so we can be
       in "block mode" - storing only block matrices on the coarse levels*/
    /* Furthermore, if we are using systems and nodal = 0, then
       we will change nodal to 1 */
-   /* probably should disable stuff like smooth num levels at some point */
+   /* probably should disable stuff like smooth number levels at some point */
 
 
-   if (grid_relax_type[0] >= 20) /* block relaxation choosen */
+   if (grid_relax_type[0] >= 20 && grid_relax_type[0] != 30 && grid_relax_type[0] != 88 && grid_relax_type[0] != 89) /* block relaxation chosen */
    {
 
       if (!((interp_type >= 20 && interp_type != 100) || interp_type == 11 || interp_type == 10 ) )
@@ -881,7 +881,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
          if (grid_relax_type[j] ==  3 || grid_relax_type[j] ==  4 || grid_relax_type[j] ==  6 ||
              grid_relax_type[j] ==  8 || grid_relax_type[j] == 13 || grid_relax_type[j] == 14 ||
-             grid_relax_type[j] == 11 || grid_relax_type[j] == 12)
+             grid_relax_type[j] == 11 || grid_relax_type[j] == 12 || grid_relax_type[j] == 88 ||
+             grid_relax_type[j] == 89)
          {
             needZ = hypre_max(needZ, 1);
             break;
@@ -3240,7 +3241,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
        grid_relax_type[1] == 12 || grid_relax_type[2] == 12 || grid_relax_type[3] == 12 ||
        grid_relax_type[1] == 13 || grid_relax_type[2] == 13 || grid_relax_type[3] == 13 ||
        grid_relax_type[1] == 14 || grid_relax_type[2] == 14 || grid_relax_type[3] == 14 ||
-       grid_relax_type[1] == 18 || grid_relax_type[2] == 18 || grid_relax_type[3] == 18)
+       grid_relax_type[1] == 18 || grid_relax_type[2] == 18 || grid_relax_type[3] == 18 ||
+       grid_relax_type[1] == 30 || grid_relax_type[2] == 30 || grid_relax_type[3] == 30 ||
+       grid_relax_type[1] == 88 || grid_relax_type[2] == 88 || grid_relax_type[3] == 88 ||
+       grid_relax_type[1] == 89 || grid_relax_type[2] == 89 || grid_relax_type[3] == 89)
    {
       l1_norms = hypre_CTAlloc(hypre_Vector*, num_levels, HYPRE_MEMORY_HOST);
       hypre_ParAMGDataL1Norms(amg_data) = l1_norms;
@@ -3286,8 +3290,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_GpuProfilingPushRange(nvtx_name);
 
       if (j < num_levels - 1 &&
-          (grid_relax_type[1] == 8 || grid_relax_type[1] == 13 || grid_relax_type[1] == 14 ||
-           grid_relax_type[2] == 8 || grid_relax_type[2] == 13 || grid_relax_type[2] == 14))
+          (grid_relax_type[1] == 8 || grid_relax_type[1] == 89 || grid_relax_type[1] == 13 || grid_relax_type[1] == 14 ||
+           grid_relax_type[2] == 8 || grid_relax_type[2] == 89 || grid_relax_type[2] == 13 || grid_relax_type[2] == 14))
       {
          if (relax_order)
          {
@@ -3299,9 +3303,41 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
       }
       else if (j == num_levels - 1 &&
-               (grid_relax_type[3] == 8 || grid_relax_type[3] == 13 || grid_relax_type[3] == 14))
+               (grid_relax_type[3] == 8 || grid_relax_type[3] == 89 || grid_relax_type[3] == 13 || grid_relax_type[3] == 14))
       {
          hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norm_data);
+      }
+
+      if (j < num_levels - 1 && (grid_relax_type[1] == 30 || grid_relax_type[2] == 30))
+      {
+         if (relax_order)
+         {
+            hypre_ParCSRComputeL1Norms(A_array[j], 3, hypre_IntArrayData(CF_marker_array[j]), &l1_norm_data);
+         }
+         else
+         {
+            hypre_ParCSRComputeL1Norms(A_array[j], 3, NULL, &l1_norm_data);
+         }
+      }
+      else if (j == num_levels - 1 && grid_relax_type[3] == 30)
+      {
+         hypre_ParCSRComputeL1Norms(A_array[j], 3, NULL, &l1_norm_data);
+      }
+
+      if (j < num_levels - 1 && (grid_relax_type[1] == 88 || grid_relax_type[2] == 88 ))
+      {
+         if (relax_order)
+         {
+            hypre_ParCSRComputeL1Norms(A_array[j], 6, hypre_IntArrayData(CF_marker_array[j]), &l1_norm_data);
+         }
+         else
+         {
+            hypre_ParCSRComputeL1Norms(A_array[j], 6, NULL, &l1_norm_data);
+         }
+      }
+      else if (j == num_levels - 1 && (grid_relax_type[3] == 88))
+      {
+         hypre_ParCSRComputeL1Norms(A_array[j], 6, NULL, &l1_norm_data);
       }
 
       if (j < num_levels - 1 && (grid_relax_type[1] == 18 || grid_relax_type[2] == 18))
