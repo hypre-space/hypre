@@ -957,6 +957,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    agg_P_max_elmts = hypre_ParAMGDataAggPMaxElmts(amg_data);
    agg_P12_max_elmts = hypre_ParAMGDataAggP12MaxElmts(amg_data);
    jacobi_trunc_threshold = hypre_ParAMGDataJacobiTruncThreshold(amg_data);
+   smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
    if (smooth_num_levels > level)
    {
       smoother = hypre_CTAlloc(HYPRE_Solver, smooth_num_levels, HYPRE_MEMORY_HOST);
