@@ -983,6 +983,125 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_ParVectorPrintBinaryIJ
+ *
+ * Prints a ParVector in binary format. The data from each process is
+ * printed to a separate file. Metadata info about the vector is printed in
+ * the header section of every file, and followed by the vector entries
+ *
+ * The header section is composed by 8 entries stored in 64 bytes (8 bytes
+ * each) and their meanings are:
+ *
+ *    0) Header version
+ *    1) Number of bytes for storing a real type (vector entries)
+ *    2) Global index of the first vector entry in this process
+ *    3) Global index of the last vector entry in this process
+ *    4) Number of entries of a global vector
+ *    5) Number of entries of a local vector
+ *    6) Number of components of a vector
+ *    7) Storage method for multi-component vectors
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorPrintBinaryIJ( hypre_ParVector *par_vector,
+                              const char      *filename )
+{
+   MPI_Comm               comm = hypre_ParVectorComm(par_vector);
+   HYPRE_BigInt           global_size = hypre_ParVectorGlobalSize(par_vector);
+   HYPRE_BigInt          *partitioning = hypre_ParVectorPartitioning(par_vector);
+   HYPRE_MemoryLocation   memory_location = hypre_ParVectorMemoryLocation(par_vector);
+
+   hypre_ParVector       *h_parvector;
+   hypre_Vector          *h_vector;
+   HYPRE_Int              size;
+   HYPRE_Int              num_components;
+   HYPRE_Int              total_size;
+   HYPRE_Int              storage_method;
+
+   /* Local variables */
+   char                   new_filename[HYPRE_MAX_FILE_NAME_LEN];
+   FILE                  *fp;
+   size_t                 count;
+   hypre_uint64           header[8];
+   HYPRE_Int              one = 1;
+   HYPRE_Complex         *data;
+   HYPRE_Int              myid;
+
+   /* Exit if trying to write from big-endian machine */
+   if ((*(char*)&one) == 0)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Support to big-endian machines is incomplete!\n");
+      return hypre_error_flag;
+   }
+
+   /* MPI variables */
+   hypre_MPI_Comm_rank(comm, &myid);
+
+   /* Create temporary vector on host memory if needed */
+   h_parvector = (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE) ?
+                 hypre_ParVectorCloneDeep_v2(par_vector, HYPRE_MEMORY_HOST) : par_vector;
+
+
+   /* Local vector variables */
+   h_vector = hypre_ParVectorLocalVector(h_parvector);
+   num_components = hypre_VectorNumVectors(h_vector);
+   storage_method = hypre_VectorMultiVecStorageMethod(h_vector);
+   data = hypre_VectorData(h_vector);
+   size = hypre_VectorSize(h_vector);
+   total_size = size * num_components;
+
+   /* Open binary file */
+   hypre_sprintf(new_filename, "%s.%05d.bin", filename, myid);
+   if ((fp = fopen(new_filename, "wb")) == NULL)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not open output file!");
+      return hypre_error_flag;
+   }
+
+   /*---------------------------------------------
+    * Write header (64 bytes)
+    *---------------------------------------------*/
+
+   count = 8;
+   header[0] = (hypre_uint64) 1; /* Header version */
+   header[1] = (hypre_uint64) sizeof(HYPRE_Complex);
+   header[2] = (hypre_uint64) partitioning[0];
+   header[3] = (hypre_uint64) partitioning[1];
+   header[4] = (hypre_uint64) global_size;
+   header[5] = (hypre_uint64) size;
+   header[6] = (hypre_uint64) num_components;
+   header[7] = (hypre_uint64) storage_method;
+   if (fwrite((const void*) header, sizeof(hypre_uint64), count, fp) != count)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not write all header entries\n");
+      return hypre_error_flag;
+   }
+
+   /*---------------------------------------------
+    * Write vector coefficients
+    *---------------------------------------------*/
+
+   count = fwrite((const void*) data, sizeof(HYPRE_Complex), total_size, fp);
+   if (count != total_size)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not write all entries\n");
+      return hypre_error_flag;
+   }
+
+   /*---------------------------------------------
+    * Finalize
+    *---------------------------------------------*/
+
+   fclose(fp);
+   if (h_parvector != par_vector)
+   {
+      hypre_ParVectorDestroy(h_parvector);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ParVectorReadIJ
  * Warning: wrong base for assumed partition if base > 0
  *--------------------------------------------------------------------------*/
