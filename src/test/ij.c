@@ -381,6 +381,7 @@ main( hypre_int argc,
    HYPRE_Real   agg_P12_trunc_factor  = 0; /* default value */
 
    HYPRE_Int    print_system = 0;
+   HYPRE_Int    print_solution = 0;
    HYPRE_Int    rel_change = 0;
    HYPRE_Int    second_time = 0;
    HYPRE_Int    benchmark = 0;
@@ -2131,6 +2132,11 @@ main( hypre_int argc,
       {
          arg_index++;
          print_system = 1;
+      }
+      else if (strcmp(argv[arg_index], "-printsolution")==0)
+      {
+         arg_index++;
+         print_solution = 1;
       }
       /* BM Oct 23, 2006 */
       else if ( strcmp(argv[arg_index], "-plot_grids") == 0 )
@@ -4468,6 +4474,12 @@ main( hypre_int argc,
             HYPRE_BoomerAMGDDSolve(amgdd_solver, parcsr_A, b, x);
          }
 
+         if ((myid == 0) && (print_solution))
+         {
+            char filename[255];
+            sprintf(filename, "x.out_%d", i);
+            HYPRE_ParVectorPrint(x, filename);
+         }
          hypre_GpuProfilingPopRange();
 
          hypre_EndTiming(time_index);
