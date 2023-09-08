@@ -73,14 +73,17 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    omp_set_default_device(device_id);
+   hypre_HandleDevice(hypre_handle_) = device_id;
 #endif
 
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
+   hypre_HandleDevice(hypre_handle_) = device_id;
 #endif
 
 #if defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipSetDevice(device_id) );
+   hypre_HandleDevice(hypre_handle_) = device_id;
 #endif
 
 #if defined(HYPRE_USING_SYCL)
@@ -120,24 +123,54 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
 }
 
 HYPRE_Int
-hypre_GetDeviceMaxShmemSize(hypre_int device_id, hypre_Handle *hypre_handle_)
+hypre_GetDeviceMaxShmemSize(hypre_int  device_id,
+                            hypre_int *max_size_ptr,
+                            hypre_int *max_size_optin_ptr)
 {
-#if defined(HYPRE_USING_GPU)
    hypre_int max_size = 0, max_size_optin = 0;
-#endif
+
+   hypre_Handle *handle = hypre_handle();
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   if (!hypre_HandleDeviceMaxShmemPerBlockInited(handle))
+   {
+      if (device_id == -1)
+      {
+         hypre_GetDevice(&device_id);
+      }
 
 #if defined(HYPRE_USING_CUDA)
-   cudaDeviceGetAttribute(&max_size, cudaDevAttrMaxSharedMemoryPerBlock, device_id);
-   cudaDeviceGetAttribute(&max_size_optin, cudaDevAttrMaxSharedMemoryPerBlockOptin, device_id);
+      cudaDeviceGetAttribute(&max_size, cudaDevAttrMaxSharedMemoryPerBlock, device_id);
+      cudaDeviceGetAttribute(&max_size_optin, cudaDevAttrMaxSharedMemoryPerBlockOptin, device_id);
 #endif
-
 #if defined(HYPRE_USING_HIP)
-   hipDeviceGetAttribute(&max_size, hipDeviceAttributeMaxSharedMemoryPerBlock, device_id);
+      hipDeviceGetAttribute(&max_size, hipDeviceAttributeMaxSharedMemoryPerBlock, device_id);
 #endif
+      hypre_HandleDeviceMaxShmemPerBlock(handle)[0] = max_size;
+      hypre_HandleDeviceMaxShmemPerBlock(handle)[1] = max_size_optin;
 
-#if defined(HYPRE_USING_GPU)
-   hypre_HandleDeviceMaxShmemPerBlock(hypre_handle_)[0] = max_size;
-   hypre_HandleDeviceMaxShmemPerBlock(hypre_handle_)[1] = max_size_optin;
+      hypre_HandleDeviceMaxShmemPerBlockInited(handle) = 1;
+   }
+
+   if (max_size_ptr)
+   {
+      *max_size_ptr = hypre_HandleDeviceMaxShmemPerBlock(handle)[0];
+   }
+
+   if (max_size_optin_ptr)
+   {
+      *max_size_optin_ptr = hypre_HandleDeviceMaxShmemPerBlock(handle)[1];
+   }
+#else
+   if (max_size_ptr)
+   {
+      *max_size_ptr = max_size;
+   }
+
+   if (max_size_optin_ptr)
+   {
+      *max_size_optin_ptr = max_size_optin;
+   }
 #endif
 
    return hypre_error_flag;
@@ -238,6 +271,8 @@ hypre_GetDeviceLastError(void)
 HYPRE_Int
 HYPRE_DeviceInitialize(void)
 {
+   hypre_Handle *handle = hypre_handle();
+
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 #if defined(HYPRE_USING_SYCL)
    /* WM: note that for sycl, we need to do device setup again if reinitializing */
@@ -260,8 +295,9 @@ HYPRE_DeviceInitialize(void)
        */
       hypre_int device_id;
       hypre_GetDevice(&device_id);
-      hypre_SetDevice(device_id, _hypre_handle);
-      hypre_GetDeviceMaxShmemSize(device_id, _hypre_handle);
+      hypre_SetDevice(device_id, handle);
+
+      hypre_GetDeviceMaxShmemSize(device_id, NULL, NULL);
 
 #if defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
       cudaMemPool_t mempool;
@@ -273,26 +309,26 @@ HYPRE_DeviceInitialize(void)
       /* To include the cost of creating streams/cudahandles in HYPRE_Init */
       /* If not here, will be done at the first use */
 #if defined(HYPRE_USING_CUDA_STREAMS)
-      hypre_HandleComputeStream(_hypre_handle);
+      hypre_HandleComputeStream(handle);
 #endif
 
       /* A separate stream for prefetching */
-      //hypre_HandleCudaPrefetchStream(_hypre_handle);
+      //hypre_HandleCudaPrefetchStream(handle);
 
 #if defined(HYPRE_USING_CUBLAS)
-      hypre_HandleCublasHandle(_hypre_handle);
+      hypre_HandleCublasHandle(handle);
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
-      hypre_HandleCusparseHandle(_hypre_handle);
+      hypre_HandleCusparseHandle(handle);
 #endif
 
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
-      hypre_HandleCurandGenerator(_hypre_handle);
+      hypre_HandleCurandGenerator(handle);
 #endif
 
 #if defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
-      hypre_HandleVendorSolverHandle(_hypre_handle);
+      hypre_HandleVendorSolverHandle(handle);
 #endif
 
       /* Check if cuda arch flags in compiling match the device */
@@ -305,8 +341,8 @@ HYPRE_DeviceInitialize(void)
        * Make sure that device pool allocator has not been setup in HYPRE_Initialize,
        * otherwise users are not able to set all the parameters
        */
-      if ( hypre_HandleCubDevAllocator(_hypre_handle) ||
-           hypre_HandleCubUvmAllocator(_hypre_handle) )
+      if ( hypre_HandleCubDevAllocator(handle) ||
+           hypre_HandleCubUvmAllocator(handle) )
       {
          char msg[256];
          hypre_sprintf(msg, "%s %s", "ERROR: device pool allocators have been created in", __func__);
@@ -445,9 +481,10 @@ HYPRE_PrintDeviceInfo(void)
 #endif
 
 #if defined(HYPRE_USING_GPU)
+   hypre_int max_size = 0, max_size_optin = 0;
+   hypre_GetDeviceMaxShmemSize(dev, &max_size, &max_size_optin);
    hypre_printf("MaxSharedMemoryPerBlock %d, MaxSharedMemoryPerBlockOptin %d\n",
-                hypre_HandleDeviceMaxShmemPerBlock(hypre_handle())[0],
-                hypre_HandleDeviceMaxShmemPerBlock(hypre_handle())[1]);
+                max_size, max_size_optin);
 #endif
 
    return hypre_error_flag;
