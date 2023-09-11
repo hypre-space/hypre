@@ -741,14 +741,32 @@ HYPRE_Int HYPRE_BoomerAMGSetGridRelaxType(HYPRE_Solver  solver,
  *    - 4  : hybrid Gauss-Seidel or SOR, backward solve
  *    - 5  : hybrid chaotic Gauss-Seidel (works only with OpenMP)
  *    - 6  : hybrid symmetric Gauss-Seidel or SSOR
+ *    - 7  : Jacobi (uses Matvec)
  *    - 8  : \f$\ell_1\f$-scaled hybrid symmetric Gauss-Seidel
  *    - 9  : Gaussian elimination (only on coarsest level)
+ *    - 10 : On-processor direct forward solve for matrices with
+ *           triangular structure
+ *    - 11 : Two Stage approximation to GS. Uses the strict lower
+ *           part of the diagonal matrix
+ *    - 12 : Two Stage approximation to GS. Uses the strict lower
+ *           part of the diagonal matrix and a second iteration
+ *           for additional error approximation
  *    - 13 : \f$\ell_1\f$ Gauss-Seidel, forward solve
  *    - 14 : \f$\ell_1\f$ Gauss-Seidel, backward solve
  *    - 15 : CG (warning - not a fixed smoother - may require FGMRES)
  *    - 16 : Chebyshev
  *    - 17 : FCF-Jacobi
  *    - 18 : \f$\ell_1\f$-scaled jacobi
+ *    - 19 : Gaussian elimination (old version)
+ *    - 21 : The same as 8 except forcing serialization on CPU (#OMP-thread = 1)
+ *    - 29 : Direct solve: use Gaussian elimination & BLAS
+ *                        (with pivoting) (old version)
+ *    - 30 : Kaczmarz
+ *    - 88:  The same methods as 8 with a convergent l1-term
+ *    - 89:  Symmetric l1-hybrid Gauss-Seidel (i.e., 13 followed by 14)
+ *    - 98 : LU with pivoting
+ *    - 99 : LU with pivoting
+ *    -199 : Matvec with the inverse
  **/
 HYPRE_Int HYPRE_BoomerAMGSetRelaxType(HYPRE_Solver  solver,
                                       HYPRE_Int     relax_type);
