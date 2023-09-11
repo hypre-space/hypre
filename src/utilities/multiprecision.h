@@ -56,6 +56,10 @@ typedef enum
 #define BUILD_MP_FUNC 1
 #undef HYPRE_SINGLE
 #undef HYPRE_LONG_DOUBLE
+/* allow definition of global variables when building in DP 
+*  to avoid multiple definition errors 
+*/
+#define DEFINE_GLOBAL_VARIABLE 1
 #else
 #ifdef BUILD_MP_FUNC
 #undef BUILD_MP_FUNC
@@ -89,6 +93,7 @@ typedef enum
 //#define HYPRE_MULTIPRECISION_FUNC(a) a
 #define BUILD_MP_FUNC 1
 #define BUILD_NON_MP_FUNC 1
+#define DEFINE_GLOBAL_VARIABLE 1
 #endif
 
 /* Helper macros to generate multiprecision function declarations */
