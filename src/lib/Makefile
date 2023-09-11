@@ -7,7 +7,6 @@ include ../config/Makefile.config
 
 FEIHYPREFILES = ${HYPRE_FEI_HYPRE_FILES}
 FEMLIFILES = ${HYPRE_FEI_FEMLI_FILES}
-MATMATFILES = ${HYPRE_SRC_TOP_DIR}/matrix_matrix/*.o
 
 ifeq (${MP_BUILD}, 1) 
 PILUTFILES =  ${HYPRE_SRC_TOP_DIR}/distributed_ls/pilut/MuP_obj.dir/pilut_*/*.o
@@ -15,6 +14,7 @@ EUCLIDFILES = ${HYPRE_SRC_TOP_DIR}/distributed_ls/Euclid/MuP_obj.dir/Euclid_*/*.
 PARASAILSFILES = ${HYPRE_SRC_TOP_DIR}/distributed_ls/ParaSails/MuP_obj.dir/ParaSails_*/*.o
 IJMVFILES = ${HYPRE_SRC_TOP_DIR}/IJ_mv/MuP_obj.dir/IJ_mv_*/*.o
 DISTMATRIXFILES = ${HYPRE_SRC_TOP_DIR}/distributed_matrix/MuP_obj.dir/distributed_matrix_*/*.o
+MATMATFILES = ${HYPRE_SRC_TOP_DIR}/matrix_matrix/MuP_obj.dir/matrix_matrix_*/*.o
 KRYLOVFILES = ${HYPRE_SRC_TOP_DIR}/krylov/MuP_obj.dir/krylov_*/*.o
 SEQMVFILES = ${HYPRE_SRC_TOP_DIR}/seq_mv/MuP_obj.dir/seq_mv_*/*.o
 PARCSRMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_mv/MuP_obj.dir/parcsr_mv_*/*.o
@@ -44,6 +44,7 @@ EUCLIDFILES = ${HYPRE_EUCLID_FILES}
 PARASAILSFILES = ${HYPRE_PARASAILS_FILES}
 IJMVFILES = ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o
 DISTMATRIXFILES = ${HYPRE_SRC_TOP_DIR}/distributed_matrix/*.o
+MATMATFILES = ${HYPRE_SRC_TOP_DIR}/matrix_matrix/*.o
 KRYLOVFILES = ${HYPRE_SRC_TOP_DIR}/krylov/*.o
 SEQMVFILES = ${HYPRE_SRC_TOP_DIR}/seq_mv/*.o
 PARCSRMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.o
@@ -77,6 +78,7 @@ $(EUCLIDFILES)\
 $(PARASAILSFILES)\
 $(PILUTFILES)\
 $(DISTMATRIXFILES)\
+$(MATMATFILES)\
 $(KRYLOVFILES)\
 $(MATMATFILES)\
 $(MULTIVECFILES)\

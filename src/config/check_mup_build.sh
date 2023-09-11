@@ -40,6 +40,7 @@ MUP_DIRS="blas
       parcsr_mv
       parcsr_block_mv
       distributed_matrix
+      matrix_matrix
       IJ_mv
       parcsr_ls
       struct_mv

@@ -7,6 +7,10 @@
 
 #include "HYPRE_distributed_matrix_types.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "matrix_matrix_mup_func.h"
+#endif
+
 #ifdef PETSC_AVAILABLE
 /* HYPRE_ConvertPETScMatrixToDistributedMatrix.c */
 HYPRE_Int HYPRE_ConvertPETScMatrixToDistributedMatrix (Mat PETSc_matrix,
