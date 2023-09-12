@@ -131,6 +131,20 @@ distclean: clean
 ##################################################################
 
 # C
+ifeq (${MP_BUILD}, 1) 
+test_mp: test_mp.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+else
+test_mp:
+endif
+ifeq (${MP_BUILD}, 1) 
+test_mp_pcg: test_mp_pcg.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+else
+test_mp_pcg:
+endif
 
 ij: ij.o
 	@echo  "Building" $@ "... "
