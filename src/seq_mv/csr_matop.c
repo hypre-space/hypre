@@ -2002,7 +2002,7 @@ hypre_CSRMatrixScale( hypre_CSRMatrix *A,
    HYPRE_Int      i;
    HYPRE_Int      k = hypre_CSRMatrixNumNonzeros(A);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)

@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
@@ -57,6 +58,7 @@ hypre_ILUSolveLUDevice(hypre_ParCSRMatrix  *A,
    if (perm)
    {
 #if defined(HYPRE_USING_SYCL)
+      hypreSycl_gather(perm, perm + num_rows, ftemp_data, utemp_data);
 #else
       HYPRE_THRUST_CALL(gather, perm, perm + num_rows, ftemp_data, utemp_data);
 #endif
@@ -77,6 +79,7 @@ hypre_ILUSolveLUDevice(hypre_ParCSRMatrix  *A,
    if (perm)
    {
 #if defined(HYPRE_USING_SYCL)
+      hypreSycl_scatter(utemp_data, utemp_data + num_rows, perm, ftemp_data);
 #else
       HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + num_rows, perm, ftemp_data);
 #endif
@@ -265,6 +268,7 @@ hypre_ILUSolveLUIterDevice(hypre_ParCSRMatrix *A,
    if (perm)
    {
 #if defined(HYPRE_USING_SYCL)
+      hypreSycl_gather(perm, perm + num_rows, ftemp_data, utemp_data);
 #else
       HYPRE_THRUST_CALL(gather, perm, perm + num_rows, ftemp_data, utemp_data);
 #endif
@@ -283,6 +287,7 @@ hypre_ILUSolveLUIterDevice(hypre_ParCSRMatrix *A,
    if (perm)
    {
 #if defined(HYPRE_USING_SYCL)
+      hypreSycl_scatter(utemp_data, utemp_data + num_rows, perm, ftemp_data);
 #else
       HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + num_rows, perm, ftemp_data);
 #endif
@@ -467,6 +472,7 @@ hypre_ILUSolveSchurGMRESDevice(hypre_ParCSRMatrix  *A,
    if (perm)
    {
 #if defined(HYPRE_USING_SYCL)
+      hypreSycl_gather(perm, perm + n, ftemp_data, utemp_data);
 #else
       HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
 #endif
@@ -532,6 +538,7 @@ hypre_ILUSolveSchurGMRESDevice(hypre_ParCSRMatrix  *A,
    if (perm)
    {
 #if defined(HYPRE_USING_SYCL)
+      hypreSycl_scatter(utemp_data, utemp_data + n, perm, ftemp_data);
 #else
       HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + n, perm, ftemp_data);
 #endif
@@ -665,6 +672,7 @@ hypre_ILUSolveSchurGMRESJacIterDevice(hypre_ParCSRMatrix *A,
    if (perm)
    {
 #if defined(HYPRE_USING_SYCL)
+      hypreSycl_gather(perm, perm + n, ftemp_data, utemp_data);
 #else
       HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
 #endif
@@ -751,6 +759,7 @@ hypre_ILUSolveSchurGMRESJacIterDevice(hypre_ParCSRMatrix *A,
    if (perm)
    {
 #if defined(HYPRE_USING_SYCL)
+      hypreSycl_scatter(utemp_data, utemp_data + n, perm, ftemp_data);
 #else
       HYPRE_THRUST_CALL(scatter, utemp_data, utemp_data + n, perm, ftemp_data);
 #endif
@@ -963,6 +972,7 @@ hypre_ILUSolveRAPGMRESDevice(hypre_ParCSRMatrix   *A,
          if (perm)
          {
 #if defined(HYPRE_USING_SYCL)
+            hypreSycl_gather(perm, perm + n, utemp_data, ftemp_data);
 #else
             HYPRE_THRUST_CALL(gather, perm, perm + n, utemp_data, ftemp_data);
 #endif
@@ -1065,6 +1075,7 @@ hypre_ILUSolveRAPGMRESDevice(hypre_ParCSRMatrix   *A,
          if (perm)
          {
 #if defined(HYPRE_USING_SYCL)
+            hypreSycl_scatter(xtemp_data, xtemp_data + n, perm, ftemp_data);
 #else
             HYPRE_THRUST_CALL(scatter, xtemp_data, xtemp_data + n, perm, ftemp_data);
 #endif
@@ -1089,6 +1100,7 @@ hypre_ILUSolveRAPGMRESDevice(hypre_ParCSRMatrix   *A,
          if (perm)
          {
 #if defined(HYPRE_USING_SYCL)
+            hypreSycl_gather(perm, perm + n, ftemp_data, utemp_data);
 #else
             HYPRE_THRUST_CALL(gather, perm, perm + n, ftemp_data, utemp_data);
 #endif
@@ -1176,6 +1188,7 @@ hypre_ILUSolveRAPGMRESDevice(hypre_ParCSRMatrix   *A,
          if (perm)
          {
 #if defined(HYPRE_USING_SYCL)
+            hypreSycl_scatter(xtemp_data, xtemp_data + n, perm, ftemp_data);
 #else
             HYPRE_THRUST_CALL(scatter, xtemp_data, xtemp_data + n, perm, ftemp_data);
 #endif

@@ -2215,11 +2215,19 @@ hypre_CSRMatrixDiagMatrixFromMatrixDevice(hypre_CSRMatrix *A, HYPRE_Int type)
    return diag_mat;
 }
 
+#endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) */
+
+#if defined(HYPRE_USING_GPU)
+
 /*--------------------------------------------------------------------------
  * adj_functor (Used in hypre_CSRMatrixPermuteDevice)
  *--------------------------------------------------------------------------*/
 
+#if defined(HYPRE_USING_SYCL)
+struct adj_functor
+#else
 struct adj_functor : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
+#endif
 {
    HYPRE_Int *ia_;
 
@@ -2250,7 +2258,7 @@ struct bii_functor
       rb_ = rb;
    }
 
-   __host__ __device__ void operator()(HYPRE_Int i)
+   __host__ __device__ void operator()(HYPRE_Int i) const
    {
       const HYPRE_Int r = rb_[i];
       rb_[i] = ia_[p_[r]] + i - ib_[r];
@@ -2282,16 +2290,36 @@ hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix  *A,
    HYPRE_Int        *B_ii;
 
    /* Build B_i */
+#if defined(HYPRE_USING_SYCL)
+   oneapi::dpl::counting_iterator count(0);
+   hypreSycl_gather(perm,
+                    perm + num_rows,
+                    oneapi::dpl::make_transform_iterator(count, adj_functor(A_i)),
+                    B_i);
+#else
    HYPRE_THRUST_CALL(gather,
                      perm,
                      perm + num_rows,
                      thrust::make_transform_iterator(thrust::make_counting_iterator(0), adj_functor(A_i)),
                      B_i);
+#endif
    hypreDevice_IntegerExclusiveScan(num_rows + 1, B_i);
 
    /* Build B_ii (row indices array) */
    B_ii = hypre_TAlloc(HYPRE_Int, num_nonzeros, HYPRE_MEMORY_DEVICE);
    hypreDevice_CsrRowPtrsToIndices_v2(num_rows, num_nonzeros, B_i, B_ii);
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL(std::for_each,
+                     count,
+                     count + num_nonzeros,
+                     bii_functor(perm, A_i, B_i, B_ii));
+
+   /* Build B_j and B_a */
+   hypreSycl_gather( B_ii,
+                     B_ii + num_nonzeros,
+                     oneapi::dpl::make_zip_iterator(oneapi::dpl::make_permutation_iterator(rqperm, A_j), A_a),
+                     oneapi::dpl::make_zip_iterator(B_j, B_a));
+#else
    HYPRE_THRUST_CALL(for_each,
                      thrust::make_counting_iterator(0),
                      thrust::make_counting_iterator(num_nonzeros),
@@ -2304,16 +2332,13 @@ hypre_CSRMatrixPermuteDevice( hypre_CSRMatrix  *A,
                      thrust::make_zip_iterator(thrust::make_tuple(
                                                   thrust::make_permutation_iterator(rqperm, A_j), A_a)),
                      thrust::make_zip_iterator(thrust::make_tuple(B_j, B_a)));
+#endif
 
    /* Free memory */
    hypre_TFree(B_ii, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }
-
-#endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) */
-
-#if defined(HYPRE_USING_GPU)
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixTransposeDevice
@@ -2401,9 +2426,12 @@ hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
    hypre_SortCSRRocsparse(hypre_CSRMatrixNumRows(A), hypre_CSRMatrixNumCols(A),
                           hypre_CSRMatrixNumNonzeros(A), hypre_CSRMatrixGPUMatDescr(A),
                           hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A));
+#elif defined(HYPRE_USING_ONEMKLSPARSE)
+   HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::sort_matrix(*hypre_HandleComputeStream(hypre_handle()),
+                                                       hypre_CSRMatrixGPUMatHandle(A), {}).wait() );
 #else
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                     "hypre_CSRMatrixSortRow only implemented for cuSPARSE/rocSPARSE!\n");
+                     "hypre_CSRMatrixSortRow only implemented for cuSPARSE/rocSPARSE/oneMKLSparse!\n");
 #endif
 
    return hypre_error_flag;
