@@ -28,7 +28,8 @@ HEADERS =\
  par_vector.h
 
 FILES =\
- hypre_parcsr_mv_mp.c
+ hypre_parcsr_mv_mp.c\
+ HYPRE_parcsr_mv_mp.c
 
 CUFILES =\
  par_csr_matvec_device.c\
@@ -99,6 +100,9 @@ all: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_parcsr_mv.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/parcsr_mv_mup_func.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/hypre_parcsr_mv_mp.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/HYPRE_parcsr_mv_mp.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/hypre_parcsr_mv_mup.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 driver: driver.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
@@ -129,6 +133,9 @@ install: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/_hypre_parcsr_mv.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/parcsr_mv_mup_func.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/hypre_parcsr_mv_mp.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/HYPRE_parcsr_mv_mp.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/hypre_parcsr_mv_mup.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean: clean_mup

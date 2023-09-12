@@ -71,6 +71,7 @@ all: libHYPRE_krylov${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/krylov.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/lobpcg.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/krylov_mup_func.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/hypre_krylov_mup.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: all
@@ -78,6 +79,7 @@ install: all
 	cp -fR $(srcdir)/krylov.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/lobpcg.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/krylov_mup_func.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/hypre_krylov_mup.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean: clean_mup

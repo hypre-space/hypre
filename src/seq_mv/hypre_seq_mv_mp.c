@@ -11,9 +11,11 @@
  *
  *****************************************************************************/
 
-#include "seq_mv.h"
+#include "_hypre_utilities.h"
+#include "hypre_seq_mv_mp.h"
+#include "hypre_utilities_mup.h"
 
-#ifdef HYPRE_MIXED_PRECISION
+#if defined(HYPRE_MIXED_PRECISION)
 
 /******************************************************************************
  *
@@ -31,19 +33,59 @@ HYPRE_Int
 hypre_SeqVectorCopy_mp( hypre_Vector *x,
                      hypre_Vector *y )
 {
+/*
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
 
    hypre_GpuProfilingPushRange("SeqVectorCopy");
-
+*/
    /* determine type of output vector data  ==> Precision of y. */
    HYPRE_Precision precision = hypre_VectorPrecision (y);
 
-   HYPRE_Int      i;           
+   HYPRE_Int      i; 
+   HYPRE_Int      ierr = 0;             
 
    size_t size = hypre_min(hypre_VectorSize(x), hypre_VectorSize(y)) * hypre_VectorNumVectors(x);
 
+  if(precision == HYPRE_REAL_SINGLE)
+   {
+      hypre_double *x_data = hypre_VectorData(x);
+      hypre_float *y_data = hypre_VectorData(y);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+         for (i = 0; i < size; i++)
+            y_data[i] = (hypre_float)x_data[i];   
+   }
+   else if(precision == HYPRE_REAL_DOUBLE)
+   {
+      hypre_float *x_data = hypre_VectorData(x);
+      hypre_double *y_data = hypre_VectorData(y);   
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+         for (i = 0; i < size; i++)
+            y_data[i] = (hypre_double)x_data[i]; 
+   }
+   else if(precision == HYPRE_REAL_LONGDOUBLE)
+   {
+      hypre_double *x_data = hypre_VectorData(x);
+      hypre_long_double *y_data = hypre_VectorData(y);   
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+         for (i = 0; i < size; i++)
+            y_data[i] = (hypre_long_double)x_data[i]; 
+   }
+   else
+   {
+         hypre_printf_dbl("Error: Undefined precision type for Vector Copy! \n");
+         ierr = 2;   
+   }
+
+
+/*
    switch (precision)
    {
       case HYPRE_REAL_SINGLE:
@@ -51,31 +93,33 @@ hypre_SeqVectorCopy_mp( hypre_Vector *x,
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < size; i++)
-            (hypre_VectorData(y))[i] += (hypre_float)((hypre_VectorData(x))[i]);
+            (hypre_VectorData(y))[i] = (hypre_float)(hypre_VectorData(x))[i];
       break;
       case HYPRE_REAL_DOUBLE:
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < size; i++)
-            (hypre_VectorData(y))[i] += (hypre_double)((hypre_VectorData(x))[i]);
+            (hypre_VectorData(y))[i] = (hypre_double)(hypre_VectorData(x))[i];
       break;      	
       case HYPRE_REAL_LONGDOUBLE:
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i = 0; i < size; i++)
-            (hypre_VectorData(y))[i] += (hypre_long_double)((hypre_VectorData(x))[i]);
+            (hypre_VectorData(y))[i] = (hypre_long_double)(hypre_VectorData(x))[i];
       break;
       default:
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type for Vector Copy!\n");
+//         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type for Vector Copy!\n");
+         hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type for Vector Copy!\n");
    }
-
+*/   
+/*
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
    hypre_GpuProfilingPopRange();
-
+*/
    return hypre_error_flag;
 }
 
@@ -88,10 +132,11 @@ hypre_SeqVectorAxpy_mp( hypre_double alpha,
                      hypre_Vector *x,
                      hypre_Vector *y     )
 {
+/*
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
-
+*/
    /* determine type of output vector data  ==> Precision of y. */
    HYPRE_Precision precision = hypre_VectorPrecision (y);
 
@@ -123,13 +168,14 @@ hypre_SeqVectorAxpy_mp( hypre_double alpha,
             (hypre_VectorData(y))[i] += (hypre_long_double)(alpha * (hypre_VectorData(x))[i]);
       break;
       default:
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type for Vector Axpy!\n");
+//         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type for Vector Axpy!\n");
+         hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type for Vector Axpy!\n");
    }
-
+/*
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
-
+*/
    return hypre_error_flag;
 }
 

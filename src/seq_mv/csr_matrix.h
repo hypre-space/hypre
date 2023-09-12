@@ -88,7 +88,7 @@ typedef struct
 #endif
 
 #ifdef HYPRE_MIXED_PRECISION
-#define hypre_CSRMatrixPrecision(vector)          ((matrix) -> matrix_precision)
+#define hypre_CSRMatrixPrecision(matrix)          ((matrix) -> matrix_precision)
 #endif
 
 /*--------------------------------------------------------------------------
