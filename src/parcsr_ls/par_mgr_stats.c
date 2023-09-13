@@ -667,10 +667,7 @@ hypre_MGRSetupStats(void *mgr_vdata)
                       hypre_MGRGetRestrictionName(mgr_data, i));
       }
       hypre_printf("%3d %14s %14s %16s %16s %16s\n",
-                   i,
-                   hypre_MGRGetGlobalRelaxName(mgr_data, i),
-                   hypre_MGRGetFRelaxName(mgr_data, i),
-                   "--", "--", "--");
+                   i, "AMG", "None", "--", "--", "--");
       hypre_printf("\n\n");
    }
 
