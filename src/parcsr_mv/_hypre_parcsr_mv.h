@@ -1297,6 +1297,7 @@ HYPRE_Int hypre_ParVectorGetValuesDevice(hypre_ParVector *vector, HYPRE_Int num_
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_parcsr_mv.h"
 
 /* Mixed precision function protos */
 /* hypre_parcsr_mv_mp.h */
