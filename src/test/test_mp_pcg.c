@@ -474,7 +474,7 @@ int main (int argc, char *argv[])
       HYPRE_PCGSetup_flt(pcg_solver, (HYPRE_Matrix)parcsr_A,  (HYPRE_Vector)par_b, (HYPRE_Vector)par_x);
       MPI_Barrier(hypre_MPI_COMM_WORLD);
       hypre_EndTiming_dbl(time_index);
-      hypre_PrintTiming_flt("Single precision Setup Time", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming_dbl("Single precision Setup Time", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming_dbl(time_index);
       hypre_ClearTiming_dbl();
       fflush(NULL);
@@ -487,7 +487,7 @@ int main (int argc, char *argv[])
 
       MPI_Barrier(hypre_MPI_COMM_WORLD);
       hypre_EndTiming_dbl(time_index);
-      hypre_PrintTiming_flt("Single precision Solve Time", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming_dbl("Single precision Solve Time", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming_dbl(time_index);
       hypre_ClearTiming_dbl();
 
@@ -566,7 +566,7 @@ int main (int argc, char *argv[])
       HYPRE_PCGSetup_dbl(pcg_solver, (HYPRE_Matrix)parcsr_B,  (HYPRE_Vector)par_bb, (HYPRE_Vector)par_xb);
       MPI_Barrier(hypre_MPI_COMM_WORLD);
       hypre_EndTiming_dbl(time_index);
-      hypre_PrintTiming_dbl("Double precision Setup Time", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming_dbl("Mixed precision Setup Time", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming_dbl(time_index);
       hypre_ClearTiming_dbl();
       fflush(NULL);
@@ -579,7 +579,7 @@ int main (int argc, char *argv[])
 
       MPI_Barrier(hypre_MPI_COMM_WORLD);
       hypre_EndTiming_dbl(time_index);
-      hypre_PrintTiming_dbl("Double precision Solve Time", hypre_MPI_COMM_WORLD);
+      hypre_PrintTiming_dbl("Mixed precision Solve Time", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming_dbl(time_index);
       hypre_ClearTiming_dbl();
 
