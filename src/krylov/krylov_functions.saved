@@ -297,6 +297,7 @@ HYPRE_PCGGetLogging
 HYPRE_PCGGetMaxIter
 HYPRE_PCGGetNumIterations
 HYPRE_PCGGetPrecond
+HYPRE_PCGGetPrecondMatrix
 HYPRE_PCGGetPrintLevel
 HYPRE_PCGGetRecomputeResidual
 HYPRE_PCGGetRecomputeResidualP
@@ -312,6 +313,7 @@ HYPRE_PCGSetConvergenceFactorTol
 HYPRE_PCGSetLogging
 HYPRE_PCGSetMaxIter
 HYPRE_PCGSetPrecond
+HYPRE_PCGSetPrecondMatrix
 HYPRE_PCGSetPrintLevel
 HYPRE_PCGSetRecomputeResidual
 HYPRE_PCGSetRecomputeResidualP
@@ -391,6 +393,7 @@ hypre_PCGGetLogging
 hypre_PCGGetMaxIter
 hypre_PCGGetNumIterations
 hypre_PCGGetPrecond
+hypre_PCGGetPrecondMatrix
 hypre_PCGGetPrintLevel
 hypre_PCGGetRecomputeResidual
 hypre_PCGGetRecomputeResidualP
@@ -408,6 +411,7 @@ hypre_PCGSetHybrid
 hypre_PCGSetLogging
 hypre_PCGSetMaxIter
 hypre_PCGSetPrecond
+hypre_PCGSetPrecondMatrix
 hypre_PCGSetPrintLevel
 hypre_PCGSetRecomputeResidual
 hypre_PCGSetRecomputeResidualP

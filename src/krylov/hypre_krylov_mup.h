@@ -1242,6 +1242,9 @@ HYPRE_Int HYPRE_PCGGetNumIterations_long_dbl  ( HYPRE_Solver solver, HYPRE_Int *
 HYPRE_Int HYPRE_PCGGetPrecond_flt  ( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int HYPRE_PCGGetPrecond_dbl  ( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int HYPRE_PCGGetPrecond_long_dbl  ( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
+HYPRE_Int HYPRE_PCGGetPrecondMatrix_flt( HYPRE_Solver  solver, HYPRE_Matrix *precond_matrix_ptr );
+HYPRE_Int HYPRE_PCGGetPrecondMatrix_dbl( HYPRE_Solver  solver, HYPRE_Matrix *precond_matrix_ptr );
+HYPRE_Int HYPRE_PCGGetPrecondMatrix_long_dbl( HYPRE_Solver  solver, HYPRE_Matrix *precond_matrix_ptr );
 HYPRE_Int HYPRE_PCGGetPrintLevel_flt  ( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int HYPRE_PCGGetPrintLevel_dbl  ( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int HYPRE_PCGGetPrintLevel_long_dbl  ( HYPRE_Solver solver, HYPRE_Int *level );
@@ -1290,6 +1293,9 @@ HYPRE_Int HYPRE_PCGSetPrecond_dbl  ( HYPRE_Solver solver, HYPRE_PtrToSolverFcn p
                                 HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver );
 HYPRE_Int HYPRE_PCGSetPrecond_long_dbl  ( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond,
                                 HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver );
+HYPRE_Int HYPRE_PCGSetPrecondMatrix_flt( HYPRE_Solver  solver, HYPRE_Matrix precond_matrix);
+HYPRE_Int HYPRE_PCGSetPrecondMatrix_dbl( HYPRE_Solver  solver, HYPRE_Matrix precond_matrix);
+HYPRE_Int HYPRE_PCGSetPrecondMatrix_long_dbl( HYPRE_Solver  solver, HYPRE_Matrix precond_matrix);
 HYPRE_Int HYPRE_PCGSetPrintLevel_flt  ( HYPRE_Solver solver, HYPRE_Int level );
 HYPRE_Int HYPRE_PCGSetPrintLevel_dbl  ( HYPRE_Solver solver, HYPRE_Int level );
 HYPRE_Int HYPRE_PCGSetPrintLevel_long_dbl  ( HYPRE_Solver solver, HYPRE_Int level );
@@ -1569,6 +1575,9 @@ HYPRE_Int hypre_PCGGetNumIterations_long_dbl  ( void *pcg_vdata, HYPRE_Int *num_
 HYPRE_Int hypre_PCGGetPrecond_flt  ( void *pcg_vdata, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int hypre_PCGGetPrecond_dbl  ( void *pcg_vdata, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int hypre_PCGGetPrecond_long_dbl  ( void *pcg_vdata, HYPRE_Solver *precond_data_ptr );
+HYPRE_Int hypre_PCGGetPrecondMatrix_flt( void  *pcg_vdata,  HYPRE_Matrix *precond_matrix_ptr );
+HYPRE_Int hypre_PCGGetPrecondMatrix_dbl( void  *pcg_vdata,  HYPRE_Matrix *precond_matrix_ptr );
+HYPRE_Int hypre_PCGGetPrecondMatrix_long_dbl( void  *pcg_vdata,  HYPRE_Matrix *precond_matrix_ptr );
 HYPRE_Int hypre_PCGGetPrintLevel_flt  ( void *pcg_vdata, HYPRE_Int *level );
 HYPRE_Int hypre_PCGGetPrintLevel_dbl  ( void *pcg_vdata, HYPRE_Int *level );
 HYPRE_Int hypre_PCGGetPrintLevel_long_dbl  ( void *pcg_vdata, HYPRE_Int *level );
@@ -1623,6 +1632,9 @@ HYPRE_Int hypre_PCGSetPrecond_dbl  ( void *pcg_vdata, HYPRE_Int (*precond )(void
                                 HYPRE_Int (*precond_setup )(void*, void*, void*, void*), void *precond_data );
 HYPRE_Int hypre_PCGSetPrecond_long_dbl  ( void *pcg_vdata, HYPRE_Int (*precond )(void*, void*, void*, void*),
                                 HYPRE_Int (*precond_setup )(void*, void*, void*, void*), void *precond_data );
+HYPRE_Int hypre_PCGSetPrecondMatrix_flt( void  *pcg_vdata,  void  *precond_matrix );
+HYPRE_Int hypre_PCGSetPrecondMatrix_dbl( void  *pcg_vdata,  void  *precond_matrix );
+HYPRE_Int hypre_PCGSetPrecondMatrix_long_dbl( void  *pcg_vdata,  void  *precond_matrix );
 HYPRE_Int hypre_PCGSetPrintLevel_flt  ( void *pcg_vdata, HYPRE_Int level );
 HYPRE_Int hypre_PCGSetPrintLevel_dbl  ( void *pcg_vdata, HYPRE_Int level );
 HYPRE_Int hypre_PCGSetPrintLevel_long_dbl  ( void *pcg_vdata, HYPRE_Int level );

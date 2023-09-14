@@ -84,12 +84,6 @@ HYPRE_BoomerAMGSolve( HYPRE_Solver solver,
       return hypre_error_flag;
    }
 
-hypre_printf("\n\n***** BoomerAMGSolve_MP: Matrix precision %d != vector precision %d *****\n", 
-      hypre_ParCSRMatrixPrecision(A), hypre_ParVectorPrecision(b));
-
-      for(int k=0; k<5; k++)
-         hypre_printf("\n\n***** b[%d] = %f\n", k,hypre_VectorData(hypre_ParVectorLocalVector(b))[0]);
-
    return ( hypre_BoomerAMGSolve( (void *) solver,
                                   (hypre_ParCSRMatrix *) A,
                                   (hypre_ParVector *) b,

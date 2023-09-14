@@ -28,6 +28,11 @@ hypre_TimingCPUCount -= time_getCPUSeconds()
 hypre_TimingWallCount += time_getWallclockSeconds();\
 hypre_TimingCPUCount += time_getCPUSeconds()
 
+/* Global variable for error handling */
+/* guard definition of global variables to avoid linker errors for multiprecision build */
+#if defined (DEFINE_GLOBAL_VARIABLE)
+hypre_TimingType *hypre_global_timing = NULL;
+#endif
 #define hypre_global_timing_ref(index,field) hypre_global_timing->field
 
 /*--------------------------------------------------------------------------

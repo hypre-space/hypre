@@ -129,6 +129,7 @@ typedef struct
    HYPRE_Int  owns_matvec_data;  /* normally 1; if 0, don't delete it */
    void      *matvec_data;
    void      *precond_data;
+   void      *precond_Mat;
 
    hypre_PCGFunctions * functions;
 

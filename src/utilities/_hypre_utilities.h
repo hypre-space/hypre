@@ -1326,11 +1326,11 @@ typedef struct
 
 } hypre_TimingType;
 
-#ifdef HYPRE_TIMING_GLOBALS
-hypre_TimingType *hypre_global_timing = NULL;
-#else
+//#ifdef HYPRE_TIMING_GLOBALS
+//hypre_TimingType *hypre_global_timing = NULL;
+//#else
 extern hypre_TimingType *hypre_global_timing;
-#endif
+//#endif
 
 /*-------------------------------------------------------
  * Accessor functions

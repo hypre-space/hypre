@@ -101,7 +101,7 @@ int main (int argc, char *argv[])
 
    /*! We set up the linear system following ex5. */
    /* Some problem parameters */
-   n = 100;
+   n = 2;
    solver_id = 0;
    /* Preliminaries: want at least one processor per row */
    if (n*n < num_procs) n = sqrt(num_procs) + 1;

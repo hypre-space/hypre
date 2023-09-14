@@ -41,6 +41,7 @@ HEADERS =\
  schwarz.h
 
 FILES =\
+ HYPRE_parcsr_ls_mp.c
 
 CUFILES =\
  ads.c\
@@ -201,6 +202,7 @@ all: libHYPRE_parcsr_ls${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/_hypre_parcsr_ls.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/parcsr_ls_mup_func.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/hypre_parcsr_ls_mup.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/HYPRE_parcsr_ls_mp.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_parcsr_ls${HYPRE_LIB_SUFFIX}
@@ -208,6 +210,7 @@ install: libHYPRE_parcsr_ls${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/_hypre_parcsr_ls.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/parcsr_ls_mup_func.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/hypre_parcsr_ls_mup.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/HYPRE_parcsr_ls_mp.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean: clean_mup

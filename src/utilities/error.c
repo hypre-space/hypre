@@ -9,7 +9,7 @@
 
 /* Global variable for error handling */
 /* guard definition of global variables to avoid linker errors for multiprecision build */
-#if defined DEFINE_GLOBAL_VARIABLE
+#if defined (DEFINE_GLOBAL_VARIABLE)
 hypre_Error hypre__global_error = {0, 0, NULL, 0, 0};
 #endif
 /*--------------------------------------------------------------------------
