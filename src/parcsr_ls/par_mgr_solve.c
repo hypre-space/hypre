@@ -144,7 +144,7 @@ hypre_MGRSolve( void               *mgr_vdata,
          resnorm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
       }
 
-      /* Since it is does not diminish performance, attempt to return an error flag
+      /* Since it does not diminish performance, attempt to return an error flag
        * and notify users when they supply bad input. */
       if (resnorm != 0.)
       {

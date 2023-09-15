@@ -351,33 +351,6 @@ hypre_MGRRelaxL1JacobiDevice( hypre_ParCSRMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_ComplexArrayToArrayOfPtrs
- *
- * TODO:
- *   1) data as template arg.
- *   2) Move this to device_utils?
- *--------------------------------------------------------------------------*/
-
-__global__ void
-hypreGPUKernel_ComplexArrayToArrayOfPtrs( hypre_DeviceItem  &item,
-                                          HYPRE_Int          num_rows,
-                                          HYPRE_Int          ldim,
-                                          HYPRE_Complex     *data,
-                                          HYPRE_Complex    **data_aop )
-{
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_Int i = item.get_local_id(2) + item.get_group(2) * item.get_local_range(2);
-#else
-   HYPRE_Int i = threadIdx.x + blockIdx.x * blockDim.x;
-#endif
-
-   if (i < num_rows)
-   {
-      data_aop[i] = &data[i * ldim];
-   }
-}
-
-/*--------------------------------------------------------------------------
  * hypreGPUKernel_CSRMatrixExtractBlockDiag
  *
  * Fills vector diag with the block diagonals from the input matrix.
@@ -402,12 +375,7 @@ hypreGPUKernel_CSRMatrixExtractBlockDiag( hypre_DeviceItem  &item,
                                           HYPRE_Int         *B_j,
                                           HYPRE_Complex     *B_a )
 {
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_Int   lane = (item.get_local_range(2) * item.get_group(2) + item.get_local_id(2)) &
-                      (HYPRE_WARP_SIZE - 1);
-#else
-   HYPRE_Int   lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
-#endif
+   HYPRE_Int   lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int   bs2  = blk_size * blk_size;
    HYPRE_Int   bidx;
    HYPRE_Int   lidx;
@@ -415,15 +383,9 @@ hypreGPUKernel_CSRMatrixExtractBlockDiag( hypre_DeviceItem  &item,
    HYPRE_Int   col;
 
    /* Grid-stride loop over block matrix rows */
-#if defined(HYPRE_USING_SYCL)
-   for (bidx = (item.get_group(2) * item.get_local_range(2) + item.get_local_id(2)) / HYPRE_WARP_SIZE;
+   for (bidx = hypre_gpu_get_grid_warp_id<1, 1>(item);
         bidx < num_rows / blk_size;
-        bidx += (item.get_group_range(2) * item.get_local_range(2)) * blk_size / HYPRE_WARP_SIZE)
-#else
-   for (bidx = (blockIdx.x * blockDim.x + threadIdx.x) / HYPRE_WARP_SIZE;
-        bidx < num_rows / blk_size;
-        bidx += (gridDim.x * blockDim.x) * blk_size / HYPRE_WARP_SIZE)
-#endif
+        bidx += hypre_gpu_get_grid_num_warps<1, 1>(item))
    {
       ii = bidx * blk_size;
 
@@ -496,28 +458,16 @@ hypreGPUKernel_CSRMatrixExtractBlockDiagMarked( hypre_DeviceItem  &item,
                                                 HYPRE_Int         *B_j,
                                                 HYPRE_Complex     *B_a )
 {
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_Int   lane = (item.get_local_range(2) * item.get_group(2) + item.get_local_id(2)) &
-                      (HYPRE_WARP_SIZE - 1);
-#else
-   HYPRE_Int   lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
-#endif
-   //HYPRE_Int   bs2  = blk_size * blk_size;
+   HYPRE_Int   lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int   bidx;
    HYPRE_Int   lidx;
    HYPRE_Int   i, ii, j, pj, qj, k;
    HYPRE_Int   col;
 
    /* Grid-stride loop over block matrix rows */
-#if defined(HYPRE_USING_SYCL)
-   for (bidx = (item.get_group(2) * item.get_local_range(2) + item.get_local_id(2)) / HYPRE_WARP_SIZE;
+   for (bidx = hypre_gpu_get_grid_warp_id<1, 1>(item);
         bidx < num_rows / blk_size;
-        bidx += (item.get_group_range(2) * item.get_local_range(2)) * blk_size / HYPRE_WARP_SIZE)
-#else
-   for (bidx = (blockIdx.x * blockDim.x + threadIdx.x) / HYPRE_WARP_SIZE;
-        bidx < num_rows / blk_size;
-        bidx += (gridDim.x * blockDim.x) * blk_size / HYPRE_WARP_SIZE)
-#endif
+        bidx += hypre_gpu_get_grid_num_warps<1, 1>(item))
    {
       /* TODO: unroll this loop */
       for (lidx = 0; lidx < blk_size; lidx++)
@@ -575,30 +525,19 @@ hypreGPUKernel_ComplexMatrixBatchedTranspose( hypre_DeviceItem  &item,
                                               HYPRE_Complex     *A_data,
                                               HYPRE_Complex     *B_data )
 {
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_Int   lane = (item.get_local_range(2) * item.get_group(2) + item.get_local_id(2)) &
-                      (HYPRE_WARP_SIZE - 1);
-#else
-   HYPRE_Int   lane = (blockDim.x * blockIdx.x + threadIdx.x) & (HYPRE_WARP_SIZE - 1);
-#endif
+   HYPRE_Int   lane = hypre_gpu_get_lane_id<1>(item);
    HYPRE_Int   bs2  = block_size * block_size;
    HYPRE_Int   bidx, lidx;
 
    /* Grid-stride loop over block matrix rows */
-#if defined(HYPRE_USING_SYCL)
-   for (bidx = (item.get_group(2) * item.get_local_range(2) + item.get_local_id(2)) / HYPRE_WARP_SIZE;
+   for (bidx = hypre_gpu_get_grid_warp_id<1, 1>(item);
         bidx < num_blocks;
-        bidx += (item.get_group_range(2) * item.get_local_range(2)) / HYPRE_WARP_SIZE)
-#else
-   for (bidx = (blockIdx.x * blockDim.x + threadIdx.x) / HYPRE_WARP_SIZE;
-        bidx < num_blocks;
-        bidx += (gridDim.x * blockDim.x) / HYPRE_WARP_SIZE)
-#endif
+        bidx += hypre_gpu_get_grid_num_warps<1, 1>(item))
    {
       for (lidx = lane; lidx < bs2; lidx += HYPRE_WARP_SIZE)
       {
-         B_data[bidx * bs2 + lidx] = A_data[bidx * bs2 + (lidx / block_size + (lidx % block_size) *
-                                                          block_size)];
+         B_data[bidx * bs2 + lidx] =
+            A_data[bidx * bs2 + (lidx / block_size + (lidx % block_size) * block_size)];
       }
    } /* Grid-stride loop */
 }
@@ -634,14 +573,17 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
    /* Local LS variables */
 #if defined(HYPRE_USING_ONEMKLBLAS)
    std::int64_t         *pivots;
+   std::int64_t          work_sizes[2];
+   std::int64_t          work_size;
+   HYPRE_Complex        *scratchpad;
 #else
    HYPRE_Int            *pivots;
-#endif
+   HYPRE_Complex       **tmpdiag_aop;
    HYPRE_Int            *infos;
+#endif
    HYPRE_Int            *blk_row_indices;
    HYPRE_Complex        *tmpdiag;
    HYPRE_Complex       **diag_aop;
-   HYPRE_Complex       **tmpdiag_aop;
 
    /* Local variables */
    HYPRE_Int             bs2 = blk_size * blk_size;
@@ -656,16 +598,29 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
    hypre_MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &myid);
 #endif
 
-   hypre_GpuProfilingPushRange("ParCSRMatrixExtractBlockDiag");
+   /*-----------------------------------------------------------------
+    * Sanity checks
+    *-----------------------------------------------------------------*/
 
-   /* Sanity check */
-   if ((num_rows_A > 0) && (num_rows_A < blk_size))
+   if (blk_size < 1)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error!!! Input matrix is smaller than block size.");
-      hypre_GpuProfilingPopRange();
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid block size!");
 
       return hypre_error_flag;
    }
+
+   if ((num_rows_A > 0) && (num_rows_A < blk_size))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Input matrix is smaller than block size!");
+
+      return hypre_error_flag;
+   }
+
+   /*-----------------------------------------------------------------
+    * Initial
+    *-----------------------------------------------------------------*/
+
+   hypre_GpuProfilingPushRange("ParCSRMatrixExtractBlockDiag");
 
    /* Count the number of points matching point_type in CF_marker */
    if (CF_marker)
@@ -709,7 +664,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
     *-----------------------------------------------------------------*/
    {
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-      dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "warp", bDim);
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows / blk_size, "warp", bDim);
 
       if (CF_marker)
       {
@@ -740,39 +695,24 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
       diag_aop    = hypre_TAlloc(HYPRE_Complex *, num_rows, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_ONEMKLBLAS)
       pivots      = hypre_CTAlloc(std::int64_t, num_rows * blk_size, HYPRE_MEMORY_DEVICE);
-
-      /* Set array of pointers */
-      {
-         dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-         dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "thread", bDim);
-
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_ComplexArrayToArrayOfPtrs, gDim, bDim,
-                           num_rows, bs2, B_diag_data, diag_aop );
-      }
 #else
-      tmpdiag_aop = hypre_TAlloc(HYPRE_Complex *, num_rows, HYPRE_MEMORY_DEVICE);
       pivots      = hypre_CTAlloc(HYPRE_Int, num_rows * blk_size, HYPRE_MEMORY_DEVICE);
+      tmpdiag_aop = hypre_TAlloc(HYPRE_Complex *, num_rows, HYPRE_MEMORY_DEVICE);
       infos       = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
 #if defined (HYPRE_DEBUG)
-      h_infos = hypre_TAlloc(HYPRE_Int,  num_rows, HYPRE_MEMORY_HOST);
+      h_infos     = hypre_TAlloc(HYPRE_Int,  num_rows, HYPRE_MEMORY_HOST);
 #endif
 
       /* Memory copy */
       hypre_TMemcpy(tmpdiag, B_diag_data, HYPRE_Complex, bdiag_size,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-      /* Set array of pointers */
-      {
-         dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-         dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "thread", bDim);
-
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_ComplexArrayToArrayOfPtrs, gDim, bDim,
-                           num_rows, bs2, B_diag_data, diag_aop );
-
-         HYPRE_GPU_LAUNCH( hypreGPUKernel_ComplexArrayToArrayOfPtrs, gDim, bDim,
-                           num_rows, bs2, tmpdiag, tmpdiag_aop );
-      }
+      /* Set work array of pointers */
+      hypreDevice_ComplexArrayToArrayOfPtrs(num_rows, bs2, tmpdiag, tmpdiag_aop);
 #endif
+
+      /* Set array of pointers */
+      hypreDevice_ComplexArrayToArrayOfPtrs(num_rows, bs2, B_diag_data, diag_aop);
 
       /* Compute LU factorization */
 #if defined(HYPRE_USING_CUBLAS)
@@ -795,8 +735,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                     num_blocks));
 
 #elif defined(HYPRE_USING_ONEMKLBLAS)
-      std::int64_t scratchpad_size;
-      HYPRE_ONEMKL_CALL( scratchpad_size =
+      HYPRE_ONEMKL_CALL( work_sizes[0] =
                             oneapi::mkl::lapack::getrf_batch_scratchpad_size<HYPRE_Complex>( *hypre_HandleComputeStream(
                                                                                                 hypre_handle()),
                                                                                              blk_size, // std::int64_t m,
@@ -805,7 +744,19 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                                                              bs2, // std::int64_t stride_a,
                                                                                              blk_size, // std::int64_t stride_ipiv,
                                                                                              num_blocks ) ); // std::int64_t batch_size
-      HYPRE_Complex *scratchpad = hypre_TAlloc(HYPRE_Complex, scratchpad_size, HYPRE_MEMORY_DEVICE);
+
+      HYPRE_ONEMKL_CALL( work_sizes[1] =
+                            oneapi::mkl::lapack::getri_batch_scratchpad_size<HYPRE_Complex>( *hypre_HandleComputeStream(
+                                                                                                hypre_handle()),
+                                                                                             (std::int64_t) blk_size, // std::int64_t n,
+                                                                                             (std::int64_t) blk_size, // std::int64_t lda,
+                                                                                             (std::int64_t) bs2, // std::int64_t stride_a,
+                                                                                             (std::int64_t) blk_size, // std::int64_t stride_ipiv,
+                                                                                             (std::int64_t) num_blocks // std::int64_t batch_size
+                                                                                           ) );
+      work_size  = hypre_max(work_sizes[0], work_sizes[1]);
+      scratchpad = hypre_TAlloc(HYPRE_Complex, work_size, HYPRE_MEMORY_DEVICE);
+
       HYPRE_ONEMKL_CALL( oneapi::mkl::lapack::getrf_batch( *hypre_HandleComputeStream(hypre_handle()),
                                                            (std::int64_t) blk_size, // std::int64_t m,
                                                            (std::int64_t) blk_size, // std::int64_t n,
@@ -816,9 +767,8 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                            (std::int64_t) blk_size, // std::int64_t stride_ipiv,
                                                            (std::int64_t) num_blocks, // std::int64_t batch_size,
                                                            scratchpad, // T *scratchpad,
-                                                           (std::int64_t) scratchpad_size // std::int64_t scratchpad_size,
+                                                           (std::int64_t) work_size // std::int64_t scratchpad_size,
                                                          ).wait() ); // const std::vector<cl::sycl::event> &events = {} ) );
-      hypre_TFree(scratchpad, HYPRE_MEMORY_DEVICE);
 #else
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Block inversion not available!");
       return hypre_error_flag;
@@ -865,16 +815,6 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                     infos,
                                                     num_blocks));
 #elif defined(HYPRE_USING_ONEMKLBLAS)
-      HYPRE_ONEMKL_CALL( scratchpad_size =
-                            oneapi::mkl::lapack:: getri_batch_scratchpad_size<HYPRE_Complex>( *hypre_HandleComputeStream(
-                                                                                                 hypre_handle()),
-                                                                                              (std::int64_t) blk_size, // std::int64_t n,
-                                                                                              (std::int64_t) blk_size, // std::int64_t lda,
-                                                                                              (std::int64_t) bs2, // std::int64_t stride_a,
-                                                                                              (std::int64_t) blk_size, // std::int64_t stride_ipiv,
-                                                                                              (std::int64_t) num_blocks // std::int64_t batch_size
-                                                                                            ) );
-      scratchpad = hypre_TAlloc(HYPRE_Complex, scratchpad_size, HYPRE_MEMORY_DEVICE);
       HYPRE_ONEMKL_CALL( oneapi::mkl::lapack::getri_batch( *hypre_HandleComputeStream(hypre_handle()),
                                                            (std::int64_t) blk_size, // std::int64_t n,
                                                            *diag_aop, // T *a,
@@ -884,9 +824,8 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                            (std::int64_t) blk_size, // std::int64_t stride_ipiv,
                                                            (std::int64_t) num_blocks, // std::int64_t batch_size,
                                                            scratchpad, // T *scratchpad,
-                                                           scratchpad_size // std::int64_t scratchpad_size
+                                                           work_size // std::int64_t scratchpad_size
                                                          ).wait() );
-      hypre_TFree(scratchpad, HYPRE_MEMORY_DEVICE);
 #else
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Block inversion not available!");
       return hypre_error_flag;
@@ -894,13 +833,15 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
 
       /* Free memory */
       hypre_TFree(diag_aop, HYPRE_MEMORY_DEVICE);
-#if !defined(HYPRE_USING_ONEMKLBLAS)
+      hypre_TFree(pivots, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_ONEMKLBLAS)
+      hypre_TFree(scratchpad, HYPRE_MEMORY_DEVICE);
+#else
       hypre_TFree(tmpdiag_aop, HYPRE_MEMORY_DEVICE);
       hypre_TFree(infos, HYPRE_MEMORY_DEVICE);
-#endif
-      hypre_TFree(pivots, HYPRE_MEMORY_DEVICE);
-#if defined (HYPRE_DEBUG) && !defined(HYPRE_USING_ONEMKLBLAS)
+#if defined (HYPRE_DEBUG)
       hypre_TFree(h_infos, HYPRE_MEMORY_HOST);
+#endif
 #endif
 
       /* Transpose data to row-major format */

@@ -58,6 +58,14 @@ Final Relative Residual Norm = 7.294103e-09
 Iterations = 6
 Final Relative Residual Norm = 9.316470e-09
 
+# Output file: smoother.out.11.1
+Iterations = 7
+Final Relative Residual Norm = 5.283599e-10
+
+# Output file: smoother.out.11.2
+Iterations = 6
+Final Relative Residual Norm = 2.220376e-09
+
 # Output file: smoother.out.12
 Iterations = 7
 Final Relative Residual Norm = 8.288309e-10

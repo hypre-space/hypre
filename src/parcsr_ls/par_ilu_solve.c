@@ -172,7 +172,7 @@ hypre_ILUSolve( void               *ilu_vdata,
          resnorm = hypre_sqrt(hypre_ParVectorInnerProd(Ftemp, Ftemp));
       }
 
-      /* Since it is does not diminish performance, attempt to return an error flag
+      /* Since it does not diminish performance, attempt to return an error flag
          and notify users when they supply bad input. */
       if (resnorm != 0.)
       {
@@ -1578,7 +1578,7 @@ hypre_NSHSolve( void               *nsh_vdata,
          resnorm = hypre_sqrt(hypre_ParVectorInnerProd(Ftemp, Ftemp));
       }
 
-      /* Since it is does not diminish performance, attempt to return an error flag
+      /* Since it does not diminish performance, attempt to return an error flag
          and notify users when they supply bad input. */
       if (resnorm != 0.)
       {
