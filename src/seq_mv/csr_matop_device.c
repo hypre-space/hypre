@@ -53,6 +53,7 @@ hypre_CsrsvDataDestroy(hypre_CsrsvData* data)
 {
    if (data)
    {
+#if !defined(HYPRE_USING_ONEMKLSPARSE)
       /* Lower matrix info */
       if (hypre_CsrsvDataInfoL(data))
       {
@@ -82,6 +83,7 @@ hypre_CsrsvDataDestroy(hypre_CsrsvData* data)
 #else
       hypre_TFree(hypre_CsrsvDataBuffer(data), HYPRE_MEMORY_DEVICE);
 #endif
+#endif // #if !defined(HYPRE_USING_ONEMKLSPARSE)
       hypre_TFree(hypre_CsrsvDataMatData(data), HYPRE_MEMORY_DEVICE);
 
       /* Free data structure pointer */
@@ -1631,10 +1633,6 @@ hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix *A )
    return ierr;
 }
 
-#endif /* defined(HYPRE_USING_GPU) */
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-
 /*--------------------------------------------------------------------------
  * hypreGPUKernel_CSRMatrixFixZeroDiagDevice
  *--------------------------------------------------------------------------*/
@@ -1725,16 +1723,26 @@ hypre_CSRMatrixReplaceDiagDevice( hypre_CSRMatrix *A,
    HYPRE_Int *result = NULL;
 #endif
 
+   HYPRE_Int    num_rows = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int        *A_i = hypre_CSRMatrixI(A);
+   HYPRE_Int        *A_j = hypre_CSRMatrixJ(A);
+   HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
    HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixReplaceDiagDevice, gDim, bDim,
-                     new_diag, v, hypre_CSRMatrixNumRows(A),
-                     hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A),
+                     new_diag, v, num_rows,
+                     A_i, A_j, A_data,
                      tol, result );
 
 #if HYPRE_DEBUG
    /* the number of structural zero in A */
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Int num_zeros = HYPRE_ONEDPL_CALL( std::reduce,
+                                            result,
+                                            result + hypre_CSRMatrixNumRows(A) );
+#else
    HYPRE_Int num_zeros = HYPRE_THRUST_CALL( reduce,
                                             result,
                                             result + hypre_CSRMatrixNumRows(A) );
+#endif
 
    hypre_TFree(result, HYPRE_MEMORY_DEVICE);
 
@@ -1748,10 +1756,6 @@ hypre_CSRMatrixReplaceDiagDevice( hypre_CSRMatrix *A,
 
    return hypre_error_flag;
 }
-
-#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
-
-#if defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_SYCL)
 typedef std::tuple<HYPRE_Int, HYPRE_Int> Int2;
@@ -3099,15 +3103,34 @@ hypre_CSRMatrixTriLowerUpperSolveOnemklsparse(char              uplo,
                                            HYPRE_Complex    *f_data,
                                            HYPRE_Complex    *u_data )
 {
+   HYPRE_Complex                            *A_a = hypre_CSRMatrixData(A);
    oneapi::mkl::sparse::matrix_handle_t handle_A = hypre_CSRMatrixGPUMatHandle(A);
-   hypre_CsrsvData     *csrsv_data    = hypre_CSRMatrixCsrsvData(A);
+   hypre_CsrsvData                   *csrsv_data = hypre_CSRMatrixCsrsvData(A);
 
    /* Generate csrsv data if necessary */
    if (!csrsv_data)
    {
       hypre_CSRMatrixCsrsvData(A) = hypre_CsrsvDataCreate();
       csrsv_data = hypre_CSRMatrixCsrsvData(A);
+
+      hypre_CsrsvDataMatData(csrsv_data) = hypre_TAlloc(HYPRE_Complex,
+                                                        hypre_CSRMatrixNumNonzeros(A),
+                                                        HYPRE_MEMORY_DEVICE);
+
+      /* WM: todo - question: does the matrix need to be sorted? */
+      hypre_TMemcpy(hypre_CsrsvDataMatData(csrsv_data), A_a,
+                    HYPRE_Complex, hypre_CSRMatrixNumNonzeros(A),
+                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+
+      /* if (l1_norms), replace A's diag with l1_norm, and
+       * replace zero diag with inf. so as to skip relaxation for this unknown */
+      hypre_CSRMatrixData(A) = hypre_CsrsvDataMatData(csrsv_data);
+      hypre_CSRMatrixReplaceDiagDevice(A, l1_norms, INFINITY, 0.0);
    }
+
+   /* Use matrix data with modified diagonal */
+   hypre_CSRMatrixData(A) = hypre_CsrsvDataMatData(csrsv_data);
+   hypre_GPUMatDataSetCSRData(A);
 
    /* Do optimization the first time */
    if ( (!hypre_CsrsvDataAnalyzedL(csrsv_data) && uplo == 'L') ||
@@ -3130,6 +3153,10 @@ hypre_CSRMatrixTriLowerUpperSolveOnemklsparse(char              uplo,
                      f_data,
                      u_data,
                      {} ).wait() );
+
+   /* Restore the original matrix data */
+   hypre_CSRMatrixData(A) = A_a;
+   hypre_GPUMatDataSetCSRData(A);
 
    return hypre_error_flag;
 }
