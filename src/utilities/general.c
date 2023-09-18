@@ -11,7 +11,9 @@
 /* global variable _hypre_handle:
  * Outside this file, do NOT access it directly,
  * but use hypre_handle() instead (see handle.h) */
-static hypre_Handle *_hypre_handle = NULL;
+#if defined (DEFINE_GLOBAL_VARIABLE)
+hypre_Handle *_hypre_handle = NULL;
+#endif
 
 /* accessor to the global ``_hypre_handle'' */
 hypre_Handle*
