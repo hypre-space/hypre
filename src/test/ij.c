@@ -363,6 +363,7 @@ main( hypre_int argc,
    HYPRE_Real   agg_P12_trunc_factor  = 0; /* default value */
 
    HYPRE_Int    print_system = 0;
+   HYPRE_Int    print_system_binary = 0;
    HYPRE_Int    rel_change = 0;
    HYPRE_Int    second_time = 0;
    HYPRE_Int    benchmark = 0;
@@ -671,7 +672,13 @@ main( hypre_int argc,
 
    while ( (arg_index < argc) && (!print_usage) )
    {
-      if ( strcmp(argv[arg_index], "-fromfile") == 0 )
+      if ( strcmp(argv[arg_index], "-frombinfile") == 0 )
+      {
+         arg_index++;
+         build_matrix_type      = -2;
+         build_matrix_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-fromfile") == 0 )
       {
          arg_index++;
          build_matrix_type      = -1;
@@ -841,6 +848,12 @@ main( hypre_int argc,
          build_rhs_type      = 0;
          build_rhs_arg_index = arg_index;
       }
+      else if ( strcmp(argv[arg_index], "-rhsfrombinfile") == 0 )
+      {
+         arg_index++;
+         build_rhs_type      = -2;
+         build_rhs_arg_index = arg_index;
+      }
       else if ( strcmp(argv[arg_index], "-rhsfromonefile") == 0 )
       {
          arg_index++;
@@ -911,6 +924,12 @@ main( hypre_int argc,
          build_src_type      = 4;
          build_rhs_type      = -1;
          build_src_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-x0frombinfile") == 0 )
+      {
+         arg_index++;
+         build_x0_type       = -2;
+         build_x0_arg_index  = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-x0fromfile") == 0 )
       {
@@ -2088,6 +2107,11 @@ main( hypre_int argc,
          arg_index++;
          print_system = 1;
       }
+      else if ( strcmp(argv[arg_index], "-printbin") == 0 )
+      {
+         arg_index++;
+         print_system_binary = 1;
+      }
       /* BM Oct 23, 2006 */
       else if ( strcmp(argv[arg_index], "-plot_grids") == 0 )
       {
@@ -2213,6 +2237,8 @@ main( hypre_int argc,
          hypre_printf("\n");
          hypre_printf("  -fromfile <filename>       : ");
          hypre_printf("matrix read from multiple files (IJ format)\n");
+         hypre_printf("  -frombinfile <filename>    : ");
+         hypre_printf("matrix read from multiple binary files (IJ format)\n");
          hypre_printf("  -fromparcsrfile <filename> : ");
          hypre_printf("matrix read from multiple files (ParCSR format)\n");
          hypre_printf("  -fromonecsrfile <filename> : ");
@@ -2242,6 +2268,8 @@ main( hypre_int argc,
          hypre_printf("  -nc <val>              : number of components of a vector (multivector)\n");
          hypre_printf("  -rhsfromfile           : ");
          hypre_printf("rhs read from multiple files (IJ format)\n");
+         hypre_printf("  -rhsfrombinfile        : ");
+         hypre_printf("rhs read from multiple binary files (IJ format)\n");
          hypre_printf("  -rhsfromonefile        : ");
          hypre_printf("rhs read from a single file (CSR format)\n");
          hypre_printf("  -rhsparcsrfile        :  ");
@@ -2674,14 +2702,24 @@ main( hypre_int argc,
 
    time_index = hypre_InitializeTiming("Spatial Operator");
    hypre_BeginTiming(time_index);
-   if ( build_matrix_type == -1 )
+   if ( build_matrix_type == -2 )
+   {
+      ierr = HYPRE_IJMatrixReadBinary( argv[build_matrix_arg_index], comm,
+                                       HYPRE_PARCSR, &ij_A );
+      if (ierr)
+      {
+         hypre_printf("ERROR: Problem reading in the system matrix!\n");
+         hypre_MPI_Abort(comm, 1);
+      }
+   }
+   else if ( build_matrix_type == -1 )
    {
       ierr = HYPRE_IJMatrixRead( argv[build_matrix_arg_index], comm,
                                  HYPRE_PARCSR, &ij_A );
       if (ierr)
       {
          hypre_printf("ERROR: Problem reading in the system matrix!\n");
-         exit(1);
+         hypre_MPI_Abort(comm, 1);
       }
    }
    else if ( build_matrix_type == 0 )
@@ -3212,7 +3250,7 @@ main( hypre_int argc,
       hypre_MPI_Abort(comm, 1);
    }
 
-   if (build_rhs_type == 0)
+   if (build_rhs_type == 0 || build_rhs_type == -2)
    {
       if (myid == 0)
       {
@@ -3221,8 +3259,19 @@ main( hypre_int argc,
       }
 
       /* RHS */
-      ierr = HYPRE_IJVectorRead( argv[build_rhs_arg_index], hypre_MPI_COMM_WORLD,
-                                 HYPRE_PARCSR, &ij_b );
+      if (!build_rhs_type)
+      {
+         ierr = HYPRE_IJVectorRead(argv[build_rhs_arg_index],
+                                   hypre_MPI_COMM_WORLD,
+                                   HYPRE_PARCSR, &ij_b);
+      }
+      else
+      {
+         ierr = HYPRE_IJVectorReadBinary(argv[build_rhs_arg_index],
+                                         hypre_MPI_COMM_WORLD,
+                                         HYPRE_PARCSR, &ij_b);
+      }
+
       if (ierr)
       {
          hypre_printf("ERROR: Problem reading in the right-hand-side!\n");
@@ -3685,20 +3734,33 @@ main( hypre_int argc,
    }
 
    /* initial guess */
-   if ( build_x0_type == 0 )
+   if (build_x0_type == 0 || build_x0_type == -2)
    {
       /* from file */
       if (myid == 0)
       {
          hypre_printf("  Initial guess vector read from file %s\n", argv[build_x0_arg_index]);
       }
+
       /* x0 */
       if (ij_x)
       {
          HYPRE_IJVectorDestroy(ij_x);
       }
-      ierr = HYPRE_IJVectorRead( argv[build_x0_arg_index], hypre_MPI_COMM_WORLD,
-                                 HYPRE_PARCSR, &ij_x );
+
+      if (!build_x0_type)
+      {
+         ierr = HYPRE_IJVectorRead(argv[build_x0_arg_index],
+                                   hypre_MPI_COMM_WORLD,
+                                   HYPRE_PARCSR, &ij_x);
+      }
+      else
+      {
+         ierr = HYPRE_IJVectorReadBinary(argv[build_x0_arg_index],
+                                         hypre_MPI_COMM_WORLD,
+                                         HYPRE_PARCSR, &ij_x);
+      }
+
       if (ierr)
       {
          hypre_printf("ERROR: Problem reading in x0!\n");
@@ -3845,9 +3907,40 @@ main( hypre_int argc,
       HYPRE_IJVectorPrint(ij_x, "IJ.out.x0");
    }
 
+   if (print_system_binary)
+   {
+      if (ij_A)
+      {
+         HYPRE_IJMatrixPrintBinary(ij_A, "IJ.out.A");
+      }
+      else
+      {
+         hypre_ParCSRMatrixPrintBinaryIJ(parcsr_A, 0, 0, "IJ.out.A");
+      }
+
+      if (ij_b)
+      {
+         HYPRE_IJVectorPrintBinary(ij_b, "IJ.out.b");
+      }
+      else if (b)
+      {
+         HYPRE_ParVectorPrintBinaryIJ(b, "IJ.out.b");
+      }
+
+      if (ij_x)
+      {
+         HYPRE_IJVectorPrintBinary(ij_x, "IJ.out.x0");
+      }
+      else if (x)
+      {
+         HYPRE_ParVectorPrintBinaryIJ(x, "IJ.out.x0");
+      }
+   }
+
    /*-----------------------------------------------------------
     * Migrate the system to the wanted memory space
     *-----------------------------------------------------------*/
+
    hypre_ParCSRMatrixMigrate(parcsr_A, hypre_HandleMemoryLocation(hypre_handle()));
    hypre_ParVectorMigrate(b, hypre_HandleMemoryLocation(hypre_handle()));
    hypre_ParVectorMigrate(x, hypre_HandleMemoryLocation(hypre_handle()));
@@ -8854,6 +8947,18 @@ main( hypre_int argc,
       HYPRE_IJVectorPrint(ij_x, "IJ.out.x");
    }
 
+   if (print_system_binary)
+   {
+      if (ij_x)
+      {
+         HYPRE_IJVectorPrintBinary(ij_x, "IJ.out.x");
+      }
+      else if (x)
+      {
+         HYPRE_ParVectorPrintBinaryIJ(x, "IJ.out.x");
+      }
+   }
+
    /*-----------------------------------------------------------
     * Finalize things
     *-----------------------------------------------------------*/
@@ -8862,7 +8967,7 @@ final:
 
    HYPRE_ParVectorDestroy(x0_save);
 
-   if (test_ij || build_matrix_type == -1)
+   if (test_ij || build_matrix_type == -1 || build_matrix_type == -2)
    {
       if (ij_A)
       {

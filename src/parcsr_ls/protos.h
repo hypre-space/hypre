@@ -1750,6 +1750,14 @@ HYPRE_Int hypre_BoomerAMGRelax14HybridL1GaussSeidel( hypre_ParCSRMatrix *A, hypr
                                                      HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega,
                                                      HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
 
+HYPRE_Int hypre_BoomerAMGRelax88HybridL1SSOR( hypre_ParCSRMatrix *A, hypre_ParVector *f,
+                                              HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega,
+                                              HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
+
+HYPRE_Int hypre_BoomerAMGRelax89HybridL1SSOR( hypre_ParCSRMatrix *A, hypre_ParVector *f,
+                                              HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega,
+                                              HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
+
 HYPRE_Int hypre_BoomerAMGRelax18WeightedL1Jacobi( hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                                   HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real *l1_norms,
                                                   hypre_ParVector *u, hypre_ParVector *Vtemp );

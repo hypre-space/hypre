@@ -62,7 +62,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
    if (solver_type != 9  && solver_type != 99 && solver_type != 199 &&
        solver_type != 19 && solver_type != 98 && solver_type != 198)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Relaxation type unsupported!");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported solver type!");
       return hypre_error_flag;
    }
 
@@ -318,6 +318,13 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
       hypre_CSRMatrixDestroy(A_CSR);
    }
 
+   /* Exit if no rows in this rank */
+   if (!num_rows)
+   {
+      hypre_ParAMGDataGSSetup(amg_data) = 1;
+      return hypre_error_flag;
+   }
+
    /*-----------------------------------------------------------------
     *  Factorization phase
     *-----------------------------------------------------------------*/
@@ -462,7 +469,7 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
    if (solver_type != 9  && solver_type != 99 && solver_type != 199 &&
        solver_type != 19 && solver_type != 98 && solver_type != 198)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Relaxation type unsupported!");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported solver type!");
       return hypre_error_flag;
    }
 
@@ -484,6 +491,21 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
 
    if (solver_type == 9 || solver_type == 99 || solver_type == 199)
    {
+      /* Exit if no rows in this rank */
+      if (!num_rows)
+      {
+         if (u_data_h != u_vec)
+         {
+            hypre_TFree(u_data_h, HYPRE_MEMORY_HOST);
+         }
+         if (b_data_h != b_vec)
+         {
+            hypre_TFree(b_data_h, HYPRE_MEMORY_HOST);
+         }
+
+         return hypre_error_flag;
+      }
+
       hypre_MPI_Comm_size(new_comm, &new_num_procs);
       info   = &comm_info[0];
       displs = &comm_info[new_num_procs];
@@ -532,6 +554,15 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
    /* Exit if no rows in this rank */
    if (!num_rows)
    {
+      if (u_data_h != u_vec)
+      {
+         hypre_TFree(u_data_h, HYPRE_MEMORY_HOST);
+      }
+      if (b_data_h != b_vec)
+      {
+         hypre_TFree(b_data_h, HYPRE_MEMORY_HOST);
+      }
+
       return hypre_error_flag;
    }
 

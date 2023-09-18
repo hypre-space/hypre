@@ -497,7 +497,9 @@ hypre_ParCSRMatrixRead( MPI_Comm    comm,
    HYPRE_BigInt         global_num_rows, global_num_cols;
 
    FILE                *fp;
-   char                 new_file_d[256], new_file_o[256], new_file_info[256];
+   char                 new_file_d[HYPRE_MAX_FILE_NAME_LEN];
+   char                 new_file_o[HYPRE_MAX_FILE_NAME_LEN];
+   char                 new_file_info[HYPRE_MAX_FILE_NAME_LEN];
 
    hypre_MPI_Comm_rank(comm, &my_id);
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -579,15 +581,19 @@ HYPRE_Int
 hypre_ParCSRMatrixPrint( hypre_ParCSRMatrix *matrix,
                          const char         *file_name )
 {
-   MPI_Comm comm;
-   HYPRE_BigInt global_num_rows;
-   HYPRE_BigInt global_num_cols;
+   MPI_Comm      comm;
+   HYPRE_BigInt  global_num_rows;
+   HYPRE_BigInt  global_num_cols;
    HYPRE_BigInt *col_map_offd;
-   HYPRE_Int  my_id, i, num_procs;
-   char   new_file_d[256], new_file_o[256], new_file_info[256];
-   FILE *fp;
-   HYPRE_Int num_cols_offd = 0;
-   HYPRE_BigInt row_s, row_e, col_s, col_e;
+   HYPRE_Int     my_id, i, num_procs;
+
+   char          new_file_d[HYPRE_MAX_FILE_NAME_LEN];
+   char          new_file_o[HYPRE_MAX_FILE_NAME_LEN];
+   char          new_file_info[HYPRE_MAX_FILE_NAME_LEN];
+   FILE         *fp;
+   HYPRE_Int     num_cols_offd = 0;
+   HYPRE_BigInt  row_s, row_e, col_s, col_e;
+
    if (!matrix)
    {
       hypre_error_in_arg(1);
@@ -622,6 +628,7 @@ hypre_ParCSRMatrixPrint( hypre_ParCSRMatrix *matrix,
    row_e = hypre_ParCSRMatrixLastRowIndex(matrix);
    col_s =  hypre_ParCSRMatrixFirstColDiag(matrix);
    col_e =  hypre_ParCSRMatrixLastColDiag(matrix);
+
    /* add 1 to the ends because this is a starts partition */
    hypre_fprintf(fp, "%b %b %b %b\n", row_s, row_e + 1, col_s, col_e + 1);
    for (i = 0; i < num_cols_offd; i++)
@@ -662,7 +669,7 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
    HYPRE_Int           *offd_j;
    HYPRE_Int            myid, num_procs, i, j;
    HYPRE_BigInt         I, J;
-   char                 new_filename[255];
+   char                 new_filename[HYPRE_MAX_FILE_NAME_LEN];
    FILE                *file;
    HYPRE_Int            num_nonzeros_offd;
    HYPRE_BigInt         ilower, iupper, jlower, jupper;
@@ -783,6 +790,337 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixPrintBinaryIJ
+ *
+ * Prints a ParCSRMatrix in binary format. The data from each process is
+ * printed to a separate file. Metadata info about the matrix is printed in
+ * the header section of every file, and it is followed by the raw data, i.e.,
+ * row, column, and coefficients.
+ *
+ * The header section is composed by 11 entries stored in 88 bytes (8 bytes
+ * each) and their meanings are:
+ *
+ *    0) Header version
+ *    1) Number of bytes for storing an integer type (row and columns)
+ *    2) Number of bytes for storing a real type (coefficients)
+ *    3) Number of rows in the matrix
+ *    4) Number of columns in the matrix
+ *    5) Number of nonzero coefficients in the matrix
+ *    6) Number of local nonzero coefficients in the current matrix block
+ *    7) Global index of the first row of the current matrix block
+ *    8) Global index of the last row of the current matrix block
+ *    9) Global index of the first column in the diagonal matrix block
+ *   10) Global index of the last column in the diagonal matrix block
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
+                                 HYPRE_Int           base_i,
+                                 HYPRE_Int           base_j,
+                                 const char         *filename )
+{
+   MPI_Comm              comm = hypre_ParCSRMatrixComm(matrix);
+   HYPRE_MemoryLocation  memory_location = hypre_ParCSRMatrixMemoryLocation(matrix);
+   hypre_ParCSRMatrix   *h_matrix;
+
+   HYPRE_BigInt          first_row_index;
+   HYPRE_BigInt          first_col_diag;
+   hypre_CSRMatrix      *diag, *offd;
+   HYPRE_BigInt         *col_map_offd;
+   HYPRE_Int             num_rows;
+   HYPRE_BigInt         *row_starts, *col_starts;
+
+   HYPRE_Complex        *diag_data;
+   HYPRE_Int            *diag_i, *diag_j;
+   HYPRE_Int             diag_nnz;
+
+   HYPRE_Complex        *offd_data;
+   HYPRE_Int            *offd_i, *offd_j;
+   HYPRE_Int             offd_nnz;
+
+   /* Local buffers */
+   hypre_uint32         *i32buffer = NULL;
+   hypre_uint64         *i64buffer = NULL;
+   hypre_float          *f32buffer = NULL;
+   hypre_double         *f64buffer = NULL;
+
+   /* Local variables */
+   char                  new_filename[HYPRE_MAX_FILE_NAME_LEN];
+   FILE                 *fp;
+   hypre_uint64          header[11];
+   size_t                count;
+   HYPRE_Int             one = 1;
+   HYPRE_Int             myid, i, j, k;
+   HYPRE_BigInt          bigI, bigJ;
+   HYPRE_BigInt          ilower, iupper, jlower, jupper;
+   HYPRE_Complex         val;
+
+   /* Exit if trying to write from big-endian machine */
+   if ((*(char*)&one) == 0)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Support to big-endian machines is incomplete!\n");
+      return hypre_error_flag;
+   }
+
+   /* MPI variables */
+   hypre_MPI_Comm_rank(comm, &myid);
+
+   /* Create temporary matrix on host memory if needed */
+   h_matrix = (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE) ?
+              hypre_ParCSRMatrixClone_v2(matrix, 1, HYPRE_MEMORY_HOST) : matrix;
+
+   /* Update global number of nonzeros */
+   hypre_ParCSRMatrixSetDNumNonzeros(h_matrix);
+
+   /* Matrix variables */
+   first_row_index = hypre_ParCSRMatrixFirstRowIndex(h_matrix);
+   first_col_diag  = hypre_ParCSRMatrixFirstColDiag(h_matrix);
+   diag            = hypre_ParCSRMatrixDiag(h_matrix);
+   offd            = hypre_ParCSRMatrixOffd(h_matrix);
+   col_map_offd    = hypre_ParCSRMatrixColMapOffd(h_matrix);
+   num_rows        = hypre_ParCSRMatrixNumRows(h_matrix);
+   row_starts      = hypre_ParCSRMatrixRowStarts(h_matrix);
+   col_starts      = hypre_ParCSRMatrixColStarts(h_matrix);
+
+   /* Diagonal matrix variables */
+   diag_nnz  = hypre_CSRMatrixNumNonzeros(diag);
+   diag_data = hypre_CSRMatrixData(diag);
+   diag_i    = hypre_CSRMatrixI(diag);
+   diag_j    = hypre_CSRMatrixJ(diag);
+
+   /* Off-diagonal matrix variables */
+   offd_nnz  = hypre_CSRMatrixNumNonzeros(offd);
+   offd_data = hypre_CSRMatrixData(offd);
+   offd_i    = hypre_CSRMatrixI(offd);
+   offd_j    = hypre_CSRMatrixJ(offd);
+
+   /* Set global matrix bounds */
+   ilower = row_starts[0] + (HYPRE_BigInt) base_i;
+   iupper = row_starts[1] + (HYPRE_BigInt) base_i - 1;
+   jlower = col_starts[0] + (HYPRE_BigInt) base_j;
+   jupper = col_starts[1] + (HYPRE_BigInt) base_j - 1;
+
+   /* Open binary file */
+   hypre_sprintf(new_filename, "%s.%05d.bin", filename, myid);
+   if ((fp = fopen(new_filename, "wb")) == NULL)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not open output file!");
+      return hypre_error_flag;
+   }
+
+   /*---------------------------------------------
+    * Write header (88 bytes)
+    *---------------------------------------------*/
+
+   count = 11;
+   header[0]  = (hypre_uint64) 1; /* Header version */
+   header[1]  = (hypre_uint64) sizeof(HYPRE_BigInt);
+   header[2]  = (hypre_uint64) sizeof(HYPRE_Complex);
+   header[3]  = (hypre_uint64) hypre_ParCSRMatrixGlobalNumRows(h_matrix);;
+   header[4]  = (hypre_uint64) hypre_ParCSRMatrixGlobalNumCols(h_matrix);;
+   header[5]  = (hypre_uint64) hypre_ParCSRMatrixDNumNonzeros(h_matrix);
+   header[6]  = (hypre_uint64) diag_nnz + offd_nnz; /* local number of nonzeros*/
+   header[7]  = (hypre_uint64) ilower;
+   header[8]  = (hypre_uint64) iupper;
+   header[9]  = (hypre_uint64) jlower;
+   header[10] = (hypre_uint64) jupper;
+   if (fwrite((const void*) header, sizeof(hypre_uint64), count, fp) != count)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not write all header entries\n");
+      return hypre_error_flag;
+   }
+
+   /* Allocate memory for buffers */
+   if (sizeof(HYPRE_BigInt) == sizeof(hypre_uint32))
+   {
+      i32buffer = hypre_TAlloc(hypre_uint32, header[6], HYPRE_MEMORY_HOST);
+   }
+   else if (sizeof(HYPRE_BigInt) == sizeof(hypre_uint64))
+   {
+      i64buffer = hypre_TAlloc(hypre_uint64, header[6], HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported data type for row/column indices\n");
+      return hypre_error_flag;
+   }
+
+   /* Allocate memory for buffers */
+   if (sizeof(HYPRE_Complex) == sizeof(hypre_float))
+   {
+      f32buffer = hypre_TAlloc(hypre_float, header[6], HYPRE_MEMORY_HOST);
+   }
+   else if (sizeof(HYPRE_Complex) == sizeof(hypre_double))
+   {
+      f64buffer = hypre_TAlloc(hypre_double, header[6], HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported data type for matrix coefficients\n");
+      return hypre_error_flag;
+   }
+
+   /*---------------------------------------------
+    * Write row indices to file
+    *---------------------------------------------*/
+
+   for (i = 0, k = 0; i < num_rows; i++)
+   {
+      bigI = first_row_index + (HYPRE_BigInt)(i + base_i);
+
+      for (j = 0; j < (diag_i[i + 1] - diag_i[i]) + (offd_i[i + 1] - offd_i[i]); j++)
+      {
+         if (i32buffer)
+         {
+            i32buffer[k++] = (hypre_uint32) bigI;
+         }
+         else
+         {
+            i64buffer[k++] = (hypre_uint64) bigI;
+         }
+      }
+   }
+
+   /* Write buffer */
+   if (i32buffer)
+   {
+      count = fwrite((const void*) i32buffer, sizeof(hypre_uint32), k, fp);
+   }
+   else if (i64buffer)
+   {
+      count = fwrite((const void*) i64buffer, sizeof(hypre_uint64), k, fp);
+   }
+
+   if (count != k)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not write all row indices entries\n");
+      return hypre_error_flag;
+   }
+
+   /*---------------------------------------------
+    * Write columns indices to file
+    *---------------------------------------------*/
+
+   for (i = 0, k = 0; i < num_rows; i++)
+   {
+      for (j = diag_i[i]; j < diag_i[i + 1]; j++)
+      {
+         bigJ = first_col_diag + (HYPRE_BigInt)(diag_j[j] + base_j);
+
+         if (i32buffer)
+         {
+            i32buffer[k++] = (hypre_uint32) bigJ;
+         }
+         else
+         {
+            i64buffer[k++] = (hypre_uint64) bigJ;
+         }
+      }
+
+      for (j = offd_i[i]; j < offd_i[i + 1]; j++)
+      {
+         bigJ = col_map_offd[offd_j[j]] + (HYPRE_BigInt) base_j;
+
+         if (i32buffer)
+         {
+            i32buffer[k++] = (hypre_uint32) bigJ;
+         }
+         else
+         {
+            i64buffer[k++] = (hypre_uint64) bigJ;
+         }
+      }
+   }
+
+   /* Write buffer */
+   if (i32buffer)
+   {
+      count = fwrite((const void*) i32buffer, sizeof(hypre_uint32), k, fp);
+   }
+   else if (i64buffer)
+   {
+      count = fwrite((const void*) i64buffer, sizeof(hypre_uint64), k, fp);
+   }
+
+   if (count != k)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not write all column indices entries\n");
+      return hypre_error_flag;
+   }
+
+   /*---------------------------------------------
+    * Write coefficients indices to file
+    *---------------------------------------------*/
+
+   if (diag_data)
+   {
+      for (i = 0, k = 0; i < num_rows; i++)
+      {
+         for (j = diag_i[i]; j < diag_i[i + 1]; j++)
+         {
+            val = diag_data[j];
+
+            if (f32buffer)
+            {
+               f32buffer[k++] = (hypre_float) val;
+            }
+            else
+            {
+               f64buffer[k++] = (hypre_double) val;
+            }
+         }
+
+         for (j = offd_i[i]; j < offd_i[i + 1]; j++)
+         {
+            val = offd_data[j];
+
+            if (f32buffer)
+            {
+               f32buffer[k++] = (hypre_float) val;
+            }
+            else
+            {
+               f64buffer[k++] = (hypre_double) val;
+            }
+         }
+      }
+
+      /* Write buffer */
+      if (f32buffer)
+      {
+         count = fwrite((const void*) f32buffer, sizeof(hypre_float), k, fp);
+      }
+      else if (f64buffer)
+      {
+         count = fwrite((const void*) f64buffer, sizeof(hypre_double), k, fp);
+      }
+
+      if (count != k)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not write all matrix coefficients\n");
+         return hypre_error_flag;
+      }
+   }
+
+   fclose(fp);
+
+   /*---------------------------------------------
+    * Free memory
+    *---------------------------------------------*/
+
+   if (h_matrix != matrix)
+   {
+      hypre_ParCSRMatrixDestroy(h_matrix);
+   }
+   hypre_TFree(i32buffer, HYPRE_MEMORY_HOST);
+   hypre_TFree(i64buffer, HYPRE_MEMORY_HOST);
+   hypre_TFree(f32buffer, HYPRE_MEMORY_HOST);
+   hypre_TFree(f64buffer, HYPRE_MEMORY_HOST);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixReadIJ
  *--------------------------------------------------------------------------*/
 
@@ -817,7 +1155,7 @@ hypre_ParCSRMatrixReadIJ( MPI_Comm             comm,
    HYPRE_BigInt       *aux_offd_j;
    HYPRE_BigInt        I, J;
    HYPRE_Int           myid, num_procs, i, i2, j;
-   char                new_filename[255];
+   char                new_filename[HYPRE_MAX_FILE_NAME_LEN];
    FILE               *file;
    HYPRE_Int           num_cols_offd, num_nonzeros_diag, num_nonzeros_offd;
    HYPRE_Int           i_col, num_cols;

@@ -14,6 +14,9 @@
 #ifndef hypre_GENERAL_HEADER
 #define hypre_GENERAL_HEADER
 
+/* #include <stdio.h> */
+/* #include <stdlib.h> */
+#include <stdint.h>
 #include <math.h>
 
 /*--------------------------------------------------------------------------
@@ -26,8 +29,11 @@ typedef long int               hypre_longint;
 typedef unsigned int           hypre_uint;
 typedef unsigned long int      hypre_ulongint;
 typedef unsigned long long int hypre_ulonglongint;
+typedef uint32_t               hypre_uint32;
+typedef uint64_t               hypre_uint64;
 
-/* This allows us to consistently avoid 'double' throughout hypre */
+/* This allows us to consistently avoid 'float' and 'double' throughout hypre */
+typedef float                  hypre_float;
 typedef double                 hypre_double;
 
 /*--------------------------------------------------------------------------

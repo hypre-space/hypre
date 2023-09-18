@@ -182,6 +182,8 @@ FILES="\
  ${TNAME}.out.211\
  ${TNAME}.out.212\
  ${TNAME}.out.213\
+ ${TNAME}.out.404\
+ ${TNAME}.out.405\
 "
 
 for i in $FILES
