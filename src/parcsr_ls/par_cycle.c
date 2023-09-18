@@ -533,6 +533,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                                 cheby_order, scale,
                                                 variant, Aux_U, Vtemp, Ztemp, Ptemp, Rtemp );
                }
+               else if (relax_type == 19)
+               {
+                  // no-op
+               }
                else if (relax_type == 17)
                {
                   if (level == num_levels - 1)
