@@ -73,7 +73,7 @@ main( HYPRE_Int   argc,
 
    hypre_ParVectorPrint(vector2, "Convert");
 
-   vector = hypre_ParVectorToVectorAll(vector2, HYPRE_MEMORY_HOST);
+   vector = hypre_ParVectorToVectorAll(vector2);
 
    /*-----------------------------------------------------------
     * Copy the vector into tmp_vector

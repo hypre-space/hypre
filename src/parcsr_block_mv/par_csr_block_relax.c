@@ -2054,7 +2054,7 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 
          /* all processors are needed for these routines */
          A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A_ParCSR, HYPRE_MEMORY_HOST);
-         f_vector = hypre_ParVectorToVectorAll(f, HYPRE_MEMORY_HOST);
+         f_vector = hypre_ParVectorToVectorAll(f);
 
          if (n)
          {

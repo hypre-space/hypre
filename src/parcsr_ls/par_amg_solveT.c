@@ -704,7 +704,7 @@ HYPRE_Int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
           *-----------------------------------------------------------------*/
 
          A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A, HYPRE_MEMORY_HOST);
-         f_vector = hypre_ParVectorToVectorAll(f, HYPRE_MEMORY_HOST);
+         f_vector = hypre_ParVectorToVectorAll(f);
          if (n)
          {
             A_CSR_i = hypre_CSRMatrixI(A_CSR);

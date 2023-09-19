@@ -381,7 +381,7 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
       {
          for (i = 0; i < num_smooth_vecs; i++)
          {
-            sv = hypre_ParVectorToVectorAll(smooth_vecs[i], HYPRE_MEMORY_HOST);
+            sv = hypre_ParVectorToVectorAll(smooth_vecs[i]);
 
             if (!myid)
             {

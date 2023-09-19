@@ -680,6 +680,16 @@ hypre_VectorToParVector ( MPI_Comm      comm,
 
 /*--------------------------------------------------------------------------
  * hypre_ParVectorToVectorAll
+ *--------------------------------------------------------------------------*/
+
+hypre_Vector *
+hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
+{
+   return hypre_ParVectorToVectorAll_v2(par_v, hypre_ParVectorMemoryLocation(par_v));
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParVectorToVectorAll_v2
  *
  * Generates a Vector on every proc which has a piece of the data
  * from a ParVector on several procs in comm.
@@ -688,8 +698,8 @@ hypre_VectorToParVector ( MPI_Comm      comm,
  *--------------------------------------------------------------------------*/
 
 hypre_Vector *
-hypre_ParVectorToVectorAll( hypre_ParVector *par_v,
-                            HYPRE_MemoryLocation memory_location )
+hypre_ParVectorToVectorAll_v2( hypre_ParVector *par_v,
+                               HYPRE_MemoryLocation memory_location )
 {
    MPI_Comm                     comm         = hypre_ParVectorComm(par_v);
    HYPRE_Int                    num_vectors  = hypre_ParVectorNumVectors(par_v);

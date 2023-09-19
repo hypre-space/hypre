@@ -532,7 +532,7 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
    }
    else /* if (solver_type == 19 || solver_type == 98 || solver_type == 198) */
    {
-      f_all = hypre_ParVectorToVectorAll(f, HYPRE_MEMORY_HOST);
+      f_all = hypre_ParVectorToVectorAll_v2(f, HYPRE_MEMORY_HOST);
    }
 
    /* Complete the computation of bvec and free work space if needed */
