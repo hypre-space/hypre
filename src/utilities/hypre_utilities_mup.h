@@ -509,6 +509,18 @@ HYPRE_Int hypre_DoubleQuickSplit_long_dbl  ( hypre_long_double *values, HYPRE_In
 /* HYPRE_CUDA_GLOBAL_flt  */ void hypre_SeedRand_flt ( HYPRE_Int seed );
 /* HYPRE_CUDA_GLOBAL_dbl  */ void hypre_SeedRand_dbl ( HYPRE_Int seed );
 /* HYPRE_CUDA_GLOBAL_long_dbl  */ void hypre_SeedRand_long_dbl ( HYPRE_Int seed );
+HYPRE_Int HYPRE_Initialize_flt(void);
+HYPRE_Int HYPRE_Initialize_dbl(void);
+HYPRE_Int HYPRE_Initialize_long_dbl(void);
+HYPRE_Int HYPRE_Initialized_flt(void);
+HYPRE_Int HYPRE_Initialized_dbl(void);
+HYPRE_Int HYPRE_Initialized_long_dbl(void);
+HYPRE_Int HYPRE_Finalize_flt(void);
+HYPRE_Int HYPRE_Finalize_dbl(void);
+HYPRE_Int HYPRE_Finalize_long_dbl(void);
+HYPRE_Int HYPRE_Finalized_flt(void);
+HYPRE_Int HYPRE_Finalized_dbl(void);
+HYPRE_Int HYPRE_Finalized_long_dbl(void);
 HYPRE_Int hypre_Finalized_flt ( void );
 HYPRE_Int hypre_Finalized_dbl ( void );
 HYPRE_Int hypre_Finalized_long_dbl ( void );
