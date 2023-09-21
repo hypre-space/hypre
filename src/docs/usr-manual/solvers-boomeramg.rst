@@ -10,13 +10,11 @@ BoomerAMG
 BoomerAMG is a parallel implementation of the algebraic multigrid method
 [RuSt1987]_.  It can be used both as a solver or as a preconditioner.  The user
 can choose between various different parallel coarsening techniques,
-interpolation and relaxation schemes.  While the default settings work fairly
-well for two-dimensional diffusion problems, for three-dimensional diffusion
-problems, it is recommended to choose a lower complexity coarsening like HMIS or
-PMIS (coarsening 10 or 8) and combine it with a distance-two interpolation
-(interpolation 6 or 7), that is also truncated to 4 or 5 elements per
-row. Additional reduction in complexity and increased scalability can often be
-achieved using one or two levels of aggressive coarsening.
+interpolation and relaxation schemes. The default settings for CPUs, HMIS 
+(coarsening 8) combined with a distance-two interpolation (6) truncated to 4
+or 5 elements per row, should work fairly well for two- and three-dimensional 
+diffusion problems. Additional reduction in complexity and increased scalability 
+can often be achieved using one or two levels of aggressive coarsening.
 
 
 Parameter Options
@@ -42,6 +40,7 @@ techniques can be found in [HeYa2002]_, [Yang2005]_.
 Various coarsening techniques are available:
 
 * the Cleary-Luby-Jones-Plassman (CLJP) coarsening,
+* parallel versions of the classical RS coarsening described in [HeYa2002]_.
 * the Falgout coarsening which is a combination of CLJP and the classical RS
   coarsening algorithm,
 * CGC and CGC-E coarsenings [GrMS2006a]_, [GrMS2006b]_,
@@ -51,14 +50,14 @@ Various coarsening techniques are available:
   techniques mentioned above a nd thus achieving much lower complexities and
   lower memory use [Stue1999]_.
 
-To use aggressive coarsening the user has to set the number of levels to which
-he wants to apply aggressive coarsening (starting with the finest level) via
+To use aggressive coarsening users have to set the number of levels to which
+they want to apply aggressive coarsening (starting with the finest level) via
 ``HYPRE_BoomerAMGSetAggNumLevels``. Since aggressive coarsening requires long
 range interpolation, multipass interpolation is always used on levels with
 aggressive coarsening, unless the user specifies another long-range
 interpolation suitable for aggressive coarsening.
 
-Note that the default coarsening is HMIS [DeYH2004]_.
+Note that the default coarsening for CPUs is HMIS, for GPUs PMIS [DeYH2004]_.
 
 
 Interpolation Options
@@ -72,12 +71,13 @@ Various interpolation techniques can be set using ``HYPRE_BoomerAMGSetInterpType
 * an extended "classical" interpolation, which is a long range interpolation and
   is recommended to be used with PMIS and HMIS coarsening for harder problems
   [DFNY2008]_,
+* distance-two interpolation based on matrix operations [LiSY2021]_,
 * multipass interpolation [Stue1999]_,
 * two-stage interpolation [Yang2010]_,
 * Jacobi interpolation [Stue1999]_,
 * the "classical" interpolation modified for hyperbolic PDEs.
 
-Jacobi interpolation is only use to improve certain interpolation operators and
+Jacobi interpolation is only used to improve certain interpolation operators and
 can be used with ``HYPRE_BoomerAMGSetPostInterpType``.  Since some of the
 interpolation operators might generate large stencils, it is often possible and
 recommended to control complexity and truncate the interpolation operators using
@@ -85,7 +85,8 @@ recommended to control complexity and truncate the interpolation operators using
 ``HYPRE_BoomerAMGSetJacobiTruncTheshold`` (for Jacobi interpolation only).
 
 Note that the default interpolation is extended+i interpolation [DFNY2008]_
-truncated to 4 elements per row.
+truncated to 4 elements per row, for CPUs, and a version of this interpolation
+based on matrix operations for GPUs [LiSY2021]_.
 
 
 Non-Galerkin Options
@@ -117,6 +118,8 @@ A good overview of parallel smoothers and their properties can be found in
 * a symmetric hybrid Gauss-Seidel / Jacobi relaxation scheme,
 * l1-Gauss-Seidel or Jacobi,
 * Chebyshev smoothers,
+* two-stage Gauss-Seidel smoothers [BKRHSMTY2021]_,
+* iterative ILU smoothers,
 * hybrid block and Schwarz smoothers [Yang2004]_,
 * Incomplete LU factorization, see :ref:`ilu-amg-smoother`.
 * Factorized Sparse Approximate Inverse (FSAI), see :ref:`fsai-amg-smoother`.
@@ -249,8 +252,6 @@ For best performance, it might be necessary to set certain parameters, which
 will affect both coarsening and interpolation.  One important parameter is the
 strong threshold, which can be set using the function
 ``HYPRE_BoomerAMGSetStrongThreshold``.  The default value is 0.25, which appears
-to be a good choice for 2-dimensional problems and the low complexity coarsening
-algorithms.  For 3-dimensional problems a better choice appears to be 0.5, when
-using the default coarsening algorithm. However, the choice of the strength
-threshold is problem dependent and therefore there could be better choices than
-the two suggested ones.
+to be a good choice for diffusion problems.  The choice of the strength
+threshold is problem dependent. For example, for elasticity problems often a larger
+strength threshold is required.
