@@ -55,7 +55,8 @@ they want to apply aggressive coarsening (starting with the finest level) via
 ``HYPRE_BoomerAMGSetAggNumLevels``. Since aggressive coarsening requires long
 range interpolation, multipass interpolation is always used on levels with
 aggressive coarsening, unless the user specifies another long-range
-interpolation suitable for aggressive coarsening.
+interpolation suitable for aggressive coarsening via 
+``HYPRE_BoomerAMGSetAggInterpType``..
 
 Note that the default coarsening for CPUs is HMIS, for GPUs PMIS [DeYH2004]_.
 
@@ -65,17 +66,17 @@ Interpolation Options
 
 Various interpolation techniques can be set using ``HYPRE_BoomerAMGSetInterpType``:
 
-* the "classical" interpolation as defined in [RuSt1987]_,
-* direct interpolation [Stue1999]_,
-* standard interpolation [Stue1999]_,
+* the "classical" interpolation (0) as defined in [RuSt1987]_,
+* direct interpolation (3) [Stue1999]_,
+* standard interpolation (8) [Stue1999]_,
 * an extended "classical" interpolation, which is a long range interpolation and
   is recommended to be used with PMIS and HMIS coarsening for harder problems
-  [DFNY2008]_,
-* distance-two interpolation based on matrix operations [LiSY2021]_,
-* multipass interpolation [Stue1999]_,
+  (6) [DFNY2008]_,
+* distance-two interpolation based on matrix operations (17) [LiSY2021]_,
+* multipass interpolation (4) [Stue1999]_,
 * two-stage interpolation [Yang2010]_,
 * Jacobi interpolation [Stue1999]_,
-* the "classical" interpolation modified for hyperbolic PDEs.
+* the "classical" interpolation modified for hyperbolic PDEs (2).
 
 Jacobi interpolation is only used to improve certain interpolation operators and
 can be used with ``HYPRE_BoomerAMGSetPostInterpType``.  Since some of the
@@ -113,13 +114,12 @@ Smoother Options
 A good overview of parallel smoothers and their properties can be found in
 [BFKY2011]_. Various of the described relaxation techniques are available:
 
-* weighted Jacobi relaxation,
-* a hybrid Gauss-Seidel / Jacobi relaxation scheme,
-* a symmetric hybrid Gauss-Seidel / Jacobi relaxation scheme,
-* l1-Gauss-Seidel or Jacobi,
-* Chebyshev smoothers,
-* two-stage Gauss-Seidel smoothers [BKRHSMTY2021]_,
-* iterative ILU smoothers,
+* weighted Jacobi relaxation (0),
+* a hybrid Gauss-Seidel / Jacobi relaxation scheme (3 4),
+* a symmetric hybrid Gauss-Seidel / Jacobi relaxation scheme (6),
+* l1-Gauss-Seidel or Jacobi (13 14 18 8),
+* Chebyshev smoothers (16),
+* two-stage Gauss-Seidel smoothers (11 12) [BKRHSMTY2021]_,
 * hybrid block and Schwarz smoothers [Yang2004]_,
 * Incomplete LU factorization, see :ref:`ilu-amg-smoother`.
 * Factorized Sparse Approximate Inverse (FSAI), see :ref:`fsai-amg-smoother`.
@@ -146,6 +146,19 @@ variables belong to which function, BoomerAMG's systems AMG version can also be
 used. Functions that enable the user to access the systems AMG version are
 ``HYPRE_BoomerAMGSetNumFunctions``, ``HYPRE_BoomerAMGSetDofFunc`` and
 ``HYPRE_BoomerAMGSetNodal``.
+
+There are basically two approaches to deal with matrices derived from systems
+of PDEs. The unknown-based approach (which is the default) treats variables 
+corresponding to the same unknown or function separately, i.e., when coarsening 
+or generating interpolation, connections between variables associated with 
+different unknowns are ignored. This can work well for weakly coupled PDEs, 
+but will be problematic for strongly coupled PDEs. For such problems, we recommend 
+to use hypre's multigrid reduction (MGR) solver. The second approach, called 
+the nodal approach, considers all unknowns at a physical grid point together 
+such that coarsening, interpolation and relaxation occur in a point-wise fashion. 
+It is possible and sometimes prefered to combine nodal coarsening with unknown-based 
+interpolation. For this case, ``HYPRE_BoomerAMGSetNodal`` should be set > 1. 
+For details see the reference manual.
 
 If the user can provide the near null-space vectors, such as the rigid body
 modes for linear elasticity problems, an interpolation is available that will
@@ -181,7 +194,7 @@ The currently available  GPU-supported BoomerAMG options include:
 * Interpolation:  direct (3), BAMG-direct (15), extended (14), extended+i (6) and extended+e (18)
 * Aggressive coarsening
 * Second-stage interpolation with aggressive coarsening: extended (5) and extended+e (7)
-* Smoother: Jacobi (7), l1-Jacobi (18), hybrid Gauss Seidel/SRROR (3 4 6), two-stage Gauss-Seidel (11,12) [BKRHSMTY2021]_
+* Smoother: Jacobi (7), l1-Jacobi (18), hybrid Gauss Seidel/SSOR (3 4 6), two-stage Gauss-Seidel (11,12) [BKRHSMTY2021]_
 * Relaxation order: must be 0, i.e., lexicographic order
 
 A sample code of setting up IJ matrix :math:`A` and solve :math:`Ax=b` using AMG-preconditioned CG
