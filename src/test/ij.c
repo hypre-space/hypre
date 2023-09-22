@@ -256,7 +256,7 @@ main( hypre_int argc,
    HYPRE_Int      CR_use_CG = 0;
    HYPRE_Int      P_max_elmts = 4;
    HYPRE_Int      cycle_type = 1;
-   HYPRE_Int      kappa;
+   HYPRE_Int      kappa=1;
    HYPRE_Int      *cycle_struct,*relax_node_types,*node_num_sweeps,cycle_num_nodes;
    HYPRE_Real     *relax_node_weights,*relax_edge_weights;
    HYPRE_Int      fcycle;
@@ -685,6 +685,12 @@ main( hypre_int argc,
          arg_index++;
          build_matrix_type      = -1;
          build_matrix_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-kappacycle") == 0 )
+      {
+         cycle_type = 3;
+         arg_index++;
+         kappa = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-amgusrinputs") == 0 )
       {
@@ -1658,7 +1664,6 @@ main( hypre_int argc,
       * Set kappa=2 for F-cycle.
       * Set kappa to large number for W-cycle.
       *--------------------------------------------*/
-      kappa=1; 
       fcycle = 0;
       relax_wt = 1.;
       outer_wt = 1.;
