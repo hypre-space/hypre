@@ -179,12 +179,13 @@ checkpar:
         echo "Testing SStruct ..."; \
         (cd test; ./runtest.sh -tol 1.e-06 -mpi "$(CHECKRUN)" TEST_sstruct/solvers.sh); \
         (cd test; ./checktest.sh); \
-        (cd test; ./cleantest.sh); 
+        (cd test; ./cleantest.sh);
 
 install: all
 	@ \
 	echo "Installing hypre ..."; \
-	${HYPRE_SRC_TOP_DIR}/config/mkinstalldirs ${HYPRE_LIB_INSTALL} ${HYPRE_INC_INSTALL}; \
+	${HYPRE_SRC_TOP_DIR}/config/mkinstalldirs \
+        ${HYPRE_LIB_INSTALL} ${HYPRE_INC_INSTALL} ${HYPRE_PKGCONFIG_INSTALL}; \
 	HYPRE_PWD=`pwd`; \
 	cd ${HYPRE_BUILD_DIR}/lib; HYPRE_FROMDIR=`pwd`; \
 	cd $$HYPRE_PWD; \
@@ -200,9 +201,17 @@ install: all
 	then \
 	  cp -fR $$HYPRE_FROMDIR/* $$HYPRE_TODIR; \
 	fi; \
+	cd ${HYPRE_SRC_TOP_DIR}/config; HYPRE_FROMDIR=`pwd`; \
+	cd $$HYPRE_PWD; \
+	cd ${HYPRE_PKGCONFIG_INSTALL}; HYPRE_TODIR=`pwd`; \
+	if [ "$$HYPRE_FROMDIR" != "$$HYPRE_TODIR" ]; \
+	then \
+	  cp -fR $$HYPRE_FROMDIR/HYPRE.pc $$HYPRE_TODIR; \
+	fi; \
 	cd $$HYPRE_PWD; \
 	chmod -R a+rX,u+w,go-w ${HYPRE_LIB_INSTALL}; \
 	chmod -R a+rX,u+w,go-w ${HYPRE_INC_INSTALL}; \
+	chmod -R a+rX,u+w,go-w ${HYPRE_PKGCONFIG_INSTALL}; \
 	echo
 
 clean:

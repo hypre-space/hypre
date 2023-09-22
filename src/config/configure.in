@@ -3089,5 +3089,6 @@ dnl *********************************************************************
 dnl * Define the files to be configured and made
 dnl *********************************************************************
 AC_CONFIG_FILES([config/Makefile.config])
+AC_CONFIG_FILES([config/HYPRE.pc])
 
 AC_OUTPUT
