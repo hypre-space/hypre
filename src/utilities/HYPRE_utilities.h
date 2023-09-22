@@ -267,6 +267,7 @@ typedef enum _HYPRE_ExecutionPolicy
 
 HYPRE_Int HYPRE_SetExecutionPolicy(HYPRE_ExecutionPolicy exec_policy);
 HYPRE_Int HYPRE_GetExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy);
+const char* HYPRE_GetExecutionPolicyName(HYPRE_ExecutionPolicy exec_policy);
 
 /*--------------------------------------------------------------------------
  * HYPRE UMPIRE
