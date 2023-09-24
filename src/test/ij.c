@@ -4623,6 +4623,11 @@ main( hypre_int argc,
       }
       if (cycle_type==4)
          hypre_TFree(iconfig_ptr, HYPRE_MEMORY_HOST);
+      if (n_rlxwts > 0)
+      {
+         hypre_TFree(rlxwts, HYPRE_MEMORY_HOST);
+         hypre_TFree(rlxlvls, HYPRE_MEMORY_HOST);
+      }
    }
 
    /*-----------------------------------------------------------
@@ -5438,6 +5443,11 @@ main( hypre_int argc,
       if (solver_id == 1)
       {
          HYPRE_BoomerAMGDestroy(pcg_precond);
+         if (n_rlxwts > 0)
+         {
+            hypre_TFree(rlxwts, HYPRE_MEMORY_HOST);
+            hypre_TFree(rlxlvls, HYPRE_MEMORY_HOST);
+         }
       }
       else if (solver_id == 8)
       {
