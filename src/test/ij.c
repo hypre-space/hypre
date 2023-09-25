@@ -4460,6 +4460,18 @@ main( hypre_int argc,
       // loop over input configurations (from evostencils)
       for (i = 0; i < n_configs; i++)
       {     
+         // get the initial residual norm
+         if (i==0)
+         {
+            residual = hypre_ParVectorCloneDeep_v2(b, hypre_ParVectorMemoryLocation(b));
+            hypre_ParVectorCopy(b, residual);
+            HYPRE_ParCSRMatrixMatvec(1.0, parcsr_A, x, -1.0, residual);
+            init_res_norm = hypre_sqrt(hypre_ParVectorInnerProd( residual, residual ));
+            b_norm = hypre_sqrt(hypre_ParVectorInnerProd( b, b ));
+            if (b_norm == 0)
+               b_norm = 1;       
+            init_res_norm = init_res_norm/b_norm;
+         }
          if (cycle_type==4)
          {
             // reset the initial guess
@@ -4467,19 +4479,7 @@ main( hypre_int argc,
                HYPRE_ParVectorSetConstantValues(x,0);
             else if (build_x0_type == 1)
                HYPRE_ParVectorSetRandomValues(x,0);
-            
-            // get the initial residual norm
-            if (i==0)
-            {
-               residual = hypre_ParVectorCloneDeep_v2(b, hypre_ParVectorMemoryLocation(b));
-               hypre_ParVectorCopy(b, residual);
-               HYPRE_ParCSRMatrixMatvec(1.0, parcsr_A, x, -1.0, residual);
-               init_res_norm = hypre_sqrt(hypre_ParVectorInnerProd( residual, residual ));
-               b_norm = hypre_sqrt(hypre_ParVectorInnerProd( b, b ));
-               if (b_norm == 0)
-                  b_norm = 1;       
-               init_res_norm = init_res_norm/b_norm;
-            }
+         
             // set cycle structure from usr inputs 
             HYPRE_BoomerAMGSetCycleStruct(amg_solver,iconfig_ptr[i].cycle_struct,iconfig_ptr[i].cycle_num_nodes);
             HYPRE_BoomerAMGSetRelaxNodeTypes(amg_solver,iconfig_ptr[i].relax_node_types);
@@ -4606,7 +4606,7 @@ main( hypre_int argc,
                hypre_printf("BoomerAMG-DD Iterations = %d\n", num_iterations);
             }
             hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
-            if (cycle_type==4) 
+            if (cycle_type==4 || cycle_type==3) 
             {
                hypre_printf("Average Convergence Factor = %f\n", hypre_pow(final_res_norm/init_res_norm, (1.0 / (HYPRE_Real) num_iterations)));
             }
@@ -5336,6 +5336,18 @@ main( hypre_int argc,
       // loop over amg precond input configurations (from evostencils)
       for (i = 0; i < n_configs; i++)
       {     
+         // get the initial residual norm
+         if (i==0)
+         {
+            residual = hypre_ParVectorCloneDeep_v2(b, hypre_ParVectorMemoryLocation(b));
+            hypre_ParVectorCopy(b, residual);
+            HYPRE_ParCSRMatrixMatvec(1.0, parcsr_A, x, -1.0, residual);
+            init_res_norm = hypre_sqrt(hypre_ParVectorInnerProd( residual, residual ));
+            b_norm = hypre_sqrt(hypre_ParVectorInnerProd( b, b ));
+            if (b_norm == 0)
+               b_norm = 1;       
+            init_res_norm = init_res_norm/b_norm;
+         }
          if (cycle_type==4)
          {
             // reset the initial guess
@@ -5343,19 +5355,6 @@ main( hypre_int argc,
                HYPRE_ParVectorSetConstantValues(x,0);
             else if (build_x0_type == 1)
                HYPRE_ParVectorSetRandomValues(x,0);
-            
-            // get the initial residual norm
-            if (i==0)
-            {
-               residual = hypre_ParVectorCloneDeep_v2(b, hypre_ParVectorMemoryLocation(b));
-               hypre_ParVectorCopy(b, residual);
-               HYPRE_ParCSRMatrixMatvec(1.0, parcsr_A, x, -1.0, residual);
-               init_res_norm = hypre_sqrt(hypre_ParVectorInnerProd( residual, residual ));
-               b_norm = hypre_sqrt(hypre_ParVectorInnerProd( b, b ));
-               if (b_norm == 0)
-                  b_norm = 1;       
-               init_res_norm = init_res_norm/b_norm;
-            }
             // set cycle structure from usr inputs 
             HYPRE_BoomerAMGSetCycleStruct(pcg_precond,iconfig_ptr[i].cycle_struct,iconfig_ptr[i].cycle_num_nodes);
             HYPRE_BoomerAMGSetRelaxNodeTypes(pcg_precond,iconfig_ptr[i].relax_node_types);
@@ -5431,7 +5430,7 @@ main( hypre_int argc,
          hypre_printf("\n");
          hypre_printf("Iterations = %d\n", num_iterations);
          hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
-         if (cycle_type==4)
+         if (cycle_type==4 || cycle_type==3)
          {
          hypre_printf("Average Convergence Factor = %f\n", hypre_pow(final_res_norm/init_res_norm, (1.0 / (HYPRE_Real) num_iterations)));
          }
