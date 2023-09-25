@@ -1177,10 +1177,10 @@ hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A,
                jcol = col - n;
                utemp_data[(perm) ? perm[i] : i] -= U_diag_data[j] * uext[jcol];
             }
-
-            /* diagonal scaling (contribution from D. Note: D is stored as its inverse) */
-            utemp_data[(perm) ? perm[i] : i] *= D[i];
          }
+
+         /* diagonal scaling (contribution from D. Note: D is stored as its inverse) */
+         utemp_data[(perm) ? perm[i] : i] *= D[i];
       }
       else
       {
