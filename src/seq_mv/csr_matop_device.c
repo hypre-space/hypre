@@ -2134,10 +2134,6 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
    return hypre_error_flag;
 }
 
-#endif /* defined(HYPRE_USING_GPU) */
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixIdentityDevice
  *
@@ -2151,6 +2147,20 @@ hypre_CSRMatrixIdentityDevice(HYPRE_Int n, HYPRE_Complex alp)
 
    hypre_CSRMatrixInitialize_v2(A, 0, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+   hypreSycl_sequence( hypre_CSRMatrixI(A),
+                       hypre_CSRMatrixI(A) + n + 1,
+                       0  );
+
+   hypreSycl_sequence( hypre_CSRMatrixJ(A),
+                       hypre_CSRMatrixJ(A) + n,
+                       0  );
+
+   HYPRE_ONEDPL_CALL( std::fill,
+                      hypre_CSRMatrixData(A),
+                      hypre_CSRMatrixData(A) + n,
+                      alp );
+#else
    HYPRE_THRUST_CALL( sequence,
                       hypre_CSRMatrixI(A),
                       hypre_CSRMatrixI(A) + n + 1,
@@ -2165,12 +2175,13 @@ hypre_CSRMatrixIdentityDevice(HYPRE_Int n, HYPRE_Complex alp)
                       hypre_CSRMatrixData(A),
                       hypre_CSRMatrixData(A) + n,
                       alp );
+#endif
 
    return A;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixIdentityDevice
+ * hypre_CSRMatrixDiagMatrixFromVectorDevice
  *
  * A = diag(v)
  *--------------------------------------------------------------------------*/
@@ -2182,6 +2193,20 @@ hypre_CSRMatrixDiagMatrixFromVectorDevice(HYPRE_Int n, HYPRE_Complex *v)
 
    hypre_CSRMatrixInitialize_v2(A, 0, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+   hypreSycl_sequence( hypre_CSRMatrixI(A),
+                       hypre_CSRMatrixI(A) + n + 1,
+                       0  );
+
+   hypreSycl_sequence( hypre_CSRMatrixJ(A),
+                       hypre_CSRMatrixJ(A) + n,
+                       0  );
+
+   HYPRE_ONEDPL_CALL( std::copy,
+                      v,
+                      v + n,
+                      hypre_CSRMatrixData(A) );
+#else
    HYPRE_THRUST_CALL( sequence,
                       hypre_CSRMatrixI(A),
                       hypre_CSRMatrixI(A) + n + 1,
@@ -2196,12 +2221,13 @@ hypre_CSRMatrixDiagMatrixFromVectorDevice(HYPRE_Int n, HYPRE_Complex *v)
                       v,
                       v + n,
                       hypre_CSRMatrixData(A) );
+#endif
 
    return A;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixIdentityDevice
+ * hypre_CSRMatrixDiagMatrixFromMatrixDevice
  *
  * B = diagm(A)
  *--------------------------------------------------------------------------*/
@@ -2218,10 +2244,6 @@ hypre_CSRMatrixDiagMatrixFromMatrixDevice(hypre_CSRMatrix *A, HYPRE_Int type)
    hypre_TFree(diag, HYPRE_MEMORY_DEVICE);
    return diag_mat;
 }
-
-#endif /* HYPRE_USING_CUDA || defined(HYPRE_USING_HIP) */
-
-#if defined(HYPRE_USING_GPU)
 
 /*--------------------------------------------------------------------------
  * adj_functor (Used in hypre_CSRMatrixPermuteDevice)
@@ -2412,8 +2434,6 @@ hypre_CSRMatrixTransposeDevice(hypre_CSRMatrix  *A,
    return hypre_error_flag;
 }
 
-#endif /* #if defined(HYPRE_USING_GPU) */
-
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixSortRow
  *--------------------------------------------------------------------------*/
@@ -2444,8 +2464,6 @@ hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
 
    return hypre_error_flag;
 }
-
-#if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixSortRowOutOfPlace
@@ -2485,7 +2503,6 @@ hypre_CSRMatrixSortRowOutOfPlace(hypre_CSRMatrix *A)
 
    return hypre_error_flag;
 }
-#endif /* defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) */
 
 #if defined(HYPRE_USING_CUSPARSE)
 
@@ -3107,9 +3124,13 @@ hypre_CSRMatrixTriLowerUpperSolveOnemklsparse(char              uplo,
                                            HYPRE_Complex    *f_data,
                                            HYPRE_Complex    *u_data )
 {
+   HYPRE_Int                                *A_j = hypre_CSRMatrixJ(A);
    HYPRE_Complex                            *A_a = hypre_CSRMatrixData(A);
    oneapi::mkl::sparse::matrix_handle_t handle_A = hypre_CSRMatrixGPUMatHandle(A);
    hypre_CsrsvData                   *csrsv_data = hypre_CSRMatrixCsrsvData(A);
+
+   /* Generate sorted matrix */
+   hypre_CSRMatrixSortRowOutOfPlace(A);
 
    /* Generate csrsv data if necessary */
    if (!csrsv_data)
@@ -3121,18 +3142,20 @@ hypre_CSRMatrixTriLowerUpperSolveOnemklsparse(char              uplo,
                                                         hypre_CSRMatrixNumNonzeros(A),
                                                         HYPRE_MEMORY_DEVICE);
 
-      /* WM: todo - question: does the matrix need to be sorted? */
-      hypre_TMemcpy(hypre_CsrsvDataMatData(csrsv_data), A_a,
+      /* Copy the sorted data to csrsv mat data */
+      hypre_TMemcpy(hypre_CsrsvDataMatData(csrsv_data), hypre_CSRMatrixSortedData(A),
                     HYPRE_Complex, hypre_CSRMatrixNumNonzeros(A),
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
       /* if (l1_norms), replace A's diag with l1_norm, and
        * replace zero diag with inf. so as to skip relaxation for this unknown */
       hypre_CSRMatrixData(A) = hypre_CsrsvDataMatData(csrsv_data);
+      hypre_CSRMatrixJ(A) = hypre_CSRMatrixSortedJ(A);
       hypre_CSRMatrixReplaceDiagDevice(A, l1_norms, INFINITY, 0.0);
    }
 
-   /* Use matrix data with modified diagonal */
+   /* Use sorted column indices and sorted matrix data with modified diagonal */
+   hypre_CSRMatrixJ(A) = hypre_CSRMatrixSortedJ(A);
    hypre_CSRMatrixData(A) = hypre_CsrsvDataMatData(csrsv_data);
    hypre_GPUMatDataSetCSRData(A);
 
@@ -3159,6 +3182,7 @@ hypre_CSRMatrixTriLowerUpperSolveOnemklsparse(char              uplo,
                      {} ).wait() );
 
    /* Restore the original matrix data */
+   hypre_CSRMatrixJ(A) = A_j;
    hypre_CSRMatrixData(A) = A_a;
    hypre_GPUMatDataSetCSRData(A);
 
@@ -3419,3 +3443,5 @@ hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix)
 
    return hypre_error_flag;
 }
+
+#endif /* #if defined(HYPRE_USING_GPU) */
