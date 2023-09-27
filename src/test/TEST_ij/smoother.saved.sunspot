@@ -6,7 +6,7 @@
                    cycle = 5.253199
 
 # Output file: smoother.out.1
- Average Convergence Factor = 0.111440
+ Average Convergence Factor = 0.111287
 
      Complexity:    grid = 1.410222
                 operator = 2.565374
@@ -28,7 +28,7 @@
 
 # Output file: smoother.out.4
 Iterations = 7
-Final Relative Residual Norm = 1.585603e-09
+Final Relative Residual Norm = 1.279851e-09
 
 # Output file: smoother.out.5
 BoomerAMG Iterations = 15
@@ -36,11 +36,11 @@ Final Relative Residual Norm = 5.891292e-09
 
 # Output file: smoother.out.6
 Iterations = 12
-Final Relative Residual Norm = 2.281457e-09
+Final Relative Residual Norm = 2.101656e-09
 
 # Output file: smoother.out.7
 BoomerAMG Iterations = 26
-Final Relative Residual Norm = 7.707252e-09
+Final Relative Residual Norm = 7.523140e-09
 
 # Output file: smoother.out.8
 BoomerAMG Iterations = 16
