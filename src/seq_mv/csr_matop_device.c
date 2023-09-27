@@ -1634,7 +1634,95 @@ hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix *A )
 }
 
 /*--------------------------------------------------------------------------
- * hypreGPUKernel_CSRMatrixFixZeroDiagDevice
+ * hypreGPUKernel_CSRMatrixCheckForMissingDiagonal
+ *--------------------------------------------------------------------------*/
+
+__global__ void
+hypreGPUKernel_CSRMatrixCheckForMissingDiagonal( hypre_DeviceItem    &item,
+                                         HYPRE_Int      nrows,
+                                         HYPRE_Int     *ia,
+                                         HYPRE_Int     *ja,
+                                         HYPRE_Int     *result )
+{
+   const HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
+
+   if (row >= nrows)
+   {
+      return;
+   }
+
+   HYPRE_Int lane = hypre_gpu_get_lane_id<1>(item);
+   HYPRE_Int p = 0, q = 0;
+   bool missing_diagonal = true;
+
+   if (lane < 2)
+   {
+      p = read_only_load(ia + row + lane);
+   }
+   q = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 1);
+   p = warp_shuffle_sync(item, HYPRE_WARP_FULL_MASK, p, 0);
+
+   for (HYPRE_Int j = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   {
+      hypre_int find_diag = j < q && read_only_load(&ja[j]) == row;
+
+      if ( warp_any_sync(item, HYPRE_WARP_FULL_MASK, find_diag) )
+      {
+         missing_diagonal = false;
+         break;
+      }
+   }
+
+   if (missing_diagonal && lane == 0)
+   {
+      result[row] = 1;
+   }
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixCheckForMissingDiagonal
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixCheckForMissingDiagonal( hypre_CSRMatrix *A )
+{
+   HYPRE_Int  *A_i      = hypre_CSRMatrixI(A);
+   HYPRE_Int  *A_j      = hypre_CSRMatrixJ(A);
+   HYPRE_Int   num_rows = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int  *result;
+   HYPRE_Int   ierr;
+
+   /* This test is only for square matrices */
+   if (hypre_CSRMatrixNumRows(A) != hypre_CSRMatrixNumCols(A))
+   {
+      return 0;
+   }
+
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(hypre_CSRMatrixNumRows(A), "thread", bDim);
+
+   result = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_CSRMatrixCheckForMissingDiagonal, gDim, bDim,
+                     num_rows, A_i, A_j, result );
+
+   /* Compute number of rows in which the diagonal is not the first entry */
+#if defined(HYPRE_USING_SYCL)
+   ierr = HYPRE_ONEDPL_CALL( std::reduce,
+                             result,
+                             result + hypre_CSRMatrixNumRows(A) );
+#else
+   ierr = HYPRE_THRUST_CALL( reduce,
+                             result,
+                             result + hypre_CSRMatrixNumRows(A) );
+#endif
+
+   hypre_TFree(result, HYPRE_MEMORY_DEVICE);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypreGPUKernel_CSRMatrixReplaceDiagDevice
  *--------------------------------------------------------------------------*/
 
 __global__ void
