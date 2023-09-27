@@ -167,7 +167,7 @@ Hypre can support NVIDIA GPUs with CUDA and OpenMP (:math:`{\ge}` 4.5). The rela
 
 .. code-block:: none
 
-  --with-cuda             Use CUDA. Require cuda-8.0 or higher (default is
+  --with-cuda             Use CUDA. Require cuda-9.0 or higher (default is
                           NO).
 
   --with-device-openmp    Use OpenMP 4.5 Device Directives. This may affect
@@ -194,7 +194,7 @@ Hypre's structured solvers can work fine with device memory,
 whereas only selected unstructured solvers can run with device memory. See 
 Chapter :ref:`ch-boomeramg-gpu` for details.
 In general, BoomerAMG and the SStruct
-require  unified (CUDA managed) memory, for which
+require  unified (CUDA managed) memory. So to use the options that do not have GPU-support,
 the following option should be added
 
 .. code-block:: none
@@ -220,7 +220,7 @@ The other NVIDIA GPU related options include:
 
 * ``--enable-gpu-profiling``  Use NVTX on CUDA, rocTX on HIP (default is NO)
 * ``--enable-cusparse``       Use cuSPARSE for GPU sparse kernels (default is YES)
-* ``--enable-cublas``         Use cuBLAS for GPU dense kernels (default is NO)
+* ``--enable-cublas``         Use cuBLAS for GPU dense kernels (default is YES)
 * ``--enable-curand``         Use random numbers generators on GPUs (default is YES)
 
 Allocations and deallocations of GPU memory are expensive. Memory pooling is a common approach to reduce such overhead and improve performance.

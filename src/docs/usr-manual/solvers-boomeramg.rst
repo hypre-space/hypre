@@ -194,8 +194,25 @@ The currently available  GPU-supported BoomerAMG options include:
 * Interpolation:  direct (3), BAMG-direct (15), extended (14), extended+i (6) and extended+e (18)
 * Aggressive coarsening
 * Second-stage interpolation with aggressive coarsening: extended (5) and extended+e (7)
-* Smoother: Jacobi (7), l1-Jacobi (18), hybrid Gauss Seidel/SSOR (3 4 6), two-stage Gauss-Seidel (11,12) [BKRHSMTY2021]_
-* Relaxation order: must be 0, i.e., lexicographic order
+* Smoother: Jacobi (7), l1-Jacobi (18), hybrid Gauss Seidel/SSOR (3 4 6), two-stage Gauss-Seidel (11,12) [BKRHSMTY2021]_,  and Chebyshev (16)
+* Relaxation order can be 0, lexicographic order, or C/F for (7) and (18)
+
+Memory locations and execution policies
+------------------------------------------------------------------------------
+Hypre provides two user-level memory locations, ``HYPRE_MEMORY_HOST`` and ``HYPRE_MEMORY_DEVICE``, where
+``HYPRE_MEMORY_HOST`` is always the CPU memory while ``HYPRE_MEMORY_DEVICE`` can be mapped to different memory spaces 
+based on the configure options of hypre.
+When built with ``--with-cuda``, ``--with-hip`` or ``--with-device-openmp``,
+``HYPRE_MEMORY_DEVICE`` is the GPU device memory,
+and when built with additionally ``--enable-unified-memory``, it is the GPU unified memory (UM).
+For a non-GPU build, ``HYPRE_MEMORY_DEVICE`` is also mapped to the CPU memory.
+The default memory location of hypre's matrix and vector objects is ``HYPRE_MEMORY_DEVICE``,
+which can be changed at runtime by ``HYPRE_SetMemoryLocation(...)``.
+
+The execution policies define the platform of running computations based on the memory locations of participating objects.
+The default policy is ``HYPRE_EXEC_HOST``, i.e., executing on the host **if the objects are accessible from the host**.
+It can be adjusted by ``HYPRE_SetExecutionPolicy(...)``.
+Clearly, this policy only has effect to objects on UM, since UM is accessible from **both CPUs and GPUs**.
 
 A sample code of setting up IJ matrix :math:`A` and solve :math:`Ax=b` using AMG-preconditioned CG
 on GPUs is shown below.
