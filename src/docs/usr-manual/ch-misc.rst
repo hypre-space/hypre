@@ -382,7 +382,7 @@ Some of the commonly used options for GPU CMake builds of hypre are listed below
 
 .. code-block:: none
 
- HYPRE_WITH_CUDA (OFF)            Use CUDA v8.0 or higher.
+ HYPRE_WITH_CUDA (OFF)            Use CUDA v9.0 or higher.
  HYPRE_CUDA_SM (70)               Target CUDA architecture.
 
 When configured with CUDA, the memory allocated on the GPUs, by default, is the GPU device memory, which is not accessible from the CPUs.
