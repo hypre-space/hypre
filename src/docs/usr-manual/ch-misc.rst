@@ -254,6 +254,32 @@ Currently, only BoomerAMG is supported with HIP. The other AMD GPU related optio
 * ``--enable-rocblas``        Use rocBLAS (default is NO)
 * ``--enable-rocrand``        Use rocRAND (default is YES)
 
+For running on Intel GPUs, configure with
+
+.. code-block:: none
+
+  --with-sycl             Use SYCL for Intel GPUs. (default is NO).
+  --with-sycl-target=ARG  User specifies sycl targets for AOT compilation in
+                          ARG, where ARG is a comma-separated list (enclosed
+                          in quotes), e.g. "spir64_gen".
+  --with-sycl-target-backend=ARG
+                          User specifies additional options for the sycl
+                          target backend for AOT compilation in ARG, where ARG
+                          contains the desired options (enclosed in
+                          double+single quotes), e.g.
+                          --with-sycl-target-backend="'-device
+                          12.1.0,12.4.0'".
+
+Intel oneMKL functionality is also used by default (and required for certain hypre solvers):
+
+.. code-block:: none
+
+  --enable-onemklsparse   Use oneMKL sparse (default is YES).
+  --enable-onemklblas     Use oneMKL blas (default is YES).
+  --enable-onemklrand     Use oneMKL rand (default is YES).
+
+The SYCL backend now supports all GPU-enabled hypre functionality currently supported by CUDA/HIP except for FSAI (work in progress).
+
 Testing the Library
 ------------------------------------------------------------------------------
 
