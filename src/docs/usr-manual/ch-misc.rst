@@ -250,12 +250,14 @@ For running on AMD GPUs, configure with
   --with-hip              Use HIP for AMD GPUs. (default is NO)
   --with-gpu-arch=ARG     Use appropriate AMD GPU architecture
 
-Currently, only BoomerAMG is supported with HIP. The other AMD GPU related options include:
+The other AMD GPU related options include:
 
 * ``--enable-gpu-profiling``  Use NVTX on CUDA, rocTX on HIP (default is NO)
 * ``--enable-rocsparse``      Use rocSPARSE (default is YES)
 * ``--enable-rocblas``        Use rocBLAS (default is NO)
 * ``--enable-rocrand``        Use rocRAND (default is YES)
+
+All the options supported by CUDA are also supported with HIP. **Note that the ``--enable-bigint`` option is not supported with CUDA or HIP.**
 
 Testing the Library
 ==============================================================================
