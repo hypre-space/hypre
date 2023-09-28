@@ -10,7 +10,7 @@ ParaSails
 .. warning::
    ParaSails is not actively supported by the hypre development team. We recommend using
    :ref:`fsai` for parallel sparse approximate inverse algorithms. This new implementation
-   includes NVIDIA/AMD GPUs support through the CUDA/HIP backends.
+   includes NVIDIA/AMD GPU support through the CUDA/HIP backends.
 
 ParaSails is a parallel implementation of a sparse approximate inverse
 preconditioner, using *a priori* sparsity patterns and least-squares (Frobenius

@@ -10,7 +10,7 @@ FEI Solvers
 ==============================================================================
 
 .. warning::
-   FEI is not actively supported by the hypre development team. For a similar
+   FEI is not actively supported by the hypre development team. For similar
    functionality, we recommend using :ref:`sec-Block-Structured-Grids-FEM`, which
    allows the representation of block-structured grid problems via hypre's
    SStruct interface.

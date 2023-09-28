@@ -202,9 +202,9 @@ Memory locations and execution policies
 Hypre provides two user-level memory locations, ``HYPRE_MEMORY_HOST`` and ``HYPRE_MEMORY_DEVICE``, where
 ``HYPRE_MEMORY_HOST`` is always the CPU memory while ``HYPRE_MEMORY_DEVICE`` can be mapped to different memory spaces 
 based on the configure options of hypre.
-When built with ``--with-cuda``, ``--with-hip`` or ``--with-device-openmp``,
+When built with ``--with-cuda``, ``--with-hip``, ``--with-sycl``, or ``--with-device-openmp``,
 ``HYPRE_MEMORY_DEVICE`` is the GPU device memory,
-and when built with additionally ``--enable-unified-memory``, it is the GPU unified memory (UM).
+and when built additionally with ``--enable-unified-memory``, it is the GPU unified memory (UM).
 For a non-GPU build, ``HYPRE_MEMORY_DEVICE`` is also mapped to the CPU memory.
 The default memory location of hypre's matrix and vector objects is ``HYPRE_MEMORY_DEVICE``,
 which can be changed at runtime by ``HYPRE_SetMemoryLocation(...)``.
@@ -212,7 +212,7 @@ which can be changed at runtime by ``HYPRE_SetMemoryLocation(...)``.
 The execution policies define the platform of running computations based on the memory locations of participating objects.
 The default policy is ``HYPRE_EXEC_HOST``, i.e., executing on the host **if the objects are accessible from the host**.
 It can be adjusted by ``HYPRE_SetExecutionPolicy(...)``.
-Clearly, this policy only has effect to objects on UM, since UM is accessible from **both CPUs and GPUs**.
+Clearly, this policy only affects objects in UM, since UM is accessible from **both CPUs and GPUs**.
 
 A sample code of setting up IJ matrix :math:`A` and solve :math:`Ax=b` using AMG-preconditioned CG
 on GPUs is shown below.
@@ -283,5 +283,5 @@ will affect both coarsening and interpolation.  One important parameter is the
 strong threshold, which can be set using the function
 ``HYPRE_BoomerAMGSetStrongThreshold``.  The default value is 0.25, which appears
 to be a good choice for diffusion problems.  The choice of the strength
-threshold is problem dependent. For example, for elasticity problems often a larger
-strength threshold is required.
+threshold is problem dependent. For example, elasticity problems often require a larger
+strength threshold.

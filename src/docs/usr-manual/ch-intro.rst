@@ -127,7 +127,7 @@ As previously noted, on most systems hypre can be built by simply typing
 Alternatively, the CMake system [CMakeWeb]_ can be used, and is the best
 approach for building hypre on Windows systems in particular.  For more detailed
 instructions, read the ``INSTALL`` file provided with the hypre distribution or
-Chapter :ref:`ch-General` in this manual.  Note the following requirements:
+the :ref:`ch-General` section of this manual.  Note the following requirements:
 
 * To run in parallel, hypre requires an installation of MPI.
 

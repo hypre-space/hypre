@@ -187,12 +187,11 @@ need to be set properly, which can be also set by
    --with-cuda-home=DIR
 
 When configured with ``--with-cuda`` or ``--with-device-openmp``, the memory allocated on the GPUs, by default, is the GPU device memory, which is not accessible from the CPUs.
-Hypre's structured solvers can work fine with device memory,
+Hypre's structured solvers can run with device memory,
 whereas only selected unstructured solvers can run with device memory. See
-Chapter :ref:`ch-boomeramg-gpu` for details.
-In general, BoomerAMG and the SStruct
-require  unified (CUDA managed) memory. So to use the options that do not have GPU-support,
-the following option should be added
+:ref:`ch-boomeramg-gpu` for details.
+Some solver options for BoomerAMG require unified (CUDA managed) memory.
+To use these options add the following configure option:
 
 .. code-block:: none
 
@@ -297,7 +296,7 @@ described in the initial comments section of each source code.
 CMake-based Build Instructions
 ==============================================================================
 
-In this section, we describe using CMake that is particularly useful for building
+This section describes hypre's CMake build system, which is particularly useful for building
 the code on Windows machines. CMake-based installation provides a platform-independent
 build system. CMake can generate Unix and Linux Makefiles, as well as Visual Studio and
 (Apple) XCode project files from the same configuration file.  In addition,
@@ -415,12 +414,11 @@ Some of the commonly used options for GPU CMake builds of hypre are listed below
  HYPRE_CUDA_SM (70)               Target CUDA architecture.
 
 When configured with CUDA, the memory allocated on the GPUs, by default, is the GPU device memory, which is not accessible from the CPUs.
-Hypre's structured solvers can work fine with device memory,
+Hypre's structured solvers can run with device memory,
 whereas only selected unstructured solvers can run with device memory. See
-Chapter :ref:`ch-boomeramg-gpu` for details.
-In general, BoomerAMG and the SStruct
-require  unified (CUDA managed) memory, for which
-the following option should be added
+:ref:`ch-boomeramg-gpu` for details.
+Some solver options for BoomerAMG require unified (CUDA managed) memory.
+To use these options turn the following option on:
 
 .. code-block:: none
 
@@ -452,7 +450,7 @@ hypre also supports Umpire [Umpire]_. To enable Umpire pool, include the followi
  TPL_UMPIRE_LIBRARIES             List of absolute paths to Umpire link libraries.
  TPL_UMPIRE_INCLUDE_DIRS          List of absolute paths to Umpire include directories.
 
-* SYCL support for Intel GPUs relevant options:
+SYCL support for Intel GPUs relevant options:
 
 .. code-block:: none
 
@@ -568,7 +566,7 @@ Using HYPRE in External FEI Implementations
 ==============================================================================
 
 .. warning::
-   FEI is not actively supported by the hypre development team. For a similar
+   FEI is not actively supported by the hypre development team. For similar
    functionality, we recommend using :ref:`sec-Block-Structured-Grids-FEM`, which
    allows the representation of block-structured grid problems via hypre's
    SStruct interface.
