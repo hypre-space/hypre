@@ -99,10 +99,12 @@ Some commonly used options include:
    --with-openmp                  Use OpenMP. This may affect which compiler is
                                   chosen.
    --enable-bigint                Use long long int for HYPRE_Int (default is NO).
+                                  NOTE: This option is not available for Nvidia
+                                  and AMD GPUs.
    --enable-mixedint              Use long long int for HYPRE_BigInt and int for
                                   HYPRE_Int.
                                   NOTE: This option disables Euclid, ParaSails,
-                                        pilut and CGC coarsening.
+                                        PILUT and CGC coarsening.
 
 The user can mix and match the configure options and variable settings to meet
 their needs.  It should be noted that hypre can be configured with external BLAS
@@ -280,7 +282,7 @@ Intel oneMKL functionality is also used by default (and required for certain hyp
   --enable-onemklrand     Use oneMKL rand (default is YES).
 
 The SYCL backend now supports all GPU-enabled hypre functionality currently supported by CUDA/HIP except for FSAI (work in progress).
-The ``--enable-bigint`` option is supported with SYLC (not supported for CUDA/HIP).
+The ``--enable-bigint`` option is supported with SYCL (not supported for CUDA/HIP).
 
 Testing the Library
 ------------------------------------------------------------------------------
