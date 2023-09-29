@@ -533,9 +533,9 @@ HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver solver,
  * HYPRE_MGRSetGlobalsmoothType
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetGlobalSmoothType( HYPRE_Solver solver, HYPRE_Int iter_type )
+HYPRE_MGRSetGlobalSmoothType( HYPRE_Solver solver, HYPRE_Int smooth_type )
 {
-   return hypre_MGRSetGlobalSmoothType(solver, iter_type);
+   return hypre_MGRSetGlobalSmoothType(solver, smooth_type);
 }
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetLevelsmoothType

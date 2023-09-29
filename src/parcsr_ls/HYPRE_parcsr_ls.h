@@ -1280,7 +1280,7 @@ HYPRE_Int HYPRE_BoomerAMGSetPrintLevel(HYPRE_Solver solver,
 
 /**
  * (Optional) Requests additional computations for diagnostic and similar
- * data to be logged by the user. Default to 0 for do nothing.  The latest
+ * data to be logged by the user. Default to 0 to do nothing.  The latest
  * residual will be available if logging > 1.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetLogging(HYPRE_Solver solver,
@@ -4059,7 +4059,7 @@ HYPRE_MGRSetReservedCpointsLevelToKeep( HYPRE_Solver solver, HYPRE_Int level);
  * Currently supports the following flavors of relaxation types
  * as described in the \e BoomerAMGSetRelaxType:
  * \e relax_type 0, 3 - 8, 13, 14, 18. Also supports AMG (options 1 and 2)
- *    and direct solver variants (9, 99, 199). See HYPRE_MGRSetLevelFRelaxType for details.
+ *    and direct solver variants (9, 99, 199). See \e HYPRE_MGRSetLevelFRelaxType for details.
  **/
 HYPRE_Int
 HYPRE_MGRSetRelaxType(HYPRE_Solver solver,
@@ -4072,7 +4072,7 @@ HYPRE_MGRSetRelaxType(HYPRE_Solver solver,
  *    - 0 : Single-level relaxation sweeps for F-relaxation as prescribed by \e MGRSetRelaxType
  *    - 1 : Multi-level relaxation strategy for F-relaxation (V(1,0) cycle currently supported).
  *
- *    NOTE: This function will be removed in favor of /e HYPRE_MGRSetLevelFRelaxType!!
+ *    NOTE: This function will be removed in favor of \e HYPRE_MGRSetLevelFRelaxType!!
  **/
 HYPRE_Int
 HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver,
@@ -4148,7 +4148,7 @@ HYPRE_MGRSetRestrictType( HYPRE_Solver solver,
                           HYPRE_Int restrict_type);
 
 /**
- * (Optional) This function is an extension of HYPRE_MGRSetRestrictType. It allows setting
+ * (Optional) This function is an extension of \e HYPRE_MGRSetRestrictType. It allows setting
  * the restriction operator strategy for each MGR level.
  **/
 HYPRE_Int
@@ -4182,7 +4182,7 @@ HYPRE_MGRSetInterpType( HYPRE_Solver solver,
                         HYPRE_Int interp_type );
 
 /**
- * (Optional) This function is an extension of HYPRE_MGRSetInterpType. It allows setting
+ * (Optional) This function is an extension of \e HYPRE_MGRSetInterpType. It allows setting
  * the prolongation (interpolation) operator strategy for each MGR level.
  **/
 HYPRE_Int
@@ -4198,7 +4198,7 @@ HYPRE_MGRSetNumRelaxSweeps( HYPRE_Solver solver,
                             HYPRE_Int nsweeps );
 
 /**
- * (Optional) This function is an extension of HYPRE_MGRSetNumRelaxSweeps. It allows setting
+ * (Optional) This function is an extension of \e HYPRE_MGRSetNumRelaxSweeps. It allows setting
  * the number of single-level relaxation sweeps for each MGR level.
  **/
 HYPRE_Int
@@ -4287,10 +4287,8 @@ HYPRE_MGRSetCoarseGridPrintLevel( HYPRE_Solver solver,
                                   HYPRE_Int print_level );
 
 /**
- * (Optional) Set the threshold to compress the coarse grid at each level
- * Use threshold = 0.0 if no truncation is applied. Otherwise, set the threshold
- * value for dropping entries for the coarse grid.
- * The default is 0.0.
+ * (Optional) Set the threshold for dropping small entries on the coarse grid at each level.
+ * No dropping is applied if \e threshold = 0.0 (default). 
  **/
 HYPRE_Int
 HYPRE_MGRSetTruncateCoarseGridThreshold( HYPRE_Solver solver,
@@ -4299,7 +4297,7 @@ HYPRE_MGRSetTruncateCoarseGridThreshold( HYPRE_Solver solver,
 /**
  * (Optional) Requests logging of solver diagnostics.
  * Requests additional computations for diagnostic and similar
- * data to be logged by the user. Default to 0 for do nothing.  The latest
+ * data to be logged by the user. Default is 0, do nothing.  The latest
  * residual will be available if logging > 1.
  **/
 HYPRE_Int
@@ -4338,8 +4336,8 @@ HYPRE_Int
 HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver solver,
                               HYPRE_Int *smooth_iters );
 /**
- * (Optional) Set the smoothing order for global smoothing at each level.
- * Options for \e level_smooth_order are:
+ * (Optional) Set the cycle for global smoothing.
+ * Options for \e global_smooth_cycle are:
  *    - 1 : Pre-smoothing - Down cycle (default)
  *    - 2 : Post-smoothing - Up cycle
  **/
