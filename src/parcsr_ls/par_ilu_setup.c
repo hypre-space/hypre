@@ -1776,7 +1776,9 @@ hypre_ILUSetupLDUtoCusparse(hypre_ParCSRMatrix  *L,
    hypre_CSRMatrixData(LDU_diag) = LDU_diag_data;
 
    /* now sort */
+#if defined(HYPRE_USING_GPU)
    hypre_CSRMatrixSortRow(LDU_diag);
+#endif
    hypre_ParCSRMatrixDiag(LDU) = LDU_diag;
 
    *LDUp = LDU;
@@ -1889,7 +1891,9 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix  *A,
       {
          /* RAP where we save E and F */
          Apq_diag = hypre_ParCSRMatrixDiag(Apq);
+#if defined(HYPRE_USING_GPU)
          hypre_CSRMatrixSortRow(Apq_diag);
+#endif
          hypre_ParILUExtractEBFC(Apq_diag, nLU, &dB, &dS, Eptr, Fptr);
 
          /* get modified ILU of B */
@@ -1906,7 +1910,9 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix  *A,
       {
          /* C-EB^{-1}F where we save EU^{-1}, L^{-1}F as sparse matrices */
          Apq_diag = hypre_ParCSRMatrixDiag(Apq);
+#if defined(HYPRE_USING_GPU)
          hypre_CSRMatrixSortRow(Apq_diag);
+#endif
          hypre_ParILUExtractEBFC(Apq_diag, nLU, &dB, CLUptr, &dE, &dF);
 
          /* get modified ILU of B */
@@ -1922,7 +1928,9 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix  *A,
       {
          /* C-EB^{-1}F where we save E and F */
          Apq_diag = hypre_ParCSRMatrixDiag(Apq);
+#if defined(HYPRE_USING_GPU)
          hypre_CSRMatrixSortRow(Apq_diag);
+#endif
          hypre_ParILUExtractEBFC(Apq_diag, nLU, &dB, CLUptr, Eptr, Fptr);
 
          /* get modified ILU of B */
