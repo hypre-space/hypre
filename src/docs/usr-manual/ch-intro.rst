@@ -127,7 +127,7 @@ As previously noted, on most systems hypre can be built by simply typing
 Alternatively, the CMake system [CMakeWeb]_ can be used, and is the best
 approach for building hypre on Windows systems in particular.  For more detailed
 instructions, read the ``INSTALL`` file provided with the hypre distribution or
-refer to the last chapter in this manual.  Note the following requirements:
+the :ref:`ch-General` section of this manual.  Note the following requirements:
 
 * To run in parallel, hypre requires an installation of MPI.
 
@@ -235,7 +235,7 @@ Writing your code
 As discussed in the previous section, the following decisions should be made
 before writing any code:
 
-* Choose a conceptual interface. 
+* Choose a conceptual interface.
 * Choose your desired solver strategy.
 * Look up matrix requirements for each solver and preconditioner.
 * Choose a matrix storage class that is compatible with your solvers and

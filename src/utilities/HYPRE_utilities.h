@@ -249,7 +249,16 @@ typedef enum _HYPRE_MemoryLocation
    HYPRE_MEMORY_DEVICE
 } HYPRE_MemoryLocation;
 
+/**
+ * (Optional) Sets the default (abstract) memory location.
+ **/
+
 HYPRE_Int HYPRE_SetMemoryLocation(HYPRE_MemoryLocation memory_location);
+
+/**
+ * (Optional) Gets a pointer to the default (abstract) memory location.
+ **/
+
 HYPRE_Int HYPRE_GetMemoryLocation(HYPRE_MemoryLocation *memory_location);
 
 #include <stdlib.h>
@@ -265,8 +274,23 @@ typedef enum _HYPRE_ExecutionPolicy
    HYPRE_EXEC_DEVICE
 } HYPRE_ExecutionPolicy;
 
+/**
+ * (Optional) Sets the default execution policy.
+ **/
+
 HYPRE_Int HYPRE_SetExecutionPolicy(HYPRE_ExecutionPolicy exec_policy);
+
+/**
+ * (Optional) Gets a pointer to the default execution policy.
+ **/
+
 HYPRE_Int HYPRE_GetExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy);
+
+/**
+ * (Optional) Returns a string denoting the execution policy passed as input.
+ **/
+
+const char* HYPRE_GetExecutionPolicyName(HYPRE_ExecutionPolicy exec_policy);
 
 /*--------------------------------------------------------------------------
  * HYPRE UMPIRE

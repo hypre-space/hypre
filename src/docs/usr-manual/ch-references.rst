@@ -141,6 +141,10 @@
    Approximate Inverse Preconditionings I. Theory. *SIAM J. Matrix Anal. A.*, 14(1):45--58, 1993.
    `https://doi.org/10.1137/0614004 <https://doi.org/10.1137/0614004>`_.
 
+.. [LiSY2021] R. Li, B. Sjogreen and U. M. Yang. A new class of AMG interpolation
+   methods based on matrix-matrix multiplications. *SIAM J. Sci. Comput.*, 43(5), 
+   S540--S564.
+
 .. [JaFe2015] C. Janna, M. Ferronato, F. Sartoretto and G. Gambolati.
    FSAIPACK: A Software Package for High-Performance Factored Sparse Approximate Inverse
    Preconditioning. *ACM T. Math. Software*, 41(2):1–-26, 2015.
