@@ -275,7 +275,10 @@ hypre_ParCSRMatrixStatsComputePassOneLocal(hypre_ParCSRMatrix *A,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      //hypre_ParCSRMatrixStatsComputePassOneLocalDevice(A, stats);
+      /* TODO (VPM): Implement computation on device */
+      hypre_ParCSRMatrix *h_A = hypre_ParCSRMatrixClone_v2(A, 1, HYPRE_MEMORY_HOST);
+      hypre_ParCSRMatrixStatsComputePassOneLocalHost(h_A, stats);
+      hypre_ParCSRMatrixDestroy(h_A);
    }
    else
 #endif
@@ -303,7 +306,10 @@ hypre_ParCSRMatrixStatsComputePassTwoLocal(hypre_ParCSRMatrix *A,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      //hypre_ParCSRMatrixStatsComputePassTwoLocalDevice(A, stats);
+      /* TODO (VPM): Implement computation on device */
+      hypre_ParCSRMatrix *h_A = hypre_ParCSRMatrixClone_v2(A, 1, HYPRE_MEMORY_HOST);
+      hypre_ParCSRMatrixStatsComputePassTwoLocalHost(h_A, stats);
+      hypre_ParCSRMatrixDestroy(h_A);
    }
    else
 #endif
