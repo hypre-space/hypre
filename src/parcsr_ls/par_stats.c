@@ -8,6 +8,76 @@
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
 
+HYPRE_Int
+hypre_BoomerAMGSetupStatsNew(void *amg_vdata)
+{
+   hypre_ParAMGData          *amg_data = (hypre_ParAMGData*) amg_vdata;
+   hypre_ParCSRMatrix        *A_fine = hypre_ParAMGDataAArray(amg_data)[0];
+   MPI_Comm                   comm = hypre_ParCSRMatrixComm(A_fine);
+   HYPRE_MemoryLocation       memory_location = hypre_ParCSRMatrixMemoryLocation(A_fine);
+   HYPRE_ExecutionPolicy      exec = hypre_GetExecPolicy1(memory_location);
+
+   hypre_ParCSRMatrix       **A_array;
+   hypre_ParCSRMatrix       **P_array;
+   hypre_MatrixStatsArray    *stats_array_A;
+   hypre_MatrixStatsArray    *stats_array_P;
+
+   HYPRE_Int                 num_levels_A;
+   HYPRE_Int                 num_levels_P;
+   HYPRE_Int                 num_procs, my_id, k;
+
+   hypre_MPI_Comm_size(comm, &num_procs);
+   hypre_MPI_Comm_rank(comm, &my_id);
+
+   num_levels_A = hypre_ParAMGDataNumLevels(amg_data);
+   num_levels_P = hypre_ParAMGDataNumLevels(amg_data) - 1;
+
+   if (my_id == 0)
+   {
+      hypre_printf("\n\n");
+      hypre_printf(" Num MPI tasks = %d\n",  num_procs);
+      hypre_printf(" Num OpenMP threads = %d\n", hypre_NumThreads());
+      hypre_printf(" Execution policy = %s\n\n", HYPRE_GetExecutionPolicyName(exec));
+      hypre_printf("\n");
+      hypre_printf("BoomerAMG SETUP PARAMETERS:\n\n");
+      hypre_printf("    AMG num levels = %d\n", num_levels_A);
+   }
+
+   stats_array_A = hypre_MatrixStatsArrayCreate(num_levels_A);
+   stats_array_P = hypre_MatrixStatsArrayCreate(num_levels_P);
+
+   /* Gather A matrices */
+   A_array = hypre_TAlloc(hypre_ParCSRMatrix *, num_levels_A, HYPRE_MEMORY_HOST);
+   P_array = hypre_TAlloc(hypre_ParCSRMatrix *, num_levels_P, HYPRE_MEMORY_HOST);
+   for (k = 0; k < num_levels_P; k++)
+   {
+      A_array[k] = hypre_ParAMGDataAArray(amg_data)[k];
+      P_array[k] = hypre_ParAMGDataPArray(amg_data)[k];
+   }
+   A_array[num_levels_A - 1] = hypre_ParAMGDataAArray(amg_data)[num_levels_A - 1];
+
+   /* Compute statistics */
+   hypre_ParCSRMatrixStatsArrayCompute(num_levels_A, A_array, stats_array_A);
+   hypre_ParCSRMatrixStatsArrayCompute(num_levels_P, P_array, stats_array_P);
+
+   /* Print matrix statistics */
+   if (!my_id)
+   {
+      char *msg_A[] = {"Operator Matrix Hierarchy Information:\n\n"};
+      char *msg_P[] = {"Prolongation Matrix Hierarchy Information:\n\n"};
+
+      hypre_MatrixStatsArrayPrint(1, &num_levels_A, 1, 0, msg_A, stats_array_A);
+      hypre_MatrixStatsArrayPrint(1, &num_levels_P, 1, 0, msg_P, stats_array_P);
+   }
+
+   hypre_MatrixStatsArrayDestroy(stats_array_A);
+   hypre_MatrixStatsArrayDestroy(stats_array_P);
+   hypre_TFree(A_array, HYPRE_MEMORY_HOST);
+   hypre_TFree(P_array, HYPRE_MEMORY_HOST);
+
+   return hypre_error_flag;
+}
+
 /*****************************************************************************
  *
  * Routine for getting matrix statistics from setup
@@ -17,10 +87,9 @@
  *
  *****************************************************************************/
 
-
 HYPRE_Int
 hypre_BoomerAMGSetupStats( void               *amg_vdata,
-                           hypre_ParCSRMatrix *A         )
+                           hypre_ParCSRMatrix *A )
 {
    hypre_GpuProfilingPushRange("AMGSetupStats");
 
@@ -1317,8 +1386,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
  * hypre_BoomerAMGWriteSolverParams
  *---------------------------------------------------------------*/
 
-
-HYPRE_Int    hypre_BoomerAMGWriteSolverParams(void* data)
+HYPRE_Int
+hypre_BoomerAMGWriteSolverParams(void* data)
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
@@ -1474,4 +1543,3 @@ HYPRE_Int    hypre_BoomerAMGWriteSolverParams(void* data)
 
    return 0;
 }
-
