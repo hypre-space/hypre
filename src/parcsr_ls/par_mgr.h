@@ -9,6 +9,21 @@
 #define hypre_ParMGR_DATA_HEADER
 
 /*--------------------------------------------------------------------------
+ * MGR print level codes
+ *--------------------------------------------------------------------------*/
+
+#define HYPRE_MGR_PRINT_INFO_SETUP  0x01       /* 1:  1st bit */
+#define HYPRE_MGR_PRINT_INFO_SOLVE  0x02       /* 2:  2nd bit */
+#define HYPRE_MGR_PRINT_INFO_PARAMS 0x04       /* 4:  3rd bit */
+#define HYPRE_MGR_PRINT_INFO_MATRIX 0x08       /* 8:  4th bit */
+#define HYPRE_MGR_PRINT_INFO_RHS    0x10       /* 16: 5th bit */
+/* ... */
+/* Reserved codes */
+#define HYPRE_MGR_PRINT_RESERVED_C  0x10000000 /* 134217728: 28th bit */
+#define HYPRE_MGR_PRINT_RESERVED_B  0x20000000 /* 268435456: 29th bit */
+#define HYPRE_MGR_PRINT_RESERVED_A  0x40000000 /* 536870912: 30th bit */
+
+/*--------------------------------------------------------------------------
  * hypre_ParMGRData
  *--------------------------------------------------------------------------*/
 
@@ -73,6 +88,7 @@ typedef struct
    HYPRE_Int             max_iter;
    HYPRE_Int             relax_order;
    HYPRE_Int            *num_relax_sweeps;
+   char                 *info_path;
 
    HYPRE_Solver          coarse_grid_solver;
    HYPRE_Int           (*coarse_grid_solver_setup)(void*, void*, void*, void*);
