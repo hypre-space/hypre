@@ -123,6 +123,10 @@ typedef struct hypre_MatrixStatsArray_struct
       hypre_printf(" ");                            \
    }
 
+#define HYPRE_PRINT_SHIFTED_PARAM(n, ...)           \
+   HYPRE_PRINT_INDENT(n)                            \
+   hypre_printf(__VA_ARGS__)
+
 #define HYPRE_NDIGITS_SIZE 12
 
 #endif /* hypre_MATRIX_STATS_HEADER */
