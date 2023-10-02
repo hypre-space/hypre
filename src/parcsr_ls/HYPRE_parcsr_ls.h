@@ -4288,7 +4288,7 @@ HYPRE_MGRSetCoarseGridPrintLevel( HYPRE_Solver solver,
 
 /**
  * (Optional) Set the threshold for dropping small entries on the coarse grid at each level.
- * No dropping is applied if \e threshold = 0.0 (default). 
+ * No dropping is applied if \e threshold = 0.0 (default).
  **/
 HYPRE_Int
 HYPRE_MGRSetTruncateCoarseGridThreshold( HYPRE_Solver solver,
@@ -4387,11 +4387,18 @@ HYPRE_MGRGetCoarseGridConvergenceFactor( HYPRE_Solver solver,
                                          HYPRE_Real *conv_factor );
 
 /**
- * (Optional) Set the number of maximum points for interpolation operator.
+ * (Optional) Set the maximum number of nonzeros per row for interpolation operators.
  **/
 HYPRE_Int
 HYPRE_MGRSetPMaxElmts( HYPRE_Solver solver,
                        HYPRE_Int P_max_elmts );
+
+/**
+ * (Optional) Set the maximum number of nonzeros per row for interpolation operators for each level.
+ **/
+HYPRE_Int
+HYPRE_MGRSetLevelPMaxElmts( HYPRE_Solver solver,
+                            HYPRE_Int *P_max_elmts );
 
 /**
  * (Optional) Return the norm of the final relative residual.
