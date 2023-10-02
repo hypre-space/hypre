@@ -4261,12 +4261,24 @@ HYPRE_Int HYPRE_MGRSetCoarseSolver(HYPRE_Solver             solver,
                                    HYPRE_Solver             coarse_grid_solver );
 
 /**
- * (Optional) Set the print level to print setup and solve information.
+ * @brief (Optional) Set the verbosity level for MGR.
  *
- *    - 0 : no printout (default)
- *    - 1 : print setup information
- *    - 2 : print solve information
- *    - 3 : print both setup and solve information
+ * @details The print level is determined by the bitwise OR of the desired output levels.
+ * Each bit represents a different kind of information to print:
+ *   - 0x01 (Bit 0): Print setup information.
+ *   - 0x02 (Bit 1): Print solve information.
+ *   - 0x04 (Bit 2): Print parameters information.
+ *   - 0x08 (Bit 3): Print the matrix to NP files where NP stands for the number of ranks.
+ *   - 0x10 (Bit 4): Print the right-hand-side to NP files.
+ *
+ * @param solver [IN] The solver to configure.
+ * @param print_level [IN] Bitwise OR of the desired output levels.
+ *
+ * @example
+ * To print setup information and matrix and rhs to files, \c print_level should be set to
+ * (0x01 | 0x08 | 0x10) i.e., 25.
+ *
+ * @note The default print level is zero.
  **/
 HYPRE_Int
 HYPRE_MGRSetPrintLevel( HYPRE_Solver solver,
@@ -4288,7 +4300,7 @@ HYPRE_MGRSetCoarseGridPrintLevel( HYPRE_Solver solver,
 
 /**
  * (Optional) Set the threshold for dropping small entries on the coarse grid at each level.
- * No dropping is applied if \e threshold = 0.0 (default). 
+ * No dropping is applied if \e threshold = 0.0 (default).
  **/
 HYPRE_Int
 HYPRE_MGRSetTruncateCoarseGridThreshold( HYPRE_Solver solver,
