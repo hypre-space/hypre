@@ -122,6 +122,7 @@ hypre_MGRCreate(void)
    (mgr_data -> print_level) = 0;
    (mgr_data -> frelax_print_level) = 0;
    (mgr_data -> cg_print_level) = 0;
+   (mgr_data -> info_path) = NULL;
 
    (mgr_data -> l1_norms) = NULL;
 
@@ -469,6 +470,9 @@ hypre_MGRDestroy( void *data )
       }
       hypre_TFree(mgr_data -> GSElimData, HYPRE_MEMORY_HOST);
    }
+
+   /* Print info path */
+   hypre_TFree(mgr_data -> info_path, HYPRE_MEMORY_HOST);
 
    /* mgr data */
    hypre_TFree(mgr_data, HYPRE_MEMORY_HOST);
@@ -5663,7 +5667,11 @@ HYPRE_Int
 hypre_MGRSetPrintLevel( void *mgr_vdata, HYPRE_Int print_level )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-   (mgr_data -> print_level) = print_level;
+
+   /* Unset reserved bits if any are active */
+   (mgr_data -> print_level) = print_level & ~(HYPRE_MGR_PRINT_RESERVED_A ||
+                                               HYPRE_MGR_PRINT_RESERVED_B ||
+                                               HYPRE_MGR_PRINT_RESERVED_C);
    return hypre_error_flag;
 }
 
@@ -6582,6 +6590,151 @@ hypre_MGRWriteSolverParams(void *mgr_vdata)
    */
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_MGRDataPrint
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRDataPrint(void *mgr_vdata)
+{
+   hypre_ParMGRData     *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+   HYPRE_Int             print_level = (mgr_data -> print_level);
+   hypre_ParCSRMatrix   *par_A = (mgr_data -> A_array)[0];
+   hypre_ParVector      *par_b = (mgr_data -> F_array)[0];
+   HYPRE_Int            *point_marker_array = (mgr_data -> point_marker_array);
+   HYPRE_Int             block_size = (mgr_data -> block_size);
+   char                 *info_path = (mgr_data -> info_path);
+
+   char                  topdir[] = "./hypre-data";
+   char                 *filename = NULL;
+   hypre_IntArray       *dofmap = NULL;
+   MPI_Comm              comm;
+   HYPRE_Int             myid;
+   HYPRE_Int             info_path_length;
+
+   /* Sanity check */
+   if (!par_A)
+   {
+      return hypre_error_flag;
+   }
+
+   /* Get rank ID */
+   comm = hypre_ParCSRMatrixComm(par_A);
+   hypre_MPI_Comm_rank(comm, &myid);
+
+   /* Create new "ls_" folder (info_path) */
+   if (((print_level & HYPRE_MGR_PRINT_INFO_PARAMS) ||
+        (print_level & HYPRE_MGR_PRINT_INFO_MATRIX) ||
+        (print_level & HYPRE_MGR_PRINT_INFO_RHS))   &&
+       (info_path == NULL))
+   {
+      if (!myid)
+      {
+         if (!hypre_CheckDirExists(topdir))
+         {
+            hypre_CreateDir(topdir);
+         }
+
+         hypre_CreateNextDirOfSequence(topdir, "ls_", &info_path);
+         info_path_length = strlen(info_path) + 1;
+      }
+      hypre_MPI_Bcast(&info_path_length, 1, HYPRE_MPI_INT, 0, comm);
+
+      if (info_path_length > 0)
+      {
+         if (myid)
+         {
+            info_path = hypre_TAlloc(char, info_path_length, HYPRE_MEMORY_HOST);
+         }
+      }
+      else
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unable to create info path!");
+         return hypre_error_flag;
+      }
+      hypre_MPI_Bcast(info_path, info_path_length, hypre_MPI_CHAR, 0, comm);
+
+      /* Save info_path */
+      (mgr_data -> info_path) = info_path;
+   }
+   else
+   {
+      if (info_path)
+      {
+         info_path_length = strlen(info_path);
+      }
+   }
+
+   /* Print MGR parameters to file */
+   if (print_level & HYPRE_MGR_PRINT_INFO_PARAMS)
+   {
+      /* TODO (VPM) */
+
+      /* Signal that the MGR parameters have already been printed */
+      (mgr_data -> print_level) &= ~HYPRE_MGR_PRINT_INFO_PARAMS;
+      (mgr_data -> print_level) |= HYPRE_MGR_PRINT_RESERVED_A;
+   }
+
+   /* Print linear system matrix and dofmap */
+   if ((print_level & HYPRE_MGR_PRINT_INFO_MATRIX) && par_A)
+   {
+      /* Build dofmap array */
+      dofmap = hypre_IntArrayCreate(hypre_ParCSRMatrixNumRows(par_A));
+      hypre_IntArrayInitialize_v2(dofmap, HYPRE_MEMORY_HOST);
+      if (point_marker_array)
+      {
+         hypre_TMemcpy(hypre_IntArrayData(dofmap), point_marker_array,
+                       HYPRE_Int, hypre_ParCSRMatrixNumRows(par_A),
+                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      }
+      else
+      {
+         hypre_IntArraySetInterleavedValues(dofmap, block_size);
+      }
+
+      /* Print Matrix */
+      hypre_ParPrintf(comm, "Writing matrix to path: %s\n", info_path);
+      filename = hypre_TAlloc(char, strlen(info_path) + 16, HYPRE_MEMORY_HOST);
+      hypre_sprintf(filename, "%s/IJ.out.A", info_path);
+      hypre_ParCSRMatrixPrintBinaryIJ(par_A, 0, 0, filename);
+
+      /* Print dofmap */
+      hypre_ParPrintf(comm, "Writing dofmap to path: %s\n", info_path);
+      hypre_sprintf(filename, "%s/dofmap.out", info_path);
+      hypre_IntArrayPrint(comm, dofmap, filename);
+
+      /* Free memory */
+      hypre_TFree(filename, HYPRE_MEMORY_HOST);
+      hypre_IntArrayDestroy(dofmap);
+
+      /* Signal that the matrix has already been printed */
+      (mgr_data -> print_level) &= ~HYPRE_MGR_PRINT_INFO_MATRIX;
+      (mgr_data -> print_level) |= HYPRE_MGR_PRINT_RESERVED_B;
+   }
+
+   /* Print linear system RHS */
+   if ((print_level & HYPRE_MGR_PRINT_INFO_RHS) && par_b)
+   {
+      /* Print RHS */
+      hypre_ParPrintf(comm, "Writing RHS to path: %s\n", info_path);
+      filename = hypre_TAlloc(char, strlen(info_path) + 16, HYPRE_MEMORY_HOST);
+      hypre_sprintf(filename, "%s/IJ.out.b", info_path);
+      hypre_ParVectorPrintBinaryIJ(par_b, filename);
+
+      /* Free memory */
+      hypre_TFree(filename, HYPRE_MEMORY_HOST);
+
+      /* Signal that the vector has already been printed */
+      (mgr_data -> print_level) &= ~HYPRE_MGR_PRINT_INFO_RHS;
+      (mgr_data -> print_level) |= HYPRE_MGR_PRINT_RESERVED_C;
+   }
+
+   return hypre_error_flag;
+}
+
+/***************************************************************************
+ ***************************************************************************/
 
 #ifdef HYPRE_USING_DSUPERLU
 void *
