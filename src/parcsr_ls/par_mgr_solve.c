@@ -95,7 +95,7 @@ hypre_MGRSolve( void               *mgr_vdata,
     *     write some initial info
     *-----------------------------------------------------------------------*/
 
-   if (my_id == 0 && print_level > 1 && tol > 0.)
+   if (my_id == 0 && (print_level & HYPRE_MGR_PRINT_INFO_SOLVE) && tol > 0.)
    {
       hypre_printf("\n\nMGR SOLVER SOLUTION INFO:\n");
    }
@@ -104,7 +104,7 @@ hypre_MGRSolve( void               *mgr_vdata,
     *    Compute initial fine-grid residual and print
     *-----------------------------------------------------------------------*/
 
-   if (print_level > 1 || logging > 1 || tol > 0.)
+   if ((print_level & HYPRE_MGR_PRINT_INFO_SOLVE) || logging > 1 || tol > 0.)
    {
       if (logging > 1)
       {
@@ -197,7 +197,7 @@ hypre_MGRSolve( void               *mgr_vdata,
        *    Compute  fine-grid residual and residual norm
        *----------------------------------------------------------------*/
 
-      if (print_level > 1 || logging > 1 || tol > 0.)
+      if ((print_level & HYPRE_MGR_PRINT_INFO_SOLVE) || logging > 1 || tol > 0.)
       {
          old_resnorm = resnorm;
 
@@ -235,7 +235,7 @@ hypre_MGRSolve( void               *mgr_vdata,
    {
       hypre_error(HYPRE_ERROR_CONV);
 
-      if (print_level > 1 && !my_id)
+      if (!my_id && (print_level & HYPRE_MGR_PRINT_INFO_SOLVE))
       {
          hypre_printf("\n\n==============================================");
          hypre_printf("\n NOTE: Convergence tolerance was not achieved\n");
