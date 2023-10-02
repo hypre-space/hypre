@@ -8,84 +8,13 @@
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
 
-HYPRE_Int
-hypre_BoomerAMGSetupStatsNew(void *amg_vdata)
-{
-   hypre_ParAMGData          *amg_data = (hypre_ParAMGData*) amg_vdata;
-   hypre_ParCSRMatrix        *A_fine = hypre_ParAMGDataAArray(amg_data)[0];
-   MPI_Comm                   comm = hypre_ParCSRMatrixComm(A_fine);
-   HYPRE_MemoryLocation       memory_location = hypre_ParCSRMatrixMemoryLocation(A_fine);
-   HYPRE_ExecutionPolicy      exec = hypre_GetExecPolicy1(memory_location);
-
-   hypre_ParCSRMatrix       **A_array;
-   hypre_ParCSRMatrix       **P_array;
-   hypre_MatrixStatsArray    *stats_array_A;
-   hypre_MatrixStatsArray    *stats_array_P;
-
-   HYPRE_Int                 num_levels_A;
-   HYPRE_Int                 num_levels_P;
-   HYPRE_Int                 num_procs, my_id, k;
-
-   hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm_rank(comm, &my_id);
-
-   num_levels_A = hypre_ParAMGDataNumLevels(amg_data);
-   num_levels_P = hypre_ParAMGDataNumLevels(amg_data) - 1;
-
-   if (my_id == 0)
-   {
-      hypre_printf("\n\n");
-      hypre_printf(" Num MPI tasks = %d\n",  num_procs);
-      hypre_printf(" Num OpenMP threads = %d\n", hypre_NumThreads());
-      hypre_printf(" Execution policy = %s\n\n", HYPRE_GetExecutionPolicyName(exec));
-      hypre_printf("\n");
-      hypre_printf("BoomerAMG SETUP PARAMETERS:\n\n");
-      hypre_printf("    AMG num levels = %d\n", num_levels_A);
-   }
-
-   stats_array_A = hypre_MatrixStatsArrayCreate(num_levels_A);
-   stats_array_P = hypre_MatrixStatsArrayCreate(num_levels_P);
-
-   /* Gather A matrices */
-   A_array = hypre_TAlloc(hypre_ParCSRMatrix *, num_levels_A, HYPRE_MEMORY_HOST);
-   P_array = hypre_TAlloc(hypre_ParCSRMatrix *, num_levels_P, HYPRE_MEMORY_HOST);
-   for (k = 0; k < num_levels_P; k++)
-   {
-      A_array[k] = hypre_ParAMGDataAArray(amg_data)[k];
-      P_array[k] = hypre_ParAMGDataPArray(amg_data)[k];
-   }
-   A_array[num_levels_A - 1] = hypre_ParAMGDataAArray(amg_data)[num_levels_A - 1];
-
-   /* Compute statistics */
-   hypre_ParCSRMatrixStatsArrayCompute(num_levels_A, A_array, stats_array_A);
-   hypre_ParCSRMatrixStatsArrayCompute(num_levels_P, P_array, stats_array_P);
-
-   /* Print matrix statistics */
-   if (!my_id)
-   {
-      char *msg_A[] = {"Operator Matrix Hierarchy Information:\n\n"};
-      char *msg_P[] = {"Prolongation Matrix Hierarchy Information:\n\n"};
-
-      hypre_MatrixStatsArrayPrint(1, &num_levels_A, 1, 0, msg_A, stats_array_A);
-      hypre_MatrixStatsArrayPrint(1, &num_levels_P, 1, 0, msg_P, stats_array_P);
-   }
-
-   hypre_MatrixStatsArrayDestroy(stats_array_A);
-   hypre_MatrixStatsArrayDestroy(stats_array_P);
-   hypre_TFree(A_array, HYPRE_MEMORY_HOST);
-   hypre_TFree(P_array, HYPRE_MEMORY_HOST);
-
-   return hypre_error_flag;
-}
-
-/*****************************************************************************
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGSetupStats
  *
  * Routine for getting matrix statistics from setup
  *
- *
  * AHB - using block norm 6 (sum of all elements) instead of 1 (frobenius)
- *
- *****************************************************************************/
+ *--------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_BoomerAMGSetupStats( void               *amg_vdata,
@@ -1542,4 +1471,247 @@ hypre_BoomerAMGWriteSolverParams(void* data)
    }
 
    return 0;
+}
+
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGGetProlongationName
+ *--------------------------------------------------------------------*/
+
+const char*
+hypre_BoomerAMGGetProlongationName(hypre_ParAMGData *amg_data)
+{
+   switch (hypre_ParAMGDataInterpType(amg_data))
+   {
+      case 0:
+         return "modified classical";
+
+      case 1:
+         return "LS";
+
+      case 2:
+         return "modified classical for hyperbolic PDEs";
+
+      case 3:
+         return "direct with separation of weights";
+
+      case 4:
+         return "multipass";
+
+      case 5:
+         return "multipass with separation of weights";
+
+      case 6:
+         return "extended+i";
+
+      case 7:
+         return "extended+i (if no common C-point)";
+
+      case 8:
+         return "standard";
+
+      case 9:
+         return "standard with separation of weights";
+
+      case 10:
+         return "block classical for nodal systems";
+
+      case 11:
+         return "block classical with diagonal blocks for nodal systems";
+
+      case 12:
+         return "F-F";
+
+      case 13:
+         return "F-F1";
+
+      case 14:
+         return "extended";
+
+      case 15:
+         return "direct with separation of weights";
+
+      case 16:
+         return "MM-extended";
+
+      case 17:
+         return "MM-extended+i";
+
+      case 18:
+         return "MM-extended+e";
+
+      case 24:
+         return "block direct for nodal systems";
+
+      case 100:
+         return "one-point";
+
+      default:
+         return "Unknown";
+   }
+}
+
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGGetAggProlongationName
+ *--------------------------------------------------------------------*/
+
+const char*
+hypre_BoomerAMGGetAggProlongationName(hypre_ParAMGData *amg_data)
+{
+   if (hypre_ParAMGDataAggNumLevels(amg_data))
+   {
+      switch (hypre_ParAMGDataAggInterpType(amg_data))
+      {
+         case 1:
+            return "2-stage extended+i";
+
+         case 2:
+            return "2-stage standard";
+
+         case 3:
+            return "2-stage extended";
+
+         case 4:
+            return "multipass";
+
+         default:
+            return "Unknown";
+      }
+   }
+   else
+   {
+      return "";
+   }
+}
+
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGGetCoarseningName
+ *--------------------------------------------------------------------*/
+
+const char*
+hypre_BoomerAMGGetCoarseningName(hypre_ParAMGData *amg_data)
+{
+   switch (hypre_ParAMGDataCoarsenType(amg_data))
+   {
+      case 0:
+         return "Cleary-Luby-Jones-Plassman";
+
+      case 1:
+         return "Ruge";
+
+      case 2:
+         return "Ruge-2B";
+
+      case 3:
+         return "Ruge-3";
+
+      case 4:
+         return "Ruge-3c";
+
+      case 5:
+         return "Ruge relax special points";
+
+      case 6:
+         return "Falgout-CLJP";
+
+      case 7:
+         return "CLJP, fixed random";
+
+      case 8:
+         return "PMIS";
+
+      case 9:
+         return "PMIS, fixed random";
+
+      case 10:
+         return "HMIS";
+
+      case 11:
+         return "Ruge 1st pass only";
+
+      case 21:
+         return "CGC";
+
+      case 22:
+         return "CGC-E";
+
+      default:
+         return "Unknown";
+   }
+}
+
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGGetCoarseningName
+ *--------------------------------------------------------------------*/
+
+const char*
+hypre_BoomerAMGGetCycleName(hypre_ParAMGData *amg_data)
+{
+   char *name = hypre_CTAlloc(char, 10, HYPRE_MEMORY_HOST);
+
+   switch (hypre_ParAMGDataCycleType(amg_data))
+   {
+      case 1:
+         hypre_sprintf(name, "V(%d,%d)",
+                       hypre_ParAMGDataNumGridSweeps(amg_data)[0],
+                       hypre_ParAMGDataNumGridSweeps(amg_data)[1]);
+         break;
+
+      case 2:
+         hypre_sprintf(name, "W(%d,%d)",
+                       hypre_ParAMGDataNumGridSweeps(amg_data)[0],
+                       hypre_ParAMGDataNumGridSweeps(amg_data)[1]);
+         break;
+
+      default:
+         return "Unknown";
+   }
+
+   return name;
+}
+
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGPrintGeneralInfo
+ *
+ * Prints to stdout info about BoomerAMG parameters.
+ * The input parameter "shift" refers to the number of whitespaces
+ * added to the beginning of each line.
+ *--------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGPrintGeneralInfo(hypre_ParAMGData *amg_data,
+                                HYPRE_Int         shift)
+{
+   HYPRE_PRINT_SHIFTED_PARAM(shift,
+                             "Solver Type = BoomerAMG\n");
+
+   HYPRE_PRINT_SHIFTED_PARAM(shift,
+                             "Strength Threshold = %f\n",
+                             hypre_ParAMGDataStrongThreshold(amg_data));
+
+   HYPRE_PRINT_SHIFTED_PARAM(shift,
+                             "Interpolation Truncation Factor = %f\n",
+                             hypre_ParAMGDataTruncFactor(amg_data));
+
+   HYPRE_PRINT_SHIFTED_PARAM(shift,
+                             "Maximum Row Sum Threshold for Dependency Weakening = %f\n",
+                             hypre_ParAMGDataMaxRowSum(amg_data));
+
+   HYPRE_PRINT_SHIFTED_PARAM(shift,
+                             "Number of functions = %d\n",
+                             hypre_ParAMGDataNumFunctions(amg_data));
+
+   HYPRE_PRINT_SHIFTED_PARAM(shift,
+                             "Coarsening type = %s\n",
+                             hypre_BoomerAMGGetCoarseningName(amg_data));
+
+   HYPRE_PRINT_SHIFTED_PARAM(shift,
+                             "Prolongation type = %s\n",
+                             hypre_BoomerAMGGetProlongationName(amg_data));
+
+   HYPRE_PRINT_SHIFTED_PARAM(shift,
+                             "Cycle type = %s\n",
+                             hypre_BoomerAMGGetCycleName(amg_data));
+   hypre_printf("\n");
+
+   return hypre_error_flag;
 }
