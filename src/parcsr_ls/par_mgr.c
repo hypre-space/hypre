@@ -6613,7 +6613,7 @@ hypre_MGRDataPrint(void *mgr_vdata)
    /* Print MGR parameters to file */
    if (print_level & HYPRE_MGR_PRINT_INFO_PARAMS)
    {
-      /* TODO (VPM) */
+      /* TODO (VPM): print internal MGR parameters to file */
 
       /* Signal that the MGR parameters have already been printed */
       (mgr_data -> print_level) &= ~HYPRE_MGR_PRINT_INFO_PARAMS;
