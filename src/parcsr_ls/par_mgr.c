@@ -6535,62 +6535,6 @@ hypre_MGRPrintCoarseSystem( void *mgr_vdata, HYPRE_Int print_flag)
    return hypre_error_flag;
 }
 
-/* Print solver params */
-HYPRE_Int
-hypre_MGRWriteSolverParams(void *mgr_vdata)
-{
-   hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-   HYPRE_Int i, j;
-   HYPRE_Int max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
-   hypre_printf("MGR Setup parameters: \n");
-   hypre_printf("Block size: %d\n", (mgr_data -> block_size));
-   hypre_printf("Max number of coarse levels: %d\n", (mgr_data -> max_num_coarse_levels));
-   //   hypre_printf("Relax type: %d\n", (mgr_data -> relax_type));
-   hypre_printf("Set non-Cpoints to F-points: %d\n", (mgr_data -> set_non_Cpoints_to_F));
-   hypre_printf("Set Cpoints method: %d\n", (mgr_data -> set_c_points_method));
-   for (i = 0; i < max_num_coarse_levels; i++)
-   {
-      hypre_printf("Lev = %d, Interpolation type: %d\n", i, (mgr_data -> interp_type)[i]);
-      hypre_printf("Lev = %d, Restriction type: %d\n", i, (mgr_data -> restrict_type)[i]);
-      hypre_printf("Lev = %d, F-relaxation type: %d\n", i, (mgr_data -> Frelax_type)[i]);
-      hypre_printf("lev = %d, Number of relax sweeps: %d\n", i, (mgr_data -> num_relax_sweeps)[i]);
-      hypre_printf("Lev = %d, Use non-Galerkin coarse grid: %d\n", i,
-                   (mgr_data -> mgr_coarse_grid_method)[i]);
-      HYPRE_Int lvl_num_coarse_points = (mgr_data -> block_num_coarse_indexes)[i];
-      hypre_printf("Lev = %d, Number of Cpoints: %d\n", i, lvl_num_coarse_points);
-      hypre_printf("Cpoints indices: ");
-      for (j = 0; j < lvl_num_coarse_points; j++)
-      {
-         if ((mgr_data -> block_cf_marker)[i][j] == 1)
-         {
-            hypre_printf("%d ", j);
-         }
-      }
-      hypre_printf("\n");
-   }
-   hypre_printf("Number of Reserved Cpoints: %d\n", (mgr_data -> reserved_coarse_size));
-   hypre_printf("Keep reserved Cpoints to level: %d\n", (mgr_data -> lvl_to_keep_cpoints));
-
-   hypre_printf("\n MGR Solver Parameters: \n");
-   hypre_printf("Number of interpolation sweeps: %d\n", (mgr_data -> num_interp_sweeps));
-   hypre_printf("Number of restriction sweeps: %d\n", (mgr_data -> num_restrict_sweeps));
-   if (mgr_data -> level_smooth_type != NULL)
-   {
-      hypre_printf("Global smoother type: %d\n", (mgr_data -> level_smooth_type)[0]);
-      hypre_printf("Number of global smoother sweeps: %d\n", (mgr_data -> level_smooth_iters)[0]);
-   }
-   hypre_printf("Max number of iterations: %d\n", (mgr_data -> max_iter));
-   hypre_printf("Stopping tolerance: %e\n", (mgr_data -> tol));
-   hypre_printf("Use default coarse grid solver: %d\n", (mgr_data -> use_default_cgrid_solver));
-   /*
-      if ((mgr_data -> fsolver_mode) >= 0)
-      {
-         hypre_printf("Use AMG solver for full AMG F-relaxation: %d\n", (mgr_data -> fsolver_mode));
-      }
-   */
-   return hypre_error_flag;
-}
-
 /*--------------------------------------------------------------------------
  * hypre_MGRDataPrint
  *--------------------------------------------------------------------------*/
