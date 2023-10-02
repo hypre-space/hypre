@@ -434,6 +434,9 @@ hypre_ParCSRMatrixStatsArrayCompute(HYPRE_Int                num_matrices,
                                                (HYPRE_Real)         global_num_rows;
 
       hypre_MatrixStatsSparsity(stats)       = 100.0 * (1.0 - recvbuffer(i, 0, 3) / global_size);
+
+      hypre_ParCSRMatrixNumNonzeros(matrices[i]) = (HYPRE_Int) recvbuffer(i, 0, 3);
+      hypre_ParCSRMatrixDNumNonzeros(matrices[i]) = (HYPRE_Real) recvbuffer(i, 0, 3);
    }
 
    /*-------------------------------------------------
