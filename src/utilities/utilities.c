@@ -10,11 +10,11 @@
 #include <dirent.h>
 #include <errno.h>
 #ifdef _WIN32
-   #include <direct.h>
-   #define mkdir(path, mode) _mkdir(path)
+#include <direct.h>
+#define mkdir(path, mode) _mkdir(path)
 #else
-   #include <sys/types.h>
-   #include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #endif
 
 /*--------------------------------------------------------------------------
