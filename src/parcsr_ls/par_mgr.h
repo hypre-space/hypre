@@ -58,7 +58,7 @@ typedef struct
    HYPRE_Real            strong_threshold;
    HYPRE_Real            trunc_factor;
    HYPRE_Real            S_commpkg_switch;
-   HYPRE_Int             P_max_elmts;
+   HYPRE_Int            *P_max_elmts;
    HYPRE_Int             num_iterations;
 
    hypre_Vector        **l1_norms;
