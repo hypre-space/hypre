@@ -1206,15 +1206,15 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
 /* l1 hybrid symmetric G-S */
 HYPRE_Int
 hypre_BoomerAMGRelax8HybridL1SSOR( hypre_ParCSRMatrix *A,
-                                    hypre_ParVector    *f,
-                                    HYPRE_Int          *cf_marker,
-                                    HYPRE_Int           relax_points,
-                                    HYPRE_Real          relax_weight,
-                                    HYPRE_Real          omega,
-                                    HYPRE_Real         *l1_norms,
-                                    hypre_ParVector    *u,
-                                    hypre_ParVector    *Vtemp,
-                                    hypre_ParVector    *Ztemp )
+                                   hypre_ParVector    *f,
+                                   HYPRE_Int          *cf_marker,
+                                   HYPRE_Int           relax_points,
+                                   HYPRE_Real          relax_weight,
+                                   HYPRE_Real          omega,
+                                   HYPRE_Real         *l1_norms,
+                                   hypre_ParVector    *u,
+                                   hypre_ParVector    *Vtemp,
+                                   hypre_ParVector    *Ztemp )
 {
    const HYPRE_Int skip_diag = relax_weight == 1.0 && omega == 1.0 ? 0 : 1;
 

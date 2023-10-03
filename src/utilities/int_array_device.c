@@ -154,14 +154,14 @@ hypre_IntArrayNegateDevice( hypre_IntArray *v )
 
 struct hypre_cycle_functor
 {
-    HYPRE_Int cycle_length;
+   HYPRE_Int cycle_length;
 
-    hypre_cycle_functor(HYPRE_Int _cycle_length) : cycle_length(_cycle_length) {}
+   hypre_cycle_functor(HYPRE_Int _cycle_length) : cycle_length(_cycle_length) {}
 
-    __host__ __device__ HYPRE_Int operator()(HYPRE_Int x) const
-    {
-       return x % cycle_length;
-    }
+   __host__ __device__ HYPRE_Int operator()(HYPRE_Int x) const
+   {
+      return x % cycle_length;
+   }
 };
 
 HYPRE_Int
