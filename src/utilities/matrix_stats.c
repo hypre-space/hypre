@@ -257,9 +257,9 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
    /* Table divisors */
    if (use_divisors)
    {
-      divisors[0] = 9 + ndigits[0] + ndigits[1] + 2*ndigits[2] +  ndigits[3];
-      divisors[1] = 5 + ndigits[4] + ndigits[5] +   ndigits[6] +  ndigits[7];
-      divisors[2] = 5 + ndigits[8] + ndigits[9] +  ndigits[10] + ndigits[11];
+      divisors[0] = 9 + ndigits[0] + ndigits[1] +  ndigits[3] + 2 * ndigits[2];
+      divisors[1] = 5 + ndigits[4] + ndigits[5] +  ndigits[6] +     ndigits[7];
+      divisors[2] = 5 + ndigits[8] + ndigits[9] + ndigits[10] +    ndigits[11];
       if (!square)
       {
          divisors[0] += 2;
@@ -420,8 +420,8 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
 
       /* Row sum info */
       hypre_printf("%*.1e %*.1e %*.1e %*.1e",
-                    ndigits[8], hypre_MatrixStatsRowsumMin(stats),
-                    ndigits[9], hypre_MatrixStatsRowsumMax(stats),
+                   ndigits[8], hypre_MatrixStatsRowsumMin(stats),
+                   ndigits[9], hypre_MatrixStatsRowsumMax(stats),
                    ndigits[10], hypre_MatrixStatsRowsumAvg(stats),
                    ndigits[11], hypre_MatrixStatsRowsumStDev(stats));
 

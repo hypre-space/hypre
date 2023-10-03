@@ -64,51 +64,51 @@ hypre_MGRGetGlobalRelaxName(hypre_ParMGRData  *mgr_data,
 
       case 16:
          /* TODO (VPM): Move this to hypre_ILUGetName */
+      {
+         hypre_ParILUData *ilu_smoother = (hypre_ParILUData*)
+                                          hypre_ParMGRDataLevelSmootherI(mgr_data, level);
+         HYPRE_Int         ilu_type = hypre_ParILUDataIluType(ilu_smoother);
+         HYPRE_Int         ilu_fill = hypre_ParILUDataLfil(ilu_smoother);
+
+         switch (ilu_type)
          {
-            hypre_ParILUData *ilu_smoother = (hypre_ParILUData*)
-                                               hypre_ParMGRDataLevelSmootherI(mgr_data, level);
-            HYPRE_Int         ilu_type = hypre_ParILUDataIluType(ilu_smoother);
-            HYPRE_Int         ilu_fill = hypre_ParILUDataLfil(ilu_smoother);
+            case 0:
+               return (ilu_fill == 0) ? "BJ-ILU0" : "BJ-ILUK";
 
-            switch (ilu_type)
-            {
-               case 0:
-                  return (ilu_fill == 0) ? "BJ-ILU0" : "BJ-ILUK";
+            case 1:
+               return "BJ-ILUT";
 
-               case 1:
-                  return "BJ-ILUT";
+            case 10:
+               return (ilu_fill == 0) ? "GMRES-ILU0" : "GMRES-ILUK";
 
-               case 10:
-                  return (ilu_fill == 0) ? "GMRES-ILU0" : "GMRES-ILUK";
+            case 11:
+               return "GMRES-ILUT";
 
-               case 11:
-                  return "GMRES-ILUT";
+            case 20:
+               return (ilu_fill == 0) ? "NSH-ILU0" : "NSH-ILUK";
 
-               case 20:
-                  return (ilu_fill == 0) ? "NSH-ILU0" : "NSH-ILUK";
+            case 21:
+               return "NSH-ILUT";
 
-               case 21:
-                  return "NSH-ILUT";
+            case 30:
+               return (ilu_fill == 0) ? "RAS-ILU0" : "RAS-ILUK";
 
-               case 30:
-                  return (ilu_fill == 0) ? "RAS-ILU0" : "RAS-ILUK";
+            case 31:
+               return "RAS-ILUT";
 
-               case 31:
-                  return "RAS-ILUT";
+            case 40:
+               return (ilu_fill == 0) ? "ddPQ-GMRES-ILU0" : "ddPQ-GMRES-ILUK";
 
-               case 40:
-                  return (ilu_fill == 0) ? "ddPQ-GMRES-ILU0" : "ddPQ-GMRES-ILUK";
+            case 41:
+               return "ddPQ-GMRES-ILUT";
 
-               case 41:
-                  return "ddPQ-GMRES-ILUT";
+            case 50:
+               return "RAP-modILU0";
 
-               case 50:
-                  return "RAP-modILU0";
-
-               default:
-                  return "Unknown";
-            }
+            default:
+               return "Unknown";
          }
+      }
 
       default:
          return "Unknown";
@@ -450,7 +450,8 @@ hypre_MGRSetupStats(void *mgr_vdata)
       char *msg[] = { "Full Operator Matrix Hierarchy Information:\n\n",
                       "MGR's coarsest level",
                       "\t( MGR )",
-                      "\t( AMG )" };
+                      "\t( AMG )"
+                    };
 
       num_levels[0] = num_levels_mgr - 1;
       num_levels[1] = num_sublevels_amg[coarsest_mgr_level] + 1;
@@ -482,7 +483,8 @@ hypre_MGRSetupStats(void *mgr_vdata)
       char *msg[] = { "Full Prolongation Matrix Hierarchy Information:\n\n",
                       "MGR's coarsest level",
                       "\t( MGR )",
-                      "\t( AMG )" };
+                      "\t( AMG )"
+                    };
 
       num_levels[0] = num_levels_mgr;
       num_levels[1] = num_sublevels_amg[coarsest_mgr_level] - 1;

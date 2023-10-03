@@ -373,9 +373,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    /* probably should disable stuff like smooth number levels at some point */
 
 
-   if (grid_relax_type[0] >= 20 && grid_relax_type[0] != 30 && grid_relax_type[0] != 88 && grid_relax_type[0] != 89) /* block relaxation chosen */
+   if (grid_relax_type[0] >= 20 && grid_relax_type[0] != 30 &&
+       grid_relax_type[0] != 88 && grid_relax_type[0] != 89) /* block relaxation chosen */
    {
-
       if (!((interp_type >= 20 && interp_type != 100) || interp_type == 11 || interp_type == 10 ) )
       {
          hypre_ParAMGDataInterpType(amg_data) = 20;
@@ -388,9 +388,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             grid_relax_type[i] = 23;
          }
-
       }
-      if (grid_relax_type[3] < 20) { grid_relax_type[3] = 29; }  /* GE */
+      if (grid_relax_type[3] < 20)
+      {
+         grid_relax_type[3] = 29; /* GE */
+      }
 
       block_mode = 1;
    }
@@ -3290,8 +3292,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_GpuProfilingPushRange(nvtx_name);
 
       if (j < num_levels - 1 &&
-          (grid_relax_type[1] == 8 || grid_relax_type[1] == 89 || grid_relax_type[1] == 13 || grid_relax_type[1] == 14 ||
-           grid_relax_type[2] == 8 || grid_relax_type[2] == 89 || grid_relax_type[2] == 13 || grid_relax_type[2] == 14))
+          (grid_relax_type[1] == 8  || grid_relax_type[1] == 89 ||
+           grid_relax_type[1] == 13 || grid_relax_type[1] == 14 ||
+           grid_relax_type[2] == 8  || grid_relax_type[2] == 89 ||
+           grid_relax_type[2] == 13 || grid_relax_type[2] == 14))
       {
          if (relax_order)
          {
@@ -3303,7 +3307,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
       }
       else if (j == num_levels - 1 &&
-               (grid_relax_type[3] == 8 || grid_relax_type[3] == 89 || grid_relax_type[3] == 13 || grid_relax_type[3] == 14))
+               (grid_relax_type[3] == 8  || grid_relax_type[3] == 89 ||
+                grid_relax_type[3] == 13 || grid_relax_type[3] == 14))
       {
          hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norm_data);
       }

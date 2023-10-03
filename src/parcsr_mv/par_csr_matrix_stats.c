@@ -476,9 +476,9 @@ hypre_ParCSRMatrixStatsArrayCompute(HYPRE_Int                num_matrices,
       hypre_MatrixStatsRowsumSqsum(stats) = recvbuffer(i, 1, 2);
 
       hypre_MatrixStatsNnzrowStDev(stats) = hypre_sqrt(recvbuffer(i, 0, 2) /
-                                                      (HYPRE_Real) global_num_rows);
+                                                       (HYPRE_Real) global_num_rows);
       hypre_MatrixStatsRowsumStDev(stats) = hypre_sqrt(recvbuffer(i, 1, 2) /
-                                                      (HYPRE_Real) global_num_rows);
+                                                       (HYPRE_Real) global_num_rows);
    }
 
    /* Free MPI buffers */
