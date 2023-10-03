@@ -61,7 +61,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_Int  *num_relax_sweeps = (mgr_data -> num_relax_sweeps);
    HYPRE_Int num_interp_sweeps = (mgr_data -> num_interp_sweeps);
    HYPRE_Int num_restrict_sweeps = (mgr_data -> num_interp_sweeps);
-   HYPRE_Int max_elmts = (mgr_data -> P_max_elmts);
+   HYPRE_Int *max_elmts = (mgr_data -> P_max_elmts);
    HYPRE_Real   max_row_sum = (mgr_data -> max_row_sum);
    HYPRE_Real   strong_threshold = (mgr_data -> strong_threshold);
    HYPRE_Real   trunc_factor = (mgr_data -> trunc_factor);
@@ -1165,7 +1165,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
          hypre_MGRBuildInterp(A_array[lev], A_FF, A_FC, CF_marker, Wp,
                               coarse_pnts_global, 1, dof_func_buff_data,
-                              debug_flag, trunc_factor, max_elmts,
+                              debug_flag, trunc_factor, max_elmts[lev],
                               block_jacobi_bsize, &P, interp_type[lev],
                               num_interp_sweeps);
       }
@@ -1173,7 +1173,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
          hypre_MGRBuildInterp(A_array[lev], A_FF, A_FC, CF_marker, S,
                               coarse_pnts_global, 1, dof_func_buff_data,
-                              debug_flag, trunc_factor, max_elmts,
+                              debug_flag, trunc_factor, max_elmts[lev],
                               block_jacobi_bsize, &P, interp_type[lev],
                               num_interp_sweeps);
       }
@@ -1338,7 +1338,7 @@ hypre_MGRSetup( void               *mgr_vdata,
             //            if (restrict_type[lev] > 0)
             {
                hypre_MGRBuildRestrict(A_array[lev], A_FF, A_FC, CF_marker, coarse_pnts_global, 1,
-                                      dof_func_buff_data, debug_flag, trunc_factor, max_elmts,
+                                      dof_func_buff_data, debug_flag, trunc_factor, max_elmts[lev],
                                       strong_threshold, max_row_sum, block_num_f_points, &RT,
                                       restrict_type[lev], num_restrict_sweeps);
 
@@ -1378,7 +1378,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                                                      block_num_f_points,
                                                      set_c_points_method,
                                                      mgr_coarse_grid_method[lev],
-                                                     max_elmts, CF_marker, &RAP_ptr);
+                                                     max_elmts[lev], CF_marker, &RAP_ptr);
             }
 
             if (interp_type[lev] == 12)
@@ -1411,7 +1411,7 @@ hypre_MGRSetup( void               *mgr_vdata,
             }
             hypre_MGRBuildRestrict(A_array[lev], A_FF, A_FC, CF_marker,
                                    coarse_pnts_global, 1, dof_func_buff_data,
-                                   debug_flag, trunc_factor, max_elmts,
+                                   debug_flag, trunc_factor, max_elmts[lev],
                                    strong_threshold, max_row_sum,
                                    block_jacobi_bsize, &RT, restrict_type[lev],
                                    num_restrict_sweeps);
