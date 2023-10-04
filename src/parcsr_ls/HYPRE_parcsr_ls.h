@@ -2745,6 +2745,9 @@ HYPRE_Int HYPRE_ParCSRPCGSetPrecond(HYPRE_Solver            solver,
                                     HYPRE_PtrToParSolverFcn precond_setup,
                                     HYPRE_Solver            precond_solver);
 
+HYPRE_Int HYPRE_ParCSRPCGSetGenericPrecond(HYPRE_Solver solver,
+                                           HYPRE_Solver precond);
+
 HYPRE_Int HYPRE_ParCSRPCGGetPrecond(HYPRE_Solver  solver,
                                     HYPRE_Solver *precond_data);
 
