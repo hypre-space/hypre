@@ -186,6 +186,15 @@ HYPRE_Int HYPRE_PCGSetPrecond(HYPRE_Solver         solver,
                               HYPRE_Solver         precond_solver);
 
 /**
+ * (Optional) Set the preconditioner to use in a generic fashion.
+ * This function does not require explicit input of the setup and solve pointers
+ * of the preconditioner object. Instead, it automatically extracts this information
+ * from the aforementioned object.
+ **/
+HYPRE_Int HYPRE_PCGSetGenericPrecond(HYPRE_Solver  solver,
+                                     HYPRE_Solver  precond);
+
+/**
  * (Optional) Set the amount of logging to do.
  **/
 HYPRE_Int HYPRE_PCGSetLogging(HYPRE_Solver solver,

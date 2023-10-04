@@ -263,6 +263,18 @@ HYPRE_PCGSetPrecond( HYPRE_Solver         solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_PCGSetGenericPrecond
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_PCGSetGenericPrecond( HYPRE_Solver  solver,
+                            HYPRE_Solver  precond_solver )
+{
+   return ( hypre_PCGSetGenericPrecond( (void *) solver,
+                                        (void *) precond_solver ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_PCGGetPrecond
  *--------------------------------------------------------------------------*/
 
@@ -355,4 +367,3 @@ HYPRE_Int HYPRE_PCGGetResidual( HYPRE_Solver   solver,
    /* returns a pointer to the residual vector */
    return hypre_PCGGetResidual( (void *) solver, (void **) residual );
 }
-
