@@ -13,17 +13,17 @@
 
 #define DEBUG 0
 #define PRINT_CF 0
-
 #define DEBUG_SAVE_ALL_OPS 0
+
 /*****************************************************************************
  *
  * Routine for driving the setup phase of AMG
  *
  *****************************************************************************/
 
-/*****************************************************************************
+/*--------------------------------------------------------------------------
  * hypre_BoomerAMGSetup
- *****************************************************************************/
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_BoomerAMGSetup( void               *amg_vdata,
@@ -4013,4 +4013,20 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_ANNOTATE_FUNC_END;
 
    return (hypre_error_flag);
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_BoomerAMGSetupWrapper
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGSetupWrapper( void *amg_vdata,
+                             void *vA,
+                             void *vf,
+                             void *vu )
+{
+   return hypre_BoomerAMGSetup((void*)               amg_vdata,
+                               (hypre_ParCSRMatrix*) vA,
+                               (hypre_ParVector*)    vf,
+                               (hypre_ParVector*)    vu );
 }

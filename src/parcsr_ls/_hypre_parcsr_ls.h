@@ -36,7 +36,11 @@ typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
 
 typedef struct
 {
-   HYPRE_MemoryLocation  memory_location;   /* memory location of matrices/vectors in AMGData */
+   /* Base solver data structure */
+   hypre_SolverBase   base;
+
+   /* Memory location of matrices/vectors in AMGData */
+   HYPRE_MemoryLocation  memory_location;
 
    /* setup params */
    HYPRE_Int      max_levels;
@@ -302,6 +306,8 @@ typedef struct
 
 /* setup params */
 
+#define hypre_ParAMGDataBaseSetup(amg_data)            ((amg_data) -> base.setup)
+#define hypre_ParAMGDataBaseSolve(amg_data)            ((amg_data) -> base.solve)
 #define hypre_ParAMGDataMemoryLocation(amg_data)       ((amg_data) -> memory_location)
 #define hypre_ParAMGDataRestriction(amg_data)          ((amg_data) -> restr_par)
 #define hypre_ParAMGDataIsTriangular(amg_data)         ((amg_data) -> is_triangular)
@@ -2633,10 +2639,12 @@ HYPRE_Int hypre_BoomerAMGGetCumNnzAP ( void *data, HYPRE_Real *cum_nnz_AP );
 /* par_amg_setup.c */
 HYPRE_Int hypre_BoomerAMGSetup ( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                  hypre_ParVector *u );
+HYPRE_Int hypre_BoomerAMGSetupWrapper ( void *amg_vdata, void *A, void *f, void *u );
 
 /* par_amg_solve.c */
 HYPRE_Int hypre_BoomerAMGSolve ( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                  hypre_ParVector *u );
+HYPRE_Int hypre_BoomerAMGSolveWrapper ( void *amg_vdata, void *A, void *f, void *u );
 
 /* par_amg_solveT.c */
 HYPRE_Int hypre_BoomerAMGSolveT ( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f,
