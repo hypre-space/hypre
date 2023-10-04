@@ -1141,8 +1141,8 @@ hypre_PCGSetGenericPrecond(void *pcg_vdata,
    hypre_PCGFunctions *pcg_functions = pcg_data->functions;
 
    (pcg_data -> precond_data)       = precond_data;
-   (pcg_functions -> precond)       = base->solve;
-   (pcg_functions -> precond_setup) = base->setup;
+   (pcg_functions -> precond)       = (HYPRE_Int (*)(void*, void*, void*, void*)) base->solve;
+   (pcg_functions -> precond_setup) = (HYPRE_Int (*)(void*, void*, void*, void*)) base->setup;
 
    return hypre_error_flag;
 }

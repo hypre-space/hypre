@@ -420,19 +420,3 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
    return hypre_error_flag;
 }
-
-/*--------------------------------------------------------------------
- * hypre_BoomerAMGSolveWrapper
- *--------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_BoomerAMGSolveWrapper( void *amg_vdata,
-                             void *vA,
-                             void *vf,
-                             void *vu )
-{
-   return hypre_BoomerAMGSolve((void*)               amg_vdata,
-                               (hypre_ParCSRMatrix*) vA,
-                               (hypre_ParVector*)    vf,
-                               (hypre_ParVector*)    vu );
-}
