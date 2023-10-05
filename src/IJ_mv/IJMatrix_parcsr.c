@@ -181,11 +181,11 @@ hypre_IJMatrixSetMaxOnProcElmtsParCSR(hypre_IJMatrix *matrix,
                                       HYPRE_Int       max_on_proc_elmts)
 {
 #if defined(HYPRE_USING_GPU)
-   hypre_AuxParCSRMatrix *aux_matrix;
-   HYPRE_Int local_num_rows, local_num_cols, my_id;
-   HYPRE_BigInt *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
-   HYPRE_BigInt *col_partitioning = hypre_IJMatrixColPartitioning(matrix);
-   MPI_Comm comm = hypre_IJMatrixComm(matrix);
+   MPI_Comm                 comm             = hypre_IJMatrixComm(matrix);
+   HYPRE_BigInt            *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
+   HYPRE_BigInt            *col_partitioning = hypre_IJMatrixColPartitioning(matrix);
+   hypre_AuxParCSRMatrix   *aux_matrix;
+   HYPRE_Int                local_num_rows, local_num_cols, my_id;
 
    hypre_MPI_Comm_rank(comm, &my_id);
    aux_matrix = (hypre_AuxParCSRMatrix *) hypre_IJMatrixTranslator(matrix);
@@ -193,10 +193,15 @@ hypre_IJMatrixSetMaxOnProcElmtsParCSR(hypre_IJMatrix *matrix,
    {
       local_num_rows = (HYPRE_Int)(row_partitioning[1] - row_partitioning[0]);
       local_num_cols = (HYPRE_Int)(col_partitioning[1] - col_partitioning[0]);
+
       hypre_AuxParCSRMatrixCreate(&aux_matrix, local_num_rows, local_num_cols, NULL);
       hypre_IJMatrixTranslator(matrix) = aux_matrix;
    }
    hypre_AuxParCSRMatrixUsrOnProcElmts(aux_matrix) = max_on_proc_elmts;
+
+#else
+   HYPRE_UNUSED_VAR(matrix);
+   HYPRE_UNUSED_VAR(max_on_proc_elmts);
 #endif
 
    return hypre_error_flag;
@@ -1739,6 +1744,8 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
                                          HYPRE_BigInt         *off_proc_j,
                                          HYPRE_Complex        *off_proc_data )
 {
+   HYPRE_UNUSED_VAR(max_off_proc_elmts);
+
    MPI_Comm comm = hypre_IJMatrixComm(matrix);
 
    HYPRE_Int i, j, k, in_i;
@@ -2405,6 +2412,8 @@ hypre_FillResponseIJOffProcVals(void      *p_recv_contact_buf,
 
 
 {
+   HYPRE_UNUSED_VAR(p_send_response_buf);
+
    HYPRE_Int    myid;
    HYPRE_Int    index, count, elength;
 
