@@ -2405,6 +2405,7 @@ hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
                           hypre_CSRMatrixNumNonzeros(A), hypre_CSRMatrixGPUMatDescr(A),
                           hypre_CSRMatrixI(A), hypre_CSRMatrixJ(A), hypre_CSRMatrixData(A));
 #else
+   HYPRE_UNUSED_VAR(A);
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                      "hypre_CSRMatrixSortRow only implemented for cuSPARSE/rocSPARSE!\n");
 #endif
@@ -3310,6 +3311,8 @@ hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix)
                                                            hypre_CSRMatrixJ(matrix),
                                                            hypre_CSRMatrixGPUMatInfo(matrix)) );
    }
+#else
+   HYPRE_UNUSED_VAR(matrix);
 #endif /* #if defined(HYPRE_USING_ROCSPARSE) */
 
    return hypre_error_flag;

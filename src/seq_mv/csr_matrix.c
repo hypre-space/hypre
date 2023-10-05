@@ -1404,7 +1404,7 @@ HYPRE_Int
 hypre_CSRMatrixPrefetch( hypre_CSRMatrix      *A,
                          HYPRE_MemoryLocation  memory_location )
 {
-#ifdef HYPRE_USING_UNIFIED_MEMORY
+#if defined(HYPRE_USING_UNIFIED_MEMORY)
    if (hypre_CSRMatrixMemoryLocation(A) != HYPRE_MEMORY_DEVICE)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "A is not at HYPRE_MEMORY_DEVICE");
@@ -1420,6 +1420,10 @@ hypre_CSRMatrixPrefetch( hypre_CSRMatrix      *A,
    hypre_MemPrefetch(data, sizeof(HYPRE_Complex)*nnzA, memory_location);
    hypre_MemPrefetch(ia,   sizeof(HYPRE_Int) * (nrow + 1), memory_location);
    hypre_MemPrefetch(ja,   sizeof(HYPRE_Int)*nnzA,     memory_location);
+
+#else
+   HYPRE_UNUSED_VAR(A);
+   HYPRE_UNUSED_VAR(memory_location);
 #endif
 
    return hypre_error_flag;
