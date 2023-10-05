@@ -21,8 +21,9 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_DistributedMatrixDestroyParCSR( hypre_DistributedMatrix *distributed_matrix )
+hypre_DistributedMatrixDestroyParCSR( hypre_DistributedMatrix *dm )
 {
+   HYPRE_UNUSED_VAR(dm);
 
    return(0);
 }
@@ -34,8 +35,9 @@ hypre_DistributedMatrixDestroyParCSR( hypre_DistributedMatrix *distributed_matri
   /* matrix must be set before calling this function*/
 
 HYPRE_Int
-hypre_DistributedMatrixInitializeParCSR(hypre_DistributedMatrix *matrix)
+hypre_DistributedMatrixInitializeParCSR(hypre_DistributedMatrix *dm)
 {
+   HYPRE_UNUSED_VAR(dm);
 
    return 0;
 }
@@ -50,10 +52,10 @@ hypre_DistributedMatrixInitializeParCSR(hypre_DistributedMatrix *matrix)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_DistributedMatrixPrintParCSR( hypre_DistributedMatrix *matrix )
+hypre_DistributedMatrixPrintParCSR( hypre_DistributedMatrix *dm )
 {
    HYPRE_Int  ierr=0;
-   HYPRE_ParCSRMatrix Parcsr_matrix = (HYPRE_ParCSRMatrix) hypre_DistributedMatrixLocalStorage(matrix);
+   HYPRE_ParCSRMatrix Parcsr_matrix = (HYPRE_ParCSRMatrix) hypre_DistributedMatrixLocalStorage(dm);
 
    HYPRE_ParCSRMatrixPrint( Parcsr_matrix, "STDOUT" );
    return(ierr);
@@ -64,17 +66,16 @@ hypre_DistributedMatrixPrintParCSR( hypre_DistributedMatrix *matrix )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_DistributedMatrixGetLocalRangeParCSR( hypre_DistributedMatrix *matrix,
-                             HYPRE_BigInt *row_start,
-                             HYPRE_BigInt *row_end,
-                             HYPRE_BigInt *col_start,
-                             HYPRE_BigInt *col_end )
+hypre_DistributedMatrixGetLocalRangeParCSR( hypre_DistributedMatrix *dm,
+                                            HYPRE_BigInt            *row_start,
+                                            HYPRE_BigInt            *row_end,
+                                            HYPRE_BigInt            *col_start,
+                                            HYPRE_BigInt            *col_end )
 {
    HYPRE_Int ierr=0;
-   HYPRE_ParCSRMatrix Parcsr_matrix = (HYPRE_ParCSRMatrix) hypre_DistributedMatrixLocalStorage(matrix);
+   HYPRE_ParCSRMatrix Parcsr_matrix = (HYPRE_ParCSRMatrix) hypre_DistributedMatrixLocalStorage(dm);
 
    if (!Parcsr_matrix) return(-1);
-
 
    ierr = HYPRE_ParCSRMatrixGetLocalRange( Parcsr_matrix, row_start, row_end,
                                            col_start, col_end );
@@ -87,14 +88,14 @@ hypre_DistributedMatrixGetLocalRangeParCSR( hypre_DistributedMatrix *matrix,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_DistributedMatrixGetRowParCSR( hypre_DistributedMatrix *matrix,
-                             HYPRE_BigInt row,
-                             HYPRE_Int *size,
-                             HYPRE_BigInt **col_ind,
-                             HYPRE_Real **values )
+hypre_DistributedMatrixGetRowParCSR( hypre_DistributedMatrix *dm,
+                                     HYPRE_BigInt             row,
+                                     HYPRE_Int               *size,
+                                     HYPRE_BigInt           **col_ind,
+                                     HYPRE_Real             **values )
 {
    HYPRE_Int ierr = 0;
-   HYPRE_ParCSRMatrix Parcsr_matrix = (HYPRE_ParCSRMatrix) hypre_DistributedMatrixLocalStorage(matrix);
+   HYPRE_ParCSRMatrix Parcsr_matrix = (HYPRE_ParCSRMatrix) hypre_DistributedMatrixLocalStorage(dm);
 
    if (!Parcsr_matrix) return(-1);
 
@@ -113,14 +114,14 @@ hypre_DistributedMatrixGetRowParCSR( hypre_DistributedMatrix *matrix,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_DistributedMatrixRestoreRowParCSR( hypre_DistributedMatrix *matrix,
-                             HYPRE_BigInt row,
-                             HYPRE_Int *size,
-                             HYPRE_BigInt **col_ind,
-                             HYPRE_Real **values )
+hypre_DistributedMatrixRestoreRowParCSR( hypre_DistributedMatrix *dm,
+                                         HYPRE_BigInt             row,
+                                         HYPRE_Int               *size,
+                                         HYPRE_BigInt           **col_ind,
+                                         HYPRE_Real             **values )
 {
    HYPRE_Int ierr;
-   HYPRE_ParCSRMatrix Parcsr_matrix = (HYPRE_ParCSRMatrix) hypre_DistributedMatrixLocalStorage(matrix);
+   HYPRE_ParCSRMatrix Parcsr_matrix = (HYPRE_ParCSRMatrix) hypre_DistributedMatrixLocalStorage(dm);
 
    if (Parcsr_matrix == NULL) return(-1);
 
