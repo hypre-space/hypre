@@ -36,7 +36,7 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix  *A,
                                  HYPRE_Int                 add_weak_to_diag,
                                  hypre_ParCSRBlockMatrix **P_ptr )
 {
-   HYPRE_UNUSER_VAR(dof_func);
+   HYPRE_UNUSED_VAR(dof_func);
 
    MPI_Comm                 comm = hypre_ParCSRBlockMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
@@ -1605,7 +1605,7 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
                                      HYPRE_Int                 add_weak_to_diag,
                                      hypre_ParCSRBlockMatrix  **P_ptr)
 {
-   HYPRE_UNUSER_VAR(dof_func);
+   HYPRE_UNUSED_VAR(dof_func);
 
    MPI_Comm                 comm = hypre_ParCSRBlockMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
@@ -2733,7 +2733,7 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix    *A,
                                    HYPRE_Int                   max_elmts,
                                    hypre_ParCSRBlockMatrix   **P_ptr)
 {
-   HYPRE_UNUSER_VAR(dof_func);
+   HYPRE_UNUSED_VAR(dof_func);
 
    MPI_Comm                 comm = hypre_ParCSRBlockMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
@@ -3790,7 +3790,8 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
                                     HYPRE_Int                  max_elmts,
                                     hypre_ParCSRBlockMatrix  **P_ptr)
 {
-   HYPRE_UNUSER_VAR(dof_func);
+   HYPRE_UNUSED_VAR(dof_func);
+   HYPRE_UNUSED_VAR(num_functions);
 
    MPI_Comm           comm = hypre_ParCSRBlockMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
@@ -4821,7 +4822,7 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix    *A,
                                     HYPRE_Int                   max_elmts,
                                     hypre_ParCSRBlockMatrix   **P_ptr)
 {
-   HYPRE_UNUSER_VAR(dof_func);
+   HYPRE_UNUSED_VAR(dof_func);
 
    MPI_Comm           comm = hypre_ParCSRBlockMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
