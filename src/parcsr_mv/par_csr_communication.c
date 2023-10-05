@@ -1267,6 +1267,9 @@ hypre_ParCSRFindExtendCommPkg(MPI_Comm              comm,
                               HYPRE_BigInt         *indices,
                               hypre_ParCSRCommPkg **extend_comm_pkg)
 {
+   HYPRE_UNUSED_VAR(local_num);
+   HYPRE_UNUSED_VAR(starts);
+
    hypre_ParCSRCommPkg *new_comm_pkg = hypre_TAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
 
    hypre_assert(apart != NULL);

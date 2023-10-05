@@ -1267,6 +1267,8 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
    // other interpolation: skip_fine = 0, skip_same_sign = 0
 )
 {
+   HYPRE_UNUSED_VAR(num_cols_B);
+
    hypre_ParCSRCommHandle *comm_handle, *row_map_comm_handle = NULL;
    hypre_ParCSRCommPkg *tmp_comm_pkg = NULL;
    HYPRE_Int *B_int_i;
@@ -4915,6 +4917,8 @@ hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix   *A,
                                  HYPRE_Int             want_data,
                                  void                **request_ptr)
 {
+   HYPRE_UNUSED_VAR(indices);
+
    MPI_Comm                 comm           = hypre_ParCSRMatrixComm(A);
    HYPRE_BigInt             first_col      = hypre_ParCSRMatrixFirstColDiag(A);
    HYPRE_BigInt            *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
@@ -5315,7 +5319,7 @@ hypre_ParCSRMatrixAddHost( HYPRE_Complex        alpha,
                                   num_rows_diag_C, num_rownnz_diag_C,
                                   num_cols_diag_C, rownnz_diag_C,
                                   memory_location_C, C_diag_i, &C_diag);
-      hypre_CSRMatrixAddSecondPass(ns, ne, twspace, marker_diag,
+      hypre_CSRMatrixAddSecondPass(ns, ne, marker_diag,
                                    NULL, NULL, rownnz_diag_C,
                                    alpha, beta, A_diag, B_diag, C_diag);
       hypre_TFree(marker_diag, HYPRE_MEMORY_HOST);
@@ -5343,7 +5347,7 @@ hypre_ParCSRMatrixAddHost( HYPRE_Complex        alpha,
                                   num_rows_offd_C, num_rownnz_offd_C,
                                   num_cols_offd_C, rownnz_offd_C,
                                   memory_location_C, C_offd_i, &C_offd);
-      hypre_CSRMatrixAddSecondPass(ns, ne, twspace, marker_offd,
+      hypre_CSRMatrixAddSecondPass(ns, ne, marker_offd,
                                    A2C_offd, B2C_offd, rownnz_offd_C,
                                    alpha, beta, A_offd, B_offd, C_offd);
       hypre_TFree(marker_offd, HYPRE_MEMORY_HOST);
@@ -6452,19 +6456,17 @@ hypre_ParCSRMatrixReorder(hypre_ParCSRMatrix *A)
 HYPRE_Int
 hypre_ParCSRMatrixCompressOffdMap(hypre_ParCSRMatrix *A)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_GpuProfilingPushRange("hypre_ParCSRMatrixCompressOffdMap");
-#endif
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
       hypre_ParCSRMatrixCompressOffdMapDevice(A);
    }
-#endif
+#else
    // RL: I guess it's not needed for the host code [?]
+   HYPRE_UNUSED_VAR(A);
+#endif
 
    return hypre_error_flag;
 }

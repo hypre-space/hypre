@@ -766,9 +766,15 @@ HYPRE_Int hypre_ParCSRBooleanMatrixGetRow(hypre_ParCSRBooleanMatrix  *mat,
  * hypre_ParCSRBooleanMatrixRestoreRow
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_ParCSRBooleanMatrixRestoreRow( hypre_ParCSRBooleanMatrix *matrix,
-                                               HYPRE_BigInt row, HYPRE_Int *size, HYPRE_BigInt **col_ind)
+HYPRE_Int
+hypre_ParCSRBooleanMatrixRestoreRow( hypre_ParCSRBooleanMatrix *matrix,
+                                     HYPRE_BigInt               row,
+                                     HYPRE_Int                 *size,
+                                     HYPRE_BigInt             **col_ind )
 {
+   HYPRE_UNUSED_VAR(row);
+   HYPRE_UNUSED_VAR(size);
+   HYPRE_UNUSED_VAR(col_ind);
 
    if (!hypre_ParCSRBooleanMatrix_Get_Getrowactive(matrix)) { return ( -1 ); }
 

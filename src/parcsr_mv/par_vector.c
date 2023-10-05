@@ -1064,6 +1064,8 @@ hypre_FillResponseParToVectorAll( void       *p_recv_contact_buf,
                                   void      **p_send_response_buf,
                                   HYPRE_Int  *response_message_size )
 {
+   HYPRE_UNUSED_VAR(p_send_response_buf);
+
    HYPRE_Int     myid;
    HYPRE_Int     i, index, count, elength;
 
