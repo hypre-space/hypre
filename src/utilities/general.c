@@ -77,13 +77,11 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
 
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
-#endif
 
-#if defined(HYPRE_USING_HIP)
+#elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipSetDevice(device_id) );
-#endif
 
-#if defined(HYPRE_USING_SYCL)
+#elif defined(HYPRE_USING_SYCL)
    if (hypre_handle_)
    {
       if (!hypre_HandleDevice(hypre_handle_))
@@ -114,7 +112,10 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
          hypre_DeviceDataDevice(hypre_HandleDeviceData(
                                    hypre_handle_))->get_info<sycl::info::device::max_work_group_size>();
    }
-#endif // #if defined(HYPRE_USING_SYCL)
+#else
+   HYPRE_UNUSED_VAR(device_id);
+   HYPRE_UNUSED_VAR(hypre_handle_);
+#endif
 
    return hypre_error_flag;
 }
@@ -129,15 +130,17 @@ hypre_GetDeviceMaxShmemSize(hypre_int device_id, hypre_Handle *hypre_handle_)
 #if defined(HYPRE_USING_CUDA)
    cudaDeviceGetAttribute(&max_size, cudaDevAttrMaxSharedMemoryPerBlock, device_id);
    cudaDeviceGetAttribute(&max_size_optin, cudaDevAttrMaxSharedMemoryPerBlockOptin, device_id);
-#endif
 
-#if defined(HYPRE_USING_HIP)
+#elif defined(HYPRE_USING_HIP)
    hipDeviceGetAttribute(&max_size, hipDeviceAttributeMaxSharedMemoryPerBlock, device_id);
 #endif
 
 #if defined(HYPRE_USING_GPU)
    hypre_HandleDeviceMaxShmemPerBlock(hypre_handle_)[0] = max_size;
    hypre_HandleDeviceMaxShmemPerBlock(hypre_handle_)[1] = max_size_optin;
+#else
+   HYPRE_UNUSED_VAR(device_id);
+   HYPRE_UNUSED_VAR(hypre_handle_);
 #endif
 
    return hypre_error_flag;
@@ -151,17 +154,14 @@ hypre_GetDevice(hypre_int *device_id)
 {
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    *device_id = omp_get_default_device();
-#endif
 
-#if defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaGetDevice(device_id) );
-#endif
 
-#if defined(HYPRE_USING_HIP)
+#elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipGetDevice(device_id) );
-#endif
 
-#if defined(HYPRE_USING_SYCL)
+#elif defined(HYPRE_USING_SYCL)
    /* WM: note - no sycl call to get which device is setup for use (if the user has already setup a device at all)
     * Assume the rank/device binding below */
    HYPRE_Int my_id;
@@ -169,6 +169,9 @@ hypre_GetDevice(hypre_int *device_id)
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &my_id);
    hypre_GetDeviceCount(&n_devices);
    (*device_id) = my_id % n_devices;
+
+#else
+   *device_id = 0;
 #endif
 
    return hypre_error_flag;
@@ -179,17 +182,14 @@ hypre_GetDeviceCount(hypre_int *device_count)
 {
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    *device_count = omp_get_num_devices();
-#endif
 
-#if defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaGetDeviceCount(device_count) );
-#endif
 
-#if defined(HYPRE_USING_HIP)
+#elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipGetDeviceCount(device_count) );
-#endif
 
-#if defined(HYPRE_USING_SYCL)
+#elif defined(HYPRE_USING_SYCL)
    (*device_count) = 0;
    sycl::platform platform(sycl::gpu_selector{});
    auto const& gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
@@ -198,6 +198,9 @@ hypre_GetDeviceCount(hypre_int *device_count)
    {
       (*device_count)++;
    }
+
+#else
+   *device_count = 0;
 #endif
 
    return hypre_error_flag;

@@ -2913,6 +2913,11 @@ hypre_bind_device( HYPRE_Int myid,
                 myid, nproc, myNodeid, NodeSize, nDevices, device_id);
 #endif
 
+#else
+   HYPRE_UNUSED_VAR(myid);
+   HYPRE_UNUSED_VAR(nproc);
+   HYPRE_UNUSED_VAR(comm);
+
 #endif // #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 
    return hypre_error_flag;
