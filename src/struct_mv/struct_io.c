@@ -104,6 +104,9 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
                              HYPRE_Int        dim,
                              HYPRE_Complex   *data       )
 {
+   HYPRE_UNUSED_VAR(num_values);
+   HYPRE_UNUSED_VAR(data_space);
+
    hypre_Box       *box;
    hypre_Box       *data_box;
 
@@ -192,6 +195,8 @@ hypre_PrintCCBoxArrayData( FILE            *file,
                            HYPRE_Int        num_values,
                            HYPRE_Complex   *data       )
 {
+   HYPRE_UNUSED_VAR(data_space);
+
    HYPRE_Int        datai;
 
    HYPRE_Int        i, j;
