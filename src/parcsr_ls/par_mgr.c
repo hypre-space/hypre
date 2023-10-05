@@ -5669,8 +5669,8 @@ hypre_MGRSetPrintLevel( void *mgr_vdata, HYPRE_Int print_level )
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
    /* Unset reserved bits if any are active */
-   (mgr_data -> print_level) = print_level & ~(HYPRE_MGR_PRINT_RESERVED_A ||
-                                               HYPRE_MGR_PRINT_RESERVED_B ||
+   (mgr_data -> print_level) = print_level & ~(HYPRE_MGR_PRINT_RESERVED_A |
+                                               HYPRE_MGR_PRINT_RESERVED_B |
                                                HYPRE_MGR_PRINT_RESERVED_C);
    return hypre_error_flag;
 }
