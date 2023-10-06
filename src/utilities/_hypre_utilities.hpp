@@ -536,9 +536,9 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 
 /* rocSOLVER */
 
-   /**************
-    * TODO (VPM) *
-    **************/
+/**************
+ * TODO (VPM) *
+ **************/
 
 #endif /* if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
@@ -593,9 +593,9 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 
 /* rocSOLVER */
 
-   /**************
-    * TODO (VPM) *
-    **************/
+/**************
+ * TODO (VPM) *
+ **************/
 
 #endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)*/
 #endif /* #if defined(HYPRE_COMPLEX) || defined(HYPRE_SINGLE) || defined(HYPRE_LONG_DOUBLE) */

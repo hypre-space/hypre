@@ -57,12 +57,12 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
     *-----------------------------------------------------------------*/
 
 #if defined(HYPRE_USING_MAGMA)
-    HYPRE_MAGMA_CALL(hypre_magma_getrf_nat(global_num_rows,
-                                           global_num_rows,
-                                           A_mat,
-                                           global_num_rows,
-                                           A_piv,
-                                           &ierr));
+   HYPRE_MAGMA_CALL(hypre_magma_getrf_nat(global_num_rows,
+                                          global_num_rows,
+                                          A_mat,
+                                          global_num_rows,
+                                          A_piv,
+                                          &ierr));
 
 #elif defined(HYPRE_USING_CUSOLVER)
    /* Allocate space for device error code */
@@ -175,9 +175,9 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
 
 #elif defined(HYPRE_USING_ROCSOLVER)
 
-   /**************
-    * TODO (VPM) *
-    **************/
+      /**************
+       * TODO (VPM) *
+       **************/
 
 #else
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,

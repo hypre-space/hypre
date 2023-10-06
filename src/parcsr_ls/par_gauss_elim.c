@@ -142,9 +142,9 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
       if (num_rows)
       {
          A_diag_host = (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE) ?
-                        hypre_CSRMatrixClone_v2(A_diag, 1, HYPRE_MEMORY_HOST) : A_diag;
+                       hypre_CSRMatrixClone_v2(A_diag, 1, HYPRE_MEMORY_HOST) : A_diag;
          A_offd_host = (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE) ?
-                        hypre_CSRMatrixClone_v2(A_offd, 1, HYPRE_MEMORY_HOST) : A_offd;
+                       hypre_CSRMatrixClone_v2(A_offd, 1, HYPRE_MEMORY_HOST) : A_offd;
 
          HYPRE_Int      *A_diag_i    = hypre_CSRMatrixI(A_diag_host);
          HYPRE_Int      *A_offd_i    = hypre_CSRMatrixI(A_offd_host);
