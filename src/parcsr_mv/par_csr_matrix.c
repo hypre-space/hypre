@@ -2138,6 +2138,7 @@ hypre_ParCSRMatrixToCSRMatrixAll( hypre_ParCSRMatrix   *par_matrix,
 
    /* Creates local matrix on host memory */
    local_matrix = hypre_MergeDiagAndOffd(par_temp);
+   hypre_ParCSRMatrixDestroy(par_temp);
 
    /* copies big_j to j */
    hypre_CSRMatrixBigJtoJ(local_matrix);
