@@ -389,8 +389,9 @@ hypre_MGRDestroy( void *data )
    hypre_TFree((mgr_data -> RT_array), HYPRE_MEMORY_HOST);
    hypre_TFree((mgr_data -> CF_marker_array), HYPRE_MEMORY_HOST);
    hypre_TFree((mgr_data -> reserved_Cpoint_local_indexes), HYPRE_MEMORY_HOST);
-   hypre_TFree(mgr_data -> restrict_type, HYPRE_MEMORY_HOST);
-   hypre_TFree(mgr_data -> interp_type, HYPRE_MEMORY_HOST);
+   hypre_TFree((mgr_data -> restrict_type), HYPRE_MEMORY_HOST);
+   hypre_TFree((mgr_data -> interp_type), HYPRE_MEMORY_HOST);
+   hypre_TFree((mgr_data -> P_max_elmts), HYPRE_MEMORY_HOST);
    /* Frelax_type */
    hypre_TFree(mgr_data -> Frelax_type, HYPRE_MEMORY_HOST);
    /* Frelax_method */
