@@ -232,7 +232,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
       hypre_CSRMatrix *P_CSR = NULL;
       hypre_Vector *sv = NULL;
 
-      P_CSR = hypre_ParCSRMatrixToCSRMatrixAll(*P, HYPRE_MEMORY_HOST);
+      P_CSR = hypre_ParCSRMatrixToCSRMatrixAll(*P);
 
       if (!myid)
       {
@@ -263,7 +263,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
 
       }
 
-      P_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A, HYPRE_MEMORY_HOST);
+      P_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
       if (!myid)
       {
          hypre_sprintf(new_file, "%s.level.%d", "A", level );
@@ -2599,7 +2599,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
       char new_file[80];
       hypre_CSRMatrix *P_CSR;
 
-      P_CSR = hypre_ParCSRMatrixToCSRMatrixAll(new_P, HYPRE_MEMORY_HOST);
+      P_CSR = hypre_ParCSRMatrixToCSRMatrixAll(new_P);
 
       if (!myid)
       {

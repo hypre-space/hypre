@@ -45,7 +45,27 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
    hypre_CSRMatrix      *A_offd          = hypre_ParCSRMatrixOffd(A);
    HYPRE_MemoryLocation  memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
+   /* Local matrices */
+   hypre_CSRMatrix      *A_diag_host;
+   hypre_CSRMatrix      *A_offd_host;
+   hypre_CSRMatrix      *A_CSR;
+   HYPRE_Int            *A_CSR_i;
+   HYPRE_Int            *A_CSR_j;
+   HYPRE_Complex        *A_CSR_data;
+   HYPRE_Int            *A_diag_i;
+   HYPRE_Int            *A_offd_i;
+   HYPRE_Int            *A_diag_j;
+   HYPRE_Int            *A_offd_j;
+   HYPRE_Complex        *A_diag_data;
+   HYPRE_Complex        *A_offd_data;
+
+   HYPRE_Complex        *A_mat_local;
+   HYPRE_Int            *comm_info, *info, *displs;
+   HYPRE_Int            *mat_info, *mat_displs;
+   HYPRE_Int             new_num_procs, A_mat_local_size;
+
    /* Local variables */
+   MPI_Comm              new_comm;
    HYPRE_Int             global_size     = global_num_rows * global_num_rows;
    HYPRE_Real           *A_mat           = NULL;
    HYPRE_Real           *AT_mat;
@@ -131,40 +151,29 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
 
    if (solver_type == 9 || solver_type == 99 || solver_type == 199)
    {
-      hypre_CSRMatrix      *A_diag_host;
-      hypre_CSRMatrix      *A_offd_host;
-      MPI_Comm              new_comm;
-
       /* Generate sub communicator - processes that have nonzero num_rows */
       hypre_GenerateSubComm(comm, num_rows, &new_comm);
       hypre_ParAMGDataNewComm(amg_data) = new_comm;
 
       if (num_rows)
       {
+         hypre_MPI_Comm_size(new_comm, &new_num_procs);
+
          A_diag_host = (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE) ?
                        hypre_CSRMatrixClone_v2(A_diag, 1, HYPRE_MEMORY_HOST) : A_diag;
          A_offd_host = (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE) ?
                        hypre_CSRMatrixClone_v2(A_offd, 1, HYPRE_MEMORY_HOST) : A_offd;
-
-         HYPRE_Int      *A_diag_i    = hypre_CSRMatrixI(A_diag_host);
-         HYPRE_Int      *A_offd_i    = hypre_CSRMatrixI(A_offd_host);
-         HYPRE_Int      *A_diag_j    = hypre_CSRMatrixJ(A_diag_host);
-         HYPRE_Int      *A_offd_j    = hypre_CSRMatrixJ(A_offd_host);
-         HYPRE_Complex  *A_diag_data = hypre_CSRMatrixData(A_diag_host);
-         HYPRE_Complex  *A_offd_data = hypre_CSRMatrixData(A_offd_host);
-
-         HYPRE_Complex  *A_mat_local;
-         HYPRE_Int      *comm_info, *info, *displs;
-         HYPRE_Int      *mat_info, *mat_displs;
-         HYPRE_Int       new_num_procs, A_mat_local_size;
-
-         hypre_MPI_Comm_size(new_comm, &new_num_procs);
-
-         comm_info  = hypre_CTAlloc(HYPRE_Int, 2 * new_num_procs + 1, HYPRE_MEMORY_HOST);
-         mat_info   = hypre_CTAlloc(HYPRE_Int, new_num_procs, HYPRE_MEMORY_HOST);
-         mat_displs = hypre_CTAlloc(HYPRE_Int, new_num_procs + 1, HYPRE_MEMORY_HOST);
-         info       = &comm_info[0];
-         displs     = &comm_info[new_num_procs];
+         A_diag_i    = hypre_CSRMatrixI(A_diag_host);
+         A_offd_i    = hypre_CSRMatrixI(A_offd_host);
+         A_diag_j    = hypre_CSRMatrixJ(A_diag_host);
+         A_offd_j    = hypre_CSRMatrixJ(A_offd_host);
+         A_diag_data = hypre_CSRMatrixData(A_diag_host);
+         A_offd_data = hypre_CSRMatrixData(A_offd_host);
+         comm_info   = hypre_CTAlloc(HYPRE_Int, 2 * new_num_procs + 1, HYPRE_MEMORY_HOST);
+         mat_info    = hypre_CTAlloc(HYPRE_Int, new_num_procs, HYPRE_MEMORY_HOST);
+         mat_displs  = hypre_CTAlloc(HYPRE_Int, new_num_procs + 1, HYPRE_MEMORY_HOST);
+         info        = &comm_info[0];
+         displs      = &comm_info[new_num_procs];
 
          hypre_ParAMGDataCommInfo(amg_data) = comm_info;
          hypre_MPI_Allgather(&num_rows, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, new_comm);
@@ -269,13 +278,13 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
    else /* if (solver_type == 19 || solver_type = 98 || solver_type == 198) */
    {
       /* Generate CSR matrix from ParCSRMatrix A */
-      hypre_CSRMatrix   *A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A, HYPRE_MEMORY_HOST);
+      A_CSR = hypre_ParCSRMatrixToCSRMatrixAll_v2(A, HYPRE_MEMORY_HOST);
 
       if (num_rows)
       {
-         HYPRE_Int      *A_CSR_i    = hypre_CSRMatrixI(A_CSR);
-         HYPRE_Int      *A_CSR_j    = hypre_CSRMatrixJ(A_CSR);
-         HYPRE_Complex  *A_CSR_data = hypre_CSRMatrixData(A_CSR);
+         A_CSR_i    = hypre_CSRMatrixI(A_CSR);
+         A_CSR_j    = hypre_CSRMatrixJ(A_CSR);
+         A_CSR_data = hypre_CSRMatrixData(A_CSR);
 
          /*---------------------------------------------------------------
           *  Load CSR matrix into A_mat.

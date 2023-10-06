@@ -2071,17 +2071,27 @@ hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixToCSRMatrixAll
  *
- * Generates a CSRMatrix from a ParCSRMatrix on all processors that have
- * parts of the ParCSRMatrix
- *
  * The resulting matrix is stored in the space given by memory_location
- *
- * Warning: this only works for a ParCSRMatrix that is smaller than 2^31-1
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix*
-hypre_ParCSRMatrixToCSRMatrixAll( hypre_ParCSRMatrix   *par_matrix,
-                                  HYPRE_MemoryLocation  memory_location )
+hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_A)
+{
+   return hypre_ParCSRMatrixToCSRMatrixAll_v2(par_A, hypre_ParCSRMatrixMemoryLocation(par_A));
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixToCSRMatrixAll_v2
+ *
+ * Generates a CSRMatrix from a ParCSRMatrix on all processors that have
+ * parts of the ParCSRMatrix
+ *
+ * Warning: This only works for a ParCSRMatrix with num_rows < 2,147,483,647
+ *--------------------------------------------------------------------------*/
+
+hypre_CSRMatrix*
+hypre_ParCSRMatrixToCSRMatrixAll_v2( hypre_ParCSRMatrix   *par_matrix,
+                                     HYPRE_MemoryLocation  memory_location )
 {
    MPI_Comm                   comm = hypre_ParCSRMatrixComm(par_matrix);
    HYPRE_Int                  num_rows = (HYPRE_Int) hypre_ParCSRMatrixGlobalNumRows(par_matrix);

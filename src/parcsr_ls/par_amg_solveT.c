@@ -703,7 +703,7 @@ HYPRE_Int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
           *  Generate CSR matrix from ParCSRMatrix A
           *-----------------------------------------------------------------*/
 
-         A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A, HYPRE_MEMORY_HOST);
+         A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
          f_vector = hypre_ParVectorToVectorAll(f);
          if (n)
          {
