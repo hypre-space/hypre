@@ -35,9 +35,9 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
    HYPRE_Int            global_size     = global_num_rows * global_num_rows;
 
    /* Local variables */
-   HYPRE_Int            buffer_size;
-   HYPRE_Int            ierr   = 0;
-   HYPRE_Int           *d_ierr = NULL;
+   HYPRE_Int            buffer_size     = 0;
+   HYPRE_Int            ierr            = 0;
+   HYPRE_Int           *d_ierr          = NULL;
    char                 msg[1024];
 
    /* Sanity checks */
@@ -104,6 +104,12 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
     **************/
 
 #else
+   /* Silence declared but never referenced warnings */
+   (A_piv  = A_piv);
+   (A_mat  = A_mat);
+   (A_work = A_work);
+   (buffer_size *= 1);
+
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                      "Missing dependency library for running gaussian elimination!");
 #endif
@@ -230,7 +236,7 @@ hypre_GaussElimSolveDevice(hypre_ParAMGData *amg_data,
    char                  msg[1024];
 
    /* Sanity check */
-   if (!num_rows)
+   if (!num_rows || !global_num_rows)
    {
       return hypre_error_flag;
    }
@@ -302,6 +308,13 @@ hypre_GaussElimSolveDevice(hypre_ParAMGData *amg_data,
     **************/
 
 #else
+   /* Silence declared but never referenced warnings */
+   (A_mat = A_mat);
+   (A_piv = A_piv);
+   (i_one *= 1);
+   (d_one *= 1.0);
+   (zero  *= zero);
+
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                      "Missing dependency library for running gaussian elimination!");
 #endif

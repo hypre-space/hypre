@@ -235,7 +235,7 @@ extern "C++"
  *--------------------------------------------------------------------------*/
 
 #if defined(HYPRE_COMPLEX) || defined(HYPRE_LONG_DOUBLE)
-/* MAGMA interface does not support (yet) complex and long double numbers */
+#error "MAGMA interface does not support (yet) HYPRE_COMPLEX and HYPRE_LONG_DOUBLE"
 
 #elif defined(HYPRE_SINGLE)
 #define hypre_magma_getrf_gpu              magma_sgetrf_gpu
