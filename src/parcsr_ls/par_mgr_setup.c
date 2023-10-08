@@ -1717,11 +1717,6 @@ hypre_MGRSetup( void               *mgr_vdata,
           Frelax_type[lev] == 199 )
       {
          use_GSElimSmoother = 1;
-
-         /* TODO (VPM): Fow now, we enforce relax_type = 9, which supports GPUs. Fix this! */
-#if defined (HYPRE_USING_GPU)
-         Frelax_type[lev] = 9;
-#endif
       }
 
 #if MGR_DEBUG_LEVEL == 2

@@ -1716,11 +1716,6 @@ main( hypre_int argc,
          arg_index++;
          schwarz_rlx_weight = (HYPRE_Real)atof(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-coarse_th") == 0 )
-      {
-         arg_index++;
-         coarse_threshold  = atoi(argv[arg_index++]);
-      }
       else if ( strcmp(argv[arg_index], "-adroptol") == 0 )
       {
          arg_index++;
@@ -1730,6 +1725,11 @@ main( hypre_int argc,
       {
          arg_index++;
          A_drop_type  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-coarse_th") == 0 )
+      {
+         arg_index++;
+         coarse_threshold  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-min_cs") == 0 )
       {
