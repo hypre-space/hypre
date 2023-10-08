@@ -354,6 +354,9 @@ hypre_MGRDestroy( void *data )
       }
       if (mgr_data -> fsolver_mode == 2)
       {
+         /* TODO (VPM): We could introduce a variable to the preconditioners' struct that keeps
+            track of its state, i.e., setup called, solve called, destroy called etc... This
+            would avoid checks like the following one: */
          if ((mgr_data -> aff_solver)[0])
          {
             hypre_BoomerAMGDestroy((mgr_data -> aff_solver)[0]);
@@ -5266,6 +5269,51 @@ hypre_MGRSetFSolver( void  *mgr_vdata,
    (mgr_data -> fine_grid_solver_setup) = fine_grid_solver_setup;
    (mgr_data -> aff_solver) = aff_solver;
    (mgr_data -> fsolver_mode) = 0;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_MGRSetFSolverAtLevel
+ *
+ * set F-relaxation solver for a given MGR level.
+ *
+ * Note this function asks for a level identifier and doesn't expect an array
+ * of function pointers for each level (as done by SetLevel functions).
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRSetFSolverAtLevel( HYPRE_Int   level,
+                            void       *mgr_vdata,
+                            void       *fsolver )
+{
+   hypre_ParMGRData *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+
+   if (!mgr_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   HYPRE_Int        max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+   HYPRE_Solver   **aff_solver = (mgr_data -> aff_solver);
+
+   /* Check if the requested level makes sense */
+   if (level < 0 || level >= max_num_coarse_levels)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   /* Allocate aff_solver if needed */
+   if (!aff_solver)
+   {
+      (mgr_data -> aff_solver) = aff_solver = hypre_CTAlloc(HYPRE_Solver*,
+                                                            max_num_coarse_levels,
+                                                            HYPRE_MEMORY_HOST);
+   }
+
+   aff_solver[level] = (HYPRE_Solver *) fsolver;
+   (mgr_data -> fsolver_mode)  = 0;
 
    return hypre_error_flag;
 }

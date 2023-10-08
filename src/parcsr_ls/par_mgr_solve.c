@@ -1014,10 +1014,23 @@ hypre_MGRCycle( void              *mgr_vdata,
             if (Frelax_type[level] == 2)
             {
                /* Do F-relaxation using AMG */
-               fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid],
-                                      A_ff_array[fine_grid],
-                                      F_fine_array[coarse_grid],
-                                      U_fine_array[coarse_grid]);
+               if (level == 0)
+               {
+                  /* TODO (VPM): unify with the next block */
+                  fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid],
+                                         A_ff_array[fine_grid],
+                                         F_fine_array[coarse_grid],
+                                         U_fine_array[coarse_grid]);
+               }
+               else
+               {
+                  hypre_SolverBase *base = (hypre_SolverBase*) (mgr_data -> aff_solver)[level];
+
+                  (base -> solve)((HYPRE_Solver) (mgr_data -> aff_solver)[level],
+                                  (HYPRE_Matrix) A_ff_array[level],
+                                  (HYPRE_Vector) F_fine_array[level + 1],
+                                  (HYPRE_Vector) U_fine_array[level + 1]);
+               }
             }
             else
             {

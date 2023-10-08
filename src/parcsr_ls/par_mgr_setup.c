@@ -860,6 +860,8 @@ hypre_MGRSetup( void               *mgr_vdata,
    {
       for (j = 1; j < (old_num_coarse_levels); j++)
       {
+         /* TODO (VPM): note we are assuming that aff_solver is AMG, need to add the destroy pointer
+            under the base solver struct so that we can make the proper call here */
          if (aff_solver[j])
          {
             hypre_BoomerAMGDestroy(aff_solver[j]);
@@ -1523,6 +1525,19 @@ hypre_MGRSetup( void               *mgr_vdata,
                              Frelax_type[lev]);
                hypre_error_w_msg(0, msg);
             }
+         }
+         else if (aff_solver[lev])
+         {
+            hypre_SolverBase   *base = (hypre_SolverBase*) aff_solver[lev];
+
+            /* Save A_FF splitting */
+            A_ff_array[lev] = A_FF;
+
+            /* Call setup function */
+            (base -> setup)((HYPRE_Solver) aff_solver[lev],
+                            (HYPRE_Matrix) A_ff_array[lev],
+                            (HYPRE_Vector) F_fine_array[lev + 1],
+                            (HYPRE_Vector) U_fine_array[lev + 1]);
          }
          else if (Frelax_type[lev] == 2) /* Construct default AMG solver */
          {

@@ -4253,6 +4253,17 @@ HYPRE_Int HYPRE_MGRSetFSolver(HYPRE_Solver             solver,
                               HYPRE_Solver             fsolver );
 
 /**
+ * (Optional) Set the F-relaxation solver at a given level.
+ *
+ * @param level [IN] MGR solver level
+ * @param solver [IN] MGR solver/preconditioner object
+ * @param fsolver [IN] F-relaxation solver object
+ **/
+HYPRE_Int HYPRE_MGRSetFSolverAtLevel(HYPRE_Int     level,
+                                     HYPRE_Solver  solver,
+                                     HYPRE_Solver  fsolver );
+
+/**
  * (Optional) Extract A_FF block from matrix A.
  *
  * TODO (VPM): Does this need to be exposed? Move to parcsr_mv?
