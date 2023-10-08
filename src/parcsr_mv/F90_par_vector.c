@@ -168,7 +168,7 @@ hypre_F90_IFACE(hypre_parvectortovectorall, HYPRE_PARVECTORTOVECTORALL)
 {
    *vector = (hypre_F90_Obj)(
                 hypre_ParVectorToVectorAll
-                ( (hypre_ParVector *) *par_vector ) );
+                ( (hypre_ParVector *) *par_vector ));
 
    *ierr = 0;
 }

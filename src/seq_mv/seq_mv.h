@@ -542,6 +542,7 @@ HYPRE_Int hypre_SeqVectorCopy ( hypre_Vector *x, hypre_Vector *y );
 hypre_Vector *hypre_SeqVectorCloneDeep ( hypre_Vector *x );
 hypre_Vector *hypre_SeqVectorCloneDeep_v2( hypre_Vector *x, HYPRE_MemoryLocation memory_location );
 hypre_Vector *hypre_SeqVectorCloneShallow ( hypre_Vector *x );
+HYPRE_Int hypre_SeqVectorMigrate( hypre_Vector *x, HYPRE_MemoryLocation  memory_location );
 HYPRE_Int hypre_SeqVectorScale( HYPRE_Complex alpha, hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorScaleHost( HYPRE_Complex alpha, hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorScaleDevice( HYPRE_Complex alpha, hypre_Vector *y );
