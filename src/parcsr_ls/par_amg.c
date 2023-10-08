@@ -316,6 +316,10 @@ hypre_BoomerAMGCreate( void )
 
    amg_data = hypre_CTAlloc(hypre_ParAMGData, 1, HYPRE_MEMORY_HOST);
 
+   /* Set setup and solve function pointers */
+   hypre_ParAMGDataBaseSetup(amg_data) = (HYPRE_PtrToSolverFcn) hypre_BoomerAMGSetup;
+   hypre_ParAMGDataBaseSolve(amg_data) = (HYPRE_PtrToSolverFcn) hypre_BoomerAMGSolve;
+
    /* memory location will be reset at the setup */
    hypre_ParAMGDataMemoryLocation(amg_data) = memory_location;
 

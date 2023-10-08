@@ -148,15 +148,26 @@ HYPRE_ParCSRPCGSetRelChange( HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_ParCSRPCGSetPrecond( HYPRE_Solver         solver,
+HYPRE_ParCSRPCGSetPrecond( HYPRE_Solver            solver,
                            HYPRE_PtrToParSolverFcn precond,
                            HYPRE_PtrToParSolverFcn precond_setup,
-                           HYPRE_Solver         precond_solver )
+                           HYPRE_Solver            precond_solver )
 {
    return ( HYPRE_PCGSetPrecond( solver,
                                  (HYPRE_PtrToSolverFcn) precond,
                                  (HYPRE_PtrToSolverFcn) precond_setup,
                                  precond_solver ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRPCGSetGenericPrecond
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRPCGSetGenericPrecond( HYPRE_Solver solver,
+                                  HYPRE_Solver precond )
+{
+   return ( HYPRE_PCGSetGenericPrecond( solver, precond ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -27,6 +27,18 @@ extern "C" {
 
 /******************************************************************************
  *
+ * Base solver struct
+ *
+ *****************************************************************************/
+
+typedef struct hypre_SolverBase_struct
+{
+   HYPRE_Int (*setup)(HYPRE_Solver, HYPRE_Matrix, HYPRE_Vector, HYPRE_Vector);
+   HYPRE_Int (*solve)(HYPRE_Solver, HYPRE_Matrix, HYPRE_Vector, HYPRE_Vector);
+} hypre_SolverBase;
+
+/******************************************************************************
+ *
  * BiCGSTAB bicgstab
  *
  *****************************************************************************/
@@ -1590,6 +1602,7 @@ HYPRE_Int HYPRE_PCGSetRecomputeResidualP ( HYPRE_Solver solver, HYPRE_Int recomp
 HYPRE_Int HYPRE_PCGGetRecomputeResidualP ( HYPRE_Solver solver, HYPRE_Int *recompute_residual_p );
 HYPRE_Int HYPRE_PCGSetPrecond ( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond,
                                 HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver );
+HYPRE_Int HYPRE_PCGSetGenericPrecond ( HYPRE_Solver solver, HYPRE_Solver precond_solver );
 HYPRE_Int HYPRE_PCGGetPrecond ( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int HYPRE_PCGSetLogging ( HYPRE_Solver solver, HYPRE_Int level );
 HYPRE_Int HYPRE_PCGGetLogging ( HYPRE_Solver solver, HYPRE_Int *level );
@@ -1629,8 +1642,11 @@ HYPRE_Int hypre_PCGGetRecomputeResidualP ( void *pcg_vdata, HYPRE_Int *recompute
 HYPRE_Int hypre_PCGSetStopCrit ( void *pcg_vdata, HYPRE_Int stop_crit );
 HYPRE_Int hypre_PCGGetStopCrit ( void *pcg_vdata, HYPRE_Int *stop_crit );
 HYPRE_Int hypre_PCGGetPrecond ( void *pcg_vdata, HYPRE_Solver *precond_data_ptr );
-HYPRE_Int hypre_PCGSetPrecond ( void *pcg_vdata, HYPRE_Int (*precond )(void*, void*, void*, void*),
-                                HYPRE_Int (*precond_setup )(void*, void*, void*, void*), void *precond_data );
+HYPRE_Int hypre_PCGSetPrecond ( void *pcg_vdata,
+                                HYPRE_Int (*precond )(void*, void*, void*, void*),
+                                HYPRE_Int (*precond_setup )(void*, void*, void*, void*),
+                                void *precond_data );
+HYPRE_Int hypre_PCGSetGenericPrecond ( void *pcg_vdata, void *precond_data );
 HYPRE_Int hypre_PCGSetPrintLevel ( void *pcg_vdata, HYPRE_Int level );
 HYPRE_Int hypre_PCGGetPrintLevel ( void *pcg_vdata, HYPRE_Int *level );
 HYPRE_Int hypre_PCGSetLogging ( void *pcg_vdata, HYPRE_Int level );
@@ -1647,4 +1663,3 @@ HYPRE_Int hypre_PCGGetFinalRelativeResidualNorm ( void *pcg_vdata,
 #endif
 
 #endif
-
