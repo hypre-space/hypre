@@ -1517,7 +1517,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                   (mgr_data -> fsolver_mode) = 1;
                }
             }
-            else
+            else if (aff_solver[lev])
             {
                hypre_sprintf(msg, "Warning!! User-prescribed F-solver for the first level\n\
                              reduction (set in HYPRE_MGRSetFSolver()) only supports AMG\n\
