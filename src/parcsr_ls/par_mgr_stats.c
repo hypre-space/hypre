@@ -178,6 +178,9 @@ hypre_MGRGetFRelaxName(hypre_ParMGRData  *mgr_data,
       case 19:
          return "LU";
 
+      case 99:
+         return "LU piv";
+
       case 199:
          return "Dense Inv";
 
