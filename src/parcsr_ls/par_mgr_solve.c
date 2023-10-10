@@ -244,7 +244,7 @@ hypre_MGRSolve( void               *mgr_vdata,
       }
    }
 
-   if ((my_id == 0) && (tol > 0) && (print_level & HYPRE_MGR_PRINT_INFO_SOLVE))
+   if ((my_id == 0) && (print_level & HYPRE_MGR_PRINT_INFO_SOLVE))
    {
       if (iter > 0 && init_resnorm)
       {
