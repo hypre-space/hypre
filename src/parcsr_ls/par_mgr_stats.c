@@ -178,6 +178,9 @@ hypre_MGRGetFRelaxName(hypre_ParMGRData  *mgr_data,
       case 19:
          return "LU";
 
+      case 99:
+         return "LU piv";
+
       case 199:
          return "Dense Inv";
 
@@ -410,7 +413,7 @@ hypre_MGRSetupStats(void *mgr_vdata)
       hypre_printf("%18s %14s %16s\n", "Global", "Fine", "Coarse");
       hypre_printf("%3s %14s %14s %16s %16s %16s\n", "lev",
                    "relaxation", "relaxation", "grid method",
-                   "Interpolation", "Restriction");
+                   "Prolongation", "Restriction");
       HYPRE_PRINT_TOP_DIVISOR(1, divisors);
       for (i = 0; i < num_levels_mgr; i++)
       {

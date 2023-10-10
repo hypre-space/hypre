@@ -1679,14 +1679,22 @@ HYPRE_Int hypre_GetCommPkgRTFromCommPkgA ( hypre_ParCSRMatrix *RT, hypre_ParCSRM
 HYPRE_Int hypre_GenerateSendMapAndCommPkg ( MPI_Comm comm, HYPRE_Int num_sends, HYPRE_Int num_recvs,
                                             HYPRE_Int *recv_procs, HYPRE_Int *send_procs, HYPRE_Int *recv_vec_starts, hypre_ParCSRMatrix *A );
 
+/* par_ge_device.c */
+HYPRE_Int hypre_GaussElimSetupDevice ( hypre_ParAMGData *amg_data, HYPRE_Int level,
+                                       HYPRE_Int solver_type );
+HYPRE_Int hypre_GaussElimSolveDevice ( hypre_ParAMGData *amg_data, HYPRE_Int level,
+                                       HYPRE_Int solver_type );
+
+/* par_gauss_elim.c */
+HYPRE_Int hypre_GaussElimSetup ( hypre_ParAMGData *amg_data, HYPRE_Int level,
+                                 HYPRE_Int solver_type );
+HYPRE_Int hypre_GaussElimSolve ( hypre_ParAMGData *amg_data, HYPRE_Int level,
+                                 HYPRE_Int solver_type );
+
 /* par_relax.c */
 HYPRE_Int hypre_BoomerAMGRelax ( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Int *cf_marker,
                                  HYPRE_Int relax_type, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega,
                                  HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
-HYPRE_Int hypre_GaussElimSetup ( hypre_ParAMGData *amg_data, HYPRE_Int level,
-                                 HYPRE_Int relax_type );
-HYPRE_Int hypre_GaussElimSolve ( hypre_ParAMGData *amg_data, HYPRE_Int level,
-                                 HYPRE_Int relax_type );
 HYPRE_Int hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                                       HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega,
                                                       HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp,
@@ -1742,13 +1750,6 @@ HYPRE_Int hypre_BoomerAMGRelax14HybridL1GaussSeidel( hypre_ParCSRMatrix *A, hypr
                                                      HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega,
                                                      HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
 
-HYPRE_Int hypre_BoomerAMGRelax18WeightedL1Jacobi( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                                  HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real *l1_norms,
-                                                  hypre_ParVector *u, hypre_ParVector *Vtemp );
-
-HYPRE_Int hypre_BoomerAMGRelax19GaussElim( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                           hypre_ParVector *u );
-
 HYPRE_Int hypre_BoomerAMGRelax88HybridL1SSOR( hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                               HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega,
                                               HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
@@ -1757,8 +1758,9 @@ HYPRE_Int hypre_BoomerAMGRelax89HybridL1SSOR( hypre_ParCSRMatrix *A, hypre_ParVe
                                               HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real omega,
                                               HYPRE_Real *l1_norms, hypre_ParVector *u, hypre_ParVector *Vtemp, hypre_ParVector *Ztemp );
 
-HYPRE_Int hypre_BoomerAMGRelax98GaussElimPivot( hypre_ParCSRMatrix *A, hypre_ParVector *f,
-                                                hypre_ParVector *u );
+HYPRE_Int hypre_BoomerAMGRelax18WeightedL1Jacobi( hypre_ParCSRMatrix *A, hypre_ParVector *f,
+                                                  HYPRE_Int *cf_marker, HYPRE_Int relax_points, HYPRE_Real relax_weight, HYPRE_Real *l1_norms,
+                                                  hypre_ParVector *u, hypre_ParVector *Vtemp );
 
 HYPRE_Int hypre_BoomerAMGRelaxKaczmarz( hypre_ParCSRMatrix *A, hypre_ParVector *f, HYPRE_Real omega,
                                         HYPRE_Real *l1_norms, hypre_ParVector *u );
