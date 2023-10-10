@@ -274,8 +274,8 @@ hypre_IJMatrixReadBinary( const char      *prefixname,
    HYPRE_Int       one = 1;
    HYPRE_Int       myid;
    char            filename[1024], msg[1024];
-   HYPRE_BigInt    ilower, iupper, jlower, jupper;
-   size_t          i, count;
+   HYPRE_BigInt    i, ilower, iupper, jlower, jupper;
+   size_t          count;
    hypre_uint64    header[11];
    FILE           *fp;
 
