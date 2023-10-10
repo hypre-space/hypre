@@ -773,8 +773,22 @@ HYPRE_Int HYPRE_BoomerAMGSetRelaxType(HYPRE_Solver  solver,
 
 /**
  * (Optional) Defines the smoother at a given cycle.
- * For options of \e relax_type see
- * description of HYPRE_BoomerAMGSetRelaxType). Options for \e k are
+ *
+ * For options of \e relax_type see description of HYPRE_BoomerAMGSetRelaxType.
+ * In addition, the following options for \e relax_type are available when choosing
+ * the coarsest level solver (k = 3):
+ *
+ *   For coarsest level systems formed via a sub-communicator defined with active ranks:
+ *      - 9   : hypre's internal Gaussian elimination (host only).
+ *      - 99  : LU factorization with pivoting.
+ *      - 199 : explicit (dense) inverse.
+ *
+ *   For coarsest level systems formed via hypre_DataExchangeList:
+ *      - 19  : hypre's internal Gaussian elimination (host only).
+ *      - 98  : LU factorization with pivoting.
+ *      - 198 : explicit (dense) inverse.
+ *
+ * Options for \e k are
  *
  *    - 1 : the down cycle
  *    - 2 : the up cycle

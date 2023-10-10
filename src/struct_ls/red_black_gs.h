@@ -357,10 +357,12 @@ typedef struct
 
 #ifdef HYPRE_USING_OPENMP
 #define HYPRE_BOX_REDUCTION
+#ifndef Pragma
 #if defined(WIN32) && defined(_MSC_VER)
-#define Pragma(x) __pragma(HYPRE_XSTR(x))
+#define Pragma(x) __pragma(x)
 #else
 #define Pragma(x) _Pragma(HYPRE_XSTR(x))
+#endif
 #endif
 #define OMPRB1 Pragma(omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
 #else

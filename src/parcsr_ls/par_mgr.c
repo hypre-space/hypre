@@ -389,8 +389,9 @@ hypre_MGRDestroy( void *data )
    hypre_TFree((mgr_data -> RT_array), HYPRE_MEMORY_HOST);
    hypre_TFree((mgr_data -> CF_marker_array), HYPRE_MEMORY_HOST);
    hypre_TFree((mgr_data -> reserved_Cpoint_local_indexes), HYPRE_MEMORY_HOST);
-   hypre_TFree(mgr_data -> restrict_type, HYPRE_MEMORY_HOST);
-   hypre_TFree(mgr_data -> interp_type, HYPRE_MEMORY_HOST);
+   hypre_TFree((mgr_data -> restrict_type), HYPRE_MEMORY_HOST);
+   hypre_TFree((mgr_data -> interp_type), HYPRE_MEMORY_HOST);
+   hypre_TFree((mgr_data -> P_max_elmts), HYPRE_MEMORY_HOST);
    /* Frelax_type */
    hypre_TFree(mgr_data -> Frelax_type, HYPRE_MEMORY_HOST);
    /* Frelax_method */
@@ -476,40 +477,60 @@ hypre_MGRDestroy( void *data )
    return hypre_error_flag;
 }
 
-/* create data for Gaussian Elim. for F-relaxation */
+/*--------------------------------------------------------------------------
+ * hypre_MGRCreateGSElimData
+ *
+ * Create data for Gaussian Elimination for F-relaxation.
+ *--------------------------------------------------------------------------*/
+
 void *
 hypre_MGRCreateGSElimData( void )
 {
    hypre_ParAMGData  *gsdata = hypre_CTAlloc(hypre_ParAMGData,  1, HYPRE_MEMORY_HOST);
 
-   hypre_ParAMGDataGSSetup(gsdata) = 0;
-   hypre_ParAMGDataAMat(gsdata) = NULL;
-   hypre_ParAMGDataAInv(gsdata) = NULL;
-   hypre_ParAMGDataBVec(gsdata) = NULL;
-   hypre_ParAMGDataCommInfo(gsdata) = NULL;
-   hypre_ParAMGDataNewComm(gsdata) = hypre_MPI_COMM_NULL;
+   hypre_ParAMGDataGSSetup(gsdata)          = 0;
+   hypre_ParAMGDataGEMemoryLocation(gsdata) = HYPRE_MEMORY_UNDEFINED;
+   hypre_ParAMGDataNewComm(gsdata)          = hypre_MPI_COMM_NULL;
+   hypre_ParAMGDataCommInfo(gsdata)         = NULL;
+   hypre_ParAMGDataAMat(gsdata)             = NULL;
+   hypre_ParAMGDataAWork(gsdata)            = NULL;
+   hypre_ParAMGDataAPiv(gsdata)             = NULL;
+   hypre_ParAMGDataBVec(gsdata)             = NULL;
+   hypre_ParAMGDataUVec(gsdata)             = NULL;
 
    return (void *) gsdata;
 }
 
-/* Destroy data for Gaussian Elim. for F-relaxation */
+/*--------------------------------------------------------------------------
+ * hypre_MGRDestroyGSElimData
+ *
+ * Destroy data for Gaussian Elimination for F-relaxation.
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_MGRDestroyGSElimData( void *data )
 {
-   hypre_ParAMGData * gsdata = (hypre_ParAMGData*) data;
-   MPI_Comm new_comm = hypre_ParAMGDataNewComm(gsdata);
+   hypre_ParAMGData  *gsdata   = (hypre_ParAMGData*) data;
+   MPI_Comm           new_comm = hypre_ParAMGDataNewComm(gsdata);
 
-   if (hypre_ParAMGDataAMat(gsdata)) { hypre_TFree(hypre_ParAMGDataAMat(gsdata), HYPRE_MEMORY_HOST); }
-   if (hypre_ParAMGDataAInv(gsdata)) { hypre_TFree(hypre_ParAMGDataAInv(gsdata), HYPRE_MEMORY_HOST); }
-   if (hypre_ParAMGDataBVec(gsdata)) { hypre_TFree(hypre_ParAMGDataBVec(gsdata), HYPRE_MEMORY_HOST); }
-   if (hypre_ParAMGDataCommInfo(gsdata)) { hypre_TFree(hypre_ParAMGDataCommInfo(gsdata), HYPRE_MEMORY_HOST); }
+#if defined(HYPRE_USING_MAGMA)
+   hypre_TFree(hypre_ParAMGDataAPiv(gsdata),  HYPRE_MEMORY_HOST);
+#else
+   hypre_TFree(hypre_ParAMGDataAPiv(gsdata),  hypre_ParAMGDataGEMemoryLocation(gsdata));
+#endif
+   hypre_TFree(hypre_ParAMGDataAMat(gsdata),  hypre_ParAMGDataGEMemoryLocation(gsdata));
+   hypre_TFree(hypre_ParAMGDataAWork(gsdata), hypre_ParAMGDataGEMemoryLocation(gsdata));
+   hypre_TFree(hypre_ParAMGDataBVec(gsdata),  hypre_ParAMGDataGEMemoryLocation(gsdata));
+   hypre_TFree(hypre_ParAMGDataUVec(gsdata),  hypre_ParAMGDataGEMemoryLocation(gsdata));
+   hypre_TFree(hypre_ParAMGDataCommInfo(gsdata), HYPRE_MEMORY_HOST);
 
    if (new_comm != hypre_MPI_COMM_NULL)
    {
-      hypre_MPI_Comm_free (&new_comm);
+      hypre_MPI_Comm_free(&new_comm);
    }
 
    hypre_TFree(gsdata, HYPRE_MEMORY_HOST);
+
    return hypre_error_flag;
 }
 
@@ -542,7 +563,7 @@ hypre_MGRCreateFrelaxVcycleData( void )
    /* Gaussian Elim data */
    hypre_ParAMGDataGSSetup(vdata) = 0;
    hypre_ParAMGDataAMat(vdata) = NULL;
-   hypre_ParAMGDataAInv(vdata) = NULL;
+   hypre_ParAMGDataAWork(vdata) = NULL;
    hypre_ParAMGDataBVec(vdata) = NULL;
    hypre_ParAMGDataCommInfo(vdata) = NULL;
 
@@ -598,10 +619,16 @@ hypre_MGRDestroyFrelaxVcycleData( void *data )
          hypre_ParVectorDestroy(hypre_ParAMGDataZtemp(vdata));
    */
 
-   if (hypre_ParAMGDataAMat(vdata)) { hypre_TFree(hypre_ParAMGDataAMat(vdata), HYPRE_MEMORY_HOST); }
-   if (hypre_ParAMGDataAInv(vdata)) { hypre_TFree(hypre_ParAMGDataAInv(vdata), HYPRE_MEMORY_HOST); }
-   if (hypre_ParAMGDataBVec(vdata)) { hypre_TFree(hypre_ParAMGDataBVec(vdata), HYPRE_MEMORY_HOST); }
-   if (hypre_ParAMGDataCommInfo(vdata)) { hypre_TFree(hypre_ParAMGDataCommInfo(vdata), HYPRE_MEMORY_HOST); }
+#if defined(HYPRE_USING_MAGMA)
+   hypre_TFree(hypre_ParAMGDataAPiv(vdata),  HYPRE_MEMORY_HOST);
+#else
+   hypre_TFree(hypre_ParAMGDataAPiv(vdata),  hypre_ParAMGDataGEMemoryLocation(vdata));
+#endif
+   hypre_TFree(hypre_ParAMGDataAMat(vdata),  hypre_ParAMGDataGEMemoryLocation(vdata));
+   hypre_TFree(hypre_ParAMGDataAWork(vdata), hypre_ParAMGDataGEMemoryLocation(vdata));
+   hypre_TFree(hypre_ParAMGDataBVec(vdata),  hypre_ParAMGDataGEMemoryLocation(vdata));
+   hypre_TFree(hypre_ParAMGDataUVec(vdata),  hypre_ParAMGDataGEMemoryLocation(vdata));
+   hypre_TFree(hypre_ParAMGDataCommInfo(vdata), HYPRE_MEMORY_HOST);
 
    if (new_comm != hypre_MPI_COMM_NULL)
    {

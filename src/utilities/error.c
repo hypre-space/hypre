@@ -14,7 +14,8 @@ hypre_Error hypre__global_error = {0, 0, NULL, 0, 0};
  * Process the error raised on the given line of the given source file
  *--------------------------------------------------------------------------*/
 
-void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const char *msg)
+void
+hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const char *msg)
 {
    /* Copy global struct into a short name and copy changes back before exiting */
    hypre_Error err = hypre__global_error;
@@ -25,10 +26,10 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #ifdef HYPRE_PRINT_ERRORS
 
    /* Error format strings without and with a message */
-   const char fmt_wo[] = "hypre error in file \"%s\", line %d, error code = %d\n";
-   const char fmt_wm[] = "hypre error in file \"%s\", line %d, error code = %d - %s\n";
-
-   HYPRE_Int bufsz = 0;
+   const char  fmt_wo[] = "hypre error in file \"%s\", line %d, error code = %d\n";
+   const char  fmt_wm[] = "hypre error in file \"%s\", line %d, error code = %d - %s\n";
+   char       *buffer;
+   HYPRE_Int   bufsz;
 
    /* Print error message to local buffer first */
 
@@ -42,7 +43,7 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
    }
 
    bufsz += 1;
-   char buffer[bufsz];
+   buffer = hypre_TAlloc(char, bufsz, HYPRE_MEMORY_HOST);
 
    if (msg)
    {
@@ -54,7 +55,6 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
    }
 
    /* Now print buffer to either memory or stderr */
-
    if (err.print_to_memory)
    {
       HYPRE_Int  msg_sz = err.msg_sz; /* Store msg_sz for snprintf below */
@@ -74,6 +74,8 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
       hypre_fprintf(stderr, "%s", buffer);
    }
 
+   /* Free buffer */
+   hypre_TFree(buffer, HYPRE_MEMORY_HOST);
 #endif
 
    hypre__global_error = err;
@@ -82,7 +84,8 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_GetError(void)
+HYPRE_Int
+HYPRE_GetError(void)
 {
    return hypre_error_flag;
 }
@@ -90,7 +93,8 @@ HYPRE_Int HYPRE_GetError(void)
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_CheckError(HYPRE_Int ierr, HYPRE_Int hypre_error_code)
+HYPRE_Int
+HYPRE_CheckError(HYPRE_Int ierr, HYPRE_Int hypre_error_code)
 {
    return ierr & hypre_error_code;
 }
@@ -98,7 +102,8 @@ HYPRE_Int HYPRE_CheckError(HYPRE_Int ierr, HYPRE_Int hypre_error_code)
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void HYPRE_DescribeError(HYPRE_Int ierr, char *msg)
+void
+HYPRE_DescribeError(HYPRE_Int ierr, char *msg)
 {
    if (ierr == 0)
    {
@@ -129,7 +134,8 @@ void HYPRE_DescribeError(HYPRE_Int ierr, char *msg)
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_GetErrorArg(void)
+HYPRE_Int
+HYPRE_GetErrorArg(void)
 {
    return (hypre_error_flag >> 3 & 31);
 }
@@ -137,7 +143,8 @@ HYPRE_Int HYPRE_GetErrorArg(void)
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_ClearAllErrors(void)
+HYPRE_Int
+HYPRE_ClearAllErrors(void)
 {
    hypre_error_flag = 0;
    return (hypre_error_flag != 0);
@@ -146,7 +153,8 @@ HYPRE_Int HYPRE_ClearAllErrors(void)
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_ClearError(HYPRE_Int hypre_error_code)
+HYPRE_Int
+HYPRE_ClearError(HYPRE_Int hypre_error_code)
 {
    hypre_error_flag &= ~hypre_error_code;
    return (hypre_error_flag & hypre_error_code);
@@ -155,7 +163,8 @@ HYPRE_Int HYPRE_ClearError(HYPRE_Int hypre_error_code)
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_SetPrintErrorMode(HYPRE_Int mode)
+HYPRE_Int
+HYPRE_SetPrintErrorMode(HYPRE_Int mode)
 {
    hypre__global_error.print_to_memory = mode;
    return hypre_error_flag;
@@ -164,7 +173,8 @@ HYPRE_Int HYPRE_SetPrintErrorMode(HYPRE_Int mode)
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_GetErrorMessages(char **buffer, HYPRE_Int *bufsz)
+HYPRE_Int
+HYPRE_GetErrorMessages(char **buffer, HYPRE_Int *bufsz)
 {
    hypre_Error err = hypre__global_error;
 
@@ -183,7 +193,8 @@ HYPRE_Int HYPRE_GetErrorMessages(char **buffer, HYPRE_Int *bufsz)
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_PrintErrorMessages(MPI_Comm comm)
+HYPRE_Int
+HYPRE_PrintErrorMessages(MPI_Comm comm)
 {
    hypre_Error err = hypre__global_error;
 

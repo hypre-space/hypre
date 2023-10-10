@@ -133,6 +133,6 @@ mpirun -np 4 ./ij -cheby_eig_est 10 -cheby_order 4 -cheby_variant 0 -cheby_scale
 mpirun -np 4 ./ij -solver 3 -cheby_eig_est 0 -cheby_order 3 -cheby_variant 1 -cheby_scale 1 -rlx 16 -negA 0 > solvers.out.403.p
 mpirun -np 4 ./ij -solver 3 -cheby_eig_est 0 -cheby_order 3 -cheby_variant 1 -cheby_scale 1 -rlx 16 -negA 1 > solvers.out.403.n
 
-##
-mpirun -np 4 ./ij -fromfile Tucker21935 -solver 1 -rlx 88 > solvers.out.404
-mpirun -np 4 ./ij -fromfile Tucker21935 -solver 1 -rlx 89 > solvers.out.405
+## Test relaxation methods 88 (L1 hybrid Symm. Gauss-Seidel with a convergent l1 term) and 89 (L1 Symm. hybrid Gauss-Seidel)
+mpirun -np 4 ./ij -fromfile data/tucker21935/IJ.A -solver 1 -rlx 88 > solvers.out.404
+mpirun -np 4 ./ij -fromfile data/tucker21935/IJ.A -solver 1 -rlx 89 > solvers.out.405

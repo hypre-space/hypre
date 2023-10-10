@@ -975,8 +975,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    operat_cmplxty = 0;
    for (j = 0; j < hypre_ParAMGDataNumLevels(amg_data); j++)
    {
-      memory_cmplxty +=  num_mem[j] / num_coeffs[0];
-      operat_cmplxty +=  num_coeffs[j] / num_coeffs[0];
+      memory_cmplxty  += num_mem[j] / num_coeffs[0];
+      operat_cmplxty  += num_coeffs[j] / num_coeffs[0];
       total_variables += num_variables[j];
    }
    if (num_variables[0] != 0)
@@ -987,9 +987,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    if (my_id == 0 )
    {
       hypre_printf("\n\n");
-      hypre_printf("     Complexity:    grid = %f\n", grid_cmplxty);
-      hypre_printf("                operator = %f\n", operat_cmplxty);
-      hypre_printf("                memory = %f\n", memory_cmplxty);
+      hypre_printf("     Complexity:   grid = %f\n", grid_cmplxty);
+      hypre_printf("               operator = %f\n", operat_cmplxty);
+      hypre_printf("                 memory = %f\n", memory_cmplxty);
       hypre_printf("\n\n");
    }
 
@@ -1009,8 +1009,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
       if (additive == 0 || mult_additive == 0 || simple == 0)
       {
-         HYPRE_Int add_lvl = add_end;
-         if (add_end == -1) { add_lvl = num_levels - 1; }
+         HYPRE_Int add_lvl = (add_end == -1) ? num_levels - 1 : add_end;
+
          if (additive > -1)
          {
             hypre_printf( "  Additive V-cycle 1st level %d last level %d: \n", additive, add_lvl);
@@ -1051,31 +1051,42 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
             hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:   %4d   %2d  %4d\n",
                           grid_relax_type[1], grid_relax_type[2], grid_relax_type[3]);
          }
-         if (add_rlx == 0) { hypre_printf( "   Relaxation Weight:   %e \n", add_rlx_wt); }
-         hypre_printf( "   Point types, partial sweeps (1=C, -1=F):\n");
-         hypre_printf( "                  Pre-CG relaxation (down):");
+         if (add_rlx == 0)
+         {
+            hypre_printf( "   Relaxation Weight:   %e \n", add_rlx_wt);
+         }
+         {
+            hypre_printf( "   Point types, partial sweeps (1=C, -1=F):\n");
+            hypre_printf( "                  Pre-CG relaxation (down):");
+         }
          for (j = 0; j < num_grid_sweeps[1]; j++)
          {
             hypre_printf("  %2d", zero);
          }
-         hypre_printf( "\n");
-         hypre_printf( "                   Post-CG relaxation (up):");
+         {
+            hypre_printf( "\n");
+            hypre_printf( "                   Post-CG relaxation (up):");
+         }
          for (j = 0; j < num_grid_sweeps[2]; j++)
          {
             hypre_printf("  %2d", zero);
          }
-         hypre_printf( "\n");
-         hypre_printf( "                             Coarsest grid:");
+         {
+            hypre_printf( "\n");
+            hypre_printf( "                             Coarsest grid:");
+         }
          for (j = 0; j < num_grid_sweeps[3]; j++)
          {
             hypre_printf("  %2d", zero);
          }
-         hypre_printf( "\n\n");
+         {
+            hypre_printf( "\n");
+         }
       }
       else if (additive > 0 || mult_additive > 0 || simple > 0)
       {
-         HYPRE_Int add_lvl = add_end;
-         if (add_end == -1) { add_lvl = num_levels - 1; }
+         HYPRE_Int add_lvl = (add_end == -1) ? (num_levels - 1) : add_end;
+
          hypre_printf( "  Relaxation Parameters:\n");
          if (add_lvl < num_levels - 1)
          {
@@ -1139,7 +1150,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
             }
             hypre_printf( "\n");
          }
-         hypre_printf( "\n\n");
+         {
+            hypre_printf( "\n\n");
+         }
          if (additive > -1)
          {
             hypre_printf( "  Additive V-cycle 1st level %d last level %d:  \n", additive, add_lvl);
@@ -1153,7 +1166,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
             hypre_printf( "  Simplified Mult-Additive V-cycle 1st level %d: last level %d  \n", simple,
                           add_lvl);
          }
-         hypre_printf( "  Relaxation Parameters:\n");
+         {
+            hypre_printf( "  Relaxation Parameters:\n");
+         }
          if (add_lvl == num_levels - 1)
          {
             hypre_printf( "   Visiting Grid:                     down   up  coarse\n");
@@ -1170,26 +1185,37 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
                           num_grid_sweeps[1], num_grid_sweeps[1]);
             hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:    %2d   %2d\n", add_rlx, add_rlx);
          }
-         if (add_rlx == 0) { hypre_printf( "   Relaxation Weight:   %e \n", add_rlx_wt); }
-         hypre_printf( "   Point types, partial sweeps (1=C, -1=F):\n");
-         hypre_printf( "                  Pre-CG relaxation (down):");
+         if (add_rlx == 0)
+         {
+            hypre_printf( "   Relaxation Weight:   %e \n", add_rlx_wt);
+         }
+         {
+            hypre_printf( "   Point types, partial sweeps (1=C, -1=F):\n");
+            hypre_printf( "                  Pre-CG relaxation (down):");
+         }
          for (j = 0; j < num_grid_sweeps[1]; j++)
          {
             hypre_printf("  %2d", zero);
          }
-         hypre_printf( "\n");
-         hypre_printf( "                   Post-CG relaxation (up):");
+         {
+            hypre_printf( "\n");
+            hypre_printf( "                   Post-CG relaxation (up):");
+         }
          for (j = 0; j < num_grid_sweeps[2]; j++)
          {
             hypre_printf("  %2d", zero);
          }
-         hypre_printf( "\n");
-         hypre_printf( "                             Coarsest grid:");
+         {
+            hypre_printf( "\n");
+            hypre_printf( "                             Coarsest grid:");
+         }
          for (j = 0; j < num_grid_sweeps[3]; j++)
          {
             hypre_printf("  %2d", zero);
          }
-         hypre_printf( "\n\n");
+         {
+            hypre_printf( "\n");
+         }
       }
       else
       {
@@ -1221,7 +1247,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
             {
                hypre_printf("  %2d", grid_relax_points[3][j]);
             }
-            hypre_printf( "\n\n");
+            {
+               hypre_printf( "\n");
+            }
          }
          else if (relax_order == 1 && grid_relax_type[1] != 8)
          {
@@ -1242,7 +1270,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
             {
                hypre_printf("  %2d", zero);
             }
-            hypre_printf( "\n\n");
+            {
+               hypre_printf( "\n");
+            }
          }
          else
          {
@@ -1263,38 +1293,65 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
             {
                hypre_printf("  %2d", zero);
             }
-            hypre_printf( "\n\n");
+            {
+               hypre_printf( "\n");
+            }
          }
       }
+#if defined(HYPRE_USING_MAGMA)
+      if (grid_relax_type[3] ==  98 || grid_relax_type[3] ==  99 ||
+          grid_relax_type[3] == 198 || grid_relax_type[3] == 199)
+      {
+         hypre_printf( "   Using MAGMA's LU factorization on coarse level\n");
+      }
+#endif
+      {
+         hypre_printf( "\n");
+      }
+
       if (smooth_type == 6)
+      {
          for (j = 0; j < smooth_num_levels; j++)
+         {
             hypre_printf( " Schwarz Relaxation Weight %f level %d\n",
                           hypre_ParAMGDataSchwarzRlxWeight(amg_data), j);
+         }
+      }
       if (smooth_type == 7)
+      {
          for (j = 0; j < smooth_num_levels; j++)
          {
             hypre_printf( " Pilut smoother level %d\n", j);
          }
+      }
       if (smooth_type == 8)
+      {
          for (j = 0; j < smooth_num_levels; j++)
          {
             hypre_printf( " ParaSails smoother level %d\n", j);
          }
+      }
       if (smooth_type == 9)
+      {
          for (j = 0; j < smooth_num_levels; j++)
          {
             hypre_printf( " Euclid smoother level %d\n", j);
          }
+      }
       for (j = 0; j < num_levels; j++)
+      {
          if (relax_weight[j] != 1)
          {
             hypre_printf( " Relaxation Weight %f level %d\n", relax_weight[j], j);
          }
+      }
       for (j = 0; j < num_levels; j++)
+      {
          if (omega[j] != 1)
          {
             hypre_printf( " Outer relaxation weight %f level %d\n", omega[j], j);
          }
+      }
    }
 
    hypre_TFree(num_coeffs, HYPRE_MEMORY_HOST);
@@ -1305,11 +1362,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
    hypre_GpuProfilingPopRange();
 
-   return (0);
+   return hypre_error_flag;
 }
-
-
-
 
 /*---------------------------------------------------------------
  * hypre_BoomerAMGWriteSolverParams
@@ -1321,27 +1375,27 @@ hypre_BoomerAMGWriteSolverParams(void* data)
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
    /* amg solve params */
-   HYPRE_Int      num_levels;
-   HYPRE_Int      max_iter;
-   HYPRE_Int      cycle_type;
-   HYPRE_Int      fcycle;
-   HYPRE_Int     *num_grid_sweeps;
-   HYPRE_Int     *grid_relax_type;
-   HYPRE_Int    **grid_relax_points;
-   HYPRE_Int      relax_order;
-   HYPRE_Real  *relax_weight;
-   HYPRE_Real  *omega;
-   HYPRE_Real   tol;
-   HYPRE_Int      smooth_type;
-   HYPRE_Int      smooth_num_levels;
+   HYPRE_Int          num_levels;
+   HYPRE_Int          max_iter;
+   HYPRE_Int          cycle_type;
+   HYPRE_Int          fcycle;
+   HYPRE_Int         *num_grid_sweeps;
+   HYPRE_Int         *grid_relax_type;
+   HYPRE_Int        **grid_relax_points;
+   HYPRE_Int          relax_order;
+   HYPRE_Real        *relax_weight;
+   HYPRE_Real        *omega;
+   HYPRE_Real         tol;
+   HYPRE_Int          smooth_type;
+   HYPRE_Int          smooth_num_levels;
+
    /* amg output params */
-   HYPRE_Int      amg_print_level;
+   HYPRE_Int          amg_print_level;
 
-   HYPRE_Int      j;
-   HYPRE_Int      one = 1;
-   HYPRE_Int      minus_one = -1;
-   HYPRE_Int      zero = 0;
-
+   HYPRE_Int          j;
+   HYPRE_Int          one = 1;
+   HYPRE_Int          minus_one = -1;
+   HYPRE_Int          zero = 0;
 
    /*----------------------------------------------------------
     * Get the amg_data data
@@ -1452,25 +1506,34 @@ hypre_BoomerAMGWriteSolverParams(void* data)
          }
          hypre_printf( "\n\n");
       }
+
       if (smooth_type == 6)
+      {
          for (j = 0; j < smooth_num_levels; j++)
+         {
             hypre_printf( " Schwarz Relaxation Weight %f level %d\n",
                           hypre_ParAMGDataSchwarzRlxWeight(amg_data), j);
+         }
+      }
       for (j = 0; j < num_levels; j++)
+      {
          if (relax_weight[j] != 1)
          {
             hypre_printf( " Relaxation Weight %f level %d\n", relax_weight[j], j);
          }
+      }
       for (j = 0; j < num_levels; j++)
+      {
          if (omega[j] != 1)
          {
             hypre_printf( " Outer relaxation weight %f level %d\n", omega[j], j);
          }
+      }
 
       hypre_printf( " Output flag (print_level): %d \n", amg_print_level);
    }
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------
