@@ -4277,22 +4277,26 @@ HYPRE_Int HYPRE_MGRSetCoarseSolver(HYPRE_Solver             solver,
 /**
  * @brief (Optional) Set the verbosity level for MGR.
  *
- * @details The print level is determined by the bitwise OR of the desired output levels.
- * Each bit represents a different kind of information to print:
- *   - 0x01 (Bit 0): Print setup information.
- *   - 0x02 (Bit 1): Print solve information.
- *   - 0x04 (Bit 2): Print parameters information.
- *   - 0x08 (Bit 3): Print the matrix to NP files where NP stands for the number of ranks.
- *   - 0x10 (Bit 4): Print the right-hand-side to NP files.
+ * @details You can control what information gets printed by specifying the
+ * output levels using this function. Each option corresponds to a specific type
+ * of information, and you can activate several of them at the same time by summing
+ * their respective numeric codes, which are given below:
+ *
+ *   - 1:  Print MGR's setup information.
+ *   - 2:  Print MGR's solve information.
+ *   - 4:  Print MGR's parameters information.
+ *   - 8:  Print the finest level matrix to NP files where NP is the number of ranks.
+ *   - 16: Print the finest level right-hand-side to NP files.
  *
  * @param solver [IN] The solver to configure.
- * @param print_level [IN] Bitwise OR of the desired output levels.
+ * @param print_level [IN] The desired output level.
  *
  * @example
- * To print setup information and matrix and rhs to files, \c print_level should be set to
- * (0x01 | 0x08 | 0x10) i.e., 25.
+ * To print setup information (1); matrix (8) and rhs (16) to files, set
+ * \c print_level to 25, i.e., (1 + 8 + 16).
  *
- * @note The default print level is zero.
+ * @note The default print level is zero, which means no information will be
+ * printed by default.
  **/
 HYPRE_Int
 HYPRE_MGRSetPrintLevel( HYPRE_Solver solver,
