@@ -859,32 +859,14 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
    /* Ensure that the diagonal entries exist in the matrix structure (even if numerically zero) */
    if (hypre_CSRMatrixCheckForMissingDiagonal(C_diag))
    {
-      hypre_CSRMatrix *zero_diag = hypre_CSRMatrixIdentityDevice(hypre_ParCSRMatrixNumRows(C), 0.0);
-      hypre_CSRMatrix *zero_offd = hypre_CSRMatrixCreate(hypre_CSRMatrixNumRows(zero_diag), 0, 0);
-      hypre_CSRMatrixInitialize_v2(zero_offd, 0, HYPRE_MEMORY_DEVICE);
+      hypre_CSRMatrix *zero = hypre_CSRMatrixIdentityDevice(hypre_CSRMatrixNumRows(C_diag), 0.0);
 
-      hypre_ParCSRMatrix *zero = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A),
-                                                          hypre_ParCSRMatrixGlobalNumRows(C),
-                                                          hypre_ParCSRMatrixGlobalNumCols(C),
-                                                          hypre_ParCSRMatrixRowStarts(C),
-                                                          hypre_ParCSRMatrixColStarts(C),
-                                                          0,
-                                                          hypre_CSRMatrixNumNonzeros(zero_diag),
-                                                          hypre_CSRMatrixNumNonzeros(zero_offd));
+      hypre_CSRMatrix *C_diag_new = hypre_CSRMatrixAddDevice(1.0, C_diag, 1.0, zero);
 
-      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(zero));
-      hypre_ParCSRMatrixDiag(zero) = zero_diag;
+      hypre_CSRMatrixDestroy(C_diag);
+      hypre_CSRMatrixDestroy(zero);
 
-      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(zero));
-      hypre_ParCSRMatrixOffd(zero) = zero_offd;
-
-      hypre_ParCSRMatrix *C_new;
-      hypre_ParCSRMatrixAdd(1.0, C, 1.0, zero, &C_new);
-
-      hypre_ParCSRMatrixDestroy(C);
-      hypre_ParCSRMatrixDestroy(zero);
-
-      C = C_new;
+      hypre_ParCSRMatrixDiag(C) = C_diag_new;
    }
 
    /* Move the diagonal entry to the first of each row */
