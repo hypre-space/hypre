@@ -64,7 +64,7 @@ hypre_FSAISolve( void               *fsai_vdata,
    }
 
    iter        = 0;
-   rel_resnorm = 1.0;
+   rel_resnorm = resnorm = 1.0;
 
    if (my_id == 0 && print_level > 1)
    {

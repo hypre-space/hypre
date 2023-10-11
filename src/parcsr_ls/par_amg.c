@@ -512,11 +512,14 @@ hypre_BoomerAMGCreate( void )
    hypre_ParAMGDataNewComm(amg_data) = hypre_MPI_COMM_NULL;
 
    /* for Gaussian elimination coarse grid solve */
-   hypre_ParAMGDataGSSetup(amg_data) = 0;
-   hypre_ParAMGDataAMat(amg_data) = NULL;
-   hypre_ParAMGDataAInv(amg_data) = NULL;
-   hypre_ParAMGDataBVec(amg_data) = NULL;
-   hypre_ParAMGDataCommInfo(amg_data) = NULL;
+   hypre_ParAMGDataGSSetup(amg_data)          = 0;
+   hypre_ParAMGDataGEMemoryLocation(amg_data) = HYPRE_MEMORY_UNDEFINED;
+   hypre_ParAMGDataCommInfo(amg_data)         = NULL;
+   hypre_ParAMGDataAMat(amg_data)             = NULL;
+   hypre_ParAMGDataAWork(amg_data)            = NULL;
+   hypre_ParAMGDataAPiv(amg_data)             = NULL;
+   hypre_ParAMGDataBVec(amg_data)             = NULL;
+   hypre_ParAMGDataUVec(amg_data)             = NULL;
 
    hypre_ParAMGDataNonGalerkinTol(amg_data) = nongalerkin_tol;
    hypre_ParAMGDataNonGalTolArray(amg_data) = NULL;
@@ -881,9 +884,17 @@ hypre_BoomerAMGDestroy( void *data )
       hypre_TFree(hypre_ParAMGDataCPointsLocalMarker(amg_data), memory_location);
       hypre_TFree(hypre_ParAMGDataFPointsMarker(amg_data), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParAMGDataIsolatedFPointsMarker(amg_data), HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_ParAMGDataAMat(amg_data), HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_ParAMGDataAInv(amg_data), HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_ParAMGDataBVec(amg_data), HYPRE_MEMORY_HOST);
+
+      /* Direct solver for the coarsest level */
+#if defined(HYPRE_USING_MAGMA)
+      hypre_TFree(hypre_ParAMGDataAPiv(amg_data),  HYPRE_MEMORY_HOST);
+#else
+      hypre_TFree(hypre_ParAMGDataAPiv(amg_data),  hypre_ParAMGDataGEMemoryLocation(amg_data));
+#endif
+      hypre_TFree(hypre_ParAMGDataAMat(amg_data),  hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataAWork(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataBVec(amg_data),  hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataUVec(amg_data),  hypre_ParAMGDataGEMemoryLocation(amg_data));
       hypre_TFree(hypre_ParAMGDataCommInfo(amg_data), HYPRE_MEMORY_HOST);
 
       if (new_comm != hypre_MPI_COMM_NULL)

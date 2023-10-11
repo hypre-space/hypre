@@ -51,7 +51,6 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
     *     relax_type =  7 -> Jacobi (uses Matvec), only needed in CGNR
     *                        [GPU-supported, CF supported with redundant computation]
     *     relax_type =  8 -> hybrid L1 Symm. Gauss-Seidel (SSOR)
-    *     relax_type =  9 -> Direct solve, Gaussian elimination
     *     relax_type = 10 -> On-processor direct forward solve for matrices with
     *                        triangular structure (indices need not be ordered
     *                        triangular)
@@ -66,14 +65,10 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
     *     relax_type = 16 -> Scaled Chebyshev
     *     relax_type = 17 -> FCF-Jacobi
     *     relax_type = 18 -> L1-Jacobi [GPU-supported through call to relax7Jacobi]
-    *     relax_type = 19 -> Direct Solve, (old version)
-    *     relax_type = 30 -> Kaczmarz
     *     relax_type = 21 -> the same as 8 except forcing serialization on CPU (#OMP-thread = 1)
-    *     relax_type = 29 -> Direct solve: use Gaussian elimination & BLAS
-    *                        (with pivoting) (old version)
-    *     relax_type = 98 -> Direct solve, Gaussian elimination
-    *     relax_type = 99 -> Direct solve, Gaussian elimination
-    *     relax_type = 199-> Direct solve, Gaussian elimination
+    *     relax_type = 30 -> Kaczmarz
+    *     relax_type = 88 -> convergent version of SSOR (option 8)
+    *     relax_type = 89 -> L1 Symm. hybrid Gauss-Seidel
     *-------------------------------------------------------------------------------------*/
 
    switch (relax_type)
@@ -91,8 +86,7 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          hypre_BoomerAMGRelax2GaussSeidel(A, f, cf_marker, relax_points, u);
          break;
 
-      /* Hybrid: Jacobi off-processor, Gauss-Seidel on-processor (forward loop) */
-      case 3:
+      case 3: /* Hybrid: Jacobi off-processor, Gauss-Seidel on-processor (forward loop) */
          hypre_BoomerAMGRelax3HybridGaussSeidel(A, f, cf_marker, relax_points,
                                                 relax_weight, omega, u, Vtemp,
                                                 Ztemp);
@@ -126,8 +120,7 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                                            Vtemp, Ztemp);
          break;
 
-      /* Hybrid: Jacobi off-processor, ordered Gauss-Seidel on-processor */
-      case 10:
+      case 10: /* Hybrid: Jacobi off-processor, ordered Gauss-Seidel on-processor */
          hypre_BoomerAMGRelax10TopoOrderedGaussSeidel(A, f, cf_marker, relax_points,
                                                       relax_weight, omega, u,
                                                       Vtemp, Ztemp);
@@ -163,10 +156,6 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                                                 Vtemp);
          break;
 
-      case 19: /* Direct solve: use gaussian elimination */
-         relax_error = hypre_BoomerAMGRelax19GaussElim(A, f, u);
-         break;
-
       case 30: /* Kaczmarz */
          hypre_BoomerAMGRelaxKaczmarz(A, f, omega, l1_norms, u);
          break;
@@ -176,16 +165,16 @@ hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                                             relax_weight, omega, l1_norms, u,
                                             Vtemp, Ztemp);
          break;
-
-      case 98: /* Direct solve: use gaussian elimination & BLAS (with pivoting) */
-         relax_error = hypre_BoomerAMGRelax98GaussElimPivot(A, f, u);
-         break;
    }
 
    hypre_ParVectorAllZeros(u) = 0;
 
    return relax_error;
 }
+
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGRelaxWeightedJacobi_core
+ *--------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_BoomerAMGRelaxWeightedJacobi_core( hypre_ParCSRMatrix *A,
@@ -324,6 +313,10 @@ hypre_BoomerAMGRelaxWeightedJacobi_core( hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGRelax0WeightedJacobi
+ *--------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_BoomerAMGRelax0WeightedJacobi( hypre_ParCSRMatrix *A,
                                      hypre_ParVector    *f,
@@ -336,6 +329,10 @@ hypre_BoomerAMGRelax0WeightedJacobi( hypre_ParCSRMatrix *A,
    return hypre_BoomerAMGRelaxWeightedJacobi_core(A, f, cf_marker, relax_points, relax_weight, NULL, u,
                                                   Vtemp, 1);
 }
+
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGRelax18WeightedL1Jacobi
+ *--------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_BoomerAMGRelax18WeightedL1Jacobi( hypre_ParCSRMatrix *A,
@@ -370,6 +367,10 @@ hypre_BoomerAMGRelax18WeightedL1Jacobi( hypre_ParCSRMatrix *A,
       }
    }
 }
+
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGRelax1GaussSeidel
+ *--------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A,
@@ -510,6 +511,10 @@ hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGRelax2GaussSeidel
+ *--------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
@@ -667,6 +672,10 @@ hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGRelaxHybridGaussSeidel_core
+ *--------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
@@ -922,7 +931,12 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
-/* forward hybrid G-S */
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGRelax3HybridGaussSeidel
+ *
+ * forward hybrid GS
+ *--------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_BoomerAMGRelax3HybridGaussSeidel( hypre_ParCSRMatrix *A,
                                         hypre_ParVector    *f,
@@ -939,7 +953,12 @@ hypre_BoomerAMGRelax3HybridGaussSeidel( hypre_ParCSRMatrix *A,
                                         1, 0, 1, 0);
 }
 
-/* backward hybrid G-S */
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGRelax4HybridGaussSeidel
+ *
+ * backward hybrid GS
+ *--------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_BoomerAMGRelax4HybridGaussSeidel( hypre_ParCSRMatrix *A,
                                         hypre_ParVector    *f,
@@ -956,7 +975,12 @@ hypre_BoomerAMGRelax4HybridGaussSeidel( hypre_ParCSRMatrix *A,
                                         -1, 0, 1, 0);
 }
 
-/* chaotic forward G-S */
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGRelax5ChaoticHybridGaussSeidel
+ *
+ * chaotic forward GS
+ *--------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_BoomerAMGRelax5ChaoticHybridGaussSeidel( hypre_ParCSRMatrix *A,
                                                hypre_ParVector    *f,
@@ -1062,7 +1086,12 @@ hypre_BoomerAMGRelax5ChaoticHybridGaussSeidel( hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
-/* symmetric hybrid SOR */
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGRelaxHybridSOR
+ *
+ * symmetric hybrid SOR
+ *--------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_BoomerAMGRelaxHybridSOR( hypre_ParCSRMatrix *A,
                                hypre_ParVector    *f,
@@ -1109,6 +1138,10 @@ hypre_BoomerAMGRelaxHybridSOR( hypre_ParCSRMatrix *A,
    }
 }
 
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGRelax6HybridSSOR
+ *--------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_BoomerAMGRelax6HybridSSOR( hypre_ParCSRMatrix *A,
                                  hypre_ParVector    *f,
@@ -1123,6 +1156,10 @@ hypre_BoomerAMGRelax6HybridSSOR( hypre_ParCSRMatrix *A,
    return hypre_BoomerAMGRelaxHybridSOR(A, f, cf_marker, relax_points, relax_weight,
                                         omega, NULL, u, Vtemp, Ztemp, 1, 1, 1, 0);
 }
+
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGRelax7Jacobi
+ *--------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
@@ -1203,18 +1240,23 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
-/* l1 hybrid symmetric G-S */
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGRelax14HybridL1GaussSeidel
+ *
+ * l1 hybrid symmetric GS
+ *--------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_BoomerAMGRelax8HybridL1SSOR( hypre_ParCSRMatrix *A,
-                                    hypre_ParVector    *f,
-                                    HYPRE_Int          *cf_marker,
-                                    HYPRE_Int           relax_points,
-                                    HYPRE_Real          relax_weight,
-                                    HYPRE_Real          omega,
-                                    HYPRE_Real         *l1_norms,
-                                    hypre_ParVector    *u,
-                                    hypre_ParVector    *Vtemp,
-                                    hypre_ParVector    *Ztemp )
+                                   hypre_ParVector    *f,
+                                   HYPRE_Int          *cf_marker,
+                                   HYPRE_Int           relax_points,
+                                   HYPRE_Real          relax_weight,
+                                   HYPRE_Real          omega,
+                                   HYPRE_Real         *l1_norms,
+                                   hypre_ParVector    *u,
+                                   hypre_ParVector    *Vtemp,
+                                   hypre_ParVector    *Ztemp )
 {
    const HYPRE_Int skip_diag = relax_weight == 1.0 && omega == 1.0 ? 0 : 1;
 
@@ -1222,7 +1264,12 @@ hypre_BoomerAMGRelax8HybridL1SSOR( hypre_ParCSRMatrix *A,
                                         omega, l1_norms, u, Vtemp, Ztemp, 1, 1, skip_diag, 0);
 }
 
-/* l1 symmetric hybrid G-S */
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGRelax14HybridL1GaussSeidel
+ *
+ * l1 symmetric hybrid GS
+ *--------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_BoomerAMGRelax89HybridL1SSOR( hypre_ParCSRMatrix *A,
                                     hypre_ParVector    *f,
@@ -1244,7 +1291,12 @@ hypre_BoomerAMGRelax89HybridL1SSOR( hypre_ParCSRMatrix *A,
    return hypre_error_flag;
 }
 
-/* forward hybrid topology ordered G-S */
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGRelax14HybridL1GaussSeidel
+ *
+ * Forward hybrid topology ordered GS
+ *--------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_BoomerAMGRelax10TopoOrderedGaussSeidel( hypre_ParCSRMatrix *A,
                                               hypre_ParVector    *f,
@@ -1261,7 +1313,12 @@ hypre_BoomerAMGRelax10TopoOrderedGaussSeidel( hypre_ParCSRMatrix *A,
                                                      1 /* forward */, 0 /* nonsymm */, 1 /* skip_diag */, 1, 1);
 }
 
-/* forward l1 hybrid G-S */
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGRelax14HybridL1GaussSeidel
+ *
+ * Forward l1 hybrid GS
+ *--------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_BoomerAMGRelax13HybridL1GaussSeidel( hypre_ParCSRMatrix *A,
                                            hypre_ParVector    *f,
@@ -1281,7 +1338,12 @@ hypre_BoomerAMGRelax13HybridL1GaussSeidel( hypre_ParCSRMatrix *A,
                                         1,  0, skip_diag, 0);
 }
 
-/* backward l1 hybrid G-S */
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGRelax14HybridL1GaussSeidel
+ *
+ * Backward l1 hybrid GS
+ *--------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_BoomerAMGRelax14HybridL1GaussSeidel( hypre_ParCSRMatrix *A,
                                            hypre_ParVector    *f,
@@ -1301,188 +1363,9 @@ hypre_BoomerAMGRelax14HybridL1GaussSeidel( hypre_ParCSRMatrix *A,
                                         -1, 0, skip_diag, 0);
 }
 
-HYPRE_Int
-hypre_BoomerAMGRelax19GaussElim( hypre_ParCSRMatrix *A,
-                                 hypre_ParVector    *f,
-                                 hypre_ParVector    *u )
-{
-   HYPRE_BigInt     global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
-   HYPRE_BigInt     first_ind       = hypre_ParVectorFirstIndex(u);
-   HYPRE_Int        n_global        = (HYPRE_Int) global_num_rows;
-   HYPRE_Int        first_index     = (HYPRE_Int) first_ind;
-   HYPRE_Int        num_rows        = hypre_ParCSRMatrixNumRows(A);
-   hypre_Vector    *u_local         = hypre_ParVectorLocalVector(u);
-   HYPRE_Complex   *u_data          = hypre_VectorData(u_local);
-   hypre_CSRMatrix *A_CSR;
-   HYPRE_Int       *A_CSR_i;
-   HYPRE_Int       *A_CSR_j;
-   HYPRE_Real      *A_CSR_data;
-   hypre_Vector    *f_vector;
-   HYPRE_Real      *f_vector_data;
-   HYPRE_Real      *A_mat;
-   HYPRE_Real      *b_vec;
-   HYPRE_Int        i, jj, column, relax_error = 0;
-
-   /* Sanity check */
-   if (hypre_ParVectorNumVectors(f) > 1)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "Gauss Elim. relaxation doesn't support multicomponent vectors");
-      return hypre_error_flag;
-   }
-
-   /*-----------------------------------------------------------------
-    *  Generate CSR matrix from ParCSRMatrix A
-    *-----------------------------------------------------------------*/
-
-   /* all processors are needed for these routines */
-   A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
-   f_vector = hypre_ParVectorToVectorAll(f);
-   if (num_rows)
-   {
-      A_CSR_i = hypre_CSRMatrixI(A_CSR);
-      A_CSR_j = hypre_CSRMatrixJ(A_CSR);
-      A_CSR_data = hypre_CSRMatrixData(A_CSR);
-      f_vector_data = hypre_VectorData(f_vector);
-
-      A_mat = hypre_CTAlloc(HYPRE_Real, n_global * n_global, HYPRE_MEMORY_HOST);
-      b_vec = hypre_CTAlloc(HYPRE_Real, n_global, HYPRE_MEMORY_HOST);
-
-      /*---------------------------------------------------------------
-       *  Load CSR matrix into A_mat.
-       *---------------------------------------------------------------*/
-      for (i = 0; i < n_global; i++)
-      {
-         for (jj = A_CSR_i[i]; jj < A_CSR_i[i + 1]; jj++)
-         {
-            column = A_CSR_j[jj];
-            A_mat[i * n_global + column] = A_CSR_data[jj];
-         }
-         b_vec[i] = f_vector_data[i];
-      }
-
-      hypre_gselim(A_mat, b_vec, n_global, relax_error);
-
-      for (i = 0; i < num_rows; i++)
-      {
-         u_data[i] = b_vec[first_index + i];
-      }
-
-      hypre_TFree(A_mat, HYPRE_MEMORY_HOST);
-      hypre_TFree(b_vec, HYPRE_MEMORY_HOST);
-      hypre_CSRMatrixDestroy(A_CSR);
-      A_CSR = NULL;
-      hypre_SeqVectorDestroy(f_vector);
-      f_vector = NULL;
-   }
-   else
-   {
-      hypre_CSRMatrixDestroy(A_CSR);
-      A_CSR = NULL;
-      hypre_SeqVectorDestroy(f_vector);
-      f_vector = NULL;
-   }
-
-   return relax_error;
-}
-
-
-HYPRE_Int
-hypre_BoomerAMGRelax98GaussElimPivot( hypre_ParCSRMatrix *A,
-                                      hypre_ParVector    *f,
-                                      hypre_ParVector    *u )
-{
-   HYPRE_BigInt     global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
-   HYPRE_BigInt     first_ind       = hypre_ParVectorFirstIndex(u);
-   HYPRE_Int        n_global        = (HYPRE_Int) global_num_rows;
-   HYPRE_Int        first_index     = (HYPRE_Int) first_ind;
-   HYPRE_Int        num_rows        = hypre_ParCSRMatrixNumRows(A);
-   hypre_Vector    *u_local         = hypre_ParVectorLocalVector(u);
-   HYPRE_Complex   *u_data          = hypre_VectorData(u_local);
-   hypre_CSRMatrix *A_CSR;
-   HYPRE_Int       *A_CSR_i;
-   HYPRE_Int       *A_CSR_j;
-   HYPRE_Real      *A_CSR_data;
-   hypre_Vector    *f_vector;
-   HYPRE_Real      *f_vector_data;
-   HYPRE_Real      *A_mat;
-   HYPRE_Real      *b_vec;
-   HYPRE_Int        i, jj, column, relax_error = 0;
-   HYPRE_Int        info;
-   HYPRE_Int        one_i = 1;
-   HYPRE_Int       *piv;
-
-   /* Sanity check */
-   if (hypre_ParVectorNumVectors(f) > 1)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "Gauss Elim. (98) relaxation doesn't support multicomponent vectors");
-      return hypre_error_flag;
-   }
-
-   /*-----------------------------------------------------------------
-    *  Generate CSR matrix from ParCSRMatrix A
-    *-----------------------------------------------------------------*/
-
-   /* all processors are needed for these routines */
-   A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
-   f_vector = hypre_ParVectorToVectorAll(f);
-   if (num_rows)
-   {
-      A_CSR_i = hypre_CSRMatrixI(A_CSR);
-      A_CSR_j = hypre_CSRMatrixJ(A_CSR);
-      A_CSR_data = hypre_CSRMatrixData(A_CSR);
-      f_vector_data = hypre_VectorData(f_vector);
-
-      A_mat = hypre_CTAlloc(HYPRE_Real,  n_global * n_global, HYPRE_MEMORY_HOST);
-      b_vec = hypre_CTAlloc(HYPRE_Real,  n_global, HYPRE_MEMORY_HOST);
-
-      /*---------------------------------------------------------------
-       *  Load CSR matrix into A_mat.
-       *---------------------------------------------------------------*/
-      for (i = 0; i < n_global; i++)
-      {
-         for (jj = A_CSR_i[i]; jj < A_CSR_i[i + 1]; jj++)
-         {
-            /* need col major */
-            column = A_CSR_j[jj];
-            A_mat[i + n_global * column] = A_CSR_data[jj];
-         }
-         b_vec[i] = f_vector_data[i];
-      }
-
-      piv = hypre_CTAlloc(HYPRE_Int,  n_global, HYPRE_MEMORY_HOST);
-
-      /* write over A with LU */
-      hypre_dgetrf(&n_global, &n_global, A_mat, &n_global, piv, &info);
-
-      /*now b_vec = inv(A)*b_vec  */
-      hypre_dgetrs("N", &n_global, &one_i, A_mat, &n_global, piv, b_vec, &n_global, &info);
-
-      hypre_TFree(piv, HYPRE_MEMORY_HOST);
-
-      for (i = 0; i < num_rows; i++)
-      {
-         u_data[i] = b_vec[first_index + i];
-      }
-
-      hypre_TFree(A_mat, HYPRE_MEMORY_HOST);
-      hypre_TFree(b_vec, HYPRE_MEMORY_HOST);
-      hypre_CSRMatrixDestroy(A_CSR);
-      A_CSR = NULL;
-      hypre_SeqVectorDestroy(f_vector);
-      f_vector = NULL;
-   }
-   else
-   {
-      hypre_CSRMatrixDestroy(A_CSR);
-      A_CSR = NULL;
-      hypre_SeqVectorDestroy(f_vector);
-      f_vector = NULL;
-   }
-
-   return relax_error;
-}
+/*--------------------------------------------------------------------
+ * hypre_BoomerAMGRelaxKaczmarz
+ *--------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_BoomerAMGRelaxKaczmarz( hypre_ParCSRMatrix *A,
@@ -1759,6 +1642,8 @@ hypre_BoomerAMGRelax12TwoStageGaussSeidel( hypre_ParCSRMatrix *A,
 
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGRelaxComputeL1Norms
+ *
+ * TODO (VPM): Use this function in BoomerAMGSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

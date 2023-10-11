@@ -155,6 +155,7 @@ CUFILES =\
  ams.c\
  ame.c\
  par_amg_setup.c\
+ par_ge_device.c\
  par_ilu_setup_device.c\
  par_ilu_solve_device.c\
  par_ilu_solve.c \

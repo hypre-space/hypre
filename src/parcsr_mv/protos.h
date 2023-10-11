@@ -473,6 +473,8 @@ HYPRE_Int GenerateDiagAndOffd ( hypre_CSRMatrix *A, hypre_ParCSRMatrix *matrix,
 hypre_CSRMatrix *hypre_MergeDiagAndOffd ( hypre_ParCSRMatrix *par_matrix );
 hypre_CSRMatrix *hypre_MergeDiagAndOffdDevice ( hypre_ParCSRMatrix *par_matrix );
 hypre_CSRMatrix *hypre_ParCSRMatrixToCSRMatrixAll ( hypre_ParCSRMatrix *par_matrix );
+hypre_CSRMatrix *hypre_ParCSRMatrixToCSRMatrixAll_v2 ( hypre_ParCSRMatrix *par_matrix,
+                                                       HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_ParCSRMatrixCopy ( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B,
                                    HYPRE_Int copy_data );
 HYPRE_Int hypre_FillResponseParToCSRMatrix ( void *p_recv_contact_buf, HYPRE_Int contact_size,
@@ -583,6 +585,8 @@ HYPRE_Int hypre_ParVectorMassDotpTwo ( hypre_ParVector *x, hypre_ParVector *y, h
 hypre_ParVector *hypre_VectorToParVector ( MPI_Comm comm, hypre_Vector *v,
                                            HYPRE_BigInt *vec_starts );
 hypre_Vector *hypre_ParVectorToVectorAll ( hypre_ParVector *par_v );
+hypre_Vector *hypre_ParVectorToVectorAll_v2 ( hypre_ParVector *par_v,
+                                              HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_ParVectorPrint ( hypre_ParVector *vector, const char *file_name );
 HYPRE_Int hypre_ParVectorPrintIJ ( hypre_ParVector *vector, HYPRE_Int base_j,
                                    const char *filename );
