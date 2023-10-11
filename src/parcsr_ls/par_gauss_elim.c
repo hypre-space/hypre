@@ -338,7 +338,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
     *  Factorization phase
     *-----------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(ge_memory_location);
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -579,7 +579,7 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
     *  Gaussian elimination solve
     *-----------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy  exec = hypre_GetExecPolicy1(ge_memory_location);
 
    if (exec == HYPRE_EXEC_DEVICE)
