@@ -2394,7 +2394,7 @@ HYPRE_Int hypre_ILULocalRCMQsort( HYPRE_Int *perm, HYPRE_Int start, HYPRE_Int en
                                   HYPRE_Int *degree );
 HYPRE_Int hypre_ILULocalRCMReverse( HYPRE_Int *perm, HYPRE_Int start, HYPRE_Int end );
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 HYPRE_Int hypre_ParILUSchurGMRESDummySolveDevice( void *ilu_vdata, void *ilu_vdata2,
                                                   hypre_ParVector *f, hypre_ParVector *u );
 HYPRE_Int hypre_ParILUSchurGMRESCommInfoDevice( void *ilu_vdata, HYPRE_Int *my_id,
@@ -2574,7 +2574,7 @@ HYPRE_Int hypre_NSHSolveInverse( hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                  hypre_ParVector *ftemp, hypre_ParVector *utemp );
 
 /* par_ilu_solve_device.c */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 HYPRE_Int hypre_ILUSolveLUDevice( hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU_d,
                                   hypre_ParVector *f, hypre_ParVector *u,
                                   HYPRE_Int *perm, hypre_ParVector *ftemp,

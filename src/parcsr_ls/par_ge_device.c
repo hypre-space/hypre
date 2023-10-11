@@ -105,9 +105,9 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
 
 #else
    /* Silence declared but never referenced warnings */
-   (A_piv  = A_piv);
-   (A_mat  = A_mat);
-   (A_work = A_work);
+   (A_piv  = NULL);
+   (A_mat  = NULL);
+   (A_work = NULL);
    (buffer_size *= 1);
 
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,
@@ -309,8 +309,8 @@ hypre_GaussElimSolveDevice(hypre_ParAMGData *amg_data,
 
 #else
    /* Silence declared but never referenced warnings */
-   (A_mat = A_mat);
-   (A_piv = A_piv);
+   (A_mat = NULL);
+   (A_piv = NULL);
    (i_one *= 1);
    (d_one *= 1.0);
    (zero  *= zero);

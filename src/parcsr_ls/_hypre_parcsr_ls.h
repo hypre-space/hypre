@@ -1173,7 +1173,7 @@ typedef struct hypre_ParILUData_struct
    HYPRE_Real           *fext;
 
    /* On GPU, we have to form E and F explicitly, since we don't have much control to it */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    hypre_CSRMatrix      *matALU_d; /* Matrix holding ILU of A (for A-smoothing) */
    hypre_CSRMatrix      *matBLU_d; /* Matrix holding ILU of B */
    hypre_CSRMatrix      *matSLU_d; /* Matrix holding ILU of S */
@@ -1240,7 +1240,7 @@ typedef struct hypre_ParILUData_struct
 
 #define hypre_ParILUDataTestOption(ilu_data)                   ((ilu_data) -> test_opt)
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 #define hypre_ParILUDataMatAILUDevice(ilu_data)                ((ilu_data) -> matALU_d)
 #define hypre_ParILUDataMatBILUDevice(ilu_data)                ((ilu_data) -> matBLU_d)
 #define hypre_ParILUDataMatSILUDevice(ilu_data)                ((ilu_data) -> matSLU_d)
@@ -3811,7 +3811,7 @@ HYPRE_Int hypre_ILULocalRCMQsort( HYPRE_Int *perm, HYPRE_Int start, HYPRE_Int en
                                   HYPRE_Int *degree );
 HYPRE_Int hypre_ILULocalRCMReverse( HYPRE_Int *perm, HYPRE_Int start, HYPRE_Int end );
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 HYPRE_Int hypre_ParILUSchurGMRESDummySolveDevice( void *ilu_vdata, void *ilu_vdata2,
                                                   hypre_ParVector *f, hypre_ParVector *u );
 HYPRE_Int hypre_ParILUSchurGMRESCommInfoDevice( void *ilu_vdata, HYPRE_Int *my_id,
@@ -3991,7 +3991,7 @@ HYPRE_Int hypre_NSHSolveInverse( hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                  hypre_ParVector *ftemp, hypre_ParVector *utemp );
 
 /* par_ilu_solve_device.c */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 HYPRE_Int hypre_ILUSolveLUDevice( hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU_d,
                                   hypre_ParVector *f, hypre_ParVector *u,
                                   HYPRE_Int *perm, hypre_ParVector *ftemp,
