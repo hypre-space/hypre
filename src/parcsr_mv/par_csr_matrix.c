@@ -95,6 +95,8 @@ hypre_ParCSRMatrixCreate( MPI_Comm      comm,
    hypre_ParCSRMatrixGlobalNumRows(matrix)   = global_num_rows;
    hypre_ParCSRMatrixGlobalNumCols(matrix)   = global_num_cols;
    hypre_ParCSRMatrixGlobalNumRownnz(matrix) = global_num_rows;
+   hypre_ParCSRMatrixNumNonzeros(matrix)     = -1;   /* Uninitialized */
+   hypre_ParCSRMatrixDNumNonzeros(matrix)    = -1.0; /* Uninitialized */
    hypre_ParCSRMatrixFirstRowIndex(matrix)   = first_row_index;
    hypre_ParCSRMatrixFirstColDiag(matrix)    = first_col_diag;
    hypre_ParCSRMatrixLastRowIndex(matrix) = first_row_index + local_num_rows - 1;
@@ -2525,6 +2527,9 @@ hypre_FillResponseParToCSRMatrix( void       *p_recv_contact_buf,
  * A and B must have the same communicator, numbers and distributions of rows
  * and columns (they can differ in which row-column pairs are nonzero, thus
  * in which columns are in a offd block)
+ *
+ * TODO (VPM): This function should use hypre_ParCSRMatrixCreate to create
+ *             the matrix.
  *--------------------------------------------------------------------------*/
 
 hypre_ParCSRMatrix * hypre_ParCSRMatrixUnion( hypre_ParCSRMatrix * A,

@@ -1863,6 +1863,11 @@ HYPRE_Int hypre_SchwarzSetDofFunc ( void *data, HYPRE_Int *dof_func );
 /* par_stats.c */
 HYPRE_Int hypre_BoomerAMGSetupStats ( void *amg_vdata, hypre_ParCSRMatrix *A );
 HYPRE_Int hypre_BoomerAMGWriteSolverParams ( void *data );
+const char* hypre_BoomerAMGGetProlongationName( hypre_ParAMGData *amg_data );
+const char* hypre_BoomerAMGGetAggProlongationName( hypre_ParAMGData *amg_data );
+const char* hypre_BoomerAMGGetCoarseningName( hypre_ParAMGData *amg_data );
+const char* hypre_BoomerAMGGetCycleName( hypre_ParAMGData *amg_data );
+HYPRE_Int hypre_BoomerAMGPrintGeneralInfo( hypre_ParAMGData *amg_data, HYPRE_Int shift );
 
 /* par_strength.c */
 HYPRE_Int hypre_BoomerAMGCreateS ( hypre_ParCSRMatrix *A, HYPRE_Real strength_threshold,
@@ -2299,6 +2304,9 @@ HYPRE_Int hypre_MGRComputeNonGalerkinCGDevice( hypre_ParCSRMatrix *A_FF, hypre_P
                                                HYPRE_Int blk_size, HYPRE_Int method,
                                                HYPRE_Complex threshold,
                                                hypre_ParCSRMatrix **A_H_ptr );
+
+/* par_mgr_stats.c */
+HYPRE_Int hypre_MGRSetupStats( void *mgr_vdata );
 
 /* par_ilu.c */
 void *hypre_ILUCreate ( void );

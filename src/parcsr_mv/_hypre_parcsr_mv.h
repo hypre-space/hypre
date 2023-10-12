@@ -310,6 +310,9 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_BigInt          global_num_rows;
    HYPRE_BigInt          global_num_cols;
    HYPRE_BigInt          global_num_rownnz;
+   HYPRE_BigInt          num_nonzeros;
+   HYPRE_Real            d_num_nonzeros;
+
    HYPRE_BigInt          first_row_index;
    HYPRE_BigInt          first_col_diag;
    /* need to know entire local range in case row_starts and col_starts
@@ -336,9 +339,6 @@ typedef struct hypre_ParCSRMatrix_struct
 
    /* Does the ParCSRMatrix create/destroy `diag', `offd', `col_map_offd'? */
    HYPRE_Int             owns_data;
-
-   HYPRE_BigInt          num_nonzeros;
-   HYPRE_Real            d_num_nonzeros;
 
    /* Buffers used by GetRow to hold row currently being accessed. AJC, 4/99 */
    HYPRE_BigInt         *rowindices;
@@ -372,6 +372,8 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixGlobalNumRows(matrix)          ((matrix) -> global_num_rows)
 #define hypre_ParCSRMatrixGlobalNumCols(matrix)          ((matrix) -> global_num_cols)
 #define hypre_ParCSRMatrixGlobalNumRownnz(matrix)        ((matrix) -> global_num_rownnz)
+#define hypre_ParCSRMatrixNumNonzeros(matrix)            ((matrix) -> num_nonzeros)
+#define hypre_ParCSRMatrixDNumNonzeros(matrix)           ((matrix) -> d_num_nonzeros)
 #define hypre_ParCSRMatrixFirstRowIndex(matrix)          ((matrix) -> first_row_index)
 #define hypre_ParCSRMatrixFirstColDiag(matrix)           ((matrix) -> first_col_diag)
 #define hypre_ParCSRMatrixLastRowIndex(matrix)           ((matrix) -> last_row_index)
@@ -387,8 +389,6 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixCommPkg(matrix)                ((matrix) -> comm_pkg)
 #define hypre_ParCSRMatrixCommPkgT(matrix)               ((matrix) -> comm_pkgT)
 #define hypre_ParCSRMatrixOwnsData(matrix)               ((matrix) -> owns_data)
-#define hypre_ParCSRMatrixNumNonzeros(matrix)            ((matrix) -> num_nonzeros)
-#define hypre_ParCSRMatrixDNumNonzeros(matrix)           ((matrix) -> d_num_nonzeros)
 #define hypre_ParCSRMatrixRowindices(matrix)             ((matrix) -> rowindices)
 #define hypre_ParCSRMatrixRowvalues(matrix)              ((matrix) -> rowvalues)
 #define hypre_ParCSRMatrixGetrowactive(matrix)           ((matrix) -> getrowactive)
@@ -1094,8 +1094,12 @@ void hypre_ParCSRMatrixDropEntries ( hypre_ParCSRMatrix *C, hypre_ParCSRMatrix *
 
 /* par_csr_matrix.c */
 hypre_ParCSRMatrix *hypre_ParCSRMatrixCreate ( MPI_Comm comm, HYPRE_BigInt global_num_rows,
-                                               HYPRE_BigInt global_num_cols, HYPRE_BigInt *row_starts_in, HYPRE_BigInt *col_starts_in,
-                                               HYPRE_Int num_cols_offd, HYPRE_Int num_nonzeros_diag, HYPRE_Int num_nonzeros_offd );
+                                               HYPRE_BigInt global_num_cols,
+                                               HYPRE_BigInt *row_starts_in,
+                                               HYPRE_BigInt *col_starts_in,
+                                               HYPRE_Int num_cols_offd,
+                                               HYPRE_Int num_nonzeros_diag,
+                                               HYPRE_Int num_nonzeros_offd );
 HYPRE_Int hypre_ParCSRMatrixDestroy ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix *matrix,
                                            HYPRE_MemoryLocation memory_location );
@@ -1145,6 +1149,11 @@ HYPRE_Int hypre_ParCSRMatrixMigrate(hypre_ParCSRMatrix *A, HYPRE_MemoryLocation 
 HYPRE_Int hypre_ParCSRMatrixSetConstantValues( hypre_ParCSRMatrix *A, HYPRE_Complex value );
 void hypre_ParCSRMatrixCopyColMapOffdToDevice(hypre_ParCSRMatrix *A);
 void hypre_ParCSRMatrixCopyColMapOffdToHost(hypre_ParCSRMatrix *A);
+
+/* par_csr_matrix_stats.c */
+HYPRE_Int hypre_ParCSRMatrixStatsArrayCompute( HYPRE_Int num_matrices,
+                                               hypre_ParCSRMatrix **matrices,
+                                               hypre_MatrixStatsArray *stats_array );
 
 /* par_csr_matvec.c */
 // y = alpha*A*x + beta*b

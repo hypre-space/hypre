@@ -97,6 +97,7 @@ set(SRCS
   par_mgr_coarsen.c
   par_mgr_setup.c
   par_mgr_solve.c
+  par_mgr_stats.c
   par_nongalerkin.c
   par_nodal_systems.c
   par_rap.c

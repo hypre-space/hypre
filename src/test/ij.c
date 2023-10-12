@@ -5271,7 +5271,7 @@ main( hypre_int argc,
          HYPRE_MGRSetGlobalSmoothType(pcg_precond, mgr_gsmooth_type);
          HYPRE_MGRSetMaxGlobalSmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );
          /* set print level */
-         HYPRE_MGRSetPrintLevel(pcg_precond, 1);
+         HYPRE_MGRSetPrintLevel(pcg_precond, ioutdat);
          /* set max iterations */
          HYPRE_MGRSetMaxIter(pcg_precond, 1);
          HYPRE_MGRSetTol(pcg_precond, pc_tol);
@@ -7488,7 +7488,7 @@ main( hypre_int argc,
          HYPRE_MGRSetInterpType(pcg_precond, mgr_interp_type);
          HYPRE_MGRSetNumInterpSweeps(pcg_precond, mgr_num_interp_sweeps);
          /* set print level */
-         HYPRE_MGRSetPrintLevel(pcg_precond, 1);
+         HYPRE_MGRSetPrintLevel(pcg_precond, ioutdat);
          /* set max iterations */
          HYPRE_MGRSetMaxIter(pcg_precond, 1);
          HYPRE_MGRSetTol(pcg_precond, pc_tol);
@@ -7972,7 +7972,7 @@ main( hypre_int argc,
          HYPRE_MGRSetInterpType(pcg_precond, mgr_interp_type);
          HYPRE_MGRSetNumInterpSweeps(pcg_precond, mgr_num_interp_sweeps);
          /* set print level */
-         HYPRE_MGRSetPrintLevel(pcg_precond, 1);
+         HYPRE_MGRSetPrintLevel(pcg_precond, ioutdat);
          /* set max iterations */
          HYPRE_MGRSetMaxIter(pcg_precond, 1);
          HYPRE_MGRSetTol(pcg_precond, pc_tol);
@@ -8351,7 +8351,7 @@ main( hypre_int argc,
          HYPRE_MGRSetInterpType(pcg_precond, mgr_interp_type);
          HYPRE_MGRSetNumInterpSweeps(pcg_precond, mgr_num_interp_sweeps);
          /* set print level */
-         HYPRE_MGRSetPrintLevel(pcg_precond, 1);
+         HYPRE_MGRSetPrintLevel(pcg_precond, ioutdat);
          /* set max iterations */
          HYPRE_MGRSetMaxIter(pcg_precond, 1);
          HYPRE_MGRSetTol(pcg_precond, pc_tol);
@@ -8724,7 +8724,7 @@ main( hypre_int argc,
       HYPRE_MGRSetInterpType(mgr_solver, mgr_interp_type);
       HYPRE_MGRSetNumInterpSweeps(mgr_solver, mgr_num_interp_sweeps);
       /* set print level */
-      HYPRE_MGRSetPrintLevel(mgr_solver, 3);
+      HYPRE_MGRSetPrintLevel(mgr_solver, ioutdat);
       /* set max iterations */
       HYPRE_MGRSetMaxIter(mgr_solver, max_iter);
       HYPRE_MGRSetTol(mgr_solver, tol);

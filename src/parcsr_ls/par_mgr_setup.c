@@ -1142,12 +1142,14 @@ hypre_MGRSetup( void               *mgr_vdata,
 #endif
 
       /* Extract A_FF and A_FC when needed by MGR's interpolation/relaxation strategies */
+#if !defined(HYPRE_USING_GPU)
       if ((Frelax_type[lev] == 2)   ||
           (Frelax_type[lev] == 9)   ||
           (Frelax_type[lev] == 99)  ||
           (Frelax_type[lev] == 199) ||
           (interp_type[lev] == 12)  ||
           (mgr_coarse_grid_method[lev] != 0))
+#endif
       {
          hypre_ParCSRMatrixGenerateFFFC(A_array[lev], CF_marker, coarse_pnts_global,
                                         NULL, &A_FC, &A_FF);
@@ -1550,6 +1552,11 @@ hypre_MGRSetup( void               *mgr_vdata,
 
             (mgr_data -> fsolver_mode) = 2;
          }
+         else
+         {
+            /* Save A_FF splitting */
+            A_ff_array[lev] = A_FF;
+         }
 
 #if MGR_DEBUG_LEVEL == 2
          wall_time = time_getWallclockSeconds() - wall_time;
@@ -1913,6 +1920,9 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_TFree(level_coarse_size, HYPRE_MEMORY_HOST);
       (mgr_data -> num_coarse_per_level) = NULL;
    }
+
+   /* Print statistics */
+   hypre_MGRSetupStats(mgr_vdata);
 
    HYPRE_ANNOTATE_FUNC_END;
    hypre_GpuProfilingPopRange();

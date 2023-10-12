@@ -56,6 +56,15 @@ HYPRE_Int hypre_GetDeviceLastError(void);
 HYPRE_Int hypre_UmpireInit(hypre_Handle *hypre_handle_);
 HYPRE_Int hypre_UmpireFinalize(hypre_Handle *hypre_handle_);
 
+/* matrix_stats.h */
+hypre_MatrixStats* hypre_MatrixStatsCreate( void );
+HYPRE_Int hypre_MatrixStatsDestroy( hypre_MatrixStats *stats );
+hypre_MatrixStatsArray* hypre_MatrixStatsArrayCreate( HYPRE_Int capacity );
+HYPRE_Int hypre_MatrixStatsArrayDestroy( hypre_MatrixStatsArray *stats_array );
+HYPRE_Int hypre_MatrixStatsArrayPrint( HYPRE_Int num_hierarchies, HYPRE_Int *num_levels,
+                                       HYPRE_Int use_divisors, HYPRE_Int shift, char **messages,
+                                       hypre_MatrixStatsArray *stats_array );
+
 /* qsort.c */
 void hypre_swap ( HYPRE_Int *v, HYPRE_Int i, HYPRE_Int j );
 void hypre_swap_c ( HYPRE_Complex *v, HYPRE_Int i, HYPRE_Int j );
@@ -390,6 +399,7 @@ HYPRE_Int hypre_IntArrayPrint( MPI_Comm comm, hypre_IntArray *array, const char 
 HYPRE_Int hypre_IntArrayRead( MPI_Comm comm, const char *filename, hypre_IntArray **array_ptr );
 HYPRE_Int hypre_IntArraySetConstantValuesHost( hypre_IntArray *v, HYPRE_Int value );
 HYPRE_Int hypre_IntArraySetConstantValues( hypre_IntArray *v, HYPRE_Int value );
+HYPRE_Int hypre_IntArraySetInterleavedValues( hypre_IntArray *v, HYPRE_Int cycle );
 HYPRE_Int hypre_IntArrayCountHost( hypre_IntArray *v, HYPRE_Int value,
                                    HYPRE_Int *num_values_ptr );
 HYPRE_Int hypre_IntArrayCount( hypre_IntArray *v, HYPRE_Int value,
@@ -404,6 +414,7 @@ HYPRE_Int hypre_IntArrayCountDevice ( hypre_IntArray *v, HYPRE_Int value,
                                       HYPRE_Int *num_values_ptr );
 HYPRE_Int hypre_IntArrayInverseMappingDevice( hypre_IntArray *v, hypre_IntArray *w );
 HYPRE_Int hypre_IntArrayNegateDevice( hypre_IntArray *v );
+HYPRE_Int hypre_IntArraySetInterleavedValuesDevice( hypre_IntArray *v, HYPRE_Int cycle );
 #endif
 
 /* memory_tracker.c */

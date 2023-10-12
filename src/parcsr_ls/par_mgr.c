@@ -3826,14 +3826,7 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
    }
 
    /* Compute R^T so it can be used in the solve phase */
-   if (!hypre_ParCSRMatrixDiagT(R))
-   {
-      hypre_CSRMatrixTranspose(hypre_ParCSRMatrixDiag(R), &hypre_ParCSRMatrixDiagT(R), 1);
-   }
-   if (!hypre_ParCSRMatrixOffdT(R))
-   {
-      hypre_CSRMatrixTranspose(hypre_ParCSRMatrixOffd(R), &hypre_ParCSRMatrixOffdT(R), 1);
-   }
+   hypre_ParCSRMatrixLocalTranspose(R);
 
    /* Set pointer to R */
    *R_ptr = R;

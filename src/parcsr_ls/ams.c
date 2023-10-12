@@ -738,8 +738,8 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
          {
             for (i = 0; i < num_rows; i++)
             {
-               l1_norm[i] = (diag_tmp[i] + l1_norm[i] +
-                             hypre_sqrt(diag_tmp[i] * diag_tmp[i] + l1_norm[i] * l1_norm[i])) * 0.5;
+               l1_norm[i] = 0.5 * (diag_tmp[i] + l1_norm[i] +
+                                   hypre_sqrt(hypre_squared(diag_tmp[i]) + hypre_squared(l1_norm[i])));
             }
          }
       }
