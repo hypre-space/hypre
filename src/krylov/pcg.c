@@ -1129,11 +1129,11 @@ hypre_PCGSetPrecond( void  *pcg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGSetGenericPrecond
+ * hypre_PCGSetPreconditioner
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PCGSetGenericPrecond(void *pcg_vdata,
+hypre_PCGSetPreconditioner(void *pcg_vdata,
                            void *precond_data )
 {
    hypre_PCGData      *pcg_data      = (hypre_PCGData *) pcg_vdata;

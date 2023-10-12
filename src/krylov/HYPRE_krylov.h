@@ -191,7 +191,7 @@ HYPRE_Int HYPRE_PCGSetPrecond(HYPRE_Solver         solver,
  * of the preconditioner object. Instead, it automatically extracts this information
  * from the aforementioned object.
  **/
-HYPRE_Int HYPRE_PCGSetGenericPrecond(HYPRE_Solver  solver,
+HYPRE_Int HYPRE_PCGSetPreconditioner(HYPRE_Solver  solver,
                                      HYPRE_Solver  precond);
 
 /**
