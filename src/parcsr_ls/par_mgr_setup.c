@@ -182,9 +182,9 @@ hypre_MGRSetup( void               *mgr_vdata,
    print_level |= ((print_level & HYPRE_MGR_PRINT_RESERVED_A) == HYPRE_MGR_PRINT_RESERVED_A) ?
                   HYPRE_MGR_PRINT_INFO_PARAMS : 0;
    print_level |= ((print_level & HYPRE_MGR_PRINT_RESERVED_B) == HYPRE_MGR_PRINT_RESERVED_B) ?
-                  HYPRE_MGR_PRINT_INFO_MATRIX : 0;
+                  HYPRE_MGR_PRINT_FINE_MATRIX : 0;
    print_level |= ((print_level & HYPRE_MGR_PRINT_RESERVED_C) == HYPRE_MGR_PRINT_RESERVED_C) ?
-                  HYPRE_MGR_PRINT_INFO_RHS : 0;
+                  HYPRE_MGR_PRINT_FINE_RHS : 0;
    (mgr_data -> print_level) = print_level;
 
    /* Trivial case: simply solve the coarse level problem */

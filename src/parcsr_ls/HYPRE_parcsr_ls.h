@@ -4285,15 +4285,16 @@ HYPRE_Int HYPRE_MGRSetCoarseSolver(HYPRE_Solver             solver,
  *   - 1:  Print MGR's setup information.
  *   - 2:  Print MGR's solve information.
  *   - 4:  Print MGR's parameters information.
- *   - 8:  Print the finest level matrix to NP files where NP is the number of ranks.
- *   - 16: Print the finest level right-hand-side to NP files.
+ *   - 8:  Set print mode for matrices and vectors to ASCII (binary mode is used by default)
+ *   - 16: Print the finest level matrix to NP files where NP is the number of ranks.
+ *   - 32: Print the finest level right-hand-side to NP files.
  *
  * @param solver [IN] The solver to configure.
  * @param print_level [IN] The desired output level.
  *
- * @example
- * To print setup information (1); matrix (8) and rhs (16) to files, set
- * \c print_level to 25, i.e., (1 + 8 + 16).
+ * @example To print setup information (1); matrix (16) and rhs (32) to binary files,
+ * set \c print_level to 49 (1 + 16 + 32). In the previous example, to use ASCII
+ * files for matrices and vectors, set \c print_level to 57 (1 + 8 + 16 + 32).
  *
  * @note The default print level is zero, which means no information will be
  * printed by default.

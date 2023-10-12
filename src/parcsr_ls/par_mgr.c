@@ -6632,8 +6632,8 @@ hypre_MGRDataPrint(void *mgr_vdata)
 
    /* Create new "ls_" folder (info_path) */
    if (((print_level & HYPRE_MGR_PRINT_INFO_PARAMS) ||
-        (print_level & HYPRE_MGR_PRINT_INFO_MATRIX) ||
-        (print_level & HYPRE_MGR_PRINT_INFO_RHS))   &&
+        (print_level & HYPRE_MGR_PRINT_FINE_MATRIX) ||
+        (print_level & HYPRE_MGR_PRINT_FINE_RHS))   &&
        (info_path == NULL))
    {
       if (!myid)
@@ -6683,8 +6683,8 @@ hypre_MGRDataPrint(void *mgr_vdata)
       (mgr_data -> print_level) |= HYPRE_MGR_PRINT_RESERVED_A;
    }
 
-   /* Print linear system matrix and dofmap */
-   if ((print_level & HYPRE_MGR_PRINT_INFO_MATRIX) && par_A)
+   /* Print linear system matrix at the finest level and dofmap */
+   if ((print_level & HYPRE_MGR_PRINT_FINE_MATRIX) && par_A)
    {
       /* Build dofmap array */
       dofmap = hypre_IntArrayCreate(hypre_ParCSRMatrixNumRows(par_A));
@@ -6716,12 +6716,12 @@ hypre_MGRDataPrint(void *mgr_vdata)
       hypre_IntArrayDestroy(dofmap);
 
       /* Signal that the matrix has already been printed */
-      (mgr_data -> print_level) &= ~HYPRE_MGR_PRINT_INFO_MATRIX;
+      (mgr_data -> print_level) &= ~HYPRE_MGR_PRINT_FINE_MATRIX;
       (mgr_data -> print_level) |= HYPRE_MGR_PRINT_RESERVED_B;
    }
 
-   /* Print linear system RHS */
-   if ((print_level & HYPRE_MGR_PRINT_INFO_RHS) && par_b)
+   /* Print linear system RHS at the finest level */
+   if ((print_level & HYPRE_MGR_PRINT_FINE_RHS) && par_b)
    {
       /* Print RHS */
       hypre_ParPrintf(comm, "Writing RHS to path: %s\n", info_path);
@@ -6733,7 +6733,7 @@ hypre_MGRDataPrint(void *mgr_vdata)
       hypre_TFree(filename, HYPRE_MEMORY_HOST);
 
       /* Signal that the vector has already been printed */
-      (mgr_data -> print_level) &= ~HYPRE_MGR_PRINT_INFO_RHS;
+      (mgr_data -> print_level) &= ~HYPRE_MGR_PRINT_FINE_RHS;
       (mgr_data -> print_level) |= HYPRE_MGR_PRINT_RESERVED_C;
    }
 
