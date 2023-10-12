@@ -6704,7 +6704,14 @@ hypre_MGRDataPrint(void *mgr_vdata)
       hypre_ParPrintf(comm, "Writing matrix to path: %s\n", info_path);
       filename = hypre_TAlloc(char, strlen(info_path) + 16, HYPRE_MEMORY_HOST);
       hypre_sprintf(filename, "%s/IJ.out.A", info_path);
-      hypre_ParCSRMatrixPrintBinaryIJ(par_A, 0, 0, filename);
+      if (print_level & HYPRE_MGR_PRINT_MODE_ASCII)
+      {
+         hypre_ParCSRMatrixPrintIJ(par_A, 0, 0, filename);
+      }
+      else
+      {
+         hypre_ParCSRMatrixPrintBinaryIJ(par_A, 0, 0, filename);
+      }
 
       /* Print dofmap */
       hypre_ParPrintf(comm, "Writing dofmap to path: %s\n", info_path);
@@ -6727,7 +6734,14 @@ hypre_MGRDataPrint(void *mgr_vdata)
       hypre_ParPrintf(comm, "Writing RHS to path: %s\n", info_path);
       filename = hypre_TAlloc(char, strlen(info_path) + 16, HYPRE_MEMORY_HOST);
       hypre_sprintf(filename, "%s/IJ.out.b", info_path);
-      hypre_ParVectorPrintBinaryIJ(par_b, filename);
+      if (print_level & HYPRE_MGR_PRINT_MODE_ASCII)
+      {
+         hypre_ParVectorPrintIJ(par_b, 0, filename);
+      }
+      else
+      {
+         hypre_ParVectorPrintBinaryIJ(par_b, filename);
+      }
 
       /* Free memory */
       hypre_TFree(filename, HYPRE_MEMORY_HOST);
