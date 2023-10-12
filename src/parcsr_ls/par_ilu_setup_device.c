@@ -8,7 +8,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 
 /*--------------------------------------------------------------------------
  * hypre_ILUSetupILUDevice
@@ -138,6 +138,7 @@ hypre_ILUSetupILUDevice(HYPRE_Int               ilu_type,
        * in a way different than HYPRE. Diagonal is not listed in the front
        */
 
+#if !defined(HYPRE_USING_SYCL)
       if (ilu_type == 0)
       {
          /* Copy diagonal matrix into a new place with permutation
@@ -151,8 +152,16 @@ hypre_ILUSetupILUDevice(HYPRE_Int               ilu_type,
          hypre_CSRMatrixDestroy(A_diag);
       }
       else
+#endif
       {
          hypre_ParILURAPReorder(A, perm_data, rqperm_data, &Apq);
+#if defined(HYPRE_USING_SYCL)
+         /* WM: note - ILU0 is not yet available in oneMKL sparse */
+         if (ilu_type == 0)
+         {
+            hypre_ILUSetupILU0(Apq, NULL, NULL, n, n, &parL, &parD, &parU, &parS, &uend);
+         }
+#endif
          if (ilu_type == 1)
          {
             hypre_ILUSetupILUK(Apq, lfil, NULL, NULL, n, n, &parL, &parD, &parU, &parS, &uend);
@@ -364,4 +373,4 @@ hypre_ILUSetupILUDevice(HYPRE_Int               ilu_type,
    return hypre_error_flag;
 }
 
-#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+#endif /* defined(HYPRE_USING_GPU) */

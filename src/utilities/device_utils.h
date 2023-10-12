@@ -780,19 +780,11 @@ struct hypre_CsrsvData
    hypre_cusparseSpSVDescr   info_U;
    cusparseSolvePolicy_t     analysis_policy;
    cusparseSolvePolicy_t     solve_policy;
-
 #elif defined(HYPRE_USING_ROCSPARSE)
    rocsparse_mat_info        info_L;
    rocsparse_mat_info        info_U;
    rocsparse_analysis_policy analysis_policy;
    rocsparse_solve_policy    solve_policy;
-
-#elif defined(HYPRE_USING_ONEMKLSPARSE)
-   /* WM: todo - placeholders */
-   char                      info_L;
-   char                      info_U;
-   char                      analysis_policy;
-   char                      solve_policy;
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE) && (CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION)
