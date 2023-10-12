@@ -203,35 +203,35 @@ time, the triangular factors are stored in a memory space that is accessible fro
    * - **BJ-ILU0**
      - Setup and Solve
      - Setup and Solve
-     - None
+     - UVM-Setup and Solve
    * - **BJ-ILU(K/T)**
      - UVM-Setup and Solve
      - UVM-Setup and Solve
-     - None
+     - UVM-Setup and Solve
    * - **GMRES-ILU0**
      - Setup and Solve
      - Setup and Solve
-     - None
+     - UVM-Setup and Solve
    * - **GMRES-RAP-ILU0**
      - UVM-Setup and Solve
      - UVM-Setup and Solve
-     - None
+     - UVM-Setup and Solve
    * - **GMRES-ILU(K/T)**
      - UVM-Setup and Solve
      - UVM-Setup and Solve
-     - None
+     - UVM-Setup and Solve
    * - **ddPQ-GMRES-ILU(K/T)**
      - UVM-Setup and Solve
      - UVM-Setup and Solve
-     - None
+     - UVM-Setup and Solve
    * - **NSH-ILU(K/T)**
      - UVM-Setup and Solve
      - UVM-Setup and Solve
-     - None
+     - UVM-Setup and Solve
    * - **RAS-ILU(K/T)**
      - UVM-Setup and Solve
      - UVM-Setup and Solve
-     - None
+     - UVM-Setup and Solve
 
 .. hint::
    For better setup performance on GPUs, disable local reordering by passing option
@@ -241,4 +241,5 @@ time, the triangular factors are stored in a memory space that is accessible fro
 
 .. note::
    hypre must be built with ``cuSPARSE`` support when running ILU on NVIDIA
-   GPUs. Similarly, ``rocSPARSE`` is required when running ILU on AMD GPUs.
+   GPUs, ``rocSPARSE`` when running on AMD GPUs, or ``oneMKL sparse`` when
+   running on Intel GPUs.

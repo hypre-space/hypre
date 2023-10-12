@@ -630,7 +630,6 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
 
 #if defined(HYPRE_USING_SYCL)
          HYPRE_ONEDPL_CALL(std::transform, stack_i, stack_i + nelms, is_on_proc, pred);
-         /* WM: HERE */
          auto zip_in = oneapi::dpl::make_zip_iterator(stack_i, stack_j, stack_data, stack_sora);
          auto zip_out = oneapi::dpl::make_zip_iterator(off_proc_i, off_proc_j, off_proc_data, off_proc_sora);
          auto new_end1 = hypreSycl_copy_if( zip_in,         /* first */

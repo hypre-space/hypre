@@ -339,7 +339,7 @@ hypre_MGRSetupStats(void *mgr_vdata)
    HYPRE_Int                  divisors[1];
 
    /* Print statistics only if first print_level bit is set */
-   if (!(print_level & 0x1))
+   if (!(print_level & HYPRE_MGR_PRINT_INFO_SETUP))
    {
       return hypre_error_flag;
    }
@@ -356,14 +356,15 @@ hypre_MGRSetupStats(void *mgr_vdata)
    num_sublevels_amg  = hypre_CTAlloc(HYPRE_Int, num_levels_mgr + 1, HYPRE_MEMORY_HOST);
 
    /* Check MGR's coarse level solver */
-   if ((void*) hypre_ParMGRDataCoarseGridSolverSetup(mgr_data) == (void*) HYPRE_BoomerAMGSetup)
+   if ((HYPRE_PtrToParSolverFcn) hypre_ParMGRDataCoarseGridSolverSetup(mgr_data) ==
+       HYPRE_BoomerAMGSetup)
    {
       coarse_amg_solver = (hypre_ParAMGData *) coarse_solver;
       num_sublevels_amg[coarsest_mgr_level] = hypre_ParAMGDataNumLevels(coarse_amg_solver);
    }
 #ifdef HYPRE_USING_DSUPERLU
-   else if ((void*) hypre_ParMGRDataCoarseGridSolverSetup(mgr_data) ==
-            (void*) hypre_MGRDirectSolverSetup)
+   else if ((HYPRE_PtrToParSolverFcn) hypre_ParMGRDataCoarseGridSolverSetup(mgr_data) ==
+             hypre_MGRDirectSolverSetup)
    {
       /* TODO (VPM): Set SuperLU solver specifics */
       num_sublevels_amg[coarsest_mgr_level] = 0;

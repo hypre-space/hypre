@@ -2743,13 +2743,17 @@ main( hypre_int argc,
    {
       BuildParLaplacian27pt(argc, argv, build_matrix_arg_index, &parcsr_A);
 
+#if defined(HYPRE_USING_GPU)
       hypre_CSRMatrixSpMVAnalysisDevice(hypre_ParCSRMatrixDiag(parcsr_A));
+#endif
    }
    else if ( build_matrix_type == 5 )
    {
       BuildParLaplacian125pt(argc, argv, build_matrix_arg_index, &parcsr_A);
 
+#if defined(HYPRE_USING_GPU)
       hypre_CSRMatrixSpMVAnalysisDevice(hypre_ParCSRMatrixDiag(parcsr_A));
+#endif
    }
    else if ( build_matrix_type == 6 )
    {

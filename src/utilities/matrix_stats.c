@@ -230,15 +230,15 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
 
       ndigits[1] = hypre_max(ndigits[1], 1 + hypre_ndigits(fine_num_rows));
       ndigits[3] = hypre_max(ndigits[3],
-                             1 + hypre_ndigits(hypre_MatrixStatsSparsity(stats)));
+                             4 + hypre_ndigits((HYPRE_Int) hypre_MatrixStatsSparsity(stats)));
       ndigits[4] = hypre_max(ndigits[4],
                              1 + hypre_ndigits(hypre_MatrixStatsNnzrowMin(stats)));
       ndigits[5] = hypre_max(ndigits[5],
                              1 + hypre_ndigits(hypre_MatrixStatsNnzrowMax(stats)));
       ndigits[6] = hypre_max(ndigits[6],
-                             4 + hypre_ndigits(hypre_MatrixStatsNnzrowAvg(stats)));
+                             4 + hypre_ndigits((HYPRE_Int) hypre_MatrixStatsNnzrowAvg(stats)));
       ndigits[7] = hypre_max(ndigits[7],
-                             4 + hypre_ndigits(hypre_MatrixStatsNnzrowStDev(stats)));
+                             4 + hypre_ndigits((HYPRE_Int) hypre_MatrixStatsNnzrowStDev(stats)));
    }
 
    /* Column offsets calculation */

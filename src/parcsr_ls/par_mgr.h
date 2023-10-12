@@ -231,7 +231,7 @@ typedef struct
 #define hypre_ParMGRDataRelaxType(data)             ((data) -> relax_type)
 #define hypre_ParMGRDataFRelaxType(data)            ((data) -> Frelax_type)
 #define hypre_ParMGRDataFRelaxTypeI(data, i)        ((data) -> Frelax_type[i])
-#define hypre_ParMGRDataAFFsolver(data)             ((data) -> aff_solver) /* TODO (VPM): does aff_solver need to be a double pointer? */
+#define hypre_ParMGRDataAFFsolver(data)             ((data) -> aff_solver)
 #define hypre_ParMGRDataAFFsolverI(data)            ((data) -> aff_solver[i])
 
 #define hypre_ParMGRDataCoarseGridMethod(data)      ((data) -> mgr_coarse_grid_method)
