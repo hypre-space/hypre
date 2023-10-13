@@ -9,6 +9,12 @@
 FEI Solvers
 ==============================================================================
 
+.. warning::
+   FEI is not actively supported by the hypre development team. For similar
+   functionality, we recommend using :ref:`sec-Block-Structured-Grids-FEM`, which
+   allows the representation of block-structured grid problems via hypre's
+   SStruct interface.
+
 After the FEI has been used to assemble the global linear system (as described
 in Chapter :ref:`ch-FEI`), a number of hypre solvers can be called to perform
 the solution.  This is straightforward, if hypre's FEI has been used.  If an
@@ -20,24 +26,24 @@ the available options can be found in the FEI section of the reference manual.
 They are passed to the FEI as in the following example:
 
 .. code-block:: c++
-   
+
    nParams = 5;
    paramStrings = new char*[nParams];
    for (i = 0; i < nParams; i++) }
       paramStrings[i] = new char[100];
-   
+
    strcpy(paramStrings[0], "solver cg");
    strcpy(paramStrings[1], "preconditioner diag");
    strcpy(paramStrings[2], "maxiterations 100");
    strcpy(paramStrings[3], "tolerance 1.0e-6");
    strcpy(paramStrings[4], "outputLevel 1");
-   
+
    feiPtr -> parameters(nParams, paramStrings);
 
 To solve the linear system of equations, we call
 
 .. code-block:: c++
-   
+
    feiPtr -> solve(&status);
 
 where the returned value ``status`` indicates whether the solve was successful.
@@ -45,7 +51,7 @@ where the returned value ``status`` indicates whether the solve was successful.
 Finally, the solution can be retrieved by the following function call:
 
 .. code-block:: c++
-   
+
    feiPtr -> getBlockNodeSolution(elemBlkID, nNodes, nodeIDList,
                                   solnOffsets, solnValues);
 
@@ -53,7 +59,7 @@ where ``nodeIDList`` is a list of nodes in element block ``elemBlkID``, and
 ``solnOffsets[i]`` is the index pointing to the first location where the
 variables at node :math:`i` is returned in ``solnValues``.
 
-Solvers Available Only through the FEI 
+Solvers Available Only through the FEI
 ------------------------------------------------------------------------------
 
 While most of the solvers from the previous sections are available through the
@@ -71,9 +77,9 @@ following we list some of these internal solvers.
 
 #. Additional Krylov solvers (FGMRES, TFQMR, symmetric QMR),
 #. SuperLU direct solver (sequential),
-#. SuperLU direct solver with iterative refinement (sequential), 
+#. SuperLU direct solver with iterative refinement (sequential),
 
-Parallel Preconditioners 
+Parallel Preconditioners
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 The performance of the Krylov solvers can be improved by clever selection of
@@ -82,7 +88,7 @@ following preconditioners are available via the ``LinearSystemCore`` interface:
 
 #. the modified version of MLI, which requires the finite element substructure
    matrices to construct the prolongation operators,
-#. parallel domain decomposition with inexact local solves (``DDIlut``), 
+#. parallel domain decomposition with inexact local solves (``DDIlut``),
 #. least-squares polynomial preconditioner,
 #. :math:`2 \times 2` block preconditioner, and
 #. :math:`2 \times 2` Uzawa preconditioner.
@@ -107,25 +113,25 @@ The incoming linear system of equations is assumed to be in the form:
 
 .. math::
 
-   \left[ 
-   \begin{array}{cc} 
+   \left[
+   \begin{array}{cc}
       D   & B \\
       B^T & 0
    \end{array}
-     \right] 
+     \right]
      \left[
-   \begin{array}{c} 
+   \begin{array}{c}
       x_1 \\
       x_2
    \end{array}
-     \right] 
+     \right]
      =
      \left[
-   \begin{array}{c} 
+   \begin{array}{c}
       b_1 \\
       b_2
    \end{array}
-     \right] 
+     \right]
 
 where :math:`D` is a diagonal matrix.  After Schur complement reduction is
 applied, the resulting linear system becomes
@@ -145,20 +151,20 @@ re-order the system into a :math:`3 \times 3` block matrix.
 
 .. math::
 
-   \left[ 
-   \begin{array}{ccc} 
+   \left[
+   \begin{array}{ccc}
       A_{11}  & A_{12} & N \\
       A_{21}  & A_{22} & D \\
       N_{T}   & D      & 0 \\
    \end{array}
-   \right] 
+   \right]
    =
-   \left[ 
-   \begin{array}{ccc} 
+   \left[
+   \begin{array}{ccc}
       A_{11}       & \hat{A}_{12} \\
       \hat{A}_{21} & \hat{A}_{22}.
    \end{array}
-   \right] 
+   \right]
 
 The reduced system has the form :
 

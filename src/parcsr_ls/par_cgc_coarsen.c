@@ -710,7 +710,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S, HYPRE_Int numbero
       vertexrange_all[0] = 0;
       for (j = 2; j <= mpisize; j++) { vertexrange_all[j] += vertexrange_all[j - 1]; }
    }
-   Gseq = hypre_ParCSRMatrixToCSRMatrixAll (G);
+   Gseq = hypre_ParCSRMatrixToCSRMatrixAll(G);
 #if 0 /* debugging */
    if (!mpirank)
    {

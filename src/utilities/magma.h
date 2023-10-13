@@ -28,6 +28,35 @@ extern "C++"
 }
 #endif
 
+/*--------------------------------------------------------------------------
+ * Wrappers to MAGMA functions according to hypre's precision
+ *--------------------------------------------------------------------------*/
+
+#if defined(HYPRE_COMPLEX) || defined(HYPRE_LONG_DOUBLE)
+#error "MAGMA interface does not support (yet) HYPRE_COMPLEX and HYPRE_LONG_DOUBLE"
+
+#elif defined(HYPRE_SINGLE)
+#define hypre_magma_getrf_gpu              magma_sgetrf_gpu
+#define hypre_magma_getrf_nat              magma_sgetrf_native
+#define hypre_magma_getrs_gpu              magma_sgetrs_gpu
+#define hypre_magma_getri_gpu              magma_sgetri_gpu
+#define hypre_magma_getri_nb               magma_get_dgetri_nb
+#define hypre_magma_gemv                   magma_sgemv
+
+#else /* Double precision */
+#define hypre_magma_getrf_gpu              magma_dgetrf_gpu
+#define hypre_magma_getrf_nat              magma_dgetrf_native
+#define hypre_magma_getrs_gpu              magma_dgetrs_gpu
+#define hypre_magma_getri_gpu              magma_dgetri_gpu
+#define hypre_magma_getri_nb               magma_get_sgetri_nb
+#define hypre_magma_gemv                   magma_dgemv
+
+#endif
+
+/*--------------------------------------------------------------------------
+ * General wrapper call to MAGMA functions
+ *--------------------------------------------------------------------------*/
+
 #define HYPRE_MAGMA_CALL(call) do {                   \
    magma_int_t err = call;                            \
    if (MAGMA_SUCCESS != err) {                        \
@@ -35,6 +64,8 @@ extern "C++"
             err, __FILE__, __LINE__);                 \
       hypre_assert(0);                                \
    } } while(0)
+
+#define HYPRE_MAGMA_VCALL(call) call
 
 #endif /* HYPRE_USING_MAGMA */
 #endif /* HYPRE_MAGMA_HEADER */

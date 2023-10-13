@@ -225,9 +225,9 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
 
    /* restore the original (unsorted) col indices and data to A and B and free sorted arrays */
    HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::set_csr_data(handle_A, m, k, oneapi::mkl::index_base::zero,
-                                                        d_ia, d_ja_sorted, d_a_sorted) );
+                                                        d_ia, d_ja, d_a) );
    HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::set_csr_data(handle_B, k, n, oneapi::mkl::index_base::zero,
-                                                        d_ib, d_jb_sorted, d_b_sorted) );
+                                                        d_ib, d_jb, d_b) );
    hypre_TFree(d_a_sorted,  HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_b_sorted,  HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_ja_sorted, HYPRE_MEMORY_DEVICE);
