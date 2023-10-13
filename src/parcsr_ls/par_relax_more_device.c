@@ -307,7 +307,7 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
 #if defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL(std::transform,
                      r_data, r_data + local_size, r_data,
-                     [] (auto x) { return 2.0 * x - 1.0; } );
+   [] (auto x) { return 2.0 * x - 1.0; } );
 #else
    HYPRE_THRUST_CALL(transform,
                      r_data, r_data + local_size, r_data,
@@ -377,7 +377,7 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
          /* u = ds .* p */
 #if defined(HYPRE_USING_SYCL)
          HYPRE_ONEDPL_CALL( std::transform, ds_data, ds_data + local_size, p_data, u_data,
-         [] (auto x, auto y) { return x*y; } );
+         [] (auto x, auto y) { return x * y; } );
 #else
          HYPRE_THRUST_CALL( transform, ds_data, ds_data + local_size, p_data, u_data, _1 * _2 );
 #endif
@@ -387,7 +387,7 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
          /* s = ds .* s */
 #if defined(HYPRE_USING_SYCL)
          HYPRE_ONEDPL_CALL( std::transform, ds_data, ds_data + local_size, s_data, s_data,
-         [] (auto x, auto y) { return x*y; } );
+         [] (auto x, auto y) { return x * y; } );
 #else
          HYPRE_THRUST_CALL( transform, ds_data, ds_data + local_size, s_data, s_data, _1 * _2 );
 #endif

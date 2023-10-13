@@ -169,7 +169,7 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
          std::for_each,
          oneapi::dpl::make_zip_iterator(orig_u, u_data, r_data),
          oneapi::dpl::make_zip_iterator(orig_u + num_rows, u_data + num_rows,
-                                                      r_data + num_rows),
+                                        r_data + num_rows),
          save_and_scale<HYPRE_Real>(coefs[cheby_order]));
 #else
       HYPRE_THRUST_CALL(
@@ -241,7 +241,8 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
          /* v = D^(-1/2)AD^(-1/2)u */
          /* tmp = ds .* u */
 #if defined(HYPRE_USING_SYCL)
-         HYPRE_ONEDPL_CALL( std::transform, ds_data, ds_data + num_rows, u_data, tmp_data, std::multiplies<HYPRE_Real>() );
+         HYPRE_ONEDPL_CALL( std::transform, ds_data, ds_data + num_rows, u_data, tmp_data,
+                            std::multiplies<HYPRE_Real>() );
 #else
          HYPRE_THRUST_CALL( transform, ds_data, ds_data + num_rows, u_data, tmp_data, _1 * _2 );
 #endif

@@ -177,6 +177,16 @@ hypre_MGRSetup( void               *mgr_vdata,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
+   /* Reset print_level codes. This is useful for printing
+      information when solving a sequence of linear systems */
+   print_level |= ((print_level & HYPRE_MGR_PRINT_RESERVED_A) == HYPRE_MGR_PRINT_RESERVED_A) ?
+                  HYPRE_MGR_PRINT_INFO_PARAMS : 0;
+   print_level |= ((print_level & HYPRE_MGR_PRINT_RESERVED_B) == HYPRE_MGR_PRINT_RESERVED_B) ?
+                  HYPRE_MGR_PRINT_FINE_MATRIX : 0;
+   print_level |= ((print_level & HYPRE_MGR_PRINT_RESERVED_C) == HYPRE_MGR_PRINT_RESERVED_C) ?
+                  HYPRE_MGR_PRINT_FINE_RHS : 0;
+   (mgr_data -> print_level) = print_level;
+
    /* Trivial case: simply solve the coarse level problem */
    if (block_size < 2 || (mgr_data -> max_num_coarse_levels) < 1)
    {
@@ -1923,6 +1933,9 @@ hypre_MGRSetup( void               *mgr_vdata,
 
    /* Print statistics */
    hypre_MGRSetupStats(mgr_vdata);
+
+   /* Print MGR and linear system info according to print level */
+   hypre_MGRDataPrint(mgr_vdata);
 
    HYPRE_ANNOTATE_FUNC_END;
    hypre_GpuProfilingPopRange();

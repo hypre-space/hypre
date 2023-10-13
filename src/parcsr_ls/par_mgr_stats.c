@@ -13,7 +13,7 @@
  * hypre_MGRGetGlobalRelaxName
  *--------------------------------------------------------------------*/
 
-char*
+const char*
 hypre_MGRGetGlobalRelaxName(hypre_ParMGRData  *mgr_data,
                             HYPRE_Int          level )
 {
@@ -119,7 +119,7 @@ hypre_MGRGetGlobalRelaxName(hypre_ParMGRData  *mgr_data,
  * hypre_MGRGetFRelaxName
  *--------------------------------------------------------------------*/
 
-char*
+const char*
 hypre_MGRGetFRelaxName(hypre_ParMGRData  *mgr_data,
                        HYPRE_Int          level )
 {
@@ -193,7 +193,7 @@ hypre_MGRGetFRelaxName(hypre_ParMGRData  *mgr_data,
  * hypre_MGRGetProlongationName
  *--------------------------------------------------------------------*/
 
-char*
+const char*
 hypre_MGRGetProlongationName(hypre_ParMGRData  *mgr_data,
                              HYPRE_Int          level )
 {
@@ -232,7 +232,7 @@ hypre_MGRGetProlongationName(hypre_ParMGRData  *mgr_data,
  * hypre_MGRGetRestrictionName
  *--------------------------------------------------------------------*/
 
-char*
+const char*
 hypre_MGRGetRestrictionName(hypre_ParMGRData  *mgr_data,
                             HYPRE_Int          level )
 {
@@ -265,7 +265,7 @@ hypre_MGRGetRestrictionName(hypre_ParMGRData  *mgr_data,
  * hypre_MGRGetCoarseGridName
  *--------------------------------------------------------------------*/
 
-char*
+const char*
 hypre_MGRGetCoarseGridName(hypre_ParMGRData  *mgr_data,
                            HYPRE_Int          level )
 {
@@ -339,7 +339,7 @@ hypre_MGRSetupStats(void *mgr_vdata)
    HYPRE_Int                  divisors[1];
 
    /* Print statistics only if first print_level bit is set */
-   if (!(print_level & 0x1))
+   if (!(print_level & HYPRE_MGR_PRINT_INFO_SETUP))
    {
       return hypre_error_flag;
    }
@@ -356,14 +356,15 @@ hypre_MGRSetupStats(void *mgr_vdata)
    num_sublevels_amg  = hypre_CTAlloc(HYPRE_Int, num_levels_mgr + 1, HYPRE_MEMORY_HOST);
 
    /* Check MGR's coarse level solver */
-   if ((void*) hypre_ParMGRDataCoarseGridSolverSetup(mgr_data) == (void*) HYPRE_BoomerAMGSetup)
+   if ((HYPRE_PtrToParSolverFcn) hypre_ParMGRDataCoarseGridSolverSetup(mgr_data) ==
+       HYPRE_BoomerAMGSetup)
    {
       coarse_amg_solver = (hypre_ParAMGData *) coarse_solver;
       num_sublevels_amg[coarsest_mgr_level] = hypre_ParAMGDataNumLevels(coarse_amg_solver);
    }
 #ifdef HYPRE_USING_DSUPERLU
-   else if ((void*) hypre_ParMGRDataCoarseGridSolverSetup(mgr_data) ==
-            (void*) hypre_MGRDirectSolverSetup)
+   else if ((HYPRE_PtrToParSolverFcn) hypre_ParMGRDataCoarseGridSolverSetup(mgr_data) ==
+            hypre_MGRDirectSolverSetup)
    {
       /* TODO (VPM): Set SuperLU solver specifics */
       num_sublevels_amg[coarsest_mgr_level] = 0;
@@ -371,6 +372,7 @@ hypre_MGRSetupStats(void *mgr_vdata)
 #endif
    else
    {
+      hypre_TFree(num_sublevels_amg, HYPRE_MEMORY_HOST);
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown coarsest level solver for MGR!\n");
       return hypre_error_flag;
    }
@@ -450,11 +452,11 @@ hypre_MGRSetupStats(void *mgr_vdata)
 
    if (!myid)
    {
-      char *msg[] = { "Full Operator Matrix Hierarchy Information:\n\n",
-                      "MGR's coarsest level",
-                      "\t( MGR )",
-                      "\t( AMG )"
-                    };
+      const char *msg[] = { "Full Operator Matrix Hierarchy Information:\n\n",
+                            "MGR's coarsest level",
+                            "\t( MGR )",
+                            "\t( AMG )"
+                          };
 
       num_levels[0] = num_levels_mgr - 1;
       num_levels[1] = num_sublevels_amg[coarsest_mgr_level] + 1;
@@ -483,11 +485,11 @@ hypre_MGRSetupStats(void *mgr_vdata)
 
    if (!myid)
    {
-      char *msg[] = { "Full Prolongation Matrix Hierarchy Information:\n\n",
-                      "MGR's coarsest level",
-                      "\t( MGR )",
-                      "\t( AMG )"
-                    };
+      const char *msg[] = { "Full Prolongation Matrix Hierarchy Information:\n\n",
+                            "MGR's coarsest level",
+                            "\t( MGR )",
+                            "\t( AMG )"
+                          };
 
       num_levels[0] = num_levels_mgr;
       num_levels[1] = num_sublevels_amg[coarsest_mgr_level] - 1;
@@ -526,7 +528,7 @@ hypre_MGRSetupStats(void *mgr_vdata)
          /* Print A matrices info */
          if (!myid)
          {
-            char *msg[] = {"Operator Matrix Hierarchy Information:\n\n"};
+            const char *msg[] = {"Operator Matrix Hierarchy Information:\n\n"};
             num_levels[0] = num_sublevels_amg[i];
             hypre_MatrixStatsArrayPrint(1, num_levels, 1, 3, msg, stats_array);
          }
@@ -543,7 +545,7 @@ hypre_MGRSetupStats(void *mgr_vdata)
          /* Print P matrices info */
          if (!myid)
          {
-            char *msg[] = {"Prolongation Matrix Hierarchy Information:\n\n"};
+            const char *msg[] = {"Prolongation Matrix Hierarchy Information:\n\n"};
             num_levels[0] = num_sublevels_amg[i] - 1;
             hypre_MatrixStatsArrayPrint(1, num_levels, 1, 3, msg, stats_array);
          }

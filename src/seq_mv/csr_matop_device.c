@@ -1639,10 +1639,10 @@ hypre_CSRMatrixCheckDiagFirstDevice( hypre_CSRMatrix *A )
 
 __global__ void
 hypreGPUKernel_CSRMatrixCheckForMissingDiagonal( hypre_DeviceItem    &item,
-                                         HYPRE_Int      nrows,
-                                         HYPRE_Int     *ia,
-                                         HYPRE_Int     *ja,
-                                         HYPRE_Int     *result )
+                                                 HYPRE_Int      nrows,
+                                                 HYPRE_Int     *ia,
+                                                 HYPRE_Int     *ja,
+                                                 HYPRE_Int     *result )
 {
    const HYPRE_Int row = hypre_gpu_get_grid_warp_id<1, 1>(item);
 
@@ -3206,11 +3206,11 @@ hypre_SortCSRRocsparse( HYPRE_Int            n,
 
 HYPRE_Int
 hypre_CSRMatrixTriLowerUpperSolveOnemklsparse(char              uplo,
-                                           HYPRE_Int         unit_diag,
-                                           hypre_CSRMatrix  *A,
-                                           HYPRE_Real       *l1_norms,
-                                           HYPRE_Complex    *f_data,
-                                           HYPRE_Complex    *u_data )
+                                              HYPRE_Int         unit_diag,
+                                              hypre_CSRMatrix  *A,
+                                              HYPRE_Real       *l1_norms,
+                                              HYPRE_Complex    *f_data,
+                                              HYPRE_Complex    *u_data )
 {
    HYPRE_Int                                *A_j = hypre_CSRMatrixJ(A);
    HYPRE_Complex                            *A_a = hypre_CSRMatrixData(A);
@@ -3252,22 +3252,22 @@ hypre_CSRMatrixTriLowerUpperSolveOnemklsparse(char              uplo,
         (!hypre_CsrsvDataAnalyzedU(csrsv_data) && uplo == 'U') )
    {
       HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::optimize_trsv( *hypre_HandleComputeStream(hypre_handle()),
-                         (uplo == 'L') ? oneapi::mkl::uplo::L : oneapi::mkl::uplo::U,
-                         oneapi::mkl::transpose::N,
-                         unit_diag ? oneapi::mkl::diag::U : oneapi::mkl::diag::N,
-                         handle_A,
-                         {} ).wait() );
+                                                             (uplo == 'L') ? oneapi::mkl::uplo::L : oneapi::mkl::uplo::U,
+                                                             oneapi::mkl::transpose::N,
+                                                             unit_diag ? oneapi::mkl::diag::U : oneapi::mkl::diag::N,
+                                                             handle_A,
+                                                             {} ).wait() );
    }
 
    /* Do the triangular solve */
    HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::trsv( *hypre_HandleComputeStream(hypre_handle()),
-                     (uplo == 'L') ? oneapi::mkl::uplo::L : oneapi::mkl::uplo::U,
-                     oneapi::mkl::transpose::N,
-                     unit_diag ? oneapi::mkl::diag::U : oneapi::mkl::diag::N,
-                     handle_A,
-                     f_data,
-                     u_data,
-                     {} ).wait() );
+                                                 (uplo == 'L') ? oneapi::mkl::uplo::L : oneapi::mkl::uplo::U,
+                                                 oneapi::mkl::transpose::N,
+                                                 unit_diag ? oneapi::mkl::diag::U : oneapi::mkl::diag::N,
+                                                 handle_A,
+                                                 f_data,
+                                                 u_data,
+                                                 {} ).wait() );
 
    /* Restore the original matrix data */
    hypre_CSRMatrixJ(A) = A_j;

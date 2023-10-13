@@ -62,7 +62,8 @@ HYPRE_Int hypre_MatrixStatsDestroy( hypre_MatrixStats *stats );
 hypre_MatrixStatsArray* hypre_MatrixStatsArrayCreate( HYPRE_Int capacity );
 HYPRE_Int hypre_MatrixStatsArrayDestroy( hypre_MatrixStatsArray *stats_array );
 HYPRE_Int hypre_MatrixStatsArrayPrint( HYPRE_Int num_hierarchies, HYPRE_Int *num_levels,
-                                       HYPRE_Int use_divisors, HYPRE_Int shift, char **messages,
+                                       HYPRE_Int use_divisors, HYPRE_Int shift,
+                                       const char **messages,
                                        hypre_MatrixStatsArray *stats_array );
 
 /* qsort.c */
@@ -363,6 +364,10 @@ void hypre_GpuProfilingPopRange(void);
 HYPRE_Int hypre_multmod(HYPRE_Int a, HYPRE_Int b, HYPRE_Int mod);
 void hypre_partition1D(HYPRE_Int n, HYPRE_Int p, HYPRE_Int j, HYPRE_Int *s, HYPRE_Int *e);
 char *hypre_strcpy(char *destination, const char *source);
+HYPRE_Int hypre_CheckDirExists(const char *path);
+HYPRE_Int hypre_CreateDir(const char *path);
+HYPRE_Int hypre_CreateNextDirOfSequence(const char *basepath, const char *prefix,
+                                        char **fullpath_ptr);
 
 HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
 HYPRE_Int hypre_RestoreSyncCudaCompute(void);

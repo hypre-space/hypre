@@ -110,7 +110,7 @@ hypre_MatrixStatsArrayDestroy(hypre_MatrixStatsArray *stats_array)
       {
          hypre_MatrixStatsDestroy(hypre_MatrixStatsArrayEntry(stats_array, i));
       }
-
+      hypre_TFree(hypre_MatrixStatsArrayEntries(stats_array), HYPRE_MEMORY_HOST);
       hypre_TFree(stats_array, HYPRE_MEMORY_HOST);
    }
 
@@ -126,7 +126,7 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
                             HYPRE_Int               *num_levels,
                             HYPRE_Int                use_divisors,
                             HYPRE_Int                shift,
-                            char                   **messages,
+                            const char             **messages,
                             hypre_MatrixStatsArray  *stats_array)
 {
    HYPRE_Int            capacity = hypre_MatrixStatsArrayCapacity(stats_array);
@@ -230,15 +230,15 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
 
       ndigits[1] = hypre_max(ndigits[1], 1 + hypre_ndigits(fine_num_rows));
       ndigits[3] = hypre_max(ndigits[3],
-                             1 + hypre_ndigits(hypre_MatrixStatsSparsity(stats)));
+                             4 + hypre_ndigits((HYPRE_Int) hypre_MatrixStatsSparsity(stats)));
       ndigits[4] = hypre_max(ndigits[4],
                              1 + hypre_ndigits(hypre_MatrixStatsNnzrowMin(stats)));
       ndigits[5] = hypre_max(ndigits[5],
                              1 + hypre_ndigits(hypre_MatrixStatsNnzrowMax(stats)));
       ndigits[6] = hypre_max(ndigits[6],
-                             4 + hypre_ndigits(hypre_MatrixStatsNnzrowAvg(stats)));
+                             4 + hypre_ndigits((HYPRE_Int) hypre_MatrixStatsNnzrowAvg(stats)));
       ndigits[7] = hypre_max(ndigits[7],
-                             4 + hypre_ndigits(hypre_MatrixStatsNnzrowStDev(stats)));
+                             4 + hypre_ndigits((HYPRE_Int) hypre_MatrixStatsNnzrowStDev(stats)));
    }
 
    /* Column offsets calculation */
