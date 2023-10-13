@@ -1709,7 +1709,7 @@ hypre_BoomerAMGGetCoarseningName(hypre_ParAMGData *amg_data)
 const char*
 hypre_BoomerAMGGetCycleName(hypre_ParAMGData *amg_data)
 {
-   char *name = hypre_CTAlloc(char, 10, HYPRE_MEMORY_HOST);
+   static char name[10];
 
    switch (hypre_ParAMGDataCycleType(amg_data))
    {

@@ -159,7 +159,7 @@ hypre_CreateNextDirOfSequence(const char *basepath, const char *prefix, char **f
    {
       if (strncmp(entry->d_name, prefix, strlen(prefix)) == 0)
       {
-         if (sscanf(entry->d_name + strlen(prefix), "%d", &suffix) == 1)
+         if (hypre_sscanf(entry->d_name + strlen(prefix), "%d", &suffix) == 1)
          {
             if (suffix > max_suffix)
             {
@@ -172,7 +172,7 @@ hypre_CreateNextDirOfSequence(const char *basepath, const char *prefix, char **f
 
    /* Create directory */
    fullpath = hypre_TAlloc(char, strlen(basepath) + 10, HYPRE_MEMORY_HOST);
-   sprintf(fullpath, "%s/%s%05d", basepath, prefix, max_suffix + 1);
+   hypre_sprintf(fullpath, "%s/%s%05d", basepath, prefix, max_suffix + 1);
    hypre_CreateDir(fullpath);
 
    /* Set output pointer */

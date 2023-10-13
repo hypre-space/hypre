@@ -110,7 +110,7 @@ hypre_MatrixStatsArrayDestroy(hypre_MatrixStatsArray *stats_array)
       {
          hypre_MatrixStatsDestroy(hypre_MatrixStatsArrayEntry(stats_array, i));
       }
-
+      hypre_TFree(hypre_MatrixStatsArrayEntries(stats_array), HYPRE_MEMORY_HOST);
       hypre_TFree(stats_array, HYPRE_MEMORY_HOST);
    }
 
@@ -126,7 +126,7 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
                             HYPRE_Int               *num_levels,
                             HYPRE_Int                use_divisors,
                             HYPRE_Int                shift,
-                            char                   **messages,
+                            const char             **messages,
                             hypre_MatrixStatsArray  *stats_array)
 {
    HYPRE_Int            capacity = hypre_MatrixStatsArrayCapacity(stats_array);

@@ -254,6 +254,8 @@ hypre_ParCSRMatrixStatsComputePassTwoLocalHost(hypre_ParCSRMatrix  *A,
    /* Free memory */
    hypre_TFree(nnzrow_sqsum, HYPRE_MEMORY_HOST);
    hypre_TFree(rowsum_sqsum, HYPRE_MEMORY_HOST);
+   hypre_TFree(nnzrow_avg, HYPRE_MEMORY_HOST);
+   hypre_TFree(rowsum_avg, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
