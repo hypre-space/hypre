@@ -1870,6 +1870,54 @@ dnl *********************************************************************
 if test "$hypre_using_c" = "yes"
 then
    AC_PROG_CC
+
+   dnl Check if the compiler supports C99
+   AC_MSG_CHECKING([whether $CC supports C99 without flags])
+   echo "int main(void) { return 0; }" > conftest.c
+   if $CC -std=c99 conftest.c -o conftest > /dev/null 2>&1; then
+      AC_MSG_RESULT([yes])
+      has_c99=yes
+   else
+      AC_MSG_RESULT([no])
+      has_c99=no
+   fi
+   rm -f conftest*
+
+   dnl If the compiler's default standard is less than C99, enforce C99
+   AC_MSG_CHECKING([whether $CC default standard is at least C99])
+   echo "#include <stdbool.h>
+         int main(void) { _Bool b = false; return b; }" > conftest.c
+   if $CC conftest.c -o conftest > /dev/null 2>&1; then
+      AC_MSG_RESULT([yes])
+   else
+      AC_MSG_RESULT([no])
+      if test "x$has_c99" = "xyes"; then
+         CFLAGS="$CFLAGS -std=c99"
+      else
+         AC_MSG_ERROR([Your C compiler does not support C99. Please use a C99-compatible compiler.])
+      fi
+   fi
+   rm -f conftest*
+
+   dnl Check if CFLAGS contains an older standard
+   AC_MSG_CHECKING([whether CFLAGS contains an older standard than C99])
+   case "$CFLAGS" in
+      *-std=c89*|*-std=gnu89*|*-std=c90*|*-std=gnu90*)
+      AC_MSG_RESULT([yes])
+      if test "x$has_c99" = "xyes"; then
+         AC_MSG_WARN([Detected older C standard in CFLAGS. Replacing with -std=c99.])
+         CFLAGS="${CFLAGS//-std=c89/-std=c99}"
+         CFLAGS="${CFLAGS//-std=gnu89/-std=c99}"
+         CFLAGS="${CFLAGS//-std=c90/-std=c99}"
+         CFLAGS="${CFLAGS//-std=gnu90/-std=c99}"
+      else
+         AC_MSG_ERROR([Your CFLAGS specify a standard older than C99 and your compiler does not support C99. Please use a C99-compatible compiler or remove the older standard from CFLAGS.])
+      fi
+      ;;
+    *)
+      AC_MSG_RESULT([no])
+      ;;
+   esac
 fi
 
 if test "$hypre_using_cxx" = "yes"
