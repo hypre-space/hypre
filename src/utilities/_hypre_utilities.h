@@ -2434,7 +2434,9 @@ HYPRE_Int hypre_MagmaFinalize(void);
 #ifndef hypre_HOPSCOTCH_HASH_HEADER
 #define hypre_HOPSCOTCH_HASH_HEADER
 
-//#include <strings.h>
+#if !defined(_WIN32)
+#include <strings.h>
+#endif
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
@@ -2524,7 +2526,7 @@ static inline HYPRE_Int
 first_lsb_bit_indx( hypre_uint x )
 {
    HYPRE_Int pos;
-#if defined(_MSC_VER) || defined(__MINGW64__)
+#if defined(_WIN32)
    if (x == 0)
    {
       pos = 0;
