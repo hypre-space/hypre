@@ -663,8 +663,6 @@ HYPRE_MAGMA_INCLUDE
 HYPRE_MAGMA_LIB_DIR
 CALIPER_LIBS
 CALIPER_INCLUDE
-MAGMA_LIBS
-MAGMA_INCLUDE
 HYPRE_SYCL_LIBS
 HYPRE_SYCL_INCL
 HYPRE_HIP_LIBS
@@ -858,9 +856,6 @@ with_superlu_lib
 with_dsuperlu
 with_dsuperlu_include
 with_dsuperlu_lib
-with_magma
-with_magma_include
-with_magma_lib
 with_fei_inc_dir
 with_mli
 with_MPI
@@ -4582,30 +4577,6 @@ then :
 fi
 
 
-if test "x$with_magma" = "xyes"; then :
-
-$as_echo "#define HYPRE_USING_MAGMA 1" >>confdefs.h
-
-fi
-
-
-# Check whether --with-magma-include was given.
-if test "${with_magma_include+set}" = set; then :
-  withval=$with_magma_include; for dmagma_inc_dir in $withval; do
-    MAGMA_INCLUDE="-I$magma_inc_dir $MAGMA_INCLUDE"
- done
-
-fi
-
-
-
-# Check whether --with-magma-lib was given.
-if test "${with_magma_lib+set}" = set; then :
-  withval=$with_magma_lib; for magma_lib in $withval; do
-    MAGMA_LIBS="$MAGMA_LIBS $magma_lib"
- done
-
-fi
 
 
 # Check whether --with-fei-inc-dir was given.
@@ -7462,6 +7433,61 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
+
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether $CC supports C99 without flags" >&5
+printf %s "checking whether $CC supports C99 without flags... " >&6; }
+   echo "int main(void) { return 0; }" > conftest.c
+   if $CC -std=c99 conftest.c -o conftest > /dev/null 2>&1; then
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+      has_c99=yes
+   else
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+      has_c99=no
+   fi
+   rm -f conftest*
+
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether $CC default standard is at least C99" >&5
+printf %s "checking whether $CC default standard is at least C99... " >&6; }
+   echo "#include <stdbool.h>
+         int main(void) { _Bool b = false; return b; }" > conftest.c
+   if $CC conftest.c -o conftest > /dev/null 2>&1; then
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+   else
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+      if test "x$has_c99" = "xyes"; then
+         CFLAGS="$CFLAGS -std=c99"
+      else
+         as_fn_error $? "Your C compiler does not support C99. Please use a C99-compatible compiler." "$LINENO" 5
+      fi
+   fi
+   rm -f conftest*
+
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether CFLAGS contains an older standard than C99" >&5
+printf %s "checking whether CFLAGS contains an older standard than C99... " >&6; }
+   case "$CFLAGS" in
+      *-std=c89*|*-std=gnu89*|*-std=c90*|*-std=gnu90*)
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+      if test "x$has_c99" = "xyes"; then
+         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Detected older C standard in CFLAGS. Replacing with -std=c99." >&5
+printf "%s\n" "$as_me: WARNING: Detected older C standard in CFLAGS. Replacing with -std=c99." >&2;}
+         CFLAGS="${CFLAGS//-std=c89/-std=c99}"
+         CFLAGS="${CFLAGS//-std=gnu89/-std=c99}"
+         CFLAGS="${CFLAGS//-std=c90/-std=c99}"
+         CFLAGS="${CFLAGS//-std=gnu90/-std=c99}"
+      else
+         as_fn_error $? "Your CFLAGS specify a standard older than C99 and your compiler does not support C99. Please use a C99-compatible compiler or remove the older standard from CFLAGS." "$LINENO" 5
+      fi
+      ;;
+    *)
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+      ;;
+   esac
 fi
 
 if test "$hypre_using_cxx" = "yes"
