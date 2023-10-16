@@ -395,10 +395,8 @@ typedef struct hypre_MatrixStatsArray_struct
    hypre_printf(" %s\n", msg);
 
 #define HYPRE_PRINT_INDENT(n)                       \
-   for (HYPRE_Int __i = 0; __i < n; __i++)          \
-   {                                                \
-      hypre_printf(" ");                            \
-   }
+   hypre_printf("%*s", (n > 0) ? n : 0, "");
+
 
 #define HYPRE_PRINT_SHIFTED_PARAM(n, ...)           \
    HYPRE_PRINT_INDENT(n)                            \
