@@ -24,6 +24,9 @@ project(${PROJECT_NAME}
   VERSION ${HYPRE_VERSION}
   LANGUAGES C)
 
+# We use C99 by default, but users are free to specify any newer standard version
+set(CMAKE_C_STANDARD 99)
+
 if (${HYPRE_SOURCE_DIR} STREQUAL ${HYPRE_BINARY_DIR})
   message(FATAL_ERROR "In-place build not allowed! Please use a separate build directory. See the Users Manual or INSTALL file for details.")
 endif ()
