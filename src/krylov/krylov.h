@@ -1463,6 +1463,8 @@ HYPRE_Int HYPRE_GMRESGetSkipRealResidualCheck ( HYPRE_Solver solver, HYPRE_Int *
 HYPRE_Int HYPRE_GMRESSetPrecond ( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond,
                                   HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver );
 HYPRE_Int HYPRE_GMRESGetPrecond ( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
+HYPRE_Int HYPRE_GMRESSetPrecondMatrix ( HYPRE_Solver solver , HYPRE_Matrix precond_matrix );
+HYPRE_Int HYPRE_GMRESGetPrecondMatrix ( HYPRE_Solver solver , HYPRE_Matrix *precond_matrix_ptr );
 HYPRE_Int HYPRE_GMRESSetPrintLevel ( HYPRE_Solver solver, HYPRE_Int level );
 HYPRE_Int HYPRE_GMRESGetPrintLevel ( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int HYPRE_GMRESSetLogging ( HYPRE_Solver solver, HYPRE_Int level );

@@ -264,11 +264,6 @@ HYPRE_Int HYPRE_PCGGetRelChange(HYPRE_Solver  solver,
 
 /**
  **/
-HYPRE_Int HYPRE_GMRESGetSkipRealResidualCheck(HYPRE_Solver solver,
-                                              HYPRE_Int   *skip_real_r_check);
-
-/**
- **/
 HYPRE_Int HYPRE_PCGGetPrecond(HYPRE_Solver  solver,
                               HYPRE_Solver *precond_data_ptr);
 
@@ -398,6 +393,11 @@ HYPRE_Int HYPRE_GMRESSetLogging(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_GMRESSetPrintLevel(HYPRE_Solver solver,
                                    HYPRE_Int    level);
+
+/**
+ **/
+HYPRE_Int HYPRE_GMRESGetSkipRealResidualCheck(HYPRE_Solver solver,
+                                              HYPRE_Int   *skip_real_r_check);
 
 /**
  * Return the number of iterations taken.
