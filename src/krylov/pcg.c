@@ -104,7 +104,7 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
    (pcg_data -> owns_matvec_data ) = 1;
    (pcg_data -> matvec_data)  = NULL;
    (pcg_data -> precond_data) = NULL;
-   (pcg_data -> precond_Mat) = NULL;
+   (pcg_data -> precond_Mat)  = NULL;
    (pcg_data -> print_level)  = 0;
    (pcg_data -> logging)      = 0;
    (pcg_data -> norms)        = NULL;

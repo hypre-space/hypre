@@ -29,9 +29,11 @@
 #include "HYPRE_IJ_mv.h"
 #include "hypre_IJ_mv_mup.h"
 #include "HYPRE_parcsr_ls.h"
+#include "HYPRE_parcsr_ls_mp.h"
 #include "hypre_parcsr_ls_mup.h"
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
+#include "hypre_krylov_mup.h"
 //#include "HYPRE_krylov_mp.h"
 //#include "hypre_utilities_mp.h"
 
@@ -312,6 +314,9 @@ int main (int argc, char *argv[])
       /* Defect correction solver using AMG */
       hypre_printf_dbl("\n\n***** Richardson Defect Correction Solver for AMG *****\n");
       /* step 0: create and setup single precision amg solver */
+      time_index = hypre_InitializeTiming_dbl("Setup AMG float");
+      hypre_BeginTiming_dbl(time_index);
+
       HYPRE_Solver amg_solver;
       HYPRE_BoomerAMGCreate_flt(&amg_solver);
       HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, 0); /* print amg solution info */
@@ -321,7 +326,14 @@ int main (int argc, char *argv[])
       HYPRE_BoomerAMGSetTol_flt(amg_solver, 1.0e-16); /* conv. tolerance zero */
       HYPRE_BoomerAMGSetMaxIter_flt(amg_solver, 1); /* do only one iteration! */
       HYPRE_BoomerAMGSetup_flt(amg_solver, parcsr_A, par_b, par_x);    
-
+      hypre_EndTiming_dbl(time_index);
+      hypre_PrintTiming_dbl("Setup AMG float",hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming_dbl(time_index);
+      hypre_ClearTiming_dbl();
+      fflush(NULL);
+      
+      time_index = hypre_InitializeTiming_dbl("Solve DC mixed");
+      hypre_BeginTiming_dbl(time_index);
       /* step 1: approximate solve */
       HYPRE_BoomerAMGSolve_flt(amg_solver, parcsr_A, par_b, par_x);
 
@@ -355,7 +367,7 @@ int main (int argc, char *argv[])
          rprod = 0.;
          HYPRE_ParVectorInnerProd_dbl(hres,hres,&rprod);
          rnrm[i] = rprod;   
-         printf("rprod = %f\n",rprod);
+         //printf("rprod = %f\n",rprod);
          /*=====================*/
 
          /* step 4: solver for error in single precision */
@@ -379,10 +391,15 @@ int main (int argc, char *argv[])
          HYPRE_ParVectorInnerProd_dbl(hres,hres,&eprod);  
          enrm[i] = eprod;      
 
-         printf("eprod = %f\n",eprod);
+         //printf("eprod = %f\n",eprod);
            
          /*=====================*/
     }
+      hypre_EndTiming_dbl(time_index);
+      hypre_PrintTiming_dbl("Solve DC mixed",hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming_dbl(time_index);
+      hypre_ClearTiming_dbl();
+      fflush(NULL);
 
     /* print some stats */
     /*==========================================*/

@@ -38,7 +38,7 @@
 
 #include <time.h>
 
-#define MAXITS 50
+#define MAXITS 1000
 
 #define my_min(a,b)  (((a)<(b)) ? (a) : (b))
 
@@ -347,7 +347,7 @@ int main (int argc, char *argv[])
       /* Now set up the AMG preconditioner and specify any parameters */
      if(solver_id == 1)
      {
-        hypre_printf_dbl("\n\n***** Solver: DOUBLE PRECISION AMG-PCG *****\n");
+        if (myid == 0) hypre_printf_dbl("\n\n***** Solver: DOUBLE PRECISION AMG-PCG *****\n");
 
          HYPRE_BoomerAMGCreate_dbl(&amg_solver);
 //         HYPRE_BoomerAMGSetPrintLevel_dbl(amg_solver, 0); /* print amg solution info */
@@ -379,7 +379,7 @@ int main (int argc, char *argv[])
       }
       else
       {
-        hypre_printf_dbl("\n\n***** Solver: DOUBLE PRECISION DS-PCG *****\n");
+        if (myid == 0) hypre_printf_dbl("\n\n***** Solver: DOUBLE PRECISION DS-PCG *****\n");
       }
       // Setup PCG solver
       HYPRE_PCGSetup_dbl(pcg_solver, (HYPRE_Matrix)parcsr_B,  (HYPRE_Vector)par_bb, (HYPRE_Vector)par_xb);
@@ -404,8 +404,11 @@ int main (int argc, char *argv[])
 
       HYPRE_PCGGetNumIterations_dbl(pcg_solver, &num_iterations);
       HYPRE_PCGGetFinalRelativeResidualNorm_dbl(pcg_solver, &dfinal_res_norm);
-      hypre_printf_dbl("final relative residual norm = %e \n", dfinal_res_norm);
-      hypre_printf_dbl("Iteration count = %d \n", num_iterations);         
+      if (myid == 0)
+      {
+        hypre_printf_dbl("final relative residual norm = %e \n", dfinal_res_norm);
+      	hypre_printf_dbl("Iteration count = %d \n", num_iterations);         
+      }
       fflush(NULL);
       // destroy pcg solver
       HYPRE_ParCSRPCGDestroy_dbl(pcg_solver);
@@ -437,7 +440,7 @@ int main (int argc, char *argv[])
       /* Now set up the AMG preconditioner and specify any parameters */
       if(solver_id == 1)
       {
-         hypre_printf_dbl("\n\n***** Solver: SINGLE PRECISION AMG-PCG *****\n");
+         if (myid == 0) hypre_printf_dbl("\n\n***** Solver: SINGLE PRECISION AMG-PCG *****\n");
          HYPRE_BoomerAMGCreate_flt(&amg_solver);
 //         HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, 0); /* print amg solution info */
          HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, 8);
@@ -468,7 +471,7 @@ int main (int argc, char *argv[])
       }
       else
       {
-         hypre_printf_dbl("\n\n***** Solver: SINGLE PRECISION DS-PCG *****\n");
+         if (myid == 0) hypre_printf_dbl("\n\n***** Solver: SINGLE PRECISION DS-PCG *****\n");
       }
       // Setup PCG solver
       HYPRE_PCGSetup_flt(pcg_solver, (HYPRE_Matrix)parcsr_A,  (HYPRE_Vector)par_b, (HYPRE_Vector)par_x);
@@ -493,8 +496,11 @@ int main (int argc, char *argv[])
 
       HYPRE_PCGGetNumIterations_flt(pcg_solver, &num_iterations);
       HYPRE_PCGGetFinalRelativeResidualNorm_flt(pcg_solver, &final_res_norm);
-      hypre_printf_dbl("final relative residual norm = %e \n", final_res_norm);
-      hypre_printf_dbl("Iteration count = %d \n", num_iterations);         
+      if (myid == 0)
+      {
+         hypre_printf_dbl("final relative residual norm = %e \n", final_res_norm);
+         hypre_printf_dbl("Iteration count = %d \n", num_iterations);         
+      }
       fflush(NULL);
       // destroy pcg solver
       HYPRE_ParCSRPCGDestroy_flt(pcg_solver);
@@ -526,7 +532,7 @@ int main (int argc, char *argv[])
       /* Now set up the AMG preconditioner and specify any parameters */
      if(solver_id == 1)
      {
-         hypre_printf_dbl("\n\n***** Solver: MIXED PRECISION AMG-PCG *****\n");
+         if (myid == 0) hypre_printf_dbl("\n\n***** Solver: MIXED PRECISION AMG-PCG *****\n");
          HYPRE_BoomerAMGCreate_flt(&amg_solver);
 //         HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, 0); /* print amg solution info */
          HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, 8);
@@ -560,7 +566,7 @@ int main (int argc, char *argv[])
       }
       else
       {
-        hypre_printf_dbl("\n\n***** Solver: DOUBLE PRECISION DS-PCG *****\n");
+        if (myid == 0) hypre_printf_dbl("\n\n***** Solver: DOUBLE PRECISION DS-PCG *****\n");
       }
       // Setup PCG solver (double precision)
       HYPRE_PCGSetup_dbl(pcg_solver, (HYPRE_Matrix)parcsr_B,  (HYPRE_Vector)par_bb, (HYPRE_Vector)par_xb);
@@ -585,8 +591,11 @@ int main (int argc, char *argv[])
 
       HYPRE_PCGGetNumIterations_dbl(pcg_solver, &num_iterations);
       HYPRE_PCGGetFinalRelativeResidualNorm_dbl(pcg_solver, &dfinal_res_norm);
-      hypre_printf_dbl("final relative residual norm = %e \n", dfinal_res_norm);
-      hypre_printf_dbl("Iteration count = %d \n", num_iterations);         
+      if (myid == 0)
+      {
+        hypre_printf_dbl("final relative residual norm = %e \n", dfinal_res_norm);
+        hypre_printf_dbl("Iteration count = %d \n", num_iterations);         
+      }
       fflush(NULL);
       // destroy pcg solver
       HYPRE_ParCSRPCGDestroy_dbl(pcg_solver);

@@ -448,6 +448,7 @@ typedef struct
 
    void    *matvec_data;
    void    *precond_data;
+   void    *precond_Mat;
 
    hypre_GMRESFunctions * functions;
 
@@ -1278,6 +1279,8 @@ HYPRE_Int hypre_GMRESSetPrecond ( void *gmres_vdata, HYPRE_Int (*precond )(void*
                                                                            void*),
                                   HYPRE_Int (*precond_setup )(void*, void*, void*, void*), void *precond_data );
 HYPRE_Int hypre_GMRESGetPrecond ( void *gmres_vdata, HYPRE_Solver *precond_data_ptr );
+HYPRE_Int hypre_GMRESSetPrecondMatrix ( void *gmres_vdata, void *precond_matrix );
+HYPRE_Int hypre_GMRESGetPrecondMatrix ( void *gmres_vdata, HYPRE_Matrix *precond_matrix_ptr );
 HYPRE_Int hypre_GMRESSetPrintLevel ( void *gmres_vdata, HYPRE_Int level );
 HYPRE_Int hypre_GMRESGetPrintLevel ( void *gmres_vdata, HYPRE_Int *level );
 HYPRE_Int hypre_GMRESSetLogging ( void *gmres_vdata, HYPRE_Int level );
