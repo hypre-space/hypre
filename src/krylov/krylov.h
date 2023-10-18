@@ -33,8 +33,8 @@ extern "C" {
 
 typedef struct hypre_SolverBase_struct
 {
-   HYPRE_Int (*setup)(HYPRE_Solver, HYPRE_Matrix, HYPRE_Vector, HYPRE_Vector);
-   HYPRE_Int (*solve)(HYPRE_Solver, HYPRE_Matrix, HYPRE_Vector, HYPRE_Vector);
+   HYPRE_PtrToSolverFcn  setup;
+   HYPRE_PtrToSolverFcn  solve;
 } hypre_SolverBase;
 
 /******************************************************************************
