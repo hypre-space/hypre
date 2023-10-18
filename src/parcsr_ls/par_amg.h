@@ -19,7 +19,7 @@
 typedef struct
 {
    /* Base solver data structure */
-   hypre_SolverBase   base;
+   hypre_Solver   base;
 
    /* Memory location of matrices/vectors in AMGData */
    HYPRE_MemoryLocation  memory_location;

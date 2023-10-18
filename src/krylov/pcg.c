@@ -1136,8 +1136,8 @@ HYPRE_Int
 hypre_PCGSetPreconditioner(void *pcg_vdata,
                            void *precond_data )
 {
-   hypre_PCGData      *pcg_data      = (hypre_PCGData *) pcg_vdata;
-   hypre_SolverBase   *base          = (hypre_SolverBase*) precond_data;
+   hypre_PCGData      *pcg_data      = (hypre_PCGData*) pcg_vdata;
+   hypre_Solver       *base          = (hypre_Solver*)  precond_data;
    hypre_PCGFunctions *pcg_functions = pcg_data->functions;
 
    (pcg_data -> precond_data)       = precond_data;

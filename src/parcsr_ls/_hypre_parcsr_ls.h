@@ -37,7 +37,7 @@ typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
 typedef struct
 {
    /* Base solver data structure */
-   hypre_SolverBase   base;
+   hypre_Solver   base;
 
    /* Memory location of matrices/vectors in AMGData */
    HYPRE_MemoryLocation  memory_location;
