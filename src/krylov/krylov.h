@@ -27,21 +27,6 @@ extern "C" {
 
 /******************************************************************************
  *
- * Base solver struct
- *
- *****************************************************************************/
-
-typedef HYPRE_Int (*HYPRE_PtrToDestroyFcn)(HYPRE_Solver);
-
-typedef struct
-{
-   HYPRE_PtrToSolverFcn   setup;
-   HYPRE_PtrToSolverFcn   solve;
-   HYPRE_PtrToDestroyFcn  destroy;
-} hypre_Solver;
-
-/******************************************************************************
- *
  * BiCGSTAB bicgstab
  *
  *****************************************************************************/

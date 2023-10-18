@@ -211,6 +211,46 @@ typedef double                 hypre_double;
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#ifndef HYPRE_BASE_HEADER
+#define HYPRE_BASE_HEADER
+
+/* Base public solver struct */
+struct hypre_Solver_struct;
+typedef struct hypre_Solver_struct *HYPRE_Solver;
+
+/* Base public matrix struct */
+struct hypre_Matrix_struct;
+typedef struct hypre_Matrix_struct *HYPRE_Matrix;
+
+/* Base public vector struct */
+struct hypre_Vector_struct;
+typedef struct hypre_Vector_struct *HYPRE_Vector;
+
+/* Base function pointers */
+typedef HYPRE_Int (*HYPRE_PtrToSolverFcn)(HYPRE_Solver, HYPRE_Matrix, HYPRE_Vector, HYPRE_Vector);
+typedef HYPRE_Int (*HYPRE_PtrToDestroyFcn)(HYPRE_Solver);
+
+/******************************************************************************
+ *
+ * Base private solver struct
+ *
+ *****************************************************************************/
+
+typedef struct
+{
+   HYPRE_PtrToSolverFcn   setup;
+   HYPRE_PtrToSolverFcn   solve;
+   HYPRE_PtrToDestroyFcn  destroy;
+} hypre_Solver;
+
+#endif /* HYPRE_BASE_HEADER */
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef HYPRE_MAGMA_HEADER
 #define HYPRE_MAGMA_HEADER
 

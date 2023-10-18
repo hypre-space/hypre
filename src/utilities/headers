@@ -35,6 +35,7 @@ extern "C" {
 
 cat state.h                    >> $INTERNAL_HEADER
 cat general.h                  >> $INTERNAL_HEADER
+cat base.h                     >> $INTERNAL_HEADER
 cat magma.h                    >> $INTERNAL_HEADER
 cat matrix_stats.h             >> $INTERNAL_HEADER
 cat printf.h                   >> $INTERNAL_HEADER
