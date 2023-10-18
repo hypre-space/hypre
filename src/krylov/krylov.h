@@ -137,7 +137,8 @@ typedef struct
    void  *q;
 
    void  *matvec_data;
-   void    *precond_data;
+   void  *precond_data;
+   void  *precond_Mat;
 
    hypre_BiCGSTABFunctions * functions;
 
@@ -1223,6 +1224,8 @@ HYPRE_Int hypre_BiCGSTABSetPrecond ( void *bicgstab_vdata, HYPRE_Int (*precond )
                                                                                  void*,
                                                                                  void*), HYPRE_Int (*precond_setup )(void*, void*, void*, void*), void *precond_data );
 HYPRE_Int hypre_BiCGSTABGetPrecond ( void *bicgstab_vdata, HYPRE_Solver *precond_data_ptr );
+HYPRE_Int hypre_BiCGSTABSetPrecondMatrix( void  *bicgstab_vdata,  void  *precond_matrix );
+HYPRE_Int hypre_BiCGSTABGetPrecondMatrix( void  *bicgstab_vdata,  HYPRE_Matrix *precond_matrix_ptr ) ;
 HYPRE_Int hypre_BiCGSTABSetLogging ( void *bicgstab_vdata, HYPRE_Int logging );
 HYPRE_Int hypre_BiCGSTABSetHybrid ( void *bicgstab_vdata, HYPRE_Int logging );
 HYPRE_Int hypre_BiCGSTABSetPrintLevel ( void *bicgstab_vdata, HYPRE_Int print_level );
@@ -1378,6 +1381,8 @@ HYPRE_Int HYPRE_BiCGSTABSetStopCrit ( HYPRE_Solver solver, HYPRE_Int stop_crit )
 HYPRE_Int HYPRE_BiCGSTABSetPrecond ( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond,
                                      HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver );
 HYPRE_Int HYPRE_BiCGSTABGetPrecond ( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
+HYPRE_Int HYPRE_BiCGSTABSetPrecondMatrix ( HYPRE_Solver solver , HYPRE_Matrix precond_matrix );
+HYPRE_Int HYPRE_BiCGSTABGetPrecondMatrix ( HYPRE_Solver solver , HYPRE_Matrix *precond_matrix_ptr );
 HYPRE_Int HYPRE_BiCGSTABSetLogging ( HYPRE_Solver solver, HYPRE_Int logging );
 HYPRE_Int HYPRE_BiCGSTABSetPrintLevel ( HYPRE_Solver solver, HYPRE_Int print_level );
 HYPRE_Int HYPRE_BiCGSTABGetNumIterations ( HYPRE_Solver solver, HYPRE_Int *num_iterations );

@@ -90,6 +90,12 @@ HYPRE_Int hypre_BiCGSTABGetNumIterations_long_dbl  ( void *bicgstab_vdata, HYPRE
 HYPRE_Int hypre_BiCGSTABGetPrecond_flt  ( void *bicgstab_vdata, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int hypre_BiCGSTABGetPrecond_dbl  ( void *bicgstab_vdata, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int hypre_BiCGSTABGetPrecond_long_dbl  ( void *bicgstab_vdata, HYPRE_Solver *precond_data_ptr );
+HYPRE_Int hypre_BiCGSTABSetPrecondMatrix_flt( void  *bicgstab_vdata,  void  *precond_matrix );
+HYPRE_Int hypre_BiCGSTABSetPrecondMatrix_dbl( void  *bicgstab_vdata,  void  *precond_matrix );
+HYPRE_Int hypre_BiCGSTABSetPrecondMatrix_long_dbl( void  *bicgstab_vdata,  void  *precond_matrix );
+HYPRE_Int hypre_BiCGSTABGetPrecondMatrix_flt( void  *bicgstab_vdata,  HYPRE_Matrix *precond_matrix_ptr );
+HYPRE_Int hypre_BiCGSTABGetPrecondMatrix_dbl( void  *bicgstab_vdata,  HYPRE_Matrix *precond_matrix_ptr );
+HYPRE_Int hypre_BiCGSTABGetPrecondMatrix_long_dbl( void  *bicgstab_vdata,  HYPRE_Matrix *precond_matrix_ptr );
 HYPRE_Int hypre_BiCGSTABGetResidual_flt  ( void *bicgstab_vdata, void **residual );
 HYPRE_Int hypre_BiCGSTABGetResidual_dbl  ( void *bicgstab_vdata, void **residual );
 HYPRE_Int hypre_BiCGSTABGetResidual_long_dbl  ( void *bicgstab_vdata, void **residual );
@@ -609,6 +615,12 @@ HYPRE_Int HYPRE_BiCGSTABGetNumIterations_long_dbl  ( HYPRE_Solver solver, HYPRE_
 HYPRE_Int HYPRE_BiCGSTABGetPrecond_flt  ( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int HYPRE_BiCGSTABGetPrecond_dbl  ( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int HYPRE_BiCGSTABGetPrecond_long_dbl  ( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
+HYPRE_Int HYPRE_BiCGSTABSetPrecondMatrix_flt  ( HYPRE_Solver solver, HYPRE_Matrix precond_matrix);
+HYPRE_Int HYPRE_BiCGSTABSetPrecondMatrix_dbl  ( HYPRE_Solver solver, HYPRE_Matrix precond_matrix);
+HYPRE_Int HYPRE_BiCGSTABSetPrecondMatrix_long_dbl  ( HYPRE_Solver solver, HYPRE_Matrix precond_matrix);
+HYPRE_Int HYPRE_BiCGSTABGetPrecondMatrix_flt( HYPRE_Solver  solver, HYPRE_Matrix *precond_matrix_ptr );
+HYPRE_Int HYPRE_BiCGSTABGetPrecondMatrix_dbl( HYPRE_Solver  solver, HYPRE_Matrix *precond_matrix_ptr );
+HYPRE_Int HYPRE_BiCGSTABGetPrecondMatrix_long_dbl( HYPRE_Solver  solver, HYPRE_Matrix *precond_matrix_ptr );
 HYPRE_Int HYPRE_BiCGSTABGetResidual_flt  ( HYPRE_Solver solver, void *residual );
 HYPRE_Int HYPRE_BiCGSTABGetResidual_dbl  ( HYPRE_Solver solver, void *residual );
 HYPRE_Int HYPRE_BiCGSTABGetResidual_long_dbl  ( HYPRE_Solver solver, void *residual );
