@@ -562,8 +562,11 @@ int main (int argc, char *argv[])
    }
 
    /*! Done with linear system setup. Now proceed to solve the system. */
+   // PCG solve
+   if (solver_id < 2)
+   {
 // Double precision
-{
+    {
       /* reset solution vector */
       if (build_rhs_type < 4 || build_rhs_type == 6) HYPRE_ParVectorSetConstantValues_dbl(x_dbl, zero);
       else  HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775);
@@ -702,9 +705,9 @@ int main (int argc, char *argv[])
       // destroy pcg solver
       HYPRE_ParCSRPCGDestroy_dbl(pcg_solver);
       if(solver_id == 1) HYPRE_BoomerAMGDestroy_dbl(amg_solver);
-}
+    }
 // Single precision
-{
+    {
       /* reset solution vector */
       if (build_rhs_type < 4)  HYPRE_ParVectorSetConstantValues_flt(x_flt, zero);
       else  HYPRE_ParVectorSetRandomValues_flt(x_flt, 22775);
@@ -842,9 +845,9 @@ int main (int argc, char *argv[])
       // destroy pcg solver
       HYPRE_ParCSRPCGDestroy_flt(pcg_solver);
       if(solver_id == 1) HYPRE_BoomerAMGDestroy_flt(amg_solver);
-   }
+    }
 // mixed-precision
-   {
+    {
       /* reset solution vector */
       if (build_rhs_type < 4)  HYPRE_ParVectorSetConstantValues_dbl(x_dbl, zero);
       else  HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775);
@@ -985,9 +988,11 @@ int main (int argc, char *argv[])
       // destroy pcg solver
       HYPRE_ParCSRPCGDestroy_dbl(pcg_solver);
       if(solver_id == 1) HYPRE_BoomerAMGDestroy_flt(amg_solver);
+    } //end PCG   
    }   
-    
-{
+   else if (solver_id < 4)  //GMRES
+   {
+    {
       /* reset solution vector */
       if (build_rhs_type < 4 || build_rhs_type == 6) HYPRE_ParVectorSetConstantValues_dbl(x_dbl, zero);
       else  HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775);
@@ -1126,9 +1131,9 @@ int main (int argc, char *argv[])
       // destroy pcg solver
       HYPRE_ParCSRGMRESDestroy_dbl(pcg_solver);
       if(solver_id == 3) HYPRE_BoomerAMGDestroy_dbl(amg_solver);
-}
+    }
 // Single precision
-{
+    {
       /* reset solution vector */
       if (build_rhs_type < 4)  HYPRE_ParVectorSetConstantValues_flt(x_flt, zero);
       else  HYPRE_ParVectorSetRandomValues_flt(x_flt, 22775);
@@ -1265,9 +1270,9 @@ int main (int argc, char *argv[])
       // destroy pcg solver
       HYPRE_ParCSRGMRESDestroy_flt(pcg_solver);
       if(solver_id == 3) HYPRE_BoomerAMGDestroy_flt(amg_solver);
-   }
+    }
 // mixed-precision
-   {
+    {
       /* reset solution vector */
       if (build_rhs_type < 4)  HYPRE_ParVectorSetConstantValues_dbl(x_dbl, zero);
       else  HYPRE_ParVectorSetRandomValues_dbl(x_dbl, 22775);
@@ -1404,9 +1409,10 @@ int main (int argc, char *argv[])
         hypre_printf_dbl("Iteration count = %d \n", num_iterations);         
       }
       fflush(NULL);
-      // destroy pcg solver
+      // destroy gmres solver
       HYPRE_ParCSRGMRESDestroy_dbl(pcg_solver);
       if(solver_id == 3) HYPRE_BoomerAMGDestroy_flt(amg_solver);
+    } // end GMRES   
    }   
     
    /* Clean up */

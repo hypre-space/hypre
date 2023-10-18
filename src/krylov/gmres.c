@@ -934,6 +934,277 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
    return hypre_error_flag;
 }
+/*--------------------------------------------------------------------------
+ * hypre_GMRESSetKDim, hypre_GMRESGetKDim
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GMRESSetKDim( void     *gmres_vdata,
+                    HYPRE_Int k_dim )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *) gmres_vdata;
+
+
+   (gmres_data -> k_dim) = k_dim;
+
+   return hypre_error_flag;
+
+}
+
+HYPRE_Int
+hypre_GMRESGetKDim( void      *gmres_vdata,
+                    HYPRE_Int *k_dim )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+
+   *k_dim = (gmres_data -> k_dim);
+
+   return hypre_error_flag;
+}
+/*--------------------------------------------------------------------------
+ * hypre_GMRESSetTol, hypre_GMRESGetTol
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GMRESSetTol( void      *gmres_vdata,
+                   HYPRE_Real tol )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+
+   (gmres_data -> tol) = tol;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_GMRESGetTol( void       *gmres_vdata,
+                   HYPRE_Real *tol )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+
+   *tol = (gmres_data -> tol);
+
+   return hypre_error_flag;
+}
+/*--------------------------------------------------------------------------
+ * hypre_GMRESSetAbsoluteTol, hypre_GMRESGetAbsoluteTol
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GMRESSetAbsoluteTol( void      *gmres_vdata,
+                           HYPRE_Real a_tol )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+
+   (gmres_data -> a_tol) = a_tol;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_GMRESGetAbsoluteTol( void       *gmres_vdata,
+                           HYPRE_Real *a_tol )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+
+   *a_tol = (gmres_data -> a_tol);
+
+   return hypre_error_flag;
+}
+/*--------------------------------------------------------------------------
+ * hypre_GMRESSetConvergenceFactorTol, hypre_GMRESGetConvergenceFactorTol
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GMRESSetConvergenceFactorTol( void      *gmres_vdata,
+                                    HYPRE_Real cf_tol )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+
+   (gmres_data -> cf_tol) = cf_tol;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_GMRESGetConvergenceFactorTol( void       *gmres_vdata,
+                                    HYPRE_Real *cf_tol )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+
+   *cf_tol = (gmres_data -> cf_tol);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GMRESSetMinIter, hypre_GMRESGetMinIter
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GMRESSetMinIter( void     *gmres_vdata,
+                       HYPRE_Int min_iter )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+
+   (gmres_data -> min_iter) = min_iter;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_GMRESGetMinIter( void      *gmres_vdata,
+                       HYPRE_Int *min_iter )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+
+   *min_iter = (gmres_data -> min_iter);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GMRESSetMaxIter, hypre_GMRESGetMaxIter
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GMRESSetMaxIter( void      *gmres_vdata,
+                       HYPRE_Int  max_iter )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+
+   (gmres_data -> max_iter) = max_iter;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_GMRESGetMaxIter( void      *gmres_vdata,
+                       HYPRE_Int *max_iter )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+
+   *max_iter = (gmres_data -> max_iter);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GMRESSetRelChange, hypre_GMRESGetRelChange
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GMRESSetRelChange( void     *gmres_vdata,
+                         HYPRE_Int rel_change )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+
+   (gmres_data -> rel_change) = rel_change;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_GMRESGetRelChange( void      *gmres_vdata,
+                         HYPRE_Int *rel_change )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+
+   *rel_change = (gmres_data -> rel_change);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GMRESSetSkipRealResidualCheck, hypre_GMRESGetSkipRealResidualCheck
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GMRESSetSkipRealResidualCheck( void     *gmres_vdata,
+                                     HYPRE_Int skip_real_r_check )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+   (gmres_data -> skip_real_r_check) = skip_real_r_check;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_GMRESGetSkipRealResidualCheck( void      *gmres_vdata,
+                                     HYPRE_Int *skip_real_r_check)
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+   *skip_real_r_check = (gmres_data -> skip_real_r_check);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *  hypre_GMRESSetStopCrit, hypre_GMRESGetStopCrit
+ * 
+ *  OBSOLETE
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GMRESSetStopCrit( void      *gmres_vdata,
+                        HYPRE_Int  stop_crit )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+
+   (gmres_data -> stop_crit) = stop_crit;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_GMRESGetStopCrit( void      *gmres_vdata,
+                        HYPRE_Int *stop_crit )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+
+   *stop_crit = (gmres_data -> stop_crit);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GMRESSetPrecond
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GMRESSetPrecond( void  *gmres_vdata,
+                       HYPRE_Int  (*precond)(void*, void*, void*, void*),
+                       HYPRE_Int  (*precond_setup)(void*, void*, void*, void*),
+                       void  *precond_data )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+   hypre_GMRESFunctions *gmres_functions = gmres_data->functions;
+
+
+   (gmres_functions -> precond)        = precond;
+   (gmres_functions -> precond_setup)  = precond_setup;
+   (gmres_data -> precond_data)        = precond_data;
+
+   return hypre_error_flag;
+}
+
 
 /*--------------------------------------------------------------------------
  * hypre_precond_setup)(void*, void*, void*, void*),
