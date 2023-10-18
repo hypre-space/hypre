@@ -31,10 +31,13 @@ extern "C" {
  *
  *****************************************************************************/
 
+typedef HYPRE_Int (*HYPRE_PtrToDestroyFcn)(HYPRE_Solver);
+
 typedef struct hypre_SolverBase_struct
 {
-   HYPRE_PtrToSolverFcn  setup;
-   HYPRE_PtrToSolverFcn  solve;
+   HYPRE_PtrToSolverFcn   setup;
+   HYPRE_PtrToSolverFcn   solve;
+   HYPRE_PtrToDestroyFcn  destroy;
 } hypre_SolverBase;
 
 /******************************************************************************
