@@ -420,6 +420,16 @@ int main (int argc, char *argv[])
          arg_index++;
          max_row_sum  = atof(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-tol") == 0 )
+      {
+         arg_index++;
+         tol  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-k") == 0 )
+      {
+         arg_index++;
+         k_dim  = atoi(argv[arg_index++]);
+      }
       else
       {
          arg_index++;
@@ -869,7 +879,7 @@ int main (int argc, char *argv[])
       
       
       /* Now set up the AMG preconditioner and specify any parameters */
-     if(solver_id == 1)
+     if (solver_id == 1)
      {
          if (myid == 0) hypre_printf_dbl("\n\n***** Solver: MIXED PRECISION AMG-PCG *****\n");
          HYPRE_PCGSetMaxIter_dbl(pcg_solver, mg_max_iter);
@@ -954,7 +964,7 @@ int main (int argc, char *argv[])
       }
       else if (solver_id == 0)
       {
-        if (myid == 0) hypre_printf_dbl("\n\n***** Solver: DOUBLE PRECISION DS-PCG *****\n");
+        if (myid == 0) hypre_printf_dbl("\n\n***** Solver: MIXED PRECISION DS-PCG *****\n");
       }
       // Setup PCG solver (double precision)
       HYPRE_PCGSetup_dbl(pcg_solver, (HYPRE_Matrix)A_dbl, (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
@@ -992,6 +1002,7 @@ int main (int argc, char *argv[])
    }   
    else if (solver_id < 4)  //GMRES
    {
+// double-precision
     {
       /* reset solution vector */
       if (build_rhs_type < 4 || build_rhs_type == 6) HYPRE_ParVectorSetConstantValues_dbl(x_dbl, zero);
@@ -1016,7 +1027,7 @@ int main (int argc, char *argv[])
       /* Now set up the AMG preconditioner and specify any parameters */
      if (solver_id == 3)
      {
-        if (myid == 0) hypre_printf_dbl("\n\n***** Solver: DOUBLE PRECISION AMG-GMRES *****\n");
+         if (myid == 0) hypre_printf_dbl("\n\n***** Solver: DOUBLE PRECISION AMG-GMRES *****\n");
 
          HYPRE_GMRESSetMaxIter_dbl(pcg_solver, mg_max_iter);
          HYPRE_BoomerAMGCreate_dbl(&amg_solver);
@@ -1099,7 +1110,7 @@ int main (int argc, char *argv[])
       {
         if (myid == 0) hypre_printf_dbl("\n\n***** Solver: DOUBLE PRECISION DS-GMRES *****\n");
       }
-      // Setup PCG solver
+      // Setup GMRES solver
       HYPRE_GMRESSetup_dbl(pcg_solver, (HYPRE_Matrix)A_dbl,  (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
       MPI_Barrier(MPI_COMM_WORLD);
       hypre_EndTiming_dbl(time_index);
@@ -1152,9 +1163,8 @@ int main (int argc, char *argv[])
       HYPRE_GMRESSetKDim_flt(pcg_solver, k_dim);
       HYPRE_GMRESSetPrintLevel_flt(pcg_solver, ioutdat);
       
-      
       /* Now set up the AMG preconditioner and specify any parameters */
-      if(solver_id == 1)
+      if(solver_id == 3)
       {
          if (myid == 0) hypre_printf_dbl("\n\n***** Solver: SINGLE PRECISION AMG-GMRES *****\n");
          HYPRE_GMRESSetMaxIter_flt(pcg_solver, mg_max_iter);
@@ -1293,7 +1303,7 @@ int main (int argc, char *argv[])
       
       
       /* Now set up the AMG preconditioner and specify any parameters */
-     if(solver_id == 1)
+     if(solver_id == 3)
      {
          if (myid == 0) hypre_printf_dbl("\n\n***** Solver: MIXED PRECISION AMG-GMRES *****\n");
          HYPRE_GMRESSetMaxIter_dbl(pcg_solver, mg_max_iter);
@@ -1378,7 +1388,7 @@ int main (int argc, char *argv[])
       }
       else if (solver_id == 2)
       {
-        if (myid == 0) hypre_printf_dbl("\n\n***** Solver: DOUBLE PRECISION DS-GMRES *****\n");
+        if (myid == 0) hypre_printf_dbl("\n\n***** Solver: MIXED PRECISION DS-GMRES *****\n");
       }
       // Setup GMRES solver (double precision)
       HYPRE_GMRESSetup_dbl(pcg_solver, (HYPRE_Matrix)A_dbl, (HYPRE_Vector)b_dbl, (HYPRE_Vector)x_dbl);
