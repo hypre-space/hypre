@@ -746,11 +746,11 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 
    /* Local linear solve data */
 #if defined (HYPRE_USING_MAGMA)
-    magma_queue_t          queue     = hypre_HandleMagmaQueue(hypre_handle());
+   magma_queue_t          queue     = hypre_HandleMagmaQueue(hypre_handle());
 #endif
 
 #if defined (HYPRE_USING_CUSOLVER) || defined (HYPRE_USING_ROCSOLVER)
-    vendorSolverHandle_t   vs_handle = hypre_HandleVendorSolverHandle(hypre_handle());
+   vendorSolverHandle_t   vs_handle = hypre_HandleVendorSolverHandle(hypre_handle());
 #endif
 
    /* TODO: Move to fsai_data? */
@@ -770,7 +770,8 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    if (local_solve_type == 1)
    {
 #if !(defined (HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER))
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "local_solve_type == 1 requires cuSOLVER (CUDA) or rocSOLVER (HIP)\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "local_solve_type == 1 requires cuSOLVER (CUDA) or rocSOLVER (HIP)\n");
       return hypre_error_flag;
 #endif
    }

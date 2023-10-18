@@ -520,6 +520,46 @@ hypre_SeqVectorCloneShallow( hypre_Vector *x )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SeqVectorMigrate
+ *
+ * Migrates the vector data to memory_location.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorMigrate(hypre_Vector         *x,
+                       HYPRE_MemoryLocation  memory_location )
+{
+   HYPRE_Complex       *data = hypre_VectorData(x);
+   HYPRE_Int            size = hypre_VectorSize(x);
+   HYPRE_Int            num_vectors = hypre_VectorNumVectors(x);
+   HYPRE_MemoryLocation old_memory_location = hypre_VectorMemoryLocation(x);
+   HYPRE_Int            total_size = size * num_vectors;
+
+   /* Update x's memory location */
+   hypre_VectorMemoryLocation(x) = memory_location;
+
+   if ( hypre_GetActualMemLocation(memory_location) !=
+        hypre_GetActualMemLocation(old_memory_location) )
+   {
+      if (data)
+      {
+         HYPRE_Complex *new_data;
+
+         new_data = hypre_TAlloc(HYPRE_Complex, total_size, memory_location);
+         hypre_TMemcpy(new_data, data, HYPRE_Complex, total_size,
+                       memory_location, old_memory_location);
+         hypre_VectorData(x) = new_data;
+         hypre_VectorOwnsData(x) = 1;
+
+         /* Free old data */
+         hypre_TFree(data, old_memory_location);
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SeqVectorScaleHost
  *--------------------------------------------------------------------------*/
 

@@ -61,7 +61,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_Int  *num_relax_sweeps = (mgr_data -> num_relax_sweeps);
    HYPRE_Int num_interp_sweeps = (mgr_data -> num_interp_sweeps);
    HYPRE_Int num_restrict_sweeps = (mgr_data -> num_interp_sweeps);
-   HYPRE_Int *max_elmts = (mgr_data -> P_max_elmts);
+   HYPRE_Int *P_max_elmts = (mgr_data -> P_max_elmts);
    HYPRE_Real   max_row_sum = (mgr_data -> max_row_sum);
    HYPRE_Real   strong_threshold = (mgr_data -> strong_threshold);
    HYPRE_Real   trunc_factor = (mgr_data -> trunc_factor);
@@ -176,6 +176,16 @@ hypre_MGRSetup( void               *mgr_vdata,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+
+   /* Reset print_level codes. This is useful for printing
+      information when solving a sequence of linear systems */
+   print_level |= ((print_level & HYPRE_MGR_PRINT_RESERVED_A) == HYPRE_MGR_PRINT_RESERVED_A) ?
+                  HYPRE_MGR_PRINT_INFO_PARAMS : 0;
+   print_level |= ((print_level & HYPRE_MGR_PRINT_RESERVED_B) == HYPRE_MGR_PRINT_RESERVED_B) ?
+                  HYPRE_MGR_PRINT_FINE_MATRIX : 0;
+   print_level |= ((print_level & HYPRE_MGR_PRINT_RESERVED_C) == HYPRE_MGR_PRINT_RESERVED_C) ?
+                  HYPRE_MGR_PRINT_FINE_RHS : 0;
+   (mgr_data -> print_level) = print_level;
 
    /* Trivial case: simply solve the coarse level problem */
    if (block_size < 2 || (mgr_data -> max_num_coarse_levels) < 1)
@@ -639,6 +649,10 @@ hypre_MGRSetup( void               *mgr_vdata,
    {
       l1_norms = hypre_CTAlloc(hypre_Vector*, max_num_coarse_levels, HYPRE_MEMORY_HOST);
    }
+   if (P_max_elmts == NULL)
+   {
+      P_max_elmts = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   }
 
    /* Set default for Frelax_method if not set already -- Supports deprecated function */
    /*
@@ -791,14 +805,15 @@ hypre_MGRSetup( void               *mgr_vdata,
    }
 
    /* set pointers to mgr data */
-   (mgr_data -> A_array) = A_array;
-   (mgr_data -> B_array) = B_array;
-   (mgr_data -> P_array) = P_array;
-   (mgr_data -> RT_array) = RT_array;
+   (mgr_data -> A_array)         = A_array;
+   (mgr_data -> B_array)         = B_array;
+   (mgr_data -> P_array)         = P_array;
+   (mgr_data -> RT_array)        = RT_array;
    (mgr_data -> CF_marker_array) = CF_marker_array;
-   (mgr_data -> l1_norms) = l1_norms;
+   (mgr_data -> l1_norms)        = l1_norms;
+   (mgr_data -> P_max_elmts)     = P_max_elmts;
 #if defined(HYPRE_USING_GPU)
-   (mgr_data -> P_FF_array) = P_FF_array;
+   (mgr_data -> P_FF_array)      = P_FF_array;
 #endif
 
    /* Set up solution and rhs arrays */
@@ -1137,12 +1152,14 @@ hypre_MGRSetup( void               *mgr_vdata,
 #endif
 
       /* Extract A_FF and A_FC when needed by MGR's interpolation/relaxation strategies */
+#if !defined(HYPRE_USING_GPU)
       if ((Frelax_type[lev] == 2)   ||
           (Frelax_type[lev] == 9)   ||
           (Frelax_type[lev] == 99)  ||
           (Frelax_type[lev] == 199) ||
           (interp_type[lev] == 12)  ||
           (mgr_coarse_grid_method[lev] != 0))
+#endif
       {
          hypre_ParCSRMatrixGenerateFFFC(A_array[lev], CF_marker, coarse_pnts_global,
                                         NULL, &A_FC, &A_FF);
@@ -1165,7 +1182,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
          hypre_MGRBuildInterp(A_array[lev], A_FF, A_FC, CF_marker, Wp,
                               coarse_pnts_global, 1, dof_func_buff_data,
-                              debug_flag, trunc_factor, max_elmts[lev],
+                              debug_flag, trunc_factor, P_max_elmts[lev],
                               block_jacobi_bsize, &P, interp_type[lev],
                               num_interp_sweeps);
       }
@@ -1173,7 +1190,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
          hypre_MGRBuildInterp(A_array[lev], A_FF, A_FC, CF_marker, S,
                               coarse_pnts_global, 1, dof_func_buff_data,
-                              debug_flag, trunc_factor, max_elmts[lev],
+                              debug_flag, trunc_factor, P_max_elmts[lev],
                               block_jacobi_bsize, &P, interp_type[lev],
                               num_interp_sweeps);
       }
@@ -1338,9 +1355,10 @@ hypre_MGRSetup( void               *mgr_vdata,
             //            if (restrict_type[lev] > 0)
             {
                hypre_MGRBuildRestrict(A_array[lev], A_FF, A_FC, CF_marker, coarse_pnts_global, 1,
-                                      dof_func_buff_data, debug_flag, trunc_factor, max_elmts[lev],
-                                      strong_threshold, max_row_sum, block_num_f_points, &RT,
-                                      restrict_type[lev], num_restrict_sweeps);
+                                      dof_func_buff_data, debug_flag, trunc_factor,
+                                      P_max_elmts[lev], strong_threshold, max_row_sum,
+                                      block_num_f_points, &RT, restrict_type[lev],
+                                      num_restrict_sweeps);
 
                RT_array[lev] = RT;
             }
@@ -1378,7 +1396,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                                                      block_num_f_points,
                                                      set_c_points_method,
                                                      mgr_coarse_grid_method[lev],
-                                                     max_elmts[lev], CF_marker, &RAP_ptr);
+                                                     P_max_elmts[lev], CF_marker, &RAP_ptr);
             }
 
             if (interp_type[lev] == 12)
@@ -1411,7 +1429,7 @@ hypre_MGRSetup( void               *mgr_vdata,
             }
             hypre_MGRBuildRestrict(A_array[lev], A_FF, A_FC, CF_marker,
                                    coarse_pnts_global, 1, dof_func_buff_data,
-                                   debug_flag, trunc_factor, max_elmts[lev],
+                                   debug_flag, trunc_factor, P_max_elmts[lev],
                                    strong_threshold, max_row_sum,
                                    block_jacobi_bsize, &RT, restrict_type[lev],
                                    num_restrict_sweeps);
@@ -1543,6 +1561,11 @@ hypre_MGRSetup( void               *mgr_vdata,
                                U_fine_array[lev + 1]);
 
             (mgr_data -> fsolver_mode) = 2;
+         }
+         else
+         {
+            /* Save A_FF splitting */
+            A_ff_array[lev] = A_FF;
          }
 
 #if MGR_DEBUG_LEVEL == 2
@@ -1711,11 +1734,6 @@ hypre_MGRSetup( void               *mgr_vdata,
           Frelax_type[lev] == 199 )
       {
          use_GSElimSmoother = 1;
-
-         /* TODO (VPM): Fow now, we enforce relax_type = 9, which supports GPUs. Fix this! */
-#if defined (HYPRE_USING_GPU)
-         Frelax_type[lev] = 9;
-#endif
       }
 
 #if MGR_DEBUG_LEVEL == 2
@@ -1912,6 +1930,12 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_TFree(level_coarse_size, HYPRE_MEMORY_HOST);
       (mgr_data -> num_coarse_per_level) = NULL;
    }
+
+   /* Print statistics */
+   hypre_MGRSetupStats(mgr_vdata);
+
+   /* Print MGR and linear system info according to print level */
+   hypre_MGRDataPrint(mgr_vdata);
 
    HYPRE_ANNOTATE_FUNC_END;
    hypre_GpuProfilingPopRange();
