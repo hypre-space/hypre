@@ -116,7 +116,7 @@ hypre_CheckDirExists(const char *path)
       return 1;
    }
 #else
-   DWORD att = GetFileAttibutesA(path);
+   DWORD att = GetFileAttributesA(path);
 
    if (att == INVALID_FILE_ATTRIBUTES)
    {
