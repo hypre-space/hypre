@@ -123,7 +123,7 @@ hypre_CheckDirExists(const char *path)
       return 0;
    }
 
-   if (att & FILE_ATTRIBUTES_DIRECTORY)
+   if (att & FILE_ATTRIBUTE_DIRECTORY)
    {
       return 1;
    }
