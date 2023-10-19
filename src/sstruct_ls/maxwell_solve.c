@@ -86,7 +86,7 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
    /* added for the relaxation routines */
    hypre_ParVector *ze = NULL;
 
-#if !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
+#if !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP) &&!defined(HYPRE_USING_SYCL)
    /* GPU impl. needs ze */
    if (hypre_NumThreads() > 1)
 #endif
