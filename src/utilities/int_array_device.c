@@ -152,6 +152,7 @@ hypre_IntArrayNegateDevice( hypre_IntArray *v )
  * hypre_IntArraySetInterleavedValuesDevice
  *--------------------------------------------------------------------------*/
 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 struct hypre_cycle_functor
 {
    HYPRE_Int cycle_length;
@@ -163,6 +164,7 @@ struct hypre_cycle_functor
       return x % cycle_length;
    }
 };
+#endif
 
 HYPRE_Int
 hypre_IntArraySetInterleavedValuesDevice( hypre_IntArray *v,
