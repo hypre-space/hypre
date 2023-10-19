@@ -25,6 +25,7 @@ void *
 hypre_BoomerAMGCreate( void )
 {
    hypre_ParAMGData  *amg_data;
+   hypre_Solver      *base;
 
    /* setup params */
    HYPRE_Int    max_levels;
@@ -315,11 +316,12 @@ hypre_BoomerAMGCreate( void )
     *-----------------------------------------------------------------------*/
 
    amg_data = hypre_CTAlloc(hypre_ParAMGData, 1, HYPRE_MEMORY_HOST);
+   base     = (hypre_Solver*) amg_data;
 
    /* Set base solver function pointers */
-   hypre_ParAMGDataBaseSetup(amg_data)   = (HYPRE_PtrToSolverFcn)  HYPRE_BoomerAMGSetup;
-   hypre_ParAMGDataBaseSolve(amg_data)   = (HYPRE_PtrToSolverFcn)  HYPRE_BoomerAMGSolve;
-   hypre_ParAMGDataBaseDestroy(amg_data) = (HYPRE_PtrToDestroyFcn) HYPRE_BoomerAMGDestroy;
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_BoomerAMGSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_BoomerAMGSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) HYPRE_BoomerAMGDestroy;
 
    /* memory location will be reset at the setup */
    hypre_ParAMGDataMemoryLocation(amg_data) = memory_location;

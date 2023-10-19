@@ -37,4 +37,12 @@ typedef struct
    HYPRE_PtrToDestroyFcn  destroy;
 } hypre_Solver;
 
+/*--------------------------------------------------------------------------
+ * Accessor functions for the hypre_Solver structure
+ *--------------------------------------------------------------------------*/
+
+#define hypre_SolverSetup(data)       ((data) -> setup)
+#define hypre_SolverSolve(data)       ((data) -> solve)
+#define hypre_SolverDestroy(data)     ((data) -> destroy)
+
 #endif /* HYPRE_BASE_HEADER */
