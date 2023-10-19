@@ -6,13 +6,14 @@
  ******************************************************************************/
 
 #include "_hypre_utilities.h"
-
-#include <dirent.h>
 #include <errno.h>
+
 #ifdef _WIN32
+#include <windows.h>
 #include <direct.h>
 #define mkdir(path, mode) _mkdir(path)
 #else
+#include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #endif
@@ -106,6 +107,7 @@ hypre_strcpy(char *destination, const char *source)
 HYPRE_Int
 hypre_CheckDirExists(const char *path)
 {
+#ifndef _WIN32
    DIR *dir = opendir(path);
 
    if (dir)
@@ -113,6 +115,20 @@ hypre_CheckDirExists(const char *path)
       closedir(dir);
       return 1;
    }
+#else
+   DWORD att = GetFileAttributesA(path);
+
+   if (att == INVALID_FILE_ATTRIBUTES)
+   {
+      return 0;
+   }
+
+   if (att & FILE_ATTRIBUTE_DIRECTORY)
+   {
+      return 1;
+   }
+#endif
+
    return 0;
 }
 
@@ -141,11 +157,14 @@ hypre_CreateDir(const char *path)
 HYPRE_Int
 hypre_CreateNextDirOfSequence(const char *basepath, const char *prefix, char **fullpath_ptr)
 {
-   DIR            *dir;
-   struct dirent  *entry;
-   HYPRE_Int       max_suffix, suffix;
+   HYPRE_Int       suffix;
+   HYPRE_Int       max_suffix = -1;
    char            msg[HYPRE_MAX_MSG_LEN];
    char           *fullpath;
+
+#ifndef _WIN32
+   DIR            *dir;
+   struct dirent  *entry;
 
    if ((dir = opendir(basepath)) == NULL)
    {
@@ -169,6 +188,9 @@ hypre_CreateNextDirOfSequence(const char *basepath, const char *prefix, char **f
       }
    }
    closedir(dir);
+#else
+   /* TODO (VPM) */
+#endif
 
    /* Create directory */
    fullpath = hypre_TAlloc(char, strlen(basepath) + 10, HYPRE_MEMORY_HOST);
