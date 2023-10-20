@@ -633,7 +633,10 @@ hypre_PCGSolve( void *pcg_vdata,
       /* x = x + alpha*p */
       (*(pcg_functions->Axpy))(alpha, p, x);
 
-      if (flex) (*(pcg_functions->CopyVector))(r, r_old); /*save old residual */
+      if (flex) 
+      {
+	 (*(pcg_functions->CopyVector))(r, r_old); /*save old residual */
+      }
 
       /* r = r - alpha*s */
       if ( !recompute_true_residual )
@@ -647,7 +650,10 @@ hypre_PCGSolve( void *pcg_vdata,
             hypre_printf("Recomputing the residual...\n");
          }
          (*(pcg_functions->CopyVector))(r, s); /*save old residual */
-         if (flex) (*(pcg_functions->CopyVector))(r, r_old); /*save old residual */
+         if (flex) 
+         {
+	    (*(pcg_functions->CopyVector))(r, r_old); /*save old residual */
+         }
          (*(pcg_functions->CopyVector))(b, r);
          (*(pcg_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
          if (rtol)
@@ -711,7 +717,10 @@ hypre_PCGSolve( void *pcg_vdata,
 
       /* gamma = <r,s> */
       gamma = (*(pcg_functions->InnerProd))(r, s);
-      if (flex) delta = gamma - (*(pcg_functions->InnerProd))(r_old, s);
+      if (flex)
+      {
+         delta = gamma - (*(pcg_functions->InnerProd))(r_old, s);
+      }
 
       /* residual-based stopping criteria: ||r_new-r_old||_C < rtol ||b||_C */
       if (rtol && !two_norm)
