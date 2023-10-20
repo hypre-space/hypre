@@ -12,9 +12,10 @@
  *
  *****************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "_hypre_parcsr_ls.h"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 #include "_hypre_utilities.hpp"
 
 /**
@@ -142,10 +143,8 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix *A,
    A_offd_j    = hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(A));
    A_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(A));
 
-   dim3 bDim, gDim;
-
-   bDim = hypre_GetDefaultDeviceBlockDimension();
-   gDim = hypre_GetDefaultDeviceGridDimension(A_num_rows, "warp", bDim);
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(A_num_rows, "warp", bDim);
    HYPRE_GPU_LAUNCH(hypreGPUKernel_CSRMaxEigEstimate,
                     gDim,
                     bDim,
@@ -162,10 +161,17 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix *A,
 
    hypre_SyncComputeStream(hypre_handle());
 
+#if defined(HYPRE_USING_SYCL)
+   e_min = HYPRE_ONEDPL_CALL(std::reduce, rowsums_lower, rowsums_lower + A_num_rows, (HYPRE_Real)0,
+                             oneapi::dpl::minimum<HYPRE_Real>());
+   e_max = HYPRE_ONEDPL_CALL(std::reduce, rowsums_upper, rowsums_upper + A_num_rows, (HYPRE_Real)0,
+                             oneapi::dpl::maximum<HYPRE_Real>());
+#else
    e_min = HYPRE_THRUST_CALL(reduce, rowsums_lower, rowsums_lower + A_num_rows, (HYPRE_Real)0,
                              thrust::minimum<HYPRE_Real>());
    e_max = HYPRE_THRUST_CALL(reduce, rowsums_upper, rowsums_upper + A_num_rows, (HYPRE_Real)0,
                              thrust::maximum<HYPRE_Real>());
+#endif
 
    /* Same as hypre_ParCSRMaxEigEstimateHost */
 
@@ -298,9 +304,15 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
 
    hypre_SyncComputeStream(hypre_handle());
 
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL(std::transform,
+                     r_data, r_data + local_size, r_data,
+   [] (auto x) { return 2.0 * x - 1.0; } );
+#else
    HYPRE_THRUST_CALL(transform,
                      r_data, r_data + local_size, r_data,
                      2.0 * _1 - 1.0);
+#endif
 
    hypre_GpuProfilingPopRange(); /*CPUAlloc_Random*/
 
@@ -363,12 +375,22 @@ hypre_ParCSRMaxEigEstimateCGDevice(hypre_ParCSRMatrix *A,     /* matrix to relax
          /* s = D^{-1/2}A*D^{-1/2}*p */
 
          /* u = ds .* p */
+#if defined(HYPRE_USING_SYCL)
+         HYPRE_ONEDPL_CALL( std::transform, ds_data, ds_data + local_size, p_data, u_data,
+         [] (auto x, auto y) { return x * y; } );
+#else
          HYPRE_THRUST_CALL( transform, ds_data, ds_data + local_size, p_data, u_data, _1 * _2 );
+#endif
 
          hypre_ParCSRMatrixMatvec(1.0, A, u, 0.0, s);
 
          /* s = ds .* s */
+#if defined(HYPRE_USING_SYCL)
+         HYPRE_ONEDPL_CALL( std::transform, ds_data, ds_data + local_size, s_data, s_data,
+         [] (auto x, auto y) { return x * y; } );
+#else
          HYPRE_THRUST_CALL( transform, ds_data, ds_data + local_size, s_data, s_data, _1 * _2 );
+#endif
       }
       else
       {

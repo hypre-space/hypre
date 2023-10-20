@@ -22,7 +22,7 @@
 #define HYPRE_BOX_REDUCTION
 #define HYPRE_OMP_CLAUSE
 #if defined(WIN32) && defined(_MSC_VER)
-#define Pragma(x) __pragma(HYPRE_XSTR(x))
+#define Pragma(x) __pragma(x)
 #else
 #define Pragma(x) _Pragma(HYPRE_XSTR(x))
 #endif

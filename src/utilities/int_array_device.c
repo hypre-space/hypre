@@ -148,4 +148,42 @@ hypre_IntArrayNegateDevice( hypre_IntArray *v )
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_IntArraySetInterleavedValuesDevice
+ *--------------------------------------------------------------------------*/
+
+struct hypre_cycle_functor
+{
+   HYPRE_Int cycle_length;
+
+   hypre_cycle_functor(HYPRE_Int _cycle_length) : cycle_length(_cycle_length) {}
+
+   __host__ __device__ HYPRE_Int operator()(HYPRE_Int x) const
+   {
+      return x % cycle_length;
+   }
+};
+
+HYPRE_Int
+hypre_IntArraySetInterleavedValuesDevice( hypre_IntArray *v,
+                                          HYPRE_Int       cycle )
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_THRUST_CALL( sequence,
+                      hypre_IntArrayData(v),
+                      hypre_IntArrayData(v) + hypre_IntArraySize(v));
+
+   HYPRE_THRUST_CALL( transform,
+                      hypre_IntArrayData(v),
+                      hypre_IntArrayData(v) + hypre_IntArraySize(v),
+                      hypre_IntArrayData(v),
+                      hypre_cycle_functor(cycle) );
+
+#else
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented yet!");
+#endif
+
+   return hypre_error_flag;
+}
+
 #endif
