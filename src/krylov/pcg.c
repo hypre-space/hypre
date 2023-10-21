@@ -595,7 +595,7 @@ hypre_PCGSolve( void *pcg_vdata,
             hypre_printf("alpha %e", alpha);
 	 }
          hypre_error_w_msg(HYPRE_ERROR_CONV, "Negative or zero alpha value in PCG");
-         if (skip_break == 0)
+         if (skip_break < 3)
 	 {
 	    if (i == 1) { i_prod = i_prod_0; }
             break;
@@ -621,7 +621,7 @@ hypre_PCGSolve( void *pcg_vdata,
 	 {
             hypre_printf("alpha %e", alpha);
 	 }
-         if (skip_break < 3)
+         if (skip_break < 1)
 	 {
 	    if (i == 1) { i_prod = i_prod_0; }
             break;
@@ -849,7 +849,7 @@ hypre_PCGSolve( void *pcg_vdata,
             hypre_printf("gamma %e", gamma);
 	 }
          hypre_error_w_msg(HYPRE_ERROR_CONV, "Negative or zero gamma value in PCG");
-         if (skip_break == 0)
+         if (skip_break < 3)
 	 {
 	    if (i == 1) { i_prod = i_prod_0; }
             break;
@@ -875,7 +875,7 @@ hypre_PCGSolve( void *pcg_vdata,
 	 {
             hypre_printf("gamma %e", gamma);
 	 }
-         if (skip_break < 3)
+         if (skip_break < 1)
 	 {
 	    if (i == 1) { i_prod = i_prod_0; }
             break;
@@ -909,7 +909,7 @@ hypre_PCGSolve( void *pcg_vdata,
                hypre_printf("i_prod_0 %e", i_prod_0);
    	    }
             hypre_error_w_msg(HYPRE_ERROR_CONV, "Negative or zero i_prod_0 value in PCG");
-            if (skip_break == 0)
+            if (skip_break < 3)
    	    {
                break;
    	    }
@@ -933,7 +933,7 @@ hypre_PCGSolve( void *pcg_vdata,
    	    {
                hypre_printf("i_prod_0 %e", i_prod_0);
    	    }
-            if (skip_break < 3)
+            if (skip_break < 1)
    	    {
                break;
    	    }

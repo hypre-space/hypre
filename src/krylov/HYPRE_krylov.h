@@ -186,11 +186,10 @@ HYPRE_Int HYPRE_PCGSetFlex(HYPRE_Solver solver,
 
 /**
  * (Optional) Skips subnormal alpha, gamma and iprod values in CG.
- *  If set to 2 (default): will always break for subnormal values
- *  If set to 0: will break if values are <= 0.
+ *  If set to 0 (default): will break if values are below HYPRE_REAL_MIN
  *  If set to 1: will break if values are below HYPRE_REAL_TRUE_MIN
  *  (requires C11 minimal or will check to HYPRE_REAL_MIN)
- *  If set to 2: will break if values are below HYPRE_REAL_MIN
+ *  If set to 2: will break if values are <= 0.
  *  If set to 3 or larger: will not break at all
  **/
 HYPRE_Int HYPRE_PCGSetSkipBreak(HYPRE_Solver solver,
