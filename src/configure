@@ -740,6 +740,9 @@ SET_MAKE
 FC
 CXX
 CC
+CUFLAGS
+CUCC
+HYPRE_CUDA_SM
 GPUFLAGS
 GPUCC
 GPU_ARCH
@@ -827,6 +830,7 @@ with_LDFLAGS
 with_extra_CFLAGS
 with_extra_CXXFLAGS
 with_extra_GPUFLAGS
+with_extra_CUFLAGS
 with_extra_BUILDFLAGS
 with_extra_incpath
 with_extra_ldpath
@@ -919,6 +923,9 @@ DPLROOT
 GPU_ARCH
 GPUCC
 GPUFLAGS
+HYPRE_CUDA_SM
+CUCC
+CUFLAGS
 CC
 CFLAGS
 LDFLAGS
@@ -1612,6 +1619,11 @@ Optional Packages:
                           Define extra GPU compile flag, where ARG is a
                           space-separated list (enclosed in quotes) of
                           directories.
+  --with-extra-CUFLAGS=ARG
+                          (DEPRECATED: use --with-extra-GPUFLAGS instead)
+                          Define extra GPU compile flag, where ARG is a
+                          space-separated list (enclosed in quotes) of
+                          directories.
   --with-extra-BUILDFLAGS=ARG
                           Define extra library build flag, where ARG is a
                           space-separated list (enclosed in quotes) of
@@ -1824,6 +1836,12 @@ Some influential environment variables:
               number)
   GPUCC       GPU compiler command (e.g. nvcc, hipcc, icpx)
   GPUFLAGS    GPU compiler flags
+  HYPRE_CUDA_SM
+              (DEPRECATED: use GPU_ARCH instead) GPU architecture (e.g.
+              CUDA/HIP SM number or Intel GPU device number)
+  CUCC        (DEPRECATED: use GPUCC instead) GPU compiler command (e.g. nvcc,
+              hipcc, icpx)
+  CUFLAGS     (DEPRECATED: use GPUFLAGS) GPU compiler flags
   CC          C compiler command
   CFLAGS      C compiler flags
   LDFLAGS     linker flags, e.g. -L<lib dir> if you have libraries in a
@@ -3822,18 +3840,52 @@ fi
 
 
 
+
+
+
 if test "x$GPUCC" = "x"
 then
-   hypre_user_chose_gpucompilers=no
+   if test "x$CUCC" = "x"
+   then
+      hypre_user_chose_gpucompilers=no
+   else
+      hypre_user_chose_gpucompilers=yes
+      as_fn_error $? "WARNING: use of CUCC variable is deprecated. Use GPUCC instead." "$LINENO" 5
+      GPUCC=$CUCC
+   fi
 else
+   if test "x$CUCC" != "x"
+      as_fn_error $? "WARNING: use of CUCC variable is deprecated and will be overriden by provided GPUCC." "$LINENO" 5
+   fi
    hypre_user_chose_gpucompilers=yes
 fi
 
 if test "x$GPUFLAGS" = "x"
 then
-   hypre_user_chose_gpuflags=no
+   if test "x$CUFLAGS" = "x"
+   then
+      hypre_user_chose_gpuflags=no
+   else
+      hypre_user_chose_gpuflags=yes
+      as_fn_error $? "WARNING: use of CUFLAGS variable is deprecated. Use GPUFLAGS instead." "$LINENO" 5
+      GPUFLAGS=$CUFLAGS
+   fi
 else
+   if test "x$CUFLAGS" != "x"
+      as_fn_error $? "WARNING: use of CUFLAGS variable is deprecated and will be overriden by provided GPUFLAGS." "$LINENO" 5
+   fi
    hypre_user_chose_gpuflags=yes
+fi
+
+if test "x$HYPRE_CUDA_SM" != "x"
+then
+   if test "x$GPU_ARCH" = "x"
+   then
+      as_fn_error $? "WARNING: use of HYPRE_CUDA_SM variable is deprecated. Use GPU_ARCH instead." "$LINENO" 5
+      GPU_ARCH=$HYPRE_CUDA_SM
+   else
+      as_fn_error $? "WARNING: use of HYPRE_CUDA_SM variable is deprecated and will be overriden by provided GPU_ARCH." "$LINENO" 5
+   fi
 fi
 
 if test "x$F77" != "x" && test "x$FC" = "x"
@@ -3916,6 +3968,15 @@ fi
 if test ${with_extra_GPUFLAGS+y}
 then :
   withval=$with_extra_GPUFLAGS; EXTRA_GPUFLAGS=$withval
+
+fi
+
+
+
+# Check whether --with-extra-CUFLAGS was given.
+if test ${with_extra_CUFLAGS+y}
+then :
+  withval=$with_extra_CUFLAGS; EXTRA_CUFLAGS=$withval
 
 fi
 
@@ -11126,7 +11187,7 @@ printf "%s\n" "#define HYPRE_WITH_GPU_AWARE_MPI 1" >>confdefs.h
 
 fi
 
-GPUFLAGS="${GPUFLAGS} ${EXTRA_GPUFLAGS}"
+GPUFLAGS="${GPUFLAGS} ${EXTRA_GPUFLAGS} ${EXTRA_CUFLAGS}"
 
 HYPRE_INSTALLDIR="${prefix}"
 HYPRE_LIBINSTALL="${libdir}"

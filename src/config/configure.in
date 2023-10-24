@@ -539,19 +539,56 @@ AC_ARG_VAR([DPLROOT], [oneDPL home directory])
 AC_ARG_VAR([GPU_ARCH], [GPU architecture (e.g. CUDA/HIP SM number or Intel GPU device number)])
 AC_ARG_VAR([GPUCC], [GPU compiler command (e.g. nvcc, hipcc, icpx)])
 AC_ARG_VAR([GPUFLAGS], [GPU compiler flags])
+dnl *********************************************************************
+dnl * Legacy variables with cuda naming convention (for backward compatibility)
+dnl *********************************************************************
+AC_ARG_VAR([HYPRE_CUDA_SM], [(DEPRECATED: use GPU_ARCH instead) GPU architecture (e.g. CUDA/HIP SM number or Intel GPU device number)])
+AC_ARG_VAR([CUCC], [(DEPRECATED: use GPUCC instead) GPU compiler command (e.g. nvcc, hipcc, icpx)])
+AC_ARG_VAR([CUFLAGS], [(DEPRECATED: use GPUFLAGS) GPU compiler flags])
 
 if test "x$GPUCC" = "x"
 then
-   hypre_user_chose_gpucompilers=no
+   if test "x$CUCC" = "x"
+   then
+      hypre_user_chose_gpucompilers=no
+   else
+      hypre_user_chose_gpucompilers=yes
+      AC_MSG_ERROR([WARNING: use of CUCC variable is deprecated. Use GPUCC instead.])
+      GPUCC=$CUCC
+   fi
 else
+   if test "x$CUCC" != "x"
+      AC_MSG_ERROR([WARNING: use of CUCC variable is deprecated and will be overriden by provided GPUCC.])
+   fi
    hypre_user_chose_gpucompilers=yes
 fi
 
 if test "x$GPUFLAGS" = "x"
 then
-   hypre_user_chose_gpuflags=no
+   if test "x$CUFLAGS" = "x"
+   then
+      hypre_user_chose_gpuflags=no
+   else
+      hypre_user_chose_gpuflags=yes
+      AC_MSG_ERROR([WARNING: use of CUFLAGS variable is deprecated. Use GPUFLAGS instead.])
+      GPUFLAGS=$CUFLAGS
+   fi
 else
+   if test "x$CUFLAGS" != "x"
+      AC_MSG_ERROR([WARNING: use of CUFLAGS variable is deprecated and will be overriden by provided GPUFLAGS.])
+   fi
    hypre_user_chose_gpuflags=yes
+fi
+
+if test "x$HYPRE_CUDA_SM" != "x"
+then
+   if test "x$GPU_ARCH" = "x"
+   then
+      AC_MSG_ERROR([WARNING: use of HYPRE_CUDA_SM variable is deprecated. Use GPU_ARCH instead.])
+      GPU_ARCH=$HYPRE_CUDA_SM
+   else
+      AC_MSG_ERROR([WARNING: use of HYPRE_CUDA_SM variable is deprecated and will be overriden by provided GPU_ARCH.])
+   fi
 fi
 
 dnl *********************************************************************
@@ -637,6 +674,16 @@ AS_HELP_STRING([--with-extra-GPUFLAGS=ARG],
                [Define extra GPU compile flag, where ARG is a space-separated
                 list (enclosed in quotes) of directories.]),
 [EXTRA_GPUFLAGS=$withval]
+)
+
+dnl *********************************************************************
+dnl * Legacy configure option with cuda naming convention (for backward compatibility)
+dnl *********************************************************************
+AC_ARG_WITH(extra-CUFLAGS,
+AS_HELP_STRING([--with-extra-CUFLAGS=ARG],
+               [(DEPRECATED: use --with-extra-GPUFLAGS instead) Define extra GPU compile flag, 
+                where ARG is a space-separated list (enclosed in quotes) of directories.]),
+[EXTRA_CUFLAGS=$withval]
 )
 
 AC_ARG_WITH(extra-BUILDFLAGS,
@@ -2869,7 +2916,7 @@ then
    AC_DEFINE([HYPRE_WITH_GPU_AWARE_MPI],1,[Define to 1 if using GPU aware MPI])
 fi
 
-GPUFLAGS="${GPUFLAGS} ${EXTRA_GPUFLAGS}"
+GPUFLAGS="${GPUFLAGS} ${EXTRA_GPUFLAGS} ${EXTRA_CUFLAGS}"
 
 dnl *********************************************************************
 dnl * Set installation directories
