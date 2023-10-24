@@ -289,3 +289,11 @@ Final Relative Residual Norm = 1.371340e-09
 Iterations = 29
 Final Relative Residual Norm = 5.204677e-09
 
+# Output file: solvers.out.404
+Iterations = 30
+Final Relative Residual Norm = 8.259159e-09
+
+# Output file: solvers.out.405
+Iterations = 24
+Final Relative Residual Norm = 6.793588e-09
+

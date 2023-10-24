@@ -2172,11 +2172,9 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix  *A,
                              hypre_ParCSRMatrix **AT_ptr,
                              HYPRE_Int            data )
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("ParCSRMatrixTranspose");
-#endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -2189,9 +2187,7 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix  *A,
       hypre_ParCSRMatrixTransposeHost(A, AT_ptr, data);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return hypre_error_flag;
 }
@@ -4158,7 +4154,7 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
       hypre_CSRMatrixDestroy(C_tmp_offd);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    if ( hypre_GetExecPolicy2(memory_location_A, memory_location_B) == HYPRE_EXEC_DEVICE )
    {
       hypre_CSRMatrixMoveDiagFirstDevice(hypre_ParCSRMatrixDiag(C));
@@ -5405,7 +5401,7 @@ hypre_ParCSRMatrixAdd( HYPRE_Complex        alpha,
    hypre_assert(hypre_ParCSRMatrixNumRows(A) == hypre_ParCSRMatrixNumRows(B));
    hypre_assert(hypre_ParCSRMatrixNumCols(A) == hypre_ParCSRMatrixNumCols(B));
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    if ( hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
                               hypre_ParCSRMatrixMemoryLocation(B) ) == HYPRE_EXEC_DEVICE )
    {
@@ -6217,13 +6213,11 @@ hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("ParCSRMatrixDropSmallEntries");
-#endif
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -6236,9 +6230,7 @@ hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
       ierr = hypre_ParCSRMatrixDropSmallEntriesHost(A, tol, type);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }
@@ -6411,7 +6403,7 @@ hypre_ParCSRMatrixDiagScale( hypre_ParCSRMatrix *par_A,
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(par_A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -6448,6 +6440,30 @@ hypre_ParCSRMatrixReorder(hypre_ParCSRMatrix *A)
    }
 
    hypre_CSRMatrixReorder(A_diag);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixCompressOffdMap
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixCompressOffdMap(hypre_ParCSRMatrix *A)
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_GpuProfilingPushRange("hypre_ParCSRMatrixCompressOffdMap");
+#endif
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_ParCSRMatrixCompressOffdMapDevice(A);
+   }
+#endif
+   // RL: I guess it's not needed for the host code [?]
 
    return hypre_error_flag;
 }
@@ -6566,9 +6582,7 @@ hypre_ParCSRDiagScaleVector( hypre_ParCSRMatrix *par_A,
                              hypre_ParVector    *par_y,
                              hypre_ParVector    *par_x )
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("hypre_ParCSRDiagScaleVector");
-#endif
 
    /* Local Matrix and Vectors */
    hypre_CSRMatrix    *A_diag        = hypre_ParCSRMatrixDiag(par_A);
@@ -6626,7 +6640,7 @@ hypre_ParCSRDiagScaleVector( hypre_ParCSRMatrix *par_A,
     * Computation
     *---------------------------------------------*/
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(par_A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -6639,9 +6653,7 @@ hypre_ParCSRDiagScaleVector( hypre_ParCSRMatrix *par_A,
       hypre_ParCSRDiagScaleVectorHost(par_A, par_y, par_x);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return hypre_error_flag;
 }

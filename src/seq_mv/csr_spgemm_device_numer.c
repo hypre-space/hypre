@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -9,7 +9,7 @@
 #include "seq_mv.h"
 #include "csr_spgemm_device.h"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 /*
  * d_rc: input: nnz (upper bound) of each row
@@ -233,5 +233,4 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
    return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
-
+#endif /* defined(HYPRE_USING_GPU) */

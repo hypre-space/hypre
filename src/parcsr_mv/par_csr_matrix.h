@@ -31,6 +31,9 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_BigInt          global_num_rows;
    HYPRE_BigInt          global_num_cols;
    HYPRE_BigInt          global_num_rownnz;
+   HYPRE_BigInt          num_nonzeros;
+   HYPRE_Real            d_num_nonzeros;
+
    HYPRE_BigInt          first_row_index;
    HYPRE_BigInt          first_col_diag;
    /* need to know entire local range in case row_starts and col_starts
@@ -58,9 +61,6 @@ typedef struct hypre_ParCSRMatrix_struct
    /* Does the ParCSRMatrix create/destroy `diag', `offd', `col_map_offd'? */
    HYPRE_Int             owns_data;
 
-   HYPRE_BigInt          num_nonzeros;
-   HYPRE_Real            d_num_nonzeros;
-
    /* Buffers used by GetRow to hold row currently being accessed. AJC, 4/99 */
    HYPRE_BigInt         *rowindices;
    HYPRE_Complex        *rowvalues;
@@ -77,7 +77,7 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_Complex        *bdiaginv;
    hypre_ParCSRCommPkg  *bdiaginv_comm_pkg;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    /* these two arrays are reserveed for SoC matrices on GPUs to help build interpolation */
    HYPRE_Int            *soc_diag_j;
    HYPRE_Int            *soc_offd_j;
@@ -93,6 +93,8 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixGlobalNumRows(matrix)          ((matrix) -> global_num_rows)
 #define hypre_ParCSRMatrixGlobalNumCols(matrix)          ((matrix) -> global_num_cols)
 #define hypre_ParCSRMatrixGlobalNumRownnz(matrix)        ((matrix) -> global_num_rownnz)
+#define hypre_ParCSRMatrixNumNonzeros(matrix)            ((matrix) -> num_nonzeros)
+#define hypre_ParCSRMatrixDNumNonzeros(matrix)           ((matrix) -> d_num_nonzeros)
 #define hypre_ParCSRMatrixFirstRowIndex(matrix)          ((matrix) -> first_row_index)
 #define hypre_ParCSRMatrixFirstColDiag(matrix)           ((matrix) -> first_col_diag)
 #define hypre_ParCSRMatrixLastRowIndex(matrix)           ((matrix) -> last_row_index)
@@ -108,15 +110,13 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixCommPkg(matrix)                ((matrix) -> comm_pkg)
 #define hypre_ParCSRMatrixCommPkgT(matrix)               ((matrix) -> comm_pkgT)
 #define hypre_ParCSRMatrixOwnsData(matrix)               ((matrix) -> owns_data)
-#define hypre_ParCSRMatrixNumNonzeros(matrix)            ((matrix) -> num_nonzeros)
-#define hypre_ParCSRMatrixDNumNonzeros(matrix)           ((matrix) -> d_num_nonzeros)
 #define hypre_ParCSRMatrixRowindices(matrix)             ((matrix) -> rowindices)
 #define hypre_ParCSRMatrixRowvalues(matrix)              ((matrix) -> rowvalues)
 #define hypre_ParCSRMatrixGetrowactive(matrix)           ((matrix) -> getrowactive)
 #define hypre_ParCSRMatrixAssumedPartition(matrix)       ((matrix) -> assumed_partition)
 #define hypre_ParCSRMatrixOwnsAssumedPartition(matrix)   ((matrix) -> owns_assumed_partition)
 #define hypre_ParCSRMatrixProcOrdering(matrix)           ((matrix) -> proc_ordering)
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 #define hypre_ParCSRMatrixSocDiagJ(matrix)               ((matrix) -> soc_diag_j)
 #define hypre_ParCSRMatrixSocOffdJ(matrix)               ((matrix) -> soc_offd_j)
 #endif

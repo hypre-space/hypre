@@ -303,7 +303,7 @@ hypre_IntArraySetConstantValues( hypre_IntArray *v,
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_IntArrayMemoryLocation(v));
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -314,6 +314,59 @@ hypre_IntArraySetConstantValues( hypre_IntArray *v,
 #endif
    {
       hypre_IntArraySetConstantValuesHost(v, value);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IntArraySetInterleavedValuesHost
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArraySetInterleavedValuesHost( hypre_IntArray *v,
+                                        HYPRE_Int       cycle )
+{
+   HYPRE_Int *array_data = hypre_IntArrayData(v);
+   HYPRE_Int  size       = hypre_IntArraySize(v);
+   HYPRE_Int  i;
+
+#if defined(HYPRE_USING_OPENMP)
+   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+   for (i = 0; i < size; i++)
+   {
+      array_data[i] = i % cycle;
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IntArraySetInterleavedValues
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArraySetInterleavedValues( hypre_IntArray *v,
+                                    HYPRE_Int       cycle )
+{
+   if (cycle < 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid cycle value!");
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_IntArrayMemoryLocation(v));
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_IntArraySetInterleavedValuesDevice(v, cycle);
+   }
+   else
+#endif
+   {
+      hypre_IntArraySetInterleavedValuesHost(v, cycle);
    }
 
    return hypre_error_flag;
@@ -361,7 +414,7 @@ hypre_IntArrayCount( hypre_IntArray *v,
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_IntArrayMemoryLocation(v));
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -428,7 +481,7 @@ hypre_IntArrayInverseMapping( hypre_IntArray  *v,
       return hypre_error_flag;
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -443,6 +496,44 @@ hypre_IntArrayInverseMapping( hypre_IntArray  *v,
 
    /* Set output pointer */
    *w_ptr = w;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IntArrayNegate
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArrayNegate( hypre_IntArray *v )
+{
+   HYPRE_Int  *array_data  = hypre_IntArrayData(v);
+   HYPRE_Int   size        = hypre_IntArraySize(v);
+   HYPRE_Int   i;
+
+   if (size <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_IntArrayMemoryLocation(v));
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_IntArrayNegateDevice(v);
+   }
+   else
+#endif
+   {
+#if defined(HYPRE_USING_OPENMP)
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < size; i++)
+      {
+         array_data[i] = - array_data[i];
+      }
+   }
 
    return hypre_error_flag;
 }

@@ -191,6 +191,22 @@ hypre_sprintf( char *s, const char *format, ...)
    return ierr;
 }
 
+HYPRE_Int
+hypre_snprintf( char *s, size_t size, const char *format, ...)
+{
+   va_list   ap;
+   char     *newformat;
+   HYPRE_Int ierr = 0;
+
+   va_start(ap, format);
+   new_format(format, &newformat);
+   ierr = vsnprintf(s, size, newformat, ap);
+   free_format(newformat);
+   va_end(ap);
+
+   return ierr;
+}
+
 /* scanf functions */
 
 HYPRE_Int

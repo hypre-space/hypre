@@ -16,7 +16,14 @@ void
 hypre_F90_IFACE(hypre_init, HYPRE_INIT)
 (hypre_F90_Int *ierr)
 {
-   *ierr = (hypre_F90_Int) HYPRE_Init();
+   *ierr = (hypre_F90_Int) HYPRE_Initialize();
+}
+
+void
+hypre_F90_IFACE(hypre_initialize, HYPRE_INITIALIZE)
+(hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int) HYPRE_Initialize();
 }
 
 void

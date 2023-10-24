@@ -19,11 +19,13 @@ cmbuild/
 ###############
 # Documentation
 ###############
+src/docs/ref-manual/html/
 src/docs/ref-manual-html/
 src/docs/ref-manual.pdf
 src/docs/ref-manual/latex/
 src/docs/ref-manual/xml/
 src/docs/usr-manual-html/
+src/docs/usr-manual/html/
 src/docs/usr-manual.pdf
 src/docs/usr-manual/_build/
 
@@ -34,6 +36,7 @@ src/test/ams_driver
 src/test/ij
 src/test/ij_assembly
 src/test/ij_mv
+src/test/ij_mm
 src/test/maxwell_unscaled
 src/test/sstruct
 src/test/sstruct_fac

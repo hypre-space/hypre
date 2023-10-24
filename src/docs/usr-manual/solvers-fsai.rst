@@ -3,6 +3,7 @@
 
    SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+.. _fsai:
 
 FSAI
 ==============================================================================
@@ -54,6 +55,8 @@ parameters of FSAI can be set via the following calls:
    HYPRE_FSAISetMaxSteps(HYPRE_Solver solver, HYPRE_Int max_steps);
    HYPRE_FSAISetMaxStepSize(HYPRE_Solver solver, HYPRE_Int max_step_size);
    HYPRE_FSAISetKapTolerance(HYPRE_Solver solver, HYPRE_Real kap_tolerance);
+
+.. _fsai-amg-smoother:
 
 FSAI as Smoother to BoomerAMG
 ------------------------------------------------------------------------------

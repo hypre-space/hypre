@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -62,6 +62,12 @@ mpirun -np 3  ./ij -rhsrand -n 15 30 10 -rlx 18 \
 
 mpirun -np 4  ./ij -rhsrand -solver 1 -rlx 8 -n 20 20 10 -P 2 2 1 \
 > smoother.out.11
+
+mpirun -np 4  ./ij -rhsrand -solver 1 -rlx 88 -n 20 20 10 -P 2 2 1 \
+> smoother.out.11.1
+
+mpirun -np 4  ./ij -rhsrand -solver 1 -rlx 89 -n 20 20 10 -P 2 2 1 \
+> smoother.out.11.2
 
 mpirun -np 4  ./ij -rhsrand -solver 1 -rlx 16 -n 20 20 10 -P 2 2 1 \
 > smoother.out.12
