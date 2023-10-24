@@ -94,7 +94,9 @@ FILES="\
  ${TNAME}.out.21\
  ${TNAME}.out.22\
  ${TNAME}.out.23\
- ${TNAME}.out.24
+ ${TNAME}.out.24\
+ ${TNAME}.out.25\
+ ${TNAME}.out.26
 "
 
 for i in $FILES
