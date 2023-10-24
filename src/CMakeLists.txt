@@ -122,6 +122,7 @@ option(HYPRE_ENABLE_CUBLAS           "Use cuBLAS" OFF)
 option(HYPRE_ENABLE_CURAND           "Use cuRAND" ON)
 option(HYPRE_ENABLE_GPU_PROFILING    "Use NVTX on CUDA" OFF)
 set(GPU_ARCH "" CACHE STRING         "GPU architecture (e.g. CUDA/HIP SM number or Intel GPU device number)")
+set(HYPRE_CUDA_SM "70" CACHE STRING  "(DEPRECATED: use GPU_ARCH instead) Target CUDA architecture.")
 # oneAPI options
 option(HYPRE_ENABLE_ONEMKLSPARSE     "Use oneMKL sparse" ON)
 option(HYPRE_ENABLE_ONEMKLBLAS       "Use oneMKL blas" ON)
