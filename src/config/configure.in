@@ -558,6 +558,7 @@ then
    fi
 else
    if test "x$CUCC" != "x"
+   then
       AC_MSG_ERROR([WARNING: use of CUCC variable is deprecated and will be overriden by provided GPUCC.])
    fi
    hypre_user_chose_gpucompilers=yes
@@ -575,6 +576,7 @@ then
    fi
 else
    if test "x$CUFLAGS" != "x"
+   then
       AC_MSG_ERROR([WARNING: use of CUFLAGS variable is deprecated and will be overriden by provided GPUFLAGS.])
    fi
    hypre_user_chose_gpuflags=yes

@@ -3856,6 +3856,7 @@ then
    fi
 else
    if test "x$CUCC" != "x"
+   then
       as_fn_error $? "WARNING: use of CUCC variable is deprecated and will be overriden by provided GPUCC." "$LINENO" 5
    fi
    hypre_user_chose_gpucompilers=yes
@@ -3873,6 +3874,7 @@ then
    fi
 else
    if test "x$CUFLAGS" != "x"
+   then
       as_fn_error $? "WARNING: use of CUFLAGS variable is deprecated and will be overriden by provided GPUFLAGS." "$LINENO" 5
    fi
    hypre_user_chose_gpuflags=yes
