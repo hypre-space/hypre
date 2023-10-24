@@ -745,7 +745,7 @@ CUCC
 HYPRE_CUDA_SM
 GPUFLAGS
 GPUCC
-GPU_ARCH
+HYPRE_GPU_ARCH
 DPLROOT
 MKLROOT
 ROCM_PATH
@@ -920,7 +920,7 @@ CUDA_HOME
 ROCM_PATH
 MKLROOT
 DPLROOT
-GPU_ARCH
+HYPRE_GPU_ARCH
 GPUCC
 GPUFLAGS
 HYPRE_CUDA_SM
@@ -1832,12 +1832,13 @@ Some influential environment variables:
   ROCM_PATH   ROCm home directory
   MKLROOT     oneMKL home directory
   DPLROOT     oneDPL home directory
-  GPU_ARCH    GPU architecture (e.g. CUDA/HIP SM number or Intel GPU device
+  HYPRE_GPU_ARCH
+              GPU architecture (e.g. CUDA/HIP SM number or Intel GPU device
               number)
   GPUCC       GPU compiler command (e.g. nvcc, hipcc, icpx)
   GPUFLAGS    GPU compiler flags
   HYPRE_CUDA_SM
-              (DEPRECATED: use GPU_ARCH instead) GPU architecture (e.g.
+              (DEPRECATED: use HYPRE_GPU_ARCH instead) GPU architecture (e.g.
               CUDA/HIP SM number or Intel GPU device number)
   CUCC        (DEPRECATED: use GPUCC instead) GPU compiler command (e.g. nvcc,
               hipcc, icpx)
@@ -3879,12 +3880,12 @@ fi
 
 if test "x$HYPRE_CUDA_SM" != "x"
 then
-   if test "x$GPU_ARCH" = "x"
+   if test "x$HYPRE_GPU_ARCH" = "x"
    then
-      as_fn_error $? "WARNING: use of HYPRE_CUDA_SM variable is deprecated. Use GPU_ARCH instead." "$LINENO" 5
-      GPU_ARCH=$HYPRE_CUDA_SM
+      as_fn_error $? "WARNING: use of HYPRE_CUDA_SM variable is deprecated. Use HYPRE_GPU_ARCH instead." "$LINENO" 5
+      HYPRE_GPU_ARCH=$HYPRE_CUDA_SM
    else
-      as_fn_error $? "WARNING: use of HYPRE_CUDA_SM variable is deprecated and will be overriden by provided GPU_ARCH." "$LINENO" 5
+      as_fn_error $? "WARNING: use of HYPRE_CUDA_SM variable is deprecated and will be overriden by provided HYPRE_GPU_ARCH." "$LINENO" 5
    fi
 fi
 
@@ -4805,9 +4806,9 @@ then :
   withval=$with_gpu_arch;
  if test "x${withval}" != "x"
  then
-    if test "x${GPU_ARCH}" = "x"
+    if test "x${HYPRE_GPU_ARCH}" = "x"
     then
-       GPU_ARCH="${withval}"
+       HYPRE_GPU_ARCH="${withval}"
     fi
  fi
 
@@ -10766,13 +10767,13 @@ printf "%s\n" "#define HYPRE_USING_CUDA 1" >>confdefs.h
 
    LINK_CC=${LINK_CXX}
 
-      if test "x$GPU_ARCH" = "x"
+      if test "x$HYPRE_GPU_ARCH" = "x"
    then
-      GPU_ARCH=70
+      HYPRE_GPU_ARCH=70
    fi
 
    HYPRE_GPU_GENCODE=""
-   for sm in ${GPU_ARCH}; do
+   for sm in ${HYPRE_GPU_ARCH}; do
       HYPRE_GPU_GENCODE="${HYPRE_GPU_GENCODE}-gencode arch=compute_${sm},code=sm_${sm} "
    done
 
@@ -10886,10 +10887,10 @@ printf "%s\n" "#define HYPRE_USING_HIP 1" >>confdefs.h
                         LINK_CC=${LINK_CXX}
 
 
-        if test "x${GPU_ARCH}" != "x"
+        if test "x${HYPRE_GPU_ARCH}" != "x"
         then
            HYPRE_GPU_GENCODE="--amdgpu-target="
-           for sm in ${GPU_ARCH}; do
+           for sm in ${HYPRE_GPU_ARCH}; do
               HYPRE_GPU_GENCODE="${HYPRE_GPU_GENCODE}${sm},"
            done
            HYPRE_GPU_GENCODE="`echo ${HYPRE_GPU_GENCODE}|sed 's/,$//'`"
@@ -10998,10 +10999,10 @@ printf "%s\n" "#define HYPRE_USING_SYCL 1" >>confdefs.h
         fi
         LDFLAGS+=" -fsycl -fsycl-device-code-split=per_kernel -Wl,--no-relax"
 
-                if test "x${GPU_ARCH}" != "x"
+                if test "x${HYPRE_GPU_ARCH}" != "x"
         then
            HYPRE_SYCL_TARGET="-fsycl-targets=spir64_gen -Xs '-device "
-           for dev in ${GPU_ARCH}; do
+           for dev in ${HYPRE_GPU_ARCH}; do
               HYPRE_SYCL_TARGET="${HYPRE_SYCL_TARGET}${dev},"
            done
            HYPRE_SYCL_TARGET="`echo ${HYPRE_SYCL_TARGET}|sed 's/,$//'`"

@@ -45,7 +45,7 @@ CFLAGS    = @CFLAGS@ @DEFS@ $(C_COMPILE_FLAGS)
 CXX       = @CXX@
 CXXFLAGS  = @CXXFLAGS@ @DEFS@ $(CXX_COMPILE_FLAGS)
 
-GPUCC     = @GPUCC@ ${GPU_ARCH}
+GPUCC     = @GPUCC@ ${HYPRE_GPU_ARCH}
 GPUFLAGS  = @GPUFLAGS@ @DEFS@ ${C_COMPILE_FLAGS}
 
 .f.o:
@@ -120,7 +120,7 @@ HYPRE_NAP_INCLUDE = @HYPRE_NAP_INCLUDE@
 ##################################################################
 ##  GPU architecture
 ##################################################################
-GPU_ARCH = @HYPRE_GPU_GENCODE@
+HYPRE_GPU_ARCH = @HYPRE_GPU_GENCODE@
 
 ##################################################################
 ##  CUDA options

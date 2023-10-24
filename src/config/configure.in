@@ -536,13 +536,13 @@ AC_ARG_VAR([CUDA_HOME], [CUDA home directory])
 AC_ARG_VAR([ROCM_PATH], [ROCm home directory])
 AC_ARG_VAR([MKLROOT], [oneMKL home directory])
 AC_ARG_VAR([DPLROOT], [oneDPL home directory])
-AC_ARG_VAR([GPU_ARCH], [GPU architecture (e.g. CUDA/HIP SM number or Intel GPU device number)])
+AC_ARG_VAR([HYPRE_GPU_ARCH], [GPU architecture (e.g. CUDA/HIP SM number or Intel GPU device number)])
 AC_ARG_VAR([GPUCC], [GPU compiler command (e.g. nvcc, hipcc, icpx)])
 AC_ARG_VAR([GPUFLAGS], [GPU compiler flags])
 dnl *********************************************************************
 dnl * Legacy variables with cuda naming convention (for backward compatibility)
 dnl *********************************************************************
-AC_ARG_VAR([HYPRE_CUDA_SM], [(DEPRECATED: use GPU_ARCH instead) GPU architecture (e.g. CUDA/HIP SM number or Intel GPU device number)])
+AC_ARG_VAR([HYPRE_CUDA_SM], [(DEPRECATED: use HYPRE_GPU_ARCH instead) GPU architecture (e.g. CUDA/HIP SM number or Intel GPU device number)])
 AC_ARG_VAR([CUCC], [(DEPRECATED: use GPUCC instead) GPU compiler command (e.g. nvcc, hipcc, icpx)])
 AC_ARG_VAR([CUFLAGS], [(DEPRECATED: use GPUFLAGS) GPU compiler flags])
 
@@ -582,12 +582,12 @@ fi
 
 if test "x$HYPRE_CUDA_SM" != "x"
 then
-   if test "x$GPU_ARCH" = "x"
+   if test "x$HYPRE_GPU_ARCH" = "x"
    then
-      AC_MSG_ERROR([WARNING: use of HYPRE_CUDA_SM variable is deprecated. Use GPU_ARCH instead.])
-      GPU_ARCH=$HYPRE_CUDA_SM
+      AC_MSG_ERROR([WARNING: use of HYPRE_CUDA_SM variable is deprecated. Use HYPRE_GPU_ARCH instead.])
+      HYPRE_GPU_ARCH=$HYPRE_CUDA_SM
    else
-      AC_MSG_ERROR([WARNING: use of HYPRE_CUDA_SM variable is deprecated and will be overriden by provided GPU_ARCH.])
+      AC_MSG_ERROR([WARNING: use of HYPRE_CUDA_SM variable is deprecated and will be overriden by provided HYPRE_GPU_ARCH.])
    fi
 fi
 
@@ -1295,9 +1295,9 @@ AS_HELP_STRING([--with-gpu-arch=ARG],
 [
  if test "x${withval}" != "x"
  then
-    if test "x${GPU_ARCH}" = "x"
+    if test "x${HYPRE_GPU_ARCH}" = "x"
     then
-       GPU_ARCH="${withval}"
+       HYPRE_GPU_ARCH="${withval}"
     fi
  fi
 ]
@@ -2546,13 +2546,13 @@ then
    dnl LINK_CXX='${GPUCC}'
 
    dnl CUDA SM
-   if test "x$GPU_ARCH" = "x"
+   if test "x$HYPRE_GPU_ARCH" = "x"
    then
-      GPU_ARCH=70
+      HYPRE_GPU_ARCH=70
    fi
 
    HYPRE_GPU_GENCODE=""
-   for sm in ${GPU_ARCH}; do
+   for sm in ${HYPRE_GPU_ARCH}; do
       HYPRE_GPU_GENCODE="${HYPRE_GPU_GENCODE}-gencode arch=compute_${sm},code=sm_${sm} "
    done
 
@@ -2662,10 +2662,10 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         dnl LINK_CXX='${GPUCC}'
 
 
-        if test "x${GPU_ARCH}" != "x"
+        if test "x${HYPRE_GPU_ARCH}" != "x"
         then
            HYPRE_GPU_GENCODE="--amdgpu-target="
-           for sm in ${GPU_ARCH}; do
+           for sm in ${HYPRE_GPU_ARCH}; do
               HYPRE_GPU_GENCODE="${HYPRE_GPU_GENCODE}${sm},"
            done
            HYPRE_GPU_GENCODE="`echo ${HYPRE_GPU_GENCODE}|sed 's/,$//'`"
@@ -2766,10 +2766,10 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         LDFLAGS+=" -fsycl -fsycl-device-code-split=per_kernel -Wl,--no-relax"
 
         dnl AOT compilation for specific devices
-        if test "x${GPU_ARCH}" != "x"
+        if test "x${HYPRE_GPU_ARCH}" != "x"
         then
            HYPRE_SYCL_TARGET="-fsycl-targets=spir64_gen -Xs '-device "
-           for dev in ${GPU_ARCH}; do
+           for dev in ${HYPRE_GPU_ARCH}; do
               HYPRE_SYCL_TARGET="${HYPRE_SYCL_TARGET}${dev},"
            done
            HYPRE_SYCL_TARGET="`echo ${HYPRE_SYCL_TARGET}|sed 's/,$//'`"
