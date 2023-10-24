@@ -37,11 +37,6 @@ extern "C" {
  * @{
  **/
 
-typedef HYPRE_Int (*HYPRE_PtrToSolverFcn)(HYPRE_Solver,
-                                          HYPRE_Matrix,
-                                          HYPRE_Vector,
-                                          HYPRE_Vector);
-
 #ifndef HYPRE_MODIFYPC
 #define HYPRE_MODIFYPC
 typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
