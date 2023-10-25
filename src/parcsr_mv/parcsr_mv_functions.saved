@@ -187,6 +187,7 @@ GenerateDiagAndOffd
 hypre_CSRMatrixToParCSRMatrix
 hypre_FillResponseParToCSRMatrix
 hypre_MergeDiagAndOffd
+hypre_MergeDiagAndOffdHost
 hypre_ParCSRMatrixClone
 hypre_ParCSRMatrixClone_v2
 hypre_ParCSRMatrixCopy

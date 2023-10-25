@@ -205,6 +205,7 @@
 #define hypre_CSRMatrixToParCSRMatrix HYPRE_MULTIPRECISION_FUNC ( hypre_CSRMatrixToParCSRMatrix )
 #define hypre_FillResponseParToCSRMatrix HYPRE_MULTIPRECISION_FUNC ( hypre_FillResponseParToCSRMatrix )
 #define hypre_MergeDiagAndOffd HYPRE_MULTIPRECISION_FUNC ( hypre_MergeDiagAndOffd )
+#define hypre_MergeDiagAndOffdHost HYPRE_MULTIPRECISION_FUNC ( hypre_MergeDiagAndOffdHost )
 #define hypre_ParCSRMatrixClone HYPRE_MULTIPRECISION_FUNC ( hypre_ParCSRMatrixClone )
 #define hypre_ParCSRMatrixClone_v2 HYPRE_MULTIPRECISION_FUNC ( hypre_ParCSRMatrixClone_v2 )
 #define hypre_ParCSRMatrixCopy HYPRE_MULTIPRECISION_FUNC ( hypre_ParCSRMatrixCopy )
