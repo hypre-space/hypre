@@ -34,6 +34,7 @@ hypre_BeginTiming
 hypre_ClearTiming
 hypre_EndTiming
 hypre_FinalizeTiming
+hypre_FinalizeAllTimings
 hypre_GetTiming
 hypre_IncFLOPCount
 hypre_InitializeTiming

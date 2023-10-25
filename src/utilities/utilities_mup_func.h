@@ -316,7 +316,9 @@
 #if defined (HYPRE_TIMING)
 #define hypre_EndTiming HYPRE_MULTIPRECISION_FUNC ( hypre_EndTiming )
 #endif
+#if defined (HYPRE_TIMING)
 #define hypre_FinalizeAllTimings HYPRE_MULTIPRECISION_FUNC ( hypre_FinalizeAllTimings )
+#endif
 #if defined (HYPRE_TIMING)
 #define hypre_FinalizeTiming HYPRE_MULTIPRECISION_FUNC ( hypre_FinalizeTiming )
 #endif
