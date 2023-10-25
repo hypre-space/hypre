@@ -16,8 +16,6 @@
 
 #include "multiprecision.h"
 
-#define hypre_CSRMatrixSortRow HYPRE_MULTIPRECISION_FUNC ( hypre_CSRMatrixSortRow )
-#define hypre_CSRMatrixSpMVAnalysisDevice HYPRE_MULTIPRECISION_FUNC ( hypre_CSRMatrixSpMVAnalysisDevice )
 #define hypre_CSRMatrixAdd HYPRE_MULTIPRECISION_FUNC ( hypre_CSRMatrixAdd )
 #define hypre_CSRMatrixAddFirstPass HYPRE_MULTIPRECISION_FUNC ( hypre_CSRMatrixAddFirstPass )
 #define hypre_CSRMatrixAddHost HYPRE_MULTIPRECISION_FUNC ( hypre_CSRMatrixAddHost )
@@ -154,6 +152,7 @@
 #define hypre_SeqVectorInitialize_v2 HYPRE_MULTIPRECISION_FUNC ( hypre_SeqVectorInitialize_v2 )
 #define hypre_SeqVectorInnerProd HYPRE_MULTIPRECISION_FUNC ( hypre_SeqVectorInnerProd )
 #define hypre_SeqVectorInnerProdHost HYPRE_MULTIPRECISION_FUNC ( hypre_SeqVectorInnerProdHost )
+#define hypre_SeqVectorMigrate HYPRE_MULTIPRECISION_FUNC ( hypre_SeqVectorMigrate )
 #define hypre_SeqVectorPrint HYPRE_MULTIPRECISION_FUNC ( hypre_SeqVectorPrint )
 #define hypre_SeqVectorRead HYPRE_MULTIPRECISION_FUNC ( hypre_SeqVectorRead )
 #define hypre_SeqVectorResize HYPRE_MULTIPRECISION_FUNC ( hypre_SeqVectorResize )

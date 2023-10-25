@@ -72,6 +72,7 @@ hypre_GetDeviceCount
 hypre_GetDeviceLastError
 hypre_GetDeviceMaxShmemSize
 HYPRE_GetExecutionPolicy
+HYPRE_GetExecutionPolicyName
 HYPRE_GetMemoryLocation
 hypre_handle
 hypre_HandleCreate
@@ -126,7 +127,14 @@ hypre_IntArrayPrint
 hypre_IntArrayRead
 hypre_IntArraySetConstantValues
 hypre_IntArraySetConstantValuesHost
+hypre_IntArraySetInterleavedValues
+hypre_IntArraySetInterleavedValuesHost
 hypre_Log2
+hypre_MatrixStatsArrayCreate
+hypre_MatrixStatsArrayDestroy
+hypre_MatrixStatsArrayPrint
+hypre_MatrixStatsCreate
+hypre_MatrixStatsDestroy
 hypre_CAlloc
 hypre_CheckMemoryLocation
 _hypre_Free
@@ -280,6 +288,9 @@ hypre_GetTiming
 hypre_IncFLOPCount
 hypre_InitializeTiming
 hypre_PrintTiming
+hypre_CheckDirExists
+hypre_CreateDir
+hypre_CreateNextDirOfSequence
 hypre_multmod
 hypre_partition1D
 hypre_strcpy

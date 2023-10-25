@@ -19,6 +19,44 @@ extern "C++" {
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#ifndef HYPRE_FUNCTORS_H
+#define HYPRE_FUNCTORS_H
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+/*--------------------------------------------------------------------------
+ * hypreFunctor_DenseMatrixIdentity
+ *
+ * Functor for generating a dense identity matrix.
+ * This assumes that the input array "a" is zeros everywhere
+ *--------------------------------------------------------------------------*/
+
+struct hypreFunctor_DenseMatrixIdentity
+{
+   HYPRE_Int   n_;
+   HYPRE_Real *a_;
+
+   hypreFunctor_DenseMatrixIdentity(HYPRE_Int n, HYPRE_Real *a)
+   {
+      n_ = n;
+      a_ = a;
+   }
+
+   __host__ __device__ void operator()(HYPRE_Int i)
+   {
+      a_[i * n_ + i] = 1.0;
+   }
+};
+
+#endif /* if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+#endif /* ifndef HYPRE_FUNCTORS_H */
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef DEVICE_ALLOCATOR_H
 #define DEVICE_ALLOCATOR_H
 
@@ -415,7 +453,6 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    if (cudaSuccess != err) {                                                                 \
       printf("CUDA ERROR (code = %d, %s) at %s:%d\n", err, cudaGetErrorString(err),          \
                    __FILE__, __LINE__);                                                      \
-      hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
 #elif defined(HYPRE_USING_HIP)
@@ -424,7 +461,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    if (hipSuccess != err) {                                                                  \
       printf("HIP ERROR (code = %d, %s) at %s:%d\n", err, hipGetErrorString(err),            \
                    __FILE__, __LINE__);                                                      \
-      hypre_assert(0); exit(1);                                                              \
+      hypre_assert(0);                                                                       \
    } } while(0)
 
 #elif defined(HYPRE_USING_SYCL)
@@ -437,13 +474,13 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    {                                                                                         \
       hypre_printf("SYCL ERROR (code = %s) at %s:%d\n", ex.what(),                           \
                      __FILE__, __LINE__);                                                    \
-      assert(0); exit(1);                                                                    \
+      assert(0);                                                                             \
    }                                                                                         \
    catch(std::runtime_error const& ex)                                                       \
    {                                                                                         \
       hypre_printf("STD ERROR (code = %s) at %s:%d\n", ex.what(),                            \
                    __FILE__, __LINE__);                                                      \
-      assert(0); exit(1);                                                                    \
+      assert(0);                                                                             \
    }
 #endif
 
@@ -455,10 +492,12 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #error "GPU build does not support complex numbers!"
 
 #elif defined(HYPRE_SINGLE) /* Single */
+#if defined(HYPRE_USING_CUDA)
 /* cuBLAS */
 #define hypre_cublas_scal                      cublasSscal
 #define hypre_cublas_axpy                      cublasSaxpy
 #define hypre_cublas_dot                       cublasSdot
+#define hypre_cublas_gemv                      cublasSgemv
 #define hypre_cublas_getrfBatched              cublasSgetrfBatched
 #define hypre_cublas_getriBatched              cublasSgetriBatched
 
@@ -478,6 +517,12 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_cusparse_csrsm2_analysis         cusparseScsrsm2_analysis
 #define hypre_cusparse_csrsm2_solve            cusparseScsrsm2_solve
 
+/* cuSOLVER */
+#define hypre_cusolver_dngetrf                 cusolverDnSgetrf
+#define hypre_cusolver_dngetrf_bs              cusolverDnSgetrf_bufferSize
+#define hypre_cusolver_dngetrs                 cusolverDnSgetrs
+
+#elif defined(HYPRE_USING_HIP)
 /* rocSPARSE */
 #define hypre_rocsparse_csrsv_buffer_size      rocsparse_scsrsv_buffer_size
 #define hypre_rocsparse_csrsv_analysis         rocsparse_scsrsv_analysis
@@ -492,14 +537,24 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csrilu0_analysis       rocsparse_scsrilu0_analysis
 #define hypre_rocsparse_csrilu0                rocsparse_scsrilu0
 
+/* rocSOLVER */
+
+/**************
+ * TODO (VPM) *
+ **************/
+
+#endif /* if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+
 #elif defined(HYPRE_LONG_DOUBLE) /* Long Double */
 #error "GPU build does not support Long Double numbers!"
 
 #else /* Double */
+#if defined(HYPRE_USING_CUDA)
 /* cuBLAS */
 #define hypre_cublas_scal                      cublasDscal
 #define hypre_cublas_axpy                      cublasDaxpy
 #define hypre_cublas_dot                       cublasDdot
+#define hypre_cublas_gemv                      cublasDgemv
 #define hypre_cublas_getrfBatched              cublasDgetrfBatched
 #define hypre_cublas_getriBatched              cublasDgetriBatched
 
@@ -519,6 +574,12 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_cusparse_csrsm2_analysis         cusparseDcsrsm2_analysis
 #define hypre_cusparse_csrsm2_solve            cusparseDcsrsm2_solve
 
+/* cuSOLVER */
+#define hypre_cusolver_dngetrf                 cusolverDnDgetrf
+#define hypre_cusolver_dngetrf_bs              cusolverDnDgetrf_bufferSize
+#define hypre_cusolver_dngetrs                 cusolverDnDgetrs
+
+#elif defined(HYPRE_USING_HIP)
 /* rocSPARSE */
 #define hypre_rocsparse_csrsv_buffer_size      rocsparse_dcsrsv_buffer_size
 #define hypre_rocsparse_csrsv_analysis         rocsparse_dcsrsv_analysis
@@ -532,7 +593,15 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csrilu0_buffer_size    rocsparse_dcsrilu0_buffer_size
 #define hypre_rocsparse_csrilu0_analysis       rocsparse_dcsrilu0_analysis
 #define hypre_rocsparse_csrilu0                rocsparse_dcsrilu0
-#endif
+
+/* rocSOLVER */
+
+/**************
+ * TODO (VPM) *
+ **************/
+
+#endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)*/
+#endif /* #if defined(HYPRE_COMPLEX) || defined(HYPRE_SINGLE) || defined(HYPRE_LONG_DOUBLE) */
 
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \
    cublasStatus_t err = call;                                                                \
@@ -581,7 +650,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    if (CUSOLVER_STATUS_SUCCESS != err) {                                                     \
       printf("cuSOLVER ERROR (code = %d) at %s:%d\n",                                        \
             err, __FILE__, __LINE__);                                                        \
-      hypre_assert(0); exit(1);                                                              \
+      hypre_assert(0);                                                                       \
    } } while(0)
 
 #define HYPRE_ROCSOLVER_CALL(call) do {                                                      \
@@ -804,19 +873,11 @@ struct hypre_CsrsvData
    hypre_cusparseSpSVDescr   info_U;
    cusparseSolvePolicy_t     analysis_policy;
    cusparseSolvePolicy_t     solve_policy;
-
 #elif defined(HYPRE_USING_ROCSPARSE)
    rocsparse_mat_info        info_L;
    rocsparse_mat_info        info_U;
    rocsparse_analysis_policy analysis_policy;
    rocsparse_solve_policy    solve_policy;
-
-#elif defined(HYPRE_USING_ONEMKLSPARSE)
-   /* WM: todo - placeholders */
-   char                      info_L;
-   char                      info_U;
-   char                      analysis_policy;
-   char                      solve_policy;
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE) && (CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION)

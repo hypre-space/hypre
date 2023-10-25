@@ -54,7 +54,9 @@ HYPRE_IJMatrixInitialize
 HYPRE_IJMatrixInitialize_v2
 HYPRE_IJMatrixNorm
 HYPRE_IJMatrixPrint
+HYPRE_IJMatrixPrintBinary
 HYPRE_IJMatrixRead
+HYPRE_IJMatrixReadBinary
 HYPRE_IJMatrixReadMM
 HYPRE_IJMatrixSetConstantValues
 HYPRE_IJMatrixSetDiagOffdSizes
@@ -79,7 +81,9 @@ HYPRE_IJVectorInitialize
 HYPRE_IJVectorInitialize_v2
 HYPRE_IJVectorInnerProd
 HYPRE_IJVectorPrint
+HYPRE_IJVectorPrintBinary
 HYPRE_IJVectorRead
+HYPRE_IJVectorReadBinary
 HYPRE_IJVectorSetComponent
 HYPRE_IJVectorSetMaxOffProcElmts
 HYPRE_IJVectorSetNumComponents
@@ -92,6 +96,7 @@ hypre_IJVectorCreateAssumedPartition
 hypre_IJMatrixGetColPartitioning
 hypre_IJMatrixGetRowPartitioning
 hypre_IJMatrixRead
+hypre_IJMatrixReadBinary
 hypre_IJMatrixSetObject
 hypre_FillResponseIJOffProcVals
 hypre_FindProc
@@ -117,6 +122,7 @@ hypre_IJMatrixSetValuesOMPParCSR
 hypre_IJMatrixSetValuesParCSR
 hypre_IJMatrixTransposeParCSR
 hypre_IJVectorDistribute
+hypre_IJVectorReadBinary
 hypre_IJVectorZeroValues
 hypre_IJVectorAddToValuesPar
 hypre_IJVectorAssembleOffProcValsPar

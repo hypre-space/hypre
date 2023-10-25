@@ -38,7 +38,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    HYPRE_Real            tol_ddPQ            = hypre_ParILUDataTolDDPQ(ilu_data);
 
    /* Pointers to device data, note that they are not NULL only when needed */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_Int             test_opt            = hypre_ParILUDataTestOption(ilu_data);
    hypre_ParCSRMatrix   *Aperm               = hypre_ParILUDataAperm(ilu_data);
    hypre_ParCSRMatrix   *R                   = hypre_ParILUDataR(ilu_data);
@@ -124,6 +124,11 @@ hypre_ILUSetup( void               *ilu_vdata,
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ILU HIP build requires rocSPARSE!");
       return hypre_error_flag;
    }
+#elif defined(HYPRE_USING_SYCL) && !defined(HYPRE_USING_ONEMKLSPARSE)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ILU SYCL build requires oneMKLSparse!");
+      return hypre_error_flag;
+   }
 #endif
 
    /* ----- begin -----*/
@@ -133,7 +138,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    hypre_CSRMatrixDestroy(matALU_d); matALU_d = NULL;
    hypre_CSRMatrixDestroy(matSLU_d); matSLU_d = NULL;
    hypre_CSRMatrixDestroy(matBLU_d); matBLU_d = NULL;
@@ -213,7 +218,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 
    /* ILU as precond for Schur */
    if ( hypre_ParILUDataSchurPrecond(ilu_data)  &&
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
         hypre_ParILUDataIluType(ilu_data) != 10 &&
         hypre_ParILUDataIluType(ilu_data) != 11 &&
 #endif
@@ -271,7 +276,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    switch (ilu_type)
    {
       case 0:
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             if (fill_level == 0)
@@ -303,7 +308,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
 
       case 1:
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
 #if !defined(HYPRE_USING_UNIFIED_MEMORY)
@@ -325,7 +330,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
 
       case 10:
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             if (fill_level == 0)
@@ -357,7 +362,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
 
       case 11:
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
 #if !defined(HYPRE_USING_UNIFIED_MEMORY)
@@ -470,7 +475,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
 
       case 50:
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
 #if !defined(HYPRE_USING_UNIFIED_MEMORY)
@@ -494,7 +499,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
 
       default:
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
             /* BJ + device_ilu0() */
@@ -531,7 +536,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          if (matS)
          {
             /* Create work vectors */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
             if (exec == HYPRE_EXEC_DEVICE)
             {
                Xtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(matS),
@@ -851,7 +856,7 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
 
       case 50:
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if (matS && exec == HYPRE_EXEC_DEVICE)
          {
             Xtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(matA),
@@ -1082,7 +1087,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 
    /* set pointers to ilu data */
    /* set device data pointers */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    hypre_ParILUDataMatAILUDevice(ilu_data) = matALU_d;
    hypre_ParILUDataMatBILUDevice(ilu_data) = matBLU_d;
    hypre_ParILUDataMatSILUDevice(ilu_data) = matSLU_d;
@@ -1128,7 +1133,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    size_C = hypre_ParCSRMatrixGlobalNumRows(matA);
 
    /* switch to compute complexity */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_Int nnzBEF = 0;
    HYPRE_Int nnzG; /* Global nnz */
 
@@ -1191,8 +1196,8 @@ hypre_ILUSetup( void               *ilu_vdata,
                                                       hypre_ParCSRMatrixDNumNonzeros(matA);
    }
    else
-   {
 #endif
+   {
       if (matS)
       {
          hypre_ParCSRMatrixSetDNumNonzeros(matS);
@@ -1227,9 +1232,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                                                       hypre_ParCSRMatrixDNumNonzeros(matL) +
                                                       hypre_ParCSRMatrixDNumNonzeros(matU)) /
                                                      hypre_ParCSRMatrixDNumNonzeros(matA);
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    }
-#endif
    if ((my_id == 0) && (print_level > 0))
    {
       hypre_printf("ILU SETUP: operator complexity = %f  \n",
@@ -1773,7 +1776,9 @@ hypre_ILUSetupLDUtoCusparse(hypre_ParCSRMatrix  *L,
    hypre_CSRMatrixData(LDU_diag) = LDU_diag_data;
 
    /* now sort */
+#if defined(HYPRE_USING_GPU)
    hypre_CSRMatrixSortRow(LDU_diag);
+#endif
    hypre_ParCSRMatrixDiag(LDU) = LDU_diag;
 
    *LDUp = LDU;
@@ -1886,7 +1891,9 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix  *A,
       {
          /* RAP where we save E and F */
          Apq_diag = hypre_ParCSRMatrixDiag(Apq);
+#if defined(HYPRE_USING_GPU)
          hypre_CSRMatrixSortRow(Apq_diag);
+#endif
          hypre_ParILUExtractEBFC(Apq_diag, nLU, &dB, &dS, Eptr, Fptr);
 
          /* get modified ILU of B */
@@ -1903,7 +1910,9 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix  *A,
       {
          /* C-EB^{-1}F where we save EU^{-1}, L^{-1}F as sparse matrices */
          Apq_diag = hypre_ParCSRMatrixDiag(Apq);
+#if defined(HYPRE_USING_GPU)
          hypre_CSRMatrixSortRow(Apq_diag);
+#endif
          hypre_ParILUExtractEBFC(Apq_diag, nLU, &dB, CLUptr, &dE, &dF);
 
          /* get modified ILU of B */
@@ -1919,7 +1928,9 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix  *A,
       {
          /* C-EB^{-1}F where we save E and F */
          Apq_diag = hypre_ParCSRMatrixDiag(Apq);
+#if defined(HYPRE_USING_GPU)
          hypre_CSRMatrixSortRow(Apq_diag);
+#endif
          hypre_ParILUExtractEBFC(Apq_diag, nLU, &dB, CLUptr, Eptr, Fptr);
 
          /* get modified ILU of B */

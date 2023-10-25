@@ -57,6 +57,7 @@ MuP_FILES = \
  error.c\
  int_array.c\
  hopscotch_hash.c\
+ matrix_stats.c\
  magma.c\
  memory_tracker.c\
  merge_sort.c\

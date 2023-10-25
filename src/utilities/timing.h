@@ -41,6 +41,7 @@ hypre_double time_getCPUSeconds( void );
 
 #define hypre_InitializeTiming(name) 0
 #define hypre_FinalizeTiming(index)
+#define hypre_FinalizeAllTimings()
 #define hypre_IncFLOPCount(inc)
 #define hypre_BeginTiming(i)
 #define hypre_EndTiming(i)

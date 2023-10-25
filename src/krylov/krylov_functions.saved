@@ -301,6 +301,7 @@ HYPRE_PCGGetAbsoluteTolFactor
 HYPRE_PCGGetConverged
 HYPRE_PCGGetConvergenceFactorTol
 HYPRE_PCGGetFinalRelativeResidualNorm
+HYPRE_PCGGetFlex
 HYPRE_PCGGetLogging
 HYPRE_PCGGetMaxIter
 HYPRE_PCGGetNumIterations
@@ -312,12 +313,14 @@ HYPRE_PCGGetRecomputeResidualP
 HYPRE_PCGGetRelChange
 HYPRE_PCGGetResidual
 HYPRE_PCGGetResidualTol
+HYPRE_PCGGetSkipBreak
 HYPRE_PCGGetStopCrit
 HYPRE_PCGGetTol
 HYPRE_PCGGetTwoNorm
 HYPRE_PCGSetAbsoluteTol
 HYPRE_PCGSetAbsoluteTolFactor
 HYPRE_PCGSetConvergenceFactorTol
+HYPRE_PCGSetFlex
 HYPRE_PCGSetLogging
 HYPRE_PCGSetMaxIter
 HYPRE_PCGSetPrecond
@@ -327,6 +330,7 @@ HYPRE_PCGSetRecomputeResidual
 HYPRE_PCGSetRecomputeResidualP
 HYPRE_PCGSetRelChange
 HYPRE_PCGSetResidualTol
+HYPRE_PCGSetSkipBreak
 HYPRE_PCGSetStopCrit
 HYPRE_PCGSetTol
 HYPRE_PCGSetTwoNorm
@@ -397,6 +401,7 @@ hypre_PCGGetAbsoluteTolFactor
 hypre_PCGGetConverged
 hypre_PCGGetConvergenceFactorTol
 hypre_PCGGetFinalRelativeResidualNorm
+hypre_PCGGetFlex
 hypre_PCGGetLogging
 hypre_PCGGetMaxIter
 hypre_PCGGetNumIterations
@@ -408,6 +413,7 @@ hypre_PCGGetRecomputeResidualP
 hypre_PCGGetRelChange
 hypre_PCGGetResidual
 hypre_PCGGetResidualTol
+hypre_PCGGetSkipBreak
 hypre_PCGGetStopCrit
 hypre_PCGGetTol
 hypre_PCGGetTwoNorm
@@ -415,6 +421,7 @@ hypre_PCGPrintLogging
 hypre_PCGSetAbsoluteTol
 hypre_PCGSetAbsoluteTolFactor
 hypre_PCGSetConvergenceFactorTol
+hypre_PCGSetFlex
 hypre_PCGSetHybrid
 hypre_PCGSetLogging
 hypre_PCGSetMaxIter
@@ -425,6 +432,7 @@ hypre_PCGSetRecomputeResidual
 hypre_PCGSetRecomputeResidualP
 hypre_PCGSetRelChange
 hypre_PCGSetResidualTol
+hypre_PCGSetSkipBreak
 hypre_PCGSetStopCrit
 hypre_PCGSetTol
 hypre_PCGSetTwoNorm

@@ -1,5 +1,3 @@
-hypre_CSRMatrixSortRow
-hypre_CSRMatrixSpMVAnalysisDevice
 hypre_CSRMatrixAdd
 hypre_CSRMatrixAddFirstPass
 hypre_CSRMatrixAddHost
@@ -136,6 +134,7 @@ hypre_SeqVectorInitialize
 hypre_SeqVectorInitialize_v2
 hypre_SeqVectorInnerProd
 hypre_SeqVectorInnerProdHost
+hypre_SeqVectorMigrate
 hypre_SeqVectorPrint
 hypre_SeqVectorRead
 hypre_SeqVectorResize

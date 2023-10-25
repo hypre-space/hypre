@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -40,6 +40,7 @@ extern "C" {
 cat state.h                    >> $INTERNAL_HEADER
 cat general.h                  >> $INTERNAL_HEADER
 cat magma.h                    >> $INTERNAL_HEADER
+cat matrix_stats.h             >> $INTERNAL_HEADER
 cat printf.h                   >> $INTERNAL_HEADER
 cat error.h                    >> $INTERNAL_HEADER
 cat mpistubs.h                 >> $INTERNAL_HEADER
@@ -101,6 +102,7 @@ extern "C++" {
 # Structures and prototypes
 #===========================================================================
 
+cat functors.h             >> $INTERNAL_HEADER
 cat device_allocator.h     >> $INTERNAL_HEADER
 cat device_utils.h         >> $INTERNAL_HEADER
 cat device_reducer.h       >> $INTERNAL_HEADER

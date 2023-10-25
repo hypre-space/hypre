@@ -73,6 +73,7 @@ HYPRE_ParVectorGetValues
 HYPRE_ParVectorInitialize
 HYPRE_ParVectorInnerProd
 HYPRE_ParVectorPrint
+HYPRE_ParVectorPrintBinaryIJ
 HYPRE_ParVectorRead
 HYPRE_ParVectorScale
 HYPRE_ParVectorSetConstantValues
@@ -200,6 +201,7 @@ hypre_ParCSRMatrixInitialize
 hypre_ParCSRMatrixInitialize_v2
 hypre_ParCSRMatrixMigrate
 hypre_ParCSRMatrixPrint
+hypre_ParCSRMatrixPrintBinaryIJ
 hypre_ParCSRMatrixPrintIJ
 hypre_ParCSRMatrixRead
 hypre_ParCSRMatrixReadIJ
@@ -212,8 +214,14 @@ hypre_ParCSRMatrixSetNumNonzeros_core
 hypre_ParCSRMatrixSetNumRownnz
 hypre_ParCSRMatrixSetPatternOnly
 hypre_ParCSRMatrixToCSRMatrixAll
+hypre_ParCSRMatrixToCSRMatrixAll_v2
 hypre_ParCSRMatrixTruncate
 hypre_ParCSRMatrixUnion
+hypre_ParCSRMatrixStatsArrayCompute
+hypre_ParCSRMatrixStatsComputePassOneLocal
+hypre_ParCSRMatrixStatsComputePassOneLocalHost
+hypre_ParCSRMatrixStatsComputePassTwoLocal
+hypre_ParCSRMatrixStatsComputePassTwoLocalHost
 hypre_ParCSRMatrixMatvec
 hypre_ParCSRMatrixMatvec_FF
 hypre_ParCSRMatrixMatvecOutOfPlace
@@ -253,6 +261,7 @@ hypre_ParVectorInnerProd
 hypre_ParVectorLocalSumElts
 hypre_ParVectorMigrate
 hypre_ParVectorPrint
+hypre_ParVectorPrintBinaryIJ
 hypre_ParVectorPrintIJ
 hypre_ParVectorRead
 hypre_ParVectorReadIJ
@@ -265,4 +274,5 @@ hypre_ParVectorSetLocalSize
 hypre_ParVectorSetRandomValues
 hypre_ParVectorSetZeros
 hypre_ParVectorToVectorAll
+hypre_ParVectorToVectorAll_v2
 hypre_VectorToParVector

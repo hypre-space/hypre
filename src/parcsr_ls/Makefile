@@ -48,6 +48,7 @@ CUFILES =\
  ams.c\
  ame.c\
  par_amg_setup.c\
+ par_ge_device.c\
  par_ilu_setup_device.c\
  par_ilu_solve_device.c\
  par_ilu_solve.c \
@@ -159,6 +160,7 @@ MuP_FILES = \
  par_mgr_coarsen.c\
  par_mgr_setup.c\
  par_mgr_solve.c\
+ par_mgr_stats.c\
  par_nongalerkin.c\
  par_nodal_systems.c\
  par_rap.c\

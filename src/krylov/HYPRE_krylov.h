@@ -182,6 +182,24 @@ HYPRE_Int HYPRE_PCGSetRecomputeResidualP(HYPRE_Solver solver,
                                          HYPRE_Int    recompute_residual_p);
 
 /**
+ * (Optional) Setting this to 1 allows use of Polak-Ribiere Method (flexible)
+ * this incrceases robustness, but adds an additional dot product per iteration
+ **/
+HYPRE_Int HYPRE_PCGSetFlex(HYPRE_Solver solver,
+                           HYPRE_Int    flex);
+
+/**
+ * (Optional) Skips subnormal alpha, gamma and iprod values in CG.
+ *  If set to 0 (default): will break if values are below HYPRE_REAL_MIN
+ *  If set to 1: will break if values are below HYPRE_REAL_TRUE_MIN
+ *  (requires C11 minimal or will check to HYPRE_REAL_MIN)
+ *  If set to 2: will break if values are <= 0.
+ *  If set to 3 or larger: will not break at all
+ **/
+HYPRE_Int HYPRE_PCGSetSkipBreak(HYPRE_Solver solver,
+                                HYPRE_Int    skip_break);
+
+/**
  * (Optional) Set the preconditioner to use.
  **/
 HYPRE_Int HYPRE_PCGSetPrecond(HYPRE_Solver         solver,
@@ -261,6 +279,16 @@ HYPRE_Int HYPRE_PCGGetTwoNorm(HYPRE_Solver  solver,
  **/
 HYPRE_Int HYPRE_PCGGetRelChange(HYPRE_Solver  solver,
                                 HYPRE_Int    *rel_change);
+
+/**
+ **/
+HYPRE_Int HYPRE_PCGGetSkipBreak(HYPRE_Solver solver,
+                                  HYPRE_Int   *skip_break);
+
+/**
+ **/
+HYPRE_Int HYPRE_PCGGetFlex(HYPRE_Solver solver,
+                           HYPRE_Int   *flex);
 
 /**
  **/
@@ -395,11 +423,6 @@ HYPRE_Int HYPRE_GMRESSetPrintLevel(HYPRE_Solver solver,
                                    HYPRE_Int    level);
 
 /**
- **/
-HYPRE_Int HYPRE_GMRESGetSkipRealResidualCheck(HYPRE_Solver solver,
-                                              HYPRE_Int   *skip_real_r_check);
-
-/**
  * Return the number of iterations taken.
  **/
 HYPRE_Int HYPRE_GMRESGetNumIterations(HYPRE_Solver  solver,
@@ -416,6 +439,11 @@ HYPRE_Int HYPRE_GMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
  **/
 HYPRE_Int HYPRE_GMRESGetResidual(HYPRE_Solver   solver,
                                  void          *residual);
+
+/**
+ **/
+HYPRE_Int HYPRE_GMRESGetSkipRealResidualCheck(HYPRE_Solver solver,
+                                              HYPRE_Int   *skip_real_r_check);
 
 /**
  **/
