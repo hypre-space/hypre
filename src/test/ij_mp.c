@@ -85,7 +85,7 @@ int main (int argc, char *argv[])
    int build_rhs_type = 2;
    int build_matrix_arg_index;
    int build_rhs_arg_index;
-   int mg_max_iter = 100;
+   int mg_max_iter = 50;
    int max_iter = 1000;
    int coarsen_type = 10;
    int interp_type = 6;
@@ -124,6 +124,7 @@ int main (int argc, char *argv[])
    double relax_wt = 1.0;
    double outer_wt = 1.0;
    int k_dim = 10;
+   int two_norm = 0;
 
    /*! Matrix and preconditioner declarations. Here, we declare IJMatrices and parcsr matrices
        for the solver (A, parcsr_A) and the preconditioner (B, A_dbl). I have included two suggestions 
@@ -425,6 +426,11 @@ int main (int argc, char *argv[])
          arg_index++;
          tol  = atof(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-two_norm") == 0 )
+      {
+         arg_index++;
+         two_norm  = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-k") == 0 )
       {
          arg_index++;
@@ -541,7 +547,7 @@ int main (int argc, char *argv[])
    {
       if (myid == 0)
       {
-         hypre_printf_dbl("  RHS vector has zero coefficients\n");
+         hypre_printf_dbl("  RHS vector has unit coefficients\n");
          hypre_printf_dbl("  Initial guess is random\n");
       }
 
@@ -551,11 +557,13 @@ int main (int argc, char *argv[])
       HYPRE_IJVectorInitialize_flt(ij_b_flt);
       HYPRE_IJVectorAssemble_flt(ij_b_flt);
       HYPRE_IJVectorGetObject_flt( ij_b_flt, (void **) &b_flt );
+      HYPRE_ParVectorSetConstantValues_flt(b_flt, (float)zero);
       HYPRE_IJVectorCreate_dbl(MPI_COMM_WORLD, ilower, iupper, &ij_b_dbl);
       HYPRE_IJVectorSetObjectType_dbl(ij_b_dbl, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize_dbl(ij_b_dbl);
       HYPRE_IJVectorAssemble_dbl(ij_b_dbl);
       HYPRE_IJVectorGetObject_dbl( ij_b_dbl, (void **) &b_dbl );
+      HYPRE_ParVectorSetConstantValues_dbl(b_dbl, zero);
       /* X0 */
       HYPRE_IJVectorCreate_flt(MPI_COMM_WORLD, ilower, iupper, &ij_x_flt);
       HYPRE_IJVectorSetObjectType_flt(ij_x_flt, HYPRE_PARCSR);
@@ -592,9 +600,9 @@ int main (int argc, char *argv[])
       HYPRE_ParCSRPCGCreate_dbl(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_PCGSetMaxIter_dbl(pcg_solver, max_iter);
       HYPRE_PCGSetTol_dbl(pcg_solver, tol);
-      HYPRE_PCGSetTwoNorm_dbl(pcg_solver, 1);
+      HYPRE_PCGSetTwoNorm_dbl(pcg_solver, two_norm);
       HYPRE_PCGSetPrintLevel_dbl(pcg_solver, ioutdat);
-//      HYPRE_PCGSetRecomputeResidual_dbl(pcg_solver, recompute_res);      
+      HYPRE_PCGSetRecomputeResidual_dbl(pcg_solver, 1);      
       
       
       /* Now set up the AMG preconditioner and specify any parameters */
@@ -733,9 +741,9 @@ int main (int argc, char *argv[])
       HYPRE_ParCSRPCGCreate_flt(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_PCGSetMaxIter_flt(pcg_solver, max_iter);
       HYPRE_PCGSetTol_flt(pcg_solver, (float)tol);
-      HYPRE_PCGSetTwoNorm_flt(pcg_solver, 1);
+      HYPRE_PCGSetTwoNorm_flt(pcg_solver, two_norm);
       HYPRE_PCGSetPrintLevel_flt(pcg_solver, ioutdat);
-//      HYPRE_PCGSetRecomputeResidual_flt(pcg_solver, recompute_res);      
+      HYPRE_PCGSetRecomputeResidual_flt(pcg_solver, 1);      
       
       
       /* Now set up the AMG preconditioner and specify any parameters */
@@ -873,9 +881,9 @@ int main (int argc, char *argv[])
       HYPRE_ParCSRPCGCreate_dbl(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_PCGSetMaxIter_dbl(pcg_solver, max_iter);
       HYPRE_PCGSetTol_dbl(pcg_solver, tol);
-      HYPRE_PCGSetTwoNorm_dbl(pcg_solver, 1);
+      HYPRE_PCGSetTwoNorm_dbl(pcg_solver, two_norm);
       HYPRE_PCGSetPrintLevel_dbl(pcg_solver, ioutdat);
-//      HYPRE_PCGSetRecomputeResidual_dbl(pcg_solver, recompute_res);      
+      HYPRE_PCGSetRecomputeResidual_dbl(pcg_solver, 1);      
       
       
       /* Now set up the AMG preconditioner and specify any parameters */
@@ -2185,7 +2193,7 @@ BuildParLaplacian_mp( HYPRE_Int            argc,
          mtrx_dbl[15] = 1;
       }
 
-      for (i=0; i++; i<num_fun*num_fun)
+      for (i=0; i<num_fun*num_fun; i++)
       {
          mtrx_flt[i] = (float)mtrx_dbl[i];
       }
@@ -2509,7 +2517,7 @@ BuildParDifConv_mp( HYPRE_Int            argc,
       }
    }
 
-   for (i=0; i++; i<7)
+   for (i=0; i<7; i++)
    {
       values_flt[i] = (float)values_dbl[i];
    }
