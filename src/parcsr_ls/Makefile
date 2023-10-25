@@ -148,13 +148,13 @@ FILES =\
  schwarz.c\
  block_tridiag.c\
  par_restr.c\
- par_lr_restr.c\
- dsuperlu.c
+ par_lr_restr.c
 
 CUFILES =\
  ads.c\
  ams.c\
  ame.c\
+ dsuperlu.c\
  par_amg_setup.c\
  par_ge_device.c\
  par_ilu_setup_device.c\
