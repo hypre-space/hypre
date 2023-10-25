@@ -5,6 +5,7 @@ hypre_BiCGSTABGetConverged
 hypre_BiCGSTABGetFinalRelativeResidualNorm
 hypre_BiCGSTABGetNumIterations
 hypre_BiCGSTABGetPrecond
+hypre_BiCGSTABGetPrecondMatrix
 hypre_BiCGSTABGetResidual
 hypre_BiCGSTABSetAbsoluteTol
 hypre_BiCGSTABSetConvergenceFactorTol
@@ -13,6 +14,7 @@ hypre_BiCGSTABSetLogging
 hypre_BiCGSTABSetMaxIter
 hypre_BiCGSTABSetMinIter
 hypre_BiCGSTABSetPrecond
+hypre_BiCGSTABSetPrecondMatrix
 hypre_BiCGSTABSetPrintLevel
 hypre_BiCGSTABSetStopCrit
 hypre_BiCGSTABSetTol
@@ -112,6 +114,7 @@ hypre_GMRESGetMaxIter
 hypre_GMRESGetMinIter
 hypre_GMRESGetNumIterations
 hypre_GMRESGetPrecond
+hypre_GMRESGetPrecondMatrix
 hypre_GMRESGetPrintLevel
 hypre_GMRESGetRelChange
 hypre_GMRESGetResidual
@@ -126,6 +129,7 @@ hypre_GMRESSetLogging
 hypre_GMRESSetMaxIter
 hypre_GMRESSetMinIter
 hypre_GMRESSetPrecond
+hypre_GMRESSetPrecondMatrix
 hypre_GMRESSetPrintLevel
 hypre_GMRESSetRelChange
 hypre_GMRESSetSkipRealResidualCheck
@@ -137,6 +141,7 @@ HYPRE_BiCGSTABDestroy
 HYPRE_BiCGSTABGetFinalRelativeResidualNorm
 HYPRE_BiCGSTABGetNumIterations
 HYPRE_BiCGSTABGetPrecond
+HYPRE_BiCGSTABGetPrecondMatrix
 HYPRE_BiCGSTABGetResidual
 HYPRE_BiCGSTABSetAbsoluteTol
 HYPRE_BiCGSTABSetConvergenceFactorTol
@@ -144,6 +149,7 @@ HYPRE_BiCGSTABSetLogging
 HYPRE_BiCGSTABSetMaxIter
 HYPRE_BiCGSTABSetMinIter
 HYPRE_BiCGSTABSetPrecond
+HYPRE_BiCGSTABSetPrecondMatrix
 HYPRE_BiCGSTABSetPrintLevel
 HYPRE_BiCGSTABSetStopCrit
 HYPRE_BiCGSTABSetTol
@@ -225,6 +231,7 @@ HYPRE_GMRESGetMaxIter
 HYPRE_GMRESGetMinIter
 HYPRE_GMRESGetNumIterations
 HYPRE_GMRESGetPrecond
+HYPRE_GMRESGetPrecondMatrix
 HYPRE_GMRESGetPrintLevel
 HYPRE_GMRESGetRelChange
 HYPRE_GMRESGetResidual
@@ -238,6 +245,7 @@ HYPRE_GMRESSetLogging
 HYPRE_GMRESSetMaxIter
 HYPRE_GMRESSetMinIter
 HYPRE_GMRESSetPrecond
+HYPRE_GMRESSetPrecondMatrix
 HYPRE_GMRESSetPrintLevel
 HYPRE_GMRESSetRelChange
 HYPRE_GMRESSetSkipRealResidualCheck
