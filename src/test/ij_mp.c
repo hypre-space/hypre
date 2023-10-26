@@ -115,6 +115,7 @@ int main (int argc, char *argv[])
    double tol = 1.e-8;
    int ioutdat = 0;
    int poutdat = 0;
+   int flex = 0;
    int num_functions = 1;
    int nodal = 0;
    int nodal_diag = 0;
@@ -416,6 +417,11 @@ int main (int argc, char *argv[])
          arg_index++;
          poutdat  = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-flex") == 0 )
+      {
+         arg_index++;
+         flex  = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-mxrs") == 0 )
       {
          arg_index++;
@@ -602,6 +608,7 @@ int main (int argc, char *argv[])
       HYPRE_PCGSetTol_dbl(pcg_solver, tol);
       HYPRE_PCGSetTwoNorm_dbl(pcg_solver, two_norm);
       HYPRE_PCGSetPrintLevel_dbl(pcg_solver, ioutdat);
+      HYPRE_PCGSetFlex_dbl(pcg_solver, flex);
       HYPRE_PCGSetRecomputeResidual_dbl(pcg_solver, 1);      
       
       
@@ -743,6 +750,7 @@ int main (int argc, char *argv[])
       HYPRE_PCGSetTol_flt(pcg_solver, (float)tol);
       HYPRE_PCGSetTwoNorm_flt(pcg_solver, two_norm);
       HYPRE_PCGSetPrintLevel_flt(pcg_solver, ioutdat);
+      HYPRE_PCGSetFlex_flt(pcg_solver, flex);
       HYPRE_PCGSetRecomputeResidual_flt(pcg_solver, 1);      
       
       
@@ -883,6 +891,7 @@ int main (int argc, char *argv[])
       HYPRE_PCGSetTol_dbl(pcg_solver, tol);
       HYPRE_PCGSetTwoNorm_dbl(pcg_solver, two_norm);
       HYPRE_PCGSetPrintLevel_dbl(pcg_solver, ioutdat);
+      HYPRE_PCGSetFlex_dbl(pcg_solver, flex);
       HYPRE_PCGSetRecomputeResidual_dbl(pcg_solver, 1);      
       
       

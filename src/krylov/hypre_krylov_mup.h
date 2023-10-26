@@ -1107,6 +1107,12 @@ HYPRE_Int HYPRE_PCGGetRecomputeResidualP_long_dbl  ( HYPRE_Solver solver, HYPRE_
 HYPRE_Int HYPRE_PCGGetRelChange_flt  ( HYPRE_Solver solver, HYPRE_Int *rel_change );
 HYPRE_Int HYPRE_PCGGetRelChange_dbl  ( HYPRE_Solver solver, HYPRE_Int *rel_change );
 HYPRE_Int HYPRE_PCGGetRelChange_long_dbl  ( HYPRE_Solver solver, HYPRE_Int *rel_change );
+HYPRE_Int HYPRE_PCGGetSkipBreak_flt  ( HYPRE_Solver solver, HYPRE_Int *skip_break );
+HYPRE_Int HYPRE_PCGGetSkipBreak_dbl  ( HYPRE_Solver solver, HYPRE_Int *skip_break );
+HYPRE_Int HYPRE_PCGGetSkipBreak_long_dbl  ( HYPRE_Solver solver, HYPRE_Int *skip_break );
+HYPRE_Int HYPRE_PCGGetFlex_flt  ( HYPRE_Solver solver, HYPRE_Int *flex );
+HYPRE_Int HYPRE_PCGGetFlex_dbl  ( HYPRE_Solver solver, HYPRE_Int *flex );
+HYPRE_Int HYPRE_PCGGetFlex_long_dbl  ( HYPRE_Solver solver, HYPRE_Int *flex );
 HYPRE_Int HYPRE_PCGGetResidual_flt  ( HYPRE_Solver solver, void *residual );
 HYPRE_Int HYPRE_PCGGetResidual_dbl  ( HYPRE_Solver solver, void *residual );
 HYPRE_Int HYPRE_PCGGetResidual_long_dbl  ( HYPRE_Solver solver, void *residual );
@@ -1158,6 +1164,12 @@ HYPRE_Int HYPRE_PCGSetRecomputeResidualP_long_dbl  ( HYPRE_Solver solver, HYPRE_
 HYPRE_Int HYPRE_PCGSetRelChange_flt  ( HYPRE_Solver solver, HYPRE_Int rel_change );
 HYPRE_Int HYPRE_PCGSetRelChange_dbl  ( HYPRE_Solver solver, HYPRE_Int rel_change );
 HYPRE_Int HYPRE_PCGSetRelChange_long_dbl  ( HYPRE_Solver solver, HYPRE_Int rel_change );
+HYPRE_Int HYPRE_PCGSetSkipBreak_flt  ( HYPRE_Solver solver, HYPRE_Int skip_break );
+HYPRE_Int HYPRE_PCGSetSkipBreak_dbl  ( HYPRE_Solver solver, HYPRE_Int skip_break );
+HYPRE_Int HYPRE_PCGSetSkipBreak_long_dbl  ( HYPRE_Solver solver, HYPRE_Int skip_break );
+HYPRE_Int HYPRE_PCGSetFlex_flt  ( HYPRE_Solver solver, HYPRE_Int flex );
+HYPRE_Int HYPRE_PCGSetFlex_dbl  ( HYPRE_Solver solver, HYPRE_Int flex );
+HYPRE_Int HYPRE_PCGSetFlex_long_dbl  ( HYPRE_Solver solver, HYPRE_Int flex );
 HYPRE_Int HYPRE_PCGSetResidualTol_flt  ( HYPRE_Solver solver, hypre_float rtol );
 HYPRE_Int HYPRE_PCGSetResidualTol_dbl  ( HYPRE_Solver solver, hypre_double rtol );
 HYPRE_Int HYPRE_PCGSetResidualTol_long_dbl  ( HYPRE_Solver solver, hypre_long_double rtol );
