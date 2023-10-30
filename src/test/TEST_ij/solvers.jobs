@@ -56,6 +56,9 @@ mpirun -np 2 ./ij -n 23 29 31 -solver 0 -rhsrand -mu 2            -rlx 18 > solv
 mpirun -np 2 ./ij -n 23 29 31 -solver 3 -rhsrand -mu 2            -rlx 18 > solvers.out.22
 mpirun -np 2 ./ij -n 23 29 31 -solver 0 -rhsrand -fmg             -rlx 18 > solvers.out.23
 mpirun -np 2 ./ij -n 23 29 31 -solver 3 -rhsrand -fmg             -rlx 18 > solvers.out.24
+#flexible CG vs CG; AMG with CG smoother
+mpirun -np 2 ./ij -solver 1 -rlx 15 -flex 1 > solvers.out.25
+mpirun -np 2 ./ij -solver 1 -rlx 15 > solvers.out.26
 
 #systems AMG run ...unknown approach, hybrid approach, nodal approach
 mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 > solvers.out.sysu
@@ -133,6 +136,6 @@ mpirun -np 4 ./ij -cheby_eig_est 10 -cheby_order 4 -cheby_variant 0 -cheby_scale
 mpirun -np 4 ./ij -solver 3 -cheby_eig_est 0 -cheby_order 3 -cheby_variant 1 -cheby_scale 1 -rlx 16 -negA 0 > solvers.out.403.p
 mpirun -np 4 ./ij -solver 3 -cheby_eig_est 0 -cheby_order 3 -cheby_variant 1 -cheby_scale 1 -rlx 16 -negA 1 > solvers.out.403.n
 
-##
-mpirun -np 4 ./ij -fromfile Tucker21935 -solver 1 -rlx 88 > solvers.out.404
-mpirun -np 4 ./ij -fromfile Tucker21935 -solver 1 -rlx 89 > solvers.out.405
+## Test relaxation methods 88 (L1 hybrid Symm. Gauss-Seidel with a convergent l1 term) and 89 (L1 Symm. hybrid Gauss-Seidel)
+mpirun -np 4 ./ij -fromfile data/tucker21935/IJ.A -solver 1 -rlx 88 > solvers.out.404
+mpirun -np 4 ./ij -fromfile data/tucker21935/IJ.A -solver 1 -rlx 89 > solvers.out.405

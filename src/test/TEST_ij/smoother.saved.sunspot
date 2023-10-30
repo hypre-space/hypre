@@ -6,7 +6,7 @@
                    cycle = 5.253199
 
 # Output file: smoother.out.1
- Average Convergence Factor = 0.111440
+ Average Convergence Factor = 0.111287
 
      Complexity:    grid = 1.410222
                 operator = 2.565374
@@ -28,7 +28,7 @@
 
 # Output file: smoother.out.4
 Iterations = 7
-Final Relative Residual Norm = 1.585603e-09
+Final Relative Residual Norm = 1.279851e-09
 
 # Output file: smoother.out.5
 BoomerAMG Iterations = 15
@@ -36,11 +36,11 @@ Final Relative Residual Norm = 5.891292e-09
 
 # Output file: smoother.out.6
 Iterations = 12
-Final Relative Residual Norm = 2.281457e-09
+Final Relative Residual Norm = 2.101656e-09
 
 # Output file: smoother.out.7
 BoomerAMG Iterations = 26
-Final Relative Residual Norm = 7.707252e-09
+Final Relative Residual Norm = 7.523140e-09
 
 # Output file: smoother.out.8
 BoomerAMG Iterations = 16
@@ -68,11 +68,11 @@ Final Relative Residual Norm = 2.220376e-09
 
 # Output file: smoother.out.12
 Iterations = 7
-Final Relative Residual Norm = 8.288309e-10
+Final Relative Residual Norm = 8.243245e-10
 
 # Output file: smoother.out.13
 Iterations = 6
-Final Relative Residual Norm = 1.798893e-09
+Final Relative Residual Norm = 1.771011e-09
 
 # Output file: smoother.out.14
 Iterations = 7
@@ -84,37 +84,37 @@ Final Relative Residual Norm = 3.559069e-09
 
 # Output file: smoother.out.16
 Iterations = 6
-Final Relative Residual Norm = 1.514123e-09
+Final Relative Residual Norm = 1.304969e-09
 
 # Output file: smoother.out.17
 Iterations = 8
-Final Relative Residual Norm = 1.001064e-09
+Final Relative Residual Norm = 9.163964e-10
 
 # Output file: smoother.out.18
 GMRES Iterations = 11
-Final GMRES Relative Residual Norm = 4.832491e-09
+Final GMRES Relative Residual Norm = 4.221402e-09
 
 # Output file: smoother.out.19
 Iterations = 8
-Final Relative Residual Norm = 8.092399e-10
+Final Relative Residual Norm = 8.108092e-10
 
 # Output file: smoother.out.20
 Iterations = 12
-Final Relative Residual Norm = 1.569562e-09
+Final Relative Residual Norm = 1.479852e-09
 
 # Output file: smoother.out.21
 Iterations = 8
-Final Relative Residual Norm = 7.599847e-09
+Final Relative Residual Norm = 7.596779e-09
 
 # Output file: smoother.out.22
 Iterations = 8
-Final Relative Residual Norm = 5.342248e-09
+Final Relative Residual Norm = 5.321560e-09
 
 # Output file: smoother.out.23
 Iterations = 9
-Final Relative Residual Norm = 1.750463e-09
+Final Relative Residual Norm = 1.667895e-09
 
 # Output file: smoother.out.24
 Iterations = 9
-Final Relative Residual Norm = 5.037927e-09
+Final Relative Residual Norm = 4.261864e-09
 

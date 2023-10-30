@@ -241,7 +241,7 @@ hypre_IJVectorReadBinary( MPI_Comm         comm,
    for (c = 0; c < num_components; c++)
    {
       HYPRE_IJVectorSetComponent(vector, c);
-      HYPRE_IJVectorSetValues(vector, size, NULL, buffer + c*size);
+      HYPRE_IJVectorSetValues(vector, size, NULL, buffer + c * size);
    }
    HYPRE_IJVectorAssemble(vector);
 

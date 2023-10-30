@@ -99,6 +99,10 @@ typedef double                 hypre_double;
 #define hypre_pow2(i)  ( 1 << (i) )
 #endif
 
+#ifndef hypre_squared
+#define hypre_squared(i)  ((i) * (i))
+#endif
+
 #ifndef hypre_sqrt
 #if defined(HYPRE_SINGLE)
 #define hypre_sqrt sqrtf
@@ -230,6 +234,35 @@ extern "C++"
 }
 #endif
 
+/*--------------------------------------------------------------------------
+ * Wrappers to MAGMA functions according to hypre's precision
+ *--------------------------------------------------------------------------*/
+
+#if defined(HYPRE_COMPLEX) || defined(HYPRE_LONG_DOUBLE)
+#error "MAGMA interface does not support (yet) HYPRE_COMPLEX and HYPRE_LONG_DOUBLE"
+
+#elif defined(HYPRE_SINGLE)
+#define hypre_magma_getrf_gpu              magma_sgetrf_gpu
+#define hypre_magma_getrf_nat              magma_sgetrf_native
+#define hypre_magma_getrs_gpu              magma_sgetrs_gpu
+#define hypre_magma_getri_gpu              magma_sgetri_gpu
+#define hypre_magma_getri_nb               magma_get_dgetri_nb
+#define hypre_magma_gemv                   magma_sgemv
+
+#else /* Double precision */
+#define hypre_magma_getrf_gpu              magma_dgetrf_gpu
+#define hypre_magma_getrf_nat              magma_dgetrf_native
+#define hypre_magma_getrs_gpu              magma_dgetrs_gpu
+#define hypre_magma_getri_gpu              magma_dgetri_gpu
+#define hypre_magma_getri_nb               magma_get_sgetri_nb
+#define hypre_magma_gemv                   magma_dgemv
+
+#endif
+
+/*--------------------------------------------------------------------------
+ * General wrapper call to MAGMA functions
+ *--------------------------------------------------------------------------*/
+
 #define HYPRE_MAGMA_CALL(call) do {                   \
    magma_int_t err = call;                            \
    if (MAGMA_SUCCESS != err) {                        \
@@ -238,8 +271,140 @@ extern "C++"
       hypre_assert(0);                                \
    } } while(0)
 
+#define HYPRE_MAGMA_VCALL(call) call
+
 #endif /* HYPRE_USING_MAGMA */
 #endif /* HYPRE_MAGMA_HEADER */
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+#ifndef hypre_MATRIX_STATS_HEADER
+#define hypre_MATRIX_STATS_HEADER
+
+/******************************************************************************
+ *
+ * Header info for (generic) matrix statistics data structure
+ *
+ *****************************************************************************/
+
+typedef struct hypre_MatrixStats_struct
+{
+   /* General info */
+   HYPRE_BigInt        num_rows;
+   HYPRE_BigInt        num_cols;
+   hypre_ulonglongint  num_nonzeros;
+
+   /* Actual nonzeros statistics */
+   hypre_ulonglongint  actual_nonzeros;
+   HYPRE_Real          actual_threshold;
+   HYPRE_Real          sparsity;
+
+   /* Nonzeros per row statistics */
+   HYPRE_Int           nnzrow_min;
+   HYPRE_Int           nnzrow_max;
+   HYPRE_Real          nnzrow_avg;
+   HYPRE_Real          nnzrow_stdev;
+   HYPRE_Real          nnzrow_sqsum;
+
+   /* Row sum statistics */
+   HYPRE_Real          rowsum_min;
+   HYPRE_Real          rowsum_max;
+   HYPRE_Real          rowsum_avg;
+   HYPRE_Real          rowsum_stdev;
+   HYPRE_Real          rowsum_sqsum;
+} hypre_MatrixStats;
+
+/*--------------------------------------------------------------------------
+ * Accessor macros
+ *--------------------------------------------------------------------------*/
+
+#define hypre_MatrixStatsNumRows(data)               ((data) -> num_rows)
+#define hypre_MatrixStatsNumCols(data)               ((data) -> num_cols)
+#define hypre_MatrixStatsNumNonzeros(data)           ((data) -> num_nonzeros)
+
+#define hypre_MatrixStatsSparsity(data)              ((data) -> sparsity)
+#define hypre_MatrixStatsActualNonzeros(data)        ((data) -> actual_nonzeros)
+#define hypre_MatrixStatsActualThreshold(data)       ((data) -> actual_threshold)
+
+#define hypre_MatrixStatsNnzrowMin(data)             ((data) -> nnzrow_min)
+#define hypre_MatrixStatsNnzrowMax(data)             ((data) -> nnzrow_max)
+#define hypre_MatrixStatsNnzrowAvg(data)             ((data) -> nnzrow_avg)
+#define hypre_MatrixStatsNnzrowStDev(data)           ((data) -> nnzrow_stdev)
+#define hypre_MatrixStatsNnzrowSqsum(data)           ((data) -> nnzrow_sqsum)
+
+#define hypre_MatrixStatsRowsumMin(data)             ((data) -> rowsum_min)
+#define hypre_MatrixStatsRowsumMax(data)             ((data) -> rowsum_max)
+#define hypre_MatrixStatsRowsumAvg(data)             ((data) -> rowsum_avg)
+#define hypre_MatrixStatsRowsumStDev(data)           ((data) -> rowsum_stdev)
+#define hypre_MatrixStatsRowsumSqsum(data)           ((data) -> rowsum_sqsum)
+
+/******************************************************************************
+ *
+ * Header info for array of (generic) matrix statistics data structure
+ *
+ *****************************************************************************/
+
+typedef struct hypre_MatrixStatsArray_struct
+{
+   HYPRE_Int             capacity;
+   hypre_MatrixStats   **entries;
+} hypre_MatrixStatsArray;
+
+/*--------------------------------------------------------------------------
+ * Accessor macros
+ *--------------------------------------------------------------------------*/
+
+#define hypre_MatrixStatsArrayCapacity(data)         ((data) -> capacity)
+#define hypre_MatrixStatsArrayEntries(data)          ((data) -> entries)
+#define hypre_MatrixStatsArrayEntry(data, i)         ((data) -> entries[i])
+
+/*--------------------------------------------------------------------------
+ * Helper macros for table formatting
+ *--------------------------------------------------------------------------*/
+
+#define HYPRE_PRINT_TOP_DIVISOR(m, d)               \
+   for (HYPRE_Int __i = 0; __i < m; __i++)          \
+   {                                                \
+      for (HYPRE_Int __j = 0; __j < d[__i]; __j++)  \
+      {                                             \
+         hypre_printf("%s", "=");                   \
+      }                                             \
+      if (__i < m - 1)                              \
+      {                                             \
+         hypre_printf("+");                         \
+      }                                             \
+   }                                                \
+   hypre_printf("\n");
+
+#define HYPRE_PRINT_MID_DIVISOR(m, d, msg)          \
+   for (HYPRE_Int __i = 0; __i < m; __i++)          \
+   {                                                \
+      for (HYPRE_Int __j = 0; __j < d[__i]; __j++)  \
+      {                                             \
+         hypre_printf("%s", "-");                   \
+      }                                             \
+      if (__i < m - 1)                              \
+      {                                             \
+         hypre_printf("+");                         \
+      }                                             \
+   }                                                \
+   hypre_printf(" %s\n", msg);
+
+#define HYPRE_PRINT_INDENT(n)                       \
+   hypre_printf("%*s", (n > 0) ? n : 0, "");
+
+
+#define HYPRE_PRINT_SHIFTED_PARAM(n, ...)           \
+   HYPRE_PRINT_INDENT(n)                            \
+   hypre_printf(__VA_ARGS__)
+
+#define HYPRE_NDIGITS_SIZE 12
+
+#endif /* hypre_MATRIX_STATS_HEADER */
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -1832,6 +1997,16 @@ HYPRE_Int hypre_GetDeviceLastError(void);
 HYPRE_Int hypre_UmpireInit(hypre_Handle *hypre_handle_);
 HYPRE_Int hypre_UmpireFinalize(hypre_Handle *hypre_handle_);
 
+/* matrix_stats.h */
+hypre_MatrixStats* hypre_MatrixStatsCreate( void );
+HYPRE_Int hypre_MatrixStatsDestroy( hypre_MatrixStats *stats );
+hypre_MatrixStatsArray* hypre_MatrixStatsArrayCreate( HYPRE_Int capacity );
+HYPRE_Int hypre_MatrixStatsArrayDestroy( hypre_MatrixStatsArray *stats_array );
+HYPRE_Int hypre_MatrixStatsArrayPrint( HYPRE_Int num_hierarchies, HYPRE_Int *num_levels,
+                                       HYPRE_Int use_divisors, HYPRE_Int shift,
+                                       const char **messages,
+                                       hypre_MatrixStatsArray *stats_array );
+
 /* qsort.c */
 void hypre_swap ( HYPRE_Int *v, HYPRE_Int i, HYPRE_Int j );
 void hypre_swap_c ( HYPRE_Complex *v, HYPRE_Int i, HYPRE_Int j );
@@ -2130,6 +2305,10 @@ void hypre_GpuProfilingPopRange(void);
 HYPRE_Int hypre_multmod(HYPRE_Int a, HYPRE_Int b, HYPRE_Int mod);
 void hypre_partition1D(HYPRE_Int n, HYPRE_Int p, HYPRE_Int j, HYPRE_Int *s, HYPRE_Int *e);
 char *hypre_strcpy(char *destination, const char *source);
+HYPRE_Int hypre_CheckDirExists(const char *path);
+HYPRE_Int hypre_CreateDir(const char *path);
+HYPRE_Int hypre_CreateNextDirOfSequence(const char *basepath, const char *prefix,
+                                        char **fullpath_ptr);
 
 HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
 HYPRE_Int hypre_RestoreSyncCudaCompute(void);
@@ -2166,6 +2345,7 @@ HYPRE_Int hypre_IntArrayPrint( MPI_Comm comm, hypre_IntArray *array, const char 
 HYPRE_Int hypre_IntArrayRead( MPI_Comm comm, const char *filename, hypre_IntArray **array_ptr );
 HYPRE_Int hypre_IntArraySetConstantValuesHost( hypre_IntArray *v, HYPRE_Int value );
 HYPRE_Int hypre_IntArraySetConstantValues( hypre_IntArray *v, HYPRE_Int value );
+HYPRE_Int hypre_IntArraySetInterleavedValues( hypre_IntArray *v, HYPRE_Int cycle );
 HYPRE_Int hypre_IntArrayCountHost( hypre_IntArray *v, HYPRE_Int value,
                                    HYPRE_Int *num_values_ptr );
 HYPRE_Int hypre_IntArrayCount( hypre_IntArray *v, HYPRE_Int value,
@@ -2180,6 +2360,7 @@ HYPRE_Int hypre_IntArrayCountDevice ( hypre_IntArray *v, HYPRE_Int value,
                                       HYPRE_Int *num_values_ptr );
 HYPRE_Int hypre_IntArrayInverseMappingDevice( hypre_IntArray *v, hypre_IntArray *w );
 HYPRE_Int hypre_IntArrayNegateDevice( hypre_IntArray *v );
+HYPRE_Int hypre_IntArraySetInterleavedValuesDevice( hypre_IntArray *v, HYPRE_Int cycle );
 #endif
 
 /* memory_tracker.c */

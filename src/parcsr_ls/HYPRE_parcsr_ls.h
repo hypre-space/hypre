@@ -773,8 +773,22 @@ HYPRE_Int HYPRE_BoomerAMGSetRelaxType(HYPRE_Solver  solver,
 
 /**
  * (Optional) Defines the smoother at a given cycle.
- * For options of \e relax_type see
- * description of HYPRE_BoomerAMGSetRelaxType). Options for \e k are
+ *
+ * For options of \e relax_type see description of HYPRE_BoomerAMGSetRelaxType.
+ * In addition, the following options for \e relax_type are available when choosing
+ * the coarsest level solver (k = 3):
+ *
+ *   For coarsest level systems formed via a sub-communicator defined with active ranks:
+ *      - 9   : hypre's internal Gaussian elimination (host only).
+ *      - 99  : LU factorization with pivoting.
+ *      - 199 : explicit (dense) inverse.
+ *
+ *   For coarsest level systems formed via hypre_DataExchangeList:
+ *      - 19  : hypre's internal Gaussian elimination (host only).
+ *      - 98  : LU factorization with pivoting.
+ *      - 198 : explicit (dense) inverse.
+ *
+ * Options for \e k are
  *
  *    - 1 : the down cycle
  *    - 2 : the up cycle
@@ -1280,7 +1294,7 @@ HYPRE_Int HYPRE_BoomerAMGSetPrintLevel(HYPRE_Solver solver,
 
 /**
  * (Optional) Requests additional computations for diagnostic and similar
- * data to be logged by the user. Default to 0 for do nothing.  The latest
+ * data to be logged by the user. Default to 0 to do nothing.  The latest
  * residual will be available if logging > 1.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetLogging(HYPRE_Solver solver,
@@ -4059,7 +4073,7 @@ HYPRE_MGRSetReservedCpointsLevelToKeep( HYPRE_Solver solver, HYPRE_Int level);
  * Currently supports the following flavors of relaxation types
  * as described in the \e BoomerAMGSetRelaxType:
  * \e relax_type 0, 3 - 8, 13, 14, 18. Also supports AMG (options 1 and 2)
- *    and direct solver variants (9, 99, 199). See HYPRE_MGRSetLevelFRelaxType for details.
+ *    and direct solver variants (9, 99, 199). See \e HYPRE_MGRSetLevelFRelaxType for details.
  **/
 HYPRE_Int
 HYPRE_MGRSetRelaxType(HYPRE_Solver solver,
@@ -4072,7 +4086,7 @@ HYPRE_MGRSetRelaxType(HYPRE_Solver solver,
  *    - 0 : Single-level relaxation sweeps for F-relaxation as prescribed by \e MGRSetRelaxType
  *    - 1 : Multi-level relaxation strategy for F-relaxation (V(1,0) cycle currently supported).
  *
- *    NOTE: This function will be removed in favor of /e HYPRE_MGRSetLevelFRelaxType!!
+ *    NOTE: This function will be removed in favor of \e HYPRE_MGRSetLevelFRelaxType!!
  **/
 HYPRE_Int
 HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver,
@@ -4148,7 +4162,7 @@ HYPRE_MGRSetRestrictType( HYPRE_Solver solver,
                           HYPRE_Int restrict_type);
 
 /**
- * (Optional) This function is an extension of HYPRE_MGRSetRestrictType. It allows setting
+ * (Optional) This function is an extension of \e HYPRE_MGRSetRestrictType. It allows setting
  * the restriction operator strategy for each MGR level.
  **/
 HYPRE_Int
@@ -4182,7 +4196,7 @@ HYPRE_MGRSetInterpType( HYPRE_Solver solver,
                         HYPRE_Int interp_type );
 
 /**
- * (Optional) This function is an extension of HYPRE_MGRSetInterpType. It allows setting
+ * (Optional) This function is an extension of \e HYPRE_MGRSetInterpType. It allows setting
  * the prolongation (interpolation) operator strategy for each MGR level.
  **/
 HYPRE_Int
@@ -4198,7 +4212,7 @@ HYPRE_MGRSetNumRelaxSweeps( HYPRE_Solver solver,
                             HYPRE_Int nsweeps );
 
 /**
- * (Optional) This function is an extension of HYPRE_MGRSetNumRelaxSweeps. It allows setting
+ * (Optional) This function is an extension of \e HYPRE_MGRSetNumRelaxSweeps. It allows setting
  * the number of single-level relaxation sweeps for each MGR level.
  **/
 HYPRE_Int
@@ -4261,12 +4275,29 @@ HYPRE_Int HYPRE_MGRSetCoarseSolver(HYPRE_Solver             solver,
                                    HYPRE_Solver             coarse_grid_solver );
 
 /**
- * (Optional) Set the print level to print setup and solve information.
+ * @brief (Optional) Set the verbosity level for MGR.
  *
- *    - 0 : no printout (default)
- *    - 1 : print setup information
- *    - 2 : print solve information
- *    - 3 : print both setup and solve information
+ * @details You can control what information gets printed by specifying the
+ * output levels using this function. Each option corresponds to a specific type
+ * of information, and you can activate several of them at the same time by summing
+ * their respective numeric codes, which are given below:
+ *
+ *   - 1:  Print MGR's setup information.
+ *   - 2:  Print MGR's solve information.
+ *   - 4:  Print MGR's parameters information.
+ *   - 8:  Set print mode for matrices and vectors to ASCII (binary mode is used by default)
+ *   - 16: Print the finest level matrix to NP files where NP is the number of ranks.
+ *   - 32: Print the finest level right-hand-side to NP files.
+ *
+ * @param solver [IN] The solver to configure.
+ * @param print_level [IN] The desired output level.
+ *
+ * @example To print setup information (1); matrix (16) and rhs (32) to binary files,
+ * set \c print_level to 49 (1 + 16 + 32). In the previous example, to use ASCII
+ * files for matrices and vectors, set \c print_level to 57 (1 + 8 + 16 + 32).
+ *
+ * @note The default print level is zero, which means no information will be
+ * printed by default.
  **/
 HYPRE_Int
 HYPRE_MGRSetPrintLevel( HYPRE_Solver solver,
@@ -4287,10 +4318,8 @@ HYPRE_MGRSetCoarseGridPrintLevel( HYPRE_Solver solver,
                                   HYPRE_Int print_level );
 
 /**
- * (Optional) Set the threshold to compress the coarse grid at each level
- * Use threshold = 0.0 if no truncation is applied. Otherwise, set the threshold
- * value for dropping entries for the coarse grid.
- * The default is 0.0.
+ * (Optional) Set the threshold for dropping small entries on the coarse grid at each level.
+ * No dropping is applied if \e threshold = 0.0 (default).
  **/
 HYPRE_Int
 HYPRE_MGRSetTruncateCoarseGridThreshold( HYPRE_Solver solver,
@@ -4299,7 +4328,7 @@ HYPRE_MGRSetTruncateCoarseGridThreshold( HYPRE_Solver solver,
 /**
  * (Optional) Requests logging of solver diagnostics.
  * Requests additional computations for diagnostic and similar
- * data to be logged by the user. Default to 0 for do nothing.  The latest
+ * data to be logged by the user. Default is 0, do nothing.  The latest
  * residual will be available if logging > 1.
  **/
 HYPRE_Int
@@ -4338,8 +4367,8 @@ HYPRE_Int
 HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver solver,
                               HYPRE_Int *smooth_iters );
 /**
- * (Optional) Set the smoothing order for global smoothing at each level.
- * Options for \e level_smooth_order are:
+ * (Optional) Set the cycle for global smoothing.
+ * Options for \e global_smooth_cycle are:
  *    - 1 : Pre-smoothing - Down cycle (default)
  *    - 2 : Post-smoothing - Up cycle
  **/
@@ -4389,11 +4418,18 @@ HYPRE_MGRGetCoarseGridConvergenceFactor( HYPRE_Solver solver,
                                          HYPRE_Real *conv_factor );
 
 /**
- * (Optional) Set the number of maximum points for interpolation operator.
+ * (Optional) Set the maximum number of nonzeros per row for interpolation operators.
  **/
 HYPRE_Int
 HYPRE_MGRSetPMaxElmts( HYPRE_Solver solver,
                        HYPRE_Int P_max_elmts );
+
+/**
+ * (Optional) Set the maximum number of nonzeros per row for interpolation operators for each level.
+ **/
+HYPRE_Int
+HYPRE_MGRSetLevelPMaxElmts( HYPRE_Solver solver,
+                            HYPRE_Int *P_max_elmts );
 
 /**
  * (Optional) Return the norm of the final relative residual.
