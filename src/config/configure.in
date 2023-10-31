@@ -2759,6 +2759,13 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
            LDFLAGS+=" -Xsycl-target-backend ${HYPRE_SYCL_TARGET_BACKEND}"
         fi
 
+        dnl Shared build needs the sycl compiler
+        if test "$hypre_using_shared" = "yes"
+        then
+           SYCLFLAGS="${SHARED_COMPILE_FLAG} ${SYCLFLAGS}"
+           BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG}"
+        fi
+
         dnl (Ab)Use CUFLAGS to capture SYCL compilation flags
         if test "$hypre_user_chose_cuflags" = "no"
         then
