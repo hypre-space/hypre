@@ -663,8 +663,6 @@ HYPRE_MAGMA_INCLUDE
 HYPRE_MAGMA_LIB_DIR
 CALIPER_LIBS
 CALIPER_INCLUDE
-MAGMA_LIBS
-MAGMA_INCLUDE
 HYPRE_SYCL_LIBS
 HYPRE_SYCL_INCL
 HYPRE_HIP_LIBS
@@ -672,7 +670,7 @@ HYPRE_HIP_INCL
 HYPRE_CUDA_LIBS
 HYPRE_CUDA_INCLUDE
 HYPRE_CUDA_PATH
-HYPRE_CUDA_GENCODE
+HYPRE_GPU_GENCODE
 HYPRE_UMPIRE_LIB
 HYPRE_UMPIRE_INCLUDE
 HYPRE_UMPIRE_LIB_DIR
@@ -745,6 +743,12 @@ CC
 CUFLAGS
 CUCC
 HYPRE_CUDA_SM
+GPUFLAGS
+GPUCC
+HYPRE_GPU_ARCH
+DPLROOT
+MKLROOT
+ROCM_PATH
 CUDA_HOME
 host_os
 host_vendor
@@ -825,6 +829,7 @@ with_LD
 with_LDFLAGS
 with_extra_CFLAGS
 with_extra_CXXFLAGS
+with_extra_GPUFLAGS
 with_extra_CUFLAGS
 with_extra_BUILDFLAGS
 with_extra_incpath
@@ -858,9 +863,6 @@ with_superlu_lib
 with_dsuperlu
 with_dsuperlu_include
 with_dsuperlu_lib
-with_magma
-with_magma_include
-with_magma_lib
 with_fei_inc_dir
 with_mli
 with_MPI
@@ -878,8 +880,6 @@ enable_curand
 enable_cuda_streams
 enable_cusparse
 enable_cusolver
-with_sycl_target
-with_sycl_target_backend
 enable_onemklsparse
 enable_onemklblas
 enable_onemklrand
@@ -917,6 +917,12 @@ with_lapack
 host_alias
 target_alias
 CUDA_HOME
+ROCM_PATH
+MKLROOT
+DPLROOT
+HYPRE_GPU_ARCH
+GPUCC
+GPUFLAGS
 HYPRE_CUDA_SM
 CUCC
 CUFLAGS
@@ -1609,8 +1615,13 @@ Optional Packages:
                           Define extra C++ compile flag, where ARG is a
                           space-separated list (enclosed in quotes) of
                           directories.
+  --with-extra-GPUFLAGS=ARG
+                          Define extra GPU compile flag, where ARG is a
+                          space-separated list (enclosed in quotes) of
+                          directories.
   --with-extra-CUFLAGS=ARG
-                          Define extra CUDA compile flag, where ARG is a
+                          (DEPRECATED: use --with-extra-GPUFLAGS instead)
+                          Define extra GPU compile flag, where ARG is a
                           space-separated list (enclosed in quotes) of
                           directories.
   --with-extra-BUILDFLAGS=ARG
@@ -1720,20 +1731,10 @@ Optional Packages:
   --with-hip              Use HIP for AMD GPUs. (default is NO).
   --with-sycl             Use SYCL for Intel GPUs. (default is NO).
   --with-cuda-home=DIR    User specifies CUDA_HOME in DIR.
-  --with-gpu-arch=ARG     User specifies NVIDIA GPU architecture that the CUDA
+  --with-gpu-arch=ARG     User specifies GPU architecture that the device code
                           files will be compiled for in ARG, where ARG is a
                           space-separated list (enclosed in quotes) of
                           numbers.
-  --with-sycl-target=ARG  User specifies sycl targets for AOT compilation in
-                          ARG, where ARG is a comma-separated list (enclosed
-                          in quotes), e.g. "spir64_gen".
-  --with-sycl-target-backend=ARG
-                          User specifies additional options for the sycl
-                          target backend for AOT compilation in ARG, where ARG
-                          contains the desired options (enclosed in
-                          double+single quotes), e.g.
-                          --with-sycl-target-backend="'-device
-                          12.1.0,12.4.0'".
   --with-raja             Use RAJA. Require RAJA package to be compiled
                           properly (default is NO).
   --with-raja-include=DIR User specifies that RAJA/*.h is in DIR. The options
@@ -1828,10 +1829,20 @@ Optional Packages:
 
 Some influential environment variables:
   CUDA_HOME   CUDA home directory
+  ROCM_PATH   ROCm home directory
+  MKLROOT     oneMKL home directory
+  DPLROOT     oneDPL home directory
+  HYPRE_GPU_ARCH
+              GPU architecture (e.g. CUDA/HIP SM number or Intel GPU device
+              number)
+  GPUCC       GPU compiler command (e.g. nvcc, hipcc, icpx)
+  GPUFLAGS    GPU compiler flags
   HYPRE_CUDA_SM
-              CUDA architecture
-  CUCC        CUDA compiler command
-  CUFLAGS     CUDA compiler flags
+              (DEPRECATED: use HYPRE_GPU_ARCH instead) GPU architecture (e.g.
+              CUDA/HIP SM number or Intel GPU device number)
+  CUCC        (DEPRECATED: use GPUCC instead) GPU compiler command (e.g. nvcc,
+              hipcc, icpx)
+  CUFLAGS     (DEPRECATED: use GPUFLAGS) GPU compiler flags
   CC          C compiler command
   CFLAGS      C compiler flags
   LDFLAGS     linker flags, e.g. -L<lib dir> if you have libraries in a
@@ -3827,18 +3838,57 @@ fi
 
 
 
-if test "x$CUCC" = "x"
+
+
+
+
+
+
+if test "x$GPUCC" = "x"
 then
-   hypre_user_chose_cudacompilers=no
+   if test "x$CUCC" = "x"
+   then
+      hypre_user_chose_gpucompilers=no
+   else
+      hypre_user_chose_gpucompilers=yes
+      as_fn_error $? "WARNING: use of CUCC variable is deprecated. Use GPUCC instead." "$LINENO" 5
+      GPUCC=$CUCC
+   fi
 else
-   hypre_user_chose_cudacompilers=yes
+   if test "x$CUCC" != "x"
+   then
+      as_fn_error $? "WARNING: use of CUCC variable is deprecated and will be overriden by provided GPUCC." "$LINENO" 5
+   fi
+   hypre_user_chose_gpucompilers=yes
 fi
 
-if test "x$CUFLAGS" = "x"
+if test "x$GPUFLAGS" = "x"
 then
-   hypre_user_chose_cuflags=no
+   if test "x$CUFLAGS" = "x"
+   then
+      hypre_user_chose_gpuflags=no
+   else
+      hypre_user_chose_gpuflags=yes
+      as_fn_error $? "WARNING: use of CUFLAGS variable is deprecated. Use GPUFLAGS instead." "$LINENO" 5
+      GPUFLAGS=$CUFLAGS
+   fi
 else
-   hypre_user_chose_cuflags=yes
+   if test "x$CUFLAGS" != "x"
+   then
+      as_fn_error $? "WARNING: use of CUFLAGS variable is deprecated and will be overriden by provided GPUFLAGS." "$LINENO" 5
+   fi
+   hypre_user_chose_gpuflags=yes
+fi
+
+if test "x$HYPRE_CUDA_SM" != "x"
+then
+   if test "x$HYPRE_GPU_ARCH" = "x"
+   then
+      as_fn_error $? "WARNING: use of HYPRE_CUDA_SM variable is deprecated. Use HYPRE_GPU_ARCH instead." "$LINENO" 5
+      HYPRE_GPU_ARCH=$HYPRE_CUDA_SM
+   else
+      as_fn_error $? "WARNING: use of HYPRE_CUDA_SM variable is deprecated and will be overriden by provided HYPRE_GPU_ARCH." "$LINENO" 5
+   fi
 fi
 
 if test "x$F77" != "x" && test "x$FC" = "x"
@@ -3912,6 +3962,15 @@ fi
 if test ${with_extra_CXXFLAGS+y}
 then :
   withval=$with_extra_CXXFLAGS; EXTRA_CXXFLAGS=$withval
+
+fi
+
+
+
+# Check whether --with-extra-GPUFLAGS was given.
+if test ${with_extra_GPUFLAGS+y}
+then :
+  withval=$with_extra_GPUFLAGS; EXTRA_GPUFLAGS=$withval
 
 fi
 
@@ -4582,30 +4641,6 @@ then :
 fi
 
 
-if test "x$with_magma" = "xyes"; then :
-
-$as_echo "#define HYPRE_USING_MAGMA 1" >>confdefs.h
-
-fi
-
-
-# Check whether --with-magma-include was given.
-if test "${with_magma_include+set}" = set; then :
-  withval=$with_magma_include; for dmagma_inc_dir in $withval; do
-    MAGMA_INCLUDE="-I$magma_inc_dir $MAGMA_INCLUDE"
- done
-
-fi
-
-
-
-# Check whether --with-magma-lib was given.
-if test "${with_magma_lib+set}" = set; then :
-  withval=$with_magma_lib; for magma_lib in $withval; do
-    MAGMA_LIBS="$MAGMA_LIBS $magma_lib"
- done
-
-fi
 
 
 # Check whether --with-fei-inc-dir was given.
@@ -4773,9 +4808,9 @@ then :
   withval=$with_gpu_arch;
  if test "x${withval}" != "x"
  then
-    if test "x${HYPRE_CUDA_SM}" = "x"
+    if test "x${HYPRE_GPU_ARCH}" = "x"
     then
-       HYPRE_CUDA_SM="${withval}"
+       HYPRE_GPU_ARCH="${withval}"
     fi
  fi
 
@@ -4866,40 +4901,6 @@ else $as_nop
 
 fi
 
-
-
-
-# Check whether --with-sycl-target was given.
-if test ${with_sycl_target+y}
-then :
-  withval=$with_sycl_target;
- if test "x${withval}" != "x"
- then
-    if test "x${HYPRE_SYCL_TARGET}" = "x"
-    then
-       HYPRE_SYCL_TARGET="${withval}"
-    fi
- fi
-
-
-fi
-
-
-
-# Check whether --with-sycl-target-backend was given.
-if test ${with_sycl_target_backend+y}
-then :
-  withval=$with_sycl_target_backend;
- if test "x${withval}" != "x"
- then
-    if test "x${HYPRE_SYCL_TARGET_BACKEND}" = "x"
-    then
-       HYPRE_SYCL_TARGET_BACKEND="${withval}"
-    fi
- fi
-
-
-fi
 
 
 # Check whether --enable-onemklsparse was given.
@@ -5968,7 +5969,7 @@ then
 fi
 
 
-if test "$hypre_user_chose_cudacompilers" = "no"
+if test "$hypre_user_chose_gpucompilers" = "no"
 then
    if test "$hypre_using_device_openmp" = "yes"
    then
@@ -5982,12 +5983,12 @@ do
 set dummy $ac_prog; ac_word=$2
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 printf %s "checking for $ac_word... " >&6; }
-if test ${ac_cv_prog_CUCC+y}
+if test ${ac_cv_prog_GPUCC+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
-  if test -n "$CUCC"; then
-  ac_cv_prog_CUCC="$CUCC" # Let the user override the test.
+  if test -n "$GPUCC"; then
+  ac_cv_prog_GPUCC="$GPUCC" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
@@ -6000,7 +6001,7 @@ do
   esac
     for ac_exec_ext in '' $ac_executable_extensions; do
   if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CUCC="$ac_prog"
+    ac_cv_prog_GPUCC="$ac_prog"
     printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -6010,17 +6011,17 @@ IFS=$as_save_IFS
 
 fi
 fi
-CUCC=$ac_cv_prog_CUCC
-if test -n "$CUCC"; then
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $CUCC" >&5
-printf "%s\n" "$CUCC" >&6; }
+GPUCC=$ac_cv_prog_GPUCC
+if test -n "$GPUCC"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $GPUCC" >&5
+printf "%s\n" "$GPUCC" >&6; }
 else
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
 printf "%s\n" "no" >&6; }
 fi
 
 
-  test -n "$CUCC" && break
+  test -n "$GPUCC" && break
 done
 
          else
@@ -6030,12 +6031,12 @@ do
 set dummy $ac_prog; ac_word=$2
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 printf %s "checking for $ac_word... " >&6; }
-if test ${ac_cv_prog_CUCC+y}
+if test ${ac_cv_prog_GPUCC+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
-  if test -n "$CUCC"; then
-  ac_cv_prog_CUCC="$CUCC" # Let the user override the test.
+  if test -n "$GPUCC"; then
+  ac_cv_prog_GPUCC="$GPUCC" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
@@ -6048,7 +6049,7 @@ do
   esac
     for ac_exec_ext in '' $ac_executable_extensions; do
   if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CUCC="$ac_prog"
+    ac_cv_prog_GPUCC="$ac_prog"
     printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -6058,17 +6059,17 @@ IFS=$as_save_IFS
 
 fi
 fi
-CUCC=$ac_cv_prog_CUCC
-if test -n "$CUCC"; then
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $CUCC" >&5
-printf "%s\n" "$CUCC" >&6; }
+GPUCC=$ac_cv_prog_GPUCC
+if test -n "$GPUCC"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $GPUCC" >&5
+printf "%s\n" "$GPUCC" >&6; }
 else
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
 printf "%s\n" "no" >&6; }
 fi
 
 
-  test -n "$CUCC" && break
+  test -n "$GPUCC" && break
 done
 
          fi
@@ -6081,12 +6082,12 @@ do
 set dummy $ac_prog; ac_word=$2
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 printf %s "checking for $ac_word... " >&6; }
-if test ${ac_cv_prog_CUCC+y}
+if test ${ac_cv_prog_GPUCC+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
-  if test -n "$CUCC"; then
-  ac_cv_prog_CUCC="$CUCC" # Let the user override the test.
+  if test -n "$GPUCC"; then
+  ac_cv_prog_GPUCC="$GPUCC" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
@@ -6099,7 +6100,7 @@ do
   esac
     for ac_exec_ext in '' $ac_executable_extensions; do
   if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CUCC="$ac_prog"
+    ac_cv_prog_GPUCC="$ac_prog"
     printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -6109,17 +6110,17 @@ IFS=$as_save_IFS
 
 fi
 fi
-CUCC=$ac_cv_prog_CUCC
-if test -n "$CUCC"; then
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $CUCC" >&5
-printf "%s\n" "$CUCC" >&6; }
+GPUCC=$ac_cv_prog_GPUCC
+if test -n "$GPUCC"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $GPUCC" >&5
+printf "%s\n" "$GPUCC" >&6; }
 else
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
 printf "%s\n" "no" >&6; }
 fi
 
 
-  test -n "$CUCC" && break
+  test -n "$GPUCC" && break
 done
 
          else
@@ -6129,12 +6130,12 @@ do
 set dummy $ac_prog; ac_word=$2
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 printf %s "checking for $ac_word... " >&6; }
-if test ${ac_cv_prog_CUCC+y}
+if test ${ac_cv_prog_GPUCC+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
-  if test -n "$CUCC"; then
-  ac_cv_prog_CUCC="$CUCC" # Let the user override the test.
+  if test -n "$GPUCC"; then
+  ac_cv_prog_GPUCC="$GPUCC" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
@@ -6147,7 +6148,7 @@ do
   esac
     for ac_exec_ext in '' $ac_executable_extensions; do
   if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CUCC="$ac_prog"
+    ac_cv_prog_GPUCC="$ac_prog"
     printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -6157,17 +6158,17 @@ IFS=$as_save_IFS
 
 fi
 fi
-CUCC=$ac_cv_prog_CUCC
-if test -n "$CUCC"; then
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $CUCC" >&5
-printf "%s\n" "$CUCC" >&6; }
+GPUCC=$ac_cv_prog_GPUCC
+if test -n "$GPUCC"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $GPUCC" >&5
+printf "%s\n" "$GPUCC" >&6; }
 else
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
 printf "%s\n" "no" >&6; }
 fi
 
 
-  test -n "$CUCC" && break
+  test -n "$GPUCC" && break
 done
 
          fi
@@ -6182,12 +6183,12 @@ do
 set dummy $ac_prog; ac_word=$2
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 printf %s "checking for $ac_word... " >&6; }
-if test ${ac_cv_prog_CUCC+y}
+if test ${ac_cv_prog_GPUCC+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
-  if test -n "$CUCC"; then
-  ac_cv_prog_CUCC="$CUCC" # Let the user override the test.
+  if test -n "$GPUCC"; then
+  ac_cv_prog_GPUCC="$GPUCC" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in "${CUDA_HOME}/bin"
@@ -6200,7 +6201,7 @@ do
   esac
     for ac_exec_ext in '' $ac_executable_extensions; do
   if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CUCC="$ac_prog"
+    ac_cv_prog_GPUCC="$ac_prog"
     printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -6210,21 +6211,21 @@ IFS=$as_save_IFS
 
 fi
 fi
-CUCC=$ac_cv_prog_CUCC
-if test -n "$CUCC"; then
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $CUCC" >&5
-printf "%s\n" "$CUCC" >&6; }
+GPUCC=$ac_cv_prog_GPUCC
+if test -n "$GPUCC"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $GPUCC" >&5
+printf "%s\n" "$GPUCC" >&6; }
 else
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
 printf "%s\n" "no" >&6; }
 fi
 
 
-  test -n "$CUCC" && break
+  test -n "$GPUCC" && break
 done
-test -n "$CUCC" || CUCC=""""
+test -n "$GPUCC" || GPUCC=""""
 
-      CUCC="\${HYPRE_CUDA_PATH}/bin/${CUCC} -ccbin=\${CXX}"
+      GPUCC="\${HYPRE_CUDA_PATH}/bin/${GPUCC} -ccbin=\${CXX}"
    fi
 
    if test "$hypre_using_hip" = "yes"
@@ -6235,12 +6236,12 @@ do
 set dummy $ac_prog; ac_word=$2
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 printf %s "checking for $ac_word... " >&6; }
-if test ${ac_cv_prog_CUCC+y}
+if test ${ac_cv_prog_GPUCC+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
-  if test -n "$CUCC"; then
-  ac_cv_prog_CUCC="$CUCC" # Let the user override the test.
+  if test -n "$GPUCC"; then
+  ac_cv_prog_GPUCC="$GPUCC" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
@@ -6253,7 +6254,7 @@ do
   esac
     for ac_exec_ext in '' $ac_executable_extensions; do
   if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CUCC="$ac_prog"
+    ac_cv_prog_GPUCC="$ac_prog"
     printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -6263,17 +6264,17 @@ IFS=$as_save_IFS
 
 fi
 fi
-CUCC=$ac_cv_prog_CUCC
-if test -n "$CUCC"; then
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $CUCC" >&5
-printf "%s\n" "$CUCC" >&6; }
+GPUCC=$ac_cv_prog_GPUCC
+if test -n "$GPUCC"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $GPUCC" >&5
+printf "%s\n" "$GPUCC" >&6; }
 else
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
 printf "%s\n" "no" >&6; }
 fi
 
 
-  test -n "$CUCC" && break
+  test -n "$GPUCC" && break
 done
 
    fi
@@ -6286,12 +6287,12 @@ do
 set dummy $ac_prog; ac_word=$2
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 printf %s "checking for $ac_word... " >&6; }
-if test ${ac_cv_prog_CUCC+y}
+if test ${ac_cv_prog_GPUCC+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
-  if test -n "$CUCC"; then
-  ac_cv_prog_CUCC="$CUCC" # Let the user override the test.
+  if test -n "$GPUCC"; then
+  ac_cv_prog_GPUCC="$GPUCC" # Let the user override the test.
 else
 as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
@@ -6304,7 +6305,7 @@ do
   esac
     for ac_exec_ext in '' $ac_executable_extensions; do
   if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CUCC="$ac_prog"
+    ac_cv_prog_GPUCC="$ac_prog"
     printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -6314,17 +6315,17 @@ IFS=$as_save_IFS
 
 fi
 fi
-CUCC=$ac_cv_prog_CUCC
-if test -n "$CUCC"; then
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $CUCC" >&5
-printf "%s\n" "$CUCC" >&6; }
+GPUCC=$ac_cv_prog_GPUCC
+if test -n "$GPUCC"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $GPUCC" >&5
+printf "%s\n" "$GPUCC" >&6; }
 else
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
 printf "%s\n" "no" >&6; }
 fi
 
 
-  test -n "$CUCC" && break
+  test -n "$GPUCC" && break
 done
 
    fi
@@ -10768,28 +10769,28 @@ printf "%s\n" "#define HYPRE_USING_CUDA 1" >>confdefs.h
 
    LINK_CC=${LINK_CXX}
 
-      if test "x$HYPRE_CUDA_SM" = "x"
+      if test "x$HYPRE_GPU_ARCH" = "x"
    then
-      HYPRE_CUDA_SM=70
+      HYPRE_GPU_ARCH=70
    fi
 
-   HYPRE_CUDA_GENCODE=""
-   for sm in ${HYPRE_CUDA_SM}; do
-      HYPRE_CUDA_GENCODE="${HYPRE_CUDA_GENCODE}-gencode arch=compute_${sm},code=sm_${sm} "
+   HYPRE_GPU_GENCODE=""
+   for sm in ${HYPRE_GPU_ARCH}; do
+      HYPRE_GPU_GENCODE="${HYPRE_GPU_GENCODE}-gencode arch=compute_${sm},code=sm_${sm} "
    done
 
-   if test "$hypre_user_chose_cuflags" = "no"
+   if test "$hypre_user_chose_gpuflags" = "no"
    then
-      CUFLAGS="-lineinfo -expt-extended-lambda -std=c++${hypre_cxxstd} --x cu"
+      GPUFLAGS="-lineinfo -expt-extended-lambda -std=c++${hypre_cxxstd} --x cu"
       if test "$hypre_using_debug" = "yes"
       then
-         CUFLAGS="-g -O0 ${CUFLAGS}"
+         GPUFLAGS="-g -O0 ${GPUFLAGS}"
       else
-         CUFLAGS="-O2 ${CUFLAGS}"
+         GPUFLAGS="-O2 ${GPUFLAGS}"
       fi
 
 
-      CUFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
+      GPUFLAGS="${GPUFLAGS} -Xcompiler \"${CXXFLAGS}\""
    fi
 
 
@@ -10885,16 +10886,16 @@ printf "%s\n" "#define HYPRE_USING_HIP 1" >>confdefs.h
 
 
 
-                                LINK_CC=${LINK_CXX}
+                        LINK_CC=${LINK_CXX}
 
 
-        if test "x${HYPRE_CUDA_SM}" != "x"
+        if test "x${HYPRE_GPU_ARCH}" != "x"
         then
-           HYPRE_CUDA_GENCODE="--amdgpu-target="
-           for sm in ${HYPRE_CUDA_SM}; do
-              HYPRE_CUDA_GENCODE="${HYPRE_CUDA_GENCODE}${sm},"
+           HYPRE_GPU_GENCODE="--amdgpu-target="
+           for sm in ${HYPRE_GPU_ARCH}; do
+              HYPRE_GPU_GENCODE="${HYPRE_GPU_GENCODE}${sm},"
            done
-           HYPRE_CUDA_GENCODE="`echo ${HYPRE_CUDA_GENCODE}|sed 's/,$//'`"
+           HYPRE_GPU_GENCODE="`echo ${HYPRE_GPU_GENCODE}|sed 's/,$//'`"
         fi
 
                                         HIPCXXFLAGS="-x hip -std=c++14 ${HIPCXXFLAGS}"
@@ -10913,9 +10914,9 @@ fi
            HIPCXXFLAGS="${SHARED_COMPILE_FLAG} ${HIPCXXFLAGS}"
         fi
 
-                        if test "$hypre_user_chose_cuflags" = "no"
+                if test "$hypre_user_chose_gpuflags" = "no"
         then
-           CUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS}"
+           GPUFLAGS="${HIPCPPFLAGS} ${HIPCXXFLAGS}"
         fi
 
                                 HYPRE_HIP_INCL="-I${HYPRE_ROCM_PREFIX}/include"
@@ -10988,8 +10989,8 @@ printf "%s\n" "#define HYPRE_USING_GPU 1" >>confdefs.h
 printf "%s\n" "#define HYPRE_USING_SYCL 1" >>confdefs.h
 
 
-                LINK_CC=${CUCC}
-        LINK_CXX=${CUCC}
+        LINK_CC=${GPUCC}
+        LINK_CXX=${GPUCC}
 
         SYCLFLAGS="-fsycl -fsycl-unnamed-lambda"
         if test "$hypre_using_debug" = "yes"
@@ -11000,18 +11001,20 @@ printf "%s\n" "#define HYPRE_USING_SYCL 1" >>confdefs.h
         fi
         LDFLAGS+=" -fsycl -fsycl-device-code-split=per_kernel -Wl,--no-relax"
 
-                if test "x${HYPRE_SYCL_TARGET}" != "x"
+                if test "x${HYPRE_GPU_ARCH}" != "x"
         then
-           LDFLAGS+=" -fsycl-targets=${HYPRE_SYCL_TARGET}"
+           HYPRE_SYCL_TARGET="-fsycl-targets=spir64_gen -Xs '-device "
+           for dev in ${HYPRE_GPU_ARCH}; do
+              HYPRE_SYCL_TARGET="${HYPRE_SYCL_TARGET}${dev},"
+           done
+           HYPRE_SYCL_TARGET="`echo ${HYPRE_SYCL_TARGET}|sed 's/,$//'`"
+           HYPRE_SYCL_TARGET=" ${HYPRE_SYCL_TARGET}'"
         fi
-        if test "x${HYPRE_SYCL_TARGET_BACKEND}" != "x"
-        then
-           LDFLAGS+=" -Xsycl-target-backend ${HYPRE_SYCL_TARGET_BACKEND}"
-        fi
+        LDFLAGS+=${HYPRE_SYCL_TARGET}
 
-                if test "$hypre_user_chose_cuflags" = "no"
+        if test "$hypre_user_chose_gpuflags" = "no"
         then
-           CUFLAGS="${SYCLFLAGS}"
+           GPUFLAGS="${SYCLFLAGS}"
         fi
 
         if test x"$hypre_using_onemklsparse" == x"yes" || test x"$hypre_using_onemklblas" == x"yes" || test x"$hypre_using_onemklrand" == x"yes"
@@ -11132,20 +11135,20 @@ printf "%s\n" "#define HYPRE_DEVICE_OPENMP_ALLOC 1" >>confdefs.h
 
 
 
-   if test "$hypre_user_chose_cuflags" = "no"
+   if test "$hypre_user_chose_gpuflags" = "no"
    then
-      CUFLAGS="${CXXFLAGS} ${CUFLAGS}"
+      GPUFLAGS="${CXXFLAGS} ${GPUFLAGS}"
                      # dnl this is too old
-         #CUFLAGS+=" -fopenmp-nonaliased-maps"
-            if test "$CUCC" = "icx" || test "$CUCC" = "icpx" || test "$CUCC" = "mpiicx" || test "$CUCC" = "mpiicpx"
+         #GPUFLAGS+=" -fopenmp-nonaliased-maps"
+            if test "$GPUCC" = "icx" || test "$GPUCC" = "icpx" || test "$GPUCC" = "mpiicx" || test "$GPUCC" = "mpiicpx"
       then
-         CUFLAGS+="-qopenmp -fopenmp-targets=spir64"
+         GPUFLAGS+="-qopenmp -fopenmp-targets=spir64"
       fi
    fi
 
    if test "$hypre_user_chose_ldflags" = "no"
    then
-      if test "$CUCC" = "icx" || test "$CUCC" = "icpx" || test "$CUCC" = "mpiicx" || test "$CUCC" = "mpiicpx"
+      if test "$GPUCC" = "icx" || test "$GPUCC" = "icpx" || test "$GPUCC" = "mpiicx" || test "$GPUCC" = "mpiicpx"
       then
          LDFLAGS+="-qopenmp -fopenmp-targets=spir64"
       fi
@@ -11158,8 +11161,8 @@ printf "%s\n" "#define HYPRE_DEVICE_OPENMP_CHECK 1" >>confdefs.h
 
    fi
 
-         LINK_CC='${CUCC}'
-   LINK_CXX='${CUCC}'
+         LINK_CC='${GPUCC}'
+   LINK_CXX='${GPUCC}'
       fi
 
 if test "x$hypre_using_um" = "xyes"
@@ -11187,7 +11190,7 @@ printf "%s\n" "#define HYPRE_WITH_GPU_AWARE_MPI 1" >>confdefs.h
 
 fi
 
-CUFLAGS="${CUFLAGS} ${EXTRA_CUFLAGS}"
+GPUFLAGS="${GPUFLAGS} ${EXTRA_GPUFLAGS} ${EXTRA_CUFLAGS}"
 
 HYPRE_INSTALLDIR="${prefix}"
 HYPRE_LIBINSTALL="${libdir}"
@@ -11305,6 +11308,7 @@ printf "%s\n" "#define HYPRE_LINUX 1" >>confdefs.h
          fi
          ;;
    esac
+
 
 
 

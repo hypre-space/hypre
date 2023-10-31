@@ -45,8 +45,8 @@ CFLAGS    = @CFLAGS@ @DEFS@ $(C_COMPILE_FLAGS)
 CXX       = @CXX@
 CXXFLAGS  = @CXXFLAGS@ @DEFS@ $(CXX_COMPILE_FLAGS)
 
-CUCC      = @CUCC@ ${CUDA_ARCH}
-CUFLAGS   = @CUFLAGS@ @DEFS@ ${C_COMPILE_FLAGS}
+GPUCC     = @GPUCC@ ${HYPRE_GPU_ARCH}
+GPUFLAGS  = @GPUFLAGS@ @DEFS@ ${C_COMPILE_FLAGS}
 
 .f.o:
 	$(FC) $(FFLAGS) -c $<
@@ -58,12 +58,12 @@ CUFLAGS   = @CUFLAGS@ @DEFS@ ${C_COMPILE_FLAGS}
 	$(CXX) $(CXXFLAGS) -c $<
 .cc.o:
 	$(CXX) $(CXXFLAGS) -c $<
-ifeq ($(CUCC), )
+ifeq ($(GPUCC), )
 .c.obj:
 	$(CC) $(CFLAGS) -c $< -o $@
 else
 .c.obj:
-	$(CUCC) $(CUFLAGS) -c $< -o $@
+	$(GPUCC) $(GPUFLAGS) -c $< -o $@
 endif
 
 LINK_FC  = @LINK_FC@
@@ -118,12 +118,16 @@ MPIFLAGS   = @MPIFLAGS@
 HYPRE_NAP_INCLUDE = @HYPRE_NAP_INCLUDE@
 
 ##################################################################
+##  GPU architecture
+##################################################################
+HYPRE_GPU_ARCH = @HYPRE_GPU_GENCODE@
+
+##################################################################
 ##  CUDA options
 ##################################################################
 HYPRE_CUDA_PATH    = @HYPRE_CUDA_PATH@
 HYPRE_CUDA_INCLUDE = @HYPRE_CUDA_INCLUDE@
 HYPRE_CUDA_LIBS    = @HYPRE_CUDA_LIBS@
-CUDA_ARCH          = @HYPRE_CUDA_GENCODE@
 
 ##################################################################
 ##  HIP options
@@ -134,8 +138,8 @@ HYPRE_HIP_LIBS    = @HYPRE_HIP_LIBS@
 ##################################################################
 ##  SYCL options
 ##################################################################
-HYPRE_SYCL_INCLUDE=@HYPRE_SYCL_INCL@
-HYPRE_SYCL_LIBS=@HYPRE_SYCL_LIBS@
+HYPRE_SYCL_INCLUDE = @HYPRE_SYCL_INCL@
+HYPRE_SYCL_LIBS    = @HYPRE_SYCL_LIBS@
 
 ##################################################################
 ##  Caliper options
