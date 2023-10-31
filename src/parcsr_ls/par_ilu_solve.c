@@ -14,7 +14,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-/* Macro for index transformation */
+/* Macro to enable fast indexing of perm */
 #define HYPRE_GET_IDX(perm, i) ((perm) ? (perm)[i] : (i))
 
 /*--------------------------------------------------------------------
@@ -565,7 +565,7 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A,
       for (j = L_diag_i[i]; j < L_diag_i[i + 1]; j++)
       {
          col = L_diag_j[j];
-         ftemp_data[HYPRE_GET_IDX(qperm, i)] -= L_diag_data[j] *
+         ftemp_data[HYPRE_GET_IDX(perm, i)] -= L_diag_data[j] *
             utemp_data[HYPRE_GET_IDX(qperm, col)];
       }
    }
@@ -960,7 +960,7 @@ hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A,
    /* Initialize iteration to 0 */
    for (i = 0; i < nLU; i++)
    {
-      utemp_data[i] = 0.0;
+      utemp_data[HYPRE_GET_IDX(perm, i)] = 0.0;
    }
 
    /* Jacobi iteration loop */
@@ -988,7 +988,7 @@ hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A,
    /* Initialize iteration to 0 */
    for (i = 0; i < nLU; i++)
    {
-      ftemp_data[i] = 0.0;
+      ftemp_data[HYPRE_GET_IDX(perm, i)] = 0.0;
    }
 
    /* Jacobi iteration loop */
