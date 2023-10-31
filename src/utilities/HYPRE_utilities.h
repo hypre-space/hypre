@@ -26,6 +26,9 @@
 
 #ifdef HYPRE_MIXED_PRECISION
 #include "utilities_mup_func.h"
+#else
+/* Expose this outside multiprecision.h to allow access to guarded global variables */
+#define DEFINE_GLOBAL_VARIABLE 1
 #endif
 
 #ifdef __cplusplus

@@ -18,7 +18,7 @@
 extern void sigRegister_dh(void); /* use sig_dh.h if not for euclid_signals_len */
 
 /* guard definition of global variables to avoid linker errors for multiprecision build */
-#if defined DEFINE_GLOBAL_VARIABLE
+#if defined (DEFINE_GLOBAL_VARIABLE)
 /*-------------------------------------------------------------------------
  * Globally scoped variables, flags, and objects
  *-------------------------------------------------------------------------*/
