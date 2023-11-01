@@ -146,6 +146,10 @@ hypre_GetDeviceMaxShmemSize(hypre_int  device_id,
 #if defined(HYPRE_USING_HIP)
       hipDeviceGetAttribute(&max_size, hipDeviceAttributeMaxSharedMemoryPerBlock, device_id);
 #endif
+#if defined(HYPRE_USING_SYCL)
+      auto device = *hypre_HandleDevice(hypre_handle());
+      max_size = device.get_info<sycl::info::device::local_mem_size>();
+#endif
       hypre_HandleDeviceMaxShmemPerBlock(handle)[0] = max_size;
       hypre_HandleDeviceMaxShmemPerBlock(handle)[1] = max_size_optin;
 
@@ -274,82 +278,73 @@ HYPRE_DeviceInitialize(void)
    hypre_Handle *handle = hypre_handle();
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-#if defined(HYPRE_USING_SYCL)
-   /* WM: note that for sycl, we need to do device setup again if reinitializing */
-   //if (!HYPRE_Initialized())
-#else
-   /* If the library has not been initialized or finalized yet,
-      meaning that it is the first time HYPRE_Init is being called,
-      then perform the initialization of device structures below */
-   //if (!HYPRE_Initialized() && !HYPRE_Finalized())
-#endif
-   {
+
 #if !defined(HYPRE_USING_SYCL)
-      /* With sycl, cannot call hypre_GetDeviceLastError() until after device and queue setup */
-      hypre_GetDeviceLastError();
+   /* With sycl, cannot call hypre_GetDeviceLastError() until after device and queue setup */
+   hypre_GetDeviceLastError();
 #endif
 
-      /* Notice: the cudaStream created is specific to the device
-       * that was in effect when you created the stream.
-       * So, we should first set the device and create the streams
-       */
-      hypre_int device_id;
-      hypre_GetDevice(&device_id);
-      hypre_SetDevice(device_id, handle);
+   /* Notice: the cudaStream created is specific to the device
+    * that was in effect when you created the stream.
+    * So, we should first set the device and create the streams
+    */
+   hypre_int device_id;
+   hypre_GetDevice(&device_id);
+   hypre_SetDevice(device_id, handle);
 
-      hypre_GetDeviceMaxShmemSize(device_id, NULL, NULL);
+   hypre_GetDeviceMaxShmemSize(device_id, NULL, NULL);
 
 #if defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
-      cudaMemPool_t mempool;
-      cudaDeviceGetDefaultMemPool(&mempool, device_id);
-      uint64_t threshold = UINT64_MAX;
-      cudaMemPoolSetAttribute(mempool, cudaMemPoolAttrReleaseThreshold, &threshold);
+   cudaMemPool_t mempool;
+   cudaDeviceGetDefaultMemPool(&mempool, device_id);
+   uint64_t threshold = UINT64_MAX;
+   cudaMemPoolSetAttribute(mempool, cudaMemPoolAttrReleaseThreshold, &threshold);
 #endif
 
-      /* To include the cost of creating streams/cudahandles in HYPRE_Init */
-      /* If not here, will be done at the first use */
+   /* To include the cost of creating streams/cudahandles in HYPRE_Init */
+   /* If not here, will be done at the first use */
 #if defined(HYPRE_USING_CUDA_STREAMS)
-      hypre_HandleComputeStream(handle);
+   hypre_HandleComputeStream(handle);
 #endif
 
-      /* A separate stream for prefetching */
-      //hypre_HandleCudaPrefetchStream(handle);
+   /* A separate stream for prefetching */
+   //hypre_HandleCudaPrefetchStream(handle);
 
 #if defined(HYPRE_USING_CUBLAS)
-      hypre_HandleCublasHandle(handle);
+   hypre_HandleCublasHandle(handle);
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE)
-      hypre_HandleCusparseHandle(handle);
+   hypre_HandleCusparseHandle(handle);
 #endif
 
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
-      hypre_HandleCurandGenerator(handle);
+   hypre_HandleCurandGenerator(handle);
 #endif
 
 #if defined(HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER)
-      hypre_HandleVendorSolverHandle(handle);
+   hypre_HandleVendorSolverHandle(handle);
 #endif
 
-      /* Check if cuda arch flags in compiling match the device */
+   /* Check if cuda arch flags in compiling match the device */
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_DEBUG)
-      hypre_CudaCompileFlagCheck();
+   hypre_CudaCompileFlagCheck();
 #endif
 
 #if defined(HYPRE_USING_DEVICE_POOL)
-      /* Keep this check here at the end of HYPRE_Initialize()
-       * Make sure that device pool allocator has not been setup in HYPRE_Initialize,
-       * otherwise users are not able to set all the parameters
-       */
-      if ( hypre_HandleCubDevAllocator(handle) ||
-           hypre_HandleCubUvmAllocator(handle) )
-      {
-         char msg[256];
-         hypre_sprintf(msg, "%s %s", "ERROR: device pool allocators have been created in", __func__);
-         hypre_error_w_msg(-1, msg);
-      }
-#endif
+   /* Keep this check here at the end of HYPRE_Initialize()
+    * Make sure that device pool allocator has not been setup in HYPRE_Initialize,
+    * otherwise users are not able to set all the parameters
+    */
+   if ( hypre_HandleCubDevAllocator(handle) ||
+        hypre_HandleCubUvmAllocator(handle) )
+   {
+      char msg[256];
+      hypre_sprintf(msg, "%s %s", "ERROR: device pool allocators have been created in", __func__);
+      hypre_error_w_msg(-1, msg);
    }
+#endif
+
 #endif /* if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP) */
 
    return hypre_error_flag;
@@ -446,8 +441,9 @@ HYPRE_Finalize(void)
 HYPRE_Int
 HYPRE_PrintDeviceInfo(void)
 {
-#if defined(HYPRE_USING_CUDA)
    hypre_int dev;
+
+#if defined(HYPRE_USING_CUDA)
    struct cudaDeviceProp deviceProp;
 
    HYPRE_CUDA_CALL( cudaGetDevice(&dev) );
@@ -457,7 +453,6 @@ HYPRE_PrintDeviceInfo(void)
 #endif
 
 #if defined(HYPRE_USING_HIP)
-   hypre_int dev;
    hipDeviceProp_t deviceProp;
 
    HYPRE_HIP_CALL( hipGetDevice(&dev) );

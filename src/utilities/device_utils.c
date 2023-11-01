@@ -421,6 +421,10 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
       }
    };
 
+   if (!data->device)
+   {
+      HYPRE_DeviceInitialize();
+   }
    sycl::device* sycl_device = data->device;
    sycl::context sycl_ctxt   = sycl::context(*sycl_device, sycl_asynchandler);
    stream = new sycl::queue(sycl_ctxt, *sycl_device, sycl::property_list{sycl::property::queue::in_order{}});
