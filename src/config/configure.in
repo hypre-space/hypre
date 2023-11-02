@@ -48,9 +48,9 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([M4_HYPRE_NAME],    [hypre])
-m4_define([M4_HYPRE_VERSION], [2.29.0])
-m4_define([M4_HYPRE_NUMBER],  [22900])
-m4_define([M4_HYPRE_DATE],    [2023/06/22])
+m4_define([M4_HYPRE_VERSION], [2.30.0])
+m4_define([M4_HYPRE_NUMBER],  [23000])
+m4_define([M4_HYPRE_DATE],    [2023/11/06])
 m4_define([M4_HYPRE_TIME],    [00:00:00])
 m4_define([M4_HYPRE_BUGS],    [https://github.com/hypre-space/hypre/issues])
 m4_define([M4_HYPRE_SRCDIR],  [`pwd`])
