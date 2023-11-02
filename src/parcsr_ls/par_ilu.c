@@ -1990,7 +1990,6 @@ hypre_ILUGetInteriorExteriorPerm(hypre_ParCSRMatrix   *A,
  *
  * Get the (local) ordering of the diag (local) matrix (no permutation).
  * This is the permutation used for the block-jacobi case.
- * If reordering_type == 0, the identity ordering is used.
  *
  * Parameters:
  *   A: parcsr matrix
@@ -2013,20 +2012,11 @@ hypre_ILUGetLocalPerm(hypre_ParCSRMatrix  *A,
 
    /* Local variables */
    HYPRE_Int            *perm = NULL;
-   HYPRE_Int            i;
 
    /* Compute local RCM ordering on the host */
    if (reordering_type != 0)
    {
       hypre_ILULocalRCM(A_diag, 0, num_rows, &perm, &perm, 1);
-   }
-   else
-   {      
-      perm = hypre_TAlloc(HYPRE_Int, num_rows, hypre_ParCSRMatrixMemoryLocation(A));
-      for (i = 0; i < num_rows; i++)
-      {
-         perm[i] = i;
-      }
    }
 
    /* Set output pointers */
