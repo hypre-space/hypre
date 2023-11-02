@@ -663,8 +663,6 @@ HYPRE_MAGMA_INCLUDE
 HYPRE_MAGMA_LIB_DIR
 CALIPER_LIBS
 CALIPER_INCLUDE
-MAGMA_LIBS
-MAGMA_INCLUDE
 HYPRE_SYCL_LIBS
 HYPRE_SYCL_INCL
 HYPRE_HIP_LIBS
@@ -858,9 +856,6 @@ with_superlu_lib
 with_dsuperlu
 with_dsuperlu_include
 with_dsuperlu_lib
-with_magma
-with_magma_include
-with_magma_lib
 with_fei_inc_dir
 with_mli
 with_MPI
@@ -4582,30 +4577,6 @@ then :
 fi
 
 
-if test "x$with_magma" = "xyes"; then :
-
-$as_echo "#define HYPRE_USING_MAGMA 1" >>confdefs.h
-
-fi
-
-
-# Check whether --with-magma-include was given.
-if test "${with_magma_include+set}" = set; then :
-  withval=$with_magma_include; for dmagma_inc_dir in $withval; do
-    MAGMA_INCLUDE="-I$magma_inc_dir $MAGMA_INCLUDE"
- done
-
-fi
-
-
-
-# Check whether --with-magma-lib was given.
-if test "${with_magma_lib+set}" = set; then :
-  withval=$with_magma_lib; for magma_lib in $withval; do
-    MAGMA_LIBS="$MAGMA_LIBS $magma_lib"
- done
-
-fi
 
 
 # Check whether --with-fei-inc-dir was given.
@@ -11007,6 +10978,12 @@ printf "%s\n" "#define HYPRE_USING_SYCL 1" >>confdefs.h
         if test "x${HYPRE_SYCL_TARGET_BACKEND}" != "x"
         then
            LDFLAGS+=" -Xsycl-target-backend ${HYPRE_SYCL_TARGET_BACKEND}"
+        fi
+
+                if test "$hypre_using_shared" = "yes"
+        then
+           SYCLFLAGS="${SHARED_COMPILE_FLAG} ${SYCLFLAGS}"
+           BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG}"
         fi
 
                 if test "$hypre_user_chose_cuflags" = "no"

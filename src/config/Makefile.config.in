@@ -171,12 +171,6 @@ DSUPERLU_INCLUDE = @DSUPERLU_INCLUDE@
 DSUPERLU_LIBS    = @DSUPERLU_LIBS@
 
 ##################################################################
-##  MAGMA options
-##################################################################
-MAGMA_INCLUDE = @MAGMA_INCLUDE@
-MAGMA_LIBS    = @MAGMA_LIBS@
-
-##################################################################
 ##  FEI options
 ##################################################################
 HYPRE_FEI_SRC_DIR       = @HYPRE_FEI_SRC_DIR@
