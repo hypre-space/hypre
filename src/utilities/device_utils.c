@@ -2688,7 +2688,7 @@ hypre_CudaCompileFlagCheck()
 
    /* HYPRE_CUDA_CALL(cudaDeviceSynchronize()); */
 
-   if (cuda_arch_actual != cuda_arch_compile)
+   if (cuda_arch_actual / 100 != cuda_arch_compile / 100)
    {
       char msg[256];
 
