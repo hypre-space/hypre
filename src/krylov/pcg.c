@@ -1367,7 +1367,6 @@ hypre_PCGGetPrecond( void         *pcg_vdata,
 {
    hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
 
-
    *precond_data_ptr = (HYPRE_Solver)(pcg_data -> precond_data);
 
    return hypre_error_flag;
@@ -1386,10 +1385,31 @@ hypre_PCGSetPrecond( void  *pcg_vdata,
    hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
    hypre_PCGFunctions *pcg_functions = pcg_data->functions;
 
-
    (pcg_functions -> precond)       = precond;
    (pcg_functions -> precond_setup) = precond_setup;
    (pcg_data -> precond_data)  = precond_data;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_PCGSetPreconditioner
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_PCGSetPreconditioner(void *pcg_vdata,
+                           void *precond_data )
+{
+   hypre_PCGData      *pcg_data      = (hypre_PCGData*) pcg_vdata;
+   hypre_Solver       *base          = (hypre_Solver*)  precond_data;
+   hypre_PCGFunctions *pcg_functions = pcg_data->functions;
+
+   (pcg_data -> precond_data)       = precond_data;
+
+   (pcg_functions -> precond)       = (HYPRE_Int (*)(void*, void*, void*,
+                                                     void*)) hypre_SolverSolve(base);
+   (pcg_functions -> precond_setup) = (HYPRE_Int (*)(void*, void*, void*,
+                                                     void*)) hypre_SolverSetup(base);
 
    return hypre_error_flag;
 }

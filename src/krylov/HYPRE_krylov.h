@@ -37,38 +37,6 @@ extern "C" {
  * @{
  **/
 
-#ifndef HYPRE_SOLVER_STRUCT
-#define HYPRE_SOLVER_STRUCT
-struct hypre_Solver_struct;
-/**
- * The solver object.
- **/
-typedef struct hypre_Solver_struct *HYPRE_Solver;
-#endif
-
-#ifndef HYPRE_MATRIX_STRUCT
-#define HYPRE_MATRIX_STRUCT
-struct hypre_Matrix_struct;
-/**
- * The matrix object.
- **/
-typedef struct hypre_Matrix_struct *HYPRE_Matrix;
-#endif
-
-#ifndef HYPRE_VECTOR_STRUCT
-#define HYPRE_VECTOR_STRUCT
-struct hypre_Vector_struct;
-/**
- * The vector object.
- **/
-typedef struct hypre_Vector_struct *HYPRE_Vector;
-#endif
-
-typedef HYPRE_Int (*HYPRE_PtrToSolverFcn)(HYPRE_Solver,
-                                          HYPRE_Matrix,
-                                          HYPRE_Vector,
-                                          HYPRE_Vector);
-
 #ifndef HYPRE_MODIFYPC
 #define HYPRE_MODIFYPC
 typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
@@ -202,6 +170,15 @@ HYPRE_Int HYPRE_PCGSetPrecond(HYPRE_Solver         solver,
                               HYPRE_PtrToSolverFcn precond,
                               HYPRE_PtrToSolverFcn precond_setup,
                               HYPRE_Solver         precond_solver);
+
+/**
+ * (Optional) Set the preconditioner to use in a generic fashion.
+ * This function does not require explicit input of the setup and solve pointers
+ * of the preconditioner object. Instead, it automatically extracts this information
+ * from the aforementioned object.
+ **/
+HYPRE_Int HYPRE_PCGSetPreconditioner(HYPRE_Solver  solver,
+                                     HYPRE_Solver  precond);
 
 /**
  * (Optional) Set the amount of logging to do.
