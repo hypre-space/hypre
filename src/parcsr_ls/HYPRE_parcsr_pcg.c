@@ -160,14 +160,14 @@ HYPRE_ParCSRPCGSetPrecond( HYPRE_Solver            solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRPCGSetGenericPrecond
+ * HYPRE_ParCSRPCGSetPreconditioner
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_ParCSRPCGSetGenericPrecond( HYPRE_Solver solver,
+HYPRE_ParCSRPCGSetPreconditioner( HYPRE_Solver solver,
                                   HYPRE_Solver precond )
 {
-   return ( HYPRE_PCGSetGenericPrecond( solver, precond ) );
+   return ( HYPRE_PCGSetPreconditioner( solver, precond ) );
 }
 
 /*--------------------------------------------------------------------------

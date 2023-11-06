@@ -37,7 +37,7 @@ typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
 typedef struct
 {
    /* Base solver data structure */
-   hypre_SolverBase   base;
+   hypre_Solver   base;
 
    /* Memory location of matrices/vectors in AMGData */
    HYPRE_MemoryLocation  memory_location;
@@ -309,9 +309,6 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 /* setup params */
-
-#define hypre_ParAMGDataBaseSetup(amg_data)            ((amg_data) -> base.setup)
-#define hypre_ParAMGDataBaseSolve(amg_data)            ((amg_data) -> base.solve)
 #define hypre_ParAMGDataMemoryLocation(amg_data)       ((amg_data) -> memory_location)
 #define hypre_ParAMGDataRestriction(amg_data)          ((amg_data) -> restr_par)
 #define hypre_ParAMGDataIsTriangular(amg_data)         ((amg_data) -> is_triangular)

@@ -5002,7 +5002,7 @@ main( hypre_int argc,
                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
                              pcg_precond);
 #else
-         HYPRE_PCGSetGenericPrecond(pcg_solver, pcg_precond);
+         HYPRE_PCGSetPreconditioner(pcg_solver, pcg_precond);
 #endif
       }
       else if (solver_id == 2)

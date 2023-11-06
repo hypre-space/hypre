@@ -299,14 +299,14 @@ HYPRE_PCGSetPrecond( HYPRE_Solver         solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_PCGSetGenericPrecond
+ * HYPRE_PCGSetPreconditioner
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGSetGenericPrecond( HYPRE_Solver  solver,
+HYPRE_PCGSetPreconditioner( HYPRE_Solver  solver,
                             HYPRE_Solver  precond_solver )
 {
-   return ( hypre_PCGSetGenericPrecond( (void *) solver,
+   return ( hypre_PCGSetPreconditioner( (void *) solver,
                                         (void *) precond_solver ) );
 }
 
