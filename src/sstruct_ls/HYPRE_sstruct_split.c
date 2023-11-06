@@ -54,6 +54,8 @@ HYPRE_Int
 HYPRE_SStructSplitCreate( MPI_Comm             comm,
                           HYPRE_SStructSolver *solver_ptr )
 {
+   HYPRE_UNUSED_VAR(comm);
+
    hypre_SStructSolver *solver;
 
    solver = hypre_TAlloc(hypre_SStructSolver,  1, HYPRE_MEMORY_HOST);
