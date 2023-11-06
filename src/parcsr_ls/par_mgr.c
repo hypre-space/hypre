@@ -92,7 +92,7 @@ hypre_MGRCreate(void)
    (mgr_data -> trunc_factor) = 0.0;
    (mgr_data -> max_row_sum) = 0.9;
    (mgr_data -> strong_threshold) = 0.25;
-   (mgr_data -> P_max_elmts) = 0;
+   (mgr_data -> P_max_elmts) = NULL;
 
    (mgr_data -> coarse_grid_solver) = NULL;
    (mgr_data -> coarse_grid_solver_setup) = NULL;
@@ -122,6 +122,7 @@ hypre_MGRCreate(void)
    (mgr_data -> print_level) = 0;
    (mgr_data -> frelax_print_level) = 0;
    (mgr_data -> cg_print_level) = 0;
+   (mgr_data -> info_path) = NULL;
 
    (mgr_data -> l1_norms) = NULL;
 
@@ -389,8 +390,9 @@ hypre_MGRDestroy( void *data )
    hypre_TFree((mgr_data -> RT_array), HYPRE_MEMORY_HOST);
    hypre_TFree((mgr_data -> CF_marker_array), HYPRE_MEMORY_HOST);
    hypre_TFree((mgr_data -> reserved_Cpoint_local_indexes), HYPRE_MEMORY_HOST);
-   hypre_TFree(mgr_data -> restrict_type, HYPRE_MEMORY_HOST);
-   hypre_TFree(mgr_data -> interp_type, HYPRE_MEMORY_HOST);
+   hypre_TFree((mgr_data -> restrict_type), HYPRE_MEMORY_HOST);
+   hypre_TFree((mgr_data -> interp_type), HYPRE_MEMORY_HOST);
+   hypre_TFree((mgr_data -> P_max_elmts), HYPRE_MEMORY_HOST);
    /* Frelax_type */
    hypre_TFree(mgr_data -> Frelax_type, HYPRE_MEMORY_HOST);
    /* Frelax_method */
@@ -470,46 +472,69 @@ hypre_MGRDestroy( void *data )
       hypre_TFree(mgr_data -> GSElimData, HYPRE_MEMORY_HOST);
    }
 
+   /* Print info path */
+   hypre_TFree(mgr_data -> info_path, HYPRE_MEMORY_HOST);
+
    /* mgr data */
    hypre_TFree(mgr_data, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
 
-/* create data for Gaussian Elim. for F-relaxation */
+/*--------------------------------------------------------------------------
+ * hypre_MGRCreateGSElimData
+ *
+ * Create data for Gaussian Elimination for F-relaxation.
+ *--------------------------------------------------------------------------*/
+
 void *
 hypre_MGRCreateGSElimData( void )
 {
    hypre_ParAMGData  *gsdata = hypre_CTAlloc(hypre_ParAMGData,  1, HYPRE_MEMORY_HOST);
 
-   hypre_ParAMGDataGSSetup(gsdata) = 0;
-   hypre_ParAMGDataAMat(gsdata) = NULL;
-   hypre_ParAMGDataAInv(gsdata) = NULL;
-   hypre_ParAMGDataBVec(gsdata) = NULL;
-   hypre_ParAMGDataCommInfo(gsdata) = NULL;
-   hypre_ParAMGDataNewComm(gsdata) = hypre_MPI_COMM_NULL;
+   hypre_ParAMGDataGSSetup(gsdata)          = 0;
+   hypre_ParAMGDataGEMemoryLocation(gsdata) = HYPRE_MEMORY_UNDEFINED;
+   hypre_ParAMGDataNewComm(gsdata)          = hypre_MPI_COMM_NULL;
+   hypre_ParAMGDataCommInfo(gsdata)         = NULL;
+   hypre_ParAMGDataAMat(gsdata)             = NULL;
+   hypre_ParAMGDataAWork(gsdata)            = NULL;
+   hypre_ParAMGDataAPiv(gsdata)             = NULL;
+   hypre_ParAMGDataBVec(gsdata)             = NULL;
+   hypre_ParAMGDataUVec(gsdata)             = NULL;
 
    return (void *) gsdata;
 }
 
-/* Destroy data for Gaussian Elim. for F-relaxation */
+/*--------------------------------------------------------------------------
+ * hypre_MGRDestroyGSElimData
+ *
+ * Destroy data for Gaussian Elimination for F-relaxation.
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_MGRDestroyGSElimData( void *data )
 {
-   hypre_ParAMGData * gsdata = (hypre_ParAMGData*) data;
-   MPI_Comm new_comm = hypre_ParAMGDataNewComm(gsdata);
+   hypre_ParAMGData  *gsdata   = (hypre_ParAMGData*) data;
+   MPI_Comm           new_comm = hypre_ParAMGDataNewComm(gsdata);
 
-   if (hypre_ParAMGDataAMat(gsdata)) { hypre_TFree(hypre_ParAMGDataAMat(gsdata), HYPRE_MEMORY_HOST); }
-   if (hypre_ParAMGDataAInv(gsdata)) { hypre_TFree(hypre_ParAMGDataAInv(gsdata), HYPRE_MEMORY_HOST); }
-   if (hypre_ParAMGDataBVec(gsdata)) { hypre_TFree(hypre_ParAMGDataBVec(gsdata), HYPRE_MEMORY_HOST); }
-   if (hypre_ParAMGDataCommInfo(gsdata)) { hypre_TFree(hypre_ParAMGDataCommInfo(gsdata), HYPRE_MEMORY_HOST); }
+#if defined(HYPRE_USING_MAGMA)
+   hypre_TFree(hypre_ParAMGDataAPiv(gsdata),  HYPRE_MEMORY_HOST);
+#else
+   hypre_TFree(hypre_ParAMGDataAPiv(gsdata),  hypre_ParAMGDataGEMemoryLocation(gsdata));
+#endif
+   hypre_TFree(hypre_ParAMGDataAMat(gsdata),  hypre_ParAMGDataGEMemoryLocation(gsdata));
+   hypre_TFree(hypre_ParAMGDataAWork(gsdata), hypre_ParAMGDataGEMemoryLocation(gsdata));
+   hypre_TFree(hypre_ParAMGDataBVec(gsdata),  hypre_ParAMGDataGEMemoryLocation(gsdata));
+   hypre_TFree(hypre_ParAMGDataUVec(gsdata),  hypre_ParAMGDataGEMemoryLocation(gsdata));
+   hypre_TFree(hypre_ParAMGDataCommInfo(gsdata), HYPRE_MEMORY_HOST);
 
    if (new_comm != hypre_MPI_COMM_NULL)
    {
-      hypre_MPI_Comm_free (&new_comm);
+      hypre_MPI_Comm_free(&new_comm);
    }
 
    hypre_TFree(gsdata, HYPRE_MEMORY_HOST);
+
    return hypre_error_flag;
 }
 
@@ -542,7 +567,7 @@ hypre_MGRCreateFrelaxVcycleData( void )
    /* Gaussian Elim data */
    hypre_ParAMGDataGSSetup(vdata) = 0;
    hypre_ParAMGDataAMat(vdata) = NULL;
-   hypre_ParAMGDataAInv(vdata) = NULL;
+   hypre_ParAMGDataAWork(vdata) = NULL;
    hypre_ParAMGDataBVec(vdata) = NULL;
    hypre_ParAMGDataCommInfo(vdata) = NULL;
 
@@ -598,10 +623,16 @@ hypre_MGRDestroyFrelaxVcycleData( void *data )
          hypre_ParVectorDestroy(hypre_ParAMGDataZtemp(vdata));
    */
 
-   if (hypre_ParAMGDataAMat(vdata)) { hypre_TFree(hypre_ParAMGDataAMat(vdata), HYPRE_MEMORY_HOST); }
-   if (hypre_ParAMGDataAInv(vdata)) { hypre_TFree(hypre_ParAMGDataAInv(vdata), HYPRE_MEMORY_HOST); }
-   if (hypre_ParAMGDataBVec(vdata)) { hypre_TFree(hypre_ParAMGDataBVec(vdata), HYPRE_MEMORY_HOST); }
-   if (hypre_ParAMGDataCommInfo(vdata)) { hypre_TFree(hypre_ParAMGDataCommInfo(vdata), HYPRE_MEMORY_HOST); }
+#if defined(HYPRE_USING_MAGMA)
+   hypre_TFree(hypre_ParAMGDataAPiv(vdata),  HYPRE_MEMORY_HOST);
+#else
+   hypre_TFree(hypre_ParAMGDataAPiv(vdata),  hypre_ParAMGDataGEMemoryLocation(vdata));
+#endif
+   hypre_TFree(hypre_ParAMGDataAMat(vdata),  hypre_ParAMGDataGEMemoryLocation(vdata));
+   hypre_TFree(hypre_ParAMGDataAWork(vdata), hypre_ParAMGDataGEMemoryLocation(vdata));
+   hypre_TFree(hypre_ParAMGDataBVec(vdata),  hypre_ParAMGDataGEMemoryLocation(vdata));
+   hypre_TFree(hypre_ParAMGDataUVec(vdata),  hypre_ParAMGDataGEMemoryLocation(vdata));
+   hypre_TFree(hypre_ParAMGDataCommInfo(vdata), HYPRE_MEMORY_HOST);
 
    if (new_comm != hypre_MPI_COMM_NULL)
    {
@@ -3816,14 +3847,7 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
    }
 
    /* Compute R^T so it can be used in the solve phase */
-   if (!hypre_ParCSRMatrixDiagT(R))
-   {
-      hypre_CSRMatrixTranspose(hypre_ParCSRMatrixDiag(R), &hypre_ParCSRMatrixDiagT(R), 1);
-   }
-   if (!hypre_ParCSRMatrixOffdT(R))
-   {
-      hypre_CSRMatrixTranspose(hypre_ParCSRMatrixOffd(R), &hypre_ParCSRMatrixOffdT(R), 1);
-   }
+   hypre_ParCSRMatrixLocalTranspose(R);
 
    /* Set pointer to R */
    *R_ptr = R;
@@ -5692,7 +5716,11 @@ HYPRE_Int
 hypre_MGRSetPrintLevel( void *mgr_vdata, HYPRE_Int print_level )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-   (mgr_data -> print_level) = print_level;
+
+   /* Unset reserved bits if any are active */
+   (mgr_data -> print_level) = print_level & ~(HYPRE_MGR_PRINT_RESERVED_A |
+                                               HYPRE_MGR_PRINT_RESERVED_B |
+                                               HYPRE_MGR_PRINT_RESERVED_C);
    return hypre_error_flag;
 }
 
@@ -5820,13 +5848,49 @@ hypre_MGRSetLevelSmoothIters( void *mgr_vdata, HYPRE_Int *gsmooth_iters )
    return hypre_error_flag;
 }
 
-/* Set the maximum number of non-zero entries for restriction
-   and interpolation operator if classical AMG interpolation is used */
+/* Set the maximum number of non-zero entries for interpolation operators */
 HYPRE_Int
-hypre_MGRSetPMaxElmts( void *mgr_vdata, HYPRE_Int P_max_elmts)
+hypre_MGRSetPMaxElmts(void *mgr_vdata, HYPRE_Int P_max_elmts)
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-   (mgr_data -> P_max_elmts) = P_max_elmts;
+   HYPRE_Int           max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+   HYPRE_Int           i;
+
+   /* Allocate internal P_max_elmts if needed */
+   if (!(mgr_data -> P_max_elmts))
+   {
+      (mgr_data -> P_max_elmts) = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   }
+
+   /* Set all P_max_elmts entries to the value passed as input */
+   for (i = 0; i < max_num_coarse_levels; i++)
+   {
+      (mgr_data -> P_max_elmts)[i] = P_max_elmts;
+   }
+
+   return hypre_error_flag;
+}
+
+/* Set the maximum number of non-zero entries for interpolation operators per level */
+HYPRE_Int
+hypre_MGRSetLevelPMaxElmts(void *mgr_vdata, HYPRE_Int *P_max_elmts)
+{
+   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+   HYPRE_Int           max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+   HYPRE_Int           i;
+
+   /* Allocate internal P_max_elmts if needed */
+   if (!(mgr_data -> P_max_elmts))
+   {
+      (mgr_data -> P_max_elmts) = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   }
+
+   /* Set all P_max_elmts entries to the value passed as input */
+   for (i = 0; i < max_num_coarse_levels; i++)
+   {
+      (mgr_data -> P_max_elmts)[i] = (P_max_elmts) ? P_max_elmts[i] : 0;
+   }
+
    return hypre_error_flag;
 }
 
@@ -6556,61 +6620,164 @@ hypre_MGRPrintCoarseSystem( void *mgr_vdata, HYPRE_Int print_flag)
    return hypre_error_flag;
 }
 
-/* Print solver params */
+/*--------------------------------------------------------------------------
+ * hypre_MGRDataPrint
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_MGRWriteSolverParams(void *mgr_vdata)
+hypre_MGRDataPrint(void *mgr_vdata)
 {
-   hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-   HYPRE_Int i, j;
-   HYPRE_Int max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
-   hypre_printf("MGR Setup parameters: \n");
-   hypre_printf("Block size: %d\n", (mgr_data -> block_size));
-   hypre_printf("Max number of coarse levels: %d\n", (mgr_data -> max_num_coarse_levels));
-   //   hypre_printf("Relax type: %d\n", (mgr_data -> relax_type));
-   hypre_printf("Set non-Cpoints to F-points: %d\n", (mgr_data -> set_non_Cpoints_to_F));
-   hypre_printf("Set Cpoints method: %d\n", (mgr_data -> set_c_points_method));
-   for (i = 0; i < max_num_coarse_levels; i++)
+   hypre_ParMGRData     *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+   HYPRE_Int             print_level = (mgr_data -> print_level);
+   hypre_ParCSRMatrix   *par_A = (mgr_data -> A_array)[0];
+   hypre_ParVector      *par_b = (mgr_data -> F_array)[0];
+   HYPRE_Int            *point_marker_array = (mgr_data -> point_marker_array);
+   HYPRE_Int             block_size = (mgr_data -> block_size);
+   char                 *info_path = (mgr_data -> info_path);
+
+   char                  topdir[] = "./hypre-data";
+   char                 *filename = NULL;
+   hypre_IntArray       *dofmap = NULL;
+   MPI_Comm              comm;
+   HYPRE_Int             myid;
+   HYPRE_Int             info_path_length;
+
+   /* Sanity check */
+   if (!par_A)
    {
-      hypre_printf("Lev = %d, Interpolation type: %d\n", i, (mgr_data -> interp_type)[i]);
-      hypre_printf("Lev = %d, Restriction type: %d\n", i, (mgr_data -> restrict_type)[i]);
-      hypre_printf("Lev = %d, F-relaxation type: %d\n", i, (mgr_data -> Frelax_type)[i]);
-      hypre_printf("lev = %d, Number of relax sweeps: %d\n", i, (mgr_data -> num_relax_sweeps)[i]);
-      hypre_printf("Lev = %d, Use non-Galerkin coarse grid: %d\n", i,
-                   (mgr_data -> mgr_coarse_grid_method)[i]);
-      HYPRE_Int lvl_num_coarse_points = (mgr_data -> block_num_coarse_indexes)[i];
-      hypre_printf("Lev = %d, Number of Cpoints: %d\n", i, lvl_num_coarse_points);
-      hypre_printf("Cpoints indices: ");
-      for (j = 0; j < lvl_num_coarse_points; j++)
+      return hypre_error_flag;
+   }
+
+   /* Get rank ID */
+   comm = hypre_ParCSRMatrixComm(par_A);
+   hypre_MPI_Comm_rank(comm, &myid);
+
+   /* Create new "ls_" folder (info_path) */
+   if (((print_level & HYPRE_MGR_PRINT_INFO_PARAMS) ||
+        (print_level & HYPRE_MGR_PRINT_FINE_MATRIX) ||
+        (print_level & HYPRE_MGR_PRINT_FINE_RHS))   &&
+       (info_path == NULL))
+   {
+      if (!myid)
       {
-         if ((mgr_data -> block_cf_marker)[i][j] == 1)
+         if (!hypre_CheckDirExists(topdir))
          {
-            hypre_printf("%d ", j);
+            hypre_CreateDir(topdir);
+         }
+
+         hypre_CreateNextDirOfSequence(topdir, "ls_", &info_path);
+         info_path_length = strlen(info_path) + 1;
+      }
+      hypre_MPI_Bcast(&info_path_length, 1, HYPRE_MPI_INT, 0, comm);
+
+      if (info_path_length > 0)
+      {
+         if (myid)
+         {
+            info_path = hypre_TAlloc(char, info_path_length, HYPRE_MEMORY_HOST);
          }
       }
-      hypre_printf("\n");
-   }
-   hypre_printf("Number of Reserved Cpoints: %d\n", (mgr_data -> reserved_coarse_size));
-   hypre_printf("Keep reserved Cpoints to level: %d\n", (mgr_data -> lvl_to_keep_cpoints));
-
-   hypre_printf("\n MGR Solver Parameters: \n");
-   hypre_printf("Number of interpolation sweeps: %d\n", (mgr_data -> num_interp_sweeps));
-   hypre_printf("Number of restriction sweeps: %d\n", (mgr_data -> num_restrict_sweeps));
-   if (mgr_data -> level_smooth_type != NULL)
-   {
-      hypre_printf("Global smoother type: %d\n", (mgr_data -> level_smooth_type)[0]);
-      hypre_printf("Number of global smoother sweeps: %d\n", (mgr_data -> level_smooth_iters)[0]);
-   }
-   hypre_printf("Max number of iterations: %d\n", (mgr_data -> max_iter));
-   hypre_printf("Stopping tolerance: %e\n", (mgr_data -> tol));
-   hypre_printf("Use default coarse grid solver: %d\n", (mgr_data -> use_default_cgrid_solver));
-   /*
-      if ((mgr_data -> fsolver_mode) >= 0)
+      else
       {
-         hypre_printf("Use AMG solver for full AMG F-relaxation: %d\n", (mgr_data -> fsolver_mode));
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unable to create info path!");
+         return hypre_error_flag;
       }
-   */
+      hypre_MPI_Bcast(info_path, info_path_length, hypre_MPI_CHAR, 0, comm);
+
+      /* Save info_path */
+      (mgr_data -> info_path) = info_path;
+   }
+   else
+   {
+      if (info_path)
+      {
+         info_path_length = strlen(info_path);
+      }
+   }
+
+   /* Print MGR parameters to file */
+   if (print_level & HYPRE_MGR_PRINT_INFO_PARAMS)
+   {
+      /* TODO (VPM): print internal MGR parameters to file */
+
+      /* Signal that the MGR parameters have already been printed */
+      (mgr_data -> print_level) &= ~HYPRE_MGR_PRINT_INFO_PARAMS;
+      (mgr_data -> print_level) |= HYPRE_MGR_PRINT_RESERVED_A;
+   }
+
+   /* Print linear system matrix at the finest level and dofmap */
+   if ((print_level & HYPRE_MGR_PRINT_FINE_MATRIX) && par_A)
+   {
+      /* Build dofmap array */
+      dofmap = hypre_IntArrayCreate(hypre_ParCSRMatrixNumRows(par_A));
+      hypre_IntArrayInitialize_v2(dofmap, HYPRE_MEMORY_HOST);
+      if (point_marker_array)
+      {
+         hypre_TMemcpy(hypre_IntArrayData(dofmap), point_marker_array,
+                       HYPRE_Int, hypre_ParCSRMatrixNumRows(par_A),
+                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      }
+      else
+      {
+         hypre_IntArraySetInterleavedValues(dofmap, block_size);
+      }
+
+      /* Print Matrix */
+      hypre_ParPrintf(comm, "Writing matrix to path: %s\n", info_path);
+      filename = hypre_TAlloc(char, strlen(info_path) + 16, HYPRE_MEMORY_HOST);
+      hypre_sprintf(filename, "%s/IJ.out.A", info_path);
+      if (print_level & HYPRE_MGR_PRINT_MODE_ASCII)
+      {
+         hypre_ParCSRMatrixPrintIJ(par_A, 0, 0, filename);
+      }
+      else
+      {
+         hypre_ParCSRMatrixPrintBinaryIJ(par_A, 0, 0, filename);
+      }
+
+      /* Print dofmap */
+      hypre_ParPrintf(comm, "Writing dofmap to path: %s\n", info_path);
+      hypre_sprintf(filename, "%s/dofmap.out", info_path);
+      hypre_IntArrayPrint(comm, dofmap, filename);
+
+      /* Free memory */
+      hypre_TFree(filename, HYPRE_MEMORY_HOST);
+      hypre_IntArrayDestroy(dofmap);
+
+      /* Signal that the matrix has already been printed */
+      (mgr_data -> print_level) &= ~HYPRE_MGR_PRINT_FINE_MATRIX;
+      (mgr_data -> print_level) |= HYPRE_MGR_PRINT_RESERVED_B;
+   }
+
+   /* Print linear system RHS at the finest level */
+   if ((print_level & HYPRE_MGR_PRINT_FINE_RHS) && par_b)
+   {
+      /* Print RHS */
+      hypre_ParPrintf(comm, "Writing RHS to path: %s\n", info_path);
+      filename = hypre_TAlloc(char, strlen(info_path) + 16, HYPRE_MEMORY_HOST);
+      hypre_sprintf(filename, "%s/IJ.out.b", info_path);
+      if (print_level & HYPRE_MGR_PRINT_MODE_ASCII)
+      {
+         hypre_ParVectorPrintIJ(par_b, 0, filename);
+      }
+      else
+      {
+         hypre_ParVectorPrintBinaryIJ(par_b, filename);
+      }
+
+      /* Free memory */
+      hypre_TFree(filename, HYPRE_MEMORY_HOST);
+
+      /* Signal that the vector has already been printed */
+      (mgr_data -> print_level) &= ~HYPRE_MGR_PRINT_FINE_RHS;
+      (mgr_data -> print_level) |= HYPRE_MGR_PRINT_RESERVED_C;
+   }
+
    return hypre_error_flag;
 }
+
+/***************************************************************************
+ ***************************************************************************/
 
 #ifdef HYPRE_USING_DSUPERLU
 void *

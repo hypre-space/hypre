@@ -12,11 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
-#include "par_amg.h"
-#ifdef HYPRE_USING_DSUPERLU
-#include <math.h>
-#include "superlu_ddefs.h"
-#endif
+
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGCreate
  *--------------------------------------------------------------------------*/
@@ -25,6 +21,7 @@ void *
 hypre_BoomerAMGCreate( void )
 {
    hypre_ParAMGData  *amg_data;
+   hypre_Solver      *base;
 
    /* setup params */
    HYPRE_Int    max_levels;
@@ -109,8 +106,13 @@ hypre_BoomerAMGCreate( void )
    HYPRE_Int    ilu_upper_jacobi_iters;
    HYPRE_Int    ilu_reordering_type;
 
+   HYPRE_Int    fsai_algo_type;
+   HYPRE_Int    fsai_local_solve_type;
    HYPRE_Int    fsai_max_steps;
    HYPRE_Int    fsai_max_step_size;
+   HYPRE_Int    fsai_max_nnz_row;
+   HYPRE_Int    fsai_num_levels;
+   HYPRE_Real   fsai_threshold;
    HYPRE_Int    fsai_eig_maxiter;
    HYPRE_Real   fsai_kap_tolerance;
 
@@ -223,8 +225,22 @@ hypre_BoomerAMGCreate( void )
    ilu_reordering_type = 1;
 
    /* FSAI smoother params */
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      fsai_algo_type = 3;
+   }
+   else
+#endif
+   {
+      fsai_algo_type = hypre_NumThreads() > 4 ? 2 : 1;
+   }
+   fsai_local_solve_type = 1;
    fsai_max_steps = 5;
    fsai_max_step_size = 3;
+   fsai_max_nnz_row = fsai_max_steps * fsai_max_step_size;
+   fsai_num_levels = 2;
+   fsai_threshold = 0.01;
    fsai_eig_maxiter = 5;
    fsai_kap_tolerance = 0.001;
 
@@ -296,6 +312,12 @@ hypre_BoomerAMGCreate( void )
     *-----------------------------------------------------------------------*/
 
    amg_data = hypre_CTAlloc(hypre_ParAMGData, 1, HYPRE_MEMORY_HOST);
+   base     = (hypre_Solver*) amg_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_BoomerAMGSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_BoomerAMGSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) HYPRE_BoomerAMGDestroy;
 
    /* memory location will be reset at the setup */
    hypre_ParAMGDataMemoryLocation(amg_data) = memory_location;
@@ -369,8 +391,13 @@ hypre_BoomerAMGCreate( void )
    hypre_BoomerAMGSetILUUpperJacobiIters(amg_data, ilu_upper_jacobi_iters);
    hypre_BoomerAMGSetILUMaxIter(amg_data, ilu_max_iter);
    hypre_BoomerAMGSetILULocalReordering(amg_data, ilu_reordering_type);
+   hypre_BoomerAMGSetFSAIAlgoType(amg_data, fsai_algo_type);
+   hypre_BoomerAMGSetFSAILocalSolveType(amg_data, fsai_local_solve_type);
    hypre_BoomerAMGSetFSAIMaxSteps(amg_data, fsai_max_steps);
    hypre_BoomerAMGSetFSAIMaxStepSize(amg_data, fsai_max_step_size);
+   hypre_BoomerAMGSetFSAIMaxNnzRow(amg_data, fsai_max_nnz_row);
+   hypre_BoomerAMGSetFSAINumLevels(amg_data, fsai_num_levels);
+   hypre_BoomerAMGSetFSAIThreshold(amg_data, fsai_threshold);
    hypre_BoomerAMGSetFSAIEigMaxIters(amg_data, fsai_eig_maxiter);
    hypre_BoomerAMGSetFSAIKapTolerance(amg_data, fsai_kap_tolerance);
 
@@ -488,11 +515,14 @@ hypre_BoomerAMGCreate( void )
    hypre_ParAMGDataNewComm(amg_data) = hypre_MPI_COMM_NULL;
 
    /* for Gaussian elimination coarse grid solve */
-   hypre_ParAMGDataGSSetup(amg_data) = 0;
-   hypre_ParAMGDataAMat(amg_data) = NULL;
-   hypre_ParAMGDataAInv(amg_data) = NULL;
-   hypre_ParAMGDataBVec(amg_data) = NULL;
-   hypre_ParAMGDataCommInfo(amg_data) = NULL;
+   hypre_ParAMGDataGSSetup(amg_data)          = 0;
+   hypre_ParAMGDataGEMemoryLocation(amg_data) = HYPRE_MEMORY_UNDEFINED;
+   hypre_ParAMGDataCommInfo(amg_data)         = NULL;
+   hypre_ParAMGDataAMat(amg_data)             = NULL;
+   hypre_ParAMGDataAWork(amg_data)            = NULL;
+   hypre_ParAMGDataAPiv(amg_data)             = NULL;
+   hypre_ParAMGDataBVec(amg_data)             = NULL;
+   hypre_ParAMGDataUVec(amg_data)             = NULL;
 
    hypre_ParAMGDataNonGalerkinTol(amg_data) = nongalerkin_tol;
    hypre_ParAMGDataNonGalTolArray(amg_data) = NULL;
@@ -857,9 +887,17 @@ hypre_BoomerAMGDestroy( void *data )
       hypre_TFree(hypre_ParAMGDataCPointsLocalMarker(amg_data), memory_location);
       hypre_TFree(hypre_ParAMGDataFPointsMarker(amg_data), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParAMGDataIsolatedFPointsMarker(amg_data), HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_ParAMGDataAMat(amg_data), HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_ParAMGDataAInv(amg_data), HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_ParAMGDataBVec(amg_data), HYPRE_MEMORY_HOST);
+
+      /* Direct solver for the coarsest level */
+#if defined(HYPRE_USING_MAGMA)
+      hypre_TFree(hypre_ParAMGDataAPiv(amg_data),  HYPRE_MEMORY_HOST);
+#else
+      hypre_TFree(hypre_ParAMGDataAPiv(amg_data),  hypre_ParAMGDataGEMemoryLocation(amg_data));
+#endif
+      hypre_TFree(hypre_ParAMGDataAMat(amg_data),  hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataAWork(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataBVec(amg_data),  hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataUVec(amg_data),  hypre_ParAMGDataGEMemoryLocation(amg_data));
       hypre_TFree(hypre_ParAMGDataCommInfo(amg_data), HYPRE_MEMORY_HOST);
 
       if (new_comm != hypre_MPI_COMM_NULL)
@@ -4261,6 +4299,38 @@ hypre_BoomerAMGSetILULocalReordering( void     *data,
 }
 
 HYPRE_Int
+hypre_BoomerAMGSetFSAIAlgoType( void      *data,
+                                HYPRE_Int  fsai_algo_type)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataFSAIAlgoType(amg_data) = fsai_algo_type;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetFSAILocalSolveType( void      *data,
+                                      HYPRE_Int  fsai_local_solve_type)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataFSAILocalSolveType(amg_data) = fsai_local_solve_type;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypre_BoomerAMGSetFSAIMaxSteps( void      *data,
                                 HYPRE_Int  fsai_max_steps)
 {
@@ -4288,6 +4358,54 @@ hypre_BoomerAMGSetFSAIMaxStepSize( void      *data,
       return hypre_error_flag;
    }
    hypre_ParAMGDataFSAIMaxStepSize(amg_data) = fsai_max_step_size;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetFSAIMaxNnzRow( void      *data,
+                                 HYPRE_Int  fsai_max_nnz_row)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataFSAIMaxNnzRow(amg_data) = fsai_max_nnz_row;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetFSAINumLevels( void      *data,
+                                 HYPRE_Int  fsai_num_levels)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataFSAINumLevels(amg_data) = fsai_num_levels;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetFSAIThreshold( void      *data,
+                                 HYPRE_Real fsai_threshold)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataFSAIThreshold(amg_data) = fsai_threshold;
 
    return hypre_error_flag;
 }
@@ -4989,4 +5107,3 @@ hypre_BoomerAMGGetCumNnzAP( void       *data,
 
    return hypre_error_flag;
 }
-

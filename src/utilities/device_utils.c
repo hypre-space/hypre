@@ -526,6 +526,61 @@ hypre_dim3(HYPRE_Int x, HYPRE_Int y, HYPRE_Int z)
    return d;
 }
 
+/*--------------------------------------------------------------------------
+ * hypreGPUKernel_ArrayToArrayOfPtrs
+ *--------------------------------------------------------------------------*/
+
+template <typename T>
+__global__ void
+hypreGPUKernel_ArrayToArrayOfPtrs( hypre_DeviceItem  &item,
+                                   HYPRE_Int          n,
+                                   HYPRE_Int          m,
+                                   T                 *data,
+                                   T                **data_aop )
+{
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+
+   if (i < n)
+   {
+      data_aop[i] = &data[i * m];
+   }
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_ArrayToArrayOfPtrs
+ *--------------------------------------------------------------------*/
+
+template <typename T>
+HYPRE_Int
+hypreDevice_ArrayToArrayOfPtrs(HYPRE_Int n, HYPRE_Int m, T *data, T **data_aop)
+{
+   /* Trivial case */
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
+
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_ArrayToArrayOfPtrs, gDim, bDim, n, m, data, data_aop);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_ComplexArrayToArrayOfPtrs
+ *--------------------------------------------------------------------*/
+
+HYPRE_Int
+hypreDevice_ComplexArrayToArrayOfPtrs(HYPRE_Int       n,
+                                      HYPRE_Int       m,
+                                      HYPRE_Complex  *data,
+                                      HYPRE_Complex **data_aop)
+{
+   return hypreDevice_ArrayToArrayOfPtrs(n, m, data, data_aop);
+}
+
 /*--------------------------------------------------------------------
  * hypreGPUKernel_IVAXPY
  *--------------------------------------------------------------------*/
@@ -542,7 +597,7 @@ hypreGPUKernel_IVAXPY( hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Complex *a, HY
 }
 
 /*--------------------------------------------------------------------
- * hypreGPUKernel_IVAXPY
+ * hypreDevice_IVAXPY
  *
  * Inverse Vector AXPY: y[i] = x[i] / a[i] + y[i]
  *--------------------------------------------------------------------*/
@@ -801,6 +856,8 @@ hypreDevice_CsrRowPtrsToIndices_v2( HYPRE_Int  nrows,
    HYPRE_ONEDPL_CALL( std::inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
                       oneapi::dpl::maximum<HYPRE_Int>());
 #else
+
+   hypre_GpuProfilingPushRange("CsrRowPtrsToIndices");
    HYPRE_THRUST_CALL( fill, d_row_ind, d_row_ind + nnz, 0 );
    HYPRE_THRUST_CALL( scatter_if,
                       thrust::counting_iterator<HYPRE_Int>(0),
@@ -812,6 +869,7 @@ hypreDevice_CsrRowPtrsToIndices_v2( HYPRE_Int  nrows,
                       d_row_ind );
    HYPRE_THRUST_CALL( inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
                       thrust::maximum<HYPRE_Int>());
+   hypre_GpuProfilingPopRange();
 #endif
 
    return hypre_error_flag;
@@ -858,11 +916,13 @@ hypreDevice_CsrRowIndicesToPtrs_v2( HYPRE_Int  nrows,
                       count + nrows + 1,
                       d_row_ptr);
 #else
+   hypre_GpuProfilingPushRange("CSRIndicesToPtrs");
    HYPRE_THRUST_CALL( lower_bound,
                       d_row_ind, d_row_ind + nnz,
                       thrust::counting_iterator<HYPRE_Int>(0),
                       thrust::counting_iterator<HYPRE_Int>(nrows + 1),
                       d_row_ptr);
+   hypre_GpuProfilingPopRange();
 #endif
 
    return hypre_error_flag;
@@ -1166,6 +1226,7 @@ hypreDevice_StableSortByTupleKey( HYPRE_Int N,
                         TupleComp3<T1, T2, T3>());
    }
 #else
+   hypre_GpuProfilingPushRange("StableSortByTupleKey");
    auto begin_keys = thrust::make_zip_iterator(thrust::make_tuple(keys1,     keys2));
    auto end_keys   = thrust::make_zip_iterator(thrust::make_tuple(keys1 + N, keys2 + N));
 
@@ -1193,6 +1254,7 @@ hypreDevice_StableSortByTupleKey( HYPRE_Int N,
                         vals,
                         TupleComp3<T1, T2>());
    }
+   hypre_GpuProfilingPopRange();
 #endif
    return hypre_error_flag;
 }
@@ -1593,6 +1655,8 @@ hypre_CurandUniform_core( HYPRE_Int          n,
 {
    curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
 
+   hypre_GpuProfilingPushRange("RandGen");
+
    if (set_seed)
    {
       HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, seed) );
@@ -1611,6 +1675,8 @@ hypre_CurandUniform_core( HYPRE_Int          n,
    {
       HYPRE_CURAND_CALL( curandGenerateUniform(gen, (float *) urand, n) );
    }
+
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }

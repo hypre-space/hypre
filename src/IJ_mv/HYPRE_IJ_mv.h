@@ -338,10 +338,25 @@ HYPRE_Int HYPRE_IJMatrixReadMM(const char     *filename,
                                HYPRE_IJMatrix *matrix);
 
 /**
- * Print the matrix to file.  This is mainly for debugging purposes.
+ * Print the matrix to file. This is mainly for debugging purposes.
  **/
 HYPRE_Int HYPRE_IJMatrixPrint(HYPRE_IJMatrix  matrix,
                               const char     *filename);
+
+/**
+ * Print the matrix to file in binary format. This is mainly for debugging purposes.
+ **/
+HYPRE_Int HYPRE_IJMatrixPrintBinary(HYPRE_IJMatrix  matrix,
+                                    const char     *filename);
+
+/**
+ * Read the matrix from file stored in binary format.  This is mainly for debugging purposes.
+ **/
+HYPRE_Int HYPRE_IJMatrixReadBinary(const char     *filename,
+                                   MPI_Comm        comm,
+                                   HYPRE_Int       type,
+                                   HYPRE_IJMatrix *matrix_ptr);
+
 
 /**@}*/
 
@@ -540,10 +555,24 @@ HYPRE_Int HYPRE_IJVectorRead(const char     *filename,
                              HYPRE_IJVector *vector);
 
 /**
+ * Read the vector from binary file.  This is mainly for debugging purposes.
+ **/
+HYPRE_Int HYPRE_IJVectorReadBinary(const char     *filename,
+                                   MPI_Comm        comm,
+                                   HYPRE_Int       type,
+                                   HYPRE_IJVector *vector);
+
+/**
  * Print the vector to file.  This is mainly for debugging purposes.
  **/
 HYPRE_Int HYPRE_IJVectorPrint(HYPRE_IJVector  vector,
                               const char     *filename);
+
+/**
+ * Print the vector to binary file.  This is mainly for debugging purposes.
+ **/
+HYPRE_Int HYPRE_IJVectorPrintBinary(HYPRE_IJVector  vector,
+                                    const char     *filename);
 
 /**
  * Computes the inner product between two vectors

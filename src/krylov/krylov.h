@@ -1122,12 +1122,16 @@ typedef struct
    HYPRE_Int      stop_crit;
    HYPRE_Int      converged;
    HYPRE_Int      hybrid;
+   HYPRE_Int      skip_break;
+   HYPRE_Int      flex;
 
    void    *A;
    void    *p;
    void    *s;
    void    *r; /* ...contains the residual.  This is currently kept permanently.
                    If that is ever changed, it still must be kept if logging>1 */
+   void    *r_old; /* only needed for flexible CG */
+   void    *v; /* work vector; only needed if recompute_residual_p is set */
 
    HYPRE_Int      owns_matvec_data;  /* normally 1; if 0, don't delete it */
    void    *matvec_data;
@@ -1588,8 +1592,13 @@ HYPRE_Int HYPRE_PCGSetRecomputeResidual ( HYPRE_Solver solver, HYPRE_Int recompu
 HYPRE_Int HYPRE_PCGGetRecomputeResidual ( HYPRE_Solver solver, HYPRE_Int *recompute_residual );
 HYPRE_Int HYPRE_PCGSetRecomputeResidualP ( HYPRE_Solver solver, HYPRE_Int recompute_residual_p );
 HYPRE_Int HYPRE_PCGGetRecomputeResidualP ( HYPRE_Solver solver, HYPRE_Int *recompute_residual_p );
+HYPRE_Int HYPRE_PCGSetSkipBreak ( HYPRE_Solver solver, HYPRE_Int skip_break );
+HYPRE_Int HYPRE_PCGGetSkipBreak ( HYPRE_Solver solver, HYPRE_Int *skip_break );
+HYPRE_Int HYPRE_PCGSetFlex ( HYPRE_Solver solver, HYPRE_Int flex );
+HYPRE_Int HYPRE_PCGGetFlex ( HYPRE_Solver solver, HYPRE_Int *flex );
 HYPRE_Int HYPRE_PCGSetPrecond ( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond,
                                 HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver );
+HYPRE_Int HYPRE_PCGSetPreconditioner ( HYPRE_Solver solver, HYPRE_Solver precond_solver );
 HYPRE_Int HYPRE_PCGGetPrecond ( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int HYPRE_PCGSetLogging ( HYPRE_Solver solver, HYPRE_Int level );
 HYPRE_Int HYPRE_PCGGetLogging ( HYPRE_Solver solver, HYPRE_Int *level );
@@ -1628,9 +1637,16 @@ HYPRE_Int hypre_PCGSetRecomputeResidualP ( void *pcg_vdata, HYPRE_Int recompute_
 HYPRE_Int hypre_PCGGetRecomputeResidualP ( void *pcg_vdata, HYPRE_Int *recompute_residual_p );
 HYPRE_Int hypre_PCGSetStopCrit ( void *pcg_vdata, HYPRE_Int stop_crit );
 HYPRE_Int hypre_PCGGetStopCrit ( void *pcg_vdata, HYPRE_Int *stop_crit );
+HYPRE_Int hypre_PCGSetSkipBreak ( void *pcg_vdata, HYPRE_Int skip_break );
+HYPRE_Int hypre_PCGGetSkipBreak ( void *pcg_vdata, HYPRE_Int *skip_break );
+HYPRE_Int hypre_PCGSetFlex ( void *pcg_vdata, HYPRE_Int flex );
+HYPRE_Int hypre_PCGGetFlex ( void *pcg_vdata, HYPRE_Int *flex );
 HYPRE_Int hypre_PCGGetPrecond ( void *pcg_vdata, HYPRE_Solver *precond_data_ptr );
-HYPRE_Int hypre_PCGSetPrecond ( void *pcg_vdata, HYPRE_Int (*precond )(void*, void*, void*, void*),
-                                HYPRE_Int (*precond_setup )(void*, void*, void*, void*), void *precond_data );
+HYPRE_Int hypre_PCGSetPrecond ( void *pcg_vdata,
+                                HYPRE_Int (*precond )(void*, void*, void*, void*),
+                                HYPRE_Int (*precond_setup )(void*, void*, void*, void*),
+                                void *precond_data );
+HYPRE_Int hypre_PCGSetPreconditioner ( void *pcg_vdata, void *precond_data );
 HYPRE_Int hypre_PCGSetPrintLevel ( void *pcg_vdata, HYPRE_Int level );
 HYPRE_Int hypre_PCGGetPrintLevel ( void *pcg_vdata, HYPRE_Int *level );
 HYPRE_Int hypre_PCGSetLogging ( void *pcg_vdata, HYPRE_Int level );
@@ -1647,4 +1663,3 @@ HYPRE_Int hypre_PCGGetFinalRelativeResidualNorm ( void *pcg_vdata,
 #endif
 
 #endif
-
