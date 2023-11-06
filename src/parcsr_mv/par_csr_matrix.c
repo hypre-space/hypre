@@ -1991,7 +1991,7 @@ GenerateDiagAndOffd(hypre_CSRMatrix    *A,
 }
 
 hypre_CSRMatrix *
-hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
+hypre_MergeDiagAndOffdHost(hypre_ParCSRMatrix *par_matrix)
 {
    hypre_CSRMatrix  *diag = hypre_ParCSRMatrixDiag(par_matrix);
    hypre_CSRMatrix  *offd = hypre_ParCSRMatrixOffd(par_matrix);
@@ -2068,6 +2068,23 @@ hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
    matrix_i[num_rows] = num_nonzeros;
 
    return matrix;
+}
+
+hypre_CSRMatrix *
+hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(par_matrix) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      return hypre_MergeDiagAndOffdDevice(par_matrix);
+   }
+   else
+#endif
+   {
+      return hypre_MergeDiagAndOffdHost(par_matrix);
+   }
 }
 
 /*--------------------------------------------------------------------------

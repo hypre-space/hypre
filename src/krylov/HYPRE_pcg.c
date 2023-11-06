@@ -252,14 +252,14 @@ HYPRE_PCGGetRecomputeResidualP( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_PCGSetSkipBreak( HYPRE_Solver solver,
-                     HYPRE_Int    skip_break )
+                       HYPRE_Int    skip_break )
 {
    return ( hypre_PCGSetSkipBreak( (void *) solver, skip_break ) );
 }
 
 HYPRE_Int
 HYPRE_PCGGetSkipBreak( HYPRE_Solver  solver,
-                     HYPRE_Int    *skip_break )
+                       HYPRE_Int    *skip_break )
 {
    return ( hypre_PCGGetSkipBreak( (void *) solver, skip_break ) );
 }
