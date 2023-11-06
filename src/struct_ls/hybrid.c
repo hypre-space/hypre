@@ -421,8 +421,13 @@ HYPRE_Int
 hypre_HybridSetup( void               *hybrid_vdata,
                    hypre_StructMatrix *A,
                    hypre_StructVector *b,
-                   hypre_StructVector *x            )
+                   hypre_StructVector *x )
 {
+   HYPRE_UNUSED_VAR(hybrid_vdata);
+   HYPRE_UNUSED_VAR(A);
+   HYPRE_UNUSED_VAR(b);
+   HYPRE_UNUSED_VAR(x);
+
    return hypre_error_flag;
 }
 
@@ -835,4 +840,3 @@ hypre_HybridSolve( void               *hybrid_vdata,
 
    return hypre_error_flag;
 }
-

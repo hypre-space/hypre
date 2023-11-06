@@ -674,6 +674,8 @@ hypre_PointRelax_core0( void               *relax_vdata,
                         hypre_IndexRef      stride
                       )
 {
+   HYPRE_UNUSED_VAR(constant_coefficient);
+
    hypre_PointRelaxData  *relax_data = (hypre_PointRelaxData *)relax_vdata;
 
    HYPRE_Real            *Ap0;
@@ -917,6 +919,8 @@ hypre_PointRelax_core12( void               *relax_vdata,
                          hypre_IndexRef      stride
                        )
 {
+   HYPRE_UNUSED_VAR(A_data_box);
+
    hypre_PointRelaxData  *relax_data = (hypre_PointRelaxData *)relax_vdata;
 
    HYPRE_Real            *Apd;

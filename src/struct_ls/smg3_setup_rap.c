@@ -19,6 +19,9 @@ hypre_SMG3CreateRAPOp( hypre_StructMatrix *R,
                        hypre_StructMatrix *PT,
                        hypre_StructGrid   *coarse_grid )
 {
+   HYPRE_UNUSED_VAR(R);
+   HYPRE_UNUSED_VAR(PT);
+
    hypre_StructMatrix    *RAP;
 
    hypre_Index           *RAP_stencil_shape;
@@ -1600,6 +1603,8 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
                           hypre_Index         cstride )
 
 {
+   HYPRE_UNUSED_VAR(cindex);
+   HYPRE_UNUSED_VAR(cstride);
 
    hypre_Index             index;
 
@@ -1793,6 +1798,8 @@ hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP,
                             hypre_Index         cstride )
 
 {
+   HYPRE_UNUSED_VAR(cindex);
+   HYPRE_UNUSED_VAR(cstride);
 
    hypre_Index             index;
 

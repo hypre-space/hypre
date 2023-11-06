@@ -555,6 +555,15 @@ hypre_PFMGSetupInterpOp_CC1
   HYPRE_Int           si0,
   HYPRE_Int           si1 )
 {
+   HYPRE_UNUSED_VAR(A_dbox);
+   HYPRE_UNUSED_VAR(stride);
+   HYPRE_UNUSED_VAR(stridec);
+   HYPRE_UNUSED_VAR(start);
+   HYPRE_UNUSED_VAR(startc);
+   HYPRE_UNUSED_VAR(loop_size);
+   HYPRE_UNUSED_VAR(P_dbox);
+   HYPRE_UNUSED_VAR(rap_type);
+
    HYPRE_Int              si;
    HYPRE_Int              Ai, Pi;
    HYPRE_Real            *Ap;
@@ -829,6 +838,9 @@ hypre_PFMGSetupInterpOp_CC0_SS5
   HYPRE_Int           rap_type,
   hypre_Index        *P_stencil_shape )
 {
+   HYPRE_UNUSED_VAR(rap_type);
+   HYPRE_UNUSED_VAR(Pstenc1);
+
    //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    //hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
@@ -954,6 +966,9 @@ hypre_PFMGSetupInterpOp_CC0_SS9
   HYPRE_Int           rap_type,
   hypre_Index        *P_stencil_shape )
 {
+   HYPRE_UNUSED_VAR(rap_type);
+   HYPRE_UNUSED_VAR(Pstenc1);
+
    //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    //hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
@@ -1091,6 +1106,9 @@ hypre_PFMGSetupInterpOp_CC0_SS7
   HYPRE_Int           rap_type,
   hypre_Index        *P_stencil_shape )
 {
+   HYPRE_UNUSED_VAR(rap_type);
+   HYPRE_UNUSED_VAR(Pstenc1);
+
    //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    //hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
@@ -1223,6 +1241,9 @@ hypre_PFMGSetupInterpOp_CC0_SS15
   HYPRE_Int           rap_type,
   hypre_Index        *P_stencil_shape )
 {
+   HYPRE_UNUSED_VAR(rap_type);
+   HYPRE_UNUSED_VAR(Pstenc1);
+
    hypre_Index           index;
    HYPRE_Int             stencil_type15;
    HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn, *a_ac, *a_bc;
@@ -1543,6 +1564,9 @@ hypre_PFMGSetupInterpOp_CC0_SS19
   HYPRE_Int           rap_type,
   hypre_Index        *P_stencil_shape )
 {
+   HYPRE_UNUSED_VAR(Pstenc1);
+   HYPRE_UNUSED_VAR(rap_type);
+
    //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    // hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
@@ -1730,6 +1754,9 @@ hypre_PFMGSetupInterpOp_CC0_SS27
   HYPRE_Int           rap_type,
   hypre_Index        *P_stencil_shape )
 {
+   HYPRE_UNUSED_VAR(rap_type);
+   HYPRE_UNUSED_VAR(Pstenc1);
+
    //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    //hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);

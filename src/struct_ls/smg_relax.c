@@ -409,6 +409,9 @@ hypre_SMGRelaxSetupTempVec( void               *relax_vdata,
                             hypre_StructVector *b,
                             hypre_StructVector *x           )
 {
+   HYPRE_UNUSED_VAR(A);
+   HYPRE_UNUSED_VAR(x);
+
    hypre_SMGRelaxData  *relax_data = (hypre_SMGRelaxData  *)relax_vdata;
    hypre_StructVector  *temp_vec   = (relax_data -> temp_vec);
 
@@ -519,6 +522,8 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
                          hypre_StructVector *b,
                          hypre_StructVector *x           )
 {
+   HYPRE_UNUSED_VAR(b);
+
    hypre_SMGRelaxData   *relax_data = (hypre_SMGRelaxData  *)relax_vdata;
 
    HYPRE_Int             num_spaces    = (relax_data -> num_spaces);
@@ -921,6 +926,9 @@ hypre_SMGRelaxSetupBaseBoxArray( void               *relax_vdata,
                                  hypre_StructVector *b,
                                  hypre_StructVector *x           )
 {
+   HYPRE_UNUSED_VAR(A);
+   HYPRE_UNUSED_VAR(b);
+
    hypre_SMGRelaxData  *relax_data = (hypre_SMGRelaxData  *)relax_vdata;
 
    hypre_StructGrid    *grid;
