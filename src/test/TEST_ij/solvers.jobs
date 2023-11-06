@@ -56,6 +56,9 @@ mpirun -np 2 ./ij -n 23 29 31 -solver 0 -rhsrand -mu 2            -rlx 18 > solv
 mpirun -np 2 ./ij -n 23 29 31 -solver 3 -rhsrand -mu 2            -rlx 18 > solvers.out.22
 mpirun -np 2 ./ij -n 23 29 31 -solver 0 -rhsrand -fmg             -rlx 18 > solvers.out.23
 mpirun -np 2 ./ij -n 23 29 31 -solver 3 -rhsrand -fmg             -rlx 18 > solvers.out.24
+#flexible CG vs CG; AMG with CG smoother
+mpirun -np 2 ./ij -solver 1 -rlx 15 -flex 1 > solvers.out.25
+mpirun -np 2 ./ij -solver 1 -rlx 15 > solvers.out.26
 
 #systems AMG run ...unknown approach, hybrid approach, nodal approach
 mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 > solvers.out.sysu

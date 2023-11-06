@@ -59,6 +59,10 @@ typedef double                 hypre_double;
 #define hypre_pow2(i)  ( 1 << (i) )
 #endif
 
+#ifndef hypre_squared
+#define hypre_squared(i)  ((i) * (i))
+#endif
+
 #ifndef hypre_sqrt
 #if defined(HYPRE_SINGLE)
 #define hypre_sqrt sqrtf

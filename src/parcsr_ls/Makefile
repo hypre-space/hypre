@@ -127,6 +127,7 @@ FILES =\
  par_mgr_coarsen.c\
  par_mgr_setup.c\
  par_mgr_solve.c\
+ par_mgr_stats.c\
  par_nongalerkin.c\
  par_nodal_systems.c\
  par_rap.c\
@@ -147,13 +148,13 @@ FILES =\
  schwarz.c\
  block_tridiag.c\
  par_restr.c\
- par_lr_restr.c\
- dsuperlu.c
+ par_lr_restr.c
 
 CUFILES =\
  ads.c\
  ams.c\
  ame.c\
+ dsuperlu.c\
  par_amg_setup.c\
  par_ge_device.c\
  par_ilu_setup_device.c\

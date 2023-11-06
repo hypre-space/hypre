@@ -1863,6 +1863,11 @@ HYPRE_Int hypre_SchwarzSetDofFunc ( void *data, HYPRE_Int *dof_func );
 /* par_stats.c */
 HYPRE_Int hypre_BoomerAMGSetupStats ( void *amg_vdata, hypre_ParCSRMatrix *A );
 HYPRE_Int hypre_BoomerAMGWriteSolverParams ( void *data );
+const char* hypre_BoomerAMGGetProlongationName( hypre_ParAMGData *amg_data );
+const char* hypre_BoomerAMGGetAggProlongationName( hypre_ParAMGData *amg_data );
+const char* hypre_BoomerAMGGetCoarseningName( hypre_ParAMGData *amg_data );
+const char* hypre_BoomerAMGGetCycleName( hypre_ParAMGData *amg_data );
+HYPRE_Int hypre_BoomerAMGPrintGeneralInfo( hypre_ParAMGData *amg_data, HYPRE_Int shift );
 
 /* par_strength.c */
 HYPRE_Int hypre_BoomerAMGCreateS ( hypre_ParCSRMatrix *A, HYPRE_Real strength_threshold,
@@ -2223,7 +2228,6 @@ HYPRE_Int hypre_MGRComputeNonGalerkinCoarseGrid( hypre_ParCSRMatrix *A, hypre_Pa
                                                  HYPRE_Int ordering, HYPRE_Int method,
                                                  HYPRE_Int Pmax, HYPRE_Int *CF_marker,
                                                  hypre_ParCSRMatrix **A_H_ptr );
-HYPRE_Int hypre_MGRWriteSolverParams( void *mgr_vdata );
 HYPRE_Int hypre_MGRSetAffSolverType( void *systg_vdata, HYPRE_Int *aff_solver_type );
 HYPRE_Int hypre_MGRSetCoarseSolverType( void *systg_vdata, HYPRE_Int coarse_solver_type );
 HYPRE_Int hypre_MGRSetCoarseSolverIter( void *systg_vdata, HYPRE_Int coarse_solver_iter );
@@ -2258,6 +2262,7 @@ HYPRE_Int hypre_MGRSetMaxIter( void *mgr_vdata, HYPRE_Int max_iter );
 HYPRE_Int hypre_MGRSetPMaxElmts( void *mgr_vdata, HYPRE_Int P_max_elmts );
 HYPRE_Int hypre_MGRSetLevelPMaxElmts( void *mgr_vdata, HYPRE_Int *P_max_elmts );
 HYPRE_Int hypre_MGRSetTol( void *mgr_vdata, HYPRE_Real tol );
+HYPRE_Int hypre_MGRDataPrint(void *mgr_vdata);
 #ifdef HYPRE_USING_DSUPERLU
 void *hypre_MGRDirectSolverCreate( void );
 HYPRE_Int hypre_MGRDirectSolverSetup( void *solver, hypre_ParCSRMatrix *A,
@@ -2300,6 +2305,9 @@ HYPRE_Int hypre_MGRComputeNonGalerkinCGDevice( hypre_ParCSRMatrix *A_FF, hypre_P
                                                HYPRE_Int blk_size, HYPRE_Int method,
                                                HYPRE_Complex threshold,
                                                hypre_ParCSRMatrix **A_H_ptr );
+
+/* par_mgr_stats.c */
+HYPRE_Int hypre_MGRSetupStats( void *mgr_vdata );
 
 /* par_ilu.c */
 void *hypre_ILUCreate ( void );
@@ -2395,7 +2403,7 @@ HYPRE_Int hypre_ILULocalRCMQsort( HYPRE_Int *perm, HYPRE_Int start, HYPRE_Int en
                                   HYPRE_Int *degree );
 HYPRE_Int hypre_ILULocalRCMReverse( HYPRE_Int *perm, HYPRE_Int start, HYPRE_Int end );
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 HYPRE_Int hypre_ParILUSchurGMRESDummySolveDevice( void *ilu_vdata, void *ilu_vdata2,
                                                   hypre_ParVector *f, hypre_ParVector *u );
 HYPRE_Int hypre_ParILUSchurGMRESCommInfoDevice( void *ilu_vdata, HYPRE_Int *my_id,
@@ -2575,7 +2583,7 @@ HYPRE_Int hypre_NSHSolveInverse( hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                  hypre_ParVector *ftemp, hypre_ParVector *utemp );
 
 /* par_ilu_solve_device.c */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 HYPRE_Int hypre_ILUSolveLUDevice( hypre_ParCSRMatrix *A, hypre_CSRMatrix *matLU_d,
                                   hypre_ParVector *f, hypre_ParVector *u,
                                   HYPRE_Int *perm, hypre_ParVector *ftemp,

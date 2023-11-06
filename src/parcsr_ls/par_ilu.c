@@ -24,7 +24,7 @@ hypre_ILUCreate( void )
 
    ilu_data = hypre_CTAlloc(hypre_ParILUData, 1, HYPRE_MEMORY_HOST);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    hypre_ParILUDataAperm(ilu_data)                        = NULL;
    hypre_ParILUDataMatBILUDevice(ilu_data)                = NULL;
    hypre_ParILUDataMatSILUDevice(ilu_data)                = NULL;
@@ -155,7 +155,7 @@ hypre_ILUDestroy( void *data )
       }
 
       /* GPU additional data */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
       hypre_ParCSRMatrixDestroy( hypre_ParILUDataAperm(ilu_data) );
       hypre_ParCSRMatrixDestroy( hypre_ParILUDataR(ilu_data) );
       hypre_ParCSRMatrixDestroy( hypre_ParILUDataP(ilu_data) );
@@ -222,7 +222,7 @@ hypre_ILUDestroy( void *data )
 
       /* ILU as precond for Schur */
       if ( hypre_ParILUDataSchurPrecond(ilu_data)  &&
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
            hypre_ParILUDataIluType(ilu_data) != 10 &&
            hypre_ParILUDataIluType(ilu_data) != 11 &&
 #endif
@@ -369,7 +369,7 @@ hypre_ILUSetType( void      *ilu_vdata,
 
    /* ILU as precond for Schur */
    if ( hypre_ParILUDataSchurPrecond(ilu_data)    &&
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
         (hypre_ParILUDataIluType(ilu_data) != 10  &&
          hypre_ParILUDataIluType(ilu_data) != 11) &&
 #endif
@@ -994,7 +994,7 @@ hypre_ILUWriteSolverParams(void *ilu_vdata)
    switch (hypre_ParILUDataIluType(ilu_data))
    {
       case 0:
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if ( hypre_ParILUDataLfil(ilu_data) == 0 )
          {
             hypre_printf("Block Jacobi with GPU-accelerated ILU0 \n");
@@ -1022,7 +1022,7 @@ hypre_ILUWriteSolverParams(void *ilu_vdata)
          break;
 
       case 10:
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if ( hypre_ParILUDataLfil(ilu_data) == 0 )
          {
             hypre_printf("ILU-GMRES with GPU-accelerated ILU0 \n");
@@ -2882,7 +2882,7 @@ hypre_ILULocalRCMReverse(HYPRE_Int *perm, HYPRE_Int start, HYPRE_Int end)
 }
 
 /* TODO (VPM): Change this block to another file? */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 
 /*--------------------------------------------------------------------------
  * hypre_ParILUSchurGMRESDummySolveDevice
@@ -3169,7 +3169,7 @@ hypre_ParILURAPSchurGMRESMatvecDevice( void           *matvec_data,
    return hypre_error_flag;
 }
 
-#endif /* if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+#endif /* if defined(HYPRE_USING_GPU) */
 
 /*--------------------------------------------------------------------------
  * hypre_ParILURAPSchurGMRESSolveHost

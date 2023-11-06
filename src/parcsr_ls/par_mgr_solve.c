@@ -52,14 +52,7 @@ hypre_MGRSolve( void               *mgr_vdata,
    HYPRE_Real           ieee_check = 0.;
 
    HYPRE_Int            iter, num_procs, my_id;
-   HYPRE_Int            Solve_err_flag;
 
-   /*
-      HYPRE_Real   total_coeffs;
-      HYPRE_Real   total_variables;
-      HYPRE_Real   operat_cmplxty;
-      HYPRE_Real   grid_cmplxty;
-      */
    HYPRE_Solver         cg_solver = (mgr_data -> coarse_grid_solver);
    HYPRE_Int            (*coarse_grid_solver_solve)(void*, void*, void*,
                                                     void*) = (mgr_data -> coarse_grid_solver_solve);
@@ -94,36 +87,24 @@ hypre_MGRSolve( void               *mgr_vdata,
    /*-----------------------------------------------------------------------
     *    Write the solver parameters
     *-----------------------------------------------------------------------*/
-   if (my_id == 0 && print_level > 1)
-   {
-      hypre_MGRWriteSolverParams(mgr_data);
-   }
 
-   /*-----------------------------------------------------------------------
-    *    Initialize the solver error flag and assorted bookkeeping variables
-    *-----------------------------------------------------------------------*/
+   /* Print MGR and linear system info according to print level */
+   hypre_MGRDataPrint(mgr_vdata);
 
-   Solve_err_flag = 0;
-   /*
-      total_coeffs = 0;
-      total_variables = 0;
-      operat_cmplxty = 0;
-      grid_cmplxty = 0;
-      */
    /*-----------------------------------------------------------------------
     *     write some initial info
     *-----------------------------------------------------------------------*/
 
-   if (my_id == 0 && print_level > 1 && tol > 0.)
+   if (my_id == 0 && (print_level & HYPRE_MGR_PRINT_INFO_SOLVE) && tol > 0.)
    {
-      hypre_printf("\n\nTWO-GRID SOLVER SOLUTION INFO:\n");
+      hypre_printf("\n\nMGR SOLVER SOLUTION INFO:\n");
    }
-
 
    /*-----------------------------------------------------------------------
     *    Compute initial fine-grid residual and print
     *-----------------------------------------------------------------------*/
-   if (print_level > 1 || logging > 1 || tol > 0.)
+
+   if ((print_level & HYPRE_MGR_PRINT_INFO_SOLVE) || logging > 1 || tol > 0.)
    {
       if (logging > 1)
       {
@@ -196,7 +177,7 @@ hypre_MGRSolve( void               *mgr_vdata,
       rel_resnorm = 1.;
    }
 
-   if (my_id == 0 && print_level > 1)
+   if (my_id == 0 && (print_level & HYPRE_MGR_PRINT_INFO_SOLVE))
    {
       hypre_printf("                                            relative\n");
       hypre_printf("               residual        factor       residual\n");
@@ -216,7 +197,7 @@ hypre_MGRSolve( void               *mgr_vdata,
        *    Compute  fine-grid residual and residual norm
        *----------------------------------------------------------------*/
 
-      if (print_level > 1 || logging > 1 || tol > 0.)
+      if ((print_level & HYPRE_MGR_PRINT_INFO_SOLVE) || logging > 1 || tol > 0.)
       {
          old_resnorm = resnorm;
 
@@ -242,7 +223,7 @@ hypre_MGRSolve( void               *mgr_vdata,
       (mgr_data -> num_iterations) = iter;
       (mgr_data -> final_rel_residual_norm) = rel_resnorm;
 
-      if (my_id == 0 && print_level > 1)
+      if (my_id == 0 && (print_level & HYPRE_MGR_PRINT_INFO_SOLVE))
       {
          hypre_printf("    MGRCycle %2d   %e    %f     %e \n", iter,
                       resnorm, conv_factor, rel_resnorm);
@@ -252,43 +233,32 @@ hypre_MGRSolve( void               *mgr_vdata,
    /* check convergence within max_iter */
    if (iter == max_iter && tol > 0.)
    {
-      Solve_err_flag = 1;
       hypre_error(HYPRE_ERROR_CONV);
-   }
 
-   /*-----------------------------------------------------------------------
-    *    Print closing statistics
-    *    Add operator and grid complexity stats
-    *-----------------------------------------------------------------------*/
-
-   if (iter > 0 && init_resnorm)
-   {
-      conv_factor = hypre_pow((resnorm / init_resnorm), (fp_one / (HYPRE_Real) iter));
-   }
-   else
-   {
-      conv_factor = fp_one;
-   }
-
-   if (print_level > 1)
-   {
-      /*** compute operator and grid complexities here ?? ***/
-      if (my_id == 0)
+      if (!my_id && (print_level & HYPRE_MGR_PRINT_INFO_SOLVE))
       {
-         if (Solve_err_flag == 1)
-         {
-            hypre_printf("\n\n==============================================");
-            hypre_printf("\n NOTE: Convergence tolerance was not achieved\n");
-            hypre_printf("      within the allowed %d iterations\n", max_iter);
-            hypre_printf("==============================================");
-         }
-         hypre_printf("\n\n Average Convergence Factor = %f \n", conv_factor);
-         hypre_printf(" Number of coarse levels = %d \n", (mgr_data -> num_coarse_levels));
-         //         hypre_printf("\n\n     Complexity:    grid = %f\n",grid_cmplxty);
-         //         hypre_printf("                operator = %f\n",operat_cmplxty);
-         //         hypre_printf("                   cycle = %f\n\n\n\n",cycle_cmplxty);
+         hypre_printf("\n\n==============================================");
+         hypre_printf("\n NOTE: Convergence tolerance was not achieved\n");
+         hypre_printf("      within the allowed %d iterations\n", max_iter);
+         hypre_printf("==============================================");
       }
    }
+
+   if ((my_id == 0) && (print_level & HYPRE_MGR_PRINT_INFO_SOLVE))
+   {
+      if (iter > 0 && init_resnorm)
+      {
+         conv_factor = hypre_pow((resnorm / init_resnorm),
+                                 (fp_one / (HYPRE_Real) iter));
+      }
+      else
+      {
+         conv_factor = fp_one;
+      }
+
+      hypre_printf("\n\n Average Convergence Factor = %f \n", conv_factor);
+   }
+
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;

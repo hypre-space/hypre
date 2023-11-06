@@ -95,6 +95,8 @@ hypre_ParCSRMatrixCreate( MPI_Comm      comm,
    hypre_ParCSRMatrixGlobalNumRows(matrix)   = global_num_rows;
    hypre_ParCSRMatrixGlobalNumCols(matrix)   = global_num_cols;
    hypre_ParCSRMatrixGlobalNumRownnz(matrix) = global_num_rows;
+   hypre_ParCSRMatrixNumNonzeros(matrix)     = -1;   /* Uninitialized */
+   hypre_ParCSRMatrixDNumNonzeros(matrix)    = -1.0; /* Uninitialized */
    hypre_ParCSRMatrixFirstRowIndex(matrix)   = first_row_index;
    hypre_ParCSRMatrixFirstColDiag(matrix)    = first_col_diag;
    hypre_ParCSRMatrixLastRowIndex(matrix) = first_row_index + local_num_rows - 1;
@@ -1989,7 +1991,7 @@ GenerateDiagAndOffd(hypre_CSRMatrix    *A,
 }
 
 hypre_CSRMatrix *
-hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
+hypre_MergeDiagAndOffdHost(hypre_ParCSRMatrix *par_matrix)
 {
    hypre_CSRMatrix  *diag = hypre_ParCSRMatrixDiag(par_matrix);
    hypre_CSRMatrix  *offd = hypre_ParCSRMatrixOffd(par_matrix);
@@ -2066,6 +2068,23 @@ hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
    matrix_i[num_rows] = num_nonzeros;
 
    return matrix;
+}
+
+hypre_CSRMatrix *
+hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
+{
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(par_matrix) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      return hypre_MergeDiagAndOffdDevice(par_matrix);
+   }
+   else
+#endif
+   {
+      return hypre_MergeDiagAndOffdHost(par_matrix);
+   }
 }
 
 /*--------------------------------------------------------------------------
@@ -2525,6 +2544,9 @@ hypre_FillResponseParToCSRMatrix( void       *p_recv_contact_buf,
  * A and B must have the same communicator, numbers and distributions of rows
  * and columns (they can differ in which row-column pairs are nonzero, thus
  * in which columns are in a offd block)
+ *
+ * TODO (VPM): This function should use hypre_ParCSRMatrixCreate to create
+ *             the matrix.
  *--------------------------------------------------------------------------*/
 
 hypre_ParCSRMatrix * hypre_ParCSRMatrixUnion( hypre_ParCSRMatrix * A,

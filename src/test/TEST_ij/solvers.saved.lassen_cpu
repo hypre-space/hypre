@@ -124,6 +124,18 @@ Final Relative Residual Norm = 5.926430e-09
 GMRES Iterations = 9
 Final GMRES Relative Residual Norm = 2.174161e-09
 
+# Output file: solvers.out.25
+
+
+Iterations = 9
+Final Relative Residual Norm = 9.045045e-09
+
+# Output file: solvers.out.26
+
+
+Iterations = 18
+Final Relative Residual Norm = 9.458475e-09
+
 # Output file: solvers.out.sysh
  Average Convergence Factor = 0.119752
 

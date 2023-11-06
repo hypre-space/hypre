@@ -12,9 +12,9 @@ else ()
 endif ()
 
 # The version number.
-set(HYPRE_VERSION 2.29.0)
-set(HYPRE_NUMBER  22900)
-set(HYPRE_DATE    2023/06/22)
+set(HYPRE_VERSION 2.30.0)
+set(HYPRE_NUMBER  23000)
+set(HYPRE_DATE    2023/11/06)
 set(HYPRE_TIME    00:00:00)
 set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -23,6 +23,9 @@ set(PROJECT_NAME HYPRE)
 project(${PROJECT_NAME}
   VERSION ${HYPRE_VERSION}
   LANGUAGES C)
+
+# We use C99 by default, but users are free to specify any newer standard version
+set(CMAKE_C_STANDARD 99)
 
 if (${HYPRE_SOURCE_DIR} STREQUAL ${HYPRE_BINARY_DIR})
   message(FATAL_ERROR "In-place build not allowed! Please use a separate build directory. See the Users Manual or INSTALL file for details.")
