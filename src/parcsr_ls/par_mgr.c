@@ -169,7 +169,8 @@ hypre_MGRCreate(void)
 HYPRE_Int
 hypre_MGRDestroy( void *data )
 {
-   hypre_ParMGRData * mgr_data = (hypre_ParMGRData*) data;
+   hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) data;
+   hypre_Solver      *aff_base;
 
    HYPRE_Int i;
    HYPRE_Int num_coarse_levels = (mgr_data -> num_coarse_levels);
@@ -348,20 +349,12 @@ hypre_MGRDestroy( void *data )
    {
       for (i = 1; i < (num_coarse_levels); i++)
       {
-         if ((mgr_data -> aff_solver)[i])
-         {
-            hypre_BoomerAMGDestroy((mgr_data -> aff_solver)[i]);
-         }
+         aff_base = (hypre_Solver*) (mgr_data -> aff_solver)[i];
+         hypre_SolverDestroy(aff_base)((HYPRE_Solver) (aff_base));
       }
       if (mgr_data -> fsolver_mode == 2)
       {
-         /* TODO (VPM): We could introduce a variable to the preconditioners' struct that keeps
-            track of its state, i.e., setup called, solve called, destroy called etc... This
-            would avoid checks like the following one: */
-         if ((mgr_data -> aff_solver)[0])
-         {
-            hypre_BoomerAMGDestroy((mgr_data -> aff_solver)[0]);
-         }
+         hypre_BoomerAMGDestroy((mgr_data -> aff_solver)[0]);
       }
       hypre_TFree(mgr_data -> aff_solver, HYPRE_MEMORY_HOST);
       (mgr_data -> aff_solver) = NULL;
