@@ -492,10 +492,21 @@ void getstencil(MatGenFD g, HYPRE_Int ix, HYPRE_Int iy, HYPRE_Int iz)
 
 
 HYPRE_Real konstant(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z)
-{  return coeff; }
+{
+  HYPRE_UNUSED_VAR(coeff);
+  HYPRE_UNUSED_VAR(x);
+  HYPRE_UNUSED_VAR(y);
+  HYPRE_UNUSED_VAR(z);
+
+  return coeff;
+}
 
 HYPRE_Real e2_xy(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z)
-{ return hypre_exp(coeff*x*y); }
+{
+  HYPRE_UNUSED_VAR(z);
+
+  return hypre_exp(coeff*x*y);
+}
 
 HYPRE_Real boxThreeD(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);
 
@@ -624,6 +635,9 @@ HYPRE_Real box_1(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z)
 */
 HYPRE_Real box_2(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z)
 {
+  HYPRE_UNUSED_VAR(coeff);
+  HYPRE_UNUSED_VAR(z);
+
   bool setup = false;
   static HYPRE_Real d1, d2;
   HYPRE_Real retval;
