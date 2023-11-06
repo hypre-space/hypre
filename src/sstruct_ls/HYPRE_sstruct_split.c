@@ -252,7 +252,9 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
                if (ssolver != HYPRE_Jacobi)
                {
                   hypre_error(HYPRE_ERROR_GENERIC);
-               } /* don't break */
+               }
+               /* fall through */
+
             case HYPRE_Jacobi:
                HYPRE_StructJacobiCreate(comm, (HYPRE_StructSolver *)&sdata);
                HYPRE_StructJacobiSetMaxIter((HYPRE_StructSolver)sdata, 1);
@@ -265,6 +267,7 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
                ssolve = (HYPRE_Int (*)(void))HYPRE_StructJacobiSolve;
                sdestroy = (HYPRE_Int (*)(void))HYPRE_StructJacobiDestroy;
                break;
+
             case HYPRE_SMG:
                HYPRE_StructSMGCreate(comm, (HYPRE_StructSolver *)&sdata);
                HYPRE_StructSMGSetMemoryUse((HYPRE_StructSolver)sdata, 0);
@@ -282,6 +285,7 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
                ssolve = (HYPRE_Int (*)(void))HYPRE_StructSMGSolve;
                sdestroy = (HYPRE_Int (*)(void))HYPRE_StructSMGDestroy;
                break;
+
             case HYPRE_PFMG:
                HYPRE_StructPFMGCreate(comm, (HYPRE_StructSolver *)&sdata);
                HYPRE_StructPFMGSetMaxIter((HYPRE_StructSolver)sdata, 1);
