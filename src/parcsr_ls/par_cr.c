@@ -30,6 +30,9 @@ hypre_BoomerAMGCoarsenCR1( hypre_ParCSRMatrix    *A,
                            HYPRE_Int              IS_type,
                            HYPRE_Int              CRaddCpoints)
 {
+   HYPRE_UNUSED_VAR(num_CR_relax_steps);
+   HYPRE_UNUSED_VAR(IS_type);
+
    HYPRE_Int i;
    /* HYPRE_Real theta_global;*/
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -1549,48 +1552,54 @@ hypre_BoomerAMGIndepRSa( hypre_ParCSRMatrix    *S,
 
 HYPRE_Int
 hypre_BoomerAMGIndepHMIS( hypre_ParCSRMatrix    *S,
-                          HYPRE_Int                    measure_type,
-                          HYPRE_Int                    debug_flag,
-                          HYPRE_Int                   *CF_marker)
+                          HYPRE_Int              measure_type,
+                          HYPRE_Int              debug_flag,
+                          HYPRE_Int             *CF_marker)
 {
-   HYPRE_Int                num_procs;
-   MPI_Comm comm = hypre_ParCSRMatrixComm(S);
+   HYPRE_UNUSED_VAR(measure_type);
+
+   HYPRE_Int    num_procs;
+   MPI_Comm     comm = hypre_ParCSRMatrixComm(S);
 
    hypre_MPI_Comm_size(comm, &num_procs);
+
    /*-------------------------------------------------------
     * Perform Ruge coarsening followed by CLJP coarsening
     *-------------------------------------------------------*/
 
-   hypre_BoomerAMGIndepRS (S, 2, debug_flag,
-                           CF_marker);
+   hypre_BoomerAMGIndepRS(S, 2, debug_flag, CF_marker);
 
    if (num_procs > 1)
-      hypre_BoomerAMGIndepPMIS (S, 0, debug_flag,
-                                CF_marker);
+   {
+      hypre_BoomerAMGIndepPMIS(S, 0, debug_flag, CF_marker);
+   }
 
    return hypre_error_flag;
 }
 
 HYPRE_Int
 hypre_BoomerAMGIndepHMISa( hypre_ParCSRMatrix    *S,
-                           HYPRE_Int                    measure_type,
-                           HYPRE_Int                    debug_flag,
-                           HYPRE_Int                   *CF_marker)
+                           HYPRE_Int              measure_type,
+                           HYPRE_Int              debug_flag,
+                           HYPRE_Int             *CF_marker)
 {
-   HYPRE_Int                num_procs;
-   MPI_Comm comm = hypre_ParCSRMatrixComm(S);
+   HYPRE_UNUSED_VAR(measure_type);
+
+   HYPRE_Int    num_procs;
+   MPI_Comm     comm = hypre_ParCSRMatrixComm(S);
 
    hypre_MPI_Comm_size(comm, &num_procs);
+
    /*-------------------------------------------------------
     * Perform Ruge coarsening followed by CLJP coarsening
     *-------------------------------------------------------*/
 
-   hypre_BoomerAMGIndepRSa (S, 2, debug_flag,
-                            CF_marker);
+   hypre_BoomerAMGIndepRSa(S, 2, debug_flag, CF_marker);
 
    if (num_procs > 1)
-      hypre_BoomerAMGIndepPMISa (S, 0, debug_flag,
-                                 CF_marker);
+   {
+      hypre_BoomerAMGIndepPMISa(S, 0, debug_flag, CF_marker);
+   }
 
    return hypre_error_flag;
 }

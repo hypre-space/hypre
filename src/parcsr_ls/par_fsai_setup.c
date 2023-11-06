@@ -142,6 +142,7 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
                    HYPRE_Int         row_num,
                    HYPRE_Int        *kg_marker )
 {
+   HYPRE_UNUSED_VAR(max_row_size);
 
    HYPRE_Int      *A_i = hypre_CSRMatrixI(A_diag);
    HYPRE_Int      *A_j = hypre_CSRMatrixJ(A_diag);
@@ -409,6 +410,9 @@ hypre_FSAISetupNative( void               *fsai_vdata,
                        hypre_ParVector    *f,
                        hypre_ParVector    *u )
 {
+   HYPRE_UNUSED_VAR(f);
+   HYPRE_UNUSED_VAR(u);
+
    /* Data structure variables */
    hypre_ParFSAIData      *fsai_data        = (hypre_ParFSAIData*) fsai_vdata;
    HYPRE_Real              kap_tolerance    = hypre_ParFSAIDataKapTolerance(fsai_data);
@@ -690,6 +694,9 @@ hypre_FSAISetupOMPDyn( void               *fsai_vdata,
                        hypre_ParVector    *f,
                        hypre_ParVector    *u )
 {
+   HYPRE_UNUSED_VAR(f);
+   HYPRE_UNUSED_VAR(u);
+
    /* Data structure variables */
    hypre_ParFSAIData      *fsai_data        = (hypre_ParFSAIData*) fsai_vdata;
    HYPRE_Real              kap_tolerance    = hypre_ParFSAIDataKapTolerance(fsai_data);

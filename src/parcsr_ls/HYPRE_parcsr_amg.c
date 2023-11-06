@@ -437,6 +437,9 @@ HYPRE_Int
 HYPRE_BoomerAMGSetSCommPkgSwitch( HYPRE_Solver solver,
                                   HYPRE_Real   S_commpkg_switch  )
 {
+   HYPRE_UNUSED_VAR(solver);
+   HYPRE_UNUSED_VAR(S_commpkg_switch);
+
    return 0;
 }
 
@@ -2135,4 +2138,3 @@ HYPRE_BoomerAMGGetCumNnzAP( HYPRE_Solver  solver,
 {
    return ( hypre_BoomerAMGGetCumNnzAP( (void *) solver, cum_nnz_AP ) );
 }
-

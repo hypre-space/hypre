@@ -2424,6 +2424,8 @@ hypre_BoomerAMGDD_UnpackSendFlagBuffer( hypre_AMGDDCompGrid **compGrid,
                                         HYPRE_Int             current_level,
                                         HYPRE_Int             num_levels )
 {
+   HYPRE_UNUSED_VAR(compGrid);
+
    HYPRE_Int level, i, cnt, num_nodes;
 
    cnt = 0;

@@ -25,6 +25,8 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
                                    HYPRE_Int            weight_option,
                                    hypre_ParCSRMatrix **P_ptr )
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MULTIPASS_INTERP] -= hypre_MPI_Wtime();
 #endif

@@ -537,6 +537,8 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
 {
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+#else
+   HYPRE_UNUSED_VAR(A);
 #endif
 
    hypre_ParCSRMatrix *Pi;
@@ -783,6 +785,8 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
 
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+#else
+   HYPRE_UNUSED_VAR(A);
 #endif
 
    /* Compute the representations of the coordinate vectors, RT100, RT010 and
@@ -1092,11 +1096,15 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
  * - hypre_ADSSetCoordinateVectors()
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_ADSSetup(void *solver,
-                         hypre_ParCSRMatrix *A,
-                         hypre_ParVector *b,
-                         hypre_ParVector *x)
+HYPRE_Int
+hypre_ADSSetup(void *solver,
+               hypre_ParCSRMatrix *A,
+               hypre_ParVector *b,
+               hypre_ParVector *x)
 {
+   HYPRE_UNUSED_VAR(b);
+   HYPRE_UNUSED_VAR(x);
+
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 #endif
@@ -1229,6 +1237,7 @@ HYPRE_Int hypre_ADSSetup(void *solver,
    if (ads_data -> Pi == NULL && ads_data -> Pix == NULL)
    {
       if (ads_data -> cycle_type > 10)
+      {
          /* Construct Pi{x,y,z} instead of Pi = [Pix,Piy,Piz] */
          hypre_ADSComputePixyz(ads_data -> A,
                                ads_data -> C,
@@ -1242,7 +1251,9 @@ HYPRE_Int hypre_ADSSetup(void *solver,
                                &ads_data -> Pix,
                                &ads_data -> Piy,
                                &ads_data -> Piz);
+      }
       else
+      {
          /* Construct the Pi interpolation matrix */
          hypre_ADSComputePi(ads_data -> A,
                             ads_data -> C,
@@ -1254,6 +1265,7 @@ HYPRE_Int hypre_ADSSetup(void *solver,
                             ams_data -> Piy,
                             ams_data -> Piz,
                             &ads_data -> Pi);
+      }
    }
 
    if (ads_data -> cycle_type > 10)
@@ -1380,8 +1392,8 @@ HYPRE_Int hypre_ADSSetup(void *solver,
                            NULL, NULL);
    }
    else
-      /* Create the AMG solver on the range of Pi^T */
    {
+      /* Create the AMG solver on the range of Pi^T */
       HYPRE_BoomerAMGCreate(&ads_data -> B_Pi);
       HYPRE_BoomerAMGSetCoarsenType(ads_data -> B_Pi, ads_data -> B_Pi_coarsen_type);
       HYPRE_BoomerAMGSetAggNumLevels(ads_data -> B_Pi, ads_data -> B_Pi_agg_levels);

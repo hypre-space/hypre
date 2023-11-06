@@ -453,6 +453,10 @@ GenerateRSVarDifConv( MPI_Comm         comm,
 
 HYPRE_Real afun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(xx);
+   HYPRE_UNUSED_VAR(yy);
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    value = 1.0;
    return value;
@@ -460,6 +464,10 @@ HYPRE_Real afun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 
 HYPRE_Real bfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(xx);
+   HYPRE_UNUSED_VAR(yy);
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    value = 1.0;
    return value;
@@ -467,6 +475,10 @@ HYPRE_Real bfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 
 HYPRE_Real cfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(xx);
+   HYPRE_UNUSED_VAR(yy);
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    value = 1.0;
    return value;
@@ -474,6 +486,8 @@ HYPRE_Real cfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 
 HYPRE_Real dfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    if (rs_example == 1)
    {
@@ -492,6 +506,8 @@ HYPRE_Real dfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 
 HYPRE_Real efun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    if (rs_example == 1)
    {
@@ -517,6 +533,10 @@ HYPRE_Real ffun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 
 HYPRE_Real gfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(xx);
+   HYPRE_UNUSED_VAR(yy);
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    value = 0.0;
    return value;
@@ -524,6 +544,10 @@ HYPRE_Real gfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 
 HYPRE_Real rfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(xx);
+   HYPRE_UNUSED_VAR(yy);
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    value = 1.0;
    return value;
@@ -531,6 +555,10 @@ HYPRE_Real rfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 
 HYPRE_Real bndfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(xx);
+   HYPRE_UNUSED_VAR(yy);
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    value = 0.0;
    return value;

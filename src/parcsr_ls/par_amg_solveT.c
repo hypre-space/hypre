@@ -616,15 +616,19 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
  * hypre_BoomerAMGRelaxT
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
-                                  hypre_ParVector    *f,
-                                  HYPRE_Int                *cf_marker,
-                                  HYPRE_Int                 relax_type,
-                                  HYPRE_Int                 relax_points,
-                                  HYPRE_Real          relax_weight,
-                                  hypre_ParVector    *u,
-                                  hypre_ParVector    *Vtemp )
+HYPRE_Int
+hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
+                       hypre_ParVector    *f,
+                       HYPRE_Int          *cf_marker,
+                       HYPRE_Int           relax_type,
+                       HYPRE_Int           relax_points,
+                       HYPRE_Real          relax_weight,
+                       hypre_ParVector    *u,
+                       hypre_ParVector    *Vtemp )
 {
+   HYPRE_UNUSED_VAR(cf_marker);
+   HYPRE_UNUSED_VAR(relax_points);
+
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real      *A_diag_data  = hypre_CSRMatrixData(A_diag);
    HYPRE_Int       *A_diag_i     = hypre_CSRMatrixI(A_diag);

@@ -1014,6 +1014,8 @@ hypre_MGRBuildPFromWpHost( hypre_ParCSRMatrix   *A,
                            HYPRE_Int            debug_flag,
                            hypre_ParCSRMatrix   **P_ptr)
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
    MPI_Comm          comm = hypre_ParCSRMatrixComm(A);
    HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
 
@@ -1145,9 +1147,6 @@ hypre_MGRBuildPFromWpHost( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrixData(P_offd) = P_offd_data;
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
-   //hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
-   //hypre_ParCSRMatrixOwnsColStarts(Wp) = 0;
-   //hypre_ParCSRMatrixOwnsColStarts(P) = 1;
 
    hypre_ParCSRMatrixDeviceColMapOffd(P) = hypre_ParCSRMatrixDeviceColMapOffd(Wp);
    hypre_ParCSRMatrixColMapOffd(P)       = hypre_ParCSRMatrixColMapOffd(Wp);
@@ -1178,6 +1177,9 @@ hypre_MGRBuildBlockJacobiWp( hypre_ParCSRMatrix   *A_FF,
                              HYPRE_BigInt         *cpts_starts,
                              hypre_ParCSRMatrix  **Wp_ptr )
 {
+   HYPRE_UNUSED_VAR(CF_marker);
+   HYPRE_UNUSED_VAR(cpts_starts);
+
    hypre_ParCSRMatrix   *A_FF_inv;
    hypre_ParCSRMatrix   *Wp;
 
@@ -2100,6 +2102,9 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
                     HYPRE_Int             debug_flag,
                     hypre_ParCSRMatrix  **P_ptr)
 {
+   HYPRE_UNUSED_VAR(blk_size);
+   HYPRE_UNUSED_VAR(reserved_coarse_size);
+
    MPI_Comm          comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
@@ -2982,6 +2987,8 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
                                       HYPRE_Int             *CF_marker,
                                       hypre_ParCSRMatrix   **A_H_ptr)
 {
+   HYPRE_UNUSED_VAR(RT);
+
    HYPRE_Int *c_marker, *f_marker;
    HYPRE_Int n_local_fine_grid, i, i1, jj;
    hypre_ParCSRMatrix *A_cc = NULL;
@@ -3400,10 +3407,12 @@ hypre_MGRApproximateInverse(hypre_ParCSRMatrix      *A,
 HYPRE_Int
 hypre_MGRBuildInterpApproximateInverse(hypre_ParCSRMatrix   *A,
                                        HYPRE_Int            *CF_marker,
-                                       HYPRE_BigInt            *num_cpts_global,
-                                       HYPRE_Int            debug_flag,
-                                       hypre_ParCSRMatrix   **P_ptr)
+                                       HYPRE_BigInt         *num_cpts_global,
+                                       HYPRE_Int             debug_flag,
+                                       hypre_ParCSRMatrix  **P_ptr)
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
    HYPRE_Int            *C_marker;
    HYPRE_Int            *F_marker;
    hypre_ParCSRMatrix   *A_ff;
@@ -3556,6 +3565,10 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
                      HYPRE_Int             interp_type,
                      HYPRE_Int             numsweeps)
 {
+   HYPRE_UNUSED_VAR(num_functions);
+   HYPRE_UNUSED_VAR(dof_func);
+   HYPRE_UNUSED_VAR(numsweeps);
+
    //  HYPRE_Int i;
    hypre_ParCSRMatrix    *P_ptr = NULL;
    //HYPRE_Real       jac_trunc_threshold = trunc_factor;
@@ -3663,6 +3676,10 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
                         HYPRE_Int              restrict_type,
                         HYPRE_Int              numsweeps )
 {
+   HYPRE_UNUSED_VAR(num_functions);
+   HYPRE_UNUSED_VAR(dof_func);
+   HYPRE_UNUSED_VAR(numsweeps);
+
    //   HYPRE_Int i;
    hypre_ParCSRMatrix    *R = NULL;
    hypre_ParCSRMatrix    *AT = NULL;
@@ -4230,6 +4247,8 @@ hypre_MGRBlockRelaxSolve( hypre_ParCSRMatrix *A,
                           HYPRE_Real         *diaginv,
                           hypre_ParVector    *Vtemp )
 {
+   HYPRE_UNUSED_VAR(left_size);
+
    MPI_Comm      comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real      *A_diag_data  = hypre_CSRMatrixData(A_diag);
@@ -4482,6 +4501,8 @@ hypre_ParCSRMatrixExtractBlockDiagHost( hypre_ParCSRMatrix   *par_A,
                                         HYPRE_Int             diag_type,
                                         HYPRE_Real           *diag_data )
 {
+   HYPRE_UNUSED_VAR(diag_size);
+
    hypre_CSRMatrix      *A_diag       = hypre_ParCSRMatrixDiag(par_A);
    HYPRE_Int             nrows        = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Complex        *A_diag_data  = hypre_CSRMatrixData(A_diag);

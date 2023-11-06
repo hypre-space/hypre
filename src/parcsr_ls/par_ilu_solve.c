@@ -511,6 +511,8 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A,
                          hypre_ParVector    *x,
                          HYPRE_Int          *u_end)
 {
+   HYPRE_UNUSED_VAR(schur_precond);
+
    /* Data objects for L and U */
    hypre_CSRMatrix   *L_diag      = hypre_ParCSRMatrixDiag(L);
    HYPRE_Real        *L_diag_data = hypre_CSRMatrixData(L_diag);

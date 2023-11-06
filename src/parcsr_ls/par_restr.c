@@ -31,6 +31,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
                               HYPRE_Int             is_triangular,
                               HYPRE_Int             gmres_switch)
 {
+   HYPRE_UNUSED_VAR(debug_flag);
 
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);

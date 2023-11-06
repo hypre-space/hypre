@@ -43,6 +43,8 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
                             HYPRE_Int              diag_option,
                             hypre_ParCSRMatrix   **AN_ptr)
 {
+   HYPRE_UNUSED_VAR(dof_func);
+
    MPI_Comm            comm            = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix    *A_diag          = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int          *A_diag_i        = hypre_CSRMatrixI(A_diag);

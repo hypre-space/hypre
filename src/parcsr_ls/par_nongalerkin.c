@@ -674,6 +674,8 @@ hypre_NonGalerkinIJBufferCompressRow( HYPRE_Int
                                       HYPRE_BigInt   *ijbuf_rownums,
                                       HYPRE_Int      *ijbuf_numcols)
 {
+   HYPRE_UNUSED_VAR(ijbuf_rownums);
+
    HYPRE_Int                ierr = 0;
    HYPRE_Int                nentries, i, nduplicate;
 

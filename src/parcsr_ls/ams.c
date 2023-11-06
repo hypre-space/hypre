@@ -1564,14 +1564,17 @@ hypreGPUKernel_AMSComputePi_copy2(hypre_DeviceItem &item,
 
 #endif
 
-HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
-                             hypre_ParCSRMatrix *G,
-                             hypre_ParVector *Gx,
-                             hypre_ParVector *Gy,
-                             hypre_ParVector *Gz,
-                             HYPRE_Int dim,
-                             hypre_ParCSRMatrix **Pi_ptr)
+HYPRE_Int
+hypre_AMSComputePi(hypre_ParCSRMatrix *A,
+                   hypre_ParCSRMatrix *G,
+                   hypre_ParVector *Gx,
+                   hypre_ParVector *Gy,
+                   hypre_ParVector *Gz,
+                   HYPRE_Int dim,
+                   hypre_ParCSRMatrix **Pi_ptr)
 {
+   HYPRE_UNUSED_VAR(A);
+
    hypre_ParCSRMatrix *Pi;
 
    /* Compute Pi = [Pi_x, Pi_y, Pi_z] */
@@ -1845,16 +1848,19 @@ hypreGPUKernel_AMSComputePixyz_copy(hypre_DeviceItem &item,
 }
 #endif
 
-HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
-                                hypre_ParCSRMatrix *G,
-                                hypre_ParVector *Gx,
-                                hypre_ParVector *Gy,
-                                hypre_ParVector *Gz,
-                                HYPRE_Int dim,
-                                hypre_ParCSRMatrix **Pix_ptr,
-                                hypre_ParCSRMatrix **Piy_ptr,
-                                hypre_ParCSRMatrix **Piz_ptr)
+HYPRE_Int
+hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
+                      hypre_ParCSRMatrix *G,
+                      hypre_ParVector *Gx,
+                      hypre_ParVector *Gy,
+                      hypre_ParVector *Gz,
+                      HYPRE_Int dim,
+                      hypre_ParCSRMatrix **Pix_ptr,
+                      hypre_ParCSRMatrix **Piy_ptr,
+                      hypre_ParCSRMatrix **Piz_ptr)
 {
+   HYPRE_UNUSED_VAR(A);
+
    hypre_ParCSRMatrix *Pix, *Piy, *Piz = NULL;
 
 #if defined(HYPRE_USING_GPU)
@@ -2518,14 +2524,17 @@ hypreGPUKernel_AMSComputeGPi_copy2(hypre_DeviceItem &item,
  * to the edge finite elements space.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
-                              hypre_ParCSRMatrix *G,
-                              hypre_ParVector *Gx,
-                              hypre_ParVector *Gy,
-                              hypre_ParVector *Gz,
-                              HYPRE_Int dim,
-                              hypre_ParCSRMatrix **GPi_ptr)
+HYPRE_Int
+hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
+                    hypre_ParCSRMatrix *G,
+                    hypre_ParVector *Gx,
+                    hypre_ParVector *Gy,
+                    hypre_ParVector *Gz,
+                    HYPRE_Int dim,
+                    hypre_ParCSRMatrix **GPi_ptr)
 {
+   HYPRE_UNUSED_VAR(A);
+
    hypre_ParCSRMatrix *GPi;
 
    /* Take into account G */
@@ -2870,11 +2879,15 @@ hypreGPUKernel_AMSSetupScaleGGt( hypre_DeviceItem &item,
 }
 #endif
 
-HYPRE_Int hypre_AMSSetup(void *solver,
-                         hypre_ParCSRMatrix *A,
-                         hypre_ParVector *b,
-                         hypre_ParVector *x)
+HYPRE_Int
+hypre_AMSSetup(void *solver,
+               hypre_ParCSRMatrix *A,
+               hypre_ParVector *b,
+               hypre_ParVector *x)
 {
+   HYPRE_UNUSED_VAR(b);
+   HYPRE_UNUSED_VAR(x);
+
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 #endif
@@ -4303,17 +4316,21 @@ HYPRE_Int hypre_AMSConstructDiscreteGradient(hypre_ParCSRMatrix *A,
  * be called before hypre_AMSSetup().
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_AMSFEISetup(void *solver,
-                            hypre_ParCSRMatrix *A,
-                            hypre_ParVector *b,
-                            hypre_ParVector *x,
-                            HYPRE_Int num_vert,
-                            HYPRE_Int num_local_vert,
-                            HYPRE_BigInt *vert_number,
-                            HYPRE_Real *vert_coord,
-                            HYPRE_Int num_edges,
-                            HYPRE_BigInt *edge_vertex)
+HYPRE_Int
+hypre_AMSFEISetup(void *solver,
+                  hypre_ParCSRMatrix *A,
+                  hypre_ParVector *b,
+                  hypre_ParVector *x,
+                  HYPRE_Int num_vert,
+                  HYPRE_Int num_local_vert,
+                  HYPRE_BigInt *vert_number,
+                  HYPRE_Real *vert_coord,
+                  HYPRE_Int num_edges,
+                  HYPRE_BigInt *edge_vertex)
 {
+   HYPRE_UNUSED_VAR(b);
+   HYPRE_UNUSED_VAR(x);
+
    hypre_AMSData *ams_data = (hypre_AMSData *) solver;
 
    HYPRE_Int i, j;

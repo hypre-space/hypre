@@ -731,17 +731,18 @@ hypre_BoomerAMGFitVectors(HYPRE_Int ip, HYPRE_Int n, HYPRE_Int num, const HYPRE_
 
 HYPRE_Int
 hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
-                              HYPRE_Int                  *CF_marker,
+                              HYPRE_Int            *CF_marker,
                               hypre_ParCSRMatrix   *S,
-                              HYPRE_BigInt            *num_cpts_global,
-                              HYPRE_Int                   num_functions,
-                              HYPRE_Int                  *dof_func,
-                              HYPRE_Int                   debug_flag,
+                              HYPRE_BigInt         *num_cpts_global,
+                              HYPRE_Int             num_functions,
+                              HYPRE_Int            *dof_func,
+                              HYPRE_Int             debug_flag,
                               HYPRE_Real            trunc_factor,
-                              HYPRE_Int                   num_smooth,
+                              HYPRE_Int             num_smooth,
                               HYPRE_Real           *SmoothVecs,
                               hypre_ParCSRMatrix  **P_ptr)
 {
+   HYPRE_UNUSED_VAR(A);
 
    MPI_Comm          comm = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(S);
@@ -1289,15 +1290,16 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
 
 HYPRE_Int
 hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
-                                HYPRE_Int                  *CF_marker,
+                                HYPRE_Int            *CF_marker,
                                 hypre_ParCSRMatrix   *S,
-                                HYPRE_BigInt               *num_cpts_global,
-                                HYPRE_Int                   num_functions,
-                                HYPRE_Int                  *dof_func,
-                                HYPRE_Int                   debug_flag,
+                                HYPRE_BigInt         *num_cpts_global,
+                                HYPRE_Int             num_functions,
+                                HYPRE_Int            *dof_func,
+                                HYPRE_Int             debug_flag,
                                 HYPRE_Real            trunc_factor,
                                 hypre_ParCSRMatrix  **P_ptr)
 {
+   HYPRE_UNUSED_VAR(A);
 
    MPI_Comm          comm = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(S);

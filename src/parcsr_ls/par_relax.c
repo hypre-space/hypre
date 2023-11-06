@@ -689,6 +689,8 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
                                             HYPRE_Int           forced_seq,
                                             HYPRE_Int           Topo_order )
 {
+   HYPRE_UNUSED_VAR(Ztemp);
+
    MPI_Comm             comm          = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix     *A_diag        = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real          *A_diag_data   = hypre_CSRMatrixData(A_diag);
@@ -1595,6 +1597,8 @@ hypre_BoomerAMGRelaxTwoStageGaussSeidelHost( hypre_ParCSRMatrix *A,
                                              hypre_ParVector    *Vtemp,
                                              HYPRE_Int           num_inner_iters )
 {
+   HYPRE_UNUSED_VAR(omega);
+
    hypre_CSRMatrix *A_diag      = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int        num_rows    = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Real      *A_diag_data = hypre_CSRMatrixData(A_diag);
@@ -1685,6 +1689,9 @@ hypre_BoomerAMGRelax11TwoStageGaussSeidel( hypre_ParCSRMatrix *A,
                                            hypre_ParVector    *Vtemp,
                                            hypre_ParVector    *Ztemp )
 {
+   HYPRE_UNUSED_VAR(cf_marker);
+   HYPRE_UNUSED_VAR(relax_points);
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
                                                       hypre_ParVectorMemoryLocation(f) );
@@ -1697,6 +1704,8 @@ hypre_BoomerAMGRelax11TwoStageGaussSeidel( hypre_ParCSRMatrix *A,
    else
 #endif
    {
+      HYPRE_UNUSED_VAR(A_diag_diag);
+      HYPRE_UNUSED_VAR(Ztemp);
       hypre_BoomerAMGRelaxTwoStageGaussSeidelHost(A, f, relax_weight, omega, u, Vtemp, 1);
    }
 
@@ -1719,6 +1728,9 @@ hypre_BoomerAMGRelax12TwoStageGaussSeidel( hypre_ParCSRMatrix *A,
                                            hypre_ParVector    *Vtemp,
                                            hypre_ParVector    *Ztemp )
 {
+   HYPRE_UNUSED_VAR(cf_marker);
+   HYPRE_UNUSED_VAR(relax_points);
+
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
                                                       hypre_ParVectorMemoryLocation(f) );
@@ -1731,6 +1743,8 @@ hypre_BoomerAMGRelax12TwoStageGaussSeidel( hypre_ParCSRMatrix *A,
    else
 #endif
    {
+      HYPRE_UNUSED_VAR(A_diag_diag);
+      HYPRE_UNUSED_VAR(Ztemp);
       hypre_BoomerAMGRelaxTwoStageGaussSeidelHost(A, f, relax_weight, omega, u, Vtemp, 2);
    }
 

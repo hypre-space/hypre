@@ -14,6 +14,8 @@
 HYPRE_Int
 HYPRE_ParCSRGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
+   HYPRE_UNUSED_VAR(comm);
+
    hypre_GMRESFunctions * gmres_functions;
 
    if (!solver)
@@ -23,15 +25,22 @@ HYPRE_ParCSRGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
    }
    gmres_functions =
       hypre_GMRESFunctionsCreate(
-         hypre_ParKrylovCAlloc, hypre_ParKrylovFree, hypre_ParKrylovCommInfo,
+         hypre_ParKrylovCAlloc,
+         hypre_ParKrylovFree,
+         hypre_ParKrylovCommInfo,
          hypre_ParKrylovCreateVector,
          hypre_ParKrylovCreateVectorArray,
-         hypre_ParKrylovDestroyVector, hypre_ParKrylovMatvecCreate,
-         hypre_ParKrylovMatvec, hypre_ParKrylovMatvecDestroy,
-         hypre_ParKrylovInnerProd, hypre_ParKrylovCopyVector,
+         hypre_ParKrylovDestroyVector,
+         hypre_ParKrylovMatvecCreate,
+         hypre_ParKrylovMatvec,
+         hypre_ParKrylovMatvecDestroy,
+         hypre_ParKrylovInnerProd,
+         hypre_ParKrylovCopyVector,
          hypre_ParKrylovClearVector,
-         hypre_ParKrylovScaleVector, hypre_ParKrylovAxpy,
-         hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
+         hypre_ParKrylovScaleVector,
+         hypre_ParKrylovAxpy,
+         hypre_ParKrylovIdentitySetup,
+         hypre_ParKrylovIdentity );
    *solver = ( (HYPRE_Solver) hypre_GMRESCreate( gmres_functions ) );
 
    return hypre_error_flag;
@@ -229,22 +238,29 @@ HYPRE_ParCSRGMRESGetResidual( HYPRE_Solver solver,
 /*--------------------------------------------------------------------------
  * Setup routine for on-processor triangular solve as preconditioning.
  *--------------------------------------------------------------------------*/
-HYPRE_Int HYPRE_ParCSROnProcTriSetup(HYPRE_Solver       solver,
-                                     HYPRE_ParCSRMatrix HA,
-                                     HYPRE_ParVector    Hy,
-                                     HYPRE_ParVector    Hx)
+
+HYPRE_Int
+HYPRE_ParCSROnProcTriSetup(HYPRE_Solver       solver,
+                           HYPRE_ParCSRMatrix HA,
+                           HYPRE_ParVector    Hy,
+                           HYPRE_ParVector    Hx)
 {
+   HYPRE_UNUSED_VAR(solver);
+   HYPRE_UNUSED_VAR(Hy);
+   HYPRE_UNUSED_VAR(Hx);
+
    hypre_ParCSRMatrix *A = (hypre_ParCSRMatrix *) HA;
 
-   // Check for and get topological ordering of matrix
+   /* Check for and get topological ordering of matrix */
    if (!hypre_ParCSRMatrixProcOrdering(A))
    {
-      hypre_CSRMatrix *A_diag  = hypre_ParCSRMatrixDiag(A);
-      HYPRE_Real *A_diag_data  = hypre_CSRMatrixData(A_diag);
-      HYPRE_Int *A_diag_i      = hypre_CSRMatrixI(A_diag);
-      HYPRE_Int *A_diag_j      = hypre_CSRMatrixJ(A_diag);
-      HYPRE_Int n              = hypre_CSRMatrixNumRows(A_diag);
-      HYPRE_Int *proc_ordering = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+      hypre_CSRMatrix *A_diag        = hypre_ParCSRMatrixDiag(A);
+      HYPRE_Real      *A_diag_data   = hypre_CSRMatrixData(A_diag);
+      HYPRE_Int       *A_diag_i      = hypre_CSRMatrixI(A_diag);
+      HYPRE_Int       *A_diag_j      = hypre_CSRMatrixJ(A_diag);
+      HYPRE_Int        n             = hypre_CSRMatrixNumRows(A_diag);
+      HYPRE_Int       *proc_ordering = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+
       hypre_topo_sort(A_diag_i, A_diag_j, A_diag_data, proc_ordering, n);
       hypre_ParCSRMatrixProcOrdering(A) = proc_ordering;
    }
@@ -252,20 +268,24 @@ HYPRE_Int HYPRE_ParCSROnProcTriSetup(HYPRE_Solver       solver,
    return 0;
 }
 
-
 /*--------------------------------------------------------------------------
  * Solve routine for on-processor triangular solve as preconditioning.
  *--------------------------------------------------------------------------*/
-HYPRE_Int HYPRE_ParCSROnProcTriSolve(HYPRE_Solver       solver,
-                                     HYPRE_ParCSRMatrix HA,
-                                     HYPRE_ParVector    Hy,
-                                     HYPRE_ParVector    Hx)
+
+HYPRE_Int
+HYPRE_ParCSROnProcTriSolve(HYPRE_Solver       solver,
+                           HYPRE_ParCSRMatrix HA,
+                           HYPRE_ParVector    Hy,
+                           HYPRE_ParVector    Hx)
 {
+   HYPRE_UNUSED_VAR(solver);
+
    hypre_ParCSRMatrix *A = (hypre_ParCSRMatrix *) HA;
    hypre_ParVector    *y = (hypre_ParVector *) Hy;
    hypre_ParVector    *x = (hypre_ParVector *) Hx;
-   HYPRE_Int ierr = 0;
+   HYPRE_Int           ierr = 0;
+
    ierr = hypre_BoomerAMGRelax(A, y, NULL, 10, 0, 1, 1, NULL, x, NULL, NULL);
+
    return ierr;
 }
-

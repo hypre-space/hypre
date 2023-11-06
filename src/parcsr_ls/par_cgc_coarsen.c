@@ -904,18 +904,28 @@ HYPRE_Int hypre_AmgCGCPrepare (hypre_ParCSRMatrix *S, HYPRE_Int nlocal, HYPRE_In
 #define tag_pointrange 301
 #define tag_vertexrange 302
 
-HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S, HYPRE_Int *vertexrange,
-                                     HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int coarsen_type,
-                                     HYPRE_IJMatrix *ijG)
-/* assemble a graph representing the connections between the grids
- * ================================================================================================
+/*--------------------------------------------------------------------------
+ * hypre_AmgCGCGraphAssemble
+ *
+ * Assemble a graph representing the connections between the grids
+ *
  * S : the strength matrix
  * vertexrange : the parallel layout of the candidate coarse grid vertices
  * CF_marker, CF_marker_offd : the coarse/fine markers
  * coarsen_type : the coarsening type
  * ijG : the created graph
- * ================================================================================================*/
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AmgCGCGraphAssemble(hypre_ParCSRMatrix *S,
+                          HYPRE_Int          *vertexrange,
+                          HYPRE_Int          *CF_marker,
+                          HYPRE_Int          *CF_marker_offd,
+                          HYPRE_Int           coarsen_type,
+                          HYPRE_IJMatrix     *ijG)
 {
+   HYPRE_UNUSED_VAR(coarsen_type);
+
    HYPRE_Int i,/* ii,ip,*/ j, jj, m, n, p;
    HYPRE_Int mpisize, mpirank;
 
