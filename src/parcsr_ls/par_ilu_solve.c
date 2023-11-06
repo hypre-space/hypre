@@ -277,7 +277,7 @@ hypre_ILUSolve( void               *ilu_vdata,
                else
                {
                   hypre_ILUSolveLUIter(matA, F_array, U_array, perm, n,
-                                       matL, matD, matU, Utemp, Ftemp, Xtemp,
+                                       matL, matD, matU, Utemp, Ftemp,
                                        lower_jacobi_iters, upper_jacobi_iters);
                }
             }
@@ -968,7 +968,6 @@ hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A,
                      hypre_ParCSRMatrix *U,
                      hypre_ParVector    *ftemp,
                      hypre_ParVector    *utemp,
-                     hypre_ParVector    *xtemp,
                      HYPRE_Int           lower_jacobi_iters,
                      HYPRE_Int           upper_jacobi_iters)
 {

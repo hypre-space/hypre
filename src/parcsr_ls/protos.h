@@ -2561,8 +2561,7 @@ HYPRE_Int hypre_ILUSolveLUIter( hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                 hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int nLU,
                                 hypre_ParCSRMatrix *L, HYPRE_Real *D, hypre_ParCSRMatrix *U,
                                 hypre_ParVector *ftemp, hypre_ParVector *utemp,
-                                hypre_ParVector *xtemp, HYPRE_Int lower_jacobi_iters,
-                                HYPRE_Int upper_jacobi_iters );
+                                HYPRE_Int lower_jacobi_iters, HYPRE_Int upper_jacobi_iters );
 HYPRE_Int hypre_ILUSolveLURAS( hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u,
                                HYPRE_Int *perm, hypre_ParCSRMatrix *L, HYPRE_Real *D,
                                hypre_ParCSRMatrix *U, hypre_ParVector *ftemp,
