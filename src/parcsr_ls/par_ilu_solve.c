@@ -815,11 +815,11 @@ hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A,
  * L, D and U factors only have local scope (no off-diagterms)
  *  so apart from the residual calculation (which uses A),
  *  the solves with the L and U factors are local.
- * 
- * Note: perm contains the permutation of indexes corresponding to 
- * user-prescribed reordering strategy. In the block Jacobi case, perm 
- * may be NULL if no reordering is done (for performance, (perm == NULL) 
- * assumes identity mapping of indexes). Hence we need to check the local 
+ *
+ * Note: perm contains the permutation of indexes corresponding to
+ * user-prescribed reordering strategy. In the block Jacobi case, perm
+ * may be NULL if no reordering is done (for performance, (perm == NULL)
+ * assumes identity mapping of indexes). Hence we need to check the local
  * solves for this case and avoid segfaults. - DOK
  *--------------------------------------------------------------------*/
 
@@ -864,7 +864,7 @@ hypre_ILUSolveLU(hypre_ParCSRMatrix *A,
 
    /* L solve - Forward solve */
    /* copy rhs to account for diagonal of L (which is identity) */
-   if(perm)
+   if (perm)
    {
       for (i = 0; i < nLU; i++)
       {
@@ -880,7 +880,7 @@ hypre_ILUSolveLU(hypre_ParCSRMatrix *A,
    }
 
    /* Update with remaining (off-diagonal) entries of L */
-   if(perm)
+   if (perm)
    {
       for ( i = 0; i < nLU; i++ )
       {
@@ -900,10 +900,10 @@ hypre_ILUSolveLU(hypre_ParCSRMatrix *A,
          {
             utemp_data[i] -= L_diag_data[j] * utemp_data[L_diag_j[j]];
          }
-      }      
+      }
    }
    /*-------------------- U solve - Backward substitution */
-   if(perm)
+   if (perm)
    {
       for ( i = nLU - 1; i >= 0; i-- )
       {
@@ -931,7 +931,7 @@ hypre_ILUSolveLU(hypre_ParCSRMatrix *A,
 
          /* diagonal scaling (contribution from D. Note: D is stored as its inverse) */
          utemp_data[i] *= D[i];
-      }      
+      }
    }
    /* Update solution */
    hypre_ParVectorAxpy(beta, utemp, u);
@@ -947,11 +947,11 @@ hypre_ILUSolveLU(hypre_ParCSRMatrix *A,
  * L, D and U factors only have local scope (no off-diag terms)
  *  so apart from the residual calculation (which uses A), the solves
  *  with the L and U factors are local.
- * 
- * Note: perm contains the permutation of indexes corresponding to 
- * user-prescribed reordering strategy. In the block Jacobi case, perm 
- * may be NULL if no reordering is done (for performance, (perm == NULL) 
- * assumes identity mapping of indexes). Hence we need to check the local 
+ *
+ * Note: perm contains the permutation of indexes corresponding to
+ * user-prescribed reordering strategy. In the block Jacobi case, perm
+ * may be NULL if no reordering is done (for performance, (perm == NULL)
+ * assumes identity mapping of indexes). Hence we need to check the local
  * solves for this case and avoid segfaults. - DOK
  *--------------------------------------------------------------------*/
 
@@ -1004,7 +1004,7 @@ hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A,
    /* copy rhs to account for diagonal of L (which is identity) */
 
    /* Initialize iteration to 0 */
-   if(perm)
+   if (perm)
    {
       for ( i = 0; i < nLU; i++ )
       {
@@ -1016,7 +1016,7 @@ hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A,
       for ( i = 0; i < nLU; i++ )
       {
          utemp_data[i] = 0.0;
-      }      
+      }
    }
    /* Jacobi iteration loop */
    for ( kk = 0; kk < lower_jacobi_iters; kk++ )
@@ -1024,9 +1024,9 @@ hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A,
       /* u^{k+1} = f - Lu^k */
 
       /* Do a SpMV with L and save the results in xtemp */
-      if(perm)
+      if (perm)
       {
-         for ( i = nLU-1; i >= 0; i-- )
+         for ( i = nLU - 1; i >= 0; i-- )
          {
             sum = 0.0;
             k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
@@ -1039,7 +1039,7 @@ hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A,
       }
       else
       {
-         for ( i = nLU-1; i >= 0; i-- )
+         for ( i = nLU - 1; i >= 0; i-- )
          {
             sum = 0.0;
             k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
@@ -1048,12 +1048,12 @@ hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A,
                sum += L_diag_data[j] * utemp_data[L_diag_j[j]];
             }
             utemp_data[i] = ftemp_data[i] - sum;
-         }       
+         }
       }
    } /* end jacobi loop */
 
    /* Initialize iteration to 0 */
-   if(perm)
+   if (perm)
    {
       for ( i = 0; i < nLU; i++ )
       {
@@ -1074,7 +1074,7 @@ hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A,
       /* u^{k+1} = f - Uu^k */
 
       /* Do a SpMV with U and save the results in xtemp */
-      if(perm)
+      if (perm)
       {
          for ( i = 0; i < nLU; ++i )
          {
@@ -1098,7 +1098,7 @@ hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A,
                sum += U_diag_data[j] * ftemp_data[U_diag_j[j]];
             }
             ftemp_data[i] = D[i] * (utemp_data[i] - sum);
-         }      
+         }
       }
    } /* end jacobi loop */
 

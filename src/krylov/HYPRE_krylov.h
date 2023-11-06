@@ -279,7 +279,7 @@ HYPRE_Int HYPRE_PCGGetRelChange(HYPRE_Solver  solver,
 /**
  **/
 HYPRE_Int HYPRE_PCGGetSkipBreak(HYPRE_Solver solver,
-                                  HYPRE_Int   *skip_break);
+                                HYPRE_Int   *skip_break);
 
 /**
  **/
