@@ -850,9 +850,9 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
    char                  new_filename[HYPRE_MAX_FILE_NAME_LEN];
    FILE                 *fp;
    hypre_uint64          header[11];
-   size_t                count;
+   size_t                count, k;
    HYPRE_Int             one = 1;
-   HYPRE_Int             myid, i, j, k;
+   HYPRE_Int             myid, i, j;
    HYPRE_BigInt          bigI, bigJ;
    HYPRE_BigInt          ilower, iupper, jlower, jupper;
    HYPRE_Complex         val;
