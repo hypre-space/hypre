@@ -25,9 +25,9 @@ hypre_MGRSolve( void               *mgr_vdata,
 {
 
    MPI_Comm              comm = hypre_ParCSRMatrixComm(A);
-   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+   hypre_ParMGRData     *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
-   hypre_ParCSRMatrix  **A_array = (mgr_data -> A_array);
+   hypre_ParCSRMatrix **A_array = (mgr_data -> A_array);
    hypre_ParVector    **F_array = (mgr_data -> F_array);
    hypre_ParVector    **U_array = (mgr_data -> U_array);
 
@@ -35,10 +35,10 @@ hypre_MGRSolve( void               *mgr_vdata,
    HYPRE_Int            logging = (mgr_data -> logging);
    HYPRE_Int            print_level = (mgr_data -> print_level);
    HYPRE_Int            max_iter = (mgr_data -> max_iter);
-   HYPRE_Real           *norms = (mgr_data -> rel_res_norms);
-   hypre_ParVector      *Vtemp = (mgr_data -> Vtemp);
+   HYPRE_Real          *norms = (mgr_data -> rel_res_norms);
+   hypre_ParVector     *Vtemp = (mgr_data -> Vtemp);
    //   hypre_ParVector      *Utemp = (mgr_data -> Utemp);
-   hypre_ParVector      *residual;
+   hypre_ParVector     *residual;
 
    HYPRE_Complex        fp_zero = 0.0;
    HYPRE_Complex        fp_one = 1.0;
@@ -507,6 +507,7 @@ hypre_MGRCycle( void              *mgr_vdata,
 {
    MPI_Comm               comm;
    hypre_ParMGRData      *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+   hypre_Solver          *aff_base;
 
    HYPRE_Int              local_size;
    HYPRE_Int              level;
@@ -984,10 +985,23 @@ hypre_MGRCycle( void              *mgr_vdata,
             if (Frelax_type[level] == 2)
             {
                /* Do F-relaxation using AMG */
-               fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid],
-                                      A_ff_array[fine_grid],
-                                      F_fine_array[coarse_grid],
-                                      U_fine_array[coarse_grid]);
+               if (level == 0)
+               {
+                  /* TODO (VPM): unify with the next block */
+                  fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid],
+                                         A_ff_array[fine_grid],
+                                         F_fine_array[coarse_grid],
+                                         U_fine_array[coarse_grid]);
+               }
+               else
+               {
+                  aff_base = (hypre_Solver*) (mgr_data -> aff_solver)[level];
+
+                  hypre_SolverSolve(aff_base)((HYPRE_Solver) (mgr_data -> aff_solver)[level],
+                                              (HYPRE_Matrix) A_ff_array[level],
+                                              (HYPRE_Vector) F_fine_array[level + 1],
+                                              (HYPRE_Vector) U_fine_array[level + 1]);
+               }
             }
             else
             {

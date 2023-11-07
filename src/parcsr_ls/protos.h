@@ -2181,6 +2181,7 @@ HYPRE_Int hypre_MGRSetFSolver( void *mgr_vdata,
                                HYPRE_Int (*fine_grid_solver_solve)(void*, void*, void*, void*),
                                HYPRE_Int (*fine_grid_solver_setup)(void*, void*, void*, void*),
                                void *fsolver );
+HYPRE_Int hypre_MGRSetFSolverAtLevel( HYPRE_Int level, void *mgr_vdata, void *fsolver );
 HYPRE_Int hypre_MGRSetup( void *mgr_vdata, hypre_ParCSRMatrix *A,
                           hypre_ParVector *f, hypre_ParVector *u );
 HYPRE_Int hypre_MGRSolve( void *mgr_vdata, hypre_ParCSRMatrix *A,

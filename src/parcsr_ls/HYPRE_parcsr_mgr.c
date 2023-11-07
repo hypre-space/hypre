@@ -223,6 +223,20 @@ HYPRE_MGRSetFSolver(HYPRE_Solver          solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_MGRSetFSolverAtLevel
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetFSolverAtLevel(HYPRE_Int     level,
+                           HYPRE_Solver  solver,
+                           HYPRE_Solver  fsolver )
+{
+   return ( hypre_MGRSetFSolverAtLevel( level,
+                                        (void *) solver,
+                                        (void *) fsolver ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_MGRBuildAff
  *--------------------------------------------------------------------------*/
 
