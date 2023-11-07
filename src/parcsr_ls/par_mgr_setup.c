@@ -871,9 +871,12 @@ hypre_MGRSetup( void               *mgr_vdata,
    {
       for (j = 1; j < (old_num_coarse_levels); j++)
       {
-         aff_base = (hypre_Solver*) aff_solver[j];
-         hypre_SolverDestroy(aff_base)((HYPRE_Solver) (aff_base));
-         aff_solver[j] = NULL;
+         if (aff_solver[j])
+         {
+            aff_base = (hypre_Solver*) aff_solver[j];
+            hypre_SolverDestroy(aff_base)((HYPRE_Solver) (aff_base));
+            aff_solver[j] = NULL;
+         }
       }
       if (mgr_data -> fsolver_mode == 2)
       {

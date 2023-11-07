@@ -349,8 +349,11 @@ hypre_MGRDestroy( void *data )
    {
       for (i = 1; i < (num_coarse_levels); i++)
       {
-         aff_base = (hypre_Solver*) (mgr_data -> aff_solver)[i];
-         hypre_SolverDestroy(aff_base)((HYPRE_Solver) (aff_base));
+         if ((mgr_data -> aff_solver)[i])
+         {
+            aff_base = (hypre_Solver*) (mgr_data -> aff_solver)[i];
+            hypre_SolverDestroy(aff_base)((HYPRE_Solver) (aff_base));
+         }
       }
       if (mgr_data -> fsolver_mode == 2)
       {
