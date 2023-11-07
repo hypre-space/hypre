@@ -129,9 +129,8 @@ hypre_GetDeviceMaxShmemSize(hypre_int  device_id,
 {
    hypre_int max_size = 0, max_size_optin = 0;
 
-   hypre_Handle *handle = hypre_handle();
-
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_Handle *handle = hypre_handle();
    if (!hypre_HandleDeviceMaxShmemPerBlockInited(handle))
    {
       if (device_id == -1)
@@ -441,7 +440,9 @@ HYPRE_Finalize(void)
 HYPRE_Int
 HYPRE_PrintDeviceInfo(void)
 {
-   hypre_int dev;
+#if defined(HYPRE_USING_GPU)
+   hypre_int dev = 0;
+#endif
 
 #if defined(HYPRE_USING_CUDA)
    struct cudaDeviceProp deviceProp;
