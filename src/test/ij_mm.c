@@ -2373,19 +2373,19 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildParRotate7pt( HYPRE_Int                  argc,
+BuildParRotate7pt( HYPRE_Int            argc,
                    char                *argv[],
-                   HYPRE_Int                  arg_index,
+                   HYPRE_Int            arg_index,
                    HYPRE_ParCSRMatrix  *A_ptr     )
 {
    HYPRE_Int                 nx, ny;
    HYPRE_Int                 P, Q;
 
-   HYPRE_ParCSRMatrix  A;
+   HYPRE_ParCSRMatrix        A;
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 p, q;
-   HYPRE_Real          eps, alpha;
+   HYPRE_Real                eps = 0.0, alpha = 1.0;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
