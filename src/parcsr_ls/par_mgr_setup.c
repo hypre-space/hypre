@@ -86,7 +86,8 @@ hypre_MGRSetup( void               *mgr_vdata,
    hypre_ParCSRMatrix  *A_CF = NULL;
    hypre_ParCSRMatrix  *A_CC = NULL;
 #endif
-   HYPRE_Solver **aff_solver = (mgr_data -> aff_solver);
+   hypre_Solver         *aff_base;
+   HYPRE_Solver        **aff_solver = (mgr_data -> aff_solver);
    hypre_ParCSRMatrix  **A_ff_array = (mgr_data -> A_ff_array);
    hypre_ParVector    **F_fine_array = (mgr_data -> F_fine_array);
    hypre_ParVector    **U_fine_array = (mgr_data -> U_fine_array);
@@ -872,15 +873,14 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
          if (aff_solver[j])
          {
-            hypre_BoomerAMGDestroy(aff_solver[j]);
+            aff_base = (hypre_Solver*) aff_solver[j];
+            hypre_SolverDestroy(aff_base)((HYPRE_Solver) (aff_base));
+            aff_solver[j] = NULL;
          }
       }
       if (mgr_data -> fsolver_mode == 2)
       {
-         if (aff_solver[0])
-         {
-            hypre_BoomerAMGDestroy(aff_solver[0]);
-         }
+         hypre_BoomerAMGDestroy(aff_solver[0]);
       }
    }
 
@@ -1527,7 +1527,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                   (mgr_data -> fsolver_mode) = 1;
                }
             }
-            else
+            else if (aff_solver[lev])
             {
                hypre_sprintf(msg, "Warning!! User-prescribed F-solver for the first level\n\
                              reduction (set in HYPRE_MGRSetFSolver()) only supports AMG\n\
@@ -1535,6 +1535,19 @@ hypre_MGRSetup( void               *mgr_vdata,
                              Frelax_type[lev]);
                hypre_error_w_msg(0, msg);
             }
+         }
+         else if (aff_solver[lev])
+         {
+            aff_base = (hypre_Solver*) aff_solver[lev];
+
+            /* Save A_FF splitting */
+            A_ff_array[lev] = A_FF;
+
+            /* Call setup function */
+            hypre_SolverSetup(aff_base)((HYPRE_Solver) aff_solver[lev],
+                                        (HYPRE_Matrix) A_ff_array[lev],
+                                        (HYPRE_Vector) F_fine_array[lev + 1],
+                                        (HYPRE_Vector) U_fine_array[lev + 1]);
          }
          else if (Frelax_type[lev] == 2) /* Construct default AMG solver */
          {
