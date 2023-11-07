@@ -2380,6 +2380,8 @@ main( hypre_int argc,
    HYPRE_Real            final_res_norm;
 
    HYPRE_Int             num_procs, myid;
+   HYPRE_Int             device_id = -1;
+   HYPRE_Int             lazy_device_init = 0;
    HYPRE_Int             time_index;
 
    HYPRE_Int             n_pre, n_post;
@@ -2471,12 +2473,29 @@ main( hypre_int argc,
     * GPU Device binding
     * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
-   hypre_bind_device(myid, num_procs, comm);
+   for (arg_index = 1; arg_index < argc; arg_index ++)
+   {
+      if (strcmp(argv[arg_index], "-lazy_device_init") == 0)
+      {
+         lazy_device_init = atoi(argv[++arg_index]);
+      }
+      else if (strcmp(argv[arg_index], "-device_id") == 0)
+      {
+         device_id = atoi(argv[++arg_index]);
+      }
+   }
+
+   hypre_bind_device(device_id, myid, num_procs, comm);
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
    HYPRE_Initialize();
+
+   if (!lazy_device_init)
+   {
+      HYPRE_DeviceInitialize();
+   }
 
    /*-----------------------------------------------------------
     * Set defaults
