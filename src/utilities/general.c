@@ -274,9 +274,8 @@ hypre_GetDeviceLastError(void)
 HYPRE_Int
 HYPRE_DeviceInitialize(void)
 {
-   hypre_Handle *handle = hypre_handle();
-
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+   hypre_Handle *handle = hypre_handle();
 
 #if !defined(HYPRE_USING_SYCL)
    /* With sycl, cannot call hypre_GetDeviceLastError() until after device and queue setup */
