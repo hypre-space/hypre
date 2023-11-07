@@ -84,6 +84,7 @@ void gpu_alloc(void **ptr, size_t size)
 
 void gpu_free(void *ptr)
 {
+   HYPRE_UNUSED_VAR(ptr);
    return;
 }
 
@@ -739,6 +740,11 @@ void runjob5( HYPRE_ParCSRMatrix parcsr_A,
    hypre_ParCSRMatrixDestroy(parcsr_B_host);
    hypre_ParCSRMatrixDestroy(parcsr_D);
    hypre_ParCSRMatrixDestroy(parcsr_error_host);
+#else
+   HYPRE_UNUSED_VAR(parcsr_A);
+   HYPRE_UNUSED_VAR(print_system);
+   HYPRE_UNUSED_VAR(rep);
+   HYPRE_UNUSED_VAR(verify);
 #endif
 }
 
