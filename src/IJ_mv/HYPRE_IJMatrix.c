@@ -218,7 +218,7 @@ HYPRE_IJMatrixSetPrintLevel( HYPRE_IJMatrix matrix,
       return hypre_error_flag;
    }
 
-   hypre_IJMatrixPrintLevel(ijmatrix) = !!(print_level);
+   hypre_IJMatrixPrintLevel(ijmatrix) = (print_level > 0) ? print_level : 0;
 
    return hypre_error_flag;
 }
