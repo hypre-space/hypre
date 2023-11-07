@@ -48,9 +48,9 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([M4_HYPRE_NAME],    [hypre])
-m4_define([M4_HYPRE_VERSION], [2.29.0])
-m4_define([M4_HYPRE_NUMBER],  [22900])
-m4_define([M4_HYPRE_DATE],    [2023/06/22])
+m4_define([M4_HYPRE_VERSION], [2.30.0])
+m4_define([M4_HYPRE_NUMBER],  [23000])
+m4_define([M4_HYPRE_DATE],    [2023/11/06])
 m4_define([M4_HYPRE_TIME],    [00:00:00])
 m4_define([M4_HYPRE_BUGS],    [https://github.com/hypre-space/hypre/issues])
 m4_define([M4_HYPRE_SRCDIR],  [`pwd`])
@@ -2757,6 +2757,13 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         if test "x${HYPRE_SYCL_TARGET_BACKEND}" != "x"
         then
            LDFLAGS+=" -Xsycl-target-backend ${HYPRE_SYCL_TARGET_BACKEND}"
+        fi
+
+        dnl Shared build needs the sycl compiler
+        if test "$hypre_using_shared" = "yes"
+        then
+           SYCLFLAGS="${SHARED_COMPILE_FLAG} ${SYCLFLAGS}"
+           BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG}"
         fi
 
         dnl (Ab)Use CUFLAGS to capture SYCL compilation flags

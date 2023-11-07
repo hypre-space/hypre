@@ -12,11 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
-#include "par_amg.h"
-#ifdef HYPRE_USING_DSUPERLU
-#include <math.h>
-#include "superlu_ddefs.h"
-#endif
+
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGCreate
  *--------------------------------------------------------------------------*/
@@ -25,6 +21,7 @@ void *
 hypre_BoomerAMGCreate( void )
 {
    hypre_ParAMGData  *amg_data;
+   hypre_Solver      *base;
 
    /* setup params */
    HYPRE_Int    max_levels;
@@ -315,6 +312,12 @@ hypre_BoomerAMGCreate( void )
     *-----------------------------------------------------------------------*/
 
    amg_data = hypre_CTAlloc(hypre_ParAMGData, 1, HYPRE_MEMORY_HOST);
+   base     = (hypre_Solver*) amg_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_BoomerAMGSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_BoomerAMGSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) HYPRE_BoomerAMGDestroy;
 
    /* memory location will be reset at the setup */
    hypre_ParAMGDataMemoryLocation(amg_data) = memory_location;
@@ -512,11 +515,14 @@ hypre_BoomerAMGCreate( void )
    hypre_ParAMGDataNewComm(amg_data) = hypre_MPI_COMM_NULL;
 
    /* for Gaussian elimination coarse grid solve */
-   hypre_ParAMGDataGSSetup(amg_data) = 0;
-   hypre_ParAMGDataAMat(amg_data) = NULL;
-   hypre_ParAMGDataAInv(amg_data) = NULL;
-   hypre_ParAMGDataBVec(amg_data) = NULL;
-   hypre_ParAMGDataCommInfo(amg_data) = NULL;
+   hypre_ParAMGDataGSSetup(amg_data)          = 0;
+   hypre_ParAMGDataGEMemoryLocation(amg_data) = HYPRE_MEMORY_UNDEFINED;
+   hypre_ParAMGDataCommInfo(amg_data)         = NULL;
+   hypre_ParAMGDataAMat(amg_data)             = NULL;
+   hypre_ParAMGDataAWork(amg_data)            = NULL;
+   hypre_ParAMGDataAPiv(amg_data)             = NULL;
+   hypre_ParAMGDataBVec(amg_data)             = NULL;
+   hypre_ParAMGDataUVec(amg_data)             = NULL;
 
    hypre_ParAMGDataNonGalerkinTol(amg_data) = nongalerkin_tol;
    hypre_ParAMGDataNonGalTolArray(amg_data) = NULL;
@@ -881,9 +887,17 @@ hypre_BoomerAMGDestroy( void *data )
       hypre_TFree(hypre_ParAMGDataCPointsLocalMarker(amg_data), memory_location);
       hypre_TFree(hypre_ParAMGDataFPointsMarker(amg_data), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParAMGDataIsolatedFPointsMarker(amg_data), HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_ParAMGDataAMat(amg_data), HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_ParAMGDataAInv(amg_data), HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_ParAMGDataBVec(amg_data), HYPRE_MEMORY_HOST);
+
+      /* Direct solver for the coarsest level */
+#if defined(HYPRE_USING_MAGMA)
+      hypre_TFree(hypre_ParAMGDataAPiv(amg_data),  HYPRE_MEMORY_HOST);
+#else
+      hypre_TFree(hypre_ParAMGDataAPiv(amg_data),  hypre_ParAMGDataGEMemoryLocation(amg_data));
+#endif
+      hypre_TFree(hypre_ParAMGDataAMat(amg_data),  hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataAWork(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataBVec(amg_data),  hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataUVec(amg_data),  hypre_ParAMGDataGEMemoryLocation(amg_data));
       hypre_TFree(hypre_ParAMGDataCommInfo(amg_data), HYPRE_MEMORY_HOST);
 
       if (new_comm != hypre_MPI_COMM_NULL)

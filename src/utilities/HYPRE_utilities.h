@@ -79,6 +79,11 @@ typedef int HYPRE_Int;
 typedef float HYPRE_Real;
 #define HYPRE_REAL_MAX FLT_MAX
 #define HYPRE_REAL_MIN FLT_MIN
+#if defined(FLT_TRUE_MIN)
+#define HYPRE_REAL_TRUE_MIN FLT_TRUE_MIN
+#else
+#define HYPRE_REAL_TRUE_MIN FLT_MIN
+#endif
 #define HYPRE_REAL_EPSILON FLT_EPSILON
 #define HYPRE_REAL_MIN_EXP FLT_MIN_EXP
 #define HYPRE_MPI_REAL MPI_FLOAT
@@ -87,6 +92,11 @@ typedef float HYPRE_Real;
 typedef long double HYPRE_Real;
 #define HYPRE_REAL_MAX LDBL_MAX
 #define HYPRE_REAL_MIN LDBL_MIN
+#if defined(LDBL_TRUE_MIN)
+#define HYPRE_REAL_TRUE_MIN LDBL_TRUE_MIN
+#else
+#define HYPRE_REAL_TRUE_MIN LDBL_MIN
+#endif
 #define HYPRE_REAL_EPSILON LDBL_EPSILON
 #define HYPRE_REAL_MIN_EXP DBL_MIN_EXP
 #define HYPRE_MPI_REAL MPI_LONG_DOUBLE
@@ -95,6 +105,11 @@ typedef long double HYPRE_Real;
 typedef double HYPRE_Real;
 #define HYPRE_REAL_MAX DBL_MAX
 #define HYPRE_REAL_MIN DBL_MIN
+#if defined(DBL_TRUE_MIN)
+#define HYPRE_REAL_TRUE_MIN DBL_TRUE_MIN
+#else
+#define HYPRE_REAL_TRUE_MIN DBL_MIN
+#endif
 #define HYPRE_REAL_EPSILON DBL_EPSILON
 #define HYPRE_REAL_MIN_EXP DBL_MIN_EXP
 #define HYPRE_MPI_REAL MPI_DOUBLE
@@ -255,7 +270,16 @@ typedef enum _HYPRE_MemoryLocation
    HYPRE_MEMORY_DEVICE
 } HYPRE_MemoryLocation;
 
+/**
+ * (Optional) Sets the default (abstract) memory location.
+ **/
+
 HYPRE_Int HYPRE_SetMemoryLocation(HYPRE_MemoryLocation memory_location);
+
+/**
+ * (Optional) Gets a pointer to the default (abstract) memory location.
+ **/
+
 HYPRE_Int HYPRE_GetMemoryLocation(HYPRE_MemoryLocation *memory_location);
 
 #include <stdlib.h>
@@ -271,8 +295,23 @@ typedef enum _HYPRE_ExecutionPolicy
    HYPRE_EXEC_DEVICE
 } HYPRE_ExecutionPolicy;
 
+/**
+ * (Optional) Sets the default execution policy.
+ **/
+
 HYPRE_Int HYPRE_SetExecutionPolicy(HYPRE_ExecutionPolicy exec_policy);
+
+/**
+ * (Optional) Gets a pointer to the default execution policy.
+ **/
+
 HYPRE_Int HYPRE_GetExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy);
+
+/**
+ * (Optional) Returns a string denoting the execution policy passed as input.
+ **/
+
+const char* HYPRE_GetExecutionPolicyName(HYPRE_ExecutionPolicy exec_policy);
 
 /*--------------------------------------------------------------------------
  * HYPRE UMPIRE
@@ -304,6 +343,39 @@ HYPRE_Int HYPRE_SetSpMVUseVendor( HYPRE_Int use_vendor );
 #define HYPRE_SetSpGemmUseCusparse(use_vendor) HYPRE_SetSpGemmUseVendor(use_vendor)
 HYPRE_Int HYPRE_SetSpGemmUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int HYPRE_SetUseGpuRand( HYPRE_Int use_curand );
+
+/*--------------------------------------------------------------------------
+ * Base objects
+ *--------------------------------------------------------------------------*/
+
+/* RDF: How should we provide reference documentation for this (and above)? */
+
+/* Base public solver struct */
+struct hypre_Solver_struct;
+typedef struct hypre_Solver_struct *HYPRE_Solver;
+
+/* Base public matrix struct */
+struct hypre_Matrix_struct;
+typedef struct hypre_Matrix_struct *HYPRE_Matrix;
+
+/* Base public vector struct */
+struct hypre_Vector_struct;
+typedef struct hypre_Vector_struct *HYPRE_Vector;
+
+/* Base function pointers */
+
+/* RDF: Note that only PtrToSolverFcn is needed at the user level right now to
+ * keep backward compatibility with SetPrecond().  In general, do we want these
+ * at the user level?  I guess it doesn't hurt. */
+
+/* RDF: Also note that PtrToSolverFcn is defined again in 'HYPRE_krylov.h' and
+ * probably needs to be for the reference manual. */
+
+typedef HYPRE_Int (*HYPRE_PtrToSolverFcn)(HYPRE_Solver,
+                                          HYPRE_Matrix,
+                                          HYPRE_Vector,
+                                          HYPRE_Vector);
+typedef HYPRE_Int (*HYPRE_PtrToDestroyFcn)(HYPRE_Solver);
 
 #ifdef __cplusplus
 }

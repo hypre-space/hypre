@@ -699,3 +699,31 @@ HYPRE_GetExecutionPolicy(HYPRE_ExecutionPolicy *exec_policy)
 
    return hypre_error_flag;
 }
+
+const char*
+HYPRE_GetExecutionPolicyName(HYPRE_ExecutionPolicy exec_policy)
+{
+   switch (exec_policy)
+   {
+      case HYPRE_EXEC_HOST:
+         return "Host";
+
+      case HYPRE_EXEC_DEVICE:
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_CUDA)
+         return "Device (CUDA)";
+#elif defined(HYPRE_USING_HIP)
+         return "Device (HIP)";
+#elif defined(HYPRE_USING_SYCL)
+         return "Device (SYCL)";
+#else
+         return "Device (OpenMP)";
+#endif
+#else
+         return "Host";
+#endif
+      case HYPRE_EXEC_UNDEFINED:
+      default:
+         return "Undefined";
+   }
+}
