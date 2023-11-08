@@ -73,7 +73,6 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    omp_set_default_device(device_id);
-   hypre_HandleDevice(hypre_handle_) = device_id;
 #endif
 
 #if defined(HYPRE_USING_CUDA)
