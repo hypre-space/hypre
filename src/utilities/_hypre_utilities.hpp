@@ -533,6 +533,8 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csrilu0_buffer_size    rocsparse_scsrilu0_buffer_size
 #define hypre_rocsparse_csrilu0_analysis       rocsparse_scsrilu0_analysis
 #define hypre_rocsparse_csrilu0                rocsparse_scsrilu0
+#define hypre_rocsparse_csritilu0_compute      rocsparse_scsritilu0_compute
+#define hypre_rocsparse_csritilu0_history      rocsparse_scsritilu0_history
 
 /* rocSOLVER */
 
@@ -590,6 +592,8 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csrilu0_buffer_size    rocsparse_dcsrilu0_buffer_size
 #define hypre_rocsparse_csrilu0_analysis       rocsparse_dcsrilu0_analysis
 #define hypre_rocsparse_csrilu0                rocsparse_dcsrilu0
+#define hypre_rocsparse_csritilu0_compute      rocsparse_dcsritilu0_compute
+#define hypre_rocsparse_csritilu0_history      rocsparse_dcsritilu0_history
 
 /* rocSOLVER */
 

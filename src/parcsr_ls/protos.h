@@ -2528,12 +2528,21 @@ HYPRE_Int hypre_ILUSetupILUTRAS( hypre_ParCSRMatrix *A, HYPRE_Int lfil,
                                  hypre_ParCSRMatrix **Uptr );
 
 /* par_ilu_setup_device.c */
+#if defined(HYPRE_USING_GPU)
 HYPRE_Int hypre_ILUSetupILUDevice( HYPRE_Int ilu_type, hypre_ParCSRMatrix *A,
                                    HYPRE_Int lfil, HYPRE_Real *tol, HYPRE_Int *perm_data,
                                    HYPRE_Int *qperm_data, HYPRE_Int n, HYPRE_Int nLU,
                                    hypre_CSRMatrix **BLUptr, hypre_ParCSRMatrix **matSptr,
                                    hypre_CSRMatrix **Eptr, hypre_CSRMatrix **Fptr,
                                    HYPRE_Int tri_solve );
+
+#if defined (HYPRE_USING_ROCSPARSE)
+HYPRE_Int hypre_ILUSetupIterativeILU0Device( hypre_CSRMatrix *A, HYPRE_Int type,
+                                             HYPRE_Int option, HYPRE_Int max_iter,
+                                             HYPRE_Real tolerance, HYPRE_Int *num_iter_ptr,
+                                             HYPRE_Real **history_ptr, hypre_CSRMatrix **B_ptr);
+#endif
+#endif
 
 /* par_ilu_solve.c */
 HYPRE_Int hypre_ILUSolve( void *ilu_vdata, hypre_ParCSRMatrix *A,

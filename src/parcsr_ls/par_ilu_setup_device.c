@@ -373,4 +373,208 @@ hypre_ILUSetupILUDevice(HYPRE_Int               ilu_type,
    return hypre_error_flag;
 }
 
+#if defined (HYPRE_USING_ROCSPARSE)
+
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetupIterativeILU0Device
+ *
+ * This function computes an ILU0 iteratively with rocSPARSE.
+ *
+ * Input arguments:
+ *   A - input matrix
+ *   type - algorithm for computing iterative ILU0
+ *   option - internal flags used by rocSPARSE
+ *   max_iter - max. number of iterations
+ *   tolerance - stopping criteria in iterative algorithm
+ *
+ * Output arguments:
+ *   num_iter_ptr - number of iterations
+ *   history_ptr - list of corrections and residual values for each iteration
+ *                 (computed only when residuals_ptr points to NULL at entrance)
+ *   B_ptr - resulting matrix (note the space for B_ptr is allocated here)
+ *
+ * Note: This function requires rocSPARSE 2.4.0 at least.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ILUSetupIterativeILU0Device(hypre_CSRMatrix  *A,
+                                  HYPRE_Int         type,
+                                  HYPRE_Int         option,
+                                  HYPRE_Int         max_iter,
+                                  HYPRE_Real        tolerance,
+                                  HYPRE_Int        *num_iter_ptr,
+                                  HYPRE_Real      **history_ptr,
+                                  hypre_CSRMatrix **B_ptr)
+{
+   /* Input matrix data */
+   HYPRE_Int                 num_rows      = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int                 num_cols      = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int                 num_nonzeros  = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int                *A_i           = hypre_CSRMatrixI(A);
+   HYPRE_Int                *A_j           = hypre_CSRMatrixJ(A);
+   HYPRE_Complex            *A_data        = hypre_CSRMatrixData(A);
+
+   /* Output matrix */
+   hypre_CSRMatrix          *B;
+   HYPRE_Complex            *B_data;
+
+   /* Vendor math sparse libraries data */
+   void                     *buffer        = NULL;
+   rocsparse_index_base      idx_base      = rocsparse_index_base_zero;
+   rocsparse_handle          handle        = hypre_HandleCusparseHandle(hypre_handle());
+   rocsparse_datatype        data_type;
+   hypre_int                 version;
+   size_t                    buffer_size;
+   HYPRE_Int                 history_size;
+   HYPRE_Complex            *d_history;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("CSRMatrixITILU0");
+
+   /* Set default output */
+   *B_ptr = A;
+   *num_iter_ptr = 0;
+
+   /*-------------------------------------------------------------------------------------
+    * 0. Sanity checks
+    *-------------------------------------------------------------------------------------*/
+
+   HYPRE_ROCSPARSE_CALL(rocsparse_get_version(handle, &version));
+   if (version < 200400)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Iterative ILU0 requires rocSPARSE 2.4.0 at least!");
+      return hypre_error_flag;
+   }
+
+   if (num_rows != num_cols)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not a square matrix!");
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_COMPLEX)
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Complex data type is not supported!");
+   return hypre_error_flag;
+
+#elif defined(HYPRE_LONG_DOUBLE)
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Long double type is not supported!");
+   return hypre_error_flag;
+
+#elif defined(HYPRE_SINGLE)
+   data_type = rocsparse_datatype_f32_r;
+
+#else
+   data_type = rocsparse_datatype_f64_r;
+#endif
+
+   /*-------------------------------------------------------------------------------------
+    * 1. Sort columns belonging to each row, then copy result to new matrix
+    *-------------------------------------------------------------------------------------*/
+
+   hypre_CSRMatrixSortRow(A);
+
+   /* Build B */
+   B = hypre_CSRMatrixClone(A, 1);
+   B_data = hypre_CSRMatrixData(B);
+
+   /*-------------------------------------------------------------------------------------
+    * 2. Get work array size
+    *-------------------------------------------------------------------------------------*/
+
+   HYPRE_ROCSPARSE_CALL(rocsparse_csritilu0_buffer_size(handle,
+                                                        (rocsparse_itilu0_alg) type,
+                                                        (rocsparse_int) option,
+                                                        (rocsparse_int) max_iter,
+                                                        (rocsparse_int) num_rows,
+                                                        (rocsparse_int) num_nonzeros,
+                                                        (const rocsparse_int*) A_i,
+                                                        (const rocsparse_int*) A_j,
+                                                        idx_base,
+                                                        data_type,
+                                                        &buffer_size));
+
+   /*-------------------------------------------------------------------------------------
+    * 3. Create work array on the device
+    *-------------------------------------------------------------------------------------*/
+
+   buffer = hypre_TAlloc(char, buffer_size, HYPRE_MEMORY_DEVICE);
+
+   /*-------------------------------------------------------------------------------------
+    * 4. Perform the analysis (pre-processing)
+    *-------------------------------------------------------------------------------------*/
+
+   hypre_GpuProfilingPushRange("Analysis");
+   HYPRE_ROCSPARSE_CALL(rocsparse_csritilu0_preprocess(handle,
+                                                       (rocsparse_itilu0_alg) type,
+                                                       (rocsparse_int) option,
+                                                       (rocsparse_int) max_iter,
+                                                       (rocsparse_int) num_rows,
+                                                       (rocsparse_int) num_nonzeros,
+                                                       (const rocsparse_int*) A_i,
+                                                       (const rocsparse_int*) A_j,
+                                                       idx_base,
+                                                       data_type,
+                                                       buffer_size,
+                                                       buffer));
+   hypre_GpuProfilingPopRange();
+
+   /*-------------------------------------------------------------------------------------
+    * 5. Compute the numerical factorization iteratively
+    *-------------------------------------------------------------------------------------*/
+
+   *num_iter_ptr = max_iter;
+   hypre_GpuProfilingPushRange("Factorization");
+   HYPRE_ROCSPARSE_CALL(hypre_rocsparse_csritilu0_compute(handle,
+                                                          (rocsparse_itilu0_alg) type,
+                                                          (rocsparse_int) option,
+                                                          (rocsparse_int*) num_iter_ptr,
+                                                          tolerance,
+                                                          (rocsparse_int) num_rows,
+                                                          (rocsparse_int) num_nonzeros,
+                                                          (const rocsparse_int*) A_i,
+                                                          (const rocsparse_int*) A_j,
+                                                          (const HYPRE_Complex*) A_data,
+                                                          B_data,
+                                                          idx_base,
+                                                          buffer_size,
+                                                          buffer));
+   hypre_GpuProfilingPopRange();
+
+   /*-------------------------------------------------------------------------------------
+    * 6. Compute history if requested (*history_ptr == NULL)
+    *-------------------------------------------------------------------------------------*/
+
+   if (*history_ptr == NULL)
+   {
+      history_size = 2 * max_iter;
+      *history_ptr = hypre_TAlloc(HYPRE_Complex, history_size, HYPRE_MEMORY_HOST);
+      d_history = hypre_TAlloc(HYPRE_Complex, history_size, HYPRE_MEMORY_DEVICE);
+
+      HYPRE_ROCSPARSE_CALL(hypre_rocsparse_csritilu0_history(handle,
+                                                             (rocsparse_itilu0_alg) type,
+                                                             (rocsparse_int*) num_iter_ptr,
+                                                             d_history,
+                                                             buffer_size,
+                                                             buffer));
+
+      hypre_TMemcpy(*history_ptr, d_history, HYPRE_Complex, history_size,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(d_history, HYPRE_MEMORY_DEVICE);
+   }
+
+   /*-------------------------------------------------------------------------------------
+    * 7. Free memory
+    *-------------------------------------------------------------------------------------*/
+
+   /* Free buffer */
+   hypre_TFree(buffer, HYPRE_MEMORY_DEVICE);
+
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+#endif /* defined(HYPRE_USING_ROCSPARSE) */
+
 #endif /* defined(HYPRE_USING_GPU) */
