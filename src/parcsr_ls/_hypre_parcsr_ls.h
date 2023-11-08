@@ -3957,10 +3957,14 @@ HYPRE_Int hypre_ILUSetupILUDevice( HYPRE_Int ilu_type, hypre_ParCSRMatrix *A,
                                    HYPRE_Int tri_solve );
 
 #if defined (HYPRE_USING_ROCSPARSE)
+HYPRE_Int hypre_ILUSetupIterativeDevice( hypre_ParILUData *ilu_data, hypre_ParCSRMatrix *A,
+                                         HYPRE_Int n, HYPRE_Int nLU, hypre_CSRMatrix **BLUptr,
+                                         hypre_ParCSRMatrix **matSptr, hypre_CSRMatrix **Eptr,
+                                         hypre_CSRMatrix **Fptr );
 HYPRE_Int hypre_ILUSetupIterativeILU0Device( hypre_CSRMatrix *A, HYPRE_Int type,
                                              HYPRE_Int option, HYPRE_Int max_iter,
                                              HYPRE_Real tolerance, HYPRE_Int *num_iter_ptr,
-                                             HYPRE_Real **history_ptr, hypre_CSRMatrix **B_ptr);
+                                             HYPRE_Real **history_ptr );
 #endif
 #endif
 
