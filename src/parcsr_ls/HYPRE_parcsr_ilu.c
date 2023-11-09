@@ -96,6 +96,16 @@ HYPRE_ILUSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ILUSetIterativeSetup
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ILUSetIterativeSetup( HYPRE_Solver solver, HYPRE_Int iter_setup )
+{
+   return hypre_ILUSetIterativeSetup( solver, iter_setup );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ILUSetTriSolve
  *--------------------------------------------------------------------------*/
 

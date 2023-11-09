@@ -376,7 +376,7 @@ hypre_ILUSetupILUDevice(HYPRE_Int               ilu_type,
 #if defined (HYPRE_USING_ROCSPARSE)
 
 /*--------------------------------------------------------------------------
- * hypre_ILUSetupIterativeDevice
+ * hypre_ILUIterativeSetupDevice
  *
  * Computes an ILU0 iteratively. See hypre_ILUSetupILUDevice for description
  * about the function arguments.
@@ -386,8 +386,9 @@ hypre_ILUSetupILUDevice(HYPRE_Int               ilu_type,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ILUSetupIterativeDevice(hypre_ParILUData       *ilu_data,
+hypre_ILUIterativeSetupDevice(hypre_ParILUData       *ilu_data,
                               hypre_ParCSRMatrix     *A,
+                              HYPRE_Int              *perm_data,
                               HYPRE_Int               n,
                               HYPRE_Int               nLU,
                               hypre_CSRMatrix       **BLUptr,
@@ -397,10 +398,9 @@ hypre_ILUSetupIterativeDevice(hypre_ParILUData       *ilu_data,
 {
    /* Input ILU data */
    HYPRE_Int                ilu_type            = hypre_ParILUDataIluType(ilu_data);
-   HYPRE_Int               *perm_data           = hypre_ParILUDataPerm(ilu_data);
-   HYPRE_Int                setup_iter_type     = 0;
-   HYPRE_Int                setup_iter_option   = 1;
-   HYPRE_Int                setup_max_iter      = 100;
+   HYPRE_Int                iter_setup_type     = 1;
+   HYPRE_Int                iter_setup_option   = 2;
+   HYPRE_Int                setup_max_iter      = 20;
    HYPRE_Complex            setup_tolerance     = 1.e-6;
    HYPRE_Int                setup_num_iter;
    HYPRE_Complex           *setup_history       = NULL;
@@ -492,7 +492,7 @@ hypre_ILUSetupIterativeDevice(hypre_ParILUData       *ilu_data,
       hypre_CSRMatrixPermute(hypre_ParCSRMatrixDiag(A), perm_data, rperm_data, &A_diag);
 
       /* Compute ILU0 on the device */
-      hypre_ILUSetupIterativeILU0Device(A_diag, setup_iter_type, setup_iter_option,
+      hypre_ILUSetupIterativeILU0Device(A_diag, iter_setup_type, iter_setup_option,
                                         setup_max_iter, setup_tolerance, &setup_num_iter,
                                         &setup_history);
 
@@ -838,7 +838,7 @@ hypre_ILUSetupIterativeILU0Device(hypre_CSRMatrix  *A,
     * 6. Compute history if requested (*history_ptr == NULL)
     *-------------------------------------------------------------------------------------*/
 
-   if (*history_ptr == NULL)
+   if (option & rocsparse_itilu0_option_convergence_history)
    {
       history_size = 2 * max_iter;
       *history_ptr = hypre_TAlloc(HYPRE_Complex, history_size, HYPRE_MEMORY_HOST);

@@ -1166,6 +1166,15 @@ typedef struct hypre_ParILUData_struct
    HYPRE_Int             nI;
    HYPRE_Int            *u_end; /* used when schur block is formed */
 
+   /* Iterative ILU parameters */
+   HYPRE_Int             iter_setup;
+   HYPRE_Int             iter_setup_type;
+   HYPRE_Int             iter_setup_option;
+   HYPRE_Int             setup_max_iter;
+   HYPRE_Int             setup_num_iter;
+   HYPRE_Complex         setup_tolerance;
+   HYPRE_Complex        *setup_history;
+
    /* temp vectors for solve phase */
    hypre_ParVector      *Utemp;
    hypre_ParVector      *Ftemp;
@@ -1306,6 +1315,15 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataRhs(ilu_data)                          ((ilu_data) -> rhs)
 #define hypre_ParILUDataX(ilu_data)                            ((ilu_data) -> x)
 #define hypre_ParILUDataReorderingType(ilu_data)               ((ilu_data) -> reordering_type)
+
+/* Iterative ILU setup */
+#define hypre_ParILUDataIterativeSetup(ilu_data)               ((ilu_data) -> iter_setup)
+#define hypre_ParILUDataIterativeSetupType(ilu_data)           ((ilu_data) -> iter_setup_type)
+#define hypre_ParILUDataIterativeSetupOption(ilu_data)         ((ilu_data) -> iter_setup_option)
+#define hypre_ParILUDataIterativeSetupMaxIter(ilu_data)        ((ilu_data) -> setup_max_iter)
+#define hypre_ParILUDataIterativeSetupNumIter(ilu_data)        ((ilu_data) -> setup_num_iter)
+#define hypre_ParILUDataIterativeSetupTolerance(ilu_data)      ((ilu_data) -> setup_tolerance)
+#define hypre_ParILUDataIterativeSetupHistory(ilu_data)        ((ilu_data) -> setup_history)
 
 /* Schur System */
 #define hypre_ParILUDataSchurGMRESKDim(ilu_data)               ((ilu_data) -> ss_kDim)
@@ -3739,6 +3757,7 @@ HYPRE_Int hypre_ILUSetDropThresholdArray( void *ilu_vdata, HYPRE_Real *threshold
 HYPRE_Int hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type );
 HYPRE_Int hypre_ILUSetMaxIter( void *ilu_vdata, HYPRE_Int max_iter );
 HYPRE_Int hypre_ILUSetTol( void *ilu_vdata, HYPRE_Real tol );
+HYPRE_Int hypre_ILUSetIterativeSetup( void *data, HYPRE_Int iter_setup );
 HYPRE_Int hypre_ILUSetTriSolve( void *ilu_vdata, HYPRE_Int tri_solve );
 HYPRE_Int hypre_ILUSetLowerJacobiIters( void *ilu_vdata, HYPRE_Int lower_jacobi_iters );
 HYPRE_Int hypre_ILUSetUpperJacobiIters( void *ilu_vdata, HYPRE_Int upper_jacobi_iters );
@@ -3957,10 +3976,10 @@ HYPRE_Int hypre_ILUSetupILUDevice( HYPRE_Int ilu_type, hypre_ParCSRMatrix *A,
                                    HYPRE_Int tri_solve );
 
 #if defined (HYPRE_USING_ROCSPARSE)
-HYPRE_Int hypre_ILUSetupIterativeDevice( hypre_ParILUData *ilu_data, hypre_ParCSRMatrix *A,
-                                         HYPRE_Int n, HYPRE_Int nLU, hypre_CSRMatrix **BLUptr,
-                                         hypre_ParCSRMatrix **matSptr, hypre_CSRMatrix **Eptr,
-                                         hypre_CSRMatrix **Fptr );
+HYPRE_Int hypre_ILUIterativeSetupDevice( hypre_ParILUData *ilu_data, hypre_ParCSRMatrix *A,
+                                         HYPRE_Int *perm, HYPRE_Int n, HYPRE_Int nLU,
+                                         hypre_CSRMatrix **BLUptr, hypre_ParCSRMatrix **matSptr,
+                                         hypre_CSRMatrix **Eptr, hypre_CSRMatrix **Fptr );
 HYPRE_Int hypre_ILUSetupIterativeILU0Device( hypre_CSRMatrix *A, HYPRE_Int type,
                                              HYPRE_Int option, HYPRE_Int max_iter,
                                              HYPRE_Real tolerance, HYPRE_Int *num_iter_ptr,

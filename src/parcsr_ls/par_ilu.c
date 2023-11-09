@@ -87,6 +87,15 @@ hypre_ILUCreate( void )
    hypre_ParILUDataNI(ilu_data)                           = 0;
    hypre_ParILUDataUEnd(ilu_data)                         = NULL;
 
+   /* Iterative setup variables */
+   hypre_ParILUDataIterativeSetup(ilu_data)               = 0;
+   hypre_ParILUDataIterativeSetupType(ilu_data)           = 0;
+   hypre_ParILUDataIterativeSetupOption(ilu_data)         = 1;
+   hypre_ParILUDataIterativeSetupMaxIter(ilu_data)        = 100;
+   hypre_ParILUDataIterativeSetupNumIter(ilu_data)        = 0;
+   hypre_ParILUDataIterativeSetupTolerance(ilu_data)      = 1.e-6;
+   hypre_ParILUDataIterativeSetupHistory(ilu_data)        = NULL;
+
    /* reordering_type default to use local RCM */
    hypre_ParILUDataReorderingType(ilu_data)               = 1;
 
@@ -452,6 +461,23 @@ hypre_ILUSetTriSolve( void      *ilu_vdata,
    hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
 
    hypre_ParILUDataTriSolve(ilu_data) = tri_solve;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetIterativeSetup
+ *
+ * Set ILU iterative setup
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ILUSetIterativeSetup( void      *ilu_vdata,
+                            HYPRE_Int  iter_setup)
+{
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+
+   hypre_ParILUDataIterativeSetup(ilu_data) = iter_setup;
 
    return hypre_error_flag;
 }

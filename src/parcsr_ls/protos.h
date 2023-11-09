@@ -2319,6 +2319,7 @@ HYPRE_Int hypre_ILUSetDropThresholdArray( void *ilu_vdata, HYPRE_Real *threshold
 HYPRE_Int hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type );
 HYPRE_Int hypre_ILUSetMaxIter( void *ilu_vdata, HYPRE_Int max_iter );
 HYPRE_Int hypre_ILUSetTol( void *ilu_vdata, HYPRE_Real tol );
+HYPRE_Int hypre_ILUSetIterativeSetup( void *data, HYPRE_Int iter_setup );
 HYPRE_Int hypre_ILUSetTriSolve( void *ilu_vdata, HYPRE_Int tri_solve );
 HYPRE_Int hypre_ILUSetLowerJacobiIters( void *ilu_vdata, HYPRE_Int lower_jacobi_iters );
 HYPRE_Int hypre_ILUSetUpperJacobiIters( void *ilu_vdata, HYPRE_Int upper_jacobi_iters );
@@ -2537,10 +2538,10 @@ HYPRE_Int hypre_ILUSetupILUDevice( HYPRE_Int ilu_type, hypre_ParCSRMatrix *A,
                                    HYPRE_Int tri_solve );
 
 #if defined (HYPRE_USING_ROCSPARSE)
-HYPRE_Int hypre_ILUSetupIterativeDevice( hypre_ParILUData *ilu_data, hypre_ParCSRMatrix *A,
-                                         HYPRE_Int n, HYPRE_Int nLU, hypre_CSRMatrix **BLUptr,
-                                         hypre_ParCSRMatrix **matSptr, hypre_CSRMatrix **Eptr,
-                                         hypre_CSRMatrix **Fptr );
+HYPRE_Int hypre_ILUIterativeSetupDevice( hypre_ParILUData *ilu_data, hypre_ParCSRMatrix *A,
+                                         HYPRE_Int *perm, HYPRE_Int n, HYPRE_Int nLU,
+                                         hypre_CSRMatrix **BLUptr, hypre_ParCSRMatrix **matSptr,
+                                         hypre_CSRMatrix **Eptr, hypre_CSRMatrix **Fptr );
 HYPRE_Int hypre_ILUSetupIterativeILU0Device( hypre_CSRMatrix *A, HYPRE_Int type,
                                              HYPRE_Int option, HYPRE_Int max_iter,
                                              HYPRE_Real tolerance, HYPRE_Int *num_iter_ptr,

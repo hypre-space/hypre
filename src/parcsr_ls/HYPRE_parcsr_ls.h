@@ -4508,6 +4508,16 @@ HYPRE_Int
 HYPRE_ILUSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter );
 
 /**
+ * (Optional) Set iterative setup of ILU. Works only for ILU0 and with rocSPARSE (device runs).
+ * Options are:
+ *
+ *    -  0 : non-iterative (default)
+ *    -  1 : iterative
+ **/
+HYPRE_Int
+HYPRE_ILUSetIterativeSetup( HYPRE_Solver solver, HYPRE_Int iter_setup );
+
+/**
  * (Optional) Set triangular solver type. Options are:
  *
  *    -  0 : iterative
