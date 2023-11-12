@@ -282,7 +282,7 @@ hypre_ILUSetup( void               *ilu_vdata,
             if (fill_level == 0)
             {
                /* BJ + device_ilu0() */
-               if (hypre_ParILUDataIterativeSetup(ilu_data))
+               if (hypre_ParILUDataIterativeSetupType(ilu_data))
                {
                   hypre_ILUIterativeSetupDevice(ilu_data, matA, perm, n, n,
                                                 &matBLU_d, &matS, &matE_d, &matF_d);

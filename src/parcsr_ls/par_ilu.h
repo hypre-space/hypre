@@ -52,12 +52,11 @@ typedef struct hypre_ParILUData_struct
    HYPRE_Int            *u_end; /* used when schur block is formed */
 
    /* Iterative ILU parameters */
-   HYPRE_Int             iter_setup;
    HYPRE_Int             iter_setup_type;
    HYPRE_Int             iter_setup_option;
    HYPRE_Int             setup_max_iter;
    HYPRE_Int             setup_num_iter;
-   HYPRE_Complex         setup_tolerance;
+   HYPRE_Real            setup_tolerance;
    HYPRE_Complex        *setup_history;
 
    /* temp vectors for solve phase */
@@ -202,7 +201,6 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataReorderingType(ilu_data)               ((ilu_data) -> reordering_type)
 
 /* Iterative ILU setup */
-#define hypre_ParILUDataIterativeSetup(ilu_data)               ((ilu_data) -> iter_setup)
 #define hypre_ParILUDataIterativeSetupType(ilu_data)           ((ilu_data) -> iter_setup_type)
 #define hypre_ParILUDataIterativeSetupOption(ilu_data)         ((ilu_data) -> iter_setup_option)
 #define hypre_ParILUDataIterativeSetupMaxIter(ilu_data)        ((ilu_data) -> setup_max_iter)

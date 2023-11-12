@@ -4508,14 +4508,55 @@ HYPRE_Int
 HYPRE_ILUSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter );
 
 /**
- * (Optional) Set iterative setup of ILU. Works only for ILU0 and with rocSPARSE (device runs).
- * Options are:
+ * (Optional) Set the algorithm type for compute the ILU factorization. Options are:
  *
- *    -  0 : non-iterative (default)
- *    -  1 : iterative
+ *    -  0 : Non-iterative algorithm (default)
+ *    -  1 : Asynchronous with in-place storage
+ *    -  2 : Asynchronous with explicit storage splitting
+ *    -  3 : Synchronous with explicit storage splitting
+ *    -  4 : Semi-synchronous with explicit storage splitting
+ *
+ * Note: Iterative ILU is available only for zero fill-in and it depends on rocSPARSE.
  **/
 HYPRE_Int
-HYPRE_ILUSetIterativeSetup( HYPRE_Solver solver, HYPRE_Int iter_setup );
+HYPRE_ILUSetIterativeSetupType( HYPRE_Solver solver, HYPRE_Int iter_setup_type );
+
+/**
+ * (Optional) Set the compute option for iterative ILU in a bitwise fashion. Options are:
+ *
+ *    -  1 (0x01): turn on log messages
+ *    -  2 (0x02): Use stopping tolerance to finish algorithm
+ *    -  4 (0x04): Compute correction norms
+ *    -  8 (0x08): Compute residual norms
+ *    - 16 (0x10): Save convergence history
+ *    - 32 (0x20): Use rocSPARSE's internal COO format
+ *
+ * The iterative ILU algorithm can terminate based on the maximum number of iterations (default)
+ * or a target tolerance. Enabling the second bit of \e iter_setup_option (0x02) activates the
+ * tolerance-based termination. In this case, residual norms are computed by default (0x08) and
+ * used in the termination criteria. To use correction norms for the termination criteria, enable
+ * the third bit (0x04) of \e iter_setup_option.
+ *
+ * Note: Iterative ILU is available only for zero fill-in and it depends on rocSPARSE.
+ **/
+HYPRE_Int
+HYPRE_ILUSetIterativeSetupOption( HYPRE_Solver solver, HYPRE_Int iter_setup_option );
+
+/**
+ * (Optional) Set the max. number of iterations for the iterative ILU algorithm.
+ *
+ * Note: Iterative ILU is available only for zero fill-in and it depends on rocSPARSE.
+ **/
+HYPRE_Int
+HYPRE_ILUSetIterativeSetupMaxIter( HYPRE_Solver solver, HYPRE_Int iter_setup_max_iter );
+
+/**
+ * (Optional) Set the stop tolerance for the iterative ILU algorithm.
+ *
+ * Note: Iterative ILU is available only for zero fill-in and it depends on rocSPARSE.
+ **/
+HYPRE_Int
+HYPRE_ILUSetIterativeSetupTolerance( HYPRE_Solver solver, HYPRE_Real iter_setup_tolerance );
 
 /**
  * (Optional) Set triangular solver type. Options are:

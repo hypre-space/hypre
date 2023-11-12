@@ -2319,7 +2319,12 @@ HYPRE_Int hypre_ILUSetDropThresholdArray( void *ilu_vdata, HYPRE_Real *threshold
 HYPRE_Int hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type );
 HYPRE_Int hypre_ILUSetMaxIter( void *ilu_vdata, HYPRE_Int max_iter );
 HYPRE_Int hypre_ILUSetTol( void *ilu_vdata, HYPRE_Real tol );
-HYPRE_Int hypre_ILUSetIterativeSetup( void *data, HYPRE_Int iter_setup );
+HYPRE_Int hypre_ILUSetIterativeSetupType( void *ilu_vdata, HYPRE_Int iter_setup_type );
+HYPRE_Int hypre_ILUSetIterativeSetupOption( void *ilu_vdata, HYPRE_Int iter_setup_option );
+HYPRE_Int hypre_ILUSetIterativeSetupMaxIter( void *ilu_vdata, HYPRE_Int iter_setup_max_iter );
+HYPRE_Int hypre_ILUSetIterativeSetupTolerance( void *ilu_vdata, HYPRE_Real iter_setup_tolerance );
+HYPRE_Int hypre_ILUGetIterativeSetupHistory( void *ilu_vdata,
+                                             HYPRE_Complex **iter_setup_history );
 HYPRE_Int hypre_ILUSetTriSolve( void *ilu_vdata, HYPRE_Int tri_solve );
 HYPRE_Int hypre_ILUSetLowerJacobiIters( void *ilu_vdata, HYPRE_Int lower_jacobi_iters );
 HYPRE_Int hypre_ILUSetUpperJacobiIters( void *ilu_vdata, HYPRE_Int upper_jacobi_iters );

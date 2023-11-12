@@ -397,58 +397,58 @@ hypre_ILUIterativeSetupDevice(hypre_ParILUData       *ilu_data,
                               hypre_CSRMatrix       **Fptr)
 {
    /* Input ILU data */
-   HYPRE_Int                ilu_type            = hypre_ParILUDataIluType(ilu_data);
-   HYPRE_Int                iter_setup_type     = 1;
-   HYPRE_Int                iter_setup_option   = 2;
-   HYPRE_Int                setup_max_iter      = 20;
-   HYPRE_Complex            setup_tolerance     = 1.e-6;
+   HYPRE_Int                ilu_type           = hypre_ParILUDataIluType(ilu_data);
+   HYPRE_Int                iter_setup_type    = hypre_ParILUDataIterativeSetupType(ilu_data);
+   HYPRE_Int                iter_setup_option  = hypre_ParILUDataIterativeSetupOption(ilu_data);
+   HYPRE_Int                setup_max_iter     = hypre_ParILUDataIterativeSetupMaxIter(ilu_data);
+   HYPRE_Complex            setup_tolerance    = hypre_ParILUDataIterativeSetupTolerance(ilu_data);
    HYPRE_Int                setup_num_iter;
-   HYPRE_Complex           *setup_history       = NULL;
+   HYPRE_Complex           *setup_history      = NULL;
 
    /* Input matrix data */
-   MPI_Comm                 comm                = hypre_ParCSRMatrixComm(A);
-   HYPRE_MemoryLocation     memory_location     = hypre_ParCSRMatrixMemoryLocation(A);
-   hypre_ParCSRMatrix      *matS                = NULL;
-   hypre_CSRMatrix         *A_diag              = NULL;
-   hypre_CSRMatrix         *A_offd              = hypre_ParCSRMatrixOffd(A);
-   hypre_CSRMatrix         *h_A_offd            = NULL;
-   HYPRE_Int               *A_offd_i            = NULL;
-   HYPRE_Int               *A_offd_j            = NULL;
-   HYPRE_Real              *A_offd_data         = NULL;
-   hypre_CSRMatrix         *SLU                 = NULL;
+   MPI_Comm                 comm               = hypre_ParCSRMatrixComm(A);
+   HYPRE_MemoryLocation     memory_location    = hypre_ParCSRMatrixMemoryLocation(A);
+   hypre_ParCSRMatrix      *matS               = NULL;
+   hypre_CSRMatrix         *A_diag             = NULL;
+   hypre_CSRMatrix         *A_offd             = hypre_ParCSRMatrixOffd(A);
+   hypre_CSRMatrix         *h_A_offd           = NULL;
+   HYPRE_Int               *A_offd_i           = NULL;
+   HYPRE_Int               *A_offd_j           = NULL;
+   HYPRE_Real              *A_offd_data        = NULL;
+   hypre_CSRMatrix         *SLU                = NULL;
 
    /* Permutation arrays */
    HYPRE_Int               *rperm_data;
-   hypre_IntArray          *perm                = NULL;
-   hypre_IntArray          *rperm               = NULL;
-   hypre_IntArray          *h_perm              = NULL;
-   hypre_IntArray          *h_rperm             = NULL;
+   hypre_IntArray          *perm               = NULL;
+   hypre_IntArray          *rperm              = NULL;
+   hypre_IntArray          *h_perm             = NULL;
+   hypre_IntArray          *h_rperm            = NULL;
 
    /* Variables for matS */
-   HYPRE_Int                m                   = n - nLU;
-   HYPRE_Int                nI                  = nLU; //use default
-   HYPRE_Int                e                   = 0;
-   HYPRE_Int                m_e                 = m;
-   HYPRE_Int               *S_diag_i            = NULL;
-   hypre_CSRMatrix         *S_offd              = NULL;
-   HYPRE_Int               *S_offd_i            = NULL;
-   HYPRE_Int               *S_offd_j            = NULL;
-   HYPRE_Real              *S_offd_data         = NULL;
-   HYPRE_BigInt            *S_offd_colmap       = NULL;
+   HYPRE_Int                m                  = n - nLU;
+   HYPRE_Int                nI                 = nLU; //use default
+   HYPRE_Int                e                  = 0;
+   HYPRE_Int                m_e                = m;
+   HYPRE_Int               *S_diag_i           = NULL;
+   hypre_CSRMatrix         *S_offd             = NULL;
+   HYPRE_Int               *S_offd_i           = NULL;
+   HYPRE_Int               *S_offd_j           = NULL;
+   HYPRE_Real              *S_offd_data        = NULL;
+   HYPRE_BigInt            *S_offd_colmap      = NULL;
    HYPRE_Int                S_offd_nnz;
    HYPRE_Int                S_offd_ncols;
    HYPRE_Int                S_diag_nnz;
 
-   hypre_ParCSRMatrix      *Apq                 = NULL;
-   hypre_ParCSRMatrix      *ALU                 = NULL;
-   hypre_ParCSRMatrix      *parL                = NULL;
-   hypre_ParCSRMatrix      *parU                = NULL;
-   hypre_ParCSRMatrix      *parS                = NULL;
-   HYPRE_Real              *parD                = NULL;
-   HYPRE_Int               *uend                = NULL;
+   hypre_ParCSRMatrix      *Apq                = NULL;
+   hypre_ParCSRMatrix      *ALU                = NULL;
+   hypre_ParCSRMatrix      *parL               = NULL;
+   hypre_ParCSRMatrix      *parU               = NULL;
+   hypre_ParCSRMatrix      *parS               = NULL;
+   HYPRE_Real              *parD               = NULL;
+   HYPRE_Int               *uend               = NULL;
 
    /* Local variables */
-   HYPRE_BigInt            *send_buf            = NULL;
+   HYPRE_BigInt            *send_buf           = NULL;
    hypre_ParCSRCommPkg     *comm_pkg;
    hypre_ParCSRCommHandle  *comm_handle;
    HYPRE_Int                num_sends, begin, end;
@@ -495,6 +495,9 @@ hypre_ILUIterativeSetupDevice(hypre_ParILUData       *ilu_data,
       hypre_ILUSetupIterativeILU0Device(A_diag, iter_setup_type, iter_setup_option,
                                         setup_max_iter, setup_tolerance, &setup_num_iter,
                                         &setup_history);
+
+      hypre_ParILUDataIterativeSetupNumIter(ilu_data) = setup_num_iter;
+      hypre_ParILUDataIterativeSetupHistory(ilu_data) = setup_history;
 
       hypre_ParILUExtractEBFC(A_diag, nLU, BLUptr, &SLU, Eptr, Fptr);
       hypre_CSRMatrixDestroy(A_diag);
