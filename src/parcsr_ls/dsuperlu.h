@@ -14,15 +14,15 @@
  *--------------------------------------------------------------------------*/
 typedef struct
 {
-   HYPRE_BigInt global_num_rows;
-   SuperMatrix A_dslu;
-   HYPRE_Real *berr;
-   dLUstruct_t dslu_data_LU;
-   SuperLUStat_t dslu_data_stat;
-   superlu_dist_options_t dslu_options;
-   gridinfo_t dslu_data_grid;
-   dScalePermstruct_t dslu_ScalePermstruct;
-   dSOLVEstruct_t dslu_solve;
+   HYPRE_BigInt            global_num_rows;
+   SuperMatrix             A_dslu;
+   double                 *berr;
+   dLUstruct_t             dslu_data_LU;
+   SuperLUStat_t           dslu_data_stat;
+   superlu_dist_options_t  dslu_options;
+   gridinfo_t              dslu_data_grid;
+   dScalePermstruct_t      dslu_ScalePermstruct;
+   dSOLVEstruct_t          dslu_solve;
 }
 hypre_DSLUData;
 
