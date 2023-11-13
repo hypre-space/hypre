@@ -9,14 +9,16 @@
 #define hypre_DSLU_DATA_HEADER
 
 #include "superlu_ddefs.h"
+
 /*--------------------------------------------------------------------------
  * hypre_DSLUData
  *--------------------------------------------------------------------------*/
+
 typedef struct
 {
    HYPRE_BigInt            global_num_rows;
    SuperMatrix             A_dslu;
-   double                 *berr;
+   hypre_double           *berr;
    dLUstruct_t             dslu_data_LU;
    SuperLUStat_t           dslu_data_stat;
    superlu_dist_options_t  dslu_options;
