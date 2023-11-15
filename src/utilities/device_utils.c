@@ -2688,7 +2688,12 @@ hypre_CudaCompileFlagCheck()
 
    /* HYPRE_CUDA_CALL(cudaDeviceSynchronize()); */
 
-   if (cuda_arch_actual != cuda_arch_compile)
+   const hypre_int cuda_arch_actual_major  = cuda_arch_actual  / 100;
+   const hypre_int cuda_arch_compile_major = cuda_arch_compile / 100;
+   const hypre_int cuda_arch_actual_minor  = cuda_arch_actual  % 100;
+   const hypre_int cuda_arch_compile_minor = cuda_arch_compile % 100;
+
+   if (cuda_arch_actual_major != cuda_arch_compile_major || cuda_arch_actual_minor < cuda_arch_compile_minor)
    {
       char msg[256];
 
