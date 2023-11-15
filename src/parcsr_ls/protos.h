@@ -1173,6 +1173,11 @@ HYPRE_Int hypre_BoomerAMGSetILUUpperJacobiIters( void *data, HYPRE_Int ilu_upper
 HYPRE_Int hypre_BoomerAMGSetILUMaxIter( void *data, HYPRE_Int ilu_max_iter );
 HYPRE_Int hypre_BoomerAMGSetILUMaxRowNnz( void *data, HYPRE_Int ilu_max_row_nnz );
 HYPRE_Int hypre_BoomerAMGSetILULocalReordering( void *data, HYPRE_Int ilu_reordering_type );
+HYPRE_Int hypre_BoomerAMGSetILUIterSetupType( void *data, HYPRE_Int ilu_iter_setup_type );
+HYPRE_Int hypre_BoomerAMGSetILUIterSetupOption( void *data, HYPRE_Int ilu_iter_setup_option );
+HYPRE_Int hypre_BoomerAMGSetILUIterSetupMaxIter( void *data, HYPRE_Int ilu_iter_setup_max_iter );
+HYPRE_Int hypre_BoomerAMGSetILUIterSetupTolerance( void *data,
+                                                   HYPRE_Real ilu_iter_setup_tolerance );
 HYPRE_Int hypre_BoomerAMGSetFSAIAlgoType ( void *data, HYPRE_Int fsai_algo_type );
 HYPRE_Int hypre_BoomerAMGSetFSAILocalSolveType ( void *data, HYPRE_Int local_solve_type );
 HYPRE_Int hypre_BoomerAMGSetFSAIMaxSteps ( void *data, HYPRE_Int fsai_max_steps );
