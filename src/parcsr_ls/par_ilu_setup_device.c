@@ -402,7 +402,6 @@ hypre_ILUIterativeSetupDevice(hypre_ParILUData       *ilu_data,
    HYPRE_Int                iter_setup_option  = hypre_ParILUDataIterativeSetupOption(ilu_data);
    HYPRE_Int                setup_max_iter     = hypre_ParILUDataIterativeSetupMaxIter(ilu_data);
    HYPRE_Complex            setup_tolerance    = hypre_ParILUDataIterativeSetupTolerance(ilu_data);
-   HYPRE_Int                setup_num_iter;
    HYPRE_Complex           *setup_history      = NULL;
 
    /* Input matrix data */
@@ -493,11 +492,9 @@ hypre_ILUIterativeSetupDevice(hypre_ParILUData       *ilu_data,
 
       /* Compute ILU0 on the device */
       hypre_ILUSetupIterativeILU0Device(A_diag, iter_setup_type, iter_setup_option,
-                                        setup_max_iter, setup_tolerance, &setup_num_iter,
-                                        &setup_history);
-
-      hypre_ParILUDataIterativeSetupNumIter(ilu_data) = setup_num_iter;
-      hypre_ParILUDataIterativeSetupHistory(ilu_data) = setup_history;
+                                        setup_max_iter, setup_tolerance,
+                                        &hypre_ParILUDataIterativeSetupNumIter(ilu_data),
+                                        &hypre_ParILUDataIterativeSetupHistory(ilu_data));
 
       hypre_ParILUExtractEBFC(A_diag, nLU, BLUptr, &SLU, Eptr, Fptr);
       hypre_CSRMatrixDestroy(A_diag);
@@ -725,7 +722,6 @@ hypre_ILUSetupIterativeILU0Device(hypre_CSRMatrix  *A,
    hypre_int                 version;
    size_t                    buffer_size;
    HYPRE_Int                 history_size;
-   HYPRE_Complex            *d_history;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("CSRMatrixITILU0");
@@ -843,20 +839,15 @@ hypre_ILUSetupIterativeILU0Device(hypre_CSRMatrix  *A,
 
    if (option & rocsparse_itilu0_option_convergence_history)
    {
-      history_size = 2 * max_iter;
+      history_size = (*num_iter_ptr) * 2;
       *history_ptr = hypre_TAlloc(HYPRE_Complex, history_size, HYPRE_MEMORY_HOST);
-      d_history = hypre_TAlloc(HYPRE_Complex, history_size, HYPRE_MEMORY_DEVICE);
 
       HYPRE_ROCSPARSE_CALL(hypre_rocsparse_csritilu0_history(handle,
                                                              (rocsparse_itilu0_alg) type,
                                                              (rocsparse_int*) num_iter_ptr,
-                                                             d_history,
+                                                             *history_ptr,
                                                              buffer_size,
                                                              buffer));
-
-      hypre_TMemcpy(*history_ptr, d_history, HYPRE_Complex, history_size,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(d_history, HYPRE_MEMORY_DEVICE);
    }
 
    /*-------------------------------------------------------------------------------------
