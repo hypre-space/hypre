@@ -1241,10 +1241,98 @@ hypre_ILUSetup( void               *ilu_vdata,
                                                       hypre_ParCSRMatrixDNumNonzeros(matU)) /
                                                      hypre_ParCSRMatrixDNumNonzeros(matA);
    }
+
+   /* TODO (VPM): Move ILU statistics printout to its own function */
    if ((my_id == 0) && (print_level > 0))
    {
       hypre_printf("ILU SETUP: operator complexity = %f  \n",
                    hypre_ParILUDataOperatorComplexity(ilu_data));
+      if (hypre_ParILUDataTriSolve(ilu_data))
+      {
+         hypre_printf("ILU SOLVE: using direct triangular solves\n",
+                      hypre_ParILUDataOperatorComplexity(ilu_data));
+      }
+      else
+      {
+         hypre_printf("ILU SOLVE: using iterative triangular solves\n",
+                      hypre_ParILUDataOperatorComplexity(ilu_data));
+      }
+
+#if defined (HYPRE_USING_ROCSPARSE)
+      HYPRE_Int i;
+
+      if (hypre_ParILUDataIterativeSetupType(ilu_data))
+      {
+         hypre_printf("ILU: iterative setup type = %d\n",
+                      hypre_ParILUDataIterativeSetupType(ilu_data));
+         hypre_printf("ILU: iterative setup option = %d\n",
+                      hypre_ParILUDataIterativeSetupOption(ilu_data));
+         if (hypre_ParILUDataIterativeSetupOption(ilu_data) & 0x2)
+         {
+            /* This path enables termination based on stopping tolerance */
+            hypre_printf("ILU: iterative setup tolerance = %g\n",
+                         hypre_ParILUDataIterativeSetupTolerance(ilu_data));
+         }
+         else
+         {
+            /* This path enables termination based on number of iterations */
+            hypre_printf("ILU: iterative setup max. iters = %d\n",
+                         hypre_ParILUDataIterativeSetupMaxIter(ilu_data));
+         }
+
+         /* TODO (VPM): Add min, max, avg statistics across ranks */
+         hypre_printf("ILU: iterative setup num. iters at rank 0 = %d\n",
+                      hypre_ParILUDataIterativeSetupNumIter(ilu_data));
+
+         /* Show convergence history */
+         if (hypre_ParILUDataIterativeSetupOption(ilu_data) & 0x10)
+         {
+            hypre_printf("ILU: iterative setup convergence history at rank 0:\n");
+            hypre_printf("%8s", "iter");
+            if (hypre_ParILUDataIterativeSetupOption(ilu_data) & 0x08)
+            {
+               hypre_printf(" %14s %14s", "residual", "rate");
+            }
+            if (hypre_ParILUDataIterativeSetupOption(ilu_data) & 0x04)
+            {
+               hypre_printf(" %14s %14s", "correction", "rate");
+            }
+            hypre_printf("\n");
+            printf("%8d", 0);
+            if (hypre_ParILUDataIterativeSetupOption(ilu_data) & 0x08)
+            {
+               hypre_printf(" %14.5e %14.5e",
+                            hypre_ParILUDataIterSetupResidualNorm(ilu_data, 0), 1.0);
+            }
+            if (hypre_ParILUDataIterativeSetupOption(ilu_data) & 0x04)
+            {
+               hypre_printf(" %14.5e %14.5e",
+                            hypre_ParILUDataIterSetupCorrectionNorm(ilu_data, 0), 1.0);
+            }
+            hypre_printf("\n");
+
+            for (i = 1; i < hypre_ParILUDataIterativeSetupNumIter(ilu_data); i++)
+            {
+               printf("%8d", i);
+               if (hypre_ParILUDataIterativeSetupOption(ilu_data) & 0x08)
+               {
+                  hypre_printf(" %14.5e %14.5e",
+                               hypre_ParILUDataIterSetupResidualNorm(ilu_data, i),
+                               hypre_ParILUDataIterSetupResidualNorm(ilu_data, i) /
+                               hypre_ParILUDataIterSetupResidualNorm(ilu_data, i - 1));
+               }
+               if (hypre_ParILUDataIterativeSetupOption(ilu_data) & 0x04)
+               {
+                  hypre_printf(" %14.5e %14.5e",
+                               hypre_ParILUDataIterSetupCorrectionNorm(ilu_data, i),
+                               hypre_ParILUDataIterSetupCorrectionNorm(ilu_data, i) /
+                               hypre_ParILUDataIterSetupCorrectionNorm(ilu_data, i - 1));
+               }
+               hypre_printf("\n");
+            }
+         }
+      }
+#endif
    }
 
    if (logging > 1)

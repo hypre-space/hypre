@@ -486,6 +486,10 @@ hypre_ILUSetIterativeSetupOption( void      *ilu_vdata,
       iter_setup_option |= 0x08;
    }
 
+   /* Zero out first bit of option (turn off rocSPARSE logging) */
+   iter_setup_option &= ~0x01;
+
+   /* Set internal iter_setup_option */
    hypre_ParILUDataIterativeSetupOption(ilu_data) = iter_setup_option;
 
    return hypre_error_flag;

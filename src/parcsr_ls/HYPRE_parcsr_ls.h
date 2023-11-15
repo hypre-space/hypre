@@ -4524,7 +4524,6 @@ HYPRE_ILUSetIterativeSetupType( HYPRE_Solver solver, HYPRE_Int iter_setup_type )
 /**
  * (Optional) Set the compute option for iterative ILU in a bitwise fashion. Options are:
  *
- *    -  1 (0x01): turn on log messages
  *    -  2 (0x02): Use stopping tolerance to finish algorithm
  *    -  4 (0x04): Compute correction norms
  *    -  8 (0x08): Compute residual norms
