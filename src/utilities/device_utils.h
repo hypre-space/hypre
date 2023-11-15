@@ -129,6 +129,9 @@ using hypre_DeviceItem = void*;
 
 #if defined(HYPRE_USING_ROCSPARSE)
 #include <rocsparse/rocsparse.h>
+#if !defined(ROCSPARSE_VERSION)
+#define ROCSPARSE_VERSION (ROCSPARSE_VERSION_MAJOR * 100000 + ROCSPARSE_VERSION_MINOR * 100 + ROCSPARSE_VERSION_PATCH)
+#endif
 #endif
 
 #if defined(HYPRE_USING_ROCSOLVER)

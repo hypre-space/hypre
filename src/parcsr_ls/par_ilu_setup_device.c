@@ -705,6 +705,7 @@ hypre_ILUSetupIterativeILU0Device(hypre_CSRMatrix  *A,
                                   HYPRE_Int        *num_iter_ptr,
                                   HYPRE_Real      **history_ptr)
 {
+#if (ROCSPARSE_VERSION >= 200400)
    /* Input matrix data */
    HYPRE_Int                 num_rows      = hypre_CSRMatrixNumRows(A);
    HYPRE_Int                 num_cols      = hypre_CSRMatrixNumCols(A);
@@ -732,13 +733,6 @@ hypre_ILUSetupIterativeILU0Device(hypre_CSRMatrix  *A,
    /*-------------------------------------------------------------------------------------
     * 0. Sanity checks
     *-------------------------------------------------------------------------------------*/
-
-   HYPRE_ROCSPARSE_CALL(rocsparse_get_version(handle, &version));
-   if (version < 200400)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Iterative ILU0 requires rocSPARSE 2.4.0 at least!");
-      return hypre_error_flag;
-   }
 
    if (num_rows != num_cols)
    {
@@ -859,6 +853,9 @@ hypre_ILUSetupIterativeILU0Device(hypre_CSRMatrix  *A,
 
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
+#else
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Iterative ILU0 requires rocSPARSE 2.4.0 at least!");
+#endif
 
    return hypre_error_flag;
 }
