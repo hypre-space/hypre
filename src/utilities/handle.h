@@ -86,6 +86,7 @@ typedef struct
 #define hypre_HandleDevice(hypre_handle)                         hypre_DeviceDataDevice(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleDeviceMaxWorkGroupSize(hypre_handle)         hypre_DeviceDataDeviceMaxWorkGroupSize(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleDeviceMaxShmemPerBlock(hypre_handle)         hypre_DeviceDataDeviceMaxShmemPerBlock(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleDeviceMaxShmemPerBlockInited(hypre_handle)   hypre_DeviceDataDeviceMaxShmemPerBlockInited(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleComputeStreamNum(hypre_handle)               hypre_DeviceDataComputeStreamNum(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleReduceBuffer(hypre_handle)                   hypre_DeviceDataReduceBuffer(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmUseVendor(hypre_handle)                hypre_DeviceDataSpgemmUseVendor(hypre_HandleDeviceData(hypre_handle))

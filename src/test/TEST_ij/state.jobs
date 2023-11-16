@@ -10,3 +10,20 @@
 
 mpirun -np 1 ./ij -test_init > state.out.1
 mpirun -np 4 ./ij -test_init > state.out.100
+
+#=============================================================================
+# Test library lazy initialization (sequential and parallel)
+#=============================================================================
+
+mpirun -np 1 ./ij                         > state.out.1.a
+mpirun -np 1 ./ij     -lazy_device_init 1 > state.out.1.b
+
+mpirun -np 4 ./ij                         > state.out.2.a
+mpirun -np 4 ./ij -lazy_device_init 1     > state.out.2.b
+
+mpirun -np 1 ./struct                     > state.out.3.a
+mpirun -np 1 ./struct -lazy_device_init 1 > state.out.3.b
+
+mpirun -np 4 ./struct                     > state.out.4.a
+mpirun -np 4 ./struct -lazy_device_init 1 > state.out.4.b
+

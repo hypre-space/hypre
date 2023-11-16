@@ -421,6 +421,10 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
       }
    };
 
+   if (!data->device)
+   {
+      HYPRE_DeviceInitialize();
+   }
    sycl::device* sycl_device = data->device;
    sycl::context sycl_ctxt   = sycl::context(*sycl_device, sycl_asynchandler);
    stream = new sycl::queue(sycl_ctxt, *sycl_device, sycl::property_list{sycl::property::queue::in_order{}});
@@ -2952,7 +2956,8 @@ HYPRE_SetSYCLDevice(sycl::device user_device)
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_bind_device( HYPRE_Int myid,
+hypre_bind_device( HYPRE_Int device_id_in,
+                   HYPRE_Int myid,
                    HYPRE_Int nproc,
                    MPI_Comm  comm )
 {
@@ -2972,13 +2977,30 @@ hypre_bind_device( HYPRE_Int myid,
    hypre_MPI_Comm_rank(node_comm, &myNodeid);
    hypre_MPI_Comm_size(node_comm, &NodeSize);
    hypre_MPI_Comm_free(&node_comm);
-
-   /* get number of devices on this node */
    hypre_GetDeviceCount(&nDevices);
 
+   if (-1 == device_id_in)
+   {
+      /* get number of devices on this node */
+      device_id = myNodeid % nDevices;
+   }
+   else
+   {
+      device_id = (hypre_int) device_id_in;
+   }
+
    /* set device */
-   device_id = myNodeid % nDevices;
-   hypre_SetDevice(device_id, NULL);
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+   omp_set_default_device(device_id);
+#endif
+
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
+#endif
+
+#if defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipSetDevice(device_id) );
+#endif
 
 #if defined(HYPRE_DEBUG) && defined(HYPRE_PRINT_ERRORS)
    hypre_printf("Proc [global %d/%d, local %d/%d] can see %d GPUs and is running on %d\n",

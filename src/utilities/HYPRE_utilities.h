@@ -170,6 +170,12 @@ HYPRE_Int HYPRE_Initialize(void);
 #define HYPRE_Init() HYPRE_Initialize()
 
 /**
+ * (Optional) Initializes GPU features in the hypre library.
+ **/
+
+HYPRE_Int HYPRE_DeviceInitialize(void);
+
+/**
  * (Required) Finalizes the hypre library.
  **/
 

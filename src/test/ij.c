@@ -215,6 +215,8 @@ main( hypre_int argc,
 
    /* Specific tests */
    HYPRE_Int           test_init = 0;
+   HYPRE_Int           lazy_device_init = 0;
+   HYPRE_Int           device_id = -1;
    HYPRE_Int           test_ij = 0;
    HYPRE_Int           test_multivec = 0;
    HYPRE_Int           test_scaling = 0;
@@ -509,7 +511,14 @@ main( hypre_int argc,
       if (strcmp(argv[arg_index], "-test_init") == 0)
       {
          test_init = 1;
-         break;
+      }
+      else if (strcmp(argv[arg_index], "-lazy_device_init") == 0)
+      {
+         lazy_device_init = atoi(argv[++arg_index]);
+      }
+      else if (strcmp(argv[arg_index], "-device_id") == 0)
+      {
+         device_id = atoi(argv[++arg_index]);
       }
    }
 
@@ -517,7 +526,7 @@ main( hypre_int argc,
     * GPU Device binding
     * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
-   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+   hypre_bind_device(device_id, myid, num_procs, hypre_MPI_COMM_WORLD);
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
@@ -572,6 +581,11 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
 
    HYPRE_Initialize();
+
+   if (!lazy_device_init)
+   {
+      HYPRE_DeviceInitialize();
+   }
 
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
