@@ -65,9 +65,6 @@
 /* Define to 1 if in debug mode */
 #undef HYPRE_DEBUG
 
-/* Deprecated function macro */
-#undef HYPRE_DEPRECATED
-
 /* Main development branch? */
 #undef HYPRE_DEVELOP_BRANCH
 
@@ -162,9 +159,6 @@
 
 /* Using HYPRE timing routines */
 #undef HYPRE_TIMING
-
-/* Macro for silencing unused variable warnings */
-#undef HYPRE_UNUSED_VAR
 
 /* Define to 1 if Caliper instrumentation is enabled */
 #undef HYPRE_USING_CALIPER
