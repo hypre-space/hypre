@@ -1634,22 +1634,15 @@ hypre_AMSComputePi(hypre_ParCSRMatrix *A,
       HYPRE_Real *Gx_data, *Gy_data = NULL, *Gz_data = NULL;
 
       MPI_Comm comm = hypre_ParCSRMatrixComm(G);
+      HYPRE_BigInt *col_starts_G = hypre_ParCSRMatrixColStarts(G);
       HYPRE_BigInt global_num_rows = hypre_ParCSRMatrixGlobalNumRows(G);
       HYPRE_BigInt global_num_cols = dim * hypre_ParCSRMatrixGlobalNumCols(G);
       HYPRE_BigInt *row_starts = hypre_ParCSRMatrixRowStarts(G);
-      HYPRE_BigInt *col_starts;
-      HYPRE_Int col_starts_size;
+      HYPRE_BigInt col_starts[2] = {(HYPRE_BigInt)dim * col_starts_G[0],
+                                    (HYPRE_BigInt)dim * col_starts_G[1] };
       HYPRE_Int num_cols_offd = dim * hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(G));
       HYPRE_Int num_nonzeros_diag = dim * hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(G));
       HYPRE_Int num_nonzeros_offd = dim * hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(G));
-      HYPRE_BigInt *col_starts_G = hypre_ParCSRMatrixColStarts(G);
-
-      col_starts_size = 2;
-      col_starts = hypre_TAlloc(HYPRE_BigInt, col_starts_size, HYPRE_MEMORY_HOST);
-      for (i = 0; i < col_starts_size; i++)
-      {
-         col_starts[i] = (HYPRE_BigInt)dim * col_starts_G[i];
-      }
 
       Pi = hypre_ParCSRMatrixCreate(comm,
                                     global_num_rows,
@@ -1662,7 +1655,6 @@ hypre_AMSComputePi(hypre_ParCSRMatrix *A,
 
       hypre_ParCSRMatrixOwnsData(Pi) = 1;
       hypre_ParCSRMatrixInitialize(Pi);
-      hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
 
       Gx_data = hypre_VectorData(hypre_ParVectorLocalVector(Gx));
       if (dim >= 2)
@@ -2597,21 +2589,15 @@ hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
       HYPRE_Real *Gx_data, *Gy_data = NULL, *Gz_data = NULL;
 
       MPI_Comm comm = hypre_ParCSRMatrixComm(G);
+      HYPRE_BigInt *col_starts_G = hypre_ParCSRMatrixColStarts(G);
       HYPRE_BigInt global_num_rows = hypre_ParCSRMatrixGlobalNumRows(G);
       HYPRE_BigInt global_num_cols = dim * hypre_ParCSRMatrixGlobalNumCols(G);
       HYPRE_BigInt *row_starts = hypre_ParCSRMatrixRowStarts(G);
-      HYPRE_BigInt *col_starts;
-      HYPRE_Int col_starts_size;
+      HYPRE_BigInt col_starts[2] = {(HYPRE_BigInt)dim * col_starts_G[0],
+                                    (HYPRE_BigInt)dim * col_starts_G[1] };
       HYPRE_Int num_cols_offd = dim * hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(G));
       HYPRE_Int num_nonzeros_diag = dim * hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(G));
       HYPRE_Int num_nonzeros_offd = dim * hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(G));
-      HYPRE_BigInt *col_starts_G = hypre_ParCSRMatrixColStarts(G);
-      col_starts_size = 2;
-      col_starts = hypre_TAlloc(HYPRE_BigInt, col_starts_size, HYPRE_MEMORY_HOST);
-      for (i = 0; i < col_starts_size; i++)
-      {
-         col_starts[i] = (HYPRE_BigInt) dim * col_starts_G[i];
-      }
 
       GPi = hypre_ParCSRMatrixCreate(comm,
                                      global_num_rows,
