@@ -4562,7 +4562,9 @@ HYPRE_ILUSetIterativeSetupType( HYPRE_Solver solver, HYPRE_Int iter_setup_type )
  * or a target tolerance. Enabling the second bit of \e iter_setup_option (0x02) activates the
  * tolerance-based termination. In this case, residual norms are computed by default (0x08) and
  * used in the termination criteria. To use correction norms for the termination criteria, enable
- * the third bit (0x04) of \e iter_setup_option.
+ * the third bit (0x04) of \e iter_setup_option. In the tolerance-based termination criteria,
+ * the max. number of iterations is still used to terminate the algorithm in case it does not
+ * converge to the requested tolerance.
  *
  * Note: Iterative ILU is available only for zero fill-in and it depends on rocSPARSE.
  **/
