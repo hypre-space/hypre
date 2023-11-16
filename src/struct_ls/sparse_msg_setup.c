@@ -45,7 +45,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
                       hypre_StructVector *b,
                       hypre_StructVector *x          )
 {
-   hypre_SparseMSGData  *smsg_data = (hypre_SparseMSGData  *)smsg_vdata;
+   hypre_SparseMSGData  *smsg_data = (hypre_SparseMSGData *) smsg_vdata;
 
    MPI_Comm              comm = (smsg_data -> comm);
 
@@ -111,6 +111,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
    HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
 
    HYPRE_Int             ierr = 0;
+   HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(A);
 #if DEBUG
    char                  filename[255];
 #endif
@@ -364,7 +365,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
                   hypre_SparseMSGCreateRAPOp(RTx_a[lx], A_a[fi], Px_a[lx],
                                              grid_a[ci], 0);
                hypre_StructMatrixInitialize(A_a[ci]);
-               hypre_SetIndex3(stridePR, 1, pow(2, ly), pow(2, lz));
+               hypre_SetIndex3(stridePR, 1, hypre_pow2(ly), hypre_pow2(lz));
                hypre_SparseMSGSetupRAPOp(RTx_a[lx], A_a[fi], Px_a[lx],
                                          0, cindex, stride, stridePR, A_a[ci]);
             }
@@ -410,7 +411,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
             A_a[ci] = hypre_SparseMSGCreateRAPOp(RTy_a[ly], A_a[fi], Py_a[ly],
                                                  grid_a[ci], 1);
             hypre_StructMatrixInitialize(A_a[ci]);
-            hypre_SetIndex3(stridePR, 1, 1, pow(2, lz));
+            hypre_SetIndex3(stridePR, 1, 1, hypre_pow2(lz));
             hypre_SparseMSGSetupRAPOp(RTy_a[ly], A_a[fi], Py_a[ly],
                                       1, cindex, stride, stridePR, A_a[ci]);
          }
@@ -552,8 +553,10 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
       }
    }
 
-   data =  hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_DEVICE);
+   data = hypre_CTAlloc(HYPRE_Real, data_size, memory_location);
+
    (smsg_data -> data) = data;
+   (smsg_data -> memory_location) = memory_location;
 
    hypre_StructVectorInitializeData(t_a[0], data);
    hypre_StructVectorAssemble(t_a[0]);
@@ -630,7 +633,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
             hypre_SparseMSGMapIndex(lx, ly, lz, num_grids, fi);
             hypre_SparseMSGMapIndex(lx + 1, ly, lz, num_grids, ci);
 
-            hypre_SetIndex3(stridePR, 1, pow(2, ly), pow(2, lz));
+            hypre_SetIndex3(stridePR, 1, hypre_pow2(ly), hypre_pow2(lz));
 
             interpx_a[fi] = hypre_SparseMSGInterpCreate();
             hypre_SparseMSGInterpSetup(interpx_a[fi], Px_a[lx],
@@ -659,7 +662,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
             hypre_SparseMSGMapIndex(lx, ly, lz, num_grids, fi);
             hypre_SparseMSGMapIndex(lx, ly + 1, lz, num_grids, ci);
 
-            hypre_SetIndex3(stridePR, pow(2, lx), 1, pow(2, lz));
+            hypre_SetIndex3(stridePR, hypre_pow2(lx), 1, hypre_pow2(lz));
 
             interpy_a[fi] = hypre_SparseMSGInterpCreate();
             hypre_SparseMSGInterpSetup(interpy_a[fi], Py_a[ly],
@@ -688,7 +691,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
             hypre_SparseMSGMapIndex(lx, ly, lz, num_grids, fi);
             hypre_SparseMSGMapIndex(lx, ly, lz + 1, num_grids, ci);
 
-            hypre_SetIndex3(stridePR, pow(2, lx), pow(2, ly), 1);
+            hypre_SetIndex3(stridePR, hypre_pow2(lx), hypre_pow2(ly), 1);
 
             interpz_a[fi] = hypre_SparseMSGInterpCreate();
             hypre_SparseMSGInterpSetup(interpz_a[fi], Pz_a[lz],

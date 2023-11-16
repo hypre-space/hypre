@@ -158,18 +158,18 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    {
       hypre_ParVectorCopy(F_array[0], Residual );
       hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Residual );
-      resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
+      resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
    }
    else
    {
       hypre_ParVectorCopy(F_array[0], Vtemp);
       hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Vtemp);
-      resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+      resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
    }
 
 
    resid_nrm_init = resid_nrm;
-   rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
+   rhs_norm = hypre_sqrt(hypre_ParVectorInnerProd(f, f));
    relative_resid = 9999;
    if (rhs_norm)
    {
@@ -208,13 +208,13 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
       {
          hypre_ParVectorCopy(F_array[0], Residual );
          hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Residual );
-         resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
+         resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
       }
       else
       {
          hypre_ParVectorCopy(F_array[0], Vtemp);
          hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Vtemp);
-         resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+         resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
       }
 
       conv_factor = resid_nrm / old_resid;
@@ -244,7 +244,7 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
     *    Compute closing statistics
     *-----------------------------------------------------------------------*/
 
-   conv_factor = pow((resid_nrm / resid_nrm_init), (1.0 / ((HYPRE_Real) cycle_count)));
+   conv_factor = hypre_pow((resid_nrm / resid_nrm_init), (1.0 / ((HYPRE_Real) cycle_count)));
 
 
    for (j = 0; j < hypre_ParAMGDataNumLevels(amg_data); j++)
@@ -703,10 +703,10 @@ HYPRE_Int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
           *  Generate CSR matrix from ParCSRMatrix A
           *-----------------------------------------------------------------*/
 
+         A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
+         f_vector = hypre_ParVectorToVectorAll(f);
          if (n)
          {
-            A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
-            f_vector = hypre_ParVectorToVectorAll(f);
             A_CSR_i = hypre_CSRMatrixI(A_CSR);
             A_CSR_j = hypre_CSRMatrixJ(A_CSR);
             A_CSR_data = hypre_CSRMatrixData(A_CSR);

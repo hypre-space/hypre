@@ -43,9 +43,10 @@ hypre_ParKrylovCreateVector( void *vvector )
    hypre_ParVector *vector = (hypre_ParVector *) vvector;
    hypre_ParVector *new_vector;
 
-   new_vector = hypre_ParVectorCreate( hypre_ParVectorComm(vector),
-                                       hypre_ParVectorGlobalSize(vector),
-                                       hypre_ParVectorPartitioning(vector) );
+   new_vector = hypre_ParMultiVectorCreate( hypre_ParVectorComm(vector),
+                                            hypre_ParVectorGlobalSize(vector),
+                                            hypre_ParVectorPartitioning(vector),
+                                            hypre_ParVectorNumVectors(vector) );
 
    hypre_ParVectorInitialize_v2(new_vector, hypre_ParVectorMemoryLocation(vector));
 
@@ -64,20 +65,22 @@ hypre_ParKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
    hypre_ParVector *vector = (hypre_ParVector *) vvector;
 
    hypre_ParVector **new_vector;
-   HYPRE_Int i, size;
+   HYPRE_Int i, size, num_vectors;
    HYPRE_Complex *array_data;
 
    HYPRE_MemoryLocation memory_location = hypre_ParVectorMemoryLocation(vector);
 
    size = hypre_VectorSize(hypre_ParVectorLocalVector(vector));
-   array_data = hypre_CTAlloc(HYPRE_Complex, (n * size), memory_location);
+   num_vectors = hypre_VectorNumVectors(hypre_ParVectorLocalVector(vector));
+   array_data = hypre_CTAlloc(HYPRE_Complex, (n * size * num_vectors), memory_location);
    new_vector = hypre_CTAlloc(hypre_ParVector*, n, HYPRE_MEMORY_HOST);
    for (i = 0; i < n; i++)
    {
-      new_vector[i] = hypre_ParVectorCreate( hypre_ParVectorComm(vector),
-                                             hypre_ParVectorGlobalSize(vector),
-                                             hypre_ParVectorPartitioning(vector) );
-      hypre_VectorData(hypre_ParVectorLocalVector(new_vector[i])) = &array_data[i * size];
+      new_vector[i] = hypre_ParMultiVectorCreate( hypre_ParVectorComm(vector),
+                                                  hypre_ParVectorGlobalSize(vector),
+                                                  hypre_ParVectorPartitioning(vector),
+                                                  hypre_ParVectorNumVectors(vector) );
+      hypre_VectorData(hypre_ParVectorLocalVector(new_vector[i])) = &array_data[i * size * num_vectors];
       hypre_ParVectorInitialize_v2(new_vector[i], memory_location);
       if (i)
       {
@@ -220,7 +223,7 @@ hypre_ParKrylovCopyVector( void *x,
 HYPRE_Int
 hypre_ParKrylovClearVector( void *x )
 {
-   return ( hypre_ParVectorSetConstantValues( (hypre_ParVector *) x, 0.0 ) );
+   return ( hypre_ParVectorSetZeros( (hypre_ParVector *) x ) );
 }
 
 /*--------------------------------------------------------------------------

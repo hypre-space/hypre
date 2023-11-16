@@ -163,7 +163,7 @@ HYPRE_Real U0(HYPRE_Real x, HYPRE_Real y)
       case 1:
          return (x + y) / 100;
       case 2:
-         return (sin(5 * PI * x) + sin(5 * PI * y)) / 1000;
+         return (hypre_sin(5 * PI * x) + hypre_sin(5 * PI * y)) / 1000;
       default:
          return 0.0;
    }
@@ -179,7 +179,7 @@ HYPRE_Real F(HYPRE_Real x, HYPRE_Real y)
       case 1:
          return 0.0;
       case 2:
-         return 2 * PI * PI * sin(PI * x) * sin(PI * y);
+         return 2 * PI * PI * hypre_sin(PI * x) * hypre_sin(PI * y);
       case 3:
          if ((fabs(x - 0.5) < 0.25) && (fabs(y - 0.5) < 0.25))
          {
@@ -426,7 +426,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    /* Figure out the processor grid (N x N).  The local
       problem size is indicated by n (n x n). pi and pj
       indicate position in the processor grid. */
-   N  = sqrt(num_procs);
+   N  = hypre_sqrt(num_procs);
    h  = 1.0 / (N * n - 1);
    h2 = h * h;
    pj = myid / N;

@@ -55,6 +55,9 @@ extern "C" {
 #define MPI_CHAR            hypre_MPI_CHAR
 #define MPI_LONG            hypre_MPI_LONG
 #define MPI_BYTE            hypre_MPI_BYTE
+
+#define MPI_C_FLOAT_COMPLEX hypre_MPI_COMPLEX
+#define MPI_C_LONG_DOUBLE_COMPLEX hypre_MPI_COMPLEX
 #define MPI_C_DOUBLE_COMPLEX hypre_MPI_COMPLEX
 
 #define MPI_SUM             hypre_MPI_SUM
@@ -139,7 +142,7 @@ typedef HYPRE_Int hypre_MPI_Comm;
 typedef HYPRE_Int hypre_MPI_Group;
 typedef HYPRE_Int hypre_MPI_Request;
 typedef HYPRE_Int hypre_MPI_Datatype;
-typedef void (hypre_MPI_User_function) ();
+typedef void (hypre_MPI_User_function) (void);
 
 typedef struct
 {
@@ -337,7 +340,7 @@ HYPRE_Int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
 HYPRE_Int hypre_MPI_Op_free( hypre_MPI_Op *op );
 HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function, hypre_int commute,
                                hypre_MPI_Op *op );
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int hypre_MPI_Comm_split_type(hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
                                     hypre_MPI_Info info, hypre_MPI_Comm *newcomm);
 HYPRE_Int hypre_MPI_Info_create(hypre_MPI_Info *info);

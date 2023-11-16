@@ -20,14 +20,12 @@
 
 typedef struct
 {
-   HYPRE_Complex  *data;
-   HYPRE_Int       size;
-
-   /* Does the Vector create/destroy `data'? */
-   HYPRE_Int       owns_data;
-
-   /* memory location of array data */
-   HYPRE_MemoryLocation  memory_location;
+   HYPRE_Complex        *data;
+   HYPRE_Int             size;      /* Number of elements of a single vector component */
+   HYPRE_Int             component; /* Index of a multivector component
+                                    (used for set/get routines )*/
+   HYPRE_Int             owns_data;  /* Does the Vector create/destroy `data'? */
+   HYPRE_MemoryLocation  memory_location; /* memory location of data array */
 
    /* For multivectors...*/
    HYPRE_Int   num_vectors;  /* the above "size" is size of one vector */
@@ -46,12 +44,12 @@ typedef struct
 
 #define hypre_VectorData(vector)                  ((vector) -> data)
 #define hypre_VectorSize(vector)                  ((vector) -> size)
+#define hypre_VectorComponent(vector)             ((vector) -> component)
 #define hypre_VectorOwnsData(vector)              ((vector) -> owns_data)
 #define hypre_VectorMemoryLocation(vector)        ((vector) -> memory_location)
 #define hypre_VectorNumVectors(vector)            ((vector) -> num_vectors)
 #define hypre_VectorMultiVecStorageMethod(vector) ((vector) -> multivec_storage_method)
-#define hypre_VectorVectorStride(vector)          ((vector) -> vecstride )
-#define hypre_VectorIndexStride(vector)           ((vector) -> idxstride )
+#define hypre_VectorVectorStride(vector)          ((vector) -> vecstride)
+#define hypre_VectorIndexStride(vector)           ((vector) -> idxstride)
 
 #endif
-

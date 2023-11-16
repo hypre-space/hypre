@@ -41,7 +41,6 @@ static void bzero(char *a, HYPRE_Int n) {HYPRE_Int i; for (i=0; i<n; i++) {a[i]=
 #endif
 #endif
 
-
 /******************************************************************************
  *
  * ParaSails private functions
@@ -796,8 +795,10 @@ static void ConstructPatternForEachRow(HYPRE_Int symmetric, PrunedRows *pruned_r
     HYPRE_Int row, len, *ind, level, lenprev, *indprev;
     HYPRE_Int i, j;
     RowPatt *row_patt;
-    HYPRE_Int nnz = 0;
     HYPRE_Int npes;
+#ifdef PARASAILS_DEBUG
+    HYPRE_Int nnz = 0;
+#endif
 
     hypre_MPI_Comm_size(M->comm, &npes);
     *costp = 0.0;
@@ -844,16 +845,19 @@ static void ConstructPatternForEachRow(HYPRE_Int symmetric, PrunedRows *pruned_r
         /* Following statement allocates space but does not store values */
         MatrixSetRow(M, row+M->beg_row, len, ind, NULL);
 
-        nnz += len;
         (*costp) += (HYPRE_Real) len*len*len;
+#ifdef PARASAILS_DEBUG
+        nnz += len;
+#endif
     }
 
-#if 0
+#ifdef PARASAILS_DEBUG
     {
-    HYPRE_Int mype;
-    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &mype);
-    hypre_printf("%d: nnz: %10d  ********* cost %7.1e\n", mype, nnz, *costp);
-    fflush(stdout);
+       HYPRE_Int mype;
+
+       hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &mype);
+       hypre_printf("%d: nnz: %10d  ********* cost %7.1e\n", mype, nnz, *costp);
+       fflush(stdout);
     }
 #endif
 
@@ -869,16 +873,18 @@ static void ConstructPatternForEachRow(HYPRE_Int symmetric, PrunedRows *pruned_r
  *               This is the approximate inverse with lower triangular pattern
  *--------------------------------------------------------------------------*/
 
-static void ConstructPatternForEachRowExt(HYPRE_Int symmetric, 
-  PrunedRows *pruned_rows_global, PrunedRows *pruned_rows_local, 
+static void ConstructPatternForEachRowExt(HYPRE_Int symmetric,
+  PrunedRows *pruned_rows_global, PrunedRows *pruned_rows_local,
   HYPRE_Int num_levels, Numbering *numb, Matrix *M, HYPRE_Real *costp)
 {
     HYPRE_Int row, len, *ind, level, lenprev, *indprev;
     HYPRE_Int i, j;
     RowPatt *row_patt;
     RowPatt *row_patt2;
-    HYPRE_Int nnz = 0;
     HYPRE_Int npes;
+#ifdef PARASAILS_DEBUG
+    HYPRE_Int nnz = 0;
+#endif
 
     hypre_MPI_Comm_size(M->comm, &npes);
     *costp = 0.0;
@@ -906,7 +912,7 @@ static void ConstructPatternForEachRowExt(HYPRE_Int symmetric,
         }
 
         /***********************
-	 * Now do the transpose 
+	 * Now do the transpose
 	 ***********************/
 
         /* Get initial pattern for row */
@@ -969,16 +975,19 @@ static void ConstructPatternForEachRowExt(HYPRE_Int symmetric,
         /* Following statement allocates space but does not store values */
         MatrixSetRow(M, row+M->beg_row, len, ind, NULL);
 
-        nnz += len;
         (*costp) += (HYPRE_Real) len*len*len;
+#ifdef PARASAILS_DEBUG
+        nnz += len;
+#endif
     }
 
-#if 0
+#ifdef PARASAILS_DEBUG
     {
-    HYPRE_Int mype;
-    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &mype);
-    hypre_printf("%d: nnz: %10d  ********* cost %7.1e\n", mype, nnz, *costp);
-    fflush(stdout);
+       HYPRE_Int mype;
+
+       hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &mype);
+       hypre_printf("%d: nnz: %10d  ********* cost %7.1e\n", mype, nnz, *costp);
+       fflush(stdout);
     }
 #endif
 
@@ -1000,11 +1009,13 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
     HYPRE_Real *ahat, *ahatp;
     HYPRE_Int i, j, len2, *ind2, loc;
     HYPRE_Real *val2, temp;
-    HYPRE_Real time0, time1, timet = 0.0, timea = 0.0;
+    HYPRE_Int error = 0;
 
+#ifdef PARASAILS_DEBUG
+    HYPRE_Real time0, time1;
+    HYPRE_Real timet = 0.0, timea = 0.0;
     HYPRE_Real ahatcost = 0.0;
-
-    HYPRE_Real error = 0;
+#endif
 
 #ifndef ESSL
     char uplo = 'L';
@@ -1051,7 +1062,9 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
         memset(ahat, 0, len*len * sizeof(HYPRE_Real));
 #endif
 
+#ifdef PARASAILS_DEBUG
         time0 = hypre_MPI_Wtime();
+#endif
 
         /* Form ahat matrix, entries correspond to indices in "ind" only */
         ahatp = ahat;
@@ -1105,9 +1118,11 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
 #endif
         }
 
+#ifdef PARASAILS_DEBUG
         time1 = hypre_MPI_Wtime();
-        timea += (time1-time0);
+        timea += (time1 - time0);
         ahatcost += (HYPRE_Real) (len*len2);
+#endif
 
         /* Set the right-hand side */
 /*        bzero((char *) val, len*sizeof(HYPRE_Real));*/
@@ -1121,7 +1136,9 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
         for (i=0; i<len; i++)
             marker[ind[i]] = -1;
 
+#ifdef PARASAILS_DEBUG
         time0 = hypre_MPI_Wtime();
+#endif
 
 #ifdef ESSL
         dppf(ahat, len, 1);
@@ -1154,11 +1171,14 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
             error = 1;
         }
 #endif
+
+#ifdef PARASAILS_DEBUG
         time1 = hypre_MPI_Wtime();
-        timet += (time1-time0);
+        timet += (time1 - time0);
+#endif
 
         /* Scale the result */
-        temp = 1.0 / sqrt(ABS(val[loc]));
+        temp = 1.0 / hypre_sqrt(ABS(val[loc]));
         for (i=0; i<len; i++)
             val[i] = val[i] * temp;
     }
@@ -1166,14 +1186,15 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
     hypre_TFree(marker,HYPRE_MEMORY_HOST);
     hypre_TFree(ahat,HYPRE_MEMORY_HOST);
 
-#if 0
+#ifdef PARASAILS_DEBUG
     {
-    HYPRE_Int mype;
-    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &mype);
-    hypre_printf("%d: Time for ahat: %f, for local solves: %f\n", mype, timea, timet);
-    hypre_printf("%d: ahatcost: %7.1e, numrows: %d, maxlen: %d\n",
-        mype, ahatcost, mat->end_row-local_beg_row+1, maxlen);
-    fflush(stdout);
+       HYPRE_Int mype;
+
+       hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &mype);
+       hypre_printf("%d: Time for ahat: %f, for local solves: %f\n", mype, timea, timet);
+       hypre_printf("%d: ahatcost: %7.1e, numrows: %d, maxlen: %d\n",
+                    mype, ahatcost, mat->end_row-local_beg_row+1, maxlen);
+       fflush(stdout);
     }
 #endif
 
@@ -1197,7 +1218,11 @@ static HYPRE_Int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
 
     HYPRE_Int i, j, len2, *ind2, loc;
     HYPRE_Real *val2;
-    HYPRE_Real time0, time1, timet = 0.0, timea = 0.0;
+
+#ifdef PARASAILS_DEBUG
+    HYPRE_Real time0, time1;
+    HYPRE_Real timet = 0.0, timea = 0.0;
+#endif
 
     HYPRE_Int npat;
     HYPRE_Int pattsize = 1000;
@@ -1226,7 +1251,9 @@ static HYPRE_Int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
     /* Compute values for row "row" of approximate inverse */
     for (row=local_beg_row; row<=mat->end_row; row++)
     {
+#ifdef PARASAILS_DEBUG
         time0 = hypre_MPI_Wtime();
+#endif
 
         /* Retrieve local indices */
         MatrixGetRow(mat, row - mat->beg_row, &len, &ind, &val);
@@ -1286,8 +1313,10 @@ static HYPRE_Int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
             ahatp += npat;
         }
 
+#ifdef PARASAILS_DEBUG
         time1 = hypre_MPI_Wtime();
-        timea += (time1-time0);
+        timea += (time1 - time0);
+#endif
 
         /* Reallocate bhat if necessary */
         if (npat > bhat_size)
@@ -1309,7 +1338,9 @@ static HYPRE_Int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
         for (i=0; i<npat; i++)
             marker[patt[i]] = -1;
 
+#ifdef PARASAILS_DEBUG
         time0 = hypre_MPI_Wtime();
+#endif
 
 #ifdef ESSL
         /* rhs in bhat, and put solution in val */
@@ -1335,8 +1366,10 @@ static HYPRE_Int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
         for (j=0; j<len; j++)
             val[j] = bhat[j];
 #endif
+#ifdef PARASAILS_DEBUG
         time1 = hypre_MPI_Wtime();
-        timet += (time1-time0);
+        timet += (time1 - time0);
+#endif
     }
 
     hypre_TFree(patt,HYPRE_MEMORY_HOST);
@@ -1345,12 +1378,13 @@ static HYPRE_Int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
     hypre_TFree(ahat,HYPRE_MEMORY_HOST);
     hypre_TFree(work,HYPRE_MEMORY_HOST);
 
-#if 0
+#ifdef PARASAILS_DEBUG
     {
-    HYPRE_Int mype;
-    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &mype);
-    hypre_printf("%d: Time for ahat: %f, for local solves: %f\n", mype, timea, timet);
-    fflush(stdout);
+       HYPRE_Int mype;
+
+       hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &mype);
+       hypre_printf("%d: Time for ahat: %f, for local solves: %f\n", mype, timea, timet);
+       fflush(stdout);
     }
 #endif
 
@@ -1564,7 +1598,7 @@ static void Rescale(Matrix *M, StoredRows *stored_rows, HYPRE_Int num_ind)
         }
 
         /* Scale the row */
-        accum = 1./sqrt(accum);
+        accum = 1./hypre_sqrt(accum);
         for (j=0; j<len; j++)
             val[j] *= accum;
     }
@@ -1710,15 +1744,15 @@ void ParaSailsSetupPatternExt(ParaSails *ps, Matrix *A,
     if (ps->thresh < 0.0)
         ps->thresh = SelectThresh(ps->comm, A, diag_scale, -ps->thresh);
 
-    pruned_rows_global = PrunedRowsCreate(A, PARASAILS_NROWS, diag_scale, 
+    pruned_rows_global = PrunedRowsCreate(A, PARASAILS_NROWS, diag_scale,
          thresh_global);
-    pruned_rows_local = PrunedRowsCreate(A, PARASAILS_NROWS, diag_scale, 
+    pruned_rows_local = PrunedRowsCreate(A, PARASAILS_NROWS, diag_scale,
          thresh_local);
 
-    ExchangePrunedRowsExt(ps->comm, A, ps->numb, 
+    ExchangePrunedRowsExt(ps->comm, A, ps->numb,
         pruned_rows_global, pruned_rows_local, ps->num_levels);
 
-    ExchangePrunedRowsExt2(ps->comm, A, ps->numb, 
+    ExchangePrunedRowsExt2(ps->comm, A, ps->numb,
         pruned_rows_global, pruned_rows_local, ps->num_levels);
 
     ConstructPatternForEachRowExt(ps->symmetric, pruned_rows_global,
@@ -1781,7 +1815,7 @@ HYPRE_Int ParaSailsSetupValues(ParaSails *ps, Matrix *A, HYPRE_Real filter)
 
     if (ps->symmetric)
     {
-        error += 
+        error +=
           ComputeValuesSym(stored_rows, ps->M, load_bal->beg_row, ps->numb,
             ps->symmetric);
 
@@ -1795,7 +1829,7 @@ HYPRE_Int ParaSailsSetupValues(ParaSails *ps, Matrix *A, HYPRE_Real filter)
     }
     else
     {
-        error += 
+        error +=
           ComputeValuesNonsym(stored_rows, ps->M, load_bal->beg_row, ps->numb);
 
         for (i=0; i<load_bal->num_taken; i++)
@@ -1957,7 +1991,7 @@ HYPRE_Real ParaSailsStatsPattern(ParaSails *ps, Matrix *A)
 	nnza = (nnza - n) / 2 + n;
     }
 
-    hypre_MPI_Allreduce(&ps->setup_pattern_time, &max_pattern_time, 
+    hypre_MPI_Allreduce(&ps->setup_pattern_time, &max_pattern_time,
 	1, hypre_MPI_REAL, hypre_MPI_MAX, comm);
     hypre_MPI_Allreduce(&ps->cost, &max_cost, 1, hypre_MPI_REAL, hypre_MPI_MAX, comm);
     hypre_MPI_Allreduce(&ps->cost, &ave_cost, 1, hypre_MPI_REAL, hypre_MPI_SUM, comm);
@@ -2006,7 +2040,7 @@ void ParaSailsStatsValues(ParaSails *ps, Matrix *A)
         nnza = (nnza - n) / 2 + n;
     }
 
-    hypre_MPI_Allreduce(&ps->setup_values_time, &max_values_time, 
+    hypre_MPI_Allreduce(&ps->setup_values_time, &max_values_time,
 	1, hypre_MPI_REAL, hypre_MPI_MAX, comm);
 
     if (!mype)

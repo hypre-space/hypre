@@ -92,7 +92,7 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_AMGHybridCreate( )
+hypre_AMGHybridCreate( void )
 {
    hypre_AMGHybridData *AMGhybrid_data;
 

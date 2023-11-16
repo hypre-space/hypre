@@ -94,6 +94,7 @@ doublereal dlange_(const char *norm, integer *m, integer *n, doublereal *a, inte
     a_offset = 1 + a_dim1 * 1;
     a -= a_offset;
     --work;
+    value = 0.;
 
     /* Function Body */
     if (min(*m,*n) == 0) {

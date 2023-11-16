@@ -13,6 +13,8 @@
 
 #include "_hypre_parcsr_block_mv.h"
 
+#define LB_VERSION 0
+
 /*--------------------------------------------------------------------------
  * hypre_CSRBlockMatrixCreate
  *--------------------------------------------------------------------------*/
@@ -192,7 +194,7 @@ hypre_CSRBlockMatrixCompress(hypre_CSRBlockMatrix *matrix)
       {
          ddata += matrix_data[i * bnnz + j] * matrix_data[i * bnnz + j];
       }
-      matrix_C_data[i] = sqrt(ddata);
+      matrix_C_data[i] = hypre_sqrt(ddata);
    }
    return matrix_C;
 }
@@ -645,7 +647,7 @@ hypre_CSRBlockMatrixBlockNorm(HYPRE_Int norm_type, HYPRE_Complex* data, HYPRE_Re
          {
             sum += ((HYPRE_Real)data[i]) * ((HYPRE_Real)data[i]);
          }
-         sum = sqrt(sum);
+         sum = hypre_sqrt(sum);
       }
    }
 
@@ -1737,4 +1739,3 @@ HYPRE_Int hypre_CSRBlockMatrixTranspose(hypre_CSRBlockMatrix *A,
 
    return (0);
 }
-

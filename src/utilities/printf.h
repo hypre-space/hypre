@@ -16,6 +16,7 @@ HYPRE_Int hypre_ndigits( HYPRE_BigInt number );
 HYPRE_Int hypre_printf( const char *format, ... );
 HYPRE_Int hypre_fprintf( FILE *stream, const char *format, ... );
 HYPRE_Int hypre_sprintf( char *s, const char *format, ... );
+HYPRE_Int hypre_snprintf( char *s, size_t size, const char *format, ...);
 HYPRE_Int hypre_scanf( const char *format, ... );
 HYPRE_Int hypre_fscanf( FILE *stream, const char *format, ... );
 HYPRE_Int hypre_sscanf( char *s, const char *format, ... );

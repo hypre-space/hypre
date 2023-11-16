@@ -292,33 +292,30 @@ hypre_PFMGSetupInterpOp_CC0
   HYPRE_Int           si0,
   HYPRE_Int           si1 )
 {
-   hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
-   hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-   HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
-   HYPRE_Int              warning_cnt = 0;
+   hypre_StructStencil *stencil = hypre_StructMatrixStencil(A);
+   hypre_Index         *stencil_shape = hypre_StructStencilShape(stencil);
+   HYPRE_Int            stencil_size = hypre_StructStencilSize(stencil);
+   HYPRE_Int            warning_cnt = 0;
+   HYPRE_Int            data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
+   HYPRE_Int          **data_indices = hypre_StructMatrixDataIndices(A);
+   HYPRE_Complex       *matrixA_data = hypre_StructMatrixData(A);
+   HYPRE_Int           *data_indices_boxi_d;
+   hypre_Index         *stencil_shape_d;
+   HYPRE_MemoryLocation memory_location = hypre_StructMatrixMemoryLocation(A);
 
-#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_Int              data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
-#endif
-
-   HYPRE_Int     **data_indices = hypre_StructMatrixDataIndices(A);
-   HYPRE_Complex  *matrixA_data = hypre_StructMatrixData(A);
-   HYPRE_Int      *data_indices_boxi_d; /* On device */
-   hypre_Index    *stencil_shape_d;
-
-   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
-      data_indices_boxi_d = hypre_TAlloc(HYPRE_Int,   stencil_size, HYPRE_MEMORY_DEVICE);
-      stencil_shape_d     = hypre_TAlloc(hypre_Index, stencil_size, HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(data_indices_boxi_d, data_indices[i], HYPRE_Int, stencil_size, HYPRE_MEMORY_DEVICE,
+      data_indices_boxi_d = hypre_TAlloc(HYPRE_Int, stencil_size, memory_location);
+      stencil_shape_d = hypre_TAlloc(hypre_Index, stencil_size, memory_location);
+      hypre_TMemcpy(data_indices_boxi_d, data_indices[i], HYPRE_Int, stencil_size, memory_location,
                     HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(stencil_shape_d, stencil_shape, hypre_Index, stencil_size, HYPRE_MEMORY_DEVICE,
+      hypre_TMemcpy(stencil_shape_d, stencil_shape, hypre_Index, stencil_size, memory_location,
                     HYPRE_MEMORY_HOST);
    }
    else
    {
       data_indices_boxi_d = data_indices[i];
-      stencil_shape_d     = stencil_shape;
+      stencil_shape_d = stencil_shape;
    }
 
 #define DEVICE_VAR is_device_ptr(Pp0,Pp1,matrixA_data,stencil_shape_d,data_indices_boxi_d)
@@ -413,10 +410,10 @@ hypre_PFMGSetupInterpOp_CC0
                         "Warning 0 center in interpolation. Setting interp = 0.");
    }
 
-   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
-      hypre_TFree(data_indices_boxi_d, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(stencil_shape_d,     HYPRE_MEMORY_DEVICE);
+      hypre_TFree(data_indices_boxi_d, memory_location);
+      hypre_TFree(stencil_shape_d, memory_location);
    }
 
    return hypre_error_flag;
@@ -452,16 +449,13 @@ hypre_PFMGSetupInterpOp_CC0
    HYPRE_Int              warning_cnt = 0;
    HYPRE_Int              dim, si, loop_length = 1, Astenc;
    HYPRE_Real            *Ap, *center, *Ap0, *Ap1;
-
-#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_Int data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
-#endif
+   HYPRE_MemoryLocation   memory_location = hypre_StructMatrixMemoryLocation(A);
 
    for (dim = 0; dim < hypre_StructMatrixNDim(A); dim++)
    {
       loop_length *= loop_size[dim];
    }
-   center = hypre_CTAlloc(HYPRE_Real, loop_length, HYPRE_MEMORY_DEVICE);
+   center = hypre_CTAlloc(HYPRE_Real, loop_length, memory_location);
 
    for (si = 0; si < stencil_size; si++)
    {
@@ -533,7 +527,7 @@ hypre_PFMGSetupInterpOp_CC0
                         "Warning 0 center in interpolation. Setting interp = 0.");
    }
 
-   hypre_TFree(center, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(center, memory_location);
 
    return hypre_error_flag;
 }

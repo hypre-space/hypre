@@ -24,9 +24,38 @@
  *
  *****************************************************************************/
 
+HYPRE_Int
+hypre_GetMemoryLocationName(hypre_MemoryLocation  memory_location,
+                            char                 *memory_location_name)
+{
+   if (memory_location == hypre_MEMORY_HOST)
+   {
+      sprintf(memory_location_name, "%s", "HOST");
+   }
+   else if (memory_location == hypre_MEMORY_HOST_PINNED)
+   {
+      sprintf(memory_location_name, "%s", "HOST PINNED");
+   }
+   else if (memory_location == hypre_MEMORY_DEVICE)
+   {
+      sprintf(memory_location_name, "%s", "DEVICE");
+   }
+   else if (memory_location == hypre_MEMORY_UNIFIED)
+   {
+      sprintf(memory_location_name, "%s", "UNIFIED");
+   }
+   else
+   {
+      sprintf(memory_location_name, "%s", "");
+   }
+
+   return hypre_error_flag;
+}
+
 /*--------------------------------------------------------------------------
  * hypre_OutOfMemory
  *--------------------------------------------------------------------------*/
+
 static inline void
 hypre_OutOfMemory(size_t size)
 {
@@ -36,10 +65,9 @@ hypre_OutOfMemory(size_t size)
 }
 
 static inline void
-hypre_WrongMemoryLocation()
+hypre_WrongMemoryLocation(void)
 {
-   hypre_error_w_msg(HYPRE_ERROR_MEMORY,
-                     "Wrong HYPRE MEMORY location: Only HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE and HYPRE_MEMORY_HOST_PINNED are supported!\n");
+   hypre_error_w_msg(HYPRE_ERROR_MEMORY, "Unrecognized hypre_MemoryLocation\n");
    hypre_assert(0);
    fflush(stdout);
 }
@@ -47,7 +75,7 @@ hypre_WrongMemoryLocation()
 void
 hypre_CheckMemoryLocation(void *ptr, hypre_MemoryLocation location)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_DEBUG) && defined(HYPRE_USING_GPU)
    if (!ptr)
    {
       return;
@@ -145,9 +173,7 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
       return;
    }
 
-#if defined(HYPRE_DEBUG)
    hypre_CheckMemoryLocation(ptr, hypre_MEMORY_UNIFIED);
-#endif
 
 #if defined(HYPRE_USING_CUDA)
    if (location == hypre_MEMORY_DEVICE)
@@ -181,7 +207,11 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
 #if defined(HYPRE_USING_SYCL)
    if (location == hypre_MEMORY_DEVICE)
    {
-      HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle())->prefetch(ptr, size).wait() );
+      /* WM: todo - the call below seems like it may occasionally result in an error: */
+      /*     Native API returns: -997 (The plugin has emitted a backend specific error) */
+      /*     or a seg fault. On the other hand, removing this line can also cause the code
+       *     to hang (or run excessively slow?). */
+      /* HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle())->prefetch(ptr, size).wait() ); */
    }
 #endif
 }
@@ -244,6 +274,8 @@ hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
 #if defined(HYPRE_USING_CUDA)
 #if defined(HYPRE_USING_DEVICE_POOL)
       HYPRE_CUDA_CALL( hypre_CachingMallocDevice(&ptr, size) );
+#elif defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
+      HYPRE_CUDA_CALL( cudaMallocAsync(&ptr, size, NULL) );
 #else
       HYPRE_CUDA_CALL( cudaMalloc(&ptr, size) );
 #endif
@@ -434,6 +466,8 @@ hypre_DeviceFree(void *ptr)
 #if defined(HYPRE_USING_CUDA)
 #if defined(HYPRE_USING_DEVICE_POOL)
       HYPRE_CUDA_CALL( hypre_CachingFreeDevice(ptr) );
+#elif defined(HYPRE_USING_DEVICE_MALLOC_ASYNC)
+      HYPRE_CUDA_CALL( cudaFreeAsync(ptr, NULL) );
 #else
       HYPRE_CUDA_CALL( cudaFree(ptr) );
 #endif
@@ -515,9 +549,7 @@ hypre_Free_core(void *ptr, hypre_MemoryLocation location)
       return;
    }
 
-#if defined(HYPRE_DEBUG)
    hypre_CheckMemoryLocation(ptr, location);
-#endif
 
    switch (location)
    {
@@ -572,13 +604,11 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
       return;
    }
 
-#if defined(HYPRE_DEBUG)
    if (size > 0)
    {
       hypre_CheckMemoryLocation(dst, loc_dst);
       hypre_CheckMemoryLocation(src, loc_src);
    }
-#endif
 
    /* Totally 4 x 4 = 16 cases */
 
@@ -765,7 +795,7 @@ hypre_GetExecPolicy1_core(hypre_MemoryLocation location)
          exec = HYPRE_EXEC_DEVICE;
          break;
       case hypre_MEMORY_UNIFIED :
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
          exec = hypre_HandleDefaultExecPolicy(hypre_handle());
 #endif
          break;
@@ -812,7 +842,7 @@ hypre_GetExecPolicy2_core(hypre_MemoryLocation location1,
 
    if (location1 == hypre_MEMORY_UNIFIED && location2 == hypre_MEMORY_UNIFIED)
    {
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
       exec = hypre_HandleDefaultExecPolicy(hypre_handle());
 #endif
    }
@@ -859,9 +889,7 @@ hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_MemoryLocation locati
       return ptr;
    }
 
-#if defined(HYPRE_DEBUG)
    hypre_CheckMemoryLocation(ptr, hypre_GetActualMemLocation(location));
-#endif
 
    switch (hypre_GetActualMemLocation(location))
    {
@@ -980,6 +1008,11 @@ hypre_ReAlloc_v2(void *ptr, size_t old_size, size_t new_size, HYPRE_MemoryLocati
    if (ptr == NULL)
    {
       return hypre_MAlloc(new_size, location);
+   }
+
+   if (old_size == new_size)
+   {
+      return ptr;
    }
 
    void *new_ptr = hypre_MAlloc(new_size, location);
@@ -1109,11 +1142,19 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
    {
       *memory_location = hypre_MEMORY_UNIFIED;
    }
+#if (HIP_VERSION_MAJOR >= 6)
+   else if (attr.type == hipMemoryTypeDevice)
+#else // (HIP_VERSION_MAJOR < 6)
    else if (attr.memoryType == hipMemoryTypeDevice)
+#endif // (HIP_VERSION_MAJOR >= 6)
    {
       *memory_location = hypre_MEMORY_DEVICE;
    }
+#if (HIP_VERSION_MAJOR >= 6)
+   else if (attr.type == hipMemoryTypeHost)
+#else // (HIP_VERSION_MAJOR < 6)
    else if (attr.memoryType == hipMemoryTypeHost)
+#endif // (HIP_VERSION_MAJOR >= 6)
    {
       *memory_location = hypre_MEMORY_HOST_PINNED;
    }
@@ -1155,254 +1196,6 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
 
    return ierr;
 }
-
-#if defined(HYPRE_USING_MEMORY_TRACKER)
-
-/*--------------------------------------------------------------------------
- * Memory tracker
- * do not use hypre_T* in the following since we don't want to track them   *
- *--------------------------------------------------------------------------*/
-hypre_MemoryTracker *
-hypre_MemoryTrackerCreate()
-{
-   hypre_MemoryTracker *ptr = (hypre_MemoryTracker *) calloc(1, sizeof(hypre_MemoryTracker));
-   return ptr;
-}
-
-void
-hypre_MemoryTrackerDestroy(hypre_MemoryTracker *tracker)
-{
-   if (tracker)
-   {
-      free(tracker->data);
-      free(tracker);
-   }
-}
-
-void
-hypre_MemoryTrackerInsert(const char           *action,
-                          void                 *ptr,
-                          size_t                nbytes,
-                          hypre_MemoryLocation  memory_location,
-                          const char           *filename,
-                          const char           *function,
-                          HYPRE_Int             line)
-{
-
-   if (ptr == NULL)
-   {
-      return;
-   }
-
-   hypre_MemoryTracker *tracker = hypre_memory_tracker();
-
-   if (tracker->alloced_size <= tracker->actual_size)
-   {
-      tracker->alloced_size = 2 * tracker->alloced_size + 1;
-      tracker->data = (hypre_MemoryTrackerEntry *) realloc(tracker->data,
-                                                           tracker->alloced_size * sizeof(hypre_MemoryTrackerEntry));
-   }
-
-   hypre_assert(tracker->actual_size < tracker->alloced_size);
-
-   hypre_MemoryTrackerEntry *entry = tracker->data + tracker->actual_size;
-
-   sprintf(entry->_action, "%s", action);
-   entry->_ptr = ptr;
-   entry->_nbytes = nbytes;
-   entry->_memory_location = memory_location;
-   sprintf(entry->_filename, "%s", filename);
-   sprintf(entry->_function, "%s", function);
-   entry->_line = line;
-   /* -1 is the initial value */
-   entry->_pair = (size_t) -1;
-
-   tracker->actual_size ++;
-}
-
-
-/* do not use hypre_printf, hypre_fprintf, which have TAlloc
- * endless loop "for (i = 0; i < tracker->actual_size; i++)" otherwise */
-HYPRE_Int
-hypre_PrintMemoryTracker()
-{
-   HYPRE_Int myid, ierr = 0;
-   char filename[256];
-   FILE *file;
-   size_t i, j;
-
-   hypre_MemoryTracker *tracker = hypre_memory_tracker();
-
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-   hypre_sprintf(filename, "HypreMemoryTrack.log.%05d", myid);
-   if ((file = fopen(filename, "a")) == NULL)
-   {
-      fprintf(stderr, "Error: can't open output file %s\n", filename);
-      return hypre_error_flag;
-   }
-
-   fprintf(file, "==== Operations:\n");
-   fprintf(file,
-           "     ID        EVENT                 ADDRESS       BYTE         LOCATION                                       FILE(LINE)                                           FUNCTION  |  Memory (   H            P            D            U )\n");
-
-   size_t totl_bytes[hypre_MEMORY_UNIFIED + 1] = {0};
-   size_t peak_bytes[hypre_MEMORY_UNIFIED + 1] = {0};
-   size_t curr_bytes[hypre_MEMORY_UNIFIED + 1] = {0};
-
-   for (i = 0; i < tracker->actual_size; i++)
-   {
-      if (strstr(tracker->data[i]._action, "alloc") != NULL)
-      {
-         totl_bytes[tracker->data[i]._memory_location] += tracker->data[i]._nbytes;
-         curr_bytes[tracker->data[i]._memory_location] += tracker->data[i]._nbytes;
-         peak_bytes[tracker->data[i]._memory_location] =
-            hypre_max( curr_bytes[tracker->data[i]._memory_location],
-                       peak_bytes[tracker->data[i]._memory_location] );
-
-         /* for each unpaired "alloc", find its "free" */
-         if (tracker->data[i]._pair != (size_t) -1)
-         {
-            if ( tracker->data[i]._pair >= tracker->actual_size ||
-                 tracker->data[tracker->data[i]._pair]._pair != i)
-            {
-               fprintf(stderr, "hypre memory tracker internal error!\n");
-               hypre_MPI_Abort(hypre_MPI_COMM_WORLD, 1);
-            }
-
-            continue;
-         }
-
-         for (j = i + 1; j < tracker->actual_size; j++)
-         {
-            if ( strstr(tracker->data[j]._action, "free") != NULL &&
-                 tracker->data[j]._pair == (size_t) -1 &&
-                 tracker->data[i]._ptr == tracker->data[j]._ptr &&
-                 tracker->data[i]._memory_location == tracker->data[j]._memory_location )
-            {
-               tracker->data[i]._pair = j;
-               tracker->data[j]._pair = i;
-               tracker->data[j]._nbytes = tracker->data[i]._nbytes;
-               break;
-            }
-         }
-
-         if (tracker->data[i]._pair == (size_t) -1)
-         {
-            fprintf(stderr, "%6zu: %16p may not freed\n", i, tracker->data[i]._ptr );
-         }
-      }
-      else if (strstr(tracker->data[i]._action, "free") != NULL)
-      {
-         size_t pair = tracker->data[i]._pair;
-
-         if (pair == (size_t) -1)
-         {
-            fprintf(stderr, "%6zu: unpaired free at %16p\n", i, tracker->data[i]._ptr );
-         }
-         else
-         {
-            curr_bytes[tracker->data[i]._memory_location] -= tracker->data[pair]._nbytes;
-         }
-      }
-
-      if (i < tracker->prev_end)
-      {
-         continue;
-      }
-
-      char memory_location[256];
-      char nbytes[32];
-
-      if (tracker->data[i]._memory_location == hypre_MEMORY_HOST)
-      {
-         sprintf(memory_location, "%s", "HOST");
-      }
-      else if (tracker->data[i]._memory_location == hypre_MEMORY_HOST_PINNED)
-      {
-         sprintf(memory_location, "%s", "HOST_PINNED");
-      }
-      else if (tracker->data[i]._memory_location == hypre_MEMORY_DEVICE)
-      {
-         sprintf(memory_location, "%s", "DEVICE");
-      }
-      else if (tracker->data[i]._memory_location == hypre_MEMORY_UNIFIED)
-      {
-         sprintf(memory_location, "%s", "UNIFIED");
-      }
-      else
-      {
-         sprintf(memory_location, "%s", "UNDEFINED");
-      }
-
-      if (tracker->data[i]._nbytes != (size_t) -1)
-      {
-         sprintf(nbytes, "%zu", tracker->data[i]._nbytes);
-      }
-      else
-      {
-         sprintf(nbytes, "%s", "");
-      }
-
-      fprintf(file, " %6zu %12s        %16p %10s %16s %40s (%5d) %50s  |  %12zu %12zu %12zu %12zu\n",
-              i,
-              tracker->data[i]._action,
-              tracker->data[i]._ptr,
-              nbytes,
-              memory_location,
-              tracker->data[i]._filename,
-              tracker->data[i]._line,
-              tracker->data[i]._function,
-              curr_bytes[hypre_MEMORY_HOST],
-              curr_bytes[hypre_MEMORY_HOST_PINNED],
-              curr_bytes[hypre_MEMORY_DEVICE],
-              curr_bytes[hypre_MEMORY_UNIFIED]
-             );
-   }
-
-   fprintf(file, "\n==== Total allocated (byte):\n");
-   fprintf(file, "HOST: %16zu, HOST_PINNED %16zu, DEVICE %16zu, UNIFIED %16zu\n",
-           totl_bytes[hypre_MEMORY_HOST],
-           totl_bytes[hypre_MEMORY_HOST_PINNED],
-           totl_bytes[hypre_MEMORY_DEVICE],
-           totl_bytes[hypre_MEMORY_UNIFIED]);
-
-   fprintf(file, "\n==== Peak (byte):\n");
-   fprintf(file, "HOST: %16zu, HOST_PINNED %16zu, DEVICE %16zu, UNIFIED %16zu\n",
-           peak_bytes[hypre_MEMORY_HOST],
-           peak_bytes[hypre_MEMORY_HOST_PINNED],
-           peak_bytes[hypre_MEMORY_DEVICE],
-           peak_bytes[hypre_MEMORY_UNIFIED]);
-
-   fprintf(file, "\n==== Reachable (byte):\n");
-   fprintf(file, "HOST: %16zu, HOST_PINNED %16zu, DEVICE %16zu, UNIFIED %16zu\n",
-           curr_bytes[hypre_MEMORY_HOST],
-           curr_bytes[hypre_MEMORY_HOST_PINNED],
-           curr_bytes[hypre_MEMORY_DEVICE],
-           curr_bytes[hypre_MEMORY_UNIFIED]);
-
-   fprintf(file, "\n==== Warnings:\n");
-   for (i = 0; i < tracker->actual_size; i++)
-   {
-      if (tracker->data[i]._pair == (size_t) -1)
-      {
-         if (strstr(tracker->data[i]._action, "alloc") != NULL)
-         {
-            fprintf(file, "%6zu: %p may have not been freed\n", i, tracker->data[i]._ptr );
-         }
-         else if (strstr(tracker->data[i]._action, "free") != NULL)
-         {
-            fprintf(file, "%6zu: unpaired free at %16p\n", i, tracker->data[i]._ptr );
-         }
-      }
-   }
-
-   fclose(file);
-
-   tracker->prev_end = tracker->actual_size;
-
-   return ierr;
-}
-#endif
 
 /*--------------------------------------------------------------------------*
  * Memory Pool
@@ -1544,9 +1337,9 @@ hypre_umpire_host_pooled_allocate(void **ptr, size_t nbytes)
    {
       umpire_allocator allocator;
       umpire_resourcemanager_get_allocator_by_name(rm_ptr, resource_name, &allocator);
-      umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
-                                                 hypre_HandleUmpireHostPoolSize(handle),
-                                                 hypre_HandleUmpireBlockSize(handle), &pooled_allocator);
+      hypre_umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
+                                                       hypre_HandleUmpireHostPoolSize(handle),
+                                                       hypre_HandleUmpireBlockSize(handle), &pooled_allocator);
       hypre_HandleOwnUmpireHostPool(handle) = 1;
    }
 
@@ -1612,9 +1405,9 @@ hypre_umpire_device_pooled_allocate(void **ptr, size_t nbytes)
    {
       umpire_allocator allocator;
       umpire_resourcemanager_get_allocator_by_name(rm_ptr, resource_name, &allocator);
-      umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
-                                                 hypre_HandleUmpireDevicePoolSize(handle),
-                                                 hypre_HandleUmpireBlockSize(handle), &pooled_allocator);
+      hypre_umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
+                                                       hypre_HandleUmpireDevicePoolSize(handle),
+                                                       hypre_HandleUmpireBlockSize(handle), &pooled_allocator);
 
       hypre_HandleOwnUmpireDevicePool(handle) = 1;
    }
@@ -1661,9 +1454,9 @@ hypre_umpire_um_pooled_allocate(void **ptr, size_t nbytes)
    {
       umpire_allocator allocator;
       umpire_resourcemanager_get_allocator_by_name(rm_ptr, resource_name, &allocator);
-      umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
-                                                 hypre_HandleUmpireUMPoolSize(handle),
-                                                 hypre_HandleUmpireBlockSize(handle), &pooled_allocator);
+      hypre_umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
+                                                       hypre_HandleUmpireUMPoolSize(handle),
+                                                       hypre_HandleUmpireBlockSize(handle), &pooled_allocator);
 
       hypre_HandleOwnUmpireUMPool(handle) = 1;
    }
@@ -1710,9 +1503,9 @@ hypre_umpire_pinned_pooled_allocate(void **ptr, size_t nbytes)
    {
       umpire_allocator allocator;
       umpire_resourcemanager_get_allocator_by_name(rm_ptr, resource_name, &allocator);
-      umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
-                                                 hypre_HandleUmpirePinnedPoolSize(handle),
-                                                 hypre_HandleUmpireBlockSize(handle), &pooled_allocator);
+      hypre_umpire_resourcemanager_make_allocator_pool(rm_ptr, pool_name, allocator,
+                                                       hypre_HandleUmpirePinnedPoolSize(handle),
+                                                       hypre_HandleUmpireBlockSize(handle), &pooled_allocator);
 
       hypre_HandleOwnUmpirePinnedPool(handle) = 1;
    }
@@ -1725,7 +1518,7 @@ hypre_umpire_pinned_pooled_allocate(void **ptr, size_t nbytes)
 HYPRE_Int
 hypre_umpire_pinned_pooled_free(void *ptr)
 {
-   const hypre_Handle *handle = hypre_handle();
+   hypre_Handle *handle = hypre_handle();
    const char *pool_name = hypre_HandleUmpirePinnedPoolName(handle);
    umpire_allocator pooled_allocator;
 
@@ -1739,4 +1532,3 @@ hypre_umpire_pinned_pooled_free(void *ptr)
    return hypre_error_flag;
 }
 #endif
-

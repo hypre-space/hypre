@@ -323,7 +323,7 @@ hypre_BoomerAMGCreateSHost(hypre_ParCSRMatrix    *A,
 
          /* compute row entries of S */
          S_temp_diag_j[A_diag_i[i]] = -1;
-         if ((fabs(row_sum) > fabs(diag)*max_row_sum) && (max_row_sum < 1.0))
+         if ((hypre_abs(row_sum) > hypre_abs(diag)*max_row_sum) && (max_row_sum < 1.0))
          {
             /* make all dependencies weak */
             for (jA = A_diag_i[i] + 1; jA < A_diag_i[i + 1]; jA++)
@@ -535,13 +535,11 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
                        HYPRE_Int             *dof_func,
                        hypre_ParCSRMatrix   **S_ptr)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("CreateS");
-#endif
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -556,9 +554,7 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
                                         S_ptr);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }
@@ -874,7 +870,7 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix   *A,
 
             /* compute row entries of S */
             S_temp_diag_j[A_diag_i[i]] = -1;
-            if ((fabs(row_sum) > fabs(diag)*max_row_sum) && (max_row_sum < 1.0))
+            if ((hypre_abs(row_sum) > hypre_abs(diag)*max_row_sum) && (max_row_sum < 1.0))
             {
                /* make all dependencies weak */
                for (jA = A_diag_i[i] + 1; jA < A_diag_i[i + 1]; jA++)
@@ -1362,23 +1358,23 @@ hypre_BoomerAMGCreateSabsHost(hypre_ParCSRMatrix    *A,
 
       /* compute scaling factor and row sum */
       row_scale = 0.0;
-      row_sum = fabs(diag);
+      row_sum = hypre_abs(diag);
       if (num_functions > 1)
       {
          for (jA = A_diag_i[i] + 1; jA < A_diag_i[i + 1]; jA++)
          {
             if (dof_func[i] == dof_func[A_diag_j[jA]])
             {
-               row_scale = hypre_max(row_scale, fabs(A_diag_data[jA]));
-               row_sum += fabs(A_diag_data[jA]);
+               row_scale = hypre_max(row_scale, hypre_abs(A_diag_data[jA]));
+               row_sum += hypre_abs(A_diag_data[jA]);
             }
          }
          for (jA = A_offd_i[i]; jA < A_offd_i[i + 1]; jA++)
          {
             if (dof_func[i] == dof_func_offd[A_offd_j[jA]])
             {
-               row_scale = hypre_max(row_scale, fabs(A_offd_data[jA]));
-               row_sum += fabs(A_offd_data[jA]);
+               row_scale = hypre_max(row_scale, hypre_abs(A_offd_data[jA]));
+               row_sum += hypre_abs(A_offd_data[jA]);
             }
          }
       }
@@ -1386,19 +1382,19 @@ hypre_BoomerAMGCreateSabsHost(hypre_ParCSRMatrix    *A,
       {
          for (jA = A_diag_i[i] + 1; jA < A_diag_i[i + 1]; jA++)
          {
-            row_scale = hypre_max(row_scale, fabs(A_diag_data[jA]));
-            row_sum += fabs(A_diag_data[jA]);
+            row_scale = hypre_max(row_scale, hypre_abs(A_diag_data[jA]));
+            row_sum += hypre_abs(A_diag_data[jA]);
          }
          for (jA = A_offd_i[i]; jA < A_offd_i[i + 1]; jA++)
          {
-            row_scale = hypre_max(row_scale, fabs(A_offd_data[jA]));
-            row_sum += fabs(A_offd_data[jA]);
+            row_scale = hypre_max(row_scale, hypre_abs(A_offd_data[jA]));
+            row_sum += hypre_abs(A_offd_data[jA]);
          }
       }
 
       /* compute row entries of S */
       S_diag_j[A_diag_i[i]] = -1; /* reject diag entry */
-      if ( fabs(row_sum) < fabs(diag) * (2.0 - max_row_sum) && max_row_sum < 1.0 )
+      if ( hypre_abs(row_sum) < hypre_abs(diag) * (2.0 - max_row_sum) && max_row_sum < 1.0 )
       {
          /* make all dependencies weak */
          for (jA = A_diag_i[i] + 1; jA < A_diag_i[i + 1]; jA++)
@@ -1416,7 +1412,7 @@ hypre_BoomerAMGCreateSabsHost(hypre_ParCSRMatrix    *A,
          {
             for (jA = A_diag_i[i] + 1; jA < A_diag_i[i + 1]; jA++)
             {
-               if (fabs(A_diag_data[jA]) <= strength_threshold * row_scale
+               if (hypre_abs(A_diag_data[jA]) <= strength_threshold * row_scale
                    || dof_func[i] != dof_func[A_diag_j[jA]])
                {
                   S_diag_j[jA] = -1;
@@ -1424,7 +1420,7 @@ hypre_BoomerAMGCreateSabsHost(hypre_ParCSRMatrix    *A,
             }
             for (jA = A_offd_i[i]; jA < A_offd_i[i + 1]; jA++)
             {
-               if (fabs(A_offd_data[jA]) <= strength_threshold * row_scale
+               if (hypre_abs(A_offd_data[jA]) <= strength_threshold * row_scale
                    || dof_func[i] != dof_func_offd[A_offd_j[jA]])
                {
                   S_offd_j[jA] = -1;
@@ -1435,14 +1431,14 @@ hypre_BoomerAMGCreateSabsHost(hypre_ParCSRMatrix    *A,
          {
             for (jA = A_diag_i[i] + 1; jA < A_diag_i[i + 1]; jA++)
             {
-               if (fabs(A_diag_data[jA]) <= strength_threshold * row_scale)
+               if (hypre_abs(A_diag_data[jA]) <= strength_threshold * row_scale)
                {
                   S_diag_j[jA] = -1;
                }
             }
             for (jA = A_offd_i[i]; jA < A_offd_i[i + 1]; jA++)
             {
-               if (fabs(A_offd_data[jA]) <= strength_threshold * row_scale)
+               if (hypre_abs(A_offd_data[jA]) <= strength_threshold * row_scale)
                {
                   S_offd_j[jA] = -1;
                }
@@ -1511,13 +1507,11 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
                           HYPRE_Int             *dof_func,
                           hypre_ParCSRMatrix   **S_ptr)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("CreateSabs");
-#endif
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -1532,9 +1526,7 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
                                            S_ptr);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }
@@ -1550,7 +1542,7 @@ hypre_BoomerAMGCreateSCommPkg(hypre_ParCSRMatrix *A,
    hypre_MPI_Status        *status;
    hypre_MPI_Request       *requests;
    hypre_ParCSRCommPkg     *comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
-   hypre_ParCSRCommPkg     *comm_pkg_S;
+   hypre_ParCSRCommPkg     *comm_pkg_S = NULL;
    hypre_ParCSRCommHandle  *comm_handle;
    hypre_CSRMatrix         *A_offd = hypre_ParCSRMatrixOffd(A);
    HYPRE_BigInt            *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
@@ -1741,7 +1733,6 @@ hypre_BoomerAMGCreateSCommPkg(hypre_ParCSRMatrix *A,
       big_send_map_elmts_S = hypre_CTAlloc(HYPRE_BigInt, total_nz, HYPRE_MEMORY_HOST);
    }
 
-
    proc = 0;
    proc_cnt = 0;
    for (i = 0; i < num_sends_A; i++)
@@ -1754,14 +1745,12 @@ hypre_BoomerAMGCreateSCommPkg(hypre_ParCSRMatrix *A,
       }
    }
 
-   comm_pkg_S = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
-   hypre_ParCSRCommPkgComm(comm_pkg_S) = comm;
-   hypre_ParCSRCommPkgNumRecvs(comm_pkg_S) = num_recvs_S;
-   hypre_ParCSRCommPkgRecvProcs(comm_pkg_S) = recv_procs_S;
-   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_S) = recv_vec_starts_S;
-   hypre_ParCSRCommPkgNumSends(comm_pkg_S) = num_sends_S;
-   hypre_ParCSRCommPkgSendProcs(comm_pkg_S) = send_procs_S;
-   hypre_ParCSRCommPkgSendMapStarts(comm_pkg_S) = send_map_starts_S;
+   /* Create communication package for S */
+   hypre_ParCSRCommPkgCreateAndFill(comm,
+                                    num_recvs_S, recv_procs_S, recv_vec_starts_S,
+                                    num_sends_S, send_procs_S, send_map_starts_S,
+                                    send_map_elmts_S,
+                                    &comm_pkg_S);
 
    comm_handle = hypre_ParCSRCommHandleCreate(22, comm_pkg_S, col_map_offd_S,
                                               big_send_map_elmts_S);
@@ -1769,12 +1758,12 @@ hypre_BoomerAMGCreateSCommPkg(hypre_ParCSRMatrix *A,
 
    first_row = hypre_ParCSRMatrixFirstRowIndex(A);
    if (first_row)
+   {
       for (i = 0; i < send_map_starts_S[num_sends_S]; i++)
       {
          send_map_elmts_S[i] = (HYPRE_Int)(big_send_map_elmts_S[i] - first_row);
       }
-
-   hypre_ParCSRCommPkgSendMapElmts(comm_pkg_S) = send_map_elmts_S;
+   }
 
    hypre_ParCSRMatrixCommPkg(S) = comm_pkg_S;
    hypre_ParCSRMatrixColMapOffd(S) = col_map_offd_S;
@@ -1807,7 +1796,7 @@ hypre_BoomerAMGCreate2ndSHost( hypre_ParCSRMatrix  *S,
 
    MPI_Comm             comm = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(S);
-   hypre_ParCSRCommPkg *tmp_comm_pkg;
+   hypre_ParCSRCommPkg *tmp_comm_pkg = NULL;
    hypre_ParCSRCommHandle *comm_handle;
 
    hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
@@ -2067,13 +2056,16 @@ hypre_BoomerAMGCreate2ndSHost( hypre_ParCSRMatrix  *S,
          tmp_send_map_starts[i + 1] = j_cnt;
       }
 
-      tmp_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
-      hypre_ParCSRCommPkgComm(tmp_comm_pkg) = comm;
-      hypre_ParCSRCommPkgNumSends(tmp_comm_pkg) = num_sends;
-      hypre_ParCSRCommPkgNumRecvs(tmp_comm_pkg) = num_recvs;
-      hypre_ParCSRCommPkgSendProcs(tmp_comm_pkg) = hypre_ParCSRCommPkgSendProcs(comm_pkg);
-      hypre_ParCSRCommPkgRecvProcs(tmp_comm_pkg) = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
-      hypre_ParCSRCommPkgSendMapStarts(tmp_comm_pkg) = tmp_send_map_starts;
+      /* Create temporary communication package */
+      hypre_ParCSRCommPkgCreateAndFill(comm,
+                                       num_recvs,
+                                       hypre_ParCSRCommPkgRecvProcs(comm_pkg),
+                                       tmp_recv_vec_starts,
+                                       num_sends,
+                                       hypre_ParCSRCommPkgSendProcs(comm_pkg),
+                                       tmp_send_map_starts,
+                                       NULL,
+                                       &tmp_comm_pkg);
 
       hypre_ParCSRCommHandleDestroy(comm_handle);
       comm_handle = NULL;
@@ -2090,15 +2082,15 @@ hypre_BoomerAMGCreate2ndSHost( hypre_ParCSRMatrix  *S,
 
       num_nonzeros = S_ext_i[recv_vec_starts[num_recvs]];
 
-      if (num_nonzeros) { S_ext_j = hypre_TAlloc(HYPRE_BigInt,  num_nonzeros, HYPRE_MEMORY_HOST); }
+      if (num_nonzeros)
+      {
+         S_ext_j = hypre_TAlloc(HYPRE_BigInt,  num_nonzeros, HYPRE_MEMORY_HOST);
+      }
 
-      tmp_recv_vec_starts[0] = 0;
       for (i = 0; i < num_recvs; i++)
       {
          tmp_recv_vec_starts[i + 1] = S_ext_i[recv_vec_starts[i + 1]];
       }
-
-      hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) = tmp_recv_vec_starts;
 
       comm_handle = hypre_ParCSRCommHandleCreate(21, tmp_comm_pkg, S_int_j, S_ext_j);
       hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -3031,13 +3023,11 @@ hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
                            HYPRE_BigInt        *coarse_row_starts,
                            hypre_ParCSRMatrix **C_ptr)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("Create2ndS");
-#endif
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(S) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -3050,9 +3040,7 @@ hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix  *S,
       ierr = hypre_BoomerAMGCreate2ndSHost( S, CF_marker, num_paths, coarse_row_starts, C_ptr );
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }
@@ -3121,11 +3109,9 @@ HYPRE_Int
 hypre_BoomerAMGCorrectCFMarker(hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker)
 {
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("CorrectCFMarker");
-#endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_IntArrayMemoryLocation(CF_marker),
                                                       hypre_IntArrayMemoryLocation(new_CF_marker));
 
@@ -3139,9 +3125,7 @@ hypre_BoomerAMGCorrectCFMarker(hypre_IntArray *CF_marker, hypre_IntArray *new_CF
       hypre_BoomerAMGCorrectCFMarkerHost(CF_marker, new_CF_marker);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return hypre_error_flag;
 }
@@ -3153,11 +3137,9 @@ HYPRE_Int
 hypre_BoomerAMGCorrectCFMarker2(hypre_IntArray *CF_marker, hypre_IntArray *new_CF_marker)
 {
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("CorrectCFMarker2");
-#endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_IntArrayMemoryLocation(CF_marker),
                                                       hypre_IntArrayMemoryLocation(new_CF_marker));
 
@@ -3171,9 +3153,7 @@ hypre_BoomerAMGCorrectCFMarker2(hypre_IntArray *CF_marker, hypre_IntArray *new_C
       hypre_BoomerAMGCorrectCFMarker2Host(CF_marker, new_CF_marker);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return hypre_error_flag;
 }

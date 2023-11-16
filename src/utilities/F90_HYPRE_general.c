@@ -16,7 +16,14 @@ void
 hypre_F90_IFACE(hypre_init, HYPRE_INIT)
 (hypre_F90_Int *ierr)
 {
-   *ierr = (hypre_F90_Int) HYPRE_Init();
+   *ierr = (hypre_F90_Int) HYPRE_Initialize();
+}
+
+void
+hypre_F90_IFACE(hypre_initialize, HYPRE_INITIALIZE)
+(hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int) HYPRE_Initialize();
 }
 
 void
@@ -44,10 +51,10 @@ hypre_F90_IFACE(hypre_setexecutionpolicy, HYPRE_SETEXECUTIONPOLICY)
 }
 
 void
-hypre_F90_IFACE(hypre_setspgemmusecusparse, HYPRE_SETSPGEMMUSECUSPARSE)
-(hypre_F90_Int *use_cusparse, hypre_F90_Int *ierr)
+hypre_F90_IFACE(hypre_setspgemmusevendor, HYPRE_SETSPGEMMUSEVENDOR)
+(hypre_F90_Int *use_vendor, hypre_F90_Int *ierr)
 {
-   *ierr = (hypre_F90_Int) HYPRE_SetSpGemmUseCusparse(*use_cusparse);
+   *ierr = (hypre_F90_Int) HYPRE_SetSpGemmUseVendor(*use_vendor);
 }
 
 #ifdef __cplusplus

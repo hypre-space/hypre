@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -35,39 +35,17 @@ mkdir -p $output_dir
 src_dir=`cd $1; pwd`
 shift
 
-# This is needed for some reason
-export CXX="mpicxx"
-
 # Basic build and run tests
-# Make sure that we don't check for a working Fortran compiler
-mo="test"
-ro="-ams -ij -sstruct -struct -rt -D HYPRE_NO_SAVED"
+mo="-j test"
+ro="-ams -ij -sstruct -struct -lobpcg -rt -rtol 0.0 -atol 1e-3"
 
-co="--disable-fortran"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
+co=""
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-default
 
-co="--enable-debug --disable-fortran"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo
+co="--enable-debug"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic--enable-debug
-
-co="--enable-bigint --disable-fortran"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo
-./renametest.sh basic $output_dir/basic--enable-bigint
-
-co="--enable-mixedint --disable-fortran"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo
-./renametest.sh basic $output_dir/basic--enable-mixedint
-
-# Test linking for different languages
-link_opts="all++"
-for opt in $link_opts
-do
-   output_subdir=$output_dir/link$opt
-   mkdir -p $output_subdir
-   ./test.sh link.sh $src_dir $opt
-   mv -f link.??? $output_subdir
-done
 
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )

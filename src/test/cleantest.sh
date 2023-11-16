@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -38,9 +38,9 @@ $RESET                     # Restore nullglob setting
 
 for testdir in $testdirs
 do
-   rm -f $testdir/*err*
-   rm -f $testdir/*out*
-   rm -f $testdir/*log*
+   rm -f $testdir/*.err*
+   rm -f $testdir/*.out*
+   rm -f $testdir/*.log*
    rm -f $testdir/*.fil
    rm -f $testdir/*.core
 done

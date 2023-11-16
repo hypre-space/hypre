@@ -1,0 +1,18 @@
+#!/bin/bash
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#=============================================================================
+# These runs generate errors
+#=============================================================================
+
+mpirun -np 2 ./ij -solver 2 -max_iter 2                         > error.out.0
+mpirun -np 2 ./ij -solver 1 -mg_max_iter 2                      > error.out.1
+mpirun -np 2 ./ij -solver 1 -mg_max_iter 2 -difconv -c 0 0 0    > error.out.2
+mpirun -np 2 ./ij -solver 1 -mg_max_iter 2 -rlx 0 -w -1.0       > error.out.3
+mpirun -np 2 ./ij -solver 0 -mg_max_iter 2                      > error.out.4
+
+# Test the HYPRE_GetErrorMessages() routine
+mpirun -np 2 ./ij -solver 1 -mg_max_iter 2 -rlx 0 -w -1.0 -test_error 1    > error.out.10

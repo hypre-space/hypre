@@ -44,6 +44,12 @@ HYPRE_BoomerAMGSetup( HYPRE_Solver solver,
                       HYPRE_ParVector b,
                       HYPRE_ParVector x      )
 {
+   if (!A)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
    return ( hypre_BoomerAMGSetup( (void *) solver,
                                   (hypre_ParCSRMatrix *) A,
                                   (hypre_ParVector *) b,
@@ -60,7 +66,23 @@ HYPRE_BoomerAMGSolve( HYPRE_Solver solver,
                       HYPRE_ParVector b,
                       HYPRE_ParVector x      )
 {
+   if (!A)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
 
+   if (!b)
+   {
+      hypre_error_in_arg(3);
+      return hypre_error_flag;
+   }
+
+   if (!x)
+   {
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
+   }
 
    return ( hypre_BoomerAMGSolve( (void *) solver,
                                   (hypre_ParCSRMatrix *) A,
@@ -78,7 +100,23 @@ HYPRE_BoomerAMGSolveT( HYPRE_Solver solver,
                        HYPRE_ParVector b,
                        HYPRE_ParVector x      )
 {
+   if (!A)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
 
+   if (!b)
+   {
+      hypre_error_in_arg(3);
+      return hypre_error_flag;
+   }
+
+   if (!x)
+   {
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
+   }
 
    return ( hypre_BoomerAMGSolveT( (void *) solver,
                                    (hypre_ParCSRMatrix *) A,
@@ -1281,6 +1319,39 @@ HYPRE_BoomerAMGSetILUDroptol( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetILUTriSolve
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetILUTriSolve( HYPRE_Solver  solver,
+                               HYPRE_Int        ilu_tri_solve)
+{
+   return ( hypre_BoomerAMGSetILUTriSolve( (void *) solver, ilu_tri_solve ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetILULowerJacobiIters
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetILULowerJacobiIters( HYPRE_Solver  solver,
+                                       HYPRE_Int        ilu_lower_jacobi_iters)
+{
+   return ( hypre_BoomerAMGSetILULowerJacobiIters( (void *) solver, ilu_lower_jacobi_iters ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetILUUpperJacobiIters
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetILUUpperJacobiIters( HYPRE_Solver  solver,
+                                       HYPRE_Int        ilu_upper_jacobi_iters)
+{
+   return ( hypre_BoomerAMGSetILUUpperJacobiIters( (void *) solver, ilu_upper_jacobi_iters ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetILULocalReordering
  *--------------------------------------------------------------------------*/
 
@@ -1289,6 +1360,28 @@ HYPRE_BoomerAMGSetILULocalReordering( HYPRE_Solver  solver,
                                       HYPRE_Int         ilu_reordering_type)
 {
    return ( hypre_BoomerAMGSetILULocalReordering( (void *) solver, ilu_reordering_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetFSAIAlgoType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFSAIAlgoType( HYPRE_Solver  solver,
+                                HYPRE_Int     algo_type )
+{
+   return ( hypre_BoomerAMGSetFSAIAlgoType( (void *) solver, algo_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetFSAILocalSolveType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFSAILocalSolveType( HYPRE_Solver  solver,
+                                      HYPRE_Int     local_solve_type )
+{
+   return ( hypre_BoomerAMGSetFSAILocalSolveType( (void *) solver, local_solve_type ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -1314,12 +1407,45 @@ HYPRE_BoomerAMGSetFSAIMaxStepSize( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetFSAIMaxNnzRow
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFSAIMaxNnzRow( HYPRE_Solver  solver,
+                                 HYPRE_Int     max_nnz_row )
+{
+   return ( hypre_BoomerAMGSetFSAIMaxNnzRow( (void *) solver, max_nnz_row ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetFSAINumLevels
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFSAINumLevels( HYPRE_Solver  solver,
+                                 HYPRE_Int     num_levels )
+{
+   return ( hypre_BoomerAMGSetFSAINumLevels( (void *) solver, num_levels ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetFSAIThreshold
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFSAIThreshold( HYPRE_Solver  solver,
+                                 HYPRE_Real    threshold )
+{
+   return ( hypre_BoomerAMGSetFSAIThreshold( (void *) solver, threshold ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetFSAIEigMaxIters
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_BoomerAMGSetFSAIEigMaxIters( HYPRE_Solver  solver,
-                                   HYPRE_Int     eig_max_iters  )
+                                   HYPRE_Int     eig_max_iters )
 {
    return ( hypre_BoomerAMGSetFSAIEigMaxIters( (void *) solver, eig_max_iters ) );
 }
@@ -2041,4 +2167,26 @@ HYPRE_BoomerAMGSetIsolatedFPoints(HYPRE_Solver   solver,
    return (hypre_BoomerAMGSetFPoints( (void *) solver,
                                       1, num_isolated_fpt,
                                       isolated_fpt_index) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetCumNnzAP
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetCumNnzAP( HYPRE_Solver  solver,
+                            HYPRE_Real    cum_nnz_AP )
+{
+   return ( hypre_BoomerAMGSetCumNnzAP( (void *) solver, cum_nnz_AP ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGGetCumNnzAP
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGGetCumNnzAP( HYPRE_Solver  solver,
+                            HYPRE_Real   *cum_nnz_AP )
+{
+   return ( hypre_BoomerAMGGetCumNnzAP( (void *) solver, cum_nnz_AP ) );
 }

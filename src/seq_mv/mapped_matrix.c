@@ -18,7 +18,7 @@
  *--------------------------------------------------------------------------*/
 
 hypre_MappedMatrix *
-hypre_MappedMatrixCreate(  )
+hypre_MappedMatrixCreate( void )
 {
    hypre_MappedMatrix  *matrix;
 

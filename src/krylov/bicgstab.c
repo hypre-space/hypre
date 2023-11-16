@@ -293,9 +293,9 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    (*(bicgstab_functions->CopyVector))(r0, r);
    (*(bicgstab_functions->CopyVector))(r0, p);
 
-   b_norm = sqrt((*(bicgstab_functions->InnerProd))(b, b));
+   b_norm = hypre_sqrt((*(bicgstab_functions->InnerProd))(b, b));
 
-   /* Since it is does not diminish performance, attempt to return an error flag
+   /* Since it does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
    if (b_norm != 0.) { ieee_check = b_norm / b_norm; } /* INF -> NaN conversion */
    if (ieee_check != ieee_check)
@@ -320,10 +320,10 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    }
 
    res = (*(bicgstab_functions->InnerProd))(r0, r0);
-   r_norm = sqrt(res);
+   r_norm = hypre_sqrt(res);
    r_norm_0 = r_norm;
 
-   /* Since it is does not diminish performance, attempt to return an error flag
+   /* Since it does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
    if (r_norm != 0.) { ieee_check = r_norm / r_norm; } /* INF -> NaN conversion */
    if (ieee_check != ieee_check)
@@ -453,7 +453,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
       precond(precond_data, A, p, v);
       (*(bicgstab_functions->Matvec))(matvec_data, 1.0, A, v, 0.0, q);
       temp = (*(bicgstab_functions->InnerProd))(r0, q);
-      if (fabs(temp) >= epsmac)
+      if (hypre_abs(temp) >= epsmac)
       {
          alpha = res / temp;
       }
@@ -483,7 +483,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
       (*(bicgstab_functions->Axpy))(gamma, v, x);
       (*(bicgstab_functions->Axpy))(-gamma, s, r);
       /* residual is now updated, must immediately check for convergence */
-      r_norm = sqrt((*(bicgstab_functions->InnerProd))(r, r));
+      r_norm = hypre_sqrt((*(bicgstab_functions->InnerProd))(r, r));
       if (logging > 0 || print_level > 0)
       {
          norms[iter] = r_norm;
@@ -502,7 +502,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
       {
          (*(bicgstab_functions->CopyVector))(b, r);
          (*(bicgstab_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
-         r_norm = sqrt((*(bicgstab_functions->InnerProd))(r, r));
+         r_norm = hypre_sqrt((*(bicgstab_functions->InnerProd))(r, r));
          if (r_norm <= epsilon)
          {
             if (print_level > 0 && my_id == 0)
@@ -524,15 +524,15 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
       if (cf_tol > 0.0)
       {
          cf_ave_0 = cf_ave_1;
-         cf_ave_1 = pow( r_norm / r_norm_0, 1.0 / (2.0 * iter));
+         cf_ave_1 = hypre_pow( r_norm / r_norm_0, 1.0 / (2.0 * iter));
 
-         weight   = fabs(cf_ave_1 - cf_ave_0);
+         weight   = hypre_abs(cf_ave_1 - cf_ave_0);
          weight   = weight / hypre_max(cf_ave_1, cf_ave_0);
          weight   = 1.0 - weight;
          if (weight * cf_ave_1 > cf_tol) { break; }
       }
 
-      if (fabs(res) >= epsmac)
+      if (hypre_abs(res) >= epsmac)
       {
          beta = 1.0 / res;
       }
@@ -546,7 +546,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
       res = (*(bicgstab_functions->InnerProd))(r0, r);
       beta *= res;
       (*(bicgstab_functions->Axpy))(-gamma, q, p);
-      if (fabs(gamma) >= epsmac)
+      if (hypre_abs(gamma) >= epsmac)
       {
          (*(bicgstab_functions->ScaleVector))((beta * alpha / gamma), p);
       }

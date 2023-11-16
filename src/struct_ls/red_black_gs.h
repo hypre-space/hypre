@@ -218,7 +218,7 @@ typedef struct
                                 xstart,xni,xnj,xi)                  \
 {                                                                   \
    HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);                         \
-   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<1> item)            \
+   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<3> item)            \
    {                                                                \
       HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();      \
       HYPRE_Int idx_local = idx;                                    \
@@ -246,7 +246,7 @@ typedef struct
                                             xstart,xni,xnj,xi)      \
 {                                                                   \
    HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);                         \
-   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<1> item)            \
+   BoxLoopforall(hypre__tot, [=] (sycl::nd_item<3> item)            \
    {                                                                \
       HYPRE_Int idx = (HYPRE_Int) item.get_global_linear_id();      \
       HYPRE_Int idx_local = idx;                                    \
@@ -357,10 +357,12 @@ typedef struct
 
 #ifdef HYPRE_USING_OPENMP
 #define HYPRE_BOX_REDUCTION
+#ifndef Pragma
 #if defined(WIN32) && defined(_MSC_VER)
-#define Pragma(x) __pragma(HYPRE_XSTR(x))
+#define Pragma(x) __pragma(x)
 #else
 #define Pragma(x) _Pragma(HYPRE_XSTR(x))
+#endif
 #endif
 #define OMPRB1 Pragma(omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
 #else

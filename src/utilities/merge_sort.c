@@ -16,50 +16,56 @@
 #define SWAP(T, a, b) do { T tmp = a; a = b; b = tmp; } while (0)
 
 /*--------------------------------------------------------------------------
- * hypre_MergeOrderedArrays: merge two ordered arrays
+ * hypre_IntArrayMergeOrdered: merge two ordered arrays
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MergeOrderedArrays( HYPRE_Int  size1,     HYPRE_Int  *array1,
-                          HYPRE_Int  size2,     HYPRE_Int  *array2,
-                          HYPRE_Int *size3_ptr, HYPRE_Int **array3_ptr )
+hypre_IntArrayMergeOrdered( hypre_IntArray *array1,
+                            hypre_IntArray *array2,
+                            hypre_IntArray *array3 )
 {
-   HYPRE_Int  *array3;
-   HYPRE_Int   i, j, k;
+   HYPRE_Int i = 0, j = 0, k = 0;
+   const HYPRE_Int size1 = hypre_IntArraySize(array1);
+   const HYPRE_Int size2 = hypre_IntArraySize(array2);
 
-   array3 = hypre_CTAlloc(HYPRE_Int, (size1 + size2), HYPRE_MEMORY_HOST);
+   HYPRE_MemoryLocation memory_location = hypre_IntArrayMemoryLocation(array3);
 
-   i = j = k = 0;
+   HYPRE_Int *array1_data = hypre_IntArrayData(array1);
+   HYPRE_Int *array2_data = hypre_IntArrayData(array2);
+   HYPRE_Int *array3_data = hypre_TAlloc(HYPRE_Int, size1 + size2, memory_location);
+
    while (i < size1 && j < size2)
    {
-      if (array1[i] > array2[j])
+      if (array1_data[i] > array2_data[j])
       {
-         array3[k++] = array2[j++];
+         array3_data[k++] = array2_data[j++];
       }
-      else if (array1[i] < array2[j])
+      else if (array1_data[i] < array2_data[j])
       {
-         array3[k++] = array1[i++];
+         array3_data[k++] = array1_data[i++];
       }
       else
       {
-         array3[k++] = array1[i++];
+         array3_data[k++] = array1_data[i++];
          j++;
       }
    }
 
    while (i < size1)
    {
-      array3[k++] = array1[i++];
+      array3_data[k++] = array1_data[i++];
    }
 
    while (j < size2)
    {
-      array3[k++] = array2[j++];
+      array3_data[k++] = array2_data[j++];
    }
 
-   /* Set pointers */
-   *size3_ptr  = k;
-   *array3_ptr = hypre_TReAlloc(array3, HYPRE_Int, k, HYPRE_MEMORY_HOST);
+   array3_data = hypre_TReAlloc_v2(array3_data, HYPRE_Int, size1 + size2, HYPRE_Int, k,
+                                   memory_location);
+
+   hypre_IntArraySize(array3) = k;
+   hypre_IntArrayData(array3) = array3_data;
 
    return hypre_error_flag;
 }

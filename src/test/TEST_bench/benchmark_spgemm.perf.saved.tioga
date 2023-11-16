@@ -1,0 +1,72 @@
+# Output file: benchmark_spgemm.out.1
+Device Parcsr Matrix-by-Matrix wall clock time = 0.019578 seconds
+# Output file: benchmark_spgemm.out.2
+Device Parcsr Matrix-by-Matrix wall clock time = 0.076419 seconds
+# Output file: benchmark_spgemm.out.3
+Device Parcsr Matrix-by-Matrix wall clock time = 0.008474 seconds
+# Output file: benchmark_spgemm.out.4
+Device Parcsr Matrix-by-Matrix wall clock time = 0.009719 seconds
+# Output file: benchmark_spgemm.out.5
+Device Parcsr Matrix-by-Matrix wall clock time = 0.007846 seconds
+# Output file: benchmark_spgemm.out.6
+Device Parcsr Matrix-by-Matrix wall clock time = 0.080421 seconds
+# Output file: benchmark_spgemm.out.7
+Device Parcsr Matrix-by-Matrix wall clock time = 0.003545 seconds
+# Output file: benchmark_spgemm.out.8
+Device Parcsr Matrix-by-Matrix wall clock time = 0.006074 seconds
+# Output file: benchmark_spgemm.out.9
+Device Parcsr Matrix-by-Matrix wall clock time = 0.038709 seconds
+# Output file: benchmark_spgemm.out.10
+Device Parcsr Matrix-by-Matrix wall clock time = 0.115453 seconds
+# Output file: benchmark_spgemm.out.11
+Device Parcsr Matrix-by-Matrix wall clock time = 0.016367 seconds
+# Output file: benchmark_spgemm.out.12
+Device Parcsr Matrix-by-Matrix wall clock time = 0.019611 seconds
+# Output file: benchmark_spgemm.out.13
+Device Parcsr Matrix-by-Matrix wall clock time = 0.018017 seconds
+# Output file: benchmark_spgemm.out.14
+Device Parcsr Matrix-by-Matrix wall clock time = 0.130224 seconds
+# Output file: benchmark_spgemm.out.15
+Device Parcsr Matrix-by-Matrix wall clock time = 0.006545 seconds
+# Output file: benchmark_spgemm.out.16
+Device Parcsr Matrix-by-Matrix wall clock time = 0.013026 seconds
+# Output file: benchmark_spgemm.out.17
+Device Parcsr Matrix-by-Matrix wall clock time = 0.002087 seconds
+# Output file: benchmark_spgemm.out.18
+Device Parcsr Matrix-by-Matrix wall clock time = 0.005301 seconds
+# Output file: benchmark_spgemm.out.19
+Device Parcsr Matrix-by-Matrix wall clock time = 0.002224 seconds
+# Output file: benchmark_spgemm.out.20
+Device Parcsr Matrix-by-Matrix wall clock time = 0.002487 seconds
+# Output file: benchmark_spgemm.out.21
+Device Parcsr Matrix-by-Matrix wall clock time = 0.031799 seconds
+# Output file: benchmark_spgemm.out.22
+Device Parcsr Matrix-by-Matrix wall clock time = 0.112757 seconds
+# Output file: benchmark_spgemm.out.23
+Device Parcsr Matrix-by-Matrix wall clock time = 0.013535 seconds
+# Output file: benchmark_spgemm.out.24
+Device Parcsr Matrix-by-Matrix wall clock time = 0.016090 seconds
+# Output file: benchmark_spgemm.out.25
+Device Parcsr Matrix-by-Matrix wall clock time = 0.057450 seconds
+# Output file: benchmark_spgemm.out.26
+Device Parcsr Matrix-by-Matrix wall clock time = 0.587366 seconds
+# Output file: benchmark_spgemm.out.27
+Device Parcsr Matrix-by-Matrix wall clock time = 0.022603 seconds
+# Output file: benchmark_spgemm.out.28
+Device Parcsr Matrix-by-Matrix wall clock time = 0.028229 seconds
+# Output file: benchmark_spgemm.out.29
+Device Parcsr Matrix-by-Matrix wall clock time = 0.057857 seconds
+# Output file: benchmark_spgemm.out.30
+Device Parcsr Matrix-by-Matrix wall clock time = 0.060432 seconds
+# Output file: benchmark_spgemm.out.31
+Device Parcsr Matrix-by-Matrix wall clock time = 0.020985 seconds
+# Output file: benchmark_spgemm.out.32
+Device Parcsr Matrix-by-Matrix wall clock time = 0.019986 seconds
+# Output file: benchmark_spgemm.out.33
+Device Parcsr Matrix-by-Matrix wall clock time = 0.063040 seconds
+# Output file: benchmark_spgemm.out.34
+Device Parcsr Matrix-by-Matrix wall clock time = 0.067800 seconds
+# Output file: benchmark_spgemm.out.35
+Device Parcsr Matrix-by-Matrix wall clock time = 0.023271 seconds
+# Output file: benchmark_spgemm.out.36
+Device Parcsr Matrix-by-Matrix wall clock time = 0.022089 seconds

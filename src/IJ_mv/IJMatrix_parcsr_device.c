@@ -11,16 +11,18 @@
  *
  *****************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "_hypre_IJ_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 
 __global__ void
-hypreCUDAKernel_IJMatrixValues_dev1(HYPRE_Int n, HYPRE_Int *rowind, HYPRE_Int *row_ptr,
-                                    HYPRE_Int *row_len, HYPRE_Int *mark)
+hypreGPUKernel_IJMatrixValues_dev1(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Int *rowind,
+                                   HYPRE_Int *row_ptr,
+                                   HYPRE_Int *row_len, HYPRE_Int *mark)
 {
-   HYPRE_Int global_thread_id = hypre_cuda_get_grid_thread_id<1, 1>();
+   HYPRE_Int global_thread_id = hypre_gpu_get_grid_thread_id<1, 1>(item);
 
    if (global_thread_id < n)
    {
@@ -88,6 +90,7 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
 
    if (nelms <= 0)
    {
+      hypre_TFree(row_ptr, HYPRE_MEMORY_DEVICE);
       return hypre_error_flag;
    }
 
@@ -98,9 +101,9 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       hypre_IJMatrixTranslator(matrix) = aux_matrix;
    }
 
-   HYPRE_Int      stack_elmts_max      = hypre_AuxParCSRMatrixMaxStackElmts(aux_matrix);
-   HYPRE_Int      stack_elmts_current  = hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix);
-   HYPRE_Int      stack_elmts_required = stack_elmts_current + nelms;
+   HYPRE_BigInt   stack_elmts_max      = hypre_AuxParCSRMatrixMaxStackElmts(aux_matrix);
+   HYPRE_BigInt   stack_elmts_current  = hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix);
+   HYPRE_BigInt   stack_elmts_required = stack_elmts_current + (HYPRE_BigInt) nelms;
    HYPRE_BigInt  *stack_i              = hypre_AuxParCSRMatrixStackI(aux_matrix);
    HYPRE_BigInt  *stack_j              = hypre_AuxParCSRMatrixStackJ(aux_matrix);
    HYPRE_Complex *stack_data           = hypre_AuxParCSRMatrixStackData(aux_matrix);
@@ -108,8 +111,10 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
 
    if ( stack_elmts_max < stack_elmts_required )
    {
-      HYPRE_Int stack_elmts_max_new = hypre_max(hypre_AuxParCSRMatrixUsrOnProcElmts (aux_matrix), 0) +
-                                      hypre_max(hypre_AuxParCSRMatrixUsrOffProcElmts(aux_matrix), 0);
+      HYPRE_BigInt stack_elmts_max_new =
+         hypre_max(hypre_AuxParCSRMatrixUsrOnProcElmts (aux_matrix), 0) +
+         hypre_max(hypre_AuxParCSRMatrixUsrOffProcElmts(aux_matrix), 0);
+
       if ( hypre_AuxParCSRMatrixUsrOnProcElmts (aux_matrix) < 0 ||
            hypre_AuxParCSRMatrixUsrOffProcElmts(aux_matrix) < 0 )
       {
@@ -131,7 +136,7 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       hypre_AuxParCSRMatrixMaxStackElmts(aux_matrix) = stack_elmts_max_new;
    }
 
-   HYPRE_THRUST_CALL(fill_n, stack_sora + stack_elmts_current, nelms, SorA);
+   hypreDevice_CharFilln(stack_sora + stack_elmts_current, nelms, SorA);
 
    if (ncols)
    {
@@ -163,9 +168,21 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       /* mark unwanted elements as -1 */
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
       dim3 gDim = hypre_GetDefaultDeviceGridDimension(len1, "thread", bDim);
-      HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IJMatrixValues_dev1, gDim, bDim, len1, indicator,
-                         (HYPRE_Int *) row_indexes, ncols, indicator );
+      HYPRE_GPU_LAUNCH( hypreGPUKernel_IJMatrixValues_dev1, gDim, bDim, len1, indicator,
+                        (HYPRE_Int *) row_indexes, ncols, indicator );
 
+#if defined(HYPRE_USING_SYCL)
+      auto zip_in = oneapi::dpl::make_zip_iterator(cols, values);
+      auto zip_out = oneapi::dpl::make_zip_iterator(stack_j + stack_elmts_current,
+                                                    stack_data + stack_elmts_current);
+      auto new_end = hypreSycl_copy_if( zip_in,
+                                        zip_in + len,
+                                        indicator,
+                                        zip_out,
+                                        is_nonnegative<HYPRE_Int>() );
+
+      HYPRE_Int nnz_tmp = std::get<0>(new_end.base()) - (stack_j + stack_elmts_current);
+#else
       auto new_end = HYPRE_THRUST_CALL(
                         copy_if,
                         thrust::make_zip_iterator(thrust::make_tuple(cols,       values)),
@@ -176,6 +193,7 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
                         is_nonnegative<HYPRE_Int>() );
 
       HYPRE_Int nnz_tmp = thrust::get<0>(new_end.get_iterator_tuple()) - (stack_j + stack_elmts_current);
+#endif
 
       hypre_assert(nnz_tmp == nelms);
 
@@ -189,13 +207,26 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
                     HYPRE_MEMORY_DEVICE);
    }
 
-   hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix) += nelms;
+   hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix) += (HYPRE_BigInt) nelms;
 
    hypre_TFree(row_ptr, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }
 
+#if defined(HYPRE_USING_SYCL)
+template<typename T1, typename T2>
+struct hypre_IJMatrixAssembleFunctor
+{
+   typedef std::tuple<T1, T2> Tuple;
+
+   Tuple operator()(const Tuple& x, const Tuple& y ) const
+   {
+      return std::make_tuple( hypre_max(std::get<0>(x), std::get<0>(y)),
+                              std::get<1>(x) + std::get<1>(y) );
+   }
+};
+#else
 template<typename T1, typename T2>
 struct hypre_IJMatrixAssembleFunctor : public
    thrust::binary_function< thrust::tuple<T1, T2>, thrust::tuple<T1, T2>, thrust::tuple<T1, T2> >
@@ -208,6 +239,7 @@ struct hypre_IJMatrixAssembleFunctor : public
                                  thrust::get<1>(x) + thrust::get<1>(y) );
    }
 };
+#endif
 
 /* helper routine used in hypre_IJMatrixAssembleParCSRDevice:
  * 1. sort (X0, A0) with key (I0, J0)
@@ -232,10 +264,57 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    /*
    dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(N0, "thread", bDim);
-   HYPRE_CUDA_LAUNCH( hypreCUDAKernel_IJMatrixAssembleSortAndReduce1, gDim, bDim, N0, I0, J0, X0, A0 );
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_IJMatrixAssembleSortAndReduce1, gDim, bDim, N0, I0, J0, X0, A0 );
    */
 
    /* output X: 0: keep, 1: zero-out */
+#if defined(HYPRE_USING_SYCL)
+   /* WM: oneDPL currently does not have a reverse iterator */
+   /*     should be able to do this with a reverse operation defined in a struct */
+   /*     instead of explicitly allocating and generating the reverse_perm, */
+   /*     but I can't get that to work for some reason */
+   HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
+   HYPRE_ONEDPL_CALL( std::transform,
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(N0),
+                      reverse_perm,
+   [N0] (auto i) { return N0 - i - 1; });
+
+   auto I0_J0_reversed = oneapi::dpl::make_permutation_iterator(
+                            oneapi::dpl::make_zip_iterator(I0, J0), reverse_perm);
+   auto X0_reversed = oneapi::dpl::make_permutation_iterator(X0, reverse_perm);
+   auto X_reversed = oneapi::dpl::make_permutation_iterator(X, reverse_perm);
+
+   HYPRE_ONEDPL_CALL( oneapi::dpl::exclusive_scan_by_segment,
+                      I0_J0_reversed,      /* key begin */
+                      I0_J0_reversed + N0, /* key end */
+                      X0_reversed,      /* input value begin */
+                      X_reversed,       /* output value begin */
+                      char(0),          /* init */
+                      std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
+                      oneapi::dpl::maximum<char>() );
+
+   hypre_TFree(reverse_perm, HYPRE_MEMORY_DEVICE);
+
+   hypreSycl_transform_if(A0,
+                          A0 + N0,
+                          X,
+                          A0,
+   [] (const auto & x) {return 0.0;},
+   [] (const auto & x) {return x;} );
+
+   auto I0_J0_zip = oneapi::dpl::make_zip_iterator(I0, J0);
+   auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
+                                     I0_J0_zip,                                                    /* keys_first */
+                                     I0_J0_zip + N0,                                               /* keys_last */
+                                     oneapi::dpl::make_zip_iterator(X0, A0),                       /* values_first */
+                                     oneapi::dpl::make_zip_iterator(I, J),                         /* keys_output */
+                                     oneapi::dpl::make_zip_iterator(X, A),                         /* values_output */
+                                     std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),    /* binary_pred */
+                                     hypre_IJMatrixAssembleFunctor<char, HYPRE_Complex>()          /* binary_op */);
+
+   *N1 = std::get<0>(new_end.first.base()) - I;
+#else
    HYPRE_THRUST_CALL(
       exclusive_scan_by_key,
       make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0 + N0, J0 + N0))),
@@ -259,6 +338,7 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
                      hypre_IJMatrixAssembleFunctor<char, HYPRE_Complex>()             /* binary_op */);
 
    *N1 = thrust::get<0>(new_end.first.get_iterator_tuple()) - I;
+#endif
    *I1 = I;
    *J1 = J;
    *X1 = X;
@@ -267,6 +347,23 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    return hypre_error_flag;
 }
 
+#if defined(HYPRE_USING_SYCL)
+template<typename T1, typename T2>
+struct hypre_IJMatrixAssembleFunctor2
+{
+   typedef std::tuple<T1, T2> Tuple;
+
+   __device__ Tuple operator()(const Tuple& x, const Tuple& y) const
+   {
+      const char          tx = std::get<0>(x);
+      const char          ty = std::get<0>(y);
+      const HYPRE_Complex vx = std::get<1>(x);
+      const HYPRE_Complex vy = std::get<1>(y);
+      const HYPRE_Complex vz = tx == 0 && ty == 0 ? vx + vy : tx ? vx : vy;
+      return std::make_tuple(0, vz);
+   }
+};
+#else
 template<typename T1, typename T2>
 struct hypre_IJMatrixAssembleFunctor2 : public
    thrust::binary_function< thrust::tuple<T1, T2>, thrust::tuple<T1, T2>, thrust::tuple<T1, T2> >
@@ -283,6 +380,7 @@ struct hypre_IJMatrixAssembleFunctor2 : public
       return thrust::make_tuple(0, vz);
    }
 };
+#endif
 
 HYPRE_Int
 hypre_IJMatrixAssembleSortAndReduce2(HYPRE_Int  N0, HYPRE_Int  *I0, HYPRE_Int  *J0, char  *X0,
@@ -297,6 +395,18 @@ hypre_IJMatrixAssembleSortAndReduce2(HYPRE_Int  N0, HYPRE_Int  *I0, HYPRE_Int  *
    char          *X = hypre_TAlloc(char,          N0, HYPRE_MEMORY_DEVICE);
    HYPRE_Complex *A = hypre_TAlloc(HYPRE_Complex, N0, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+   auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
+                                     oneapi::dpl::make_zip_iterator(I0, J0),                 /* keys_first */
+                                     oneapi::dpl::make_zip_iterator(I0 + N0, J0 + N0),       /* keys_last */
+                                     oneapi::dpl::make_zip_iterator(X0, A0),                 /* values_first */
+                                     oneapi::dpl::make_zip_iterator(I, J),                   /* keys_output */
+                                     oneapi::dpl::make_zip_iterator(X, A),                   /* values_output */
+                                     std::equal_to< std::tuple<HYPRE_Int, HYPRE_Int> >(),    /* binary_pred */
+                                     hypre_IJMatrixAssembleFunctor2<char, HYPRE_Complex>()   /* binary_op */);
+
+   *N1 = std::get<0>(new_end.first.base()) - I;
+#else
    auto new_end = HYPRE_THRUST_CALL(
                      reduce_by_key,
                      thrust::make_zip_iterator(thrust::make_tuple(I0,      J0     )), /* keys_first */
@@ -308,6 +418,7 @@ hypre_IJMatrixAssembleSortAndReduce2(HYPRE_Int  N0, HYPRE_Int  *I0, HYPRE_Int  *
                      hypre_IJMatrixAssembleFunctor2<char, HYPRE_Complex>()            /* binary_op */);
 
    *N1 = thrust::get<0>(new_end.first.get_iterator_tuple()) - I;
+#endif
    *I1 = I;
    *J1 = J;
    *A1 = A;
@@ -328,6 +439,49 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    HYPRE_BigInt  *J = hypre_TAlloc(HYPRE_BigInt,  N0, HYPRE_MEMORY_DEVICE);
    HYPRE_Complex *A = hypre_TAlloc(HYPRE_Complex, N0, HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+   /* WM: oneDPL currently does not have a reverse iterator */
+   /*     should be able to do this with a reverse operation defined in a struct */
+   /*     instead of explicitly allocating and generating the reverse_perm, */
+   /*     but I can't get that to work for some reason */
+   HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
+   HYPRE_ONEDPL_CALL( std::transform,
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(N0),
+                      reverse_perm,
+   [N0] (auto i) { return N0 - i - 1; });
+
+   auto I0_J0_reversed = oneapi::dpl::make_permutation_iterator(
+                            oneapi::dpl::make_zip_iterator(I0, J0), reverse_perm);
+   auto X0_reversed = oneapi::dpl::make_permutation_iterator(X0, reverse_perm);
+
+   HYPRE_ONEDPL_CALL( oneapi::dpl::inclusive_scan_by_segment,
+                      I0_J0_reversed,      /* key begin */
+                      I0_J0_reversed + N0, /* key end */
+                      X0_reversed,         /* input value begin */
+                      X0_reversed,         /* output value begin */
+                      std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
+                      oneapi::dpl::maximum<char>() );
+
+   hypre_TFree(reverse_perm, HYPRE_MEMORY_DEVICE);
+
+   hypreSycl_transform_if(A0,
+                          A0 + N0,
+                          X0,
+                          A0,
+   [] (const auto & x) {return 0.0;},
+   [] (const auto & x) {return x;} );
+
+   auto I0_J0_zip = oneapi::dpl::make_zip_iterator(I0, J0);
+
+   auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
+                                     I0_J0_zip,                                                    /* keys_first */
+                                     I0_J0_zip + N0,                                               /* keys_last */
+                                     A0,                                                           /* values_first */
+                                     oneapi::dpl::make_zip_iterator(I, J),                         /* keys_output */
+                                     A,                                                            /* values_output */
+                                     std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >()     /* binary_pred */);
+#else
    /* output in X0: 0: keep, 1: zero-out */
    HYPRE_THRUST_CALL(
       inclusive_scan_by_key,
@@ -348,12 +502,22 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
                      thrust::make_zip_iterator(thrust::make_tuple(I,       J      )), /* keys_output */
                      A,                                                               /* values_output */
                      thrust::equal_to< thrust::tuple<HYPRE_Int, HYPRE_Int> >()        /* binary_pred */);
+#endif
 
    HYPRE_Int Nt = new_end.second - A;
 
    hypre_assert(Nt <= N0);
 
    /* remove numrical zeros */
+#if defined(HYPRE_USING_SYCL)
+   auto new_end2 = hypreSycl_copy_if( oneapi::dpl::make_zip_iterator(I, J, A),
+                                      oneapi::dpl::make_zip_iterator(I + Nt, J + Nt, A + Nt),
+                                      A,
+                                      oneapi::dpl::make_zip_iterator(I0, J0, A0),
+   [] (const auto & x) {return x;});
+
+   *N1 = std::get<0>(new_end2.base()) - I0;
+#else
    auto new_end2 = HYPRE_THRUST_CALL( copy_if,
                                       thrust::make_zip_iterator(thrust::make_tuple(I,    J,    A)),
                                       thrust::make_zip_iterator(thrust::make_tuple(I + Nt, J + Nt, A + Nt)),
@@ -362,6 +526,7 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
                                       thrust::identity<HYPRE_Complex>() );
 
    *N1 = thrust::get<0>(new_end2.get_iterator_tuple()) - I0;
+#endif
 
    hypre_assert(*N1 <= Nt);
 
@@ -437,7 +602,11 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
    char          *stack_sora = hypre_AuxParCSRMatrixStackSorA(aux_matrix);
 
    in_range<HYPRE_BigInt> pred(row_start, row_end - 1);
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Int nelms_on = HYPRE_ONEDPL_CALL(std::count_if, stack_i, stack_i + nelms, pred);
+#else
    HYPRE_Int nelms_on = HYPRE_THRUST_CALL(count_if, stack_i, stack_i + nelms, pred);
+#endif
    HYPRE_Int nelms_off = nelms - nelms_on;
    HYPRE_Int nelms_off_max;
    hypre_MPI_Allreduce(&nelms_off, &nelms_off_max, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm);
@@ -459,6 +628,26 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
          char *off_proc_sora = hypre_TAlloc(char,          nelms_off, HYPRE_MEMORY_DEVICE);
          char *is_on_proc    = hypre_TAlloc(char,          nelms,     HYPRE_MEMORY_DEVICE);
 
+#if defined(HYPRE_USING_SYCL)
+         HYPRE_ONEDPL_CALL(std::transform, stack_i, stack_i + nelms, is_on_proc, pred);
+         auto zip_in = oneapi::dpl::make_zip_iterator(stack_i, stack_j, stack_data, stack_sora);
+         auto zip_out = oneapi::dpl::make_zip_iterator(off_proc_i, off_proc_j, off_proc_data, off_proc_sora);
+         auto new_end1 = hypreSycl_copy_if( zip_in,         /* first */
+                                            zip_in + nelms, /* last */
+                                            is_on_proc,     /* stencil */
+                                            zip_out,        /* result */
+         [] (const auto & x) {return !x;} );
+
+         hypre_assert(std::get<0>(new_end1.base()) - off_proc_i == nelms_off);
+
+         /* remove off-proc entries from stack */
+         auto new_end2 = hypreSycl_remove_if( zip_in,          /* first */
+                                              zip_in + nelms,  /* last */
+                                              is_on_proc,      /* stencil */
+         [] (const auto & x) {return !x;} );
+
+         hypre_assert(std::get<0>(new_end2.base()) - stack_i == nelms_on);
+#else
          HYPRE_THRUST_CALL(transform, stack_i, stack_i + nelms, is_on_proc, pred);
 
          auto new_end1 = HYPRE_THRUST_CALL(
@@ -485,6 +674,7 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
                             thrust::not1(thrust::identity<char>()) );
 
          hypre_assert(thrust::get<0>(new_end2.get_iterator_tuple()) - stack_i == nelms_on);
+#endif
 
          hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix) = nelms_on;
 
@@ -517,7 +707,11 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
 
 #ifdef HYPRE_DEBUG
    /* the stack should only have on-proc elements now */
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_Int tmp = HYPRE_ONEDPL_CALL(std::count_if, stack_i, stack_i + nelms, pred);
+#else
    HYPRE_Int tmp = HYPRE_THRUST_CALL(count_if, stack_i, stack_i + nelms, pred);
+#endif
    hypre_assert(nelms == tmp);
 #endif
 
@@ -535,11 +729,19 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
 
       /* adjust row indices from global to local */
       HYPRE_Int *new_i_local = hypre_TAlloc(HYPRE_Int, new_nnz, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL( std::transform,
+                         new_i,
+                         new_i + new_nnz,
+                         new_i_local,
+      [row_start = row_start] (const auto & x) {return x - row_start;} );
+#else
       HYPRE_THRUST_CALL( transform,
                          new_i,
                          new_i + new_nnz,
                          new_i_local,
                          _1 - row_start );
+#endif
 
       hypre_TFree(new_i, HYPRE_MEMORY_DEVICE);
 
@@ -658,7 +860,7 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
             hypre_TMemcpy(diag_a_new, hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(par_matrix)), HYPRE_Complex,
                           diag_nnz_existed, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-            HYPRE_THRUST_CALL(fill_n, diag_sora_new, diag_nnz_existed, 0);
+            hypreDevice_CharFilln(diag_sora_new, diag_nnz_existed, 0);
 
             hypre_IJMatrixAssembleSortAndReduce2(diag_nnz_existed + diag_nnz_new, diag_i_new, diag_j_new,
                                                  diag_sora_new, diag_a_new,
@@ -702,16 +904,23 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
                                                hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(par_matrix)), offd_i_new);
 
             /* adjust with the new col_map_offd_map */
+#if defined(HYPRE_USING_SYCL)
+            hypreSycl_gather( hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(par_matrix)),
+                              hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(par_matrix)) + offd_nnz_existed,
+                              col_map_offd_map,
+                              offd_j_new );
+#else
             HYPRE_THRUST_CALL( gather,
                                hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(par_matrix)),
                                hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(par_matrix)) + offd_nnz_existed,
                                col_map_offd_map,
                                offd_j_new );
+#endif
 
             hypre_TMemcpy(offd_a_new, hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(par_matrix)), HYPRE_Complex,
                           offd_nnz_existed, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
-            HYPRE_THRUST_CALL(fill_n, offd_sora_new, offd_nnz_existed, 0);
+            hypreDevice_CharFilln(offd_sora_new, offd_nnz_existed, 0);
 
             hypre_IJMatrixAssembleSortAndReduce2(offd_nnz_existed + offd_nnz_new, offd_i_new, offd_j_new,
                                                  offd_sora_new, offd_a_new,
@@ -781,8 +990,8 @@ hypre_IJMatrixSetConstantValuesParCSRDevice( hypre_IJMatrix *matrix,
    HYPRE_Int           nnz_diag   = hypre_CSRMatrixNumNonzeros(diag);
    HYPRE_Int           nnz_offd   = hypre_CSRMatrixNumNonzeros(offd);
 
-   HYPRE_THRUST_CALL( fill_n, diag_data, nnz_diag, value );
-   HYPRE_THRUST_CALL( fill_n, offd_data, nnz_offd, value );
+   hypreDevice_ComplexFilln( diag_data, nnz_diag, value );
+   hypreDevice_ComplexFilln( offd_data, nnz_offd, value );
 
    return hypre_error_flag;
 }

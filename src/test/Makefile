@@ -38,17 +38,7 @@ MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS}
 LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
 LIBFLAGS = ${LDFLAGS} ${LIBS}
-
-# WM: currently have to add the absolute path to libHYPRE.a when building sycl code; RL: reorg
-ifeq ($(notdir $(firstword ${LINK_CC})), dpcpp)
-   LIBHYPRE = ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
-else ifeq ($(notdir $(firstword ${LINK_CC})), mpiicx)
-   LIBHYPRE = ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
-else ifeq ($(notdir $(firstword ${LINK_CC})), mpiicpx)
-   LIBHYPRE = ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
-else
-   LIBHYPRE = -L${HYPRE_BUILD_DIR}/lib -lHYPRE
-endif
+LIBHYPRE = -L${HYPRE_BUILD_DIR}/lib -lHYPRE
 
 ifeq ($(notdir $(firstword ${LINK_CC})), nvcc)
    XLINK = -Xlinker=-rpath,${HYPRE_BUILD_DIR}/lib
@@ -80,6 +70,7 @@ HYPRE_DRIVERS =\
  struct_migrate.c\
  sstruct_fac.c\
  ij_mv.c\
+ ij_mm.c\
  zboxloop.c
 
 HYPRE_DRIVERS_CXX =\
@@ -113,7 +104,7 @@ all++: ${HYPRE_DRIVER_CXX_EXECS}
 install:
 
 clean:
-	rm -f *.o *.obj
+	rm -f *.o *.obj *.csv
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -153,7 +144,7 @@ sstruct: sstruct.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-struct: struct.obj
+struct: struct.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
@@ -165,7 +156,7 @@ maxwell_unscaled: maxwell_unscaled.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-struct_migrate: struct_migrate.obj
+struct_migrate: struct_migrate.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 

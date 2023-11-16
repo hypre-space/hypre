@@ -9,10 +9,9 @@
 
 #if defined(HYPRE_USING_ROCTX)
 #include "hip/hip_runtime_api.h"
-#include "roctx.h"
-#endif
+#include "roctracer/roctx.h"
 
-#if defined(HYPRE_USING_NVTX)
+#elif defined(HYPRE_USING_NVTX)
 
 #include <string>
 #include <algorithm>
@@ -70,7 +69,7 @@ static std::vector<std::string> hypre_nvtx_range_names;
 
 void hypre_GpuProfilingPushRangeColor(const char *name, HYPRE_Int color_id)
 {
-#ifdef HYPRE_USING_NVTX
+#if defined (HYPRE_USING_NVTX)
    color_id = color_id % hypre_nvtx_num_colors;
    nvtxEventAttributes_t eventAttrib = {0};
    eventAttrib.version = NVTX_VERSION;
@@ -80,16 +79,16 @@ void hypre_GpuProfilingPushRangeColor(const char *name, HYPRE_Int color_id)
    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII;
    eventAttrib.message.ascii = name;
    nvtxRangePushEx(&eventAttrib);
-#endif
 
-#ifdef HYPRE_USING_ROCTX
+#elif defined (HYPRE_USING_ROCTX)
    roctxRangePush(name);
+
 #endif
 }
 
 void hypre_GpuProfilingPushRange(const char *name)
 {
-#ifdef HYPRE_USING_NVTX
+#if defined (HYPRE_USING_NVTX)
    std::vector<std::string>::iterator p = std::find(hypre_nvtx_range_names.begin(),
                                                     hypre_nvtx_range_names.end(),
                                                     name);
@@ -103,23 +102,22 @@ void hypre_GpuProfilingPushRange(const char *name)
    HYPRE_Int color = p - hypre_nvtx_range_names.begin();
 
    hypre_GpuProfilingPushRangeColor(name, color);
-#endif
 
-#ifdef HYPRE_USING_ROCTX
+#elif defined (HYPRE_USING_ROCTX)
    roctxRangePush(name);
+
 #endif
 }
 
-void hypre_GpuProfilingPopRange()
+void hypre_GpuProfilingPopRange(void)
 {
-#ifdef HYPRE_USING_NVTX
+#if defined (HYPRE_USING_NVTX)
    hypre_GpuProfilingPushRangeColor("StreamSync0", Red);
    cudaStreamSynchronize(0);
    nvtxRangePop();
    nvtxRangePop();
-#endif
 
-#ifdef HYPRE_USING_ROCTX
+#elif defined (HYPRE_USING_ROCTX)
    roctxRangePush("StreamSync0");
    hipStreamSynchronize(0);
    roctxRangePop();

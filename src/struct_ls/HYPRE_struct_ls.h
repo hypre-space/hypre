@@ -22,10 +22,8 @@ extern "C" {
 /**
  * @defgroup StructSolvers Struct Solvers
  *
- * These solvers use matrix/vector storage schemes that are tailored
- * to structured grid problems.
- *
- * @memo Linear solvers for structured grids
+ * Linear solvers for structured grids. These solvers use matrix/vector storage
+ * schemes that are tailored to structured grid problems.
  *
  * @{
  **/
@@ -53,12 +51,6 @@ typedef HYPRE_Int (*HYPRE_PtrToStructSolverFcn)(HYPRE_StructSolver,
 #ifndef HYPRE_MODIFYPC
 #define HYPRE_MODIFYPC
 /* if pc not defined, then may need HYPRE_SOLVER also */
-
-#ifndef HYPRE_SOLVER_STRUCT
-#define HYPRE_SOLVER_STRUCT
-struct hypre_Solver_struct;
-typedef struct hypre_Solver_struct *HYPRE_Solver;
-#endif
 
 typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
                                             HYPRE_Int,

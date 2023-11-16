@@ -130,6 +130,17 @@ typedef struct
 #define hypre_AMSDataPoissonAlphaAMG(ams_data) ((ams_data)->B_Pi)
 #define hypre_AMSDataOwnsPoissonAlpha(ams_data) ((ams_data)->owns_A_Pi)
 
+/* Vector vertex components data */
+#define hypre_AMSDataPiXInterpolation(ams_data) ((ams_data)->Pix)
+#define hypre_AMSDataPiYInterpolation(ams_data) ((ams_data)->Piy)
+#define hypre_AMSDataPiZInterpolation(ams_data) ((ams_data)->Piz)
+#define hypre_AMSDataPoissonAlphaX(ams_data) ((ams_data)->A_Pix)
+#define hypre_AMSDataPoissonAlphaY(ams_data) ((ams_data)->A_Piy)
+#define hypre_AMSDataPoissonAlphaZ(ams_data) ((ams_data)->A_Piz)
+#define hypre_AMSDataPoissonAlphaXAMG(ams_data) ((ams_data)->B_Pix)
+#define hypre_AMSDataPoissonAlphaYAMG(ams_data) ((ams_data)->B_Piy)
+#define hypre_AMSDataPoissonAlphaZAMG(ams_data) ((ams_data)->B_Piz)
+
 /* Coordinates of the vertices */
 #define hypre_AMSDataVertexCoordinateX(ams_data) ((ams_data)->x)
 #define hypre_AMSDataVertexCoordinateY(ams_data) ((ams_data)->y)
@@ -139,6 +150,14 @@ typedef struct
 #define hypre_AMSDataEdgeConstantX(ams_data) ((ams_data)->Gx)
 #define hypre_AMSDataEdgeConstantY(ams_data) ((ams_data)->Gy)
 #define hypre_AMSDataEdgeConstantZ(ams_data) ((ams_data)->Gz)
+
+/* Interior zero conductivity region */
+#define hypre_AMSDataInteriorNodes(ams_data) ((ams_data)->interior_nodes)
+#define hypre_AMSDataInteriorDiscreteGradient(ams_data) ((ams_data)->G0)
+#define hypre_AMSDataInteriorPoissonBeta(ams_data) ((ams_data)->A_G0)
+#define hypre_AMSDataInteriorPoissonBetaAMG(ams_data) ((ams_data)->B_G0)
+#define hypre_AMSDataInteriorProjectionFrequency(ams_data) ((ams_data)->projection_frequency)
+#define hypre_AMSDataInteriorSolveCounter(ams_data) ((ams_data)->solve_counter)
 
 /* Solver options */
 #define hypre_AMSDataMaxIter(ams_data) ((ams_data)->maxit)
@@ -157,15 +176,21 @@ typedef struct
 #define hypre_AMSDataAChebyOrder(ams_data) ((ams_data)->A_cheby_order)
 #define hypre_AMSDataAChebyFraction(ams_data) ((ams_data)->A_cheby_fraction)
 
-#define hypre_AMSDataPoissonAlphaAMGCoarsenType(ams_data) ((ams_data)->B_Pi_coarsen_type)
-#define hypre_AMSDataPoissonAlphaAMGAggLevels(ams_data) ((ams_data)->B_Pi_agg_levels)
-#define hypre_AMSDataPoissonAlphaAMGRelaxType(ams_data) ((ams_data)->B_Pi_relax_type)
-#define hypre_AMSDataPoissonAlphaAMGStrengthThreshold(ams_data) ((ams_data)->B_Pi_theta)
-
 #define hypre_AMSDataPoissonBetaAMGCoarsenType(ams_data) ((ams_data)->B_G_coarsen_type)
 #define hypre_AMSDataPoissonBetaAMGAggLevels(ams_data) ((ams_data)->B_G_agg_levels)
 #define hypre_AMSDataPoissonBetaAMGRelaxType(ams_data) ((ams_data)->B_G_relax_type)
+#define hypre_AMSDataPoissonBetaAMGCoarseRelaxType(ams_data) ((ams_data)->B_G_coarse_relax_type)
 #define hypre_AMSDataPoissonBetaAMGStrengthThreshold(ams_data) ((ams_data)->B_G_theta)
+#define hypre_AMSDataPoissonBetaAMGInterpType(ams_data) ((ams_data)->B_G_interp_type)
+#define hypre_AMSDataPoissonBetaAMGPMax(ams_data) ((ams_data)->B_G_Pmax)
+
+#define hypre_AMSDataPoissonAlphaAMGCoarsenType(ams_data) ((ams_data)->B_Pi_coarsen_type)
+#define hypre_AMSDataPoissonAlphaAMGAggLevels(ams_data) ((ams_data)->B_Pi_agg_levels)
+#define hypre_AMSDataPoissonAlphaAMGRelaxType(ams_data) ((ams_data)->B_Pi_relax_type)
+#define hypre_AMSDataPoissonAlphaAMGCoarseRelaxType(ams_data) ((ams_data)->B_Pi_coarse_relax_type)
+#define hypre_AMSDataPoissonAlphaAMGStrengthThreshold(ams_data) ((ams_data)->B_Pi_theta)
+#define hypre_AMSDataPoissonAlphaAMGInterpType(ams_data) ((ams_data)->B_Pi_interp_type)
+#define hypre_AMSDataPoissonAlphaAMGPMax(ams_data) ((ams_data)->B_Pi_Pmax)
 
 /* Temporary vectors */
 #define hypre_AMSDataTempEdgeVectorR(ams_data) ((ams_data)->r0)
@@ -174,5 +199,10 @@ typedef struct
 #define hypre_AMSDataTempVertexVectorG(ams_data) ((ams_data)->g1)
 #define hypre_AMSDataTempVecVertexVectorR(ams_data) ((ams_data)->r2)
 #define hypre_AMSDataTempVecVertexVectorG(ams_data) ((ams_data)->g2)
+#define hypre_AMSDataTempVecVertexVectorZZ(ams_data) ((ams_data)->zz)
+
+/* Output log info */
+#define hypre_AMSDataNumIterations(ams_data) ((ams_data)->num_iterations)
+#define hypre_AMSDataResidualNorm(ams_data) ((ams_data)->rel_resid_norm)
 
 #endif

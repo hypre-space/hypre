@@ -217,7 +217,7 @@ hypre_BoomerAMGDD_FAC_Jacobi( void      *amgdd_vdata,
                               HYPRE_Int  level,
                               HYPRE_Int  cycle_param )
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    hypre_ParAMGDDData      *amgdd_data      = (hypre_ParAMGDDData*) amgdd_vdata;
    hypre_AMGDDCompGrid     *compGrid        = hypre_ParAMGDDDataCompGrid(amgdd_data)[level];
    HYPRE_MemoryLocation     memory_location = hypre_AMGDDCompGridMemoryLocation(compGrid);
@@ -266,7 +266,7 @@ hypre_BoomerAMGDD_FAC_JacobiHost( void      *amgdd_vdata,
       {
          for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i + 1]; j++)
          {
-            // hypre_AMGDDCompGridL1Norms(compGrid)[i] += fabs(hypre_CSRMatrixData(diag)[j]);
+            // hypre_AMGDDCompGridL1Norms(compGrid)[i] += hypre_abs(hypre_CSRMatrixData(diag)[j]);
             if (hypre_CSRMatrixJ(diag)[j] == i)
             {
                hypre_AMGDDCompGridL1Norms(compGrid)[i] = hypre_CSRMatrixData(diag)[j];
@@ -279,7 +279,7 @@ hypre_BoomerAMGDD_FAC_JacobiHost( void      *amgdd_vdata,
       {
          for (j = hypre_CSRMatrixI(diag)[i]; j < hypre_CSRMatrixI(diag)[i + 1]; j++)
          {
-            // hypre_AMGDDCompGridL1Norms(compGrid)[i + hypre_AMGDDCompGridNumOwnedNodes(compGrid)] += fabs(hypre_CSRMatrixData(diag)[j]);
+            // hypre_AMGDDCompGridL1Norms(compGrid)[i + hypre_AMGDDCompGridNumOwnedNodes(compGrid)] += hypre_abs(hypre_CSRMatrixData(diag)[j]);
             if (hypre_CSRMatrixJ(diag)[j] == i)
             {
                hypre_AMGDDCompGridL1Norms(compGrid)[i + hypre_AMGDDCompGridNumOwnedNodes(
@@ -558,7 +558,7 @@ hypre_BoomerAMGDD_FAC_CFL1Jacobi( void      *amgdd_vdata,
                                   HYPRE_Int  level,
                                   HYPRE_Int  cycle_param )
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    hypre_ParAMGDDData      *amgdd_data      = (hypre_ParAMGDDData*) amgdd_vdata;
    hypre_AMGDDCompGrid     *compGrid        = hypre_ParAMGDDDataCompGrid(amgdd_data)[level];
    HYPRE_MemoryLocation     memory_location = hypre_AMGDDCompGridMemoryLocation(compGrid);

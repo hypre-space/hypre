@@ -96,6 +96,8 @@ typedef struct
    ProblemPartData       *pdata;
    HYPRE_Int              max_boxsize;
 
+   HYPRE_MemoryLocation   memory_location;
+
    HYPRE_Int              nstencils;
    HYPRE_Int             *stencil_sizes;
    Index                **stencil_offsets;
@@ -234,6 +236,8 @@ ReadData( char         *filename,
 
    HYPRE_Int          part, var, entry, s, i, il, iu;
 
+   HYPRE_MemoryLocation memory_location = data_ptr -> memory_location;
+
    /*-----------------------------------------------------------
     * Read data file from process 0, then broadcast
     *-----------------------------------------------------------*/
@@ -281,6 +285,7 @@ ReadData( char         *filename,
     * Parse the data and fill ProblemData structure
     *-----------------------------------------------------------*/
 
+   data.memory_location = memory_location;
    data.max_boxsize = 0;
    data.symmetric_nentries = 0;
    data.symmetric_parts    = NULL;
@@ -443,7 +448,7 @@ ReadData( char         *filename,
                data.stencil_offsets[s][entry][i] = 0;
             }
             data.stencil_vars[s][entry] = strtol(sdata_ptr, &sdata_ptr, 10);
-            data.stencil_values[s][entry] = strtod(sdata_ptr, &sdata_ptr);
+            data.stencil_values[s][entry] = (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
          }
          else if ( strcmp(key, "GraphSetStencil:") == 0 )
          {
@@ -493,7 +498,7 @@ ReadData( char         *filename,
                   hypre_TReAlloc(pdata.graph_values,  HYPRE_Real,  size, HYPRE_MEMORY_HOST);
                pdata.d_graph_values =
                   hypre_TReAlloc_v2(pdata.d_graph_values, HYPRE_Real, pdata.graph_values_size,
-                                    HYPRE_Real, size, HYPRE_MEMORY_DEVICE);
+                                    HYPRE_Real, size, memory_location);
                pdata.graph_values_size = size;
                pdata.graph_boxsizes =
                   hypre_TReAlloc(pdata.graph_boxsizes,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
@@ -542,7 +547,7 @@ ReadData( char         *filename,
             pdata.graph_entries[pdata.graph_nentries] =
                strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.graph_values[pdata.graph_nentries] =
-               strtod(sdata_ptr, &sdata_ptr);
+               (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
             pdata.graph_boxsizes[pdata.graph_nentries] = 1;
             for (i = 0; i < 3; i++)
             {
@@ -602,7 +607,7 @@ ReadData( char         *filename,
                   hypre_TReAlloc(pdata.matrix_values,  HYPRE_Real,  size, HYPRE_MEMORY_HOST);
                pdata.d_matrix_values =
                   hypre_TReAlloc_v2(pdata.d_matrix_values, HYPRE_Real, pdata.matrix_values_size,
-                                    HYPRE_Real, size, HYPRE_MEMORY_DEVICE);
+                                    HYPRE_Real, size, memory_location);
                pdata.matrix_values_size = size;
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
@@ -620,7 +625,7 @@ ReadData( char         *filename,
             pdata.matrix_entries[pdata.matrix_nentries] =
                strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.matrix_values[pdata.matrix_nentries] =
-               strtod(sdata_ptr, &sdata_ptr);
+               (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
             pdata.matrix_nentries++;
             data.pdata[part] = pdata;
          }
@@ -717,6 +722,7 @@ DistributeData( ProblemData   global_data,
                 HYPRE_Int     myid,
                 ProblemData  *data_ptr )
 {
+   HYPRE_MemoryLocation memory_location = global_data.memory_location;
    ProblemData      data = global_data;
    ProblemPartData  pdata;
    HYPRE_Int       *pool_procs;
@@ -1072,7 +1078,7 @@ DistributeData( ProblemData   global_data,
          hypre_TFree(pdata.graph_entries, HYPRE_MEMORY_HOST);
          pdata.graph_values_size = 0;
          hypre_TFree(pdata.graph_values, HYPRE_MEMORY_HOST);
-         hypre_TFree(pdata.d_graph_values, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(pdata.d_graph_values, memory_location);
          hypre_TFree(pdata.graph_boxsizes, HYPRE_MEMORY_HOST);
       }
 
@@ -1085,7 +1091,7 @@ DistributeData( ProblemData   global_data,
          hypre_TFree(pdata.matrix_entries, HYPRE_MEMORY_HOST);
          pdata.matrix_values_size = 0;
          hypre_TFree(pdata.matrix_values, HYPRE_MEMORY_HOST);
-         hypre_TFree(pdata.d_matrix_values, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(pdata.d_matrix_values, memory_location);
       }
 
       data.pdata[part] = pdata;
@@ -1111,6 +1117,7 @@ DistributeData( ProblemData   global_data,
 HYPRE_Int
 DestroyData( ProblemData   data )
 {
+   HYPRE_MemoryLocation memory_location = data.memory_location;
    ProblemPartData  pdata;
    HYPRE_Int        part, s;
 
@@ -1166,7 +1173,7 @@ DestroyData( ProblemData   data )
          hypre_TFree(pdata.graph_index_signs, HYPRE_MEMORY_HOST);
          hypre_TFree(pdata.graph_entries, HYPRE_MEMORY_HOST);
          hypre_TFree(pdata.graph_values, HYPRE_MEMORY_HOST);
-         hypre_TFree(pdata.d_graph_values, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(pdata.d_graph_values, memory_location);
          hypre_TFree(pdata.graph_boxsizes, HYPRE_MEMORY_HOST);
       }
 
@@ -1178,7 +1185,7 @@ DestroyData( ProblemData   data )
          hypre_TFree(pdata.matrix_vars, HYPRE_MEMORY_HOST);
          hypre_TFree(pdata.matrix_entries, HYPRE_MEMORY_HOST);
          hypre_TFree(pdata.matrix_values, HYPRE_MEMORY_HOST);
-         hypre_TFree(pdata.d_matrix_values, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(pdata.d_matrix_values, memory_location);
       }
 
    }
@@ -1340,11 +1347,24 @@ main( hypre_int argc,
 
    HYPRE_Int             arg_index, part, box, var, entry, s, i, j, k;
 
-#if defined(HYPRE_USING_GPU)
-   HYPRE_Int spgemm_use_cusparse = 0;
+#if defined(HYPRE_USING_MEMORY_TRACKER)
+   HYPRE_Int print_mem_tracker = 0;
+   char mem_tracker_name[HYPRE_MAX_FILE_NAME_LEN] = {0};
 #endif
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_Int spgemm_use_vendor = 0;
+#endif
+
+#if defined(HYPRE_TEST_USING_HOST)
+   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_HOST;
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
+#else
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
+   HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
+#endif
+
+   global_data.memory_location = memory_location;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -1357,14 +1377,15 @@ main( hypre_int argc,
 
    /*-----------------------------------------------------------------
     * GPU Device binding
-    * Must be done before HYPRE_Init() and should not be changed after
+    * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
-   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+   hypre_bind_device(-1, myid, num_procs, hypre_MPI_COMM_WORLD);
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
-   HYPRE_Init();
+   HYPRE_Initialize();
+   HYPRE_DeviceInitialize();
 
    /*-----------------------------------------------------------
     * Read input file
@@ -1475,7 +1496,6 @@ main( hypre_int argc,
          arg_index++;
          print_system = 1;
       }
-#if defined(HYPRE_USING_GPU)
       else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
       {
          arg_index++;
@@ -1486,10 +1506,23 @@ main( hypre_int argc,
          arg_index++;
          default_exec_policy = HYPRE_EXEC_DEVICE;
       }
-      else if ( strcmp(argv[arg_index], "-mm_cusparse") == 0 )
+#if defined(HYPRE_USING_GPU)
+      else if ( strcmp(argv[arg_index], "-mm_vendor") == 0 )
       {
          arg_index++;
-         spgemm_use_cusparse = atoi(argv[arg_index++]);
+         spgemm_use_vendor = atoi(argv[arg_index++]);
+      }
+#endif
+#if defined(HYPRE_USING_MEMORY_TRACKER)
+      else if ( strcmp(argv[arg_index], "-print_mem_tracker") == 0 )
+      {
+         arg_index++;
+         print_mem_tracker = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mem_tracker_filename") == 0 )
+      {
+         arg_index++;
+         snprintf(mem_tracker_name, HYPRE_MAX_FILE_NAME_LEN, "%s", argv[arg_index++]);
       }
 #endif
       else if ( strcmp(argv[arg_index], "-help") == 0 )
@@ -1504,6 +1537,11 @@ main( hypre_int argc,
       }
    }
 
+#if defined(HYPRE_USING_MEMORY_TRACKER)
+   hypre_MemoryTrackerSetPrint(print_mem_tracker);
+   if (mem_tracker_name[0]) { hypre_MemoryTrackerSetFileName(mem_tracker_name); }
+#endif
+
    /* default memory location */
    HYPRE_SetMemoryLocation(memory_location);
 
@@ -1511,9 +1549,8 @@ main( hypre_int argc,
    HYPRE_SetExecutionPolicy(default_exec_policy);
 
 #if defined(HYPRE_USING_GPU)
-   HYPRE_SetSpGemmUseCusparse(spgemm_use_cusparse);
+   HYPRE_SetSpGemmUseVendor(spgemm_use_vendor);
 #endif
-
 
    /*-----------------------------------------------------------
     * Distribute data
@@ -1645,7 +1682,7 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
 
    values = hypre_CTAlloc(HYPRE_Real, data.max_boxsize, HYPRE_MEMORY_HOST);
-   d_values = hypre_TAlloc(HYPRE_Real, data.max_boxsize, HYPRE_MEMORY_DEVICE);
+   d_values = hypre_TAlloc(HYPRE_Real, data.max_boxsize, memory_location);
 
    HYPRE_SStructMatrixCreate(hypre_MPI_COMM_WORLD, graph, &A);
 
@@ -1698,7 +1735,7 @@ main( hypre_int argc,
             }
 
             hypre_TMemcpy(d_values, values, HYPRE_Real, data.max_boxsize,
-                          HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                          memory_location, HYPRE_MEMORY_HOST);
 
             for (box = 0; box < pdata.nboxes; box++)
             {
@@ -1711,7 +1748,7 @@ main( hypre_int argc,
       }
 
       hypre_TMemcpy(pdata.d_graph_values, pdata.graph_values, HYPRE_Real, pdata.graph_values_size,
-                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                    memory_location, HYPRE_MEMORY_HOST);
 
       /* set non-stencil entries */
       for (entry = 0; entry < pdata.graph_nentries; entry++)
@@ -1748,7 +1785,7 @@ main( hypre_int argc,
       pdata = data.pdata[part];
 
       hypre_TMemcpy(pdata.d_matrix_values, pdata.matrix_values, HYPRE_Real, pdata.matrix_values_size,
-                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                    memory_location, HYPRE_MEMORY_HOST);
 
       for (entry = 0; entry < pdata.matrix_nentries; entry++)
       {
@@ -1807,13 +1844,13 @@ main( hypre_int argc,
    HYPRE_SStructVectorInitialize(b);
    for (j = 0; j < data.max_boxsize; j++)
    {
-      values[j] = sin((HYPRE_Real)(j + 1));
+      values[j] = hypre_sin((HYPRE_Real)(j + 1));
       values[j] = (HYPRE_Real) hypre_Rand();
       values[j] = (HYPRE_Real) j;
    }
 
    hypre_TMemcpy(d_values, values, HYPRE_Real, data.max_boxsize,
-                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                 memory_location, HYPRE_MEMORY_HOST);
 
    for (part = 0; part < data.nparts; part++)
    {
@@ -1841,7 +1878,7 @@ main( hypre_int argc,
    }
 
    hypre_TMemcpy(d_values, values, HYPRE_Real, data.max_boxsize,
-                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                 memory_location, HYPRE_MEMORY_HOST);
 
    for (part = 0; part < data.nparts; part++)
    {
@@ -1889,7 +1926,7 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
 
    hypre_TFree(values, HYPRE_MEMORY_HOST);
-   hypre_TFree(d_values, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(d_values, memory_location);
 
    if (solver_id == 1)
    {
@@ -1979,6 +2016,16 @@ main( hypre_int argc,
    /* Finalize MPI */
    hypre_MPI_Finalize();
 
+#if defined(HYPRE_USING_MEMORY_TRACKER)
+   if (memory_location == HYPRE_MEMORY_HOST)
+   {
+      if (hypre_total_bytes[hypre_MEMORY_DEVICE] || hypre_total_bytes[hypre_MEMORY_UNIFIED])
+      {
+         hypre_printf("Error: nonzero GPU memory allocated with the HOST mode\n");
+         hypre_assert(0);
+      }
+   }
+#endif
+
    return (0);
 }
-

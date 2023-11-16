@@ -89,6 +89,28 @@ HYPRE_FSAIGetAlgoType( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_FSAISetLocalSolveType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FSAISetLocalSolveType( HYPRE_Solver solver,
+                             HYPRE_Int    local_solve_type  )
+{
+   return ( hypre_FSAISetLocalSolveType( (void *) solver, local_solve_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_FSAIGetLocalSolveType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FSAIGetLocalSolveType( HYPRE_Solver  solver,
+                             HYPRE_Int    *local_solve_type  )
+{
+   return ( hypre_FSAIGetLocalSolveType( (void *) solver, local_solve_type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_FSAISetMaxSteps
  *--------------------------------------------------------------------------*/
 
@@ -111,6 +133,28 @@ HYPRE_FSAIGetMaxSteps( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_FSAISetMaxNnzRow
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FSAISetMaxNnzRow( HYPRE_Solver solver,
+                        HYPRE_Int    max_nnz_row  )
+{
+   return ( hypre_FSAISetMaxNnzRow( (void *) solver, max_nnz_row ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_FSAIGetMaxNnzRow
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FSAIGetMaxNnzRow( HYPRE_Solver  solver,
+                        HYPRE_Int    *max_nnz_row  )
+{
+   return ( hypre_FSAIGetMaxNnzRow( (void *) solver, max_nnz_row ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_FSAISetMaxStepSize
  *--------------------------------------------------------------------------*/
 
@@ -130,6 +174,50 @@ HYPRE_FSAIGetMaxStepSize( HYPRE_Solver  solver,
                           HYPRE_Int    *max_step_size )
 {
    return ( hypre_FSAIGetMaxStepSize( (void *) solver, max_step_size ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_FSAISetNumLevels
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FSAISetNumLevels( HYPRE_Solver solver,
+                        HYPRE_Int    num_levels )
+{
+   return ( hypre_FSAISetNumLevels( (void *) solver, num_levels ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_FSAIGetNumLevels
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FSAIGetNumLevels( HYPRE_Solver  solver,
+                        HYPRE_Int    *num_levels )
+{
+   return ( hypre_FSAIGetNumLevels( (void *) solver, num_levels ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_FSAISetThreshold
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FSAISetThreshold( HYPRE_Solver solver,
+                        HYPRE_Real   threshold )
+{
+   return ( hypre_FSAISetThreshold( (void *) solver, threshold ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_FSAIGetThreshold
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_FSAIGetThreshold( HYPRE_Solver  solver,
+                        HYPRE_Real   *threshold )
+{
+   return ( hypre_FSAIGetThreshold( (void *) solver, threshold ) );
 }
 
 /*--------------------------------------------------------------------------

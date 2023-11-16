@@ -1,0 +1,40 @@
+
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+#include "seq_mv.h"
+
+#if defined(HYPRE_USING_GPU)
+
+#if defined(HYPRE_USING_CUDA) && HYPRE_SPGEMM_BIN >= 10
+#define HYPRE_SPGEMM_DEVICE_USE_DSHMEM
+#endif
+
+#include <csr_spgemm_device_symbl.h>
+
+template HYPRE_Int
+hypre_spgemm_symbolic_rownnz
+< HYPRE_SPGEMM_BIN, SYMBL_HASH_SIZE[HYPRE_SPGEMM_BIN], T_GROUP_SIZE[HYPRE_SPGEMM_BIN], true >
+( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n, bool need_ghash, HYPRE_Int *d_ia,
+  HYPRE_Int *d_ja,
+  HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_rc, bool can_fail, char *d_rf );
+
+#if HYPRE_SPGEMM_BIN == 5
+template HYPRE_Int
+hypre_spgemm_symbolic_rownnz
+< HYPRE_SPGEMM_BIN, SYMBL_HASH_SIZE[HYPRE_SPGEMM_BIN], T_GROUP_SIZE[HYPRE_SPGEMM_BIN], false >
+( HYPRE_Int m, HYPRE_Int *row_ind, HYPRE_Int k, HYPRE_Int n, bool need_ghash, HYPRE_Int *d_ia,
+  HYPRE_Int *d_ja,
+  HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Int *d_rc, bool can_fail, char *d_rf );
+#endif
+
+template HYPRE_Int
+hypre_spgemm_symbolic_max_num_blocks
+< SYMBL_HASH_SIZE[HYPRE_SPGEMM_BIN], T_GROUP_SIZE[HYPRE_SPGEMM_BIN] >
+( HYPRE_Int multiProcessorCount, HYPRE_Int *num_blocks_ptr, HYPRE_Int *block_size_ptr );
+
+#endif /* defined(HYPRE_USING_GPU) */
