@@ -481,10 +481,10 @@ hypre_ILUSetIterativeSetupOption( void      *ilu_vdata,
    hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
 
    /* Compute residuals when using the stopping criteria, if not chosen by the user */
-   if ((iter_setup_option & 0x02) && !(iter_setup_option & 0x0C))
-   {
-      iter_setup_option |= 0x08;
-   }
+   iter_setup_option |= ((iter_setup_option & 0x02) && !(iter_setup_option & 0x0C)) ? 0x08 : 0;
+
+   /* Compute residuals when asking for conv. history, if not chosen by the user */
+   iter_setup_option |= ((iter_setup_option & 0x10) && !(iter_setup_option & 0x08)) ? 0x08 : 0;
 
    /* Zero out first bit of option (turn off rocSPARSE logging) */
    iter_setup_option &= ~0x01;
