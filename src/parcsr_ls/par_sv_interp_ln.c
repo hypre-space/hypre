@@ -84,7 +84,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
    HYPRE_BigInt    *new_col_map_offd_P = NULL;
 
    /* HYPRE_Real       orig_row_sum, new_row_sum; */
-   HYPRE_Real       gm_row_sum;
+   HYPRE_Real       gm_row_sum = 1.0;
 
    HYPRE_Int        orig_diag_start, orig_offd_start, j_offd_pos, j_diag_pos;
    HYPRE_Int        new_nnz_diag, new_nnz_offd;

@@ -908,13 +908,13 @@ HYPRE_Int hypre_AMGDDCompGridFinalize( hypre_ParAMGDDData *amgdd_data )
    hypre_CSRMatrix      *P_offd;
 
    HYPRE_Int             P_diag_nnz;
-   HYPRE_Int            *new_P_diag_rowPtr;
-   HYPRE_Int            *new_P_diag_colInd;
+   HYPRE_Int            *new_P_diag_rowPtr = NULL;
+   HYPRE_Int            *new_P_diag_colInd = NULL;
    HYPRE_Complex        *new_P_diag_data;
 
    HYPRE_Int             P_offd_nnz;
-   HYPRE_Int            *new_P_offd_rowPtr;
-   HYPRE_Int            *new_P_offd_colInd;
+   HYPRE_Int            *new_P_offd_rowPtr = NULL;
+   HYPRE_Int            *new_P_offd_colInd = NULL;
    HYPRE_Complex        *new_P_offd_data;
 
    hypre_CSRMatrix      *R_diag = NULL;

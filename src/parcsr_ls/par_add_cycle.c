@@ -357,8 +357,8 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
    hypre_CSRMatrix *L_diag;
    hypre_CSRMatrix *L_offd;
    hypre_ParCSRMatrix *Atilde;
-   hypre_CSRMatrix *Atilde_diag;
-   hypre_CSRMatrix *Atilde_offd;
+   hypre_CSRMatrix *Atilde_diag = NULL;
+   hypre_CSRMatrix *Atilde_offd = NULL;
    HYPRE_Real    *Atilde_diag_data = NULL;
    HYPRE_Real    *Atilde_offd_data = NULL;
    hypre_CSRMatrix *A_tmp_diag;
@@ -385,9 +385,9 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
    HYPRE_Int *L_diag_j = NULL;
    HYPRE_Int *L_offd_i;
    HYPRE_Int *L_offd_j = NULL;
-   HYPRE_Int *Atilde_diag_i;
+   HYPRE_Int *Atilde_diag_i = NULL;
    HYPRE_Int *Atilde_diag_j = NULL;
-   HYPRE_Int *Atilde_offd_i;
+   HYPRE_Int *Atilde_offd_i = NULL;
    HYPRE_Int *Atilde_offd_j = NULL;
    HYPRE_Int *A_tmp_diag_i;
    HYPRE_Int *A_tmp_offd_i;

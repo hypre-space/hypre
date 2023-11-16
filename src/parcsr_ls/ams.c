@@ -161,9 +161,10 @@ hypreGPUKernel_ParVectorBlockSplitGather(hypre_DeviceItem &item,
 }
 #endif
 
-HYPRE_Int hypre_ParVectorBlockSplit(hypre_ParVector *x,
-                                    hypre_ParVector *x_[3],
-                                    HYPRE_Int dim)
+HYPRE_Int
+hypre_ParVectorBlockSplit(hypre_ParVector *x,
+                          hypre_ParVector *x_[3],
+                          HYPRE_Int dim)
 {
    HYPRE_Int i, d, size_;
    HYPRE_Real *x_data, *x_data_[3];
@@ -192,10 +193,12 @@ HYPRE_Int hypre_ParVectorBlockSplit(hypre_ParVector *x,
 #endif
    {
       for (i = 0; i < size_; i++)
+      {
          for (d = 0; d < dim; d++)
          {
             x_data_[d][i] = x_data[dim * i + d];
          }
+      }
    }
 
    return hypre_error_flag;
@@ -208,9 +211,10 @@ HYPRE_Int hypre_ParVectorBlockSplit(hypre_ParVector *x,
  * x_0,...,x_{dim-1}, such that &x[i] = [x_0[i],...,x_{dim-1}[i]].
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_ParVectorBlockGather(hypre_ParVector *x,
-                                     hypre_ParVector *x_[3],
-                                     HYPRE_Int dim)
+HYPRE_Int
+hypre_ParVectorBlockGather(hypre_ParVector *x,
+                           hypre_ParVector *x_[3],
+                           HYPRE_Int dim)
 {
    HYPRE_Int i, d, size_;
    HYPRE_Real *x_data, *x_data_[3];
@@ -239,10 +243,12 @@ HYPRE_Int hypre_ParVectorBlockGather(hypre_ParVector *x,
 #endif
    {
       for (i = 0; i < size_; i++)
+      {
          for (d = 0; d < dim; d++)
          {
             x_data[dim * i + d] = x_data_[d][i];
          }
+      }
    }
 
    return hypre_error_flag;
@@ -263,8 +269,8 @@ HYPRE_Int hypre_BoomerAMGBlockSolve(void *B,
 {
    HYPRE_Int d, dim = 1;
 
-   hypre_ParVector *b_[3];
-   hypre_ParVector *x_[3];
+   hypre_ParVector *b_[3] = {NULL, NULL, NULL};
+   hypre_ParVector *x_[3] = {NULL, NULL, NULL};
 
    dim = hypre_ParVectorGlobalSize(x) / hypre_ParCSRMatrixGlobalNumRows(A);
 
@@ -1625,7 +1631,7 @@ hypre_AMSComputePi(hypre_ParCSRMatrix *A,
    {
       HYPRE_Int i, j, d;
 
-      HYPRE_Real *Gx_data, *Gy_data, *Gz_data;
+      HYPRE_Real *Gx_data, *Gy_data = NULL, *Gz_data = NULL;
 
       MPI_Comm comm = hypre_ParCSRMatrixComm(G);
       HYPRE_BigInt global_num_rows = hypre_ParCSRMatrixGlobalNumRows(G);
@@ -2588,7 +2594,7 @@ hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
    {
       HYPRE_Int i, j, d;
 
-      HYPRE_Real *Gx_data, *Gy_data, *Gz_data;
+      HYPRE_Real *Gx_data, *Gy_data = NULL, *Gz_data = NULL;
 
       MPI_Comm comm = hypre_ParCSRMatrixComm(G);
       HYPRE_BigInt global_num_rows = hypre_ParCSRMatrixGlobalNumRows(G);

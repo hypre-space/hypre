@@ -669,7 +669,7 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
       if (fcn_num < orig_nf)
       {
 
-
+         row_sum = 1.0;
          if ((variant == 1 || variant == 2) && add_q)
          {
             /* calc. row sum */

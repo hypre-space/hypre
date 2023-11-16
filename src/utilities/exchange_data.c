@@ -167,7 +167,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
 
    void **contact_ptrs = NULL, **response_ptrs = NULL, **post_ptrs = NULL;
 
-   hypre_BinaryTree tree;
+   hypre_BinaryTree *tree = NULL;
 
    hypre_MPI_Request *response_requests = NULL, *contact_requests = NULL;
    hypre_MPI_Status  *response_statuses = NULL, *contact_statuses = NULL;
@@ -275,18 +275,18 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
 
    if (num_procs > 1)
    {
-      hypre_CreateBinaryTree(myid, num_procs, &tree);
+      hypre_CreateBinaryTree(myid, num_procs, tree);
 
       /* we will get a message from all of our children when they
          have received responses for all of their contacts.
          So post receives now */
 
-      term_requests = hypre_CTAlloc(hypre_MPI_Request,  tree.num_child, HYPRE_MEMORY_HOST);
-      term_statuses = hypre_CTAlloc(hypre_MPI_Status,  tree.num_child, HYPRE_MEMORY_HOST);
+      term_requests = hypre_CTAlloc(hypre_MPI_Request, tree -> num_child, HYPRE_MEMORY_HOST);
+      term_statuses = hypre_CTAlloc(hypre_MPI_Status, tree -> num_child, HYPRE_MEMORY_HOST);
 
-      for (i = 0; i < tree.num_child; i++)
+      for (i = 0; i < tree -> num_child; i++)
       {
-         hypre_MPI_Irecv(NULL, 0, HYPRE_MPI_INT, tree.child_id[i], term_tag, comm,
+         hypre_MPI_Irecv(NULL, 0, HYPRE_MPI_INT, (tree -> child_id)[i], term_tag, comm,
                          &term_requests[i]);
       }
 
@@ -413,17 +413,17 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
       else if (!children_complete) /* have all of our children received all of their
                                      response messages?*/
       {
-         hypre_MPI_Testall(tree.num_child, term_requests, &children_complete,
+         hypre_MPI_Testall(tree -> num_child, term_requests, &children_complete,
                            term_statuses);
 
          /* if we have gotten term messages from all of our children, send a term
             message to our parent.  Then post a receive to hear back from parent */
          if (children_complete & (myid > 0)) /*root does not have a parent*/
          {
-            hypre_MPI_Isend(NULL, 0, HYPRE_MPI_INT, tree.parent_id, term_tag,
+            hypre_MPI_Isend(NULL, 0, HYPRE_MPI_INT, tree -> parent_id, term_tag,
                             comm, &request_parent);
 
-            hypre_MPI_Irecv(NULL, 0, HYPRE_MPI_INT, tree.parent_id, term_tag,
+            hypre_MPI_Irecv(NULL, 0, HYPRE_MPI_INT, tree -> parent_id, term_tag,
                             comm, &term_request1);
          }
       }
@@ -441,10 +441,10 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
          {
             if (myid > 0 ) { hypre_MPI_Wait(&request_parent, &status_parent); }
 
-            for (i = 0; i < tree.num_child; i++)
+            for (i = 0; i < tree -> num_child; i++)
             {
                /*a blocking send  - recv has been posted already*/
-               hypre_MPI_Send(NULL, 0, HYPRE_MPI_INT, tree.child_id[i],
+               hypre_MPI_Send(NULL, 0, HYPRE_MPI_INT, (tree -> child_id)[i],
                               term_tag, comm);
             }
          }
@@ -571,7 +571,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
       hypre_TFree(term_requests, HYPRE_MEMORY_HOST);
       hypre_TFree(term_statuses, HYPRE_MEMORY_HOST);
 
-      hypre_DestroyBinaryTree(&tree);
+      hypre_DestroyBinaryTree(tree);
    }
 
    /* output  */
