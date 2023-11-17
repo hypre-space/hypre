@@ -569,7 +569,9 @@ HYPRE_Int hypre_spgemm_symbolic_max_num_blocks( HYPRE_Int  multiProcessorCount,
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM)
 #if defined(HYPRE_USING_CUDA)
    /* with CUDA, to use > 48K shared memory, must use dynamic and must opt-in. BIN = 10 requires 64K */
-   const hypre_int max_shmem_optin = hypre_HandleDeviceMaxShmemPerBlock(hypre_handle())[1];
+   hypre_int max_shmem_optin;
+   hypre_GetDeviceMaxShmemSize(-1, NULL, &max_shmem_optin);
+
    if (dynamic_shmem_size <= max_shmem_optin)
    {
       HYPRE_CUDA_CALL( cudaFuncSetAttribute(
