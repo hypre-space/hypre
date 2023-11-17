@@ -167,6 +167,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
    if (debug_flag == 3) { wall_time = time_getWallclockSeconds(); }
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    if (!comm_pkg)
    {
@@ -548,7 +549,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
        *------------------------------------------------*/
 
       big_graph_size = (HYPRE_BigInt) graph_size;
-      hypre_MPI_Allreduce(&big_graph_size, &global_graph_size, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+      hypre_MPI_Allreduce(&big_graph_size, &global_graph_size, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
 
       if (global_graph_size == 0)
       {
@@ -2186,6 +2187,7 @@ hypre_BoomerAMGCoarsenPMISHost( hypre_ParCSRMatrix    *S,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    if (!comm_pkg)
    {
@@ -2468,7 +2470,7 @@ hypre_BoomerAMGCoarsenPMISHost( hypre_ParCSRMatrix    *S,
       big_graph_size = (HYPRE_BigInt) graph_size;
 
       /* stop the coarsening if nothing left to be coarsened */
-      hypre_MPI_Allreduce(&big_graph_size, &global_graph_size, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+      hypre_MPI_Allreduce(&big_graph_size, &global_graph_size, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
 
       /* if (my_id == 0) { hypre_printf("graph size %b\n", global_graph_size); } */
 

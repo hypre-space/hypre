@@ -147,8 +147,8 @@ HYPRE_ParCSRMatrixGetRowPartitioning( HYPRE_ParCSRMatrix   matrix,
       return hypre_error_flag;
    }
 
-   hypre_MPI_Comm_size(hypre_ParCSRMatrixComm((hypre_ParCSRMatrix *) matrix),
-                       &num_procs);
+   MPI_Comm comm = hypre_ParCSRMatrixComm((hypre_ParCSRMatrix *) matrix);
+   hypre_MPI_Comm_size(comm, &num_procs);
    row_starts = hypre_ParCSRMatrixRowStarts((hypre_ParCSRMatrix *) matrix);
    if (!row_starts) { return -1; }
    row_partitioning = hypre_CTAlloc(HYPRE_BigInt,  num_procs + 1, HYPRE_MEMORY_HOST);
@@ -169,7 +169,6 @@ HYPRE_ParCSRMatrixGetGlobalRowPartitioning( HYPRE_ParCSRMatrix   matrix,
                                             HYPRE_Int            all_procs,
                                             HYPRE_BigInt       **row_partitioning_ptr )
 {
-   MPI_Comm        comm;
    HYPRE_Int       my_id;
    HYPRE_BigInt   *row_partitioning = NULL;
 
@@ -179,7 +178,8 @@ HYPRE_ParCSRMatrixGetGlobalRowPartitioning( HYPRE_ParCSRMatrix   matrix,
       return hypre_error_flag;
    }
 
-   comm = hypre_ParCSRMatrixComm((hypre_ParCSRMatrix *) matrix);
+   MPI_Comm comm = hypre_ParCSRMatrixComm((hypre_ParCSRMatrix *) matrix);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    hypre_MPI_Comm_rank(comm, &my_id);
 
    HYPRE_Int       num_procs;
@@ -195,12 +195,12 @@ HYPRE_ParCSRMatrixGetGlobalRowPartitioning( HYPRE_ParCSRMatrix   matrix,
    if (all_procs)
    {
       hypre_MPI_Allgather(&row_start, 1, HYPRE_MPI_BIG_INT, row_partitioning,
-                          1, HYPRE_MPI_BIG_INT, comm);
+                          1, HYPRE_MPI_BIG_INT, hcomm);
    }
    else
    {
       hypre_MPI_Gather(&row_start, 1, HYPRE_MPI_BIG_INT, row_partitioning,
-                       1, HYPRE_MPI_BIG_INT, 0, comm);
+                       1, HYPRE_MPI_BIG_INT, 0, hcomm);
    }
 
    if (my_id == 0 || all_procs)
@@ -230,8 +230,8 @@ HYPRE_ParCSRMatrixGetColPartitioning( HYPRE_ParCSRMatrix   matrix,
       return hypre_error_flag;
    }
 
-   hypre_MPI_Comm_size(hypre_ParCSRMatrixComm((hypre_ParCSRMatrix *) matrix),
-                       &num_procs);
+   MPI_Comm comm = hypre_ParCSRMatrixComm((hypre_ParCSRMatrix *) matrix);
+   hypre_MPI_Comm_size(comm, &num_procs);
    col_starts = hypre_ParCSRMatrixColStarts((hypre_ParCSRMatrix *) matrix);
    if (!col_starts) { return -1; }
    col_partitioning = hypre_CTAlloc(HYPRE_BigInt,  num_procs + 1, HYPRE_MEMORY_HOST);

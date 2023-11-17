@@ -158,7 +158,8 @@ HYPRE_Int Factor_dhReadNz(Factor_dh mat)
   START_FUNC_DH
   HYPRE_Int ierr, retval = mat->rp[mat->m];
   HYPRE_Int nz = retval;
-  ierr = hypre_MPI_Allreduce(&nz, &retval, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm_dh); CHECK_MPI_ERROR(ierr);
+  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
+  ierr = hypre_MPI_Allreduce(&nz, &retval, 1, HYPRE_MPI_INT, hypre_MPI_SUM, hcomm); CHECK_MPI_ERROR(ierr);
   END_FUNC_VAL(retval)
 }
 
@@ -370,12 +371,13 @@ static HYPRE_Int setup_receives_private(Factor_dh mat, HYPRE_Int *beg_rows, HYPR
        receive; this matching receive will be started later,
        in setup_sends_private.
     */
-    hypre_MPI_Isend(reqind+i, j-i, HYPRE_MPI_INT, this_pe, 444, comm_dh, &request); 
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
+    hypre_MPI_Isend(reqind+i, j-i, HYPRE_MPI_INT, this_pe, 444, hcomm, &request); 
     hypre_MPI_Request_free(&request); 
 
     /* set up persistent comms for receiving the values from this_pe */
     hypre_MPI_Recv_init(recvBuf+i, j-i, hypre_MPI_REAL, this_pe, 555,
-                        comm_dh, req+num_recv); 
+                        hcomm, req+num_recv); 
     ++num_recv;
   }
 
@@ -401,6 +403,7 @@ static void setup_sends_private(Factor_dh mat, HYPRE_Int *inlist,
   HYPRE_Real  *sendBuf;
   HYPRE_Int         myidNEW = o2n_subdomain[myid_dh];
   HYPRE_Int         count;
+  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
 
   if (debug) {
     hypre_fprintf(logFile, "FACT \nSTARTING: setup_sends_private\n");
@@ -448,11 +451,11 @@ static void setup_sends_private(Factor_dh mat, HYPRE_Int *inlist,
       /* matching receive, for list of unknowns that will be sent,
          during the triangular solves, from ourselves to P_i
        */
-      hypre_MPI_Irecv(rcvBuf, inlist[i], HYPRE_MPI_INT, i, 444, comm_dh, requests+count); 
+      hypre_MPI_Irecv(rcvBuf, inlist[i], HYPRE_MPI_INT, i, 444, hcomm, requests+count); 
       ++count;
 
       /* Set up the send */
-      hypre_MPI_Send_init(sendBuf, inlist[i], hypre_MPI_REAL, i, 555, comm_dh, sendReq); 
+      hypre_MPI_Send_init(sendBuf, inlist[i], hypre_MPI_REAL, i, 555, hcomm, sendReq); 
     }
   }
 
@@ -555,7 +558,8 @@ void Factor_dhSolveSetup(Factor_dh mat, SubdomainGraph_dh sg)
                             outlist, debug); CHECK_V_ERROR;
   }
 
-  hypre_MPI_Alltoall(outlist, 1, HYPRE_MPI_INT, inlist, 1, HYPRE_MPI_INT, comm_dh); 
+  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
+  hypre_MPI_Alltoall(outlist, 1, HYPRE_MPI_INT, inlist, 1, HYPRE_MPI_INT, hcomm); 
   /* At this point, inlist[j] contains the number of indices 
      that this processor must send to P_j.  Processors next need
      to exchange the actual lists of required indices; this is done
@@ -1123,7 +1127,8 @@ HYPRE_Real Factor_dhMaxPivotInverse(Factor_dh mat)
   if (np_dh == 1) {
     minGlobal = min;
   } else {
-    hypre_MPI_Reduce(&min, &minGlobal, 1, hypre_MPI_REAL, hypre_MPI_MIN, 0, comm_dh);
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
+    hypre_MPI_Reduce(&min, &minGlobal, 1, hypre_MPI_REAL, hypre_MPI_MIN, 0, hcomm);
   }
 
   if (minGlobal == 0) {
@@ -1150,7 +1155,8 @@ HYPRE_Real Factor_dhMaxValue(Factor_dh mat)
   if (np_dh == 1) {
     maxGlobal = max;
   } else {
-    hypre_MPI_Reduce(&max, &maxGlobal, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0, comm_dh);
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
+    hypre_MPI_Reduce(&max, &maxGlobal, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0, hcomm);
   }
   END_FUNC_VAL(maxGlobal)
 }
@@ -1180,7 +1186,8 @@ HYPRE_Real Factor_dhCondEst(Factor_dh mat, Euclid_dh ctx)
   if (np_dh == 1) {
     maxGlobal = max;
   } else {
-    hypre_MPI_Reduce(&max, &maxGlobal, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0, comm_dh);
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
+    hypre_MPI_Reduce(&max, &maxGlobal, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0, hcomm);
   }
   END_FUNC_VAL(maxGlobal)
 }

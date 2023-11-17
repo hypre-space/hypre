@@ -34,7 +34,8 @@
 HYPRE_Int hypre_GlobalSEMax(HYPRE_Int value, MPI_Comm hypre_MPI_Context )
 {
   HYPRE_Int max;
-  hypre_MPI_Allreduce( &value, &max, 1, HYPRE_MPI_INT, hypre_MPI_MAX, hypre_MPI_Context );
+  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(hypre_MPI_Context);
+  hypre_MPI_Allreduce( &value, &max, 1, HYPRE_MPI_INT, hypre_MPI_MAX, hcomm );
 
   return max;
 }
@@ -46,7 +47,8 @@ HYPRE_Int hypre_GlobalSEMax(HYPRE_Int value, MPI_Comm hypre_MPI_Context )
 HYPRE_Int hypre_GlobalSEMin(HYPRE_Int value, MPI_Comm hypre_MPI_Context)
 {
   HYPRE_Int min;
-  hypre_MPI_Allreduce( &value, &min, 1, HYPRE_MPI_INT, hypre_MPI_MIN, hypre_MPI_Context );
+  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(hypre_MPI_Context);
+  hypre_MPI_Allreduce( &value, &min, 1, HYPRE_MPI_INT, hypre_MPI_MIN, hcomm );
 
   return min;
 }
@@ -57,8 +59,8 @@ HYPRE_Int hypre_GlobalSEMin(HYPRE_Int value, MPI_Comm hypre_MPI_Context)
 HYPRE_Int hypre_GlobalSESum(HYPRE_Int value, MPI_Comm hypre_MPI_Context)
 {
   HYPRE_Int sum;
-
-  hypre_MPI_Allreduce( &value, &sum, 1, HYPRE_MPI_INT, hypre_MPI_SUM, hypre_MPI_Context );
+  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(hypre_MPI_Context);
+  hypre_MPI_Allreduce( &value, &sum, 1, HYPRE_MPI_INT, hypre_MPI_SUM, hcomm );
 
   return sum;
 }
@@ -69,7 +71,8 @@ HYPRE_Int hypre_GlobalSESum(HYPRE_Int value, MPI_Comm hypre_MPI_Context)
 HYPRE_Real hypre_GlobalSEMaxDouble(HYPRE_Real value, MPI_Comm hypre_MPI_Context)
 {
   HYPRE_Real max;
-  hypre_MPI_Allreduce( &value, &max, 1, hypre_MPI_REAL, hypre_MPI_MAX, hypre_MPI_Context );
+  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(hypre_MPI_Context);
+  hypre_MPI_Allreduce( &value, &max, 1, hypre_MPI_REAL, hypre_MPI_MAX, hcomm );
 
   return max;
 }
@@ -80,7 +83,8 @@ HYPRE_Real hypre_GlobalSEMaxDouble(HYPRE_Real value, MPI_Comm hypre_MPI_Context)
 HYPRE_Real hypre_GlobalSEMinDouble(HYPRE_Real value, MPI_Comm hypre_MPI_Context)
 {
   HYPRE_Real min;
-  hypre_MPI_Allreduce( &value, &min, 1, hypre_MPI_REAL, hypre_MPI_MIN, hypre_MPI_Context );
+  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(hypre_MPI_Context);
+  hypre_MPI_Allreduce( &value, &min, 1, hypre_MPI_REAL, hypre_MPI_MIN, hcomm );
 
   return min;
 }
@@ -91,7 +95,8 @@ HYPRE_Real hypre_GlobalSEMinDouble(HYPRE_Real value, MPI_Comm hypre_MPI_Context)
 HYPRE_Real hypre_GlobalSESumDouble(HYPRE_Real value, MPI_Comm hypre_MPI_Context)
 {
   HYPRE_Real sum;
-  hypre_MPI_Allreduce( &value, &sum, 1, hypre_MPI_REAL, hypre_MPI_SUM, hypre_MPI_Context );
+  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(hypre_MPI_Context);
+  hypre_MPI_Allreduce( &value, &sum, 1, hypre_MPI_REAL, hypre_MPI_SUM, hcomm );
 
   return sum;
 }

@@ -1581,8 +1581,9 @@ hypre_AMGHybridGetSetupSolveTime( void          *AMGhybrid_vdata,
    t[3] = AMGhybrid_data->solve_time2;
 
    MPI_Comm comm = AMGhybrid_data->comm;
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
-   hypre_MPI_Allreduce(t, time, 4, hypre_MPI_REAL, hypre_MPI_MAX, comm);
+   hypre_MPI_Allreduce(t, time, 4, hypre_MPI_REAL, hypre_MPI_MAX, hcomm);
 
    return hypre_error_flag;
 }

@@ -153,6 +153,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
 
    hypre_MPI_Comm_rank(A_comm, &myproc);
    hypre_MPI_Comm_size(grid_comm, &nprocs);
+   hypre_MPI_Comm hgrid_comm = hypre_MPI_CommFromMPI_Comm(grid_comm);
 
    start_rank = hypre_ParCSRMatrixFirstRowIndex(A);
    end_rank  = hypre_ParCSRMatrixLastRowIndex(A);
@@ -781,7 +782,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
       {
          rbuffer_RowsNcols[proc] = hypre_TAlloc(HYPRE_Int,  2 * RecvFromProcs[proc], HYPRE_MEMORY_HOST);
          hypre_MPI_Irecv(rbuffer_RowsNcols[proc], 2 * RecvFromProcs[proc], HYPRE_MPI_INT,
-                         proc, 0, grid_comm, &requests[j++]);
+                         proc, 0, hgrid_comm, &requests[j++]);
       }  /* if (RecvFromProcs[proc]) */
 
    }     /* for (proc= 0; proc< nprocs; proc++) */
@@ -791,7 +792,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
       if (tot_nsendRowsNcols[proc])
       {
          hypre_MPI_Isend(send_RowsNcols[proc], tot_nsendRowsNcols[proc], HYPRE_MPI_INT, proc,
-                         0, grid_comm, &requests[j++]);
+                         0, hgrid_comm, &requests[j++]);
       }
    }
 
@@ -835,7 +836,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
       if (RecvFromProcs[proc])
       {
          hypre_MPI_Irecv(rbuffer_ColsData[proc], 2 * send_RowsNcols_alloc[proc], HYPRE_MPI_REAL,
-                         proc, 1, grid_comm, &requests[j++]);
+                         proc, 1, hgrid_comm, &requests[j++]);
       }  /* if (RecvFromProcs[proc]) */
    }     /* for (proc= 0; proc< nprocs; proc++) */
 
@@ -844,7 +845,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
       if (tot_sendColsData[proc])
       {
          hypre_MPI_Isend(vals[proc], tot_sendColsData[proc], HYPRE_MPI_REAL, proc,
-                         1, grid_comm, &requests[j++]);
+                         1, hgrid_comm, &requests[j++]);
       }
    }
 

@@ -22,7 +22,8 @@ hypre_ParCSRMatrixGenerateFFFCHost( hypre_ParCSRMatrix  *A,
                                     hypre_ParCSRMatrix **A_FC_ptr,
                                     hypre_ParCSRMatrix **A_FF_ptr)
 {
-   MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
+   MPI_Comm       comm  = hypre_ParCSRMatrixComm(A);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
    if (!hypre_ParCSRMatrixCommPkg(A))
    {
@@ -170,15 +171,15 @@ hypre_ParCSRMatrixGenerateFFFCHost( hypre_ParCSRMatrix  *A,
          n_Fpts = fpt_array[num_threads];
          big_Fpts = n_Fpts;
 
-         hypre_MPI_Scan(&big_Fpts, fpts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_Fpts, fpts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
          fpts_starts[0] = fpts_starts[1] - big_Fpts;
          if (my_id == num_procs - 1)
          {
             total_global_fpts = fpts_starts[1];
             total_global_cpts = cpts_starts[1];
          }
-         hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
-         hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+         hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+         hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
       }
 #ifdef HYPRE_USING_OPENMP
       #pragma omp barrier
@@ -531,7 +532,8 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
                                  hypre_ParCSRMatrix **A_FC_ptr,
                                  hypre_ParCSRMatrix **A_FF_ptr)
 {
-   MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
+   MPI_Comm       comm  = hypre_ParCSRMatrixComm(A);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
@@ -687,8 +689,8 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
          big_Fpts = n_Fpts;
          big_new_Fpts = n_new_Fpts;
 
-         hypre_MPI_Scan(&big_Fpts, fpts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
-         hypre_MPI_Scan(&big_new_Fpts, new_fpts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_Fpts, fpts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
+         hypre_MPI_Scan(&big_new_Fpts, new_fpts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
          fpts_starts[0] = fpts_starts[1] - big_Fpts;
          new_fpts_starts[0] = new_fpts_starts[1] - big_new_Fpts;
          if (my_id == num_procs - 1)
@@ -697,9 +699,9 @@ hypre_ParCSRMatrixGenerateFFFC3( hypre_ParCSRMatrix  *A,
             total_global_fpts = fpts_starts[1];
             total_global_cpts = cpts_starts[1];
          }
-         hypre_MPI_Bcast(&total_global_new_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
-         hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
-         hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+         hypre_MPI_Bcast(&total_global_new_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+         hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+         hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
       }
 #ifdef HYPRE_USING_OPENMP
       #pragma omp barrier
@@ -1072,7 +1074,8 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
                                   hypre_ParCSRMatrix **A_FF_ptr,
                                   HYPRE_Real         **D_lambda_ptr)
 {
-   MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
+   MPI_Comm       comm  = hypre_ParCSRMatrixComm(A);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
@@ -1227,9 +1230,9 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
          big_Fpts = n_Fpts;
          big_new_Fpts = n_new_Fpts;
 
-         hypre_MPI_Scan(&big_Fpts, fpts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_Fpts, fpts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
          hypre_MPI_Scan(&big_new_Fpts, new_fpts_starts + 1, 1, HYPRE_MPI_BIG_INT,
-                        hypre_MPI_SUM, comm);
+                        hypre_MPI_SUM, hcomm);
          fpts_starts[0] = fpts_starts[1] - big_Fpts;
          new_fpts_starts[0] = new_fpts_starts[1] - big_new_Fpts;
          if (my_id == num_procs - 1)
@@ -1238,9 +1241,9 @@ hypre_ParCSRMatrixGenerateFFFCD3( hypre_ParCSRMatrix *A,
             total_global_fpts = fpts_starts[1];
             total_global_cpts = cpts_starts[1];
          }
-         hypre_MPI_Bcast(&total_global_new_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
-         hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
-         hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+         hypre_MPI_Bcast(&total_global_new_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+         hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+         hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
       }
 #ifdef HYPRE_USING_OPENMP
       #pragma omp barrier

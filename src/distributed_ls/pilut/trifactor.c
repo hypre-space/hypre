@@ -49,6 +49,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
   HYPRE_Real *lx, *ux, *values, *dvalues, *gatherbuf, **raddr, xx;
   hypre_MPI_Status Status;
   hypre_MPI_Request *receive_requests;
+  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(pilut_comm);
 
   /* hypre_PrintLine("hypre_LDUSolve start", globals); */
 
@@ -119,7 +120,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
     for (i=0; i<rnbrpes; i++) {
       if ( rnum[i] > 0 ) { /* Something to recv */
 	hypre_MPI_Irecv( raddr[i]+rdone[i], rnum[i], hypre_MPI_REAL,
-		  rpes[i], TAG, pilut_comm, &receive_requests[i] );
+		  rpes[i], TAG, hcomm, &receive_requests[i] );
 
 	rdone[i] += rnum[i] ;
       }
@@ -132,7 +133,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
           gatherbuf[l] = lx[sindex[j]];
 
 	hypre_MPI_Send( gatherbuf, l, hypre_MPI_REAL,
-		  spes[i], TAG, pilut_comm );
+		  spes[i], TAG, hcomm );
 
         auxsptr[i] = j;
       }
@@ -205,7 +206,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
     for (i=0; i<rnbrpes; i++) {
       if ( rnum[i] > 0 ) { /* Something to recv */
 	hypre_MPI_Irecv( raddr[i]+rdone[i], rnum[i], hypre_MPI_REAL,
-		  rpes[i], TAG, pilut_comm, &receive_requests[ i ] );
+		  rpes[i], TAG, hcomm, &receive_requests[ i ] );
 
 	rdone[i] += rnum[i] ;
       }
@@ -218,7 +219,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
           gatherbuf[l] = ux[sindex[j]];
 
 	hypre_MPI_Send( gatherbuf, l, hypre_MPI_REAL,
-		  spes[i], TAG, pilut_comm );
+		  spes[i], TAG, hcomm );
 
         auxsptr[i] = j;
       }
@@ -345,6 +346,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   hypre_MPI_Status Status;
   hypre_MPI_Request *receive_requests;
   hypre_MPI_Datatype MyColType_rnbr;
+  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(pilut_comm);
 
   /* data common to L and U */
   lnrows   = ddist->ddist_lnrows;
@@ -407,7 +409,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   TriSolveComm->rnbrpes = rnbrpes ;
 
   hypre_MPI_Alltoall( petotal, 1, HYPRE_MPI_INT,
-		lu_recv, 1, HYPRE_MPI_INT, pilut_comm );
+		lu_recv, 1, HYPRE_MPI_INT, hcomm );
 
   /* Determine to how many processors you will be sending data */
   snbrpes = 0;
@@ -459,7 +461,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   /* Start asynchronous receives */
   for (i=0; i<snbrpes; i++) {
     hypre_MPI_Irecv( sindex+sptr[i], sptr[i+1]-sptr[i], HYPRE_MPI_INT,
-	      spes[i], TAG_SetUp_rind, pilut_comm, &receive_requests[i] );
+	      spes[i], TAG_SetUp_rind, hcomm, &receive_requests[i] );
   }
 
   /* Send the rind sets to the processors */
@@ -468,7 +470,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   for (i=0; i<npes; i++) {
     if (petotal[i] > 0) {
       hypre_MPI_Send( rind+k, petotal[i], HYPRE_MPI_INT ,
-		i, TAG_SetUp_rind, pilut_comm );
+		i, TAG_SetUp_rind, hcomm );
 
       /* recv info for hypre_LDUSolve */
       raddr[rnbrpes] = x + k + lnrows;
@@ -518,7 +520,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   for (i=0; i<npes; i++) {
     if (petotal[i] > 0) {
       hypre_MPI_Irecv( rind+k, petotal[i], HYPRE_MPI_INT,
-	        i, TAG_SetUp_reord, pilut_comm, &receive_requests[i] );
+	        i, TAG_SetUp_reord, hcomm, &receive_requests[i] );
       k += petotal[i];
     }
   }
@@ -526,7 +528,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   /* Write them back to the processors that send them to me */
   for (i=0; i<snbrpes; i++) {
     hypre_MPI_Send( sindex+sptr[i], sptr[i+1]-sptr[i], HYPRE_MPI_INT,
-	      spes[i], TAG_SetUp_reord, pilut_comm );
+	      spes[i], TAG_SetUp_reord, hcomm );
   }
 
   /* Finish Recv  */
@@ -580,7 +582,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
     }
 
     hypre_MPI_Send( rnum, nlevels, HYPRE_MPI_INT,
-	      spes[i], TAG_SetUp_rnum, pilut_comm );
+	      spes[i], TAG_SetUp_rnum, hcomm );
   }
 
   if (rnum) hypre_TFree(rnum,HYPRE_MEMORY_HOST);
@@ -592,7 +594,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   /* receive each column */
   for (i=0; i<rnbrpes; i++) {
     hypre_MPI_Recv( TriSolveComm->rnum+i, 1, MyColType_rnbr,
-	      rpes[i], TAG_SetUp_rnum, pilut_comm, &Status );
+	      rpes[i], TAG_SetUp_rnum, hcomm, &Status );
   }
 
   hypre_MPI_Type_free( &MyColType_rnbr );

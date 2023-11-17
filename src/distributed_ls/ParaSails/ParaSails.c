@@ -63,10 +63,11 @@ HYPRE_Int FindNumReplies(MPI_Comm comm, HYPRE_Int *replies_list)
 
     hypre_MPI_Comm_rank(comm, &mype);
     hypre_MPI_Comm_size(comm, &npes);
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
     replies_list2 = hypre_TAlloc(HYPRE_Int, npes , HYPRE_MEMORY_HOST);
 
-    hypre_MPI_Allreduce(replies_list, replies_list2, npes, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+    hypre_MPI_Allreduce(replies_list, replies_list2, npes, HYPRE_MPI_INT, hypre_MPI_SUM, hcomm);
     num_replies = replies_list2[mype];
 
     hypre_TFree(replies_list2,HYPRE_MEMORY_HOST);
@@ -98,6 +99,7 @@ static void SendRequests(MPI_Comm comm, HYPRE_Int tag, Matrix *mat, HYPRE_Int re
 {
     hypre_MPI_Request request;
     HYPRE_Int i, j, this_pe;
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
     hypre_shell_sort(reqlen, reqind);
 
@@ -119,7 +121,7 @@ static void SendRequests(MPI_Comm comm, HYPRE_Int tag, Matrix *mat, HYPRE_Int re
 
         /* Request rows in reqind[i..j-1] */
         hypre_MPI_Isend(&reqind[i], j-i, HYPRE_MPI_INT, this_pe, tag,
-            comm, &request);
+            hcomm, &request);
         hypre_MPI_Request_free(&request);
         (*num_requests)++;
 
@@ -148,9 +150,10 @@ static void SendRequests(MPI_Comm comm, HYPRE_Int tag, Matrix *mat, HYPRE_Int re
 static void ReceiveRequest(MPI_Comm comm, HYPRE_Int *source, HYPRE_Int tag, HYPRE_Int **buffer,
   HYPRE_Int *buflen, HYPRE_Int *count)
 {
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
     hypre_MPI_Status status;
 
-    hypre_MPI_Probe(hypre_MPI_ANY_SOURCE, tag, comm, &status);
+    hypre_MPI_Probe(hypre_MPI_ANY_SOURCE, tag, hcomm, &status);
     *source = status.hypre_MPI_SOURCE;
     hypre_MPI_Get_count(&status, HYPRE_MPI_INT, count);
 
@@ -161,7 +164,7 @@ static void ReceiveRequest(MPI_Comm comm, HYPRE_Int *source, HYPRE_Int tag, HYPR
         *buffer = hypre_TAlloc(HYPRE_Int, *buflen , HYPRE_MEMORY_HOST);
     }
 
-    hypre_MPI_Recv(*buffer, *count, HYPRE_MPI_INT, *source, tag, comm, &status);
+    hypre_MPI_Recv(*buffer, *count, HYPRE_MPI_INT, *source, tag, hcomm, &status);
 }
 
 /*--------------------------------------------------------------------------
@@ -190,6 +193,7 @@ static void SendReplyPrunedRows(MPI_Comm comm, Numbering *numb,
     HYPRE_Int sendbacksize, j;
     HYPRE_Int len, *ind, *indbuf, *indbufp;
     HYPRE_Int temp;
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
     /* Determine the size of the integer message we need to send back */
     sendbacksize = count+1; /* length of header part */
@@ -226,7 +230,7 @@ static void SendReplyPrunedRows(MPI_Comm comm, Numbering *numb,
     }
 
     hypre_MPI_Isend(indbuf, indbufp-indbuf, HYPRE_MPI_INT, dest, ROW_REPI_TAG,
-        comm, request);
+        hcomm, request);
 }
 
 /*--------------------------------------------------------------------------
@@ -245,15 +249,16 @@ static void ReceiveReplyPrunedRows(MPI_Comm comm, Numbering *numb,
     hypre_MPI_Status status;
     HYPRE_Int source, count;
     HYPRE_Int len, *ind, num_rows, *row_nums, j;
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
     /* Don't know the size of reply, so use probe and get count */
-    hypre_MPI_Probe(hypre_MPI_ANY_SOURCE, ROW_REPI_TAG, comm, &status);
+    hypre_MPI_Probe(hypre_MPI_ANY_SOURCE, ROW_REPI_TAG, hcomm, &status);
     source = status.hypre_MPI_SOURCE;
     hypre_MPI_Get_count(&status, HYPRE_MPI_INT, &count);
 
     /* Allocate space in stored rows data structure */
     ind = PrunedRowsAlloc(pruned_rows, count);
-    hypre_MPI_Recv(ind, count, HYPRE_MPI_INT, source, ROW_REPI_TAG, comm, &status);
+    hypre_MPI_Recv(ind, count, HYPRE_MPI_INT, source, ROW_REPI_TAG, hcomm, &status);
 
     /* Parse the message */
     num_rows = *ind++; /* number of rows */
@@ -304,6 +309,7 @@ static void SendReplyStoredRows(MPI_Comm comm, Numbering *numb,
     HYPRE_Int len, *ind, *indbuf, *indbufp;
     HYPRE_Real *val, *valbuf, *valbufp;
     HYPRE_Int temp;
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
     /* Determine the size of the integer message we need to send back */
     sendbacksize = count+1; /* length of header part */
@@ -345,12 +351,12 @@ static void SendReplyStoredRows(MPI_Comm comm, Numbering *numb,
     }
 
     hypre_MPI_Isend(indbuf, indbufp-indbuf, HYPRE_MPI_INT, dest, ROW_REPI_TAG,
-        comm, request);
+        hcomm, request);
 
     hypre_MPI_Request_free(request);
 
     hypre_MPI_Isend(valbuf, valbufp-valbuf, hypre_MPI_REAL, dest, ROW_REPV_TAG,
-        comm, request);
+        hcomm, request);
 }
 
 /*--------------------------------------------------------------------------
@@ -368,17 +374,18 @@ static void ReceiveReplyStoredRows(MPI_Comm comm, Numbering *numb,
     HYPRE_Int source, count;
     HYPRE_Int len, *ind, num_rows, *row_nums, j;
     HYPRE_Real *val;
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
     /* Don't know the size of reply, so use probe and get count */
-    hypre_MPI_Probe(hypre_MPI_ANY_SOURCE, ROW_REPI_TAG, comm, &status);
+    hypre_MPI_Probe(hypre_MPI_ANY_SOURCE, ROW_REPI_TAG, hcomm, &status);
     source = status.hypre_MPI_SOURCE;
     hypre_MPI_Get_count(&status, HYPRE_MPI_INT, &count);
 
     /* Allocate space in stored rows data structure */
     ind = StoredRowsAllocInd(stored_rows, count);
-    hypre_MPI_Recv(ind, count, HYPRE_MPI_INT, source, ROW_REPI_TAG, comm, &status);
+    hypre_MPI_Recv(ind, count, HYPRE_MPI_INT, source, ROW_REPI_TAG, hcomm, &status);
     val = StoredRowsAllocVal(stored_rows, count);
-    hypre_MPI_Recv(val, count, hypre_MPI_REAL, source, ROW_REPV_TAG, comm, &status);
+    hypre_MPI_Recv(val, count, hypre_MPI_REAL, source, ROW_REPV_TAG, hcomm, &status);
 
     /* Parse the message */
     num_rows = *ind++; /* number of rows */
@@ -1407,6 +1414,7 @@ static HYPRE_Real SelectThresh(MPI_Comm comm, Matrix *A, DiagScale *diag_scale,
     HYPRE_Real *val;
     HYPRE_Real localsum = 0.0, sum;
     HYPRE_Real temp;
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
     /* Buffer for storing the values in each row when computing the
        i-th smallest element - buffer will grow if necessary */
@@ -1442,7 +1450,7 @@ static HYPRE_Real SelectThresh(MPI_Comm comm, Matrix *A, DiagScale *diag_scale,
     }
 
     /* Find the average across all processors */
-    hypre_MPI_Allreduce(&localsum, &sum, 1, hypre_MPI_REAL, hypre_MPI_SUM, comm);
+    hypre_MPI_Allreduce(&localsum, &sum, 1, hypre_MPI_REAL, hypre_MPI_SUM, hcomm);
     hypre_MPI_Comm_size(comm, &npes);
 
     hypre_TFree(buffer,HYPRE_MEMORY_HOST);
@@ -1461,6 +1469,7 @@ static HYPRE_Real SelectFilter(MPI_Comm comm, Matrix *M, DiagScale *diag_scale,
     HYPRE_Real *val;
     HYPRE_Real localsum = 0.0, sum;
     HYPRE_Real temp = 1.0;
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
     /* Buffer for storing the values in each row when computing the
        i-th smallest element - buffer will grow if necessary */
@@ -1498,7 +1507,7 @@ static HYPRE_Real SelectFilter(MPI_Comm comm, Matrix *M, DiagScale *diag_scale,
     }
 
     /* Find the average across all processors */
-    hypre_MPI_Allreduce(&localsum, &sum, 1, hypre_MPI_REAL, hypre_MPI_SUM, comm);
+    hypre_MPI_Allreduce(&localsum, &sum, 1, hypre_MPI_REAL, hypre_MPI_SUM, hcomm);
     hypre_MPI_Comm_size(comm, &npes);
 
     hypre_TFree(buffer,HYPRE_MEMORY_HOST);
@@ -1643,12 +1652,13 @@ ParaSails *ParaSailsCreate(MPI_Comm comm, HYPRE_Int beg_row, HYPRE_Int end_row, 
     ps->end_row            = end_row;
 
     hypre_MPI_Comm_size(comm, &npes);
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
     ps->beg_rows = hypre_TAlloc(HYPRE_Int, npes , HYPRE_MEMORY_HOST);
     ps->end_rows = hypre_TAlloc(HYPRE_Int, npes , HYPRE_MEMORY_HOST);
 
-    hypre_MPI_Allgather(&beg_row, 1, HYPRE_MPI_INT, ps->beg_rows, 1, HYPRE_MPI_INT, comm);
-    hypre_MPI_Allgather(&end_row, 1, HYPRE_MPI_INT, ps->end_rows, 1, HYPRE_MPI_INT, comm);
+    hypre_MPI_Allgather(&beg_row, 1, HYPRE_MPI_INT, ps->beg_rows, 1, HYPRE_MPI_INT, hcomm);
+    hypre_MPI_Allgather(&end_row, 1, HYPRE_MPI_INT, ps->end_rows, 1, HYPRE_MPI_INT, hcomm);
 
     return ps;
 }
@@ -1782,6 +1792,7 @@ HYPRE_Int ParaSailsSetupValues(ParaSails *ps, Matrix *A, HYPRE_Real filter)
     HYPRE_Int i;
     HYPRE_Real time0, time1;
     MPI_Comm comm = ps->comm;
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
     HYPRE_Int error = 0, error_sum;
 
     time0 = hypre_MPI_Wtime();
@@ -1846,7 +1857,7 @@ HYPRE_Int ParaSailsSetupValues(ParaSails *ps, Matrix *A, HYPRE_Real filter)
     LoadBalReturn(load_bal, ps->comm, ps->M);
 
     /* check if there was an error in computing the approximate inverse */
-    hypre_MPI_Allreduce(&error, &error_sum, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+    hypre_MPI_Allreduce(&error, &error_sum, 1, HYPRE_MPI_INT, hypre_MPI_SUM, hcomm);
     if (error_sum != 0)
     {
         hypre_printf("Hypre-ParaSails detected a problem.  The input matrix\n");
@@ -1979,6 +1990,7 @@ HYPRE_Real ParaSailsStatsPattern(ParaSails *ps, Matrix *A)
     HYPRE_Int n, nnzm, nnza;
     MPI_Comm comm = ps->comm;
     HYPRE_Real max_pattern_time, max_cost, ave_cost;
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
     hypre_MPI_Comm_rank(comm, &mype);
     hypre_MPI_Comm_size(comm, &npes);
@@ -1992,9 +2004,9 @@ HYPRE_Real ParaSailsStatsPattern(ParaSails *ps, Matrix *A)
     }
 
     hypre_MPI_Allreduce(&ps->setup_pattern_time, &max_pattern_time,
-	1, hypre_MPI_REAL, hypre_MPI_MAX, comm);
-    hypre_MPI_Allreduce(&ps->cost, &max_cost, 1, hypre_MPI_REAL, hypre_MPI_MAX, comm);
-    hypre_MPI_Allreduce(&ps->cost, &ave_cost, 1, hypre_MPI_REAL, hypre_MPI_SUM, comm);
+	1, hypre_MPI_REAL, hypre_MPI_MAX, hcomm);
+    hypre_MPI_Allreduce(&ps->cost, &max_cost, 1, hypre_MPI_REAL, hypre_MPI_MAX, hcomm);
+    hypre_MPI_Allreduce(&ps->cost, &ave_cost, 1, hypre_MPI_REAL, hypre_MPI_SUM, hcomm);
     ave_cost = ave_cost / (HYPRE_Real) npes;
 
     if (mype)
@@ -2031,6 +2043,7 @@ void ParaSailsStatsValues(ParaSails *ps, Matrix *A)
 
     hypre_MPI_Comm_rank(comm, &mype);
     hypre_MPI_Comm_size(comm, &npes);
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
     nnzm = MatrixNnz(ps->M);
     nnza = MatrixNnz(A);
@@ -2041,13 +2054,13 @@ void ParaSailsStatsValues(ParaSails *ps, Matrix *A)
     }
 
     hypre_MPI_Allreduce(&ps->setup_values_time, &max_values_time,
-	1, hypre_MPI_REAL, hypre_MPI_MAX, comm);
+	1, hypre_MPI_REAL, hypre_MPI_MAX, hcomm);
 
     if (!mype)
         setup_times = hypre_TAlloc(HYPRE_Real, npes , HYPRE_MEMORY_HOST);
 
     temp = ps->setup_pattern_time + ps->setup_values_time;
-    hypre_MPI_Gather(&temp, 1, hypre_MPI_REAL, setup_times, 1, hypre_MPI_REAL, 0, comm);
+    hypre_MPI_Gather(&temp, 1, hypre_MPI_REAL, setup_times, 1, hypre_MPI_REAL, 0, hcomm);
 
     if (mype)
         return;

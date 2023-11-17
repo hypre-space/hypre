@@ -1028,7 +1028,7 @@ void partition_and_distribute_metis_private(Mat_dh A, Mat_dh *Bout)
 
   /* broadcast number of rows to all processors */
   if (myid_dh == 0)  m = A->m;
-  hypre_MPI_Bcast(&m, 1, HYPRE_MPI_INT, 0, hypre_MPI_COMM_WORLD);
+  hypre_MPI_Bcast(&m, 1, HYPRE_MPI_INT, 0, hypre_MPI_CommFromMPI_Comm(hypre_MPI_COMM_WORLD));
 
   /* broadcast number of nonzeros in each row to all processors */
   rowLengths = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
@@ -1040,7 +1040,8 @@ void partition_and_distribute_metis_private(Mat_dh A, Mat_dh *Bout)
       rowLengths[i] = tmp[i+1] - tmp[i];
     }
   }
-  hypre_MPI_Bcast(rowLengths, m, HYPRE_MPI_INT, 0, comm_dh);
+  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
+  hypre_MPI_Bcast(rowLengths, m, HYPRE_MPI_INT, 0, hcomm);
 
   /* partition matrix */
   if (myid_dh == 0) {
@@ -1060,7 +1061,7 @@ void partition_and_distribute_metis_private(Mat_dh A, Mat_dh *Bout)
   }
 
   /* broadcast partitiioning information to all processors */
-  hypre_MPI_Bcast(rowToBlock, m, HYPRE_MPI_INT, 0, comm_dh);
+  hypre_MPI_Bcast(rowToBlock, m, HYPRE_MPI_INT, 0, hcomm);
 
   /* allocate storage for local portion of matrix */
   mat_par_read_allocate_private(&B, m, rowLengths, rowToBlock); CHECK_V_ERROR;
@@ -1081,8 +1082,8 @@ void partition_and_distribute_metis_private(Mat_dh A, Mat_dh *Bout)
         SET_V_ERROR(msgBuf_dh);
       }
 
-      hypre_MPI_Isend(cval+rp[i], count, HYPRE_MPI_INT, owner, CVAL_TAG, comm_dh, send_req+2*i);
-      hypre_MPI_Isend(aval+rp[i], count, hypre_MPI_REAL, owner, AVAL_TAG, comm_dh, send_req+2*i+1);
+      hypre_MPI_Isend(cval+rp[i], count, HYPRE_MPI_INT, owner, CVAL_TAG, hcomm, send_req+2*i);
+      hypre_MPI_Isend(aval+rp[i], count, hypre_MPI_REAL, owner, AVAL_TAG, hcomm, send_req+2*i+1);
     }
   }
 
@@ -1104,8 +1105,8 @@ void partition_and_distribute_metis_private(Mat_dh A, Mat_dh *Bout)
         SET_V_ERROR(msgBuf_dh);
       }
 
-      hypre_MPI_Irecv(cval+rp[i], count, HYPRE_MPI_INT, 0, CVAL_TAG, comm_dh, rcv_req+2*i);
-      hypre_MPI_Irecv(aval+rp[i], count, hypre_MPI_REAL, 0, AVAL_TAG, comm_dh, rcv_req+2*i+1);
+      hypre_MPI_Irecv(cval+rp[i], count, HYPRE_MPI_INT, 0, CVAL_TAG, hcomm, rcv_req+2*i);
+      hypre_MPI_Irecv(aval+rp[i], count, hypre_MPI_REAL, 0, AVAL_TAG, hcomm, rcv_req+2*i+1);
     }
   }
 
@@ -1152,7 +1153,7 @@ void partition_and_distribute_private(Mat_dh A, Mat_dh *Bout)
 
   /* broadcast number of rows to all processors */
   if (myid_dh == 0)  m = A->m;
-  hypre_MPI_Bcast(&m, 1, HYPRE_MPI_INT, 0, hypre_MPI_COMM_WORLD);
+  hypre_MPI_Bcast(&m, 1, HYPRE_MPI_INT, 0, hypre_MPI_CommFromMPI_Comm(hypre_MPI_COMM_WORLD));
 
   /* broadcast number of nonzeros in each row to all processors */
   rowLengths = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
@@ -1162,7 +1163,9 @@ void partition_and_distribute_private(Mat_dh A, Mat_dh *Bout)
       rowLengths[i] = tmp[i+1] - tmp[i];
     }
   }
-  hypre_MPI_Bcast(rowLengths, m, HYPRE_MPI_INT, 0, comm_dh);
+
+  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
+  hypre_MPI_Bcast(rowLengths, m, HYPRE_MPI_INT, 0, hcomm);
 
   /* partition matrix */
   rowToBlock = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
@@ -1173,7 +1176,7 @@ void partition_and_distribute_private(Mat_dh A, Mat_dh *Bout)
   }
 
   /* broadcast partitiioning information to all processors */
-  hypre_MPI_Bcast(rowToBlock, m, HYPRE_MPI_INT, 0, comm_dh);
+  hypre_MPI_Bcast(rowToBlock, m, HYPRE_MPI_INT, 0, hcomm);
 
   /* allocate storage for local portion of matrix */
   mat_par_read_allocate_private(&B, m, rowLengths, rowToBlock); CHECK_V_ERROR;
@@ -1194,8 +1197,8 @@ void partition_and_distribute_private(Mat_dh A, Mat_dh *Bout)
         SET_V_ERROR(msgBuf_dh);
       }
 
-      hypre_MPI_Isend(cval+rp[i], count, HYPRE_MPI_INT, owner, CVAL_TAG, comm_dh, send_req+2*i);
-      hypre_MPI_Isend(aval+rp[i], count, hypre_MPI_REAL, owner, AVAL_TAG, comm_dh, send_req+2*i+1);
+      hypre_MPI_Isend(cval+rp[i], count, HYPRE_MPI_INT, owner, CVAL_TAG, hcomm, send_req+2*i);
+      hypre_MPI_Isend(aval+rp[i], count, hypre_MPI_REAL, owner, AVAL_TAG, hcomm, send_req+2*i+1);
     }
   }
 
@@ -1217,8 +1220,8 @@ void partition_and_distribute_private(Mat_dh A, Mat_dh *Bout)
         SET_V_ERROR(msgBuf_dh);
       }
 
-      hypre_MPI_Irecv(cval+rp[i], count, HYPRE_MPI_INT, 0, CVAL_TAG, comm_dh, rcv_req+2*i);
-      hypre_MPI_Irecv(aval+rp[i], count, hypre_MPI_REAL, 0, AVAL_TAG, comm_dh, rcv_req+2*i+1);
+      hypre_MPI_Irecv(cval+rp[i], count, HYPRE_MPI_INT, 0, CVAL_TAG, hcomm, rcv_req+2*i);
+      hypre_MPI_Irecv(aval+rp[i], count, hypre_MPI_REAL, 0, AVAL_TAG, hcomm, rcv_req+2*i+1);
     }
   }
 

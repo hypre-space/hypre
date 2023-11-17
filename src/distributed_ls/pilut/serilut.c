@@ -458,12 +458,13 @@ HYPRE_Int hypre_ExchangeStructuralUnions( DataDistType *ddist,
                     hypre_PilutSolverGlobals *globals )
 {
   HYPRE_Int ierr=0, *recv_unions;
+  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(pilut_comm);
 
   /* allocate space for receiving unions */
   recv_unions = hypre_CTAlloc( HYPRE_Int,  nrows , HYPRE_MEMORY_HOST);
 
   hypre_MPI_Allreduce( *structural_union, recv_unions, nrows,
-                 HYPRE_MPI_INT, hypre_MPI_LOR, pilut_comm );
+                 HYPRE_MPI_INT, hypre_MPI_LOR, hcomm );
 
   /* free and reallocate structural union so that is of local size */
   hypre_TFree( *structural_union , HYPRE_MEMORY_HOST);

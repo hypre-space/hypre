@@ -202,8 +202,8 @@ HYPRE_PrintErrorMessages(MPI_Comm comm)
    char *msg;
 
    hypre_MPI_Barrier(comm);
-
    hypre_MPI_Comm_rank(comm, &myid);
+
    for (msg = err.memory; msg < (err.memory + err.msg_sz); msg += strlen(msg) + 1)
    {
       hypre_fprintf(stderr, "%d: %s", myid, msg);

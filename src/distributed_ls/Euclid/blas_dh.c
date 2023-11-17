@@ -114,7 +114,8 @@ HYPRE_Real InnerProd(HYPRE_Int n, HYPRE_Real *x, HYPRE_Real *y)
     }
 
     if (np_dh > 1) {
-      hypre_MPI_Allreduce(&local_result, &result, 1, hypre_MPI_REAL, hypre_MPI_SUM, comm_dh);
+      hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
+      hypre_MPI_Allreduce(&local_result, &result, 1, hypre_MPI_REAL, hypre_MPI_SUM, hcomm);
     } else {
       result = local_result;
     }
@@ -140,7 +141,8 @@ HYPRE_Real Norm2(HYPRE_Int n, HYPRE_Real *x)
   }
 
   if (np_dh > 1) {
-    hypre_MPI_Allreduce(&local_result, &result, 1, hypre_MPI_REAL, hypre_MPI_SUM, comm_dh);
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
+    hypre_MPI_Allreduce(&local_result, &result, 1, hypre_MPI_REAL, hypre_MPI_SUM, hcomm);
   } else {
     result = local_result;
   }

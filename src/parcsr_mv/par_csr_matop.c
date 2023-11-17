@@ -2344,6 +2344,7 @@ hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
    /* fetch the communication information from */
 
    comm = hypre_ParCSRMatrixComm(G_csr);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    hypre_MPI_Comm_rank(comm, &mypid);
    hypre_MPI_Comm_size(comm, &nprocs);
    comm_pkg = hypre_ParCSRMatrixCommPkg(G_csr);
@@ -2384,7 +2385,7 @@ hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
       pgraph_i = hypre_TAlloc(HYPRE_Int, (nprocs + 1), HYPRE_MEMORY_HOST);
       recv_cnts = hypre_TAlloc(HYPRE_Int, nprocs, HYPRE_MEMORY_HOST);
       hypre_MPI_Allgather(&n_proc_array, 1, HYPRE_MPI_INT, recv_cnts, 1,
-                          HYPRE_MPI_INT, comm);
+                          HYPRE_MPI_INT, hcomm);
       pgraph_i[0] = 0;
       for (i = 1; i <= nprocs; i++)
       {
@@ -2392,7 +2393,7 @@ hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
       }
       pgraph_j = hypre_TAlloc(HYPRE_Int, pgraph_i[nprocs], HYPRE_MEMORY_HOST);
       hypre_MPI_Allgatherv(proc_array, n_proc_array, HYPRE_MPI_INT, pgraph_j,
-                           recv_cnts, pgraph_i, HYPRE_MPI_INT, comm);
+                           recv_cnts, pgraph_i, HYPRE_MPI_INT, hcomm);
       hypre_TFree(recv_cnts, HYPRE_MEMORY_HOST);
 
       /* BFS on the processor graph to determine parent and children */
@@ -2549,6 +2550,7 @@ void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr,
    A_diag_j = hypre_CSRMatrixJ(A_diag);
    A_diag_a = hypre_CSRMatrixData(A_diag);
    comm = hypre_ParCSRMatrixComm(A_csr);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    hypre_MPI_Comm_rank(comm, &mypid);
    hypre_MPI_Comm_size(comm, &nprocs);
    if (nprocs > 1)
@@ -2564,7 +2566,7 @@ void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr,
    proc_offsets1 = hypre_TAlloc(HYPRE_Int, (nprocs + 1), HYPRE_MEMORY_HOST);
    proc_offsets2 = hypre_TAlloc(HYPRE_Int, (nprocs + 1), HYPRE_MEMORY_HOST);
    hypre_MPI_Allgather(&nindices, 1, HYPRE_MPI_INT, proc_offsets1, 1,
-                       HYPRE_MPI_INT, comm);
+                       HYPRE_MPI_INT, hcomm);
    k = 0;
    for (i = 0; i < nprocs; i++)
    {
@@ -2914,6 +2916,7 @@ void hypre_ParCSRMatrixExtractRowSubmatrices( hypre_ParCSRMatrix *A_csr,
    A_offd_i = hypre_CSRMatrixI(A_offd);
    A_offd_j = hypre_CSRMatrixJ(A_offd);
    comm = hypre_ParCSRMatrixComm(A_csr);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    hypre_MPI_Comm_rank(comm, &mypid);
    hypre_MPI_Comm_size(comm, &nprocs);
 
@@ -2924,7 +2927,7 @@ void hypre_ParCSRMatrixExtractRowSubmatrices( hypre_ParCSRMatrix *A_csr,
    proc_offsets1 = hypre_TAlloc(HYPRE_Int, (nprocs + 1), HYPRE_MEMORY_HOST);
    proc_offsets2 = hypre_TAlloc(HYPRE_Int, (nprocs + 1), HYPRE_MEMORY_HOST);
    hypre_MPI_Allgather(&nindices, 1, HYPRE_MPI_INT, proc_offsets1, 1,
-                       HYPRE_MPI_INT, comm);
+                       HYPRE_MPI_INT, hcomm);
    k = 0;
    for (i = 0; i < nprocs; i++)
    {
@@ -5424,13 +5427,14 @@ HYPRE_Real
 hypre_ParCSRMatrixFnorm( hypre_ParCSRMatrix *A )
 {
    MPI_Comm   comm = hypre_ParCSRMatrixComm(A);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    HYPRE_Real f_diag, f_offd, local_result, result;
 
    f_diag = hypre_CSRMatrixFnorm(hypre_ParCSRMatrixDiag(A));
    f_offd = hypre_CSRMatrixFnorm(hypre_ParCSRMatrixOffd(A));
    local_result = f_diag * f_diag + f_offd * f_offd;
 
-   hypre_MPI_Allreduce(&local_result, &result, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&local_result, &result, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, hcomm);
 
    return hypre_sqrt(result);
 }
@@ -5448,6 +5452,7 @@ hypre_ParCSRMatrixInfNorm( hypre_ParCSRMatrix  *A,
                            HYPRE_Real          *norm )
 {
    MPI_Comm            comm     = hypre_ParCSRMatrixComm(A);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    /* diag part of A */
    hypre_CSRMatrix    *A_diag   = hypre_ParCSRMatrixDiag(A);
@@ -5518,7 +5523,7 @@ hypre_ParCSRMatrixInfNorm( hypre_ParCSRMatrix  *A,
    }
 #endif
 
-   hypre_MPI_Allreduce(&maxsum, norm, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, comm);
+   hypre_MPI_Allreduce(&maxsum, norm, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, hcomm);
 
    return hypre_error_flag;
 }
@@ -5693,6 +5698,7 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
                                       HYPRE_Real           strength_thresh)
 {
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
+   hypre_MPI_Comm           hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
 
@@ -5750,7 +5756,7 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
       {
          total_global_cpts = cpts_starts[1];
       }
-      hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+      hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
       nc_local = (HYPRE_Int)(cpts_starts[1] - cpts_starts[0]);
    }
 
@@ -5766,13 +5772,13 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
          }
       }
       big_nf_local = (HYPRE_BigInt) nf_local;
-      hypre_MPI_Scan(&big_nf_local, fpts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+      hypre_MPI_Scan(&big_nf_local, fpts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
       fpts_starts[0] = fpts_starts[1] - nf_local;
       if (my_id == num_procs - 1)
       {
          total_global_fpts = fpts_starts[1];
       }
-      hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+      hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
    }
 
    if (row_set == -1 && col_set == -1)

@@ -284,6 +284,7 @@ hypre_APGetAllBoxesInRegions( hypre_BoxArray *region_array,
    HYPRE_Real  *send_buf_vol;
    HYPRE_Real  *vol_array;
    HYPRE_Real  *dbl_vol_and_count;
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    count_array = *p_count_array;
    vol_array = *p_vol_array;
@@ -309,7 +310,7 @@ hypre_APGetAllBoxesInRegions( hypre_BoxArray *region_array,
    }
 
    hypre_MPI_Allreduce(send_buf_vol, dbl_vol_and_count, num_regions * 2,
-                       HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+                       HYPRE_MPI_REAL, hypre_MPI_SUM, hcomm);
 
    /* Unpack */
    for (i = 0; i < num_regions; i++)
@@ -348,6 +349,7 @@ hypre_APShrinkRegions( hypre_BoxArray *region_array,
 
    hypre_Box    *my_box, *result_box, *grow_box, *region;
    hypre_Index   grow_index, imin, imax;
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    ndim  = hypre_BoxArrayNDim(my_box_array);
    ndim2 = 2 * ndim;
@@ -455,7 +457,7 @@ hypre_APShrinkRegions( hypre_BoxArray *region_array,
 
    /* Do an Allreduce on size and volume to get the global information */
    hypre_MPI_Allreduce(indices, recvbuf, num_regions * ndim2, HYPRE_MPI_INT,
-                       hypre_MPI_MIN, comm);
+                       hypre_MPI_MIN, hcomm);
 
    /* Unpack the "shrunk" regions */
    /* For each region */

@@ -48,7 +48,7 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &myid);
-
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    if (ilower > iupper + 1 || ilower < 0)
    {
@@ -92,7 +92,7 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
       info[0] = ilower;
       info[1] = jlower;
    }
-   hypre_MPI_Bcast(info, 2, HYPRE_MPI_BIG_INT, 0, comm);
+   hypre_MPI_Bcast(info, 2, HYPRE_MPI_BIG_INT, 0, hcomm);
    row0 = info[0];
    col0 = info[1];
 
@@ -102,7 +102,7 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
       info[0] = iupper;
       info[1] = jupper;
    }
-   hypre_MPI_Bcast(info, 2, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+   hypre_MPI_Bcast(info, 2, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
 
    rowN = info[0];
    colN = info[1];

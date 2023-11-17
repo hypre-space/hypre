@@ -193,7 +193,13 @@ typedef HYPRE_Int  hypre_MPI_Info;
  * MPI stubs to do casting of HYPRE_Int and hypre_int correctly
  *****************************************************************************/
 
-typedef MPI_Comm     hypre_MPI_Comm;
+typedef struct
+{
+   MPI_Comm mpi_comm;     
+} hypre_MPI_Comm;
+
+#define hypre_MPI_CommMPI_Comm(comm) ((comm).mpi_comm)
+
 typedef MPI_Group    hypre_MPI_Group;
 typedef MPI_Request  hypre_MPI_Request;
 typedef MPI_Datatype hypre_MPI_Datatype;
@@ -251,20 +257,20 @@ typedef MPI_User_function    hypre_MPI_User_function;
 /* mpistubs.c */
 HYPRE_Int hypre_MPI_Init( hypre_int *argc, char ***argv );
 HYPRE_Int hypre_MPI_Finalize( void );
-HYPRE_Int hypre_MPI_Abort( hypre_MPI_Comm comm, HYPRE_Int errorcode );
+HYPRE_Int hypre_MPI_Abort( MPI_Comm comm, HYPRE_Int errorcode );
 HYPRE_Real hypre_MPI_Wtime( void );
 HYPRE_Real hypre_MPI_Wtick( void );
-HYPRE_Int hypre_MPI_Barrier( hypre_MPI_Comm comm );
-HYPRE_Int hypre_MPI_Comm_create( hypre_MPI_Comm comm, hypre_MPI_Group group,
-                                 hypre_MPI_Comm *newcomm );
-HYPRE_Int hypre_MPI_Comm_dup( hypre_MPI_Comm comm, hypre_MPI_Comm *newcomm );
-hypre_MPI_Comm hypre_MPI_Comm_f2c( hypre_int comm );
-HYPRE_Int hypre_MPI_Comm_size( hypre_MPI_Comm comm, HYPRE_Int *size );
-HYPRE_Int hypre_MPI_Comm_rank( hypre_MPI_Comm comm, HYPRE_Int *rank );
-HYPRE_Int hypre_MPI_Comm_free( hypre_MPI_Comm *comm );
-HYPRE_Int hypre_MPI_Comm_group( hypre_MPI_Comm comm, hypre_MPI_Group *group );
-HYPRE_Int hypre_MPI_Comm_split( hypre_MPI_Comm comm, HYPRE_Int n, HYPRE_Int m,
-                                hypre_MPI_Comm * comms );
+HYPRE_Int hypre_MPI_Barrier( MPI_Comm comm );
+HYPRE_Int hypre_MPI_Comm_create( MPI_Comm comm, hypre_MPI_Group group,
+                                 MPI_Comm *newcomm );
+HYPRE_Int hypre_MPI_Comm_dup( MPI_Comm comm, MPI_Comm *newcomm );
+MPI_Comm hypre_MPI_Comm_f2c( hypre_int comm );
+HYPRE_Int hypre_MPI_Comm_size( MPI_Comm comm, HYPRE_Int *size );
+HYPRE_Int hypre_MPI_Comm_rank( MPI_Comm comm, HYPRE_Int *rank );
+HYPRE_Int hypre_MPI_Comm_free( MPI_Comm *comm );
+HYPRE_Int hypre_MPI_Comm_group( MPI_Comm comm, hypre_MPI_Group *group );
+HYPRE_Int hypre_MPI_Comm_split( MPI_Comm comm, HYPRE_Int n, HYPRE_Int m,
+                                MPI_Comm * comms );
 HYPRE_Int hypre_MPI_Group_incl( hypre_MPI_Group group, HYPRE_Int n, HYPRE_Int *ranks,
                                 hypre_MPI_Group *newgroup );
 HYPRE_Int hypre_MPI_Group_free( hypre_MPI_Group *group );
@@ -340,6 +346,7 @@ HYPRE_Int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
 HYPRE_Int hypre_MPI_Op_free( hypre_MPI_Op *op );
 HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function, hypre_int commute,
                                hypre_MPI_Op *op );
+hypre_MPI_Comm hypre_MPI_CommFromMPI_Comm(MPI_Comm comm);
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int hypre_MPI_Comm_split_type(hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
                                     hypre_MPI_Info info, hypre_MPI_Comm *newcomm);

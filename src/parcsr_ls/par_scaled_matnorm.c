@@ -23,6 +23,7 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    hypre_ParCSRCommHandle  *comm_handle;
    hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    MPI_Comm     comm = hypre_ParCSRMatrixComm(A);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    hypre_CSRMatrix      *diag   = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int      *diag_i = hypre_CSRMatrixI(diag);
    HYPRE_Int      *diag_j = hypre_CSRMatrixJ(diag);
@@ -116,7 +117,7 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
       }
    }
 
-   hypre_MPI_Allreduce(&max_row_sum, &mat_norm, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, comm);
+   hypre_MPI_Allreduce(&max_row_sum, &mat_norm, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, hcomm);
 
    hypre_ParVectorDestroy(dinvsqrt);
    hypre_SeqVectorDestroy(sum);

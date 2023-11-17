@@ -391,8 +391,10 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
 
    /* if any processor has added entries, then all need to participate */
 
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
+
    hypre_MPI_Allreduce(&n_add_entries, &global_n_add_entries,
-                       1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+                       1, HYPRE_MPI_INT, hypre_MPI_SUM, hcomm);
 
    if (global_n_add_entries > 0 )
    {

@@ -869,8 +869,10 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
       }
 
       lev_nboxes = 0;
+      MPI_Comm comm = hypre_SStructGridComm(egrid_l[l + 1]);
+      hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
       hypre_MPI_Allreduce(&nboxes, &lev_nboxes, 1, HYPRE_MPI_INT, hypre_MPI_SUM,
-                          hypre_SStructGridComm(egrid_l[l + 1]));
+                          hcomm);
 
       if (lev_nboxes)  /* there were coarsen boxes */
       {

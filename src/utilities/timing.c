@@ -345,7 +345,8 @@ hypre_PrintTiming( const char     *heading,
       return ierr;
    }
 
-   hypre_MPI_Comm_rank(comm, &myrank );
+   hypre_MPI_Comm_rank(comm, &myrank);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    /* print heading */
    if (myrank == 0)
@@ -362,9 +363,9 @@ hypre_PrintTiming( const char     *heading,
          local_wall_time = hypre_TimingWallTime(i);
          local_cpu_time  = hypre_TimingCPUTime(i);
          hypre_MPI_Allreduce(&local_wall_time, &wall_time, 1,
-                             hypre_MPI_REAL, hypre_MPI_MAX, comm);
+                             hypre_MPI_REAL, hypre_MPI_MAX, hcomm);
          hypre_MPI_Allreduce(&local_cpu_time, &cpu_time, 1,
-                             hypre_MPI_REAL, hypre_MPI_MAX, comm);
+                             hypre_MPI_REAL, hypre_MPI_MAX, hcomm);
 
          if (myrank == 0)
          {
@@ -422,7 +423,8 @@ hypre_GetTiming( const char     *heading,
       return ierr;
    }
 
-   hypre_MPI_Comm_rank(comm, &myrank );
+   hypre_MPI_Comm_rank(comm, &myrank);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    /* print heading */
    if (myrank == 0)
@@ -438,7 +440,7 @@ hypre_GetTiming( const char     *heading,
       {
          local_wall_time = hypre_TimingWallTime(i);
          hypre_MPI_Allreduce(&local_wall_time, &wall_time, 1,
-                             hypre_MPI_REAL, hypre_MPI_MAX, comm);
+                             hypre_MPI_REAL, hypre_MPI_MAX, hcomm);
 
          if (myrank == 0)
          {

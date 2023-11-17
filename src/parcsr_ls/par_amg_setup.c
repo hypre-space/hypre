@@ -237,6 +237,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    /*A_new = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(A), 1.e-16);
    hypre_CSRMatrixPrint(A_new, "Atestnew"); */
@@ -1641,7 +1642,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             {
                coarse_size = coarse_pnts_global[1];
             }
-            hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+            hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
 
             /* if no coarse-grid, stop coarsening, and set the
              * coarsest solve to be a single sweep of default smoother or smoother set by user */
@@ -2094,7 +2095,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             {
                coarse_size = coarse_pnts_global[1];
             }
-            hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+            hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
          }
          else /* no aggressive coarsening */
          {

@@ -2017,6 +2017,7 @@ hypre_MGRSetupFrelaxVcycleData( void               *mgr_vdata,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    local_size = hypre_ParCSRMatrixNumRows(A);
 
@@ -2185,7 +2186,7 @@ hypre_MGRSetupFrelaxVcycleData( void               *mgr_vdata,
       {
          coarse_size = coarse_pnts_global_lvl[1];
       }
-      hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+      hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
 
       if (coarse_size == 0) // stop coarsening
       {

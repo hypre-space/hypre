@@ -48,6 +48,7 @@ static void ExchangeDiagEntries(MPI_Comm comm, Matrix *mat, HYPRE_Int reqlen,
 {
     hypre_MPI_Request request;
     HYPRE_Int i, j, this_pe;
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
     hypre_shell_sort(reqlen, reqind);
 
@@ -69,11 +70,11 @@ static void ExchangeDiagEntries(MPI_Comm comm, Matrix *mat, HYPRE_Int reqlen,
 
         /* Post receive for diagonal values */
         hypre_MPI_Irecv(&diags[i], j-i, hypre_MPI_REAL, this_pe, DIAG_VALS_TAG, 
-	    comm, &requests[*num_requests]);
+	    hcomm, &requests[*num_requests]);
 
         /* Request rows in reqind[i..j-1] */
         hypre_MPI_Isend(&reqind[i], j-i, HYPRE_MPI_INT, this_pe, DIAG_INDS_TAG,
-            comm, &request);
+            hcomm, &request);
         hypre_MPI_Request_free(&request);
         (*num_requests)++;
 
@@ -99,13 +100,14 @@ static void ExchangeDiagEntriesServer(MPI_Comm comm, Matrix *mat,
     HYPRE_Int *recvbuf;
     HYPRE_Real *sendbuf;
     HYPRE_Int i, j, source, count;
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
     /* recvbuf contains requested indices */
     /* sendbuf contains corresponding diagonal entries */
 
     for (i=0; i<num_requests; i++)
     {
-        hypre_MPI_Probe(hypre_MPI_ANY_SOURCE, DIAG_INDS_TAG, comm, &status);
+        hypre_MPI_Probe(hypre_MPI_ANY_SOURCE, DIAG_INDS_TAG, hcomm, &status);
         source = status.hypre_MPI_SOURCE;
 	hypre_MPI_Get_count(&status, HYPRE_MPI_INT, &count);
 
@@ -114,7 +116,7 @@ static void ExchangeDiagEntriesServer(MPI_Comm comm, Matrix *mat,
 
         /*hypre_MPI_Recv(recvbuf, count, HYPRE_MPI_INT, hypre_MPI_ANY_SOURCE, */
         hypre_MPI_Recv(recvbuf, count, HYPRE_MPI_INT, source, 
-	    DIAG_INDS_TAG, comm, &status);
+	    DIAG_INDS_TAG, hcomm, &status);
         source = status.hypre_MPI_SOURCE;
 
 	/* Construct reply message of diagonal entries in sendbuf */
@@ -123,7 +125,7 @@ static void ExchangeDiagEntriesServer(MPI_Comm comm, Matrix *mat,
 
 	/* Use ready-mode send, since receives already posted */
 	hypre_MPI_Irsend(sendbuf, count, hypre_MPI_REAL, source, 
-	    DIAG_VALS_TAG, comm, &requests[i]);
+	    DIAG_VALS_TAG, hcomm, &requests[i]);
     }
 }
 

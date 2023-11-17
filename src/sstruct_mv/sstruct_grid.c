@@ -480,6 +480,7 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
 
    hypre_MPI_Comm_size(comm, &nprocs);
    hypre_MPI_Comm_rank(comm, &myproc);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    /*find offset and ghost offsets */
    {
@@ -488,7 +489,7 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
       /* offsets */
 
       hypre_MPI_Scan(
-         &local_size, &scan_recv, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+         &local_size, &scan_recv, 1, HYPRE_MPI_INT, hypre_MPI_SUM, hcomm);
       /* first point in my range */
       offsets[0] = scan_recv - local_size;
       /* first point in next proc's range */
@@ -498,7 +499,7 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
 
       /* ghost offsets */
       hypre_MPI_Scan(
-         &ghlocal_size, &scan_recv, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+         &ghlocal_size, &scan_recv, 1, HYPRE_MPI_INT, hypre_MPI_SUM, hcomm);
       /* first point in my range */
       ghoffsets[0] = scan_recv - ghlocal_size;
       /* first point in next proc's range */

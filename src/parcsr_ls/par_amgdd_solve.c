@@ -415,6 +415,7 @@ hypre_BoomerAMGDD_ResidualCommunication( hypre_ParAMGDDData *amgdd_data )
    {
       // Get some communication info
       comm = hypre_ParCSRMatrixComm(A_array[level]);
+      hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
       hypre_MPI_Comm_size(comm, &num_procs);
 
       if (num_procs > 1)
@@ -437,7 +438,7 @@ hypre_BoomerAMGDD_ResidualCommunication( hypre_ParAMGDDData *amgdd_data )
                recv_buffer_size = hypre_AMGDDCommPkgRecvBufferSize(compGridCommPkg)[level][i];
                recv_buffers[i] = hypre_CTAlloc(HYPRE_Complex, recv_buffer_size, HYPRE_MEMORY_HOST);
                hypre_MPI_Irecv(recv_buffers[i], recv_buffer_size, HYPRE_MPI_COMPLEX,
-                               hypre_AMGDDCommPkgRecvProcs(compGridCommPkg)[level][i], 3, comm, &requests[request_counter++]);
+                               hypre_AMGDDCommPkgRecvProcs(compGridCommPkg)[level][i], 3, hcomm, &requests[request_counter++]);
             }
 
             for (i = 0; i < num_sends; i++)
@@ -445,7 +446,7 @@ hypre_BoomerAMGDD_ResidualCommunication( hypre_ParAMGDDData *amgdd_data )
                send_buffer_size = hypre_AMGDDCommPkgSendBufferSize(compGridCommPkg)[level][i];
                send_buffers[i] = hypre_BoomerAMGDD_PackResidualBuffer(compGrid, compGridCommPkg, level, i);
                hypre_MPI_Isend(send_buffers[i], send_buffer_size, HYPRE_MPI_COMPLEX,
-                               hypre_AMGDDCommPkgSendProcs(compGridCommPkg)[level][i], 3, comm, &requests[request_counter++]);
+                               hypre_AMGDDCommPkgSendProcs(compGridCommPkg)[level][i], 3, hcomm, &requests[request_counter++]);
             }
 
             // wait for buffers to be received

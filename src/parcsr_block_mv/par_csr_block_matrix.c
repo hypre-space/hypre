@@ -163,6 +163,7 @@ HYPRE_Int
 hypre_ParCSRBlockMatrixSetNumNonzeros( hypre_ParCSRBlockMatrix *matrix)
 {
    MPI_Comm comm = hypre_ParCSRBlockMatrixComm(matrix);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    hypre_CSRBlockMatrix *diag = hypre_ParCSRBlockMatrixDiag(matrix);
    HYPRE_Int *diag_i = hypre_CSRBlockMatrixI(diag);
    hypre_CSRBlockMatrix *offd = hypre_ParCSRBlockMatrixOffd(matrix);
@@ -174,7 +175,7 @@ hypre_ParCSRBlockMatrixSetNumNonzeros( hypre_ParCSRBlockMatrix *matrix)
 
    local_num_nonzeros = (HYPRE_BigInt)(diag_i[local_num_rows] + offd_i[local_num_rows]);
    hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1, HYPRE_MPI_BIG_INT,
-                       hypre_MPI_SUM, comm);
+                       hypre_MPI_SUM, hcomm);
    hypre_ParCSRBlockMatrixNumNonzeros(matrix) = total_num_nonzeros;
 
    return ierr;
@@ -188,6 +189,7 @@ HYPRE_Int
 hypre_ParCSRBlockMatrixSetDNumNonzeros( hypre_ParCSRBlockMatrix *matrix)
 {
    MPI_Comm comm = hypre_ParCSRBlockMatrixComm(matrix);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    hypre_CSRBlockMatrix *diag = hypre_ParCSRBlockMatrixDiag(matrix);
    HYPRE_Int *diag_i = hypre_CSRBlockMatrixI(diag);
    hypre_CSRBlockMatrix *offd = hypre_ParCSRBlockMatrixOffd(matrix);
@@ -199,7 +201,7 @@ hypre_ParCSRBlockMatrixSetDNumNonzeros( hypre_ParCSRBlockMatrix *matrix)
 
    local_num_nonzeros = (HYPRE_Real) diag_i[local_num_rows] + (HYPRE_Real) offd_i[local_num_rows];
    hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1,
-                       HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+                       HYPRE_MPI_REAL, hypre_MPI_SUM, hcomm);
    hypre_ParCSRBlockMatrixDNumNonzeros(matrix) = total_num_nonzeros;
 
    return ierr;

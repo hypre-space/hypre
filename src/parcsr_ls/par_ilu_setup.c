@@ -137,6 +137,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
 #if defined(HYPRE_USING_GPU)
    hypre_CSRMatrixDestroy(matALU_d); matALU_d = NULL;
@@ -976,7 +977,7 @@ hypre_ILUSetup( void               *ilu_vdata,
             HYPRE_BigInt   global_start, S_total_rows, S_row_starts[2];
             HYPRE_BigInt   big_m = (HYPRE_BigInt) m;
 
-            hypre_MPI_Allreduce(&big_m, &S_total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+            hypre_MPI_Allreduce(&big_m, &S_total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
 
             if (S_total_rows > 0)
             {
@@ -990,7 +991,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                                              hypre_ParCSRMatrixRowStarts(matA));
                hypre_ParVectorInitialize(Ytemp);
 
-               hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+               hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
                S_row_starts[0] = global_start - big_m;
                S_row_starts[1] = global_start;
 
@@ -1214,7 +1215,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                /* borrow i for local nnz of S */
                nnzS_offd_local = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(matS));
                hypre_MPI_Allreduce(&nnzS_offd_local, &nnzS_offd, 1, HYPRE_MPI_REAL,
-                                   hypre_MPI_SUM, comm);
+                                   hypre_MPI_SUM, hcomm);
                nnzS = nnzS * hypre_ParILUDataOperatorComplexity(schur_precond_ilu) + nnzS_offd;
                break;
 
@@ -1850,6 +1851,7 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix  *A,
                             HYPRE_Int            test_opt)
 {
    MPI_Comm             comm          = hypre_ParCSRMatrixComm(A);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    HYPRE_Int           *rperm         = NULL;
    HYPRE_Int            m             = n - nLU;
    HYPRE_Int            i;
@@ -1970,13 +1972,13 @@ hypre_ILUSetupRAPILU0Device(hypre_ParCSRMatrix  *A,
 
    HYPRE_BigInt   S_total_rows, S_row_starts[2];
    HYPRE_BigInt   big_m = (HYPRE_BigInt)m;
-   hypre_MPI_Allreduce(&big_m, &S_total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&big_m, &S_total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
 
    if (S_total_rows > 0)
    {
       {
          HYPRE_BigInt global_start;
-         hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
          S_row_starts[0] = global_start - big_m;
          S_row_starts[1] = global_start;
       }
@@ -2243,6 +2245,7 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix  *A,
     */
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    comm_pkg = hypre_ParCSRMatrixCommPkg(A);
 
    /* setup if not yet built */
@@ -2659,7 +2662,7 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix  *A,
     * Check if we need to create Schur complement
     */
    HYPRE_BigInt big_m = (HYPRE_BigInt)m;
-   hypre_MPI_Allreduce(&big_m, &total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&big_m, &total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
 
    /* only form when total_rows > 0 */
    if (total_rows > 0)
@@ -2668,7 +2671,7 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix  *A,
       /* need to get new column start */
       {
          HYPRE_BigInt global_start;
-         hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
          col_starts[0] = global_start - m;
          col_starts[1] = global_start;
       }
@@ -2780,7 +2783,7 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix  *A,
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) ctrL;
-   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, hcomm);
    hypre_ParCSRMatrixDNumNonzeros(matL) = total_nnz;
 
    matU = hypre_ParCSRMatrixCreate( comm,
@@ -2807,7 +2810,7 @@ hypre_ILUSetupMILU0(hypre_ParCSRMatrix  *A,
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) ctrU;
-   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, hcomm);
    hypre_ParCSRMatrixDNumNonzeros(matU) = total_nnz;
    /* free memory */
    hypre_TFree(wL, HYPRE_MEMORY_HOST);
@@ -3395,6 +3398,7 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix  *A,
    /* set Comm_Pkg if not yet built */
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    if (!comm_pkg)
    {
@@ -3655,7 +3659,7 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix  *A,
     * Check if we need to create Schur complement
     */
    HYPRE_BigInt big_m = (HYPRE_BigInt)m;
-   hypre_MPI_Allreduce(&big_m, &total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&big_m, &total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
    /* only form when total_rows > 0 */
    if ( total_rows > 0 )
    {
@@ -3663,7 +3667,7 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix  *A,
       /* need to get new column start */
       {
          HYPRE_BigInt global_start;
-         hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
          col_starts[0] = global_start - m;
          col_starts[1] = global_start;
       }
@@ -3780,7 +3784,7 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix  *A,
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) (L_diag_i[n]);
-   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, hcomm);
    hypre_ParCSRMatrixDNumNonzeros(matL) = total_nnz;
 
    matU = hypre_ParCSRMatrixCreate( comm,
@@ -3806,7 +3810,7 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix  *A,
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) (U_diag_i[n]);
-   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, hcomm);
    hypre_ParCSRMatrixDNumNonzeros(matU) = total_nnz;
 
    /* free */
@@ -3987,6 +3991,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix  *A,
     */
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    /* create if not yet built */
    if (!comm_pkg)
@@ -4527,7 +4532,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix  *A,
     * Check if we need to create Schur complement
     */
    HYPRE_BigInt big_m = (HYPRE_BigInt)m;
-   hypre_MPI_Allreduce(&big_m, &total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&big_m, &total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
 
    /* only form when total_rows > 0 */
    if ( total_rows > 0 )
@@ -4536,7 +4541,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix  *A,
       /* need to get new column start */
       {
          HYPRE_BigInt global_start;
-         hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
          col_starts[0] = global_start - m;
          col_starts[1] = global_start;
       }
@@ -4655,7 +4660,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix  *A,
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) (L_diag_i[n]);
-   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, hcomm);
    hypre_ParCSRMatrixDNumNonzeros(matL) = total_nnz;
 
    matU = hypre_ParCSRMatrixCreate( comm,
@@ -4682,7 +4687,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix  *A,
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) (U_diag_i[n]);
-   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, hcomm);
    hypre_ParCSRMatrixDNumNonzeros(matU) = total_nnz;
 
    /* free working array */
@@ -4913,6 +4918,7 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix  *A,
     * get communication stuffs first
     */
    hypre_MPI_Comm_size(comm, &num_procs);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    comm_pkg = hypre_ParCSRMatrixCommPkg(A);
 
    /* Setup if not yet built */
@@ -5403,12 +5409,12 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix  *A,
    }
 
    HYPRE_BigInt big_total_rows = (HYPRE_BigInt)total_rows;
-   hypre_MPI_Allreduce(&big_total_rows, &global_num_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&big_total_rows, &global_num_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
 
    /* need to get new column start */
    {
       HYPRE_BigInt global_start;
-      hypre_MPI_Scan(&big_total_rows, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+      hypre_MPI_Scan(&big_total_rows, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
       col_starts[0] = global_start - total_rows;
       col_starts[1] = global_start;
    }
@@ -5437,7 +5443,7 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix  *A,
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) ctrL;
-   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, hcomm);
    hypre_ParCSRMatrixDNumNonzeros(matL) = total_nnz;
 
    matU = hypre_ParCSRMatrixCreate( comm,
@@ -5464,7 +5470,7 @@ hypre_ILUSetupILU0RAS(hypre_ParCSRMatrix  *A,
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) ctrU;
-   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, hcomm);
    hypre_ParCSRMatrixDNumNonzeros(matU) = total_nnz;
    /* free memory */
    hypre_TFree(wL, HYPRE_MEMORY_HOST);
@@ -6136,6 +6142,7 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix  *A,
    /* communication */
    hypre_ParCSRCommPkg     *comm_pkg;
    hypre_MPI_Comm_size(comm, &num_procs);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    /* reverse permutation array */
    HYPRE_Int               *rperm;
@@ -6523,11 +6530,11 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix  *A,
     */
    HYPRE_BigInt big_total_rows = (HYPRE_BigInt)total_rows;
    hypre_MPI_Allreduce(&big_total_rows, &global_num_rows, 1, HYPRE_MPI_BIG_INT,
-                       hypre_MPI_SUM, comm);
+                       hypre_MPI_SUM, hcomm);
    /* need to get new column start */
    {
       HYPRE_BigInt global_start;
-      hypre_MPI_Scan(&big_total_rows, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+      hypre_MPI_Scan(&big_total_rows, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
       col_starts[0] = global_start - total_rows;
       col_starts[1] = global_start;
    }
@@ -6555,7 +6562,7 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix  *A,
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) (L_diag_i[total_rows]);
-   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, hcomm);
    hypre_ParCSRMatrixDNumNonzeros(matL) = total_nnz;
 
    matU = hypre_ParCSRMatrixCreate( comm,
@@ -6581,7 +6588,7 @@ hypre_ILUSetupILUKRAS(hypre_ParCSRMatrix  *A,
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) (U_diag_i[total_rows]);
-   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, hcomm);
    hypre_ParCSRMatrixDNumNonzeros(matU) = total_nnz;
 
    /* free */
@@ -6721,6 +6728,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix  *A,
     * setup communication stuffs first
     */
    hypre_MPI_Comm_size(comm, &num_procs);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    /* create if not yet built */
    if (!comm_pkg)
@@ -7466,11 +7474,11 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix  *A,
     */
    HYPRE_BigInt big_total_rows = (HYPRE_BigInt)total_rows;
    hypre_MPI_Allreduce(&big_total_rows, &global_num_rows, 1, HYPRE_MPI_BIG_INT,
-                       hypre_MPI_SUM, comm);
+                       hypre_MPI_SUM, hcomm);
    /* need to get new column start */
    {
       HYPRE_BigInt global_start;
-      hypre_MPI_Scan(&big_total_rows, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+      hypre_MPI_Scan(&big_total_rows, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
       col_starts[0] = global_start - total_rows;
       col_starts[1] = global_start;
    }
@@ -7500,7 +7508,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix  *A,
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) (L_diag_i[total_rows]);
-   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, hcomm);
    hypre_ParCSRMatrixDNumNonzeros(matL) = total_nnz;
 
    matU = hypre_ParCSRMatrixCreate( comm,
@@ -7527,7 +7535,7 @@ hypre_ILUSetupILUTRAS(hypre_ParCSRMatrix  *A,
    }
    /* store (global) total number of nonzeros */
    local_nnz = (HYPRE_Real) (U_diag_i[total_rows]);
-   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&local_nnz, &total_nnz, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, hcomm);
    hypre_ParCSRMatrixDNumNonzeros(matU) = total_nnz;
 
    /* free working array */

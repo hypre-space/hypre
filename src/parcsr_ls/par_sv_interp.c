@@ -355,6 +355,7 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &myid);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
 #if SV_DEBUG
    {
@@ -1407,7 +1408,7 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
       new_col_starts[1] = (col_starts[1] / (HYPRE_BigInt)num_functions) * (HYPRE_BigInt)new_nf;
 
       if (myid == (num_procs - 1)) { g_nc = new_col_starts[1]; }
-      hypre_MPI_Bcast(&g_nc, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+      hypre_MPI_Bcast(&g_nc, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
    }
    else /* not first level */
    {

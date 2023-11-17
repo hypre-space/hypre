@@ -467,6 +467,7 @@ void init_mpi_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
   HYPRE_Int m, n, beg_row;
   bool symmetric;
   HYPRE_Real t1;
+  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
 
   symmetric = Parser_dhHasSwitch(parser_dh, "-sym"); CHECK_V_ERROR;
   if (Parser_dhHasSwitch(parser_dh, "-makeSymmetric")) {
@@ -494,8 +495,8 @@ void init_mpi_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
    * At this point, beg_rowP[] is a copy of beg_row[])
    *-------------------------------------------------------------*/
   if (!bj) {
-    hypre_MPI_Allgather(&beg_row, 1, HYPRE_MPI_INT, s->beg_row, 1, HYPRE_MPI_INT, comm_dh);
-    hypre_MPI_Allgather(&m, 1, HYPRE_MPI_INT, s->row_count, 1, HYPRE_MPI_INT, comm_dh);
+    hypre_MPI_Allgather(&beg_row, 1, HYPRE_MPI_INT, s->beg_row, 1, HYPRE_MPI_INT, hcomm);
+    hypre_MPI_Allgather(&m, 1, HYPRE_MPI_INT, s->row_count, 1, HYPRE_MPI_INT, hcomm);
     hypre_TMemcpy(s->beg_rowP,  s->beg_row, HYPRE_Int, np_dh, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
   } else {
     s->beg_row[myid_dh] = beg_row;
@@ -548,7 +549,7 @@ void init_mpi_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
       }
 
       /* exchange number of boundary rows with all neighbors */
-      hypre_MPI_Allgather(&bdryCount, 1, HYPRE_MPI_INT, s->bdry_count, 1, HYPRE_MPI_INT, comm_dh);
+      hypre_MPI_Allgather(&bdryCount, 1, HYPRE_MPI_INT, s->bdry_count, 1, HYPRE_MPI_INT, hcomm);
 
       /* form local permutation */
       idx = 0;
@@ -649,6 +650,7 @@ void SubdomainGraph_dhExchangePerms(SubdomainGraph_dh s)
   HYPRE_Int myFirstBdry = m - myBdryCount;
   HYPRE_Int *n2o_row = s->n2o_row;
   Hash_i_dh n2o_table, o2n_table;
+  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
 
   if (logFile != NULL && s->debug) debug = true;
 
@@ -704,15 +706,14 @@ void SubdomainGraph_dhExchangePerms(SubdomainGraph_dh s)
     HYPRE_Int *buf = recvBuf + naborIdx[i];
     HYPRE_Int ct = 2*bdryNodeCounts[nabr];
 
-
-    hypre_MPI_Isend(sendBuf, 2*myBdryCount, HYPRE_MPI_INT, nabr, 444, comm_dh, &(send_req[i]));
+    hypre_MPI_Isend(sendBuf, 2*myBdryCount, HYPRE_MPI_INT, nabr, 444, hcomm, &(send_req[i]));
 
     if (debug) {
       hypre_fprintf(logFile , "SUBG   sending %i elts to %i\n", 2*myBdryCount, nabr);
       fflush(logFile);
     }
 
-    hypre_MPI_Irecv(buf, ct, HYPRE_MPI_INT, nabr, 444, comm_dh, &(recv_req[i]));
+    hypre_MPI_Irecv(buf, ct, HYPRE_MPI_INT, nabr, 444, hcomm, &(recv_req[i]));
 
     if (debug) {
       hypre_fprintf(logFile, "SUBG  receiving %i elts from %i\n", ct, nabr);
@@ -765,19 +766,20 @@ void form_subdomaingraph_mpi_private(SubdomainGraph_dh s)
   HYPRE_Int i, j, nz, *adj, *ptrs = s->ptrs;
   hypre_MPI_Request *recvReqs = NULL, sendReq;
   hypre_MPI_Status *statuses = NULL, status;
+  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
 
   /* all processors tell root how many nabors they have */
   if (myid_dh == 0) {
     idxAll = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   }
-  hypre_MPI_Gather(&nct, 1, HYPRE_MPI_INT, idxAll, 1, HYPRE_MPI_INT, 0, comm_dh);
+  hypre_MPI_Gather(&nct, 1, HYPRE_MPI_INT, idxAll, 1, HYPRE_MPI_INT, 0, hcomm);
 
   /* root counts edges in graph, and broacasts to all */
   if (myid_dh == 0) {
     nz = 0;
     for (i=0; i<np_dh; ++i) nz += idxAll[i];
   }
-  hypre_MPI_Bcast(&nz, 1, HYPRE_MPI_INT, 0, comm_dh);
+  hypre_MPI_Bcast(&nz, 1, HYPRE_MPI_INT, 0, hcomm);
 
   /* allocate space for adjacency lists (memory for the
      pointer array was previously allocated)
@@ -797,12 +799,12 @@ void form_subdomaingraph_mpi_private(SubdomainGraph_dh s)
     for (j=0; j<np_dh; ++j) {
       HYPRE_Int ct = idxAll[j];
 
-      hypre_MPI_Irecv(adj+ptrs[j], ct, HYPRE_MPI_INT, j, 42, comm_dh, recvReqs+j);
+      hypre_MPI_Irecv(adj+ptrs[j], ct, HYPRE_MPI_INT, j, 42, hcomm, recvReqs+j);
     }
   }
 
   /* all processors send root their adjacency list */
-  hypre_MPI_Isend(nabors, nct, HYPRE_MPI_INT, 0, 42, comm_dh, &sendReq);
+  hypre_MPI_Isend(nabors, nct, HYPRE_MPI_INT, 0, 42, hcomm, &sendReq);
 
   /* wait for comms to go through */
   if (myid_dh == 0) {
@@ -811,8 +813,8 @@ void form_subdomaingraph_mpi_private(SubdomainGraph_dh s)
   hypre_MPI_Wait(&sendReq, &status);
 
   /* root broadcasts assembled subdomain graph to all processors */
-  hypre_MPI_Bcast(ptrs, 1+np_dh, HYPRE_MPI_INT, 0, comm_dh);
-  hypre_MPI_Bcast(adj, nz, HYPRE_MPI_INT, 0, comm_dh);
+  hypre_MPI_Bcast(ptrs, 1+np_dh, HYPRE_MPI_INT, 0, hcomm);
+  hypre_MPI_Bcast(adj, nz, HYPRE_MPI_INT, 0, hcomm);
 
   if (idxAll != NULL) { FREE_DH(idxAll); CHECK_V_ERROR; }
   if (recvReqs != NULL) { FREE_DH(recvReqs); CHECK_V_ERROR; }
@@ -929,6 +931,7 @@ void find_all_neighbors_unsym_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
   HYPRE_Int *marker;
   HYPRE_Int *cval, len, idx = 0;
   HYPRE_Int nz, *nabors = s->allNabors, *myNabors;
+  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
 
   myNabors = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   marker = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
@@ -987,7 +990,7 @@ hypre_fprintf(stderr, "\n");
 */
 
   /* find out who my neighbors are that I cannot discern locally */
-  hypre_MPI_Alltoall(marker, 1, HYPRE_MPI_INT, nabors, 1, HYPRE_MPI_INT, comm_dh); CHECK_V_ERROR;
+  hypre_MPI_Alltoall(marker, 1, HYPRE_MPI_INT, nabors, 1, HYPRE_MPI_INT, hcomm); CHECK_V_ERROR;
 
   /* add in neighbors that I know about from scanning my adjacency lists */
   for (i=0; i<idx; ++i) nabors[myNabors[i]] = 1;
@@ -1080,6 +1083,7 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, HYPRE_Int m, void* A,
   hypre_MPI_Request *sendReq, *recvReq;
   hypre_MPI_Status *status;
   SortedSet_dh ss;
+  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
 
   SortedSet_dhCreate(&ss, m); CHECK_V_ERROR;
 
@@ -1140,7 +1144,7 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, HYPRE_Int m, void* A,
    * processors tell each other how much information
    * each will send to whom
    *-----------------------------------------------------*/
-  hypre_MPI_Alltoall(sendBuf, 1, HYPRE_MPI_INT, recvBuf, 1, HYPRE_MPI_INT, comm_dh); CHECK_V_ERROR;
+  hypre_MPI_Alltoall(sendBuf, 1, HYPRE_MPI_INT, recvBuf, 1, HYPRE_MPI_INT, hcomm); CHECK_V_ERROR;
 
   /*-----------------------------------------------------
    * exchange boundary node information
@@ -1170,7 +1174,7 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, HYPRE_Int m, void* A,
   for (i=0; i<np_dh; ++i) {
     if (recvBuf[i]) {
       hypre_MPI_Irecv(bdryNodes+rpIN[j], recvBuf[i], HYPRE_MPI_INT,
-                i, BDRY_NODE_TAG, comm_dh, recvReq+j);
+                i, BDRY_NODE_TAG, hcomm, recvReq+j);
       ++j;
     }
   }
@@ -1180,7 +1184,7 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, HYPRE_Int m, void* A,
   for (i=0; i<np_dh; ++i) {
     if (sendBuf[i]) {
       hypre_MPI_Isend(list+rpOUT[j], sendBuf[i], HYPRE_MPI_INT,
-                i, BDRY_NODE_TAG, comm_dh, sendReq+j);
+                i, BDRY_NODE_TAG, hcomm, sendReq+j);
       ++j;
     }
   }

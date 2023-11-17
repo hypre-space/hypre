@@ -607,6 +607,7 @@ hypre_IJVectorAssemblePar(hypre_IJVector *vector)
    hypre_AuxParVector  *aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
    MPI_Comm             comm = hypre_IJVectorComm(vector);
    HYPRE_Int            print_level = hypre_IJVectorPrintLevel(vector);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    if (!par_vector)
    {
@@ -627,7 +628,7 @@ hypre_IJVectorAssemblePar(hypre_IJVector *vector)
       HYPRE_Complex *off_proc_data;
       current_num_elmts = hypre_AuxParVectorCurrentOffProcElmts(aux_vector);
       hypre_MPI_Allreduce(&current_num_elmts, &off_proc_elmts, 1, HYPRE_MPI_INT,
-                          hypre_MPI_SUM, comm);
+                          hypre_MPI_SUM, hcomm);
       if (off_proc_elmts)
       {
          max_off_proc_elmts = hypre_AuxParVectorMaxOffProcElmts(aux_vector);

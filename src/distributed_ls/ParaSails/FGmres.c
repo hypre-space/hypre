@@ -21,11 +21,12 @@
 static HYPRE_Real InnerProd(HYPRE_Int n, HYPRE_Real *x, HYPRE_Real *y, MPI_Comm comm)
 {
     HYPRE_Real local_result, result;
+    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
     HYPRE_Int one = 1;
     local_result = hypre_ddot(&n, x, &one, y, &one);
 
-    hypre_MPI_Allreduce(&local_result, &result, 1, hypre_MPI_REAL, hypre_MPI_SUM, comm);
+    hypre_MPI_Allreduce(&local_result, &result, 1, hypre_MPI_REAL, hypre_MPI_SUM, hcomm);
 
     return result;
 }

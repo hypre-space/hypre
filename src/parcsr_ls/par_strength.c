@@ -1539,6 +1539,7 @@ hypre_BoomerAMGCreateSCommPkg(hypre_ParCSRMatrix *A,
                               HYPRE_Int         **col_offd_S_to_A_ptr)
 {
    MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    hypre_MPI_Status        *status;
    hypre_MPI_Request       *requests;
    hypre_ParCSRCommPkg     *comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
@@ -1689,12 +1690,12 @@ hypre_BoomerAMGCreateSCommPkg(hypre_ParCSRMatrix *A,
    j = 0;
    for (i = 0; i < num_sends_A; i++)
    {
-      hypre_MPI_Irecv(&send_change[i], 1, HYPRE_MPI_INT, send_procs_A[i], 0, comm, &requests[j++]);
+      hypre_MPI_Irecv(&send_change[i], 1, HYPRE_MPI_INT, send_procs_A[i], 0, hcomm, &requests[j++]);
    }
 
    for (i = 0; i < num_recvs_A; i++)
    {
-      hypre_MPI_Isend(&recv_change[i], 1, HYPRE_MPI_INT, recv_procs_A[i], 0, comm, &requests[j++]);
+      hypre_MPI_Isend(&recv_change[i], 1, HYPRE_MPI_INT, recv_procs_A[i], 0, hcomm, &requests[j++]);
    }
 
    status = hypre_CTAlloc(hypre_MPI_Status, j, HYPRE_MEMORY_HOST);
@@ -1890,11 +1891,12 @@ hypre_BoomerAMGCreate2ndSHost( hypre_ParCSRMatrix  *S,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    my_first_cpt = coarse_row_starts[0];
    my_last_cpt = coarse_row_starts[1] - 1;
    if (my_id == (num_procs - 1)) { global_num_coarse = coarse_row_starts[1]; }
-   hypre_MPI_Bcast(&global_num_coarse, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+   hypre_MPI_Bcast(&global_num_coarse, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
 
    if (num_cols_offd_S)
    {
