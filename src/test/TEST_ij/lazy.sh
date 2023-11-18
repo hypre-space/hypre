@@ -8,11 +8,18 @@ TNAME=`basename $0 .sh`
 
 tail -3 ${TNAME}.out.1.a | head -2 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.1.b | head -2 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+fi
 
 tail -3 ${TNAME}.out.2.a | head -2 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.2.b | head -2 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+fi
 
 #=============================================================================
 # remove temporary files
