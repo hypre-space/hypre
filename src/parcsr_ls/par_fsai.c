@@ -45,7 +45,7 @@ hypre_FSAICreate( void )
    fsai_data = hypre_CTAlloc(hypre_ParFSAIData, 1, HYPRE_MEMORY_HOST);
 
    /* setup params */
-   local_solve_type = 1;
+   local_solve_type = 0;
    max_steps = 3;
    max_step_size = 5;
    max_nnz_row = max_steps * max_step_size;

@@ -1675,6 +1675,7 @@ HYPRE_Int HYPRE_FSAISetAlgoType( HYPRE_Solver solver,
  * (Optional) Sets the solver type for solving local linear systems in FSAI. This
  * option makes sense only for GPU runs.
  *
+ *      - 0: Gauss-Jordan solver
  *      - 1: Vendor solver (cuSOLVER/rocSOLVER)
  *      - 2: MAGMA solver
  **/
