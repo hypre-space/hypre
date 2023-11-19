@@ -1158,7 +1158,7 @@ hypre_ILUSetup( void               *ilu_vdata,
       {
          nnzBEF  += hypre_CSRMatrixNumNonzeros(matF_d);
       }
-      hypre_MPI_Allreduce(&nnzBEF, &nnzG, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+      hypre_MPI_Allreduce(&nnzBEF, &nnzG, 1, HYPRE_MPI_INT, hypre_MPI_SUM, hcomm);
       if (matS)
       {
          hypre_ParCSRMatrixSetDNumNonzeros(matS);
@@ -1186,7 +1186,7 @@ hypre_ILUSetup( void               *ilu_vdata,
       {
          nnzBEF  += hypre_CSRMatrixNumNonzeros(matF_d);
       }
-      hypre_MPI_Allreduce(&nnzBEF, &nnzG, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+      hypre_MPI_Allreduce(&nnzBEF, &nnzG, 1, HYPRE_MPI_INT, hypre_MPI_SUM, hcomm);
       if (matS)
       {
          hypre_ParCSRMatrixSetDNumNonzeros(matS);

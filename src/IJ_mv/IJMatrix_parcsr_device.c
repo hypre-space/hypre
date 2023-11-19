@@ -573,6 +573,7 @@ HYPRE_Int
 hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
 {
    MPI_Comm comm = hypre_IJMatrixComm(matrix);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    HYPRE_BigInt *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
    HYPRE_BigInt *col_partitioning = hypre_IJMatrixColPartitioning(matrix);
    HYPRE_BigInt row_start = row_partitioning[0];
@@ -609,7 +610,7 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
 #endif
    HYPRE_Int nelms_off = nelms - nelms_on;
    HYPRE_Int nelms_off_max;
-   hypre_MPI_Allreduce(&nelms_off, &nelms_off_max, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm);
+   hypre_MPI_Allreduce(&nelms_off, &nelms_off_max, 1, HYPRE_MPI_INT, hypre_MPI_MAX, hcomm);
 
    /* communicate for aux off-proc and add to remote aux on-proc */
    if (nelms_off_max)

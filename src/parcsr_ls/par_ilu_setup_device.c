@@ -101,6 +101,7 @@ hypre_ILUSetupILUDevice(HYPRE_Int               ilu_type,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    /* Build the inverse permutation arrays */
    if (perm_data && qperm_data)
@@ -198,7 +199,7 @@ hypre_ILUSetupILUDevice(HYPRE_Int               ilu_type,
 
    /* Compute total rows in Schur block */
    HYPRE_BigInt big_m = (HYPRE_BigInt) m;
-   hypre_MPI_Allreduce(&big_m, &total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&big_m, &total_rows, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
 
    /* only form when total_rows > 0 */
    if (total_rows > 0)
@@ -206,7 +207,7 @@ hypre_ILUSetupILUDevice(HYPRE_Int               ilu_type,
       /* now create S - need to get new column start */
       {
          HYPRE_BigInt global_start;
-         hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+         hypre_MPI_Scan(&big_m, &global_start, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
          col_starts[0] = global_start - m;
          col_starts[1] = global_start;
       }

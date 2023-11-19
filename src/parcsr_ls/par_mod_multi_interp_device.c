@@ -255,6 +255,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    if (num_procs > 1)
    {
@@ -262,7 +263,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       {
          total_global_cpts = num_cpts_global[1];
       }
-      hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+      hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
    }
    else
    {
@@ -438,7 +439,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    num_passes = 1;
    /* color points according to pass number */
    remaining_big = remaining;
-   hypre_MPI_Allreduce(&remaining_big, &global_remaining, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&remaining_big, &global_remaining, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
 
    hypre_GpuProfilingPopRange();
 
@@ -588,7 +589,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       HYPRE_BigInt old_global_remaining = global_remaining;
 
       remaining_big = remaining;
-      hypre_MPI_Allreduce(&remaining_big, &global_remaining, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+      hypre_MPI_Allreduce(&remaining_big, &global_remaining, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
 
       /* if the number of remaining points does not change, we have a situation of isolated areas of
        * fine points that are not connected to any C-points, and the pass generation process breaks
@@ -1042,6 +1043,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    fine_to_coarse = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
 
@@ -1051,7 +1053,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
    {
       HYPRE_BigInt big_Fpts = num_points;
 
-      hypre_MPI_Scan(&big_Fpts, f_pts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+      hypre_MPI_Scan(&big_Fpts, f_pts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
 
       f_pts_starts[0] = f_pts_starts[1] - big_Fpts;
 
@@ -1060,8 +1062,8 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
          total_global_fpts = f_pts_starts[1];
          total_global_cpts = c_pts_starts[1];
       }
-      hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
-      hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+      hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+      hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
    }
    else
    {
@@ -1338,6 +1340,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    fine_to_coarse = hypre_TAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_DEVICE);
 
@@ -1347,7 +1350,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
    {
       HYPRE_BigInt big_Fpts = num_points;
 
-      hypre_MPI_Scan(&big_Fpts, f_pts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+      hypre_MPI_Scan(&big_Fpts, f_pts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
 
       f_pts_starts[0] = f_pts_starts[1] - big_Fpts;
 
@@ -1356,8 +1359,8 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
          total_global_fpts = f_pts_starts[1];
          total_global_cpts = c_pts_starts[1];
       }
-      hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
-      hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+      hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+      hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
    }
    else
    {
