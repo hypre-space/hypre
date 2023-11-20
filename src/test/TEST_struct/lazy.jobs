@@ -5,9 +5,12 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 #=============================================================================
-# Test library initialization (sequential and parallel)
+# Test library lazy initialization (sequential and parallel)
 #=============================================================================
 
-mpirun -np 1 ./ij -test_init > state.out.1
-mpirun -np 4 ./ij -test_init > state.out.100
+mpirun -np 1 ./struct                         > lazy.out.1.a
+mpirun -np 1 ./struct -lazy_device_init 1     > lazy.out.1.b
+
+mpirun -np 4 ./struct                         > lazy.out.2.a
+mpirun -np 4 ./struct -lazy_device_init 1     > lazy.out.2.b
 

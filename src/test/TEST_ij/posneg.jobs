@@ -1,0 +1,17 @@
+#!/bin/bash
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+## Solve Ax=b and -Ax=b, convergence should be the same
+mpirun -np 2 ./ij -solver 0 -rhsrand -negA 0 > posneg.out.400.p
+mpirun -np 2 ./ij -solver 0 -rhsrand -negA 1 > posneg.out.400.n
+mpirun -np 3 ./ij -solver 3 -rhsrand -negA 0 > posneg.out.401.p
+mpirun -np 3 ./ij -solver 3 -rhsrand -negA 1 > posneg.out.401.n
+mpirun -np 4 ./ij -cheby_eig_est 10 -cheby_order 4 -cheby_variant 0 -cheby_scale 1 -rlx 16 -negA 0 > posneg.out.402.p
+mpirun -np 4 ./ij -cheby_eig_est 10 -cheby_order 4 -cheby_variant 0 -cheby_scale 1 -rlx 16 -negA 1 > posneg.out.402.n
+mpirun -np 4 ./ij -solver 3 -cheby_eig_est 0 -cheby_order 3 -cheby_variant 1 -cheby_scale 1 -rlx 16 -negA 0 > posneg.out.403.p
+mpirun -np 4 ./ij -solver 3 -cheby_eig_est 0 -cheby_order 3 -cheby_variant 1 -cheby_scale 1 -rlx 16 -negA 1 > posneg.out.403.n
+
+
