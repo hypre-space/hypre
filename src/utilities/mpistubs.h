@@ -195,10 +195,14 @@ typedef HYPRE_Int  hypre_MPI_Info;
 
 typedef struct
 {
-   MPI_Comm mpi_comm;     
+   MPI_Comm             mpi_comm;
+   hypre_MemoryLocation send_location;
+   hypre_MemoryLocation recv_location;
 } hypre_MPI_Comm;
 
-#define hypre_MPI_CommMPI_Comm(comm) ((comm).mpi_comm)
+#define hypre_MPI_CommMPI_Comm(comm)         ((comm).mpi_comm)
+#define hypre_MPI_CommMPI_SendLocation(comm) ((comm).send_location)
+#define hypre_MPI_CommMPI_RecvLocation(comm) ((comm).recv_location)
 
 typedef MPI_Group    hypre_MPI_Group;
 typedef MPI_Request  hypre_MPI_Request;
@@ -353,7 +357,10 @@ HYPRE_Int hypre_MPI_Comm_split_type(MPI_Comm comm, HYPRE_Int split_type, HYPRE_I
 HYPRE_Int hypre_MPI_Info_create(hypre_MPI_Info *info);
 HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 #endif
-
+HYPRE_Int hypre_MPI_Isend_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
+hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests );
+HYPRE_Int hypre_MPI_Irecv_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
+hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests );
 #ifdef __cplusplus
 }
 #endif

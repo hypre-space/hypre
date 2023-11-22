@@ -1149,6 +1149,56 @@ hypre_MPI_Irecv( void               *buf,
                                 hypre_MPI_CommMPI_Comm(comm), request);
 }
 
+#define TYPE_MACRO(MPI_CMD, HYPRE_DTYPE, HYPRE_MPI_DTYPE)               \
+{                                                                       \
+   if (datatype == HYPRE_MPI_DTYPE)                                     \
+   {                                                                    \
+      HYPRE_Int    i;                                                   \
+      HYPRE_DTYPE *data = (HYPRE_DTYPE *) buf;                          \
+      for (i = 0; i < num; i++)                                         \
+      {                                                                 \
+         HYPRE_Int ip = procs[i];                                       \
+         HYPRE_Int start = displs[i];                                   \
+         HYPRE_Int len = counts ? counts[i] : displs[i + 1] - start;    \
+         MPI_CMD(data + start, len, HYPRE_MPI_COMPLEX,                  \
+                 ip, tag, hypre_MPI_CommMPI_Comm(comm), requests + i);  \
+      }                                                                 \
+      return hypre_error_flag;                                          \
+   }                                                                    \
+}
+
+HYPRE_Int
+hypre_MPI_Isend_Multiple( void               *buf,
+                          HYPRE_Int           num,
+                          HYPRE_Int          *displs,
+                          HYPRE_Int          *counts,
+                          hypre_MPI_Datatype  datatype,
+                          HYPRE_Int          *procs,
+                          HYPRE_Int           tag,
+                          hypre_MPI_Comm      comm,
+                          hypre_MPI_Request  *requests )
+{
+   TYPE_MACRO(MPI_Isend, HYPRE_Complex, HYPRE_MPI_COMPLEX);
+   TYPE_MACRO(MPI_Isend, HYPRE_Int,     HYPRE_MPI_INT);
+   TYPE_MACRO(MPI_Isend, HYPRE_BigInt,  HYPRE_MPI_BIG_INT);
+}
+
+HYPRE_Int
+hypre_MPI_Irecv_Multiple( void               *buf,
+                          HYPRE_Int           num,
+                          HYPRE_Int          *displs,
+                          HYPRE_Int          *counts,
+                          hypre_MPI_Datatype  datatype,
+                          HYPRE_Int          *procs,
+                          HYPRE_Int           tag,
+                          hypre_MPI_Comm      comm,
+                          hypre_MPI_Request  *requests )
+{
+   TYPE_MACRO(MPI_Irecv, HYPRE_Complex, HYPRE_MPI_COMPLEX);
+   TYPE_MACRO(MPI_Irecv, HYPRE_Int,     HYPRE_MPI_INT);
+   TYPE_MACRO(MPI_Irecv, HYPRE_BigInt,  HYPRE_MPI_BIG_INT);
+}
+
 HYPRE_Int
 hypre_MPI_Send_init( void               *buf,
                      HYPRE_Int           count,
