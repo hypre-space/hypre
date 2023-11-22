@@ -380,6 +380,9 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
    void                      *send_data;
    void                      *recv_data;
 
+   hypre_MPI_CommMPI_SendLocation(hcomm) = hypre_GetActualMemLocation(send_memory_location);
+   hypre_MPI_CommMPI_RecvLocation(hcomm) = hypre_GetActualMemLocation(recv_memory_location);
+
    /*--------------------------------------------------------------------
     * hypre_Initialize sets up a communication handle,
     * posts receives and initiates sends. It always requires num_sends,
@@ -484,24 +487,18 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
    {
       case  1:
       {
-         HYPRE_Complex *d_send_data = (HYPRE_Complex *) send_data;
-         HYPRE_Complex *d_recv_data = (HYPRE_Complex *) recv_data;
-         for (i = 0; i < num_recvs; i++)
-         {
-            ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
-            vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i);
-            vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start;
-            hypre_MPI_Irecv(&d_recv_data[vec_start], vec_len, HYPRE_MPI_COMPLEX,
-                            ip, 0, hcomm, &requests[j++]);
-         }
-         for (i = 0; i < num_sends; i++)
-         {
-            ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
-            vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-            vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) - vec_start;
-            hypre_MPI_Isend(&d_send_data[vec_start], vec_len, HYPRE_MPI_COMPLEX,
-                            ip, 0, hcomm, &requests[j++]);
-         }
+         hypre_MPI_Irecv_Multiple(recv_data, num_recvs,
+                                  hypre_ParCSRCommPkgRecvVecStarts(comm_pkg),
+                                  NULL, HYPRE_MPI_COMPLEX,
+                                  hypre_ParCSRCommPkgRecvProcs(comm_pkg),
+                                  0, hcomm, requests);
+
+         hypre_MPI_Isend_Multiple(send_data, num_sends,
+                                  hypre_ParCSRCommPkgSendMapStarts(comm_pkg),
+                                  NULL, HYPRE_MPI_COMPLEX,
+                                  hypre_ParCSRCommPkgSendProcs(comm_pkg),
+                                  0, hcomm, requests);
+
          break;
       }
       case  2:
