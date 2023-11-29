@@ -32,7 +32,7 @@ doublereal dnrm2_(integer*n,doublereal* dx,integer* incx)
     /*doublereal sqrt(doublereal);*/
 
     /* Local variables */
-     doublereal xmax;
+     doublereal xmax = zero;
      integer next, i__, j, ix;
      doublereal hitest, sum;
 

@@ -307,6 +307,12 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
                             hypre_StructVector *visity,
                             hypre_StructVector *visitz    )
 {
+   HYPRE_UNUSED_VAR(num_grids);
+   HYPRE_UNUSED_VAR(jump);
+   HYPRE_UNUSED_VAR(lx);
+   HYPRE_UNUSED_VAR(ly);
+   HYPRE_UNUSED_VAR(lz);
+
    HYPRE_Int             ierr = 0;
 
    hypre_BoxArray        *compute_boxes;
@@ -475,6 +481,11 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
                        HYPRE_Int           lz,
                        HYPRE_Int           jump  )
 {
+   HYPRE_UNUSED_VAR(jump);
+   HYPRE_UNUSED_VAR(lx);
+   HYPRE_UNUSED_VAR(ly);
+   HYPRE_UNUSED_VAR(lz);
+
    HYPRE_Int             ierr = 0;
 
    hypre_BoxArray        *compute_boxes;

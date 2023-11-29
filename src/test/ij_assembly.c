@@ -81,7 +81,7 @@ main( hypre_int  argc,
    HYPRE_Int                 print_usage;
    HYPRE_MemoryLocation      memory_location;
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-   HYPRE_ExecutionPolicy    default_exec_policy;
+   HYPRE_ExecutionPolicy     default_exec_policy;
 #endif
    char                      memory_location_name[8];
 
@@ -89,11 +89,11 @@ main( hypre_int  argc,
    HYPRE_BigInt              num_nonzeros;
    HYPRE_BigInt              ilower, iupper;
    HYPRE_BigInt              jlower, jupper;
-   HYPRE_Int                *nnzrow, *h_nnzrow, *d_nnzrow;
-   HYPRE_BigInt             *rows,   *h_rows,   *d_rows;
-   HYPRE_BigInt             *rows2,  *h_rows2,  *d_rows2;
-   HYPRE_BigInt             *cols,   *h_cols,   *d_cols;
-   HYPRE_Real               *coefs,  *h_coefs,  *d_coefs;
+   HYPRE_Int                *nnzrow = NULL, *h_nnzrow, *d_nnzrow = NULL;
+   HYPRE_BigInt             *rows = NULL,   *h_rows,   *d_rows = NULL;
+   HYPRE_BigInt             *rows2 = NULL,  *h_rows2,  *d_rows2 = NULL;
+   HYPRE_BigInt             *cols = NULL,   *h_cols,   *d_cols = NULL;
+   HYPRE_Real               *coefs = NULL,  *h_coefs,  *d_coefs = NULL;
    HYPRE_IJMatrix            ij_A;
    HYPRE_IJMatrix            ij_AT;
    HYPRE_ParCSRMatrix        parcsr_ref;
@@ -469,10 +469,10 @@ buildMatrixEntries(MPI_Comm            comm,
                    HYPRE_Int           stencil,
                    HYPRE_ParCSRMatrix *parcsr_ptr)
 {
-   HYPRE_Int        num_procs;
-   HYPRE_Int        myid;
-   HYPRE_Real       values[4];
-   HYPRE_ParCSRMatrix A;
+   HYPRE_Int          num_procs;
+   HYPRE_Int          myid;
+   HYPRE_Real         values[4];
+   HYPRE_ParCSRMatrix A = NULL;
 
    hypre_MPI_Comm_size(comm, &num_procs );
    hypre_MPI_Comm_rank(comm, &myid );
@@ -750,15 +750,15 @@ test_SetOffProc(HYPRE_ParCSRMatrix    parcsr_A,
    HYPRE_BigInt       *h_cols;
    HYPRE_Real         *h_coefs;
 
-   HYPRE_Int          *d_nnzrow;
-   HYPRE_BigInt       *d_rows;
-   HYPRE_BigInt       *d_cols;
-   HYPRE_Real         *d_coefs;
+   HYPRE_Int          *d_nnzrow = NULL;
+   HYPRE_BigInt       *d_rows   = NULL;
+   HYPRE_BigInt       *d_cols   = NULL;
+   HYPRE_Real         *d_coefs  = NULL;
 
-   HYPRE_Int          *nnzrow;
-   HYPRE_BigInt       *rows;
-   HYPRE_BigInt       *cols;
-   HYPRE_Real         *coefs;
+   HYPRE_Int          *nnzrow   = NULL;
+   HYPRE_BigInt       *rows     = NULL;
+   HYPRE_BigInt       *cols     = NULL;
+   HYPRE_Real         *coefs    = NULL;
 
    HYPRE_Int          *h_rowptr;
 

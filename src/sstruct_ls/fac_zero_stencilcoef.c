@@ -36,6 +36,8 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
                      HYPRE_Int             fine_part,
                      hypre_Index           rfactors )
 {
+   HYPRE_UNUSED_VAR(Af);
+
    hypre_BoxManager      *fboxman;
    hypre_BoxManEntry    **boxman_entries;
    HYPRE_Int              nboxman_entries;
@@ -417,4 +419,3 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
 
    return ierr;
 }
-

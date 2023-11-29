@@ -181,7 +181,7 @@ main( hypre_int argc,
    HYPRE_Int           check_residual = 0;
    HYPRE_Int           num_procs, myid;
    HYPRE_Int           local_row;
-   HYPRE_Int          *row_sizes;
+   HYPRE_Int          *row_sizes = NULL;
    HYPRE_Int          *diag_sizes;
    HYPRE_Int          *offdiag_sizes;
    HYPRE_BigInt       *rows;
@@ -282,9 +282,9 @@ main( hypre_int argc,
 #endif
    HYPRE_Real   relax_wt;
    HYPRE_Real   add_relax_wt = 1.0;
-   HYPRE_Real   relax_wt_level;
+   HYPRE_Real   relax_wt_level = 0.0;
    HYPRE_Real   outer_wt;
-   HYPRE_Real   outer_wt_level;
+   HYPRE_Real   outer_wt_level = 0;
    HYPRE_Real   tol = 1.e-8, pc_tol = 0.;
    HYPRE_Real   atol = 0.0;
    HYPRE_Real   max_row_sum = 1.;
@@ -10095,19 +10095,24 @@ BuildParFromOneFile( HYPRE_Int                  argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildFuncsFromFiles(    HYPRE_Int                  argc,
-                        char                *argv[],
-                        HYPRE_Int                  arg_index,
-                        HYPRE_ParCSRMatrix   parcsr_A,
-                        HYPRE_Int                **dof_func_ptr     )
+BuildFuncsFromFiles( HYPRE_Int            argc,
+                     char                *argv[],
+                     HYPRE_Int            arg_index,
+                     HYPRE_ParCSRMatrix   parcsr_A,
+                     HYPRE_Int          **dof_func_ptr )
 {
+   HYPRE_UNUSED_VAR(argc);
+   HYPRE_UNUSED_VAR(argv);
+   HYPRE_UNUSED_VAR(arg_index);
+   HYPRE_UNUSED_VAR(parcsr_A);
+   HYPRE_UNUSED_VAR(dof_func_ptr);
+
    /*----------------------------------------------------------------------
     * Build Function array from files on different processors
     *----------------------------------------------------------------------*/
 
-   hypre_printf (" Feature is not implemented yet!\n");
+   hypre_printf("Feature is not implemented yet!\n");
    return (0);
-
 }
 
 /*----------------------------------------------------------------------
@@ -10115,19 +10120,19 @@ BuildFuncsFromFiles(    HYPRE_Int                  argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildFuncsFromOneFile(  HYPRE_Int                  argc,
-                        char                *argv[],
-                        HYPRE_Int                  arg_index,
-                        HYPRE_ParCSRMatrix   parcsr_A,
-                        HYPRE_Int                **dof_func_ptr     )
+BuildFuncsFromOneFile( HYPRE_Int            argc,
+                       char                *argv[],
+                       HYPRE_Int            arg_index,
+                       HYPRE_ParCSRMatrix   parcsr_A,
+                       HYPRE_Int          **dof_func_ptr )
 {
-   char           *filename;
+   char                 *filename;
 
    HYPRE_Int             myid, num_procs;
    HYPRE_Int             first_row_index;
    HYPRE_Int             last_row_index;
    HYPRE_BigInt         *partitioning;
-   HYPRE_Int            *dof_func;
+   HYPRE_Int            *dof_func = NULL;
    HYPRE_Int            *dof_func_local;
    HYPRE_Int             i, j;
    HYPRE_Int             local_size;
@@ -10187,7 +10192,7 @@ BuildFuncsFromOneFile(  HYPRE_Int                  argc,
    first_row_index = hypre_ParCSRMatrixFirstRowIndex(parcsr_A);
    last_row_index  = hypre_ParCSRMatrixLastRowIndex(parcsr_A);
    local_size      = last_row_index - first_row_index + 1;
-   dof_func_local = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
+   dof_func_local  = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
    if (myid == 0)
    {
       requests = hypre_CTAlloc(hypre_MPI_Request, num_procs - 1, HYPRE_MEMORY_HOST);
@@ -10297,17 +10302,17 @@ BuildBigArrayFromOneFile( HYPRE_Int            argc,
                           HYPRE_BigInt       **array_ptr )
 {
    MPI_Comm        comm = hypre_MPI_COMM_WORLD;
-   char           *filename;
+   char           *filename = NULL;
    FILE           *fp;
    HYPRE_Int       myid;
    HYPRE_Int       num_procs;
    HYPRE_Int       global_size;
-   HYPRE_BigInt   *global_array;
-   HYPRE_BigInt   *array;
-   HYPRE_BigInt   *send_buffer;
-   HYPRE_Int      *send_counts = NULL;
-   HYPRE_Int      *displs;
-   HYPRE_Int      *array_procs;
+   HYPRE_BigInt   *global_array = NULL;
+   HYPRE_BigInt   *array        = NULL;
+   HYPRE_BigInt   *send_buffer  = NULL;
+   HYPRE_Int      *send_counts  = NULL;
+   HYPRE_Int      *displs       = NULL;
+   HYPRE_Int      *array_procs  = NULL;
    HYPRE_Int       j, jj, proc;
 
    /*-----------------------------------------------------------
@@ -10807,14 +10812,14 @@ BuildParRotate7pt( HYPRE_Int            argc,
                    HYPRE_Int            arg_index,
                    HYPRE_ParCSRMatrix  *A_ptr     )
 {
-   HYPRE_BigInt              nx, ny;
-   HYPRE_Int                 P, Q;
+   HYPRE_BigInt        nx, ny;
+   HYPRE_Int           P, Q;
 
    HYPRE_ParCSRMatrix  A;
 
-   HYPRE_Int                 num_procs, myid;
-   HYPRE_Int                 p, q;
-   HYPRE_Real          eps, alpha;
+   HYPRE_Int           num_procs, myid;
+   HYPRE_Int           p, q;
+   HYPRE_Real          eps = 0.0, alpha = 1.0;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -11160,8 +11165,10 @@ BuildParCoordinates( HYPRE_Int            argc,
    if (nz < 2) { coorddim--; }
 
    if (coorddim > 0)
-      coordinates = GenerateCoordinates (hypre_MPI_COMM_WORLD,
-                                         nx, ny, nz, P, Q, R, p, q, r, coorddim);
+   {
+      coordinates = hypre_GenerateCoordinates(hypre_MPI_COMM_WORLD,
+                                              nx, ny, nz, P, Q, R, p, q, r, coorddim);
+   }
    else
    {
       coordinates = NULL;

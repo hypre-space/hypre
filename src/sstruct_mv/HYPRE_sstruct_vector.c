@@ -204,11 +204,15 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
       ilower = hypre_SStructGridStartRank(grid);
       iupper = ilower + hypre_SStructGridLocalSize(grid) - 1;
    }
-
-   if (vector_type == HYPRE_SSTRUCT || vector_type == HYPRE_STRUCT)
+   else if (vector_type == HYPRE_SSTRUCT || vector_type == HYPRE_STRUCT)
    {
       ilower = hypre_SStructGridGhstartRank(grid);
       iupper = ilower + hypre_SStructGridGhlocalSize(grid) - 1;
+   }
+   else
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid vector type!\n");
+      return hypre_error_flag;
    }
 
    HYPRE_IJVectorCreate(comm, ilower, iupper,

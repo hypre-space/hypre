@@ -667,7 +667,7 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
    HYPRE_Int           *diag_i;
    HYPRE_Int           *diag_j;
    HYPRE_Complex       *offd_data;
-   HYPRE_Int           *offd_i;
+   HYPRE_Int           *offd_i = NULL;
    HYPRE_Int           *offd_j;
    HYPRE_Int            myid, num_procs, i, j;
    HYPRE_BigInt         I, J;
@@ -850,9 +850,9 @@ hypre_ParCSRMatrixPrintBinaryIJ( hypre_ParCSRMatrix *matrix,
    char                  new_filename[HYPRE_MAX_FILE_NAME_LEN];
    FILE                 *fp;
    hypre_uint64          header[11];
-   size_t                count;
+   size_t                count, k;
    HYPRE_Int             one = 1;
-   HYPRE_Int             myid, i, j, k;
+   HYPRE_Int             myid, i, j;
    HYPRE_BigInt          bigI, bigJ;
    HYPRE_BigInt          ilower, iupper, jlower, jupper;
    HYPRE_Complex         val;
@@ -1150,10 +1150,10 @@ hypre_ParCSRMatrixReadIJ( MPI_Comm             comm,
    HYPRE_Complex      *diag_data;
    HYPRE_Int          *diag_i;
    HYPRE_Int          *diag_j;
-   HYPRE_Complex      *offd_data;
+   HYPRE_Complex      *offd_data = NULL;
    HYPRE_Int          *offd_i;
-   HYPRE_Int          *offd_j;
-   HYPRE_BigInt       *tmp_j;
+   HYPRE_Int          *offd_j = NULL;
+   HYPRE_BigInt       *tmp_j = NULL;
    HYPRE_BigInt       *aux_offd_j;
    HYPRE_BigInt        I, J;
    HYPRE_Int           myid, num_procs, i, i2, j;
@@ -1546,6 +1546,11 @@ hypre_ParCSRMatrixRestoreRow( hypre_ParCSRMatrix *matrix,
                               HYPRE_BigInt      **col_ind,
                               HYPRE_Complex     **values )
 {
+   HYPRE_UNUSED_VAR(row);
+   HYPRE_UNUSED_VAR(size);
+   HYPRE_UNUSED_VAR(col_ind);
+   HYPRE_UNUSED_VAR(values);
+
    if (!hypre_ParCSRMatrixGetrowactive(matrix))
    {
       hypre_error(HYPRE_ERROR_GENERIC);
@@ -1585,9 +1590,9 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
    HYPRE_BigInt        col_starts[2];
 
    hypre_CSRMatrix    *local_A;
-   HYPRE_Complex      *A_data;
-   HYPRE_Int          *A_i;
-   HYPRE_Int          *A_j;
+   HYPRE_Complex      *A_data = NULL;
+   HYPRE_Int          *A_i = NULL;
+   HYPRE_Int          *A_j = NULL;
 
    hypre_MPI_Request  *requests;
    hypre_MPI_Status   *status, status0;
@@ -2485,6 +2490,8 @@ hypre_FillResponseParToCSRMatrix( void       *p_recv_contact_buf,
                                   void      **p_send_response_buf,
                                   HYPRE_Int *response_message_size )
 {
+   HYPRE_UNUSED_VAR(p_send_response_buf);
+
    HYPRE_Int    myid;
    HYPRE_Int    i, index, count, elength;
 
@@ -3222,12 +3229,18 @@ hypre_ParCSRMatrixCopyColMapOffdToDevice(hypre_ParCSRMatrix *A)
    if (hypre_ParCSRMatrixDeviceColMapOffd(A) == NULL)
    {
       const HYPRE_Int num_cols_A_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
-      hypre_ParCSRMatrixDeviceColMapOffd(A) = hypre_TAlloc(HYPRE_BigInt, num_cols_A_offd,
+      hypre_ParCSRMatrixDeviceColMapOffd(A) = hypre_TAlloc(HYPRE_BigInt,
+                                                           num_cols_A_offd,
                                                            HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(hypre_ParCSRMatrixDeviceColMapOffd(A), hypre_ParCSRMatrixColMapOffd(A), HYPRE_BigInt,
+      hypre_TMemcpy(hypre_ParCSRMatrixDeviceColMapOffd(A),
+                    hypre_ParCSRMatrixColMapOffd(A),
+                    HYPRE_BigInt,
                     num_cols_A_offd,
-                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                    HYPRE_MEMORY_DEVICE,
+                    HYPRE_MEMORY_HOST);
    }
+#else
+   HYPRE_UNUSED_VAR(A);
 #endif
 }
 
@@ -3238,11 +3251,17 @@ hypre_ParCSRMatrixCopyColMapOffdToHost(hypre_ParCSRMatrix *A)
    if (hypre_ParCSRMatrixColMapOffd(A) == NULL)
    {
       const HYPRE_Int num_cols_A_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
-      hypre_ParCSRMatrixColMapOffd(A) = hypre_TAlloc(HYPRE_BigInt, num_cols_A_offd,
+      hypre_ParCSRMatrixColMapOffd(A) = hypre_TAlloc(HYPRE_BigInt,
+                                                     num_cols_A_offd,
                                                      HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(A), hypre_ParCSRMatrixDeviceColMapOffd(A), HYPRE_BigInt,
+      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(A),
+                    hypre_ParCSRMatrixDeviceColMapOffd(A),
+                    HYPRE_BigInt,
                     num_cols_A_offd,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+                    HYPRE_MEMORY_HOST,
+                    HYPRE_MEMORY_DEVICE);
    }
+#else
+   HYPRE_UNUSED_VAR(A);
 #endif
 }

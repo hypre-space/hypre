@@ -235,6 +235,8 @@ hypre_ParCSRRelax_Cheby_SolveHost(hypre_ParCSRMatrix *A, /* matrix to relax with
                                   hypre_ParVector    *orig_u_vec, /*another temp vector */
                                   hypre_ParVector    *tmp_vec) /*a potential temp vector */
 {
+   HYPRE_UNUSED_VAR(variant);
+
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real *u_data = hypre_VectorData(hypre_ParVectorLocalVector(u));
    HYPRE_Real *f_data = hypre_VectorData(hypre_ParVectorLocalVector(f));

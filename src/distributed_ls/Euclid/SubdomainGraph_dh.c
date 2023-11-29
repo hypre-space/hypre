@@ -529,7 +529,7 @@ void init_mpi_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
   t1 = hypre_MPI_Wtime();
   if (!bj) {
       HYPRE_Int *interiorNodes, *bdryNodes;
-      HYPRE_Int interiorCount, bdryCount;
+      HYPRE_Int interiorCount = 0, bdryCount;
       HYPRE_Int *o2n = s->o2n_col, idx;
       HYPRE_Int i;
 
@@ -828,6 +828,8 @@ void form_subdomaingraph_mpi_private(SubdomainGraph_dh s)
 #define __FUNC__ "form_subdomaingraph_seq_private"
 void form_subdomaingraph_seq_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
 {
+  HYPRE_UNUSED_VAR(m);
+
   START_FUNC_DH
   HYPRE_Int *dense, i, j, row, blocks = s->blocks;
   HYPRE_Int *cval, len, *adj;
@@ -924,6 +926,8 @@ void find_all_neighbors_sym_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
 #define __FUNC__ "find_all_neighbors_unsym_private"
 void find_all_neighbors_unsym_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
 {
+  HYPRE_UNUSED_VAR(m);
+
   START_FUNC_DH
   HYPRE_Int i, j, row, beg_row, end_row;
   HYPRE_Int *marker;
@@ -1022,6 +1026,8 @@ void find_bdry_nodes_sym_private(SubdomainGraph_dh s, HYPRE_Int m, void* A,
                      HYPRE_Int *interiorNodes, HYPRE_Int *bdryNodes,
                      HYPRE_Int *interiorCount, HYPRE_Int *bdryCount)
 {
+  HYPRE_UNUSED_VAR(m);
+
   START_FUNC_DH
   HYPRE_Int beg_row = s->beg_row[myid_dh];
   HYPRE_Int end_row = beg_row + s->row_count[myid_dh];

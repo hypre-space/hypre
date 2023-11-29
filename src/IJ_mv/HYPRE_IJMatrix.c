@@ -201,7 +201,6 @@ HYPRE_IJMatrixInitialize_v2( HYPRE_IJMatrix matrix, HYPRE_MemoryLocation memory_
    }
 
    return hypre_error_flag;
-
 }
 
 /*--------------------------------------------------------------------------
@@ -219,7 +218,8 @@ HYPRE_IJMatrixSetPrintLevel( HYPRE_IJMatrix matrix,
       return hypre_error_flag;
    }
 
-   hypre_IJMatrixPrintLevel(ijmatrix) = 1;
+   hypre_IJMatrixPrintLevel(ijmatrix) = (print_level > 0) ? print_level : 0;
+
    return hypre_error_flag;
 }
 

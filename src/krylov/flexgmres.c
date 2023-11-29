@@ -1099,32 +1099,34 @@ hypre_FlexGMRESGetFinalRelativeResidualNorm( void   *fgmres_vdata,
  * hypre_FlexGMRESSetModifyPC
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_FlexGMRESSetModifyPC(void *fgmres_vdata,
-                                     HYPRE_Int (*modify_pc)(void *precond_data, HYPRE_Int iteration, HYPRE_Real rel_residual_norm))
+HYPRE_Int
+hypre_FlexGMRESSetModifyPC(void *fgmres_vdata,
+                           HYPRE_Int (*modify_pc)(void*, HYPRE_Int, HYPRE_Real))
 {
-
    hypre_FlexGMRESData *fgmres_data = (hypre_FlexGMRESData *)fgmres_vdata;
    hypre_FlexGMRESFunctions *fgmres_functions = fgmres_data->functions;
 
-   (fgmres_functions -> modify_pc)        = modify_pc;
+   (fgmres_functions -> modify_pc) = modify_pc;
 
    return hypre_error_flag;
 }
-
 
 /*--------------------------------------------------------------------------
  * hypre_FlexGMRESModifyPCDefault - if the user does not specify a function
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int iteration,
-                                         HYPRE_Real rel_residual_norm)
+HYPRE_Int
+hypre_FlexGMRESModifyPCDefault(void       *precond_data,
+                               HYPRE_Int   iteration,
+                               HYPRE_Real  rel_residual_norm)
 {
+   /* TODO - Here could check the number of its and the current
+      residual and make some changes to the preconditioner.
+      There is an example in ex5.c.*/
 
-
-   /* Here would could check the number of its and the current
-      residual and make some changes to the preconditioner.  There is
-      an example in ex5.c.*/
-
+   HYPRE_UNUSED_VAR(precond_data);
+   HYPRE_UNUSED_VAR(iteration);
+   HYPRE_UNUSED_VAR(rel_residual_norm);
 
    return 0;
 }

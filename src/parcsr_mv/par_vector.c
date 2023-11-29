@@ -576,7 +576,7 @@ hypre_VectorToParVector ( MPI_Comm      comm,
    HYPRE_Int           global_vecstride, vecstride, idxstride;
    hypre_ParVector    *par_vector;
    hypre_Vector       *local_vector;
-   HYPRE_Complex      *v_data;
+   HYPRE_Complex      *v_data = NULL;
    HYPRE_Complex      *local_data;
    hypre_MPI_Request  *requests;
    hypre_MPI_Status   *status, status0;
@@ -1041,13 +1041,12 @@ hypre_ParVectorPrintBinaryIJ( hypre_ParVector *par_vector,
    hypre_Vector          *h_vector;
    HYPRE_Int              size;
    HYPRE_Int              num_components;
-   HYPRE_Int              total_size;
    HYPRE_Int              storage_method;
 
    /* Local variables */
    char                   new_filename[HYPRE_MAX_FILE_NAME_LEN];
    FILE                  *fp;
-   size_t                 count;
+   size_t                 count, total_size;
    hypre_uint64           header[8];
    HYPRE_Int              one = 1;
    HYPRE_Complex         *data;
@@ -1209,6 +1208,8 @@ hypre_FillResponseParToVectorAll( void       *p_recv_contact_buf,
                                   void      **p_send_response_buf,
                                   HYPRE_Int  *response_message_size )
 {
+   HYPRE_UNUSED_VAR(p_send_response_buf);
+
    HYPRE_Int     myid;
    HYPRE_Int     i, index, count, elength;
 

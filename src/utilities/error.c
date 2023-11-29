@@ -23,7 +23,7 @@ hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const 
    /* Store the error code */
    err.error_flag |= ierr;
 
-#ifdef HYPRE_PRINT_ERRORS
+#if defined(HYPRE_PRINT_ERRORS)
 
    /* Error format strings without and with a message */
    const char  fmt_wo[] = "hypre error in file \"%s\", line %d, error code = %d\n";
@@ -76,7 +76,11 @@ hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const 
 
    /* Free buffer */
    hypre_TFree(buffer, HYPRE_MEMORY_HOST);
-#endif
+#else
+   HYPRE_UNUSED_VAR(filename);
+   HYPRE_UNUSED_VAR(line);
+   HYPRE_UNUSED_VAR(msg);
+#endif /* if defined(HYPRE_PRINT_ERRORS) */
 
    hypre__global_error = err;
 }

@@ -99,7 +99,7 @@ main( hypre_int argc,
    HYPRE_Int           p, q, r;
    HYPRE_Int           dim;
    HYPRE_Int           n_pre, n_post;
-   HYPRE_Int           nblocks ;
+   HYPRE_Int           nblocks = 0;
    HYPRE_Int           skip;
    HYPRE_Int           sym;
    HYPRE_Int           rap;
@@ -245,6 +245,7 @@ main( hypre_int argc,
    sym  = 1;
    rap = 0;
    relax = 1;
+   jacobi_weight = 1.0;
    usr_jacobi_weight = 0;
    jump  = 0;
    reps = 1;
