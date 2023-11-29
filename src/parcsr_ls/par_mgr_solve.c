@@ -615,7 +615,8 @@ hypre_MGRCycle( void              *mgr_vdata,
          if (use_default_cgrid_solver)
          {
             HYPRE_Real convergence_factor_cg;
-            hypre_BoomerAMGGetRelResidualNorm(cg_solver, &convergence_factor_cg);
+
+            HYPRE_BoomerAMGGetFinalRelativeResidualNorm(cg_solver, &convergence_factor_cg);
             (mgr_data -> cg_convergence_factor) = convergence_factor_cg;
             if ((print_level) > 1 && my_id == 0 && convergence_factor_cg > hypre_cabs(fp_one))
             {

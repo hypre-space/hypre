@@ -19,12 +19,9 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
+hypre_BoomerAMGAdditiveCycle( hypre_ParAMGData *amg_data)
 {
-   hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
-
    /* Data Structure variables */
-
    hypre_ParCSRMatrix    **A_array;
    hypre_ParCSRMatrix    **P_array;
    hypre_ParCSRMatrix    **R_array;
@@ -315,6 +312,7 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
             }
          }
          else
+         {
             for (j = 0; j < num_grid_sweeps[2]; j++)
             {
                hypre_ParCSRRelax(A_array[fine_grid], F_array[fine_grid],
@@ -323,6 +321,7 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
                                  1.0, 1.0, 0.0, 0.0, 0, 0.0,
                                  U_array[fine_grid], Vtemp, Ztemp);
             }
+         }
       }
       else /* additive version */
       {
@@ -341,13 +340,11 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
    return (Solve_err_flag);
 }
 
-
-HYPRE_Int hypre_CreateLambda(void *amg_vdata)
+HYPRE_Int
+hypre_CreateLambda(hypre_ParAMGData *amg_data)
 {
-   hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
-
    /* Data Structure variables */
-   MPI_Comm comm;
+   MPI_Comm             comm;
    hypre_ParCSRMatrix **A_array;
    hypre_ParVector    **F_array;
    hypre_ParVector    **U_array;
@@ -1017,10 +1014,9 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
    return Solve_err_flag;
 }
 
-HYPRE_Int hypre_CreateDinv(void *amg_vdata)
+HYPRE_Int
+hypre_CreateDinv(hypre_ParAMGData *amg_data)
 {
-   hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
-
    /* Data Structure variables */
    hypre_ParCSRMatrix **A_array;
    hypre_ParVector    **F_array;
@@ -1056,7 +1052,6 @@ HYPRE_Int hypre_CreateDinv(void *amg_vdata)
    HYPRE_Int l1_start;
 
    /* Acquire data and allocate storage */
-
    A_array           = hypre_ParAMGDataAArray(amg_data);
    F_array           = hypre_ParAMGDataFArray(amg_data);
    U_array           = hypre_ParAMGDataUArray(amg_data);

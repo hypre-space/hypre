@@ -198,7 +198,7 @@ HYPRE_Int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
    HYPRE_BoomerAMGSetNumFunctions(precon1, 1);
    HYPRE_BoomerAMGSetNumSweeps(precon1, nsweeps);
    HYPRE_BoomerAMGSetRelaxType(precon1, relax_type);
-   hypre_BoomerAMGSetup(precon1, submatrices[0], b_data->U1, b_data->F1);
+   HYPRE_BoomerAMGSetup(precon1, submatrices[0], b_data->U1, b_data->F1);
 
    HYPRE_BoomerAMGCreate(&precon2);
    HYPRE_BoomerAMGSetMaxIter(precon2, 1);
@@ -212,7 +212,7 @@ HYPRE_Int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
    HYPRE_BoomerAMGSetNumFunctions(precon2, 1);
    HYPRE_BoomerAMGSetNumSweeps(precon2, nsweeps);
    HYPRE_BoomerAMGSetRelaxType(precon2, relax_type);
-   hypre_BoomerAMGSetup(precon2, submatrices[3], NULL, NULL);
+   HYPRE_BoomerAMGSetup(precon2, submatrices[3], NULL, NULL);
 
    b_data->precon1 = precon1;
    b_data->precon2 = precon2;
@@ -350,4 +350,3 @@ HYPRE_Int hypre_BlockTridiagSetPrintLevel(void *data, HYPRE_Int print_level)
    b_data->print_level = print_level;
    return (0);
 }
-

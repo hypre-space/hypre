@@ -19,14 +19,12 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
-                          HYPRE_Int   level,
-                          HYPRE_Int   num_cg_sweeps,
-                          HYPRE_Real *rlx_wt_ptr)
+hypre_BoomerAMGCGRelaxWt( hypre_ParAMGData  *amg_data,
+                          HYPRE_Int          level,
+                          HYPRE_Int          num_cg_sweeps,
+                          HYPRE_Real        *rlx_wt_ptr)
 {
-   hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
-
-   MPI_Comm comm;
+   MPI_Comm      comm;
    HYPRE_Solver *smoother;
    /* Data Structure variables */
 

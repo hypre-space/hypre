@@ -55,9 +55,12 @@ static void mydscal(HYPRE_Int n, HYPRE_Real a, HYPRE_Real *x)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixFillSmooth(HYPRE_Int nsamples, HYPRE_Real *samples,
-                             hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A,
-                             HYPRE_Int num_functions, HYPRE_Int *dof_func)
+hypre_ParCSRMatrixFillSmooth(HYPRE_Int           nsamples,
+                             HYPRE_Real         *samples,
+                             hypre_ParCSRMatrix *S,
+                             hypre_ParCSRMatrix *A,
+                             HYPRE_Int           num_functions,
+                             HYPRE_Int          *dof_func)
 {
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
@@ -415,14 +418,12 @@ hypre_ParCSRMatrixThreshold(hypre_ParCSRMatrix *A, HYPRE_Real thresh)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGCreateSmoothVecs(void         *data,
+hypre_BoomerAMGCreateSmoothVecs(hypre_ParAMGData      *amg_data,
                                 hypre_ParCSRMatrix    *A,
-                                HYPRE_Int                    num_sweeps,
-                                HYPRE_Int                    level,
+                                HYPRE_Int              num_sweeps,
+                                HYPRE_Int              level,
                                 HYPRE_Real           **SmoothVecs_p)
 {
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
    MPI_Comm             comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
 
@@ -564,15 +565,14 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGCreateSmoothDirs(void         *data,
+hypre_BoomerAMGCreateSmoothDirs(hypre_ParAMGData      *amg_data,
                                 hypre_ParCSRMatrix    *A,
                                 HYPRE_Real            *SmoothVecs,
                                 HYPRE_Real             thresh,
-                                HYPRE_Int                    num_functions,
-                                HYPRE_Int                   *dof_func,
+                                HYPRE_Int              num_functions,
+                                HYPRE_Int             *dof_func,
                                 hypre_ParCSRMatrix   **S_ptr)
 {
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
    hypre_ParCSRMatrix *S;
    HYPRE_Real minimax;
    HYPRE_Int debug_flag = hypre_ParAMGDataDebugFlag(amg_data);
@@ -1290,12 +1290,12 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
 
 HYPRE_Int
 hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
-                                HYPRE_Int                  *CF_marker,
+                                HYPRE_Int            *CF_marker,
                                 hypre_ParCSRMatrix   *S,
-                                HYPRE_BigInt               *num_cpts_global,
-                                HYPRE_Int                   num_functions,
-                                HYPRE_Int                  *dof_func,
-                                HYPRE_Int                   debug_flag,
+                                HYPRE_BigInt         *num_cpts_global,
+                                HYPRE_Int             num_functions,
+                                HYPRE_Int            *dof_func,
+                                HYPRE_Int             debug_flag,
                                 HYPRE_Real            trunc_factor,
                                 hypre_ParCSRMatrix  **P_ptr)
 {
@@ -2013,7 +2013,6 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
                                 P_diag_i[n_fine],
                                 P_offd_i[n_fine]);
 
-
    P_diag = hypre_ParCSRMatrixDiag(P);
    hypre_CSRMatrixData(P_diag) = P_diag_data;
    hypre_CSRMatrixI(P_diag) = P_diag_i;
@@ -2104,5 +2103,4 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
    if (num_procs > 1) { hypre_CSRMatrixDestroy(S_ext); }
 
    return (0);
-
 }

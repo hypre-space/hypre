@@ -19,13 +19,12 @@
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGSolve( void               *amg_vdata,
+hypre_BoomerAMGSolve( hypre_ParAMGData   *amg_data,
                       hypre_ParCSRMatrix *A,
                       hypre_ParVector    *f,
                       hypre_ParVector    *u         )
 {
    MPI_Comm             comm = hypre_ParCSRMatrixComm(A);
-   hypre_ParAMGData    *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    /* Data Structure variables */
    HYPRE_Int            amg_print_level;
