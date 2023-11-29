@@ -284,6 +284,86 @@ hypre_ParPrintf(MPI_Comm comm, const char *format, ...)
 
    return ierr;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_fprintKey
+ *
+ * Write a key in YAML-like format to a file with optional indentation.
+ *
+ * Input arguments:
+ *   stream  - A pointer to the FILE structure representing the output file.
+ *   level   - The indentation level (0 or greater).
+ *   key     - The key (string) to be written.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_fprintKey( FILE       *stream,
+                 HYPRE_Int   level,
+                 const char *key )
+{
+   HYPRE_Int indentation = (level > 0) ? level * 2 : 0;
+
+   /* Check if key is valid */
+   if (!key)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "key is missing!");
+      return hypre_error_flag;
+   }
+
+   /* Print key entry to file stream */
+   fprintf(stream, "%*s%s:\n", indentation, "", key);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_fprintKeyVal
+ *
+ * Write a key in YAML-like format to a file with optional indentation.
+ * The function allows for different types of values (integers, floats,
+ * doubles, or characters).
+ *
+ * Input arguments:
+ *   stream  - A pointer to the FILE structure representing the output file.
+ *   level   - The indentation level (0 or greater).
+ *   key     - The key (string) to be written.
+ *   val_fmt - A format specifier corresponding to the type of val.
+ *   val     - A pointer to the value to be written.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_fprintKeyVal( FILE       *stream,
+                    HYPRE_Int   level,
+                    const char *key,
+                    const char *val_fmt,
+                    void       *val )
+{
+   HYPRE_Int indentation = (level > 0) ? level * 2 : 0;
+
+   /* Check if key or val_fmt are not missing */
+   if (!key)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "key is missing!");
+      return hypre_error_flag;
+   }
+
+   if (val && !val_fmt)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "val_fmt is missing!");
+      return hypre_error_flag;
+   }
+
+   /* Print YAML entry to file stream */
+   fprintf(stream, "%*s%s:%s", indentation, "", key, (val != NULL) ? " " : "");
+   if (val)
+   {
+      hypre_fprintf(stream, val_fmt, val);
+   }
+   fprintf(stream, "\n");
+
+   return hypre_error_flag;
+}
+
 // #else
 //
 // /* this is used only to eliminate compiler warnings */
