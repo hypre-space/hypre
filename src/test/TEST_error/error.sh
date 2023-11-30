@@ -37,3 +37,4 @@ egrep -v "hypre error" ${TNAME}.tmp        >  ${TNAME}.err
 #=============================================================================
 
 rm -f ${TNAME}.testdata*
+rm -f ${TNAME}.tmp

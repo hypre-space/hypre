@@ -24,6 +24,8 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
                                      HYPRE_Int            max_elmts,
                                      hypre_ParCSRMatrix **P_ptr)
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
    /* Communication Variables */
    MPI_Comm              comm = hypre_ParCSRMatrixComm(A);
    HYPRE_MemoryLocation  memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
@@ -591,6 +593,8 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
                                        HYPRE_Int            max_elmts,
                                        hypre_ParCSRMatrix **P_ptr)
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
    /* Communication Variables */
    MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -1259,6 +1263,8 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
                                        HYPRE_Int             max_elmts,
                                        hypre_ParCSRMatrix  **P_ptr)
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
    /* Communication Variables */
    MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
    HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);

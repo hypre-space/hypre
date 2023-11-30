@@ -33,6 +33,9 @@ hypre_PFMG2CreateRAPOp( hypre_StructMatrix *R,
                         hypre_StructGrid   *coarse_grid,
                         HYPRE_Int           cdir        )
 {
+   HYPRE_UNUSED_VAR(R);
+   HYPRE_UNUSED_VAR(P);
+
    hypre_StructMatrix    *RAP;
 
    hypre_Index           *RAP_stencil_shape;
@@ -2462,6 +2465,3 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
 
    return hypre_error_flag;
 }
-
-
-

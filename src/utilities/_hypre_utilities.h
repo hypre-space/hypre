@@ -77,6 +77,16 @@ typedef float                  hypre_float;
 typedef double                 hypre_double;
 
 /*--------------------------------------------------------------------------
+ * Define macros
+ *--------------------------------------------------------------------------*/
+
+/* Macro for silencing unused variable warning */
+#define HYPRE_UNUSED_VAR(var) ((void) var)
+
+/* Macro for marking deprecated functions */
+#define HYPRE_DEPRECATED(reason) _Pragma(reason)
+
+/*--------------------------------------------------------------------------
  * Define various functions
  *--------------------------------------------------------------------------*/
 
@@ -1827,6 +1837,7 @@ typedef struct
 #define hypre_HandleDevice(hypre_handle)                         hypre_DeviceDataDevice(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleDeviceMaxWorkGroupSize(hypre_handle)         hypre_DeviceDataDeviceMaxWorkGroupSize(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleDeviceMaxShmemPerBlock(hypre_handle)         hypre_DeviceDataDeviceMaxShmemPerBlock(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleDeviceMaxShmemPerBlockInited(hypre_handle)   hypre_DeviceDataDeviceMaxShmemPerBlockInited(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleComputeStreamNum(hypre_handle)               hypre_DeviceDataComputeStreamNum(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleReduceBuffer(hypre_handle)                   hypre_DeviceDataReduceBuffer(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmUseVendor(hypre_handle)                hypre_DeviceDataSpgemmUseVendor(hypre_HandleDeviceData(hypre_handle))
@@ -2029,6 +2040,7 @@ HYPRE_Int hypre_GetDeviceCount(hypre_int *device_count);
 HYPRE_Int hypre_GetDeviceLastError(void);
 HYPRE_Int hypre_UmpireInit(hypre_Handle *hypre_handle_);
 HYPRE_Int hypre_UmpireFinalize(hypre_Handle *hypre_handle_);
+HYPRE_Int hypre_GetDeviceMaxShmemSize(hypre_int device_id, hypre_int *max_size_ptr, hypre_int *max_size_optin_ptr);
 
 /* matrix_stats.h */
 hypre_MatrixStats* hypre_MatrixStatsCreate( void );
@@ -2327,7 +2339,7 @@ HYPRE_Int hypre_CurandUniformSingle( HYPRE_Int n, float *urand, HYPRE_Int set_se
 
 HYPRE_Int hypre_ResetDeviceRandGenerator( hypre_ulonglongint seed, hypre_ulonglongint offset );
 
-HYPRE_Int hypre_bind_device(HYPRE_Int myid, HYPRE_Int nproc, MPI_Comm comm);
+HYPRE_Int hypre_bind_device(HYPRE_Int device_id_in, HYPRE_Int myid, HYPRE_Int nproc, MPI_Comm comm);
 
 /* nvtx.c */
 void hypre_GpuProfilingPushRangeColor(const char *name, HYPRE_Int cid);
@@ -2893,6 +2905,8 @@ hypre_UnorderedIntMapFindCloserFreeBucket( hypre_UnorderedIntMap  *m,
                                            hypre_HopscotchBucket **free_bucket,
                                            HYPRE_Int *free_dist)
 {
+   HYPRE_UNUSED_VAR(m);
+
    hypre_HopscotchBucket* move_bucket = *free_bucket - (HYPRE_HOPSCOTCH_HASH_HOP_RANGE - 1);
    HYPRE_Int move_free_dist;
    for (move_free_dist = HYPRE_HOPSCOTCH_HASH_HOP_RANGE - 1; move_free_dist > 0; --move_free_dist)
@@ -2969,6 +2983,8 @@ hypre_UnorderedBigIntMapFindCloserFreeBucket( hypre_UnorderedBigIntMap   *m,
                                               hypre_BigHopscotchBucket **free_bucket,
                                               HYPRE_Int *free_dist)
 {
+   HYPRE_UNUSED_VAR(m);
+
    hypre_BigHopscotchBucket* move_bucket = *free_bucket - (HYPRE_HOPSCOTCH_HASH_HOP_RANGE - 1);
    HYPRE_Int move_free_dist;
    for (move_free_dist = HYPRE_HOPSCOTCH_HASH_HOP_RANGE - 1; move_free_dist > 0; --move_free_dist)

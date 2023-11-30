@@ -38,7 +38,7 @@ hypre_MGRSolve( void               *mgr_vdata,
    HYPRE_Real          *norms = (mgr_data -> rel_res_norms);
    hypre_ParVector     *Vtemp = (mgr_data -> Vtemp);
    //   hypre_ParVector      *Utemp = (mgr_data -> Utemp);
-   hypre_ParVector     *residual;
+   hypre_ParVector     *residual = NULL;
 
    HYPRE_Complex        fp_zero = 0.0;
    HYPRE_Complex        fp_one = 1.0;
@@ -108,7 +108,7 @@ hypre_MGRSolve( void               *mgr_vdata,
    {
       if (logging > 1)
       {
-         hypre_ParVectorCopy(F_array[0], residual );
+         hypre_ParVectorCopy(F_array[0], residual);
          if (tol > hypre_cabs(fp_zero))
          {
             hypre_ParCSRMatrixMatvec(fp_neg_one, A_array[0], U_array[0], fp_one, residual);

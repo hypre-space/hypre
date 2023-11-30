@@ -457,6 +457,8 @@ HYPRE_Int hypre_ExchangeStructuralUnions( DataDistType *ddist,
                     HYPRE_Int **structural_union,
                     hypre_PilutSolverGlobals *globals )
 {
+  HYPRE_UNUSED_VAR(ddist);
+
   HYPRE_Int ierr=0, *recv_unions;
 
   /* allocate space for receiving unions */
@@ -486,6 +488,9 @@ void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
                 HYPRE_Int *perm, HYPRE_Int *iperm,
                 FactorMatType *ldu, hypre_PilutSolverGlobals *globals)
 {
+  HYPRE_UNUSED_VAR(iperm);
+  HYPRE_UNUSED_VAR(perm);
+
   HYPRE_Int i, j;
   HYPRE_Int diag, lrow;
   HYPRE_Int first, last, itmp;
@@ -641,6 +646,8 @@ void hypre_SecondDropUpdate(HYPRE_Int maxnz, HYPRE_Int maxnzkeep, HYPRE_Real tol
       FactorMatType *ldu, ReduceMatType *rmat,
                       hypre_PilutSolverGlobals *globals )
 {
+  HYPRE_UNUSED_VAR(perm);
+
   HYPRE_Int i, j, nl;
   HYPRE_Int max, nz, lrow, rrow;
   HYPRE_Int last, first, itmp;

@@ -2617,13 +2617,18 @@ hypre_BoxManIntersect ( hypre_BoxManager *manager,
  *****************************************************************************/
 
 HYPRE_Int
-hypre_FillResponseBoxManAssemble1( void *p_recv_contact_buf,
-                                   HYPRE_Int contact_size,
-                                   HYPRE_Int contact_proc,
-                                   void *ro, MPI_Comm comm,
-                                   void **p_send_response_buf,
-                                   HYPRE_Int *response_message_size )
+hypre_FillResponseBoxManAssemble1( void       *p_recv_contact_buf,
+                                   HYPRE_Int   contact_size,
+                                   HYPRE_Int   contact_proc,
+                                   void       *ro,
+                                   MPI_Comm    comm,
+                                   void      **p_send_response_buf,
+                                   HYPRE_Int  *response_message_size )
 {
+   HYPRE_UNUSED_VAR(p_recv_contact_buf);
+   HYPRE_UNUSED_VAR(contact_size);
+   HYPRE_UNUSED_VAR(contact_proc);
+
    HYPRE_Int    myid, i, index;
    HYPRE_Int    size, num_boxes, num_objects;
    HYPRE_Int   *proc_ids;
@@ -2692,13 +2697,18 @@ hypre_FillResponseBoxManAssemble1( void *p_recv_contact_buf,
  *****************************************************************************/
 
 HYPRE_Int
-hypre_FillResponseBoxManAssemble2( void *p_recv_contact_buf,
-                                   HYPRE_Int contact_size,
-                                   HYPRE_Int contact_proc,
-                                   void *ro, MPI_Comm comm,
-                                   void **p_send_response_buf,
-                                   HYPRE_Int *response_message_size )
+hypre_FillResponseBoxManAssemble2( void       *p_recv_contact_buf,
+                                   HYPRE_Int   contact_size,
+                                   HYPRE_Int   contact_proc,
+                                   void       *ro,
+                                   MPI_Comm    comm,
+                                   void      **p_send_response_buf,
+                                   HYPRE_Int  *response_message_size )
 {
+   HYPRE_UNUSED_VAR(p_recv_contact_buf);
+   HYPRE_UNUSED_VAR(contact_size);
+   HYPRE_UNUSED_VAR(contact_proc);
+
    HYPRE_Int          myid, i, d, size, position;
    HYPRE_Int          proc_id, box_id, tmp_int;
    HYPRE_Int          entry_size_bytes;

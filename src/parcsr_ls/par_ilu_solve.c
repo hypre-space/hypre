@@ -74,7 +74,7 @@ hypre_ILUSolve( void               *ilu_vdata,
    hypre_ParVector      *Ytemp              = hypre_ParILUDataYTemp(ilu_data);
    HYPRE_Real           *fext               = hypre_ParILUDataFExt(ilu_data);
    HYPRE_Real           *uext               = hypre_ParILUDataUExt(ilu_data);
-   hypre_ParVector      *residual;
+   hypre_ParVector      *residual           = NULL;
    HYPRE_Real            alpha              = -1.0;
    HYPRE_Real            beta               = 1.0;
    HYPRE_Real            conv_factor        = 0.0;
@@ -277,7 +277,7 @@ hypre_ILUSolve( void               *ilu_vdata,
                else
                {
                   hypre_ILUSolveLUIter(matA, F_array, U_array, perm, n,
-                                       matL, matD, matU, Utemp, Ftemp, Xtemp,
+                                       matL, matD, matU, Utemp, Ftemp,
                                        lower_jacobi_iters, upper_jacobi_iters);
                }
             }
@@ -511,6 +511,8 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A,
                          hypre_ParVector    *x,
                          HYPRE_Int          *u_end)
 {
+   HYPRE_UNUSED_VAR(schur_precond);
+
    /* Data objects for L and U */
    hypre_CSRMatrix   *L_diag      = hypre_ParCSRMatrixDiag(L);
    HYPRE_Real        *L_diag_data = hypre_CSRMatrixData(L_diag);
@@ -966,7 +968,6 @@ hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A,
                      hypre_ParCSRMatrix *U,
                      hypre_ParVector    *ftemp,
                      hypre_ParVector    *utemp,
-                     hypre_ParVector    *xtemp,
                      HYPRE_Int           lower_jacobi_iters,
                      HYPRE_Int           upper_jacobi_iters)
 {
@@ -1378,7 +1379,7 @@ hypre_ILUSolveRAPGMRESHost(hypre_ParCSRMatrix *A,
    /* other data objects for computation */
    hypre_Vector      *rhs_local;
    HYPRE_Real        *rhs_data;
-   hypre_Vector      *x_local;
+   hypre_Vector      *x_local = NULL;
    HYPRE_Real        *x_data;
 
    /* xtemp might be null when we have no Schur complement */
@@ -1594,7 +1595,7 @@ hypre_NSHSolve( void               *nsh_vdata,
    HYPRE_Real           *norms          = hypre_ParNSHDataRelResNorms(nsh_data);
    hypre_ParVector      *Ftemp          = hypre_ParNSHDataFTemp(nsh_data);
    hypre_ParVector      *Utemp          = hypre_ParNSHDataUTemp(nsh_data);
-   hypre_ParVector      *residual;
+   hypre_ParVector      *residual       = NULL;
 
    HYPRE_Real            alpha          = -1.0;
    HYPRE_Real            beta           = 1.0;
@@ -1648,14 +1649,14 @@ hypre_NSHSolve( void               *nsh_vdata,
     *-----------------------------------------------------------------------*/
    if (print_level > 1 || logging > 1 || tol > 0.)
    {
-      if ( logging > 1 )
+      if (logging > 1)
       {
-         hypre_ParVectorCopy(f, residual );
+         hypre_ParVectorCopy(f, residual);
          if (tol > 0.0)
          {
-            hypre_ParCSRMatrixMatvec(alpha, A, u, beta, residual );
+            hypre_ParCSRMatrixMatvec(alpha, A, u, beta, residual);
          }
-         resnorm = hypre_sqrt(hypre_ParVectorInnerProd( residual, residual ));
+         resnorm = hypre_sqrt(hypre_ParVectorInnerProd(residual, residual));
       }
       else
       {
@@ -1818,6 +1819,7 @@ hypre_NSHSolve( void               *nsh_vdata,
          hypre_printf("                operator = %f\n", operat_cmplxty);
       }
    }
+
    return hypre_error_flag;
 }
 

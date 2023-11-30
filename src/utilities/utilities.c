@@ -157,12 +157,12 @@ hypre_CreateDir(const char *path)
 HYPRE_Int
 hypre_CreateNextDirOfSequence(const char *basepath, const char *prefix, char **fullpath_ptr)
 {
-   HYPRE_Int       suffix;
    HYPRE_Int       max_suffix = -1;
-   char            msg[HYPRE_MAX_MSG_LEN];
    char           *fullpath;
 
 #ifndef _WIN32
+   HYPRE_Int       suffix;
+   char            msg[HYPRE_MAX_MSG_LEN];
    DIR            *dir;
    struct dirent  *entry;
 

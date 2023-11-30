@@ -83,6 +83,9 @@ hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix  *A,
                                HYPRE_Int           *dof_func_offd,
                                HYPRE_Real           weight_AF )
 {
+   HYPRE_UNUSED_VAR(S);
+   HYPRE_UNUSED_VAR(level);
+
    hypre_ParCSRMatrix * Pnew;
    hypre_ParCSRMatrix * C;
    hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(*P);

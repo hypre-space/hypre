@@ -25,7 +25,7 @@ extern "C" {
     doublereal temp;
     integer i, j;
     extern logical lsame_(const char *,const char *);
-    integer ix, jx, kx;
+    integer ix, jx, kx = 0;
     extern /* Subroutine */ integer xerbla_(const char *, integer *);
     logical nounit;
 

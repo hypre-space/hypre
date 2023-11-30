@@ -21,11 +21,11 @@ hypre_MGRSetup( void               *mgr_vdata,
    MPI_Comm           comm = hypre_ParCSRMatrixComm(A);
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
-   HYPRE_Int       i, j, final_coarse_size, block_size, idx, **block_cf_marker;
+   HYPRE_Int       i, j, final_coarse_size = 0, block_size, idx, **block_cf_marker;
    HYPRE_Int       *block_num_coarse_indexes, *point_marker_array;
    HYPRE_BigInt    row, end_idx;
    HYPRE_Int    lev, num_coarsening_levs, last_level;
-   HYPRE_Int    num_c_levels, nc, index_i, cflag;
+   HYPRE_Int    num_c_levels = 0, nc, index_i, cflag;
    HYPRE_Int      set_c_points_method;
    HYPRE_Int    debug_flag = 0;
    HYPRE_Int    block_jacobi_bsize;
