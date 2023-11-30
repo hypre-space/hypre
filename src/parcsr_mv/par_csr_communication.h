@@ -125,6 +125,8 @@ hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRCommPkg *comm_pkg)
                     HYPRE_MEMORY_DEVICE,
                     HYPRE_MEMORY_HOST);
    }
+#else
+   HYPRE_UNUSED_VAR(comm_pkg);
 #endif
 }
 

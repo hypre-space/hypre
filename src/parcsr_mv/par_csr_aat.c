@@ -316,7 +316,8 @@ void hypre_ParAat_RowSizes(
    going on, nothing is being done to take advantage of symmetry, and probably
    more things. */
 
-hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
+hypre_ParCSRMatrix*
+hypre_ParCSRAAt(hypre_ParCSRMatrix  *A)
 {
    MPI_Comm         comm = hypre_ParCSRMatrixComm(A);
 
@@ -359,11 +360,11 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
    HYPRE_Int        last_col_diag_C;
    HYPRE_Int        num_cols_offd_C;
 
-   hypre_CSRMatrix *A_ext;
+   hypre_CSRMatrix *A_ext = NULL;
 
-   HYPRE_Complex   *A_ext_data;
-   HYPRE_Int       *A_ext_i;
-   HYPRE_BigInt    *A_ext_j;
+   HYPRE_Complex   *A_ext_data = NULL;
+   HYPRE_Int       *A_ext_i = NULL;
+   HYPRE_BigInt    *A_ext_j = NULL;
    HYPRE_Int        num_rows_A_ext = 0;
 
    HYPRE_BigInt     first_row_index_A = hypre_ParCSRMatrixFirstRowIndex(A);
@@ -867,9 +868,7 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
    }
 
    return C;
-
 }
-
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixExtractAExt : extracts rows from A which are located on other

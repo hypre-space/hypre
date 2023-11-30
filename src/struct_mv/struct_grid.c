@@ -700,7 +700,8 @@ hypre_ComputeBoxnums(hypre_BoxArray *boxes,
 
    HYPRE_Int         *boxnums;
    HYPRE_Int          num_boxes;
-   HYPRE_Int          p, b, boxnum;
+   HYPRE_Int          p, b;
+   HYPRE_Int          boxnum = 0;
 
    /*-----------------------------------------------------
     *-----------------------------------------------------*/

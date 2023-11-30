@@ -14,6 +14,8 @@
 HYPRE_Int
 HYPRE_ParCSRBiCGSTABCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
+   HYPRE_UNUSED_VAR(comm);
+
    hypre_BiCGSTABFunctions * bicgstab_functions;
 
    if (!solver)
@@ -24,13 +26,18 @@ HYPRE_ParCSRBiCGSTABCreate( MPI_Comm comm, HYPRE_Solver *solver )
    bicgstab_functions =
       hypre_BiCGSTABFunctionsCreate(
          hypre_ParKrylovCreateVector,
-         hypre_ParKrylovDestroyVector, hypre_ParKrylovMatvecCreate,
-         hypre_ParKrylovMatvec, hypre_ParKrylovMatvecDestroy,
-         hypre_ParKrylovInnerProd, hypre_ParKrylovCopyVector,
+         hypre_ParKrylovDestroyVector,
+         hypre_ParKrylovMatvecCreate,
+         hypre_ParKrylovMatvec,
+         hypre_ParKrylovMatvecDestroy,
+         hypre_ParKrylovInnerProd,
+         hypre_ParKrylovCopyVector,
          hypre_ParKrylovClearVector,
-         hypre_ParKrylovScaleVector, hypre_ParKrylovAxpy,
+         hypre_ParKrylovScaleVector,
+         hypre_ParKrylovAxpy,
          hypre_ParKrylovCommInfo,
-         hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
+         hypre_ParKrylovIdentitySetup,
+         hypre_ParKrylovIdentity );
    *solver = ( (HYPRE_Solver) hypre_BiCGSTABCreate( bicgstab_functions) );
 
    return hypre_error_flag;
