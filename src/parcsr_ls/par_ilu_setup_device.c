@@ -500,7 +500,9 @@ hypre_ILUSetupIterativeILU0Device(hypre_CSRMatrix  *A,
     *-------------------------------------------------------------------------------------*/
 
    hypre_CSRMatrixSortRow(A);
-   A_data_new = hypre_TAlloc(HYPRE_Complex, num_nonzeros, HYPRE_MEMORY_DEVICE);
+
+   /* TODO (VPM): make use of a non-zero initial guess if available. */
+   A_data_new = hypre_CTAlloc(HYPRE_Complex, num_nonzeros, HYPRE_MEMORY_DEVICE);
 
    /*-------------------------------------------------------------------------------------
     * 2. Get work array size
