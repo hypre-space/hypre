@@ -741,6 +741,8 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector       *vector,
                                       HYPRE_BigInt         *off_proc_i,
                                       HYPRE_Complex        *off_proc_data)
 {
+   HYPRE_UNUSED_VAR(max_off_proc_elmts);
+
    HYPRE_Int myid;
    HYPRE_BigInt global_first_row, global_num_rows;
    HYPRE_Int i, j, in, k;

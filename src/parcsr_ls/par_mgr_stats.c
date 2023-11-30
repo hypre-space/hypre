@@ -364,7 +364,7 @@ hypre_MGRSetupStats(void *mgr_vdata)
    }
 #ifdef HYPRE_USING_DSUPERLU
    else if ((HYPRE_PtrToParSolverFcn) hypre_ParMGRDataCoarseGridSolverSetup(mgr_data) ==
-            hypre_MGRDirectSolverSetup)
+            (HYPRE_PtrToParSolverFcn) hypre_MGRDirectSolverSetup)
    {
       /* TODO (VPM): Set SuperLU solver specifics */
       num_sublevels_amg[coarsest_mgr_level] = 0;

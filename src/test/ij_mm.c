@@ -84,6 +84,7 @@ void gpu_alloc(void **ptr, size_t size)
 
 void gpu_free(void *ptr)
 {
+   HYPRE_UNUSED_VAR(ptr);
    return;
 }
 
@@ -739,6 +740,11 @@ void runjob5( HYPRE_ParCSRMatrix parcsr_A,
    hypre_ParCSRMatrixDestroy(parcsr_B_host);
    hypre_ParCSRMatrixDestroy(parcsr_D);
    hypre_ParCSRMatrixDestroy(parcsr_error_host);
+#else
+   HYPRE_UNUSED_VAR(parcsr_A);
+   HYPRE_UNUSED_VAR(print_system);
+   HYPRE_UNUSED_VAR(rep);
+   HYPRE_UNUSED_VAR(verify);
 #endif
 }
 
@@ -2368,19 +2374,19 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildParRotate7pt( HYPRE_Int                  argc,
+BuildParRotate7pt( HYPRE_Int            argc,
                    char                *argv[],
-                   HYPRE_Int                  arg_index,
+                   HYPRE_Int            arg_index,
                    HYPRE_ParCSRMatrix  *A_ptr     )
 {
    HYPRE_Int                 nx, ny;
    HYPRE_Int                 P, Q;
 
-   HYPRE_ParCSRMatrix  A;
+   HYPRE_ParCSRMatrix        A;
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 p, q;
-   HYPRE_Real          eps, alpha;
+   HYPRE_Real                eps = 0.0, alpha = 1.0;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -2726,8 +2732,10 @@ BuildParCoordinates( HYPRE_Int                  argc,
    if (nz < 2) { coorddim--; }
 
    if (coorddim > 0)
-      coordinates = GenerateCoordinates (hypre_MPI_COMM_WORLD,
-                                         nx, ny, nz, P, Q, R, p, q, r, coorddim);
+   {
+      coordinates = hypre_GenerateCoordinates(hypre_MPI_COMM_WORLD,
+                                              nx, ny, nz, P, Q, R, p, q, r, coorddim);
+   }
    else
    {
       coordinates = NULL;

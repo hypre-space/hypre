@@ -224,7 +224,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    HYPRE_Int      *num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);
    HYPRE_Int       ns = num_grid_sweeps[1];
-   HYPRE_Real      wall_time;   /* for debugging instrumentation */
+   HYPRE_Real      wall_time = 0.0;   /* for debugging instrumentation */
    HYPRE_Int       add_end;
 
 #ifdef HYPRE_USING_DSUPERLU

@@ -144,6 +144,8 @@ hypre_SparseMSGDestroy( void *smsg_vdata )
       hypre_FinalizeTiming(smsg_data -> time_index);
       hypre_TFree(smsg_data, HYPRE_MEMORY_HOST);
    }
+#else
+   HYPRE_UNUSED_VAR(smsg_vdata);
 #endif
    /* RDF */
 
@@ -429,5 +431,3 @@ hypre_SparseMSGGetFinalRelativeResidualNorm( void   *smsg_vdata,
 
    return ierr;
 }
-
-

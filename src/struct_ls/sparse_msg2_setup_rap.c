@@ -33,6 +33,9 @@ hypre_SparseMSG2CreateRAPOp( hypre_StructMatrix *R,
                              hypre_StructGrid   *coarse_grid,
                              HYPRE_Int           cdir        )
 {
+   HYPRE_UNUSED_VAR(R);
+   HYPRE_UNUSED_VAR(P);
+
    hypre_StructMatrix    *RAP;
 
    hypre_Index           *RAP_stencil_shape;
@@ -192,7 +195,7 @@ hypre_SparseMSG2BuildRAPSym( hypre_StructMatrix *A,
    HYPRE_Real           *ra, *rb;
 
    HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-   HYPRE_Real           *a_csw, *a_cse, *a_cnw;
+   HYPRE_Real           *a_csw = NULL, *a_cse = NULL, *a_cnw = NULL;
 
    HYPRE_Real           *rap_cc, *rap_cw, *rap_cs;
    HYPRE_Real           *rap_csw, *rap_cse;
@@ -530,8 +533,8 @@ hypre_SparseMSG2BuildRAPNoSym( hypre_StructMatrix *A,
    HYPRE_Real           *pa, *pb;
    HYPRE_Real           *ra, *rb;
 
-   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cn;
-   HYPRE_Real           *a_cse, *a_cnw, *a_cne;
+   HYPRE_Real           *a_cc = NULL, *a_cw = NULL, *a_ce = NULL, *a_cn = NULL;
+   HYPRE_Real           *a_cse = NULL, *a_cnw = NULL, *a_cne = NULL;
 
    HYPRE_Real           *rap_ce, *rap_cn;
    HYPRE_Real           *rap_cnw, *rap_cne;
@@ -799,4 +802,3 @@ hypre_SparseMSG2BuildRAPNoSym( hypre_StructMatrix *A,
 
    return ierr;
 }
-

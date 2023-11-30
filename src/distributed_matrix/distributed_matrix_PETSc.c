@@ -23,13 +23,15 @@
  *   Internal routine for freeing a matrix stored in PETSc form.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
-hypre_DistributedMatrixDestroyPETSc( hypre_DistributedMatrix *distributed_matrix )
+HYPRE_Int
+hypre_DistributedMatrixDestroyPETSc( hypre_DistributedMatrix *dm )
 {
 #ifdef PETSC_AVAILABLE
-   Mat PETSc_matrix = (Mat) hypre_DistributedMatrixLocalStorage(distributed_matrix);
+   Mat PETSc_matrix = (Mat) hypre_DistributedMatrixLocalStorage(dm);
 
    MatDestroy( PETSc_matrix );
+#else
+   HYPRE_UNUSED_VAR(dm);
 #endif
 
    return(0);
@@ -44,15 +46,18 @@ hypre_DistributedMatrixDestroyPETSc( hypre_DistributedMatrix *distributed_matrix
  *   Internal routine for printing a matrix stored in PETSc form.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
-hypre_DistributedMatrixPrintPETSc( hypre_DistributedMatrix *matrix )
+HYPRE_Int
+hypre_DistributedMatrixPrintPETSc( hypre_DistributedMatrix *dm )
 {
    HYPRE_Int  ierr=0;
 #ifdef PETSC_AVAILABLE
-   Mat PETSc_matrix = (Mat) hypre_DistributedMatrixLocalStorage(matrix);
+   Mat PETSc_matrix = (Mat) hypre_DistributedMatrixLocalStorage(dm);
 
    ierr = MatView( PETSc_matrix, VIEWER_STDOUT_WORLD );
+#else
+   HYPRE_UNUSED_VAR(dm);
 #endif
+
    return(ierr);
 }
 
@@ -60,14 +65,14 @@ hypre_DistributedMatrixPrintPETSc( hypre_DistributedMatrix *matrix )
  * hypre_DistributedMatrixGetLocalRangePETSc
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
-hypre_DistributedMatrixGetLocalRangePETSc( hypre_DistributedMatrix *matrix,
+HYPRE_Int
+hypre_DistributedMatrixGetLocalRangePETSc( hypre_DistributedMatrix *dm,
                              HYPRE_BigInt *start,
                              HYPRE_BigInt *end )
 {
    HYPRE_Int ierr=0;
 #ifdef PETSC_AVAILABLE
-   Mat PETSc_matrix = (Mat) hypre_DistributedMatrixLocalStorage(matrix);
+   Mat PETSc_matrix = (Mat) hypre_DistributedMatrixLocalStorage(dm);
 
    if (!PETSc_matrix) return(-1);
 
@@ -75,13 +80,17 @@ hypre_DistributedMatrixGetLocalRangePETSc( hypre_DistributedMatrix *matrix,
    ierr = MatGetOwnershipRange( PETSc_matrix, start, end ); CHKERRA(ierr);
 /*
 
-  Since PETSc's MatGetOwnershipRange actually returns 
+  Since PETSc's MatGetOwnershipRange actually returns
   end = "one more than the global index of the last local row",
   we need to subtract one; hypre assumes we return the index
   of the last row itself.
 
 */
    *end = *end - 1;
+#else
+   HYPRE_UNUSED_VAR(dm);
+   HYPRE_UNUSED_VAR(start);
+   HYPRE_UNUSED_VAR(end);
 #endif
 
    return(ierr);
@@ -91,8 +100,8 @@ hypre_DistributedMatrixGetLocalRangePETSc( hypre_DistributedMatrix *matrix,
  * hypre_DistributedMatrixGetRowPETSc
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
-hypre_DistributedMatrixGetRowPETSc( hypre_DistributedMatrix *matrix,
+HYPRE_Int
+hypre_DistributedMatrixGetRowPETSc( hypre_DistributedMatrix *dm,
                              HYPRE_BigInt row,
                              HYPRE_Int *size,
                              HYPRE_BigInt **col_ind,
@@ -100,11 +109,17 @@ hypre_DistributedMatrixGetRowPETSc( hypre_DistributedMatrix *matrix,
 {
    HYPRE_Int ierr=0;
 #ifdef PETSC_AVAILABLE
-   Mat PETSc_matrix = (Mat) hypre_DistributedMatrixLocalStorage(matrix);
+   Mat PETSc_matrix = (Mat) hypre_DistributedMatrixLocalStorage(dm);
 
    if (!PETSc_matrix) return(-1);
 
    ierr = MatGetRow( PETSc_matrix, row, size, col_ind, values); CHKERRA(ierr);
+#else
+   HYPRE_UNUSED_VAR(dm);
+   HYPRE_UNUSED_VAR(row);
+   HYPRE_UNUSED_VAR(size);
+   HYPRE_UNUSED_VAR(col_ind);
+   HYPRE_UNUSED_VAR(values);
 #endif
 
    return(ierr);
@@ -114,8 +129,8 @@ hypre_DistributedMatrixGetRowPETSc( hypre_DistributedMatrix *matrix,
  * hypre_DistributedMatrixRestoreRowPETSc
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int 
-hypre_DistributedMatrixRestoreRowPETSc( hypre_DistributedMatrix *matrix,
+HYPRE_Int
+hypre_DistributedMatrixRestoreRowPETSc( hypre_DistributedMatrix *dm,
                              HYPRE_BigInt row,
                              HYPRE_Int *size,
                              HYPRE_BigInt **col_ind,
@@ -123,11 +138,17 @@ hypre_DistributedMatrixRestoreRowPETSc( hypre_DistributedMatrix *matrix,
 {
    HYPRE_Int ierr=0;
 #ifdef PETSC_AVAILABLE
-   Mat PETSc_matrix = (Mat) hypre_DistributedMatrixLocalStorage(matrix);
+   Mat PETSc_matrix = (Mat) hypre_DistributedMatrixLocalStorage(dm);
 
    if (PETSc_matrix == NULL) return(-1);
 
    ierr = MatRestoreRow( PETSc_matrix, row, size, col_ind, values); CHKERRA(ierr);
+#else
+   HYPRE_UNUSED_VAR(dm);
+   HYPRE_UNUSED_VAR(row);
+   HYPRE_UNUSED_VAR(size);
+   HYPRE_UNUSED_VAR(col_ind);
+   HYPRE_UNUSED_VAR(values);
 #endif
 
    return(ierr);

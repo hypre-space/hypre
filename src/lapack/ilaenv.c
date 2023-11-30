@@ -131,7 +131,9 @@ integer ilaenv_(integer *ispec,const char *name__,const char *opts, integer *n1,
     extern integer ieeeck_(integer *, real *, real *);
     integer iz, nx;
     char subnam[6];
-
+    HYPRE_UNUSED_VAR(opts);
+    HYPRE_UNUSED_VAR(n3);
+    HYPRE_UNUSED_VAR(opts_len);
 
 
 

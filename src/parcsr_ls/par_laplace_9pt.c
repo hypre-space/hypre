@@ -30,15 +30,15 @@ GenerateLaplacian9pt( MPI_Comm comm,
    HYPRE_Real *diag_data;
 
    HYPRE_Int    *offd_i;
-   HYPRE_Int    *offd_j;
-   HYPRE_Real *offd_data;
+   HYPRE_Int    *offd_j = NULL;
+   HYPRE_Real *offd_data = NULL;
 
    HYPRE_BigInt global_part[2];
    HYPRE_BigInt ix, iy;
    HYPRE_Int cnt, o_cnt;
    HYPRE_Int local_num_rows;
    HYPRE_BigInt *col_map_offd;
-   HYPRE_BigInt *big_offd_j;
+   HYPRE_BigInt *big_offd_j = NULL;
    HYPRE_Int row_index;
    HYPRE_Int i;
 

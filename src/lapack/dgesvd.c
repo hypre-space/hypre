@@ -35,15 +35,15 @@ extern "C" {
 	    integer *, doublereal *, doublereal *, integer *, doublereal *,
 	    integer *, doublereal *, doublereal *, integer *);
     extern logical lsame_(const char *,const char *);
-    integer chunk, minmn, wrkbl, itaup, itauq, mnthr, iwork;
+    integer chunk, minmn, wrkbl = 0, itaup, itauq, mnthr, iwork;
     logical wntua, wntva, wntun, wntuo, wntvn, wntvo, wntus, wntvs;
-    integer ie;
+    integer ie = 0;
     extern /* Subroutine */ integer dgebrd_(integer *, integer *, doublereal *,
 	    integer *, doublereal *, doublereal *, doublereal *, doublereal *,
 	     doublereal *, integer *, integer *);
     extern doublereal dlamch_(const char *), dlange_(const char *, integer *,
 	    integer *, doublereal *, integer *, doublereal *);
-    integer ir, bdspac, iu;
+    integer ir, bdspac = 0, iu;
     extern /* Subroutine */ integer dgelqf_(integer *, integer *, doublereal *,
 	    integer *, doublereal *, doublereal *, integer *, integer *),
 	    dlascl_(const char *, integer *, integer *, doublereal *, doublereal *,

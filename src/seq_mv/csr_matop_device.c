@@ -2544,6 +2544,7 @@ hypre_CSRMatrixSortRow(hypre_CSRMatrix *A)
    HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::sort_matrix(*hypre_HandleComputeStream(hypre_handle()),
                                                        hypre_CSRMatrixGPUMatHandle(A), {}).wait() );
 #else
+   HYPRE_UNUSED_VAR(A);
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                      "hypre_CSRMatrixSortRow only implemented for cuSPARSE/rocSPARSE/oneMKLSparse!\n");
 #endif
@@ -3527,6 +3528,8 @@ hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix)
                                                            hypre_CSRMatrixJ(matrix),
                                                            hypre_CSRMatrixGPUMatInfo(matrix)) );
    }
+#else
+   HYPRE_UNUSED_VAR(matrix);
 #endif /* #if defined(HYPRE_USING_ROCSPARSE) */
 
    return hypre_error_flag;

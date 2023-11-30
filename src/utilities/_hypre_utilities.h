@@ -77,6 +77,16 @@ typedef float                  hypre_float;
 typedef double                 hypre_double;
 
 /*--------------------------------------------------------------------------
+ * Define macros
+ *--------------------------------------------------------------------------*/
+
+/* Macro for silencing unused variable warning */
+#define HYPRE_UNUSED_VAR(var) ((void) var)
+
+/* Macro for marking deprecated functions */
+#define HYPRE_DEPRECATED(reason) _Pragma(reason)
+
+/*--------------------------------------------------------------------------
  * Define various functions
  *--------------------------------------------------------------------------*/
 
@@ -1651,7 +1661,7 @@ typedef struct
 
 } hypre_DataExchangeResponse;
 
-HYPRE_Int hypre_CreateBinaryTree(HYPRE_Int, HYPRE_Int, hypre_BinaryTree*);
+HYPRE_Int hypre_CreateBinaryTree(HYPRE_Int, HYPRE_Int, hypre_BinaryTree**);
 HYPRE_Int hypre_DestroyBinaryTree(hypre_BinaryTree*);
 HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts, HYPRE_Int *contact_proc_list,
                                  void *contact_send_buf, HYPRE_Int *contact_send_buf_starts, HYPRE_Int contact_obj_size,
@@ -1659,7 +1669,6 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts, HYPRE_Int *contact_proc
                                  HYPRE_Int rnum, MPI_Comm comm, void **p_response_recv_buf, HYPRE_Int **p_response_recv_buf_starts);
 
 #endif /* end of header */
-
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -2895,6 +2904,8 @@ hypre_UnorderedIntMapFindCloserFreeBucket( hypre_UnorderedIntMap  *m,
                                            hypre_HopscotchBucket **free_bucket,
                                            HYPRE_Int *free_dist)
 {
+   HYPRE_UNUSED_VAR(m);
+
    hypre_HopscotchBucket* move_bucket = *free_bucket - (HYPRE_HOPSCOTCH_HASH_HOP_RANGE - 1);
    HYPRE_Int move_free_dist;
    for (move_free_dist = HYPRE_HOPSCOTCH_HASH_HOP_RANGE - 1; move_free_dist > 0; --move_free_dist)
@@ -2971,6 +2982,8 @@ hypre_UnorderedBigIntMapFindCloserFreeBucket( hypre_UnorderedBigIntMap   *m,
                                               hypre_BigHopscotchBucket **free_bucket,
                                               HYPRE_Int *free_dist)
 {
+   HYPRE_UNUSED_VAR(m);
+
    hypre_BigHopscotchBucket* move_bucket = *free_bucket - (HYPRE_HOPSCOTCH_HASH_HOP_RANGE - 1);
    HYPRE_Int move_free_dist;
    for (move_free_dist = HYPRE_HOPSCOTCH_HASH_HOP_RANGE - 1; move_free_dist > 0; --move_free_dist)
