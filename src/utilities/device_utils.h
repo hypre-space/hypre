@@ -284,6 +284,28 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    }                                                                                         \
 }
 
+#define HYPRE_CPU_LAUNCH(kernel_name, gridsize, blocksize, ...)                              \
+{                                                                                            \
+   if ( gridsize[2] == 0 || blocksize[2] == 0 )                                              \
+   {                                                                                         \
+     /* hypre_printf("Warning %s %d: Zero SYCL 1D launch parameters grid/block (%d) (%d)\n", \
+                  __FILE__, __LINE__,                                                        \
+                  gridsize[0], blocksize[0]); */                                             \
+   }                                                                                         \
+   else                                                                                      \
+   {                                                                                         \
+      HPYRE_Int compute_stream = hypre_HandleComputeStreamNum(hypre_handle());               \
+      hypre_HandleComputeStreamNum(hypre_handle) = HYPRE_MAX_NUM_STREAMS - 1;                \
+      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
+         cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
+            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+               { (kernel_name)(item, __VA_ARGS__);                                           \
+         });                                                                                 \
+      }).wait_and_throw();                                                                   \
+      hypre_HandleComputeStreamNum(hypre_handle) = compute_stream;                           \
+   }                                                                                         \
+}
+
 #define HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)                 \
 {                                                                                            \
    if ( gridsize[2] == 0 || blocksize[2] == 0 )                                              \
@@ -608,9 +630,15 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    thrust::func_name(thrust::hip::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
 
 #elif defined(HYPRE_USING_SYCL)
+
 #define HYPRE_ONEDPL_CALL(func_name, ...)                                                    \
   func_name(oneapi::dpl::execution::make_device_policy(                                      \
            *hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
+
+#define HYPRE_ONEDPL_CPU_CALL(func_name, ...)                                                \
+   func_name(oneapi::dpl::execution::make_device_policy(                                     \
+             *hypre_DeviceDataStream(hypre_HandleDeviceData(hypre_handle()), HYPRE_MAX_NUM_STREAMS - 1)), __VA_ARGS__);                      \
+
 #endif
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

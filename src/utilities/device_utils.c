@@ -405,25 +405,33 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
 #elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL(hipStreamCreateWithFlags(&stream, hipStreamDefault));
 #elif defined(HYPRE_USING_SYCL)
-   auto sycl_asynchandler = [] (sycl::exception_list exceptions)
+   /* Reserve the last stream as a debugging stream on the CPU */
+   if (i == HYPRE_MAX_NUM_STREAMS - 1)
    {
-      for (std::exception_ptr const& e : exceptions)
+      stream = new sycl::queue(sycl::cpu_selector_v, sycl::property_list{sycl::property::queue::in_order{}});
+   }
+   else
+   {
+      auto sycl_asynchandler = [] (sycl::exception_list exceptions)
       {
-         try
+         for (std::exception_ptr const& e : exceptions)
          {
-            std::rethrow_exception(e);
+            try
+            {
+               std::rethrow_exception(e);
+            }
+            catch (sycl::exception const& ex)
+            {
+               std::cout << "Caught asynchronous SYCL exception:" << std::endl
+                         << ex.what() << ", SYCL code: " << ex.code() << std::endl;
+            }
          }
-         catch (sycl::exception const& ex)
-         {
-            std::cout << "Caught asynchronous SYCL exception:" << std::endl
-                      << ex.what() << ", SYCL code: " << ex.code() << std::endl;
-         }
-      }
-   };
+      };
 
-   sycl::device* sycl_device = data->device;
-   sycl::context sycl_ctxt   = sycl::context(*sycl_device, sycl_asynchandler);
-   stream = new sycl::queue(sycl_ctxt, *sycl_device, sycl::property_list{sycl::property::queue::in_order{}});
+      sycl::device* sycl_device = data->device;
+      sycl::context sycl_ctxt   = sycl::context(*sycl_device, sycl_asynchandler);
+      stream = new sycl::queue(sycl_ctxt, *sycl_device, sycl::property_list{sycl::property::queue::in_order{}});
+   }
 #endif
 
    data->streams[i] = stream;
