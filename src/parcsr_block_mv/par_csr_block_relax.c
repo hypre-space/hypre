@@ -110,7 +110,7 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
    HYPRE_Int            *A_offd_j     = hypre_CSRBlockMatrixJ(A_offd);
 
    hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
-   hypre_ParCSRCommHandle *comm_handle;
+   hypre_ParCSRCommHandle *comm_handle = NULL;
 
    HYPRE_Int             block_size = hypre_CSRBlockMatrixBlockSize(A_diag);
    HYPRE_Int             bnnz = block_size * block_size;
@@ -128,8 +128,8 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 
    hypre_Vector   *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
    HYPRE_Real     *Vtemp_data  = hypre_VectorData(Vtemp_local);
-   HYPRE_Real     *Vext_data;
-   HYPRE_Real     *v_buf_data;
+   HYPRE_Real     *Vext_data = NULL;
+   HYPRE_Real     *v_buf_data = NULL;
 
    HYPRE_Real     *tmp_data;
 
@@ -2139,7 +2139,7 @@ HYPRE_Int gselim_piv(HYPRE_Real *A, HYPRE_Real *x, HYPRE_Int n)
 
    if (n == 1)                         /* A is 1x1 */
    {
-      if (fabs(A[0]) >  1e-10)
+      if (hypre_abs(A[0]) >  1e-10)
       {
          x[0] = x[0] / A[0];
          return (err_flag);
@@ -2161,7 +2161,7 @@ HYPRE_Int gselim_piv(HYPRE_Real *A, HYPRE_Real *x, HYPRE_Int n)
          /* find the largest pivot in position k*/
          for (j = k + 1; j < n; j++)
          {
-            if (fabs(A[j * n + k]) > fabs(piv))
+            if (hypre_abs(A[j * n + k]) > hypre_abs(piv))
             {
                piv =  A[j * n + k];
                piv_row = j;
@@ -2181,7 +2181,7 @@ HYPRE_Int gselim_piv(HYPRE_Real *A, HYPRE_Real *x, HYPRE_Int n)
          }
 
 
-         if (fabs(piv) > eps)
+         if (hypre_abs(piv) > eps)
          {
             for (j = k + 1; j < n; j++)
             {
@@ -2205,7 +2205,7 @@ HYPRE_Int gselim_piv(HYPRE_Real *A, HYPRE_Real *x, HYPRE_Int n)
       }
       /* we also need to check the pivot in the last row to see if it is zero */
       k = n - 1; /* last row */
-      if ( fabs(A[k * n + k]) < eps)
+      if ( hypre_abs(A[k * n + k]) < eps)
       {
          /* hypre_printf("Block of matrix is nearly singular: zero pivot error\n"); */
          return (-1);

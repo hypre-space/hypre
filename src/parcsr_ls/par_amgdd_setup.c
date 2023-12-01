@@ -49,12 +49,12 @@ hypre_BoomerAMGDDSetup( void               *amgdd_vdata,
    HYPRE_Int           ****send_flag;
    HYPRE_Int           ****recv_map;
    HYPRE_Int           ****recv_red_marker;
-   HYPRE_Int             **send_buffer;
-   HYPRE_Int             **recv_buffer;
-   HYPRE_Int             **send_flag_buffer;
-   HYPRE_Int             **recv_map_send_buffer;
-   HYPRE_Int              *send_flag_buffer_size;
-   HYPRE_Int              *recv_map_send_buffer_size;
+   HYPRE_Int             **send_buffer               = NULL;
+   HYPRE_Int             **recv_buffer               = NULL;
+   HYPRE_Int             **send_flag_buffer          = NULL;
+   HYPRE_Int             **recv_map_send_buffer      = NULL;
+   HYPRE_Int              *send_flag_buffer_size     = NULL;
+   HYPRE_Int              *recv_map_send_buffer_size = NULL;
 
    HYPRE_Int               num_procs;
    HYPRE_Int               num_send_procs;
@@ -62,6 +62,13 @@ hypre_BoomerAMGDDSetup( void               *amgdd_vdata,
    HYPRE_Int               level, i, j;
    HYPRE_Int               num_requests;
    HYPRE_Int               request_counter;
+
+   /* Sanity check */
+   if (hypre_ParVectorNumVectors(b) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "BoomerAMGDD doesn't support multicomponent vectors");
+      return hypre_error_flag;
+   }
 
    // If the underlying AMG data structure has not yet been set up, call BoomerAMGSetup()
    if (!hypre_ParAMGDataAArray(amg_data))

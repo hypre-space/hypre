@@ -28,7 +28,7 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_SemiInterpCreate( )
+hypre_SemiInterpCreate( void )
 {
    hypre_SemiInterpData *interp_data;
 
@@ -51,6 +51,8 @@ hypre_SemiInterpSetup( void               *interp_vdata,
                        hypre_Index         findex,
                        hypre_Index         stride       )
 {
+   HYPRE_UNUSED_VAR(xc);
+
    hypre_SemiInterpData   *interp_data = (hypre_SemiInterpData   *)interp_vdata;
 
    hypre_StructGrid       *grid;
@@ -358,4 +360,3 @@ hypre_SemiInterpDestroy( void *interp_vdata )
 
    return hypre_error_flag;
 }
-

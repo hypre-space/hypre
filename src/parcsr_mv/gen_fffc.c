@@ -501,7 +501,7 @@ hypre_ParCSRMatrixGenerateFFFC( hypre_ParCSRMatrix  *A,
                                 hypre_ParCSRMatrix **A_FC_ptr,
                                 hypre_ParCSRMatrix **A_FF_ptr)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)

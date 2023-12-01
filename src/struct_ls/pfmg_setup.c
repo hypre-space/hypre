@@ -881,11 +881,11 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       if (cxyz[d] > (cxyz_max / max_anisotropy))
       {
          cxyz[d] /= cxyz_max;
-         dxyz[d] = sqrt(1.0 / cxyz[d]);
+         dxyz[d] = hypre_sqrt(1.0 / cxyz[d]);
       }
       else
       {
-         dxyz[d] = sqrt(max_anisotropy);
+         dxyz[d] = hypre_sqrt(max_anisotropy);
       }
    }
 

@@ -50,7 +50,7 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   HYPRE_Init();
+   HYPRE_Initialize();
 
 #if defined(HYPRE_USING_KOKKOS)
    Kokkos::initialize (argc, argv);
@@ -221,7 +221,7 @@ main( hypre_int argc,
    hypre_SerialBoxLoop1Begin(3, loop_size,
                              x1_data_box, start, unit_stride, xi1);
    {
-      sum += xp1[xi1];
+      sum += (HYPRE_Int)xp1[xi1];
       if (xp1[xi1] != 1)
       {
          zypre_BoxLoopGetIndex(index);
@@ -437,8 +437,8 @@ main( hypre_int argc,
       HYPRE_Int i;
       for (i = 0; i < size; i++)
       {
-         xp1[i] = cos(i + 1.0);
-         xp2[i] = sin(i + 2.0);
+         xp1[i] = hypre_cos(i + 1.0);
+         xp2[i] = hypre_sin(i + 2.0);
       }
       hypre_TMemcpy(d_xp1, xp1, HYPRE_Real, size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TMemcpy(d_xp2, xp2, HYPRE_Real, size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
@@ -584,4 +584,3 @@ main( hypre_int argc,
 
    return (0);
 }
-

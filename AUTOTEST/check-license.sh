@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -38,7 +38,7 @@ LicStr='SPDX-License-Identifier: \(Apache-2.0 OR MIT\)'
 
 # Remove these files from the list of all files without 'SPDX'
 
-egrep -LR "$LicStr" . | egrep -v '[.](o|obj|a|filters|pdf|svg|gif)$' |
+egrep -LR "$LicStr" . | egrep -v '[.](o|obj|a|filters|pdf|svg|gif|png)$' |
   egrep -v '[.]/[.]git' |
   egrep -v '[.]/.*HYPRE_config[.]h' |
   egrep -v '[.]/src/(blas|lapack)/.*[.]c' |
@@ -73,7 +73,6 @@ cat > check-license.remove <<EOF
 ./src/config/missing
 ./src/config/mkinstalldirs
 ./src/configure
-./src/docs/hypre-wwords.png
 ./src/docs/ref-manual/conf.doxygen
 ./src/docs/usr-manual/Makefile
 ./src/docs/usr-manual/_static/custom.css

@@ -17,9 +17,6 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* Define to 1 if you have the <memory.h> header file. */
-#undef HAVE_MEMORY_H
-
 /* Define to 1 if using MLI */
 #undef HAVE_MLI
 
@@ -28,6 +25,9 @@
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdio.h> header file. */
+#undef HAVE_STDIO_H
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
@@ -175,7 +175,7 @@
 /* Define to 1 if using cuRAND */
 #undef HYPRE_USING_CURAND
 
-/* Define to 1 if using cuSolver */
+/* Define to 1 if using cuSOLVER */
 #undef HYPRE_USING_CUSOLVER
 
 /* Define to 1 if using cuSPARSE */
@@ -220,6 +220,9 @@
 /* Define to 1 if executing on host/device with KOKKOS */
 #undef HYPRE_USING_KOKKOS
 
+/* Define to 1 if MAGMA is enabled */
+#undef HYPRE_USING_MAGMA
+
 /* Define to 1 if want to track memory operations in hypre */
 #undef HYPRE_USING_MEMORY_TRACKER
 
@@ -253,6 +256,9 @@
 /* rocRAND being used */
 #undef HYPRE_USING_ROCRAND
 
+/* rocSOLVER being used */
+#undef HYPRE_USING_ROCSOLVER
+
 /* rocSPARSE being used */
 #undef HYPRE_USING_ROCSPARSE
 
@@ -261,6 +267,9 @@
 
 /* SYCL being used */
 #undef HYPRE_USING_SYCL
+
+/* Define to 1 if using thrust par_nosync policy */
+#undef HYPRE_USING_THRUST_NOSYNC
 
 /* Define to 1 if using UMPIRE */
 #undef HYPRE_USING_UMPIRE
@@ -301,5 +310,7 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
-/* Define to 1 if you have the ANSI C header files. */
+/* Define to 1 if all of the C90 standard headers exist (not just the ones
+   required in a freestanding environment). This macro is provided for
+   backward compatibility; new code need not use it. */
 #undef STDC_HEADERS

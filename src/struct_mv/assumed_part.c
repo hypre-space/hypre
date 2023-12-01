@@ -87,6 +87,9 @@ hypre_APSubdivideRegion( hypre_Box      *region,
    hypre_Index  isize, index, div;
    hypre_Box   *box;
 
+   /* Initialize div */
+   hypre_SetIndex(div, 0);
+
    /* if level = 0 then no dividing */
    if (!level)
    {
@@ -1162,16 +1165,16 @@ hypre_StructAssumedPartitionCreate(
          rn_cube_divs, then div_index[dmax] is incremented until we have more
          partitions than processors. */
 
-      rn_cubes = hypre_doubleBoxVolume(box) / pow(wmin, ndim);
+      rn_cubes = hypre_doubleBoxVolume(box) / hypre_pow(wmin, ndim);
       rn_cube_procs = proc_count / rn_cubes;
-      rn_cube_divs = pow(rn_cube_procs, (1.0 / (HYPRE_Real)ndim));
+      rn_cube_divs = hypre_pow(rn_cube_procs, (1.0 / (HYPRE_Real)ndim));
 
       for (d = 0; d < ndim; d++)
       {
          width = hypre_BoxSizeD(box, d);
          rdiv = rn_cube_divs * (width / wmin);
          /* Add a small number to compensate for roundoff issues */
-         hypre_IndexD(div_index, d) = (HYPRE_Int) floor(rdiv + 1.0e-6);
+         hypre_IndexD(div_index, d) = (HYPRE_Int) hypre_floor(rdiv + 1.0e-6);
          /* Make sure div_index[d] is at least 1 */
          hypre_IndexD(div_index, d) = hypre_max(hypre_IndexD(div_index, d), 1);
       }
@@ -1248,7 +1251,7 @@ hypre_StructAssumedPartitionCreate(
 
    /* Probably there will mostly be one proc per box */
    /* Don't want to allocate too much memory here */
-   size = 1.2 * hypre_BoxArraySize(local_boxes);
+   size = (HYPRE_Int)(1.2 * hypre_BoxArraySize(local_boxes));
 
    /* Each local box may live on multiple procs in the assumed partition */
    tmp_proc_ids = hypre_CTAlloc(HYPRE_Int,  size, HYPRE_MEMORY_HOST); /* local box proc ids */
@@ -1268,7 +1271,7 @@ hypre_StructAssumedPartitionCreate(
       /* Do we need more storage? */
       if ((count + proc_count) > size)
       {
-         size = size + proc_count + 1.2 * (hypre_BoxArraySize(local_boxes) - i);
+         size = (HYPRE_Int)(size + proc_count + 1.2 * (hypre_BoxArraySize(local_boxes) - i));
          /* hypre_printf("myid = %d, *adjust* alloc size = %d\n", myid, size);*/
          tmp_proc_ids = hypre_TReAlloc(tmp_proc_ids,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
          tmp_box_nums = hypre_TReAlloc(tmp_box_nums,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
@@ -1418,15 +1421,16 @@ hypre_StructAssumedPartitionDestroy( hypre_StructAssumedPart *assumed_part )
  *****************************************************************************/
 
 HYPRE_Int
-hypre_APFillResponseStructAssumedPart(
-   void      *p_recv_contact_buf,
-   HYPRE_Int  contact_size,
-   HYPRE_Int  contact_proc,
-   void      *ro,
-   MPI_Comm   comm,
-   void     **p_send_response_buf,
-   HYPRE_Int *response_message_size )
+hypre_APFillResponseStructAssumedPart(void      *p_recv_contact_buf,
+                                      HYPRE_Int  contact_size,
+                                      HYPRE_Int  contact_proc,
+                                      void      *ro,
+                                      MPI_Comm   comm,
+                                      void     **p_send_response_buf,
+                                      HYPRE_Int *response_message_size )
 {
+   HYPRE_UNUSED_VAR(p_send_response_buf);
+
    HYPRE_Int    ndim, size, alloc_size, myid, i, d, index;
    HYPRE_Int   *ids, *boxnums;
    HYPRE_Int   *recv_contact_buf;

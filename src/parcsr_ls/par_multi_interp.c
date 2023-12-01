@@ -25,6 +25,8 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
                                    HYPRE_Int            weight_option,
                                    hypre_ParCSRMatrix **P_ptr )
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MULTIPASS_INTERP] -= hypre_MPI_Wtime();
 #endif
@@ -76,12 +78,12 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    HYPRE_Int        num_sends = 0;
    HYPRE_Int       *int_buf_data = NULL;
    HYPRE_BigInt    *big_buf_data = NULL;
-   HYPRE_Int       *send_map_start;
+   HYPRE_Int       *send_map_start = NULL;
    HYPRE_Int       *send_map_elmt;
-   HYPRE_Int       *send_procs;
+   HYPRE_Int       *send_procs = NULL;
    HYPRE_Int        num_recvs = 0;
-   HYPRE_Int       *recv_vec_start;
-   HYPRE_Int       *recv_procs;
+   HYPRE_Int       *recv_vec_start = NULL;
+   HYPRE_Int       *recv_procs = NULL;
    HYPRE_Int       *new_recv_vec_start = NULL;
    HYPRE_Int      **Pext_send_map_start = NULL;
    HYPRE_Int      **Pext_recv_vec_start = NULL;
@@ -130,7 +132,6 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    HYPRE_Int        n_coarse = 0;
    HYPRE_Int        n_coarse_offd = 0;
    HYPRE_Int        n_SF = 0;
-   HYPRE_Int        n_SF_offd = 0;
 
    HYPRE_Int       *fine_to_coarse = NULL;
    HYPRE_BigInt    *fine_to_coarse_offd = NULL;
@@ -242,24 +243,32 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
     *  Intialize counters and allocate mapping vector.
     *-----------------------------------------------------------------------*/
 
-   if (n_fine) { fine_to_coarse = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST); }
+   fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
 
    n_coarse = 0;
    n_SF = 0;
 #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel for private(i) reduction(+:n_coarse,n_SF ) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i) reduction(+:n_coarse,n_SF) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < n_fine; i++)
-      if (CF_marker[i] == 1) { n_coarse++; }
-      else if (CF_marker[i] == -3) { n_SF++; }
+   {
+      if (CF_marker[i] == 1)
+      {
+         n_coarse++;
+      }
+      else if (CF_marker[i] == -3)
+      {
+         n_SF++;
+      }
+   }
 
    pass_array_size = n_fine - n_coarse - n_SF;
-   if (pass_array_size) { pass_array = hypre_CTAlloc(HYPRE_Int,  pass_array_size, HYPRE_MEMORY_HOST); }
+   pass_array = hypre_CTAlloc(HYPRE_Int,  pass_array_size, HYPRE_MEMORY_HOST);
    pass_pointer = hypre_CTAlloc(HYPRE_Int,  max_num_passes + 1, HYPRE_MEMORY_HOST);
-   if (n_fine) { assigned = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST); }
+   assigned = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST);
    P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, memory_location_P);
    P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine + 1, memory_location_P);
-   if (n_coarse) { C_array = hypre_CTAlloc(HYPRE_Int,  n_coarse, HYPRE_MEMORY_HOST); }
+   C_array = hypre_CTAlloc(HYPRE_Int,  n_coarse, HYPRE_MEMORY_HOST);
 
    if (num_cols_offd)
    {
@@ -278,11 +287,10 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
       recv_vec_start = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
       if (send_map_start[num_sends])
       {
-         int_buf_data = hypre_CTAlloc(HYPRE_Int,  send_map_start[num_sends], HYPRE_MEMORY_HOST);
-         big_buf_data = hypre_CTAlloc(HYPRE_BigInt,  send_map_start[num_sends], HYPRE_MEMORY_HOST);
+         int_buf_data = hypre_CTAlloc(HYPRE_Int, send_map_start[num_sends], HYPRE_MEMORY_HOST);
+         big_buf_data = hypre_CTAlloc(HYPRE_BigInt, send_map_start[num_sends], HYPRE_MEMORY_HOST);
       }
    }
-
 
    index = 0;
    for (i = 0; i < num_sends; i++)
@@ -320,13 +328,11 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    }
 
    n_coarse_offd = 0;
-   n_SF_offd = 0;
 #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel for private(i) reduction(+:n_coarse_offd,n_SF_offd) HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for private(i) reduction(+:n_coarse_offd) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < num_cols_offd; i++)
       if (CF_marker_offd[i] == 1) { n_coarse_offd++; }
-      else if (CF_marker_offd[i] == -3) { n_SF_offd++; }
 
    if (num_cols_offd)
    {
@@ -2133,13 +2139,11 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                                HYPRE_Int            weight_option,
                                hypre_ParCSRMatrix **P_ptr )
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("MultipassInterp");
-#endif
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_ParCSRMatrixMemoryLocation(A),
                                                       hypre_ParCSRMatrixMemoryLocation(S) );
    if (exec == HYPRE_EXEC_DEVICE)
@@ -2159,9 +2163,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                                                 P_ptr );
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }

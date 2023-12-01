@@ -83,6 +83,9 @@ void hypre_GpuProfilingPushRangeColor(const char *name, HYPRE_Int color_id)
 #elif defined (HYPRE_USING_ROCTX)
    roctxRangePush(name);
 
+#else
+   HYPRE_UNUSED_VAR(name);
+   HYPRE_UNUSED_VAR(color_id);
 #endif
 }
 
@@ -106,10 +109,12 @@ void hypre_GpuProfilingPushRange(const char *name)
 #elif defined (HYPRE_USING_ROCTX)
    roctxRangePush(name);
 
+#else
+   HYPRE_UNUSED_VAR(name);
 #endif
 }
 
-void hypre_GpuProfilingPopRange()
+void hypre_GpuProfilingPopRange(void)
 {
 #if defined (HYPRE_USING_NVTX)
    hypre_GpuProfilingPushRangeColor("StreamSync0", Red);

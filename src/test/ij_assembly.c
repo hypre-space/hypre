@@ -21,7 +21,7 @@
 HYPRE_Int buildMatrixEntries(MPI_Comm comm,
                              HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz,
                              HYPRE_Int Px, HYPRE_Int Py, HYPRE_Int Pz,
-                             HYPRE_Int cx, HYPRE_Int cy, HYPRE_Int cz,
+                             HYPRE_Real cx, HYPRE_Real cy, HYPRE_Real cz,
                              HYPRE_BigInt *ilower, HYPRE_BigInt *iupper,
                              HYPRE_BigInt *jlower, HYPRE_BigInt *jupper,
                              HYPRE_Int *nrows, HYPRE_BigInt *num_nonzeros,
@@ -80,8 +80,8 @@ main( hypre_int  argc,
    HYPRE_Int                 time_index;
    HYPRE_Int                 print_usage;
    HYPRE_MemoryLocation      memory_location;
-#if defined(HYPRE_USING_GPU)
-   HYPRE_ExecutionPolicy    default_exec_policy;
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_ExecutionPolicy     default_exec_policy;
 #endif
    char                      memory_location_name[8];
 
@@ -89,11 +89,11 @@ main( hypre_int  argc,
    HYPRE_BigInt              num_nonzeros;
    HYPRE_BigInt              ilower, iupper;
    HYPRE_BigInt              jlower, jupper;
-   HYPRE_Int                *nnzrow, *h_nnzrow, *d_nnzrow;
-   HYPRE_BigInt             *rows,   *h_rows,   *d_rows;
-   HYPRE_BigInt             *rows2,  *h_rows2,  *d_rows2;
-   HYPRE_BigInt             *cols,   *h_cols,   *d_cols;
-   HYPRE_Real               *coefs,  *h_coefs,  *d_coefs;
+   HYPRE_Int                *nnzrow = NULL, *h_nnzrow, *d_nnzrow = NULL;
+   HYPRE_BigInt             *rows = NULL,   *h_rows,   *d_rows = NULL;
+   HYPRE_BigInt             *rows2 = NULL,  *h_rows2,  *d_rows2 = NULL;
+   HYPRE_BigInt             *cols = NULL,   *h_cols,   *d_cols = NULL;
+   HYPRE_Real               *coefs = NULL,  *h_coefs,  *d_coefs = NULL;
    HYPRE_IJMatrix            ij_A;
    HYPRE_IJMatrix            ij_AT;
    HYPRE_ParCSRMatrix        parcsr_ref;
@@ -115,15 +115,16 @@ main( hypre_int  argc,
 
    /*-----------------------------------------------------------------
     * GPU Device binding
-    * Must be done before HYPRE_Init() and should not be changed after
+    * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
-   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+   hypre_bind_device(-1, myid, num_procs, hypre_MPI_COMM_WORLD);
 
    /* Initialize Hypre */
    /* Initialize Hypre: must be the first Hypre function to call */
    time_index = hypre_InitializeTiming("Hypre init");
    hypre_BeginTiming(time_index);
-   HYPRE_Init();
+   HYPRE_Initialize();
+   HYPRE_DeviceInitialize();
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
@@ -144,7 +145,7 @@ main( hypre_int  argc,
    cy = 2.0;
    cz = 3.0;
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    default_exec_policy = HYPRE_EXEC_DEVICE;
 #endif
    memory_location     = HYPRE_MEMORY_DEVICE;
@@ -183,9 +184,9 @@ main( hypre_int  argc,
       else if ( strcmp(argv[arg_index], "-c") == 0 )
       {
          arg_index++;
-         cx = atof(argv[arg_index++]);
-         cy = atof(argv[arg_index++]);
-         cz = atof(argv[arg_index++]);
+         cx = (HYPRE_Real)atof(argv[arg_index++]);
+         cy = (HYPRE_Real)atof(argv[arg_index++]);
+         cz = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-mode") == 0 )
       {
@@ -289,7 +290,7 @@ main( hypre_int  argc,
       hypre_printf("\n");
    }
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_HandleDefaultExecPolicy(hypre_handle()) = default_exec_policy;
 #endif
 
@@ -451,9 +452,9 @@ buildMatrixEntries(MPI_Comm            comm,
                    HYPRE_Int           Px,
                    HYPRE_Int           Py,
                    HYPRE_Int           Pz,
-                   HYPRE_Int           cx,
-                   HYPRE_Int           cy,
-                   HYPRE_Int           cz,
+                   HYPRE_Real           cx,
+                   HYPRE_Real           cy,
+                   HYPRE_Real           cz,
                    HYPRE_BigInt       *ilower_ptr,
                    HYPRE_BigInt       *iupper_ptr,
                    HYPRE_BigInt       *jlower_ptr,
@@ -468,10 +469,10 @@ buildMatrixEntries(MPI_Comm            comm,
                    HYPRE_Int           stencil,
                    HYPRE_ParCSRMatrix *parcsr_ptr)
 {
-   HYPRE_Int        num_procs;
-   HYPRE_Int        myid;
-   HYPRE_Real       values[4];
-   HYPRE_ParCSRMatrix A;
+   HYPRE_Int          num_procs;
+   HYPRE_Int          myid;
+   HYPRE_Real         values[4];
+   HYPRE_ParCSRMatrix A = NULL;
 
    hypre_MPI_Comm_size(comm, &num_procs );
    hypre_MPI_Comm_rank(comm, &myid );
@@ -749,15 +750,15 @@ test_SetOffProc(HYPRE_ParCSRMatrix    parcsr_A,
    HYPRE_BigInt       *h_cols;
    HYPRE_Real         *h_coefs;
 
-   HYPRE_Int          *d_nnzrow;
-   HYPRE_BigInt       *d_rows;
-   HYPRE_BigInt       *d_cols;
-   HYPRE_Real         *d_coefs;
+   HYPRE_Int          *d_nnzrow = NULL;
+   HYPRE_BigInt       *d_rows   = NULL;
+   HYPRE_BigInt       *d_cols   = NULL;
+   HYPRE_Real         *d_coefs  = NULL;
 
-   HYPRE_Int          *nnzrow;
-   HYPRE_BigInt       *rows;
-   HYPRE_BigInt       *cols;
-   HYPRE_Real         *coefs;
+   HYPRE_Int          *nnzrow   = NULL;
+   HYPRE_BigInt       *rows     = NULL;
+   HYPRE_BigInt       *cols     = NULL;
+   HYPRE_Real         *coefs    = NULL;
 
    HYPRE_Int          *h_rowptr;
 

@@ -46,10 +46,10 @@ GenerateRSVarDifConv( MPI_Comm         comm,
    HYPRE_Int    *diag_j;
    HYPRE_Real *diag_data;
 
-   HYPRE_Int    *offd_i;
-   HYPRE_Int    *offd_j;
-   HYPRE_BigInt *big_offd_j;
-   HYPRE_Real *offd_data;
+   HYPRE_Int    *offd_i = NULL;
+   HYPRE_Int    *offd_j = NULL;
+   HYPRE_BigInt *big_offd_j = NULL;
+   HYPRE_Real   *offd_data = NULL;
 
    HYPRE_BigInt global_part[2];
    HYPRE_BigInt ix, iy, iz;
@@ -453,6 +453,10 @@ GenerateRSVarDifConv( MPI_Comm         comm,
 
 HYPRE_Real afun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(xx);
+   HYPRE_UNUSED_VAR(yy);
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    value = 1.0;
    return value;
@@ -460,6 +464,10 @@ HYPRE_Real afun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 
 HYPRE_Real bfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(xx);
+   HYPRE_UNUSED_VAR(yy);
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    value = 1.0;
    return value;
@@ -467,6 +475,10 @@ HYPRE_Real bfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 
 HYPRE_Real cfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(xx);
+   HYPRE_UNUSED_VAR(yy);
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    value = 1.0;
    return value;
@@ -474,10 +486,12 @@ HYPRE_Real cfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 
 HYPRE_Real dfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    if (rs_example == 1)
    {
-      value = sin(rs_l * M_PI / 8.0);
+      value = hypre_sin(rs_l * M_PI / 8.0);
    }
    else if (rs_example == 2)
    {
@@ -492,10 +506,12 @@ HYPRE_Real dfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 
 HYPRE_Real efun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    if (rs_example == 1)
    {
-      value = cos(rs_l * M_PI / 8.0);
+      value = hypre_cos(rs_l * M_PI / 8.0);
    }
    else if (rs_example == 2)
    {
@@ -517,6 +533,10 @@ HYPRE_Real ffun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 
 HYPRE_Real gfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(xx);
+   HYPRE_UNUSED_VAR(yy);
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    value = 0.0;
    return value;
@@ -524,6 +544,10 @@ HYPRE_Real gfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 
 HYPRE_Real rfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(xx);
+   HYPRE_UNUSED_VAR(yy);
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    value = 1.0;
    return value;
@@ -531,6 +555,10 @@ HYPRE_Real rfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 
 HYPRE_Real bndfun_rs(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
+   HYPRE_UNUSED_VAR(xx);
+   HYPRE_UNUSED_VAR(yy);
+   HYPRE_UNUSED_VAR(zz);
+
    HYPRE_Real value;
    value = 0.0;
    return value;

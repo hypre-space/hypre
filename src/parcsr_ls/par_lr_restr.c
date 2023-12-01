@@ -52,6 +52,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
                                    HYPRE_Int             is_triangular,
                                    HYPRE_Int             gmres_switch)
 {
+   HYPRE_UNUSED_VAR(debug_flag);
    /* HYPRE_Real t0 = hypre_MPI_Wtime(); */
 
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
@@ -1676,6 +1677,10 @@ hypre_BoomerAMGBuildRestrNeumannAIRHost( hypre_ParCSRMatrix   *A,
                                          HYPRE_Int             debug_flag,
                                          hypre_ParCSRMatrix  **R_ptr)
 {
+   HYPRE_UNUSED_VAR(num_functions);
+   HYPRE_UNUSED_VAR(dof_func);
+   HYPRE_UNUSED_VAR(debug_flag);
+
    /* HYPRE_Real t0 = hypre_MPI_Wtime(); */
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommHandle  *comm_handle;
@@ -2037,13 +2042,11 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
                                      HYPRE_Int             debug_flag,
                                      hypre_ParCSRMatrix  **R_ptr)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("RestrNeumannAIR");
-#endif
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -2062,9 +2065,7 @@ hypre_BoomerAMGBuildRestrNeumannAIR( hypre_ParCSRMatrix   *A,
                                                      debug_flag, R_ptr);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }

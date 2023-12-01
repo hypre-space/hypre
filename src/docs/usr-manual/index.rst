@@ -8,8 +8,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to hypre's documentation!
-=================================
+Documentation for hypre
+=======================
 
 .. include:: ../copyright.txt
 

@@ -12,6 +12,8 @@
 HYPRE_Int
 HYPRE_StructLGMRESCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 {
+   HYPRE_UNUSED_VAR(comm);
+
    hypre_LGMRESFunctions * lgmres_functions =
       hypre_LGMRESFunctionsCreate(
          hypre_StructKrylovCAlloc, hypre_StructKrylovFree,
@@ -162,5 +164,3 @@ HYPRE_StructLGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
    return ( HYPRE_LGMRESGetFinalRelativeResidualNorm( (HYPRE_Solver) solver,
                                                       norm ) );
 }
-
-

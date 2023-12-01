@@ -357,6 +357,8 @@ HYPRE_Int hypre_SelectSet(ReduceMatType *rmat, CommInfoType *cinfo,
               HYPRE_Int *newperm, HYPRE_Int *newiperm,
               hypre_PilutSolverGlobals *globals)
 {
+  HYPRE_UNUSED_VAR(iperm);
+
   HYPRE_Int ir, i, j, k, l, num;
   HYPRE_Int nnz, snnbr;
   HYPRE_Int *rcolind, *snbrind, *snbrptr, *srowind;
@@ -592,6 +594,8 @@ void hypre_ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
                  HYPRE_Int *newperm, HYPRE_Int *newiperm, HYPRE_Int nmis, HYPRE_Real tol,
                  hypre_PilutSolverGlobals *globals)
 {
+  HYPRE_UNUSED_VAR(perm);
+
   HYPRE_Int i, ir, inr, start, k, kk, l, m, end, nnz;
   HYPRE_Int *usrowptr, *uerowptr, *ucolind, *incolind, *rcolind, rrowlen;
   HYPRE_Real *uvalues, *nrm2s, *invalues, *rvalues, *dvalues;
@@ -683,14 +687,14 @@ void hypre_ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
         mult = w[jr[k]]*dvalues[kk];
         w[jr[k]] = mult;
 
-        if (fabs(mult) < rtol)
+        if (hypre_abs(mult) < rtol)
            continue; /* First drop test */
 
         for (l=usrowptr[kk]; l<uerowptr[kk]; l++) {
           hypre_CheckBounds(0, ucolind[l], nrows, globals);
           m = jr[ucolind[l]];
           if (m == -1) {
-            if (fabs(mult*uvalues[l]) < rtol)
+            if (hypre_abs(mult*uvalues[l]) < rtol)
               continue;  /* Don't worry. The fill has too small of a value */
 
             /* record L elements -- these must be local */
@@ -723,14 +727,14 @@ void hypre_ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
         mult = w[jr[k]]*invalues[start];
         w[jr[k]] = mult;
 
-        if (fabs(mult) < rtol)
+        if (hypre_abs(mult) < rtol)
            continue; /* First drop test */
 
         for (l=++start; l<=end; l++) {
           hypre_CheckBounds(0, incolind[l], nrows, globals);
           m = jr[incolind[l]];
           if (m == -1) {
-            if (fabs(mult*invalues[l]) < rtol)
+            if (hypre_abs(mult*invalues[l]) < rtol)
               continue;  /* Don't worry. The fill has too small of a value */
 
             /* record L elements -- these must be remote */
@@ -778,6 +782,8 @@ void hypre_FactorLocal(FactorMatType *ldu, ReduceMatType *rmat,
                  HYPRE_Int *newperm, HYPRE_Int *newiperm, HYPRE_Int nmis, HYPRE_Real tol,
                  hypre_PilutSolverGlobals *globals)
 {
+  HYPRE_UNUSED_VAR(cinfo);
+
   HYPRE_Int i, ir, k, kk, l, m, nnz, diag;
   HYPRE_Int *usrowptr, *uerowptr, *ucolind, *rcolind;
   HYPRE_Real *uvalues, *nrm2s, *rvalues, *dvalues;
@@ -858,14 +864,14 @@ void hypre_FactorLocal(FactorMatType *ldu, ReduceMatType *rmat,
       mult = w[jr[k]]*dvalues[kk];
       w[jr[k]] = mult;
 
-      if (fabs(mult) < rtol)
+      if (hypre_abs(mult) < rtol)
          continue; /* First drop test */
 
       for (l=usrowptr[kk]; l<uerowptr[kk]; l++) {
          hypre_CheckBounds(0, ucolind[l], nrows, globals);
          m = jr[ucolind[l]];
          if (m == -1) {
-            if (fabs(mult*uvalues[l]) < rtol)
+            if (hypre_abs(mult*uvalues[l]) < rtol)
              continue;  /* Don't worry. The fill has too small of a value */
 
             /* record L elements */
@@ -917,7 +923,7 @@ void hypre_SecondDropSmall( HYPRE_Real rtol,
 
   /* Remove any (off-diagonal) elements of the row below the tolerance */
   for (i=1; i<lastjr;) {
-    if (fabs(w[i]) < rtol) {
+    if (hypre_abs(w[i]) < rtol) {
       jw[i] = jw[--lastjr];
        w[i] =  w[lastjr];
     }
@@ -1116,11 +1122,11 @@ void hypre_UpdateL(HYPRE_Int lrow, HYPRE_Int last, FactorMatType *ldu,
     else {
       min = start;  /* find min and replace if i is larger */
       for (j=start+1; j<end; j++) {
-         if (fabs(lvalues[j]) < fabs(lvalues[min]))
+         if (hypre_abs(lvalues[j]) < hypre_abs(lvalues[min]))
             min = j;
       }
 
-      if (fabs(lvalues[min]) < fabs(w[i])) {
+      if (hypre_abs(lvalues[min]) < hypre_abs(w[i])) {
          lcolind[min] = jw[i];
          lvalues[min] =  w[i];
       }
@@ -1189,7 +1195,7 @@ void hypre_FormNRmat(HYPRE_Int rrow, HYPRE_Int first, ReduceMatType *nrmat,
     for (nz=1; nz<out_rowlen; nz++) {
       max = first;
       for (j=first+1; j<lastjr; j++) {
-         if (fabs(w[j]) > fabs(w[max]))
+         if (hypre_abs(w[j]) > hypre_abs(w[max]))
             max = j;
       }
 
@@ -1255,7 +1261,7 @@ void hypre_FormDU(HYPRE_Int lrow, HYPRE_Int first, FactorMatType *ldu,
     /* The entries [first, lastjr) are part of U */
     max = first;
     for (j=first+1; j<lastjr; j++) {
-      if (fabs(w[j]) > fabs(w[max]))
+      if (hypre_abs(w[j]) > hypre_abs(w[max]))
          max = j;
     }
 

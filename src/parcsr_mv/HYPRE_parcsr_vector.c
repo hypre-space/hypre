@@ -105,6 +105,18 @@ HYPRE_ParVectorPrint( HYPRE_ParVector  vector,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParVectorPrintBinaryIJ
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParVectorPrintBinaryIJ( HYPRE_ParVector  vector,
+                              const char      *file_name )
+{
+   return ( hypre_ParVectorPrintBinaryIJ( (hypre_ParVector *) vector,
+                                          file_name ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParVectorSetConstantValues
  *--------------------------------------------------------------------------*/
 
@@ -165,6 +177,7 @@ HYPRE_ParVectorScale( HYPRE_Complex   value,
 /*--------------------------------------------------------------------------
  * HYPRE_ParVectorAxpy
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 HYPRE_ParVectorAxpy( HYPRE_Complex   alpha,
                      HYPRE_ParVector x,

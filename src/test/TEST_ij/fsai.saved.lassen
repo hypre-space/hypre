@@ -92,61 +92,60 @@ Final Relative Residual Norm = 7.992635e-09
 
 # Output file: fsai.out.104
 Iterations = 7
-Final Relative Residual Norm = 3.407304e-10
+Final Relative Residual Norm = 3.296684e-10
 
 # Output file: fsai.out.105
 Iterations = 5
-Final Relative Residual Norm = 1.893066e-09
+Final Relative Residual Norm = 1.829167e-09
 
 # Output file: fsai.out.106
 Iterations = 5
-Final Relative Residual Norm = 1.990993e-09
+Final Relative Residual Norm = 1.901994e-09
 
 # Output file: fsai.out.107
 Iterations = 7
-Final Relative Residual Norm = 6.676698e-09
+Final Relative Residual Norm = 7.069461e-09
 
 # Output file: fsai.out.108
 Iterations = 5
-Final Relative Residual Norm = 3.301976e-10
+Final Relative Residual Norm = 3.267638e-10
 
 # Output file: fsai.out.109
 Iterations = 6
-Final Relative Residual Norm = 5.606390e-09
+Final Relative Residual Norm = 8.879422e-09
 
 # Output file: fsai.out.110
 Iterations = 7
-Final Relative Residual Norm = 6.436983e-10
+Final Relative Residual Norm = 9.454511e-10
 
 # Output file: fsai.out.111
 Iterations = 10
-Final Relative Residual Norm = 1.237707e-09
+Final Relative Residual Norm = 1.114164e-09
 
 # Output file: fsai.out.112
 Iterations = 10
-Final Relative Residual Norm = 3.014097e-09
+Final Relative Residual Norm = 2.738091e-09
 
 # Output file: fsai.out.113
 Iterations = 10
-Final Relative Residual Norm = 4.721663e-09
+Final Relative Residual Norm = 4.476226e-09
 
 # Output file: fsai.out.114
 Iterations = 25
-Final Relative Residual Norm = 1.460516e-09
+Final Relative Residual Norm = 2.054687e-09
 
 # Output file: fsai.out.115
 Iterations = 27
-Final Relative Residual Norm = 5.651187e-09
+Final Relative Residual Norm = 2.533347e-09
 
 # Output file: fsai.out.116
 Iterations = 37
-Final Relative Residual Norm = 1.665508e-09
+Final Relative Residual Norm = 1.700494e-09
 
 # Output file: fsai.out.117
 Iterations = 32
-Final Relative Residual Norm = 8.769693e-09
+Final Relative Residual Norm = 7.611745e-09
 
 # Output file: fsai.out.118
 Iterations = 38
-Final Relative Residual Norm = 7.450064e-09
-
+Final Relative Residual Norm = 6.230831e-09

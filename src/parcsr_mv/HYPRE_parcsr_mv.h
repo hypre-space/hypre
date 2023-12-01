@@ -70,6 +70,7 @@ HYPRE_Int HYPRE_ParVectorDestroy( HYPRE_ParVector vector );
 HYPRE_Int HYPRE_ParVectorInitialize( HYPRE_ParVector vector );
 HYPRE_Int HYPRE_ParVectorRead( MPI_Comm comm, const char *file_name, HYPRE_ParVector *vector );
 HYPRE_Int HYPRE_ParVectorPrint( HYPRE_ParVector vector, const char *file_name );
+HYPRE_Int HYPRE_ParVectorPrintBinaryIJ( HYPRE_ParVector vector, const char *file_name );
 HYPRE_Int HYPRE_ParVectorSetConstantValues( HYPRE_ParVector vector, HYPRE_Complex value );
 HYPRE_Int HYPRE_ParVectorSetRandomValues( HYPRE_ParVector vector, HYPRE_Int seed );
 HYPRE_Int HYPRE_ParVectorCopy( HYPRE_ParVector x, HYPRE_ParVector y );
@@ -85,4 +86,3 @@ HYPRE_Int HYPRE_ParVectorGetValues( HYPRE_ParVector vector, HYPRE_Int num_values
 #endif
 
 #endif
-

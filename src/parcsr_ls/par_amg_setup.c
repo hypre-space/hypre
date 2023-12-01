@@ -13,17 +13,17 @@
 
 #define DEBUG 0
 #define PRINT_CF 0
-
 #define DEBUG_SAVE_ALL_OPS 0
+
 /*****************************************************************************
  *
  * Routine for driving the setup phase of AMG
  *
  *****************************************************************************/
 
-/*****************************************************************************
+/*--------------------------------------------------------------------------
  * hypre_BoomerAMGSetup
- *****************************************************************************/
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_BoomerAMGSetup( void               *amg_vdata,
@@ -128,7 +128,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int       seq_threshold = hypre_ParAMGDataSeqThreshold(amg_data);
    HYPRE_Int       j, k;
    HYPRE_Int       num_procs, my_id;
-#if !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP) && !defined(HYPRE_USING_SYCL)
+#if !defined(HYPRE_USING_GPU)
    HYPRE_Int       num_threads = hypre_NumThreads();
 #endif
    HYPRE_Int      *grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
@@ -148,7 +148,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Real *max_eig_est = NULL;
    HYPRE_Real *min_eig_est = NULL;
 
-   HYPRE_Solver *smoother = NULL;
+   HYPRE_Solver *smoother = hypre_ParAMGDataSmoother(amg_data);
    HYPRE_Int     smooth_type = hypre_ParAMGDataSmoothType(amg_data);
    HYPRE_Int     smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
    HYPRE_Int     sym;
@@ -170,8 +170,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int     ilu_upper_jacobi_iters;
    HYPRE_Real    ilu_droptol;
    HYPRE_Int     ilu_reordering_type;
+   HYPRE_Int     fsai_algo_type;
+   HYPRE_Int     fsai_local_solve_type;
    HYPRE_Int     fsai_max_steps;
    HYPRE_Int     fsai_max_step_size;
+   HYPRE_Int     fsai_max_nnz_row;
+   HYPRE_Int     fsai_num_levels;
+   HYPRE_Real    fsai_threshold;
    HYPRE_Int     fsai_eig_max_iters;
    HYPRE_Real    fsai_kap_tolerance;
    HYPRE_Int     needZ = 0;
@@ -219,16 +224,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    HYPRE_Int      *num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);
    HYPRE_Int       ns = num_grid_sweeps[1];
-   HYPRE_Real      wall_time;   /* for debugging instrumentation */
+   HYPRE_Real      wall_time = 0.0;   /* for debugging instrumentation */
    HYPRE_Int       add_end;
 
 #ifdef HYPRE_USING_DSUPERLU
    HYPRE_Int       dslu_threshold = hypre_ParAMGDataDSLUThreshold(amg_data);
 #endif
 
-#if defined (HYPRE_USING_NVTX) || defined (HYPRE_USING_ROCTX)
    char            nvtx_name[1024];
-#endif
 
    HYPRE_Real cum_nnz_AP = hypre_ParAMGDataCumNnzAP(amg_data);
 
@@ -268,8 +271,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    ilu_upper_jacobi_iters = hypre_ParAMGDataILUUpperJacobiIters(amg_data);
    ilu_max_iter = hypre_ParAMGDataILUMaxIter(amg_data);
    ilu_reordering_type = hypre_ParAMGDataILULocalReordering(amg_data);
+   fsai_algo_type = hypre_ParAMGDataFSAIAlgoType(amg_data);
+   fsai_local_solve_type = hypre_ParAMGDataFSAILocalSolveType(amg_data);
    fsai_max_steps = hypre_ParAMGDataFSAIMaxSteps(amg_data);
    fsai_max_step_size = hypre_ParAMGDataFSAIMaxStepSize(amg_data);
+   fsai_max_nnz_row = hypre_ParAMGDataFSAIMaxNnzRow(amg_data);
+   fsai_num_levels = hypre_ParAMGDataFSAINumLevels(amg_data);
+   fsai_threshold = hypre_ParAMGDataFSAIThreshold(amg_data);
    fsai_eig_max_iters = hypre_ParAMGDataFSAIEigMaxIters(amg_data);
    fsai_kap_tolerance = hypre_ParAMGDataFSAIKapTolerance(amg_data);
    interp_type = hypre_ParAMGDataInterpType(amg_data);
@@ -356,18 +364,19 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                         "WARNING: Changing to node-based coarsening because LN of GM interpolation has been specified via HYPRE_BoomerAMGSetInterpVecVariant.\n");
    }
 
-   /* Verify that settings are correct for solving systmes */
+   /* Verify that settings are correct for solving systems */
    /* If the user has specified either a block interpolation or a block relaxation then
-      we need to make sure the other has been choosen as well  - so we can be
+      we need to make sure the other has been chosen as well  - so we can be
       in "block mode" - storing only block matrices on the coarse levels*/
    /* Furthermore, if we are using systems and nodal = 0, then
       we will change nodal to 1 */
-   /* probably should disable stuff like smooth num levels at some point */
+   /* probably should disable stuff like smooth number levels at some point */
 
 
-   if (grid_relax_type[0] >= 20) /* block relaxation choosen */
+   if (grid_relax_type[0] >= 20 && grid_relax_type[0] != 30 &&
+       grid_relax_type[0] != 88 && grid_relax_type[0] != 89)
    {
-
+      /* block relaxation chosen */
       if (!((interp_type >= 20 && interp_type != 100) || interp_type == 11 || interp_type == 10 ) )
       {
          hypre_ParAMGDataInterpType(amg_data) = 20;
@@ -380,9 +389,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             grid_relax_type[i] = 23;
          }
-
       }
-      if (grid_relax_type[3] < 20) { grid_relax_type[3] = 29; }  /* GE */
+      if (grid_relax_type[3] < 20)
+      {
+         grid_relax_type[3] = 29; /* GE */
+      }
 
       block_mode = 1;
    }
@@ -513,9 +524,15 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          hypre_ParAMGDataFCoarse(amg_data) = NULL;
       }
 
-      hypre_TFree(hypre_ParAMGDataAMat(amg_data), HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_ParAMGDataAInv(amg_data), HYPRE_MEMORY_HOST);
-      hypre_TFree(hypre_ParAMGDataBVec(amg_data), HYPRE_MEMORY_HOST);
+#if defined(HYPRE_USING_MAGMA)
+      hypre_TFree(hypre_ParAMGDataAPiv(amg_data),  HYPRE_MEMORY_HOST);
+#else
+      hypre_TFree(hypre_ParAMGDataAPiv(amg_data),  hypre_ParAMGDataGEMemoryLocation(amg_data));
+#endif
+      hypre_TFree(hypre_ParAMGDataAMat(amg_data),  hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataAWork(amg_data), hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataBVec(amg_data),  hypre_ParAMGDataGEMemoryLocation(amg_data));
+      hypre_TFree(hypre_ParAMGDataUVec(amg_data),  hypre_ParAMGDataGEMemoryLocation(amg_data));
       hypre_TFree(hypre_ParAMGDataCommInfo(amg_data), HYPRE_MEMORY_HOST);
 
       if (new_comm != hypre_MPI_COMM_NULL)
@@ -561,7 +578,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       if (smooth_num_levels && smoother)
       {
-         if (smooth_num_levels > old_num_levels - 1)
+         if (smooth_num_levels > 1 &&
+             smooth_num_levels > old_num_levels - 1)
          {
             smooth_num_levels = old_num_levels - 1;
          }
@@ -678,7 +696,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    if (num_C_points_coarse > 0)
    {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
       HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
       if (exec == HYPRE_EXEC_DEVICE)
       {
@@ -707,7 +725,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          num_C_points_coarse = new_end - C_points_local_marker;
       }
       else
-#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
+#endif /* defined(HYPRE_USING_GPU) */
       {
          k = 0;
          for (j = 0; j < num_C_points_coarse; j++)
@@ -734,14 +752,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       offset = (HYPRE_Int) ( first_local_row % ((HYPRE_BigInt) num_functions) );
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
       HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_BoomerAMGInitDofFuncDevice(hypre_IntArrayData(dof_func), local_size, offset, num_functions);
       }
       else
-#endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL) */
+#endif /* defined(HYPRE_USING_GPU) */
       {
          for (i = 0; i < local_size; i++)
          {
@@ -862,7 +880,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       needZ = hypre_max(needZ, 1);
    }
 
-#if !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP) && !defined(HYPRE_USING_SYCL)
+#if !defined(HYPRE_USING_GPU)
    /* GPU impl. needs Z */
    if (num_threads > 1)
 #endif
@@ -872,7 +890,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
          if (grid_relax_type[j] ==  3 || grid_relax_type[j] ==  4 || grid_relax_type[j] ==  6 ||
              grid_relax_type[j] ==  8 || grid_relax_type[j] == 13 || grid_relax_type[j] == 14 ||
-             grid_relax_type[j] == 11 || grid_relax_type[j] == 12)
+             grid_relax_type[j] == 11 || grid_relax_type[j] == 12 || grid_relax_type[j] == 88 ||
+             grid_relax_type[j] == 89)
          {
             needZ = hypre_max(needZ, 1);
             break;
@@ -933,10 +952,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    level = 0;
    HYPRE_ANNOTATE_MGLEVEL_BEGIN(level);
 
-#if defined (HYPRE_USING_NVTX) || defined (HYPRE_USING_ROCTX)
    hypre_sprintf(nvtx_name, "%s-%d", "AMG Level", level);
    hypre_GpuProfilingPushRange(nvtx_name);
-#endif
 
    strong_threshold = hypre_ParAMGDataStrongThreshold(amg_data);
    coarsen_cut_factor = hypre_ParAMGDataCoarsenCutFactor(amg_data);
@@ -950,6 +967,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    agg_P_max_elmts = hypre_ParAMGDataAggPMaxElmts(amg_data);
    agg_P12_max_elmts = hypre_ParAMGDataAggP12MaxElmts(amg_data);
    jacobi_trunc_threshold = hypre_ParAMGDataJacobiTruncThreshold(amg_data);
+   smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
    if (smooth_num_levels > level)
    {
       smoother = hypre_CTAlloc(HYPRE_Solver, smooth_num_levels, HYPRE_MEMORY_HOST);
@@ -1148,7 +1166,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                first_local_row = hypre_ParCSRMatrixFirstRowIndex(A_array[level]);
             }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
             HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IntArrayMemoryLocation(
                                                                   CF_marker_array[level]) );
 
@@ -1445,7 +1463,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          /* Set fine points (F_PT) given by the user */
          if ( (num_F_points > 0) && (level == 0) )
          {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
             HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IntArrayMemoryLocation(
                                                                   CF_marker_array[level]) );
             if (exec == HYPRE_EXEC_DEVICE)
@@ -1494,7 +1512,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
             else if (level < hypre_ParAMGDataCPointsLevel(amg_data))
             {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
                HYPRE_MemoryLocation memory_location = hypre_IntArrayMemoryLocation(CF_marker_array[level]);
                HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
                if (exec == HYPRE_EXEC_DEVICE)
@@ -1857,6 +1875,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
                   hypre_BoomerAMGInterpTruncation(P, agg_trunc_factor, agg_P_max_elmts);
 
+                  if (agg_trunc_factor != 0.0 || agg_P_max_elmts > 0 ||
+                      agg_P12_trunc_factor != 0.0 || agg_P12_max_elmts > 0)
+                  {
+                     hypre_ParCSRMatrixCompressOffdMap(P);
+                  }
+
                   hypre_MatvecCommPkgCreate(P);
                   hypre_ParCSRMatrixDestroy(P1);
                   hypre_ParCSRMatrixDestroy(P2);
@@ -2041,8 +2065,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   {
                      P = hypre_ParMatmul(P1, P2);
                   }
+
                   hypre_BoomerAMGInterpTruncation(P, agg_trunc_factor,
                                                   agg_P_max_elmts);
+
+                  if (agg_trunc_factor != 0.0 || agg_P_max_elmts > 0 ||
+                      agg_P12_trunc_factor != 0.0 || agg_P12_max_elmts > 0)
+                  {
+                     hypre_ParCSRMatrixCompressOffdMap(P);
+                  }
+
                   hypre_MatvecCommPkgCreate(P);
                   hypre_ParCSRMatrixDestroy(P1);
                   hypre_ParCSRMatrixDestroy(P2);
@@ -2099,7 +2131,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                HYPRE_Int is_triangular = hypre_ParAMGDataIsTriangular(amg_data);
                HYPRE_Int gmres_switch = hypre_ParAMGDataGMRESSwitchR(amg_data);
                /* !!! RL: ensure that CF_marker contains -1 or 1 !!! */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
                HYPRE_MemoryLocation memory_location = hypre_IntArrayMemoryLocation(CF_marker_array[level]);
                HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
                if (exec == HYPRE_EXEC_DEVICE)
@@ -3070,15 +3102,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
 
       HYPRE_ANNOTATE_MGLEVEL_END(level);
-#if defined (HYPRE_USING_NVTX) || defined (HYPRE_USING_ROCTX)
       hypre_GpuProfilingPopRange();
-#endif
       ++level;
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(level);
-#if defined (HYPRE_USING_NVTX) || defined (HYPRE_USING_ROCTX)
       hypre_sprintf(nvtx_name, "%s-%d", "AMG Level", level);
       hypre_GpuProfilingPushRange(nvtx_name);
-#endif
 
       if (!block_mode)
       {
@@ -3107,7 +3135,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       {
          HYPRE_Int max_thresh = hypre_max(coarse_threshold, seq_threshold);
-#ifdef HYPRE_USING_DSUPERLU
+#if defined(HYPRE_USING_DSUPERLU)
          max_thresh = hypre_max(max_thresh, dslu_threshold);
 #endif
          if ( (level == max_levels - 1) || (coarse_size <= (HYPRE_BigInt) max_thresh) )
@@ -3126,7 +3154,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    {
       hypre_seqAMGSetup(amg_data, level, coarse_threshold);
    }
-#ifdef HYPRE_USING_DSUPERLU
+#if defined(HYPRE_USING_DSUPERLU)
    else if ((dslu_threshold >= coarse_threshold) &&
             (coarse_size > (HYPRE_BigInt)coarse_threshold) &&
             (level != max_levels - 1))
@@ -3136,10 +3164,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_ParAMGDataDSLUSolver(amg_data) = dslu_solver;
    }
 #endif
-   else if (grid_relax_type[3] == 9  ||
-            grid_relax_type[3] == 99 ||
-            grid_relax_type[3] == 199 ) /*use of Gaussian elimination on coarsest level */
+   else if (grid_relax_type[3] == 9   ||
+            grid_relax_type[3] == 19  ||
+            grid_relax_type[3] == 98  ||
+            grid_relax_type[3] == 99  ||
+            grid_relax_type[3] == 198 ||
+            grid_relax_type[3] == 199)
    {
+      /* Gaussian elimination on the coarsest level */
       if (coarse_size <= coarse_threshold)
       {
          hypre_GaussElimSetup(amg_data, level, grid_relax_type[3]);
@@ -3149,19 +3181,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          grid_relax_type[3] = grid_relax_type[1];
       }
    }
-   else if (grid_relax_type[3] == 19 ||
-            grid_relax_type[3] == 98)  /*use of Gaussian elimination on coarsest level */
-   {
-      if (coarse_size > coarse_threshold)
-      {
-         grid_relax_type[3] = grid_relax_type[1];
-      }
-   }
    HYPRE_ANNOTATE_REGION_END("%s", "Coarse solve");
    HYPRE_ANNOTATE_MGLEVEL_END(level);
-#if defined (HYPRE_USING_NVTX) || defined (HYPRE_USING_ROCTX)
    hypre_GpuProfilingPopRange();
-#endif
 
    if (level > 0)
    {
@@ -3224,7 +3246,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
        grid_relax_type[1] == 12 || grid_relax_type[2] == 12 || grid_relax_type[3] == 12 ||
        grid_relax_type[1] == 13 || grid_relax_type[2] == 13 || grid_relax_type[3] == 13 ||
        grid_relax_type[1] == 14 || grid_relax_type[2] == 14 || grid_relax_type[3] == 14 ||
-       grid_relax_type[1] == 18 || grid_relax_type[2] == 18 || grid_relax_type[3] == 18)
+       grid_relax_type[1] == 18 || grid_relax_type[2] == 18 || grid_relax_type[3] == 18 ||
+       grid_relax_type[1] == 30 || grid_relax_type[2] == 30 || grid_relax_type[3] == 30 ||
+       grid_relax_type[1] == 88 || grid_relax_type[2] == 88 || grid_relax_type[3] == 88 ||
+       grid_relax_type[1] == 89 || grid_relax_type[2] == 89 || grid_relax_type[3] == 89)
    {
       l1_norms = hypre_CTAlloc(hypre_Vector*, num_levels, HYPRE_MEMORY_HOST);
       hypre_ParAMGDataL1Norms(amg_data) = l1_norms;
@@ -3263,17 +3288,17 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(j);
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
-#if defined (HYPRE_USING_NVTX) || defined (HYPRE_USING_ROCTX)
       hypre_sprintf(nvtx_name, "%s-%d", "AMG Level", level);
       hypre_GpuProfilingPushRange(nvtx_name);
 
       hypre_sprintf(nvtx_name, "%s-%d", "Relaxation", j);
       hypre_GpuProfilingPushRange(nvtx_name);
-#endif
 
       if (j < num_levels - 1 &&
-          (grid_relax_type[1] == 8 || grid_relax_type[1] == 13 || grid_relax_type[1] == 14 ||
-           grid_relax_type[2] == 8 || grid_relax_type[2] == 13 || grid_relax_type[2] == 14))
+          (grid_relax_type[1] == 8  || grid_relax_type[1] == 89 ||
+           grid_relax_type[1] == 13 || grid_relax_type[1] == 14 ||
+           grid_relax_type[2] == 8  || grid_relax_type[2] == 89 ||
+           grid_relax_type[2] == 13 || grid_relax_type[2] == 14))
       {
          if (relax_order)
          {
@@ -3285,9 +3310,42 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
       }
       else if (j == num_levels - 1 &&
-               (grid_relax_type[3] == 8 || grid_relax_type[3] == 13 || grid_relax_type[3] == 14))
+               (grid_relax_type[3] == 8  || grid_relax_type[3] == 89 ||
+                grid_relax_type[3] == 13 || grid_relax_type[3] == 14))
       {
          hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norm_data);
+      }
+
+      if (j < num_levels - 1 && (grid_relax_type[1] == 30 || grid_relax_type[2] == 30))
+      {
+         if (relax_order)
+         {
+            hypre_ParCSRComputeL1Norms(A_array[j], 3, hypre_IntArrayData(CF_marker_array[j]), &l1_norm_data);
+         }
+         else
+         {
+            hypre_ParCSRComputeL1Norms(A_array[j], 3, NULL, &l1_norm_data);
+         }
+      }
+      else if (j == num_levels - 1 && grid_relax_type[3] == 30)
+      {
+         hypre_ParCSRComputeL1Norms(A_array[j], 3, NULL, &l1_norm_data);
+      }
+
+      if (j < num_levels - 1 && (grid_relax_type[1] == 88 || grid_relax_type[2] == 88 ))
+      {
+         if (relax_order)
+         {
+            hypre_ParCSRComputeL1Norms(A_array[j], 6, hypre_IntArrayData(CF_marker_array[j]), &l1_norm_data);
+         }
+         else
+         {
+            hypre_ParCSRComputeL1Norms(A_array[j], 6, NULL, &l1_norm_data);
+         }
+      }
+      else if (j == num_levels - 1 && (grid_relax_type[3] == 88))
+      {
+         hypre_ParCSRComputeL1Norms(A_array[j], 6, NULL, &l1_norm_data);
       }
 
       if (j < num_levels - 1 && (grid_relax_type[1] == 18 || grid_relax_type[2] == 18))
@@ -3315,10 +3373,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
       HYPRE_ANNOTATE_MGLEVEL_END(j);
-#if defined (HYPRE_USING_NVTX) || defined (HYPRE_USING_ROCTX)
       hypre_GpuProfilingPopRange();
       hypre_GpuProfilingPopRange();
-#endif
    }
 
    for (j = addlvl; j < hypre_min(add_end + 1, num_levels) ; j++)
@@ -3329,13 +3385,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
          HYPRE_ANNOTATE_MGLEVEL_BEGIN(j);
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
-#if defined (HYPRE_USING_NVTX) || defined (HYPRE_USING_ROCTX)
          hypre_sprintf(nvtx_name, "%s-%d", "AMG Level", level);
          hypre_GpuProfilingPushRange(nvtx_name);
 
          hypre_sprintf(nvtx_name, "%s-%d", "Relaxation", j);
          hypre_GpuProfilingPushRange(nvtx_name);
-#endif
 
          hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norm_data);
 
@@ -3345,10 +3399,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
          HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
          HYPRE_ANNOTATE_MGLEVEL_END(j);
-#if defined (HYPRE_USING_NVTX) || defined (HYPRE_USING_ROCTX)
          hypre_GpuProfilingPopRange();
          hypre_GpuProfilingPopRange();
-#endif
       }
    }
 
@@ -3358,13 +3410,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(j);
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
-#if defined (HYPRE_USING_NVTX) || defined (HYPRE_USING_ROCTX)
       hypre_sprintf(nvtx_name, "%s-%d", "AMG Level", level);
       hypre_GpuProfilingPushRange(nvtx_name);
 
       hypre_sprintf(nvtx_name, "%s-%d", "Relaxation", j);
       hypre_GpuProfilingPushRange(nvtx_name);
-#endif
 
 
       if (j < num_levels - 1 &&
@@ -3412,23 +3462,19 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
       HYPRE_ANNOTATE_MGLEVEL_END(j);
-#if defined (HYPRE_USING_NVTX) || defined (HYPRE_USING_ROCTX)
       hypre_GpuProfilingPopRange();
       hypre_GpuProfilingPopRange();
-#endif
    }
 
    for (j = 0; j < num_levels; j++)
    {
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(j);
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
-#if defined (HYPRE_USING_NVTX) || defined (HYPRE_USING_ROCTX)
       hypre_sprintf(nvtx_name, "%s-%d", "AMG Level", level);
       hypre_GpuProfilingPushRange(nvtx_name);
 
       hypre_sprintf(nvtx_name, "%s-%d", "Relaxation", j);
       hypre_GpuProfilingPushRange(nvtx_name);
-#endif
 
       if ( grid_relax_type[1]  == 7 || grid_relax_type[2] == 7   ||
            (grid_relax_type[3] == 7 && j == (num_levels - 1))    ||
@@ -3522,6 +3568,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       if ((smooth_type == 6 || smooth_type == 16) && smooth_num_levels > j)
       {
+         /* Sanity check */
+         if (num_vectors > 1)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "Schwarz smoothing doesn't support multicomponent vectors");
+            return hypre_error_flag;
+         }
+
          schwarz_relax_wt = hypre_ParAMGDataSchwarzRlxWeight(amg_data);
 
          HYPRE_SchwarzCreate(&smoother[j]);
@@ -3559,10 +3613,20 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       else if ((smooth_type == 9 || smooth_type == 19) && smooth_num_levels > j)
       {
+         /* Sanity checks */
 #ifdef HYPRE_MIXEDINT
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Euclid smoothing is not available in mixedint mode!");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "Euclid smoothing is not available in mixedint mode!");
          return hypre_error_flag;
 #endif
+
+         if (num_vectors > 1)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "Euclid smoothing doesn't support multicomponent vectors");
+            return hypre_error_flag;
+         }
+
          HYPRE_EuclidCreate(comm, &smoother[j]);
          if (euclidfile)
          {
@@ -3584,14 +3648,27 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       else if ((smooth_type == 4 || smooth_type == 14) && smooth_num_levels > j)
       {
+         /* Sanity check */
+         if (num_vectors > 1)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "FSAI smoothing doesn't support multicomponent vectors");
+            return hypre_error_flag;
+         }
+
          HYPRE_FSAICreate(&smoother[j]);
+         HYPRE_FSAISetAlgoType(smoother[j], fsai_algo_type);
+         HYPRE_FSAISetLocalSolveType(smoother[j], fsai_local_solve_type);
          HYPRE_FSAISetMaxSteps(smoother[j], fsai_max_steps);
          HYPRE_FSAISetMaxStepSize(smoother[j], fsai_max_step_size);
+         HYPRE_FSAISetMaxNnzRow(smoother[j], fsai_max_nnz_row);
+         HYPRE_FSAISetNumLevels(smoother[j], fsai_num_levels);
+         HYPRE_FSAISetThreshold(smoother[j], fsai_threshold);
          HYPRE_FSAISetKapTolerance(smoother[j], fsai_kap_tolerance);
          HYPRE_FSAISetTolerance(smoother[j], 0.0);
          HYPRE_FSAISetOmega(smoother[j], relax_weight[level]);
          HYPRE_FSAISetEigMaxIters(smoother[j], fsai_eig_max_iters);
-         HYPRE_FSAISetPrintLevel(smoother[j], 1);
+         HYPRE_FSAISetPrintLevel(smoother[j], (amg_print_level >= 1) ? 1 : 0);
 
          HYPRE_FSAISetup(smoother[j],
                          (HYPRE_ParCSRMatrix) A_array[j],
@@ -3599,15 +3676,26 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                          (HYPRE_ParVector) U_array[j]);
 
 #if DEBUG_SAVE_ALL_OPS
-         char file[256];
-         hypre_sprintf(file, "G_%02d.IJ.out", j);
-         hypre_ParCSRMatrixPrintIJ(hypre_ParFSAIDataGmat((hypre_ParFSAIData*) smoother[j]), 0, 0, file);
+         {
+            char filename[256];
+            hypre_sprintf(file, "G_%02d.IJ.out", j);
+            hypre_ParCSRMatrixPrintIJ(hypre_ParFSAIDataGmat((hypre_ParFSAIData*) smoother[j]),
+                                      0, 0, filename);
+         }
 #endif
       }
       else if ((smooth_type == 5 || smooth_type == 15) && smooth_num_levels > j)
       {
-         HYPRE_ILUCreate( &smoother[j]);
-         HYPRE_ILUSetType( smoother[j], ilu_type);
+         /* Sanity check */
+         if (num_vectors > 1)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "ILU smoothing doesn't support multicomponent vectors");
+            return hypre_error_flag;
+         }
+
+         HYPRE_ILUCreate(&smoother[j]);
+         HYPRE_ILUSetType(smoother[j], ilu_type);
          HYPRE_ILUSetLocalReordering( smoother[j], ilu_reordering_type);
          HYPRE_ILUSetMaxIter(smoother[j], ilu_max_iter);
          HYPRE_ILUSetTriSolve(smoother[j], ilu_tri_solve);
@@ -3626,10 +3714,20 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       else if ((smooth_type == 8 || smooth_type == 18) && smooth_num_levels > j)
       {
+         /* Sanity checks */
 #ifdef HYPRE_MIXEDINT
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "ParaSails smoothing is not available in mixedint mode!");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "ParaSails smoothing is not available in mixedint mode!");
          return hypre_error_flag;
 #endif
+
+         if (num_vectors > 1)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "ParaSails smoothing doesn't support multicomponent vectors");
+            return hypre_error_flag;
+         }
+
          HYPRE_ParCSRParaSailsCreate(comm, &smoother[j]);
          HYPRE_ParCSRParaSailsSetParams(smoother[j], thresh, nlevel);
          HYPRE_ParCSRParaSailsSetFilter(smoother[j], filter);
@@ -3641,10 +3739,20 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       else if ((smooth_type == 7 || smooth_type == 17) && smooth_num_levels > j)
       {
+         /* Sanity checks */
 #ifdef HYPRE_MIXEDINT
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "pilut smoothing is not available in mixedint mode!");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "Pilut smoothing is not available in mixedint mode!");
          return hypre_error_flag;
 #endif
+
+         if (num_vectors > 1)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "Pilut smoothing doesn't support multicomponent vectors");
+            return hypre_error_flag;
+         }
+
          HYPRE_ParCSRPilutCreate(comm, &smoother[j]);
          HYPRE_ParCSRPilutSetup(smoother[j],
                                 (HYPRE_ParCSRMatrix) A_array[j],
@@ -3653,9 +3761,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          HYPRE_ParCSRPilutSetDropTolerance(smoother[j], drop_tol);
          HYPRE_ParCSRPilutSetFactorRowSize(smoother[j], max_nz_per_row);
       }
-      else if ( (j < num_levels - 1) || ((j == num_levels - 1) &&
-                                         (grid_relax_type[3] !=  9 && grid_relax_type[3] != 99  &&
-                                          grid_relax_type[3] != 19 && grid_relax_type[3] != 98) && coarse_size > 9) )
+      else if ( (j < num_levels - 1) ||
+                ((j == num_levels - 1) &&
+                 (grid_relax_type[3] !=  9 && grid_relax_type[3] != 99  &&
+                  grid_relax_type[3] != 19 && grid_relax_type[3] != 98) && coarse_size > 9) )
       {
          if (relax_weight[j] < 0)
          {
@@ -3671,10 +3780,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
       HYPRE_ANNOTATE_MGLEVEL_END(j);
-#if defined (HYPRE_USING_NVTX) || defined (HYPRE_USING_ROCTX)
       hypre_GpuProfilingPopRange();
       hypre_GpuProfilingPopRange();
-#endif
    } /* end of levels loop */
 
    if (amg_logging > 1)
@@ -3703,11 +3810,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (cum_nnz_AP > 0.0)
    {
       cum_nnz_AP = hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
-      for (j = 0; j < num_levels-1; j++)
+      for (j = 0; j < num_levels - 1; j++)
       {
          hypre_ParCSRMatrixSetDNumNonzeros(P_array[j]);
          cum_nnz_AP += hypre_ParCSRMatrixDNumNonzeros(P_array[j]);
-         cum_nnz_AP += hypre_ParCSRMatrixDNumNonzeros(A_array[j+1]);
+         cum_nnz_AP += hypre_ParCSRMatrixDNumNonzeros(A_array[j + 1]);
       }
       hypre_ParAMGDataCumNnzAP(amg_data) = cum_nnz_AP;
    }
@@ -3893,7 +4000,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                  relax_weight[level], omega[level], l1_norms[level],
                                  u_vec, Vtemp, Ztemp);
             rho1 = hypre_ParVectorInnerProd(u_vec, u_vec);
-            rho = sqrt(rho1 / rho0);
+            rho = hypre_sqrt(rho1 / rho0);
             if (rho < 0.01)
             {
                break;

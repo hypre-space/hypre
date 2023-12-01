@@ -21,11 +21,9 @@ extern "C" {
 /**
  * @defgroup IJSystemInterface IJ System Interface
  *
- * This interface represents a linear-algebraic conceptual view of a
- * linear system.  The 'I' and 'J' in the name are meant to be
- * mnemonic for the traditional matrix notation A(I,J).
- *
- * @memo A linear-algebraic conceptual interface
+ * A linear-algebraic conceptual interface. This interface represents a
+ * linear-algebraic conceptual view of a linear system.  The 'I' and 'J' in the
+ * name are meant to be mnemonic for the traditional matrix notation A(I,J).
  *
  * @{
  **/
@@ -340,10 +338,25 @@ HYPRE_Int HYPRE_IJMatrixReadMM(const char     *filename,
                                HYPRE_IJMatrix *matrix);
 
 /**
- * Print the matrix to file.  This is mainly for debugging purposes.
+ * Print the matrix to file. This is mainly for debugging purposes.
  **/
 HYPRE_Int HYPRE_IJMatrixPrint(HYPRE_IJMatrix  matrix,
                               const char     *filename);
+
+/**
+ * Print the matrix to file in binary format. This is mainly for debugging purposes.
+ **/
+HYPRE_Int HYPRE_IJMatrixPrintBinary(HYPRE_IJMatrix  matrix,
+                                    const char     *filename);
+
+/**
+ * Read the matrix from file stored in binary format.  This is mainly for debugging purposes.
+ **/
+HYPRE_Int HYPRE_IJMatrixReadBinary(const char     *filename,
+                                   MPI_Comm        comm,
+                                   HYPRE_Int       type,
+                                   HYPRE_IJMatrix *matrix_ptr);
+
 
 /**@}*/
 
@@ -469,6 +482,20 @@ HYPRE_Int HYPRE_IJVectorAddToValues(HYPRE_IJVector       vector,
 HYPRE_Int HYPRE_IJVectorAssemble(HYPRE_IJVector vector);
 
 /**
+ * Update vectors by setting (action 1) or
+ * adding to (action 0) values in 'vector'.
+ * Note that this function cannot update values owned by other processes
+ * and does not allow repeated index values in 'indices'.
+ *
+ * Not collective.
+ **/
+HYPRE_Int HYPRE_IJVectorUpdateValues(HYPRE_IJVector       vector,
+                                     HYPRE_Int            nvalues,
+                                     const HYPRE_BigInt  *indices,
+                                     const HYPRE_Complex *values,
+                                     HYPRE_Int            action);
+
+/**
  * Gets values in vector.  Usage details are analogous to
  * \ref HYPRE_IJVectorSetValues.
  *
@@ -528,10 +555,24 @@ HYPRE_Int HYPRE_IJVectorRead(const char     *filename,
                              HYPRE_IJVector *vector);
 
 /**
+ * Read the vector from binary file.  This is mainly for debugging purposes.
+ **/
+HYPRE_Int HYPRE_IJVectorReadBinary(const char     *filename,
+                                   MPI_Comm        comm,
+                                   HYPRE_Int       type,
+                                   HYPRE_IJVector *vector);
+
+/**
  * Print the vector to file.  This is mainly for debugging purposes.
  **/
 HYPRE_Int HYPRE_IJVectorPrint(HYPRE_IJVector  vector,
                               const char     *filename);
+
+/**
+ * Print the vector to binary file.  This is mainly for debugging purposes.
+ **/
+HYPRE_Int HYPRE_IJVectorPrintBinary(HYPRE_IJVector  vector,
+                                    const char     *filename);
 
 /**
  * Computes the inner product between two vectors

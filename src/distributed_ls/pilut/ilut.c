@@ -25,7 +25,7 @@
 HYPRE_Int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatType *ldu,
           HYPRE_Int maxnz, HYPRE_Real tol, hypre_PilutSolverGlobals *globals )
 {
-  HYPRE_Int i, ierr;
+  HYPRE_Int i, ierr = 0;
   ReduceMatType rmat;
   HYPRE_Int dummy_row_ptr[2], size;
   HYPRE_Real *values;
@@ -159,10 +159,10 @@ void hypre_ComputeAdd2Nrms(HYPRE_Int num_rows, HYPRE_Int *rowptr, HYPRE_Real *va
 
   for (i=0; i<num_rows; i++) {
     n = rowptr[i+1]-rowptr[i];
-    /* sum = SNRM2(&n, values+rowptr[i], &incx);*/
+    /* sum = hypre_dnrm2(&n, values+rowptr[i], &incx);*/
     sum = 0.0;
     for (j=0; j<n; j++) sum += (values[rowptr[i]+j] * values[rowptr[i]+j]);
-    sum = sqrt( sum );
+    sum = hypre_sqrt( sum );
     nrm2s[i] += sum;
   }
 }

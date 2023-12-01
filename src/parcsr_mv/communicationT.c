@@ -151,6 +151,8 @@ hypre_MatTCommPkgCreate_core (
 
 )
 {
+   HYPRE_UNUSED_VAR(data);
+
    HYPRE_Int         num_sends;
    HYPRE_Int         *send_procs;
    HYPRE_Int         *send_map_starts;

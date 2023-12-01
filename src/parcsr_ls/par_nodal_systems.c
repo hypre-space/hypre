@@ -43,6 +43,8 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
                             HYPRE_Int              diag_option,
                             hypre_ParCSRMatrix   **AN_ptr)
 {
+   HYPRE_UNUSED_VAR(dof_func);
+
    MPI_Comm            comm            = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix    *A_diag          = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int          *A_diag_i        = hypre_CSRMatrixI(A_diag);
@@ -69,7 +71,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    hypre_CSRMatrix    *AN_offd;
    HYPRE_Int          *AN_offd_i;
    HYPRE_Int          *AN_offd_j;
-   HYPRE_Real         *AN_offd_data;
+   HYPRE_Real         *AN_offd_data = NULL;
    HYPRE_BigInt       *col_map_offd_AN;
    HYPRE_BigInt       *new_col_map_offd;
    HYPRE_BigInt        row_starts_AN[2];
@@ -79,21 +81,21 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    HYPRE_Int           new_num_cols_offd;
 
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-   HYPRE_Int            num_sends;
-   HYPRE_Int            num_recvs;
+   HYPRE_Int            num_sends = 0;
+   HYPRE_Int            num_recvs = 0;
    HYPRE_Int           *send_procs;
-   HYPRE_Int           *send_map_starts;
-   HYPRE_Int           *send_map_elmts = NULL;
+   HYPRE_Int           *send_map_starts = NULL;
+   HYPRE_Int           *send_map_elmts  = NULL;
    HYPRE_Int           *new_send_map_elmts;
    HYPRE_Int           *recv_procs;
-   HYPRE_Int           *recv_vec_starts;
+   HYPRE_Int           *recv_vec_starts = NULL;
 
    hypre_ParCSRCommPkg *comm_pkg_AN;
    HYPRE_Int           *send_procs_AN;
-   HYPRE_Int           *send_map_starts_AN;
-   HYPRE_Int           *send_map_elmts_AN;
+   HYPRE_Int           *send_map_starts_AN = NULL;
+   HYPRE_Int           *send_map_elmts_AN = NULL;
    HYPRE_Int           *recv_procs_AN;
-   HYPRE_Int           *recv_vec_starts_AN;
+   HYPRE_Int           *recv_vec_starts_AN = NULL;
 
    HYPRE_Int           i, j, k, k_map;
 
@@ -225,7 +227,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
          }
          for (i = 0; i < AN_num_nonzeros_diag; i++)
          {
-            AN_diag_data[i] = sqrt(AN_diag_data[i]);
+            AN_diag_data[i] = hypre_sqrt(AN_diag_data[i]);
          }
 
       }
@@ -244,12 +246,12 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
                   {
                      counter[k_map] = index;
                      AN_diag_j[index] = k_map;
-                     AN_diag_data[index] = fabs(A_diag_data[k]);
+                     AN_diag_data[index] = hypre_abs(A_diag_data[k]);
                      index++;
                   }
                   else
                   {
-                     AN_diag_data[counter[k_map]] += fabs(A_diag_data[k]);
+                     AN_diag_data[counter[k_map]] += hypre_abs(A_diag_data[k]);
                   }
                }
                row++;
@@ -282,8 +284,8 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
                   }
                   else
                   {
-                     if (fabs(A_diag_data[k]) >
-                         fabs(AN_diag_data[counter[k_map]]))
+                     if (hypre_abs(A_diag_data[k]) >
+                         hypre_abs(AN_diag_data[counter[k_map]]))
                      {
                         AN_diag_data[counter[k_map]] = A_diag_data[k];
                      }
@@ -312,12 +314,12 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
                   {
                      counter[k_map] = index;
                      AN_diag_j[index] = k_map;
-                     data[index * num_functions + j] = fabs(A_diag_data[k]);
+                     data[index * num_functions + j] = hypre_abs(A_diag_data[k]);
                      index++;
                   }
                   else
                   {
-                     data[(counter[k_map])*num_functions + j] += fabs(A_diag_data[k]);
+                     data[(counter[k_map])*num_functions + j] += hypre_abs(A_diag_data[k]);
                   }
                }
                row++;
@@ -575,7 +577,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
             }
             for (i = 0; i < AN_num_nonzeros_offd; i++)
             {
-               AN_offd_data[i] = sqrt(AN_offd_data[i]);
+               AN_offd_data[i] = hypre_sqrt(AN_offd_data[i]);
             }
          }
          break;
@@ -593,12 +595,12 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
                      {
                         counter[k_map] = index;
                         AN_offd_j[index] = k_map;
-                        AN_offd_data[index] = fabs(A_offd_data[k]);
+                        AN_offd_data[index] = hypre_abs(A_offd_data[k]);
                         index++;
                      }
                      else
                      {
-                        AN_offd_data[counter[k_map]] += fabs(A_offd_data[k]);
+                        AN_offd_data[counter[k_map]] += hypre_abs(A_offd_data[k]);
                      }
                   }
                   row++;
@@ -630,8 +632,8 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
                      }
                      else
                      {
-                        if (fabs(A_offd_data[k]) >
-                            fabs(AN_offd_data[counter[k_map]]))
+                        if (hypre_abs(A_offd_data[k]) >
+                            hypre_abs(AN_offd_data[counter[k_map]]))
                         {
                            AN_offd_data[counter[k_map]] = A_offd_data[k];
                         }
@@ -660,12 +662,12 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
                      {
                         counter[k_map] = index;
                         AN_offd_j[index] = k_map;
-                        data[index * num_functions + j] = fabs(A_offd_data[k]);
+                        data[index * num_functions + j] = hypre_abs(A_offd_data[k]);
                         index++;
                      }
                      else
                      {
-                        data[(counter[k_map])*num_functions + j] += fabs(A_offd_data[k]);
+                        data[(counter[k_map])*num_functions + j] += hypre_abs(A_offd_data[k]);
                      }
                   }
                   row++;

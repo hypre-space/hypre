@@ -228,6 +228,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    p_old = -1;
    num_comms = 0;
    comm_bufsize = 0;
+   comm_type = &comm_types[0];
    for (m = 0; m < num_boxes; m++)
    {
       i = comm_boxes_i[m];
@@ -360,6 +361,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    p_old = -1;
    num_comms = 0;
    comm_bufsize = 0;
+   comm_type = &comm_types[0];
    for (m = 0; m < num_boxes; m++)
    {
       i = comm_boxes_i[m];
@@ -768,7 +770,7 @@ hypre_StructCommunicationGetBuffer(HYPRE_MemoryLocation memory_location,
 {
    HYPRE_Complex *ptr;
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
       if (size > hypre_HandleStructCommSendBufferSize(hypre_handle()))
@@ -958,7 +960,7 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
       }
    }
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
 #if defined(HYPRE_WITH_GPU_AWARE_MPI)
@@ -1149,7 +1151,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    HYPRE_MemoryLocation memory_location     = hypre_HandleMemoryLocation(hypre_handle());
    HYPRE_MemoryLocation memory_location_mpi = memory_location;
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 #if !defined(HYPRE_WITH_GPU_AWARE_MPI)
    memory_location_mpi = HYPRE_MEMORY_HOST;
 #endif

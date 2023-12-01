@@ -18,7 +18,7 @@
  *--------------------------------------------------------------------------*/
 
 hypre_MultiblockMatrix *
-hypre_MultiblockMatrixCreate( )
+hypre_MultiblockMatrixCreate( void )
 {
    hypre_MultiblockMatrix  *matrix;
 
@@ -96,7 +96,6 @@ hypre_MultiblockMatrixInitialize( hypre_MultiblockMatrix *matrix )
    return ierr;
 }
 
-
 /*--------------------------------------------------------------------------
  * hypre_MultiblockMatrixAssemble
  *--------------------------------------------------------------------------*/
@@ -106,9 +105,10 @@ hypre_MultiblockMatrixAssemble( hypre_MultiblockMatrix *matrix )
 {
    HYPRE_Int    ierr = 0;
 
+   HYPRE_UNUSED_VAR(matrix);
+
    return (ierr);
 }
-
 
 /*--------------------------------------------------------------------------
  * hypre_MultiblockMatrixPrint
@@ -117,6 +117,8 @@ hypre_MultiblockMatrixAssemble( hypre_MultiblockMatrix *matrix )
 void
 hypre_MultiblockMatrixPrint(hypre_MultiblockMatrix *matrix  )
 {
+   HYPRE_UNUSED_VAR(matrix);
+
    hypre_printf("Stub for hypre_MultiblockMatrix\n");
 }
 
@@ -176,5 +178,3 @@ hypre_MultiblockMatrixSetSubmatrix(hypre_MultiblockMatrix *matrix,
 
    return ( ierr );
 }
-
-

@@ -92,7 +92,7 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_AMGHybridCreate( )
+hypre_AMGHybridCreate( void )
 {
    hypre_AMGHybridData *AMGhybrid_data;
 
@@ -1668,12 +1668,17 @@ hypre_AMGHybridGetFinalRelativeResidualNorm( void   *AMGhybrid_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_AMGHybridSetup( void               *AMGhybrid_vdata,
-                      hypre_ParCSRMatrix *A,
-                      hypre_ParVector *b,
-                      hypre_ParVector *x            )
+hypre_AMGHybridSetup( void                *AMGhybrid_vdata,
+                      hypre_ParCSRMatrix  *A,
+                      hypre_ParVector     *b,
+                      hypre_ParVector     *x )
 {
+   HYPRE_UNUSED_VAR(A);
+   HYPRE_UNUSED_VAR(b);
+   HYPRE_UNUSED_VAR(x);
+
    hypre_AMGHybridData *AMGhybrid_data = (hypre_AMGHybridData *) AMGhybrid_vdata;
+
    if (!AMGhybrid_data)
    {
       hypre_error_in_arg(1);
@@ -2306,4 +2311,3 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
 
    return hypre_error_flag;
 }
-

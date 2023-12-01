@@ -18,7 +18,7 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_MultiblockMatrix
-HYPRE_MultiblockMatrixCreate( )
+HYPRE_MultiblockMatrixCreate( void )
 {
    return ( (HYPRE_MultiblockMatrix)
             hypre_MultiblockMatrixCreate(  ));

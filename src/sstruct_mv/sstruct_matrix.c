@@ -776,6 +776,8 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
                                                            HYPRE_MEMORY_HOST);
 
    HYPRE_IJMatrixInitialize(ijmatrix);
+   HYPRE_IJMatrixGetObject(ijmatrix,
+                           (void **) &hypre_SStructMatrixParCSRMatrix(matrix));
 
    return hypre_error_flag;
 }
@@ -1130,7 +1132,6 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                hypre_BoxGetSize(int_box, loop_size);
 
 #if defined(HYPRE_USING_GPU)
-               if ( hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE )
                {
                   hypre_assert(ndim <= 3);
 
@@ -1195,8 +1196,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 #undef DEVICE_VAR
 #define DEVICE_VAR
                }
-               else
-#endif
+#else
                {
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       box,       start, stride, mi,
@@ -1223,6 +1223,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                   }
                   hypre_BoxLoop2End(mi, vi);
                }
+#endif
             } /* end loop through boxman to entries */
 
             hypre_TFree(boxman_to_entries, HYPRE_MEMORY_HOST);
@@ -1298,8 +1299,6 @@ hypre_SStructUMatrixAssemble( hypre_SStructMatrix *matrix )
    HYPRE_IJMatrix ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
 
    HYPRE_IJMatrixAssemble(ijmatrix);
-   HYPRE_IJMatrixGetObject(
-      ijmatrix, (void **) &hypre_SStructMatrixParCSRMatrix(matrix));
 
    return hypre_error_flag;
 }
@@ -1721,4 +1720,3 @@ hypre_SStructMatrixMemoryLocation(hypre_SStructMatrix *matrix)
 
    return HYPRE_MEMORY_UNDEFINED;
 }
-

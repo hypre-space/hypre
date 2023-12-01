@@ -28,7 +28,7 @@ Final GMRES Relative Residual Norm = 7.132032e-05
 
 # Output file: solvers_ij.out.7
 Iterations = 13
-Final Relative Residual Norm = 7.750608e-05
+Final Relative Residual Norm = 7.750613e-05
 
 # Output file: solvers_ij.out.8
 Iterations = 26
@@ -142,3 +142,4 @@ Final GMRES Relative Residual Norm = 3.056660e-05
 # Output file: solvers_ij.out.117
 GMRES Iterations = 6
 Final GMRES Relative Residual Norm = 3.009877e-05
+

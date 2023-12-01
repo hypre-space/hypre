@@ -9,7 +9,7 @@
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 /* This function effectively does (in Matlab notation)
  *              C := alpha * A(:, a_colmap)
@@ -197,4 +197,4 @@ hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
    return hypre_error_flag;
 }
 
-#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#endif // defined(HYPRE_USING_GPU)

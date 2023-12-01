@@ -11,7 +11,7 @@
 
 #define PARCSRGEMM_TIMING 0
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 /* option == 1, T = HYPRE_BigInt
  * option == 2, T = HYPRE_Int,
@@ -297,11 +297,9 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
    if (num_cols_offd_C)
    {
       hypre_ParCSRMatrixDeviceColMapOffd(C) = col_map_offd_C;
-
-      hypre_ParCSRMatrixColMapOffd(C) = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(C), col_map_offd_C, HYPRE_BigInt, num_cols_offd_C,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
+
+   hypre_ParCSRMatrixCopyColMapOffdToHost(C);
 
 #if PARCSRGEMM_TIMING > 0
    hypre_ForceSyncComputeStream(hypre_handle());
@@ -494,7 +492,7 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
                          func1 );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure Cint is ready before issuing GPU-GPU MPI */
       hypre_ForceSyncComputeStream(hypre_handle());
 #endif
@@ -594,14 +592,11 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(C));
    hypre_ParCSRMatrixOffd(C) = C_offd;
 
-   if (num_cols_offd_C)
-   {
-      hypre_ParCSRMatrixDeviceColMapOffd(C) = col_map_offd_C;
+   hypre_ParCSRMatrixDeviceColMapOffd(C) = col_map_offd_C;
 
-      hypre_ParCSRMatrixColMapOffd(C) = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(C), col_map_offd_C, HYPRE_BigInt, num_cols_offd_C,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-   }
+   hypre_ParCSRMatrixCompressOffdMapDevice(C);
+
+   hypre_ParCSRMatrixCopyColMapOffdToHost(C);
 
    hypre_assert(!hypre_CSRMatrixCheckDiagFirstDevice(hypre_ParCSRMatrixDiag(C)));
 
@@ -623,17 +618,18 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                                hypre_ParCSRMatrix *P,
                                HYPRE_Int           keep_transpose )
 {
-   hypre_CSRMatrix *R_diag = hypre_ParCSRMatrixDiag(R);
-   hypre_CSRMatrix *R_offd = hypre_ParCSRMatrixOffd(R);
+   MPI_Comm             comm   = hypre_ParCSRMatrixComm(A);
+   hypre_CSRMatrix     *R_diag = hypre_ParCSRMatrixDiag(R);
+   hypre_CSRMatrix     *R_offd = hypre_ParCSRMatrixOffd(R);
 
-   hypre_ParCSRMatrix *C;
-   hypre_CSRMatrix    *C_diag;
-   hypre_CSRMatrix    *C_offd;
-   HYPRE_Int           num_cols_offd_C = 0;
-   HYPRE_BigInt       *col_map_offd_C = NULL;
+   hypre_ParCSRMatrix  *C;
+   hypre_CSRMatrix     *C_diag;
+   hypre_CSRMatrix     *C_offd;
+   HYPRE_Int            num_cols_offd_C = 0;
+   HYPRE_BigInt        *col_map_offd_C = NULL;
 
-   HYPRE_Int num_procs;
-   MPI_Comm comm = hypre_ParCSRMatrixComm(A);
+   HYPRE_Int            num_procs;
+
    hypre_MPI_Comm_size(comm, &num_procs);
 
    if ( hypre_ParCSRMatrixGlobalNumRows(R) != hypre_ParCSRMatrixGlobalNumRows(A) ||
@@ -717,12 +713,14 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       hypre_CSRMatrixDestroy(Abar);
       hypre_CSRMatrixDestroy(Pbar);
 
-      hypre_assert(hypre_CSRMatrixNumRows(Cbar) == hypre_ParCSRMatrixNumCols(R) + hypre_CSRMatrixNumCols(
-                      R_offd));
-      hypre_assert(hypre_CSRMatrixNumCols(Cbar) == hypre_ParCSRMatrixNumCols(P) + num_cols_offd);
+      hypre_assert(hypre_CSRMatrixNumRows(Cbar) ==
+                   hypre_ParCSRMatrixNumCols(R) + hypre_CSRMatrixNumCols(R_offd));
+      hypre_assert(hypre_CSRMatrixNumCols(Cbar) ==
+                   hypre_ParCSRMatrixNumCols(P) + num_cols_offd);
 
-      hypre_TMemcpy(&local_nnz_Cbar, hypre_CSRMatrixI(Cbar) + hypre_ParCSRMatrixNumCols(R), HYPRE_Int, 1,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(&local_nnz_Cbar,
+                    hypre_CSRMatrixI(Cbar) + hypre_ParCSRMatrixNumCols(R),
+                    HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
       // Cint is the bottom part of Cbar
       Cint = hypre_CSRMatrixCreate(hypre_CSRMatrixNumCols(R_offd), hypre_CSRMatrixNumCols(Cbar),
@@ -748,10 +746,12 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
 
       // Change Cint into a BigJ matrix
       // RL: TODO FIX the 'big' num of columns to global size
-      hypre_CSRMatrixBigJ(Cint) = hypre_TAlloc(HYPRE_BigInt, hypre_CSRMatrixNumNonzeros(Cint),
+      hypre_CSRMatrixBigJ(Cint) = hypre_TAlloc(HYPRE_BigInt,
+                                               hypre_CSRMatrixNumNonzeros(Cint),
                                                HYPRE_MEMORY_DEVICE);
 
-      RAP_functor<1, HYPRE_BigInt> func1(hypre_ParCSRMatrixNumCols(P), hypre_ParCSRMatrixFirstColDiag(P),
+      RAP_functor<1, HYPRE_BigInt> func1(hypre_ParCSRMatrixNumCols(P),
+                                         hypre_ParCSRMatrixFirstColDiag(P),
                                          col_map_offd);
 #if defined(HYPRE_USING_SYCL)
       HYPRE_ONEDPL_CALL( std::transform,
@@ -767,7 +767,7 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                          func1 );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure Cint is ready before issuing GPU-GPU MPI */
       hypre_ForceSyncComputeStream(hypre_handle());
 #endif
@@ -780,7 +780,8 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       hypre_TFree(hypre_CSRMatrixBigJ(Cint), HYPRE_MEMORY_DEVICE);
       hypre_TFree(Cint, HYPRE_MEMORY_HOST);
 
-      hypre_TMemcpy(hypre_CSRMatrixI(Cbar) + hypre_ParCSRMatrixNumCols(R), &local_nnz_Cbar, HYPRE_Int, 1,
+      hypre_TMemcpy(hypre_CSRMatrixI(Cbar) + hypre_ParCSRMatrixNumCols(R),
+                    &local_nnz_Cbar, HYPRE_Int, 1,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
       /* add Cext to local part of Cbar */
@@ -806,22 +807,34 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       hypre_CSRMatrix *R_diagT;
       hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
       hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(P);
-      hypre_CSRMatrixTransposeDevice(R_diag, &R_diagT, 1);
-      C_diag = hypre_CSRMatrixTripleMultiplyDevice(R_diagT, A_diag, P_diag);
-      C_offd = hypre_CSRMatrixCreate(hypre_ParCSRMatrixNumCols(R), 0, 0);
-      hypre_CSRMatrixInitialize_v2(C_offd, 0, HYPRE_MEMORY_DEVICE);
-      if (keep_transpose)
+
+      /* Recover or compute transpose of R_diag */
+      if (hypre_ParCSRMatrixDiagT(R))
       {
-         hypre_ParCSRMatrixDiagT(R) = R_diagT;
+         R_diagT = hypre_ParCSRMatrixDiagT(R);
       }
       else
       {
-         hypre_CSRMatrixDestroy(R_diagT);
+         hypre_CSRMatrixTransposeDevice(R_diag, &R_diagT, 1);
+      }
+
+      C_diag = hypre_CSRMatrixTripleMultiplyDevice(R_diagT, A_diag, P_diag);
+      C_offd = hypre_CSRMatrixCreate(hypre_ParCSRMatrixNumCols(R), 0, 0);
+      hypre_CSRMatrixInitialize_v2(C_offd, 0, HYPRE_MEMORY_DEVICE);
+
+      /* Keep or destroy transpose of R_diag */
+      if (!hypre_ParCSRMatrixDiagT(R))
+      {
+         if (keep_transpose)
+         {
+            hypre_ParCSRMatrixDiagT(R) = R_diagT;
+         }
+         else
+         {
+            hypre_CSRMatrixDestroy(R_diagT);
+         }
       }
    }
-
-   /* Move the diagonal entry to the first of each row */
-   hypre_CSRMatrixMoveDiagFirstDevice(C_diag);
 
    C = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A),
                                 hypre_ParCSRMatrixGlobalNumCols(R),
@@ -838,14 +851,26 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(C));
    hypre_ParCSRMatrixOffd(C) = C_offd;
 
-   if (num_cols_offd_C)
-   {
-      hypre_ParCSRMatrixDeviceColMapOffd(C) = col_map_offd_C;
+   hypre_ParCSRMatrixDeviceColMapOffd(C) = col_map_offd_C;
 
-      hypre_ParCSRMatrixColMapOffd(C) = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(C), col_map_offd_C, HYPRE_BigInt, num_cols_offd_C,
-                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   hypre_ParCSRMatrixCompressOffdMapDevice(C);
+   hypre_ParCSRMatrixCopyColMapOffdToHost(C);
+
+   /* Ensure that the diagonal entries exist in the matrix structure (even if numerically zero) */
+   if (hypre_CSRMatrixCheckForMissingDiagonal(C_diag))
+   {
+      hypre_CSRMatrix *zero = hypre_CSRMatrixIdentityDevice(hypre_CSRMatrixNumRows(C_diag), 0.0);
+
+      hypre_CSRMatrix *C_diag_new = hypre_CSRMatrixAddDevice(1.0, C_diag, 1.0, zero);
+
+      hypre_CSRMatrixDestroy(C_diag);
+      hypre_CSRMatrixDestroy(zero);
+
+      hypre_ParCSRMatrixDiag(C) = C_diag_new;
    }
+
+   /* Move the diagonal entry to the first of each row */
+   hypre_CSRMatrixMoveDiagFirstDevice(hypre_ParCSRMatrixDiag(C));
 
    hypre_assert(!hypre_CSRMatrixCheckDiagFirstDevice(hypre_ParCSRMatrixDiag(C)));
 
@@ -1244,5 +1269,4 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
-
+#endif /* #if defined(HYPRE_USING_GPU) */

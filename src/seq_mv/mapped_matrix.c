@@ -18,7 +18,7 @@
  *--------------------------------------------------------------------------*/
 
 hypre_MappedMatrix *
-hypre_MappedMatrixCreate(  )
+hypre_MappedMatrixCreate( void )
 {
    hypre_MappedMatrix  *matrix;
 
@@ -66,7 +66,6 @@ hypre_MappedMatrixLimitedDestroy( hypre_MappedMatrix *matrix )
    return ierr;
 }
 
-
 /*--------------------------------------------------------------------------
  * hypre_MappedMatrixInitialize
  *--------------------------------------------------------------------------*/
@@ -74,11 +73,12 @@ hypre_MappedMatrixLimitedDestroy( hypre_MappedMatrix *matrix )
 HYPRE_Int
 hypre_MappedMatrixInitialize( hypre_MappedMatrix *matrix )
 {
-   HYPRE_Int    ierr = 0;
+   HYPRE_Int ierr = 0;
+
+   HYPRE_UNUSED_VAR(matrix);
 
    return ierr;
 }
-
 
 /*--------------------------------------------------------------------------
  * hypre_MappedMatrixAssemble
@@ -120,6 +120,8 @@ hypre_MappedMatrixAssemble( hypre_MappedMatrix *matrix )
 void
 hypre_MappedMatrixPrint(hypre_MappedMatrix *matrix  )
 {
+   HYPRE_UNUSED_VAR(matrix);
+
    hypre_printf("Stub for hypre_MappedMatrix\n");
 }
 
@@ -186,4 +188,3 @@ hypre_MappedMatrixSetMapData(hypre_MappedMatrix *matrix,
 
    return (ierr);
 }
-

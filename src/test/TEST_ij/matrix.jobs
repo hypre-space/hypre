@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -33,3 +33,25 @@ mpirun -np 2 ./ij -test_ij -solver 2 -tol 0 -max_iter 5 -chunk 1 -omp 1 > matrix
 mpirun -np 3 ./ij -fromfile test.A -rhsfromfile test.b > matrix.out.11
 
 mpirun -np 2 ./ij -test_ij -solver 2 -tol 0 -max_iter 5 -chunk 1 -add 1 -check_constant 1 > matrix.out.12
+
+#=============================================================================
+# Test matrix scaling. Solver: BJ-GMRES
+#=============================================================================
+
+# Sequential - Left scaling
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ  -solver 4 -tol 1e-2 -k 100 -test_scaling 1 > matrix.out.100
+
+# Sequential - Right scaling
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ  -solver 4 -tol 1e-2 -k 100 -test_scaling 2 > matrix.out.101
+
+# Sequential - Left and right scaling
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ  -solver 4 -tol 1e-2 -k 100 -test_scaling 3 > matrix.out.102
+
+# Parallel - Left scaling
+mpirun -np 4 ./ij -fromfile data/beam_tet_dof2475_np4/A.IJ -solver 4 -tol 9e-1 -k 100 -test_scaling 1 > matrix.out.110
+
+# Parallel - Right scaling
+mpirun -np 4 ./ij -fromfile data/beam_tet_dof2475_np4/A.IJ -solver 4 -tol 9e-1 -k 100 -test_scaling 2 > matrix.out.111
+
+# Parallel - Left and right scaling
+mpirun -np 4 ./ij -fromfile data/beam_tet_dof2475_np4/A.IJ -solver 4 -tol 9e-1 -k 100 -test_scaling 3 > matrix.out.112

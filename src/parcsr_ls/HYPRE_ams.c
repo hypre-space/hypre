@@ -231,7 +231,7 @@ HYPRE_Int HYPRE_AMSSetSmoothingOptions(HYPRE_Solver solver,
 
 HYPRE_Int HYPRE_AMSSetChebySmoothingOptions(HYPRE_Solver solver,
                                             HYPRE_Int cheby_order,
-                                            HYPRE_Int cheby_fraction)
+                                            HYPRE_Real cheby_fraction)
 {
    return hypre_AMSSetChebySmoothingOptions((void *) solver,
                                             cheby_order,

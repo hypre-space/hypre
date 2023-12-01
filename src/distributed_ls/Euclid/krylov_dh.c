@@ -23,10 +23,10 @@ void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, HYPR
   HYPRE_Real atol = ctx->atol, rtol = ctx->rtol;
 
   /* scalars */
-  HYPRE_Real alpha, alpha_1,
+  HYPRE_Real alpha, alpha_1 = 1.0,
          beta_1,
-         widget, widget_1,
-         rho_1, rho_2,
+         widget, widget_1 = 1.0,
+         rho_1, rho_2 = 1.0,
          s_norm, eps,
          exit_a, b_iprod, r_iprod;
 
@@ -58,7 +58,7 @@ void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, HYPR
 
   its = 0;
   while(1) {
-    ++its;  
+    ++its;
     rho_1 = InnerProd(m, r_hat, r);
     if (rho_1 == 0) {
       SET_V_ERROR("(r_hat . r) = 0; method fails");
@@ -68,7 +68,7 @@ void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, HYPR
       CopyVec(m, r, p);   /* p = r_0 */ CHECK_V_ERROR;
     } else {
       beta_1 = (rho_1/rho_2)*(alpha_1/widget_1);
-      
+
       /* p_i = r_(i-1) + beta_(i-1)*( p_(i-1) - w_(i-1)*v_(i-1) ) */
       Axpy(m, -widget_1, v, p); CHECK_V_ERROR;
       ScaleVec(m, beta_1, p); CHECK_V_ERROR;
@@ -132,7 +132,7 @@ void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, HYPR
 
     /* monitor convergence */
     if (monitor && myid_dh == 0) {
-      hypre_fprintf(stderr, "[it = %i] %e\n", its, sqrt(r_iprod/b_iprod));
+      hypre_fprintf(stderr, "[it = %i] %e\n", its, hypre_sqrt(r_iprod/b_iprod));
     }
 
     /* prepare for next iteration */
@@ -212,7 +212,7 @@ void cg_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, HYPRE_Int 
 
     /* r = r - alpha*s */
     Axpy(m, -alpha, s, r); CHECK_V_ERROR;
-         
+
     /* solve Ms = r */
     Euclid_dhApply(ctx, r, s); CHECK_V_ERROR;
 
@@ -223,7 +223,7 @@ void cg_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, HYPRE_Int 
     i_prod = InnerProd(m, r, r); CHECK_V_ERROR;
 
     if (monitor && myid_dh == 0) {
-      hypre_fprintf(stderr, "iter = %i  rel. resid. norm: %e\n", its, sqrt(i_prod/bi_prod));
+      hypre_fprintf(stderr, "iter = %i  rel. resid. norm: %e\n", its, hypre_sqrt(i_prod/bi_prod));
     }
 
     /* check for convergence */
