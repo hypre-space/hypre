@@ -165,8 +165,10 @@ hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixResize( hypre_CSRMatrix *matrix, HYPRE_Int new_num_rows, HYPRE_Int new_num_cols,
-                       HYPRE_Int new_num_nonzeros )
+hypre_CSRMatrixResize( hypre_CSRMatrix *matrix,
+                       HYPRE_Int        new_num_rows,
+                       HYPRE_Int        new_num_cols,
+                       HYPRE_Int        new_num_nonzeros )
 {
    HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(matrix);
    HYPRE_Int old_num_nonzeros = hypre_CSRMatrixNumNonzeros(matrix);
@@ -191,18 +193,26 @@ hypre_CSRMatrixResize( hypre_CSRMatrix *matrix, HYPRE_Int new_num_rows, HYPRE_In
       }
       else
       {
-         hypre_CSRMatrixData(matrix) = hypre_TReAlloc_v2(hypre_CSRMatrixData(matrix), HYPRE_Complex,
-                                                         old_num_nonzeros, HYPRE_Complex, new_num_nonzeros, memory_location);
+         hypre_CSRMatrixData(matrix) = hypre_TReAlloc_v2(hypre_CSRMatrixData(matrix), HYPRE_Complex, old_num_nonzeros,
+                                                         HYPRE_Complex, new_num_nonzeros, memory_location);
       }
 
-      if (!hypre_CSRMatrixJ(matrix))
+      if (hypre_CSRMatrixBigJ(matrix))
       {
-         hypre_CSRMatrixJ(matrix) = hypre_CTAlloc(HYPRE_Int, new_num_nonzeros, memory_location);
+         hypre_CSRMatrixBigJ(matrix) = hypre_TReAlloc_v2(hypre_CSRMatrixBigJ(matrix), HYPRE_BigInt, old_num_nonzeros,
+                                                         HYPRE_BigInt, new_num_nonzeros, memory_location);
       }
       else
       {
-         hypre_CSRMatrixJ(matrix) = hypre_TReAlloc_v2(hypre_CSRMatrixJ(matrix), HYPRE_Int, old_num_nonzeros,
-                                                      HYPRE_Int, new_num_nonzeros, memory_location);
+         if (!hypre_CSRMatrixJ(matrix))
+         {
+            hypre_CSRMatrixJ(matrix) = hypre_CTAlloc(HYPRE_Int, new_num_nonzeros, memory_location);
+         }
+         else
+         {
+            hypre_CSRMatrixJ(matrix) = hypre_TReAlloc_v2(hypre_CSRMatrixJ(matrix), HYPRE_Int, old_num_nonzeros,
+                                                         HYPRE_Int, new_num_nonzeros, memory_location);
+         }
       }
    }
 
