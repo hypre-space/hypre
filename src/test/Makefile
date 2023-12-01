@@ -144,7 +144,7 @@ sstruct: sstruct.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-struct: struct.o
+struct: struct.obj
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
