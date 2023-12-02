@@ -11,6 +11,9 @@
  *-----------------------------------------------------*/
 
 #include "_hypre_parcsr_mv.h"
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+#include <mpi.h>
+#endif
 
 /* some debugging tools*/
 #define mydebug 0
@@ -546,6 +549,43 @@ hypre_ParCSRCommPkgCreateApart
                                     num_sends, send_procs, send_map_starts,
                                     send_map_elmts,
                                     &comm_pkg);
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+   if (comm_pkg->use_neighbor) {
+      HYPRE_Int *sendcounts = hypre_TAlloc(HYPRE_Int, num_sends, HYPRE_MEMORY_HOST);
+      HYPRE_Int *recvcounts = hypre_TAlloc(HYPRE_Int, num_recvs, HYPRE_MEMORY_HOST);
+      for (HYPRE_Int i = 0; i < num_sends; i++) {
+         sendcounts[i] = send_map_starts[i+1] - send_map_starts[i];
+      }
+      for (HYPRE_Int i = 0; i < num_recvs; i++) {
+         recvcounts[i] = recv_vec_starts[i+1] - recv_vec_starts[i];
+      }
+      MPIX_Dist_graph_create_adjacent( comm, num_recvs, hypre_ParCSRCommPkgRecvProcs(comm_pkg),
+                                       recvcounts,
+                                       num_sends, hypre_ParCSRCommPkgSendProcs(comm_pkg),
+                                       sendcounts,
+                                       MPI_INFO_NULL, 0, &(comm_pkg->neighbor_comm));
+      MPIX_Dist_graph_create_adjacent( comm, num_sends, hypre_ParCSRCommPkgSendProcs(comm_pkg),
+                                       sendcounts,
+                                       num_recvs, hypre_ParCSRCommPkgRecvProcs(comm_pkg),
+                                       recvcounts,
+                                       MPI_INFO_NULL, 0, &(comm_pkg->neighborT_comm));
+
+      HYPRE_Int num_send_elmts = send_map_starts[num_sends];
+      comm_pkg->global_send_indices = hypre_CTAlloc(long, num_send_elmts, HYPRE_MEMORY_HOST);
+      for (int i = 0; i < num_sends; i++) {
+         for (int j = send_map_starts[i]; j < send_map_starts[i+1]; j++) {
+            comm_pkg->global_send_indices[j] = send_map_elmts[j] + first_col_diag;
+         }
+      }
+      HYPRE_Int num_recv_elmts = recv_vec_starts[num_recvs];
+      comm_pkg->global_recv_indices = hypre_CTAlloc(long, num_recv_elmts, HYPRE_MEMORY_HOST);
+      for (int i = 0; i < num_recvs; i++) {
+         for (int j = recv_vec_starts[i]; j < recv_vec_starts[i+1]; j++) {
+            comm_pkg->global_recv_indices[j] = col_map_off_d[j];
+         }
+      }
+   }
+#endif
 
    return hypre_error_flag;
 }

@@ -7,6 +7,10 @@
 
 #include "_hypre_parcsr_mv.h"
 
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+#include "mpi_advance.h"
+#endif
+
 /*==========================================================================*/
 
 #ifdef HYPRE_USING_PERSISTENT_COMM
@@ -66,6 +70,21 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job, hypre_ParCSRCommPkg *comm
    hypre_ParCSRCommHandleNumRequests(comm_handle) = num_requests;
    hypre_ParCSRCommHandleRequests(comm_handle)    = requests;
 
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+   if (comm_pkg->neighbor_comm == NULL) {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Trying to communicate with a NULL communicator\n");
+   } else if (!comm_pkg->use_neighbor) {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Trying to use neighbor collectives without proper setup\n");
+   }
+   MPIX_Request *Xrequest;
+
+   HYPRE_Int *send_sizes = hypre_TAlloc(HYPRE_Int, num_sends, HYPRE_MEMORY_HOST);
+   HYPRE_Int *recv_sizes = hypre_TAlloc(HYPRE_Int, num_recvs, HYPRE_MEMORY_HOST);
+
+   HYPRE_BigInt num_send_elmts = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+   HYPRE_BigInt num_recv_elmts = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs);
+#endif
+
    void *send_buff = NULL, *recv_buff = NULL;
 
    switch (job_type)
@@ -77,6 +96,52 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job, hypre_ParCSRCommPkg *comm
                                   HYPRE_MEMORY_HOST);
          recv_buff = hypre_TAlloc(HYPRE_Complex, hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs),
                                   HYPRE_MEMORY_HOST);
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+         if (hypre_HandleUsingNodeAwareMPI(hypre_handle()) == 0) {
+            for (i = 0; i < num_recvs; ++i)
+            {
+               HYPRE_Int ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
+               HYPRE_Int vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i);
+               HYPRE_Int vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start;
+               hypre_MPI_Recv_init( (HYPRE_Complex *)recv_buff + vec_start, vec_len, HYPRE_MPI_COMPLEX,
+                                    ip, 0, comm, requests + i );
+            }
+            for (i = 0; i < num_sends; ++i)
+            {
+               HYPRE_Int ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
+               HYPRE_Int vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+               HYPRE_Int vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) - vec_start;
+               hypre_MPI_Send_init( (HYPRE_Complex *)send_buff + vec_start, vec_len, HYPRE_MPI_COMPLEX,
+                                    ip, 0, comm, requests + num_recvs + i );
+            }
+            //int rank;
+            //MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+            //if (rank == 0) { hypre_printf("Standard init done\n"); }
+         } else {
+            for (i = 0; i < num_recvs; ++i)
+            {
+               recv_sizes[i] = (hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) -
+                                hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i));
+            }
+            for (i = 0; i < num_sends; ++i)
+            {
+               send_sizes[i] = (hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) -
+                                hypre_ParCSRCommPkgSendMapStart(comm_pkg, i));
+            }
+            MPIX_Neighbor_locality_alltoallv_init( (HYPRE_Complex *)send_buff, send_sizes,
+                                                   hypre_ParCSRCommPkgSendMapStarts(comm_pkg),
+                                                   comm_pkg->global_send_indices,
+                                                   HYPRE_MPI_COMPLEX,
+                                                   (HYPRE_Complex *)recv_buff, recv_sizes,
+                                                   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg),
+                                                   comm_pkg->global_recv_indices,
+                                                   HYPRE_MPI_COMPLEX, comm_pkg->neighbor_comm,
+                                                   MPI_INFO_NULL, &Xrequest);
+            //int rank;
+            //MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+            //if (rank == 0) { hypre_printf("Node-aware init done\n"); }
+         }
+#else
          for (i = 0; i < num_recvs; ++i)
          {
             HYPRE_Int ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
@@ -93,6 +158,7 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job, hypre_ParCSRCommPkg *comm
             hypre_MPI_Send_init( (HYPRE_Complex *)send_buff + vec_start, vec_len, HYPRE_MPI_COMPLEX,
                                  ip, 0, comm, requests + num_recvs + i );
          }
+#endif
          break;
 
       case HYPRE_COMM_PKG_JOB_COMPLEX_TRANSPOSE:
@@ -102,6 +168,47 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job, hypre_ParCSRCommPkg *comm
                                   HYPRE_MEMORY_HOST);
          send_buff = hypre_TAlloc(HYPRE_Complex, hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs),
                                   HYPRE_MEMORY_HOST);
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+         if (!hypre_HandleUsingNodeAwareMPI(hypre_handle())) {
+            for (i = 0; i < num_sends; ++i)
+            {
+               HYPRE_Int ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
+               HYPRE_Int vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+               HYPRE_Int vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) - vec_start;
+               hypre_MPI_Recv_init( (HYPRE_Complex *)recv_buff + vec_start, vec_len, HYPRE_MPI_COMPLEX,
+                                    ip, 0, comm, requests + i );
+            }
+            for (i = 0; i < num_recvs; ++i)
+            {
+               HYPRE_Int ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
+               HYPRE_Int vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i);
+               HYPRE_Int vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start;
+               hypre_MPI_Send_init( (HYPRE_Complex *)send_buff + vec_start, vec_len, HYPRE_MPI_COMPLEX,
+                                    ip, 0, comm, requests + num_sends + i );
+            }
+         } else {
+            for (i = 0; i < num_recvs; ++i)
+            {
+               recv_sizes[i] = (hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) -
+                                hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i));
+            }
+            for (i = 0; i < num_sends; ++i)
+            {
+               send_sizes[i] = (hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) -
+                                hypre_ParCSRCommPkgSendMapStart(comm_pkg, i));
+            }
+            MPIX_Neighbor_part_locality_alltoallv_init( (HYPRE_Complex *)send_buff, recv_sizes,
+                                                   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg),
+                                                   HYPRE_MPI_COMPLEX,
+                                                   (HYPRE_Complex *)recv_buff, send_sizes,
+                                                   hypre_ParCSRCommPkgSendMapStarts(comm_pkg),
+                                                   HYPRE_MPI_COMPLEX, comm_pkg->neighborT_comm,
+                                                   MPI_INFO_NULL, &Xrequest);
+            //int rank;
+            //MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+            //if (rank == 0) { hypre_printf("Node-aware transpose init done\n"); }
+         }
+#else
          for (i = 0; i < num_sends; ++i)
          {
             HYPRE_Int ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
@@ -118,6 +225,7 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job, hypre_ParCSRCommPkg *comm
             hypre_MPI_Send_init( (HYPRE_Complex *)send_buff + vec_start, vec_len, HYPRE_MPI_COMPLEX,
                                  ip, 0, comm, requests + num_sends + i );
          }
+#endif
          break;
 
       case HYPRE_COMM_PKG_JOB_INT:
@@ -127,6 +235,46 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job, hypre_ParCSRCommPkg *comm
                                   HYPRE_MEMORY_HOST);
          recv_buff = hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs),
                                   HYPRE_MEMORY_HOST);
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+         if (!hypre_HandleUsingNodeAwareMPI(hypre_handle())) {
+            for (i = 0; i < num_recvs; ++i)
+            {
+               HYPRE_Int ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
+               HYPRE_Int vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i);
+               HYPRE_Int vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start;
+               hypre_MPI_Recv_init( (HYPRE_Int *)recv_buff + vec_start, vec_len, HYPRE_MPI_INT,
+                                    ip, 0, comm, requests + i );
+            }
+            for (i = 0; i < num_sends; ++i)
+            {
+               HYPRE_Int ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
+               HYPRE_Int vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+               HYPRE_Int vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) - vec_start;
+               hypre_MPI_Send_init( (HYPRE_Int *)send_buff + vec_start, vec_len, HYPRE_MPI_INT,
+                                    ip, 0, comm, requests + num_recvs + i );
+            }
+         } else {
+            for (i = 0; i < num_recvs; ++i)
+            {
+               recv_sizes[i] = (hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) -
+                                hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i));
+            }
+            for (i = 0; i < num_sends; ++i)
+            {
+               send_sizes[i] = (hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) -
+                                hypre_ParCSRCommPkgSendMapStart(comm_pkg, i));
+            }
+            MPIX_Neighbor_locality_alltoallv_init( (HYPRE_Int *)send_buff, send_sizes,
+                                                   hypre_ParCSRCommPkgSendMapStarts(comm_pkg),
+                                                   comm_pkg->global_send_indices,
+                                                   HYPRE_MPI_INT,
+                                                   (HYPRE_Int *)recv_buff, recv_sizes,
+                                                   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg),
+                                                   comm_pkg->global_recv_indices,
+                                                   HYPRE_MPI_INT, comm_pkg->neighbor_comm,
+                                                   0, &Xrequest);
+         }
+#else
          for (i = 0; i < num_recvs; ++i)
          {
             HYPRE_Int ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
@@ -143,6 +291,7 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job, hypre_ParCSRCommPkg *comm
             hypre_MPI_Send_init( (HYPRE_Int *)send_buff + vec_start, vec_len, HYPRE_MPI_INT,
                                  ip, 0, comm, requests + num_recvs + i );
          }
+#endif
          break;
 
       case HYPRE_COMM_PKG_JOB_INT_TRANSPOSE:
@@ -152,6 +301,44 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job, hypre_ParCSRCommPkg *comm
                                   HYPRE_MEMORY_HOST);
          send_buff = hypre_TAlloc(HYPRE_Int, hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs),
                                   HYPRE_MEMORY_HOST);
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+         if (!hypre_HandleUsingNodeAwareMPI(hypre_handle())) {
+            for (i = 0; i < num_sends; ++i)
+            {
+               HYPRE_Int ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
+               HYPRE_Int vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+               HYPRE_Int vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) - vec_start;
+               hypre_MPI_Recv_init( (HYPRE_Int *)recv_buff + vec_start, vec_len, HYPRE_MPI_INT,
+                                    ip, 0, comm, requests + i );
+            }
+            for (i = 0; i < num_recvs; ++i)
+            {
+               HYPRE_Int ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
+               HYPRE_Int vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i);
+               HYPRE_Int vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start;
+               hypre_MPI_Send_init( (HYPRE_Int *)send_buff + vec_start, vec_len, HYPRE_MPI_INT,
+                                    ip, 0, comm, requests + num_sends + i );
+            }
+         } else {
+            for (i = 0; i < num_recvs; ++i)
+            {
+               recv_sizes[i] = (hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) -
+                                hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i));
+            }
+            for (i = 0; i < num_sends; ++i)
+            {
+               send_sizes[i] = (hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) -
+                                hypre_ParCSRCommPkgSendMapStart(comm_pkg, i));
+            }
+            MPIX_Neighbor_part_locality_alltoallv_init( (HYPRE_Int *)send_buff, recv_sizes,
+                                                   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg),
+                                                   HYPRE_MPI_INT,
+                                                   (HYPRE_Int *)recv_buff, send_sizes,
+                                                   hypre_ParCSRCommPkgSendMapStarts(comm_pkg),
+                                                   HYPRE_MPI_INT, comm_pkg->neighborT_comm,
+                                                   0, &Xrequest);
+         }
+#else
          for (i = 0; i < num_sends; ++i)
          {
             HYPRE_Int ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
@@ -168,6 +355,7 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job, hypre_ParCSRCommPkg *comm
             hypre_MPI_Send_init( (HYPRE_Int *)send_buff + vec_start, vec_len, HYPRE_MPI_INT,
                                  ip, 0, comm, requests + num_sends + i );
          }
+#endif
          break;
 
       case HYPRE_COMM_PKG_JOB_BIGINT:
@@ -177,6 +365,48 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job, hypre_ParCSRCommPkg *comm
                                   HYPRE_MEMORY_HOST);
          recv_buff = hypre_TAlloc(HYPRE_BigInt, hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs),
                                   HYPRE_MEMORY_HOST);
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+         if (!hypre_HandleUsingNodeAwareMPI(hypre_handle())) {
+            for (i = 0; i < num_recvs; ++i)
+            {
+               HYPRE_Int ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
+               HYPRE_Int vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i);
+               HYPRE_Int vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start;
+               hypre_MPI_Recv_init( (HYPRE_BigInt *)recv_buff + (HYPRE_BigInt)vec_start, vec_len,
+                                    HYPRE_MPI_BIG_INT,
+                                    ip, 0, comm, requests + i );
+            }
+            for (i = 0; i < num_sends; ++i)
+            {
+               HYPRE_Int ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
+               HYPRE_Int vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+               HYPRE_Int vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) - vec_start;
+               hypre_MPI_Send_init( (HYPRE_BigInt *)send_buff + (HYPRE_BigInt)vec_start, vec_len,
+                                    HYPRE_MPI_BIG_INT,
+                                    ip, 0, comm, requests + num_recvs + i);
+            }
+         } else {
+            for (i = 0; i < num_recvs; ++i)
+            {
+               recv_sizes[i] = (hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) -
+                                hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i));
+            }
+            for (i = 0; i < num_sends; ++i)
+            {
+               send_sizes[i] = (hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) -
+                                hypre_ParCSRCommPkgSendMapStart(comm_pkg, i));
+            }
+            MPIX_Neighbor_locality_alltoallv_init( (HYPRE_BigInt *)send_buff, send_sizes,
+                                                   hypre_ParCSRCommPkgSendMapStarts(comm_pkg),
+                                                   comm_pkg->global_send_indices,
+                                                   HYPRE_MPI_BIG_INT,
+                                                   (HYPRE_BigInt *)recv_buff, recv_sizes,
+                                                   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg),
+                                                   comm_pkg->global_recv_indices,
+                                                   HYPRE_MPI_BIG_INT, comm_pkg->neighbor_comm,
+                                                   0, &Xrequest);
+         }
+#else
          for (i = 0; i < num_recvs; ++i)
          {
             HYPRE_Int ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
@@ -195,6 +425,7 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job, hypre_ParCSRCommPkg *comm
                                  HYPRE_MPI_BIG_INT,
                                  ip, 0, comm, requests + num_recvs + i);
          }
+#endif
          break;
 
       case HYPRE_COMM_PKG_JOB_BIGINT_TRANSPOSE:
@@ -204,6 +435,46 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job, hypre_ParCSRCommPkg *comm
                                   HYPRE_MEMORY_HOST);
          send_buff = hypre_TAlloc(HYPRE_BigInt, hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs),
                                   HYPRE_MEMORY_HOST);
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+         if (!hypre_HandleUsingNodeAwareMPI(hypre_handle())) {
+            for (i = 0; i < num_sends; ++i)
+            {
+               HYPRE_Int ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
+               HYPRE_Int vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+               HYPRE_Int vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) - vec_start;
+               hypre_MPI_Recv_init( (HYPRE_BigInt *)recv_buff + (HYPRE_BigInt)vec_start, vec_len,
+                                    HYPRE_MPI_BIG_INT,
+                                    ip, 0, comm, requests + i );
+            }
+            for (i = 0; i < num_recvs; ++i)
+            {
+               HYPRE_Int ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
+               HYPRE_Int vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i);
+               HYPRE_Int vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start;
+               hypre_MPI_Send_init( (HYPRE_BigInt *)send_buff + (HYPRE_BigInt)vec_start, vec_len,
+                                    HYPRE_MPI_BIG_INT,
+                                    ip, 0, comm, requests + num_sends + i);
+            }
+         } else {
+            for (i = 0; i < num_recvs; ++i)
+            {
+               recv_sizes[i] = (hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) -
+                                hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i));
+            }
+            for (i = 0; i < num_sends; ++i)
+            {
+               send_sizes[i] = (hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) -
+                                hypre_ParCSRCommPkgSendMapStart(comm_pkg, i));
+            }
+            MPIX_Neighbor_part_locality_alltoallv_init( (HYPRE_BigInt *)send_buff, recv_sizes,
+                                                   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg),
+                                                   HYPRE_MPI_BIG_INT,
+                                                   (HYPRE_BigInt *)recv_buff, send_sizes,
+                                                   hypre_ParCSRCommPkgSendMapStarts(comm_pkg),
+                                                   HYPRE_MPI_BIG_INT, comm_pkg->neighborT_comm,
+                                                   0, &Xrequest);
+         }
+#else
          for (i = 0; i < num_sends; ++i)
          {
             HYPRE_Int ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
@@ -218,11 +489,11 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job, hypre_ParCSRCommPkg *comm
             HYPRE_Int ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
             HYPRE_Int vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i);
             HYPRE_Int vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start;
-
             hypre_MPI_Send_init( (HYPRE_BigInt *)send_buff + (HYPRE_BigInt)vec_start, vec_len,
                                  HYPRE_MPI_BIG_INT,
                                  ip, 0, comm, requests + num_sends + i);
          }
+#endif
          break;
       default:
          hypre_assert(1 == 0);
@@ -233,6 +504,14 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job, hypre_ParCSRCommPkg *comm
    hypre_ParCSRCommHandleSendDataBuffer(comm_handle) = send_buff;
    hypre_ParCSRCommHandleNumSendBytes(comm_handle)   = num_bytes_send;
    hypre_ParCSRCommHandleNumRecvBytes(comm_handle)   = num_bytes_recv;
+
+
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+   comm_handle->Xrequest = Xrequest;
+
+   hypre_TFree(send_sizes, HYPRE_MEMORY_HOST);
+   hypre_TFree(recv_sizes, HYPRE_MEMORY_HOST);
+#endif
 
    return ( comm_handle );
 }
@@ -266,8 +545,14 @@ hypre_ParCSRPersistentCommHandleDestroy( hypre_ParCSRPersistentCommHandle *comm_
    {
       hypre_TFree(hypre_ParCSRCommHandleSendDataBuffer(comm_handle), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParCSRCommHandleRecvDataBuffer(comm_handle), HYPRE_MEMORY_HOST);
-      hypre_TFree(comm_handle->requests, HYPRE_MEMORY_HOST);
-
+      if (comm_handle->requests) {
+         hypre_TFree(comm_handle->requests, HYPRE_MEMORY_HOST);
+      }
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+      if (comm_handle->Xrequest && hypre_HandleUsingNodeAwareMPI(hypre_handle())) {
+         MPIX_Request_free(comm_handle->Xrequest);
+      }
+#endif
       hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
    }
 }
@@ -284,6 +569,50 @@ hypre_ParCSRPersistentCommHandleStart( hypre_ParCSRPersistentCommHandle *comm_ha
    hypre_ParCSRCommHandleSendData(comm_handle) = send_data;
    hypre_ParCSRCommHandleSendMemoryLocation(comm_handle) = send_memory_location;
 
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+   if (!hypre_HandleUsingNodeAwareMPI(hypre_handle())) {
+      if (hypre_ParCSRCommHandleNumRequests(comm_handle) > 0)
+      {
+         //int rank;
+         //MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+         //if (rank == 0) { hypre_printf("Standard starting\n"); }
+         hypre_TMemcpy( hypre_ParCSRCommHandleSendDataBuffer(comm_handle),
+                        send_data,
+                        char,
+                        hypre_ParCSRCommHandleNumSendBytes(comm_handle),
+                        HYPRE_MEMORY_HOST,
+                        send_memory_location );
+         HYPRE_Int ret = hypre_MPI_Startall(hypre_ParCSRCommHandleNumRequests(comm_handle),
+                                            hypre_ParCSRCommHandleRequests(comm_handle));
+         if (hypre_MPI_SUCCESS != ret)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "MPI error\n");
+            /*hypre_printf("MPI error %d in %s (%s, line %u)\n", ret, __FUNCTION__, __FILE__, __LINE__);*/
+         }
+      }
+   } else {
+      if (comm_handle->Xrequest)
+      {
+         //int rank;
+         //MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+         //if (rank == 0) { hypre_printf("Node-aware starting\n"); }
+         hypre_TMemcpy( hypre_ParCSRCommHandleSendDataBuffer(comm_handle),
+                        send_data,
+                        char,
+                        hypre_ParCSRCommHandleNumSendBytes(comm_handle),
+                        HYPRE_MEMORY_HOST,
+                        send_memory_location );
+         //if (rank == 0) { hypre_printf("Node-aware start copied\n"); }
+         HYPRE_Int ret = (HYPRE_Int) MPIX_Start(comm_handle->Xrequest);
+         //if (rank == 0) { hypre_printf("Node-aware started\n"); }
+         if (hypre_MPI_SUCCESS != ret)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "MPI error\n");
+            /*hypre_printf("MPI error %d in %s (%s, line %u)\n", ret, __FUNCTION__, __FILE__, __LINE__);*/
+         }
+      }
+   }
+#else
    if (hypre_ParCSRCommHandleNumRequests(comm_handle) > 0)
    {
       hypre_TMemcpy( hypre_ParCSRCommHandleSendDataBuffer(comm_handle),
@@ -292,7 +621,6 @@ hypre_ParCSRPersistentCommHandleStart( hypre_ParCSRPersistentCommHandle *comm_ha
                      hypre_ParCSRCommHandleNumSendBytes(comm_handle),
                      HYPRE_MEMORY_HOST,
                      send_memory_location );
-
       HYPRE_Int ret = hypre_MPI_Startall(hypre_ParCSRCommHandleNumRequests(comm_handle),
                                          hypre_ParCSRCommHandleRequests(comm_handle));
       if (hypre_MPI_SUCCESS != ret)
@@ -301,6 +629,7 @@ hypre_ParCSRPersistentCommHandleStart( hypre_ParCSRPersistentCommHandle *comm_ha
          /*hypre_printf("MPI error %d in %s (%s, line %u)\n", ret, __FUNCTION__, __FILE__, __LINE__);*/
       }
    }
+#endif
 }
 
 /*------------------------------------------------------------------
@@ -315,6 +644,52 @@ hypre_ParCSRPersistentCommHandleWait( hypre_ParCSRPersistentCommHandle *comm_han
    hypre_ParCSRCommHandleRecvData(comm_handle) = recv_data;
    hypre_ParCSRCommHandleRecvMemoryLocation(comm_handle) = recv_memory_location;
 
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+   //int rank;
+   //MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+   if (!hypre_HandleUsingNodeAwareMPI(hypre_handle())) {
+      //if (rank == 0) { hypre_printf("wait not using node aware\n"); }
+      if (hypre_ParCSRCommHandleNumRequests(comm_handle) > 0)
+      {
+         HYPRE_Int ret = hypre_MPI_Waitall(hypre_ParCSRCommHandleNumRequests(comm_handle),
+                                           hypre_ParCSRCommHandleRequests(comm_handle),
+                                           hypre_MPI_STATUSES_IGNORE);
+         if (hypre_MPI_SUCCESS != ret)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "MPI error\n");
+            /*hypre_printf("MPI error %d in %s (%s, line %u)\n", ret, __FUNCTION__, __FILE__, __LINE__);*/
+         }
+
+         hypre_TMemcpy(recv_data,
+                       hypre_ParCSRCommHandleRecvDataBuffer(comm_handle),
+                       char,
+                       hypre_ParCSRCommHandleNumRecvBytes(comm_handle),
+                       recv_memory_location,
+                       HYPRE_MEMORY_HOST);
+      }
+      //if (rank == 0) { hypre_printf("wait done not using node aware\n"); }
+   } else {
+      if (comm_handle->Xrequest)
+      {
+         //if (rank == 0) { hypre_printf("Node-aware waiting\n"); }
+         HYPRE_Int ret = (HYPRE_Int) MPIX_Wait(comm_handle->Xrequest,
+                                               MPI_STATUS_IGNORE);
+
+         if (hypre_MPI_SUCCESS != ret)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "MPI error\n");
+            /*hypre_printf("MPI error %d in %s (%s, line %u)\n", ret, __FUNCTION__, __FILE__, __LINE__);*/
+         }
+
+         hypre_TMemcpy(recv_data,
+                       hypre_ParCSRCommHandleRecvDataBuffer(comm_handle),
+                       char,
+                       hypre_ParCSRCommHandleNumRecvBytes(comm_handle),
+                       recv_memory_location,
+                       HYPRE_MEMORY_HOST);
+      }
+   }
+#else
    if (hypre_ParCSRCommHandleNumRequests(comm_handle) > 0)
    {
       HYPRE_Int ret = hypre_MPI_Waitall(hypre_ParCSRCommHandleNumRequests(comm_handle),
@@ -333,6 +708,7 @@ hypre_ParCSRPersistentCommHandleWait( hypre_ParCSRPersistentCommHandle *comm_han
                     recv_memory_location,
                     HYPRE_MEMORY_HOST);
    }
+#endif
 }
 #endif // HYPRE_USING_PERSISTENT_COMM
 
@@ -1190,6 +1566,11 @@ hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A )
 
    comm_pkg = hypre_TAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixCommPkg(A) = comm_pkg;
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+   comm_pkg->use_neighbor = 1;
+#else
+   comm_pkg->use_neighbor = 0;
+#endif
    hypre_ParCSRCommPkgCreateApart( comm, col_map_offd, first_col_diag,
                                    num_cols_offd, global_num_cols,
                                    apart,
@@ -1271,6 +1652,7 @@ hypre_ParCSRFindExtendCommPkg(MPI_Comm              comm,
    HYPRE_UNUSED_VAR(starts);
 
    hypre_ParCSRCommPkg *new_comm_pkg = hypre_TAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
+   new_comm_pkg->use_neighbor = 0;
 
    hypre_assert(apart != NULL);
    hypre_ParCSRCommPkgCreateApart(comm, indices, my_first, indices_len,

@@ -285,6 +285,15 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    hypre_GpuProfilingPushRange(nvtx_name);
    while (Not_Finished)
    {
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+      if (level >= hypre_HandleNodeAwareSwitchoverThreshold(hypre_handle()))
+      {
+         hypre_HandleUsingNodeAwareMPI(hypre_handle()) = 1;
+      } else
+      {
+         hypre_HandleUsingNodeAwareMPI(hypre_handle()) = 0;
+      }
+#endif
       if (num_levels > 1)
       {
          local_size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[level]));
