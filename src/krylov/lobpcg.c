@@ -230,7 +230,7 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
               HYPRE_Real * lambdaHistory_values,
 
               /* global height of the matrix (stored in fotran-style)  specified by previous argument */
-              HYPRE_Int lambdaHistory_gh,
+              HYPRE_BigInt lambdaHistory_gh,
 
               /* residual norms; argument should point to array of <blocksize> doubles */
               HYPRE_Real * residualNorms_values,
