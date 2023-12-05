@@ -294,7 +294,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
    HYPRE_Int             *A_marker;
    HYPRE_BigInt          *temp = NULL;
 
-   HYPRE_Int              n_coarse;
+   HYPRE_BigInt           n_coarse;
    HYPRE_Int              num_cols_offd_Pext = 0;
 
    HYPRE_Int              ic, i, j, k, bnnz, kk;
