@@ -86,7 +86,7 @@ hypre_ParBooleanMatmul( hypre_ParCSRBooleanMatrix *A,
    HYPRE_Int              allsquare = 0;
    HYPRE_Int              cnt, cnt_offd, cnt_diag;
    HYPRE_Int              num_procs;
-   HYPRE_Int              value;
+   HYPRE_BigInt           value;
 
    n_rows_A = hypre_ParCSRBooleanMatrix_Get_GlobalNRows(A);
    n_cols_A = hypre_ParCSRBooleanMatrix_Get_GlobalNCols(A);
