@@ -5382,7 +5382,7 @@ done
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         for ac_prog in mpxlc mpixlc_r mpixlc mpiicc mpiicx mpigcc mpicc mpipgcc mpipgicc
+         for ac_prog in cc mpicc mpxlc mpixlc_r mpixlc mpiicc mpiicx mpigcc mpipgcc mpipgicc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5430,7 +5430,7 @@ fi
 done
 
       else
-         for ac_prog in mpxlc mpixlc mpiicc mpiicx mpigcc mpicc mpipgcc mpipgicc
+         for ac_prog in cc mpicc mpxlc mpixlc mpiicc mpiicx mpigcc mpipgcc mpipgicc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5492,7 +5492,7 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         for ac_prog in xlC_r xlc_r xlC xlc icpc icc icpx icx g++ gcc pgCC pgcc pgc++ CC cc KCC kcc
+         for ac_prog in xlC_r xlc_r xlC xlc icx icpc icc icpx g++ gcc pgCC pgcc pgc++ CC cc KCC kcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5540,7 +5540,7 @@ fi
 done
 
       else
-         for ac_prog in xlC xlc icpc icc icpx icx g++ gcc pgCC pgcc pgc++ CC cc KCC kcc
+         for ac_prog in xlC xlc icx icpc icc icpx g++ gcc pgCC pgcc pgc++ CC cc KCC kcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5591,7 +5591,7 @@ done
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         for ac_prog in mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpiicpx mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++
+         for ac_prog in CC mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpiicpx mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5639,7 +5639,7 @@ fi
 done
 
       else
-         for ac_prog in mpxlC mpixlcxx mpixlC mpiicpc mpiicpx mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++
+         for ac_prog in CC mpicxx mpxlC mpixlcxx mpixlC mpiicpc mpiicpx mpig++ mpic++ mpiCC mpipgCC mpipgic++
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
