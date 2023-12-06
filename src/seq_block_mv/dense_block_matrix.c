@@ -94,25 +94,15 @@ HYPRE_Int
 hypre_DenseBlockMatrixInitializeOn( hypre_DenseBlockMatrix  *A,
                                     HYPRE_MemoryLocation     memory_location )
 {
-   HYPRE_Int   num_coefs  = hypre_DenseBlockMatrixNumCoefs(A);
-   HYPRE_Int   num_blocks = hypre_DenseBlockMatrixNumBlocks(A);
-
    hypre_DenseBlockMatrixMemoryLocation(A) = memory_location;
 
    /* Allocate memory for data */
-   if (!hypre_DenseBlockMatrixData(A) && num_coefs)
+   if (!hypre_DenseBlockMatrixData(A) && hypre_DenseBlockMatrixNumCoefs(A))
    {
       hypre_DenseBlockMatrixData(A) = hypre_CTAlloc(HYPRE_Complex,
-                                                    num_coefs,
+                                                    hypre_DenseBlockMatrixNumCoefs(A),
                                                     memory_location);
       hypre_DenseBlockMatrixOwnsData(A) = 1;
-
-      if (num_blocks > 1)
-      {
-         hypre_DenseBlockMatrixDataAOP(A) = hypre_TAlloc(HYPRE_Complex *,
-                                                         num_blocks,
-                                                         memory_location);
-      }
    }
 
    return hypre_error_flag;
@@ -126,6 +116,39 @@ HYPRE_Int
 hypre_DenseBlockMatrixInitialize( hypre_DenseBlockMatrix *A )
 {
    return hypre_DenseBlockMatrixInitializeOn(A, hypre_DenseBlockMatrixMemoryLocation(A));
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_DenseBlockMatrixBuildAOP
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_DenseBlockMatrixBuildAOP( hypre_DenseBlockMatrix *A )
+{
+   HYPRE_MemoryLocation memory_location = hypre_DenseBlockMatrixMemoryLocation(A);
+
+   /* Allocate memory if we need */
+   if (!hypre_DenseBlockMatrixDataAOP(A))
+   {
+      hypre_DenseBlockMatrixDataAOP(A) = hypre_TAlloc(HYPRE_Complex *,
+                                                      hypre_DenseBlockMatrixNumBlocks(A),
+                                                      memory_location);
+   }
+
+   /* Build array of pointers to the matrix data */
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypreDevice_ComplexArrayToArrayOfPtrs(hypre_DenseBlockMatrixNumBlocks(A),
+                                            hypre_DenseBlockMatrixNumCoefsBlock(A),
+                                            hypre_DenseBlockMatrixData(A),
+                                            hypre_DenseBlockMatrixDataAOP(A));
+   }
+#endif
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
