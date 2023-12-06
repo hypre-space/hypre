@@ -5382,7 +5382,7 @@ done
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         for ac_prog in cc mpicc mpxlc mpixlc_r mpixlc mpiicc mpiicx mpigcc mpipgcc mpipgicc
+         for ac_prog in mpicc mpxlc mpixlc_r mpixlc mpiicc mpiicx mpigcc mpipgcc mpipgicc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5430,7 +5430,7 @@ fi
 done
 
       else
-         for ac_prog in cc mpicc mpxlc mpixlc mpiicc mpiicx mpigcc mpipgcc mpipgicc
+         for ac_prog in mpicc mpxlc mpixlc mpiicc mpiicx mpigcc mpipgcc mpipgicc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2

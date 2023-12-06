@@ -1720,9 +1720,9 @@ then
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CC, [cc mpicc mpxlc mpixlc_r mpixlc mpiicc mpiicx mpigcc mpipgcc mpipgicc])
+         AC_CHECK_PROGS(CC, [mpicc mpxlc mpixlc_r mpixlc mpiicc mpiicx mpigcc mpipgcc mpipgicc])
       else
-         AC_CHECK_PROGS(CC, [cc mpicc mpxlc mpixlc mpiicc mpiicx mpigcc mpipgcc mpipgicc])
+         AC_CHECK_PROGS(CC, [mpicc mpxlc mpixlc mpiicc mpiicx mpigcc mpipgcc mpipgicc])
       fi
    fi
 
