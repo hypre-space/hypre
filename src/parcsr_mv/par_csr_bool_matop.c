@@ -637,8 +637,8 @@ hypre_ParBooleanAAt(hypre_ParCSRBooleanMatrix  *A)
 
    HYPRE_Int              C_diag_size;
    HYPRE_Int              C_offd_size;
-   HYPRE_Int          last_col_diag_C;
-   HYPRE_Int          num_cols_offd_C;
+   HYPRE_BigInt           last_col_diag_C;
+   HYPRE_Int              num_cols_offd_C;
 
    hypre_CSRBooleanMatrix *A_ext = NULL;
 
