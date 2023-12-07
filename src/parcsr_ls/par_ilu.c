@@ -1609,6 +1609,8 @@ hypre_ILUGetPermddPQPre(HYPRE_Int   n,
                         HYPRE_Int  *qperm_pre,
                         HYPRE_Int  *nB)
 {
+   HYPRE_UNUSED_VAR(n);
+
    HYPRE_Int   i, ii, nB_pre, k1, k2;
    HYPRE_Real  gtol, max_value, norm;
 
@@ -3181,6 +3183,8 @@ hypre_ParILURAPSchurGMRESSolveHost( void               *ilu_vdata,
                                     hypre_ParVector    *f,
                                     hypre_ParVector    *u )
 {
+   HYPRE_UNUSED_VAR(ilu_vdata2);
+
    hypre_ParILUData        *ilu_data     = (hypre_ParILUData*) ilu_vdata;
    hypre_ParCSRMatrix      *L            = hypre_ParILUDataMatLModified(ilu_data);
    hypre_CSRMatrix         *L_diag       = hypre_ParCSRMatrixDiag(L);
@@ -3275,6 +3279,8 @@ hypre_ParILURAPSchurGMRESMatvecHost( void          *matvec_data,
                                      HYPRE_Complex  beta,
                                      void          *y )
 {
+   HYPRE_UNUSED_VAR(matvec_data);
+
    /* get matrix information first */
    hypre_ParILUData        *ilu_data            = (hypre_ParILUData*) ilu_vdata;
 
@@ -4094,7 +4100,7 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix  *matA,
 
    /* complexity */
    HYPRE_Real        nnzA = hypre_CSRMatrixNumNonzeros(matA);
-   HYPRE_Real        nnzM;
+   HYPRE_Real        nnzM = 1.0;
 
    /* inverse matrix */
    hypre_CSRMatrix   *inM = *M;
@@ -4116,9 +4122,9 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix  *matA,
    hypre_CSRMatrix   *matC;
    hypre_CSRMatrix   *matW;
 
-   HYPRE_Real        time_s, time_e;
+   HYPRE_Real        time_s = 0.0, time_e;
    HYPRE_Int         i, k1, k2;
-   HYPRE_Real        value, trace1, trace2, alpha, r_norm;
+   HYPRE_Real        value, trace1, trace2, alpha, r_norm = 0.0;
 
    HYPRE_Int         n = hypre_CSRMatrixNumRows(matA);
 
@@ -4239,8 +4245,7 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix  *matA,
       hypre_CSRMatrixDestroy(matW);
       hypre_CSRMatrixDestroy(matC);
       hypre_CSRMatrixDestroy(matR_temp);
-
-   }/* end of main loop i for compute inverse matrix */
+   } /* end of main loop i for compute inverse matrix */
 
    /* time if we need to print */
    if (print_level > 1)
@@ -4262,7 +4267,6 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix  *matA,
    *M = matM;
 
    return hypre_error_flag;
-
 }
 
 /*--------------------------------------------------------------------------
@@ -4297,6 +4301,8 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix  *A,
                           HYPRE_Int            mr_col_version,
                           HYPRE_Int            print_level)
 {
+   HYPRE_UNUSED_VAR(nsh_max_row_nnz);
+
    /* data slots for matrices */
    hypre_ParCSRMatrix      *matM = NULL;
    hypre_ParCSRMatrix      *inM = *M;

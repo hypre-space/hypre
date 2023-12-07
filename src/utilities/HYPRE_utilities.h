@@ -187,6 +187,12 @@ HYPRE_Int HYPRE_Initialize(void);
 #define HYPRE_Init() HYPRE_Initialize()
 
 /**
+ * (Optional) Initializes GPU features in the hypre library.
+ **/
+
+HYPRE_Int HYPRE_DeviceInitialize(void);
+
+/**
  * (Required) Finalizes the hypre library.
  **/
 
@@ -354,6 +360,39 @@ HYPRE_Int HYPRE_SetSpMVUseVendor( HYPRE_Int use_vendor );
 #define HYPRE_SetSpGemmUseCusparse(use_vendor) HYPRE_SetSpGemmUseVendor(use_vendor)
 HYPRE_Int HYPRE_SetSpGemmUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int HYPRE_SetUseGpuRand( HYPRE_Int use_curand );
+
+/*--------------------------------------------------------------------------
+ * Base objects
+ *--------------------------------------------------------------------------*/
+
+/* RDF: How should we provide reference documentation for this (and above)? */
+
+/* Base public solver struct */
+struct hypre_Solver_struct;
+typedef struct hypre_Solver_struct *HYPRE_Solver;
+
+/* Base public matrix struct */
+struct hypre_Matrix_struct;
+typedef struct hypre_Matrix_struct *HYPRE_Matrix;
+
+/* Base public vector struct */
+struct hypre_Vector_struct;
+typedef struct hypre_Vector_struct *HYPRE_Vector;
+
+/* Base function pointers */
+
+/* RDF: Note that only PtrToSolverFcn is needed at the user level right now to
+ * keep backward compatibility with SetPrecond().  In general, do we want these
+ * at the user level?  I guess it doesn't hurt. */
+
+/* RDF: Also note that PtrToSolverFcn is defined again in 'HYPRE_krylov.h' and
+ * probably needs to be for the reference manual. */
+
+typedef HYPRE_Int (*HYPRE_PtrToSolverFcn)(HYPRE_Solver,
+                                          HYPRE_Matrix,
+                                          HYPRE_Vector,
+                                          HYPRE_Vector);
+typedef HYPRE_Int (*HYPRE_PtrToDestroyFcn)(HYPRE_Solver);
 
 #ifdef __cplusplus
 }

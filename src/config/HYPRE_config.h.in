@@ -65,9 +65,6 @@
 /* Define to 1 if in debug mode */
 #undef HYPRE_DEBUG
 
-/* Deprecated function macro */
-#undef HYPRE_DEPRECATED
-
 /* Main development branch? */
 #undef HYPRE_DEVELOP_BRANCH
 

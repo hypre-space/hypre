@@ -258,10 +258,10 @@ HYPRE_IJVectorSetPrintLevel( HYPRE_IJVector vector,
       return hypre_error_flag;
    }
 
-   hypre_IJVectorPrintLevel(ijvector) = 1;
+   hypre_IJVectorPrintLevel(ijvector) = (print_level > 0) ? print_level : 0;
+
    return hypre_error_flag;
 }
-
 
 /*--------------------------------------------------------------------------
  * HYPRE_IJVectorSetValues

@@ -192,6 +192,11 @@ hypre_StructKrylovIdentitySetup( void *vdata,
                                  void *x     )
 
 {
+   HYPRE_UNUSED_VAR(vdata);
+   HYPRE_UNUSED_VAR(A);
+   HYPRE_UNUSED_VAR(b);
+   HYPRE_UNUSED_VAR(x);
+
    return hypre_error_flag;
 }
 
@@ -205,6 +210,9 @@ hypre_StructKrylovIdentity( void *vdata,
                             void *x     )
 
 {
+   HYPRE_UNUSED_VAR(vdata);
+   HYPRE_UNUSED_VAR(A);
+
    return ( hypre_StructKrylovCopyVector( b, x ) );
 }
 
@@ -221,4 +229,3 @@ hypre_StructKrylovCommInfo( void  *A,
    hypre_MPI_Comm_rank(comm, my_id);
    return hypre_error_flag;
 }
-

@@ -59,7 +59,10 @@ hypre_GetMemoryLocationName(hypre_MemoryLocation  memory_location,
 static inline void
 hypre_OutOfMemory(size_t size)
 {
-   hypre_error_w_msg(HYPRE_ERROR_MEMORY, "Out of memory trying to allocate too many bytes\n");
+   char msg[1024];
+
+   hypre_sprintf(msg, "Out of memory trying to allocate %zu bytes\n", size);
+   hypre_error_w_msg(HYPRE_ERROR_MEMORY, msg);
    hypre_assert(0);
    fflush(stdout);
 }
@@ -86,6 +89,9 @@ hypre_CheckMemoryLocation(void *ptr, hypre_MemoryLocation location)
    /* do not use hypre_assert, which has alloc and free;
     * will create an endless loop otherwise */
    assert(location == location_ptr);
+#else
+   HYPRE_UNUSED_VAR(ptr);
+   HYPRE_UNUSED_VAR(location);
 #endif
 }
 
@@ -117,18 +123,20 @@ hypre_DeviceMemset(void *ptr, HYPRE_Int value, size_t num)
    HYPRE_OMPOffload(hypre__offload_device_num, ptr, num, "update", "to");
 #endif
    /* HYPRE_CUDA_CALL( cudaDeviceSynchronize() ); */
-#endif
 
-#if defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaMemset(ptr, value, num) );
-#endif
 
-#if defined(HYPRE_USING_HIP)
+#elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipMemset(ptr, value, num) );
-#endif
 
-#if defined(HYPRE_USING_SYCL)
+#elif defined(HYPRE_USING_SYCL)
    HYPRE_SYCL_CALL( (hypre_HandleComputeStream(hypre_handle()))->memset(ptr, value, num).wait() );
+
+#else
+   HYPRE_UNUSED_VAR(ptr);
+   HYPRE_UNUSED_VAR(value);
+   HYPRE_UNUSED_VAR(num);
 #endif
 }
 
@@ -147,18 +155,20 @@ hypre_UnifiedMemset(void *ptr, HYPRE_Int value, size_t num)
    HYPRE_OMPOffload(hypre__offload_device_num, ptr, num, "update", "to");
 #endif
    /* HYPRE_CUDA_CALL( cudaDeviceSynchronize() ); */
-#endif
 
-#if defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaMemset(ptr, value, num) );
-#endif
 
-#if defined(HYPRE_USING_HIP)
+#elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipMemset(ptr, value, num) );
-#endif
 
-#if defined(HYPRE_USING_SYCL)
+#elif defined(HYPRE_USING_SYCL)
    HYPRE_SYCL_CALL( (hypre_HandleComputeStream(hypre_handle()))->memset(ptr, value, num).wait() );
+
+#else
+   HYPRE_UNUSED_VAR(ptr);
+   HYPRE_UNUSED_VAR(value);
+   HYPRE_UNUSED_VAR(num);
 #endif
 }
 
@@ -186,9 +196,11 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
       HYPRE_CUDA_CALL( cudaMemPrefetchAsync(ptr, size, cudaCpuDeviceId,
                                             hypre_HandleComputeStream(hypre_handle())) );
    }
-#endif
 
-#if defined(HYPRE_USING_HIP)
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_UNUSED_VAR(ptr);
+   HYPRE_UNUSED_VAR(size);
+   HYPRE_UNUSED_VAR(location);
    // Not currently implemented for HIP, but leaving place holder
    /*
     *if (location == hypre_MEMORY_DEVICE)
@@ -202,9 +214,11 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
     *                    hypre_HandleComputeStream(hypre_handle())) );
     *}
     */
-#endif
 
-#if defined(HYPRE_USING_SYCL)
+#elif defined(HYPRE_USING_SYCL)
+   HYPRE_UNUSED_VAR(ptr);
+   HYPRE_UNUSED_VAR(size);
+   HYPRE_UNUSED_VAR(location);
    if (location == hypre_MEMORY_DEVICE)
    {
       /* WM: todo - the call below seems like it may occasionally result in an error: */
@@ -213,6 +227,10 @@ hypre_UnifiedMemPrefetch(void *ptr, size_t size, hypre_MemoryLocation location)
        *     to hang (or run excessively slow?). */
       /* HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle())->prefetch(ptr, size).wait() ); */
    }
+#else
+   HYPRE_UNUSED_VAR(ptr);
+   HYPRE_UNUSED_VAR(size);
+   HYPRE_UNUSED_VAR(location);
 #endif
 }
 
@@ -490,31 +508,27 @@ hypre_UnifiedFree(void *ptr)
 {
 #if defined(HYPRE_USING_UMPIRE_UM)
    hypre_umpire_um_pooled_free(ptr);
-#else
 
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-#if defined(HYPRE_DEVICE_OPENMP_ALLOC)
+#elif defined(HYPRE_USING_DEVICE_OPENMP) && defined(HYPRE_DEVICE_OPENMP_ALLOC)
    omp_target_free(ptr, hypre__offload_device_num);
-#else
+
+#elif defined(HYPRE_USING_DEVICE_OPENMP) && !defined(HYPRE_DEVICE_OPENMP_ALLOC)
    HYPRE_OMPOffload(hypre__offload_device_num, ptr, ((size_t *) ptr)[-1], "exit", "delete");
-#endif
-#endif
 
-#if defined(HYPRE_USING_CUDA)
-#if defined(HYPRE_USING_DEVICE_POOL)
+#elif defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_DEVICE_POOL)
    HYPRE_CUDA_CALL( hypre_CachingFreeManaged(ptr) );
-#else
+
+#elif defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_DEVICE_POOL)
    HYPRE_CUDA_CALL( cudaFree(ptr) );
-#endif
-#endif
 
-#if defined(HYPRE_USING_HIP)
+#elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipFree(ptr) );
-#endif
 
-#if defined(HYPRE_USING_SYCL)
+#elif defined(HYPRE_USING_SYCL)
    HYPRE_SYCL_CALL( sycl::free(ptr, *(hypre_HandleComputeStream(hypre_handle()))) );
-#endif
+
+#else
+   HYPRE_UNUSED_VAR(ptr);
 
 #endif /* #if defined(HYPRE_USING_UMPIRE_UM) */
 }
@@ -524,19 +538,18 @@ hypre_HostPinnedFree(void *ptr)
 {
 #if defined(HYPRE_USING_UMPIRE_PINNED)
    hypre_umpire_pinned_pooled_free(ptr);
-#else
 
-#if defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaFreeHost(ptr) );
-#endif
 
-#if defined(HYPRE_USING_HIP)
+#elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipHostFree(ptr) );
-#endif
 
-#if defined(HYPRE_USING_SYCL)
+#elif defined(HYPRE_USING_SYCL)
    HYPRE_SYCL_CALL( sycl::free(ptr, *(hypre_HandleComputeStream(hypre_handle()))) );
-#endif
+
+#else
+   HYPRE_UNUSED_VAR(ptr);
 
 #endif /* #if defined(HYPRE_USING_UMPIRE_PINNED) */
 }
@@ -1142,11 +1155,19 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
    {
       *memory_location = hypre_MEMORY_UNIFIED;
    }
+#if (HIP_VERSION_MAJOR >= 6)
+   else if (attr.type == hipMemoryTypeDevice)
+#else // (HIP_VERSION_MAJOR < 6)
    else if (attr.memoryType == hipMemoryTypeDevice)
+#endif // (HIP_VERSION_MAJOR >= 6)
    {
       *memory_location = hypre_MEMORY_DEVICE;
    }
+#if (HIP_VERSION_MAJOR >= 6)
+   else if (attr.type == hipMemoryTypeHost)
+#else // (HIP_VERSION_MAJOR < 6)
    else if (attr.memoryType == hipMemoryTypeHost)
+#endif // (HIP_VERSION_MAJOR >= 6)
    {
       *memory_location = hypre_MEMORY_HOST_PINNED;
    }
@@ -1184,6 +1205,7 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
 
 #else /* #if defined(HYPRE_USING_GPU) */
    *memory_location = hypre_MEMORY_HOST;
+   HYPRE_UNUSED_VAR(ptr);
 #endif
 
    return ierr;
@@ -1199,8 +1221,7 @@ hypre_SetCubMemPoolSize(hypre_uint cub_bin_growth,
                         hypre_uint cub_max_bin,
                         size_t     cub_max_cached_bytes)
 {
-#if defined(HYPRE_USING_CUDA)
-#if defined(HYPRE_USING_DEVICE_POOL)
+#if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_DEVICE_POOL)
    hypre_HandleCubBinGrowth(hypre_handle())      = cub_bin_growth;
    hypre_HandleCubMinBin(hypre_handle())         = cub_min_bin;
    hypre_HandleCubMaxBin(hypre_handle())         = cub_max_bin;
@@ -1216,7 +1237,11 @@ hypre_SetCubMemPoolSize(hypre_uint cub_bin_growth,
    {
       hypre_HandleCubUvmAllocator(hypre_handle()) -> SetMaxCachedBytes(cub_max_cached_bytes);
    }
-#endif
+#else
+   HYPRE_UNUSED_VAR(cub_bin_growth);
+   HYPRE_UNUSED_VAR(cub_min_bin);
+   HYPRE_UNUSED_VAR(cub_max_bin);
+   HYPRE_UNUSED_VAR(cub_max_cached_bytes);
 #endif
 
    return hypre_error_flag;

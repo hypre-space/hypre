@@ -99,8 +99,10 @@ HYPRE_Int
 hypre_SchwarzSetup(void               *schwarz_vdata,
                    hypre_ParCSRMatrix *A,
                    hypre_ParVector    *f,
-                   hypre_ParVector    *u         )
+                   hypre_ParVector    *u)
 {
+   HYPRE_UNUSED_VAR(f);
+   HYPRE_UNUSED_VAR(u);
 
    hypre_SchwarzData   *schwarz_data = (hypre_SchwarzData*) schwarz_vdata;
    HYPRE_Int *dof_func;

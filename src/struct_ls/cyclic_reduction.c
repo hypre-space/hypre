@@ -238,7 +238,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
    hypre_Box              *Ac_dbox;
 
    HYPRE_Real             *a_cc, *a_cw, *a_ce;
-   HYPRE_Real             *ac_cc, *ac_cw, *ac_ce;
+   HYPRE_Real             *ac_cc, *ac_cw, *ac_ce = NULL;
 
    HYPRE_Int               offsetA;
 
@@ -470,6 +470,8 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
                             hypre_StructVector *b,
                             hypre_StructVector *x             )
 {
+   HYPRE_UNUSED_VAR(b);
+
    hypre_CyclicReductionData *cyc_red_data = (hypre_CyclicReductionData *) cyc_red_vdata;
 
    MPI_Comm                comm        = (cyc_red_data -> comm);

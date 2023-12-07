@@ -34,6 +34,9 @@ hypre_SparseMSG3CreateRAPOp( hypre_StructMatrix *R,
                              hypre_StructGrid   *coarse_grid,
                              HYPRE_Int           cdir        )
 {
+   HYPRE_UNUSED_VAR(R);
+   HYPRE_UNUSED_VAR(P);
+
    hypre_StructMatrix    *RAP;
 
    hypre_Index           *RAP_stencil_shape;
@@ -210,17 +213,18 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
    HYPRE_Real           *pa, *pb;
    HYPRE_Real           *ra, *rb;
 
-   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-   HYPRE_Real           *a_ac, *a_aw, *a_as;
-   HYPRE_Real           *a_bc, *a_bw, *a_be, *a_bs, *a_bn;
-   HYPRE_Real           *a_csw, *a_cse, *a_cnw, *a_cne;
-   HYPRE_Real           *a_asw, *a_ase;
-   HYPRE_Real           *a_bsw, *a_bse, *a_bnw, *a_bne;
+   HYPRE_Real           *a_cc = NULL, *a_cw = NULL, *a_ce = NULL, *a_cs = NULL, *a_cn = NULL;
+   HYPRE_Real           *a_ac = NULL, *a_aw = NULL, *a_as = NULL;
+   HYPRE_Real           *a_bc = NULL, *a_bw = NULL, *a_be = NULL, *a_bs = NULL, *a_bn = NULL;
+   HYPRE_Real           *a_csw = NULL, *a_cse = NULL, *a_cnw = NULL, *a_cne = NULL;
+   HYPRE_Real           *a_asw = NULL, *a_ase = NULL;
+   HYPRE_Real           *a_bsw = NULL, *a_bse = NULL, *a_bnw = NULL, *a_bne = NULL;
 
-   HYPRE_Real           *rap_cc, *rap_cw, *rap_cs;
-   HYPRE_Real           *rap_bc, *rap_bw, *rap_be, *rap_bs, *rap_bn;
-   HYPRE_Real           *rap_csw, *rap_cse;
-   HYPRE_Real           *rap_bsw, *rap_bse, *rap_bnw, *rap_bne;
+   HYPRE_Real           *rap_cc = NULL, *rap_cw = NULL, *rap_cs = NULL;
+   HYPRE_Real           *rap_bc = NULL, *rap_bw = NULL, *rap_be = NULL;
+   HYPRE_Real           *rap_bs = NULL, *rap_bn = NULL;
+   HYPRE_Real           *rap_csw = NULL, *rap_cse = NULL;
+   HYPRE_Real           *rap_bsw = NULL, *rap_bse = NULL, *rap_bnw = NULL, *rap_bne = NULL;
 
    HYPRE_Int             zOffsetA;
    HYPRE_Int             xOffsetP;
@@ -872,17 +876,18 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
    HYPRE_Real           *pa, *pb;
    HYPRE_Real           *ra, *rb;
 
-   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-   HYPRE_Real           *a_ac, *a_aw, *a_ae, *a_as, *a_an;
-   HYPRE_Real           *a_be, *a_bn;
-   HYPRE_Real           *a_csw, *a_cse, *a_cnw, *a_cne;
-   HYPRE_Real           *a_asw, *a_ase, *a_anw, *a_ane;
-   HYPRE_Real           *a_bnw, *a_bne;
+   HYPRE_Real           *a_cc = NULL, *a_cw = NULL, *a_ce = NULL, *a_cs = NULL, *a_cn = NULL;
+   HYPRE_Real           *a_ac = NULL, *a_aw = NULL, *a_ae = NULL, *a_as = NULL, *a_an = NULL;
+   HYPRE_Real           *a_be = NULL, *a_bn = NULL;
+   HYPRE_Real           *a_csw = NULL, *a_cse = NULL, *a_cnw = NULL, *a_cne = NULL;
+   HYPRE_Real           *a_asw = NULL, *a_ase = NULL, *a_anw = NULL, *a_ane = NULL;
+   HYPRE_Real           *a_bnw = NULL, *a_bne = NULL;
 
-   HYPRE_Real           *rap_ce, *rap_cn;
-   HYPRE_Real           *rap_ac, *rap_aw, *rap_ae, *rap_as, *rap_an;
-   HYPRE_Real           *rap_cnw, *rap_cne;
-   HYPRE_Real           *rap_asw, *rap_ase, *rap_anw, *rap_ane;
+   HYPRE_Real           *rap_ce = NULL, *rap_cn = NULL;
+   HYPRE_Real           *rap_ac = NULL, *rap_aw = NULL, *rap_ae = NULL;
+   HYPRE_Real           *rap_as = NULL, *rap_an = NULL;
+   HYPRE_Real           *rap_cnw = NULL, *rap_cne = NULL;
+   HYPRE_Real           *rap_asw = NULL, *rap_ase = NULL, *rap_anw = NULL, *rap_ane = NULL;
 
    HYPRE_Int             zOffsetA;
    HYPRE_Int             xOffsetP;
@@ -1459,4 +1464,3 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
 
    return ierr;
 }
-

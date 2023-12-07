@@ -1148,6 +1148,7 @@ HYPRE_MGRSetCpointsByPointMarkerArray
 HYPRE_MGRSetFRelaxMethod
 HYPRE_MGRSetFrelaxPrintLevel
 HYPRE_MGRSetFSolver
+HYPRE_MGRSetFSolverAtLevel
 HYPRE_MGRSetGlobalSmoothCycle
 HYPRE_MGRSetGlobalSmoothType
 HYPRE_MGRSetInterpType
@@ -1222,6 +1223,7 @@ HYPRE_ParCSRPCGSetAbsoluteTol
 HYPRE_ParCSRPCGSetLogging
 HYPRE_ParCSRPCGSetMaxIter
 HYPRE_ParCSRPCGSetPrecond
+HYPRE_ParCSRPCGSetPreconditioner
 HYPRE_ParCSRPCGSetPrintLevel
 HYPRE_ParCSRPCGSetRelChange
 HYPRE_ParCSRPCGSetStopCrit
@@ -1566,7 +1568,7 @@ hypre_BoomerAMGCoarsenPMISHost
 hypre_BoomerAMGCoarsenRuge
 hypre_BoomerAMGCoarseParms
 hypre_BoomerAMGCoarseParmsHost
-GenerateCoordinates
+hypre_GenerateCoordinates
 hypre_BoomerAMGCoarsenCR
 hypre_BoomerAMGCoarsenCR1
 hypre_BoomerAMGIndepHMIS
@@ -1872,6 +1874,7 @@ hypre_MGRSetCpointsByPointMarkerArray
 hypre_MGRSetFRelaxMethod
 hypre_MGRSetFrelaxPrintLevel
 hypre_MGRSetFSolver
+hypre_MGRSetFSolverAtLevel
 hypre_MGRSetGlobalSmoothCycle
 hypre_MGRSetGlobalSmoothType
 hypre_MGRSetInterpType

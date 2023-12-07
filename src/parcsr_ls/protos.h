@@ -1318,8 +1318,9 @@ HYPRE_Int hypre_BoomerAMGInitDofFuncDevice( HYPRE_Int *dof_func, HYPRE_Int local
                                             HYPRE_Int offset, HYPRE_Int num_functions );
 
 /* par_coordinates.c */
-float *GenerateCoordinates ( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny, HYPRE_BigInt nz,
-                             HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R, HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int coorddim );
+float *hypre_GenerateCoordinates ( MPI_Comm comm, HYPRE_BigInt nx, HYPRE_BigInt ny,
+                                   HYPRE_BigInt nz, HYPRE_Int P, HYPRE_Int Q, HYPRE_Int R,
+                                   HYPRE_Int p, HYPRE_Int q, HYPRE_Int r, HYPRE_Int coorddim );
 
 /* par_cr.c */
 HYPRE_Int hypre_BoomerAMGCoarsenCR1 ( hypre_ParCSRMatrix *A, hypre_IntArray **CF_marker_ptr,
@@ -2181,6 +2182,7 @@ HYPRE_Int hypre_MGRSetFSolver( void *mgr_vdata,
                                HYPRE_Int (*fine_grid_solver_solve)(void*, void*, void*, void*),
                                HYPRE_Int (*fine_grid_solver_setup)(void*, void*, void*, void*),
                                void *fsolver );
+HYPRE_Int hypre_MGRSetFSolverAtLevel( HYPRE_Int level, void *mgr_vdata, void *fsolver );
 HYPRE_Int hypre_MGRSetup( void *mgr_vdata, hypre_ParCSRMatrix *A,
                           hypre_ParVector *f, hypre_ParVector *u );
 HYPRE_Int hypre_MGRSolve( void *mgr_vdata, hypre_ParCSRMatrix *A,
@@ -2560,8 +2562,7 @@ HYPRE_Int hypre_ILUSolveLUIter( hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                 hypre_ParVector *u, HYPRE_Int *perm, HYPRE_Int nLU,
                                 hypre_ParCSRMatrix *L, HYPRE_Real *D, hypre_ParCSRMatrix *U,
                                 hypre_ParVector *ftemp, hypre_ParVector *utemp,
-                                hypre_ParVector *xtemp, HYPRE_Int lower_jacobi_iters,
-                                HYPRE_Int upper_jacobi_iters );
+                                HYPRE_Int lower_jacobi_iters, HYPRE_Int upper_jacobi_iters );
 HYPRE_Int hypre_ILUSolveLURAS( hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u,
                                HYPRE_Int *perm, hypre_ParCSRMatrix *L, HYPRE_Real *D,
                                hypre_ParCSRMatrix *U, hypre_ParVector *ftemp,

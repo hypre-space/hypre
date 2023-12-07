@@ -252,14 +252,14 @@ HYPRE_PCGGetRecomputeResidualP( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_PCGSetSkipBreak( HYPRE_Solver solver,
-                     HYPRE_Int    skip_break )
+                       HYPRE_Int    skip_break )
 {
    return ( hypre_PCGSetSkipBreak( (void *) solver, skip_break ) );
 }
 
 HYPRE_Int
 HYPRE_PCGGetSkipBreak( HYPRE_Solver  solver,
-                     HYPRE_Int    *skip_break )
+                       HYPRE_Int    *skip_break )
 {
    return ( hypre_PCGGetSkipBreak( (void *) solver, skip_break ) );
 }
@@ -296,6 +296,18 @@ HYPRE_PCGSetPrecond( HYPRE_Solver         solver,
                                  (HYPRE_Int (*)(void*, void*, void*, void*))precond,
                                  (HYPRE_Int (*)(void*, void*, void*, void*))precond_setup,
                                  (void *) precond_solver ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PCGSetPreconditioner
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_PCGSetPreconditioner( HYPRE_Solver  solver,
+                            HYPRE_Solver  precond_solver )
+{
+   return ( hypre_PCGSetPreconditioner( (void *) solver,
+                                        (void *) precond_solver ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -415,4 +427,3 @@ HYPRE_Int HYPRE_PCGGetResidual( HYPRE_Solver   solver,
    /* returns a pointer to the residual vector */
    return hypre_PCGGetResidual( (void *) solver, (void **) residual );
 }
-

@@ -12,6 +12,8 @@
 HYPRE_Int
 HYPRE_StructPCGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 {
+   HYPRE_UNUSED_VAR(comm);
+
    /* The function names with a PCG in them are in
       struct_ls/pcg_struct.c .  These functions do rather little -
       e.g., cast to the correct type - before calling something else.
@@ -173,6 +175,11 @@ HYPRE_StructDiagScaleSetup( HYPRE_StructSolver solver,
                             HYPRE_StructVector y,
                             HYPRE_StructVector x      )
 {
+   HYPRE_UNUSED_VAR(solver);
+   HYPRE_UNUSED_VAR(A);
+   HYPRE_UNUSED_VAR(y);
+   HYPRE_UNUSED_VAR(x);
+
    return hypre_error_flag;
 }
 
@@ -184,10 +191,11 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
                        HYPRE_StructVector Hy,
                        HYPRE_StructVector Hx      )
 {
+   HYPRE_UNUSED_VAR(solver);
+
    hypre_StructMatrix   *A = (hypre_StructMatrix *) HA;
    hypre_StructVector   *y = (hypre_StructVector *) Hy;
    hypre_StructVector   *x = (hypre_StructVector *) Hx;
 
    return (hypre_StructDiagScale(A, y, x));
 }
-

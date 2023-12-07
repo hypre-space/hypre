@@ -59,7 +59,7 @@ hypre_CGNRFunctionsCreate(
    /* default preconditioner must be set here but can be changed later... */
    cgnr_functions->precond_setup = PrecondSetup;
    cgnr_functions->precond       = Precond;
-   cgnr_functions->precondT       = Precond;
+   cgnr_functions->precondT      = PrecondT;
 
    return cgnr_functions;
 }

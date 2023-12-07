@@ -43,16 +43,9 @@ extern "C" {
  * @{
  **/
 
-struct hypre_Solver_struct;
 /**
  * The solver object.
  **/
-
-#ifndef HYPRE_SOLVER_STRUCT
-#define HYPRE_SOLVER_STRUCT
-struct hypre_Solver_struct;
-typedef struct hypre_Solver_struct *HYPRE_Solver;
-#endif
 
 typedef HYPRE_Int (*HYPRE_PtrToParSolverFcn)(HYPRE_Solver,
                                              HYPRE_ParCSRMatrix,
@@ -1658,6 +1651,7 @@ HYPRE_Int HYPRE_FSAISetAlgoType( HYPRE_Solver solver,
  * (Optional) Sets the solver type for solving local linear systems in FSAI. This
  * option makes sense only for GPU runs.
  *
+ *      - 0: Gauss-Jordan solver
  *      - 1: Vendor solver (cuSOLVER/rocSOLVER)
  *      - 2: MAGMA solver
  **/
@@ -2762,6 +2756,9 @@ HYPRE_Int HYPRE_ParCSRPCGSetPrecond(HYPRE_Solver            solver,
                                     HYPRE_PtrToParSolverFcn precond,
                                     HYPRE_PtrToParSolverFcn precond_setup,
                                     HYPRE_Solver            precond_solver);
+
+HYPRE_Int HYPRE_ParCSRPCGSetPreconditioner(HYPRE_Solver solver,
+                                           HYPRE_Solver precond);
 
 HYPRE_Int HYPRE_ParCSRPCGGetPrecond(HYPRE_Solver  solver,
                                     HYPRE_Solver *precond_data);
@@ -4254,6 +4251,17 @@ HYPRE_Int HYPRE_MGRSetFSolver(HYPRE_Solver             solver,
                               HYPRE_Solver             fsolver );
 
 /**
+ * (Optional) Set the F-relaxation solver at a given level.
+ *
+ * @param level [IN] MGR solver level
+ * @param solver [IN] MGR solver/preconditioner object
+ * @param fsolver [IN] F-relaxation solver object
+ **/
+HYPRE_Int HYPRE_MGRSetFSolverAtLevel(HYPRE_Int     level,
+                                     HYPRE_Solver  solver,
+                                     HYPRE_Solver  fsolver );
+
+/**
  * (Optional) Extract A_FF block from matrix A.
  *
  * TODO (VPM): Does this need to be exposed? Move to parcsr_mv?
@@ -4756,17 +4764,17 @@ GenerateRSVarDifConv(MPI_Comm         comm,
                      HYPRE_Int        type);
 
 float*
-GenerateCoordinates(MPI_Comm  comm,
-                    HYPRE_BigInt nx,
-                    HYPRE_BigInt ny,
-                    HYPRE_BigInt nz,
-                    HYPRE_Int P,
-                    HYPRE_Int Q,
-                    HYPRE_Int R,
-                    HYPRE_Int p,
-                    HYPRE_Int q,
-                    HYPRE_Int r,
-                    HYPRE_Int coorddim);
+hypre_GenerateCoordinates(MPI_Comm  comm,
+                          HYPRE_BigInt nx,
+                          HYPRE_BigInt ny,
+                          HYPRE_BigInt nz,
+                          HYPRE_Int P,
+                          HYPRE_Int Q,
+                          HYPRE_Int R,
+                          HYPRE_Int p,
+                          HYPRE_Int q,
+                          HYPRE_Int r,
+                          HYPRE_Int coorddim);
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/

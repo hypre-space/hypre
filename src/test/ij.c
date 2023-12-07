@@ -182,7 +182,7 @@ main( hypre_int argc,
    HYPRE_Int           check_residual = 0;
    HYPRE_Int           num_procs, myid;
    HYPRE_Int           local_row;
-   HYPRE_Int          *row_sizes;
+   HYPRE_Int          *row_sizes = NULL;
    HYPRE_Int          *diag_sizes;
    HYPRE_Int          *offdiag_sizes;
    HYPRE_BigInt       *rows;
@@ -216,6 +216,8 @@ main( hypre_int argc,
 
    /* Specific tests */
    HYPRE_Int           test_init = 0;
+   HYPRE_Int           lazy_device_init = 0;
+   HYPRE_Int           device_id = -1;
    HYPRE_Int           test_ij = 0;
    HYPRE_Int           test_multivec = 0;
    HYPRE_Int           test_scaling = 0;
@@ -281,9 +283,9 @@ main( hypre_int argc,
 #endif
    HYPRE_Real   relax_wt;
    HYPRE_Real   add_relax_wt = 1.0;
-   HYPRE_Real   relax_wt_level;
+   HYPRE_Real   relax_wt_level = 0.0;
    HYPRE_Real   outer_wt;
-   HYPRE_Real   outer_wt_level;
+   HYPRE_Real   outer_wt_level = 0;
    HYPRE_Real   tol = 1.e-8, pc_tol = 0.;
    HYPRE_Real   atol = 0.0;
    HYPRE_Real   max_row_sum = 1.;
@@ -510,7 +512,14 @@ main( hypre_int argc,
       if (strcmp(argv[arg_index], "-test_init") == 0)
       {
          test_init = 1;
-         break;
+      }
+      else if (strcmp(argv[arg_index], "-lazy_device_init") == 0)
+      {
+         lazy_device_init = atoi(argv[++arg_index]);
+      }
+      else if (strcmp(argv[arg_index], "-device_id") == 0)
+      {
+         device_id = atoi(argv[++arg_index]);
       }
    }
 
@@ -518,7 +527,7 @@ main( hypre_int argc,
     * GPU Device binding
     * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
-   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+   hypre_bind_device(device_id, myid, num_procs, hypre_MPI_COMM_WORLD);
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
@@ -573,6 +582,11 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
 
    HYPRE_Initialize();
+
+   if (!lazy_device_init)
+   {
+      HYPRE_DeviceInitialize();
+   }
 
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
@@ -4996,10 +5010,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetInterpVecAbsQTrunc(pcg_precond, Q_trunc);
          }
          HYPRE_PCGSetMaxIter(pcg_solver, mg_max_iter);
-         HYPRE_PCGSetPrecond(pcg_solver,
-                             (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
-                             (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
-                             pcg_precond);
+         HYPRE_PCGSetPreconditioner(pcg_solver, pcg_precond);
       }
       else if (solver_id == 2)
       {
@@ -10085,19 +10096,24 @@ BuildParFromOneFile( HYPRE_Int                  argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildFuncsFromFiles(    HYPRE_Int                  argc,
-                        char                *argv[],
-                        HYPRE_Int                  arg_index,
-                        HYPRE_ParCSRMatrix   parcsr_A,
-                        HYPRE_Int                **dof_func_ptr     )
+BuildFuncsFromFiles( HYPRE_Int            argc,
+                     char                *argv[],
+                     HYPRE_Int            arg_index,
+                     HYPRE_ParCSRMatrix   parcsr_A,
+                     HYPRE_Int          **dof_func_ptr )
 {
+   HYPRE_UNUSED_VAR(argc);
+   HYPRE_UNUSED_VAR(argv);
+   HYPRE_UNUSED_VAR(arg_index);
+   HYPRE_UNUSED_VAR(parcsr_A);
+   HYPRE_UNUSED_VAR(dof_func_ptr);
+
    /*----------------------------------------------------------------------
     * Build Function array from files on different processors
     *----------------------------------------------------------------------*/
 
-   hypre_printf (" Feature is not implemented yet!\n");
+   hypre_printf("Feature is not implemented yet!\n");
    return (0);
-
 }
 
 /*----------------------------------------------------------------------
@@ -10105,19 +10121,19 @@ BuildFuncsFromFiles(    HYPRE_Int                  argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildFuncsFromOneFile(  HYPRE_Int                  argc,
-                        char                *argv[],
-                        HYPRE_Int                  arg_index,
-                        HYPRE_ParCSRMatrix   parcsr_A,
-                        HYPRE_Int                **dof_func_ptr     )
+BuildFuncsFromOneFile( HYPRE_Int            argc,
+                       char                *argv[],
+                       HYPRE_Int            arg_index,
+                       HYPRE_ParCSRMatrix   parcsr_A,
+                       HYPRE_Int          **dof_func_ptr )
 {
-   char           *filename;
+   char                 *filename;
 
    HYPRE_Int             myid, num_procs;
    HYPRE_Int             first_row_index;
    HYPRE_Int             last_row_index;
    HYPRE_BigInt         *partitioning;
-   HYPRE_Int            *dof_func;
+   HYPRE_Int            *dof_func = NULL;
    HYPRE_Int            *dof_func_local;
    HYPRE_Int             i, j;
    HYPRE_Int             local_size;
@@ -10177,7 +10193,7 @@ BuildFuncsFromOneFile(  HYPRE_Int                  argc,
    first_row_index = hypre_ParCSRMatrixFirstRowIndex(parcsr_A);
    last_row_index  = hypre_ParCSRMatrixLastRowIndex(parcsr_A);
    local_size      = last_row_index - first_row_index + 1;
-   dof_func_local = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
+   dof_func_local  = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
    if (myid == 0)
    {
       requests = hypre_CTAlloc(hypre_MPI_Request, num_procs - 1, HYPRE_MEMORY_HOST);
@@ -10287,17 +10303,17 @@ BuildBigArrayFromOneFile( HYPRE_Int            argc,
                           HYPRE_BigInt       **array_ptr )
 {
    MPI_Comm        comm = hypre_MPI_COMM_WORLD;
-   char           *filename;
+   char           *filename = NULL;
    FILE           *fp;
    HYPRE_Int       myid;
    HYPRE_Int       num_procs;
    HYPRE_Int       global_size;
-   HYPRE_BigInt   *global_array;
-   HYPRE_BigInt   *array;
-   HYPRE_BigInt   *send_buffer;
-   HYPRE_Int      *send_counts = NULL;
-   HYPRE_Int      *displs;
-   HYPRE_Int      *array_procs;
+   HYPRE_BigInt   *global_array = NULL;
+   HYPRE_BigInt   *array        = NULL;
+   HYPRE_BigInt   *send_buffer  = NULL;
+   HYPRE_Int      *send_counts  = NULL;
+   HYPRE_Int      *displs       = NULL;
+   HYPRE_Int      *array_procs  = NULL;
    HYPRE_Int       j, jj, proc;
 
    /*-----------------------------------------------------------
@@ -10797,14 +10813,14 @@ BuildParRotate7pt( HYPRE_Int            argc,
                    HYPRE_Int            arg_index,
                    HYPRE_ParCSRMatrix  *A_ptr     )
 {
-   HYPRE_BigInt              nx, ny;
-   HYPRE_Int                 P, Q;
+   HYPRE_BigInt        nx, ny;
+   HYPRE_Int           P, Q;
 
    HYPRE_ParCSRMatrix  A;
 
-   HYPRE_Int                 num_procs, myid;
-   HYPRE_Int                 p, q;
-   HYPRE_Real          eps, alpha;
+   HYPRE_Int           num_procs, myid;
+   HYPRE_Int           p, q;
+   HYPRE_Real          eps = 0.0, alpha = 1.0;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -11150,8 +11166,10 @@ BuildParCoordinates( HYPRE_Int            argc,
    if (nz < 2) { coorddim--; }
 
    if (coorddim > 0)
-      coordinates = GenerateCoordinates (hypre_MPI_COMM_WORLD,
-                                         nx, ny, nz, P, Q, R, p, q, r, coorddim);
+   {
+      coordinates = hypre_GenerateCoordinates(hypre_MPI_COMM_WORLD,
+                                              nx, ny, nz, P, Q, R, p, q, r, coorddim);
+   }
    else
    {
       coordinates = NULL;

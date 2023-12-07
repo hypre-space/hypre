@@ -66,6 +66,7 @@ utilities_FortranMatrixValuePtr
 utilities_FortranMatrixValues
 utilities_FortranMatrixWidth
 utilities_FortranMatrixWrap
+HYPRE_DeviceInitialize
 HYPRE_Finalize
 hypre_GetDevice
 hypre_GetDeviceCount

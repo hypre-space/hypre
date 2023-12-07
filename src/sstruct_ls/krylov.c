@@ -21,6 +21,11 @@ hypre_SStructKrylovIdentitySetup( void *vdata,
                                   void *x )
 
 {
+   HYPRE_UNUSED_VAR(vdata);
+   HYPRE_UNUSED_VAR(A);
+   HYPRE_UNUSED_VAR(b);
+   HYPRE_UNUSED_VAR(x);
+
    return hypre_error_flag;
 }
 
@@ -34,6 +39,8 @@ hypre_SStructKrylovIdentity( void *vdata,
                              void *x )
 
 {
+   HYPRE_UNUSED_VAR(vdata);
+   HYPRE_UNUSED_VAR(A);
+
    return ( hypre_SStructKrylovCopyVector(b, x) );
 }
-
