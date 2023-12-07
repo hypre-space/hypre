@@ -724,20 +724,21 @@ hypre_NonGalerkinIJBufferCompress( HYPRE_MemoryLocation memory_location,
    HYPRE_Int                *indys     = hypre_CTAlloc(HYPRE_Int,  (*ijbuf_rowcounter),
                                                        HYPRE_MEMORY_HOST);
 
-   HYPRE_Int                i, j, duplicate, cnt_new, rowcounter_new, prev_row;
+   HYPRE_Int                i, duplicate, cnt_new, rowcounter_new;
    HYPRE_Int                row_loc;
-   HYPRE_BigInt             row_start, row_stop, row;
+   HYPRE_BigInt             row_start, row_stop, row, prev_row, j;
 
    HYPRE_Real               *data_new;
    HYPRE_BigInt             *cols_new;
    HYPRE_BigInt             *rownums_new;
    HYPRE_Int                *numcols_new;
 
-
    /* Do a sort on rownums, but store the original order in indys.
     * Then see if there are any duplicate rows */
    for (i = 0; i < (*ijbuf_rowcounter); i++)
-   {   indys[i] = i; }
+   {
+      indys[i] = i;
+   }
    hypre_BigQsortbi((*ijbuf_rownums), indys, 0, (*ijbuf_rowcounter) - 1);
    duplicate = 0;
    for (i = 1; i < (*ijbuf_rowcounter); i++)
@@ -752,7 +753,6 @@ hypre_NonGalerkinIJBufferCompress( HYPRE_MemoryLocation memory_location,
    /* Compress duplicate rows */
    if (duplicate)
    {
-
       /* Accumulate numcols, so that it functions like a CSR row-pointer */
       for (i = 1; i < (*ijbuf_rowcounter); i++)
       {   (*ijbuf_numcols)[i] += (*ijbuf_numcols)[i - 1]; }
@@ -1016,8 +1016,8 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
    HYPRE_Real          max_entry         = 0.0;
    HYPRE_Real          max_entry_offd    = 0.0;
    HYPRE_Int          *rownz             = NULL;
-   HYPRE_Int           i, j, Cpt;
-   HYPRE_BigInt        row_start, row_end, global_row, global_col;
+   HYPRE_Int           i, j, Cpt, row_start, row_end;
+   HYPRE_BigInt        global_row, global_col;
 
    /* Other Setup */
    if (num_cols_RAP_offd)
@@ -1252,13 +1252,12 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
    MPI_Comm            comm                  = hypre_ParCSRMatrixComm(*RAP_ptr);
    hypre_ParCSRMatrix  *S                    = NULL;
    hypre_ParCSRMatrix  *RAP                  = *RAP_ptr;
-   HYPRE_Int           i, j, k, row_start, row_end, value, num_cols_offd_Sext, num_procs;
-   HYPRE_Int           S_ext_diag_size, S_ext_offd_size, last_col_diag_RAP, cnt_offd, cnt_diag, cnt;
+   HYPRE_Int           i, j, k, row_start, row_end, num_cols_offd_Sext, num_procs;
+   HYPRE_Int           S_ext_diag_size, S_ext_offd_size, last_col_diag_RAP;
+   HYPRE_Int           cnt_offd, cnt_diag, cnt;
    HYPRE_Int           col_indx_Pattern, current_Pattern_j, col_indx_RAP;
-   /* HYPRE_Real          start_time            = hypre_MPI_Wtime(); */
-   /* HYPRE_Real          end_time; */
+   HYPRE_BigInt        value;
    HYPRE_BigInt       *temp                = NULL;
-   HYPRE_Int           ierr                  = 0;
    char                filename[256];
 
    HYPRE_MemoryLocation memory_location_RAP = hypre_ParCSRMatrixMemoryLocation(RAP);
@@ -1518,7 +1517,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
    S_ext_diag_size = 0;
    S_ext_offd_size = 0;
    /* num_rows_Sext = num_cols_RAP_offd; */
-   last_col_diag_RAP = first_col_diag_RAP + num_cols_diag_RAP - 1;
+   last_col_diag_RAP = (HYPRE_Int) (first_col_diag_RAP + num_cols_diag_RAP - 1);
 
    /* construct the S_ext_diag and _offd row-pointer arrays by counting elements
     * This looks to create offd and diag blocks related to the local rows belonging
@@ -1689,14 +1688,17 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
 
    /* Initialize the ijmatrix, leveraging our knowledge of the nonzero
     * structure in Pattern */
-   ierr += HYPRE_IJMatrixCreate(comm, first_col_diag_RAP, last_col_diag_RAP,
-                                first_col_diag_RAP, last_col_diag_RAP, &ijmatrix);
-   ierr += HYPRE_IJMatrixSetObjectType(ijmatrix, HYPRE_PARCSR);
+   HYPRE_IJMatrixCreate(comm, first_col_diag_RAP, last_col_diag_RAP,
+                        first_col_diag_RAP, last_col_diag_RAP, &ijmatrix);
+   HYPRE_IJMatrixSetObjectType(ijmatrix, HYPRE_PARCSR);
    rownz = hypre_CTAlloc(HYPRE_Int,  num_variables, HYPRE_MEMORY_HOST);
    for (i = 0; i < num_variables; i++)
-   {   rownz[i] = (HYPRE_Int)(1.2 * (Pattern_diag_i[i + 1] - Pattern_diag_i[i]) + 1.2 * (Pattern_offd_i[i + 1] - Pattern_offd_i[i])); }
+   {
+      rownz[i] = (HYPRE_Int)(1.2 * (Pattern_diag_i[i + 1] - Pattern_diag_i[i]) +
+                             1.2 * (Pattern_offd_i[i + 1] - Pattern_offd_i[i]));
+   }
    HYPRE_IJMatrixSetRowSizes(ijmatrix, rownz);
-   ierr += HYPRE_IJMatrixInitialize(ijmatrix);
+   HYPRE_IJMatrixInitialize(ijmatrix);
    hypre_TFree(rownz, HYPRE_MEMORY_HOST);
 
    /*
@@ -1723,7 +1725,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
     * */
    for (i = 0; i < num_variables; i++)
    {
-      global_row = i + first_col_diag_RAP;
+      global_row = (HYPRE_BigInt) i + first_col_diag_RAP;
       row_start = RAP_diag_i[i];
       row_end = RAP_diag_i[i + 1];
       has_row_ended = 0;
@@ -2286,9 +2288,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                }
             }
          }
-
       }
-
    }
 
    /* For efficiency, we do a buffered IJAddToValues.
@@ -2296,28 +2296,29 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
    hypre_NonGalerkinIJBufferEmpty(ijmatrix, ijbuf_size, &ijbuf_cnt, ijbuf_rowcounter,
                                   &ijbuf_data, &ijbuf_cols, &ijbuf_rownums, &ijbuf_numcols);
    if (sym_collapse)
+   {
       hypre_NonGalerkinIJBufferEmpty(ijmatrix, ijbuf_size, &ijbuf_sym_cnt, ijbuf_sym_rowcounter,
                                      &ijbuf_sym_data, &ijbuf_sym_cols, &ijbuf_sym_rownums,
                                      &ijbuf_sym_numcols);
+   }
 
    /* Assemble non-Galerkin Matrix, and overwrite current RAP*/
-   ierr += HYPRE_IJMatrixAssemble (ijmatrix);
-   ierr += HYPRE_IJMatrixGetObject( ijmatrix, (void**) RAP_ptr);
+   HYPRE_IJMatrixAssemble(ijmatrix);
+   HYPRE_IJMatrixGetObject(ijmatrix, (void**) RAP_ptr);
 
    /* Optional diagnostic matrix printing */
-   if (0)
-   {
-      hypre_sprintf(filename, "Pattern_%d.ij", global_num_vars);
-      hypre_ParCSRMatrixPrintIJ(Pattern, 0, 0, filename);
-      hypre_sprintf(filename, "Strength_%d.ij", global_num_vars);
-      hypre_ParCSRMatrixPrintIJ(S, 0, 0, filename);
-      hypre_sprintf(filename, "RAP_%d.ij", global_num_vars);
-      hypre_ParCSRMatrixPrintIJ(RAP, 0, 0, filename);
-      hypre_sprintf(filename, "RAPc_%d.ij", global_num_vars);
-      hypre_ParCSRMatrixPrintIJ(*RAP_ptr, 0, 0, filename);
-      hypre_sprintf(filename, "AP_%d.ij", global_num_vars);
-      hypre_ParCSRMatrixPrintIJ(AP, 0, 0, filename);
-   }
+#if 0
+   hypre_sprintf(filename, "Pattern_%d.ij", global_num_vars);
+   hypre_ParCSRMatrixPrintIJ(Pattern, 0, 0, filename);
+   hypre_sprintf(filename, "Strength_%d.ij", global_num_vars);
+   hypre_ParCSRMatrixPrintIJ(S, 0, 0, filename);
+   hypre_sprintf(filename, "RAP_%d.ij", global_num_vars);
+   hypre_ParCSRMatrixPrintIJ(RAP, 0, 0, filename);
+   hypre_sprintf(filename, "RAPc_%d.ij", global_num_vars);
+   hypre_ParCSRMatrixPrintIJ(*RAP_ptr, 0, 0, filename);
+   hypre_sprintf(filename, "AP_%d.ij", global_num_vars);
+   hypre_ParCSRMatrixPrintIJ(AP, 0, 0, filename);
+#endif
 
    /* Free matrices and variables and arrays */
    hypre_TFree(ijbuf_data,    memory_location_RAP);
@@ -2331,7 +2332,6 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
       hypre_TFree(ijbuf_sym_rownums, memory_location_RAP);
       hypre_TFree(ijbuf_sym_numcols, memory_location_RAP);
    }
-
    hypre_TFree(Pattern_offd_indices, HYPRE_MEMORY_HOST);
    hypre_TFree(S_ext_diag_i, HYPRE_MEMORY_HOST);
    hypre_TFree(S_ext_offd_i, HYPRE_MEMORY_HOST);
@@ -2340,28 +2340,17 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
    hypre_TFree(offd_intersection_data, HYPRE_MEMORY_HOST);
    hypre_TFree(diag_intersection, HYPRE_MEMORY_HOST);
    hypre_TFree(diag_intersection_data, HYPRE_MEMORY_HOST);
-   if (S_ext_diag_size)
-   {
-      hypre_TFree(S_ext_diag_j, HYPRE_MEMORY_HOST);
-      hypre_TFree(S_ext_diag_data, HYPRE_MEMORY_HOST);
-   }
-   if (S_ext_offd_size)
-   {
-      hypre_TFree(S_ext_offd_j, HYPRE_MEMORY_HOST);
-      hypre_TFree(S_ext_offd_data, HYPRE_MEMORY_HOST);
-   }
-   if (num_cols_offd_Sext)
-   {   hypre_TFree(col_map_offd_Sext, HYPRE_MEMORY_HOST); }
+   hypre_TFree(S_ext_diag_j, HYPRE_MEMORY_HOST);
+   hypre_TFree(S_ext_diag_data, HYPRE_MEMORY_HOST);
+   hypre_TFree(S_ext_offd_j, HYPRE_MEMORY_HOST);
+   hypre_TFree(S_ext_offd_data, HYPRE_MEMORY_HOST);
+   hypre_TFree(col_map_offd_Sext, HYPRE_MEMORY_HOST);
 
-   ierr += hypre_ParCSRMatrixDestroy(Pattern);
-   ierr += hypre_ParCSRMatrixDestroy(RAP);
-   ierr += hypre_ParCSRMatrixDestroy(S);
-   ierr += HYPRE_IJMatrixSetObjectType(ijmatrix, -1);
-   ierr += HYPRE_IJMatrixDestroy(ijmatrix);
+   hypre_ParCSRMatrixDestroy(Pattern);
+   hypre_ParCSRMatrixDestroy(RAP);
+   hypre_ParCSRMatrixDestroy(S);
+   HYPRE_IJMatrixSetObjectType(ijmatrix, -1);
+   HYPRE_IJMatrixDestroy(ijmatrix);
 
-   /*end_time = hypre_MPI_Wtime();
-     if(my_id == 0)
-     {   fprintf(stdout, "NonGalerkin Time:  %1.2e\n", end_time-start_time); } */
-
-   return ierr;
+   return hypre_error_flag;
 }
