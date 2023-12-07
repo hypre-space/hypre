@@ -10857,7 +10857,7 @@ printf "%s\n" "#define HYPRE_USING_HIP 1" >>confdefs.h
 
         if test "x${HYPRE_CUDA_SM}" != "x"
         then
-           HYPRE_CUDA_GENCODE="--amdgpu-target="
+           HYPRE_CUDA_GENCODE="--offload-arch="
            for sm in ${HYPRE_CUDA_SM}; do
               HYPRE_CUDA_GENCODE="${HYPRE_CUDA_GENCODE}${sm},"
            done
