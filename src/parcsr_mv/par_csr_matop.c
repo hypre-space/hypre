@@ -5689,6 +5689,8 @@ hypre_ExchangeExternalRowsWait(void *vrequest)
  *
  * extract submatrix A_{FF}, A_{FC}, A_{CF} or A_{CC}
  * char job[2] = "FF", "FC", "CF" or "CC"
+ *
+ * TODO (VPM): Can we do the same with hypre_ParCSRMatrixGenerateFFFC?
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -5846,7 +5848,8 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
    hypre_assert(k == B_ncol_local);
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   send_buf_data = hypre_TAlloc(HYPRE_BigInt, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+   send_buf_data = hypre_TAlloc(HYPRE_BigInt,
+                                hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                 HYPRE_MEMORY_HOST);
    k = 0;
    for (i = 0; i < num_sends; i++)
@@ -5990,7 +5993,7 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
       }
       for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
       {
-         HYPRE_BigInt j1 = sub_idx_offd[A_offd_j[j]];
+         HYPRE_Int j1 = (HYPRE_Int) sub_idx_offd[A_offd_j[j]];
          if ((j1 != -1) && (hypre_cabs(A_offd_a[j]) > (strength_thresh * maxel)))
          {
             hypre_assert(j1 >= 0 && j1 < num_cols_B_offd);
