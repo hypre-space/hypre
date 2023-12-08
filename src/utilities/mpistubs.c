@@ -769,6 +769,16 @@ hypre_MPI_CommFromMPI_Comm(MPI_Comm comm)
    return hcomm;
 }
 
+hypre_MPI_Request
+hypre_MPI_RequestFromMPI_Request(MPI_Request request)
+{
+   hypre_MPI_Request hrequest;
+   hypre_Memset(&hrequest, 0, sizeof(hypre_MPI_Request), HYPRE_MEMORY_HOST);
+   hypre_MPI_RequestMPI_Request(hrequest) = request;
+
+   return hrequest;
+}
+
 HYPRE_Int
 hypre_MPI_Init( hypre_int   *argc,
                 char      ***argv )
@@ -1132,7 +1142,8 @@ hypre_MPI_Isend( void               *buf,
 {
    return (HYPRE_Int) MPI_Isend(buf, (hypre_int)count, datatype,
                                 (hypre_int)dest, (hypre_int)tag,
-                                hypre_MPI_CommMPI_Comm(comm), request);
+                                hypre_MPI_CommMPI_Comm(comm),
+                                &hypre_MPI_RequestMPI_Request(*request));
 }
 
 HYPRE_Int
@@ -1146,7 +1157,8 @@ hypre_MPI_Irecv( void               *buf,
 {
    return (HYPRE_Int) MPI_Irecv(buf, (hypre_int)count, datatype,
                                 (hypre_int)source, (hypre_int)tag,
-                                hypre_MPI_CommMPI_Comm(comm), request);
+                                hypre_MPI_CommMPI_Comm(comm),
+                                &hypre_MPI_RequestMPI_Request(*request));
 }
 
 #define TYPE_MACRO(MPI_CMD, HYPRE_DTYPE, HYPRE_MPI_DTYPE)               \
@@ -1161,7 +1173,8 @@ hypre_MPI_Irecv( void               *buf,
          HYPRE_Int start = displs[i];                                   \
          HYPRE_Int len = counts ? counts[i] : displs[i + 1] - start;    \
          MPI_CMD(data + start, len, HYPRE_MPI_DTYPE,                    \
-                 ip, tag, hypre_MPI_CommMPI_Comm(comm), requests + i);  \
+                 ip, tag, hypre_MPI_CommMPI_Comm(comm),                 \
+                 &hypre_MPI_RequestMPI_Request(requests[i]));           \
       }                                                                 \
       return hypre_error_flag;                                          \
    }                                                                    \
@@ -1181,6 +1194,8 @@ hypre_MPI_Isend_Multiple( void               *buf,
    TYPE_MACRO(MPI_Isend, HYPRE_Complex, HYPRE_MPI_COMPLEX);
    TYPE_MACRO(MPI_Isend, HYPRE_Int,     HYPRE_MPI_INT);
    TYPE_MACRO(MPI_Isend, HYPRE_BigInt,  HYPRE_MPI_BIG_INT);
+
+   return hypre_error_flag;
 }
 
 HYPRE_Int
@@ -1197,6 +1212,8 @@ hypre_MPI_Irecv_Multiple( void               *buf,
    TYPE_MACRO(MPI_Irecv, HYPRE_Complex, HYPRE_MPI_COMPLEX);
    TYPE_MACRO(MPI_Irecv, HYPRE_Int,     HYPRE_MPI_INT);
    TYPE_MACRO(MPI_Irecv, HYPRE_BigInt,  HYPRE_MPI_BIG_INT);
+
+   return hypre_error_flag;
 }
 
 HYPRE_Int
@@ -1210,7 +1227,8 @@ hypre_MPI_Send_init( void               *buf,
 {
    return (HYPRE_Int) MPI_Send_init(buf, (hypre_int)count, datatype,
                                     (hypre_int)dest, (hypre_int)tag,
-                                    hypre_MPI_CommMPI_Comm(comm), request);
+                                    hypre_MPI_CommMPI_Comm(comm),
+                                    &hypre_MPI_RequestMPI_Request(*request));
 }
 
 HYPRE_Int
@@ -1224,7 +1242,8 @@ hypre_MPI_Recv_init( void               *buf,
 {
    return (HYPRE_Int) MPI_Recv_init(buf, (hypre_int)count, datatype,
                                     (hypre_int)dest, (hypre_int)tag,
-                                    hypre_MPI_CommMPI_Comm(comm), request);
+                                    hypre_MPI_CommMPI_Comm(comm),
+                                    &hypre_MPI_RequestMPI_Request(*request));
 }
 
 HYPRE_Int
@@ -1238,14 +1257,32 @@ hypre_MPI_Irsend( void               *buf,
 {
    return (HYPRE_Int) MPI_Irsend(buf, (hypre_int)count, datatype,
                                  (hypre_int)dest, (hypre_int)tag,
-                                 hypre_MPI_CommMPI_Comm(comm), request);
+                                 hypre_MPI_CommMPI_Comm(comm),
+                                 &hypre_MPI_RequestMPI_Request(*request));
 }
 
 HYPRE_Int
 hypre_MPI_Startall( HYPRE_Int          count,
                     hypre_MPI_Request *array_of_requests )
 {
-   return (HYPRE_Int) MPI_Startall((hypre_int)count, array_of_requests);
+   HYPRE_Int i, ierr;
+   MPI_Request *array_of_mpi_requests = hypre_CTAlloc(MPI_Request, count, HYPRE_MEMORY_HOST);
+
+   for (i = 0; i < count; i++)
+   {
+      array_of_mpi_requests[i] = hypre_MPI_RequestMPI_Request(array_of_requests[i]);
+   }
+
+   ierr = (HYPRE_Int) MPI_Startall((hypre_int)count, array_of_mpi_requests);
+
+   for (i = 0; i < count; i++)
+   {
+      hypre_MPI_RequestMPI_Request(array_of_requests[i]) = array_of_mpi_requests[i];
+   }
+
+   hypre_TFree(array_of_mpi_requests, HYPRE_MEMORY_HOST);
+
+   return ierr;
 }
 
 HYPRE_Int
@@ -1281,7 +1318,7 @@ hypre_MPI_Test( hypre_MPI_Request *request,
 {
    hypre_int mpi_flag;
    HYPRE_Int ierr;
-   ierr = (HYPRE_Int) MPI_Test(request, &mpi_flag, status);
+   ierr = (HYPRE_Int) MPI_Test(&hypre_MPI_RequestMPI_Request(*request), &mpi_flag, status);
    *flag = (HYPRE_Int) mpi_flag;
    return ierr;
 }
@@ -1293,10 +1330,20 @@ hypre_MPI_Testall( HYPRE_Int          count,
                    hypre_MPI_Status  *array_of_statuses )
 {
    hypre_int mpi_flag;
-   HYPRE_Int ierr;
-   ierr = (HYPRE_Int) MPI_Testall((hypre_int)count, array_of_requests,
+   HYPRE_Int i, ierr;
+
+   MPI_Request *array_of_mpi_requests = hypre_TAlloc(MPI_Request, count, HYPRE_MEMORY_HOST);
+   for (i = 0; i < count; i++)
+   {
+      array_of_mpi_requests[i] = hypre_MPI_RequestMPI_Request(array_of_requests[i]);
+   }
+
+   ierr = (HYPRE_Int) MPI_Testall((hypre_int)count, array_of_mpi_requests,
                                   &mpi_flag, array_of_statuses);
    *flag = (HYPRE_Int) mpi_flag;
+
+   hypre_TFree(array_of_mpi_requests, HYPRE_MEMORY_HOST);
+
    return ierr;
 }
 
@@ -1304,7 +1351,7 @@ HYPRE_Int
 hypre_MPI_Wait( hypre_MPI_Request *request,
                 hypre_MPI_Status  *status )
 {
-   return (HYPRE_Int) MPI_Wait(request, status);
+   return (HYPRE_Int) MPI_Wait(&hypre_MPI_RequestMPI_Request(*request), status);
 }
 
 HYPRE_Int
@@ -1312,8 +1359,20 @@ hypre_MPI_Waitall( HYPRE_Int          count,
                    hypre_MPI_Request *array_of_requests,
                    hypre_MPI_Status  *array_of_statuses )
 {
-   return (HYPRE_Int) MPI_Waitall((hypre_int)count,
-                                  array_of_requests, array_of_statuses);
+   HYPRE_Int i, ierr;
+
+   MPI_Request *array_of_mpi_requests = hypre_TAlloc(MPI_Request, count, HYPRE_MEMORY_HOST);
+   for (i = 0; i < count; i++)
+   {
+      array_of_mpi_requests[i] = hypre_MPI_RequestMPI_Request(array_of_requests[i]);
+   }
+
+   ierr = (HYPRE_Int) MPI_Waitall((hypre_int)count,
+                                   array_of_mpi_requests, array_of_statuses);
+
+   hypre_TFree(array_of_mpi_requests, HYPRE_MEMORY_HOST);
+
+   return ierr;
 }
 
 HYPRE_Int
@@ -1323,10 +1382,20 @@ hypre_MPI_Waitany( HYPRE_Int          count,
                    hypre_MPI_Status  *status )
 {
    hypre_int mpi_index;
-   HYPRE_Int ierr;
-   ierr = (HYPRE_Int) MPI_Waitany((hypre_int)count, array_of_requests,
+   HYPRE_Int i, ierr;
+
+   MPI_Request *array_of_mpi_requests = hypre_TAlloc(MPI_Request, count, HYPRE_MEMORY_HOST);
+   for (i = 0; i < count; i++)
+   {
+      array_of_mpi_requests[i] = hypre_MPI_RequestMPI_Request(array_of_requests[i]);
+   }
+
+   ierr = (HYPRE_Int) MPI_Waitany((hypre_int)count, array_of_mpi_requests,
                                   &mpi_index, status);
    *index = (HYPRE_Int) mpi_index;
+
+   hypre_TFree(array_of_mpi_requests, HYPRE_MEMORY_HOST);
+
    return ierr;
 }
 
@@ -1377,7 +1446,7 @@ hypre_MPI_Scan( void               *sendbuf,
 HYPRE_Int
 hypre_MPI_Request_free( hypre_MPI_Request *request )
 {
-   return (HYPRE_Int) MPI_Request_free(request);
+   return (HYPRE_Int) MPI_Request_free(&hypre_MPI_RequestMPI_Request(*request));
 }
 
 HYPRE_Int

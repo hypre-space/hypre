@@ -205,7 +205,19 @@ typedef struct
 #define hypre_MPI_CommMPI_RecvLocation(comm) ((comm).recv_location)
 
 typedef MPI_Group    hypre_MPI_Group;
-typedef MPI_Request  hypre_MPI_Request;
+
+typedef HYPRE_Int (*hypre_mpi_request_action) (void *);
+typedef struct
+{
+   MPI_Request               mpi_request;
+   hypre_mpi_request_action  post_wait_action;
+   void                     *post_wait_data;
+} hypre_MPI_Request;
+
+#define hypre_MPI_RequestMPI_Request(request)    ((request).mpi_request)
+#define hypre_MPI_RequestPostWaitAction(request) ((request).post_wait_action)
+#define hypre_MPI_RequestPostWaitData(request)   ((request).post_wait_data)
+
 typedef MPI_Datatype hypre_MPI_Datatype;
 typedef MPI_Status   hypre_MPI_Status;
 typedef MPI_Op       hypre_MPI_Op;
@@ -351,6 +363,7 @@ HYPRE_Int hypre_MPI_Op_free( hypre_MPI_Op *op );
 HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function, hypre_int commute,
                                hypre_MPI_Op *op );
 hypre_MPI_Comm hypre_MPI_CommFromMPI_Comm(MPI_Comm comm);
+hypre_MPI_Request hypre_MPI_RequestFromMPI_Request(MPI_Request request);
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int hypre_MPI_Comm_split_type(MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
                                     hypre_MPI_Info info, MPI_Comm *newcomm);
