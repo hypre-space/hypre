@@ -1160,7 +1160,7 @@ hypre_MPI_Irecv( void               *buf,
          HYPRE_Int ip = procs[i];                                       \
          HYPRE_Int start = displs[i];                                   \
          HYPRE_Int len = counts ? counts[i] : displs[i + 1] - start;    \
-         MPI_CMD(data + start, len, HYPRE_MPI_COMPLEX,                  \
+         MPI_CMD(data + start, len, HYPRE_MPI_DTYPE,                    \
                  ip, tag, hypre_MPI_CommMPI_Comm(comm), requests + i);  \
       }                                                                 \
       return hypre_error_flag;                                          \
@@ -1237,7 +1237,7 @@ hypre_MPI_Irsend( void               *buf,
                   hypre_MPI_Request  *request )
 {
    return (HYPRE_Int) MPI_Irsend(buf, (hypre_int)count, datatype,
-                                 (hypre_int)dest, (hypre_int)tag, 
+                                 (hypre_int)dest, (hypre_int)tag,
                                  hypre_MPI_CommMPI_Comm(comm), request);
 }
 
@@ -1254,7 +1254,7 @@ hypre_MPI_Probe( HYPRE_Int         source,
                  hypre_MPI_Comm    comm,
                  hypre_MPI_Status *status )
 {
-   return (HYPRE_Int) MPI_Probe((hypre_int)source, (hypre_int)tag, 
+   return (HYPRE_Int) MPI_Probe((hypre_int)source, (hypre_int)tag,
    hypre_MPI_CommMPI_Comm(comm), status);
 }
 
@@ -1267,7 +1267,7 @@ hypre_MPI_Iprobe( HYPRE_Int         source,
 {
    hypre_int mpi_flag;
    HYPRE_Int ierr;
-   ierr = (HYPRE_Int) MPI_Iprobe((hypre_int)source, (hypre_int)tag, 
+   ierr = (HYPRE_Int) MPI_Iprobe((hypre_int)source, (hypre_int)tag,
                                  hypre_MPI_CommMPI_Comm(comm),
                                  &mpi_flag, status);
    *flag = (HYPRE_Int) mpi_flag;
