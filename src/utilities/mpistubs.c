@@ -1342,6 +1342,11 @@ hypre_MPI_Testall( HYPRE_Int          count,
                                   &mpi_flag, array_of_statuses);
    *flag = (HYPRE_Int) mpi_flag;
 
+   for (i = 0; i < count; i++)
+   {
+      hypre_MPI_RequestMPI_Request(array_of_requests[i]) = array_of_mpi_requests[i];
+   }
+
    hypre_TFree(array_of_mpi_requests, HYPRE_MEMORY_HOST);
 
    return ierr;
@@ -1370,6 +1375,11 @@ hypre_MPI_Waitall( HYPRE_Int          count,
    ierr = (HYPRE_Int) MPI_Waitall((hypre_int)count,
                                    array_of_mpi_requests, array_of_statuses);
 
+   for (i = 0; i < count; i++)
+   {
+      hypre_MPI_RequestMPI_Request(array_of_requests[i]) = array_of_mpi_requests[i];
+   }
+
    hypre_TFree(array_of_mpi_requests, HYPRE_MEMORY_HOST);
 
    return ierr;
@@ -1393,6 +1403,11 @@ hypre_MPI_Waitany( HYPRE_Int          count,
    ierr = (HYPRE_Int) MPI_Waitany((hypre_int)count, array_of_mpi_requests,
                                   &mpi_index, status);
    *index = (HYPRE_Int) mpi_index;
+
+   for (i = 0; i < count; i++)
+   {
+      hypre_MPI_RequestMPI_Request(array_of_requests[i]) = array_of_mpi_requests[i];
+   }
 
    hypre_TFree(array_of_mpi_requests, HYPRE_MEMORY_HOST);
 
