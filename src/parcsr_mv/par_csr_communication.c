@@ -359,9 +359,9 @@ hypre_ParCSRCommHandle*
 hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
                                   hypre_ParCSRCommPkg *comm_pkg,
                                   HYPRE_MemoryLocation send_memory_location,
-                                  void                *send_data_in,
+                                  void                *send_data,
                                   HYPRE_MemoryLocation recv_memory_location,
-                                  void                *recv_data_in )
+                                  void                *recv_data )
 {
    hypre_GpuProfilingPushRange("hypre_ParCSRCommHandleCreate_v2");
 
@@ -369,18 +369,16 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
    HYPRE_Int                  num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
    MPI_Comm                   comm      = hypre_ParCSRCommPkgComm(comm_pkg);
    hypre_MPI_Comm             hcomm     = hypre_MPI_CommFromMPI_Comm(comm);
-   HYPRE_Int                  num_send_bytes = 0;
-   HYPRE_Int                  num_recv_bytes = 0;
    hypre_ParCSRCommHandle    *comm_handle;
-   HYPRE_Int                  num_requests;
-   hypre_MPI_Request         *requests;
-   HYPRE_Int                  my_id, num_procs;
-   hypre_MPI_Datatype         mpi_dtype;
-   void                      *send_data;
-   void                      *recv_data;
+   HYPRE_Int                  num_requests = num_sends + num_recvs;
+   hypre_MPI_Request         *requests = hypre_CTAlloc(hypre_MPI_Request, num_requests, HYPRE_MEMORY_HOST);
 
    hypre_MPI_CommMPI_SendLocation(hcomm) = hypre_GetActualMemLocation(send_memory_location);
    hypre_MPI_CommMPI_RecvLocation(hcomm) = hypre_GetActualMemLocation(recv_memory_location);
+
+   hypre_MPI_Datatype mpi_dtype = job <=  2 ? HYPRE_MPI_COMPLEX :
+                                  job <= 12 ? HYPRE_MPI_INT     :
+                                              HYPRE_MPI_BIG_INT;
 
    /*--------------------------------------------------------------------
     * hypre_Initialize sets up a communication handle,
@@ -412,76 +410,6 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
     *           datatypes need to point to absolute
     *           addresses, e.g. generated using hypre_MPI_Address .
     *--------------------------------------------------------------------*/
-#ifndef HYPRE_WITH_GPU_AWARE_MPI
-   switch (job)
-   {
-      case 1:
-         num_send_bytes = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends) * sizeof(HYPRE_Complex);
-         num_recv_bytes = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs) * sizeof(HYPRE_Complex);
-         break;
-      case 2:
-         num_send_bytes = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs) * sizeof(HYPRE_Complex);
-         num_recv_bytes = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends) * sizeof(HYPRE_Complex);
-         break;
-      case 11:
-         num_send_bytes = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends) * sizeof(HYPRE_Int);
-         num_recv_bytes = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs) * sizeof(HYPRE_Int);
-         break;
-      case 12:
-         num_send_bytes = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs) * sizeof(HYPRE_Int);
-         num_recv_bytes = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends) * sizeof(HYPRE_Int);
-         break;
-      case 21:
-         num_send_bytes = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends) * sizeof(HYPRE_BigInt);
-         num_recv_bytes = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs) * sizeof(HYPRE_BigInt);
-         break;
-      case 22:
-         num_send_bytes = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs) * sizeof(HYPRE_BigInt);
-         num_recv_bytes = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends) * sizeof(HYPRE_BigInt);
-         break;
-   }
-
-   hypre_MemoryLocation act_send_memory_location = hypre_GetActualMemLocation(send_memory_location);
-
-   if ( act_send_memory_location == hypre_MEMORY_DEVICE ||
-        act_send_memory_location == hypre_MEMORY_UNIFIED )
-   {
-      //send_data = _hypre_TAlloc(char, num_send_bytes, hypre_MEMORY_HOST_PINNED);
-      send_data = hypre_TAlloc(char, num_send_bytes, HYPRE_MEMORY_HOST);
-      hypre_GpuProfilingPushRange("MPI-D2H");
-      hypre_TMemcpy(send_data, send_data_in, char, num_send_bytes, HYPRE_MEMORY_HOST,
-                    HYPRE_MEMORY_DEVICE);
-      hypre_GpuProfilingPopRange();
-   }
-   else
-   {
-      send_data = send_data_in;
-   }
-
-   hypre_MemoryLocation act_recv_memory_location = hypre_GetActualMemLocation(recv_memory_location);
-
-   if ( act_recv_memory_location == hypre_MEMORY_DEVICE ||
-        act_recv_memory_location == hypre_MEMORY_UNIFIED )
-   {
-      //recv_data = hypre_TAlloc(char, num_recv_bytes, hypre_MEMORY_HOST_PINNED);
-      recv_data = hypre_TAlloc(char, num_recv_bytes, HYPRE_MEMORY_HOST);
-   }
-   else
-   {
-      recv_data = recv_data_in;
-   }
-#else /* #ifndef HYPRE_WITH_GPU_AWARE_MPI */
-   send_data = send_data_in;
-   recv_data = recv_data_in;
-#endif
-
-   num_requests = num_sends + num_recvs;
-   requests = hypre_CTAlloc(hypre_MPI_Request, num_requests, HYPRE_MEMORY_HOST);
-
-   hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm_rank(comm, &my_id);
-
-   mpi_dtype = job <= 2 ? HYPRE_MPI_COMPLEX : job <= 12 ? HYPRE_MPI_INT : HYPRE_MPI_BIG_INT;
 
    switch (job)
    {
@@ -523,24 +451,17 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
          break;
       }
    }
-
    /*--------------------------------------------------------------------
     * set up comm_handle and return
     *--------------------------------------------------------------------*/
 
    comm_handle = hypre_CTAlloc(hypre_ParCSRCommHandle,  1, HYPRE_MEMORY_HOST);
 
-   hypre_ParCSRCommHandleCommPkg(comm_handle)            = comm_pkg;
-   hypre_ParCSRCommHandleSendMemoryLocation(comm_handle) = send_memory_location;
-   hypre_ParCSRCommHandleRecvMemoryLocation(comm_handle) = recv_memory_location;
-   hypre_ParCSRCommHandleNumSendBytes(comm_handle)       = num_send_bytes;
-   hypre_ParCSRCommHandleNumRecvBytes(comm_handle)       = num_recv_bytes;
-   hypre_ParCSRCommHandleSendData(comm_handle)           = send_data_in;
-   hypre_ParCSRCommHandleRecvData(comm_handle)           = recv_data_in;
-   hypre_ParCSRCommHandleSendDataBuffer(comm_handle)     = send_data;
-   hypre_ParCSRCommHandleRecvDataBuffer(comm_handle)     = recv_data;
-   hypre_ParCSRCommHandleNumRequests(comm_handle)        = num_requests;
-   hypre_ParCSRCommHandleRequests(comm_handle)           = requests;
+   hypre_ParCSRCommHandleCommPkg(comm_handle)     = comm_pkg;
+   hypre_ParCSRCommHandleSendData(comm_handle)    = send_data;
+   hypre_ParCSRCommHandleRecvData(comm_handle)    = recv_data;
+   hypre_ParCSRCommHandleNumRequests(comm_handle) = num_requests;
+   hypre_ParCSRCommHandleRequests(comm_handle)    = requests;
 
    hypre_GpuProfilingPopRange();
 
@@ -566,40 +487,10 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
       hypre_MPI_Status *status0;
       status0 = hypre_CTAlloc(hypre_MPI_Status,
                               hypre_ParCSRCommHandleNumRequests(comm_handle), HYPRE_MEMORY_HOST);
-      hypre_GpuProfilingPushRange("hypre_MPI_Waitall");
       hypre_MPI_Waitall(hypre_ParCSRCommHandleNumRequests(comm_handle),
                         hypre_ParCSRCommHandleRequests(comm_handle), status0);
-      hypre_GpuProfilingPopRange();
       hypre_TFree(status0, HYPRE_MEMORY_HOST);
    }
-
-#ifndef HYPRE_WITH_GPU_AWARE_MPI
-   hypre_MemoryLocation act_send_memory_location = hypre_GetActualMemLocation(
-                                                      hypre_ParCSRCommHandleSendMemoryLocation(comm_handle));
-   if ( act_send_memory_location == hypre_MEMORY_DEVICE ||
-        act_send_memory_location == hypre_MEMORY_UNIFIED )
-   {
-      //hypre_HostPinnedFree(hypre_ParCSRCommHandleSendDataBuffer(comm_handle));
-      hypre_TFree(hypre_ParCSRCommHandleSendDataBuffer(comm_handle), HYPRE_MEMORY_HOST);
-   }
-
-   hypre_MemoryLocation act_recv_memory_location = hypre_GetActualMemLocation(
-                                                      hypre_ParCSRCommHandleRecvMemoryLocation(comm_handle));
-   if ( act_recv_memory_location == hypre_MEMORY_DEVICE ||
-        act_recv_memory_location == hypre_MEMORY_UNIFIED )
-   {
-      hypre_GpuProfilingPushRange("MPI-H2D");
-      hypre_TMemcpy( hypre_ParCSRCommHandleRecvData(comm_handle),
-                     hypre_ParCSRCommHandleRecvDataBuffer(comm_handle),
-                     char,
-                     hypre_ParCSRCommHandleNumRecvBytes(comm_handle),
-                     HYPRE_MEMORY_DEVICE,
-                     HYPRE_MEMORY_HOST );
-      hypre_GpuProfilingPopRange();
-      //hypre_HostPinnedFree(hypre_ParCSRCommHandleRecvDataBuffer(comm_handle));
-      hypre_TFree(hypre_ParCSRCommHandleRecvDataBuffer(comm_handle), HYPRE_MEMORY_HOST);
-   }
-#endif
 
    hypre_TFree(hypre_ParCSRCommHandleRequests(comm_handle), HYPRE_MEMORY_HOST);
    hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
