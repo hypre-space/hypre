@@ -707,6 +707,9 @@ hypre_GetActualMemLocation(HYPRE_MemoryLocation location)
 #define hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
 (hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc))
 
+#define _hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
+(_hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc))
+
 #define hypre_TFree(ptr, location) \
 ( hypre_Free((void *)ptr, location), ptr = NULL )
 
@@ -736,6 +739,8 @@ void * hypre_ReAlloc_v2(void *ptr, size_t old_size, size_t new_size, HYPRE_Memor
 
 void * _hypre_MAlloc(size_t size, hypre_MemoryLocation location);
 void   _hypre_Free(void *ptr, hypre_MemoryLocation location);
+void   _hypre_Memcpy(void *dst, void *src, size_t size, hypre_MemoryLocation loc_dst,
+                     hypre_MemoryLocation loc_src);
 
 HYPRE_ExecutionPolicy hypre_GetExecPolicy1(HYPRE_MemoryLocation location);
 HYPRE_ExecutionPolicy hypre_GetExecPolicy2(HYPRE_MemoryLocation location1,
@@ -930,6 +935,17 @@ extern hypre_MemoryTracker *_hypre_memory_tracker;
    hypre_MemoryTrackerInsert1("malloc", ptr, sizeof(type)*(count), location,                        \
                               __FILE__, __func__, __LINE__);                                        \
    (type *) ptr;                                                                                    \
+}                                                                                                   \
+)
+
+#define _hypre_TMemcpy(dst, src, type, count, locdst, locsrc)                                       \
+(                                                                                                   \
+{                                                                                                   \
+   _hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc);   \
+                                                                                                    \
+   hypre_MemoryTrackerInsert2("memcpy", (void *) (dst), (void *) (src), sizeof(type)*(count),       \
+                              location_dst, location_src,                                           \
+                              __FILE__, __func__, __LINE__);                                        \
 }                                                                                                   \
 )
 
@@ -1155,17 +1171,16 @@ typedef struct
 
 typedef MPI_Group    hypre_MPI_Group;
 
-typedef HYPRE_Int (*hypre_mpi_request_action) (void *);
 typedef struct
 {
-   MPI_Request               mpi_request;
-   hypre_mpi_request_action  post_wait_action;
-   void                     *post_wait_data;
+   MPI_Request  mpi_request;
+   void        *post_action;
 } hypre_MPI_Request;
 
+#define HYPRE_MPI_REQUEST_FREE 1
+#define HYPRE_MPI_REQUEST_COPY 2
 #define hypre_MPI_RequestMPI_Request(request)    ((request).mpi_request)
-#define hypre_MPI_RequestPostWaitAction(request) ((request).post_wait_action)
-#define hypre_MPI_RequestPostWaitData(request)   ((request).post_wait_data)
+#define hypre_MPI_RequestPostAction(request)     ((request).post_action)
 
 typedef MPI_Datatype hypre_MPI_Datatype;
 typedef MPI_Status   hypre_MPI_Status;
@@ -1313,6 +1328,12 @@ HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function, hypre_int comm
                                hypre_MPI_Op *op );
 hypre_MPI_Comm hypre_MPI_CommFromMPI_Comm(MPI_Comm comm);
 hypre_MPI_Request hypre_MPI_RequestFromMPI_Request(MPI_Request request);
+HYPRE_Int hypre_MPI_RequestSetPostActionCopy(void *dest, hypre_MemoryLocation dest_location,
+                                             void *src, hypre_MemoryLocation src_location,
+                                             HYPRE_Int num_bytes, hypre_MPI_Request *request);
+HYPRE_Int hypre_MPI_RequestSetPostActionFree(void *ptr, hypre_MemoryLocation ptr_location,
+                                             hypre_MPI_Request *request);
+HYPRE_Int hypre_MPI_RequestProcessPostAction(hypre_MPI_Request *request);
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int hypre_MPI_Comm_split_type(MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
                                     hypre_MPI_Info info, MPI_Comm *newcomm);
