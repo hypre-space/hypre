@@ -296,8 +296,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    {                                                                                         \
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
          sycl::range<1> shmem_range(shmem_size);                                             \
-         sycl::accessor<char, 1, sycl::access_mode::read_write,                              \
-            sycl::target::local> shmem_accessor(shmem_range, cgh);                           \
+         sycl::local_accessor<char, 1> shmem_accessor(shmem_range, cgh);                     \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
             [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item, shmem_accessor.get_pointer(), __VA_ARGS__);             \

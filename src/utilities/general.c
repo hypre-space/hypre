@@ -135,6 +135,11 @@ hypre_GetDeviceMaxShmemSize(hypre_int device_id, hypre_Handle *hypre_handle_)
    hipDeviceGetAttribute(&max_size, hipDeviceAttributeMaxSharedMemoryPerBlock, device_id);
 #endif
 
+#if defined(HYPRE_USING_SYCL)
+   auto device = *hypre_HandleDevice(hypre_handle());
+   max_size = device.get_info<sycl::info::device::local_mem_size>();
+#endif
+
 #if defined(HYPRE_USING_GPU)
    hypre_HandleDeviceMaxShmemPerBlock(hypre_handle_)[0] = max_size;
    hypre_HandleDeviceMaxShmemPerBlock(hypre_handle_)[1] = max_size_optin;
