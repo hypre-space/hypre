@@ -61,7 +61,7 @@ hypre_spgemm_hash_insert_numer(
       auto atomic_key = sycl::atomic_ref <
                         HYPRE_Int, sycl::memory_order::relaxed,
                         sycl::memory_scope::device,
-                        sycl::access::address_space::generic_space > (HashKeys[j]);
+                        sycl::access::address_space::local_space > (HashKeys[j]);
       old = -1;
       atomic_key.compare_exchange_strong(old, key);
 #else
@@ -75,8 +75,10 @@ hypre_spgemm_hash_insert_numer(
          auto atomic_val = sycl::atomic_ref <
                            HYPRE_Complex, sycl::memory_order::relaxed,
                            sycl::memory_scope::device,
-                           sycl::access::address_space::generic_space > (HashVals[j]);
-         atomic_val.fetch_add(val);
+                           sycl::access::address_space::local_space > (HashVals[j]);
+         /* atomic_val.fetch_add(val); */
+         auto curr = atomic_val.load(sycl::memory_order::relaxed);
+         while (!atomic_val.compare_exchange_strong(curr, curr + val, sycl::memory_order::relaxed)) {}
 #else
          atomicAdd((HYPRE_Complex*)(HashVals + j), val);
 #endif
@@ -121,7 +123,7 @@ hypre_spgemm_hash_insert_numer( HYPRE_Int               HashSize,
       auto atomic_key = sycl::atomic_ref <
                         HYPRE_Int, sycl::memory_order::relaxed,
                         sycl::memory_scope::device,
-                        sycl::access::address_space::generic_space > (HashKeys[j]);
+                        sycl::access::address_space::local_space > (HashKeys[j]);
       old = -1;
       atomic_key.compare_exchange_strong(old, key);
 #else
@@ -135,8 +137,10 @@ hypre_spgemm_hash_insert_numer( HYPRE_Int               HashSize,
          auto atomic_val = sycl::atomic_ref <
                            HYPRE_Complex, sycl::memory_order::relaxed,
                            sycl::memory_scope::device,
-                           sycl::access::address_space::generic_space > (HashVals[j]);
-         atomic_val.fetch_add(val);
+                           sycl::access::address_space::local_space > (HashVals[j]);
+         /* atomic_val.fetch_add(val); */
+         auto curr = atomic_val.load(sycl::memory_order::relaxed);
+         while (!atomic_val.compare_exchange_strong(curr, curr + val, sycl::memory_order::relaxed)) {}
 #else
          atomicAdd((HYPRE_Complex*)(HashVals + j), val);
 #endif
