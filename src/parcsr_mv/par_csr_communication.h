@@ -34,16 +34,10 @@ struct _hypre_ParCSRCommPkg;
 typedef struct
 {
    struct _hypre_ParCSRCommPkg *comm_pkg;
-   HYPRE_MemoryLocation  send_memory_location;
-   HYPRE_MemoryLocation  recv_memory_location;
-   HYPRE_Int             num_send_bytes;
-   HYPRE_Int             num_recv_bytes;
-   void                 *send_data;
-   void                 *recv_data;
-   void                 *send_data_buffer;
-   void                 *recv_data_buffer;
-   HYPRE_Int             num_requests;
-   hypre_MPI_Request    *requests;
+   void                        *send_data;
+   void                        *recv_data;
+   HYPRE_Int                    num_requests;
+   hypre_MPI_Request           *requests;
 } hypre_ParCSRCommHandle;
 
 typedef hypre_ParCSRCommHandle hypre_ParCSRPersistentCommHandle;
@@ -135,14 +129,8 @@ hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRCommPkg *comm_pkg)
  *--------------------------------------------------------------------------*/
 
 #define hypre_ParCSRCommHandleCommPkg(comm_handle)                (comm_handle -> comm_pkg)
-#define hypre_ParCSRCommHandleSendMemoryLocation(comm_handle)     (comm_handle -> send_memory_location)
-#define hypre_ParCSRCommHandleRecvMemoryLocation(comm_handle)     (comm_handle -> recv_memory_location)
-#define hypre_ParCSRCommHandleNumSendBytes(comm_handle)           (comm_handle -> num_send_bytes)
-#define hypre_ParCSRCommHandleNumRecvBytes(comm_handle)           (comm_handle -> num_recv_bytes)
 #define hypre_ParCSRCommHandleSendData(comm_handle)               (comm_handle -> send_data)
 #define hypre_ParCSRCommHandleRecvData(comm_handle)               (comm_handle -> recv_data)
-#define hypre_ParCSRCommHandleSendDataBuffer(comm_handle)         (comm_handle -> send_data_buffer)
-#define hypre_ParCSRCommHandleRecvDataBuffer(comm_handle)         (comm_handle -> recv_data_buffer)
 #define hypre_ParCSRCommHandleNumRequests(comm_handle)            (comm_handle -> num_requests)
 #define hypre_ParCSRCommHandleRequests(comm_handle)               (comm_handle -> requests)
 #define hypre_ParCSRCommHandleRequest(comm_handle, i)             (comm_handle -> requests[i])

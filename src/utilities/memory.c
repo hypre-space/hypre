@@ -789,6 +789,14 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
    hypre_WrongMemoryLocation();
 }
 
+
+void
+_hypre_Memcpy(void *dst, void *src, size_t size, hypre_MemoryLocation loc_dst,
+              hypre_MemoryLocation loc_src)
+{
+   hypre_Memcpy_core(dst, src, size, loc_dst, loc_src);
+}
+
 /*--------------------------------------------------------------------------*
  * ExecPolicy
  *--------------------------------------------------------------------------*/

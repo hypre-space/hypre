@@ -44,6 +44,12 @@ hypre_HandleCreate(void)
    hypre_HandleDeviceGSMethod(hypre_handle_) = 1; /* CPU: 0; Cusparse: 1 */
 #endif
 
+#if defined(HYPRE_WITH_GPU_AWARE_MPI)
+   hypre_HandleUseGpuAwareMPI(hypre_handle_) = 1;
+#else
+   hypre_HandleUseGpuAwareMPI(hypre_handle_) = 0;
+#endif
+
    return hypre_handle_;
 }
 

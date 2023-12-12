@@ -160,6 +160,17 @@ extern hypre_MemoryTracker *_hypre_memory_tracker;
 }                                                                                                   \
 )
 
+#define _hypre_TMemcpy(dst, src, type, count, locdst, locsrc)                                       \
+(                                                                                                   \
+{                                                                                                   \
+   _hypre_Memcpy((void *)(dst), (void *)(src), (size_t)(sizeof(type) * (count)), locdst, locsrc);   \
+                                                                                                    \
+   hypre_MemoryTrackerInsert2("memcpy", (void *) (dst), (void *) (src), sizeof(type)*(count),       \
+                              location_dst, location_src,                                           \
+                              __FILE__, __func__, __LINE__);                                        \
+}                                                                                                   \
+)
+
 #define _hypre_TFree(ptr, location)                                                                 \
 (                                                                                                   \
 {                                                                                                   \
