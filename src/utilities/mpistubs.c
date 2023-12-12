@@ -1287,8 +1287,9 @@ hypre_MPI_Irecv( void               *buf,
    {                                                                         \
       HYPRE_Int    i;                                                        \
       HYPRE_DTYPE *data = (HYPRE_DTYPE *) buf;                               \
-      HYPRE_Int ntot = displs[num];                                          \
-      HYPRE_Int host_buf = memory_location != hypre_MEMORY_HOST;             \
+      HYPRE_Int    ntot = displs[num];                                       \
+      HYPRE_Int    gpu_mpi = hypre_GetGpuAwareMPI();                         \
+      HYPRE_Int host_buf = !gpu_mpi && memory_location != hypre_MEMORY_HOST; \
       if (host_buf)                                                          \
       {                                                                      \
          data = _hypre_TAlloc(HYPRE_DTYPE, ntot, hypre_MEMORY_HOST);         \
