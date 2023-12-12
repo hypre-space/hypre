@@ -79,6 +79,12 @@ hypre_DeviceDataCreate()
    hypre_DeviceDataCubUvmAllocator(data)   = NULL;
 #endif
 
+#if defined(HYPRE_WITH_GPU_AWARE_MPI)
+   hypre_DeviceDataUseGpuAwareMPI(data) = 1;
+#else
+   hypre_DeviceDataUseGpuAwareMPI(data) = 0;
+#endif
+
    return data;
 }
 
