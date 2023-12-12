@@ -1293,7 +1293,9 @@ hypreDevice_ReduceByTupleKey( HYPRE_Int N,
    std::equal_to< std::tuple<T1, T2> > pred;
    std::plus<T3> func;
 
-   auto new_end = HYPRE_ONEDPL_CALL(oneapi::dpl::reduce_by_segment,
+/* WM: debug - latest oneDPL has errors in reduce_by_segment... using CPU version for now,
+ * which requires unified memory! */
+   auto new_end = HYPRE_ONEDPL_CPU_CALL(oneapi::dpl::reduce_by_segment,
                                     begin_keys_in,
                                     begin_keys_in + N,
                                     vals_in,
