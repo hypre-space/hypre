@@ -127,6 +127,8 @@ void Mat_dhDestroy(Mat_dh mat)
 #define __FUNC__ "Mat_dhMatVecSetDown"
 void Mat_dhMatVecSetdown(Mat_dh mat)
 {
+  HYPRE_UNUSED_VAR(mat);
+
   START_FUNC_DH
   if (ignoreMe) SET_V_ERROR("not implemented");
   END_FUNC_DH
@@ -1254,6 +1256,12 @@ void Mat_dhGetRow(Mat_dh B, HYPRE_Int globalRow, HYPRE_Int *len, HYPRE_Int **ind
 #define __FUNC__ "Mat_dhRestoreRow"
 void Mat_dhRestoreRow(Mat_dh B, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val)
 {
+  HYPRE_UNUSED_VAR(B);
+  HYPRE_UNUSED_VAR(row);
+  HYPRE_UNUSED_VAR(len);
+  HYPRE_UNUSED_VAR(ind);
+  HYPRE_UNUSED_VAR(val);
+
   START_FUNC_DH
   END_FUNC_DH
 }
@@ -1262,6 +1270,8 @@ void Mat_dhRestoreRow(Mat_dh B, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, 
 #define __FUNC__ "Mat_dhRowPermute"
 void Mat_dhRowPermute(Mat_dh mat)
 {
+  HYPRE_UNUSED_VAR(mat);
+
   START_FUNC_DH
   if (ignoreMe) SET_V_ERROR("turned off; compilation problem on blue");
 
@@ -1407,6 +1417,13 @@ void build_adj_lists_private(Mat_dh mat, HYPRE_Int **rpOUT, HYPRE_Int **cvalOUT)
 void Mat_dhPartition(Mat_dh mat, HYPRE_Int blocks,
                      HYPRE_Int **beg_rowOUT, HYPRE_Int **row_countOUT,  HYPRE_Int **n2oOUT, HYPRE_Int **o2nOUT)
 {
+  HYPRE_UNUSED_VAR(mat);
+  HYPRE_UNUSED_VAR(blocks);
+  HYPRE_UNUSED_VAR(beg_rowOUT);
+  HYPRE_UNUSED_VAR(row_countOUT);
+  HYPRE_UNUSED_VAR(n2oOUT);
+  HYPRE_UNUSED_VAR(o2nOUT);
+
   START_FUNC_DH
 #ifndef HAVE_METIS_DH
 

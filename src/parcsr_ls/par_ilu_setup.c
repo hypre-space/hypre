@@ -2898,7 +2898,7 @@ hypre_ILUSetupILUKSymbolic(HYPRE_Int   n,
    HYPRE_Int         ctrS;
    HYPRE_Int         capacity_L;
    HYPRE_Int         capacity_U;
-   HYPRE_Int         capacity_S;
+   HYPRE_Int         capacity_S = 0;
    HYPRE_Int         initial_alloc = 0;
    HYPRE_Int         nnz_A;
    HYPRE_MemoryLocation memory_location;
@@ -3902,7 +3902,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix  *A,
    HYPRE_Int                capacity_L;
    HYPRE_Int                capacity_U;
    HYPRE_Int                ctrS;
-   HYPRE_Int                capacity_S;
+   HYPRE_Int                capacity_S = 0;
    HYPRE_Int                nnz_A;
 
    /* communication stuffs for S */

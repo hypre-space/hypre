@@ -23,6 +23,8 @@ hypre_MGRCoarseParms(MPI_Comm          comm,
                      HYPRE_BigInt     *row_starts_cpts,
                      HYPRE_BigInt     *row_starts_fpts)
 {
+   HYPRE_UNUSED_VAR(num_rows);
+
    HYPRE_Int     num_cpts;
    HYPRE_Int     num_fpts;
 

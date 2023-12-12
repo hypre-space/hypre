@@ -293,7 +293,7 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
    mv_MultiVectorPtr     blockVectorBR; /* B*R */
    mv_MultiVectorPtr     blockVectorBP; /* B*P */
 
-   mv_MultiVectorPtr     blockVectorBY; /* B*Y */
+   mv_MultiVectorPtr     blockVectorBY = NULL; /* B*Y */
 
    utilities_FortranMatrix* gramA; /* Gram matrix for A */
    utilities_FortranMatrix* gramB; /* Gram matrix for B */

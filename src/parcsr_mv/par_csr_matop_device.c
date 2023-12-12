@@ -1004,6 +1004,7 @@ hypre_ParCSRCommPkgCreateMatrixE( hypre_ParCSRCommPkg  *comm_pkg,
 HYPRE_Int
 hypre_ParCSRMatrixCompressOffdMapDevice(hypre_ParCSRMatrix *A)
 {
+   hypre_GpuProfilingPushRange("CompressOffdMap");
    hypre_ParCSRMatrixCopyColMapOffdToDevice(A);
 
    hypre_CSRMatrix *A_offd          = hypre_ParCSRMatrixOffd(A);
@@ -1030,6 +1031,8 @@ hypre_ParCSRMatrixCompressOffdMapDevice(hypre_ParCSRMatrix *A)
                     HYPRE_BigInt, num_cols_A_offd_new,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
+
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }

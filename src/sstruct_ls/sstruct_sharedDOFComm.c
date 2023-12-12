@@ -116,8 +116,8 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
    HYPRE_Int              i, j, k, m, n, t, part, var, nvars;
 
    HYPRE_SStructVariable *vartypes;
-   HYPRE_Int              nbdry_slabs;
-   hypre_BoxArray        *recv_slabs, *send_slabs;
+   HYPRE_Int              nbdry_slabs = 0;
+   hypre_BoxArray        *recv_slabs = NULL, *send_slabs = NULL;
    hypre_Index            varoffset;
 
    hypre_BoxManager     **boxmans, *cell_boxman;
@@ -150,6 +150,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
 
    hypre_BoxInit(&vbox, ndim);
    hypre_BoxInit(&boxman_entry_box, ndim);
+   hypre_SetIndex(lindex, 0);
 
    hypre_MPI_Comm_rank(A_comm, &myproc);
    hypre_MPI_Comm_size(grid_comm, &nprocs);

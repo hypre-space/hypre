@@ -7,13 +7,17 @@
 
 /* csr_matop.c */
 HYPRE_Int hypre_CSRMatrixAddFirstPass ( HYPRE_Int firstrow, HYPRE_Int lastrow, HYPRE_Int *marker,
-                                        HYPRE_Int *twspace, HYPRE_Int *map_A2C, HYPRE_Int *map_B2C, hypre_CSRMatrix *A, hypre_CSRMatrix *B,
-                                        HYPRE_Int nnzrows_C, HYPRE_Int nrows_C, HYPRE_Int ncols_C, HYPRE_Int *rownnz_C,
-                                        HYPRE_MemoryLocation memory_location_C, HYPRE_Int *C_i, hypre_CSRMatrix **C_ptr );
+                                        HYPRE_Int *twspace, HYPRE_Int *map_A2C, HYPRE_Int *map_B2C,
+                                        hypre_CSRMatrix *A, hypre_CSRMatrix *B,
+                                        HYPRE_Int nnzrows_C, HYPRE_Int nrows_C, HYPRE_Int ncols_C,
+                                        HYPRE_Int *rownnz_C,
+                                        HYPRE_MemoryLocation memory_location_C,
+                                        HYPRE_Int *C_i, hypre_CSRMatrix **C_ptr );
 HYPRE_Int hypre_CSRMatrixAddSecondPass ( HYPRE_Int firstrow, HYPRE_Int lastrow, HYPRE_Int *marker,
-                                         HYPRE_Int *twspace, HYPRE_Int *map_A2C, HYPRE_Int *map_B2C, HYPRE_Int *rownnz_C,
-                                         HYPRE_Complex alpha, HYPRE_Complex beta, hypre_CSRMatrix *A, hypre_CSRMatrix *B,
-                                         hypre_CSRMatrix *C);
+                                         HYPRE_Int *map_A2C, HYPRE_Int *map_B2C,
+                                         HYPRE_Int *rownnz_C, HYPRE_Complex alpha,
+                                         HYPRE_Complex beta, hypre_CSRMatrix *A,
+                                         hypre_CSRMatrix *B, hypre_CSRMatrix *C);
 hypre_CSRMatrix *hypre_CSRMatrixAddHost ( HYPRE_Complex alpha, hypre_CSRMatrix *A,
                                           HYPRE_Complex beta, hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixAdd ( HYPRE_Complex alpha, hypre_CSRMatrix *A, HYPRE_Complex beta,

@@ -14,8 +14,8 @@
 */
 
 
-  /* a memRecord_dh is pre and post-pended to every 
-   * piece of memory obtained by calling MALLOC_DH 
+  /* a memRecord_dh is pre and post-pended to every
+   * piece of memory obtained by calling MALLOC_DH
    */
 typedef struct {
     HYPRE_Real size;
@@ -80,7 +80,7 @@ void* Mem_dhMalloc(Mem_dh m, size_t size)
 
   retval = (char*)address + sizeof(memRecord_dh);
 
-  /* we prepend and postpend a private record to the 
+  /* we prepend and postpend a private record to the
    * requested chunk of memory; this permits tracking the
    * sizes of freed memory, along with other rudimentary
    * error checking.  This is modeled after the PETSc code.
@@ -101,13 +101,15 @@ void* Mem_dhMalloc(Mem_dh m, size_t size)
 #define __FUNC__ "Mem_dhFree"
 void Mem_dhFree(Mem_dh m, void *ptr)
 {
+  HYPRE_UNUSED_VAR(m);
+
   START_FUNC_DH_2
   HYPRE_Real size;
   char *tmp = (char*)ptr;
   memRecord_dh *rec;
   tmp -= sizeof(memRecord_dh);
   rec = (memRecord_dh*)tmp;
-  size = rec->size;   
+  size = rec->size;
 
   mem_dh->curMem -= size;
   mem_dh->freeCount += 1;
@@ -128,13 +130,13 @@ void  Mem_dhPrint(Mem_dh m, FILE* fp, bool allPrint)
     hypre_fprintf(fp, "---------------------- Euclid memory report (start)\n");
     hypre_fprintf(fp, "malloc calls = %g\n", m->mallocCount);
     hypre_fprintf(fp, "free   calls = %g\n", m->freeCount);
-    hypre_fprintf(fp, "curMem          = %g Mbytes (should be zero)\n", 
+    hypre_fprintf(fp, "curMem          = %g Mbytes (should be zero)\n",
                                                    m->curMem/1000000);
     tmp = m->totalMem / 1000000;
     hypre_fprintf(fp, "total allocated = %g Mbytes\n", tmp);
     hypre_fprintf(fp, "max malloc      = %g Mbytes (max allocated at any point in time)\n", m->maxMem/1000000);
     hypre_fprintf(fp, "\n");
     hypre_fprintf(fp, "---------------------- Euclid memory report (end)\n");
-  } 
+  }
   END_FUNC_DH_2
 }

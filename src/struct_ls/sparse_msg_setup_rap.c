@@ -26,7 +26,7 @@ hypre_SparseMSGCreateRAPOp( hypre_StructMatrix *R,
                             hypre_StructGrid   *coarse_grid,
                             HYPRE_Int           cdir        )
 {
-   hypre_StructMatrix    *RAP;
+   hypre_StructMatrix    *RAP = NULL;
    hypre_StructStencil   *stencil;
 
    stencil = hypre_StructMatrixStencil(A);
@@ -111,4 +111,3 @@ hypre_SparseMSGSetupRAPOp( hypre_StructMatrix *R,
 
    return ierr;
 }
-

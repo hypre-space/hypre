@@ -41,7 +41,7 @@ typedef struct
 
 } hypre_DataExchangeResponse;
 
-HYPRE_Int hypre_CreateBinaryTree(HYPRE_Int, HYPRE_Int, hypre_BinaryTree*);
+HYPRE_Int hypre_CreateBinaryTree(HYPRE_Int, HYPRE_Int, hypre_BinaryTree**);
 HYPRE_Int hypre_DestroyBinaryTree(hypre_BinaryTree*);
 HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts, HYPRE_Int *contact_proc_list,
                                  void *contact_send_buf, HYPRE_Int *contact_send_buf_starts, HYPRE_Int contact_obj_size,
@@ -49,4 +49,3 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts, HYPRE_Int *contact_proc
                                  HYPRE_Int rnum, MPI_Comm comm, void **p_response_recv_buf, HYPRE_Int **p_response_recv_buf_starts);
 
 #endif /* end of header */
-

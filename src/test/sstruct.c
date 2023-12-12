@@ -2331,12 +2331,12 @@ main( hypre_int argc,
    ProblemData           global_data;
    ProblemData           data;
    ProblemPartData       pdata;
-   HYPRE_Int             nparts;
+   HYPRE_Int             nparts = 0;
    HYPRE_Int             pooldist;
-   HYPRE_Int            *parts;
-   Index                *refine;
-   Index                *distribute;
-   Index                *block;
+   HYPRE_Int            *parts = NULL;
+   Index                *refine = NULL;
+   Index                *distribute = NULL;
+   Index                *block = NULL;
    HYPRE_Int             solver_id, object_type;
    HYPRE_Int             print_system;
    HYPRE_Int             cosine;
@@ -2372,7 +2372,7 @@ main( hypre_int argc,
    Index                 ilower, iupper;
    Index                 index, to_index;
 
-   HYPRE_Int             values_size;
+   HYPRE_Int             values_size = 0;
    HYPRE_Real           *values = NULL;
    HYPRE_Real           *d_values = NULL;
 
@@ -2504,6 +2504,7 @@ main( hypre_int argc,
    skip  = 0;
    rap   = 0;
    relax = 1;
+   jacobi_weight = 1.0;
    usr_jacobi_weight = 0;
    jump  = 0;
    gradient_matrix = 0;

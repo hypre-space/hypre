@@ -110,7 +110,7 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
    HYPRE_Int            *A_offd_j     = hypre_CSRBlockMatrixJ(A_offd);
 
    hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
-   hypre_ParCSRCommHandle *comm_handle;
+   hypre_ParCSRCommHandle *comm_handle = NULL;
 
    HYPRE_Int             block_size = hypre_CSRBlockMatrixBlockSize(A_diag);
    HYPRE_Int             bnnz = block_size * block_size;
@@ -128,8 +128,8 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 
    hypre_Vector   *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
    HYPRE_Real     *Vtemp_data  = hypre_VectorData(Vtemp_local);
-   HYPRE_Real     *Vext_data;
-   HYPRE_Real     *v_buf_data;
+   HYPRE_Real     *Vext_data = NULL;
+   HYPRE_Real     *v_buf_data = NULL;
 
    HYPRE_Real     *tmp_data;
 

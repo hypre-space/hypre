@@ -3241,10 +3241,6 @@ HYPRE_BUGS="https://github.com/hypre-space/hypre/issues"
 HYPRE_SRCDIR="`pwd`"
 
 
-printf "%s\n" "#define HYPRE_DEPRECATED(reason) _Pragma(reason)" >>confdefs.h
-
-
-
 printf "%s\n" "#define HYPRE_RELEASE_NAME \"$HYPRE_NAME\"" >>confdefs.h
 
 
@@ -10861,7 +10857,7 @@ printf "%s\n" "#define HYPRE_USING_HIP 1" >>confdefs.h
 
         if test "x${HYPRE_CUDA_SM}" != "x"
         then
-           HYPRE_CUDA_GENCODE="--amdgpu-target="
+           HYPRE_CUDA_GENCODE="--offload-arch="
            for sm in ${HYPRE_CUDA_SM}; do
               HYPRE_CUDA_GENCODE="${HYPRE_CUDA_GENCODE}${sm},"
            done

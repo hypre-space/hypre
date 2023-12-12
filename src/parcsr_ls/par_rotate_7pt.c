@@ -31,8 +31,8 @@ GenerateRotate7pt( MPI_Comm       comm,
    HYPRE_Real *diag_data;
 
    HYPRE_Int    *offd_i;
-   HYPRE_Int    *offd_j;
-   HYPRE_Real *offd_data;
+   HYPRE_Int    *offd_j = NULL;
+   HYPRE_Real *offd_data = NULL;
 
    HYPRE_Real *value;
    HYPRE_Real ac, bc, cc, s, c, pi, x;

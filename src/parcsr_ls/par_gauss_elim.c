@@ -66,10 +66,10 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
 
    /* Local variables */
    MPI_Comm              new_comm;
-   HYPRE_Int             global_size     = global_num_rows * global_num_rows;
-   HYPRE_Real           *A_mat           = NULL;
-   HYPRE_Real           *AT_mat;
-   HYPRE_Int            *A_piv;
+   HYPRE_Int             global_size = global_num_rows * global_num_rows;
+   HYPRE_Real           *A_mat       = NULL;
+   HYPRE_Real           *AT_mat      = NULL;
+   HYPRE_Int            *A_piv       = NULL;
    HYPRE_MemoryLocation  ge_memory_location;
    HYPRE_Int             i, jj, col;
    HYPRE_Int             ierr = 0;
