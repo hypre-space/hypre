@@ -383,9 +383,12 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                          int_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
-      hypre_ForceSyncComputeStream(hypre_handle());
+      if (hypre_GetGpuAwareMPI())
+      {
+         hypre_ForceSyncComputeStream(hypre_handle());
+      }
 #endif
 
       dof_func_offd = hypre_TAlloc(HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_DEVICE);
@@ -418,9 +421,12 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                          int_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
-      hypre_ForceSyncComputeStream(hypre_handle());
+      if (hypre_GetGpuAwareMPI())
+      {
+         hypre_ForceSyncComputeStream(hypre_handle());
+      }
 #endif
 
       /* allocate one more see comments in hypre_modmp_compute_num_cols_offd_fine_to_coarse */
@@ -572,9 +578,12 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                             int_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
          /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
-         hypre_ForceSyncComputeStream(hypre_handle());
+         if (hypre_GetGpuAwareMPI())
+         {
+            hypre_ForceSyncComputeStream(hypre_handle());
+         }
 #endif
 
          /* create a handle to start communication. 11: for integer */
@@ -1096,9 +1105,12 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                          big_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure big_buf_data is ready before issuing GPU-GPU MPI */
-      hypre_ForceSyncComputeStream(hypre_handle());
+      if (hypre_GetGpuAwareMPI())
+      {
+         hypre_ForceSyncComputeStream(hypre_handle());
+      }
 #endif
 
       comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg, HYPRE_MEMORY_DEVICE, big_buf_data,
@@ -1392,9 +1404,12 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
                          big_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure big_buf_data is ready before issuing GPU-GPU MPI */
-      hypre_ForceSyncComputeStream(hypre_handle());
+      if (hypre_GetGpuAwareMPI())
+      {
+         hypre_ForceSyncComputeStream(hypre_handle());
+      }
 #endif
 
       comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg, HYPRE_MEMORY_DEVICE, big_buf_data,

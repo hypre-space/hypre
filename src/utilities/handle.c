@@ -182,3 +182,22 @@ hypre_SetUserDeviceMfree(GPUMfreeFunc func)
 
    return hypre_error_flag;
 }
+
+HYPRE_Int
+hypre_SetGpuAwareMPI( HYPRE_Int use_gpu_aware_mpi )
+{
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+   hypre_HandleUseGpuAwareMPI(hypre_handle()) = use_gpu_aware_mpi;
+#endif
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_GetGpuAwareMPI()
+{
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+   return hypre_HandleUseGpuAwareMPI(hypre_handle());
+#else
+   return 0;
+#endif
+}
