@@ -145,6 +145,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
 
    hypre_MPI_Comm_rank(comm, &myid);
    hypre_SetIndex3(zero_index, 0, 0, 0);
+   hypre_SetIndex3(lindex, 0, 0, 0);
 
    hypre_BoxInit(&refined_box, ndim);
    hypre_BoxInit(&boxman_entry_box, ndim);
@@ -157,11 +158,15 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
 
    if (graph_type == HYPRE_SSTRUCT)
    {
-      startrank   = hypre_SStructGridGhstartRank(grid);
+      startrank = hypre_SStructGridGhstartRank(grid);
    }
-   if (graph_type == HYPRE_PARCSR)
+   else if (graph_type == HYPRE_PARCSR)
    {
-      startrank   = hypre_SStructGridStartRank(grid);
+      startrank = hypre_SStructGridStartRank(grid);
+   }
+   else
+   {
+      startrank = 0;
    }
 
    /*--------------------------------------------------------------------------
@@ -497,4 +502,3 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
 
    return 0;
 }
-

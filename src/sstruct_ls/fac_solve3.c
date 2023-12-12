@@ -21,6 +21,8 @@ hypre_FACSolve3( void                 *fac_vdata,
                  hypre_SStructVector  *b_in,
                  hypre_SStructVector  *x_in         )
 {
+   HYPRE_UNUSED_VAR(A_user);
+
    hypre_FACData           *fac_data           = (hypre_FACData*)fac_vdata;
 
    hypre_SStructMatrix     *A_in               = (fac_data-> A_rap);
@@ -403,4 +405,3 @@ hypre_FACSolve3( void                 *fac_vdata,
 
    return ierr;
 }
-

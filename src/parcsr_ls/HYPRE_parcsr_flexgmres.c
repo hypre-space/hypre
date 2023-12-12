@@ -14,6 +14,8 @@
 HYPRE_Int
 HYPRE_ParCSRFlexGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
+   HYPRE_UNUSED_VAR(comm);
+
    hypre_FlexGMRESFunctions * fgmres_functions;
 
    if (!solver)
@@ -23,15 +25,22 @@ HYPRE_ParCSRFlexGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
    }
    fgmres_functions =
       hypre_FlexGMRESFunctionsCreate(
-         hypre_ParKrylovCAlloc, hypre_ParKrylovFree, hypre_ParKrylovCommInfo,
+         hypre_ParKrylovCAlloc,
+         hypre_ParKrylovFree,
+         hypre_ParKrylovCommInfo,
          hypre_ParKrylovCreateVector,
          hypre_ParKrylovCreateVectorArray,
-         hypre_ParKrylovDestroyVector, hypre_ParKrylovMatvecCreate,
-         hypre_ParKrylovMatvec, hypre_ParKrylovMatvecDestroy,
-         hypre_ParKrylovInnerProd, hypre_ParKrylovCopyVector,
+         hypre_ParKrylovDestroyVector,
+         hypre_ParKrylovMatvecCreate,
+         hypre_ParKrylovMatvec,
+         hypre_ParKrylovMatvecDestroy,
+         hypre_ParKrylovInnerProd,
+         hypre_ParKrylovCopyVector,
          hypre_ParKrylovClearVector,
-         hypre_ParKrylovScaleVector, hypre_ParKrylovAxpy,
-         hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
+         hypre_ParKrylovScaleVector,
+         hypre_ParKrylovAxpy,
+         hypre_ParKrylovIdentitySetup,
+         hypre_ParKrylovIdentity );
    *solver = ( (HYPRE_Solver) hypre_FlexGMRESCreate( fgmres_functions ) );
 
    return hypre_error_flag;
@@ -225,6 +234,3 @@ HYPRE_Int HYPRE_ParCSRFlexGMRESSetModifyPC( HYPRE_Solver  solver,
    return ( HYPRE_FlexGMRESSetModifyPC( solver,
                                         (HYPRE_PtrToModifyPCFcn) modify_pc));
 }
-
-
-

@@ -215,7 +215,7 @@ void Vec_dhPrintBIN(Vec_dh v, SubdomainGraph_dh sg, char *filename)
 void Vec_dhRead(Vec_dh *vout, HYPRE_Int ignore, char *filename)
 {
   START_FUNC_DH
-  Vec_dh tmp;
+  Vec_dh tmp = 0;
   FILE *fp;
   HYPRE_Int items, n, i;
   HYPRE_Real *v, w;
@@ -285,7 +285,7 @@ extern void Vec_dhReadBIN(Vec_dh *vout, char *filename)
 
 {
   START_FUNC_DH
-  Vec_dh tmp;
+  Vec_dh tmp = 0;
 
   Vec_dhCreate(&tmp); CHECK_V_ERROR;
   *vout = tmp;

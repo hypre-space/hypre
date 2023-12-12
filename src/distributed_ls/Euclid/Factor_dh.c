@@ -334,6 +334,7 @@ static HYPRE_Int setup_receives_private(Factor_dh mat, HYPRE_Int *beg_rows, HYPR
                                   HYPRE_Int *reqind, HYPRE_Int reqlen,
                                   HYPRE_Int *outlist, bool debug)
 {
+  HYPRE_UNUSED_VAR(mat);
   START_FUNC_DH
   HYPRE_Int i, j, this_pe, num_recv = 0;
   hypre_MPI_Request request;

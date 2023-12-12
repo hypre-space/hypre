@@ -359,7 +359,7 @@ hypre_PCGSolve( void *pcg_vdata,
    HYPRE_Real     *rel_norms    = (pcg_data -> rel_norms);
 
    HYPRE_Real      alpha, beta;
-   HYPRE_Real      delta;
+   HYPRE_Real      delta = 0.0;
    HYPRE_Real      gamma, gamma_old;
    HYPRE_Real      bi_prod, eps;
    HYPRE_Real      pi_prod, xi_prod;

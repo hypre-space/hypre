@@ -18,7 +18,7 @@ extern "C" {
     doublereal temp;
     integer i__, j;
     extern logical lsame_(const char *,const char *);
-    integer ix, jx, kx;
+    integer ix, jx, kx = 0;
     extern /* Subroutine */ integer xerbla_(const char *, integer *);
     logical nounit;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]

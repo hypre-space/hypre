@@ -541,8 +541,8 @@ hypre_ParCSRCommPkgCreate_core(
    HYPRE_Int  num_sends, *send_procs, *send_map_starts, *send_map_elmts;
    HYPRE_Int  ip, vec_start, vec_len, num_requests;
 
-   hypre_MPI_Request *requests;
-   hypre_MPI_Status *status;
+   hypre_MPI_Request *requests = NULL;
+   hypre_MPI_Status *status = NULL;
 
    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -1070,6 +1070,9 @@ hypre_ParCSRFindExtendCommPkg(MPI_Comm              comm,
                               HYPRE_BigInt         *indices,
                               hypre_ParCSRCommPkg **extend_comm_pkg)
 {
+   HYPRE_UNUSED_VAR(local_num);
+   HYPRE_UNUSED_VAR(starts);
+
    hypre_ParCSRCommPkg *new_comm_pkg = hypre_TAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
 
    hypre_assert(apart != NULL);

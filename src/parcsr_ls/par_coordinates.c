@@ -8,22 +8,24 @@
 #include "_hypre_parcsr_ls.h"
 
 /*--------------------------------------------------------------------------
- * GenerateCoordinates
+ * hypre_GenerateCoordinates
  *--------------------------------------------------------------------------*/
 
 float *
-GenerateCoordinates( MPI_Comm comm,
-                     HYPRE_BigInt      nx,
-                     HYPRE_BigInt      ny,
-                     HYPRE_BigInt      nz,
-                     HYPRE_Int      P,
-                     HYPRE_Int      Q,
-                     HYPRE_Int      R,
-                     HYPRE_Int      p,
-                     HYPRE_Int      q,
-                     HYPRE_Int      r,
-                     HYPRE_Int      coorddim)
+hypre_GenerateCoordinates( MPI_Comm       comm,
+                           HYPRE_BigInt   nx,
+                           HYPRE_BigInt   ny,
+                           HYPRE_BigInt   nz,
+                           HYPRE_Int      P,
+                           HYPRE_Int      Q,
+                           HYPRE_Int      R,
+                           HYPRE_Int      p,
+                           HYPRE_Int      q,
+                           HYPRE_Int      r,
+                           HYPRE_Int      coorddim)
 {
+   HYPRE_UNUSED_VAR(comm);
+
    HYPRE_BigInt ix, iy, iz;
    HYPRE_Int cnt;
 

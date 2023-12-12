@@ -228,6 +228,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    p_old = -1;
    num_comms = 0;
    comm_bufsize = 0;
+   comm_type = &comm_types[0];
    for (m = 0; m < num_boxes; m++)
    {
       i = comm_boxes_i[m];
@@ -360,6 +361,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    p_old = -1;
    num_comms = 0;
    comm_bufsize = 0;
+   comm_type = &comm_types[0];
    for (m = 0; m < num_boxes; m++)
    {
       i = comm_boxes_i[m];

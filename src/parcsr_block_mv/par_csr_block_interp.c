@@ -24,18 +24,19 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix *A,
-                                 HYPRE_Int               *CF_marker,
-                                 hypre_ParCSRMatrix   *S,
-                                 HYPRE_BigInt         *num_cpts_global,
-                                 HYPRE_Int             num_functions,
-                                 HYPRE_Int            *dof_func,
-                                 HYPRE_Int             debug_flag,
-                                 HYPRE_Real            trunc_factor,
-                                 HYPRE_Int             max_elmts,
-                                 HYPRE_Int             add_weak_to_diag,
-                                 hypre_ParCSRBlockMatrix  **P_ptr )
+hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix  *A,
+                                 HYPRE_Int                *CF_marker,
+                                 hypre_ParCSRMatrix       *S,
+                                 HYPRE_BigInt             *num_cpts_global,
+                                 HYPRE_Int                 num_functions,
+                                 HYPRE_Int                *dof_func,
+                                 HYPRE_Int                 debug_flag,
+                                 HYPRE_Real                trunc_factor,
+                                 HYPRE_Int                 max_elmts,
+                                 HYPRE_Int                 add_weak_to_diag,
+                                 hypre_ParCSRBlockMatrix **P_ptr )
 {
+   HYPRE_UNUSED_VAR(dof_func);
 
    MPI_Comm                 comm = hypre_ParCSRBlockMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
@@ -70,8 +71,7 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix *A,
 
    HYPRE_Int             *CF_marker_offd = NULL;
 
-   hypre_CSRBlockMatrix  *A_ext;
-
+   hypre_CSRBlockMatrix  *A_ext = NULL;
    HYPRE_Real            *A_ext_data = NULL;
    HYPRE_Int             *A_ext_i = NULL;
    HYPRE_BigInt          *A_ext_j = NULL;
@@ -145,6 +145,11 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix *A,
    /* num_threads = hypre_NumThreads(); */
    num_threads = 1;
 
+   if (num_functions > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented for num_functions > 1!");
+   }
+
    my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs - 1)) { total_global_cpts = num_cpts_global[1]; }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
@@ -165,8 +170,9 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix *A,
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart(comm_pkg,
-                                                                            num_sends), HYPRE_MEMORY_HOST);
+   int_buf_data = hypre_CTAlloc(HYPRE_Int,
+                                hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                HYPRE_MEMORY_HOST);
 
    index = 0;
    for (i = 0; i < num_sends; i++)
@@ -177,17 +183,14 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix *A,
          int_buf_data[index++]
             = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
       }
-
    }
 
    /* we do not need the block version of comm handle - because
       CF_marker corresponds to the nodal matrix.  This call populates
       CF_marker_offd */
-   comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
-                                               CF_marker_offd);
-
+   comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data,
+                                              CF_marker_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);
-
 
    if (debug_flag == 4)
    {
@@ -1603,6 +1606,7 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
                                      HYPRE_Int                 add_weak_to_diag,
                                      hypre_ParCSRBlockMatrix  **P_ptr)
 {
+   HYPRE_UNUSED_VAR(dof_func);
 
    MPI_Comm                 comm = hypre_ParCSRBlockMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
@@ -1637,8 +1641,7 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
 
    HYPRE_Int             *CF_marker_offd = NULL;
 
-   hypre_CSRBlockMatrix  *A_ext;
-
+   hypre_CSRBlockMatrix  *A_ext = NULL;
    HYPRE_Real            *A_ext_data = NULL;
    HYPRE_Int             *A_ext_i = NULL;
    HYPRE_BigInt          *A_ext_j = NULL;
@@ -1714,6 +1717,10 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    num_threads = hypre_NumThreads();
 
+   if (num_functions > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented for num_functions > 1!");
+   }
 
    my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs - 1)) { total_global_cpts = num_cpts_global[1]; }
@@ -2728,6 +2735,7 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix    *A,
                                    HYPRE_Int                   max_elmts,
                                    hypre_ParCSRBlockMatrix   **P_ptr)
 {
+   HYPRE_UNUSED_VAR(dof_func);
 
    MPI_Comm                 comm = hypre_ParCSRBlockMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
@@ -2762,8 +2770,7 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix    *A,
 
    HYPRE_Int             *CF_marker_offd = NULL;
 
-   hypre_CSRBlockMatrix  *A_ext;
-
+   hypre_CSRBlockMatrix  *A_ext = NULL;
    HYPRE_Real            *A_ext_data = NULL;
    HYPRE_Int             *A_ext_i = NULL;
    HYPRE_BigInt          *A_ext_j = NULL;
@@ -2838,6 +2845,11 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix    *A,
    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    num_threads = hypre_NumThreads();
 
+   if (num_functions > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented for num_functions > 1!");
+   }
+
    my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs - 1)) { total_global_cpts = num_cpts_global[1]; }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
@@ -2858,8 +2870,9 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix    *A,
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart(comm_pkg,
-                                                                            num_sends), HYPRE_MEMORY_HOST);
+   int_buf_data = hypre_CTAlloc(HYPRE_Int,
+                                hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                HYPRE_MEMORY_HOST);
 
    index = 0;
    for (i = 0; i < num_sends; i++)
@@ -2870,7 +2883,6 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix    *A,
          int_buf_data[index++]
             = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
       }
-
    }
 
    /* we do not need the block version of comm handle - because
@@ -3781,6 +3793,8 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
                                     HYPRE_Int                  max_elmts,
                                     hypre_ParCSRBlockMatrix  **P_ptr)
 {
+   HYPRE_UNUSED_VAR(dof_func);
+   HYPRE_UNUSED_VAR(num_functions);
 
    MPI_Comm           comm = hypre_ParCSRBlockMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
@@ -3815,8 +3829,7 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
 
    HYPRE_Int             *CF_marker_offd = NULL;
 
-   hypre_CSRBlockMatrix *A_ext;
-
+   hypre_CSRBlockMatrix  *A_ext = NULL;
    HYPRE_Real            *A_ext_data = NULL;
    HYPRE_Int             *A_ext_i = NULL;
    HYPRE_BigInt          *A_ext_j = NULL;
@@ -4813,6 +4826,7 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix    *A,
                                     HYPRE_Int                   max_elmts,
                                     hypre_ParCSRBlockMatrix   **P_ptr)
 {
+   HYPRE_UNUSED_VAR(dof_func);
 
    MPI_Comm           comm = hypre_ParCSRBlockMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
@@ -4906,6 +4920,11 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix    *A,
    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    num_threads = hypre_NumThreads();
 
+   if (num_functions > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented for num_functions > 1!");
+   }
+
    my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs - 1)) { total_global_cpts = num_cpts_global[1]; }
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
@@ -4918,7 +4937,6 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix    *A,
 
    CF_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_A_offd, HYPRE_MEMORY_HOST);
 
-
    if (!comm_pkg)
    {
       hypre_BlockMatvecCommPkgCreate(A);
@@ -4926,21 +4944,22 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix    *A,
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart(comm_pkg,
-                                                                            num_sends), HYPRE_MEMORY_HOST);
+   int_buf_data = hypre_CTAlloc(HYPRE_Int,
+                                hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                HYPRE_MEMORY_HOST);
 
    index = 0;
    for (i = 0; i < num_sends; i++)
    {
       start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
       for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
+      {
          int_buf_data[index++]
             = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
+      }
    }
 
-   comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
-                                               CF_marker_offd);
-
+   comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data, CF_marker_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
    if (debug_flag == 4)
@@ -4990,11 +5009,9 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix    *A,
          ne = (j + 1) * size + rest;
       }
 
-
       /* loop over the fine grid points */
       for (i = ns; i < ne; i++)
       {
-
          /*--------------------------------------------------------------------
           *  If i is a C-point, interpolation is the identity. Also set up
           *  mapping vector (fine_to_coarse is the mapping vector).
@@ -5104,9 +5121,10 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix    *A,
 
    if (debug_flag == 4) { wall_time = time_getWallclockSeconds(); }
 
-   fine_to_coarse_offd = hypre_CTAlloc(HYPRE_BigInt,  num_cols_A_offd, HYPRE_MEMORY_HOST);
-   big_buf_data = hypre_CTAlloc(HYPRE_BigInt,  hypre_ParCSRCommPkgSendMapStart(comm_pkg,
-                                                                               num_sends), HYPRE_MEMORY_HOST);
+   fine_to_coarse_offd = hypre_CTAlloc(HYPRE_BigInt, num_cols_A_offd, HYPRE_MEMORY_HOST);
+   big_buf_data = hypre_CTAlloc(HYPRE_BigInt,
+                                hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                HYPRE_MEMORY_HOST);
 
    for (j = 0; j < num_threads; j++)
    {
@@ -5134,13 +5152,13 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix    *A,
    {
       start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
       for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
+      {
          big_buf_data[index++] = my_first_cpt
                                  + fine_to_coarse[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
+      }
    }
 
-   comm_handle = hypre_ParCSRCommHandleCreate( 21, comm_pkg, big_buf_data,
-                                               fine_to_coarse_offd);
-
+   comm_handle = hypre_ParCSRCommHandleCreate(21, comm_pkg, big_buf_data, fine_to_coarse_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
    if (debug_flag == 4)
@@ -5737,10 +5755,11 @@ hypre_BoomerAMGBuildBlockStdInterp(hypre_ParCSRBlockMatrix *A,
                            full_off_procNodes, CF_marker_offd);
 
       if (num_functions > 1)
+      {
          alt_insert_new_nodes(comm_pkg, extend_comm_pkg, dof_func,
                               full_off_procNodes, dof_func_offd);
+      }
    }
-
 
    /*-----------------------------------------------------------------------
     *  First Pass: Determine size of P and fill in fine_to_coarse mapping.
@@ -5783,8 +5802,6 @@ hypre_BoomerAMGBuildBlockStdInterp(hypre_ParCSRBlockMatrix *A,
    diagonal_block =  hypre_CTAlloc(HYPRE_Real,  bnnz, HYPRE_MEMORY_HOST);
    sum_block =  hypre_CTAlloc(HYPRE_Real,  bnnz, HYPRE_MEMORY_HOST);
    distribute_block =  hypre_CTAlloc(HYPRE_Real,  bnnz, HYPRE_MEMORY_HOST);
-
-
 
    jj_counter = start_indexing;
    jj_counter_offd = start_indexing;
