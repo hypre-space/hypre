@@ -405,29 +405,38 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
 #elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL(hipStreamCreateWithFlags(&stream, hipStreamDefault));
 #elif defined(HYPRE_USING_SYCL)
-   auto sycl_asynchandler = [] (sycl::exception_list exceptions)
+   /* Reserve the last stream as a debugging stream on the CPU */
+   if (i == HYPRE_MAX_NUM_STREAMS - 1)
    {
-      for (std::exception_ptr const& e : exceptions)
-      {
-         try
-         {
-            std::rethrow_exception(e);
-         }
-         catch (sycl::exception const& ex)
-         {
-            std::cout << "Caught asynchronous SYCL exception:" << std::endl
-                      << ex.what() << ", SYCL code: " << ex.code() << std::endl;
-         }
-      }
-   };
-
-   if (!data->device)
-   {
-      HYPRE_DeviceInitialize();
+      stream = new sycl::queue(sycl::cpu_selector_v, sycl::property_list{sycl::property::queue::in_order{}});
    }
-   sycl::device* sycl_device = data->device;
-   sycl::context sycl_ctxt   = sycl::context(*sycl_device, sycl_asynchandler);
-   stream = new sycl::queue(sycl_ctxt, *sycl_device, sycl::property_list{sycl::property::queue::in_order{}});
+   else
+   {
+      auto sycl_asynchandler = [] (sycl::exception_list exceptions)
+      {
+         for (std::exception_ptr const& e : exceptions)
+         {
+            try
+            {
+               std::rethrow_exception(e);
+            }
+            catch (sycl::exception const& ex)
+            {
+               std::cout << "Caught asynchronous SYCL exception:" << std::endl
+                         << ex.what() << ", SYCL code: " << ex.code() << std::endl;
+            }
+         }
+      };
+
+      /* WM: todo - use sycl::gpu_selector_v instead of the below for instantiation of stream? Removes issue with device not being initialized? */
+      if (!data->device)
+      {
+         HYPRE_DeviceInitialize();
+      }
+      sycl::device* sycl_device = data->device;
+      sycl::context sycl_ctxt   = sycl::context(*sycl_device, sycl_asynchandler);
+      stream = new sycl::queue(sycl_ctxt, *sycl_device, sycl::property_list{sycl::property::queue::in_order{}});
+   }
 #endif
 
    data->streams[i] = stream;
@@ -1289,7 +1298,9 @@ hypreDevice_ReduceByTupleKey( HYPRE_Int N,
    std::equal_to< std::tuple<T1, T2> > pred;
    std::plus<T3> func;
 
-   auto new_end = HYPRE_ONEDPL_CALL(oneapi::dpl::reduce_by_segment,
+/* WM: debug - latest oneDPL has errors in reduce_by_segment... using CPU version for now,
+ * which requires unified memory! */
+   auto new_end = HYPRE_ONEDPL_CPU_CALL(oneapi::dpl::reduce_by_segment,
                                     begin_keys_in,
                                     begin_keys_in + N,
                                     vals_in,
