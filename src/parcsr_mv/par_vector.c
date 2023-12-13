@@ -958,12 +958,14 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
                         const char      *filename )
 {
    MPI_Comm          comm;
-   HYPRE_BigInt      global_size, j;
+   HYPRE_BigInt      global_size;
    HYPRE_BigInt     *partitioning;
-   HYPRE_Complex    *local_data;
-   HYPRE_Int         myid, num_procs, i, part0;
+   hypre_Vector     *local_vector;
+   HYPRE_Int         local_size;
+   HYPRE_Int         myid, num_procs, i, j;
    char              new_filename[255];
    FILE             *file;
+
    if (!vector)
    {
       hypre_error_in_arg(1);
@@ -972,37 +974,59 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
    comm         = hypre_ParVectorComm(vector);
    global_size  = hypre_ParVectorGlobalSize(vector);
    partitioning = hypre_ParVectorPartitioning(vector);
-
-   /* multivector code not written yet */
-   hypre_assert( hypre_ParVectorNumVectors(vector) == 1 );
-   if ( hypre_ParVectorNumVectors(vector) != 1 ) { hypre_error_in_arg(1); }
+   local_vector = hypre_ParVectorLocalVector(vector);
+   local_size   = hypre_VectorSize(local_vector);
 
    hypre_MPI_Comm_rank(comm, &myid);
    hypre_MPI_Comm_size(comm, &num_procs);
 
    hypre_sprintf(new_filename, "%s.%05d", filename, myid);
-
    if ((file = fopen(new_filename, "w")) == NULL)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: can't open output file %s\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: can't open output file!");
       return hypre_error_flag;
    }
 
-   local_data = hypre_VectorData(hypre_ParVectorLocalVector(vector));
+   /* Write 1st header line: global number of rows */
+   hypre_fprintf(file, "%b\n", global_size);
 
-   hypre_fprintf(file, "%b \n", global_size);
-   for (i = 0; i < 2; i++)
+   /* Write 2nd header line: global partitioning */
+   hypre_fprintf(file, "%b %b\n", partitioning[0] + base_j, partitioning[1] + base_j - 1);
+
+   /* Write additional header line in the case of multi-component vectors */
+   if (hypre_ParVectorNumVectors(vector) > 1)
    {
-      hypre_fprintf(file, "%b ", partitioning[i] + base_j);
+      hypre_fprintf(file, "%d %d %d %d\n",
+                    hypre_VectorNumVectors(local_vector),
+                    hypre_VectorMultiVecStorageMethod(local_vector),
+                    hypre_VectorVectorStride(local_vector),
+                    hypre_VectorIndexStride(local_vector));
    }
-   hypre_fprintf(file, "\n");
 
-   part0 = partitioning[0];
-   for (j = part0; j < partitioning[1]; j++)
+   /* Write coefficients */
+   if (hypre_ParVectorNumVectors(vector) > 1)
    {
-      hypre_fprintf(file, "%b %.14e\n", j + base_j, local_data[(HYPRE_Int)(j - part0)]);
+      /* Multi-component vectors */
+      for (i = 0; i < local_size; i++)
+      {
+         hypre_fprintf(file, "%b", (HYPRE_BigInt) i + base_j);
+         for (j = 0; j < hypre_VectorNumVectors(local_vector); j++)
+         {
+            hypre_fprintf(file, " %.14e", hypre_VectorEntryIJ(local_vector, i, j));
+         }
+         hypre_fprintf(file, "\n");
+      }
    }
-
+   else
+   {
+      /* Single-component (regular) vectors */
+      for (j = 0; j < local_size; j++)
+      {
+         hypre_fprintf(file, "%b %.14e\n",
+                       (HYPRE_BigInt) j + base_j,
+                       hypre_VectorEntryI(local_vector, j));
+      }
+   }
    fclose(file);
 
    return hypre_error_flag;
