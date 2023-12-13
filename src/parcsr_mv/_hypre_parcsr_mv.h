@@ -268,7 +268,9 @@ typedef struct hypre_ParVector_struct
 #define hypre_ParVectorLocalVector(vector)      ((vector) -> local_vector)
 #define hypre_ParVectorOwnsData(vector)         ((vector) -> owns_data)
 #define hypre_ParVectorAllZeros(vector)         ((vector) -> all_zeros)
-#define hypre_ParVectorNumVectors(vector)       (hypre_VectorNumVectors(hypre_ParVectorLocalVector(vector)))
+#define hypre_ParVectorNumVectors(vector)       (hypre_VectorNumVectors((vector) -> local_vector))
+#define hypre_ParVectorEntryI(vector, i)        (hypre_VectorEntryI((vector) -> local_vector, i))
+#define hypre_ParVectorEntryIJ(vector, i, j)    (hypre_VectorEntryIJ((vector) -> local_vector, i, j))
 
 #define hypre_ParVectorAssumedPartition(vector) ((vector) -> assumed_partition)
 
@@ -1059,6 +1061,8 @@ HYPRE_Int hypre_ParCSRMatrixAddHost( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
 HYPRE_Int hypre_ParCSRMatrixAddDevice( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
                                        HYPRE_Complex beta, hypre_ParCSRMatrix *B,
                                        hypre_ParCSRMatrix **Cout);
+HYPRE_Int hypre_ParCSRMatrixColSumReduce( hypre_ParCSRMatrix *A, HYPRE_Int block_dim,
+                                          hypre_ParVector **B_ptr );
 
 /* par_csr_matop_device.c */
 HYPRE_Int hypre_ParCSRMatrixDiagScaleDevice ( hypre_ParCSRMatrix *par_A, hypre_ParVector *par_ld,
