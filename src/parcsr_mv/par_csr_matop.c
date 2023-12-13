@@ -6836,9 +6836,9 @@ hypre_ParCSRMatrixColSumReduce( hypre_ParCSRMatrix  *A,
    if (exec == HYPRE_EXEC_DEVICE)
    {
       /* TODO (VPM): hypre_ParCSRMatrixColSumReduceDevice */
-      hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_DEVICE);
-      hypre_ParCSRMatrixColSumReduceHost(A, block_dim, B_ptr);
       hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_HOST);
+      hypre_ParCSRMatrixColSumReduceHost(A, block_dim, B_ptr);
+      hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_DEVICE);
       hypre_ParVectorMigrate(*B_ptr, HYPRE_MEMORY_DEVICE);
    }
    else
