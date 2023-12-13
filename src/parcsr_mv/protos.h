@@ -404,6 +404,8 @@ HYPRE_Int hypre_ParCSRMatrixAddHost( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
 HYPRE_Int hypre_ParCSRMatrixAddDevice( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
                                        HYPRE_Complex beta, hypre_ParCSRMatrix *B,
                                        hypre_ParCSRMatrix **Cout);
+HYPRE_Int hypre_ParCSRMatrixColSumReduce( hypre_ParCSRMatrix *A, HYPRE_Int block_dim,
+                                          hypre_ParVector **B_ptr );
 
 /* par_csr_matop_device.c */
 HYPRE_Int hypre_ParCSRMatrixDiagScaleDevice ( hypre_ParCSRMatrix *par_A, hypre_ParVector *par_ld,
