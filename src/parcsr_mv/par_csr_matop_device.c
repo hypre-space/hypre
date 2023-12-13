@@ -1994,6 +1994,8 @@ hypre_ParCSRDiagScaleVectorDevice( hypre_ParCSRMatrix *par_A,
    hypre_assert(y_vecstride == y_size);
    hypre_assert(x_num_vectors == y_num_vectors);
 
+   hypre_GpuProfilingPushRange("ParCSRDiagScaleVector");
+
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
 
@@ -2006,7 +2008,7 @@ hypre_ParCSRDiagScaleVectorDevice( hypre_ParCSRMatrix *par_A,
    hypreDevice_DiagScaleVector(x_num_vectors, num_rows, A_i, A_data, y_data, 0.0, x_data);
 #endif // #if defined(HYPRE_USING_DEVICE_OPENMP)
 
-   //hypre_SyncComputeStream(hypre_handle());
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }
