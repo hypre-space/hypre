@@ -390,7 +390,7 @@ HYPRE_Int hypre_SetGaussSeidelMethod( HYPRE_Int gs_method );
 HYPRE_Int hypre_SetUserDeviceMalloc(GPUMallocFunc func);
 HYPRE_Int hypre_SetUserDeviceMfree(GPUMfreeFunc func);
 HYPRE_Int hypre_SetGpuAwareMPI( HYPRE_Int use_gpu_aware_mpi );
-HYPRE_Int hypre_GetGpuAwareMPI();
+HYPRE_Int hypre_GetGpuAwareMPI(void);
 
 /* int_array.c */
 hypre_IntArray* hypre_IntArrayCreate( HYPRE_Int size );
