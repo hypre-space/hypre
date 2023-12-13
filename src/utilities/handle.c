@@ -195,7 +195,7 @@ hypre_SetGpuAwareMPI( HYPRE_Int use_gpu_aware_mpi )
 }
 
 HYPRE_Int
-hypre_GetGpuAwareMPI()
+hypre_GetGpuAwareMPI(void)
 {
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    return hypre_HandleUseGpuAwareMPI(hypre_handle());
