@@ -365,15 +365,17 @@ HYPRE_Int hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A, HYPRE
 HYPRE_Int hypre_ParCSRCommPkgCreateMatrixE( hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int local_ncols );
 
 #ifdef HYPRE_USING_PERSISTENT_COMM
-hypre_ParCSRPersistentCommHandle* hypre_ParCSRPersistentCommHandleCreate(HYPRE_Int job,
-                                                                         hypre_ParCSRCommPkg *comm_pkg);
-hypre_ParCSRPersistentCommHandle* hypre_ParCSRCommPkgGetPersistentCommHandle(HYPRE_Int job,
-                                                                             hypre_ParCSRCommPkg *comm_pkg);
-void hypre_ParCSRPersistentCommHandleDestroy(hypre_ParCSRPersistentCommHandle *comm_handle);
-void hypre_ParCSRPersistentCommHandleStart(hypre_ParCSRPersistentCommHandle *comm_handle,
-                                           HYPRE_MemoryLocation send_memory_location, void *send_data);
-void hypre_ParCSRPersistentCommHandleWait(hypre_ParCSRPersistentCommHandle *comm_handle,
-                                          HYPRE_MemoryLocation recv_memory_location, void *recv_data);
+hypre_ParCSRCommHandle* hypre_ParCSRPersistentCommHandleCreate(HYPRE_Int job,
+                                                               hypre_ParCSRCommPkg *comm_pkg,
+                                                               HYPRE_MemoryLocation send_memory_location,
+                                                               HYPRE_MemoryLocation recv_memory_location);
+hypre_ParCSRCommHandle* hypre_ParCSRCommPkgGetPersistentCommHandle(HYPRE_Int job,
+                                                                   hypre_ParCSRCommPkg *comm_pkg,
+                                                                   HYPRE_MemoryLocation send_memory_location,
+                                                                   HYPRE_MemoryLocation recv_memory_location);
+HYPRE_Int hypre_ParCSRPersistentCommHandleDestroy(hypre_ParCSRCommHandle *comm_handle);
+HYPRE_Int hypre_ParCSRPersistentCommHandleStart(hypre_ParCSRCommHandle *comm_handle);
+HYPRE_Int hypre_ParCSRPersistentCommHandleWait(hypre_ParCSRCommHandle *comm_handle);
 #endif
 
 HYPRE_Int hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix *A, HYPRE_Int indices_len,

@@ -49,7 +49,6 @@ hypre_ParCSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex       alpha,
    HYPRE_Int                idxstride    = hypre_VectorIndexStride(x_local);
    HYPRE_Int                num_vectors  = hypre_VectorNumVectors(x_local);
    HYPRE_Complex           *x_local_data = hypre_VectorData(x_local);
-   HYPRE_Complex           *x_tmp_data;
    HYPRE_Complex           *x_buf_data;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -123,7 +122,7 @@ hypre_ParCSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex       alpha,
 
 #if defined(HYPRE_USING_PERSISTENT_COMM)
    hypre_ParCSRPersistentCommHandle *persistent_comm_handle =
-      hypre_ParCSRCommPkgGetPersistentCommHandle(1, comm_pkg);
+      hypre_ParCSRCommPkgGetPersistentCommHandle(1, comm_pkg, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 #else
    hypre_ParCSRCommHandle *comm_handle;
 #endif
@@ -134,21 +133,18 @@ hypre_ParCSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex       alpha,
     *--------------------------------------------------------------------*/
 
 #if defined(HYPRE_USING_PERSISTENT_COMM)
-   hypre_VectorData(x_tmp) = (HYPRE_Complex *)
-                             hypre_ParCSRCommHandleRecvDataBuffer(persistent_comm_handle);
+   hypre_VectorData(x_tmp) = (HYPRE_Complex *) hypre_ParCSRCommHandleRecvData(persistent_comm_handle);
    hypre_SeqVectorSetDataOwner(x_tmp, 0);
 #endif
 
    hypre_SeqVectorInitialize_v2(x_tmp, HYPRE_MEMORY_HOST);
-   x_tmp_data = hypre_VectorData(x_tmp);
 
    /*---------------------------------------------------------------------
     * Allocate data send buffer
     *--------------------------------------------------------------------*/
 
 #if defined(HYPRE_USING_PERSISTENT_COMM)
-   x_buf_data = (HYPRE_Complex *) hypre_ParCSRCommHandleSendDataBuffer(persistent_comm_handle);
-
+   x_buf_data = (HYPRE_Complex *) hypre_ParCSRCommHandleSendData(persistent_comm_handle);
 #else
    x_buf_data = hypre_TAlloc(HYPRE_Complex,
                              hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
@@ -179,12 +175,11 @@ hypre_ParCSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex       alpha,
 
    /* Non-blocking communication starts */
 #ifdef HYPRE_USING_PERSISTENT_COMM
-   hypre_ParCSRPersistentCommHandleStart(persistent_comm_handle,
-                                         HYPRE_MEMORY_HOST, x_buf_data);
+   hypre_ParCSRPersistentCommHandleStart(persistent_comm_handle);
 #else
    comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg,
                                                  HYPRE_MEMORY_HOST, x_buf_data,
-                                                 HYPRE_MEMORY_HOST, x_tmp_data);
+                                                 HYPRE_MEMORY_HOST, hypre_VectorData(x_tmp));
 #endif
 
 #ifdef HYPRE_PROFILE
@@ -200,7 +195,7 @@ hypre_ParCSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex       alpha,
 
    /* Non-blocking communication ends */
 #ifdef HYPRE_USING_PERSISTENT_COMM
-   hypre_ParCSRPersistentCommHandleWait(persistent_comm_handle, HYPRE_MEMORY_HOST, x_tmp_data);
+   hypre_ParCSRPersistentCommHandleWait(persistent_comm_handle);
 #else
    hypre_ParCSRCommHandleDestroy(comm_handle);
 #endif
@@ -306,7 +301,6 @@ hypre_ParCSRMatrixMatvecTHost( HYPRE_Complex       alpha,
    HYPRE_BigInt             x_size        = hypre_ParVectorGlobalSize(x);
    HYPRE_BigInt             y_size        = hypre_ParVectorGlobalSize(y);
 
-   HYPRE_Complex           *y_tmp_data;
    HYPRE_Complex           *y_buf_data;
    HYPRE_Complex           *y_local_data  = hypre_VectorData(y_local);
    HYPRE_Int                idxstride     = hypre_VectorIndexStride(y_local);
@@ -384,7 +378,7 @@ hypre_ParCSRMatrixMatvecTHost( HYPRE_Complex       alpha,
 
 #if defined(HYPRE_USING_PERSISTENT_COMM)
    hypre_ParCSRPersistentCommHandle *persistent_comm_handle =
-      hypre_ParCSRCommPkgGetPersistentCommHandle(2, comm_pkg);
+      hypre_ParCSRCommPkgGetPersistentCommHandle(2, comm_pkg, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 #else
    hypre_ParCSRCommHandle *comm_handle;
 #endif
@@ -395,20 +389,18 @@ hypre_ParCSRMatrixMatvecTHost( HYPRE_Complex       alpha,
     *--------------------------------------------------------------------*/
 
 #if defined(HYPRE_USING_PERSISTENT_COMM)
-   hypre_VectorData(y_tmp) = (HYPRE_Complex *)
-                             hypre_ParCSRCommHandleSendDataBuffer(persistent_comm_handle);
+   hypre_VectorData(y_tmp) = (HYPRE_Complex *) hypre_ParCSRCommHandleSendData(persistent_comm_handle);
    hypre_SeqVectorSetDataOwner(y_tmp, 0);
 #endif
 
    hypre_SeqVectorInitialize_v2(y_tmp, HYPRE_MEMORY_HOST);
-   y_tmp_data = hypre_VectorData(y_tmp);
 
    /*---------------------------------------------------------------------
     * Allocate receive data buffer
     *--------------------------------------------------------------------*/
 
 #if defined(HYPRE_USING_PERSISTENT_COMM)
-   y_buf_data = (HYPRE_Complex *) hypre_ParCSRCommHandleRecvDataBuffer(persistent_comm_handle);
+   y_buf_data = (HYPRE_Complex *) hypre_ParCSRCommHandleRecvData(persistent_comm_handle);
 
 #else
    y_buf_data = hypre_TAlloc(HYPRE_Complex,
@@ -440,11 +432,10 @@ hypre_ParCSRMatrixMatvecTHost( HYPRE_Complex       alpha,
 
    /* Non-blocking communication starts */
 #if defined(HYPRE_USING_PERSISTENT_COMM)
-   hypre_ParCSRPersistentCommHandleStart(persistent_comm_handle, HYPRE_MEMORY_HOST, y_tmp_data);
-
+   hypre_ParCSRPersistentCommHandleStart(persistent_comm_handle);
 #else
    comm_handle = hypre_ParCSRCommHandleCreate_v2(2, comm_pkg,
-                                                 HYPRE_MEMORY_HOST, y_tmp_data,
+                                                 HYPRE_MEMORY_HOST, hypre_VectorData(y_tmp),
                                                  HYPRE_MEMORY_HOST, y_buf_data );
 #endif
 
@@ -469,8 +460,7 @@ hypre_ParCSRMatrixMatvecTHost( HYPRE_Complex       alpha,
 
    /* Non-blocking communication ends */
 #if defined(HYPRE_USING_PERSISTENT_COMM)
-   hypre_ParCSRPersistentCommHandleWait(persistent_comm_handle,
-                                        HYPRE_MEMORY_HOST, y_buf_data);
+   hypre_ParCSRPersistentCommHandleWait(persistent_comm_handle);
 #else
    hypre_ParCSRCommHandleDestroy(comm_handle);
 #endif

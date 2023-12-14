@@ -1181,16 +1181,28 @@ typedef struct
 
 typedef MPI_Group    hypre_MPI_Group;
 
-typedef struct
-{
-   MPI_Request  mpi_request;
-   void        *post_action;
-} hypre_MPI_Request;
-
 #define HYPRE_MPI_REQUEST_FREE 1
 #define HYPRE_MPI_REQUEST_COPY 2
-#define hypre_MPI_RequestMPI_Request(request)    ((request).mpi_request)
-#define hypre_MPI_RequestPostAction(request)     ((request).post_action)
+
+typedef struct
+{
+   HYPRE_Int  count;
+   HYPRE_Int  data_size;
+   char      *data;
+} hypre_MPI_Request_Action;
+
+#define hypre_MPI_Request_ActionCount(action)    ((action) -> count)
+#define hypre_MPI_Request_ActionDataSize(action) ((action) -> data_size)
+#define hypre_MPI_Request_ActionData(action)     ((action) -> data)
+
+typedef struct
+{
+   MPI_Request              mpi_request;
+   hypre_MPI_Request_Action action[2];
+} hypre_MPI_Request;
+
+#define hypre_MPI_RequestMPI_Request(request)   ((request).mpi_request)
+#define hypre_MPI_RequestAction(request, i)     ((request).action[i])
 
 typedef MPI_Datatype hypre_MPI_Datatype;
 typedef MPI_Status   hypre_MPI_Status;
@@ -1338,12 +1350,12 @@ HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function, hypre_int comm
                                hypre_MPI_Op *op );
 hypre_MPI_Comm hypre_MPI_CommFromMPI_Comm(MPI_Comm comm);
 hypre_MPI_Request hypre_MPI_RequestFromMPI_Request(MPI_Request request);
-HYPRE_Int hypre_MPI_RequestSetPostActionCopy(void *dest, hypre_MemoryLocation dest_location,
-                                             void *src, hypre_MemoryLocation src_location,
-                                             HYPRE_Int num_bytes, hypre_MPI_Request *request);
-HYPRE_Int hypre_MPI_RequestSetPostActionFree(void *ptr, hypre_MemoryLocation ptr_location,
-                                             hypre_MPI_Request *request);
-HYPRE_Int hypre_MPI_RequestProcessPostAction(hypre_MPI_Request *request);
+HYPRE_Int hypre_MPI_RequestSetActionCopy(HYPRE_Int i, void *dest, hypre_MemoryLocation dest_location,
+                                         void *src, hypre_MemoryLocation src_location,
+                                         HYPRE_Int num_bytes, hypre_MPI_Request *request);
+HYPRE_Int hypre_MPI_RequestSetActionFree(HYPRE_Int i, void *ptr, hypre_MemoryLocation ptr_location,
+                                         hypre_MPI_Request *request);
+HYPRE_Int hypre_MPI_RequestProcessAction(HYPRE_Int i, hypre_MPI_Request *request);
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int hypre_MPI_Comm_split_type(MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
                                     hypre_MPI_Info info, MPI_Comm *newcomm);

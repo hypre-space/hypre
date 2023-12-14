@@ -6291,7 +6291,6 @@ hypre_ParCSRMatrixDiagScaleHost( hypre_ParCSRMatrix *par_A,
    /* Local variables */
    HYPRE_Int              i;
    hypre_Vector          *rdbuf;
-   HYPRE_Complex         *recv_rdbuf_data;
    HYPRE_Complex         *send_rdbuf_data;
 
    /*---------------------------------------------------------------------
@@ -6313,23 +6312,20 @@ hypre_ParCSRMatrixDiagScaleHost( hypre_ParCSRMatrix *par_A,
 
 #if defined(HYPRE_USING_PERSISTENT_COMM)
    hypre_ParCSRPersistentCommHandle *comm_handle =
-      hypre_ParCSRCommPkgGetPersistentCommHandle(1, comm_pkg);
+      hypre_ParCSRCommPkgGetPersistentCommHandle(1, comm_pkg, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
-   hypre_VectorData(rdbuf) = (HYPRE_Complex *)
-                             hypre_ParCSRCommHandleRecvDataBuffer(comm_handle);
+   hypre_VectorData(rdbuf) = (HYPRE_Complex *) hypre_ParCSRCommHandleRecvData(comm_handle);
    hypre_SeqVectorSetDataOwner(rdbuf, 0);
 
 #else
    hypre_ParCSRCommHandle *comm_handle;
-#endif
-
-   /* Initialize rdbuf */
    hypre_SeqVectorInitialize_v2(rdbuf, HYPRE_MEMORY_HOST);
-   recv_rdbuf_data = hypre_VectorData(rdbuf);
+   HYPRE_Complex *recv_rdbuf_data = hypre_VectorData(rdbuf);
+#endif
 
    /* Allocate send buffer for rdbuf */
 #if defined(HYPRE_USING_PERSISTENT_COMM)
-   send_rdbuf_data = (HYPRE_Complex *) hypre_ParCSRCommHandleSendDataBuffer(comm_handle);
+   send_rdbuf_data = (HYPRE_Complex *) hypre_ParCSRCommHandleSendData(comm_handle);
 #else
    send_rdbuf_data = hypre_TAlloc(HYPRE_Complex, send_map_starts[num_sends], HYPRE_MEMORY_HOST);
 #endif
@@ -6345,7 +6341,7 @@ hypre_ParCSRMatrixDiagScaleHost( hypre_ParCSRMatrix *par_A,
 
    /* Non-blocking communication starts */
 #ifdef HYPRE_USING_PERSISTENT_COMM
-   hypre_ParCSRPersistentCommHandleStart(comm_handle, HYPRE_MEMORY_HOST, send_rdbuf_data);
+   hypre_ParCSRPersistentCommHandleStart(comm_handle);
 
 #else
    comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg,
@@ -6362,7 +6358,7 @@ hypre_ParCSRMatrixDiagScaleHost( hypre_ParCSRMatrix *par_A,
 
    /* Non-blocking communication ends */
 #ifdef HYPRE_USING_PERSISTENT_COMM
-   hypre_ParCSRPersistentCommHandleWait(comm_handle, HYPRE_MEMORY_HOST, recv_rdbuf_data);
+   hypre_ParCSRPersistentCommHandleWait(comm_handle);
 #else
    hypre_ParCSRCommHandleDestroy(comm_handle);
 #endif
