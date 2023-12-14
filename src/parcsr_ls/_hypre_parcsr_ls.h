@@ -1129,6 +1129,9 @@ typedef struct
 
 typedef struct hypre_ParILUData_struct
 {
+   /* Base solver data structure */
+   hypre_Solver          base;
+
    /* General data */
    HYPRE_Int             global_solver;
    hypre_ParCSRMatrix   *matA;

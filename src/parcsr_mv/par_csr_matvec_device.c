@@ -205,9 +205,12 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
    /* RL: make sure x_buf_data is ready before issuing GPU-GPU MPI */
-   hypre_ForceSyncComputeStream(hypre_handle());
+   if (hypre_GetGpuAwareMPI())
+   {
+      hypre_ForceSyncComputeStream(hypre_handle());
+   }
 #endif
 
    /* when using GPUs, start local matvec first in order to overlap with communication */
@@ -426,10 +429,11 @@ hypre_ParCSRMatrixMatvecTDevice( HYPRE_Complex       alpha,
       }
    }
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI)
    /* RL: make sure y_tmp is ready before issuing GPU-GPU MPI */
-   hypre_ForceSyncComputeStream(hypre_handle());
-#endif
+   if (hypre_GetGpuAwareMPI())
+   {
+      hypre_ForceSyncComputeStream(hypre_handle());
+   }
 
    /* when using GPUs, start local matvec first in order to overlap with communication */
    if (diagT)
