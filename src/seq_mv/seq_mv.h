@@ -272,6 +272,9 @@ typedef struct
 #define hypre_VectorMultiVecStorageMethod(vector) ((vector) -> multivec_storage_method)
 #define hypre_VectorVectorStride(vector)          ((vector) -> vecstride)
 #define hypre_VectorIndexStride(vector)           ((vector) -> idxstride)
+#define hypre_VectorEntryI(vector, i)             ((vector) -> data[i])
+#define hypre_VectorEntryIJ(vector, i, j) \
+   ((vector) -> data[((vector) -> vecstride) * j + ((vector) -> idxstride) * i])
 
 #endif
 /******************************************************************************
@@ -586,6 +589,7 @@ HYPRE_Int hypre_SeqVectorMassAxpy8(HYPRE_Complex *alpha, hypre_Vector **x, hypre
 HYPRE_Complex hypre_SeqVectorSumElts ( hypre_Vector *vector );
 HYPRE_Complex hypre_SeqVectorSumEltsHost ( hypre_Vector *vector );
 HYPRE_Complex hypre_SeqVectorSumEltsDevice ( hypre_Vector *vector );
+HYPRE_Int hypre_SeqVectorUpdateStorage ( hypre_Vector *v, HYPRE_Int method_in );
 HYPRE_Int hypre_SeqVectorPrefetch(hypre_Vector *x, HYPRE_MemoryLocation memory_location);
 //HYPRE_Int hypre_SeqVectorMax( HYPRE_Complex alpha, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y );
 

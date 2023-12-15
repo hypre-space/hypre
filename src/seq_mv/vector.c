@@ -1068,7 +1068,7 @@ hypre_SeqVectorSumEltsHost( hypre_Vector *vector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SeqVectorSumElts:
+ * hypre_SeqVectorSumElts
  *
  * Returns the sum of all vector elements.
  *--------------------------------------------------------------------------*/
@@ -1100,6 +1100,133 @@ hypre_SeqVectorSumElts( hypre_Vector *v )
 #endif
 
    return sum;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorUpdateStorageHost
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorUpdateStorageHost( hypre_Vector *v,
+                                  HYPRE_Int     method_in )
+{
+   /* Vector variables */
+   HYPRE_Int       method        = hypre_VectorMultiVecStorageMethod(v);
+   HYPRE_Int       size          = hypre_VectorSize(v);
+   HYPRE_Int       num_vectors   = hypre_VectorNumVectors(v);
+   HYPRE_Int       total_size    = num_vectors * size;
+
+   /* Local variables */
+   HYPRE_Int       i, j;
+   HYPRE_Int       vecstride;
+   HYPRE_Int       idxstride;
+   HYPRE_Complex  *data;
+
+   /* Set new strides */
+   if (method == 0)
+   {
+      vecstride = 1;
+      idxstride = num_vectors;
+   }
+   else if (method == 1)
+   {
+      vecstride = size;
+      idxstride = 1;
+   }
+   else
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid multi-component vector storage method!\n");
+      return hypre_error_flag;
+   }
+
+   /* Allocate new data */
+   data = hypre_CTAlloc(HYPRE_Complex, total_size, hypre_VectorMemoryLocation(v));
+
+   /* Transpose coefficients */
+   for (i = 0; i < size; i++)
+   {
+      for (j = 0; j < num_vectors; j++)
+      {
+         data[idxstride * i + vecstride * j] = hypre_VectorEntryIJ(v, i, j);
+      }
+   }
+
+   /* Update storage method */
+   hypre_VectorMultiVecStorageMethod(v) = method ? 0 : 1;
+
+   /* Update with new transposed data */
+   if (hypre_VectorOwnsData(v))
+   {
+      hypre_TFree(hypre_VectorData(v), hypre_VectorMemoryLocation(v));
+   }
+   hypre_VectorData(v)     = data;
+   hypre_VectorOwnsData(v) = 1;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorUpdateStorage
+ *
+ * Updates the storage layout of a hypre_Vector's data.
+ * This function is a no-op for single-component vectors
+ *
+ * Sketches of the available storage methods:
+ *
+ * (start)                 (start)
+ *    |              /|         --> -->
+ *    v             / v               /
+ *    |            /  |              /
+ *    v           /   v             /
+ *    |          /    |            /
+ *    v         /     v           /
+ *    |        /      |          /
+ *    v       /       v         --> -->
+ *    |      /        |               /
+ *    v     /         v              /
+ *    |    /          |             /
+ *    v   /           v            /
+ *    |  /            |           /
+ *    | /             |          /
+ *    v               v         --> -->
+ *                  (end)             (end)
+ *
+ *     column-wise (0)        row-wise (1)
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorUpdateStorage( hypre_Vector *v,
+                              HYPRE_Int     method_in )
+{
+   /* Exit in the case of single-component vectors */
+   if (hypre_VectorNumVectors(v) == 1)
+   {
+      return hypre_error_flag;
+   }
+
+   /* Trivial case: storage method is unchanged */
+   if (hypre_VectorMultiVecStorageMethod(v) == method_in)
+   {
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_VectorMemoryLocation(v));
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      /* TODO (VPM): Implement hypre_SeqVectorUpdateStorageDevice */
+      hypre_SeqVectorMigrate(v, HYPRE_MEMORY_HOST);
+      hypre_SeqVectorUpdateStorageHost(v, method_in);
+      hypre_SeqVectorMigrate(v, HYPRE_MEMORY_DEVICE);
+   }
+   else
+#endif
+   {
+      hypre_SeqVectorUpdateStorageHost(v, method_in);
+   }
+
+   return hypre_error_flag;
 }
 
 
