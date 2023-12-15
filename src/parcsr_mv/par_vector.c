@@ -963,7 +963,8 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
    hypre_Vector     *local_vector;
    HYPRE_Int         local_size;
    HYPRE_Int         myid, num_procs, i, j;
-   char              new_filename[255];
+   char              new_filename[HYPRE_MAX_FILE_NAME_LEN];
+   char              msg[1024];
    FILE             *file;
 
    if (!vector)
@@ -983,7 +984,8 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
    hypre_sprintf(new_filename, "%s.%05d", filename, myid);
    if ((file = fopen(new_filename, "w")) == NULL)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: can't open output file!");
+      hypre_sprintf(msg, "Error: cannot open output file: %s", new_filename);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
       return hypre_error_flag;
    }
 
@@ -1169,7 +1171,7 @@ hypre_ParVectorReadIJ( MPI_Comm          comm,
    HYPRE_Int         base_j;
 
    HYPRE_Int         myid, num_procs, i, j;
-   char              new_filename[255];
+   char              new_filename[HYPRE_MAX_FILE_NAME_LEN];
    FILE             *file;
 
    hypre_MPI_Comm_size(comm, &num_procs);
