@@ -109,7 +109,7 @@ mv_TempMultiVectorAxpy( HYPRE_Complex, void*, void* );
 
 void
 mv_TempMultiVectorByMultiVector( void*, void*,
-                                 HYPRE_Int gh, HYPRE_Int h, HYPRE_Int w, HYPRE_Complex* v );
+                                 HYPRE_BigInt gh, HYPRE_Int h, HYPRE_Int w, HYPRE_Complex* v );
 
 void
 mv_TempMultiVectorByMultiVectorDiag( void* x, void* y,
@@ -117,12 +117,12 @@ mv_TempMultiVectorByMultiVectorDiag( void* x, void* y,
 
 void
 mv_TempMultiVectorByMatrix( void*,
-                            HYPRE_Int gh, HYPRE_Int h, HYPRE_Int w, HYPRE_Complex* v,
+                            HYPRE_BigInt gh, HYPRE_Int h, HYPRE_Int w, HYPRE_Complex* v,
                             void* );
 
 void
 mv_TempMultiVectorXapy( void* x,
-                        HYPRE_Int gh, HYPRE_Int h, HYPRE_Int w, HYPRE_Complex* v,
+                        HYPRE_BigInt gh, HYPRE_Int h, HYPRE_Int w, HYPRE_Complex* v,
                         void* y );
 
 void mv_TempMultiVectorByDiagonal( void* x,
