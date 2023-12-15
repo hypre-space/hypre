@@ -6,11 +6,15 @@
  ******************************************************************************/
 
 /* dense_block_matrix.c */
-hypre_DenseBlockMatrix* hypre_DenseBlockMatrixCreate(HYPRE_Int, HYPRE_Int, HYPRE_Int, HYPRE_Int);
-hypre_DenseBlockMatrix* hypre_DenseBlockMatrixCreateByBlock(HYPRE_Int, HYPRE_Int, HYPRE_Int);
+hypre_DenseBlockMatrix* hypre_DenseBlockMatrixCreate(HYPRE_Int, HYPRE_Int, HYPRE_Int,
+                                                     HYPRE_Int, HYPRE_Int);
+hypre_DenseBlockMatrix* hypre_DenseBlockMatrixCreateByBlock(HYPRE_Int, HYPRE_Int,
+                                                            HYPRE_Int, HYPRE_Int);
+hypre_DenseBlockMatrix* hypre_DenseBlockMatrixClone(hypre_DenseBlockMatrix*, HYPRE_Int);
 HYPRE_Int hypre_DenseBlockMatrixDestroy(hypre_DenseBlockMatrix*);
 HYPRE_Int hypre_DenseBlockMatrixInitializeOn(hypre_DenseBlockMatrix*, HYPRE_MemoryLocation);
 HYPRE_Int hypre_DenseBlockMatrixInitialize(hypre_DenseBlockMatrix*);
 HYPRE_Int hypre_DenseBlockMatrixBuildAOP(hypre_DenseBlockMatrix*);
 HYPRE_Int hypre_DenseBlockMatrixCopy(hypre_DenseBlockMatrix*, hypre_DenseBlockMatrix*);
-hypre_DenseBlockMatrix* hypre_DenseBlockMatrixClone(hypre_DenseBlockMatrix*, HYPRE_Int);
+HYPRE_Int hypre_DenseBlockMatrixMigrate(hypre_DenseBlockMatrix*, HYPRE_MemoryLocation);
+HYPRE_Int hypre_DenseBlockMatrixPrint(MPI_Comm, hypre_DenseBlockMatrix*, const char*);
