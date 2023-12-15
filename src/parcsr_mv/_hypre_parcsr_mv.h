@@ -7,6 +7,7 @@
 #include <HYPRE_config.h>
 #include "HYPRE_parcsr_mv.h"
 #include "_hypre_utilities.h"
+#include "_hypre_seq_block_mv.h"
 #include "seq_mv.h"
 
 #ifdef __cplusplus
