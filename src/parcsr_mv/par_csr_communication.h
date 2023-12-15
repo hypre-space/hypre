@@ -115,6 +115,11 @@ typedef struct
    struct _hypre_ParCSRCommPkg *comm_pkg;
    void                        *send_data;
    void                        *recv_data;
+#if defined(HYPRE_USING_PERSISTENT_COMM)
+   /* persistent HOST buffer */
+   void                        *send_buffer;
+   void                        *recv_buffer;
+#endif
    HYPRE_Int                    num_requests;
    hypre_MPI_Request           *requests;
 } hypre_ParCSRCommHandle;
@@ -126,6 +131,8 @@ typedef struct
 #define hypre_ParCSRCommHandleCommPkg(comm_handle)                (comm_handle -> comm_pkg)
 #define hypre_ParCSRCommHandleSendData(comm_handle)               (comm_handle -> send_data)
 #define hypre_ParCSRCommHandleRecvData(comm_handle)               (comm_handle -> recv_data)
+#define hypre_ParCSRCommHandleSendBuffer(comm_handle)             (comm_handle -> send_buffer)
+#define hypre_ParCSRCommHandleRecvBuffer(comm_handle)             (comm_handle -> recv_buffer)
 #define hypre_ParCSRCommHandleNumRequests(comm_handle)            (comm_handle -> num_requests)
 #define hypre_ParCSRCommHandleRequests(comm_handle)               (comm_handle -> requests)
 #define hypre_ParCSRCommHandleRequest(comm_handle, i)             (comm_handle -> requests[i])
