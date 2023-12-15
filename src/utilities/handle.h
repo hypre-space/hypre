@@ -34,6 +34,8 @@ typedef struct
    HYPRE_Int              use_gpu_aware_mpi;
 #endif
 
+   hypre_MemoryLocation   mpi_host_buffer_location;
+
 #if defined(HYPRE_USING_GPU)
    hypre_DeviceData      *device_data;
    HYPRE_Int              device_gs_method; /* device G-S options */
@@ -77,6 +79,7 @@ typedef struct
 #define hypre_HandleDeviceData(hypre_handle)                     ((hypre_handle) -> device_data)
 #define hypre_HandleDeviceGSMethod(hypre_handle)                 ((hypre_handle) -> device_gs_method)
 #define hypre_HandleUseGpuAwareMPI(hypre_handle)                 ((hypre_handle) -> use_gpu_aware_mpi)
+#define hypre_HandleMPIHostBufferLocation(hypre_handle)          ((hypre_handle) -> mpi_host_buffer_location)
 
 #define hypre_HandleCurandGenerator(hypre_handle)                hypre_DeviceDataCurandGenerator(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCublasHandle(hypre_handle)                   hypre_DeviceDataCublasHandle(hypre_HandleDeviceData(hypre_handle))

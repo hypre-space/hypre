@@ -50,6 +50,7 @@ hypre_HandleCreate(void)
 #else
    hypre_HandleUseGpuAwareMPI(hypre_handle_) = 0;
 #endif
+   hypre_HandleMPIHostBufferLocation(hypre_handle_) = hypre_MEMORY_HOST;
 #endif
 
    return hypre_handle_;

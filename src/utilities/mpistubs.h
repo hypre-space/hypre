@@ -381,20 +381,24 @@ HYPRE_Int hypre_MPI_RequestSetActionCopy(HYPRE_Int i, void *dest, hypre_MemoryLo
 HYPRE_Int hypre_MPI_RequestSetActionFree(HYPRE_Int i, void *ptr, hypre_MemoryLocation ptr_location,
                                          hypre_MPI_Request *request);
 HYPRE_Int hypre_MPI_RequestProcessAction(HYPRE_Int i, hypre_MPI_Request *request);
+HYPRE_Int hypre_MPI_RequestClear(hypre_MPI_Request *request);
+HYPRE_Int hypre_MPINeedHostBuffer(hypre_MemoryLocation memory_location);
+HYPRE_Int hypre_MPI_Isend_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
+hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests );
+HYPRE_Int hypre_MPI_Irecv_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
+hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests );
+HYPRE_Int hypre_MPI_Send_init_Multiple( void *buf, void *pbuf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
+hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests );
+HYPRE_Int hypre_MPI_Recv_init_Multiple( void *buf, void *pbuf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
+hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests );
+
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int hypre_MPI_Comm_split_type(MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
                                     hypre_MPI_Info info, MPI_Comm *newcomm);
 HYPRE_Int hypre_MPI_Info_create(hypre_MPI_Info *info);
 HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 #endif
-HYPRE_Int hypre_MPI_Isend_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
-hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests );
-HYPRE_Int hypre_MPI_Irecv_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
-hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests );
-HYPRE_Int hypre_MPI_Send_init_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
-hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests );
-HYPRE_Int hypre_MPI_Recv_init_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
-hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests );
+
 #ifdef __cplusplus
 }
 #endif
