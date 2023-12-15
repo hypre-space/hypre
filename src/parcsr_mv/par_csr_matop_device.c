@@ -1837,7 +1837,7 @@ hypre_ParCSRMatrixDiagScaleDevice( hypre_ParCSRMatrix *par_A,
    hypre_CSRMatrix        *A_offd        = hypre_ParCSRMatrixOffd(par_A);
    HYPRE_Int               num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
-   hypre_Vector          *ld             = (par_ld) ? hypre_ParVectorLocalVector(par_ld) : NULL;
+   hypre_Vector           *ld            = (par_ld) ? hypre_ParVectorLocalVector(par_ld) : NULL;
    hypre_Vector           *rd            = hypre_ParVectorLocalVector(par_rd);
    HYPRE_Complex          *rd_data       = hypre_VectorData(rd);
 
@@ -1865,7 +1865,10 @@ hypre_ParCSRMatrixDiagScaleDevice( hypre_ParCSRMatrix *par_A,
    }
 
    /* Communicate a single vector component */
-   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, par_rd);
+   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg,
+                                      hypre_VectorNumVectors(rd),
+                                      hypre_VectorVectorStride(rd),
+                                      hypre_VectorIndexStride(rd));
 
    /* send_map_elmts on device */
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
