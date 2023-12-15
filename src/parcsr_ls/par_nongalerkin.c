@@ -1259,7 +1259,6 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
    HYPRE_Int           col_indx_Pattern, current_Pattern_j, col_indx_RAP;
    HYPRE_BigInt        value;
    HYPRE_BigInt       *temp                = NULL;
-   char                filename[256];
 
    HYPRE_MemoryLocation memory_location_RAP = hypre_ParCSRMatrixMemoryLocation(RAP);
 
@@ -1304,9 +1303,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
    HYPRE_Int           *RAP_offd_j           = hypre_CSRMatrixJ(RAP_offd);
    HYPRE_BigInt        *col_map_offd_RAP     = hypre_ParCSRMatrixColMapOffd(RAP);
    HYPRE_Int            num_cols_RAP_offd    = hypre_CSRMatrixNumCols(RAP_offd);
-
    HYPRE_Int            num_variables        = hypre_CSRMatrixNumRows(RAP_diag);
-   HYPRE_BigInt         global_num_vars      = hypre_ParCSRMatrixGlobalNumRows(RAP);
 
    /* offd and diag portions of S */
    hypre_CSRMatrix     *S_diag               = NULL;
@@ -2309,6 +2306,8 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
 
    /* Optional diagnostic matrix printing */
 #if 0
+   char  filename[256];
+
    hypre_sprintf(filename, "Pattern_%d.ij", global_num_vars);
    hypre_ParCSRMatrixPrintIJ(Pattern, 0, 0, filename);
    hypre_sprintf(filename, "Strength_%d.ij", global_num_vars);
