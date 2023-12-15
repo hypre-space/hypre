@@ -83,7 +83,6 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
    hypre_TMemcpy(d_b_sorted,  d_b,  HYPRE_Complex, nnzB, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
    /* sort copies of col indices and data for A and B */
-   /* WM: todo - this is currently necessary for correctness of oneMKL's matmat, but this may change in the future? */
    HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::set_csr_data(*hypre_HandleComputeStream(hypre_handle()),
                                                         handle_A, m, k, oneapi::mkl::index_base::zero,
                                                         d_ia, d_ja_sorted, d_a_sorted) );

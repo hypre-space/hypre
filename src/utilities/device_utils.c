@@ -1185,12 +1185,7 @@ hypreDevice_IntegerExclusiveScan( HYPRE_Int  n,
                                   HYPRE_Int *d_i )
 {
 #if defined(HYPRE_USING_SYCL)
-   /* WM: todo - this is a workaround since oneDPL's exclusive_scan gives incorrect results when doing the scan in place */
-   HYPRE_Int *tmp = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
-   /* HYPRE_ONEDPL_CALL(std::exclusive_scan, d_i, d_i + n, d_i, 0); */
-   HYPRE_ONEDPL_CALL(std::exclusive_scan, d_i, d_i + n, tmp, 0);
-   hypre_TMemcpy(d_i, tmp, HYPRE_Int, n, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(tmp, HYPRE_MEMORY_DEVICE);
+   HYPRE_ONEDPL_CALL(std::exclusive_scan, d_i, d_i + n, d_i, 0);
 #else
    HYPRE_THRUST_CALL(exclusive_scan, d_i, d_i + n, d_i);
 #endif
@@ -1483,19 +1478,12 @@ hypreDevice_GenScatterAdd( HYPRE_Real  *x,
       HYPRE_ONEDPL_CALL(std::sort, zipped_begin, zipped_begin + ny,
       [](auto lhs, auto rhs) {return std::get<0>(lhs) < std::get<0>(rhs);});
 
-      // WM: todo - ABB: The below code has issues because of name mangling issues,
-      //       similar to https://github.com/oneapi-src/oneDPL/pull/166
-      //       https://github.com/oneapi-src/oneDPL/issues/507
-      //       should be fixed by now?
-      /* auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment, */
-      /*                                   map2, */
-      /*                                   map2 + ny, */
-      /*                                   y, */
-      /*                                   reduced_map, */
-      /*                                   reduced_y ); */
-      std::pair<HYPRE_Int*, HYPRE_Real*> new_end = oneapi::dpl::reduce_by_segment(
-                                                      oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream(
-                                                               hypre_handle())), map2, map2 + ny, y, reduced_map, reduced_y );
+      auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
+                                        map2,
+                                        map2 + ny,
+                                        y,
+                                        reduced_map,
+                                        reduced_y );
 #else
       HYPRE_THRUST_CALL(sort_by_key, map2, map2 + ny, y);
 

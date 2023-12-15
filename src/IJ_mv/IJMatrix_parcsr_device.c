@@ -269,10 +269,7 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
 
    /* output X: 0: keep, 1: zero-out */
 #if defined(HYPRE_USING_SYCL)
-   /* WM: oneDPL currently does not have a reverse iterator */
-   /*     should be able to do this with a reverse operation defined in a struct */
-   /*     instead of explicitly allocating and generating the reverse_perm, */
-   /*     but I can't get that to work for some reason */
+   /* WM: note - oneDPL currently does not have a reverse iterator */
    HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::transform,
                       oneapi::dpl::counting_iterator<HYPRE_Int>(0),
@@ -440,10 +437,7 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    HYPRE_Complex *A = hypre_TAlloc(HYPRE_Complex, N0, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: oneDPL currently does not have a reverse iterator */
-   /*     should be able to do this with a reverse operation defined in a struct */
-   /*     instead of explicitly allocating and generating the reverse_perm, */
-   /*     but I can't get that to work for some reason */
+   /* WM: note - oneDPL currently does not have a reverse iterator */
    HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::transform,
                       oneapi::dpl::counting_iterator<HYPRE_Int>(0),

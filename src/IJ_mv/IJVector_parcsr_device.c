@@ -88,10 +88,7 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
 
    /* output X: 0: keep, 1: zero-out */
 #if defined(HYPRE_USING_SYCL)
-   /* WM: todo - oneDPL currently does not have a reverse iterator */
-   /*     should be able to do this with a reverse operation defined in a struct */
-   /*     instead of explicitly allocating and generating the reverse_perm, */
-   /*     but I can't get that to work for some reason */
+   /* WM: note - oneDPL currently does not have a reverse iterator */
    HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::transform,
                       oneapi::dpl::counting_iterator<HYPRE_Int>(0),
@@ -189,10 +186,7 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
 
    /* output in X0: 0: keep, 1: zero-out */
 #if defined(HYPRE_USING_SYCL)
-   /* WM: todo - oneDPL currently does not have a reverse iterator */
-   /*     should be able to do this with a reverse operation defined in a struct */
-   /*     instead of explicitly allocating and generating the reverse_perm, */
-   /*     but I can't get that to work for some reason */
+   /* WM: note - oneDPL currently does not have a reverse iterator */
    HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::transform,
                       oneapi::dpl::counting_iterator<HYPRE_Int>(0),
@@ -220,15 +214,12 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
    [] (const auto & x) {return 0.0;},
    [] (const auto & x) {return x;} );
 
-   /* WM: todo - why don't I use the HYPRE_ONEDPL_CALL macro here? Compile issue? */
-   auto new_end = oneapi::dpl::reduce_by_segment(
-                     oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream(
-                                                                                   hypre_handle())),
-                     I0,      /* keys_first */
-                     I0 + N0, /* keys_last */
-                     A0,      /* values_first */
-                     I,       /* keys_output */
-                     A        /* values_output */);
+   auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
+                                     I0,      /* keys_first */
+                                     I0 + N0, /* keys_last */
+                                     A0,      /* values_first */
+                                     I,       /* keys_output */
+                                     A );     /* values_output */
 #else
    HYPRE_THRUST_CALL(
       inclusive_scan_by_key,
