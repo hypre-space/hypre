@@ -1011,7 +1011,7 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
       /* Multi-component vectors */
       for (i = 0; i < local_size; i++)
       {
-         hypre_fprintf(file, "%b", (HYPRE_BigInt) i + base_j);
+         hypre_fprintf(file, "%b", (HYPRE_BigInt) (i + base_j) + partitioning[0]);
          for (j = 0; j < hypre_VectorNumVectors(local_vector); j++)
          {
             hypre_fprintf(file, " %.14e", hypre_VectorEntryIJ(local_vector, i, j));
@@ -1025,7 +1025,7 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
       for (j = 0; j < local_size; j++)
       {
          hypre_fprintf(file, "%b %.14e\n",
-                       (HYPRE_BigInt) j + base_j,
+                       (HYPRE_BigInt) (j + base_j) + partitioning[0],
                        hypre_VectorEntryI(local_vector, j));
       }
    }
