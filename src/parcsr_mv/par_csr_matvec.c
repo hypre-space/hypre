@@ -195,7 +195,7 @@ hypre_ParCSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex       alpha,
 
    /* Non-blocking communication ends */
 #ifdef HYPRE_USING_PERSISTENT_COMM
-   hypre_ParCSRPersistentCommHandleWait(persistent_comm_handle);
+   hypre_ParCSRCommHandleWait(persistent_comm_handle);
 #else
    hypre_ParCSRCommHandleDestroy(comm_handle);
 #endif
@@ -460,7 +460,7 @@ hypre_ParCSRMatrixMatvecTHost( HYPRE_Complex       alpha,
 
    /* Non-blocking communication ends */
 #if defined(HYPRE_USING_PERSISTENT_COMM)
-   hypre_ParCSRPersistentCommHandleWait(persistent_comm_handle);
+   hypre_ParCSRCommHandleWait(persistent_comm_handle);
 #else
    hypre_ParCSRCommHandleDestroy(comm_handle);
 #endif

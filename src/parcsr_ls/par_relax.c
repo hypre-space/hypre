@@ -821,7 +821,7 @@ hypre_BoomerAMGRelaxHybridGaussSeidel_core( hypre_ParCSRMatrix *A,
 #endif
 
 #if defined(HYPRE_USING_PERSISTENT_COMM)
-      hypre_ParCSRPersistentCommHandleWait(persistent_comm_handle);
+      hypre_ParCSRCommHandleWait(persistent_comm_handle);
 #else
       hypre_ParCSRCommHandleDestroy(comm_handle);
 #endif

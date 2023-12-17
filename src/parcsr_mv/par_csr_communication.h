@@ -115,11 +115,13 @@ typedef struct
    struct _hypre_ParCSRCommPkg *comm_pkg;
    void                        *send_data;
    void                        *recv_data;
-   /* HOST buffers for non-GPU-aware MPIs */
+   /* send/recv buffers to copy to/from */
    void                        *send_buffer;
    void                        *recv_buffer;
    HYPRE_MemoryLocation         send_location;
    HYPRE_MemoryLocation         recv_location;
+   hypre_MemoryLocation         send_buffer_location;
+   hypre_MemoryLocation         recv_buffer_location;
    HYPRE_Int                    num_requests;
    hypre_MPI_Request           *requests;
 } hypre_ParCSRCommHandle;
@@ -135,6 +137,8 @@ typedef struct
 #define hypre_ParCSRCommHandleRecvBuffer(comm_handle)             (comm_handle -> recv_buffer)
 #define hypre_ParCSRCommHandleSendLocation(comm_handle)           (comm_handle -> send_location)
 #define hypre_ParCSRCommHandleRecvLocation(comm_handle)           (comm_handle -> recv_location)
+#define hypre_ParCSRCommHandleSendBufferLocation(comm_handle)     (comm_handle -> send_buffer_location)
+#define hypre_ParCSRCommHandleRecvBufferLocation(comm_handle)     (comm_handle -> recv_buffer_location)
 #define hypre_ParCSRCommHandleNumRequests(comm_handle)            (comm_handle -> num_requests)
 #define hypre_ParCSRCommHandleRequests(comm_handle)               (comm_handle -> requests)
 #define hypre_ParCSRCommHandleRequest(comm_handle, i)             (comm_handle -> requests[i])

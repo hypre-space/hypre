@@ -6358,7 +6358,7 @@ hypre_ParCSRMatrixDiagScaleHost( hypre_ParCSRMatrix *par_A,
 
    /* Non-blocking communication ends */
 #ifdef HYPRE_USING_PERSISTENT_COMM
-   hypre_ParCSRPersistentCommHandleWait(comm_handle);
+   hypre_ParCSRCommHandleWait(comm_handle);
 #else
    hypre_ParCSRCommHandleDestroy(comm_handle);
 #endif

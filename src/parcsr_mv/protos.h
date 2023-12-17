@@ -241,6 +241,7 @@ hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int job,
                                                           void *send_data_in,
                                                           HYPRE_MemoryLocation recv_memory_location,
                                                           void *recv_data_in );
+HYPRE_Int hypre_ParCSRCommHandleWait(hypre_ParCSRCommHandle *comm_handle);
 HYPRE_Int hypre_ParCSRCommHandleDestroy ( hypre_ParCSRCommHandle *comm_handle );
 void hypre_ParCSRCommPkgCreate_core ( MPI_Comm comm, HYPRE_BigInt *col_map_offd,
                                       HYPRE_BigInt first_col_diag, HYPRE_BigInt *col_starts, HYPRE_Int num_cols_diag,
@@ -376,7 +377,6 @@ hypre_ParCSRCommHandle* hypre_ParCSRCommPkgGetPersistentCommHandle(HYPRE_Int job
                                                                    HYPRE_MemoryLocation recv_memory_location);
 HYPRE_Int hypre_ParCSRPersistentCommHandleDestroy(hypre_ParCSRCommHandle *comm_handle);
 HYPRE_Int hypre_ParCSRPersistentCommHandleStart(hypre_ParCSRCommHandle *comm_handle);
-HYPRE_Int hypre_ParCSRPersistentCommHandleWait(hypre_ParCSRCommHandle *comm_handle);
 #endif
 
 HYPRE_Int hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix *A, HYPRE_Int indices_len,

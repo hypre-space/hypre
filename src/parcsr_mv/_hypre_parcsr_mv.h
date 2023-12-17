@@ -130,15 +130,13 @@ typedef struct
    struct _hypre_ParCSRCommPkg *comm_pkg;
    void                        *send_data;
    void                        *recv_data;
-#if 1 || defined(HYPRE_USING_GPU)
-   /* HOST buffers for non-GPU-aware MPIs */
+   /* send/recv buffers to copy to/from */
    void                        *send_buffer;
    void                        *recv_buffer;
-#endif
-#if defined(HYPRE_USING_PERSISTENT_COMM)
    HYPRE_MemoryLocation         send_location;
    HYPRE_MemoryLocation         recv_location;
-#endif
+   hypre_MemoryLocation         send_buffer_location;
+   hypre_MemoryLocation         recv_buffer_location;
    HYPRE_Int                    num_requests;
    hypre_MPI_Request           *requests;
 } hypre_ParCSRCommHandle;
@@ -154,6 +152,8 @@ typedef struct
 #define hypre_ParCSRCommHandleRecvBuffer(comm_handle)             (comm_handle -> recv_buffer)
 #define hypre_ParCSRCommHandleSendLocation(comm_handle)           (comm_handle -> send_location)
 #define hypre_ParCSRCommHandleRecvLocation(comm_handle)           (comm_handle -> recv_location)
+#define hypre_ParCSRCommHandleSendBufferLocation(comm_handle)     (comm_handle -> send_buffer_location)
+#define hypre_ParCSRCommHandleRecvBufferLocation(comm_handle)     (comm_handle -> recv_buffer_location)
 #define hypre_ParCSRCommHandleNumRequests(comm_handle)            (comm_handle -> num_requests)
 #define hypre_ParCSRCommHandleRequests(comm_handle)               (comm_handle -> requests)
 #define hypre_ParCSRCommHandleRequest(comm_handle, i)             (comm_handle -> requests[i])
@@ -978,6 +978,7 @@ hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int job,
                                                           void *send_data_in,
                                                           HYPRE_MemoryLocation recv_memory_location,
                                                           void *recv_data_in );
+HYPRE_Int hypre_ParCSRCommHandleWait(hypre_ParCSRCommHandle *comm_handle);
 HYPRE_Int hypre_ParCSRCommHandleDestroy ( hypre_ParCSRCommHandle *comm_handle );
 void hypre_ParCSRCommPkgCreate_core ( MPI_Comm comm, HYPRE_BigInt *col_map_offd,
                                       HYPRE_BigInt first_col_diag, HYPRE_BigInt *col_starts, HYPRE_Int num_cols_diag,
@@ -1113,7 +1114,6 @@ hypre_ParCSRCommHandle* hypre_ParCSRCommPkgGetPersistentCommHandle(HYPRE_Int job
                                                                    HYPRE_MemoryLocation recv_memory_location);
 HYPRE_Int hypre_ParCSRPersistentCommHandleDestroy(hypre_ParCSRCommHandle *comm_handle);
 HYPRE_Int hypre_ParCSRPersistentCommHandleStart(hypre_ParCSRCommHandle *comm_handle);
-HYPRE_Int hypre_ParCSRPersistentCommHandleWait(hypre_ParCSRCommHandle *comm_handle);
 #endif
 
 HYPRE_Int hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix *A, HYPRE_Int indices_len,
