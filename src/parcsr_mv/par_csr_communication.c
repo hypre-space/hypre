@@ -46,6 +46,7 @@ hypre_ParCSRCommHandleCreateBuffer( HYPRE_MemoryLocation    send_memory_location
                                     HYPRE_Int               size_of_elem,
                                     hypre_ParCSRCommHandle *comm_handle )
 {
+#if defined(HYPRE_USING_PERSISTENT_COMM)
    if (!hypre_ParCSRCommHandleSendData(comm_handle))
    {
       hypre_ParCSRCommHandleSendData(comm_handle) = hypre_TAlloc(char, num_send_elems * size_of_elem,
@@ -57,19 +58,39 @@ hypre_ParCSRCommHandleCreateBuffer( HYPRE_MemoryLocation    send_memory_location
       hypre_ParCSRCommHandleRecvData(comm_handle) = hypre_TAlloc(char, num_recv_elems * size_of_elem,
                                                                  recv_memory_location);
    }
+#endif
 
    if (!hypre_ParCSRCommHandleSendBuffer(comm_handle) &&
         hypre_MPINeedHostBuffer(hypre_GetActualMemLocation(send_memory_location)))
    {
-      hypre_ParCSRCommHandleSendBuffer(comm_handle) = _hypre_TAlloc(char, num_send_elems * size_of_elem,
-                                                      hypre_HandleMPIHostBufferLocation(hypre_handle()));
+      hypre_MemoryLocation location = hypre_HandleMPIHostBufferLocation(hypre_handle());
+      hypre_ParCSRCommHandleSendBufferLocation(comm_handle) = location;
+      hypre_ParCSRCommHandleSendBuffer(comm_handle) = _hypre_TAlloc(char, num_send_elems * size_of_elem, location);
    }
 
    if (!hypre_ParCSRCommHandleRecvBuffer(comm_handle) &&
         hypre_MPINeedHostBuffer(hypre_GetActualMemLocation(recv_memory_location)))
    {
-      hypre_ParCSRCommHandleRecvBuffer(comm_handle) = _hypre_TAlloc(char, num_recv_elems * size_of_elem,
-                                                      hypre_HandleMPIHostBufferLocation(hypre_handle()));
+      hypre_MemoryLocation location = hypre_HandleMPIHostBufferLocation(hypre_handle());
+      hypre_ParCSRCommHandleRecvBufferLocation(comm_handle) = location;
+      hypre_ParCSRCommHandleRecvBuffer(comm_handle) = _hypre_TAlloc(char, num_recv_elems * size_of_elem, location);
+   }
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_ParCSRCommHandleDestroyRequests( hypre_ParCSRCommHandle *comm_handle )
+{
+   if (comm_handle)
+   {
+      HYPRE_Int i;
+
+      for (i = 0; i < hypre_ParCSRCommHandleNumRequests(comm_handle); i++)
+      {
+         hypre_MPI_RequestClear(&hypre_ParCSRCommHandleRequest(comm_handle, i));
+      }
+      hypre_TFree(hypre_ParCSRCommHandleRequests(comm_handle), HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
@@ -111,7 +132,6 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int            job,
                                             hypre_ParCSRCommHandleGetDataTypeSize(job), comm_handle);
 
          hypre_MPI_Recv_init_Multiple(hypre_ParCSRCommHandleRecvData(comm_handle),
-                                      hypre_ParCSRCommHandleRecvBuffer(comm_handle),
                                       num_recvs,
                                       hypre_ParCSRCommPkgRecvVecStarts(comm_pkg),
                                       NULL, mpi_dtype,
@@ -119,7 +139,6 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int            job,
                                       0, hcomm, requests);
 
          hypre_MPI_Send_init_Multiple(hypre_ParCSRCommHandleSendData(comm_handle),
-                                      hypre_ParCSRCommHandleSendBuffer(comm_handle),
                                       num_sends,
                                       hypre_ParCSRCommPkgSendMapStarts(comm_pkg),
                                       NULL, mpi_dtype,
@@ -139,7 +158,6 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int            job,
                                             hypre_ParCSRCommHandleGetDataTypeSize(job), comm_handle);
 
          hypre_MPI_Recv_init_Multiple(hypre_ParCSRCommHandleRecvData(comm_handle),
-                                      hypre_ParCSRCommHandleRecvBuffer(comm_handle),
                                       num_sends,
                                       hypre_ParCSRCommPkgSendMapStarts(comm_pkg),
                                       NULL, mpi_dtype,
@@ -147,7 +165,6 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int            job,
                                       0, hcomm, requests);
 
          hypre_MPI_Send_init_Multiple(hypre_ParCSRCommHandleSendData(comm_handle),
-                                      hypre_ParCSRCommHandleSendBuffer(comm_handle),
                                       num_recvs,
                                       hypre_ParCSRCommPkgRecvVecStarts(comm_pkg),
                                       NULL, mpi_dtype,
@@ -192,23 +209,6 @@ hypre_ParCSRCommPkgGetPersistentCommHandle( HYPRE_Int            job,
    return hypre_ParCSRCommPkgPersistentCommHandle(comm_pkg, type);
 }
 
-HYPRE_Int
-hypre_ParCSRCommHandleDestroyRequests( hypre_ParCSRCommHandle *comm_handle )
-{
-   if (comm_handle)
-   {
-      HYPRE_Int i;
-
-      for (i = 0; i < hypre_ParCSRCommHandleNumRequests(comm_handle); i++)
-      {
-         hypre_MPI_RequestClear(&hypre_ParCSRCommHandleRequest(comm_handle, i));
-      }
-      hypre_TFree(hypre_ParCSRCommHandleRequests(comm_handle), HYPRE_MEMORY_HOST);
-   }
-
-   return hypre_error_flag;
-}
-
 /*------------------------------------------------------------------
  * hypre_ParCSRPersistentCommHandleDestroy
  *------------------------------------------------------------------*/
@@ -216,15 +216,17 @@ hypre_ParCSRCommHandleDestroyRequests( hypre_ParCSRCommHandle *comm_handle )
 HYPRE_Int
 hypre_ParCSRPersistentCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
 {
-   if (comm_handle)
+   if (!comm_handle)
    {
-      hypre_TFree(hypre_ParCSRCommHandleSendData(comm_handle), hypre_ParCSRCommHandleSendLocation(comm_handle));
-      hypre_TFree(hypre_ParCSRCommHandleRecvData(comm_handle), hypre_ParCSRCommHandleRecvLocation(comm_handle));
-      _hypre_TFree(hypre_ParCSRCommHandleSendBuffer(comm_handle), hypre_HandleMPIHostBufferLocation(hypre_handle()));
-      _hypre_TFree(hypre_ParCSRCommHandleRecvBuffer(comm_handle), hypre_HandleMPIHostBufferLocation(hypre_handle()));
-      hypre_ParCSRCommHandleDestroyRequests(comm_handle);
-      hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
+      return hypre_error_flag;
    }
+
+   hypre_TFree(hypre_ParCSRCommHandleSendData(comm_handle), hypre_ParCSRCommHandleSendLocation(comm_handle));
+   hypre_TFree(hypre_ParCSRCommHandleRecvData(comm_handle), hypre_ParCSRCommHandleRecvLocation(comm_handle));
+   _hypre_TFree(hypre_ParCSRCommHandleSendBuffer(comm_handle), hypre_ParCSRCommHandleSendBufferLocation(comm_handle));
+   _hypre_TFree(hypre_ParCSRCommHandleRecvBuffer(comm_handle), hypre_ParCSRCommHandleRecvBufferLocation(comm_handle));
+   hypre_ParCSRCommHandleDestroyRequests(comm_handle);
+   hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -250,27 +252,6 @@ hypre_ParCSRPersistentCommHandleStart( hypre_ParCSRCommHandle *comm_handle )
    return hypre_error_flag;
 }
 
-/*------------------------------------------------------------------
- * hypre_ParCSRPersistentCommHandleWait
- *------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ParCSRPersistentCommHandleWait( hypre_ParCSRCommHandle *comm_handle )
-{
-   if (hypre_ParCSRCommHandleNumRequests(comm_handle) > 0)
-   {
-      HYPRE_Int ret = hypre_MPI_Waitall(hypre_ParCSRCommHandleNumRequests(comm_handle),
-                                        hypre_ParCSRCommHandleRequests(comm_handle),
-                                        hypre_MPI_STATUSES_IGNORE);
-      if (hypre_MPI_SUCCESS != ret)
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "MPI error\n");
-         /*hypre_printf("MPI error %d in %s (%s, line %u)\n", ret, __FUNCTION__, __FILE__, __LINE__);*/
-      }
-   }
-
-   return hypre_error_flag;
-}
 #endif // HYPRE_USING_PERSISTENT_COMM
 
 /*------------------------------------------------------------------
@@ -319,6 +300,16 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
       case HYPRE_COMM_PKG_JOB_INT:
       case HYPRE_COMM_PKG_JOB_BIGINT:
       {
+         hypre_ParCSRCommHandleCreateBuffer(send_memory_location, recv_memory_location,
+                                            hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                            hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs),
+                                            hypre_ParCSRCommHandleGetDataTypeSize(job), comm_handle);
+
+         hypre_MPI_CommMPI_SendCopy(hcomm) = hypre_ParCSRCommHandleSendBuffer(comm_handle);
+         hypre_MPI_CommMPI_RecvCopy(hcomm) = hypre_ParCSRCommHandleRecvBuffer(comm_handle);
+         hypre_MPI_CommMPI_SendCopyLocation(hcomm) = hypre_ParCSRCommHandleSendBufferLocation(comm_handle);
+         hypre_MPI_CommMPI_RecvCopyLocation(hcomm) = hypre_ParCSRCommHandleRecvBufferLocation(comm_handle);
+
          hypre_MPI_Irecv_Multiple(recv_data, num_recvs,
                                   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg),
                                   NULL, mpi_dtype,
@@ -338,6 +329,16 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
       case HYPRE_COMM_PKG_JOB_INT_TRANSPOSE:
       case HYPRE_COMM_PKG_JOB_BIGINT_TRANSPOSE:
       {
+         hypre_ParCSRCommHandleCreateBuffer(send_memory_location, recv_memory_location,
+                                            hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs),
+                                            hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                            hypre_ParCSRCommHandleGetDataTypeSize(job), comm_handle);
+
+         hypre_MPI_CommMPI_SendCopy(hcomm) = hypre_ParCSRCommHandleSendBuffer(comm_handle);
+         hypre_MPI_CommMPI_RecvCopy(hcomm) = hypre_ParCSRCommHandleRecvBuffer(comm_handle);
+         hypre_MPI_CommMPI_SendCopyLocation(hcomm) = hypre_ParCSRCommHandleSendBufferLocation(comm_handle);
+         hypre_MPI_CommMPI_RecvCopyLocation(hcomm) = hypre_ParCSRCommHandleRecvBufferLocation(comm_handle);
+
          hypre_MPI_Irecv_Multiple(recv_data, num_sends,
                                   hypre_ParCSRCommPkgSendMapStarts(comm_pkg),
                                   NULL, mpi_dtype,
@@ -374,28 +375,48 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
 }
 
 /*------------------------------------------------------------------
- * hypre_ParCSRCommHandleDestroy
+ * hypre_ParCSRCommHandleWait
  *------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
+hypre_ParCSRCommHandleWait( hypre_ParCSRCommHandle *comm_handle )
 {
    if ( comm_handle == NULL )
    {
       return hypre_error_flag;
    }
 
-   hypre_GpuProfilingPushRange("hypre_ParCSRCommHandleDestroy");
-
    if (hypre_ParCSRCommHandleNumRequests(comm_handle))
    {
-      hypre_MPI_Status *status0;
-      status0 = hypre_CTAlloc(hypre_MPI_Status,
-                              hypre_ParCSRCommHandleNumRequests(comm_handle), HYPRE_MEMORY_HOST);
-      hypre_MPI_Waitall(hypre_ParCSRCommHandleNumRequests(comm_handle),
-                        hypre_ParCSRCommHandleRequests(comm_handle), status0);
-      hypre_TFree(status0, HYPRE_MEMORY_HOST);
+      HYPRE_Int ret = hypre_MPI_Waitall(hypre_ParCSRCommHandleNumRequests(comm_handle),
+                                        hypre_ParCSRCommHandleRequests(comm_handle),
+                                        hypre_MPI_STATUSES_IGNORE);
+      if (hypre_MPI_SUCCESS != ret)
+      {
+         char errmsg[256];
+         hypre_sprintf(errmsg, "MPI error %d in %s (%s, line %u)\n", ret, __FUNCTION__, __FILE__, __LINE__);
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, errmsg);
+      }
    }
+
+   return hypre_error_flag;
+}
+
+/*------------------------------------------------------------------
+ * hypre_ParCSRCommHandleDestroy
+ *------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
+{
+   hypre_GpuProfilingPushRange("hypre_ParCSRCommHandleDestroy");
+
+   if (!comm_handle)
+   {
+      return hypre_error_flag;
+   }
+
+   hypre_ParCSRCommHandleWait(comm_handle);
 
    hypre_ParCSRCommHandleDestroyRequests(comm_handle);
    hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
