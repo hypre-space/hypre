@@ -1713,16 +1713,16 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CC, [xlc_r xlC_r xlc xlC icc icpc icx icpx gcc g++ pgcc pgCC cc CC kcc KCC])
+         AC_CHECK_PROGS(CC, [xlc_r xlC_r xlc xlC icx icc icpc icpx gcc g++ pgcc pgCC cc CC kcc KCC])
       else
-         AC_CHECK_PROGS(CC, [xlc xlC icc icpc icx icpx gcc g++ pgcc pgCC cc CC kcc KCC])
+         AC_CHECK_PROGS(CC, [xlc xlC icx icc icpc icpx gcc g++ pgcc pgCC cc CC kcc KCC])
       fi
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CC, [mpicc mpxlc mpixlc_r mpixlc mpiicc mpiicx mpigcc mpipgcc mpipgicc])
+         AC_CHECK_PROGS(CC, [mpxlc mpixlc_r mpixlc mpiicx mpiicc mpigcc mpipgcc mpipgicc mpicc])
       else
-         AC_CHECK_PROGS(CC, [mpicc mpxlc mpixlc mpiicc mpiicx mpigcc mpipgcc mpipgicc])
+         AC_CHECK_PROGS(CC, [mpxlc mpixlc mpiicx mpiicc mpigcc mpipgcc mpipgicc mpicc])
       fi
    fi
 
@@ -1738,16 +1738,16 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CXX, [xlC_r xlc_r xlC xlc icx icpc icc icpx g++ gcc pgCC pgcc pgc++ CC cc KCC kcc])
+         AC_CHECK_PROGS(CXX, [xlC_r xlc_r xlC xlc icpx icx icpc icc g++ gcc pgCC pgcc pgc++ CC cc KCC kcc])
       else
-         AC_CHECK_PROGS(CXX, [xlC xlc icx icpc icc icpx g++ gcc pgCC pgcc pgc++ CC cc KCC kcc])
+         AC_CHECK_PROGS(CXX, [xlC xlc icpx icx icpc icc g++ gcc pgCC pgcc pgc++ CC cc KCC kcc])
       fi
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CXX, [CC mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpiicpx mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++])
+         AC_CHECK_PROGS(CXX, [CC mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpx mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++])
       else
-         AC_CHECK_PROGS(CXX, [CC mpicxx mpxlC mpixlcxx mpixlC mpiicpc mpiicpx mpig++ mpic++ mpiCC mpipgCC mpipgic++])
+         AC_CHECK_PROGS(CXX, [CC mpicxx mpxlC mpixlcxx mpixlC mpiicpx mpiicpc mpig++ mpic++ mpiCC mpipgCC mpipgic++])
       fi
    fi
 
