@@ -418,6 +418,9 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
 
    hypre_ParCSRCommHandleWait(comm_handle);
 
+   _hypre_TFree(hypre_ParCSRCommHandleSendBuffer(comm_handle), hypre_ParCSRCommHandleSendBufferLocation(comm_handle));
+   _hypre_TFree(hypre_ParCSRCommHandleRecvBuffer(comm_handle), hypre_ParCSRCommHandleRecvBufferLocation(comm_handle));
+
    hypre_ParCSRCommHandleDestroyRequests(comm_handle);
    hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
 
