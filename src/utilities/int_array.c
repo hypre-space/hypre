@@ -539,9 +539,9 @@ hypre_IntArrayNegate( hypre_IntArray *v )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_IntArraySegregateByValue
+ * hypre_IntArraySeparateByValue
  *
- * This function segregates the indices of an array "v" based on
+ * This function separates the indices of an array "v" based on
  * specified values.
  *
  * Input parameters:
@@ -568,11 +568,11 @@ hypre_IntArrayNegate( hypre_IntArray *v )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_IntArraySegregateByValue( HYPRE_Int             num_values,
-                                HYPRE_Int            *values,
-                                HYPRE_Int            *sizes,
-                                hypre_IntArray       *v,
-                                hypre_IntArrayArray **w_ptr )
+hypre_IntArraySeparateByValue( HYPRE_Int             num_values,
+                               HYPRE_Int            *values,
+                               HYPRE_Int            *sizes,
+                               hypre_IntArray       *v,
+                               hypre_IntArrayArray **w_ptr )
 {
    hypre_IntArrayArray *w;
 
@@ -591,7 +591,7 @@ hypre_IntArraySegregateByValue( HYPRE_Int             num_values,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypre_IntArraySegregateByValueDevice(num_values, values, sizes, v, w);
+      hypre_IntArraySeparateByValueDevice(num_values, values, sizes, v, w);
    }
    else
 #endif

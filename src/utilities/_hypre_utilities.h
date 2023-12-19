@@ -2431,9 +2431,9 @@ HYPRE_Int hypre_IntArrayCount( hypre_IntArray *v, HYPRE_Int value,
                                HYPRE_Int *num_values_ptr );
 HYPRE_Int hypre_IntArrayInverseMapping( hypre_IntArray *v, hypre_IntArray **w_ptr );
 HYPRE_Int hypre_IntArrayNegate( hypre_IntArray *v );
-HYPRE_Int hypre_IntArraySegregateByValue( HYPRE_Int num_values, HYPRE_Int *values,
-                                          HYPRE_Int *sizes, hypre_IntArray *v,
-                                          hypre_IntArrayArray **w_ptr );
+HYPRE_Int hypre_IntArraySeparateByValue( HYPRE_Int num_values, HYPRE_Int *values,
+                                         HYPRE_Int *sizes, hypre_IntArray *v,
+                                         hypre_IntArrayArray **w_ptr );
 hypre_IntArrayArray* hypre_IntArrayArrayCreate( HYPRE_Int num_entries, HYPRE_Int *sizes );
 HYPRE_Int hypre_IntArrayArrayDestroy( hypre_IntArrayArray *w );
 HYPRE_Int hypre_IntArrayArrayInitializeIn( hypre_IntArrayArray *w,
@@ -2450,9 +2450,9 @@ HYPRE_Int hypre_IntArrayCountDevice ( hypre_IntArray *v, HYPRE_Int value,
 HYPRE_Int hypre_IntArrayInverseMappingDevice( hypre_IntArray *v, hypre_IntArray *w );
 HYPRE_Int hypre_IntArrayNegateDevice( hypre_IntArray *v );
 HYPRE_Int hypre_IntArraySetInterleavedValuesDevice( hypre_IntArray *v, HYPRE_Int cycle );
-HYPRE_Int hypre_IntArraySegregateByValueDevice( HYPRE_Int num_values, HYPRE_Int *values,
-                                                HYPRE_Int *sizes, hypre_IntArray *v,
-                                                hypre_IntArrayArray *w );
+HYPRE_Int hypre_IntArraySeparateByValueDevice( HYPRE_Int num_values, HYPRE_Int *values,
+                                               HYPRE_Int *sizes, hypre_IntArray *v,
+                                               hypre_IntArrayArray *w );
 #endif
 
 /* memory_tracker.c */

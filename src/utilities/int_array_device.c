@@ -193,15 +193,15 @@ hypre_IntArraySetInterleavedValuesDevice( hypre_IntArray *v,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_IntArraySegregateByValueDevice
+ * hypre_IntArraySeparateByValueDevice
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_IntArraySegregateByValueDevice( HYPRE_Int             num_values,
-                                      HYPRE_Int            *values,
-                                      HYPRE_Int            *sizes,
-                                      hypre_IntArray       *v,
-                                      hypre_IntArrayArray  *w )
+hypre_IntArraySeparateByValueDevice( HYPRE_Int             num_values,
+                                     HYPRE_Int            *values,
+                                     HYPRE_Int            *sizes,
+                                     hypre_IntArray       *v,
+                                     hypre_IntArrayArray  *w )
 {
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_Int     v_size = hypre_IntArraySize(v);
