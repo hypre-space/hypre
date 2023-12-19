@@ -15,18 +15,18 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRBuildProlongation(hypre_ParCSRMatrix   *A,
-                           hypre_ParCSRMatrix   *A_FF,
-                           hypre_ParCSRMatrix   *A_FC,
-                           HYPRE_Int            *CF_marker,
-                           hypre_ParCSRMatrix   *aux_mat,
-                           HYPRE_BigInt         *num_cpts_global,
-                           HYPRE_Real            trunc_factor,
-                           HYPRE_Int             max_elmts,
-                           HYPRE_Int             blk_size,
-                           hypre_ParCSRMatrix  **P_ptr,
-                           HYPRE_Int             interp_type,
-                           HYPRE_Int             num_sweeps_post)
+hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
+                     hypre_ParCSRMatrix   *A_FF,
+                     hypre_ParCSRMatrix   *A_FC,
+                     HYPRE_Int            *CF_marker,
+                     hypre_ParCSRMatrix   *aux_mat,
+                     HYPRE_BigInt         *num_cpts_global,
+                     HYPRE_Real            trunc_factor,
+                     HYPRE_Int             max_elmts,
+                     HYPRE_Int             blk_size,
+                     hypre_ParCSRMatrix  **P_ptr,
+                     HYPRE_Int             interp_type,
+                     HYPRE_Int             num_sweeps_post)
 {
    hypre_ParCSRMatrix    *P = NULL;
 #if defined (HYPRE_USING_GPU)
