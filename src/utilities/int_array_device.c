@@ -226,6 +226,10 @@ hypre_IntArraySegregateByValueDevice( HYPRE_Int             num_values,
       hypre_TMemcpy(hypre_IntArrayArrayEntryIData(w, i), buffer, HYPRE_Int, sizes[i],
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    }
+
+   /* Free memory */
+   hypre_TFree(indices, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(buffer, HYPRE_MEMORY_DEVICE);
 #else
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented yet!");
 #endif
