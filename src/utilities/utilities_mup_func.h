@@ -99,6 +99,7 @@
 #define hypre_GetDeviceCount HYPRE_MULTIPRECISION_FUNC ( hypre_GetDeviceCount )
 #define hypre_GetDeviceLastError HYPRE_MULTIPRECISION_FUNC ( hypre_GetDeviceLastError )
 #define hypre_GetDeviceMaxShmemSize HYPRE_MULTIPRECISION_FUNC ( hypre_GetDeviceMaxShmemSize )
+#define HYPRE_DeviceInitialize HYPRE_MULTIPRECISION_FUNC ( HYPRE_DeviceInitialize )
 #define HYPRE_GetExecutionPolicy HYPRE_MULTIPRECISION_FUNC ( HYPRE_GetExecutionPolicy )
 #define HYPRE_GetExecutionPolicyName HYPRE_MULTIPRECISION_FUNC ( HYPRE_GetExecutionPolicyName )
 #define HYPRE_GetMemoryLocation HYPRE_MULTIPRECISION_FUNC ( HYPRE_GetMemoryLocation )
