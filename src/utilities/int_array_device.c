@@ -216,7 +216,7 @@ hypre_IntArraySegregateByValueDevice( HYPRE_Int             num_values,
    /* Create a buffer array */
    buffer = hypre_TAlloc(HYPRE_Int, v_size, HYPRE_MEMORY_DEVICE);
 
-   for (i = 0; i < v_size; i++)
+   for (i = 0; i < num_values; i++)
    {
       val = values[i];
 
