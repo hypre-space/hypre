@@ -540,6 +540,31 @@ hypre_IntArrayNegate( hypre_IntArray *v )
 
 /*--------------------------------------------------------------------------
  * hypre_IntArraySegregateByValue
+ *
+ * This function segregates the indices of an array "v" based on
+ * specified values.
+ *
+ * Input parameters:
+ *   - num_values: number of unique values found in "v"
+ *   - values: array of size "num_values" containing a list of unique values
+ *   - sizes: array of size "num_values" containing the number of occurrences
+ *            in "v" of each value in "values".
+ *   - v: object of type hypre_IntArray containing values for categorization.
+ *
+ * Output parameter:
+ *   - w: object of type hypre_IntArrayArray containing pointers to "num_values"
+ *        arrays. Each array contains the set of indices in "v" that map to a
+ *        particular value of the array "values".
+ *
+ * Example:
+ *   Consider the following:
+ *   - v = {-1, -1, 1, -1, -1, 1, 1, -1}
+ *   - values = {-1, 1}
+ *   - num_values = 2
+ *
+ *   This function computes:
+ *   - w[0] = {0, 1, 3, 4, 7}
+ *   - w[1] = {2, 5, 6}
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
