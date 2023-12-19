@@ -548,7 +548,7 @@ hypre_IntArrayNegate( hypre_IntArray *v )
  *   - num_values: number of unique values found in "v"
  *   - values: array of size "num_values" containing a list of unique values
  *   - sizes: array of size "num_values" containing the number of occurrences
- *            in "v" of each value in "values".
+ *            in "v" of each value from "values".
  *   - v: object of type hypre_IntArray containing values for categorization.
  *
  * Output parameter:
