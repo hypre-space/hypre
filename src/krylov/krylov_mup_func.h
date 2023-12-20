@@ -342,7 +342,7 @@
 #define HYPRE_PCGSetLogging HYPRE_MULTIPRECISION_FUNC ( HYPRE_PCGSetLogging )
 #define HYPRE_PCGSetMaxIter HYPRE_MULTIPRECISION_FUNC ( HYPRE_PCGSetMaxIter )
 #define HYPRE_PCGSetPrecond HYPRE_MULTIPRECISION_FUNC ( HYPRE_PCGSetPrecond )
-#define HYPRE_PCGSetPreconditioner HYPRE_MULTIPRECISION_FUNC ( HYPRE_PCGSetPrecondPreconditioner )
+#define HYPRE_PCGSetPreconditioner HYPRE_MULTIPRECISION_FUNC ( HYPRE_PCGSetPreconditioner )
 #define HYPRE_PCGSetPrecondMatrix HYPRE_MULTIPRECISION_FUNC ( HYPRE_PCGSetPrecondMatrix )
 #define HYPRE_PCGSetPrintLevel HYPRE_MULTIPRECISION_FUNC ( HYPRE_PCGSetPrintLevel )
 #define HYPRE_PCGSetRecomputeResidual HYPRE_MULTIPRECISION_FUNC ( HYPRE_PCGSetRecomputeResidual )
