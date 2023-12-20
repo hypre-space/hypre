@@ -687,6 +687,7 @@ struct hypre_DeviceData
    HYPRE_Int                         compute_stream_num;
    /* work space for hypre's device reducer */
    void                             *reduce_buffer;
+   HYPRE_Int                         spadd_algorithm;
    /* device spgemm options */
    HYPRE_Int                         spgemm_algorithm;
    HYPRE_Int                         spgemm_binned;
@@ -700,10 +701,11 @@ struct hypre_DeviceData
    HYPRE_Int                         spgemm_rownnz_estimate_method;
    HYPRE_Int                         spgemm_rownnz_estimate_nsamples;
    float                             spgemm_rownnz_estimate_mult_factor;
-   /* cusparse */
+   /* vendor's sparse kernels */
    HYPRE_Int                         spmv_use_vendor;
    HYPRE_Int                         sptrans_use_vendor;
    HYPRE_Int                         spgemm_use_vendor;
+   HYPRE_Int                         spadd_use_vendor;
    /* PMIS RNG */
    HYPRE_Int                         use_gpu_rand;
 };
@@ -723,6 +725,7 @@ struct hypre_DeviceData
 #define hypre_DeviceDataSpgemmUseVendor(data)                ((data) -> spgemm_use_vendor)
 #define hypre_DeviceDataSpMVUseVendor(data)                  ((data) -> spmv_use_vendor)
 #define hypre_DeviceDataSpTransUseVendor(data)               ((data) -> sptrans_use_vendor)
+#define hypre_DeviceDataSpAddUseVendor(data)                 ((data) -> spadd_use_vendor)
 #define hypre_DeviceDataSpgemmAlgorithm(data)                ((data) -> spgemm_algorithm)
 #define hypre_DeviceDataSpgemmBinned(data)                   ((data) -> spgemm_binned)
 #define hypre_DeviceDataSpgemmNumBin(data)                   ((data) -> spgemm_num_bin)
@@ -731,6 +734,7 @@ struct hypre_DeviceData
 #define hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     ((data) -> spgemm_rownnz_estimate_method)
 #define hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   ((data) -> spgemm_rownnz_estimate_nsamples)
 #define hypre_DeviceDataSpgemmRownnzEstimateMultFactor(data) ((data) -> spgemm_rownnz_estimate_mult_factor)
+#define hypre_DeviceDataSpAddAlgorithm(data)                 ((data) -> spadd_algorithm)
 #define hypre_DeviceDataDeviceAllocator(data)                ((data) -> device_allocator)
 #define hypre_DeviceDataUseGpuRand(data)                     ((data) -> use_gpu_rand)
 
