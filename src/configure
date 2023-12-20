@@ -827,7 +827,6 @@ with_extra_CUFLAGS
 with_extra_BUILDFLAGS
 with_extra_incpath
 with_extra_ldpath
-with_insure
 with_strict_checking
 with_MPI_include
 with_MPI_libs
@@ -1620,8 +1619,6 @@ Optional Packages:
                           Define extra ld path, where PATH is a
                           space-separated list (enclosed in quotes) of
                           directories.
-  --with-insure=FLAGS     FLAGS are options to pass to insure. Nothing is done
-                          to verify that insure is available
   --with-strict-checking  Compiles without MPI ('--without-MPI') and tries to
                           find a compiler option that warns of as many non-ISO
                           features as possible.
@@ -3342,7 +3339,6 @@ hypre_using_mli=no
 
 hypre_using_openmp=no
 hypre_using_device_openmp=no
-hypre_using_insure=no
 hypre_using_cuda=no
 hypre_using_gpu=no
 hypre_using_um=no
@@ -3939,23 +3935,6 @@ fi
 if test ${with_extra_ldpath+y}
 then :
   withval=$with_extra_ldpath; LDFLAGS="-L`echo ${withval}|sed 's/ /\ -L/g'` ${LDFLAGS}"
-
-fi
-
-
-
-# Check whether --with-insure was given.
-if test ${with_insure+y}
-then :
-  withval=$with_insure; case "${withval}" in
-    yes) hypre_using_insure=yes
-         hypre_using_debug=yes
-         hypre_insure_flags="" ;;
-    no)  ;;
-     *)  hypre_using_insure=yes
-         hypre_using_debug=yes
-         hypre_insure_flags="$withval" ;;
- esac
 
 fi
 
@@ -10009,21 +9988,6 @@ BUILD_JAVA=0
 if test "$hypre_using_java" = "yes"
 then
    BUILD_JAVA=1
-fi
-
-if test "$hypre_using_insure" = "yes"
-then
-   LINK_FC="insure"
-   LINK_CC="insure"
-   LINK_CXX="insure"
-   LDFLAGS=`mpicc -link-info | awk '{$1=""; print}'`
-   LDFLAGS="$LDFLAGS ${hypre_insure_flags}"
-   FC="insure"
-   CC="insure"
-   CXX="insure"
-   FFLAGS="`mpicc -link-info | awk '{$1=""; print}'` $FFLAGS"
-   CFLAGS="`mpicc -link-info | awk '{$1=""; print}'` $CFLAGS"
-   CXXFLAGS="`mpicc -link-info | awk '{$1=""; print}'` $CXXFLAGS"
 fi
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for cabs in -lm" >&5
