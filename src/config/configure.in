@@ -1731,7 +1731,7 @@ then
       then
          AC_CHECK_PROGS(CXX, [CC mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpx mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++])
       else
-         AC_CHECK_PROGS(CXX, [CC mpicxx mpxlC mpixlcxx mpixlC mpiicpx mpiicpc mpig++ mpic++ mpiCC mpipgCC mpipgic++])
+         AC_CHECK_PROGS(CXX, [CC mpxlC mpixlcxx mpixlC mpiicpx mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++])
       fi
    fi
 

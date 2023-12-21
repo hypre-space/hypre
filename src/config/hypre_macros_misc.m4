@@ -278,7 +278,7 @@ then
         fi
         ;;
       CC|cxx|xlC|mpxlC|mpixlcxx|mpCC)
-        CXXFLAGS="-O0 -g -Wall"
+        CXXFLAGS="-O0 -g"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS+=" -qsmp=omp"
         fi
