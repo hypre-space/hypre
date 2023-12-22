@@ -41,6 +41,15 @@ HYPRE_SetSpGemmUseVendor( HYPRE_Int use_vendor )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SetSpAddUseVendor
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SetSpAddUseVendor( HYPRE_Int use_vendor )
+{
+   return hypre_SetSpAddUseVendor(use_vendor);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_SetUseGpuRand
  *--------------------------------------------------------------------------*/
 HYPRE_Int

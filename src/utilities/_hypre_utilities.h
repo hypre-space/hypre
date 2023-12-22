@@ -2371,6 +2371,8 @@ HYPRE_Int hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_SetSpTransUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int hypre_SetSpMVUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int hypre_SetSpGemmUseVendor( HYPRE_Int use_vendor );
+HYPRE_Int hypre_SetSpAddUseVendor( HYPRE_Int use_vendor );
+HYPRE_Int hypre_SetSpAddAlgorithm( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmAlgorithm( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmBinned( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmRownnzEstimateMethod( HYPRE_Int value );
