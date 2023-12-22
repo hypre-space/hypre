@@ -46,7 +46,7 @@ hypre_GetMemoryLocationName(hypre_MemoryLocation  memory_location,
    }
    else
    {
-      sprintf(memory_location_name, "%s", "");
+      sprintf(memory_location_name, "%s", "UNKNOWN");
    }
 
    return hypre_error_flag;
@@ -88,7 +88,14 @@ hypre_CheckMemoryLocation(void *ptr, hypre_MemoryLocation location)
    hypre_GetPointerLocation(ptr, &location_ptr);
    /* do not use hypre_assert, which has alloc and free;
     * will create an endless loop otherwise */
-   assert(location == location_ptr);
+   if (location != location_ptr)
+   {
+      char name[32], name2[32];
+      hypre_GetMemoryLocationName(location, name);
+      hypre_GetMemoryLocationName(location_ptr, name2);
+      hypre_printf("%s error: %s %s\n", __func__, name, name2);
+      assert(0);
+   }
 #else
    HYPRE_UNUSED_VAR(ptr);
    HYPRE_UNUSED_VAR(location);
