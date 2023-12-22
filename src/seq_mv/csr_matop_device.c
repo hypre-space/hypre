@@ -228,8 +228,8 @@ hypre_CSRMatrixAddDevice( HYPRE_Complex    alpha,
       return NULL;
    }
 
-   hypreDevice_CSRSpAdd(nrows_A, nrows_B, ncols_A, nnz_A, nnz_B,
-                        A_i, A_j, alpha, A_data, NULL, B_i, B_j, beta, B_data, NULL, NULL,
+   hypreDevice_CSRSpAdd(nrows_A, ncols_A, nnz_A, nnz_B,
+                        A_i, A_j, alpha, A_data, B_i, B_j, beta, B_data,
                         &nnzC, &C_i, &C_j, &C_data);
 
    C = hypre_CSRMatrixCreate(nrows_A, ncols_B, nnzC);
@@ -973,10 +973,10 @@ hypre_CSRMatrixAddPartialDevice( hypre_CSRMatrix *A,
       return NULL;
    }
 
-   hypreDevice_CSRSpAdd(nrows_A, nrows_B, ncols_A, nnz_A, nnz_B,
-                        A_i, A_j, 1.0, A_data, NULL, B_i, B_j,
-                        1.0, B_data, NULL, row_nums,
-                        &nnzC, &C_i, &C_j, &C_data);
+   hypreDevice_CSRSpAdd2(nrows_A, nrows_B, ncols_A, nnz_A, nnz_B,
+                         A_i, A_j, 1.0, A_data, NULL, B_i, B_j,
+                         1.0, B_data, NULL, row_nums,
+                         &nnzC, &C_i, &C_j, &C_data);
 
    C = hypre_CSRMatrixCreate(nrows_A, ncols_B, nnzC);
    hypre_CSRMatrixI(C) = C_i;

@@ -11,6 +11,179 @@
 
 #if defined(HYPRE_USING_GPU)
 
+HYPRE_Int
+hypreDevice_CSRSpAdd( HYPRE_Int       nrows,
+                      HYPRE_Int       ncols,
+                      HYPRE_Int       nnzA,
+                      HYPRE_Int       nnzB,
+                      HYPRE_Int      *d_ia,
+                      HYPRE_Int      *d_ja,
+                      HYPRE_Complex   alpha,
+                      HYPRE_Complex  *d_aa,
+                      HYPRE_Int      *d_ib,
+                      HYPRE_Int      *d_jb,
+                      HYPRE_Complex   beta,
+                      HYPRE_Complex  *d_ab,
+                      HYPRE_Int      *nnzC_out,
+                      HYPRE_Int     **d_ic_out,
+                      HYPRE_Int     **d_jc_out,
+                      HYPRE_Complex **d_ac_out)
+{
+   /* trivial case */
+   if (nnzA == 0 && nnzB == 0)
+   {
+      *d_ic_out = hypre_CTAlloc(HYPRE_Int,     nrows + 1, HYPRE_MEMORY_DEVICE);
+      *d_jc_out = hypre_CTAlloc(HYPRE_Int,     0,         HYPRE_MEMORY_DEVICE);
+      *d_ac_out = hypre_CTAlloc(HYPRE_Complex, 0,         HYPRE_MEMORY_DEVICE);
+      *nnzC_out = 0;
+
+      return hypre_error_flag;
+   }
+
+   if (nnzA == 0)
+   {
+      *d_ic_out = hypre_TAlloc(HYPRE_Int,     nrows + 1, HYPRE_MEMORY_DEVICE);
+      *d_jc_out = hypre_TAlloc(HYPRE_Int,     nnzB,      HYPRE_MEMORY_DEVICE);
+      *d_ac_out = hypre_TAlloc(HYPRE_Complex, nnzB,      HYPRE_MEMORY_DEVICE);
+      *nnzC_out = nnzB;
+
+      hypre_TMemcpy(*d_ic_out, d_ib, HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(*d_jc_out, d_jb, HYPRE_Int, nnzB,      HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypreDevice_ComplexScalen(d_ab, nnzB, *d_ac_out, beta );
+
+      return hypre_error_flag;
+   }
+
+   if (nnzB == 0)
+   {
+      *d_ic_out = hypre_TAlloc(HYPRE_Int,     nrows + 1, HYPRE_MEMORY_DEVICE);
+      *d_jc_out = hypre_TAlloc(HYPRE_Int,     nnzA,      HYPRE_MEMORY_DEVICE);
+      *d_ac_out = hypre_TAlloc(HYPRE_Complex, nnzA,      HYPRE_MEMORY_DEVICE);
+      *nnzC_out = nnzA;
+
+      hypre_TMemcpy(*d_ic_out, d_ia, HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(*d_jc_out, d_ja, HYPRE_Int, nnzA,   HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypreDevice_ComplexScalen(d_aa, nnzA, *d_ac_out, alpha );
+
+      return hypre_error_flag;
+   }
+
+   if (hypre_HandleSpAddUseVendor(hypre_handle()))
+   {
+      hypre_printf("WIP\n");
+      exit(0);
+   }
+   else
+   {
+      if (1 == hypre_HandleSpAddAlgorithm(hypre_handle()))
+      {
+         hypreDevice_CSRSpAdd1(nrows, ncols, nnzA, nnzB,
+                               d_ia, d_ja, alpha, d_aa,
+                               d_ib, d_jb, beta, d_ab,
+                               nnzC_out, d_ic_out, d_jc_out, d_ac_out);
+      }
+      else
+      {
+         hypreDevice_CSRSpAdd2(nrows, nrows, ncols, nnzA, nnzB,
+                               d_ia, d_ja, alpha, d_aa, NULL,
+                               d_ib, d_jb, beta, d_ab, NULL,
+                               NULL, nnzC_out, d_ic_out, d_jc_out, d_ac_out);
+      }
+   }
+
+   return hypre_error_flag;
+}
+__global__ void
+hypreGPUKernel_II( hypre_DeviceItem &item,
+                   HYPRE_Int         n,
+                   HYPRE_Complex     alpha,
+                   HYPRE_Complex     beta,
+                   HYPRE_Int        *ja,
+                   HYPRE_Complex    *aa )
+{
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+   const HYPRE_Int nnz = n << 1;
+   if (i >= nnz) { return; }
+   /* 1 if odd, 0 if even */
+   const HYPRE_Int s = i & 1;
+   ja[i] = (i >> 1) + s * n;
+   if (aa) { aa[i] = alpha + s * (beta - alpha); }
+}
+
+HYPRE_Int
+hypreDevice_CSRSpAdd1( HYPRE_Int       nrows,
+                       HYPRE_Int       ncols,
+                       HYPRE_Int       nnzA,
+                       HYPRE_Int       nnzB,
+                       HYPRE_Int      *d_ia,
+                       HYPRE_Int      *d_ja,
+                       HYPRE_Complex   alpha,
+                       HYPRE_Complex  *d_aa,
+                       HYPRE_Int      *d_ib,
+                       HYPRE_Int      *d_jb,
+                       HYPRE_Complex   beta,
+                       HYPRE_Complex  *d_ab,
+                       HYPRE_Int      *nnzC_out,
+                       HYPRE_Int     **d_ic_out,
+                       HYPRE_Int     **d_jc_out,
+                       HYPRE_Complex **d_ac_out)
+{
+   hypre_CSRMatrix *A = hypre_CSRMatrixCreate(nrows, ncols, nnzA);
+   hypre_CSRMatrixData(A) = d_aa;
+   hypre_CSRMatrixI(A) = d_ia;
+   hypre_CSRMatrixJ(A) = d_ja;
+   hypre_CSRMatrixMemoryLocation(A) = HYPRE_MEMORY_DEVICE;
+
+   hypre_CSRMatrix *B = hypre_CSRMatrixCreate(nrows, ncols, nnzB);
+   hypre_CSRMatrixData(B) = d_ab;
+   hypre_CSRMatrixI(B) = d_ib;
+   hypre_CSRMatrixJ(B) = d_jb;
+   hypre_CSRMatrixMemoryLocation(B) = HYPRE_MEMORY_DEVICE;
+
+   hypre_CSRMatrix *AB = hypre_CSRMatrixStack2Device(A, B);
+
+   HYPRE_Int nnzE = 2 * nrows;
+   hypre_CSRMatrix *E = hypre_CSRMatrixCreate(nrows, 2 * nrows, nnzE);
+   HYPRE_Int *ie = hypre_TAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE);
+   HYPRE_Int *je = hypre_TAlloc(HYPRE_Int, nnzE, HYPRE_MEMORY_DEVICE);
+   HYPRE_Complex *ae = NULL;
+   if ( hypre_HandleSpgemmUseVendor(hypre_handle()) || alpha != 1.0 || beta != 1.0)
+   {
+      ae = hypre_TAlloc(HYPRE_Complex, nnzE, HYPRE_MEMORY_DEVICE);
+   }
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(nnzE, "thread", bDim);
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_II, gDim, bDim, nrows, alpha, beta, je, ae );
+   HYPRE_THRUST_CALL( transform,
+                      thrust::counting_iterator<HYPRE_Int>(0),
+                      thrust::counting_iterator<HYPRE_Int>(nrows + 1),
+                      ie,
+                      _1 * 2);
+   hypre_CSRMatrixData(E) = ae;
+   hypre_CSRMatrixI(E) = ie;
+   hypre_CSRMatrixJ(E) = je;
+   hypre_CSRMatrixMemoryLocation(E) = HYPRE_MEMORY_DEVICE;
+
+   hypre_CSRMatrix *C = hypre_CSRMatrixMultiplyDevice(E, AB);
+
+   *nnzC_out = hypre_CSRMatrixNumNonzeros(C);
+   *d_ic_out = hypre_CSRMatrixI(C);
+   *d_jc_out = hypre_CSRMatrixJ(C);
+   *d_ac_out = hypre_CSRMatrixData(C);
+
+   hypre_CSRMatrixI(C) = NULL;
+   hypre_CSRMatrixJ(C) = NULL;
+   hypre_CSRMatrixData(C) = NULL;
+
+   hypre_TFree(A, HYPRE_MEMORY_HOST);
+   hypre_TFree(B, HYPRE_MEMORY_HOST);
+   hypre_CSRMatrixDestroy(E);
+   hypre_CSRMatrixDestroy(AB);
+   hypre_CSRMatrixDestroy(C);
+
+   return hypre_error_flag;
+}
+
 /* This function effectively does (in Matlab notation)
  *              C := alpha * A(:, a_colmap)
  *              C(num_b, :) += beta * B(:, b_colmap)
@@ -23,26 +196,26 @@
  * if d_ja_map/d_jb_map == NULL, it is [0:n)
  */
 HYPRE_Int
-hypreDevice_CSRSpAdd( HYPRE_Int       ma, /* num of rows of A */
-                      HYPRE_Int       mb, /* num of rows of B */
-                      HYPRE_Int       n,  /* not used actually */
-                      HYPRE_Int       nnzA,
-                      HYPRE_Int       nnzB,
-                      HYPRE_Int      *d_ia,
-                      HYPRE_Int      *d_ja,
-                      HYPRE_Complex   alpha,
-                      HYPRE_Complex  *d_aa,
-                      HYPRE_Int      *d_ja_map,
-                      HYPRE_Int      *d_ib,
-                      HYPRE_Int      *d_jb,
-                      HYPRE_Complex   beta,
-                      HYPRE_Complex  *d_ab,
-                      HYPRE_Int      *d_jb_map,
-                      HYPRE_Int      *d_num_b,
-                      HYPRE_Int      *nnzC_out,
-                      HYPRE_Int     **d_ic_out,
-                      HYPRE_Int     **d_jc_out,
-                      HYPRE_Complex **d_ac_out)
+hypreDevice_CSRSpAdd2( HYPRE_Int       ma, /* num of rows of A */
+                       HYPRE_Int       mb, /* num of rows of B */
+                       HYPRE_Int       n,  /* not used actually */
+                       HYPRE_Int       nnzA,
+                       HYPRE_Int       nnzB,
+                       HYPRE_Int      *d_ia,
+                       HYPRE_Int      *d_ja,
+                       HYPRE_Complex   alpha,
+                       HYPRE_Complex  *d_aa,
+                       HYPRE_Int      *d_ja_map,
+                       HYPRE_Int      *d_ib,
+                       HYPRE_Int      *d_jb,
+                       HYPRE_Complex   beta,
+                       HYPRE_Complex  *d_ab,
+                       HYPRE_Int      *d_jb_map,
+                       HYPRE_Int      *d_num_b,
+                       HYPRE_Int      *nnzC_out,
+                       HYPRE_Int     **d_ic_out,
+                       HYPRE_Int     **d_jc_out,
+                       HYPRE_Complex **d_ac_out)
 {
    /* trivial case */
    if (nnzA == 0 && nnzB == 0)
