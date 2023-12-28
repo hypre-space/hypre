@@ -8,88 +8,104 @@
 #include "_hypre_onedpl.hpp"
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
+#include "seq_mv.hpp"
 
 #if defined(HYPRE_USING_GPU)
 
 HYPRE_Int
-hypreDevice_CSRSpAdd( HYPRE_Int       nrows,
-                      HYPRE_Int       ncols,
-                      HYPRE_Int       nnzA,
-                      HYPRE_Int       nnzB,
-                      HYPRE_Int      *d_ia,
-                      HYPRE_Int      *d_ja,
-                      HYPRE_Complex   alpha,
-                      HYPRE_Complex  *d_aa,
-                      HYPRE_Int      *d_ib,
-                      HYPRE_Int      *d_jb,
-                      HYPRE_Complex   beta,
-                      HYPRE_Complex  *d_ab,
-                      HYPRE_Int      *nnzC_out,
-                      HYPRE_Int     **d_ic_out,
-                      HYPRE_Int     **d_jc_out,
-                      HYPRE_Complex **d_ac_out)
+hypreDevice_CSRSpAdd( HYPRE_Complex     alpha,
+                      hypre_CSRMatrix  *A,
+                      HYPRE_Complex     beta,
+                      hypre_CSRMatrix  *B,
+                      hypre_CSRMatrix **C_ptr )
 {
+   HYPRE_Int        nrows  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int        ncols  = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int        nnzA    = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int        nnzB    = hypre_CSRMatrixNumNonzeros(B);
+   HYPRE_Complex   *A_a      = hypre_CSRMatrixData(A);
+   HYPRE_Int       *A_i      = hypre_CSRMatrixI(A);
+   HYPRE_Int       *A_j      = hypre_CSRMatrixJ(A);
+   HYPRE_Complex   *B_a      = hypre_CSRMatrixData(B);
+   HYPRE_Int       *B_i      = hypre_CSRMatrixI(B);
+   HYPRE_Int       *B_j      = hypre_CSRMatrixJ(B);
+   HYPRE_Complex   *C_a      = NULL;
+   HYPRE_Int       *C_i      = NULL;
+   HYPRE_Int       *C_j      = NULL;
+   HYPRE_Int        nnzC     = 0;
+   hypre_CSRMatrix *C        = NULL;
+
+   *C_ptr = C = hypre_CSRMatrixCreate(nrows, ncols, 0);
+   hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
+
    /* trivial case */
    if (nnzA == 0 && nnzB == 0)
    {
-      *d_ic_out = hypre_CTAlloc(HYPRE_Int,     nrows + 1, HYPRE_MEMORY_DEVICE);
-      *d_jc_out = hypre_CTAlloc(HYPRE_Int,     0,         HYPRE_MEMORY_DEVICE);
-      *d_ac_out = hypre_CTAlloc(HYPRE_Complex, 0,         HYPRE_MEMORY_DEVICE);
-      *nnzC_out = 0;
-
-      return hypre_error_flag;
+      C_i = hypre_CTAlloc(HYPRE_Int,     nrows + 1, HYPRE_MEMORY_DEVICE);
+      C_j = hypre_CTAlloc(HYPRE_Int,     0,         HYPRE_MEMORY_DEVICE);
+      C_a = hypre_CTAlloc(HYPRE_Complex, 0,         HYPRE_MEMORY_DEVICE);
+      nnzC = 0;
    }
-
-   if (nnzA == 0)
+   else if (nnzA == 0)
    {
-      *d_ic_out = hypre_TAlloc(HYPRE_Int,     nrows + 1, HYPRE_MEMORY_DEVICE);
-      *d_jc_out = hypre_TAlloc(HYPRE_Int,     nnzB,      HYPRE_MEMORY_DEVICE);
-      *d_ac_out = hypre_TAlloc(HYPRE_Complex, nnzB,      HYPRE_MEMORY_DEVICE);
-      *nnzC_out = nnzB;
-
-      hypre_TMemcpy(*d_ic_out, d_ib, HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(*d_jc_out, d_jb, HYPRE_Int, nnzB,      HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-      hypreDevice_ComplexScalen(d_ab, nnzB, *d_ac_out, beta );
-
-      return hypre_error_flag;
+      C_i = hypre_TAlloc(HYPRE_Int,     nrows + 1, HYPRE_MEMORY_DEVICE);
+      C_j = hypre_TAlloc(HYPRE_Int,     nnzB,      HYPRE_MEMORY_DEVICE);
+      C_a = hypre_TAlloc(HYPRE_Complex, nnzB,      HYPRE_MEMORY_DEVICE);
+      nnzC = nnzB;
+      hypre_TMemcpy(C_i, B_i, HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(C_j, B_j, HYPRE_Int, nnzB,      HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypreDevice_ComplexScalen(B_a, nnzB, C_a, beta);
    }
-
-   if (nnzB == 0)
+   else if (nnzB == 0)
    {
-      *d_ic_out = hypre_TAlloc(HYPRE_Int,     nrows + 1, HYPRE_MEMORY_DEVICE);
-      *d_jc_out = hypre_TAlloc(HYPRE_Int,     nnzA,      HYPRE_MEMORY_DEVICE);
-      *d_ac_out = hypre_TAlloc(HYPRE_Complex, nnzA,      HYPRE_MEMORY_DEVICE);
-      *nnzC_out = nnzA;
-
-      hypre_TMemcpy(*d_ic_out, d_ia, HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(*d_jc_out, d_ja, HYPRE_Int, nnzA,   HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-      hypreDevice_ComplexScalen(d_aa, nnzA, *d_ac_out, alpha );
-
-      return hypre_error_flag;
+      C_i = hypre_TAlloc(HYPRE_Int,     nrows + 1, HYPRE_MEMORY_DEVICE);
+      C_j = hypre_TAlloc(HYPRE_Int,     nnzA,      HYPRE_MEMORY_DEVICE);
+      C_a = hypre_TAlloc(HYPRE_Complex, nnzA,      HYPRE_MEMORY_DEVICE);
+      nnzC = nnzA;
+      hypre_TMemcpy(C_i, A_i, HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(C_j, A_j, HYPRE_Int, nnzA,      HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+      hypreDevice_ComplexScalen(A_a, nnzA, C_a, alpha);
    }
-
-   if (hypre_HandleSpAddUseVendor(hypre_handle()))
+   else if (hypre_HandleSpAddUseVendor(hypre_handle()))
    {
-      hypre_printf("WIP\n");
-      exit(0);
+#if defined(HYPRE_USING_CUSPARSE)
+      hypre_CSRMatrixSortRowOutOfPlace(A);
+      hypre_CSRMatrixSortRowOutOfPlace(B);
+      hypreDevice_CSRSpAddCusparse(nrows, ncols, nnzA, nnzB,
+                                   A_i, hypre_CSRMatrixSortedJ(A), alpha, hypre_CSRMatrixSortedData(A),
+                                   hypre_CSRMatrixGPUMatDescr(A),
+                                   B_i, hypre_CSRMatrixSortedJ(B), beta, hypre_CSRMatrixSortedData(B),
+                                   hypre_CSRMatrixGPUMatDescr(B),
+                                   &nnzC, &C_i, &C_j, &C_a, hypre_CSRMatrixGPUMatDescr(C));
+#elif defined(HYPRE_USING_ROCSPARSE)
+#elif defined(HYPRE_USING_ONEMKLSPARSE)
+#else
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Attempting to use device sparse matrix library for SpAdd without having compiled support for it!\n");
+#endif
    }
    else
    {
       if (1 == hypre_HandleSpAddAlgorithm(hypre_handle()))
       {
          hypreDevice_CSRSpAdd1(nrows, ncols, nnzA, nnzB,
-                               d_ia, d_ja, alpha, d_aa,
-                               d_ib, d_jb, beta, d_ab,
-                               nnzC_out, d_ic_out, d_jc_out, d_ac_out);
+                               A_i, A_j, alpha, A_a,
+                               B_i, B_j, beta, B_a,
+                               &nnzC, &C_i, &C_j, &C_a);
       }
       else
       {
          hypreDevice_CSRSpAdd2(nrows, nrows, ncols, nnzA, nnzB,
-                               d_ia, d_ja, alpha, d_aa, NULL,
-                               d_ib, d_jb, beta, d_ab, NULL,
-                               NULL, nnzC_out, d_ic_out, d_jc_out, d_ac_out);
+                               A_i, A_j, alpha, A_a, NULL,
+                               B_i, B_j, beta, B_a, NULL,
+                               NULL, &nnzC, &C_i, &C_j, &C_a);
       }
    }
+
+   hypre_CSRMatrixI(C)           = C_i;
+   hypre_CSRMatrixJ(C)           = C_j;
+   hypre_CSRMatrixData(C)        = C_a;
+   hypre_CSRMatrixNumNonzeros(C) = nnzC;
 
    return hypre_error_flag;
 }
@@ -369,5 +385,101 @@ hypreDevice_CSRSpAdd2( HYPRE_Int       ma, /* num of rows of A */
 
    return hypre_error_flag;
 }
+
+#if defined(HYPRE_USING_CUSPARSE)
+HYPRE_Int
+hypreDevice_CSRSpAddCusparse(HYPRE_Int          nrows,
+                             HYPRE_Int          ncols,
+                             HYPRE_Int          nnzA,
+                             HYPRE_Int          nnzB,
+                             HYPRE_Int         *d_ia,
+                             HYPRE_Int         *d_ja,
+                             HYPRE_Complex      alpha,
+                             HYPRE_Complex     *d_aa,
+                             cusparseMatDescr_t descrA,
+                             HYPRE_Int         *d_ib,
+                             HYPRE_Int         *d_jb,
+                             HYPRE_Complex      beta,
+                             HYPRE_Complex     *d_ab,
+                             cusparseMatDescr_t descrB,
+                             HYPRE_Int         *nnzC_out,
+                             HYPRE_Int        **d_ic_out,
+                             HYPRE_Int        **d_jc_out,
+                             HYPRE_Complex    **d_ac_out,
+                             cusparseMatDescr_t descrC)
+{
+   HYPRE_Int     *d_ic = NULL, *d_jc = NULL;
+   HYPRE_Complex *d_ac = NULL;
+   HYPRE_Int      nnzC = 0;
+   size_t         bufferSizeInBytes;
+   hypre_int      nnzTotalDevHostPtr;
+   char          *buffer = NULL;
+
+   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
+
+   d_ic = hypre_TAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE);
+
+   hypre_cusparse_csrgeam2_bufferSizeExt(handle, nrows, ncols,
+                                         &alpha,
+                                         descrA, nnzA, d_aa, d_ia, d_ja,
+                                         &beta,
+                                         descrB, nnzB, d_ab, d_ib, d_jb,
+                                         descrC,       d_ac, d_ic, d_jc,
+                                         &bufferSizeInBytes);
+
+   buffer = hypre_TAlloc(char, bufferSizeInBytes, HYPRE_MEMORY_DEVICE);
+
+   cusparseXcsrgeam2Nnz(handle, nrows, ncols,
+                        descrA, nnzA, d_ia, d_ja,
+                        descrB, nnzB, d_ib, d_jb,
+                        descrC, d_ic, &nnzTotalDevHostPtr,
+                        buffer);
+
+   nnzC = nnzTotalDevHostPtr;
+
+   d_jc = hypre_TAlloc(HYPRE_Int,     nnzC, HYPRE_MEMORY_DEVICE);
+   d_ac = hypre_TAlloc(HYPRE_Complex, nnzC, HYPRE_MEMORY_DEVICE);
+
+   hypre_cusparse_csrgeam2(handle, nrows, ncols,
+                           &alpha,
+                           descrA, nnzA, d_aa, d_ia, d_ja,
+                           &beta,
+                           descrB, nnzB, d_ab, d_ib, d_jb,
+                           descrC,       d_ac, d_ic, d_jc,
+                           buffer);
+
+   hypre_TFree(buffer, HYPRE_MEMORY_DEVICE);
+
+   *nnzC_out = nnzC;
+   *d_ic_out = d_ic;
+   *d_jc_out = d_jc;
+   *d_ac_out = d_ac;
+
+   return hypre_error_flag;
+}
+#endif
+
+#if defined(HYPRE_USING_CUSPARSE)
+HYPRE_Int
+hypreDevice_CSRSpAddRocsparse(HYPRE_Int nrows,
+                              HYPRE_Int ncols,
+                              HYPRE_Int nnzA,
+                              HYPRE_Int nnzB,
+                              HYPRE_Int *d_ia,
+                              HYPRE_Int *d_ja,
+                              HYPRE_Complex alpha,
+                              HYPRE_Complex *d_aa,
+                              HYPRE_Int *d_ib,
+                              HYPRE_Int *d_jb,
+                              HYPRE_Complex beta,
+                              HYPRE_Complex *d_ab,
+                              HYPRE_Int *nnzC_out,
+                              HYPRE_Int **d_ic_out,
+                              HYPRE_Int **d_jc_out,
+                              HYPRE_Complex **d_ac_out)
+{
+   return hypre_error_flag;
+}
+#endif
 
 #endif // defined(HYPRE_USING_GPU)

@@ -44,6 +44,12 @@ HYPRE_Int hypreDevice_CSRSpGemmCusparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
 HYPRE_Int hypre_SortCSRCusparse( HYPRE_Int n, HYPRE_Int m, HYPRE_Int nnzA,
                                  cusparseMatDescr_t descrA,
                                  const HYPRE_Int *d_ia, HYPRE_Int *d_ja_sorted, HYPRE_Complex *d_a_sorted );
+
+HYPRE_Int hypreDevice_CSRSpAddCusparse(HYPRE_Int nrows, HYPRE_Int ncols, HYPRE_Int nnzA, HYPRE_Int nnzB,
+                                       HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex alpha,
+                                       HYPRE_Complex *d_aa, cusparseMatDescr_t descr_A, HYPRE_Int *d_ib, HYPRE_Int *d_jb,
+                                       HYPRE_Complex beta, HYPRE_Complex *d_ab, cusparseMatDescr_t descr_B, HYPRE_Int *nnzC_out,
+                                       HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out, cusparseMatDescr_t descr_C);
 #endif
 
 #if defined(HYPRE_USING_ROCSPARSE)
@@ -56,6 +62,12 @@ HYPRE_Int hypreDevice_CSRSpGemmRocsparse(HYPRE_Int m, HYPRE_Int k, HYPRE_Int n,
 HYPRE_Int hypre_SortCSRRocsparse( HYPRE_Int n, HYPRE_Int m, HYPRE_Int nnzA,
                                   rocsparse_mat_descr descrA,
                                   const HYPRE_Int *d_ia, HYPRE_Int *d_ja_sorted, HYPRE_Complex *d_a_sorted );
+
+HYPRE_Int hypreDevice_CSRSpAddRocsparse(HYPRE_Int nrows, HYPRE_Int ncols, HYPRE_Int nnzA, HYPRE_Int nnzB,
+                                        HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex alpha,
+                                        HYPRE_Complex *d_aa, rocsparse_mat_descr descr_A, HYPRE_Int *d_ib, HYPRE_Int *d_jb,
+                                        HYPRE_Complex beta, HYPRE_Complex *d_ab, rocsparse_mat_descr descr_B, HYPRE_Int *nnzC_out,
+                                        HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out, rocsparse_mat_descr descr_C);
 #endif
 
 #if defined(HYPRE_USING_ONEMKLSPARSE)

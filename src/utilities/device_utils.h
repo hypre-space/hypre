@@ -423,6 +423,8 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_cusparse_csrsm2_bufferSizeExt    cusparseScsrsm2_bufferSizeExt
 #define hypre_cusparse_csrsm2_analysis         cusparseScsrsm2_analysis
 #define hypre_cusparse_csrsm2_solve            cusparseScsrsm2_solve
+#define hypre_cusparse_csrgeam2_bufferSizeExt  cusparseScsrgeam2_bufferSizeExt
+#define hypre_cusparse_csrgeam2                cusparseScsrgeam2
 
 /* cuSOLVER */
 #define hypre_cusolver_dngetrf                 cusolverDnSgetrf
@@ -480,6 +482,8 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_cusparse_csrsm2_bufferSizeExt    cusparseDcsrsm2_bufferSizeExt
 #define hypre_cusparse_csrsm2_analysis         cusparseDcsrsm2_analysis
 #define hypre_cusparse_csrsm2_solve            cusparseDcsrsm2_solve
+#define hypre_cusparse_csrgeam2_bufferSizeExt  cusparseDcsrgeam2_bufferSizeExt
+#define hypre_cusparse_csrgeam2                cusparseDcsrgeam2
 
 /* cuSOLVER */
 #define hypre_cusolver_dngetrf                 cusolverDnDgetrf

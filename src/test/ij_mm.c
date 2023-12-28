@@ -908,7 +908,8 @@ main( hypre_int argc,
    HYPRE_Int           mult_order = 0;
    HYPRE_Int           print_system = 0;
    HYPRE_Int           verify       = 0;
-   HYPRE_Int           use_vendor = 0;
+   HYPRE_Int           spgemm_use_vendor = 0;
+   HYPRE_Int           spadd_use_vendor = 0;
    HYPRE_Int           spgemm_alg = 1;
    HYPRE_Int           spgemm_binned = 0;
    HYPRE_Int           rowest_mtd = 3;
@@ -1061,7 +1062,18 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-vendor") == 0 )
       {
          arg_index++;
-         use_vendor = atoi(argv[arg_index++]);
+         spgemm_use_vendor = atoi(argv[arg_index++]);
+         spadd_use_vendor = spgemm_use_vendor;
+      }
+      else if ( strcmp(argv[arg_index], "-mm_vendor") == 0 )
+      {
+         arg_index++;
+         spgemm_use_vendor = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-add_vendor") == 0 )
+      {
+         arg_index++;
+         spadd_use_vendor = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-spgemmalg") == 0 )
       {
@@ -1183,10 +1195,10 @@ main( hypre_int argc,
       hypre_assert(errcode == 0);
    }
 
-   HYPRE_SetSpAddUseVendor(use_vendor);
+   HYPRE_SetSpAddUseVendor(spadd_use_vendor);
    hypre_SetSpAddAlgorithm(1);
 
-   errcode = HYPRE_SetSpGemmUseVendor(use_vendor);
+   errcode = HYPRE_SetSpGemmUseVendor(spgemm_use_vendor);
    hypre_assert(errcode == 0);
    errcode = hypre_SetSpGemmAlgorithm(spgemm_alg);
    hypre_assert(errcode == 0);

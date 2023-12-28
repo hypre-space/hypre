@@ -203,22 +203,10 @@ hypre_CSRMatrixAddDevice( HYPRE_Complex    alpha,
                           HYPRE_Complex    beta,
                           hypre_CSRMatrix *B )
 {
-   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
-   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
-   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
    HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
-   HYPRE_Int         nnz_A    = hypre_CSRMatrixNumNonzeros(A);
-   HYPRE_Complex    *B_data   = hypre_CSRMatrixData(B);
-   HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
-   HYPRE_Int        *B_j      = hypre_CSRMatrixJ(B);
    HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
    HYPRE_Int         ncols_B  = hypre_CSRMatrixNumCols(B);
-   HYPRE_Int         nnz_B    = hypre_CSRMatrixNumNonzeros(B);
-   HYPRE_Complex    *C_data;
-   HYPRE_Int        *C_i;
-   HYPRE_Int        *C_j;
-   HYPRE_Int         nnzC;
    hypre_CSRMatrix  *C;
 
    if (nrows_A != nrows_B || ncols_A != ncols_B)
@@ -228,15 +216,7 @@ hypre_CSRMatrixAddDevice( HYPRE_Complex    alpha,
       return NULL;
    }
 
-   hypreDevice_CSRSpAdd(nrows_A, ncols_A, nnz_A, nnz_B,
-                        A_i, A_j, alpha, A_data, B_i, B_j, beta, B_data,
-                        &nnzC, &C_i, &C_j, &C_data);
-
-   C = hypre_CSRMatrixCreate(nrows_A, ncols_B, nnzC);
-   hypre_CSRMatrixI(C) = C_i;
-   hypre_CSRMatrixJ(C) = C_j;
-   hypre_CSRMatrixData(C) = C_data;
-   hypre_CSRMatrixMemoryLocation(C) = HYPRE_MEMORY_DEVICE;
+   hypreDevice_CSRSpAdd(alpha, A, beta, B, &C);
 
    hypre_SyncComputeStream(hypre_handle());
 
