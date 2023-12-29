@@ -430,6 +430,9 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
                               bool       can_fail,
                               char      *d_rf  /* output: if symbolic mult. failed for each row */ )
 {
+#ifdef HYPRE_SPGEMM_TIMING
+   HYPRE_Real t1 = hypre_MPI_Wtime();
+#endif
    const HYPRE_Int num_groups_per_block = hypre_spgemm_get_num_groups_per_block<GROUP_SIZE>();
 #if defined(HYPRE_USING_CUDA)
    const HYPRE_Int BDIMX                = hypre_min(4, GROUP_SIZE);
@@ -546,6 +549,12 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
 
    hypre_TFree(d_ghash_i, HYPRE_MEMORY_DEVICE);
    hypre_TFree(d_ghash_j, HYPRE_MEMORY_DEVICE);
+
+#ifdef HYPRE_SPGEMM_TIMING
+   hypre_ForceSyncComputeStream(hypre_handle());
+   HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
+   HYPRE_SPGEMM_PRINT("hypre_spgemm_symbolic_rownnz time %f\n", t2);
+#endif
 
    return hypre_error_flag;
 }

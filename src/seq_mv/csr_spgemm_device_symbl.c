@@ -177,9 +177,9 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
                                   HYPRE_Int  in_rc,
                                   HYPRE_Int *d_rc )
 {
-   constexpr HYPRE_Int SHMEM_HASH_SIZE = SYMBL_HASH_SIZE[5];
-   constexpr HYPRE_Int GROUP_SIZE = T_GROUP_SIZE[5];
-   const HYPRE_Int BIN = 5;
+   const HYPRE_Int BIN = HYPRE_SPGEMM_DEFAULT_BIN;
+   constexpr HYPRE_Int SHMEM_HASH_SIZE = SYMBL_HASH_SIZE[BIN];
+   constexpr HYPRE_Int GROUP_SIZE = T_GROUP_SIZE[BIN];
 
    const bool need_ghash = in_rc > 0;
    const bool can_fail = in_rc < 2;
@@ -232,8 +232,17 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
 
          hypre_assert(new_end - d_rind == num_failed_rows);
 
-         hypre_spgemm_symbolic_rownnz < BIN + 1, 2 * SHMEM_HASH_SIZE, 2 * GROUP_SIZE, true >
-         (num_failed_rows, d_rind, k, n, true, d_ia, d_ja, d_ib, d_jb, d_rc, false, NULL);
+         HYPRE_Int high_bin = hypre_HandleSpgemmHighestBin(hypre_handle())[0];
+         if (BIN < high_bin)
+         {
+            hypre_spgemm_symbolic_rownnz < BIN + 1, 2 * SHMEM_HASH_SIZE, 2 * GROUP_SIZE, true >
+            (num_failed_rows, d_rind, k, n, true, d_ia, d_ja, d_ib, d_jb, d_rc, false, NULL);
+         }
+         else
+         {
+            hypre_spgemm_symbolic_rownnz < BIN, SHMEM_HASH_SIZE, GROUP_SIZE, true >
+            (num_failed_rows, d_rind, k, n, true, d_ia, d_ja, d_ib, d_jb, d_rc, false, NULL);
+         }
 
          hypre_TFree(d_rind, HYPRE_MEMORY_DEVICE);
       }
