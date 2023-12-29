@@ -32,17 +32,20 @@ hypre_DeviceDataCreate()
 #endif
    hypre_DeviceDataComputeStreamNum(data) = 0;
 
-   /* SpMV, SpGeMM, SpTrans: use vendor's lib by default */
+   /* Use vendor's sparse library by default */
 #if defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_ROCSPARSE) || defined(HYPRE_USING_ONEMKLSPARSE)
    hypre_DeviceDataSpgemmUseVendor(data)  = 1;
    hypre_DeviceDataSpMVUseVendor(data)    = 1;
    hypre_DeviceDataSpTransUseVendor(data) = 1;
+   hypre_DeviceDataSpAddUseVendor(data)   = 1;
 #else
    hypre_DeviceDataSpgemmUseVendor(data)  = 0;
    hypre_DeviceDataSpMVUseVendor(data)    = 0;
    hypre_DeviceDataSpTransUseVendor(data) = 0;
+   hypre_DeviceDataSpAddUseVendor(data)   = 0;
 #endif
-   /* for CUDA, it seems cusparse is slow due to memory allocation inside the transposition */
+   /* Exceptions:
+    * for CUDA, it seems cusparse is slow due to memory allocation inside the transposition */
 #if defined(HYPRE_USING_CUDA)
    hypre_DeviceDataSpTransUseVendor(data) = 0;
 #endif
@@ -61,6 +64,8 @@ hypre_DeviceDataCreate()
    hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     = 3;
    hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   = Nsamples;
    hypre_DeviceDataSpgemmRownnzEstimateMultFactor(data) = multfactor;
+
+   hypre_DeviceDataSpAddAlgorithm(data) = 1;
 
    /* pmis */
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND) || defined(HYPRE_USING_ONEMKLRAND)

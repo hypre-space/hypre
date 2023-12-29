@@ -53,6 +53,38 @@ hypre_SetSpGemmUseVendor( HYPRE_Int use_vendor )
    return hypre_error_flag;
 }
 
+/* GPU SpAdd */
+HYPRE_Int
+hypre_SetSpAddUseVendor( HYPRE_Int use_vendor )
+{
+#if defined(HYPRE_USING_GPU)
+   hypre_HandleSpAddUseVendor(hypre_handle()) = use_vendor;
+#else
+   HYPRE_UNUSED_VAR(use_vendor);
+#endif
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_SetSpAddAlgorithm( HYPRE_Int value )
+{
+#if defined(HYPRE_USING_GPU)
+   if (value >= 1 && value <= 2)
+   {
+      hypre_HandleSpAddAlgorithm(hypre_handle()) = value;
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+#else
+   HYPRE_UNUSED_VAR(value);
+#endif
+
+   return hypre_error_flag;
+}
+
 HYPRE_Int
 hypre_SetSpGemmAlgorithm( HYPRE_Int value )
 {

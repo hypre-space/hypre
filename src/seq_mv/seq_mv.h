@@ -589,11 +589,20 @@ HYPRE_Complex hypre_SeqVectorSumEltsDevice ( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorPrefetch(hypre_Vector *x, HYPRE_MemoryLocation memory_location);
 //HYPRE_Int hypre_SeqVectorMax( HYPRE_Complex alpha, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y );
 
-HYPRE_Int hypreDevice_CSRSpAdd(HYPRE_Int ma, HYPRE_Int mb, HYPRE_Int n, HYPRE_Int nnzA,
-                               HYPRE_Int nnzB, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex alpha, HYPRE_Complex *d_aa,
-                               HYPRE_Int *d_ja_map, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex beta, HYPRE_Complex *d_ab,
-                               HYPRE_Int *d_jb_map, HYPRE_Int *d_num_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out,
-                               HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out);
+HYPRE_Int hypreDevice_CSRSpAdd(HYPRE_Complex alpha, hypre_CSRMatrix *A, HYPRE_Complex beta,
+                               hypre_CSRMatrix *B, hypre_CSRMatrix **C_ptr);
+
+HYPRE_Int hypreDevice_CSRSpAdd1(HYPRE_Int nrows, HYPRE_Int ncols, HYPRE_Int nnzA, HYPRE_Int nnzB,
+                                HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex alpha,
+                                HYPRE_Complex *d_aa, HYPRE_Int *d_ib, HYPRE_Int *d_jb,
+                                HYPRE_Complex beta, HYPRE_Complex *d_ab, HYPRE_Int *nnzC_out,
+                                HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out);
+
+HYPRE_Int hypreDevice_CSRSpAdd2(HYPRE_Int ma, HYPRE_Int mb, HYPRE_Int n, HYPRE_Int nnzA,
+                                HYPRE_Int nnzB, HYPRE_Int *d_ia, HYPRE_Int *d_ja, HYPRE_Complex alpha, HYPRE_Complex *d_aa,
+                                HYPRE_Int *d_ja_map, HYPRE_Int *d_ib, HYPRE_Int *d_jb, HYPRE_Complex beta, HYPRE_Complex *d_ab,
+                                HYPRE_Int *d_jb_map, HYPRE_Int *d_num_b, HYPRE_Int *nnzC_out, HYPRE_Int **d_ic_out,
+                                HYPRE_Int **d_jc_out, HYPRE_Complex **d_ac_out);
 
 HYPRE_Int hypreDevice_CSRSpTrans(HYPRE_Int m, HYPRE_Int n, HYPRE_Int nnzA, HYPRE_Int *d_ia,
                                  HYPRE_Int *d_ja, HYPRE_Complex *d_aa, HYPRE_Int **d_ic_out, HYPRE_Int **d_jc_out,

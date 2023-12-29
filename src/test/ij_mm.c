@@ -748,6 +748,142 @@ void runjob5( HYPRE_ParCSRMatrix parcsr_A,
 #endif
 }
 
+void runjob6( HYPRE_ParCSRMatrix parcsr_A,
+              HYPRE_Int          print_system,
+              HYPRE_Int          rep,
+              HYPRE_Int          verify)
+{
+   HYPRE_Int          i;
+   HYPRE_ParCSRMatrix parcsr_A_host  = NULL;
+   HYPRE_ParCSRMatrix parcsr_AA_host = NULL;
+   HYPRE_ParCSRMatrix parcsr_B_host  = NULL;
+   HYPRE_ParCSRMatrix parcsr_B_host2 = NULL;
+   HYPRE_ParCSRMatrix parcsr_AA      = NULL;
+   HYPRE_ParCSRMatrix parcsr_B       = NULL;
+   HYPRE_ParCSRMatrix parcsr_error_host = NULL;
+   HYPRE_Real         fnorm, rfnorm, fnorm0;
+   HYPRE_Int          time_index;
+   char               fname[1024];
+   HYPRE_Complex      alpha = 1.0, beta = 1.0;
+
+   MPI_Comm comm = hypre_ParCSRMatrixComm(parcsr_A);
+
+   hypre_ParPrintf(comm, "A %d x %d, NNZ %d, RNZ %d\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_A),
+                   hypre_ParCSRMatrixGlobalNumCols(parcsr_A),
+                   hypre_ParCSRMatrixNumNonzeros(parcsr_A),
+                   hypre_ParCSRMatrixNumNonzeros(parcsr_A) / hypre_ParCSRMatrixGlobalNumRows(parcsr_A));
+
+   hypre_assert(hypre_ParCSRMatrixMemoryLocation(parcsr_A) == HYPRE_MEMORY_DEVICE);
+
+   hypre_MatvecCommPkgCreate(parcsr_A);
+   hypre_ParCSRMatrixCopyColMapOffdToDevice(parcsr_A);
+
+   if (verify)
+   {
+      parcsr_A_host = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_HOST);
+      hypre_MatvecCommPkgCreate(parcsr_A_host);
+
+      time_index = hypre_InitializeTiming("Host Parcsr A * A + A");
+
+      hypre_BeginTiming(time_index);
+
+      parcsr_AA_host = hypre_ParCSRMatMat(parcsr_A_host, parcsr_A_host);
+
+      hypre_ParCSRMatrixAdd(alpha, parcsr_AA_host, beta, parcsr_A_host, &parcsr_B_host);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Host Parcsr A * A + A", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      hypre_ParCSRMatrixSetNumNonzeros(parcsr_B_host);
+   }
+
+   if (print_system)
+   {
+      sprintf(fname, "%s/%s", file_dir, "IJ.out.A");
+      hypre_ParCSRMatrixPrintIJ(parcsr_A, 0, 0, fname);
+      //hypre_CSRMatrixPrintMM(hypre_ParCSRMatrixDiag(parcsr_A_host), 1, 1, 0, "A.mtx");
+   }
+
+   for (i = 0 ; i < rep; i++)
+   {
+      hypre_ParPrintf(comm, "--- rep %d (out of %d) ---\n", i, rep);
+
+      if (i == rep - 1)
+      {
+         time_index = hypre_InitializeTiming("Device Parcsr , A * A + A");
+         hypre_BeginTiming(time_index);
+         //cudaProfilerStart();
+      }
+
+      parcsr_AA = hypre_ParCSRMatMat(parcsr_A, parcsr_A);
+      hypre_ParCSRMatrixAdd(alpha, parcsr_AA, beta, parcsr_A, &parcsr_B);
+
+      if (i == rep - 1)
+      {
+#if defined(HYPRE_USING_GPU)
+         hypre_SyncCudaDevice(hypre_handle());
+#endif
+         //cudaProfilerStop();
+         hypre_EndTiming(time_index);
+         hypre_PrintTiming("Device Parcsr Matrix-by-Matrix, A*A", hypre_MPI_COMM_WORLD);
+         hypre_FinalizeTiming(time_index);
+         hypre_ClearTiming();
+      }
+
+      if (i < rep - 1)
+      {
+         hypre_ParCSRMatrixDestroy(parcsr_B);
+      }
+   }
+
+   if (verify)
+   {
+      parcsr_B_host2 = hypre_ParCSRMatrixClone_v2(parcsr_B, 1, HYPRE_MEMORY_HOST);
+      hypre_ParCSRMatrixSetNumNonzeros(parcsr_B_host2);
+
+      hypre_ParCSRMatrixAdd(1.0, parcsr_B_host, -1.0, parcsr_B_host2, &parcsr_error_host);
+      fnorm = hypre_ParCSRMatrixFnorm(parcsr_error_host);
+      fnorm0 = hypre_ParCSRMatrixFnorm(parcsr_B_host);
+      rfnorm = fnorm0 > 0 ? fnorm / fnorm0 : fnorm;
+
+      hypre_ParPrintf(comm, "A^2: %d x %d, nnz [CPU %d, GPU %d], CPU-GPU err %e\n",
+                      hypre_ParCSRMatrixGlobalNumRows(parcsr_B_host2),
+                      hypre_ParCSRMatrixGlobalNumCols(parcsr_B_host2),
+                      hypre_ParCSRMatrixNumNonzeros(parcsr_B_host),
+                      hypre_ParCSRMatrixNumNonzeros(parcsr_B_host2),
+                      rfnorm);
+   }
+
+   if (print_system)
+   {
+      if (!parcsr_B_host2)
+      {
+         parcsr_B_host2 = hypre_ParCSRMatrixClone_v2(parcsr_B, 1, HYPRE_MEMORY_HOST);
+      }
+      sprintf(fname, "%s/%s", file_dir, "IJ.out.B");
+      hypre_ParCSRMatrixPrintIJ(parcsr_B_host2, 0, 0, fname);
+      sprintf(fname, "%s/%s", file_dir, "IJ.out.B.CPU");
+      hypre_ParCSRMatrixPrintIJ(parcsr_B_host, 0, 0, fname);
+   }
+
+   hypre_ParCSRMatrixSetNumNonzeros(parcsr_B);
+
+   hypre_ParPrintf(comm, "B %d x %d, NNZ %d, RNZ %d\n", hypre_ParCSRMatrixGlobalNumRows(parcsr_B),
+                   hypre_ParCSRMatrixGlobalNumCols(parcsr_B),
+                   hypre_ParCSRMatrixNumNonzeros(parcsr_B),
+                   hypre_ParCSRMatrixNumNonzeros(parcsr_B) / hypre_ParCSRMatrixGlobalNumRows(parcsr_B));
+
+   hypre_ParCSRMatrixDestroy(parcsr_A_host);
+   hypre_ParCSRMatrixDestroy(parcsr_AA_host);
+   hypre_ParCSRMatrixDestroy(parcsr_B_host);
+   hypre_ParCSRMatrixDestroy(parcsr_B_host2);
+   hypre_ParCSRMatrixDestroy(parcsr_AA);
+   hypre_ParCSRMatrixDestroy(parcsr_B);
+   hypre_ParCSRMatrixDestroy(parcsr_error_host);
+}
+
 hypre_int
 main( hypre_int argc,
       char *argv[] )
@@ -772,7 +908,8 @@ main( hypre_int argc,
    HYPRE_Int           mult_order = 0;
    HYPRE_Int           print_system = 0;
    HYPRE_Int           verify       = 0;
-   HYPRE_Int           use_vendor = 0;
+   HYPRE_Int           spgemm_use_vendor = 0;
+   HYPRE_Int           spadd_use_vendor = 0;
    HYPRE_Int           spgemm_alg = 1;
    HYPRE_Int           spgemm_binned = 0;
    HYPRE_Int           rowest_mtd = 3;
@@ -925,7 +1062,18 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-vendor") == 0 )
       {
          arg_index++;
-         use_vendor = atoi(argv[arg_index++]);
+         spgemm_use_vendor = atoi(argv[arg_index++]);
+         spadd_use_vendor = spgemm_use_vendor;
+      }
+      else if ( strcmp(argv[arg_index], "-mm_vendor") == 0 )
+      {
+         arg_index++;
+         spgemm_use_vendor = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-add_vendor") == 0 )
+      {
+         arg_index++;
+         spadd_use_vendor = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-spgemmalg") == 0 )
       {
@@ -1026,6 +1174,7 @@ main( hypre_int argc,
          hypre_printf("  -job                   : 1. A^2  2. A^T*A  3. P^T*A*P\n");
          hypre_printf("                           4. P^T*A*P (P is AMG Interp from A)\n");
          hypre_printf("                           5. Diag(A) * A\n");
+         hypre_printf("                           6. A^2 + A\n");
       }
       goto final;
    }
@@ -1045,7 +1194,11 @@ main( hypre_int argc,
       errcode = hypre_SetSpGemmRownnzEstimateMultFactor(rowest_mult);
       hypre_assert(errcode == 0);
    }
-   errcode = HYPRE_SetSpGemmUseVendor(use_vendor);
+
+   HYPRE_SetSpAddUseVendor(spadd_use_vendor);
+   hypre_SetSpAddAlgorithm(1);
+
+   errcode = HYPRE_SetSpGemmUseVendor(spgemm_use_vendor);
    hypre_assert(errcode == 0);
    errcode = hypre_SetSpGemmAlgorithm(spgemm_alg);
    hypre_assert(errcode == 0);
@@ -1184,6 +1337,10 @@ main( hypre_int argc,
    else if (job == 5)
    {
       runjob5(parcsr_A, print_system, rep, verify);
+   }
+   else if (job == 6)
+   {
+      runjob6(parcsr_A, print_system, rep, verify);
    }
 
    /*-----------------------------------------------------------

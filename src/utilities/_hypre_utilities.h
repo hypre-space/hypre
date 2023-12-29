@@ -1848,6 +1848,7 @@ typedef struct
 #define hypre_HandleSpgemmUseVendor(hypre_handle)                hypre_DeviceDataSpgemmUseVendor(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpMVUseVendor(hypre_handle)                  hypre_DeviceDataSpMVUseVendor(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpTransUseVendor(hypre_handle)               hypre_DeviceDataSpTransUseVendor(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleSpAddUseVendor(hypre_handle)                 hypre_DeviceDataSpAddUseVendor(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmAlgorithm(hypre_handle)                hypre_DeviceDataSpgemmAlgorithm(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmBinned(hypre_handle)                   hypre_DeviceDataSpgemmBinned(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmNumBin(hypre_handle)                   hypre_DeviceDataSpgemmNumBin(hypre_HandleDeviceData(hypre_handle))
@@ -1856,6 +1857,7 @@ typedef struct
 #define hypre_HandleSpgemmRownnzEstimateMethod(hypre_handle)     hypre_DeviceDataSpgemmRownnzEstimateMethod(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateNsamples(hypre_handle)   hypre_DeviceDataSpgemmRownnzEstimateNsamples(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleSpgemmRownnzEstimateMultFactor(hypre_handle) hypre_DeviceDataSpgemmRownnzEstimateMultFactor(hypre_HandleDeviceData(hypre_handle))
+#define hypre_HandleSpAddAlgorithm(hypre_handle)                 hypre_DeviceDataSpAddAlgorithm(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleDeviceAllocator(hypre_handle)                hypre_DeviceDataDeviceAllocator(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleUseGpuRand(hypre_handle)                     hypre_DeviceDataUseGpuRand(hypre_HandleDeviceData(hypre_handle))
 
@@ -2369,6 +2371,8 @@ HYPRE_Int hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_SetSpTransUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int hypre_SetSpMVUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int hypre_SetSpGemmUseVendor( HYPRE_Int use_vendor );
+HYPRE_Int hypre_SetSpAddUseVendor( HYPRE_Int use_vendor );
+HYPRE_Int hypre_SetSpAddAlgorithm( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmAlgorithm( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmBinned( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmRownnzEstimateMethod( HYPRE_Int value );

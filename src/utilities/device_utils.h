@@ -74,6 +74,7 @@ using hypre_DeviceItem = void*;
 #define CUSPARSE_NEWSPMM_VERSION 11401
 #define CUDA_MALLOCASYNC_VERSION 11020
 #define CUDA_THRUST_NOSYNC_VERSION 12000
+#define CUSPARSE_CSRGEAM2_VERSION 9020
 
 #define CUSPARSE_SPSV_VERSION 11600
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
@@ -423,6 +424,9 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_cusparse_csrsm2_bufferSizeExt    cusparseScsrsm2_bufferSizeExt
 #define hypre_cusparse_csrsm2_analysis         cusparseScsrsm2_analysis
 #define hypre_cusparse_csrsm2_solve            cusparseScsrsm2_solve
+#define hypre_cusparse_csrgeam2_bufferSizeExt  cusparseScsrgeam2_bufferSizeExt
+#define hypre_cusparse_csrgeam2                cusparseScsrgeam2
+#define hypre_cusparse_csrgeam                 cusparseScsrgeam
 
 /* cuSOLVER */
 #define hypre_cusolver_dngetrf                 cusolverDnSgetrf
@@ -480,6 +484,9 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_cusparse_csrsm2_bufferSizeExt    cusparseDcsrsm2_bufferSizeExt
 #define hypre_cusparse_csrsm2_analysis         cusparseDcsrsm2_analysis
 #define hypre_cusparse_csrsm2_solve            cusparseDcsrsm2_solve
+#define hypre_cusparse_csrgeam2_bufferSizeExt  cusparseDcsrgeam2_bufferSizeExt
+#define hypre_cusparse_csrgeam2                cusparseDcsrgeam2
+#define hypre_cusparse_csrgeam                 cusparseDcsrgeam
 
 /* cuSOLVER */
 #define hypre_cusolver_dngetrf                 cusolverDnDgetrf
@@ -526,7 +533,14 @@ using hypre_DeviceItem = sycl::nd_item<3>;
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
-#if CUSPARSE_VERSION >= 10300
+#if CUSPARSE_VERSION < 10300
+static inline
+const char *cusparseGetErrorString(cusparseStatus_t)
+{
+   return "CUSPARSE ERROR";
+}
+#endif
+
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
    cusparseStatus_t err = call;                                                              \
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
@@ -534,15 +548,6 @@ using hypre_DeviceItem = sycl::nd_item<3>;
             err, cusparseGetErrorString(err), __FILE__, __LINE__);                           \
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
-#else
-#define HYPRE_CUSPARSE_CALL(call) do {                                                       \
-   cusparseStatus_t err = call;                                                              \
-   if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
-      printf("CUSPARSE ERROR (code = %d) at %s:%d\n",                                        \
-            err, __FILE__, __LINE__);                                                        \
-      hypre_assert(0); exit(1);                                                              \
-   } } while(0)
-#endif
 
 #define HYPRE_ROCSPARSE_CALL(call) do {                                                      \
    rocsparse_status err = call;                                                              \
@@ -687,6 +692,7 @@ struct hypre_DeviceData
    HYPRE_Int                         compute_stream_num;
    /* work space for hypre's device reducer */
    void                             *reduce_buffer;
+   HYPRE_Int                         spadd_algorithm;
    /* device spgemm options */
    HYPRE_Int                         spgemm_algorithm;
    HYPRE_Int                         spgemm_binned;
@@ -700,10 +706,11 @@ struct hypre_DeviceData
    HYPRE_Int                         spgemm_rownnz_estimate_method;
    HYPRE_Int                         spgemm_rownnz_estimate_nsamples;
    float                             spgemm_rownnz_estimate_mult_factor;
-   /* cusparse */
+   /* vendor's sparse kernels */
    HYPRE_Int                         spmv_use_vendor;
    HYPRE_Int                         sptrans_use_vendor;
    HYPRE_Int                         spgemm_use_vendor;
+   HYPRE_Int                         spadd_use_vendor;
    /* PMIS RNG */
    HYPRE_Int                         use_gpu_rand;
 };
@@ -723,6 +730,7 @@ struct hypre_DeviceData
 #define hypre_DeviceDataSpgemmUseVendor(data)                ((data) -> spgemm_use_vendor)
 #define hypre_DeviceDataSpMVUseVendor(data)                  ((data) -> spmv_use_vendor)
 #define hypre_DeviceDataSpTransUseVendor(data)               ((data) -> sptrans_use_vendor)
+#define hypre_DeviceDataSpAddUseVendor(data)                 ((data) -> spadd_use_vendor)
 #define hypre_DeviceDataSpgemmAlgorithm(data)                ((data) -> spgemm_algorithm)
 #define hypre_DeviceDataSpgemmBinned(data)                   ((data) -> spgemm_binned)
 #define hypre_DeviceDataSpgemmNumBin(data)                   ((data) -> spgemm_num_bin)
@@ -731,6 +739,7 @@ struct hypre_DeviceData
 #define hypre_DeviceDataSpgemmRownnzEstimateMethod(data)     ((data) -> spgemm_rownnz_estimate_method)
 #define hypre_DeviceDataSpgemmRownnzEstimateNsamples(data)   ((data) -> spgemm_rownnz_estimate_nsamples)
 #define hypre_DeviceDataSpgemmRownnzEstimateMultFactor(data) ((data) -> spgemm_rownnz_estimate_mult_factor)
+#define hypre_DeviceDataSpAddAlgorithm(data)                 ((data) -> spadd_algorithm)
 #define hypre_DeviceDataDeviceAllocator(data)                ((data) -> device_allocator)
 #define hypre_DeviceDataUseGpuRand(data)                     ((data) -> use_gpu_rand)
 
