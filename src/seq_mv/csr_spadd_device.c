@@ -387,6 +387,7 @@ hypreDevice_CSRSpAdd2( HYPRE_Int       ma, /* num of rows of A */
 }
 
 #if defined(HYPRE_USING_CUSPARSE)
+#if CUSPARSE_VERSION >= CUSPARSE_CSRGEAM2_VERSION
 HYPRE_Int
 hypreDevice_CSRSpAddCusparse(HYPRE_Int          nrows,
                              HYPRE_Int          ncols,
@@ -457,6 +458,65 @@ hypreDevice_CSRSpAddCusparse(HYPRE_Int          nrows,
 
    return hypre_error_flag;
 }
+
+#else
+
+HYPRE_Int
+hypreDevice_CSRSpAddCusparse(HYPRE_Int          nrows,
+                             HYPRE_Int          ncols,
+                             HYPRE_Int          nnzA,
+                             HYPRE_Int          nnzB,
+                             HYPRE_Int         *d_ia,
+                             HYPRE_Int         *d_ja,
+                             HYPRE_Complex      alpha,
+                             HYPRE_Complex     *d_aa,
+                             cusparseMatDescr_t descrA,
+                             HYPRE_Int         *d_ib,
+                             HYPRE_Int         *d_jb,
+                             HYPRE_Complex      beta,
+                             HYPRE_Complex     *d_ab,
+                             cusparseMatDescr_t descrB,
+                             HYPRE_Int         *nnzC_out,
+                             HYPRE_Int        **d_ic_out,
+                             HYPRE_Int        **d_jc_out,
+                             HYPRE_Complex    **d_ac_out,
+                             cusparseMatDescr_t descrC)
+{
+   HYPRE_Int     *d_ic = NULL, *d_jc = NULL;
+   HYPRE_Complex *d_ac = NULL;
+   HYPRE_Int      nnzC = 0;
+   hypre_int      nnzTotalDevHostPtr;
+
+   cusparseHandle_t handle = hypre_HandleCusparseHandle(hypre_handle());
+
+   d_ic = hypre_TAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_DEVICE);
+
+   cusparseXcsrgeamNnz(handle, nrows, ncols,
+                       descrA, nnzA, d_ia, d_ja,
+                       descrB, nnzB, d_ib, d_jb,
+                       descrC, d_ic, &nnzTotalDevHostPtr);
+
+   nnzC = nnzTotalDevHostPtr;
+
+   d_jc = hypre_TAlloc(HYPRE_Int,     nnzC, HYPRE_MEMORY_DEVICE);
+   d_ac = hypre_TAlloc(HYPRE_Complex, nnzC, HYPRE_MEMORY_DEVICE);
+
+   hypre_cusparse_csrgeam(handle, nrows, ncols,
+                          &alpha,
+                          descrA, nnzA, d_aa, d_ia, d_ja,
+                          &beta,
+                          descrB, nnzB, d_ab, d_ib, d_jb,
+                          descrC,       d_ac, d_ic, d_jc);
+
+   *nnzC_out = nnzC;
+   *d_ic_out = d_ic;
+   *d_jc_out = d_jc;
+   *d_ac_out = d_ac;
+
+   return hypre_error_flag;
+}
+
+#endif
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE)

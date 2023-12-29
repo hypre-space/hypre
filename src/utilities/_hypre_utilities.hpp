@@ -164,6 +164,7 @@ using hypre_DeviceItem = void*;
 #define CUSPARSE_NEWSPMM_VERSION 11401
 #define CUDA_MALLOCASYNC_VERSION 11020
 #define CUDA_THRUST_NOSYNC_VERSION 12000
+#define CUSPARSE_CSRGEAM2_VERSION 9020
 
 #define CUSPARSE_SPSV_VERSION 11600
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
@@ -515,6 +516,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_cusparse_csrsm2_solve            cusparseScsrsm2_solve
 #define hypre_cusparse_csrgeam2_bufferSizeExt  cusparseScsrgeam2_bufferSizeExt
 #define hypre_cusparse_csrgeam2                cusparseScsrgeam2
+#define hypre_cusparse_csrgeam                 cusparseScsrgeam
 
 /* cuSOLVER */
 #define hypre_cusolver_dngetrf                 cusolverDnSgetrf
@@ -574,6 +576,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_cusparse_csrsm2_solve            cusparseDcsrsm2_solve
 #define hypre_cusparse_csrgeam2_bufferSizeExt  cusparseDcsrgeam2_bufferSizeExt
 #define hypre_cusparse_csrgeam2                cusparseDcsrgeam2
+#define hypre_cusparse_csrgeam                 cusparseDcsrgeam
 
 /* cuSOLVER */
 #define hypre_cusolver_dngetrf                 cusolverDnDgetrf
@@ -620,7 +623,14 @@ using hypre_DeviceItem = sycl::nd_item<3>;
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
-#if CUSPARSE_VERSION >= 10300
+#if CUSPARSE_VERSION < 10300
+static inline
+const char *cusparseGetErrorString(cusparseStatus_t)
+{
+   return "CUSPARSE ERROR";
+}
+#endif
+
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
    cusparseStatus_t err = call;                                                              \
    if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
@@ -628,15 +638,6 @@ using hypre_DeviceItem = sycl::nd_item<3>;
             err, cusparseGetErrorString(err), __FILE__, __LINE__);                           \
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
-#else
-#define HYPRE_CUSPARSE_CALL(call) do {                                                       \
-   cusparseStatus_t err = call;                                                              \
-   if (CUSPARSE_STATUS_SUCCESS != err) {                                                     \
-      printf("CUSPARSE ERROR (code = %d) at %s:%d\n",                                        \
-            err, __FILE__, __LINE__);                                                        \
-      hypre_assert(0); exit(1);                                                              \
-   } } while(0)
-#endif
 
 #define HYPRE_ROCSPARSE_CALL(call) do {                                                      \
    rocsparse_status err = call;                                                              \
