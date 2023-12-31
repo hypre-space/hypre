@@ -623,12 +623,14 @@ using hypre_DeviceItem = sycl::nd_item<3>;
       hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
+#if defined(HYPRE_USING_CUDA)
 #if CUSPARSE_VERSION < 10300
 static inline
 const char *cusparseGetErrorString(cusparseStatus_t)
 {
    return "CUSPARSE ERROR";
 }
+#endif
 #endif
 
 #define HYPRE_CUSPARSE_CALL(call) do {                                                       \
