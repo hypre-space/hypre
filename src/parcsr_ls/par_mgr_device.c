@@ -579,7 +579,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
 #else
    HYPRE_Int            *pivots;
    HYPRE_Complex       **tmpdiag_aop;
-   HYPRE_Int            *infos;
+   HYPRE_Int            *info;
 #endif
    HYPRE_Int            *blk_row_indices;
    HYPRE_Complex        *tmpdiag;
@@ -592,7 +592,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
 
    /* Additional variables for debugging */
 #if HYPRE_DEBUG
-   HYPRE_Int            *h_infos;
+   HYPRE_Int            *h_info;
    HYPRE_Int             k, myid;
 
    hypre_MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &myid);
@@ -664,7 +664,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
     *-----------------------------------------------------------------*/
    {
       dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-      dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows / blk_size, "warp", bDim);
+      dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_blocks, "warp", bDim);
 
       if (CF_marker)
       {
@@ -692,15 +692,15 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
 
       /* Memory allocation */
       tmpdiag     = hypre_TAlloc(HYPRE_Complex, bdiag_size, HYPRE_MEMORY_DEVICE);
-      diag_aop    = hypre_TAlloc(HYPRE_Complex *, num_rows, HYPRE_MEMORY_DEVICE);
+      diag_aop    = hypre_TAlloc(HYPRE_Complex *, num_blocks, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_ONEMKLBLAS)
       pivots      = hypre_CTAlloc(std::int64_t, num_rows * blk_size, HYPRE_MEMORY_DEVICE);
 #else
       pivots      = hypre_CTAlloc(HYPRE_Int, num_rows * blk_size, HYPRE_MEMORY_DEVICE);
-      tmpdiag_aop = hypre_TAlloc(HYPRE_Complex *, num_rows, HYPRE_MEMORY_DEVICE);
-      infos       = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_DEVICE);
+      tmpdiag_aop = hypre_TAlloc(HYPRE_Complex *, num_blocks, HYPRE_MEMORY_DEVICE);
+      info        = hypre_CTAlloc(HYPRE_Int, num_blocks, HYPRE_MEMORY_DEVICE);
 #if defined (HYPRE_DEBUG)
-      h_infos     = hypre_TAlloc(HYPRE_Int,  num_rows, HYPRE_MEMORY_HOST);
+      h_info      = hypre_TAlloc(HYPRE_Int,  num_blocks, HYPRE_MEMORY_HOST);
 #endif
 
       /* Memory copy */
@@ -708,11 +708,11 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
       /* Set work array of pointers */
-      hypreDevice_ComplexArrayToArrayOfPtrs(num_rows, bs2, tmpdiag, tmpdiag_aop);
+      hypreDevice_ComplexArrayToArrayOfPtrs(num_blocks, bs2, tmpdiag, tmpdiag_aop);
 #endif
 
       /* Set array of pointers */
-      hypreDevice_ComplexArrayToArrayOfPtrs(num_rows, bs2, B_diag_data, diag_aop);
+      hypreDevice_ComplexArrayToArrayOfPtrs(num_blocks, bs2, B_diag_data, diag_aop);
 
       /* Compute LU factorization */
 #if defined(HYPRE_USING_CUBLAS)
@@ -721,7 +721,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                   tmpdiag_aop,
                                                   blk_size,
                                                   pivots,
-                                                  infos,
+                                                  info,
                                                   num_blocks));
 #elif defined(HYPRE_USING_ROCSOLVER)
       HYPRE_ROCSOLVER_CALL(rocsolver_dgetrf_batched(hypre_HandleVendorSolverHandle(hypre_handle()),
@@ -731,7 +731,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                     blk_size,
                                                     pivots,
                                                     blk_size,
-                                                    infos,
+                                                    info,
                                                     num_blocks));
 
 #elif defined(HYPRE_USING_ONEMKLBLAS)
@@ -775,20 +775,20 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
 #endif
 
 #if defined (HYPRE_DEBUG) && !defined(HYPRE_USING_ONEMKLBLAS)
-      hypre_TMemcpy(h_infos, infos, HYPRE_Int, num_rows, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
-      for (k = 0; k < num_rows; k++)
+      hypre_TMemcpy(h_info, info, HYPRE_Int, num_blocks, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+      for (k = 0; k < num_blocks; k++)
       {
-         if (h_infos[k] != 0)
+         if (h_info[k] != 0)
          {
-            if (h_infos[k] < 0)
+            if (h_info[k] < 0)
             {
                hypre_printf("[%d]: LU fact. failed at system %d, parameter %d ",
-                            myid, k, h_infos[k]);
+                            myid, k, h_info[k]);
             }
             else
             {
                hypre_printf("[%d]: Singular U(%d, %d) at system %d",
-                            myid, h_infos[k], h_infos[k], k);
+                            myid, h_info[k], h_info[k], k);
             }
          }
       }
@@ -803,7 +803,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                   pivots,
                                                   diag_aop,
                                                   blk_size,
-                                                  infos,
+                                                  info,
                                                   num_blocks));
 #elif defined(HYPRE_USING_ROCSOLVER)
       HYPRE_ROCSOLVER_CALL(rocsolver_dgetri_batched(hypre_HandleVendorSolverHandle(hypre_handle()),
@@ -812,7 +812,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                     blk_size,
                                                     pivots,
                                                     blk_size,
-                                                    infos,
+                                                    info,
                                                     num_blocks));
 #elif defined(HYPRE_USING_ONEMKLBLAS)
       HYPRE_ONEMKL_CALL( oneapi::mkl::lapack::getri_batch( *hypre_HandleComputeStream(hypre_handle()),
@@ -838,9 +838,9 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
       hypre_TFree(scratchpad, HYPRE_MEMORY_DEVICE);
 #else
       hypre_TFree(tmpdiag_aop, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(infos, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(info, HYPRE_MEMORY_DEVICE);
 #if defined (HYPRE_DEBUG)
-      hypre_TFree(h_infos, HYPRE_MEMORY_HOST);
+      hypre_TFree(h_info, HYPRE_MEMORY_HOST);
 #endif
 #endif
 
