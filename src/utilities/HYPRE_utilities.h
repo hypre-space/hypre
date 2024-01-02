@@ -197,6 +197,9 @@ HYPRE_Int HYPRE_Finalized(void);
  * HYPRE error user functions
  *--------------------------------------------------------------------------*/
 
+/* Return the max. value of the current hypre error flag among all ranks */
+HYPRE_Int HYPRE_GetMaxGlobalError(MPI_Comm comm);
+
 /* Return the current hypre error flag */
 HYPRE_Int HYPRE_GetError(void);
 

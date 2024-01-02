@@ -88,6 +88,40 @@ hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+void
+hypre_error_handler_rank_0(HYPRE_Int   myid,
+                           const char *filename,
+                           HYPRE_Int   line,
+                           HYPRE_Int   ierr,
+                           const char *msg)
+{
+   /* Update error code in all ranks */
+   hypre__global_error.error_flag |= ierr;
+
+   /* Print message only from rank 0 */
+   if (!myid)
+   {
+      hypre_error_handler(filename, line, ierr, msg);
+   }
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_GetMaxGlobalError(MPI_Comm comm)
+{
+   HYPRE_Int global_error_flag;
+
+   hypre_MPI_Allreduce(&hypre_error_flag, &global_error_flag, 1,
+                       HYPRE_MPI_INT, hypre_MPI_MAX, comm);
+
+   return global_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 HYPRE_GetError(void)
 {
