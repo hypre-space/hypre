@@ -515,10 +515,14 @@ extern hypre_Error hypre__global_error;
  *--------------------------------------------------------------------------*/
 
 void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const char *msg);
+void hypre_error_handler_rank_0(HYPRE_Int myid, const char *filename, HYPRE_Int line,
+                                HYPRE_Int ierr, const char *msg);
 
-#define hypre_error(IERR)  hypre_error_handler(__FILE__, __LINE__, IERR, NULL)
-#define hypre_error_w_msg(IERR, msg)  hypre_error_handler(__FILE__, __LINE__, IERR, msg)
-#define hypre_error_in_arg(IARG)  hypre_error(HYPRE_ERROR_ARG | IARG<<3)
+#define hypre_error(IERR) hypre_error_handler(__FILE__, __LINE__, IERR, NULL)
+#define hypre_error_rank_0(i, IERR) hypre_error_handler_rank_0(i, __FILE__, __LINE__, IERR, NULL)
+#define hypre_error_w_msg(IERR, msg) hypre_error_handler(__FILE__, __LINE__, IERR, msg)
+#define hypre_error_w_msg_rank_0(i, IERR, msg) hypre_error_handler(i, __FILE__, __LINE__, IERR, msg)
+#define hypre_error_in_arg(IARG) hypre_error(HYPRE_ERROR_ARG | IARG<<3)
 
 #if defined(HYPRE_DEBUG)
 /* host assert */
@@ -543,7 +547,6 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #endif
 
 #endif /* hypre_ERROR_HEADER */
-
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
