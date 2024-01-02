@@ -500,6 +500,7 @@ HYPRE_Int hypre_ParPrintf(MPI_Comm comm, const char *format, ...);
 typedef struct
 {
    HYPRE_Int  error_flag;
+   HYPRE_Int  temp_error_flag;
    HYPRE_Int  print_to_memory;
    char      *memory;
    HYPRE_Int  mem_sz;
@@ -509,6 +510,7 @@ typedef struct
 
 extern hypre_Error hypre__global_error;
 #define hypre_error_flag  hypre__global_error.error_flag
+#define hypre_error_temp_flag  hypre__global_error.temp_error_flag
 
 /*--------------------------------------------------------------------------
  * HYPRE error macros
@@ -517,6 +519,8 @@ extern hypre_Error hypre__global_error;
 void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const char *msg);
 void hypre_error_handler_rank_0(HYPRE_Int myid, const char *filename, HYPRE_Int line,
                                 HYPRE_Int ierr, const char *msg);
+void hypre_error_code_save(void);
+void hypre_error_code_restore(void);
 
 #define hypre_error(IERR) hypre_error_handler(__FILE__, __LINE__, IERR, NULL)
 #define hypre_error_rank_0(i, IERR) hypre_error_handler_rank_0(i, __FILE__, __LINE__, IERR, NULL)
@@ -2048,7 +2052,8 @@ HYPRE_Int hypre_GetDeviceCount(hypre_int *device_count);
 HYPRE_Int hypre_GetDeviceLastError(void);
 HYPRE_Int hypre_UmpireInit(hypre_Handle *hypre_handle_);
 HYPRE_Int hypre_UmpireFinalize(hypre_Handle *hypre_handle_);
-HYPRE_Int hypre_GetDeviceMaxShmemSize(hypre_int device_id, hypre_int *max_size_ptr, hypre_int *max_size_optin_ptr);
+HYPRE_Int hypre_GetDeviceMaxShmemSize(hypre_int device_id, hypre_int *max_size_ptr,
+                                      hypre_int *max_size_optin_ptr);
 
 /* matrix_stats.h */
 hypre_MatrixStats* hypre_MatrixStatsCreate( void );

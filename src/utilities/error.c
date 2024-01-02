@@ -8,7 +8,7 @@
 #include "_hypre_utilities.h"
 
 /* Global variable for error handling */
-hypre_Error hypre__global_error = {0, 0, NULL, 0, 0};
+hypre_Error hypre__global_error = {0, 0, 0, NULL, 0, 0};
 
 /*--------------------------------------------------------------------------
  * Process the error raised on the given line of the given source file
@@ -103,6 +103,32 @@ hypre_error_handler_rank_0(HYPRE_Int   myid,
    {
       hypre_error_handler(filename, line, ierr, msg);
    }
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_error_code_save(void)
+{
+   /* Store the current error code in a temporary variable */
+   hypre_error_temp_flag = hypre_error_flag;
+
+   /* Reset current error code */
+   HYPRE_ClearAllErrors();
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_error_code_restore(void)
+{
+   /* Restore hypre's error code */
+   hypre_error_flag = hypre_error_temp_flag;
+
+   /* Reset temporary error code */
+   hypre_error_temp_flag = 0;
 }
 
 /*--------------------------------------------------------------------------

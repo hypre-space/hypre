@@ -1906,6 +1906,9 @@ hypre_MGRSetup( void               *mgr_vdata,
             (GSElimData[i] -> F_array) = &F_fine_array[1];
             (GSElimData[i] -> U_array) = &U_fine_array[1];
 
+            /* Save current error code to a temporary variable */
+            hypre_error_code_save();
+
             // setup Gaussian Elim. in the F-relaxation step. Here, we apply GSElim at level 0
             // since we have a single matrix (and not an array of matrices).
             // hypre_printf("Setting GSElim Solver %d \n", Frelax_type[i]);
@@ -1918,12 +1921,10 @@ hypre_MGRSetup( void               *mgr_vdata,
                (mgr_data -> GSElimData)[i] = NULL;
 
                Frelax_type[i] = 7; /* Jacobi */
-               if (!my_id)
+               if (print_level)
                {
-                  hypre_sprintf(msg, "Switching F-relaxation at level %d to Jacobi", my_id, i);
-                  hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+                  hypre_ParPrintf(comm, "Switching F-relaxation at level %d to Jacobi", my_id, i);
                }
-               HYPRE_ClearAllErrors();
 
                /* Compute l1_norms if needed */
                if (!l1_norms[i])
@@ -1938,6 +1939,9 @@ hypre_MGRSetup( void               *mgr_vdata,
                   }
                }
             }
+
+            /* Restore error code prior to GaussElimSetup call */
+            hypre_error_code_restore();
          }
       }
    }
