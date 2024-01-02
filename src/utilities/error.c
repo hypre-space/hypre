@@ -89,26 +89,6 @@ hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const 
  *--------------------------------------------------------------------------*/
 
 void
-hypre_error_handler_rank_0(HYPRE_Int   myid,
-                           const char *filename,
-                           HYPRE_Int   line,
-                           HYPRE_Int   ierr,
-                           const char *msg)
-{
-   /* Update error code in all ranks */
-   hypre__global_error.error_flag |= ierr;
-
-   /* Print message only from rank 0 */
-   if (!myid)
-   {
-      hypre_error_handler(filename, line, ierr, msg);
-   }
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-void
 hypre_error_code_save(void)
 {
    /* Store the current error code in a temporary variable */
