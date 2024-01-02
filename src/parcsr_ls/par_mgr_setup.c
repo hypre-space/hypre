@@ -1915,7 +1915,7 @@ hypre_MGRSetup( void               *mgr_vdata,
             hypre_GaussElimSetup(GSElimData[i], i, Frelax_type[i]);
 
             /* Fallback to Jacobi when Gaussian Elim. is not successful */
-            if (HYPRE_GetMaxGlobalError(hypre_ParCSRMatrixComm(A_array[i])))
+            if (HYPRE_GetGlobalError(hypre_ParCSRMatrixComm(A_array[i])))
             {
                hypre_MGRDestroyGSElimData((mgr_data -> GSElimData)[i]);
                (mgr_data -> GSElimData)[i] = NULL;

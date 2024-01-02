@@ -115,12 +115,12 @@ hypre_error_code_restore(void)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GetMaxGlobalError(MPI_Comm comm)
+HYPRE_GetGlobalError(MPI_Comm comm)
 {
    HYPRE_Int global_error_flag;
 
    hypre_MPI_Allreduce(&hypre_error_flag, &global_error_flag, 1,
-                       HYPRE_MPI_INT, hypre_MPI_MAX, comm);
+                       HYPRE_MPI_INT, hypre_MPI_BOR, comm);
 
    return global_error_flag;
 }
