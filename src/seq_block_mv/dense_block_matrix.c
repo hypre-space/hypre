@@ -39,29 +39,30 @@ hypre_DenseBlockMatrixCreate( HYPRE_Int  row_major,
    /* Allocate memory */
    A = hypre_TAlloc(hypre_DenseBlockMatrix, 1, HYPRE_MEMORY_HOST);
 
-   hypre_DenseBlockMatrixRowMajor(A)          = row_major;
-   hypre_DenseBlockMatrixNumRowsBlock(A)      = num_rows_block;
-   hypre_DenseBlockMatrixNumColsBlock(A)      = num_cols_block;
-   hypre_DenseBlockMatrixNumBlocks(A)         = num_blocks[0];
-   hypre_DenseBlockMatrixNumRows(A)           = num_blocks[0] * hypre_DenseBlockMatrixNumRowsBlock(A);
-   hypre_DenseBlockMatrixNumCols(A)           = num_blocks[0] * hypre_DenseBlockMatrixNumColsBlock(A);
-   hypre_DenseBlockMatrixNumNonzerosBlock(A)  = hypre_DenseBlockMatrixNumRowsBlock(A) *
-                                                hypre_DenseBlockMatrixNumColsBlock(A);
-   hypre_DenseBlockMatrixNumNonzeros(A)       = num_blocks[0] * hypre_DenseBlockMatrixNumNonzerosBlock(A);
-   hypre_DenseBlockMatrixOwnsData(A)          = 0;
-   hypre_DenseBlockMatrixData(A)              = NULL;
-   hypre_DenseBlockMatrixDataAOP(A)           = NULL;
-   hypre_DenseBlockMatrixMemoryLocation(A)    = hypre_HandleMemoryLocation(hypre_handle());
+   hypre_DenseBlockMatrixRowMajor(A)         = row_major;
+   hypre_DenseBlockMatrixNumRowsBlock(A)     = num_rows_block;
+   hypre_DenseBlockMatrixNumColsBlock(A)     = num_cols_block;
+   hypre_DenseBlockMatrixNumBlocks(A)        = num_blocks[0];
+   hypre_DenseBlockMatrixNumRows(A)          = num_blocks[0] * hypre_DenseBlockMatrixNumRowsBlock(A);
+   hypre_DenseBlockMatrixNumCols(A)          = num_blocks[0] * hypre_DenseBlockMatrixNumColsBlock(A);
+   hypre_DenseBlockMatrixNumNonzerosBlock(A) = hypre_DenseBlockMatrixNumRowsBlock(A) *
+                                               hypre_DenseBlockMatrixNumColsBlock(A);
+   hypre_DenseBlockMatrixNumNonzeros(A)      = num_blocks[0] *
+                                               hypre_DenseBlockMatrixNumNonzerosBlock(A);
+   hypre_DenseBlockMatrixOwnsData(A)         = 0;
+   hypre_DenseBlockMatrixData(A)             = NULL;
+   hypre_DenseBlockMatrixDataAOP(A)          = NULL;
+   hypre_DenseBlockMatrixMemoryLocation(A)   = hypre_HandleMemoryLocation(hypre_handle());
 
    if (row_major)
    {
-      hypre_DenseBlockMatrixRowStride(A)      = 1;
-      hypre_DenseBlockMatrixColStride(A)      = hypre_DenseBlockMatrixNumColsBlock(A);
+      hypre_DenseBlockMatrixRowStride(A)     = 1;
+      hypre_DenseBlockMatrixColStride(A)     = hypre_DenseBlockMatrixNumColsBlock(A);
    }
    else
    {
-      hypre_DenseBlockMatrixRowStride(A)      = hypre_DenseBlockMatrixNumRowsBlock(A);
-      hypre_DenseBlockMatrixColStride(A)      = 1;
+      hypre_DenseBlockMatrixRowStride(A)     = hypre_DenseBlockMatrixNumRowsBlock(A);
+      hypre_DenseBlockMatrixColStride(A)     = 1;
    }
 
    return A;

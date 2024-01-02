@@ -1642,7 +1642,8 @@ hypre_AMSComputePi(hypre_ParCSRMatrix *A,
       HYPRE_BigInt global_num_cols = dim * hypre_ParCSRMatrixGlobalNumCols(G);
       HYPRE_BigInt *row_starts = hypre_ParCSRMatrixRowStarts(G);
       HYPRE_BigInt col_starts[2] = {(HYPRE_BigInt)dim * col_starts_G[0],
-                                    (HYPRE_BigInt)dim * col_starts_G[1] };
+                                    (HYPRE_BigInt)dim * col_starts_G[1]
+                                   };
       HYPRE_Int num_cols_offd = dim * hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(G));
       HYPRE_Int num_nonzeros_diag = dim * hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(G));
       HYPRE_Int num_nonzeros_offd = dim * hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(G));
@@ -2597,7 +2598,8 @@ hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
       HYPRE_BigInt global_num_cols = dim * hypre_ParCSRMatrixGlobalNumCols(G);
       HYPRE_BigInt *row_starts = hypre_ParCSRMatrixRowStarts(G);
       HYPRE_BigInt col_starts[2] = {(HYPRE_BigInt)dim * col_starts_G[0],
-                                    (HYPRE_BigInt)dim * col_starts_G[1] };
+                                    (HYPRE_BigInt)dim * col_starts_G[1]
+                                   };
       HYPRE_Int num_cols_offd = dim * hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(G));
       HYPRE_Int num_nonzeros_diag = dim * hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(G));
       HYPRE_Int num_nonzeros_offd = dim * hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(G));

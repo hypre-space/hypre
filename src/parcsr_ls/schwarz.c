@@ -1802,7 +1802,7 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix  *A,
                   i_dof_index[j_dof_dof[k]]++;
                   domain_dof_counter++;
                }
-             }
+            }
          }
 
          for (j = i_aggregate_dof[i]; j < i_aggregate_dof[i + 1]; j++)
@@ -2491,7 +2491,7 @@ end_agglomerate:
    {
       if (i_face_to_prefer_weight[i] == -1)
       {
-          i_face_weight[i] = -1;
+         i_face_weight[i] = -1;
       }
    }
 
