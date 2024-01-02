@@ -15,7 +15,8 @@ Getting the Source Code
 ==============================================================================
 
 The most recent hypre distribution is available at
-https://github.com/hypre-space/hypre/tags along with previous distribution versions.
+`https://github.com/hypre-space/hypre/tags`_ along with previous distribution
+versions.
 
 Building the Library
 ==============================================================================
@@ -553,7 +554,7 @@ standard error during execution.
 Bug Reporting and General Support
 ==============================================================================
 
-Simply create an issue at ``https://github.com/hypre-space/hypre/issues`` to
+Simply create an issue at `https://github.com/hypre-space/hypre/issues`_ to
 report bugs, request features, or ask general usage questions.
 
 Users should include as much relevant information as possible in their issue
