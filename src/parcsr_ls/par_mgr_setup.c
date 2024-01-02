@@ -1923,7 +1923,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                Frelax_type[i] = 7; /* Jacobi */
                if (print_level)
                {
-                  hypre_ParPrintf(comm, "Switching F-relaxation at level %d to Jacobi", my_id, i);
+                  hypre_ParPrintf(comm, "Switching F-relaxation at level %d to Jacobi", i);
                }
 
                /* Compute l1_norms if needed */
