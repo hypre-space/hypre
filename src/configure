@@ -827,7 +827,6 @@ with_extra_CUFLAGS
 with_extra_BUILDFLAGS
 with_extra_incpath
 with_extra_ldpath
-with_insure
 with_strict_checking
 with_MPI_include
 with_MPI_libs
@@ -1620,8 +1619,6 @@ Optional Packages:
                           Define extra ld path, where PATH is a
                           space-separated list (enclosed in quotes) of
                           directories.
-  --with-insure=FLAGS     FLAGS are options to pass to insure. Nothing is done
-                          to verify that insure is available
   --with-strict-checking  Compiles without MPI ('--without-MPI') and tries to
                           find a compiler option that warns of as many non-ISO
                           features as possible.
@@ -3342,7 +3339,6 @@ hypre_using_mli=no
 
 hypre_using_openmp=no
 hypre_using_device_openmp=no
-hypre_using_insure=no
 hypre_using_cuda=no
 hypre_using_gpu=no
 hypre_using_um=no
@@ -3939,23 +3935,6 @@ fi
 if test ${with_extra_ldpath+y}
 then :
   withval=$with_extra_ldpath; LDFLAGS="-L`echo ${withval}|sed 's/ /\ -L/g'` ${LDFLAGS}"
-
-fi
-
-
-
-# Check whether --with-insure was given.
-if test ${with_insure+y}
-then :
-  withval=$with_insure; case "${withval}" in
-    yes) hypre_using_insure=yes
-         hypre_using_debug=yes
-         hypre_insure_flags="" ;;
-    no)  ;;
-     *)  hypre_using_insure=yes
-         hypre_using_debug=yes
-         hypre_insure_flags="$withval" ;;
- esac
 
 fi
 
@@ -5283,7 +5262,7 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         for ac_prog in xlc_r xlC_r xlc xlC icc icpc icx icpx gcc g++ pgcc pgCC cc CC kcc KCC
+         for ac_prog in xlc_r xlC_r xlc xlC icx icc icpc icpx gcc g++ pgcc pgCC cc CC kcc KCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5331,7 +5310,7 @@ fi
 done
 
       else
-         for ac_prog in xlc xlC icc icpc icx icpx gcc g++ pgcc pgCC cc CC kcc KCC
+         for ac_prog in xlc xlC icx icc icpc icpx gcc g++ pgcc pgCC cc CC kcc KCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5382,7 +5361,7 @@ done
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         for ac_prog in mpxlc mpixlc_r mpixlc mpiicc mpiicx mpigcc mpicc mpipgcc mpipgicc
+         for ac_prog in mpxlc mpixlc_r mpixlc mpiicx mpiicc mpigcc mpipgcc mpipgicc mpicc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5430,7 +5409,7 @@ fi
 done
 
       else
-         for ac_prog in mpxlc mpixlc mpiicc mpiicx mpigcc mpicc mpipgcc mpipgicc
+         for ac_prog in mpxlc mpixlc mpiicx mpiicc mpigcc mpipgcc mpipgicc mpicc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5492,7 +5471,7 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         for ac_prog in xlC_r xlc_r xlC xlc icpc icc icpx icx g++ gcc pgCC pgcc pgc++ CC cc KCC kcc
+         for ac_prog in xlC_r xlc_r xlC xlc icpx icx icpc icc g++ gcc pgCC pgcc pgc++ CC cc KCC kcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5540,7 +5519,7 @@ fi
 done
 
       else
-         for ac_prog in xlC xlc icpc icc icpx icx g++ gcc pgCC pgcc pgc++ CC cc KCC kcc
+         for ac_prog in xlC xlc icpx icx icpc icc g++ gcc pgCC pgcc pgc++ CC cc KCC kcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5591,7 +5570,7 @@ done
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         for ac_prog in mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpiicpx mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++
+         for ac_prog in CC mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpx mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5639,7 +5618,7 @@ fi
 done
 
       else
-         for ac_prog in mpxlC mpixlcxx mpixlC mpiicpc mpiicpx mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++
+         for ac_prog in CC mpxlC mpixlcxx mpixlC mpiicpx mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -9755,31 +9734,31 @@ if test "x${hypre_user_chose_cflags}" = "xno"
 then
    case `basename ${CC}` in
       gcc|mpigcc|mpicc)
-        CFLAGS="-g -Wall"
+        CFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS="$CFLAGS -fopenmp"
-          LDFLAGS="$LDFLAGS -fopenmp"
+          CFLAGS+=" -fopenmp"
+          LDFLAGS+=" -fopenmp"
         fi
         ;;
       icc|mpiicc|icx|mpiicx)
-        CFLAGS="-g"
+        CFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS="$CFLAGS -qopenmp"
-          LDFLAGS="$LDFLAGS -qopenmp"
+          CFLAGS+=" -qopenmp"
+          LDFLAGS+=" -qopenmp"
         fi
         ;;
       pgcc|mpipgcc|mpipgicc)
-        CFLAGS="-g"
+        CFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS="$CFLAGS -mp"
-          LDFLAGS="$LDFLAGS -mp"
+          CFLAGS+=" -mp"
+          LDFLAGS+=" -mp"
         fi
         ;;
       cc|xlc|mpxlc|mpixlc|mpcc)
-        CFLAGS="-g"
+        CFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS="$CFLAGS -qsmp=omp"
-          LDFLAGS="$LDFLAGS -qsmp=omp"
+          CFLAGS+=" -qsmp=omp"
+          LDFLAGS+=" -qsmp=omp"
         fi
         ;;
       KCC|mpiKCC)
@@ -9795,27 +9774,27 @@ if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
    case `basename ${CXX}` in
       g++|gCC|mpig++|mpicxx|mpic++|mpiCC)
-        CXXFLAGS="-g -Wall"
+        CXXFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS="$CXXFLAGS -fopenmp"
+          CXXFLAGS+=" -fopenmp"
         fi
         ;;
       icpc|icc|mpiicpc|mpiicc|icpx|mpiicpx)
-        CXXFLAGS="-g"
+        CXXFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS="$CXXFLAGS -qopenmp"
+          CXXFLAGS+=" -qopenmp"
         fi
         ;;
       pgCC|mpipgCC|pgc++|mpipgic++)
-        CXXFLAGS="-g"
+        CXXFLAGS="-O0 -g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS="$CXXFLAGS -mp"
+          CXXFLAGS+=" -mp"
         fi
         ;;
       CC|cxx|xlC|mpxlC|mpixlcxx|mpCC)
-        CXXFLAGS="-g"
+        CXXFLAGS="-O0 -g"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS="$CXXFLAGS -qsmp=omp"
+          CXXFLAGS+=" -qsmp=omp"
         fi
         ;;
       KCC|mpiKCC)
@@ -9873,29 +9852,29 @@ then
       gcc|mpigcc|mpicc)
         CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS="$CFLAGS -fopenmp"
-          LDFLAGS="$LDFLAGS -fopenmp"
+          CFLAGS+=" -fopenmp"
+          LDFLAGS+=" -fopenmp"
         fi
         ;;
       icc|mpiicc|icx|mpiicx)
         CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS="$CFLAGS -qopenmp"
-          LDFLAGS="$LDFLAGS -qopenmp"
+          CFLAGS+=" -qopenmp"
+          LDFLAGS+=" -qopenmp"
         fi
         ;;
       pgcc|mpipgcc|mpipgicc)
         CFLAGS="-fast"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS="$CFLAGS -mp"
-          LDFLAGS="$LDFLAGS -mp"
+          CFLAGS+=" -mp"
+          LDFLAGS+=" -mp"
         fi
         ;;
       cc|xlc|xlc_r|mpxlc|mpixlc|mpixlc_r|mpixlc-gpu|mpcc)
         CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          CFLAGS="$CFLAGS -qsmp=omp"
-          LDFLAGS="$LDFLAGS -qsmp=omp"
+          CFLAGS+=" -qsmp=omp"
+          LDFLAGS+=" -qsmp=omp"
         fi
         ;;
       KCC|mpiKCC)
@@ -9913,25 +9892,25 @@ then
       g++|gCC|mpig++|mpicxx|mpic++|mpiCC)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS="$CXXFLAGS -fopenmp"
+          CXXFLAGS+=" -fopenmp"
         fi
         ;;
       icpc|icc|mpiicpc|mpiicc|icpx|mpiicpx)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS="$CXXFLAGS -qopenmp"
+          CXXFLAGS+=" -qopenmp"
         fi
         ;;
       pgCC|mpipgCC|pgc++|mpipgic++)
         CXXFLAGS="-fast"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS="$CXXFLAGS -mp"
+          CXXFLAGS+=" -mp"
         fi
         ;;
       CC|cxx|xlC|xlC_r|mpxlC|mpixlC|mpixlC-gpu|mpixlcxx|mpixlcxx_r|mpCC)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          CXXFLAGS="$CXXFLAGS -qsmp=omp"
+          CXXFLAGS+=" -qsmp=omp"
         fi
         ;;
       KCC|mpiKCC)
@@ -9949,25 +9928,25 @@ then
       g77|gfortran|mpigfortran|mpif77)
         FFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          FFLAGS="$FFLAGS -fopenmp"
+          FFLAGS+=" -fopenmp"
         fi
         ;;
       ifort|mpiifort)
         FFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          FFLAGS="$FFLAGS -qopenmp"
+          FFLAGS+=" -qopenmp"
         fi
         ;;
       pgf77|mpipgf77|pgfortran|mpipgifort)
         FFLAGS="-fast"
         if test "$hypre_using_openmp" = "yes" ; then
-          FFLAGS="$FFLAGS -mp"
+          FFLAGS+=" -mp"
         fi
         ;;
       f77|f90|xlf|xlf_r|mpxlf|mpixlf77|mpixlf77_r)
         FFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
-          FFLAGS="$FFLAGS -qsmp=omp"
+          FFLAGS+=" -qsmp=omp"
         fi
         ;;
       kf77|mpikf77)
@@ -10009,21 +9988,6 @@ BUILD_JAVA=0
 if test "$hypre_using_java" = "yes"
 then
    BUILD_JAVA=1
-fi
-
-if test "$hypre_using_insure" = "yes"
-then
-   LINK_FC="insure"
-   LINK_CC="insure"
-   LINK_CXX="insure"
-   LDFLAGS=`mpicc -link-info | awk '{$1=""; print}'`
-   LDFLAGS="$LDFLAGS ${hypre_insure_flags}"
-   FC="insure"
-   CC="insure"
-   CXX="insure"
-   FFLAGS="`mpicc -link-info | awk '{$1=""; print}'` $FFLAGS"
-   CFLAGS="`mpicc -link-info | awk '{$1=""; print}'` $CFLAGS"
-   CXXFLAGS="`mpicc -link-info | awk '{$1=""; print}'` $CXXFLAGS"
 fi
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for cabs in -lm" >&5

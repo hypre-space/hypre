@@ -3008,6 +3008,7 @@ hypre_bind_device( HYPRE_Int device_id_in,
 #endif
 
 #else
+   HYPRE_UNUSED_VAR(device_id_in);
    HYPRE_UNUSED_VAR(myid);
    HYPRE_UNUSED_VAR(nproc);
    HYPRE_UNUSED_VAR(comm);
