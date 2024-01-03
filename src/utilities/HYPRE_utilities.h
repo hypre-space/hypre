@@ -343,6 +343,7 @@ HYPRE_Int HYPRE_SetSpMVUseVendor( HYPRE_Int use_vendor );
 #define HYPRE_SetSpGemmUseCusparse(use_vendor) HYPRE_SetSpGemmUseVendor(use_vendor)
 HYPRE_Int HYPRE_SetSpGemmUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int HYPRE_SetUseGpuRand( HYPRE_Int use_curand );
+HYPRE_Int HYPRE_SetGpuAwareMPI( HYPRE_Int use_gpu_aware_mpi );
 
 /*--------------------------------------------------------------------------
  * Base objects

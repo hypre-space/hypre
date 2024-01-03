@@ -666,7 +666,7 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
       comm_handle = NULL;
 
       if (num_cols_offd) hypre_CSRMatrixMatvec_FF(alpha, offd, x_tmp, 1.0, y_local,
-                                                  CF_marker, CF_marker_offd, fpt);
+                                                     CF_marker, CF_marker_offd, fpt);
 
       hypre_SeqVectorDestroy(x_tmp);
       x_tmp = NULL;
