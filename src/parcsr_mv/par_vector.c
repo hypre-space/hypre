@@ -989,10 +989,7 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
       return hypre_error_flag;
    }
 
-   /* Write 1st header line: global number of rows */
-   hypre_fprintf(file, "%b\n", global_size);
-
-   /* Write 2nd header line: global partitioning */
+   /* Write header: global partitioning */
    hypre_fprintf(file, "%b %b\n", partitioning[0] + base_j, partitioning[1] + base_j - 1);
 
    /* Write additional header line in the case of multi-component vectors */
@@ -1185,19 +1182,13 @@ hypre_ParVectorReadIJ( MPI_Comm          comm,
       return hypre_error_flag;
    }
 
-   hypre_fscanf(file, "%b", &global_size);
    /* this may need to be changed so that the base is available in the file! */
-   hypre_fscanf(file, "%b", partitioning);
-   for (i = 0; i < 2; i++)
-   {
-      hypre_fscanf(file, "%b", partitioning + i);
-   }
+   hypre_fscanf(file, "%b %b", partitioning[0], partitioning[2]);
+
    /* This is not yet implemented correctly! */
    base_j = 0;
-   vector = hypre_ParVectorCreate(comm, global_size,
-                                  partitioning);
-
-   hypre_ParVectorInitialize(vector);
+   vector = hypre_ParVectorCreate(comm, global_size, partitioning);
+   hypre_ParVectorInitialize_v2(vector, HYPRE_MEMORY_HOST);
 
    local_vector = hypre_ParVectorLocalVector(vector);
    local_data   = hypre_VectorData(local_vector);
