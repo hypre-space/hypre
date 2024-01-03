@@ -743,37 +743,37 @@ hypre_PointRelax_core0( void               *relax_vdata,
          case 7:
             Ap6 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[6]);
             xoff6 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[6]]);
-            /* fall through */
+         /* fall through */
 
          case 6:
             Ap5 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[5]);
             xoff5 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[5]]);
-            /* fall through */
+         /* fall through */
 
          case 5:
             Ap4 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[4]);
             xoff4 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[4]]);
-            /* fall through */
+         /* fall through */
 
          case 4:
             Ap3 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[3]);
             xoff3 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[3]]);
-            /* fall through */
+         /* fall through */
 
          case 3:
             Ap2 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[2]);
             xoff2 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[2]]);
-            /* fall through */
+         /* fall through */
 
          case 2:
             Ap1 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[1]);
             xoff1 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[1]]);
-            /* fall through */
+         /* fall through */
 
          case 1:
             Ap0 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[0]);
             xoff0 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[0]]);
-            /* fall through */
+         /* fall through */
 
          case 0:
             break;
@@ -1030,37 +1030,37 @@ hypre_PointRelax_core12( void               *relax_vdata,
          case 7:
             Ap6 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[6]);
             xoff6 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[6]]);
-            /* fall through */
+         /* fall through */
 
          case 6:
             Ap5 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[5]);
             xoff5 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[5]]);
-            /* fall through */
+         /* fall through */
 
          case 5:
             Ap4 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[4]);
             xoff4 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[4]]);
-            /* fall through */
+         /* fall through */
 
          case 4:
             Ap3 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[3]);
             xoff3 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[3]]);
-            /* fall through */
+         /* fall through */
 
          case 3:
             Ap2 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[2]);
             xoff2 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[2]]);
-            /* fall through */
+         /* fall through */
 
          case 2:
             Ap1 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[1]);
             xoff1 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[1]]);
-            /* fall through */
+         /* fall through */
 
          case 1:
             Ap0 = hypre_StructMatrixBoxData(A, boxarray_id, ssi[0]);
             xoff0 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[ssi[0]]);
-            /* fall through */
+         /* fall through */
 
          case 0:
             break;
