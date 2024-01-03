@@ -57,7 +57,9 @@ typedef struct hypre_ParVector_struct
 #define hypre_ParVectorLocalVector(vector)      ((vector) -> local_vector)
 #define hypre_ParVectorOwnsData(vector)         ((vector) -> owns_data)
 #define hypre_ParVectorAllZeros(vector)         ((vector) -> all_zeros)
-#define hypre_ParVectorNumVectors(vector)       (hypre_VectorNumVectors(hypre_ParVectorLocalVector(vector)))
+#define hypre_ParVectorNumVectors(vector)       (hypre_VectorNumVectors((vector) -> local_vector))
+#define hypre_ParVectorEntryI(vector, i)        (hypre_VectorEntryI((vector) -> local_vector, i))
+#define hypre_ParVectorEntryIJ(vector, i, j)    (hypre_VectorEntryIJ((vector) -> local_vector, i, j))
 
 #define hypre_ParVectorAssumedPartition(vector) ((vector) -> assumed_partition)
 
