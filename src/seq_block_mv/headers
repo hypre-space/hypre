@@ -31,6 +31,7 @@ extern "C" {
 #endif
 @
 
+tail +7 csr_block_matrix.h   >> $INTERNAL_HEADER
 tail +7 dense_block_matrix.h >> $INTERNAL_HEADER
 tail +7 protos.h             >> $INTERNAL_HEADER
 

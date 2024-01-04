@@ -19,6 +19,8 @@ HEADERS =\
  _hypre_seq_block_mv.h
 
 FILES =\
+ csr_block_matrix.c\
+ csr_block_matvec.c\
  dense_block_matrix.c
 
 # CUFILES =\

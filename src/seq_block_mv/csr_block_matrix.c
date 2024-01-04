@@ -11,7 +11,7 @@
  *
  *****************************************************************************/
 
-#include "_hypre_parcsr_block_mv.h"
+#include "_hypre_seq_block_mv.h"
 
 #define LB_VERSION 0
 
@@ -27,15 +27,15 @@ hypre_CSRBlockMatrixCreate(HYPRE_Int block_size,
 {
    hypre_CSRBlockMatrix  *matrix;
 
-   matrix = hypre_CTAlloc(hypre_CSRBlockMatrix,  1, HYPRE_MEMORY_HOST);
+   matrix = hypre_CTAlloc(hypre_CSRBlockMatrix, 1, HYPRE_MEMORY_HOST);
 
-   hypre_CSRBlockMatrixData(matrix) = NULL;
-   hypre_CSRBlockMatrixI(matrix)    = NULL;
-   hypre_CSRBlockMatrixJ(matrix)    = NULL;
-   hypre_CSRBlockMatrixBigJ(matrix)    = NULL;
-   hypre_CSRBlockMatrixBlockSize(matrix) = block_size;
-   hypre_CSRBlockMatrixNumRows(matrix) = num_rows;
-   hypre_CSRBlockMatrixNumCols(matrix) = num_cols;
+   hypre_CSRBlockMatrixData(matrix)        = NULL;
+   hypre_CSRBlockMatrixI(matrix)           = NULL;
+   hypre_CSRBlockMatrixJ(matrix)           = NULL;
+   hypre_CSRBlockMatrixBigJ(matrix)        = NULL;
+   hypre_CSRBlockMatrixBlockSize(matrix)   = block_size;
+   hypre_CSRBlockMatrixNumRows(matrix)     = num_rows;
+   hypre_CSRBlockMatrixNumCols(matrix)     = num_cols;
    hypre_CSRBlockMatrixNumNonzeros(matrix) = num_nonzeros;
 
    /* set defaults */

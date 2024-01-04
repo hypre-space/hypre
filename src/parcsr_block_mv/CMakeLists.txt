@@ -4,13 +4,10 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 set(HDRS
-  par_csr_block_matrix.h
-  csr_block_matrix.h
+  _hypre_parcsr_block_mv.h
 )
 
 set(SRCS
-  csr_block_matrix.c
-  csr_block_matvec.c
   par_csr_block_matrix.c
   par_csr_block_matvec.c
   par_csr_block_comm.c

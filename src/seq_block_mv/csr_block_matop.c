@@ -7,12 +7,14 @@
 
 /******************************************************************************
  *
- * Matrix operation functions for hypre_CSRMatrix class.
+ * Matrix operation functions for hypre_CSRBlockMatrix class.
  *
  *****************************************************************************/
 
+#include "_hypre_seq_block_mv.h"
+
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixAdd:
+ * hypre_CSRBlockMatrixAdd:
  * adds two CSR Matrices A and B and returns a CSR Matrix C;
  * Note: The routine does not check for 0-elements which might be generated
  *       through cancellation of elements in A and B or already contained
@@ -239,4 +241,3 @@ hypre_CSRBlockMatrixMultiply(hypre_CSRBlockMatrix *A, hypre_CSRBlockMatrix *B)
    hypre_TFree(B_marker, HYPRE_MEMORY_HOST);
    return C;
 }
-

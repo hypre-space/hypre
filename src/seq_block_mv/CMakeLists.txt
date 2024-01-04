@@ -8,6 +8,8 @@ set(HDRS
 )
 
 set(SRCS
+  csr_block_matrix.c
+  csr_block_matvec.c
   dense_block_matrix.c
 )
 
