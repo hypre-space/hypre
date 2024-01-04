@@ -139,7 +139,6 @@ hypre_CSRBlockMatrixMatvec(HYPRE_Complex alpha, hypre_CSRBlockMatrix *A,
    return ierr;
 }
 
-
 /*--------------------------------------------------------------------------
  * hypre_CSRBlockMatrixMatvecT
  *
@@ -288,4 +287,3 @@ hypre_CSRBlockMatrixMatvecT( HYPRE_Complex         alpha,
 
    return ierr;
 }
-

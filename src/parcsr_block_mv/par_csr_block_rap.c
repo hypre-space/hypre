@@ -7,8 +7,8 @@
 
 #include <HYPRE_config.h>
 #include "_hypre_utilities.h"
-#include "par_csr_block_matrix.h"
-#include "../parcsr_mv/_hypre_parcsr_mv.h"
+#include "_hypre_parcsr_block_mv.h"
+#include "_hypre_parcsr_mv.h"
 
 /*--------------------------------------------------------------------------
  * used in RAP function - block size must be an argument because RAP_int may

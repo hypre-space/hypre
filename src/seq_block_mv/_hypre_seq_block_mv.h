@@ -69,102 +69,6 @@ typedef struct
 #define hypre_CSRBlockMatrixNumNonzeros(matrix)  ((matrix) -> num_nonzeros)
 #define hypre_CSRBlockMatrixOwnsData(matrix)     ((matrix) -> owns_data)
 
-/*--------------------------------------------------------------------------
- * other functions for the CSR Block Matrix structure
- *--------------------------------------------------------------------------*/
-
-hypre_CSRBlockMatrix
-*hypre_CSRBlockMatrixCreate(HYPRE_Int, HYPRE_Int, HYPRE_Int, HYPRE_Int);
-HYPRE_Int hypre_CSRBlockMatrixDestroy(hypre_CSRBlockMatrix *);
-HYPRE_Int hypre_CSRBlockMatrixInitialize(hypre_CSRBlockMatrix *);
-HYPRE_Int hypre_CSRBlockMatrixBigInitialize(hypre_CSRBlockMatrix *);
-HYPRE_Int hypre_CSRBlockMatrixSetDataOwner(hypre_CSRBlockMatrix *, HYPRE_Int);
-hypre_CSRMatrix
-*hypre_CSRBlockMatrixCompress(hypre_CSRBlockMatrix *);
-hypre_CSRMatrix
-*hypre_CSRBlockMatrixConvertToCSRMatrix(hypre_CSRBlockMatrix *);
-hypre_CSRBlockMatrix
-*hypre_CSRBlockMatrixConvertFromCSRMatrix(hypre_CSRMatrix *, HYPRE_Int);
-HYPRE_Int hypre_CSRBlockMatrixBlockAdd(HYPRE_Complex *, HYPRE_Complex *, HYPRE_Complex*, HYPRE_Int);
-
-HYPRE_Int hypre_CSRBlockMatrixBlockMultAdd(HYPRE_Complex *, HYPRE_Complex *, HYPRE_Complex,
-                                           HYPRE_Complex *, HYPRE_Int);
-HYPRE_Int hypre_CSRBlockMatrixBlockMultAddDiag(HYPRE_Complex *, HYPRE_Complex *, HYPRE_Complex,
-                                               HYPRE_Complex *, HYPRE_Int);
-HYPRE_Int
-hypre_CSRBlockMatrixBlockMultAddDiag2(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Complex beta,
-                                      HYPRE_Complex* o, HYPRE_Int block_size);
-HYPRE_Int
-hypre_CSRBlockMatrixBlockMultAddDiag3(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Complex beta,
-                                      HYPRE_Complex* o, HYPRE_Int block_size);
-
-
-HYPRE_Int hypre_CSRBlockMatrixBlockInvMult(HYPRE_Complex *, HYPRE_Complex *, HYPRE_Complex *,
-                                           HYPRE_Int);
-HYPRE_Int hypre_CSRBlockMatrixBlockInvMultDiag(HYPRE_Complex *, HYPRE_Complex *, HYPRE_Complex *,
-                                               HYPRE_Int);
-
-HYPRE_Int
-hypre_CSRBlockMatrixBlockInvMultDiag2(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Complex* o,
-                                      HYPRE_Int block_size);
-
-HYPRE_Int
-hypre_CSRBlockMatrixBlockInvMultDiag3(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Complex* o,
-                                      HYPRE_Int block_size);
-
-
-
-
-HYPRE_Int hypre_CSRBlockMatrixBlockMultInv(HYPRE_Complex *, HYPRE_Complex *, HYPRE_Complex *,
-                                           HYPRE_Int);
-HYPRE_Int hypre_CSRBlockMatrixBlockTranspose(HYPRE_Complex *, HYPRE_Complex *, HYPRE_Int);
-
-HYPRE_Int hypre_CSRBlockMatrixTranspose(hypre_CSRBlockMatrix *A,
-                                        hypre_CSRBlockMatrix **AT, HYPRE_Int data);
-
-HYPRE_Int hypre_CSRBlockMatrixBlockCopyData(HYPRE_Complex*, HYPRE_Complex*, HYPRE_Complex,
-                                            HYPRE_Int);
-HYPRE_Int hypre_CSRBlockMatrixBlockCopyDataDiag(HYPRE_Complex*, HYPRE_Complex*, HYPRE_Complex,
-                                                HYPRE_Int);
-
-HYPRE_Int hypre_CSRBlockMatrixBlockAddAccumulate(HYPRE_Complex*, HYPRE_Complex*, HYPRE_Int);
-HYPRE_Int hypre_CSRBlockMatrixBlockAddAccumulateDiag(HYPRE_Complex* i1, HYPRE_Complex* o,
-                                                     HYPRE_Int block_size);
-
-
-
-HYPRE_Int
-hypre_CSRBlockMatrixMatvec(HYPRE_Complex alpha, hypre_CSRBlockMatrix *A,
-                           hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y);
-
-
-HYPRE_Int
-hypre_CSRBlockMatrixMatvecT( HYPRE_Complex alpha, hypre_CSRBlockMatrix *A, hypre_Vector  *x,
-                             HYPRE_Complex beta, hypre_Vector *y );
-
-HYPRE_Int
-hypre_CSRBlockMatrixBlockInvMatvec(HYPRE_Complex* mat, HYPRE_Complex* v,
-                                   HYPRE_Complex* ov, HYPRE_Int block_size);
-
-HYPRE_Int
-hypre_CSRBlockMatrixBlockMatvec(HYPRE_Complex alpha, HYPRE_Complex* mat, HYPRE_Complex* v,
-                                HYPRE_Complex beta,
-                                HYPRE_Complex* ov, HYPRE_Int block_size);
-
-
-HYPRE_Int hypre_CSRBlockMatrixBlockNorm(HYPRE_Int norm_type, HYPRE_Complex* data, HYPRE_Real* out,
-                                        HYPRE_Int block_size);
-
-HYPRE_Int hypre_CSRBlockMatrixBlockSetScalar(HYPRE_Complex* o, HYPRE_Complex beta,
-                                             HYPRE_Int block_size);
-
-HYPRE_Int hypre_CSRBlockMatrixComputeSign(HYPRE_Complex *i1, HYPRE_Complex *o,
-                                          HYPRE_Int block_size);
-HYPRE_Int hypre_CSRBlockMatrixBlockAddAccumulateDiagCheckSign(HYPRE_Complex* i1, HYPRE_Complex* o,
-                                                              HYPRE_Int block_size, HYPRE_Real *sign);
-HYPRE_Int hypre_CSRBlockMatrixBlockMultAddDiagCheckSign(HYPRE_Complex* i1, HYPRE_Complex* i2,
-                                                        HYPRE_Complex beta, HYPRE_Complex* o, HYPRE_Int block_size, HYPRE_Real *sign);
-
 #ifdef __cplusplus
 }
 #endif
@@ -225,6 +129,64 @@ typedef struct hypre_DenseBlockMatrix_struct
                      (matrix) -> col_stride * j])
 
 #endif
+
+/* csr_block_matrix.c */
+hypre_CSRBlockMatrix* hypre_CSRBlockMatrixCreate(HYPRE_Int, HYPRE_Int, HYPRE_Int, HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixDestroy(hypre_CSRBlockMatrix*);
+HYPRE_Int hypre_CSRBlockMatrixInitialize(hypre_CSRBlockMatrix*);
+HYPRE_Int hypre_CSRBlockMatrixBigInitialize(hypre_CSRBlockMatrix*);
+HYPRE_Int hypre_CSRBlockMatrixSetDataOwner(hypre_CSRBlockMatrix*, HYPRE_Int);
+hypre_CSRMatrix* hypre_CSRBlockMatrixCompress(hypre_CSRBlockMatrix*);
+hypre_CSRMatrix* hypre_CSRBlockMatrixConvertToCSRMatrix(hypre_CSRBlockMatrix*);
+hypre_CSRBlockMatrix* hypre_CSRBlockMatrixConvertFromCSRMatrix(hypre_CSRMatrix*, HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixBlockAdd(HYPRE_Complex*, HYPRE_Complex*, HYPRE_Complex*, HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixBlockAddAccumulate(HYPRE_Complex*, HYPRE_Complex*, HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixBlockAddAccumulateDiag(HYPRE_Complex*, HYPRE_Complex*, HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixBlockAddAccumulateDiagCheckSign(HYPRE_Complex*, HYPRE_Complex*,
+                                                              HYPRE_Int, HYPRE_Real*);
+HYPRE_Int hypre_CSRBlockMatrixComputeSign(HYPRE_Complex*, HYPRE_Complex*, HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixBlockSetScalar(HYPRE_Complex*, HYPRE_Complex, HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixBlockCopyData(HYPRE_Complex*, HYPRE_Complex*,
+                                            HYPRE_Complex, HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixBlockCopyDataDiag(HYPRE_Complex*, HYPRE_Complex*,
+                                                HYPRE_Complex, HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixTranspose(hypre_CSRBlockMatrix*, hypre_CSRBlockMatrix**, HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixBlockNorm(HYPRE_Int, HYPRE_Complex*, HYPRE_Real*, HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixBlockMultAdd(HYPRE_Complex*, HYPRE_Complex*, HYPRE_Complex,
+                                           HYPRE_Complex*, HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixBlockMultAddDiag(HYPRE_Complex*, HYPRE_Complex*, HYPRE_Complex,
+                                               HYPRE_Complex*, HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixBlockMultAddDiagCheckSign(HYPRE_Complex*, HYPRE_Complex*,
+                                                        HYPRE_Complex, HYPRE_Complex*,
+                                                        HYPRE_Int, HYPRE_Real*);
+HYPRE_Int hypre_CSRBlockMatrixBlockMultAddDiag2(HYPRE_Complex*, HYPRE_Complex*,
+                                                HYPRE_Complex, HYPRE_Complex*, HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixBlockMultAddDiag3(HYPRE_Complex*, HYPRE_Complex*, HYPRE_Complex,
+                                                HYPRE_Complex*, HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixMatvec(HYPRE_Complex, hypre_CSRBlockMatrix*,
+                                     hypre_Vector*, HYPRE_Complex, hypre_Vector*);
+HYPRE_Int hypre_CSRBlockMatrixMatvecT(HYPRE_Complex, hypre_CSRBlockMatrix*, hypre_Vector*,
+                                      HYPRE_Complex, hypre_Vector*);
+HYPRE_Int hypre_CSRBlockMatrixBlockInvMatvec(HYPRE_Complex*, HYPRE_Complex*,
+                                             HYPRE_Complex*, HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixBlockInvMult(HYPRE_Complex*, HYPRE_Complex*,
+                                           HYPRE_Complex*, HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixBlockMultInv(HYPRE_Complex*, HYPRE_Complex*,
+                                           HYPRE_Complex*, HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixBlockInvMultDiag(HYPRE_Complex*, HYPRE_Complex*,
+                                               HYPRE_Complex*, HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixBlockInvMultDiag2(HYPRE_Complex*, HYPRE_Complex*, HYPRE_Complex*,
+                                                HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixBlockInvMultDiag3(HYPRE_Complex*, HYPRE_Complex*, HYPRE_Complex*,
+                                                HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixBlockMatvec(HYPRE_Complex, HYPRE_Complex*, HYPRE_Complex*,
+                                          HYPRE_Complex, HYPRE_Complex*, HYPRE_Int);
+HYPRE_Int hypre_CSRBlockMatrixBlockTranspose(HYPRE_Complex *, HYPRE_Complex *, HYPRE_Int);
+
+/* csr_block_matop.c */
+hypre_CSRBlockMatrix* hypre_CSRBlockMatrixAdd(hypre_CSRBlockMatrix*, hypre_CSRBlockMatrix*);
+hypre_CSRBlockMatrix* hypre_CSRBlockMatrixMultiply(hypre_CSRBlockMatrix*, hypre_CSRBlockMatrix*);
+
 
 /* dense_block_matrix.c */
 hypre_DenseBlockMatrix* hypre_DenseBlockMatrixCreate(HYPRE_Int, HYPRE_Int, HYPRE_Int,

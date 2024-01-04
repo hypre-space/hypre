@@ -7,15 +7,13 @@
 
 /******************************************************************************
  *
- * Matvec functions for hypre_CSRMatrix class.
+ * Matvec functions for hypre_ParCSRBlockMatrix class.
  *
  *****************************************************************************/
 
 #include "_hypre_parcsr_block_mv.h"
-
-#include "HYPRE.h"
-#include "parcsr_mv/_hypre_parcsr_mv.h"
-#include "seq_mv/seq_mv.h"
+#include "_hypre_parcsr_mv.h"
+#include "seq_mv.h"
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatvec
