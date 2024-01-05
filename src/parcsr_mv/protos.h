@@ -462,6 +462,13 @@ HYPRE_Int hypre_ParCSRMatrixSetDNumNonzeros ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixSetNumRownnz ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixSetDataOwner ( hypre_ParCSRMatrix *matrix, HYPRE_Int owns_data );
 HYPRE_Int hypre_ParCSRMatrixSetPatternOnly( hypre_ParCSRMatrix *matrix, HYPRE_Int pattern_only);
+hypre_ParCSRMatrix* hypre_ParCSRMatrixCreateFromDenseBlockMatrix(MPI_Comm comm,
+                                                                 HYPRE_BigInt global_num_rows,
+                                                                 HYPRE_BigInt global_num_cols,
+                                                                 HYPRE_BigInt *row_starts,
+                                                                 HYPRE_BigInt *col_starts,
+                                                                 hypre_DenseBlockMatrix *B);
+hypre_ParCSRMatrix* hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b, HYPRE_Int copy_data);
 hypre_ParCSRMatrix *hypre_ParCSRMatrixRead ( MPI_Comm comm, const char *file_name );
 HYPRE_Int hypre_ParCSRMatrixPrint ( hypre_ParCSRMatrix *matrix, const char *file_name );
 HYPRE_Int hypre_ParCSRMatrixPrintIJ ( const hypre_ParCSRMatrix *matrix, const HYPRE_Int base_i,
