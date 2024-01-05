@@ -122,7 +122,7 @@ hypre_MGRCreate(void)
    (mgr_data -> print_level) = 0;
    (mgr_data -> frelax_print_level) = 0;
    (mgr_data -> cg_print_level) = 0;
-   (mgr_data -> info_path) = NULL;
+   (mgr_data -> data_path) = NULL;
 
    (mgr_data -> l1_norms) = NULL;
 
@@ -471,8 +471,8 @@ hypre_MGRDestroy( void *data )
       hypre_TFree(mgr_data -> GSElimData, HYPRE_MEMORY_HOST);
    }
 
-   /* Print info path */
-   hypre_TFree(mgr_data -> info_path, HYPRE_MEMORY_HOST);
+   /* Free the data path filename */
+   hypre_TFree(mgr_data -> data_path, HYPRE_MEMORY_HOST);
 
    /* mgr data */
    hypre_TFree(mgr_data, HYPRE_MEMORY_HOST);
@@ -6671,36 +6671,42 @@ hypre_MGRPrintCoarseSystem( void *mgr_vdata, HYPRE_Int print_flag)
 HYPRE_Int
 hypre_MGRDataPrint(void *mgr_vdata)
 {
-   hypre_ParMGRData     *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-   HYPRE_Int             print_level = (mgr_data -> print_level);
-   hypre_ParCSRMatrix   *par_A = (mgr_data -> A_array)[0];
-   hypre_ParVector      *par_b = (mgr_data -> F_array)[0];
+   hypre_ParMGRData     *mgr_data           = (hypre_ParMGRData*) mgr_vdata;
+   HYPRE_Int             print_level        = (mgr_data -> print_level);
+   HYPRE_Int             num_coarse_levels  = (mgr_data -> num_coarse_levels);
+   hypre_ParCSRMatrix  **A_array            = (mgr_data -> A_array);
+   hypre_ParCSRMatrix  **P_array            = (mgr_data -> P_array);
+   hypre_ParCSRMatrix  **RT_array           = (mgr_data -> RT_array);
+   hypre_ParCSRMatrix   *A_coarsest         = (mgr_data -> RAP);
+   hypre_ParVector     **f_array            = (mgr_data -> F_array);
    HYPRE_Int            *point_marker_array = (mgr_data -> point_marker_array);
-   HYPRE_Int             block_size = (mgr_data -> block_size);
-   char                 *info_path = (mgr_data -> info_path);
+   HYPRE_Int             block_size         = (mgr_data -> block_size);
+   char                 *data_path          = (mgr_data -> data_path);
 
    char                  topdir[] = "./hypre-data";
    char                 *filename = NULL;
-   hypre_IntArray       *dofmap = NULL;
+   hypre_IntArray       *dofmap   = NULL;
    MPI_Comm              comm;
-   HYPRE_Int             myid;
-   HYPRE_Int             info_path_length;
+   HYPRE_Int             myid, lvl;
+   HYPRE_Int             data_path_length = 0;
 
    /* Sanity check */
-   if (!par_A)
+   if (!A_array[0])
    {
       return hypre_error_flag;
    }
 
    /* Get rank ID */
-   comm = hypre_ParCSRMatrixComm(par_A);
+   comm = hypre_ParCSRMatrixComm(A_array[0]);
    hypre_MPI_Comm_rank(comm, &myid);
 
-   /* Create new "ls_" folder (info_path) */
+   /* Create new "ls_" folder (data_path) */
    if (((print_level & HYPRE_MGR_PRINT_INFO_PARAMS) ||
         (print_level & HYPRE_MGR_PRINT_FINE_MATRIX) ||
-        (print_level & HYPRE_MGR_PRINT_FINE_RHS))   &&
-       (info_path == NULL))
+        (print_level & HYPRE_MGR_PRINT_FINE_RHS)    ||
+        (print_level & HYPRE_MGR_PRINT_CRSE_MATRIX) ||
+        (print_level & HYPRE_MGR_PRINT_LVLS_MATRIX) )   &&
+       (data_path == NULL))
    {
       if (!myid)
       {
@@ -6709,35 +6715,38 @@ hypre_MGRDataPrint(void *mgr_vdata)
             hypre_CreateDir(topdir);
          }
 
-         hypre_CreateNextDirOfSequence(topdir, "ls_", &info_path);
-         info_path_length = strlen(info_path) + 1;
+         hypre_CreateNextDirOfSequence(topdir, "ls_", &data_path);
+         data_path_length = strlen(data_path) + 1;
       }
-      hypre_MPI_Bcast(&info_path_length, 1, HYPRE_MPI_INT, 0, comm);
+      hypre_MPI_Bcast(&data_path_length, 1, HYPRE_MPI_INT, 0, comm);
 
-      if (info_path_length > 0)
+      if (data_path_length > 0)
       {
          if (myid)
          {
-            info_path = hypre_TAlloc(char, info_path_length, HYPRE_MEMORY_HOST);
+            data_path = hypre_TAlloc(char, data_path_length, HYPRE_MEMORY_HOST);
          }
       }
       else
       {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unable to create info path!");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unable to create data path!");
          return hypre_error_flag;
       }
-      hypre_MPI_Bcast(info_path, info_path_length, hypre_MPI_CHAR, 0, comm);
+      hypre_MPI_Bcast(data_path, data_path_length, hypre_MPI_CHAR, 0, comm);
 
-      /* Save info_path */
-      (mgr_data -> info_path) = info_path;
+      /* Save data_path */
+      (mgr_data -> data_path) = data_path;
    }
    else
    {
-      if (info_path)
+      if (data_path)
       {
-         info_path_length = strlen(info_path);
+         data_path_length = strlen(data_path);
       }
    }
+
+   /* Allocate memory for filename */
+   filename = hypre_TAlloc(char, data_path_length + 16, HYPRE_MEMORY_HOST);
 
    /* Print MGR parameters to file */
    if (print_level & HYPRE_MGR_PRINT_INFO_PARAMS)
@@ -6750,15 +6759,15 @@ hypre_MGRDataPrint(void *mgr_vdata)
    }
 
    /* Print linear system matrix at the finest level and dofmap */
-   if ((print_level & HYPRE_MGR_PRINT_FINE_MATRIX) && par_A)
+   if ((print_level & (HYPRE_MGR_PRINT_FINE_MATRIX + HYPRE_MGR_PRINT_LVLS_MATRIX)) && A_array[0])
    {
       /* Build dofmap array */
-      dofmap = hypre_IntArrayCreate(hypre_ParCSRMatrixNumRows(par_A));
+      dofmap = hypre_IntArrayCreate(hypre_ParCSRMatrixNumRows(A_array[0]));
       hypre_IntArrayInitialize_v2(dofmap, HYPRE_MEMORY_HOST);
       if (point_marker_array)
       {
          hypre_TMemcpy(hypre_IntArrayData(dofmap), point_marker_array,
-                       HYPRE_Int, hypre_ParCSRMatrixNumRows(par_A),
+                       HYPRE_Int, hypre_ParCSRMatrixNumRows(A_array[0]),
                        HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       }
       else
@@ -6766,27 +6775,25 @@ hypre_MGRDataPrint(void *mgr_vdata)
          hypre_IntArraySetInterleavedValues(dofmap, block_size);
       }
 
-      /* Print Matrix */
-      hypre_ParPrintf(comm, "Writing matrix to path: %s\n", info_path);
-      filename = hypre_TAlloc(char, strlen(info_path) + 16, HYPRE_MEMORY_HOST);
-      hypre_sprintf(filename, "%s/IJ.out.A", info_path);
-      if (print_level & HYPRE_MGR_PRINT_MODE_ASCII)
-      {
-         hypre_ParCSRMatrixPrintIJ(par_A, 0, 0, filename);
-      }
-      else
-      {
-         hypre_ParCSRMatrixPrintBinaryIJ(par_A, 0, 0, filename);
-      }
-
       /* Print dofmap */
-      hypre_ParPrintf(comm, "Writing dofmap to path: %s\n", info_path);
-      hypre_sprintf(filename, "%s/dofmap.out", info_path);
+      hypre_ParPrintf(comm, "Writing dofmap to path: %s\n", data_path);
+      hypre_sprintf(filename, "%s/dofmap.out", data_path);
       hypre_IntArrayPrint(comm, dofmap, filename);
 
       /* Free memory */
-      hypre_TFree(filename, HYPRE_MEMORY_HOST);
       hypre_IntArrayDestroy(dofmap);
+
+      /* Print Matrix */
+      hypre_ParPrintf(comm, "Writing fine level matrix to path: %s\n", data_path);
+      hypre_sprintf(filename, "%s/IJ.out.A", data_path);
+      if (print_level & HYPRE_MGR_PRINT_MODE_ASCII)
+      {
+         hypre_ParCSRMatrixPrintIJ(A_array[0], 0, 0, filename);
+      }
+      else
+      {
+         hypre_ParCSRMatrixPrintBinaryIJ(A_array[0], 0, 0, filename);
+      }
 
       /* Signal that the matrix has already been printed */
       (mgr_data -> print_level) &= ~HYPRE_MGR_PRINT_FINE_MATRIX;
@@ -6794,19 +6801,18 @@ hypre_MGRDataPrint(void *mgr_vdata)
    }
 
    /* Print linear system RHS at the finest level */
-   if ((print_level & HYPRE_MGR_PRINT_FINE_RHS) && par_b)
+   if ((print_level & HYPRE_MGR_PRINT_FINE_RHS) && f_array[0])
    {
       /* Print RHS */
-      hypre_ParPrintf(comm, "Writing RHS to path: %s\n", info_path);
-      filename = hypre_TAlloc(char, strlen(info_path) + 16, HYPRE_MEMORY_HOST);
-      hypre_sprintf(filename, "%s/IJ.out.b", info_path);
+      hypre_ParPrintf(comm, "Writing RHS to path: %s\n", data_path);
+      hypre_sprintf(filename, "%s/IJ.out.b", data_path);
       if (print_level & HYPRE_MGR_PRINT_MODE_ASCII)
       {
-         hypre_ParVectorPrintIJ(par_b, 0, filename);
+         hypre_ParVectorPrintIJ(f_array[0], 0, filename);
       }
       else
       {
-         hypre_ParVectorPrintBinaryIJ(par_b, filename);
+         hypre_ParVectorPrintBinaryIJ(f_array[0], filename);
       }
 
       /* Free memory */
@@ -6816,6 +6822,79 @@ hypre_MGRDataPrint(void *mgr_vdata)
       (mgr_data -> print_level) &= ~HYPRE_MGR_PRINT_FINE_RHS;
       (mgr_data -> print_level) |= HYPRE_MGR_PRINT_RESERVED_C;
    }
+
+   /* Print linear system matrix at the coarsest level */
+   if ((print_level & (HYPRE_MGR_PRINT_CRSE_MATRIX + HYPRE_MGR_PRINT_LVLS_MATRIX)) && A_coarsest)
+   {
+      hypre_ParPrintf(comm, "Writing coarsest level matrix to path: %s\n", data_path);
+      hypre_sprintf(filename, "%s/IJ.out.A.%02d", data_path, num_coarse_levels);
+      if (print_level & HYPRE_MGR_PRINT_MODE_ASCII)
+      {
+         hypre_ParCSRMatrixPrintIJ(A_coarsest, 0, 0, filename);
+      }
+      else
+      {
+         hypre_ParCSRMatrixPrintBinaryIJ(A_coarsest, 0, 0, filename);
+      }
+
+      /* Signal that the matrix has already been printed */
+      (mgr_data -> print_level) &= ~HYPRE_MGR_PRINT_CRSE_MATRIX;
+   }
+
+   /* Print MGR hierarchy */
+   if ((print_level & HYPRE_MGR_PRINT_LVLS_MATRIX))
+   {
+      for (lvl = 0; lvl < num_coarse_levels - 1; lvl++)
+      {
+         /* Print operator matrix */
+         hypre_ParPrintf(comm, "Writing level %d matrix to path: %s\n", lvl + 1, data_path);
+         hypre_sprintf(filename, "%s/IJ.out.A.%02d", data_path, lvl + 1);
+         if (print_level & HYPRE_MGR_PRINT_MODE_ASCII)
+         {
+            hypre_ParCSRMatrixPrintIJ(A_array[lvl + 1], 0, 0, filename);
+         }
+         else
+         {
+            hypre_ParCSRMatrixPrintBinaryIJ(A_array[lvl + 1], 0, 0, filename);
+         }
+
+         /* Print interpolation matrix */
+         if (P_array[lvl])
+         {
+            hypre_ParPrintf(comm, "Writing level %d interpolation to path: %s\n", lvl, data_path);
+            hypre_sprintf(filename, "%s/IJ.out.P.%02d", data_path, lvl);
+            if (print_level & HYPRE_MGR_PRINT_MODE_ASCII)
+            {
+               hypre_ParCSRMatrixPrintIJ(P_array[lvl], 0, 0, filename);
+            }
+            else
+            {
+               hypre_ParCSRMatrixPrintBinaryIJ(P_array[lvl], 0, 0, filename);
+            }
+         }
+
+         /* Print restriction matrix */
+         if (RT_array[lvl])
+         {
+            hypre_ParPrintf(comm, "Writing level %d restriction to path: %s\n", lvl, data_path);
+            hypre_sprintf(filename, "%s/IJ.out.RT.%02d", data_path, lvl);
+            if (print_level & HYPRE_MGR_PRINT_MODE_ASCII)
+            {
+               hypre_ParCSRMatrixPrintIJ(RT_array[lvl], 0, 0, filename);
+            }
+            else
+            {
+               hypre_ParCSRMatrixPrintBinaryIJ(RT_array[lvl], 0, 0, filename);
+            }
+         }
+      }
+
+      /* Signal that the data has already been printed */
+      (mgr_data -> print_level) &= ~HYPRE_MGR_PRINT_LVLS_MATRIX;
+   }
+
+   /* Free memory */
+   hypre_TFree(filename, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

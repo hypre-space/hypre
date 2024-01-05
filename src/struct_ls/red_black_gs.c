@@ -384,14 +384,14 @@ hypre_RedBlackGS( void               *relax_vdata,
                      Ap4 = hypre_StructMatrixBoxData(A, i, offd[4]);
                      xoff5 = hypre_BoxOffsetDistance(x_dbox, stencil_shape[offd[5]]);
                      xoff4 = hypre_BoxOffsetDistance(x_dbox, stencil_shape[offd[4]]);
-                     // fall through
+                  // fall through
 
                   case 5:
                      Ap3 = hypre_StructMatrixBoxData(A, i, offd[3]);
                      Ap2 = hypre_StructMatrixBoxData(A, i, offd[2]);
                      xoff3 = hypre_BoxOffsetDistance(x_dbox, stencil_shape[offd[3]]);
                      xoff2 = hypre_BoxOffsetDistance(x_dbox, stencil_shape[offd[2]]);
-                     // fall through
+                  // fall through
 
                   case 3:
                      Ap1 = hypre_StructMatrixBoxData(A, i, offd[1]);
