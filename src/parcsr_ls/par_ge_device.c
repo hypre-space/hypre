@@ -114,6 +114,9 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
                      "Missing dependency library for running gaussian elimination!");
 #endif
 
+   /* Free memory */
+   hypre_TFree(d_ierr, HYPRE_MEMORY_DEVICE);
+
    if (ierr < 0)
    {
       hypre_sprintf(msg, "Problem with getrf's %d-th input argument", -ierr);
@@ -154,6 +157,9 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
                                              &ierr));
 
 #elif defined(HYPRE_USING_CUSOLVER)
+      /* Allocate space for device error code */
+      d_ierr = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_DEVICE);
+
       /* Create identity dense matrix */
       hypre_Memset((void*) A_work, 0,
                    (size_t) global_size * sizeof(HYPRE_Real),
@@ -179,6 +185,9 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
       hypre_TMemcpy(A_mat, A_work, HYPRE_Real, global_size,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
+      /* Free memory */
+      hypre_TFree(d_ierr, HYPRE_MEMORY_DEVICE);
+
 #elif defined(HYPRE_USING_ROCSOLVER)
 
       /**************
@@ -190,9 +199,6 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
                         "Missing dependency library for running gaussian elimination!");
 #endif
    }
-
-   /* Free memory */
-   hypre_TFree(d_ierr, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }
