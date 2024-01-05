@@ -2247,13 +2247,13 @@ HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *re
 HYPRE_Int hypre_MGRGetCoarseGridConvergenceFactor( void *mgr_data, HYPRE_Real *conv_factor );
 
 /* par_mgr_interp.c */
-HYPRE_Int hypre_MGRBuildProlongation( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
-                                      hypre_ParCSRMatrix *A_FC, HYPRE_Int *CF_marker,
-                                      hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global,
-                                      HYPRE_Real trunc_factor, HYPRE_Int max_elmts,
-                                      HYPRE_Int block_jacobi_bsize,
-                                      hypre_ParCSRMatrix **P_tr, HYPRE_Int method,
-                                      HYPRE_Int num_sweeps_post );
+HYPRE_Int hypre_MGRBuildInterp( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
+                                hypre_ParCSRMatrix *A_FC, HYPRE_Int *CF_marker,
+                                hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global,
+                                HYPRE_Real trunc_factor, HYPRE_Int max_elmts,
+                                HYPRE_Int block_jacobi_bsize,
+                                hypre_ParCSRMatrix **P_tr, HYPRE_Int method,
+                                HYPRE_Int num_sweeps_post );
 HYPRE_Int hypre_MGRBuildRestrict( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
                                   hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *A_CF,
                                   hypre_IntArray *CF_marker, HYPRE_BigInt *num_cpts_global,

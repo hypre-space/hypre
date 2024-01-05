@@ -1141,17 +1141,17 @@ hypre_MGRSetup( void               *mgr_vdata,
             hypre_MGRBuildBlockJacobiWp(A_FF, A_FC, block_jacobi_bsize,
                                         CF_marker, coarse_pnts_global, &Wp);
          }
-         hypre_MGRBuildProlongation(A_array[lev], A_FF, A_FC, CF_marker, Wp,
-                                    coarse_pnts_global, trunc_factor, P_max_elmts[lev],
-                                    block_jacobi_bsize, &P, interp_type[lev],
-                                    num_interp_sweeps);
+         hypre_MGRBuildInterp(A_array[lev], A_FF, A_FC, CF_marker, Wp,
+                              coarse_pnts_global, trunc_factor, P_max_elmts[lev],
+                              block_jacobi_bsize, &P, interp_type[lev],
+                              num_interp_sweeps);
       }
       else
       {
-         hypre_MGRBuildProlongation(A_array[lev], A_FF, A_FC, CF_marker, S,
-                                    coarse_pnts_global, trunc_factor, P_max_elmts[lev],
-                                    block_jacobi_bsize, &P, interp_type[lev],
-                                    num_interp_sweeps);
+         hypre_MGRBuildInterp(A_array[lev], A_FF, A_FC, CF_marker, S,
+                              coarse_pnts_global, trunc_factor, P_max_elmts[lev],
+                              block_jacobi_bsize, &P, interp_type[lev],
+                              num_interp_sweeps);
       }
 
       hypre_GpuProfilingPopRange();
