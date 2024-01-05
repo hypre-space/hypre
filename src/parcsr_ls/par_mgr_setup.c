@@ -31,11 +31,14 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_Int    level_blk_size;
 
    hypre_ParCSRMatrix  *RT = NULL;
+   hypre_ParCSRMatrix  *R  = NULL;
    hypre_ParCSRMatrix  *P = NULL;
    hypre_ParCSRMatrix  *S = NULL;
    hypre_ParCSRMatrix  *ST = NULL;
    hypre_ParCSRMatrix  *AT = NULL;
    hypre_ParCSRMatrix  *Wp = NULL;
+   hypre_ParCSRMatrix  *Wr = NULL;
+   hypre_ParCSRMatrix  *AP = NULL;
 
    HYPRE_Int           *dof_func_buff_data = NULL;
    HYPRE_BigInt         coarse_pnts_global[2]; // TODO: Change to row_starts_cpts
@@ -68,6 +71,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_Int * reserved_Cpoint_local_indexes = (mgr_data -> reserved_Cpoint_local_indexes);
    hypre_IntArray      **CF_marker_array = (mgr_data -> CF_marker_array);
    HYPRE_Int            *CF_marker;
+   hypre_IntArray       *FC_marker;
    hypre_ParCSRMatrix  **A_array = (mgr_data -> A_array);
    hypre_ParCSRMatrix  **B_array = (mgr_data -> B_array);
    hypre_ParCSRMatrix  **B_FF_array = (mgr_data -> B_FF_array);
@@ -75,20 +79,20 @@ hypre_MGRSetup( void               *mgr_vdata,
    hypre_ParCSRMatrix  **P_FF_array = (mgr_data -> P_FF_array);
 #endif
    hypre_ParCSRMatrix  **P_array = (mgr_data -> P_array);
+   hypre_ParCSRMatrix  **R_array = (mgr_data -> RT_array);
    hypre_ParCSRMatrix  **RT_array = (mgr_data -> RT_array);
-   hypre_ParCSRMatrix  *RAP_ptr = NULL;
+   hypre_ParCSRMatrix   *RAP_ptr = NULL;
 
    hypre_ParCSRMatrix  *A_FF = NULL;
    hypre_ParCSRMatrix  *A_FC = NULL;
-#if defined (HYPRE_USING_GPU)
    hypre_ParCSRMatrix  *A_CF = NULL;
    hypre_ParCSRMatrix  *A_CC = NULL;
-#endif
+
    hypre_Solver         *aff_base;
    HYPRE_Solver        **aff_solver = (mgr_data -> aff_solver);
    hypre_ParCSRMatrix  **A_ff_array = (mgr_data -> A_ff_array);
-   hypre_ParVector    **F_fine_array = (mgr_data -> F_fine_array);
-   hypre_ParVector    **U_fine_array = (mgr_data -> U_fine_array);
+   hypre_ParVector     **F_fine_array = (mgr_data -> F_fine_array);
+   hypre_ParVector     **U_fine_array = (mgr_data -> U_fine_array);
 
    HYPRE_Int (*fgrid_solver_setup)(void*, void*, void*, void*);
    HYPRE_Int (*fgrid_solver_solve)(void*, void*, void*, void*);
@@ -377,8 +381,8 @@ hypre_MGRSetup( void               *mgr_vdata,
    (mgr_data -> num_coarse_per_level) = level_coarse_size;
 
    /* Free Previously allocated data, if any not destroyed */
-   if (A_array || B_array  || B_FF_array ||
-       P_array || RT_array || CF_marker_array)
+   if (A_array || B_array || B_FF_array ||
+       P_array || R_array || RT_array || CF_marker_array)
    {
       for (j = 1; j < (old_num_coarse_levels); j++)
       {
@@ -409,6 +413,12 @@ hypre_MGRSetup( void               *mgr_vdata,
             P_array[j] = NULL;
          }
 
+         if (R_array[j])
+         {
+            hypre_ParCSRMatrixDestroy(R_array[j]);
+            R_array[j] = NULL;
+         }
+
          if (RT_array[j])
          {
             hypre_ParCSRMatrixDestroy(RT_array[j]);
@@ -422,15 +432,11 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
       }
       hypre_TFree(B_array, HYPRE_MEMORY_HOST);
-      B_array = NULL;
       hypre_TFree(B_FF_array, HYPRE_MEMORY_HOST);
-      B_FF_array = NULL;
       hypre_TFree(P_array, HYPRE_MEMORY_HOST);
-      P_array = NULL;
+      hypre_TFree(R_array, HYPRE_MEMORY_HOST);
       hypre_TFree(RT_array, HYPRE_MEMORY_HOST);
-      RT_array = NULL;
       hypre_TFree(CF_marker_array, HYPRE_MEMORY_HOST);
-      CF_marker_array = NULL;
    }
 
 #if defined(HYPRE_USING_GPU)
@@ -621,6 +627,10 @@ hypre_MGRSetup( void               *mgr_vdata,
    {
       P_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_num_coarse_levels, HYPRE_MEMORY_HOST);
    }
+   if (R_array == NULL && max_num_coarse_levels > 0)
+   {
+      R_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   }
 #if defined(HYPRE_USING_GPU)
    if (P_FF_array == NULL && max_num_coarse_levels > 0)
    {
@@ -798,6 +808,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    (mgr_data -> A_array)         = A_array;
    (mgr_data -> B_array)         = B_array;
    (mgr_data -> P_array)         = P_array;
+   (mgr_data -> R_array)         = R_array;
    (mgr_data -> RT_array)        = RT_array;
    (mgr_data -> CF_marker_array) = CF_marker_array;
    (mgr_data -> l1_norms)        = l1_norms;
@@ -1108,19 +1119,15 @@ hypre_MGRSetup( void               *mgr_vdata,
          interp_type[lev] = 2;
       }
 
-      /* Extract A_FF and A_FC when needed by MGR's interpolation/relaxation strategies */
-#if !defined(HYPRE_USING_GPU)
-      if ((Frelax_type[lev] == 2)   ||
-          (Frelax_type[lev] == 9)   ||
-          (Frelax_type[lev] == 99)  ||
-          (Frelax_type[lev] == 199) ||
-          (interp_type[lev] == 12)  ||
-          (mgr_coarse_grid_method[lev] != 0))
-#endif
-      {
-         hypre_ParCSRMatrixGenerateFFFC(A_array[lev], CF_marker, coarse_pnts_global,
-                                        NULL, &A_FC, &A_FF);
-      }
+      /* Compute C/F splitting (needed by RAP computation and other operations) */
+      FC_marker = hypre_IntArrayCloneDeep(CF_marker_array[lev]);
+      hypre_IntArrayNegate(FC_marker);
+
+      hypre_ParCSRMatrixGenerateFFFC(A_array[lev], CF_marker, coarse_pnts_global,
+                                     NULL, &A_FC, &A_FF);
+      hypre_ParCSRMatrixGenerateFFFC(A_array[lev], hypre_IntArrayData(FC_marker), row_starts_fpts,
+                                     NULL, &A_CF, &A_CC);
+      hypre_IntArrayDestroy(FC_marker);
 
       /* Build MGR interpolation */
       hypre_sprintf(region_name, "Interp");
@@ -1248,16 +1255,16 @@ hypre_MGRSetup( void               *mgr_vdata,
             hypre_BoomerAMGBuildRestrAIR(A_array[lev], CF_marker,
                                          ST, coarse_pnts_global, 1,
                                          dof_func_buff_data, filter_thresholdR,
-                                         debug_flag, &RT, is_triangular, gmres_switch);
+                                         debug_flag, &R, is_triangular, gmres_switch);
          }
          else /* distance-1.5 AIR - distance 2 locally and distance 1 across procs. */
          {
             hypre_BoomerAMGBuildRestrDist2AIR(A_array[lev], CF_marker,
                                               ST, coarse_pnts_global, 1,
                                               dof_func_buff_data, filter_thresholdR,
-                                              debug_flag, &RT, 1, is_triangular, gmres_switch);
+                                              debug_flag, &R, 1, is_triangular, gmres_switch);
          }
-         RT_array[lev] = RT;
+         R_array[lev] = R;
          hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_REGION_END("%s", region_name);
 
@@ -1268,7 +1275,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          hypre_GpuProfilingPushRange(region_name);
          HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
          AP      = hypre_ParMatmul(A_array[lev], P_array[lev]);
-         RAP_ptr = hypre_ParMatmul(RT, AP);
+         RAP_ptr = hypre_ParMatmul(R, AP);
          if (num_procs > 1)
          {
             hypre_MatvecCommPkgCreate(RAP_ptr);
@@ -1292,13 +1299,14 @@ hypre_MGRSetup( void               *mgr_vdata,
             {
                restrict_type[lev] = 2;
             }
-            //            if (restrict_type[lev] > 0)
-            {
-               hypre_MGRBuildRestrict(A_array[lev], A_FF, A_FC, CF_marker, coarse_pnts_global,
-                                      trunc_factor, P_max_elmts[lev], strong_threshold,
-                                      max_row_sum, block_num_f_points, &RT, restrict_type[lev]);
-               RT_array[lev] = RT;
-            }
+
+            hypre_MGRBuildRestrict(A_array[lev], A_FF, A_FC, A_CF, CF_marker_array[lev],
+                                   coarse_pnts_global, trunc_factor, P_max_elmts[lev],
+                                   strong_threshold, max_row_sum, block_num_f_points,
+                                   restrict_type[lev], &Wr, &R, &RT);
+            R_array[lev]  = R;
+            RT_array[lev] = RT;
+
             hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_REGION_END("%s", region_name);
 
@@ -1309,27 +1317,19 @@ hypre_MGRSetup( void               *mgr_vdata,
 #if defined (HYPRE_USING_GPU)
             if (exec == HYPRE_EXEC_DEVICE)
             {
-               hypre_ParCSRMatrixGenerateCCCFDevice(RAP_ptr, CF_marker,
-                                                    coarse_pnts_global,
-                                                    S, &A_CF, &A_CC);
-
                hypre_MGRComputeNonGalerkinCGDevice(A_FF, A_FC, A_CF, A_CC,
                                                    block_num_f_points,
                                                    mgr_coarse_grid_method[lev],
                                                    truncate_cg_threshold,
                                                    &RAP_ptr);
-
-               hypre_ParCSRMatrixDestroy(A_CC);
-               hypre_ParCSRMatrixDestroy(A_CF);
             }
             else
 #endif
             {
-               hypre_MGRComputeNonGalerkinCoarseGrid(A_array[lev], Wp, RT,
-                                                     block_num_f_points,
-                                                     set_c_points_method,
+               hypre_MGRComputeNonGalerkinCoarseGrid(A_FF, A_FC, A_CF, A_CC, Wp, Wr,
+                                                     block_num_f_points, set_c_points_method,
                                                      mgr_coarse_grid_method[lev],
-                                                     P_max_elmts[lev], CF_marker, &RAP_ptr);
+                                                     P_max_elmts[lev], &RAP_ptr);
             }
 
             if (interp_type[lev] == 12)
@@ -1351,10 +1351,11 @@ hypre_MGRSetup( void               *mgr_vdata,
             {
                restrict_type[lev] = 2;
             }
-            hypre_MGRBuildRestrict(A_array[lev], A_FF, A_FC, CF_marker,
+            hypre_MGRBuildRestrict(A_array[lev], A_FF, A_FC, A_CF, CF_marker_array[lev],
                                    coarse_pnts_global, trunc_factor, P_max_elmts[lev],
                                    strong_threshold, max_row_sum, block_jacobi_bsize,
-                                   &RT, restrict_type[lev]);
+                                   restrict_type[lev], &Wr, &R, &RT);
+            R_array[lev]  = R;
             RT_array[lev] = RT;
             hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_REGION_END("%s", region_name);
@@ -1362,12 +1363,28 @@ hypre_MGRSetup( void               *mgr_vdata,
             hypre_sprintf(region_name, "RAP");
             hypre_GpuProfilingPushRange(region_name);
             HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
-            RAP_ptr = hypre_ParCSRMatrixRAPKT(RT, A_array[lev], P, 1);
+            if (RT)
+            {
+               RAP_ptr = hypre_ParCSRMatrixRAPKT(RT, A_array[lev], P, 1);
+            }
+            else if (R)
+            {
+               AP      = hypre_ParCSRMatMat(A_array[lev], P);
+               RAP_ptr = hypre_ParCSRMatMat(R, AP);
+               hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(RAP_ptr));
+               hypre_ParCSRMatrixDestroy(AP);
+            }
+            else
+            {
+               hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Expected either R or RT!");
+               return hypre_error_flag;
+            }
             hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_REGION_END("%s", region_name);
          }
       }
 
+      /* TODO (VPM): truncation is also performed in hypre_MGRComputeNonGalerkinCoarseGrid */
       if (truncate_cg_threshold > 0.0)
       {
          /* Truncate the coarse grid */
@@ -1383,9 +1400,11 @@ hypre_MGRSetup( void               *mgr_vdata,
 #endif
       }
 
-      /* Destroy temporary FC splitting */
-      hypre_ParCSRMatrixDestroy(A_FC);
-      A_FC = NULL;
+      /* Destroy temporary variables */
+      hypre_ParCSRMatrixDestroy(A_FC), A_FC = NULL;
+      hypre_ParCSRMatrixDestroy(A_CF), A_CF = NULL;
+      hypre_ParCSRMatrixDestroy(A_CC), A_CF = NULL;
+      hypre_ParCSRMatrixDestroy(Wr); Wr = NULL;
 
       /* User-prescribed F-solver */
       if (Frelax_type[lev] == 2  ||
@@ -1484,9 +1503,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          /* TODO: refactor this block (VPM) */
 #if defined (HYPRE_USING_GPU)
          hypre_ParCSRMatrix  *P_FF_ptr;
-         hypre_IntArray      *F_marker = hypre_IntArrayCloneDeep(CF_marker_array[lev]);
 
-         hypre_IntArrayNegate(F_marker);
          hypre_MGRBuildPDevice(A_array[lev], hypre_IntArrayData(F_marker),
                                row_starts_fpts, 0, &P_FF_ptr);
          P_FF_array[lev] = P_FF_ptr;
@@ -1712,7 +1729,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       TODO (VPM): move this block closer to global smoother setup */
    for (j = 0; j < num_c_levels; j++)
    {
-      if (((mgr_data -> num_relax_sweeps)[j] > 0) && (l1_norms[j] == NULL))
+      if (!l1_norms[j])
       {
          /* Compute l1_norms according to relaxation type */
          hypre_BoomerAMGRelaxComputeL1Norms(A_array[j], Frelax_type[j],
@@ -1720,8 +1737,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                                             &l1_norms_data);
          if (l1_norms_data)
          {
-            nloc = hypre_ParCSRMatrixNumRows(A_array[j]);
-            l1_norms[j] = hypre_SeqVectorCreate(nloc);
+            l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
             hypre_VectorData(l1_norms[j]) = l1_norms_data;
             hypre_VectorMemoryLocation(l1_norms[j]) = memory_location;
          }
@@ -1789,10 +1805,42 @@ hypre_MGRSetup( void               *mgr_vdata,
             (GSElimData[i] -> F_array) = &F_fine_array[1];
             (GSElimData[i] -> U_array) = &U_fine_array[1];
 
+            /* Save current error code to a temporary variable */
+            hypre_error_code_save();
+
             // setup Gaussian Elim. in the F-relaxation step. Here, we apply GSElim at level 0
             // since we have a single matrix (and not an array of matrices).
             // hypre_printf("Setting GSElim Solver %d \n", Frelax_type[i]);
             hypre_GaussElimSetup(GSElimData[i], i, Frelax_type[i]);
+
+            /* Fallback to Jacobi when Gaussian Elim. is not successful */
+            if (HYPRE_GetGlobalError(hypre_ParCSRMatrixComm(A_array[i])))
+            {
+               hypre_MGRDestroyGSElimData((mgr_data -> GSElimData)[i]);
+               (mgr_data -> GSElimData)[i] = NULL;
+
+               Frelax_type[i] = 7; /* Jacobi */
+               if (print_level)
+               {
+                  hypre_ParPrintf(comm, "Switching F-relaxation at level %d to Jacobi", i);
+               }
+
+               /* Compute l1_norms if needed */
+               if (!l1_norms[i])
+               {
+                  hypre_BoomerAMGRelaxComputeL1Norms(A_array[i], Frelax_type[i], 0, 0, NULL,
+                                                     &l1_norms_data);
+                  if (l1_norms_data)
+                  {
+                     l1_norms[i] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[i]));
+                     hypre_VectorData(l1_norms[i]) = l1_norms_data;
+                     hypre_VectorMemoryLocation(l1_norms[i]) = memory_location;
+                  }
+               }
+            }
+
+            /* Restore error code prior to GaussElimSetup call */
+            hypre_error_code_restore();
          }
       }
    }
