@@ -914,7 +914,8 @@ HYPRE_Int hypre_ParCSRCommPkgCreateAndFill ( MPI_Comm comm, HYPRE_Int num_recvs,
                                              HYPRE_Int num_sends, HYPRE_Int *send_procs,
                                              HYPRE_Int *send_map_starts, HYPRE_Int *send_map_elmts,
                                              hypre_ParCSRCommPkg **comm_pkg_ptr );
-HYPRE_Int hypre_ParCSRCommPkgUpdateVecStarts ( hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int num_components_in,
+HYPRE_Int hypre_ParCSRCommPkgUpdateVecStarts ( hypre_ParCSRCommPkg *comm_pkg,
+                                               HYPRE_Int num_components_in,
                                                HYPRE_Int vecstride, HYPRE_Int idxstride );
 HYPRE_Int hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A );
 HYPRE_Int hypre_MatvecCommPkgDestroy ( hypre_ParCSRCommPkg *comm_pkg );

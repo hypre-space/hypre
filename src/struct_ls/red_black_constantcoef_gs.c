@@ -315,7 +315,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                                 x_dbox, stencil_shape[offd[5]]);
                      xoff4 = hypre_BoxOffsetDistance(
                                 x_dbox, stencil_shape[offd[4]]);
-                     /* fall through */
+                  /* fall through */
 
                   case 5:
                      App = hypre_StructMatrixBoxData(A, i, offd[3]);
@@ -326,7 +326,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                                 x_dbox, stencil_shape[offd[3]]);
                      xoff2 = hypre_BoxOffsetDistance(
                                 x_dbox, stencil_shape[offd[2]]);
-                     /* fall through */
+                  /* fall through */
 
                   case 3:
                      App = hypre_StructMatrixBoxData(A, i, offd[1]);

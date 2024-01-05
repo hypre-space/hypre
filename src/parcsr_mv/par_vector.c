@@ -958,12 +958,12 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
                         const char      *filename )
 {
    MPI_Comm          comm;
-   HYPRE_BigInt      global_size;
    HYPRE_BigInt     *partitioning;
    hypre_Vector     *local_vector;
    HYPRE_Int         local_size;
    HYPRE_Int         myid, num_procs, i, j;
-   char              new_filename[255];
+   char              new_filename[HYPRE_MAX_FILE_NAME_LEN];
+   char              msg[1024];
    FILE             *file;
 
    if (!vector)
@@ -972,7 +972,6 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
       return hypre_error_flag;
    }
    comm         = hypre_ParVectorComm(vector);
-   global_size  = hypre_ParVectorGlobalSize(vector);
    partitioning = hypre_ParVectorPartitioning(vector);
    local_vector = hypre_ParVectorLocalVector(vector);
    local_size   = hypre_VectorSize(local_vector);
@@ -983,14 +982,12 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
    hypre_sprintf(new_filename, "%s.%05d", filename, myid);
    if ((file = fopen(new_filename, "w")) == NULL)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: can't open output file!");
+      hypre_sprintf(msg, "Error: cannot open output file: %s", new_filename);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
       return hypre_error_flag;
    }
 
-   /* Write 1st header line: global number of rows */
-   hypre_fprintf(file, "%b\n", global_size);
-
-   /* Write 2nd header line: global partitioning */
+   /* Write header: global partitioning */
    hypre_fprintf(file, "%b %b\n", partitioning[0] + base_j, partitioning[1] + base_j - 1);
 
    /* Write additional header line in the case of multi-component vectors */
@@ -1009,7 +1006,7 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
       /* Multi-component vectors */
       for (i = 0; i < local_size; i++)
       {
-         hypre_fprintf(file, "%b", (HYPRE_BigInt) i + base_j);
+         hypre_fprintf(file, "%b", (HYPRE_BigInt) (i + base_j) + partitioning[0]);
          for (j = 0; j < hypre_VectorNumVectors(local_vector); j++)
          {
             hypre_fprintf(file, " %.14e", hypre_VectorEntryIJ(local_vector, i, j));
@@ -1023,7 +1020,7 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
       for (j = 0; j < local_size; j++)
       {
          hypre_fprintf(file, "%b %.14e\n",
-                       (HYPRE_BigInt) j + base_j,
+                       (HYPRE_BigInt) (j + base_j) + partitioning[0],
                        hypre_VectorEntryI(local_vector, j));
       }
    }
@@ -1165,11 +1162,12 @@ hypre_ParVectorReadIJ( MPI_Comm          comm,
    hypre_ParVector  *vector;
    hypre_Vector     *local_vector;
    HYPRE_Complex    *local_data;
+   HYPRE_BigInt      big_local_size;
    HYPRE_BigInt      partitioning[2];
    HYPRE_Int         base_j;
 
-   HYPRE_Int         myid, num_procs, i, j;
-   char              new_filename[255];
+   HYPRE_Int         myid, num_procs, j;
+   char              new_filename[HYPRE_MAX_FILE_NAME_LEN];
    FILE             *file;
 
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -1183,24 +1181,21 @@ hypre_ParVectorReadIJ( MPI_Comm          comm,
       return hypre_error_flag;
    }
 
-   hypre_fscanf(file, "%b", &global_size);
    /* this may need to be changed so that the base is available in the file! */
-   hypre_fscanf(file, "%b", partitioning);
-   for (i = 0; i < 2; i++)
-   {
-      hypre_fscanf(file, "%b", partitioning + i);
-   }
+   hypre_fscanf(file, "%b %b", partitioning[0], partitioning[1]);
+   big_local_size = partitioning[1] - partitioning[0] + 1;
+   hypre_MPI_Allreduce(&big_local_size, &global_size, 1, HYPRE_MPI_BIG_INT,
+                       hypre_MPI_SUM, comm);
+
    /* This is not yet implemented correctly! */
    base_j = 0;
-   vector = hypre_ParVectorCreate(comm, global_size,
-                                  partitioning);
-
-   hypre_ParVectorInitialize(vector);
+   vector = hypre_ParVectorCreate(comm, global_size, partitioning);
+   hypre_ParVectorInitialize_v2(vector, HYPRE_MEMORY_HOST);
 
    local_vector = hypre_ParVectorLocalVector(vector);
    local_data   = hypre_VectorData(local_vector);
 
-   for (j = 0; j < (HYPRE_Int)(partitioning[1] - partitioning[0]); j++)
+   for (j = 0; j < (HYPRE_Int) big_local_size; j++)
    {
       hypre_fscanf(file, "%b %le", &J, local_data + j);
    }

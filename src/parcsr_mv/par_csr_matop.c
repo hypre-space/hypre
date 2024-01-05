@@ -7014,9 +7014,10 @@ hypre_ParCSRMatrixColSum( hypre_ParCSRMatrix   *A,
    {
       /* TODO (VPM): hypre_ParCSRMatrixColSumDevice */
       hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_HOST);
+      hypre_ParVectorMigrate(b, HYPRE_MEMORY_HOST);
       hypre_ParCSRMatrixColSumHost(A, b);
       hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_DEVICE);
-      hypre_ParVectorMigrate(B, HYPRE_MEMORY_DEVICE);
+      hypre_ParVectorMigrate(b, HYPRE_MEMORY_DEVICE);
    }
    else
 #endif
