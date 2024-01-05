@@ -3108,8 +3108,7 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A,
       }
       else
       {
-         /* TODO (VPM): Shouldn't blk_inv_size = bsize for method == 3? Check with DOK */
-         HYPRE_Int blk_inv_size = method == 2 ? bsize : 1;
+         HYPRE_Int blk_inv_size = method == 2 ? 1 : bsize;
          hypre_ParCSRMatrixBlockDiagMatrix(A_ff, blk_inv_size, -1, NULL, 1, &A_ff_inv);
          hypre_ParCSRMatrix *Wr = NULL;
          Wr = hypre_ParCSRMatMat(A_cf_truncated, A_ff_inv);
