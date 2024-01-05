@@ -998,11 +998,7 @@ hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix  *A,
 /*--------------------------------------------------------------------------
  * hypre_MGRComputeNonGalerkinCGDevice
  *
- * Available methods:
- *   1: inv(A_FF) approximated by its (block) diagonal inverse
- *   2: CPR-like approx. with inv(A_FF) approx. by its diagonal inverse
- *   3: CPR-like approx. with inv(A_FF) approx. by its block diagonal inverse
- *   4: inv(A_FF) approximated by sparse approximate inverse
+ * See hypre_MGRComputeNonGalerkinCoarseGrid for available methods.
  *
  * TODO (VPM): Can we have a single function that works for host and device?
  *             inv(A_FF)*A_FC might have been computed before. Reuse it!
@@ -1074,15 +1070,26 @@ hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_FF,
    }
    else
    {
-      /* Use approximate inverse for ideal interploation */
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: feature not implemented yet!");
-      hypre_GpuProfilingPopRange();
+      if (method != 5)
+      {
+         /* Use approximate inverse for ideal interploation */
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: feature not implemented yet!");
+         hypre_GpuProfilingPopRange();
 
-      return hypre_error_flag;
+         return hypre_error_flag;
+      }
    }
 
    /* Compute A_Hc (the correction for A_H) */
-   A_Hc = hypre_ParCSRMatMat(A_CF_trunc, Wp);
+   if (method != 5)
+   {
+      A_Hc = hypre_ParCSRMatMat(A_CF_trunc, Wp);
+   }
+   else
+   {
+      /* A_Hc = Wr * A_FC */
+      A_Hc = hypre_ParCSRMatMat(Wr, A_FC);
+   }
 
    /* Drop small entries from A_Hc */
    hypre_ParCSRMatrixDropSmallEntriesDevice(A_Hc, threshold, -1);

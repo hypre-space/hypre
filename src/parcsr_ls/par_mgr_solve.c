@@ -524,6 +524,7 @@ hypre_MGRCycle( void              *mgr_vdata,
    hypre_ParCSRMatrix   **A_array    = (mgr_data -> A_array);
    hypre_ParCSRMatrix   **RT_array   = (mgr_data -> RT_array);
    hypre_ParCSRMatrix   **P_array    = (mgr_data -> P_array);
+   hypre_ParCSRMatrix   **R_array    = (mgr_data -> R_array);
 #if defined(HYPRE_USING_GPU)
    hypre_ParCSRMatrix   **B_array    = (mgr_data -> B_array);
    hypre_ParCSRMatrix   **B_FF_array = (mgr_data -> B_FF_array);
@@ -573,7 +574,6 @@ hypre_MGRCycle( void              *mgr_vdata,
    HYPRE_Int             *restrict_type  = (mgr_data -> restrict_type);
    HYPRE_Int              pre_smoothing  = (mgr_data -> global_smooth_cycle) == 1 ? 1 : 0;
    HYPRE_Int              post_smoothing = (mgr_data -> global_smooth_cycle) == 2 ? 1 : 0;
-   HYPRE_Int              use_air = 0;
    HYPRE_Int              my_id;
    char                   region_name[1024];
    char                   msg[1024];
@@ -1056,19 +1056,13 @@ hypre_MGRCycle( void              *mgr_vdata,
          hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_REGION_END("%s", region_name);
 
-         if ((restrict_type[fine_grid] == 4) ||
-             (restrict_type[fine_grid] == 5))
-         {
-            use_air = 1;
-         }
-
          hypre_sprintf(region_name, "Restrict");
          hypre_GpuProfilingPushRange(region_name);
          HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
-         if (use_air)
+         if (R_array[fine_grid])
          {
             /* no transpose necessary for R */
-            hypre_ParCSRMatrixMatvec(fp_one, RT_array[fine_grid], Vtemp,
+            hypre_ParCSRMatrixMatvec(fp_one, R_array[fine_grid], Vtemp,
                                      fp_zero, F_array[coarse_grid]);
          }
          else
