@@ -14,6 +14,8 @@
  *    1) A = 1x2 and B = 2x2
  *    2) A = 1x3 and B = 3x3
  *    3) A = 1x4 and B = 4x4
+ *
+ * TODO (VPM): use lapack's dgemm for large matrices (local blocks).
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

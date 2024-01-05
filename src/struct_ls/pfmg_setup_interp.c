@@ -892,7 +892,7 @@ hypre_PFMGSetupInterpOp_CC0_SS5
             left   = -a_cw[Ai];
             right  = -a_ce[Ai];
             break;
-         case 1: default:
+      case 1: default:
             center = a_cc[Ai] + a_cw[Ai] + a_ce[Ai];
             left   = -a_cs[Ai];
             right  = -a_cn[Ai];
@@ -1041,7 +1041,7 @@ hypre_PFMGSetupInterpOp_CC0_SS9
             left   = -a_cw[Ai] - a_csw[Ai] - a_cnw[Ai];
             right  = -a_ce[Ai] - a_cse[Ai] - a_cne[Ai];
             break;
-         case 1: default:
+      case 1: default:
             center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai];
             left   = -a_cs[Ai] - a_csw[Ai] - a_cse[Ai];
             right  = -a_cn[Ai] - a_cnw[Ai] - a_cne[Ai];
@@ -1173,7 +1173,7 @@ hypre_PFMGSetupInterpOp_CC0_SS7
             left   = -a_cs[Ai];
             right  = -a_cn[Ai];
             break;
-         case 2: default:
+      case 2: default:
             center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_cs[Ai] + a_cn[Ai] ;
             left   = -a_bc[Ai];
             right  = -a_ac[Ai];
@@ -1380,7 +1380,7 @@ hypre_PFMGSetupInterpOp_CC0_SS15
                left   = -a_cs[Ai] - a_csw[Ai] - a_cse[Ai]; /* front */
                right  = -a_cn[Ai] - a_cnw[Ai] - a_cne[Ai]; /* back */
                break;
-            case 2: default:
+         case 2: default:
                center =   a_cc[Ai] +  a_cw[Ai] +   a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] +
                           a_csw[Ai] + a_cse[Ai] +  a_cnw[Ai] - a_cne[Ai];
                left   =  -a_bc[Ai] -  a_bw[Ai] -   a_be[Ai]; /* below */
@@ -1440,7 +1440,7 @@ hypre_PFMGSetupInterpOp_CC0_SS15
                left   = -a_cs[Ai] - a_as[Ai] - a_bs[Ai] - a_csw[Ai] - a_cse[Ai]; /* front */
                right  = -a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai]; /* back */
                break;
-            case 2: default:
+         case 2: default:
                center =  a_cc[Ai] + a_cw[Ai] + a_ce[Ai] + a_cs[Ai] + a_cn[Ai] +
                          a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai];
                left   = -a_bc[Ai] - a_bs[Ai] - a_bn[Ai]; /* below */
@@ -1501,7 +1501,7 @@ hypre_PFMGSetupInterpOp_CC0_SS15
                left   = -a_cs[Ai] - a_as[Ai] - a_bs[Ai]; /* front */
                right  = -a_cn[Ai] - a_an[Ai] - a_bn[Ai]; /* back */
                break;
-            case 2: default:
+         case 2: default:
                center =  a_cc[Ai] + a_cw[Ai] + a_ce[Ai] + a_cs[Ai] + a_cn[Ai];
                left   = -a_bc[Ai] - a_bw[Ai] - a_be[Ai] - a_bs[Ai] - a_bn[Ai]; /* below */
                right  = -a_ac[Ai] - a_aw[Ai] - a_ae[Ai] - a_as[Ai] - a_an[Ai]; /* above */
@@ -1688,7 +1688,7 @@ hypre_PFMGSetupInterpOp_CC0_SS19
             left   = -a_cs[Ai] - a_as[Ai] - a_bs[Ai] - a_csw[Ai] - a_cse[Ai];
             right  = -a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai];
             break;
-         case 2: default:
+      case 2: default:
             center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai]
                      + a_cne[Ai];
             left   = -a_bc[Ai] - a_bw[Ai] - a_be[Ai] - a_bs[Ai] - a_bn[Ai];
@@ -1920,7 +1920,7 @@ hypre_PFMGSetupInterpOp_CC0_SS27
             right  = -a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai] - a_anw[Ai] - a_ane[Ai] - a_bnw[Ai]
                      - a_bne[Ai];
             break;
-         case 2: default:
+      case 2: default:
             center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai]
                      + a_cne[Ai];
             left   = -a_bc[Ai] - a_bw[Ai] - a_be[Ai] - a_bs[Ai] - a_bn[Ai] - a_bsw[Ai] - a_bse[Ai] - a_bnw[Ai] -

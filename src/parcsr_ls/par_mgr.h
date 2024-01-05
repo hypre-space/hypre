@@ -91,7 +91,7 @@ typedef struct
    HYPRE_Int             max_iter;
    HYPRE_Int             relax_order;
    HYPRE_Int            *num_relax_sweeps;
-   char                 *info_path;
+   char                 *data_path;
 
    HYPRE_Solver          coarse_grid_solver;
    HYPRE_Int           (*coarse_grid_solver_setup)(void*, void*, void*, void*);

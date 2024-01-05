@@ -57,7 +57,6 @@ typedef struct hypre_DenseBlockMatrix_struct
 #define hypre_DenseBlockMatrixDataIJ(matrix, d, i, j) \
    (d[(matrix) -> row_stride * i + \
       (matrix) -> col_stride * j])
-
 #define hypre_DenseBlockMatrixDataBIJ(matrix, b, i, j) \
    ((matrix) -> data[(matrix) -> num_nonzeros_block * b + \
                      (matrix) -> row_stride * i + \

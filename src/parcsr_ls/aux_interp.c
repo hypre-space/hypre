@@ -360,7 +360,7 @@ hypre_new_offd_nodes(HYPRE_BigInt **found,
                      HYPRE_BigInt  *Sop_j,
                      HYPRE_Int     *CF_marker_offd)
 {
-  HYPRE_UNUSED_VAR(num_cols_S_offd);
+   HYPRE_UNUSED_VAR(num_cols_S_offd);
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] -= hypre_MPI_Wtime();
