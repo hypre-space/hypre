@@ -1072,7 +1072,6 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A_FF,
                                       HYPRE_Int              ordering,
                                       HYPRE_Int              method,
                                       HYPRE_Int              max_elmts,
-                                      HYPRE_Int             *CF_marker,
                                       hypre_ParCSRMatrix   **A_H_ptr)
 {
    HYPRE_MemoryLocation   memory_location = hypre_ParCSRMatrixMemoryLocation(A_FF);

@@ -3620,7 +3620,6 @@ HYPRE_Int hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix *A_FF,
                                                 hypre_ParCSRMatrix *Wp, hypre_ParCSRMatrix *Wr,
                                                 HYPRE_Int bsize, HYPRE_Int ordering,
                                                 HYPRE_Int method, HYPRE_Int max_elmts,
-                                                HYPRE_Int *CF_marker,
                                                 hypre_ParCSRMatrix **A_H_ptr);
 HYPRE_Int hypre_MGRSetAffSolverType( void *systg_vdata, HYPRE_Int *aff_solver_type );
 HYPRE_Int hypre_MGRSetCoarseSolverType( void *systg_vdata, HYPRE_Int coarse_solver_type );

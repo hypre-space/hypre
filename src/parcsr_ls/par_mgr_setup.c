@@ -1329,7 +1329,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                hypre_MGRComputeNonGalerkinCoarseGrid(A_FF, A_FC, A_CF, A_CC, Wp, Wr,
                                                      block_num_f_points, set_c_points_method,
                                                      mgr_coarse_grid_method[lev],
-                                                     P_max_elmts[lev], CF_marker, &RAP_ptr);
+                                                     P_max_elmts[lev], &RAP_ptr);
             }
 
             if (interp_type[lev] == 12)
