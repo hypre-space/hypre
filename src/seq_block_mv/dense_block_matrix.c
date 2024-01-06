@@ -28,8 +28,8 @@ hypre_DenseBlockMatrixCreate( HYPRE_Int  row_major,
    HYPRE_Int                num_blocks[2];
 
    /* Compute number of blocks */
-   num_blocks[0] = 1 + ((num_rows - 1) / num_rows_block);
-   num_blocks[1] = 1 + ((num_cols - 1) / num_cols_block);
+   num_blocks[0] = num_rows ? (1 + ((num_rows - 1) / num_rows_block)) : 0;
+   num_blocks[1] = num_cols ? (1 + ((num_cols - 1) / num_cols_block)) : 0;
    if (num_blocks[0] != num_blocks[1])
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid number of blocks!");

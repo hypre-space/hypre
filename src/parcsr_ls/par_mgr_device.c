@@ -648,7 +648,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
    }
 
    /* Compute block info */
-   num_blocks = (num_points - 1) / blk_size + 1;
+   num_blocks = num_points ? (1 + (num_points - 1) / blk_size) : 0;
    bdiag_size = num_blocks * bs2;
 
    if (num_points % blk_size)
@@ -935,7 +935,7 @@ hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix  *A,
                                            point_type );
 #endif
    }
-   num_blocks  = 1 + (B_diag_num_rows - 1) / blk_size;
+   num_blocks  = B_diag_num_rows ? (1 + (B_diag_num_rows - 1) / blk_size) : 0;
    B_diag_size = blk_size * (blk_size * num_blocks);
 
    /*-----------------------------------------------------------------
