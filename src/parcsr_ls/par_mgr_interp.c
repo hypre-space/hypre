@@ -2416,7 +2416,7 @@ hypre_MGRColSumRestrict(hypre_ParCSRMatrix  *A,
     *-------------------------------------------------------*/
 
    /* Compute C/F local mappings */
-   hypre_IntArraySegregateByValue(num_points, points, sizes, CF_marker, &CF_maps);
+   hypre_IntArraySeparateByValue(num_points, points, sizes, CF_marker, &CF_maps);
 
    /* Build restriction from W (R = [-W  I]) */
    hypre_MGRBuildRFromW(hypre_IntArrayArrayEntryIData(CF_maps, 0),
@@ -2513,7 +2513,7 @@ hypre_MGRBlockColSumRestrict(hypre_ParCSRMatrix  *A,
     *-------------------------------------------------------*/
 
    /* Compute C/F local mappings */
-   hypre_IntArraySegregateByValue(num_points, points, sizes, CF_marker, &CF_maps);
+   hypre_IntArraySeparateByValue(num_points, points, sizes, CF_marker, &CF_maps);
 
    /* Build restriction from W (R = [-W  I]) */
    hypre_MGRBuildRFromW(hypre_IntArrayArrayEntryIData(CF_maps, 0),
