@@ -616,6 +616,12 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
       return hypre_error_flag;
    }
 
+   /* Return if the local matrix is empty */
+   if (!num_rows)
+   {
+      return hypre_error_flag;
+   }
+
    /*-----------------------------------------------------------------
     * Initial
     *-----------------------------------------------------------------*/
