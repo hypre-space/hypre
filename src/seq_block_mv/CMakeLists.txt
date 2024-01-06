@@ -9,6 +9,7 @@ set(HDRS
 
 set(SRCS
   dense_block_matrix.c
+  dense_block_matmult.c
 )
 
 target_sources(${PROJECT_NAME}
