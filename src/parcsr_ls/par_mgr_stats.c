@@ -256,6 +256,9 @@ hypre_MGRGetRestrictionName(hypre_ParMGRData  *mgr_data,
       case 13:
          return "CPR-like";
 
+      case 14:
+         return "Blk-Colsum";
+
       default:
          return "Classical";
    }
@@ -285,6 +288,9 @@ hypre_MGRGetCoarseGridName(hypre_ParMGRData  *mgr_data,
 
       case 4:
          return "NG-ApproxInv";
+
+      case 5:
+         return "NG-RAI";
 
       default:
          return "Unknown";
