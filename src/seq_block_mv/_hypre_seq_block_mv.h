@@ -66,6 +66,9 @@ typedef struct hypre_DenseBlockMatrix_struct
 #define hypre_DenseBlockMatrixData(matrix)             ((matrix) -> data)
 #define hypre_DenseBlockMatrixDataAOP(matrix)          ((matrix) -> data_aop)
 #define hypre_DenseBlockMatrixMemoryLocation(matrix)   ((matrix) -> memory_location)
+#define hypre_DenseBlockMatrixDataIJ(matrix, d, i, j) \
+   (d[(matrix) -> row_stride * i + \
+      (matrix) -> col_stride * j])
 #define hypre_DenseBlockMatrixDataBIJ(matrix, b, i, j) \
    ((matrix) -> data[(matrix) -> num_nonzeros_block * b + \
                      (matrix) -> row_stride * i + \
@@ -86,6 +89,10 @@ HYPRE_Int hypre_DenseBlockMatrixBuildAOP(hypre_DenseBlockMatrix*);
 HYPRE_Int hypre_DenseBlockMatrixCopy(hypre_DenseBlockMatrix*, hypre_DenseBlockMatrix*);
 HYPRE_Int hypre_DenseBlockMatrixMigrate(hypre_DenseBlockMatrix*, HYPRE_MemoryLocation);
 HYPRE_Int hypre_DenseBlockMatrixPrint(MPI_Comm, hypre_DenseBlockMatrix*, const char*);
+
+/* dense_block_matmult.c */
+HYPRE_Int hypre_DenseBlockMatrixMultiply(hypre_DenseBlockMatrix*, hypre_DenseBlockMatrix*,
+                                         hypre_DenseBlockMatrix**);
 
 #ifdef __cplusplus
 }

@@ -54,6 +54,9 @@ typedef struct hypre_DenseBlockMatrix_struct
 #define hypre_DenseBlockMatrixData(matrix)             ((matrix) -> data)
 #define hypre_DenseBlockMatrixDataAOP(matrix)          ((matrix) -> data_aop)
 #define hypre_DenseBlockMatrixMemoryLocation(matrix)   ((matrix) -> memory_location)
+#define hypre_DenseBlockMatrixDataIJ(matrix, d, i, j) \
+   (d[(matrix) -> row_stride * i + \
+      (matrix) -> col_stride * j])
 #define hypre_DenseBlockMatrixDataBIJ(matrix, b, i, j) \
    ((matrix) -> data[(matrix) -> num_nonzeros_block * b + \
                      (matrix) -> row_stride * i + \
