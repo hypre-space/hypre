@@ -2289,7 +2289,8 @@ HYPRE_Int hypre_MGRBuildRFromW( HYPRE_Int *C_map, HYPRE_Int *F_map, HYPRE_BigInt
                                 hypre_ParCSRMatrix **R_ptr );
 HYPRE_Int hypre_MGRBlockColSumRestrict( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
                                         hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker,
-                                        hypre_ParCSRMatrix **W_ptr, hypre_ParCSRMatrix **R_ptr);
+                                        HYPRE_Int block_dim, hypre_ParCSRMatrix **W_ptr,
+                                        hypre_ParCSRMatrix **R_ptr);
 HYPRE_Int hypre_MGRColSumRestrict(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
                                   hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker,
                                   hypre_ParCSRMatrix **W_ptr, hypre_ParCSRMatrix **R_ptr);
@@ -2320,6 +2321,7 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix *A, HYPRE_
                                                    hypre_ParCSRMatrix **B_ptr );
 HYPRE_Int hypre_MGRComputeNonGalerkinCGDevice( hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC,
                                                hypre_ParCSRMatrix *A_CF, hypre_ParCSRMatrix *A_CC,
+                                               hypre_ParCSRMatrix *Wp, hypre_ParCSRMatrix *Wr,
                                                HYPRE_Int blk_size, HYPRE_Int method,
                                                HYPRE_Complex threshold,
                                                hypre_ParCSRMatrix **A_H_ptr );

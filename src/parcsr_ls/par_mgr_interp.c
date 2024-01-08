@@ -71,7 +71,8 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
 #if defined (HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         hypre_NoGPUSupport("interpolation");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "No GPU support!");
+         return hypre_error_flag;
       }
       else
 #endif
@@ -223,7 +224,8 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
 #if defined (HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         hypre_NoGPUSupport("restriction");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "No GPU support!");
+         return hypre_error_flag;
       }
       else
 #endif
@@ -256,7 +258,7 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
       if (blk_size > 1)
       {
          /* Block column sum restriction */
-         hypre_MGRBlockColSumRestrict(A, A_FF, A_CF, CF_marker, &W, &R);
+         hypre_MGRBlockColSumRestrict(A, A_FF, A_CF, CF_marker, blk_size, &W, &R);
       }
       else
       {
@@ -2444,12 +2446,12 @@ hypre_MGRBlockColSumRestrict(hypre_ParCSRMatrix  *A,
                              hypre_ParCSRMatrix  *A_FF,
                              hypre_ParCSRMatrix  *A_CF,
                              hypre_IntArray      *CF_marker,
+                             HYPRE_Int            block_dim,
                              hypre_ParCSRMatrix **W_ptr,
                              hypre_ParCSRMatrix **R_ptr)
 {
    HYPRE_BigInt             num_rows_F = hypre_ParCSRMatrixGlobalNumRows(A_FF);
    HYPRE_BigInt             num_rows_C = hypre_ParCSRMatrixGlobalNumRows(A_CF);
-   HYPRE_Int                block_dim  = (HYPRE_Int) (num_rows_F / num_rows_C);
 
    hypre_DenseBlockMatrix  *b_FF       = NULL;
    hypre_DenseBlockMatrix  *b_CF       = NULL;
@@ -2487,9 +2489,23 @@ hypre_MGRBlockColSumRestrict(hypre_ParCSRMatrix  *A,
     * 3) b_FF = inv(approx(A_FF))          (invert in-place)
     *-------------------------------------------------------*/
 
-   hypre_BlockDiagInvLapack(hypre_DenseBlockMatrixData(b_FF),
-                            hypre_DenseBlockMatrixNumBlocks(b_FF),
-                            hypre_DenseBlockMatrixNumRowsBlock(b_FF));
+#if defined (HYPRE_USING_GPU)
+   if (hypre_GetExecPolicy1(hypre_DenseBlockMatrixMemoryLocation(b_FF)) == HYPRE_EXEC_DEVICE)
+   {
+      /* TODO (VPM): GPU version */
+      hypre_DenseBlockMatrixMigrate(b_FF, HYPRE_MEMORY_HOST);
+      hypre_BlockDiagInvLapack(hypre_DenseBlockMatrixData(b_FF),
+                               hypre_DenseBlockMatrixNumBlocks(b_FF),
+                               hypre_DenseBlockMatrixNumRowsBlock(b_FF));
+      hypre_DenseBlockMatrixMigrate(b_FF, HYPRE_MEMORY_DEVICE);
+   }
+   else
+#endif
+   {
+      hypre_BlockDiagInvLapack(hypre_DenseBlockMatrixData(b_FF),
+                               hypre_DenseBlockMatrixNumBlocks(b_FF),
+                               hypre_DenseBlockMatrixNumRowsBlock(b_FF));
+   }
 
    /*-------------------------------------------------------
     * 4) W = approx(A_CF) * inv(approx(A_FF))

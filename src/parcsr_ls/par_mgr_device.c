@@ -1009,6 +1009,8 @@ hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_FF,
                                     hypre_ParCSRMatrix    *A_FC,
                                     hypre_ParCSRMatrix    *A_CF,
                                     hypre_ParCSRMatrix    *A_CC,
+                                    hypre_ParCSRMatrix    *Wp,
+                                    hypre_ParCSRMatrix    *Wr,
                                     HYPRE_Int              blk_size,
                                     HYPRE_Int              method,
                                     HYPRE_Complex          threshold,
@@ -1018,8 +1020,8 @@ hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_FF,
    hypre_ParCSRMatrix   *A_H;
    hypre_ParCSRMatrix   *A_Hc;
    hypre_ParCSRMatrix   *A_CF_trunc;
-   hypre_ParCSRMatrix   *Wp;
-   HYPRE_Complex         alpha = -1.0;
+   hypre_ParCSRMatrix   *Wp_tmp = NULL;
+   HYPRE_Complex         alpha  = -1.0;
 
    hypre_GpuProfilingPushRange("MGRComputeNonGalerkinCG");
 
@@ -1033,8 +1035,8 @@ hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_FF,
       A_CF_trunc = A_CF;
    }
 
-   /* Compute Wp */
-   if (method == 1 || method == 2)
+   /* Compute Wp/Wr if not passed in */
+   if (!Wp && (method == 1 || method == 2))
    {
       hypre_Vector         *D_FF_inv;
       HYPRE_Complex        *data;
@@ -1048,14 +1050,14 @@ hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_FF,
       hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(A_FF), data, 2);
 
       /* Compute D_FF_inv*A_FC */
-      Wp = hypre_ParCSRMatrixClone(A_FC, 1);
-      hypre_CSRMatrixDiagScaleDevice(hypre_ParCSRMatrixDiag(Wp), D_FF_inv, NULL);
-      hypre_CSRMatrixDiagScaleDevice(hypre_ParCSRMatrixOffd(Wp), D_FF_inv, NULL);
+      Wp_tmp = hypre_ParCSRMatrixClone(A_FC, 1);
+      hypre_CSRMatrixDiagScaleDevice(hypre_ParCSRMatrixDiag(Wp_tmp), D_FF_inv, NULL);
+      hypre_CSRMatrixDiagScaleDevice(hypre_ParCSRMatrixOffd(Wp_tmp), D_FF_inv, NULL);
 
       /* Free memory */
       hypre_SeqVectorDestroy(D_FF_inv);
    }
-   else if (method == 3)
+   else if (!Wp && (method == 3))
    {
       hypre_ParCSRMatrix  *B_FF_inv;
 
@@ -1085,10 +1087,16 @@ hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_FF,
    {
       A_Hc = hypre_ParCSRMatMat(A_CF_trunc, Wp);
    }
+   else if (Wr && (method == 5))
+   {
+      A_Hc = hypre_ParCSRMatMat(Wr, A_FC);
+   }
    else
    {
-      /* A_Hc = Wr * A_FC */
-      A_Hc = hypre_ParCSRMatMat(Wr, A_FC);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Wr matrix was not provided!");
+      hypre_GpuProfilingPopRange();
+
+      return hypre_error_flag;
    }
 
    /* Drop small entries from A_Hc */
@@ -1099,7 +1107,7 @@ hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_FF,
 
    /* Free memory */
    hypre_ParCSRMatrixDestroy(A_Hc);
-   hypre_ParCSRMatrixDestroy(Wp);
+   hypre_ParCSRMatrixDestroy(Wp_tmp);
    if (method == 2 || method == 3)
    {
       hypre_ParCSRMatrixDestroy(A_CF_trunc);

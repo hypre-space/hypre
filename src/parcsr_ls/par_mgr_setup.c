@@ -1127,7 +1127,6 @@ hypre_MGRSetup( void               *mgr_vdata,
                                      NULL, &A_FC, &A_FF);
       hypre_ParCSRMatrixGenerateFFFC(A_array[lev], hypre_IntArrayData(FC_marker), row_starts_fpts,
                                      NULL, &A_CF, &A_CC);
-      hypre_IntArrayDestroy(FC_marker);
 
       /* Build MGR interpolation */
       hypre_sprintf(region_name, "Interp");
@@ -1318,7 +1317,7 @@ hypre_MGRSetup( void               *mgr_vdata,
             if (exec == HYPRE_EXEC_DEVICE)
             {
                hypre_MGRComputeNonGalerkinCGDevice(A_FF, A_FC, A_CF, A_CC,
-                                                   block_num_f_points,
+                                                   Wp, Wr, block_num_f_points,
                                                    mgr_coarse_grid_method[lev],
                                                    truncate_cg_threshold,
                                                    &RAP_ptr);
@@ -1500,17 +1499,6 @@ hypre_MGRSetup( void               *mgr_vdata,
             A_ff_array[lev] = A_FF;
          }
 
-         /* TODO: refactor this block (VPM) */
-#if defined (HYPRE_USING_GPU)
-         hypre_ParCSRMatrix  *P_FF_ptr;
-
-         hypre_MGRBuildPDevice(A_array[lev], hypre_IntArrayData(F_marker),
-                               row_starts_fpts, 0, &P_FF_ptr);
-         P_FF_array[lev] = P_FF_ptr;
-
-         hypre_IntArrayDestroy(F_marker);
-#endif
-
          /* TODO: Check use of A_ff_array[lev], vectors at (lev + 1) are correct? (VPM) */
          F_fine_array[lev + 1] =
             hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_array[lev]),
@@ -1525,12 +1513,22 @@ hypre_MGRSetup( void               *mgr_vdata,
          hypre_ParVectorInitialize(U_fine_array[lev + 1]);
       }
 
+      /* TODO: refactor this block (VPM) */
+#if defined (HYPRE_USING_GPU)
+      hypre_ParCSRMatrix  *P_FF_ptr;
+
+      hypre_MGRBuildPDevice(A_array[lev], hypre_IntArrayData(FC_marker),
+                            row_starts_fpts, 0, &P_FF_ptr);
+      P_FF_array[lev] = P_FF_ptr;
+#endif
+
       /* Destroy A_FF if it has not been saved on A_ff_array[lev] */
       if (!A_ff_array[lev])
       {
          hypre_ParCSRMatrixDestroy(A_FF);
       }
       A_FF = NULL;
+      hypre_IntArrayDestroy(FC_marker);
 
       /* TODO: move this to par_mgr_coarsen.c and port to GPUs (VPM) */
       /* Update coarse level indexes for next levels */
