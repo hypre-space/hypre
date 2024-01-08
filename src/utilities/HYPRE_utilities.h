@@ -197,6 +197,10 @@ HYPRE_Int HYPRE_Finalized(void);
  * HYPRE error user functions
  *--------------------------------------------------------------------------*/
 
+
+/* Return an aggregate error code representing the collective status of all ranks */
+HYPRE_Int HYPRE_GetGlobalError(MPI_Comm comm);
+
 /* Return the current hypre error flag */
 HYPRE_Int HYPRE_GetError(void);
 

@@ -1721,7 +1721,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       TODO (VPM): move this block closer to global smoother setup */
    for (j = 0; j < num_c_levels; j++)
    {
-      if (((mgr_data -> num_relax_sweeps)[j] > 0) && (l1_norms[j] == NULL))
+      if (!l1_norms[j])
       {
          /* Compute l1_norms according to relaxation type */
          hypre_BoomerAMGRelaxComputeL1Norms(A_array[j], Frelax_type[j],
@@ -1729,8 +1729,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                                             &l1_norms_data);
          if (l1_norms_data)
          {
-            nloc = hypre_ParCSRMatrixNumRows(A_array[j]);
-            l1_norms[j] = hypre_SeqVectorCreate(nloc);
+            l1_norms[j] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[j]));
             hypre_VectorData(l1_norms[j]) = l1_norms_data;
             hypre_VectorMemoryLocation(l1_norms[j]) = memory_location;
          }
@@ -1798,10 +1797,42 @@ hypre_MGRSetup( void               *mgr_vdata,
             (GSElimData[i] -> F_array) = &F_fine_array[1];
             (GSElimData[i] -> U_array) = &U_fine_array[1];
 
+            /* Save current error code to a temporary variable */
+            hypre_error_code_save();
+
             // setup Gaussian Elim. in the F-relaxation step. Here, we apply GSElim at level 0
             // since we have a single matrix (and not an array of matrices).
             // hypre_printf("Setting GSElim Solver %d \n", Frelax_type[i]);
             hypre_GaussElimSetup(GSElimData[i], i, Frelax_type[i]);
+
+            /* Fallback to Jacobi when Gaussian Elim. is not successful */
+            if (HYPRE_GetGlobalError(hypre_ParCSRMatrixComm(A_array[i])))
+            {
+               hypre_MGRDestroyGSElimData((mgr_data -> GSElimData)[i]);
+               (mgr_data -> GSElimData)[i] = NULL;
+
+               Frelax_type[i] = 7; /* Jacobi */
+               if (print_level)
+               {
+                  hypre_ParPrintf(comm, "Switching F-relaxation at level %d to Jacobi", i);
+               }
+
+               /* Compute l1_norms if needed */
+               if (!l1_norms[i])
+               {
+                  hypre_BoomerAMGRelaxComputeL1Norms(A_array[i], Frelax_type[i], 0, 0, NULL,
+                                                     &l1_norms_data);
+                  if (l1_norms_data)
+                  {
+                     l1_norms[i] = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_array[i]));
+                     hypre_VectorData(l1_norms[i]) = l1_norms_data;
+                     hypre_VectorMemoryLocation(l1_norms[i]) = memory_location;
+                  }
+               }
+            }
+
+            /* Restore error code prior to GaussElimSetup call */
+            hypre_error_code_restore();
          }
       }
    }
