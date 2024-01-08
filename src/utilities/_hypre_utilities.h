@@ -133,6 +133,10 @@ typedef double                 hypre_double;
 #endif
 #endif
 
+#ifndef hypre_ceildiv
+#define hypre_ceildiv(a, b) (((a) + (b) - 1) / (b))
+#endif
+
 #ifndef hypre_ceil
 #if defined(HYPRE_SINGLE)
 #define hypre_ceil ceilf
