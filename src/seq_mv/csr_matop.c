@@ -1996,6 +1996,8 @@ hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
    {
       hypre_CSRMatrixExtractDiagonalHost(A, d, type);
    }
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
