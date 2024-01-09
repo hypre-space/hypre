@@ -256,7 +256,8 @@ HYPRE_Int hypre_ParCSRCommPkgCreateAndFill ( MPI_Comm comm, HYPRE_Int num_recvs,
                                              HYPRE_Int num_sends, HYPRE_Int *send_procs,
                                              HYPRE_Int *send_map_starts, HYPRE_Int *send_map_elmts,
                                              hypre_ParCSRCommPkg **comm_pkg_ptr );
-HYPRE_Int hypre_ParCSRCommPkgUpdateVecStarts ( hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int num_components_in,
+HYPRE_Int hypre_ParCSRCommPkgUpdateVecStarts ( hypre_ParCSRCommPkg *comm_pkg,
+                                               HYPRE_Int num_components_in,
                                                HYPRE_Int vecstride, HYPRE_Int idxstride );
 HYPRE_Int hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A );
 HYPRE_Int hypre_MatvecCommPkgDestroy ( hypre_ParCSRCommPkg *comm_pkg );
@@ -408,6 +409,7 @@ HYPRE_Int hypre_ParCSRMatrixAddDevice( HYPRE_Complex alpha, hypre_ParCSRMatrix *
 HYPRE_Int hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix *A, HYPRE_Int row_major,
                                          HYPRE_Int num_rows_block, HYPRE_Int num_cols_block,
                                          hypre_DenseBlockMatrix **B_ptr );
+HYPRE_Int hypre_ParCSRMatrixColSum( hypre_ParCSRMatrix *A, hypre_ParVector **B_ptr );
 
 /* par_csr_matop_device.c */
 HYPRE_Int hypre_ParCSRMatrixDiagScaleDevice ( hypre_ParCSRMatrix *par_A, hypre_ParVector *par_ld,
