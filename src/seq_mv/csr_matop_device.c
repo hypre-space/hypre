@@ -2731,6 +2731,16 @@ hypre_CSRMatrixTriLowerUpperSolveCusparse(char             uplo,
    /* Analysis and Solve */
    A_ma = hypre_CsrsvDataMatData(csrsv_data);
 
+   /* Use Jacobi for small systems (Is this necessary for CUDA 12?) */
+   if (num_rows < 64)
+   {
+      HYPRE_Complex *diag = hypre_CTAlloc(HYPRE_Complex, num_rows, HYPRE_MEMORY_DEVICE);
+      hypre_CSRMatrixExtractDiagonalDevice(A, diag, 0);
+      hypre_Memset(u_data, 0, num_rows * sizeof(HYPRE_Complex), HYPRE_MEMORY_DEVICE);
+      hypreDevice_IVAXPY(num_rows, diag, f_data, u_data);
+      hypre_TFree(diag, HYPRE_MEMORY_DEVICE);
+   }
+
 #if CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION
    matA = hypre_CSRMatrixToCusparseSpMat_core(num_rows, num_cols, 0,
                                               num_nonzeros, A_i, A_j, A_ma);
