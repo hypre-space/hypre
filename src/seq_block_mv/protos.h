@@ -18,3 +18,7 @@ HYPRE_Int hypre_DenseBlockMatrixBuildAOP(hypre_DenseBlockMatrix*);
 HYPRE_Int hypre_DenseBlockMatrixCopy(hypre_DenseBlockMatrix*, hypre_DenseBlockMatrix*);
 HYPRE_Int hypre_DenseBlockMatrixMigrate(hypre_DenseBlockMatrix*, HYPRE_MemoryLocation);
 HYPRE_Int hypre_DenseBlockMatrixPrint(MPI_Comm, hypre_DenseBlockMatrix*, const char*);
+
+/* dense_block_matmult.c */
+HYPRE_Int hypre_DenseBlockMatrixMultiply(hypre_DenseBlockMatrix*, hypre_DenseBlockMatrix*,
+                                         hypre_DenseBlockMatrix**);
