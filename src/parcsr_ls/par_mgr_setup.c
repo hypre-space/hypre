@@ -1057,9 +1057,17 @@ hypre_MGRSetup( void               *mgr_vdata,
             HYPRE_ILUCreate(&(level_smoother[lev]));
             HYPRE_ILUSetType(level_smoother[lev], 0);
             HYPRE_ILUSetLevelOfFill(level_smoother[lev], 0);
-            HYPRE_ILUSetLocalReordering(level_smoother[lev], 1);
             HYPRE_ILUSetMaxIter(level_smoother[lev], level_smooth_iters[lev]);
             HYPRE_ILUSetTol(level_smoother[lev], 0.0);
+            if (hypre_GetActualMemLocation(hypre_ParCSRMatrixMemoryLocation(A_array[lev]) ==
+                hypre_MEMORY_DEVICE))
+            {
+               HYPRE_ILUSetLocalReordering(level_smoother[lev], 0);
+            }
+            else
+            {
+               HYPRE_ILUSetLocalReordering(level_smoother[lev], 1);
+            }
             HYPRE_ILUSetup(level_smoother[lev], A_array[lev], NULL, NULL);
          }
          else
@@ -1536,6 +1544,13 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
          for (i = lev + 1; i < max_num_coarse_levels; i++)
          {
+            memory_location = hypre_IntArrayMemoryLocation(CF_marker_array[lev]);
+            if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE)
+            {
+               hypre_IntArrayMigrate(CF_marker_array[lev], HYPRE_MEMORY_HOST);
+            }
+            CF_marker = hypre_IntArrayData(CF_marker_array[lev]);
+
             /* First mark indexes to be updated */
             for (j = 0; j < level_coarse_size[i]; j++)
             {
@@ -1563,6 +1578,11 @@ hypre_MGRSetup( void               *mgr_vdata,
             for (j = 0; j < level_coarse_size[lev]; j++)
             {
                CF_marker[level_coarse_indexes[lev][j]] = CMRK;
+            }
+
+            if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE)
+            {
+               hypre_IntArrayMigrate(CF_marker_array[lev], HYPRE_MEMORY_DEVICE);
             }
          }
       }

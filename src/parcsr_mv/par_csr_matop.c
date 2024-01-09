@@ -6690,8 +6690,8 @@ hypre_ParCSRMatrixBlockColSumHost( hypre_ParCSRMatrix     *A,
    /* Communication variables */
    hypre_ParCSRCommPkg    *comm_pkg          = hypre_ParCSRMatrixCommPkg(A);
    HYPRE_Int               num_sends         = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   HYPRE_Int              *send_map_elmts    = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
-   HYPRE_Int              *send_map_starts   = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
+   HYPRE_Int              *send_map_elmts;
+   HYPRE_Int              *send_map_starts;
 #if defined(HYPRE_USING_PERSISTENT_COMM)
    hypre_ParCSRPersistentCommHandle *comm_handle;
 #else
@@ -6699,7 +6699,9 @@ hypre_ParCSRMatrixBlockColSumHost( hypre_ParCSRMatrix     *A,
 #endif
 
    /* Update commpkg offsets */
-   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, num_cols_block_B, 1, num_cols_block_B);
+   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, 1, 0, 1);
+   send_map_elmts  = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
+   send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
 
    /* Allocate the recv and send buffers  */
 #if defined(HYPRE_USING_PERSISTENT_COMM)
@@ -6707,22 +6709,20 @@ hypre_ParCSRMatrixBlockColSumHost( hypre_ParCSRMatrix     *A,
    recv_data = (HYPRE_Complex *) hypre_ParCSRCommHandleRecvDataBuffer(comm_handle);
    send_data = (HYPRE_Complex *) hypre_ParCSRCommHandleSendDataBuffer(comm_handle);
    send_data = hypre_Memset((void *) send_data, 0,
-                            (size_t) (num_cols_offd_A * num_cols_block_B) * sizeof(HYPRE_Complex),
+                            (size_t) (num_cols_offd_A) * sizeof(HYPRE_Complex),
                             memory_location);
 #else
-   send_data = hypre_CTAlloc(HYPRE_Complex, num_cols_offd_A * num_cols_block_B, memory_location);
+   send_data = hypre_CTAlloc(HYPRE_Complex, num_cols_offd_A, memory_location);
    recv_data = hypre_TAlloc(HYPRE_Complex, send_map_starts[num_sends], memory_location);
 #endif
 
    /* Pack send data */
    for (i = 0; i < num_rows_offd_A; i++)
    {
-      jr = i % num_cols_block_B;
       for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
       {
          col = A_offd_j[j];
-
-         send_data[col * num_cols_block_B + jr] += A_offd_data[j];
+         send_data[col] += A_offd_data[j];
       }
    }
 
@@ -6899,8 +6899,8 @@ hypre_ParCSRMatrixColSumHost( hypre_ParCSRMatrix *A,
    /* Communication variables */
    hypre_ParCSRCommPkg    *comm_pkg          = hypre_ParCSRMatrixCommPkg(A);
    HYPRE_Int               num_sends         = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   HYPRE_Int              *send_map_elmts    = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
-   HYPRE_Int              *send_map_starts   = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
+   HYPRE_Int              *send_map_elmts;
+   HYPRE_Int              *send_map_starts;
 #if defined(HYPRE_USING_PERSISTENT_COMM)
    hypre_ParCSRPersistentCommHandle *comm_handle;
 #else
@@ -6909,6 +6909,8 @@ hypre_ParCSRMatrixColSumHost( hypre_ParCSRMatrix *A,
 
    /* Update commpkg offsets */
    hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, 1, 0, 1);
+   send_map_elmts  = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
+   send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
 
    /* Allocate the recv and send buffers  */
 #if defined(HYPRE_USING_PERSISTENT_COMM)

@@ -159,7 +159,7 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
 #endif
 
    /* Build AT (transpose A) */
-   if (restrict_type > 0)
+   if (restrict_type > 0 && restrict_type != 14)
    {
       hypre_ParCSRMatrixTranspose(A, &AT, 1);
 
@@ -2294,7 +2294,7 @@ hypre_MGRBuildRFromW(HYPRE_Int            *C_map,
    /* Input matrix variables */
    MPI_Comm               comm              = hypre_ParCSRMatrixComm(W);
    HYPRE_BigInt           num_rows_W        = hypre_ParCSRMatrixGlobalNumRows(W);
-   HYPRE_BigInt           num_cols_W        = hypre_ParCSRMatrixGlobalNumRows(W);
+   HYPRE_BigInt           num_cols_W        = hypre_ParCSRMatrixGlobalNumCols(W);
    HYPRE_MemoryLocation   memory_location_W = hypre_ParCSRMatrixMemoryLocation(W);
 
    hypre_CSRMatrix       *W_diag            = hypre_ParCSRMatrixDiag(W);
@@ -2450,9 +2450,6 @@ hypre_MGRBlockColSumRestrict(hypre_ParCSRMatrix  *A,
                              hypre_ParCSRMatrix **W_ptr,
                              hypre_ParCSRMatrix **R_ptr)
 {
-   HYPRE_BigInt             num_rows_F = hypre_ParCSRMatrixGlobalNumRows(A_FF);
-   HYPRE_BigInt             num_rows_C = hypre_ParCSRMatrixGlobalNumRows(A_CF);
-
    hypre_DenseBlockMatrix  *b_FF       = NULL;
    hypre_DenseBlockMatrix  *b_CF       = NULL;
    hypre_DenseBlockMatrix  *r_CF       = NULL;

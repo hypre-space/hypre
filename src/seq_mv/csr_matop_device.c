@@ -1502,7 +1502,9 @@ hypreGPUKernel_CSRExtractDiag( hypre_DeviceItem    &item,
 
    HYPRE_Int has_diag = 0;
 
-   for (HYPRE_Int j = p + lane; warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q); j += HYPRE_WARP_SIZE)
+   for (HYPRE_Int j = p + lane;
+        warp_any_sync(item, HYPRE_WARP_FULL_MASK, j < q);
+        j += HYPRE_WARP_SIZE)
    {
       hypre_int find_diag = j < q && ja[j] == row;
 
@@ -1516,21 +1518,28 @@ hypreGPUKernel_CSRExtractDiag( hypre_DeviceItem    &item,
          {
             d[row] = hypre_abs(aa[j]);
          }
-         else if (type == 2)
+         else
          {
-            d[row] = 1.0 / aa[j];
-         }
-         else if (type == 3)
-         {
-            d[row] = 1.0 / hypre_sqrt(aa[j]);
-         }
-         else if (type == 4)
-         {
-            d[row] = 1.0 / hypre_sqrt(hypre_abs(aa[j]));
+            if (aa[j] == 0.0)
+            {
+               d[row] = 0.0;
+            }
+            else if (type == 2)
+            {
+               d[row] = 1.0 / aa[j];
+            }
+            else if (type == 3)
+            {
+               d[row] = 1.0 / hypre_sqrt(aa[j]);
+            }
+            else if (type == 4)
+            {
+               d[row] = 1.0 / hypre_sqrt(hypre_abs(aa[j]));
+            }
          }
       }
 
-      if ( warp_any_sync(item, HYPRE_WARP_FULL_MASK, find_diag) )
+      if (warp_any_sync(item, HYPRE_WARP_FULL_MASK, find_diag))
       {
          has_diag = 1;
          break;

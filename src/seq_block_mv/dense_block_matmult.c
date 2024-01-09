@@ -28,9 +28,9 @@ hypre_DenseBlockMatrixMultiplyHost( hypre_DenseBlockMatrix  *A,
    HYPRE_Int       num_cols_block_C = hypre_DenseBlockMatrixNumColsBlock(C);
    HYPRE_Int       num_rows_block_B = hypre_DenseBlockMatrixNumRowsBlock(B);
 
-   HYPRE_Int       num_nonzeros_block_A = hypre_DenseBlockMatrixNumNonzeros(A);
-   HYPRE_Int       num_nonzeros_block_B = hypre_DenseBlockMatrixNumNonzeros(B);
-   HYPRE_Int       num_nonzeros_block_C = hypre_DenseBlockMatrixNumNonzeros(C);
+   HYPRE_Int       num_nonzeros_block_A = hypre_DenseBlockMatrixNumNonzerosBlock(A);
+   HYPRE_Int       num_nonzeros_block_B = hypre_DenseBlockMatrixNumNonzerosBlock(B);
+   HYPRE_Int       num_nonzeros_block_C = hypre_DenseBlockMatrixNumNonzerosBlock(C);
 
    HYPRE_Int       ib;
 
