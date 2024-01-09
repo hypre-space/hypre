@@ -2441,7 +2441,7 @@ hypre_MGRBuildRFromW(HYPRE_Int            *C_map,
    /* Input matrix variables */
    MPI_Comm               comm              = hypre_ParCSRMatrixComm(W);
    HYPRE_BigInt           num_rows_W        = hypre_ParCSRMatrixGlobalNumRows(W);
-   HYPRE_BigInt           num_cols_W        = hypre_ParCSRMatrixGlobalNumRows(W);
+   HYPRE_BigInt           num_cols_W        = hypre_ParCSRMatrixGlobalNumCols(W);
    HYPRE_MemoryLocation   memory_location_W = hypre_ParCSRMatrixMemoryLocation(W);
 
    hypre_CSRMatrix       *W_diag            = hypre_ParCSRMatrixDiag(W);
