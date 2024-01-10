@@ -1059,15 +1059,11 @@ hypre_MGRSetup( void               *mgr_vdata,
             HYPRE_ILUSetLevelOfFill(level_smoother[lev], 0);
             HYPRE_ILUSetMaxIter(level_smoother[lev], level_smooth_iters[lev]);
             HYPRE_ILUSetTol(level_smoother[lev], 0.0);
-            if (hypre_GetActualMemLocation(hypre_ParCSRMatrixMemoryLocation(A_array[lev]) ==
-                hypre_MEMORY_DEVICE))
-            {
-               HYPRE_ILUSetLocalReordering(level_smoother[lev], 0);
-            }
-            else
-            {
-               HYPRE_ILUSetLocalReordering(level_smoother[lev], 1);
-            }
+#if defined (HYPRE_USING_GPU)
+            HYPRE_ILUSetLocalReordering(level_smoother[lev], 0);
+#else
+            HYPRE_ILUSetLocalReordering(level_smoother[lev], 1);
+#endif
             HYPRE_ILUSetup(level_smoother[lev], A_array[lev], NULL, NULL);
          }
          else

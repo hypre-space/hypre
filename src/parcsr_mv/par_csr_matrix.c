@@ -665,6 +665,9 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
    }
    A_diag_i[local_size] = local_size;
 
+   /* Initialize offd portion */
+   hypre_CSRMatrixInitialize_v2(A_offd, 0, memory_location);
+
    /* Migrate to dest. memory location */
    if (memory_location != HYPRE_MEMORY_HOST)
    {
