@@ -3690,13 +3690,11 @@ HYPRE_Int hypre_MGRBuildPFromWp( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *Wp,
 HYPRE_Int hypre_MGRBuildPFromWpHost( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *Wp,
                                      HYPRE_Int *CF_marker, hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_MGRBuildBlockJacobiWp( hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC,
-                                       HYPRE_Int blk_size, HYPRE_Int *CF_marker,
-                                       HYPRE_BigInt *cpts_starts_in,
-                                       hypre_ParCSRMatrix **Wp_ptr );
+                                       HYPRE_Int blk_size, hypre_ParCSRMatrix **Wp_ptr );
 HYPRE_Int hypre_MGRBuildPBlockJacobi( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
                                       hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *Wp,
                                       HYPRE_Int blk_size, HYPRE_Int *CF_marker,
-                                      HYPRE_BigInt *cpts_starts, hypre_ParCSRMatrix **P_ptr );
+                                      hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_MGRBuildP( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                            HYPRE_BigInt *num_cpts_global, HYPRE_Int method,
                            HYPRE_Int debug_flag, hypre_ParCSRMatrix **P_ptr );

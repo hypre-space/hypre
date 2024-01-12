@@ -1141,8 +1141,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
          if (mgr_coarse_grid_method[lev] != 0)
          {
-            hypre_MGRBuildBlockJacobiWp(A_FF, A_FC, block_jacobi_bsize,
-                                        CF_marker, coarse_pnts_global, &Wp);
+            hypre_MGRBuildBlockJacobiWp(A_FF, A_FC, block_jacobi_bsize, &Wp);
          }
          hypre_MGRBuildInterp(A_array[lev], A_FF, A_FC, CF_marker, Wp,
                               coarse_pnts_global, trunc_factor, P_max_elmts[lev],

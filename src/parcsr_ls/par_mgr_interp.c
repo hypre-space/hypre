@@ -33,6 +33,8 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 #endif
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /* Interpolation for each level */
    if (interp_type < 3)
    {
@@ -72,6 +74,8 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "No GPU support!");
+
+         HYPRE_ANNOTATE_FUNC_END;
          return hypre_error_flag;
       }
       else
@@ -98,8 +102,7 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
    }
    else if (interp_type == 12)
    {
-      hypre_MGRBuildPBlockJacobi(A, A_FF, A_FC, aux_mat, blk_size, CF_marker,
-                                 num_cpts_global, &P);
+      hypre_MGRBuildPBlockJacobi(A, A_FF, A_FC, aux_mat, blk_size, CF_marker, &P);
    }
    else
    {
@@ -110,6 +113,8 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
 
    /* set pointer to P */
    *P_ptr = P;
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -157,6 +162,8 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
 #if defined (HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 #endif
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* Build AT (transpose A) */
    if (restrict_type > 0 && restrict_type != 14)
@@ -210,8 +217,7 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
    }
    else if (restrict_type == 12)
    {
-      hypre_MGRBuildPBlockJacobi(AT, A_FFT, A_FCT, NULL, blk_size,
-                                 CF_marker_data, num_cpts_global, &RT);
+      hypre_MGRBuildPBlockJacobi(AT, A_FFT, A_FCT, NULL, blk_size, CF_marker_data, &RT);
    }
    else if (restrict_type == 13) // CPR-like restriction operator
    {
@@ -225,6 +231,8 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "No GPU support!");
+
+         HYPRE_ANNOTATE_FUNC_END;
          return hypre_error_flag;
       }
       else
@@ -299,6 +307,8 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
       hypre_ParCSRMatrixDestroy(ST);
    }
 
+   HYPRE_ANNOTATE_FUNC_END;
+
    return hypre_error_flag;
 }
 
@@ -316,6 +326,8 @@ hypre_MGRBuildPFromWp( hypre_ParCSRMatrix    *A,
                        HYPRE_Int             *CF_marker,
                        hypre_ParCSRMatrix   **P_ptr)
 {
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
@@ -328,6 +340,8 @@ hypre_MGRBuildPFromWp( hypre_ParCSRMatrix    *A,
    {
       hypre_MGRBuildPFromWpHost(A, Wp, CF_marker, P_ptr);
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -494,15 +508,12 @@ HYPRE_Int
 hypre_MGRBuildBlockJacobiWp( hypre_ParCSRMatrix   *A_FF,
                              hypre_ParCSRMatrix   *A_FC,
                              HYPRE_Int             blk_size,
-                             HYPRE_Int            *CF_marker,
-                             HYPRE_BigInt         *cpts_starts,
                              hypre_ParCSRMatrix  **Wp_ptr )
 {
-   HYPRE_UNUSED_VAR(CF_marker);
-   HYPRE_UNUSED_VAR(cpts_starts);
-
    hypre_ParCSRMatrix   *A_FF_inv;
    hypre_ParCSRMatrix   *Wp;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* Build A_FF_inv */
    hypre_ParCSRMatrixBlockDiagMatrix(A_FF, blk_size, -1, NULL, 1, &A_FF_inv);
@@ -515,6 +526,8 @@ hypre_MGRBuildBlockJacobiWp( hypre_ParCSRMatrix   *A_FF,
 
    /* Set output pointer */
    *Wp_ptr = Wp;
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -530,7 +543,6 @@ hypre_MGRBuildPBlockJacobi( hypre_ParCSRMatrix   *A,
                             hypre_ParCSRMatrix   *Wp,
                             HYPRE_Int             blk_size,
                             HYPRE_Int            *CF_marker,
-                            HYPRE_BigInt         *cpts_starts,
                             hypre_ParCSRMatrix  **P_ptr)
 {
    hypre_ParCSRMatrix   *Wp_tmp;
@@ -539,7 +551,7 @@ hypre_MGRBuildPBlockJacobi( hypre_ParCSRMatrix   *A,
 
    if (Wp == NULL)
    {
-      hypre_MGRBuildBlockJacobiWp(A_FF, A_FC, blk_size, CF_marker, cpts_starts, &Wp_tmp);
+      hypre_MGRBuildBlockJacobiWp(A_FF, A_FC, blk_size, &Wp_tmp);
       hypre_MGRBuildPFromWp(A, Wp_tmp, CF_marker, P_ptr);
 
       hypre_ParCSRMatrixDeviceColMapOffd(Wp_tmp) = NULL;
@@ -2170,6 +2182,8 @@ hypre_MGRTruncateAcfCPR(hypre_ParCSRMatrix  *A_CF,
    HYPRE_Int            jj_counter;
    HYPRE_Int            blk_size = num_cols / num_rows;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /* First pass: count the nnz of truncated (new) A_CF */
    jj_counter = 0;
    for (i = 0; i < num_rows_local; i++)
@@ -2221,6 +2235,8 @@ hypre_MGRTruncateAcfCPR(hypre_ParCSRMatrix  *A_CF,
 
    /* Set output pointer */
    *A_CF_new_ptr = A_CF_new;
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -2321,6 +2337,8 @@ hypre_MGRBuildRFromW(HYPRE_Int            *C_map,
       return hypre_error_flag;
    }
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /*-----------------------------------------------------------------------
     * Create and initialize output matrix
     *-----------------------------------------------------------------------*/
@@ -2358,6 +2376,8 @@ hypre_MGRBuildRFromW(HYPRE_Int            *C_map,
    /* Set output pointer */
    *R_ptr = R;
 
+   HYPRE_ANNOTATE_FUNC_END;
+
    return hypre_error_flag;
 }
 
@@ -2384,6 +2404,8 @@ hypre_MGRColSumRestrict(hypre_ParCSRMatrix  *A,
    HYPRE_Int                sizes[2]   = {hypre_ParCSRMatrixNumRows(A_CF),
                                           hypre_ParCSRMatrixNumCols(A_CF)};
    hypre_IntArrayArray     *CF_maps;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /*-------------------------------------------------------
     * 1) b_FF = approx(A_FF)
@@ -2434,6 +2456,8 @@ hypre_MGRColSumRestrict(hypre_ParCSRMatrix  *A,
    /* Free memory */
    hypre_IntArrayArrayDestroy(CF_maps);
 
+   HYPRE_ANNOTATE_FUNC_END;
+
    return hypre_error_flag;
 }
 
@@ -2462,6 +2486,8 @@ hypre_MGRBlockColSumRestrict(hypre_ParCSRMatrix  *A,
    HYPRE_Int                sizes[2]   = {hypre_ParCSRMatrixNumRows(A_CF),
                                           hypre_ParCSRMatrixNumCols(A_CF)};
    hypre_IntArrayArray     *CF_maps;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* Sanity check */
    if (block_dim <= 1)
@@ -2541,6 +2567,8 @@ hypre_MGRBlockColSumRestrict(hypre_ParCSRMatrix  *A,
 
    /* Free memory */
    hypre_IntArrayArrayDestroy(CF_maps);
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
