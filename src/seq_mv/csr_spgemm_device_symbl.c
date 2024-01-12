@@ -233,7 +233,7 @@ hypreDevice_CSRSpGemmRownnzNoBin( HYPRE_Int  m,
          hypre_assert(new_end - d_rind == num_failed_rows);
 
          HYPRE_Int high_bin = hypre_HandleSpgemmHighestBin(hypre_handle())[0];
-         if (BIN < high_bin)
+         if (BIN < HYPRE_SPGEMM_DEFAULT_BIN && BIN < high_bin)
          {
             hypre_spgemm_symbolic_rownnz < BIN + 1, 2 * SHMEM_HASH_SIZE, 2 * GROUP_SIZE, true >
             (num_failed_rows, d_rind, k, n, true, d_ia, d_ja, d_ib, d_jb, d_rc, false, NULL);
