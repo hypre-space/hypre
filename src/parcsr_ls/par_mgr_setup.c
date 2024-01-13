@@ -1060,6 +1060,9 @@ hypre_MGRSetup( void               *mgr_vdata,
             HYPRE_ILUSetMaxIter(level_smoother[lev], level_smooth_iters[lev]);
             HYPRE_ILUSetTol(level_smoother[lev], 0.0);
             HYPRE_ILUSetLocalReordering(level_smoother[lev], 0);
+#if defined (HYPRE_USING_GPU)
+            HYPRE_ILUSetTriSolve(level_smoother[lev], 0);
+#endif
             HYPRE_ILUSetup(level_smoother[lev], A_array[lev], NULL, NULL);
          }
          else
