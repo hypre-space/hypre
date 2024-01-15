@@ -1593,7 +1593,7 @@ void hypre_swap_blk( HYPRE_Complex *v,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
+hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix  *A,
                                      HYPRE_Int                *CF_marker,
                                      hypre_ParCSRMatrix       *S,
                                      HYPRE_BigInt             *num_cpts_global,
@@ -1603,7 +1603,7 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
                                      HYPRE_Real                trunc_factor,
                                      HYPRE_Int                 max_elmts,
                                      HYPRE_Int                 add_weak_to_diag,
-                                     hypre_ParCSRBlockMatrix  **P_ptr)
+                                     hypre_ParCSRBlockMatrix **P_ptr)
 {
    HYPRE_UNUSED_VAR(dof_func);
 
@@ -1674,8 +1674,8 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
    HYPRE_BigInt          *fine_to_coarse_offd = NULL;
    HYPRE_Int             *coarse_counter;
    HYPRE_Int              coarse_shift;
-   HYPRE_BigInt           total_global_cpts;
-   HYPRE_Int              num_cols_P_offd, my_first_cpt;
+   HYPRE_BigInt           my_first_cpt, total_global_cpts;
+   HYPRE_Int              num_cols_P_offd;
 
    HYPRE_Int              bd;
 
@@ -1730,8 +1730,7 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
 
    if (debug_flag == 4) { wall_time = time_getWallclockSeconds(); }
 
-   CF_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_A_offd, HYPRE_MEMORY_HOST);
-
+   CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_HOST);
 
    if (!comm_pkg)
    {
@@ -1740,8 +1739,9 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart(comm_pkg,
-                                                                            num_sends), HYPRE_MEMORY_HOST);
+   int_buf_data = hypre_CTAlloc(HYPRE_Int,
+                                hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                HYPRE_MEMORY_HOST);
 
    index = 0;
    for (i = 0; i < num_sends; i++)
@@ -1967,24 +1967,20 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
    }
 
    /* we need a block identity and a block of zeros*/
-   identity_block = hypre_CTAlloc(HYPRE_Real,  bnnz, HYPRE_MEMORY_HOST);
-   zero_block =  hypre_CTAlloc(HYPRE_Real,  bnnz, HYPRE_MEMORY_HOST);
-
-
+   identity_block = hypre_CTAlloc(HYPRE_Real, bnnz, HYPRE_MEMORY_HOST);
+   zero_block     = hypre_CTAlloc(HYPRE_Real, bnnz, HYPRE_MEMORY_HOST);
 
    for (i = 0; i < block_size; i++)
    {
       identity_block[i * block_size + i] = 1.0;
    }
 
-
    /* we also need a block to keep track of the diagonal values and a sum */
-   diagonal_block =  hypre_CTAlloc(HYPRE_Real,  bnnz, HYPRE_MEMORY_HOST);
-   sum_block =  hypre_CTAlloc(HYPRE_Real,  bnnz, HYPRE_MEMORY_HOST);
-   distribute_block =  hypre_CTAlloc(HYPRE_Real,  bnnz, HYPRE_MEMORY_HOST);
+   diagonal_block   = hypre_CTAlloc(HYPRE_Real, bnnz, HYPRE_MEMORY_HOST);
+   sum_block        = hypre_CTAlloc(HYPRE_Real, bnnz, HYPRE_MEMORY_HOST);
+   distribute_block = hypre_CTAlloc(HYPRE_Real, bnnz, HYPRE_MEMORY_HOST);
 
-
-   sign =  hypre_CTAlloc(HYPRE_Real,  block_size, HYPRE_MEMORY_HOST);
+   sign = hypre_CTAlloc(HYPRE_Real, block_size, HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------------------
     *  Send and receive fine_to_coarse info.
@@ -1992,9 +1988,10 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
 
    if (debug_flag == 4) { wall_time = time_getWallclockSeconds(); }
 
-   fine_to_coarse_offd = hypre_CTAlloc(HYPRE_BigInt,  num_cols_A_offd, HYPRE_MEMORY_HOST);
-   big_buf_data = hypre_CTAlloc(HYPRE_BigInt,  hypre_ParCSRCommPkgSendMapStart(comm_pkg,
-                                                                               num_sends), HYPRE_MEMORY_HOST);
+   fine_to_coarse_offd = hypre_CTAlloc(HYPRE_BigInt, num_cols_A_offd, HYPRE_MEMORY_HOST);
+   big_buf_data = hypre_CTAlloc(HYPRE_BigInt,
+                                hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                HYPRE_MEMORY_HOST);
 
    for (j = 0; j < num_threads; j++)
    {
@@ -2022,16 +2019,16 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix *A,
    {
       start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
       for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1); j++)
+      {
          big_buf_data[index++] = my_first_cpt
                                  + fine_to_coarse[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
+      }
    }
 
    /* again, we do not need to use the block version of comm handle since
       the fine to coarse mapping is size of the nodes */
 
-   comm_handle = hypre_ParCSRCommHandleCreate( 21, comm_pkg, big_buf_data,
-                                               fine_to_coarse_offd);
-
+   comm_handle = hypre_ParCSRCommHandleCreate(21, comm_pkg, big_buf_data, fine_to_coarse_offd);
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
    if (debug_flag == 4)
