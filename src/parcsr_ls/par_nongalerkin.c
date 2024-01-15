@@ -777,13 +777,13 @@ hypre_NonGalerkinIJBufferCompress( HYPRE_MemoryLocation memory_location,
          row = (*ijbuf_rownums)[i];
          if (row_loc > 0)
          {
-            row_start = (*ijbuf_numcols)[row_loc - 1];
-            row_stop  = (*ijbuf_numcols)[row_loc];
+            row_start = (HYPRE_BigInt) (*ijbuf_numcols)[row_loc - 1];
+            row_stop  = (HYPRE_BigInt) (*ijbuf_numcols)[row_loc];
          }
          else
          {
             row_start = 0;
-            row_stop  = (*ijbuf_numcols)[row_loc];
+            row_stop  = (HYPRE_BigInt) (*ijbuf_numcols)[row_loc];
          }
 
          /* Is this a new row?  If so, compress previous row, and add a new
