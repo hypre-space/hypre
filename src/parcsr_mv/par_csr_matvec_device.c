@@ -120,7 +120,9 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
 
    /* Update send_map_starts, send_map_elmts, and recv_vec_starts when doing
       sparse matrix/multivector product  */
-   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, x);
+   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, num_vectors,
+                                      hypre_VectorVectorStride(hypre_ParVectorLocalVector(x)),
+                                      hypre_VectorIndexStride(hypre_ParVectorLocalVector(x)));
 
    /* Copy send_map_elmts to the device if not already there */
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
@@ -365,7 +367,9 @@ hypre_ParCSRMatrixMatvecTDevice( HYPRE_Complex       alpha,
    }
 
    /* Update send_map_starts, send_map_elmts, and recv_vec_starts for SpMV with multivecs */
-   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, y);
+   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, num_vectors,
+                                      hypre_VectorVectorStride(hypre_ParVectorLocalVector(y)),
+                                      hypre_VectorIndexStride(hypre_ParVectorLocalVector(y)));
 
    /* Update send_map_elmts on device */
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);

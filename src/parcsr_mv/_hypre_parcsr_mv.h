@@ -7,6 +7,7 @@
 #include <HYPRE_config.h>
 #include "HYPRE_parcsr_mv.h"
 #include "_hypre_utilities.h"
+#include "_hypre_seq_block_mv.h"
 #include "seq_mv.h"
 
 #ifdef __cplusplus
@@ -268,7 +269,9 @@ typedef struct hypre_ParVector_struct
 #define hypre_ParVectorLocalVector(vector)      ((vector) -> local_vector)
 #define hypre_ParVectorOwnsData(vector)         ((vector) -> owns_data)
 #define hypre_ParVectorAllZeros(vector)         ((vector) -> all_zeros)
-#define hypre_ParVectorNumVectors(vector)       (hypre_VectorNumVectors(hypre_ParVectorLocalVector(vector)))
+#define hypre_ParVectorNumVectors(vector)       (hypre_VectorNumVectors((vector) -> local_vector))
+#define hypre_ParVectorEntryI(vector, i)        (hypre_VectorEntryI((vector) -> local_vector, i))
+#define hypre_ParVectorEntryIJ(vector, i, j)    (hypre_VectorEntryIJ((vector) -> local_vector, i, j))
 
 #define hypre_ParVectorAssumedPartition(vector) ((vector) -> assumed_partition)
 
@@ -911,7 +914,9 @@ HYPRE_Int hypre_ParCSRCommPkgCreateAndFill ( MPI_Comm comm, HYPRE_Int num_recvs,
                                              HYPRE_Int num_sends, HYPRE_Int *send_procs,
                                              HYPRE_Int *send_map_starts, HYPRE_Int *send_map_elmts,
                                              hypre_ParCSRCommPkg **comm_pkg_ptr );
-HYPRE_Int hypre_ParCSRCommPkgUpdateVecStarts ( hypre_ParCSRCommPkg *comm_pkg, hypre_ParVector *x );
+HYPRE_Int hypre_ParCSRCommPkgUpdateVecStarts ( hypre_ParCSRCommPkg *comm_pkg,
+                                               HYPRE_Int num_components_in,
+                                               HYPRE_Int vecstride, HYPRE_Int idxstride );
 HYPRE_Int hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A );
 HYPRE_Int hypre_MatvecCommPkgDestroy ( hypre_ParCSRCommPkg *comm_pkg );
 HYPRE_Int hypre_BuildCSRMatrixMPIDataType ( HYPRE_Int num_nonzeros, HYPRE_Int num_rows,
@@ -1059,6 +1064,10 @@ HYPRE_Int hypre_ParCSRMatrixAddHost( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
 HYPRE_Int hypre_ParCSRMatrixAddDevice( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
                                        HYPRE_Complex beta, hypre_ParCSRMatrix *B,
                                        hypre_ParCSRMatrix **Cout);
+HYPRE_Int hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix *A, HYPRE_Int row_major,
+                                         HYPRE_Int num_rows_block, HYPRE_Int num_cols_block,
+                                         hypre_DenseBlockMatrix **B_ptr );
+HYPRE_Int hypre_ParCSRMatrixColSum( hypre_ParCSRMatrix *A, hypre_ParVector **B_ptr );
 
 /* par_csr_matop_device.c */
 HYPRE_Int hypre_ParCSRMatrixDiagScaleDevice ( hypre_ParCSRMatrix *par_A, hypre_ParVector *par_ld,

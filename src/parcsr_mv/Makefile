@@ -15,6 +15,7 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)/../lapack\
  -I$(srcdir)/../utilities\
  -I$(srcdir)/../seq_mv\
+ -I$(srcdir)/../seq_block_mv\
  ${CINCLUDES}
 
 HEADERS =\

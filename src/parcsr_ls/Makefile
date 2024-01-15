@@ -20,6 +20,7 @@ C_COMPILE_FLAGS =\
  -I$(srcdir)/../utilities\
  -I$(srcdir)/../krylov\
  -I$(srcdir)/../seq_mv\
+ -I$(srcdir)/../seq_block_mv\
  -I$(srcdir)/../parcsr_mv\
  -I$(srcdir)/../distributed_matrix\
  -I$(srcdir)/../matrix_matrix\
