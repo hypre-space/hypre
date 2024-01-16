@@ -58,7 +58,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_Int  *restrict_type = (mgr_data -> restrict_type);
    HYPRE_Int  *num_relax_sweeps = (mgr_data -> num_relax_sweeps);
    HYPRE_Int num_interp_sweeps = (mgr_data -> num_interp_sweeps);
-   HYPRE_Int num_restrict_sweeps = (mgr_data -> num_interp_sweeps);
+   //HYPRE_Int num_restrict_sweeps = (mgr_data -> num_interp_sweeps);
    HYPRE_Int *P_max_elmts = (mgr_data -> P_max_elmts);
    HYPRE_Real   max_row_sum = (mgr_data -> max_row_sum);
    HYPRE_Real   strong_threshold = (mgr_data -> strong_threshold);
@@ -1135,16 +1135,14 @@ hypre_MGRSetup( void               *mgr_vdata,
                                         CF_marker, coarse_pnts_global, &Wp);
          }
          hypre_MGRBuildInterp(A_array[lev], A_FF, A_FC, CF_marker, Wp,
-                              coarse_pnts_global, 1, dof_func_buff_data,
-                              debug_flag, trunc_factor, P_max_elmts[lev],
+                              coarse_pnts_global, trunc_factor, P_max_elmts[lev],
                               block_jacobi_bsize, &P, interp_type[lev],
                               num_interp_sweeps);
       }
       else
       {
          hypre_MGRBuildInterp(A_array[lev], A_FF, A_FC, CF_marker, S,
-                              coarse_pnts_global, 1, dof_func_buff_data,
-                              debug_flag, trunc_factor, P_max_elmts[lev],
+                              coarse_pnts_global, trunc_factor, P_max_elmts[lev],
                               block_jacobi_bsize, &P, interp_type[lev],
                               num_interp_sweeps);
       }
@@ -1250,16 +1248,14 @@ hypre_MGRSetup( void               *mgr_vdata,
             hypre_BoomerAMGBuildRestrAIR(A_array[lev], CF_marker,
                                          ST, coarse_pnts_global, 1,
                                          dof_func_buff_data, filter_thresholdR,
-                                         debug_flag, &RT,
-                                         is_triangular, gmres_switch);
+                                         debug_flag, &RT, is_triangular, gmres_switch);
          }
          else /* distance-1.5 AIR - distance 2 locally and distance 1 across procs. */
          {
             hypre_BoomerAMGBuildRestrDist2AIR(A_array[lev], CF_marker,
                                               ST, coarse_pnts_global, 1,
                                               dof_func_buff_data, filter_thresholdR,
-                                              debug_flag, &RT, 1,
-                                              is_triangular, gmres_switch);
+                                              debug_flag, &RT, 1, is_triangular, gmres_switch);
          }
          RT_array[lev] = RT;
          hypre_GpuProfilingPopRange();
@@ -1298,12 +1294,9 @@ hypre_MGRSetup( void               *mgr_vdata,
             }
             //            if (restrict_type[lev] > 0)
             {
-               hypre_MGRBuildRestrict(A_array[lev], A_FF, A_FC, CF_marker, coarse_pnts_global, 1,
-                                      dof_func_buff_data, debug_flag, trunc_factor,
-                                      P_max_elmts[lev], strong_threshold, max_row_sum,
-                                      block_num_f_points, &RT, restrict_type[lev],
-                                      num_restrict_sweeps);
-
+               hypre_MGRBuildRestrict(A_array[lev], A_FF, A_FC, CF_marker, coarse_pnts_global,
+                                      trunc_factor, P_max_elmts[lev], strong_threshold,
+                                      max_row_sum, block_num_f_points, &RT, restrict_type[lev]);
                RT_array[lev] = RT;
             }
             hypre_GpuProfilingPopRange();
@@ -1359,11 +1352,9 @@ hypre_MGRSetup( void               *mgr_vdata,
                restrict_type[lev] = 2;
             }
             hypre_MGRBuildRestrict(A_array[lev], A_FF, A_FC, CF_marker,
-                                   coarse_pnts_global, 1, dof_func_buff_data,
-                                   debug_flag, trunc_factor, P_max_elmts[lev],
-                                   strong_threshold, max_row_sum,
-                                   block_jacobi_bsize, &RT, restrict_type[lev],
-                                   num_restrict_sweeps);
+                                   coarse_pnts_global, trunc_factor, P_max_elmts[lev],
+                                   strong_threshold, max_row_sum, block_jacobi_bsize,
+                                   &RT, restrict_type[lev]);
             RT_array[lev] = RT;
             hypre_GpuProfilingPopRange();
             HYPRE_ANNOTATE_REGION_END("%s", region_name);
