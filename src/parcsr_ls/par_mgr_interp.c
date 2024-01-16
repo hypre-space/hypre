@@ -265,13 +265,13 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
    {
       if (blk_size > 1)
       {
-         /* Block column sum restriction */
-         hypre_MGRBlockColSumRestrict(A, A_FF, A_CF, CF_marker, blk_size, &W, &R);
+         /* Block column-lumped restriction */
+         hypre_MGRBlockColLumpedRestrict(A, A_FF, A_CF, CF_marker, blk_size, &W, &R);
       }
       else
       {
-         /* Column sum restriction */
-         hypre_MGRColSumRestrict(A, A_FF, A_CF, CF_marker, &W, &R);
+         /* Column-lumped restriction */
+         hypre_MGRColLumpedRestrict(A, A_FF, A_CF, CF_marker, &W, &R);
       }
    }
    else
@@ -2382,16 +2382,16 @@ hypre_MGRBuildRFromW(HYPRE_Int            *C_map,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MGRColSumRestrict
+ * hypre_MGRColLumpedRestrict
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRColSumRestrict(hypre_ParCSRMatrix  *A,
-                        hypre_ParCSRMatrix  *A_FF,
-                        hypre_ParCSRMatrix  *A_CF,
-                        hypre_IntArray      *CF_marker,
-                        hypre_ParCSRMatrix **W_ptr,
-                        hypre_ParCSRMatrix **R_ptr)
+hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix  *A,
+                           hypre_ParCSRMatrix  *A_FF,
+                           hypre_ParCSRMatrix  *A_CF,
+                           hypre_IntArray      *CF_marker,
+                           hypre_ParCSRMatrix **W_ptr,
+                           hypre_ParCSRMatrix **R_ptr)
 {
    hypre_ParVector         *b_FF       = NULL;
    hypre_ParVector         *b_CF       = NULL;
@@ -2466,17 +2466,17 @@ hypre_MGRColSumRestrict(hypre_ParCSRMatrix  *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MGRBlockColSumRestrict
+ * hypre_MGRBlockColLumpedRestrict
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRBlockColSumRestrict(hypre_ParCSRMatrix  *A,
-                             hypre_ParCSRMatrix  *A_FF,
-                             hypre_ParCSRMatrix  *A_CF,
-                             hypre_IntArray      *CF_marker,
-                             HYPRE_Int            block_dim,
-                             hypre_ParCSRMatrix **W_ptr,
-                             hypre_ParCSRMatrix **R_ptr)
+hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
+                                hypre_ParCSRMatrix  *A_FF,
+                                hypre_ParCSRMatrix  *A_CF,
+                                hypre_IntArray      *CF_marker,
+                                HYPRE_Int            block_dim,
+                                hypre_ParCSRMatrix **W_ptr,
+                                hypre_ParCSRMatrix **R_ptr)
 {
    hypre_DenseBlockMatrix  *b_FF       = NULL;
    hypre_DenseBlockMatrix  *b_CF       = NULL;

@@ -3708,13 +3708,13 @@ HYPRE_Int hypre_MGRTruncateAcfCPR( hypre_ParCSRMatrix *A_CF, hypre_ParCSRMatrix 
 HYPRE_Int hypre_MGRBuildRFromW( HYPRE_Int *C_map, HYPRE_Int *F_map, HYPRE_BigInt *row_starts_R,
                                 HYPRE_BigInt *col_starts_R, hypre_ParCSRMatrix *W,
                                 hypre_ParCSRMatrix **R_ptr );
-HYPRE_Int hypre_MGRBlockColSumRestrict( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
-                                        hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker,
-                                        HYPRE_Int block_dim, hypre_ParCSRMatrix **W_ptr,
-                                        hypre_ParCSRMatrix **R_ptr);
-HYPRE_Int hypre_MGRColSumRestrict(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
-                                  hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker,
-                                  hypre_ParCSRMatrix **W_ptr, hypre_ParCSRMatrix **R_ptr);
+HYPRE_Int hypre_MGRBlockColLumpedRestrict( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
+                                           hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker,
+                                           HYPRE_Int block_dim, hypre_ParCSRMatrix **W_ptr,
+                                           hypre_ParCSRMatrix **R_ptr);
+HYPRE_Int hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
+                                     hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker,
+                                     hypre_ParCSRMatrix **W_ptr, hypre_ParCSRMatrix **R_ptr);
 
 /* par_mgr_coarsen.c */
 HYPRE_Int hypre_MGRCoarseParms( MPI_Comm comm, HYPRE_Int num_rows, hypre_IntArray *CF_marker,
