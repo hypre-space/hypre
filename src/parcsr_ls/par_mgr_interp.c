@@ -2323,8 +2323,8 @@ hypre_MGRBuildRFromW(HYPRE_Int            *C_map,
 
    /* Output matrix */
    hypre_ParCSRMatrix    *R;
-   HYPRE_BigInt           num_rows_R        = num_rows_W;
-   HYPRE_BigInt           num_cols_R        = num_cols_W + num_rows_W;
+   HYPRE_BigInt           num_rows_R        = (HYPRE_Int) (row_starts_R[1] - row_starts_R[0]);
+   HYPRE_BigInt           num_cols_R        = (HYPRE_Int) (col_starts_R[1] - col_starts_R[0]);
    HYPRE_Int              num_nonzeros_diag = W_diag_nnz + W_diag_num_rows;
    HYPRE_Int              num_nonzeros_offd = W_offd_nnz;
 
@@ -2423,12 +2423,16 @@ hypre_MGRColSumRestrict(hypre_ParCSRMatrix  *A,
     * 3) W = approx(A_CF) * inv(approx(A_FF))
     *-------------------------------------------------------*/
 
-   r_CF = hypre_ParVectorCreate(hypre_ParVectorComm(b_FF),
-                                hypre_ParVectorGlobalSize(b_FF),
-                                hypre_ParVectorPartitioning(b_FF));
-   hypre_ParVectorInitialize_v2(r_CF, hypre_ParVectorMemoryLocation(b_FF));
+   r_CF = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_CF),
+                                hypre_ParCSRMatrixGlobalNumRows(A_CF),
+                                hypre_ParCSRMatrixRowStarts(A_CF));
+   hypre_ParVectorInitialize_v2(r_CF, hypre_ParCSRMatrixMemoryLocation(A_CF));
    hypre_ParVectorElmdivpy(b_CF, b_FF, r_CF);
-   W = hypre_ParCSRMatrixCreateFromParVector(r_CF, 0);
+   W = hypre_ParCSRMatrixCreateFromParVector(r_CF,
+                                             hypre_ParCSRMatrixGlobalNumRows(A_CF),
+                                             hypre_ParCSRMatrixGlobalNumCols(A_CF),
+                                             hypre_ParCSRMatrixRowStarts(A_CF),
+                                             hypre_ParCSRMatrixColStarts(A_CF));
 
    /* Free memory */
    hypre_ParVectorDestroy(b_FF);

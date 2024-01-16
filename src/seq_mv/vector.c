@@ -900,15 +900,9 @@ hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
 #endif
 
    /* Sanity checks */
-   if (hypre_VectorSize(y) != hypre_VectorSize(b))
+   if (hypre_VectorSize(x) != hypre_VectorSize(b))
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "sizes of y and b do not match!\n");
-      return hypre_error_flag;
-   }
-
-   if (hypre_VectorSize(x) < hypre_VectorSize(y))
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "x_size is smaller than y_size!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "sizes of x and b do not match!\n");
       return hypre_error_flag;
    }
 
@@ -967,8 +961,8 @@ hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
  * Computes: y = y + x ./ b
  *
  * Notes:
- *    1) y and b must have the same sizes
- *    2) x_size can be larger than y_size
+ *    1) x and b must have the same sizes
+ *    2) x and y can have different sizes
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

@@ -607,15 +607,20 @@ hypre_ParCSRMatrixCreateFromDenseBlockMatrix(MPI_Comm                comm,
 
 hypre_ParCSRMatrix*
 hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
-                                      HYPRE_Int        copy_data)
+                                      HYPRE_BigInt     global_num_rows,
+                                      HYPRE_BigInt     global_num_cols,
+                                      HYPRE_BigInt    *row_starts,
+                                      HYPRE_BigInt    *col_starts)
 {
    /* Input vector variables */
    MPI_Comm              comm            = hypre_ParVectorComm(b);
-   HYPRE_BigInt         *row_starts      = hypre_ParVectorPartitioning(b);
-   HYPRE_BigInt          global_size     = hypre_ParVectorGlobalSize(b);
-   HYPRE_Int             local_size      = hypre_ParVectorLocalSize(b);
    hypre_Vector         *local_vector    = hypre_ParVectorLocalVector(b);
    HYPRE_MemoryLocation  memory_location = hypre_ParVectorMemoryLocation(b);
+
+   /* Auxiliary variables */
+   HYPRE_Int             num_rows        = (HYPRE_Int) row_starts[1] - row_starts[0];
+   HYPRE_Int             num_cols        = (HYPRE_Int) col_starts[1] - col_starts[0];
+   HYPRE_Int             num_nonzeros    = hypre_min(num_rows, num_cols);
 
    /* Output matrix variables */
    hypre_ParCSRMatrix   *A;
@@ -627,9 +632,16 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
    /* Local variables */
    HYPRE_Int             i;
 
+   /* Sanity check */
+   if (hypre_ParVectorNumVectors(b) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented for multi-component vectors");
+      return NULL;
+   }
+
    /* Create output matrix */
-   A = hypre_ParCSRMatrixCreate(comm, global_size, global_size,
-                                row_starts, row_starts, 0, local_size, 0);
+   A = hypre_ParCSRMatrixCreate(comm, global_num_rows, global_num_cols,
+                                row_starts, col_starts, 0, num_nonzeros, 0);
    A_diag = hypre_ParCSRMatrixDiag(A);
    A_offd = hypre_ParCSRMatrixOffd(A);
 
@@ -638,32 +650,39 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
    hypre_CSRMatrixMemoryLocation(A_offd) = memory_location;
 
    /* Set diag's data pointer */
-   if (hypre_VectorOwnsData(local_vector) && !copy_data)
+   if (hypre_VectorOwnsData(local_vector))
    {
       hypre_CSRMatrixData(A_diag) = hypre_VectorData(local_vector);
       hypre_VectorOwnsData(b) = 0;
    }
    else
    {
-      hypre_CSRMatrixData(A_diag) = hypre_CTAlloc(HYPRE_Complex, local_size, memory_location);
+      hypre_CSRMatrixData(A_diag) = hypre_CTAlloc(HYPRE_Complex, num_nonzeros, memory_location);
       hypre_TMemcpy(hypre_CSRMatrixData(A_diag),
                     hypre_VectorData(local_vector),
-                    HYPRE_Complex, local_size,
+                    HYPRE_Complex, num_nonzeros,
                     memory_location, memory_location);
    }
 
    /* Set diag's row pointer and column indices */
-   A_diag_i = hypre_CTAlloc(HYPRE_Int, local_size + 1, HYPRE_MEMORY_HOST);
-   A_diag_j = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
+   A_diag_i = hypre_CTAlloc(HYPRE_Int, num_rows + 1, HYPRE_MEMORY_HOST);
+   A_diag_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
    #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
-   for (i = 0; i < local_size; i++)
+   for (i = 0; i < num_nonzeros; i++)
    {
       A_diag_i[i] = A_diag_j[i] = i;
    }
-   A_diag_i[local_size] = local_size;
+
+#ifdef HYPRE_USING_OPENMP
+   #pragma omp parallel for HYPRE_SMP_SCHEDULE
+#endif
+   for (i = num_nonzeros; i < num_rows + 1; i++)
+   {
+      A_diag_i[i] = num_nonzeros;
+   }
 
    /* Initialize offd portion */
    hypre_CSRMatrixInitialize_v2(A_offd, 0, memory_location);
@@ -671,15 +690,15 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
    /* Migrate to dest. memory location */
    if (memory_location != HYPRE_MEMORY_HOST)
    {
-      hypre_CSRMatrixI(A_diag) = hypre_TAlloc(HYPRE_Int, local_size + 1, memory_location);
-      hypre_CSRMatrixJ(A_diag) = hypre_TAlloc(HYPRE_Int, local_size, memory_location);
+      hypre_CSRMatrixI(A_diag) = hypre_TAlloc(HYPRE_Int, num_rows + 1, memory_location);
+      hypre_CSRMatrixJ(A_diag) = hypre_TAlloc(HYPRE_Int, num_nonzeros, memory_location);
 
       hypre_TMemcpy(hypre_CSRMatrixI(A_diag), A_diag_i,
-                    HYPRE_Int, local_size + 1,
+                    HYPRE_Int, num_rows + 1,
                     memory_location, HYPRE_MEMORY_HOST);
 
       hypre_TMemcpy(hypre_CSRMatrixJ(A_diag), A_diag_j,
-                    HYPRE_Int, local_size,
+                    HYPRE_Int, num_nonzeros,
                     memory_location, HYPRE_MEMORY_HOST);
    }
    else
