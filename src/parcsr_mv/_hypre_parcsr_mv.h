@@ -741,7 +741,7 @@ HYPRE_Int HYPRE_ParVectorPrintBinaryIJ ( HYPRE_ParVector vector, const char *fil
 HYPRE_Int HYPRE_ParVectorSetConstantValues ( HYPRE_ParVector vector, HYPRE_Complex value );
 HYPRE_Int HYPRE_ParVectorSetRandomValues ( HYPRE_ParVector vector, HYPRE_Int seed );
 HYPRE_Int HYPRE_ParVectorCopy ( HYPRE_ParVector x, HYPRE_ParVector y );
-HYPRE_Int hypre_ParVectorStridedCopy( hypre_ParVector *x, HYPRE_Int stride,
+HYPRE_Int hypre_ParVectorStridedCopy( hypre_ParVector *x, HYPRE_Int istride, HYPRE_Int ostride,
                                       HYPRE_Int size, HYPRE_Complex *data );
 HYPRE_ParVector HYPRE_ParVectorCloneShallow ( HYPRE_ParVector x );
 HYPRE_Int HYPRE_ParVectorScale ( HYPRE_Complex value, HYPRE_ParVector x );

@@ -46,26 +46,49 @@ struct hypreFunctor_DenseMatrixIdentity
 };
 
 /*--------------------------------------------------------------------------
- * hypreFunctor_ComplexStridedAccess
+ * hypreFunctor_ArrayStridedAccess
  *
- * Functor for doing strided access on a HYPRE_Complex array
+ * Functor for performing strided data access on a templated array.
+ *
+ * The stride interval "s_" is used to access every "s_"-th element
+ * from the source array "a_".
+ *
+ * It is templated to support various data types for the array.
  *--------------------------------------------------------------------------*/
 
-struct hypreFunctor_ComplexStridedAccess
+template <typename T>
+struct hypreFunctor_ArrayStridedAccess
 {
-   HYPRE_Int      s_;
-   HYPRE_Complex *a_;
+   HYPRE_Int  s_;
+   T         *a_;
 
-   hypreFunctor_ComplexStridedAccess(HYPRE_Int s, HYPRE_Complex *a)
-   {
-      s_ = s;
-      a_ = a;
-   }
+   hypreFunctor_ArrayStridedAccess(HYPRE_Int s, T *a) : s_(s), a_(a) {}
 
-   __host__ __device__ HYPRE_Complex operator()(HYPRE_Int i)
+   __host__ __device__ T operator()(HYPRE_Int i)
    {
       return a_[i * s_];
    }
+};
+
+/*--------------------------------------------------------------------------
+ * hypreFunctor_IndexStrided
+ *
+ * This functor multiplies a given index "i" by a specified stride "s_".
+ *
+ * It is templated to support various data types for the index and stride.
+ *--------------------------------------------------------------------------*/
+
+template <typename T>
+struct hypreFunctor_IndexStrided
+{
+    T s_;
+
+    hypreFunctor_IndexStrided(T s) : s_(s) {}
+
+    __host__ __device__ T operator()(const T i) const
+    {
+        return i * s_;
+    }
 };
 
 #endif /* if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
