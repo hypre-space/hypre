@@ -28,6 +28,8 @@ constexpr HYPRE_Int NUMER_HASH_SIZE[11] = { 0,  8, 16,  32,  64, 128,  256,  512
 #endif
 constexpr HYPRE_Int T_GROUP_SIZE[11]    = { 0,  2,  4,   8,  16,  32,   64,  128,  256,  512,  1024 };
 
+#define HYPRE_SPGEMM_HIGHEST_BIN 10
+
 #if defined(HYPRE_USING_CUDA)
 #define HYPRE_SPGEMM_DEFAULT_BIN 5
 #elif defined(HYPRE_USING_HIP)
