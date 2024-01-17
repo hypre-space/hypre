@@ -4185,7 +4185,8 @@ hypre_ParvecBdiagInvScal( hypre_ParVector     *b,
    hypre_MPI_Comm_rank(comm, &my_id);
    hypre_MPI_Comm_size(comm, &num_procs);
 
-   HYPRE_Int i, j, s, block_start, block_end;
+   HYPRE_Int    i, j, s;
+   HYPRE_BigInt block_start, block_end;
    HYPRE_BigInt nrow_global = hypre_ParVectorGlobalSize(b);
    HYPRE_BigInt first_row   = hypre_ParVectorFirstIndex(b);
    HYPRE_BigInt last_row    = hypre_ParVectorLastIndex(b);
@@ -4217,7 +4218,8 @@ hypre_ParvecBdiagInvScal( hypre_ParVector     *b,
    hypre_ParCSRCommHandle  *comm_handle;
 
    hypre_ParVector *bnew = hypre_ParVectorCreate( hypre_ParVectorComm(b),
-                                                  hypre_ParVectorGlobalSize(b), hypre_ParVectorPartitioning(b) );
+                                                  hypre_ParVectorGlobalSize(b),
+                                                  hypre_ParVectorPartitioning(b) );
    hypre_ParVectorInitialize(bnew);
    hypre_Vector    *bnew_local      = hypre_ParVectorLocalVector(bnew);
    HYPRE_Complex   *bnew_local_data = hypre_VectorData(bnew_local);
@@ -5687,6 +5689,8 @@ hypre_ExchangeExternalRowsWait(void *vrequest)
  *
  * extract submatrix A_{FF}, A_{FC}, A_{CF} or A_{CC}
  * char job[2] = "FF", "FC", "CF" or "CC"
+ *
+ * TODO (VPM): Can we do the same with hypre_ParCSRMatrixGenerateFFFC?
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -5844,7 +5848,8 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
    hypre_assert(k == B_ncol_local);
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   send_buf_data = hypre_TAlloc(HYPRE_BigInt, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+   send_buf_data = hypre_TAlloc(HYPRE_BigInt,
+                                hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                 HYPRE_MEMORY_HOST);
    k = 0;
    for (i = 0; i < num_sends; i++)
@@ -5988,7 +5993,7 @@ hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix  *A,
       }
       for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
       {
-         HYPRE_Int j1 = sub_idx_offd[A_offd_j[j]];
+         HYPRE_Int j1 = (HYPRE_Int) sub_idx_offd[A_offd_j[j]];
          if ((j1 != -1) && (hypre_cabs(A_offd_a[j]) > (strength_thresh * maxel)))
          {
             hypre_assert(j1 >= 0 && j1 < num_cols_B_offd);

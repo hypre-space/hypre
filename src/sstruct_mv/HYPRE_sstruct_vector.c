@@ -150,7 +150,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
    HYPRE_MemoryLocation    memory_location = hypre_HandleMemoryLocation(hypre_handle());
 
    /* GEC0902 addition of variables for ilower and iupper   */
-   HYPRE_Int               ilower, iupper;
+   HYPRE_BigInt            ilower, iupper;
    hypre_ParVector        *par_vector;
    hypre_Vector           *parlocal_vector;
 
