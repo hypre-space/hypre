@@ -2309,8 +2309,6 @@ hypre_MGRBuildRFromW(HYPRE_Int            *C_map,
 {
    /* Input matrix variables */
    MPI_Comm               comm              = hypre_ParCSRMatrixComm(W);
-   HYPRE_BigInt           num_rows_W        = hypre_ParCSRMatrixGlobalNumRows(W);
-   HYPRE_BigInt           num_cols_W        = hypre_ParCSRMatrixGlobalNumCols(W);
    HYPRE_MemoryLocation   memory_location_W = hypre_ParCSRMatrixMemoryLocation(W);
 
    hypre_CSRMatrix       *W_diag            = hypre_ParCSRMatrixDiag(W);
@@ -2323,8 +2321,8 @@ hypre_MGRBuildRFromW(HYPRE_Int            *C_map,
 
    /* Output matrix */
    hypre_ParCSRMatrix    *R;
-   HYPRE_BigInt           num_rows_R        = (HYPRE_Int) (row_starts_R[1] - row_starts_R[0]);
-   HYPRE_BigInt           num_cols_R        = (HYPRE_Int) (col_starts_R[1] - col_starts_R[0]);
+   HYPRE_BigInt           global_num_rows_R = row_starts_R[1] - row_starts_R[0];
+   HYPRE_BigInt           global_num_cols_R = col_starts_R[1] - col_starts_R[0];
    HYPRE_Int              num_nonzeros_diag = W_diag_nnz + W_diag_num_rows;
    HYPRE_Int              num_nonzeros_offd = W_offd_nnz;
 
@@ -2343,7 +2341,7 @@ hypre_MGRBuildRFromW(HYPRE_Int            *C_map,
     * Create and initialize output matrix
     *-----------------------------------------------------------------------*/
 
-   R = hypre_ParCSRMatrixCreate(comm, num_rows_R, num_cols_R,
+   R = hypre_ParCSRMatrixCreate(comm, global_num_rows_R, global_num_cols_R,
                                 row_starts_R, col_starts_R, W_offd_num_cols,
                                 num_nonzeros_diag, num_nonzeros_offd);
    hypre_ParCSRMatrixInitialize_v2(R, memory_location_W);
