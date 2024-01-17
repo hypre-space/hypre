@@ -373,6 +373,21 @@ hypre_ParVectorCopy( hypre_ParVector *x,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_ParVectorStridedCopy
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorStridedCopy( hypre_ParVector *x,
+                            HYPRE_Int        stride,
+                            HYPRE_Int        size,
+                            HYPRE_Complex   *data)
+{
+   hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
+
+   return hypre_SeqVectorStridedCopy(x_local, stride, size, data);
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ParVectorCloneShallow
  *
  * Returns a complete copy of a hypre_ParVector x - a shallow copy, re-using
