@@ -34,5 +34,28 @@ struct hypreFunctor_DenseMatrixIdentity
    }
 };
 
+/*--------------------------------------------------------------------------
+ * hypreFunctor_ComplexStridedAccess
+ *
+ * Functor for doing strided access on a HYPRE_Complex array
+ *--------------------------------------------------------------------------*/
+
+struct hypreFunctor_ComplexStridedAccess
+{
+   HYPRE_Int      s_;
+   HYPRE_Complex *a_;
+
+   hypreFunctor_ComplexStridedAccess(HYPRE_Int s, HYPRE_Complex *a)
+   {
+      s_ = s;
+      a_ = a;
+   }
+
+   __host__ __device__ HYPRE_Complex operator()(HYPRE_Int i)
+   {
+      return a_[i * s_];
+   }
+};
+
 #endif /* if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 #endif /* ifndef HYPRE_FUNCTORS_H */
