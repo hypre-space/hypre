@@ -479,9 +479,9 @@ hypre_SeqVectorStridedCopy( hypre_Vector  *x,
    HYPRE_Int        i;
 
    /* Sanity checks */
-   if (stride < 0)
+   if (stride < 1)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid stride!");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Stride needs to be greater than zero!");
       return hypre_error_flag;
    }
 
