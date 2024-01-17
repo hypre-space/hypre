@@ -460,6 +460,60 @@ hypre_SeqVectorCopy( hypre_Vector *x,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SeqVectorStridedCopy
+ *
+ * Perform strided copy from a data array to x->data.
+ *
+ * We assume that the data array lives in the same memory location as x->data
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorStridedCopy( hypre_Vector  *x,
+                            HYPRE_Int      stride,
+                            HYPRE_Int      size,
+                            HYPRE_Complex *data)
+{
+   HYPRE_Int        x_size = hypre_VectorSize(x);
+   HYPRE_Complex   *x_data = hypre_VectorData(x);
+
+   HYPRE_Int        i;
+
+   /* Sanity checks */
+   if (stride < 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Stride needs to be greater than zero!");
+      return hypre_error_flag;
+   }
+
+   if (x_size < size)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not enough space in x!");
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_VectorMemoryLocation(x));
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_SeqVectorStridedCopyDevice(x, stride, size, data);
+   }
+   else
+#endif
+   {
+#if defined(HYPRE_USING_OPENMP)
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < size; i += stride)
+      {
+         x_data[i] = data[i];
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SeqVectorCloneDeep_v2
  *--------------------------------------------------------------------------*/
 
