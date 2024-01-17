@@ -2302,6 +2302,8 @@ hypre_MGRBuildRFromWHost(HYPRE_Int           *C_map,
 HYPRE_Int
 hypre_MGRBuildRFromW(HYPRE_Int            *C_map,
                      HYPRE_Int            *F_map,
+                     HYPRE_BigInt          global_num_rows_R,
+                     HYPRE_BigInt          global_num_cols_R,
                      HYPRE_BigInt         *row_starts_R,
                      HYPRE_BigInt         *col_starts_R,
                      hypre_ParCSRMatrix   *W,
@@ -2321,8 +2323,6 @@ hypre_MGRBuildRFromW(HYPRE_Int            *C_map,
 
    /* Output matrix */
    hypre_ParCSRMatrix    *R;
-   HYPRE_BigInt           global_num_rows_R = row_starts_R[1] - row_starts_R[0];
-   HYPRE_BigInt           global_num_cols_R = col_starts_R[1] - col_starts_R[0];
    HYPRE_Int              num_nonzeros_diag = W_diag_nnz + W_diag_num_rows;
    HYPRE_Int              num_nonzeros_offd = W_offd_nnz;
 
@@ -2447,6 +2447,8 @@ hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix  *A,
    /* Build restriction from W (R = [-W  I]) */
    hypre_MGRBuildRFromW(hypre_IntArrayArrayEntryIData(CF_maps, 0),
                         hypre_IntArrayArrayEntryIData(CF_maps, 1),
+                        hypre_ParCSRMatrixGlobalNumRows(A_CF),
+                        hypre_ParCSRMatrixGlobalNumCols(A),
                         hypre_ParCSRMatrixRowStarts(A_CF),
                         hypre_ParCSRMatrixColStarts(A),
                         W, &R);
@@ -2559,6 +2561,8 @@ hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
    /* Build restriction from W (R = [-W  I]) */
    hypre_MGRBuildRFromW(hypre_IntArrayArrayEntryIData(CF_maps, 0),
                         hypre_IntArrayArrayEntryIData(CF_maps, 1),
+                        hypre_ParCSRMatrixGlobalNumRows(A_CF),
+                        hypre_ParCSRMatrixGlobalNumCols(A),
                         hypre_ParCSRMatrixRowStarts(A_CF),
                         hypre_ParCSRMatrixColStarts(A),
                         W, &R);
