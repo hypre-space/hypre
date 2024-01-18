@@ -269,7 +269,7 @@ HYPRE_Int hypre_SeqVectorSetConstantValues ( hypre_Vector *v, HYPRE_Complex valu
 HYPRE_Int hypre_SeqVectorSetConstantValuesHost ( hypre_Vector *v, HYPRE_Complex value );
 HYPRE_Int hypre_SeqVectorSetRandomValues ( hypre_Vector *v, HYPRE_Int seed );
 HYPRE_Int hypre_SeqVectorCopy ( hypre_Vector *x, hypre_Vector *y );
-HYPRE_Int hypre_SeqVectorStridedCopy( hypre_Vector *x, HYPRE_Int stride,
+HYPRE_Int hypre_SeqVectorStridedCopy( hypre_Vector *x, HYPRE_Int istride, HYPRE_Int ostride,
                                       HYPRE_Int size, HYPRE_Complex *data);
 hypre_Vector *hypre_SeqVectorCloneDeep ( hypre_Vector *x );
 hypre_Vector *hypre_SeqVectorCloneDeep_v2( hypre_Vector *x, HYPRE_MemoryLocation memory_location );
@@ -378,6 +378,7 @@ HYPRE_Int hypre_SeqVectorElmdivpyDevice( hypre_Vector *x, hypre_Vector *b, hypre
                                          HYPRE_Int *marker, HYPRE_Int marker_val );
 HYPRE_Real hypre_SeqVectorInnerProdDevice ( hypre_Vector *x, hypre_Vector *y );
 HYPRE_Complex hypre_SeqVectorSumEltsDevice ( hypre_Vector *vector );
-HYPRE_Int hypre_SeqVectorStridedCopyDevice( hypre_Vector *vector, HYPRE_Int stride,
+HYPRE_Int hypre_SeqVectorStridedCopyDevice( hypre_Vector *vector,
+                                            HYPRE_Int istride, HYPRE_Int ostride,
                                             HYPRE_Int size, HYPRE_Complex *data );
 HYPRE_Int hypre_SeqVectorPrefetch(hypre_Vector *x, HYPRE_MemoryLocation memory_location);

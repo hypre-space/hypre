@@ -469,7 +469,8 @@ hypre_SeqVectorCopy( hypre_Vector *x,
 
 HYPRE_Int
 hypre_SeqVectorStridedCopy( hypre_Vector  *x,
-                            HYPRE_Int      stride,
+                            HYPRE_Int      istride,
+                            HYPRE_Int      ostride,
                             HYPRE_Int      size,
                             HYPRE_Complex *data)
 {
@@ -479,13 +480,19 @@ hypre_SeqVectorStridedCopy( hypre_Vector  *x,
    HYPRE_Int        i;
 
    /* Sanity checks */
-   if (stride < 1)
+   if (istride < 1)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Stride needs to be greater than zero!");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Input stride needs to be greater than zero!");
       return hypre_error_flag;
    }
 
-   if (x_size < size)
+   if (ostride < 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Output stride needs to be greater than zero!");
+      return hypre_error_flag;
+   }
+
+   if (x_size < (size / istride) * ostride)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not enough space in x!");
       return hypre_error_flag;
@@ -496,7 +503,7 @@ hypre_SeqVectorStridedCopy( hypre_Vector  *x,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypre_SeqVectorStridedCopyDevice(x, stride, size, data);
+      hypre_SeqVectorStridedCopyDevice(x, istride, ostride, size, data);
    }
    else
 #endif
@@ -504,9 +511,9 @@ hypre_SeqVectorStridedCopy( hypre_Vector  *x,
 #if defined(HYPRE_USING_OPENMP)
       #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-      for (i = 0; i < size; i += stride)
+      for (i = 0; i < size; i += istride)
       {
-         x_data[i] = data[i];
+         x_data[(i / istride) * ostride] = data[i];
       }
    }
 
