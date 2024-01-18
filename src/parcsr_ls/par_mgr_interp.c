@@ -2391,12 +2391,18 @@ hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix  *A,
                            hypre_ParCSRMatrix **W_ptr,
                            hypre_ParCSRMatrix **R_ptr)
 {
+   HYPRE_BigInt             global_num_coarse = hypre_ParCSRMatrixGlobalNumRows(A_CF);
+   HYPRE_BigInt             global_num_fine   = hypre_ParCSRMatrixGlobalNumCols(A_CF);
+
+   hypre_ParVector         *tmp_FF     = NULL;
    hypre_ParVector         *b_FF       = NULL;
    hypre_ParVector         *b_CF       = NULL;
    hypre_ParVector         *r_CF       = NULL;
    hypre_ParCSRMatrix      *W          = NULL;
    hypre_ParCSRMatrix      *R          = NULL;
+   hypre_DenseBlockMatrix  *B_CF       = NULL;
 
+   HYPRE_Int                block_dim;
    HYPRE_Int                num_points = 2;
    HYPRE_Int                points[2]  = {1, -1}; // {C, F}
    HYPRE_Int                sizes[2]   = {hypre_ParCSRMatrixNumRows(A_CF),
@@ -2405,17 +2411,65 @@ hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix  *A,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
+   /* Sanity check */
+   block_dim = global_num_coarse / global_num_fine;
+   if (global_num_coarse % global_num_fine)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "num_coarse is not evenly divisible by num_fine!");
+      return hypre_error_flag;
+   }
+
    /*-------------------------------------------------------
     * 1) b_FF = approx(A_FF)
     *-------------------------------------------------------*/
 
    hypre_ParCSRMatrixColSum(A_FF, &b_FF);
 
+   /* Scatter b_FF coefficients */
+   if (global_num_fine < global_num_coarse)
+   {
+      tmp_FF = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_CF),
+                                     hypre_ParCSRMatrixGlobalNumRows(A_CF),
+                                     hypre_ParCSRMatrixRowStarts(A_CF));
+      hypre_ParVectorInitialize_v2(tmp_FF, hypre_ParCSRMatrixMemoryLocation(A_CF));
+      hypre_ParVectorSetConstantValues(tmp_FF, 1.0);
+      hypre_ParVectorStridedCopy(tmp_FF,
+                                 1, block_dim,
+                                 hypre_ParVectorLocalSize(b_FF),
+                                 hypre_ParVectorLocalData(b_FF));
+      hypre_ParVectorDestroy(b_FF);
+      b_FF = tmp_FF;
+   }
+
    /*-------------------------------------------------------
     * 2) b_CF = approx(A_CF)
     *-------------------------------------------------------*/
 
-   hypre_ParCSRMatrixColSum(A_CF, &b_CF);
+   if (global_num_fine == global_num_coarse)
+   {
+      /* Compute column sum */
+      hypre_ParCSRMatrixColSum(A_CF, &b_CF);
+   }
+   else if (global_num_fine < global_num_coarse)
+   {
+      /* Compute block column sum */
+      hypre_ParCSRMatrixBlockColSum(A_CF, 1, block_dim, 1, &B_CF);
+
+      /* Gather coefficients from B_CF into b_CF */
+      b_CF = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_CF),
+                                   hypre_ParCSRMatrixGlobalNumRows(A_CF),
+                                   hypre_ParCSRMatrixRowStarts(A_CF));
+      hypre_ParVectorInitialize_v2(b_CF, hypre_ParCSRMatrixMemoryLocation(A_CF));
+      hypre_ParVectorStridedCopy(b_CF,
+                                 block_dim, block_dim,
+                                 hypre_DenseBlockMatrixNumNonzeros(B_CF),
+                                 hypre_DenseBlockMatrixData(B_CF));
+   }
+   else
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "num_fine > num_coarse not implemented!");
+      return hypre_error_flag;
+   }
 
    /*-------------------------------------------------------
     * 3) W = approx(A_CF) * inv(approx(A_FF))

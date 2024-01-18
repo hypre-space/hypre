@@ -620,7 +620,8 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
    /* Auxiliary variables */
    HYPRE_Int             num_rows        = (HYPRE_Int) row_starts[1] - row_starts[0];
    HYPRE_Int             num_cols        = (HYPRE_Int) col_starts[1] - col_starts[0];
-   HYPRE_Int             num_nonzeros    = hypre_min(num_rows, num_cols);
+   HYPRE_Int             num_nonzeros    = hypre_ParVectorLocalSize(b);
+   HYPRE_Int             rows_block_dim  = num_rows / num_cols;
 
    /* Output matrix variables */
    hypre_ParCSRMatrix   *A;
@@ -630,12 +631,19 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
    HYPRE_Int            *A_diag_j;
 
    /* Local variables */
-   HYPRE_Int             i;
+   HYPRE_Int             i, j;
 
-   /* Sanity check */
+   /* Sanity checks */
    if (hypre_ParVectorNumVectors(b) > 1)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented for multi-component vectors");
+      return NULL;
+   }
+
+   if (num_rows % num_cols)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Number of rows is not evenly divisible by number of columns");
       return NULL;
    }
 
@@ -668,21 +676,28 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
    A_diag_i = hypre_CTAlloc(HYPRE_Int, num_rows + 1, HYPRE_MEMORY_HOST);
    A_diag_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros, HYPRE_MEMORY_HOST);
 
-#ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel for HYPRE_SMP_SCHEDULE
-#endif
-   for (i = 0; i < num_nonzeros; i++)
+   if (num_rows == num_cols)
    {
-      A_diag_i[i] = A_diag_j[i] = i;
-   }
-
 #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel for HYPRE_SMP_SCHEDULE
+      #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
-   for (i = num_nonzeros; i < num_rows + 1; i++)
-   {
-      A_diag_i[i] = num_nonzeros;
+      for (i = 0; i < num_rows; i++)
+      {
+         A_diag_i[i] = A_diag_j[i] = i;
+      }
    }
+   else
+   {
+      for (i = 0; i < num_rows; i++)
+      {
+         A_diag_i[i] = i;
+         for (j = 0; j < rows_block_dim; j++)
+         {
+            A_diag_j[i] = i / rows_block_dim;
+         }
+      }
+   }
+   A_diag_i[num_rows] = num_nonzeros;
 
    /* Initialize offd portion */
    hypre_CSRMatrixInitialize_v2(A_offd, 0, memory_location);
