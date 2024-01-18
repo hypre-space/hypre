@@ -74,8 +74,8 @@ typedef struct _hypre_ParCSRCommPkg
 {
    MPI_Comm                          comm;
 #ifdef HYPRE_USING_NODE_AWARE_MPI
-   MPIX_Comm                        *neighbor_comm;
-   MPIX_Comm                        *neighborT_comm;
+   MPI_Comm                        *neighbor_comm;
+   MPI_Comm                        *neighborT_comm;
 #endif
    HYPRE_Int                         num_components;
    HYPRE_Int                         num_sends;
@@ -803,10 +803,12 @@ HYPRE_Int hypre_RangeFillResponseIJDetermineRecvProcs ( void *p_recv_contact_buf
 HYPRE_Int hypre_FillResponseIJDetermineSendProcs ( void *p_recv_contact_buf, HYPRE_Int contact_size,
                                                    HYPRE_Int contact_proc, void *ro, MPI_Comm comm, void **p_send_response_buf,
                                                    HYPRE_Int *response_message_size );
+#ifdef HYPRE_USING_NODE_AWARE_MPI
 void hypre_ParCSRCreateCommGraph( HYPRE_BigInt first_col_diag,
                                   HYPRE_BigInt *col_map_offd,
                                   MPI_Comm comm,
                                   hypre_ParCSRCommPkg *comm_pkg );
+#endif
 
 /* numbers.c */
 hypre_NumbersNode *hypre_NumbersNewNode ( void );

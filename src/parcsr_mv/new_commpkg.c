@@ -781,16 +781,18 @@ hypre_ParCSRCreateCommGraph(HYPRE_BigInt first_col_diag,
    for (int i = 0; i < num_recvs; i++) {
       recvcounts[i] = recv_vec_starts[i+1] - recv_vec_starts[i];
    }
-   MPIX_Dist_graph_create_adjacent( comm, num_recvs, hypre_ParCSRCommPkgRecvProcs(comm_pkg),
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", "MPI graph creation");
+   MPI_Dist_graph_create_adjacent( comm, num_recvs, hypre_ParCSRCommPkgRecvProcs(comm_pkg),
                                     recvcounts,
                                     num_sends, hypre_ParCSRCommPkgSendProcs(comm_pkg),
                                     sendcounts,
                                     MPI_INFO_NULL, 0, &(comm_pkg->neighbor_comm));
-   MPIX_Dist_graph_create_adjacent( comm, num_sends, hypre_ParCSRCommPkgSendProcs(comm_pkg),
+   MPI_Dist_graph_create_adjacent( comm, num_sends, hypre_ParCSRCommPkgSendProcs(comm_pkg),
                                     sendcounts,
                                     num_recvs, hypre_ParCSRCommPkgRecvProcs(comm_pkg),
                                     recvcounts,
                                     MPI_INFO_NULL, 0, &(comm_pkg->neighborT_comm));
+   HYPRE_ANNOTATE_REGION_END("%s", "MPI graph creation");
 
    HYPRE_Int num_send_elmts = send_map_starts[num_sends];
    comm_pkg->global_send_indices = hypre_CTAlloc(long, num_send_elmts, HYPRE_MEMORY_HOST);
