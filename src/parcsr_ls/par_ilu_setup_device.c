@@ -431,7 +431,7 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
  * Output arguments:
  *   num_iter_ptr - number of iterations
  *   history_ptr - list of corrections and residual values for each iteration
- *                 (computed only when residuals_ptr points to NULL at entrance)
+ *                 (computed only when the 5th bit of option is active)
  *
  * Note: This function requires rocSPARSE 2.4.0 at least.
  *--------------------------------------------------------------------------*/
@@ -570,7 +570,7 @@ hypre_ILUSetupIterativeILU0Device(hypre_CSRMatrix  *A,
    hypre_TFree(A_data, HYPRE_MEMORY_DEVICE);
 
    /*-------------------------------------------------------------------------------------
-    * 6. Compute history if requested (*history_ptr == NULL)
+    * 6. Compute history if requested
     *-------------------------------------------------------------------------------------*/
 
    if (option & rocsparse_itilu0_option_convergence_history)
