@@ -133,6 +133,12 @@ typedef double                 hypre_double;
 #endif
 #endif
 
+/* Macro for ceiling division. It assumes non-negative dividend and positive divisor.
+   The result of this macro might need to be casted to an integer type depending on the use case */
+#ifndef hypre_ceildiv
+#define hypre_ceildiv(a, b) (((a) + (b) - 1) / (b))
+#endif
+
 #ifndef hypre_ceil
 #if defined(HYPRE_SINGLE)
 #define hypre_ceil ceilf
