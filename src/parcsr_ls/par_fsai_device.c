@@ -947,10 +947,7 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    hypre_GpuProfilingPushRange("CandPat");
 
    /* Compute filtered version of A */
-   if (num_levels > 0)
-   {
-      Atilde = hypre_ParCSRMatrixClone(A, 1);
-   }
+   Atilde = hypre_ParCSRMatrixClone(A, 1);
 
    /* Pre-filter to reduce SpGEMM cost */
    if (num_levels > 1)
@@ -963,14 +960,6 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    /* Compute power pattern */
    switch (num_levels)
    {
-      case 0:
-         hypre_TFree(h_info, HYPRE_MEMORY_HOST);
-         hypre_TFree(info, HYPRE_MEMORY_DEVICE);
-         hypre_CSRMatrixExtractDiagonalDevice(hypre_ParCSRMatrixDiag(Atilde), scaling, 0);
-
-
-         return hypre_error_flag;
-
       case 1:
          Ktilde = Atilde;
          break;
