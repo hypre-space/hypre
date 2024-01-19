@@ -1680,8 +1680,8 @@ HYPRE_Int HYPRE_FSAISetMaxNnzRow( HYPRE_Solver solver,
 
 /**
  * (Optional) Sets the number of levels for computing the candidate pattern of G.
- * This input parameter makes sense when using static FSAI, i.e., algorithm
- * type 3.
+ * This input parameter must be a positive integer and it makes sense
+ * when using static FSAI, i.e., algorithm type 3.
  **/
 HYPRE_Int HYPRE_FSAISetNumLevels( HYPRE_Solver solver,
                                   HYPRE_Int    num_levels );
