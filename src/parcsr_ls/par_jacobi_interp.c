@@ -14,14 +14,17 @@
 #define HYPRE_MAX_PRINTABLE_MATRIX 125
 /*#define HYPRE_JACINT_PRINT_DIAGNOSTICS*/
 
-void hypre_BoomerAMGJacobiInterp( hypre_ParCSRMatrix * A,
-                                  hypre_ParCSRMatrix ** P,
-                                  hypre_ParCSRMatrix * S,
-                                  HYPRE_Int num_functions, HYPRE_Int * dof_func,
-                                  HYPRE_Int * CF_marker, HYPRE_Int level,
-                                  HYPRE_Real truncation_threshold,
-                                  HYPRE_Real truncation_threshold_minus )
 /* nji steps of Jacobi interpolation, with nji presently just set in the code.*/
+HYPRE_Int
+hypre_BoomerAMGJacobiInterp( hypre_ParCSRMatrix  *A,
+                             hypre_ParCSRMatrix **P,
+                             hypre_ParCSRMatrix  *S,
+                             HYPRE_Int            num_functions,
+                             HYPRE_Int           *dof_func,
+                             HYPRE_Int           *CF_marker,
+                             HYPRE_Int            level,
+                             HYPRE_Real           truncation_threshold,
+                             HYPRE_Real           truncation_threshold_minus )
 {
    HYPRE_Real weight_AF = 1.0;  /* weight multiplied by A's fine row elements */
    HYPRE_Int * dof_func_offd = NULL;
@@ -45,16 +48,10 @@ void hypre_BoomerAMGJacobiInterp( hypre_ParCSRMatrix * A,
    {
       hypre_TFree( dof_func_offd, HYPRE_MEMORY_HOST);
    }
+
+   return hypre_error_flag;
 }
 
-void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
-                                    hypre_ParCSRMatrix ** P,
-                                    hypre_ParCSRMatrix * S,
-                                    HYPRE_Int * CF_marker, HYPRE_Int level,
-                                    HYPRE_Real truncation_threshold,
-                                    HYPRE_Real truncation_threshold_minus,
-                                    HYPRE_Int * dof_func, HYPRE_Int * dof_func_offd,
-                                    HYPRE_Real weight_AF)
 /* One step of Jacobi interpolation:
    A is the linear system.
    P is an interpolation matrix, input and output
@@ -73,6 +70,18 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    where "old" denotes a value on entry to this function, "new" a returned value.
 
 */
+
+HYPRE_Int
+hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix  *A,
+                               hypre_ParCSRMatrix **P,
+                               hypre_ParCSRMatrix  *S,
+                               HYPRE_Int           *CF_marker,
+                               HYPRE_Int            level,
+                               HYPRE_Real           truncation_threshold,
+                               HYPRE_Real           truncation_threshold_minus,
+                               HYPRE_Int           *dof_func,
+                               HYPRE_Int           *dof_func_offd,
+                               HYPRE_Real           weight_AF )
 {
    HYPRE_UNUSED_VAR(S);
    HYPRE_UNUSED_VAR(level);
@@ -393,13 +402,11 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    if ( num_rows_diag_P <= HYPRE_MAX_PRINTABLE_MATRIX ) { hypre_ParCSRMatrixPrintIJ( *P, 0, 0, filename); }
 #endif
 
-   hypre_TFree( J_marker, HYPRE_MEMORY_HOST);
+   hypre_TFree(J_marker, HYPRE_MEMORY_HOST);
 
+   return hypre_error_flag;
 }
 
-void hypre_BoomerAMGTruncateInterp( hypre_ParCSRMatrix *P,
-                                    HYPRE_Real eps, HYPRE_Real dlt,
-                                    HYPRE_Int * CF_marker )
 /* Truncate the interpolation matrix P, but only in rows for which the
    marker is <0.  Truncation means that an element P(i,j) is set to 0 if
    P(i,j)>0 and P(i,j)<eps*max( P(i,j) )  or if
@@ -419,6 +426,12 @@ void hypre_BoomerAMGTruncateInterp( hypre_ParCSRMatrix *P,
    are affected.  Lastly, in hypre_BoomerAMGInterpTruncation, if any
    element gets discarded, it reallocates arrays to the new size.
 */
+
+HYPRE_Int
+hypre_BoomerAMGTruncateInterp( hypre_ParCSRMatrix *P,
+                               HYPRE_Real          eps,
+                               HYPRE_Real          dlt,
+                               HYPRE_Int          *CF_marker )
 {
    hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(P);
    hypre_CSRMatrix *P_offd = hypre_ParCSRMatrixOffd(P);
@@ -555,9 +568,8 @@ void hypre_BoomerAMGTruncateInterp( hypre_ParCSRMatrix *P,
    hypre_ParCSRMatrixSetDNumNonzeros( P );
    hypre_ParCSRMatrixSetNumNonzeros( P );
 
+   return hypre_error_flag;
 }
-
-
 
 /*
   hypre_ParCSRMatrix_dof_func_offd allocates, computes and returns dof_func_offd.
@@ -568,11 +580,10 @@ void hypre_BoomerAMGTruncateInterp( hypre_ParCSRMatrix *P,
 */
 
 HYPRE_Int
-hypre_ParCSRMatrix_dof_func_offd(
-   hypre_ParCSRMatrix    *A,
-   HYPRE_Int                    num_functions,
-   HYPRE_Int                   *dof_func,
-   HYPRE_Int                  **dof_func_offd )
+hypre_ParCSRMatrix_dof_func_offd(hypre_ParCSRMatrix    *A,
+                                 HYPRE_Int              num_functions,
+                                 HYPRE_Int             *dof_func,
+                                 HYPRE_Int            **dof_func_offd )
 {
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
@@ -593,7 +604,6 @@ hypre_ParCSRMatrix_dof_func_offd(
          *dof_func_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
       }
    }
-
 
    /*-------------------------------------------------------------------
      * Get the dof_func data for the off-processor columns

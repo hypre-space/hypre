@@ -222,7 +222,7 @@ hypre_MGRDestroy( void *data )
    {
       if ((mgr_data -> coarse_grid_solver))
       {
-         hypre_BoomerAMGDestroy( (mgr_data -> coarse_grid_solver) );
+         HYPRE_BoomerAMGDestroy( (mgr_data -> coarse_grid_solver) );
       }
       (mgr_data -> coarse_grid_solver) = NULL;
    }
@@ -357,7 +357,7 @@ hypre_MGRDestroy( void *data )
       }
       if (mgr_data -> fsolver_mode == 2)
       {
-         hypre_BoomerAMGDestroy((mgr_data -> aff_solver)[0]);
+         HYPRE_BoomerAMGDestroy((mgr_data -> aff_solver)[0]);
       }
       hypre_TFree(mgr_data -> aff_solver, HYPRE_MEMORY_HOST);
       (mgr_data -> aff_solver) = NULL;
@@ -1421,7 +1421,7 @@ hypre_MGRComputeAlgebraicFixedStress(hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrixMatvecOutOfPlace(1.0, A_up, e1_vector, 0.0, e2_vector, e2_vector);
 
    // solve e3 = A_uu^-1 * e2
-   hypre_BoomerAMGSolve(A_ff_solver, A_uu, e2_vector, e3_vector);
+   HYPRE_BoomerAMGSolve(A_ff_solver, A_uu, e2_vector, e3_vector);
 
    // compute e4 = A_su * e3
    hypre_ParCSRMatrixMatvecOutOfPlace(1.0, A_su, e3_vector, 0.0, e4_vector, e4_vector);
@@ -2886,15 +2886,15 @@ hypre_MGRSetFSolver( void  *mgr_vdata,
       return hypre_error_flag;
    }
    HYPRE_Int max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
-   HYPRE_Solver **aff_solver = (mgr_data -> aff_solver);
+   HYPRE_Solver *aff_solver = (mgr_data -> aff_solver);
 
    if (aff_solver == NULL)
    {
-      aff_solver = hypre_CTAlloc(HYPRE_Solver*, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+      aff_solver = hypre_CTAlloc(HYPRE_Solver, max_num_coarse_levels, HYPRE_MEMORY_HOST);
    }
 
    /* only allow to set F-solver for the first level */
-   aff_solver[0] = (HYPRE_Solver *) fsolver;
+   aff_solver[0] = (HYPRE_Solver) fsolver;
 
    (mgr_data -> fine_grid_solver_solve) = fine_grid_solver_solve;
    (mgr_data -> fine_grid_solver_setup) = fine_grid_solver_setup;
@@ -2926,7 +2926,7 @@ hypre_MGRSetFSolverAtLevel( HYPRE_Int   level,
       return hypre_error_flag;
    }
    HYPRE_Int        max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
-   HYPRE_Solver   **aff_solver = (mgr_data -> aff_solver);
+   HYPRE_Solver    *aff_solver = (mgr_data -> aff_solver);
 
    /* Check if the requested level makes sense */
    if (level < 0 || level >= max_num_coarse_levels)
@@ -2938,12 +2938,12 @@ hypre_MGRSetFSolverAtLevel( HYPRE_Int   level,
    /* Allocate aff_solver if needed */
    if (!aff_solver)
    {
-      (mgr_data -> aff_solver) = aff_solver = hypre_CTAlloc(HYPRE_Solver*,
+      (mgr_data -> aff_solver) = aff_solver = hypre_CTAlloc(HYPRE_Solver,
                                                             max_num_coarse_levels,
                                                             HYPRE_MEMORY_HOST);
    }
 
-   aff_solver[level] = (HYPRE_Solver *) fsolver;
+   aff_solver[level] = (HYPRE_Solver) fsolver;
    (mgr_data -> fsolver_mode)  = 0;
 
    return hypre_error_flag;

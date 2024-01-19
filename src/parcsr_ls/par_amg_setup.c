@@ -26,13 +26,12 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGSetup( void               *amg_vdata,
+hypre_BoomerAMGSetup( hypre_ParAMGData   *amg_data,
                       hypre_ParCSRMatrix *A,
                       hypre_ParVector    *f,
                       hypre_ParVector    *u )
 {
    MPI_Comm            comm = hypre_ParCSRMatrixComm(A);
-   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    /* Data Structure variables */
    HYPRE_Int            num_vectors;
@@ -488,8 +487,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    }
 
    {
-      MPI_Comm new_comm = hypre_ParAMGDataNewComm(amg_data);
-      void *amg = hypre_ParAMGDataCoarseSolver(amg_data);
+      MPI_Comm     new_comm = hypre_ParAMGDataNewComm(amg_data);
+
       if (hypre_ParAMGDataRtemp(amg_data))
       {
          hypre_ParVectorDestroy(hypre_ParAMGDataRtemp(amg_data));
@@ -541,11 +540,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          hypre_ParAMGDataNewComm(amg_data) = hypre_MPI_COMM_NULL;
       }
 
-      if (amg)
-      {
-         hypre_BoomerAMGDestroy (amg);
-         hypre_ParAMGDataCoarseSolver(amg_data) = NULL;
-      }
+      HYPRE_BoomerAMGDestroy(hypre_ParAMGDataCoarseSolver(amg_data));
+      hypre_ParAMGDataCoarseSolver(amg_data) = NULL;
 
       hypre_TFree(hypre_ParAMGDataMaxEigEst(amg_data), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParAMGDataMinEigEst(amg_data), HYPRE_MEMORY_HOST);

@@ -20,13 +20,11 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGCycle( void              *amg_vdata,
+hypre_BoomerAMGCycle( hypre_ParAMGData  *amg_data,
                       hypre_ParVector  **F_array,
                       hypre_ParVector  **U_array   )
 {
-   hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
-
-   HYPRE_Solver *smoother;
+   HYPRE_Solver             *smoother;
 
    /* Data Structure variables */
    hypre_ParCSRMatrix      **A_array;

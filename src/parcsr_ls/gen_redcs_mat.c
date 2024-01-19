@@ -22,18 +22,17 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
    HYPRE_UNUSED_VAR(coarse_threshold);
 
    /* Par Data Structure variables */
-   hypre_ParCSRMatrix **Par_A_array = hypre_ParAMGDataAArray(amg_data);
+   hypre_ParCSRMatrix    **Par_A_array = hypre_ParAMGDataAArray(amg_data);
+   MPI_Comm                comm        = hypre_ParCSRMatrixComm(Par_A_array[0]);
+   MPI_Comm                new_comm, seq_comm;
 
-   MPI_Comm      comm = hypre_ParCSRMatrixComm(Par_A_array[0]);
-   MPI_Comm      new_comm, seq_comm;
+   hypre_ParCSRMatrix      *A_seq = NULL;
+   hypre_CSRMatrix         *A_seq_diag;
+   hypre_CSRMatrix         *A_seq_offd;
+   hypre_ParVector         *F_seq = NULL;
+   hypre_ParVector         *U_seq = NULL;
 
-   hypre_ParCSRMatrix   *A_seq = NULL;
-   hypre_CSRMatrix  *A_seq_diag;
-   hypre_CSRMatrix  *A_seq_offd;
-   hypre_ParVector   *F_seq = NULL;
-   hypre_ParVector   *U_seq = NULL;
-
-   hypre_ParCSRMatrix *A;
+   hypre_ParCSRMatrix      *A;
 
    hypre_IntArray         **dof_func_array;
    HYPRE_Int                num_procs, my_id;
@@ -42,7 +41,7 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
    HYPRE_Int                redundant;
    HYPRE_Int                num_functions;
 
-   HYPRE_Solver  coarse_solver;
+   HYPRE_Solver             coarse_solver;
 
    /* misc */
    dof_func_array = hypre_ParAMGDataDofFuncArray(amg_data);
@@ -318,7 +317,7 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
             hypre_ParVectorInitialize(F_seq);
             hypre_ParVectorInitialize(U_seq);
 
-            hypre_BoomerAMGSetup(coarse_solver, A_seq, F_seq, U_seq);
+            hypre_BoomerAMGSetup((hypre_ParAMGData *) coarse_solver, A_seq, F_seq, U_seq);
 
             hypre_ParAMGDataCoarseSolver(amg_data) = coarse_solver;
             hypre_ParAMGDataACoarse(amg_data) = A_seq;
@@ -455,7 +454,7 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
       /* clean up */
       if (redundant || my_id == 0)
       {
-         hypre_BoomerAMGSolve(coarse_solver, A_coarse, F_coarse, U_coarse);
+         hypre_BoomerAMGSolve((hypre_ParAMGData *) coarse_solver, A_coarse, F_coarse, U_coarse);
       }
 
       /*copy my part of U to parallel vector */

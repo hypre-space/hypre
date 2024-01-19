@@ -276,7 +276,7 @@ HYPRE_Int hypre_BoomerAMGBlockSolve(void *B,
 
    if (dim == 1)
    {
-      hypre_BoomerAMGSolve(B, A, b, x);
+      hypre_BoomerAMGSolve((hypre_ParAMGData*) B, A, b, x);
       return hypre_error_flag;
    }
 
@@ -291,7 +291,7 @@ HYPRE_Int hypre_BoomerAMGBlockSolve(void *B,
 
    for (d = 0; d < dim; d++)
    {
-      hypre_BoomerAMGSolve(B, A, b_[d], x_[d]);
+      hypre_BoomerAMGSolve((hypre_ParAMGData*) B, A, b_[d], x_[d]);
    }
 
    hypre_ParVectorBlockGather(x, x_, dim);
@@ -4215,7 +4215,7 @@ HYPRE_Int hypre_AMSProjectOutGradients(void *solver,
    {
       hypre_ParCSRMatrixMatvecT(1.0, ams_data -> G0, x, 0.0, ams_data -> r1);
       hypre_ParVectorSetConstantValues(ams_data -> g1, 0.0);
-      hypre_BoomerAMGSolve(ams_data -> B_G0, ams_data -> A_G0, ams_data -> r1, ams_data -> g1);
+      HYPRE_BoomerAMGSolve(ams_data -> B_G0, ams_data -> A_G0, ams_data -> r1, ams_data -> g1);
       hypre_ParCSRMatrixMatvec(1.0, ams_data -> G0, ams_data -> g1, 0.0, ams_data -> g0);
       hypre_ParVectorAxpy(-1.0, ams_data -> g0, x);
    }

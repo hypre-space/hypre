@@ -19,18 +19,14 @@
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGSolveT( void               *amg_vdata,
+hypre_BoomerAMGSolveT( hypre_ParAMGData   *amg_data,
                        hypre_ParCSRMatrix *A,
                        hypre_ParVector    *f,
                        hypre_ParVector    *u         )
 {
-
    MPI_Comm          comm = hypre_ParCSRMatrixComm(A);
 
-   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
-
    /* Data Structure variables */
-
    HYPRE_Int      amg_print_level;
    HYPRE_Int      amg_logging;
    HYPRE_Real  *num_coeffs;
@@ -308,14 +304,11 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGCycleT( void              *amg_vdata,
+hypre_BoomerAMGCycleT( hypre_ParAMGData  *amg_data,
                        hypre_ParVector  **F_array,
                        hypre_ParVector  **U_array   )
 {
-   hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
-
    /* Data Structure variables */
-
    hypre_ParCSRMatrix    **A_array;
    hypre_ParCSRMatrix    **P_array;
    hypre_ParCSRMatrix    **R_array;
