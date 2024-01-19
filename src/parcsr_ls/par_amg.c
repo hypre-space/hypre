@@ -239,7 +239,7 @@ hypre_BoomerAMGCreate( void )
    fsai_max_steps = 4;
    fsai_max_step_size = 2;
    fsai_max_nnz_row = 8;
-   fsai_num_levels = 0;
+   fsai_num_levels = 1;
    fsai_threshold = 0.01;
    fsai_eig_maxiter = 5;
    fsai_kap_tolerance = 0.001;
