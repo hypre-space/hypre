@@ -497,6 +497,7 @@ hypre_new_offd_nodes(HYPRE_BigInt **found,
    HYPRE_BigInt *tmp_found;
    HYPRE_Int min;
    HYPRE_Int ifound;
+   HYPRE_BigInt ifound_big;
 
    size_offP = A_ext_i[num_cols_A_offd] + Sop_i[num_cols_A_offd];
    tmp_found = hypre_CTAlloc(HYPRE_BigInt, size_offP, HYPRE_MEMORY_HOST);
@@ -546,14 +547,14 @@ hypre_new_offd_nodes(HYPRE_BigInt **found,
    if (newoff > 0)
    {
       hypre_BigQsort0(tmp_found, 0, newoff - 1);
-      ifound = tmp_found[0];
+      ifound_big = tmp_found[0];
       min = 1;
       for (i = 1; i < newoff; i++)
       {
-         if (tmp_found[i] > ifound)
+         if (tmp_found[i] > ifound_big)
          {
-            ifound = tmp_found[i];
-            tmp_found[min++] = ifound;
+            ifound_big = tmp_found[i];
+            tmp_found[min++] = ifound_big;
          }
       }
       newoff = min;

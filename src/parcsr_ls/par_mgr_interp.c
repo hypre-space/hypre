@@ -71,7 +71,9 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
 #if defined (HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         hypre_NoGPUSupport("interpolation");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "No GPU support!");
+
+         return hypre_error_flag;
       }
       else
 #endif
@@ -227,7 +229,9 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
 #if defined (HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         hypre_NoGPUSupport("restriction");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "No GPU support!");
+
+         return hypre_error_flag;
       }
       else
 #endif
