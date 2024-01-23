@@ -503,6 +503,8 @@ main( hypre_int argc,
    char mem_tracker_name[HYPRE_MAX_FILE_NAME_LEN] = {0};
 #endif
 
+   HYPRE_Int gpu_aware_mpi = 0;
+
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
 
@@ -1631,6 +1633,11 @@ main( hypre_int argc,
          snprintf(mem_tracker_name, HYPRE_MAX_FILE_NAME_LEN, "%s", argv[arg_index++]);
       }
 #endif
+      else if ( strcmp(argv[arg_index], "-gpu_mpi") == 0 )
+      {
+         arg_index++;
+         gpu_aware_mpi = atoi(argv[arg_index++]);
+      }
       else
       {
          arg_index++;
@@ -2757,6 +2764,8 @@ main( hypre_int argc,
    /* use cuRand for PMIS */
    HYPRE_SetUseGpuRand(use_curand);
 #endif
+
+   HYPRE_SetGpuAwareMPI(gpu_aware_mpi);
 
    /*-----------------------------------------------------------
     * Set up matrix

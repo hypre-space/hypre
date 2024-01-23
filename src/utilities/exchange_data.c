@@ -15,19 +15,25 @@
 #include "_hypre_utilities.h"
 
 /*---------------------------------------------------
- * hypre_CreateBinaryTree()
+ * hypre_CreateBinaryTree
+ *
  * Get the processors position in the binary tree (i.e.,
  * its children and parent processor ids)
  *----------------------------------------------------*/
 
-HYPRE_Int hypre_CreateBinaryTree(HYPRE_Int myid, HYPRE_Int num_procs,
-                                 hypre_BinaryTree *tree)
+HYPRE_Int
+hypre_CreateBinaryTree(HYPRE_Int          myid,
+                       HYPRE_Int          num_procs,
+                       hypre_BinaryTree **tree_ptr)
 {
+   hypre_BinaryTree *tree;
    HYPRE_Int  i, proc, size = 0;
    HYPRE_Int  *tmp_child_id;
    HYPRE_Int  num = 0, parent = 0;
 
-   /* initialize*/
+   tree = hypre_CTAlloc(hypre_BinaryTree, 1, HYPRE_MEMORY_HOST);
+
+   /* initialize */
    proc = myid;
 
    /*how many children can a processor have?*/
@@ -37,7 +43,7 @@ HYPRE_Int hypre_CreateBinaryTree(HYPRE_Int myid, HYPRE_Int num_procs,
    }
 
    /* allocate space */
-   tmp_child_id = hypre_TAlloc(HYPRE_Int,  size, HYPRE_MEMORY_HOST);
+   tmp_child_id = hypre_TAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
 
    /* find children and parent */
    for (i = 1; i < num_procs; i *= 2)
@@ -56,30 +62,38 @@ HYPRE_Int hypre_CreateBinaryTree(HYPRE_Int myid, HYPRE_Int num_procs,
          parent = myid - i;
          break;
       }
-
    }
 
    hypre_BinaryTreeParentId(tree) = parent;
    hypre_BinaryTreeNumChild(tree) = num;
    hypre_BinaryTreeChildIds(tree) = tmp_child_id;
 
+   *tree_ptr = tree;
+
    return hypre_error_flag;
 }
 
 /*---------------------------------------------------
  * hypre_DestroyBinaryTree()
- * Destroy storage created by createBinaryTree
+ *
+ * Destroy storage created by hypre_CreateBinaryTree
  *----------------------------------------------------*/
-HYPRE_Int hypre_DestroyBinaryTree(hypre_BinaryTree *tree)
-{
 
-   hypre_TFree(hypre_BinaryTreeChildIds(tree), HYPRE_MEMORY_HOST);
+HYPRE_Int
+hypre_DestroyBinaryTree(hypre_BinaryTree *tree)
+{
+   if (tree)
+   {
+      hypre_TFree(hypre_BinaryTreeChildIds(tree), HYPRE_MEMORY_HOST);
+      hypre_TFree(tree, HYPRE_MEMORY_HOST);
+   }
 
    return hypre_error_flag;
 }
 
 /*---------------------------------------------------
  * hypre_DataExchangeList()
+ *
  * This function is for sending a list of messages ("contacts" to
  * a list of processors.  The receiving processors
  * do not know how many messages they are getting. The
@@ -90,17 +104,19 @@ HYPRE_Int hypre_DestroyBinaryTree(hypre_BinaryTree *tree)
 /* should change to where the buffers for sending and receiving are voids
    instead of ints - then cast accordingly */
 
-HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
-                                 HYPRE_Int *contact_proc_list,
-                                 void *contact_send_buf,
-                                 HYPRE_Int *contact_send_buf_starts,
-                                 HYPRE_Int contact_obj_size,
-                                 HYPRE_Int response_obj_size,
-                                 hypre_DataExchangeResponse *response_obj,
-                                 HYPRE_Int max_response_size,
-                                 HYPRE_Int rnum, MPI_Comm comm,
-                                 void **p_response_recv_buf,
-                                 HYPRE_Int **p_response_recv_buf_starts)
+HYPRE_Int
+hypre_DataExchangeList(HYPRE_Int num_contacts,
+                       HYPRE_Int *contact_proc_list,
+                       void *contact_send_buf,
+                       HYPRE_Int *contact_send_buf_starts,
+                       HYPRE_Int contact_obj_size,
+                       HYPRE_Int response_obj_size,
+                       hypre_DataExchangeResponse *response_obj,
+                       HYPRE_Int max_response_size,
+                       HYPRE_Int rnum,
+                       MPI_Comm comm,
+                       void **p_response_recv_buf,
+                       HYPRE_Int **p_response_recv_buf_starts)
 {
    /*-------------------------------------------
     *  parameters:
@@ -275,7 +291,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
 
    if (num_procs > 1)
    {
-      hypre_CreateBinaryTree(myid, num_procs, tree);
+      hypre_CreateBinaryTree(myid, num_procs, &tree);
 
       /* we will get a message from all of our children when they
          have received responses for all of their contacts.

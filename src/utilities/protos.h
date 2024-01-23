@@ -55,7 +55,8 @@ HYPRE_Int hypre_GetDeviceCount(hypre_int *device_count);
 HYPRE_Int hypre_GetDeviceLastError(void);
 HYPRE_Int hypre_UmpireInit(hypre_Handle *hypre_handle_);
 HYPRE_Int hypre_UmpireFinalize(hypre_Handle *hypre_handle_);
-HYPRE_Int hypre_GetDeviceMaxShmemSize(hypre_int device_id, hypre_int *max_size_ptr, hypre_int *max_size_optin_ptr);
+HYPRE_Int hypre_GetDeviceMaxShmemSize(hypre_int device_id, hypre_int *max_size_ptr,
+                                      hypre_int *max_size_optin_ptr);
 
 /* matrix_stats.h */
 hypre_MatrixStats* hypre_MatrixStatsCreate( void );
@@ -389,6 +390,8 @@ HYPRE_Int hypre_SetUseGpuRand( HYPRE_Int use_gpurand );
 HYPRE_Int hypre_SetGaussSeidelMethod( HYPRE_Int gs_method );
 HYPRE_Int hypre_SetUserDeviceMalloc(GPUMallocFunc func);
 HYPRE_Int hypre_SetUserDeviceMfree(GPUMfreeFunc func);
+HYPRE_Int hypre_SetGpuAwareMPI( HYPRE_Int use_gpu_aware_mpi );
+HYPRE_Int hypre_GetGpuAwareMPI(void);
 
 /* int_array.c */
 hypre_IntArray* hypre_IntArrayCreate( HYPRE_Int size );

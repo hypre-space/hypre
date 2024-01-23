@@ -1708,8 +1708,8 @@ HYPRE_Int HYPRE_FSAISetMaxNnzRow( HYPRE_Solver solver,
 
 /**
  * (Optional) Sets the number of levels for computing the candidate pattern of G.
- * This input parameter makes sense when using static FSAI, i.e., algorithm
- * type 3.
+ * This input parameter must be a positive integer and it makes sense
+ * when using static FSAI, i.e., algorithm type 3.
  **/
 HYPRE_Int HYPRE_FSAISetNumLevels( HYPRE_Solver solver,
                                   HYPRE_Int    num_levels );
@@ -4313,27 +4313,29 @@ HYPRE_Int HYPRE_MGRSetCoarseSolver(HYPRE_Solver             solver,
 /**
  * @brief (Optional) Set the verbosity level for MGR.
  *
- * @details You can control what information gets printed by specifying the
- * output levels using this function. Each option corresponds to a specific type
- * of information, and you can activate several of them at the same time by summing
- * their respective numeric codes, which are given below:
+ * @details Control what information gets printed by specifying the output levels
+ * using this function. Each option corresponds to a specific type of information, and you
+ * can activate several of them at the same time by summing their respective numeric codes,
+*  which are given below:
  *
- *   - 1:  Print MGR's setup information.
- *   - 2:  Print MGR's solve information.
- *   - 4:  Print MGR's parameters information.
- *   - 8:  Set print mode for matrices and vectors to ASCII (binary mode is used by default)
- *   - 16: Print the finest level matrix to NP files where NP is the number of ranks.
- *   - 32: Print the finest level right-hand-side to NP files.
+ *   - 1:   Print MGR's setup information.
+ *   - 2:   Print MGR's solve information.
+ *   - 4:   Print MGR's parameters information.
+ *   - 8:   Set print mode for matrices and vectors to ASCII (binary mode is used by default)
+ *   - 16:  Print the finest level matrix to NP files where NP is the number of ranks.
+ *   - 32:  Print the finest level right-hand-side to NP files.
+ *   - 64:  Print the coarsest level matrix to NP files.
+ *   - 128: Print the full MGR hierarchy (operator, interpolation, and restriction).
  *
  * @param solver [IN] The solver to configure.
  * @param print_level [IN] The desired output level.
  *
- * @example To print setup information (1); matrix (16) and rhs (32) to binary files,
+ * @example To print setup information (1); fine matrix (16) and rhs (32) to binary files,
  * set \c print_level to 49 (1 + 16 + 32). In the previous example, to use ASCII
  * files for matrices and vectors, set \c print_level to 57 (1 + 8 + 16 + 32).
  *
  * @note The default print level is zero, which means no information will be
- * printed by default.
+ * printed by default. Options starting from 8 are intended for developers' usage.
  **/
 HYPRE_Int
 HYPRE_MGRSetPrintLevel( HYPRE_Solver solver,

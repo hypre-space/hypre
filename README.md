@@ -14,13 +14,14 @@ large, sparse linear systems of equations on massively parallel computers.
 
 For documentation, see our [readthedocs page](https://hypre.readthedocs.io/en/latest/).
 
+For information on code development, build requirements, publications, and more,
+see our [Wiki page](https://github.com/hypre-space/hypre/wiki).
+
 To install HYPRE, please see either the documentation or the file [INSTALL.md](./INSTALL.md).
 
 An overview of the HYPRE release history can be found in the file [CHANGELOG](./CHANGELOG).
 
-We appreciate feedback from users.  Please submit comments, suggestions, and
-report issues on our [issues page](https://github.com/hypre-space/hypre/issues).
-See also [SUPPORT.md](./SUPPORT.md).
+Support information can be found in the file [SUPPORT.md](./SUPPORT.md).
 
 
 License
@@ -37,4 +38,3 @@ See [LICENSE-MIT](./LICENSE-MIT), [LICENSE-APACHE](./LICENSE-APACHE),
 SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 LLNL-CODE-778117
-

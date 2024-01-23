@@ -133,6 +133,12 @@ typedef double                 hypre_double;
 #endif
 #endif
 
+/* Macro for ceiling division. It assumes non-negative dividend and positive divisor.
+   The result of this macro might need to be casted to an integer type depending on the use case */
+#ifndef hypre_ceildiv
+#define hypre_ceildiv(a, b) (((a) + (b) - 1) / (b))
+#endif
+
 #ifndef hypre_ceil
 #if defined(HYPRE_SINGLE)
 #define hypre_ceil ceilf
@@ -500,6 +506,7 @@ HYPRE_Int hypre_ParPrintf(MPI_Comm comm, const char *format, ...);
 typedef struct
 {
    HYPRE_Int  error_flag;
+   HYPRE_Int  temp_error_flag;
    HYPRE_Int  print_to_memory;
    char      *memory;
    HYPRE_Int  mem_sz;
@@ -509,16 +516,19 @@ typedef struct
 
 extern hypre_Error hypre__global_error;
 #define hypre_error_flag  hypre__global_error.error_flag
+#define hypre_error_temp_flag  hypre__global_error.temp_error_flag
 
 /*--------------------------------------------------------------------------
  * HYPRE error macros
  *--------------------------------------------------------------------------*/
 
 void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const char *msg);
+void hypre_error_code_save(void);
+void hypre_error_code_restore(void);
 
-#define hypre_error(IERR)  hypre_error_handler(__FILE__, __LINE__, IERR, NULL)
-#define hypre_error_w_msg(IERR, msg)  hypre_error_handler(__FILE__, __LINE__, IERR, msg)
-#define hypre_error_in_arg(IARG)  hypre_error(HYPRE_ERROR_ARG | IARG<<3)
+#define hypre_error(IERR) hypre_error_handler(__FILE__, __LINE__, IERR, NULL)
+#define hypre_error_w_msg(IERR, msg) hypre_error_handler(__FILE__, __LINE__, IERR, msg)
+#define hypre_error_in_arg(IARG) hypre_error(HYPRE_ERROR_ARG | IARG<<3)
 
 #if defined(HYPRE_DEBUG)
 /* host assert */
@@ -543,7 +553,6 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #endif
 
 #endif /* hypre_ERROR_HEADER */
-
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -611,6 +620,7 @@ extern "C" {
 #define MPI_MAX             hypre_MPI_MAX
 #define MPI_LOR             hypre_MPI_LOR
 #define MPI_LAND            hypre_MPI_LAND
+#define MPI_BOR             hypre_MPI_BOR
 #define MPI_SUCCESS         hypre_MPI_SUCCESS
 #define MPI_STATUSES_IGNORE hypre_MPI_STATUSES_IGNORE
 
@@ -724,6 +734,7 @@ typedef HYPRE_Int  hypre_MPI_Info;
 #define  hypre_MPI_MAX 2
 #define  hypre_MPI_LOR 3
 #define  hypre_MPI_LAND 4
+#define  hypre_MPI_BOR 5
 #define  hypre_MPI_SUCCESS 0
 #define  hypre_MPI_STATUSES_IGNORE 0
 
@@ -772,6 +783,7 @@ typedef MPI_User_function    hypre_MPI_User_function;
 #define  hypre_MPI_MIN MPI_MIN
 #define  hypre_MPI_MAX MPI_MAX
 #define  hypre_MPI_LOR MPI_LOR
+#define  hypre_MPI_BOR MPI_BOR
 #define  hypre_MPI_SUCCESS MPI_SUCCESS
 #define  hypre_MPI_STATUSES_IGNORE MPI_STATUSES_IGNORE
 
@@ -1661,7 +1673,7 @@ typedef struct
 
 } hypre_DataExchangeResponse;
 
-HYPRE_Int hypre_CreateBinaryTree(HYPRE_Int, HYPRE_Int, hypre_BinaryTree*);
+HYPRE_Int hypre_CreateBinaryTree(HYPRE_Int, HYPRE_Int, hypre_BinaryTree**);
 HYPRE_Int hypre_DestroyBinaryTree(hypre_BinaryTree*);
 HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts, HYPRE_Int *contact_proc_list,
                                  void *contact_send_buf, HYPRE_Int *contact_send_buf_starts, HYPRE_Int contact_obj_size,
@@ -1669,7 +1681,6 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts, HYPRE_Int *contact_proc
                                  HYPRE_Int rnum, MPI_Comm comm, void **p_response_recv_buf, HYPRE_Int **p_response_recv_buf_starts);
 
 #endif /* end of header */
-
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -1780,6 +1791,11 @@ typedef struct
    HYPRE_Int              struct_comm_recv_buffer_size;
    HYPRE_Int              struct_comm_send_buffer_size;
 
+   /* GPU MPI */
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_Int              use_gpu_aware_mpi;
+#endif
+
 #if defined(HYPRE_USING_GPU)
    hypre_DeviceData      *device_data;
    HYPRE_Int              device_gs_method; /* device G-S options */
@@ -1822,6 +1838,7 @@ typedef struct
 
 #define hypre_HandleDeviceData(hypre_handle)                     ((hypre_handle) -> device_data)
 #define hypre_HandleDeviceGSMethod(hypre_handle)                 ((hypre_handle) -> device_gs_method)
+#define hypre_HandleUseGpuAwareMPI(hypre_handle)                 ((hypre_handle) -> use_gpu_aware_mpi)
 
 #define hypre_HandleCurandGenerator(hypre_handle)                hypre_DeviceDataCurandGenerator(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCublasHandle(hypre_handle)                   hypre_DeviceDataCublasHandle(hypre_HandleDeviceData(hypre_handle))
@@ -2040,7 +2057,8 @@ HYPRE_Int hypre_GetDeviceCount(hypre_int *device_count);
 HYPRE_Int hypre_GetDeviceLastError(void);
 HYPRE_Int hypre_UmpireInit(hypre_Handle *hypre_handle_);
 HYPRE_Int hypre_UmpireFinalize(hypre_Handle *hypre_handle_);
-HYPRE_Int hypre_GetDeviceMaxShmemSize(hypre_int device_id, hypre_int *max_size_ptr, hypre_int *max_size_optin_ptr);
+HYPRE_Int hypre_GetDeviceMaxShmemSize(hypre_int device_id, hypre_int *max_size_ptr,
+                                      hypre_int *max_size_optin_ptr);
 
 /* matrix_stats.h */
 hypre_MatrixStats* hypre_MatrixStatsCreate( void );
@@ -2374,6 +2392,8 @@ HYPRE_Int hypre_SetUseGpuRand( HYPRE_Int use_gpurand );
 HYPRE_Int hypre_SetGaussSeidelMethod( HYPRE_Int gs_method );
 HYPRE_Int hypre_SetUserDeviceMalloc(GPUMallocFunc func);
 HYPRE_Int hypre_SetUserDeviceMfree(GPUMfreeFunc func);
+HYPRE_Int hypre_SetGpuAwareMPI( HYPRE_Int use_gpu_aware_mpi );
+HYPRE_Int hypre_GetGpuAwareMPI(void);
 
 /* int_array.c */
 hypre_IntArray* hypre_IntArrayCreate( HYPRE_Int size );

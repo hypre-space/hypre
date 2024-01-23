@@ -20,9 +20,16 @@
 void *
 hypre_ILUCreate( void )
 {
-   hypre_ParILUData *ilu_data;
+   hypre_ParILUData  *ilu_data;
+   hypre_Solver      *base;
 
    ilu_data = hypre_CTAlloc(hypre_ParILUData, 1, HYPRE_MEMORY_HOST);
+   base     = (hypre_Solver*) ilu_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_ILUSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_ILUSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) HYPRE_ILUDestroy;
 
 #if defined(HYPRE_USING_GPU)
    hypre_ParILUDataAperm(ilu_data)                        = NULL;

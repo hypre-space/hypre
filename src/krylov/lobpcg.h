@@ -15,10 +15,10 @@
 extern "C" {
 #endif
 
-#define PROBLEM_SIZE_TOO_SMALL                  1
-#define WRONG_BLOCK_SIZE                  2
-#define WRONG_CONSTRAINTS                               3
-#define REQUESTED_ACCURACY_NOT_ACHIEVED         -1
+#define PROBLEM_SIZE_TOO_SMALL           1
+#define WRONG_BLOCK_SIZE                 2
+#define WRONG_CONSTRAINTS                3
+#define REQUESTED_ACCURACY_NOT_ACHIEVED -1
 
 typedef struct
 {
@@ -66,7 +66,7 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
               HYPRE_Real * lambdaHistory_values,
 
               /* global height of the matrix (stored in fotran-style)  specified by previous argument */
-              HYPRE_Int lambdaHistory_gh,
+              HYPRE_BigInt lambdaHistory_gh,
 
               /* residual norms; argument should point to array of <blocksize> doubles */
               HYPRE_Real * residualNorms_values,
@@ -79,7 +79,7 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
               HYPRE_Real * residualNormsHistory_values,
 
               /* global height of the matrix (stored in fotran-style)  specified by previous argument */
-              HYPRE_Int residualNormsHistory_gh
+              HYPRE_BigInt residualNormsHistory_gh
 
             );
 
