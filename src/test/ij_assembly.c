@@ -41,7 +41,7 @@ HYPRE_Int test_Set(MPI_Comm comm, HYPRE_MemoryLocation memory_location, HYPRE_In
                    HYPRE_BigInt num_nonzeros, HYPRE_Int nchunks, HYPRE_Int *h_nnzrow, HYPRE_Int *nnzrow,
                    HYPRE_BigInt *rows, HYPRE_BigInt *cols, HYPRE_Real *coefs, HYPRE_IJMatrix *ij_A_ptr);
 
-HYPRE_Int test_SetTranspose(MPI_Comm comm, HYPRE_MemoryLocation memory_location, HYPRE_Int option, HYPRE_BigInt ilower,
+HYPRE_Int test_AddTranspose(MPI_Comm comm, HYPRE_MemoryLocation memory_location, HYPRE_Int option, HYPRE_BigInt ilower,
                    HYPRE_BigInt iupper, HYPRE_BigInt jlower, HYPRE_BigInt jupper, HYPRE_Int nrows,
                    HYPRE_BigInt num_nonzeros, HYPRE_Int nchunks, HYPRE_Int *h_nnzrow, HYPRE_Int *nnzrow,
                    HYPRE_BigInt *rows, HYPRE_BigInt *cols, HYPRE_Real *coefs, HYPRE_IJMatrix *ij_AT_ptr);
@@ -360,10 +360,10 @@ main( hypre_int  argc,
       HYPRE_IJMatrixDestroy(ij_A);
    }
 
-   /* Test SetTranspose */
+   /* Test AddTranspose */
    if (mode & 2)
    {
-      test_SetTranspose(comm, memory_location, 2, ilower, iupper, jlower, jupper, nrows, num_nonzeros,
+      test_AddTranspose(comm, memory_location, 2, ilower, iupper, jlower, jupper, nrows, num_nonzeros,
                         nchunks, h_nnzrow, nnzrow, rows_coo, cols, coefs, &ij_AT);
 
       hypre_ParCSRMatrixTranspose(parcsr_ref, &parcsr_trans, 1);
@@ -371,7 +371,7 @@ main( hypre_int  argc,
       ierr += checkMatrix(parcsr_trans, ij_AT) > tol;
       if (print_matrix)
       {
-         HYPRE_IJMatrixPrint(ij_AT, "ij_SetTrans");
+         HYPRE_IJMatrixPrint(ij_AT, "ij_AddTrans");
       }
       HYPRE_IJMatrixDestroy(ij_AT);
       HYPRE_ParCSRMatrixDestroy(parcsr_trans);
@@ -801,7 +801,7 @@ test_Set(MPI_Comm             comm,
 /* set values with (row, col) reversed, i.e., the transpose of A
  * in this way, we can test off-proc set values */
 HYPRE_Int
-test_SetTranspose(MPI_Comm             comm,
+test_AddTranspose(MPI_Comm             comm,
                   HYPRE_MemoryLocation memory_location,
                   HYPRE_Int            option,
                   HYPRE_BigInt         ilower,
@@ -854,9 +854,9 @@ test_SetTranspose(MPI_Comm             comm,
    {
       chunk_size = hypre_min(chunk_size, nrows - chunk);
 
-      HYPRE_IJMatrixSetValues(ij_AT, h_rowptr[chunk + chunk_size] - h_rowptr[chunk],
-                              NULL, &cols[h_rowptr[chunk]],
-                              &rows[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
+      HYPRE_IJMatrixAddToValues(ij_AT, h_rowptr[chunk + chunk_size] - h_rowptr[chunk],
+                                NULL, &cols[h_rowptr[chunk]],
+                                &rows[h_rowptr[chunk]], &coefs[h_rowptr[chunk]]);
    }
 
    // Assemble matrix
