@@ -96,6 +96,46 @@ HYPRE_ILUSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ILUSetIterativeSetupType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ILUSetIterativeSetupType( HYPRE_Solver solver, HYPRE_Int iter_setup_type )
+{
+   return hypre_ILUSetIterativeSetupType( solver, iter_setup_type );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetIterativeSetupOption
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ILUSetIterativeSetupOption( HYPRE_Solver solver, HYPRE_Int iter_setup_option )
+{
+   return hypre_ILUSetIterativeSetupOption( solver, iter_setup_option );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetIterativeSetupMaxIter
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ILUSetIterativeSetupMaxIter( HYPRE_Solver solver, HYPRE_Int iter_setup_max_iter )
+{
+   return hypre_ILUSetIterativeSetupMaxIter( solver, iter_setup_max_iter );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetIterativeSetupTolerance
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ILUSetIterativeSetupTolerance( HYPRE_Solver solver, HYPRE_Real iter_setup_tolerance )
+{
+   return hypre_ILUSetIterativeSetupTolerance( solver, iter_setup_tolerance );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ILUSetTriSolve
  *--------------------------------------------------------------------------*/
 
