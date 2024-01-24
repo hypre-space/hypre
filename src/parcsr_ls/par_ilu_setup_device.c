@@ -170,7 +170,7 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
        */
 
 #if !defined(HYPRE_USING_SYCL)
-      if (ilu_type == 0)
+      if ((fill_level == 0) && !(ilu_type % 10))
       {
          /* Copy diagonal matrix into a new place with permutation
           * That is, A_diag = A_diag(perm,qperm); */
@@ -198,16 +198,16 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
          hypre_ParILURAPReorder(A, perm_data, rqperm_data, &Apq);
 #if defined(HYPRE_USING_SYCL)
          /* WM: note - ILU0 is not yet available in oneMKL sparse */
-         if (ilu_type == 0)
+         if (fill_level == 0 && !(ilu_type % 10))
          {
             hypre_ILUSetupILU0(Apq, NULL, NULL, n, n, &parL, &parD, &parU, &parS, &uend);
          }
 #endif
-         if (ilu_type == 1)
+         if (fill_level != 0 && !(ilu_type % 10))
          {
             hypre_ILUSetupILUK(Apq, fill_level, NULL, NULL, n, n, &parL, &parD, &parU, &parS, &uend);
          }
-         else if (ilu_type == 2)
+         else if ((ilu_type % 10) == 1)
          {
             hypre_ILUSetupILUT(Apq, fill_level, droptol, NULL, NULL, n, n,
                                &parL, &parD, &parU, &parS, &uend);
