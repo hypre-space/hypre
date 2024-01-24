@@ -4337,7 +4337,7 @@ hypre_BoomerAMGSetILUIterSetupType( void     *data,
 
 HYPRE_Int
 hypre_BoomerAMGSetILUIterSetupOption( void     *data,
-                                    HYPRE_Int       ilu_iter_setup_option)
+                                      HYPRE_Int       ilu_iter_setup_option)
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
@@ -4353,7 +4353,7 @@ hypre_BoomerAMGSetILUIterSetupOption( void     *data,
 
 HYPRE_Int
 hypre_BoomerAMGSetILUIterSetupMaxIter( void     *data,
-                                    HYPRE_Int       ilu_iter_setup_max_iter)
+                                       HYPRE_Int       ilu_iter_setup_max_iter)
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
@@ -4369,7 +4369,7 @@ hypre_BoomerAMGSetILUIterSetupMaxIter( void     *data,
 
 HYPRE_Int
 hypre_BoomerAMGSetILUIterSetupTolerance( void     *data,
-                                    HYPRE_Real       ilu_iter_setup_tolerance)
+                                         HYPRE_Real       ilu_iter_setup_tolerance)
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
