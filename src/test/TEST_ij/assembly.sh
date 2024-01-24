@@ -32,7 +32,7 @@ if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
   echo "Incorrect number of runs in ${TNAME}.out" >&2
 fi
 
-# Make the output file has no errors
+# Make sure that the output file has no errors
 for i in $FILES
 do
   echo "# Output file: $i"
