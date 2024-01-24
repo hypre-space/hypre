@@ -42,13 +42,11 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
    /* Input ILU data */
    HYPRE_Int                ilu_type            = hypre_ParILUDataIluType(ilu_data);
    HYPRE_Int                fill_level          = hypre_ParILUDataLfil(ilu_data);
-   HYPRE_Int                max_row_elmts       = hypre_ParILUDataMaxRowNnz(ilu_data);
    HYPRE_Real              *droptol             = hypre_ParILUDataDroptol(ilu_data);
    HYPRE_Int                iter_setup_type     = hypre_ParILUDataIterativeSetupType(ilu_data);
    HYPRE_Int                iter_setup_option   = hypre_ParILUDataIterativeSetupOption(ilu_data);
    HYPRE_Int                iter_setup_max_iter = hypre_ParILUDataIterativeSetupMaxIter(ilu_data);
    HYPRE_Complex            iter_setup_tol      = hypre_ParILUDataIterativeSetupTolerance(ilu_data);
-   HYPRE_Int                tri_solve           = hypre_ParILUDataTriSolve(ilu_data);
 
    /* Input matrix data */
    MPI_Comm                 comm                = hypre_ParCSRMatrixComm(A);
@@ -460,7 +458,6 @@ hypre_ILUSetupIterativeILU0Device(hypre_CSRMatrix  *A,
    rocsparse_index_base      idx_base      = rocsparse_index_base_zero;
    rocsparse_handle          handle        = hypre_HandleCusparseHandle(hypre_handle());
    rocsparse_datatype        data_type;
-   hypre_int                 version;
    size_t                    buffer_size;
    HYPRE_Int                 history_size;
 
