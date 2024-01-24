@@ -1146,57 +1146,85 @@ HYPRE_Int HYPRE_BoomerAMGSetILUUpperJacobiIters( HYPRE_Solver  solver,
                                                  HYPRE_Int     ilu_upper_jacobi_iters);
 
 /**
- * Set Local Reordering paramter (1==RCM, 0==None)
+ * (Optional) Set Local Reordering paramter (1==RCM, 0==None)
  * For further explanation see description of ILU.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetILULocalReordering( HYPRE_Solver solver,
                                                 HYPRE_Int    ilu_reordering_type);
 
 /**
+ * (Optional) Set iterative ILU's algorithm type.
+ * For further explanation see \e HYPRE_ILUSetIterativeSetupType.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILUIterSetupType( HYPRE_Solver solver,
+                                              HYPRE_Int    ilu_iter_setup_type);
+
+/**
+ * (Optional) Set iterative ILU's option.
+ * For further explanation see \e HYPRE_ILUSetIterativeSetupOption.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILUIterSetupOption( HYPRE_Solver solver,
+                                                HYPRE_Int    ilu_iter_setup_option);
+
+/**
+ * (Optional) Set iterative ILU's max. number of iterations.
+ * For further explanation see \e HYPRE_ILUSetIterativeSetupMaxIter.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILUIterSetupMaxIter( HYPRE_Solver solver,
+                                                 HYPRE_Int    ilu_iter_setup_max_iter);
+
+/**
+ * (Optional) Set iterative ILU's tolerance.
+ * For further explanation see \e HYPRE_ILUSetIterativeSetupTolerance.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetILUIterSetupTolerance( HYPRE_Solver solver,
+                                                   HYPRE_Real    ilu_iter_setup_tolerance);
+
+/**
  * (Optional) Defines the algorithm type for setting up FSAI
- * For further explanation see HYPRE_FSAISetAlgoType.
+ * For further explanation see \e HYPRE_FSAISetAlgoType.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFSAIAlgoType(HYPRE_Solver solver,
                                          HYPRE_Int    algo_type);
 
 /**
  * (Optional) Sets the solver type for solving local linear systems in FSAI.
- * For further explanation see HYPRE_FSAISetLocalSolveType.
+ * For further explanation see \e HYPRE_FSAISetLocalSolveType.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFSAILocalSolveType( HYPRE_Solver solver,
                                                 HYPRE_Int    local_solve_type );
 
 /**
  * (Optional) Defines maximum number of steps for FSAI.
- * For further explanation see HYPRE_FSAISetMaxSteps.
+ * For further explanation see \e HYPRE_FSAISetMaxSteps.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxSteps(HYPRE_Solver solver,
                                          HYPRE_Int    max_steps);
 
 /**
  * (Optional) Defines maximum step size for FSAI.
- * For further explanation see HYPRE_FSAISetMaxStepSize.
+ * For further explanation see \e HYPRE_FSAISetMaxStepSize.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxStepSize(HYPRE_Solver solver,
                                             HYPRE_Int    max_step_size);
 
 /**
  * (Optional) Defines maximum number of nonzero entries per row for FSAI.
- * For further explanation see HYPRE_FSAISetMaxNnzRow.
+ * For further explanation see \e HYPRE_FSAISetMaxNnzRow.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFSAIMaxNnzRow(HYPRE_Solver solver,
                                           HYPRE_Int    max_nnz_row);
 
 /**
  * (Optional) Defines number of levels for computing the candidate pattern for FSAI
- * For further explanation see HYPRE_FSAISetNumLevels.
+ * For further explanation see \e HYPRE_FSAISetNumLevels.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFSAINumLevels(HYPRE_Solver solver,
                                           HYPRE_Int    num_levels);
 
 /**
  * (Optional) Defines the threshold for computing the candidate pattern for FSAI
- * For further explanation see HYPRE_FSAISetThreshold.
+ * For further explanation see \e HYPRE_FSAISetThreshold.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFSAIThreshold(HYPRE_Solver solver,
                                           HYPRE_Real   threshold);
@@ -1204,14 +1232,14 @@ HYPRE_Int HYPRE_BoomerAMGSetFSAIThreshold(HYPRE_Solver solver,
 /**
  * (Optional) Defines maximum number of iterations for estimating the
  * largest eigenvalue of the FSAI preconditioned matrix (G^T * G * A).
- * For further explanation see HYPRE_FSAISetEigMaxIters.
+ * For further explanation see \e HYPRE_FSAISetEigMaxIters.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFSAIEigMaxIters(HYPRE_Solver solver,
                                             HYPRE_Int    eig_max_iters);
 
 /**
  * (Optional) Defines the kaporin dropping tolerance.
- * For further explanation see HYPRE_FSAISetKapTolerance.
+ * For further explanation see \e HYPRE_FSAISetKapTolerance.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFSAIKapTolerance(HYPRE_Solver solver,
                                              HYPRE_Real   kap_tolerance);
@@ -4509,6 +4537,58 @@ HYPRE_ILUSolve( HYPRE_Solver solver,
  **/
 HYPRE_Int
 HYPRE_ILUSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter );
+
+/**
+ * (Optional) Set the algorithm type to compute the ILU factorization. Options are:
+ *
+ *    -  0 : Non-iterative algorithm (default)
+ *    -  1 : Asynchronous with in-place storage
+ *    -  2 : Asynchronous with explicit storage splitting
+ *    -  3 : Synchronous with explicit storage splitting
+ *    -  4 : Semi-synchronous with explicit storage splitting
+ *
+ * Note: Iterative ILU is available only for zero fill-in and it depends on rocSPARSE.
+ **/
+HYPRE_Int
+HYPRE_ILUSetIterativeSetupType( HYPRE_Solver solver, HYPRE_Int iter_setup_type );
+
+/**
+ * (Optional) Set the compute option for iterative ILU in an additive fashion, i.e.; multiple
+ * options can be turned on by summing their respective numeric codes as given below:
+ *
+ *    -  2: Use stopping tolerance to finish the algorithm
+ *    -  4: Compute correction norms
+ *    -  8: Compute residual norms
+ *    - 16: Save convergence history
+ *    - 32: Use rocSPARSE's internal COO format
+ *
+ * The iterative ILU algorithm can terminate based on the maximum number of iterations (default)
+ * or a target tolerance (option 2). In the tolerance-based case, the max. number of iterations
+ * is still used to terminate the algorithm in case it does not converge to the requested
+ * tolerance. In addition, the tolerance-based mode uses residual norms by default (option 8).
+ * To use correction norms instead, enable option 4. Lastly, the convergence history for
+ * computing the triangular factors can be saved and printed out by enabling option 16.
+ *
+ * Note: Iterative ILU is available only for zero fill-in, and it depends on rocSPARSE.
+ **/
+HYPRE_Int
+HYPRE_ILUSetIterativeSetupOption( HYPRE_Solver solver, HYPRE_Int iter_setup_option );
+
+/**
+ * (Optional) Set the max. number of iterations for the iterative ILU algorithm.
+ *
+ * Note: Iterative ILU is available only for zero fill-in and it depends on rocSPARSE.
+ **/
+HYPRE_Int
+HYPRE_ILUSetIterativeSetupMaxIter( HYPRE_Solver solver, HYPRE_Int iter_setup_max_iter );
+
+/**
+ * (Optional) Set the stop tolerance for the iterative ILU algorithm.
+ *
+ * Note: Iterative ILU is available only for zero fill-in and it depends on rocSPARSE.
+ **/
+HYPRE_Int
+HYPRE_ILUSetIterativeSetupTolerance( HYPRE_Solver solver, HYPRE_Real iter_setup_tolerance );
 
 /**
  * (Optional) Set triangular solver type. Options are:

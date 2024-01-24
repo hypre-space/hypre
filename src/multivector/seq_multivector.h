@@ -72,7 +72,8 @@ HYPRE_Int hypre_SeqMultivectorSetMask(hypre_Multivector *mvector, HYPRE_Int * ma
 HYPRE_Int hypre_SeqMultivectorCopyWithoutMask(hypre_Multivector *x,
                                               hypre_Multivector *y);
 
-HYPRE_Int hypre_SeqMultivectorByMatrix(hypre_Multivector *x, HYPRE_BigInt rGHeight, HYPRE_Int rHeight,
+HYPRE_Int hypre_SeqMultivectorByMatrix(hypre_Multivector *x, HYPRE_BigInt rGHeight,
+                                       HYPRE_Int rHeight,
                                        HYPRE_Int rWidth, HYPRE_Complex* rVal, hypre_Multivector *y);
 
 HYPRE_Int hypre_SeqMultivectorXapy (hypre_Multivector *x, HYPRE_BigInt rGHeight, HYPRE_Int rHeight,
