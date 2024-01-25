@@ -42,6 +42,7 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
    /* Input ILU data */
    HYPRE_Int                ilu_type            = hypre_ParILUDataIluType(ilu_data);
    HYPRE_Int                fill_level          = hypre_ParILUDataLfil(ilu_data);
+   HYPRE_Int                max_row_nnz         = hypre_ParILUDataMaxRowNnz(ilu_data);
    HYPRE_Real              *droptol             = hypre_ParILUDataDroptol(ilu_data);
    HYPRE_Int                iter_setup_type     = hypre_ParILUDataIterativeSetupType(ilu_data);
    HYPRE_Int                iter_setup_option   = hypre_ParILUDataIterativeSetupOption(ilu_data);
@@ -170,7 +171,7 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
        */
 
 #if !defined(HYPRE_USING_SYCL)
-      if (ilu_type == 0)
+      if ((fill_level == 0) && !(ilu_type % 10))
       {
          /* Copy diagonal matrix into a new place with permutation
           * That is, A_diag = A_diag(perm,qperm); */
@@ -198,18 +199,18 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
          hypre_ParILURAPReorder(A, perm_data, rqperm_data, &Apq);
 #if defined(HYPRE_USING_SYCL)
          /* WM: note - ILU0 is not yet available in oneMKL sparse */
-         if (ilu_type == 0)
+         if (fill_level == 0 && !(ilu_type % 10))
          {
             hypre_ILUSetupILU0(Apq, NULL, NULL, n, n, &parL, &parD, &parU, &parS, &uend);
          }
 #endif
-         if (ilu_type == 1)
+         if (fill_level != 0 && !(ilu_type % 10))
          {
             hypre_ILUSetupILUK(Apq, fill_level, NULL, NULL, n, n, &parL, &parD, &parU, &parS, &uend);
          }
-         else if (ilu_type == 2)
+         else if ((ilu_type % 10) == 1)
          {
-            hypre_ILUSetupILUT(Apq, fill_level, droptol, NULL, NULL, n, n,
+            hypre_ILUSetupILUT(Apq, max_row_nnz, droptol, NULL, NULL, n, n,
                                &parL, &parD, &parU, &parS, &uend);
          }
 
@@ -482,7 +483,7 @@ hypre_ILUSetupIterativeILU0Device(hypre_CSRMatrix  *A,
    return hypre_error_flag;
 
 #elif defined(HYPRE_LONG_DOUBLE)
-   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Long double type is not supported!");
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Long-double type is not supported!");
    return hypre_error_flag;
 
 #elif defined(HYPRE_SINGLE)
@@ -593,6 +594,14 @@ hypre_ILUSetupIterativeILU0Device(hypre_CSRMatrix  *A,
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 #else
+   HYPRE_UNUSED_VAR(A);
+   HYPRE_UNUSED_VAR(type);
+   HYPRE_UNUSED_VAR(option);
+   HYPRE_UNUSED_VAR(max_iter);
+   HYPRE_UNUSED_VAR(tolerance);
+   HYPRE_UNUSED_VAR(num_iter_ptr);
+   HYPRE_UNUSED_VAR(history_ptr);
+
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Iterative ILU0 requires rocSPARSE 2.4.0 at least!");
 #endif
 
