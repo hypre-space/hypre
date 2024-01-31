@@ -1770,7 +1770,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
    HYPRE_Int /*current_proc,*/ original_proc_indx;
 
    HYPRE_BigInt *row_list = NULL;
-   HYPRE_Int *row_list_num_elements = NULL;
+   HYPRE_BigInt *row_list_num_elements = NULL;
    HYPRE_Int *a_proc_id = NULL, *orig_order = NULL;
    HYPRE_Int *real_proc_id = NULL, *us_real_proc_id = NULL;
    HYPRE_Int *ex_contact_procs = NULL, *ex_contact_vec_starts = NULL;
@@ -1876,11 +1876,11 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
 
      apart = hypre_ParCSRMatrixAssumedPartition(par_matrix);*/
 
-   row_list = hypre_CTAlloc(HYPRE_BigInt,  num_rows, HYPRE_MEMORY_HOST);
-   row_list_num_elements = hypre_CTAlloc(HYPRE_Int,  num_rows, HYPRE_MEMORY_HOST);
-   a_proc_id = hypre_CTAlloc(HYPRE_Int,  num_rows, HYPRE_MEMORY_HOST);
-   orig_order =  hypre_CTAlloc(HYPRE_Int,  num_rows, HYPRE_MEMORY_HOST);
-   real_proc_id = hypre_CTAlloc(HYPRE_Int,  num_rows, HYPRE_MEMORY_HOST);
+   row_list              = hypre_CTAlloc(HYPRE_BigInt, num_rows, HYPRE_MEMORY_HOST);
+   row_list_num_elements = hypre_CTAlloc(HYPRE_BigInt, num_rows, HYPRE_MEMORY_HOST);
+   a_proc_id             = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
+   orig_order            = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
+   real_proc_id          = hypre_CTAlloc(HYPRE_Int, num_rows, HYPRE_MEMORY_HOST);
 
    /* get the assumed processor id for each row */
    if (num_rows > 0 )
@@ -2057,7 +2057,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
    big_int_size = sizeof(HYPRE_BigInt);
    complex_size = sizeof(HYPRE_Complex);
 
-   obj_size_bytes = hypre_max(big_int_size, complex_size);
+   obj_size_bytes = (HYPRE_Int) hypre_max(big_int_size, complex_size);
 
    /* set up data to be sent to send procs */
    /* for each proc, ex_contact_buf contains #rows, row #,

@@ -279,7 +279,7 @@ hypre_FSAISetNumLevels( void      *data,
       return hypre_error_flag;
    }
 
-   if (num_levels < 0)
+   if (num_levels < 1)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;

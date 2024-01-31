@@ -20,6 +20,7 @@ C_COMPILE_FLAGS =\
  -I$(srcdir)/../utilities\
  -I$(srcdir)/../krylov\
  -I$(srcdir)/../seq_mv\
+ -I$(srcdir)/../seq_block_mv\
  -I$(srcdir)/../parcsr_mv\
  -I$(srcdir)/../distributed_matrix\
  -I$(srcdir)/../matrix_matrix\
@@ -125,6 +126,7 @@ FILES =\
  par_lr_interp.c\
  par_mgr.c\
  par_mgr_coarsen.c\
+ par_mgr_interp.c\
  par_mgr_setup.c\
  par_mgr_solve.c\
  par_mgr_stats.c\

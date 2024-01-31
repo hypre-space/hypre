@@ -2487,7 +2487,7 @@ main( hypre_int argc,
       }
    }
 
-   hypre_bind_device(device_id, myid, num_procs, comm);
+   hypre_bind_device_id(device_id, myid, num_procs, comm);
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call

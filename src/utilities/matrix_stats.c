@@ -141,9 +141,9 @@ hypre_MatrixStatsArrayPrint(HYPRE_Int                num_hierarchies,
    HYPRE_Int            i, square;
    HYPRE_Int            square_count;
    HYPRE_Int            num_levels_total;
-   HYPRE_Int            fine_num_rows;
-   HYPRE_Int            coarse_num_rows;
-   HYPRE_Int            total_num_rows;
+   HYPRE_BigInt         fine_num_rows;
+   HYPRE_BigInt         coarse_num_rows;
+   HYPRE_BigInt         total_num_rows;
 
    /* Compute total number of levels */
    num_levels_total = 0;
