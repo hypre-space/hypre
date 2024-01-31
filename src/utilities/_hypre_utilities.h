@@ -2969,8 +2969,8 @@ hypre_UnorderedIntMapFindCloserFreeBucket( hypre_UnorderedIntMap  *m,
             #pragma omp flush
 #endif
 
-            move_bucket->hopInfo |= (1U << move_free_dist);
-            move_bucket->hopInfo &= ~(1U << move_new_free_dist);
+            move_bucket->hopInfo = move_bucket->hopInfo | (1U << move_free_dist);
+            move_bucket->hopInfo = move_bucket->hopInfo & ~(1U << move_new_free_dist);
 
             *free_bucket = new_free_bucket;
             *free_dist -= move_free_dist - move_new_free_dist;
@@ -3047,8 +3047,8 @@ hypre_UnorderedBigIntMapFindCloserFreeBucket( hypre_UnorderedBigIntMap   *m,
             #pragma omp flush
 #endif
 
-            move_bucket->hopInfo |= (1U << move_free_dist);
-            move_bucket->hopInfo &= ~(1U << move_new_free_dist);
+            move_bucket->hopInfo = move_bucket->hopInfo | (1U << move_free_dist);
+            move_bucket->hopInfo = move_bucket->hopInfo & ~(1U << move_new_free_dist);
 
             *free_bucket = new_free_bucket;
             *free_dist -= move_free_dist - move_new_free_dist;
@@ -3640,10 +3640,10 @@ hypre_UnorderedIntMapPutIfAbsent( hypre_UnorderedIntMap *m,
       {
          if (free_dist < HYPRE_HOPSCOTCH_HASH_HOP_RANGE)
          {
-            free_bucket->data     = data;
-            free_bucket->key      = key;
-            free_bucket->hash     = hash;
-            startBucket->hopInfo |= 1U << free_dist;
+            free_bucket->data    = data;
+            free_bucket->key     = key;
+            free_bucket->hash    = hash;
+            startBucket->hopInfo = startBucket->hopInfo | (1U << free_dist);
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
             omp_unset_lock(&segment->lock);
 #endif
@@ -3722,10 +3722,10 @@ hypre_UnorderedBigIntMapPutIfAbsent( hypre_UnorderedBigIntMap *m,
       {
          if (free_dist < HYPRE_HOPSCOTCH_HASH_HOP_RANGE)
          {
-            free_bucket->data     = data;
-            free_bucket->key      = key;
-            free_bucket->hash     = hash;
-            startBucket->hopInfo |= 1U << free_dist;
+            free_bucket->data    = data;
+            free_bucket->key     = key;
+            free_bucket->hash    = hash;
+            startBucket->hopInfo = startBucket->hopInfo | (1U << free_dist);
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
             omp_unset_lock(&segment->lock);
 #endif
