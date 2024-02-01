@@ -51,7 +51,7 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
          if (interp_type == 2)
          {
             HYPRE_Real  jac_trunc_threshold = trunc_factor;
-            HYPRE_Real  jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
+            HYPRE_Real  jac_trunc_threshold_minus = 0.5 * jac_trunc_threshold;
             HYPRE_Int   i;
 
             for (i = 0; i < num_sweeps_post; i++)
