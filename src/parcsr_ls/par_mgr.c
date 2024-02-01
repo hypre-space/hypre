@@ -21,17 +21,6 @@
 //#include "dsuperlu.h"
 //#endif
 
-#if defined(HYPRE_USING_GPU)
-void hypre_NoGPUSupport(char *option)
-{
-   char msg[256];
-   hypre_sprintf(msg, "Error: Chosen %s option is not currently supported on GPU\n\n", option);
-   hypre_printf("%s ", msg);
-   //  hypre_error_w_msg(1, msg);
-   hypre_MPI_Abort(hypre_MPI_COMM_WORLD, -1);
-}
-#endif
-
 /* Need to define these hypre_lapack protos here instead of including _hypre_lapack.h to avoid conflicts with
  * dsuperlu.h on some lapack functions. Alternative is to move superLU related functions to a separate file.
 */
