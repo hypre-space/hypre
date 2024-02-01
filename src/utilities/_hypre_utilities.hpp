@@ -45,6 +45,22 @@ struct hypreFunctor_DenseMatrixIdentity
    }
 };
 
+/*--------------------------------------------------------------------------
+ * hypreFunctor_IndexCycle
+ *--------------------------------------------------------------------------*/
+
+struct hypreFunctor_IndexCycle
+{
+   HYPRE_Int cycle_length;
+
+   hypreFunctor_IndexCycle(HYPRE_Int _cycle_length) : cycle_length(_cycle_length) {}
+
+   __host__ __device__ HYPRE_Int operator()(HYPRE_Int i) const
+   {
+      return i % cycle_length;
+   }
+};
+
 #endif /* if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 #endif /* ifndef HYPRE_FUNCTORS_H */
 /******************************************************************************
