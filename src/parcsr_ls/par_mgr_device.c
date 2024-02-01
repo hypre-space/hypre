@@ -616,6 +616,12 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
       return hypre_error_flag;
    }
 
+   /* Return if the local matrix is empty */
+   if (!num_rows)
+   {
+      return hypre_error_flag;
+   }
+
    /*-----------------------------------------------------------------
     * Initial
     *-----------------------------------------------------------------*/
@@ -648,7 +654,7 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
    }
 
    /* Compute block info */
-   num_blocks = (num_points - 1) / blk_size + 1;
+   num_blocks = hypre_ceildiv(num_points, blk_size);
    bdiag_size = num_blocks * bs2;
 
    if (num_points % blk_size)
@@ -935,7 +941,7 @@ hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix  *A,
                                            point_type );
 #endif
    }
-   num_blocks  = 1 + (B_diag_num_rows - 1) / blk_size;
+   num_blocks  = hypre_ceildiv(B_diag_num_rows, blk_size);
    B_diag_size = blk_size * (blk_size * num_blocks);
 
    /*-----------------------------------------------------------------

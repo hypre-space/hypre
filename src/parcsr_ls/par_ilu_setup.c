@@ -275,116 +275,68 @@ hypre_ILUSetup( void               *ilu_vdata,
    /* Factorization */
    switch (ilu_type)
    {
-      case 0:
+      case 0: /* BJ + hypre_iluk() */
 #if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-            if (fill_level == 0)
-            {
-               /* BJ + device_ilu0() */
-               hypre_ILUSetupILUDevice(0, matA, 0, NULL, perm, perm, n, n, &matBLU_d,
-                                       &matS, &matE_d, &matF_d, tri_solve);
-            }
-            else
-            {
-#if !defined(HYPRE_USING_UNIFIED_MEMORY)
-               hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                                 "ILUK setup on device runs requires unified memory!");
-               return hypre_error_flag;
-#endif
-
-               /* BJ + hypre_iluk(), setup the device solve */
-               hypre_ILUSetupILUDevice(1, matA, fill_level, NULL, perm, perm, n, n,
-                                       &matBLU_d, &matS, &matE_d, &matF_d, tri_solve);
-            }
+            hypre_ILUSetupDevice(ilu_data, matA, perm, perm, n, n,
+                                 &matBLU_d, &matS, &matE_d, &matF_d);
          }
          else
 #endif
          {
-            /* BJ + hypre_iluk() */
             hypre_ILUSetupILUK(matA, fill_level, perm, perm, n, n,
                                &matL, &matD, &matU, &matS, &u_end);
          }
          break;
 
-      case 1:
+      case 1: /* BJ + hypre_ilut() */
 #if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-#if !defined(HYPRE_USING_UNIFIED_MEMORY)
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                              "ILUT setup on device runs requires unified memory!");
-            return hypre_error_flag;
-#endif
-            /* BJ + hypre_ilut(), setup the device solve */
-            hypre_ILUSetupILUDevice(2, matA, max_row_elmts, droptol, perm, perm, n, n,
-                                    &matBLU_d, &matS, &matE_d, &matF_d, tri_solve);
+            hypre_ILUSetupDevice(ilu_data, matA, perm, perm, n, n,
+                                 &matBLU_d, &matS, &matE_d, &matF_d);
          }
          else
 #endif
          {
-            /* BJ + hypre_ilut() */
             hypre_ILUSetupILUT(matA, max_row_elmts, droptol, perm, perm, n, n,
                                &matL, &matD, &matU, &matS, &u_end);
          }
          break;
 
-      case 10:
+      case 10: /* GMRES + hypre_iluk() */
 #if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-            if (fill_level == 0)
-            {
-               /* GMRES + device_ilu0() - Only support ILU0 */
-               hypre_ILUSetupILUDevice(0, matA, 0, NULL, perm, perm, n, nLU,
-                                       &matBLU_d, &matS, &matE_d, &matF_d, 1);
-            }
-            else
-            {
-#if !defined(HYPRE_USING_UNIFIED_MEMORY)
-               hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                                 "GMRES+ILUK setup on device runs requires unified memory!");
-               return hypre_error_flag;
-#endif
-
-               /* GMRES + hypre_iluk() */
-               hypre_ILUSetupILUDevice(1, matA, fill_level, NULL, perm, perm,
-                                       n, nLU, &matBLU_d, &matS, &matE_d, &matF_d, 1);
-            }
+            hypre_ILUSetupDevice(ilu_data, matA, perm, perm, n, nLU,
+                                 &matBLU_d, &matS, &matE_d, &matF_d);
          }
          else
 #endif
          {
-            /* GMRES + hypre_iluk() */
             hypre_ILUSetupILUK(matA, fill_level, perm, perm, nLU, nLU,
                                &matL, &matD, &matU, &matS, &u_end);
          }
          break;
 
-      case 11:
+      case 11: /* GMRES + hypre_ilut() */
 #if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-#if !defined(HYPRE_USING_UNIFIED_MEMORY)
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                              "GMRES+ILUT setup on device runs requires unified memory!");
-            return hypre_error_flag;
-#endif
-
-            /* GMRES + hypre_ilut() */
-            hypre_ILUSetupILUDevice(2, matA, max_row_elmts, droptol, perm, perm, n, nLU,
-                                    &matBLU_d, &matS, &matE_d, &matF_d, 1);
+            hypre_ILUSetupDevice(ilu_data, matA, perm, perm, n, nLU,
+                                 &matBLU_d, &matS, &matE_d, &matF_d);
          }
          else
 #endif
          {
-            /* GMRES + hypre_ilut() */
+
             hypre_ILUSetupILUT(matA, max_row_elmts, droptol, perm, perm, nLU, nLU,
                                &matL, &matD, &matU, &matS, &u_end);
          }
          break;
 
-      case 20:
+      case 20: /* Newton Schulz Hotelling + hypre_iluk() */
 #if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
          if (exec == HYPRE_EXEC_DEVICE)
          {
@@ -394,12 +346,11 @@ hypre_ILUSetup( void               *ilu_vdata,
          }
 #endif
 
-         /* Newton Schulz Hotelling + hypre_iluk() */
          hypre_ILUSetupILUK(matA, fill_level, perm, perm, nLU, nLU,
                             &matL, &matD, &matU, &matS, &u_end);
          break;
 
-      case 21:
+      case 21: /* Newton Schulz Hotelling + hypre_ilut() */
 #if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
          if (exec == HYPRE_EXEC_DEVICE)
          {
@@ -409,12 +360,11 @@ hypre_ILUSetup( void               *ilu_vdata,
          }
 #endif
 
-         /* Newton Schulz Hotelling + hypre_ilut() */
          hypre_ILUSetupILUT(matA, max_row_elmts, droptol, perm, perm, nLU, nLU,
                             &matL, &matD, &matU, &matS, &u_end);
          break;
 
-      case 30:
+      case 30: /* RAS + hypre_iluk() */
 #if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
          if (exec == HYPRE_EXEC_DEVICE)
          {
@@ -424,12 +374,11 @@ hypre_ILUSetup( void               *ilu_vdata,
          }
 #endif
 
-         /* RAS + hypre_iluk() */
          hypre_ILUSetupILUKRAS(matA, fill_level, perm, nLU,
                                &matL, &matD, &matU);
          break;
 
-      case 31:
+      case 31: /* RAS + hypre_ilut() */
 #if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
          if (exec == HYPRE_EXEC_DEVICE)
          {
@@ -439,12 +388,11 @@ hypre_ILUSetup( void               *ilu_vdata,
          }
 #endif
 
-         /* RAS + hypre_ilut() */
          hypre_ILUSetupILUTRAS(matA, max_row_elmts, droptol,
                                perm, nLU, &matL, &matD, &matU);
          break;
 
-      case 40:
+      case 40: /* ddPQ + GMRES + hypre_iluk() */
 #if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
          if (exec == HYPRE_EXEC_DEVICE)
          {
@@ -454,12 +402,11 @@ hypre_ILUSetup( void               *ilu_vdata,
          }
 #endif
 
-         /* ddPQ + GMRES + hypre_iluk() */
          hypre_ILUSetupILUK(matA, fill_level, perm, qperm, nLU, nI,
                             &matL, &matD, &matU, &matS, &u_end);
          break;
 
-      case 41:
+      case 41: /* ddPQ + GMRES + hypre_ilut() */
 #if defined(HYPRE_USING_GPU) && !defined(HYPRE_USING_UNIFIED_MEMORY)
          if (exec == HYPRE_EXEC_DEVICE)
          {
@@ -469,12 +416,11 @@ hypre_ILUSetup( void               *ilu_vdata,
          }
 #endif
 
-         /* ddPQ + GMRES + hypre_ilut() */
          hypre_ILUSetupILUT(matA, max_row_elmts, droptol, perm, qperm, nLU, nI,
                             &matL, &matD, &matU, &matS, &u_end);
          break;
 
-      case 50:
+      case 50: /* RAP + hypre_modified_ilu0 */
 #if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
@@ -484,7 +430,6 @@ hypre_ILUSetup( void               *ilu_vdata,
             return hypre_error_flag;
 #endif
 
-            /* RAP + hypre_modified_ilu0 */
             hypre_ILUSetupRAPILU0Device(matA, perm, n, nLU,
                                         &Aperm, &matS, &matALU_d, &matBLU_d,
                                         &matSLU_d, &matE_d, &matF_d, test_opt);
@@ -492,24 +437,21 @@ hypre_ILUSetup( void               *ilu_vdata,
          else
 #endif
          {
-            /* RAP + hypre_modified_ilu0 */
             hypre_ILUSetupRAPILU0(matA, perm, n, nLU, &matL, &matD, &matU,
                                   &matmL, &matmD, &matmU, &u_end);
          }
          break;
 
-      default:
+      default: /* BJ + device_ilu0() */
 #if defined(HYPRE_USING_GPU)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-            /* BJ + device_ilu0() */
-            hypre_ILUSetupILUDevice(0, matA, 0, NULL, perm, perm, n, n,
-                                    &matBLU_d, &matS, &matE_d, &matF_d, tri_solve);
+            hypre_ILUSetupDevice(ilu_data, matA, perm, perm, n, n,
+                                 &matBLU_d, &matS, &matE_d, &matF_d);
          }
          else
 #endif
          {
-            /* BJ + hypre_ilu0() */
             hypre_ILUSetupILU0(matA, perm, perm, n, n, &matL,
                                &matD, &matU, &matS, &u_end);
          }
@@ -1233,10 +1175,98 @@ hypre_ILUSetup( void               *ilu_vdata,
                                                       hypre_ParCSRMatrixDNumNonzeros(matU)) /
                                                      hypre_ParCSRMatrixDNumNonzeros(matA);
    }
+
+   /* TODO (VPM): Move ILU statistics printout to its own function */
    if ((my_id == 0) && (print_level > 0))
    {
       hypre_printf("ILU SETUP: operator complexity = %f  \n",
                    hypre_ParILUDataOperatorComplexity(ilu_data));
+      if (hypre_ParILUDataTriSolve(ilu_data))
+      {
+         hypre_printf("ILU SOLVE: using direct triangular solves\n",
+                      hypre_ParILUDataOperatorComplexity(ilu_data));
+      }
+      else
+      {
+         hypre_printf("ILU SOLVE: using iterative triangular solves\n",
+                      hypre_ParILUDataOperatorComplexity(ilu_data));
+      }
+
+#if defined (HYPRE_USING_ROCSPARSE)
+      HYPRE_Int i;
+
+      if (hypre_ParILUDataIterativeSetupType(ilu_data))
+      {
+         hypre_printf("ILU: iterative setup type = %d\n",
+                      hypre_ParILUDataIterativeSetupType(ilu_data));
+         hypre_printf("ILU: iterative setup option = %d\n",
+                      hypre_ParILUDataIterativeSetupOption(ilu_data));
+         if (hypre_ParILUDataIterativeSetupOption(ilu_data) & 0x2)
+         {
+            /* This path enables termination based on stopping tolerance */
+            hypre_printf("ILU: iterative setup tolerance = %g\n",
+                         hypre_ParILUDataIterativeSetupTolerance(ilu_data));
+         }
+         else
+         {
+            /* This path enables termination based on number of iterations */
+            hypre_printf("ILU: iterative setup max. iters = %d\n",
+                         hypre_ParILUDataIterativeSetupMaxIter(ilu_data));
+         }
+
+         /* TODO (VPM): Add min, max, avg statistics across ranks */
+         hypre_printf("ILU: iterative setup num. iters at rank 0 = %d\n",
+                      hypre_ParILUDataIterativeSetupNumIter(ilu_data));
+
+         /* Show convergence history */
+         if (hypre_ParILUDataIterativeSetupOption(ilu_data) & 0x10)
+         {
+            hypre_printf("ILU: iterative setup convergence history at rank 0:\n");
+            hypre_printf("%8s", "iter");
+            if (hypre_ParILUDataIterativeSetupOption(ilu_data) & 0x08)
+            {
+               hypre_printf(" %14s %14s", "residual", "rate");
+            }
+            if (hypre_ParILUDataIterativeSetupOption(ilu_data) & 0x04)
+            {
+               hypre_printf(" %14s %14s", "correction", "rate");
+            }
+            hypre_printf("\n");
+            printf("%8d", 0);
+            if (hypre_ParILUDataIterativeSetupOption(ilu_data) & 0x08)
+            {
+               hypre_printf(" %14.5e %14.5e",
+                            hypre_ParILUDataIterSetupResidualNorm(ilu_data, 0), 1.0);
+            }
+            if (hypre_ParILUDataIterativeSetupOption(ilu_data) & 0x04)
+            {
+               hypre_printf(" %14.5e %14.5e",
+                            hypre_ParILUDataIterSetupCorrectionNorm(ilu_data, 0), 1.0);
+            }
+            hypre_printf("\n");
+
+            for (i = 1; i < hypre_ParILUDataIterativeSetupNumIter(ilu_data); i++)
+            {
+               printf("%8d", i);
+               if (hypre_ParILUDataIterativeSetupOption(ilu_data) & 0x08)
+               {
+                  hypre_printf(" %14.5e %14.5e",
+                               hypre_ParILUDataIterSetupResidualNorm(ilu_data, i),
+                               hypre_ParILUDataIterSetupResidualNorm(ilu_data, i) /
+                               hypre_ParILUDataIterSetupResidualNorm(ilu_data, i - 1));
+               }
+               if (hypre_ParILUDataIterativeSetupOption(ilu_data) & 0x04)
+               {
+                  hypre_printf(" %14.5e %14.5e",
+                               hypre_ParILUDataIterSetupCorrectionNorm(ilu_data, i),
+                               hypre_ParILUDataIterSetupCorrectionNorm(ilu_data, i) /
+                               hypre_ParILUDataIterSetupCorrectionNorm(ilu_data, i - 1));
+               }
+               hypre_printf("\n");
+            }
+         }
+      }
+#endif
    }
 
    if (logging > 1)

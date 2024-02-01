@@ -133,6 +133,12 @@ typedef double                 hypre_double;
 #endif
 #endif
 
+/* Macro for ceiling division. It assumes non-negative dividend and positive divisor.
+   The result of this macro might need to be casted to an integer type depending on the use case */
+#ifndef hypre_ceildiv
+#define hypre_ceildiv(a, b) (((a) + (b) - 1) / (b))
+#endif
+
 #ifndef hypre_ceil
 #if defined(HYPRE_SINGLE)
 #define hypre_ceil ceilf
@@ -1990,8 +1996,35 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 #define hypre_IntArrayData(array)                  ((array) -> data)
+#define hypre_IntArrayDataI(array, i)              ((array) -> data[i])
 #define hypre_IntArraySize(array)                  ((array) -> size)
 #define hypre_IntArrayMemoryLocation(array)        ((array) -> memory_location)
+
+/******************************************************************************
+ *
+ * hypre_IntArrayArray: struct for holding an array of hypre_IntArray
+ *
+ *****************************************************************************/
+
+/*--------------------------------------------------------------------------
+ * hypre_IntArrayArray
+ *--------------------------------------------------------------------------*/
+
+typedef struct
+{
+   hypre_IntArray       **entries;
+   HYPRE_Int              size;
+} hypre_IntArrayArray;
+
+/*--------------------------------------------------------------------------
+ * Accessor functions for the IntArrayArray structure
+ *--------------------------------------------------------------------------*/
+
+#define hypre_IntArrayArrayEntries(array)           ((array) -> entries)
+#define hypre_IntArrayArrayEntryI(array, i)         ((array) -> entries[i])
+#define hypre_IntArrayArrayEntryIData(array, i)     ((array) -> entries[i] -> data)
+#define hypre_IntArrayArrayEntryIDataJ(array, i, j) ((array) -> entries[i] -> data[j])
+#define hypre_IntArrayArraySize(array)              ((array) -> size)
 
 #endif
 /******************************************************************************
@@ -2351,7 +2384,9 @@ HYPRE_Int hypre_CurandUniformSingle( HYPRE_Int n, float *urand, HYPRE_Int set_se
 
 HYPRE_Int hypre_ResetDeviceRandGenerator( hypre_ulonglongint seed, hypre_ulonglongint offset );
 
-HYPRE_Int hypre_bind_device(HYPRE_Int device_id_in, HYPRE_Int myid, HYPRE_Int nproc, MPI_Comm comm);
+HYPRE_Int hypre_bind_device_id(HYPRE_Int device_id_in, HYPRE_Int myid,
+                               HYPRE_Int nproc, MPI_Comm comm);
+HYPRE_Int hypre_bind_device(HYPRE_Int myid, HYPRE_Int nproc, MPI_Comm comm);
 
 /* nvtx.c */
 void hypre_GpuProfilingPushRangeColor(const char *name, HYPRE_Int cid);
@@ -2411,6 +2446,16 @@ HYPRE_Int hypre_IntArrayCount( hypre_IntArray *v, HYPRE_Int value,
                                HYPRE_Int *num_values_ptr );
 HYPRE_Int hypre_IntArrayInverseMapping( hypre_IntArray *v, hypre_IntArray **w_ptr );
 HYPRE_Int hypre_IntArrayNegate( hypre_IntArray *v );
+HYPRE_Int hypre_IntArraySeparateByValue( HYPRE_Int num_values, HYPRE_Int *values,
+                                         HYPRE_Int *sizes, hypre_IntArray *v,
+                                         hypre_IntArrayArray **w_ptr );
+hypre_IntArrayArray* hypre_IntArrayArrayCreate( HYPRE_Int num_entries, HYPRE_Int *sizes );
+HYPRE_Int hypre_IntArrayArrayDestroy( hypre_IntArrayArray *w );
+HYPRE_Int hypre_IntArrayArrayInitializeIn( hypre_IntArrayArray *w,
+                                           HYPRE_MemoryLocation  memory_location );
+HYPRE_Int hypre_IntArrayArrayInitialize( hypre_IntArrayArray *w );
+HYPRE_Int hypre_IntArrayArrayMigrate( hypre_IntArrayArray *w,
+                                      HYPRE_MemoryLocation memory_location );
 
 /* int_array_device.c */
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -2420,6 +2465,9 @@ HYPRE_Int hypre_IntArrayCountDevice ( hypre_IntArray *v, HYPRE_Int value,
 HYPRE_Int hypre_IntArrayInverseMappingDevice( hypre_IntArray *v, hypre_IntArray *w );
 HYPRE_Int hypre_IntArrayNegateDevice( hypre_IntArray *v );
 HYPRE_Int hypre_IntArraySetInterleavedValuesDevice( hypre_IntArray *v, HYPRE_Int cycle );
+HYPRE_Int hypre_IntArraySeparateByValueDevice( HYPRE_Int num_values, HYPRE_Int *values,
+                                               HYPRE_Int *sizes, hypre_IntArray *v,
+                                               hypre_IntArrayArray *w );
 #endif
 
 /* memory_tracker.c */
@@ -2962,8 +3010,8 @@ hypre_UnorderedIntMapFindCloserFreeBucket( hypre_UnorderedIntMap  *m,
             #pragma omp flush
 #endif
 
-            move_bucket->hopInfo |= (1U << move_free_dist);
-            move_bucket->hopInfo &= ~(1U << move_new_free_dist);
+            move_bucket->hopInfo = move_bucket->hopInfo | (1U << move_free_dist);
+            move_bucket->hopInfo = move_bucket->hopInfo & ~(1U << move_new_free_dist);
 
             *free_bucket = new_free_bucket;
             *free_dist -= move_free_dist - move_new_free_dist;
@@ -3040,8 +3088,8 @@ hypre_UnorderedBigIntMapFindCloserFreeBucket( hypre_UnorderedBigIntMap   *m,
             #pragma omp flush
 #endif
 
-            move_bucket->hopInfo |= (1U << move_free_dist);
-            move_bucket->hopInfo &= ~(1U << move_new_free_dist);
+            move_bucket->hopInfo = move_bucket->hopInfo | (1U << move_free_dist);
+            move_bucket->hopInfo = move_bucket->hopInfo & ~(1U << move_new_free_dist);
 
             *free_bucket = new_free_bucket;
             *free_dist -= move_free_dist - move_new_free_dist;
@@ -3633,10 +3681,10 @@ hypre_UnorderedIntMapPutIfAbsent( hypre_UnorderedIntMap *m,
       {
          if (free_dist < HYPRE_HOPSCOTCH_HASH_HOP_RANGE)
          {
-            free_bucket->data     = data;
-            free_bucket->key      = key;
-            free_bucket->hash     = hash;
-            startBucket->hopInfo |= 1U << free_dist;
+            free_bucket->data    = data;
+            free_bucket->key     = key;
+            free_bucket->hash    = hash;
+            startBucket->hopInfo = startBucket->hopInfo | (1U << free_dist);
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
             omp_unset_lock(&segment->lock);
 #endif
@@ -3715,10 +3763,10 @@ hypre_UnorderedBigIntMapPutIfAbsent( hypre_UnorderedBigIntMap *m,
       {
          if (free_dist < HYPRE_HOPSCOTCH_HASH_HOP_RANGE)
          {
-            free_bucket->data     = data;
-            free_bucket->key      = key;
-            free_bucket->hash     = hash;
-            startBucket->hopInfo |= 1U << free_dist;
+            free_bucket->data    = data;
+            free_bucket->key     = key;
+            free_bucket->hash    = hash;
+            startBucket->hopInfo = startBucket->hopInfo | (1U << free_dist);
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
             omp_unset_lock(&segment->lock);
 #endif
