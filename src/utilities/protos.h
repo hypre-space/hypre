@@ -355,7 +355,8 @@ HYPRE_Int hypre_CurandUniformSingle( HYPRE_Int n, float *urand, HYPRE_Int set_se
 
 HYPRE_Int hypre_ResetDeviceRandGenerator( hypre_ulonglongint seed, hypre_ulonglongint offset );
 
-HYPRE_Int hypre_bind_device_id(HYPRE_Int device_id_in, HYPRE_Int myid, HYPRE_Int nproc, MPI_Comm comm);
+HYPRE_Int hypre_bind_device_id(HYPRE_Int device_id_in, HYPRE_Int myid,
+                               HYPRE_Int nproc, MPI_Comm comm);
 HYPRE_Int hypre_bind_device(HYPRE_Int myid, HYPRE_Int nproc, MPI_Comm comm);
 
 /* nvtx.c */
