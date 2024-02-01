@@ -2384,7 +2384,9 @@ HYPRE_Int hypre_CurandUniformSingle( HYPRE_Int n, float *urand, HYPRE_Int set_se
 
 HYPRE_Int hypre_ResetDeviceRandGenerator( hypre_ulonglongint seed, hypre_ulonglongint offset );
 
-HYPRE_Int hypre_bind_device(HYPRE_Int device_id_in, HYPRE_Int myid, HYPRE_Int nproc, MPI_Comm comm);
+HYPRE_Int hypre_bind_device_id(HYPRE_Int device_id_in, HYPRE_Int myid,
+                               HYPRE_Int nproc, MPI_Comm comm);
+HYPRE_Int hypre_bind_device(HYPRE_Int myid, HYPRE_Int nproc, MPI_Comm comm);
 
 /* nvtx.c */
 void hypre_GpuProfilingPushRangeColor(const char *name, HYPRE_Int cid);
@@ -3008,8 +3010,8 @@ hypre_UnorderedIntMapFindCloserFreeBucket( hypre_UnorderedIntMap  *m,
             #pragma omp flush
 #endif
 
-            move_bucket->hopInfo |= (1U << move_free_dist);
-            move_bucket->hopInfo &= ~(1U << move_new_free_dist);
+            move_bucket->hopInfo = move_bucket->hopInfo | (1U << move_free_dist);
+            move_bucket->hopInfo = move_bucket->hopInfo & ~(1U << move_new_free_dist);
 
             *free_bucket = new_free_bucket;
             *free_dist -= move_free_dist - move_new_free_dist;
@@ -3086,8 +3088,8 @@ hypre_UnorderedBigIntMapFindCloserFreeBucket( hypre_UnorderedBigIntMap   *m,
             #pragma omp flush
 #endif
 
-            move_bucket->hopInfo |= (1U << move_free_dist);
-            move_bucket->hopInfo &= ~(1U << move_new_free_dist);
+            move_bucket->hopInfo = move_bucket->hopInfo | (1U << move_free_dist);
+            move_bucket->hopInfo = move_bucket->hopInfo & ~(1U << move_new_free_dist);
 
             *free_bucket = new_free_bucket;
             *free_dist -= move_free_dist - move_new_free_dist;
@@ -3679,10 +3681,10 @@ hypre_UnorderedIntMapPutIfAbsent( hypre_UnorderedIntMap *m,
       {
          if (free_dist < HYPRE_HOPSCOTCH_HASH_HOP_RANGE)
          {
-            free_bucket->data     = data;
-            free_bucket->key      = key;
-            free_bucket->hash     = hash;
-            startBucket->hopInfo |= 1U << free_dist;
+            free_bucket->data    = data;
+            free_bucket->key     = key;
+            free_bucket->hash    = hash;
+            startBucket->hopInfo = startBucket->hopInfo | (1U << free_dist);
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
             omp_unset_lock(&segment->lock);
 #endif
@@ -3761,10 +3763,10 @@ hypre_UnorderedBigIntMapPutIfAbsent( hypre_UnorderedBigIntMap *m,
       {
          if (free_dist < HYPRE_HOPSCOTCH_HASH_HOP_RANGE)
          {
-            free_bucket->data     = data;
-            free_bucket->key      = key;
-            free_bucket->hash     = hash;
-            startBucket->hopInfo |= 1U << free_dist;
+            free_bucket->data    = data;
+            free_bucket->key     = key;
+            free_bucket->hash    = hash;
+            startBucket->hopInfo = startBucket->hopInfo | (1U << free_dist);
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
             omp_unset_lock(&segment->lock);
 #endif
