@@ -46,6 +46,52 @@ struct hypreFunctor_DenseMatrixIdentity
 };
 
 /*--------------------------------------------------------------------------
+ * hypreFunctor_ArrayStridedAccess
+ *
+ * Functor for performing strided data access on a templated array.
+ *
+ * The stride interval "s_" is used to access every "s_"-th element
+ * from the source array "a_".
+ *
+ * It is templated to support various data types for the array.
+ *--------------------------------------------------------------------------*/
+
+template <typename T>
+struct hypreFunctor_ArrayStridedAccess
+{
+   HYPRE_Int  s_;
+   T         *a_;
+
+   hypreFunctor_ArrayStridedAccess(HYPRE_Int s, T *a) : s_(s), a_(a) {}
+
+   __host__ __device__ T operator()(HYPRE_Int i)
+   {
+      return a_[i * s_];
+   }
+};
+
+/*--------------------------------------------------------------------------
+ * hypreFunctor_IndexStrided
+ *
+ * This functor multiplies a given index "i" by a specified stride "s_".
+ *
+ * It is templated to support various data types for the index and stride.
+ *--------------------------------------------------------------------------*/
+
+template <typename T>
+struct hypreFunctor_IndexStrided
+{
+    T s_;
+
+    hypreFunctor_IndexStrided(T s) : s_(s) {}
+
+    __host__ __device__ T operator()(const T i) const
+    {
+        return i * s_;
+    }
+};
+
+/*--------------------------------------------------------------------------
  * hypreFunctor_IndexCycle
  *--------------------------------------------------------------------------*/
 
@@ -63,6 +109,49 @@ struct hypreFunctor_IndexCycle
 
 #endif /* if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 #endif /* ifndef HYPRE_FUNCTORS_H */
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+#ifndef HYPRE_PREDICATES_H
+#define HYPRE_PREDICATES_H
+
+/******************************************************************************
+ *
+ * Header file defining predicates for thrust used throughout hypre
+ *
+ *****************************************************************************/
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+/*--------------------------------------------------------------------------
+ * hyprePred_StridedAccess
+ *
+ * This struct defines a predicate for strided access in array-like data.
+ *
+ * It is used to determine if an element at a given index should be processed
+ * or not, based on a specified stride. The operator() returns true when the
+ * index is a multiple of the stride, indicating the element at that index
+ * is part of the strided subset.
+ *--------------------------------------------------------------------------*/
+
+struct hyprePred_StridedAccess
+{
+   HYPRE_Int  s_;
+
+   hyprePred_StridedAccess(HYPRE_Int s) : s_(s) {}
+
+   __host__ __device__ HYPRE_Int operator()(const HYPRE_Int i) const
+   {
+      return (!(i % s_));
+   }
+};
+
+#endif /* if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+#endif /* ifndef HYPRE_PREDICATES_H */
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
