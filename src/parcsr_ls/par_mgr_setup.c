@@ -1514,11 +1514,11 @@ hypre_MGRSetup( void               *mgr_vdata,
 
       /* TODO: refactor this block (VPM) */
 #if defined (HYPRE_USING_GPU)
-      hypre_ParCSRMatrix  *P_FF_ptr;
-
-      hypre_MGRBuildPDevice(A_array[lev], hypre_IntArrayData(FC_marker),
-                            row_starts_fpts, 0, &P_FF_ptr);
-      P_FF_array[lev] = P_FF_ptr;
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         hypre_MGRBuildPDevice(A_array[lev], hypre_IntArrayData(FC_marker),
+                               row_starts_fpts, 0, &P_FF_array[lev]);
+      }
 #endif
 
       /* Destroy A_FF if it has not been saved on A_ff_array[lev] */
