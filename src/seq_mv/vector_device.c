@@ -358,8 +358,8 @@ hypre_SeqVectorStridedCopyDevice( hypre_Vector  *vector,
 
    HYPRE_THRUST_CALL( transform, begin, last,
                       thrust::make_permutation_iterator(v_data,
-                         thrust::make_transform_iterator(begin,
-                            hypreFunctor_IndexStrided<HYPRE_Int>(ostride))),
+                                                        thrust::make_transform_iterator(begin,
+                                                                                        hypreFunctor_IndexStrided<HYPRE_Int>(ostride))),
                       hypreFunctor_ArrayStridedAccess<HYPRE_Complex>(istride, data) );
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP) || defined(HYPRE_USING_SYCL)

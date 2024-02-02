@@ -1915,7 +1915,7 @@ hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A,
  *      4: abs diag inverse sqrt
  *--------------------------------------------------------------------------*/
 
-void
+HYPRE_Int
 hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
                                     HYPRE_Complex   *d,
                                     HYPRE_Int        type)
@@ -1926,6 +1926,7 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
    HYPRE_Int     *A_j    = hypre_CSRMatrixJ(A);
    HYPRE_Int      i, j;
    HYPRE_Complex  d_i;
+   char           msg[HYPRE_MAX_MSG_LEN];
 
    for (i = 0; i < nrows; i++)
    {
@@ -1942,23 +1943,33 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
             {
                d_i = hypre_cabs(A_data[j]);
             }
-            else if (type == 2)
+            else
             {
-               d_i = 1.0 / (A_data[j]);
-            }
-            else if (type == 3)
-            {
-               d_i = 1.0 / (hypre_sqrt(A_data[j]));
-            }
-            else if (type == 4)
-            {
-               d_i = 1.0 / (hypre_sqrt(hypre_cabs(A_data[j])));
+               if (A_data[j] == 0.0)
+               {
+                  hypre_sprintf(msg, "Zero diagonal found at row %i!", i);
+                  hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+               }
+               else if (type == 2)
+               {
+                  d_i = 1.0 / A_data[j];
+               }
+               else if (type == 3)
+               {
+                  d_i = 1.0 / hypre_sqrt(A_data[j]);
+               }
+               else if (type == 4)
+               {
+                  d_i = 1.0 / hypre_sqrt(hypre_cabs(A_data[j]));
+               }
             }
             break;
          }
       }
       d[i] = d_i;
    }
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -1970,7 +1981,7 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
  *      3: diag inverse sqrt
  *--------------------------------------------------------------------------*/
 
-void
+HYPRE_Int
 hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
                                 HYPRE_Complex   *d,
                                 HYPRE_Int        type)
@@ -1987,6 +1998,8 @@ hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
    {
       hypre_CSRMatrixExtractDiagonalHost(A, d, type);
    }
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------

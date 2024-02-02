@@ -81,14 +81,14 @@ struct hypreFunctor_ArrayStridedAccess
 template <typename T>
 struct hypreFunctor_IndexStrided
 {
-    T s_;
+   T s_;
 
-    hypreFunctor_IndexStrided(T s) : s_(s) {}
+   hypreFunctor_IndexStrided(T s) : s_(s) {}
 
-    __host__ __device__ T operator()(const T i) const
-    {
-        return i * s_;
-    }
+   __host__ __device__ T operator()(const T i) const
+   {
+      return i * s_;
+   }
 };
 
 /*--------------------------------------------------------------------------

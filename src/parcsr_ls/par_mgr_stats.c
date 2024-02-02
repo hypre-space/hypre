@@ -256,6 +256,9 @@ hypre_MGRGetRestrictionName(hypre_ParMGRData  *mgr_data,
       case 13:
          return "CPR-like";
 
+      case 14:
+         return "Blk-ColLumped";
+
       default:
          return "Classical";
    }
@@ -272,7 +275,7 @@ hypre_MGRGetCoarseGridName(hypre_ParMGRData  *mgr_data,
    switch (hypre_ParMGRDataCoarseGridMethodI(mgr_data, level))
    {
       case 0:
-         return "RAP";
+         return "Glk-RAP";
 
       case 1:
          return "NG-BlkDiag";
@@ -285,6 +288,9 @@ hypre_MGRGetCoarseGridName(hypre_ParMGRData  *mgr_data,
 
       case 4:
          return "NG-ApproxInv";
+
+      case 5:
+         return "Glk-RAI";
 
       default:
          return "Unknown";

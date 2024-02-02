@@ -4145,6 +4145,7 @@ HYPRE_MGRSetLevelFRelaxType(HYPRE_Solver solver,
  * Options for \e cg_method are:
  *
  *    - 0 : Galerkin coarse grid computation using RAP.
+ *    - 5 : Galerkin coarse grid computation using RAI (injective prolongation).
  *    - 1 - 4 : Non-Galerkin coarse grid computation with dropping strategy.
  *         - 1: inv(A_FF) approximated by its (block) diagonal inverse
  *         - 2: CPR-like approximation with inv(A_FF) approximated by its diagonal inverse
@@ -4178,6 +4179,7 @@ HYPRE_MGRSetLevelFRelaxNumFunctions(HYPRE_Solver solver,
  *    - 5    : pAIR distance 2
  *    - 12   : Block Jacobi
  *    - 13   : CPR-like restriction operator
+ *    - 14   : (Block) Column-lumped restriction
  *    - else : use classical modified interpolation
  *
  * The default is injection.

@@ -205,8 +205,7 @@ hypre_IntArraySeparateByValueDevice( HYPRE_Int             num_values,
    {
       val = values[i];
 
-      HYPRE_THRUST_CALL(copy_if, indices, indices + v_size, v_data, buffer,
-      [val] __device__ (HYPRE_Int x) { return x == val; });
+      HYPRE_THRUST_CALL(copy_if, indices, indices + v_size, v_data, buffer, equal<HYPRE_Int>(val));
 
       hypre_TMemcpy(hypre_IntArrayArrayEntryIData(w, i), buffer, HYPRE_Int, sizes[i],
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);

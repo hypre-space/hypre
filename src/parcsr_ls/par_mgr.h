@@ -53,6 +53,7 @@ typedef struct
    hypre_ParCSRMatrix  **P_FF_array;
 #endif
    hypre_ParCSRMatrix  **P_array;
+   hypre_ParCSRMatrix  **R_array;
    hypre_ParCSRMatrix  **RT_array;
    hypre_ParCSRMatrix   *RAP;
    hypre_IntArray      **CF_marker_array;
