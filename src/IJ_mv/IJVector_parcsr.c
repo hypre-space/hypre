@@ -1235,6 +1235,8 @@ hypre_IJVectorAssembleOffProcValsParMultiVec( hypre_IJVector       *vector,
 															 HYPRE_Int            *off_proc_comp,
 															 HYPRE_Complex        *off_proc_data)
 {
+   HYPRE_UNUSED_VAR(max_off_proc_elmts);
+
    HYPRE_Int myid;
    HYPRE_BigInt global_first_row, global_num_rows;
    HYPRE_Int i, j, in, k;
@@ -1300,7 +1302,7 @@ hypre_IJVectorAssembleOffProcValsParMultiVec( hypre_IJVector       *vector,
                     HYPRE_MEMORY_DEVICE);
 
       off_proc_i    = off_proc_i_h;
-      off_proc_comp    = off_proc_comp_h;
+      off_proc_comp = off_proc_comp_h;
       off_proc_data = off_proc_data_h;
    }
 
@@ -1539,26 +1541,27 @@ hypre_IJVectorAssembleOffProcValsParMultiVec( hypre_IJVector       *vector,
          /* re-calc. index_ptr since in_i was negative */
          index_ptr = (void *) ((char *) void_contact_buf + in * obj_size_bytes);
 
-         tmp_int =  num_rows_per_proc[indx];
-         hypre_TMemcpy( index_ptr,  &tmp_int,  HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         tmp_int = num_rows_per_proc[indx];
+         hypre_TMemcpy(index_ptr, &tmp_int,  HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          index_ptr = (void *) ((char *) index_ptr + obj_size_bytes);
 
          in++;
       }
       /* add row # */
-      hypre_TMemcpy( index_ptr,  &row,  HYPRE_BigInt, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(index_ptr, &row, HYPRE_BigInt, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       index_ptr = (void *) ((char *) index_ptr + obj_size_bytes);
       in++;
 
       /* add component */
       tmp_comp = off_proc_comp[i];
-      hypre_TMemcpy( index_ptr,  &tmp_comp, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(index_ptr, &tmp_comp, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       index_ptr = (void *) ((char *) index_ptr + obj_size_bytes);
       in++;
 
       /* add value */
       tmp_complex = off_proc_data[i];
-      hypre_TMemcpy( index_ptr,  &tmp_complex, HYPRE_Complex, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(index_ptr, &tmp_complex, HYPRE_Complex, 1,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       index_ptr = (void *) ((char *) index_ptr + obj_size_bytes);
       in++;
 
@@ -1637,31 +1640,35 @@ hypre_IJVectorAssembleOffProcValsParMultiVec( hypre_IJVector       *vector,
    recv_starts = send_proc_obj.vec_starts;
 
    vector_data = hypre_VectorData(hypre_ParVectorLocalVector(par_vector));
-   first_index =  hypre_ParVectorFirstIndex(par_vector);
+   first_index = hypre_ParVectorFirstIndex(par_vector);
 
    for (i = 0; i < num_recvs; i++)
    {
       indx = recv_starts[i];
 
       /* get the number of rows for  this recv */
-      hypre_TMemcpy( &row_count,  recv_data_ptr, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&row_count, recv_data_ptr, HYPRE_Int, 1,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
       indx++;
 
       for (j = 0; j < row_count; j++) /* for each row: unpack info */
       {
          /* row # */
-         hypre_TMemcpy( &row,  recv_data_ptr, HYPRE_BigInt, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(&row, recv_data_ptr, HYPRE_BigInt, 1,
+                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
          indx++;
 
-			/* component */
-         hypre_TMemcpy( &tmp_comp,  recv_data_ptr, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         /* component */
+         hypre_TMemcpy(&tmp_comp, recv_data_ptr, HYPRE_Int, 1,
+                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
          indx++;
 
          /* value */
-         hypre_TMemcpy( &value,  recv_data_ptr, HYPRE_Complex, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(&value, recv_data_ptr, HYPRE_Complex, 1,
+                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
          indx++;
 
@@ -1703,9 +1710,9 @@ hypre_IJVectorAssembleOffProcValsParMultiVec( hypre_IJVector       *vector,
       hypre_TMemcpy(off_proc_data_recv_d, off_proc_data_recv, HYPRE_Complex, off_proc_nelm_recv_cur,
                     HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
-      hypre_IJVectorSetAddValuesParMultiVecDevice(vector, off_proc_nelm_recv_cur, off_proc_i_recv_d, off_proc_comp_recv_d,
-																  off_proc_data_recv_d, "add");
+#if defined(HYPRE_USING_GPU)
+      hypre_IJVectorSetAddValuesParMultiVecDevice(vector, off_proc_nelm_recv_cur, off_proc_i_recv_d,
+                                                  off_proc_comp_recv_d, off_proc_data_recv_d, "add");
 #endif
    }
 
