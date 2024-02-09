@@ -5,12 +5,14 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 #=============================================================================
-# Test library lazy initialization (sequential and parallel)
+# ij_assembly: Run default case
 #=============================================================================
 
-mpirun -np 1 ./ij                         > lazy.out.1.a
-mpirun -np 1 ./ij -lazy_device_init 1     > lazy.out.1.b
+mpirun -np 1  ./ij_assembly > assembly.out.0
 
-mpirun -np 4 ./ij                         > lazy.out.2.a
-mpirun -np 4 ./ij -lazy_device_init 1     > lazy.out.2.b
+mpirun -np 2  ./ij_assembly > assembly.out.1
+
+mpirun -np 3  ./ij_assembly > assembly.out.2
+
+mpirun -np 7  ./ij_assembly > assembly.out.3
 
