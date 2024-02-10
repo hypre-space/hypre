@@ -38,6 +38,136 @@ means half, and .1 means 10percent)
 
 *******************************************************************************/
 
+
+/* WM: Setup and Solve wrappers for use with PCG */
+HYPRE_Int
+HYPRE_ParCSRChebyCreate( HYPRE_Solver *solver)
+{
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   hypre_ParChebyData *cheby_data = hypre_CTAlloc(hypre_ParChebyData, 1, HYPRE_MEMORY_HOST);
+   
+   hypre_ParChebyDataFraction(cheby_data) = .3;
+   hypre_ParChebyDataOrder(cheby_data) = 2;
+   hypre_ParChebyDataScale(cheby_data) = 1;
+   hypre_ParChebyDataVariant(cheby_data) = 0;
+   hypre_ParChebyDataMaxCGIterations(cheby_data) = 10;
+
+   *solver = (HYPRE_Solver) cheby_data;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+HYPRE_ParCSRChebySetup( HYPRE_Solver solver,
+                        HYPRE_ParCSRMatrix A,
+                        HYPRE_ParVector b,
+                        HYPRE_ParVector x      )
+{
+   hypre_ParChebyData *cheby_data = (hypre_ParChebyData*) solver;
+   HYPRE_Int scale = hypre_ParChebyDataScale(cheby_data);
+   HYPRE_Int variant = hypre_ParChebyDataVariant(cheby_data);
+   HYPRE_Real max_eig, min_eig = 0;
+   HYPRE_Real *coefs = NULL;
+   HYPRE_Int order = hypre_ParChebyDataOrder(cheby_data);
+   HYPRE_Int max_cg_it = hypre_ParChebyDataMaxCGIterations(cheby_data);
+   HYPRE_Real fraction = hypre_ParChebyDataFraction(cheby_data);
+   if (max_cg_it)
+   {
+      hypre_ParCSRMaxEigEstimateCG(A, scale, max_cg_it,
+                                   &max_eig, &min_eig);
+   }
+   else
+   {
+      hypre_ParCSRMaxEigEstimate(A, scale, &max_eig, &min_eig);
+   }
+
+   hypre_Vector *ds = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A));
+   hypre_VectorVectorStride(ds)   = hypre_ParCSRMatrixNumRows(A);
+   hypre_VectorIndexStride(ds)    = 1;
+   hypre_VectorMemoryLocation(ds) = hypre_ParCSRMatrixMemoryLocation(A);
+
+   hypre_ParCSRRelax_Cheby_Setup(A,
+                                 max_eig,
+                                 min_eig,
+                                 fraction,
+                                 order,
+                                 scale,
+                                 variant,
+                                 &coefs,
+                                 &hypre_VectorData(ds));
+
+   hypre_ParChebyDataMaxEig(cheby_data) = max_eig;
+   hypre_ParChebyDataMinEig(cheby_data) = min_eig;
+   hypre_ParChebyDataCoefs(cheby_data) = coefs;
+   hypre_ParChebyDataDs(cheby_data) = hypre_VectorData(ds);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+HYPRE_ParCSRChebySolve( HYPRE_Solver solver,
+                        HYPRE_ParCSRMatrix A,
+                        HYPRE_ParVector f,
+                        HYPRE_ParVector u      )
+{
+   hypre_ParChebyData *cheby_data = (hypre_ParChebyData*) solver;
+   HYPRE_Int order = hypre_ParChebyDataOrder(cheby_data);
+   HYPRE_Int scale = hypre_ParChebyDataScale(cheby_data);
+   HYPRE_Int variant = hypre_ParChebyDataVariant(cheby_data);
+   HYPRE_Real *coefs   = hypre_ParChebyDataCoefs(cheby_data);
+   HYPRE_Real *ds_data = hypre_ParChebyDataDs(cheby_data);
+
+   hypre_ParVector *tmp_vec    = NULL;
+   hypre_ParVector *orig_u_vec = NULL;
+   hypre_ParVector *v = NULL;
+   hypre_ParVector *r = NULL;
+
+
+   orig_u_vec = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                      hypre_ParCSRMatrixGlobalNumRows(A),
+                                      hypre_ParCSRMatrixRowStarts(A));
+   hypre_ParVectorInitialize_v2(orig_u_vec, hypre_ParCSRMatrixMemoryLocation(A));
+
+   /* WM: so many temporary vectors... why? */
+   v = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                      hypre_ParCSRMatrixGlobalNumRows(A),
+                                      hypre_ParCSRMatrixRowStarts(A));
+   hypre_ParVectorInitialize_v2(v, hypre_ParCSRMatrixMemoryLocation(A));
+
+   r = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                      hypre_ParCSRMatrixGlobalNumRows(A),
+                                      hypre_ParCSRMatrixRowStarts(A));
+   hypre_ParVectorInitialize_v2(r, hypre_ParCSRMatrixMemoryLocation(A));
+
+   if (scale)
+   {
+      tmp_vec = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+                                      hypre_ParCSRMatrixGlobalNumRows(A),
+                                      hypre_ParCSRMatrixRowStarts(A));
+      hypre_ParVectorInitialize_v2(tmp_vec, hypre_ParCSRMatrixMemoryLocation(A));
+   }
+   hypre_ParCSRRelax_Cheby_Solve(A, f, ds_data, coefs, order, scale, variant, u, v, r, orig_u_vec,
+                                 tmp_vec);
+
+   hypre_TFree(ds_data, hypre_ParCSRMatrixMemoryLocation(A));
+   hypre_TFree(coefs, HYPRE_MEMORY_HOST);
+   hypre_ParVectorDestroy(orig_u_vec);
+   hypre_ParVectorDestroy(tmp_vec);
+   hypre_ParVectorDestroy(v);
+   hypre_ParVectorDestroy(r);
+
+   return hypre_error_flag;
+
+}
+
+
+
+
 /**
  * @brief Setups of coefficients (and optional diagonal scaling elements) for
  * Chebyshev relaxation

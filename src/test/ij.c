@@ -5745,12 +5745,19 @@ main( hypre_int argc,
          {
             /* use diagonal scaling as preconditioner */
             if (myid == 0) { hypre_printf("Solver: DS-PCG\n"); }
-            pcg_precond = NULL;
+            /* pcg_precond = NULL; */
+            HYPRE_ParCSRChebyCreate(&pcg_precond);
 
+            /* WM: trying out Chebyshev preconditioner here */
             HYPRE_PCGSetPrecond(pcg_solver,
-                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
-                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
+                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRChebySetup,
+                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRChebySolve,
                                 pcg_precond);
+
+            /* HYPRE_PCGSetPrecond(pcg_solver, */
+            /*                     (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale, */
+            /*                     (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup, */
+            /*                     pcg_precond); */
          }
          else if (solver_id == 8)
          {
