@@ -63,6 +63,31 @@ HYPRE_ParCSRChebyCreate( HYPRE_Solver *solver)
 }
 
 HYPRE_Int
+HYPRE_ParCSRChebyDestroy( HYPRE_Solver solver )
+{
+   hypre_ParChebyData  *cheby_data = (hypre_ParChebyData*) solver;
+
+   if (cheby_data)
+   {
+      if (hypre_ParChebyDataCoefs(cheby_data))
+      {
+         hypre_TFree(hypre_ParChebyDataCoefs(cheby_data), HYPRE_MEMORY_HOST);
+      }
+
+      if (hypre_ParChebyDataDs(cheby_data))
+      {
+         /* WM: todo - memory should store a memory location instead of assuming the device? 
+          *            or just store a vector here instead of raw Real array */
+         hypre_TFree(hypre_ParChebyDataDs(cheby_data), HYPRE_MEMORY_HOST);
+      }
+
+      hypre_TFree(cheby_data, HYPRE_MEMORY_HOST);
+   }
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 HYPRE_ParCSRChebySetup( HYPRE_Solver solver,
                         HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b,
@@ -154,8 +179,6 @@ HYPRE_ParCSRChebySolve( HYPRE_Solver solver,
    hypre_ParCSRRelax_Cheby_Solve(A, f, ds_data, coefs, order, scale, variant, u, v, r, orig_u_vec,
                                  tmp_vec);
 
-   hypre_TFree(ds_data, hypre_ParCSRMatrixMemoryLocation(A));
-   hypre_TFree(coefs, HYPRE_MEMORY_HOST);
    hypre_ParVectorDestroy(orig_u_vec);
    hypre_ParVectorDestroy(tmp_vec);
    hypre_ParVectorDestroy(v);
