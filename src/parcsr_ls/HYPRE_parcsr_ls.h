@@ -61,6 +61,9 @@ HYPRE_Int
 HYPRE_ParCSRChebyCreate( HYPRE_Solver *solver);
 
 HYPRE_Int
+HYPRE_ParCSRChebyDestroy( HYPRE_Solver solver );
+
+HYPRE_Int
 HYPRE_ParCSRChebySetup( HYPRE_Solver solver,
                         HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b,
