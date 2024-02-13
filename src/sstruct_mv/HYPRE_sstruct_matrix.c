@@ -237,7 +237,7 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
    /* GEC0902 addition of variables for ilower and iupper   */
    MPI_Comm                comm;
    hypre_SStructGrid      *grid, *domain_grid;
-   HYPRE_Int               ilower, iupper, jlower, jupper;
+   HYPRE_BigInt            ilower, iupper, jlower, jupper;
    HYPRE_Int               matrix_type = hypre_SStructMatrixObjectType(matrix);
 
    /* S-matrix */
@@ -302,13 +302,17 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
       jlower = hypre_SStructGridStartRank(domain_grid);
       jupper = jlower + hypre_SStructGridLocalSize(domain_grid) - 1;
    }
-
-   if (matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
+   else if (matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
    {
       ilower = hypre_SStructGridGhstartRank(grid);
       iupper = ilower + hypre_SStructGridGhlocalSize(grid) - 1;
       jlower = hypre_SStructGridGhstartRank(domain_grid);
       jupper = jlower + hypre_SStructGridGhlocalSize(domain_grid) - 1;
+   }
+   else
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid matrix type!\n");
+      return hypre_error_flag;
    }
 
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper,

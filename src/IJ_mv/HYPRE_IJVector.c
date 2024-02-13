@@ -258,10 +258,10 @@ HYPRE_IJVectorSetPrintLevel( HYPRE_IJVector vector,
       return hypre_error_flag;
    }
 
-   hypre_IJVectorPrintLevel(ijvector) = 1;
+   hypre_IJVectorPrintLevel(ijvector) = (print_level > 0) ? print_level : 0;
+
    return hypre_error_flag;
 }
-
 
 /*--------------------------------------------------------------------------
  * HYPRE_IJVectorSetValues
@@ -698,6 +698,19 @@ HYPRE_IJVectorRead( const char     *filename,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJVectorReadBinary
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorReadBinary( const char     *filename,
+                          MPI_Comm        comm,
+                          HYPRE_Int       type,
+                          HYPRE_IJVector *vector_ptr )
+{
+   return hypre_IJVectorReadBinary(comm, filename, type, vector_ptr);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJVectorPrint
  *--------------------------------------------------------------------------*/
 
@@ -763,6 +776,34 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
    hypre_TFree(h_values, HYPRE_MEMORY_HOST);
 
    fclose(file);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorPrintBinary
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorPrintBinary( HYPRE_IJVector  vector,
+                           const char     *filename )
+{
+   if (!vector)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (hypre_IJVectorObjectType(vector) == HYPRE_PARCSR)
+   {
+      hypre_ParVectorPrintBinaryIJ((hypre_ParVector*) hypre_IJVectorObject(vector),
+                                   filename);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
 
    return hypre_error_flag;
 }

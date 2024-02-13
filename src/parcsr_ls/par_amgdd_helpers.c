@@ -2424,6 +2424,8 @@ hypre_BoomerAMGDD_UnpackSendFlagBuffer( hypre_AMGDDCompGrid **compGrid,
                                         HYPRE_Int             current_level,
                                         HYPRE_Int             num_levels )
 {
+   HYPRE_UNUSED_VAR(compGrid);
+
    HYPRE_Int level, i, cnt, num_nodes;
 
    cnt = 0;
@@ -2849,8 +2851,8 @@ hypre_BoomerAMGDD_CommunicateRemainingMatrixInfo( hypre_ParAMGDDData* amgdd_data
          hypre_TFree(buf_statuses, HYPRE_MEMORY_HOST);
 
          // P_tmp_info[buffer_number] = [ size, [row], size, [row], ... ]
-         HYPRE_Int **P_tmp_info_int;
-         HYPRE_Complex **P_tmp_info_complex;
+         HYPRE_Int **P_tmp_info_int = NULL;
+         HYPRE_Complex **P_tmp_info_complex = NULL;
          HYPRE_Int P_tmp_info_size = 0;
          HYPRE_Int P_tmp_info_cnt = 0;
          if (outer_level != num_levels - 1)
@@ -2865,8 +2867,8 @@ hypre_BoomerAMGDD_CommunicateRemainingMatrixInfo( hypre_ParAMGDDData* amgdd_data
             P_tmp_info_complex = hypre_CTAlloc(HYPRE_Complex*, P_tmp_info_size, HYPRE_MEMORY_HOST);
          }
          // R_tmp_info[buffer_number] = [ size, [row], size, [row], ... ]
-         HYPRE_Int **R_tmp_info_int;
-         HYPRE_Complex **R_tmp_info_complex;
+         HYPRE_Int **R_tmp_info_int = NULL;
+         HYPRE_Complex **R_tmp_info_complex = NULL;
          HYPRE_Int R_tmp_info_size = 0;
          HYPRE_Int R_tmp_info_cnt = 0;
          if (hypre_ParAMGDataRestriction(amg_data) && outer_level != 0)

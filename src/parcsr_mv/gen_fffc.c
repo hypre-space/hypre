@@ -491,6 +491,10 @@ hypre_ParCSRMatrixGenerateFFFCHost( hypre_ParCSRMatrix  *A,
  * hypre_ParCSRMatrixGenerateFFFC
  *
  * Generate AFF or AFC
+ *
+ * TODO (VPM): build the communication package of the resulting matrices
+ * (A_FF and A_FC) from the communication package of the original matrix
+ * without doing MPI calls.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

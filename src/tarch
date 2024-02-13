@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # set -x
 #
 #  Returns the architecture of the host machine
@@ -59,7 +59,7 @@ for LARCH in $ARCHLIST ; do
 	mips|dec-5000)   FARCH=dec5000 ; break ;;
         IP12|iris-4d)    GARCH=IRIX ;;
         cray|CRAY*)      GARCH=CRAY ;;
-	KSR1|KSR2)       FARCH=ksr ; break ;;	
+	KSR1|KSR2)       FARCH=ksr ; break ;;
         FreeBSD)         FARCH=freebsd ; break ;;
 	i386)            GARCH=ipsc2 ;;
 	ULTRIX|RISC)     GARCH=dec5000 ;;

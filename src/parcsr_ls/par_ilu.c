@@ -20,11 +20,18 @@
 void *
 hypre_ILUCreate( void )
 {
-   hypre_ParILUData *ilu_data;
+   hypre_ParILUData  *ilu_data;
+   hypre_Solver      *base;
 
    ilu_data = hypre_CTAlloc(hypre_ParILUData, 1, HYPRE_MEMORY_HOST);
+   base     = (hypre_Solver*) ilu_data;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_ILUSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_ILUSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) HYPRE_ILUDestroy;
+
+#if defined(HYPRE_USING_GPU)
    hypre_ParILUDataAperm(ilu_data)                        = NULL;
    hypre_ParILUDataMatBILUDevice(ilu_data)                = NULL;
    hypre_ParILUDataMatSILUDevice(ilu_data)                = NULL;
@@ -86,6 +93,14 @@ hypre_ILUCreate( void )
    hypre_ParILUDataNLU(ilu_data)                          = 0;
    hypre_ParILUDataNI(ilu_data)                           = 0;
    hypre_ParILUDataUEnd(ilu_data)                         = NULL;
+
+   /* Iterative setup variables */
+   hypre_ParILUDataIterativeSetupType(ilu_data)           = 0;
+   hypre_ParILUDataIterativeSetupOption(ilu_data)         = 0;
+   hypre_ParILUDataIterativeSetupMaxIter(ilu_data)        = 100;
+   hypre_ParILUDataIterativeSetupNumIter(ilu_data)        = 0;
+   hypre_ParILUDataIterativeSetupTolerance(ilu_data)      = 1.e-6;
+   hypre_ParILUDataIterativeSetupHistory(ilu_data)        = NULL;
 
    /* reordering_type default to use local RCM */
    hypre_ParILUDataReorderingType(ilu_data)               = 1;
@@ -155,7 +170,7 @@ hypre_ILUDestroy( void *data )
       }
 
       /* GPU additional data */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
       hypre_ParCSRMatrixDestroy( hypre_ParILUDataAperm(ilu_data) );
       hypre_ParCSRMatrixDestroy( hypre_ParILUDataR(ilu_data) );
       hypre_ParCSRMatrixDestroy( hypre_ParILUDataP(ilu_data) );
@@ -222,7 +237,7 @@ hypre_ILUDestroy( void *data )
 
       /* ILU as precond for Schur */
       if ( hypre_ParILUDataSchurPrecond(ilu_data)  &&
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
            hypre_ParILUDataIluType(ilu_data) != 10 &&
            hypre_ParILUDataIluType(ilu_data) != 11 &&
 #endif
@@ -240,6 +255,9 @@ hypre_ILUDestroy( void *data )
       /* permutation array */
       hypre_TFree( hypre_ParILUDataPerm(ilu_data), memory_location );
       hypre_TFree( hypre_ParILUDataQPerm(ilu_data), memory_location );
+
+      /* Iterative ILU data */
+      hypre_TFree( hypre_ParILUDataIterativeSetupHistory(ilu_data), HYPRE_MEMORY_HOST );
 
       /* droptol array - TODO (VPM): remove this after changing to static array */
       hypre_TFree( hypre_ParILUDataDroptol(ilu_data), HYPRE_MEMORY_HOST );
@@ -369,7 +387,7 @@ hypre_ILUSetType( void      *ilu_vdata,
 
    /* ILU as precond for Schur */
    if ( hypre_ParILUDataSchurPrecond(ilu_data)    &&
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
         (hypre_ParILUDataIluType(ilu_data) != 10  &&
          hypre_ParILUDataIluType(ilu_data) != 11) &&
 #endif
@@ -430,11 +448,108 @@ hypre_ILUSetType( void      *ilu_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ILUSetMaxIter( void     *ilu_vdata,
+hypre_ILUSetMaxIter( void      *ilu_vdata,
                      HYPRE_Int  max_iter )
 {
-   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+
    hypre_ParILUDataMaxIter(ilu_data) = max_iter;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetIterativeSetupType
+ *
+ * Set iterative ILU setup algorithm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ILUSetIterativeSetupType( void      *ilu_vdata,
+                                HYPRE_Int  iter_setup_type)
+{
+   hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+
+   hypre_ParILUDataIterativeSetupType(ilu_data) = iter_setup_type;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetIterativeSetupOption
+ *
+ * Set iterative ILU compute option
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ILUSetIterativeSetupOption( void      *ilu_vdata,
+                                  HYPRE_Int  iter_setup_option)
+{
+   hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+
+   /* Compute residuals when using the stopping criteria, if not chosen by the user */
+   iter_setup_option |= ((iter_setup_option & 0x02) && !(iter_setup_option & 0x0C)) ? 0x08 : 0;
+
+   /* Compute residuals when asking for conv. history, if not chosen by the user */
+   iter_setup_option |= ((iter_setup_option & 0x10) && !(iter_setup_option & 0x08)) ? 0x08 : 0;
+
+   /* Zero out first bit of option (turn off rocSPARSE logging) */
+   iter_setup_option &= ~0x01;
+
+   /* Set internal iter_setup_option */
+   hypre_ParILUDataIterativeSetupOption(ilu_data) = iter_setup_option;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetIterativeSetupMaxIter
+ *
+ * Set maximum number of iterations for iterative ILU setup
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ILUSetIterativeSetupMaxIter( void      *ilu_vdata,
+                                   HYPRE_Int  iter_setup_max_iter)
+{
+   hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+
+   hypre_ParILUDataIterativeSetupMaxIter(ilu_data) = iter_setup_max_iter;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetIterativeSetupTolerance
+ *
+ * Set dropping tolerance for iterative ILU setup
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ILUSetIterativeSetupTolerance( void       *ilu_vdata,
+                                     HYPRE_Real  iter_setup_tolerance)
+{
+   hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+
+   hypre_ParILUDataIterativeSetupTolerance(ilu_data) = iter_setup_tolerance;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ILUGetIterativeSetupHistory
+ *
+ * Get array of corrections and/or residual norms computed during ILU's
+ * iterative setup algorithm.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ILUGetIterativeSetupHistory( void           *ilu_vdata,
+                                   HYPRE_Complex **iter_setup_history)
+{
+   hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+
+   *iter_setup_history = hypre_ParILUDataIterativeSetupHistory(ilu_data);
 
    return hypre_error_flag;
 }
@@ -866,7 +981,7 @@ hypre_ILUSetSchurPrecondUpperJacobiIters( void      *ilu_vdata,
 /*--------------------------------------------------------------------------
  * hypre_ILUSetSchurPrecondTol
  *
- * Set onvergence tolerance for Precond of Schur System
+ * Set convergence tolerance for Precond of Schur System
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -994,7 +1109,7 @@ hypre_ILUWriteSolverParams(void *ilu_vdata)
    switch (hypre_ParILUDataIluType(ilu_data))
    {
       case 0:
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if ( hypre_ParILUDataLfil(ilu_data) == 0 )
          {
             hypre_printf("Block Jacobi with GPU-accelerated ILU0 \n");
@@ -1022,7 +1137,7 @@ hypre_ILUWriteSolverParams(void *ilu_vdata)
          break;
 
       case 10:
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
          if ( hypre_ParILUDataLfil(ilu_data) == 0 )
          {
             hypre_printf("ILU-GMRES with GPU-accelerated ILU0 \n");
@@ -1609,6 +1724,8 @@ hypre_ILUGetPermddPQPre(HYPRE_Int   n,
                         HYPRE_Int  *qperm_pre,
                         HYPRE_Int  *nB)
 {
+   HYPRE_UNUSED_VAR(n);
+
    HYPRE_Int   i, ii, nB_pre, k1, k2;
    HYPRE_Real  gtol, max_value, norm;
 
@@ -2882,7 +2999,7 @@ hypre_ILULocalRCMReverse(HYPRE_Int *perm, HYPRE_Int start, HYPRE_Int end)
 }
 
 /* TODO (VPM): Change this block to another file? */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 
 /*--------------------------------------------------------------------------
  * hypre_ParILUSchurGMRESDummySolveDevice
@@ -3169,7 +3286,7 @@ hypre_ParILURAPSchurGMRESMatvecDevice( void           *matvec_data,
    return hypre_error_flag;
 }
 
-#endif /* if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+#endif /* if defined(HYPRE_USING_GPU) */
 
 /*--------------------------------------------------------------------------
  * hypre_ParILURAPSchurGMRESSolveHost
@@ -3181,6 +3298,8 @@ hypre_ParILURAPSchurGMRESSolveHost( void               *ilu_vdata,
                                     hypre_ParVector    *f,
                                     hypre_ParVector    *u )
 {
+   HYPRE_UNUSED_VAR(ilu_vdata2);
+
    hypre_ParILUData        *ilu_data     = (hypre_ParILUData*) ilu_vdata;
    hypre_ParCSRMatrix      *L            = hypre_ParILUDataMatLModified(ilu_data);
    hypre_CSRMatrix         *L_diag       = hypre_ParCSRMatrixDiag(L);
@@ -3275,6 +3394,8 @@ hypre_ParILURAPSchurGMRESMatvecHost( void          *matvec_data,
                                      HYPRE_Complex  beta,
                                      void          *y )
 {
+   HYPRE_UNUSED_VAR(matvec_data);
+
    /* get matrix information first */
    hypre_ParILUData        *ilu_data            = (hypre_ParILUData*) ilu_vdata;
 
@@ -4094,7 +4215,7 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix  *matA,
 
    /* complexity */
    HYPRE_Real        nnzA = hypre_CSRMatrixNumNonzeros(matA);
-   HYPRE_Real        nnzM;
+   HYPRE_Real        nnzM = 1.0;
 
    /* inverse matrix */
    hypre_CSRMatrix   *inM = *M;
@@ -4116,9 +4237,9 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix  *matA,
    hypre_CSRMatrix   *matC;
    hypre_CSRMatrix   *matW;
 
-   HYPRE_Real        time_s, time_e;
+   HYPRE_Real        time_s = 0.0, time_e;
    HYPRE_Int         i, k1, k2;
-   HYPRE_Real        value, trace1, trace2, alpha, r_norm;
+   HYPRE_Real        value, trace1, trace2, alpha, r_norm = 0.0;
 
    HYPRE_Int         n = hypre_CSRMatrixNumRows(matA);
 
@@ -4239,8 +4360,7 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix  *matA,
       hypre_CSRMatrixDestroy(matW);
       hypre_CSRMatrixDestroy(matC);
       hypre_CSRMatrixDestroy(matR_temp);
-
-   }/* end of main loop i for compute inverse matrix */
+   } /* end of main loop i for compute inverse matrix */
 
    /* time if we need to print */
    if (print_level > 1)
@@ -4262,7 +4382,6 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix  *matA,
    *M = matM;
 
    return hypre_error_flag;
-
 }
 
 /*--------------------------------------------------------------------------
@@ -4297,6 +4416,8 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix  *A,
                           HYPRE_Int            mr_col_version,
                           HYPRE_Int            print_level)
 {
+   HYPRE_UNUSED_VAR(nsh_max_row_nnz);
+
    /* data slots for matrices */
    hypre_ParCSRMatrix      *matM = NULL;
    hypre_ParCSRMatrix      *inM = *M;

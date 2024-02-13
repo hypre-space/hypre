@@ -315,7 +315,7 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
    HYPRE_Int  break_value = 0;
    HYPRE_Int  i, j, k;
    /*KS: rv is the norm history */
-   HYPRE_Real *rs, *hh, *uu, *c, *s, *rs_2, *rv;
+   HYPRE_Real *rs, *hh, *uu, *c, *s, *rs_2 = NULL, *rv;
    //, *tmp;
    HYPRE_Int  iter;
    HYPRE_Int  my_id, num_procs;
@@ -373,7 +373,7 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
    b_norm = hypre_sqrt((*(cogmres_functions->InnerProd))(b, b));
    real_r_norm_old = b_norm;
 
-   /* Since it is does not diminish performance, attempt to return an error flag
+   /* Since it does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
    if (b_norm != 0.) { ieee_check = b_norm / b_norm; } /* INF -> NaN conversion */
    if (ieee_check != ieee_check)
@@ -400,7 +400,7 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
    r_norm   = hypre_sqrt((*(cogmres_functions->InnerProd))(p[0], p[0]));
    r_norm_0 = r_norm;
 
-   /* Since it is does not diminish performance, attempt to return an error flag
+   /* Since it does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
    if (r_norm != 0.) { ieee_check = r_norm / r_norm; } /* INF -> NaN conversion */
    if (ieee_check != ieee_check)

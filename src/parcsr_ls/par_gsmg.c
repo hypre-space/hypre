@@ -448,7 +448,7 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
    HYPRE_Int smooth_type;
    HYPRE_Int smooth_option = 0;
    HYPRE_Int smooth_num_levels;
-   HYPRE_Solver *smoother;
+   HYPRE_Solver *smoother = NULL;
 
    HYPRE_Int debug_flag = hypre_ParAMGDataDebugFlag(amg_data);
    HYPRE_Int num_threads;
@@ -520,7 +520,7 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
 
       for (i = 0; i < num_sweeps; i++)
       {
-         if (smooth_option == 6)
+         if ((smooth_num_levels > level) && (smooth_option == 6))
          {
             HYPRE_SchwarzSolve(smoother[level],
                                (HYPRE_ParCSRMatrix) A,
@@ -731,17 +731,18 @@ hypre_BoomerAMGFitVectors(HYPRE_Int ip, HYPRE_Int n, HYPRE_Int num, const HYPRE_
 
 HYPRE_Int
 hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
-                              HYPRE_Int                  *CF_marker,
+                              HYPRE_Int            *CF_marker,
                               hypre_ParCSRMatrix   *S,
-                              HYPRE_BigInt            *num_cpts_global,
-                              HYPRE_Int                   num_functions,
-                              HYPRE_Int                  *dof_func,
-                              HYPRE_Int                   debug_flag,
+                              HYPRE_BigInt         *num_cpts_global,
+                              HYPRE_Int             num_functions,
+                              HYPRE_Int            *dof_func,
+                              HYPRE_Int             debug_flag,
                               HYPRE_Real            trunc_factor,
-                              HYPRE_Int                   num_smooth,
+                              HYPRE_Int             num_smooth,
                               HYPRE_Real           *SmoothVecs,
                               hypre_ParCSRMatrix  **P_ptr)
 {
+   HYPRE_UNUSED_VAR(A);
 
    MPI_Comm          comm = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(S);
@@ -767,7 +768,7 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
    HYPRE_Int             *CF_marker_offd;
    HYPRE_Int             *dof_func_offd = NULL;
 
-   hypre_CSRMatrix *S_ext;
+   hypre_CSRMatrix *S_ext = NULL;
 
    //HYPRE_Real      *S_ext_data;
    //HYPRE_Int       *S_ext_i;
@@ -1275,12 +1276,11 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
    hypre_TFree(coarse_counter, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count_offd, HYPRE_MEMORY_HOST);
+   hypre_CSRMatrixDestroy(S_ext);
 
-   if (num_procs > 1) { hypre_CSRMatrixDestroy(S_ext); }
-
-   return (0);
-
+   return hypre_error_flag;
 }
+
 /*---------------------------------------------------------------------------
  * hypre_BoomerAMGBuildInterpGSMG
  *
@@ -1290,15 +1290,16 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
 
 HYPRE_Int
 hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
-                                HYPRE_Int                  *CF_marker,
+                                HYPRE_Int            *CF_marker,
                                 hypre_ParCSRMatrix   *S,
-                                HYPRE_BigInt               *num_cpts_global,
-                                HYPRE_Int                   num_functions,
-                                HYPRE_Int                  *dof_func,
-                                HYPRE_Int                   debug_flag,
+                                HYPRE_BigInt         *num_cpts_global,
+                                HYPRE_Int             num_functions,
+                                HYPRE_Int            *dof_func,
+                                HYPRE_Int             debug_flag,
                                 HYPRE_Real            trunc_factor,
                                 hypre_ParCSRMatrix  **P_ptr)
 {
+   HYPRE_UNUSED_VAR(A);
 
    MPI_Comm          comm = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(S);
@@ -1324,11 +1325,11 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
    HYPRE_Int             *CF_marker_offd;
    HYPRE_Int             *dof_func_offd = NULL;
 
-   hypre_CSRMatrix *S_ext;
+   hypre_CSRMatrix *S_ext = NULL;
 
-   HYPRE_Real      *S_ext_data;
-   HYPRE_Int             *S_ext_i;
-   HYPRE_BigInt    *S_ext_j;
+   HYPRE_Real      *S_ext_data = NULL;
+   HYPRE_Int             *S_ext_i = NULL;
+   HYPRE_BigInt    *S_ext_j = NULL;
 
    hypre_CSRMatrix    *P_diag;
    hypre_CSRMatrix    *P_offd;
@@ -2100,9 +2101,7 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
    hypre_TFree(coarse_counter, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count_offd, HYPRE_MEMORY_HOST);
+   hypre_CSRMatrixDestroy(S_ext);
 
-   if (num_procs > 1) { hypre_CSRMatrixDestroy(S_ext); }
-
-   return (0);
-
+   return hypre_error_flag;
 }

@@ -201,7 +201,6 @@ HYPRE_IJMatrixInitialize_v2( HYPRE_IJMatrix matrix, HYPRE_MemoryLocation memory_
    }
 
    return hypre_error_flag;
-
 }
 
 /*--------------------------------------------------------------------------
@@ -219,7 +218,8 @@ HYPRE_IJMatrixSetPrintLevel( HYPRE_IJMatrix matrix,
       return hypre_error_flag;
    }
 
-   hypre_IJMatrixPrintLevel(ijmatrix) = 1;
+   hypre_IJMatrixPrintLevel(ijmatrix) = (print_level > 0) ? print_level : 0;
+
    return hypre_error_flag;
 }
 
@@ -1011,7 +1011,8 @@ HYPRE_IJMatrixSetMaxOffProcElmts( HYPRE_IJMatrix matrix,
 
 /*--------------------------------------------------------------------------
  * HYPRE_IJMatrixRead
- * create IJMatrix on host memory
+ *
+ * Reads data from file in ASCII format and creates an IJMatrix on host memory
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1024,6 +1025,31 @@ HYPRE_IJMatrixRead( const char     *filename,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixReadBinary
+ *
+ * Reads data from file in binary format and creates an IJMatrix
+ * on host memory.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJMatrixReadBinary( const char     *filename,
+                          MPI_Comm        comm,
+                          HYPRE_Int       type,
+                          HYPRE_IJMatrix *matrix_ptr )
+{
+   hypre_IJMatrixReadBinary(filename, comm, type, matrix_ptr);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixReadMM
+ *
+ * Reads matrix-market data from file in ASCII format and creates an
+ * IJMatrix on host memory.
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_IJMatrixReadMM( const char     *filename,
@@ -1061,6 +1087,34 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
    hypre_ParCSRMatrix *par_csr = (hypre_ParCSRMatrix*) object;
 
    hypre_ParCSRMatrixPrintIJ(par_csr, 0, 0, filename);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixPrintBinary
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJMatrixPrintBinary( HYPRE_IJMatrix  matrix,
+                           const char     *filename )
+{
+   void    *object;
+
+   if (!matrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( (hypre_IJMatrixObjectType(matrix) != HYPRE_PARCSR) )
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   HYPRE_IJMatrixGetObject(matrix, &object);
+   hypre_ParCSRMatrixPrintBinaryIJ((hypre_ParCSRMatrix*) object, 0, 0, filename);
 
    return hypre_error_flag;
 }

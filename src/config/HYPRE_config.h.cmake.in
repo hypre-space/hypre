@@ -107,6 +107,9 @@
 /* Use cuSOLVER */
 #cmakedefine HYPRE_USING_CUSOLVER 1
 
+/* Use if using host memory only */
+#cmakedefine HYPRE_USING_HOST_MEMORY 1
+
 /* Use device memory pool */
 #cmakedefine HYPRE_USING_DEVICE_POOL 1
 
@@ -146,6 +149,9 @@
 /* Use SuperLU */
 #cmakedefine HAVE_SUPERLU 1
 
+/* Use MAGMA */
+#cmakedefine HYPRE_USING_MAGMA 1
+
 /* Use MPI */
 #cmakedefine HYPRE_HAVE_MPI 1
 
@@ -172,9 +178,3 @@
 
 /* As F77_FUNC, but for C identifiers containing underscores. */
 #define HYPRE_F77_FUNC_(name,NAME) name ## __
-
-/* Deprecated function macro */
-#define HYPRE_DEPRECATED(reason) _Pragma(reason)
-
-/* Define to 1 if using host memory only */
-#cmakedefine HYPRE_USING_HOST_MEMORY 1

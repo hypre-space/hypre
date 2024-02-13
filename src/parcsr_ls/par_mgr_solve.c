@@ -25,9 +25,9 @@ hypre_MGRSolve( void               *mgr_vdata,
 {
 
    MPI_Comm              comm = hypre_ParCSRMatrixComm(A);
-   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+   hypre_ParMGRData     *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
-   hypre_ParCSRMatrix  **A_array = (mgr_data -> A_array);
+   hypre_ParCSRMatrix **A_array = (mgr_data -> A_array);
    hypre_ParVector    **F_array = (mgr_data -> F_array);
    hypre_ParVector    **U_array = (mgr_data -> U_array);
 
@@ -35,10 +35,10 @@ hypre_MGRSolve( void               *mgr_vdata,
    HYPRE_Int            logging = (mgr_data -> logging);
    HYPRE_Int            print_level = (mgr_data -> print_level);
    HYPRE_Int            max_iter = (mgr_data -> max_iter);
-   HYPRE_Real           *norms = (mgr_data -> rel_res_norms);
-   hypre_ParVector      *Vtemp = (mgr_data -> Vtemp);
+   HYPRE_Real          *norms = (mgr_data -> rel_res_norms);
+   hypre_ParVector     *Vtemp = (mgr_data -> Vtemp);
    //   hypre_ParVector      *Utemp = (mgr_data -> Utemp);
-   hypre_ParVector      *residual;
+   hypre_ParVector     *residual = NULL;
 
    HYPRE_Complex        fp_zero = 0.0;
    HYPRE_Complex        fp_one = 1.0;
@@ -52,14 +52,7 @@ hypre_MGRSolve( void               *mgr_vdata,
    HYPRE_Real           ieee_check = 0.;
 
    HYPRE_Int            iter, num_procs, my_id;
-   HYPRE_Int            Solve_err_flag;
 
-   /*
-      HYPRE_Real   total_coeffs;
-      HYPRE_Real   total_variables;
-      HYPRE_Real   operat_cmplxty;
-      HYPRE_Real   grid_cmplxty;
-      */
    HYPRE_Solver         cg_solver = (mgr_data -> coarse_grid_solver);
    HYPRE_Int            (*coarse_grid_solver_solve)(void*, void*, void*,
                                                     void*) = (mgr_data -> coarse_grid_solver_solve);
@@ -94,40 +87,28 @@ hypre_MGRSolve( void               *mgr_vdata,
    /*-----------------------------------------------------------------------
     *    Write the solver parameters
     *-----------------------------------------------------------------------*/
-   if (my_id == 0 && print_level > 1)
-   {
-      hypre_MGRWriteSolverParams(mgr_data);
-   }
 
-   /*-----------------------------------------------------------------------
-    *    Initialize the solver error flag and assorted bookkeeping variables
-    *-----------------------------------------------------------------------*/
+   /* Print MGR and linear system info according to print level */
+   hypre_MGRDataPrint(mgr_vdata);
 
-   Solve_err_flag = 0;
-   /*
-      total_coeffs = 0;
-      total_variables = 0;
-      operat_cmplxty = 0;
-      grid_cmplxty = 0;
-      */
    /*-----------------------------------------------------------------------
     *     write some initial info
     *-----------------------------------------------------------------------*/
 
-   if (my_id == 0 && print_level > 1 && tol > 0.)
+   if (my_id == 0 && (print_level & HYPRE_MGR_PRINT_INFO_SOLVE) && tol > 0.)
    {
-      hypre_printf("\n\nTWO-GRID SOLVER SOLUTION INFO:\n");
+      hypre_printf("\n\nMGR SOLVER SOLUTION INFO:\n");
    }
-
 
    /*-----------------------------------------------------------------------
     *    Compute initial fine-grid residual and print
     *-----------------------------------------------------------------------*/
-   if (print_level > 1 || logging > 1 || tol > 0.)
+
+   if ((print_level & HYPRE_MGR_PRINT_INFO_SOLVE) || logging > 1 || tol > 0.)
    {
       if (logging > 1)
       {
-         hypre_ParVectorCopy(F_array[0], residual );
+         hypre_ParVectorCopy(F_array[0], residual);
          if (tol > hypre_cabs(fp_zero))
          {
             hypre_ParCSRMatrixMatvec(fp_neg_one, A_array[0], U_array[0], fp_one, residual);
@@ -144,7 +125,7 @@ hypre_MGRSolve( void               *mgr_vdata,
          resnorm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
       }
 
-      /* Since it is does not diminish performance, attempt to return an error flag
+      /* Since it does not diminish performance, attempt to return an error flag
        * and notify users when they supply bad input. */
       if (resnorm != 0.)
       {
@@ -196,7 +177,7 @@ hypre_MGRSolve( void               *mgr_vdata,
       rel_resnorm = 1.;
    }
 
-   if (my_id == 0 && print_level > 1)
+   if (my_id == 0 && (print_level & HYPRE_MGR_PRINT_INFO_SOLVE))
    {
       hypre_printf("                                            relative\n");
       hypre_printf("               residual        factor       residual\n");
@@ -216,7 +197,7 @@ hypre_MGRSolve( void               *mgr_vdata,
        *    Compute  fine-grid residual and residual norm
        *----------------------------------------------------------------*/
 
-      if (print_level > 1 || logging > 1 || tol > 0.)
+      if ((print_level & HYPRE_MGR_PRINT_INFO_SOLVE) || logging > 1 || tol > 0.)
       {
          old_resnorm = resnorm;
 
@@ -242,7 +223,7 @@ hypre_MGRSolve( void               *mgr_vdata,
       (mgr_data -> num_iterations) = iter;
       (mgr_data -> final_rel_residual_norm) = rel_resnorm;
 
-      if (my_id == 0 && print_level > 1)
+      if (my_id == 0 && (print_level & HYPRE_MGR_PRINT_INFO_SOLVE))
       {
          hypre_printf("    MGRCycle %2d   %e    %f     %e \n", iter,
                       resnorm, conv_factor, rel_resnorm);
@@ -252,43 +233,32 @@ hypre_MGRSolve( void               *mgr_vdata,
    /* check convergence within max_iter */
    if (iter == max_iter && tol > 0.)
    {
-      Solve_err_flag = 1;
       hypre_error(HYPRE_ERROR_CONV);
-   }
 
-   /*-----------------------------------------------------------------------
-    *    Print closing statistics
-    *    Add operator and grid complexity stats
-    *-----------------------------------------------------------------------*/
-
-   if (iter > 0 && init_resnorm)
-   {
-      conv_factor = hypre_pow((resnorm / init_resnorm), (fp_one / (HYPRE_Real) iter));
-   }
-   else
-   {
-      conv_factor = fp_one;
-   }
-
-   if (print_level > 1)
-   {
-      /*** compute operator and grid complexities here ?? ***/
-      if (my_id == 0)
+      if (!my_id && (print_level & HYPRE_MGR_PRINT_INFO_SOLVE))
       {
-         if (Solve_err_flag == 1)
-         {
-            hypre_printf("\n\n==============================================");
-            hypre_printf("\n NOTE: Convergence tolerance was not achieved\n");
-            hypre_printf("      within the allowed %d iterations\n", max_iter);
-            hypre_printf("==============================================");
-         }
-         hypre_printf("\n\n Average Convergence Factor = %f \n", conv_factor);
-         hypre_printf(" Number of coarse levels = %d \n", (mgr_data -> num_coarse_levels));
-         //         hypre_printf("\n\n     Complexity:    grid = %f\n",grid_cmplxty);
-         //         hypre_printf("                operator = %f\n",operat_cmplxty);
-         //         hypre_printf("                   cycle = %f\n\n\n\n",cycle_cmplxty);
+         hypre_printf("\n\n==============================================");
+         hypre_printf("\n NOTE: Convergence tolerance was not achieved\n");
+         hypre_printf("      within the allowed %d iterations\n", max_iter);
+         hypre_printf("==============================================");
       }
    }
+
+   if ((my_id == 0) && (print_level & HYPRE_MGR_PRINT_INFO_SOLVE))
+   {
+      if (iter > 0 && init_resnorm)
+      {
+         conv_factor = hypre_pow((resnorm / init_resnorm),
+                                 (fp_one / (HYPRE_Real) iter));
+      }
+      else
+      {
+         conv_factor = fp_one;
+      }
+
+      hypre_printf("\n\n Average Convergence Factor = %f \n", conv_factor);
+   }
+
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
@@ -537,6 +507,7 @@ hypre_MGRCycle( void              *mgr_vdata,
 {
    MPI_Comm               comm;
    hypre_ParMGRData      *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+   hypre_Solver          *aff_base;
 
    HYPRE_Int              local_size;
    HYPRE_Int              level;
@@ -553,6 +524,7 @@ hypre_MGRCycle( void              *mgr_vdata,
    hypre_ParCSRMatrix   **A_array    = (mgr_data -> A_array);
    hypre_ParCSRMatrix   **RT_array   = (mgr_data -> RT_array);
    hypre_ParCSRMatrix   **P_array    = (mgr_data -> P_array);
+   hypre_ParCSRMatrix   **R_array    = (mgr_data -> R_array);
 #if defined(HYPRE_USING_GPU)
    hypre_ParCSRMatrix   **B_array    = (mgr_data -> B_array);
    hypre_ParCSRMatrix   **B_FF_array = (mgr_data -> B_FF_array);
@@ -602,7 +574,6 @@ hypre_MGRCycle( void              *mgr_vdata,
    HYPRE_Int             *restrict_type  = (mgr_data -> restrict_type);
    HYPRE_Int              pre_smoothing  = (mgr_data -> global_smooth_cycle) == 1 ? 1 : 0;
    HYPRE_Int              post_smoothing = (mgr_data -> global_smooth_cycle) == 2 ? 1 : 0;
-   HYPRE_Int              use_air = 0;
    HYPRE_Int              my_id;
    char                   region_name[1024];
    char                   msg[1024];
@@ -1014,10 +985,23 @@ hypre_MGRCycle( void              *mgr_vdata,
             if (Frelax_type[level] == 2)
             {
                /* Do F-relaxation using AMG */
-               fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid],
-                                      A_ff_array[fine_grid],
-                                      F_fine_array[coarse_grid],
-                                      U_fine_array[coarse_grid]);
+               if (level == 0)
+               {
+                  /* TODO (VPM): unify with the next block */
+                  fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid],
+                                         A_ff_array[fine_grid],
+                                         F_fine_array[coarse_grid],
+                                         U_fine_array[coarse_grid]);
+               }
+               else
+               {
+                  aff_base = (hypre_Solver*) (mgr_data -> aff_solver)[level];
+
+                  hypre_SolverSolve(aff_base)((HYPRE_Solver) (mgr_data -> aff_solver)[level],
+                                              (HYPRE_Matrix) A_ff_array[level],
+                                              (HYPRE_Vector) F_fine_array[level + 1],
+                                              (HYPRE_Vector) U_fine_array[level + 1]);
+               }
             }
             else
             {
@@ -1072,19 +1056,13 @@ hypre_MGRCycle( void              *mgr_vdata,
          hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_REGION_END("%s", region_name);
 
-         if ((restrict_type[fine_grid] == 4) ||
-             (restrict_type[fine_grid] == 5))
-         {
-            use_air = 1;
-         }
-
          hypre_sprintf(region_name, "Restrict");
          hypre_GpuProfilingPushRange(region_name);
          HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
-         if (use_air)
+         if (R_array[fine_grid])
          {
             /* no transpose necessary for R */
-            hypre_ParCSRMatrixMatvec(fp_one, RT_array[fine_grid], Vtemp,
+            hypre_ParCSRMatrixMatvec(fp_one, R_array[fine_grid], Vtemp,
                                      fp_zero, F_array[coarse_grid]);
          }
          else

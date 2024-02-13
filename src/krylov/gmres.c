@@ -307,7 +307,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
    HYPRE_Int             break_value = 0;
    HYPRE_Int             i, j, k;
-   HYPRE_Real           *rs, **hh, *c, *s, *rs_2;
+   HYPRE_Real           *rs, **hh, *c, *s, *rs_2 = NULL;
    HYPRE_Int             iter;
    HYPRE_Int             my_id, num_procs;
    HYPRE_Real            epsilon, gamma, t, r_norm, b_norm, den_norm, x_norm;
@@ -364,7 +364,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    b_norm = hypre_sqrt((*(gmres_functions->InnerProd))(b, b));
    real_r_norm_old = b_norm;
 
-   /* Since it is does not diminish performance, attempt to return an error flag
+   /* Since it does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
    if (b_norm != 0.)
    {
@@ -394,7 +394,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    r_norm = hypre_sqrt((*(gmres_functions->InnerProd))(p[0], p[0]));
    r_norm_0 = r_norm;
 
-   /* Since it is does not diminish performance, attempt to return an error flag
+   /* Since it does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
    if (r_norm != 0.)
    {

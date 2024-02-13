@@ -46,7 +46,7 @@ main( hypre_int argc,
 
    HYPRE_Int           p, q, r;
    HYPRE_Int           dim;
-   HYPRE_Int           nblocks ;
+   HYPRE_Int           nblocks = 0;
    HYPRE_Int         **ilower, **iupper, **iupper2;
    HYPRE_Int           istart[3];
    HYPRE_Int           i, ix, iy, iz, ib;
@@ -67,12 +67,13 @@ main( hypre_int argc,
     * GPU Device binding
     * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
-   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+   hypre_bind_device_id(-1, myid, num_procs, hypre_MPI_COMM_WORLD);
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
    HYPRE_Initialize();
+   HYPRE_DeviceInitialize();
 
 #if defined(HYPRE_USING_KOKKOS)
    Kokkos::initialize (argc, argv);
@@ -91,6 +92,8 @@ main( hypre_int argc,
    P  = num_procs;
    Q  = 1;
    R  = 1;
+
+   p = q = r = 1;
 
    bx = 1;
    by = 1;

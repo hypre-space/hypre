@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -38,6 +38,6 @@ find . -type f -print | egrep '[.]*[.](c|cc|cpp|cxx|C|h|hpp|hxx|H)$' |
   egrep -v '/FEI_mv' |
   egrep -v '/hypre/include' > check-double.files
 
-egrep '(^|[^[:alnum:]_]+)double([^[:alnum:]_]+|$)' `cat check-double.files` >&2
+egrep '(^|[^[:alnum:]_-]+)double([^[:alnum:]_-]+|$)' `cat check-double.files` >&2
 
 rm -f check-double.files

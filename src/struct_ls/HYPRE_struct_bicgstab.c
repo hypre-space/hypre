@@ -12,6 +12,8 @@
 HYPRE_Int
 HYPRE_StructBiCGSTABCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 {
+   HYPRE_UNUSED_VAR(comm);
+
    hypre_BiCGSTABFunctions * bicgstab_functions =
       hypre_BiCGSTABFunctionsCreate(
          hypre_StructKrylovCreateVector,
@@ -152,4 +154,3 @@ HYPRE_StructBiCGSTABGetResidual( HYPRE_StructSolver  solver,
 {
    return ( HYPRE_BiCGSTABGetResidual( (HYPRE_Solver) solver, residual ) );
 }
-

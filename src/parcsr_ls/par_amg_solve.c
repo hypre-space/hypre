@@ -74,7 +74,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    hypre_ParVector    *Rtemp;
    hypre_ParVector    *Ptemp;
    hypre_ParVector    *Ztemp;
-   hypre_ParVector    *Residual;
+   hypre_ParVector    *Residual = NULL;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -188,7 +188,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
          resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
       }
 
-      /* Since it is does not diminish performance, attempt to return an error flag
+      /* Since it does not diminish performance, attempt to return an error flag
          and notify users when they supply bad input. */
       if (resid_nrm != 0.)
       {
@@ -280,14 +280,16 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       {
          old_resid = resid_nrm;
 
-         if ( amg_logging > 1 )
+         if (amg_logging > 1)
          {
-            hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Residual );
-            resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
+            hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0],
+                                               Residual);
+            resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(Residual, Residual));
          }
          else
          {
-            hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp);
+            hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0],
+                                               Vtemp);
             resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
          }
 

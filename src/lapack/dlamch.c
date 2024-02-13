@@ -835,13 +835,14 @@ L10:
     doublereal d__1;
     /* Local variables */
     integer lexp;
-    doublereal oldy;
+    doublereal oldy = 0.;
     integer uexp, i;
-    doublereal y, z;
+    doublereal z;
     integer nbits;
     extern doublereal dlamc3_(doublereal *, doublereal *);
     doublereal recbas;
     integer exbits, expsum, try__;
+    doublereal y;
 
 
 
@@ -937,7 +938,7 @@ it
 
 /***i__1 = *emax;***/
     for (i = 1; i <= *emax; ++i) {
-	d__1 = y * *beta;
+	d__1 = y * ((doublereal) *beta);
 	y = dlamc3_(&d__1, &c_b5);
 /* L30: */
     }

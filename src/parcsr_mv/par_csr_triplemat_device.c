@@ -492,9 +492,12 @@ hypre_ParCSRTMatMatKTDevice( hypre_ParCSRMatrix  *A,
                          func1 );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure Cint is ready before issuing GPU-GPU MPI */
-      hypre_ForceSyncComputeStream(hypre_handle());
+      if (hypre_GetGpuAwareMPI())
+      {
+         hypre_ForceSyncComputeStream(hypre_handle());
+      }
 #endif
 
       hypre_CSRMatrixData(Cint) = hypre_CSRMatrixData(Cbar) + local_nnz_Cbar;
@@ -767,9 +770,12 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
                          func1 );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure Cint is ready before issuing GPU-GPU MPI */
-      hypre_ForceSyncComputeStream(hypre_handle());
+      if (hypre_GetGpuAwareMPI())
+      {
+         hypre_ForceSyncComputeStream(hypre_handle());
+      }
 #endif
 
       hypre_CSRMatrixData(Cint) = hypre_CSRMatrixData(Cbar) + local_nnz_Cbar;
@@ -836,9 +842,6 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
       }
    }
 
-   /* Move the diagonal entry to the first of each row */
-   hypre_CSRMatrixMoveDiagFirstDevice(C_diag);
-
    C = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A),
                                 hypre_ParCSRMatrixGlobalNumCols(R),
                                 hypre_ParCSRMatrixGlobalNumCols(P),
@@ -858,6 +861,22 @@ hypre_ParCSRMatrixRAPKTDevice( hypre_ParCSRMatrix *R,
 
    hypre_ParCSRMatrixCompressOffdMapDevice(C);
    hypre_ParCSRMatrixCopyColMapOffdToHost(C);
+
+   /* Ensure that the diagonal entries exist in the matrix structure (even if numerically zero) */
+   if (hypre_CSRMatrixCheckForMissingDiagonal(C_diag))
+   {
+      hypre_CSRMatrix *zero = hypre_CSRMatrixIdentityDevice(hypre_CSRMatrixNumRows(C_diag), 0.0);
+
+      hypre_CSRMatrix *C_diag_new = hypre_CSRMatrixAddDevice(1.0, C_diag, 1.0, zero);
+
+      hypre_CSRMatrixDestroy(C_diag);
+      hypre_CSRMatrixDestroy(zero);
+
+      hypre_ParCSRMatrixDiag(C) = C_diag_new;
+   }
+
+   /* Move the diagonal entry to the first of each row */
+   hypre_CSRMatrixMoveDiagFirstDevice(hypre_ParCSRMatrixDiag(C));
 
    hypre_assert(!hypre_CSRMatrixCheckDiagFirstDevice(hypre_ParCSRMatrixDiag(C)));
 

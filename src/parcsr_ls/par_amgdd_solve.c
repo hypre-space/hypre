@@ -21,7 +21,7 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
    hypre_ParCSRMatrix  **P_array;
    hypre_ParVector     **F_array;
    hypre_ParVector     **U_array;
-   hypre_ParVector      *res;
+   hypre_ParVector      *res = NULL;
    hypre_ParVector      *Vtemp;
    hypre_ParVector      *Ztemp;
 
@@ -37,9 +37,9 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
    HYPRE_Int             amg_print_level;
    HYPRE_Int             amg_logging;
    HYPRE_Real            tol;
-   HYPRE_Real            resid_nrm;
-   HYPRE_Real            resid_nrm_init;
-   HYPRE_Real            rhs_norm;
+   HYPRE_Real            resid_nrm = 0.0;
+   HYPRE_Real            resid_nrm_init = 1.0;
+   HYPRE_Real            rhs_norm = 1.0;
    HYPRE_Real            old_resid;
    HYPRE_Real            relative_resid;
    HYPRE_Real            conv_factor;
@@ -135,7 +135,7 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
          resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
       }
 
-      /* Since it is does not diminish performance, attempt to return an error flag
+      /* Since it does not diminish performance, attempt to return an error flag
          and notify users when they supply bad input. */
       if (resid_nrm != 0.)
       {

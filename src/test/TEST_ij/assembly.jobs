@@ -1,0 +1,18 @@
+#!/bin/bash
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#=============================================================================
+# ij_assembly: Run default case
+#=============================================================================
+
+mpirun -np 1  ./ij_assembly > assembly.out.0
+
+mpirun -np 2  ./ij_assembly > assembly.out.1
+
+mpirun -np 3  ./ij_assembly > assembly.out.2
+
+mpirun -np 7  ./ij_assembly > assembly.out.3
+

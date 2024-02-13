@@ -18,6 +18,7 @@ set(TEST_SRCS
   struct_migrate.c
   sstruct_fac.c
   ij_mv.c
+  ij_assembly.c
 )
 
 add_hypre_executables(TEST_SRCS)

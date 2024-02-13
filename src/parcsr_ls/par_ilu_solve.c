@@ -47,7 +47,7 @@ hypre_ILUSolve( void               *ilu_vdata,
    hypre_ParVector      *U_array            = hypre_ParILUDataU(ilu_data);
 
    /* Device data */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    hypre_CSRMatrix      *matALU_d           = hypre_ParILUDataMatAILUDevice(ilu_data);
    hypre_CSRMatrix      *matBLU_d           = hypre_ParILUDataMatBILUDevice(ilu_data);
    hypre_CSRMatrix      *matE_d             = hypre_ParILUDataMatEDevice(ilu_data);
@@ -74,7 +74,7 @@ hypre_ILUSolve( void               *ilu_vdata,
    hypre_ParVector      *Ytemp              = hypre_ParILUDataYTemp(ilu_data);
    HYPRE_Real           *fext               = hypre_ParILUDataFExt(ilu_data);
    HYPRE_Real           *uext               = hypre_ParILUDataUExt(ilu_data);
-   hypre_ParVector      *residual;
+   hypre_ParVector      *residual           = NULL;
    HYPRE_Real            alpha              = -1.0;
    HYPRE_Real            beta               = 1.0;
    HYPRE_Real            conv_factor        = 0.0;
@@ -172,7 +172,7 @@ hypre_ILUSolve( void               *ilu_vdata,
          resnorm = hypre_sqrt(hypre_ParVectorInnerProd(Ftemp, Ftemp));
       }
 
-      /* Since it is does not diminish performance, attempt to return an error flag
+      /* Since it does not diminish performance, attempt to return an error flag
          and notify users when they supply bad input. */
       if (resnorm != 0.)
       {
@@ -247,7 +247,7 @@ hypre_ILUSolve( void               *ilu_vdata,
       {
       case 0: case 1: default:
             /* TODO (VPM): Encapsulate host and device functions into a single one */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
             if (exec == HYPRE_EXEC_DEVICE)
             {
                /* Apply GPU-accelerated LU solve - BJ-ILU0 */
@@ -277,14 +277,14 @@ hypre_ILUSolve( void               *ilu_vdata,
                else
                {
                   hypre_ILUSolveLUIter(matA, F_array, U_array, perm, n,
-                                       matL, matD, matU, Utemp, Ftemp, Xtemp,
+                                       matL, matD, matU, Utemp, Ftemp,
                                        lower_jacobi_iters, upper_jacobi_iters);
                }
             }
             break;
 
          case 10: case 11:
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
             if (exec == HYPRE_EXEC_DEVICE)
             {
                /* Apply GPU-accelerated GMRES-ILU solve */
@@ -362,7 +362,7 @@ hypre_ILUSolve( void               *ilu_vdata,
 
          case 50:
             /* GMRES-RAP */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
             if (exec == HYPRE_EXEC_DEVICE)
             {
                hypre_ILUSolveRAPGMRESDevice(matA, F_array, U_array, perm, nLU, matS, Utemp, Ftemp,
@@ -511,6 +511,8 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A,
                          hypre_ParVector    *x,
                          HYPRE_Int          *u_end)
 {
+   HYPRE_UNUSED_VAR(schur_precond);
+
    /* Data objects for L and U */
    hypre_CSRMatrix   *L_diag      = hypre_ParCSRMatrixDiag(L);
    HYPRE_Real        *L_diag_data = hypre_CSRMatrixData(L_diag);
@@ -815,6 +817,12 @@ hypre_ILUSolveSchurNSH(hypre_ParCSRMatrix *A,
  * L, D and U factors only have local scope (no off-diagterms)
  *  so apart from the residual calculation (which uses A),
  *  the solves with the L and U factors are local.
+ *
+ * Note: perm contains the permutation of indexes corresponding to
+ * user-prescribed reordering strategy. In the block Jacobi case, perm
+ * may be NULL if no reordering is done (for performance, (perm == NULL)
+ * assumes identity mapping of indexes). Hence we need to check the local
+ * solves for this case and avoid segfaults. - DOK
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -858,35 +866,75 @@ hypre_ILUSolveLU(hypre_ParCSRMatrix *A,
 
    /* L solve - Forward solve */
    /* copy rhs to account for diagonal of L (which is identity) */
-   for (i = 0; i < nLU; i++)
+   if (perm)
    {
-      utemp_data[perm[i]] = ftemp_data[perm[i]];
+      for (i = 0; i < nLU; i++)
+      {
+         utemp_data[perm[i]] = ftemp_data[perm[i]];
+      }
+   }
+   else
+   {
+      for (i = 0; i < nLU; i++)
+      {
+         utemp_data[i] = ftemp_data[i];
+      }
    }
 
    /* Update with remaining (off-diagonal) entries of L */
-   for ( i = 0; i < nLU; i++ )
+   if (perm)
    {
-      k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
-      for (j = k1; j < k2; j++)
+      for ( i = 0; i < nLU; i++ )
       {
-         utemp_data[perm[i]] -= L_diag_data[j] * utemp_data[perm[L_diag_j[j]]];
+         k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
+         for (j = k1; j < k2; j++)
+         {
+            utemp_data[perm[i]] -= L_diag_data[j] * utemp_data[perm[L_diag_j[j]]];
+         }
       }
    }
-
+   else
+   {
+      for ( i = 0; i < nLU; i++ )
+      {
+         k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
+         for (j = k1; j < k2; j++)
+         {
+            utemp_data[i] -= L_diag_data[j] * utemp_data[L_diag_j[j]];
+         }
+      }
+   }
    /*-------------------- U solve - Backward substitution */
-   for ( i = nLU - 1; i >= 0; i-- )
+   if (perm)
    {
-      /* first update with the remaining (off-diagonal) entries of U */
-      k1 = U_diag_i[i] ; k2 = U_diag_i[i + 1];
-      for (j = k1; j < k2; j++)
+      for ( i = nLU - 1; i >= 0; i-- )
       {
-         utemp_data[perm[i]] -= U_diag_data[j] * utemp_data[perm[U_diag_j[j]]];
+         /* first update with the remaining (off-diagonal) entries of U */
+         k1 = U_diag_i[i] ; k2 = U_diag_i[i + 1];
+         for (j = k1; j < k2; j++)
+         {
+            utemp_data[perm[i]] -= U_diag_data[j] * utemp_data[perm[U_diag_j[j]]];
+         }
+
+         /* diagonal scaling (contribution from D. Note: D is stored as its inverse) */
+         utemp_data[perm[i]] *= D[i];
       }
-
-      /* diagonal scaling (contribution from D. Note: D is stored as its inverse) */
-      utemp_data[perm[i]] *= D[i];
    }
+   else
+   {
+      for ( i = nLU - 1; i >= 0; i-- )
+      {
+         /* first update with the remaining (off-diagonal) entries of U */
+         k1 = U_diag_i[i] ; k2 = U_diag_i[i + 1];
+         for (j = k1; j < k2; j++)
+         {
+            utemp_data[i] -= U_diag_data[j] * utemp_data[U_diag_j[j]];
+         }
 
+         /* diagonal scaling (contribution from D. Note: D is stored as its inverse) */
+         utemp_data[i] *= D[i];
+      }
+   }
    /* Update solution */
    hypre_ParVectorAxpy(beta, utemp, u);
 
@@ -901,6 +949,12 @@ hypre_ILUSolveLU(hypre_ParCSRMatrix *A,
  * L, D and U factors only have local scope (no off-diag terms)
  *  so apart from the residual calculation (which uses A), the solves
  *  with the L and U factors are local.
+ *
+ * Note: perm contains the permutation of indexes corresponding to
+ * user-prescribed reordering strategy. In the block Jacobi case, perm
+ * may be NULL if no reordering is done (for performance, (perm == NULL)
+ * assumes identity mapping of indexes). Hence we need to check the local
+ * solves for this case and avoid segfaults. - DOK
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -914,7 +968,6 @@ hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A,
                      hypre_ParCSRMatrix *U,
                      hypre_ParVector    *ftemp,
                      hypre_ParVector    *utemp,
-                     hypre_ParVector    *xtemp,
                      HYPRE_Int           lower_jacobi_iters,
                      HYPRE_Int           upper_jacobi_iters)
 {
@@ -933,8 +986,6 @@ hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A,
    HYPRE_Real      *utemp_data  = hypre_VectorData(utemp_local);
    hypre_Vector    *ftemp_local = hypre_ParVectorLocalVector(ftemp);
    HYPRE_Real      *ftemp_data  = hypre_VectorData(ftemp_local);
-   hypre_Vector    *xtemp_local = hypre_ParVectorLocalVector(xtemp);
-   HYPRE_Real      *xtemp_data  = hypre_VectorData(xtemp_local);
 
    /* Local variables */
    HYPRE_Real       alpha       = -1.0;
@@ -954,40 +1005,68 @@ hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A,
    /* copy rhs to account for diagonal of L (which is identity) */
 
    /* Initialize iteration to 0 */
-   for ( i = 0; i < nLU; i++ )
+   if (perm)
    {
-      utemp_data[perm[i]] = 0.0;
+      for ( i = 0; i < nLU; i++ )
+      {
+         utemp_data[perm[i]] = 0.0;
+      }
    }
-
+   else
+   {
+      for ( i = 0; i < nLU; i++ )
+      {
+         utemp_data[i] = 0.0;
+      }
+   }
    /* Jacobi iteration loop */
    for ( kk = 0; kk < lower_jacobi_iters; kk++ )
    {
       /* u^{k+1} = f - Lu^k */
 
       /* Do a SpMV with L and save the results in xtemp */
-      for ( i = 0; i < nLU; i++ )
+      if (perm)
       {
-         sum = 0.0;
-         k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
-         for (j = k1; j < k2; j++)
+         for ( i = nLU - 1; i >= 0; i-- )
          {
-            sum += L_diag_data[j] * utemp_data[perm[L_diag_j[j]]];
+            sum = 0.0;
+            k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
+            for (j = k1; j < k2; j++)
+            {
+               sum += L_diag_data[j] * utemp_data[perm[L_diag_j[j]]];
+            }
+            utemp_data[perm[i]] = ftemp_data[perm[i]] - sum;
          }
-         xtemp_data[i] = sum;
       }
-
-      for ( i = 0; i < nLU; i++ )
+      else
       {
-         utemp_data[perm[i]] = ftemp_data[perm[i]] - xtemp_data[i];
+         for ( i = nLU - 1; i >= 0; i-- )
+         {
+            sum = 0.0;
+            k1 = L_diag_i[i] ; k2 = L_diag_i[i + 1];
+            for (j = k1; j < k2; j++)
+            {
+               sum += L_diag_data[j] * utemp_data[L_diag_j[j]];
+            }
+            utemp_data[i] = ftemp_data[i] - sum;
+         }
       }
    } /* end jacobi loop */
 
    /* Initialize iteration to 0 */
-   for ( i = 0; i < nLU; i++ )
+   if (perm)
    {
-      /* this should is doable without the permutation */
-      //ftemp_data[perm[i]] = utemp_data[perm[i]];
-      ftemp_data[perm[i]] = 0.0;
+      for ( i = 0; i < nLU; i++ )
+      {
+         ftemp_data[perm[i]] = 0.0;
+      }
+   }
+   else
+   {
+      for ( i = 0; i < nLU; i++ )
+      {
+         ftemp_data[i] = 0.0;
+      }
    }
 
    /* Jacobi iteration loop */
@@ -996,20 +1075,31 @@ hypre_ILUSolveLUIter(hypre_ParCSRMatrix *A,
       /* u^{k+1} = f - Uu^k */
 
       /* Do a SpMV with U and save the results in xtemp */
-      for ( i = 0; i < nLU; ++i )
+      if (perm)
       {
-         sum = 0.0;
-         k1 = U_diag_i[i] ; k2 = U_diag_i[i + 1];
-         for (j = k1; j < k2; j++)
+         for ( i = 0; i < nLU; ++i )
          {
-            sum += U_diag_data[j] * ftemp_data[perm[U_diag_j[j]]];
+            sum = 0.0;
+            k1 = U_diag_i[i] ; k2 = U_diag_i[i + 1];
+            for (j = k1; j < k2; j++)
+            {
+               sum += U_diag_data[j] * ftemp_data[perm[U_diag_j[j]]];
+            }
+            ftemp_data[perm[i]] = D[i] * (utemp_data[perm[i]] - sum);
          }
-         xtemp_data[i] = sum;
       }
-
-      for ( i = 0; i < nLU; ++i )
+      else
       {
-         ftemp_data[perm[i]] = D[i] * (utemp_data[perm[i]] - xtemp_data[i]);
+         for ( i = 0; i < nLU; ++i )
+         {
+            sum = 0.0;
+            k1 = U_diag_i[i] ; k2 = U_diag_i[i + 1];
+            for (j = k1; j < k2; j++)
+            {
+               sum += U_diag_data[j] * ftemp_data[U_diag_j[j]];
+            }
+            ftemp_data[i] = D[i] * (utemp_data[i] - sum);
+         }
       }
    } /* end jacobi loop */
 
@@ -1289,7 +1379,7 @@ hypre_ILUSolveRAPGMRESHost(hypre_ParCSRMatrix *A,
    /* other data objects for computation */
    hypre_Vector      *rhs_local;
    HYPRE_Real        *rhs_data;
-   hypre_Vector      *x_local;
+   hypre_Vector      *x_local = NULL;
    HYPRE_Real        *x_data;
 
    /* xtemp might be null when we have no Schur complement */
@@ -1505,7 +1595,7 @@ hypre_NSHSolve( void               *nsh_vdata,
    HYPRE_Real           *norms          = hypre_ParNSHDataRelResNorms(nsh_data);
    hypre_ParVector      *Ftemp          = hypre_ParNSHDataFTemp(nsh_data);
    hypre_ParVector      *Utemp          = hypre_ParNSHDataUTemp(nsh_data);
-   hypre_ParVector      *residual;
+   hypre_ParVector      *residual       = NULL;
 
    HYPRE_Real            alpha          = -1.0;
    HYPRE_Real            beta           = 1.0;
@@ -1559,14 +1649,14 @@ hypre_NSHSolve( void               *nsh_vdata,
     *-----------------------------------------------------------------------*/
    if (print_level > 1 || logging > 1 || tol > 0.)
    {
-      if ( logging > 1 )
+      if (logging > 1)
       {
-         hypre_ParVectorCopy(f, residual );
+         hypre_ParVectorCopy(f, residual);
          if (tol > 0.0)
          {
-            hypre_ParCSRMatrixMatvec(alpha, A, u, beta, residual );
+            hypre_ParCSRMatrixMatvec(alpha, A, u, beta, residual);
          }
-         resnorm = hypre_sqrt(hypre_ParVectorInnerProd( residual, residual ));
+         resnorm = hypre_sqrt(hypre_ParVectorInnerProd(residual, residual));
       }
       else
       {
@@ -1578,7 +1668,7 @@ hypre_NSHSolve( void               *nsh_vdata,
          resnorm = hypre_sqrt(hypre_ParVectorInnerProd(Ftemp, Ftemp));
       }
 
-      /* Since it is does not diminish performance, attempt to return an error flag
+      /* Since it does not diminish performance, attempt to return an error flag
          and notify users when they supply bad input. */
       if (resnorm != 0.)
       {
@@ -1729,6 +1819,7 @@ hypre_NSHSolve( void               *nsh_vdata,
          hypre_printf("                operator = %f\n", operat_cmplxty);
       }
    }
+
    return hypre_error_flag;
 }
 

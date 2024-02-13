@@ -2331,12 +2331,12 @@ main( hypre_int argc,
    ProblemData           global_data;
    ProblemData           data;
    ProblemPartData       pdata;
-   HYPRE_Int             nparts;
+   HYPRE_Int             nparts = 0;
    HYPRE_Int             pooldist;
-   HYPRE_Int            *parts;
-   Index                *refine;
-   Index                *distribute;
-   Index                *block;
+   HYPRE_Int            *parts = NULL;
+   Index                *refine = NULL;
+   Index                *distribute = NULL;
+   Index                *block = NULL;
    HYPRE_Int             solver_id, object_type;
    HYPRE_Int             print_system;
    HYPRE_Int             cosine;
@@ -2372,7 +2372,7 @@ main( hypre_int argc,
    Index                 ilower, iupper;
    Index                 index, to_index;
 
-   HYPRE_Int             values_size;
+   HYPRE_Int             values_size = 0;
    HYPRE_Real           *values = NULL;
    HYPRE_Real           *d_values = NULL;
 
@@ -2380,6 +2380,8 @@ main( hypre_int argc,
    HYPRE_Real            final_res_norm;
 
    HYPRE_Int             num_procs, myid;
+   HYPRE_Int             device_id = -1;
+   HYPRE_Int             lazy_device_init = 0;
    HYPRE_Int             time_index;
 
    HYPRE_Int             n_pre, n_post;
@@ -2458,6 +2460,8 @@ main( hypre_int argc,
 
    global_data.memory_location = memory_location;
 
+   HYPRE_Int gpu_aware_mpi = 0;
+
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -2471,12 +2475,29 @@ main( hypre_int argc,
     * GPU Device binding
     * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
-   hypre_bind_device(myid, num_procs, comm);
+   for (arg_index = 1; arg_index < argc; arg_index ++)
+   {
+      if (strcmp(argv[arg_index], "-lazy_device_init") == 0)
+      {
+         lazy_device_init = atoi(argv[++arg_index]);
+      }
+      else if (strcmp(argv[arg_index], "-device_id") == 0)
+      {
+         device_id = atoi(argv[++arg_index]);
+      }
+   }
+
+   hypre_bind_device_id(device_id, myid, num_procs, comm);
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
    HYPRE_Initialize();
+
+   if (!lazy_device_init)
+   {
+      HYPRE_DeviceInitialize();
+   }
 
    /*-----------------------------------------------------------
     * Set defaults
@@ -2485,6 +2506,7 @@ main( hypre_int argc,
    skip  = 0;
    rap   = 0;
    relax = 1;
+   jacobi_weight = 1.0;
    usr_jacobi_weight = 0;
    jump  = 0;
    gradient_matrix = 0;
@@ -2883,6 +2905,11 @@ main( hypre_int argc,
          snprintf(mem_tracker_name, HYPRE_MAX_FILE_NAME_LEN, "%s", argv[arg_index++]);
       }
 #endif
+      else if ( strcmp(argv[arg_index], "-gpu_mpi") == 0 )
+      {
+         arg_index++;
+         gpu_aware_mpi = atoi(argv[arg_index++]);
+      }
       else
       {
          arg_index++;
@@ -2903,6 +2930,8 @@ main( hypre_int argc,
 #if defined(HYPRE_USING_GPU)
    HYPRE_SetSpGemmUseVendor(spgemm_use_vendor);
 #endif
+
+   HYPRE_SetGpuAwareMPI(gpu_aware_mpi);
 
    if ( solver_id == 39 && lobpcgFlag )
    {

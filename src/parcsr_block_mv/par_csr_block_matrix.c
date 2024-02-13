@@ -747,7 +747,7 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
 
    HYPRE_Int *B_int_i;
    HYPRE_BigInt *B_int_j;
-   HYPRE_Complex *B_int_data;
+   HYPRE_Complex *B_int_data = NULL;
 
    HYPRE_Int num_cols_B, num_nonzeros;
    HYPRE_Int num_rows_B_ext;
@@ -757,7 +757,7 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
 
    HYPRE_Int *B_ext_i;
    HYPRE_BigInt *B_ext_j;
-   HYPRE_Complex *B_ext_data;
+   HYPRE_Complex *B_ext_data = NULL;
 
    HYPRE_Int *jdata_recv_vec_starts;
    HYPRE_Int *jdata_send_map_starts;
