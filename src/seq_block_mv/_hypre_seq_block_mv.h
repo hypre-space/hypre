@@ -16,6 +16,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 #ifndef hypre_DENSE_BLOCK_MATRIX_HEADER
 #define hypre_DENSE_BLOCK_MATRIX_HEADER
@@ -75,6 +81,12 @@ typedef struct hypre_DenseBlockMatrix_struct
                      (matrix) -> col_stride * j])
 
 #endif
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
 /* dense_block_matrix.c */
 hypre_DenseBlockMatrix* hypre_DenseBlockMatrixCreate(HYPRE_Int, HYPRE_Int, HYPRE_Int,
