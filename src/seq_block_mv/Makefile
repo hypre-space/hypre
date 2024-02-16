@@ -36,7 +36,7 @@ SONAME = libHYPRE_seq_block_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 ##################################################################
 
 all:
-	make lib
+	$(MAKE) lib
 
 lib: libHYPRE_seq_block_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/_hypre_seq_block_mv.h $(HYPRE_BUILD_DIR)/include
