@@ -78,7 +78,7 @@ HYPRE_ParCSRChebyDestroy( HYPRE_Solver solver )
       {
          /* WM: todo - memory should store a memory location instead of assuming the device? 
           *            or just store a vector here instead of raw Real array */
-         hypre_TFree(hypre_ParChebyDataDs(cheby_data), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_ParChebyDataDs(cheby_data), HYPRE_MEMORY_DEVICE);
       }
 
       hypre_TFree(cheby_data, HYPRE_MEMORY_HOST);

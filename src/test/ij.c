@@ -5459,6 +5459,10 @@ main( hypre_int argc,
       {
          HYPRE_BoomerAMGDestroy(pcg_precond);
       }
+      if (solver_id == 2)
+      {
+         HYPRE_ParCSRChebyDestroy(pcg_precond);
+      }
       else if (solver_id == 8)
       {
          HYPRE_ParaSailsDestroy(pcg_precond);
@@ -6075,6 +6079,10 @@ main( hypre_int argc,
          {
             HYPRE_BoomerAMGDestroy(pcg_precond);
          }
+         if (solver_id == 2)
+         {
+            HYPRE_ParCSRChebyDestroy(pcg_precond);
+         }
          else if (solver_id == 8)
          {
             HYPRE_ParaSailsDestroy(pcg_precond);
@@ -6501,6 +6509,10 @@ main( hypre_int argc,
          if (solver_id == 1)
          {
             HYPRE_BoomerAMGDestroy(pcg_precond);
+         }
+         if (solver_id == 2)
+         {
+            HYPRE_ParCSRChebyDestroy(pcg_precond);
          }
          else if (solver_id == 8)
          {
