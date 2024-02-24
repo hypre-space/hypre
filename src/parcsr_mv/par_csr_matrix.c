@@ -653,7 +653,7 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
    if (hypre_VectorOwnsData(local_vector))
    {
       hypre_CSRMatrixData(A_diag) = hypre_VectorData(local_vector);
-      hypre_VectorOwnsData(b) = 0;
+      hypre_VectorOwnsData(local_vector) = 0;
    }
    else
    {
