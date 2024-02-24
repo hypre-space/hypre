@@ -78,6 +78,7 @@ hypre_MGRSolve( void               *mgr_vdata,
       return hypre_error_flag;
    }
 
+   A_array[0] = A;
    U_array[0] = u;
    F_array[0] = f;
 
