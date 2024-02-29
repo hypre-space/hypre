@@ -464,6 +464,67 @@ hypre_SeqVectorCopy( hypre_Vector *x,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SeqVectorStridedCopy
+ *
+ * Perform strided copy from a data array to x->data.
+ *
+ * We assume that the data array lives in the same memory location as x->data
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorStridedCopy( hypre_Vector  *x,
+                            HYPRE_Int      istride,
+                            HYPRE_Int      ostride,
+                            HYPRE_Int      size,
+                            HYPRE_Complex *data)
+{
+   HYPRE_Int        x_size = hypre_VectorSize(x);
+   HYPRE_Complex   *x_data = hypre_VectorData(x);
+
+   HYPRE_Int        i;
+
+   /* Sanity checks */
+   if (istride < 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Input stride needs to be greater than zero!");
+      return hypre_error_flag;
+   }
+
+   if (ostride < 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Output stride needs to be greater than zero!");
+      return hypre_error_flag;
+   }
+
+   if (x_size < (size / istride) * ostride)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not enough space in x!");
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_VectorMemoryLocation(x));
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_SeqVectorStridedCopyDevice(x, istride, ostride, size, data);
+   }
+   else
+#endif
+   {
+#if defined(HYPRE_USING_OPENMP)
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < size; i += istride)
+      {
+         x_data[(i / istride) * ostride] = data[i];
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SeqVectorCloneDeep_v2
  *--------------------------------------------------------------------------*/
 
@@ -904,15 +965,9 @@ hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
 #endif
 
    /* Sanity checks */
-   if (hypre_VectorSize(y) != hypre_VectorSize(b))
+   if (hypre_VectorSize(x) < hypre_VectorSize(b))
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "sizes of y and b do not match!\n");
-      return hypre_error_flag;
-   }
-
-   if (hypre_VectorSize(x) < hypre_VectorSize(y))
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "x_size is smaller than y_size!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "sizes of x and b do not match!\n");
       return hypre_error_flag;
    }
 
@@ -971,8 +1026,8 @@ hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
  * Computes: y = y + x ./ b
  *
  * Notes:
- *    1) y and b must have the same sizes
- *    2) x_size can be larger than y_size
+ *    1) x and b must have the same sizes
+ *    2) x and y can have different sizes
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

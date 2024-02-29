@@ -14,6 +14,9 @@
 
 typedef struct hypre_ParILUData_struct
 {
+   /* Base solver data structure */
+   hypre_Solver          base;
+
    /* General data */
    HYPRE_Int             global_solver;
    hypre_ParCSRMatrix   *matA;
@@ -50,6 +53,14 @@ typedef struct hypre_ParILUData_struct
    HYPRE_Int             nLU;
    HYPRE_Int             nI;
    HYPRE_Int            *u_end; /* used when schur block is formed */
+
+   /* Iterative ILU parameters */
+   HYPRE_Int             iter_setup_type;
+   HYPRE_Int             iter_setup_option;
+   HYPRE_Int             setup_max_iter;
+   HYPRE_Int             setup_num_iter;
+   HYPRE_Real            setup_tolerance;
+   HYPRE_Complex        *setup_history;
 
    /* temp vectors for solve phase */
    hypre_ParVector      *Utemp;
@@ -191,6 +202,17 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataRhs(ilu_data)                          ((ilu_data) -> rhs)
 #define hypre_ParILUDataX(ilu_data)                            ((ilu_data) -> x)
 #define hypre_ParILUDataReorderingType(ilu_data)               ((ilu_data) -> reordering_type)
+
+/* Iterative ILU setup */
+#define hypre_ParILUDataIterativeSetupType(ilu_data)           ((ilu_data) -> iter_setup_type)
+#define hypre_ParILUDataIterativeSetupOption(ilu_data)         ((ilu_data) -> iter_setup_option)
+#define hypre_ParILUDataIterativeSetupMaxIter(ilu_data)        ((ilu_data) -> setup_max_iter)
+#define hypre_ParILUDataIterativeSetupNumIter(ilu_data)        ((ilu_data) -> setup_num_iter)
+#define hypre_ParILUDataIterativeSetupTolerance(ilu_data)      ((ilu_data) -> setup_tolerance)
+#define hypre_ParILUDataIterativeSetupHistory(ilu_data)        ((ilu_data) -> setup_history)
+#define hypre_ParILUDataIterSetupCorrectionNorm(ilu_data,i)    ((ilu_data) -> setup_history[i])
+#define hypre_ParILUDataIterSetupResidualNorm(ilu_data,i)      (((ilu_data) -> setup_history + \
+                                                                 (ilu_data) -> setup_num_iter)[i])
 
 /* Schur System */
 #define hypre_ParILUDataSchurGMRESKDim(ilu_data)               ((ilu_data) -> ss_kDim)

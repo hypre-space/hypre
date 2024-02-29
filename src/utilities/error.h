@@ -17,6 +17,7 @@
 typedef struct
 {
    HYPRE_Int  error_flag;
+   HYPRE_Int  temp_error_flag;
    HYPRE_Int  print_to_memory;
    char      *memory;
    HYPRE_Int  mem_sz;
@@ -26,12 +27,15 @@ typedef struct
 
 extern hypre_Error hypre__global_error;
 #define hypre_error_flag  hypre__global_error.error_flag
+#define hypre_error_temp_flag  hypre__global_error.temp_error_flag
 
 /*--------------------------------------------------------------------------
  * HYPRE error macros
  *--------------------------------------------------------------------------*/
 
 void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const char *msg);
+void hypre_error_code_save(void);
+void hypre_error_code_restore(void);
 
 #if defined(HYPRE_MIXED_PRECISION)
 #define hypre_error_w_msg_mp(IERR, msg)  hypre_error_handler_dbl(__FILE__, __LINE__, IERR, msg)
@@ -63,4 +67,3 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #endif
 
 #endif /* hypre_ERROR_HEADER */
-

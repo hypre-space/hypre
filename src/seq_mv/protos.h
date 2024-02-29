@@ -41,8 +41,8 @@ void hypre_CSRMatrixComputeRowSumHost( hypre_CSRMatrix *A, HYPRE_Int *CF_i, HYPR
                                        HYPRE_Complex *row_sum, HYPRE_Int type, HYPRE_Complex scal, const char *set_or_add);
 void hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A, HYPRE_Int *CF_i, HYPRE_Int *CF_j,
                                    HYPRE_Complex *row_sum, HYPRE_Int type, HYPRE_Complex scal, const char *set_or_add);
-void hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A, HYPRE_Complex *d, HYPRE_Int type);
-void hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A, HYPRE_Complex *d, HYPRE_Int type);
+HYPRE_Int hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A, HYPRE_Complex *d, HYPRE_Int type);
+HYPRE_Int hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A, HYPRE_Complex *d, HYPRE_Int type);
 HYPRE_Int hypre_CSRMatrixScale(hypre_CSRMatrix *A, HYPRE_Complex scalar);
 HYPRE_Int hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A, HYPRE_Complex value);
 HYPRE_Int hypre_CSRMatrixDiagScale( hypre_CSRMatrix *A, hypre_Vector *ld, hypre_Vector *rd);
@@ -269,28 +269,23 @@ hypre_Vector *hypre_SeqVectorRead ( char *file_name );
 HYPRE_Int hypre_SeqVectorPrint ( hypre_Vector *vector, char *file_name );
 HYPRE_Int hypre_SeqVectorSetConstantValues ( hypre_Vector *v, HYPRE_Complex value );
 HYPRE_Int hypre_SeqVectorSetConstantValuesHost ( hypre_Vector *v, HYPRE_Complex value );
-HYPRE_Int hypre_SeqVectorSetConstantValuesDevice ( hypre_Vector *v, HYPRE_Complex value );
 HYPRE_Int hypre_SeqVectorSetRandomValues ( hypre_Vector *v, HYPRE_Int seed );
 HYPRE_Int hypre_SeqVectorCopy ( hypre_Vector *x, hypre_Vector *y );
+HYPRE_Int hypre_SeqVectorStridedCopy( hypre_Vector *x, HYPRE_Int istride, HYPRE_Int ostride,
+                                      HYPRE_Int size, HYPRE_Complex *data);
 hypre_Vector *hypre_SeqVectorCloneDeep ( hypre_Vector *x );
 hypre_Vector *hypre_SeqVectorCloneDeep_v2( hypre_Vector *x, HYPRE_MemoryLocation memory_location );
 hypre_Vector *hypre_SeqVectorCloneShallow ( hypre_Vector *x );
 HYPRE_Int hypre_SeqVectorMigrate( hypre_Vector *x, HYPRE_MemoryLocation  memory_location );
 HYPRE_Int hypre_SeqVectorScale( HYPRE_Complex alpha, hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorScaleHost( HYPRE_Complex alpha, hypre_Vector *y );
-HYPRE_Int hypre_SeqVectorScaleDevice( HYPRE_Complex alpha, hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorAxpy ( HYPRE_Complex alpha, hypre_Vector *x, hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorAxpyHost ( HYPRE_Complex alpha, hypre_Vector *x, hypre_Vector *y );
-HYPRE_Int hypre_SeqVectorAxpyDevice ( HYPRE_Complex alpha, hypre_Vector *x, hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorAxpyz ( HYPRE_Complex alpha, hypre_Vector *x,
                                  HYPRE_Complex beta, hypre_Vector *y,
                                  hypre_Vector *z );
-HYPRE_Int hypre_SeqVectorAxpyzDevice ( HYPRE_Complex alpha, hypre_Vector *x,
-                                       HYPRE_Complex beta, hypre_Vector *y,
-                                       hypre_Vector *z );
 HYPRE_Real hypre_SeqVectorInnerProd ( hypre_Vector *x, hypre_Vector *y );
 HYPRE_Real hypre_SeqVectorInnerProdHost ( hypre_Vector *x, hypre_Vector *y );
-HYPRE_Real hypre_SeqVectorInnerProdDevice ( hypre_Vector *x, hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorMassInnerProd(hypre_Vector *x, hypre_Vector **y, HYPRE_Int k,
                                        HYPRE_Int unroll, HYPRE_Real *result);
 HYPRE_Int hypre_SeqVectorMassInnerProd4(hypre_Vector *x, hypre_Vector **y, HYPRE_Int k,
@@ -311,8 +306,6 @@ HYPRE_Int hypre_SeqVectorMassAxpy8(HYPRE_Complex *alpha, hypre_Vector **x, hypre
                                    HYPRE_Int k);
 HYPRE_Complex hypre_SeqVectorSumElts ( hypre_Vector *vector );
 HYPRE_Complex hypre_SeqVectorSumEltsHost ( hypre_Vector *vector );
-HYPRE_Complex hypre_SeqVectorSumEltsDevice ( hypre_Vector *vector );
-HYPRE_Int hypre_SeqVectorPrefetch(hypre_Vector *x, HYPRE_MemoryLocation memory_location);
 //HYPRE_Int hypre_SeqVectorMax( HYPRE_Complex alpha, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y );
 
 HYPRE_Int hypreDevice_CSRSpAdd(HYPRE_Int ma, HYPRE_Int mb, HYPRE_Int n, HYPRE_Int nnzA,
@@ -349,9 +342,6 @@ HYPRE_Int hypre_SeqVectorElmdivpyMarked( hypre_Vector *x, hypre_Vector *b, hypre
                                          HYPRE_Int *marker, HYPRE_Int marker_val );
 HYPRE_Int hypre_SeqVectorElmdivpyHost( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y,
                                        HYPRE_Int *marker, HYPRE_Int marker_val );
-HYPRE_Int hypre_SeqVectorElmdivpyDevice( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y,
-                                         HYPRE_Int *marker, HYPRE_Int marker_val );
-
 HYPRE_Int hypre_CSRMatrixSpMVDevice( HYPRE_Int trans, HYPRE_Complex alpha, hypre_CSRMatrix *A,
                                      hypre_Vector *x,
                                      HYPRE_Complex beta, hypre_Vector *y, HYPRE_Int fill );
@@ -378,3 +368,19 @@ hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
 #endif
 
 HYPRE_Int hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix);
+
+/* vector_device.c */
+HYPRE_Int hypre_SeqVectorSetConstantValuesDevice ( hypre_Vector *v, HYPRE_Complex value );
+HYPRE_Int hypre_SeqVectorScaleDevice( HYPRE_Complex alpha, hypre_Vector *y );
+HYPRE_Int hypre_SeqVectorAxpyDevice ( HYPRE_Complex alpha, hypre_Vector *x, hypre_Vector *y );
+HYPRE_Int hypre_SeqVectorAxpyzDevice ( HYPRE_Complex alpha, hypre_Vector *x,
+                                       HYPRE_Complex beta, hypre_Vector *y,
+                                       hypre_Vector *z );
+HYPRE_Int hypre_SeqVectorElmdivpyDevice( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y,
+                                         HYPRE_Int *marker, HYPRE_Int marker_val );
+HYPRE_Real hypre_SeqVectorInnerProdDevice ( hypre_Vector *x, hypre_Vector *y );
+HYPRE_Complex hypre_SeqVectorSumEltsDevice ( hypre_Vector *vector );
+HYPRE_Int hypre_SeqVectorStridedCopyDevice( hypre_Vector *vector,
+                                            HYPRE_Int istride, HYPRE_Int ostride,
+                                            HYPRE_Int size, HYPRE_Complex *data );
+HYPRE_Int hypre_SeqVectorPrefetch(hypre_Vector *x, HYPRE_MemoryLocation memory_location);

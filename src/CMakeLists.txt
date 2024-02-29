@@ -12,9 +12,9 @@ else ()
 endif ()
 
 # The version number.
-set(HYPRE_VERSION 2.30.0)
-set(HYPRE_NUMBER  23000)
-set(HYPRE_DATE    2023/11/06)
+set(HYPRE_VERSION 2.31.0)
+set(HYPRE_NUMBER  23100)
+set(HYPRE_DATE    2024/02/14)
 set(HYPRE_TIME    00:00:00)
 set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -639,7 +639,7 @@ configure_file(
   )
 
 # Headers and sources: remaining subdirectories
-set(HYPRE_DIRS utilities multivector krylov seq_mv parcsr_mv parcsr_block_mv distributed_matrix IJ_mv matrix_matrix distributed_ls parcsr_ls struct_mv struct_ls sstruct_mv sstruct_ls)
+set(HYPRE_DIRS utilities multivector krylov seq_mv seq_block_mv parcsr_mv parcsr_block_mv distributed_matrix IJ_mv matrix_matrix distributed_ls parcsr_ls struct_mv struct_ls sstruct_mv sstruct_ls)
 foreach (DIR IN LISTS HYPRE_DIRS)
   add_subdirectory(${DIR})
   target_include_directories(${PROJECT_NAME} PUBLIC

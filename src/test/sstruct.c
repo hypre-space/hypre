@@ -2461,6 +2461,8 @@ main( hypre_int argc,
 
    global_data.memory_location = memory_location;
 
+   HYPRE_Int gpu_aware_mpi = 0;
+
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -2486,7 +2488,7 @@ main( hypre_int argc,
       }
    }
 
-   hypre_bind_device(device_id, myid, num_procs, comm);
+   hypre_bind_device_id(device_id, myid, num_procs, comm);
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
@@ -2904,6 +2906,11 @@ main( hypre_int argc,
          snprintf(mem_tracker_name, HYPRE_MAX_FILE_NAME_LEN, "%s", argv[arg_index++]);
       }
 #endif
+      else if ( strcmp(argv[arg_index], "-gpu_mpi") == 0 )
+      {
+         arg_index++;
+         gpu_aware_mpi = atoi(argv[arg_index++]);
+      }
       else
       {
          arg_index++;
@@ -2924,6 +2931,8 @@ main( hypre_int argc,
 #if defined(HYPRE_USING_GPU)
    HYPRE_SetSpGemmUseVendor(spgemm_use_vendor);
 #endif
+
+   HYPRE_SetGpuAwareMPI(gpu_aware_mpi);
 
    if ( solver_id == 39 && lobpcgFlag )
    {

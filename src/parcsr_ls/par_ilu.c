@@ -20,9 +20,16 @@
 void *
 hypre_ILUCreate( void )
 {
-   hypre_ParILUData *ilu_data;
+   hypre_ParILUData  *ilu_data;
+   hypre_Solver      *base;
 
    ilu_data = hypre_CTAlloc(hypre_ParILUData, 1, HYPRE_MEMORY_HOST);
+   base     = (hypre_Solver*) ilu_data;
+
+   /* Set base solver function pointers */
+   hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_ILUSetup;
+   hypre_SolverSolve(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_ILUSolve;
+   hypre_SolverDestroy(base) = (HYPRE_PtrToDestroyFcn) HYPRE_ILUDestroy;
 
 #if defined(HYPRE_USING_GPU)
    hypre_ParILUDataAperm(ilu_data)                        = NULL;
@@ -86,6 +93,14 @@ hypre_ILUCreate( void )
    hypre_ParILUDataNLU(ilu_data)                          = 0;
    hypre_ParILUDataNI(ilu_data)                           = 0;
    hypre_ParILUDataUEnd(ilu_data)                         = NULL;
+
+   /* Iterative setup variables */
+   hypre_ParILUDataIterativeSetupType(ilu_data)           = 0;
+   hypre_ParILUDataIterativeSetupOption(ilu_data)         = 0;
+   hypre_ParILUDataIterativeSetupMaxIter(ilu_data)        = 100;
+   hypre_ParILUDataIterativeSetupNumIter(ilu_data)        = 0;
+   hypre_ParILUDataIterativeSetupTolerance(ilu_data)      = 1.e-6;
+   hypre_ParILUDataIterativeSetupHistory(ilu_data)        = NULL;
 
    /* reordering_type default to use local RCM */
    hypre_ParILUDataReorderingType(ilu_data)               = 1;
@@ -240,6 +255,9 @@ hypre_ILUDestroy( void *data )
       /* permutation array */
       hypre_TFree( hypre_ParILUDataPerm(ilu_data), memory_location );
       hypre_TFree( hypre_ParILUDataQPerm(ilu_data), memory_location );
+
+      /* Iterative ILU data */
+      hypre_TFree( hypre_ParILUDataIterativeSetupHistory(ilu_data), HYPRE_MEMORY_HOST );
 
       /* droptol array - TODO (VPM): remove this after changing to static array */
       hypre_TFree( hypre_ParILUDataDroptol(ilu_data), HYPRE_MEMORY_HOST );
@@ -430,11 +448,108 @@ hypre_ILUSetType( void      *ilu_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ILUSetMaxIter( void     *ilu_vdata,
+hypre_ILUSetMaxIter( void      *ilu_vdata,
                      HYPRE_Int  max_iter )
 {
-   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+
    hypre_ParILUDataMaxIter(ilu_data) = max_iter;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetIterativeSetupType
+ *
+ * Set iterative ILU setup algorithm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ILUSetIterativeSetupType( void      *ilu_vdata,
+                                HYPRE_Int  iter_setup_type)
+{
+   hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+
+   hypre_ParILUDataIterativeSetupType(ilu_data) = iter_setup_type;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetIterativeSetupOption
+ *
+ * Set iterative ILU compute option
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ILUSetIterativeSetupOption( void      *ilu_vdata,
+                                  HYPRE_Int  iter_setup_option)
+{
+   hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+
+   /* Compute residuals when using the stopping criteria, if not chosen by the user */
+   iter_setup_option |= ((iter_setup_option & 0x02) && !(iter_setup_option & 0x0C)) ? 0x08 : 0;
+
+   /* Compute residuals when asking for conv. history, if not chosen by the user */
+   iter_setup_option |= ((iter_setup_option & 0x10) && !(iter_setup_option & 0x08)) ? 0x08 : 0;
+
+   /* Zero out first bit of option (turn off rocSPARSE logging) */
+   iter_setup_option &= ~0x01;
+
+   /* Set internal iter_setup_option */
+   hypre_ParILUDataIterativeSetupOption(ilu_data) = iter_setup_option;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetIterativeSetupMaxIter
+ *
+ * Set maximum number of iterations for iterative ILU setup
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ILUSetIterativeSetupMaxIter( void      *ilu_vdata,
+                                   HYPRE_Int  iter_setup_max_iter)
+{
+   hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+
+   hypre_ParILUDataIterativeSetupMaxIter(ilu_data) = iter_setup_max_iter;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ILUSetIterativeSetupTolerance
+ *
+ * Set dropping tolerance for iterative ILU setup
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ILUSetIterativeSetupTolerance( void       *ilu_vdata,
+                                     HYPRE_Real  iter_setup_tolerance)
+{
+   hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+
+   hypre_ParILUDataIterativeSetupTolerance(ilu_data) = iter_setup_tolerance;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ILUGetIterativeSetupHistory
+ *
+ * Get array of corrections and/or residual norms computed during ILU's
+ * iterative setup algorithm.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ILUGetIterativeSetupHistory( void           *ilu_vdata,
+                                   HYPRE_Complex **iter_setup_history)
+{
+   hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+
+   *iter_setup_history = hypre_ParILUDataIterativeSetupHistory(ilu_data);
 
    return hypre_error_flag;
 }
@@ -866,7 +981,7 @@ hypre_ILUSetSchurPrecondUpperJacobiIters( void      *ilu_vdata,
 /*--------------------------------------------------------------------------
  * hypre_ILUSetSchurPrecondTol
  *
- * Set onvergence tolerance for Precond of Schur System
+ * Set convergence tolerance for Precond of Schur System
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

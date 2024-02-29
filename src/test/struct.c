@@ -189,6 +189,7 @@ main( hypre_int argc,
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
 #endif
+   HYPRE_Int gpu_aware_mpi = 0;
 
    //HYPRE_Int device_level = -2;
 
@@ -216,7 +217,7 @@ main( hypre_int argc,
       }
    }
 
-   hypre_bind_device(device_id, myid, num_procs, hypre_MPI_COMM_WORLD);
+   hypre_bind_device_id(device_id, myid, num_procs, hypre_MPI_COMM_WORLD);
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
@@ -567,6 +568,11 @@ main( hypre_int argc,
          snprintf(mem_tracker_name, HYPRE_MAX_FILE_NAME_LEN, "%s", argv[arg_index++]);
       }
 #endif
+      else if ( strcmp(argv[arg_index], "-gpu_mpi") == 0 )
+      {
+         arg_index++;
+         gpu_aware_mpi = atoi(argv[arg_index++]);
+      }
       /* end lobpcg */
       else
       {
@@ -584,6 +590,8 @@ main( hypre_int argc,
 
    /* default execution policy */
    HYPRE_SetExecutionPolicy(default_exec_policy);
+
+   HYPRE_SetGpuAwareMPI(gpu_aware_mpi);
 
    /* begin lobpcg */
 

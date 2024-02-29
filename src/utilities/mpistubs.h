@@ -65,6 +65,7 @@ extern "C" {
 #define MPI_MAX             hypre_MPI_MAX
 #define MPI_LOR             hypre_MPI_LOR
 #define MPI_LAND            hypre_MPI_LAND
+#define MPI_BOR             hypre_MPI_BOR
 #define MPI_SUCCESS         hypre_MPI_SUCCESS
 #define MPI_STATUSES_IGNORE hypre_MPI_STATUSES_IGNORE
 
@@ -178,6 +179,7 @@ typedef HYPRE_Int  hypre_MPI_Info;
 #define  hypre_MPI_MAX 2
 #define  hypre_MPI_LOR 3
 #define  hypre_MPI_LAND 4
+#define  hypre_MPI_BOR 5
 #define  hypre_MPI_SUCCESS 0
 #define  hypre_MPI_STATUSES_IGNORE 0
 
@@ -226,6 +228,7 @@ typedef MPI_User_function    hypre_MPI_User_function;
 #define  hypre_MPI_MIN MPI_MIN
 #define  hypre_MPI_MAX MPI_MAX
 #define  hypre_MPI_LOR MPI_LOR
+#define  hypre_MPI_BOR MPI_BOR
 #define  hypre_MPI_SUCCESS MPI_SUCCESS
 #define  hypre_MPI_STATUSES_IGNORE MPI_STATUSES_IGNORE
 
