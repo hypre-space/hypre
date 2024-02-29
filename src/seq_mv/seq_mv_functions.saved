@@ -145,5 +145,6 @@ hypre_SeqVectorSetConstantValuesHost
 hypre_SeqVectorSetDataOwner
 hypre_SeqVectorSetRandomValues
 hypre_SeqVectorSetSize
+hypre_SeqVectorStridedCopy
 hypre_SeqVectorSumElts
 hypre_SeqVectorSumEltsHost

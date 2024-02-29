@@ -163,6 +163,7 @@
 #define hypre_SeqVectorSetDataOwner HYPRE_MULTIPRECISION_FUNC ( hypre_SeqVectorSetDataOwner )
 #define hypre_SeqVectorSetRandomValues HYPRE_MULTIPRECISION_FUNC ( hypre_SeqVectorSetRandomValues )
 #define hypre_SeqVectorSetSize HYPRE_MULTIPRECISION_FUNC ( hypre_SeqVectorSetSize )
+#define hypre_SeqVectorStridedCopy HYPRE_MULTIPRECISION_FUNC ( hypre_SeqVectorStridedCopy )
 #define hypre_SeqVectorSumElts HYPRE_MULTIPRECISION_FUNC ( hypre_SeqVectorSumElts )
 #define hypre_SeqVectorSumEltsHost HYPRE_MULTIPRECISION_FUNC ( hypre_SeqVectorSumEltsHost )
 

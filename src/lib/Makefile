@@ -17,6 +17,7 @@ DISTMATRIXFILES = ${HYPRE_SRC_TOP_DIR}/distributed_matrix/MuP_obj.dir/distribute
 MATMATFILES = ${HYPRE_SRC_TOP_DIR}/matrix_matrix/MuP_obj.dir/matrix_matrix_*/*.o
 KRYLOVFILES = ${HYPRE_SRC_TOP_DIR}/krylov/MuP_obj.dir/krylov_*/*.o
 SEQMVFILES = ${HYPRE_SRC_TOP_DIR}/seq_mv/MuP_obj.dir/seq_mv_*/*.o ${HYPRE_SRC_TOP_DIR}/seq_mv/*.o ${HYPRE_SRC_TOP_DIR}/seq_mv/MuP_obj.dir/seq_mv_*/*.obj
+SEQBLOCKMVFILES = ${HYPRE_SRC_TOP_DIR}/seq_block_mv/MuP_obj.dir/seq_block_mv_*/*.o
 PARCSRMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_mv/MuP_obj.dir/parcsr_mv_*/*.o ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.o ${HYPRE_SRC_TOP_DIR}/parcsr_mv/MuP_obj.dir/parcsr_mv_*/*.obj
 PARCSRBLOCKMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/MuP_obj.dir/parcsr_block_mv_*/*.o
 PARCSRLSFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_ls/MuP_obj.dir/parcsr_ls_*/*.o ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.o ${HYPRE_SRC_TOP_DIR}/parcsr_ls/MuP_obj.dir/parcsr_ls_*/*.obj
@@ -106,8 +107,8 @@ distclean: clean
 libHYPRE.a: ${FILES_HYPRE}
 	@echo  "Building libHYPRE ... "
 	rm -f $@
+	${AR} $@ $(FEIHYPREFILES) $(FEMLIFILES) $(IJMVFILES)
 	${AR} $@ $(EUCLIDFILES) $(PARASAILSFILES) $(PILUTFILES) $(DISTMATRIXFILES)
-	${AR} $@ $(IJMVFILES)
 	${AR} $@ $(KRYLOVFILES)
 	${AR} $@ $(MATMATFILES)
 	${AR} $@ $(MULTIVECFILES)

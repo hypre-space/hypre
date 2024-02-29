@@ -19,8 +19,9 @@
 
 # output: prints out directories whose saved files need updating
 # Suggested next steps:
-# 1. Inspect .saved and .new files in directories that need updating. It helps 
-#    if the files are sorted first. So do:
+# 1. Inspect .saved and .new files in directories that need updating. 
+#    For convenience a .err file is generated from diff.  
+#    Alternatively, it helps if the files are sorted first. So do:
 #    sort -o new.srt <directory_name>_functions.new
 #    sort -o sav.srt <directory_name>_functions.saved
 #    <your-favorite-diff-tool> sav.srt new.srt (eg. meld sav.srt new.srt)
@@ -37,6 +38,7 @@ MUP_DIRS="blas
       multivector
       krylov
       seq_mv
+      seq_block_mv
       parcsr_mv
       parcsr_block_mv
       distributed_matrix
