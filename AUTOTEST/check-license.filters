@@ -17,3 +17,4 @@
 ./src/config.status
 .gitignore
 TVD.v3breakpoints
+.vscode
