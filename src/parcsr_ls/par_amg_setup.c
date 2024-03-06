@@ -3126,10 +3126,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
 
 #if defined(HYPRE_USING_GPU)
-      HYPRE_Real size = ((HYPRE_Real) fine_size ) * .75;
-      if (coarsen_type > 0 && coarse_size >= (HYPRE_BigInt) size)
+      if (exec == HYPRE_EXEC_DEVICE)
       {
-         coarsen_type = 0;
+         HYPRE_Real size = ((HYPRE_Real)fine_size) * .75;
+         if (coarsen_type > 0 && coarse_size >= (HYPRE_BigInt)size)
+         {
+            coarsen_type = 0;
+         }
       }
 #endif
 
