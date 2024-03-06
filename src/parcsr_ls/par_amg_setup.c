@@ -3126,7 +3126,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
 
 #if defined(HYPRE_USING_GPU)
-      if (exec == HYPRE_EXEC_DEVICE)
+      if (exec == HYPRE_EXEC_HOST)
+#endif
       {
          HYPRE_Real size = ((HYPRE_Real)fine_size) * .75;
          if (coarsen_type > 0 && coarse_size >= (HYPRE_BigInt)size)
@@ -3134,7 +3135,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             coarsen_type = 0;
          }
       }
-#endif
 
       {
          HYPRE_Int max_thresh = hypre_max(coarse_threshold, seq_threshold);
