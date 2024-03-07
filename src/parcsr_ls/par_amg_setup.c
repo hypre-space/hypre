@@ -89,7 +89,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
    hypre_ParAMGDataMemoryLocation(amg_data) = memory_location;
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
+#endif
 
    /* Local variables */
    HYPRE_Int           *CF_marker;
