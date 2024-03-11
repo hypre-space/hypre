@@ -54,7 +54,7 @@ constexpr HYPRE_Int T_GROUP_SIZE[11]    = { 0,  2,  4,   8,  16,  32,   64,  128
 /* ----------------------------------------------------------------------------------------------- *
  * these are under the assumptions made in spgemm on block sizes: only use in csr_spgemm routines
  * where we assume CUDA block is 3D and blockDim.x * blockDim.y = GROUP_SIZE
- * WM: note - sycl linearizes indices differently from cuda, i.e. a cuda block with dimensions
+ * Note - sycl linearizes indices differently from cuda, i.e. a cuda block with dimensions
  * (x, y, z) is equivalent to a sycl nd_range (z, y, x)
  *------------------------------------------------------------------------------------------------ */
 

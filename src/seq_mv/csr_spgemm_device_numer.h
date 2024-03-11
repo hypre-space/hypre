@@ -397,9 +397,9 @@ hypre_spgemm_numeric( hypre_DeviceItem                 &item,
    hypre_device_assert(blockDim.x * blockDim.y == GROUP_SIZE);
 #endif
 
-   /* WM: note - in cuda/hip, exited threads are not required to reach collective calls like
-    *            syncthreads(), but this is not true for sycl (all threads must call the collective).
-    *            Thus, all threads in the block must enter the loop (which is not ensured for cuda). */
+   /* Note - in cuda/hip, exited threads are not required to reach collective calls like
+    *        syncthreads(), but this is not true for sycl (all threads must call the collective).
+    *        Thus, all threads in the block must enter the loop (which is not ensured for cuda). */
 #if defined(HYPRE_USING_SYCL)
    for (HYPRE_Int i = grid_group_id; sycl::any_of_group(item.get_group(), i < M);
         i += grid_num_groups)
@@ -814,7 +814,7 @@ HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int  multiProcessorCount,
    const HYPRE_Int num_groups_per_block = hypre_spgemm_get_num_groups_per_block<GROUP_SIZE>();
    const HYPRE_Int block_size = num_groups_per_block * GROUP_SIZE;
    hypre_int numBlocksPerSm = 0;
-   /* WM: note - for now, sycl shmem is alwasy dynamic */
+   /* Note - sycl shmem is alwasy dynamic */
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM) || defined(HYPRE_USING_SYCL)
    const hypre_int shmem_bytes = num_groups_per_block * SHMEM_HASH_SIZE *
                                  (sizeof(HYPRE_Int) + sizeof(HYPRE_Complex));

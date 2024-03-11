@@ -196,7 +196,7 @@ hypre_GetDevice(hypre_int *device_id)
    HYPRE_HIP_CALL( hipGetDevice(device_id) );
 
 #elif defined(HYPRE_USING_SYCL)
-   /* WM: note - no sycl call to get which device is setup for use (if the user has already setup a device at all)
+   /* Note - no sycl call to get which device is setup for use (if the user has already setup a device at all)
     * Assume the rank/device binding below */
    HYPRE_Int my_id;
    hypre_int n_devices;
