@@ -269,6 +269,8 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
 
    /* output X: 0: keep, 1: zero-out */
 #if defined(HYPRE_USING_SYCL)
+   /* WM: debug - copy X0 to check difference in implementations */
+   char *X_copy = hypre_TAlloc(char, N0, HYPRE_MEMORY_DEVICE);
    /* WM: note - oneDPL currently does not have a reverse iterator */
    HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::transform,
@@ -292,6 +294,77 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
                       oneapi::dpl::maximum<char>() );
 
    hypre_TFree(reverse_perm, HYPRE_MEMORY_DEVICE);
+
+
+
+
+
+
+   /* WM: try new version and check result against previous */
+   hypre_printf("WM: debug - about to use reverse iterator, N0 = %d\n", N0);
+   auto it = oneapi::dpl::make_reverse_iterator(oneapi::dpl::make_zip_iterator(I0, J0));
+   HYPRE_ONEDPL_CALL( oneapi::dpl::exclusive_scan_by_segment,
+                      /* oneapi::dpl::make_reverse_iterator(oneapi::dpl::make_zip_iterator(I0 + N0, J0 + N0)),      /1* key begin *1/ */
+                      /* oneapi::dpl::make_reverse_iterator(oneapi::dpl::make_zip_iterator(I0, J0)), /1* key end *1/ */
+                      /* oneapi::dpl::make_reverse_iterator(J0 + N0),      /1* key begin *1/ */
+                      /* oneapi::dpl::make_reverse_iterator(J0), /1* key end *1/ */
+                      it,
+                      it + N0,
+                      oneapi::dpl::make_reverse_iterator(X0 + N0),      /* input value begin */
+                      oneapi::dpl::make_reverse_iterator(X_copy + N0),       /* output value begin */
+                      char(0),                                                                           /* init */
+                      std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
+                      /* std::equal_to< HYPRE_BigInt >(), */
+                      oneapi::dpl::maximum<char>() );
+   hypre_printf("WM: debug - DONE\n");
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+   if (myid == 1)
+   {
+      for (auto i = 0; i < N0; i++)
+      {
+         if (X[i] != X_copy[i])
+         {
+            hypre_printf("WM: debug - X and X_copy not equal!\n");
+            FILE *file;
+
+            file = fopen("I0", "w");
+            hypre_fprintf(file, "%d\n", N0);
+            for (auto j = 0; j < N0; j++)
+            {
+               hypre_fprintf(file, "%ld\n", I0[j]);
+            }
+            fclose(file);
+
+            file = fopen("J0", "w");
+            hypre_fprintf(file, "%d\n", N0);
+            for (auto j = 0; j < N0; j++)
+            {
+               hypre_fprintf(file, "%ld\n", J0[j]);
+            }
+            fclose(file);
+
+            file = fopen("X0", "w");
+            hypre_fprintf(file, "%d\n", N0);
+            for (auto j = 0; j < N0; j++)
+            {
+               hypre_fprintf(file, "%c\n", X0[j]);
+            }
+            fclose(file);
+
+            break;
+         }
+      }
+      hypre_TFree(X_copy, HYPRE_MEMORY_DEVICE);
+   }
+
+
+
+
+
+
+
+
 
    hypreSycl_transform_if(A0,
                           A0 + N0,
@@ -437,6 +510,9 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    HYPRE_Complex *A = hypre_TAlloc(HYPRE_Complex, N0, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
+   /* WM: debug - copy X0 to check difference in implementations */
+   char *X0_copy = hypre_TAlloc(char, N0, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(X0_copy, X0, char, N0, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
    /* WM: note - oneDPL currently does not have a reverse iterator */
    HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::transform,
@@ -447,7 +523,7 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
 
    auto I0_J0_reversed = oneapi::dpl::make_permutation_iterator(
                             oneapi::dpl::make_zip_iterator(I0, J0), reverse_perm);
-   auto X0_reversed = oneapi::dpl::make_permutation_iterator(X0, reverse_perm);
+   auto X0_reversed = oneapi::dpl::make_permutation_iterator(X0_copy, reverse_perm);
 
    HYPRE_ONEDPL_CALL( oneapi::dpl::inclusive_scan_by_segment,
                       I0_J0_reversed,      /* key begin */
@@ -458,6 +534,41 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
                       oneapi::dpl::maximum<char>() );
 
    hypre_TFree(reverse_perm, HYPRE_MEMORY_DEVICE);
+
+
+
+
+
+
+   /* WM: try new version and check result against previous */
+   HYPRE_ONEDPL_CALL( oneapi::dpl::inclusive_scan_by_segment,
+                      oneapi::dpl::make_permutation_iterator(
+                         oneapi::dpl::make_zip_iterator(I0, J0), hypreSycl_reverse<HYPRE_Int>(N0)),      /* key begin */
+                      oneapi::dpl::make_permutation_iterator(
+                         oneapi::dpl::make_zip_iterator(I0, J0), hypreSycl_reverse<HYPRE_Int>(N0)) + N0, /* key end */
+                      oneapi::dpl::make_permutation_iterator(X0, hypreSycl_reverse<HYPRE_Int>(N0)),      /* input value begin */
+                      oneapi::dpl::make_permutation_iterator(X0, hypreSycl_reverse<HYPRE_Int>(N0)),      /* output value begin */
+                      std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
+                      oneapi::dpl::maximum<char>() );
+   for (auto i = 0; i < N0; i++)
+   {
+      if (X0[i] != X0_copy[i])
+      {
+         hypre_printf("WM: debug - X0 and X0_copy not equal!\n");
+         break;
+      }
+   }
+   hypre_TFree(X0_copy, HYPRE_MEMORY_DEVICE);
+
+
+
+
+
+
+
+
+
+
 
    hypreSycl_transform_if(A0,
                           A0 + N0,
