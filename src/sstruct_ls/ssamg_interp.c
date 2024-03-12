@@ -458,7 +458,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
    hypre_ParCSRMatrix *A_bndry = hypre_IJMatrixObject(A_bndry_ij);
 
    /* WM: debug */
-   hypre_ParCSRMatrixPrintIJ(A_bndry, 0, 0, "A_bndry");
+   /* hypre_ParCSRMatrixPrintIJ(A_bndry, 0, 0, "A_bndry"); */
 
    /* Extract diagonal along boundaries and add to A_u */
    hypre_ParCSRMatrix *diag_A_u = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A_u),
@@ -482,9 +482,9 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
    hypre_ParCSRMatrixAdd(1.0, diag_A_u, 1.0, A_u, &A_u_aug);
 
    /* WM: debug */
-   hypre_ParCSRMatrixPrintIJ(diag_A_u, 0, 0, "diag_A_u");
-   hypre_ParCSRMatrixPrintIJ(A_u, 0, 0, "A_u");
-   hypre_ParCSRMatrixPrintIJ(A_u_aug, 0, 0, "A_u_aug");
+   /* hypre_ParCSRMatrixPrintIJ(diag_A_u, 0, 0, "diag_A_u"); */
+   /* hypre_ParCSRMatrixPrintIJ(A_u, 0, 0, "A_u"); */
+   /* hypre_ParCSRMatrixPrintIJ(A_u_aug, 0, 0, "A_u_aug"); */
 
    /* WM: todo - get CF splitting, num_cpts_global, and strength matrix */
 
@@ -545,7 +545,8 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          hypre_CSRMatrixData( hypre_ParCSRMatrixDiag(P_u) )[ hypre_CSRMatrixI( hypre_ParCSRMatrixDiag(P_u) )[i] ] = 0.0;
       }
    }
-   hypre_ParCSRMatrixPrintIJ(P_u, 0, 0, "P_u");
+   /* WM: debug */
+   /* hypre_ParCSRMatrixPrintIJ(P_u, 0, 0, "P_u"); */
 
    hypre_ParCSRMatrixDestroy(diag_A_u);
    HYPRE_IJMatrixDestroy(A_bndry_ij);
@@ -553,13 +554,13 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
    hypre_ParCSRMatrixDestroy(A_u_aug);
 
    /* WM: is this the right way to set the U matrix? */
-   hypre_ParCSRMatrixDestroy(hypre_SStructMatrixParCSRMatrix(P));
+   hypre_IJMatrixDestroyParCSR(hypre_SStructMatrixIJMatrix(P));
    hypre_SStructMatrixParCSRMatrix(P) = P_u;
    hypre_IJMatrixSetObject(hypre_SStructMatrixIJMatrix(P), P_u);
 
    /* WM: debug */
    HYPRE_SStructMatrixPrint("P", P, 0);
-   exit(0);
+   /* exit(0); */
 
    return hypre_error_flag;
 }

@@ -890,6 +890,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
       /* Compute uM iteratively */
       for (t = (nterms - 2); t >= 0; t--)
       {
+         hypre_printf("WM: debug - %s : %d\n", __FILE__, __LINE__);
          m = terms[t];
 
          /* Convert sA_n to IJMatrix */
