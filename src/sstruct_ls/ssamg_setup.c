@@ -41,6 +41,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    HYPRE_Int              non_galerkin = hypre_SSAMGDataNonGalerkin(ssamg_data);
    HYPRE_Int              max_iter     = hypre_SSAMGDataMaxIter(ssamg_data);
    HYPRE_Int              max_levels   = hypre_SSAMGDataMaxLevels(ssamg_data);
+   HYPRE_Int              interp_type  = hypre_SSAMGDataInterpType(ssamg_data);
    HYPRE_Int              relax_type   = hypre_SSAMGDataRelaxType(ssamg_data);
    HYPRE_Real           **dxyz         = hypre_SSAMGDataDxyz(ssamg_data);
    HYPRE_Int            **active_l;
@@ -159,7 +160,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       hypre_printf("WM: debug -    SSAMG interpolation\n");
       P_l[l]  = hypre_SSAMGCreateInterpOp(A_l[l], grid_l[l + 1], cdir_l[l]);
       //HYPRE_SStructMatrixSetTranspose(P_l[l], 1);
-      hypre_SSAMGSetupInterpOp(A_l[l], cdir_l[l], P_l[l]);
+      hypre_SSAMGSetupInterpOp(A_l[l], cdir_l[l], P_l[l], interp_type);
 
       // Build restriction matrix
       hypre_SStructMatrixRef(P_l[l], &RT_l[l]);

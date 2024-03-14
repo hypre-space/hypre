@@ -165,7 +165,8 @@ hypre_SSAMGCreateInterpOp( hypre_SStructMatrix  *A,
 HYPRE_Int
 hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                           HYPRE_Int            *cdir_p,
-                          hypre_SStructMatrix  *P)
+                          hypre_SStructMatrix  *P,
+                          HYPRE_Int            interp_type)
 {
    HYPRE_Int                ndim       = hypre_SStructMatrixNDim(P);
    hypre_SStructGraph      *graph      = hypre_SStructMatrixGraph(P);
@@ -445,118 +446,118 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
    hypre_BoxDestroy(tmp_box);
 
-
-
-
-
-
-
-
-
-
-
-   /* WM: todo - add an option to toggle building the unstructured part of P */
-#if 1
    /* WM: unstructured interpolation */
-   hypre_ParCSRMatrix *A_u = hypre_SStructMatrixParCSRMatrix(A);
-   hypre_ParCSRMatrix *P_u;
-
-   /* WM: todo - Add diagonal and other relevant connections to A_u */
-
-   /* Convert boundary of A to IJ matrix */
-   hypre_IJMatrix *A_bndry_ij;
-   hypre_SStructMatrixBoundaryToUMatrix(A, grid, &A_bndry_ij);
-   hypre_ParCSRMatrix *A_bndry = hypre_IJMatrixObject(A_bndry_ij);
-
-   /* Extract diagonal along boundaries and add to A_u */
-   hypre_ParCSRMatrix *diag_A_u = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A_u),
-                                                         hypre_ParCSRMatrixGlobalNumRows(A_u),
-                                                         hypre_ParCSRMatrixGlobalNumCols(A_u),
-                                                         hypre_ParCSRMatrixRowStarts(A_u),
-                                                         hypre_ParCSRMatrixRowStarts(A_u),
-                                                         0,
-                                                         hypre_ParCSRMatrixNumRows(A_u),
-                                                         0);
-   hypre_ParCSRMatrixInitialize(diag_A_u);
-   hypre_CSRMatrix *diag_A_u_diag = hypre_ParCSRMatrixDiag(diag_A_u);
-   for (i = 0; i < hypre_CSRMatrixNumRows(diag_A_u_diag); i++)
+   if (interp_type)
    {
-      hypre_CSRMatrixI(diag_A_u_diag)[i] = i;
-      hypre_CSRMatrixJ(diag_A_u_diag)[i] = i;
-   }
-   hypre_CSRMatrixI(diag_A_u_diag)[ hypre_CSRMatrixNumRows(diag_A_u_diag) ] = hypre_CSRMatrixNumRows(diag_A_u_diag);
-   hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A_bndry), hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(diag_A_u)), 0);
-   hypre_ParCSRMatrix *A_u_aug;
-   hypre_ParCSRMatrixAdd(1.0, diag_A_u, 1.0, A_u, &A_u_aug);
+      hypre_ParCSRMatrix *A_u = hypre_SStructMatrixParCSRMatrix(A);
+      hypre_ParCSRMatrix *P_u;
 
-   /* WM: todo - get CF splitting, num_cpts_global, and strength matrix */
+      /* WM: todo - Add diagonal and other relevant connections to A_u */
 
-   /* Convert boundary of P to IJ matrix */
-   hypre_IJMatrix *P_bndry_ij;
-   hypre_SStructMatrixBoundaryToUMatrix(P, grid, &P_bndry_ij);
-   hypre_ParCSRMatrix *P_bndry = hypre_IJMatrixObject(P_bndry_ij);
+      /* Convert boundary of A to IJ matrix */
+      hypre_IJMatrix *A_bndry_ij;
+      hypre_SStructMatrixBoundaryToUMatrix(A, grid, &A_bndry_ij);
+      hypre_ParCSRMatrix *A_bndry = hypre_IJMatrixObject(A_bndry_ij);
 
-   /* hypre_IJMatrix *P_ij = hypre_SStructMatrixToUMatrix(P, 0); */
-   /* hypre_ParCSRMatrix *P_parcsr = hypre_IJMatrixObject(P_ij); */
-
-   HYPRE_Int *CF_marker = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A_u), HYPRE_MEMORY_DEVICE);
-
-   HYPRE_BigInt local_coarse_size = 0;
-   HYPRE_Int *P_bndry_row_ptr = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(P_bndry));
-   for (i = 0; i < hypre_ParCSRMatrixNumRows(P_bndry); i++)
-   {
-      /* WM: todo - is this a correct way of doing this? There is almost certainly a better way... */
-      if (P_bndry_row_ptr[i+1] - P_bndry_row_ptr[i] == 1)
+      /* Extract diagonal along boundaries and add to A_u */
+      hypre_ParCSRMatrix *diag_A_u = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A_u),
+                                                            hypre_ParCSRMatrixGlobalNumRows(A_u),
+                                                            hypre_ParCSRMatrixGlobalNumCols(A_u),
+                                                            hypre_ParCSRMatrixRowStarts(A_u),
+                                                            hypre_ParCSRMatrixRowStarts(A_u),
+                                                            0,
+                                                            hypre_ParCSRMatrixNumRows(A_u),
+                                                            0);
+      hypre_ParCSRMatrixInitialize(diag_A_u);
+      hypre_CSRMatrix *diag_A_u_diag = hypre_ParCSRMatrixDiag(diag_A_u);
+      for (i = 0; i < hypre_CSRMatrixNumRows(diag_A_u_diag); i++)
       {
-         CF_marker[i] = 1;
-         local_coarse_size++;
+         hypre_CSRMatrixI(diag_A_u_diag)[i] = i;
+         hypre_CSRMatrixJ(diag_A_u_diag)[i] = i;
       }
-      else
+      hypre_CSRMatrixI(diag_A_u_diag)[ hypre_CSRMatrixNumRows(diag_A_u_diag) ] = hypre_CSRMatrixNumRows(diag_A_u_diag);
+      hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A_bndry), hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(diag_A_u)), 0);
+      hypre_ParCSRMatrix *A_u_aug;
+      hypre_ParCSRMatrixAdd(1.0, diag_A_u, 1.0, A_u, &A_u_aug);
+
+      /* WM: todo - get CF splitting, num_cpts_global, and strength matrix */
+
+      /* Convert boundary of P to IJ matrix */
+      hypre_IJMatrix *P_bndry_ij;
+      hypre_SStructMatrixBoundaryToUMatrix(P, grid, &P_bndry_ij);
+      hypre_ParCSRMatrix *P_bndry = hypre_IJMatrixObject(P_bndry_ij);
+
+      /* hypre_IJMatrix *P_ij = hypre_SStructMatrixToUMatrix(P, 0); */
+      /* hypre_ParCSRMatrix *P_parcsr = hypre_IJMatrixObject(P_ij); */
+
+      HYPRE_Int *CF_marker = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A_u), HYPRE_MEMORY_DEVICE);
+
+      HYPRE_BigInt local_coarse_size = 0;
+      HYPRE_Int *P_bndry_row_ptr = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(P_bndry));
+      for (i = 0; i < hypre_ParCSRMatrixNumRows(P_bndry); i++)
       {
-         CF_marker[i] = -1;
+         /* WM: todo - is this a correct way of doing this? There is almost certainly a better way... */
+         if (P_bndry_row_ptr[i+1] - P_bndry_row_ptr[i] == 1)
+         {
+            CF_marker[i] = 1;
+            local_coarse_size++;
+         }
+         else
+         {
+            CF_marker[i] = -1;
+         }
       }
-   }
 
-   HYPRE_Int debug_flag = 0;
-   HYPRE_Real trunc_factor = 0.0;
-   HYPRE_Int max_elmts = 4;
-   hypre_BoomerAMGBuildInterp(A_u_aug,
-                              CF_marker,
-                              A_u_aug, /* WM: todo - do I need to do any strength measure here? */
-                              hypre_ParCSRMatrixColStarts(P_bndry),
-                              1,
-                              NULL,
-                              debug_flag,
-                              trunc_factor,
-                              max_elmts,
-                              &P_u);
+      HYPRE_Int debug_flag = 0;
+      HYPRE_Real trunc_factor = 0.0;
+      HYPRE_Int max_elmts = 4;
+      hypre_BoomerAMGBuildInterp(A_u_aug,
+                                 CF_marker,
+                                 A_u_aug, /* WM: todo - do I need to do any strength measure here? */
+                                 hypre_ParCSRMatrixColStarts(P_bndry),
+                                 1,
+                                 NULL,
+                                 debug_flag,
+                                 trunc_factor,
+                                 max_elmts,
+                                 &P_u);
 
 
-   /* WM: todo - postprocess P_u to remove injection entries. These should already be accounted for in P_s. Is this the best way to do this? */
-   for (i = 0; i < hypre_ParCSRMatrixNumRows(P_u); i++)
-   {
-      if (CF_marker[i] == 1)
+      /* WM: todo - postprocess P_u to remove injection entries. These should already be accounted for in P_s. Is this the best way to do this? */
+      for (i = 0; i < hypre_ParCSRMatrixNumRows(P_u); i++)
       {
-         hypre_CSRMatrixData( hypre_ParCSRMatrixDiag(P_u) )[ hypre_CSRMatrixI( hypre_ParCSRMatrixDiag(P_u) )[i] ] = 0.0;
+         if (CF_marker[i] == 1)
+         {
+            hypre_CSRMatrixData( hypre_ParCSRMatrixDiag(P_u) )[ hypre_CSRMatrixI( hypre_ParCSRMatrixDiag(P_u) )[i] ] = 0.0;
+         }
       }
+
+      /* WM: should I do this here? What tolerance? Smarter way to avoid a bunch of zero entries? */
+      hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(P_u), 1e-9);
+      if (delete_zeros)
+      {
+         hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(P_u));
+         hypre_ParCSRMatrixDiag(P_u) = delete_zeros;
+      }
+      delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(P_u), 1e-9);
+      if (delete_zeros)
+      {
+         hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(P_u));
+         hypre_ParCSRMatrixOffd(P_u) = delete_zeros;
+      }
+      hypre_ParCSRMatrixSetNumNonzeros(P_u);
+
+      hypre_ParCSRMatrixDestroy(diag_A_u);
+      HYPRE_IJMatrixDestroy(A_bndry_ij);
+      HYPRE_IJMatrixDestroy(P_bndry_ij);
+      /* HYPRE_IJMatrixDestroy(P_ij); */
+      hypre_ParCSRMatrixDestroy(A_u_aug);
+
+      /* WM: is this the right way to set the U matrix? */
+      hypre_IJMatrixDestroyParCSR(hypre_SStructMatrixIJMatrix(P));
+      hypre_SStructMatrixParCSRMatrix(P) = P_u;
+      hypre_IJMatrixSetObject(hypre_SStructMatrixIJMatrix(P), P_u);
    }
-
-   /* WM: should I do this here? What tolerance? Smarter way to avoid a bunch of zero entries? */
-   hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(P_u), 1e-9);
-   hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(P_u), 1e-9);
-
-   hypre_ParCSRMatrixDestroy(diag_A_u);
-   HYPRE_IJMatrixDestroy(A_bndry_ij);
-   HYPRE_IJMatrixDestroy(P_bndry_ij);
-   /* HYPRE_IJMatrixDestroy(P_ij); */
-   hypre_ParCSRMatrixDestroy(A_u_aug);
-
-   /* WM: is this the right way to set the U matrix? */
-   hypre_IJMatrixDestroyParCSR(hypre_SStructMatrixIJMatrix(P));
-   hypre_SStructMatrixParCSRMatrix(P) = P_u;
-   hypre_IJMatrixSetObject(hypre_SStructMatrixIJMatrix(P), P_u);
-
-#endif
 
    return hypre_error_flag;
 }

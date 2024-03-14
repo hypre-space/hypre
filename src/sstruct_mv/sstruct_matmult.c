@@ -1037,6 +1037,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(parcsr_uM));
       hypre_ParCSRMatrixOffd(parcsr_uM) = delete_zeros;
    }
+   hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
 
    /* WM: is this the right place to do this? */
    hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixDiag(parcsr_uM));

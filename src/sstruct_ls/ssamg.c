@@ -30,6 +30,7 @@ hypre_SSAMGCreate( hypre_MPI_Comm comm )
    (ssamg_data -> zero_guess)       = 0;
    (ssamg_data -> max_levels)       = 0;
    (ssamg_data -> relax_type)       = 0;
+   (ssamg_data -> interp_type)      = 0;
    (ssamg_data -> skip_relax)       = 0;
    (ssamg_data -> usr_relax_weight) = 1.0;
    (ssamg_data -> usr_set_rweight)  = 0;
@@ -265,6 +266,20 @@ hypre_SSAMGSetRelaxType( void       *ssamg_vdata,
    {
       hypre_SSAMGDataUsrSetRWeight(ssamg_data) = 1;
    }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SSAMGSetInterpType( void       *ssamg_vdata,
+                          HYPRE_Int   interp_type)
+{
+   hypre_SSAMGData *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
+
+   hypre_SSAMGDataInterpType(ssamg_data) = interp_type;
 
    return hypre_error_flag;
 }
