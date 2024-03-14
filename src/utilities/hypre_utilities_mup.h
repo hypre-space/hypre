@@ -18,6 +18,14 @@
 
 #if defined (HYPRE_MIXED_PRECISION)
 
+void hypre_Free_dbl(void *ptr, HYPRE_MemoryLocation location);
+void hypre_Free_flt(void *ptr, HYPRE_MemoryLocation location);
+void hypre_Free_long_dbl(void *ptr, HYPRE_MemoryLocation location);
+
+void * hypre_CAlloc_dbl( size_t count, size_t elt_size, HYPRE_MemoryLocation location);
+void * hypre_CAlloc_flt( size_t count, size_t elt_size, HYPRE_MemoryLocation location);
+void * hypre_CAlloc_long_dbl( size_t count, size_t elt_size, HYPRE_MemoryLocation location);
+
 hypre_LinkList hypre_create_elt_flt  ( HYPRE_Int Item );
 hypre_LinkList hypre_create_elt_dbl  ( HYPRE_Int Item );
 hypre_LinkList hypre_create_elt_long_dbl  ( HYPRE_Int Item );

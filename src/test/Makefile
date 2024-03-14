@@ -62,6 +62,7 @@ LFLAGS =\
 
 HYPRE_DRIVERS =\
  ij_mp.c\
+ ijnew_mp.c\
  test_mp.c\
  test_mp_pcg.c\
  test_mp_pcg_3d.c\
@@ -74,6 +75,7 @@ HYPRE_DRIVERS =\
  struct_migrate.c\
  sstruct_fac.c\
  ij_mv.c\
+ ij_mv1.c\
  ij_mm.c\
  zboxloop.c
 
@@ -141,6 +143,13 @@ ij_mp: ij_mp.o
 	${LINK_CC} -o $@ $< ${LFLAGS}
 else
 ij_mp:
+endif
+ifeq (${MP_BUILD}, 1) 
+ijnew_mp: ijnew_mp.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+else
+ijnew_mp:
 endif
 ifeq (${MP_BUILD}, 1) 
 test_mp: test_mp.o

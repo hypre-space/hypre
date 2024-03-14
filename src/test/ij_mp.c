@@ -30,6 +30,7 @@
 #include "hypre_IJ_mv_mup.h"
 #include "HYPRE_parcsr_ls.h"
 #include "HYPRE_parcsr_ls_mp.h"
+#include "_hypre_parcsr_ls.h"
 #include "hypre_parcsr_ls_mup.h"
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"

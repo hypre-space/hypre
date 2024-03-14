@@ -1330,6 +1330,13 @@ HYPRE_Int
 hypre_ParVectorAxpy_mp( HYPRE_Complex    alpha,
                      hypre_ParVector *x,
                      hypre_ParVector *y );
+HYPRE_Int
+hypre_ParVectorConvert_mp (hypre_ParVector *v,
+                    HYPRE_Precision new_precision );
+
+HYPRE_Int
+hypre_ParCSRMatrixConvert_mp (hypre_ParCSRMatrix *A,
+                              HYPRE_Precision new_precision );
 
 #endif
 

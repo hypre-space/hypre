@@ -35,6 +35,8 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 
 #if defined(HYPRE_MIXED_PRECISION)
 #define hypre_error_w_msg_mp(IERR, msg)  hypre_error_handler_dbl(__FILE__, __LINE__, IERR, msg)
+#define hypre_error_mp(IERR)  hypre_error_handler_dbl(__FILE__, __LINE__, IERR, NULL)
+#define hypre_error_in_arg_mp(IARG)  hypre_error_mp(HYPRE_ERROR_ARG | IARG<<3)
 #endif
 #define hypre_error(IERR)  hypre_error_handler(__FILE__, __LINE__, IERR, NULL)
 #define hypre_error_w_msg(IERR, msg)  hypre_error_handler(__FILE__, __LINE__, IERR, msg)

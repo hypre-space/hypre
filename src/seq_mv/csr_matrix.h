@@ -61,6 +61,37 @@ typedef struct
 #endif
 } hypre_CSRMatrix;
 
+typedef struct
+{
+   HYPRE_Int            *i;
+   HYPRE_Int            *j;
+   HYPRE_BigInt         *big_j;
+   HYPRE_Int             num_rows;
+   HYPRE_Int             num_cols;
+   HYPRE_Int             num_nonzeros;
+   hypre_int            *i_short;
+   hypre_int            *j_short;
+   HYPRE_Int             owns_data;       /* Does the CSRMatrix create/destroy `data', `i', `j'? */
+   HYPRE_Int             pattern_only;    /* 1: data array is ignored, and assumed to be all 1's */
+   void                 *data;
+   HYPRE_Int            *rownnz;          /* for compressing rows in matrix multiplication  */
+   HYPRE_Int             num_rownnz;
+   HYPRE_MemoryLocation  memory_location; /* memory location of arrays i, j, data */
+
+#if defined(HYPRE_USING_CUSPARSE)  ||\
+    defined(HYPRE_USING_ROCSPARSE) ||\
+    defined(HYPRE_USING_ONEMKLSPARSE)
+   HYPRE_Int            *sorted_j;        /* some cusparse routines require sorted CSR */
+   HYPRE_Complex        *sorted_data;
+   hypre_CsrsvData      *csrsv_data;
+   hypre_GpuMatData     *mat_data;
+#endif
+
+#if defined(HYPRE_MIXED_PRECISION)   
+   HYPRE_Precision matrix_precision;
+#endif
+} hypre_CSRMatrix_mp;
+
 /*--------------------------------------------------------------------------
  * Accessor functions for the CSR Matrix structure
  *--------------------------------------------------------------------------*/

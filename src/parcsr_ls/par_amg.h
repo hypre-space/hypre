@@ -284,6 +284,17 @@ typedef struct
    HYPRE_Solver dslu_solver;
 #endif
 
+#ifdef(HYPRE_MIXED_PRECISION)
+   HYPRE_Precision *precision_array;
+   HYPRE_Int        precision_type[3];
+   hypre_ParVector *Vtemp_dbl;
+   hypre_ParVector *Vtemp_flt;
+   hypre_ParVector *Vtemp_long_dbl;
+   hypre_ParVector *Ztemp_dbl;
+   hypre_ParVector *Ztemp_flt;
+   hypre_ParVector *Ztemp_long_dbl;
+#endif
+
 } hypre_ParAMGData;
 
 /*--------------------------------------------------------------------------
@@ -548,6 +559,17 @@ typedef struct
 #ifdef HYPRE_USING_DSUPERLU
 #define hypre_ParAMGDataDSLUThreshold(amg_data) ((amg_data)->dslu_threshold)
 #define hypre_ParAMGDataDSLUSolver(amg_data) ((amg_data)->dslu_solver)
+#endif
+
+#if defined(HYPRE_MIXED_PRECISION)
+#define hypre_ParAMGDataPrecisionArray(amg_data) ((amg_data)->precision_array)
+#define hypre_ParAMGDataPrecisionType(amg_data) ((amg_data)->precision_type)
+#define hypre_ParAMGDataVtempDBL(amg_data) ((amg_data)->Vtemp_dbl)
+#define hypre_ParAMGDataVtempFLT(amg_data) ((amg_data)->Vtemp_flt)
+#define hypre_ParAMGDataVtempLONGDBL(amg_data) ((amg_data)->Vtemp_long_dbl)
+#define hypre_ParAMGDataZtempDBL(amg_data) ((amg_data)->Ztemp_dbl)
+#define hypre_ParAMGDataZtempFLT(amg_data) ((amg_data)->Ztemp_flt)
+#define hypre_ParAMGDataZtempLONGDBL(amg_data) ((amg_data)->Ztemp_long_dbl)
 #endif
 
 #endif

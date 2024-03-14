@@ -21,4 +21,16 @@ HYPRE_Int HYPRE_BoomerAMGSolve_mp(HYPRE_Solver       solver,
                                HYPRE_ParVector    b,
                                HYPRE_ParVector    x);
 
+HYPRE_Int HYPRE_MPAMGSetup_mp(HYPRE_Solver       solver,
+                                  HYPRE_ParCSRMatrix A,
+                                  HYPRE_ParVector    b,
+                                  HYPRE_ParVector    x);
+
+HYPRE_Int HYPRE_MPAMGSolve_mp(HYPRE_Solver       solver,
+                                  HYPRE_ParCSRMatrix A,
+                                  HYPRE_ParVector    b,
+                                  HYPRE_ParVector    x);
+HYPRE_Int HYPRE_MPAMGCreate_mp(HYPRE_Solver *solver);
+HYPRE_Int HYPRE_MPAMGDestroy_mp(HYPRE_Solver solver);
+
 #endif

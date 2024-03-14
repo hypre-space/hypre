@@ -41,7 +41,11 @@ HEADERS =\
  schwarz.h
 
 FILES =\
- HYPRE_parcsr_ls_mp.c
+ HYPRE_parcsr_ls_mp.c\
+ par_cycle_mp.c\
+ par_mpamg_mp.c\
+ par_mpamg_setup_mp.c\
+ par_mpamg_solve_mp.c
 
 CUFILES =\
  ads.c\
@@ -121,6 +125,7 @@ MuP_FILES = \
  HYPRE_ame.c\
  par_2s_interp.c\
  par_amg.c\
+ par_amg_setup_options.c\
  par_amgdd.c\
  par_amgdd_comp_grid.c\
  par_amgdd_setup.c\

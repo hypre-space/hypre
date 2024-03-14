@@ -19,5 +19,13 @@ HYPRE_Int
 hypre_SeqVectorAxpy_mp( hypre_double alpha,
                      hypre_Vector_mp *x,
                      hypre_Vector_mp *y     );
+
+HYPRE_Int
+hypre_CSRMatrixConvert_mp (hypre_CSRMatrix_mp *A,
+                          HYPRE_Precision new_precision);
+
+HYPRE_Int
+hypre_SeqVectorConvert_mp (hypre_Vector_mp *v,
+                          HYPRE_Precision new_precision);
                      
 #endif

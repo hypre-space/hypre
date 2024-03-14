@@ -12,6 +12,7 @@
  *****************************************************************************/
 
 #include "HYPRE_parcsr_ls_mp.h"
+#include "_hypre_parcsr_ls.h"
 #include "hypre_parcsr_ls_mup.h"
 #include "hypre_parcsr_mv_mup.h"
 #include "HYPRE_parcsr_mv_mp.h"
@@ -103,5 +104,76 @@ HYPRE_BoomerAMGSolve_mp( HYPRE_Solver solver,
 
    return 0;
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MPAMGSetup
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MPAMGSetup_mp( HYPRE_Solver solver,
+                     HYPRE_ParCSRMatrix A,
+                     HYPRE_ParVector b,
+                     HYPRE_ParVector x      )
+{
+  if (!A)
+   {
+      //hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   return ( hypre_MPAMGSetup_mp( (void *) solver,
+                                 (hypre_ParCSRMatrix *) A,
+                                 (hypre_ParVector *) b,
+                                 (hypre_ParVector *) x ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MPAMGSolve
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MPAMGSolve_mp( HYPRE_Solver solver,
+                     HYPRE_ParCSRMatrix A,
+                     HYPRE_ParVector b,
+                     HYPRE_ParVector x      )
+{
+  if (!A)
+   {
+      //hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+   return ( hypre_MPAMGSolve_mp( (void *) solver,
+                                 (hypre_ParCSRMatrix *) A,
+                                 (hypre_ParVector *) b,
+                                 (hypre_ParVector *) x ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MPAMGCreate
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MPAMGCreate_mp( HYPRE_Solver *solver)
+{
+   if (!solver)
+   {
+      //hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   *solver = (HYPRE_Solver) hypre_MPAMGCreate_mp( ) ;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MPAMGDestroy
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MPAMGDestroy_mp( HYPRE_Solver solver )
+{
+   return ( hypre_MPAMGDestroy_mp( (void *) solver ) );
+}
+
 
 #endif

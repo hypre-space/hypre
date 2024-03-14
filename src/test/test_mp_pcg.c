@@ -22,16 +22,17 @@
 #include "_hypre_utilities.h"
 #include "hypre_utilities_mup.h"
 #include "HYPRE.h"
+#include "_hypre_parcsr_mv.h"
 #include "HYPRE_parcsr_mv.h"
 #include "HYPRE_parcsr_mv_mp.h"
 #include "hypre_parcsr_mv_mup.h"
 
 #include "HYPRE_IJ_mv.h"
 #include "hypre_IJ_mv_mup.h"
+#include "_hypre_parcsr_ls.h"
 #include "HYPRE_parcsr_ls.h"
 #include "HYPRE_parcsr_ls_mp.h"
 #include "hypre_parcsr_ls_mup.h"
-#include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
 #include "hypre_krylov_mup.h"
 //#include "hypre_utilities_mp.h"
@@ -359,7 +360,7 @@ int main (int argc, char *argv[])
          HYPRE_BoomerAMGSetMaxIter_dbl(amg_solver, 1); /* do only one iteration! */
       
          // Set the preconditioner for PCG
-        HYPRE_PCGSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)parcsr_B);
+         HYPRE_PCGSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)parcsr_B);
         
          HYPRE_PCGSetPrecond_dbl(pcg_solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve_dbl,
@@ -533,14 +534,14 @@ int main (int argc, char *argv[])
      if(solver_id == 1)
      {
          if (myid == 0) hypre_printf_dbl("\n\n***** Solver: MIXED PRECISION AMG-PCG *****\n");
-         HYPRE_BoomerAMGCreate_flt(&amg_solver);
+         //HYPRE_BoomerAMGCreate_flt(&amg_solver);
 //         HYPRE_BoomerAMGSetPrintLevel_flt(amg_solver, 0); /* print amg solution info */
-         HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, 8);
+         //HYPRE_BoomerAMGSetCoarsenType_flt(amg_solver, 8);
 //         HYPRE_BoomerAMGSetOldDefault_flt(amg_solver); 
-         HYPRE_BoomerAMGSetRelaxType_flt(amg_solver, 18); /* Sym G.S./Jacobi hybrid */
-         HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, 1);
-         HYPRE_BoomerAMGSetTol_flt(amg_solver, 0.0); /* conv. tolerance zero */
-         HYPRE_BoomerAMGSetMaxIter_flt(amg_solver, 1); /* do only one iteration! */
+         //HYPRE_BoomerAMGSetRelaxType_flt(amg_solver, 18); /* Sym G.S./Jacobi hybrid */
+         //HYPRE_BoomerAMGSetNumSweeps_flt(amg_solver, 1);
+         //HYPRE_BoomerAMGSetTol_flt(amg_solver, 0.0); /* conv. tolerance zero */
+         //HYPRE_BoomerAMGSetMaxIter_flt(amg_solver, 1); /* do only one iteration! */
       
          // Set the preconditioner for PCG (single precision matrix)
         HYPRE_PCGSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)parcsr_A);
