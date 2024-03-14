@@ -890,7 +890,6 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
       /* Compute uM iteratively */
       for (t = (nterms - 2); t >= 0; t--)
       {
-         hypre_printf("WM: debug - %s : %d\n", __FILE__, __LINE__);
          m = terms[t];
 
          /* Convert sA_n to IJMatrix */
@@ -1024,6 +1023,24 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_IJMatrixDestroyParCSR(ij_M);
    hypre_IJMatrixSetObject(ij_M, parcsr_uM);
    hypre_IJMatrixAssembleFlag(ij_M) = 1;
+
+   /* WM: should I do this here? What tolerance? Smarter way to avoid a bunch of zero entries? */
+   hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(parcsr_uM), 1e-9);
+   if (delete_zeros)
+   {
+      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(parcsr_uM));
+      hypre_ParCSRMatrixDiag(parcsr_uM) = delete_zeros;
+   }
+   delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(parcsr_uM), 1e-9);
+   if (delete_zeros)
+   {
+      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(parcsr_uM));
+      hypre_ParCSRMatrixOffd(parcsr_uM) = delete_zeros;
+   }
+
+   /* WM: is this the right place to do this? */
+   hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixDiag(parcsr_uM));
+   hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixOffd(parcsr_uM));
 
    HYPRE_ANNOTATE_FUNC_END;
 

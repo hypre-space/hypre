@@ -2660,6 +2660,7 @@ hypre_SStructMatrixGetDiagonal( hypre_SStructMatrix   *matrix,
       hypre_SStructVectorConvert(diag, &par_d);
       d_data = hypre_ParVectorLocalData(par_d);
 
+      /* WM: todo - need to account for case where A_num_rownnz == A_num_rows? Seems unlikely (but possible) in practice? */
       for (i = 0; i < A_num_rownnz; i++)
       {
          ii = A_rownnz[i];

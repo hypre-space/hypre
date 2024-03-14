@@ -446,6 +446,17 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
    hypre_BoxDestroy(tmp_box);
 
 
+
+
+
+
+
+
+
+
+
+   /* WM: todo - add an option to toggle building the unstructured part of P */
+#if 1
    /* WM: unstructured interpolation */
    hypre_ParCSRMatrix *A_u = hypre_SStructMatrixParCSRMatrix(A);
    hypre_ParCSRMatrix *P_u;
@@ -456,9 +467,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
    hypre_IJMatrix *A_bndry_ij;
    hypre_SStructMatrixBoundaryToUMatrix(A, grid, &A_bndry_ij);
    hypre_ParCSRMatrix *A_bndry = hypre_IJMatrixObject(A_bndry_ij);
-
-   /* WM: debug */
-   /* hypre_ParCSRMatrixPrintIJ(A_bndry, 0, 0, "A_bndry"); */
 
    /* Extract diagonal along boundaries and add to A_u */
    hypre_ParCSRMatrix *diag_A_u = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A_u),
@@ -476,15 +484,10 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       hypre_CSRMatrixI(diag_A_u_diag)[i] = i;
       hypre_CSRMatrixJ(diag_A_u_diag)[i] = i;
    }
-   hypre_CSRMatrixI(diag_A_u_diag)[ hypre_CSRMatrixNumRows(diag_A_u_diag) + 1 ] = hypre_CSRMatrixNumRows(diag_A_u_diag) + 1;
+   hypre_CSRMatrixI(diag_A_u_diag)[ hypre_CSRMatrixNumRows(diag_A_u_diag) ] = hypre_CSRMatrixNumRows(diag_A_u_diag);
    hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A_bndry), hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(diag_A_u)), 0);
    hypre_ParCSRMatrix *A_u_aug;
    hypre_ParCSRMatrixAdd(1.0, diag_A_u, 1.0, A_u, &A_u_aug);
-
-   /* WM: debug */
-   /* hypre_ParCSRMatrixPrintIJ(diag_A_u, 0, 0, "diag_A_u"); */
-   /* hypre_ParCSRMatrixPrintIJ(A_u, 0, 0, "A_u"); */
-   /* hypre_ParCSRMatrixPrintIJ(A_u_aug, 0, 0, "A_u_aug"); */
 
    /* WM: todo - get CF splitting, num_cpts_global, and strength matrix */
 
@@ -493,8 +496,10 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
    hypre_SStructMatrixBoundaryToUMatrix(P, grid, &P_bndry_ij);
    hypre_ParCSRMatrix *P_bndry = hypre_IJMatrixObject(P_bndry_ij);
 
+   /* hypre_IJMatrix *P_ij = hypre_SStructMatrixToUMatrix(P, 0); */
+   /* hypre_ParCSRMatrix *P_parcsr = hypre_IJMatrixObject(P_ij); */
+
    HYPRE_Int *CF_marker = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A_u), HYPRE_MEMORY_DEVICE);
-   HYPRE_Int num_cpts_global[2];
 
    HYPRE_BigInt local_coarse_size = 0;
    HYPRE_Int *P_bndry_row_ptr = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(P_bndry));
@@ -512,30 +517,20 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       }
    }
 
-   {
-      HYPRE_BigInt scan_recv;
-      hypre_MPI_Scan(&local_coarse_size, &scan_recv, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hypre_ParCSRMatrixComm(A_u));
-
-      /* first point in my range */
-      num_cpts_global[0] = scan_recv - local_coarse_size;
-
-      /* first point in next proc's range */
-      num_cpts_global[1] = scan_recv;
-   }
-
    HYPRE_Int debug_flag = 0;
    HYPRE_Real trunc_factor = 0.0;
    HYPRE_Int max_elmts = 4;
    hypre_BoomerAMGBuildInterp(A_u_aug,
                               CF_marker,
                               A_u_aug, /* WM: todo - do I need to do any strength measure here? */
-                              num_cpts_global,
+                              hypre_ParCSRMatrixColStarts(P_bndry),
                               1,
                               NULL,
                               debug_flag,
                               trunc_factor,
                               max_elmts,
                               &P_u);
+
 
    /* WM: todo - postprocess P_u to remove injection entries. These should already be accounted for in P_s. Is this the best way to do this? */
    for (i = 0; i < hypre_ParCSRMatrixNumRows(P_u); i++)
@@ -545,12 +540,15 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          hypre_CSRMatrixData( hypre_ParCSRMatrixDiag(P_u) )[ hypre_CSRMatrixI( hypre_ParCSRMatrixDiag(P_u) )[i] ] = 0.0;
       }
    }
-   /* WM: debug */
-   /* hypre_ParCSRMatrixPrintIJ(P_u, 0, 0, "P_u"); */
+
+   /* WM: should I do this here? What tolerance? Smarter way to avoid a bunch of zero entries? */
+   hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(P_u), 1e-9);
+   hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(P_u), 1e-9);
 
    hypre_ParCSRMatrixDestroy(diag_A_u);
    HYPRE_IJMatrixDestroy(A_bndry_ij);
    HYPRE_IJMatrixDestroy(P_bndry_ij);
+   /* HYPRE_IJMatrixDestroy(P_ij); */
    hypre_ParCSRMatrixDestroy(A_u_aug);
 
    /* WM: is this the right way to set the U matrix? */
@@ -558,9 +556,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
    hypre_SStructMatrixParCSRMatrix(P) = P_u;
    hypre_IJMatrixSetObject(hypre_SStructMatrixIJMatrix(P), P_u);
 
-   /* WM: debug */
-   HYPRE_SStructMatrixPrint("P", P, 0);
-   /* exit(0); */
+#endif
 
    return hypre_error_flag;
 }
