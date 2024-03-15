@@ -1619,7 +1619,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
          hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
       }
    }
-   return (hypre_error_flag);
+   return hypre_error_flag;
 }
 
 #endif

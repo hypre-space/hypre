@@ -83,7 +83,6 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
    HYPRE_Real      alfa, beta, gammaold;
    HYPRE_Real      gamma = 1.0;
    HYPRE_Int       local_size;
-   HYPRE_Int       my_id;
    HYPRE_Real      alpha;
    hypre_Vector_mp **l1_norms = NULL;
    hypre_Vector_mp *l1_norms_level;
@@ -118,7 +117,7 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
 
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
-   lev_counter = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+   lev_counter = (HYPRE_Int *) (hypre_CAlloc_dbl((size_t)(num_levels), (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST));
 
    /* Initialize */
    Solve_err_flag = 0;
@@ -128,10 +127,9 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
       old_version = 1;
    }
 
-   num_coeffs = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
+   num_coeffs = (HYPRE_Real *) (hypre_CAlloc_dbl ((size_t)(num_levels), (size_t)sizeof(HYPRE_Real), HYPRE_MEMORY_HOST));
    num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
    comm = hypre_ParCSRMatrixComm(A_array[0]);
-   hypre_MPI_Comm_rank(comm, &my_id);
 
    for (j = 1; j < num_levels; j++)
    {
@@ -484,26 +482,37 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
          fine_grid = level;
          coarse_grid = level + 1;
 
-         hypre_ParVectorSetZeros(U_array[coarse_grid]);
-
-         alpha = -1.0;
-         beta = 1.0;
 
          // JSP: avoid unnecessary copy using out-of-place version of SpMV
          if (precision_array[fine_grid] == HYPRE_REAL_DOUBLE)
 	 {
+            hypre_ParVectorSetZeros_dbl(U_array[coarse_grid]);
+
+            alpha = -1.0;
+            beta = 1.0;
+
 	    hypre_ParCSRMatrixMatvecOutOfPlace_dbl((hypre_double)alpha, A_array[fine_grid], 
 			                           U_array[fine_grid], (hypre_double) beta, 
 						   F_array[fine_grid], Vtemp_dbl);
 	 }
 	 else if (precision_array[fine_grid] == HYPRE_REAL_SINGLE)
 	 {
+            hypre_ParVectorSetZeros_flt(U_array[coarse_grid]);
+
+            alpha = -1.0;
+            beta = 1.0;
+
 	    hypre_ParCSRMatrixMatvecOutOfPlace_flt((hypre_float)alpha, A_array[fine_grid], 
 			                           U_array[fine_grid], (hypre_float) beta, 
 						   F_array[fine_grid], Vtemp_flt);
 	 }
 	 else if (precision_array[fine_grid] == HYPRE_REAL_LONGDOUBLE)
 	 {
+            hypre_ParVectorSetZeros_long_dbl(U_array[coarse_grid]);
+
+            alpha = -1.0;
+            beta = 1.0;
+
 	    hypre_ParCSRMatrixMatvecOutOfPlace_long_dbl((hypre_long_double)alpha, A_array[fine_grid], 
 			                           U_array[fine_grid], (hypre_long_double) beta, 
 						   F_array[fine_grid], Vtemp_long_dbl);
@@ -619,8 +628,8 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
 
    hypre_ParAMGDataCycleOpCount(amg_data) = cycle_op_count;
 
-   hypre_TFree(lev_counter, HYPRE_MEMORY_HOST);
-   hypre_TFree(num_coeffs, HYPRE_MEMORY_HOST);
+   hypre_Free_dbl(lev_counter, HYPRE_MEMORY_HOST);
+   hypre_Free_dbl(num_coeffs, HYPRE_MEMORY_HOST);
 
    return (Solve_err_flag);
 }
