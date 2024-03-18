@@ -149,9 +149,11 @@ hypre_ParCSRMatrixMemoryLocation(hypre_ParCSRMatrix *matrix)
       if (memory_diag != memory_offd)
       {
          char err_msg[1024];
+#ifndef HYPRE_MIXED_PRECISION   
          hypre_sprintf(err_msg, "Error: ParCSRMatrix Memory Location Diag (%d) != Offd (%d)\n", memory_diag,
                        memory_offd);
          hypre_error_w_msg(HYPRE_ERROR_MEMORY, err_msg);
+#endif
          hypre_assert(0);
 
          return HYPRE_MEMORY_UNDEFINED;
