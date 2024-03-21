@@ -26,6 +26,9 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
+/* WM: dpct below currently needed for constant iterators */
+#include <dpct/dpl_extras/iterators.h>
+
 
 /* Used in creating constant iterators (no native constant iterator in oneDPL) */
 template<typename T>

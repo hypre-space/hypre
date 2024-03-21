@@ -1020,23 +1020,10 @@ hypre_CSRMatrixColNNzRealDevice( hypre_CSRMatrix  *A,
    reduced_col_nnz     = hypre_TAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-
-   /* WM: todo - better way to get around lack of constant iterator in DPL? */
-   /* HYPRE_Int *ones = hypre_TAlloc(HYPRE_Int, nnz_A, HYPRE_MEMORY_DEVICE); */
-   /* HYPRE_ONEDPL_CALL( std::fill_n, ones, nnz_A, 1 ); */
-   /* auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment, */
-   /*                                   A_j_sorted, */
-   /*                                   A_j_sorted + nnz_A, */
-   /*                                   ones, */
-   /*                                   reduced_col_indices, */
-   /*                                   reduced_col_nnz); */
-
-   /* hypre_TFree(ones, HYPRE_MEMORY_DEVICE); */
-   oneapi::dpl::counting_iterator count(0);
    auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
                                      A_j_sorted,
                                      A_j_sorted + nnz_A,
-                                     oneapi::dpl::make_transform_iterator(count, hypreSycl_constant<HYPRE_Int>(1)),
+                                     dpct::constant_iterator(1),
                                      reduced_col_indices,
                                      reduced_col_nnz);
 
