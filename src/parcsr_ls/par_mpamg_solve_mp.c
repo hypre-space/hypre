@@ -176,10 +176,10 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
             }
             resid_nrm = (HYPRE_Real) sqrtl(hypre_ParVectorInnerProd_long_dbl( Residual, Residual ));
          }
-         else
+         /*else
          {
             hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }
+         }*/
       }
       else
       {
@@ -210,10 +210,10 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
             }
             resid_nrm = (HYPRE_Real) sqrtl(hypre_ParVectorInnerProd_long_dbl( Vtemp_long_dbl, Vtemp_long_dbl ));
          }
-         else
+         /*else
          {
             hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }
+         }*/
       }
 
       /* Since it does not diminish performance, attempt to return an error flag

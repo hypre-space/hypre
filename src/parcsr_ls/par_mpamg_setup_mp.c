@@ -175,10 +175,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
       hypre_ParCSRMatrixSetNumNonzeros_long_dbl(A);
       hypre_ParCSRMatrixSetDNumNonzeros_long_dbl(A);
    }
-   else 
+   /*else 
    {
       hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-   }
+   }*/
    hypre_ParAMGDataNumVariables(amg_data) = hypre_ParCSRMatrixNumRows(A);
 
    S = NULL;
@@ -245,10 +245,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
          dof_func = hypre_IntArrayCreate_long_dbl(local_size);
          hypre_IntArrayInitialize_v2_long_dbl(dof_func, memory_location);
       }
-      else 
+      /*else 
       {
          hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-      }
+      }*/
       offset = (HYPRE_Int) ( hypre_ParCSRMatrixRowStarts(A)[0] % ((HYPRE_BigInt) num_functions) );
 
       for (i = 0; i < local_size; i++)
@@ -429,10 +429,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
             hypre_ParVectorNumVectors(U_array[level]) = num_vectors;
             hypre_ParVectorInitialize_v2_long_dbl(U_array[level], memory_location);
          }
-	 else 
+	 /*else 
 	 {
 	    hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-	 }
+	 }*/
          hypre_ParVectorPrecision(F_array[level]) = level_precision;
          hypre_ParVectorPrecision(U_array[level]) = level_precision;
       }
@@ -470,10 +470,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
             hypre_IntArrayInitialize_long_dbl(CF_marker_array[level]);
             hypre_IntArraySetConstantValues_long_dbl(CF_marker_array[level], 1);
 	 }
-	 else 
+	 /*else 
 	 {
 	    hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-	 }
+	 }*/
          coarse_size = fine_size;
       }
       else /* max_levels > 1 */
@@ -496,10 +496,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
 	          	                    num_functions, nodal, nodal_diag, 
 			  	            useSabs, dof_func_data, &S);
 	 }
-	 else 
+	 /*else 
 	 {
 	    hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-	 }
+	 }*/
 	 if (nodal) 
          {
             SN = S;
@@ -524,10 +524,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
          CF_marker = hypre_IntArrayCreate_long_dbl(local_num_vars);
          hypre_IntArrayInitialize_long_dbl(CF_marker);
       }
-      else 
+      /*else 
       {
          hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-      }
+      }*/
       CF_marker_data = hypre_IntArrayData(CF_marker);
       CF_marker_array[level] = CF_marker; 
  
@@ -609,10 +609,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
             }
          }
       }
-      else 
+      /*else 
       {
          hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-      }
+      }*/
 
       /*****xxxxxxxxxxxxx changes for min_coarse_size */
       /* here we will determine the coarse grid size to be able to
@@ -641,10 +641,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
 					        CF_marker_array[level],
                                                 &coarse_dof_func, coarse_pnts_global);
 	 }
-         else 
+         /*else 
          {
             hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }
+         }*/
          if (my_id == num_procs - 1)
          {
             coarse_size = coarse_pnts_global[1];
@@ -796,10 +796,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
                hypre_ParCSRMatrixDestroy_long_dbl(Sabs);
             }
          }
-         else 
+         /*else 
          {
             hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }
+         }*/
       }
 
       if (level < agg_num_levels)
@@ -1119,10 +1119,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
    				             P_max_elmts, trunc_factor, sep_weight, &P);
             } /* end of no aggressive coarsening */
          } 
-         else 
+         /*else 
          {
             hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }
+         }*/
 
          dof_func_array[level + 1] = NULL;
          if (num_functions > 1 && nodal > -1 )
@@ -1204,10 +1204,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
                dof_func_array[level + 1] = NULL;
             }
          }
-         else 
+         /*else 
          {
             hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }
+         }*/
 
          break;
       }
@@ -1252,10 +1252,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
             }
             hypre_IntArrayDestroy_long_dbl(dof_func_array[level + 1]);
 	 }
-         else 
+         /*else 
          {
             hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }
+         }*/
          dof_func_array[level + 1] = NULL;
          coarse_size = fine_size;
 
@@ -1371,10 +1371,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
             hypre_MatvecCommPkgCreate_long_dbl(A_H);
          }
       }
-      else 
+      /*else 
       {
          hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-      }
+      }*/
 
       ++level;
 
@@ -1416,10 +1416,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
          {
             hypre_GaussElimSetup_long_dbl(amg_data, level, grid_relax_type[3]);
          }
-         else 
+         /*else 
          {
             hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }
+         }*/
       }
       else
       {
@@ -1477,10 +1477,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
          hypre_ParVectorNumVectors(U_array[level]) = num_vectors;
          hypre_ParVectorInitialize_v2_long_dbl(U_array[level], memory_location);
       }
-      else 
+      /*else 
       {
          hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-      }
+      }*/
    }
 
    /*-----------------------------------------------------------------------
@@ -1526,10 +1526,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
          hypre_Level_L1Norms_long_dbl(A_array[j], CF_marker_array[j], 
 		                      grid_relax_type, j, num_levels, relax_order, &l1_norms_tmp);
       }
-      else 
+      /*else 
       {
          hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-      }
+      }*/
       l1_norms[j] = l1_norms_tmp;
       l1_norms_tmp = NULL;
    } /* end of levels loop */
@@ -1558,10 +1558,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
                                                          hypre_ParCSRMatrixRowStarts(A_array[0]) );
          hypre_ParVectorInitialize_v2_long_dbl(Residual_array, memory_location);
       }
-      else 
+      /*else 
       {
          hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-      }
+      }*/
       hypre_ParAMGDataResidual(amg_data) = Residual_array;
    }
    else
@@ -1586,10 +1586,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
          {
             hypre_ParCSRMatrixSetDNumNonzeros_long_dbl(P_array[j]);
          }
-         else 
+         /*else 
          {
             hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }
+         }*/
          cum_nnz_AP += (HYPRE_Real) hypre_ParCSRMatrixDNumNonzeros(P_array[j]);
          cum_nnz_AP += (HYPRE_Real) hypre_ParCSRMatrixDNumNonzeros(A_array[j + 1]);
       }
@@ -1614,10 +1614,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
       {
          hypre_BoomerAMGSetupStats_long_dbl(amg_data, A);
       }
-      else 
+      /*else 
       {
          hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-      }
+      }*/
    }
    return hypre_error_flag;
 }

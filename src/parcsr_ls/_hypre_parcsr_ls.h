@@ -4440,6 +4440,7 @@ HYPRE_Int hypre_MPAMGSetRAP2_mp( void *data, HYPRE_Int rap2 );
 HYPRE_Int hypre_MPAMGSetModuleRAP2_mp( void *data, HYPRE_Int mod_rap2 );
 HYPRE_Int hypre_MPAMGSetKeepTranspose_mp( void *data, HYPRE_Int keepTranspose);
 HYPRE_Int hypre_MPAMGGetCumNnzAP_mp( void *data, HYPRE_Real *cum_nnz_AP );
+HYPRE_Int hypre_MPAMGSetPrecisionArray_mp( void *data, HYPRE_Precision *precision_array);
 
 #endif
 #ifdef __cplusplus

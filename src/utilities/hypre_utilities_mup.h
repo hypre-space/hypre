@@ -26,6 +26,10 @@ void * hypre_CAlloc_dbl( size_t count, size_t elt_size, HYPRE_MemoryLocation loc
 void * hypre_CAlloc_flt( size_t count, size_t elt_size, HYPRE_MemoryLocation location);
 void * hypre_CAlloc_long_dbl( size_t count, size_t elt_size, HYPRE_MemoryLocation location);
 
+void * hypre_ReAlloc_dbl( void *ptr, size_t size, HYPRE_MemoryLocation location);
+void * hypre_ReAlloc_flt( void *ptr, size_t size, HYPRE_MemoryLocation location);
+void * hypre_ReAlloc_long_dbl( void *ptr, size_t size, HYPRE_MemoryLocation location);
+
 hypre_LinkList hypre_create_elt_flt  ( HYPRE_Int Item );
 hypre_LinkList hypre_create_elt_dbl  ( HYPRE_Int Item );
 hypre_LinkList hypre_create_elt_long_dbl  ( HYPRE_Int Item );
