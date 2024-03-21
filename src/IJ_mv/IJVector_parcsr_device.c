@@ -88,34 +88,12 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
 
    /* output X: 0: keep, 1: zero-out */
 #if defined(HYPRE_USING_SYCL)
-   /* WM: note - oneDPL currently does not have a reverse iterator */
-   /* HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE); */
-   /* HYPRE_ONEDPL_CALL( std::transform, */
-   /*                    oneapi::dpl::counting_iterator<HYPRE_Int>(0), */
-   /*                    oneapi::dpl::counting_iterator<HYPRE_Int>(N0), */
-   /*                    reverse_perm, */
-   /* [N0] (auto i) { return N0 - i - 1; }); */
-
-   /* auto I0_reversed = oneapi::dpl::make_permutation_iterator(I0, reverse_perm); */
-   /* auto X0_reversed = oneapi::dpl::make_permutation_iterator(X0, reverse_perm); */
-   /* auto X_reversed = oneapi::dpl::make_permutation_iterator(X, reverse_perm); */
-
-   /* HYPRE_ONEDPL_CALL( oneapi::dpl::exclusive_scan_by_segment, */
-   /*                    I0_reversed,      /1* key begin *1/ */
-   /*                    I0_reversed + N0, /1* key end *1/ */
-   /*                    X0_reversed,      /1* input value begin *1/ */
-   /*                    X_reversed,       /1* output value begin *1/ */
-   /*                    char(0),          /1* init *1/ */
-   /*                    std::equal_to<HYPRE_BigInt>(), */
-   /*                    oneapi::dpl::maximum<char>() ); */
-
-   /* hypre_TFree(reverse_perm, HYPRE_MEMORY_DEVICE); */
    HYPRE_ONEDPL_CALL( oneapi::dpl::exclusive_scan_by_segment,
-                      oneapi::dpl::make_permutation_iterator(I0, hypreSycl_reverse<HYPRE_Int>(N0)),      /* key begin */
-                      oneapi::dpl::make_permutation_iterator(I0, hypreSycl_reverse<HYPRE_Int>(N0)) + N0, /* key end */
-                      oneapi::dpl::make_permutation_iterator(X0, hypreSycl_reverse<HYPRE_Int>(N0)),      /* input value begin */
-                      oneapi::dpl::make_permutation_iterator(X, hypreSycl_reverse<HYPRE_Int>(N0)),       /* output value begin */
-                      char(0),                                                                           /* init */
+                      oneapi::dpl::make_reverse_iterator(I0 + N0), /* key begin */
+                      oneapi::dpl::make_reverse_iterator(I0),      /* key end */
+                      oneapi::dpl::make_reverse_iterator(X0 + N0), /* input value begin */
+                      oneapi::dpl::make_reverse_iterator(X + N0),  /* output value begin */
+                      char(0),                                     /* init */
                       std::equal_to<HYPRE_BigInt>(),
                       oneapi::dpl::maximum<char>() );
 
@@ -194,31 +172,11 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
 
    /* output in X0: 0: keep, 1: zero-out */
 #if defined(HYPRE_USING_SYCL)
-   /* WM: note - oneDPL currently does not have a reverse iterator */
-   /* HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE); */
-   /* HYPRE_ONEDPL_CALL( std::transform, */
-   /*                    oneapi::dpl::counting_iterator<HYPRE_Int>(0), */
-   /*                    oneapi::dpl::counting_iterator<HYPRE_Int>(N0), */
-   /*                    reverse_perm, */
-   /* [N0] (auto i) { return N0 - i - 1; }); */
-
-   /* auto I0_reversed = oneapi::dpl::make_permutation_iterator(I0, reverse_perm); */
-   /* auto X0_reversed = oneapi::dpl::make_permutation_iterator(X0, reverse_perm); */
-
-   /* HYPRE_ONEDPL_CALL( oneapi::dpl::inclusive_scan_by_segment, */
-   /*                    I0_reversed,      /1* key begin *1/ */
-   /*                    I0_reversed + N0, /1* key end *1/ */
-   /*                    X0_reversed,      /1* input value begin *1/ */
-   /*                    X0_reversed,      /1* output value begin *1/ */
-   /*                    std::equal_to<HYPRE_BigInt>(), */
-   /*                    oneapi::dpl::maximum<char>() ); */
-
-   /* hypre_TFree(reverse_perm, HYPRE_MEMORY_DEVICE); */
    HYPRE_ONEDPL_CALL( oneapi::dpl::inclusive_scan_by_segment,
-                      oneapi::dpl::make_permutation_iterator(I0, hypreSycl_reverse<HYPRE_Int>(N0)),      /* key begin */
-                      oneapi::dpl::make_permutation_iterator(I0, hypreSycl_reverse<HYPRE_Int>(N0)) + N0, /* key end */
-                      oneapi::dpl::make_permutation_iterator(X0, hypreSycl_reverse<HYPRE_Int>(N0)),      /* input value begin */
-                      oneapi::dpl::make_permutation_iterator(X0, hypreSycl_reverse<HYPRE_Int>(N0)),      /* output value begin */
+                      oneapi::dpl::make_reverse_iterator(I0 + N0),      /* key begin */
+                      oneapi::dpl::make_reverse_iterator(I0),           /* key end */
+                      oneapi::dpl::make_reverse_iterator(X0 + N0),      /* input value begin */
+                      oneapi::dpl::make_reverse_iterator(X0 + N0),      /* output value begin */
                       std::equal_to<HYPRE_BigInt>(),
                       oneapi::dpl::maximum<char>() );
 
