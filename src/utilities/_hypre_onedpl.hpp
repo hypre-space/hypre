@@ -15,6 +15,9 @@
 /* oneAPI DPL headers */
 /* NOTE: these must be included before standard C++ headers */
 
+/* WM: this is a workaround for a bug in oneDPL reduce by segment */
+#define ONEDPL_WORKAROUND_FOR_IGPU_64BIT_REDUCTION 1
+
 #include <oneapi/dpl/execution>
 #include <oneapi/dpl/algorithm>
 #include <oneapi/dpl/numeric>
