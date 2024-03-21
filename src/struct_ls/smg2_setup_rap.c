@@ -19,6 +19,9 @@ hypre_SMG2CreateRAPOp( hypre_StructMatrix *R,
                        hypre_StructMatrix *PT,
                        hypre_StructGrid   *coarse_grid )
 {
+   HYPRE_UNUSED_VAR(R);
+   HYPRE_UNUSED_VAR(PT);
+
    hypre_StructMatrix    *RAP;
 
    hypre_Index           *RAP_stencil_shape;
@@ -177,7 +180,7 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
    HYPRE_Real           *ra, *rb;
 
    HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-   HYPRE_Real           *a_csw, *a_cse, *a_cnw;
+   HYPRE_Real           *a_csw = NULL, *a_cse = NULL, *a_cnw = NULL;
 
    HYPRE_Real           *rap_cc, *rap_cw, *rap_cs;
    HYPRE_Real           *rap_csw, *rap_cse;
@@ -488,7 +491,7 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
    HYPRE_Real           *ra, *rb;
 
    HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cn;
-   HYPRE_Real           *a_cse, *a_cnw, *a_cne;
+   HYPRE_Real           *a_cse = NULL, *a_cnw = NULL, *a_cne = NULL;
 
    HYPRE_Real           *rap_ce, *rap_cn;
    HYPRE_Real           *rap_cnw, *rap_cne;
@@ -593,7 +596,6 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
 
          hypre_SetIndex3(index, 1, 1, 0);
          a_cne = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-
       }
 
       /*-----------------------------------------------------------------
@@ -748,6 +750,9 @@ hypre_SMG2RAPPeriodicSym( hypre_StructMatrix *RAP,
                           hypre_Index         cstride )
 
 {
+   HYPRE_UNUSED_VAR(cindex);
+   HYPRE_UNUSED_VAR(cstride);
+
    hypre_Index             index;
 
    hypre_StructGrid       *cgrid;
@@ -848,6 +853,9 @@ hypre_SMG2RAPPeriodicNoSym( hypre_StructMatrix *RAP,
                             hypre_Index         cstride )
 
 {
+   HYPRE_UNUSED_VAR(cindex);
+   HYPRE_UNUSED_VAR(cstride);
+
    hypre_Index             index;
 
    hypre_StructGrid       *cgrid;
@@ -941,4 +949,3 @@ hypre_SMG2RAPPeriodicNoSym( hypre_StructMatrix *RAP,
 
    return hypre_error_flag;
 }
-

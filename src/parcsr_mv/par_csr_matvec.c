@@ -107,7 +107,9 @@ hypre_ParCSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex       alpha,
 
    /* Update send_map_starts, send_map_elmts, and recv_vec_starts when doing
       sparse matrix/multivector product  */
-   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, x);
+   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, num_vectors,
+                                      hypre_VectorVectorStride(hypre_ParVectorLocalVector(x)),
+                                      hypre_VectorIndexStride(hypre_ParVectorLocalVector(x)));
 
    num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
@@ -368,7 +370,9 @@ hypre_ParCSRMatrixMatvecTHost( HYPRE_Complex       alpha,
    }
 
    /* Update send_map_starts, send_map_elmts, and recv_vec_starts for SpMV with multivecs */
-   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, y);
+   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, num_vectors,
+                                      hypre_VectorVectorStride(hypre_ParVectorLocalVector(y)),
+                                      hypre_VectorIndexStride(hypre_ParVectorLocalVector(y)));
 
    num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
@@ -555,7 +559,7 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
                              HYPRE_Int           fpt )
 {
    MPI_Comm                comm = hypre_ParCSRMatrixComm(A);
-   hypre_ParCSRCommHandle *comm_handle;
+   hypre_ParCSRCommHandle *comm_handle = NULL;
    hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_CSRMatrix        *diag   = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix        *offd   = hypre_ParCSRMatrixOffd(A);
@@ -564,12 +568,12 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
    HYPRE_BigInt            num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
    HYPRE_BigInt            num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
 
-   hypre_Vector      *x_tmp;
+   hypre_Vector      *x_tmp = NULL;
    HYPRE_BigInt       x_size = hypre_ParVectorGlobalSize(x);
    HYPRE_BigInt       y_size = hypre_ParVectorGlobalSize(y);
    HYPRE_Int          num_cols_offd = hypre_CSRMatrixNumCols(offd);
    HYPRE_Int          ierr = 0;
-   HYPRE_Int          num_sends, i, j, index, start, num_procs;
+   HYPRE_Int          num_sends = 0, i, j, index, start, num_procs;
    HYPRE_Int         *int_buf_data = NULL;
    HYPRE_Int         *CF_marker_offd = NULL;
 
@@ -665,8 +669,8 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
       hypre_ParCSRCommHandleDestroy(comm_handle);
       comm_handle = NULL;
 
-      if (num_cols_offd) hypre_CSRMatrixMatvec_FF( alpha, offd, x_tmp, 1.0, y_local,
-                                                      CF_marker, CF_marker_offd, fpt);
+      if (num_cols_offd) hypre_CSRMatrixMatvec_FF(alpha, offd, x_tmp, 1.0, y_local,
+                                                     CF_marker, CF_marker_offd, fpt);
 
       hypre_SeqVectorDestroy(x_tmp);
       x_tmp = NULL;

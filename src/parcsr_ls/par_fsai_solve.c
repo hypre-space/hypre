@@ -36,7 +36,7 @@ hypre_FSAISolve( void               *fsai_vdata,
 
    /* Local variables */
    HYPRE_Int            iter, my_id;
-   HYPRE_Real           old_resnorm, resnorm, rel_resnorm;
+   HYPRE_Real           old_resnorm, resnorm = 0.0, rel_resnorm;
    HYPRE_Complex        one = 1.0;
    HYPRE_Complex        neg_one = -1.0;
    HYPRE_Complex        zero = 0.0;
@@ -64,7 +64,7 @@ hypre_FSAISolve( void               *fsai_vdata,
    }
 
    iter        = 0;
-   rel_resnorm = 1.0;
+   rel_resnorm = resnorm = 1.0;
 
    if (my_id == 0 && print_level > 1)
    {

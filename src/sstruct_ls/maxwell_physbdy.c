@@ -68,7 +68,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
    hypre_Box              *box, *contract_fbox, rbox;
    hypre_Box               intersect;
 
-   HYPRE_Int             **cbox_mapping, **fbox_mapping;
+   HYPRE_Int             **cbox_mapping = NULL, **fbox_mapping = NULL;
    HYPRE_Int             **boxes_with_bdry;
 
    HYPRE_Int               ndim, nvars;
@@ -91,7 +91,8 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
    hypre_MPI_Comm_rank(comm, &myproc);
 
    ndim = hypre_SStructGridNDim(grid_l[0]);
-   hypre_SetIndex3(zero_shift, 0, 0, 0);
+   hypre_SetIndex(zero_shift, 0);
+   hypre_SetIndex(lindex, 0);
 
    hypre_BoxInit(&intersect, ndim);
 
@@ -945,4 +946,3 @@ hypre_Maxwell_VarBdy( hypre_SStructPGrid       *pgrid,
 
    return ierr;
 }
-

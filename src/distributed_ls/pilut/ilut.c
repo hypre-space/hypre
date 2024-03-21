@@ -25,7 +25,7 @@
 HYPRE_Int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatType *ldu,
           HYPRE_Int maxnz, HYPRE_Real tol, hypre_PilutSolverGlobals *globals )
 {
-  HYPRE_Int i, ierr;
+  HYPRE_Int i, ierr = 0;
   ReduceMatType rmat;
   HYPRE_Int dummy_row_ptr[2], size;
   HYPRE_Real *values;

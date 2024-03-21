@@ -643,6 +643,8 @@ hypre_StructVectorSetDataSize(hypre_StructVector *vector,
                               HYPRE_Int          *data_size,
                               HYPRE_Int          *data_host_size)
 {
+   HYPRE_UNUSED_VAR(data_host_size);
+
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_StructGrid     *grid = hypre_StructVectorGrid(vector);
    if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
@@ -665,6 +667,8 @@ hypre_StructVectorSetDataSize(hypre_StructVector *vector,
 HYPRE_Int
 hypre_StructVectorAssemble( hypre_StructVector *vector )
 {
+   HYPRE_UNUSED_VAR(vector);
+
    return hypre_error_flag;
 }
 

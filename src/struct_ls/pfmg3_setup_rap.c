@@ -34,6 +34,9 @@ hypre_PFMG3CreateRAPOp( hypre_StructMatrix *R,
                         hypre_StructGrid   *coarse_grid,
                         HYPRE_Int           cdir        )
 {
+   HYPRE_UNUSED_VAR(R);
+   HYPRE_UNUSED_VAR(P);
+
    hypre_StructMatrix    *RAP;
 
    hypre_Index           *RAP_stencil_shape;

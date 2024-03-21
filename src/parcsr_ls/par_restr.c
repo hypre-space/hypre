@@ -31,6 +31,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
                               HYPRE_Int             is_triangular,
                               HYPRE_Int             gmres_switch)
 {
+   HYPRE_UNUSED_VAR(debug_flag);
 
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -810,10 +811,13 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    return 0;
 }
 
-
 /* Compute matvec A^Tx = y, where A is stored in column major form. */
 // This can also probably be accomplished with BLAS
-static inline void colmaj_mvT(HYPRE_Complex *A, HYPRE_Complex *x, HYPRE_Complex *y, HYPRE_Int n)
+static inline void
+colmaj_mvT(HYPRE_Complex *A,
+           HYPRE_Complex *x,
+           HYPRE_Complex *y,
+           HYPRE_Int      n)
 {
    memset(y, 0, n * sizeof(HYPRE_Complex));
    HYPRE_Int i, j;
@@ -828,17 +832,17 @@ static inline void colmaj_mvT(HYPRE_Complex *A, HYPRE_Complex *x, HYPRE_Complex 
 }
 
 // TODO : need to initialize and de-initialize GMRES
-void hypre_fgmresT(HYPRE_Int n,
-                   HYPRE_Complex *A,
-                   HYPRE_Complex *b,
-                   HYPRE_Real tol,
-                   HYPRE_Int kdim,
-                   HYPRE_Complex *x,
-                   HYPRE_Real *relres,
-                   HYPRE_Int *iter,
-                   HYPRE_Int job)
+void
+hypre_fgmresT(HYPRE_Int      n,
+              HYPRE_Complex *A,
+              HYPRE_Complex *b,
+              HYPRE_Real     tol,
+              HYPRE_Int      kdim,
+              HYPRE_Complex *x,
+              HYPRE_Real    *relres,
+              HYPRE_Int     *iter,
+              HYPRE_Int      job)
 {
-
    HYPRE_Int one = 1, i, j, k;
    static HYPRE_Complex *V = NULL, *Z = NULL, *H = NULL, *c = NULL, *s = NULL, *rs = NULL;
    HYPRE_Complex *v, *z, *w;
@@ -871,7 +875,7 @@ void hypre_fgmresT(HYPRE_Int n,
    /* XXX: x_0 is all ZERO !!! so r0 = b */
    v = V;
    hypre_TMemcpy(v, b, HYPRE_Complex, n, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   normr0 = hypre_sqrt(hypre_ddot(&n, v, &one, v, &one));
+   normr = normr0 = hypre_sqrt(hypre_ddot(&n, v, &one, v, &one));
 
    if (normr0 < EPSIMAC)
    {
@@ -947,6 +951,7 @@ void hypre_fgmresT(HYPRE_Int n,
       }
       rs[k] /= H[k + k * kdim];
    }
+
    // get solution
    for (j = 0; j < i; j++)
    {
@@ -958,13 +963,13 @@ void hypre_fgmresT(HYPRE_Int n,
    *iter = i;
 }
 
-
 /* Ordered Gauss Seidel on A^T in column major format. Since we are
  * solving A^T, equivalent to solving A in row major format. */
-void hypre_ordered_GS(const HYPRE_Complex L[],
-                      const HYPRE_Complex rhs[],
-                      HYPRE_Complex x[],
-                      const HYPRE_Int n)
+void
+hypre_ordered_GS(const HYPRE_Complex L[],
+                 const HYPRE_Complex rhs[],
+                 HYPRE_Complex       x[],
+                 const HYPRE_Int     n)
 {
    // Get triangular ordering of L^T in col major as ordering of L in row major
    HYPRE_Int *ordering = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
@@ -983,6 +988,7 @@ void hypre_ordered_GS(const HYPRE_Complex L[],
             temp -= L[row * n + col] * x[col]; // row-major
          }
       }
+
       HYPRE_Complex diag = L[row * n + row];
       if (hypre_cabs(diag) < 1e-12)
       {

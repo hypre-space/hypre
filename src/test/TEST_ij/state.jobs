@@ -10,3 +10,4 @@
 
 mpirun -np 1 ./ij -test_init > state.out.1
 mpirun -np 4 ./ij -test_init > state.out.100
+

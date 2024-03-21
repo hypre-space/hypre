@@ -357,6 +357,8 @@ HYPRE_Int hypre_SelectSet(ReduceMatType *rmat, CommInfoType *cinfo,
               HYPRE_Int *newperm, HYPRE_Int *newiperm,
               hypre_PilutSolverGlobals *globals)
 {
+  HYPRE_UNUSED_VAR(iperm);
+
   HYPRE_Int ir, i, j, k, l, num;
   HYPRE_Int nnz, snnbr;
   HYPRE_Int *rcolind, *snbrind, *snbrptr, *srowind;
@@ -592,6 +594,8 @@ void hypre_ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
                  HYPRE_Int *newperm, HYPRE_Int *newiperm, HYPRE_Int nmis, HYPRE_Real tol,
                  hypre_PilutSolverGlobals *globals)
 {
+  HYPRE_UNUSED_VAR(perm);
+
   HYPRE_Int i, ir, inr, start, k, kk, l, m, end, nnz;
   HYPRE_Int *usrowptr, *uerowptr, *ucolind, *incolind, *rcolind, rrowlen;
   HYPRE_Real *uvalues, *nrm2s, *invalues, *rvalues, *dvalues;
@@ -778,6 +782,8 @@ void hypre_FactorLocal(FactorMatType *ldu, ReduceMatType *rmat,
                  HYPRE_Int *newperm, HYPRE_Int *newiperm, HYPRE_Int nmis, HYPRE_Real tol,
                  hypre_PilutSolverGlobals *globals)
 {
+  HYPRE_UNUSED_VAR(cinfo);
+
   HYPRE_Int i, ir, k, kk, l, m, nnz, diag;
   HYPRE_Int *usrowptr, *uerowptr, *ucolind, *rcolind;
   HYPRE_Real *uvalues, *nrm2s, *rvalues, *dvalues;

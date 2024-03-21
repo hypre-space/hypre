@@ -320,6 +320,59 @@ hypre_IntArraySetConstantValues( hypre_IntArray *v,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_IntArraySetInterleavedValuesHost
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArraySetInterleavedValuesHost( hypre_IntArray *v,
+                                        HYPRE_Int       cycle )
+{
+   HYPRE_Int *array_data = hypre_IntArrayData(v);
+   HYPRE_Int  size       = hypre_IntArraySize(v);
+   HYPRE_Int  i;
+
+#if defined(HYPRE_USING_OPENMP)
+   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+   for (i = 0; i < size; i++)
+   {
+      array_data[i] = i % cycle;
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IntArraySetInterleavedValues
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArraySetInterleavedValues( hypre_IntArray *v,
+                                    HYPRE_Int       cycle )
+{
+   if (cycle < 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid cycle value!");
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_IntArrayMemoryLocation(v));
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_IntArraySetInterleavedValuesDevice(v, cycle);
+   }
+   else
+#endif
+   {
+      hypre_IntArraySetInterleavedValuesHost(v, cycle);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_IntArrayCountHost
  *--------------------------------------------------------------------------*/
 
@@ -480,6 +533,194 @@ hypre_IntArrayNegate( hypre_IntArray *v )
       {
          array_data[i] = - array_data[i];
       }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IntArraySeparateByValue
+ *
+ * This function separates the indices of an array "v" based on
+ * specified values.
+ *
+ * Input parameters:
+ *   - num_values: number of unique values found in "v"
+ *   - values: array of size "num_values" containing a list of unique values
+ *   - sizes: array of size "num_values" containing the number of occurrences
+ *            in "v" of each value from "values".
+ *   - v: object of type hypre_IntArray containing values for categorization.
+ *
+ * Output parameter:
+ *   - w: object of type hypre_IntArrayArray containing pointers to "num_values"
+ *        arrays. Each array contains the set of indices in "v" that map to a
+ *        particular value of the array "values".
+ *
+ * Example:
+ *   Consider the following:
+ *   - v = {-1, -1, 1, -1, -1, 1, 1, -1}
+ *   - values = {-1, 1}
+ *   - num_values = 2
+ *
+ *   This function computes:
+ *   - w[0] = {0, 1, 3, 4, 7}
+ *   - w[1] = {2, 5, 6}
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArraySeparateByValue( HYPRE_Int             num_values,
+                               HYPRE_Int            *values,
+                               HYPRE_Int            *sizes,
+                               hypre_IntArray       *v,
+                               hypre_IntArrayArray **w_ptr )
+{
+   hypre_IntArrayArray *w;
+
+   HYPRE_Int           *v_data = hypre_IntArrayData(v);
+   HYPRE_Int            v_size = hypre_IntArraySize(v);
+   HYPRE_Int            i, k, val;
+   HYPRE_Int           *count;
+
+   /* Create output array */
+   w = hypre_IntArrayArrayCreate(num_values, sizes);
+   hypre_IntArrayArrayInitializeIn(w, hypre_IntArrayMemoryLocation(v));
+
+   /* Fill arrays */
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_IntArrayMemoryLocation(v));
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_IntArraySeparateByValueDevice(num_values, values, sizes, v, w);
+   }
+   else
+#endif
+   {
+      count = hypre_CTAlloc(HYPRE_Int, num_values, HYPRE_MEMORY_HOST);
+      for (k = 0; k < v_size; k++)
+      {
+         val = v_data[k];
+
+         /* Find which entry "val" belongs to */
+         for (i = 0; i < num_values; i++)
+         {
+            if (values[i] == val)
+            {
+               hypre_IntArrayArrayEntryIDataJ(w, i, count[i]++) = k;
+               break;
+            }
+         }
+      }
+      hypre_TFree(count, HYPRE_MEMORY_HOST);
+   }
+
+   /* Set output pointer */
+   *w_ptr = w;
+
+   return hypre_error_flag;
+}
+
+/******************************************************************************
+ *
+ * Routines for hypre_IntArrayArray struct
+ *
+ *****************************************************************************/
+
+/*--------------------------------------------------------------------------
+ * hypre_IntArrayArrayCreate
+ *--------------------------------------------------------------------------*/
+
+hypre_IntArrayArray *
+hypre_IntArrayArrayCreate( HYPRE_Int  num_entries,
+                           HYPRE_Int *sizes )
+{
+   hypre_IntArrayArray  *w;
+   HYPRE_Int             i;
+
+   w = hypre_CTAlloc(hypre_IntArrayArray, 1, HYPRE_MEMORY_HOST);
+
+   hypre_IntArrayArraySize(w)    = num_entries;
+   hypre_IntArrayArrayEntries(w) = hypre_TAlloc(hypre_IntArray*, num_entries, HYPRE_MEMORY_HOST);
+
+   for (i = 0; i < num_entries; i++)
+   {
+      hypre_IntArrayArrayEntryI(w, i) = hypre_IntArrayCreate(sizes[i]);
+   }
+
+   return w;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IntArrayArrayDestroy
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArrayArrayDestroy( hypre_IntArrayArray *w )
+{
+   HYPRE_Int  i;
+
+   if (w)
+   {
+      for (i = 0; i < hypre_IntArrayArraySize(w); i++)
+      {
+         hypre_IntArrayDestroy(hypre_IntArrayArrayEntryI(w, i));
+      }
+      hypre_TFree(hypre_IntArrayArrayEntries(w), HYPRE_MEMORY_HOST);
+      hypre_TFree(w, HYPRE_MEMORY_HOST);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IntArrayArrayInitializeIn
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArrayArrayInitializeIn( hypre_IntArrayArray  *w,
+                                 HYPRE_MemoryLocation  memory_location )
+{
+   HYPRE_Int  i;
+
+   for (i = 0; i < hypre_IntArrayArraySize(w); i++)
+   {
+      hypre_IntArrayInitialize_v2(hypre_IntArrayArrayEntryI(w, i), memory_location);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IntArrayArrayInitialize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArrayArrayInitialize( hypre_IntArrayArray *w )
+{
+   hypre_IntArray  *v = hypre_IntArrayArrayEntryI(w, 0);
+   HYPRE_Int        i;
+
+   for (i = 0; i < hypre_IntArrayArraySize(w); i++)
+   {
+      hypre_IntArrayInitialize_v2(v, hypre_IntArrayMemoryLocation(v));
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IntArrayArrayMigrate
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IntArrayArrayMigrate( hypre_IntArrayArray  *w,
+                            HYPRE_MemoryLocation  memory_location )
+{
+   HYPRE_Int i;
+
+   for (i = 0; i < hypre_IntArrayArraySize(w); i++)
+   {
+      hypre_IntArrayMigrate(hypre_IntArrayArrayEntryI(w, i), memory_location);
    }
 
    return hypre_error_flag;

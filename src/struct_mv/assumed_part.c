@@ -87,6 +87,9 @@ hypre_APSubdivideRegion( hypre_Box      *region,
    hypre_Index  isize, index, div;
    hypre_Box   *box;
 
+   /* Initialize div */
+   hypre_SetIndex(div, 0);
+
    /* if level = 0 then no dividing */
    if (!level)
    {
@@ -1418,15 +1421,16 @@ hypre_StructAssumedPartitionDestroy( hypre_StructAssumedPart *assumed_part )
  *****************************************************************************/
 
 HYPRE_Int
-hypre_APFillResponseStructAssumedPart(
-   void      *p_recv_contact_buf,
-   HYPRE_Int  contact_size,
-   HYPRE_Int  contact_proc,
-   void      *ro,
-   MPI_Comm   comm,
-   void     **p_send_response_buf,
-   HYPRE_Int *response_message_size )
+hypre_APFillResponseStructAssumedPart(void      *p_recv_contact_buf,
+                                      HYPRE_Int  contact_size,
+                                      HYPRE_Int  contact_proc,
+                                      void      *ro,
+                                      MPI_Comm   comm,
+                                      void     **p_send_response_buf,
+                                      HYPRE_Int *response_message_size )
 {
+   HYPRE_UNUSED_VAR(p_send_response_buf);
+
    HYPRE_Int    ndim, size, alloc_size, myid, i, d, index;
    HYPRE_Int   *ids, *boxnums;
    HYPRE_Int   *recv_contact_buf;

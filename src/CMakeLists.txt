@@ -12,9 +12,9 @@ else ()
 endif ()
 
 # The version number.
-set(HYPRE_VERSION 2.29.0)
-set(HYPRE_NUMBER  22900)
-set(HYPRE_DATE    2023/06/22)
+set(HYPRE_VERSION 2.31.0)
+set(HYPRE_NUMBER  23100)
+set(HYPRE_DATE    2024/02/14)
 set(HYPRE_TIME    00:00:00)
 set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -23,6 +23,9 @@ set(PROJECT_NAME HYPRE)
 project(${PROJECT_NAME}
   VERSION ${HYPRE_VERSION}
   LANGUAGES C)
+
+# We use C99 by default, but users are free to specify any newer standard version
+set(CMAKE_C_STANDARD 99)
 
 if (${HYPRE_SOURCE_DIR} STREQUAL ${HYPRE_BINARY_DIR})
   message(FATAL_ERROR "In-place build not allowed! Please use a separate build directory. See the Users Manual or INSTALL file for details.")
@@ -636,7 +639,7 @@ configure_file(
   )
 
 # Headers and sources: remaining subdirectories
-set(HYPRE_DIRS utilities multivector krylov seq_mv parcsr_mv parcsr_block_mv distributed_matrix IJ_mv matrix_matrix distributed_ls parcsr_ls struct_mv struct_ls sstruct_mv sstruct_ls)
+set(HYPRE_DIRS utilities multivector krylov seq_mv seq_block_mv parcsr_mv parcsr_block_mv distributed_matrix IJ_mv matrix_matrix distributed_ls parcsr_ls struct_mv struct_ls sstruct_mv sstruct_ls)
 foreach (DIR IN LISTS HYPRE_DIRS)
   add_subdirectory(${DIR})
   target_include_directories(${PROJECT_NAME} PUBLIC

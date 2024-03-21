@@ -11,11 +11,120 @@
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
-#define mat_(ldim, k, i, j) mat_data[ldim * (ldim * k + i) + j]
-#define rhs_(ldim, i, j)    rhs_data[ldim * i + j]
-#define sol_(ldim, i, j)    sol_data[ldim * i + j]
+#define mat_(l, k, i, j) mat_data[l * (l * k + i) + j]
+#define rhs_(l, i, j)    rhs_data[l * i + j]
+#define sol_(l, i, j)    sol_data[l * i + j]
+#define ls_(i, j)        ls_data[batch_dim * j + i]
 
 #define HYPRE_THRUST_ZIP3(A, B, C) thrust::make_zip_iterator(thrust::make_tuple(A, B, C))
+
+/*--------------------------------------------------------------------------
+ * hypreGPUKernel_BatchedGaussJordanSolve
+ *--------------------------------------------------------------------------*/
+
+__global__ void
+__launch_bounds__(1024, 1)
+hypreGPUKernel_BatchedGaussJordanSolve( hypre_DeviceItem  &item,
+                                        HYPRE_Int          batch_num_items,
+                                        HYPRE_Int          batch_dim,
+                                        HYPRE_Complex     *mat_data,
+                                        HYPRE_Complex     *rhs_data,
+                                        HYPRE_Complex     *sol_data )
+{
+   extern __shared__ void* shmem[];
+
+   HYPRE_Complex    *ls_data = (HYPRE_Complex*) shmem;
+   HYPRE_Complex    *coef    = (HYPRE_Complex*) (ls_data + batch_dim * (batch_dim + 1));
+   HYPRE_Int        *pos     = (HYPRE_Int*) (coef + 2);
+
+   HYPRE_Int         tidx    = threadIdx.x;
+   HYPRE_Int         tidy    = threadIdx.y;
+   HYPRE_Int         btid    = blockIdx.y * gridDim.x + blockIdx.x;
+
+   HYPRE_Int         i, k;
+   HYPRE_Int         posA;
+   HYPRE_Complex     coefA, coefB;
+   HYPRE_Complex    *ptrA;
+
+   if (btid < batch_num_items)
+   {
+      /* Shift to LS belonging to the current batch ID (btid) */
+      mat_data += btid * batch_dim * batch_dim;
+      rhs_data += btid * batch_dim;
+      sol_data += btid * batch_dim;
+
+      /* Copy matrix into shared memory */
+      if (tidy < batch_dim)
+      {
+         ls_(tidx, tidy) = mat_data[tidy * batch_dim + tidx];
+      }
+
+      /* Copy RHS into shared memory */
+      if (tidy == batch_dim)
+      {
+         ls_(tidx, tidy) = rhs_data[tidx];
+      }
+
+      /* Perform elimination */
+      for (k = 0; k < batch_dim; k++)
+      {
+         /* Pivot computation */
+         __syncthreads();
+         if ((tidx < 2) && (tidy == 0))
+         {
+            i = k + 1 + tidx;
+            posA  = k;
+            ptrA  = &ls_(i, k);
+            coefA = fabs(ls_(k, k));
+
+#pragma unroll 1
+            for (; i < batch_dim; i += 2)
+            {
+               coefB = fabs(*ptrA);
+               if (coefA < coefB)
+               {
+                  coefA = coefB;
+                  posA  = i;
+               }
+               ptrA += 2;
+            }
+            pos[tidx]  = posA;
+            coef[tidx] = coefA;
+         }
+
+         /* Swap row coefficients */
+         __syncthreads();
+         if ((tidx == k) && (tidy >= k))
+         {
+            posA = (coef[1] > coef[0]) ? pos[1] : pos[0];
+
+            coefA = ls_(posA, tidy);
+            ls_(posA, tidy) = ls_(tidx, tidy);
+            ls_(tidx, tidy) = coefA;
+         }
+
+         /* Row scaling */
+         __syncthreads();
+         if ((tidx == k) && (tidy > k))
+         {
+            ls_(tidx, tidy) = ls_(tidx, tidy) * (1.0 / ls_(tidx, k));
+         }
+
+         /* Row elimination */
+         __syncthreads();
+         if ((tidx != k) && (tidy > k))
+         {
+            ls_(tidx, tidy) -= ls_(tidx, k) * ls_(k, tidy);
+         }
+      }
+
+      __syncthreads();
+      if (tidy == batch_dim)
+      {
+         sol_data[tidx] = ls_(tidx, batch_dim);
+      }
+   }
+}
 
 /*--------------------------------------------------------------------
  * hypreGPUKernel_FSAIExtractSubSystems
@@ -38,7 +147,7 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
                                       HYPRE_Int        *P_i,
                                       HYPRE_Int        *P_e,
                                       HYPRE_Int        *P_j,
-                                      HYPRE_Int         ldim,
+                                      HYPRE_Int         batch_dim,
                                       HYPRE_Complex    *mat_data,
                                       HYPRE_Complex    *rhs_data,
                                       HYPRE_Int        *G_r )
@@ -57,9 +166,9 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
         i += hypre_gpu_get_grid_num_warps<1, 1>(item))
    {
       /* Set identity matrix */
-      for (j = lane; j < ldim; j += HYPRE_WARP_SIZE)
+      for (j = lane; j < batch_dim; j += HYPRE_WARP_SIZE)
       {
-         mat_(ldim, i, j, j) = 1.0;
+         mat_(batch_dim, i, j, j) = 1.0;
       }
 
       if (lane == 0)
@@ -104,7 +213,7 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
             {
                if (lane == (hypre_ffs(bitmask) - 1))
                {
-                  rhs_(ldim, i, j - pj) = - read_only_load(A_a + k);
+                  rhs_(batch_dim, i, j - pj) = - read_only_load(A_a + k);
                }
                break;
             }
@@ -149,8 +258,8 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
                   if (lane == (hypre_ffs(bitmask) - 1))
                   {
                      val = read_only_load(A_a + k);
-                     mat_(ldim, i, j - pj, jj - pj) = val;
-                     mat_(ldim, i, jj - pj, j - pj) = val;
+                     mat_(batch_dim, i, j - pj, jj - pj) = val;
+                     mat_(batch_dim, i, jj - pj, j - pj) = val;
                   }
                   break;
                }
@@ -176,7 +285,7 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
 __global__ void
 hypreGPUKernel_FSAIScaling( hypre_DeviceItem &item,
                             HYPRE_Int         num_rows,
-                            HYPRE_Int         ldim,
+                            HYPRE_Int         batch_dim,
                             HYPRE_Complex    *sol_data,
                             HYPRE_Complex    *rhs_data,
                             HYPRE_Complex    *scaling,
@@ -191,9 +300,9 @@ hypreGPUKernel_FSAIScaling( hypre_DeviceItem &item,
         i += hypre_gpu_get_grid_num_threads<1, 1>(item))
    {
       val = scaling[i];
-      for (j = 0; j < ldim; j++)
+      for (j = 0; j < batch_dim; j++)
       {
-         val += sol_(ldim, i, j) * rhs_(ldim, i, j);
+         val += sol_(batch_dim, i, j) * rhs_(batch_dim, i, j);
       }
 
       if (val > 0)
@@ -222,7 +331,7 @@ hypreGPUKernel_FSAIScaling( hypre_DeviceItem &item,
 __global__ void
 hypreGPUKernel_FSAIGatherEntries( hypre_DeviceItem &item,
                                   HYPRE_Int         num_rows,
-                                  HYPRE_Int         ldim,
+                                  HYPRE_Int         batch_dim,
                                   HYPRE_Complex    *sol_data,
                                   HYPRE_Complex    *scaling,
                                   HYPRE_Int        *K_i,
@@ -258,7 +367,7 @@ hypreGPUKernel_FSAIGatherEntries( hypre_DeviceItem &item,
          col = K_j[j];
 
          G_j[cnt + il] = col;
-         G_a[cnt + il] = sol_(ldim, i, il) * val;
+         G_a[cnt + il] = sol_(batch_dim, i, il) * val;
          il++;
       }
    }
@@ -576,6 +685,39 @@ hypreGPUKernel_FSAITruncateCandidateUnordered( hypre_DeviceItem &item,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_BatchedGaussJordanSolveDevice
+ *
+ * Solve dense linear systems with less than 32 unknowns via Gauss-Jordan
+ * elimination.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BatchedGaussJordanSolveDevice( HYPRE_Int       batch_num_items,
+                                     HYPRE_Int       batch_dim,
+                                     HYPRE_Complex  *mat_data,
+                                     HYPRE_Complex  *rhs_data,
+                                     HYPRE_Complex  *sol_data )
+{
+   if (batch_dim > 31)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Error: cannot solve for local systems larger than 31.");
+      return hypre_error_flag;
+   }
+
+   /* Assign one linear system per thread block*/
+   dim3       bDim = hypre_dim3(batch_dim, batch_dim + 1, 1);
+   dim3       gDim = hypre_dim3(batch_num_items, 1, 1);
+   HYPRE_Int  shared_mem_size = (sizeof(HYPRE_Complex) * ((batch_dim + 1) * batch_dim + 2) +
+                                 sizeof(HYPRE_Int) * 2);
+
+   HYPRE_GPU_LAUNCH2(hypreGPUKernel_BatchedGaussJordanSolve, gDim, bDim, shared_mem_size,
+                     batch_num_items, batch_dim, mat_data, rhs_data, sol_data);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_FSAIExtractSubSystemsDevice
  *
  * TODO (VPM): This could be a hypre_CSRMatrix routine
@@ -590,7 +732,7 @@ hypre_FSAIExtractSubSystemsDevice( HYPRE_Int       num_rows,
                                    HYPRE_Int      *P_i,
                                    HYPRE_Int      *P_e,
                                    HYPRE_Int      *P_j,
-                                   HYPRE_Int       ldim,
+                                   HYPRE_Int       batch_dim,
                                    HYPRE_Complex  *mat_data,
                                    HYPRE_Complex  *rhs_data,
                                    HYPRE_Int      *G_r )
@@ -605,7 +747,7 @@ hypre_FSAIExtractSubSystemsDevice( HYPRE_Int       num_rows,
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "warp", bDim);
 
    HYPRE_GPU_LAUNCH( hypreGPUKernel_FSAIExtractSubSystems, gDim, bDim, num_rows,
-                     A_i, A_j, A_a, P_i, P_e, P_j, ldim, mat_data, rhs_data, G_r );
+                     A_i, A_j, A_a, P_i, P_e, P_j, batch_dim, mat_data, rhs_data, G_r );
 
    return hypre_error_flag;
 }
@@ -616,7 +758,7 @@ hypre_FSAIExtractSubSystemsDevice( HYPRE_Int       num_rows,
 
 HYPRE_Int
 hypre_FSAIScalingDevice( HYPRE_Int       num_rows,
-                         HYPRE_Int       ldim,
+                         HYPRE_Int       batch_dim,
                          HYPRE_Complex  *sol_data,
                          HYPRE_Complex  *rhs_data,
                          HYPRE_Complex  *scaling,
@@ -632,7 +774,7 @@ hypre_FSAIScalingDevice( HYPRE_Int       num_rows,
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "thread", bDim);
 
    HYPRE_GPU_LAUNCH( hypreGPUKernel_FSAIScaling, gDim, bDim,
-                     num_rows, ldim, sol_data, rhs_data, scaling, info );
+                     num_rows, batch_dim, sol_data, rhs_data, scaling, info );
 
    return hypre_error_flag;
 }
@@ -643,7 +785,7 @@ hypre_FSAIScalingDevice( HYPRE_Int       num_rows,
 
 HYPRE_Int
 hypre_FSAIGatherEntriesDevice( HYPRE_Int       num_rows,
-                               HYPRE_Int       ldim,
+                               HYPRE_Int       batch_dim,
                                HYPRE_Complex  *sol_data,
                                HYPRE_Complex  *scaling,
                                HYPRE_Int      *K_i,
@@ -663,7 +805,7 @@ hypre_FSAIGatherEntriesDevice( HYPRE_Int       num_rows,
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "thread", bDim);
 
    HYPRE_GPU_LAUNCH( hypreGPUKernel_FSAIGatherEntries, gDim, bDim,
-                     num_rows, ldim, sol_data, scaling, K_i, K_e, K_j, G_i, G_j, G_a );
+                     num_rows, batch_dim, sol_data, scaling, K_i, K_e, K_j, G_i, G_j, G_a );
 
    return hypre_error_flag;
 }
@@ -737,6 +879,9 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    HYPRE_Int               block_size       = max_nnz_row * max_nnz_row;
    HYPRE_Int               num_nonzeros_G;
 
+   HYPRE_Complex         **sol_aop = NULL;
+   HYPRE_Complex         **mat_aop = NULL;
+
    hypre_ParCSRMatrix     *Atilde;
    hypre_ParCSRMatrix     *B;
    hypre_ParCSRMatrix     *Ktilde;
@@ -746,11 +891,11 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 
    /* Local linear solve data */
 #if defined (HYPRE_USING_MAGMA)
-    magma_queue_t          queue     = hypre_HandleMagmaQueue(hypre_handle());
+   magma_queue_t          queue     = hypre_HandleMagmaQueue(hypre_handle());
 #endif
 
 #if defined (HYPRE_USING_CUSOLVER) || defined (HYPRE_USING_ROCSOLVER)
-    vendorSolverHandle_t   vs_handle = hypre_HandleVendorSolverHandle(hypre_handle());
+   vendorSolverHandle_t   vs_handle = hypre_HandleVendorSolverHandle(hypre_handle());
 #endif
 
    /* TODO: Move to fsai_data? */
@@ -770,7 +915,8 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    if (local_solve_type == 1)
    {
 #if !(defined (HYPRE_USING_CUSOLVER) || defined(HYPRE_USING_ROCSOLVER))
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "local_solve_type == 1 requires cuSOLVER (CUDA) or rocSOLVER (HIP)\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "local_solve_type == 1 requires cuSOLVER (CUDA) or rocSOLVER (HIP)\n");
       return hypre_error_flag;
 #endif
    }
@@ -780,6 +926,13 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "local_solve_type == 2 requires MAGMA\n");
       return hypre_error_flag;
 #endif
+   }
+   else if (local_solve_type == 0)
+   {
+      if (max_nnz_row > 31)
+      {
+         hypre_ParFSAIDataMaxNnzRow(fsai_data) = max_nnz_row = 31;
+      }
    }
    else
    {
@@ -925,15 +1078,18 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    hypre_GpuProfilingPopRange();
 
    /* Build array of pointers */
-   hypre_GpuProfilingPushRange("Storage2");
-   HYPRE_Complex **sol_aop = hypre_TAlloc(HYPRE_Complex *, num_rows, HYPRE_MEMORY_DEVICE);
-   HYPRE_Complex **mat_aop = hypre_TAlloc(HYPRE_Complex *, num_rows, HYPRE_MEMORY_DEVICE);
-   hypre_GpuProfilingPopRange();
+   if (local_solve_type != 0)
+   {
+      hypre_GpuProfilingPushRange("Storage2");
+      sol_aop = hypre_TAlloc(HYPRE_Complex *, num_rows, HYPRE_MEMORY_DEVICE);
+      mat_aop = hypre_TAlloc(HYPRE_Complex *, num_rows, HYPRE_MEMORY_DEVICE);
+      hypre_GpuProfilingPopRange();
 
-   hypre_GpuProfilingPushRange("FormAOP");
-   hypreDevice_ComplexArrayToArrayOfPtrs(num_rows, block_size, mat_data, mat_aop);
-   hypreDevice_ComplexArrayToArrayOfPtrs(num_rows, max_nnz_row, sol_data, sol_aop);
-   hypre_GpuProfilingPopRange();
+      hypre_GpuProfilingPushRange("FormAOP");
+      hypreDevice_ComplexArrayToArrayOfPtrs(num_rows, block_size, mat_data, mat_aop);
+      hypreDevice_ComplexArrayToArrayOfPtrs(num_rows, max_nnz_row, sol_data, sol_aop);
+      hypre_GpuProfilingPopRange();
+   }
 
    /*-----------------------------------------------------
     *  Solve local linear systems
@@ -994,7 +1150,11 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
 
       hypre_GpuProfilingPushRange("Solve");
 
-      if (local_solve_type == 1)
+      if (local_solve_type == 0)
+      {
+         hypre_BatchedGaussJordanSolveDevice(num_rows, max_nnz_row, mat_data, rhs_data, sol_data);
+      }
+      else if (local_solve_type == 1)
       {
 #if defined (HYPRE_USING_CUSOLVER)
          HYPRE_CUSOLVER_CALL(cusolverDnDpotrsBatched(vs_handle,

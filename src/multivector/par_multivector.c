@@ -290,7 +290,7 @@ hypre_ParMultiVectorInnerProdDiag(hypre_ParMultiVector *x, hypre_ParMultiVector 
 }
 
 HYPRE_Int
-hypre_ParMultiVectorByMatrix(hypre_ParMultiVector *x, HYPRE_Int rGHeight, HYPRE_Int rHeight,
+hypre_ParMultiVectorByMatrix(hypre_ParMultiVector *x, HYPRE_BigInt rGHeight, HYPRE_Int rHeight,
                              HYPRE_Int rWidth, HYPRE_Complex* rVal, hypre_ParMultiVector * y)
 {
    return hypre_SeqMultivectorByMatrix(x->local_vector, rGHeight, rHeight,
@@ -298,7 +298,7 @@ hypre_ParMultiVectorByMatrix(hypre_ParMultiVector *x, HYPRE_Int rGHeight, HYPRE_
 }
 
 HYPRE_Int
-hypre_ParMultiVectorXapy(hypre_ParMultiVector *x, HYPRE_Int rGHeight, HYPRE_Int rHeight,
+hypre_ParMultiVectorXapy(hypre_ParMultiVector *x, HYPRE_BigInt rGHeight, HYPRE_Int rHeight,
                          HYPRE_Int rWidth, HYPRE_Complex* rVal, hypre_ParMultiVector * y)
 {
    return hypre_SeqMultivectorXapy(x->local_vector, rGHeight, rHeight,

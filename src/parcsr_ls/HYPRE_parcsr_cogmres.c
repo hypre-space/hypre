@@ -14,6 +14,8 @@
 HYPRE_Int
 HYPRE_ParCSRCOGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
+   HYPRE_UNUSED_VAR(comm);
+
    hypre_COGMRESFunctions * cogmres_functions;
 
    if (!solver)
@@ -23,17 +25,26 @@ HYPRE_ParCSRCOGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
    }
    cogmres_functions =
       hypre_COGMRESFunctionsCreate(
-         hypre_ParKrylovCAlloc, hypre_ParKrylovFree, hypre_ParKrylovCommInfo,
+         hypre_ParKrylovCAlloc,
+         hypre_ParKrylovFree,
+         hypre_ParKrylovCommInfo,
          hypre_ParKrylovCreateVector,
          hypre_ParKrylovCreateVectorArray,
-         hypre_ParKrylovDestroyVector, hypre_ParKrylovMatvecCreate,
-         hypre_ParKrylovMatvec, hypre_ParKrylovMatvecDestroy,
-         hypre_ParKrylovInnerProd, hypre_ParKrylovMassInnerProd,
-         hypre_ParKrylovMassDotpTwo, hypre_ParKrylovCopyVector,
+         hypre_ParKrylovDestroyVector,
+         hypre_ParKrylovMatvecCreate,
+         hypre_ParKrylovMatvec,
+         hypre_ParKrylovMatvecDestroy,
+         hypre_ParKrylovInnerProd,
+         hypre_ParKrylovMassInnerProd,
+         hypre_ParKrylovMassDotpTwo,
+         hypre_ParKrylovCopyVector,
          //hypre_ParKrylovCopyVector,
          hypre_ParKrylovClearVector,
-         hypre_ParKrylovScaleVector, hypre_ParKrylovAxpy, hypre_ParKrylovMassAxpy,
-         hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
+         hypre_ParKrylovScaleVector,
+         hypre_ParKrylovAxpy,
+         hypre_ParKrylovMassAxpy,
+         hypre_ParKrylovIdentitySetup,
+         hypre_ParKrylovIdentity );
    *solver = ( (HYPRE_Solver) hypre_COGMRESCreate( cogmres_functions ) );
 
    return hypre_error_flag;

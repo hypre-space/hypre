@@ -606,6 +606,10 @@ hypre_RangeFillResponseIJDetermineRecvProcs( void      *p_recv_contact_buf,
                                              void     **p_send_response_buf,
                                              HYPRE_Int *response_message_size )
 {
+   HYPRE_UNUSED_VAR(contact_size);
+   HYPRE_UNUSED_VAR(contact_proc);
+   HYPRE_UNUSED_VAR(p_send_response_buf);
+
    HYPRE_Int    myid, tmp_id;
    HYPRE_BigInt row_end;
    HYPRE_Int    j;
@@ -699,6 +703,8 @@ hypre_FillResponseIJDetermineSendProcs(void       *p_recv_contact_buf,
                                        void      **p_send_response_buf,
                                        HYPRE_Int  *response_message_size )
 {
+   HYPRE_UNUSED_VAR(p_send_response_buf);
+
    HYPRE_Int    myid;
    HYPRE_Int    i, index, count, elength;
 
@@ -718,7 +724,8 @@ hypre_FillResponseIJDetermineSendProcs(void       *p_recv_contact_buf,
       send_proc_obj->id = hypre_TReAlloc(send_proc_obj->id, HYPRE_Int,
                                          send_proc_obj->storage_length, HYPRE_MEMORY_HOST);
       send_proc_obj->vec_starts = hypre_TReAlloc(send_proc_obj->vec_starts, HYPRE_Int,
-                                                 send_proc_obj->storage_length + 1, HYPRE_MEMORY_HOST);
+                                                 send_proc_obj->storage_length + 1,
+                                                 HYPRE_MEMORY_HOST);
    }
 
    /*initialize*/

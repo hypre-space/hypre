@@ -93,11 +93,13 @@ main( hypre_int argc,
    HYPRE_Real          cf_tol;
 
    HYPRE_Int           num_procs, myid;
+   HYPRE_Int           device_id = -1;
+   HYPRE_Int           lazy_device_init = 0;
 
    HYPRE_Int           p, q, r;
    HYPRE_Int           dim;
    HYPRE_Int           n_pre, n_post;
-   HYPRE_Int           nblocks ;
+   HYPRE_Int           nblocks = 0;
    HYPRE_Int           skip;
    HYPRE_Int           sym;
    HYPRE_Int           rap;
@@ -186,6 +188,7 @@ main( hypre_int argc,
    HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
 #endif
+   HYPRE_Int gpu_aware_mpi = 0;
 
    //HYPRE_Int device_level = -2;
 
@@ -201,12 +204,29 @@ main( hypre_int argc,
     * GPU Device binding
     * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
-   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+   for (arg_index = 1; arg_index < argc; arg_index ++)
+   {
+      if (strcmp(argv[arg_index], "-lazy_device_init") == 0)
+      {
+         lazy_device_init = atoi(argv[++arg_index]);
+      }
+      else if (strcmp(argv[arg_index], "-device_id") == 0)
+      {
+         device_id = atoi(argv[++arg_index]);
+      }
+   }
+
+   hypre_bind_device_id(device_id, myid, num_procs, hypre_MPI_COMM_WORLD);
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
    HYPRE_Initialize();
+
+   if (!lazy_device_init)
+   {
+      HYPRE_DeviceInitialize();
+   }
 
 #if defined(HYPRE_USING_KOKKOS)
    Kokkos::initialize (argc, argv);
@@ -226,6 +246,7 @@ main( hypre_int argc,
    sym  = 1;
    rap = 0;
    relax = 1;
+   jacobi_weight = 1.0;
    usr_jacobi_weight = 0;
    jump  = 0;
    reps = 1;
@@ -546,6 +567,11 @@ main( hypre_int argc,
          snprintf(mem_tracker_name, HYPRE_MAX_FILE_NAME_LEN, "%s", argv[arg_index++]);
       }
 #endif
+      else if ( strcmp(argv[arg_index], "-gpu_mpi") == 0 )
+      {
+         arg_index++;
+         gpu_aware_mpi = atoi(argv[arg_index++]);
+      }
       /* end lobpcg */
       else
       {
@@ -563,6 +589,8 @@ main( hypre_int argc,
 
    /* default execution policy */
    HYPRE_SetExecutionPolicy(default_exec_policy);
+
+   HYPRE_SetGpuAwareMPI(gpu_aware_mpi);
 
    /* begin lobpcg */
 

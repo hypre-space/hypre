@@ -1,6 +1,6 @@
 # Output file: ilu.out.300
 hypre_ILU Iterations = 85
-Final Relative Residual Norm = 9.266244e-09
+Final Relative Residual Norm = 9.266245e-09
 
 # Output file: ilu.out.301
 hypre_ILU Iterations = 40
@@ -16,15 +16,15 @@ Final Relative Residual Norm = 8.558467e-09
 
 # Output file: ilu.out.304
 hypre_ILU Iterations = 52
-Final Relative Residual Norm = 9.189234e-09
+Final Relative Residual Norm = 9.189235e-09
 
 # Output file: ilu.out.305
-hypre_ILU Iterations = 38
-Final Relative Residual Norm = 7.024121e-09
+hypre_ILU Iterations = 39
+Final Relative Residual Norm = 8.838453e-09
 
 # Output file: ilu.out.306
-hypre_ILU Iterations = 26
-Final Relative Residual Norm = 7.556742e-09
+hypre_ILU Iterations = 27
+Final Relative Residual Norm = 6.194020e-09
 
 # Output file: ilu.out.307
 hypre_ILU Iterations = 39
@@ -68,11 +68,11 @@ Final GMRES Relative Residual Norm = 7.969372e-09
 
 # Output file: ilu.out.317
 FlexGMRES Iterations = 17
-Final FlexGMRES Relative Residual Norm = 9.152443e-09
+Final FlexGMRES Relative Residual Norm = 7.140004e-09
 
 # Output file: ilu.out.318
 FlexGMRES Iterations = 9
-Final FlexGMRES Relative Residual Norm = 5.768784e-09
+Final FlexGMRES Relative Residual Norm = 9.362787e-09
 
 # Output file: ilu.out.319
 FlexGMRES Iterations = 17
@@ -92,7 +92,7 @@ Final FlexGMRES Relative Residual Norm = 3.082447e-09
 
 # Output file: ilu.out.323
 FlexGMRES Iterations = 18
-Final FlexGMRES Relative Residual Norm = 4.133851e-09
+Final FlexGMRES Relative Residual Norm = 3.782082e-09
 
 # Output file: ilu.out.324
 BoomerAMG Iterations = 10

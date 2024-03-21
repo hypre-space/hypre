@@ -403,7 +403,7 @@ GenerateSysLaplacian( MPI_Comm comm,
    HYPRE_Int    *offd_i;
    HYPRE_Int    *offd_j = NULL;
    HYPRE_BigInt *big_offd_j = NULL;
-   HYPRE_Real *offd_data;
+   HYPRE_Real *offd_data = NULL;
 
    HYPRE_BigInt global_part[2];
    HYPRE_Int ix, iy, iz;
@@ -895,9 +895,9 @@ GenerateSysLaplacianVCoef( MPI_Comm       comm,
    HYPRE_Real *diag_data;
 
    HYPRE_Int    *offd_i;
-   HYPRE_Int    *offd_j;
-   HYPRE_BigInt *big_offd_j;
-   HYPRE_Real *offd_data;
+   HYPRE_Int    *offd_j = NULL;
+   HYPRE_BigInt *big_offd_j = NULL;
+   HYPRE_Real *offd_data = NULL;
 
    HYPRE_BigInt global_part[2];
    HYPRE_BigInt ix, iy, iz;

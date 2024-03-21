@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -37,3 +37,4 @@ egrep -v "hypre error" ${TNAME}.tmp        >  ${TNAME}.err
 #=============================================================================
 
 rm -f ${TNAME}.testdata*
+rm -f ${TNAME}.tmp

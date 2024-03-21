@@ -149,6 +149,8 @@ void dh_StartFunc(const char *function,const char *file, HYPRE_Int line, HYPRE_I
 
 void dh_EndFunc(const char *function, HYPRE_Int priority)
 {
+  HYPRE_UNUSED_VAR(function);
+
   if (priority == 1) {
     --calling_stack_count;
 
@@ -251,6 +253,8 @@ void Error_dhStartFunc(char *function, char *file, HYPRE_Int line)
 
 void Error_dhEndFunc(char *function)
 {
+  HYPRE_UNUSED_VAR(function);
+
   nesting -= 1;
   if (nesting < 0) nesting = 0;
   spaces[INDENT_DH*nesting] = '\0';

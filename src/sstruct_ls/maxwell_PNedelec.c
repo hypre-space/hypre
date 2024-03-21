@@ -86,12 +86,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
    hypre_SetIndex3(ishift, 1, 0, 0);
    hypre_SetIndex3(jshift, 0, 1, 0);
    hypre_SetIndex3(kshift, 0, 0, 1);
-   hypre_SetIndex3(zero_index, 0, 0, 0);
-   hypre_SetIndex3(one_index, 0, 0, 0);
-   for (i = 0; i < ndim; i++)
-   {
-      one_index[i] = 1;
-   }
+   hypre_SetIndex(zero_index, 0);
+   hypre_SetIndex(one_index, 1);
+   hypre_SetIndex(lindex, 0);
 
    /* set rfactor[2]= 1 if ndim=2. */
    if (ndim == 2)
@@ -1574,6 +1571,10 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                hypre_SetIndex3(hi_index, 1, 1, 0);
                break;
             }
+            default:
+            {
+               fCedge_ratio = 1.0;
+            }
          }
 
          hypre_ForBoxI(i, fboxes)
@@ -2891,4 +2892,3 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
 
    return (hypre_IJMatrix *) edge_Edge;
 }
-

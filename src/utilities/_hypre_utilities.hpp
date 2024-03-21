@@ -16,6 +16,149 @@ extern "C++" {
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#ifndef HYPRE_FUNCTORS_H
+#define HYPRE_FUNCTORS_H
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+/*--------------------------------------------------------------------------
+ * hypreFunctor_DenseMatrixIdentity
+ *
+ * Functor for generating a dense identity matrix.
+ * This assumes that the input array "a" is zeros everywhere
+ *--------------------------------------------------------------------------*/
+
+struct hypreFunctor_DenseMatrixIdentity
+{
+   HYPRE_Int   n_;
+   HYPRE_Real *a_;
+
+   hypreFunctor_DenseMatrixIdentity(HYPRE_Int n, HYPRE_Real *a)
+   {
+      n_ = n;
+      a_ = a;
+   }
+
+   __host__ __device__ void operator()(HYPRE_Int i)
+   {
+      a_[i * n_ + i] = 1.0;
+   }
+};
+
+/*--------------------------------------------------------------------------
+ * hypreFunctor_ArrayStridedAccess
+ *
+ * Functor for performing strided data access on a templated array.
+ *
+ * The stride interval "s_" is used to access every "s_"-th element
+ * from the source array "a_".
+ *
+ * It is templated to support various data types for the array.
+ *--------------------------------------------------------------------------*/
+
+template <typename T>
+struct hypreFunctor_ArrayStridedAccess
+{
+   HYPRE_Int  s_;
+   T         *a_;
+
+   hypreFunctor_ArrayStridedAccess(HYPRE_Int s, T *a) : s_(s), a_(a) {}
+
+   __host__ __device__ T operator()(HYPRE_Int i)
+   {
+      return a_[i * s_];
+   }
+};
+
+/*--------------------------------------------------------------------------
+ * hypreFunctor_IndexStrided
+ *
+ * This functor multiplies a given index "i" by a specified stride "s_".
+ *
+ * It is templated to support various data types for the index and stride.
+ *--------------------------------------------------------------------------*/
+
+template <typename T>
+struct hypreFunctor_IndexStrided
+{
+   T s_;
+
+   hypreFunctor_IndexStrided(T s) : s_(s) {}
+
+   __host__ __device__ T operator()(const T i) const
+   {
+      return i * s_;
+   }
+};
+
+/*--------------------------------------------------------------------------
+ * hypreFunctor_IndexCycle
+ *--------------------------------------------------------------------------*/
+
+struct hypreFunctor_IndexCycle
+{
+   HYPRE_Int cycle_length;
+
+   hypreFunctor_IndexCycle(HYPRE_Int _cycle_length) : cycle_length(_cycle_length) {}
+
+   __host__ __device__ HYPRE_Int operator()(HYPRE_Int i) const
+   {
+      return i % cycle_length;
+   }
+};
+
+#endif /* if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+#endif /* ifndef HYPRE_FUNCTORS_H */
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+#ifndef HYPRE_PREDICATES_H
+#define HYPRE_PREDICATES_H
+
+/******************************************************************************
+ *
+ * Header file defining predicates for thrust used throughout hypre
+ *
+ *****************************************************************************/
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+/*--------------------------------------------------------------------------
+ * hyprePred_StridedAccess
+ *
+ * This struct defines a predicate for strided access in array-like data.
+ *
+ * It is used to determine if an element at a given index should be processed
+ * or not, based on a specified stride. The operator() returns true when the
+ * index is a multiple of the stride, indicating the element at that index
+ * is part of the strided subset.
+ *--------------------------------------------------------------------------*/
+
+struct hyprePred_StridedAccess
+{
+   HYPRE_Int  s_;
+
+   hyprePred_StridedAccess(HYPRE_Int s) : s_(s) {}
+
+   __host__ __device__ HYPRE_Int operator()(const HYPRE_Int i) const
+   {
+      return (!(i % s_));
+   }
+};
+
+#endif /* if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
+#endif /* ifndef HYPRE_PREDICATES_H */
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 #ifndef DEVICE_ALLOCATOR_H
 #define DEVICE_ALLOCATOR_H
 
@@ -181,6 +324,9 @@ using hypre_DeviceItem = void*;
 
 #if defined(HYPRE_USING_ROCSPARSE)
 #include <rocsparse/rocsparse.h>
+#if !defined(ROCSPARSE_VERSION)
+#define ROCSPARSE_VERSION (ROCSPARSE_VERSION_MAJOR * 100000 + ROCSPARSE_VERSION_MINOR * 100 + ROCSPARSE_VERSION_PATCH)
+#endif
 #endif
 
 #if defined(HYPRE_USING_ROCSOLVER)
@@ -412,7 +558,6 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    if (cudaSuccess != err) {                                                                 \
       printf("CUDA ERROR (code = %d, %s) at %s:%d\n", err, cudaGetErrorString(err),          \
                    __FILE__, __LINE__);                                                      \
-      hypre_assert(0); exit(1);                                                              \
    } } while(0)
 
 #elif defined(HYPRE_USING_HIP)
@@ -421,7 +566,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    if (hipSuccess != err) {                                                                  \
       printf("HIP ERROR (code = %d, %s) at %s:%d\n", err, hipGetErrorString(err),            \
                    __FILE__, __LINE__);                                                      \
-      hypre_assert(0); exit(1);                                                              \
+      hypre_assert(0);                                                                       \
    } } while(0)
 
 #elif defined(HYPRE_USING_SYCL)
@@ -434,13 +579,13 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    {                                                                                         \
       hypre_printf("SYCL ERROR (code = %s) at %s:%d\n", ex.what(),                           \
                      __FILE__, __LINE__);                                                    \
-      assert(0); exit(1);                                                                    \
+      assert(0);                                                                             \
    }                                                                                         \
    catch(std::runtime_error const& ex)                                                       \
    {                                                                                         \
       hypre_printf("STD ERROR (code = %s) at %s:%d\n", ex.what(),                            \
                    __FILE__, __LINE__);                                                      \
-      assert(0); exit(1);                                                                    \
+      assert(0);                                                                             \
    }
 #endif
 
@@ -452,10 +597,12 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #error "GPU build does not support complex numbers!"
 
 #elif defined(HYPRE_SINGLE) /* Single */
+#if defined(HYPRE_USING_CUDA)
 /* cuBLAS */
 #define hypre_cublas_scal                      cublasSscal
 #define hypre_cublas_axpy                      cublasSaxpy
 #define hypre_cublas_dot                       cublasSdot
+#define hypre_cublas_gemv                      cublasSgemv
 #define hypre_cublas_getrfBatched              cublasSgetrfBatched
 #define hypre_cublas_getriBatched              cublasSgetriBatched
 
@@ -475,6 +622,12 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_cusparse_csrsm2_analysis         cusparseScsrsm2_analysis
 #define hypre_cusparse_csrsm2_solve            cusparseScsrsm2_solve
 
+/* cuSOLVER */
+#define hypre_cusolver_dngetrf                 cusolverDnSgetrf
+#define hypre_cusolver_dngetrf_bs              cusolverDnSgetrf_bufferSize
+#define hypre_cusolver_dngetrs                 cusolverDnSgetrs
+
+#elif defined(HYPRE_USING_HIP)
 /* rocSPARSE */
 #define hypre_rocsparse_csrsv_buffer_size      rocsparse_scsrsv_buffer_size
 #define hypre_rocsparse_csrsv_analysis         rocsparse_scsrsv_analysis
@@ -488,15 +641,27 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csrilu0_buffer_size    rocsparse_scsrilu0_buffer_size
 #define hypre_rocsparse_csrilu0_analysis       rocsparse_scsrilu0_analysis
 #define hypre_rocsparse_csrilu0                rocsparse_scsrilu0
+#define hypre_rocsparse_csritilu0_compute      rocsparse_scsritilu0_compute
+#define hypre_rocsparse_csritilu0_history      rocsparse_scsritilu0_history
+
+/* rocSOLVER */
+
+/**************
+ * TODO (VPM) *
+ **************/
+
+#endif /* if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
 #elif defined(HYPRE_LONG_DOUBLE) /* Long Double */
 #error "GPU build does not support Long Double numbers!"
 
 #else /* Double */
+#if defined(HYPRE_USING_CUDA)
 /* cuBLAS */
 #define hypre_cublas_scal                      cublasDscal
 #define hypre_cublas_axpy                      cublasDaxpy
 #define hypre_cublas_dot                       cublasDdot
+#define hypre_cublas_gemv                      cublasDgemv
 #define hypre_cublas_getrfBatched              cublasDgetrfBatched
 #define hypre_cublas_getriBatched              cublasDgetriBatched
 
@@ -516,6 +681,12 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_cusparse_csrsm2_analysis         cusparseDcsrsm2_analysis
 #define hypre_cusparse_csrsm2_solve            cusparseDcsrsm2_solve
 
+/* cuSOLVER */
+#define hypre_cusolver_dngetrf                 cusolverDnDgetrf
+#define hypre_cusolver_dngetrf_bs              cusolverDnDgetrf_bufferSize
+#define hypre_cusolver_dngetrs                 cusolverDnDgetrs
+
+#elif defined(HYPRE_USING_HIP)
 /* rocSPARSE */
 #define hypre_rocsparse_csrsv_buffer_size      rocsparse_dcsrsv_buffer_size
 #define hypre_rocsparse_csrsv_analysis         rocsparse_dcsrsv_analysis
@@ -529,7 +700,17 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csrilu0_buffer_size    rocsparse_dcsrilu0_buffer_size
 #define hypre_rocsparse_csrilu0_analysis       rocsparse_dcsrilu0_analysis
 #define hypre_rocsparse_csrilu0                rocsparse_dcsrilu0
-#endif
+#define hypre_rocsparse_csritilu0_compute      rocsparse_dcsritilu0_compute
+#define hypre_rocsparse_csritilu0_history      rocsparse_dcsritilu0_history
+
+/* rocSOLVER */
+
+/**************
+ * TODO (VPM) *
+ **************/
+
+#endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)*/
+#endif /* #if defined(HYPRE_COMPLEX) || defined(HYPRE_SINGLE) || defined(HYPRE_LONG_DOUBLE) */
 
 #define HYPRE_CUBLAS_CALL(call) do {                                                         \
    cublasStatus_t err = call;                                                                \
@@ -578,7 +759,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    if (CUSOLVER_STATUS_SUCCESS != err) {                                                     \
       printf("cuSOLVER ERROR (code = %d) at %s:%d\n",                                        \
             err, __FILE__, __LINE__);                                                        \
-      hypre_assert(0); exit(1);                                                              \
+      hypre_assert(0);                                                                       \
    } } while(0)
 
 #define HYPRE_ROCSOLVER_CALL(call) do {                                                      \
@@ -702,7 +883,7 @@ struct hypre_DeviceData
 #else
    HYPRE_Int                         device;
 #endif
-   hypre_int                         device_max_shmem_per_block[2];
+   hypre_int                         device_max_shmem_per_block[3];
    /* by default, hypre puts GPU computations in this stream
     * Do not be confused with the default (null) stream */
    HYPRE_Int                         compute_stream_num;
@@ -738,6 +919,7 @@ struct hypre_DeviceData
 #define hypre_DeviceDataDevice(data)                         ((data) -> device)
 #define hypre_DeviceDataDeviceMaxWorkGroupSize(data)         ((data) -> device_max_work_group_size)
 #define hypre_DeviceDataDeviceMaxShmemPerBlock(data)         ((data) -> device_max_shmem_per_block)
+#define hypre_DeviceDataDeviceMaxShmemPerBlockInited(data)  (((data) -> device_max_shmem_per_block)[2])
 #define hypre_DeviceDataComputeStreamNum(data)               ((data) -> compute_stream_num)
 #define hypre_DeviceDataReduceBuffer(data)                   ((data) -> reduce_buffer)
 #define hypre_DeviceDataSpgemmUseVendor(data)                ((data) -> spgemm_use_vendor)
@@ -801,19 +983,11 @@ struct hypre_CsrsvData
    hypre_cusparseSpSVDescr   info_U;
    cusparseSolvePolicy_t     analysis_policy;
    cusparseSolvePolicy_t     solve_policy;
-
 #elif defined(HYPRE_USING_ROCSPARSE)
    rocsparse_mat_info        info_L;
    rocsparse_mat_info        info_U;
    rocsparse_analysis_policy analysis_policy;
    rocsparse_solve_policy    solve_policy;
-
-#elif defined(HYPRE_USING_ONEMKLSPARSE)
-   /* WM: todo - placeholders */
-   char                      info_L;
-   char                      info_U;
-   char                      analysis_policy;
-   char                      solve_policy;
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE) && (CUSPARSE_VERSION >= CUSPARSE_SPSV_VERSION)

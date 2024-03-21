@@ -287,7 +287,7 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
 
    hypre_ParCSRMatrix *C;
    HYPRE_BigInt       *col_map_offd_C;
-   HYPRE_Int          *map_P_to_C;
+   HYPRE_Int          *map_P_to_C = NULL;
 
    hypre_CSRMatrix    *C_diag;
 
@@ -305,18 +305,18 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
    HYPRE_Int           C_offd_size;
    HYPRE_Int           num_cols_offd_C = 0;
 
-   hypre_CSRMatrix    *Ps_ext;
+   hypre_CSRMatrix    *Ps_ext = NULL;
 
-   HYPRE_Complex      *Ps_ext_data;
-   HYPRE_Int          *Ps_ext_i;
-   HYPRE_BigInt       *Ps_ext_j;
+   HYPRE_Complex      *Ps_ext_data = NULL;
+   HYPRE_Int          *Ps_ext_i = NULL;
+   HYPRE_BigInt       *Ps_ext_j = NULL;
 
-   HYPRE_Complex      *P_ext_diag_data;
+   HYPRE_Complex      *P_ext_diag_data = NULL;
    HYPRE_Int          *P_ext_diag_i;
-   HYPRE_Int          *P_ext_diag_j;
+   HYPRE_Int          *P_ext_diag_j = NULL;
    HYPRE_Int           P_ext_diag_size;
 
-   HYPRE_Complex      *P_ext_offd_data;
+   HYPRE_Complex      *P_ext_offd_data = NULL;
    HYPRE_Int          *P_ext_offd_i;
    HYPRE_Int          *P_ext_offd_j = NULL;
    HYPRE_BigInt       *P_ext_tmp_j = NULL;

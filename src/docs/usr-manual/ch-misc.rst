@@ -14,24 +14,22 @@ General Information
 Getting the Source Code
 ==============================================================================
 
-The hypre distribution tar file is available from the Software link of the hypre
-web page, http://www.llnl.gov/CASC/hypre/.  The hypre Software distribution page
-allows access to the tar files of the latest and previous general and beta
-distributions as well as documentation.
-
+The most recent hypre distribution is available at
+`https://github.com/hypre-space/hypre/tags`_ along with previous distribution
+versions.
 
 Building the Library
 ==============================================================================
 
 In this and the following several sections, we discuss the steps to install and
-use hypre on a Unix-like operating system, such as Linux, AIX, and Mac OS X.
-Alternatively, the CMake build system [CMakeWeb]_ can be used, and is the best
-approach for building hypre on Windows systems in particular (see the
-``INSTALL`` file for details).
+use hypre.  First, we focus on the primary method targeting Unix-like operating
+systems, such as Linux, AIX, and Mac OS X.  Then in `CMake instructions`_, we
+explain an alternative approach using the CMake build system [CMakeWeb]_, which
+is the best approach for building hypre on Windows systems in particular.
 
 After unpacking the hypre tar file, the source code will be in the ``src``
 sub-directory of a directory named hypre-VERSION, where VERSION is the current
-version number (e.g., hypre-1.8.4, with a "b" appended for a beta release).
+version number (e.g., hypre-2.29.0).
 
 Move to the ``src`` sub-directory to build hypre for the host platform.  The
 simplest method is to configure, compile and install the libraries in
@@ -87,7 +85,7 @@ is to display the help package, by executing ``./configure --help``, which also
 includes the usage information.  The user can mix and match the configure
 options and variable settings to meet their needs.
 
-Some of the commonly used options include:
+Some commonly used options include:
 
 .. code-block:: none
 
@@ -102,10 +100,12 @@ Some of the commonly used options include:
    --with-openmp                  Use OpenMP. This may affect which compiler is
                                   chosen.
    --enable-bigint                Use long long int for HYPRE_Int (default is NO).
+                                  NOTE: This option is not available for Nvidia
+                                  and AMD GPUs.
    --enable-mixedint              Use long long int for HYPRE_BigInt and int for
                                   HYPRE_Int.
                                   NOTE: This option disables Euclid, ParaSails,
-                                        pilut and CGC coarsening.
+                                        PILUT and CGC coarsening.
 
 The user can mix and match the configure options and variable settings to meet
 their needs.  It should be noted that hypre can be configured with external BLAS
@@ -167,7 +167,7 @@ Hypre can support NVIDIA GPUs with CUDA and OpenMP (:math:`{\ge}` 4.5). The rela
 
 .. code-block:: none
 
-  --with-cuda             Use CUDA. Require cuda-8.0 or higher (default is
+  --with-cuda             Use CUDA. Require cuda-9.0 or higher (default is
                           NO).
 
   --with-device-openmp    Use OpenMP 4.5 Device Directives. This may affect
@@ -190,12 +190,11 @@ need to be set properly, which can be also set by
    --with-cuda-home=DIR
 
 When configured with ``--with-cuda`` or ``--with-device-openmp``, the memory allocated on the GPUs, by default, is the GPU device memory, which is not accessible from the CPUs.
-Hypre's structured solvers can work fine with device memory,
-whereas only selected unstructured solvers can run with device memory. See 
-Chapter :ref:`ch-boomeramg-gpu` for details.
-In general, BoomerAMG and the SStruct
-require  unified (CUDA managed) memory, for which
-the following option should be added
+Hypre's structured solvers can run with device memory,
+whereas only selected unstructured solvers can run with device memory. See
+:ref:`ch-boomeramg-gpu` for details.
+Some solver options for BoomerAMG require unified (CUDA managed) memory.
+To use these options add the following configure option:
 
 .. code-block:: none
 
@@ -220,11 +219,11 @@ The other NVIDIA GPU related options include:
 
 * ``--enable-gpu-profiling``  Use NVTX on CUDA, rocTX on HIP (default is NO)
 * ``--enable-cusparse``       Use cuSPARSE for GPU sparse kernels (default is YES)
-* ``--enable-cublas``         Use cuBLAS for GPU dense kernels (default is NO)
+* ``--enable-cublas``         Use cuBLAS for GPU dense kernels (default is YES)
 * ``--enable-curand``         Use random numbers generators on GPUs (default is YES)
 
 Allocations and deallocations of GPU memory are expensive. Memory pooling is a common approach to reduce such overhead and improve performance.
-hypre provides caching allocators for GPU device memory and unified memory, 
+hypre provides caching allocators for GPU device memory and unified memory,
 enabled by
 
 .. code-block:: none
@@ -250,21 +249,225 @@ For running on AMD GPUs, configure with
   --with-hip              Use HIP for AMD GPUs. (default is NO)
   --with-gpu-arch=ARG     Use appropriate AMD GPU architecture
 
-Currently, only BoomerAMG is supported with HIP. The other AMD GPU related options include:
+The other AMD GPU related options include:
 
 * ``--enable-gpu-profiling``  Use NVTX on CUDA, rocTX on HIP (default is NO)
 * ``--enable-rocsparse``      Use rocSPARSE (default is YES)
 * ``--enable-rocblas``        Use rocBLAS (default is NO)
 * ``--enable-rocrand``        Use rocRAND (default is YES)
 
+All the options supported by CUDA are also supported with HIP. **Note that the ``--enable-bigint`` option is not supported with CUDA or HIP.**
+
+For running on Intel GPUs, configure with
+
+.. code-block:: none
+
+  --with-sycl             Use SYCL for Intel GPUs. (default is NO).
+  --with-sycl-target=ARG  User specifies sycl targets for AOT compilation in
+                          ARG, where ARG is a comma-separated list (enclosed
+                          in quotes), e.g. "spir64_gen".
+  --with-sycl-target-backend=ARG
+                          User specifies additional options for the sycl
+                          target backend for AOT compilation in ARG, where ARG
+                          contains the desired options (enclosed in
+                          double+single quotes), e.g.
+                          --with-sycl-target-backend="'-device
+                          12.1.0,12.4.0'".
+
+Intel oneMKL functionality is also used by default (and required for certain hypre solvers):
+
+.. code-block:: none
+
+  --enable-onemklsparse   Use oneMKL sparse (default is YES).
+  --enable-onemklblas     Use oneMKL blas (default is YES).
+  --enable-onemklrand     Use oneMKL rand (default is YES).
+
+The SYCL backend now supports all GPU-enabled hypre functionality currently supported by CUDA/HIP except for FSAI (work in progress).
+The ``--enable-bigint`` option is supported with SYCL (not supported for CUDA/HIP).
+
 Testing the Library
-==============================================================================
+------------------------------------------------------------------------------
 
 The ``examples`` subdirectory contains several codes that can be used to test
 the newly created hypre library.  To create the executable versions, move into
 the ``examples`` subdirectory, enter ``make`` then execute the codes as
 described in the initial comments section of each source code.
 
+
+.. _CMake instructions:
+
+CMake-based Build Instructions
+==============================================================================
+
+This section describes hypre's CMake build system, which is particularly useful for building
+the code on Windows machines. CMake-based installation provides a platform-independent
+build system. CMake can generate Unix and Linux Makefiles, as well as Visual Studio and
+(Apple) XCode project files from the same configuration file.  In addition,
+CMake also provides a GUI front end and which allows an interactive build and
+installation process. For more detailed information on using CMake,
+see `CMake's User Interaction Guide <https://cmake.org/cmake/help/latest/guide/user-interaction/index.html>`_.
+
+**Note**: Not all options are currently supported when using CMake. This is an
+on-going effort to support all hypre configure options.
+
+Here are the basic steps to configure, make, and install hypre using CMake:
+
+#. Ensure that CMake version 3.13.0 or later is installed on the system.
+#. After unpacking the hypre tar file or cloning, move to the ``src`` sub-directory.
+#. To build the library, run CMake on the top-level hypre source directory to
+   generate files appropriate for the native build system.  To prevent writing
+   over the Makefiles in hypre's configure/make system above, only out-of-source
+   builds are allowed with CMake, that is, it is required to use a separate build
+   directory.
+
+   The directory ``src/cmbuild``
+   is provided in the release for convenience, but
+   alternative build directories may be created by the user. To configure with
+   the default options:
+
+   - Unix: From the ``src/cmbuild`` directory, type ``cmake ..``.
+
+   - Windows Visual Studio: Set the source and build directories to ``src`` and ``src/cmbuild``,
+     then click on `Configure` following by `Generate`.
+
+
+#. To build the library, compile with the native build system:
+
+   - Unix: From the ``src/cmbuild`` directory, type ``make`` or ``make -j 4``
+     (for a faster parallel build with 4 threads).
+
+   - Windows Visual Studio: Open the 'hypre' VS solution file generated by CMake
+     and build the `ALL_BUILD` target.
+
+#. To install hypre to the installation directory specified in the configuration:
+
+   - Unix: From the ``src/cmbuild`` directory, type ``make install``.
+
+   - Windows Visual Studio: Open the `hypre` VS solution file generated by CMake
+     and build the `INSTALL` target.
+
+   - *Note*: The default installation location is set to ``src/hypre``.
+     Use the ``HYPRE_INSTALL_PREFIX`` option to change this location if desired.
+
+Changing Default CMake Configuration Options
+------------------------------------------------------------------------------
+
+Various configuration options can be set from within CMake (see `CMake options`_).
+One option is to specify these options in the command-line CMake invocation,
+e.g., to enabling building of the examples:
+
+.. code-block:: none
+
+  cmake -DHYPRE_BUILD_EXAMPLES=ON ..
+
+Another option is to use the CMake GUI (``ccmake`` or ``cmake-gui``) to change the default options
+as appropriate, then reconfigure / generate:
+
+- Unix: From the ``src/cmbuild`` directory, type ``ccmake ..``.
+
+  * Change options to desired settings:
+
+    * To set a variable, move the cursor to the variable and press enter.
+    * If it is a boolean (ON/OFF) it will toggle the value.
+    * If it is string or file, it will allow editing of the string.
+
+  * Then configure (``c`` key).
+  * Repeat until all values are set as desired and then generate (``g`` key).
+
+- Windows Visual Studio: Change options, then click on `Configure` then `Generate`.
+
+Then the re-build and re-install with the updated configuration options.
+
+.. _CMake options:
+
+CMake Configure Options
+------------------------------------------------------------------------------
+
+There are many options to allow the user to override and refine
+the defaults for any system.  The best way to find out what options are available
+is to use ``cmake``, ``cmake-gui``, or inspect using Windows Visual Studio.
+
+
+Some commonly used options (default value) include:
+
+.. code-block:: none
+
+ HYPRE_INSTALL_PREFIX (src/hypre) Installation location.
+ HYPRE_BUILD_EXAMPLES (OFF)       Compile test cases for examples of using the library.
+ HYPRE_BUILD_TYPE (Release)       Sets compiler flags to generate information.
+                                  needed for debugging.
+ HYPRE_ENABLE_SHARED (OFF)        Build shared libraries.
+ HYPRE_PRINT_ERRORS (OFF)         Print HYPRE errors.
+ HYPRE_WITH_OPENMP (OFF)          Use OpenMP.
+
+ HYPRE_ENABLE_BIGINT (OFF)        Use long long int for HYPRE_Int.
+ HYPRE_ENABLE_MIXEDINT (OFF)      Use long long int for HYPRE_BigInt and int for
+                                  HYPRE_Int.
+
+GPU CMake Build Options
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Some of the commonly used options for GPU CMake builds of hypre are listed below.
+
+* CUDA support for NVIDIA GPUs relevant options:
+
+.. code-block:: none
+
+ HYPRE_WITH_CUDA (OFF)            Use CUDA v9.0 or higher.
+ HYPRE_CUDA_SM (70)               Target CUDA architecture.
+
+When configured with CUDA, the memory allocated on the GPUs, by default, is the GPU device memory, which is not accessible from the CPUs.
+Hypre's structured solvers can run with device memory,
+whereas only selected unstructured solvers can run with device memory. See
+:ref:`ch-boomeramg-gpu` for details.
+Some solver options for BoomerAMG require unified (CUDA managed) memory.
+To use these options turn the following option on:
+
+.. code-block:: none
+
+  HYPRE_ENABLE_UNIFIED_MEMORY (OFF)  Use unified memory for allocating the memory.
+
+The other NVIDIA GPU related options include:
+
+.. code-block:: none
+
+ HYPRE_ENABLE_GPU_PROFILING (OFF) Use NVTX.
+ HYPRE_ENABLE_CUSPARSE (ON)       Use cuSPARSE for GPU sparse kernels.
+ HYPRE_ENABLE_CUBLAS (OFF)        Use cuBLAS for GPU dense kernels.
+ HYPRE_ENABLE_CURAND (ON)         Use random numbers generators on GPUs.
+
+Allocations and deallocations of GPU memory are expensive. Memory pooling is a common approach to reduce such overhead and improve performance.
+hypre provides caching allocators for GPU device memory and unified memory,
+enabled by
+
+.. code-block:: none
+
+ HYPRE_ENABLE_DEVICE_POOL (OFF)   Enable the caching GPU memory allocator in hypre
+
+
+hypre also supports Umpire [Umpire]_. To enable Umpire pool, include the following options:
+
+.. code-block:: none
+
+ HYPRE_WITH_UMPIRE (OFF)          Use Umpire Allocator for device and unified memory.
+ TPL_UMPIRE_LIBRARIES             List of absolute paths to Umpire link libraries.
+ TPL_UMPIRE_INCLUDE_DIRS          List of absolute paths to Umpire include directories.
+
+SYCL support for Intel GPUs relevant options:
+
+.. code-block:: none
+
+ HYPRE_WITH_SYCL (OFF)            Enable SYCL support.
+ HYPRE_SYCL_TARGET                Target SYCL architecture, e.g. 'spir64_gen'.
+ HYPRE_SYCL_TARGET_BACKEND        Additional SYCL backend options, e.g. '-device 12.1.0,12.4.0'.
+
+
+Testing the Library with CMake Build Process
+------------------------------------------------------------------------------
+
+The ``examples`` subdirectory contains several codes that can be used to test
+the newly created hypre library. The CMake option ``HYPRE_BUILD_EXAMPLES`` should
+be enabled so ensure the executables in the ``examples`` subdirectory are built.
 
 Linking to the Library
 ==============================================================================
@@ -351,7 +554,7 @@ standard error during execution.
 Bug Reporting and General Support
 ==============================================================================
 
-Simply create an issue at ``https://github.com/hypre-space/hypre/issues`` to
+Simply create an issue at `https://github.com/hypre-space/hypre/issues`_ to
 report bugs, request features, or ask general usage questions.
 
 Users should include as much relevant information as possible in their issue
@@ -364,6 +567,12 @@ system, MPI implementation, compiler, and any error messages produced.
 
 Using HYPRE in External FEI Implementations
 ==============================================================================
+
+.. warning::
+   FEI is not actively supported by the hypre development team. For similar
+   functionality, we recommend using :ref:`sec-Block-Structured-Grids-FEM`, which
+   allows the representation of block-structured grid problems via hypre's
+   SStruct interface.
 
 To set up hypre for use in external, e.g. Sandia's, FEI implementations one
 needs to follow the following steps:

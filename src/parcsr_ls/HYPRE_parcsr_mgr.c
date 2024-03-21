@@ -223,6 +223,20 @@ HYPRE_MGRSetFSolver(HYPRE_Solver          solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_MGRSetFSolverAtLevel
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetFSolverAtLevel(HYPRE_Int     level,
+                           HYPRE_Solver  solver,
+                           HYPRE_Solver  fsolver )
+{
+   return ( hypre_MGRSetFSolverAtLevel( level,
+                                        (void *) solver,
+                                        (void *) fsolver ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_MGRBuildAff
  *--------------------------------------------------------------------------*/
 
@@ -557,13 +571,23 @@ HYPRE_MGRSetGlobalSmoothCycle( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetMaxPElmts
+ * HYPRE_MGRSetPMaxElmts
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_MGRSetPMaxElmts( HYPRE_Solver solver, HYPRE_Int P_max_elmts )
 {
    return hypre_MGRSetPMaxElmts(solver, P_max_elmts);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetLevelPMaxElmts
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetLevelPMaxElmts( HYPRE_Solver solver, HYPRE_Int *P_max_elmts )
+{
+   return hypre_MGRSetLevelPMaxElmts(solver, P_max_elmts);
 }
 
 /*--------------------------------------------------------------------------
