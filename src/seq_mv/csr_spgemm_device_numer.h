@@ -76,6 +76,7 @@ hypre_spgemm_hash_insert_numer(
                            HYPRE_Complex, sycl::memory_order::relaxed,
                            sycl::memory_scope::device,
                            sycl::access::address_space::local_space > (HashVals[j]);
+         /* WM: replacing fetch_add(), which has slow performance due to poor compiler interpretation */
          /* atomic_val.fetch_add(val); */
          auto curr = atomic_val.load(sycl::memory_order::relaxed);
          while (!atomic_val.compare_exchange_strong(curr, curr + val, sycl::memory_order::relaxed)) {}
@@ -138,6 +139,7 @@ hypre_spgemm_hash_insert_numer( HYPRE_Int               HashSize,
                            HYPRE_Complex, sycl::memory_order::relaxed,
                            sycl::memory_scope::device,
                            sycl::access::address_space::local_space > (HashVals[j]);
+         /* WM: replacing fetch_add(), which has slow performance due to poor compiler interpretation */
          /* atomic_val.fetch_add(val); */
          auto curr = atomic_val.load(sycl::memory_order::relaxed);
          while (!atomic_val.compare_exchange_strong(curr, curr + val, sycl::memory_order::relaxed)) {}
