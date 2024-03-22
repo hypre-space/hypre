@@ -361,75 +361,76 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                } /* loop on compute_boxes */
 
                /* Adjust weights at part boundaries */
-               hypre_ForBoxArrayI(i, pbnd_boxaa)
-               {
-                  pbnd_boxa = hypre_BoxArrayArrayBoxArray(pbnd_boxaa, i);
-                  box_id = hypre_BoxArrayArrayID(pbnd_boxaa, i);
-                  ii = hypre_BinarySearch(hypre_StructGridIDs(sgrid),
-                                          box_id,
-                                          hypre_StructGridNumBoxes(sgrid));
+               /* WM: todo - commenting this out for now because I think the unstructured interpolation should take care of this? */
+               /* hypre_ForBoxArrayI(i, pbnd_boxaa) */
+               /* { */
+               /*    pbnd_boxa = hypre_BoxArrayArrayBoxArray(pbnd_boxaa, i); */
+               /*    box_id = hypre_BoxArrayArrayID(pbnd_boxaa, i); */
+               /*    ii = hypre_BinarySearch(hypre_StructGridIDs(sgrid), */
+               /*                            box_id, */
+               /*                            hypre_StructGridNumBoxes(sgrid)); */
 
-                  if (ii > -1)
-                  {
-                     hypre_ForBoxI(j, pbnd_boxa)
-                     {
-                        hypre_CopyBox(hypre_BoxArrayBox(pbnd_boxa, j), compute_box);
-                        hypre_ProjectBox(compute_box, origin, stride);
-                        hypre_CopyToIndex(hypre_BoxIMin(compute_box), ndim, Pstart);
-                        hypre_StructMatrixMapDataIndex(P_s, Pstart);
+               /*    if (ii > -1) */
+               /*    { */
+               /*       hypre_ForBoxI(j, pbnd_boxa) */
+               /*       { */
+               /*          hypre_CopyBox(hypre_BoxArrayBox(pbnd_boxa, j), compute_box); */
+               /*          hypre_ProjectBox(compute_box, origin, stride); */
+               /*          hypre_CopyToIndex(hypre_BoxIMin(compute_box), ndim, Pstart); */
+               /*          hypre_StructMatrixMapDataIndex(P_s, Pstart); */
 
-                        Pp1 = hypre_StructMatrixBoxData(P_s, ii, 1);
-                        Pp2 = hypre_StructMatrixBoxData(P_s, ii, 2);
-                        P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P_s), ii);
+               /*          Pp1 = hypre_StructMatrixBoxData(P_s, ii, 1); */
+               /*          Pp2 = hypre_StructMatrixBoxData(P_s, ii, 2); */
+               /*          P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P_s), ii); */
 
-                        /* Update compute_box */
-                        for (d = 0; d < ndim; d++)
-                        {
-                           if ((d != cdir) && (hypre_BoxSizeD(compute_box, d) > 1))
-                           {
-                              hypre_IndexD(hypre_BoxIMin(compute_box), d) -= 1;
-                              hypre_IndexD(hypre_BoxIMax(compute_box), d) += 1;
-                           }
-                        }
-                        hypre_CopyBox(compute_box, tmp_box);
-                        hypre_IntersectBoxes(tmp_box, hypre_BoxArrayBox(compute_boxes, ii), compute_box);
+               /*          /1* Update compute_box *1/ */
+               /*          for (d = 0; d < ndim; d++) */
+               /*          { */
+               /*             if ((d != cdir) && (hypre_BoxSizeD(compute_box, d) > 1)) */
+               /*             { */
+               /*                hypre_IndexD(hypre_BoxIMin(compute_box), d) -= 1; */
+               /*                hypre_IndexD(hypre_BoxIMax(compute_box), d) += 1; */
+               /*             } */
+               /*          } */
+               /*          hypre_CopyBox(compute_box, tmp_box); */
+               /*          hypre_IntersectBoxes(tmp_box, hypre_BoxArrayBox(compute_boxes, ii), compute_box); */
 
-                        hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-                        if (hypre_IndexD(loop_size, cdir) > 1)
-                        {
-                           hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
-                           {
-                              HYPRE_Real center;
+               /*          hypre_BoxGetStrideSize(compute_box, stride, loop_size); */
+               /*          if (hypre_IndexD(loop_size, cdir) > 1) */
+               /*          { */
+               /*             hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi); */
+               /*             { */
+               /*                HYPRE_Real center; */
 
-                              center = Pp1[Pi] + Pp2[Pi];
-                              if (center)
-                              {
-                                 Pp1[Pi] /= center;
-                                 Pp2[Pi] /= center;
-                              }
-                           }
-                           hypre_BoxLoop1End(Pi);
-                        }
-                        else
-                        {
-                           hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
-                           {
-                              if (Pp1[Pi] > Pp2[Pi])
-                              {
-                                 Pp1[Pi] = 1.0;
-                                 Pp2[Pi] = 0.0;
-                              }
-                              else if (Pp2[Pi] > Pp1[Pi])
-                              {
-                                 Pp1[Pi] = 0.0;
-                                 Pp2[Pi] = 1.0;
-                              }
-                           }
-                           hypre_BoxLoop1End(Pi);
-                        }
-                     } /* loop on pbnd_boxa */
-                  }
-               } /* loop on pbnd_boxaa */
+               /*                center = Pp1[Pi] + Pp2[Pi]; */
+               /*                if (center) */
+               /*                { */
+               /*                   Pp1[Pi] /= center; */
+               /*                   Pp2[Pi] /= center; */
+               /*                } */
+               /*             } */
+               /*             hypre_BoxLoop1End(Pi); */
+               /*          } */
+               /*          else */
+               /*          { */
+               /*             hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi); */
+               /*             { */
+               /*                if (Pp1[Pi] > Pp2[Pi]) */
+               /*                { */
+               /*                   Pp1[Pi] = 1.0; */
+               /*                   Pp2[Pi] = 0.0; */
+               /*                } */
+               /*                else if (Pp2[Pi] > Pp1[Pi]) */
+               /*                { */
+               /*                   Pp1[Pi] = 0.0; */
+               /*                   Pp2[Pi] = 1.0; */
+               /*                } */
+               /*             } */
+               /*             hypre_BoxLoop1End(Pi); */
+               /*          } */
+               /*       } /1* loop on pbnd_boxa *1/ */
+               /*    } */
+               /* } /1* loop on pbnd_boxaa *1/ */
 
                hypre_TFree(ventries, HYPRE_MEMORY_HOST);
                hypre_BoxDestroy(compute_box);
@@ -480,50 +481,95 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       hypre_ParCSRMatrix *A_u_aug;
       hypre_ParCSRMatrixAdd(1.0, diag_A_u, 1.0, A_u, &A_u_aug);
 
-      /* WM: todo - get CF splitting, num_cpts_global, and strength matrix */
+      /* WM: debug */
+      hypre_ParCSRMatrixPrintIJ(A_u_aug, 0, 0, "A_u_aug");
 
-      /* Convert boundary of P to IJ matrix */
-      hypre_IJMatrix *P_bndry_ij;
-      hypre_SStructMatrixBoundaryToUMatrix(P, grid, &P_bndry_ij);
-      hypre_ParCSRMatrix *P_bndry = hypre_IJMatrixObject(P_bndry_ij);
 
-      /* hypre_IJMatrix *P_ij = hypre_SStructMatrixToUMatrix(P, 0); */
-      /* hypre_ParCSRMatrix *P_parcsr = hypre_IJMatrixObject(P_ij); */
-
+      /* WM: todo - get CF splitting (and strength matrix) */
       HYPRE_Int *CF_marker = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A_u), HYPRE_MEMORY_DEVICE);
 
-      HYPRE_BigInt local_coarse_size = 0;
-      HYPRE_Int *P_bndry_row_ptr = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(P_bndry));
-      for (i = 0; i < hypre_ParCSRMatrixNumRows(P_bndry); i++)
+
+
+      /* WM: init CF_marker to all F-points... or is there a nice way of just doing this in the loop below? */
+      /* WM: well... I think I had it backwards in my head? Switching it to mark all C-points, then updating with F-points below */
+      for (i = 0; i < hypre_ParCSRMatrixNumRows(A_u); i++)
       {
-         /* WM: todo - is this a correct way of doing this? There is almost certainly a better way... */
-         if (P_bndry_row_ptr[i+1] - P_bndry_row_ptr[i] == 1)
+         CF_marker[i] = 1;
+      }
+
+      /* Loop over parts */
+      HYPRE_Int cf_index = 0;
+      for (part = 0; part < nparts; part++)
+      {
+         A_p   = hypre_SStructMatrixPMatrix(A, part);
+
+         /* Loop over variables */
+         for (vi = 0; vi < nvars; vi++)
          {
-            CF_marker[i] = 1;
-            local_coarse_size++;
-         }
-         else
-         {
-            CF_marker[i] = -1;
+            A_s = hypre_SStructPMatrixSMatrix(A_p, vi, vi);
+            sgrid = hypre_StructMatrixGrid(A_s);
+            compute_boxes = hypre_StructGridBoxes(sgrid);
+
+            /* Loop over boxes */
+            hypre_ForBoxI(i, compute_boxes)
+            {
+               /* WM: how to set loop_size, box, start, stride?
+                *     I guess cdir will be used to set the stride? */
+               /* WM: do I need to worry about ghost zones here or anything? */
+               compute_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_s), i);
+               hypre_IndexX(stride) = 1;
+               hypre_IndexY(stride) = 1;
+               hypre_IndexZ(stride) = 1;
+               hypre_IndexD(stride, cdir) = 2;
+               hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+               hypre_IndexRef start = hypre_BoxIMin(compute_box);
+
+               /* Loop over dofs */
+               hypre_BoxLoop1Begin(ndim, loop_size, compute_box, start, stride, ii);
+               {
+                  /* WM: how to get the correct mapping/offset to index into cf_marker? */
+                  CF_marker[cf_index + ii] = -1;
+               }
+               hypre_BoxLoop1End(ii);
+               cf_index += hypre_BoxVolume(compute_box);
+               
+            }
          }
       }
 
+      /* WM: debug */
+      FILE    *fp;
+      fp = fopen("CF_marker.txt", "w");
+      for (i = 0; i < hypre_ParCSRMatrixNumRows(A_u); i++)
+      {
+         hypre_fprintf(fp, "%d, %d\n", i, CF_marker[i]);
+      }
+      fclose(fp);
+
+      /* Generate unstructured interpolation */
       HYPRE_Int debug_flag = 0;
       HYPRE_Real trunc_factor = 0.0;
       HYPRE_Int max_elmts = 4;
       hypre_BoomerAMGBuildInterp(A_u_aug,
                                  CF_marker,
                                  A_u_aug, /* WM: todo - do I need to do any strength measure here? */
-                                 hypre_ParCSRMatrixColStarts(P_bndry),
+                                 hypre_ParCSRMatrixColStarts(hypre_SStructMatrixParCSRMatrix(P)),
                                  1,
                                  NULL,
                                  debug_flag,
                                  trunc_factor,
                                  max_elmts,
                                  &P_u);
+      /* WM: debug */
+      hypre_ParCSRMatrixPrintIJ(P_u, 0, 0, "P_u_init");
 
+      /* WM: debug - REMOVE */
+      /* for (i = 0; i < hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(P_u)); i++) */
+      /* { */
+      /*    hypre_CSRMatrixData( hypre_ParCSRMatrixDiag(P_u) )[i] = 0.5; */
+      /* } */
 
-      /* WM: todo - postprocess P_u to remove injection entries. These should already be accounted for in P_s. Is this the best way to do this? */
+      /* WM: postprocess P_u to remove injection entries. These should already be accounted for in P_s. Is this the best way to do this? */
       for (i = 0; i < hypre_ParCSRMatrixNumRows(P_u); i++)
       {
          if (CF_marker[i] == 1)
@@ -531,6 +577,9 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
             hypre_CSRMatrixData( hypre_ParCSRMatrixDiag(P_u) )[ hypre_CSRMatrixI( hypre_ParCSRMatrixDiag(P_u) )[i] ] = 0.0;
          }
       }
+
+      /* WM: debug */
+      hypre_ParCSRMatrixPrintIJ(P_u, 0, 0, "P_u_inter");
 
       /* WM: should I do this here? What tolerance? Smarter way to avoid a bunch of zero entries? */
       hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(P_u), 1e-9);
@@ -547,16 +596,18 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       }
       hypre_ParCSRMatrixSetNumNonzeros(P_u);
 
-      hypre_ParCSRMatrixDestroy(diag_A_u);
-      HYPRE_IJMatrixDestroy(A_bndry_ij);
-      HYPRE_IJMatrixDestroy(P_bndry_ij);
-      /* HYPRE_IJMatrixDestroy(P_ij); */
-      hypre_ParCSRMatrixDestroy(A_u_aug);
+      /* WM: debug */
+      hypre_ParCSRMatrixPrintIJ(P_u, 0, 0, "P_u_final");
 
       /* WM: is this the right way to set the U matrix? */
       hypre_IJMatrixDestroyParCSR(hypre_SStructMatrixIJMatrix(P));
       hypre_SStructMatrixParCSRMatrix(P) = P_u;
       hypre_IJMatrixSetObject(hypre_SStructMatrixIJMatrix(P), P_u);
+
+      /* Clean up */
+      hypre_ParCSRMatrixDestroy(diag_A_u);
+      HYPRE_IJMatrixDestroy(A_bndry_ij);
+      hypre_ParCSRMatrixDestroy(A_u_aug);
    }
 
    return hypre_error_flag;

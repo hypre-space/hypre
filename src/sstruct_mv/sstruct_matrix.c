@@ -2358,7 +2358,9 @@ hypre_SStructMatrixBoundaryToUMatrix( hypre_SStructMatrix   *A,
                {
                   box = hypre_BoxArrayBox(pbnd_boxa, j);
                   hypre_CopyBox(box, grow_box);
-                  hypre_BoxGrowByValue(grow_box, 1);
+                  /* WM: todo - growing the box by more than 1 gave me correct mat-mat multiplication on coarser levels... */
+                  /*     BUT, we really need a robust way of doing this that guarantees correctness without doing too much work. */
+                  hypre_BoxGrowByValue(grow_box, 3);
                   hypre_IntersectBoxes(grow_box, grid_box, convert_box);
 
                   hypre_AppendBox(convert_box, convert_boxa);

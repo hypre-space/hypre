@@ -366,6 +366,11 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       HYPRE_SStructVectorCreate(comm, grid_l[l + 1], &Aones_l[l + 1]);
       HYPRE_SStructVectorInitialize(Aones_l[l + 1]);
       HYPRE_SStructVectorAssemble(Aones_l[l + 1]);
+      if (hypre_SSAMGDataCSolverType(ssamg_data) && l == num_levels - 2)
+      {
+         hypre_SStructMatvecCreate(&matvec_data_l[l + 1]);
+         hypre_SStructMatvecSetup(matvec_data_l[l + 1], A_l[l + 1], x_l[l + 1]);
+      }
       hypre_SStructMatvecCompute(matvec_data_l[l + 1], 1.0, A_l[l + 1], ones_l[l + 1],
                                  0.0, Aones_l[l + 1], Aones_l[l + 1]);
 
