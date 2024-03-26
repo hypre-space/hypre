@@ -618,7 +618,7 @@ int main (int argc, char *argv[])
    }
    /*! Done with linear system setup. Now proceed to solve the system. */
    // PCG solve
-   if (solver_id < 2)
+   if (solver_id < 2 || solver_id == 11)
    {
 // Double precision
     if (precision == 0 || all) 
@@ -1134,7 +1134,7 @@ int main (int argc, char *argv[])
       if(solver_id == 11) HYPRE_MPAMGDestroy_mp(amg_solver);
     } //end PCG   
    }   
-   else if (solver_id < 4)  //GMRES
+   else if (solver_id < 4 || solver_id == 13)  //GMRES
    {
 // double-precision
     if (precision == 0 || all)
@@ -1644,7 +1644,7 @@ int main (int argc, char *argv[])
     } // end GMRES   
    }   
    // BiCGSTAB solve
-   else if (solver_id < 6)
+   else if (solver_id < 6 || solver_id == 15)
    {
 // Double precision
     {

@@ -308,7 +308,7 @@ typedef struct
 
 #ifdef HYPRE_MIXED_PRECISION
    HYPRE_Precision *precision_array;
-   HYPRE_Int        precision_type[3];
+   HYPRE_Int       *precision_type;
    hypre_ParVector *Vtemp_dbl;
    hypre_ParVector *Vtemp_flt;
    hypre_ParVector *Vtemp_long_dbl;
@@ -2710,7 +2710,7 @@ HYPRE_Int hypre_StageTwoInterp_Options(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix
                                        hypre_ParCSRMatrix **P_ptr);
 HYPRE_Int hypre_Level_L1Norms(hypre_ParCSRMatrix *A, hypre_IntArray *CF_marker,
                               HYPRE_Int *grid_relax_type, HYPRE_Int level, HYPRE_Int num_levels,
-                              HYPRE_Int relax_order, HYPRE_Real **l1_norm_data_ptr);
+                              HYPRE_Int relax_order, hypre_Vector **l1_norm_ptr);
 
 
 /* par_amg_solve.c */

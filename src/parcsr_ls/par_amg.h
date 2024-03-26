@@ -286,7 +286,7 @@ typedef struct
 
 #ifdef(HYPRE_MIXED_PRECISION)
    HYPRE_Precision *precision_array;
-   HYPRE_Int        precision_type[3];
+   HYPRE_Int       *precision_type;
    hypre_ParVector *Vtemp_dbl;
    hypre_ParVector *Vtemp_flt;
    hypre_ParVector *Vtemp_long_dbl;

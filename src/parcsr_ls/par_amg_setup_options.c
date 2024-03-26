@@ -462,9 +462,12 @@ HYPRE_Int hypre_Level_L1Norms(hypre_ParCSRMatrix *A,
 			      HYPRE_Int           level,
 			      HYPRE_Int           num_levels,
 			      HYPRE_Int           relax_order,
-			      HYPRE_Real       **l1_norm_data_ptr)
+			      hypre_Vector       **l1_norm_ptr)
 {
    HYPRE_Real *l1_norm_data = NULL;
+   hypre_Vector *l1_norm = NULL;
+
+   l1_norm = hypre_SeqVectorCreate(num_levels);
 
    if ( grid_relax_type[1] == 8  || grid_relax_type[1] == 89 ||
         grid_relax_type[1] == 13 || grid_relax_type[1] == 14 ||
@@ -544,6 +547,7 @@ HYPRE_Int hypre_Level_L1Norms(hypre_ParCSRMatrix *A,
       hypre_ParCSRComputeL1Norms(A, 5, NULL, &l1_norm_data);
    }
 
-   *l1_norm_data_ptr = l1_norm_data;
+   hypre_VectorData(l1_norm) = l1_norm_data;
+   *l1_norm_ptr = l1_norm;
    return hypre_error_flag;
 }

@@ -38,21 +38,21 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
 
    /* Data Structure variables */
    HYPRE_Int            num_vectors;
-   hypre_ParCSRMatrix **A_array;
-   hypre_ParVector    **F_array;
-   hypre_ParVector    **U_array;
-   hypre_ParCSRMatrix **P_array;
-   hypre_ParVector     *Residual_array;
+   hypre_ParCSRMatrix **A_array = NULL;
+   hypre_ParVector    **F_array = NULL;
+   hypre_ParVector    **U_array = NULL;
+   hypre_ParCSRMatrix **P_array = NULL;
+   hypre_ParVector     *Residual_array = NULL;
    hypre_ParVector     *Vtemp_dbl = NULL;
    hypre_ParVector     *Vtemp_flt = NULL;
    hypre_ParVector     *Vtemp_long_dbl = NULL;
    hypre_ParVector     *Ztemp_dbl = NULL;
    hypre_ParVector     *Ztemp_flt = NULL;
    hypre_ParVector     *Ztemp_long_dbl = NULL;
-   hypre_IntArray     **CF_marker_array;
-   hypre_IntArray     **dof_func_array;
-   hypre_IntArray      *dof_func;
-   HYPRE_Int           *dof_func_data;
+   hypre_IntArray     **CF_marker_array = NULL;
+   hypre_IntArray     **dof_func_array = NULL;
+   hypre_IntArray      *dof_func = NULL;
+   HYPRE_Int           *dof_func_data = NULL;
    HYPRE_Real           strong_threshold;
    HYPRE_Int            coarsen_cut_factor;
    HYPRE_Int            useSabs;
@@ -70,8 +70,8 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
    HYPRE_Int            agg_P12_max_elmts;
    HYPRE_Int            keep_same_sign = hypre_ParAMGDataKeepSameSign(amg_data);
    HYPRE_Precision     *precision_array = hypre_ParAMGDataPrecisionArray(amg_data);
+   HYPRE_Int           *precision_type;
    HYPRE_Precision      level_precision = precision_array[0];
-   HYPRE_Int           *precision_type = hypre_ParAMGDataPrecisionType(amg_data);
 
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
    hypre_ParAMGDataMemoryLocation(amg_data) = memory_location;
@@ -123,6 +123,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
    HYPRE_BigInt    coarse_pnts_global[2];
    HYPRE_BigInt    coarse_pnts_global1[2];
    HYPRE_Int       num_cg_sweeps;
+   HYPRE_Int       three = 3;
 
    HYPRE_Real *max_eig_est = NULL;
    HYPRE_Real *min_eig_est = NULL;
@@ -212,6 +213,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
    {
       A_array = (hypre_ParCSRMatrix **) hypre_CAlloc_dbl((size_t)(max_levels), (size_t)sizeof(hypre_ParCSRMatrix *), HYPRE_MEMORY_HOST);
    }
+   A_array[0] = A;
 
    if (P_array == NULL && max_levels > 1)
    {
@@ -299,6 +301,11 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
    Ztemp_dbl         = hypre_ParAMGDataZtempDBL(amg_data);
    Ztemp_flt         = hypre_ParAMGDataZtempFLT(amg_data);
    Ztemp_long_dbl    = hypre_ParAMGDataZtempLONGDBL(amg_data);
+
+   precision_type = (HYPRE_Int *) hypre_CAlloc_dbl((size_t)(three), (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+   for (i=0; i< 3; i++) precision_type = 0;
+
+   hypre_ParAMGDataPrecisionType(amg_data) = precision_type;
 
    for (i=0; i< num_levels; i++)
    {
@@ -1515,16 +1522,19 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
       {
          hypre_Level_L1Norms_dbl(A_array[j], CF_marker_array[j], 
 		                 grid_relax_type, j, num_levels, relax_order, &l1_norms_tmp);
+         hypre_VectorPrecision(l1_norms_tmp) = HYPRE_REAL_DOUBLE;
       }
       else if (precision_array[j] == HYPRE_REAL_SINGLE)
       {
          hypre_Level_L1Norms_flt(A_array[j], CF_marker_array[j], 
 		                 grid_relax_type, j, num_levels, relax_order, &l1_norms_tmp);
+         hypre_VectorPrecision(l1_norms_tmp) = HYPRE_REAL_SINGLE;
       }
       else if (precision_array[j] == HYPRE_REAL_LONGDOUBLE)
       {
          hypre_Level_L1Norms_long_dbl(A_array[j], CF_marker_array[j], 
 		                      grid_relax_type, j, num_levels, relax_order, &l1_norms_tmp);
+         hypre_VectorPrecision(l1_norms_tmp) = HYPRE_REAL_LONGDOUBLE;
       }
       /*else 
       {
@@ -1623,3 +1633,4 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
 }
 
 #endif
+

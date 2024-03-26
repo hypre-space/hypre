@@ -2942,13 +2942,13 @@ HYPRE_Int hypre_StageTwoInterp_Options_long_dbl(hypre_ParCSRMatrix *A, hypre_Par
                                                 hypre_ParCSRMatrix **P_ptr);
 HYPRE_Int hypre_Level_L1Norms_dbl(hypre_ParCSRMatrix *A, hypre_IntArray *CF_marker,
                                   HYPRE_Int *grid_relax_type, HYPRE_Int level,
-                                  HYPRE_Int num_levels, HYPRE_Int relax_order, hypre_double **l1_norm_data_ptr);
+                                  HYPRE_Int num_levels, HYPRE_Int relax_order, hypre_Vector **l1_norm_ptr);
 HYPRE_Int hypre_Level_L1Norms_flt(hypre_ParCSRMatrix *A, hypre_IntArray *CF_marker,
                                   HYPRE_Int *grid_relax_type, HYPRE_Int level,
-                                  HYPRE_Int num_levels, HYPRE_Int relax_order, hypre_float **l1_norm_data_ptr);
+                                  HYPRE_Int num_levels, HYPRE_Int relax_order, hypre_Vector **l1_norm_ptr);
 HYPRE_Int hypre_Level_L1Norms_long_dbl(hypre_ParCSRMatrix *A, hypre_IntArray *CF_marker,
                                   HYPRE_Int *grid_relax_type, HYPRE_Int level,
-                                  HYPRE_Int num_levels, HYPRE_Int relax_order, hypre_long_double **l1_norm_data_ptr);
+                                  HYPRE_Int num_levels, HYPRE_Int relax_order, hypre_Vector **l1_norm_ptr);
 HYPRE_Int hypre_CreateDinv_flt  ( void *amg_vdata );
 HYPRE_Int hypre_CreateDinv_dbl  ( void *amg_vdata );
 HYPRE_Int hypre_CreateDinv_long_dbl  ( void *amg_vdata );
