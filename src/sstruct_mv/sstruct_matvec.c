@@ -366,18 +366,6 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
 
    if ( (x_object_type == HYPRE_SSTRUCT) || (x_object_type == HYPRE_STRUCT) )
    {
-      /* WM: debug - check against parcsr matvec */
-      /* hypre_ParVector *parb; */
-      /* hypre_SStructVectorConvert(x, &parx); */
-      /* hypre_SStructVectorConvert(b, &parb); */
-
-      /* hypre_IJMatrix *A_ij = hypre_SStructMatrixToUMatrix(A, 0); */
-      /* HYPRE_IJMatrixGetObject(A_ij, (void**) &parcsrA); */
-
-      /* hypre_ParVector *pary_2 = hypre_ParVectorCloneDeep_v2(parb, hypre_ParVectorMemoryLocation(parb)); */
-      /* hypre_ParCSRMatrixMatvecOutOfPlace(alpha, parcsrA, parx, beta, parb, pary_2); */
-      /* HYPRE_IJMatrixDestroy(A_ij); */
-
       /* do S-matrix computations */
       for (part = 0; part < nparts; part++)
       {
@@ -420,13 +408,6 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
 
          parx = NULL;
       }
-
-      /* WM: debug - check against parcsr matvec */
-      /* hypre_ParVectorAxpy(-1.0, pary, pary_2); */
-      /* HYPRE_Real norm = hypre_ParVectorInnerProd(pary_2, pary_2); */
-      /* hypre_printf("WM: debug - matvec difference norm = %e\n", norm); */
-      /* hypre_ParVectorDestroy(pary_2); */
-
    }
    else if (x_object_type == HYPRE_PARCSR)
    {

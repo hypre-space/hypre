@@ -482,13 +482,10 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       hypre_ParCSRMatrixAdd(1.0, diag_A_u, 1.0, A_u, &A_u_aug);
 
       /* WM: debug */
-      hypre_ParCSRMatrixPrintIJ(A_u_aug, 0, 0, "A_u_aug");
-
+      /* hypre_ParCSRMatrixPrintIJ(A_u_aug, 0, 0, "A_u_aug"); */
 
       /* WM: todo - get CF splitting (and strength matrix) */
       HYPRE_Int *CF_marker = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A_u), HYPRE_MEMORY_DEVICE);
-
-
 
       /* WM: init CF_marker to all F-points... or is there a nice way of just doing this in the loop below? */
       /* WM: well... I think I had it backwards in my head? Switching it to mark all C-points, then updating with F-points below */
@@ -517,34 +514,45 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                 *     I guess cdir will be used to set the stride? */
                /* WM: do I need to worry about ghost zones here or anything? */
                compute_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_s), i);
+               hypre_Box *shrink_box = hypre_BoxClone(compute_box);
+               hypre_Index shrink_index;
+               hypre_IndexX(shrink_index) = 0;
+               hypre_IndexY(shrink_index) = 0;
+               hypre_IndexZ(shrink_index) = 0;
+               hypre_IndexD(shrink_index, cdir) = -1;
+               hypre_BoxGrowByIndex(shrink_box, shrink_index);
                hypre_IndexX(stride) = 1;
                hypre_IndexY(stride) = 1;
                hypre_IndexZ(stride) = 1;
                hypre_IndexD(stride, cdir) = 2;
-               hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+               hypre_BoxGetStrideSize(shrink_box, stride, loop_size);
                hypre_IndexRef start = hypre_BoxIMin(compute_box);
+               hypre_IndexRef shrink_start = hypre_BoxIMin(shrink_box);
 
                /* Loop over dofs */
-               hypre_BoxLoop1Begin(ndim, loop_size, compute_box, start, stride, ii);
+               /* hypre_BoxLoop2Begin(ndim, loop_size, compute_box, start, stride, ii); */
+               hypre_BoxLoop2Begin(ndim, loop_size, compute_box, start, stride, ii, shrink_box, shrink_start, stride, j);
                {
                   /* WM: how to get the correct mapping/offset to index into cf_marker? */
-                  CF_marker[cf_index + ii] = -1;
+                  /* WM: hardcoded 2 below is probably not general??? Or maybe it is??? */
+                  CF_marker[cf_index + ii + 2] = -1;
                }
-               hypre_BoxLoop1End(ii);
-               cf_index += hypre_BoxVolume(compute_box);
+               hypre_BoxLoop2End(ii,j);
+               /* hypre_BoxLoop1End(ii); */
+               cf_index += hypre_BoxVolume( hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_s), i) );
                
             }
          }
       }
 
       /* WM: debug */
-      FILE    *fp;
-      fp = fopen("CF_marker.txt", "w");
-      for (i = 0; i < hypre_ParCSRMatrixNumRows(A_u); i++)
-      {
-         hypre_fprintf(fp, "%d, %d\n", i, CF_marker[i]);
-      }
-      fclose(fp);
+      /* FILE    *fp; */
+      /* fp = fopen("CF_marker.txt", "w"); */
+      /* for (i = 0; i < hypre_ParCSRMatrixNumRows(A_u); i++) */
+      /* { */
+      /*    hypre_fprintf(fp, "%d, %d\n", i, CF_marker[i]); */
+      /* } */
+      /* fclose(fp); */
 
       /* Generate unstructured interpolation */
       HYPRE_Int debug_flag = 0;
@@ -561,13 +569,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                                  max_elmts,
                                  &P_u);
       /* WM: debug */
-      hypre_ParCSRMatrixPrintIJ(P_u, 0, 0, "P_u_init");
-
-      /* WM: debug - REMOVE */
-      /* for (i = 0; i < hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(P_u)); i++) */
-      /* { */
-      /*    hypre_CSRMatrixData( hypre_ParCSRMatrixDiag(P_u) )[i] = 0.5; */
-      /* } */
+      /* hypre_ParCSRMatrixPrintIJ(P_u, 0, 0, "P_u_init"); */
 
       /* WM: postprocess P_u to remove injection entries. These should already be accounted for in P_s. Is this the best way to do this? */
       for (i = 0; i < hypre_ParCSRMatrixNumRows(P_u); i++)
@@ -577,9 +579,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
             hypre_CSRMatrixData( hypre_ParCSRMatrixDiag(P_u) )[ hypre_CSRMatrixI( hypre_ParCSRMatrixDiag(P_u) )[i] ] = 0.0;
          }
       }
-
-      /* WM: debug */
-      hypre_ParCSRMatrixPrintIJ(P_u, 0, 0, "P_u_inter");
 
       /* WM: should I do this here? What tolerance? Smarter way to avoid a bunch of zero entries? */
       hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(P_u), 1e-9);
@@ -595,9 +594,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          hypre_ParCSRMatrixOffd(P_u) = delete_zeros;
       }
       hypre_ParCSRMatrixSetNumNonzeros(P_u);
-
-      /* WM: debug */
-      hypre_ParCSRMatrixPrintIJ(P_u, 0, 0, "P_u_final");
 
       /* WM: is this the right way to set the U matrix? */
       hypre_IJMatrixDestroyParCSR(hypre_SStructMatrixIJMatrix(P));
