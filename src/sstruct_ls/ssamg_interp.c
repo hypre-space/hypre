@@ -529,16 +529,19 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                hypre_IndexRef start = hypre_BoxIMin(compute_box);
                hypre_IndexRef shrink_start = hypre_BoxIMin(shrink_box);
 
-               /* Loop over dofs */
-               /* hypre_BoxLoop2Begin(ndim, loop_size, compute_box, start, stride, ii); */
-               hypre_BoxLoop2Begin(ndim, loop_size, compute_box, start, stride, ii, shrink_box, shrink_start, stride, j);
+               /* WM: define the start by even/odd coordinate... is this right? */
+               if (hypre_IndexD(shrink_start, cdir) % 2 == 0)
                {
-                  /* WM: how to get the correct mapping/offset to index into cf_marker? */
-                  /* WM: hardcoded 2 below is probably not general??? Or maybe it is??? */
-                  CF_marker[cf_index + ii + 2] = -1;
+                  hypre_IndexD(shrink_start, cdir)++;
                }
-               hypre_BoxLoop2End(ii,j);
-               /* hypre_BoxLoop1End(ii); */
+
+               /* Loop over dofs */
+               hypre_BoxLoop1Begin(ndim, loop_size, compute_box, shrink_start, stride, ii);
+               {
+                  CF_marker[cf_index + ii] = -1;
+               }
+               /* hypre_BoxLoop2End(ii,j); */
+               hypre_BoxLoop1End(ii);
                cf_index += hypre_BoxVolume( hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_s), i) );
                
             }

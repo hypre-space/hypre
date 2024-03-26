@@ -76,5 +76,12 @@ ProcessPoolCreate: 1
 ProcessPoolSetPart: 0 0
 ProcessPoolSetPart: 0 1
 
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 2
+
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+ProcessPoolSetPart: 1 1
+
 ###########################################################
 
