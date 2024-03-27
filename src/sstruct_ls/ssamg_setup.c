@@ -8,9 +8,9 @@
 #include "_hypre_sstruct_ls.h"
 #include "ssamg.h"
 
-#define DEBUG_SETUP
-#define DEBUG_SYMMETRY
-#define DEBUG_MATMULT
+//#define DEBUG_SETUP
+//#define DEBUG_SYMMETRY
+//#define DEBUG_MATMULT
 //#define DEBUG_WITH_GLVIS
 
 /*--------------------------------------------------------------------------
@@ -152,12 +152,12 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    /* Compute interpolation, restriction and coarse grids */
    for (l = 0; l < (num_levels - 1); l++)
    {
-      hypre_printf("WM: debug - SSAMG level %d\n", l);
+      /* hypre_printf("WM: debug - SSAMG level %d\n", l); */
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
 
       // Build prolongation matrix
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
-      hypre_printf("WM: debug -    SSAMG interpolation\n");
+      /* hypre_printf("WM: debug -    SSAMG interpolation\n"); */
       P_l[l]  = hypre_SSAMGCreateInterpOp(A_l[l], grid_l[l + 1], cdir_l[l]);
       //HYPRE_SStructMatrixSetTranspose(P_l[l], 1);
       hypre_SSAMGSetupInterpOp(A_l[l], cdir_l[l], P_l[l], interp_type);
@@ -167,7 +167,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
 
       // Compute coarse matrix
-      hypre_printf("WM: debug -    SSAMG RAP\n");
+      /* hypre_printf("WM: debug -    SSAMG RAP\n"); */
       hypre_SSAMGComputeRAP(A_l[l], P_l[l], &grid_l[l + 1], cdir_l[l], non_galerkin, &A_l[l + 1]);
 
       // Build SStructVectors

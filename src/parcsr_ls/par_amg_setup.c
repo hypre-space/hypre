@@ -14,7 +14,7 @@
 #define DEBUG 0
 #define PRINT_CF 0
 
-#define DEBUG_SAVE_ALL_OPS 1
+#define DEBUG_SAVE_ALL_OPS 0
 /*****************************************************************************
  *
  * Routine for driving the setup phase of AMG

@@ -168,6 +168,8 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                           hypre_SStructMatrix  *P,
                           HYPRE_Int            interp_type)
 {
+   /* WM: debug */
+   /* HYPRE_SStructMatrixPrint("A", A, 0); */
    HYPRE_Int                ndim       = hypre_SStructMatrixNDim(P);
    hypre_SStructGraph      *graph      = hypre_SStructMatrixGraph(P);
    hypre_SStructGrid       *grid       = hypre_SStructGraphGrid(graph);
@@ -499,6 +501,8 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       for (part = 0; part < nparts; part++)
       {
          A_p   = hypre_SStructMatrixPMatrix(A, part);
+         cdir  = cdir_p[part];
+         /* hypre_printf("WM: debug - cdir = %d\n", cdir); */
 
          /* Loop over variables */
          for (vi = 0; vi < nvars; vi++)
@@ -506,6 +510,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
             A_s = hypre_SStructPMatrixSMatrix(A_p, vi, vi);
             sgrid = hypre_StructMatrixGrid(A_s);
             compute_boxes = hypre_StructGridBoxes(sgrid);
+            /* compute_boxes = hypre_StructMatrixDataSpace(A_s); */
 
             /* Loop over boxes */
             hypre_ForBoxI(i, compute_boxes)
@@ -513,21 +518,56 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                /* WM: how to set loop_size, box, start, stride?
                 *     I guess cdir will be used to set the stride? */
                /* WM: do I need to worry about ghost zones here or anything? */
-               compute_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_s), i);
+               compute_box = hypre_BoxClone(hypre_BoxArrayBox(compute_boxes, i));
+               /* compute_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_s), i); */
                hypre_Box *shrink_box = hypre_BoxClone(compute_box);
-               hypre_Index shrink_index;
-               hypre_IndexX(shrink_index) = 0;
-               hypre_IndexY(shrink_index) = 0;
-               hypre_IndexZ(shrink_index) = 0;
-               hypre_IndexD(shrink_index, cdir) = -1;
-               hypre_BoxGrowByIndex(shrink_box, shrink_index);
+
+               /* Grow the compute box to include ghosts */
+               /* WM: todo - use the below instead? I guess sometimes the number of ghosts is not 1 in all directions? */
+               /* HYPRE_Int *num_ghost = hypre_StructGridNumGhost(sgrid); */
+               /* hypre_BoxGrowByArray(compute_box, num_ghost); */
+
+               hypre_Index grow_index;
+               hypre_IndexX(grow_index) = 1;
+               hypre_IndexY(grow_index) = 1;
+               hypre_IndexZ(grow_index) = 1;
+               hypre_BoxGrowByIndex(compute_box, grow_index);
+
+               /* Don't add ghosts to the shrink box in the coarseining direction */
+               /* WM: is this right??? What if num_ghosts is not 1??? */
+               /* num_ghost[2 * cdir] -= 1; */
+               /* num_ghost[2 * cdir + 1] -= 1; */
+               /* hypre_BoxGrowByArray(shrink_box, num_ghost); */
+
+               hypre_IndexD(grow_index, cdir) = 0;
+               hypre_BoxGrowByIndex(shrink_box, grow_index);
+
+               /* Set the stride to 2 in the coarsening direction (1 otherwise) */
                hypre_IndexX(stride) = 1;
                hypre_IndexY(stride) = 1;
                hypre_IndexZ(stride) = 1;
                hypre_IndexD(stride, cdir) = 2;
+
+               /* Get the loop size and start */
+               /* WM: double check this: loop size and start correct in all cases? */
                hypre_BoxGetStrideSize(shrink_box, stride, loop_size);
-               hypre_IndexRef start = hypre_BoxIMin(compute_box);
+               /* hypre_IndexRef start = hypre_BoxIMin(compute_box); */
                hypre_IndexRef shrink_start = hypre_BoxIMin(shrink_box);
+
+               /* hypre_printf("WM: debug - compute_box = (%d, %d, %d) x (%d, %d, %d)\n", */
+               /*       hypre_BoxIMin(compute_box)[0], */
+               /*       hypre_BoxIMin(compute_box)[1], */
+               /*       hypre_BoxIMin(compute_box)[2], */
+               /*       hypre_BoxIMax(compute_box)[0], */
+               /*       hypre_BoxIMax(compute_box)[1], */
+               /*       hypre_BoxIMax(compute_box)[2]); */
+               /* hypre_printf("WM: debug - shrink_box = (%d, %d, %d) x (%d, %d, %d)\n", */
+               /*       hypre_BoxIMin(shrink_box)[0], */
+               /*       hypre_BoxIMin(shrink_box)[1], */
+               /*       hypre_BoxIMin(shrink_box)[2], */
+               /*       hypre_BoxIMax(shrink_box)[0], */
+               /*       hypre_BoxIMax(shrink_box)[1], */
+               /*       hypre_BoxIMax(shrink_box)[2]); */
 
                /* WM: define the start by even/odd coordinate... is this right? */
                if (hypre_IndexD(shrink_start, cdir) % 2 == 0)
@@ -535,14 +575,28 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                   hypre_IndexD(shrink_start, cdir)++;
                }
 
+               /* hypre_printf("WM: debug - stride = (%d, %d, %d)\n", */
+               /*       stride[0], */
+               /*       stride[1], */
+               /*       stride[2]); */
+               /* hypre_printf("WM: debug - shrink_start = (%d, %d, %d)\n", */
+               /*       shrink_start[0], */
+               /*       shrink_start[1], */
+               /*       shrink_start[2]); */
+               /* hypre_printf("WM: debug - loop_size = (%d, %d, %d)\n", */
+               /*       loop_size[0], */
+               /*       loop_size[1], */
+               /*       loop_size[2]); */
+
                /* Loop over dofs */
                hypre_BoxLoop1Begin(ndim, loop_size, compute_box, shrink_start, stride, ii);
                {
+                  /* hypre_printf("WM: debug - ii = %d\n", ii); */
                   CF_marker[cf_index + ii] = -1;
                }
                /* hypre_BoxLoop2End(ii,j); */
                hypre_BoxLoop1End(ii);
-               cf_index += hypre_BoxVolume( hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_s), i) );
+               cf_index += hypre_BoxVolume(compute_box);
                
             }
          }
