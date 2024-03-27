@@ -21,6 +21,8 @@ hypre_FacSetup2( void                 *fac_vdata,
                  hypre_SStructVector  *b,
                  hypre_SStructVector  *x )
 {
+   HYPRE_UNUSED_VAR(b);
+
    hypre_FACData          *fac_data      =  (hypre_FACData*)fac_vdata;
 
    HYPRE_Int              *plevels       = (fac_data-> plevels);
@@ -949,4 +951,3 @@ hypre_FacSetup2( void                 *fac_vdata,
 
    return ierr;
 }
-

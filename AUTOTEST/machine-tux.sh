@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -96,7 +96,7 @@ co="--enable-shared"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic--enable-shared
 
-co="--enable-debug"
+co="--enable-debug --with-extra-CFLAGS=\\'-Wstrict-prototypes\\'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: $eo
 ./renametest.sh basic $output_dir/basic-debug1
 
@@ -144,7 +144,7 @@ RO="-ams -ij-mixed -sstruct-mixed -struct -lobpcg-mixed"
 ./renametest.sh basic $output_dir/basic--enable-mixedint
 
 co="--enable-debug --with-print-errors"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -error -rt -valgrind
 ./renametest.sh basic $output_dir/basic--valgrind
 
 # CMake build and run tests

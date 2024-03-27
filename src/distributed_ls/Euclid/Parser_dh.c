@@ -200,7 +200,7 @@ bool Parser_dhReadDouble(Parser_dh p,const char* in, HYPRE_Real *out)
   OptionsNode *node;
 
   if (p != NULL && find(p,in,&node)) {
-    *out = atof(node->value);
+    *out = (HYPRE_Real)atof(node->value);
     optionExists = true;
   }
   END_FUNC_VAL_2(optionExists)

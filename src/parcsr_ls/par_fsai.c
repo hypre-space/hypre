@@ -13,14 +13,17 @@
  ******************************************************************************/
 
 void *
-hypre_FSAICreate()
+hypre_FSAICreate( void )
 {
    hypre_ParFSAIData    *fsai_data;
 
    /* setup params */
    HYPRE_Int            algo_type;
+   HYPRE_Int            local_solve_type;
    HYPRE_Int            max_steps;
    HYPRE_Int            max_step_size;
+   HYPRE_Int            max_nnz_row;
+   HYPRE_Int            num_levels;
    HYPRE_Real           kap_tolerance;
 
    /* solver params */
@@ -42,10 +45,26 @@ hypre_FSAICreate()
    fsai_data = hypre_CTAlloc(hypre_ParFSAIData, 1, HYPRE_MEMORY_HOST);
 
    /* setup params */
-   algo_type = hypre_NumThreads() > 4 ? 2 : 1;
+   local_solve_type = 0;
    max_steps = 3;
    max_step_size = 5;
+   max_nnz_row = max_steps * max_step_size;
+   num_levels = 2;
    kap_tolerance = 1.0e-3;
+
+   /* parameters that depend on the execution policy */
+#if defined (HYPRE_USING_CUDA) || defined (HYPRE_USING_HIP)
+   HYPRE_MemoryLocation memory_location = hypre_HandleMemoryLocation(hypre_handle());
+
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      algo_type = 3;
+   }
+   else
+#endif
+   {
+      algo_type = hypre_NumThreads() > 4 ? 2 : 1;
+   }
 
    /* solver params */
    eig_max_iters = 0;
@@ -73,8 +92,11 @@ hypre_FSAICreate()
    hypre_ParFSAIDataZeroGuess(fsai_data) = 0;
 
    hypre_FSAISetAlgoType(fsai_data, algo_type);
+   hypre_FSAISetLocalSolveType(fsai_data, local_solve_type);
    hypre_FSAISetMaxSteps(fsai_data, max_steps);
    hypre_FSAISetMaxStepSize(fsai_data, max_step_size);
+   hypre_FSAISetMaxNnzRow(fsai_data, max_nnz_row);
+   hypre_FSAISetNumLevels(fsai_data, num_levels);
    hypre_FSAISetKapTolerance(fsai_data, kap_tolerance);
 
    hypre_FSAISetMaxIterations(fsai_data, max_iterations);
@@ -154,6 +176,29 @@ hypre_FSAISetAlgoType( void      *data,
 }
 
 HYPRE_Int
+hypre_FSAISetLocalSolveType( void      *data,
+                             HYPRE_Int  local_solve_type )
+{
+   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
+
+   if (!fsai_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (local_solve_type < 0 || local_solve_type > 2)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_ParFSAIDataLocalSolveType(fsai_data) = local_solve_type;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypre_FSAISetMaxSteps( void      *data,
                        HYPRE_Int  max_steps )
 {
@@ -195,6 +240,75 @@ hypre_FSAISetMaxStepSize( void      *data,
    }
 
    hypre_ParFSAIDataMaxStepSize(fsai_data) = max_step_size;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_FSAISetMaxNnzRow( void      *data,
+                        HYPRE_Int  max_nnz_row )
+{
+   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
+
+   if (!fsai_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (max_nnz_row < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_ParFSAIDataMaxNnzRow(fsai_data) = max_nnz_row;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_FSAISetNumLevels( void      *data,
+                        HYPRE_Int  num_levels )
+{
+   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
+
+   if (!fsai_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (num_levels < 1)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_ParFSAIDataNumLevels(fsai_data) = num_levels;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_FSAISetThreshold( void       *data,
+                        HYPRE_Real  threshold )
+{
+   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
+
+   if (!fsai_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (threshold < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_ParFSAIDataThreshold(fsai_data) = threshold;
 
    return hypre_error_flag;
 }
@@ -342,12 +456,6 @@ HYPRE_Int
 hypre_FSAISetLogging( void      *data,
                       HYPRE_Int  logging )
 {
-   /*   This function should be called before Setup.  Logging changes
-    *    may require allocation or freeing of arrays, which is presently
-    *    only done there.
-    *    It may be possible to support logging changes at other times,
-    *    but there is little need.
-    */
    hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
 
    if (!fsai_data)
@@ -435,6 +543,23 @@ hypre_FSAIGetAlgoType( void      *data,
 }
 
 HYPRE_Int
+hypre_FSAIGetLocalSolveType( void      *data,
+                             HYPRE_Int *local_solve_type )
+{
+   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
+
+   if (!fsai_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *local_solve_type = hypre_ParFSAIDataLocalSolveType(fsai_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypre_FSAIGetMaxSteps( void      *data,
                        HYPRE_Int *algo_type )
 {
@@ -464,6 +589,57 @@ hypre_FSAIGetMaxStepSize( void      *data,
    }
 
    *max_step_size = hypre_ParFSAIDataMaxStepSize(fsai_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_FSAIGetMaxNnzRow( void      *data,
+                        HYPRE_Int *max_nnz_row )
+{
+   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
+
+   if (!fsai_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *max_nnz_row = hypre_ParFSAIDataMaxNnzRow(fsai_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_FSAIGetNumLevels( void      *data,
+                        HYPRE_Int *num_levels )
+{
+   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
+
+   if (!fsai_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *num_levels = hypre_ParFSAIDataNumLevels(fsai_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_FSAIGetThreshold( void       *data,
+                        HYPRE_Real *threshold )
+{
+   hypre_ParFSAIData  *fsai_data = (hypre_ParFSAIData*) data;
+
+   if (!fsai_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *threshold = hypre_ParFSAIDataThreshold(fsai_data);
 
    return hypre_error_flag;
 }

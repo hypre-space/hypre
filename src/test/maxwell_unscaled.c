@@ -448,7 +448,7 @@ ReadData( char         *filename,
                data.stencil_offsets[s][entry][i] = 0;
             }
             data.stencil_vars[s][entry] = strtol(sdata_ptr, &sdata_ptr, 10);
-            data.stencil_values[s][entry] = strtod(sdata_ptr, &sdata_ptr);
+            data.stencil_values[s][entry] = (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
          }
          else if ( strcmp(key, "GraphSetStencil:") == 0 )
          {
@@ -547,7 +547,7 @@ ReadData( char         *filename,
             pdata.graph_entries[pdata.graph_nentries] =
                strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.graph_values[pdata.graph_nentries] =
-               strtod(sdata_ptr, &sdata_ptr);
+               (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
             pdata.graph_boxsizes[pdata.graph_nentries] = 1;
             for (i = 0; i < 3; i++)
             {
@@ -625,7 +625,7 @@ ReadData( char         *filename,
             pdata.matrix_entries[pdata.matrix_nentries] =
                strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.matrix_values[pdata.matrix_nentries] =
-               strtod(sdata_ptr, &sdata_ptr);
+               (HYPRE_Real)strtod(sdata_ptr, &sdata_ptr);
             pdata.matrix_nentries++;
             data.pdata[part] = pdata;
          }
@@ -1377,14 +1377,15 @@ main( hypre_int argc,
 
    /*-----------------------------------------------------------------
     * GPU Device binding
-    * Must be done before HYPRE_Init() and should not be changed after
+    * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
-   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+   hypre_bind_device_id(-1, myid, num_procs, hypre_MPI_COMM_WORLD);
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
-   HYPRE_Init();
+   HYPRE_Initialize();
+   HYPRE_DeviceInitialize();
 
    /*-----------------------------------------------------------
     * Read input file
@@ -1426,6 +1427,7 @@ main( hypre_int argc,
       }
    }
 
+   solver_id = 0;
    print_system = 0;
 
    /*-----------------------------------------------------------
@@ -1495,7 +1497,6 @@ main( hypre_int argc,
          arg_index++;
          print_system = 1;
       }
-#if defined(HYPRE_USING_GPU)
       else if ( strcmp(argv[arg_index], "-exec_host") == 0 )
       {
          arg_index++;
@@ -1506,6 +1507,7 @@ main( hypre_int argc,
          arg_index++;
          default_exec_policy = HYPRE_EXEC_DEVICE;
       }
+#if defined(HYPRE_USING_GPU)
       else if ( strcmp(argv[arg_index], "-mm_vendor") == 0 )
       {
          arg_index++;
@@ -1843,7 +1845,7 @@ main( hypre_int argc,
    HYPRE_SStructVectorInitialize(b);
    for (j = 0; j < data.max_boxsize; j++)
    {
-      values[j] = sin((HYPRE_Real)(j + 1));
+      values[j] = hypre_sin((HYPRE_Real)(j + 1));
       values[j] = (HYPRE_Real) hypre_Rand();
       values[j] = (HYPRE_Real) j;
    }
@@ -2028,4 +2030,3 @@ main( hypre_int argc,
 
    return (0);
 }
-

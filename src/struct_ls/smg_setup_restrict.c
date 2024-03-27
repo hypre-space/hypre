@@ -16,6 +16,10 @@ hypre_SMGCreateRestrictOp( hypre_StructMatrix *A,
                            hypre_StructGrid   *cgrid,
                            HYPRE_Int           cdir  )
 {
+   HYPRE_UNUSED_VAR(A);
+   HYPRE_UNUSED_VAR(cgrid);
+   HYPRE_UNUSED_VAR(cdir);
+
    hypre_StructMatrix *R = NULL;
 
    return R;
@@ -32,5 +36,12 @@ hypre_SMGSetupRestrictOp( hypre_StructMatrix *A,
                           hypre_Index         cindex,
                           hypre_Index         cstride  )
 {
+   HYPRE_UNUSED_VAR(A);
+   HYPRE_UNUSED_VAR(R);
+   HYPRE_UNUSED_VAR(temp_vec);
+   HYPRE_UNUSED_VAR(cdir);
+   HYPRE_UNUSED_VAR(cindex);
+   HYPRE_UNUSED_VAR(cstride);
+
    return hypre_error_flag;
 }

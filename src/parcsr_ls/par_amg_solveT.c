@@ -158,18 +158,18 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    {
       hypre_ParVectorCopy(F_array[0], Residual );
       hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Residual );
-      resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
+      resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
    }
    else
    {
       hypre_ParVectorCopy(F_array[0], Vtemp);
       hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Vtemp);
-      resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+      resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
    }
 
 
    resid_nrm_init = resid_nrm;
-   rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
+   rhs_norm = hypre_sqrt(hypre_ParVectorInnerProd(f, f));
    relative_resid = 9999;
    if (rhs_norm)
    {
@@ -208,13 +208,13 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
       {
          hypre_ParVectorCopy(F_array[0], Residual );
          hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Residual );
-         resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
+         resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
       }
       else
       {
          hypre_ParVectorCopy(F_array[0], Vtemp);
          hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Vtemp);
-         resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+         resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
       }
 
       conv_factor = resid_nrm / old_resid;
@@ -244,7 +244,7 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
     *    Compute closing statistics
     *-----------------------------------------------------------------------*/
 
-   conv_factor = pow((resid_nrm / resid_nrm_init), (1.0 / ((HYPRE_Real) cycle_count)));
+   conv_factor = hypre_pow((resid_nrm / resid_nrm_init), (1.0 / ((HYPRE_Real) cycle_count)));
 
 
    for (j = 0; j < hypre_ParAMGDataNumLevels(amg_data); j++)
@@ -350,8 +350,8 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    HYPRE_Int       Not_Finished;
    HYPRE_Int       num_sweep;
    HYPRE_Int       relax_type;
-   HYPRE_Int       relax_points;
-   HYPRE_Real   *relax_weight;
+   HYPRE_Int       relax_points = 0;
+   HYPRE_Real     *relax_weight;
 
    HYPRE_Int       old_version = 0;
 
@@ -441,7 +441,11 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    {
       num_sweep = num_grid_sweeps[cycle_param];
       relax_type = grid_relax_type[cycle_param];
-      if (relax_type != 7 && relax_type != 9) { relax_type = 7; }
+      if (relax_type != 7 && relax_type != 9)
+      {
+         relax_type = 7;
+      }
+
       /*------------------------------------------------------------------
        * Do the relaxation num_sweep times
        *-----------------------------------------------------------------*/
@@ -612,15 +616,19 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
  * hypre_BoomerAMGRelaxT
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
-                                  hypre_ParVector    *f,
-                                  HYPRE_Int                *cf_marker,
-                                  HYPRE_Int                 relax_type,
-                                  HYPRE_Int                 relax_points,
-                                  HYPRE_Real          relax_weight,
-                                  hypre_ParVector    *u,
-                                  hypre_ParVector    *Vtemp )
+HYPRE_Int
+hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
+                       hypre_ParVector    *f,
+                       HYPRE_Int          *cf_marker,
+                       HYPRE_Int           relax_type,
+                       HYPRE_Int           relax_points,
+                       HYPRE_Real          relax_weight,
+                       hypre_ParVector    *u,
+                       hypre_ParVector    *Vtemp )
 {
+   HYPRE_UNUSED_VAR(cf_marker);
+   HYPRE_UNUSED_VAR(relax_points);
+
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real      *A_diag_data  = hypre_CSRMatrixData(A_diag);
    HYPRE_Int       *A_diag_i     = hypre_CSRMatrixI(A_diag);

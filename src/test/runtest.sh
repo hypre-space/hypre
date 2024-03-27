@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -129,9 +129,6 @@ function MpirunString
       tioga*)
          shift
          RunString="srun -n$1"
-         if [ "$mpibind" = "mpibind" ] ; then
-            mpibind="--mpibind=on"
-         fi
          ;;
       node*)
          shift
@@ -319,8 +316,8 @@ function ExecuteJobs
             ;;
 
          *mpirun*)
-            RunCmd=`echo $InputLine| sed -e 's/^[ \t]*mpirun[ \t]*//'` # remove 'mpirun'
-            RunCmd=`echo $RunCmd | sed -e 's/[ \t]*>.*$//'`            # remove output redirect
+            RunCmd=`echo $InputLine| sed -e 's/^[[:space:]]*mpirun[[:space:]]*//'` # remove 'mpirun'
+            RunCmd=`echo $RunCmd | sed -e 's/[[:space:]]*>.*$//'`            # remove output redirect
             OutFile=`echo $InputLine | sed -e 's/^.*>//'`           # set output file
             OutFile=`echo $OutFile | sed -e 's/ //g'`               # remove extra space
             ErrFile=`echo $OutFile | sed -e 's/\.out\./.err./'`  # set error file

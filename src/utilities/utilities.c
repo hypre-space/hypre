@@ -6,6 +6,17 @@
  ******************************************************************************/
 
 #include "_hypre_utilities.h"
+#include <errno.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#include <direct.h>
+#define mkdir(path, mode) _mkdir(path)
+#else
+#include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#endif
 
 /*--------------------------------------------------------------------------
  * hypre_multmod
@@ -87,4 +98,107 @@ hypre_strcpy(char *destination, const char *source)
       /* +1: including the terminating null character */
       return ((char *) memmove(destination, source, len + 1));
    }
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CheckDirExists
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CheckDirExists(const char *path)
+{
+#ifndef _WIN32
+   DIR *dir = opendir(path);
+
+   if (dir)
+   {
+      closedir(dir);
+      return 1;
+   }
+#else
+   DWORD att = GetFileAttributesA(path);
+
+   if (att == INVALID_FILE_ATTRIBUTES)
+   {
+      return 0;
+   }
+
+   if (att & FILE_ATTRIBUTE_DIRECTORY)
+   {
+      return 1;
+   }
+#endif
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CreateDir
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CreateDir(const char *path)
+{
+   char msg[HYPRE_MAX_MSG_LEN];
+
+   if (mkdir(path, 0777))
+   {
+      hypre_sprintf(msg, "Could not create directory: %s", path);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CreateNextDirOfSequence
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CreateNextDirOfSequence(const char *basepath, const char *prefix, char **fullpath_ptr)
+{
+   HYPRE_Int       max_suffix = -1;
+   char           *fullpath;
+
+#ifndef _WIN32
+   HYPRE_Int       suffix;
+   char            msg[HYPRE_MAX_MSG_LEN];
+   DIR            *dir;
+   struct dirent  *entry;
+
+   if ((dir = opendir(basepath)) == NULL)
+   {
+      hypre_sprintf(msg, "Could not open directory: %s", basepath);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+      return hypre_error_flag;
+   }
+
+   max_suffix = -1;
+   while ((entry = readdir(dir)) != NULL)
+   {
+      if (strncmp(entry->d_name, prefix, strlen(prefix)) == 0)
+      {
+         if (hypre_sscanf(entry->d_name + strlen(prefix), "%d", &suffix) == 1)
+         {
+            if (suffix > max_suffix)
+            {
+               max_suffix = suffix;
+            }
+         }
+      }
+   }
+   closedir(dir);
+#else
+   /* TODO (VPM) */
+#endif
+
+   /* Create directory */
+   fullpath = hypre_TAlloc(char, strlen(basepath) + 10, HYPRE_MEMORY_HOST);
+   hypre_sprintf(fullpath, "%s/%s%05d", basepath, prefix, max_suffix + 1);
+   hypre_CreateDir(fullpath);
+
+   /* Set output pointer */
+   *fullpath_ptr = fullpath;
+
+   return hypre_error_flag;
 }

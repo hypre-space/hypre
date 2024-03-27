@@ -59,7 +59,7 @@ hypre_CGNRFunctionsCreate(
    /* default preconditioner must be set here but can be changed later... */
    cgnr_functions->precond_setup = PrecondSetup;
    cgnr_functions->precond       = Precond;
-   cgnr_functions->precondT       = Precond;
+   cgnr_functions->precondT      = PrecondT;
 
    return cgnr_functions;
 }
@@ -237,7 +237,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
    /* compute eps */
    bi_prod = (*(cgnr_functions->InnerProd))(b, b);
 
-   /* Since it is does not diminish performance, attempt to return an error flag
+   /* Since it does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
    if (bi_prod != 0.) { ieee_check = bi_prod / bi_prod; } /* INF -> NaN conversion */
    if (ieee_check != ieee_check)
@@ -292,9 +292,9 @@ hypre_CGNRSolve(void *cgnr_vdata,
    /* Set initial residual norm */
    if (logging > 0)
    {
-      norms[0] = sqrt((*(cgnr_functions->InnerProd))(r, r));
+      norms[0] = hypre_sqrt((*(cgnr_functions->InnerProd))(r, r));
 
-      /* Since it is does not diminish performance, attempt to return an error flag
+      /* Since it does not diminish performance, attempt to return an error flag
          and notify users when they supply bad input. */
       if (norms[0] != 0.) { ieee_check = norms[0] / norms[0]; } /* INF -> NaN conversion */
       if (ieee_check != ieee_check)
@@ -330,7 +330,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
    /* gamma = <t,t> */
    gamma = (*(cgnr_functions->InnerProd))(t, t);
 
-   /* Since it is does not diminish performance, attempt to return an error flag
+   /* Since it does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
    if (gamma != 0.) { ieee_check = gamma / gamma; } /* INF -> NaN conversion */
    if (ieee_check != ieee_check)
@@ -388,7 +388,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
       /* log norm info */
       if (logging > 0)
       {
-         norms[i]     = sqrt(i_prod);
+         norms[i]     = hypre_sqrt(i_prod);
          if (logging > 1 && my_id == 0)
          {
             hypre_printf("% 5d    %e    %f   %e\n", i, norms[i], norms[i] /
@@ -438,7 +438,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
     * Print log
     *-----------------------------------------------------------------------*/
 
-   bi_prod = sqrt(bi_prod);
+   bi_prod = hypre_sqrt(bi_prod);
 
    if (logging > 1 && my_id == 0)
    {

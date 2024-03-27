@@ -21,6 +21,8 @@ hypre_FACSolve3( void                 *fac_vdata,
                  hypre_SStructVector  *b_in,
                  hypre_SStructVector  *x_in         )
 {
+   HYPRE_UNUSED_VAR(A_user);
+
    hypre_FACData           *fac_data           = (hypre_FACData*)fac_vdata;
 
    hypre_SStructMatrix     *A_in               = (fac_data-> A_rap);
@@ -141,10 +143,10 @@ hypre_FACSolve3( void                 *fac_vdata,
 
          if (logging > 0)
          {
-            norms[i] = sqrt(r_dot_r);
+            norms[i] = hypre_sqrt(r_dot_r);
             if (b_dot_b > 0)
             {
-               rel_norms[i] = sqrt(r_dot_r / b_dot_b);
+               rel_norms[i] = hypre_sqrt(r_dot_r / b_dot_b);
             }
             else
             {
@@ -403,4 +405,3 @@ hypre_FACSolve3( void                 *fac_vdata,
 
    return ierr;
 }
-

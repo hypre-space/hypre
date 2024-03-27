@@ -44,7 +44,8 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    HYPRE_Int              Ai, Astart, Ani, Anj;
    HYPRE_Int              bstart, bni, bnj;
    HYPRE_Int              xstart, xni, xnj;
-   HYPRE_Int              xoff0, xoff1, xoff2, xoff3, xoff4, xoff5;
+   HYPRE_Int              xoff0 = 0, xoff1 = 0, xoff2 = 0;
+   HYPRE_Int              xoff3 = 0, xoff4 = 0, xoff5 = 0;
 
    HYPRE_Real            *Ap;
    HYPRE_Real            *App;
@@ -53,7 +54,8 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
 
    /* constant coefficient */
    HYPRE_Int              constant_coeff = hypre_StructMatrixConstantCoefficient(A);
-   HYPRE_Real             App0, App1, App2, App3, App4, App5, AApd;
+   HYPRE_Real             App0 = 1.0, App1 = 1.0, App2 = 1.0;
+   HYPRE_Real             App3 = 1.0, App4 = 1.0, App5 = 1.0, AApd = 1.0;
 
    hypre_IndexRef         start;
    hypre_Index            loop_size;
@@ -313,6 +315,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                                 x_dbox, stencil_shape[offd[5]]);
                      xoff4 = hypre_BoxOffsetDistance(
                                 x_dbox, stencil_shape[offd[4]]);
+                  /* fall through */
 
                   case 5:
                      App = hypre_StructMatrixBoxData(A, i, offd[3]);
@@ -323,6 +326,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                                 x_dbox, stencil_shape[offd[3]]);
                      xoff2 = hypre_BoxOffsetDistance(
                                 x_dbox, stencil_shape[offd[2]]);
+                  /* fall through */
 
                   case 3:
                      App = hypre_StructMatrixBoxData(A, i, offd[1]);
@@ -486,5 +490,3 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
 
    return hypre_error_flag;
 }
-
-

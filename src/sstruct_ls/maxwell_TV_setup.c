@@ -102,7 +102,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    HYPRE_Int             *coarsen;
    hypre_SStructGrid    **egrid_l;
    hypre_SStructGrid     *edge_grid, *face_grid, *cell_grid;
-   hypre_SStructGrid    **topological_edge, **topological_face, **topological_cell;
+   hypre_SStructGrid    **topological_edge, **topological_face = NULL, **topological_cell;
 
    HYPRE_Int            **BdryRanks_l;
    HYPRE_Int             *BdryRanksCnts_l;
@@ -114,7 +114,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    hypre_Box             *box, *box_piece, *contract_box;
    hypre_BoxArray        *cboxes;
 
-   HYPRE_SStructVariable *vartypes, *vartype_edges, *vartype_faces, *vartype_cell;
+   HYPRE_SStructVariable *vartypes, *vartype_edges, *vartype_faces = NULL, *vartype_cell;
    hypre_SStructStencil **Ann_stencils;
 
    hypre_MaxwellOffProcRow **OffProcRows;
@@ -170,6 +170,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
       rfactor_in[0][i] = 1;
    }
    hypre_CopyIndex(rfactor_in[0], rfactor);
+   hypre_SetIndex(lindex, 0);
 
    /*---------------------------------------------------------------------
     * Set up matrices Ann, Aen.

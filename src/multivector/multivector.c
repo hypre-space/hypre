@@ -165,7 +165,7 @@ mv_MultiVectorAxpy( HYPRE_Complex a, mv_MultiVectorPtr x, mv_MultiVectorPtr y )
 
 void
 mv_MultiVectorByMultiVector( mv_MultiVectorPtr x, mv_MultiVectorPtr y,
-                             HYPRE_Int xyGHeight, HYPRE_Int xyHeight,
+                             HYPRE_BigInt xyGHeight, HYPRE_Int xyHeight,
                              HYPRE_Int xyWidth, HYPRE_Real* xy )
 {
    /* xy = x'*y */
@@ -187,7 +187,7 @@ mv_MultiVectorByMultiVectorDiag( mv_MultiVectorPtr x, mv_MultiVectorPtr y,
 
 void
 mv_MultiVectorByMatrix( mv_MultiVectorPtr x,
-                        HYPRE_Int rGHeight, HYPRE_Int rHeight,
+                        HYPRE_BigInt rGHeight, HYPRE_Int rHeight,
                         HYPRE_Int rWidth, HYPRE_Complex* rVal,
                         mv_MultiVectorPtr y )
 {
@@ -201,7 +201,7 @@ mv_MultiVectorByMatrix( mv_MultiVectorPtr x,
 
 void
 mv_MultiVectorXapy( mv_MultiVectorPtr x,
-                    HYPRE_Int rGHeight, HYPRE_Int rHeight,
+                    HYPRE_BigInt rGHeight, HYPRE_Int rHeight,
                     HYPRE_Int rWidth, HYPRE_Complex* rVal,
                     mv_MultiVectorPtr y )
 {
@@ -235,5 +235,3 @@ mv_MultiVectorEval( void (*f)( void*, void*, void* ), void* par,
    hypre_assert( x != NULL && y != NULL );
    (x->interpreter->Eval)( f, par, x->data, y->data );
 }
-
-

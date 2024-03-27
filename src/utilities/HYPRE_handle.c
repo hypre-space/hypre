@@ -49,3 +49,11 @@ HYPRE_SetUseGpuRand( HYPRE_Int use_gpu_rand )
    return hypre_SetUseGpuRand(use_gpu_rand);
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_SetGPUAwareMPI
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SetGpuAwareMPI( HYPRE_Int use_gpu_aware_mpi )
+{
+   return hypre_SetGpuAwareMPI(use_gpu_aware_mpi);
+}

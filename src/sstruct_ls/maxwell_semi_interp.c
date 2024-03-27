@@ -112,16 +112,18 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    HYPRE_Int              nElements_iedges, nFaces_iedges, nEdges_iedges;
    HYPRE_Int              nElements_Faces, nElements_Edges;
 
-   HYPRE_BigInt          *iFace, *iEdge;
+   HYPRE_BigInt          *iFace = NULL, *iEdge;
    HYPRE_BigInt          *jFace_edge;
    HYPRE_BigInt          *jEdge_iedge;
-   HYPRE_BigInt          *jElement_Face, *jedge_Edge;
+   HYPRE_BigInt          *jElement_Face = NULL, *jedge_Edge;
    HYPRE_BigInt          *iElement, *jElement_Edge, *iedgeEdge, *jElement_edge;
 
-   HYPRE_Real            *vals_ElementEdge, *vals_ElementFace, *vals_edgeEdge, *vals_Faceedge;
+   HYPRE_Real            *vals_ElementEdge, *vals_ElementFace = NULL;
+   HYPRE_Real            *vals_edgeEdge, *vals_Faceedge;
    HYPRE_Real            *vals_Elementedge, *vals_Edgeiedge;
-   HYPRE_Int             *ncols_Elementedge, *ncols_Edgeiedge, *ncols_edgeEdge, *ncols_Faceedge;
-   HYPRE_Int             *ncols_ElementFace, *ncols_ElementEdge;
+   HYPRE_Int             *ncols_Elementedge, *ncols_Edgeiedge;
+   HYPRE_Int             *ncols_edgeEdge, *ncols_Faceedge;
+   HYPRE_Int             *ncols_ElementFace = NULL, *ncols_ElementEdge;
    HYPRE_Int             *bdryedge_location;
    HYPRE_Real             fCedge_ratio;
    HYPRE_Real            *stencil_vals, *upper, *lower, *diag, *face_w1, *face_w2;
@@ -138,12 +140,13 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    HYPRE_Int              nparts = hypre_SStructGridNParts(fgrid_element);
    HYPRE_Int              ndim  = hypre_SStructGridNDim(fgrid_element);
 
-   HYPRE_SStructVariable *vartypes, *Edge_vartypes, *Face_vartypes;
+   HYPRE_SStructVariable *vartypes, *Face_vartypes, *Edge_vartypes = NULL;
    hypre_Index           *varoffsets;
    HYPRE_Int             *vartype_map;
    HYPRE_Int              matrix_type = HYPRE_PARCSR;
 
-   HYPRE_Int              nvars, Face_nvars, Edge_nvars, part, var, box, fboxi;
+   HYPRE_Int              nvars, Face_nvars, part, var, box, fboxi;
+   HYPRE_Int              Edge_nvars = 0;
    HYPRE_Int              tot_vars = 8;
 
    HYPRE_Int              t, i, j, k, l, m, n, p;
@@ -172,10 +175,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    hypre_SetIndex3(kshift, 0, 0, 1);
    hypre_ClearIndex(zero_index);
    hypre_ClearIndex(one_index);
-   for (i = 0; i < ndim; i++)
-   {
-      one_index[i] = 1;
-   }
+   hypre_SetIndex(one_index, 1);
+   hypre_SetIndex(lindex, 1);
 
    /* set rfactor[2]= 1 if ndim=2. */
    if (ndim == 2)
@@ -958,14 +959,14 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    {
       if (ndim == 3)
       {
-         p_cgrid      = hypre_SStructGridPGrid(cgrid_edge, part);  /* Edge grid */
-         Edge_nvars   = hypre_SStructPGridNVars(p_cgrid);
+         p_cgrid       = hypre_SStructGridPGrid(cgrid_edge, part);  /* Edge grid */
+         Edge_nvars    = hypre_SStructPGridNVars(p_cgrid);
          Edge_vartypes = hypre_SStructPGridVarTypes(p_cgrid);
       }
       else if (ndim == 2) /* edge is a face in 2-d*/
       {
-         p_cgrid      = hypre_SStructGridPGrid(cgrid_face, part);  /* Face grid */
-         Face_nvars   = hypre_SStructPGridNVars(p_cgrid);
+         p_cgrid       = hypre_SStructGridPGrid(cgrid_face, part);  /* Face grid */
+         Face_nvars    = hypre_SStructPGridNVars(p_cgrid);
          Face_vartypes = hypre_SStructPGridVarTypes(p_cgrid);
       }
 
@@ -3391,6 +3392,10 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                hypre_SetIndex3(hi_index, 1, 1, 0);
                break;
             }
+            default:
+            {
+               fCedge_ratio = 1.0;
+            }
          }
 
          hypre_ForBoxI(i, fboxes)
@@ -4436,7 +4441,10 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   }  /* hypre_ForBoxI(i, fboxes) */
                   break;
                }
-
+               default:
+               {
+                  fCedge_ratio = 1.0;
+               }
             }  /* switch */
          }     /* for (t= 0; t< Edge_nvars; t++) */
 

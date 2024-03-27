@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
    MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
 
    /* Initialize HYPRE */
-   HYPRE_Init();
+   HYPRE_Initialize();
 
    /* Print GPU info */
    /* HYPRE_PrintDeviceInfo(); */

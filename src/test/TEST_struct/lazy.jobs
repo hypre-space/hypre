@@ -1,0 +1,16 @@
+#!/bin/bash
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#=============================================================================
+# Test library lazy initialization (sequential and parallel)
+#=============================================================================
+
+mpirun -np 1 ./struct                         > lazy.out.1.a
+mpirun -np 1 ./struct -lazy_device_init 1     > lazy.out.1.b
+
+mpirun -np 4 ./struct                         > lazy.out.2.a
+mpirun -np 4 ./struct -lazy_device_init 1     > lazy.out.2.b
+

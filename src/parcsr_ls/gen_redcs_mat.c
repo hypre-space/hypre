@@ -19,6 +19,7 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
                    HYPRE_Int         p_level,
                    HYPRE_Int         coarse_threshold)
 {
+   HYPRE_UNUSED_VAR(coarse_threshold);
 
    /* Par Data Structure variables */
    hypre_ParCSRMatrix **Par_A_array = hypre_ParAMGDataAArray(amg_data);
@@ -73,7 +74,7 @@ hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
       HYPRE_Int *info = NULL;
       HYPRE_Int *displs = NULL;
       HYPRE_Int *displs2 = NULL;
-      HYPRE_Int i, j, size, num_nonzeros, total_nnz, cnt;
+      HYPRE_Int i, j, size, num_nonzeros, total_nnz = 0, cnt;
 
       hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
       hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
@@ -492,15 +493,22 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
    return (Solve_err_flag);
 }
 
-/* generate sub communicator, which contains no idle processors */
+/*--------------------------------------------------------------------------
+ * hypre_GenerateSubComm
+ *
+ * generate sub communicator, which contains no idle processors
+ *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_GenerateSubComm(MPI_Comm comm, HYPRE_Int participate, MPI_Comm *new_comm_ptr)
+HYPRE_Int
+hypre_GenerateSubComm(MPI_Comm   comm,
+                      HYPRE_Int  participate,
+                      MPI_Comm  *new_comm_ptr)
 {
-   MPI_Comm new_comm;
-   hypre_MPI_Group orig_group, new_group;
-   hypre_MPI_Op hypre_MPI_MERGE;
-   HYPRE_Int *info, *ranks, new_num_procs, my_info, my_id, num_procs;
-   HYPRE_Int *list_len;
+   MPI_Comm          new_comm;
+   hypre_MPI_Group   orig_group, new_group;
+   hypre_MPI_Op      hypre_MPI_MERGE;
+   HYPRE_Int        *info, *ranks, new_num_procs, my_info, my_id, num_procs;
+   HYPRE_Int        *list_len;
 
    hypre_MPI_Comm_rank(comm, &my_id);
 
@@ -519,7 +527,8 @@ HYPRE_Int hypre_GenerateSubComm(MPI_Comm comm, HYPRE_Int participate, MPI_Comm *
    {
       new_comm = hypre_MPI_COMM_NULL;
       *new_comm_ptr = new_comm;
-      return 0;
+
+      return hypre_error_flag;
    }
 
    ranks = hypre_CTAlloc(HYPRE_Int, new_num_procs + 2, HYPRE_MEMORY_HOST);
@@ -571,13 +580,21 @@ HYPRE_Int hypre_GenerateSubComm(MPI_Comm comm, HYPRE_Int participate, MPI_Comm *
 
    *new_comm_ptr = new_comm;
 
-   return 0;
+   return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_merge_lists
+ *--------------------------------------------------------------------------*/
 
-void hypre_merge_lists (HYPRE_Int *list1, HYPRE_Int* list2, hypre_int *np1,
-                        hypre_MPI_Datatype *dptr)
+void
+hypre_merge_lists(HYPRE_Int          *list1,
+                  HYPRE_Int          *list2,
+                  hypre_int          *np1,
+                  hypre_MPI_Datatype *dptr)
 {
+   HYPRE_UNUSED_VAR(dptr);
+
    HYPRE_Int i, len1, len2, indx1, indx2;
 
    if (list1[0] == 0)

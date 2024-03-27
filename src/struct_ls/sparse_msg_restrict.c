@@ -29,7 +29,7 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_SparseMSGRestrictCreate( )
+hypre_SparseMSGRestrictCreate( void )
 {
    hypre_SparseMSGRestrictData *restrict_data;
 
@@ -54,6 +54,8 @@ hypre_SparseMSGRestrictSetup( void               *restrict_vdata,
                               hypre_Index         stride,
                               hypre_Index         strideR         )
 {
+   HYPRE_UNUSED_VAR(rc);
+
    hypre_SparseMSGRestrictData *restrict_data = (hypre_SparseMSGRestrictData *)restrict_vdata;
 
    hypre_StructGrid       *grid;
@@ -265,4 +267,3 @@ hypre_SparseMSGRestrictDestroy( void *restrict_vdata )
 
    return ierr;
 }
-

@@ -71,7 +71,7 @@ void hypre_SeedRand( HYPRE_Int seed )
  *
  * @return a HYPRE_Int between (0, 2147483647]
  *--------------------------------------------------------------------------*/
-HYPRE_Int hypre_RandI()
+HYPRE_Int hypre_RandI( void )
 {
    HYPRE_Int  low, high, test;
    high = Seed / q;
@@ -96,7 +96,7 @@ HYPRE_Int hypre_RandI()
  * @return a HYPRE_Real containing the next number in the sequence divided by
  * 2147483647 so that the numbers are in (0, 1].
  *--------------------------------------------------------------------------*/
-HYPRE_Real hypre_Rand()
+HYPRE_Real hypre_Rand( void )
 {
    return ((HYPRE_Real)(hypre_RandI()) / (HYPRE_Real)m);
 }

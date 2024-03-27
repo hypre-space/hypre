@@ -18,7 +18,11 @@
 
 typedef struct
 {
-   HYPRE_MemoryLocation  memory_location;   /* memory location of matrices/vectors in AMGData */
+   /* Base solver data structure */
+   hypre_Solver   base;
+
+   /* Memory location of matrices/vectors in AMGData */
+   HYPRE_MemoryLocation  memory_location;
 
    /* setup params */
    HYPRE_Int      max_levels;
@@ -137,6 +141,8 @@ typedef struct
    HYPRE_Real           pi_drop_tol;
    HYPRE_Real           eu_sparse_A;
    char                *euclidfile;
+
+   /* ILU parameters */
    HYPRE_Int            ilu_lfil;
    HYPRE_Int            ilu_type;
    HYPRE_Int            ilu_max_row_nnz;
@@ -146,9 +152,19 @@ typedef struct
    HYPRE_Int            ilu_lower_jacobi_iters;
    HYPRE_Int            ilu_upper_jacobi_iters;
    HYPRE_Int            ilu_reordering_type;
+   HYPRE_Int            ilu_iter_setup_type;
+   HYPRE_Int            ilu_iter_setup_option;
+   HYPRE_Int            ilu_iter_setup_max_iter;
+   HYPRE_Real           ilu_iter_setup_tolerance;
 
+   /* FSAI parameters */
+   HYPRE_Int            fsai_algo_type;
+   HYPRE_Int            fsai_local_solve_type;
    HYPRE_Int            fsai_max_steps;
    HYPRE_Int            fsai_max_step_size;
+   HYPRE_Int            fsai_max_nnz_row;
+   HYPRE_Int            fsai_num_levels;
+   HYPRE_Real           fsai_threshold;
    HYPRE_Int            fsai_eig_max_iters;
    HYPRE_Real           fsai_kap_tolerance;
 
@@ -226,10 +242,14 @@ typedef struct
    MPI_Comm             new_comm;
 
    /* store matrix, vector and communication info for Gaussian elimination */
+   HYPRE_MemoryLocation ge_memory_location;
    HYPRE_Int   gs_setup;
-   HYPRE_Real *A_mat, *A_inv;
-   HYPRE_Real *b_vec;
    HYPRE_Int  *comm_info;
+   HYPRE_Int  *A_piv;
+   HYPRE_Real *A_mat;
+   HYPRE_Real *A_work;
+   HYPRE_Real *b_vec;
+   HYPRE_Real *u_vec;
 
    /* information for multiplication with Lambda - additive AMG */
    HYPRE_Int      additive;
@@ -278,7 +298,6 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 /* setup params */
-
 #define hypre_ParAMGDataMemoryLocation(amg_data)       ((amg_data) -> memory_location)
 #define hypre_ParAMGDataRestriction(amg_data)          ((amg_data) -> restr_par)
 #define hypre_ParAMGDataIsTriangular(amg_data)         ((amg_data) -> is_triangular)
@@ -398,8 +417,17 @@ typedef struct
 #define hypre_ParAMGDataILUUpperJacobiIters(amg_data) ((amg_data)->ilu_upper_jacobi_iters)
 #define hypre_ParAMGDataILUMaxIter(amg_data) ((amg_data)->ilu_max_iter)
 #define hypre_ParAMGDataILULocalReordering(amg_data) ((amg_data)->ilu_reordering_type)
+#define hypre_ParAMGDataILUIterSetupType(amg_data) ((amg_data)->ilu_iter_setup_type)
+#define hypre_ParAMGDataILUIterSetupOption(amg_data) ((amg_data)->ilu_iter_setup_option)
+#define hypre_ParAMGDataILUIterSetupMaxIter(amg_data) ((amg_data)->ilu_iter_setup_max_iter)
+#define hypre_ParAMGDataILUIterSetupTolerance(amg_data) ((amg_data)->ilu_iter_setup_tolerance)
+#define hypre_ParAMGDataFSAIAlgoType(amg_data) ((amg_data)->fsai_algo_type)
+#define hypre_ParAMGDataFSAILocalSolveType(amg_data) ((amg_data)->fsai_local_solve_type)
 #define hypre_ParAMGDataFSAIMaxSteps(amg_data) ((amg_data)->fsai_max_steps)
 #define hypre_ParAMGDataFSAIMaxStepSize(amg_data) ((amg_data)->fsai_max_step_size)
+#define hypre_ParAMGDataFSAIMaxNnzRow(amg_data) ((amg_data)->fsai_max_nnz_row)
+#define hypre_ParAMGDataFSAINumLevels(amg_data) ((amg_data)->fsai_num_levels)
+#define hypre_ParAMGDataFSAIThreshold(amg_data) ((amg_data)->fsai_threshold)
 #define hypre_ParAMGDataFSAIEigMaxIters(amg_data) ((amg_data)->fsai_eig_max_iters)
 #define hypre_ParAMGDataFSAIKapTolerance(amg_data) ((amg_data)->fsai_kap_tolerance)
 
@@ -480,9 +508,12 @@ typedef struct
 #define hypre_ParAMGDataParticipate(amg_data) ((amg_data)->participate)
 
 #define hypre_ParAMGDataGSSetup(amg_data) ((amg_data)->gs_setup)
+#define hypre_ParAMGDataGEMemoryLocation(amg_data) ((amg_data)->ge_memory_location)
 #define hypre_ParAMGDataAMat(amg_data) ((amg_data)->A_mat)
-#define hypre_ParAMGDataAInv(amg_data) ((amg_data)->A_inv)
+#define hypre_ParAMGDataAWork(amg_data) ((amg_data)->A_work)
+#define hypre_ParAMGDataAPiv(amg_data) ((amg_data)->A_piv)
 #define hypre_ParAMGDataBVec(amg_data) ((amg_data)->b_vec)
+#define hypre_ParAMGDataUVec(amg_data) ((amg_data)->u_vec)
 #define hypre_ParAMGDataCommInfo(amg_data) ((amg_data)->comm_info)
 
 /* additive AMG parameters */

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -19,6 +19,8 @@ cat <<EOF
    script is being run from within the hypre 'test' directory, and all of the
    'TEST_*' directories are checked.
 
+   Returns 0 if all tests pass, 1 if any test fails.
+
    Example usage: $0 TEST_struct TEST_ij
 
 EOF
@@ -36,6 +38,7 @@ else
 fi
 $RESET                     # Restore nullglob setting
 
+error_code=0
 echo ""
 for testdir in $testdirs
 do
@@ -47,7 +50,9 @@ do
          SZ=`ls -l $file | awk '{print $5}'`
          if [ $SZ != 0 ]
          then
-            echo "FAILED : $file  ($SZ)"
+            echo -e "FAILED : $file  ($SZ)\n"
+            cat $file
+            error_code=1
          else
             echo "    OK : $file"
          fi
@@ -55,3 +60,4 @@ do
       echo ""
    fi
 done
+exit $error_code

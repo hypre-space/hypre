@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -6,7 +6,7 @@
 
 testname=`basename $0 .sh`
 
-drivers="ij sstruct struct ams_driver maxwell_unscaled sstruct_fac ij_mv struct_migrate"
+drivers="ij sstruct struct ams_driver maxwell_unscaled sstruct_fac ij_mv struct_migrate ij_assembly"
 
 # Echo usage information
 case $1 in

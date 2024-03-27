@@ -27,7 +27,7 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_SemiRestrictCreate( )
+hypre_SemiRestrictCreate( void )
 {
    hypre_SemiRestrictData *restrict_data;
 
@@ -51,6 +51,8 @@ hypre_SemiRestrictSetup( void               *restrict_vdata,
                          hypre_Index         findex,
                          hypre_Index         stride                )
 {
+   HYPRE_UNUSED_VAR(rc);
+
    hypre_SemiRestrictData *restrict_data = (hypre_SemiRestrictData *)restrict_vdata;
 
    hypre_StructGrid       *grid;
@@ -329,4 +331,3 @@ hypre_SemiRestrictDestroy( void *restrict_vdata )
 
    return hypre_error_flag;
 }
-

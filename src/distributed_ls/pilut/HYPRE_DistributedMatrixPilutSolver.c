@@ -208,9 +208,10 @@ HYPRE_Int HYPRE_FreeDistributedMatrixPilutSolver (
  * HYPRE_DistributedMatrixPilutSolverInitialize
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_DistributedMatrixPilutSolverInitialize (
-                  HYPRE_DistributedMatrixPilutSolver solver )
+HYPRE_Int
+HYPRE_DistributedMatrixPilutSolverInitialize( HYPRE_DistributedMatrixPilutSolver solver )
 {
+   HYPRE_UNUSED_VAR(solver);
 
    return(0);
 }

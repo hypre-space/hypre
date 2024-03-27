@@ -56,7 +56,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix      *A,
    HYPRE_Int         *CF_marker_offd = NULL;
    HYPRE_Int         *dof_func_offd = NULL;
 
-   hypre_CSRMatrix   *A_ext;
+   hypre_CSRMatrix   *A_ext = NULL;
 
    HYPRE_Real        *A_ext_data = NULL;
    HYPRE_Int         *A_ext_i = NULL;
@@ -960,7 +960,6 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix      *A,
 
    hypre_GetCommPkgRTFromCommPkgA(P, A, fine_to_coarse, tmp_map_offd);
 
-
    *P_ptr = P;
 
    hypre_TFree(tmp_map_offd, HYPRE_MEMORY_HOST);
@@ -972,12 +971,10 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix      *A,
    hypre_TFree(coarse_counter, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count_offd, HYPRE_MEMORY_HOST);
-
-   if (num_procs > 1) { hypre_CSRMatrixDestroy(A_ext); }
+   hypre_CSRMatrixDestroy(A_ext);
 
    return hypre_error_flag;
 }
-
 
 /*---------------------------------------------------------------------------
  * hypre_BoomerAMGBuildInterpHE
@@ -1029,7 +1026,7 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
    HYPRE_Int          *CF_marker_offd = NULL;
    HYPRE_Int          *dof_func_offd = NULL;
 
-   hypre_CSRMatrix *A_ext;
+   hypre_CSRMatrix *A_ext = NULL;
 
    HYPRE_Real      *A_ext_data = NULL;
    HYPRE_Int       *A_ext_i = NULL;
@@ -1862,11 +1859,7 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
    hypre_TFree(coarse_counter, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count_offd, HYPRE_MEMORY_HOST);
-
-   if (num_procs > 1)
-   {
-      hypre_CSRMatrixDestroy(A_ext);
-   }
+   hypre_CSRMatrixDestroy(A_ext);
 
    return hypre_error_flag;
 }
@@ -2594,34 +2587,29 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
                                HYPRE_Int             interp_type,
                                hypre_ParCSRMatrix  **P_ptr)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_UNUSED_VAR(interp_type);
+
    hypre_GpuProfilingPushRange("DirInterp");
-#endif
 
-   HYPRE_Int ierr = 0;
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      ierr = hypre_BoomerAMGBuildDirInterpDevice(A, CF_marker, S, num_cpts_global, num_functions,
-                                                 dof_func,
-                                                 debug_flag, trunc_factor, max_elmts,
-                                                 interp_type, P_ptr);
+      hypre_BoomerAMGBuildDirInterpDevice(A, CF_marker, S, num_cpts_global, num_functions,
+                                          dof_func, debug_flag, trunc_factor, max_elmts,
+                                          interp_type, P_ptr);
    }
    else
 #endif
    {
-      ierr = hypre_BoomerAMGBuildDirInterpHost(A, CF_marker, S, num_cpts_global, num_functions, dof_func,
-                                               debug_flag, trunc_factor, max_elmts, P_ptr);
+      hypre_BoomerAMGBuildDirInterpHost(A, CF_marker, S, num_cpts_global, num_functions,
+                                        dof_func, debug_flag, trunc_factor, max_elmts, P_ptr);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*------------------------------------------------
@@ -2638,7 +2626,7 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
       return 0;
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(P) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -2699,12 +2687,12 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
 
    hypre_ParCSRMatrix *P;
    HYPRE_BigInt       *col_map_offd_P;
-   HYPRE_Int          *tmp_map_offd;
+   HYPRE_Int          *tmp_map_offd = NULL;
 
    HYPRE_Int          *CF_marker_offd = NULL;
    HYPRE_Int          *dof_func_offd = NULL;
 
-   hypre_CSRMatrix *A_ext;
+   hypre_CSRMatrix *A_ext = NULL;
 
    HYPRE_Real      *A_ext_data = NULL;
    HYPRE_Int       *A_ext_i = NULL;
@@ -3640,11 +3628,9 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
    hypre_TFree(coarse_counter, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
    hypre_TFree(jj_count_offd, HYPRE_MEMORY_HOST);
-
-   if (num_procs > 1) { hypre_CSRMatrixDestroy(A_ext); }
+   hypre_CSRMatrixDestroy(A_ext);
 
    return hypre_error_flag;
-
 }
 
 /*---------------------------------------------------------------------------
@@ -3822,14 +3808,14 @@ hypre_ParCSRMatrix *hypre_CreateC( hypre_ParCSRMatrix  *A,
       C_diag_j[index] = A_diag_j[index];
       if (w == 0)
       {
-         w_local = fabs(A_diag_data[index]);
+         w_local = hypre_abs(A_diag_data[index]);
          for (j = index + 1; j < A_diag_i[i + 1]; j++)
          {
-            w_local += fabs(A_diag_data[j]);
+            w_local += hypre_abs(A_diag_data[j]);
          }
          for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
          {
-            w_local += fabs(A_offd_data[j]);
+            w_local += hypre_abs(A_offd_data[j]);
          }
          invdiag = -1 / w_local;
          C_diag_data[index] = 1.0 - A_diag_data[index] / w_local;
@@ -3864,6 +3850,8 @@ hypre_BoomerAMGBuildInterpOnePntHost( hypre_ParCSRMatrix  *A,
                                       HYPRE_Int            debug_flag,
                                       hypre_ParCSRMatrix **P_ptr)
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
@@ -4061,7 +4049,7 @@ hypre_BoomerAMGBuildInterpOnePntHost( hypre_ParCSRMatrix  *A,
       for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
       {
          i1 = A_diag_j[j];
-         vv = fabs(A_diag_data[j]);
+         vv = hypre_abs(A_diag_data[j]);
 #if 0
          /* !!! this is a hack just for code verification purpose !!!
             it basically says:
@@ -4098,7 +4086,7 @@ hypre_BoomerAMGBuildInterpOnePntHost( hypre_ParCSRMatrix  *A,
          for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
          {
             i1 = A_offd_j[j];
-            vv = fabs(A_offd_data[j]);
+            vv = hypre_abs(A_offd_data[j]);
             if (CF_marker_offd[i1] >= 0 && marker_offd[i1] == MARK && vv > max_abs_aij)
             {
                /* mark it as an 'o' */
@@ -4305,13 +4293,11 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
                                   HYPRE_Int            debug_flag,
                                   hypre_ParCSRMatrix **P_ptr)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("OnePntInterp");
-#endif
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
@@ -4326,9 +4312,7 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
                                                   dof_func, debug_flag, P_ptr);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }

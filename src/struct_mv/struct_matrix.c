@@ -712,7 +712,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
    hypre_Box           *int_box;
    hypre_Index          center_index;
    hypre_StructStencil *stencil;
-   HYPRE_Int            center_rank;
+   HYPRE_Int            center_rank = 0;
 
    HYPRE_Int           *symm_elements;
    hypre_BoxArray      *data_space;
@@ -788,11 +788,11 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
          hypre_CopyIndex(data_start, dval_start);
          hypre_IndexD(dval_start, 0) *= num_stencil_indices;
 
-         if ( constant_coefficient == 2 )
+         if (constant_coefficient == 2)
          {
             hypre_SetIndex(center_index, 0);
             stencil = hypre_StructMatrixStencil(matrix);
-            center_rank = hypre_StructStencilElementRank( stencil, center_index );
+            center_rank = hypre_StructStencilElementRank(stencil, center_index);
          }
 
          for (s = 0; s < num_stencil_indices; s++)

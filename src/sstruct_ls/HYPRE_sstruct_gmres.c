@@ -14,6 +14,8 @@ HYPRE_Int
 HYPRE_SStructGMRESCreate( MPI_Comm             comm,
                           HYPRE_SStructSolver *solver )
 {
+   HYPRE_UNUSED_VAR(comm);
+
    hypre_GMRESFunctions * gmres_functions =
       hypre_GMRESFunctionsCreate(
          hypre_SStructKrylovCAlloc, hypre_SStructKrylovFree, hypre_SStructKrylovCommInfo,

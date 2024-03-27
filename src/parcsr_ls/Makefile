@@ -20,6 +20,7 @@ C_COMPILE_FLAGS =\
  -I$(srcdir)/../utilities\
  -I$(srcdir)/../krylov\
  -I$(srcdir)/../seq_mv\
+ -I$(srcdir)/../seq_block_mv\
  -I$(srcdir)/../parcsr_mv\
  -I$(srcdir)/../distributed_matrix\
  -I$(srcdir)/../matrix_matrix\
@@ -114,6 +115,8 @@ FILES =\
  par_interp.c\
  par_jacobi_interp.c\
  par_krylov_func.c\
+ par_ilu.c\
+ par_ilu_setup.c \
  par_mod_lr_interp.c\
  par_multi_interp.c\
  par_mod_multi_interp.c\
@@ -122,8 +125,11 @@ FILES =\
  par_laplace_9pt.c\
  par_lr_interp.c\
  par_mgr.c\
+ par_mgr_coarsen.c\
+ par_mgr_interp.c\
  par_mgr_setup.c\
  par_mgr_solve.c\
+ par_mgr_stats.c\
  par_nongalerkin.c\
  par_nodal_systems.c\
  par_rap.c\
@@ -144,16 +150,16 @@ FILES =\
  schwarz.c\
  block_tridiag.c\
  par_restr.c\
- par_lr_restr.c\
- dsuperlu.c
+ par_lr_restr.c
 
 CUFILES =\
  ads.c\
  ams.c\
  ame.c\
+ dsuperlu.c\
  par_amg_setup.c\
- par_ilu.c\
- par_ilu_setup.c \
+ par_ge_device.c\
+ par_ilu_setup_device.c\
  par_ilu_solve_device.c\
  par_ilu_solve.c \
  par_cheby_device.c\
@@ -171,7 +177,8 @@ CUFILES =\
  par_2s_interp_device.c\
  par_relax_device.c\
  par_mod_multi_interp_device.c\
- par_mgr_device.c
+ par_mgr_device.c\
+ par_fsai_device.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}

@@ -9,7 +9,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 #if defined(HYPRE_USING_SYCL)
 template<typename T>
@@ -250,9 +250,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *dof_func_offd = NULL;
    HYPRE_Real      *row_sums = NULL;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("Section1");
-#endif
 
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -385,9 +383,12 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                          int_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+#if defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
-      hypre_ForceSyncComputeStream(hypre_handle());
+      if (hypre_GetGpuAwareMPI())
+      {
+         hypre_ForceSyncComputeStream(hypre_handle());
+      }
 #endif
 
       dof_func_offd = hypre_TAlloc(HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_DEVICE);
@@ -420,9 +421,12 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                          int_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+#if defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
-      hypre_ForceSyncComputeStream(hypre_handle());
+      if (hypre_GetGpuAwareMPI())
+      {
+         hypre_ForceSyncComputeStream(hypre_handle());
+      }
 #endif
 
       /* allocate one more see comments in hypre_modmp_compute_num_cols_offd_fine_to_coarse */
@@ -442,13 +446,9 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    remaining_big = remaining;
    hypre_MPI_Allreduce(&remaining_big, &global_remaining, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("Section2");
-#endif
 
    HYPRE_Int *points_left_old = hypre_TAlloc(HYPRE_Int, remaining, HYPRE_MEMORY_DEVICE);
    HYPRE_Int *diag_shifts     = hypre_TAlloc(HYPRE_Int, remaining, HYPRE_MEMORY_DEVICE);
@@ -578,9 +578,12 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                             int_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+#if defined(HYPRE_USING_THRUST_NOSYNC)
          /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
-         hypre_ForceSyncComputeStream(hypre_handle());
+         if (hypre_GetGpuAwareMPI())
+         {
+            hypre_ForceSyncComputeStream(hypre_handle());
+         }
 #endif
 
          /* create a handle to start communication. 11: for integer */
@@ -628,13 +631,9 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                         row_sums );
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("MultipassPiDevice");
-#endif
 
    Pi = hypre_CTAlloc(hypre_ParCSRMatrix*, num_passes, HYPRE_MEMORY_HOST);
 
@@ -642,17 +641,13 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                    pass_marker, pass_marker_offd,
                                    pass_starts[2] - pass_starts[1], 1, row_sums, &Pi[0]);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    if (interp_type == 8)
    {
       for (i = 1; i < num_passes - 1; i++)
       {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          hypre_GpuProfilingPushRange(std::string("MultipassPiDevice Loop" + std::to_string(i)).c_str());
-#endif
 
          hypre_ParCSRMatrix *Q;
          HYPRE_BigInt *c_pts_starts = hypre_ParCSRMatrixRowStarts(Pi[i - 1]);
@@ -661,9 +656,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                          pass_marker, pass_marker_offd,
                                          pass_starts[i + 2] - pass_starts[i + 1], i + 1, row_sums, &Q);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          hypre_GpuProfilingPopRange();
-#endif
          Pi[i] = hypre_ParCSRMatMat(Q, Pi[i - 1]);
 
          hypre_ParCSRMatrixDestroy(Q);
@@ -673,9 +666,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    {
       for (i = 1; i < num_passes - 1; i++)
       {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          hypre_GpuProfilingPushRange(std::string("MultiPiDevice Loop" + std::to_string(i)).c_str());
-#endif
          HYPRE_BigInt *c_pts_starts = hypre_ParCSRMatrixRowStarts(Pi[i - 1]);
 
          hypre_GenerateMultiPiDevice(A, S, Pi[i - 1], c_pts_starts, &pass_order[pass_starts[i + 1]],
@@ -683,15 +674,11 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                      pass_starts[i + 2] - pass_starts[i + 1], i + 1,
                                      num_functions, dof_func, dof_func_offd, &Pi[i] );
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          hypre_GpuProfilingPopRange();
-#endif
       }
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("Section3");
-#endif
 
    // We don't need the row sums anymore
    hypre_TFree(row_sums, HYPRE_MEMORY_DEVICE);
@@ -866,17 +853,13 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       P_offd_size = hypre_CSRMatrixNumNonzeros(P_offd);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    num_cols_offd_P = 0;
 
    if (P_offd_size)
    {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       hypre_GpuProfilingPushRange("Section4");
-#endif
 
       HYPRE_BigInt *big_P_offd_j = hypre_TAlloc(HYPRE_BigInt, P_offd_size, HYPRE_MEMORY_DEVICE);
 
@@ -952,14 +935,10 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
       hypre_TFree(big_P_offd_j, HYPRE_MEMORY_DEVICE);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       hypre_GpuProfilingPopRange();
-#endif
    } // if (P_offd_size)
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("Section5");
-#endif
 
    hypre_ParCSRMatrixColMapOffd(P)       = col_map_offd_P_host;
    hypre_ParCSRMatrixDeviceColMapOffd(P) = col_map_offd_P;
@@ -999,9 +978,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
 
    *P_ptr = P;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return hypre_error_flag;
 }
@@ -1128,9 +1105,12 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
                          big_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+#if defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure big_buf_data is ready before issuing GPU-GPU MPI */
-      hypre_ForceSyncComputeStream(hypre_handle());
+      if (hypre_GetGpuAwareMPI())
+      {
+         hypre_ForceSyncComputeStream(hypre_handle());
+      }
 #endif
 
       comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg, HYPRE_MEMORY_DEVICE, big_buf_data,
@@ -1424,9 +1404,12 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
                          big_buf_data );
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && THRUST_CALL_BLOCKING == 0
+#if defined(HYPRE_USING_THRUST_NOSYNC)
       /* RL: make sure big_buf_data is ready before issuing GPU-GPU MPI */
-      hypre_ForceSyncComputeStream(hypre_handle());
+      if (hypre_GetGpuAwareMPI())
+      {
+         hypre_ForceSyncComputeStream(hypre_handle());
+      }
 #endif
 
       comm_handle = hypre_ParCSRCommHandleCreate_v2(21, comm_pkg, HYPRE_MEMORY_DEVICE, big_buf_data,
@@ -2529,4 +2512,4 @@ void hypreGPUKernel_populate_big_P_offd_j( hypre_DeviceItem   &item,
    }
 }
 
-#endif // defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#endif // defined(HYPRE_USING_GPU)

@@ -15,7 +15,7 @@
 /* #include "Parser_dh.h" */
 /* #include "Mem_dh.h" */
 /* #include "TimeLog_dh.h" */
-extern void sigRegister_dh(); /* use sig_dh.h if not for euclid_signals_len */
+extern void sigRegister_dh(void); /* use sig_dh.h if not for euclid_signals_len */
 
 /*-------------------------------------------------------------------------
  * Globally scoped variables, flags, and objects
@@ -38,7 +38,7 @@ MPI_Comm    comm_dh = 0;
    */
 
 void openLogfile_dh(HYPRE_Int argc, char *argv[]);
-void closeLogfile_dh();
+void closeLogfile_dh(void);
 bool logInfoToStderr  = false;
 bool logInfoToFile    = true;
 bool logFuncsToStderr = false;
@@ -102,7 +102,7 @@ void  openLogfile_dh(HYPRE_Int argc, char *argv[])
   }
 }
 
-void  closeLogfile_dh()
+void  closeLogfile_dh(void)
 {
   if (logFile != NULL) {
     if (fclose(logFile)) {
@@ -149,6 +149,8 @@ void dh_StartFunc(const char *function,const char *file, HYPRE_Int line, HYPRE_I
 
 void dh_EndFunc(const char *function, HYPRE_Int priority)
 {
+  HYPRE_UNUSED_VAR(function);
+
   if (priority == 1) {
     --calling_stack_count;
 
@@ -251,6 +253,8 @@ void Error_dhStartFunc(char *function, char *file, HYPRE_Int line)
 
 void Error_dhEndFunc(char *function)
 {
+  HYPRE_UNUSED_VAR(function);
+
   nesting -= 1;
   if (nesting < 0) nesting = 0;
   spaces[INDENT_DH*nesting] = '\0';
@@ -264,7 +268,7 @@ static bool EuclidIsActive = false;
 
 #undef __FUNC__
 #define __FUNC__ "EuclidIsInitialized"
-bool EuclidIsInitialized()
+bool EuclidIsInitialized(void)
 {
   return EuclidIsActive;
 }
@@ -304,7 +308,7 @@ void EuclidInitialize(HYPRE_Int argc, char *argv[], char *help)
 /* to do: should restore the signal handler that we preempted above! */
 #undef __FUNC__
 #define __FUNC__ "EuclidFinalize"
-void EuclidFinalize()
+void EuclidFinalize(void)
 {
   if (ref_counter) return;
 

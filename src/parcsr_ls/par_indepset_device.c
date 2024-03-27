@@ -12,7 +12,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 __global__ void
 hypreGPUKernel_IndepSetMain(hypre_DeviceItem &item,
                             HYPRE_Int   graph_diag_size,
@@ -163,7 +163,7 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
    /*------------------------------------------------------------------
     * Initialize IS_marker by putting all nodes in the IS (marked by 1)
     *------------------------------------------------------------------*/
-   hypreDevice_ScatterConstant(IS_marker_diag, graph_diag_size, graph_diag, 1);
+   hypreDevice_ScatterConstant(IS_marker_diag, graph_diag_size, graph_diag, (HYPRE_Int) 1);
 
    /*-------------------------------------------------------
     * Remove nodes from the initial independent set
@@ -179,10 +179,11 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
    /*--------------------------------------------------------------------
     * Exchange boundary data for IS_marker: send external IS to internal
     *-------------------------------------------------------------------*/
-#if defined(HYPRE_WITH_GPU_AWARE_MPI)
    /* RL: make sure IS_marker_offd is ready before issuing GPU-GPU MPI */
-   hypre_ForceSyncComputeStream(hypre_handle());
-#endif
+   if (hypre_GetGpuAwareMPI())
+   {
+      hypre_ForceSyncComputeStream(hypre_handle());
+   }
 
    comm_handle = hypre_ParCSRCommHandleCreate_v2(12, comm_pkg,
                                                  HYPRE_MEMORY_DEVICE, IS_marker_offd,
@@ -252,4 +253,4 @@ hypre_BoomerAMGIndepSetInitDevice( hypre_ParCSRMatrix *S,
    return hypre_error_flag;
 }
 
-#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#endif // #if defined(HYPRE_USING_GPU)

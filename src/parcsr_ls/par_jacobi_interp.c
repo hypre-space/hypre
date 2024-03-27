@@ -74,6 +74,9 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
 
 */
 {
+   HYPRE_UNUSED_VAR(S);
+   HYPRE_UNUSED_VAR(level);
+
    hypre_ParCSRMatrix * Pnew;
    hypre_ParCSRMatrix * C;
    hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(*P);
@@ -90,9 +93,12 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    HYPRE_Int   num_rows_diag_P = hypre_CSRMatrixNumRows(P_diag);
    HYPRE_Int i;
    /*HYPRE_Int Jnochanges=0, Jchanges, Pnew_num_nonzeros*/;
+#ifdef HYPRE_JACINT_PRINT_DIAGNOSTICS
    HYPRE_Int CF_coarse = 0;
+   HYPRE_Int nc1;
+#endif
    HYPRE_Int * J_marker = hypre_CTAlloc( HYPRE_Int,  num_rows_diag_P, HYPRE_MEMORY_HOST);
-   HYPRE_Int nc, ncmax, ncmin, nc1;
+   HYPRE_Int nc, ncmax, ncmin;
    HYPRE_Int num_procs, my_id;
    MPI_Comm comm = hypre_ParCSRMatrixComm( A );
 #ifdef HYPRE_JACINT_PRINT_ROW_SUMS
@@ -117,7 +123,9 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    for ( i = 0; i < num_rows_diag_P; ++i )
    {
       J_marker[i] = CF_marker[i];
+#ifdef HYPRE_JACINT_PRINT_DIAGNOSTICS
       if (CF_marker[i] >= 0) { ++CF_coarse; }
+#endif
    }
 #ifdef HYPRE_JACINT_PRINT_DIAGNOSTICS
    hypre_printf("%i %i Jacobi_Interp_1, P has %i+%i=%i nonzeros, local sum %e\n", my_id, level,
@@ -154,15 +162,20 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    hypre_printf("%i %i P in max,min row sums %e %e\n", my_id, level, PIimax, PIimin );
 #endif
 
-   ncmax = 0; ncmin = num_rows_diag_P; nc1 = 0;
+   ncmax = 0; ncmin = num_rows_diag_P;
+#ifdef HYPRE_JACINT_PRINT_DIAGNOSTICS
+   nc1 = 0;
+#endif
    for ( i = 0; i < num_rows_diag_P; ++i )
       if (CF_marker[i] < 0)
       {
          nc = P_diag_i[i + 1] - P_diag_i[i];
+#ifdef HYPRE_JACINT_PRINT_DIAGNOSTICS
          if (nc <= 1)
          {
             ++nc1;
          }
+#endif
          ncmax = hypre_max( nc, ncmax );
          ncmin = hypre_min( nc, ncmin );
       }
@@ -344,12 +357,17 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    }
    hypre_printf("\n");
 #endif
-   ncmax = 0; ncmin = num_rows_diag_P; nc1 = 0;
+   ncmax = 0; ncmin = num_rows_diag_P;
+#ifdef HYPRE_JACINT_PRINT_DIAGNOSTICS
+   nc1 = 0;
+#endif
    for ( i = 0; i < num_rows_diag_P; ++i )
       if (CF_marker[i] < 0)
       {
          nc = P_diag_i[i + 1] - P_diag_i[i];
+#ifdef HYPRE_JACINT_PRINT_DIAGNOSTICS
          if (nc <= 1) { ++nc1; }
+#endif
          ncmax = hypre_max( nc, ncmax );
          ncmin = hypre_min( nc, ncmin );
       }

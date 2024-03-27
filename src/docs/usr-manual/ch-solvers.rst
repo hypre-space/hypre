@@ -32,7 +32,7 @@ interfaces:
    MGR                                        X
    FSAI                                       X
    ParaSails                X        X        X
-   hypre-ILU                                  X
+   ILU                                        X
    Euclid                   X        X        X
    PILUT                    X        X        X
    PCG             X        X        X        X
@@ -76,8 +76,8 @@ side. We comment later on considerations for other usage patterns.
    parameters depend on the problem to be solved. We give recommendations in the
    individual sections on how to choose these parameters.  Note that in hypre,
    convergence criteria can be chosen after the preconditioner/solver has been
-   setup.  For a complete set of all available parameters see the Reference
-   Manual.
+   setup.  For a complete set of all available parameters see Chapter
+   :ref:`ch-API`.
 
 #. **Pass the preconditioner to the solver.** For solvers that are not
    preconditioned, this step is omitted.  The preconditioner is passed through
@@ -137,7 +137,7 @@ In the following sections, we will give brief descriptions of the available
 hypre solvers with some suggestions on how to choose the parameters as well as
 references for users who are interested in a more detailed description and
 analysis of the solvers.  A complete list of all routines that are available can
-be found in the reference manual.
+be found in Chapter :ref:`ch-API`.
 
 
 .. toctree::
@@ -155,7 +155,7 @@ be found in the reference manual.
    solvers-mgr
    solvers-fsai
    solvers-parasails
-   solvers-hypre-ilu
+   solvers-ilu
    solvers-euclid
    solvers-pilut
    solvers-lobpcg

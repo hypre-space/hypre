@@ -15,7 +15,7 @@
 #include "_hypre_IJ_mv.h"
 #include "_hypre_utilities.hpp"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) || defined(HYPRE_USING_SYCL)
+#if defined(HYPRE_USING_GPU)
 
 __global__ void
 hypreGPUKernel_IJMatrixValues_dev1(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Int *rowind,
@@ -101,9 +101,9 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       hypre_IJMatrixTranslator(matrix) = aux_matrix;
    }
 
-   HYPRE_Int      stack_elmts_max      = hypre_AuxParCSRMatrixMaxStackElmts(aux_matrix);
-   HYPRE_Int      stack_elmts_current  = hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix);
-   HYPRE_Int      stack_elmts_required = stack_elmts_current + nelms;
+   HYPRE_BigInt   stack_elmts_max      = hypre_AuxParCSRMatrixMaxStackElmts(aux_matrix);
+   HYPRE_BigInt   stack_elmts_current  = hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix);
+   HYPRE_BigInt   stack_elmts_required = stack_elmts_current + (HYPRE_BigInt) nelms;
    HYPRE_BigInt  *stack_i              = hypre_AuxParCSRMatrixStackI(aux_matrix);
    HYPRE_BigInt  *stack_j              = hypre_AuxParCSRMatrixStackJ(aux_matrix);
    HYPRE_Complex *stack_data           = hypre_AuxParCSRMatrixStackData(aux_matrix);
@@ -111,8 +111,10 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
 
    if ( stack_elmts_max < stack_elmts_required )
    {
-      HYPRE_Int stack_elmts_max_new = hypre_max(hypre_AuxParCSRMatrixUsrOnProcElmts (aux_matrix), 0) +
-                                      hypre_max(hypre_AuxParCSRMatrixUsrOffProcElmts(aux_matrix), 0);
+      HYPRE_BigInt stack_elmts_max_new =
+         hypre_max(hypre_AuxParCSRMatrixUsrOnProcElmts (aux_matrix), 0) +
+         hypre_max(hypre_AuxParCSRMatrixUsrOffProcElmts(aux_matrix), 0);
+
       if ( hypre_AuxParCSRMatrixUsrOnProcElmts (aux_matrix) < 0 ||
            hypre_AuxParCSRMatrixUsrOffProcElmts(aux_matrix) < 0 )
       {
@@ -205,7 +207,7 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
                     HYPRE_MEMORY_DEVICE);
    }
 
-   hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix) += nelms;
+   hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix) += (HYPRE_BigInt) nelms;
 
    hypre_TFree(row_ptr, HYPRE_MEMORY_DEVICE);
 
@@ -273,8 +275,8 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    /*     but I can't get that to work for some reason */
    HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::transform,
-                      oneapi::dpl::counting_iterator(0),
-                      oneapi::dpl::counting_iterator(N0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(N0),
                       reverse_perm,
    [N0] (auto i) { return N0 - i - 1; });
 
@@ -298,8 +300,8 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
                           A0 + N0,
                           X,
                           A0,
-   [] (const auto & x) {return x;},
-   [] (const auto & x) {return 0.0;} );
+   [] (const auto & x) {return 0.0;},
+   [] (const auto & x) {return x;} );
 
    auto I0_J0_zip = oneapi::dpl::make_zip_iterator(I0, J0);
    auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
@@ -444,8 +446,8 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    /*     but I can't get that to work for some reason */
    HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::transform,
-                      oneapi::dpl::counting_iterator(0),
-                      oneapi::dpl::counting_iterator(N0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
+                      oneapi::dpl::counting_iterator<HYPRE_Int>(N0),
                       reverse_perm,
    [N0] (auto i) { return N0 - i - 1; });
 
@@ -467,8 +469,8 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
                           A0 + N0,
                           X0,
                           A0,
-   [] (const auto & x) {return x;},
-   [] (const auto & x) {return 0.0;} );
+   [] (const auto & x) {return 0.0;},
+   [] (const auto & x) {return x;} );
 
    auto I0_J0_zip = oneapi::dpl::make_zip_iterator(I0, J0);
 
@@ -577,6 +579,7 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
    HYPRE_BigInt row_end   = row_partitioning[1];
    HYPRE_BigInt col_start = col_partitioning[0];
    HYPRE_BigInt col_end   = col_partitioning[1];
+   HYPRE_BigInt col_first = hypre_IJMatrixGlobalFirstCol(matrix);
    HYPRE_Int nrows = row_end - row_start;
    HYPRE_Int ncols = col_end - col_start;
 
@@ -628,7 +631,6 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
 
 #if defined(HYPRE_USING_SYCL)
          HYPRE_ONEDPL_CALL(std::transform, stack_i, stack_i + nelms, is_on_proc, pred);
-         /* WM: HERE */
          auto zip_in = oneapi::dpl::make_zip_iterator(stack_i, stack_j, stack_data, stack_sora);
          auto zip_out = oneapi::dpl::make_zip_iterator(off_proc_i, off_proc_j, off_proc_data, off_proc_sora);
          auto new_end1 = hypreSycl_copy_if( zip_in,         /* first */
@@ -742,6 +744,24 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
                          _1 - row_start );
 #endif
 
+      /* adjust col indices wrt the global first index */
+      if (col_first)
+      {
+#if defined(HYPRE_USING_SYCL)
+         HYPRE_ONEDPL_CALL( std::transform,
+                            new_j,
+                            new_j + new_nnz,
+                            new_j,
+         [col_first = col_first] (const auto & x) {return x - col_first;} );
+#else
+         HYPRE_THRUST_CALL( transform,
+                            new_j,
+                            new_j + new_nnz,
+                            new_j,
+                            _1 - col_first );
+#endif
+      }
+
       hypre_TFree(new_i, HYPRE_MEMORY_DEVICE);
 
       HYPRE_Int      num_cols_offd_new;
@@ -768,9 +788,9 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
                                        new_j,
                                        NULL,
                                        NULL,
-                                       col_start,
-                                       col_end - 1,
-                                       hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(par_matrix)),
+                                       col_start - col_first,
+                                       col_end - col_first - 1,
+                                       -1,
                                        NULL,
                                        NULL,
                                        NULL,
@@ -816,8 +836,8 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
                                        new_j,
                                        new_data,
                                        diag_nnz_existed || offd_nnz_existed ? new_sora : NULL,
-                                       col_start,
-                                       col_end - 1,
+                                       col_start - col_first,
+                                       col_end - col_first - 1,
                                        hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(par_matrix)),
                                        hypre_ParCSRMatrixDeviceColMapOffd(par_matrix),
                                        &col_map_offd_map,

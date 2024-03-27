@@ -38,7 +38,7 @@ hypre_MPI_Init( hypre_int   *argc,
 }
 
 HYPRE_Int
-hypre_MPI_Finalize( )
+hypre_MPI_Finalize( void )
 {
    return (0);
 }
@@ -51,13 +51,13 @@ hypre_MPI_Abort( hypre_MPI_Comm comm,
 }
 
 HYPRE_Real
-hypre_MPI_Wtime( )
+hypre_MPI_Wtime( void )
 {
    return (0.0);
 }
 
 HYPRE_Real
-hypre_MPI_Wtick( )
+hypre_MPI_Wtick( void )
 {
    return (0.0);
 }
@@ -767,7 +767,7 @@ hypre_MPI_Init( hypre_int   *argc,
 }
 
 HYPRE_Int
-hypre_MPI_Finalize( )
+hypre_MPI_Finalize( void )
 {
    return (HYPRE_Int) MPI_Finalize();
 }
@@ -780,15 +780,15 @@ hypre_MPI_Abort( hypre_MPI_Comm comm,
 }
 
 HYPRE_Real
-hypre_MPI_Wtime( )
+hypre_MPI_Wtime( void )
 {
-   return MPI_Wtime();
+   return (HYPRE_Real)MPI_Wtime();
 }
 
 HYPRE_Real
-hypre_MPI_Wtick( )
+hypre_MPI_Wtick( void )
 {
-   return MPI_Wtick();
+   return (HYPRE_Real)MPI_Wtick();
 }
 
 HYPRE_Int
@@ -1267,16 +1267,12 @@ hypre_MPI_Allreduce( void              *sendbuf,
                      hypre_MPI_Op       op,
                      hypre_MPI_Comm     comm )
 {
-#if defined(HYPRE_USING_NVTX)
    hypre_GpuProfilingPushRange("MPI_Allreduce");
-#endif
 
    HYPRE_Int result = MPI_Allreduce(sendbuf, recvbuf, (hypre_int)count,
                                     datatype, op, comm);
 
-#if defined(HYPRE_USING_NVTX)
    hypre_GpuProfilingPopRange();
-#endif
 
    return result;
 }
@@ -1403,7 +1399,7 @@ hypre_MPI_Op_create( hypre_MPI_User_function *function, hypre_int commute, hypre
    return (HYPRE_Int) MPI_Op_create(function, commute, op);
 }
 
-#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int
 hypre_MPI_Comm_split_type( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
                            hypre_MPI_Info info, hypre_MPI_Comm *newcomm )

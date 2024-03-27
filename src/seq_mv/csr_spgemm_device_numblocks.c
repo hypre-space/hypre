@@ -1,12 +1,13 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
+
 #include "seq_mv.h"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 
 #include "csr_spgemm_device.h"
 
@@ -26,6 +27,12 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetBlockNumDim()
 #if defined(HYPRE_USING_HIP)
    hipDeviceGetAttribute(&multiProcessorCount, hipDeviceAttributeMultiprocessorCount,
                          hypre_HandleDevice(hypre_handle()));
+#endif
+
+#if defined(HYPRE_USING_SYCL)
+   /* WM: todo - is this right? */
+   multiProcessorCount = hypre_HandleDevice(
+                            hypre_handle())->get_info<sycl::info::device::max_compute_units>();
 #endif
 
    typedef HYPRE_Int arrType[4][HYPRE_SPGEMM_MAX_NBIN + 1];
@@ -138,5 +145,4 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetBlockNumDim()
    return hypre_error_flag;
 }
 
-#endif /* HYPRE_USING_CUDA  || defined(HYPRE_USING_HIP) */
-
+#endif /* defined(HYPRE_USING_GPU) */

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 1998-2019 Lawrence Livermore National Security, LLC and other
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
  *
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -275,14 +275,14 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
    * Initialize : must be the first HYPRE function to call
    *-----------------------------------------------------------*/
-   HYPRE_Init();
+   HYPRE_Initialize();
 
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Hypre init times", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
 
-   /* To be effective, hypre_SetCubMemPoolSize must immediately follow HYPRE_Init */
+   /* To be effective, hypre_SetCubMemPoolSize must immediately follow HYPRE_Initialize */
    hypre_SetCubMemPoolSize( mempool_bin_growth, mempool_min_bin,
                             mempool_max_bin, mempool_max_cached_bytes );
 
@@ -1168,5 +1168,3 @@ BuildParFromFile( HYPRE_Int                  argc,
 
    return (0);
 }
-
-

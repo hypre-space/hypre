@@ -653,7 +653,7 @@ main( HYPRE_Int   argc,
       else if ( strcmp(argv[arg_index], "-dt") == 0 )
       {
          arg_index++;
-         dt = atof(argv[arg_index++]);
+         dt = (HYPRE_Real)atof(argv[arg_index++]);
          build_rhs_type = -1;
          if ( build_src_type == -1 ) { build_src_type = 2; }
       }
@@ -732,7 +732,7 @@ main( HYPRE_Int   argc,
       {
          /* lobpcg: inner pcg iterations */
          arg_index++;
-         pcgTol = atof(argv[arg_index++]);
+         pcgTol = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-pcgmode") == 0 )
       {
@@ -922,7 +922,7 @@ main( HYPRE_Int   argc,
          if (solver_id == HYPRE_BOOMERAMG || solver_id == HYPRE_GSMG ||
              (solver_id == HYPRE_HYBRID && precond_id == HYPRE_BOOMERAMG))
          {
-            relax_weight[0] = atof(argv[arg_index++]);
+            relax_weight[0] = (HYPRE_Real)atof(argv[arg_index++]);
             for (i = 1; i < max_levels; i++)
             {
                relax_weight[i] = relax_weight[0];
@@ -935,7 +935,7 @@ main( HYPRE_Int   argc,
          if (solver_id == HYPRE_BOOMERAMG || solver_id == HYPRE_GSMG ||
              (solver_id == HYPRE_HYBRID && precond_id == HYPRE_BOOMERAMG))
          {
-            omega[0] = atof(argv[arg_index++]);
+            omega[0] = (HYPRE_Real)atof(argv[arg_index++]);
             for (i = 1; i < max_levels; i++)
             {
                omega[i] = omega[0];
@@ -945,42 +945,42 @@ main( HYPRE_Int   argc,
       else if ( strcmp(argv[arg_index], "-sw") == 0 )
       {
          arg_index++;
-         schwarz_rlx_weight = atof(argv[arg_index++]);
+         schwarz_rlx_weight = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-th") == 0 )
       {
          arg_index++;
-         strong_threshold  = atof(argv[arg_index++]);
+         strong_threshold  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-cf") == 0 )
       {
          arg_index++;
-         cf_tol  = atof(argv[arg_index++]);
+         cf_tol  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-tol") == 0 )
       {
          arg_index++;
-         tol  = atof(argv[arg_index++]);
+         tol  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-mxrs") == 0 )
       {
          arg_index++;
-         max_row_sum  = atof(argv[arg_index++]);
+         max_row_sum  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-sai_th") == 0 )
       {
          arg_index++;
-         sai_threshold  = atof(argv[arg_index++]);
+         sai_threshold  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-sai_filt") == 0 )
       {
          arg_index++;
-         sai_filter  = atof(argv[arg_index++]);
+         sai_filter  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-drop_tol") == 0 )
       {
          arg_index++;
-         drop_tol  = atof(argv[arg_index++]);
+         drop_tol  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-nonzeros_to_keep") == 0 )
       {
@@ -990,7 +990,7 @@ main( HYPRE_Int   argc,
       else if ( strcmp(argv[arg_index], "-tr") == 0 )
       {
          arg_index++;
-         trunc_factor  = atof(argv[arg_index++]);
+         trunc_factor  = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-solver_type") == 0 )
       {
@@ -1621,7 +1621,7 @@ main( HYPRE_Int   argc,
 
       HYPRE_ParVectorSetRandomValues(b, 22775);
       HYPRE_ParVectorInnerProd(b, b, &norm);
-      norm = 1. / sqrt(norm);
+      norm = 1. / hypre_sqrt(norm);
       ierr = HYPRE_ParVectorScale(norm, b);
 
       /* Initial guess */
@@ -2258,7 +2258,7 @@ main( HYPRE_Int   argc,
 
          HYPRE_EuclidCreate(hypre_MPI_COMM_WORLD, &pcg_precond);
 
-         /* note: There are three three methods of setting run-time
+         /* note: There are three methods of setting run-time
             parameters for Euclid: (see HYPRE_parcsr_ls.h); here
             we'll use what I think is simplest: let Euclid internally
             parse the command line.
@@ -2650,7 +2650,7 @@ main( HYPRE_Int   argc,
 
             HYPRE_EuclidCreate(hypre_MPI_COMM_WORLD, &pcg_precond);
 
-            /* note: There are three three methods of setting run-time
+            /* note: There are three methods of setting run-time
                parameters for Euclid: (see HYPRE_parcsr_ls.h); here
                we'll use what I think is simplest: let Euclid internally
                parse the command line.
@@ -3086,7 +3086,7 @@ main( HYPRE_Int   argc,
 
             HYPRE_EuclidCreate(hypre_MPI_COMM_WORLD, &pcg_precond);
 
-            /* note: There are three three methods of setting run-time
+            /* note: There are three methods of setting run-time
                parameters for Euclid: (see HYPRE_parcsr_ls.h); here
                we'll use what I think is simplest: let Euclid internally
                parse the command line.
@@ -3511,7 +3511,7 @@ main( HYPRE_Int   argc,
 
          HYPRE_EuclidCreate(hypre_MPI_COMM_WORLD, &pcg_precond);
 
-         /* note: There are three three methods of setting run-time
+         /* note: There are three methods of setting run-time
             parameters for Euclid: (see HYPRE_parcsr_ls.h); here
             we'll use what I think is simplest: let Euclid internally
             parse the command line.
@@ -3689,7 +3689,7 @@ main( HYPRE_Int   argc,
 
          HYPRE_EuclidCreate(hypre_MPI_COMM_WORLD, &pcg_precond);
 
-         /* note: There are three three methods of setting run-time
+         /* note: There are three methods of setting run-time
             parameters for Euclid: (see HYPRE_parcsr_ls.h); here
             we'll use what I think is simplest: let Euclid internally
             parse the command line.
@@ -4029,9 +4029,9 @@ BuildParLaplacian( HYPRE_Int                  argc,
       else if ( strcmp(argv[arg_index], "-c") == 0 )
       {
          arg_index++;
-         cx = atof(argv[arg_index++]);
-         cy = atof(argv[arg_index++]);
-         cz = atof(argv[arg_index++]);
+         cx = (HYPRE_Real)atof(argv[arg_index++]);
+         cy = (HYPRE_Real)atof(argv[arg_index++]);
+         cz = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else
       {
@@ -4181,16 +4181,16 @@ BuildParDifConv( HYPRE_Int                  argc,
       else if ( strcmp(argv[arg_index], "-c") == 0 )
       {
          arg_index++;
-         cx = atof(argv[arg_index++]);
-         cy = atof(argv[arg_index++]);
-         cz = atof(argv[arg_index++]);
+         cx = (HYPRE_Real)atof(argv[arg_index++]);
+         cy = (HYPRE_Real)atof(argv[arg_index++]);
+         cz = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-a") == 0 )
       {
          arg_index++;
-         ax = atof(argv[arg_index++]);
-         ay = atof(argv[arg_index++]);
-         az = atof(argv[arg_index++]);
+         ax = (HYPRE_Real)atof(argv[arg_index++]);
+         ay = (HYPRE_Real)atof(argv[arg_index++]);
+         az = (HYPRE_Real)atof(argv[arg_index++]);
       }
       else
       {

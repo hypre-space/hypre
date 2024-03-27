@@ -11,12 +11,17 @@
  *
  *****************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_parcsr_mv.h"
 #include "float.h"
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
 #include "_hypre_utilities.hpp"
+
+#if defined(HYPRE_USING_SYCL)
+namespace thrust = std;
+#endif
 
 /**
  * @brief waxpyz
@@ -33,7 +38,7 @@ struct waxpyz
    const T scale;
    waxpyz(T _scale) : scale(_scale) {}
 
-   __host__ __device__ void operator()(Tuple t)
+   __host__ __device__ void operator()(Tuple t) const
    {
       thrust::get<0>(t) = scale * thrust::get<1>(t) + thrust::get<2>(t) * thrust::get<3>(t);
    }
@@ -50,7 +55,7 @@ template <typename T>
 struct wxypz
 {
    typedef thrust::tuple<T &, T, T, T> Tuple;
-   __host__ __device__ void            operator()(Tuple t)
+   __host__ __device__ void            operator()(Tuple t) const
    {
       thrust::get<0>(t) = thrust::get<1>(t) * (thrust::get<2>(t) + thrust::get<3>(t));
    }
@@ -72,7 +77,7 @@ struct save_and_scale
 
    save_and_scale(T _scale) : scale(_scale) {}
 
-   __host__ __device__ void operator()(Tuple t)
+   __host__ __device__ void operator()(Tuple t) const
    {
       thrust::get<0>(t) = thrust::get<1>(t);
       thrust::get<1>(t) = thrust::get<2>(t) * scale;
@@ -91,7 +96,7 @@ struct xpyz
 {
    typedef thrust::tuple<T &, T, T> Tuple;
 
-   __host__ __device__ void operator()(Tuple t)
+   __host__ __device__ void operator()(Tuple t) const
    {
       thrust::get<0>(t) = thrust::get<1>(t) + thrust::get<2>(t) * thrust::get<0>(t);
    }
@@ -159,12 +164,21 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
       hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, r);
 
       /* o = u; u = r .* coef */
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL(
+         std::for_each,
+         oneapi::dpl::make_zip_iterator(orig_u, u_data, r_data),
+         oneapi::dpl::make_zip_iterator(orig_u + num_rows, u_data + num_rows,
+                                        r_data + num_rows),
+         save_and_scale<HYPRE_Real>(coefs[cheby_order]));
+#else
       HYPRE_THRUST_CALL(
          for_each,
          thrust::make_zip_iterator(thrust::make_tuple(orig_u, u_data, r_data)),
          thrust::make_zip_iterator(thrust::make_tuple(orig_u + num_rows, u_data + num_rows,
                                                       r_data + num_rows)),
          save_and_scale<HYPRE_Real>(coefs[cheby_order]));
+#endif
 
       for (i = cheby_order - 1; i >= 0; i--)
       {
@@ -181,7 +195,7 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
    else /* scaling! */
    {
 
-      /*grab 1/sqrt(diagonal) */
+      /*grab 1/hypre_sqrt(diagonal) */
 
       tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(tmp_vec));
 
@@ -193,26 +207,45 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
 
       /* TODO: It might be possible to merge this and the next call to:
        * r[j] = ds_data[j] * (f_data[j] + tmp_data[j]); o[j] = u[j]; u[j] = r[j] * coef */
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL(std::for_each,
+                        oneapi::dpl::make_zip_iterator(r_data, ds_data, f_data, tmp_data),
+                        oneapi::dpl::make_zip_iterator(r_data, ds_data, f_data, tmp_data) + num_rows,
+                        wxypz<HYPRE_Real>());
+#else
       HYPRE_THRUST_CALL(for_each,
                         thrust::make_zip_iterator(thrust::make_tuple(r_data, ds_data, f_data, tmp_data)),
                         thrust::make_zip_iterator(thrust::make_tuple(r_data, ds_data, f_data, tmp_data)) + num_rows,
                         wxypz<HYPRE_Real>());
+#endif
 
       /* save original u, then start
          the iteration by multiplying r by the cheby coef.*/
 
       /* o = u;  u = r * coef */
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL(std::for_each,
+                        oneapi::dpl::make_zip_iterator(orig_u, u_data, r_data),
+                        oneapi::dpl::make_zip_iterator(orig_u, u_data, r_data) + num_rows,
+                        save_and_scale<HYPRE_Real>(coefs[cheby_order]));
+#else
       HYPRE_THRUST_CALL(for_each,
                         thrust::make_zip_iterator(thrust::make_tuple(orig_u, u_data, r_data)),
                         thrust::make_zip_iterator(thrust::make_tuple(orig_u, u_data, r_data)) + num_rows,
                         save_and_scale<HYPRE_Real>(coefs[cheby_order]));
+#endif
 
       /* now do the other coefficients */
       for (i = cheby_order - 1; i >= 0; i--)
       {
          /* v = D^(-1/2)AD^(-1/2)u */
          /* tmp = ds .* u */
+#if defined(HYPRE_USING_SYCL)
+         HYPRE_ONEDPL_CALL( std::transform, ds_data, ds_data + num_rows, u_data, tmp_data,
+                            std::multiplies<HYPRE_Real>() );
+#else
          HYPRE_THRUST_CALL( transform, ds_data, ds_data + num_rows, u_data, tmp_data, _1 * _2 );
+#endif
 
          hypre_ParCSRMatrixMatvec(1.0, A, tmp_vec, 0.0, v);
 
@@ -220,21 +253,36 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
          mult = coefs[i];
 
          /* u = coef * r + ds .* v */
+#if defined(HYPRE_USING_SYCL)
+         HYPRE_ONEDPL_CALL(std::for_each,
+                           oneapi::dpl::make_zip_iterator(u_data, r_data, ds_data, v_data),
+                           oneapi::dpl::make_zip_iterator(u_data, r_data, ds_data, v_data) + num_rows,
+                           waxpyz<HYPRE_Real>(mult));
+#else
          HYPRE_THRUST_CALL(for_each,
                            thrust::make_zip_iterator(thrust::make_tuple(u_data, r_data, ds_data, v_data)),
                            thrust::make_zip_iterator(thrust::make_tuple(u_data, r_data, ds_data, v_data)) + num_rows,
                            waxpyz<HYPRE_Real>(mult));
+#endif
       } /* end of cheby_order loop */
 
       /* now we have to scale u_data before adding it to u_orig*/
 
       /* u = orig_u + ds .* u */
+#if defined(HYPRE_USING_SYCL)
+      HYPRE_ONEDPL_CALL(
+         std::for_each,
+         oneapi::dpl::make_zip_iterator(u_data, orig_u, ds_data),
+         oneapi::dpl::make_zip_iterator(u_data + num_rows, orig_u + num_rows, ds_data + num_rows),
+         xpyz<HYPRE_Real>());
+#else
       HYPRE_THRUST_CALL(
          for_each,
          thrust::make_zip_iterator(thrust::make_tuple(u_data, orig_u, ds_data)),
          thrust::make_zip_iterator(thrust::make_tuple(u_data + num_rows, orig_u + num_rows,
                                                       ds_data + num_rows)),
          xpyz<HYPRE_Real>());
+#endif
 
 
    } /* end of scaling code */
