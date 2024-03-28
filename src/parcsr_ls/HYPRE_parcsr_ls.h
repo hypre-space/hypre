@@ -1457,6 +1457,14 @@ HYPRE_Int HYPRE_BoomerAMGSetIsolatedFPoints(HYPRE_Solver  solver,
                                             HYPRE_BigInt *isolated_fpt_index);
 
 /**
+ * (Optional) if use_aux_strength_mat equals 1, the strength matrix is created from
+ * an auxilliary M-matrix that is generated from the original system matrix A.
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGSetUseAuxStrengthMatrix(HYPRE_Solver   solver,
+                                  HYPRE_Int      use_aux_strength_mat);
+
+/**
  * (Optional) if Sabs equals 1, the strength of connection test is based
  * on the absolute value of the matrix coefficients
  **/

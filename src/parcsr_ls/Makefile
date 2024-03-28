@@ -142,6 +142,7 @@ FILES =\
  par_schwarz.c\
  par_stats.c\
  par_strength.c\
+ par_aux_strength.c\
  par_sv_interp.c\
  par_sv_interp_ln.c\
  par_vardifconv.c\
