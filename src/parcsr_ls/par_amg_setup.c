@@ -3293,6 +3293,7 @@ hypre_ParCSRMatrixPrintIJ(S_aux, 0, 0, sname);
    }
 #if defined (HYPRE_USING_NVTX) || defined (HYPRE_USING_ROCTX)
    hypre_GpuProfilingPopRange();
+#endif
 
    if (level > 0)
    {
