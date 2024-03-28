@@ -2915,7 +2915,7 @@ HYPRE_Int hypre_StageOneInterp_Options_long_dbl(hypre_ParCSRMatrix *A, hypre_Par
                                                 hypre_ParCSRMatrix **P1_ptr);
 HYPRE_Int hypre_StageTwoInterp_Options_dbl(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P1,
                                            hypre_ParCSRMatrix *S, hypre_IntArray *CF_marker,
-                                           hypre_IntArray *CFN_marker, HYPRE_BigInt *coarse_pnts_global,
+                                           HYPRE_BigInt *coarse_pnts_global,
                                            HYPRE_BigInt *coarse_pnts_global1, HYPRE_Int *dof_func_data,
                                            HYPRE_Int agg_interp_type, HYPRE_Int num_functions,
                                            HYPRE_Int debug_flag, HYPRE_Int sep_weight,
@@ -2924,7 +2924,7 @@ HYPRE_Int hypre_StageTwoInterp_Options_dbl(hypre_ParCSRMatrix *A, hypre_ParCSRMa
                                            hypre_ParCSRMatrix **P_ptr);
 HYPRE_Int hypre_StageTwoInterp_Options_flt(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P1,
                                            hypre_ParCSRMatrix *S, hypre_IntArray *CF_marker,
-                                           hypre_IntArray *CFN_marker, HYPRE_BigInt *coarse_pnts_global,
+                                           HYPRE_BigInt *coarse_pnts_global,
                                            HYPRE_BigInt *coarse_pnts_global1, HYPRE_Int *dof_func_data,
                                            HYPRE_Int agg_interp_type, HYPRE_Int num_functions,
                                            HYPRE_Int debug_flag, HYPRE_Int sep_weight,
@@ -2933,7 +2933,7 @@ HYPRE_Int hypre_StageTwoInterp_Options_flt(hypre_ParCSRMatrix *A, hypre_ParCSRMa
                                            hypre_ParCSRMatrix **P_ptr);
 HYPRE_Int hypre_StageTwoInterp_Options_long_dbl(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P1,
                                                 hypre_ParCSRMatrix *S, hypre_IntArray *CF_marker,
-                                                hypre_IntArray *CFN_marker, HYPRE_BigInt *coarse_pnts_global,
+                                                HYPRE_BigInt *coarse_pnts_global,
                                                 HYPRE_BigInt *coarse_pnts_global1, HYPRE_Int *dof_func_data,
                                                 HYPRE_Int agg_interp_type, HYPRE_Int num_functions,
                                                 HYPRE_Int debug_flag, HYPRE_Int sep_weight,

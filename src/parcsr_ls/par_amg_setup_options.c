@@ -114,6 +114,7 @@ HYPRE_Int hypre_Coarsen_Options(hypre_ParCSRMatrix   *S,
    {
       hypre_BoomerAMGCoarsen(S, A, 0, debug_flag, &CF_marker);
    }
+   *CF_marker_ptr = CF_marker;
 
    if (level < agg_num_levels)
    {
@@ -381,7 +382,6 @@ HYPRE_Int hypre_StageTwoInterp_Options(hypre_ParCSRMatrix  *A,
    		                       hypre_ParCSRMatrix  *P1,
    		                       hypre_ParCSRMatrix  *S,
    		                       hypre_IntArray      *CF_marker,
-   		                       hypre_IntArray      *CFN_marker,
    			               HYPRE_BigInt        *coarse_pnts_global,
    			               HYPRE_BigInt        *coarse_pnts_global1,
    			               HYPRE_Int           *dof_func_data,

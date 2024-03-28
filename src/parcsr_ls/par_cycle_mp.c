@@ -84,8 +84,8 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
    HYPRE_Real      gamma = 1.0;
    HYPRE_Int       local_size;
    HYPRE_Real      alpha;
-   hypre_Vector_mp **l1_norms = NULL;
-   hypre_Vector_mp *l1_norms_level;
+   hypre_Vector  **l1_norms = NULL;
+   hypre_Vector   *l1_norms_level;
    MPI_Comm        comm;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
