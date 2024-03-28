@@ -4541,7 +4541,9 @@ hypre_MGRDataPrint(void *mgr_vdata)
       (mgr_data -> print_level) &= ~HYPRE_MGR_PRINT_LVLS_MATRIX;
    }
 
-*/
+   /* Free memory */
+   hypre_TFree(filename, HYPRE_MEMORY_HOST);
+   
    return hypre_error_flag;
 }
 
