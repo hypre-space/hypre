@@ -844,7 +844,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
       HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_sA);
 
       m = terms[2];
-      hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_tmp, 3);
+      hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_tmp, 4);
       HYPRE_IJMatrixGetObject(ij_tmp, (void **) &parcsr_sP);
 
       if (!hypre_ParCSRMatrixCommPkg(parcsr_sP))
@@ -875,7 +875,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
       m = terms[nterms - 1];
       ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
       HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uMold);
-      hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_sA[m], 3);
+      hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_sA[m], 4);
       HYPRE_IJMatrixGetObject(ij_sA[m], (void **) &parcsr_sMold);
 
 #if defined(DEBUG_MATMULT)
@@ -896,7 +896,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
             graph = hypre_SStructMatrixGraph(matrices[terms[t + 1]]);
             grid  = hypre_SStructGraphGrid(graph);
 
-            hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_sA[m], 3);
+            hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_sA[m], 4);
          }
          HYPRE_IJMatrixGetObject(ij_sA[m], (void **) &parcsr_sA);
 #if defined(DEBUG_MATMULT)

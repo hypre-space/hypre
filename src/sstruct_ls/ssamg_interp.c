@@ -504,7 +504,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 #endif
 
       /* WM: debug */
-      hypre_ParCSRMatrixPrintIJ(A_u_aug, 0, 0, "A_u_aug");
+      /* hypre_ParCSRMatrixPrintIJ(A_u_aug, 0, 0, "A_u_aug"); */
       /* hypre_ParCSRMatrixPrintIJ(A_bndry, 0, 0, "A_bndry"); */
 
       /* WM: todo - get CF splitting (and strength matrix) */
@@ -562,6 +562,13 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
                hypre_IndexD(grow_index, cdir) = 0;
                hypre_BoxGrowByIndex(shrink_box, grow_index);
+               hypre_IndexRef shrink_start = hypre_BoxIMin(shrink_box);
+
+               /* WM: define the start by even/odd coordinate... is this right? */
+               if (hypre_IndexD(shrink_start, cdir) % 2 == 0)
+               {
+                  hypre_IndexD(shrink_start, cdir)++;
+               }
 
                /* Set the stride to 2 in the coarsening direction (1 otherwise) */
                hypre_IndexX(stride) = 1;
@@ -569,11 +576,9 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                hypre_IndexZ(stride) = 1;
                hypre_IndexD(stride, cdir) = 2;
 
-               /* Get the loop size and start */
+               /* Get the loop size */
                /* WM: double check this: loop size and start correct in all cases? */
                hypre_BoxGetStrideSize(shrink_box, stride, loop_size);
-               /* hypre_IndexRef start = hypre_BoxIMin(compute_box); */
-               hypre_IndexRef shrink_start = hypre_BoxIMin(shrink_box);
 
                /* hypre_printf("WM: debug - compute_box = (%d, %d, %d) x (%d, %d, %d)\n", */
                /*       hypre_BoxIMin(compute_box)[0], */
@@ -589,12 +594,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                /*       hypre_BoxIMax(shrink_box)[0], */
                /*       hypre_BoxIMax(shrink_box)[1], */
                /*       hypre_BoxIMax(shrink_box)[2]); */
-
-               /* WM: define the start by even/odd coordinate... is this right? */
-               if (hypre_IndexD(shrink_start, cdir) % 2 == 0)
-               {
-                  hypre_IndexD(shrink_start, cdir)++;
-               }
 
                /* hypre_printf("WM: debug - stride = (%d, %d, %d)\n", */
                /*       stride[0], */
@@ -612,7 +611,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                /* Loop over dofs */
                hypre_BoxLoop1Begin(ndim, loop_size, compute_box, shrink_start, stride, ii);
                {
-                  /* hypre_printf("WM: debug - ii = %d\n", ii); */
+                  /* hypre_printf("WM: debug - hypre__I = %d, hypre__J = %d, ii = %d\n", hypre__I, hypre__J, ii); */
                   CF_marker[cf_index + ii] = -1;
                }
                /* hypre_BoxLoop2End(ii,j); */
@@ -624,18 +623,18 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       }
 
       /* WM: debug */
-      FILE    *fp;
-      fp = fopen("CF_marker.txt", "w");
-      for (i = 0; i < hypre_ParCSRMatrixNumRows(A_u); i++)
-      {
-         hypre_fprintf(fp, "%d, %d\n", i, CF_marker[i]);
-      }
-      fclose(fp);
+      /* FILE    *fp; */
+      /* fp = fopen("CF_marker.txt", "w"); */
+      /* for (i = 0; i < hypre_ParCSRMatrixNumRows(A_u); i++) */
+      /* { */
+      /*    hypre_fprintf(fp, "%d, %d\n", i, CF_marker[i]); */
+      /* } */
+      /* fclose(fp); */
 
       /* Generate unstructured interpolation */
       HYPRE_Int debug_flag = 0;
       HYPRE_Real trunc_factor = 0.0;
-      HYPRE_Int max_elmts = 4;
+      HYPRE_Int max_elmts = 0;
       hypre_BoomerAMGBuildInterp(A_u_aug,
                                  CF_marker,
                                  A_u_aug, /* WM: todo - do I need to do any strength measure here? */
