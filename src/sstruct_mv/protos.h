@@ -311,7 +311,7 @@ HYPRE_Int hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix, HY
 hypre_IJMatrix* hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
                                               HYPRE_Int fill_diagonal );
 HYPRE_Int hypre_SStructMatrixBoundaryToUMatrix ( hypre_SStructMatrix *A, hypre_SStructGrid *grid,
-                                                 hypre_IJMatrix **ij_Ahat_ptr );
+                                                 hypre_IJMatrix **ij_Ahat_ptr, HYPRE_Int halo_size );
 HYPRE_Int hypre_SStructMatrixGetDiagonal ( hypre_SStructMatrix *matrix,
                                            hypre_SStructVector **diag_ptr );
 HYPRE_MemoryLocation hypre_SStructMatrixMemoryLocation(hypre_SStructMatrix *matrix);

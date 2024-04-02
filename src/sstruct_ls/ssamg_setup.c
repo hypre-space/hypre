@@ -8,9 +8,9 @@
 #include "_hypre_sstruct_ls.h"
 #include "ssamg.h"
 
-//#define DEBUG_SETUP
-//#define DEBUG_SYMMETRY
-//#define DEBUG_MATMULT
+#define DEBUG_SETUP
+#define DEBUG_SYMMETRY
+#define DEBUG_MATMULT
 //#define DEBUG_WITH_GLVIS
 
 /*--------------------------------------------------------------------------

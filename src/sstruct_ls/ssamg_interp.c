@@ -8,6 +8,8 @@
 #include "_hypre_sstruct_ls.h"
 #include "ssamg.h"
 
+#define INTERP_TYPE 1
+
 /*--------------------------------------------------------------------------
  * TODO:
  *       1) Consider inter-variable coupling
@@ -364,75 +366,87 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
                /* Adjust weights at part boundaries */
                /* WM: todo - commenting this out for now because I think the unstructured interpolation should take care of this? */
-               /* hypre_ForBoxArrayI(i, pbnd_boxaa) */
-               /* { */
-               /*    pbnd_boxa = hypre_BoxArrayArrayBoxArray(pbnd_boxaa, i); */
-               /*    box_id = hypre_BoxArrayArrayID(pbnd_boxaa, i); */
-               /*    ii = hypre_BinarySearch(hypre_StructGridIDs(sgrid), */
-               /*                            box_id, */
-               /*                            hypre_StructGridNumBoxes(sgrid)); */
+               /* WM: todo - using this to zero out boundary struct entries in P as a temporary test */
+#if INTERP_TYPE
+               hypre_ForBoxArrayI(i, pbnd_boxaa)
+               {
+                  pbnd_boxa = hypre_BoxArrayArrayBoxArray(pbnd_boxaa, i);
+                  box_id = hypre_BoxArrayArrayID(pbnd_boxaa, i);
+                  ii = hypre_BinarySearch(hypre_StructGridIDs(sgrid),
+                                          box_id,
+                                          hypre_StructGridNumBoxes(sgrid));
 
-               /*    if (ii > -1) */
-               /*    { */
-               /*       hypre_ForBoxI(j, pbnd_boxa) */
-               /*       { */
-               /*          hypre_CopyBox(hypre_BoxArrayBox(pbnd_boxa, j), compute_box); */
-               /*          hypre_ProjectBox(compute_box, origin, stride); */
-               /*          hypre_CopyToIndex(hypre_BoxIMin(compute_box), ndim, Pstart); */
-               /*          hypre_StructMatrixMapDataIndex(P_s, Pstart); */
+                  if (ii > -1)
+                  {
+                     hypre_ForBoxI(j, pbnd_boxa)
+                     {
+                        hypre_CopyBox(hypre_BoxArrayBox(pbnd_boxa, j), compute_box);
+                        hypre_ProjectBox(compute_box, origin, stride);
+                        hypre_CopyToIndex(hypre_BoxIMin(compute_box), ndim, Pstart);
+                        hypre_StructMatrixMapDataIndex(P_s, Pstart);
 
-               /*          Pp1 = hypre_StructMatrixBoxData(P_s, ii, 1); */
-               /*          Pp2 = hypre_StructMatrixBoxData(P_s, ii, 2); */
-               /*          P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P_s), ii); */
+                        Pp1 = hypre_StructMatrixBoxData(P_s, ii, 1);
+                        Pp2 = hypre_StructMatrixBoxData(P_s, ii, 2);
+                        P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P_s), ii);
 
-               /*          /1* Update compute_box *1/ */
-               /*          for (d = 0; d < ndim; d++) */
-               /*          { */
-               /*             if ((d != cdir) && (hypre_BoxSizeD(compute_box, d) > 1)) */
-               /*             { */
-               /*                hypre_IndexD(hypre_BoxIMin(compute_box), d) -= 1; */
-               /*                hypre_IndexD(hypre_BoxIMax(compute_box), d) += 1; */
-               /*             } */
-               /*          } */
-               /*          hypre_CopyBox(compute_box, tmp_box); */
-               /*          hypre_IntersectBoxes(tmp_box, hypre_BoxArrayBox(compute_boxes, ii), compute_box); */
+                        /* Update compute_box */
+                        for (d = 0; d < ndim; d++)
+                        {
+                           if ((d != cdir) && (hypre_BoxSizeD(compute_box, d) > 1))
+                           {
+                              hypre_IndexD(hypre_BoxIMin(compute_box), d) -= 1;
+                              hypre_IndexD(hypre_BoxIMax(compute_box), d) += 1;
+                           }
+                        }
+                        hypre_CopyBox(compute_box, tmp_box);
+                        hypre_IntersectBoxes(tmp_box, hypre_BoxArrayBox(compute_boxes, ii), compute_box);
 
-               /*          hypre_BoxGetStrideSize(compute_box, stride, loop_size); */
-               /*          if (hypre_IndexD(loop_size, cdir) > 1) */
-               /*          { */
-               /*             hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi); */
-               /*             { */
-               /*                HYPRE_Real center; */
+                        hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-               /*                center = Pp1[Pi] + Pp2[Pi]; */
-               /*                if (center) */
-               /*                { */
-               /*                   Pp1[Pi] /= center; */
-               /*                   Pp2[Pi] /= center; */
-               /*                } */
-               /*             } */
-               /*             hypre_BoxLoop1End(Pi); */
-               /*          } */
-               /*          else */
-               /*          { */
-               /*             hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi); */
-               /*             { */
-               /*                if (Pp1[Pi] > Pp2[Pi]) */
-               /*                { */
-               /*                   Pp1[Pi] = 1.0; */
-               /*                   Pp2[Pi] = 0.0; */
-               /*                } */
-               /*                else if (Pp2[Pi] > Pp1[Pi]) */
-               /*                { */
-               /*                   Pp1[Pi] = 0.0; */
-               /*                   Pp2[Pi] = 1.0; */
-               /*                } */
-               /*             } */
-               /*             hypre_BoxLoop1End(Pi); */
-               /*          } */
-               /*       } /1* loop on pbnd_boxa *1/ */
-               /*    } */
-               /* } /1* loop on pbnd_boxaa *1/ */
+                        /* WM: debug - adding the loop below and commenting out the ones below it (Victor's implementation) */
+                        hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
+                        {
+                           Pp1[Pi] = 0.0;
+                           Pp2[Pi] = 0.0;
+                        }
+                        hypre_BoxLoop1End(Pi);
+
+                        /* if (hypre_IndexD(loop_size, cdir) > 1) */
+                        /* { */
+                        /*    hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi); */
+                        /*    { */
+                        /*       HYPRE_Real center; */
+
+                        /*       center = Pp1[Pi] + Pp2[Pi]; */
+                        /*       if (center) */
+                        /*       { */
+                        /*          Pp1[Pi] /= center; */
+                        /*          Pp2[Pi] /= center; */
+                        /*       } */
+                        /*    } */
+                        /*    hypre_BoxLoop1End(Pi); */
+                        /* } */
+                        /* else */
+                        /* { */
+                        /*    hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi); */
+                        /*    { */
+                        /*       if (Pp1[Pi] > Pp2[Pi]) */
+                        /*       { */
+                        /*          Pp1[Pi] = 1.0; */
+                        /*          Pp2[Pi] = 0.0; */
+                        /*       } */
+                        /*       else if (Pp2[Pi] > Pp1[Pi]) */
+                        /*       { */
+                        /*          Pp1[Pi] = 0.0; */
+                        /*          Pp2[Pi] = 1.0; */
+                        /*       } */
+                        /*    } */
+                           /* hypre_BoxLoop1End(Pi); */
+                        /* } */
+                     } /* loop on pbnd_boxa */
+                  }
+               } /* loop on pbnd_boxaa */
+#endif
 
                hypre_TFree(ventries, HYPRE_MEMORY_HOST);
                hypre_BoxDestroy(compute_box);
@@ -453,15 +467,20 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
    if (interp_type)
    {
       hypre_ParCSRMatrix *A_u = hypre_SStructMatrixParCSRMatrix(A);
+      hypre_ParCSRMatrix *A_u_aug;
       hypre_ParCSRMatrix *P_u;
 
       /* WM: todo - Add diagonal and other relevant connections to A_u */
 
       /* Convert boundary of A to IJ matrix */
       hypre_IJMatrix *A_bndry_ij;
-      hypre_SStructMatrixBoundaryToUMatrix(A, grid, &A_bndry_ij);
+      hypre_SStructMatrixBoundaryToUMatrix(A, grid, &A_bndry_ij, 1);
       hypre_ParCSRMatrix *A_bndry = hypre_IJMatrixObject(A_bndry_ij);
 
+#if INTERP_TYPE
+      /* Add structured boundary portion to unstructured portion */
+      hypre_ParCSRMatrixAdd(1.0, A_bndry, 1.0, A_u, &A_u_aug);
+#else
       /* Extract diagonal along boundaries and add to A_u */
       hypre_ParCSRMatrix *diag_A_u = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A_u),
                                                             hypre_ParCSRMatrixGlobalNumRows(A_u),
@@ -480,11 +499,13 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       }
       hypre_CSRMatrixI(diag_A_u_diag)[ hypre_CSRMatrixNumRows(diag_A_u_diag) ] = hypre_CSRMatrixNumRows(diag_A_u_diag);
       hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A_bndry), hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(diag_A_u)), 0);
-      hypre_ParCSRMatrix *A_u_aug;
       hypre_ParCSRMatrixAdd(1.0, diag_A_u, 1.0, A_u, &A_u_aug);
+      hypre_ParCSRMatrixDestroy(diag_A_u);
+#endif
 
       /* WM: debug */
-      /* hypre_ParCSRMatrixPrintIJ(A_u_aug, 0, 0, "A_u_aug"); */
+      hypre_ParCSRMatrixPrintIJ(A_u_aug, 0, 0, "A_u_aug");
+      /* hypre_ParCSRMatrixPrintIJ(A_bndry, 0, 0, "A_bndry"); */
 
       /* WM: todo - get CF splitting (and strength matrix) */
       HYPRE_Int *CF_marker = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A_u), HYPRE_MEMORY_DEVICE);
@@ -603,13 +624,13 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       }
 
       /* WM: debug */
-      /* FILE    *fp; */
-      /* fp = fopen("CF_marker.txt", "w"); */
-      /* for (i = 0; i < hypre_ParCSRMatrixNumRows(A_u); i++) */
-      /* { */
-      /*    hypre_fprintf(fp, "%d, %d\n", i, CF_marker[i]); */
-      /* } */
-      /* fclose(fp); */
+      FILE    *fp;
+      fp = fopen("CF_marker.txt", "w");
+      for (i = 0; i < hypre_ParCSRMatrixNumRows(A_u); i++)
+      {
+         hypre_fprintf(fp, "%d, %d\n", i, CF_marker[i]);
+      }
+      fclose(fp);
 
       /* Generate unstructured interpolation */
       HYPRE_Int debug_flag = 0;
@@ -658,7 +679,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       hypre_IJMatrixSetObject(hypre_SStructMatrixIJMatrix(P), P_u);
 
       /* Clean up */
-      hypre_ParCSRMatrixDestroy(diag_A_u);
       HYPRE_IJMatrixDestroy(A_bndry_ij);
       hypre_ParCSRMatrixDestroy(A_u_aug);
    }
