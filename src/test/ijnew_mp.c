@@ -8,7 +8,7 @@
 /*!
    This file contains a mocked-up example, based on ex5.c in the examples directory. 
    The goal is to give an idea of how a user may utilize hypre to assemble matrix data 
-   and access solvers in a way that would facilitate a mixed-precision solution of the 
+   and access solvers in a way that would facilitate a mixed-1recision solution of the 
    linear system. This particular driver demonstrates how the mixed-precision build may 
    be used to develop mixed-precision solvers, such as the defect-correction-based solver
    implemented here. Feel free to ask questions, make comments or suggestions 
@@ -126,7 +126,7 @@ int main (int argc, char *argv[])
    double outer_wt = 1.0;
    int k_dim = 10;
    int two_norm = 0;
-   int all = 1;
+   int all = 0;
    int precision = 0;
 
    /*! Matrix and preconditioner declarations. Here, we declare IJMatrices and parcsr matrices
@@ -446,6 +446,11 @@ int main (int argc, char *argv[])
          arg_index++;
          k_dim  = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-all") == 0 )
+      {
+         arg_index++;
+         all = 1;
+      }
       else if ( strcmp(argv[arg_index], "-double") == 0 )
       {
          arg_index++;
@@ -611,10 +616,12 @@ int main (int argc, char *argv[])
    {
       HYPRE_Int i;
       precision_array = (HYPRE_Precision *) hypre_CAlloc_dbl((size_t)(max_levels), (size_t)sizeof(HYPRE_Precision), HYPRE_MEMORY_HOST);
-      for (i=0; i < max_levels; i++)
+      precision_array[0] = HYPRE_REAL_DOUBLE;
+      for (i=1; i < max_levels; i++)
       {
-         precision_array[i] = HYPRE_REAL_DOUBLE;
+         precision_array[i] = HYPRE_REAL_SINGLE;
       }
+      precision = 2;
    }
    /*! Done with linear system setup. Now proceed to solve the system. */
    // PCG solve

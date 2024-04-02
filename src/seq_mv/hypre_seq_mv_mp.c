@@ -209,8 +209,7 @@ hypre_SeqVectorConvert_mp (hypre_Vector_mp *v,
             {
                case HYPRE_REAL_DOUBLE:
                {
-                  data_mp = (double *) malloc(size* sizeof(double));
-                  //data_mp = hypre_TAlloc(hypre_double, size, memory_location);
+                  data_mp = (hypre_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_double), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -220,8 +219,7 @@ hypre_SeqVectorConvert_mp (hypre_Vector_mp *v,
                break;
                case HYPRE_REAL_LONGDOUBLE:
                {
-                  //data_mp = hypre_TAlloc(hypre_long_double, size, memory_location);
-                  data_mp = (long double *) malloc(size* sizeof(long double));
+                  data_mp = (hypre_long_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_long_double), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -240,8 +238,7 @@ hypre_SeqVectorConvert_mp (hypre_Vector_mp *v,
             {
                case HYPRE_REAL_SINGLE:
                {
-                  //data_mp = hypre_TAlloc(hypre_float, size, memory_location);
-                  data_mp = (float *) malloc(size* sizeof(float));
+                  data_mp = (hypre_float *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_float), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -251,8 +248,7 @@ hypre_SeqVectorConvert_mp (hypre_Vector_mp *v,
                break;
                case HYPRE_REAL_LONGDOUBLE:
                {
-                  data_mp = (long double *) malloc(size*sizeof(long double));
-                  //data_mp = hypre_TAlloc(hypre_long_double, size, memory_location);
+                  data_mp = (hypre_long_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_long_double), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -271,8 +267,7 @@ hypre_SeqVectorConvert_mp (hypre_Vector_mp *v,
             {
                case HYPRE_REAL_SINGLE:
                {
-                  data_mp = (float *) malloc(size*sizeof(float));
-                  //data_mp = hypre_TAlloc(hypre_float, size, memory_location);
+                  data_mp = (hypre_float *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_float), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -282,8 +277,7 @@ hypre_SeqVectorConvert_mp (hypre_Vector_mp *v,
                break;
                case HYPRE_REAL_DOUBLE:
                {
-                  data_mp = (double*) malloc(size* sizeof(double));
-                  //data_mp = hypre_TAlloc(hypre_double, size, memory_location);
+                  data_mp = (hypre_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_double), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -333,8 +327,7 @@ hypre_CSRMatrixConvert_mp (hypre_CSRMatrix_mp *A,
             {
                case HYPRE_REAL_DOUBLE:
                {
-                  data_mp = (double *) malloc(size* sizeof(double));
-                  //data_mp = hypre_TAlloc(hypre_double, size, memory_location);
+                  data_mp = (hypre_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_double), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -344,8 +337,7 @@ hypre_CSRMatrixConvert_mp (hypre_CSRMatrix_mp *A,
                break;
                case HYPRE_REAL_LONGDOUBLE:
                {
-                  //data_mp = hypre_TAlloc(hypre_long_double, size, memory_location);
-                  data_mp = (long double *) malloc(size* sizeof(long double));
+                  data_mp = (hypre_long_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_long_double), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -364,8 +356,7 @@ hypre_CSRMatrixConvert_mp (hypre_CSRMatrix_mp *A,
             {
                case HYPRE_REAL_SINGLE:
                {
-                  //data_mp = hypre_TAlloc(hypre_float, size, memory_location);
-                  data_mp = (float *) malloc(size* sizeof(float));
+                  data_mp = (hypre_float *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_float), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -375,8 +366,7 @@ hypre_CSRMatrixConvert_mp (hypre_CSRMatrix_mp *A,
                break;
                case HYPRE_REAL_LONGDOUBLE:
                {
-                  data_mp = (long double *) malloc(size*sizeof(long double));
-                  //data_mp = hypre_TAlloc(hypre_long_double, size, memory_location);
+                  data_mp = (hypre_long_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_long_double), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -395,8 +385,7 @@ hypre_CSRMatrixConvert_mp (hypre_CSRMatrix_mp *A,
             {
                case HYPRE_REAL_SINGLE:
                {
-                  data_mp = (float *) malloc(size*sizeof(float));
-                  //data_mp = hypre_TAlloc(hypre_float, size, memory_location);
+                  data_mp = (hypre_float *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_float), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -406,8 +395,7 @@ hypre_CSRMatrixConvert_mp (hypre_CSRMatrix_mp *A,
                break;
                case HYPRE_REAL_DOUBLE:
                {
-                  data_mp = (double*) malloc(size* sizeof(double));
-                  //data_mp = hypre_TAlloc(hypre_double, size, memory_location);
+                  data_mp = (hypre_double *) hypre_CAlloc_dbl ((size_t)size, (size_t)sizeof(hypre_double), memory_location);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif

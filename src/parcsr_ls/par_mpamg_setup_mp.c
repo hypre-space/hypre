@@ -37,7 +37,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
    hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    /* Data Structure variables */
-   HYPRE_Int            num_vectors;
+   HYPRE_Int            num_vectors = 1;
    hypre_ParCSRMatrix **A_array = NULL;
    hypre_ParVector    **F_array = NULL;
    hypre_ParVector    **U_array = NULL;
@@ -295,12 +295,12 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
    hypre_ParAMGDataFArray(amg_data) = F_array;
    hypre_ParAMGDataUArray(amg_data) = U_array;
 
-   Vtemp_dbl         = hypre_ParAMGDataVtempDBL(amg_data);
+   /*Vtemp_dbl         = hypre_ParAMGDataVtempDBL(amg_data);
    Vtemp_flt         = hypre_ParAMGDataVtempFLT(amg_data);
    Vtemp_long_dbl    = hypre_ParAMGDataVtempLONGDBL(amg_data);
    Ztemp_dbl         = hypre_ParAMGDataZtempDBL(amg_data);
    Ztemp_flt         = hypre_ParAMGDataZtempFLT(amg_data);
-   Ztemp_long_dbl    = hypre_ParAMGDataZtempLONGDBL(amg_data);
+   Ztemp_long_dbl    = hypre_ParAMGDataZtempLONGDBL(amg_data);*/
 
    precision_type = (HYPRE_Int *) hypre_CAlloc_dbl((size_t)(three), (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
    for (i=0; i< 3; i++) precision_type[i] = 0;
@@ -487,19 +487,19 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
       {
          if (level_precision == HYPRE_REAL_DOUBLE)
 	 {
-	    hypre_Strength_Options_dbl(A_array[level], strong_threshold, max_row_sum,
+	    hypre_Strength_Options_dbl(A_array[level], (hypre_double) strong_threshold, max_row_sum,
 	          	               num_functions, nodal, nodal_diag, 
 			  	       useSabs, dof_func_data, &S);
 	 }
 	 else if (level_precision == HYPRE_REAL_SINGLE)
 	 {
-	    hypre_Strength_Options_flt(A_array[level], strong_threshold, max_row_sum,
+	    hypre_Strength_Options_flt(A_array[level], (hypre_float) strong_threshold, max_row_sum,
 	          	               num_functions, nodal, nodal_diag, 
 			  	       useSabs, dof_func_data, &S);
 	 }
 	 else if (level_precision == HYPRE_REAL_LONGDOUBLE)
 	 {
-	    hypre_Strength_Options_long_dbl(A_array[level], strong_threshold, max_row_sum,
+	    hypre_Strength_Options_long_dbl(A_array[level], (hypre_long_double) strong_threshold, max_row_sum,
 	          	                    num_functions, nodal, nodal_diag, 
 			  	            useSabs, dof_func_data, &S);
 	 }
@@ -706,7 +706,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
                   hypre_ParCSRMatrixDestroy_dbl(Sabs);
                }
             }
-   	 else if (level_precision == HYPRE_REAL_SINGLE)
+   	    else if (level_precision == HYPRE_REAL_SINGLE)
             {
                if ((coarse_size == 0) || (coarse_size == fine_size))
                {
@@ -754,7 +754,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
                   hypre_ParCSRMatrixDestroy_flt(Sabs);
                }
             }
-   	 else if (level_precision == HYPRE_REAL_LONGDOUBLE)
+   	    else if (level_precision == HYPRE_REAL_LONGDOUBLE)
             {
                if ((coarse_size == 0) || (coarse_size == fine_size))
                {
@@ -1406,6 +1406,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
       if (coarsen_type > 0 && coarse_size >= (HYPRE_BigInt) size)
       {
          coarsen_type = 0;
+      }
+      if ( (level == max_levels - 1) || (coarse_size <= (HYPRE_BigInt) coarse_threshold ))
+      {
+         not_finished_coarsening = 0;
       }
    }  /* end of coarsening loop: while (not_finished_coarsening) */
 

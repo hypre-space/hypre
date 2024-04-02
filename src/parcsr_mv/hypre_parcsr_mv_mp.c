@@ -59,7 +59,7 @@ hypre_ParVectorConvert_mp( hypre_ParVector *v,
 {
    hypre_Vector_mp *v_local = (hypre_Vector_mp *) hypre_ParVectorLocalVector(v);
    hypre_SeqVectorConvert_mp (v_local, new_precision);
-
+   hypre_VectorPrecision(v) = new_precision;
    return (hypre_error_flag);
 }
 /*--------------------------------------------------------------------------
@@ -75,6 +75,8 @@ hypre_ParCSRMatrixConvert_mp( hypre_ParCSRMatrix *A,
 
    hypre_CSRMatrixConvert_mp (A_diag, new_precision);
    hypre_CSRMatrixConvert_mp (A_offd, new_precision);
+
+   hypre_ParCSRMatrixPrecision(A) = new_precision;
 
    return (hypre_error_flag);
 }

@@ -263,6 +263,7 @@ HYPRE_Int hypre_Interp_Options(hypre_ParCSRMatrix  *A,
                                  S, coarse_pnts_global, num_functions, dof_func_data,
                                  debug_flag, trunc_factor, P_max_elmts, &P);
    }
+   *P_ptr = P;
 
    return hypre_error_flag;
 }
