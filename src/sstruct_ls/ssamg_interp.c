@@ -8,8 +8,6 @@
 #include "_hypre_sstruct_ls.h"
 #include "ssamg.h"
 
-#define INTERP_TYPE 1
-
 /*--------------------------------------------------------------------------
  * TODO:
  *       1) Consider inter-variable coupling
@@ -365,9 +363,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                } /* loop on compute_boxes */
 
                /* Adjust weights at part boundaries */
-               /* WM: todo - commenting this out for now because I think the unstructured interpolation should take care of this? */
-               /* WM: todo - using this to zero out boundary struct entries in P as a temporary test */
-#if INTERP_TYPE
                hypre_ForBoxArrayI(i, pbnd_boxaa)
                {
                   pbnd_boxa = hypre_BoxArrayArrayBoxArray(pbnd_boxaa, i);
@@ -403,51 +398,60 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
                         hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-                        /* WM: todo - adding the loop below and commenting out the ones below it (Victor's implementation)
-                         *            I need to restore Victor's code for comparison between interp 0, 1 */
-                        hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
+                        /* WM: only do the renormalization at boundaries if interp_type == 0 */
+                        if (interp_type)
                         {
-                           Pp1[Pi] = 0.0;
-                           Pp2[Pi] = 0.0;
+                           if (interp_type == 2)
+                           {
+                              /* If handling all interpolation at part boundaries with unstructured, zero out the structured weights */
+                              /* WM: todo - this zeros out the boundary weights, but we should not rely on a halo here */
+                              hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
+                              {
+                                 Pp1[Pi] = 0.0;
+                                 Pp2[Pi] = 0.0;
+                              }
+                              hypre_BoxLoop1End(Pi);
+                           }
                         }
-                        hypre_BoxLoop1End(Pi);
+                        else
+                        {
 
-                        /* if (hypre_IndexD(loop_size, cdir) > 1) */
-                        /* { */
-                        /*    hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi); */
-                        /*    { */
-                        /*       HYPRE_Real center; */
+                           if (hypre_IndexD(loop_size, cdir) > 1)
+                           {
+                              hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
+                              {
+                                 HYPRE_Real center;
 
-                        /*       center = Pp1[Pi] + Pp2[Pi]; */
-                        /*       if (center) */
-                        /*       { */
-                        /*          Pp1[Pi] /= center; */
-                        /*          Pp2[Pi] /= center; */
-                        /*       } */
-                        /*    } */
-                        /*    hypre_BoxLoop1End(Pi); */
-                        /* } */
-                        /* else */
-                        /* { */
-                        /*    hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi); */
-                        /*    { */
-                        /*       if (Pp1[Pi] > Pp2[Pi]) */
-                        /*       { */
-                        /*          Pp1[Pi] = 1.0; */
-                        /*          Pp2[Pi] = 0.0; */
-                        /*       } */
-                        /*       else if (Pp2[Pi] > Pp1[Pi]) */
-                        /*       { */
-                        /*          Pp1[Pi] = 0.0; */
-                        /*          Pp2[Pi] = 1.0; */
-                        /*       } */
-                        /*    } */
-                           /* hypre_BoxLoop1End(Pi); */
-                        /* } */
+                                 center = Pp1[Pi] + Pp2[Pi];
+                                 if (center)
+                                 {
+                                    Pp1[Pi] /= center;
+                                    Pp2[Pi] /= center;
+                                 }
+                              }
+                              hypre_BoxLoop1End(Pi);
+                           }
+                           else
+                           {
+                              hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
+                              {
+                                 if (Pp1[Pi] > Pp2[Pi])
+                                 {
+                                    Pp1[Pi] = 1.0;
+                                    Pp2[Pi] = 0.0;
+                                 }
+                                 else if (Pp2[Pi] > Pp1[Pi])
+                                 {
+                                    Pp1[Pi] = 0.0;
+                                    Pp2[Pi] = 1.0;
+                                 }
+                              }
+                              hypre_BoxLoop1End(Pi);
+                           }
+                        }
                      } /* loop on pbnd_boxa */
                   }
                } /* loop on pbnd_boxaa */
-#endif
 
                hypre_TFree(ventries, HYPRE_MEMORY_HOST);
                hypre_BoxDestroy(compute_box);
@@ -478,54 +482,57 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       hypre_SStructMatrixBoundaryToUMatrix(A, grid, &A_struct_bndry_ij, 1);
       hypre_ParCSRMatrix *A_struct_bndry = hypre_IJMatrixObject(A_struct_bndry_ij);
 
-#if INTERP_TYPE
-      /* Add structured boundary portion to unstructured portion */
-      hypre_ParCSRMatrix *A_bndry;
-      hypre_ParCSRMatrixAdd(1.0, A_struct_bndry, 1.0, A_u, &A_bndry);
+      if (interp_type == 2)
+      {
+         /* Add structured boundary portion to unstructured portion */
+         hypre_ParCSRMatrix *A_bndry;
+         hypre_ParCSRMatrixAdd(1.0, A_struct_bndry, 1.0, A_u, &A_bndry);
 
-      /* WM: todo - I'm adding a zero diagonal here because if BoomerAMG interpolation gets a */
-      /* totally empty matrix (no nonzeros and a NULL data array) you run into seg faults... this is kind of a dirty fix for now */
-      hypre_ParCSRMatrix *zero = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A_u),
-                                                            hypre_ParCSRMatrixGlobalNumRows(A_u),
-                                                            hypre_ParCSRMatrixGlobalNumCols(A_u),
-                                                            hypre_ParCSRMatrixRowStarts(A_u),
-                                                            hypre_ParCSRMatrixRowStarts(A_u),
-                                                            0,
-                                                            hypre_ParCSRMatrixNumRows(A_u),
-                                                            0);
-      hypre_ParCSRMatrixInitialize(zero);
-      hypre_CSRMatrix *zero_diag = hypre_ParCSRMatrixDiag(zero);
-      for (i = 0; i < hypre_CSRMatrixNumRows(zero_diag); i++)
-      {
-         hypre_CSRMatrixI(zero_diag)[i] = i;
-         hypre_CSRMatrixJ(zero_diag)[i] = i;
-         hypre_CSRMatrixData(zero_diag)[i] = 0.0;
+         /* WM: todo - I'm adding a zero diagonal here because if BoomerAMG interpolation gets a */
+         /* totally empty matrix (no nonzeros and a NULL data array) you run into seg faults... this is kind of a dirty fix for now */
+         hypre_ParCSRMatrix *zero = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A_u),
+                                                               hypre_ParCSRMatrixGlobalNumRows(A_u),
+                                                               hypre_ParCSRMatrixGlobalNumCols(A_u),
+                                                               hypre_ParCSRMatrixRowStarts(A_u),
+                                                               hypre_ParCSRMatrixRowStarts(A_u),
+                                                               0,
+                                                               hypre_ParCSRMatrixNumRows(A_u),
+                                                               0);
+         hypre_ParCSRMatrixInitialize(zero);
+         hypre_CSRMatrix *zero_diag = hypre_ParCSRMatrixDiag(zero);
+         for (i = 0; i < hypre_CSRMatrixNumRows(zero_diag); i++)
+         {
+            hypre_CSRMatrixI(zero_diag)[i] = i;
+            hypre_CSRMatrixJ(zero_diag)[i] = i;
+            hypre_CSRMatrixData(zero_diag)[i] = 0.0;
+         }
+         hypre_CSRMatrixI(zero_diag)[ hypre_CSRMatrixNumRows(zero_diag) ] = hypre_CSRMatrixNumRows(zero_diag);
+         hypre_ParCSRMatrixAdd(1.0, zero, 1.0, A_bndry, &A_u_aug);
+         hypre_ParCSRMatrixDestroy(zero);
       }
-      hypre_CSRMatrixI(zero_diag)[ hypre_CSRMatrixNumRows(zero_diag) ] = hypre_CSRMatrixNumRows(zero_diag);
-      hypre_ParCSRMatrixAdd(1.0, zero, 1.0, A_bndry, &A_u_aug);
-      hypre_ParCSRMatrixDestroy(zero);
-#else
-      /* Extract diagonal along boundaries and add to A_u */
-      hypre_ParCSRMatrix *diag_A_u = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A_u),
-                                                            hypre_ParCSRMatrixGlobalNumRows(A_u),
-                                                            hypre_ParCSRMatrixGlobalNumCols(A_u),
-                                                            hypre_ParCSRMatrixRowStarts(A_u),
-                                                            hypre_ParCSRMatrixRowStarts(A_u),
-                                                            0,
-                                                            hypre_ParCSRMatrixNumRows(A_u),
-                                                            0);
-      hypre_ParCSRMatrixInitialize(diag_A_u);
-      hypre_CSRMatrix *diag_A_u_diag = hypre_ParCSRMatrixDiag(diag_A_u);
-      for (i = 0; i < hypre_CSRMatrixNumRows(diag_A_u_diag); i++)
+      else
       {
-         hypre_CSRMatrixI(diag_A_u_diag)[i] = i;
-         hypre_CSRMatrixJ(diag_A_u_diag)[i] = i;
+         /* Extract diagonal along boundaries and add to A_u */
+         hypre_ParCSRMatrix *diag_A_u = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A_u),
+                                                               hypre_ParCSRMatrixGlobalNumRows(A_u),
+                                                               hypre_ParCSRMatrixGlobalNumCols(A_u),
+                                                               hypre_ParCSRMatrixRowStarts(A_u),
+                                                               hypre_ParCSRMatrixRowStarts(A_u),
+                                                               0,
+                                                               hypre_ParCSRMatrixNumRows(A_u),
+                                                               0);
+         hypre_ParCSRMatrixInitialize(diag_A_u);
+         hypre_CSRMatrix *diag_A_u_diag = hypre_ParCSRMatrixDiag(diag_A_u);
+         for (i = 0; i < hypre_CSRMatrixNumRows(diag_A_u_diag); i++)
+         {
+            hypre_CSRMatrixI(diag_A_u_diag)[i] = i;
+            hypre_CSRMatrixJ(diag_A_u_diag)[i] = i;
+         }
+         hypre_CSRMatrixI(diag_A_u_diag)[ hypre_CSRMatrixNumRows(diag_A_u_diag) ] = hypre_CSRMatrixNumRows(diag_A_u_diag);
+         hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A_struct_bndry), hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(diag_A_u)), 0);
+         hypre_ParCSRMatrixAdd(1.0, diag_A_u, 1.0, A_u, &A_u_aug);
+         hypre_ParCSRMatrixDestroy(diag_A_u);
       }
-      hypre_CSRMatrixI(diag_A_u_diag)[ hypre_CSRMatrixNumRows(diag_A_u_diag) ] = hypre_CSRMatrixNumRows(diag_A_u_diag);
-      hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A_struct_bndry), hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(diag_A_u)), 0);
-      hypre_ParCSRMatrixAdd(1.0, diag_A_u, 1.0, A_u, &A_u_aug);
-      hypre_ParCSRMatrixDestroy(diag_A_u);
-#endif
 
       /* WM: debug */
       /* hypre_ParCSRMatrixPrintIJ(A_u_aug, 0, 0, "A_u_aug"); */
