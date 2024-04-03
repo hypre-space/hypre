@@ -403,7 +403,8 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
                         hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-                        /* WM: debug - adding the loop below and commenting out the ones below it (Victor's implementation) */
+                        /* WM: todo - adding the loop below and commenting out the ones below it (Victor's implementation)
+                         *            I need to restore Victor's code for comparison between interp 0, 1 */
                         hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
                         {
                            Pp1[Pi] = 0.0;
@@ -473,13 +474,36 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       /* WM: todo - Add diagonal and other relevant connections to A_u */
 
       /* Convert boundary of A to IJ matrix */
-      hypre_IJMatrix *A_bndry_ij;
-      hypre_SStructMatrixBoundaryToUMatrix(A, grid, &A_bndry_ij, 1);
-      hypre_ParCSRMatrix *A_bndry = hypre_IJMatrixObject(A_bndry_ij);
+      hypre_IJMatrix *A_struct_bndry_ij;
+      hypre_SStructMatrixBoundaryToUMatrix(A, grid, &A_struct_bndry_ij, 1);
+      hypre_ParCSRMatrix *A_struct_bndry = hypre_IJMatrixObject(A_struct_bndry_ij);
 
 #if INTERP_TYPE
       /* Add structured boundary portion to unstructured portion */
-      hypre_ParCSRMatrixAdd(1.0, A_bndry, 1.0, A_u, &A_u_aug);
+      hypre_ParCSRMatrix *A_bndry;
+      hypre_ParCSRMatrixAdd(1.0, A_struct_bndry, 1.0, A_u, &A_bndry);
+
+      /* WM: todo - I'm adding a zero diagonal here because if BoomerAMG interpolation gets a */
+      /* totally empty matrix (no nonzeros and a NULL data array) you run into seg faults... this is kind of a dirty fix for now */
+      hypre_ParCSRMatrix *zero = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A_u),
+                                                            hypre_ParCSRMatrixGlobalNumRows(A_u),
+                                                            hypre_ParCSRMatrixGlobalNumCols(A_u),
+                                                            hypre_ParCSRMatrixRowStarts(A_u),
+                                                            hypre_ParCSRMatrixRowStarts(A_u),
+                                                            0,
+                                                            hypre_ParCSRMatrixNumRows(A_u),
+                                                            0);
+      hypre_ParCSRMatrixInitialize(zero);
+      hypre_CSRMatrix *zero_diag = hypre_ParCSRMatrixDiag(zero);
+      for (i = 0; i < hypre_CSRMatrixNumRows(zero_diag); i++)
+      {
+         hypre_CSRMatrixI(zero_diag)[i] = i;
+         hypre_CSRMatrixJ(zero_diag)[i] = i;
+         hypre_CSRMatrixData(zero_diag)[i] = 0.0;
+      }
+      hypre_CSRMatrixI(zero_diag)[ hypre_CSRMatrixNumRows(zero_diag) ] = hypre_CSRMatrixNumRows(zero_diag);
+      hypre_ParCSRMatrixAdd(1.0, zero, 1.0, A_bndry, &A_u_aug);
+      hypre_ParCSRMatrixDestroy(zero);
 #else
       /* Extract diagonal along boundaries and add to A_u */
       hypre_ParCSRMatrix *diag_A_u = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A_u),
@@ -498,14 +522,13 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          hypre_CSRMatrixJ(diag_A_u_diag)[i] = i;
       }
       hypre_CSRMatrixI(diag_A_u_diag)[ hypre_CSRMatrixNumRows(diag_A_u_diag) ] = hypre_CSRMatrixNumRows(diag_A_u_diag);
-      hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A_bndry), hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(diag_A_u)), 0);
+      hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A_struct_bndry), hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(diag_A_u)), 0);
       hypre_ParCSRMatrixAdd(1.0, diag_A_u, 1.0, A_u, &A_u_aug);
       hypre_ParCSRMatrixDestroy(diag_A_u);
 #endif
 
       /* WM: debug */
       /* hypre_ParCSRMatrixPrintIJ(A_u_aug, 0, 0, "A_u_aug"); */
-      /* hypre_ParCSRMatrixPrintIJ(A_bndry, 0, 0, "A_bndry"); */
 
       /* WM: todo - get CF splitting (and strength matrix) */
       HYPRE_Int *CF_marker = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A_u), HYPRE_MEMORY_DEVICE);
@@ -624,7 +647,9 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
       /* WM: debug */
       /* FILE    *fp; */
-      /* fp = fopen("CF_marker.txt", "w"); */
+      /* char filename[256]; */
+      /* hypre_sprintf(filename, "CF_marker_%d.txt", my_id); */
+      /* fp = fopen(filename, "w"); */
       /* for (i = 0; i < hypre_ParCSRMatrixNumRows(A_u); i++) */
       /* { */
       /*    hypre_fprintf(fp, "%d, %d\n", i, CF_marker[i]); */
@@ -678,7 +703,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       hypre_IJMatrixSetObject(hypre_SStructMatrixIJMatrix(P), P_u);
 
       /* Clean up */
-      HYPRE_IJMatrixDestroy(A_bndry_ij);
+      HYPRE_IJMatrixDestroy(A_struct_bndry_ij);
       hypre_ParCSRMatrixDestroy(A_u_aug);
    }
 

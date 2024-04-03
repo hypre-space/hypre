@@ -451,7 +451,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix      *A,
    /* WM: debug */
    /* FILE *file; */
    /* char filename[256]; */
-   /* hypre_sprintf(filename, "fine_to_coarse.txt"); */
+   /* hypre_sprintf(filename, "fine_to_coarse_%d.txt", my_id); */
    /* file = fopen(filename, "w"); */
    /* for (i = 0; i < n_fine; i++) */
    /* { */
