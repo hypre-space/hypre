@@ -149,10 +149,6 @@ set(SRCS
   par_mgr_device.c
 )
 
-if (HYPRE_USING_DSUPERLU)
-  list(APPEND SRCS dsuperlu.c)
-endif()
-
 target_sources(${PROJECT_NAME}
   PRIVATE ${SRCS}
           ${HDRS}
@@ -187,6 +183,7 @@ if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
     par_relax_device.c
     par_mgr_device.c
     par_fsai_device.c
+    dsuperlu.c
   )
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)
