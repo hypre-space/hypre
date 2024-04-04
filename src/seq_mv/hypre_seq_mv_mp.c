@@ -293,7 +293,7 @@ hypre_SeqVectorConvert_mp (hypre_Vector_mp *v,
          default:
             hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
       }
-      free(data);
+      hypre_Free_dbl(data, memory_location);
       hypre_VectorData(v) = data_mp;
       hypre_VectorPrecision(v) = new_precision;
    }
@@ -411,7 +411,7 @@ hypre_CSRMatrixConvert_mp (hypre_CSRMatrix_mp *A,
          default:
             hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
       }
-      free(data);
+      hypre_Free_dbl(data, memory_location);
       hypre_CSRMatrixData(A) = data_mp;
       hypre_CSRMatrixPrecision(A) = new_precision;
    }
