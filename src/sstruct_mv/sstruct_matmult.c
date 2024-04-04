@@ -844,7 +844,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
       HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_sA);
 
       m = terms[2];
-      hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_tmp, 4);
+      hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_tmp, 2);
       HYPRE_IJMatrixGetObject(ij_tmp, (void **) &parcsr_sP);
 
       if (!hypre_ParCSRMatrixCommPkg(parcsr_sP))
@@ -875,7 +875,9 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
       m = terms[nterms - 1];
       ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
       HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uMold);
-      hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_sA[m], 4);
+      /* WM: todo - converting the whole matrix for now to be safe... */
+      /* hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_sA[m], 4); */
+      ij_sA[m] = hypre_SStructMatrixToUMatrix(matrices[m], 0);
       HYPRE_IJMatrixGetObject(ij_sA[m], (void **) &parcsr_sMold);
 
 #if defined(DEBUG_MATMULT)
@@ -896,7 +898,9 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
             graph = hypre_SStructMatrixGraph(matrices[terms[t + 1]]);
             grid  = hypre_SStructGraphGrid(graph);
 
-            hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_sA[m], 4);
+            /* WM: todo - converting the whole matrix for now to be safe... */
+            /* hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_sA[m], 4); */
+            ij_sA[m] = hypre_SStructMatrixToUMatrix(matrices[m], 0);
          }
          HYPRE_IJMatrixGetObject(ij_sA[m], (void **) &parcsr_sA);
 #if defined(DEBUG_MATMULT)
@@ -1023,13 +1027,14 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_IJMatrixAssembleFlag(ij_M) = 1;
 
    /* WM: should I do this here? What tolerance? Smarter way to avoid a bunch of zero entries? */
-   hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(parcsr_uM), 1e-9);
+   /* WM: todo - CAREFUL HERE! This can screw things up if you throw away entries that are actually non-trivial and should be there... */
+   hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(parcsr_uM), 1e-15);
    if (delete_zeros)
    {
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(parcsr_uM));
       hypre_ParCSRMatrixDiag(parcsr_uM) = delete_zeros;
    }
-   delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(parcsr_uM), 1e-9);
+   delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(parcsr_uM), 1e-15);
    if (delete_zeros)
    {
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(parcsr_uM));
