@@ -92,7 +92,7 @@ def process(args, section_A, section_B):
 
 def main():
     parser = argparse.ArgumentParser(description="Check and update CMakeLists based on the contents of Makefile")
-    parser.add_argument("-f", "--folder", help="Folder path")
+    parser.add_argument("-f", "--folder", required=True, help="Folder path")
     parser.add_argument("-v", "--verbose", action="store_true", help="Turn on verbose mode")
     args = parser.parse_args()
 
