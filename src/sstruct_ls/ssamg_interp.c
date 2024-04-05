@@ -534,9 +534,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          hypre_ParCSRMatrixDestroy(diag_A_u);
       }
 
-      /* WM: debug */
-      /* hypre_ParCSRMatrixPrintIJ(A_u_aug, 0, 0, "A_u_aug"); */
-
       /* WM: todo - get CF splitting (and strength matrix) */
       HYPRE_Int *CF_marker = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A_u), HYPRE_MEMORY_DEVICE);
 
@@ -548,9 +545,12 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       }
 
       /* Loop over parts */
-      HYPRE_Int cf_index = 0;
+      HYPRE_Int box_start_index = 0;
       for (part = 0; part < nparts; part++)
       {
+         pgrid = hypre_SStructGridPGrid(grid, part);
+         nvars = hypre_SStructPGridNVars(pgrid);
+
          A_p   = hypre_SStructMatrixPMatrix(A, part);
          cdir  = cdir_p[part];
          /* hypre_printf("WM: debug - cdir = %d\n", cdir); */
@@ -608,6 +608,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
                /* Get the loop size */
                /* WM: double check this: loop size and start correct in all cases? */
+               /* WM: todo - what if there are multiple boxes per part??? Does this approach still work? */
                hypre_BoxGetStrideSize(shrink_box, stride, loop_size);
 
                /* hypre_printf("WM: debug - compute_box = (%d, %d, %d) x (%d, %d, %d)\n", */
@@ -642,12 +643,109 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                hypre_BoxLoop1Begin(ndim, loop_size, compute_box, shrink_start, stride, ii);
                {
                   /* hypre_printf("WM: debug - hypre__I = %d, hypre__J = %d, ii = %d\n", hypre__I, hypre__J, ii); */
-                  CF_marker[cf_index + ii] = -1;
+                  CF_marker[box_start_index + ii] = -1;
                }
-               /* hypre_BoxLoop2End(ii,j); */
                hypre_BoxLoop1End(ii);
-               cf_index += hypre_BoxVolume(compute_box);
-               
+
+               /* Zero out rows of A_u_aug that are away from the boundary */
+               /* WM: todo - this isn't right... I need to only shrink away from the part boundary... */ 
+               /* not in all dimensions... this is what pbnd gives me? But I need to figure out how to use it. */
+               /* shrink_box = hypre_BoxClone(compute_box); */
+               /* hypre_IndexX(stride) = 1; */
+               /* hypre_IndexY(stride) = 1; */
+               /* hypre_IndexZ(stride) = 1; */
+               /* hypre_IndexX(grow_index) = -2; */
+               /* hypre_IndexY(grow_index) = -2; */
+               /* hypre_IndexZ(grow_index) = -2; */
+               /* hypre_BoxGrowByIndex(shrink_box, grow_index); */
+               /* shrink_start = hypre_BoxIMin(shrink_box); */
+               /* hypre_BoxGetStrideSize(shrink_box, stride, loop_size); */
+
+               /* HYPRE_Int *A_u_aug_diag_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A_u_aug)); */
+               /* HYPRE_Int *A_u_aug_offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(A_u_aug)); */
+               /* HYPRE_Complex *A_u_aug_diag_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A_u_aug)); */
+               /* HYPRE_Complex *A_u_aug_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(A_u_aug)); */
+
+               /* hypre_printf("WM: debug - compute_box = (%d, %d, %d) x (%d, %d, %d)\n", */
+               /*       hypre_BoxIMin(compute_box)[0], */
+               /*       hypre_BoxIMin(compute_box)[1], */
+               /*       hypre_BoxIMin(compute_box)[2], */
+               /*       hypre_BoxIMax(compute_box)[0], */
+               /*       hypre_BoxIMax(compute_box)[1], */
+               /*       hypre_BoxIMax(compute_box)[2]); */
+               /* hypre_printf("WM: debug - shrink_box = (%d, %d, %d) x (%d, %d, %d)\n", */
+               /*       hypre_BoxIMin(shrink_box)[0], */
+               /*       hypre_BoxIMin(shrink_box)[1], */
+               /*       hypre_BoxIMin(shrink_box)[2], */
+               /*       hypre_BoxIMax(shrink_box)[0], */
+               /*       hypre_BoxIMax(shrink_box)[1], */
+               /*       hypre_BoxIMax(shrink_box)[2]); */
+
+               /* hypre_printf("WM: debug - stride = (%d, %d, %d)\n", */
+               /*       stride[0], */
+               /*       stride[1], */
+               /*       stride[2]); */
+               /* hypre_printf("WM: debug - shrink_start = (%d, %d, %d)\n", */
+               /*       shrink_start[0], */
+               /*       shrink_start[1], */
+               /*       shrink_start[2]); */
+               /* hypre_printf("WM: debug - loop_size = (%d, %d, %d)\n", */
+               /*       loop_size[0], */
+               /*       loop_size[1], */
+               /*       loop_size[2]); */
+
+               /* hypre_BoxLoop1Begin(ndim, loop_size, compute_box, shrink_start, stride, ii); */
+               /* { */
+               /*    hypre_printf("WM: debug - hypre__I = %d, hypre__J = %d, ii = %d\n", hypre__I, hypre__J, ii); */
+               /*    for (j = A_u_aug_diag_i[box_start_index + ii]; j < A_u_aug_diag_i[box_start_index + ii + 1]; j++) */
+               /*    { */
+               /*       hypre_printf("WM: debug - setting diag to zero\n"); */
+               /*       A_u_aug_diag_data[j] = 0.0; */
+               /*    } */
+               /*    for (j = A_u_aug_offd_i[box_start_index + ii]; j < A_u_aug_offd_i[box_start_index + ii + 1]; j++) */
+               /*    { */
+               /*       hypre_printf("WM: debug - setting offd to zero\n"); */
+               /*       A_u_aug_offd_data[j] = 0.0; */
+               /*    } */
+               /* } */
+               /* hypre_BoxLoop1End(ii); */
+
+               /* Increment box start index */
+               box_start_index += hypre_BoxVolume(compute_box);
+            }
+         }
+      }
+
+
+      /* WM: todo - this is kind of a hacky workaround for now... just looping through */
+      /* A_u_aug and looking for missing/negative diagonals and removing those rows */
+      HYPRE_Int *A_u_aug_diag_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A_u_aug));
+      HYPRE_Int *A_u_aug_offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(A_u_aug));
+      HYPRE_Int *A_u_aug_diag_j = hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(A_u_aug));
+      HYPRE_Complex *A_u_aug_diag_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A_u_aug));
+      HYPRE_Complex *A_u_aug_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(A_u_aug));
+      HYPRE_Int zero_this_row;
+
+      for (i = 0; i < hypre_ParCSRMatrixNumRows(A_u_aug); i++)
+      {
+         /* Zero out the row unless you find a positive diagonal element */
+         zero_this_row = 1;
+         for (j = A_u_aug_diag_i[i]; j < A_u_aug_diag_i[i+1]; j++)
+         {
+            if (A_u_aug_diag_j[j] == i && A_u_aug_diag_data[j] > 0.0)
+            {
+               zero_this_row = 0;
+            }
+         }
+         if (zero_this_row)
+         {
+            for (j = A_u_aug_diag_i[i]; j < A_u_aug_diag_i[i+1]; j++)
+            {
+               A_u_aug_diag_data[j] = 0.0;
+            }
+            for (j = A_u_aug_offd_i[i]; j < A_u_aug_offd_i[i+1]; j++)
+            {
+               A_u_aug_offd_data[j] = 0.0;
             }
          }
       }
@@ -663,10 +761,13 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       /* } */
       /* fclose(fp); */
 
+      /* WM: debug */
+      /* hypre_ParCSRMatrixPrintIJ(A_u_aug, 0, 0, "A_u_aug"); */
+
       /* Generate unstructured interpolation */
       HYPRE_Int debug_flag = 0;
       HYPRE_Real trunc_factor = 0.0;
-      HYPRE_Int max_elmts = 0;
+      HYPRE_Int max_elmts = 4;
       hypre_BoomerAMGBuildInterp(A_u_aug,
                                  CF_marker,
                                  A_u_aug, /* WM: todo - do I need to do any strength measure here? */
@@ -689,14 +790,14 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          }
       }
 
-      /* WM: should I do this here? What tolerance? Smarter way to avoid a bunch of zero entries? */
-      hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(P_u), 1e-9);
+      /* WM: todo - should I do this here? What tolerance? Smarter way to avoid a bunch of zero entries? */
+      hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(P_u), 1e-20);
       if (delete_zeros)
       {
          hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(P_u));
          hypre_ParCSRMatrixDiag(P_u) = delete_zeros;
       }
-      delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(P_u), 1e-9);
+      delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(P_u), 1e-20);
       if (delete_zeros)
       {
          hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(P_u));

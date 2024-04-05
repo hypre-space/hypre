@@ -1028,13 +1028,13 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
 
    /* WM: should I do this here? What tolerance? Smarter way to avoid a bunch of zero entries? */
    /* WM: todo - CAREFUL HERE! This can screw things up if you throw away entries that are actually non-trivial and should be there... */
-   hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(parcsr_uM), 1e-15);
+   hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(parcsr_uM), 1e-20);
    if (delete_zeros)
    {
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(parcsr_uM));
       hypre_ParCSRMatrixDiag(parcsr_uM) = delete_zeros;
    }
-   delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(parcsr_uM), 1e-15);
+   delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(parcsr_uM), 1e-20);
    if (delete_zeros)
    {
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(parcsr_uM));

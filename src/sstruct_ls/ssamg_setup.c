@@ -495,7 +495,50 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
          HYPRE_IJMatrixGetObject(ij_A[1], (void **) &par_A[1]);
          HYPRE_IJMatrixGetObject(ij_P, (void **) &par_P);
 
-         par_AP  = hypre_ParMatmul(par_A[0], par_P);
+         /* WM: debug */
+         HYPRE_Int i, j;
+         HYPRE_Real min_rowsum = 0.0;
+         HYPRE_Real max_rowsum = 0.0;
+         HYPRE_Real rowsum = 0.0;
+
+         hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(par_P);
+         hypre_CSRMatrix *P_offd = hypre_ParCSRMatrixOffd(par_P);
+         HYPRE_Int *P_diag_i = hypre_CSRMatrixI(P_diag);
+         HYPRE_Complex *P_diag_data = hypre_CSRMatrixData(P_diag);
+         HYPRE_Int *P_offd_i = hypre_CSRMatrixI(P_offd);
+         HYPRE_Complex *P_offd_data = hypre_CSRMatrixData(P_offd);
+         if (hypre_CSRMatrixNumRows(P_diag))
+         {
+            for (j = P_diag_i[0]; j < P_diag_i[1]; j++)
+            {
+               min_rowsum += P_diag_data[j];
+            }
+            for (j = P_offd_i[0]; j < P_offd_i[1]; j++)
+            {
+               min_rowsum += P_offd_data[j];
+            }
+
+            max_rowsum = min_rowsum;
+
+            for (j = 0; j < hypre_CSRMatrixNumRows(P_diag); j++)
+            {
+               rowsum = 0.0;
+               for (i = P_diag_i[j]; i < P_diag_i[j + 1]; i++)
+               {
+                  rowsum += P_diag_data[i];
+               }
+
+               for (i = P_offd_i[j]; i < P_offd_i[j + 1]; i++)
+               {
+                  rowsum += P_offd_data[i];
+               }
+
+               min_rowsum = hypre_min(rowsum, min_rowsum);
+               max_rowsum = hypre_max(rowsum, max_rowsum);
+            }
+         }
+         hypre_printf("WM: debug - min/max rowsum of P = %.2e , %.2e\n", min_rowsum, max_rowsum);
+
          par_RAP = hypre_ParTMatmul(par_P, par_AP);
 
          hypre_ParCSRMatrixAdd(1.0, par_RAP, -1.0, par_A[1], &par_B);
