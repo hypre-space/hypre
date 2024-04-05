@@ -118,6 +118,14 @@ hypre_MGRSetup( void               *mgr_vdata,
 
    HYPRE_Int    reserved_coarse_size = (mgr_data -> reserved_coarse_size);
 
+   /* ILU smoother options */
+   HYPRE_Int *level_ilu_type = (mgr_data -> level_ilu_type);
+   HYPRE_Int *level_ilu_lfil = (mgr_data -> level_ilu_lfil);
+   HYPRE_Real *level_ilu_droptol = (mgr_data -> level_ilu_droptol);
+   HYPRE_Int *level_ilu_max_rownnz = (mgr_data -> level_ilu_max_rownnz);
+   HYPRE_Int *level_ilu_local_reordering = (mgr_data -> level_ilu_local_reordering);
+
+
    HYPRE_Int      num_procs,  my_id;
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int             n       = hypre_CSRMatrixNumRows(A_diag);
@@ -1051,16 +1059,58 @@ hypre_MGRSetup( void               *mgr_vdata,
             HYPRE_EuclidSetBJ(level_smoother[lev], 1);
             HYPRE_EuclidSetup(level_smoother[lev], A_array[lev], NULL, NULL);
          }
-         else if (level_smooth_type[lev] == 16)
+         else if (level_smooth_type[lev] == 16)  /* TODO (VPM): Option 16 should be for Chebyshev */
          {
-            /* TODO (VPM): Option 16 should be for Chebyshev */
             HYPRE_ILUCreate(&(level_smoother[lev]));
-            HYPRE_ILUSetType(level_smoother[lev], 0);
-            HYPRE_ILUSetLevelOfFill(level_smoother[lev], 0);
+            
+            /* ilu_type */
+            if (level_ilu_type != NULL)
+            {
+               HYPRE_ILUSetType(level_smoother[lev], level_ilu_type[lev]);
+            }
+            else
+            {
+               HYPRE_ILUSetType(level_smoother[lev], hypre_ParMGRDataILUType(mgr_data));            
+            }
+            /* lfil (ILUK) */
+            if (level_ilu_lfil != NULL)
+            {
+               HYPRE_ILUSetLevelOfFill(level_smoother[lev], level_ilu_lfil[lev]);
+            }
+            else
+            {
+               HYPRE_ILUSetLevelOfFill(level_smoother[lev], hypre_ParMGRDataILUFillLevel(mgr_data));            
+            }
+            /* max_rownnz (ILUT) */
+            if (level_ilu_max_rownnz != NULL)
+            {
+               HYPRE_ILUSetMaxNnzPerRow(level_smoother[lev], level_ilu_max_rownnz[lev]);
+            }
+            else
+            {
+               HYPRE_ILUSetMaxNnzPerRow(level_smoother[lev], hypre_ParMGRDataILUMaxRowNnz(mgr_data));            
+            }
+            /* droptol (ILUT) */
+            if (level_ilu_droptol != NULL)
+            {
+               HYPRE_ILUSetDropThreshold(level_smoother[lev], level_ilu_droptol[lev]);
+            }
+            else
+            {
+               HYPRE_ILUSetDropThreshold(level_smoother[lev], hypre_ParMGRDataILUDroptol(mgr_data));            
+            }
+            /* local_reordering (RCM) */
+            if (level_ilu_local_reordering != NULL)
+            {
+               HYPRE_ILUSetLocalReordering(level_smoother[lev], level_ilu_local_reordering[lev]);
+            }
+            else
+            {
+               HYPRE_ILUSetLocalReordering(level_smoother[lev], hypre_ParMGRDataILULocalReordering(mgr_data));            
+            }
+
             HYPRE_ILUSetMaxIter(level_smoother[lev], level_smooth_iters[lev]);
             HYPRE_ILUSetTol(level_smoother[lev], 0.0);
-            HYPRE_ILUSetLocalReordering(level_smoother[lev], 0);
-            HYPRE_ILUSetup(level_smoother[lev], A_array[lev], NULL, NULL);
          }
          else
          {

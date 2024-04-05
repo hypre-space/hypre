@@ -4497,14 +4497,14 @@ HYPRE_MGRSetLevelILUType( HYPRE_Solver solver,
  * (Optional) Set the fill level of the ILU smoother to use.
  **/
 HYPRE_Int
-HYPRE_MGRSetILULevel( HYPRE_Solver solver,
+HYPRE_MGRSetILULevelOfFill( HYPRE_Solver solver,
                       HYPRE_Int ilu_lfil);
 
 /**
  * (Optional) Set the fill level of the ILU smoother for each MGR level.
  **/
 HYPRE_Int
-HYPRE_MGRSetLevelILULevel( HYPRE_Solver solver,
+HYPRE_MGRSetLevelILULevelOfFill( HYPRE_Solver solver,
                       HYPRE_Int *level_ilu_lfil);
 
 /**
@@ -4521,20 +4521,6 @@ HYPRE_MGRSetILUMaxRowNnz( HYPRE_Solver solver,
 HYPRE_Int
 HYPRE_MGRSetLevelILUMaxRowNnz( HYPRE_Solver solver,
                                HYPRE_Int *ilu_max_row_nnz);
-
-/**
- * (Optional) Set the max. number of sweeps for the ILU smoother.
- **/
-HYPRE_Int
-HYPRE_MGRSetILUMaxIter( HYPRE_Solver solver,
-                        HYPRE_Int ilu_max_iter);
-
-/**
- * (Optional) Set the max. number of sweeps for the ILU smoother at each MGR level.
- **/
-HYPRE_Int
-HYPRE_MGRSetLevelILUMaxIter( HYPRE_Solver solver,
-                              HYPRE_Int *ilu_max_iter);
 
 /**
  * (Optional) Set the drop tolerance for the ILU smoother.

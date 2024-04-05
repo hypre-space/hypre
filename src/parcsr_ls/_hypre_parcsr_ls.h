@@ -3693,7 +3693,7 @@ HYPRE_Int hypre_MGRSetTol( void *mgr_vdata, HYPRE_Real tol );
 HYPRE_Int hypre_MGRSetILUType( void *vdata, HYPRE_Int ilu_type );
 HYPRE_Int hypre_MGRSetLevelILUType( void *vdata, HYPRE_Int *ilu_type );
 HYPRE_Int hypre_MGRSetILULevel( void *data, HYPRE_Int ilu_lfil );
-HYPRE_Int hypre_MGRSetLevelILULevel( void *data, HYPRE_Int *ilu_lfil );
+HYPRE_Int hypre_MGRSetLevelILULevelOfFill( void *data, HYPRE_Int *ilu_lfil );
 HYPRE_Int hypre_MGRSetILUDroptol( void *data, HYPRE_Real ilu_droptol );
 HYPRE_Int hypre_MGRSetLevelILUDroptol( void *data, HYPRE_Real *ilu_droptol );
 HYPRE_Int hypre_MGRSetMaxIter( void *data, HYPRE_Int ilu_max_iter );

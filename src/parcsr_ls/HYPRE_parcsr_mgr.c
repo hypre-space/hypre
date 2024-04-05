@@ -654,14 +654,14 @@ HYPRE_MGRSetILULevel( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetLevelILULevel
+ * HYPRE_MGRSetLevelILULevelOfFill
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetLevelILULevel( HYPRE_Solver  solver,
+HYPRE_MGRSetLevelILULevelOfFill( HYPRE_Solver  solver,
                             HYPRE_Int         *ilu_lfil)
 {
-   return ( hypre_MGRSetLevelILULevel( (void *) solver, ilu_lfil ) );
+   return ( hypre_MGRSetLevelILULevelOfFill( (void *) solver, ilu_lfil ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -683,29 +683,7 @@ HYPRE_Int
 HYPRE_MGRSetLevelILUMaxRowNnz( HYPRE_Solver  solver,
                                 HYPRE_Int        * ilu_max_row_nnz)
 {
-   return ( hypre_MGRsetLevelILUMaxRowNnz( (void *) solver, ilu_max_row_nnz ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_MGRSetILUMaxIter
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_MGRSetILUMaxIter( HYPRE_Solver  solver,
-                              HYPRE_Int         ilu_max_iter)
-{
-   return ( hypre_MGRSetILUMaxIter( (void *) solver, ilu_max_iter ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_MGRSetLevelILUMaxIter
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_MGRSetLevelILUMaxIter( HYPRE_Solver  solver,
-                              HYPRE_Int         *ilu_max_iter)
-{
-   return ( hypre_MGRSetLevelILUMaxIter( (void *) solver, ilu_max_iter ) );
+   return ( hypre_MGRSetLevelILUMaxRowNnz( (void *) solver, ilu_max_row_nnz ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -749,5 +727,5 @@ HYPRE_Int
 HYPRE_MGRSetLevelILULocalReordering( HYPRE_Solver  solver,
                                       HYPRE_Int         *ilu_reordering_type)
 {
-   return ( hypre_MGRSetILULocalReordering( (void *) solver, ilu_reordering_type ) );
+   return ( hypre_MGRSetLevelILULocalReordering( (void *) solver, ilu_reordering_type ) );
 }

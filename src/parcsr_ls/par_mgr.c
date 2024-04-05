@@ -150,6 +150,20 @@ hypre_MGRCreate(void)
 
    (mgr_data -> GSElimData) = NULL;
 
+   /* ILU smoother options */
+   (mgr_data -> level_ilu_type) = NULL;
+   (mgr_data -> level_ilu_lfil) = NULL;
+   (mgr_data -> level_ilu_droptol) = NULL;
+   (mgr_data -> level_ilu_local_reordering) = NULL;
+   (mgr_data -> level_ilu_max_rownnz) = NULL;
+   
+   /* defaults */
+   hypre_ParMGRDataILUType(mgr_data) = 0;
+   hypre_ParMGRDataILUFillLevel(mgr_data) = 0;
+   hypre_ParMGRDataILUMaxRowNnz(mgr_data) = 1000;
+   hypre_ParMGRDataILUDroptol(mgr_data) = 1.0e-2;
+   hypre_ParMGRDataILULocalReordering(mgr_data) = 1;
+
    return (void *) mgr_data;
 }
 
@@ -454,6 +468,13 @@ hypre_MGRDestroy( void *data )
    hypre_TFree(mgr_data -> level_smooth_type, HYPRE_MEMORY_HOST);
    hypre_TFree(mgr_data -> level_smooth_iters, HYPRE_MEMORY_HOST);
    hypre_TFree(mgr_data -> num_relax_sweeps, HYPRE_MEMORY_HOST);
+
+   /* free level data for ILU */
+   hypre_TFree(mgr_data -> level_ilu_type, HYPRE_MEMORY_HOST);
+   hypre_TFree(mgr_data -> level_ilu_lfil, HYPRE_MEMORY_HOST);
+   hypre_TFree(mgr_data -> level_ilu_droptol, HYPRE_MEMORY_HOST);
+   hypre_TFree(mgr_data -> level_ilu_max_rownnz, HYPRE_MEMORY_HOST);
+   hypre_TFree(mgr_data -> level_ilu_local_reordering, HYPRE_MEMORY_HOST);
 
    if (mgr_data -> GSElimData)
    {
@@ -4627,7 +4648,7 @@ hypre_MGRSetLevelILUType( void     *data,
 }
 
 HYPRE_Int
-hypre_MGRSetILULevel( void     *data,
+hypre_MGRSetILULevelOfFill( void     *data,
                             HYPRE_Int       ilu_lfil)
 {
    hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) data;
@@ -4643,7 +4664,7 @@ hypre_MGRSetILULevel( void     *data,
 }
 
 HYPRE_Int
-hypre_MGRSetLevelILULevel( void     *data,
+hypre_MGRSetLevelILULevelOfFill( void     *data,
                             HYPRE_Int       *ilu_lfil)
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) data;
@@ -4697,44 +4718,6 @@ hypre_MGRSetLevelILUDroptol( void     *data,
          level_ilu_droptol[i] = ilu_droptol[i];
       }
       (mgr_data -> level_ilu_droptol) = level_ilu_droptol;
-   }
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_MGRSetILUMaxIter( void     *data,
-                              HYPRE_Int       ilu_max_iter)
-{
-   hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) data;
-
-   if (!mgr_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-   hypre_ParMGRDataILUMaxIter(mgr_data) = ilu_max_iter;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_MGRSetLevelMaxIter( void     *data,
-                              HYPRE_Int       *ilu_max_iter)
-{
-   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) data;
-   HYPRE_Int i;
-   HYPRE_Int max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
-   hypre_TFree((mgr_data -> level_ilu_maxiter), HYPRE_MEMORY_HOST);
-
-   if (ilu_max_iter != NULL)
-   {
-      HYPRE_Int *level_ilu_maxiter = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < max_num_coarse_levels; i++)
-      {
-         level_ilu_maxiter[i] = ilu_max_iter[i];
-      }
-      (mgr_data -> level_ilu_maxiter) = level_ilu_maxiter;
    }
 
    return hypre_error_flag;
