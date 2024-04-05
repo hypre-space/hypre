@@ -47,7 +47,7 @@ save="lassen"
 
 ######################
 ##   DEFAULT CUDA   ##
-##  (cuda/10.1.243) ##
+##  (cuda/11.2.0)   ##
 ######################
 
 module -q load cuda
@@ -96,7 +96,7 @@ ro="-struct -rt -mpibind -save ${save}"
 ./renametest.sh basic $output_dir/basic-cuda-nonum
 
 # CUDA without UM with umpire [benchmark]
-UMPIRE_DIR=/usr/workspace/hypre/ext-libs/Umpire/2022.03.1-nvcc10.1.243-sm_70-xl2021.09.22
+UMPIRE_DIR=/usr/workspace/hypre/ext-libs/Umpire/2022.03.1-nvcc11.2-sm_70-xl2023.06.28-cuda-11.2.0-gcc-8.3.1
 co="--with-cuda --with-gpu-arch=70 --with-umpire --with-umpire-include=${UMPIRE_DIR}/include --with-umpire-lib-dirs=${UMPIRE_DIR}/lib --with-umpire-libs=umpire --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 ro="-bench -rt -mpibind -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
@@ -146,21 +146,21 @@ co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_
 
 #######################
 ## latest CUDA tests ##
-##    cuda/12.0.0    ##
+##    cuda/12.2.2    ##
 #######################
 
 rtol="1e-2"
 atol="1e-6"
 mo="-j test"
 
-# CUDA 12.0 + GCC with UM in debug mode, thrust nosync [ij, ams, struct, sstruct]
+# CUDA 12.2.2 + GCC with UM in debug mode, thrust nosync [ij, ams, struct, sstruct]
 module -q load gcc/8.3.1
-module -q load cuda/12.0
-module list cuda/12.0 |& grep "None found"
+module -q load cuda/12.2.2
+module list cuda/12.2.2 |& grep "None found"
 co="--with-cuda --enable-unified-memory --enable-thrust-nosync --enable-debug --with-gpu-arch=70 CC=mpicc CXX=mpicxx"
 ro="-ij-gpu -ams -struct -sstruct -rt -mpibind -save ${save} -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
-./renametest.sh basic $output_dir/basic-cuda12_0
+./renametest.sh basic $output_dir/basic-cuda12_2_2
 
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )
