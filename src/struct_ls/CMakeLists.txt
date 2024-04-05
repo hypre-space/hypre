@@ -73,6 +73,8 @@ set(SRCS
   sparse_msg_setup.c
   sparse_msg_setup_rap.c
   sparse_msg_solve.c
+  F90_HYPRE_struct_flexgmres.c
+  F90_HYPRE_struct_lgmres.c
 )
 target_sources(${PROJECT_NAME}
   PRIVATE ${SRCS}
