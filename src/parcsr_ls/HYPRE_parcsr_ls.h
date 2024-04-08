@@ -4444,6 +4444,19 @@ HYPRE_MGRSetLevelSmoothType( HYPRE_Solver solver,
                              HYPRE_Int *smooth_type );
 
 /**
+ * (Optional) Set the global smoother solver at a given level.
+ *
+ * @param level [IN] MGR solver level
+ * @param solver [IN] MGR solver/preconditioner object
+ * @param fsolver [IN] Global smoother solver object
+ **/
+
+HYPRE_Int
+HYPRE_MGRSetGlobalSmootherAtLevel( HYPRE_Int     level,
+                                   HYPRE_Solver  solver,
+                                   HYPRE_Solver  smoother );
+
+/**
  * (Optional) Return the number of MGR iterations.
  **/
 HYPRE_Int

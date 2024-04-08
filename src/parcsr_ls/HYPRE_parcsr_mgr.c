@@ -533,9 +533,11 @@ HYPRE_MGRSetMaxGlobalSmoothIters( HYPRE_Solver solver, HYPRE_Int max_iter )
 {
    return hypre_MGRSetMaxGlobalSmoothIters(solver, max_iter);
 }
+
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetLevelsmoothIters
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver solver,
                               HYPRE_Int *smooth_iters )
@@ -546,28 +548,45 @@ HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver solver,
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetGlobalsmoothType
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 HYPRE_MGRSetGlobalSmoothType( HYPRE_Solver solver, HYPRE_Int smooth_type )
 {
    return hypre_MGRSetGlobalSmoothType(solver, smooth_type);
 }
+
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetLevelsmoothType
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 HYPRE_MGRSetLevelSmoothType( HYPRE_Solver solver,
                              HYPRE_Int *smooth_type )
 {
    return hypre_MGRSetLevelSmoothType(solver, smooth_type);
 }
+
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetGlobalSmoothCycle
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 HYPRE_MGRSetGlobalSmoothCycle( HYPRE_Solver solver,
                                HYPRE_Int global_smooth_cycle )
 {
    return hypre_MGRSetGlobalSmoothCycle(solver, global_smooth_cycle);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetGlobalSmootherAtLevel
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetGlobalSmootherAtLevel( HYPRE_Int     level,
+                                   HYPRE_Solver  solver,
+                                   HYPRE_Solver  smoother )
+{
+   return hypre_MGRSetGlobalSmootherAtLevel(level, (void*) solver, smoother);
 }
 
 /*--------------------------------------------------------------------------

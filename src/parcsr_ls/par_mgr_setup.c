@@ -1020,11 +1020,23 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_sprintf(region_name, "Global-Relax");
       hypre_GpuProfilingPushRange(region_name);
       HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
+
+      /* TODO (VPM): Change option types for block-Jacobi and block-GS to 30 and 31 and
+            make them accessible through hypre_BoomerAMGRelax? */
       if (level_smooth_iters[lev] > 0)
       {
          /* TODO (VPM): Change option types for block-Jacobi and block-GS to 30 and 31 and
             make them accessible through hypre_BoomerAMGRelax? */
-         if (level_smooth_type[lev] == 0 || level_smooth_type[lev] == 1)
+         if (level_smoother[lev])
+         {
+            hypre_Solver *smoother_base = (hypre_Solver*) level_smoother[lev];
+
+            /* Call setup function */
+            hypre_SolverSetup(smoother_base)((HYPRE_Solver) level_smoother[lev],
+                                             (HYPRE_Matrix) A_array[lev],
+                                             NULL, NULL);
+         }
+         else if (level_smooth_type[lev] == 0 || level_smooth_type[lev] == 1)
          {
             /* TODO (VPM): move this to hypre_MGRBlockRelaxSetup and change its declaration */
 #if defined (HYPRE_USING_GPU)

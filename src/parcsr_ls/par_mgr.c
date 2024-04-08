@@ -444,6 +444,11 @@ hypre_MGRDestroy( void *data )
             {
                HYPRE_ILUDestroy((mgr_data -> level_smoother)[i]);
             }
+            else if ((mgr_data -> level_smoother)[i])
+            {
+               hypre_Solver *smoother_base = (hypre_Solver*) (mgr_data -> level_smoother)[i];
+               hypre_SolverDestroy(smoother_base)((HYPRE_Solver) mgr_data -> level_smoother);
+            }
          }
       }
       hypre_TFree(mgr_data -> level_smoother, HYPRE_MEMORY_HOST);
@@ -3534,6 +3539,49 @@ hypre_MGRSetLevelSmoothIters( void *mgr_vdata, HYPRE_Int *gsmooth_iters )
       }
    }
    (mgr_data -> level_smooth_iters) = level_smooth_iters;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * MGRSetGlobalSmootherAtLevel
+ *
+ * Set global smoother solver for a given MGR level.
+ *
+ * Note this function asks for a level identifier and doesn't expect an array
+ * of function pointers for each level (as done by SetLevel functions).
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRSetGlobalSmootherAtLevel( HYPRE_Int     level,
+                                   void         *mgr_vdata,
+                                   HYPRE_Solver  smoother )
+{
+   hypre_ParMGRData *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+
+   if (!mgr_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   HYPRE_Int        max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+
+   /* Allocate level_smoother if needed */
+   if (!(mgr_data -> level_smoother))
+   {
+      (mgr_data -> level_smoother) = hypre_CTAlloc(HYPRE_Solver,
+                                                   max_num_coarse_levels,
+                                                   HYPRE_MEMORY_HOST);
+   }
+
+   /* Check if the requested level makes sense */
+   if (level < 0 || level >= max_num_coarse_levels)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   (mgr_data -> level_smoother)[level] = smoother;
+
    return hypre_error_flag;
 }
 
