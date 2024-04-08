@@ -1025,8 +1025,6 @@ hypre_MGRSetup( void               *mgr_vdata,
             make them accessible through hypre_BoomerAMGRelax? */
       if (level_smooth_iters[lev] > 0)
       {
-         /* TODO (VPM): Change option types for block-Jacobi and block-GS to 30 and 31 and
-            make them accessible through hypre_BoomerAMGRelax? */
          if (level_smoother[lev])
          {
             hypre_Solver *smoother_base = (hypre_Solver*) level_smoother[lev];
