@@ -447,7 +447,7 @@ hypre_MGRDestroy( void *data )
             else if ((mgr_data -> level_smoother)[i])
             {
                hypre_Solver *smoother_base = (hypre_Solver*) (mgr_data -> level_smoother)[i];
-               hypre_SolverDestroy(smoother_base)((HYPRE_Solver) mgr_data -> level_smoother);
+               hypre_SolverDestroy(smoother_base)((mgr_data -> level_smoother)[i]);
             }
          }
       }
