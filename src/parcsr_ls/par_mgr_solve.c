@@ -744,6 +744,16 @@ hypre_MGRCycle( void              *mgr_vdata,
                               U_array[fine_grid]);
                hypre_ParVectorAllZeros(U_array[fine_grid]) = 0;
             }
+            else if ((mgr_data -> level_smoother)[fine_grid])
+            {
+               /* User smoother */
+               hypre_Solver *base = (hypre_Solver*) (mgr_data -> level_smoother)[fine_grid];
+
+               hypre_SolverSolve(base)((mgr_data -> level_smoother)[fine_grid],
+                                       (HYPRE_Matrix) A_array[fine_grid],
+                                       (HYPRE_Vector) F_array[fine_grid],
+                                       (HYPRE_Vector) U_array[fine_grid]);
+            }
             else
             {
                /* Generic relaxation interface */
@@ -1213,6 +1223,16 @@ hypre_MGRCycle( void              *mgr_vdata,
                HYPRE_ILUSolve((mgr_data -> level_smoother)[fine_grid],
                               A_array[fine_grid], F_array[fine_grid],
                               U_array[fine_grid]);
+            }
+            else if ((mgr_data -> level_smoother)[fine_grid])
+            {
+               /* User smoother */
+               hypre_Solver *base = (hypre_Solver*) (mgr_data -> level_smoother)[fine_grid];
+
+               hypre_SolverSolve(base)((mgr_data -> level_smoother)[fine_grid],
+                                       (HYPRE_Matrix) A_array[fine_grid],
+                                       (HYPRE_Vector) F_array[fine_grid],
+                                       (HYPRE_Vector) U_array[fine_grid]);
             }
             else
             {

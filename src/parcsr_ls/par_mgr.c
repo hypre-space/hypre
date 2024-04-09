@@ -857,17 +857,6 @@ hypre_MGRSetReservedCoarseNodes(void      *mgr_vdata,
    HYPRE_BigInt *reserved_coarse_indexes = NULL;
    HYPRE_Int i;
 
-   if (!mgr_data)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Warning! MGR object empty!\n");
-      return hypre_error_flag;
-   }
-
-   if (reserved_coarse_size < 0)
-   {
-      hypre_error_in_arg(2);
-      return hypre_error_flag;
-   }
    /* free data not previously destroyed */
    if ((mgr_data -> reserved_coarse_indexes))
    {
@@ -2913,14 +2902,8 @@ hypre_MGRSetFSolver( void  *mgr_vdata,
                      void       *fsolver )
 {
    hypre_ParMGRData *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-
-   if (!mgr_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-   HYPRE_Int max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
-   HYPRE_Solver **aff_solver = (mgr_data -> aff_solver);
+   HYPRE_Int         max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+   HYPRE_Solver    **aff_solver = (mgr_data -> aff_solver);
 
    if (aff_solver == NULL)
    {
@@ -2953,19 +2936,13 @@ hypre_MGRSetFSolverAtLevel( HYPRE_Int   level,
                             void       *fsolver )
 {
    hypre_ParMGRData *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-
-   if (!mgr_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-   HYPRE_Int        max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
-   HYPRE_Solver   **aff_solver = (mgr_data -> aff_solver);
+   HYPRE_Int         max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+   HYPRE_Solver    **aff_solver = (mgr_data -> aff_solver);
 
    /* Check if the requested level makes sense */
    if (level < 0 || level >= max_num_coarse_levels)
    {
-      hypre_error_in_arg(2);
+      hypre_error_in_arg(1);
       return hypre_error_flag;
    }
 
@@ -2985,18 +2962,12 @@ hypre_MGRSetFSolverAtLevel( HYPRE_Int   level,
 
 /* set coarse grid solver */
 HYPRE_Int
-hypre_MGRSetCoarseSolver( void  *mgr_vdata,
+hypre_MGRSetCoarseSolver( void        *mgr_vdata,
                           HYPRE_Int  (*coarse_grid_solver_solve)(void*, void*, void*, void*),
                           HYPRE_Int  (*coarse_grid_solver_setup)(void*, void*, void*, void*),
-                          void  *coarse_grid_solver )
+                          void        *coarse_grid_solver )
 {
    hypre_ParMGRData *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-
-   if (!mgr_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
 
    (mgr_data -> coarse_grid_solver_solve) = coarse_grid_solver_solve;
    (mgr_data -> coarse_grid_solver_setup) = coarse_grid_solver_setup;
@@ -3015,6 +2986,7 @@ hypre_MGRSetMaxCoarseLevels( void *mgr_vdata, HYPRE_Int maxcoarselevs )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    (mgr_data -> max_num_coarse_levels) = maxcoarselevs;
+
    return hypre_error_flag;
 }
 
@@ -3024,6 +2996,7 @@ hypre_MGRSetBlockSize( void *mgr_vdata, HYPRE_Int bsize )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    (mgr_data -> block_size) = bsize;
+
    return hypre_error_flag;
 }
 
@@ -3466,7 +3439,12 @@ hypre_MGRSetMaxGlobalSmoothIters( void *mgr_vdata, HYPRE_Int max_iter )
    return hypre_error_flag;
 }
 
-/* Set global smoothing type for mgr solver */
+/*--------------------------------------------------------------------------
+ * hypre_MGRSetGlobalSmoothType
+ *
+ * Set global smoothing type at the first (finest) MGR level
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_MGRSetGlobalSmoothType( void *mgr_vdata, HYPRE_Int gsmooth_type )
 {
@@ -3487,43 +3465,73 @@ hypre_MGRSetGlobalSmoothType( void *mgr_vdata, HYPRE_Int gsmooth_type )
    return hypre_error_flag;
 }
 
-/* Set global smoothing type for mgr solver */
+/*--------------------------------------------------------------------------
+ * hypre_MGRSetLevelSmoothType
+ *
+ * Set global smoothing type at each MGR level.
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_MGRSetLevelSmoothType( void *mgr_vdata, HYPRE_Int *gsmooth_type )
+hypre_MGRSetLevelSmoothType( void       *mgr_vdata,
+                             HYPRE_Int  *gsmooth_type )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-   HYPRE_Int i;
-   HYPRE_Int max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
-   hypre_TFree((mgr_data -> level_smooth_type), HYPRE_MEMORY_HOST);
+   HYPRE_Int           max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+   HYPRE_Int          *level_smooth_type, i;
+   char                msg[1024];
 
-   HYPRE_Int *level_smooth_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   /* Set level_smooth_type array */
+   level_smooth_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   hypre_TFree((mgr_data -> level_smooth_type), HYPRE_MEMORY_HOST);
    if (gsmooth_type != NULL)
    {
       for (i = 0; i < max_num_coarse_levels; i++)
       {
-         level_smooth_type[i] = gsmooth_type[i];
+         /* For meaningful values of global smoothing type, the option set via
+            hypre_MGRSetGlobalSmootherAtLevel has precedence over the option set
+            via this function. */
+         if ((mgr_data -> level_smoother) && (mgr_data -> level_smoother)[i] &&
+             (gsmooth_type[i] >= 0))
+         {
+            hypre_sprintf(msg, "hypre_MGRSetLevelSmoothType does not take effect at level %d since\n\
+                                hypre_MGRSetGlobalSmootherAtLevel has been called at the same level", i);
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+         }
+         else
+         {
+            level_smooth_type[i] = gsmooth_type[i];
+         }
       }
    }
    else
    {
       for (i = 0; i < max_num_coarse_levels; i++)
       {
-         level_smooth_type[i] = 0;
+         level_smooth_type[i] = 0; // Jacobi
       }
    }
    (mgr_data -> level_smooth_type) = level_smooth_type;
+
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_MGRSetLevelSmoothIters
+ *
+ * Set the number of global smoothing iterations at each MGR level.
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_MGRSetLevelSmoothIters( void *mgr_vdata, HYPRE_Int *gsmooth_iters )
+hypre_MGRSetLevelSmoothIters( void      *mgr_vdata,
+                              HYPRE_Int *gsmooth_iters )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-   HYPRE_Int i;
-   HYPRE_Int max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
-   hypre_TFree((mgr_data -> level_smooth_iters), HYPRE_MEMORY_HOST);
+   HYPRE_Int           max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+   HYPRE_Int          *level_smooth_iters;
+   HYPRE_Int           i;
 
-   HYPRE_Int *level_smooth_iters = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   level_smooth_iters = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   hypre_TFree((mgr_data -> level_smooth_iters), HYPRE_MEMORY_HOST);
    if (gsmooth_iters != NULL)
    {
       for (i = 0; i < max_num_coarse_levels; i++)
@@ -3539,13 +3547,14 @@ hypre_MGRSetLevelSmoothIters( void *mgr_vdata, HYPRE_Int *gsmooth_iters )
       }
    }
    (mgr_data -> level_smooth_iters) = level_smooth_iters;
+
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * MGRSetGlobalSmootherAtLevel
+ * hypre_MGRSetGlobalSmootherAtLevel
  *
- * Set global smoother solver for a given MGR level.
+ * Set global relaxation method for a given MGR level via a HYPRE solver object.
  *
  * Note this function asks for a level identifier and doesn't expect an array
  * of function pointers for each level (as done by SetLevel functions).
@@ -3556,14 +3565,19 @@ hypre_MGRSetGlobalSmootherAtLevel( HYPRE_Int     level,
                                    void         *mgr_vdata,
                                    HYPRE_Solver  smoother )
 {
-   hypre_ParMGRData *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+   hypre_Solver          *base = (hypre_Solver*) smoother;
+   HYPRE_PtrToSolverFcn   setup = hypre_SolverSetup(base);
+   hypre_ParMGRData      *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+   HYPRE_Int              max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+   HYPRE_Int              smoother_type, i;
+   char                   msg[1024];
 
-   if (!mgr_data)
+   /* Check if the requested level makes sense */
+   if (level < 0 || level >= max_num_coarse_levels)
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
-   HYPRE_Int        max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
 
    /* Allocate level_smoother if needed */
    if (!(mgr_data -> level_smoother))
@@ -3573,14 +3587,33 @@ hypre_MGRSetGlobalSmootherAtLevel( HYPRE_Int     level,
                                                    HYPRE_MEMORY_HOST);
    }
 
-   /* Check if the requested level makes sense */
-   if (level < 0 || level >= max_num_coarse_levels)
+   /* Allocate level_smooth_type if needed */
+   if (!(mgr_data -> level_smooth_type))
    {
-      hypre_error_in_arg(2);
-      return hypre_error_flag;
+      (mgr_data -> level_smooth_type) = hypre_CTAlloc(HYPRE_Int,
+                                                      max_num_coarse_levels,
+                                                      HYPRE_MEMORY_HOST);
    }
 
    (mgr_data -> level_smoother)[level] = smoother;
+
+   /* Obtain corresponding smoother type */
+   if (setup == (HYPRE_PtrToSolverFcn) HYPRE_ILUSetup)
+   {
+       smoother_type = 16;
+   }
+   else
+   {
+       smoother_type = -1; /* Unknown smoother */
+   }
+
+   /* Check if level_smooth_type[level] corresponds to the right smoother type */
+   if ((mgr_data -> level_smooth_type)[level] > 0 && (mgr_data -> level_smooth_type)[level] != smoother_type)
+   {
+      hypre_sprintf(msg, "Reseting global relaxation type at level %d to user's smoother", level);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
+   }
+   (mgr_data -> level_smooth_type)[level] = smoother_type;
 
    return hypre_error_flag;
 }
@@ -3637,11 +3670,6 @@ hypre_MGRGetNumIterations( void *mgr_vdata, HYPRE_Int *num_iterations )
 {
    hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
-   if (!mgr_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
    *num_iterations = mgr_data->num_iterations;
 
    return hypre_error_flag;
@@ -3653,11 +3681,6 @@ hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *res_norm )
 {
    hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
-   if (!mgr_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
    *res_norm = mgr_data->final_rel_residual_norm;
 
    return hypre_error_flag;
@@ -3668,11 +3691,6 @@ hypre_MGRGetCoarseGridConvergenceFactor( void *mgr_vdata, HYPRE_Real *conv_facto
 {
    hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
-   if (!mgr_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
    *conv_factor = (mgr_data -> cg_convergence_factor);
 
    return hypre_error_flag;
@@ -4287,11 +4305,6 @@ hypre_MGRGetCoarseGridMatrix( void *mgr_vdata, hypre_ParCSRMatrix **RAP )
 {
    hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
-   if (!mgr_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
    if (mgr_data -> RAP == NULL)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
@@ -4309,11 +4322,6 @@ hypre_MGRGetCoarseGridSolution( void *mgr_vdata, hypre_ParVector **sol )
 {
    hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
-   if (!mgr_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
    if (mgr_data -> U_array == NULL)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
@@ -4331,11 +4339,6 @@ hypre_MGRGetCoarseGridRHS( void *mgr_vdata, hypre_ParVector **rhs )
 {
    hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
-   if (!mgr_data)
-   {
-      hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
    if (mgr_data -> F_array == NULL)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
