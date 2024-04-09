@@ -3494,7 +3494,8 @@ hypre_MGRSetLevelSmoothType( void       *mgr_vdata,
              (gsmooth_type[i] >= 0))
          {
             hypre_sprintf(msg, "hypre_MGRSetLevelSmoothType does not take effect at level %d since\n\
-                                hypre_MGRSetGlobalSmootherAtLevel has been called at the same level", i);
+                                hypre_MGRSetGlobalSmootherAtLevel has been called at the same level",
+                          i);
             hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
          }
          else
@@ -3569,7 +3570,7 @@ hypre_MGRSetGlobalSmootherAtLevel( HYPRE_Int     level,
    HYPRE_PtrToSolverFcn   setup = hypre_SolverSetup(base);
    hypre_ParMGRData      *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    HYPRE_Int              max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
-   HYPRE_Int              smoother_type, i;
+   HYPRE_Int              smoother_type;
    char                   msg[1024];
 
    /* Check if the requested level makes sense */
@@ -3600,15 +3601,16 @@ hypre_MGRSetGlobalSmootherAtLevel( HYPRE_Int     level,
    /* Obtain corresponding smoother type */
    if (setup == (HYPRE_PtrToSolverFcn) HYPRE_ILUSetup)
    {
-       smoother_type = 16;
+      smoother_type = 16;
    }
    else
    {
-       smoother_type = -1; /* Unknown smoother */
+      smoother_type = -1; /* Unknown smoother */
    }
 
    /* Check if level_smooth_type[level] corresponds to the right smoother type */
-   if ((mgr_data -> level_smooth_type)[level] > 0 && (mgr_data -> level_smooth_type)[level] != smoother_type)
+   if ((mgr_data -> level_smooth_type)[level] > 0 &&
+       (mgr_data -> level_smooth_type)[level] != smoother_type)
    {
       hypre_sprintf(msg, "Reseting global relaxation type at level %d to user's smoother", level);
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
