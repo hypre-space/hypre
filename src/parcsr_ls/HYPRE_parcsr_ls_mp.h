@@ -57,10 +57,10 @@ HYPRE_Int HYPRE_MPAMGGetNumIterations_mp(HYPRE_Solver  solver,
                                          HYPRE_Int    *num_iterations);
 
 HYPRE_Int HYPRE_MPAMGGetCumNnzAP_mp(HYPRE_Solver  solver,
-                                    HYPRE_Real   *cum_nnz_AP);
+                                    hypre_double *cum_nnz_AP);
 
 HYPRE_Int HYPRE_MPAMGSetCumNnzAP_mp(HYPRE_Solver  solver,
-                                    HYPRE_Real    cum_nnz_AP);
+                                    hypre_double  cum_nnz_AP);
 
 HYPRE_Int HYPRE_MPAMGGetFinalRelativeResidualNorm_mp(HYPRE_Solver  solver,
                                                      HYPRE_Real   *rel_resid_norm);
@@ -296,8 +296,8 @@ HYPRE_Int hypre_MPAMGGetRelResidualNorm_mp ( void *data, HYPRE_Real *rel_resid_n
 HYPRE_Int hypre_MPAMGSetRAP2_mp ( void *data, HYPRE_Int rap2 );
 HYPRE_Int hypre_MPAMGSetModuleRAP2_mp ( void *data, HYPRE_Int mod_rap2 );
 HYPRE_Int hypre_MPAMGSetKeepTranspose_mp ( void *data, HYPRE_Int keepTranspose );
-HYPRE_Int hypre_MPAMGSetCumNnzAP_mp ( void *data, HYPRE_Real cum_nnz_AP );
-HYPRE_Int hypre_MPAMGGetCumNnzAP_mp ( void *data, HYPRE_Real *cum_nnz_AP );
+HYPRE_Int hypre_MPAMGSetCumNnzAP_mp ( void *data, hypre_double cum_nnz_AP );
+HYPRE_Int hypre_MPAMGGetCumNnzAP_mp ( void *data, hypre_double *cum_nnz_AP );
 HYPRE_Int hypre_MPAMGSetPrecisionArray_mp (void *data, HYPRE_Precision *precision_array);*/
 
 #ifdef __cplusplus

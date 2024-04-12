@@ -488,7 +488,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          row_starts = hypre_ParCSRBlockMatrixRowStarts(A_block_array[level]);
 
          fine_size = hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[level]);
-         global_nonzeros = hypre_ParCSRBlockMatrixDNumNonzeros(A_block_array[level]);
+         global_nonzeros = (HYPRE_Real) hypre_ParCSRBlockMatrixDNumNonzeros(A_block_array[level]);
          num_coeffs[level] = global_nonzeros;
          num_mem[level] = global_nonzeros;
          num_variables[level] = (HYPRE_Real) fine_size;
@@ -569,7 +569,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          row_starts = hypre_ParCSRMatrixRowStarts(A_array[level]);
 
          fine_size = hypre_ParCSRMatrixGlobalNumRows(A_array[level]);
-         global_nonzeros = hypre_ParCSRMatrixDNumNonzeros(A_array[level]);
+         global_nonzeros = (HYPRE_Real) hypre_ParCSRMatrixDNumNonzeros(A_array[level]);
          num_coeffs[level] = global_nonzeros;
          if (level == 0)
          {
@@ -729,7 +729,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
          fine_size = hypre_ParCSRBlockMatrixGlobalNumRows(P_block_array[level]);
          coarse_size = hypre_ParCSRBlockMatrixGlobalNumCols(P_block_array[level]);
-         global_nonzeros = hypre_ParCSRBlockMatrixDNumNonzeros(P_block_array[level]);
+         global_nonzeros = (HYPRE_Real) hypre_ParCSRBlockMatrixDNumNonzeros(P_block_array[level]);
          num_mem[level] += global_nonzeros;
 
          min_weight = 1.0;
@@ -853,8 +853,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          fine_size = hypre_ParCSRMatrixGlobalNumRows(P_array[level]);
          coarse_size = hypre_ParCSRMatrixGlobalNumCols(P_array[level]);
          hypre_ParCSRMatrixSetDNumNonzeros(P_array[level]);
-         global_nonzeros = hypre_ParCSRMatrixDNumNonzeros(P_array[level]);
-         num_mem[level] += (HYPRE_Real) global_nonzeros;
+         global_nonzeros = (HYPRE_Real) hypre_ParCSRMatrixDNumNonzeros(P_array[level]);
+         num_mem[level] += global_nonzeros;
 
          min_weight = 1.0;
          max_weight = 0.0;

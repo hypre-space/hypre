@@ -40,7 +40,7 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
    HYPRE_Int            num_levels;
    HYPRE_Int            min_iter;
    HYPRE_Int            max_iter;
-   HYPRE_Real           tol;
+   hypre_double         tol;
 
    hypre_ParCSRMatrix **A_array;
    hypre_ParVector    **F_array;
@@ -51,23 +51,23 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
    HYPRE_Int           Solve_err_flag;
    HYPRE_Int           num_procs, my_id;
    HYPRE_Int           num_vectors;
-   HYPRE_Real          alpha = 1.0;
-   HYPRE_Real          beta = -1.0;
-   HYPRE_Real          cycle_op_count;
-   HYPRE_Real          total_coeffs;
-   HYPRE_Real          total_variables;
-   HYPRE_Real         *num_coeffs;
-   HYPRE_Real         *num_variables;
-   HYPRE_Real          cycle_cmplxty = 0.0;
-   HYPRE_Real          operat_cmplxty;
-   HYPRE_Real          grid_cmplxty;
-   HYPRE_Real          conv_factor = 0.0;
-   HYPRE_Real          resid_nrm = 1.0;
-   HYPRE_Real          resid_nrm_init = 0.0;
-   HYPRE_Real          relative_resid;
-   HYPRE_Real          rhs_norm = 0.0;
-   HYPRE_Real          old_resid;
-   HYPRE_Real          ieee_check = 0.;
+   hypre_double        alpha = 1.0;
+   hypre_double        beta = -1.0;
+   hypre_double        cycle_op_count;
+   hypre_double        total_coeffs;
+   hypre_double        total_variables;
+   hypre_double       *num_coeffs;
+   hypre_double       *num_variables;
+   hypre_double        cycle_cmplxty = 0.0;
+   hypre_double        operat_cmplxty;
+   hypre_double        grid_cmplxty;
+   hypre_double        conv_factor = 0.0;
+   hypre_double        resid_nrm = 1.0;
+   hypre_double        resid_nrm_init = 0.0;
+   hypre_double        relative_resid;
+   hypre_double        rhs_norm = 0.0;
+   hypre_double        old_resid;
+   hypre_double        ieee_check = 0.;
 
    hypre_ParVector    *Vtemp_dbl;
    hypre_ParVector    *Vtemp_flt;
@@ -93,7 +93,7 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
    F_array          = hypre_ParAMGDataFArray(amg_data);
    U_array          = hypre_ParAMGDataUArray(amg_data);
 
-   tol              = hypre_ParAMGDataTol(amg_data);
+   tol              = (hypre_double) hypre_ParAMGDataTol(amg_data);
    min_iter         = hypre_ParAMGDataMinIter(amg_data);
    max_iter         = hypre_ParAMGDataMaxIter(amg_data);
    Vtemp_dbl        = hypre_ParAMGDataVtempDBL(amg_data);
@@ -154,27 +154,27 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
             hypre_ParVectorCopy_dbl(F_array[0], Residual);
             if (tol > 0)
             {
-               hypre_ParCSRMatrixMatvec_dbl(alpha, A_array[0], U_array[0], beta, Residual);
+               hypre_ParCSRMatrixMatvec_dbl((hypre_double) alpha, A_array[0], U_array[0], (hypre_double) beta, Residual);
             }
-            resid_nrm = (HYPRE_Real) sqrt(hypre_ParVectorInnerProd_dbl( Residual, Residual ));
+            resid_nrm = (hypre_double) sqrt(hypre_ParVectorInnerProd_dbl( Residual, Residual ));
          }
 	 else if (level_precision == HYPRE_REAL_SINGLE)
          {
             hypre_ParVectorCopy_flt(F_array[0], Residual);
             if (tol > 0)
             {
-               hypre_ParCSRMatrixMatvec_flt(alpha, A_array[0], U_array[0], beta, Residual);
+               hypre_ParCSRMatrixMatvec_flt((hypre_float) alpha, A_array[0], U_array[0], (hypre_float) beta, Residual);
             }
-            resid_nrm = (HYPRE_Real) sqrtf(hypre_ParVectorInnerProd_flt( Residual, Residual ));
+            resid_nrm = (hypre_double) sqrtf(hypre_ParVectorInnerProd_flt( Residual, Residual ));
          }
 	 else if (level_precision == HYPRE_REAL_LONGDOUBLE)
          {
             hypre_ParVectorCopy_long_dbl(F_array[0], Residual);
             if (tol > 0)
             {
-               hypre_ParCSRMatrixMatvec_long_dbl(alpha, A_array[0], U_array[0], beta, Residual);
+               hypre_ParCSRMatrixMatvec_long_dbl((hypre_long_double) alpha, A_array[0], U_array[0], (hypre_long_double) beta, Residual);
             }
-            resid_nrm = (HYPRE_Real) sqrtl(hypre_ParVectorInnerProd_long_dbl( Residual, Residual ));
+            resid_nrm = (hypre_double) sqrtl(hypre_ParVectorInnerProd_long_dbl( Residual, Residual ));
          }
          /*else
          {
@@ -188,27 +188,27 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
             hypre_ParVectorCopy_dbl(F_array[0], Vtemp_dbl);
             if (tol > 0)
             {
-               hypre_ParCSRMatrixMatvec_dbl(alpha, A_array[0], U_array[0], beta, Vtemp_dbl);
+               hypre_ParCSRMatrixMatvec_dbl((hypre_double) alpha, A_array[0], U_array[0], (hypre_double) beta, Vtemp_dbl);
             }
-            resid_nrm = (HYPRE_Real) sqrt(hypre_ParVectorInnerProd_dbl( Vtemp_dbl, Vtemp_dbl ));
+            resid_nrm = (hypre_double) sqrt(hypre_ParVectorInnerProd_dbl( Vtemp_dbl, Vtemp_dbl ));
          }
 	 else if (level_precision == HYPRE_REAL_SINGLE)
          {
             hypre_ParVectorCopy_flt(F_array[0], Vtemp_flt);
             if (tol > 0)
             {
-               hypre_ParCSRMatrixMatvec_flt(alpha, A_array[0], U_array[0], beta, Vtemp_flt);
+               hypre_ParCSRMatrixMatvec_flt((hypre_float) alpha, A_array[0], U_array[0], (hypre_float) beta, Vtemp_flt);
             }
-            resid_nrm = (HYPRE_Real) sqrtf(hypre_ParVectorInnerProd_flt( Vtemp_flt, Vtemp_flt ));
+            resid_nrm = (hypre_double) sqrtf(hypre_ParVectorInnerProd_flt( Vtemp_flt, Vtemp_flt ));
          }
 	 else if (level_precision == HYPRE_REAL_LONGDOUBLE)
          {
             hypre_ParVectorCopy_long_dbl(F_array[0], Vtemp_long_dbl);
             if (tol > 0)
             {
-               hypre_ParCSRMatrixMatvec_long_dbl(alpha, A_array[0], U_array[0], beta, Vtemp_long_dbl);
+               hypre_ParCSRMatrixMatvec_long_dbl((hypre_long_double) alpha, A_array[0], U_array[0], (hypre_long_double) beta, Vtemp_long_dbl);
             }
-            resid_nrm = (HYPRE_Real) sqrtl(hypre_ParVectorInnerProd_long_dbl( Vtemp_long_dbl, Vtemp_long_dbl ));
+            resid_nrm = (hypre_double) sqrtl(hypre_ParVectorInnerProd_long_dbl( Vtemp_long_dbl, Vtemp_long_dbl ));
          }
          /*else
          {
@@ -248,15 +248,15 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
 
       if (level_precision == HYPRE_REAL_DOUBLE)
       {
-         rhs_norm = (HYPRE_Real) sqrt(hypre_ParVectorInnerProd_dbl(f, f));
+         rhs_norm = (hypre_double) sqrt(hypre_ParVectorInnerProd_dbl(f, f));
       }
       else if (level_precision == HYPRE_REAL_SINGLE)
       {
-         rhs_norm = (HYPRE_Real) sqrtf(hypre_ParVectorInnerProd_flt(f, f));
+         rhs_norm = (hypre_double) sqrtf(hypre_ParVectorInnerProd_flt(f, f));
       }
       else if (level_precision == HYPRE_REAL_LONGDOUBLE)
       {
-         rhs_norm = (HYPRE_Real) sqrtl(hypre_ParVectorInnerProd_long_dbl(f, f));
+         rhs_norm = (hypre_double) sqrtl(hypre_ParVectorInnerProd_long_dbl(f, f));
       }
       else
       {
@@ -308,39 +308,39 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
          {
             if ( amg_logging > 1 )
             {
-               hypre_ParCSRMatrixMatvecOutOfPlace_dbl(alpha, A_array[0], U_array[0], beta, F_array[0], Residual );
-               resid_nrm = (HYPRE_Real) sqrt(hypre_ParVectorInnerProd_dbl( Residual, Residual ));
+               hypre_ParCSRMatrixMatvecOutOfPlace_dbl((hypre_double) alpha, A_array[0], U_array[0], (hypre_double) beta, F_array[0], Residual );
+               resid_nrm = (hypre_double) sqrt(hypre_ParVectorInnerProd_dbl( Residual, Residual ));
             }
             else
             {
-               hypre_ParCSRMatrixMatvecOutOfPlace_dbl(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp_dbl);
-               resid_nrm = (HYPRE_Real) sqrt(hypre_ParVectorInnerProd_dbl(Vtemp_dbl, Vtemp_dbl));
+               hypre_ParCSRMatrixMatvecOutOfPlace_dbl((hypre_double) alpha, A_array[0], U_array[0], (hypre_double) beta, F_array[0], Vtemp_dbl);
+               resid_nrm = (hypre_double) sqrt(hypre_ParVectorInnerProd_dbl(Vtemp_dbl, Vtemp_dbl));
             }
          }
 	 else if (level_precision == HYPRE_REAL_SINGLE)
          {
             if ( amg_logging > 1 )
             {
-               hypre_ParCSRMatrixMatvecOutOfPlace_flt(alpha, A_array[0], U_array[0], beta, F_array[0], Residual );
-               resid_nrm = (HYPRE_Real) sqrtf(hypre_ParVectorInnerProd_flt( Residual, Residual ));
+               hypre_ParCSRMatrixMatvecOutOfPlace_flt((hypre_float) alpha, A_array[0], U_array[0], (hypre_float) beta, F_array[0], Residual );
+               resid_nrm = (hypre_double) sqrtf(hypre_ParVectorInnerProd_flt( Residual, Residual ));
             }
             else
             {
-               hypre_ParCSRMatrixMatvecOutOfPlace_flt(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp_flt);
-               resid_nrm = (HYPRE_Real) sqrtf(hypre_ParVectorInnerProd_flt(Vtemp_flt, Vtemp_flt));
+               hypre_ParCSRMatrixMatvecOutOfPlace_flt((hypre_float) alpha, A_array[0], U_array[0], (hypre_float) beta, F_array[0], Vtemp_flt);
+               resid_nrm = (hypre_double) sqrtf(hypre_ParVectorInnerProd_flt(Vtemp_flt, Vtemp_flt));
             }
          }
 	 else if (level_precision == HYPRE_REAL_LONGDOUBLE)
          {
             if ( amg_logging > 1 )
             {
-               hypre_ParCSRMatrixMatvecOutOfPlace_long_dbl(alpha, A_array[0], U_array[0], beta, F_array[0], Residual );
-               resid_nrm = (HYPRE_Real) sqrtl(hypre_ParVectorInnerProd_long_dbl( Residual, Residual ));
+               hypre_ParCSRMatrixMatvecOutOfPlace_long_dbl((hypre_long_double) alpha, A_array[0], U_array[0], (hypre_long_double) beta, F_array[0], Residual );
+               resid_nrm = (hypre_double) sqrtl(hypre_ParVectorInnerProd_long_dbl( Residual, Residual ));
             }
             else
             {
-               hypre_ParCSRMatrixMatvecOutOfPlace_long_dbl(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp_long_dbl);
-               resid_nrm = (HYPRE_Real) sqrtl(hypre_ParVectorInnerProd_long_dbl(Vtemp_long_dbl, Vtemp_long_dbl));
+               hypre_ParCSRMatrixMatvecOutOfPlace_long_dbl((hypre_long_double) alpha, A_array[0], U_array[0], (hypre_long_double) beta, F_array[0], Vtemp_long_dbl);
+               resid_nrm = (hypre_double) sqrtl(hypre_ParVectorInnerProd_long_dbl(Vtemp_long_dbl, Vtemp_long_dbl));
             }
          }
          else
@@ -395,7 +395,7 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
 
    if (cycle_count > 0 && resid_nrm_init)
    {
-      conv_factor = hypre_pow((resid_nrm / resid_nrm_init), (1.0 / (HYPRE_Real) cycle_count));
+      conv_factor = hypre_pow((resid_nrm / resid_nrm_init), (1.0 / (hypre_double) cycle_count));
    }
    else
    {
@@ -404,15 +404,15 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
 
    if (amg_print_level > 1)
    {
-      num_coeffs       = (HYPRE_Real *) hypre_CAlloc_dbl((size_t)(num_levels), (size_t)sizeof(HYPRE_Real), HYPRE_MEMORY_HOST);
-      num_variables    = (HYPRE_Real *) hypre_CAlloc_dbl((size_t)(num_levels), (size_t)sizeof(HYPRE_Real), HYPRE_MEMORY_HOST);
+      num_coeffs       = (HYPRE_Real *) hypre_CAlloc_dbl((size_t)(num_levels), (size_t)sizeof(hypre_double), HYPRE_MEMORY_HOST);
+      num_variables    = (HYPRE_Real *) hypre_CAlloc_dbl((size_t)(num_levels), (size_t)sizeof(hypre_double), HYPRE_MEMORY_HOST);
       num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A);
       num_variables[0] = hypre_ParCSRMatrixGlobalNumRows(A);
 
       for (j = 1; j < num_levels; j++)
       {
-         num_coeffs[j]    = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(A_array[j]);
-         num_variables[j] = (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A_array[j]);
+         num_coeffs[j]    = (hypre_double) hypre_ParCSRMatrixNumNonzeros(A_array[j]);
+         num_variables[j] = (hypre_double) hypre_ParCSRMatrixGlobalNumRows(A_array[j]);
       }
 
 

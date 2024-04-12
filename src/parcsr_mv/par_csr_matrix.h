@@ -32,7 +32,7 @@ typedef struct hypre_ParCSRMatrix_struct
    HYPRE_BigInt          global_num_cols;
    HYPRE_BigInt          global_num_rownnz;
    HYPRE_BigInt          num_nonzeros;
-   HYPRE_Real            d_num_nonzeros;
+   hypre_double          d_num_nonzeros;
 
    HYPRE_BigInt          first_row_index;
    HYPRE_BigInt          first_col_diag;

@@ -44,8 +44,6 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
    hypre_ParVector          *Aux_U;
    hypre_ParVector          *Aux_F;
 
-   HYPRE_Real      *Ztemp_data;
-   HYPRE_Real      *Ptemp_data;
    hypre_IntArray **CF_marker_array;
    HYPRE_Int       *CF_marker;
 
@@ -78,15 +76,14 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
    HYPRE_Int       relax_order;
    HYPRE_Int       relax_local;
    HYPRE_Int       old_version = 0;
-   HYPRE_Real     *relax_weight;
-   HYPRE_Real     *omega;
-   HYPRE_Real      alfa, beta, gammaold;
-   HYPRE_Real      gamma = 1.0;
+   hypre_double    beta;
+   hypre_double    alpha;
    HYPRE_Int       local_size;
-   HYPRE_Real      alpha;
    hypre_Vector  **l1_norms = NULL;
    hypre_Vector   *l1_norms_level;
    MPI_Comm        comm;
+   hypre_double   *relax_weight;
+   hypre_double   *omega;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -127,7 +124,7 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
       old_version = 1;
    }
 
-   num_coeffs = (HYPRE_Real *) (hypre_CAlloc_dbl ((size_t)(num_levels), (size_t)sizeof(HYPRE_Real), HYPRE_MEMORY_HOST));
+   num_coeffs = (HYPRE_Real *) (hypre_CAlloc_dbl ((size_t)(num_levels), (size_t)sizeof(hypre_double), HYPRE_MEMORY_HOST));
    num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
    comm = hypre_ParCSRMatrixComm(A_array[0]);
 

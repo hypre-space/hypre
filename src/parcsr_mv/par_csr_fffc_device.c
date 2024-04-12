@@ -656,7 +656,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
       hypre_ParCSRMatrixSetNumNonzeros(AFF);
-      hypre_ParCSRMatrixDNumNonzeros(AFF) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(AFF);
+      hypre_ParCSRMatrixDNumNonzeros(AFF) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(AFF);
       hypre_MatvecCommPkgCreate(AFF);
 
       *AFF_ptr = AFF;
@@ -879,7 +879,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
       hypre_ParCSRMatrixSetNumNonzeros(AFC);
-      hypre_ParCSRMatrixDNumNonzeros(AFC) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(AFC);
+      hypre_ParCSRMatrixDNumNonzeros(AFC) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(AFC);
       hypre_MatvecCommPkgCreate(AFC);
 
       *AFC_ptr = AFC;
@@ -1107,7 +1107,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
       hypre_ParCSRMatrixSetNumNonzeros(ACF);
-      hypre_ParCSRMatrixDNumNonzeros(ACF) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(ACF);
+      hypre_ParCSRMatrixDNumNonzeros(ACF) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(ACF);
       hypre_MatvecCommPkgCreate(ACF);
 
       *ACF_ptr = ACF;
@@ -1331,7 +1331,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
       hypre_ParCSRMatrixSetNumNonzeros(ACC);
-      hypre_ParCSRMatrixDNumNonzeros(ACC) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(ACC);
+      hypre_ParCSRMatrixDNumNonzeros(ACC) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(ACC);
       hypre_MatvecCommPkgCreate(ACC);
 
       *ACC_ptr = ACC;
@@ -1814,7 +1814,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
       hypre_ParCSRMatrixSetNumNonzeros(ACX);
-      hypre_ParCSRMatrixDNumNonzeros(ACX) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(ACX);
+      hypre_ParCSRMatrixDNumNonzeros(ACX) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(ACX);
       hypre_MatvecCommPkgCreate(ACX);
 
       *ACX_ptr = ACX;
@@ -2013,7 +2013,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
                     HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
       hypre_ParCSRMatrixSetNumNonzeros(AXC);
-      hypre_ParCSRMatrixDNumNonzeros(AXC) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(AXC);
+      hypre_ParCSRMatrixDNumNonzeros(AXC) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(AXC);
       hypre_MatvecCommPkgCreate(AXC);
 
       *AXC_ptr = AXC;

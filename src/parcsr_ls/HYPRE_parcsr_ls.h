@@ -154,14 +154,14 @@ HYPRE_Int HYPRE_BoomerAMGGetNumIterations(HYPRE_Solver  solver,
  * Returns cumulative num of nonzeros for A and P operators
  **/
 HYPRE_Int HYPRE_BoomerAMGGetCumNnzAP(HYPRE_Solver  solver,
-                                     HYPRE_Real   *cum_nnz_AP);
+                                     hypre_double *cum_nnz_AP);
 
 /**
  * Activates cumulative num of nonzeros for A and P operators.
  * Needs to be set to a positive number for activation.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCumNnzAP(HYPRE_Solver  solver,
-                                     HYPRE_Real    cum_nnz_AP);
+                                     hypre_double  cum_nnz_AP);
 
 /**
  * Returns the norm of the final relative residual.
@@ -174,7 +174,7 @@ HYPRE_Int HYPRE_BoomerAMGGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
  * The default is 1, i.e. a scalar system.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetNumFunctions(HYPRE_Solver solver,
-                                         HYPRE_Int          num_functions);
+                                         HYPRE_Int    num_functions);
 
 /**
  * (Optional) Sets the mapping that assigns the function to each variable,

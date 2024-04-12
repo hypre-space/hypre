@@ -48,19 +48,7 @@ typedef struct
 
    /* setup params */
    HYPRE_Int      max_levels;
-   HYPRE_Real     strong_threshold;
    HYPRE_Int      coarsen_cut_factor;
-   HYPRE_Real     strong_thresholdR; /* theta for build R: defines strong F neighbors */
-   HYPRE_Real     filter_thresholdR; /* theta for filtering R  */
-   HYPRE_Real     max_row_sum;
-   HYPRE_Real     trunc_factor;
-   HYPRE_Real     agg_trunc_factor;
-   HYPRE_Real     agg_P12_trunc_factor;
-   HYPRE_Real     jacobi_trunc_threshold;
-   HYPRE_Real     S_commpkg_switch;
-   HYPRE_Real     CR_rate;
-   HYPRE_Real     CR_strong_th;
-   HYPRE_Real     A_drop_tol;
    HYPRE_Int      A_drop_type;
    HYPRE_Int      measure_type;
    HYPRE_Int      setup_type;
@@ -100,12 +88,7 @@ typedef struct
    HYPRE_Int      user_coarse_relax_type;
    HYPRE_Int      user_relax_type;
    HYPRE_Int      user_num_sweeps;
-   HYPRE_Real     user_relax_weight;
-   HYPRE_Real     outer_wt;
-   HYPRE_Real    *relax_weight;
-   HYPRE_Real    *omega;
    HYPRE_Int      converge_type;
-   HYPRE_Real     tol;
    HYPRE_Int      partial_cycle_coarsest_level;
    HYPRE_Int      partial_cycle_control;
 
@@ -151,23 +134,17 @@ typedef struct
    HYPRE_Int            schw_variant;
    HYPRE_Int            schw_overlap;
    HYPRE_Int            schw_domain_type;
-   HYPRE_Real           schwarz_rlx_weight;
    HYPRE_Int            schwarz_use_nonsymm;
    HYPRE_Int            ps_sym;
    HYPRE_Int            ps_level;
    HYPRE_Int            pi_max_nz_per_row;
    HYPRE_Int            eu_level;
    HYPRE_Int            eu_bj;
-   HYPRE_Real           ps_threshold;
-   HYPRE_Real           ps_filter;
-   HYPRE_Real           pi_drop_tol;
-   HYPRE_Real           eu_sparse_A;
    char                *euclidfile;
    HYPRE_Int            ilu_lfil;
    HYPRE_Int            ilu_type;
    HYPRE_Int            ilu_max_row_nnz;
    HYPRE_Int            ilu_max_iter;
-   HYPRE_Real           ilu_droptol;
    HYPRE_Int            ilu_tri_solve;
    HYPRE_Int            ilu_lower_jacobi_iters;
    HYPRE_Int            ilu_upper_jacobi_iters;
@@ -179,33 +156,20 @@ typedef struct
    HYPRE_Int            fsai_max_step_size;
    HYPRE_Int            fsai_max_nnz_row;
    HYPRE_Int            fsai_num_levels;
-   HYPRE_Real           fsai_threshold;
    HYPRE_Int            fsai_eig_max_iters;
-   HYPRE_Real           fsai_kap_tolerance;
 
-   HYPRE_Real          *max_eig_est;
-   HYPRE_Real          *min_eig_est;
    HYPRE_Int            cheby_eig_est;
    HYPRE_Int            cheby_order;
    HYPRE_Int            cheby_variant;
    HYPRE_Int            cheby_scale;
-   HYPRE_Real           cheby_fraction;
    hypre_Vector       **cheby_ds;
-   HYPRE_Real         **cheby_coefs;
-
-   HYPRE_Real           cum_nnz_AP;
 
    /* data needed for non-Galerkin option */
    HYPRE_Int           nongalerk_num_tol;
-   HYPRE_Real         *nongalerk_tol;
-   HYPRE_Real          nongalerkin_tol;
-   HYPRE_Real         *nongal_tol_array;
 
    /* data generated in the solve phase */
    hypre_ParVector   *Vtemp;
    hypre_Vector      *Vtemp_local;
-   HYPRE_Real        *Vtemp_local_data;
-   HYPRE_Real         cycle_op_count;
    hypre_ParVector   *Rtemp;
    hypre_ParVector   *Ptemp;
    hypre_ParVector   *Ztemp;
@@ -220,7 +184,7 @@ typedef struct
 #ifdef CUMNUMIT
    HYPRE_Int        cum_num_iterations;
 #endif
-   HYPRE_Real       rel_resid_norm;
+   hypre_double     cum_nnz_AP;
    hypre_ParVector *residual; /* available if logging>1 */
 
    /* output params */
@@ -243,11 +207,9 @@ typedef struct
    hypre_ParVector ***interp_vectors_array;
    HYPRE_Int          interp_vec_variant;
    HYPRE_Int          interp_vec_first_level;
-   HYPRE_Real         interp_vectors_abs_q_trunc;
    HYPRE_Int          interp_vectors_q_max;
    HYPRE_Int          interp_refine;
    HYPRE_Int          smooth_interp_vectors;
-   HYPRE_Real       *expandp_weights; /* currently not set by user */
 
    /* enable redundant coarse grid solve */
    HYPRE_Solver         coarse_solver;
@@ -261,10 +223,6 @@ typedef struct
    HYPRE_Int   gs_setup;
    HYPRE_Int  *comm_info;
    HYPRE_Int  *A_piv;
-   HYPRE_Real *A_mat;
-   HYPRE_Real *A_work;
-   HYPRE_Real *b_vec;
-   HYPRE_Real *u_vec;
 
    /* information for multiplication with Lambda - additive AMG */
    HYPRE_Int      additive;
@@ -272,14 +230,11 @@ typedef struct
    HYPRE_Int      simple;
    HYPRE_Int      add_last_lvl;
    HYPRE_Int      add_P_max_elmts;
-   HYPRE_Real     add_trunc_factor;
    HYPRE_Int      add_rlx_type;
-   HYPRE_Real     add_rlx_wt;
    hypre_ParCSRMatrix *Lambda;
    hypre_ParCSRMatrix *Atilde;
    hypre_ParVector *Rtilde;
    hypre_ParVector *Xtilde;
-   HYPRE_Real *D_inv;
 
    /* Use 2 mat-mat-muls instead of triple product*/
    HYPRE_Int rap2;
@@ -299,14 +254,14 @@ typedef struct
    /* information for preserving indices as fine grid points */
    HYPRE_Int      num_F_points;
    HYPRE_BigInt  *F_points_marker;
-
+   
 #ifdef HYPRE_USING_DSUPERLU
    /* Parameters and data for SuperLU_Dist */
    HYPRE_Int dslu_threshold;
    HYPRE_Solver dslu_solver;
 #endif
 
-#ifdef HYPRE_MIXED_PRECISION
+#ifdef HYPRE_MIXED_PRECISION 
    HYPRE_Precision *precision_array;
    HYPRE_Int       *precision_type;
    hypre_ParVector *Vtemp_dbl;
@@ -316,6 +271,70 @@ typedef struct
    hypre_ParVector *Ztemp_flt;
    hypre_ParVector *Ztemp_long_dbl;
 #endif
+
+   /* HYPRE_Real parameters */
+   
+   /* setup params */
+   hypre_double   strong_threshold;
+   hypre_double   max_row_sum;
+   hypre_double   trunc_factor;
+   hypre_double   agg_trunc_factor;
+   hypre_double   agg_P12_trunc_factor;
+   HYPRE_Real    *relax_weight;
+   HYPRE_Real    *omega;
+   HYPRE_Real     jacobi_trunc_threshold;
+   HYPRE_Real     S_commpkg_switch;
+   HYPRE_Real     CR_rate;
+   HYPRE_Real     CR_strong_th;
+   HYPRE_Real     A_drop_tol;
+   HYPRE_Real     strong_thresholdR; /* theta for build R: defines strong F neighbors */
+   HYPRE_Real     filter_thresholdR; /* theta for filtering R  */
+
+   /* solve params */
+   HYPRE_Real     user_relax_weight;
+   HYPRE_Real     outer_wt;
+   HYPRE_Real     tol;
+
+   /* data for more complex smoothers */
+   HYPRE_Real           schwarz_rlx_weight;
+   HYPRE_Real           ps_threshold;
+   HYPRE_Real           ps_filter;
+   HYPRE_Real           pi_drop_tol;
+   HYPRE_Real           eu_sparse_A;
+   HYPRE_Real           ilu_droptol;
+   HYPRE_Real           fsai_threshold;
+   HYPRE_Real           fsai_kap_tolerance;
+   HYPRE_Real          *max_eig_est;
+   HYPRE_Real          *min_eig_est;
+   HYPRE_Real           cheby_fraction;
+   HYPRE_Real         **cheby_coefs;
+
+   /* data needed for non-Galerkin option */
+   HYPRE_Real         *nongalerk_tol;
+   HYPRE_Real          nongalerkin_tol;
+   HYPRE_Real         *nongal_tol_array;
+
+   /* data generated in the solve phase */
+   HYPRE_Real        *Vtemp_local_data;
+   HYPRE_Real         cycle_op_count;
+
+   /* log info */
+   HYPRE_Real       rel_resid_norm;
+
+   /* data for fitting vectors in interpolation */
+   HYPRE_Real         interp_vectors_abs_q_trunc;
+   HYPRE_Real       *expandp_weights; /* currently not set by user */
+
+   /* store matrix, vector and communication info for Gaussian elimination */
+   HYPRE_Real *A_mat;
+   HYPRE_Real *A_work;
+   HYPRE_Real *b_vec;
+   HYPRE_Real *u_vec;
+
+   /* information for multiplication with Lambda - additive AMG */
+   HYPRE_Real     add_trunc_factor;
+   HYPRE_Real     add_rlx_wt;
+   HYPRE_Real *D_inv;
 
 } hypre_ParAMGData;
 
@@ -2047,8 +2066,8 @@ HYPRE_Int HYPRE_BoomerAMGSetIsolatedFPoints( HYPRE_Solver solver, HYPRE_Int num_
                                              HYPRE_BigInt *isolated_fpt_index );
 HYPRE_Int HYPRE_BoomerAMGSetFPoints( HYPRE_Solver solver, HYPRE_Int num_fpt,
                                      HYPRE_BigInt *fpt_index );
-HYPRE_Int HYPRE_BoomerAMGSetCumNnzAP ( HYPRE_Solver solver, HYPRE_Real cum_nnz_AP );
-HYPRE_Int HYPRE_BoomerAMGGetCumNnzAP ( HYPRE_Solver solver, HYPRE_Real *cum_nnz_AP );
+HYPRE_Int HYPRE_BoomerAMGSetCumNnzAP ( HYPRE_Solver solver, hypre_double cum_nnz_AP );
+HYPRE_Int HYPRE_BoomerAMGGetCumNnzAP ( HYPRE_Solver solver, hypre_double *cum_nnz_AP );
 
 /* HYPRE_parcsr_amgdd.c */
 HYPRE_Int HYPRE_BoomerAMGDDSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
@@ -2663,55 +2682,12 @@ HYPRE_Int hypre_BoomerAMGSetCPoints( void *data, HYPRE_Int cpt_coarse_level,
                                      HYPRE_Int  num_cpt_coarse, HYPRE_BigInt *cpt_coarse_index );
 HYPRE_Int hypre_BoomerAMGSetFPoints( void *data, HYPRE_Int isolated, HYPRE_Int num_points,
                                      HYPRE_BigInt *indices );
-HYPRE_Int hypre_BoomerAMGSetCumNnzAP ( void *data, HYPRE_Real cum_nnz_AP );
-HYPRE_Int hypre_BoomerAMGGetCumNnzAP ( void *data, HYPRE_Real *cum_nnz_AP );
+HYPRE_Int hypre_BoomerAMGSetCumNnzAP ( void *data, hypre_double cum_nnz_AP );
+HYPRE_Int hypre_BoomerAMGGetCumNnzAP ( void *data, hypre_double *cum_nnz_AP );
 
 /* par_amg_setup.c */
 HYPRE_Int hypre_BoomerAMGSetup ( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                  hypre_ParVector *u );
-/* par_amg_setup_options.c */
-HYPRE_Int hypre_Strength_Options(hypre_ParCSRMatrix *A, HYPRE_Real strong_threshold,
-                                 HYPRE_Real max_row_sum, HYPRE_Int num_functions, HYPRE_Int nodal,
-                                 HYPRE_Int nodal_diag, HYPRE_Int useSabs, HYPRE_Int *dof_func_data,
-                                 hypre_ParCSRMatrix  **S_ptr);
-HYPRE_Int hypre_Coarsen_Options(hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A, HYPRE_Int level,
-                                HYPRE_Int debug_flag, HYPRE_Int coarsen_type,
-                                HYPRE_Int measure_type, HYPRE_Int coarsen_cut_factor,
-                                HYPRE_Int agg_num_levels, HYPRE_Int num_paths,
-                                HYPRE_Int local_num_vars, hypre_IntArray *dof_func,
-                                HYPRE_BigInt *coarse_points_global, hypre_IntArray **CF_marker2_ptr,
-                                hypre_IntArray **CF_marker_ptr);
-HYPRE_Int hypre_Interp_Options(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S,
-                               hypre_IntArray *CF_marker, HYPRE_BigInt *coarse_pnts_global,
-                               HYPRE_Int *dof_func_data, HYPRE_Int interp_type,
-                               HYPRE_Int num_functions, HYPRE_Int debug_flag,
-                               HYPRE_Int P_max_elmts, HYPRE_Real trunc_factor,
-                               HYPRE_Int sep_weight, hypre_ParCSRMatrix **P_ptr);
-HYPRE_Int hypre_MPassInterp_Options(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S,
-                                    hypre_IntArray *CF_marker, hypre_IntArray *dof_func,
-                                    HYPRE_BigInt *coarse_pnts_global, HYPRE_Int agg_interp_type,
-                                    HYPRE_Int num_functions, HYPRE_Int debug_flag,
-                                    HYPRE_Int agg_P_max_elmts, HYPRE_Real agg_trunc_factor,
-                                    HYPRE_Int sep_weight, hypre_ParCSRMatrix **P_ptr);
-HYPRE_Int hypre_StageOneInterp_Options(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S,
-                                       hypre_IntArray *CF_marker, HYPRE_BigInt *coarse_pnts_global1,
-                                       HYPRE_Int *dof_func_data, HYPRE_Int agg_interp_type,
-                                       HYPRE_Int num_functions, HYPRE_Int debug_flag,
-                                       HYPRE_Int agg_P12_max_elmts, HYPRE_Real agg_P12_trunc_factor,
-                                       hypre_ParCSRMatrix **P1_ptr);
-HYPRE_Int hypre_StageTwoInterp_Options(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P1,
-                                       hypre_ParCSRMatrix *S, hypre_IntArray *CF_marker,
-                                       HYPRE_BigInt *coarse_pnts_global,
-                                       HYPRE_BigInt *coarse_pnts_global1, HYPRE_Int *dof_func_data,
-                                       HYPRE_Int agg_interp_type, HYPRE_Int num_functions,
-                                       HYPRE_Int debug_flag, HYPRE_Int sep_weight,
-                                       HYPRE_Int agg_P_max_elmts, HYPRE_Int agg_P12_max_elmts,
-                                       HYPRE_Real agg_trunc_factor, HYPRE_Real agg_P12_trunc_factor,
-                                       hypre_ParCSRMatrix **P_ptr);
-HYPRE_Int hypre_Level_L1Norms(hypre_ParCSRMatrix *A, hypre_IntArray *CF_marker,
-                              HYPRE_Int *grid_relax_type, HYPRE_Int level, HYPRE_Int num_levels,
-                              HYPRE_Int relax_order, hypre_Vector **l1_norm_ptr);
-
 
 /* par_amg_solve.c */
 HYPRE_Int hypre_BoomerAMGSolve ( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f,
@@ -4346,103 +4322,7 @@ HYPRE_Int hypre_FSAIApply ( void *fsai_vdata, HYPRE_Complex alpha, hypre_ParVect
 /* par_fsai_device.c */
 HYPRE_Int hypre_FSAISetupDevice( void *fsai_vdata, hypre_ParCSRMatrix *A,
                                  hypre_ParVector *f, hypre_ParVector *u );
-#if HYPRE_MIXED_PRECISION
 
-HYPRE_Int hypre_MPAMGSetup_mp( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
-HYPRE_Int hypre_MPAMGSolve_mp( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u );
-HYPRE_Int hypre_MPAMGCycle_mp( void *amg_vdata, hypre_ParVector **F_array, hypre_ParVector **U_array );
-void *hypre_MPAMGCreate_mp( void );
-HYPRE_Int hypre_MPAMGDestroy_mp( void *data );
-HYPRE_Int hypre_MPAMGSetMaxLevels_mp( void *data, HYPRE_Int max_levels );
-HYPRE_Int hypre_MPAMGGetMaxLevels_mp( void *data, HYPRE_Int *max_levels );
-HYPRE_Int hypre_MPAMGSetMaxCoarseSize_mp( void *data, HYPRE_Int max_coarse_size );
-HYPRE_Int hypre_MPAMGGetMaxCoarseSize_mp( void *data, HYPRE_Int *max_coarse_size );
-HYPRE_Int hypre_MPAMGSetMinCoarseSize_mp( void *data, HYPRE_Int min_coarse_size );
-HYPRE_Int hypre_MPAMGGetMinCoarseSize_mp( void *data, HYPRE_Int *min_coarse_size );
-HYPRE_Int hypre_MPAMGSetCoarsenCutFactor_mp( void *data, HYPRE_Int coarsen_cut_factor );
-HYPRE_Int hypre_MPAMGGetCoarsenCutFactor_mp( void *data, HYPRE_Int *coarsen_cut_factor );
-HYPRE_Int hypre_MPAMGSetStrongThreshold_mp( void *data, HYPRE_Real strong_threshold );
-HYPRE_Int hypre_MPAMGGetStrongThreshold_mp( void *data, HYPRE_Real *strong_threshold );
-HYPRE_Int hypre_MPAMGSetSabs_mp( void *data, HYPRE_Int Sabs );
-HYPRE_Int hypre_MPAMGSetMaxRowSum_mp( void *data, HYPRE_Real max_row_sum );
-HYPRE_Int hypre_MPAMGGetMaxRowSum_mp( void *data, HYPRE_Real *max_row_sum );
-HYPRE_Int hypre_MPAMGSetTruncFactor_mp( void *data, HYPRE_Real trunc_factor );
-HYPRE_Int hypre_MPAMGGetTruncFactor_mp( void *data, HYPRE_Real *trunc_factor );
-HYPRE_Int hypre_MPAMGSetPMaxElmts_mp( void *data, HYPRE_Int P_max_elmts );
-HYPRE_Int hypre_MPAMGGetPMaxElmts_mp( void *data, HYPRE_Int *P_max_elmts );
-HYPRE_Int hypre_MPAMGSetInterpType_mp( void *data, HYPRE_Int interp_type );
-HYPRE_Int hypre_MPAMGGetInterpType_mp( void *data, HYPRE_Int *interp_type );
-HYPRE_Int hypre_MPAMGSetSepWeight_mp( void *data, HYPRE_Int sep_weight );
-HYPRE_Int hypre_MPAMGSetMinIter_mp( void *data, HYPRE_Int min_iter );
-HYPRE_Int hypre_MPAMGGetMinIter_mp( void *data, HYPRE_Int *min_iter );
-HYPRE_Int hypre_MPAMGSetMaxIter_mp( void *data, HYPRE_Int max_iter );
-HYPRE_Int hypre_MPAMGGetMaxIter_mp( void *data, HYPRE_Int *max_iter );
-HYPRE_Int hypre_MPAMGSetCoarsenType_mp( void *data, HYPRE_Int coarsen_type );
-HYPRE_Int hypre_MPAMGGetCoarsenType_mp( void *data, HYPRE_Int *coarsen_type );
-HYPRE_Int hypre_MPAMGSetMeasureType_mp( void *data, HYPRE_Int measure_type );
-HYPRE_Int hypre_MPAMGGetMeasureType_mp( void *data, HYPRE_Int *measure_type );
-HYPRE_Int hypre_MPAMGSetCycleType_mp( void *data, HYPRE_Int cycle_type );
-HYPRE_Int hypre_MPAMGGetCycleType_mp( void *data, HYPRE_Int *cycle_type );
-HYPRE_Int hypre_MPAMGSetFCycle_mp( void *data, HYPRE_Int fcycle );
-HYPRE_Int hypre_MPAMGGetFCycle_mp( void *data, HYPRE_Int *fcycle );
-HYPRE_Int hypre_MPAMGSetTol_mp( void *data, HYPRE_Real tol  );
-HYPRE_Int hypre_MPAMGGetTol_mp( void *data, HYPRE_Real *tol  );
-HYPRE_Int hypre_MPAMGSetNumSweeps_mp( void *data, HYPRE_Int num_sweeps );
-HYPRE_Int hypre_MPAMGSetCycleNumSweeps_mp( void *data, HYPRE_Int num_sweeps, HYPRE_Int k );
-HYPRE_Int hypre_MPAMGGetCycleNumSweeps_mp( void *data, HYPRE_Int *num_sweeps, HYPRE_Int k );
-HYPRE_Int hypre_MPAMGSetNumGridSweeps_mp( void *data, HYPRE_Int *num_grid_sweeps );
-HYPRE_Int hypre_MPAMGGetNumGridSweeps_mp( void *data, HYPRE_Int **num_grid_sweeps );
-HYPRE_Int hypre_MPAMGSetRelaxType_mp( void *data, HYPRE_Int relax_type );
-HYPRE_Int hypre_MPAMGSetCycleRelaxType_mp( void *data, HYPRE_Int relax_type, HYPRE_Int k );
-HYPRE_Int hypre_MPAMGGetCycleRelaxType_mp( void *data, HYPRE_Int *relax_type, HYPRE_Int k );
-HYPRE_Int hypre_MPAMGSetRelaxOrder_mp( void *data, HYPRE_Int relax_order);
-HYPRE_Int hypre_MPAMGGetRelaxOrder_mp( void *data, HYPRE_Int *relax_order);
-HYPRE_Int hypre_MPAMGSetGridRelaxType_mp( void *data, HYPRE_Int *grid_relax_type );
-HYPRE_Int hypre_MPAMGGetGridRelaxType_mp( void *data, HYPRE_Int **grid_relax_type );
-HYPRE_Int hypre_MPAMGSetGridRelaxPoints_mp( void *data, HYPRE_Int **grid_relax_points );
-HYPRE_Int hypre_MPAMGGetGridRelaxPoints_mp( void *data, HYPRE_Int ***grid_relax_points );
-HYPRE_Int hypre_MPAMGSetRelaxWeight_mp( void *data, HYPRE_Real *relax_weight );
-HYPRE_Int hypre_MPAMGGetRelaxWeight_mp( void *data, HYPRE_Real **relax_weight );
-HYPRE_Int hypre_MPAMGSetRelaxWt_mp( void *data, HYPRE_Real relax_weight );
-HYPRE_Int hypre_MPAMGSetLevelRelaxWt_mp( void *data, HYPRE_Real relax_weight, HYPRE_Int level );
-HYPRE_Int hypre_MPAMGGetLevelRelaxWt_mp( void *data, HYPRE_Real *relax_weight, HYPRE_Int level );
-HYPRE_Int hypre_MPAMGSetOmega_mp( void *data, HYPRE_Real *omega );
-HYPRE_Int hypre_MPAMGGetOmega_mp( void *data, HYPRE_Real **omega );
-HYPRE_Int hypre_MPAMGSetOuterWt_mp( void *data, HYPRE_Real omega );
-HYPRE_Int hypre_MPAMGSetLevelOuterWt_mp( void *data, HYPRE_Real omega, HYPRE_Int level );
-HYPRE_Int hypre_MPAMGGetLevelOuterWt_mp( void *data, HYPRE_Real *omega, HYPRE_Int level );
-HYPRE_Int hypre_MPAMGSetLogging_mp( void *data, HYPRE_Int logging );
-HYPRE_Int hypre_MPAMGGetLogging_mp( void *data, HYPRE_Int *logging );
-HYPRE_Int hypre_MPAMGSetPrintLevel_mp( void *data, HYPRE_Int print_level );
-HYPRE_Int hypre_MPAMGGetPrintLevel_mp( void *data, HYPRE_Int *print_level );
-HYPRE_Int hypre_MPAMGSetNumIterations_mp( void *data, HYPRE_Int num_iterations );
-HYPRE_Int hypre_MPAMGSetDebugFlag_mp( void *data, HYPRE_Int debug_flag );
-HYPRE_Int hypre_MPAMGGetDebugFlag_mp( void *data, HYPRE_Int *debug_flag );
-HYPRE_Int hypre_MPAMGSetNumFunctions_mp( void *data, HYPRE_Int num_functions );
-HYPRE_Int hypre_MPAMGGetNumFunctions_mp( void *data, HYPRE_Int *num_functions );
-HYPRE_Int hypre_MPAMGSetNodal_mp( void *data, HYPRE_Int nodal );
-HYPRE_Int hypre_MPAMGSetNodalLevels_mp( void *data, HYPRE_Int nodal_levels );
-HYPRE_Int hypre_MPAMGSetNodalDiag_mp( void *data, HYPRE_Int nodal );
-HYPRE_Int hypre_MPAMGSetKeepSameSign_mp( void  *data, HYPRE_Int keep_same_sign );
-HYPRE_Int hypre_MPAMGSetNumPaths_mp( void *data, HYPRE_Int num_paths );
-HYPRE_Int hypre_MPAMGSetAggNumLevels_mp( void *data, HYPRE_Int agg_num_levels );
-HYPRE_Int hypre_MPAMGSetAggInterpType_mp( void *data, HYPRE_Int agg_interp_type );
-HYPRE_Int hypre_MPAMGSetAggPMaxElmts_mp( void *data, HYPRE_Int agg_P_max_elmts );
-HYPRE_Int hypre_MPAMGSetAggP12MaxElmts_mp( void *data, HYPRE_Int agg_P12_max_elmts );
-HYPRE_Int hypre_MPAMGSetAggTruncFactor_mp( void *data, HYPRE_Real agg_trunc_factor );
-HYPRE_Int hypre_MPAMGSetAggP12TruncFactor_mp( void *data, HYPRE_Real agg_P12_trunc_factor );
-HYPRE_Int hypre_MPAMGSetDofFunc_mp( void *data, HYPRE_Int *dof_func);
-HYPRE_Int hypre_MPAMGGetNumIterations_mp( void *data, HYPRE_Int *num_iterations );
-HYPRE_Int hypre_MPAMGGetCumNumIterations_mp( void *data, HYPRE_Int *cum_num_iterations );
-HYPRE_Int hypre_MPAMGGetResidual_mp( void *data, hypre_ParVector **resid );
-HYPRE_Int hypre_MPAMGGetRelResidualNorm_mp( void *data, HYPRE_Real *rel_resid_norm );
-HYPRE_Int hypre_MPAMGSetRAP2_mp( void *data, HYPRE_Int rap2 );
-HYPRE_Int hypre_MPAMGSetModuleRAP2_mp( void *data, HYPRE_Int mod_rap2 );
-HYPRE_Int hypre_MPAMGSetKeepTranspose_mp( void *data, HYPRE_Int keepTranspose);
-HYPRE_Int hypre_MPAMGGetCumNnzAP_mp( void *data, HYPRE_Real *cum_nnz_AP );
-HYPRE_Int hypre_MPAMGSetPrecisionArray_mp( void *data, HYPRE_Precision *precision_array);
-
-#endif
 #ifdef __cplusplus
 }
 #endif

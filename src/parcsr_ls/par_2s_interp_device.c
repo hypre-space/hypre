@@ -306,7 +306,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
 
    hypre_ParCSRMatrixNumNonzeros(P)  = hypre_ParCSRMatrixNumNonzeros(W) +
                                        hypre_ParCSRMatrixGlobalNumCols(W);
-   hypre_ParCSRMatrixDNumNonzeros(P) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P);
+   hypre_ParCSRMatrixDNumNonzeros(P) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(P);
 
    hypre_ParCSRMatrixDestroy(W);
 
@@ -649,7 +649,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
 
    hypre_ParCSRMatrixNumNonzeros(P)  = hypre_ParCSRMatrixNumNonzeros(W) +
                                        hypre_ParCSRMatrixGlobalNumCols(W);
-   hypre_ParCSRMatrixDNumNonzeros(P) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P);
+   hypre_ParCSRMatrixDNumNonzeros(P) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(P);
 
    hypre_ParCSRMatrixDestroy(W);
 

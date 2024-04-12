@@ -77,7 +77,7 @@ hypre_MPAMGCreate_mp( void )
    /* log info */
    HYPRE_Int    num_iterations;
    HYPRE_Int    cum_num_iterations;
-   HYPRE_Real   cum_nnz_AP;
+   hypre_double cum_nnz_AP;
 
    /* output params */
    HYPRE_Int    print_level;
@@ -2291,8 +2291,8 @@ hypre_MPAMGSetKeepTranspose_mp( void       *data,
 }
 
 HYPRE_Int
-hypre_MPAMGSetCumNnzAP_mp( void       *data,
-                            HYPRE_Real  cum_nnz_AP )
+hypre_MPAMGSetCumNnzAP_mp( void         *data,
+                           hypre_double  cum_nnz_AP )
 {
    hypre_ParAMGData *amg_data = (hypre_ParAMGData*) data;
 
@@ -2308,8 +2308,8 @@ hypre_MPAMGSetCumNnzAP_mp( void       *data,
 
 
 HYPRE_Int
-hypre_MPAMGGetCumNnzAP_mp( void       *data,
-                            HYPRE_Real *cum_nnz_AP )
+hypre_MPAMGGetCumNnzAP_mp( void         *data,
+                           hypre_double *cum_nnz_AP )
 {
    hypre_ParAMGData *amg_data = (hypre_ParAMGData*) data;
 

@@ -26,19 +26,7 @@ typedef struct
 
    /* setup params */
    HYPRE_Int      max_levels;
-   HYPRE_Real     strong_threshold;
    HYPRE_Int      coarsen_cut_factor;
-   HYPRE_Real     strong_thresholdR; /* theta for build R: defines strong F neighbors */
-   HYPRE_Real     filter_thresholdR; /* theta for filtering R  */
-   HYPRE_Real     max_row_sum;
-   HYPRE_Real     trunc_factor;
-   HYPRE_Real     agg_trunc_factor;
-   HYPRE_Real     agg_P12_trunc_factor;
-   HYPRE_Real     jacobi_trunc_threshold;
-   HYPRE_Real     S_commpkg_switch;
-   HYPRE_Real     CR_rate;
-   HYPRE_Real     CR_strong_th;
-   HYPRE_Real     A_drop_tol;
    HYPRE_Int      A_drop_type;
    HYPRE_Int      measure_type;
    HYPRE_Int      setup_type;
@@ -78,12 +66,7 @@ typedef struct
    HYPRE_Int      user_coarse_relax_type;
    HYPRE_Int      user_relax_type;
    HYPRE_Int      user_num_sweeps;
-   HYPRE_Real     user_relax_weight;
-   HYPRE_Real     outer_wt;
-   HYPRE_Real    *relax_weight;
-   HYPRE_Real    *omega;
    HYPRE_Int      converge_type;
-   HYPRE_Real     tol;
    HYPRE_Int      partial_cycle_coarsest_level;
    HYPRE_Int      partial_cycle_control;
 
@@ -129,23 +112,17 @@ typedef struct
    HYPRE_Int            schw_variant;
    HYPRE_Int            schw_overlap;
    HYPRE_Int            schw_domain_type;
-   HYPRE_Real           schwarz_rlx_weight;
    HYPRE_Int            schwarz_use_nonsymm;
    HYPRE_Int            ps_sym;
    HYPRE_Int            ps_level;
    HYPRE_Int            pi_max_nz_per_row;
    HYPRE_Int            eu_level;
    HYPRE_Int            eu_bj;
-   HYPRE_Real           ps_threshold;
-   HYPRE_Real           ps_filter;
-   HYPRE_Real           pi_drop_tol;
-   HYPRE_Real           eu_sparse_A;
    char                *euclidfile;
    HYPRE_Int            ilu_lfil;
    HYPRE_Int            ilu_type;
    HYPRE_Int            ilu_max_row_nnz;
    HYPRE_Int            ilu_max_iter;
-   HYPRE_Real           ilu_droptol;
    HYPRE_Int            ilu_tri_solve;
    HYPRE_Int            ilu_lower_jacobi_iters;
    HYPRE_Int            ilu_upper_jacobi_iters;
@@ -157,33 +134,20 @@ typedef struct
    HYPRE_Int            fsai_max_step_size;
    HYPRE_Int            fsai_max_nnz_row;
    HYPRE_Int            fsai_num_levels;
-   HYPRE_Real           fsai_threshold;
    HYPRE_Int            fsai_eig_max_iters;
-   HYPRE_Real           fsai_kap_tolerance;
 
-   HYPRE_Real          *max_eig_est;
-   HYPRE_Real          *min_eig_est;
    HYPRE_Int            cheby_eig_est;
    HYPRE_Int            cheby_order;
    HYPRE_Int            cheby_variant;
    HYPRE_Int            cheby_scale;
-   HYPRE_Real           cheby_fraction;
    hypre_Vector       **cheby_ds;
-   HYPRE_Real         **cheby_coefs;
-
-   HYPRE_Real           cum_nnz_AP;
 
    /* data needed for non-Galerkin option */
    HYPRE_Int           nongalerk_num_tol;
-   HYPRE_Real         *nongalerk_tol;
-   HYPRE_Real          nongalerkin_tol;
-   HYPRE_Real         *nongal_tol_array;
 
    /* data generated in the solve phase */
    hypre_ParVector   *Vtemp;
    hypre_Vector      *Vtemp_local;
-   HYPRE_Real        *Vtemp_local_data;
-   HYPRE_Real         cycle_op_count;
    hypre_ParVector   *Rtemp;
    hypre_ParVector   *Ptemp;
    hypre_ParVector   *Ztemp;
@@ -198,7 +162,7 @@ typedef struct
 #ifdef CUMNUMIT
    HYPRE_Int        cum_num_iterations;
 #endif
-   HYPRE_Real       rel_resid_norm;
+   hypre_double     cum_nnz_AP;
    hypre_ParVector *residual; /* available if logging>1 */
 
    /* output params */
@@ -221,11 +185,9 @@ typedef struct
    hypre_ParVector ***interp_vectors_array;
    HYPRE_Int          interp_vec_variant;
    HYPRE_Int          interp_vec_first_level;
-   HYPRE_Real         interp_vectors_abs_q_trunc;
    HYPRE_Int          interp_vectors_q_max;
    HYPRE_Int          interp_refine;
    HYPRE_Int          smooth_interp_vectors;
-   HYPRE_Real       *expandp_weights; /* currently not set by user */
 
    /* enable redundant coarse grid solve */
    HYPRE_Solver         coarse_solver;
@@ -239,10 +201,6 @@ typedef struct
    HYPRE_Int   gs_setup;
    HYPRE_Int  *comm_info;
    HYPRE_Int  *A_piv;
-   HYPRE_Real *A_mat;
-   HYPRE_Real *A_work;
-   HYPRE_Real *b_vec;
-   HYPRE_Real *u_vec;
 
    /* information for multiplication with Lambda - additive AMG */
    HYPRE_Int      additive;
@@ -250,14 +208,11 @@ typedef struct
    HYPRE_Int      simple;
    HYPRE_Int      add_last_lvl;
    HYPRE_Int      add_P_max_elmts;
-   HYPRE_Real     add_trunc_factor;
    HYPRE_Int      add_rlx_type;
-   HYPRE_Real     add_rlx_wt;
    hypre_ParCSRMatrix *Lambda;
    hypre_ParCSRMatrix *Atilde;
    hypre_ParVector *Rtilde;
    hypre_ParVector *Xtilde;
-   HYPRE_Real *D_inv;
 
    /* Use 2 mat-mat-muls instead of triple product*/
    HYPRE_Int rap2;
@@ -277,14 +232,14 @@ typedef struct
    /* information for preserving indices as fine grid points */
    HYPRE_Int      num_F_points;
    HYPRE_BigInt  *F_points_marker;
-
+   
 #ifdef HYPRE_USING_DSUPERLU
    /* Parameters and data for SuperLU_Dist */
    HYPRE_Int dslu_threshold;
    HYPRE_Solver dslu_solver;
 #endif
 
-#ifdef(HYPRE_MIXED_PRECISION)
+#ifdef HYPRE_MIXED_PRECISION 
    HYPRE_Precision *precision_array;
    HYPRE_Int       *precision_type;
    hypre_ParVector *Vtemp_dbl;
@@ -294,6 +249,70 @@ typedef struct
    hypre_ParVector *Ztemp_flt;
    hypre_ParVector *Ztemp_long_dbl;
 #endif
+
+   /* HYPRE_Real parameters */
+   
+   /* setup params */
+   hypre_double   strong_threshold;
+   hypre_double   max_row_sum;
+   hypre_double   trunc_factor;
+   hypre_double   agg_trunc_factor;
+   hypre_double   agg_P12_trunc_factor;
+   HYPRE_Real    *relax_weight;
+   HYPRE_Real    *omega;
+   HYPRE_Real     jacobi_trunc_threshold;
+   HYPRE_Real     S_commpkg_switch;
+   HYPRE_Real     CR_rate;
+   HYPRE_Real     CR_strong_th;
+   HYPRE_Real     A_drop_tol;
+   HYPRE_Real     strong_thresholdR; /* theta for build R: defines strong F neighbors */
+   HYPRE_Real     filter_thresholdR; /* theta for filtering R  */
+
+   /* solve params */
+   HYPRE_Real     user_relax_weight;
+   HYPRE_Real     outer_wt;
+   HYPRE_Real     tol;
+
+   /* data for more complex smoothers */
+   HYPRE_Real           schwarz_rlx_weight;
+   HYPRE_Real           ps_threshold;
+   HYPRE_Real           ps_filter;
+   HYPRE_Real           pi_drop_tol;
+   HYPRE_Real           eu_sparse_A;
+   HYPRE_Real           ilu_droptol;
+   HYPRE_Real           fsai_threshold;
+   HYPRE_Real           fsai_kap_tolerance;
+   HYPRE_Real          *max_eig_est;
+   HYPRE_Real          *min_eig_est;
+   HYPRE_Real           cheby_fraction;
+   HYPRE_Real         **cheby_coefs;
+
+   /* data needed for non-Galerkin option */
+   HYPRE_Real         *nongalerk_tol;
+   HYPRE_Real          nongalerkin_tol;
+   HYPRE_Real         *nongal_tol_array;
+
+   /* data generated in the solve phase */
+   HYPRE_Real        *Vtemp_local_data;
+   HYPRE_Real         cycle_op_count;
+
+   /* log info */
+   HYPRE_Real       rel_resid_norm;
+
+   /* data for fitting vectors in interpolation */
+   HYPRE_Real         interp_vectors_abs_q_trunc;
+   HYPRE_Real       *expandp_weights; /* currently not set by user */
+
+   /* store matrix, vector and communication info for Gaussian elimination */
+   HYPRE_Real *A_mat;
+   HYPRE_Real *A_work;
+   HYPRE_Real *b_vec;
+   HYPRE_Real *u_vec;
+
+   /* information for multiplication with Lambda - additive AMG */
+   HYPRE_Real     add_trunc_factor;
+   HYPRE_Real     add_rlx_wt;
+   HYPRE_Real *D_inv;
 
 } hypre_ParAMGData;
 

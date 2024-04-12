@@ -359,7 +359,7 @@ hypre_ParCSRMatrixSetNumNonzeros_core( hypre_ParCSRMatrix *matrix, const char* f
       hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1,
                           HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
 
-      hypre_ParCSRMatrixDNumNonzeros(matrix) = total_num_nonzeros;
+      hypre_ParCSRMatrixDNumNonzeros(matrix) = (hypre_double) total_num_nonzeros;
    }
    else
    {

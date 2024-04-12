@@ -960,7 +960,7 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
 
    hypre_ParCSRMatrixNumNonzeros(P)  = hypre_ParCSRMatrixNumNonzeros(W) +
                                        hypre_ParCSRMatrixGlobalNumCols(W);
-   hypre_ParCSRMatrixDNumNonzeros(P) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P);
+   hypre_ParCSRMatrixDNumNonzeros(P) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(P);
 
    hypre_GpuProfilingPushRange("Truncation");
    if (trunc_factor != 0.0 || max_elmts > 0)
@@ -1230,7 +1230,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
 
    hypre_ParCSRMatrixNumNonzeros(P)  = hypre_ParCSRMatrixNumNonzeros(W) +
                                        hypre_ParCSRMatrixGlobalNumCols(W);
-   hypre_ParCSRMatrixDNumNonzeros(P) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P);
+   hypre_ParCSRMatrixDNumNonzeros(P) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(P);
 
    hypre_GpuProfilingPushRange("Truncation");
    if (trunc_factor != 0.0 || max_elmts > 0)
@@ -1499,7 +1499,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
 
    hypre_ParCSRMatrixNumNonzeros(P)  = hypre_ParCSRMatrixNumNonzeros(W) +
                                        hypre_ParCSRMatrixGlobalNumCols(W);
-   hypre_ParCSRMatrixDNumNonzeros(P) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(P);
+   hypre_ParCSRMatrixDNumNonzeros(P) = (hypre_double) hypre_ParCSRMatrixNumNonzeros(P);
 
    hypre_GpuProfilingPushRange("Truncation");
    if (trunc_factor != 0.0 || max_elmts > 0)

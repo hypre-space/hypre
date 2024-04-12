@@ -136,7 +136,7 @@ hypre_BoomerAMGCreate( void )
    /* log info */
    HYPRE_Int    num_iterations;
    HYPRE_Int    cum_num_iterations;
-   HYPRE_Real   cum_nnz_AP;
+   hypre_double cum_nnz_AP;
 
    /* output params */
    HYPRE_Int    print_level;
@@ -5076,8 +5076,8 @@ hypre_BoomerAMGSetFPoints(void         *data,
 }
 
 HYPRE_Int
-hypre_BoomerAMGSetCumNnzAP( void       *data,
-                            HYPRE_Real  cum_nnz_AP )
+hypre_BoomerAMGSetCumNnzAP( void         *data,
+                            hypre_double  cum_nnz_AP )
 {
    hypre_ParAMGData *amg_data = (hypre_ParAMGData*) data;
 
@@ -5093,8 +5093,8 @@ hypre_BoomerAMGSetCumNnzAP( void       *data,
 
 
 HYPRE_Int
-hypre_BoomerAMGGetCumNnzAP( void       *data,
-                            HYPRE_Real *cum_nnz_AP )
+hypre_BoomerAMGGetCumNnzAP( void         *data,
+                            hypre_double *cum_nnz_AP )
 {
    hypre_ParAMGData *amg_data = (hypre_ParAMGData*) data;
 
