@@ -479,37 +479,40 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
          fine_grid = level;
          coarse_grid = level + 1;
 
-
-         // JSP: avoid unnecessary copy using out-of-place version of SpMV
-         if (precision_array[fine_grid] == HYPRE_REAL_DOUBLE)
+         if (precision_array[coarse_grid] == HYPRE_REAL_DOUBLE)
 	 {
             hypre_ParVectorSetZeros_dbl(U_array[coarse_grid]);
+	 }
+	 else if (precision_array[coarse_grid] == HYPRE_REAL_SINGLE)
+	 {
+            hypre_ParVectorSetZeros_flt(U_array[coarse_grid]);
+	 }
+	 else if (precision_array[coarse_grid] == HYPRE_REAL_LONGDOUBLE)
+	 {
+            hypre_ParVectorSetZeros_long_dbl(U_array[coarse_grid]);
+	 }
+	 else
+         {
+            hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
+         }
 
-            alpha = -1.0;
-            beta = 1.0;
-
+         // JSP: avoid unnecessary copy using out-of-place version of SpMV
+         alpha = -1.0;
+         beta = 1.0;
+         if (precision_array[fine_grid] == HYPRE_REAL_DOUBLE)
+	 {
 	    hypre_ParCSRMatrixMatvecOutOfPlace_dbl((hypre_double)alpha, A_array[fine_grid], 
 			                           U_array[fine_grid], (hypre_double) beta, 
 						   F_array[fine_grid], Vtemp_dbl);
 	 }
 	 else if (precision_array[fine_grid] == HYPRE_REAL_SINGLE)
 	 {
-            hypre_ParVectorSetZeros_flt(U_array[coarse_grid]);
-
-            alpha = -1.0;
-            beta = 1.0;
-
 	    hypre_ParCSRMatrixMatvecOutOfPlace_flt((hypre_float)alpha, A_array[fine_grid], 
 			                           U_array[fine_grid], (hypre_float) beta, 
 						   F_array[fine_grid], Vtemp_flt);
 	 }
 	 else if (precision_array[fine_grid] == HYPRE_REAL_LONGDOUBLE)
 	 {
-            hypre_ParVectorSetZeros_long_dbl(U_array[coarse_grid]);
-
-            alpha = -1.0;
-            beta = 1.0;
-
 	    hypre_ParCSRMatrixMatvecOutOfPlace_long_dbl((hypre_long_double)alpha, A_array[fine_grid], 
 			                           U_array[fine_grid], (hypre_long_double) beta, 
 						   F_array[fine_grid], Vtemp_long_dbl);
