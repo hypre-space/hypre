@@ -280,6 +280,7 @@ typedef struct
    hypre_double   trunc_factor;
    hypre_double   agg_trunc_factor;
    hypre_double   agg_P12_trunc_factor;
+   hypre_double   tol;
    HYPRE_Real    *relax_weight;
    HYPRE_Real    *omega;
    HYPRE_Real     jacobi_trunc_threshold;
@@ -293,7 +294,6 @@ typedef struct
    /* solve params */
    HYPRE_Real     user_relax_weight;
    HYPRE_Real     outer_wt;
-   HYPRE_Real     tol;
 
    /* data for more complex smoothers */
    HYPRE_Real           schwarz_rlx_weight;

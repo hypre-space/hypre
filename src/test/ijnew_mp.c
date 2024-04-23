@@ -1163,7 +1163,6 @@ int main (int argc, char *argv[])
       HYPRE_GMRESSetMaxIter_dbl(pcg_solver, max_iter);
       HYPRE_GMRESSetTol_dbl(pcg_solver, tol);
       HYPRE_GMRESSetPrintLevel_dbl(pcg_solver, ioutdat);
-//      HYPRE_PCGSetRecomputeResidual_dbl(pcg_solver, recompute_res);      
       
       
       /* Now set up the AMG preconditioner and specify any parameters */
@@ -1534,7 +1533,7 @@ int main (int argc, char *argv[])
       else if (solver_id == 13)
       {
          if (myid == 0) hypre_printf_dbl("\n\n***** Solver: MIXED PRECISION AMG-PCG *****\n");
-         HYPRE_PCGSetMaxIter_dbl(pcg_solver, mg_max_iter);
+         HYPRE_GMRESSetMaxIter_dbl(pcg_solver, mg_max_iter);
          HYPRE_MPAMGCreate_mp(&amg_solver);
          HYPRE_MPAMGSetPrintLevel_mp(amg_solver, poutdat); 
          HYPRE_MPAMGSetCoarsenType_mp(amg_solver, coarsen_type);
@@ -1813,7 +1812,6 @@ int main (int argc, char *argv[])
       HYPRE_BiCGSTABSetMaxIter_flt(pcg_solver, max_iter);
       HYPRE_BiCGSTABSetTol_flt(pcg_solver, (float)tol);
       HYPRE_BiCGSTABSetPrintLevel_flt(pcg_solver, ioutdat);
-      //HYPRE_BiCGSTABSetRecomputeResidual_flt(pcg_solver, 1);      
       
       
       /* Now set up the AMG preconditioner and specify any parameters */
@@ -1953,7 +1951,6 @@ int main (int argc, char *argv[])
       HYPRE_BiCGSTABSetMaxIter_dbl(pcg_solver, max_iter);
       HYPRE_BiCGSTABSetTol_dbl(pcg_solver, tol);
       HYPRE_BiCGSTABSetPrintLevel_dbl(pcg_solver, ioutdat);
-      //HYPRE_BiCGSTABSetRecomputeResidual_dbl(pcg_solver, 1);      
       
       
       /* Now set up the AMG preconditioner and specify any parameters */
