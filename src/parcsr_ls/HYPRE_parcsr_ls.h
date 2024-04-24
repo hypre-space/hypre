@@ -4476,7 +4476,7 @@ HYPRE_MGRSetLevelSmoothType(HYPRE_Solver  solver,
  *          inactive code, indicating the use of an user-defined smoother instead.
  *
  * @param[in] \e level The level identifier for which the global relaxation method is to be set.
- *            Must be within the range of the configured levels in the MGR solver.
+ *            Must be within the range of the number of levels in the MGR solver.
  * @param[in,out] \e solver A pointer to the MGR solver object. This object is modified to include the
  *                specified smoother for the given level.
  * @param[in] \e smoother The HYPRE solver object that specifies the global relaxation method to be used
