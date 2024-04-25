@@ -239,24 +239,24 @@ HYPRE_MGRSetFSolver(HYPRE_Solver             solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetFSolverAtLevel(HYPRE_Int     level,
-                           HYPRE_Solver  solver,
-                           HYPRE_Solver  fsolver )
+HYPRE_MGRSetFSolverAtLevel(HYPRE_Solver  solver,
+                           HYPRE_Solver  fsolver,
+                           HYPRE_Int     level )
 {
    if (!solver)
    {
-      hypre_error_in_arg(2);
+      hypre_error_in_arg(1);
       return hypre_error_flag;
    }
    else if (!fsolver)
    {
-      hypre_error_in_arg(3);
+      hypre_error_in_arg(2);
       return hypre_error_flag;
    }
 
-   return ( hypre_MGRSetFSolverAtLevel( level,
-                                        (void *) solver,
-                                        (void *) fsolver ) );
+   return ( hypre_MGRSetFSolverAtLevel( (void *) solver,
+                                        (void *) fsolver,
+                                        level ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -861,22 +861,22 @@ HYPRE_MGRSetGlobalSmoothCycle( HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetGlobalSmootherAtLevel( HYPRE_Int     level,
-                                   HYPRE_Solver  solver,
-                                   HYPRE_Solver  smoother )
+HYPRE_MGRSetGlobalSmootherAtLevel( HYPRE_Solver  solver,
+                                   HYPRE_Solver  smoother,
+                                   HYPRE_Int     level )
 {
    if (!solver)
    {
-      hypre_error_in_arg(2);
+      hypre_error_in_arg(1);
       return hypre_error_flag;
    }
    else if (!smoother)
    {
-      hypre_error_in_arg(3);
+      hypre_error_in_arg(2);
       return hypre_error_flag;
    }
 
-   return hypre_MGRSetGlobalSmootherAtLevel(level, (void*) solver, smoother);
+   return hypre_MGRSetGlobalSmootherAtLevel((void*) solver, smoother, level);
 }
 
 /*--------------------------------------------------------------------------

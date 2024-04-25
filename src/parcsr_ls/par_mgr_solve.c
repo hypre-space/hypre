@@ -705,7 +705,6 @@ hypre_MGRCycle( void              *mgr_vdata,
                                               level_diaginv, Vtemp);
                   }
                }
-               hypre_ParVectorAllZeros(U_array[fine_grid]) = 0;
             }
             else if ((level_smooth_type[fine_grid] > 1) &&
                      (level_smooth_type[fine_grid] < 7))
@@ -733,20 +732,11 @@ hypre_MGRCycle( void              *mgr_vdata,
 
                   /* Update solution */
                   hypre_ParVectorAxpy(fp_one, Utemp, U_array[fine_grid]);
-                  hypre_ParVectorAllZeros(U_array[fine_grid]) = 0;
                }
-            }
-            else if (level_smooth_type[fine_grid] == 16)
-            {
-               /* hypre_ILU smoother */
-               HYPRE_ILUSolve((mgr_data -> level_smoother)[fine_grid],
-                              A_array[fine_grid], F_array[fine_grid],
-                              U_array[fine_grid]);
-               hypre_ParVectorAllZeros(U_array[fine_grid]) = 0;
             }
             else if ((mgr_data -> level_smoother)[fine_grid])
             {
-               /* User smoother */
+               /* Generic smoother object */
                hypre_Solver *base = (hypre_Solver*) (mgr_data -> level_smoother)[fine_grid];
 
                hypre_SolverSolve(base)((mgr_data -> level_smoother)[fine_grid],
@@ -765,6 +755,7 @@ hypre_MGRCycle( void              *mgr_vdata,
                                        U_array[fine_grid], Vtemp, Ztemp);
                }
             }
+            hypre_ParVectorAllZeros(U_array[fine_grid]) = 0;
 
             /* Error checking */
             if (HYPRE_GetError())

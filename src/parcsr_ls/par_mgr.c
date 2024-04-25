@@ -2931,9 +2931,9 @@ hypre_MGRSetFSolver( void  *mgr_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRSetFSolverAtLevel( HYPRE_Int   level,
-                            void       *mgr_vdata,
-                            void       *fsolver )
+hypre_MGRSetFSolverAtLevel( void       *mgr_vdata,
+                            void       *fsolver,
+                            HYPRE_Int   level )
 {
    hypre_ParMGRData *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    HYPRE_Int         max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
@@ -3562,9 +3562,9 @@ hypre_MGRSetLevelSmoothIters( void      *mgr_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRSetGlobalSmootherAtLevel( HYPRE_Int     level,
-                                   void         *mgr_vdata,
-                                   HYPRE_Solver  smoother )
+hypre_MGRSetGlobalSmootherAtLevel( void         *mgr_vdata,
+                                   HYPRE_Solver  smoother,
+                                   HYPRE_Int     level )
 {
    hypre_Solver          *base = (hypre_Solver*) smoother;
    HYPRE_PtrToSolverFcn   setup = hypre_SolverSetup(base);
