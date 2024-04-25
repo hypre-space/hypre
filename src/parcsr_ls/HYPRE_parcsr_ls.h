@@ -4463,22 +4463,22 @@ HYPRE_MGRSetLevelSmoothType(HYPRE_Solver  solver,
                             HYPRE_Int    *smooth_type);
 
 /**
- * @brief Sets the global relaxation method for a specified MGR level using a HYPRE solver object.
+ * @brief Sets the global smoother method for a specified MGR level using a HYPRE solver object.
  *
- * This function configures a global relaxation (smoother) method for a specific level within the
- * multigrid reduction (MGR) scheme.
+ * This function enables solvers within hypre to be used as complex smoothers for a specific level 
+ * within the multigrid reduction (MGR) scheme. Users can configure the solver options and pass the 
+ * solver in as the smoother. Currently supported solver options via this interface are ILU and AMG.
  *
  * @note Unlike some other setup functions that might require an array to set options across multiple
  *       levels, this function focuses on a single level, identified by the \e level parameter.
  *
- * @warning If `hypre_MGRSetLevelSmoothType` has previously been called, setting a global smoother at
- *          a specific level using this function will override the smoother type for that level to an
- *          inactive code, indicating the use of an user-defined smoother instead.
+ * @warning The smoother passed to function takes precedence over the smoother type set for that level 
+ *       in the MGR hierarchy.
  *
  * @param[in,out] \e solver A pointer to the MGR solver object. This object is modified to include the
  *                specified smoother for the given level.
  * @param[in] \e smoother The HYPRE solver object that specifies the global relaxation method to be used
- *            at the specified level. Current available choices are AMG and ILU.
+ *            at the specified level. Currently available choices are BoomerAMG and ILU.
  * @param[in] \e level The level identifier for which the global relaxation method is to be set.
  *            Must be within the range of the number of levels in the MGR solver.
  *
