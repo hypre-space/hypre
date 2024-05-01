@@ -126,6 +126,8 @@ ro="-struct -rt -mpibind -save ${save}"
 #####################################
 ## CUDA + CMake build (only) tests ##
 #####################################
+module -q load cmake/3.16.8
+module list cmake/3.16.8 |& grep "None found"
 
 mo="-j"
 
