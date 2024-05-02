@@ -61,8 +61,10 @@ hypre_AuxParCSRMatrixCreate( hypre_AuxParCSRMatrix **aux_matrix,
    hypre_AuxParCSRMatrixStackSorA(matrix) = NULL;
    hypre_AuxParCSRMatrixUsrOnProcElmts(matrix) = -1;
    hypre_AuxParCSRMatrixUsrOffProcElmts(matrix) = -1;
-   hypre_AuxParCSRMatrixInitAllocFactor(matrix) = 5;
-   hypre_AuxParCSRMatrixGrowFactor(matrix) = 2;
+   hypre_AuxParCSRMatrixInitAllocFactor(matrix) = 0;
+   hypre_AuxParCSRMatrixEarlyAssemble(matrix) = 0;
+   hypre_AuxParCSRMatrixGrowFactor(matrix) = 2.0;
+   hypre_AuxParCSRMatrixShrinkThreshold(matrix) = 0.25;
 #endif
 
    *aux_matrix = matrix;
