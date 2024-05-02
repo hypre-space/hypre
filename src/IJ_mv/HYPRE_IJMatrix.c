@@ -1010,6 +1010,118 @@ HYPRE_IJMatrixSetMaxOffProcElmts( HYPRE_IJMatrix matrix,
 }
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJMatrixSetInitAllocation(hypre_IJMatrix *matrix,
+                                HYPRE_Int       factor)
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+   {
+      return ( hypre_IJMatrixSetInitAllocationParCSR(ijmatrix,
+                                                     factor) );
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJMatrixSetEarlyAssemble(hypre_IJMatrix *matrix,
+                               HYPRE_Int       early_assemble)
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+   {
+      return ( hypre_IJMatrixSetEarlyAssembleParCSR(ijmatrix,
+                                                    early_assemble) );
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJMatrixSetGrowFactor(hypre_IJMatrix *matrix,
+                            HYPRE_Real      factor)
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+   {
+      return ( hypre_IJMatrixSetGrowFactorParCSR(ijmatrix,
+                                                 factor) );
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJMatrixSetShrinkThreshold(hypre_IJMatrix *matrix,
+                                 HYPRE_Real      threshold)
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+   {
+      return ( hypre_IJMatrixSetShrinkThresholdParCSR(ijmatrix,
+                                                      threshold) );
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJMatrixRead
  *
  * Reads data from file in ASCII format and creates an IJMatrix on host memory
