@@ -67,6 +67,14 @@ HYPRE_Int hypre_IJMatrixSetDiagOffdSizesParCSR ( hypre_IJMatrix *matrix,
                                                  const HYPRE_Int *diag_sizes, const HYPRE_Int *offdiag_sizes );
 HYPRE_Int hypre_IJMatrixSetMaxOffProcElmtsParCSR ( hypre_IJMatrix *matrix,
                                                    HYPRE_Int max_off_proc_elmts );
+HYPRE_Int hypre_IJMatrixSetInitAllocationParCSR(hypre_IJMatrix *matrix,
+                                                HYPRE_Int       factor);
+HYPRE_Int hypre_IJMatrixSetEarlyAssembleParCSR(hypre_IJMatrix *matrix,
+                                               HYPRE_Int       early_assemble);
+HYPRE_Int hypre_IJMatrixSetGrowFactorParCSR(hypre_IJMatrix *matrix,
+                                            HYPRE_Real      factor);
+HYPRE_Int hypre_IJMatrixSetShrinkThresholdParCSR(hypre_IJMatrix *matrix,
+                                                 HYPRE_Real      threshold);
 HYPRE_Int hypre_IJMatrixInitializeParCSR ( hypre_IJMatrix *matrix );
 HYPRE_Int hypre_IJMatrixGetRowCountsParCSR ( hypre_IJMatrix *matrix, HYPRE_Int nrows,
                                              HYPRE_BigInt *rows, HYPRE_Int *ncols );
@@ -107,6 +115,8 @@ HYPRE_Int hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix,
                                             HYPRE_MemoryLocation memory_location);
 HYPRE_Int hypre_IJMatrixSetConstantValuesParCSRDevice( hypre_IJMatrix *matrix,
                                                        HYPRE_Complex value );
+
+HYPRE_Int hypre_IJMatrixAssembleCommunicateAndCompressDevice(hypre_IJMatrix *matrix, HYPRE_Int reduce_stack_size);
 
 /* IJMatrix_petsc.c */
 HYPRE_Int hypre_IJMatrixSetLocalSizePETSc ( hypre_IJMatrix *matrix, HYPRE_Int local_m,

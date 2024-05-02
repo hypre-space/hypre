@@ -295,6 +295,18 @@ HYPRE_Int HYPRE_IJMatrixSetDiagOffdSizes(HYPRE_IJMatrix   matrix,
 HYPRE_Int HYPRE_IJMatrixSetMaxOffProcElmts(HYPRE_IJMatrix matrix,
                                            HYPRE_Int      max_off_proc_elmts);
 
+HYPRE_Int HYPRE_IJMatrixSetInitAllocation(HYPRE_IJMatrix matrix,
+                                          HYPRE_Int      factor);
+
+HYPRE_Int HYPRE_IJMatrixSetEarlyAssemble(HYPRE_IJMatrix matrix,
+                                         HYPRE_Int      early_assemble);
+
+HYPRE_Int HYPRE_IJMatrixSetGrowFactor(HYPRE_IJMatrix matrix,
+                                      HYPRE_Real     factor);
+
+HYPRE_Int HYPRE_IJMatrixSetShrinkThreshold(HYPRE_IJMatrix matrix,
+                                           HYPRE_Real     threshold);
+
 /**
  * (Optional) Sets the print level, if the user wants to print
  * error messages. The default is 0, i.e. no error messages are printed.

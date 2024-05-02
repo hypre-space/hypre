@@ -74,8 +74,10 @@ typedef struct
    char                *stack_sora;              /* Set (1) or Add (0) */
    HYPRE_Int            usr_on_proc_elmts;       /* user given num elmt on-proc */
    HYPRE_Int            usr_off_proc_elmts;      /* user given num elmt off-proc */
-   HYPRE_BigInt         init_alloc_factor;
-   HYPRE_BigInt         grow_factor;
+   HYPRE_Int            early_assemble;
+   HYPRE_Int            init_alloc_factor;
+   HYPRE_Real           grow_factor;
+   HYPRE_Real           shrink_threshold;
 #endif
 } hypre_AuxParCSRMatrix;
 
@@ -118,8 +120,10 @@ typedef struct
 #define hypre_AuxParCSRMatrixStackSorA(matrix)            ((matrix) -> stack_sora)
 #define hypre_AuxParCSRMatrixUsrOnProcElmts(matrix)       ((matrix) -> usr_on_proc_elmts)
 #define hypre_AuxParCSRMatrixUsrOffProcElmts(matrix)      ((matrix) -> usr_off_proc_elmts)
+#define hypre_AuxParCSRMatrixEarlyAssemble(matrix)        ((matrix) -> early_assemble)
 #define hypre_AuxParCSRMatrixInitAllocFactor(matrix)      ((matrix) -> init_alloc_factor)
 #define hypre_AuxParCSRMatrixGrowFactor(matrix)           ((matrix) -> grow_factor)
+#define hypre_AuxParCSRMatrixShrinkThreshold(matrix)      ((matrix) -> shrink_threshold)
 #endif
 
 #endif /* #ifndef hypre_AUX_PARCSR_MATRIX_HEADER */
