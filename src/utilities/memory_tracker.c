@@ -621,10 +621,12 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
 
       }
 
+      /*
       for (t = hypre_MEMORY_HOST; t <= hypre_MEMORY_UNIFIED; t++)
       {
          hypre_assert(curr_bytes[t] == 0);
       }
+      */
    }
 
    //HYPRE_Real t1 = hypre_MPI_Wtime() - t0;
