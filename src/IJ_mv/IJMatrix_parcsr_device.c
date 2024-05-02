@@ -274,11 +274,6 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
 
       HYPRE_BigInt stack_elmts_max_new = hypre_max(stack_elmts_current * hypre_AuxParCSRMatrixGrowFactor(aux_matrix), stack_elmts_max);
 
-      if (stack_elmts_current < stack_elmts_max_new * hypre_AuxParCSRMatrixShrinkThreshold(aux_matrix))
-      {
-         stack_elmts_max_new = stack_elmts_current * hypre_AuxParCSRMatrixGrowFactor(aux_matrix);
-      }
-
       if (stack_elmts_max_new != stack_elmts_max)
       {
          hypre_AuxParCSRMatrixStackReallocate(aux_matrix, stack_elmts_max_new);

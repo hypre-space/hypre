@@ -36,7 +36,7 @@ HYPRE_Int getParCSRMatrixData(HYPRE_ParCSRMatrix  A, HYPRE_Int base, HYPRE_Int *
 
 HYPRE_Real checkMatrix(HYPRE_ParCSRMatrix parcsr_ref, HYPRE_IJMatrix ij_A);
 
-HYPRE_Int test_all(MPI_Comm comm, char *test_name, HYPRE_MemoryLocation memory_location, HYPRE_Int option, char *cmd_sequence, HYPRE_BigInt ilower, HYPRE_BigInt iupper, HYPRE_BigInt jlower, HYPRE_BigInt jupper, HYPRE_Int nrows, HYPRE_BigInt num_nonzeros, HYPRE_Int nchunks, HYPRE_Int init_alloc, HYPRE_Int early_assemble, HYPRE_Real grow_factor, HYPRE_Real shrink_threshold, HYPRE_Int *h_nnzrow, HYPRE_Int *nnzrow, HYPRE_BigInt *rows, HYPRE_BigInt *cols, HYPRE_Real *coefs, HYPRE_IJMatrix *ij_A_ptr);
+HYPRE_Int test_all(MPI_Comm comm, char *test_name, HYPRE_MemoryLocation memory_location, HYPRE_Int option, char *cmd_sequence, HYPRE_BigInt ilower, HYPRE_BigInt iupper, HYPRE_BigInt jlower, HYPRE_BigInt jupper, HYPRE_Int nrows, HYPRE_BigInt num_nonzeros, HYPRE_Int nchunks, HYPRE_Int init_alloc, HYPRE_Int early_assemble, HYPRE_Real grow_factor, HYPRE_Int *h_nnzrow, HYPRE_Int *nnzrow, HYPRE_BigInt *rows, HYPRE_BigInt *cols, HYPRE_Real *coefs, HYPRE_IJMatrix *ij_A_ptr);
 
 hypre_int
 main( hypre_int  argc,
@@ -77,7 +77,6 @@ main( hypre_int  argc,
    HYPRE_Int                 init_alloc = -1;
    HYPRE_Int                 early_assemble = 0;
    HYPRE_Real                grow_factor = -1.0;
-   HYPRE_Real                shrink_threshold = -1.0;
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
@@ -204,11 +203,6 @@ main( hypre_int  argc,
       {
          arg_index++;
          grow_factor = (HYPRE_Real) atof(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-shrink") == 0 )
-      {
-         arg_index++;
-         shrink_threshold = (HYPRE_Real) atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-print") == 0 )
       {
@@ -354,7 +348,7 @@ main( hypre_int  argc,
    if (mode & 1)
    {
       test_all(comm, "set", memory_location, option, "sA", ilower, iupper, jlower, jupper, nrows, num_nonzeros,
-               nchunks, init_alloc, early_assemble, grow_factor, shrink_threshold, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo, cols, coefs, &ij_A);
+               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo, cols, coefs, &ij_A);
 
       ierr += checkMatrix(parcsr_ref, ij_A) > tol;
       if (print_matrix)
@@ -371,7 +365,7 @@ main( hypre_int  argc,
    if (mode & 2)
    {
       test_all(comm, "addtrans", memory_location, 2, "aA", ilower, iupper, jlower, jupper, nrows, num_nonzeros,
-               nchunks, init_alloc, early_assemble, grow_factor, shrink_threshold, h_nnzrow, nnzrow, cols, rows_coo, coefs, &ij_AT);
+               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, cols, rows_coo, coefs, &ij_AT);
 
       hypre_ParCSRMatrixTranspose(parcsr_ref, &parcsr_trans, 1);
 
@@ -388,7 +382,7 @@ main( hypre_int  argc,
    if (mode & 4)
    {
       test_all(comm, "set/set", memory_location, option, "ssA", ilower, iupper, jlower, jupper, nrows, num_nonzeros,
-                  nchunks, init_alloc, early_assemble, grow_factor, shrink_threshold, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo, cols, coefs, &ij_A);
+                  nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo, cols, coefs, &ij_A);
 
       ierr += checkMatrix(parcsr_ref, ij_A) > tol;
       if (print_matrix)
@@ -402,7 +396,7 @@ main( hypre_int  argc,
    if (mode & 8)
    {
       test_all(comm, "add/set", memory_location, option, "asA", ilower, iupper, jlower, jupper, nrows, num_nonzeros,
-                  nchunks, init_alloc, early_assemble, grow_factor, shrink_threshold, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo, cols, coefs, &ij_A);
+                  nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo, cols, coefs, &ij_A);
 
       ierr += checkMatrix(parcsr_ref, ij_A) > tol;
       if (print_matrix)
@@ -416,7 +410,7 @@ main( hypre_int  argc,
    if (mode & 16)
    {
       test_all(comm, "set/add", memory_location, option, "saA", ilower, iupper, jlower, jupper, nrows, num_nonzeros,
-               nchunks, init_alloc, early_assemble, grow_factor, shrink_threshold, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo, cols, coefs, &ij_A);
+               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo, cols, coefs, &ij_A);
 
       hypre_ParCSRMatrix *parcsr_ref2 = hypre_ParCSRMatrixClone(parcsr_ref, 1);
       hypre_ParCSRMatrixScale(parcsr_ref2, 2.0);
@@ -434,7 +428,7 @@ main( hypre_int  argc,
    if (mode & 32)
    {
       test_all(comm, "set/add/assemble/set", memory_location, option, "saAsA", ilower, iupper, jlower, jupper, nrows, num_nonzeros,
-               nchunks, init_alloc, early_assemble, grow_factor, shrink_threshold, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo, cols, coefs, &ij_A);
+               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo, cols, coefs, &ij_A);
 
       ierr += checkMatrix(parcsr_ref, ij_A) > tol;
       if (print_matrix)
@@ -448,7 +442,7 @@ main( hypre_int  argc,
    if (mode & 64)
    {
       test_all(comm, "5adds/set", memory_location, option, "aaaaasA", ilower, iupper, jlower, jupper, nrows, num_nonzeros,
-               nchunks, init_alloc, early_assemble, grow_factor, shrink_threshold, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo, cols, coefs, &ij_A);
+               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo, cols, coefs, &ij_A);
 
       hypre_ParCSRMatrix *parcsr_ref2 = hypre_ParCSRMatrixClone(parcsr_ref, 1);
       hypre_ParCSRMatrixScale(parcsr_ref2, 1.);
@@ -753,7 +747,6 @@ test_all(MPI_Comm             comm,
          HYPRE_Int            init_alloc,
          HYPRE_Int            early_assemble,
          HYPRE_Real           grow_factor,
-         HYPRE_Real           shrink_threshold,
          HYPRE_Int           *h_nnzrow,
          HYPRE_Int           *nnzrow,
          HYPRE_BigInt        *rows,
@@ -785,10 +778,6 @@ test_all(MPI_Comm             comm,
    if (grow_factor > 0)
    {
       HYPRE_IJMatrixSetGrowFactor(ij_A, grow_factor);
-   }
-   if (shrink_threshold >= 0)
-   {
-      HYPRE_IJMatrixSetShrinkThreshold(ij_A, shrink_threshold);
    }
 
    chunk_size = nrows / nchunks;

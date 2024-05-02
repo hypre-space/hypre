@@ -73,8 +73,6 @@ HYPRE_Int hypre_IJMatrixSetEarlyAssembleParCSR(hypre_IJMatrix *matrix,
                                                HYPRE_Int       early_assemble);
 HYPRE_Int hypre_IJMatrixSetGrowFactorParCSR(hypre_IJMatrix *matrix,
                                             HYPRE_Real      factor);
-HYPRE_Int hypre_IJMatrixSetShrinkThresholdParCSR(hypre_IJMatrix *matrix,
-                                                 HYPRE_Real      threshold);
 HYPRE_Int hypre_IJMatrixInitializeParCSR ( hypre_IJMatrix *matrix );
 HYPRE_Int hypre_IJMatrixGetRowCountsParCSR ( hypre_IJMatrix *matrix, HYPRE_Int nrows,
                                              HYPRE_BigInt *rows, HYPRE_Int *ncols );

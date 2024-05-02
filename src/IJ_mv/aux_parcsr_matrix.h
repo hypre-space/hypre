@@ -77,7 +77,6 @@ typedef struct
    HYPRE_Int            early_assemble;
    HYPRE_Int            init_alloc_factor;
    HYPRE_Real           grow_factor;
-   HYPRE_Real           shrink_threshold;
 #endif
 } hypre_AuxParCSRMatrix;
 
@@ -123,7 +122,6 @@ typedef struct
 #define hypre_AuxParCSRMatrixEarlyAssemble(matrix)        ((matrix) -> early_assemble)
 #define hypre_AuxParCSRMatrixInitAllocFactor(matrix)      ((matrix) -> init_alloc_factor)
 #define hypre_AuxParCSRMatrixGrowFactor(matrix)           ((matrix) -> grow_factor)
-#define hypre_AuxParCSRMatrixShrinkThreshold(matrix)      ((matrix) -> shrink_threshold)
 #endif
 
 #endif /* #ifndef hypre_AUX_PARCSR_MATRIX_HEADER */
