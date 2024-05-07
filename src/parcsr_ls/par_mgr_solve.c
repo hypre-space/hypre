@@ -78,6 +78,7 @@ hypre_MGRSolve( void               *mgr_vdata,
       return hypre_error_flag;
    }
 
+   A_array[0] = A;
    U_array[0] = u;
    F_array[0] = f;
 
@@ -849,20 +850,25 @@ hypre_MGRCycle( void              *mgr_vdata,
                if (relax_type == 18)
                {
 #if defined(HYPRE_USING_GPU)
-                  for (i = 0; i < nsweeps[fine_grid]; i++)
+                  if (exec == HYPRE_EXEC_DEVICE)
                   {
-                     hypre_MGRRelaxL1JacobiDevice(A_array[fine_grid], F_array[fine_grid],
-                                                  CF_marker_data, relax_points, relax_weight,
-                                                  l1_norms, U_array[fine_grid], Vtemp);
+                     for (i = 0; i < nsweeps[fine_grid]; i++)
+                     {
+                        hypre_MGRRelaxL1JacobiDevice(A_array[fine_grid], F_array[fine_grid],
+                                                     CF_marker_data, relax_points, relax_weight,
+                                                     l1_norms, U_array[fine_grid], Vtemp);
+                     }
                   }
-#else
-                  for (i = 0; i < nsweeps[fine_grid]; i++)
-                  {
-                     hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid],
-                                                 CF_marker_data, relax_points, relax_weight,
-                                                 l1_norms, U_array[fine_grid], Vtemp);
-                  }
+                  else
 #endif
+                  {
+                     for (i = 0; i < nsweeps[fine_grid]; i++)
+                     {
+                         hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid],
+                                                     CF_marker_data, relax_points, relax_weight,
+                                                     l1_norms, U_array[fine_grid], Vtemp);
+                     }
+                  }
                }
                else
                {
@@ -972,13 +978,18 @@ hypre_MGRCycle( void              *mgr_vdata,
                                                F_array[fine_grid], Vtemp);
 
             /* Restrict to F points */
-#if defined (HYPRE_USING_GPU)
-            hypre_ParCSRMatrixMatvecT(fp_one, P_FF_array[fine_grid], Vtemp,
-                                      fp_zero, F_fine_array[coarse_grid]);
-#else
-            hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, fp_one, Vtemp,
-                                fp_zero, &(F_fine_array[coarse_grid]));
+#if defined(HYPRE_USING_GPU)
+            if (exec == HYPRE_EXEC_DEVICE)
+            {
+               hypre_ParCSRMatrixMatvecT(fp_one, P_FF_array[fine_grid], Vtemp,
+                                         fp_zero, F_fine_array[coarse_grid]);
+            }
+            else
 #endif
+            {
+               hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, fp_one, Vtemp,
+                                   fp_zero, &(F_fine_array[coarse_grid]));
+            }
 
             /* Set initial guess to zeros */
             hypre_ParVectorSetZeros(U_fine_array[coarse_grid]);
@@ -1012,15 +1023,20 @@ hypre_MGRCycle( void              *mgr_vdata,
             }
 
             /* Interpolate the solution back to the fine grid level */
-#if defined (HYPRE_USING_GPU)
-            hypre_ParCSRMatrixMatvec(fp_one, P_FF_array[fine_grid],
-                                     U_fine_array[coarse_grid], fp_one,
-                                     U_array[fine_grid]);
-#else
-            hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, fp_one,
-                                U_fine_array[coarse_grid], fp_one,
-                                &(U_array[fine_grid]));
+#if defined(HYPRE_USING_GPU)
+            if (exec == HYPRE_EXEC_DEVICE)
+            {
+               hypre_ParCSRMatrixMatvec(fp_one, P_FF_array[fine_grid],
+                                        U_fine_array[coarse_grid], fp_one,
+                                        U_array[fine_grid]);
+            }
+            else
 #endif
+            {
+               hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, fp_one,
+                                   U_fine_array[coarse_grid], fp_one,
+                                   &(U_array[fine_grid]));
+            }
          }
          else
          {

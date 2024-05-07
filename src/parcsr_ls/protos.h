@@ -2289,7 +2289,7 @@ HYPRE_Int hypre_MGRBuildInterpApproximateInverse( hypre_ParCSRMatrix *A, HYPRE_I
                                                   HYPRE_BigInt *num_cpts_global,
                                                   hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_MGRTruncateAcfCPR( hypre_ParCSRMatrix *A_CF, hypre_ParCSRMatrix **A_CF_new_ptr );
-HYPRE_Int hypre_MGRBuildRFromW( HYPRE_Int *C_map, HYPRE_Int *F_map,
+HYPRE_Int hypre_MGRBuildRFromW( hypre_IntArray *C_map, hypre_IntArray *F_map,
                                 HYPRE_BigInt global_num_rows_R, HYPRE_BigInt global_num_cols_R,
                                 HYPRE_BigInt *row_starts_R, HYPRE_BigInt *col_starts_R,
                                 hypre_ParCSRMatrix *W, hypre_ParCSRMatrix **R_ptr );

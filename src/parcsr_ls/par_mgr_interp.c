@@ -2248,8 +2248,8 @@ hypre_MGRTruncateAcfCPR(hypre_ParCSRMatrix  *A_CF,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRBuildRFromWHost(HYPRE_Int           *C_map,
-                         HYPRE_Int           *F_map,
+hypre_MGRBuildRFromWHost(hypre_IntArray      *C_map,
+                         hypre_IntArray      *F_map,
                          hypre_ParCSRMatrix  *W,
                          hypre_ParCSRMatrix  *R)
 {
@@ -2259,6 +2259,8 @@ hypre_MGRBuildRFromWHost(HYPRE_Int           *C_map,
    HYPRE_Int             *W_diag_j        = hypre_CSRMatrixJ(W_diag);
    HYPRE_Complex         *W_diag_a        = hypre_CSRMatrixData(W_diag);
    HYPRE_Int              W_diag_num_rows = hypre_CSRMatrixNumRows(W_diag);
+   HYPRE_Int             *C_map_data      = hypre_IntArrayData(C_map);
+   HYPRE_Int             *F_map_data      = hypre_IntArrayData(F_map);
 
    /* Output matrix */
    hypre_CSRMatrix       *R_diag          = hypre_ParCSRMatrixDiag(R);
@@ -2276,13 +2278,13 @@ hypre_MGRBuildRFromWHost(HYPRE_Int           *C_map,
       /* Set CF connections */
       for (j = W_diag_i[i]; j < W_diag_i[i + 1]; j++)
       {
-         R_diag_j[nnz_diag] = F_map[W_diag_j[j]];
+         R_diag_j[nnz_diag] = F_map_data[W_diag_j[j]];
          R_diag_a[nnz_diag] = - W_diag_a[j];
          nnz_diag++;
       }
 
       /* Set CC connection */
-      R_diag_j[nnz_diag] = C_map[i];
+      R_diag_j[nnz_diag] = C_map_data[i];
       R_diag_a[nnz_diag] = one;
       nnz_diag++;
 
@@ -2300,8 +2302,8 @@ hypre_MGRBuildRFromWHost(HYPRE_Int           *C_map,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRBuildRFromW(HYPRE_Int            *C_map,
-                     HYPRE_Int            *F_map,
+hypre_MGRBuildRFromW(hypre_IntArray       *C_map,
+                     hypre_IntArray       *F_map,
                      HYPRE_BigInt          global_num_rows_R,
                      HYPRE_BigInt          global_num_cols_R,
                      HYPRE_BigInt         *row_starts_R,
@@ -2358,6 +2360,8 @@ hypre_MGRBuildRFromW(HYPRE_Int            *C_map,
       /* TODO (VPM): Implement hypre_MGRBuildRFromWDevice */
       hypre_ParCSRMatrixMigrate(W, HYPRE_MEMORY_HOST);
       hypre_ParCSRMatrixMigrate(R, HYPRE_MEMORY_HOST);
+      hypre_IntArrayMigrate(C_map, HYPRE_MEMORY_HOST);
+      hypre_IntArrayMigrate(F_map, HYPRE_MEMORY_HOST);
       hypre_MGRBuildRFromWHost(C_map, F_map, W, R);
       hypre_ParCSRMatrixMigrate(W, HYPRE_MEMORY_DEVICE);
       hypre_ParCSRMatrixMigrate(R, HYPRE_MEMORY_DEVICE);
@@ -2446,8 +2450,8 @@ hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix  *A,
    hypre_IntArraySeparateByValue(num_points, points, sizes, CF_marker, &CF_maps);
 
    /* Build restriction from W (R = [-W  I]) */
-   hypre_MGRBuildRFromW(hypre_IntArrayArrayEntryIData(CF_maps, 0),
-                        hypre_IntArrayArrayEntryIData(CF_maps, 1),
+   hypre_MGRBuildRFromW(hypre_IntArrayArrayEntryI(CF_maps, 0),
+                        hypre_IntArrayArrayEntryI(CF_maps, 1),
                         hypre_ParCSRMatrixGlobalNumRows(A_CF),
                         hypre_ParCSRMatrixGlobalNumCols(A),
                         hypre_ParCSRMatrixRowStarts(A_CF),
@@ -2561,8 +2565,8 @@ hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
    hypre_IntArraySeparateByValue(num_points, points, sizes, CF_marker, &CF_maps);
 
    /* Build restriction from W (R = [-W  I]) */
-   hypre_MGRBuildRFromW(hypre_IntArrayArrayEntryIData(CF_maps, 0),
-                        hypre_IntArrayArrayEntryIData(CF_maps, 1),
+   hypre_MGRBuildRFromW(hypre_IntArrayArrayEntryI(CF_maps, 0),
+                        hypre_IntArrayArrayEntryI(CF_maps, 1),
                         hypre_ParCSRMatrixGlobalNumRows(A_CF),
                         hypre_ParCSRMatrixGlobalNumCols(A),
                         hypre_ParCSRMatrixRowStarts(A_CF),
