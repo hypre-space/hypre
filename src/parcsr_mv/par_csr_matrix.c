@@ -700,6 +700,9 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
       hypre_TMemcpy(hypre_CSRMatrixJ(A_diag), A_diag_j,
                     HYPRE_Int, num_nonzeros,
                     memory_location, HYPRE_MEMORY_HOST);
+
+      hypre_TFree(A_diag_i, HYPRE_MEMORY_HOST);
+      hypre_TFree(A_diag_j, HYPRE_MEMORY_HOST);
    }
    else
    {

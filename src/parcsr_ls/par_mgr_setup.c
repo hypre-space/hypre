@@ -1509,17 +1509,23 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
 
          /* TODO: Check use of A_ff_array[lev], vectors at (lev + 1) are correct? (VPM) */
-         F_fine_array[lev + 1] =
-            hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_array[lev]),
-                                  hypre_ParCSRMatrixGlobalNumRows(A_ff_array[lev]),
-                                  hypre_ParCSRMatrixRowStarts(A_ff_array[lev]));
-         hypre_ParVectorInitialize(F_fine_array[lev + 1]);
+         if (!F_fine_array[lev + 1])
+         {
+            F_fine_array[lev + 1] =
+               hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_array[lev]),
+                                     hypre_ParCSRMatrixGlobalNumRows(A_ff_array[lev]),
+                                     hypre_ParCSRMatrixRowStarts(A_ff_array[lev]));
+            hypre_ParVectorInitialize(F_fine_array[lev + 1]);
+         }
 
-         U_fine_array[lev + 1] =
-            hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_array[lev]),
-                                  hypre_ParCSRMatrixGlobalNumRows(A_ff_array[lev]),
-                                  hypre_ParCSRMatrixRowStarts(A_ff_array[lev]));
-         hypre_ParVectorInitialize(U_fine_array[lev + 1]);
+         if (!U_fine_array[lev + 1])
+         {
+            U_fine_array[lev + 1] =
+               hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_array[lev]),
+                                     hypre_ParCSRMatrixGlobalNumRows(A_ff_array[lev]),
+                                     hypre_ParCSRMatrixRowStarts(A_ff_array[lev]));
+            hypre_ParVectorInitialize(U_fine_array[lev + 1]);
+         }
       }
 
       /* TODO: refactor this block (VPM) */

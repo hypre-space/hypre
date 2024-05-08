@@ -815,8 +815,8 @@ hypre_MGRCycle( void              *mgr_vdata,
                   {
                      hypre_MGRBlockRelaxSolveDevice(B_FF_array[fine_grid],
                                                     A_ff_array[fine_grid],
-                                                    F_fine_array[fine_grid],
-                                                    U_fine_array[fine_grid],
+                                                    F_fine_array[coarse_grid],
+                                                    U_fine_array[coarse_grid],
                                                     Vtemp, fp_one);
                   }
                   else
