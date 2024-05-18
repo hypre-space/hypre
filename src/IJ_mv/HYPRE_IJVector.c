@@ -319,6 +319,33 @@ HYPRE_IJVectorSetValues( HYPRE_IJVector        vector,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJVectorSetConstantValues
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorSetConstantValues( HYPRE_IJVector vector, HYPRE_Complex value )
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (!vec)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+   {
+     return ( hypre_IJVectorSetConstantValuesPar(vec, value) );
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJVectorAddToValues
  *--------------------------------------------------------------------------*/
 
