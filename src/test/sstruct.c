@@ -2613,6 +2613,7 @@ main( hypre_int argc,
    n_pre  = 1;
    n_post = 1;
    n_coarse = 1;
+   interp_type = 0;
    relax_is_set = 0;
    relax[0] = 1;
    relax[1] = -1; /* Relax up */
@@ -2732,17 +2733,18 @@ main( hypre_int argc,
          sol_type = -1;
       }
    }
-   else
-   {
-      if (read_fromfile_flag < 7)
-      {
-         if (!myid)
-         {
-            hypre_printf("Error: Must read A, b, and x from file! \n");
-         }
-         hypre_MPI_Abort(comm, 1);
-      }
-   }
+   /* WM: debug - commenting out to allow only reading matrix from file */
+   /* else */
+   /* { */
+   /*    if (read_fromfile_flag < 7) */
+   /*    { */
+   /*       if (!myid) */
+   /*       { */
+   /*          hypre_printf("Error: Must read A, b, and x from file! \n"); */
+   /*       } */
+   /*       hypre_MPI_Abort(comm, 1); */
+   /*    } */
+   /* } */
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -3779,6 +3781,25 @@ main( hypre_int argc,
 
       HYPRE_SStructMatrixAssemble(A);
    } /* if (read_fromfile_flag & 0x1) */
+
+
+
+
+
+   /* WM: debug - insert test code here */
+
+/*    HYPRE_SStructMatrixPrint("sstruct.out.A_before",  A, 0); */
+
+/*    hypre_SStructMatrixCompressUToS(A); */
+
+/*    HYPRE_SStructMatrixPrint("sstruct.out.A_after",  A, 0); */
+
+/*    hypre_MPI_Finalize(); */
+/*    return 0; */
+   /* WM: debug - insert test code above */
+
+
+
 
    /*-----------------------------------------------------------
     * Set up the RHS vector

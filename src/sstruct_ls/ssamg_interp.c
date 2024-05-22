@@ -765,6 +765,8 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       /* hypre_ParCSRMatrixPrintIJ(A_u_aug, 0, 0, "A_u_aug"); */
 
       /* Generate unstructured interpolation */
+      /* WM: todo - experiment with strenght matrix that counts only the P_s stencil entries and all inter-part connections as strong; */
+      /*            this keeps the same sparsity pattern inside the structured part */
       HYPRE_Int debug_flag = 0;
       HYPRE_Real trunc_factor = 0.0;
       HYPRE_Int max_elmts = 4;
@@ -782,6 +784,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       /* hypre_ParCSRMatrixPrintIJ(P_u, 0, 0, "P_u_init"); */
 
       /* WM: postprocess P_u to remove injection entries. These should already be accounted for in P_s. Is this the best way to do this? */
+      /* WM: todo - yeah, once I have the functionality for compressing unstructured -> structured entries, I can use that here */
       for (i = 0; i < hypre_ParCSRMatrixNumRows(P_u); i++)
       {
          if (CF_marker[i] == 1)
@@ -814,6 +817,9 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       HYPRE_IJMatrixDestroy(A_struct_bndry_ij);
       hypre_ParCSRMatrixDestroy(A_u_aug);
    }
+
+   /* WM: todo - this doesn't seem to be working in the rectangular case! */
+   /* hypre_SStructMatrixCompressUToS(P); */
 
    return hypre_error_flag;
 }

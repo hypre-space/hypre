@@ -2291,7 +2291,8 @@ hypre_StructMatrixReadData( FILE               *file,
                           num_values, ndim, h_data);
 
    /* Move data to the device memory if necessary and free host data */
-   if (h_data != data)
+   /* WM: subtract off stencil_size (which is added above) for this check? */
+   if (h_data - stencil_size != data)
    {
       hypre_TMemcpy(data, h_data, HYPRE_Complex, data_size,
                     memory_location, HYPRE_MEMORY_HOST);

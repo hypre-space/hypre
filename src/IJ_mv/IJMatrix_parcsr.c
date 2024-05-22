@@ -409,8 +409,10 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
                                HYPRE_Int       nrows,
                                HYPRE_Int      *ncols,
                                HYPRE_BigInt   *rows,
+                               HYPRE_Int      *row_indexes,
                                HYPRE_BigInt   *cols,
-                               HYPRE_Complex  *values)
+                               HYPRE_Complex  *values,
+                               HYPRE_Int       zero_out)
 {
    MPI_Comm comm = hypre_IJMatrixComm(matrix);
    hypre_ParCSRMatrix *par_matrix = (hypre_ParCSRMatrix *) hypre_IJMatrixObject(matrix);
@@ -469,6 +471,7 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
       col_map_offd = hypre_ParCSRMatrixColMapOffd(par_matrix);
    }
 
+   /* WM: question - what does rows < 0 signify? Do I need to add row_indexes here? */
    if (nrows < 0)
    {
       nrows = -nrows;
@@ -505,11 +508,19 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
             {
                cols[indx] = (HYPRE_BigInt)diag_j[j] + col_0;
                values[indx++] = diag_data[j];
+               if (zero_out)
+               {
+                  diag_data[j] = 0.0;
+               }
             }
             for (j = offd_i[row_local]; j < offd_i[row_local + 1]; j++)
             {
                cols[indx] = col_map_offd[offd_j[j]];
                values[indx++] = offd_data[j];
+               if (zero_out)
+               {
+                  offd_data[j] = 0.0;
+               }
             }
             counter[i + 1] = indx;
          }
@@ -536,7 +547,6 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
    }
    else
    {
-      indx = 0;
       for (ii = 0; ii < nrows; ii++)
       {
          row = rows[ii];
@@ -545,6 +555,7 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
          {
             continue;
          }
+         indx = row_indexes[ii];
          if (row >= row_partitioning[0] && row < row_partitioning[1])
          {
             row_local = (HYPRE_Int)(row - row_partitioning[0]);
@@ -553,6 +564,7 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
             {
                col_indx = cols[indx] - first;
                values[indx] = 0.0;
+               /* hypre_printf("WM: debug - row = %d, col_indx = %d\n", row, col_indx); */
                if (col_indx < col_0 || col_indx > col_n)
                   /* search in offd */
                {
@@ -561,6 +573,11 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
                      if (col_map_offd[offd_j[j]] == col_indx)
                      {
                         values[indx] = offd_data[j];
+                        if (zero_out)
+                        {
+                           offd_data[j] = 0.0;
+                        }
+                        /* hypre_printf("WM: debug - values[%d] = %e\n", indx, values[indx]); */
                         break;
                      }
                   }
@@ -573,6 +590,11 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
                      if (diag_j[j] == (HYPRE_Int)col_indx)
                      {
                         values[indx] = diag_data[j];
+                        if (zero_out)
+                        {
+                           diag_data[j] = 0.0;
+                        }
+                        /* hypre_printf("WM: debug - values[%d] = %e\n", indx, values[indx]); */
                         break;
                      }
                   }

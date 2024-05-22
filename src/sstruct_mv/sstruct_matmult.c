@@ -1046,6 +1046,30 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixDiag(parcsr_uM));
    hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixOffd(parcsr_uM));
 
+   /* WM: debug - extra checks to make sure compression doesn't change the matrix */
+   /* HYPRE_SStructMatrixPrint("A_before",  M, 0); */
+   /* HYPRE_IJMatrix As = hypre_SStructMatrixToUMatrix(M, 0); */
+   /* HYPRE_IJMatrix A_before; */
+   /* HYPRE_IJMatrixAdd(1.0, As, 1.0, hypre_SStructMatrixIJMatrix(M), &A_before); */
+   /* HYPRE_IJMatrixPrint(A_before, "A_before"); */
+
+   hypre_SStructMatrixCompressUToS(M);
+
+   /* HYPRE_SStructMatrixPrint("A_after",  M, 0); */
+   /* HYPRE_IJMatrixDestroy(As); */
+   /* As = hypre_SStructMatrixToUMatrix(M, 0); */
+   /* HYPRE_IJMatrix A_after; */
+   /* HYPRE_IJMatrixAdd(1.0, As, 1.0, hypre_SStructMatrixIJMatrix(M), &A_after); */
+   /* HYPRE_IJMatrixPrint(A_after, "A_after"); */
+   
+   /* HYPRE_IJMatrix diff; */
+   /* HYPRE_IJMatrixAdd(1.0, A_after, -1.0, A_before, &diff); */
+   /* HYPRE_IJMatrixPrint(diff, "diff"); */
+
+/*    hypre_MPI_Finalize(); */
+/*    exit(0); */
+
+
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;

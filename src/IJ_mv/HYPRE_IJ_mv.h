@@ -223,6 +223,37 @@ HYPRE_Int HYPRE_IJMatrixGetValues(HYPRE_IJMatrix  matrix,
                                   HYPRE_Complex  *values);
 
 /**
+ * Gets values for \e nrows rows or partial rows of the matrix.
+ *
+ * Same as IJMatrixGetValues, but with an additional \e row_indexes array
+ * that provides indexes into the \e cols and \e values arrays.  Because
+ * of this, there can be gaps between the row data in these latter two arrays.
+ *
+ **/
+HYPRE_Int HYPRE_IJMatrixGetValues2(HYPRE_IJMatrix  matrix,
+                                   HYPRE_Int       nrows,
+                                   HYPRE_Int      *ncols,
+                                   HYPRE_BigInt   *rows,
+                                   HYPRE_Int      *row_indexes,
+                                   HYPRE_BigInt   *cols,
+                                   HYPRE_Complex  *values);
+
+/**
+ * Gets values for \e nrows rows or partial rows of the matrix
+ * and zeros out those entries in the matrix.
+ *
+ * Same as IJMatrixGetValues2, but zeros out the entries after getting them.
+ *
+ **/
+HYPRE_Int HYPRE_IJMatrixGetValuesAndZero(HYPRE_IJMatrix  matrix,
+                                         HYPRE_Int       nrows,
+                                         HYPRE_Int      *ncols,
+                                         HYPRE_BigInt   *rows,
+                                         HYPRE_Int      *row_indexes,
+                                         HYPRE_BigInt   *cols,
+                                         HYPRE_Complex  *values);
+
+/**
  * Set the storage type of the matrix object to be constructed.
  * Currently, \e type can only be \c HYPRE_PARCSR.
  *
