@@ -77,8 +77,8 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
    hypre_ParAMGDataMemoryLocation(amg_data) = memory_location;
 
    /* Local variables */
-   hypre_IntArray      *CF_marker;
-   HYPRE_Int           *CF_marker_data;
+   hypre_IntArray      *CF_marker = NULL;
+   HYPRE_Int           *CF_marker_data = NULL;
    hypre_IntArray      *CFN_marker = NULL;
    hypre_IntArray      *CF2_marker = NULL;
    hypre_IntArray      *CFN2_marker = NULL;
@@ -89,8 +89,8 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
    hypre_ParCSRMatrix  *R = NULL;
    hypre_ParCSRMatrix  *A_H;
    hypre_ParCSRMatrix  *AN = NULL;
-   hypre_ParCSRMatrix  *P1;
-   hypre_ParCSRMatrix  *P2;
+   hypre_ParCSRMatrix  *P1 = NULL;
+   hypre_ParCSRMatrix  *P2 = NULL;
    hypre_Vector    **l1_norms = NULL;
 
    HYPRE_Int       num_levels;
@@ -825,7 +825,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
       	          {
                      hypre_StageOneInterp_Options_dbl(A_array[level], S, CF_marker, 
          		                           coarse_pnts_global1,
-         	                                     dof_func_data, agg_interp_type, num_functions, 
+         	                                   dof_func_data, agg_interp_type, num_functions, 
       				                   debug_flag, agg_P12_max_elmts, 
       				                   (hypre_double) agg_P12_trunc_factor, &P1);
       	             hypre_BoomerAMGCorrectCFMarker2_dbl (CF_marker, CF2_marker);
@@ -900,12 +900,12 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
                      hypre_ParCSRMatrixDestroy_dbl(AN);
                      /* done aggressive coarsening nodal */
                   }
-                  if (my_id == (num_procs - 1))
-                  {
-                     coarse_size = coarse_pnts_global[1];
-                  }
-                  MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
                }
+               if (my_id == (num_procs - 1))
+               {
+                  coarse_size = coarse_pnts_global[1];
+               }
+               MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
             }
             else /* no aggressive coarsening */
             {
@@ -1009,12 +1009,12 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
                      hypre_ParCSRMatrixDestroy_flt(SN);
                      hypre_ParCSRMatrixDestroy_flt(AN);
                   }
-                  if (my_id == (num_procs - 1))
-                  {
-                     coarse_size = coarse_pnts_global[1];
-                  }
-                  MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
                }
+               if (my_id == (num_procs - 1))
+               {
+                  coarse_size = coarse_pnts_global[1];
+               }
+               MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
             }
             else /* no aggressive coarsening */
             {
@@ -1119,12 +1119,12 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
                      hypre_ParCSRMatrixDestroy_long_dbl(SN);
                      hypre_ParCSRMatrixDestroy_long_dbl(AN);
                   }
-                  if (my_id == (num_procs - 1))
-                  {
-                     coarse_size = coarse_pnts_global[1];
-                  }
-                  MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
                }
+               if (my_id == (num_procs - 1))
+               {
+                  coarse_size = coarse_pnts_global[1];
+               }
+               MPI_Bcast(&coarse_size, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
             }
             else /* no aggressive coarsening */
             {

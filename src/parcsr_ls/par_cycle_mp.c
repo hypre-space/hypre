@@ -49,12 +49,12 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
 
    HYPRE_Precision *precision_array;  
    HYPRE_Precision level_precision;
-   HYPRE_Real      cycle_op_count;
+   hypre_double    cycle_op_count;
    HYPRE_Int       cycle_type;
    HYPRE_Int       fcycle, fcycle_lev;
    HYPRE_Int       num_levels;
    HYPRE_Int       max_levels;
-   HYPRE_Real     *num_coeffs;
+   hypre_double   *num_coeffs;
    HYPRE_Int      *num_grid_sweeps;
    HYPRE_Int      *grid_relax_type;
    HYPRE_Int     **grid_relax_points;
@@ -124,7 +124,7 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
       old_version = 1;
    }
 
-   num_coeffs = (HYPRE_Real *) (hypre_CAlloc_dbl ((size_t)(num_levels), (size_t)sizeof(hypre_double), HYPRE_MEMORY_HOST));
+   num_coeffs = (hypre_double *) (hypre_CAlloc_dbl ((size_t)(num_levels), (size_t)sizeof(hypre_double), HYPRE_MEMORY_HOST));
    num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
    comm = hypre_ParCSRMatrixComm(A_array[0]);
 

@@ -259,6 +259,7 @@ typedef struct
    hypre_double   agg_trunc_factor;
    hypre_double   agg_P12_trunc_factor;
    hypre_double   tol;
+   hypre_double   cycle_op_count;
    HYPRE_Real    *relax_weight;
    HYPRE_Real    *omega;
    HYPRE_Real     jacobi_trunc_threshold;
@@ -294,7 +295,6 @@ typedef struct
 
    /* data generated in the solve phase */
    HYPRE_Real        *Vtemp_local_data;
-   HYPRE_Real         cycle_op_count;
 
    /* log info */
    HYPRE_Real       rel_resid_norm;

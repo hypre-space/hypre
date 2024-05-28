@@ -34,6 +34,15 @@ HYPRE_Int HYPRE_BoomerAMGSolve_mp(HYPRE_Solver       solver,
                                   HYPRE_ParCSRMatrix A,
                                   HYPRE_ParVector    b,
                                   HYPRE_ParVector    x);
+HYPRE_Int HYPRE_MPAMGPrecSetup_mp(HYPRE_Solver       solver,
+                                  HYPRE_ParCSRMatrix A,
+                                  HYPRE_ParVector    b,
+                                  HYPRE_ParVector    x);
+
+HYPRE_Int HYPRE_MPAMGPrecSolve_mp(HYPRE_Solver       solver,
+                                  HYPRE_ParCSRMatrix A,
+                                  HYPRE_ParVector    b,
+                                  HYPRE_ParVector    x);
 HYPRE_Int hypre_MPAMGCycle_mp( void *amg_vdata, hypre_ParVector **F_array, hypre_ParVector **U_array );
 
 HYPRE_Int HYPRE_MPAMGCreate_mp(HYPRE_Solver *solver);

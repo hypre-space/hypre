@@ -252,7 +252,6 @@ hypre_MPAMGDestroy_mp( void *data )
    if (amg_data)
    {
       HYPRE_Int     num_levels = hypre_ParAMGDataNumLevels(amg_data);
-      MPI_Comm      new_comm = hypre_ParAMGDataNewComm(amg_data);
       HYPRE_Int    *grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
       HYPRE_Int     i;
       HYPRE_MemoryLocation memory_location = hypre_ParAMGDataMemoryLocation(amg_data);
@@ -390,11 +389,6 @@ hypre_MPAMGDestroy_mp( void *data )
       }
       hypre_ParVectorDestroy_dbl(hypre_ParAMGDataResidual(amg_data));
       hypre_ParAMGDataResidual(amg_data) = NULL;
-
-      if (new_comm != hypre_MPI_COMM_NULL)
-      {
-         MPI_Comm_free(&new_comm);
-      }
 
       hypre_Free_dbl(amg_data, HYPRE_MEMORY_HOST);
    }

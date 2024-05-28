@@ -1224,6 +1224,67 @@ HYPRE_Int hypre_BoomerAMGGetCumNnzAP ( void *data, hypre_double *cum_nnz_AP );
 HYPRE_Int hypre_BoomerAMGSetup ( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                  hypre_ParVector *u );
 
+/* par_amg_setup_options.c */
+HYPRE_Int hypre_Strength_Options(hypre_ParCSRMatrix   *A,
+                                 HYPRE_Real            strong_threshold,
+                                 HYPRE_Real            max_row_sum,
+                                 HYPRE_Int             num_functions,
+                                 HYPRE_Int             nodal,
+                                 HYPRE_Int             nodal_diag,
+                                 HYPRE_Int             useSabs,
+                                 HYPRE_Int            *dof_func_data,
+                                 hypre_ParCSRMatrix  **S_ptr);
+HYPRE_Int hypre_Coarsen_Options(hypre_ParCSRMatrix   *S,
+                                hypre_ParCSRMatrix   *A,
+                                HYPRE_Int             level,
+                                HYPRE_Int             debug_flag,
+                                HYPRE_Int             coarsen_type,
+                                HYPRE_Int             measure_type,
+                                HYPRE_Int             coarsen_cut_factor,
+                                HYPRE_Int             agg_num_levels,
+                                HYPRE_Int             num_paths,
+                                HYPRE_Int             local_num_vars,
+                                hypre_IntArray       *dof_func,
+                                HYPRE_BigInt         *coarse_pnts_global,
+                                hypre_IntArray      **CF2_marker_ptr,
+                                hypre_IntArray      **CF_marker_ptr);
+HYPRE_Int hypre_Interp_Options(hypre_ParCSRMatrix  *A,
+                               hypre_ParCSRMatrix  *S,
+                               hypre_IntArray      *CF_marker,
+                               HYPRE_BigInt        *coarse_pnts_global,
+                               HYPRE_Int           *dof_func_data,
+                               HYPRE_Int            interp_type,
+                               HYPRE_Int            num_functions,
+                               HYPRE_Int            debug_flag,
+                               HYPRE_Int            P_max_elmts,
+                               HYPRE_Real           trunc_factor,
+                               HYPRE_Int            sep_weight,
+                               hypre_ParCSRMatrix **P_ptr);
+HYPRE_Int hypre_MPassInterp_Options(hypre_ParCSRMatrix  *A,
+                                    hypre_ParCSRMatrix  *S,
+                                    hypre_IntArray      *CF_marker,
+                                    hypre_IntArray      *dof_func,
+                                    HYPRE_BigInt        *coarse_pnts_global,
+                                    HYPRE_Int            agg_interp_type,
+                                    HYPRE_Int            num_functions,
+                                    HYPRE_Int            debug_flag,
+                                    HYPRE_Int            agg_P_max_elmts,
+                                    HYPRE_Real           agg_trunc_factor,
+                                    HYPRE_Int            sep_weight,
+                                    hypre_ParCSRMatrix **P_ptr);
+HYPRE_Int hypre_StageOneInterp_Options(hypre_ParCSRMatrix  *A,
+                                       hypre_ParCSRMatrix  *S,
+                                       hypre_IntArray      *CF_marker,
+                                       HYPRE_BigInt        *coarse_pnts_global1,
+                                       HYPRE_Int           *dof_func_data,
+                                       HYPRE_Int            agg_interp_type,
+                                       HYPRE_Int            num_functions,
+                                       HYPRE_Int            debug_flag,
+                                       HYPRE_Int            agg_P12_max_elmts,
+                                       HYPRE_Real           agg_P12_trunc_factor,
+                                       hypre_ParCSRMatrix **P1_ptr);
+
+
 /* par_amg_solve.c */
 HYPRE_Int hypre_BoomerAMGSolve ( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f,
                                  hypre_ParVector *u );

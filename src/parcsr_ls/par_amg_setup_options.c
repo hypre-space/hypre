@@ -287,9 +287,10 @@ HYPRE_Int hypre_MPassInterp_Options(hypre_ParCSRMatrix  *A,
    MPI_Comm comm = hypre_ParCSRMatrixComm(A);
    hypre_IntArray *coarse_dof_func = NULL;
    HYPRE_Int *CF_marker_data = hypre_IntArrayData(CF_marker);
-   HYPRE_Int *dof_func_data = hypre_IntArrayData(dof_func);
+   HYPRE_Int *dof_func_data = NULL;
    HYPRE_Int local_num_vars = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
    
+   if (dof_func) dof_func_data = hypre_IntArrayData(dof_func);
    hypre_BoomerAMGCoarseParms(comm, local_num_vars, num_functions, dof_func,
                               CF_marker, &coarse_dof_func, coarse_pnts_global);
    if (agg_interp_type == 4)
