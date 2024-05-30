@@ -428,7 +428,6 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
          }
       };
 
-      /* WM: todo - use sycl::gpu_selector_v instead of the below for instantiation of stream? Removes issue with device not being initialized? */
       if (!data->device)
       {
          HYPRE_DeviceInitialize();
@@ -915,7 +914,7 @@ hypreDevice_CsrRowIndicesToPtrs_v2( HYPRE_Int  nrows,
                                     HYPRE_Int *d_row_ptr )
 {
 #if defined(HYPRE_USING_SYCL)
-   /* WM: if nnz <= 0, then dpl::lower_bound is a no-op, which means we still need to zero out the row pointer */
+   /* Note: if nnz <= 0, then dpl::lower_bound is a no-op, which means we still need to zero out the row pointer */
    /* Note that this is different from thrust's behavior, where lower_bound zeros out the row pointer when nnz = 0 */
    if (nnz <= 0)
    {
@@ -1293,8 +1292,6 @@ hypreDevice_ReduceByTupleKey( HYPRE_Int N,
    std::equal_to< std::tuple<T1, T2> > pred;
    std::plus<T3> func;
 
-   /* WM: debug - latest oneDPL has errors in reduce_by_segment... using CPU version for now,
-    * which requires unified memory! */
    auto new_end = HYPRE_ONEDPL_CALL(oneapi::dpl::reduce_by_segment,
                                     begin_keys_in,
                                     begin_keys_in + N,
@@ -1769,7 +1766,7 @@ hypre_CurandUniform_core( HYPRE_Int          n,
                           HYPRE_Int          set_offset,
                           hypre_ulonglongint offset)
 {
-   /* WM: if n is zero, onemkl rand throws an error */
+   /* Note: if n is zero, onemkl rand throws an error */
    if (n <= 0)
    {
       return hypre_error_flag;

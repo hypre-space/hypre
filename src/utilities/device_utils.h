@@ -636,7 +636,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 
 #define HYPRE_ONEDPL_CPU_CALL(func_name, ...)                                                \
    func_name(oneapi::dpl::execution::make_device_policy(                                     \
-             *hypre_DeviceDataStream(hypre_HandleDeviceData(hypre_handle()), HYPRE_MAX_NUM_STREAMS - 1)), __VA_ARGS__);                      \
+             *hypre_DeviceDataStream(hypre_HandleDeviceData(hypre_handle()), HYPRE_MAX_NUM_STREAMS - 1)), __VA_ARGS__);
 
 #endif
 
