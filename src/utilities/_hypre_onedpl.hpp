@@ -29,27 +29,6 @@
 /* WM: dpct below currently needed for constant iterators */
 #include <dpct/dpl_extras/iterators.h>
 
-
-/* Used in creating constant iterators (no native constant iterator in oneDPL) */
-template<typename T>
-struct hypreSycl_constant
-{
-   T N;
-   hypreSycl_constant(T _N = T()) {N = _N;}
-
-   constexpr T operator()(const T &x = T()) const { return N; }
-};
-
-/* Used in creating reverse iterators (no native reverse iterator in oneDPL) */
-template<typename T>
-struct hypreSycl_reverse
-{
-   T N;
-   hypreSycl_reverse(T _N = T()) {N = _N;}
-
-   constexpr T operator()(const T &i = T()) const { return N - 1 - i; }
-};
-
 //[pred, op](Ref1 a, Ref2 s) { return pred(s) ? op(a) : a; });
 template <typename T, typename Predicate, typename Operator>
 struct hypreSycl_transform_if_unary_zip_mask_fun
