@@ -197,6 +197,10 @@ HYPRE_Int HYPRE_Finalized(void);
  * HYPRE error user functions
  *--------------------------------------------------------------------------*/
 
+
+/* Return an aggregate error code representing the collective status of all ranks */
+HYPRE_Int HYPRE_GetGlobalError(MPI_Comm comm);
+
 /* Return the current hypre error flag */
 HYPRE_Int HYPRE_GetError(void);
 
@@ -343,6 +347,7 @@ HYPRE_Int HYPRE_SetSpMVUseVendor( HYPRE_Int use_vendor );
 #define HYPRE_SetSpGemmUseCusparse(use_vendor) HYPRE_SetSpGemmUseVendor(use_vendor)
 HYPRE_Int HYPRE_SetSpGemmUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int HYPRE_SetUseGpuRand( HYPRE_Int use_curand );
+HYPRE_Int HYPRE_SetGpuAwareMPI( HYPRE_Int use_gpu_aware_mpi );
 
 /*--------------------------------------------------------------------------
  * Base objects

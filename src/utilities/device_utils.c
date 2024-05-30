@@ -2952,10 +2952,10 @@ HYPRE_SetSYCLDevice(sycl::device user_device)
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_bind_device( HYPRE_Int device_id_in,
-                   HYPRE_Int myid,
-                   HYPRE_Int nproc,
-                   MPI_Comm  comm )
+hypre_bind_device_id( HYPRE_Int device_id_in,
+                      HYPRE_Int myid,
+                      HYPRE_Int nproc,
+                      MPI_Comm  comm )
 {
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* proc id (rank) on the running node */
@@ -3004,6 +3004,7 @@ hypre_bind_device( HYPRE_Int device_id_in,
 #endif
 
 #else
+   HYPRE_UNUSED_VAR(device_id_in);
    HYPRE_UNUSED_VAR(myid);
    HYPRE_UNUSED_VAR(nproc);
    HYPRE_UNUSED_VAR(comm);
@@ -3012,3 +3013,12 @@ hypre_bind_device( HYPRE_Int device_id_in,
 
    return hypre_error_flag;
 }
+
+HYPRE_Int
+hypre_bind_device( HYPRE_Int myid,
+                   HYPRE_Int nproc,
+                   MPI_Comm  comm )
+{
+   return hypre_bind_device_id(-1, myid, nproc, comm);
+}
+

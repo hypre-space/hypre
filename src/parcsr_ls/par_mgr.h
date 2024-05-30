@@ -53,6 +53,7 @@ typedef struct
    hypre_ParCSRMatrix  **P_FF_array;
 #endif
    hypre_ParCSRMatrix  **P_array;
+   hypre_ParCSRMatrix  **R_array;
    hypre_ParCSRMatrix  **RT_array;
    hypre_ParCSRMatrix   *RAP;
    hypre_IntArray      **CF_marker_array;
@@ -91,7 +92,7 @@ typedef struct
    HYPRE_Int             max_iter;
    HYPRE_Int             relax_order;
    HYPRE_Int            *num_relax_sweeps;
-   char                 *info_path;
+   char                 *data_path;
 
    HYPRE_Solver          coarse_grid_solver;
    HYPRE_Int           (*coarse_grid_solver_setup)(void*, void*, void*, void*);

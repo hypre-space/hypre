@@ -15,6 +15,7 @@ autom4te.cache
 src/TAGS
 hypre/
 cmbuild/
+.vscode
 
 ###############
 # Documentation

@@ -33,7 +33,34 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 #define hypre_IntArrayData(array)                  ((array) -> data)
+#define hypre_IntArrayDataI(array, i)              ((array) -> data[i])
 #define hypre_IntArraySize(array)                  ((array) -> size)
 #define hypre_IntArrayMemoryLocation(array)        ((array) -> memory_location)
+
+/******************************************************************************
+ *
+ * hypre_IntArrayArray: struct for holding an array of hypre_IntArray
+ *
+ *****************************************************************************/
+
+/*--------------------------------------------------------------------------
+ * hypre_IntArrayArray
+ *--------------------------------------------------------------------------*/
+
+typedef struct
+{
+   hypre_IntArray       **entries;
+   HYPRE_Int              size;
+} hypre_IntArrayArray;
+
+/*--------------------------------------------------------------------------
+ * Accessor functions for the IntArrayArray structure
+ *--------------------------------------------------------------------------*/
+
+#define hypre_IntArrayArrayEntries(array)           ((array) -> entries)
+#define hypre_IntArrayArrayEntryI(array, i)         ((array) -> entries[i])
+#define hypre_IntArrayArrayEntryIData(array, i)     ((array) -> entries[i] -> data)
+#define hypre_IntArrayArrayEntryIDataJ(array, i, j) ((array) -> entries[i] -> data[j])
+#define hypre_IntArrayArraySize(array)              ((array) -> size)
 
 #endif

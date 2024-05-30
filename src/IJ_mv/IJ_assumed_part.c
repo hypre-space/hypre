@@ -85,12 +85,11 @@ hypre_IJMatrixCreateAssumedPartition( hypre_IJMatrix *matrix)
 HYPRE_Int
 hypre_IJVectorCreateAssumedPartition( hypre_IJVector *vector)
 {
-   HYPRE_BigInt global_num, global_first_row;
-   HYPRE_Int myid;
-   HYPRE_Int  start = 0, end = 0;
+   HYPRE_BigInt  global_num, global_first_row;
+   HYPRE_Int     myid;
+   HYPRE_BigInt  start, end;
    HYPRE_BigInt *partitioning = hypre_IJVectorPartitioning(vector);
-
-   MPI_Comm   comm;
+   MPI_Comm      comm;
 
    hypre_IJAssumedPart *apart;
 
@@ -99,13 +98,13 @@ hypre_IJVectorCreateAssumedPartition( hypre_IJVector *vector)
    comm = hypre_ParVectorComm(vector);
 
    /* find out my actualy range of rows */
-   start =  partitioning[0];
-   end = partitioning[1] - 1;
+   start = partitioning[0];
+   end   = partitioning[1] - 1;
 
-   hypre_MPI_Comm_rank(comm, &myid );
+   hypre_MPI_Comm_rank(comm, &myid);
 
    /* allocate space */
-   apart = hypre_CTAlloc(hypre_IJAssumedPart,  1, HYPRE_MEMORY_HOST);
+   apart = hypre_CTAlloc(hypre_IJAssumedPart, 1, HYPRE_MEMORY_HOST);
 
    /* get my assumed partitioning  - we want partitioning of the vector that the
       matrix multiplies - so we use the col start and end */
@@ -116,9 +115,9 @@ hypre_IJVectorCreateAssumedPartition( hypre_IJVector *vector)
    apart->length = 0;
    /*room for 10 owners of the assumed partition*/
    apart->storage_length = 10; /*need to be >=1 */
-   apart->proc_list = hypre_TAlloc(HYPRE_Int,  apart->storage_length, HYPRE_MEMORY_HOST);
-   apart->row_start_list =   hypre_TAlloc(HYPRE_BigInt,  apart->storage_length, HYPRE_MEMORY_HOST);
-   apart->row_end_list =   hypre_TAlloc(HYPRE_BigInt,  apart->storage_length, HYPRE_MEMORY_HOST);
+   apart->proc_list      = hypre_TAlloc(HYPRE_Int, apart->storage_length, HYPRE_MEMORY_HOST);
+   apart->row_start_list = hypre_TAlloc(HYPRE_BigInt, apart->storage_length, HYPRE_MEMORY_HOST);
+   apart->row_end_list   = hypre_TAlloc(HYPRE_BigInt, apart->storage_length, HYPRE_MEMORY_HOST);
 
    /* now we want to reconcile our actual partition with the assumed partition */
    hypre_LocateAssumedPartition(comm, start, end, global_first_row,

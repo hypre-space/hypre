@@ -548,6 +548,7 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
    HYPRE_BigInt row_end   = row_partitioning[1];
    HYPRE_BigInt col_start = col_partitioning[0];
    HYPRE_BigInt col_end   = col_partitioning[1];
+   HYPRE_BigInt col_first = hypre_IJMatrixGlobalFirstCol(matrix);
    HYPRE_Int nrows = row_end - row_start;
    HYPRE_Int ncols = col_end - col_start;
 
@@ -712,6 +713,24 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
                          _1 - row_start );
 #endif
 
+      /* adjust col indices wrt the global first index */
+      if (col_first)
+      {
+#if defined(HYPRE_USING_SYCL)
+         HYPRE_ONEDPL_CALL( std::transform,
+                            new_j,
+                            new_j + new_nnz,
+                            new_j,
+         [col_first = col_first] (const auto & x) {return x - col_first;} );
+#else
+         HYPRE_THRUST_CALL( transform,
+                            new_j,
+                            new_j + new_nnz,
+                            new_j,
+                            _1 - col_first );
+#endif
+      }
+
       hypre_TFree(new_i, HYPRE_MEMORY_DEVICE);
 
       HYPRE_Int      num_cols_offd_new;
@@ -738,9 +757,9 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
                                        new_j,
                                        NULL,
                                        NULL,
-                                       col_start,
-                                       col_end - 1,
-                                       hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(par_matrix)),
+                                       col_start - col_first,
+                                       col_end - col_first - 1,
+                                       -1,
                                        NULL,
                                        NULL,
                                        NULL,
@@ -786,8 +805,8 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
                                        new_j,
                                        new_data,
                                        diag_nnz_existed || offd_nnz_existed ? new_sora : NULL,
-                                       col_start,
-                                       col_end - 1,
+                                       col_start - col_first,
+                                       col_end - col_first - 1,
                                        hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(par_matrix)),
                                        hypre_ParCSRMatrixDeviceColMapOffd(par_matrix),
                                        &col_map_offd_map,

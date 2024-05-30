@@ -120,7 +120,9 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
 
    /* Update send_map_starts, send_map_elmts, and recv_vec_starts when doing
       sparse matrix/multivector product  */
-   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, x);
+   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, num_vectors,
+                                      hypre_VectorVectorStride(hypre_ParVectorLocalVector(x)),
+                                      hypre_VectorIndexStride(hypre_ParVectorLocalVector(x)));
 
    /* Copy send_map_elmts to the device if not already there */
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
@@ -205,9 +207,12 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 #endif
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI) && defined(HYPRE_USING_THRUST_NOSYNC)
+#if defined(HYPRE_USING_THRUST_NOSYNC)
    /* RL: make sure x_buf_data is ready before issuing GPU-GPU MPI */
-   hypre_ForceSyncComputeStream(hypre_handle());
+   if (hypre_GetGpuAwareMPI())
+   {
+      hypre_ForceSyncComputeStream(hypre_handle());
+   }
 #endif
 
    /* when using GPUs, start local matvec first in order to overlap with communication */
@@ -362,7 +367,9 @@ hypre_ParCSRMatrixMatvecTDevice( HYPRE_Complex       alpha,
    }
 
    /* Update send_map_starts, send_map_elmts, and recv_vec_starts for SpMV with multivecs */
-   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, y);
+   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, num_vectors,
+                                      hypre_VectorVectorStride(hypre_ParVectorLocalVector(y)),
+                                      hypre_VectorIndexStride(hypre_ParVectorLocalVector(y)));
 
    /* Update send_map_elmts on device */
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
@@ -426,10 +433,11 @@ hypre_ParCSRMatrixMatvecTDevice( HYPRE_Complex       alpha,
       }
    }
 
-#if defined(HYPRE_WITH_GPU_AWARE_MPI)
    /* RL: make sure y_tmp is ready before issuing GPU-GPU MPI */
-   hypre_ForceSyncComputeStream(hypre_handle());
-#endif
+   if (hypre_GetGpuAwareMPI())
+   {
+      hypre_ForceSyncComputeStream(hypre_handle());
+   }
 
    /* when using GPUs, start local matvec first in order to overlap with communication */
    if (diagT)

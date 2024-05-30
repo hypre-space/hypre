@@ -345,6 +345,12 @@ hypre_ParCSRMatrixStatsArrayCompute(HYPRE_Int                num_matrices,
    HYPRE_BigInt           global_num_rows;
    HYPRE_Real             global_size;
 
+   /* Sanity check */
+   if (num_matrices < 1)
+   {
+      return hypre_error_flag;
+   }
+
    /* We assume all MPI communicators are equal */
    comm = hypre_ParCSRMatrixComm(matrices[0]);
 

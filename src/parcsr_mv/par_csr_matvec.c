@@ -107,7 +107,9 @@ hypre_ParCSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex       alpha,
 
    /* Update send_map_starts, send_map_elmts, and recv_vec_starts when doing
       sparse matrix/multivector product  */
-   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, x);
+   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, num_vectors,
+                                      hypre_VectorVectorStride(hypre_ParVectorLocalVector(x)),
+                                      hypre_VectorIndexStride(hypre_ParVectorLocalVector(x)));
 
    num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
@@ -368,7 +370,9 @@ hypre_ParCSRMatrixMatvecTHost( HYPRE_Complex       alpha,
    }
 
    /* Update send_map_starts, send_map_elmts, and recv_vec_starts for SpMV with multivecs */
-   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, y);
+   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, num_vectors,
+                                      hypre_VectorVectorStride(hypre_ParVectorLocalVector(y)),
+                                      hypre_VectorIndexStride(hypre_ParVectorLocalVector(y)));
 
    num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
@@ -666,7 +670,7 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
       comm_handle = NULL;
 
       if (num_cols_offd) hypre_CSRMatrixMatvec_FF(alpha, offd, x_tmp, 1.0, y_local,
-                                                  CF_marker, CF_marker_offd, fpt);
+                                                     CF_marker, CF_marker_offd, fpt);
 
       hypre_SeqVectorDestroy(x_tmp);
       x_tmp = NULL;
