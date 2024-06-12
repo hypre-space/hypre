@@ -51,5 +51,8 @@ typedef struct
 #define hypre_VectorMultiVecStorageMethod(vector) ((vector) -> multivec_storage_method)
 #define hypre_VectorVectorStride(vector)          ((vector) -> vecstride)
 #define hypre_VectorIndexStride(vector)           ((vector) -> idxstride)
+#define hypre_VectorEntryI(vector, i)             ((vector) -> data[i])
+#define hypre_VectorEntryIJ(vector, i, j) \
+   ((vector) -> data[((vector) -> vecstride) * j + ((vector) -> idxstride) * i])
 
 #endif

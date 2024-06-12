@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_sstruct_ls.h"
+#include "_hypre_struct_mv.hpp"
 
 #define MAX_DEPTH 10
 

@@ -449,7 +449,8 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
    HYPRE_Int           component, vecoffset;
    HYPRE_Int           num_vectors;
    HYPRE_Int           my_id;
-   HYPRE_Int           i, j, vec_start, vec_stop;
+   HYPRE_Int           j;
+   HYPRE_BigInt        big_i, vec_start, vec_stop;
    HYPRE_Complex      *data;
 
    /* If no components are to be retrieved, perform no checking and return */
@@ -522,41 +523,42 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
 
       for (j = 0; j < num_values; j++)
       {
-         i = indices[j];
-         if (i < vec_start || i > vec_stop)
+         big_i = indices[j];
+         if (big_i < vec_start || big_i > vec_stop)
          {
             /* if elements outside processor boundaries, store in off processor
                stash */
             if (!max_off_proc_elmts)
             {
                max_off_proc_elmts = 100;
-               hypre_AuxParVectorMaxOffProcElmts(aux_vector) =
-                  max_off_proc_elmts;
-               hypre_AuxParVectorOffProcI(aux_vector)
-                  = hypre_CTAlloc(HYPRE_BigInt, max_off_proc_elmts, HYPRE_MEMORY_HOST);
-               hypre_AuxParVectorOffProcData(aux_vector)
-                  = hypre_CTAlloc(HYPRE_Complex, max_off_proc_elmts, HYPRE_MEMORY_HOST);
+               hypre_AuxParVectorMaxOffProcElmts(aux_vector) = max_off_proc_elmts;
+               hypre_AuxParVectorOffProcI(aux_vector) = hypre_CTAlloc(HYPRE_BigInt,
+                                                                      max_off_proc_elmts,
+                                                                      HYPRE_MEMORY_HOST);
+               hypre_AuxParVectorOffProcData(aux_vector) = hypre_CTAlloc(HYPRE_Complex,
+                                                                         max_off_proc_elmts,
+                                                                         HYPRE_MEMORY_HOST);
                off_proc_i = hypre_AuxParVectorOffProcI(aux_vector);
                off_proc_data = hypre_AuxParVectorOffProcData(aux_vector);
             }
             else if (current_num_elmts + 1 > max_off_proc_elmts)
             {
                max_off_proc_elmts += 10;
-               off_proc_i = hypre_TReAlloc(off_proc_i, HYPRE_BigInt, max_off_proc_elmts, HYPRE_MEMORY_HOST);
+               off_proc_i = hypre_TReAlloc(off_proc_i, HYPRE_BigInt, max_off_proc_elmts,
+                                           HYPRE_MEMORY_HOST);
                off_proc_data = hypre_TReAlloc(off_proc_data, HYPRE_Complex,
                                               max_off_proc_elmts, HYPRE_MEMORY_HOST);
-               hypre_AuxParVectorMaxOffProcElmts(aux_vector)
-                  = max_off_proc_elmts;
+               hypre_AuxParVectorMaxOffProcElmts(aux_vector) = max_off_proc_elmts;
                hypre_AuxParVectorOffProcI(aux_vector) = off_proc_i;
                hypre_AuxParVectorOffProcData(aux_vector) = off_proc_data;
             }
-            off_proc_i[current_num_elmts] = i;
+            off_proc_i[current_num_elmts] = big_i;
             off_proc_data[current_num_elmts++] = values[j];
             hypre_AuxParVectorCurrentOffProcElmts(aux_vector) = current_num_elmts;
          }
          else /* local values are added to the vector */
          {
-            k = (HYPRE_Int)(i - vec_start);
+            k = (HYPRE_Int)(big_i - vec_start);
             data[vecoffset + k * idxstride] += values[j];
          }
       }
@@ -741,6 +743,8 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector       *vector,
                                       HYPRE_BigInt         *off_proc_i,
                                       HYPRE_Complex        *off_proc_data)
 {
+   HYPRE_UNUSED_VAR(max_off_proc_elmts);
+
    HYPRE_Int myid;
    HYPRE_BigInt global_first_row, global_num_rows;
    HYPRE_Int i, j, in, k;
@@ -1038,20 +1042,21 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector       *vector,
          /* re-calc. index_ptr since in_i was negative */
          index_ptr = (void *) ((char *) void_contact_buf + in * obj_size_bytes);
 
-         tmp_int =  num_rows_per_proc[indx];
-         hypre_TMemcpy( index_ptr,  &tmp_int,  HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         tmp_int = num_rows_per_proc[indx];
+         hypre_TMemcpy(index_ptr, &tmp_int,  HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          index_ptr = (void *) ((char *) index_ptr + obj_size_bytes);
 
          in++;
       }
       /* add row # */
-      hypre_TMemcpy( index_ptr,  &row,  HYPRE_BigInt, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(index_ptr, &row, HYPRE_BigInt, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       index_ptr = (void *) ((char *) index_ptr + obj_size_bytes);
       in++;
 
       /* add value */
       tmp_complex = off_proc_data[i];
-      hypre_TMemcpy( index_ptr,  &tmp_complex, HYPRE_Complex, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(index_ptr, &tmp_complex, HYPRE_Complex, 1,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       index_ptr = (void *) ((char *) index_ptr + obj_size_bytes);
       in++;
 
@@ -1130,26 +1135,29 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector       *vector,
    recv_starts = send_proc_obj.vec_starts;
 
    vector_data = hypre_VectorData(hypre_ParVectorLocalVector(par_vector));
-   first_index =  hypre_ParVectorFirstIndex(par_vector);
+   first_index = hypre_ParVectorFirstIndex(par_vector);
 
    for (i = 0; i < num_recvs; i++)
    {
       indx = recv_starts[i];
 
       /* get the number of rows for  this recv */
-      hypre_TMemcpy( &row_count,  recv_data_ptr, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(&row_count, recv_data_ptr, HYPRE_Int, 1,
+                    HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
       indx++;
 
       for (j = 0; j < row_count; j++) /* for each row: unpack info */
       {
          /* row # */
-         hypre_TMemcpy( &row,  recv_data_ptr, HYPRE_BigInt, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(&row, recv_data_ptr, HYPRE_BigInt, 1,
+                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
          indx++;
 
          /* value */
-         hypre_TMemcpy( &value,  recv_data_ptr, HYPRE_Complex, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(&value, recv_data_ptr, HYPRE_Complex, 1,
+                       HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
          indx++;
 

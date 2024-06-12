@@ -715,6 +715,9 @@ HYPRE_Int
 hypre_SStructVectorRestore( hypre_SStructVector *vector,
                             hypre_ParVector     *parvector )
 {
+   HYPRE_UNUSED_VAR(vector);
+   HYPRE_UNUSED_VAR(parvector);
+
    return hypre_error_flag;
 }
 

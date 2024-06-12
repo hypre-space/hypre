@@ -7,6 +7,36 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
+Version 2.31.0 released 2024/02/14
+
+- Added iterative ILU0 option
+- Refactored MGR interpolation, added column-sum restriction, improved robustness
+- Added new print level options for MGR
+- Updated IJ vector I/O functions
+- Updated default compiler list for configure
+- Added a feature to avoid GPU device initialization for CPU runs
+- Improved FSAI performance on GPUs
+- Added MGR function to set the F-relaxation solver on a specific level
+- Various bug fixes
+
+#====================================
+
+Version 2.30.0 released 2023/11/06
+
+- Added FSAI support with CUDA and HIP
+- Added MAGMA option to FSAI
+- Added Binary I/O functions for IJ matrices and vectors
+- Added a convergent l1-hybrid symmetric Gauss-Seidel smoother to BoomerAMG
+- Added CUDA support to dense direct solver options in BoomerAMG and MGR
+- Added SYCL support for triangular solves (enabling Gauss-Seidel, ILU, etc.)
+  and Chebyshev relaxation
+- Improved MGR statistics and data printing
+- Added CG options to ignore errors, and added a flexible CG version
+- Added superlu_dist support on GPUs
+- Various bug fixes
+
+#====================================
+
 Version 2.29.0 released 2023/06/22
 
 - Added ILU support for AMD GPUs

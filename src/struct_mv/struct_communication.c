@@ -237,6 +237,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    p_old = -1;
    n = -1;
    num_comms = 0;
+   comm_type = &comm_types[0];
    for (m = 0; m < num_boxes; m++)
    {
       i = comm_boxes_i[m];
@@ -399,6 +400,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
 
    p_old = -1;
    num_comms = 0;
+   comm_type = &comm_types[0];
    for (m = 0; m < num_boxes; m++)
    {
       i = comm_boxes_i[m];
@@ -1569,38 +1571,42 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
-#if defined(HYPRE_WITH_GPU_AWARE_MPI)
-      hypre_ForceSyncComputeStream(hypre_handle());
-
-      send_buffers_mpi = send_buffers;
-      recv_buffers_mpi = recv_buffers;
-#else
-      memory_location_mpi = HYPRE_MEMORY_HOST;
-
-      send_buffers_mpi = hypre_TAlloc(HYPRE_Complex *, num_sends, HYPRE_MEMORY_HOST);
-      if (num_sends > 0)
+      if (hypre_GetGpuAwareMPI())
       {
-         size = hypre_CommPkgSendBufsize(comm_pkg);
-         send_buffers_mpi[0] = hypre_CTAlloc(HYPRE_Complex, size, memory_location_mpi);
-         for (i = 1; i < num_sends; i++)
-         {
-            send_buffers_mpi[i] = send_buffers_mpi[i - 1] + (send_buffers[i] - send_buffers[i - 1]);
-         }
-         hypre_TMemcpy(send_buffers_mpi[0], send_buffers[0], HYPRE_Complex, size, HYPRE_MEMORY_HOST,
-                       memory_location);
+#if defined(HYPRE_USING_GPU)
+         hypre_ForceSyncComputeStream(hypre_handle());
+#endif
+         send_buffers_mpi = send_buffers;
+         recv_buffers_mpi = recv_buffers;
       }
-
-      recv_buffers_mpi = hypre_TAlloc(HYPRE_Complex *, num_recvs, HYPRE_MEMORY_HOST);
-      if (num_recvs > 0)
+      else
       {
-         size = hypre_CommPkgRecvBufsize(comm_pkg);
-         recv_buffers_mpi[0] = hypre_CTAlloc(HYPRE_Complex, size, memory_location_mpi);
-         for (i = 1; i < num_recvs; i++)
+         memory_location_mpi = HYPRE_MEMORY_HOST;
+
+         send_buffers_mpi = hypre_TAlloc(HYPRE_Complex *, num_sends, HYPRE_MEMORY_HOST);
+         if (num_sends > 0)
          {
-            recv_buffers_mpi[i] = recv_buffers_mpi[i - 1] + (recv_buffers[i] - recv_buffers[i - 1]);
+            size = hypre_CommPkgSendBufsize(comm_pkg);
+            send_buffers_mpi[0] = hypre_CTAlloc(HYPRE_Complex, size, memory_location_mpi);
+            for (i = 1; i < num_sends; i++)
+            {
+               send_buffers_mpi[i] = send_buffers_mpi[i - 1] + (send_buffers[i] - send_buffers[i - 1]);
+            }
+            hypre_TMemcpy(send_buffers_mpi[0], send_buffers[0], HYPRE_Complex, size, HYPRE_MEMORY_HOST,
+                          memory_location);
+         }
+
+         recv_buffers_mpi = hypre_TAlloc(HYPRE_Complex *, num_recvs, HYPRE_MEMORY_HOST);
+         if (num_recvs > 0)
+         {
+            size = hypre_CommPkgRecvBufsize(comm_pkg);
+            recv_buffers_mpi[0] = hypre_CTAlloc(HYPRE_Complex, size, memory_location_mpi);
+            for (i = 1; i < num_recvs; i++)
+            {
+               recv_buffers_mpi[i] = recv_buffers_mpi[i - 1] + (recv_buffers[i] - recv_buffers[i - 1]);
+            }
          }
       }
-#endif /* if defined (HYPRE_WITH_GPU_AWARE_MPI) */
    }
    else
 #endif /* if defined HYPRE_USING_GPU */
@@ -1778,10 +1784,13 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    HYPRE_MemoryLocation  memory_location     = hypre_HandleMemoryLocation(hypre_handle());
    HYPRE_MemoryLocation  memory_location_mpi = memory_location;
 
-#if (defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)) && !defined(HYPRE_WITH_GPU_AWARE_MPI)
-   memory_location_mpi = HYPRE_MEMORY_HOST;
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+   if (!hypre_GetGpuAwareMPI())
+   {
+      memory_location_mpi = HYPRE_MEMORY_HOST;
+   }
 #endif
-#endif
+#endif /* if defined(RECMAT_COMMPKG) */
 
    /*--------------------------------------------------------------------
     * finish communications

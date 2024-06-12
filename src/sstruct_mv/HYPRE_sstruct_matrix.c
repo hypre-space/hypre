@@ -376,7 +376,7 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
          }
       }
    }
-   else /* matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT */
+   else if (matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
    {
       for (part = 0; part < nparts; part++)
       {
@@ -410,6 +410,12 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
          }
       }
    }
+   else
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid matrix type!\n");
+      return hypre_error_flag;
+   }
+
    hypre_BoxDestroy(box);
    hypre_MPI_Scan(&nrows, &iupper, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
    hypre_MPI_Scan(&ncols, &jupper, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);

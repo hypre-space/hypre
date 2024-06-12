@@ -27,10 +27,10 @@ set(SRCS
   HYPRE_struct_stencil.c
   HYPRE_struct_vector.c
   project.c
-  struct_data.c
   struct_axpy.c
   struct_communication.c
   struct_copy.c
+  struct_data.c
   struct_grid.c
   struct_innerprod.c
   struct_io.c
@@ -55,7 +55,10 @@ if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
     struct_axpy.c
     struct_communication.c
     struct_copy.c
+    struct_data.c
     struct_innerprod.c
+    struct_matmult.c
+    struct_matop.c
     struct_matrix.c
     struct_matvec.c
     struct_scale.c

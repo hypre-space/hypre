@@ -10,6 +10,11 @@
 Finite Element Interface
 ******************************************************************************
 
+.. warning::
+   FEI is not actively supported by the hypre development team. For similar
+   functionality, we recommend using :ref:`sec-Block-Structured-Grids-FEM`, which
+   allows the representation of block-structured grid problems via hypre's
+   SStruct interface.
 
 Introduction
 ==============================================================================
@@ -48,7 +53,7 @@ illustrate this in the rest of the section and refer to example 10 (in the
 In hypre, one creates an instance of the FEI as follows:
 
 .. code-block:: c++
-   
+
    LLNL_FEI_Impl *feiPtr = new LLNL_FEI_Impl(mpiComm);
 
 Here ``mpiComm`` is an MPI communicator (e.g. ``MPI\_COMM\_WORLD``).  If
@@ -56,7 +61,7 @@ Sandia's FEI package is to be used, one needs to define a hypre solver object
 first:
 
 .. code-block:: c++
-   
+
    LinearSystemCore   *solver = HYPRE_base_create(mpiComm);
    FEI_Implementation *feiPtr = FEI_Implementation(solver,mpiComm,rank);
 
@@ -76,19 +81,19 @@ variables, and if we assign ``fieldID`` :math:`7` and :math:`8` to them,
 respectively, then the finite element field information can be set up by
 
 .. code-block:: c++
-   
+
    nFields   = 2;                 /* number of unknown fields */
    fieldID   = new int[nFields];  /* field identifiers */
    fieldSize = new int[nFields];  /* vector dimension of each field */
-   
+
    /* velocity (a 3D vector) */
    fieldID[0]   = 7;
    fieldSize[0] = 3;
-   
+
    /* pressure (a scalar function) */
    fieldID[1]   = 8;
    fieldSize[1] = 1;
-   
+
    feiPtr -> initFields(nFields, fieldSize, fieldID);
 
 Once the field information has been established, we are ready to initialize an
@@ -99,21 +104,21 @@ element fields (fields that have been defined previously). Suppose we use
 consists of
 
 .. code-block:: c++
-   
+
    elemBlkID  = 0;     /* identifier for a block of elements */
    nElems     = 1000;  /* number of elements in the block */
    elemNNodes = 8;     /* number of nodes per element */
-   
+
    /* nodal-based field for the velocity */
    nodeNFields     = 1;
    nodeFieldIDs    = new[nodeNFields];
    nodeFieldIDs[0] = fieldID[0];
-   
+
    /* element-based field for the pressure */
    elemNFields     = 1;
    elemFieldIDs    = new[elemNFields];
    elemFieldIDs[0] = fieldID[1];
-   
+
    feiPtr -> initElemBlock(elemBlkID, nElems, elemNNodes, nodeNFields,
                            nodeFieldIDs, elemNFields, elemFieldIDs, 0);
 
@@ -132,14 +137,14 @@ are shared with the other processors.  The syntax for setting up the shared
 nodes is
 
 .. code-block:: c++
-   
+
    feiPtr -> initSharedNodes(nShared, sharedIDs, sharedLengs, sharedProcs);
 
 This completes the initialization phase, and a completion signal is sent to the
 FEI via
 
 .. code-block:: c++
-   
+
    feiPtr -> initComplete();
 
 Next, we begin the *load* phase. The first entity for loading is the nodal
@@ -149,7 +154,7 @@ on whether the boundary conditions are Dirichlet, Neumann, or mixed, the three
 values should be passed into the FEI accordingly.
 
 .. code-block:: c++
-   
+
    feiPtr -> loadNodeBCs(nBCs, BCEqn, fieldID, alpha, beta, gamma);
 
 The element stiffness matrices are to be loaded in the next step. We need to
@@ -162,7 +167,7 @@ equations are arranged (similar to the interleaving scheme mentioned above).
 The calling sequence for loading element stiffness matrices is
 
 .. code-block:: c++
-   
+
    for (i = 0; i < nElems; i++)
       feiPtr -> sumInElem(elemBlkID, elemID, elemConn[i], elemStiff[i],
                           elemLoads[i], elemFormat);
@@ -171,6 +176,5 @@ To complete the assembling of the global stiffness matrix and the corresponding
 right hand side, a signal is sent to the FEI via
 
 .. code-block:: c++
-   
-   feiPtr -> loadComplete();
 
+   feiPtr -> loadComplete();

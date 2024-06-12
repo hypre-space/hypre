@@ -2515,7 +2515,7 @@ hypre_SStructGridPrintGLVis( hypre_SStructGrid *grid,
          hypre_BoxGetSize(box, loop_size);
          hypre_SerialBoxLoop0Begin(ndim, loop_size);
          {
-            hypre_BoxLoopGetIndex(index);
+            zypre_BoxLoopGetIndex(index);
             hypre_AddIndexes(index, hypre_BoxIMin(box), ndim, index);
 
             for (v = 0; v < cellNV; v++)

@@ -48,9 +48,9 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([M4_HYPRE_NAME],    [hypre])
-m4_define([M4_HYPRE_VERSION], [2.29.0])
-m4_define([M4_HYPRE_NUMBER],  [22900])
-m4_define([M4_HYPRE_DATE],    [2023/06/22])
+m4_define([M4_HYPRE_VERSION], [2.31.0])
+m4_define([M4_HYPRE_NUMBER],  [23100])
+m4_define([M4_HYPRE_DATE],    [2024/02/14])
 m4_define([M4_HYPRE_TIME],    [00:00:00])
 m4_define([M4_HYPRE_BUGS],    [https://github.com/hypre-space/hypre/issues])
 m4_define([M4_HYPRE_SRCDIR],  [`pwd`])
@@ -88,8 +88,6 @@ HYPRE_DATE="M4_HYPRE_DATE"
 HYPRE_TIME="M4_HYPRE_TIME"
 HYPRE_BUGS="M4_HYPRE_BUGS"
 HYPRE_SRCDIR="M4_HYPRE_SRCDIR"
-
-AC_DEFINE(HYPRE_DEPRECATED(reason), _Pragma(reason), [Deprecated function macro])
 
 AC_DEFINE_UNQUOTED(HYPRE_RELEASE_NAME,    ["$HYPRE_NAME"],    [Release name])
 AC_DEFINE_UNQUOTED(HYPRE_RELEASE_VERSION, ["$HYPRE_VERSION"], [Release version])
@@ -168,7 +166,6 @@ hypre_using_mli=no
 
 hypre_using_openmp=no
 hypre_using_device_openmp=no
-hypre_using_insure=no
 hypre_using_cuda=no
 hypre_using_gpu=no
 hypre_using_um=no
@@ -655,21 +652,6 @@ AS_HELP_STRING([--with-extra-ldpath=PATH],
                [Define extra ld path, where PATH is a space-separated
                 list (enclosed in quotes) of directories.]),
 [LDFLAGS="-L`echo ${withval}|sed 's/ /\ -L/g'` ${LDFLAGS}"]
-)
-
-AC_ARG_WITH(insure,
-AS_HELP_STRING([--with-insure=FLAGS],
-               [FLAGS are options to pass to insure. Nothing is done
-                to verify that insure is available]),
-[case "${withval}" in
-    yes) hypre_using_insure=yes
-         hypre_using_debug=yes
-         hypre_insure_flags="" ;;
-    no)  ;;
-     *)  hypre_using_insure=yes
-         hypre_using_debug=yes
-         hypre_insure_flags="$withval" ;;
- esac]
 )
 
 AC_ARG_WITH(strict-checking,
@@ -1715,16 +1697,16 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CC, [xlc_r xlC_r xlc xlC icc icpc icx icpx gcc g++ pgcc pgCC cc CC kcc KCC])
+         AC_CHECK_PROGS(CC, [xlc_r xlC_r xlc xlC icx icc icpc icpx gcc g++ pgcc pgCC cc CC kcc KCC])
       else
-         AC_CHECK_PROGS(CC, [xlc xlC icc icpc icx icpx gcc g++ pgcc pgCC cc CC kcc KCC])
+         AC_CHECK_PROGS(CC, [xlc xlC icx icc icpc icpx gcc g++ pgcc pgCC cc CC kcc KCC])
       fi
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CC, [mpxlc mpixlc_r mpixlc mpiicc mpiicx mpigcc mpicc mpipgcc mpipgicc])
+         AC_CHECK_PROGS(CC, [mpxlc mpixlc_r mpixlc mpiicx mpiicc mpigcc mpipgcc mpipgicc mpicc])
       else
-         AC_CHECK_PROGS(CC, [mpxlc mpixlc mpiicc mpiicx mpigcc mpicc mpipgcc mpipgicc])
+         AC_CHECK_PROGS(CC, [mpxlc mpixlc mpiicx mpiicc mpigcc mpipgcc mpipgicc mpicc])
       fi
    fi
 
@@ -1740,16 +1722,16 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CXX, [xlC_r xlc_r xlC xlc icpc icc icpx icx g++ gcc pgCC pgcc pgc++ CC cc KCC kcc])
+         AC_CHECK_PROGS(CXX, [xlC_r xlc_r xlC xlc icpx icx icpc icc g++ gcc pgCC pgcc pgc++ CC cc KCC kcc])
       else
-         AC_CHECK_PROGS(CXX, [xlC xlc icpc icc icpx icx g++ gcc pgCC pgcc pgc++ CC cc KCC kcc])
+         AC_CHECK_PROGS(CXX, [xlC xlc icpx icx icpc icc g++ gcc pgCC pgcc pgc++ CC cc KCC kcc])
       fi
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpiicpx mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++])
+         AC_CHECK_PROGS(CXX, [CC mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpx mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++])
       else
-         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx mpixlC mpiicpc mpiicpx mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++])
+         AC_CHECK_PROGS(CXX, [CC mpxlC mpixlcxx mpixlC mpiicpx mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC mpipgic++])
       fi
    fi
 
@@ -2103,26 +2085,6 @@ BUILD_JAVA=0
 if test "$hypre_using_java" = "yes"
 then
    BUILD_JAVA=1
-fi
-
-dnl *********************************************************************
-dnl * Set INSURE options
-dnl *********************************************************************
-if test "$hypre_using_insure" = "yes"
-then
-dnl   LINK_F77="insure"
-   LINK_FC="insure"
-   LINK_CC="insure"
-   LINK_CXX="insure"
-   LDFLAGS=`mpicc -link-info | awk '{$1=""; print}'`
-   LDFLAGS="$LDFLAGS ${hypre_insure_flags}"
-dnl   F77="insure"
-   FC="insure"
-   CC="insure"
-   CXX="insure"
-   FFLAGS="`mpicc -link-info | awk '{$1=""; print}'` $FFLAGS"
-   CFLAGS="`mpicc -link-info | awk '{$1=""; print}'` $CFLAGS"
-   CXXFLAGS="`mpicc -link-info | awk '{$1=""; print}'` $CXXFLAGS"
 fi
 
 dnl *********************************************************************
@@ -2646,7 +2608,7 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
 
         if test "x${HYPRE_CUDA_SM}" != "x"
         then
-           HYPRE_CUDA_GENCODE="--amdgpu-target="
+           HYPRE_CUDA_GENCODE="--offload-arch="
            for sm in ${HYPRE_CUDA_SM}; do
               HYPRE_CUDA_GENCODE="${HYPRE_CUDA_GENCODE}${sm},"
            done
@@ -2757,6 +2719,13 @@ AS_IF([test x"$hypre_using_sycl" == x"yes"],
         if test "x${HYPRE_SYCL_TARGET_BACKEND}" != "x"
         then
            LDFLAGS+=" -Xsycl-target-backend ${HYPRE_SYCL_TARGET_BACKEND}"
+        fi
+
+        dnl Shared build needs the sycl compiler
+        if test "$hypre_using_shared" = "yes"
+        then
+           SYCLFLAGS="${SHARED_COMPILE_FLAG} ${SYCLFLAGS}"
+           BUILD_CC_SHARED="\${CUCC} ${SHARED_BUILD_FLAG}"
         fi
 
         dnl (Ab)Use CUFLAGS to capture SYCL compilation flags

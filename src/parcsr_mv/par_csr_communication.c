@@ -739,8 +739,8 @@ hypre_ParCSRCommPkgCreate_core(
    HYPRE_Int  num_sends, *send_procs, *send_map_starts, *send_map_elmts;
    HYPRE_Int  ip, vec_start, vec_len, num_requests;
 
-   hypre_MPI_Request *requests;
-   hypre_MPI_Status *status;
+   hypre_MPI_Request *requests = NULL;
+   hypre_MPI_Status *status = NULL;
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -1052,13 +1052,10 @@ hypre_ParCSRCommPkgCreateAndFill( MPI_Comm              comm,
 
 HYPRE_Int
 hypre_ParCSRCommPkgUpdateVecStarts( hypre_ParCSRCommPkg *comm_pkg,
-                                    hypre_ParVector     *x )
+                                    HYPRE_Int            num_components_in,
+                                    HYPRE_Int            vecstride,
+                                    HYPRE_Int            idxstride )
 {
-   hypre_Vector *x_local         = hypre_ParVectorLocalVector(x);
-   HYPRE_Int     num_vectors     = hypre_VectorNumVectors(x_local);
-   HYPRE_Int     vecstride       = hypre_VectorVectorStride(x_local);
-   HYPRE_Int     idxstride       = hypre_VectorIndexStride(x_local);
-
    HYPRE_Int     num_components  = hypre_ParCSRCommPkgNumComponents(comm_pkg);
    HYPRE_Int     num_sends       = hypre_ParCSRCommPkgNumSends(comm_pkg);
    HYPRE_Int     num_recvs       = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
@@ -1072,27 +1069,27 @@ hypre_ParCSRCommPkgUpdateVecStarts( hypre_ParCSRCommPkg *comm_pkg,
 
    hypre_assert(num_components > 0);
 
-   if (num_vectors != num_components)
+   if (num_components_in != num_components)
    {
       /* Update number of components in the communication package */
-      hypre_ParCSRCommPkgNumComponents(comm_pkg) = num_vectors;
+      hypre_ParCSRCommPkgNumComponents(comm_pkg) = num_components_in;
 
       /* Allocate send_maps_elmts */
       send_map_elmts_new = hypre_CTAlloc(HYPRE_Int,
-                                         send_map_starts[num_sends] * num_vectors,
+                                         send_map_starts[num_sends] * num_components_in,
                                          HYPRE_MEMORY_HOST);
 
       /* Update send_maps_elmts */
-      if (num_vectors > num_components)
+      if (num_components_in > num_components)
       {
          if (num_components == 1)
          {
             for (i = 0; i < send_map_starts[num_sends]; i++)
             {
-               for (j = 0; j < num_vectors; j++)
+               for (j = 0; j < num_components_in; j++)
                {
-                  send_map_elmts_new[i * num_vectors + j] = send_map_elmts[i] * idxstride +
-                                                            j * vecstride;
+                  send_map_elmts_new[i * num_components_in + j] = send_map_elmts[i] * idxstride +
+                                                                  j * vecstride;
                }
             }
          }
@@ -1100,9 +1097,9 @@ hypre_ParCSRCommPkgUpdateVecStarts( hypre_ParCSRCommPkg *comm_pkg,
          {
             for (i = 0; i < send_map_starts[num_sends]; i++)
             {
-               for (j = 0; j < num_vectors; j++)
+               for (j = 0; j < num_components_in; j++)
                {
-                  send_map_elmts_new[i * num_vectors + j] =
+                  send_map_elmts_new[i * num_components_in + j] =
                      send_map_elmts[i * num_components] * idxstride + j * vecstride;
                }
             }
@@ -1110,8 +1107,8 @@ hypre_ParCSRCommPkgUpdateVecStarts( hypre_ParCSRCommPkg *comm_pkg,
       }
       else
       {
-         /* num_vectors < num_components */
-         if (num_vectors == 1)
+         /* num_components_in < num_components */
+         if (num_components_in == 1)
          {
             for (i = 0; i < send_map_starts[num_sends]; i++)
             {
@@ -1122,9 +1119,9 @@ hypre_ParCSRCommPkgUpdateVecStarts( hypre_ParCSRCommPkg *comm_pkg,
          {
             for (i = 0; i < send_map_starts[num_sends]; i++)
             {
-               for (j = 0; j < num_vectors; j++)
+               for (j = 0; j < num_components_in; j++)
                {
-                  send_map_elmts_new[i * num_vectors + j] =
+                  send_map_elmts_new[i * num_components_in + j] =
                      send_map_elmts[i * num_components + j];
                }
             }
@@ -1143,13 +1140,13 @@ hypre_ParCSRCommPkgUpdateVecStarts( hypre_ParCSRCommPkg *comm_pkg,
       /* Update send_map_starts */
       for (i = 0; i < num_sends + 1; i++)
       {
-         send_map_starts[i] *= num_vectors / num_components;
+         send_map_starts[i] *= num_components_in / num_components;
       }
 
       /* Update recv_vec_starts */
       for (i = 0; i < num_recvs + 1; i++)
       {
-         recv_vec_starts[i] *= num_vectors / num_components;
+         recv_vec_starts[i] *= num_components_in / num_components;
       }
    }
 
@@ -1267,6 +1264,9 @@ hypre_ParCSRFindExtendCommPkg(MPI_Comm              comm,
                               HYPRE_BigInt         *indices,
                               hypre_ParCSRCommPkg **extend_comm_pkg)
 {
+   HYPRE_UNUSED_VAR(local_num);
+   HYPRE_UNUSED_VAR(starts);
+
    hypre_ParCSRCommPkg *new_comm_pkg = hypre_TAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
 
    hypre_assert(apart != NULL);

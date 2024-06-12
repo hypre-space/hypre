@@ -42,6 +42,9 @@ HYPRE_Int
 HYPRE_ParCSRPilutCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
 #ifdef HYPRE_MIXEDINT
+   HYPRE_UNUSED_VAR(solver);
+   HYPRE_UNUSED_VAR(comm);
+
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Pilut cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
@@ -64,6 +67,8 @@ HYPRE_Int
 HYPRE_ParCSRPilutDestroy( HYPRE_Solver solver )
 {
 #ifdef HYPRE_MIXEDINT
+   HYPRE_UNUSED_VAR(solver);
+
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Pilut cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
@@ -89,7 +94,13 @@ HYPRE_ParCSRPilutSetup( HYPRE_Solver solver,
                         HYPRE_ParVector b,
                         HYPRE_ParVector x      )
 {
+   HYPRE_UNUSED_VAR(b);
+   HYPRE_UNUSED_VAR(x);
+
 #ifdef HYPRE_MIXEDINT
+   HYPRE_UNUSED_VAR(solver);
+   HYPRE_UNUSED_VAR(A);
+
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Pilut cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
@@ -119,7 +130,13 @@ HYPRE_ParCSRPilutSolve( HYPRE_Solver solver,
                         HYPRE_ParVector b,
                         HYPRE_ParVector x      )
 {
+   HYPRE_UNUSED_VAR(A);
+
 #ifdef HYPRE_MIXEDINT
+   HYPRE_UNUSED_VAR(b);
+   HYPRE_UNUSED_VAR(x);
+   HYPRE_UNUSED_VAR(solver);
+
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Pilut cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
@@ -146,10 +163,12 @@ HYPRE_ParCSRPilutSetMaxIter( HYPRE_Solver solver,
                              HYPRE_Int          max_iter  )
 {
 #ifdef HYPRE_MIXEDINT
+   HYPRE_UNUSED_VAR(solver);
+   HYPRE_UNUSED_VAR(max_iter);
+
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Pilut cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
-
 
    HYPRE_DistributedMatrixPilutSolverSetMaxIts(
       (HYPRE_DistributedMatrixPilutSolver) solver, max_iter );
@@ -167,6 +186,9 @@ HYPRE_ParCSRPilutSetDropTolerance( HYPRE_Solver solver,
                                    HYPRE_Real   tol    )
 {
 #ifdef HYPRE_MIXEDINT
+   HYPRE_UNUSED_VAR(solver);
+   HYPRE_UNUSED_VAR(tol);
+
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Pilut cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
@@ -187,6 +209,9 @@ HYPRE_ParCSRPilutSetFactorRowSize( HYPRE_Solver solver,
                                    HYPRE_Int       size    )
 {
 #ifdef HYPRE_MIXEDINT
+   HYPRE_UNUSED_VAR(solver);
+   HYPRE_UNUSED_VAR(size);
+
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Pilut cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
@@ -203,6 +228,9 @@ HYPRE_ParCSRPilutSetLogging( HYPRE_Solver solver,
                              HYPRE_Int    logging    )
 {
 #ifdef HYPRE_MIXEDINT
+   HYPRE_UNUSED_VAR(solver);
+   HYPRE_UNUSED_VAR(logging);
+
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Pilut cannot be used in mixedint mode!");
    return hypre_error_flag;
 #else
@@ -213,4 +241,3 @@ HYPRE_ParCSRPilutSetLogging( HYPRE_Solver solver,
    return hypre_error_flag;
 #endif
 }
-

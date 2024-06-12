@@ -373,6 +373,22 @@ hypre_ParVectorCopy( hypre_ParVector *x,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_ParVectorStridedCopy
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorStridedCopy( hypre_ParVector *x,
+                            HYPRE_Int        istride,
+                            HYPRE_Int        ostride,
+                            HYPRE_Int        size,
+                            HYPRE_Complex   *data)
+{
+   hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
+
+   return hypre_SeqVectorStridedCopy(x_local, istride, ostride, size, data);
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ParVectorCloneShallow
  *
  * Returns a complete copy of a hypre_ParVector x - a shallow copy, re-using
@@ -576,7 +592,7 @@ hypre_VectorToParVector ( MPI_Comm      comm,
    HYPRE_Int           global_vecstride, vecstride, idxstride;
    hypre_ParVector    *par_vector;
    hypre_Vector       *local_vector;
-   HYPRE_Complex      *v_data;
+   HYPRE_Complex      *v_data = NULL;
    HYPRE_Complex      *local_data;
    hypre_MPI_Request  *requests;
    hypre_MPI_Status   *status, status0;
@@ -680,53 +696,77 @@ hypre_VectorToParVector ( MPI_Comm      comm,
 
 /*--------------------------------------------------------------------------
  * hypre_ParVectorToVectorAll
- *
- * Generates a Vector on every proc which has a piece of the data
- * from a ParVector on several procs in comm,
- * vec_starts needs to contain the partitioning across all procs in comm
  *--------------------------------------------------------------------------*/
 
 hypre_Vector *
 hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
 {
-   MPI_Comm             comm = hypre_ParVectorComm(par_v);
-   HYPRE_BigInt         global_size = hypre_ParVectorGlobalSize(par_v);
-   hypre_Vector        *local_vector = hypre_ParVectorLocalVector(par_v);
-   HYPRE_Int            num_procs, my_id;
-   HYPRE_Int            num_vectors = hypre_ParVectorNumVectors(par_v);
-   hypre_Vector        *vector;
-   HYPRE_Complex       *vector_data;
-   HYPRE_Complex       *local_data;
-   HYPRE_Int            local_size;
-   hypre_MPI_Request   *requests;
-   hypre_MPI_Status    *status;
-   HYPRE_Int            i, j;
-   HYPRE_Int           *used_procs;
-   HYPRE_Int            num_types, num_requests;
-   HYPRE_Int            vec_len, proc_id;
+   return hypre_ParVectorToVectorAll_v2(par_v, hypre_ParVectorMemoryLocation(par_v));
+}
 
-   HYPRE_Int *new_vec_starts;
+/*--------------------------------------------------------------------------
+ * hypre_ParVectorToVectorAll_v2
+ *
+ * Generates a Vector on every proc which has a piece of the data
+ * from a ParVector on several procs in comm.
+ * The resulting vector lives in the same memory space as the input vector.
+ * vec_starts needs to contain the partitioning across all procs in comm
+ *--------------------------------------------------------------------------*/
 
-   HYPRE_Int num_contacts;
-   HYPRE_Int contact_proc_list[1];
-   HYPRE_Int contact_send_buf[1];
-   HYPRE_Int contact_send_buf_starts[2];
-   HYPRE_Int max_response_size;
-   HYPRE_Int *response_recv_buf = NULL;
-   HYPRE_Int *response_recv_buf_starts = NULL;
-   hypre_DataExchangeResponse response_obj;
-   hypre_ProcListElements send_proc_obj;
+hypre_Vector *
+hypre_ParVectorToVectorAll_v2( hypre_ParVector *par_v,
+                               HYPRE_MemoryLocation memory_location )
+{
+   MPI_Comm                     comm         = hypre_ParVectorComm(par_v);
+   HYPRE_Int                    num_vectors  = hypre_ParVectorNumVectors(par_v);
+   HYPRE_BigInt                 global_size  = hypre_ParVectorGlobalSize(par_v);
+   HYPRE_BigInt                 first_index  = hypre_ParVectorFirstIndex(par_v);
+   HYPRE_BigInt                 last_index   = hypre_ParVectorLastIndex(par_v);
+   hypre_Vector                *local_vector;
 
-   HYPRE_Int *send_info = NULL;
-   hypre_MPI_Status  status1;
-   HYPRE_Int count, tag1 = 112, tag2 = 223;
-   HYPRE_Int start;
+   hypre_Vector                *vector;
+   HYPRE_Complex               *vector_data;
+   HYPRE_Complex               *local_data;
+   HYPRE_Int                    local_size;
+   hypre_MPI_Request           *requests;
+   hypre_MPI_Status            *status;
+   HYPRE_Int                    i, j;
+   HYPRE_Int                   *used_procs;
+   HYPRE_Int                    num_types, num_requests;
+   HYPRE_Int                    vec_len;
+
+   HYPRE_Int                   *new_vec_starts;
+
+   HYPRE_Int                    num_contacts;
+   HYPRE_Int                    contact_proc_list[1];
+   HYPRE_Int                    contact_send_buf[1];
+   HYPRE_Int                    contact_send_buf_starts[2];
+   HYPRE_Int                    max_response_size;
+   HYPRE_Int                   *response_recv_buf = NULL;
+   HYPRE_Int                   *response_recv_buf_starts = NULL;
+   hypre_DataExchangeResponse   response_obj;
+   hypre_ProcListElements       send_proc_obj;
+
+   HYPRE_Int                   *send_info = NULL;
+   hypre_MPI_Status             status1;
+   HYPRE_Int                    count, tag1 = 112, tag2 = 223;
+   HYPRE_Int                    start;
+   HYPRE_Int                    num_procs, my_id;
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-   local_size = (HYPRE_Int)(hypre_ParVectorLastIndex(par_v) -
-                            hypre_ParVectorFirstIndex(par_v) + 1);
+   local_size = (HYPRE_Int)(last_index - first_index + 1);
+   if (hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(par_v)) !=
+       hypre_GetActualMemLocation(HYPRE_MEMORY_HOST))
+   {
+      local_vector = hypre_SeqVectorCloneDeep_v2(hypre_ParVectorLocalVector(par_v),
+                                                 HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      local_vector = hypre_ParVectorLocalVector(par_v);
+   }
 
    /* determine procs which hold data of par_v and store ids in used_procs */
    /* we need to do an exchange data for this.  If I own row then I will contact
@@ -736,7 +776,7 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
    {
       num_contacts = 1;
       contact_proc_list[0] = 0;
-      contact_send_buf[0] =  hypre_ParVectorLastIndex(par_v);
+      contact_send_buf[0]  = last_index;
       contact_send_buf_starts[0] = 0;
       contact_send_buf_starts[1] = 1;
    }
@@ -751,19 +791,18 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
    /*send_proc_obj will  be for saving info from contacts */
    send_proc_obj.length = 0;
    send_proc_obj.storage_length = 10;
-   send_proc_obj.id = hypre_CTAlloc(HYPRE_Int,  send_proc_obj.storage_length, HYPRE_MEMORY_HOST);
-   send_proc_obj.vec_starts =
-      hypre_CTAlloc(HYPRE_Int,  send_proc_obj.storage_length + 1, HYPRE_MEMORY_HOST);
+   send_proc_obj.id = hypre_CTAlloc(HYPRE_Int, send_proc_obj.storage_length, HYPRE_MEMORY_HOST);
+   send_proc_obj.vec_starts = hypre_CTAlloc(HYPRE_Int, send_proc_obj.storage_length + 1,
+                                            HYPRE_MEMORY_HOST);
    send_proc_obj.vec_starts[0] = 0;
    send_proc_obj.element_storage_length = 10;
-   send_proc_obj.elements =
-      hypre_CTAlloc(HYPRE_BigInt,  send_proc_obj.element_storage_length, HYPRE_MEMORY_HOST);
+   send_proc_obj.elements = hypre_CTAlloc(HYPRE_BigInt, send_proc_obj.element_storage_length,
+                                          HYPRE_MEMORY_HOST);
 
    max_response_size = 0; /* each response is null */
    response_obj.fill_response = hypre_FillResponseParToVectorAll;
    response_obj.data1 = NULL;
    response_obj.data2 = &send_proc_obj; /*this is where we keep info from contacts*/
-
 
    hypre_DataExchangeList(num_contacts,
                           contact_proc_list, contact_send_buf,
@@ -785,13 +824,13 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
          hypre_MPI_Probe(0, tag1, comm, &status1);
          hypre_MPI_Get_count(&status1, HYPRE_MPI_INT, &count);
 
-         send_info = hypre_CTAlloc(HYPRE_Int,  count, HYPRE_MEMORY_HOST);
+         send_info = hypre_CTAlloc(HYPRE_Int, count, HYPRE_MEMORY_HOST);
          hypre_MPI_Recv(send_info, count, HYPRE_MPI_INT, 0, tag1, comm, &status1);
 
          /* now unpack */
          num_types = send_info[0];
-         used_procs =  hypre_CTAlloc(HYPRE_Int,  num_types, HYPRE_MEMORY_HOST);
-         new_vec_starts = hypre_CTAlloc(HYPRE_Int,  num_types + 1, HYPRE_MEMORY_HOST);
+         used_procs =  hypre_CTAlloc(HYPRE_Int, num_types, HYPRE_MEMORY_HOST);
+         new_vec_starts = hypre_CTAlloc(HYPRE_Int, num_types + 1, HYPRE_MEMORY_HOST);
 
          for (i = 1; i <= num_types; i++)
          {
@@ -807,16 +846,17 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
          hypre_TFree(send_proc_obj.vec_starts, HYPRE_MEMORY_HOST);
          hypre_TFree(send_proc_obj.id, HYPRE_MEMORY_HOST);
          hypre_TFree(send_proc_obj.elements, HYPRE_MEMORY_HOST);
-         if (response_recv_buf) { hypre_TFree(response_recv_buf, HYPRE_MEMORY_HOST); }
-         if (response_recv_buf_starts) { hypre_TFree(response_recv_buf_starts, HYPRE_MEMORY_HOST); }
+         hypre_TFree(response_recv_buf, HYPRE_MEMORY_HOST);
+         hypre_TFree(response_recv_buf_starts, HYPRE_MEMORY_HOST);
+
          return NULL;
       }
    }
    else /* my_id ==0 */
    {
-      num_types = send_proc_obj.length;
-      used_procs =  hypre_CTAlloc(HYPRE_Int,  num_types, HYPRE_MEMORY_HOST);
-      new_vec_starts = hypre_CTAlloc(HYPRE_Int,  num_types + 1, HYPRE_MEMORY_HOST);
+      num_types  = send_proc_obj.length;
+      used_procs = hypre_CTAlloc(HYPRE_Int, num_types, HYPRE_MEMORY_HOST);
+      new_vec_starts = hypre_CTAlloc(HYPRE_Int, num_types + 1, HYPRE_MEMORY_HOST);
 
       new_vec_starts[0] = 0;
       for (i = 0; i < num_types; i++)
@@ -826,28 +866,28 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
       }
       hypre_qsort0(used_procs, 0, num_types - 1);
       hypre_qsort0(new_vec_starts, 0, num_types);
+
       /*now we need to put into an array to send */
-      count =  2 * num_types + 2;
-      send_info = hypre_CTAlloc(HYPRE_Int,  count, HYPRE_MEMORY_HOST);
+      count = 2 * num_types + 2;
+      send_info = hypre_CTAlloc(HYPRE_Int, count, HYPRE_MEMORY_HOST);
       send_info[0] = num_types;
       for (i = 1; i <= num_types; i++)
       {
-         send_info[i] = (HYPRE_Int)used_procs[i - 1];
+         send_info[i] = (HYPRE_Int) used_procs[i - 1];
       }
       for (i = num_types + 1; i < count; i++)
       {
          send_info[i] = new_vec_starts[i - num_types - 1];
       }
-      requests = hypre_CTAlloc(hypre_MPI_Request,  num_types, HYPRE_MEMORY_HOST);
-      status =  hypre_CTAlloc(hypre_MPI_Status,  num_types, HYPRE_MEMORY_HOST);
+      requests = hypre_CTAlloc(hypre_MPI_Request, num_types, HYPRE_MEMORY_HOST);
+      status   = hypre_CTAlloc(hypre_MPI_Status, num_types, HYPRE_MEMORY_HOST);
 
-      /* don't send to myself  - these are sorted so my id would be first*/
+      /* don't send to myself - these are sorted so my id would be first*/
       start = 0;
       if (used_procs[0] == 0)
       {
          start = 1;
       }
-
 
       for (i = start; i < num_types; i++)
       {
@@ -860,19 +900,20 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
       hypre_TFree(requests, HYPRE_MEMORY_HOST);
    }
 
-   /* clean up */
+   /* Clean up */
    hypre_TFree(send_proc_obj.vec_starts, HYPRE_MEMORY_HOST);
    hypre_TFree(send_proc_obj.id, HYPRE_MEMORY_HOST);
    hypre_TFree(send_proc_obj.elements, HYPRE_MEMORY_HOST);
    hypre_TFree(send_info, HYPRE_MEMORY_HOST);
-   if (response_recv_buf) { hypre_TFree(response_recv_buf, HYPRE_MEMORY_HOST); }
-   if (response_recv_buf_starts) { hypre_TFree(response_recv_buf_starts, HYPRE_MEMORY_HOST); }
+   hypre_TFree(response_recv_buf, HYPRE_MEMORY_HOST);
+   hypre_TFree(response_recv_buf_starts, HYPRE_MEMORY_HOST);
 
    /* now proc 0 can exit if it has no rows */
    if (!local_size)
    {
       hypre_TFree(used_procs, HYPRE_MEMORY_HOST);
       hypre_TFree(new_vec_starts, HYPRE_MEMORY_HOST);
+
       return NULL;
    }
 
@@ -881,43 +922,44 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
    /* this vector should be rather small */
 
    local_data = hypre_VectorData(local_vector);
-   vector = hypre_SeqVectorCreate((HYPRE_Int)global_size);
+   vector = hypre_SeqVectorCreate((HYPRE_Int) global_size);
    hypre_VectorNumVectors(vector) = num_vectors;
-   hypre_SeqVectorInitialize(vector);
+   hypre_SeqVectorInitialize_v2(vector, HYPRE_MEMORY_HOST);
    vector_data = hypre_VectorData(vector);
 
    num_requests = 2 * num_types;
 
-   requests = hypre_CTAlloc(hypre_MPI_Request,  num_requests, HYPRE_MEMORY_HOST);
-   status = hypre_CTAlloc(hypre_MPI_Status,  num_requests, HYPRE_MEMORY_HOST);
+   requests = hypre_CTAlloc(hypre_MPI_Request, num_requests, HYPRE_MEMORY_HOST);
+   status = hypre_CTAlloc(hypre_MPI_Status, num_requests, HYPRE_MEMORY_HOST);
 
    /* initialize data exchange among used_procs and generate vector  - here we
       send to ourself also*/
-
    j = 0;
    for (i = 0; i < num_types; i++)
    {
-      proc_id = used_procs[i];
-      vec_len = (HYPRE_Int)(new_vec_starts[i + 1] - new_vec_starts[i]);
+      vec_len = (HYPRE_Int) (new_vec_starts[i + 1] - new_vec_starts[i]);
       hypre_MPI_Irecv(&vector_data[(HYPRE_Int)new_vec_starts[i]], num_vectors * vec_len,
-                      HYPRE_MPI_COMPLEX, proc_id, tag2, comm, &requests[j++]);
+                      HYPRE_MPI_COMPLEX, used_procs[i], tag2, comm, &requests[j++]);
    }
    for (i = 0; i < num_types; i++)
    {
       hypre_MPI_Isend(local_data, num_vectors * local_size, HYPRE_MPI_COMPLEX,
                       used_procs[i], tag2, comm, &requests[j++]);
    }
-
    hypre_MPI_Waitall(num_requests, requests, status);
 
-   if (num_requests)
-   {
-      hypre_TFree(requests, HYPRE_MEMORY_HOST);
-      hypre_TFree(status, HYPRE_MEMORY_HOST);
-      hypre_TFree(used_procs, HYPRE_MEMORY_HOST);
-   }
+   /* Move vector to final destination */
+   hypre_SeqVectorMigrate(vector, memory_location);
 
+   /* Free memory */
+   hypre_TFree(requests, HYPRE_MEMORY_HOST);
+   hypre_TFree(status, HYPRE_MEMORY_HOST);
+   hypre_TFree(used_procs, HYPRE_MEMORY_HOST);
    hypre_TFree(new_vec_starts, HYPRE_MEMORY_HOST);
+   if (local_vector != hypre_ParVectorLocalVector(par_v))
+   {
+      hypre_SeqVectorDestroy(local_vector);
+   }
 
    return vector;
 }
@@ -932,52 +974,191 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
                         const char      *filename )
 {
    MPI_Comm          comm;
-   HYPRE_BigInt      global_size, j;
    HYPRE_BigInt     *partitioning;
-   HYPRE_Complex    *local_data;
-   HYPRE_Int         myid, num_procs, i, part0;
-   char              new_filename[255];
+   hypre_Vector     *local_vector;
+   HYPRE_Int         local_size;
+   HYPRE_Int         myid, num_procs, i, j;
+   char              new_filename[HYPRE_MAX_FILE_NAME_LEN];
+   char              msg[1024];
    FILE             *file;
+
    if (!vector)
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
    comm         = hypre_ParVectorComm(vector);
-   global_size  = hypre_ParVectorGlobalSize(vector);
    partitioning = hypre_ParVectorPartitioning(vector);
-
-   /* multivector code not written yet */
-   hypre_assert( hypre_ParVectorNumVectors(vector) == 1 );
-   if ( hypre_ParVectorNumVectors(vector) != 1 ) { hypre_error_in_arg(1); }
+   local_vector = hypre_ParVectorLocalVector(vector);
+   local_size   = hypre_VectorSize(local_vector);
 
    hypre_MPI_Comm_rank(comm, &myid);
    hypre_MPI_Comm_size(comm, &num_procs);
 
    hypre_sprintf(new_filename, "%s.%05d", filename, myid);
-
    if ((file = fopen(new_filename, "w")) == NULL)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: can't open output file %s\n");
+      hypre_sprintf(msg, "Error: cannot open output file: %s", new_filename);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, msg);
       return hypre_error_flag;
    }
 
-   local_data = hypre_VectorData(hypre_ParVectorLocalVector(vector));
+   /* Write header: global partitioning */
+   hypre_fprintf(file, "%b %b\n", partitioning[0] + base_j, partitioning[1] + base_j - 1);
 
-   hypre_fprintf(file, "%b \n", global_size);
-   for (i = 0; i < 2; i++)
+   /* Write additional header line in the case of multi-component vectors */
+   if (hypre_ParVectorNumVectors(vector) > 1)
    {
-      hypre_fprintf(file, "%b ", partitioning[i] + base_j);
-   }
-   hypre_fprintf(file, "\n");
-
-   part0 = partitioning[0];
-   for (j = part0; j < partitioning[1]; j++)
-   {
-      hypre_fprintf(file, "%b %.14e\n", j + base_j, local_data[(HYPRE_Int)(j - part0)]);
+      hypre_fprintf(file, "%d %d %d %d\n",
+                    hypre_VectorNumVectors(local_vector),
+                    hypre_VectorMultiVecStorageMethod(local_vector),
+                    hypre_VectorVectorStride(local_vector),
+                    hypre_VectorIndexStride(local_vector));
    }
 
+   /* Write coefficients */
+   if (hypre_ParVectorNumVectors(vector) > 1)
+   {
+      /* Multi-component vectors */
+      for (i = 0; i < local_size; i++)
+      {
+         hypre_fprintf(file, "%b", (HYPRE_BigInt) (i + base_j) + partitioning[0]);
+         for (j = 0; j < hypre_VectorNumVectors(local_vector); j++)
+         {
+            hypre_fprintf(file, " %.14e", hypre_VectorEntryIJ(local_vector, i, j));
+         }
+         hypre_fprintf(file, "\n");
+      }
+   }
+   else
+   {
+      /* Single-component (regular) vectors */
+      for (j = 0; j < local_size; j++)
+      {
+         hypre_fprintf(file, "%b %.14e\n",
+                       (HYPRE_BigInt) (j + base_j) + partitioning[0],
+                       hypre_VectorEntryI(local_vector, j));
+      }
+   }
    fclose(file);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParVectorPrintBinaryIJ
+ *
+ * Prints a ParVector in binary format. The data from each process is
+ * printed to a separate file. Metadata info about the vector is printed in
+ * the header section of every file, and followed by the vector entries
+ *
+ * The header section is composed by 8 entries stored in 64 bytes (8 bytes
+ * each) and their meanings are:
+ *
+ *    0) Header version
+ *    1) Number of bytes for storing a real type (vector entries)
+ *    2) Global index of the first vector entry in this process
+ *    3) Global index of the last vector entry in this process
+ *    4) Number of entries of a global vector
+ *    5) Number of entries of a local vector
+ *    6) Number of components of a vector
+ *    7) Storage method for multi-component vectors
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorPrintBinaryIJ( hypre_ParVector *par_vector,
+                              const char      *filename )
+{
+   MPI_Comm               comm = hypre_ParVectorComm(par_vector);
+   HYPRE_BigInt           global_size = hypre_ParVectorGlobalSize(par_vector);
+   HYPRE_BigInt          *partitioning = hypre_ParVectorPartitioning(par_vector);
+   HYPRE_MemoryLocation   memory_location = hypre_ParVectorMemoryLocation(par_vector);
+
+   hypre_ParVector       *h_parvector;
+   hypre_Vector          *h_vector;
+   HYPRE_Int              size;
+   HYPRE_Int              num_components;
+   HYPRE_Int              storage_method;
+
+   /* Local variables */
+   char                   new_filename[HYPRE_MAX_FILE_NAME_LEN];
+   FILE                  *fp;
+   size_t                 count, total_size;
+   hypre_uint64           header[8];
+   HYPRE_Int              one = 1;
+   HYPRE_Complex         *data;
+   HYPRE_Int              myid;
+
+   /* Exit if trying to write from big-endian machine */
+   if ((*(char*)&one) == 0)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Support to big-endian machines is incomplete!\n");
+      return hypre_error_flag;
+   }
+
+   /* MPI variables */
+   hypre_MPI_Comm_rank(comm, &myid);
+
+   /* Create temporary vector on host memory if needed */
+   h_parvector = (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE) ?
+                 hypre_ParVectorCloneDeep_v2(par_vector, HYPRE_MEMORY_HOST) : par_vector;
+
+
+   /* Local vector variables */
+   h_vector = hypre_ParVectorLocalVector(h_parvector);
+   num_components = hypre_VectorNumVectors(h_vector);
+   storage_method = hypre_VectorMultiVecStorageMethod(h_vector);
+   data = hypre_VectorData(h_vector);
+   size = hypre_VectorSize(h_vector);
+   total_size = size * num_components;
+
+   /* Open binary file */
+   hypre_sprintf(new_filename, "%s.%05d.bin", filename, myid);
+   if ((fp = fopen(new_filename, "wb")) == NULL)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not open output file!");
+      return hypre_error_flag;
+   }
+
+   /*---------------------------------------------
+    * Write header (64 bytes)
+    *---------------------------------------------*/
+
+   count = 8;
+   header[0] = (hypre_uint64) 1; /* Header version */
+   header[1] = (hypre_uint64) sizeof(HYPRE_Complex);
+   header[2] = (hypre_uint64) partitioning[0];
+   header[3] = (hypre_uint64) partitioning[1];
+   header[4] = (hypre_uint64) global_size;
+   header[5] = (hypre_uint64) size;
+   header[6] = (hypre_uint64) num_components;
+   header[7] = (hypre_uint64) storage_method;
+   if (fwrite((const void*) header, sizeof(hypre_uint64), count, fp) != count)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not write all header entries\n");
+      return hypre_error_flag;
+   }
+
+   /*---------------------------------------------
+    * Write vector coefficients
+    *---------------------------------------------*/
+
+   count = fwrite((const void*) data, sizeof(HYPRE_Complex), total_size, fp);
+   if (count != total_size)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Could not write all entries\n");
+      return hypre_error_flag;
+   }
+
+   /*---------------------------------------------
+    * Finalize
+    *---------------------------------------------*/
+
+   fclose(fp);
+   if (h_parvector != par_vector)
+   {
+      hypre_ParVectorDestroy(h_parvector);
+   }
 
    return hypre_error_flag;
 }
@@ -997,11 +1178,12 @@ hypre_ParVectorReadIJ( MPI_Comm          comm,
    hypre_ParVector  *vector;
    hypre_Vector     *local_vector;
    HYPRE_Complex    *local_data;
+   HYPRE_BigInt      big_local_size;
    HYPRE_BigInt      partitioning[2];
    HYPRE_Int         base_j;
 
-   HYPRE_Int         myid, num_procs, i, j;
-   char              new_filename[255];
+   HYPRE_Int         myid, num_procs, j;
+   char              new_filename[HYPRE_MAX_FILE_NAME_LEN];
    FILE             *file;
 
    hypre_MPI_Comm_size(comm, &num_procs);
@@ -1015,24 +1197,21 @@ hypre_ParVectorReadIJ( MPI_Comm          comm,
       return hypre_error_flag;
    }
 
-   hypre_fscanf(file, "%b", &global_size);
    /* this may need to be changed so that the base is available in the file! */
-   hypre_fscanf(file, "%b", partitioning);
-   for (i = 0; i < 2; i++)
-   {
-      hypre_fscanf(file, "%b", partitioning + i);
-   }
+   hypre_fscanf(file, "%b %b", partitioning[0], partitioning[1]);
+   big_local_size = partitioning[1] - partitioning[0] + 1;
+   hypre_MPI_Allreduce(&big_local_size, &global_size, 1, HYPRE_MPI_BIG_INT,
+                       hypre_MPI_SUM, comm);
+
    /* This is not yet implemented correctly! */
    base_j = 0;
-   vector = hypre_ParVectorCreate(comm, global_size,
-                                  partitioning);
-
-   hypre_ParVectorInitialize(vector);
+   vector = hypre_ParVectorCreate(comm, global_size, partitioning);
+   hypre_ParVectorInitialize_v2(vector, HYPRE_MEMORY_HOST);
 
    local_vector = hypre_ParVectorLocalVector(vector);
    local_data   = hypre_VectorData(local_vector);
 
-   for (j = 0; j < (HYPRE_Int)(partitioning[1] - partitioning[0]); j++)
+   for (j = 0; j < (HYPRE_Int) big_local_size; j++)
    {
       hypre_fscanf(file, "%b %le", &J, local_data + j);
    }
@@ -1064,6 +1243,8 @@ hypre_FillResponseParToVectorAll( void       *p_recv_contact_buf,
                                   void      **p_send_response_buf,
                                   HYPRE_Int  *response_message_size )
 {
+   HYPRE_UNUSED_VAR(p_send_response_buf);
+
    HYPRE_Int     myid;
    HYPRE_Int     i, index, count, elength;
 

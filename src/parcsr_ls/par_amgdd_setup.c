@@ -49,12 +49,12 @@ hypre_BoomerAMGDDSetup( void               *amgdd_vdata,
    HYPRE_Int           ****send_flag;
    HYPRE_Int           ****recv_map;
    HYPRE_Int           ****recv_red_marker;
-   HYPRE_Int             **send_buffer;
-   HYPRE_Int             **recv_buffer;
-   HYPRE_Int             **send_flag_buffer;
-   HYPRE_Int             **recv_map_send_buffer;
-   HYPRE_Int              *send_flag_buffer_size;
-   HYPRE_Int              *recv_map_send_buffer_size;
+   HYPRE_Int             **send_buffer               = NULL;
+   HYPRE_Int             **recv_buffer               = NULL;
+   HYPRE_Int             **send_flag_buffer          = NULL;
+   HYPRE_Int             **recv_map_send_buffer      = NULL;
+   HYPRE_Int              *send_flag_buffer_size     = NULL;
+   HYPRE_Int              *recv_map_send_buffer_size = NULL;
 
    HYPRE_Int               num_procs;
    HYPRE_Int               num_send_procs;

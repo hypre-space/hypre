@@ -12,6 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_struct_mv.h"
+#include "_hypre_struct_mv.hpp"
 #include "struct_matmult_core.h"
 
 #ifdef HYPRE_UNROLL_MAXDEPTH

@@ -42,33 +42,6 @@ extern "C" {
  * @{
  **/
 
-#ifndef HYPRE_SOLVER_STRUCT
-#define HYPRE_SOLVER_STRUCT
-struct hypre_Solver_struct;
-/**
- * The solver object.
- **/
-typedef struct hypre_Solver_struct *HYPRE_Solver;
-#endif
-
-#ifndef HYPRE_MATRIX_STRUCT
-#define HYPRE_MATRIX_STRUCT
-struct hypre_Matrix_struct;
-/**
- * The matrix object.
- **/
-typedef struct hypre_Matrix_struct *HYPRE_Matrix;
-#endif
-
-#ifndef HYPRE_VECTOR_STRUCT
-#define HYPRE_VECTOR_STRUCT
-struct hypre_Vector_struct;
-/**
- * The vector object.
- **/
-typedef struct hypre_Vector_struct *HYPRE_Vector;
-#endif
-
 /**@}*/
 
 /*--------------------------------------------------------------------------

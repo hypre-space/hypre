@@ -8,6 +8,10 @@ default: all
 # Include all variables defined by configure
 include config/Makefile.config
 
+# Tolerance level for checkpar tests
+# The value of the variable can be set when calling `make checkpar`
+HYPRE_CHECKPAR_TOL ?= 1e-6
+
 # These are the directories for internal blas, lapack and general utilities
 HYPRE_BASIC_DIRS =\
  blas\
@@ -25,6 +29,7 @@ HYPRE_KRYLOV_DIRS =\
 #These are the directories for the IJ interface
 HYPRE_IJ_DIRS =\
  seq_mv\
+ seq_block_mv\
  parcsr_mv\
  parcsr_block_mv\
  distributed_matrix\
@@ -158,6 +163,7 @@ test: all
 check:
 	@ \
 	echo "Checking the library ..."; \
+	set -e; \
 	(cd test; $(MAKE) all); \
 	(cd test; $(CHECKRUN) ./ij $(PARMS) 2> ij.err); \
 	(cd test; $(CHECKRUN) ./struct $(PARMS) 2> struct.err); \
@@ -167,19 +173,20 @@ check:
 checkpar:
 	@ \
         echo "Checking the library ..."; \
+        set -e; \
         (cd test; $(MAKE) all); \
         echo "Testing IJ ..."; \
-        (cd test; ./runtest.sh -tol 1.e-06 -mpi "$(CHECKRUN)" TEST_ij/solvers.sh); \
+        (cd test; ./runtest.sh -atol $(HYPRE_CHECKPAR_TOL) -mpi "$(CHECKRUN)" TEST_ij/solvers.sh); \
         (cd test; ./checktest.sh); \
         (cd test; ./cleantest.sh); \
         echo "Testing Struct ..."; \
-        (cd test; ./runtest.sh -tol 1.e-06 -mpi "$(CHECKRUN)" TEST_struct/solvers.sh); \
+        (cd test; ./runtest.sh -atol $(HYPRE_CHECKPAR_TOL) -mpi "$(CHECKRUN)" TEST_struct/solvers.sh); \
         (cd test; ./checktest.sh); \
         (cd test; ./cleantest.sh); \
         echo "Testing SStruct ..."; \
-        (cd test; ./runtest.sh -tol 1.e-06 -mpi "$(CHECKRUN)" TEST_sstruct/solvers.sh); \
+        (cd test; ./runtest.sh -atol $(HYPRE_CHECKPAR_TOL) -mpi "$(CHECKRUN)" TEST_sstruct/solvers.sh); \
         (cd test; ./checktest.sh); \
-        (cd test; ./cleantest.sh); 
+        (cd test; ./cleantest.sh);
 
 install: all
 	@ \

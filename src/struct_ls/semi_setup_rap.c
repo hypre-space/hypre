@@ -46,6 +46,10 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
                        HYPRE_Int           cdir,
                        HYPRE_Int           P_stored_as_transpose )
 {
+   HYPRE_UNUSED_VAR(R);
+   HYPRE_UNUSED_VAR(P);
+   HYPRE_UNUSED_VAR(P_stored_as_transpose);
+
    hypre_StructMatrix    *RAP;
 
    hypre_Index           *RAP_stencil_shape;
@@ -54,7 +58,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
    HYPRE_Int              dim;
    HYPRE_Int              RAP_num_ghost[] = {1, 1, 1, 1, 1, 1};
 
-   HYPRE_Int             *not_cdirs;
+   HYPRE_Int             *not_cdirs = NULL;
    hypre_StructStencil   *A_stencil;
    HYPRE_Int              A_stencil_size;
    hypre_Index           *A_stencil_shape;
