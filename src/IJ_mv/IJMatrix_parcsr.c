@@ -564,7 +564,6 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
             {
                col_indx = cols[indx] - first;
                values[indx] = 0.0;
-               /* hypre_printf("WM: debug - row = %d, col_indx = %d\n", row, col_indx); */
                if (col_indx < col_0 || col_indx > col_n)
                   /* search in offd */
                {
@@ -577,7 +576,6 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
                         {
                            offd_data[j] = 0.0;
                         }
-                        /* hypre_printf("WM: debug - values[%d] = %e\n", indx, values[indx]); */
                         break;
                      }
                   }
@@ -594,7 +592,6 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
                         {
                            diag_data[j] = 0.0;
                         }
-                        /* hypre_printf("WM: debug - values[%d] = %e\n", indx, values[indx]); */
                         break;
                      }
                   }

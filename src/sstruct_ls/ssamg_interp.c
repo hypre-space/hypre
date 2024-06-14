@@ -168,8 +168,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                           hypre_SStructMatrix  *P,
                           HYPRE_Int            interp_type)
 {
-   /* WM: debug */
-   /* HYPRE_SStructMatrixPrint("A", A, 0); */
    HYPRE_Int                ndim       = hypre_SStructMatrixNDim(P);
    hypre_SStructGraph      *graph      = hypre_SStructMatrixGraph(P);
    hypre_SStructGrid       *grid       = hypre_SStructGraphGrid(graph);
@@ -479,7 +477,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
       /* Convert boundary of A to IJ matrix */
       hypre_IJMatrix *A_struct_bndry_ij;
-      hypre_SStructMatrixBoundaryToUMatrix(A, grid, &A_struct_bndry_ij, 1);
+      hypre_SStructMatrixHaloToUMatrix(A, grid, &A_struct_bndry_ij, 1);
       hypre_ParCSRMatrix *A_struct_bndry = hypre_IJMatrixObject(A_struct_bndry_ij);
 
       if (interp_type == 2)
@@ -553,7 +551,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
          A_p   = hypre_SStructMatrixPMatrix(A, part);
          cdir  = cdir_p[part];
-         /* hypre_printf("WM: debug - cdir = %d\n", cdir); */
 
          /* Loop over variables */
          for (vi = 0; vi < nvars; vi++)
@@ -611,104 +608,13 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                /* WM: todo - what if there are multiple boxes per part??? Does this approach still work? */
                hypre_BoxGetStrideSize(shrink_box, stride, loop_size);
 
-               /* hypre_printf("WM: debug - compute_box = (%d, %d, %d) x (%d, %d, %d)\n", */
-               /*       hypre_BoxIMin(compute_box)[0], */
-               /*       hypre_BoxIMin(compute_box)[1], */
-               /*       hypre_BoxIMin(compute_box)[2], */
-               /*       hypre_BoxIMax(compute_box)[0], */
-               /*       hypre_BoxIMax(compute_box)[1], */
-               /*       hypre_BoxIMax(compute_box)[2]); */
-               /* hypre_printf("WM: debug - shrink_box = (%d, %d, %d) x (%d, %d, %d)\n", */
-               /*       hypre_BoxIMin(shrink_box)[0], */
-               /*       hypre_BoxIMin(shrink_box)[1], */
-               /*       hypre_BoxIMin(shrink_box)[2], */
-               /*       hypre_BoxIMax(shrink_box)[0], */
-               /*       hypre_BoxIMax(shrink_box)[1], */
-               /*       hypre_BoxIMax(shrink_box)[2]); */
-
-               /* hypre_printf("WM: debug - stride = (%d, %d, %d)\n", */
-               /*       stride[0], */
-               /*       stride[1], */
-               /*       stride[2]); */
-               /* hypre_printf("WM: debug - shrink_start = (%d, %d, %d)\n", */
-               /*       shrink_start[0], */
-               /*       shrink_start[1], */
-               /*       shrink_start[2]); */
-               /* hypre_printf("WM: debug - loop_size = (%d, %d, %d)\n", */
-               /*       loop_size[0], */
-               /*       loop_size[1], */
-               /*       loop_size[2]); */
-
                /* Loop over dofs */
                hypre_BoxLoop1Begin(ndim, loop_size, compute_box, shrink_start, stride, ii);
                {
-                  /* hypre_printf("WM: debug - hypre__I = %d, hypre__J = %d, ii = %d\n", hypre__I, hypre__J, ii); */
                   CF_marker[box_start_index + ii] = -1;
                }
                hypre_BoxLoop1End(ii);
 
-               /* Zero out rows of A_u_aug that are away from the boundary */
-               /* WM: todo - this isn't right... I need to only shrink away from the part boundary... */ 
-               /* not in all dimensions... this is what pbnd gives me? But I need to figure out how to use it. */
-               /* shrink_box = hypre_BoxClone(compute_box); */
-               /* hypre_IndexX(stride) = 1; */
-               /* hypre_IndexY(stride) = 1; */
-               /* hypre_IndexZ(stride) = 1; */
-               /* hypre_IndexX(grow_index) = -2; */
-               /* hypre_IndexY(grow_index) = -2; */
-               /* hypre_IndexZ(grow_index) = -2; */
-               /* hypre_BoxGrowByIndex(shrink_box, grow_index); */
-               /* shrink_start = hypre_BoxIMin(shrink_box); */
-               /* hypre_BoxGetStrideSize(shrink_box, stride, loop_size); */
-
-               /* HYPRE_Int *A_u_aug_diag_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A_u_aug)); */
-               /* HYPRE_Int *A_u_aug_offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(A_u_aug)); */
-               /* HYPRE_Complex *A_u_aug_diag_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A_u_aug)); */
-               /* HYPRE_Complex *A_u_aug_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(A_u_aug)); */
-
-               /* hypre_printf("WM: debug - compute_box = (%d, %d, %d) x (%d, %d, %d)\n", */
-               /*       hypre_BoxIMin(compute_box)[0], */
-               /*       hypre_BoxIMin(compute_box)[1], */
-               /*       hypre_BoxIMin(compute_box)[2], */
-               /*       hypre_BoxIMax(compute_box)[0], */
-               /*       hypre_BoxIMax(compute_box)[1], */
-               /*       hypre_BoxIMax(compute_box)[2]); */
-               /* hypre_printf("WM: debug - shrink_box = (%d, %d, %d) x (%d, %d, %d)\n", */
-               /*       hypre_BoxIMin(shrink_box)[0], */
-               /*       hypre_BoxIMin(shrink_box)[1], */
-               /*       hypre_BoxIMin(shrink_box)[2], */
-               /*       hypre_BoxIMax(shrink_box)[0], */
-               /*       hypre_BoxIMax(shrink_box)[1], */
-               /*       hypre_BoxIMax(shrink_box)[2]); */
-
-               /* hypre_printf("WM: debug - stride = (%d, %d, %d)\n", */
-               /*       stride[0], */
-               /*       stride[1], */
-               /*       stride[2]); */
-               /* hypre_printf("WM: debug - shrink_start = (%d, %d, %d)\n", */
-               /*       shrink_start[0], */
-               /*       shrink_start[1], */
-               /*       shrink_start[2]); */
-               /* hypre_printf("WM: debug - loop_size = (%d, %d, %d)\n", */
-               /*       loop_size[0], */
-               /*       loop_size[1], */
-               /*       loop_size[2]); */
-
-               /* hypre_BoxLoop1Begin(ndim, loop_size, compute_box, shrink_start, stride, ii); */
-               /* { */
-               /*    hypre_printf("WM: debug - hypre__I = %d, hypre__J = %d, ii = %d\n", hypre__I, hypre__J, ii); */
-               /*    for (j = A_u_aug_diag_i[box_start_index + ii]; j < A_u_aug_diag_i[box_start_index + ii + 1]; j++) */
-               /*    { */
-               /*       hypre_printf("WM: debug - setting diag to zero\n"); */
-               /*       A_u_aug_diag_data[j] = 0.0; */
-               /*    } */
-               /*    for (j = A_u_aug_offd_i[box_start_index + ii]; j < A_u_aug_offd_i[box_start_index + ii + 1]; j++) */
-               /*    { */
-               /*       hypre_printf("WM: debug - setting offd to zero\n"); */
-               /*       A_u_aug_offd_data[j] = 0.0; */
-               /*    } */
-               /* } */
-               /* hypre_BoxLoop1End(ii); */
 
                /* Increment box start index */
                box_start_index += hypre_BoxVolume(compute_box);
@@ -718,6 +624,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
 
       /* WM: todo - this is kind of a hacky workaround for now... just looping through */
+      /* WM: todo - test without this now that I have compressSToU */
       /* A_u_aug and looking for missing/negative diagonals and removing those rows */
       HYPRE_Int *A_u_aug_diag_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A_u_aug));
       HYPRE_Int *A_u_aug_offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(A_u_aug));
@@ -750,20 +657,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          }
       }
 
-      /* WM: debug */
-      /* FILE    *fp; */
-      /* char filename[256]; */
-      /* hypre_sprintf(filename, "CF_marker_%d.txt", my_id); */
-      /* fp = fopen(filename, "w"); */
-      /* for (i = 0; i < hypre_ParCSRMatrixNumRows(A_u); i++) */
-      /* { */
-      /*    hypre_fprintf(fp, "%d, %d\n", i, CF_marker[i]); */
-      /* } */
-      /* fclose(fp); */
-
-      /* WM: debug */
-      /* hypre_ParCSRMatrixPrintIJ(A_u_aug, 0, 0, "A_u_aug"); */
-
       /* Generate unstructured interpolation */
       /* WM: todo - experiment with strenght matrix that counts only the P_s stencil entries and all inter-part connections as strong; */
       /*            this keeps the same sparsity pattern inside the structured part */
@@ -780,8 +673,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                                  trunc_factor,
                                  max_elmts,
                                  &P_u);
-      /* WM: debug */
-      /* hypre_ParCSRMatrixPrintIJ(P_u, 0, 0, "P_u_init"); */
 
       /* WM: postprocess P_u to remove injection entries. These should already be accounted for in P_s. Is this the best way to do this? */
       /* WM: todo - yeah, once I have the functionality for compressing unstructured -> structured entries, I can use that here */
@@ -808,7 +699,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       }
       hypre_ParCSRMatrixSetNumNonzeros(P_u);
 
-      /* WM: is this the right way to set the U matrix? */
+      /* WM: question - is this the right way to set the U matrix? */
       hypre_IJMatrixDestroyParCSR(hypre_SStructMatrixIJMatrix(P));
       hypre_SStructMatrixParCSRMatrix(P) = P_u;
       hypre_IJMatrixSetObject(hypre_SStructMatrixIJMatrix(P), P_u);
@@ -817,9 +708,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       HYPRE_IJMatrixDestroy(A_struct_bndry_ij);
       hypre_ParCSRMatrixDestroy(A_u_aug);
    }
-
-   /* WM: todo - this doesn't seem to be working in the rectangular case! */
-   /* hypre_SStructMatrixCompressUToS(P); */
 
    return hypre_error_flag;
 }

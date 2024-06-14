@@ -361,7 +361,7 @@ HYPRE_SStructSSAMGSetNonZeroGuess(HYPRE_SStructSolver solver);
  *
  * \begin{tabular}{l@{ -- }l}
  * 0  & Structured interpolation only (default) \\
- * 1  & Structure and unstructured interpolation \\
+ * 1  & Structured and unstructured interpolation \\
  * \end{tabular}
  **/
 HYPRE_Int

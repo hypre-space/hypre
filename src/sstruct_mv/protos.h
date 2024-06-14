@@ -309,10 +309,12 @@ HYPRE_Int hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix, HY
                                                  hypre_Box *set_box, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, hypre_Box *value_box,
                                                  HYPRE_Complex *values, HYPRE_Int action );
 HYPRE_Int hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix matrix );
+HYPRE_Int hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix *A, hypre_SStructGrid *grid,
+                                             hypre_IJMatrix **ij_Ahat_ptr, hypre_BoxArrayArray ***convert_boxaa);
 hypre_IJMatrix* hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
                                               HYPRE_Int fill_diagonal );
-HYPRE_Int hypre_SStructMatrixBoundaryToUMatrix ( hypre_SStructMatrix *A, hypre_SStructGrid *grid,
-                                                 hypre_IJMatrix **ij_Ahat_ptr, HYPRE_Int halo_size );
+HYPRE_Int hypre_SStructMatrixHaloToUMatrix ( hypre_SStructMatrix *A, hypre_SStructGrid *grid,
+                                             hypre_IJMatrix **ij_Ahat_ptr, HYPRE_Int halo_size );
 HYPRE_Int hypre_SStructMatrixGetDiagonal ( hypre_SStructMatrix *matrix,
                                            hypre_SStructVector **diag_ptr );
 HYPRE_MemoryLocation hypre_SStructMatrixMemoryLocation(hypre_SStructMatrix *matrix);
@@ -350,6 +352,8 @@ HYPRE_Int hypre_SStructMatrixRAP ( hypre_SStructMatrix *R, hypre_SStructMatrix *
                                    hypre_SStructMatrix *P, hypre_SStructMatrix **M_ptr );
 HYPRE_Int hypre_SStructMatrixRTtAP ( hypre_SStructMatrix *RT, hypre_SStructMatrix *A,
                                      hypre_SStructMatrix *P, hypre_SStructMatrix **M_ptr );
+HYPRE_Int hypre_SStructMatmatConvertSToU ( hypre_SStructMatrix *S, hypre_IJMatrix *U,
+                                           hypre_IJMatrix **ij_Ahat_ptr, HYPRE_Int left_right);
 
 /* sstruct_matop.c */
 HYPRE_Int hypre_SStructPMatrixComputeRowSum ( hypre_SStructPMatrix *pA, HYPRE_Int type,

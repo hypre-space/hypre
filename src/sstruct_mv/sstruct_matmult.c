@@ -844,7 +844,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
       HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_sA);
 
       m = terms[2];
-      hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_tmp, 2);
+      hypre_SStructMatrixHaloToUMatrix(matrices[m], grid, &ij_tmp, 2);
       HYPRE_IJMatrixGetObject(ij_tmp, (void **) &parcsr_sP);
 
       if (!hypre_ParCSRMatrixCommPkg(parcsr_sP))
@@ -876,7 +876,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
       ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
       HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uMold);
       /* WM: todo - converting the whole matrix for now to be safe... */
-      /* hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_sA[m], 4); */
+      /* hypre_SStructMatrixHaloToUMatrix(matrices[m], grid, &ij_sA[m], 4); */
       ij_sA[m] = hypre_SStructMatrixToUMatrix(matrices[m], 0);
       HYPRE_IJMatrixGetObject(ij_sA[m], (void **) &parcsr_sMold);
 
@@ -899,7 +899,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
             grid  = hypre_SStructGraphGrid(graph);
 
             /* WM: todo - converting the whole matrix for now to be safe... */
-            /* hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_sA[m], 4); */
+            /* hypre_SStructMatrixHaloToUMatrix(matrices[m], grid, &ij_sA[m], 4); */
             ij_sA[m] = hypre_SStructMatrixToUMatrix(matrices[m], 0);
          }
          HYPRE_IJMatrixGetObject(ij_sA[m], (void **) &parcsr_sA);
@@ -1046,29 +1046,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixDiag(parcsr_uM));
    hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixOffd(parcsr_uM));
 
-   /* WM: debug - extra checks to make sure compression doesn't change the matrix */
-   /* HYPRE_SStructMatrixPrint("A_before",  M, 0); */
-   /* HYPRE_IJMatrix As = hypre_SStructMatrixToUMatrix(M, 0); */
-   /* HYPRE_IJMatrix A_before; */
-   /* HYPRE_IJMatrixAdd(1.0, As, 1.0, hypre_SStructMatrixIJMatrix(M), &A_before); */
-   /* HYPRE_IJMatrixPrint(A_before, "A_before"); */
-
    hypre_SStructMatrixCompressUToS(M);
-
-   /* HYPRE_SStructMatrixPrint("A_after",  M, 0); */
-   /* HYPRE_IJMatrixDestroy(As); */
-   /* As = hypre_SStructMatrixToUMatrix(M, 0); */
-   /* HYPRE_IJMatrix A_after; */
-   /* HYPRE_IJMatrixAdd(1.0, As, 1.0, hypre_SStructMatrixIJMatrix(M), &A_after); */
-   /* HYPRE_IJMatrixPrint(A_after, "A_after"); */
-   
-   /* HYPRE_IJMatrix diff; */
-   /* HYPRE_IJMatrixAdd(1.0, A_after, -1.0, A_before, &diff); */
-   /* HYPRE_IJMatrixPrint(diff, "diff"); */
-
-/*    hypre_MPI_Finalize(); */
-/*    exit(0); */
-
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -1298,6 +1276,93 @@ hypre_SStructMatrixRTtAP( hypre_SStructMatrix  *RT,
    *M_ptr = M;
 
    HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructMatmatConvertSToU
+ *
+ * Convert the necessary rows of the structured part of matrix S in
+ * preparation for multiplying with U in unstructured format.
+ *
+ * Can handle left or right multiplication or both, i.e.
+ * U * S (left_right = 0)
+ * S * U (left_right = 1)
+ * U * S * U (left_right = 2)
+ * S * U * S (left_right = 2)
+ *
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_SStructMatmatConvertSToU ( hypre_SStructMatrix *S, hypre_IJMatrix *U,
+                                           hypre_IJMatrix **ij_S_ptr, HYPRE_Int left_right)
+{
+
+
+   HYPRE_Int ndim;
+   HYPRE_Int i, part, var;
+
+   /* Indices correspond to rows of S to be converted */
+   /* WM: todo - indices are per box? So I need more arrays here... */
+   /* something like indices[part][var][box][dim1]? */
+   HYPRE_Int num_indices;
+   HYPRE_Int **indices;
+
+   HYPRE_Real threshold;
+
+   /* WM: question - what's the data layout with part/var, boxarray, boxarrayarrays? */
+   hypre_BoxArrayArray ***convert_boxaa;
+
+   /* Get parcsr object for unstructured matrix U */
+   hypre_ParCSRMatrix *parcsr_U;
+   HYPRE_IJMatrixGetObject(U, (void **) &parcsr_U);
+
+   /* Get diag and offd matrices for U */
+   hypre_CSRMatrix *U_diag = hypre_ParCSRMatrixDiag(parcsr_U);
+   hypre_CSRMatrix *U_offd = hypre_ParCSRMatrixOffd(parcsr_U);
+      
+
+   /* Accumulate indices needed for U * S multiplication */
+   if (left_right == 0 || left_right == 2)
+   {
+      /* Loop over diag column indices of U */
+      /* WM: question - don't need offd here, correct? */
+      for (i = 0; i < hypre_CSRMatrixNumNonzeros(U_diag); i++)
+      {
+         /* WM: todo - Get mapping from col index (domain U) to part/var/box/idx (in range grid of S) */
+      }
+
+   }
+
+   /* Accumulate indices needed for S * U multiplication */
+   if (left_right == 1 || left_right == 2)
+   {
+      /* Loop over rows of U */
+      for (i = 0; i < hypre_CSRMatrixNumRows(U_diag); i++)
+      {
+         /* If nonzero row... */
+         if (hypre_CSRMatrixI(U_diag)[i+1] - hypre_CSRMatrixI(U_diag)[i] + hypre_CSRMatrixI(U_offd)[i+1] - hypre_CSRMatrixI(U_offd)[i] > 0)
+         {
+            /* Convert all rows of S that have nonzeros in the corresponding column of S. */
+            /* Since S is structured, we can get these rows via the stencil pattern */
+            /* WM: todo - Get mapping from row index (range U) to part/var/box/idx (in domain grid of S) */ 
+            /* WM: todo - for each index in the domain grid above, find indices in the range grid connected through the stencil */
+            /*            The resulting indices in the range grid are the ones to convert */
+         }
+      }
+
+   }
+
+
+   /* Use indices to generate a set of boxes */
+   /* WM: todo - need to loop over part/var here? */
+   hypre_BoxArrayCreateFromIndices(ndim, num_indices, indices, threshold, &(convert_boxaa[part][var]));
+
+   /* Convert rows of S in the boxes */
+   /* WM: question - why is the grid a separate arg here? It should be the grid associated with the matrix, correct? */
+   hypre_SStructGraph     *graph  = hypre_SStructMatrixGraph(S);
+   hypre_SStructGrid      *grid   = hypre_SStructGraphGrid(graph);
+   hypre_SStructMatrixBoxesToUMatrix(S, grid, ij_S_ptr, convert_boxaa);
 
    return hypre_error_flag;
 }

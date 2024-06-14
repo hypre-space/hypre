@@ -448,16 +448,6 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix      *A,
    /*-----------------------------------------------------------------------
     *  Loop over fine grid points.
     *-----------------------------------------------------------------------*/
-   /* WM: debug */
-   /* FILE *file; */
-   /* char filename[256]; */
-   /* hypre_sprintf(filename, "fine_to_coarse_%d.txt", my_id); */
-   /* file = fopen(filename, "w"); */
-   /* for (i = 0; i < n_fine; i++) */
-   /* { */
-   /*    hypre_fprintf(file, "%d, %d\n", i, fine_to_coarse[i]); */
-   /* } */
-   /* fclose(file); */
 
 #ifdef HYPRE_USING_OPENMP
    #pragma omp parallel for private(i,j,jl,i1,i2,jj,jj1,ns,ne,size,rest,sum,diagonal,distribute,P_marker,P_marker_offd,strong_f_marker,jj_counter,jj_counter_offd,sgn,c_num,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd) HYPRE_SMP_SCHEDULE

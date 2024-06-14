@@ -102,11 +102,6 @@ hypre_ReadBoxArrayData( FILE            *file,
                         HYPRE_Int        ndim,
                         HYPRE_Complex   *data       )
 {
-   /* WM: debug */
-   /* char line[256]; */
-   /* fscanf(file, "%[^\n]", line); */
-   /* printf("WM: debug - line = %s\n", line); */
-
    hypre_Box       *box;
    hypre_Box       *data_box;
 
