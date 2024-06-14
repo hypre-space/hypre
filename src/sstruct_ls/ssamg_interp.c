@@ -397,20 +397,19 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
                         hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-                        /* WM: only do the renormalization at boundaries if interp_type == 0 */
-                        if (interp_type)
+                        /* Only do the renormalization at boundaries if interp_type < 0
+                         * (that is, if no unstructured interpolation is used) */
+                        if (interp_type >= 0)
                         {
-                           if (interp_type == 2)
+                           /* If handling all interpolation at part boundaries with unstructured, zero out the structured weights */
+                           /* WM: todo - this zeros out the boundary weights, but we should not rely on a halo here...
+                            *            Move this later, and loop over the same boxes that get converted for A_u_aug */
+                           hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
                            {
-                              /* If handling all interpolation at part boundaries with unstructured, zero out the structured weights */
-                              /* WM: todo - this zeros out the boundary weights, but we should not rely on a halo here */
-                              hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
-                              {
-                                 Pp1[Pi] = 0.0;
-                                 Pp2[Pi] = 0.0;
-                              }
-                              hypre_BoxLoop1End(Pi);
+                              Pp1[Pi] = 0.0;
+                              Pp2[Pi] = 0.0;
                            }
+                           hypre_BoxLoop1End(Pi);
                         }
                         else
                         {
@@ -467,83 +466,56 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
    hypre_BoxDestroy(tmp_box);
 
-   /* WM: unstructured interpolation */
-   if (interp_type)
+   /* Unstructured interpolation */
+   if (interp_type >= 0)
    {
       hypre_ParCSRMatrix *A_u = hypre_SStructMatrixParCSRMatrix(A);
       hypre_ParCSRMatrix *A_u_aug;
       hypre_ParCSRMatrix *P_u;
 
-      /* WM: todo - Add diagonal and other relevant connections to A_u */
-
       /* Convert boundary of A to IJ matrix */
+      /* WM: todo - don't rely on a halo here but rather connections in A_u */
       hypre_IJMatrix *A_struct_bndry_ij;
       hypre_SStructMatrixHaloToUMatrix(A, grid, &A_struct_bndry_ij, 1);
       hypre_ParCSRMatrix *A_struct_bndry = hypre_IJMatrixObject(A_struct_bndry_ij);
 
-      if (interp_type == 2)
-      {
-         /* Add structured boundary portion to unstructured portion */
-         hypre_ParCSRMatrix *A_bndry;
-         hypre_ParCSRMatrixAdd(1.0, A_struct_bndry, 1.0, A_u, &A_bndry);
+      /* Add structured boundary portion to unstructured portion */
+      hypre_ParCSRMatrix *A_bndry;
+      hypre_ParCSRMatrixAdd(1.0, A_struct_bndry, 1.0, A_u, &A_bndry);
 
-         /* WM: todo - I'm adding a zero diagonal here because if BoomerAMG interpolation gets a */
-         /* totally empty matrix (no nonzeros and a NULL data array) you run into seg faults... this is kind of a dirty fix for now */
-         hypre_ParCSRMatrix *zero = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A_u),
-                                                               hypre_ParCSRMatrixGlobalNumRows(A_u),
-                                                               hypre_ParCSRMatrixGlobalNumCols(A_u),
-                                                               hypre_ParCSRMatrixRowStarts(A_u),
-                                                               hypre_ParCSRMatrixRowStarts(A_u),
-                                                               0,
-                                                               hypre_ParCSRMatrixNumRows(A_u),
-                                                               0);
-         hypre_ParCSRMatrixInitialize(zero);
-         hypre_CSRMatrix *zero_diag = hypre_ParCSRMatrixDiag(zero);
-         for (i = 0; i < hypre_CSRMatrixNumRows(zero_diag); i++)
-         {
-            hypre_CSRMatrixI(zero_diag)[i] = i;
-            hypre_CSRMatrixJ(zero_diag)[i] = i;
-            hypre_CSRMatrixData(zero_diag)[i] = 0.0;
-         }
-         hypre_CSRMatrixI(zero_diag)[ hypre_CSRMatrixNumRows(zero_diag) ] = hypre_CSRMatrixNumRows(zero_diag);
-         hypre_ParCSRMatrixAdd(1.0, zero, 1.0, A_bndry, &A_u_aug);
-         hypre_ParCSRMatrixDestroy(zero);
-      }
-      else
+      /* WM: todo - I'm adding a zero diagonal here because if BoomerAMG interpolation gets a */
+      /* totally empty matrix (no nonzeros and a NULL data array) you run into seg faults... this is kind of a dirty fix for now */
+      hypre_ParCSRMatrix *zero = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A_u),
+                                                            hypre_ParCSRMatrixGlobalNumRows(A_u),
+                                                            hypre_ParCSRMatrixGlobalNumCols(A_u),
+                                                            hypre_ParCSRMatrixRowStarts(A_u),
+                                                            hypre_ParCSRMatrixRowStarts(A_u),
+                                                            0,
+                                                            hypre_ParCSRMatrixNumRows(A_u),
+                                                            0);
+      hypre_ParCSRMatrixInitialize(zero);
+      hypre_CSRMatrix *zero_diag = hypre_ParCSRMatrixDiag(zero);
+      for (i = 0; i < hypre_CSRMatrixNumRows(zero_diag); i++)
       {
-         /* Extract diagonal along boundaries and add to A_u */
-         hypre_ParCSRMatrix *diag_A_u = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A_u),
-                                                               hypre_ParCSRMatrixGlobalNumRows(A_u),
-                                                               hypre_ParCSRMatrixGlobalNumCols(A_u),
-                                                               hypre_ParCSRMatrixRowStarts(A_u),
-                                                               hypre_ParCSRMatrixRowStarts(A_u),
-                                                               0,
-                                                               hypre_ParCSRMatrixNumRows(A_u),
-                                                               0);
-         hypre_ParCSRMatrixInitialize(diag_A_u);
-         hypre_CSRMatrix *diag_A_u_diag = hypre_ParCSRMatrixDiag(diag_A_u);
-         for (i = 0; i < hypre_CSRMatrixNumRows(diag_A_u_diag); i++)
-         {
-            hypre_CSRMatrixI(diag_A_u_diag)[i] = i;
-            hypre_CSRMatrixJ(diag_A_u_diag)[i] = i;
-         }
-         hypre_CSRMatrixI(diag_A_u_diag)[ hypre_CSRMatrixNumRows(diag_A_u_diag) ] = hypre_CSRMatrixNumRows(diag_A_u_diag);
-         hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A_struct_bndry), hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(diag_A_u)), 0);
-         hypre_ParCSRMatrixAdd(1.0, diag_A_u, 1.0, A_u, &A_u_aug);
-         hypre_ParCSRMatrixDestroy(diag_A_u);
+         hypre_CSRMatrixI(zero_diag)[i] = i;
+         hypre_CSRMatrixJ(zero_diag)[i] = i;
+         hypre_CSRMatrixData(zero_diag)[i] = 0.0;
       }
+      hypre_CSRMatrixI(zero_diag)[ hypre_CSRMatrixNumRows(zero_diag) ] = hypre_CSRMatrixNumRows(zero_diag);
+      hypre_ParCSRMatrixAdd(1.0, zero, 1.0, A_bndry, &A_u_aug);
+      hypre_ParCSRMatrixDestroy(zero);
 
-      /* WM: todo - get CF splitting (and strength matrix) */
+      /* Get CF splitting */
       HYPRE_Int *CF_marker = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A_u), HYPRE_MEMORY_DEVICE);
 
-      /* WM: init CF_marker to all F-points... or is there a nice way of just doing this in the loop below? */
-      /* WM: well... I think I had it backwards in my head? Switching it to mark all C-points, then updating with F-points below */
+      /* Initialize CF_marker to all C-point (F-points marked below) */
       for (i = 0; i < hypre_ParCSRMatrixNumRows(A_u); i++)
       {
          CF_marker[i] = 1;
       }
 
       /* Loop over parts */
+      /* WM: todo - re-work CF splitting stuff below... I don't think what I have is general. */
       HYPRE_Int box_start_index = 0;
       for (part = 0; part < nparts; part++)
       {
@@ -605,7 +577,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                hypre_IndexD(stride, cdir) = 2;
 
                /* Get the loop size */
-               /* WM: double check this: loop size and start correct in all cases? */
                /* WM: todo - what if there are multiple boxes per part??? Does this approach still work? */
                hypre_BoxGetStrideSize(shrink_box, stride, loop_size);
 
@@ -616,13 +587,11 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                }
                hypre_BoxLoop1End(ii);
 
-
                /* Increment box start index */
                box_start_index += hypre_BoxVolume(compute_box);
             }
          }
       }
-
 
       /* WM: todo - this is kind of a hacky workaround for now... just looping through */
       /* WM: todo - test without this now that I have compressSToU */
@@ -661,6 +630,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       /* Generate unstructured interpolation */
       /* WM: todo - experiment with strenght matrix that counts only the P_s stencil entries and all inter-part connections as strong; */
       /*            this keeps the same sparsity pattern inside the structured part */
+      /* WM: todo - add other interpolation options (align interp_type parameter with BoomerAMG numbering) */
       HYPRE_Int debug_flag = 0;
       HYPRE_Real trunc_factor = 0.0;
       HYPRE_Int max_elmts = 4;

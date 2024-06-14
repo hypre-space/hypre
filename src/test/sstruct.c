@@ -2301,7 +2301,9 @@ PrintUsage( char *progname,
       hypre_printf("                        0 - Galerkin (default)\n");
       hypre_printf("                        1 - non-Galerkin ParFlow operators\n");
       hypre_printf("                        2 - Galerkin, general operators\n");
-      hypre_printf("  -interp <r>        : SSAMG interpolation type\n");
+      hypre_printf("  -interp <r>        : SSAMG unstructured interpolation type\n");
+      hypre_printf("                       -1 - No unstructured interpolation\n");
+      hypre_printf("                        0 - Classical modified interpolation\n");
       hypre_printf("  -relax <r>         : (S)Struct - relaxation type\n");
       hypre_printf("                        0 - Jacobi\n");
       hypre_printf("                        1 - Weighted Jacobi (default)\n");
@@ -2633,7 +2635,7 @@ main( hypre_int argc,
    n_pre  = 1;
    n_post = 1;
    n_coarse = 1;
-   interp_type = 0;
+   interp_type = -1;
    relax_is_set = 0;
    relax[0] = 1;
    relax[1] = -1; /* Relax up */
