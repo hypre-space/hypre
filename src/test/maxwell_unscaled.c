@@ -1379,12 +1379,13 @@ main( hypre_int argc,
     * GPU Device binding
     * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
-   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+   hypre_bind_device_id(-1, myid, num_procs, hypre_MPI_COMM_WORLD);
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
    HYPRE_Initialize();
+   HYPRE_DeviceInitialize();
 
    /*-----------------------------------------------------------
     * Read input file
@@ -1426,6 +1427,7 @@ main( hypre_int argc,
       }
    }
 
+   solver_id = 0;
    print_system = 0;
 
    /*-----------------------------------------------------------

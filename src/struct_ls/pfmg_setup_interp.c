@@ -740,6 +740,15 @@ hypre_PFMGSetupInterpOp_CC1
   HYPRE_Int           si0,
   HYPRE_Int           si1 )
 {
+   HYPRE_UNUSED_VAR(A_dbox);
+   HYPRE_UNUSED_VAR(stride);
+   HYPRE_UNUSED_VAR(stridec);
+   HYPRE_UNUSED_VAR(start);
+   HYPRE_UNUSED_VAR(startc);
+   HYPRE_UNUSED_VAR(loop_size);
+   HYPRE_UNUSED_VAR(P_dbox);
+   HYPRE_UNUSED_VAR(rap_type);
+
    HYPRE_Int              si;
    HYPRE_Int              Ai, Pi;
    HYPRE_Real            *Ap;

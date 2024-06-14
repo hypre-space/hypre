@@ -34,6 +34,8 @@ hypre_ParReadVector( MPI_Comm comm, const char* file )
 
 HYPRE_Int hypre_ParVectorSize(void * x)
 {
+   HYPRE_UNUSED_VAR(x);
+
    return 0;
 }
 

@@ -12,6 +12,8 @@
 HYPRE_Int
 HYPRE_StructFlexGMRESCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 {
+   HYPRE_UNUSED_VAR(comm);
+
    hypre_FlexGMRESFunctions * fgmres_functions =
       hypre_FlexGMRESFunctionsCreate(
          hypre_StructKrylovCAlloc, hypre_StructKrylovFree,
@@ -162,4 +164,3 @@ HYPRE_Int HYPRE_StructFlexGMRESSetModifyPC( HYPRE_StructSolver  solver,
    return ( HYPRE_FlexGMRESSetModifyPC( (HYPRE_Solver) solver,
                                         (HYPRE_PtrToModifyPCFcn) modify_pc));
 }
-

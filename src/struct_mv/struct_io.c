@@ -167,7 +167,8 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
    hypre_Box       *box;
    hypre_Box       *data_box;
 
-   HYPRE_Int        data_box_volume, constant_stencil_size;
+   HYPRE_Int        data_box_volume;
+   HYPRE_Int        constant_stencil_size;
 
    hypre_Index      loop_size;
    hypre_IndexRef   start;
@@ -179,11 +180,22 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
     * Read data
     *----------------------------------------*/
 
-   if (constant_coefficient == 1) { constant_stencil_size = stencil_size; }
-   if (constant_coefficient == 2) { constant_stencil_size = stencil_size - 1; }
+   switch (constant_coefficient)
+   {
+      case 1:
+         constant_stencil_size = stencil_size;
+         break;
+
+      case 2:
+         constant_stencil_size = stencil_size - 1;
+         break;
+
+      default:
+         constant_stencil_size = 0;
+         break;
+   }
 
    hypre_SetIndex(stride, 1);
-
    hypre_ForBoxI(i, box_array)
    {
       box      = hypre_BoxArrayBox(box_array, i);

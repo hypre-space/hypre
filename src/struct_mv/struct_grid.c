@@ -775,7 +775,8 @@ hypre_ComputeBoxnums(hypre_BoxArray *boxes,
 
    HYPRE_Int         *boxnums;
    HYPRE_Int          num_boxes;
-   HYPRE_Int          p, b, boxnum;
+   HYPRE_Int          p, b;
+   HYPRE_Int          boxnum = 0;
 
    /*-----------------------------------------------------
     *-----------------------------------------------------*/
@@ -902,7 +903,7 @@ hypre_StructGridPrintVTK( const char       *filename,
             hypre_BoxGetSize(box, loop_size);
             hypre_SerialBoxLoop0Begin(ndim, loop_size);
             {
-               hypre_BoxLoopGetIndex(index);
+               zypre_BoxLoopGetIndex(index);
                hypre_AddIndexes(index, hypre_BoxIMin(box), ndim, coords);
                hypre_fprintf(fp, "\t\t\t\t\t%d 0 0\n", coords[0]);
             }
@@ -921,7 +922,7 @@ hypre_StructGridPrintVTK( const char       *filename,
             hypre_BoxGetSize(box, loop_size);
             hypre_SerialBoxLoop0Begin(ndim, loop_size);
             {
-               hypre_BoxLoopGetIndex(index);
+               zypre_BoxLoopGetIndex(index);
                hypre_AddIndexes(index, hypre_BoxIMin(box), ndim, coords);
                hypre_fprintf(fp, "\t\t\t\t\t%d %d 0\n", coords[0], coords[1]);
             }
@@ -940,7 +941,7 @@ hypre_StructGridPrintVTK( const char       *filename,
             hypre_BoxGetSize(box, loop_size);
             hypre_SerialBoxLoop0Begin(ndim, loop_size);
             {
-               hypre_BoxLoopGetIndex(index);
+               zypre_BoxLoopGetIndex(index);
                hypre_AddIndexes(index, hypre_BoxIMin(box), ndim, coords);
                hypre_fprintf(fp, "\t\t\t\t\t%d %d %d\n", coords[0], coords[1], coords[2]);
             }
@@ -969,7 +970,7 @@ hypre_StructGridPrintVTK( const char       *filename,
             hypre_BoxGetSize(box, loop_size);
             hypre_SerialBoxLoop0Begin(ndim, loop_size);
             {
-               hypre_BoxLoopGetIndex(index);
+               zypre_BoxLoopGetIndex(index);
 
                n[0]  = hypre_BoxOffsetDistance(box, index) + offset;
                n[1]  = n[0] + 1;
@@ -993,7 +994,7 @@ hypre_StructGridPrintVTK( const char       *filename,
             hypre_BoxGetSize(box, loop_size);
             hypre_SerialBoxLoop0Begin(ndim, loop_size);
             {
-               hypre_BoxLoopGetIndex(index);
+               zypre_BoxLoopGetIndex(index);
 
                n[0]  = hypre_BoxOffsetDistance(box, index) + hypre_IndexD(index, 1) + offset;
                n[1]  = n[0] + 1;
@@ -1022,7 +1023,7 @@ hypre_StructGridPrintVTK( const char       *filename,
             hypre_BoxGetSize(box, loop_size);
             hypre_SerialBoxLoop0Begin(ndim, loop_size);
             {
-               hypre_BoxLoopGetIndex(index);
+               zypre_BoxLoopGetIndex(index);
 
                n[0]  = hypre_BoxOffsetDistance(box, index) + offset;
                n[0] += hypre_IndexD(index, 1);

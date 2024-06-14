@@ -7,6 +7,13 @@
 Euclid
 ==============================================================================
 
+.. warning::
+   Euclid is not actively supported by the hypre development team. We recommend using
+   :ref:`ilu` for parallel ILU algorithms. This new ILU implementation includes
+   64-bit integers support (for linear systems with more than 2,147,483,647 global
+   unknowns) through both *mixedint* and *bigint* builds of hypre and NVIDIA/AMD GPUs
+   support through the CUDA/HIP backends.
+
 The Euclid library is a scalable implementation of the Parallel ILU algorithm
 that was presented at SC99 [HyPo1999]_, and published in expanded form in the
 SIAM Journal on Scientific Computing [HyPo2001]_.  By *scalable* we mean that
@@ -45,28 +52,28 @@ subsection lists the options, and provides guidance as to the settings that (in
 our experience) will likely prove effective for minimizing execution time.
 
 .. code-block:: c
-   
+
    #include "HYPRE_parcsr_ls.h"
-   
+
    HYPRE_Solver eu;
    HYPRE_Solver pcg_solver;
    HYPRE_ParVector b, x;
    HYPRE_ParCSRMatrix A;
-   
+
    //Instantiate the preconditioner.
    HYPRE_EuclidCreate(comm, &eu);
-   
+
    //Optionally use the following three methods to set runtime options.
    // 1. pass options from command line or string array.
    HYPRE_EuclidSetParams(eu, argc, argv);
-   
+
    // 2. pass options from a configuration file.
    HYPRE_EuclidSetParamsFromFile(eu, "filename");
-   
+
    // 3. pass options using interface functions.
    HYPRE_EuclidSetLevel(eu, 3);
    ...
-   
+
    //Set Euclid as the preconditioning method for some
    //other solver, using the function calls HYPRE_EuclidSetup
    //and HYPRE_EuclidSolve.  We assume that the pcg_solver
@@ -75,13 +82,13 @@ our experience) will likely prove effective for minimizing execution time.
                        (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
                        (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
                        eu);
-   
-   //Solve the system by calling the Setup and Solve methods for, 
+
+   //Solve the system by calling the Setup and Solve methods for,
    //in this case, the HYPRE_PCG solver.  We assume that A, b, and x
    //have been properly initialized.
    HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
    HYPRE_PCGSolve(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
-   
+
    //Destroy the Euclid preconditioning object.
    HYPRE_EuclidDestroy(eu);
 
@@ -118,7 +125,7 @@ recognized by Euclid, no harm should ensue.
 **Method 2.** To pass options on the command line, call
 
 .. code-block:: c
-   
+
    HYPRE_EuclidSetParams(HYPRE_Solver solver, int argc, char *argv[]);
 
 where ``argc`` and ``argv`` carry the usual connotation: ``main(int argc, char
@@ -126,7 +133,7 @@ where ``argc`` and ``argv`` carry the usual connotation: ``main(int argc, char
 options on the command line per the following example.
 
 .. code-block:: bash
-   
+
    mpirun -np 2 phoo -level 3
 
 Since Euclid looks for the ``database`` file when ``HYPRE_EuclidCreate`` is
@@ -149,13 +156,13 @@ you can then specify the configuration filename on the command line using the
 ``-db_filename filename`` option, e.g.,
 
 .. code-block:: bash
-   
+
    mpirun -np 2 phoo -db_filename ../myConfigFile
 
 **Method 4.** One can also set parameters via interface functions, e.g
 
 .. code-block:: c
-   
+
    int HYPRE_EuclidSetLevel(HYPRE_Solver solver, int level);
 
 For a full set of functions, see the reference manual.
@@ -192,13 +199,13 @@ Options Summary
   largest absolute value of any entry in the row. Guidance: try this in
   conjunction with -rowScale.  CAUTION: If the coefficient matrix :math:`A` is
   symmetric, this setting is likely to cause the filled matrix, :math:`F =
-  L+U-I`, to be unsymmetric.  This setting has no effect when ILUT factorization
+  L+U-I`, to be non-symmetric.  This setting has no effect when ILUT factorization
   is selected.
 
 * **-rowScale** Scale values prior to factorization such that the largest value
   in any row is +1 or -1.  Default: 0 (false).  CAUTION: If the coefficient
   matrix :math:`A` is symmetric, this setting is likely to cause the filled
-  matrix, :math:`F = L+U-I`, to be unsymmetric.  Guidance: if the matrix is
+  matrix, :math:`F = L+U-I`, to be non-symmetric.  Guidance: if the matrix is
   poorly scaled, turning on row scaling may help convergence.
 
 * **-ilut** :math:`\langle float \rangle` Use ILUT factorization instead of the
@@ -206,5 +213,4 @@ Options Summary
   tolerance, which is relative to the largest absolute value of any entry in the
   row being factored.  CAUTION: If the coefficient matrix :math:`A` is
   symmetric, this setting is likely to cause the filled matrix, :math:`F =
-  L+U-I`, to be unsymmetric.  NOTE: this option can only be used sequentially!
-
+  L+U-I`, to be non-symmetric.  NOTE: this option can only be used sequentially!

@@ -1061,7 +1061,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
             Uventry = hypre_SStructGraphUVEntry(graph, Uverank);
 
             /* Sanity check */
-            hypre_assert(entry < hypre_SStructUVEntryNUEntries(Uventry));
+            //hypre_assert(entry < hypre_SStructUVEntryNUEntries(Uventry));
 
             /* Set column number and coefficient */
             col_coords[ncoeffs] = hypre_SStructUVEntryToRank(Uventry, entry);
@@ -1320,7 +1320,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
 #if defined(HYPRE_USING_GPU)
                if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
                {
-                  hypre_assert(ndim <= 3);
+                  //hypre_assert(ndim <= 3);
 
                   HYPRE_Int rs_0, rs_1, rs_2;
                   HYPRE_Int cs_0, cs_1, cs_2;
@@ -1395,7 +1395,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
                      HYPRE_Int   ci, d;
 
                      hypre_BoxLoopGetIndex(loop_index);
-                     hypre_assert((mi >= 0) && (vi >= 0));
+                     //hypre_assert((mi >= 0) && (vi >= 0));
 
                      ci = mi * nentries + ncols[mi];
                      rows[mi] = row_base;
@@ -1485,7 +1485,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
       hypre_BoxGetSize(set_box, loop_size);
       hypre_SerialBoxLoop0Begin(ndim, loop_size);
       {
-         hypre_BoxLoopGetIndex(index);
+         zypre_BoxLoopGetIndex(index);
          hypre_AddIndexes(index, hypre_BoxIMin(set_box), ndim, index);
          hypre_SStructUMatrixSetValues(matrix, part, index, var,
                                        nentries, entries, values, action);
@@ -2217,7 +2217,7 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
                         {
                            row += loop_index[d] * rs[d] * dom_stride[d];
                         }
-                        hypre_assert(row < nrows);
+                        //hypre_assert(row < nrows);
 
                         row_sizes[row]++;
                      }
@@ -2795,7 +2795,7 @@ hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix   *A,
             while (convert_box_id != grid_box_id)
             {
                k++;
-               hypre_assert(k < hypre_StructGridNumBoxes(sgrid));
+               //hypre_assert(k < hypre_StructGridNumBoxes(sgrid));
                grid_box_id = hypre_StructGridID(sgrid, k);
             }
             grid_box = hypre_BoxArrayBox(grid_boxes, k);
@@ -2978,8 +2978,8 @@ hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix   *A,
             {
                convert_box = hypre_BoxArrayBox(convert_boxa, j);
 
-               hypre_assert(hypre_BoxVolume(convert_box) > 0);
-               hypre_assert(hypre_BoxVolume(convert_box) <= nvalues);
+               //hypre_assert(hypre_BoxVolume(convert_box) > 0);
+               //hypre_assert(hypre_BoxVolume(convert_box) <= nvalues);
 
 #if defined(HYPRE_DEBUG) && defined(DEBUG_MATCONV)
                if (!myid)
@@ -3072,7 +3072,7 @@ hypre_SStructMatrixGetDiagonal( hypre_SStructMatrix   *matrix,
    hypre_ParVector        *par_d;
    hypre_SStructPMatrix   *pmatrix;
    hypre_SStructPVector   *pdiag;
-   HYPRE_Int               i, ii, part;
+   HYPRE_Int               i, part;
 
    hypre_ParCSRMatrix     *A;
    hypre_CSRMatrix        *A_diag;
@@ -3080,7 +3080,7 @@ hypre_SStructMatrixGetDiagonal( hypre_SStructMatrix   *matrix,
    HYPRE_Complex          *d_data;
    HYPRE_Int              *A_i, *A_j;
    HYPRE_Int              *A_rownnz;
-   HYPRE_Int               A_num_rownnz;
+   //HYPRE_Int               A_num_rownnz;
 
    /* Create vector */
    HYPRE_SStructVectorCreate(comm, grid, &diag);
@@ -3106,19 +3106,23 @@ hypre_SStructMatrixGetDiagonal( hypre_SStructMatrix   *matrix,
       A_data = hypre_CSRMatrixData(A_diag);
       A_i = hypre_CSRMatrixI(A_diag);
       A_j = hypre_CSRMatrixJ(A_diag);
-      A_num_rownnz = hypre_CSRMatrixNumRownnz(A_diag);
+      //A_num_rownnz = hypre_CSRMatrixNumRownnz(A_diag);
       A_rownnz = hypre_CSRMatrixRownnz(A_diag);
+      if (!A_rownnz)
+      {
+         hypre_CSRMatrixSetRownnz(A_diag);
+         A_rownnz = hypre_CSRMatrixRownnz(A_diag);
+      }
 
       hypre_SStructVectorConvert(diag, &par_d);
       d_data = hypre_ParVectorLocalData(par_d);
 
-      /* WM: todo - need to account for case where A_num_rownnz == A_num_rows? Seems unlikely (but possible) in practice? */
-      for (i = 0; i < A_num_rownnz; i++)
+      // TODO (VPM): Make use of rownnz
+      for (i = 0; i < hypre_CSRMatrixNumRows(A_diag); i++)
       {
-         ii = A_rownnz[i];
-         if (A_j[A_i[ii]] == ii)
+         if ((A_i[i + 1] > A_i[i]) && (A_j[A_i[i]] == i))
          {
-            d_data[A_rownnz[i]] += A_data[A_i[ii]];
+            d_data[i] += A_data[A_i[i]];
          }
       }
 

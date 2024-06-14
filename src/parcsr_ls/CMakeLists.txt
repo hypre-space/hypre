@@ -27,6 +27,8 @@ set(SRCS
   F90_HYPRE_parcsr_pcg.c
   F90_HYPRE_parcsr_pilut.c
   F90_HYPRE_parcsr_schwarz.c
+  F90_HYPRE_parcsr_mgr.c
+  F90_HYPRE_parcsr_ilu.c
   F90_HYPRE_ams.c
   gen_redcs_mat.c
   HYPRE_parcsr_amg.c
@@ -75,9 +77,12 @@ set(SRCS
   par_add_cycle.c
   par_difconv.c
   par_fsai.c
+  par_fsai_device.c
   par_fsai_setup.c
   par_fsai_solve.c
+  par_fsai_device.c
   par_gauss_elim.c
+  par_ge_device.c
   par_gsmg.c
   par_indepset.c
   par_interp.c
@@ -92,8 +97,10 @@ set(SRCS
   par_lr_interp.c
   par_mgr.c
   par_mgr_coarsen.c
+  par_mgr_interp.c
   par_mgr_setup.c
   par_mgr_solve.c
+  par_mgr_stats.c
   par_nongalerkin.c
   par_nodal_systems.c
   par_rap.c
@@ -142,10 +149,6 @@ set(SRCS
   par_mgr_device.c
 )
 
-if (HYPRE_USING_DSUPERLU)
-  list(APPEND SRCS dsuperlu.c)
-endif()
-
 target_sources(${PROJECT_NAME}
   PRIVATE ${SRCS}
           ${HDRS}
@@ -157,6 +160,7 @@ if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
     ads.c
     ame.c
     par_amg_setup.c
+    par_ge_device.c
     par_ilu.c
     par_ilu_setup.c
     par_ilu_setup_device.c
@@ -178,6 +182,8 @@ if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
     par_2s_interp_device.c
     par_relax_device.c
     par_mgr_device.c
+    par_fsai_device.c
+    dsuperlu.c
   )
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)

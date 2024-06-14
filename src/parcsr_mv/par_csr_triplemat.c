@@ -577,8 +577,8 @@ hypre_ParCSRMatrixRAPKTHost( hypre_ParCSRMatrix *R,
    hypre_CSRMatrix      *AP_offd;
    HYPRE_Int             AP_offd_num_nonzeros;
    HYPRE_Int            *AP_offd_j;
-   hypre_CSRMatrix      *APext_diag;
-   hypre_CSRMatrix      *APext_offd;
+   hypre_CSRMatrix      *APext_diag = NULL;
+   hypre_CSRMatrix      *APext_offd = NULL;
 
    hypre_ParCSRMatrix   *C;
    HYPRE_BigInt         *col_map_offd_C = NULL;

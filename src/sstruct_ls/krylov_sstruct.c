@@ -184,6 +184,8 @@ hypre_SStructKrylovMatvec( void   *matvec_data,
                            HYPRE_Complex  beta,
                            void   *y )
 {
+   HYPRE_UNUSED_VAR(matvec_data);
+
    return ( hypre_SStructMatvec( alpha,
                                  (hypre_SStructMatrix *) A,
                                  (hypre_SStructVector *) x,

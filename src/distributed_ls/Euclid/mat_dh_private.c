@@ -110,6 +110,8 @@ void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, H
 void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, HYPRE_Int *cval,
                     HYPRE_Real *aval, HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, FILE* fp)
 {
+  HYPRE_UNUSED_VAR(aval);
+
   START_FUNC_DH
   HYPRE_Int i, j, row, col;
   bool private_n2o = false;
@@ -1504,7 +1506,7 @@ void profileMat(Mat_dh A)
   HYPRE_Int m;
   HYPRE_Int i, j;
   HYPRE_Int *work1=NULL;
-  HYPRE_Real *work2;
+  HYPRE_Real *work2=NULL;
   bool isStructurallySymmetric = true;
   bool isNumericallySymmetric = true;
   bool is_Triangular = false;

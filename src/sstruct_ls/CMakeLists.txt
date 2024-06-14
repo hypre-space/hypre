@@ -97,6 +97,8 @@ if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
     fac_setup2.c
     fac_zero_stencilcoef.c
     node_relax.c
+    ssamg_interp.c
+    ssamg_relax.c
   )
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)

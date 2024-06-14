@@ -112,6 +112,9 @@ void *
 hypre_ParKrylovMatvecCreate( void   *A,
                              void   *x )
 {
+   HYPRE_UNUSED_VAR(A);
+   HYPRE_UNUSED_VAR(x);
+
    void *matvec_data;
 
    matvec_data = NULL;
@@ -124,13 +127,15 @@ hypre_ParKrylovMatvecCreate( void   *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParKrylovMatvec( void   *matvec_data,
+hypre_ParKrylovMatvec( void          *matvec_data,
                        HYPRE_Complex  alpha,
-                       void   *A,
-                       void   *x,
+                       void          *A,
+                       void          *x,
                        HYPRE_Complex  beta,
-                       void   *y           )
+                       void          *y )
 {
+   HYPRE_UNUSED_VAR(matvec_data);
+
    return ( hypre_ParCSRMatrixMatvec ( alpha,
                                        (hypre_ParCSRMatrix *) A,
                                        (hypre_ParVector *) x,
@@ -143,13 +148,15 @@ hypre_ParKrylovMatvec( void   *matvec_data,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParKrylovMatvecT(void   *matvec_data,
+hypre_ParKrylovMatvecT(void          *matvec_data,
                        HYPRE_Complex  alpha,
-                       void   *A,
-                       void   *x,
+                       void          *A,
+                       void          *x,
                        HYPRE_Complex  beta,
-                       void   *y           )
+                       void          *y)
 {
+   HYPRE_UNUSED_VAR(matvec_data);
+
    return ( hypre_ParCSRMatrixMatvecT( alpha,
                                        (hypre_ParCSRMatrix *) A,
                                        (hypre_ParVector *) x,
@@ -164,6 +171,8 @@ hypre_ParKrylovMatvecT(void   *matvec_data,
 HYPRE_Int
 hypre_ParKrylovMatvecDestroy( void *matvec_data )
 {
+   HYPRE_UNUSED_VAR(matvec_data);
+
    return 0;
 }
 
@@ -291,6 +300,11 @@ hypre_ParKrylovIdentitySetup( void *vdata,
                               void *x     )
 
 {
+   HYPRE_UNUSED_VAR(vdata);
+   HYPRE_UNUSED_VAR(A);
+   HYPRE_UNUSED_VAR(b);
+   HYPRE_UNUSED_VAR(x);
+
    return 0;
 }
 
@@ -305,5 +319,8 @@ hypre_ParKrylovIdentity( void *vdata,
                          void *x     )
 
 {
+   HYPRE_UNUSED_VAR(vdata);
+   HYPRE_UNUSED_VAR(A);
+
    return ( hypre_ParKrylovCopyVector( b, x ) );
 }

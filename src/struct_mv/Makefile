@@ -50,11 +50,8 @@ FILES =\
  HYPRE_struct_stencil.c\
  HYPRE_struct_vector.c\
  project.c\
- struct_data.c\
  struct_grid.c\
  struct_io.c\
- struct_matmult.c\
- struct_matop.c\
  struct_matrix_mask.c\
  struct_stencil.c\
  struct_stmatrix.c
@@ -63,7 +60,10 @@ CUFILES =\
  struct_axpy.c\
  struct_communication.c\
  struct_copy.c\
+ struct_data.c\
  struct_innerprod.c\
+ struct_matmult.c\
+ struct_matop.c\
  struct_matrix.c\
  struct_matvec.c\
  struct_scale.c\

@@ -54,7 +54,7 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
    HYPRE_Int              num_variables = hypre_CSRMatrixNumRows(S_diag);
    HYPRE_Int              num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
 
-   hypre_CSRMatrix *S_ext;
+   hypre_CSRMatrix       *S_ext = NULL;
    HYPRE_Int             *S_ext_i;
    HYPRE_BigInt          *S_ext_j;
 
@@ -93,9 +93,9 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
    HYPRE_Int              nabor, nabor_two;
 
    HYPRE_Int              use_commpkg_A = 0;
-   HYPRE_Real             wall_time;
+   HYPRE_Real             wall_time = 0.0;
 
-   HYPRE_Int              measure_max; /* BM Aug 30, 2006: maximal measure, needed for CGC */
+   HYPRE_Int              measure_max = 0; /* BM Aug 30, 2006: maximal measure, needed for CGC */
 
    if (coarsen_type < 0) { coarsen_type = -coarsen_type; }
 
@@ -710,7 +710,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S, HYPRE_Int numbero
       vertexrange_all[0] = 0;
       for (j = 2; j <= mpisize; j++) { vertexrange_all[j] += vertexrange_all[j - 1]; }
    }
-   Gseq = hypre_ParCSRMatrixToCSRMatrixAll (G);
+   Gseq = hypre_ParCSRMatrixToCSRMatrixAll(G);
 #if 0 /* debugging */
    if (!mpirank)
    {
@@ -904,18 +904,28 @@ HYPRE_Int hypre_AmgCGCPrepare (hypre_ParCSRMatrix *S, HYPRE_Int nlocal, HYPRE_In
 #define tag_pointrange 301
 #define tag_vertexrange 302
 
-HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S, HYPRE_Int *vertexrange,
-                                     HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd, HYPRE_Int coarsen_type,
-                                     HYPRE_IJMatrix *ijG)
-/* assemble a graph representing the connections between the grids
- * ================================================================================================
+/*--------------------------------------------------------------------------
+ * hypre_AmgCGCGraphAssemble
+ *
+ * Assemble a graph representing the connections between the grids
+ *
  * S : the strength matrix
  * vertexrange : the parallel layout of the candidate coarse grid vertices
  * CF_marker, CF_marker_offd : the coarse/fine markers
  * coarsen_type : the coarsening type
  * ijG : the created graph
- * ================================================================================================*/
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AmgCGCGraphAssemble(hypre_ParCSRMatrix *S,
+                          HYPRE_Int          *vertexrange,
+                          HYPRE_Int          *CF_marker,
+                          HYPRE_Int          *CF_marker_offd,
+                          HYPRE_Int           coarsen_type,
+                          HYPRE_IJMatrix     *ijG)
 {
+   HYPRE_UNUSED_VAR(coarsen_type);
+
    HYPRE_Int i,/* ii,ip,*/ j, jj, m, n, p;
    HYPRE_Int mpisize, mpirank;
 

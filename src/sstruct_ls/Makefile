@@ -16,6 +16,7 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)/../krylov\
  -I$(srcdir)/../struct_mv\
  -I$(srcdir)/../seq_mv\
+ -I$(srcdir)/../seq_block_mv\
  -I$(srcdir)/../parcsr_mv\
  -I$(srcdir)/../IJ_mv\
  -I$(srcdir)/../parcsr_block_mv\
@@ -102,9 +103,7 @@ FILES =\
  ssamg_stats.c\
  ssamg_setup.c\
  ssamg_setup_rap.c\
- ssamg_relax.c\
- ssamg_solve.c\
- ssamg_interp.c
+ ssamg_solve.c
 
 CUFILES =\
  fac_amr_fcoarsen.c\
@@ -113,6 +112,8 @@ CUFILES =\
  fac_setup2.c\
  fac_zero_stencilcoef.c\
  node_relax.c\
+ ssamg_interp.c\
+ ssamg_relax.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}

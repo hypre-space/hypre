@@ -28,6 +28,8 @@ hypre_HybridGaussSeidelNS( HYPRE_Int     *A_diag_i,
                            HYPRE_Int      iorder,
                            HYPRE_Int      Skip_diag )
 {
+   HYPRE_UNUSED_VAR(v_tmp_data);
+
    HYPRE_Int i;
    const HYPRE_Complex zero = 0.0;
 
@@ -471,6 +473,8 @@ hypre_HybridGaussSeidelOrderedNS( HYPRE_Int     *A_diag_i,
                                   HYPRE_Int      iorder,
                                   HYPRE_Int     *proc_ordering )
 {
+   HYPRE_UNUSED_VAR(v_tmp_data);
+
    HYPRE_Int j;
    const HYPRE_Complex zero = 0.0;
 
@@ -505,4 +509,3 @@ hypre_HybridGaussSeidelOrderedNS( HYPRE_Int     *A_diag_i,
 }
 
 #endif /* #ifndef HYPRE_PAR_RELAX_HEADER */
-

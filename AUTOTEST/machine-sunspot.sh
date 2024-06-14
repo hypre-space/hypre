@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -11,11 +11,18 @@ case $1 in
    -h|-help)
       cat <<EOF
 
-   **** Only run this script on sunspot nodes              ****
-   **** Test with:                                         ****
-   ****     export SYCL_CACHE_PERSISTENT=1                 ****
-   ****     export SYCL_CACHE_THRESHOLD=0                  ****
-   ****     module load oneapi/eng-compiler/2022.12.30.005 ****
+   **** Only run this script on sunspot nodes                     ****
+   **** Test with:                                                ****
+   ****     export SYCL_CACHE_PERSISTENT=1                        ****
+   ****     export SYCL_CACHE_THRESHOLD=0                         ****
+   ****     module load oneapi/eng-compiler/2023.05.15.007        ****
+   ****     module load mpich/52.2/icc-all-pmix-gpu               ****
+
+   **** A custom oneDPL install is also required:                 ****
+   ****    git clone https://github.com/oneapi-src/oneDPL.git     ****
+   ****    cd oneDPL                                              ****
+   ****    git checkout fda906e3994782bbe9e898582b129a7525c4428c  ****
+   ****    export DPLROOT=$(pwd)                                  ****
 
    $0 [-h|-help] {src_dir}
 
@@ -55,14 +62,14 @@ save="sunspot"
 
 # SYCL with UM in debug mode [ij, struct]
 # WM: I suppress all warnings for sycl files for now
-co="--enable-debug --with-sycl --enable-unified-memory CC=mpicc CXX=mpicxx --disable-fortran --with-extra-CFLAGS=\\'-Wno-unused-but-set-variable -Wno-unused-variable -Rno-debug-disables-optimization\\' --with-extra-CUFLAGS=\\'-w\\' --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib"
+co="--enable-debug --with-sycl --enable-unified-memory CC=mpicc CXX=mpicxx --disable-fortran --with-extra-CFLAGS=\\'-Wno-unused-but-set-variable -Wno-unused-variable -Wno-builtin-macro-redefined -Rno-debug-disables-optimization\\' --with-extra-CUFLAGS=\\'-w\\' --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib"
 ro="-ij-gpu -struct -rt -save ${save} -script gpu_tile_compact.sh -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-sycl-um
 
 # SYCL with bigint (compile only)
 # WM: I suppress all warnings for sycl files for now
-co="--enable-bigint --with-sycl --enable-unified-memory CC=mpicc CXX=mpicxx --disable-fortran --with-extra-CFLAGS=\\'-Wno-unused-but-set-variable -Wno-unused-variable -Rno-debug-disables-optimization\\' --with-extra-CUFLAGS=\\'-w\\' --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib"
+co="--enable-bigint --with-sycl --enable-unified-memory CC=mpicc CXX=mpicxx --disable-fortran --with-extra-CFLAGS=\\'-Wno-unused-but-set-variable -Wno-unused-variable -Wno-builtin-macro-redefined -Rno-debug-disables-optimization\\' --with-extra-CUFLAGS=\\'-w\\' --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-sycl-bigint
 

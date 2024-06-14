@@ -227,8 +227,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
    hypre_Box              *Ac_dbox;
 
    HYPRE_Real             *a_cc, *a_cw, *a_ce;
-   HYPRE_Real             *ac_cc, *ac_cw, *ac_ce;
-   HYPRE_Real              accm1, accp1;
+   HYPRE_Real             *ac_cc, *ac_cw, *ac_ce = NULL;
 
    HYPRE_Int               offsetA;
 
@@ -323,12 +322,12 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
                              A_dbox, fstart, stridef, iA,
                              Ac_dbox, cstart, stridec, iAc);
          {
-            HYPRE_Int iAm1 = iA - offsetA;
-            HYPRE_Int iAp1 = iA + offsetA;
+            HYPRE_Int  iAm1 = iA - offsetA;
+            HYPRE_Int  iAp1 = iA + offsetA;
 
             /* Avoid division by zero along domain boundaries */
-            accm1 = 1.0;
-            accp1 = 1.0;
+            HYPRE_Real accm1 = 1.0;
+            HYPRE_Real accp1 = 1.0;
             if (a_cc[iAm1] != 0.0)
             {
                accm1 = a_cc[iAm1];
@@ -363,12 +362,12 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
                              A_dbox, fstart, stridef, iA,
                              Ac_dbox, cstart, stridec, iAc);
          {
-            HYPRE_Int iAm1 = iA - offsetA;
-            HYPRE_Int iAp1 = iA + offsetA;
+            HYPRE_Int  iAm1 = iA - offsetA;
+            HYPRE_Int  iAp1 = iA + offsetA;
 
             /* Avoid division by zero along domain boundaries */
-            accm1 = 1.0;
-            accp1 = 1.0;
+            HYPRE_Real accm1 = 1.0;
+            HYPRE_Real accp1 = 1.0;
             if (a_cc[iAm1] != 0.0)
             {
                accm1 = a_cc[iAm1];
@@ -485,6 +484,8 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
                             hypre_StructVector *b,
                             hypre_StructVector *x             )
 {
+   HYPRE_UNUSED_VAR(b);
+
    hypre_CyclicReductionData *cyc_red_data = (hypre_CyclicReductionData *) cyc_red_vdata;
 
    MPI_Comm                comm        = (cyc_red_data -> comm);

@@ -421,6 +421,10 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
       }
    };
 
+   if (!data->device)
+   {
+      HYPRE_DeviceInitialize();
+   }
    sycl::device* sycl_device = data->device;
    sycl::context sycl_ctxt   = sycl::context(*sycl_device, sycl_asynchandler);
    stream = new sycl::queue(sycl_ctxt, *sycl_device, sycl::property_list{sycl::property::queue::in_order{}});
@@ -526,6 +530,61 @@ hypre_dim3(HYPRE_Int x, HYPRE_Int y, HYPRE_Int z)
    return d;
 }
 
+/*--------------------------------------------------------------------------
+ * hypreGPUKernel_ArrayToArrayOfPtrs
+ *--------------------------------------------------------------------------*/
+
+template <typename T>
+__global__ void
+hypreGPUKernel_ArrayToArrayOfPtrs( hypre_DeviceItem  &item,
+                                   HYPRE_Int          n,
+                                   HYPRE_Int          m,
+                                   T                 *data,
+                                   T                **data_aop )
+{
+   HYPRE_Int i = hypre_gpu_get_grid_thread_id<1, 1>(item);
+
+   if (i < n)
+   {
+      data_aop[i] = &data[i * m];
+   }
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_ArrayToArrayOfPtrs
+ *--------------------------------------------------------------------*/
+
+template <typename T>
+HYPRE_Int
+hypreDevice_ArrayToArrayOfPtrs(HYPRE_Int n, HYPRE_Int m, T *data, T **data_aop)
+{
+   /* Trivial case */
+   if (n <= 0)
+   {
+      return hypre_error_flag;
+   }
+
+   dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
+   dim3 gDim = hypre_GetDefaultDeviceGridDimension(n, "thread", bDim);
+
+   HYPRE_GPU_LAUNCH( hypreGPUKernel_ArrayToArrayOfPtrs, gDim, bDim, n, m, data, data_aop);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------
+ * hypreDevice_ComplexArrayToArrayOfPtrs
+ *--------------------------------------------------------------------*/
+
+HYPRE_Int
+hypreDevice_ComplexArrayToArrayOfPtrs(HYPRE_Int       n,
+                                      HYPRE_Int       m,
+                                      HYPRE_Complex  *data,
+                                      HYPRE_Complex **data_aop)
+{
+   return hypreDevice_ArrayToArrayOfPtrs(n, m, data, data_aop);
+}
+
 /*--------------------------------------------------------------------
  * hypreGPUKernel_IVAXPY
  *--------------------------------------------------------------------*/
@@ -542,7 +601,7 @@ hypreGPUKernel_IVAXPY( hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Complex *a, HY
 }
 
 /*--------------------------------------------------------------------
- * hypreGPUKernel_IVAXPY
+ * hypreDevice_IVAXPY
  *
  * Inverse Vector AXPY: y[i] = x[i] / a[i] + y[i]
  *--------------------------------------------------------------------*/
@@ -801,6 +860,8 @@ hypreDevice_CsrRowPtrsToIndices_v2( HYPRE_Int  nrows,
    HYPRE_ONEDPL_CALL( std::inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
                       oneapi::dpl::maximum<HYPRE_Int>());
 #else
+
+   hypre_GpuProfilingPushRange("CsrRowPtrsToIndices");
    HYPRE_THRUST_CALL( fill, d_row_ind, d_row_ind + nnz, 0 );
    HYPRE_THRUST_CALL( scatter_if,
                       thrust::counting_iterator<HYPRE_Int>(0),
@@ -812,6 +873,7 @@ hypreDevice_CsrRowPtrsToIndices_v2( HYPRE_Int  nrows,
                       d_row_ind );
    HYPRE_THRUST_CALL( inclusive_scan, d_row_ind, d_row_ind + nnz, d_row_ind,
                       thrust::maximum<HYPRE_Int>());
+   hypre_GpuProfilingPopRange();
 #endif
 
    return hypre_error_flag;
@@ -858,11 +920,13 @@ hypreDevice_CsrRowIndicesToPtrs_v2( HYPRE_Int  nrows,
                       count + nrows + 1,
                       d_row_ptr);
 #else
+   hypre_GpuProfilingPushRange("CSRIndicesToPtrs");
    HYPRE_THRUST_CALL( lower_bound,
                       d_row_ind, d_row_ind + nnz,
                       thrust::counting_iterator<HYPRE_Int>(0),
                       thrust::counting_iterator<HYPRE_Int>(nrows + 1),
                       d_row_ptr);
+   hypre_GpuProfilingPopRange();
 #endif
 
    return hypre_error_flag;
@@ -1166,6 +1230,7 @@ hypreDevice_StableSortByTupleKey( HYPRE_Int N,
                         TupleComp3<T1, T2, T3>());
    }
 #else
+   hypre_GpuProfilingPushRange("StableSortByTupleKey");
    auto begin_keys = thrust::make_zip_iterator(thrust::make_tuple(keys1,     keys2));
    auto end_keys   = thrust::make_zip_iterator(thrust::make_tuple(keys1 + N, keys2 + N));
 
@@ -1193,6 +1258,7 @@ hypreDevice_StableSortByTupleKey( HYPRE_Int N,
                         vals,
                         TupleComp3<T1, T2>());
    }
+   hypre_GpuProfilingPopRange();
 #endif
    return hypre_error_flag;
 }
@@ -1593,6 +1659,8 @@ hypre_CurandUniform_core( HYPRE_Int          n,
 {
    curandGenerator_t gen = hypre_HandleCurandGenerator(hypre_handle());
 
+   hypre_GpuProfilingPushRange("RandGen");
+
    if (set_seed)
    {
       HYPRE_CURAND_CALL( curandSetPseudoRandomGeneratorSeed(gen, seed) );
@@ -1611,6 +1679,8 @@ hypre_CurandUniform_core( HYPRE_Int          n,
    {
       HYPRE_CURAND_CALL( curandGenerateUniform(gen, (float *) urand, n) );
    }
+
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }
@@ -2622,7 +2692,13 @@ hypre_CudaCompileFlagCheck()
 
    /* HYPRE_CUDA_CALL(cudaDeviceSynchronize()); */
 
-   if (cuda_arch_actual != cuda_arch_compile)
+   const hypre_int cuda_arch_actual_major  = cuda_arch_actual  / 100;
+   const hypre_int cuda_arch_compile_major = cuda_arch_compile / 100;
+   const hypre_int cuda_arch_actual_minor  = cuda_arch_actual  % 100;
+   const hypre_int cuda_arch_compile_minor = cuda_arch_compile % 100;
+
+   if (cuda_arch_actual_major != cuda_arch_compile_major ||
+       cuda_arch_actual_minor < cuda_arch_compile_minor)
    {
       char msg[256];
 
@@ -2880,9 +2956,10 @@ HYPRE_SetSYCLDevice(sycl::device user_device)
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_bind_device( HYPRE_Int myid,
-                   HYPRE_Int nproc,
-                   MPI_Comm  comm )
+hypre_bind_device_id( HYPRE_Int device_id_in,
+                      HYPRE_Int myid,
+                      HYPRE_Int nproc,
+                      MPI_Comm  comm )
 {
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* proc id (rank) on the running node */
@@ -2900,20 +2977,52 @@ hypre_bind_device( HYPRE_Int myid,
    hypre_MPI_Comm_rank(node_comm, &myNodeid);
    hypre_MPI_Comm_size(node_comm, &NodeSize);
    hypre_MPI_Comm_free(&node_comm);
-
-   /* get number of devices on this node */
    hypre_GetDeviceCount(&nDevices);
 
+   if (-1 == device_id_in)
+   {
+      /* get number of devices on this node */
+      device_id = myNodeid % nDevices;
+   }
+   else
+   {
+      device_id = (hypre_int) device_id_in;
+   }
+
    /* set device */
-   device_id = myNodeid % nDevices;
-   hypre_SetDevice(device_id, NULL);
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+   omp_set_default_device(device_id);
+#endif
+
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
+#endif
+
+#if defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL( hipSetDevice(device_id) );
+#endif
 
 #if defined(HYPRE_DEBUG) && defined(HYPRE_PRINT_ERRORS)
    hypre_printf("Proc [global %d/%d, local %d/%d] can see %d GPUs and is running on %d\n",
                 myid, nproc, myNodeid, NodeSize, nDevices, device_id);
 #endif
 
+#else
+   HYPRE_UNUSED_VAR(device_id_in);
+   HYPRE_UNUSED_VAR(myid);
+   HYPRE_UNUSED_VAR(nproc);
+   HYPRE_UNUSED_VAR(comm);
+
 #endif // #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 
    return hypre_error_flag;
 }
+
+HYPRE_Int
+hypre_bind_device( HYPRE_Int myid,
+                   HYPRE_Int nproc,
+                   MPI_Comm  comm )
+{
+   return hypre_bind_device_id(-1, myid, nproc, comm);
+}
+

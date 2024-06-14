@@ -347,8 +347,8 @@ hypre_StructVectorResize( hypre_StructVector *vector,
    hypre_BoxArray       *old_data_space   = hypre_StructVectorDataSpace(vector);
    HYPRE_Int             old_data_size    = hypre_StructVectorDataSize(vector);
    HYPRE_Int            *old_data_indices = hypre_StructVectorDataIndices(vector);
-
    HYPRE_Int             ndim             = hypre_StructVectorNDim(vector);
+   HYPRE_MemoryLocation  memory_location  = hypre_StructVectorMemoryLocation(vector);
 
    HYPRE_Complex        *data = NULL;
    HYPRE_Int             data_size;
@@ -391,7 +391,7 @@ hypre_StructVectorResize( hypre_StructVector *vector,
       }
 
       /* This will return NULL if data_size = 0  */
-      data = hypre_CTAlloc(HYPRE_Complex, data_size, HYPRE_MEMORY_HOST);
+      data = hypre_CTAlloc(HYPRE_Complex, data_size, memory_location);
 
       /* Copy old_data to data */
       if ((old_data != NULL) && (data != NULL))
@@ -407,7 +407,7 @@ hypre_StructVectorResize( hypre_StructVector *vector,
       /* Free up some things */
       if (hypre_StructVectorDataAlloced(vector) == 1)
       {
-         hypre_TFree(old_data, HYPRE_MEMORY_HOST);
+         hypre_TFree(old_data, memory_location);
       }
       hypre_TFree(old_data_indices, HYPRE_MEMORY_HOST);
 
@@ -439,14 +439,15 @@ hypre_StructVectorResize( hypre_StructVector *vector,
 HYPRE_Int
 hypre_StructVectorRestore( hypre_StructVector *vector )
 {
-   hypre_StructGrid *old_grid       = hypre_StructVectorGrid(vector);
-   HYPRE_Complex    *old_data       = hypre_StructVectorData(vector);
-   hypre_BoxArray   *old_data_space = hypre_StructVectorDataSpace(vector);
-   hypre_StructGrid *grid           = hypre_StructVectorSaveGrid(vector);
-   HYPRE_Complex    *data           = hypre_StructVectorSaveData(vector);
-   hypre_IndexRef    stride         = hypre_StructVectorSaveStride(vector);
-   hypre_BoxArray   *data_space     = hypre_StructVectorSaveDataSpace(vector);
-   HYPRE_Int         data_size      = hypre_StructVectorSaveDataSize(vector);
+   hypre_StructGrid      *old_grid        = hypre_StructVectorGrid(vector);
+   HYPRE_Complex         *old_data        = hypre_StructVectorData(vector);
+   hypre_BoxArray        *old_data_space  = hypre_StructVectorDataSpace(vector);
+   hypre_StructGrid      *grid            = hypre_StructVectorSaveGrid(vector);
+   HYPRE_Complex         *data            = hypre_StructVectorSaveData(vector);
+   hypre_IndexRef         stride          = hypre_StructVectorSaveStride(vector);
+   hypre_BoxArray        *data_space      = hypre_StructVectorSaveDataSpace(vector);
+   HYPRE_Int              data_size       = hypre_StructVectorSaveDataSize(vector);
+   HYPRE_MemoryLocation   memory_location = hypre_StructVectorMemoryLocation(vector);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -459,10 +460,10 @@ hypre_StructVectorRestore( hypre_StructVector *vector )
       /* Move old_data to data */
       if (hypre_StructVectorDataAlloced(vector) == 1)
       {
-         data = hypre_CTAlloc(HYPRE_Complex, data_size, HYPRE_MEMORY_HOST);
+         data = hypre_CTAlloc(HYPRE_Complex, data_size, memory_location);
       }
       hypre_StructDataCopy(old_data, old_data_space, old_ids, data, data_space, ids, ndim, 1);
-      hypre_TFree(old_data, HYPRE_MEMORY_HOST);
+      hypre_TFree(old_data, memory_location);
 
       /* Reset certain fields to enable the Resize call below */
       hypre_StructVectorSaveGrid(vector)      = NULL;
@@ -1033,8 +1034,36 @@ hypre_StructVectorSetNumGhost( hypre_StructVector *vector,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_StructVectorSetDataSize(hypre_StructVector *vector,
+                              HYPRE_Int          *data_size,
+                              HYPRE_Int          *data_host_size)
+{
+   HYPRE_UNUSED_VAR(data_host_size);
+
+#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   hypre_StructGrid     *grid = hypre_StructVectorGrid(vector);
+   if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
+   {
+      *data_size += hypre_StructVectorDataSize(vector);
+   }
+   else
+   {
+      *data_host_size += hypre_StructVectorDataSize(vector);
+   }
+#else
+   *data_size += hypre_StructVectorDataSize(vector);
+#endif
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_StructVectorAssemble( hypre_StructVector *vector )
 {
+   HYPRE_UNUSED_VAR(vector);
+
    return hypre_error_flag;
 }
 
@@ -1668,6 +1697,8 @@ hypre_StructVectorRead( MPI_Comm    comm,
  * The following is used only as a debugging aid.
  *--------------------------------------------------------------------------*/
 
+// TODO (VPM): Fix for GPU support
+#if 0
 HYPRE_Int
 hypre_StructVectorMaxValue( hypre_StructVector *vector,
                             HYPRE_Real *max_value, HYPRE_Int *max_index,
@@ -1733,6 +1764,7 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
 
    return hypre_error_flag;
 }
+#endif
 
 /*--------------------------------------------------------------------------
  * hypre_StructVectorClone

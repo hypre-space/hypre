@@ -102,10 +102,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid *grid)
    hypre_MPI_Comm_rank(comm, &myproc);
 
    hypre_ClearIndex(shift);
-   for (i = 0; i < ndim; i++)
-   {
-      hypre_IndexD(shift, i) = -1;
-   }
+   hypre_SetIndex(shift, -1);
+   hypre_SetIndex(lindex, 0);
 
    /* To get the correct ranks, separate node & edge grids must be formed.
       Note that the edge vars must be ordered the same way as is in grid.*/
@@ -401,6 +399,11 @@ hypre_Maxwell_Grad(hypre_SStructGrid *grid)
                direction[0] = 0;
                direction[1] = 1;
                break;
+            }
+
+            default:
+            {
+               ndirection = 0;
             }
          }  /* switch(j) */
 
