@@ -349,6 +349,20 @@ HYPRE_Int
 HYPRE_SStructSSAMGSetNonZeroGuess(HYPRE_SStructSolver solver);
 
 /**
+ * (Optional) Set interpolation type.
+ *
+ * Current interpolation methods set by {\tt interp\_type} are:
+ *
+ * \begin{tabular}{l@{ -- }l}
+ * -1  & Structured interpolation only (default) \\
+ *  0  & Structured and classical modified unstructured interpolation \\
+ * \end{tabular}
+ **/
+HYPRE_Int
+HYPRE_SStructSSAMGSetInterpType(HYPRE_SStructSolver solver,
+                                HYPRE_Int           interp_type);
+
+/**
  * (Optional) Set relaxation type.
  *
  * Current relaxation methods set by {\tt relax\_type} are:
