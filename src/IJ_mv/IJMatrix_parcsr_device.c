@@ -64,17 +64,13 @@ hypre_AuxParCSRMatrixStackReallocate(hypre_AuxParCSRMatrix *aux_matrix,
 inline void
 hypre_AuxParCSRMatrixStackPrintInfo(hypre_IJMatrix *matrix)
 {
-   HYPRE_Int myid;
    static HYPRE_Int counter = 0;
-   hypre_MPI_Comm_rank(hypre_IJMatrixComm(matrix), &myid );
    hypre_AuxParCSRMatrix *aux_matrix = (hypre_AuxParCSRMatrix *) hypre_IJMatrixTranslator(matrix);
 
-   counter ++;
-   //hypre_printf(" IJMatrixSetAddValues: PID %d: max %d, size %d\n", myid,
-   //hypre_AuxParCSRMatrixMaxStackElmts(aux_matrix)), hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix));
-   hypre_printf(" %d, %d, %d\n", counter,
-                                 hypre_AuxParCSRMatrixMaxStackElmts(aux_matrix),
-                                 hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix));
+   hypre_ParPrintf(hypre_IJMatrixComm(matrix),
+                   " %d, %d, %d\n", ++counter,
+                   hypre_AuxParCSRMatrixMaxStackElmts(aux_matrix),
+                   hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix));
 }
 
 /* E.g. nrows = 3
@@ -110,7 +106,6 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
 
    HYPRE_Int  nelms;
    HYPRE_Int *row_ptr = NULL;
-   HYPRE_Int  early_assemble = hypre_AuxParCSRMatrixEarlyAssemble(aux_matrix);
    HYPRE_Int  early_assemble_flag = 0;
 
    /* expand rows into full expansion of rows based on ncols
@@ -150,6 +145,7 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
    HYPRE_BigInt  *stack_j              = hypre_AuxParCSRMatrixStackJ(aux_matrix);
    HYPRE_Complex *stack_data           = hypre_AuxParCSRMatrixStackData(aux_matrix);
    char          *stack_sora           = hypre_AuxParCSRMatrixStackSorA(aux_matrix);
+   HYPRE_Int      early_assemble       = hypre_AuxParCSRMatrixEarlyAssemble(aux_matrix);
 
    if ( stack_elmts_max < stack_elmts_required )
    {
@@ -173,7 +169,10 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
          if (early_assemble)
          {
             stack_elmts_max_new = stack_elmts_required;
-            early_assemble_flag = 1;
+            if (early_assemble == 1)
+            {
+               early_assemble_flag = 1;
+            }
          }
          else
          {
@@ -263,16 +262,21 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
    stack_elmts_current += (HYPRE_BigInt) nelms;
    hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix) = stack_elmts_current;
 
-   hypre_AuxParCSRMatrixStackPrintInfo(matrix);
+   /* for debug */
+   // hypre_AuxParCSRMatrixStackPrintInfo(matrix);
 
    if (early_assemble_flag)
    {
+      /* temporarily disable early assembly in the next line */
+      hypre_AuxParCSRMatrixEarlyAssemble(aux_matrix) = 2;
       hypre_IJMatrixAssembleCommunicateAndCompressDevice(matrix, 0);
+      /* resore early assembly */
+      hypre_AuxParCSRMatrixEarlyAssemble(aux_matrix) = early_assemble;
 
       stack_elmts_current = hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix);
-      hypre_assert(stack_elmts_max == hypre_AuxParCSRMatrixMaxStackElmts(aux_matrix));
+      stack_elmts_max = hypre_AuxParCSRMatrixMaxStackElmts(aux_matrix);
 
-      HYPRE_BigInt stack_elmts_max_new = hypre_max(stack_elmts_current * hypre_AuxParCSRMatrixGrowFactor(aux_matrix), stack_elmts_max);
+      HYPRE_BigInt stack_elmts_max_new = stack_elmts_current * hypre_AuxParCSRMatrixGrowFactor(aux_matrix);
 
       if (stack_elmts_max_new != stack_elmts_max)
       {
