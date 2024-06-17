@@ -4279,13 +4279,13 @@ HYPRE_Int HYPRE_MGRSetFSolver(HYPRE_Solver             solver,
 /**
  * (Optional) Set the F-relaxation solver at a given level.
  *
- * @param level [IN] MGR solver level
  * @param solver [IN] MGR solver/preconditioner object
  * @param fsolver [IN] F-relaxation solver object
+ * @param level [IN] MGR solver level
  **/
-HYPRE_Int HYPRE_MGRSetFSolverAtLevel(HYPRE_Int     level,
-                                     HYPRE_Solver  solver,
-                                     HYPRE_Solver  fsolver );
+HYPRE_Int HYPRE_MGRSetFSolverAtLevel(HYPRE_Solver  solver,
+                                     HYPRE_Solver  fsolver,
+                                     HYPRE_Int     level );
 
 /**
  * (Optional) Extract A_FF block from matrix A.
@@ -4436,12 +4436,59 @@ HYPRE_MGRSetGlobalSmoothType( HYPRE_Solver solver,
                               HYPRE_Int smooth_type );
 
 /**
- * (Optional) Determines type of global smoother for each level.
- * See \e HYPRE_MGRSetGlobalSmoothType for global smoother options.
- **/
+ * @brief Sets the type of global smoother for each level in the multigrid reduction (MGR) solver.
+ *
+ * This function allows the user to specify the type of global smoother to be used at each level
+ * of the multigrid reduction process. The types of smoothers available can be found in the
+ * documentation for \e HYPRE_MGRSetGlobalSmoothType. The smoother type for each level is indicated
+ * by the \e smooth_type array, which should have a size equal to \e max_num_coarse_levels.
+ *
+ * @note This function does not take ownership of the \e smooth_type array.
+ * @note If \e smooth_type is a NULL pointer, a default global smoother (Jacobi) is used for all levels.
+ * @note This call is optional. It is intended for advanced users who need specific control over the
+ *       smoothing process at different levels of the solver. If not called, the solver will proceed
+ *       with default smoothing parameters.
+ *
+ * @param[in] \e solver The HYPRE solver object to configure.
+ * @param[in] \e smooth_type An array of integers where each value specifies the type of smoother to
+ *            be used at the corresponding level.
+ *
+ * @return HYPRE_Int Error code (0 for success, non-zero for failure).
+ *
+ * @see HYPRE_MGRSetGlobalSmoothType for details on global smoother options.
+ */
+
 HYPRE_Int
-HYPRE_MGRSetLevelSmoothType( HYPRE_Solver solver,
-                             HYPRE_Int *smooth_type );
+HYPRE_MGRSetLevelSmoothType(HYPRE_Solver  solver,
+                            HYPRE_Int    *smooth_type);
+
+/**
+ * @brief Sets the global smoother method for a specified MGR level using a HYPRE solver object.
+ *
+ * This function enables solvers within hypre to be used as complex smoothers for a specific level 
+ * within the multigrid reduction (MGR) scheme. Users can configure the solver options and pass the 
+ * solver in as the smoother. Currently supported solver options via this interface are ILU and AMG.
+ *
+ * @note Unlike some other setup functions that might require an array to set options across multiple
+ *       levels, this function focuses on a single level, identified by the \e level parameter.
+ *
+ * @warning The smoother passed to function takes precedence over the smoother type set for that level 
+ *       in the MGR hierarchy.
+ *
+ * @param[in,out] \e solver A pointer to the MGR solver object. This object is modified to include the
+ *                specified smoother for the given level.
+ * @param[in] \e smoother The HYPRE solver object that specifies the global relaxation method to be used
+ *            at the specified level. Currently available choices are BoomerAMG and ILU.
+ * @param[in] \e level The level identifier for which the global relaxation method is to be set.
+ *            Must be within the range of the number of levels in the MGR solver.
+ *
+ * @return HYPRE_Int Returns an error code. Success is indicated by 0, while any non-zero value signifies an error.
+ */
+
+HYPRE_Int
+HYPRE_MGRSetGlobalSmootherAtLevel( HYPRE_Solver  solver,
+                                   HYPRE_Solver  smoother,
+                                   HYPRE_Int     level );
 
 /**
  * (Optional) Return the number of MGR iterations.
