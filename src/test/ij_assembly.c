@@ -70,7 +70,7 @@ main( hypre_int  argc,
    HYPRE_Real                cx, cy, cz;
    HYPRE_Int                 nchunks;
    HYPRE_Int                 mode, ierr = 0;
-   HYPRE_Real                tol = 0.;
+   HYPRE_Real                tol = HYPRE_REAL_EPSILON;
    HYPRE_Int                 option, base;
    HYPRE_Int                 stencil;
    HYPRE_Int                 print_matrix;
@@ -364,10 +364,11 @@ main( hypre_int  argc,
     */
    if (mode & 2)
    {
-      test_all(comm, "addtrans", memory_location, 2, "aA", ilower, iupper, jlower, jupper, nrows, num_nonzeros,
+      test_all(comm, "addtrans", memory_location, 2, "aaaaaA", ilower, iupper, jlower, jupper, nrows, num_nonzeros,
                nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, cols, rows_coo, coefs, &ij_AT);
 
       hypre_ParCSRMatrixTranspose(parcsr_ref, &parcsr_trans, 1);
+      hypre_ParCSRMatrixScale(parcsr_trans, 5.0);
 
       ierr += checkMatrix(parcsr_trans, ij_AT) > tol;
       if (print_matrix)
@@ -708,20 +709,22 @@ checkMatrix(HYPRE_ParCSRMatrix h_parcsr_ref, HYPRE_IJMatrix ij_A)
    HYPRE_ParCSRMatrix  parcsr_A     = (HYPRE_ParCSRMatrix) hypre_IJMatrixObject(ij_A);
    HYPRE_ParCSRMatrix  h_parcsr_A;
    HYPRE_ParCSRMatrix  parcsr_error;
-   HYPRE_Real          fnorm;
+   HYPRE_Real          fnorm_err, fnorm_ref, rel_err;
 
    h_parcsr_A = hypre_ParCSRMatrixClone_v2(parcsr_A, 1, HYPRE_MEMORY_HOST);
 
    // Check norm of (parcsr_ref - parcsr_A)
    hypre_ParCSRMatrixAdd(1.0, h_parcsr_ref, -1.0, h_parcsr_A, &parcsr_error);
-   fnorm = hypre_ParCSRMatrixFnorm(parcsr_error);
+   fnorm_err = hypre_ParCSRMatrixFnorm(parcsr_error);
+   fnorm_ref = hypre_ParCSRMatrixFnorm(h_parcsr_ref);
+   rel_err = fnorm_err / fnorm_ref;
 
-   hypre_ParPrintf(comm, "Frobenius norm of (A_ref - A): %e\n", fnorm);
+   hypre_ParPrintf(comm, "||A_ref - A||_F / ||A_ref||_F: %e\n", rel_err);
 
    HYPRE_ParCSRMatrixDestroy(h_parcsr_A);
    HYPRE_ParCSRMatrixDestroy(parcsr_error);
 
-   return fnorm;
+   return rel_err;
 }
 
 /* ---------------------------------- *
