@@ -16,6 +16,7 @@
 #include "_hypre_IJ_mv.h"
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_parcsr_ls.h"
+#include "_hypre_utilities.h"
 //#include "_hypre_utilities.hpp"
 
 HYPRE_Int buildMatrixEntries(MPI_Comm comm,
@@ -258,7 +259,9 @@ main( hypre_int  argc,
       return (0);
    }
 
+#if defined(HYPRE_USING_MEMORY_TRACKER)
    hypre_MemoryTrackerSetPrint(1);
+#endif
 
    /*-----------------------------------------------------------
     * Print driver parameters
