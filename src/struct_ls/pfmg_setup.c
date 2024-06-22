@@ -773,8 +773,6 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    HYPRE_Int              constant_coefficient;
    HYPRE_Int              i, d;
 
-   MPI_Comm comm = hypre_StructMatrixComm(A);
-
    /*----------------------------------------------------------
     * Initialize some things
     *----------------------------------------------------------*/
@@ -846,13 +844,13 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       tcxyz[1] = cxyz[1];
       tcxyz[2] = cxyz[2];
       hypre_MPI_Allreduce(tcxyz, cxyz, 3, HYPRE_MPI_REAL, hypre_MPI_SUM,
-                          comm);
+                          hypre_StructMatrixComm(A));
 
       tcxyz[0] = sqcxyz[0];
       tcxyz[1] = sqcxyz[1];
       tcxyz[2] = sqcxyz[2];
       hypre_MPI_Allreduce(tcxyz, sqcxyz, 3, HYPRE_MPI_REAL, hypre_MPI_SUM,
-                          comm);
+                          hypre_StructMatrixComm(A));
 
       for (d = 0; d < 3; d++)
       {

@@ -40,8 +40,6 @@ hypre_StructInnerProd( hypre_StructVector *x,
    HYPRE_Int        ndim = hypre_StructVectorNDim(x);
    HYPRE_Int        i;
 
-   MPI_Comm comm = hypre_StructVectorComm(x);
-
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    const HYPRE_Int  data_location = hypre_StructGridDataLocation(hypre_StructVectorGrid(y));
 #endif
@@ -101,7 +99,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
    process_result = (HYPRE_Real) local_result;
 
    hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
-                       HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+                       HYPRE_MPI_REAL, hypre_MPI_SUM, hypre_StructVectorComm(x));
 
    hypre_IncFLOPCount(2 * hypre_StructVectorGlobalSize(x));
 

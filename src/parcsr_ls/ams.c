@@ -2937,8 +2937,6 @@ hypre_AMSSetup(void *solver,
 
    ams_data -> A = A;
 
-   MPI_Comm comm = hypre_ParCSRMatrixComm(A);
-
    /* Modifications for problems with zero-conductivity regions */
    if (ams_data -> interior_nodes)
    {
@@ -3123,7 +3121,7 @@ hypre_AMSSetup(void *solver,
             }
 
             lfactor *= 1e-10; /* scaling factor: max|A_ij|*1e-10 */
-            hypre_MPI_Allreduce(&lfactor, &factor, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, comm);
+            hypre_MPI_Allreduce(&lfactor, &factor, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, hypre_ParCSRMatrixComm(A));
          }
 
          hypre_ParCSRMatrixAdd(factor, A, 1.0, B, &C);

@@ -181,9 +181,8 @@ hypre_ParCSRMaxEigEstimateDevice( hypre_ParCSRMatrix *A,
    send_buf[0] = -e_min;
    send_buf[1] = e_max;
 
-   MPI_Comm comm = hypre_ParCSRMatrixComm(A);
-
-   hypre_MPI_Allreduce(send_buf, recv_buf, 2, HYPRE_MPI_REAL, hypre_MPI_MAX, comm);
+   hypre_MPI_Allreduce(send_buf, recv_buf, 2, HYPRE_MPI_REAL, hypre_MPI_MAX,
+                       hypre_ParCSRMatrixComm(A));
 
    /* return */
    if ( hypre_abs(e_min) > hypre_abs(e_max) )

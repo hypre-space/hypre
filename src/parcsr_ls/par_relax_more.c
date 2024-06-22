@@ -49,8 +49,6 @@ hypre_ParCSRMaxEigEstimateHost( hypre_ParCSRMatrix *A,       /* matrix to relax 
    HYPRE_Real  e_min = 0.0;
    HYPRE_Real  send_buf[2], recv_buf[2];
 
-   MPI_Comm comm = hypre_ParCSRMatrixComm(A);
-
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
    if (scale > 1)
@@ -105,7 +103,7 @@ hypre_ParCSRMaxEigEstimateHost( hypre_ParCSRMatrix *A,       /* matrix to relax 
 
    /* get e_min e_max across procs */
    hypre_MPI_Allreduce(send_buf, recv_buf, 2, HYPRE_MPI_REAL, hypre_MPI_MAX,
-                       comm);
+                       hypre_ParCSRMatrixComm(A));
 
    e_min = -recv_buf[0];
    e_max =  recv_buf[1];

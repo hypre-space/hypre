@@ -140,7 +140,6 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-
    hypre_GpuProfilingPushRange("MGRBuildP");
 
 #if defined(HYPRE_USING_SYCL)

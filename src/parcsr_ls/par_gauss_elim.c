@@ -458,7 +458,6 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
    HYPRE_Int            *displs, *info;
    HYPRE_Int             new_num_procs;
 
-
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SOLVE] -= hypre_MPI_Wtime();
 #endif

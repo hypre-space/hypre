@@ -2971,7 +2971,7 @@ hypre_bind_device( HYPRE_Int device_id_in,
    /* device id that want to bind */
    hypre_int device_id;
 
-   MPI_Comm node_comm;
+   hypre_MPI_Comm node_comm;
    hypre_MPI_Comm_split_type( comm, hypre_MPI_COMM_TYPE_SHARED,
                               myid, hypre_MPI_INFO_NULL, &node_comm );
    hypre_MPI_Comm_rank(node_comm, &myNodeid);
