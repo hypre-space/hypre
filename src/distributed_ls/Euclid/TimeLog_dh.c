@@ -108,7 +108,6 @@ void TimeLog_dhPrint(TimeLog_dh t, FILE *fp, bool allPrint)
   HYPRE_Real total = 0.0;
   HYPRE_Real timeMax[MAX_TIME_MARKS]; HYPRE_Real timeMin[MAX_TIME_MARKS];
   static bool wasSummed = false;
-  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
 
 
   if (! wasSummed) {
@@ -117,8 +116,8 @@ void TimeLog_dhPrint(TimeLog_dh t, FILE *fp, bool allPrint)
     hypre_sprintf(t->desc[t->last], "========== totals, and reset ==========\n");
     t->last += 1;
 
-    hypre_MPI_Allreduce(t->time, timeMax, t->last, hypre_MPI_REAL, hypre_MPI_MAX, hcomm);
-    hypre_MPI_Allreduce(t->time, timeMin, t->last, hypre_MPI_REAL, hypre_MPI_MIN, hcomm);
+    hypre_MPI_Allreduce(t->time, timeMax, t->last, hypre_MPI_REAL, hypre_MPI_MAX, comm_dh);
+    hypre_MPI_Allreduce(t->time, timeMin, t->last, hypre_MPI_REAL, hypre_MPI_MIN, comm_dh);
     wasSummed = true;
   }
 

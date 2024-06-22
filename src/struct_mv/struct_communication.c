@@ -831,7 +831,6 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
    HYPRE_Int            num_sends  = hypre_CommPkgNumSends(comm_pkg);
    HYPRE_Int            num_recvs  = hypre_CommPkgNumRecvs(comm_pkg);
    MPI_Comm             comm       = hypre_CommPkgComm(comm_pkg);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    HYPRE_Int            num_requests;
    hypre_MPI_Request   *requests;
@@ -1039,7 +1038,7 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
       hypre_MPI_Irecv(recv_buffers_mpi[i],
                       hypre_CommTypeBufsize(comm_type)*sizeof(HYPRE_Complex),
                       hypre_MPI_BYTE, hypre_CommTypeProc(comm_type),
-                      tag, hcomm, &requests[j++]);
+                      tag, comm, &requests[j++]);
       if ( hypre_CommPkgFirstComm(comm_pkg) )
       {
          size = hypre_CommPrefixSize(hypre_CommTypeNumEntries(comm_type));
@@ -1054,7 +1053,7 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
       hypre_MPI_Isend(send_buffers_mpi[i],
                       hypre_CommTypeBufsize(comm_type)*sizeof(HYPRE_Complex),
                       hypre_MPI_BYTE, hypre_CommTypeProc(comm_type),
-                      tag, hcomm, &requests[j++]);
+                      tag, comm, &requests[j++]);
       if ( hypre_CommPkgFirstComm(comm_pkg) )
       {
          size = hypre_CommPrefixSize(hypre_CommTypeNumEntries(comm_type));

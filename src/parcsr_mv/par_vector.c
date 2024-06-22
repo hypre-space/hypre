@@ -498,7 +498,6 @@ hypre_ParVectorInnerProd( hypre_ParVector *x,
                           hypre_ParVector *y )
 {
    MPI_Comm      comm    = hypre_ParVectorComm(x);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
 
@@ -509,7 +508,7 @@ hypre_ParVectorInnerProd( hypre_ParVector *x,
    hypre_profile_times[HYPRE_TIMER_ID_ALL_REDUCE] -= hypre_MPI_Wtime();
 #endif
    hypre_MPI_Allreduce(&local_result, &result, 1, HYPRE_MPI_REAL,
-                       hypre_MPI_SUM, hcomm);
+                       hypre_MPI_SUM, comm);
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_ALL_REDUCE] += hypre_MPI_Wtime();
 #endif
@@ -585,7 +584,6 @@ hypre_VectorToParVector ( MPI_Comm      comm,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    if (my_id == 0)
    {
@@ -595,9 +593,9 @@ hypre_VectorToParVector ( MPI_Comm      comm,
       global_vecstride = hypre_VectorVectorStride(v);
    }
 
-   hypre_MPI_Bcast(&global_size, 1, HYPRE_MPI_BIG_INT, 0, hcomm);
-   hypre_MPI_Bcast(&num_vectors, 1, HYPRE_MPI_INT, 0, hcomm);
-   hypre_MPI_Bcast(&global_vecstride, 1, HYPRE_MPI_INT, 0, hcomm);
+   hypre_MPI_Bcast(&global_size, 1, HYPRE_MPI_BIG_INT, 0, comm);
+   hypre_MPI_Bcast(&num_vectors, 1, HYPRE_MPI_INT, 0, comm);
+   hypre_MPI_Bcast(&global_vecstride, 1, HYPRE_MPI_INT, 0, comm);
 
    if (num_vectors == 1)
    {
@@ -618,7 +616,7 @@ hypre_VectorToParVector ( MPI_Comm      comm,
       global_vec_starts = hypre_CTAlloc(HYPRE_BigInt, num_procs + 1, HYPRE_MEMORY_HOST);
    }
    hypre_MPI_Gather(&first_index, 1, HYPRE_MPI_BIG_INT, global_vec_starts,
-                    1, HYPRE_MPI_BIG_INT, 0, hcomm);
+                    1, HYPRE_MPI_BIG_INT, 0, comm);
    if (my_id == 0)
    {
       global_vec_starts[num_procs] = hypre_ParVectorGlobalSize(par_vector);
@@ -642,7 +640,7 @@ hypre_VectorToParVector ( MPI_Comm      comm,
          {
             hypre_MPI_Isend( &v_data[(HYPRE_Int) global_vec_starts[p]] + j * global_vecstride,
                              (HYPRE_Int)(global_vec_starts[p + 1] - global_vec_starts[p]),
-                             HYPRE_MPI_COMPLEX, p, 0, hcomm, &requests[k++] );
+                             HYPRE_MPI_COMPLEX, p, 0, comm, &requests[k++] );
          }
       if (num_vectors == 1)
       {
@@ -669,7 +667,7 @@ hypre_VectorToParVector ( MPI_Comm      comm,
    {
       for ( j = 0; j < num_vectors; ++j )
          hypre_MPI_Recv( local_data + j * vecstride, local_size, HYPRE_MPI_COMPLEX,
-                         0, 0, hcomm, &status0 );
+                         0, 0, comm, &status0 );
    }
 
    if (global_vec_starts)
@@ -741,7 +739,6 @@ hypre_ParVectorToVectorAll_v2( hypre_ParVector *par_v,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    local_size = (HYPRE_Int)(last_index - first_index + 1);
    if (hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(par_v)) !=
@@ -808,11 +805,11 @@ hypre_ParVectorToVectorAll_v2( hypre_ParVector *par_v,
       if (local_size)
       {
          /* look for a message from processor 0 */
-         hypre_MPI_Probe(0, tag1, hcomm, &status1);
+         hypre_MPI_Probe(0, tag1, comm, &status1);
          hypre_MPI_Get_count(&status1, HYPRE_MPI_INT, &count);
 
          send_info = hypre_CTAlloc(HYPRE_Int, count, HYPRE_MEMORY_HOST);
-         hypre_MPI_Recv(send_info, count, HYPRE_MPI_INT, 0, tag1, hcomm, &status1);
+         hypre_MPI_Recv(send_info, count, HYPRE_MPI_INT, 0, tag1, comm, &status1);
 
          /* now unpack */
          num_types = send_info[0];
@@ -879,7 +876,7 @@ hypre_ParVectorToVectorAll_v2( hypre_ParVector *par_v,
       for (i = start; i < num_types; i++)
       {
          hypre_MPI_Isend(send_info, count, HYPRE_MPI_INT, used_procs[i],
-                         tag1, hcomm, &requests[i - start]);
+                         tag1, comm, &requests[i - start]);
       }
       hypre_MPI_Waitall(num_types - start, requests, status);
 
@@ -926,12 +923,12 @@ hypre_ParVectorToVectorAll_v2( hypre_ParVector *par_v,
    {
       vec_len = (HYPRE_Int) (new_vec_starts[i + 1] - new_vec_starts[i]);
       hypre_MPI_Irecv(&vector_data[(HYPRE_Int)new_vec_starts[i]], num_vectors * vec_len,
-                      HYPRE_MPI_COMPLEX, used_procs[i], tag2, hcomm, &requests[j++]);
+                      HYPRE_MPI_COMPLEX, used_procs[i], tag2, comm, &requests[j++]);
    }
    for (i = 0; i < num_types; i++)
    {
       hypre_MPI_Isend(local_data, num_vectors * local_size, HYPRE_MPI_COMPLEX,
-                      used_procs[i], tag2, hcomm, &requests[j++]);
+                      used_procs[i], tag2, comm, &requests[j++]);
    }
    hypre_MPI_Waitall(num_requests, requests, status);
 

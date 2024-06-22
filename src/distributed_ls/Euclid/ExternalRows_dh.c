@@ -187,14 +187,12 @@ void rcv_ext_storage_private(ExternalRows_dh er)
 
   if (logFile != NULL && er->debug) debug = true;
 
-  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
-
   /* get number of rows, and total nonzeros, that each lo-nabor will send */
   for (i=0; i<loCount; ++i) {
     HYPRE_Int nabor = loNabors[i];
-    hypre_MPI_Irecv(rcv_row_counts+i, 1, HYPRE_MPI_INT, nabor, ROW_CT_TAG, hcomm, er->req1+i);
-    hypre_MPI_Irecv(rcv_nz_counts+i,  1, HYPRE_MPI_INT, nabor, NZ_CT_TAG,  hcomm, er->req2+i);
-  }    
+    hypre_MPI_Irecv(rcv_row_counts+i, 1, HYPRE_MPI_INT, nabor, ROW_CT_TAG, comm_dh, er->req1+i);
+    hypre_MPI_Irecv(rcv_nz_counts+i,  1, HYPRE_MPI_INT, nabor, NZ_CT_TAG,  comm_dh, er->req2+i);
+  }
   hypre_MPI_Waitall(loCount, er->req1, er->status);
   hypre_MPI_Waitall(loCount, er->req2, er->status);
 
@@ -211,8 +209,8 @@ void rcv_ext_storage_private(ExternalRows_dh er)
     HYPRE_Int nabor = loNabors[i];
     lengths[i] =  (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
     numbers[i] =  (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-    hypre_MPI_Irecv(lengths[i], nz, HYPRE_MPI_INT, nabor, ROW_LENGTH_TAG, hcomm, er->req1+i);
-    hypre_MPI_Irecv(numbers[i], nz, HYPRE_MPI_INT, nabor, ROW_NUMBER_TAG, hcomm, er->req2+i);
+    hypre_MPI_Irecv(lengths[i], nz, HYPRE_MPI_INT, nabor, ROW_LENGTH_TAG, comm_dh, er->req1+i);
+    hypre_MPI_Irecv(numbers[i], nz, HYPRE_MPI_INT, nabor, ROW_NUMBER_TAG, comm_dh, er->req2+i);
   }
   hypre_MPI_Waitall(loCount, er->req1, er->status);
   hypre_MPI_Waitall(loCount, er->req2, er->status);
@@ -307,16 +305,14 @@ void rcv_external_rows_private(ExternalRows_dh er)
   HYPRE_Int *extRowCval = er->cvalExt, *extRowFill = er->fillExt;
   HYPRE_Real *extRowAval = er->avalExt;
 
-  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
-
   /* start receives of external rows */
   nz = 0;
   for (i=0; i<loCount; ++i) {
     nabor = loNabors[i];
     nz = rcv_nz_counts[i];
-    hypre_MPI_Irecv(extRowCval+offset, nz, HYPRE_MPI_INT,    nabor, CVAL_TAG, hcomm, er->req1+i);
-    hypre_MPI_Irecv(extRowFill+offset, nz, HYPRE_MPI_INT,    nabor, FILL_TAG, hcomm, er->req2+i);
-    hypre_MPI_Irecv(extRowAval+offset, nz, hypre_MPI_REAL, nabor, AVAL_TAG, hcomm, er->req3+i);
+    hypre_MPI_Irecv(extRowCval+offset, nz, HYPRE_MPI_INT,    nabor, CVAL_TAG, comm_dh, er->req1+i);
+    hypre_MPI_Irecv(extRowFill+offset, nz, HYPRE_MPI_INT,    nabor, FILL_TAG, comm_dh, er->req2+i);
+    hypre_MPI_Irecv(extRowAval+offset, nz, hypre_MPI_REAL, nabor, AVAL_TAG, comm_dh, er->req3+i);
     offset += nz;
   }
 
@@ -447,14 +443,12 @@ void send_ext_storage_private(ExternalRows_dh er)
     hypre_fprintf(logFile, "EXR send_ext_storage_private:: nz Count = %i\n", nz);
   }
 
-  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
-
   /* send  number of rows, and total nonzeros, to higher ordered nabors */
   for (i=0; i<hiCount; ++i) {
     HYPRE_Int nabor = hiNabors[i];
-    hypre_MPI_Isend(&rowCount, 1, HYPRE_MPI_INT, nabor, ROW_CT_TAG, hcomm, er->req1+i);
-    hypre_MPI_Isend(&nz,       1, HYPRE_MPI_INT, nabor, NZ_CT_TAG,  hcomm, er->req2+i);
-  }    
+    hypre_MPI_Isend(&rowCount, 1, HYPRE_MPI_INT, nabor, ROW_CT_TAG, comm_dh, er->req1+i);
+    hypre_MPI_Isend(&nz,       1, HYPRE_MPI_INT, nabor, NZ_CT_TAG,  comm_dh, er->req2+i);
+  }
 
   /* set up array for global row numbers */
   for (i=0, j=first_bdry; j<m; ++i, ++j) {
@@ -468,8 +462,8 @@ void send_ext_storage_private(ExternalRows_dh er)
    */
   for (i=0; i<hiCount; ++i) {
     HYPRE_Int nabor = hiNabors[i];
-    hypre_MPI_Isend(nzNumbers, rowCount, HYPRE_MPI_INT, nabor, ROW_NUMBER_TAG, hcomm, er->req3+i);
-    hypre_MPI_Isend(nzCounts,  rowCount, HYPRE_MPI_INT, nabor, ROW_LENGTH_TAG, hcomm, er->req4+i);
+    hypre_MPI_Isend(nzNumbers, rowCount, HYPRE_MPI_INT, nabor, ROW_NUMBER_TAG, comm_dh, er->req3+i);
+    hypre_MPI_Isend(nzCounts,  rowCount, HYPRE_MPI_INT, nabor, ROW_LENGTH_TAG, comm_dh, er->req4+i);
   }
 
   END_FUNC_DH
@@ -533,14 +527,12 @@ void send_external_rows_private(ExternalRows_dh er)
     }
   }
 
-  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
-
   /* start sends to higher-ordred nabors */
   for (i=0; i<hiCount; ++i) {
     HYPRE_Int nabor = hiNabors[i];
-    hypre_MPI_Isend(cvalSend, nz, HYPRE_MPI_INT,    nabor, CVAL_TAG, hcomm, er->cval_req+i);
-    hypre_MPI_Isend(fillSend, nz, HYPRE_MPI_INT,    nabor, FILL_TAG, hcomm, er->fill_req+i);
-    hypre_MPI_Isend(avalSend, nz, hypre_MPI_REAL, nabor, AVAL_TAG, hcomm, er->aval_req+i);
+    hypre_MPI_Isend(cvalSend, nz, HYPRE_MPI_INT,    nabor, CVAL_TAG, comm_dh, er->cval_req+i);
+    hypre_MPI_Isend(fillSend, nz, HYPRE_MPI_INT,    nabor, FILL_TAG, comm_dh, er->fill_req+i);
+    hypre_MPI_Isend(avalSend, nz, hypre_MPI_REAL, nabor, AVAL_TAG, comm_dh, er->aval_req+i);
   }
   END_FUNC_DH
 }

@@ -317,9 +317,8 @@ hypre_BoomerAMGDD_FindNeighborProcessors( hypre_ParCSRMatrix      *A,
                                          hypre_AMGDDCommPkgNumRecvProcs(compGridCommPkg)[level], HYPRE_MEMORY_HOST);
    for (i = 0; i < hypre_AMGDDCommPkgNumRecvProcs(compGridCommPkg)[level]; i++)
    {
-      hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(hypre_MPI_COMM_WORLD);
       hypre_MPI_Irecv(&(recv_sizes[i]), 1, HYPRE_MPI_INT,
-                      hypre_AMGDDCommPkgRecvProcs(compGridCommPkg)[level][i], 6, hcomm,
+                      hypre_AMGDDCommPkgRecvProcs(compGridCommPkg)[level][i], 6, hypre_MPI_COMM_WORLD,
                       &(requests[request_cnt++]));
    }
    HYPRE_Int *send_sizes = hypre_CTAlloc(HYPRE_Int,
@@ -333,9 +332,8 @@ hypre_BoomerAMGDD_FindNeighborProcessors( hypre_ParCSRMatrix      *A,
             send_sizes[i]++;
          }
       }
-      hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(hypre_MPI_COMM_WORLD);
       hypre_MPI_Isend(&(send_sizes[i]), 1, HYPRE_MPI_INT,
-                      hypre_AMGDDCommPkgSendProcs(compGridCommPkg)[level][i], 6, hcomm,
+                      hypre_AMGDDCommPkgSendProcs(compGridCommPkg)[level][i], 6, hypre_MPI_COMM_WORLD,
                       &(requests[request_cnt++]));
    }
 
@@ -358,9 +356,8 @@ hypre_BoomerAMGDD_FindNeighborProcessors( hypre_ParCSRMatrix      *A,
    for (i = 0; i < hypre_AMGDDCommPkgNumRecvProcs(compGridCommPkg)[level]; i++)
    {
       recv_buffers[i] = hypre_CTAlloc(HYPRE_Int, recv_sizes[i], HYPRE_MEMORY_HOST);
-      hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(hypre_MPI_COMM_WORLD);
       hypre_MPI_Irecv(recv_buffers[i], recv_sizes[i], HYPRE_MPI_INT,
-                      hypre_AMGDDCommPkgRecvProcs(compGridCommPkg)[level][i], 7, hcomm,
+                      hypre_AMGDDCommPkgRecvProcs(compGridCommPkg)[level][i], 7, hypre_MPI_COMM_WORLD,
                       &(requests[request_cnt++]));
    }
    // Setup and send the send buffers
@@ -378,9 +375,8 @@ hypre_BoomerAMGDD_FindNeighborProcessors( hypre_ParCSRMatrix      *A,
          }
 
       }
-      hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(hypre_MPI_COMM_WORLD);
       hypre_MPI_Isend(send_buffers[i], send_sizes[i], HYPRE_MPI_INT,
-                      hypre_AMGDDCommPkgSendProcs(compGridCommPkg)[level][i], 7, hcomm,
+                      hypre_AMGDDCommPkgSendProcs(compGridCommPkg)[level][i], 7, hypre_MPI_COMM_WORLD,
                       &(requests[request_cnt++]));
    }
 
@@ -452,9 +448,8 @@ hypre_BoomerAMGDD_FindNeighborProcessors( hypre_ParCSRMatrix      *A,
    request_cnt = 0;
    for (i = 0; i < csr_num_sends; i++)
    {
-      hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(hypre_MPI_COMM_WORLD);
       hypre_MPI_Irecv(&(recv_sizes[i]), 1, HYPRE_MPI_INT, hypre_ParCSRCommPkgSendProc(commPkg, i), 4,
-                      hcomm, &(requests[request_cnt++]));
+                      hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
    }
    for (i = 0; i < csr_num_recvs; i++)
    {
@@ -466,9 +461,8 @@ hypre_BoomerAMGDD_FindNeighborProcessors( hypre_ParCSRMatrix      *A,
             send_sizes[i] += 2 + 2 * num_req_dofs[i][j];
          }
       }
-      hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(hypre_MPI_COMM_WORLD);
       hypre_MPI_Isend(&(send_sizes[i]), 1, HYPRE_MPI_INT, hypre_ParCSRCommPkgRecvProc(commPkg, i), 4,
-                      hcomm, &(requests[request_cnt++]));
+                      hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
    }
 
    // Wait on the recv sizes, then free and re-allocate the requests and statuses
@@ -484,9 +478,8 @@ hypre_BoomerAMGDD_FindNeighborProcessors( hypre_ParCSRMatrix      *A,
    for (i = 0; i < csr_num_sends; i++)
    {
       recv_buffers[i] = hypre_CTAlloc(HYPRE_Int, recv_sizes[i], HYPRE_MEMORY_HOST);
-      hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(hypre_MPI_COMM_WORLD);
       hypre_MPI_Irecv(recv_buffers[i], recv_sizes[i], HYPRE_MPI_INT, hypre_ParCSRCommPkgSendProc(commPkg,
-                                                                                                 i), 5, hcomm, &(requests[request_cnt++]));
+                                                                                                 i), 5, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
    }
 
    // Setup the send buffer and post the sends
@@ -509,9 +502,8 @@ hypre_BoomerAMGDD_FindNeighborProcessors( hypre_ParCSRMatrix      *A,
             }
          }
       }
-      hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(hypre_MPI_COMM_WORLD);
       hypre_MPI_Isend(send_buffers[i], send_sizes[i], HYPRE_MPI_INT, hypre_ParCSRCommPkgRecvProc(commPkg,
-                                                                                                 i), 5, hcomm, &(requests[request_cnt++]));
+                                                                                                 i), 5, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
    }
    // Free the req dof info
    for (i = 0; i < csr_num_recvs; i++)
@@ -2634,16 +2626,14 @@ hypre_BoomerAMGDD_CommunicateRemainingMatrixInfo( hypre_ParAMGDDData* amgdd_data
 
          for (proc = 0; proc < num_recv_procs; proc++)
          {
-            hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(hypre_MPI_COMM_WORLD);
             hypre_MPI_Irecv(&(recv_sizes[2 * proc]), 2, HYPRE_MPI_INT, recv_procs[proc], 1,
-                            hcomm,
+                            hypre_MPI_COMM_WORLD,
                             &(size_requests[request_cnt++]));
          }
          for (proc = 0; proc < num_send_procs; proc++)
          {
-            hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(hypre_MPI_COMM_WORLD);
             hypre_MPI_Isend(&(send_sizes[2 * proc]), 2, HYPRE_MPI_INT, send_procs[proc], 1,
-                            hcomm,
+                            hypre_MPI_COMM_WORLD,
                             &(size_requests[request_cnt++]));
          }
 
@@ -2827,11 +2817,10 @@ hypre_BoomerAMGDD_CommunicateRemainingMatrixInfo( hypre_ParAMGDDData* amgdd_data
 
          for (proc = 0; proc < num_send_procs; proc++)
          {
-            hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(hypre_MPI_COMM_WORLD);
             hypre_MPI_Isend(int_send_buffers[proc], send_sizes[2 * proc], HYPRE_MPI_INT, send_procs[proc], 2,
-                            hcomm, &(buf_requests[request_cnt++]));
+                            hypre_MPI_COMM_WORLD, &(buf_requests[request_cnt++]));
             hypre_MPI_Isend(complex_send_buffers[proc], send_sizes[2 * proc + 1], HYPRE_MPI_COMPLEX,
-                            send_procs[proc], 3, hcomm, &(buf_requests[request_cnt++]));
+                            send_procs[proc], 3, hypre_MPI_COMM_WORLD, &(buf_requests[request_cnt++]));
          }
 
          // Wait on buffer sizes
@@ -2840,14 +2829,13 @@ hypre_BoomerAMGDD_CommunicateRemainingMatrixInfo( hypre_ParAMGDDData* amgdd_data
          // Allocate and post recvs
          for (proc = 0; proc < num_recv_procs; proc++)
          {
-            hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(hypre_MPI_COMM_WORLD);
             int_recv_buffers[proc] = hypre_CTAlloc(HYPRE_Int, recv_sizes[2 * proc], HYPRE_MEMORY_HOST);
             complex_recv_buffers[proc] = hypre_CTAlloc(HYPRE_Complex, recv_sizes[2 * proc + 1],
                                                        HYPRE_MEMORY_HOST);
             hypre_MPI_Irecv(int_recv_buffers[proc], recv_sizes[2 * proc], HYPRE_MPI_INT, recv_procs[proc], 2,
-                            hcomm, &(buf_requests[request_cnt++]));
+                            hypre_MPI_COMM_WORLD, &(buf_requests[request_cnt++]));
             hypre_MPI_Irecv(complex_recv_buffers[proc], recv_sizes[2 * proc + 1], HYPRE_MPI_COMPLEX,
-                            recv_procs[proc], 3, hcomm, &(buf_requests[request_cnt++]));
+                            recv_procs[proc], 3, hypre_MPI_COMM_WORLD, &(buf_requests[request_cnt++]));
          }
 
          // Wait on buffers

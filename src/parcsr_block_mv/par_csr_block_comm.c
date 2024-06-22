@@ -46,7 +46,6 @@ hypre_ParCSRBlockCommHandleCreate(HYPRE_Int job,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    j = 0;
 
@@ -61,7 +60,7 @@ hypre_ParCSRBlockCommHandleCreate(HYPRE_Int job,
             vec_len =
                (hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start) * bnnz;
             hypre_MPI_Irecv(&d_recv_data[vec_start * bnnz], vec_len,
-                            HYPRE_MPI_COMPLEX, ip, 0, hcomm, &requests[j++]);
+                            HYPRE_MPI_COMPLEX, ip, 0, comm, &requests[j++]);
          }
          for (i = 0; i < num_sends; i++)
          {
@@ -70,7 +69,7 @@ hypre_ParCSRBlockCommHandleCreate(HYPRE_Int job,
                (hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) - vec_start) * bnnz;
             ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
             hypre_MPI_Isend(&d_send_data[vec_start * bnnz], vec_len,
-                            HYPRE_MPI_COMPLEX, ip, 0, hcomm, &requests[j++]);
+                            HYPRE_MPI_COMPLEX, ip, 0, comm, &requests[j++]);
          }
          break;
       }
@@ -84,7 +83,7 @@ hypre_ParCSRBlockCommHandleCreate(HYPRE_Int job,
                (hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) - vec_start) * bnnz;
             ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
             hypre_MPI_Irecv(&d_recv_data[vec_start * bnnz], vec_len,
-                            HYPRE_MPI_COMPLEX, ip, 0, hcomm, &requests[j++]);
+                            HYPRE_MPI_COMPLEX, ip, 0, comm, &requests[j++]);
          }
          for (i = 0; i < num_recvs; i++)
          {
@@ -93,7 +92,7 @@ hypre_ParCSRBlockCommHandleCreate(HYPRE_Int job,
             vec_len =
                (hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start) * bnnz;
             hypre_MPI_Isend(&d_send_data[vec_start * bnnz], vec_len,
-                            HYPRE_MPI_COMPLEX, ip, 0, hcomm, &requests[j++]);
+                            HYPRE_MPI_COMPLEX, ip, 0, comm, &requests[j++]);
          }
          break;
       }

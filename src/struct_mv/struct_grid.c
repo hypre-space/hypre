@@ -276,7 +276,6 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &myid);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    /* has the box manager been created? */
    if (boxman == NULL)
@@ -376,7 +375,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
 
       HYPRE_BigInt big_size = (HYPRE_BigInt)size;
       hypre_MPI_Allreduce(&big_size, &global_size, 1, HYPRE_MPI_BIG_INT,
-                          hypre_MPI_SUM, hcomm);
+                          hypre_MPI_SUM, comm);
       hypre_StructGridGlobalSize(grid) = global_size; /* TO DO: this HYPRE_Int
                                                        * could overflow! (used
                                                        * to calc flops) */
@@ -437,7 +436,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
          sendbuf6[d + ndim] = -hypre_BoxIMaxD(bounding_box, d);
       }
       hypre_MPI_Allreduce(sendbuf6, recvbuf6, 2 * ndim, HYPRE_MPI_INT,
-                          hypre_MPI_MIN, hcomm);
+                          hypre_MPI_MIN, comm);
       /* unpack buffer */
       for (d = 0; d < ndim; d++)
       {
@@ -594,7 +593,6 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
 
    hypre_MPI_Comm_size(comm, &num_all_procs);
    hypre_MPI_Comm_rank(comm, &my_rank);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    /* compute recvcounts and displs */
    item_size = 2 * ndim + 1;
@@ -602,7 +600,7 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
    recvcounts =  hypre_TAlloc(HYPRE_Int,  num_all_procs, HYPRE_MEMORY_HOST);
    displs = hypre_TAlloc(HYPRE_Int,  num_all_procs, HYPRE_MEMORY_HOST);
    hypre_MPI_Allgather(&sendcount, 1, HYPRE_MPI_INT,
-                       recvcounts, 1, HYPRE_MPI_INT, hcomm);
+                       recvcounts, 1, HYPRE_MPI_INT, comm);
    displs[0] = 0;
    recvbuf_size = recvcounts[0];
    for (p = 1; p < num_all_procs; p++)
@@ -631,7 +629,7 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
 
    /* get global grid info */
    hypre_MPI_Allgatherv(sendbuf, sendcount, HYPRE_MPI_INT,
-                        recvbuf, recvcounts, displs, HYPRE_MPI_INT, hcomm);
+                        recvbuf, recvcounts, displs, HYPRE_MPI_INT, comm);
 
    /* sort recvbuf by process rank? */
 

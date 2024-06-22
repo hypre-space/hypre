@@ -168,7 +168,6 @@ hypre_BoomerAMGDDSetup( void               *amgdd_vdata,
    for (level = num_levels - 1; level >= amgdd_start_level; level--)
    {
       comm = hypre_ParCSRMatrixComm(A_array[level]);
-      hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
       num_send_procs = hypre_AMGDDCommPkgNumSendProcs(compGridCommPkg)[level];
       num_recv_procs = hypre_AMGDDCommPkgNumRecvProcs(compGridCommPkg)[level];
       num_requests   = num_send_procs + num_recv_procs;
@@ -193,7 +192,7 @@ hypre_BoomerAMGDDSetup( void               *amgdd_vdata,
          for (i = 0; i < num_recv_procs; i++)
          {
             hypre_MPI_Irecv(&(recv_buffer_size[level][i]), 1, HYPRE_MPI_INT,
-                            hypre_AMGDDCommPkgRecvProcs(compGridCommPkg)[level][i], 0, hcomm, &(requests[request_counter++]));
+                            hypre_AMGDDCommPkgRecvProcs(compGridCommPkg)[level][i], 0, comm, &(requests[request_counter++]));
          }
       }
 
@@ -215,7 +214,7 @@ hypre_BoomerAMGDDSetup( void               *amgdd_vdata,
          for (i = 0; i < num_send_procs; i++)
          {
             hypre_MPI_Isend(&(send_buffer_size[level][i]), 1, HYPRE_MPI_INT,
-                            hypre_AMGDDCommPkgSendProcs(compGridCommPkg)[level][i], 0, hcomm, &(requests[request_counter++]));
+                            hypre_AMGDDCommPkgSendProcs(compGridCommPkg)[level][i], 0, comm, &(requests[request_counter++]));
          }
       }
 
@@ -228,13 +227,13 @@ hypre_BoomerAMGDDSetup( void               *amgdd_vdata,
       {
          recv_buffer[i] = hypre_CTAlloc(HYPRE_Int, recv_buffer_size[level][i], HYPRE_MEMORY_HOST);
          hypre_MPI_Irecv(recv_buffer[i], recv_buffer_size[level][i], HYPRE_MPI_INT,
-                         hypre_AMGDDCommPkgRecvProcs(compGridCommPkg)[level][i], 1, hcomm, &(requests[request_counter++]));
+                         hypre_AMGDDCommPkgRecvProcs(compGridCommPkg)[level][i], 1, comm, &(requests[request_counter++]));
       }
 
       for (i = 0; i < num_send_procs; i++)
       {
          hypre_MPI_Isend(send_buffer[i], send_buffer_size[level][i], HYPRE_MPI_INT,
-                         hypre_AMGDDCommPkgSendProcs(compGridCommPkg)[level][i], 1, hcomm, &(requests[request_counter++]));
+                         hypre_AMGDDCommPkgSendProcs(compGridCommPkg)[level][i], 1, comm, &(requests[request_counter++]));
       }
 
       // Wait for buffers to be received
@@ -271,14 +270,14 @@ hypre_BoomerAMGDDSetup( void               *amgdd_vdata,
       {
          send_flag_buffer[i] = hypre_CTAlloc(HYPRE_Int, send_flag_buffer_size[i], HYPRE_MEMORY_HOST);
          hypre_MPI_Irecv(send_flag_buffer[i], send_flag_buffer_size[i], HYPRE_MPI_INT,
-                         hypre_AMGDDCommPkgSendProcs(compGridCommPkg)[level][i], 2, hcomm, &(requests[request_counter++]));
+                         hypre_AMGDDCommPkgSendProcs(compGridCommPkg)[level][i], 2, comm, &(requests[request_counter++]));
       }
 
       // send the recv_map_send_buffer's
       for (i = 0; i < num_recv_procs; i++)
       {
          hypre_MPI_Isend(recv_map_send_buffer[i], recv_map_send_buffer_size[i], HYPRE_MPI_INT,
-                         hypre_AMGDDCommPkgRecvProcs(compGridCommPkg)[level][i], 2, hcomm, &(requests[request_counter++]));
+                         hypre_AMGDDCommPkgRecvProcs(compGridCommPkg)[level][i], 2, comm, &(requests[request_counter++]));
       }
 
       // wait for maps to be received

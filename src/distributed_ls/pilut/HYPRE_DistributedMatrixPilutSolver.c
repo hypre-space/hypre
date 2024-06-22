@@ -369,9 +369,8 @@ HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutS
 
    rowdist = DataDistTypeRowdist( hypre_DistributedMatrixPilutSolverDataDist( solver ) );
 
-   MPI_Comm comm = hypre_DistributedMatrixPilutSolverComm(solver);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
-   hypre_MPI_Allgather( &start, 1, HYPRE_MPI_INT, rowdist, 1, HYPRE_MPI_INT, hcomm );
+   hypre_MPI_Allgather( &start, 1, HYPRE_MPI_INT, rowdist, 1, HYPRE_MPI_INT,
+      hypre_DistributedMatrixPilutSolverComm(solver) );
 
    rowdist[ nprocs ] = n;
 

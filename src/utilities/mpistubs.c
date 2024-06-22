@@ -759,16 +759,6 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info )
 
 #else
 
-hypre_MPI_Comm
-hypre_MPI_CommFromMPI_Comm(MPI_Comm comm)
-{
-   hypre_MPI_Comm hcomm;
-   hypre_Memset(&hcomm, 0, sizeof(hypre_MPI_Comm), HYPRE_MEMORY_HOST);
-   hypre_MPI_CommMPI_Comm(hcomm) = comm;
-
-   return hcomm;
-}
-
 hypre_MPI_Request
 hypre_MPI_RequestFromMPI_Request(MPI_Request request)
 {
@@ -1078,8 +1068,7 @@ hypre_MPI_Alltoall( void               *sendbuf,
                     hypre_MPI_Comm      comm )
 {
    return (HYPRE_Int) MPI_Alltoall(sendbuf, (hypre_int)sendcount, sendtype,
-                                   recvbuf, (hypre_int)recvcount, recvtype,
-                                   hypre_MPI_CommMPI_Comm(comm));
+                                   recvbuf, (hypre_int)recvcount, recvtype, comm);
 }
 
 HYPRE_Int
@@ -1092,8 +1081,7 @@ hypre_MPI_Allgather( void               *sendbuf,
                      hypre_MPI_Comm      comm )
 {
    return (HYPRE_Int) MPI_Allgather(sendbuf, (hypre_int)sendcount, sendtype,
-                                    recvbuf, (hypre_int)recvcount, recvtype,
-                                    hypre_MPI_CommMPI_Comm(comm));
+                                    recvbuf, (hypre_int)recvcount, recvtype, comm);
 }
 
 HYPRE_Int
@@ -1110,7 +1098,7 @@ hypre_MPI_Allgatherv( void               *sendbuf,
    HYPRE_Int  i;
    HYPRE_Int  ierr;
 
-   MPI_Comm_size(hypre_MPI_CommMPI_Comm(comm), &csize);
+   MPI_Comm_size(comm, &csize);
    mpi_recvcounts = hypre_TAlloc(hypre_int, csize, HYPRE_MEMORY_HOST);
    mpi_displs = hypre_TAlloc(hypre_int, csize, HYPRE_MEMORY_HOST);
    for (i = 0; i < csize; i++)
@@ -1120,7 +1108,7 @@ hypre_MPI_Allgatherv( void               *sendbuf,
    }
    ierr = (HYPRE_Int) MPI_Allgatherv(sendbuf, (hypre_int)sendcount, sendtype,
                                      recvbuf, mpi_recvcounts, mpi_displs,
-                                     recvtype, hypre_MPI_CommMPI_Comm(comm));
+                                     recvtype, comm);
    hypre_TFree(mpi_recvcounts, HYPRE_MEMORY_HOST);
    hypre_TFree(mpi_displs, HYPRE_MEMORY_HOST);
 
@@ -1139,7 +1127,7 @@ hypre_MPI_Gather( void               *sendbuf,
 {
    return (HYPRE_Int) MPI_Gather(sendbuf, (hypre_int) sendcount, sendtype,
                                  recvbuf, (hypre_int) recvcount, recvtype,
-                                 (hypre_int)root, hypre_MPI_CommMPI_Comm(comm));
+                                 (hypre_int)root, comm);
 }
 
 HYPRE_Int
@@ -1159,8 +1147,8 @@ hypre_MPI_Gatherv(void               *sendbuf,
    HYPRE_Int  i;
    HYPRE_Int  ierr;
 
-   MPI_Comm_size(hypre_MPI_CommMPI_Comm(comm), &csize);
-   MPI_Comm_rank(hypre_MPI_CommMPI_Comm(comm), &croot);
+   MPI_Comm_size(comm, &csize);
+   MPI_Comm_rank(comm, &croot);
    if (croot == (hypre_int) root)
    {
       mpi_recvcounts = hypre_TAlloc(hypre_int,  csize, HYPRE_MEMORY_HOST);
@@ -1173,7 +1161,7 @@ hypre_MPI_Gatherv(void               *sendbuf,
    }
    ierr = (HYPRE_Int) MPI_Gatherv(sendbuf, (hypre_int)sendcount, sendtype,
                                   recvbuf, mpi_recvcounts, mpi_displs,
-                                  recvtype, (hypre_int) root, hypre_MPI_CommMPI_Comm(comm));
+                                  recvtype, (hypre_int) root, comm);
    hypre_TFree(mpi_recvcounts, HYPRE_MEMORY_HOST);
    hypre_TFree(mpi_displs, HYPRE_MEMORY_HOST);
 
@@ -1192,7 +1180,7 @@ hypre_MPI_Scatter( void               *sendbuf,
 {
    return (HYPRE_Int) MPI_Scatter(sendbuf, (hypre_int)sendcount, sendtype,
                                   recvbuf, (hypre_int)recvcount, recvtype,
-                                  (hypre_int)root, hypre_MPI_CommMPI_Comm(comm));
+                                  (hypre_int)root, comm);
 }
 
 HYPRE_Int
@@ -1212,8 +1200,8 @@ hypre_MPI_Scatterv(void               *sendbuf,
    HYPRE_Int  i;
    HYPRE_Int  ierr;
 
-   MPI_Comm_size(hypre_MPI_CommMPI_Comm(comm), &csize);
-   MPI_Comm_rank(hypre_MPI_CommMPI_Comm(comm), &croot);
+   MPI_Comm_size(comm, &csize);
+   MPI_Comm_rank(comm, &croot);
    if (croot == (hypre_int) root)
    {
       mpi_sendcounts = hypre_TAlloc(hypre_int,  csize, HYPRE_MEMORY_HOST);
@@ -1226,8 +1214,7 @@ hypre_MPI_Scatterv(void               *sendbuf,
    }
    ierr = (HYPRE_Int) MPI_Scatterv(sendbuf, mpi_sendcounts, mpi_displs, sendtype,
                                    recvbuf, (hypre_int) recvcount,
-                                   recvtype, (hypre_int) root,
-                                   hypre_MPI_CommMPI_Comm(comm));
+                                   recvtype, (hypre_int) root, comm);
    hypre_TFree(mpi_sendcounts, HYPRE_MEMORY_HOST);
    hypre_TFree(mpi_displs, HYPRE_MEMORY_HOST);
 
@@ -1242,8 +1229,7 @@ hypre_MPI_Bcast( void               *buffer,
                  hypre_MPI_Comm      comm )
 {
    return (HYPRE_Int) MPI_Bcast(buffer, (hypre_int)count, datatype,
-                                (hypre_int)root,
-                                hypre_MPI_CommMPI_Comm(comm));
+                                (hypre_int)root, comm);
 }
 
 HYPRE_Int
@@ -1255,8 +1241,7 @@ hypre_MPI_Send( void               *buf,
                 hypre_MPI_Comm      comm )
 {
    return (HYPRE_Int) MPI_Send(buf, (hypre_int)count, datatype,
-                               (hypre_int)dest, (hypre_int)tag,
-                               hypre_MPI_CommMPI_Comm(comm));
+                               (hypre_int)dest, (hypre_int)tag, comm);
 }
 
 HYPRE_Int
@@ -1269,8 +1254,7 @@ hypre_MPI_Recv( void               *buf,
                 hypre_MPI_Status   *status )
 {
    return (HYPRE_Int) MPI_Recv(buf, (hypre_int)count, datatype,
-                               (hypre_int)source, (hypre_int)tag,
-                               hypre_MPI_CommMPI_Comm(comm), status);
+                               (hypre_int)source, (hypre_int)tag, comm, status);
 }
 
 HYPRE_Int
@@ -1283,8 +1267,7 @@ hypre_MPI_Isend( void               *buf,
                  hypre_MPI_Request  *request )
 {
    return (HYPRE_Int) MPI_Isend(buf, (hypre_int)count, datatype,
-                                (hypre_int)dest, (hypre_int)tag,
-                                hypre_MPI_CommMPI_Comm(comm),
+                                (hypre_int)dest, (hypre_int)tag, comm,
                                 &hypre_MPI_RequestMPI_Request(*request));
 }
 
@@ -1298,8 +1281,7 @@ hypre_MPI_Irecv( void               *buf,
                  hypre_MPI_Request  *request )
 {
    return (HYPRE_Int) MPI_Irecv(buf, (hypre_int)count, datatype,
-                                (hypre_int)source, (hypre_int)tag,
-                                hypre_MPI_CommMPI_Comm(comm),
+                                (hypre_int)source, (hypre_int)tag, comm,
                                 &hypre_MPI_RequestMPI_Request(*request));
 }
 
@@ -1320,18 +1302,18 @@ hypre_MPI_Irecv( void               *buf,
       void *cbuf = NULL;                                                              \
       if (SEND_RECV == TYPE_MACRO_SEND || SEND_RECV == TYPE_MACRO_SEND_INIT)          \
       {                                                                               \
-         cbuf = hypre_MPI_CommMPI_SendCopy(comm);                                     \
+         cbuf = hypre_MPICommGetSendCopy(comm);                                       \
       }                                                                               \
       else if (SEND_RECV == TYPE_MACRO_RECV || SEND_RECV == TYPE_MACRO_RECV_INIT)     \
       {                                                                               \
-         cbuf = hypre_MPI_CommMPI_RecvCopy(comm);                                     \
+         cbuf = hypre_MPICommGetRecvCopy(comm);                                       \
       }                                                                               \
       HYPRE_DTYPE *_buf = (HYPRE_DTYPE *) (cbuf ? cbuf : buf);                        \
       if (SEND_RECV == TYPE_MACRO_SEND && _buf != buf)                                \
       {                                                                               \
          hypre_GpuProfilingPushRange("MPI-D2H");                                      \
          _hypre_TMemcpy(_buf, buf, HYPRE_DTYPE, ntot,                                 \
-                        hypre_MPI_CommMPI_SendCopyLocation(comm), memory_location);   \
+                        hypre_MPICommGetSendCopyLocation(comm), memory_location);     \
          hypre_GpuProfilingPopRange();                                                \
       }                                                                               \
       for (i = 0; i < num; i++)                                                       \
@@ -1340,7 +1322,7 @@ hypre_MPI_Irecv( void               *buf,
          HYPRE_Int start = displs[i];                                                 \
          HYPRE_Int len = counts ? counts[i] : displs[i + 1] - start;                  \
          MPI_CMD(_buf + start, len, HYPRE_MPI_DTYPE,                                  \
-                 ip, tag, hypre_MPI_CommMPI_Comm(comm),                               \
+                 ip, tag, comm,                                                       \
                  &hypre_MPI_RequestMPI_Request(requests[i]));                         \
       }                                                                               \
       if (_buf != buf)                                                                \
@@ -1349,7 +1331,7 @@ hypre_MPI_Irecv( void               *buf,
          if (SEND_RECV == TYPE_MACRO_SEND_INIT)                                       \
          {                                                                            \
             hypre_MPI_RequestSetActionCopy(0, _buf,                                   \
-                                           hypre_MPI_CommMPI_SendCopyLocation(comm),  \
+                                           hypre_MPICommGetSendCopyLocation(comm),    \
                                            buf,                                       \
                                            memory_location,                           \
                                            ntot * sizeof(HYPRE_DTYPE),                \
@@ -1360,7 +1342,7 @@ hypre_MPI_Irecv( void               *buf,
             hypre_MPI_RequestSetActionCopy(1, buf,                                    \
                                            memory_location,                           \
                                            _buf,                                      \
-                                           hypre_MPI_CommMPI_RecvCopyLocation(comm),  \
+                                           hypre_MPICommGetRecvCopyLocation(comm),    \
                                            ntot * sizeof(HYPRE_DTYPE),                \
                                            &requests[0]);                             \
          }                                                                            \
@@ -1380,7 +1362,7 @@ hypre_MPI_Isend_Multiple( void               *buf,
                           hypre_MPI_Comm      comm,
                           hypre_MPI_Request  *requests )
 {
-   hypre_MemoryLocation memory_location = hypre_MPI_CommMPI_SendLocation(comm);
+   hypre_MemoryLocation memory_location = hypre_MPICommGetSendLocation(comm);
 
    TYPE_MACRO(MPI_Isend, TYPE_MACRO_SEND, HYPRE_Complex, HYPRE_MPI_COMPLEX);
    TYPE_MACRO(MPI_Isend, TYPE_MACRO_SEND, HYPRE_Int,     HYPRE_MPI_INT);
@@ -1400,7 +1382,7 @@ hypre_MPI_Irecv_Multiple( void               *buf,
                           hypre_MPI_Comm      comm,
                           hypre_MPI_Request  *requests )
 {
-   hypre_MemoryLocation memory_location = hypre_MPI_CommMPI_RecvLocation(comm);
+   hypre_MemoryLocation memory_location = hypre_MPICommGetRecvLocation(comm);
 
    TYPE_MACRO(MPI_Irecv, TYPE_MACRO_RECV, HYPRE_Complex, HYPRE_MPI_COMPLEX);
    TYPE_MACRO(MPI_Irecv, TYPE_MACRO_RECV, HYPRE_Int,     HYPRE_MPI_INT);
@@ -1419,8 +1401,7 @@ hypre_MPI_Send_init( void               *buf,
                      hypre_MPI_Request  *request )
 {
    return (HYPRE_Int) MPI_Send_init(buf, (hypre_int)count, datatype,
-                                    (hypre_int)dest, (hypre_int)tag,
-                                    hypre_MPI_CommMPI_Comm(comm),
+                                    (hypre_int)dest, (hypre_int)tag, comm,
                                     &hypre_MPI_RequestMPI_Request(*request));
 }
 
@@ -1435,7 +1416,7 @@ hypre_MPI_Send_init_Multiple( void               *buf,
                               hypre_MPI_Comm      comm,
                               hypre_MPI_Request  *requests )
 {
-   hypre_MemoryLocation memory_location = hypre_MPI_CommMPI_SendLocation(comm);
+   hypre_MemoryLocation memory_location = hypre_MPICommGetSendLocation(comm);
 
    TYPE_MACRO(MPI_Send_init, TYPE_MACRO_SEND_INIT, HYPRE_Complex, HYPRE_MPI_COMPLEX);
    TYPE_MACRO(MPI_Send_init, TYPE_MACRO_SEND_INIT, HYPRE_Int,     HYPRE_MPI_INT);
@@ -1454,8 +1435,7 @@ hypre_MPI_Recv_init( void               *buf,
                      hypre_MPI_Request  *request )
 {
    return (HYPRE_Int) MPI_Recv_init(buf, (hypre_int)count, datatype,
-                                    (hypre_int)dest, (hypre_int)tag,
-                                    hypre_MPI_CommMPI_Comm(comm),
+                                    (hypre_int)dest, (hypre_int)tag, comm,
                                     &hypre_MPI_RequestMPI_Request(*request));
 }
 
@@ -1470,7 +1450,7 @@ hypre_MPI_Recv_init_Multiple( void               *buf,
                               hypre_MPI_Comm      comm,
                               hypre_MPI_Request  *requests )
 {
-   hypre_MemoryLocation memory_location = hypre_MPI_CommMPI_RecvLocation(comm);
+   hypre_MemoryLocation memory_location = hypre_MPICommGetRecvLocation(comm);
 
    TYPE_MACRO(MPI_Recv_init, TYPE_MACRO_RECV_INIT, HYPRE_Complex, HYPRE_MPI_COMPLEX);
    TYPE_MACRO(MPI_Recv_init, TYPE_MACRO_RECV_INIT, HYPRE_Int,     HYPRE_MPI_INT);
@@ -1489,8 +1469,7 @@ hypre_MPI_Irsend( void               *buf,
                   hypre_MPI_Request  *request )
 {
    return (HYPRE_Int) MPI_Irsend(buf, (hypre_int)count, datatype,
-                                 (hypre_int)dest, (hypre_int)tag,
-                                 hypre_MPI_CommMPI_Comm(comm),
+                                 (hypre_int)dest, (hypre_int)tag, comm,
                                  &hypre_MPI_RequestMPI_Request(*request));
 }
 
@@ -1525,8 +1504,7 @@ hypre_MPI_Probe( HYPRE_Int         source,
                  hypre_MPI_Comm    comm,
                  hypre_MPI_Status *status )
 {
-   return (HYPRE_Int) MPI_Probe((hypre_int)source, (hypre_int)tag,
-   hypre_MPI_CommMPI_Comm(comm), status);
+   return (HYPRE_Int) MPI_Probe((hypre_int)source, (hypre_int)tag, comm, status);
 }
 
 HYPRE_Int
@@ -1538,8 +1516,7 @@ hypre_MPI_Iprobe( HYPRE_Int         source,
 {
    hypre_int mpi_flag;
    HYPRE_Int ierr;
-   ierr = (HYPRE_Int) MPI_Iprobe((hypre_int)source, (hypre_int)tag,
-                                 hypre_MPI_CommMPI_Comm(comm),
+   ierr = (HYPRE_Int) MPI_Iprobe((hypre_int)source, (hypre_int)tag, comm,
                                  &mpi_flag, status);
    *flag = (HYPRE_Int) mpi_flag;
    return ierr;
@@ -1664,7 +1641,7 @@ hypre_MPI_Allreduce( void              *sendbuf,
    hypre_GpuProfilingPushRange("MPI_Allreduce");
 
    HYPRE_Int result = MPI_Allreduce(sendbuf, recvbuf, (hypre_int)count,
-                                    datatype, op, hypre_MPI_CommMPI_Comm(comm));
+                                    datatype, op, comm);
 
    hypre_GpuProfilingPopRange();
 
@@ -1681,8 +1658,7 @@ hypre_MPI_Reduce( void               *sendbuf,
                   hypre_MPI_Comm      comm )
 {
    return (HYPRE_Int) MPI_Reduce(sendbuf, recvbuf, (hypre_int)count,
-                                 datatype, op, (hypre_int)root,
-                                 hypre_MPI_CommMPI_Comm(comm));
+                                 datatype, op, (hypre_int)root, comm);
 }
 
 HYPRE_Int
@@ -1694,7 +1670,7 @@ hypre_MPI_Scan( void               *sendbuf,
                 hypre_MPI_Comm      comm )
 {
    return (HYPRE_Int) MPI_Scan(sendbuf, recvbuf, (hypre_int)count,
-                               datatype, op, hypre_MPI_CommMPI_Comm(comm));
+                               datatype, op, comm);
 }
 
 HYPRE_Int

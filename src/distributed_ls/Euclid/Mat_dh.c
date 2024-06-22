@@ -153,7 +153,6 @@ void Mat_dhMatVecSetup(Mat_dh mat)
     HYPRE_Int firstLocal = mat->beg_row;
     HYPRE_Int lastLocal = firstLocal+m;
     HYPRE_Int *beg_rows, *end_rows;
-    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
 
     mat->recv_req = (hypre_MPI_Request *)MALLOC_DH(np_dh * sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
     mat->send_req = (hypre_MPI_Request *)MALLOC_DH(np_dh * sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
@@ -165,9 +164,11 @@ void Mat_dhMatVecSetup(Mat_dh mat)
       beg_rows[0] = 0;
       end_rows[0] = m;
     } else {
-      ierr = hypre_MPI_Allgather(&firstLocal, 1, HYPRE_MPI_INT, beg_rows, 1, HYPRE_MPI_INT, hcomm); CHECK_MPI_V_ERROR(ierr);
+      ierr = hypre_MPI_Allgather(&firstLocal, 1, HYPRE_MPI_INT, beg_rows, 1, HYPRE_MPI_INT, comm_dh);
 
-      ierr = hypre_MPI_Allgather(&lastLocal, 1, HYPRE_MPI_INT, end_rows, 1, HYPRE_MPI_INT, hcomm); CHECK_MPI_V_ERROR(ierr);
+  CHECK_MPI_V_ERROR(ierr);
+
+      ierr = hypre_MPI_Allgather(&lastLocal, 1, HYPRE_MPI_INT, end_rows, 1, HYPRE_MPI_INT, comm_dh); CHECK_MPI_V_ERROR(ierr);
     }
 
     outlist = (HYPRE_Int *)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
@@ -188,7 +189,7 @@ void Mat_dhMatVecSetup(Mat_dh mat)
     if (np_dh == 1) { /* this is for debugging purposes in some of the drivers */
       inlist[0] = outlist[0];
     } else {
-      ierr = hypre_MPI_Alltoall(outlist, 1, HYPRE_MPI_INT, inlist, 1, HYPRE_MPI_INT, hcomm); CHECK_MPI_V_ERROR(ierr);
+      ierr = hypre_MPI_Alltoall(outlist, 1, HYPRE_MPI_INT, inlist, 1, HYPRE_MPI_INT, comm_dh); CHECK_MPI_V_ERROR(ierr);
     }
 
     setup_matvec_sends_private(mat, inlist); CHECK_V_ERROR;
@@ -221,7 +222,6 @@ void setup_matvec_receives_private(Mat_dh mat, HYPRE_Int *beg_rows, HYPRE_Int *e
   HYPRE_Int ierr, i, j, this_pe;
   hypre_MPI_Request request;
   HYPRE_Int m = mat->m;
-  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
 
   mat->num_recv = 0;
 
@@ -242,14 +242,14 @@ void setup_matvec_receives_private(Mat_dh mat, HYPRE_Int *beg_rows, HYPRE_Int *e
     }
 
     /* Request rows in reqind[i..j-1] */
-    ierr = hypre_MPI_Isend(&reqind[i], j-i, HYPRE_MPI_INT, this_pe, 444, hcomm, &request); CHECK_MPI_V_ERROR(ierr);
+    ierr = hypre_MPI_Isend(&reqind[i], j-i, HYPRE_MPI_INT, this_pe, 444, comm_dh, &request); CHECK_MPI_V_ERROR(ierr);
     ierr = hypre_MPI_Request_free(&request); CHECK_MPI_V_ERROR(ierr);
 
     /* Count of number of number of indices needed from this_pe */
     outlist[this_pe] = j-i;
 
     ierr = hypre_MPI_Recv_init(&mat->recvbuf[i+m], j-i, hypre_MPI_REAL, this_pe, 555,
-                               hcomm, &mat->recv_req[mat->num_recv]); CHECK_MPI_V_ERROR(ierr);
+            comm_dh, &mat->recv_req[mat->num_recv]); CHECK_MPI_V_ERROR(ierr);
 
     mat->num_recv++;
     mat->recvlen += j-i;  /* only used for statistical reporting */
@@ -267,7 +267,6 @@ void setup_matvec_sends_private(Mat_dh mat, HYPRE_Int *inlist)
   HYPRE_Int ierr, i, j, sendlen, first = mat->beg_row;
   hypre_MPI_Request *requests;
   hypre_MPI_Status  *statuses;
-  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
 
   requests = (hypre_MPI_Request *) MALLOC_DH(np_dh * sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
   statuses = (hypre_MPI_Status *)  MALLOC_DH(np_dh * sizeof(hypre_MPI_Status)); CHECK_V_ERROR;
@@ -284,10 +283,10 @@ void setup_matvec_sends_private(Mat_dh mat, HYPRE_Int *inlist)
   for (i=0; i<np_dh; i++) {
     if (inlist[i] != 0) {
       /* Post receive for the actual indices */
-      ierr = hypre_MPI_Irecv(&mat->sendind[j], inlist[i], HYPRE_MPI_INT, i, 444, hcomm,
+      ierr = hypre_MPI_Irecv(&mat->sendind[j], inlist[i], HYPRE_MPI_INT, i, 444, comm_dh,
                             &requests[mat->num_send]); CHECK_MPI_V_ERROR(ierr);
       /* Set up the send */
-      ierr = hypre_MPI_Send_init(&mat->sendbuf[j], inlist[i], hypre_MPI_REAL, i, 555, hcomm,
+      ierr = hypre_MPI_Send_init(&mat->sendbuf[j], inlist[i], hypre_MPI_REAL, i, 555, comm_dh,
                        &mat->send_req[mat->num_send]); CHECK_MPI_V_ERROR(ierr);
 
       mat->num_send++;
@@ -541,8 +540,7 @@ HYPRE_Int Mat_dhReadNz(Mat_dh mat)
   START_FUNC_DH
   HYPRE_Int ierr, retval = mat->rp[mat->m];
   HYPRE_Int nz = retval;
-  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
-  ierr = hypre_MPI_Allreduce(&nz, &retval, 1, HYPRE_MPI_INT, hypre_MPI_SUM, hcomm); CHECK_MPI_ERROR(ierr);
+  ierr = hypre_MPI_Allreduce(&nz, &retval, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm_dh); CHECK_MPI_ERROR(ierr);
   END_FUNC_VAL(retval)
 }
 
@@ -600,9 +598,8 @@ void Mat_dhReduceTiming(Mat_dh mat)
   if (mat->time[MATVEC_MPI_TIME]) {
     mat->time[MATVEC_RATIO] = mat->time[MATVEC_TIME] / mat->time[MATVEC_MPI_TIME];
   }
-  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
-  hypre_MPI_Allreduce(mat->time, mat->time_min, MAT_DH_BINS, hypre_MPI_REAL, hypre_MPI_MIN, hcomm);
-  hypre_MPI_Allreduce(mat->time, mat->time_max, MAT_DH_BINS, hypre_MPI_REAL, hypre_MPI_MAX, hcomm);
+  hypre_MPI_Allreduce(mat->time, mat->time_min, MAT_DH_BINS, hypre_MPI_REAL, hypre_MPI_MIN, comm_dh);
+  hypre_MPI_Allreduce(mat->time, mat->time_max, MAT_DH_BINS, hypre_MPI_REAL, hypre_MPI_MAX, comm_dh);
   END_FUNC_DH
 }
 

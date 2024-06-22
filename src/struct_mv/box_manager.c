@@ -273,14 +273,13 @@ hypre_BoxManGetGlobalIsGatherCalled( hypre_BoxManager *manager,
    HYPRE_Int nprocs;
 
    hypre_MPI_Comm_size(comm, &nprocs);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    loc_is_gather = hypre_BoxManIsGatherCalled(manager);
 
    if (nprocs > 1)
    {
       hypre_MPI_Allreduce(&loc_is_gather, is_gather, 1, HYPRE_MPI_INT,
-                          hypre_MPI_LOR, hcomm);
+                          hypre_MPI_LOR, comm);
    }
    else /* just one proc */
    {
@@ -1160,7 +1159,6 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
    /* initilize */
    hypre_MPI_Comm_rank(comm, &myid);
    hypre_MPI_Comm_size(comm, &nprocs);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    gather_regions = hypre_BoxManGatherRegions(manager);
    nentries = hypre_BoxManNEntries(manager);
@@ -1178,7 +1176,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
       {
          is_gather = hypre_BoxManIsGatherCalled(manager);
          hypre_MPI_Allreduce(&is_gather, &global_is_gather, 1, HYPRE_MPI_INT,
-                             hypre_MPI_LOR, hcomm);
+                             hypre_MPI_LOR, comm);
       }
       else /* just one proc */
       {
@@ -1319,7 +1317,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
             sendbuf2[1] = (HYPRE_Real) num_my_entries;
 
             hypre_MPI_Allreduce(&sendbuf2, &recvbuf2, 2, HYPRE_MPI_REAL,
-                                hypre_MPI_SUM, hcomm);
+                                hypre_MPI_SUM, comm);
 
             global_volume = recvbuf2[0];
             global_num_boxes = (HYPRE_Int) recvbuf2[1];
@@ -1427,7 +1425,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
             send_statbuf[2] = num_my_entries;
 
             hypre_MPI_Allreduce(send_statbuf, statbuf, 3, HYPRE_MPI_INT,
-                                hypre_MPI_MAX, hcomm);
+                                hypre_MPI_MAX, comm);
 
             //max_proc_count = statbuf[0];
 
@@ -1775,7 +1773,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
          recv_counts = hypre_CTAlloc(HYPRE_Int,  nprocs, HYPRE_MEMORY_HOST);
 
          hypre_MPI_Allgather(&send_count_bytes, 1, HYPRE_MPI_INT,
-                             recv_counts, 1, HYPRE_MPI_INT, hcomm);
+                             recv_counts, 1, HYPRE_MPI_INT, comm);
 
          displs = hypre_CTAlloc(HYPRE_Int,  nprocs, HYPRE_MEMORY_HOST);
          displs[0] = 0;
@@ -1844,7 +1842,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
          /* now send_buf is ready to go! */
 
          hypre_MPI_Allgatherv(send_buf, send_count_bytes, hypre_MPI_BYTE,
-                              recv_buf, recv_counts, displs, hypre_MPI_BYTE, hcomm);
+                              recv_buf, recv_counts, displs, hypre_MPI_BYTE, comm);
 
          /* unpack recv_buf into entries - let's just unpack them all into the
             entries table - this way they will already be sorted - so we set
@@ -2205,7 +2203,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
          if (global_num_boxes == nentries) { all_known = 1; }
 
          hypre_MPI_Allreduce(&all_known, &global_all_known, 1, HYPRE_MPI_INT,
-                             hypre_MPI_LAND, hcomm);
+                             hypre_MPI_LAND, comm);
 
          hypre_BoxManAllGlobalKnown(manager) = global_all_known;
       }

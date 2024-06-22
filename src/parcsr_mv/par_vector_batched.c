@@ -53,7 +53,6 @@ hypre_ParVectorMassInnerProd( hypre_ParVector  *x,
                               HYPRE_Real       *result )
 {
    MPI_Comm      comm    = hypre_ParVectorComm(x);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
    HYPRE_Real *local_result;
    HYPRE_Int i;
@@ -73,7 +72,7 @@ hypre_ParVectorMassInnerProd( hypre_ParVector  *x,
    hypre_profile_times[HYPRE_TIMER_ID_ALL_REDUCE] -= hypre_MPI_Wtime();
 #endif
    hypre_MPI_Allreduce(local_result, result, k, HYPRE_MPI_REAL,
-                       hypre_MPI_SUM, hcomm);
+                       hypre_MPI_SUM, comm);
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_ALL_REDUCE] += hypre_MPI_Wtime();
 #endif
@@ -98,7 +97,6 @@ hypre_ParVectorMassDotpTwo ( hypre_ParVector  *x,
                              HYPRE_Real       *result_y )
 {
    MPI_Comm      comm    = hypre_ParVectorComm(x);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
    HYPRE_Real *local_result, *result;
@@ -121,7 +119,7 @@ hypre_ParVectorMassDotpTwo ( hypre_ParVector  *x,
    hypre_profile_times[HYPRE_TIMER_ID_ALL_REDUCE] -= hypre_MPI_Wtime();
 #endif
    hypre_MPI_Allreduce(local_result, result, 2 * k, HYPRE_MPI_REAL,
-                       hypre_MPI_SUM, hcomm);
+                       hypre_MPI_SUM, comm);
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_ALL_REDUCE] += hypre_MPI_Wtime();
 #endif

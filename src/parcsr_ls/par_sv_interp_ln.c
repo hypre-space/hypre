@@ -223,7 +223,6 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &myid);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
 
 #if SV_DEBUG
@@ -2485,7 +2484,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
       {
          g_nc = new_col_starts[1];
       }
-      hypre_MPI_Bcast(&g_nc, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+      hypre_MPI_Bcast(&g_nc, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    }
    else /* not first level */
    {

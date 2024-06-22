@@ -40,8 +40,7 @@ hypre_MGRCoarseParms(MPI_Comm          comm,
    /* Scan global starts */
    sbuffer_send[0] = (HYPRE_BigInt) num_cpts;
    sbuffer_send[1] = (HYPRE_BigInt) num_fpts;
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
-   hypre_MPI_Scan(&sbuffer_send, &sbuffer_recv, 2, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
+   hypre_MPI_Scan(&sbuffer_send, &sbuffer_recv, 2, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
 
    /* First points in next processor's range */
    row_starts_cpts[1] = sbuffer_recv[0];

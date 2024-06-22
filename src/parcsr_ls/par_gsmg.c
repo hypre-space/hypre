@@ -286,8 +286,7 @@ hypre_ParCSRMatrixChooseThresh(hypre_ParCSRMatrix *S)
       }
    }
 
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
-   hypre_MPI_Allreduce(&minimax, &minmin, 1, HYPRE_MPI_REAL, hypre_MPI_MIN, hcomm);
+   hypre_MPI_Allreduce(&minimax, &minmin, 1, HYPRE_MPI_REAL, hypre_MPI_MIN, comm);
 
    return minmin;
 }

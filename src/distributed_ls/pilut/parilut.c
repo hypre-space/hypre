@@ -196,7 +196,6 @@ void hypre_ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, HYPRE_Int *
   HYPRE_Int *rrowind,  *rnbrptr,  *rnbrind, *srowind, *snbrind, *snbrptr;
   hypre_MPI_Status Status ;
   hypre_MPI_Request *index_requests;
-  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(pilut_comm);
 
 #ifdef HYPRE_DEBUG
   hypre_PrintLine("hypre_ComputeCommInfo", globals);
@@ -277,7 +276,7 @@ void hypre_ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, HYPRE_Int *
     pilu_send[rnbrind[i]] = rnbrptr[i+1]-rnbrptr[i];    /* The # of rows I need */
 
   hypre_MPI_Alltoall( pilu_send, 1, HYPRE_MPI_INT,
-        pilu_recv, 1, HYPRE_MPI_INT, hcomm );
+        pilu_recv, 1, HYPRE_MPI_INT, pilut_comm );
 
   nsend = 0;
   snnbr = 0;
@@ -309,12 +308,12 @@ void hypre_ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, HYPRE_Int *
   /* issue asynchronous recieves */
   for (i=0; i<snnbr; i++) {
     hypre_MPI_Irecv( srowind+snbrptr[i], snbrptr[i+1]-snbrptr[i], HYPRE_MPI_INT,
-          snbrind[i], TAG_Comm_rrowind, hcomm, &index_requests[i] ) ;
+          snbrind[i], TAG_Comm_rrowind, pilut_comm, &index_requests[i] ) ;
   }
   /* OK, now I go and send the rrowind to the processor */
   for (i=0; i<rnnbr; i++) {
     hypre_MPI_Send( rrowind+rnbrptr[i], rnbrptr[i+1]-rnbrptr[i], HYPRE_MPI_INT,
-          rnbrind[i], TAG_Comm_rrowind, hcomm );
+          rnbrind[i], TAG_Comm_rrowind, pilut_comm );
   }
 
   /* finalize  receives */
@@ -457,7 +456,6 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
   HYPRE_Real *dgatherbuf, *uvalues, *dvalues, *invalues;
   hypre_MPI_Status Status;
   hypre_MPI_Request *index_requests, *value_requests ;
-  hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(pilut_comm);
 
 #ifdef HYPRE_DEBUG
   hypre_PrintLine("hypre_SendFactoredRows", globals);
@@ -498,10 +496,10 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
     penum = rnbrind[i];
 
     hypre_MPI_Irecv( incolind+j, cnt, HYPRE_MPI_INT,
-          penum, TAG_Send_colind, hcomm, &index_requests[i] );
+          penum, TAG_Send_colind, pilut_comm, &index_requests[i] );
 
     hypre_MPI_Irecv( invalues+j, cnt, hypre_MPI_REAL,
-          penum, TAG_Send_values, hcomm, &value_requests[i] );
+          penum, TAG_Send_values, pilut_comm, &value_requests[i] );
 
     j += cnt;
   }
@@ -527,7 +525,7 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
   /* send colind to each neighbor */
   for (i=0; i<snnbr; i++) {
     hypre_MPI_Send( sgatherbuf, l, HYPRE_MPI_INT,
-          snbrind[i], TAG_Send_colind, hcomm );
+          snbrind[i], TAG_Send_colind, pilut_comm );
   }
 
   /* pack the values */
@@ -548,7 +546,7 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
   /* send values to each neighbor */
   for (i=0; i<snnbr; i++) {
     hypre_MPI_Send( dgatherbuf, l, hypre_MPI_REAL,
-          snbrind[i], TAG_Send_values, hcomm );
+          snbrind[i], TAG_Send_values, pilut_comm );
   }
 
   /* Finish receiving rows */

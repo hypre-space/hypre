@@ -54,13 +54,12 @@ Matrix *MatrixCreate(MPI_Comm comm, HYPRE_Int beg_row, HYPRE_Int end_row)
 
    hypre_MPI_Comm_rank(comm, &mype);
    hypre_MPI_Comm_size(comm, &npes);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    mat->beg_rows = (HYPRE_Int *) MemAlloc(mat->mem, npes * sizeof(HYPRE_Int));
    mat->end_rows = (HYPRE_Int *) MemAlloc(mat->mem, npes * sizeof(HYPRE_Int));
 
-   hypre_MPI_Allgather(&beg_row, 1, HYPRE_MPI_INT, mat->beg_rows, 1, HYPRE_MPI_INT, hcomm);
-   hypre_MPI_Allgather(&end_row, 1, HYPRE_MPI_INT, mat->end_rows, 1, HYPRE_MPI_INT, hcomm);
+   hypre_MPI_Allgather(&beg_row, 1, HYPRE_MPI_INT, mat->beg_rows, 1, HYPRE_MPI_INT, comm);
+   hypre_MPI_Allgather(&end_row, 1, HYPRE_MPI_INT, mat->end_rows, 1, HYPRE_MPI_INT, comm);
 
    mat->num_recv = 0;
    mat->num_send = 0;
@@ -237,8 +236,6 @@ HYPRE_Int MatrixRowPe(Matrix *mat, HYPRE_Int row)
 HYPRE_Int MatrixNnz(Matrix *mat)
 {
    HYPRE_Int num_local, i, total, alltotal;
-   MPI_Comm comm = mat->comm;
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    num_local = mat->end_row - mat->beg_row + 1;
 
@@ -246,7 +243,7 @@ HYPRE_Int MatrixNnz(Matrix *mat)
    for (i=0; i<num_local; i++)
       total += mat->lens[i];
 
-   hypre_MPI_Allreduce(&total, &alltotal, 1, HYPRE_MPI_INT, hypre_MPI_SUM, hcomm);
+   hypre_MPI_Allreduce(&total, &alltotal, 1, HYPRE_MPI_INT, hypre_MPI_SUM, mat->comm);
 
    return alltotal;
 }
@@ -318,7 +315,6 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
 
    hypre_MPI_Comm_size(mat->comm, &npes);
    hypre_MPI_Comm_rank(mat->comm, &mype);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    file = fopen(filename, "r");
    hypre_assert(file != NULL);
@@ -348,7 +344,7 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
       {
          hypre_MPI_Wait(&request, &status);
          outbuf = offset;
-         hypre_MPI_Isend(&outbuf, 1, hypre_MPI_LONG, curr_proc, 0, hcomm, &request);
+         hypre_MPI_Isend(&outbuf, 1, hypre_MPI_LONG, curr_proc, 0, comm, &request);
          curr_proc++;
       }
       offset = ftell(file);
@@ -425,7 +421,6 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
 static void MatrixReadSlave(Matrix *mat, char *filename)
 {
    MPI_Comm comm = mat->comm;
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    hypre_MPI_Status status;
    HYPRE_Int mype;
    FILE *file;
@@ -446,7 +441,7 @@ static void MatrixReadSlave(Matrix *mat, char *filename)
 
    hypre_MPI_Comm_rank(mat->comm, &mype);
 
-   hypre_MPI_Recv(&offset, 1, hypre_MPI_LONG, 0, 0, hcomm, &status);
+   hypre_MPI_Recv(&offset, 1, hypre_MPI_LONG, 0, 0, comm, &status);
    time0 = hypre_MPI_Wtime();
 
    ret = fseek(file, offset, SEEK_SET);
@@ -538,13 +533,12 @@ void RhsRead(HYPRE_Real *rhs, Matrix *mat, char *filename)
 
    hypre_MPI_Comm_size(mat->comm, &npes);
    hypre_MPI_Comm_rank(mat->comm, &mype);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(mat->comm);
 
    num_local = mat->end_row - mat->beg_row + 1;
 
    if (mype != 0)
    {
-      hypre_MPI_Recv(rhs, num_local, hypre_MPI_REAL, 0, 0, hcomm, &status);
+      hypre_MPI_Recv(rhs, num_local, hypre_MPI_REAL, 0, 0, mat->comm, &status);
       return;
    }
 
@@ -583,7 +577,7 @@ void RhsRead(HYPRE_Real *rhs, Matrix *mat, char *filename)
          else
             hypre_fscanf(file, "%lf", &buffer[i]);
 
-      hypre_MPI_Send(buffer, num_local, hypre_MPI_REAL, pe, 0, hcomm);
+      hypre_MPI_Send(buffer, num_local, hypre_MPI_REAL, pe, 0, mat->comm);
    }
 
    hypre_TFree(buffer,HYPRE_MEMORY_HOST);
@@ -598,7 +592,6 @@ static void SetupReceives(Matrix *mat, HYPRE_Int reqlen, HYPRE_Int *reqind, HYPR
    HYPRE_Int i, j, this_pe, mype;
    hypre_MPI_Request request;
    MPI_Comm comm = mat->comm;
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    HYPRE_Int num_local = mat->end_row - mat->beg_row + 1;
 
    hypre_MPI_Comm_rank(comm, &mype);
@@ -625,17 +618,17 @@ static void SetupReceives(Matrix *mat, HYPRE_Int reqlen, HYPRE_Int *reqind, HYPR
       }
 
       /* Request rows in reqind[i..j-1] */
-      hypre_MPI_Isend(&reqind[i], j-i, HYPRE_MPI_INT, this_pe, 444, hcomm, &request);
+      hypre_MPI_Isend(&reqind[i], j-i, HYPRE_MPI_INT, this_pe, 444, comm, &request);
       hypre_MPI_Request_free(&request);
 
       /* Count of number of number of indices needed from this_pe */
       outlist[this_pe] = j-i;
 
       hypre_MPI_Recv_init(&mat->recvbuf[i+num_local], j-i, hypre_MPI_REAL, this_pe, 555,
-            hcomm, &mat->recv_req[mat->num_recv]);
+            comm, &mat->recv_req[mat->num_recv]);
 
       hypre_MPI_Send_init(&mat->recvbuf[i+num_local], j-i, hypre_MPI_REAL, this_pe, 666,
-            hcomm, &mat->send_req2[mat->num_recv]);
+            comm, &mat->send_req2[mat->num_recv]);
 
       mat->num_recv++;
    }
@@ -652,7 +645,6 @@ static void SetupSends(Matrix *mat, HYPRE_Int *inlist)
    hypre_MPI_Request *requests;
    hypre_MPI_Status  *statuses;
    MPI_Comm comm = mat->comm;
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    hypre_MPI_Comm_rank(comm, &mype);
    hypre_MPI_Comm_size(comm, &npes);
@@ -679,15 +671,15 @@ static void SetupSends(Matrix *mat, HYPRE_Int *inlist)
       if (inlist[i] != 0)
       {
          /* Post receive for the actual indices */
-         hypre_MPI_Irecv(&mat->sendind[j], inlist[i], HYPRE_MPI_INT, i, 444, hcomm,
+         hypre_MPI_Irecv(&mat->sendind[j], inlist[i], HYPRE_MPI_INT, i, 444, comm,
                &requests[mat->num_send]);
 
          /* Set up the send */
-         hypre_MPI_Send_init(&mat->sendbuf[j], inlist[i], hypre_MPI_REAL, i, 555, hcomm,
+         hypre_MPI_Send_init(&mat->sendbuf[j], inlist[i], hypre_MPI_REAL, i, 555, comm,
                &mat->send_req[mat->num_send]);
 
          /* Set up the receive for the transpose  */
-         hypre_MPI_Recv_init(&mat->sendbuf[j], inlist[i], hypre_MPI_REAL, i, 666, hcomm,
+         hypre_MPI_Recv_init(&mat->sendbuf[j], inlist[i], hypre_MPI_REAL, i, 666, comm,
                &mat->recv_req2[mat->num_send]);
 
          mat->num_send++;
@@ -719,7 +711,6 @@ void MatrixComplete(Matrix *mat)
 
    hypre_MPI_Comm_rank(mat->comm, &mype);
    hypre_MPI_Comm_size(mat->comm, &npes);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(mat->comm);
 
    mat->recv_req = hypre_TAlloc(hypre_MPI_Request, npes , HYPRE_MEMORY_HOST);
    mat->send_req = hypre_TAlloc(hypre_MPI_Request, npes , HYPRE_MEMORY_HOST);
@@ -736,7 +727,7 @@ void MatrixComplete(Matrix *mat)
    SetupReceives(mat, mat->numb->num_ind - mat->numb->num_loc,
          &mat->numb->local_to_global[mat->numb->num_loc], outlist);
 
-   hypre_MPI_Alltoall(outlist, 1, HYPRE_MPI_INT, inlist, 1, HYPRE_MPI_INT, hcomm);
+   hypre_MPI_Alltoall(outlist, 1, HYPRE_MPI_INT, inlist, 1, HYPRE_MPI_INT, mat->comm);
 
    SetupSends(mat, inlist);
 

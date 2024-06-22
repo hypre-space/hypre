@@ -49,7 +49,6 @@ hypre_LocateAssumedPartition(MPI_Comm comm, HYPRE_BigInt row_start, HYPRE_BigInt
 
    hypre_MPI_Request  *requests;
    hypre_MPI_Status   status0, *statuses;
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -180,7 +179,7 @@ hypre_LocateAssumedPartition(MPI_Comm comm, HYPRE_BigInt row_start, HYPRE_BigInt
    for (i = 0; i < contact_list_length; i++)
    {
       hypre_MPI_Isend(&CONTACT(i, 1), 2, HYPRE_MPI_BIG_INT, CONTACT(i, 0), flag1,
-                      hcomm, &requests[i]);
+                      comm, &requests[i]);
       /*hypre_MPI_COMM_WORLD, &requests[i]);*/
    }
 
@@ -262,7 +261,7 @@ hypre_LocateAssumedPartition(MPI_Comm comm, HYPRE_BigInt row_start, HYPRE_BigInt
    while (rows_found != locate_row_count)
    {
       hypre_MPI_Recv( tmp_range, 2, HYPRE_MPI_BIG_INT, hypre_MPI_ANY_SOURCE,
-                      flag1, hcomm, &status0);
+                      flag1, comm, &status0);
       /*flag1 , hypre_MPI_COMM_WORLD, &status0);*/
 
       if (part->length == part->storage_length)

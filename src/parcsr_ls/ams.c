@@ -2938,7 +2938,6 @@ hypre_AMSSetup(void *solver,
    ams_data -> A = A;
 
    MPI_Comm comm = hypre_ParCSRMatrixComm(A);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    /* Modifications for problems with zero-conductivity regions */
    if (ams_data -> interior_nodes)
@@ -3124,7 +3123,7 @@ hypre_AMSSetup(void *solver,
             }
 
             lfactor *= 1e-10; /* scaling factor: max|A_ij|*1e-10 */
-            hypre_MPI_Allreduce(&lfactor, &factor, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, hcomm);
+            hypre_MPI_Allreduce(&lfactor, &factor, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, comm);
          }
 
          hypre_ParCSRMatrixAdd(factor, A, 1.0, B, &C);
@@ -4382,15 +4381,14 @@ hypre_AMSFEISetup(void *solver,
    HYPRE_Real *x_data, *y_data, *z_data;
 
    MPI_Comm comm = hypre_ParCSRMatrixComm(A);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    HYPRE_BigInt vert_part[2], num_global_vert;
    HYPRE_BigInt vert_start, vert_end;
    HYPRE_BigInt big_local_vert = (HYPRE_BigInt) num_local_vert;
 
    /* Find the processor partitioning of the vertices */
-   hypre_MPI_Scan(&big_local_vert, &vert_part[1], 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
+   hypre_MPI_Scan(&big_local_vert, &vert_part[1], 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
    vert_part[0] = vert_part[1] - big_local_vert;
-   hypre_MPI_Allreduce(&big_local_vert, &num_global_vert, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
+   hypre_MPI_Allreduce(&big_local_vert, &num_global_vert, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
 
    /* Construct hypre parallel vectors for the vertex coordinates */
    x_coord = hypre_ParVectorCreate(comm, num_global_vert, vert_part);

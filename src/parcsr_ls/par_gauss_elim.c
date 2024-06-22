@@ -154,7 +154,6 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
       /* Generate sub communicator - processes that have nonzero num_rows */
       hypre_GenerateSubComm(comm, num_rows, &new_comm);
       hypre_ParAMGDataNewComm(amg_data) = new_comm;
-      hypre_MPI_Comm hnew_comm = hypre_MPI_CommFromMPI_Comm(new_comm);
 
       if (num_rows)
       {
@@ -177,7 +176,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
          displs      = &comm_info[new_num_procs];
 
          hypre_ParAMGDataCommInfo(amg_data) = comm_info;
-         hypre_MPI_Allgather(&num_rows, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, hnew_comm);
+         hypre_MPI_Allgather(&num_rows, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, new_comm);
 
          displs[0] = 0;
          mat_displs[0] = 0;
@@ -216,7 +215,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
          }
 
          hypre_MPI_Allgatherv(A_mat_local, A_mat_local_size, HYPRE_MPI_REAL, A_mat, mat_info,
-                              mat_displs, HYPRE_MPI_REAL, hnew_comm);
+                              mat_displs, HYPRE_MPI_REAL, new_comm);
 
          /* Set dense matrix - We store it in row-major format when using hypre's internal
             Gaussian Elimination or in column-major format if using LAPACK solvers */
@@ -459,7 +458,6 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
    HYPRE_Int            *displs, *info;
    HYPRE_Int             new_num_procs;
 
-   hypre_MPI_Comm hnew_comm = hypre_MPI_CommFromMPI_Comm(new_comm);
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SOLVE] -= hypre_MPI_Wtime();
@@ -535,7 +533,7 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
 
       /* TODO (VPM): Add GPU-aware MPI support to buffers */
       hypre_MPI_Allgatherv(f_data_h, num_rows, HYPRE_MPI_REAL, b_data_h,
-                           info, displs, HYPRE_MPI_REAL, hnew_comm);
+                           info, displs, HYPRE_MPI_REAL, new_comm);
 
       if (f_data_h != f_data)
       {

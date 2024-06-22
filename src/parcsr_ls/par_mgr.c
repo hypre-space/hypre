@@ -1398,7 +1398,6 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    nfpoints = 0;
    for (i = 0; i < A_nr_of_rows; i++)
@@ -1466,7 +1465,7 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
       {
          nC_global = num_cpts_global[1];
       }
-      hypre_MPI_Bcast(&nC_global, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+      hypre_MPI_Bcast(&nC_global, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    }
 
    /* Construct P from matrix product W_diag */
@@ -1629,7 +1628,6 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    //num_threads = hypre_NumThreads();
    // Temporary fix, disable threading
    // TODO: enable threading
@@ -1637,7 +1635,7 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
 
    //my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs - 1)) { total_global_cpts = num_cpts_global[1]; }
-   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
 
    /*-------------------------------------------------------------------
    * Get the CF_marker data for the off-processor columns
@@ -2209,7 +2207,6 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    //num_threads = hypre_NumThreads();
    // Temporary fix, disable threading
    // TODO: enable threading
@@ -2217,7 +2214,7 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 
    //my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs - 1)) { total_global_cpts = num_cpts_global[1]; }
-   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -2748,7 +2745,6 @@ hypre_MGRGetAcfCPR(hypre_ParCSRMatrix     *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    // Count total F-points
    // Also setup F to C column map
@@ -2779,7 +2775,7 @@ hypre_MGRGetAcfCPR(hypre_ParCSRMatrix     *A,
    //hypre_printf("my_id = %d, cpts_this = %d, cpts_next = %d\n", my_id, num_row_cpts_global[0], num_row_cpts_global[1]);
 
    if (my_id == (num_procs - 1)) { total_global_row_cpts = num_row_cpts_global[1]; }
-   hypre_MPI_Bcast(&total_global_row_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+   hypre_MPI_Bcast(&total_global_row_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
 
    /* get the number of coarse rows */
    hypre_IntArrayData(wrap_cf) = f_marker;
@@ -2793,7 +2789,7 @@ hypre_MGRGetAcfCPR(hypre_ParCSRMatrix     *A,
    //hypre_printf("my_id = %d, cpts_this = %d, cpts_next = %d\n", my_id, num_col_fpts_global[0], num_col_fpts_global[1]);
 
    if (my_id == (num_procs - 1)) { total_global_col_fpts = num_col_fpts_global[1]; }
-   hypre_MPI_Bcast(&total_global_col_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+   hypre_MPI_Bcast(&total_global_col_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
 
    // First pass: count the nnz of A_CF
    jj_counter = 0;
@@ -3503,10 +3499,9 @@ hypre_MGRBuildInterpApproximateInverse(hypre_ParCSRMatrix   *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    if (my_id == (num_procs - 1)) { total_global_cpts = num_cpts_global[1]; }
-   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
 
    /*-----------------------------------------------------------------------
     *  Allocate  arrays.
@@ -4799,7 +4794,6 @@ hypre_ParCSRMatrixBlockDiagMatrixHost( hypre_ParCSRMatrix  *A,
 
    hypre_MPI_Comm_rank(comm, &my_id);
    hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    /* Sanity check */
    if ((num_rows_A > 0) && (num_rows_A < blk_size))
@@ -4837,7 +4831,7 @@ hypre_ParCSRMatrixBlockDiagMatrixHost( hypre_ParCSRMatrix  *A,
    if (CF_marker)
    {
       num_rows_big = (HYPRE_BigInt) B_diag_num_rows;
-      hypre_MPI_Scan(&num_rows_big, &scan_recv, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
+      hypre_MPI_Scan(&num_rows_big, &scan_recv, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
 
       /* first point in my range */
       row_starts_B[0] = scan_recv - num_rows_big;
@@ -4848,7 +4842,7 @@ hypre_ParCSRMatrixBlockDiagMatrixHost( hypre_ParCSRMatrix  *A,
       {
          num_rows_B = row_starts_B[1];
       }
-      hypre_MPI_Bcast(&num_rows_B, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+      hypre_MPI_Bcast(&num_rows_B, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    }
    else
    {
@@ -6076,7 +6070,6 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    //num_threads = hypre_NumThreads();
    // Temporary fix, disable threading
    // TODO: enable threading
@@ -6095,7 +6088,7 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
 
    //  my_first_row_cpt = num_row_cpts_global[0];
    if (my_id == (num_procs - 1)) { total_global_row_cpts = num_row_cpts_global[1]; }
-   hypre_MPI_Bcast(&total_global_row_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+   hypre_MPI_Bcast(&total_global_row_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
 
    /* get the number of coarse rows */
    hypre_IntArrayData(wrap_cf) = col_cf_marker;
@@ -6108,7 +6101,7 @@ hypre_MGRGetSubBlock( hypre_ParCSRMatrix   *A,
 
    //  my_first_col_cpt = num_col_cpts_global[0];
    if (my_id == (num_procs - 1)) { total_global_col_cpts = num_col_cpts_global[1]; }
-   hypre_MPI_Bcast(&total_global_col_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+   hypre_MPI_Bcast(&total_global_col_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -6702,7 +6695,6 @@ hypre_MGRDataPrint(void *mgr_vdata)
    /* Get rank ID */
    comm = hypre_ParCSRMatrixComm(par_A);
    hypre_MPI_Comm_rank(comm, &myid);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    /* Create new "ls_" folder (info_path) */
    if (((print_level & HYPRE_MGR_PRINT_INFO_PARAMS) ||
@@ -6720,7 +6712,7 @@ hypre_MGRDataPrint(void *mgr_vdata)
          hypre_CreateNextDirOfSequence(topdir, "ls_", &info_path);
          info_path_length = strlen(info_path) + 1;
       }
-      hypre_MPI_Bcast(&info_path_length, 1, HYPRE_MPI_INT, 0, hcomm);
+      hypre_MPI_Bcast(&info_path_length, 1, HYPRE_MPI_INT, 0, comm);
 
       if (info_path_length > 0)
       {
@@ -6734,7 +6726,7 @@ hypre_MGRDataPrint(void *mgr_vdata)
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unable to create info path!");
          return hypre_error_flag;
       }
-      hypre_MPI_Bcast(info_path, info_path_length, hypre_MPI_CHAR, 0, hcomm);
+      hypre_MPI_Bcast(info_path, info_path_length, hypre_MPI_CHAR, 0, comm);
 
       /* Save info_path */
       (mgr_data -> info_path) = info_path;

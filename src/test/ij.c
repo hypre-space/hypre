@@ -10157,7 +10157,6 @@ BuildFuncsFromOneFile( HYPRE_Int            argc,
    comm = hypre_MPI_COMM_WORLD;
    hypre_MPI_Comm_rank(comm, &myid );
    hypre_MPI_Comm_size(comm, &num_procs );
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -10211,7 +10210,7 @@ BuildFuncsFromOneFile( HYPRE_Int            argc,
       {
          hypre_MPI_Isend(&dof_func[partitioning[i]],
                          (partitioning[i + 1] - partitioning[i]),
-                         HYPRE_MPI_INT, i, 0, hcomm, &requests[i - 1]);
+                         HYPRE_MPI_INT, i, 0, comm, &requests[i - 1]);
       }
       for (i = 0; i < local_size; i++)
       {
@@ -10223,7 +10222,7 @@ BuildFuncsFromOneFile( HYPRE_Int            argc,
    }
    else
    {
-      hypre_MPI_Recv(dof_func_local, local_size, HYPRE_MPI_INT, 0, 0, hcomm, &status0);
+      hypre_MPI_Recv(dof_func_local, local_size, HYPRE_MPI_INT, 0, 0, comm, &status0);
    }
 
    *dof_func_ptr = dof_func_local;
@@ -10330,7 +10329,6 @@ BuildBigArrayFromOneFile( HYPRE_Int            argc,
     *-----------------------------------------------------------*/
    hypre_MPI_Comm_rank(comm, &myid);
    hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -10405,7 +10403,7 @@ BuildBigArrayFromOneFile( HYPRE_Int            argc,
          displs[proc + 1] = displs[proc] + send_counts[proc];
       }
    }
-   hypre_MPI_Scatter(send_counts, 1, HYPRE_MPI_INT, size, 1, HYPRE_MPI_INT, 0, hcomm);
+   hypre_MPI_Scatter(send_counts, 1, HYPRE_MPI_INT, size, 1, HYPRE_MPI_INT, 0, comm);
 
    if (myid == 0)
    {
@@ -10428,7 +10426,7 @@ BuildBigArrayFromOneFile( HYPRE_Int            argc,
 
    array = hypre_CTAlloc(HYPRE_BigInt, *size, HYPRE_MEMORY_HOST);
    hypre_MPI_Scatterv(send_buffer, send_counts, displs, HYPRE_MPI_BIG_INT,
-                      array, *size, HYPRE_MPI_BIG_INT, 0, hcomm);
+                      array, *size, HYPRE_MPI_BIG_INT, 0, comm);
    *array_ptr = array;
 
    /* Free memory */

@@ -669,7 +669,6 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S, HYPRE_Int numbero
 
    hypre_MPI_Comm_size (comm, &mpisize);
    hypre_MPI_Comm_rank (comm, &mpirank);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
 #if 0
    if (!mpirank)
@@ -707,7 +706,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S, HYPRE_Int numbero
          anyway, here it is: */
       HYPRE_Int nlocal = vertexrange[1] - vertexrange[0];
       vertexrange_all = hypre_CTAlloc(HYPRE_Int, mpisize + 1, HYPRE_MEMORY_HOST);
-      hypre_MPI_Allgather (&nlocal, 1, HYPRE_MPI_INT, vertexrange_all + 1, 1, HYPRE_MPI_INT, hcomm);
+      hypre_MPI_Allgather (&nlocal, 1, HYPRE_MPI_INT, vertexrange_all + 1, 1, HYPRE_MPI_INT, comm);
       vertexrange_all[0] = 0;
       for (j = 2; j <= mpisize; j++) { vertexrange_all[j] += vertexrange_all[j - 1]; }
    }
@@ -833,7 +832,6 @@ HYPRE_Int hypre_AmgCGCPrepare (hypre_ParCSRMatrix *S, HYPRE_Int nlocal, HYPRE_In
 
    hypre_MPI_Comm_size (comm, &mpisize);
    hypre_MPI_Comm_rank (comm, &mpirank);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    if (!comm_pkg)
    {
@@ -847,7 +845,7 @@ HYPRE_Int hypre_AmgCGCPrepare (hypre_ParCSRMatrix *S, HYPRE_Int nlocal, HYPRE_In
       HYPRE_Int scan_recv;
 
       vertexrange = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
-      hypre_MPI_Scan(&nlocal, &scan_recv, 1, HYPRE_MPI_INT, hypre_MPI_SUM, hcomm);
+      hypre_MPI_Scan(&nlocal, &scan_recv, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
       /* first point in my range */
       vertexrange[0] = scan_recv - nlocal;
       /* first point in next proc's range */
@@ -960,7 +958,6 @@ hypre_AmgCGCGraphAssemble(hypre_ParCSRMatrix *S,
 
    hypre_MPI_Comm_size (comm, &mpisize);
    hypre_MPI_Comm_rank (comm, &mpirank);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    /* determine neighbor processors */
    num_recvs = hypre_ParCSRCommPkgNumRecvs (comm_pkg);
@@ -986,10 +983,10 @@ hypre_AmgCGCGraphAssemble(hypre_ParCSRMatrix *S,
 
       for (i = 0; i < num_recvs; i++)
       {
-         hypre_MPI_Irecv (pointrange_nonlocal + 2 * i, 2, HYPRE_MPI_INT, recv_procs[i], tag_pointrange, hcomm,
+         hypre_MPI_Irecv (pointrange_nonlocal + 2 * i, 2, HYPRE_MPI_INT, recv_procs[i], tag_pointrange, comm,
                           &recvrequest[2 * i]);
          hypre_MPI_Irecv (vertexrange_nonlocal + 2 * i, 2, HYPRE_MPI_INT, recv_procs[i], tag_vertexrange,
-                          hcomm,
+                          comm,
                           &recvrequest[2 * i + 1]);
       }
       for (i = 0; i < num_sends; i++)
@@ -998,9 +995,9 @@ hypre_AmgCGCGraphAssemble(hypre_ParCSRMatrix *S,
          int_buf_data[2 * i + 1] = pointrange_end;
          int_buf_data2[2 * i] = vertexrange_start;
          int_buf_data2[2 * i + 1] = vertexrange_end;
-         hypre_MPI_Isend (int_buf_data + 2 * i, 2, HYPRE_MPI_INT, send_procs[i], tag_pointrange, hcomm,
+         hypre_MPI_Isend (int_buf_data + 2 * i, 2, HYPRE_MPI_INT, send_procs[i], tag_pointrange, comm,
                           &sendrequest[2 * i]);
-         hypre_MPI_Isend (int_buf_data2 + 2 * i, 2, HYPRE_MPI_INT, send_procs[i], tag_vertexrange, hcomm,
+         hypre_MPI_Isend (int_buf_data2 + 2 * i, 2, HYPRE_MPI_INT, send_procs[i], tag_vertexrange, comm,
                           &sendrequest[2 * i + 1]);
       }
       hypre_MPI_Waitall (2 * (num_sends + num_recvs), sendrequest, hypre_MPI_STATUSES_IGNORE);

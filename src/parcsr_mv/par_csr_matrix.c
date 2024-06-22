@@ -325,7 +325,6 @@ hypre_ParCSRMatrixSetNumNonzeros_core( hypre_ParCSRMatrix *matrix, const char* f
    }
 
    comm = hypre_ParCSRMatrixComm(matrix);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    diag = hypre_ParCSRMatrixDiag(matrix);
    offd = hypre_ParCSRMatrixOffd(matrix);
 
@@ -342,7 +341,7 @@ hypre_ParCSRMatrixSetNumNonzeros_core( hypre_ParCSRMatrix *matrix, const char* f
                                             hypre_CSRMatrixNumNonzeros(offd) );
 
       hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1, HYPRE_MPI_BIG_INT,
-                          hypre_MPI_SUM, hcomm);
+                          hypre_MPI_SUM, comm);
 
       hypre_ParCSRMatrixNumNonzeros(matrix) = total_num_nonzeros;
    }
@@ -354,7 +353,7 @@ hypre_ParCSRMatrixSetNumNonzeros_core( hypre_ParCSRMatrix *matrix, const char* f
                                           hypre_CSRMatrixNumNonzeros(offd) );
 
       hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1,
-                          HYPRE_MPI_REAL, hypre_MPI_SUM, hcomm);
+                          HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
 
       hypre_ParCSRMatrixDNumNonzeros(matrix) = total_num_nonzeros;
    }
@@ -394,7 +393,6 @@ HYPRE_Int
 hypre_ParCSRMatrixSetNumRownnz( hypre_ParCSRMatrix *matrix )
 {
    MPI_Comm          comm = hypre_ParCSRMatrixComm(matrix);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    hypre_CSRMatrix  *diag = hypre_ParCSRMatrixDiag(matrix);
    hypre_CSRMatrix  *offd = hypre_ParCSRMatrixOffd(matrix);
    HYPRE_Int        *rownnz_diag = hypre_CSRMatrixRownnz(diag);
@@ -429,7 +427,7 @@ hypre_ParCSRMatrixSetNumRownnz( hypre_ParCSRMatrix *matrix )
    local_num_rownnz += (HYPRE_BigInt) ((num_rownnz_diag - i) + (num_rownnz_offd - j));
 
    hypre_MPI_Allreduce(&local_num_rownnz, &global_num_rownnz, 1,
-                       HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
+                       HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
 
    hypre_ParCSRMatrixGlobalNumRownnz(matrix) = global_num_rownnz;
 
@@ -1612,7 +1610,6 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
 
    hypre_MPI_Comm_rank(comm, &my_id);
    hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    total_size = 4;
    if (my_id == 0)
@@ -1686,7 +1683,7 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
       A_i = hypre_CSRMatrixI(A);
       A_j = hypre_CSRMatrixJ(A);
    }
-   hypre_MPI_Bcast(global_data, 3, HYPRE_MPI_BIG_INT, 0, hcomm);
+   hypre_MPI_Bcast(global_data, 3, HYPRE_MPI_BIG_INT, 0, comm);
    global_num_rows = global_data[0];
    global_num_cols = global_data[1];
    global_size     = global_data[2];
@@ -1699,29 +1696,29 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
       {
          send_start = 4;
          hypre_MPI_Scatter(&global_data[send_start], 1, HYPRE_MPI_BIG_INT,
-                           &row_starts[0], 1, HYPRE_MPI_BIG_INT, 0, hcomm);
+                           &row_starts[0], 1, HYPRE_MPI_BIG_INT, 0, comm);
 
          send_start = 5;
          hypre_MPI_Scatter(&global_data[send_start], 1, HYPRE_MPI_BIG_INT,
-                           &row_starts[1], 1, HYPRE_MPI_BIG_INT, 0, hcomm);
+                           &row_starts[1], 1, HYPRE_MPI_BIG_INT, 0, comm);
 
          send_start = 4 + (num_procs + 1);
          hypre_MPI_Scatter(&global_data[send_start], 1, HYPRE_MPI_BIG_INT,
-                           &col_starts[0], 1, HYPRE_MPI_BIG_INT, 0, hcomm);
+                           &col_starts[0], 1, HYPRE_MPI_BIG_INT, 0, comm);
 
          send_start = 5 + (num_procs + 1);
          hypre_MPI_Scatter(&global_data[send_start], 1, HYPRE_MPI_BIG_INT,
-                           &col_starts[1], 1, HYPRE_MPI_BIG_INT, 0, hcomm);
+                           &col_starts[1], 1, HYPRE_MPI_BIG_INT, 0, comm);
       }
       else if ((global_data[3] == 0) || (global_data[3] == 1))
       {
          send_start = 4;
          hypre_MPI_Scatter(&global_data[send_start], 1, HYPRE_MPI_BIG_INT,
-                           &row_starts[0], 1, HYPRE_MPI_BIG_INT, 0, hcomm);
+                           &row_starts[0], 1, HYPRE_MPI_BIG_INT, 0, comm);
 
          send_start = 5;
          hypre_MPI_Scatter(&global_data[send_start], 1, HYPRE_MPI_BIG_INT,
-                           &row_starts[1], 1, HYPRE_MPI_BIG_INT, 0, hcomm);
+                           &row_starts[1], 1, HYPRE_MPI_BIG_INT, 0, comm);
 
          if (global_data[3] == 0)
          {
@@ -1733,11 +1730,11 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
       {
          send_start = 4;
          hypre_MPI_Scatter(&global_data[send_start], 1, HYPRE_MPI_BIG_INT,
-                           &col_starts[0], 1, HYPRE_MPI_BIG_INT, 0, hcomm);
+                           &col_starts[0], 1, HYPRE_MPI_BIG_INT, 0, comm);
 
          send_start = 5;
          hypre_MPI_Scatter(&global_data[send_start], 1, HYPRE_MPI_BIG_INT,
-                           &col_starts[1], 1, HYPRE_MPI_BIG_INT, 0, hcomm);
+                           &col_starts[1], 1, HYPRE_MPI_BIG_INT, 0, comm);
       }
    }
    hypre_TFree(global_data, HYPRE_MEMORY_HOST);
@@ -1771,8 +1768,8 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
       }
       //num_nonzeros_proc[num_procs-1] = A_i[(HYPRE_Int)global_num_rows] - A_i[(HYPRE_Int)row_starts[num_procs-1]];
    }
-   hypre_MPI_Scatter(num_rows_proc, 1, HYPRE_MPI_INT, &num_rows, 1, HYPRE_MPI_INT, 0, hcomm);
-   hypre_MPI_Scatter(num_nonzeros_proc, 1, HYPRE_MPI_INT, &num_nonzeros, 1, HYPRE_MPI_INT, 0, hcomm);
+   hypre_MPI_Scatter(num_rows_proc, 1, HYPRE_MPI_INT, &num_rows, 1, HYPRE_MPI_INT, 0, comm);
+   hypre_MPI_Scatter(num_nonzeros_proc, 1, HYPRE_MPI_INT, &num_nonzeros, 1, HYPRE_MPI_INT, 0, comm);
 
    /* RL: this is not correct: (HYPRE_Int) global_num_cols */
    local_A = hypre_CSRMatrixCreate(num_rows, (HYPRE_Int) global_num_cols, num_nonzeros);
@@ -1792,7 +1789,7 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
                                          &A_i[(HYPRE_Int) global_row_starts[i]],
                                          &A_j[ind],
                                          &csr_matrix_datatypes[i]);
-         hypre_MPI_Isend(hypre_MPI_BOTTOM, 1, csr_matrix_datatypes[i], i, 0, hcomm,
+         hypre_MPI_Isend(hypre_MPI_BOTTOM, 1, csr_matrix_datatypes[i], i, 0, comm,
                          &requests[i - 1]);
          hypre_MPI_Type_free(&csr_matrix_datatypes[i]);
       }
@@ -1826,7 +1823,7 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
                                       hypre_CSRMatrixI(local_A),
                                       hypre_CSRMatrixJ(local_A),
                                       &csr_matrix_datatypes[0]);
-      hypre_MPI_Recv(hypre_MPI_BOTTOM, 1, csr_matrix_datatypes[0], 0, 0, hcomm, &status0);
+      hypre_MPI_Recv(hypre_MPI_BOTTOM, 1, csr_matrix_datatypes[0], 0, 0, comm, &status0);
       hypre_MPI_Type_free(csr_matrix_datatypes);
    }
 
@@ -2169,7 +2166,6 @@ hypre_ParCSRMatrixToCSRMatrixAll_v2( hypre_ParCSRMatrix   *par_matrix,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    /* Clone input matrix to host memory */
    par_temp = hypre_ParCSRMatrixClone_v2(par_matrix, 1, HYPRE_MEMORY_HOST);
@@ -2236,11 +2232,11 @@ hypre_ParCSRMatrixToCSRMatrixAll_v2( hypre_ParCSRMatrix   *par_matrix,
       if (local_num_rows)
       {
          /* look for a message from processor 0 */
-         hypre_MPI_Probe(0, tag1, hcomm, &status1);
+         hypre_MPI_Probe(0, tag1, comm, &status1);
          hypre_MPI_Get_count(&status1, HYPRE_MPI_INT, &count);
 
          send_info = hypre_CTAlloc(HYPRE_Int, count, HYPRE_MEMORY_HOST);
-         hypre_MPI_Recv(send_info, count, HYPRE_MPI_INT, 0, tag1, hcomm, &status1);
+         hypre_MPI_Recv(send_info, count, HYPRE_MPI_INT, 0, tag1, comm, &status1);
 
          /* now unpack */
          num_types = send_info[0];
@@ -2308,7 +2304,7 @@ hypre_ParCSRMatrixToCSRMatrixAll_v2( hypre_ParCSRMatrix   *par_matrix,
       for (i = start; i < num_types; i++)
       {
          hypre_MPI_Isend(send_info, count, HYPRE_MPI_INT, used_procs[i], tag1,
-                         hcomm, &requests[i - start]);
+                         comm, &requests[i - start]);
       }
       hypre_MPI_Waitall(num_types - start, requests, status);
 
@@ -2350,13 +2346,13 @@ hypre_ParCSRMatrixToCSRMatrixAll_v2( hypre_ParCSRMatrix   *par_matrix,
       proc_id = used_procs[i];
       vec_len = (HYPRE_Int)(new_vec_starts[i + 1] - new_vec_starts[i]);
       hypre_MPI_Irecv(&matrix_i[new_vec_starts[i] + 1], vec_len, HYPRE_MPI_INT,
-                      proc_id, tag2, hcomm, &requests[j++]);
+                      proc_id, tag2, comm, &requests[j++]);
    }
    for (i = 0; i < num_types; i++)
    {
       proc_id = used_procs[i];
       hypre_MPI_Isend(&local_matrix_i[1], local_num_rows, HYPRE_MPI_INT,
-                      proc_id, tag2, hcomm, &requests[j++]);
+                      proc_id, tag2, comm, &requests[j++]);
    }
    hypre_MPI_Waitall(j, requests, status);
 
@@ -2389,17 +2385,17 @@ hypre_ParCSRMatrixToCSRMatrixAll_v2( hypre_ParCSRMatrix   *par_matrix,
       start_index = matrix_i[(HYPRE_Int)new_vec_starts[i]];
       num_data = matrix_i[(HYPRE_Int)new_vec_starts[i + 1]] - start_index;
       hypre_MPI_Irecv(&matrix_data[start_index], num_data, HYPRE_MPI_COMPLEX,
-                      used_procs[i], tag1, hcomm, &requests[j++]);
+                      used_procs[i], tag1, comm, &requests[j++]);
       hypre_MPI_Irecv(&matrix_j[start_index], num_data, HYPRE_MPI_INT,
-                      used_procs[i], tag3, hcomm, &requests[j++]);
+                      used_procs[i], tag3, comm, &requests[j++]);
    }
    local_num_nonzeros = local_matrix_i[local_num_rows];
    for (i = 0; i < num_types; i++)
    {
       hypre_MPI_Isend(local_matrix_data, local_num_nonzeros, HYPRE_MPI_COMPLEX,
-                      used_procs[i], tag1, hcomm, &requests[j++]);
+                      used_procs[i], tag1, comm, &requests[j++]);
       hypre_MPI_Isend(local_matrix_j, local_num_nonzeros, HYPRE_MPI_INT,
-                      used_procs[i], tag3, hcomm, &requests[j++]);
+                      used_procs[i], tag3, comm, &requests[j++]);
    }
 
    hypre_MPI_Waitall(num_requests, requests, status);

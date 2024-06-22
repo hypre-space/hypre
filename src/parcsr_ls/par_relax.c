@@ -417,7 +417,6 @@ hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    if (num_procs > 1)
    {
@@ -453,7 +452,7 @@ hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A,
                   v_buf_data[j] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
                }
                hypre_MPI_Isend(&v_buf_data[vec_start], vec_len, HYPRE_MPI_COMPLEX, ip, 0,
-                               hcomm, &requests[jr++]);
+                               comm, &requests[jr++]);
             }
          }
          hypre_MPI_Waitall(jr, requests, status);
@@ -469,7 +468,7 @@ hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A,
                vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i);
                vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start;
                hypre_MPI_Irecv(&v_ext_data[vec_start], vec_len, HYPRE_MPI_COMPLEX, ip, 0,
-                               hcomm, &requests[jr++]);
+                               comm, &requests[jr++]);
             }
             hypre_MPI_Waitall(jr, requests, status);
          }
@@ -566,7 +565,6 @@ hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    if (num_procs > 1)
    {
@@ -623,7 +621,7 @@ hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
                   v_buf_data[j] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg, j)];
                }
                hypre_MPI_Isend(&v_buf_data[vec_start], vec_len, HYPRE_MPI_COMPLEX, ip, 0,
-                               hcomm, &requests[jr++]);
+                               comm, &requests[jr++]);
             }
          }
          hypre_MPI_Waitall(jr, requests, status);
@@ -639,7 +637,7 @@ hypre_BoomerAMGRelax2GaussSeidel( hypre_ParCSRMatrix *A,
                vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i);
                vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start;
                hypre_MPI_Irecv(&v_ext_data[vec_start], vec_len, HYPRE_MPI_COMPLEX, ip, 0,
-                               hcomm, &requests[jr++]);
+                               comm, &requests[jr++]);
             }
             hypre_MPI_Waitall(jr, requests, status);
          }

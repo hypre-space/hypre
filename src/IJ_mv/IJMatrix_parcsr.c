@@ -2562,7 +2562,6 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
    //HYPRE_Int row_len;
    HYPRE_Int max_num_threads;
    HYPRE_Int aux_flag, aux_flag_global;
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -2576,7 +2575,7 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
    {
       aux_flag = 1;
    }
-   hypre_MPI_Allreduce(&aux_flag, &aux_flag_global, 1, HYPRE_MPI_INT, hypre_MPI_SUM, hcomm);
+   hypre_MPI_Allreduce(&aux_flag, &aux_flag_global, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
    if (aux_flag_global && (!aux_flag))
    {
       hypre_MPI_Comm_rank(comm, &my_id);
@@ -2634,7 +2633,7 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
       }*/
       off_proc_i_indx = hypre_AuxParCSRMatrixOffProcIIndx(aux_matrix);
       hypre_MPI_Allreduce(&off_proc_i_indx, &offd_proc_elmts, 1, HYPRE_MPI_INT,
-                          hypre_MPI_SUM, hcomm);
+                          hypre_MPI_SUM, comm);
       if (offd_proc_elmts)
       {
          max_off_proc_elmts = hypre_AuxParCSRMatrixMaxOffProcElmts(aux_matrix);

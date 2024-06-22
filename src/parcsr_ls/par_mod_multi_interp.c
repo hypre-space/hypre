@@ -98,7 +98,6 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    if (num_procs > 1)
    {
@@ -106,7 +105,7 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
       {
          total_global_cpts = num_cpts_global[1];
       }
-      hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+      hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    }
    else
    {
@@ -200,7 +199,7 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
    current_pass = 1;
    num_passes = 1;
    /* color points according to pass number */
-   hypre_MPI_Allreduce(&remaining, &global_remaining, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
+   hypre_MPI_Allreduce(&remaining, &global_remaining, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
    while (global_remaining > 0)
    {
       HYPRE_Int remaining_pts = (HYPRE_Int) remaining;
@@ -266,7 +265,7 @@ hypre_BoomerAMGBuildModMultipassHost( hypre_ParCSRMatrix  *A,
          hypre_ParCSRCommHandleDestroy(comm_handle);
       }
       old_global_remaining = global_remaining;
-      hypre_MPI_Allreduce(&remaining, &global_remaining, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
+      hypre_MPI_Allreduce(&remaining, &global_remaining, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       /* if the number of remaining points does not change, we have a situation of isolated areas of
        * fine points that are not connected to any C-points, and the pass generation process breaks
        * down. Those points can be ignored, i.e. the corresponding rows in P will just be 0
@@ -597,7 +596,6 @@ hypre_GenerateMultipassPi( hypre_ParCSRMatrix  *A,
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    /* define P matrices */
 
@@ -625,15 +623,15 @@ hypre_GenerateMultipassPi( hypre_ParCSRMatrix  *A,
       HYPRE_BigInt big_Fpts;
       big_Fpts = num_points;
 
-      hypre_MPI_Scan(&big_Fpts, f_pts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
+      hypre_MPI_Scan(&big_Fpts, f_pts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       f_pts_starts[0] = f_pts_starts[1] - big_Fpts;
       if (my_id == num_procs - 1)
       {
          total_global_fpts = f_pts_starts[1];
          total_global_cpts = c_pts_starts[1];
       }
-      hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
-      hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+      hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+      hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    }
    else
    {
@@ -924,7 +922,6 @@ hypre_GenerateMultiPi( hypre_ParCSRMatrix  *A,
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    /* define P matrices */
 
@@ -952,15 +949,15 @@ hypre_GenerateMultiPi( hypre_ParCSRMatrix  *A,
       HYPRE_BigInt big_Fpts;
       big_Fpts = num_points;
 
-      hypre_MPI_Scan(&big_Fpts, f_pts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
+      hypre_MPI_Scan(&big_Fpts, f_pts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       f_pts_starts[0] = f_pts_starts[1] - big_Fpts;
       if (my_id == num_procs - 1)
       {
          total_global_fpts = f_pts_starts[1];
          total_global_cpts = c_pts_starts[1];
       }
-      hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
-      hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+      hypre_MPI_Bcast(&total_global_fpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+      hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    }
    else
    {

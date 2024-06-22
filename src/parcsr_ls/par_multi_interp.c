@@ -206,12 +206,11 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    my_first_cpt = num_cpts_global[0];
    /*   total_global_cpts = 0; */
    if (my_id == (num_procs - 1)) { total_global_cpts = num_cpts_global[1]; }
-   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
 
    if (!comm_pkg)
    {
@@ -528,7 +527,7 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    pass = 2;
    local_pass_array_size = (HYPRE_BigInt)(pass_array_size - cnt);
    hypre_MPI_Allreduce(&local_pass_array_size, &global_pass_array_size, 1, HYPRE_MPI_BIG_INT,
-                       hypre_MPI_SUM, hcomm);
+                       hypre_MPI_SUM, comm);
    while (global_pass_array_size && pass < max_num_passes)
    {
       for (i = pass_array_size - 1; i > cnt - 1; i--)
@@ -569,7 +568,7 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
 
       local_pass_array_size = (HYPRE_BigInt)(pass_array_size - cnt);
       hypre_MPI_Allreduce(&local_pass_array_size, &global_pass_array_size, 1, HYPRE_MPI_BIG_INT,
-                          hypre_MPI_SUM, hcomm);
+                          hypre_MPI_SUM, comm);
       index = 0;
       for (i = 0; i < num_sends; i++)
       {

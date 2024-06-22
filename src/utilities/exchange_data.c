@@ -200,7 +200,6 @@ hypre_DataExchangeList(HYPRE_Int num_contacts,
    const HYPRE_Int term_tag =  1004 * rnum;
    const HYPRE_Int post_tag = 1006 * rnum;
 
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    hypre_MPI_Comm_size(comm, &num_procs );
    hypre_MPI_Comm_rank(comm, &myid );
 
@@ -265,7 +264,7 @@ hypre_DataExchangeList(HYPRE_Int num_contacts,
 
          hypre_MPI_Irecv(response_ptrs[i], max_response_total_bytes,
                          hypre_MPI_BYTE, contact_proc_list[i],
-                         response_tag, hcomm, &response_requests[i]);
+                         response_tag, comm, &response_requests[i]);
       }
 
       /* send out contact messages */
@@ -276,7 +275,7 @@ hypre_DataExchangeList(HYPRE_Int num_contacts,
          size =  contact_send_buf_starts[i + 1] - contact_send_buf_starts[i]  ;
          hypre_MPI_Isend(contact_ptrs[i], size * contact_obj_size,
                          hypre_MPI_BYTE, contact_proc_list[i],
-                         contact_tag, hcomm, &contact_requests[i]);
+                         contact_tag, comm, &contact_requests[i]);
          /*  start_ptr += (size*contact_obj_size); */
          start_ptr = (void *) ((char *) start_ptr  + (size * contact_obj_size));
       }
@@ -303,12 +302,11 @@ hypre_DataExchangeList(HYPRE_Int num_contacts,
 
       for (i = 0; i < tree -> num_child; i++)
       {
-         hypre_MPI_Irecv(NULL, 0, HYPRE_MPI_INT, (tree -> child_id)[i], term_tag, hcomm,
+         hypre_MPI_Irecv(NULL, 0, HYPRE_MPI_INT, (tree -> child_id)[i], term_tag, comm,
                          &term_requests[i]);
       }
 
       terminate = 0;
-
       children_complete = 0;
    }
    else if (num_procs == 1 && num_contacts > 0) /* added 11/08 */
@@ -323,7 +321,7 @@ hypre_DataExchangeList(HYPRE_Int num_contacts,
    while (!terminate)
    {
       /* did I receive any contact messages? */
-      hypre_MPI_Iprobe(hypre_MPI_ANY_SOURCE, contact_tag, hcomm,
+      hypre_MPI_Iprobe(hypre_MPI_ANY_SOURCE, contact_tag, comm,
                        &contact_flag, &status);
 
       while (contact_flag)
@@ -349,7 +347,7 @@ hypre_DataExchangeList(HYPRE_Int num_contacts,
 
          /* this must be blocking - can't fill recv without the buffer*/
          hypre_MPI_Recv(recv_contact_buf, contact_size * contact_obj_size,
-                        hypre_MPI_BYTE, proc, contact_tag, hcomm, &fill_status);
+                        hypre_MPI_BYTE, proc, contact_tag, comm, &fill_status);
 
          response_obj->fill_response(recv_contact_buf, contact_size, proc,
                                      response_obj, comm, &send_response_buf,
@@ -390,7 +388,7 @@ hypre_DataExchangeList(HYPRE_Int num_contacts,
             hypre_MPI_Isend(post_array[post_array_size], size,
                             hypre_MPI_BYTE, proc, post_tag,
                             /*hypre_MPI_COMM_WORLD, */
-                            hcomm,
+                            comm,
                             &post_send_requests[post_array_size]);
 
             post_array_size++;
@@ -407,12 +405,12 @@ hypre_DataExchangeList(HYPRE_Int num_contacts,
          /*send the block of data that includes the overhead */
          /* this is a blocking send - the recv has already been posted */
          hypre_MPI_Send(send_response_buf, max_response_total_bytes,
-                        hypre_MPI_BYTE, proc, response_tag, hcomm);
+                        hypre_MPI_BYTE, proc, response_tag, comm);
 
          /*--------------------------------------------------------------*/
 
          /* look for any more contact messages*/
-         hypre_MPI_Iprobe(hypre_MPI_ANY_SOURCE, contact_tag, hcomm,
+         hypre_MPI_Iprobe(hypre_MPI_ANY_SOURCE, contact_tag, comm,
                           &contact_flag, &status);
       }
 
@@ -439,10 +437,10 @@ hypre_DataExchangeList(HYPRE_Int num_contacts,
          if (children_complete & (myid > 0)) /*root does not have a parent*/
          {
             hypre_MPI_Isend(NULL, 0, HYPRE_MPI_INT, tree -> parent_id, term_tag,
-                            hcomm, &request_parent);
+                            comm, &request_parent);
 
             hypre_MPI_Irecv(NULL, 0, HYPRE_MPI_INT, tree -> parent_id, term_tag,
-                            hcomm, &term_request1);
+                            comm, &term_request1);
          }
       }
       else /*have we gotten a term message from our parent? */
@@ -463,7 +461,7 @@ hypre_DataExchangeList(HYPRE_Int num_contacts,
             {
                /*a blocking send  - recv has been posted already*/
                hypre_MPI_Send(NULL, 0, HYPRE_MPI_INT, (tree -> child_id)[i],
-                              term_tag, hcomm);
+                              term_tag, comm);
             }
          }
       }
@@ -533,7 +531,7 @@ hypre_DataExchangeList(HYPRE_Int num_contacts,
          post_ptrs[count] = index_ptr;
          hypre_MPI_Irecv(post_ptrs[count], size, hypre_MPI_BYTE,
                          contact_proc_list[i], post_tag,
-                         hcomm, &post_recv_requests[count]);
+                         comm, &post_recv_requests[count]);
          count++;
          /* index_ptr+=size;*/
          index_ptr =  (void *) ((char *) index_ptr + size);

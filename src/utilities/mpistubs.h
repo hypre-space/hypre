@@ -193,24 +193,21 @@ typedef HYPRE_Int  hypre_MPI_Info;
  * MPI stubs to do casting of HYPRE_Int and hypre_int correctly
  *****************************************************************************/
 
-typedef struct
-{
-   MPI_Comm              mpi_comm;
-   hypre_MemoryLocation  send_location;
-   hypre_MemoryLocation  recv_location;
-   void                  *send_copy;
-   void                  *recv_copy;
-   hypre_MemoryLocation  send_copy_location;
-   hypre_MemoryLocation  recv_copy_location;
-} hypre_MPI_Comm;
+typedef MPI_Comm     hypre_MPI_Comm;
 
-#define hypre_MPI_CommMPI_Comm(comm)              ((comm).mpi_comm)
-#define hypre_MPI_CommMPI_SendLocation(comm)      ((comm).send_location)
-#define hypre_MPI_CommMPI_RecvLocation(comm)      ((comm).recv_location)
-#define hypre_MPI_CommMPI_SendCopy(comm)          ((comm).send_copy)
-#define hypre_MPI_CommMPI_RecvCopy(comm)          ((comm).recv_copy)
-#define hypre_MPI_CommMPI_SendCopyLocation(comm)  ((comm).send_copy_location)
-#define hypre_MPI_CommMPI_RecvCopyLocation(comm)  ((comm).recv_copy_location)
+hypre_MemoryLocation hypre_MPICommGetSendLocation(hypre_MPI_Comm comm);
+hypre_MemoryLocation hypre_MPICommGetRecvLocation(hypre_MPI_Comm comm);
+hypre_MemoryLocation hypre_MPICommGetSendCopyLocation(hypre_MPI_Comm comm);
+hypre_MemoryLocation hypre_MPICommGetRecvCopyLocation(hypre_MPI_Comm comm);
+void* hypre_MPICommGetSendCopy(hypre_MPI_Comm comm);
+void* hypre_MPICommGetRecvCopy(hypre_MPI_Comm comm);
+
+HYPRE_Int hypre_MPICommSetSendLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
+HYPRE_Int hypre_MPICommSetRecvLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
+HYPRE_Int hypre_MPICommSetSendCopyLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
+HYPRE_Int hypre_MPICommSetRecvCopyLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
+HYPRE_Int hypre_MPICommSetSendCopy(hypre_MPI_Comm comm, void*);
+HYPRE_Int hypre_MPICommSetRecvCopy(hypre_MPI_Comm comm, void*);
 
 typedef MPI_Group    hypre_MPI_Group;
 
@@ -381,7 +378,6 @@ HYPRE_Int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
 HYPRE_Int hypre_MPI_Op_free( hypre_MPI_Op *op );
 HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function, hypre_int commute,
                                hypre_MPI_Op *op );
-hypre_MPI_Comm hypre_MPI_CommFromMPI_Comm(MPI_Comm comm);
 hypre_MPI_Request hypre_MPI_RequestFromMPI_Request(MPI_Request request);
 HYPRE_Int hypre_MPI_RequestSetActionCopy(HYPRE_Int i, void *dest, hypre_MemoryLocation dest_location,
                                          void *src, hypre_MemoryLocation src_location,

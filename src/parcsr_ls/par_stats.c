@@ -155,7 +155,6 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    num_threads = hypre_NumThreads();
 
    A_array = hypre_ParAMGDataAArray(amg_data);
@@ -657,7 +656,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       send_buff[2] = - min_rowsum;
       send_buff[3] = max_rowsum;
 
-      hypre_MPI_Reduce(send_buff, gather_buff, 4, HYPRE_MPI_REAL, hypre_MPI_MAX, 0, hcomm);
+      hypre_MPI_Reduce(send_buff, gather_buff, 4, HYPRE_MPI_REAL, hypre_MPI_MAX, 0, comm);
 
       if (my_id == 0)
       {
@@ -953,7 +952,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       send_buff[4] = - min_weight;
       send_buff[5] = max_weight;
 
-      hypre_MPI_Reduce(send_buff, gather_buff, 6, HYPRE_MPI_REAL, hypre_MPI_MAX, 0, hcomm);
+      hypre_MPI_Reduce(send_buff, gather_buff, 6, HYPRE_MPI_REAL, hypre_MPI_MAX, 0, comm);
 
       if (my_id == 0)
       {

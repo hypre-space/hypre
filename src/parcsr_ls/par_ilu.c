@@ -3807,7 +3807,6 @@ hypre_ParCSRMatrixNormFro(hypre_ParCSRMatrix *A, HYPRE_Real *norm_io)
    HYPRE_Real        local_norm = 0.0;
    HYPRE_Real        global_norm;
    MPI_Comm          comm = hypre_ParCSRMatrixComm(A);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    hypre_CSRMatrix   *A_diag = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix   *A_offd = hypre_ParCSRMatrixOffd(A);
@@ -3821,7 +3820,7 @@ hypre_ParCSRMatrixNormFro(hypre_ParCSRMatrix *A, HYPRE_Real *norm_io)
    local_norm += global_norm * global_norm;
 
    /* do communication to get global total sum */
-   hypre_MPI_Allreduce(&local_norm, &global_norm, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, hcomm);
+   hypre_MPI_Allreduce(&local_norm, &global_norm, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
 
    *norm_io = hypre_sqrt(global_norm);
 
@@ -3844,7 +3843,6 @@ hypre_ParCSRMatrixResNormFro(hypre_ParCSRMatrix *A, HYPRE_Real *norm_io)
    HYPRE_Real        local_norm = 0.0;
    HYPRE_Real        global_norm;
    MPI_Comm          comm = hypre_ParCSRMatrixComm(A);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    hypre_CSRMatrix   *A_diag = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix   *A_offd = hypre_ParCSRMatrixOffd(A);
@@ -3860,7 +3858,7 @@ hypre_ParCSRMatrixResNormFro(hypre_ParCSRMatrix *A, HYPRE_Real *norm_io)
    local_norm += global_norm * global_norm;
 
    /* do communication to get global total sum */
-   hypre_MPI_Allreduce(&local_norm, &global_norm, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, hcomm);
+   hypre_MPI_Allreduce(&local_norm, &global_norm, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
 
    *norm_io = hypre_sqrt(global_norm);
    return hypre_error_flag;

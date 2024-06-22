@@ -169,7 +169,6 @@ hypre_MatTCommPkgCreate_core (
    HYPRE_BigInt col, kc;
    HYPRE_Int * recv_sz_buf;
    HYPRE_Int * row_marker;
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -237,7 +236,7 @@ hypre_MatTCommPkgCreate_core (
    num_recvs = num_procs - 1;
    local_info = num_procs + num_cols_offd + num_cols_diag;
 
-   hypre_MPI_Allgather(&local_info, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, hcomm);
+   hypre_MPI_Allgather(&local_info, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, comm);
 
    /* ----------------------------------------------------------------------
     * generate information to be send: tmp contains for each recv_proc:
@@ -277,7 +276,7 @@ hypre_MatTCommPkgCreate_core (
 
    hypre_MPI_Allgatherv(tmp, local_info, HYPRE_MPI_BIG_INT,
                         recv_buf, info, displs, HYPRE_MPI_BIG_INT,
-                        hcomm);
+                        comm);
 
    /* ----------------------------------------------------------------------
     * determine send_procs and actual elements to be send (in send_map_elmts)
@@ -426,7 +425,7 @@ hypre_MatTCommPkgCreate_core (
 
    /* scatter-gather num_sends, to set up the size for the main comm. step */
    i = 3 * num_sends;
-   hypre_MPI_Allgather( &i, 1, HYPRE_MPI_INT, all_num_sends3, 1, HYPRE_MPI_INT, hcomm );
+   hypre_MPI_Allgather( &i, 1, HYPRE_MPI_INT, all_num_sends3, 1, HYPRE_MPI_INT, comm );
    displs[0] = 0;
    for ( p = 0; p < num_procs; ++p )
    {
@@ -445,7 +444,7 @@ hypre_MatTCommPkgCreate_core (
    };
 
    hypre_MPI_Allgatherv( send_buf, 3 * num_sends, HYPRE_MPI_INT,
-                         recv_sz_buf, all_num_sends3, displs, HYPRE_MPI_INT, hcomm);
+                         recv_sz_buf, all_num_sends3, displs, HYPRE_MPI_INT, comm);
 
    recv_vec_starts[0] = 0;
    j2 = 0;  j = 0;

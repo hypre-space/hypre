@@ -347,7 +347,6 @@ hypre_ParCSRMatrixStatsArrayCompute(HYPRE_Int                num_matrices,
 
    /* We assume all MPI communicators are equal */
    comm = hypre_ParCSRMatrixComm(matrices[0]);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    /* Allocate MPI buffers */
    recvbuffer = hypre_CTAlloc(HYPRE_Real, 4 * num_matrices, HYPRE_MEMORY_HOST);
@@ -389,7 +388,7 @@ hypre_ParCSRMatrixStatsArrayCompute(HYPRE_Int                num_matrices,
    }
 
    hypre_MPI_Reduce(sendbuffer, recvbuffer, 4 * num_matrices,
-                    HYPRE_MPI_REAL, hypre_MPI_MAX, 0, hcomm);
+                    HYPRE_MPI_REAL, hypre_MPI_MAX, 0, comm);
 
    /* Unpack MPI buffers */
    for (i = 0; i < num_matrices; i++)
@@ -420,7 +419,7 @@ hypre_ParCSRMatrixStatsArrayCompute(HYPRE_Int                num_matrices,
    }
 
    hypre_MPI_Reduce(sendbuffer, recvbuffer, 3 * num_matrices,
-                    HYPRE_MPI_REAL, hypre_MPI_SUM, 0, hcomm);
+                    HYPRE_MPI_REAL, hypre_MPI_SUM, 0, comm);
 
    /* Unpack MPI buffers */
    for (i = 0; i < num_matrices; i++)
@@ -467,7 +466,7 @@ hypre_ParCSRMatrixStatsArrayCompute(HYPRE_Int                num_matrices,
    }
 
    hypre_MPI_Reduce(sendbuffer, recvbuffer, 2 * num_matrices,
-                    HYPRE_MPI_REAL, hypre_MPI_SUM, 0, hcomm);
+                    HYPRE_MPI_REAL, hypre_MPI_SUM, 0, comm);
 
    /* Unpack MPI buffers */
    for (i = 0; i < num_matrices; i++)

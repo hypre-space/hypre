@@ -137,7 +137,6 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix  *A,
    /* BEGIN */
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
    max_num_threads = hypre_NumThreads();
 
    my_first_cpt = num_cpts_global[0];
@@ -149,8 +148,8 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix  *A,
       total_global_cpts = num_cpts_global[1];
       total_old_global_cpts = num_old_cpts_global[1];
    }
-   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
-   hypre_MPI_Bcast(&total_old_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+   hypre_MPI_Bcast(&total_old_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
 
    if (!comm_pkg)
    {
@@ -1008,7 +1007,6 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix  *A,
    /* BEGIN */
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    my_first_cpt = num_cpts_global[0];
    /*my_first_old_cpt = num_old_cpts_global[0];*/
@@ -1020,8 +1018,8 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix  *A,
       total_global_cpts = num_cpts_global[1];
       total_old_global_cpts = num_old_cpts_global[1];
    }
-   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
-   hypre_MPI_Bcast(&total_old_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+   hypre_MPI_Bcast(&total_old_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
 
    if (!comm_pkg)
    {
@@ -2015,7 +2013,6 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    /* BEGIN */
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    my_first_cpt = num_cpts_global[0];
    /*my_first_old_cpt = num_old_cpts_global[0];*/
@@ -2026,8 +2023,8 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
       total_global_cpts = num_cpts_global[1];
       total_old_global_cpts = num_old_cpts_global[1];
    }
-   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
-   hypre_MPI_Bcast(&total_old_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+   hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
+   hypre_MPI_Bcast(&total_old_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
 
    if (!comm_pkg)
    {

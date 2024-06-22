@@ -407,8 +407,7 @@ void compute_rho_private(Euclid_dh ctx)
       bufGlobal[1] = bufLocal[1];
       bufGlobal[2] = bufLocal[2];
     } else {
-      hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
-      hypre_MPI_Reduce(bufLocal, bufGlobal, 3, hypre_MPI_REAL, hypre_MPI_SUM, 0, hcomm);
+      hypre_MPI_Reduce(bufLocal, bufGlobal, 3, hypre_MPI_REAL, hypre_MPI_SUM, 0, comm_dh);
     }
 
     if (myid_dh == 0) {
@@ -886,9 +885,7 @@ void reduce_timings_private(Euclid_dh ctx)
     HYPRE_Real bufOUT[TIMING_BINS];
 
     hypre_TMemcpy(bufOUT,  ctx->timing, HYPRE_Real, TIMING_BINS, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-
-    hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm_dh);
-    hypre_MPI_Reduce(bufOUT, ctx->timing, TIMING_BINS, hypre_MPI_REAL, hypre_MPI_MAX, 0, hcomm);
+    hypre_MPI_Reduce(bufOUT, ctx->timing, TIMING_BINS, hypre_MPI_REAL, hypre_MPI_MAX, 0, comm_dh);
   }
 
   ctx->timingsWereReduced = true;

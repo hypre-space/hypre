@@ -39,7 +39,6 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    if (jlower > jupper + 1 || jlower < 0)
    {
@@ -61,13 +60,13 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    {
       row0 = jlower;
    }
-   hypre_MPI_Bcast(&row0, 1, HYPRE_MPI_BIG_INT, 0, hcomm);
+   hypre_MPI_Bcast(&row0, 1, HYPRE_MPI_BIG_INT, 0, comm);
    /* proc (num_procs-1) has the last row  */
    if (my_id == (num_procs - 1))
    {
       rowN = jupper;
    }
-   hypre_MPI_Bcast(&rowN, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+   hypre_MPI_Bcast(&rowN, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
 
    hypre_IJVectorGlobalFirstRow(vec) = row0;
    hypre_IJVectorGlobalNumRows(vec) = rowN - row0 + 1;
