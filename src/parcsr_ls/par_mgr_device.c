@@ -140,7 +140,6 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    hypre_GpuProfilingPushRange("MGRBuildP");
 
@@ -243,7 +242,7 @@ hypre_MGRBuildPDevice(hypre_ParCSRMatrix  *A,
       {
          nC_global = num_cpts_global[1];
       }
-      hypre_MPI_Bcast(&nC_global, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+      hypre_MPI_Bcast(&nC_global, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    }
 
    W_nr_of_rows = hypre_CSRMatrixNumRows(W_diag);
@@ -914,7 +913,6 @@ hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix  *A,
 
    hypre_MPI_Comm_rank(comm, &my_id);
    hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    /*-----------------------------------------------------------------
     * Count the number of points matching point_type in CF_marker
@@ -948,7 +946,7 @@ hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix  *A,
    if (CF_marker)
    {
       num_rows_big = (HYPRE_BigInt) B_diag_num_rows;
-      hypre_MPI_Scan(&num_rows_big, &scan_recv, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
+      hypre_MPI_Scan(&num_rows_big, &scan_recv, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
 
       /* first point in my range */
       row_starts_B[0] = scan_recv - num_rows_big;
@@ -959,7 +957,7 @@ hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix  *A,
       {
          num_rows_B = row_starts_B[1];
       }
-      hypre_MPI_Bcast(&num_rows_B, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+      hypre_MPI_Bcast(&num_rows_B, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    }
    else
    {

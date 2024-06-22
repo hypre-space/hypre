@@ -283,7 +283,6 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    n_local    = hypre_ParCSRMatrixNumRows(A);
    row_starts = hypre_ParCSRMatrixRowStarts(A);
@@ -292,7 +291,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    {
       nC_global = cpts_starts[1];
    }
-   hypre_MPI_Bcast(&nC_global, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+   hypre_MPI_Bcast(&nC_global, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    nC_local = (HYPRE_Int) (cpts_starts[1] - cpts_starts[0]);
    fpts_starts[0] = row_starts[0] - cpts_starts[0];
    fpts_starts[1] = row_starts[1] - cpts_starts[1];
@@ -321,13 +320,13 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
 
       HYPRE_BigInt nF2_local_big = nF2_local;
 
-      hypre_MPI_Scan(&nF2_local_big, f2pts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, hcomm);
+      hypre_MPI_Scan(&nF2_local_big, f2pts_starts + 1, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       f2pts_starts[0] = f2pts_starts[1] - nF2_local_big;
       if (my_id == (num_procs - 1))
       {
          nF2_global = f2pts_starts[1];
       }
-      hypre_MPI_Bcast(&nF2_global, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+      hypre_MPI_Bcast(&nF2_global, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    }
 
    /* map from all points (i.e, F+C) to F/C indices */
@@ -1501,7 +1500,6 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   hypre_MPI_Comm hcomm = hypre_MPI_CommFromMPI_Comm(comm);
 
    n_local    = hypre_ParCSRMatrixNumRows(A);
    row_starts = hypre_ParCSRMatrixRowStarts(A);
@@ -1518,7 +1516,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    {
       nC_global = cpts_starts[1];
    }
-   hypre_MPI_Bcast(&nC_global, 1, HYPRE_MPI_BIG_INT, num_procs - 1, hcomm);
+   hypre_MPI_Bcast(&nC_global, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    nC_local = (HYPRE_Int) (cpts_starts[1] - cpts_starts[0]);
    fpts_starts[0] = row_starts[0] - cpts_starts[0];
    fpts_starts[1] = row_starts[1] - cpts_starts[1];

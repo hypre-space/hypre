@@ -436,7 +436,6 @@ HYPRE_Int
 hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
 {
    MPI_Comm            comm           = hypre_IJVectorComm(vector);
-   hypre_MPI_Comm      hcomm          = hypre_MPI_CommFromMPI_Comm(comm);
    hypre_ParVector    *par_vector     = (hypre_ParVector*) hypre_IJVectorObject(vector);
    hypre_AuxParVector *aux_vector     = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
    HYPRE_BigInt       *IJpartitioning = hypre_IJVectorPartitioning(vector);
@@ -471,7 +470,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
 #endif
    HYPRE_Int nelms_off = nelms - nelms_on;
    HYPRE_Int nelms_off_max;
-   hypre_MPI_Allreduce(&nelms_off, &nelms_off_max, 1, HYPRE_MPI_INT, hypre_MPI_MAX, hcomm);
+   hypre_MPI_Allreduce(&nelms_off, &nelms_off_max, 1, HYPRE_MPI_INT, hypre_MPI_MAX, comm);
 
    /* communicate for aux off-proc and add to remote aux on-proc */
    if (nelms_off_max)

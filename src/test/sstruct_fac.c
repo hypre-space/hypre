@@ -321,11 +321,11 @@ ReadData( char         *filename,
    }
 
    /* broadcast the data size */
-   hypre_MPI_Bcast(&sdata_size, 1, HYPRE_MPI_INT, 0, hypre_MPI_CommFromMPI_Comm(hypre_MPI_COMM_WORLD));
+   hypre_MPI_Bcast(&sdata_size, 1, HYPRE_MPI_INT, 0, hypre_MPI_COMM_WORLD);
 
    /* broadcast the data */
    sdata = hypre_TReAlloc(sdata,  char,  sdata_size, HYPRE_MEMORY_HOST);
-   hypre_MPI_Bcast(sdata, sdata_size, hypre_MPI_CHAR, 0, hypre_MPI_CommFromMPI_Comm(hypre_MPI_COMM_WORLD));
+   hypre_MPI_Bcast(sdata, sdata_size, hypre_MPI_CHAR, 0, hypre_MPI_COMM_WORLD);
 
    /*-----------------------------------------------------------
     * Parse the data and fill ProblemData structure

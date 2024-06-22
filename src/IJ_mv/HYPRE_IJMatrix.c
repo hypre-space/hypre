@@ -49,6 +49,7 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &myid);
 
+
    if (ilower > iupper + 1 || ilower < 0)
    {
       hypre_error_in_arg(2);
