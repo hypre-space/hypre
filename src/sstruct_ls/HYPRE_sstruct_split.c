@@ -236,7 +236,7 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
                {
                   hypre_error(HYPRE_ERROR_GENERIC);
                }
-               /* fall through */
+            /* fall through */
 
             case HYPRE_Jacobi:
                HYPRE_StructJacobiCreate(comm, (HYPRE_StructSolver *)&sdata);

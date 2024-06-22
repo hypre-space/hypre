@@ -965,8 +965,9 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
    {
       if (hypre_GetGpuAwareMPI())
       {
+#if defined(HYPRE_USING_GPU)
          hypre_ForceSyncComputeStream(hypre_handle());
-
+#endif
          send_buffers_mpi = send_buffers;
          recv_buffers_mpi = recv_buffers;
       }

@@ -89,6 +89,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
    hypre_ParAMGDataMemoryLocation(amg_data) = memory_location;
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
+#endif
 
    /* Local variables */
    HYPRE_Int           *CF_marker;
@@ -121,7 +124,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int       setup_type;
    HYPRE_BigInt    fine_size;
    HYPRE_Int       offset;
-   HYPRE_Real      size;
    HYPRE_Int       not_finished_coarsening = 1;
    HYPRE_Int       coarse_threshold = hypre_ParAMGDataMaxCoarseSize(amg_data);
    HYPRE_Int       min_coarse_size = hypre_ParAMGDataMinCoarseSize(amg_data);
@@ -697,7 +699,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (num_C_points_coarse > 0)
    {
 #if defined(HYPRE_USING_GPU)
-      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
       if (exec == HYPRE_EXEC_DEVICE)
       {
 #if defined(HYPRE_USING_SYCL)
@@ -753,7 +754,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       offset = (HYPRE_Int) ( first_local_row % ((HYPRE_BigInt) num_functions) );
 
 #if defined(HYPRE_USING_GPU)
-      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
       if (exec == HYPRE_EXEC_DEVICE)
       {
          hypre_BoomerAMGInitDofFuncDevice(hypre_IntArrayData(dof_func), local_size, offset, num_functions);
@@ -3127,10 +3127,15 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          A_array[level] = A_H;
       }
 
-      size = ((HYPRE_Real) fine_size ) * .75;
-      if (coarsen_type > 0 && coarse_size >= (HYPRE_BigInt) size)
+#if defined(HYPRE_USING_GPU)
+      if (exec == HYPRE_EXEC_HOST)
+#endif
       {
-         coarsen_type = 0;
+         HYPRE_Real size = ((HYPRE_Real)fine_size) * .75;
+         if (coarsen_type > 0 && coarse_size >= (HYPRE_BigInt)size)
+         {
+            coarsen_type = 0;
+         }
       }
 
       {

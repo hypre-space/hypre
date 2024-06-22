@@ -38,14 +38,16 @@ typedef struct
    void   (*CopyMultiVector)    ( void *x, void *y );
    void   (*ClearMultiVector)   ( void *x );
    void   (*SetRandomVectors)   ( void *x, HYPRE_Int seed );
-   void   (*MultiInnerProd)     ( void *x, void *y, HYPRE_Int, HYPRE_Int, HYPRE_Int, HYPRE_Real* );
+   void   (*MultiInnerProd)     ( void *x, void *y, HYPRE_BigInt, HYPRE_Int, HYPRE_Int, HYPRE_Real* );
    void   (*MultiInnerProdDiag) ( void *x, void *y, HYPRE_Int*, HYPRE_Int, HYPRE_Real* );
-   void   (*MultiVecMat)        ( void *x, HYPRE_Int, HYPRE_Int, HYPRE_Int, HYPRE_Complex*, void *y );
+   void   (*MultiVecMat)        ( void *x, HYPRE_BigInt, HYPRE_Int, HYPRE_Int, HYPRE_Complex*,
+                                  void *y );
    void   (*MultiVecMatDiag)    ( void *x, HYPRE_Int*, HYPRE_Int, HYPRE_Complex*, void *y );
    void   (*MultiAxpy)          ( HYPRE_Complex alpha, void *x, void *y );
 
    /* do we need the following 2 entries? */
-   void   (*MultiXapy)          ( void *x, HYPRE_Int, HYPRE_Int, HYPRE_Int, HYPRE_Complex*, void *y );
+   void   (*MultiXapy)          ( void *x, HYPRE_BigInt, HYPRE_Int, HYPRE_Int, HYPRE_Complex*,
+                                  void *y );
    void   (*Eval)               ( void (*f)( void*, void*, void* ), void*, void *x, void *y );
 
 } mv_InterfaceInterpreter;

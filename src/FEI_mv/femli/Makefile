@@ -20,6 +20,7 @@ MLI_INCLUDES = \
  -I$(srcdir)/../../parcsr_mv\
  -I$(srcdir)/../../parcsr_ls\
  -I$(srcdir)/../../seq_mv\
+ -I$(srcdir)/../../seq_block_mv\
  -I$(srcdir)/../../distributed_matrix\
  -I$(srcdir)/../../distributed_ls\
  -I$(srcdir)/../../FEI_mv/fei-hypre\

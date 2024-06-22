@@ -1837,7 +1837,7 @@ hypre_ParCSRMatrixDiagScaleDevice( hypre_ParCSRMatrix *par_A,
    hypre_CSRMatrix        *A_offd        = hypre_ParCSRMatrixOffd(par_A);
    HYPRE_Int               num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
-   hypre_Vector          *ld             = (par_ld) ? hypre_ParVectorLocalVector(par_ld) : NULL;
+   hypre_Vector           *ld            = (par_ld) ? hypre_ParVectorLocalVector(par_ld) : NULL;
    hypre_Vector           *rd            = hypre_ParVectorLocalVector(par_rd);
    HYPRE_Complex          *rd_data       = hypre_VectorData(rd);
 
@@ -1865,7 +1865,10 @@ hypre_ParCSRMatrixDiagScaleDevice( hypre_ParCSRMatrix *par_A,
    }
 
    /* Communicate a single vector component */
-   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg, par_rd);
+   hypre_ParCSRCommPkgUpdateVecStarts(comm_pkg,
+                                      hypre_VectorNumVectors(rd),
+                                      hypre_VectorVectorStride(rd),
+                                      hypre_VectorIndexStride(rd));
 
    /* send_map_elmts on device */
    hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
@@ -2001,6 +2004,8 @@ hypre_ParCSRDiagScaleVectorDevice( hypre_ParCSRMatrix *par_A,
    hypre_assert(y_vecstride == y_size);
    hypre_assert(x_num_vectors == y_num_vectors);
 
+   hypre_GpuProfilingPushRange("ParCSRDiagScaleVector");
+
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
 
@@ -2013,7 +2018,7 @@ hypre_ParCSRDiagScaleVectorDevice( hypre_ParCSRMatrix *par_A,
    hypreDevice_DiagScaleVector(x_num_vectors, num_rows, A_i, A_data, y_data, 0.0, x_data);
 #endif // #if defined(HYPRE_USING_DEVICE_OPENMP)
 
-   //hypre_SyncComputeStream(hypre_handle());
+   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }

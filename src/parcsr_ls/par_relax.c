@@ -481,7 +481,7 @@ hypre_BoomerAMGRelax1GaussSeidel( hypre_ParCSRMatrix *A,
              * Relax only C or F points as determined by relax_points.
              *-----------------------------------------------------------*/
             if ( (relax_points == 0 || cf_marker[i] == relax_points) &&
-                  A_diag_data[A_diag_i[i]] != zero )
+                 A_diag_data[A_diag_i[i]] != zero )
             {
                res = f_data[i];
                for (jj = A_diag_i[i] + 1; jj < A_diag_i[i + 1]; jj++)

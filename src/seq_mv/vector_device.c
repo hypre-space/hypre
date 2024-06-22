@@ -340,6 +340,36 @@ hypre_SeqVectorSumEltsDevice( hypre_Vector *vector )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SeqVectorStridedCopyDevice
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorStridedCopyDevice( hypre_Vector  *vector,
+                                  HYPRE_Int      istride,
+                                  HYPRE_Int      ostride,
+                                  HYPRE_Int      size,
+                                  HYPRE_Complex *data)
+{
+   HYPRE_Complex  *v_data = hypre_VectorData(vector);
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   auto begin = thrust::make_counting_iterator(0);
+   auto last  = thrust::make_counting_iterator(size / istride);
+
+   HYPRE_THRUST_CALL( transform, begin, last,
+                      thrust::make_permutation_iterator(v_data,
+                                                        thrust::make_transform_iterator(begin,
+                                                                                        hypreFunctor_IndexStrided<HYPRE_Int>(ostride))),
+                      hypreFunctor_ArrayStridedAccess<HYPRE_Complex>(istride, data) );
+
+#elif defined(HYPRE_USING_DEVICE_OPENMP) || defined(HYPRE_USING_SYCL)
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented!");
+#endif
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SeqVectorPrefetch
  *--------------------------------------------------------------------------*/
 
