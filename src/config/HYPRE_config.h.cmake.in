@@ -155,7 +155,8 @@
 /* Use MPI */
 #cmakedefine HYPRE_HAVE_MPI 1
 
-/* #undef HYPRE_HAVE_MPI_COMM_F2C */
+/* Use MPI_Comm_f2c */
+#cmakedefine HYPRE_HAVE_MPI_COMM_F2C 1
 
 /* Define as follows to set the Fortran name mangling scheme:
  * 0 = unspecified
