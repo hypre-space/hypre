@@ -2951,6 +2951,62 @@ hypre_MGRSetCoarseGridMethod( void *mgr_vdata, HYPRE_Int *cg_method )
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_MGRSetNonGalerkinMaxElmts
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRSetNonGalerkinMaxElmts( void *mgr_vdata, HYPRE_Int max_elmts )
+{
+   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+   HYPRE_Int           max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+   HYPRE_Int          *nonglk_max_elmts = (mgr_data -> nonglk_max_elmts);
+   HYPRE_Int           i;
+
+   if (!nonglk_max_elmts)
+   {
+      nonglk_max_elmts = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   }
+   hypre_TFree(mgr_data -> nonglk_max_elmts, HYPRE_MEMORY_HOST);
+
+   for (i = 0; i < max_num_coarse_levels; i++)
+   {
+      nonglk_max_elmts[i] = max_elmts;
+   }
+
+   (mgr_data -> nonglk_max_elmts) = nonglk_max_elmts;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_MGRSetLevelNonGalerkinMaxElmts
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRSetLevelNonGalerkinMaxElmts( void *mgr_vdata, HYPRE_Int *max_elmts )
+{
+   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+   HYPRE_Int           max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+   HYPRE_Int          *nonglk_max_elmts = (mgr_data -> nonglk_max_elmts);
+   HYPRE_Int           i;
+
+   if (!nonglk_max_elmts)
+   {
+      nonglk_max_elmts = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   }
+   hypre_TFree(mgr_data -> nonglk_max_elmts, HYPRE_MEMORY_HOST);
+
+   for (i = 0; i < max_num_coarse_levels; i++)
+   {
+      nonglk_max_elmts[i] = max_elmts[i];
+   }
+
+   (mgr_data -> nonglk_max_elmts) = nonglk_max_elmts;
+
+   return hypre_error_flag;
+}
+
 /* Set the F-relaxation number of functions for each level */
 HYPRE_Int
 hypre_MGRSetLevelFRelaxNumFunctions( void *mgr_vdata, HYPRE_Int *num_functions )

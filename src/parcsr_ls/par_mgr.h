@@ -141,6 +141,7 @@ typedef struct
 
    /* Non-Galerkin coarse grid */
    HYPRE_Int            *mgr_coarse_grid_method; /* TODO (VPM): Change name? remove mgr_?*/
+   HYPRE_Int            *nonglk_max_elmts;
 
    /* V-cycle F relaxation method */
    hypre_ParAMGData    **FrelaxVcycleData;
