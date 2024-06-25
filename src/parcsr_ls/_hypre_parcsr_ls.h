@@ -3648,13 +3648,11 @@ HYPRE_Int hypre_MGRAddVectorR( hypre_IntArray *CF_marker, HYPRE_Int point_type, 
                                hypre_ParVector **toVector );
 HYPRE_Int hypre_MGRTruncateAcfCPRDevice( hypre_ParCSRMatrix  *A_CF,
                                          hypre_ParCSRMatrix **A_CF_new_ptr );
-HYPRE_Int hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix *A_FF,
-                                                hypre_ParCSRMatrix *A_FC,
-                                                hypre_ParCSRMatrix *A_CF,
-                                                hypre_ParCSRMatrix *A_CC,
+HYPRE_Int hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC,
+                                                hypre_ParCSRMatrix *A_CF, hypre_ParCSRMatrix *A_CC,
                                                 hypre_ParCSRMatrix *Wp, hypre_ParCSRMatrix *Wr,
-                                                HYPRE_Int bsize, HYPRE_Int ordering,
-                                                HYPRE_Int method, HYPRE_Int max_elmts,
+                                                HYPRE_Int fine_block_dim, HYPRE_Int coarse_block_dim,
+                                                HYPRE_Int ordering, HYPRE_Int method, HYPRE_Int max_elmts,
                                                 hypre_ParCSRMatrix **A_H_ptr);
 HYPRE_Int hypre_MGRSetAffSolverType( void *systg_vdata, HYPRE_Int *aff_solver_type );
 HYPRE_Int hypre_MGRSetCoarseSolverType( void *systg_vdata, HYPRE_Int coarse_solver_type );
@@ -3782,12 +3780,6 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix *A, HYPRE_
                                                    HYPRE_Int point_type, HYPRE_Int *CF_marker,
                                                    HYPRE_Int diag_type,
                                                    hypre_ParCSRMatrix **B_ptr );
-HYPRE_Int hypre_MGRComputeNonGalerkinCGDevice( hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC,
-                                               hypre_ParCSRMatrix *A_CF, hypre_ParCSRMatrix *A_CC,
-                                               hypre_ParCSRMatrix *Wp, hypre_ParCSRMatrix *Wr,
-                                               HYPRE_Int blk_size, HYPRE_Int method,
-                                               HYPRE_Complex threshold,
-                                               hypre_ParCSRMatrix **A_H_ptr );
 
 /* par_mgr_stats.c */
 HYPRE_Int hypre_MGRSetupStats( void *mgr_vdata );

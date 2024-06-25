@@ -1315,22 +1315,6 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_REGION_END("%s", region_name);
 
-      /* TODO (VPM): truncation is also performed in hypre_MGRComputeNonGalerkinCoarseGrid */
-      if (truncate_cg_threshold > 0.0)
-      {
-         /* Truncate the coarse grid */
-         if (exec == HYPRE_EXEC_HOST)
-         {
-            hypre_ParCSRMatrixTruncate(A_array[lev + 1], truncate_cg_threshold, 0, 0, 0);
-         }
-#if defined (HYPRE_USING_GPU)
-         else
-         {
-            hypre_ParCSRMatrixDropSmallEntriesDevice(A_array[lev + 1], truncate_cg_threshold, -1);
-         }
-#endif
-      }
-
       /* Destroy temporary variables */
       hypre_ParCSRMatrixDestroy(A_FC), A_FC = NULL;
       hypre_ParCSRMatrixDestroy(A_CF), A_CF = NULL;
@@ -1623,7 +1607,6 @@ hypre_MGRSetup( void               *mgr_vdata,
 
    /* set pointer to last level matrix */
    (mgr_data -> num_coarse_levels) = num_c_levels;
-   (mgr_data -> RAP) = A_array[num_c_levels];
 
    /* setup default coarsest grid solver (BoomerAMG) */
    if (use_default_cgrid_solver)
