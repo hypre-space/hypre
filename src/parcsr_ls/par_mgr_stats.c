@@ -328,6 +328,7 @@ hypre_MGRSetupStats(void *mgr_vdata)
    hypre_ParAMGData          *coarse_amg_solver = NULL;
    hypre_ParCSRMatrix       **A_array;
    hypre_ParCSRMatrix       **P_array;
+   hypre_ParCSRMatrix       **R_array;
    hypre_ParCSRMatrix       **RT_array;
    hypre_MatrixStatsArray    *stats_array;
 
@@ -475,18 +476,33 @@ hypre_MGRSetupStats(void *mgr_vdata)
 
    /* Set pointer to level matrices */
    P_array  = hypre_TAlloc(hypre_ParCSRMatrix *, max_levels, HYPRE_MEMORY_HOST);
+   R_array  = hypre_TAlloc(hypre_ParCSRMatrix *, max_levels, HYPRE_MEMORY_HOST);
    RT_array = hypre_TAlloc(hypre_ParCSRMatrix *, max_levels, HYPRE_MEMORY_HOST);
    for (i = 0; i < num_levels_mgr; i++)
    {
       P_array[i] = hypre_ParMGRDataP(mgr_data, i);
+
+      if (hypre_ParMGRDataR(mgr_data, i))
+      {
+         R_array[i] = hypre_ParMGRDataR(mgr_data, i);
+      }
+      else if (hypre_ParMGRDataRT(mgr_data, i))
+      {
+         hypre_ParCSRMatrixTranspose(hypre_ParMGRDataRT(mgr_data, i), &R_array[i], 1);
+      }
+      else
+      {
+         R_array[i] = NULL;
+      }
    }
 
    for (i = 0; i < num_sublevels_amg[coarsest_mgr_level]; i++)
    {
       P_array[num_levels_mgr + i] = hypre_ParAMGDataPArray(coarse_amg_solver)[i];
+      R_array[num_levels_mgr + i] = NULL;
    }
 
-   /* Compute statistics data structure */
+   /* Compute statistics data structure for Prolongation operator */
    hypre_ParCSRMatrixStatsArrayCompute(num_levels_total - 1, P_array, stats_array);
 
    if (!myid)
@@ -500,6 +516,17 @@ hypre_MGRSetupStats(void *mgr_vdata)
       num_levels[0] = num_levels_mgr;
       num_levels[1] = num_sublevels_amg[coarsest_mgr_level] - 1;
       hypre_MatrixStatsArrayPrint(2, num_levels, 1, 0, msg, stats_array);
+   }
+
+   /* Compute statistics data structure for Restriction operator (only for MGR) */
+   hypre_ParCSRMatrixStatsArrayCompute(num_levels_mgr, R_array, stats_array);
+
+   if (!myid)
+   {
+      const char *msg[] = { "MGR Restriction Matrix Hierarchy Information:\n\n" };
+
+      num_levels[0] = num_levels_mgr;
+      hypre_MatrixStatsArrayPrint(1, num_levels, 1, 0, msg, stats_array);
    }
 
    /*-------------------------------------------------
@@ -668,6 +695,14 @@ hypre_MGRSetupStats(void *mgr_vdata)
    /*-------------------------------------------------
     *  Free memory
     *-------------------------------------------------*/
+
+   for (i = 0; i < num_levels_mgr; i++)
+   {
+      if (hypre_ParMGRDataRT(mgr_data, i))
+      {
+         hypre_ParCSRMatrixDestroy(R_array[i]);
+      }
+   }
 
    hypre_MatrixStatsArrayDestroy(stats_array);
    hypre_TFree(A_array, HYPRE_MEMORY_HOST);

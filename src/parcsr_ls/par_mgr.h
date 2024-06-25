@@ -213,6 +213,8 @@ typedef struct
 #define hypre_ParMGRDataB(data, i)                  ((data) -> B_array[i])
 #define hypre_ParMGRDataPArray(data)                ((data) -> P_array)
 #define hypre_ParMGRDataP(data, i)                  ((data) -> P_array[i])
+#define hypre_ParMGRDataRArray(data)                ((data) -> R_array)
+#define hypre_ParMGRDataR(data, i)                  ((data) -> R_array[i])
 #define hypre_ParMGRDataRTArray(data)               ((data) -> RT_array)
 #define hypre_ParMGRDataRT(data, i)                 ((data) -> RT_array[i])
 #define hypre_ParMGRDataBFFArray(data)              ((data) -> B_FF_array)
