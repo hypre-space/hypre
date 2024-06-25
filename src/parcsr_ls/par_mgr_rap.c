@@ -9,112 +9,21 @@
 #include "par_mgr.h"
 
 /*--------------------------------------------------------------------------
- * hypre_MGRComputeRAP
+ * hypre_MGRNonGalerkinTruncate
+ *
+ * Applies filtering in-place to the input matrix "A" based on the maximum
+ * number of nonzero entries per row. This algorithm is tailored to the needs
+ * of the Non-Galerkin approach in MGR.
+ *
+ *   1) max_elmts == 0 and block_dim == 1: keep diagonal entries
+ *   2) max_elmts == 0 and  block_dim > 1: keep block diagonal entries
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRComputeRAP(void                *mgr_vdata,
-                    hypre_ParCSRMatrix  *A_FF,
-                    hypre_ParCSRMatrix  *A_FC,
-                    hypre_ParCSRMatrix  *A_CF,
-                    hypre_ParCSRMatrix  *A_CC,
-                    hypre_ParCSRMatrix  *Wp,
-                    hypre_ParCSRMatrix  *Wr,
-                    HYPRE_Int            level)
-{
-   hypre_ParMGRData      *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-   hypre_ParCSRMatrix    *A  = (mgr_data -> A_array)[level];
-   hypre_ParCSRMatrix    *P  = (mgr_data -> P_array)[level];
-   hypre_ParCSRMatrix    *R  = (mgr_data -> R_array)[level];
-   hypre_ParCSRMatrix    *RT = (mgr_data -> RT_array)[level];
-   HYPRE_Int             *block_dims = (mgr_data -> block_num_coarse_indexes);
-   HYPRE_Int              block_size = (mgr_data -> block_size);
-   HYPRE_Int              method = (mgr_data -> mgr_coarse_grid_method)[level];
-   HYPRE_Int              num_coarse_levels = (mgr_data -> max_num_coarse_levels);
-   HYPRE_Int              ordering = (mgr_data -> set_c_points_method);
-   HYPRE_Int              max_elmts = (mgr_data -> P_max_elmts)[level];
-   HYPRE_Real             threshold = (mgr_data -> truncate_coarse_grid_threshold);
-
-   hypre_ParCSRMatrix    *AP, *RAP;
-   HYPRE_Int              fine_block_dim = (level) ? block_dims[level - 1] - block_dims[level] :
-                                           block_size - block_dims[level];
-   HYPRE_Int              coarse_block_dim = block_dims[level];
-
-   if (!method)
-   {
-      /* Galerkin path */
-      if (RT)
-      {
-         RAP = hypre_ParCSRMatrixRAPKT(RT, A, P, 1);
-      }
-      else if (R)
-      {
-         AP  = hypre_ParCSRMatMat(A, P);
-         RAP = hypre_ParCSRMatMat(R, AP);
-         hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(RAP));
-         hypre_ParCSRMatrixDestroy(AP);
-      }
-      else
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Expected either R or RT!");
-         return hypre_error_flag;
-      }
-   }
-   else
-   {
-      /* Non-Galerkin path */
-      hypre_MGRComputeNonGalerkinCoarseGrid(A_FF, A_FC, A_CF, A_CC, Wp, Wr,
-                                            fine_block_dim, coarse_block_dim,
-                                            ordering, method, max_elmts, &RAP);
-   }
-
-   if (threshold > 0.0)
-   {
-#if defined (HYPRE_USING_GPU)
-      HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(RAP);
-
-      if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
-      {
-         hypre_ParCSRMatrixDropSmallEntriesDevice(RAP, threshold, -1);
-      }
-      else
-#endif
-      {
-         hypre_ParCSRMatrixTruncate(RAP, threshold, 0, 0, 0);
-      }
-   }
-
-   /* Compute communication package when necessary */
-   if (!hypre_ParCSRMatrixCommPkg(RAP))
-   {
-      hypre_MatvecCommPkgCreate(RAP);
-   }
-
-   /* Set coarse grid matrix */
-   (mgr_data -> A_array)[level + 1] = RAP;
-   if ((level + 1) == num_coarse_levels)
-   {
-      (mgr_data -> RAP) = RAP;
-   }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_ParCSRMatrixFilterByNonzerosPerRow
- *
- * Applies filtering in-place to the input matrix A based on max. number of
- * nonzero entries per row.
- *
- *   1) max_elmts == 0 and block_dim == 1: keeps diagonal entries
- *   2) max_elmts == 0 and  block_dim > 1: keeps block diagonal entries
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ParCSRMatrixFilterByNonzerosPerRow(hypre_ParCSRMatrix *A,
-                                         HYPRE_Int           ordering,
-                                         HYPRE_Int           block_dim,
-                                         HYPRE_Int           max_elmts)
+hypre_MGRNonGalerkinTruncate(hypre_ParCSRMatrix *A,
+                             HYPRE_Int           ordering,
+                             HYPRE_Int           block_dim,
+                             HYPRE_Int           max_elmts)
 {
    HYPRE_MemoryLocation   memory_location = hypre_ParCSRMatrixMemoryLocation(A);
    HYPRE_Int              nrows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
@@ -287,22 +196,22 @@ hypre_ParCSRMatrixFilterByNonzerosPerRow(hypre_ParCSRMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MGRComputeNonGalerkinCGHost
+ * hypre_MGRBuildNonGalerkinCoarseOperatorHost
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRComputeNonGalerkinCGHost(hypre_ParCSRMatrix    *A_FF,
-                                  hypre_ParCSRMatrix    *A_FC,
-                                  hypre_ParCSRMatrix    *A_CF,
-                                  hypre_ParCSRMatrix    *A_CC,
-                                  hypre_ParCSRMatrix    *Wp,
-                                  hypre_ParCSRMatrix    *Wr,
-                                  HYPRE_Int              fine_block_dim,
-                                  HYPRE_Int              coarse_block_dim,
-                                  HYPRE_Int              ordering,
-                                  HYPRE_Int              method,
-                                  HYPRE_Int              max_elmts,
-                                  hypre_ParCSRMatrix   **A_H_ptr)
+hypre_MGRBuildNonGalerkinCoarseOperatorHost(hypre_ParCSRMatrix    *A_FF,
+                                            hypre_ParCSRMatrix    *A_FC,
+                                            hypre_ParCSRMatrix    *A_CF,
+                                            hypre_ParCSRMatrix    *A_CC,
+                                            hypre_ParCSRMatrix    *Wp,
+                                            hypre_ParCSRMatrix    *Wr,
+                                            HYPRE_Int              fine_block_dim,
+                                            HYPRE_Int              coarse_block_dim,
+                                            HYPRE_Int              ordering,
+                                            HYPRE_Int              method,
+                                            HYPRE_Int              max_elmts,
+                                            hypre_ParCSRMatrix   **A_H_ptr)
 {
    hypre_ParCSRMatrix    *A_H = NULL;
    hypre_ParCSRMatrix    *A_Hc = NULL;
@@ -386,7 +295,7 @@ hypre_MGRComputeNonGalerkinCGHost(hypre_ParCSRMatrix    *A_FF,
    /* Drop small entries in the correction term A_Hc */
    if (method != 5)
    {
-      hypre_ParCSRMatrixFilterByNonzerosPerRow(A_Hc, ordering, coarse_block_dim, max_elmts);
+      hypre_MGRNonGalerkinTruncate(A_Hc, ordering, coarse_block_dim, max_elmts);
    }
 
    /* Coarse grid / Schur complement */
@@ -402,22 +311,22 @@ hypre_MGRComputeNonGalerkinCGHost(hypre_ParCSRMatrix    *A_FF,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MGRComputeNonGalerkinCGDevice
+ * hypre_MGRBuildNonGalerkinCoarseOperatorDevice
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_FF,
-                                    hypre_ParCSRMatrix    *A_FC,
-                                    hypre_ParCSRMatrix    *A_CF,
-                                    hypre_ParCSRMatrix    *A_CC,
-                                    hypre_ParCSRMatrix    *Wp,
-                                    hypre_ParCSRMatrix    *Wr,
-                                    HYPRE_Int              fine_block_dim,
-                                    HYPRE_Int              coarse_block_dim,
-                                    HYPRE_Int              ordering,
-                                    HYPRE_Int              method,
-                                    HYPRE_Int              max_elmts,
-                                    hypre_ParCSRMatrix   **A_H_ptr)
+hypre_MGRBuildNonGalerkinCoarseOperatorDevice(hypre_ParCSRMatrix    *A_FF,
+                                              hypre_ParCSRMatrix    *A_FC,
+                                              hypre_ParCSRMatrix    *A_CF,
+                                              hypre_ParCSRMatrix    *A_CC,
+                                              hypre_ParCSRMatrix    *Wp,
+                                              hypre_ParCSRMatrix    *Wr,
+                                              HYPRE_Int              fine_block_dim,
+                                              HYPRE_Int              coarse_block_dim,
+                                              HYPRE_Int              ordering,
+                                              HYPRE_Int              method,
+                                              HYPRE_Int              max_elmts,
+                                              hypre_ParCSRMatrix   **A_H_ptr)
 {
    /* Local variables */
    hypre_ParCSRMatrix   *A_H;
@@ -505,7 +414,7 @@ hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_FF,
    /* Filter A_Hc */
    if (method != 5)
    {
-      hypre_ParCSRMatrixFilterByNonzerosPerRow(A_Hc, ordering, coarse_block_dim, max_elmts);
+      hypre_MGRNonGalerkinTruncate(A_Hc, ordering, coarse_block_dim, max_elmts);
    }
 
    /* Coarse grid (Schur complement) computation */
@@ -531,9 +440,9 @@ hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_FF,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MGRComputeNonGalerkinCoarseGrid
+ * hypre_MGRBuildNonGalerkinCoarseOperator
  *
- * Computes the level (grid) operator A_H = RAP.
+ * Computes the coarse level operator A_H = RAP via a Non-Galerkin approach.
  *
  * Available methods:
  *   1: inv(A_FF) approximated by its (block) diagonal inverse
@@ -549,18 +458,18 @@ hypre_MGRComputeNonGalerkinCGDevice(hypre_ParCSRMatrix    *A_FF,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A_FF,
-                                      hypre_ParCSRMatrix    *A_FC,
-                                      hypre_ParCSRMatrix    *A_CF,
-                                      hypre_ParCSRMatrix    *A_CC,
-                                      hypre_ParCSRMatrix    *Wp,
-                                      hypre_ParCSRMatrix    *Wr,
-                                      HYPRE_Int              fine_block_dim,
-                                      HYPRE_Int              coarse_block_dim,
-                                      HYPRE_Int              ordering,
-                                      HYPRE_Int              method,
-                                      HYPRE_Int              max_elmts,
-                                      hypre_ParCSRMatrix   **A_H_ptr)
+hypre_MGRBuildNonGalerkinCoarseOperator(hypre_ParCSRMatrix    *A_FF,
+                                        hypre_ParCSRMatrix    *A_FC,
+                                        hypre_ParCSRMatrix    *A_CF,
+                                        hypre_ParCSRMatrix    *A_CC,
+                                        hypre_ParCSRMatrix    *Wp,
+                                        hypre_ParCSRMatrix    *Wr,
+                                        HYPRE_Int              fine_block_dim,
+                                        HYPRE_Int              coarse_block_dim,
+                                        HYPRE_Int              ordering,
+                                        HYPRE_Int              method,
+                                        HYPRE_Int              max_elmts,
+                                        hypre_ParCSRMatrix   **A_H_ptr)
 {
    hypre_ParCSRMatrix   *matrices[6] = {A_FF, A_FC, A_CF, A_CC, Wp, Wr};
    HYPRE_Int             i;
@@ -582,16 +491,108 @@ hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix    *A_FF,
 
    if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
-      hypre_MGRComputeNonGalerkinCGDevice(A_FF, A_FC, A_CF, A_CC, Wp, Wr,
-                                          fine_block_dim, coarse_block_dim,
-                                          ordering, method, max_elmts, A_H_ptr);
+      hypre_MGRBuildNonGalerkinCoarseOperatorDevice(A_FF, A_FC, A_CF, A_CC, Wp, Wr,
+                                                    fine_block_dim, coarse_block_dim,
+                                                    ordering, method, max_elmts, A_H_ptr);
    }
    else
 #endif
    {
-      hypre_MGRComputeNonGalerkinCGHost(A_FF, A_FC, A_CF, A_CC, Wp, Wr,
-                                        fine_block_dim, coarse_block_dim,
-                                        ordering, method, max_elmts, A_H_ptr);
+      hypre_MGRBuildNonGalerkinCoarseOperatorHost(A_FF, A_FC, A_CF, A_CC, Wp, Wr,
+                                                  fine_block_dim, coarse_block_dim,
+                                                  ordering, method, max_elmts, A_H_ptr);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_MGRComputeRAP
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MGRComputeRAP(void                *mgr_vdata,
+                    hypre_ParCSRMatrix  *A_FF,
+                    hypre_ParCSRMatrix  *A_FC,
+                    hypre_ParCSRMatrix  *A_CF,
+                    hypre_ParCSRMatrix  *A_CC,
+                    hypre_ParCSRMatrix  *Wp,
+                    hypre_ParCSRMatrix  *Wr,
+                    HYPRE_Int            level)
+{
+   hypre_ParMGRData      *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+   hypre_ParCSRMatrix    *A  = (mgr_data -> A_array)[level];
+   hypre_ParCSRMatrix    *P  = (mgr_data -> P_array)[level];
+   hypre_ParCSRMatrix    *R  = (mgr_data -> R_array)[level];
+   hypre_ParCSRMatrix    *RT = (mgr_data -> RT_array)[level];
+   HYPRE_Int             *block_dims = (mgr_data -> block_num_coarse_indexes);
+   HYPRE_Int              block_size = (mgr_data -> block_size);
+   HYPRE_Int              method = (mgr_data -> mgr_coarse_grid_method)[level];
+   HYPRE_Int              num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+   HYPRE_Int              ordering = (mgr_data -> set_c_points_method);
+   HYPRE_Int              max_elmts = (mgr_data -> nonglk_max_elmts)[level];
+   HYPRE_Real             threshold = (mgr_data -> truncate_coarse_grid_threshold);
+
+   hypre_ParCSRMatrix    *AP, *RAP;
+   HYPRE_Int              fine_block_dim = (level) ? block_dims[level - 1] - block_dims[level] :
+                                           block_size - block_dims[level];
+   HYPRE_Int              coarse_block_dim = block_dims[level];
+
+   if (!method)
+   {
+      /* Galerkin path */
+      if (RT)
+      {
+         RAP = hypre_ParCSRMatrixRAPKT(RT, A, P, 1);
+      }
+      else if (R)
+      {
+         AP  = hypre_ParCSRMatMat(A, P);
+         RAP = hypre_ParCSRMatMat(R, AP);
+         hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(RAP));
+         hypre_ParCSRMatrixDestroy(AP);
+      }
+      else
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Expected either R or RT!");
+         return hypre_error_flag;
+      }
+   }
+   else
+   {
+      /* Non-Galerkin path */
+      hypre_MGRBuildNonGalerkinCoarseOperator(A_FF, A_FC, A_CF, A_CC, Wp, Wr,
+                                              fine_block_dim, coarse_block_dim,
+                                              ordering, method, max_elmts, &RAP);
+   }
+
+   if (threshold > 0.0)
+   {
+#if defined (HYPRE_USING_GPU)
+      HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(RAP);
+
+      if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+      {
+         hypre_ParCSRMatrixDropSmallEntriesDevice(RAP, threshold, -1);
+      }
+      else
+#endif
+      {
+         hypre_ParCSRMatrixTruncate(RAP, threshold, 0, 0, 0);
+      }
+   }
+
+   /* Compute communication package when necessary */
+   if (!hypre_ParCSRMatrixCommPkg(RAP))
+   {
+      hypre_MatvecCommPkgCreate(RAP);
+   }
+
+   /* Set coarse grid matrix */
+   (mgr_data -> A_array)[level + 1] = RAP;
+   if ((level + 1) == num_coarse_levels)
+   {
+      (mgr_data -> RAP) = RAP;
    }
 
    return hypre_error_flag;

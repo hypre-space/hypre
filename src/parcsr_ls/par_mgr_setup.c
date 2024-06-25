@@ -136,8 +136,9 @@ hypre_MGRSetup( void               *mgr_vdata,
 
    HYPRE_Int use_air = 0;
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
-   HYPRE_Real truncate_cg_threshold = (mgr_data -> truncate_coarse_grid_threshold);
+#endif
    char        region_name[1024];
    char        msg[2048];
 
@@ -713,7 +714,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    }
 #endif
 
-   /* Set default for using non-Galerkin coarse grid */
+   /* Set default for using Non-Galerkin coarse grid */
    if (mgr_coarse_grid_method == NULL)
    {
       mgr_coarse_grid_method = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
@@ -722,6 +723,16 @@ hypre_MGRSetup( void               *mgr_vdata,
          mgr_coarse_grid_method[i] = 0;
       }
       (mgr_data -> mgr_coarse_grid_method) = mgr_coarse_grid_method;
+   }
+
+   /* Set default for Non-Galerkin correction truncation */
+   if ((mgr_data -> nonglk_max_elmts) == NULL)
+   {
+      (mgr_data -> nonglk_max_elmts) = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+      for (i = 0; i < max_num_coarse_levels; i++)
+      {
+         (mgr_data -> nonglk_max_elmts)[i] = 1;
+      }
    }
 
    /*
