@@ -201,15 +201,15 @@ hypre_MemoryLocation hypre_MPICommGetSendLocation(hypre_MPI_Comm comm);
 hypre_MemoryLocation hypre_MPICommGetRecvLocation(hypre_MPI_Comm comm);
 hypre_MemoryLocation hypre_MPICommGetSendCopyLocation(hypre_MPI_Comm comm);
 hypre_MemoryLocation hypre_MPICommGetRecvCopyLocation(hypre_MPI_Comm comm);
-void* hypre_MPICommGetSendCopy(hypre_MPI_Comm comm);
-void* hypre_MPICommGetRecvCopy(hypre_MPI_Comm comm);
+void* hypre_MPICommGetSendBuffer(hypre_MPI_Comm comm);
+void* hypre_MPICommGetRecvBuffer(hypre_MPI_Comm comm);
 
 HYPRE_Int hypre_MPICommSetSendLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
 HYPRE_Int hypre_MPICommSetRecvLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
-HYPRE_Int hypre_MPICommSetSendCopyLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
-HYPRE_Int hypre_MPICommSetRecvCopyLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
-HYPRE_Int hypre_MPICommSetSendCopy(hypre_MPI_Comm comm, void*);
-HYPRE_Int hypre_MPICommSetRecvCopy(hypre_MPI_Comm comm, void*);
+HYPRE_Int hypre_MPICommSetSendBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
+HYPRE_Int hypre_MPICommSetRecvBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
+HYPRE_Int hypre_MPICommSetSendBuffer(hypre_MPI_Comm comm, void*);
+HYPRE_Int hypre_MPICommSetRecvBuffer(hypre_MPI_Comm comm, void*);
 
 typedef MPI_Group    hypre_MPI_Group;
 

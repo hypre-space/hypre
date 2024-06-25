@@ -759,6 +759,134 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info )
 
 #else
 
+HYPRE_Int
+hypre_MPICommSetSendLocation(hypre_MPI_Comm comm, hypre_MemoryLocation send_location)
+{
+   hypre_Handle *handle = hypre_handle();
+   MPI_Comm_set_attr(comm, hypre_HandleMPICommKeySendLocation(handle),
+                     &hypre_HandleMPIAttrLocations(handle)[send_location]);
+   return hypre_error_flag;
+}
+
+hypre_MemoryLocation
+hypre_MPICommGetSendLocation(hypre_MPI_Comm comm)
+{
+   hypre_int flag;
+   hypre_MemoryLocation *atrr_val = NULL, send_location = hypre_MEMORY_UNDEFINED;
+   MPI_Comm_get_attr(comm, hypre_HandleMPICommKeySendLocation(hypre_handle()), &atrr_val, &flag);
+   if (flag)
+   {
+      send_location = *atrr_val;
+   }
+   return (send_location);
+}
+
+HYPRE_Int
+hypre_MPICommSetRecvLocation(hypre_MPI_Comm comm, hypre_MemoryLocation recv_location)
+{
+   hypre_Handle *handle = hypre_handle();
+   MPI_Comm_set_attr(comm, hypre_HandleMPICommKeyRecvLocation(handle),
+                     &hypre_HandleMPIAttrLocations(handle)[recv_location]);
+   return hypre_error_flag;
+}
+
+hypre_MemoryLocation
+hypre_MPICommGetRecvLocation(hypre_MPI_Comm comm)
+{
+   hypre_int flag;
+   hypre_MemoryLocation *atrr_val = NULL, recv_location = hypre_MEMORY_UNDEFINED;
+   MPI_Comm_get_attr(comm, hypre_HandleMPICommKeyRecvLocation(hypre_handle()), &atrr_val, &flag);
+   if (flag)
+   {
+      recv_location = *atrr_val;
+   }
+   return (recv_location);
+}
+
+HYPRE_Int
+hypre_MPICommSetSendBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation send_buffer_location)
+{
+   hypre_Handle *handle = hypre_handle();
+   MPI_Comm_set_attr(comm, hypre_HandleMPICommKeySendBufferLocation(handle),
+                     &hypre_HandleMPIAttrLocations(handle)[send_buffer_location]);
+   return hypre_error_flag;
+}
+
+hypre_MemoryLocation
+hypre_MPICommGetSendBufferLocation(hypre_MPI_Comm comm)
+{
+   hypre_int flag;
+   hypre_MemoryLocation *atrr_val = NULL, send_buffer_location = hypre_MEMORY_UNDEFINED;
+   MPI_Comm_get_attr(comm, hypre_HandleMPICommKeySendBufferLocation(hypre_handle()), &atrr_val, &flag);
+   if (flag)
+   {
+      send_buffer_location = *atrr_val;
+   }
+   return (send_buffer_location);
+}
+
+HYPRE_Int
+hypre_MPICommSetRecvBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation recv_buffer_location)
+{
+   hypre_Handle *handle = hypre_handle();
+   MPI_Comm_set_attr(comm, hypre_HandleMPICommKeyRecvBufferLocation(handle),
+                     &hypre_HandleMPIAttrLocations(handle)[recv_buffer_location]);
+   return hypre_error_flag;
+}
+
+hypre_MemoryLocation
+hypre_MPICommGetRecvBufferLocation(hypre_MPI_Comm comm)
+{
+   hypre_int flag;
+   hypre_MemoryLocation *atrr_val = NULL, recv_buffer_location = hypre_MEMORY_UNDEFINED;
+   MPI_Comm_get_attr(comm, hypre_HandleMPICommKeyRecvBufferLocation(hypre_handle()), &atrr_val, &flag);
+   if (flag)
+   {
+      recv_buffer_location = *atrr_val;
+   }
+   return (recv_buffer_location);
+}
+
+HYPRE_Int
+hypre_MPICommSetSendBuffer(hypre_MPI_Comm comm, void *buffer)
+{
+   MPI_Comm_set_attr(comm, hypre_HandleMPICommKeySendBuffer(hypre_handle()), buffer);
+   return hypre_error_flag;
+}
+
+void *
+hypre_MPICommGetSendBuffer(hypre_MPI_Comm comm)
+{
+   hypre_int flag;
+   void *buffer = NULL;
+   MPI_Comm_get_attr(comm, hypre_HandleMPICommKeySendBuffer(hypre_handle()), &buffer, &flag);
+   if (!flag)
+   {
+      buffer = NULL;
+   }
+   return (buffer);
+}
+
+HYPRE_Int
+hypre_MPICommSetRecvBuffer(hypre_MPI_Comm comm, void *buffer)
+{
+   MPI_Comm_set_attr(comm, hypre_HandleMPICommKeyRecvBuffer(hypre_handle()), buffer);
+   return hypre_error_flag;
+}
+
+void *
+hypre_MPICommGetRecvBuffer(hypre_MPI_Comm comm)
+{
+   hypre_int flag;
+   void *buffer = NULL;
+   MPI_Comm_get_attr(comm, hypre_HandleMPICommKeyRecvBuffer(hypre_handle()), &buffer, &flag);
+   if (!flag)
+   {
+      buffer = NULL;
+   }
+   return (buffer);
+}
+
 hypre_MPI_Request
 hypre_MPI_RequestFromMPI_Request(MPI_Request request)
 {
@@ -1302,18 +1430,18 @@ hypre_MPI_Irecv( void               *buf,
       void *cbuf = NULL;                                                              \
       if (SEND_RECV == TYPE_MACRO_SEND || SEND_RECV == TYPE_MACRO_SEND_INIT)          \
       {                                                                               \
-         cbuf = hypre_MPICommGetSendCopy(comm);                                       \
+         cbuf = hypre_MPICommGetSendBuffer(comm);                                     \
       }                                                                               \
       else if (SEND_RECV == TYPE_MACRO_RECV || SEND_RECV == TYPE_MACRO_RECV_INIT)     \
       {                                                                               \
-         cbuf = hypre_MPICommGetRecvCopy(comm);                                       \
+         cbuf = hypre_MPICommGetRecvBuffer(comm);                                     \
       }                                                                               \
       HYPRE_DTYPE *_buf = (HYPRE_DTYPE *) (cbuf ? cbuf : buf);                        \
       if (SEND_RECV == TYPE_MACRO_SEND && _buf != buf)                                \
       {                                                                               \
          hypre_GpuProfilingPushRange("MPI-D2H");                                      \
          _hypre_TMemcpy(_buf, buf, HYPRE_DTYPE, ntot,                                 \
-                        hypre_MPICommGetSendCopyLocation(comm), memory_location);     \
+                        hypre_MPICommGetSendBufferLocation(comm), memory_location);   \
          hypre_GpuProfilingPopRange();                                                \
       }                                                                               \
       for (i = 0; i < num; i++)                                                       \
@@ -1331,7 +1459,7 @@ hypre_MPI_Irecv( void               *buf,
          if (SEND_RECV == TYPE_MACRO_SEND_INIT)                                       \
          {                                                                            \
             hypre_MPI_RequestSetActionCopy(0, _buf,                                   \
-                                           hypre_MPICommGetSendCopyLocation(comm),    \
+                                           hypre_MPICommGetSendBufferLocation(comm),  \
                                            buf,                                       \
                                            memory_location,                           \
                                            ntot * sizeof(HYPRE_DTYPE),                \
@@ -1342,7 +1470,7 @@ hypre_MPI_Irecv( void               *buf,
             hypre_MPI_RequestSetActionCopy(1, buf,                                    \
                                            memory_location,                           \
                                            _buf,                                      \
-                                           hypre_MPICommGetRecvCopyLocation(comm),    \
+                                           hypre_MPICommGetRecvBufferLocation(comm),  \
                                            ntot * sizeof(HYPRE_DTYPE),                \
                                            &requests[0]);                             \
          }                                                                            \

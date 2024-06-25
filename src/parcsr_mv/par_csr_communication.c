@@ -303,10 +303,10 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
                                             hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs),
                                             hypre_ParCSRCommHandleGetDataTypeSize(job), comm_handle);
 
-         hypre_MPICommSetSendCopy(comm, hypre_ParCSRCommHandleSendBuffer(comm_handle));
-         hypre_MPICommSetRecvCopy(comm, hypre_ParCSRCommHandleRecvBuffer(comm_handle));
-         hypre_MPICommSetSendCopyLocation(comm, hypre_ParCSRCommHandleSendBufferLocation(comm_handle));
-         hypre_MPICommSetRecvCopyLocation(comm, hypre_ParCSRCommHandleRecvBufferLocation(comm_handle));
+         hypre_MPICommSetSendBuffer(comm, hypre_ParCSRCommHandleSendBuffer(comm_handle));
+         hypre_MPICommSetRecvBuffer(comm, hypre_ParCSRCommHandleRecvBuffer(comm_handle));
+         hypre_MPICommSetSendBufferLocation(comm, hypre_ParCSRCommHandleSendBufferLocation(comm_handle));
+         hypre_MPICommSetRecvBufferLocation(comm, hypre_ParCSRCommHandleRecvBufferLocation(comm_handle));
 
          hypre_MPI_Irecv_Multiple(recv_data, num_recvs,
                                   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg),
@@ -332,10 +332,10 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
                                             hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
                                             hypre_ParCSRCommHandleGetDataTypeSize(job), comm_handle);
 
-         hypre_MPICommSetSendCopy(comm, hypre_ParCSRCommHandleSendBuffer(comm_handle));
-         hypre_MPICommSetRecvCopy(comm, hypre_ParCSRCommHandleRecvBuffer(comm_handle));
-         hypre_MPICommSetSendCopyLocation(comm, hypre_ParCSRCommHandleSendBufferLocation(comm_handle));
-         hypre_MPICommSetRecvCopyLocation(comm, hypre_ParCSRCommHandleRecvBufferLocation(comm_handle));
+         hypre_MPICommSetSendBuffer(comm, hypre_ParCSRCommHandleSendBuffer(comm_handle));
+         hypre_MPICommSetRecvBuffer(comm, hypre_ParCSRCommHandleRecvBuffer(comm_handle));
+         hypre_MPICommSetSendBufferLocation(comm, hypre_ParCSRCommHandleSendBufferLocation(comm_handle));
+         hypre_MPICommSetRecvBufferLocation(comm, hypre_ParCSRCommHandleRecvBufferLocation(comm_handle));
 
          hypre_MPI_Irecv_Multiple(recv_data, num_sends,
                                   hypre_ParCSRCommPkgSendMapStarts(comm_pkg),

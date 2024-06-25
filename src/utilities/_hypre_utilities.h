@@ -1185,15 +1185,15 @@ hypre_MemoryLocation hypre_MPICommGetSendLocation(hypre_MPI_Comm comm);
 hypre_MemoryLocation hypre_MPICommGetRecvLocation(hypre_MPI_Comm comm);
 hypre_MemoryLocation hypre_MPICommGetSendCopyLocation(hypre_MPI_Comm comm);
 hypre_MemoryLocation hypre_MPICommGetRecvCopyLocation(hypre_MPI_Comm comm);
-void* hypre_MPICommGetSendCopy(hypre_MPI_Comm comm);
-void* hypre_MPICommGetRecvCopy(hypre_MPI_Comm comm);
+void* hypre_MPICommGetSendBuffer(hypre_MPI_Comm comm);
+void* hypre_MPICommGetRecvBuffer(hypre_MPI_Comm comm);
 
 HYPRE_Int hypre_MPICommSetSendLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
 HYPRE_Int hypre_MPICommSetRecvLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
-HYPRE_Int hypre_MPICommSetSendCopyLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
-HYPRE_Int hypre_MPICommSetRecvCopyLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
-HYPRE_Int hypre_MPICommSetSendCopy(hypre_MPI_Comm comm, void*);
-HYPRE_Int hypre_MPICommSetRecvCopy(hypre_MPI_Comm comm, void*);
+HYPRE_Int hypre_MPICommSetSendBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
+HYPRE_Int hypre_MPICommSetRecvBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
+HYPRE_Int hypre_MPICommSetSendBuffer(hypre_MPI_Comm comm, void*);
+HYPRE_Int hypre_MPICommSetRecvBuffer(hypre_MPI_Comm comm, void*);
 
 typedef MPI_Group    hypre_MPI_Group;
 
@@ -1276,20 +1276,20 @@ typedef MPI_User_function    hypre_MPI_User_function;
 /* mpistubs.c */
 HYPRE_Int hypre_MPI_Init( hypre_int *argc, char ***argv );
 HYPRE_Int hypre_MPI_Finalize( void );
-HYPRE_Int hypre_MPI_Abort( MPI_Comm comm, HYPRE_Int errorcode );
+HYPRE_Int hypre_MPI_Abort( hypre_MPI_Comm comm, HYPRE_Int errorcode );
 HYPRE_Real hypre_MPI_Wtime( void );
 HYPRE_Real hypre_MPI_Wtick( void );
-HYPRE_Int hypre_MPI_Barrier( MPI_Comm comm );
-HYPRE_Int hypre_MPI_Comm_create( MPI_Comm comm, hypre_MPI_Group group,
-                                 MPI_Comm *newcomm );
-HYPRE_Int hypre_MPI_Comm_dup( MPI_Comm comm, MPI_Comm *newcomm );
-MPI_Comm hypre_MPI_Comm_f2c( hypre_int comm );
-HYPRE_Int hypre_MPI_Comm_size( MPI_Comm comm, HYPRE_Int *size );
-HYPRE_Int hypre_MPI_Comm_rank( MPI_Comm comm, HYPRE_Int *rank );
-HYPRE_Int hypre_MPI_Comm_free( MPI_Comm *comm );
-HYPRE_Int hypre_MPI_Comm_group( MPI_Comm comm, hypre_MPI_Group *group );
-HYPRE_Int hypre_MPI_Comm_split( MPI_Comm comm, HYPRE_Int n, HYPRE_Int m,
-                                MPI_Comm * comms );
+HYPRE_Int hypre_MPI_Barrier( hypre_MPI_Comm comm );
+HYPRE_Int hypre_MPI_Comm_create( hypre_MPI_Comm comm, hypre_MPI_Group group,
+                                 hypre_MPI_Comm *newcomm );
+HYPRE_Int hypre_MPI_Comm_dup( hypre_MPI_Comm comm, hypre_MPI_Comm *newcomm );
+hypre_MPI_Comm hypre_MPI_Comm_f2c( hypre_int comm );
+HYPRE_Int hypre_MPI_Comm_size( hypre_MPI_Comm comm, HYPRE_Int *size );
+HYPRE_Int hypre_MPI_Comm_rank( hypre_MPI_Comm comm, HYPRE_Int *rank );
+HYPRE_Int hypre_MPI_Comm_free( hypre_MPI_Comm *comm );
+HYPRE_Int hypre_MPI_Comm_group( hypre_MPI_Comm comm, hypre_MPI_Group *group );
+HYPRE_Int hypre_MPI_Comm_split( hypre_MPI_Comm comm, HYPRE_Int n, HYPRE_Int m,
+                                hypre_MPI_Comm * comms );
 HYPRE_Int hypre_MPI_Group_incl( hypre_MPI_Group group, HYPRE_Int n, HYPRE_Int *ranks,
                                 hypre_MPI_Group *newgroup );
 HYPRE_Int hypre_MPI_Group_free( hypre_MPI_Group *group );
@@ -1384,8 +1384,8 @@ HYPRE_Int hypre_MPI_Recv_init_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *dis
 hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests );
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-HYPRE_Int hypre_MPI_Comm_split_type(MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
-                                    hypre_MPI_Info info, MPI_Comm *newcomm);
+HYPRE_Int hypre_MPI_Comm_split_type(hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
+                                    hypre_MPI_Info info, hypre_MPI_Comm *newcomm);
 HYPRE_Int hypre_MPI_Info_create(hypre_MPI_Info *info);
 HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 #endif
@@ -1851,6 +1851,8 @@ extern "C++"
 struct hypre_DeviceData;
 typedef struct hypre_DeviceData hypre_DeviceData;
 
+#define HYPRE_MAX_NUM_COMM_KEYS 8
+
 typedef struct
 {
    HYPRE_Int              hypre_error;
@@ -1863,7 +1865,10 @@ typedef struct
    HYPRE_Int              struct_comm_recv_buffer_size;
    HYPRE_Int              struct_comm_send_buffer_size;
 
-   /* GPU MPI */
+   /* MPI */
+   hypre_int              comm_keys[HYPRE_MAX_NUM_COMM_KEYS];
+   hypre_MemoryLocation   mpi_attr_locations[hypre_NUM_MEMORY_LOCATION];
+
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int              use_gpu_aware_mpi;
 #endif
@@ -1912,6 +1917,16 @@ typedef struct
 
 #define hypre_HandleDeviceData(hypre_handle)                     ((hypre_handle) -> device_data)
 #define hypre_HandleDeviceGSMethod(hypre_handle)                 ((hypre_handle) -> device_gs_method)
+
+#define hypre_HandleMPICommKeys(hypre_handle)                    ((hypre_handle) -> comm_keys)
+#define hypre_HandleMPICommKeySendLocation(hypre_handle)         ((hypre_handle) -> comm_keys[0])
+#define hypre_HandleMPICommKeyRecvLocation(hypre_handle)         ((hypre_handle) -> comm_keys[1])
+#define hypre_HandleMPICommKeySendBufferLocation(hypre_handle)   ((hypre_handle) -> comm_keys[2])
+#define hypre_HandleMPICommKeyRecvBufferLocation(hypre_handle)   ((hypre_handle) -> comm_keys[3])
+#define hypre_HandleMPICommKeySendBuffer(hypre_handle)           ((hypre_handle) -> comm_keys[4])
+#define hypre_HandleMPICommKeyRecvBuffer(hypre_handle)           ((hypre_handle) -> comm_keys[5])
+#define hypre_HandleMPIAttrLocations(hypre_handle)               ((hypre_handle) -> mpi_attr_locations)
+
 #define hypre_HandleUseGpuAwareMPI(hypre_handle)                 ((hypre_handle) -> use_gpu_aware_mpi)
 #define hypre_HandleMPIHostBufferLocation(hypre_handle)          ((hypre_handle) -> mpi_host_buffer_location)
 

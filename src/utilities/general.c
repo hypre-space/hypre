@@ -44,6 +44,18 @@ hypre_HandleCreate(void)
    hypre_HandleDeviceGSMethod(hypre_handle_) = 1; /* CPU: 0; Cusparse: 1 */
 #endif
 
+   HYPRE_Int i;
+   for (i = 0; i < HYPRE_MAX_NUM_COMM_KEYS; i++)
+   {
+      MPI_Comm_create_keyval( MPI_COMM_NULL_COPY_FN, MPI_COMM_NULL_DELETE_FN,
+                              &hypre_HandleMPICommKeys(hypre_handle_)[i], (void *)0 );
+   }
+
+   for (i = 0; i < hypre_NUM_MEMORY_LOCATION; i++)
+   {
+      hypre_HandleMPIAttrLocations(hypre_handle_)[i] = i;
+   }
+
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 #if defined(HYPRE_WITH_GPU_AWARE_MPI)
    hypre_HandleUseGpuAwareMPI(hypre_handle_) = 1;
