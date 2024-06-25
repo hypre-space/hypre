@@ -31,7 +31,7 @@ hypre_IntSequence(HYPRE_MemoryLocation  memory_location,
 #if defined(HYPRE_USING_SYCL)
       hypreSycl_sequence(data, data + size, 0);
 #else
-      HYPRE_THRUST_CALL(sequence, data, data + num_rows);
+      HYPRE_THRUST_CALL(sequence, data, data + size);
 #endif
    }
    else
