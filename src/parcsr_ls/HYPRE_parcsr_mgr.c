@@ -367,6 +367,26 @@ HYPRE_MGRSetCoarseGridMethod( HYPRE_Solver solver, HYPRE_Int *cg_method )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_MGRSetNonGalerkinMaxElmts
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetNonGalerkinMaxElmts( HYPRE_Solver solver, HYPRE_Int max_elmts )
+{
+   return hypre_MGRSetNonGalerkinMaxElmts( solver, max_elmts );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetLevelNonGalerkinMaxElmts
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetLevelNonGalerkinMaxElmts( HYPRE_Solver solver, HYPRE_Int *max_elmts )
+{
+   return hypre_MGRSetLevelNonGalerkinMaxElmts( solver, max_elmts );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_MGRSetLevelFRelaxNumFunctions
  *--------------------------------------------------------------------------*/
 

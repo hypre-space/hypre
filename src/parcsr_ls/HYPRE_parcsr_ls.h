@@ -4157,6 +4157,27 @@ HYPRE_MGRSetCoarseGridMethod(HYPRE_Solver solver,
                              HYPRE_Int *cg_method );
 
 /**
+ * (Optional) Set the maximum number of nonzeros per row of the coarse grid correction
+ * operator computed in the Non-Galerkin approach. Options for \e max_elmts are:
+ *
+ *     - 0: keep only the (block) diagonal portion of the correction matrix (default).
+ *     - k > 0: keep the (block) diagonal plus the k-th largest entries per row
+ *              of the correction matrix.
+ **/
+HYPRE_Int
+HYPRE_MGRSetNonGalerkinMaxElmts(HYPRE_Solver solver,
+                                HYPRE_Int    max_elmts);
+
+/**
+ * (Optional) Set the maximum number of nonzeros per row of the coarse grid correction
+ * operator computed in the Non-Galerkin approach at each MGR level. For options, see
+ * \e HYPRE_MGRSetNonGalerkinMaxElmts.
+ **/
+HYPRE_Int
+HYPRE_MGRSetLevelNonGalerkinMaxElmts(HYPRE_Solver  solver,
+                                     HYPRE_Int    *max_elmts);
+
+/**
  * (Optional) Set the number of functions for F-relaxation V-cycle.
  * For problems like elasticity, one may want to perform coarsening and
  * interpolation for block matrices. The number of functions corresponds
