@@ -26,9 +26,6 @@ hypre_MGRGetGlobalRelaxName(hypre_ParMGRData  *mgr_data,
 
    switch (smoother_type)
    {
-      case -1:
-         return "--";
-
       case 0:
          return "Blk-Jacobi";
 

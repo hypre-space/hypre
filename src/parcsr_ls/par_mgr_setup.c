@@ -1028,11 +1028,21 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_sprintf(region_name, "Global-Relax");
       hypre_GpuProfilingPushRange(region_name);
       HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
+
+      /* TODO (VPM): Change option types for block-Jacobi and block-GS to 30 and 31 and
+            make them accessible through hypre_BoomerAMGRelax? */
       if (level_smooth_iters[lev] > 0)
       {
-         /* TODO (VPM): Change option types for block-Jacobi and block-GS to 30 and 31 and
-            make them accessible through hypre_BoomerAMGRelax? */
-         if (level_smooth_type[lev] == 0 || level_smooth_type[lev] == 1)
+         if (level_smoother[lev])
+         {
+            hypre_Solver *smoother_base = (hypre_Solver*) level_smoother[lev];
+
+            /* Call setup function */
+            hypre_SolverSetup(smoother_base)((HYPRE_Solver) level_smoother[lev],
+                                             (HYPRE_Matrix) A_array[lev],
+                                             NULL, NULL);
+         }
+         else if (level_smooth_type[lev] == 0 || level_smooth_type[lev] == 1)
          {
             /* TODO (VPM): move this to hypre_MGRBlockRelaxSetup and change its declaration */
 #if defined (HYPRE_USING_GPU)
@@ -1433,17 +1443,23 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
 
          /* TODO: Check use of A_ff_array[lev], vectors at (lev + 1) are correct? (VPM) */
-         F_fine_array[lev + 1] =
-            hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_array[lev]),
-                                  hypre_ParCSRMatrixGlobalNumRows(A_ff_array[lev]),
-                                  hypre_ParCSRMatrixRowStarts(A_ff_array[lev]));
-         hypre_ParVectorInitialize(F_fine_array[lev + 1]);
+         if (!F_fine_array[lev + 1])
+         {
+            F_fine_array[lev + 1] =
+               hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_array[lev]),
+                                     hypre_ParCSRMatrixGlobalNumRows(A_ff_array[lev]),
+                                     hypre_ParCSRMatrixRowStarts(A_ff_array[lev]));
+            hypre_ParVectorInitialize(F_fine_array[lev + 1]);
+         }
 
-         U_fine_array[lev + 1] =
-            hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_array[lev]),
-                                  hypre_ParCSRMatrixGlobalNumRows(A_ff_array[lev]),
-                                  hypre_ParCSRMatrixRowStarts(A_ff_array[lev]));
-         hypre_ParVectorInitialize(U_fine_array[lev + 1]);
+         if (!U_fine_array[lev + 1])
+         {
+            U_fine_array[lev + 1] =
+               hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_array[lev]),
+                                     hypre_ParCSRMatrixGlobalNumRows(A_ff_array[lev]),
+                                     hypre_ParCSRMatrixRowStarts(A_ff_array[lev]));
+            hypre_ParVectorInitialize(U_fine_array[lev + 1]);
+         }
       }
 
       /* TODO: refactor this block (VPM) */

@@ -653,7 +653,7 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
    if (hypre_VectorOwnsData(local_vector))
    {
       hypre_CSRMatrixData(A_diag) = hypre_VectorData(local_vector);
-      hypre_VectorOwnsData(b) = 0;
+      hypre_VectorOwnsData(local_vector) = 0;
    }
    else
    {
@@ -700,6 +700,9 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
       hypre_TMemcpy(hypre_CSRMatrixJ(A_diag), A_diag_j,
                     HYPRE_Int, num_nonzeros,
                     memory_location, HYPRE_MEMORY_HOST);
+
+      hypre_TFree(A_diag_i, HYPRE_MEMORY_HOST);
+      hypre_TFree(A_diag_j, HYPRE_MEMORY_HOST);
    }
    else
    {
