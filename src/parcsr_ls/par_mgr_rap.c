@@ -269,11 +269,16 @@ hypre_ParCSRMatrixFilterByNonzerosPerRow(hypre_ParCSRMatrix *A,
    else
    {
       /* Keep only the diagonal */
+      hypre_CSRMatrixNumCols(A_offd) = 0;
       hypre_CSRMatrixNumNonzeros(A_offd) = 0;
+      hypre_CSRMatrixNumRownnz(A_offd) = 0;
+      hypre_TFree(hypre_CSRMatrixRownnz(A_offd), memory_location);
+      hypre_TFree(hypre_CSRMatrixI(A_offd), memory_location);
       hypre_TFree(hypre_CSRMatrixJ(A_offd), memory_location);
       hypre_TFree(hypre_CSRMatrixData(A_offd), memory_location);
       hypre_TFree(hypre_ParCSRMatrixColMapOffd(A), HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_ParCSRMatrixDeviceColMapOffd(A), memory_location);
+      hypre_CSRMatrixI(A_offd) = hypre_CTAlloc(HYPRE_Int, nrows + 1, memory_location);
 
       hypre_CSRMatrixFilterToDiag(A_diag);
    }
