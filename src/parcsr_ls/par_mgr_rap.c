@@ -189,7 +189,7 @@ hypre_MGRNonGalerkinTruncate(hypre_ParCSRMatrix *A,
       hypre_TFree(hypre_ParCSRMatrixDeviceColMapOffd(A), memory_location);
       hypre_CSRMatrixI(A_offd) = hypre_CTAlloc(HYPRE_Int, nrows + 1, memory_location);
 
-      hypre_CSRMatrixFilterToDiag(A_diag);
+      hypre_CSRMatrixTruncateDiag(A_diag);
    }
 
    return hypre_error_flag;

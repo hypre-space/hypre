@@ -7,18 +7,20 @@
 
 /******************************************************************************
  *
- * Member functions for hypre_CSRMatrix class.
+ * Methods for matrix truncation/filtering
  *
  *****************************************************************************/
 
 #include "seq_mv.h"
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixFilterToDiag
+ * hypre_CSRMatrixTruncateDiag
+ *
+ * Truncates the input matrix to its diagonal portion.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixFilterToDiag(hypre_CSRMatrix *A)
+hypre_CSRMatrixTruncateDiag(hypre_CSRMatrix *A)
 {
    HYPRE_MemoryLocation  memory_location = hypre_CSRMatrixMemoryLocation(A);
    HYPRE_Int             num_rows        = hypre_CSRMatrixNumRows(A);

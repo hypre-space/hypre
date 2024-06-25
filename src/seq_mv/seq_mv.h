@@ -285,7 +285,7 @@ typedef struct
  ******************************************************************************/
 
 /* csr_filter.c */
-HYPRE_Int hypre_CSRMatrixFilterToDiag(hypre_CSRMatrix *A);
+HYPRE_Int hypre_CSRMatrixTruncateDiag(hypre_CSRMatrix *A);
 
 /* csr_matop.c */
 HYPRE_Int hypre_CSRMatrixAddFirstPass ( HYPRE_Int firstrow, HYPRE_Int lastrow, HYPRE_Int *marker,
