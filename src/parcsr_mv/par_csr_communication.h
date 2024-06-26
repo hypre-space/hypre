@@ -124,6 +124,7 @@ typedef struct
    hypre_MemoryLocation         recv_buffer_location;
    HYPRE_Int                    num_requests;
    hypre_MPI_Request           *requests;
+   MPI_Comm                     comm;
 } hypre_ParCSRCommHandle;
 
 /*--------------------------------------------------------------------------
@@ -142,6 +143,7 @@ typedef struct
 #define hypre_ParCSRCommHandleNumRequests(comm_handle)            (comm_handle -> num_requests)
 #define hypre_ParCSRCommHandleRequests(comm_handle)               (comm_handle -> requests)
 #define hypre_ParCSRCommHandleRequest(comm_handle, i)             (comm_handle -> requests[i])
+#define hypre_ParCSRCommHandleComm(comm_handle)                   (comm_handle -> comm)
 
 typedef hypre_ParCSRCommHandle hypre_ParCSRPersistentCommHandle;
 

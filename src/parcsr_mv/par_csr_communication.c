@@ -283,11 +283,14 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
 
    HYPRE_Int               num_sends    = hypre_ParCSRCommPkgNumSends(comm_pkg);
    HYPRE_Int               num_recvs    = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
-   MPI_Comm                comm         = hypre_ParCSRCommPkgComm(comm_pkg);
+   MPI_Comm                comm_orig    = hypre_ParCSRCommPkgComm(comm_pkg);
+   MPI_Comm                comm;
    HYPRE_Int               num_requests = num_sends + num_recvs;
    hypre_MPI_Request      *requests     = hypre_CTAlloc(hypre_MPI_Request, num_requests, HYPRE_MEMORY_HOST);
    hypre_MPI_Datatype      mpi_dtype    = hypre_ParCSRCommHandleGetMPIDataType(job);
    hypre_ParCSRCommHandle *comm_handle  = hypre_CTAlloc(hypre_ParCSRCommHandle, 1, HYPRE_MEMORY_HOST);
+
+   hypre_MPI_Comm_dup(comm_orig, &comm);
 
    hypre_MPICommSetSendLocation(comm, hypre_GetActualMemLocation(send_memory_location));
    hypre_MPICommSetRecvLocation(comm, hypre_GetActualMemLocation(recv_memory_location));
@@ -366,6 +369,7 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
    hypre_ParCSRCommHandleRecvLocation(comm_handle) = recv_memory_location;
    hypre_ParCSRCommHandleNumRequests(comm_handle)  = num_requests;
    hypre_ParCSRCommHandleRequests(comm_handle)     = requests;
+   hypre_ParCSRCommHandleComm(comm_handle)         = comm;
 
    hypre_GpuProfilingPopRange();
 
@@ -420,6 +424,7 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
    _hypre_TFree(hypre_ParCSRCommHandleRecvBuffer(comm_handle), hypre_ParCSRCommHandleRecvBufferLocation(comm_handle));
 
    hypre_ParCSRCommHandleDestroyRequests(comm_handle);
+   hypre_MPI_Comm_free(&hypre_ParCSRCommHandleComm(comm_handle));
    hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
 
    hypre_GpuProfilingPopRange();
