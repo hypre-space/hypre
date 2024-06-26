@@ -48,6 +48,7 @@ set(SRCS
   qsplit.c
   random.c
   state.c
+  stl_ops.c
   threading.c
   timer.c
   timing.c
@@ -68,6 +69,7 @@ if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
     memory_tracker.c
     nvtx.c
     omp_device.c
+    stl_ops.c
     HYPRE_handle.c
   )
   convert_filenames_to_full_paths(GPU_SRCS)

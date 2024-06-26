@@ -76,7 +76,8 @@ CUFILES=\
  int_array_device.c\
  memory.c\
  omp_device.c\
- nvtx.c
+ nvtx.c\
+ stl_ops.c
 
 COBJS = ${FILES:.c=.o}
 CUOBJS = ${CUFILES:.c=.obj}
