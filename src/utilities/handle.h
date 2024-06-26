@@ -32,7 +32,7 @@ typedef struct
    HYPRE_Int              struct_comm_send_buffer_size;
 
    /* MPI */
-   hypre_int              comm_keys[HYPRE_MAX_NUM_COMM_KEYS];
+   HYPRE_Int              comm_keys[HYPRE_MAX_NUM_COMM_KEYS];
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int              use_gpu_aware_mpi;

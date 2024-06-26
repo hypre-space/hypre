@@ -753,6 +753,56 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info )
 }
 #endif
 
+HYPRE_Int
+hypre_MPI_Comm_set_attr(hypre_MPI_Comm comm, HYPRE_Int comm_keyval, void *attribute_val)
+{
+   return (0);
+}
+
+HYPRE_Int
+hypre_MPI_Comm_get_attr(hypre_MPI_Comm comm, HYPRE_Int comm_keyval, void *attribute_val, HYPRE_Int *flag)
+{
+   return (0);
+}
+
+HYPRE_Int
+hypre_MPI_Comm_create_keyval(hypre_MPI_Comm_copy_attr_function   *comm_copy_attr_fn,
+                             hypre_MPI_Comm_delete_attr_function *comm_delete_attr_fn,
+                             HYPRE_Int                           *comm_keyval,
+                             void                                *extra_state)
+{
+   *comm_keyval = 0;
+   return (0);
+}
+
+HYPRE_Int
+hypre_MPI_Isend_Multiple( void               *buf,
+                          HYPRE_Int           num,
+                          HYPRE_Int          *displs,
+                          HYPRE_Int          *counts,
+                          hypre_MPI_Datatype  datatype,
+                          HYPRE_Int          *procs,
+                          HYPRE_Int           tag,
+                          hypre_MPI_Comm      comm,
+                          hypre_MPI_Request  *requests )
+{
+   return (0);
+}
+
+HYPRE_Int
+hypre_MPI_Irecv_Multiple( void               *buf,
+                          HYPRE_Int           num,
+                          HYPRE_Int          *displs,
+                          HYPRE_Int          *counts,
+                          hypre_MPI_Datatype  datatype,
+                          HYPRE_Int          *procs,
+                          HYPRE_Int           tag,
+                          hypre_MPI_Comm      comm,
+                          hypre_MPI_Request  *requests )
+{
+   return (0);
+}
+
 /******************************************************************************
  * MPI stubs to do casting of HYPRE_Int and hypre_int correctly
  *****************************************************************************/
@@ -760,127 +810,32 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info )
 #else
 
 HYPRE_Int
-hypre_MPICommSetSendLocation(hypre_MPI_Comm comm, hypre_MemoryLocation location)
+hypre_MPI_Comm_set_attr(hypre_MPI_Comm comm, HYPRE_Int comm_keyval, void *attribute_val)
 {
-   hypre_Handle *handle = hypre_handle();
-   MPI_Comm_set_attr(comm, hypre_HandleMPICommKeySendLocation(handle), (void *) location);
-   return hypre_error_flag;
-}
-
-hypre_MemoryLocation
-hypre_MPICommGetSendLocation(hypre_MPI_Comm comm)
-{
-   hypre_int flag, *atrr_val;
-   hypre_MemoryLocation location = hypre_MEMORY_UNDEFINED;
-   MPI_Comm_get_attr(comm, hypre_HandleMPICommKeySendLocation(hypre_handle()), &atrr_val, &flag);
-   if (flag)
-   {
-      location = (MPI_Aint) atrr_val;
-   }
-   return (location);
+   return (HYPRE_Int) MPI_Comm_set_attr(comm, (hypre_int) comm_keyval, attribute_val);
 }
 
 HYPRE_Int
-hypre_MPICommSetRecvLocation(hypre_MPI_Comm comm, hypre_MemoryLocation location)
+hypre_MPI_Comm_get_attr(hypre_MPI_Comm comm, HYPRE_Int comm_keyval, void *attribute_val, HYPRE_Int *flag)
 {
-   hypre_Handle *handle = hypre_handle();
-   MPI_Comm_set_attr(comm, hypre_HandleMPICommKeyRecvLocation(handle), (void *) location);
-   return hypre_error_flag;
-}
-
-hypre_MemoryLocation
-hypre_MPICommGetRecvLocation(hypre_MPI_Comm comm)
-{
-   hypre_int flag, *atrr_val;
-   hypre_MemoryLocation location = hypre_MEMORY_UNDEFINED;
-   MPI_Comm_get_attr(comm, hypre_HandleMPICommKeyRecvLocation(hypre_handle()), &atrr_val, &flag);
-   if (flag)
-   {
-      location = (MPI_Aint) atrr_val;
-   }
-   return (location);
+   hypre_int mpi_flag;
+   HYPRE_Int ierr;
+   ierr = (HYPRE_Int) MPI_Comm_get_attr(comm, (hypre_int) comm_keyval, attribute_val, &mpi_flag);
+   *flag = (HYPRE_Int) mpi_flag;
+   return ierr;
 }
 
 HYPRE_Int
-hypre_MPICommSetSendBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation location)
+hypre_MPI_Comm_create_keyval(hypre_MPI_Comm_copy_attr_function   *comm_copy_attr_fn,
+                             hypre_MPI_Comm_delete_attr_function *comm_delete_attr_fn,
+                             HYPRE_Int                           *comm_keyval,
+                             void                                *extra_state)
 {
-   hypre_Handle *handle = hypre_handle();
-   MPI_Comm_set_attr(comm, hypre_HandleMPICommKeySendBufferLocation(handle), (void *) location);
-   return hypre_error_flag;
-}
-
-hypre_MemoryLocation
-hypre_MPICommGetSendBufferLocation(hypre_MPI_Comm comm)
-{
-   hypre_int flag, *atrr_val;
-   hypre_MemoryLocation location = hypre_MEMORY_UNDEFINED;
-   MPI_Comm_get_attr(comm, hypre_HandleMPICommKeySendBufferLocation(hypre_handle()), &atrr_val, &flag);
-   if (flag)
-   {
-      location = (MPI_Aint) atrr_val;
-   }
-   return (location);
-}
-
-HYPRE_Int
-hypre_MPICommSetRecvBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation location)
-{
-   hypre_Handle *handle = hypre_handle();
-   MPI_Comm_set_attr(comm, hypre_HandleMPICommKeyRecvBufferLocation(handle), (void *) location);
-   return hypre_error_flag;
-}
-
-hypre_MemoryLocation
-hypre_MPICommGetRecvBufferLocation(hypre_MPI_Comm comm)
-{
-   hypre_int flag, *atrr_val;
-   hypre_MemoryLocation location = hypre_MEMORY_UNDEFINED;
-   MPI_Comm_get_attr(comm, hypre_HandleMPICommKeyRecvBufferLocation(hypre_handle()), &atrr_val, &flag);
-   if (flag)
-   {
-      location = (MPI_Aint) atrr_val;
-   }
-   return (location);
-}
-
-HYPRE_Int
-hypre_MPICommSetSendBuffer(hypre_MPI_Comm comm, void *buffer)
-{
-   MPI_Comm_set_attr(comm, hypre_HandleMPICommKeySendBuffer(hypre_handle()), buffer);
-   return hypre_error_flag;
-}
-
-void *
-hypre_MPICommGetSendBuffer(hypre_MPI_Comm comm)
-{
-   hypre_int flag;
-   void *buffer = NULL;
-   MPI_Comm_get_attr(comm, hypre_HandleMPICommKeySendBuffer(hypre_handle()), &buffer, &flag);
-   if (!flag)
-   {
-      buffer = NULL;
-   }
-   return (buffer);
-}
-
-HYPRE_Int
-hypre_MPICommSetRecvBuffer(hypre_MPI_Comm comm, void *buffer)
-{
-   MPI_Comm_set_attr(comm, hypre_HandleMPICommKeyRecvBuffer(hypre_handle()), buffer);
-   return hypre_error_flag;
-}
-
-void *
-hypre_MPICommGetRecvBuffer(hypre_MPI_Comm comm)
-{
-   hypre_int flag;
-   void *buffer = NULL;
-   MPI_Comm_get_attr(comm, hypre_HandleMPICommKeyRecvBuffer(hypre_handle()), &buffer, &flag);
-   if (!flag)
-   {
-      buffer = NULL;
-   }
-   return (buffer);
+   hypre_int mpi_comm_keyval;
+   HYPRE_Int ierr;
+   ierr = MPI_Comm_create_keyval(comm_copy_attr_fn, comm_delete_attr_fn, &mpi_comm_keyval, extra_state);
+   *comm_keyval = mpi_comm_keyval;
+   return ierr;
 }
 
 hypre_MPI_Request
@@ -1915,6 +1870,8 @@ hypre_MPI_Info_free( hypre_MPI_Info *info )
 }
 #endif
 
+#endif
+
 HYPRE_Int
 hypre_MPINeedHostBuffer(hypre_MemoryLocation memory_location)
 {
@@ -1928,4 +1885,126 @@ hypre_MPINeedHostBuffer(hypre_MemoryLocation memory_location)
 #endif
 }
 
-#endif
+HYPRE_Int
+hypre_MPICommSetSendLocation(hypre_MPI_Comm comm, hypre_MemoryLocation location)
+{
+   hypre_Handle *handle = hypre_handle();
+   hypre_MPI_Comm_set_attr(comm, hypre_HandleMPICommKeySendLocation(handle), (void *) location);
+   return hypre_error_flag;
+}
+
+hypre_MemoryLocation
+hypre_MPICommGetSendLocation(hypre_MPI_Comm comm)
+{
+   HYPRE_Int flag, *atrr_val;
+   hypre_MemoryLocation location = hypre_MEMORY_UNDEFINED;
+   hypre_MPI_Comm_get_attr(comm, hypre_HandleMPICommKeySendLocation(hypre_handle()), &atrr_val, &flag);
+   if (flag)
+   {
+      location = (hypre_MPI_Aint) atrr_val;
+   }
+   return (location);
+}
+
+HYPRE_Int
+hypre_MPICommSetRecvLocation(hypre_MPI_Comm comm, hypre_MemoryLocation location)
+{
+   hypre_Handle *handle = hypre_handle();
+   hypre_MPI_Comm_set_attr(comm, hypre_HandleMPICommKeyRecvLocation(handle), (void *) location);
+   return hypre_error_flag;
+}
+
+hypre_MemoryLocation
+hypre_MPICommGetRecvLocation(hypre_MPI_Comm comm)
+{
+   HYPRE_Int flag, *atrr_val;
+   hypre_MemoryLocation location = hypre_MEMORY_UNDEFINED;
+   hypre_MPI_Comm_get_attr(comm, hypre_HandleMPICommKeyRecvLocation(hypre_handle()), &atrr_val, &flag);
+   if (flag)
+   {
+      location = (hypre_MPI_Aint) atrr_val;
+   }
+   return (location);
+}
+
+HYPRE_Int
+hypre_MPICommSetSendBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation location)
+{
+   hypre_Handle *handle = hypre_handle();
+   hypre_MPI_Comm_set_attr(comm, hypre_HandleMPICommKeySendBufferLocation(handle), (void *) location);
+   return hypre_error_flag;
+}
+
+hypre_MemoryLocation
+hypre_MPICommGetSendBufferLocation(hypre_MPI_Comm comm)
+{
+   HYPRE_Int flag, *atrr_val;
+   hypre_MemoryLocation location = hypre_MEMORY_UNDEFINED;
+   hypre_MPI_Comm_get_attr(comm, hypre_HandleMPICommKeySendBufferLocation(hypre_handle()), &atrr_val, &flag);
+   if (flag)
+   {
+      location = (hypre_MPI_Aint) atrr_val;
+   }
+   return (location);
+}
+
+HYPRE_Int
+hypre_MPICommSetRecvBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation location)
+{
+   hypre_Handle *handle = hypre_handle();
+   hypre_MPI_Comm_set_attr(comm, hypre_HandleMPICommKeyRecvBufferLocation(handle), (void *) location);
+   return hypre_error_flag;
+}
+
+hypre_MemoryLocation
+hypre_MPICommGetRecvBufferLocation(hypre_MPI_Comm comm)
+{
+   HYPRE_Int flag, *atrr_val;
+   hypre_MemoryLocation location = hypre_MEMORY_UNDEFINED;
+   hypre_MPI_Comm_get_attr(comm, hypre_HandleMPICommKeyRecvBufferLocation(hypre_handle()), &atrr_val, &flag);
+   if (flag)
+   {
+      location = (hypre_MPI_Aint) atrr_val;
+   }
+   return (location);
+}
+
+HYPRE_Int
+hypre_MPICommSetSendBuffer(hypre_MPI_Comm comm, void *buffer)
+{
+   hypre_MPI_Comm_set_attr(comm, hypre_HandleMPICommKeySendBuffer(hypre_handle()), buffer);
+   return hypre_error_flag;
+}
+
+void *
+hypre_MPICommGetSendBuffer(hypre_MPI_Comm comm)
+{
+   HYPRE_Int flag;
+   void *buffer = NULL;
+   hypre_MPI_Comm_get_attr(comm, hypre_HandleMPICommKeySendBuffer(hypre_handle()), &buffer, &flag);
+   if (!flag)
+   {
+      buffer = NULL;
+   }
+   return (buffer);
+}
+
+HYPRE_Int
+hypre_MPICommSetRecvBuffer(hypre_MPI_Comm comm, void *buffer)
+{
+   hypre_MPI_Comm_set_attr(comm, hypre_HandleMPICommKeyRecvBuffer(hypre_handle()), buffer);
+   return hypre_error_flag;
+}
+
+void *
+hypre_MPICommGetRecvBuffer(hypre_MPI_Comm comm)
+{
+   HYPRE_Int flag;
+   void *buffer = NULL;
+   hypre_MPI_Comm_get_attr(comm, hypre_HandleMPICommKeyRecvBuffer(hypre_handle()), &buffer, &flag);
+   if (!flag)
+   {
+      buffer = NULL;
+   }
+   return (buffer);
+}

@@ -1002,7 +1002,7 @@ extern hypre_MemoryTracker *_hypre_memory_tracker;
 extern "C" {
 #endif
 
-#ifdef HYPRE_SEQUENTIAL
+#if defined(HYPRE_SEQUENTIAL)
 
 /******************************************************************************
  * MPI stubs to generate serial codes without mpi
@@ -1117,6 +1117,9 @@ extern "C" {
 #define MPI_Op_create       hypre_MPI_Op_create
 #define MPI_User_function   hypre_MPI_User_function
 #define MPI_Info_create     hypre_MPI_Info_create
+#define MPI_Comm_set_attr   hypre_MPI_Comm_set_attr
+#define MPI_Comm_copy_attr_function   hypre_MPI_Comm_copy_attr_function
+#define MPI_Comm_delete_attr_function hypre_MPI_Comm_delete_attr_function
 
 /*--------------------------------------------------------------------------
  * Types, etc.
@@ -1128,6 +1131,8 @@ typedef HYPRE_Int hypre_MPI_Group;
 typedef HYPRE_Int hypre_MPI_Request;
 typedef HYPRE_Int hypre_MPI_Datatype;
 typedef void (hypre_MPI_User_function) (void);
+typedef void (hypre_MPI_Comm_copy_attr_function) (void);
+typedef void (hypre_MPI_Comm_delete_attr_function) (void);
 
 typedef struct
 {
@@ -1136,7 +1141,7 @@ typedef struct
 } hypre_MPI_Status;
 
 typedef HYPRE_Int  hypre_MPI_Op;
-typedef HYPRE_Int  hypre_MPI_Aint;
+typedef intptr_t   hypre_MPI_Aint;
 typedef HYPRE_Int  hypre_MPI_Info;
 
 #define  hypre_MPI_COMM_SELF   1
@@ -1173,6 +1178,11 @@ typedef HYPRE_Int  hypre_MPI_Info;
 #define  hypre_MPI_ANY_SOURCE    1
 #define  hypre_MPI_ANY_TAG       1
 
+#define  hypre_MPI_COMM_NULL_COPY_FN   NULL
+#define  hypre_MPI_COMM_NULL_DELETE_FN NULL
+
+#define  hypre_MPI_RequestMPI_Request(request) (request)
+
 #else
 
 /******************************************************************************
@@ -1180,21 +1190,6 @@ typedef HYPRE_Int  hypre_MPI_Info;
  *****************************************************************************/
 
 typedef MPI_Comm     hypre_MPI_Comm;
-
-hypre_MemoryLocation hypre_MPICommGetSendLocation(hypre_MPI_Comm comm);
-hypre_MemoryLocation hypre_MPICommGetRecvLocation(hypre_MPI_Comm comm);
-hypre_MemoryLocation hypre_MPICommGetSendCopyLocation(hypre_MPI_Comm comm);
-hypre_MemoryLocation hypre_MPICommGetRecvCopyLocation(hypre_MPI_Comm comm);
-void* hypre_MPICommGetSendBuffer(hypre_MPI_Comm comm);
-void* hypre_MPICommGetRecvBuffer(hypre_MPI_Comm comm);
-
-HYPRE_Int hypre_MPICommSetSendLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
-HYPRE_Int hypre_MPICommSetRecvLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
-HYPRE_Int hypre_MPICommSetSendBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
-HYPRE_Int hypre_MPICommSetRecvBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
-HYPRE_Int hypre_MPICommSetSendBuffer(hypre_MPI_Comm comm, void*);
-HYPRE_Int hypre_MPICommSetRecvBuffer(hypre_MPI_Comm comm, void*);
-
 typedef MPI_Group    hypre_MPI_Group;
 
 #define HYPRE_MPI_REQUEST_FREE 1
@@ -1226,6 +1221,8 @@ typedef MPI_Op       hypre_MPI_Op;
 typedef MPI_Aint     hypre_MPI_Aint;
 typedef MPI_Info     hypre_MPI_Info;
 typedef MPI_User_function    hypre_MPI_User_function;
+typedef MPI_Comm_copy_attr_function   hypre_MPI_Comm_copy_attr_function;
+typedef MPI_Comm_delete_attr_function hypre_MPI_Comm_delete_attr_function;
 
 #define  hypre_MPI_COMM_WORLD         MPI_COMM_WORLD
 #define  hypre_MPI_COMM_NULL          MPI_COMM_NULL
@@ -1262,6 +1259,9 @@ typedef MPI_User_function    hypre_MPI_User_function;
 #define  hypre_MPI_SOURCE          MPI_SOURCE
 #define  hypre_MPI_TAG             MPI_TAG
 #define  hypre_MPI_LAND            MPI_LAND
+
+#define  hypre_MPI_COMM_NULL_COPY_FN   MPI_COMM_NULL_COPY_FN
+#define  hypre_MPI_COMM_NULL_DELETE_FN MPI_COMM_NULL_DELETE_FN
 
 #endif
 
@@ -1389,6 +1389,24 @@ HYPRE_Int hypre_MPI_Comm_split_type(hypre_MPI_Comm comm, HYPRE_Int split_type, H
 HYPRE_Int hypre_MPI_Info_create(hypre_MPI_Info *info);
 HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 #endif
+
+HYPRE_Int hypre_MPI_Comm_create_keyval(hypre_MPI_Comm_copy_attr_function *comm_copy_attr_fn,
+hypre_MPI_Comm_delete_attr_function *comm_delete_attr_fn, HYPRE_Int *comm_keyval, void *extra_state);
+HYPRE_Int hypre_MPI_Comm_set_attr(hypre_MPI_Comm comm, HYPRE_Int comm_keyval, void *attribute_val);
+HYPRE_Int hypre_MPI_Comm_get_attr(hypre_MPI_Comm comm, HYPRE_Int comm_keyval, void *attribute_val, HYPRE_Int *flag);
+
+hypre_MemoryLocation hypre_MPICommGetSendLocation(hypre_MPI_Comm comm);
+hypre_MemoryLocation hypre_MPICommGetRecvLocation(hypre_MPI_Comm comm);
+hypre_MemoryLocation hypre_MPICommGetSendBufferLocation(hypre_MPI_Comm comm);
+hypre_MemoryLocation hypre_MPICommGetRecvBufferLocation(hypre_MPI_Comm comm);
+void* hypre_MPICommGetSendBuffer(hypre_MPI_Comm comm);
+void* hypre_MPICommGetRecvBuffer(hypre_MPI_Comm comm);
+HYPRE_Int hypre_MPICommSetSendLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
+HYPRE_Int hypre_MPICommSetRecvLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
+HYPRE_Int hypre_MPICommSetSendBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
+HYPRE_Int hypre_MPICommSetRecvBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
+HYPRE_Int hypre_MPICommSetSendBuffer(hypre_MPI_Comm comm, void*);
+HYPRE_Int hypre_MPICommSetRecvBuffer(hypre_MPI_Comm comm, void*);
 
 #ifdef __cplusplus
 }

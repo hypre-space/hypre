@@ -47,8 +47,8 @@ hypre_HandleCreate(void)
    HYPRE_Int i;
    for (i = 0; i < HYPRE_MAX_NUM_COMM_KEYS; i++)
    {
-      MPI_Comm_create_keyval( MPI_COMM_NULL_COPY_FN, MPI_COMM_NULL_DELETE_FN,
-                              &hypre_HandleMPICommKeys(hypre_handle_)[i], (void *)0 );
+      hypre_MPI_Comm_create_keyval( hypre_MPI_COMM_NULL_COPY_FN, hypre_MPI_COMM_NULL_DELETE_FN,
+                                    &hypre_HandleMPICommKeys(hypre_handle_)[i], (void *)0 );
    }
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
