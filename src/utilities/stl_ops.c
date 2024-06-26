@@ -12,6 +12,9 @@
 
 /*--------------------------------------------------------------------
  * hypre_IntSequence
+ *
+ * Generate a linear sequence of integers from 0 to size-1 and store
+ * them in the provided data array.
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
