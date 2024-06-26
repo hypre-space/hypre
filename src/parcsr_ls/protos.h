@@ -2289,7 +2289,7 @@ HYPRE_Int hypre_MGRBuildRFromW( hypre_IntArray *C_map, hypre_IntArray *F_map,
                                 hypre_ParCSRMatrix *W, hypre_ParCSRMatrix **R_ptr );
 HYPRE_Int hypre_MGRBlockColLumpedRestrict( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
                                            hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker,
-                                           HYPRE_Int block_dim, hypre_ParCSRMatrix **W_ptr,
+                                           HYPRE_Int blk_dim, hypre_ParCSRMatrix **W_ptr,
                                            hypre_ParCSRMatrix **R_ptr);
 HYPRE_Int hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
                                      hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker,

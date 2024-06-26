@@ -15,14 +15,19 @@
  * number of nonzero entries per row. This algorithm is tailored to the needs
  * of the Non-Galerkin approach in MGR.
  *
- *   1) max_elmts == 0 and block_dim == 1: keep diagonal entries
- *   2) max_elmts == 0 and  block_dim > 1: keep block diagonal entries
+ *  - max_elmts == 0: no filtering
+ *  - max_elmts == 1 and blk_dim == 1: keep diagonal entries
+ *  - max_elmts == 1 and  blk_dim > 1: keep block diagonal entries
+ *  - max_elmts > 1 and blk_dim == 1: keep diagonal entries and
+ *                                    (max_elmts - 1) largest ones per row
+ *  - max_elmts > blk_dim and blk_dim > 1: keep block diagonal entries and
+ *                                         (max_elmts - blk_dim) largest ones
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_MGRNonGalerkinTruncate(hypre_ParCSRMatrix *A,
                              HYPRE_Int           ordering,
-                             HYPRE_Int           block_dim,
+                             HYPRE_Int           blk_dim,
                              HYPRE_Int           max_elmts)
 {
    HYPRE_MemoryLocation   memory_location = hypre_ParCSRMatrixMemoryLocation(A);
@@ -48,7 +53,7 @@ hypre_MGRNonGalerkinTruncate(hypre_ParCSRMatrix *A,
    HYPRE_Int       *A_offd_i_new, *A_offd_j_new;
    HYPRE_Complex   *A_offd_a_new;
    HYPRE_Int        num_nonzeros_offd_new = 0;
-   HYPRE_Int        num_nonzeros_max = (block_dim + max_elmts) * nrows;
+   HYPRE_Int        num_nonzeros_max = (blk_dim + max_elmts) * nrows;
    HYPRE_Int        num_nonzeros_offd_max = max_elmts * nrows;
 
    HYPRE_Int        max_num_nonzeros;
@@ -58,6 +63,11 @@ hypre_MGRNonGalerkinTruncate(hypre_ParCSRMatrix *A,
    HYPRE_Int        col_idx;
    HYPRE_Real       col_value;
 
+   /* Return if max_elmts is zero, i.e., no truncation */
+   if (max_elmts == 0)
+   {
+      return hypre_error_flag;
+   }
 
    /* Allocate new memory */
    if (ordering == 0)
@@ -107,8 +117,8 @@ hypre_MGRNonGalerkinTruncate(hypre_ParCSRMatrix *A,
          if (max_elmts > 0)
          {
             cnt = 0;
-            row_start = i - (i % block_dim);
-            row_stop  = row_start + block_dim - 1;
+            row_start = i - (i % blk_dim);
+            row_stop  = row_start + blk_dim - 1;
 
             for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
             {
@@ -177,7 +187,8 @@ hypre_MGRNonGalerkinTruncate(hypre_ParCSRMatrix *A,
    }
    else
    {
-      /* Keep only the diagonal */
+      /* Keep only the diagonal portion of A
+         TODO (VPM): consider other combinations of max_elmts and blk_dim */
       hypre_CSRMatrixNumCols(A_offd) = 0;
       hypre_CSRMatrixNumNonzeros(A_offd) = 0;
       hypre_CSRMatrixNumRownnz(A_offd) = 0;
@@ -206,8 +217,8 @@ hypre_MGRBuildNonGalerkinCoarseOperatorHost(hypre_ParCSRMatrix    *A_FF,
                                             hypre_ParCSRMatrix    *A_CC,
                                             hypre_ParCSRMatrix    *Wp,
                                             hypre_ParCSRMatrix    *Wr,
-                                            HYPRE_Int              fine_block_dim,
-                                            HYPRE_Int              coarse_block_dim,
+                                            HYPRE_Int              fine_blk_dim,
+                                            HYPRE_Int              coarse_blk_dim,
                                             HYPRE_Int              ordering,
                                             HYPRE_Int              method,
                                             HYPRE_Int              max_elmts,
@@ -234,7 +245,7 @@ hypre_MGRBuildNonGalerkinCoarseOperatorHost(hypre_ParCSRMatrix    *A_FF,
       else
       {
          // Build block diagonal inverse for A_FF
-         hypre_ParCSRMatrixBlockDiagMatrix(A_FF, fine_block_dim, -1, NULL, 1, &A_FF_inv);
+         hypre_ParCSRMatrixBlockDiagMatrix(A_FF, fine_blk_dim, -1, NULL, 1, &A_FF_inv);
 
          // compute Wp = A_FF_inv * A_FC
          // NOTE: Use hypre_ParMatmul here instead of hypre_ParCSRMatMat to avoid padding
@@ -259,7 +270,7 @@ hypre_MGRBuildNonGalerkinCoarseOperatorHost(hypre_ParCSRMatrix    *A_FF,
       }
       else
       {
-         blk_inv_size = method == 2 ? 1 : fine_block_dim;
+         blk_inv_size = method == 2 ? 1 : fine_blk_dim;
          hypre_ParCSRMatrixBlockDiagMatrix(A_FF, blk_inv_size, -1, NULL, 1, &A_FF_inv);
 
          /* TODO (VPM): We shouldn't need to compute Wr_tmp since we are passing in Wr already */
@@ -282,7 +293,7 @@ hypre_MGRBuildNonGalerkinCoarseOperatorHost(hypre_ParCSRMatrix    *A_FF,
    }
 
    /* Drop small entries in the correction term A_Hc */
-   hypre_MGRNonGalerkinTruncate(A_Hc, ordering, coarse_block_dim, max_elmts);
+   hypre_MGRNonGalerkinTruncate(A_Hc, ordering, coarse_blk_dim, max_elmts);
 
    /* Coarse grid / Schur complement */
    hypre_ParCSRMatrixAdd(one, A_CC, neg_one, A_Hc, &A_H);
@@ -307,8 +318,8 @@ hypre_MGRBuildNonGalerkinCoarseOperatorDevice(hypre_ParCSRMatrix    *A_FF,
                                               hypre_ParCSRMatrix    *A_CC,
                                               hypre_ParCSRMatrix    *Wp,
                                               hypre_ParCSRMatrix    *Wr,
-                                              HYPRE_Int              fine_block_dim,
-                                              HYPRE_Int              coarse_block_dim,
+                                              HYPRE_Int              fine_blk_dim,
+                                              HYPRE_Int              coarse_blk_dim,
                                               HYPRE_Int              ordering,
                                               HYPRE_Int              method,
                                               HYPRE_Int              max_elmts,
@@ -360,7 +371,7 @@ hypre_MGRBuildNonGalerkinCoarseOperatorDevice(hypre_ParCSRMatrix    *A_FF,
       hypre_ParCSRMatrix  *B_FF_inv;
 
       /* Compute the block diagonal inverse of A_FF */
-      hypre_ParCSRMatrixBlockDiagMatrix(A_FF, fine_block_dim, -1, NULL, 1, &B_FF_inv);
+      hypre_ParCSRMatrixBlockDiagMatrix(A_FF, fine_blk_dim, -1, NULL, 1, &B_FF_inv);
 
       /* Compute Wp = A_FF_inv * A_FC */
       Wp_tmp = hypre_ParCSRMatMat(B_FF_inv, A_FC);
@@ -387,7 +398,7 @@ hypre_MGRBuildNonGalerkinCoarseOperatorDevice(hypre_ParCSRMatrix    *A_FF,
    }
 
    /* Filter A_Hc */
-   hypre_MGRNonGalerkinTruncate(A_Hc, ordering, coarse_block_dim, max_elmts);
+   hypre_MGRNonGalerkinTruncate(A_Hc, ordering, coarse_blk_dim, max_elmts);
 
    /* Coarse grid (Schur complement) computation */
    hypre_ParCSRMatrixAdd(1.0, A_CC, alpha, A_Hc, &A_H);
@@ -434,8 +445,8 @@ hypre_MGRBuildNonGalerkinCoarseOperator(hypre_ParCSRMatrix    *A_FF,
                                         hypre_ParCSRMatrix    *A_CC,
                                         hypre_ParCSRMatrix    *Wp,
                                         hypre_ParCSRMatrix    *Wr,
-                                        HYPRE_Int              fine_block_dim,
-                                        HYPRE_Int              coarse_block_dim,
+                                        HYPRE_Int              fine_blk_dim,
+                                        HYPRE_Int              coarse_blk_dim,
                                         HYPRE_Int              ordering,
                                         HYPRE_Int              method,
                                         HYPRE_Int              max_elmts,
@@ -462,14 +473,14 @@ hypre_MGRBuildNonGalerkinCoarseOperator(hypre_ParCSRMatrix    *A_FF,
    if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
       hypre_MGRBuildNonGalerkinCoarseOperatorDevice(A_FF, A_FC, A_CF, A_CC, Wp, Wr,
-                                                    fine_block_dim, coarse_block_dim,
+                                                    fine_blk_dim, coarse_blk_dim,
                                                     ordering, method, max_elmts, A_H_ptr);
    }
    else
 #endif
    {
       hypre_MGRBuildNonGalerkinCoarseOperatorHost(A_FF, A_FC, A_CF, A_CC, Wp, Wr,
-                                                  fine_block_dim, coarse_block_dim,
+                                                  fine_blk_dim, coarse_blk_dim,
                                                   ordering, method, max_elmts, A_H_ptr);
    }
 
@@ -497,7 +508,7 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
    hypre_ParCSRMatrix    *RT = (mgr_data -> RT_array)[level];
    hypre_ParCSRMatrix    *A_CC = *A_CC_ptr;
 
-   HYPRE_Int             *block_dims = (mgr_data -> block_num_coarse_indexes);
+   HYPRE_Int             *blk_dims = (mgr_data -> block_num_coarse_indexes);
    HYPRE_Int              block_size = (mgr_data -> block_size);
    HYPRE_Int              method = (mgr_data -> mgr_coarse_grid_method)[level];
    HYPRE_Int              num_coarse_levels = (mgr_data -> max_num_coarse_levels);
@@ -506,9 +517,9 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
    HYPRE_Real             threshold = (mgr_data -> truncate_coarse_grid_threshold);
 
    hypre_ParCSRMatrix    *AP, *RAP, *RAP_c;
-   HYPRE_Int              fine_block_dim = (level) ? block_dims[level - 1] - block_dims[level] :
-                                           block_size - block_dims[level];
-   HYPRE_Int              coarse_block_dim = block_dims[level];
+   HYPRE_Int              fine_blk_dim = (level) ? blk_dims[level - 1] - blk_dims[level] :
+                                           block_size - blk_dims[level];
+   HYPRE_Int              coarse_blk_dim = blk_dims[level];
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("RAP");
@@ -550,10 +561,11 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
    {
       /* Non-Galerkin path */
       hypre_MGRBuildNonGalerkinCoarseOperator(A_FF, A_FC, A_CF, A_CC, Wp, Wr,
-                                              fine_block_dim, coarse_block_dim,
+                                              fine_blk_dim, coarse_blk_dim,
                                               ordering, method, max_elmts, &RAP);
    }
 
+   /* Truncate coarse level matrix based on input threshold */
    if (threshold > 0.0)
    {
 #if defined (HYPRE_USING_GPU)
