@@ -2249,12 +2249,12 @@ HYPRE_Int hypre_MGRGetCoarseGridConvergenceFactor( void *mgr_data, HYPRE_Real *c
 
 /* par_mgr_interp.c */
 HYPRE_Int hypre_MGRBuildInterp( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
-                                hypre_ParCSRMatrix *A_FC, HYPRE_Int *CF_marker,
-                                hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global,
+                                hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *S,
+                                hypre_IntArray *CF_marker, HYPRE_BigInt *num_cpts_global,
                                 HYPRE_Real trunc_factor, HYPRE_Int max_elmts,
-                                HYPRE_Int block_jacobi_bsize,
-                                hypre_ParCSRMatrix **P_tr, HYPRE_Int method,
-                                HYPRE_Int num_sweeps_post );
+                                HYPRE_Int block_jacobi_bsize, HYPRE_Int method,
+                                HYPRE_Int num_sweeps_post, hypre_ParCSRMatrix **Wp_ptr,
+                                hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_MGRBuildRestrict( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
                                   hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *A_CF,
                                   hypre_IntArray *CF_marker, HYPRE_BigInt *num_cpts_global,
@@ -2269,7 +2269,7 @@ HYPRE_Int hypre_MGRBuildPFromWpHost( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *
                                      HYPRE_Int *CF_marker, hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_MGRBuildBlockJacobiWp( hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC,
                                        HYPRE_Int blk_size, hypre_ParCSRMatrix **Wp_ptr );
-HYPRE_Int hypre_MGRBuildPBlockJacobi( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
+HYPRE_Int hypre_MGRBuildBlockJacobiP( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
                                       hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *Wp,
                                       HYPRE_Int blk_size, HYPRE_Int *CF_marker,
                                       hypre_ParCSRMatrix **P_ptr );
