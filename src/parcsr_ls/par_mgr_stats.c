@@ -287,7 +287,7 @@ hypre_MGRGetCoarseGridName(hypre_ParMGRData  *mgr_data,
          return "NG-ApproxInv";
 
       case 5:
-         return "Glk-RAI";
+         return "NG-A_CC";
 
       default:
          return "Unknown";

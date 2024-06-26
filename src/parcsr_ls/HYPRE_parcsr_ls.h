@@ -4085,10 +4085,10 @@ HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver,
  * The default is 0 (no reduction, i.e. keep the reserved cpoints in the coarse grid solve).
  *
  * The default setup for the reduction is as follows:
- *    interp_type = 2
- *    restrict_type = 0
- *    F-relax method = 99
- *    Galerkin coarse grid
+ *    - Interpolation type: Jacobi (2)
+ *    - Restriction type: Injection (0)
+ *    - F-relaxation type: LU factorization with pivoting (99)
+ *    - Coarse grid type: galerkin (0)
  **/
 HYPRE_Int
 HYPRE_MGRSetReservedCpointsLevelToKeep( HYPRE_Solver solver, HYPRE_Int level);
@@ -4145,12 +4145,12 @@ HYPRE_MGRSetLevelFRelaxType(HYPRE_Solver solver,
  * Options for \e cg_method are:
  *
  *    - 0 : Galerkin coarse grid computation using RAP.
- *    - 5 : Galerkin coarse grid computation using RAI (injective prolongation).
- *    - 1 - 4 : Non-Galerkin coarse grid computation with dropping strategy.
+ *    - 1 - 5 : Non-Galerkin coarse grid computation with dropping strategy.
  *         - 1: inv(A_FF) approximated by its (block) diagonal inverse
  *         - 2: CPR-like approximation with inv(A_FF) approximated by its diagonal inverse
  *         - 3: CPR-like approximation with inv(A_FF) approximated by its block diagonal inverse
  *         - 4: inv(A_FF) approximated by sparse approximate inverse
+ *         - 5: inv(A_FF) is an empty matrix and coarse level matrix is set to A_CC
  **/
 HYPRE_Int
 HYPRE_MGRSetCoarseGridMethod(HYPRE_Solver solver,
@@ -4486,14 +4486,14 @@ HYPRE_MGRSetLevelSmoothType(HYPRE_Solver  solver,
 /**
  * @brief Sets the global smoother method for a specified MGR level using a HYPRE solver object.
  *
- * This function enables solvers within hypre to be used as complex smoothers for a specific level 
- * within the multigrid reduction (MGR) scheme. Users can configure the solver options and pass the 
+ * This function enables solvers within hypre to be used as complex smoothers for a specific level
+ * within the multigrid reduction (MGR) scheme. Users can configure the solver options and pass the
  * solver in as the smoother. Currently supported solver options via this interface are ILU and AMG.
  *
  * @note Unlike some other setup functions that might require an array to set options across multiple
  *       levels, this function focuses on a single level, identified by the \e level parameter.
  *
- * @warning The smoother passed to function takes precedence over the smoother type set for that level 
+ * @warning The smoother passed to function takes precedence over the smoother type set for that level
  *       in the MGR hierarchy.
  *
  * @param[in,out] \e solver A pointer to the MGR solver object. This object is modified to include the

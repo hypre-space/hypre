@@ -2296,10 +2296,10 @@ HYPRE_Int hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *
                                      hypre_ParCSRMatrix **W_ptr, hypre_ParCSRMatrix **R_ptr);
 
 /* par_mgr_rap.c */
-HYPRE_Int hypre_MGRComputeRAP(void *mgr_data, hypre_ParCSRMatrix *A_FF,
-                              hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *A_CF,
-                              hypre_ParCSRMatrix *A_CC, hypre_ParCSRMatrix *Wp,
-                              hypre_ParCSRMatrix *Wr, HYPRE_Int level);
+HYPRE_Int hypre_MGRBuildCoarseOperator(void *mgr_data, hypre_ParCSRMatrix *A_FF,
+                                       hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *A_CF,
+                                       hypre_ParCSRMatrix **A_CC_ptr, hypre_ParCSRMatrix *Wp,
+                                       hypre_ParCSRMatrix *Wr, HYPRE_Int level);
 
 /* par_mgr_coarsen.c */
 HYPRE_Int hypre_MGRCoarseParms( MPI_Comm comm, HYPRE_Int num_rows, hypre_IntArray *CF_marker,

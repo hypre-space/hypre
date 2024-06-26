@@ -234,7 +234,7 @@ hypre_MGRBuildNonGalerkinCoarseOperatorHost(hypre_ParCSRMatrix    *A_FF,
       else
       {
          // Build block diagonal inverse for A_FF
-         hypre_ParCSRMatrixBlockDiagMatrix(A_FF, 1, -1, NULL, 1, &A_FF_inv);
+         hypre_ParCSRMatrixBlockDiagMatrix(A_FF, fine_block_dim, -1, NULL, 1, &A_FF_inv);
 
          // compute Wp = A_FF_inv * A_FC
          // NOTE: Use hypre_ParMatmul here instead of hypre_ParCSRMatMat to avoid padding
@@ -280,23 +280,9 @@ hypre_MGRBuildNonGalerkinCoarseOperatorHost(hypre_ParCSRMatrix    *A_FF,
 
       hypre_ParCSRMatrixDestroy(minus_Wp);
    }
-   else if (method == 5)
-   {
-      if (!Wr)
-      {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Expected Wr matrix!");
-         return hypre_error_flag;
-      }
-
-      /* A_Hc = Wr * A_FC */
-      A_Hc = hypre_ParCSRMatMat(Wr, A_FC);
-   }
 
    /* Drop small entries in the correction term A_Hc */
-   if (method != 5)
-   {
-      hypre_MGRNonGalerkinTruncate(A_Hc, ordering, coarse_block_dim, max_elmts);
-   }
+   hypre_MGRNonGalerkinTruncate(A_Hc, ordering, coarse_block_dim, max_elmts);
 
    /* Coarse grid / Schur complement */
    hypre_ParCSRMatrixAdd(one, A_CC, neg_one, A_Hc, &A_H);
@@ -382,40 +368,26 @@ hypre_MGRBuildNonGalerkinCoarseOperatorDevice(hypre_ParCSRMatrix    *A_FF,
       /* Free memory */
       hypre_ParCSRMatrixDestroy(B_FF_inv);
    }
-   else
-   {
-      if (method != 5)
-      {
-         /* Use approximate inverse for ideal interploation */
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: feature not implemented yet!");
-         hypre_GpuProfilingPopRange();
-
-         return hypre_error_flag;
-      }
-   }
 
    /* Compute A_Hc (the correction for A_H) */
-   if (method != 5)
+   if (Wp_tmp)
    {
       A_Hc = hypre_ParCSRMatMat(A_CF_trunc, Wp_tmp);
    }
-   else if (Wr && (method == 5))
+   else if (Wr)
    {
       A_Hc = hypre_ParCSRMatMat(Wr, A_FC);
    }
    else
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Wr matrix was not provided!");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Wp/Wr matrices was not provided!");
       hypre_GpuProfilingPopRange();
 
       return hypre_error_flag;
    }
 
    /* Filter A_Hc */
-   if (method != 5)
-   {
-      hypre_MGRNonGalerkinTruncate(A_Hc, ordering, coarse_block_dim, max_elmts);
-   }
+   hypre_MGRNonGalerkinTruncate(A_Hc, ordering, coarse_block_dim, max_elmts);
 
    /* Coarse grid (Schur complement) computation */
    hypre_ParCSRMatrixAdd(1.0, A_CC, alpha, A_Hc, &A_H);
@@ -449,10 +421,8 @@ hypre_MGRBuildNonGalerkinCoarseOperatorDevice(hypre_ParCSRMatrix    *A_FF,
  *   2: CPR-like approx. with inv(A_FF) approx. by its diagonal inverse
  *   3: CPR-like approx. with inv(A_FF) approx. by its block diagonal inverse
  *   4: inv(A_FF) approximated by sparse approximate inverse
- *   5: Uses classical restriction R = [-Wr I] from input parameters list.
  *
  * Methods 1-4 assume that restriction is the injection operator.
- * Method 5 assumes that interpolation is the injection operator.
  *
  * TODO (VPM): inv(A_FF)*A_FC might have been computed before. Reuse it!
  *--------------------------------------------------------------------------*/
@@ -507,24 +477,26 @@ hypre_MGRBuildNonGalerkinCoarseOperator(hypre_ParCSRMatrix    *A_FF,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MGRComputeRAP
+ * hypre_MGRBuildCoarseOperator
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRComputeRAP(void                *mgr_vdata,
-                    hypre_ParCSRMatrix  *A_FF,
-                    hypre_ParCSRMatrix  *A_FC,
-                    hypre_ParCSRMatrix  *A_CF,
-                    hypre_ParCSRMatrix  *A_CC,
-                    hypre_ParCSRMatrix  *Wp,
-                    hypre_ParCSRMatrix  *Wr,
-                    HYPRE_Int            level)
+hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
+                             hypre_ParCSRMatrix  *A_FF,
+                             hypre_ParCSRMatrix  *A_FC,
+                             hypre_ParCSRMatrix  *A_CF,
+                             hypre_ParCSRMatrix **A_CC_ptr,
+                             hypre_ParCSRMatrix  *Wp,
+                             hypre_ParCSRMatrix  *Wr,
+                             HYPRE_Int            level)
 {
    hypre_ParMGRData      *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    hypre_ParCSRMatrix    *A  = (mgr_data -> A_array)[level];
    hypre_ParCSRMatrix    *P  = (mgr_data -> P_array)[level];
    hypre_ParCSRMatrix    *R  = (mgr_data -> R_array)[level];
    hypre_ParCSRMatrix    *RT = (mgr_data -> RT_array)[level];
+   hypre_ParCSRMatrix    *A_CC = *A_CC_ptr;
+
    HYPRE_Int             *block_dims = (mgr_data -> block_num_coarse_indexes);
    HYPRE_Int              block_size = (mgr_data -> block_size);
    HYPRE_Int              method = (mgr_data -> mgr_coarse_grid_method)[level];
@@ -533,15 +505,25 @@ hypre_MGRComputeRAP(void                *mgr_vdata,
    HYPRE_Int              max_elmts = (mgr_data -> nonglk_max_elmts)[level];
    HYPRE_Real             threshold = (mgr_data -> truncate_coarse_grid_threshold);
 
-   hypre_ParCSRMatrix    *AP, *RAP;
+   hypre_ParCSRMatrix    *AP, *RAP, *RAP_c;
    HYPRE_Int              fine_block_dim = (level) ? block_dims[level - 1] - block_dims[level] :
                                            block_size - block_dims[level];
    HYPRE_Int              coarse_block_dim = block_dims[level];
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("RAP");
+
    if (!method)
    {
       /* Galerkin path */
-      if (RT)
+      if (Wr && !Wp)
+      {
+         /* Prolongation is the injection operator (Wp == NULL) and
+            Restriction is not the injection operator (Wr != NULL) */
+         RAP_c = hypre_ParCSRMatMat(Wr, A_FC);
+         hypre_ParCSRMatrixAdd(1.0, A_CC, -1.0, RAP_c, &RAP);
+      }
+      else if (RT)
       {
          RAP = hypre_ParCSRMatrixRAPKT(RT, A, P, 1);
       }
@@ -557,6 +539,12 @@ hypre_MGRComputeRAP(void                *mgr_vdata,
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Expected either R or RT!");
          return hypre_error_flag;
       }
+   }
+   else if (method == 5)
+   {
+      /* Approximate the coarse level matrix as A_CC */
+      RAP = *A_CC_ptr;
+      *A_CC_ptr = NULL;
    }
    else
    {
@@ -594,6 +582,9 @@ hypre_MGRComputeRAP(void                *mgr_vdata,
    {
       (mgr_data -> RAP) = RAP;
    }
+
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

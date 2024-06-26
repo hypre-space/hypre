@@ -735,18 +735,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
    }
 
-   /*
-   if (Frelax_num_functions== NULL)
-   {
-     Frelax_num_functions = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
-     for (i = 0; i < max_num_coarse_levels; i++)
-     {
-       Frelax_num_functions[i] = 1;
-     }
-     (mgr_data -> Frelax_num_functions) = Frelax_num_functions;
-   }
-   */
-   /* Set default for interp_type and restrict_type if not set already */
+   /* Set default options for the interpolation type at each level if not already set */
    if (interp_type == NULL)
    {
       interp_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
@@ -756,6 +745,8 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
       (mgr_data -> interp_type) = interp_type;
    }
+
+   /* Set default options for restriction type at each level if not already set */
    if (restrict_type == NULL)
    {
       restrict_type = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
@@ -765,6 +756,8 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
       (mgr_data -> restrict_type) = restrict_type;
    }
+
+   /* Set default number of sweeps at each level if not already set */
    if (num_relax_sweeps == NULL)
    {
       num_relax_sweeps = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
@@ -1329,17 +1322,12 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
 
       /* Compute coarse level matrix */
-      hypre_sprintf(region_name, "RAP");
-      hypre_GpuProfilingPushRange(region_name);
-      HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
-      hypre_MGRComputeRAP(mgr_vdata, A_FF, A_FC, A_CF, A_CC, Wp, Wr, lev);
-      hypre_GpuProfilingPopRange();
-      HYPRE_ANNOTATE_REGION_END("%s", region_name);
+      hypre_MGRBuildCoarseOperator(mgr_vdata, A_FF, A_FC, A_CF, &A_CC, Wp, Wr, lev);
 
       /* Destroy temporary variables */
       hypre_ParCSRMatrixDestroy(A_FC), A_FC = NULL;
       hypre_ParCSRMatrixDestroy(A_CF), A_CF = NULL;
-      hypre_ParCSRMatrixDestroy(A_CC), A_CF = NULL;
+      hypre_ParCSRMatrixDestroy(A_CC), A_CC = NULL;
       hypre_ParCSRMatrixDestroy(Wr); Wr = NULL;
       if (Wp)
       {
