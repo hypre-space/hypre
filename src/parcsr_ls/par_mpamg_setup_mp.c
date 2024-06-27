@@ -1623,22 +1623,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
 
    if (amg_print_level == 1 || amg_print_level == 3)
    {
-      if (precision_array[0] == HYPRE_REAL_DOUBLE)
-      {
-         hypre_BoomerAMGSetupStats_dbl(amg_data, A);
-      }
-      else if (precision_array[0] == HYPRE_REAL_SINGLE)
-      {
-         hypre_BoomerAMGSetupStats_flt(amg_data, A);
-      }
-      else if (precision_array[0] == HYPRE_REAL_LONGDOUBLE)
-      {
-         hypre_BoomerAMGSetupStats_long_dbl(amg_data, A);
-      }
-      /*else 
-      {
-         hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-      }*/
+      hypre_MPAMGSetupStats_mp(amg_data, A);
    }
    return hypre_error_flag;
 }

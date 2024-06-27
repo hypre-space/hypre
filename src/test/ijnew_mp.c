@@ -515,7 +515,7 @@ int main (int argc, char *argv[])
    else if (build_matrix_type == 7)
    {
       BuildParVarDifConv_mp(argc, argv, build_matrix_arg_index, &A_flt, &A_dbl, &b_flt, &b_dbl);
-      build_rhs_type = 6;
+      //build_rhs_type = 6;
    }
    else if (build_matrix_type == 8)
    {
@@ -1920,15 +1920,22 @@ int main (int argc, char *argv[])
          }
 	
          // Set the preconditioner for GMRES (single precision matrix)
-         HYPRE_GMRESSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)A_dbl);
-         // Set the preconditioner for GMRES.
-         // This actually sets a pointer to a single precision AMG solver.
-         // The setup and solve functions just allow us to accept double precision
-         // rhs and sol vectors from the GMRES solver to do the preconditioner solve.        
-         HYPRE_GMRESSetPrecond_dbl(pcg_solver,
+         if (precision_array[0] == HYPRE_REAL_SINGLE)
+	 {
+	    HYPRE_GMRESSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)A_flt);
+            HYPRE_GMRESSetPrecond_dbl(pcg_solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_MPAMGPrecSolve_mp,
+                                (HYPRE_PtrToSolverFcn) HYPRE_MPAMGPrecSetup_mp,
+                                amg_solver);
+	 }
+	 else if (precision_array[0] == HYPRE_REAL_DOUBLE)
+	 {
+            HYPRE_GMRESSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)A_dbl);
+            HYPRE_GMRESSetPrecond_dbl(pcg_solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_MPAMGSolve_mp,
                                 (HYPRE_PtrToSolverFcn) HYPRE_MPAMGSetup_mp,
                                 amg_solver);
+	 }
 
          HYPRE_GMRESGetPrecond_dbl(pcg_solver, &pcg_precond_gotten);
          if (pcg_precond_gotten !=  amg_solver)
@@ -2428,15 +2435,26 @@ int main (int argc, char *argv[])
             HYPRE_MPAMGSetCycleNumSweeps_mp(amg_solver, ns_up,     2);
          }
          // Set the preconditioner for BiCGSTAB (single precision matrix)
-         HYPRE_BiCGSTABSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)A_dbl);
+         if (precision_array[0] == HYPRE_REAL_SINGLE)
+	 {
+	    HYPRE_BiCGSTABSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)A_flt);
+            HYPRE_BiCGSTABSetPrecond_dbl(pcg_solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_MPAMGPrecSolve_mp,
+                                (HYPRE_PtrToSolverFcn) HYPRE_MPAMGPrecSetup_mp,
+                                amg_solver);
+	 }
+	 else if (precision_array[0] == HYPRE_REAL_DOUBLE)
+	 {
+            HYPRE_BiCGSTABSetPrecondMatrix_dbl(pcg_solver, (HYPRE_Matrix)A_dbl);
+            HYPRE_BiCGSTABSetPrecond_dbl(pcg_solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_MPAMGSolve_mp,
+                                (HYPRE_PtrToSolverFcn) HYPRE_MPAMGSetup_mp,
+                                amg_solver);
+	 }
          // Set the preconditioner for BiCGSTAB.
          // This actually sets a pointer to a single precision AMG solver.
          // The setup and solve functions just allow us to accept double precision
          // rhs and sol vectors from the BiCGSTAB solver to do the preconditioner solve.        
-         HYPRE_BiCGSTABSetPrecond_dbl(pcg_solver,
-                                (HYPRE_PtrToSolverFcn) HYPRE_MPAMGSolve_mp,
-                                (HYPRE_PtrToSolverFcn) HYPRE_MPAMGSetup_mp,
-                                amg_solver);
 
          HYPRE_BiCGSTABGetPrecond_dbl(pcg_solver, &pcg_precond_gotten);
          if (pcg_precond_gotten !=  amg_solver)
@@ -2791,6 +2809,18 @@ BuildParLaplacian_mp( HYPRE_Int            argc,
             mtrx_dbl[6] = 0.0;
             mtrx_dbl[7] = 2;
             mtrx_dbl[8] = .25;
+         }
+         else if (sys_opt == 5)
+         {
+            mtrx_dbl[0] = 2.0;
+            mtrx_dbl[1] = 1.0;
+            mtrx_dbl[2] = 0.0;
+            mtrx_dbl[3] = 1.0;
+            mtrx_dbl[4] = 200.0;
+            mtrx_dbl[5] = 0.01;
+            mtrx_dbl[6] = 0.0;
+            mtrx_dbl[7] = 0.01;
+            mtrx_dbl[8] = 0.02;
          }
          else /* == 0 */
          {

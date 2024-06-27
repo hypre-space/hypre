@@ -394,9 +394,9 @@ HYPRE_Real afun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
    {
       value = 0.01;
    }
-   else if (xx >= 0.1 && xx <= 0.9
-            && yy >= 0.1 && yy <= 0.9
-            && zz >= 0.1 && zz <= 0.9)
+   else if (xx >= 0.2 && xx <= 0.8
+            && yy >= 0.2 && yy <= 0.8
+            && zz >= 0.2 && zz <= 0.8)
    {
       value = 1000.0;
    }
@@ -425,9 +425,9 @@ HYPRE_Real bfun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
    {
       value = 0.01;
    }
-   else if (xx >= 0.1 && xx <= 0.9
-            && yy >= 0.1 && yy <= 0.9
-            && zz >= 0.1 && zz <= 0.9)
+   else if (xx >= 0.2 && xx <= 0.8
+            && yy >= 0.2 && yy <= 0.8
+            && zz >= 0.2 && zz <= 0.8)
    {
       value = 1000.0;
    }
@@ -466,9 +466,9 @@ HYPRE_Real cfun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
    {
       value = 0.01;
    }
-   else if (xx >= 0.1 && xx <= 0.9
-            && yy >= 0.1 && yy <= 0.9
-            && zz >= 0.1 && zz <= 0.9)
+   else if (xx >= 0.2 && xx <= 0.8
+            && yy >= 0.2 && yy <= 0.8
+            && zz >= 0.2 && zz <= 0.8)
    {
       value = 1000.0;
    }

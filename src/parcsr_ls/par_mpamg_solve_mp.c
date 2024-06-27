@@ -117,7 +117,7 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
 
    if (my_id == 0 && amg_print_level > 1)
    {
-      hypre_BoomerAMGWriteSolverParams_dbl(amg_data);
+      hypre_MPAMGWriteSolverParams_mp(amg_data);
    }
 
    /*-----------------------------------------------------------------------

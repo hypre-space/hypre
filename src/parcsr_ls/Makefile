@@ -45,7 +45,8 @@ FILES =\
  par_cycle_mp.c\
  par_mpamg_mp.c\
  par_mpamg_setup_mp.c\
- par_mpamg_solve_mp.c
+ par_mpamg_solve_mp.c\
+ par_stats_mp.c
 
 CUFILES =\
  ads.c\

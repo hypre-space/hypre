@@ -220,6 +220,11 @@ HYPRE_Int HYPRE_MPAMGSetSabs_mp (HYPRE_Solver solver,
 HYPRE_Int HYPRE_MPAMGSetPrecisionArray_mp (HYPRE_Solver solver,
                                            HYPRE_Precision *precision_array);
 
+HYPRE_Int hypre_MPAMGSetupStats_mp (void * amg_vdata, hypre_ParCSRMatrix *A);
+
+HYPRE_Int hypre_MPAMGWriteSolverParams_mp (void * data);
+
+
 /* par_mpamg_mp.c */
 /*void *hypre_MPAMGCreate_mp ( void );
 HYPRE_Int hypre_MPAMGDestroy_mp ( void *data );
