@@ -839,6 +839,22 @@ hypre_MPI_Comm_create_keyval(hypre_MPI_Comm_copy_attr_function   *comm_copy_attr
 }
 
 HYPRE_Int
+hypre_MPI_Grequest_start(hypre_MPI_Grequest_query_function  *query_fn,
+                         hypre_MPI_Grequest_free_function   *free_fn,
+                         hypre_MPI_Grequest_cancel_function *cancel_fn,
+                         void                               *extra_state,
+                         hypre_MPI_Request                  *request)
+{
+   return (HYPRE_Int) MPI_Grequest_start(query_fn, free_fn, cancel_fn, extra_state, request);
+}
+
+HYPRE_Int
+hypre_MPI_Grequest_complete( hypre_MPI_Request request )
+{
+   return (HYPRE_Int) MPI_Grequest_complete(request);
+}
+
+HYPRE_Int
 hypre_MPI_Init( hypre_int   *argc,
                 char      ***argv )
 {
@@ -1862,7 +1878,8 @@ hypre_MPI_GRequestProcessAction(hypre_MPI_GRequest_Action *action)
 
    hypre_assert(data == hypre_MPI_GRequest_ActionData(action) + hypre_MPI_GRequest_ActionDataSize(action));
 
-   hypre_TFree(action, HYPRE_MEMORY_HOST);
-
    return hypre_error_flag;
 }
+
+hypre_int hypre_grequest_noop_query_fn(void *extra_state, hypre_MPI_Status *status) { return hypre_MPI_SUCCESS; }
+hypre_int hypre_grequest_noop_cancel_fn(void *extra_state, hypre_int complete) { return hypre_MPI_SUCCESS; }

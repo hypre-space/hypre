@@ -250,14 +250,13 @@ hypre_ParCSRCommHandleCreate ( HYPRE_Int            job,
                                           HYPRE_MEMORY_HOST, recv_data);
 }
 
-hypre_int hypre_grequest_noop_query_fn(void *extra_state, MPI_Status *status) { return MPI_SUCCESS; }
-
 hypre_int hypre_grequest_free_fn(void *extra_state)
 {
-   return MPI_SUCCESS;
+   hypre_MPI_GRequest_Action *action = (hypre_MPI_GRequest_Action *) extra_state;
+   hypre_MPI_GRequestProcessAction(action);
+   hypre_TFree(action, HYPRE_MEMORY_HOST);
+   return hypre_MPI_SUCCESS;
 }
-
-hypre_int hypre_grequest_noop_cancel_fn(void *extra_state, hypre_int complete) { return MPI_SUCCESS; }
 
 /*------------------------------------------------------------------
  * hypre_ParCSRCommHandleCreate_v2
@@ -278,11 +277,11 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
    MPI_Comm                comm_orig    = hypre_ParCSRCommPkgComm(comm_pkg);
    MPI_Comm                comm;
    HYPRE_Int               num_requests = num_sends + num_recvs;
-   HYPRE_Int               nelem_recvs  = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg)[num_recvs];
    HYPRE_Int               data_size    = hypre_ParCSRCommHandleGetDataTypeSize(job);
    hypre_MPI_Request      *requests     = hypre_CTAlloc(hypre_MPI_Request, num_requests, HYPRE_MEMORY_HOST);
    hypre_MPI_Datatype      mpi_dtype    = hypre_ParCSRCommHandleGetMPIDataType(job);
    hypre_ParCSRCommHandle *comm_handle  = hypre_CTAlloc(hypre_ParCSRCommHandle, 1, HYPRE_MEMORY_HOST);
+   HYPRE_Int               num_send_elems = 0, num_recv_elems = 0;
 
    hypre_MPI_Comm_dup(comm_orig, &comm);
 
@@ -295,9 +294,10 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
       case HYPRE_COMM_PKG_JOB_INT:
       case HYPRE_COMM_PKG_JOB_BIGINT:
       {
+         num_send_elems = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+         num_recv_elems = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs);
          hypre_ParCSRCommHandleCreateBuffer(send_memory_location, recv_memory_location,
-                                            hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
-                                            hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs),
+                                            num_send_elems, num_recv_elems,
                                             hypre_ParCSRCommHandleGetDataTypeSize(job), comm_handle);
 
          hypre_MPICommSetSendBuffer(comm, hypre_ParCSRCommHandleSendBuffer(comm_handle));
@@ -324,9 +324,10 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
       case HYPRE_COMM_PKG_JOB_INT_TRANSPOSE:
       case HYPRE_COMM_PKG_JOB_BIGINT_TRANSPOSE:
       {
+         num_send_elems = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs);
+         num_recv_elems = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
          hypre_ParCSRCommHandleCreateBuffer(send_memory_location, recv_memory_location,
-                                            hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs),
-                                            hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                                            num_send_elems, num_recv_elems,
                                             hypre_ParCSRCommHandleGetDataTypeSize(job), comm_handle);
 
          hypre_MPICommSetSendBuffer(comm, hypre_ParCSRCommHandleSendBuffer(comm_handle));
@@ -352,22 +353,20 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
          break;
       }
    }
-#if 0
+
    hypre_MPI_GRequest_Action *action;
    hypre_MPI_GRequestGetCopyAction(recv_data,
                                    hypre_GetActualMemLocation(recv_memory_location),
                                    hypre_ParCSRCommHandleRecvBuffer(comm_handle),
                                    hypre_ParCSRCommHandleRecvBufferLocation(comm_handle),
-                                   nelem_recvs * data_size,
+                                   num_recv_elems * data_size,
                                    &action);
 
-   MPI_Grequest_start(hypre_grequest_noop_query_fn,
-                      hypre_grequest_free_fn,
-                      hypre_grequest_noop_cancel_fn,
-                      action,
-                      &hypre_ParCSRCommHandleGRequest(comm_handle));
-#endif
-printf("%d\n", __LINE__);
+   hypre_MPI_Grequest_start(hypre_grequest_noop_query_fn,
+                            hypre_grequest_free_fn,
+                            hypre_grequest_noop_cancel_fn,
+                            action,
+                            &hypre_ParCSRCommHandleGRequest(comm_handle));
 
    /*--------------------------------------------------------------------
     * set up comm_handle and return
@@ -412,9 +411,8 @@ hypre_ParCSRCommHandleWait( hypre_ParCSRCommHandle *comm_handle )
       }
    }
 
-   //MPI_Grequest_complete(hypre_ParCSRCommHandleGRequest(comm_handle));
-
-   //MPI_Wait(&hypre_ParCSRCommHandleGRequest(comm_handle), MPI_STATUS_IGNORE);
+   hypre_MPI_Grequest_complete(hypre_ParCSRCommHandleGRequest(comm_handle));
+   hypre_MPI_Wait(&hypre_ParCSRCommHandleGRequest(comm_handle), MPI_STATUS_IGNORE);
 
    return hypre_error_flag;
 }
@@ -432,7 +430,7 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
    {
       return hypre_error_flag;
    }
-printf("%d\n", __LINE__);
+
    hypre_ParCSRCommHandleWait(comm_handle);
 
    _hypre_TFree(hypre_ParCSRCommHandleSendBuffer(comm_handle), hypre_ParCSRCommHandleSendBufferLocation(comm_handle));
