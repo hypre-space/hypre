@@ -14,13 +14,13 @@
  * a Fortran integer and hence usually the size of hypre_int.
  ****************************************************************************/
 
-MPI_Comm
+hypre_MPI_Comm
 hypre_MPI_Comm_f2c( hypre_int comm )
 {
 #ifdef HYPRE_HAVE_MPI_COMM_F2C
-   return (MPI_Comm) MPI_Comm_f2c(comm);
+   return (hypre_MPI_Comm) MPI_Comm_f2c(comm);
 #else
-   return (MPI_Comm) (size_t)comm;
+   return (hypre_MPI_Comm) (size_t)comm;
 #endif
 }
 
@@ -852,7 +852,7 @@ hypre_MPI_Finalize( void )
 }
 
 HYPRE_Int
-hypre_MPI_Abort( MPI_Comm  comm,
+hypre_MPI_Abort( hypre_MPI_Comm  comm,
                  HYPRE_Int errorcode )
 {
    return (HYPRE_Int) MPI_Abort(comm, (hypre_int)errorcode);
@@ -871,28 +871,28 @@ hypre_MPI_Wtick( void )
 }
 
 HYPRE_Int
-hypre_MPI_Barrier( MPI_Comm comm )
+hypre_MPI_Barrier( hypre_MPI_Comm comm )
 {
    return (HYPRE_Int) MPI_Barrier(comm);
 }
 
 HYPRE_Int
-hypre_MPI_Comm_create( MPI_Comm        comm,
+hypre_MPI_Comm_create( hypre_MPI_Comm  comm,
                        hypre_MPI_Group group,
-                       MPI_Comm       *newcomm )
+                       hypre_MPI_Comm  *newcomm )
 {
    return (HYPRE_Int) MPI_Comm_create(comm, group, newcomm);
 }
 
 HYPRE_Int
-hypre_MPI_Comm_dup( MPI_Comm  comm,
-                    MPI_Comm *newcomm )
+hypre_MPI_Comm_dup( hypre_MPI_Comm  comm,
+                    hypre_MPI_Comm *newcomm )
 {
    return (HYPRE_Int) MPI_Comm_dup(comm, newcomm);
 }
 
 HYPRE_Int
-hypre_MPI_Comm_size( MPI_Comm   comm,
+hypre_MPI_Comm_size( hypre_MPI_Comm   comm,
                      HYPRE_Int *size )
 {
    hypre_int mpi_size;
@@ -903,7 +903,7 @@ hypre_MPI_Comm_size( MPI_Comm   comm,
 }
 
 HYPRE_Int
-hypre_MPI_Comm_rank( MPI_Comm   comm,
+hypre_MPI_Comm_rank( hypre_MPI_Comm   comm,
                      HYPRE_Int *rank )
 {
    hypre_int mpi_rank;
@@ -914,23 +914,23 @@ hypre_MPI_Comm_rank( MPI_Comm   comm,
 }
 
 HYPRE_Int
-hypre_MPI_Comm_free( MPI_Comm *comm )
+hypre_MPI_Comm_free( hypre_MPI_Comm *comm )
 {
    return (HYPRE_Int) MPI_Comm_free(comm);
 }
 
 HYPRE_Int
-hypre_MPI_Comm_group( MPI_Comm   comm,
+hypre_MPI_Comm_group( hypre_MPI_Comm   comm,
                       hypre_MPI_Group *group )
 {
    return (HYPRE_Int) MPI_Comm_group(comm, group);
 }
 
 HYPRE_Int
-hypre_MPI_Comm_split( MPI_Comm  comm,
-                      HYPRE_Int color,
-                      HYPRE_Int key,
-                      MPI_Comm *newcomm )
+hypre_MPI_Comm_split( hypre_MPI_Comm  comm,
+                      HYPRE_Int       color,
+                      HYPRE_Int       key,
+                      MPI_Comm       *newcomm )
 {
    return (HYPRE_Int) MPI_Comm_split(comm, (hypre_int) color, (hypre_int) key, newcomm);
 }
@@ -1302,7 +1302,8 @@ hypre_MPI_Send_init( void               *buf,
                      hypre_MPI_Request  *request )
 {
    return (HYPRE_Int) MPI_Send_init(buf, (hypre_int)count, datatype,
-                                    (hypre_int)dest, (hypre_int)tag, comm, request);
+                                    (hypre_int)dest, (hypre_int)tag,
+                                    comm, request);
 }
 
 HYPRE_Int
@@ -1335,7 +1336,8 @@ hypre_MPI_Recv_init( void               *buf,
                      hypre_MPI_Request  *request )
 {
    return (HYPRE_Int) MPI_Recv_init(buf, (hypre_int)count, datatype,
-                                    (hypre_int)dest, (hypre_int)tag, comm, request);
+                                    (hypre_int)dest, (hypre_int)tag,
+                                    comm, request);
 }
 
 HYPRE_Int
@@ -1422,11 +1424,9 @@ hypre_MPI_Testall( HYPRE_Int          count,
 {
    hypre_int mpi_flag;
    HYPRE_Int ierr;
-
    ierr = (HYPRE_Int) MPI_Testall((hypre_int)count, array_of_requests,
                                   &mpi_flag, array_of_statuses);
    *flag = (HYPRE_Int) mpi_flag;
-
    return ierr;
 }
 
@@ -1442,13 +1442,8 @@ hypre_MPI_Waitall( HYPRE_Int          count,
                    hypre_MPI_Request *array_of_requests,
                    hypre_MPI_Status  *array_of_statuses )
 {
-   hypre_GpuProfilingPushRange("hypre_MPI_Waitall");
-   HYPRE_Int ierr;
-   ierr = (HYPRE_Int) MPI_Waitall((hypre_int)count,
-                                   array_of_requests, array_of_statuses);
-   hypre_GpuProfilingPopRange();
-
-   return ierr;
+   return (HYPRE_Int) MPI_Waitall((hypre_int)count,
+                                  array_of_requests, array_of_statuses);
 }
 
 HYPRE_Int
@@ -1459,11 +1454,9 @@ hypre_MPI_Waitany( HYPRE_Int          count,
 {
    hypre_int mpi_index;
    HYPRE_Int ierr;
-
    ierr = (HYPRE_Int) MPI_Waitany((hypre_int)count, array_of_requests,
                                   &mpi_index, status);
    *index = (HYPRE_Int) mpi_index;
-
    return ierr;
 }
 
@@ -1609,8 +1602,8 @@ hypre_MPI_Op_create( hypre_MPI_User_function *function, hypre_int commute, hypre
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int
-hypre_MPI_Comm_split_type( MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
-                           hypre_MPI_Info info, MPI_Comm *newcomm )
+hypre_MPI_Comm_split_type( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
+                           hypre_MPI_Info info, hypre_MPI_Comm *newcomm )
 {
    return (HYPRE_Int) MPI_Comm_split_type(comm, split_type, key, info, newcomm );
 }
