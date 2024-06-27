@@ -761,14 +761,8 @@ void MatrixMatvec(Matrix *mat, HYPRE_Real *x, HYPRE_Real *y)
    for (i=0; i<mat->sendlen; i++)
       mat->sendbuf[i] = x[mat->sendind[i]];
 
-   if (mat->num_recv)
-   {
-      hypre_MPI_Startall(mat->num_recv, mat->recv_req);
-   }
-   if (mat->num_send)
-   {
-      hypre_MPI_Startall(mat->num_send, mat->send_req);
-   }
+   hypre_MPI_Startall(mat->num_recv, mat->recv_req);
+   hypre_MPI_Startall(mat->num_send, mat->send_req);
 
    /* Copy local part of x into top part of recvbuf */
    for (i=0; i<num_local; i++)
@@ -809,15 +803,8 @@ void MatrixMatvecSerial(Matrix *mat, HYPRE_Real *x, HYPRE_Real *y)
    for (i=0; i<mat->sendlen; i++)
       mat->sendbuf[i] = x[mat->sendind[i]];
 
-   if (mat->num_recv)
-   {
-      hypre_MPI_Startall(mat->num_recv, mat->recv_req);
-   }
-
-   if (mat->num_send)
-   {
-      hypre_MPI_Startall(mat->num_send, mat->send_req);
-   }
+   hypre_MPI_Startall(mat->num_recv, mat->recv_req);
+   hypre_MPI_Startall(mat->num_send, mat->send_req);
 
    /* Copy local part of x into top part of recvbuf */
    for (i=0; i<num_local; i++)
@@ -857,10 +844,7 @@ void MatrixMatvecTrans(Matrix *mat, HYPRE_Real *x, HYPRE_Real *y)
    /* Assumes MatrixComplete has been called */
 
    /* Post receives for local parts of the solution y */
-   if (mat->num_send)
-   {
-      hypre_MPI_Startall(mat->num_send, mat->recv_req2);
-   }
+   hypre_MPI_Startall(mat->num_send, mat->recv_req2);
 
    /* initialize accumulator buffer to zero */
    for (i=0; i<mat->recvlen+num_local; i++)
@@ -878,10 +862,7 @@ void MatrixMatvecTrans(Matrix *mat, HYPRE_Real *x, HYPRE_Real *y)
    }
 
    /* Now can send nonlocal parts of solution to other procs */
-   if (mat->num_recv)
-   {
-      hypre_MPI_Startall(mat->num_recv, mat->send_req2);
-   }
+   hypre_MPI_Startall(mat->num_recv, mat->send_req2);
 
    /* copy local part of solution into y */
    for (i=0; i<num_local; i++)
