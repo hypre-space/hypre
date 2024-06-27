@@ -930,7 +930,7 @@ HYPRE_Int
 hypre_MPI_Comm_split( hypre_MPI_Comm  comm,
                       HYPRE_Int       color,
                       HYPRE_Int       key,
-                      MPI_Comm       *newcomm )
+                      hypre_MPI_Comm *newcomm )
 {
    return (HYPRE_Int) MPI_Comm_split(comm, (hypre_int) color, (hypre_int) key, newcomm);
 }
