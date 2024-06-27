@@ -838,158 +838,6 @@ hypre_MPI_Comm_create_keyval(hypre_MPI_Comm_copy_attr_function   *comm_copy_attr
    return ierr;
 }
 
-hypre_MPI_Request
-hypre_MPI_RequestFromMPI_Request(MPI_Request request)
-{
-   hypre_MPI_Request hrequest;
-   hypre_Memset(&hrequest, 0, sizeof(hypre_MPI_Request), HYPRE_MEMORY_HOST);
-   hypre_MPI_RequestMPI_Request(hrequest) = request;
-
-   return hrequest;
-}
-
-HYPRE_Int
-hypre_MPI_RequestClear(hypre_MPI_Request *request)
-{
-   HYPRE_Int i;
-   for (i = 0; i < 2; i++)
-   {
-      hypre_MPI_Request_Action *action = &hypre_MPI_RequestAction(*request, i);
-      hypre_MPI_Request_ActionCount(action) = 0;
-      hypre_MPI_Request_ActionDataSize(action) = 0;
-      hypre_TFree(hypre_MPI_Request_ActionData(action), HYPRE_MEMORY_HOST);
-   }
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_MPI_RequestSetActionFree(HYPRE_Int             i,
-                               void                 *ptr,
-                               hypre_MemoryLocation  ptr_location,
-                               hypre_MPI_Request    *request)
-{
-   HYPRE_Int action_id = HYPRE_MPI_REQUEST_FREE;
-   hypre_MPI_Request_Action *action = &hypre_MPI_RequestAction(*request, i);
-
-   HYPRE_Int nb = sizeof(HYPRE_Int) + sizeof(void *) + sizeof(hypre_MemoryLocation);
-   HYPRE_Int data_size = hypre_MPI_Request_ActionDataSize(action);
-
-   hypre_MPI_Request_ActionCount(action) ++;
-   hypre_MPI_Request_ActionDataSize(action) = data_size + nb;
-   hypre_MPI_Request_ActionData(action) = hypre_TReAlloc(hypre_MPI_Request_ActionData(action),
-                                                         char,
-                                                         hypre_MPI_Request_ActionDataSize(action),
-                                                         HYPRE_MEMORY_HOST);
-
-   char *data = hypre_MPI_Request_ActionData(action) + data_size;
-   hypre_TMemcpy(data, &action_id, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   data += sizeof(HYPRE_Int);
-   hypre_TMemcpy(data, &ptr, void *, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   data += sizeof(void *);
-   hypre_TMemcpy(data, &ptr_location, hypre_MemoryLocation, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   data += sizeof(hypre_MemoryLocation);
-
-   hypre_assert(data == hypre_MPI_Request_ActionData(action) + hypre_MPI_Request_ActionDataSize(action));
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_MPI_RequestSetActionCopy(HYPRE_Int             i,
-                               void                 *dest,
-                               hypre_MemoryLocation  dest_location,
-                               void                 *src,
-                               hypre_MemoryLocation  src_location,
-                               HYPRE_Int             num_bytes,
-                               hypre_MPI_Request    *request)
-{
-   HYPRE_Int action_id = HYPRE_MPI_REQUEST_COPY;
-   hypre_MPI_Request_Action *action = &hypre_MPI_RequestAction(*request, i);
-
-   HYPRE_Int nb = 2 * (sizeof(HYPRE_Int) + sizeof(void *) + sizeof(hypre_MemoryLocation));
-   HYPRE_Int data_size = hypre_MPI_Request_ActionDataSize(action);
-
-   hypre_MPI_Request_ActionCount(action) ++;
-   hypre_MPI_Request_ActionDataSize(action) = data_size + nb;
-   hypre_MPI_Request_ActionData(action) = hypre_TReAlloc(hypre_MPI_Request_ActionData(action),
-                                                         char,
-                                                         hypre_MPI_Request_ActionDataSize(action),
-                                                         HYPRE_MEMORY_HOST);
-
-   char *data = hypre_MPI_Request_ActionData(action) + data_size;
-   hypre_TMemcpy(data, &action_id, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   data += sizeof(HYPRE_Int);
-   hypre_TMemcpy(data, &num_bytes, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   data += sizeof(HYPRE_Int);
-   hypre_TMemcpy(data, &dest, void *, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   data += sizeof(void *);
-   hypre_TMemcpy(data, &src, void *, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   data += sizeof(void *);
-   hypre_TMemcpy(data, &dest_location, hypre_MemoryLocation, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   data += sizeof(hypre_MemoryLocation);
-   hypre_TMemcpy(data, &src_location, hypre_MemoryLocation, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-   data += sizeof(hypre_MemoryLocation);
-
-   hypre_assert(data == hypre_MPI_Request_ActionData(action) + hypre_MPI_Request_ActionDataSize(action));
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_MPI_RequestProcessAction(HYPRE_Int          i,
-                               hypre_MPI_Request *request)
-{
-   hypre_MPI_Request_Action *action = &hypre_MPI_RequestAction(*request, i);
-   HYPRE_Int count = hypre_MPI_Request_ActionCount(action);
-   char *data = hypre_MPI_Request_ActionData(action);
-   HYPRE_Int k;
-
-   for (k = 0; k < count; k ++)
-   {
-      HYPRE_Int action_id;
-
-      hypre_TMemcpy(&action_id, data, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-      data += sizeof(HYPRE_Int);
-
-      if (action_id == HYPRE_MPI_REQUEST_FREE)
-      {
-         void *ptr;
-         hypre_MemoryLocation ptr_location;
-         hypre_TMemcpy(&ptr, data, void *, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-         data += sizeof(void *);
-         hypre_TMemcpy(&ptr_location, data, hypre_MemoryLocation, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-         data += sizeof(hypre_MemoryLocation);
-         // action!
-         _hypre_TFree(ptr, ptr_location);
-      }
-      else if (action_id == HYPRE_MPI_REQUEST_COPY)
-      {
-         void *dest, *src;
-         HYPRE_Int num_bytes;
-         hypre_MemoryLocation dest_location, src_location;
-         hypre_TMemcpy(&num_bytes, data, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-         data += sizeof(HYPRE_Int);
-         hypre_TMemcpy(&dest, data, void *, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-         data += sizeof(void *);
-         hypre_TMemcpy(&src, data, void *, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-         data += sizeof(void *);
-         hypre_TMemcpy(&dest_location, data, hypre_MemoryLocation, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-         data += sizeof(hypre_MemoryLocation);
-         hypre_TMemcpy(&src_location, data, hypre_MemoryLocation, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
-         data += sizeof(hypre_MemoryLocation);
-         // action!
-         hypre_GpuProfilingPushRange("MPI-H2D");
-         _hypre_TMemcpy(dest, src, char, num_bytes, dest_location, src_location);
-         hypre_GpuProfilingPopRange();
-      }
-   }
-
-   hypre_assert(data == hypre_MPI_Request_ActionData(action) + hypre_MPI_Request_ActionDataSize(action));
-
-   return hypre_error_flag;
-}
-
 HYPRE_Int
 hypre_MPI_Init( hypre_int   *argc,
                 char      ***argv )
@@ -1346,8 +1194,7 @@ hypre_MPI_Isend( void               *buf,
                  hypre_MPI_Request  *request )
 {
    return (HYPRE_Int) MPI_Isend(buf, (hypre_int)count, datatype,
-                                (hypre_int)dest, (hypre_int)tag, comm,
-                                &hypre_MPI_RequestMPI_Request(*request));
+                                (hypre_int)dest, (hypre_int)tag, comm, request);
 }
 
 HYPRE_Int
@@ -1360,8 +1207,7 @@ hypre_MPI_Irecv( void               *buf,
                  hypre_MPI_Request  *request )
 {
    return (HYPRE_Int) MPI_Irecv(buf, (hypre_int)count, datatype,
-                                (hypre_int)source, (hypre_int)tag, comm,
-                                &hypre_MPI_RequestMPI_Request(*request));
+                                (hypre_int)source, (hypre_int)tag, comm, request);
 }
 
 #define TYPE_MACRO_SEND      0
@@ -1400,31 +1246,7 @@ hypre_MPI_Irecv( void               *buf,
          HYPRE_Int ip = procs[i];                                                     \
          HYPRE_Int start = displs[i];                                                 \
          HYPRE_Int len = counts ? counts[i] : displs[i + 1] - start;                  \
-         MPI_CMD(_buf + start, len, HYPRE_MPI_DTYPE,                                  \
-                 ip, tag, comm,                                                       \
-                 &hypre_MPI_RequestMPI_Request(requests[i]));                         \
-      }                                                                               \
-      if (_buf != buf)                                                                \
-      {                                                                               \
-         /* register pre/post action in the first request */                          \
-         if (SEND_RECV == TYPE_MACRO_SEND_INIT)                                       \
-         {                                                                            \
-            hypre_MPI_RequestSetActionCopy(0, _buf,                                   \
-                                           hypre_MPICommGetSendBufferLocation(comm),  \
-                                           buf,                                       \
-                                           memory_location,                           \
-                                           ntot * sizeof(HYPRE_DTYPE),                \
-                                           &requests[0]);                             \
-         }                                                                            \
-         else if (SEND_RECV == TYPE_MACRO_RECV || SEND_RECV == TYPE_MACRO_RECV_INIT)  \
-         {                                                                            \
-            hypre_MPI_RequestSetActionCopy(1, buf,                                    \
-                                           memory_location,                           \
-                                           _buf,                                      \
-                                           hypre_MPICommGetRecvBufferLocation(comm),  \
-                                           ntot * sizeof(HYPRE_DTYPE),                \
-                                           &requests[0]);                             \
-         }                                                                            \
+         MPI_CMD(_buf + start, len, HYPRE_MPI_DTYPE, ip, tag, comm, &requests[i]);    \
       }                                                                               \
       return hypre_error_flag;                                                        \
    }                                                                                  \
@@ -1480,8 +1302,7 @@ hypre_MPI_Send_init( void               *buf,
                      hypre_MPI_Request  *request )
 {
    return (HYPRE_Int) MPI_Send_init(buf, (hypre_int)count, datatype,
-                                    (hypre_int)dest, (hypre_int)tag, comm,
-                                    &hypre_MPI_RequestMPI_Request(*request));
+                                    (hypre_int)dest, (hypre_int)tag, comm, request);
 }
 
 HYPRE_Int
@@ -1514,8 +1335,7 @@ hypre_MPI_Recv_init( void               *buf,
                      hypre_MPI_Request  *request )
 {
    return (HYPRE_Int) MPI_Recv_init(buf, (hypre_int)count, datatype,
-                                    (hypre_int)dest, (hypre_int)tag, comm,
-                                    &hypre_MPI_RequestMPI_Request(*request));
+                                    (hypre_int)dest, (hypre_int)tag, comm, request);
 }
 
 HYPRE_Int
@@ -1548,33 +1368,14 @@ hypre_MPI_Irsend( void               *buf,
                   hypre_MPI_Request  *request )
 {
    return (HYPRE_Int) MPI_Irsend(buf, (hypre_int)count, datatype,
-                                 (hypre_int)dest, (hypre_int)tag, comm,
-                                 &hypre_MPI_RequestMPI_Request(*request));
+                                 (hypre_int)dest, (hypre_int)tag, comm, request);
 }
 
 HYPRE_Int
 hypre_MPI_Startall( HYPRE_Int          count,
                     hypre_MPI_Request *array_of_requests )
 {
-   HYPRE_Int i, ierr;
-   MPI_Request *array_of_mpi_requests = hypre_CTAlloc(MPI_Request, count, HYPRE_MEMORY_HOST);
-
-   for (i = 0; i < count; i++)
-   {
-      array_of_mpi_requests[i] = hypre_MPI_RequestMPI_Request(array_of_requests[i]);
-      hypre_MPI_RequestProcessAction(0, &array_of_requests[i]);
-   }
-
-   ierr = (HYPRE_Int) MPI_Startall((hypre_int)count, array_of_mpi_requests);
-
-   for (i = 0; i < count; i++)
-   {
-      hypre_MPI_RequestMPI_Request(array_of_requests[i]) = array_of_mpi_requests[i];
-   }
-
-   hypre_TFree(array_of_mpi_requests, HYPRE_MEMORY_HOST);
-
-   return ierr;
+   return (HYPRE_Int) MPI_Startall((hypre_int)count, array_of_requests);
 }
 
 HYPRE_Int
@@ -1608,7 +1409,7 @@ hypre_MPI_Test( hypre_MPI_Request *request,
 {
    hypre_int mpi_flag;
    HYPRE_Int ierr;
-   ierr = (HYPRE_Int) MPI_Test(&hypre_MPI_RequestMPI_Request(*request), &mpi_flag, status);
+   ierr = (HYPRE_Int) MPI_Test(request, &mpi_flag, status);
    *flag = (HYPRE_Int) mpi_flag;
    return ierr;
 }
@@ -1620,24 +1421,11 @@ hypre_MPI_Testall( HYPRE_Int          count,
                    hypre_MPI_Status  *array_of_statuses )
 {
    hypre_int mpi_flag;
-   HYPRE_Int i, ierr;
+   HYPRE_Int ierr;
 
-   MPI_Request *array_of_mpi_requests = hypre_TAlloc(MPI_Request, count, HYPRE_MEMORY_HOST);
-   for (i = 0; i < count; i++)
-   {
-      array_of_mpi_requests[i] = hypre_MPI_RequestMPI_Request(array_of_requests[i]);
-   }
-
-   ierr = (HYPRE_Int) MPI_Testall((hypre_int)count, array_of_mpi_requests,
+   ierr = (HYPRE_Int) MPI_Testall((hypre_int)count, array_of_requests,
                                   &mpi_flag, array_of_statuses);
    *flag = (HYPRE_Int) mpi_flag;
-
-   for (i = 0; i < count; i++)
-   {
-      hypre_MPI_RequestMPI_Request(array_of_requests[i]) = array_of_mpi_requests[i];
-   }
-
-   hypre_TFree(array_of_mpi_requests, HYPRE_MEMORY_HOST);
 
    return ierr;
 }
@@ -1646,7 +1434,7 @@ HYPRE_Int
 hypre_MPI_Wait( hypre_MPI_Request *request,
                 hypre_MPI_Status  *status )
 {
-   return (HYPRE_Int) MPI_Wait(&hypre_MPI_RequestMPI_Request(*request), status);
+   return (HYPRE_Int) MPI_Wait(request, status);
 }
 
 HYPRE_Int
@@ -1655,26 +1443,9 @@ hypre_MPI_Waitall( HYPRE_Int          count,
                    hypre_MPI_Status  *array_of_statuses )
 {
    hypre_GpuProfilingPushRange("hypre_MPI_Waitall");
-
-   HYPRE_Int i, ierr;
-
-   MPI_Request *array_of_mpi_requests = hypre_TAlloc(MPI_Request, count, HYPRE_MEMORY_HOST);
-   for (i = 0; i < count; i++)
-   {
-      array_of_mpi_requests[i] = hypre_MPI_RequestMPI_Request(array_of_requests[i]);
-   }
-
+   HYPRE_Int ierr;
    ierr = (HYPRE_Int) MPI_Waitall((hypre_int)count,
-                                   array_of_mpi_requests, array_of_statuses);
-
-   for (i = 0; i < count; i++)
-   {
-      hypre_MPI_RequestMPI_Request(array_of_requests[i]) = array_of_mpi_requests[i];
-      hypre_MPI_RequestProcessAction(1, &array_of_requests[i]);
-   }
-
-   hypre_TFree(array_of_mpi_requests, HYPRE_MEMORY_HOST);
-
+                                   array_of_requests, array_of_statuses);
    hypre_GpuProfilingPopRange();
 
    return ierr;
@@ -1687,24 +1458,11 @@ hypre_MPI_Waitany( HYPRE_Int          count,
                    hypre_MPI_Status  *status )
 {
    hypre_int mpi_index;
-   HYPRE_Int i, ierr;
+   HYPRE_Int ierr;
 
-   MPI_Request *array_of_mpi_requests = hypre_TAlloc(MPI_Request, count, HYPRE_MEMORY_HOST);
-   for (i = 0; i < count; i++)
-   {
-      array_of_mpi_requests[i] = hypre_MPI_RequestMPI_Request(array_of_requests[i]);
-   }
-
-   ierr = (HYPRE_Int) MPI_Waitany((hypre_int)count, array_of_mpi_requests,
+   ierr = (HYPRE_Int) MPI_Waitany((hypre_int)count, array_of_requests,
                                   &mpi_index, status);
    *index = (HYPRE_Int) mpi_index;
-
-   for (i = 0; i < count; i++)
-   {
-      hypre_MPI_RequestMPI_Request(array_of_requests[i]) = array_of_mpi_requests[i];
-   }
-
-   hypre_TFree(array_of_mpi_requests, HYPRE_MEMORY_HOST);
 
    return ierr;
 }
@@ -1755,7 +1513,7 @@ hypre_MPI_Scan( void               *sendbuf,
 HYPRE_Int
 hypre_MPI_Request_free( hypre_MPI_Request *request )
 {
-   return (HYPRE_Int) MPI_Request_free(&hypre_MPI_RequestMPI_Request(*request));
+   return (HYPRE_Int) MPI_Request_free(request);
 }
 
 HYPRE_Int
@@ -2007,4 +1765,111 @@ hypre_MPICommGetRecvBuffer(hypre_MPI_Comm comm)
       buffer = NULL;
    }
    return (buffer);
+}
+
+HYPRE_Int
+hypre_MPI_GRequestGetCopyAction(void                       *dest,
+                                hypre_MemoryLocation        dest_location,
+                                void                       *src,
+                                hypre_MemoryLocation        src_location,
+                                HYPRE_Int                   num_bytes,
+                                hypre_MPI_GRequest_Action **action_ptr)
+{
+   if (dest == src || num_bytes == 0)
+   {
+      *action_ptr = NULL;
+      return hypre_error_flag;
+   }
+
+   HYPRE_Int action_id = HYPRE_MPI_GREQUEST_COPY;
+   hypre_MPI_GRequest_Action *action = hypre_CTAlloc(hypre_MPI_GRequest_Action, 1, HYPRE_MEMORY_HOST);
+
+   HYPRE_Int nb = 2 * (sizeof(HYPRE_Int) + sizeof(void *) + sizeof(hypre_MemoryLocation));
+   HYPRE_Int data_size = hypre_MPI_GRequest_ActionDataSize(action);
+
+   hypre_MPI_GRequest_ActionCount(action) ++;
+   hypre_MPI_GRequest_ActionDataSize(action) = data_size + nb;
+   hypre_MPI_GRequest_ActionData(action) = hypre_TReAlloc(hypre_MPI_GRequest_ActionData(action),
+                                                          char,
+                                                          hypre_MPI_GRequest_ActionDataSize(action),
+                                                          HYPRE_MEMORY_HOST);
+
+   char *data = hypre_MPI_GRequest_ActionData(action) + data_size;
+   hypre_TMemcpy(data, &action_id, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   data += sizeof(HYPRE_Int);
+   hypre_TMemcpy(data, &num_bytes, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   data += sizeof(HYPRE_Int);
+   hypre_TMemcpy(data, &dest, void *, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   data += sizeof(void *);
+   hypre_TMemcpy(data, &src, void *, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   data += sizeof(void *);
+   hypre_TMemcpy(data, &dest_location, hypre_MemoryLocation, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   data += sizeof(hypre_MemoryLocation);
+   hypre_TMemcpy(data, &src_location, hypre_MemoryLocation, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   data += sizeof(hypre_MemoryLocation);
+
+   hypre_assert(data == hypre_MPI_GRequest_ActionData(action) + hypre_MPI_GRequest_ActionDataSize(action));
+
+   *action_ptr = action;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_MPI_GRequestProcessAction(hypre_MPI_GRequest_Action *action)
+{
+   if (!action)
+   {
+      return hypre_error_flag;
+   }
+
+   HYPRE_Int count = hypre_MPI_GRequest_ActionCount(action);
+   char *data = hypre_MPI_GRequest_ActionData(action);
+   HYPRE_Int k;
+
+   for (k = 0; k < count; k ++)
+   {
+      HYPRE_Int action_id;
+
+      hypre_TMemcpy(&action_id, data, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      data += sizeof(HYPRE_Int);
+
+      if (action_id == HYPRE_MPI_GREQUEST_FREE)
+      {
+         void *ptr;
+         hypre_MemoryLocation ptr_location;
+         hypre_TMemcpy(&ptr, data, void *, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         data += sizeof(void *);
+         hypre_TMemcpy(&ptr_location, data, hypre_MemoryLocation, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         data += sizeof(hypre_MemoryLocation);
+         // action!
+         _hypre_TFree(ptr, ptr_location);
+      }
+      else if (action_id == HYPRE_MPI_GREQUEST_COPY)
+      {
+         void *dest, *src;
+         HYPRE_Int num_bytes;
+         hypre_MemoryLocation dest_location, src_location;
+         hypre_TMemcpy(&num_bytes, data, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         data += sizeof(HYPRE_Int);
+         hypre_TMemcpy(&dest, data, void *, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         data += sizeof(void *);
+         hypre_TMemcpy(&src, data, void *, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         data += sizeof(void *);
+         hypre_TMemcpy(&dest_location, data, hypre_MemoryLocation, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         data += sizeof(hypre_MemoryLocation);
+         hypre_TMemcpy(&src_location, data, hypre_MemoryLocation, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         data += sizeof(hypre_MemoryLocation);
+         // action!
+         hypre_GpuProfilingPushRange("MPI-H2D");
+         _hypre_TMemcpy(dest, src, char, num_bytes, dest_location, src_location);
+         hypre_GpuProfilingPopRange();
+      }
+   }
+
+   hypre_assert(data == hypre_MPI_GRequest_ActionData(action) + hypre_MPI_GRequest_ActionDataSize(action));
+
+   hypre_TFree(action, HYPRE_MEMORY_HOST);
+
+   return hypre_error_flag;
 }
