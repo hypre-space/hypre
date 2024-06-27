@@ -74,11 +74,11 @@ void Factor_dhCreate(Factor_dh *mat)
   /* initialize MPI request to null */
   for(i=0; i<MAX_MPI_TASKS; i++)
   {
-     tmp->recv_reqLo[i] = hypre_MPI_RequestFromMPI_Request(hypre_MPI_REQUEST_NULL);
-     tmp->recv_reqHi[i] = hypre_MPI_RequestFromMPI_Request(hypre_MPI_REQUEST_NULL);
-     tmp->send_reqLo[i] = hypre_MPI_RequestFromMPI_Request(hypre_MPI_REQUEST_NULL);
-     tmp->send_reqHi[i] = hypre_MPI_RequestFromMPI_Request(hypre_MPI_REQUEST_NULL);
-     tmp->requests[i] = hypre_MPI_RequestFromMPI_Request(hypre_MPI_REQUEST_NULL);
+     tmp->recv_reqLo[i] = hypre_MPI_REQUEST_NULL;
+     tmp->recv_reqHi[i] = hypre_MPI_REQUEST_NULL;
+     tmp->send_reqLo[i] = hypre_MPI_REQUEST_NULL;
+     tmp->send_reqHi[i] = hypre_MPI_REQUEST_NULL;
+     tmp->requests[i] = hypre_MPI_REQUEST_NULL;
   }
 /*  Factor_dhZeroTiming(tmp); CHECK_V_ERROR; */
   END_FUNC_DH
@@ -109,11 +109,11 @@ void Factor_dhDestroy(Factor_dh mat)
   /* cleanup MPI requests */
   for(i=0; i<MAX_MPI_TASKS; i++)
   {
-     if(hypre_MPI_RequestMPI_Request(mat->recv_reqLo[i]) != hypre_MPI_REQUEST_NULL) hypre_MPI_Request_free(&(mat->recv_reqLo[i]));
-     if(hypre_MPI_RequestMPI_Request(mat->recv_reqHi[i]) != hypre_MPI_REQUEST_NULL) hypre_MPI_Request_free(&(mat->recv_reqHi[i]));
-     if(hypre_MPI_RequestMPI_Request(mat->send_reqLo[i]) != hypre_MPI_REQUEST_NULL) hypre_MPI_Request_free(&(mat->send_reqLo[i]));
-     if(hypre_MPI_RequestMPI_Request(mat->send_reqHi[i]) != hypre_MPI_REQUEST_NULL) hypre_MPI_Request_free(&(mat->send_reqHi[i]));
-     if(hypre_MPI_RequestMPI_Request(mat->requests[i]) != hypre_MPI_REQUEST_NULL) hypre_MPI_Request_free(&(mat->requests[i]));
+     if(mat->recv_reqLo[i] != hypre_MPI_REQUEST_NULL) hypre_MPI_Request_free(&(mat->recv_reqLo[i]));
+     if(mat->recv_reqHi[i] != hypre_MPI_REQUEST_NULL) hypre_MPI_Request_free(&(mat->recv_reqHi[i]));
+     if(mat->send_reqLo[i] != hypre_MPI_REQUEST_NULL) hypre_MPI_Request_free(&(mat->send_reqLo[i]));
+     if(mat->send_reqHi[i] != hypre_MPI_REQUEST_NULL) hypre_MPI_Request_free(&(mat->send_reqHi[i]));
+     if(mat->requests[i] != hypre_MPI_REQUEST_NULL) hypre_MPI_Request_free(&(mat->requests[i]));
   }
   FREE_DH(mat); CHECK_V_ERROR;
   END_FUNC_DH

@@ -336,7 +336,7 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
    offset = ftell(file);
    hypre_fscanf(file, "%d %d %lf", &row, &col, &value);
 
-   request = hypre_MPI_RequestFromMPI_Request(hypre_MPI_REQUEST_NULL);
+   request = hypre_MPI_REQUEST_NULL;
    curr_proc = 1; /* proc for which we are looking for the beginning */
    while (curr_proc < npes)
    {
