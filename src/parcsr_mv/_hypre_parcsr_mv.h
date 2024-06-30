@@ -95,32 +95,6 @@ hypre_ParCSRCommHandleGetMPIDataType(HYPRE_Int job)
    return dtype;
 }
 
-static inline HYPRE_Int
-hypre_ParCSRCommHandleGetDataTypeSize(HYPRE_Int job)
-{
-   HYPRE_Int nbytes = 0;
-
-   switch (hypre_ParCSRCommHandleGetJobType(job))
-   {
-      case HYPRE_COMM_PKG_JOB_COMPLEX:
-      case HYPRE_COMM_PKG_JOB_COMPLEX_TRANSPOSE:
-         nbytes = (HYPRE_Int) sizeof(HYPRE_Complex);
-         break;
-      case HYPRE_COMM_PKG_JOB_INT:
-      case HYPRE_COMM_PKG_JOB_INT_TRANSPOSE:
-         nbytes = (HYPRE_Int) sizeof(HYPRE_Int);
-         break;
-      case HYPRE_COMM_PKG_JOB_BIGINT:
-      case HYPRE_COMM_PKG_JOB_BIGINT_TRANSPOSE:
-         nbytes = (HYPRE_Int) sizeof(HYPRE_BigInt);
-         break;
-      default:
-         break;
-   }
-
-   return nbytes;
-}
-
 /*--------------------------------------------------------------------------
  * hypre_ParCSRCommHandle, hypre_ParCSRPersistentCommHandle
  *--------------------------------------------------------------------------*/
@@ -140,7 +114,7 @@ typedef struct
    hypre_MemoryLocation         recv_buffer_location;
    HYPRE_Int                    num_requests;
    hypre_MPI_Request           *requests;
-   hypre_MPI_Request            grequest;
+   hypre_MPI_Request            extra_request;
    MPI_Comm                     comm;
 } hypre_ParCSRCommHandle;
 
@@ -160,7 +134,7 @@ typedef struct
 #define hypre_ParCSRCommHandleNumRequests(comm_handle)            (comm_handle -> num_requests)
 #define hypre_ParCSRCommHandleRequests(comm_handle)               (comm_handle -> requests)
 #define hypre_ParCSRCommHandleRequest(comm_handle, i)             (comm_handle -> requests[i])
-#define hypre_ParCSRCommHandleGRequest(comm_handle)               (comm_handle -> grequest)
+#define hypre_ParCSRCommHandleExtraRequest(comm_handle)           (comm_handle -> extra_request)
 #define hypre_ParCSRCommHandleComm(comm_handle)                   (comm_handle -> comm)
 
 typedef hypre_ParCSRCommHandle hypre_ParCSRPersistentCommHandle;

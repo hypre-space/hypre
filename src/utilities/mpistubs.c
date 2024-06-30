@@ -855,6 +855,16 @@ hypre_MPI_Grequest_complete( hypre_MPI_Request request )
 }
 
 HYPRE_Int
+hypre_MPI_Type_size(hypre_MPI_Datatype datatype, HYPRE_Int *size)
+{
+   hypre_int mpi_size;
+   HYPRE_Int ierr;
+   ierr = MPI_Type_size(datatype, &mpi_size);
+   *size = (HYPRE_Int) mpi_size;
+   return ierr;
+}
+
+HYPRE_Int
 hypre_MPI_Init( hypre_int   *argc,
                 char      ***argv )
 {
@@ -1279,11 +1289,35 @@ hypre_MPI_Isend_Multiple( void               *buf,
                           hypre_MPI_Comm      comm,
                           hypre_MPI_Request  *requests )
 {
-   hypre_MemoryLocation memory_location = hypre_MPICommGetSendLocation(comm);
+   if (!num)
+   {
+      return hypre_error_flag;
+   }
 
-   TYPE_MACRO(MPI_Isend, TYPE_MACRO_SEND, HYPRE_Complex, HYPRE_MPI_COMPLEX);
-   TYPE_MACRO(MPI_Isend, TYPE_MACRO_SEND, HYPRE_Int,     HYPRE_MPI_INT);
-   TYPE_MACRO(MPI_Isend, TYPE_MACRO_SEND, HYPRE_BigInt,  HYPRE_MPI_BIG_INT);
+   HYPRE_Int data_size;
+   hypre_MPI_Type_size(datatype, &data_size);
+
+   void *cbuf = hypre_MPICommGetSendBuffer(comm);
+   void *sbuf = cbuf ? cbuf : buf;
+   if (sbuf != buf)
+   {
+      hypre_GpuProfilingPushRange("MPI-D2H");
+      _hypre_TMemcpy(sbuf,
+                     buf,
+                     char,
+                     displs[num] * data_size,
+                     hypre_MPICommGetSendBufferLocation(comm),
+                     hypre_MPICommGetSendLocation(comm));
+      hypre_GpuProfilingPopRange();
+   }
+
+   HYPRE_Int i;
+   for (i = 0; i < num; i++)
+   {
+      HYPRE_Int start = displs[i];
+      HYPRE_Int len = counts ? counts[i] : displs[i + 1] - start;
+      hypre_MPI_Isend((char *) sbuf + start * data_size, len, datatype, procs[i], tag, comm, &requests[i]);
+   }
 
    return hypre_error_flag;
 }
@@ -1297,13 +1331,44 @@ hypre_MPI_Irecv_Multiple( void               *buf,
                           HYPRE_Int          *procs,
                           HYPRE_Int           tag,
                           hypre_MPI_Comm      comm,
-                          hypre_MPI_Request  *requests )
+                          hypre_MPI_Request  *requests,
+                          hypre_MPI_Request  *extra_request)
 {
-   hypre_MemoryLocation memory_location = hypre_MPICommGetRecvLocation(comm);
+   *extra_request = hypre_MPI_REQUEST_NULL;
 
-   TYPE_MACRO(MPI_Irecv, TYPE_MACRO_RECV, HYPRE_Complex, HYPRE_MPI_COMPLEX);
-   TYPE_MACRO(MPI_Irecv, TYPE_MACRO_RECV, HYPRE_Int,     HYPRE_MPI_INT);
-   TYPE_MACRO(MPI_Irecv, TYPE_MACRO_RECV, HYPRE_BigInt,  HYPRE_MPI_BIG_INT);
+   if (!num)
+   {
+      return hypre_error_flag;
+   }
+
+   HYPRE_Int data_size, i;
+
+   hypre_MPI_Type_size(datatype, &data_size);
+   void *cbuf = hypre_MPICommGetRecvBuffer(comm);
+   void *rbuf = cbuf ? cbuf : buf;
+
+   for (i = 0; i < num; i++)
+   {
+      HYPRE_Int start = displs[i];
+      HYPRE_Int len = counts ? counts[i] : displs[i + 1] - start;
+      hypre_MPI_Irecv((char *) rbuf + start * data_size, len, datatype, procs[i], tag, comm, &requests[i]);
+   }
+
+   if (rbuf != buf)
+   {
+      hypre_MPI_GRequest_Action *action;
+      hypre_MemoryLocation recv_memory_location = hypre_MPICommGetRecvLocation(comm);
+      hypre_MemoryLocation recv_buffer_location = hypre_MPICommGetRecvBufferLocation(comm);
+      HYPRE_Int num_recv_elems = displs[num];
+      hypre_MPI_GRequestGetCopyAction(buf, recv_memory_location, rbuf, recv_buffer_location,
+                                      num_recv_elems * data_size, &action);
+
+      hypre_MPI_Grequest_start(hypre_grequest_noop_query_fn,
+                               hypre_grequest_free_fn,
+                               hypre_grequest_noop_cancel_fn,
+                               action, extra_request);
+      hypre_MPI_Grequest_complete(*extra_request);
+   }
 
    return hypre_error_flag;
 }
@@ -1881,5 +1946,16 @@ hypre_MPI_GRequestProcessAction(hypre_MPI_GRequest_Action *action)
    return hypre_error_flag;
 }
 
-hypre_int hypre_grequest_noop_query_fn(void *extra_state, hypre_MPI_Status *status) { return hypre_MPI_SUCCESS; }
-hypre_int hypre_grequest_noop_cancel_fn(void *extra_state, hypre_int complete) { return hypre_MPI_SUCCESS; }
+hypre_int
+hypre_grequest_free_fn(void *extra_state)
+{
+   hypre_MPI_GRequest_Action *action = (hypre_MPI_GRequest_Action *) extra_state;
+   hypre_MPI_GRequestProcessAction(action);
+   hypre_TFree(action, HYPRE_MEMORY_HOST);
+   return hypre_MPI_SUCCESS;
+}
+
+hypre_int
+hypre_grequest_noop_query_fn(void *extra_state, hypre_MPI_Status *status) { return hypre_MPI_SUCCESS; }
+hypre_int
+hypre_grequest_noop_cancel_fn(void *extra_state, hypre_int complete) { return hypre_MPI_SUCCESS; }
