@@ -237,6 +237,13 @@ HYPRE_Int hypre_BooleanGenerateDiagAndOffd ( hypre_CSRBooleanMatrix *A,
 /* par_csr_communication.c */
 hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate ( HYPRE_Int job, hypre_ParCSRCommPkg *comm_pkg,
                                                        void *send_data, void *recv_data );
+hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate_core ( HYPRE_Int persistent,
+                                                            HYPRE_Int job,
+                                                            hypre_ParCSRCommPkg *comm_pkg,
+                                                            HYPRE_MemoryLocation send_memory_location,
+                                                            void *send_data_in,
+                                                            HYPRE_MemoryLocation recv_memory_location,
+                                                            void *recv_data_in );
 hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int job,
                                                           hypre_ParCSRCommPkg *comm_pkg,
                                                           HYPRE_MemoryLocation send_memory_location,
