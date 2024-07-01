@@ -630,6 +630,7 @@ hypre_MPI_Allreduce( void              *sendbuf,
       case hypre_MPI_COMPLEX:
       {
          HYPRE_Complex *crecvbuf = (HYPRE_Complex *)recvbuf;
+
          HYPRE_Complex *csendbuf = (HYPRE_Complex *)sendbuf;
          for (i = 0; i < count; i++)
          {
@@ -736,22 +737,31 @@ hypre_MPI_Op_free( hypre_MPI_Op *op )
 }
 
 #if defined(HYPRE_USING_GPU)
-HYPRE_Int hypre_MPI_Comm_split_type( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
-                                     hypre_MPI_Info info, hypre_MPI_Comm *newcomm )
+HYPRE_Int
+hypre_MPI_Comm_split_type( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
+                           hypre_MPI_Info info, hypre_MPI_Comm *newcomm )
 {
    return (0);
 }
 
-HYPRE_Int hypre_MPI_Info_create( hypre_MPI_Info *info )
+HYPRE_Int
+hypre_MPI_Info_create( hypre_MPI_Info *info )
 {
    return (0);
 }
 
-HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info )
+HYPRE_Int
+hypre_MPI_Info_free( hypre_MPI_Info *info )
 {
    return (0);
 }
 #endif
+
+HYPRE_Int
+hypre_MPI_Request_get_status(hypre_MPI_Request request, HYPRE_Int *flag, hypre_MPI_Status *status)
+{
+   return (0);
+}
 
 HYPRE_Int
 hypre_MPI_Comm_set_attr(hypre_MPI_Comm comm, HYPRE_Int comm_keyval, void *attribute_val)
@@ -772,6 +782,13 @@ hypre_MPI_Comm_create_keyval(hypre_MPI_Comm_copy_attr_function   *comm_copy_attr
                              void                                *extra_state)
 {
    *comm_keyval = 0;
+   return (0);
+}
+
+HYPRE_Int
+hypre_MPI_Type_size(hypre_MPI_Datatype datatype, HYPRE_Int *size)
+{
+   *size = 0;
    return (0);
 }
 
@@ -798,7 +815,38 @@ hypre_MPI_Irecv_Multiple( void               *buf,
                           HYPRE_Int          *procs,
                           HYPRE_Int           tag,
                           hypre_MPI_Comm      comm,
-                          hypre_MPI_Request  *requests )
+                          hypre_MPI_Request  *requests,
+                          hypre_MPI_Request  *extra_request)
+{
+   return (0);
+}
+
+HYPRE_Int
+hypre_MPI_Send_init_Multiple( void               *buf,
+                              HYPRE_Int           num,
+                              HYPRE_Int          *displs,
+                              HYPRE_Int          *counts,
+                              hypre_MPI_Datatype  datatype,
+                              HYPRE_Int          *procs,
+                              HYPRE_Int           tag,
+                              hypre_MPI_Comm      comm,
+                              hypre_MPI_Request  *requests,
+                              hypre_MPI_Request  *extra_request)
+{
+   return (0);
+}
+
+HYPRE_Int
+hypre_MPI_Recv_init_Multiple( void               *buf,
+                              HYPRE_Int           num,
+                              HYPRE_Int          *displs,
+                              HYPRE_Int          *counts,
+                              hypre_MPI_Datatype  datatype,
+                              HYPRE_Int          *procs,
+                              HYPRE_Int           tag,
+                              hypre_MPI_Comm      comm,
+                              hypre_MPI_Request  *requests,
+                              hypre_MPI_Request  *extra_request)
 {
    return (0);
 }

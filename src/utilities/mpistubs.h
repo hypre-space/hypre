@@ -68,6 +68,7 @@ extern "C" {
 #define MPI_BOR             hypre_MPI_BOR
 #define MPI_SUCCESS         hypre_MPI_SUCCESS
 #define MPI_STATUSES_IGNORE hypre_MPI_STATUSES_IGNORE
+#define MPI_STATUS_IGNORE   hypre_MPI_STATUS_IGNORE
 
 #define MPI_UNDEFINED       hypre_MPI_UNDEFINED
 #define MPI_REQUEST_NULL    hypre_MPI_REQUEST_NULL
@@ -193,6 +194,7 @@ typedef HYPRE_Int  hypre_MPI_Info;
 #define  hypre_MPI_BOR 5
 #define  hypre_MPI_SUCCESS 0
 #define  hypre_MPI_STATUSES_IGNORE 0
+#define  hypre_MPI_STATUS_IGNORE 0
 
 #define  hypre_MPI_UNDEFINED -9999
 #define  hypre_MPI_REQUEST_NULL  0
@@ -250,6 +252,7 @@ typedef MPI_Grequest_cancel_function  hypre_MPI_Grequest_cancel_function;
 #define  hypre_MPI_BOR MPI_BOR
 #define  hypre_MPI_SUCCESS MPI_SUCCESS
 #define  hypre_MPI_STATUSES_IGNORE MPI_STATUSES_IGNORE
+#define  hypre_MPI_STATUS_IGNORE   MPI_STATUS_IGNORE
 
 #define  hypre_MPI_UNDEFINED       MPI_UNDEFINED
 #define  hypre_MPI_REQUEST_NULL    MPI_REQUEST_NULL
