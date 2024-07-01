@@ -365,6 +365,7 @@ HYPRE_Int hypre_MPI_Reduce( void *sendbuf, void *recvbuf, HYPRE_Int count,
 HYPRE_Int hypre_MPI_Scan( void *sendbuf, void *recvbuf, HYPRE_Int count,
                           hypre_MPI_Datatype datatype, hypre_MPI_Op op, hypre_MPI_Comm comm );
 HYPRE_Int hypre_MPI_Request_free( hypre_MPI_Request *request );
+HYPRE_Int hypre_MPI_Request_get_status(hypre_MPI_Request request, HYPRE_Int *flag, hypre_MPI_Status *status);
 HYPRE_Int hypre_MPI_Type_contiguous( HYPRE_Int count, hypre_MPI_Datatype oldtype,
                                      hypre_MPI_Datatype *newtype );
 HYPRE_Int hypre_MPI_Type_vector( HYPRE_Int count, HYPRE_Int blocklength, HYPRE_Int stride,
@@ -390,9 +391,11 @@ HYPRE_Int hypre_MPI_Irecv_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *displs,
 hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests,
 hypre_MPI_Request *extra_request );
 HYPRE_Int hypre_MPI_Send_init_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
-hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests );
+hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests,
+hypre_MPI_Request  *extra_request );
 HYPRE_Int hypre_MPI_Recv_init_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
-hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests );
+hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests,
+hypre_MPI_Request  *extra_request );
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int hypre_MPI_Comm_split_type(hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
@@ -424,7 +427,7 @@ HYPRE_Int hypre_MPICommSetSendBuffer(hypre_MPI_Comm comm, void*);
 HYPRE_Int hypre_MPICommSetRecvBuffer(hypre_MPI_Comm comm, void*);
 
 hypre_int hypre_grequest_free_fn(void *extra_state);
-hypre_int hypre_grequest_noop_query_fn(void *extra_state, hypre_MPI_Status *status);
+hypre_int hypre_grequest_query_fn(void *extra_state, hypre_MPI_Status *status);
 hypre_int hypre_grequest_noop_cancel_fn(void *extra_state, hypre_int complete);
 
 #ifdef __cplusplus
