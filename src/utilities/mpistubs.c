@@ -786,6 +786,12 @@ hypre_MPI_Comm_create_keyval(hypre_MPI_Comm_copy_attr_function   *comm_copy_attr
 }
 
 HYPRE_Int
+hypre_MPI_Comm_free_keyval(HYPRE_Int *comm_keyval)
+{
+   return (0);
+}
+
+HYPRE_Int
 hypre_MPI_Type_size(hypre_MPI_Datatype datatype, HYPRE_Int *size)
 {
    *size = 0;
@@ -893,6 +899,13 @@ hypre_MPI_Comm_create_keyval(hypre_MPI_Comm_copy_attr_function   *comm_copy_attr
    ierr = MPI_Comm_create_keyval(comm_copy_attr_fn, comm_delete_attr_fn, &mpi_comm_keyval, extra_state);
    *comm_keyval = mpi_comm_keyval;
    return ierr;
+}
+
+HYPRE_Int
+hypre_MPI_Comm_free_keyval(HYPRE_Int *comm_keyval)
+{
+   hypre_int mpi_comm_keyval = (hypre_int) (*comm_keyval);
+   return MPI_Comm_free_keyval(&mpi_comm_keyval);
 }
 
 HYPRE_Int

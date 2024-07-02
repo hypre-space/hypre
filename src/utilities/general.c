@@ -78,6 +78,12 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
    hypre_HandleDeviceData(hypre_handle_) = NULL;
 #endif
 
+   HYPRE_Int i;
+   for (i = 0; i < HYPRE_MAX_NUM_COMM_KEYS; i++)
+   {
+      hypre_MPI_Comm_free_keyval(&hypre_HandleMPICommKeys(hypre_handle_)[i]);
+   }
+
    hypre_TFree(hypre_handle_, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;

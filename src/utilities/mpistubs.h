@@ -410,6 +410,7 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 
 HYPRE_Int hypre_MPI_Comm_create_keyval(hypre_MPI_Comm_copy_attr_function *comm_copy_attr_fn,
 hypre_MPI_Comm_delete_attr_function *comm_delete_attr_fn, HYPRE_Int *comm_keyval, void *extra_state);
+HYPRE_Int hypre_MPI_Comm_free_keyval(HYPRE_Int *comm_keyval);
 HYPRE_Int hypre_MPI_Comm_set_attr(hypre_MPI_Comm comm, HYPRE_Int comm_keyval, void *attribute_val);
 HYPRE_Int hypre_MPI_Comm_get_attr(hypre_MPI_Comm comm, HYPRE_Int comm_keyval, void *attribute_val, HYPRE_Int *flag);
 HYPRE_Int hypre_MPI_Grequest_start(hypre_MPI_Grequest_query_function *query_fn, hypre_MPI_Grequest_free_function *free_fn,
