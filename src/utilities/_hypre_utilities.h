@@ -1371,6 +1371,7 @@ HYPRE_Int hypre_MPI_GRequestGetCopyAction(void *dest, hypre_MemoryLocation dest_
                                           void *src, hypre_MemoryLocation src_location,
                                           HYPRE_Int num_bytes, hypre_MPI_GRequest_Action **action_ptr);
 HYPRE_Int hypre_MPI_GRequestProcessAction(hypre_MPI_GRequest_Action *action);
+HYPRE_Int hypre_MPI_GRequestDestroyAction(hypre_MPI_GRequest_Action *action);
 HYPRE_Int hypre_MPINeedHostBuffer(hypre_MemoryLocation memory_location);
 HYPRE_Int hypre_MPI_Isend_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
 hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests );

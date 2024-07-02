@@ -2007,6 +2007,7 @@ hypre_MPI_GRequestProcessAction(hypre_MPI_GRequest_Action *action)
          data += sizeof(hypre_MemoryLocation);
          // action!
          hypre_GpuProfilingPushRange("MPI-H2D/D2H");
+         //hypre_printf(" copying %p <-- %p\n", dest, src);
          _hypre_TMemcpy(dest, src, char, num_bytes, dest_location, src_location);
          hypre_GpuProfilingPopRange();
       }
@@ -2017,10 +2018,27 @@ hypre_MPI_GRequestProcessAction(hypre_MPI_GRequest_Action *action)
    return hypre_error_flag;
 }
 
+HYPRE_Int
+hypre_MPI_GRequestDestroyAction(hypre_MPI_GRequest_Action *action)
+{
+   if (!action)
+   {
+      return hypre_error_flag;
+   }
+
+   hypre_MPI_GRequest_ActionCount(action) = 0;
+   hypre_MPI_GRequest_ActionDataSize(action) = 0;
+   hypre_TFree(hypre_MPI_GRequest_ActionData(action), HYPRE_MEMORY_HOST);
+
+   return hypre_error_flag;
+}
+
 hypre_int
 hypre_grequest_free_fn(void *extra_state)
 {
-   hypre_TFree(extra_state, HYPRE_MEMORY_HOST);
+   hypre_MPI_GRequest_Action *action = (hypre_MPI_GRequest_Action *) extra_state;
+   hypre_MPI_GRequestDestroyAction(action);
+   hypre_TFree(action, HYPRE_MEMORY_HOST);
    return hypre_MPI_SUCCESS;
 }
 
