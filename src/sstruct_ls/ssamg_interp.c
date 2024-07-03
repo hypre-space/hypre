@@ -460,7 +460,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          /* The following call is needed to prevent cases where interpolation reaches
           * outside the boundary with nonzero coefficient */
          hypre_StructMatrixClearBoundary(P_s);
-
       }
    }
 
