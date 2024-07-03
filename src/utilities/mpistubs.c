@@ -2080,7 +2080,12 @@ hypre_MPI_GRequestProcessAction(hypre_MPI_GRequest_Action *action)
          data += sizeof(hypre_MemoryLocation);
          // action!
          hypre_GpuProfilingPushRange("MPI-H2D/D2H");
-         //hypre_printf(" copying %p <-- %p\n", dest, src);
+#if 1
+         char dname[32],sname[32];
+         hypre_GetMemoryLocationName(dest_location, dname);
+         hypre_GetMemoryLocationName(src_location, sname);
+         hypre_printf(" copying %s %p <-- %s %p\n", dname, dest, sname, src);
+#endif
          _hypre_TMemcpy(dest, src, char, num_bytes, dest_location, src_location);
          hypre_GpuProfilingPopRange();
       }
