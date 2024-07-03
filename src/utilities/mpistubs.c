@@ -1343,14 +1343,13 @@ hypre_MPI_Isend_Multiple( void               *buf,
    void *sbuf = cbuf ? cbuf : buf;
    if (sbuf != buf)
    {
-      hypre_GpuProfilingPushRange("MPI-D2H");
-      _hypre_TMemcpy(sbuf,
-                     buf,
-                     char,
-                     displs[num] * data_size,
-                     hypre_MPICommGetSendBufferLocation(comm),
-                     hypre_MPICommGetSendLocation(comm));
-      hypre_GpuProfilingPopRange();
+      hypre_MPI_GRequest_Action *action;
+      hypre_MPI_GRequestGetCopyAction(sbuf, hypre_MPICommGetSendBufferLocation(comm),
+                                      buf, hypre_MPICommGetSendLocation(comm),
+                                      displs[num] * data_size, &action);
+      hypre_MPI_GRequestProcessAction(action);
+      hypre_MPI_GRequestDestroyAction(action);
+      hypre_TFree(action, HYPRE_MEMORY_HOST);
    }
 
    HYPRE_Int i;
