@@ -413,12 +413,15 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
 
    hypre_TFree(hypre_ParCSRCommHandleExtraRequests(comm_handle), HYPRE_MEMORY_HOST);
 
+   /* attributes should be deleted when the communicator is being freed */
+   /*
    hypre_MPICommDeleteSendLocation(hypre_ParCSRCommHandleComm(comm_handle));
    hypre_MPICommDeleteRecvLocation(hypre_ParCSRCommHandleComm(comm_handle));
    hypre_MPICommDeleteSendBufferLocation(hypre_ParCSRCommHandleComm(comm_handle));
    hypre_MPICommDeleteRecvBufferLocation(hypre_ParCSRCommHandleComm(comm_handle));
    hypre_MPICommDeleteSendBuffer(hypre_ParCSRCommHandleComm(comm_handle));
    hypre_MPICommDeleteRecvBuffer(hypre_ParCSRCommHandleComm(comm_handle));
+   */
 
    hypre_MPI_Comm_free(&hypre_ParCSRCommHandleComm(comm_handle));
    hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);

@@ -144,7 +144,7 @@ typedef struct _hypre_ParCSRCommPkg
    hypre_MPI_Datatype               *send_mpi_types;
    hypre_MPI_Datatype               *recv_mpi_types;
 #if defined(HYPRE_USING_PERSISTENT_COMM)
-   hypre_ParCSRCommHandle           *persistent_comm_handles[NUM_OF_COMM_PKG_JOB_TYPE];
+   hypre_ParCSRPersistentCommHandle *persistent_comm_handles[NUM_OF_COMM_PKG_JOB_TYPE];
 #endif
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* temporary memory for matvec. cudaMalloc is expensive. alloc once and reuse */
