@@ -143,31 +143,37 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
 #endif
 
+#if defined(HYPRE_USING_PERSISTENT_COMM)
+   comm_handle = hypre_ParCSRCommPkgGetPersistentCommHandle(1, comm_pkg,
+                                                            HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   x_tmp_data = (HYPRE_Complex *) hypre_ParCSRCommHandleRecvData(comm_handle);
+   x_buf_data = (HYPRE_Complex *) hypre_ParCSRCommHandleSendData(comm_handle);
+#else
    /*---------------------------------------------------------------------
     * Allocate or reuse receive data buffer for x_tmp
     *--------------------------------------------------------------------*/
-
    if (!hypre_ParCSRCommPkgTmpData(comm_pkg))
    {
       hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex,
                                                           num_cols_offd * num_vectors,
                                                           HYPRE_MEMORY_DEVICE);
    }
-   hypre_VectorData(x_tmp) = x_tmp_data = hypre_ParCSRCommPkgTmpData(comm_pkg);
-   hypre_SeqVectorSetDataOwner(x_tmp, 0);
-   hypre_SeqVectorInitialize_v2(x_tmp, HYPRE_MEMORY_DEVICE);
-
    /*---------------------------------------------------------------------
     * Allocate or reuse send data buffer
     *--------------------------------------------------------------------*/
-
    if (!hypre_ParCSRCommPkgBufData(comm_pkg))
    {
       hypre_ParCSRCommPkgBufData(comm_pkg) = hypre_TAlloc(HYPRE_Complex,
                                                           send_map_num_elmts,
                                                           HYPRE_MEMORY_DEVICE);
    }
+   x_tmp_data = hypre_ParCSRCommPkgTmpData(comm_pkg);
    x_buf_data = hypre_ParCSRCommPkgBufData(comm_pkg);
+#endif
+
+   hypre_VectorData(x_tmp) = x_tmp_data;
+   hypre_SeqVectorSetDataOwner(x_tmp, 0);
+   hypre_SeqVectorInitialize_v2(x_tmp, HYPRE_MEMORY_DEVICE);
 
    /* The assert is because this code has been tested for column-wise vector storage only. */
    hypre_assert(idxstride == 1);
@@ -223,12 +229,16 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
 #endif
 
    /* Non-blocking communication starts */
+#if !defined(HYPRE_USING_PERSISTENT_COMM)
    comm_handle = hypre_ParCSRCommHandleCreate_v2(1, comm_pkg,
                                                  HYPRE_MEMORY_DEVICE, x_buf_data,
                                                  HYPRE_MEMORY_DEVICE, x_tmp_data);
-
    /* Non-blocking communication ends */
    hypre_ParCSRCommHandleDestroy(comm_handle);
+#else
+   hypre_ParCSRPersistentCommHandleStart(comm_handle);
+   hypre_ParCSRPersistentCommHandleWait(comm_handle);
+#endif
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
@@ -389,31 +399,37 @@ hypre_ParCSRMatrixMatvecTDevice( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
 #endif
 
+#if defined(HYPRE_USING_PERSISTENT_COMM)
+   comm_handle = hypre_ParCSRCommPkgGetPersistentCommHandle(2, comm_pkg,
+                                                            HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
+   y_tmp_data = (HYPRE_Complex *) hypre_ParCSRCommHandleSendData(comm_handle);
+   y_buf_data = (HYPRE_Complex *) hypre_ParCSRCommHandleRecvData(comm_handle);
+#else
    /*---------------------------------------------------------------------
     * Allocate or reuse send data buffer for y_tmp
     *--------------------------------------------------------------------*/
-
    if (!hypre_ParCSRCommPkgTmpData(comm_pkg))
    {
       hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex,
                                                           num_cols_offd * num_vectors,
                                                           HYPRE_MEMORY_DEVICE);
    }
-   hypre_VectorData(y_tmp) = y_tmp_data = hypre_ParCSRCommPkgTmpData(comm_pkg);
-   hypre_SeqVectorSetDataOwner(y_tmp, 0);
-   hypre_SeqVectorInitialize_v2(y_tmp, HYPRE_MEMORY_DEVICE);
-
    /*---------------------------------------------------------------------
     * Allocate receive data buffer
     *--------------------------------------------------------------------*/
-
    if (!hypre_ParCSRCommPkgBufData(comm_pkg))
    {
       hypre_ParCSRCommPkgBufData(comm_pkg) = hypre_TAlloc(HYPRE_Complex,
                                                           send_map_num_elmts,
                                                           HYPRE_MEMORY_DEVICE);
    }
+   y_tmp_data = hypre_ParCSRCommPkgTmpData(comm_pkg);
    y_buf_data = hypre_ParCSRCommPkgBufData(comm_pkg);
+#endif
+
+   hypre_VectorData(y_tmp) = y_tmp_data;
+   hypre_SeqVectorSetDataOwner(y_tmp, 0);
+   hypre_SeqVectorInitialize_v2(y_tmp, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
@@ -455,12 +471,16 @@ hypre_ParCSRMatrixMatvecTDevice( HYPRE_Complex       alpha,
 #endif
 
    /* Non-blocking communication starts */
+#if !defined(HYPRE_USING_PERSISTENT_COMM)
    comm_handle = hypre_ParCSRCommHandleCreate_v2(2, comm_pkg,
                                                  HYPRE_MEMORY_DEVICE, y_tmp_data,
                                                  HYPRE_MEMORY_DEVICE, y_buf_data );
-
    /* Non-blocking communication ends */
    hypre_ParCSRCommHandleDestroy(comm_handle);
+#else
+   hypre_ParCSRPersistentCommHandleStart(comm_handle);
+   hypre_ParCSRPersistentCommHandleWait(comm_handle);
+#endif
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
