@@ -118,6 +118,59 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixPartialClone
+ *
+ * Creates a new IJMatrix with data copied from an existing matrix except
+ * for the members:
+ *    1) hypre_IJMatrixObject
+ *    2) hypre_IJMatrixTranslator
+ *    3) hypre_IJMatrixAssumedPart
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJMatrixPartialClone( HYPRE_IJMatrix  matrix_in,
+                            HYPRE_IJMatrix *matrix_out )
+{
+   hypre_IJMatrix *ijmatrix_in = (hypre_IJMatrix *) matrix_in;
+   hypre_IJMatrix *ijmatrix_out;
+   HYPRE_BigInt    ilower;
+   HYPRE_BigInt    iupper;
+   HYPRE_BigInt    jlower;
+   HYPRE_BigInt    jupper;
+
+   if (!ijmatrix_in)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   HYPRE_IJMatrixGetLocalRange(ijmatrix_in, &ilower, &iupper, &jlower, &jupper);
+
+   ijmatrix_out = hypre_CTAlloc(hypre_IJMatrix, 1, HYPRE_MEMORY_HOST);
+
+   hypre_IJMatrixComm(ijmatrix_out)               = hypre_IJMatrixComm(ijmatrix_in);
+   hypre_IJMatrixObject(ijmatrix_out)             = NULL;
+   hypre_IJMatrixTranslator(ijmatrix_out)         = NULL;
+   hypre_IJMatrixAssumedPart(ijmatrix_out)        = NULL;
+   hypre_IJMatrixObjectType(ijmatrix_out)         = hypre_IJMatrixObjectType(ijmatrix_in);
+   hypre_IJMatrixAssembleFlag(ijmatrix_out)       = 0;
+   hypre_IJMatrixPrintLevel(ijmatrix_out)         = hypre_IJMatrixPrintLevel(ijmatrix_in);
+   hypre_IJMatrixOMPFlag(ijmatrix_out)            = hypre_IJMatrixOMPFlag(ijmatrix_in);
+   hypre_IJMatrixGlobalFirstRow(ijmatrix_out)     = hypre_IJMatrixGlobalFirstRow(ijmatrix_in);
+   hypre_IJMatrixGlobalFirstCol(ijmatrix_out)     = hypre_IJMatrixGlobalFirstCol(ijmatrix_in);
+   hypre_IJMatrixGlobalNumRows(ijmatrix_out)      = hypre_IJMatrixGlobalNumRows(ijmatrix_in);
+   hypre_IJMatrixGlobalNumCols(ijmatrix_out)      = hypre_IJMatrixGlobalNumCols(ijmatrix_in);
+   hypre_IJMatrixRowPartitioning(ijmatrix_out)[0] = ilower;
+   hypre_IJMatrixRowPartitioning(ijmatrix_out)[1] = iupper + 1;
+   hypre_IJMatrixColPartitioning(ijmatrix_out)[0] = jlower;
+   hypre_IJMatrixColPartitioning(ijmatrix_out)[1] = jupper + 1;
+
+   *matrix_out = (HYPRE_IJMatrix) ijmatrix_out;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -814,7 +867,133 @@ HYPRE_IJMatrixGetValues( HYPRE_IJMatrix matrix,
    if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
    {
       hypre_IJMatrixGetValuesParCSR( ijmatrix, nrows, ncols,
-                                     rows, cols, values );
+                                     rows, NULL, cols, values, 0 );
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJMatrixGetValues2( HYPRE_IJMatrix matrix,
+                          HYPRE_Int      nrows,
+                          HYPRE_Int     *ncols,
+                          HYPRE_BigInt  *rows,
+                          HYPRE_Int     *row_indexes,
+                          HYPRE_BigInt  *cols,
+                          HYPRE_Complex *values )
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (nrows == 0)
+   {
+      return hypre_error_flag;
+   }
+
+   if (!ijmatrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (!ncols)
+   {
+      hypre_error_in_arg(3);
+      return hypre_error_flag;
+   }
+
+   if (!rows)
+   {
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
+   }
+
+   if (!cols)
+   {
+      hypre_error_in_arg(5);
+      return hypre_error_flag;
+   }
+
+   if (!values)
+   {
+      hypre_error_in_arg(6);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+   {
+      hypre_IJMatrixGetValuesParCSR( ijmatrix, nrows, ncols,
+                                     rows, row_indexes, cols, values, 0 );
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJMatrixGetValuesAndZero( HYPRE_IJMatrix matrix,
+                                HYPRE_Int      nrows,
+                                HYPRE_Int     *ncols,
+                                HYPRE_BigInt  *rows,
+                                HYPRE_Int     *row_indexes,
+                                HYPRE_BigInt  *cols,
+                                HYPRE_Complex *values )
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (nrows == 0)
+   {
+      return hypre_error_flag;
+   }
+
+   if (!ijmatrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (!ncols)
+   {
+      hypre_error_in_arg(3);
+      return hypre_error_flag;
+   }
+
+   if (!rows)
+   {
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
+   }
+
+   if (!cols)
+   {
+      hypre_error_in_arg(5);
+      return hypre_error_flag;
+   }
+
+   if (!values)
+   {
+      hypre_error_in_arg(6);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+   {
+      hypre_IJMatrixGetValuesParCSR( ijmatrix, nrows, ncols,
+                                     rows, row_indexes, cols, values, 1 );
    }
    else
    {
