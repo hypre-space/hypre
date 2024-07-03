@@ -2079,7 +2079,7 @@ hypre_MPI_GRequestProcessAction(hypre_MPI_GRequest_Action *action)
          data += sizeof(hypre_MemoryLocation);
          // action!
          hypre_GpuProfilingPushRange("MPI-H2D/D2H");
-#if 1
+#if 0
          char dname[32],sname[32];
          hypre_GetMemoryLocationName(dest_location, dname);
          hypre_GetMemoryLocationName(src_location, sname);
