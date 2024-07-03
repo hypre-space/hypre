@@ -6353,7 +6353,7 @@ hypre_ParCSRMatrixDiagScaleHost( hypre_ParCSRMatrix *par_A,
 
    /* Non-blocking communication ends */
 #ifdef HYPRE_USING_PERSISTENT_COMM
-   hypre_ParCSRCommHandleWait(comm_handle);
+   hypre_ParCSRPersistentCommHandleWait(comm_handle);
 #else
    hypre_ParCSRCommHandleDestroy(comm_handle);
 #endif
@@ -6755,7 +6755,7 @@ hypre_ParCSRMatrixBlockColSumHost( hypre_ParCSRMatrix     *A,
 
    /* Non-blocking communication ends */
 #if defined(HYPRE_USING_PERSISTENT_COMM)
-   hypre_ParCSRCommHandleWait(comm_handle);
+   hypre_ParCSRPersistentCommHandleWait(comm_handle);
 #else
    hypre_ParCSRCommHandleDestroy(comm_handle);
 #endif
@@ -6961,7 +6961,7 @@ hypre_ParCSRMatrixColSumHost( hypre_ParCSRMatrix *A,
 
    /* Non-blocking communication ends */
 #if defined(HYPRE_USING_PERSISTENT_COMM)
-   hypre_ParCSRCommHandleWait(comm_handle);
+   hypre_ParCSRPersistentCommHandleWait(comm_handle);
 #else
    hypre_ParCSRCommHandleDestroy(comm_handle);
 #endif
