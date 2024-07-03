@@ -939,9 +939,9 @@ hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
    HYPRE_Int i;
    for (i = HYPRE_COMM_PKG_JOB_COMPLEX; i < NUM_OF_COMM_PKG_JOB_TYPE; ++i)
    {
-      if (comm_pkg->persistent_comm_handles[i])
+      if (hypre_ParCSRCommPkgPersistentCommHandle(comm_pkg, i))
       {
-         hypre_ParCSRPersistentCommHandleDestroy(comm_pkg->persistent_comm_handles[i]);
+         hypre_ParCSRPersistentCommHandleDestroy(hypre_ParCSRCommPkgPersistentCommHandle(comm_pkg, i));
       }
    }
 #endif
