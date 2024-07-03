@@ -127,38 +127,6 @@ hypre_ParCSRCommPkgGetPersistentCommHandle( HYPRE_Int            job,
    return hypre_ParCSRCommPkgPersistentCommHandle(comm_pkg, type);
 }
 
-/*------------------------------------------------------------------
- * hypre_ParCSRPersistentCommHandleDestroy
- *------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_ParCSRPersistentCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
-{
-   if (!comm_handle)
-   {
-      return hypre_error_flag;
-   }
-
-   HYPRE_Int i;
-
-   _hypre_TFree(hypre_ParCSRCommHandleSendBuffer(comm_handle), hypre_ParCSRCommHandleSendBufferLocation(comm_handle));
-   _hypre_TFree(hypre_ParCSRCommHandleRecvBuffer(comm_handle), hypre_ParCSRCommHandleRecvBufferLocation(comm_handle));
-   hypre_TFree(hypre_ParCSRCommHandleSendData(comm_handle), hypre_ParCSRCommHandleSendLocation(comm_handle));
-   hypre_TFree(hypre_ParCSRCommHandleRecvData(comm_handle), hypre_ParCSRCommHandleRecvLocation(comm_handle));
-   hypre_TFree(hypre_ParCSRCommHandleRequests(comm_handle), HYPRE_MEMORY_HOST);
-   for (i = 0; i < hypre_ParCSRCommHandleNumExtraRequests(comm_handle); i++)
-   {
-      if (hypre_ParCSRCommHandleExtraRequest(comm_handle, i) != hypre_MPI_REQUEST_NULL)
-      {
-         hypre_MPI_Request_free(&hypre_ParCSRCommHandleExtraRequest(comm_handle, i));
-      }
-   }
-   hypre_TFree(hypre_ParCSRCommHandleExtraRequests(comm_handle), HYPRE_MEMORY_HOST);
-   hypre_MPI_Comm_free(&hypre_ParCSRCommHandleComm(comm_handle));
-   hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
-
-   return hypre_error_flag;
-}
 
 /*------------------------------------------------------------------
  * hypre_ParCSRPersistentCommHandleStart
@@ -407,23 +375,53 @@ hypre_ParCSRCommHandleWait( hypre_ParCSRCommHandle *comm_handle )
 HYPRE_Int
 hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
 {
-   hypre_GpuProfilingPushRange("hypre_ParCSRCommHandleDestroy");
-
    if (!comm_handle)
    {
       return hypre_error_flag;
    }
 
-   hypre_ParCSRCommHandleWait(comm_handle);
+   HYPRE_Int persistent = hypre_ParCSRCommHandlePersistent(comm_handle);
+
+   if (!persistent)
+   {
+      hypre_ParCSRCommHandleWait(comm_handle);
+   }
 
    _hypre_TFree(hypre_ParCSRCommHandleSendBuffer(comm_handle), hypre_ParCSRCommHandleSendBufferLocation(comm_handle));
    _hypre_TFree(hypre_ParCSRCommHandleRecvBuffer(comm_handle), hypre_ParCSRCommHandleRecvBufferLocation(comm_handle));
+
+
+   if (persistent)
+   {
+      hypre_TFree(hypre_ParCSRCommHandleSendData(comm_handle), hypre_ParCSRCommHandleSendLocation(comm_handle));
+      hypre_TFree(hypre_ParCSRCommHandleRecvData(comm_handle), hypre_ParCSRCommHandleRecvLocation(comm_handle));
+   }
+
    hypre_TFree(hypre_ParCSRCommHandleRequests(comm_handle), HYPRE_MEMORY_HOST);
+
+   if (persistent)
+   {
+      HYPRE_Int i;
+      for (i = 0; i < hypre_ParCSRCommHandleNumExtraRequests(comm_handle); i++)
+      {
+         if (hypre_ParCSRCommHandleExtraRequest(comm_handle, i) != hypre_MPI_REQUEST_NULL)
+         {
+            hypre_MPI_Request_free(&hypre_ParCSRCommHandleExtraRequest(comm_handle, i));
+         }
+      }
+   }
+
    hypre_TFree(hypre_ParCSRCommHandleExtraRequests(comm_handle), HYPRE_MEMORY_HOST);
+
+   hypre_MPICommDeleteSendLocation(hypre_ParCSRCommHandleComm(comm_handle));
+   hypre_MPICommDeleteRecvLocation(hypre_ParCSRCommHandleComm(comm_handle));
+   hypre_MPICommDeleteSendBufferLocation(hypre_ParCSRCommHandleComm(comm_handle));
+   hypre_MPICommDeleteRecvBufferLocation(hypre_ParCSRCommHandleComm(comm_handle));
+   hypre_MPICommDeleteSendBuffer(hypre_ParCSRCommHandleComm(comm_handle));
+   hypre_MPICommDeleteRecvBuffer(hypre_ParCSRCommHandleComm(comm_handle));
+
    hypre_MPI_Comm_free(&hypre_ParCSRCommHandleComm(comm_handle));
    hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
-
-   hypre_GpuProfilingPopRange();
 
    return hypre_error_flag;
 }

@@ -413,6 +413,7 @@ hypre_MPI_Comm_delete_attr_function *comm_delete_attr_fn, HYPRE_Int *comm_keyval
 HYPRE_Int hypre_MPI_Comm_free_keyval(HYPRE_Int *comm_keyval);
 HYPRE_Int hypre_MPI_Comm_set_attr(hypre_MPI_Comm comm, HYPRE_Int comm_keyval, void *attribute_val);
 HYPRE_Int hypre_MPI_Comm_get_attr(hypre_MPI_Comm comm, HYPRE_Int comm_keyval, void *attribute_val, HYPRE_Int *flag);
+HYPRE_Int hypre_MPI_Comm_delete_attr(hypre_MPI_Comm comm, HYPRE_Int comm_keyval);
 HYPRE_Int hypre_MPI_Grequest_start(hypre_MPI_Grequest_query_function *query_fn, hypre_MPI_Grequest_free_function *free_fn,
                                    hypre_MPI_Grequest_cancel_function *cancel_fn, void *extra_state, hypre_MPI_Request *request);
 HYPRE_Int hypre_MPI_Grequest_complete( hypre_MPI_Request request );
@@ -424,12 +425,20 @@ hypre_MemoryLocation hypre_MPICommGetSendBufferLocation(hypre_MPI_Comm comm);
 hypre_MemoryLocation hypre_MPICommGetRecvBufferLocation(hypre_MPI_Comm comm);
 void* hypre_MPICommGetSendBuffer(hypre_MPI_Comm comm);
 void* hypre_MPICommGetRecvBuffer(hypre_MPI_Comm comm);
+
 HYPRE_Int hypre_MPICommSetSendLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
 HYPRE_Int hypre_MPICommSetRecvLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
 HYPRE_Int hypre_MPICommSetSendBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
 HYPRE_Int hypre_MPICommSetRecvBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
 HYPRE_Int hypre_MPICommSetSendBuffer(hypre_MPI_Comm comm, void*);
 HYPRE_Int hypre_MPICommSetRecvBuffer(hypre_MPI_Comm comm, void*);
+
+HYPRE_Int hypre_MPICommDeleteSendLocation(hypre_MPI_Comm comm);
+HYPRE_Int hypre_MPICommDeleteRecvLocation(hypre_MPI_Comm comm);
+HYPRE_Int hypre_MPICommDeleteSendBufferLocation(hypre_MPI_Comm comm);
+HYPRE_Int hypre_MPICommDeleteRecvBufferLocation(hypre_MPI_Comm comm);
+HYPRE_Int hypre_MPICommDeleteSendBuffer(hypre_MPI_Comm comm);
+HYPRE_Int hypre_MPICommDeleteRecvBuffer(hypre_MPI_Comm comm);
 
 hypre_int hypre_grequest_free_fn(void *extra_state);
 hypre_int hypre_grequest_query_fn(void *extra_state, hypre_MPI_Status *status);

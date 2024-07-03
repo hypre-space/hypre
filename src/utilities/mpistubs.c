@@ -776,6 +776,12 @@ hypre_MPI_Comm_get_attr(hypre_MPI_Comm comm, HYPRE_Int comm_keyval, void *attrib
 }
 
 HYPRE_Int
+hypre_MPI_Comm_delete_attr(hypre_MPI_Comm comm, HYPRE_Int comm_keyval)
+{
+   return (0);
+}
+
+HYPRE_Int
 hypre_MPI_Comm_create_keyval(hypre_MPI_Comm_copy_attr_function   *comm_copy_attr_fn,
                              hypre_MPI_Comm_delete_attr_function *comm_delete_attr_fn,
                              HYPRE_Int                           *comm_keyval,
@@ -886,6 +892,14 @@ hypre_MPI_Comm_get_attr(hypre_MPI_Comm comm, HYPRE_Int comm_keyval, void *attrib
    ierr = (HYPRE_Int) MPI_Comm_get_attr(comm, (hypre_int) comm_keyval, attribute_val, &mpi_flag);
    *flag = (HYPRE_Int) mpi_flag;
    return ierr;
+}
+
+HYPRE_Int
+hypre_MPI_Comm_delete_attr(hypre_MPI_Comm comm, HYPRE_Int comm_keyval)
+{
+   hypre_int mpi_comm_keyval = (hypre_int) comm_keyval;
+
+   return (HYPRE_Int) MPI_Comm_delete_attr(comm, mpi_comm_keyval);
 }
 
 HYPRE_Int
@@ -1823,6 +1837,14 @@ hypre_MPICommGetSendLocation(hypre_MPI_Comm comm)
 }
 
 HYPRE_Int
+hypre_MPICommDeleteSendLocation(hypre_MPI_Comm comm)
+{
+   hypre_Handle *handle = hypre_handle();
+   hypre_MPI_Comm_delete_attr(comm, hypre_HandleMPICommKeySendLocation(handle));
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypre_MPICommSetRecvLocation(hypre_MPI_Comm comm, hypre_MemoryLocation location)
 {
    hypre_Handle *handle = hypre_handle();
@@ -1841,6 +1863,14 @@ hypre_MPICommGetRecvLocation(hypre_MPI_Comm comm)
       location = (hypre_MPI_Aint) atrr_val;
    }
    return (location);
+}
+
+HYPRE_Int
+hypre_MPICommDeleteRecvLocation(hypre_MPI_Comm comm)
+{
+   hypre_Handle *handle = hypre_handle();
+   hypre_MPI_Comm_delete_attr(comm, hypre_HandleMPICommKeyRecvLocation(handle));
+   return hypre_error_flag;
 }
 
 HYPRE_Int
@@ -1865,6 +1895,14 @@ hypre_MPICommGetSendBufferLocation(hypre_MPI_Comm comm)
 }
 
 HYPRE_Int
+hypre_MPICommDeleteSendBufferLocation(hypre_MPI_Comm comm)
+{
+   hypre_Handle *handle = hypre_handle();
+   hypre_MPI_Comm_delete_attr(comm, hypre_HandleMPICommKeySendBufferLocation(handle));
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypre_MPICommSetRecvBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation location)
 {
    hypre_Handle *handle = hypre_handle();
@@ -1883,6 +1921,14 @@ hypre_MPICommGetRecvBufferLocation(hypre_MPI_Comm comm)
       location = (hypre_MPI_Aint) atrr_val;
    }
    return (location);
+}
+
+HYPRE_Int
+hypre_MPICommDeleteRecvBufferLocation(hypre_MPI_Comm comm)
+{
+   hypre_Handle *handle = hypre_handle();
+   hypre_MPI_Comm_delete_attr(comm, hypre_HandleMPICommKeyRecvBufferLocation(handle));
+   return hypre_error_flag;
 }
 
 HYPRE_Int
@@ -1906,6 +1952,13 @@ hypre_MPICommGetSendBuffer(hypre_MPI_Comm comm)
 }
 
 HYPRE_Int
+hypre_MPICommDeleteSendBuffer(hypre_MPI_Comm comm)
+{
+   hypre_MPI_Comm_delete_attr(comm, hypre_HandleMPICommKeySendBuffer(hypre_handle()));
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypre_MPICommSetRecvBuffer(hypre_MPI_Comm comm, void *buffer)
 {
    hypre_MPI_Comm_set_attr(comm, hypre_HandleMPICommKeyRecvBuffer(hypre_handle()), buffer);
@@ -1923,6 +1976,13 @@ hypre_MPICommGetRecvBuffer(hypre_MPI_Comm comm)
       buffer = NULL;
    }
    return (buffer);
+}
+
+HYPRE_Int
+hypre_MPICommDeleteRecvBuffer(hypre_MPI_Comm comm)
+{
+   hypre_MPI_Comm_delete_attr(comm, hypre_HandleMPICommKeyRecvBuffer(hypre_handle()));
+   return hypre_error_flag;
 }
 
 HYPRE_Int

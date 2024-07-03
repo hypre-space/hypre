@@ -385,7 +385,9 @@ hypre_ParCSRCommHandle* hypre_ParCSRCommPkgGetPersistentCommHandle(HYPRE_Int job
                                                                    hypre_ParCSRCommPkg *comm_pkg,
                                                                    HYPRE_MemoryLocation send_memory_location,
                                                                    HYPRE_MemoryLocation recv_memory_location);
-HYPRE_Int hypre_ParCSRPersistentCommHandleDestroy(hypre_ParCSRCommHandle *comm_handle);
+#define hypre_ParCSRPersistentCommHandleWait hypre_ParCSRCommHandleWait
+#define hypre_ParCSRPersistentCommHandleDestroy hypre_ParCSRCommHandleDestroy
+
 HYPRE_Int hypre_ParCSRPersistentCommHandleStart(hypre_ParCSRCommHandle *comm_handle);
 #endif
 
