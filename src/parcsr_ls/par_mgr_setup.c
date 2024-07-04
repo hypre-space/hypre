@@ -1531,7 +1531,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    /* keep reserved coarse indexes to coarsest grid */
    if (reserved_coarse_size > 0 && lvl_to_keep_cpoints == 0)
    {
-      ilower = hypre_ParCSRMatrixFirstRowIndex(A_array[lev + 1]);
+      ilower = hypre_ParCSRMatrixFirstRowIndex(A_array[num_c_levels]);
       for (i = 0; i < reserved_coarse_size; i++)
       {
          reserved_coarse_indexes[i] = (HYPRE_BigInt) (reserved_Cpoint_local_indexes[i] + ilower);
