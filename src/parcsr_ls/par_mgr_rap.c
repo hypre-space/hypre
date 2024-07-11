@@ -518,7 +518,7 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
 
    hypre_ParCSRMatrix    *AP, *RAP, *RAP_c;
    HYPRE_Int              fine_blk_dim = (level) ? blk_dims[level - 1] - blk_dims[level] :
-                                           block_size - blk_dims[level];
+                                         block_size - blk_dims[level];
    HYPRE_Int              coarse_blk_dim = blk_dims[level];
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
