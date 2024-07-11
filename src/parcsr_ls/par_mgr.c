@@ -136,6 +136,7 @@ hypre_MGRCreate(void)
    (mgr_data -> max_local_lvls) = 10;
 
    (mgr_data -> mgr_coarse_grid_method) = NULL;
+   (mgr_data -> nonglk_max_elmts) = NULL;
 
    (mgr_data -> print_coarse_system) = 0;
 
@@ -425,8 +426,9 @@ hypre_MGRDestroy( void *data )
       hypre_TFree(mgr_data -> idx_array, HYPRE_MEMORY_HOST);
    }
 
-   /* array for setting option to use non-Galerkin coarse grid */
+   /* Coarse grid options */
    hypre_TFree(mgr_data -> mgr_coarse_grid_method, HYPRE_MEMORY_HOST);
+   hypre_TFree(mgr_data -> nonglk_max_elmts, HYPRE_MEMORY_HOST);
 
    /* coarsest level matrix - RAP */
    if ((mgr_data -> RAP))

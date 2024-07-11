@@ -704,6 +704,7 @@ hypre_MGRSetupStats(void *mgr_vdata)
    hypre_MatrixStatsArrayDestroy(stats_array);
    hypre_TFree(A_array, HYPRE_MEMORY_HOST);
    hypre_TFree(P_array, HYPRE_MEMORY_HOST);
+   hypre_TFree(R_array, HYPRE_MEMORY_HOST);
    hypre_TFree(RT_array, HYPRE_MEMORY_HOST);
    hypre_TFree(num_sublevels_amg, HYPRE_MEMORY_HOST);
    hypre_TFree(gridcomp, HYPRE_MEMORY_HOST);
