@@ -140,7 +140,7 @@ typedef struct
    HYPRE_Int            *Frelax_num_functions;
 
    /* Non-Galerkin coarse grid */
-   HYPRE_Int            *mgr_coarse_grid_method; /* TODO (VPM): Change name? remove mgr_?*/
+   HYPRE_Int            *coarse_grid_method;
    HYPRE_Int            *nonglk_max_elmts;
 
    /* V-cycle F relaxation method */
@@ -238,8 +238,8 @@ typedef struct
 #define hypre_ParMGRDataAFFsolver(data)             ((data) -> aff_solver)
 #define hypre_ParMGRDataAFFsolverI(data)            ((data) -> aff_solver[i])
 
-#define hypre_ParMGRDataCoarseGridMethod(data)      ((data) -> mgr_coarse_grid_method)
-#define hypre_ParMGRDataCoarseGridMethodI(data, i)  ((data) -> mgr_coarse_grid_method[i])
+#define hypre_ParMGRDataCoarseGridMethod(data)      ((data) -> coarse_grid_method)
+#define hypre_ParMGRDataCoarseGridMethodI(data, i)  ((data) -> coarse_grid_method[i])
 #define hypre_ParMGRDataCoarseGridSolver(data)      ((data) -> coarse_grid_solver)
 #define hypre_ParMGRDataCoarseGridSolverSetup(data) ((data) -> coarse_grid_solver_setup)
 

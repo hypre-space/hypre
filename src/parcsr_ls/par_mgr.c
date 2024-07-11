@@ -135,7 +135,7 @@ hypre_MGRCreate(void)
    (mgr_data -> Frelax_num_functions) = NULL;
    (mgr_data -> max_local_lvls) = 10;
 
-   (mgr_data -> mgr_coarse_grid_method) = NULL;
+   (mgr_data -> coarse_grid_method) = NULL;
    (mgr_data -> nonglk_max_elmts) = NULL;
 
    (mgr_data -> print_coarse_system) = 0;
@@ -427,7 +427,7 @@ hypre_MGRDestroy( void *data )
    }
 
    /* Coarse grid options */
-   hypre_TFree(mgr_data -> mgr_coarse_grid_method, HYPRE_MEMORY_HOST);
+   hypre_TFree(mgr_data -> coarse_grid_method, HYPRE_MEMORY_HOST);
    hypre_TFree(mgr_data -> nonglk_max_elmts, HYPRE_MEMORY_HOST);
 
    /* coarsest level matrix - RAP */
@@ -2910,24 +2910,24 @@ hypre_MGRSetCoarseGridMethod( void *mgr_vdata, HYPRE_Int *cg_method )
    HYPRE_Int i;
    HYPRE_Int max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
 
-   hypre_TFree(mgr_data -> mgr_coarse_grid_method, HYPRE_MEMORY_HOST);
-   HYPRE_Int *mgr_coarse_grid_method = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels,
-                                                     HYPRE_MEMORY_HOST);
+   hypre_TFree(mgr_data -> coarse_grid_method, HYPRE_MEMORY_HOST);
+   HYPRE_Int *coarse_grid_method = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels,
+                                                 HYPRE_MEMORY_HOST);
    if (cg_method != NULL)
    {
       for (i = 0; i < max_num_coarse_levels; i++)
       {
-         mgr_coarse_grid_method[i] = cg_method[i];
+         coarse_grid_method[i] = cg_method[i];
       }
    }
    else
    {
       for (i = 0; i < max_num_coarse_levels; i++)
       {
-         mgr_coarse_grid_method[i] = 0;
+         coarse_grid_method[i] = 0;
       }
    }
-   (mgr_data -> mgr_coarse_grid_method) = mgr_coarse_grid_method;
+   (mgr_data -> coarse_grid_method) = coarse_grid_method;
    return hypre_error_flag;
 }
 

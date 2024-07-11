@@ -510,7 +510,7 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
 
    HYPRE_Int             *blk_dims = (mgr_data -> block_num_coarse_indexes);
    HYPRE_Int              block_size = (mgr_data -> block_size);
-   HYPRE_Int              method = (mgr_data -> mgr_coarse_grid_method)[level];
+   HYPRE_Int              method = (mgr_data -> coarse_grid_method)[level];
    HYPRE_Int              num_coarse_levels = (mgr_data -> max_num_coarse_levels);
    HYPRE_Int              ordering = (mgr_data -> set_c_points_method);
    HYPRE_Int              max_elmts = (mgr_data -> nonglk_max_elmts)[level];

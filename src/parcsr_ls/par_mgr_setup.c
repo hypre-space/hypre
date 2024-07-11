@@ -129,7 +129,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
    HYPRE_Int *Frelax_type = (mgr_data -> Frelax_type);
 
-   HYPRE_Int *mgr_coarse_grid_method = (mgr_data -> mgr_coarse_grid_method);
+   HYPRE_Int *coarse_grid_method = (mgr_data -> coarse_grid_method);
 
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 #if defined(HYPRE_USING_GPU)
@@ -711,14 +711,10 @@ hypre_MGRSetup( void               *mgr_vdata,
 #endif
 
    /* Set default for using Non-Galerkin coarse grid */
-   if (mgr_coarse_grid_method == NULL)
+   if (coarse_grid_method == NULL)
    {
-      mgr_coarse_grid_method = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
-      for (i = 0; i < max_num_coarse_levels; i++)
-      {
-         mgr_coarse_grid_method[i] = 0;
-      }
-      (mgr_data -> mgr_coarse_grid_method) = mgr_coarse_grid_method;
+      coarse_grid_method = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+      (mgr_data -> coarse_grid_method) = coarse_grid_method;
    }
 
    /* Set default for Non-Galerkin correction truncation */
