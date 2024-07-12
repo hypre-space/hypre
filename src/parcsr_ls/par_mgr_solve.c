@@ -864,9 +864,9 @@ hypre_MGRCycle( void              *mgr_vdata,
                   {
                      for (i = 0; i < nsweeps[fine_grid]; i++)
                      {
-                         hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid],
-                                                     CF_marker_data, relax_points, relax_weight,
-                                                     l1_norms, U_array[fine_grid], Vtemp);
+                        hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid],
+                                                    CF_marker_data, relax_points, relax_weight,
+                                                    l1_norms, U_array[fine_grid], Vtemp);
                      }
                   }
                }
