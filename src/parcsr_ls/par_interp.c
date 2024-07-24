@@ -2623,7 +2623,7 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
 {
    if (trunc_factor <= 0.0 && max_elmts == 0)
    {
-      return 0;
+      return hypre_error_flag;
    }
 
 #if defined(HYPRE_USING_GPU)

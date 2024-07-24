@@ -96,7 +96,13 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
    }
    else
    {
+      /* Fallback to host execution when dependency libraries are not met (cuSOLVER/MAGMA) */
+#if defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_CUSOLVER) && !defined(HYPRE_USING_MAGMA) ||\
+    (defined(HYPRE_USING_HIP) && !defined(HYPRE_USING_MAGMA))
+      ge_memory_location = HYPRE_MEMORY_HOST;
+#else
       ge_memory_location = memory_location;
+#endif
    }
    hypre_ParAMGDataGEMemoryLocation(amg_data) = ge_memory_location;
 

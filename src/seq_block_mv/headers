@@ -31,8 +31,8 @@ extern "C" {
 #endif
 @
 
-tail +7 dense_block_matrix.h >> $INTERNAL_HEADER
-tail +7 protos.h             >> $INTERNAL_HEADER
+cat dense_block_matrix.h >> $INTERNAL_HEADER
+cat protos.h             >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards

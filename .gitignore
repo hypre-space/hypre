@@ -7,6 +7,7 @@
 *.err
 *.out
 *.perf
+*.btr
 config.log
 config.status
 Makefile.config
@@ -15,6 +16,7 @@ autom4te.cache
 src/TAGS
 hypre/
 cmbuild/
+.vscode
 
 ###############
 # Documentation
