@@ -2309,6 +2309,7 @@ main( hypre_int argc,
       {
          arg_index++;
          print_solution = 1;
+      }
       else if ( strcmp(argv[arg_index], "-printbin") == 0 )
       {
          arg_index++;

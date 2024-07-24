@@ -1395,13 +1395,10 @@ hypre_BoomerAMGWriteSolverParams(void* data)
    HYPRE_Int      one = 1;
    HYPRE_Int      minus_one = -1;
    HYPRE_Int      zero = 0;
+   
    /* local params */
    HYPRE_Int      i,j,sum,*bool_print;
 
-   HYPRE_Int          j;
-   HYPRE_Int          one = 1;
-   HYPRE_Int          minus_one = -1;
-   HYPRE_Int          zero = 0;
 
    /*----------------------------------------------------------
     * Get the amg_data data
