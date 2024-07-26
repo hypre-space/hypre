@@ -469,16 +469,86 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
    if (interp_type >= 0)
    {
       hypre_ParCSRMatrix *A_u = hypre_SStructMatrixParCSRMatrix(A);
+      hypre_CSRMatrix *A_u_diag = hypre_ParCSRMatrixDiag(A_u);
+      hypre_CSRMatrix *A_u_offd = hypre_ParCSRMatrixOffd(A_u);
       hypre_ParCSRMatrix *A_u_aug;
       hypre_ParCSRMatrix *P_u;
 
       /* Convert boundary of A to IJ matrix */
-      /* WM: todo - don't rely on a halo here but rather connections in A_u */
       hypre_IJMatrix *A_struct_bndry_ij;
+
+      /* WM: todo - don't rely on a halo here but rather connections in A_u */
       hypre_SStructMatrixHaloToUMatrix(A, grid, &A_struct_bndry_ij, 1);
-      hypre_ParCSRMatrix *A_struct_bndry = hypre_IJMatrixObject(A_struct_bndry_ij);
+      HYPRE_Int              num_indices = 0;
+      HYPRE_Int             *indices[ndim];
+      hypre_Index            index, start;
+      hypre_printf("WM: debug - num rows A_u_diag = %d\n", hypre_CSRMatrixNumRows(A_u_diag));
+      for (i = 0; i < ndim; i++)
+      {
+         indices[i] = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A_u_diag), HYPRE_MEMORY_HOST);
+      }
+      HYPRE_Real             threshold = 1.0; // WM: todo - what should this be?
+      hypre_BoxArray      ***convert_boxa = hypre_TAlloc(hypre_BoxArray**, nparts, HYPRE_MEMORY_HOST);
+      HYPRE_Int cnt = 0;
+      for (part = 0; part < nparts; part++)
+      {
+         pgrid = hypre_SStructGridPGrid(grid, part);
+         nvars = hypre_SStructPGridNVars(pgrid);
+
+         convert_boxa[part] = hypre_TAlloc(hypre_BoxArray*, nvars, HYPRE_MEMORY_HOST);
+
+         /* Loop over variables */
+         for (vi = 0; vi < nvars; vi++)
+         {
+            A_s = hypre_SStructPMatrixSMatrix(A_p, vi, vi);
+            sgrid = hypre_StructMatrixGrid(A_s);
+            /* compute_boxes = hypre_StructGridBoxes(sgrid); */
+            compute_boxes = hypre_StructMatrixDataSpace(A_s);
+
+            /* Loop over boxes */
+            hypre_ForBoxI(i, compute_boxes)
+            {
+               compute_box = hypre_BoxArrayBox(compute_boxes, i);
+               hypre_printf("WM: debug - compute_box = (%d %d) x (%d %d)\n",
+                     hypre_BoxIMin(compute_box)[0],
+                     hypre_BoxIMin(compute_box)[1],
+                     hypre_BoxIMax(compute_box)[0],
+                     hypre_BoxIMax(compute_box)[1]);
+               hypre_BoxGetSize(compute_box, loop_size);
+               hypre_SetIndex(stride, 1);
+               hypre_CopyToIndex(hypre_BoxIMin(compute_box), ndim, start);
+               hypre_BoxLoop1Begin(ndim, loop_size, compute_box, start, stride, ii);
+               {
+                  hypre_printf("WM: debug - cnt = %d\n", cnt);
+                  hypre_BoxLoopGetIndex(index);
+                  hypre_printf("WM: debug - index = (%d, %d)\n", index[0] + start[0], index[1] + start[1]);
+                  if (hypre_CSRMatrixI(A_u_diag)[cnt+1] - hypre_CSRMatrixI(A_u_diag)[cnt] + 
+                        hypre_CSRMatrixI(A_u_offd)[cnt+1] - hypre_CSRMatrixI(A_u_offd)[cnt] > 0)
+                  {
+                     /* hypre_BoxLoopGetIndex(index); */
+                     for (j = 0; j < ndim; j++)
+                     {
+                        indices[j][num_indices] = index[j] + start[j];
+                     }
+                     /* hypre_printf("WM: debug - indices[%d] = (%d, %d)\n", num_indices, index[0], index[1]); */
+                     num_indices++;
+                  }
+                  cnt++;
+               }
+               hypre_BoxLoop1End(ii);
+            }
+            hypre_printf("WM: debug - %s : %d\n", __FILE__, __LINE__);
+            hypre_BoxArrayCreateFromIndices(ndim, num_indices, indices, threshold, &(convert_boxa[part][vi]));
+            hypre_printf("WM: debug - %s : %d\n", __FILE__, __LINE__);
+         }
+      }
+      /* hypre_SStructMatrixBoxesToUMatrix(A, grid, &A_struct_bndry_ij, convert_boxa); */
+      /* WM: todo - cleanup memory: convert_boxa, indices, etc. */
+
+
 
       /* Add structured boundary portion to unstructured portion */
+      hypre_ParCSRMatrix *A_struct_bndry = hypre_IJMatrixObject(A_struct_bndry_ij);
       hypre_ParCSRMatrix *A_bndry;
       hypre_ParCSRMatrixAdd(1.0, A_struct_bndry, 1.0, A_u, &A_bndry);
 

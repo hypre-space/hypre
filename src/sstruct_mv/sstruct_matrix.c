@@ -1213,7 +1213,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
    HYPRE_BigInt         *rows, *cols;
    HYPRE_Complex        *ijvalues;
    HYPRE_Int            *values_map;
-   hypre_Box            *box = hypre_BoxCreate(ndim);
+   hypre_Box            *box;
    hypre_Box            *to_box;
    hypre_Box            *map_box;
    hypre_Box            *int_box;
@@ -2420,7 +2420,7 @@ HYPRE_Int
 hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
                                    hypre_SStructGrid     *grid,
                                    hypre_IJMatrix       **ij_Ahat_ptr,
-                                   hypre_BoxArrayArray ***convert_boxaa)
+                                   hypre_BoxArray      ***convert_boxa)
 {
    HYPRE_Int              ndim     = hypre_SStructMatrixNDim(A);
    HYPRE_Int              nparts   = hypre_SStructMatrixNParts(A);
@@ -2435,17 +2435,13 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
    hypre_AuxParCSRMatrix *aux_matrix;
 
    HYPRE_Int             *split;
-   hypre_BoxArrayArray   *pbnd_boxaa;
-   hypre_BoxArray        *convert_boxa;
-   hypre_BoxArray        *pbnd_boxa;
    hypre_BoxArray        *grid_boxes;
-   hypre_Box             *box;
-   hypre_Box             *grow_box;
+   hypre_Box             *box = hypre_BoxCreate(ndim);
    hypre_Box             *grid_box;
    hypre_Box             *ghost_box = hypre_BoxCreate(ndim);
    hypre_Box             *convert_box;
 
-   hypre_Index            ustride;
+   hypre_Index            stride;
    hypre_Index            loop_size;
    hypre_IndexRef         start;
 
@@ -2457,12 +2453,7 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_BigInt           sizes[4];
    HYPRE_Int              entry, part, var, nvars;
    HYPRE_Int              nnzs;
-   HYPRE_Int              nvalues, i, j, k, kk, m;
-   HYPRE_Int              num_boxes;
-   HYPRE_Int              pbnd_boxaa_size;
-   HYPRE_Int              convert_boxaa_size;
-   HYPRE_Int              grid_box_id;
-   HYPRE_Int              convert_box_id;
+   HYPRE_Int              nvalues, i, j, m;
    HYPRE_Int             *num_ghost;
    HYPRE_Int              nSentries;
 
@@ -2483,7 +2474,7 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
    /* Set row sizes */
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "Set rowsizes");
    nvalues = 0; m = 0;
-   hypre_SetIndex(ustride, 1);
+   hypre_SetIndex(stride, 1);
    row_sizes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
@@ -2499,90 +2490,47 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
          grid_boxes = hypre_StructGridBoxes(sgrid);
          num_ghost  = hypre_StructGridNumGhost(sgrid);
 
-         nnzs = 0;
-         for (entry = 0; entry < hypre_SStructStencilSize(stencil); entry++)
+         /* WM: shouldn't the nnzs here just be the stencil size? */
+         /* nnzs = 0; */
+         /* for (entry = 0; entry < hypre_SStructStencilSize(stencil); entry++) */
+         /* { */
+         /*    if (split[entry] > -1) */
+         /*    { */
+         /*       nnzs++; */
+         /*    } */
+         /* } */
+         nnzs = hypre_SStructStencilSize(stencil);
+
+         hypre_ForBoxI(i, grid_boxes)
          {
-            if (split[entry] > -1)
-            {
-               nnzs++;
-            }
-         }
-
-         k = 0;
-         hypre_ForBoxArrayI(i, convert_boxaa[part][var])
-         {
-            convert_boxa   = hypre_BoxArrayArrayBoxArray(convert_boxaa[part][var], i);
-            convert_box_id = hypre_BoxArrayArrayID(convert_boxaa[part][var], i);
-            grid_box_id    = hypre_StructGridID(sgrid, k);
-
-            /* Exit in case of non-stencil coupling */
-            if (convert_box_id > -1)
-            {
-               while (grid_box_id != convert_box_id)
-               {
-                  grid_box = hypre_BoxArrayBox(grid_boxes, k);
-                  hypre_CopyBox(grid_box, ghost_box);
-                  hypre_BoxGrowByArray(ghost_box, num_ghost);
-                  m += hypre_BoxVolume(ghost_box);
-
-                  if (k < (hypre_StructGridNumBoxes(sgrid) - 1))
-                  {
-                     k++;
-                     grid_box_id = hypre_StructGridID(sgrid, k);
-                  }
-                  else
-                  {
-                     hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                                       "grid_box_id == convert_box_id not found");
-                     break;
-                  }
-               }
-
-               grid_box = hypre_BoxArrayBox(grid_boxes, k);
-               hypre_CopyBox(grid_box, ghost_box);
-               hypre_BoxGrowByArray(ghost_box, num_ghost);
-
-               convert_boxa = hypre_BoxArrayArrayBoxArray(convert_boxaa[part][var], i);
-               hypre_ForBoxI(j, convert_boxa)
-               {
-                  convert_box = hypre_BoxArrayBox(convert_boxa, j);
-                  start = hypre_BoxIMin(convert_box);
-                  hypre_BoxGetSize(convert_box, loop_size);
-
-                  hypre_BoxLoop1Begin(ndim, loop_size, ghost_box, start, ustride, mi);
-                  {
-                     row_sizes[m + mi] = nnzs;
-                  }
-                  hypre_BoxLoop1End(mi);
-                  nvalues += nnzs * hypre_BoxVolume(convert_box);
-               } /* Loop over convert_boxa */
-
-               m += hypre_BoxVolume(ghost_box);
-
-               /* Go to next grid box */
-               k++;
-            }
-            else
-            {
-               /* Update size of values array */
-               hypre_ForBoxI(j, convert_boxa)
-               {
-                  convert_box = hypre_BoxArrayBox(convert_boxa, j);
-                  nvalues += nnzs * hypre_BoxVolume(convert_box);
-               }
-               /* TODO: Update rowsizes for non-stencil couplings */
-            } /* if (convert_box_id) */
-         } /* Loop over convert_boxaa */
-
-         for (; k < hypre_StructGridNumBoxes(sgrid); k++)
-         {
-            grid_box = hypre_BoxArrayBox(grid_boxes, k);
+            grid_box = hypre_BoxArrayBox(grid_boxes, i);
             hypre_CopyBox(grid_box, ghost_box);
             hypre_BoxGrowByArray(ghost_box, num_ghost);
+
+            hypre_ForBoxI(j, convert_boxa[part][var])
+            {
+               convert_box = hypre_BoxArrayBox(convert_boxa[part][var], j);
+               hypre_IntersectBoxes(grid_box, convert_box, box);
+               start = hypre_BoxIMin(box);
+               hypre_BoxGetSize(box, loop_size);
+               /* WM: do I need to check whether there is a non-trivial intersection, or is that handled automatically? */
+               hypre_BoxLoop1Begin(ndim, loop_size, ghost_box, start, stride, mi);
+               {
+                  row_sizes[m + mi] = nnzs;
+               }
+               hypre_BoxLoop1End(mi);
+               nvalues = hypre_max(nvalues, nnzs * hypre_BoxVolume(convert_box));
+            } /* Loop over convert_boxa[part][var] */
+
+            /* WM: doesn't seem like the right way to do nvalues? Should be a max, not a sum, correct? */
+            /* nvalues += nnzs * hypre_BoxVolume(convert_box); */
+
             m += hypre_BoxVolume(ghost_box);
-         }
+
+         } /* Loop over grid_boxes */
       } /* Loop over vars */
    } /* Loop over parts */
+   hypre_BoxDestroy(box);
    hypre_BoxDestroy(ghost_box);
    HYPRE_ANNOTATE_REGION_END("%s", "Set rowsizes");
 
@@ -2595,6 +2543,7 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_ANNOTATE_REGION_END("%s", "Create Matrix");
 
    /* Allocate memory */
+   /* WM: this seems too large for nvalues??? Can I set this a different way? */
    values = hypre_CTAlloc(HYPRE_Complex, nvalues, HYPRE_MEMORY_HOST);
 
    /* Set entries of ij_Ahat */
@@ -2619,52 +2568,49 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
             }
          }
 
-         hypre_ForBoxArrayI(i, convert_boxaa[part][var])
+         hypre_ForBoxI(i, convert_boxa[part][var])
          {
-            convert_boxa = hypre_BoxArrayArrayBoxArray(convert_boxaa[part][var], i);
-            hypre_ForBoxI(j, convert_boxa)
+            convert_box = hypre_BoxArrayBox(convert_boxa[part][var], i);
+
+            hypre_assert(hypre_BoxVolume(convert_box) > 0);
+            hypre_assert(hypre_BoxVolume(convert_box) <= nvalues);
+
+#if defined(HYPRE_DEBUG) && defined(DEBUG_MATCONV)
+            if (!myid)
             {
-               convert_box = hypre_BoxArrayBox(convert_boxa, j);
-
-               hypre_assert(hypre_BoxVolume(convert_box) > 0);
-               hypre_assert(hypre_BoxVolume(convert_box) <= nvalues);
-
-#if defined(HYPRE_DEBUG) && defined(DEBUG_MATCONV)
-               if (!myid)
-               {
-                  hypre_IndexRef  ilower = hypre_BoxIMin(convert_box);
-                  hypre_IndexRef  iupper = hypre_BoxIMax(convert_box);
-                  hypre_printf("Part %d - boxa %d - box %d - Converting %d entries - ",
-                               part, i, j, hypre_BoxVolume(convert_box));
-                  hypre_printf("(%d, %d, %d) x (%d, %d, %d)\n",
-                               ilower[0], ilower[1], ilower[2],
-                               iupper[0], iupper[1], iupper[2]);
-               }
-               HYPRE_ANNOTATE_REGION_BEGIN("%s %d %s %d", "Get values part", part, "convert_box", j);
+               hypre_IndexRef  ilower = hypre_BoxIMin(convert_box);
+               hypre_IndexRef  iupper = hypre_BoxIMax(convert_box);
+               hypre_printf("Part %d - box %d - Converting %d entries - ",
+                            part, i, hypre_BoxVolume(convert_box));
+               hypre_printf("(%d, %d, %d) x (%d, %d, %d)\n",
+                            ilower[0], ilower[1], ilower[2],
+                            iupper[0], iupper[1], iupper[2]);
+            }
+            HYPRE_ANNOTATE_REGION_BEGIN("%s %d %s %d", "Get values part", part, "convert_box", i);
 #endif
-               /* GET values from this box */
-               HYPRE_ANNOTATE_REGION_BEGIN("%s", "Get entries");
-               hypre_SStructPMatrixSetBoxValues(pA, convert_box, var,
-                                                nSentries, Sentries, convert_box, values, -1);
-               HYPRE_ANNOTATE_REGION_END("%s", "Get entries");
+            /* GET values from this box */
+            HYPRE_ANNOTATE_REGION_BEGIN("%s", "Get entries");
+            hypre_SStructPMatrixSetBoxValues(pA, convert_box, var,
+                                             nSentries, Sentries, convert_box, values, -1);
+            HYPRE_ANNOTATE_REGION_END("%s", "Get entries");
 
 #if defined(HYPRE_DEBUG) && defined(DEBUG_MATCONV)
-               HYPRE_ANNOTATE_REGION_END("%s %d %s %d", "Get values part", part, "convert_box", j);
-               HYPRE_ANNOTATE_REGION_BEGIN("%s %d %s %d", "Set values part", part, "convert_box", j);
+            HYPRE_ANNOTATE_REGION_END("%s %d %s %d", "Get values part", part, "convert_box", i);
+            HYPRE_ANNOTATE_REGION_BEGIN("%s %d %s %d", "Set values part", part, "convert_box", i);
 #endif
-               /* SET values to ij_Ahat */
-               HYPRE_ANNOTATE_REGION_BEGIN("%s", "Set entries");
-               hypre_SStructUMatrixSetBoxValuesHelper(A, part, convert_box,
-                                                      var, nSentries, Sentries,
-                                                      convert_box, values, 0, ij_Ahat);
-               HYPRE_ANNOTATE_REGION_END("%s", "Set entries");
+            /* SET values to ij_Ahat */
+            HYPRE_ANNOTATE_REGION_BEGIN("%s", "Set entries");
+            hypre_SStructUMatrixSetBoxValuesHelper(A, part, convert_box,
+                                                   var, nSentries, Sentries,
+                                                   convert_box, values, 0, ij_Ahat);
+            HYPRE_ANNOTATE_REGION_END("%s", "Set entries");
 #if defined(HYPRE_DEBUG) && defined(DEBUG_MATCONV)
-               HYPRE_ANNOTATE_REGION_END("%s %d %s %d", "Set values part", part, "convert_box", j);
+            HYPRE_ANNOTATE_REGION_END("%s %d %s %d", "Set values part", part, "convert_box", i);
 #endif
-            } /* Loop over convert_boxa */
-         } /* Loop over convert_boxaa */
+         } /* Loop over convert_boxa */
       } /* Loop over vars */
    } /* Loop over parts */
+   hypre_TFree(values, HYPRE_MEMORY_HOST);
 
 #if defined(HYPRE_DEBUG) && defined(DEBUG_MATCONV)
    if (!myid)
@@ -2675,20 +2621,6 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
 
    /* Assemble ij_A */
    HYPRE_IJMatrixAssemble(ij_Ahat);
-
-   /* Free memory */
-   hypre_TFree(values, HYPRE_MEMORY_HOST);
-   for (part = 0; part < nparts; part++)
-   {
-      pgrid = hypre_SStructGridPGrid(grid, part);
-      nvars = hypre_SStructPGridNVars(pgrid);
-      for (var = 0; var < nvars; var++)
-      {
-         hypre_BoxArrayArrayDestroy(convert_boxaa[part][var]);
-      }
-      hypre_TFree(convert_boxaa[part], HYPRE_MEMORY_HOST);
-   }
-   hypre_TFree(convert_boxaa, HYPRE_MEMORY_HOST);
 
    /* Set pointer to ij_Ahat */
    *ij_Ahat_ptr = ij_Ahat;
@@ -2715,7 +2647,6 @@ hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix   *A,
 {
    HYPRE_Int              ndim     = hypre_SStructMatrixNDim(A);
    HYPRE_Int              nparts   = hypre_SStructMatrixNParts(A);
-   HYPRE_Int             *Sentries = hypre_SStructMatrixSEntries(A);
    HYPRE_IJMatrix         ij_A     = hypre_SStructMatrixIJMatrix(A);
    hypre_SStructPGrid    *pgrid;
    hypre_StructGrid      *sgrid;
@@ -2725,7 +2656,6 @@ hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix   *A,
    hypre_IJMatrix        *ij_Ahat;
    hypre_AuxParCSRMatrix *aux_matrix;
 
-   HYPRE_Int             *split;
    hypre_BoxArrayArray ***convert_boxaa;
    hypre_BoxArrayArray   *pbnd_boxaa;
    hypre_BoxArray        *convert_boxa;
@@ -2734,7 +2664,6 @@ hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix   *A,
    hypre_Box             *box;
    hypre_Box             *grow_box;
    hypre_Box             *grid_box;
-   hypre_Box             *ghost_box;
    hypre_Box             *convert_box;
 
    hypre_Index            ustride;
@@ -2744,19 +2673,17 @@ hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_Int              nrows;
    HYPRE_Int              ncols;
    HYPRE_Int             *row_sizes;
-   HYPRE_Complex         *values;
 
    HYPRE_BigInt           sizes[4];
    HYPRE_Int              entry, part, var, nvars;
    HYPRE_Int              nnzs;
-   HYPRE_Int              nvalues, i, j, k, kk, m;
+   HYPRE_Int              i, j, k, kk, m;
    HYPRE_Int              num_boxes;
    HYPRE_Int              pbnd_boxaa_size;
    HYPRE_Int              convert_boxaa_size;
    HYPRE_Int              grid_box_id;
    HYPRE_Int              convert_box_id;
    HYPRE_Int             *num_ghost;
-   HYPRE_Int              nSentries;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -2776,7 +2703,6 @@ hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "Find boxes");
    convert_box   = hypre_BoxCreate(ndim);
    grow_box      = hypre_BoxCreate(ndim);
-   ghost_box     = hypre_BoxCreate(ndim);
    convert_boxaa = hypre_TAlloc(hypre_BoxArrayArray **, nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
@@ -2826,8 +2752,6 @@ hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix   *A,
                {
                   box = hypre_BoxArrayBox(pbnd_boxa, j);
                   hypre_CopyBox(box, grow_box);
-                  /* WM: todo - growing the box by more than 1 gave me correct mat-mat multiplication on coarser levels... */
-                  /*     BUT, we really need a robust way of doing this that guarantees correctness without doing too much work. */
                   hypre_BoxGrowByValue(grow_box, halo_size - 1);
                   hypre_IntersectBoxes(grow_box, grid_box, convert_box);
 
@@ -2850,7 +2774,43 @@ hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix   *A,
    hypre_BoxDestroy(convert_box);
    HYPRE_ANNOTATE_REGION_END("%s", "Find boxes");
 
-   hypre_SStructMatrixBoxesToUMatrix(A, grid, ij_Ahat_ptr, convert_boxaa);
+   /* Flatten the convert_boxaa to convert_boxa_flattened (that is ArrayArray to Array). */
+   hypre_BoxArray ***convert_boxaa_flattened = hypre_TAlloc(hypre_BoxArray **, nparts, HYPRE_MEMORY_HOST);
+   for (part = 0; part < nparts; part++)
+   {
+      convert_boxaa_flattened[part] = hypre_TAlloc(hypre_BoxArray *, nvars, HYPRE_MEMORY_HOST);
+      for (var = 0; var < nvars; var++)
+      {
+         convert_boxaa_flattened[part][var] = hypre_BoxArrayCreate(0, ndim);
+         hypre_ForBoxArrayI(i, convert_boxaa[part][var])
+         {
+            grid_boxes = hypre_BoxArrayArrayBoxArray(convert_boxaa[part][var], i);
+            hypre_ForBoxI(j, grid_boxes)
+            {
+               box = hypre_BoxArrayBox(grid_boxes, j);
+               hypre_AppendBox(box, convert_boxaa_flattened[part][var]);
+            }
+         }
+      }
+   }
+
+   hypre_SStructMatrixBoxesToUMatrix(A, grid, ij_Ahat_ptr, convert_boxaa_flattened);
+
+   /* Free memory */
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+      for (var = 0; var < nvars; var++)
+      {
+         hypre_BoxArrayArrayDestroy(convert_boxaa[part][var]);
+         hypre_BoxArrayDestroy(convert_boxaa_flattened[part][var]);
+      }
+      hypre_TFree(convert_boxaa[part], HYPRE_MEMORY_HOST);
+      hypre_TFree(convert_boxaa_flattened[part], HYPRE_MEMORY_HOST);
+   }
+   hypre_TFree(convert_boxaa, HYPRE_MEMORY_HOST);
+   hypre_TFree(convert_boxaa_flattened, HYPRE_MEMORY_HOST);
 
    HYPRE_ANNOTATE_FUNC_END;
 
