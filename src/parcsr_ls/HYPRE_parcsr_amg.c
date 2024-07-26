@@ -920,6 +920,24 @@ HYPRE_BoomerAMGSetRelaxWeight( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetRelaxNodeOuterWeights, HYPRE_BoomerAMGGetRelaxNodeOuterWeights
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetRelaxNodeOuterWeights( HYPRE_Solver  solver,
+                               HYPRE_Real   *relax_node_outerweights  )
+{
+   return ( hypre_BoomerAMGSetRelaxNodeOuterWeights( (void *) solver, relax_node_outerweights ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetRelaxNodeOuterWeights( HYPRE_Solver  solver,
+                               HYPRE_Real   **relax_node_outerweights  )
+{
+   return ( hypre_BoomerAMGGetRelaxNodeOuterWeights( (void *) solver, relax_node_outerweights ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetRelaxNodeWeights, HYPRE_BoomerAMGGetRelaxNodeWeights
  *--------------------------------------------------------------------------*/
 

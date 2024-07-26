@@ -57,7 +57,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Int       kappa;
    HYPRE_Int       fcycle, fcycle_lev;
    HYPRE_Int      *cycle_struct,*relax_node_types,*node_num_sweeps,cycle_num_nodes;
-   HYPRE_Real     *relax_node_weights,*relax_edge_weights;
+   HYPRE_Real     *relax_node_outerweights, *relax_node_weights,*relax_edge_weights;
    HYPRE_Int       num_levels;
    HYPRE_Int       max_levels;
    HYPRE_Real     *num_coeffs;
@@ -144,6 +144,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    grid_relax_points   = hypre_ParAMGDataGridRelaxPoints(amg_data);
    relax_order         = hypre_ParAMGDataRelaxOrder(amg_data);
    relax_node_types    = hypre_ParAMGDataRelaxNodeTypes(amg_data);
+   relax_node_outerweights  = hypre_ParAMGDataRelaxNodeOuterWeights(amg_data);
    relax_node_weights  = hypre_ParAMGDataRelaxNodeWeights(amg_data);
    relax_edge_weights  = hypre_ParAMGDataRelaxEdgeWeights(amg_data);
    relax_weight        = hypre_ParAMGDataRelaxWeight(amg_data);
@@ -413,6 +414,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
             *-----------------------------------------------------------------*/
             relax_type=relax_node_types[edge_index];
             relax_weight[level] =relax_node_weights[edge_index];
+            omega[level] = relax_node_outerweights[edge_index];
             num_sweep = node_num_sweeps[edge_index];
          }
 

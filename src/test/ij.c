@@ -237,12 +237,13 @@ main( hypre_int argc,
    HYPRE_Int *relax_node_types;
    HYPRE_Int *node_num_sweeps;
    HYPRE_Int cycle_num_nodes;
+   HYPRE_Real *relax_node_outerweights;
    HYPRE_Real *relax_node_weights;
    HYPRE_Real *relax_edge_weights;
    } *iconfig_ptr;
 
    HYPRE_Int n_configs=1;
-   char *token[6], *subtoken;
+   char *token[7], *subtoken;
    char *config_str;
 
    /* parameters for BoomerAMG */
@@ -262,7 +263,7 @@ main( hypre_int argc,
    HYPRE_Int      cycle_type = 1;
    HYPRE_Int      kappa=1;
    HYPRE_Int      *cycle_struct,*relax_node_types,*node_num_sweeps,cycle_num_nodes;
-   HYPRE_Real     *relax_node_weights,*relax_edge_weights;
+   HYPRE_Real     *relax_node_outerweights, *relax_node_weights,*relax_edge_weights;
    HYPRE_Int      fcycle;
    HYPRE_Int      coarsen_type = 10;
    HYPRE_Int      measure_type = 0;
@@ -765,13 +766,14 @@ main( hypre_int argc,
             // read the input configuration
             config_str = argv[arg_index++];
             token[0] = strtok(config_str, "/");
-            for (j=1;j<6;j++)
+            for (j=1;j<7;j++)
                token[j] = strtok(NULL, "/");
             iconfig_ptr[i].cycle_num_nodes = atoi(token[0]);
             // allocate memory for the member variables
             iconfig_ptr[i].cycle_struct = hypre_CTAlloc(HYPRE_Int,  iconfig_ptr[i].cycle_num_nodes-1, HYPRE_MEMORY_HOST);
             iconfig_ptr[i].relax_node_types = hypre_CTAlloc(HYPRE_Int,  iconfig_ptr[i].cycle_num_nodes, HYPRE_MEMORY_HOST);
             iconfig_ptr[i].node_num_sweeps = hypre_CTAlloc(HYPRE_Int,  iconfig_ptr[i].cycle_num_nodes, HYPRE_MEMORY_HOST);
+            iconfig_ptr[i].relax_node_outerweights = hypre_CTAlloc(HYPRE_Real,  iconfig_ptr[i].cycle_num_nodes, HYPRE_MEMORY_HOST);
             iconfig_ptr[i].relax_node_weights = hypre_CTAlloc(HYPRE_Real,  iconfig_ptr[i].cycle_num_nodes, HYPRE_MEMORY_HOST);
             iconfig_ptr[i].relax_edge_weights = hypre_CTAlloc(HYPRE_Real,  iconfig_ptr[i].cycle_num_nodes-1, HYPRE_MEMORY_HOST);
             
@@ -796,15 +798,22 @@ main( hypre_int argc,
                iconfig_ptr[i].node_num_sweeps[j] = atoi(subtoken);
                subtoken = strtok(NULL, ",");
             }
-            // parse the relaxation smoother weights array values
+            // parse the outer relaxation weights array values
             subtoken = strtok(token[4], ",");
+            for (j=0;j<iconfig_ptr[i].cycle_num_nodes;j++)
+            {
+               iconfig_ptr[i].relax_node_outerweights[j] = atof(subtoken);
+               subtoken = strtok(NULL, ",");
+            }
+            // parse the relaxation smoother weights array values
+            subtoken = strtok(token[5], ",");
             for (j=0;j<iconfig_ptr[i].cycle_num_nodes;j++)
             {
                iconfig_ptr[i].relax_node_weights[j] = atof(subtoken);
                subtoken = strtok(NULL, ",");
             }
             // parse the relaxation cgc weights array values
-            subtoken = strtok(token[5], ",");
+            subtoken = strtok(token[6], ",");
             for (j=0;j<iconfig_ptr[i].cycle_num_nodes-1;j++)
             {
                iconfig_ptr[i].relax_edge_weights[j] = atof(subtoken);
@@ -4763,6 +4772,7 @@ main( hypre_int argc,
             // set cycle structure from usr inputs 
             HYPRE_BoomerAMGSetCycleStruct(amg_solver,iconfig_ptr[i].cycle_struct,iconfig_ptr[i].cycle_num_nodes);
             HYPRE_BoomerAMGSetRelaxNodeTypes(amg_solver,iconfig_ptr[i].relax_node_types);
+            HYPRE_BoomerAMGSetRelaxNodeOuterWeights(amg_solver,iconfig_ptr[i].relax_node_outerweights);
             HYPRE_BoomerAMGSetRelaxNodeWeights(amg_solver,iconfig_ptr[i].relax_node_weights);
             HYPRE_BoomerAMGSetRelaxEdgeWeights(amg_solver,iconfig_ptr[i].relax_edge_weights);
             HYPRE_BoomerAMGSetNodeNumSweeps(amg_solver,iconfig_ptr[i].node_num_sweeps);
@@ -5695,6 +5705,7 @@ main( hypre_int argc,
             // set cycle structure from usr inputs 
             HYPRE_BoomerAMGSetCycleStruct(pcg_precond,iconfig_ptr[i].cycle_struct,iconfig_ptr[i].cycle_num_nodes);
             HYPRE_BoomerAMGSetRelaxNodeTypes(pcg_precond,iconfig_ptr[i].relax_node_types);
+            HYPRE_BoomerAMGSetRelaxNodeOuterWeights(amg_solver,iconfig_ptr[i].relax_node_outerweights);
             HYPRE_BoomerAMGSetRelaxNodeWeights(pcg_precond,iconfig_ptr[i].relax_node_weights);
             HYPRE_BoomerAMGSetRelaxEdgeWeights(pcg_precond,iconfig_ptr[i].relax_edge_weights);
             HYPRE_BoomerAMGSetNodeNumSweeps(pcg_precond,iconfig_ptr[i].node_num_sweeps);

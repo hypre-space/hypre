@@ -1385,7 +1385,7 @@ hypre_BoomerAMGWriteSolverParams(void* data)
    HYPRE_Int     *grid_relax_type,*relax_node_types;
    HYPRE_Int    **grid_relax_points;
    HYPRE_Int      relax_order;
-   HYPRE_Real  *relax_weight,*relax_node_weights,*relax_edge_weights;
+   HYPRE_Real  *relax_weight,*relax_node_outerweights,*relax_node_weights,*relax_edge_weights;
    HYPRE_Real  *omega;
    HYPRE_Real   tol;
    HYPRE_Int      smooth_type;
@@ -1426,6 +1426,7 @@ hypre_BoomerAMGWriteSolverParams(void* data)
       cycle_struct = hypre_ParAMGDataCycleStruct(amg_data);
       relax_node_types = hypre_ParAMGDataRelaxNodeTypes(amg_data);
       node_num_sweeps = hypre_ParAMGDataNodeNumSweeps(amg_data);
+      relax_node_outerweights = hypre_ParAMGDataRelaxNodeOuterWeights(amg_data);
       relax_node_weights = hypre_ParAMGDataRelaxNodeWeights(amg_data);
       relax_edge_weights = hypre_ParAMGDataRelaxEdgeWeights(amg_data);
       cycle_num_nodes = hypre_ParAMGDataCycleNumNodes(amg_data);

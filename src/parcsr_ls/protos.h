@@ -468,6 +468,8 @@ HYPRE_Int HYPRE_BoomerAMGGetCycleRelaxType ( HYPRE_Solver solver, HYPRE_Int *rel
 HYPRE_Int HYPRE_BoomerAMGSetRelaxOrder ( HYPRE_Solver solver, HYPRE_Int relax_order );
 HYPRE_Int HYPRE_BoomerAMGSetGridRelaxPoints ( HYPRE_Solver solver, HYPRE_Int **grid_relax_points );
 HYPRE_Int HYPRE_BoomerAMGSetRelaxWeight ( HYPRE_Solver solver, HYPRE_Real *relax_weight );
+HYPRE_Int HYPRE_BoomerAMGSetRelaxNodeOuterWeights ( HYPRE_Solver solver, HYPRE_Real *relax_node_outerweights );
+HYPRE_Int HYPRE_BoomerAMGGetRelaxNodeOuterWeights ( HYPRE_Solver solver, HYPRE_Real **relax_node_outerweights );
 HYPRE_Int HYPRE_BoomerAMGSetRelaxNodeWeights ( HYPRE_Solver solver, HYPRE_Real *relax_node_weights );
 HYPRE_Int HYPRE_BoomerAMGGetRelaxNodeWeights ( HYPRE_Solver solver, HYPRE_Real **relax_node_weights );
 HYPRE_Int HYPRE_BoomerAMGSetRelaxEdgeWeights ( HYPRE_Solver solver, HYPRE_Real *relax_edge_weights );
@@ -1102,6 +1104,8 @@ HYPRE_Int hypre_BoomerAMGSetGridRelaxPoints ( void *data, HYPRE_Int **grid_relax
 HYPRE_Int hypre_BoomerAMGGetGridRelaxPoints ( void *data, HYPRE_Int ***grid_relax_points );
 HYPRE_Int hypre_BoomerAMGSetRelaxWeight ( void *data, HYPRE_Real *relax_weight );
 HYPRE_Int hypre_BoomerAMGGetRelaxWeight ( void *data, HYPRE_Real **relax_weight );
+HYPRE_Int hypre_BoomerAMGSetRelaxNodeOuterWeights ( void *data, HYPRE_Real *relax_node_outerweights );
+HYPRE_Int hypre_BoomerAMGGetRelaxNodeOuterWeights ( void *data, HYPRE_Real **relax_node_outerweights );
 HYPRE_Int hypre_BoomerAMGSetRelaxNodeWeights ( void *data, HYPRE_Real *relax_node_weights );
 HYPRE_Int hypre_BoomerAMGGetRelaxNodeWeights ( void *data, HYPRE_Real **relax_node_weights );
 HYPRE_Int hypre_BoomerAMGSetRelaxEdgeWeights ( void *data, HYPRE_Real *relax_edge_weights );
