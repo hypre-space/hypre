@@ -836,7 +836,9 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uP);
    diag_uP = hypre_ParCSRMatrixDiag(parcsr_uP);
    num_nonzeros_uP = hypre_CSRMatrixNumNonzeros(diag_uP);
+   /* WM: debug */
    if (nterms == 3 && (num_nonzeros_uP == 0))
+   /* if (0) */
    {
       /* Specialization for RAP when P has only the structured component */
       m = terms[1];
@@ -1030,27 +1032,24 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_IJMatrixSetObject(ij_M, parcsr_uM);
    hypre_IJMatrixAssembleFlag(ij_M) = 1;
 
+   hypre_SStructMatrixCompressUToS(M);
+
    /* WM: should I do this here? What tolerance? Smarter way to avoid a bunch of zero entries? */
+   /*     note that once I'm not converting the entire struct matrix, most of these should go away, I think... */
    /* WM: todo - CAREFUL HERE! This can screw things up if you throw away entries that are actually non-trivial and should be there... */
-   /* hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(parcsr_uM), 1e-20); */
-   /* if (delete_zeros) */
-   /* { */
-   /*    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(parcsr_uM)); */
-   /*    hypre_ParCSRMatrixDiag(parcsr_uM) = delete_zeros; */
-   /* } */
-   /* delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(parcsr_uM), 1e-20); */
-   /* if (delete_zeros) */
-   /* { */
-   /*    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(parcsr_uM)); */
-   /*    hypre_ParCSRMatrixOffd(parcsr_uM) = delete_zeros; */
-   /* } */
-   /* hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM); */
-
-   hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixDiag(parcsr_uM));
-   hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixOffd(parcsr_uM));
-
-   /* WM: todo */
-   /* hypre_SStructMatrixCompressUToS(M); */
+   hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(parcsr_uM), HYPRE_REAL_MIN);
+   if (delete_zeros)
+   {
+      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(parcsr_uM));
+      hypre_ParCSRMatrixDiag(parcsr_uM) = delete_zeros;
+   }
+   delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(parcsr_uM), HYPRE_REAL_MIN);
+   if (delete_zeros)
+   {
+      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(parcsr_uM));
+      hypre_ParCSRMatrixOffd(parcsr_uM) = delete_zeros;
+   }
+   hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
 
    HYPRE_ANNOTATE_FUNC_END;
 

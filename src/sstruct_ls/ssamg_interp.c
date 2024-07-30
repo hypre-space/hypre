@@ -473,12 +473,18 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       hypre_CSRMatrix *A_u_offd = hypre_ParCSRMatrixOffd(A_u);
       hypre_ParCSRMatrix *A_u_aug;
       hypre_ParCSRMatrix *P_u;
+      /* WM: debug */
+      char filename[256];
+      hypre_sprintf(filename, "A_u_diag_%d", hypre_CSRMatrixNumRows(A_u_diag));
+      hypre_CSRMatrixPrintIJ(A_u_diag, 0, 0, filename);
 
       /* Convert boundary of A to IJ matrix */
       hypre_IJMatrix *A_struct_bndry_ij;
 
       /* WM: todo - don't rely on a halo here but rather connections in A_u */
+#if 1
       hypre_SStructMatrixHaloToUMatrix(A, grid, &A_struct_bndry_ij, 1);
+#else
       HYPRE_Int              num_indices = 0;
       HYPRE_Int             *indices[ndim];
       hypre_Index            index, start;
@@ -495,20 +501,31 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          pgrid = hypre_SStructGridPGrid(grid, part);
          nvars = hypre_SStructPGridNVars(pgrid);
 
-         convert_boxa[part] = hypre_TAlloc(hypre_BoxArray*, nvars, HYPRE_MEMORY_HOST);
+         convert_boxa[part] = hypre_CTAlloc(hypre_BoxArray*, nvars, HYPRE_MEMORY_HOST);
 
          /* Loop over variables */
          for (vi = 0; vi < nvars; vi++)
          {
             A_s = hypre_SStructPMatrixSMatrix(A_p, vi, vi);
             sgrid = hypre_StructMatrixGrid(A_s);
-            /* compute_boxes = hypre_StructGridBoxes(sgrid); */
-            compute_boxes = hypre_StructMatrixDataSpace(A_s);
+            /* WM: todo - using the DataSpace yields a box that contains one layer of ghost zones on the fine grid */
+            /* but NOT on the coarse grid... need to do grid box and then add the ghosts... why? */
+            /* compute_boxes = hypre_StructMatrixDataSpace(A_s); */
+            compute_boxes = hypre_StructGridBoxes(sgrid);
 
             /* Loop over boxes */
             hypre_ForBoxI(i, compute_boxes)
             {
                compute_box = hypre_BoxArrayBox(compute_boxes, i);
+               /* WM: todo - adding ghosts here... why can't I just use the DataSpace of the matrix? */
+               HYPRE_Int *num_ghost = hypre_StructGridNumGhost(sgrid);
+               hypre_printf("WM: debug - compute_box before growing = (%d %d) x (%d %d)\n",
+                     hypre_BoxIMin(compute_box)[0],
+                     hypre_BoxIMin(compute_box)[1],
+                     hypre_BoxIMax(compute_box)[0],
+                     hypre_BoxIMax(compute_box)[1]);
+               hypre_printf("WM: debug - num_ghost = %d %d\n", num_ghost[0], num_ghost[1]);
+               hypre_BoxGrowByArray(compute_box, num_ghost);
                hypre_printf("WM: debug - compute_box = (%d %d) x (%d %d)\n",
                      hypre_BoxIMin(compute_box)[0],
                      hypre_BoxIMin(compute_box)[1],
@@ -530,20 +547,21 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                      {
                         indices[j][num_indices] = index[j] + start[j];
                      }
-                     /* hypre_printf("WM: debug - indices[%d] = (%d, %d)\n", num_indices, index[0], index[1]); */
+                     hypre_printf("WM: debug - indices[%d] = (%d, %d)\n", num_indices, index[0], index[1]);
                      num_indices++;
                   }
                   cnt++;
                }
                hypre_BoxLoop1End(ii);
             }
-            hypre_printf("WM: debug - %s : %d\n", __FILE__, __LINE__);
+            /* hypre_printf("WM: debug - %s : %d\n", __FILE__, __LINE__); */
             hypre_BoxArrayCreateFromIndices(ndim, num_indices, indices, threshold, &(convert_boxa[part][vi]));
-            hypre_printf("WM: debug - %s : %d\n", __FILE__, __LINE__);
+            /* hypre_printf("WM: debug - %s : %d\n", __FILE__, __LINE__); */
          }
       }
-      /* hypre_SStructMatrixBoxesToUMatrix(A, grid, &A_struct_bndry_ij, convert_boxa); */
+      hypre_SStructMatrixBoxesToUMatrix(A, grid, &A_struct_bndry_ij, convert_boxa);
       /* WM: todo - cleanup memory: convert_boxa, indices, etc. */
+#endif
 
 
 
