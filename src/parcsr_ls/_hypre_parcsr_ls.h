@@ -96,6 +96,7 @@ typedef struct
    HYPRE_Int     *grid_relax_type;
    HYPRE_Int    **grid_relax_points;
    HYPRE_Int      *relax_node_types;
+   HYPRE_Int      *relax_node_order;
    HYPRE_Real     *relax_node_outerweights;
    HYPRE_Real     *relax_node_weights;
    HYPRE_Real     *relax_edge_weights;
@@ -375,6 +376,7 @@ typedef struct
 #define hypre_ParAMGDataCycleStruct(amg_data) ((amg_data)->cycle_struct)
 #define hypre_ParAMGDataCycleNumNodes(amg_data) ((amg_data)->cycle_num_nodes)
 #define hypre_ParAMGDataRelaxNodeTypes(amg_data) ((amg_data)->relax_node_types)
+#define hypre_ParAMGDataRelaxNodeOrder(amg_data) ((amg_data)->relax_node_order)
 #define hypre_ParAMGDataRelaxNodeOuterWeights(amg_data) ((amg_data)->relax_node_outerweights)
 #define hypre_ParAMGDataRelaxNodeWeights(amg_data) ((amg_data)->relax_node_weights)
 #define hypre_ParAMGDataRelaxEdgeWeights(amg_data) ((amg_data)->relax_edge_weights)
@@ -1928,6 +1930,7 @@ HYPRE_Int HYPRE_BoomerAMGInitGridRelaxation ( HYPRE_Int **num_grid_sweeps_ptr,
                                               HYPRE_Real **relax_weights_ptr, HYPRE_Int max_levels );
 HYPRE_Int HYPRE_BoomerAMGSetGridRelaxType ( HYPRE_Solver solver, HYPRE_Int *grid_relax_type );
 HYPRE_Int HYPRE_BoomerAMGSetRelaxType ( HYPRE_Solver solver, HYPRE_Int relax_type );
+HYPRE_Int HYPRE_BoomerAMGSetRelaxNodeOrder ( HYPRE_Solver solver, HYPRE_Int *relax_node_order );
 HYPRE_Int HYPRE_BoomerAMGSetRelaxNodeTypes ( HYPRE_Solver solver, HYPRE_Int *relax_node_types );
 HYPRE_Int HYPRE_BoomerAMGGetRelaxNodeTypes( HYPRE_Solver solver, HYPRE_Int **relax_node_types );
 HYPRE_Int HYPRE_BoomerAMGSetCycleRelaxType ( HYPRE_Solver solver, HYPRE_Int relax_type,
@@ -2561,6 +2564,7 @@ HYPRE_Int hypre_BoomerAMGGetCycleNumSweeps ( void *data, HYPRE_Int *num_sweeps, 
 HYPRE_Int hypre_BoomerAMGSetNumGridSweeps ( void *data, HYPRE_Int *num_grid_sweeps );
 HYPRE_Int hypre_BoomerAMGGetNumGridSweeps ( void *data, HYPRE_Int **num_grid_sweeps );
 HYPRE_Int hypre_BoomerAMGSetRelaxType ( void *data, HYPRE_Int relax_type );
+HYPRE_Int hypre_BoomerAMGSetRelaxNodeOrder ( void *data, HYPRE_Int *relax_node_order );
 HYPRE_Int hypre_BoomerAMGSetRelaxNodeTypes ( void *data, HYPRE_Int *relax_node_types );
 HYPRE_Int hypre_BoomerAMGGetRelaxNodeTypes( void *data, HYPRE_Int **relax_node_types );
 HYPRE_Int hypre_BoomerAMGSetCycleRelaxType ( void *data, HYPRE_Int relax_type, HYPRE_Int k );

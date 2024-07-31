@@ -845,6 +845,17 @@ HYPRE_BoomerAMGSetRelaxType( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetRelaxNodeOrder
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetRelaxNodeOrder( HYPRE_Solver  solver,
+                             HYPRE_Int          *relax_node_order  )
+{
+   return ( hypre_BoomerAMGSetRelaxNodeOrder( (void *) solver, relax_node_order ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetRelaxNodeTypes, HYPRE_BoomerAMGGetRelaxNodeTypes
  *--------------------------------------------------------------------------*/
 

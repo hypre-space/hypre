@@ -766,6 +766,8 @@ HYPRE_Int HYPRE_BoomerAMGSetGridRelaxType(HYPRE_Solver  solver,
 HYPRE_Int HYPRE_BoomerAMGSetRelaxNodeTypes(HYPRE_Solver  solver,
                                           HYPRE_Int    *relax_node_types);
 
+HYPRE_Int HYPRE_BoomerAMGSetRelaxNodeOrder(HYPRE_Solver  solver,
+                                          HYPRE_Int    *relax_node_order);
 /**
  * (Optional) Defines the smoother to be used. It uses the given
  * smoother on the fine grid, the up and

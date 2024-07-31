@@ -460,6 +460,7 @@ HYPRE_Int HYPRE_BoomerAMGInitGridRelaxation ( HYPRE_Int **num_grid_sweeps_ptr,
 HYPRE_Int HYPRE_BoomerAMGSetGridRelaxType ( HYPRE_Solver solver, HYPRE_Int *grid_relax_type );
 HYPRE_Int HYPRE_BoomerAMGSetRelaxType ( HYPRE_Solver solver, HYPRE_Int relax_type );
 HYPRE_Int HYPRE_BoomerAMGSetRelaxNodeTypes ( HYPRE_Solver solver, HYPRE_Int *relax_node_types );
+HYPRE_Int HYPRE_BoomerAMGSetRelaxNodeOrder ( HYPRE_Solver solver, HYPRE_Int *relax_node_order );
 HYPRE_Int HYPRE_BoomerAMGGetRelaxNodeTypes( HYPRE_Solver solver, HYPRE_Int **relax_node_types );
 HYPRE_Int HYPRE_BoomerAMGSetCycleRelaxType ( HYPRE_Solver solver, HYPRE_Int relax_type,
                                              HYPRE_Int k );
@@ -1093,6 +1094,7 @@ HYPRE_Int hypre_BoomerAMGSetNumGridSweeps ( void *data, HYPRE_Int *num_grid_swee
 HYPRE_Int hypre_BoomerAMGGetNumGridSweeps ( void *data, HYPRE_Int **num_grid_sweeps );
 HYPRE_Int hypre_BoomerAMGSetRelaxType ( void *data, HYPRE_Int relax_type );
 HYPRE_Int hypre_BoomerAMGSetRelaxNodeTypes ( void *data, HYPRE_Int *relax_node_types );
+HYPRE_Int hypre_BoomerAMGSetRelaxNodeOrder ( void *data, HYPRE_Int *relax_node_order );
 HYPRE_Int hypre_BoomerAMGGetRelaxNodeTypes( void *data, HYPRE_Int **relax_node_types );
 HYPRE_Int hypre_BoomerAMGSetCycleRelaxType ( void *data, HYPRE_Int relax_type, HYPRE_Int k );
 HYPRE_Int hypre_BoomerAMGGetCycleRelaxType ( void *data, HYPRE_Int *relax_type, HYPRE_Int k );
