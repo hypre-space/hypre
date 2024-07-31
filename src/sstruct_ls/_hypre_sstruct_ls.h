@@ -563,6 +563,7 @@ HYPRE_Int HYPRE_SStructSSAMGSetRelChange ( HYPRE_SStructSolver solver , HYPRE_In
 HYPRE_Int HYPRE_SStructSSAMGSetZeroGuess ( HYPRE_SStructSolver solver );
 HYPRE_Int HYPRE_SStructSSAMGSetNonZeroGuess ( HYPRE_SStructSolver solver );
 HYPRE_Int HYPRE_SStructSSAMGSetRelaxType ( HYPRE_SStructSolver solver , HYPRE_Int relax_type );
+HYPRE_Int HYPRE_SStructSSAMGSetInterpType ( HYPRE_SStructSolver solver , HYPRE_Int interp_type );
 HYPRE_Int HYPRE_SStructSSAMGSetSkipRelax ( HYPRE_SStructSolver solver , HYPRE_Int skip_relax );
 HYPRE_Int HYPRE_SStructSSAMGSetRelaxWeight ( HYPRE_SStructSolver solver , HYPRE_Real relax_weight );
 HYPRE_Int HYPRE_SStructSSAMGSetNumPreRelax ( HYPRE_SStructSolver solver , HYPRE_Int num_pre_relax );
@@ -720,6 +721,7 @@ HYPRE_Int hypre_SSAMGSetZeroGuess ( void *ssamg_vdata , HYPRE_Int zero_guess );
 HYPRE_Int hypre_SSAMGSetNonGalerkinRAP ( void *ssamg_vdata , HYPRE_Int non_galerkin );
 HYPRE_Int hypre_SSAMGSetDxyz ( void *ssamg_vdata , HYPRE_Int nparts , HYPRE_Real **dxyz );
 HYPRE_Int hypre_SSAMGSetRelaxType ( void *ssamg_vdata , HYPRE_Int relax_type );
+HYPRE_Int hypre_SSAMGSetInterpType ( void *ssamg_vdata , HYPRE_Int interp_type );
 HYPRE_Int hypre_SSAMGSetRelaxWeight ( void *ssamg_vdata , HYPRE_Real relax_weight );
 HYPRE_Int hypre_SSAMGSetSkipRelax ( void *ssamg_vdata , HYPRE_Int skip_relax );
 HYPRE_Int hypre_SSAMGSetNumPreRelax ( void *ssamg_vdata , HYPRE_Int num_pre_relax );
@@ -742,7 +744,7 @@ HYPRE_Int hypre_SSAMGCoarseSolverDestroy( void *ssamg_vdata );
 
 /* ssamg_interp.c */
 hypre_SStructMatrix* hypre_SSAMGCreateInterpOp ( hypre_SStructMatrix *A , hypre_SStructGrid *cgrid, HYPRE_Int *cdir_p );
-HYPRE_Int hypre_SSAMGSetupInterpOp ( hypre_SStructMatrix  *A , HYPRE_Int *cdir_p , hypre_SStructMatrix *P );
+HYPRE_Int hypre_SSAMGSetupInterpOp ( hypre_SStructMatrix  *A , HYPRE_Int *cdir_p , hypre_SStructMatrix *P, HYPRE_Int interp_type );
 
 /* ssamg_setup_rap.c */
 HYPRE_Int hypre_SSAMGComputeRAP ( hypre_SStructMatrix *A , hypre_SStructMatrix *P , hypre_SStructGrid **cgrid , HYPRE_Int *cdir_p , HYPRE_Int non_galerkin , hypre_SStructMatrix **Ac_ptr );
