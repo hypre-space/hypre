@@ -274,6 +274,7 @@ hypre_MGRBuildNonGalerkinCoarseOperatorHost(hypre_ParCSRMatrix    *A_FF,
          hypre_ParCSRMatrixBlockDiagMatrix(A_FF, blk_inv_size, -1, NULL, 1, &A_FF_inv);
 
          /* TODO (VPM): We shouldn't need to compute Wr_tmp since we are passing in Wr already */
+         HYPRE_UNUSED_VAR(Wr);
          Wr_tmp = hypre_ParCSRMatMat(A_CF_truncated, A_FF_inv);
          A_Hc = hypre_ParCSRMatMat(Wr_tmp, A_FC);
          hypre_ParCSRMatrixDestroy(Wr_tmp);
@@ -533,6 +534,7 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
             Restriction is not the injection operator (Wr != NULL) */
          RAP_c = hypre_ParCSRMatMat(Wr, A_FC);
          hypre_ParCSRMatrixAdd(1.0, A_CC, -1.0, RAP_c, &RAP);
+         hypre_ParCSRMatrixDestroy(RAP_c);
       }
       else if (RT)
       {
