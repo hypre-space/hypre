@@ -533,6 +533,7 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
             Restriction is not the injection operator (Wr != NULL) */
          RAP_c = hypre_ParCSRMatMat(Wr, A_FC);
          hypre_ParCSRMatrixAdd(1.0, A_CC, -1.0, RAP_c, &RAP);
+         hypre_ParCSRMatrixDestroy(RAP_c);
       }
       else if (RT)
       {
