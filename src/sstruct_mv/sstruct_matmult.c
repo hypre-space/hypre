@@ -823,7 +823,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_ParCSRMatrix      *parcsr_sMold;
    hypre_CSRMatrix         *diag_uP;
    hypre_IJMatrix          *ijmatrix;
-   hypre_IJMatrix          *ij_tmp;
+   hypre_IJMatrix          *ij_tmp = NULL;
    hypre_IJMatrix         **ij_sA;
 
    HYPRE_Int                m, t;

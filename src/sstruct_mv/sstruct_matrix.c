@@ -2084,11 +2084,59 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
    hypre_StructGrid        *sgrid;
    hypre_BoxArray          *grid_boxes;
    hypre_Box               *grid_box;
-   HYPRE_Int                i, part, var, nvars;
+   HYPRE_Int                i, part, var, nvars, nrows;
 
-   hypre_IJMatrix          *ij_Ahat;
+   hypre_IJMatrix          *ij_Ahat = NULL;
+   HYPRE_BigInt             sizes[4];
+   HYPRE_Int               *ncols, *rowidx;
+   HYPRE_BigInt            *rows, *cols;
+   HYPRE_Complex           *values;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   /* Set beggining/end of rows and columns that belong to this process */
+   HYPRE_IJMatrixGetLocalRange(ij_A, &sizes[0], &sizes[1], &sizes[2], &sizes[3]);
+   nrows = (HYPRE_Int) (sizes[1] - sizes[0] + 1);
+
+   /* Set all diagonal entries to 1 */
+   if (fill_diagonal)
+   {
+      /* Create and initialize ij_Ahat */
+      HYPRE_IJMatrixCreate(comm, sizes[0], sizes[1], sizes[2], sizes[3], &ij_Ahat);
+      HYPRE_IJMatrixSetObjectType(ij_Ahat, HYPRE_PARCSR);
+      HYPRE_IJMatrixInitialize(ij_Ahat);
+
+      ncols  = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_DEVICE);
+      rows   = hypre_CTAlloc(HYPRE_BigInt, nrows, HYPRE_MEMORY_DEVICE);
+      rowidx = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_DEVICE);
+      cols   = hypre_CTAlloc(HYPRE_BigInt, nrows, HYPRE_MEMORY_DEVICE);
+
+      values = hypre_CTAlloc(HYPRE_Complex, nrows, HYPRE_MEMORY_HOST);
+
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < nrows; i++)
+      {
+         ncols[i]  = 1;
+         rows[i]   = sizes[0] + i;
+         cols[i]   = sizes[2] + i;
+         rowidx[i] = i;
+         values[i] = 1.0;
+      }
+
+      HYPRE_IJMatrixSetValues2(ij_Ahat, nrows, ncols,
+                               (const HYPRE_BigInt *) rows,
+                               (const HYPRE_Int *) rowidx,
+                               (const HYPRE_BigInt *) cols,
+                               (const HYPRE_Complex *) values);
+
+      hypre_TFree(ncols, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(rows, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(rowidx, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(cols, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(values, HYPRE_MEMORY_HOST);
+   }
 
    hypre_BoxArray ***convert_boxa;
    convert_boxa = hypre_TAlloc(hypre_BoxArray **, nparts, HYPRE_MEMORY_HOST);
@@ -2128,7 +2176,6 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
    HYPRE_ANNOTATE_FUNC_END;
 
    return ij_Ahat;
-
 }
 
 /*--------------------------------------------------------------------------
@@ -2307,12 +2354,19 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_ANNOTATE_REGION_END("%s", "Set rowsizes");
 
    /* Create and initialize ij_Ahat */
-   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Create Matrix");
-   HYPRE_IJMatrixPartialClone(ij_A, &ij_Ahat);
-   hypre_AuxParCSRMatrixCreate(&aux_matrix, nrows, ncols, row_sizes);
-   hypre_IJMatrixTranslator(ij_Ahat) = aux_matrix;
-   HYPRE_IJMatrixInitialize(ij_Ahat);
-   HYPRE_ANNOTATE_REGION_END("%s", "Create Matrix");
+   if (*ij_Ahat_ptr)
+   {
+      ij_Ahat = *ij_Ahat_ptr;
+   }
+   else
+   {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Create Matrix");
+      HYPRE_IJMatrixPartialClone(ij_A, &ij_Ahat);
+      hypre_AuxParCSRMatrixCreate(&aux_matrix, nrows, ncols, row_sizes);
+      hypre_IJMatrixTranslator(ij_Ahat) = aux_matrix;
+      HYPRE_IJMatrixInitialize(ij_Ahat);
+      HYPRE_ANNOTATE_REGION_END("%s", "Create Matrix");
+   }
 
    /* Allocate memory */
    /* WM: this seems too large for nvalues??? Can I set this a different way? */
@@ -2425,7 +2479,6 @@ hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix   *A,
    hypre_SStructStencil  *stencil;
 
    hypre_SStructPMatrix  *pA;
-   hypre_IJMatrix        *ij_Ahat;
    hypre_AuxParCSRMatrix *aux_matrix;
 
    hypre_BoxArrayArray ***convert_boxaa;
