@@ -93,7 +93,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    HYPRE_Int             *RAP_int_i;
    HYPRE_BigInt          *RAP_int_j;
 
-   hypre_CSRMatrix       *RAP_ext;
+   hypre_CSRMatrix       *RAP_ext = NULL;
    HYPRE_Complex         *RAP_ext_data = NULL;
    HYPRE_Int             *RAP_ext_i = NULL;
    HYPRE_BigInt          *RAP_ext_j = NULL;
@@ -123,10 +123,10 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    HYPRE_Int             *R_diag_i;
    HYPRE_Int             *R_diag_j;
 
-   hypre_CSRMatrix       *R_offd;
-   HYPRE_Complex         *R_offd_data;
-   HYPRE_Int             *R_offd_i;
-   HYPRE_Int             *R_offd_j;
+   hypre_CSRMatrix       *R_offd = NULL;
+   HYPRE_Complex         *R_offd_data = NULL;
+   HYPRE_Int             *R_offd_i = NULL;
+   HYPRE_Int             *R_offd_j = NULL;
 
    HYPRE_Real            *RA_diag_data_array = NULL;
    HYPRE_Int             *RA_diag_j_array = NULL;

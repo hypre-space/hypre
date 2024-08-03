@@ -892,8 +892,8 @@ hypre_MGRCycle( void              *mgr_vdata,
             //                                    F_array[fine_grid], Vtemp);
             //  convergence_factor_frelax = hypre_ParVectorInnerProd(Vtemp, Vtemp);
 
-            HYPRE_Real resnorm, init_resnorm;
-            HYPRE_Real rhs_norm, old_resnorm;
+            HYPRE_Real resnorm = 0.0, init_resnorm;
+            HYPRE_Real rhs_norm = 0.0, old_resnorm;
             HYPRE_Real rel_resnorm = fp_one;
             HYPRE_Real conv_factor = fp_one;
             if (frelax_print_level > 1)
