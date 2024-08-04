@@ -232,6 +232,9 @@ HYPRE_Int HYPRE_PrintErrorMessages(MPI_Comm comm);
 /* Print GPU information */
 HYPRE_Int HYPRE_PrintDeviceInfo(void);
 
+/* Print memory usage */
+HYPRE_Int HYPRE_MemoryPrintUsage(MPI_Comm comm, const char *function, HYPRE_Int line);
+
 /*--------------------------------------------------------------------------
  * HYPRE Version routines
  *--------------------------------------------------------------------------*/
