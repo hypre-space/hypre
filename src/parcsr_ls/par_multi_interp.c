@@ -79,7 +79,7 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *int_buf_data = NULL;
    HYPRE_BigInt    *big_buf_data = NULL;
    HYPRE_Int       *send_map_start = NULL;
-   HYPRE_Int       *send_map_elmt;
+   HYPRE_Int       *send_map_elmt = NULL;
    HYPRE_Int       *send_procs = NULL;
    HYPRE_Int        num_recvs = 0;
    HYPRE_Int       *recv_vec_start = NULL;
