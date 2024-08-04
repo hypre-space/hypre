@@ -1169,7 +1169,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    if (*CF_marker_ptr == NULL)
    {
       *CF_marker_ptr = hypre_IntArrayCreate(num_variables);
-      hypre_IntArrayInitialize(*CF_marker_ptr);
+      hypre_IntArrayInitialize_v2(*CF_marker_ptr, HYPRE_MEMORY_HOST);
    }
    CF_marker = hypre_IntArrayData(*CF_marker_ptr);
 
@@ -2841,6 +2841,12 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
    return ierr;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_BoomerAMGCoarsenHMIS
+ *
+ * Ruge coarsening followed by CLJP coarsening
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_BoomerAMGCoarsenHMIS( hypre_ParCSRMatrix    *S,
                             hypre_ParCSRMatrix    *A,
@@ -2849,16 +2855,33 @@ hypre_BoomerAMGCoarsenHMIS( hypre_ParCSRMatrix    *S,
                             HYPRE_Int              debug_flag,
                             hypre_IntArray       **CF_marker_ptr)
 {
-   HYPRE_Int              ierr = 0;
+   hypre_ParCSRMatrix   *h_A, *h_S;
 
-   /*-------------------------------------------------------
-    * Perform Ruge coarsening followed by CLJP coarsening
-    *-------------------------------------------------------*/
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
-   ierr += hypre_BoomerAMGCoarsenRuge (S, A, measure_type, 10, cut_factor,
-                                       debug_flag, CF_marker_ptr);
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      h_S = hypre_ParCSRMatrixClone_v2(S, 0, HYPRE_MEMORY_HOST);
+      h_A = hypre_ParCSRMatrixClone_v2(A, 0, HYPRE_MEMORY_HOST);
+   }
+   else
+#endif
+   {
+      h_A = A;
+      h_S = S;
+   }
 
-   ierr += hypre_BoomerAMGCoarsenPMISHost (S, A, 1, debug_flag, CF_marker_ptr);
+   hypre_BoomerAMGCoarsenRuge(S, A, measure_type, 10, cut_factor,
+                              debug_flag, CF_marker_ptr);
 
-   return (ierr);
+   if (h_S != S && h_A != A)
+   {
+      hypre_ParCSRMatrixDestroy(h_S);
+      hypre_ParCSRMatrixDestroy(h_A);
+   }
+
+   hypre_BoomerAMGCoarsenPMIS(S, A, 1, debug_flag, CF_marker_ptr);
+
+   return hypre_error_flag;
 }
