@@ -18,7 +18,7 @@
 extern "C" {
 #endif
 
-#ifdef HYPRE_SEQUENTIAL
+#if defined(HYPRE_SEQUENTIAL)
 
 /******************************************************************************
  * MPI stubs to generate serial codes without mpi
@@ -68,6 +68,7 @@ extern "C" {
 #define MPI_BOR             hypre_MPI_BOR
 #define MPI_SUCCESS         hypre_MPI_SUCCESS
 #define MPI_STATUSES_IGNORE hypre_MPI_STATUSES_IGNORE
+#define MPI_STATUS_IGNORE   hypre_MPI_STATUS_IGNORE
 
 #define MPI_UNDEFINED       hypre_MPI_UNDEFINED
 #define MPI_REQUEST_NULL    hypre_MPI_REQUEST_NULL
@@ -133,6 +134,12 @@ extern "C" {
 #define MPI_Op_create       hypre_MPI_Op_create
 #define MPI_User_function   hypre_MPI_User_function
 #define MPI_Info_create     hypre_MPI_Info_create
+#define MPI_Comm_set_attr   hypre_MPI_Comm_set_attr
+#define MPI_Comm_copy_attr_function   hypre_MPI_Comm_copy_attr_function
+#define MPI_Comm_delete_attr_function hypre_MPI_Comm_delete_attr_function
+#define MPI_Grequest_query_function   hypre_MPI_Grequest_query_function;
+#define MPI_Grequest_free_function    hypre_MPI_Grequest_free_function;
+#define MPI_Grequest_cancel_function  hypre_MPI_Grequest_cancel_function;
 
 /*--------------------------------------------------------------------------
  * Types, etc.
@@ -144,6 +151,11 @@ typedef HYPRE_Int hypre_MPI_Group;
 typedef HYPRE_Int hypre_MPI_Request;
 typedef HYPRE_Int hypre_MPI_Datatype;
 typedef void (hypre_MPI_User_function) (void);
+typedef void (hypre_MPI_Comm_copy_attr_function) (void);
+typedef void (hypre_MPI_Comm_delete_attr_function) (void);
+typedef void (hypre_MPI_Grequest_query_function) (void);
+typedef void (hypre_MPI_Grequest_free_function) (void);
+typedef void (hypre_MPI_Grequest_cancel_function) (void);
 
 typedef struct
 {
@@ -152,7 +164,7 @@ typedef struct
 } hypre_MPI_Status;
 
 typedef HYPRE_Int  hypre_MPI_Op;
-typedef HYPRE_Int  hypre_MPI_Aint;
+typedef intptr_t   hypre_MPI_Aint;
 typedef HYPRE_Int  hypre_MPI_Info;
 
 #define  hypre_MPI_COMM_SELF   1
@@ -182,6 +194,7 @@ typedef HYPRE_Int  hypre_MPI_Info;
 #define  hypre_MPI_BOR 5
 #define  hypre_MPI_SUCCESS 0
 #define  hypre_MPI_STATUSES_IGNORE 0
+#define  hypre_MPI_STATUS_IGNORE 0
 
 #define  hypre_MPI_UNDEFINED -9999
 #define  hypre_MPI_REQUEST_NULL  0
@@ -189,21 +202,29 @@ typedef HYPRE_Int  hypre_MPI_Info;
 #define  hypre_MPI_ANY_SOURCE    1
 #define  hypre_MPI_ANY_TAG       1
 
+#define  hypre_MPI_COMM_NULL_COPY_FN    NULL
+#define  hypre_MPI_COMM_NULL_DELETE_FN  NULL
+
 #else
 
 /******************************************************************************
  * MPI stubs to do casting of HYPRE_Int and hypre_int correctly
  *****************************************************************************/
 
-typedef MPI_Comm     hypre_MPI_Comm;
-typedef MPI_Group    hypre_MPI_Group;
-typedef MPI_Request  hypre_MPI_Request;
-typedef MPI_Datatype hypre_MPI_Datatype;
-typedef MPI_Status   hypre_MPI_Status;
-typedef MPI_Op       hypre_MPI_Op;
-typedef MPI_Aint     hypre_MPI_Aint;
-typedef MPI_Info     hypre_MPI_Info;
-typedef MPI_User_function    hypre_MPI_User_function;
+typedef MPI_Comm                      hypre_MPI_Comm;
+typedef MPI_Group                     hypre_MPI_Group;
+typedef MPI_Request                   hypre_MPI_Request;
+typedef MPI_Datatype                  hypre_MPI_Datatype;
+typedef MPI_Status                    hypre_MPI_Status;
+typedef MPI_Op                        hypre_MPI_Op;
+typedef MPI_Aint                      hypre_MPI_Aint;
+typedef MPI_Info                      hypre_MPI_Info;
+typedef MPI_User_function             hypre_MPI_User_function;
+typedef MPI_Comm_copy_attr_function   hypre_MPI_Comm_copy_attr_function;
+typedef MPI_Comm_delete_attr_function hypre_MPI_Comm_delete_attr_function;
+typedef MPI_Grequest_query_function   hypre_MPI_Grequest_query_function;
+typedef MPI_Grequest_free_function    hypre_MPI_Grequest_free_function;
+typedef MPI_Grequest_cancel_function  hypre_MPI_Grequest_cancel_function;
 
 #define  hypre_MPI_COMM_WORLD         MPI_COMM_WORLD
 #define  hypre_MPI_COMM_NULL          MPI_COMM_NULL
@@ -231,6 +252,7 @@ typedef MPI_User_function    hypre_MPI_User_function;
 #define  hypre_MPI_BOR MPI_BOR
 #define  hypre_MPI_SUCCESS MPI_SUCCESS
 #define  hypre_MPI_STATUSES_IGNORE MPI_STATUSES_IGNORE
+#define  hypre_MPI_STATUS_IGNORE   MPI_STATUS_IGNORE
 
 #define  hypre_MPI_UNDEFINED       MPI_UNDEFINED
 #define  hypre_MPI_REQUEST_NULL    MPI_REQUEST_NULL
@@ -241,11 +263,28 @@ typedef MPI_User_function    hypre_MPI_User_function;
 #define  hypre_MPI_TAG             MPI_TAG
 #define  hypre_MPI_LAND            MPI_LAND
 
+#define  hypre_MPI_COMM_NULL_COPY_FN   MPI_COMM_NULL_COPY_FN
+#define  hypre_MPI_COMM_NULL_DELETE_FN MPI_COMM_NULL_DELETE_FN
+
 #endif
 
 /******************************************************************************
  * Everything below this applies to both ifdef cases above
  *****************************************************************************/
+
+#define HYPRE_MPI_GREQUEST_FREE 1
+#define HYPRE_MPI_GREQUEST_COPY 2
+
+typedef struct
+{
+   HYPRE_Int  count;
+   HYPRE_Int  data_size;
+   char      *data;
+} hypre_MPI_GRequest_Action;
+
+#define hypre_MPI_GRequest_ActionCount(action)    ((action) -> count)
+#define hypre_MPI_GRequest_ActionDataSize(action) ((action) -> data_size)
+#define hypre_MPI_GRequest_ActionData(action)     ((action) -> data)
 
 /*--------------------------------------------------------------------------
  * Prototypes
@@ -329,6 +368,7 @@ HYPRE_Int hypre_MPI_Reduce( void *sendbuf, void *recvbuf, HYPRE_Int count,
 HYPRE_Int hypre_MPI_Scan( void *sendbuf, void *recvbuf, HYPRE_Int count,
                           hypre_MPI_Datatype datatype, hypre_MPI_Op op, hypre_MPI_Comm comm );
 HYPRE_Int hypre_MPI_Request_free( hypre_MPI_Request *request );
+HYPRE_Int hypre_MPI_Request_get_status(hypre_MPI_Request request, HYPRE_Int *flag, hypre_MPI_Status *status);
 HYPRE_Int hypre_MPI_Type_contiguous( HYPRE_Int count, hypre_MPI_Datatype oldtype,
                                      hypre_MPI_Datatype *newtype );
 HYPRE_Int hypre_MPI_Type_vector( HYPRE_Int count, HYPRE_Int blocklength, HYPRE_Int stride,
@@ -343,12 +383,66 @@ HYPRE_Int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
 HYPRE_Int hypre_MPI_Op_free( hypre_MPI_Op *op );
 HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function, hypre_int commute,
                                hypre_MPI_Op *op );
+HYPRE_Int hypre_MPI_GRequestGetCopyAction(void *dest, hypre_MemoryLocation dest_location,
+                                          void *src, hypre_MemoryLocation src_location,
+                                          HYPRE_Int num_bytes, hypre_MPI_GRequest_Action **action_ptr);
+HYPRE_Int hypre_MPI_GRequestProcessAction(hypre_MPI_GRequest_Action *action);
+HYPRE_Int hypre_MPI_GRequestDestroyAction(hypre_MPI_GRequest_Action *action);
+HYPRE_Int hypre_MPINeedHostBuffer(hypre_MemoryLocation memory_location);
+HYPRE_Int hypre_MPI_Isend_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
+hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests );
+HYPRE_Int hypre_MPI_Irecv_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
+hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests,
+hypre_MPI_Request *extra_request );
+HYPRE_Int hypre_MPI_Send_init_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
+hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests,
+hypre_MPI_Request  *extra_request );
+HYPRE_Int hypre_MPI_Recv_init_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
+hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests,
+hypre_MPI_Request  *extra_request );
+
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int hypre_MPI_Comm_split_type(hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
                                     hypre_MPI_Info info, hypre_MPI_Comm *newcomm);
 HYPRE_Int hypre_MPI_Info_create(hypre_MPI_Info *info);
 HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 #endif
+
+HYPRE_Int hypre_MPI_Comm_create_keyval(hypre_MPI_Comm_copy_attr_function *comm_copy_attr_fn,
+hypre_MPI_Comm_delete_attr_function *comm_delete_attr_fn, HYPRE_Int *comm_keyval, void *extra_state);
+HYPRE_Int hypre_MPI_Comm_free_keyval(HYPRE_Int *comm_keyval);
+HYPRE_Int hypre_MPI_Comm_set_attr(hypre_MPI_Comm comm, HYPRE_Int comm_keyval, void *attribute_val);
+HYPRE_Int hypre_MPI_Comm_get_attr(hypre_MPI_Comm comm, HYPRE_Int comm_keyval, void *attribute_val, HYPRE_Int *flag);
+HYPRE_Int hypre_MPI_Comm_delete_attr(hypre_MPI_Comm comm, HYPRE_Int comm_keyval);
+HYPRE_Int hypre_MPI_Grequest_start(hypre_MPI_Grequest_query_function *query_fn, hypre_MPI_Grequest_free_function *free_fn,
+                                   hypre_MPI_Grequest_cancel_function *cancel_fn, void *extra_state, hypre_MPI_Request *request);
+HYPRE_Int hypre_MPI_Grequest_complete( hypre_MPI_Request request );
+HYPRE_Int hypre_MPI_Type_size(hypre_MPI_Datatype datatype, HYPRE_Int *size);
+
+hypre_MemoryLocation hypre_MPICommGetSendLocation(hypre_MPI_Comm comm);
+hypre_MemoryLocation hypre_MPICommGetRecvLocation(hypre_MPI_Comm comm);
+hypre_MemoryLocation hypre_MPICommGetSendBufferLocation(hypre_MPI_Comm comm);
+hypre_MemoryLocation hypre_MPICommGetRecvBufferLocation(hypre_MPI_Comm comm);
+void* hypre_MPICommGetSendBuffer(hypre_MPI_Comm comm);
+void* hypre_MPICommGetRecvBuffer(hypre_MPI_Comm comm);
+
+HYPRE_Int hypre_MPICommSetSendLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
+HYPRE_Int hypre_MPICommSetRecvLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
+HYPRE_Int hypre_MPICommSetSendBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
+HYPRE_Int hypre_MPICommSetRecvBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
+HYPRE_Int hypre_MPICommSetSendBuffer(hypre_MPI_Comm comm, void*);
+HYPRE_Int hypre_MPICommSetRecvBuffer(hypre_MPI_Comm comm, void*);
+
+HYPRE_Int hypre_MPICommDeleteSendLocation(hypre_MPI_Comm comm);
+HYPRE_Int hypre_MPICommDeleteRecvLocation(hypre_MPI_Comm comm);
+HYPRE_Int hypre_MPICommDeleteSendBufferLocation(hypre_MPI_Comm comm);
+HYPRE_Int hypre_MPICommDeleteRecvBufferLocation(hypre_MPI_Comm comm);
+HYPRE_Int hypre_MPICommDeleteSendBuffer(hypre_MPI_Comm comm);
+HYPRE_Int hypre_MPICommDeleteRecvBuffer(hypre_MPI_Comm comm);
+
+hypre_int hypre_grequest_free_fn(void *extra_state);
+hypre_int hypre_grequest_query_fn(void *extra_state, hypre_MPI_Status *status);
+hypre_int hypre_grequest_noop_cancel_fn(void *extra_state, hypre_int complete);
 
 #ifdef __cplusplus
 }
