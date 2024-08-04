@@ -31,7 +31,9 @@ hypre_Handle*
 hypre_HandleCreate(void)
 {
    hypre_Handle *hypre_handle_ = hypre_CTAlloc(hypre_Handle, 1, HYPRE_MEMORY_HOST);
+   const char* env_log_level = getenv("HYPRE_LOG_LEVEL");
 
+   hypre_HandleLogLevel(hypre_handle_) = (env_log_level) ? (HYPRE_Int) atoi(env_log_level) : 0;
    hypre_HandleMemoryLocation(hypre_handle_) = HYPRE_MEMORY_DEVICE;
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -490,176 +492,17 @@ HYPRE_PrintDeviceInfo(void)
    return hypre_error_flag;
 }
 
-/******************************************************************************
- *
- * hypre Umpire
- *
- *****************************************************************************/
-
-#if defined(HYPRE_USING_UMPIRE)
-HYPRE_Int
-hypre_UmpireInit(hypre_Handle *hypre_handle_)
-{
-   umpire_resourcemanager_get_instance(&hypre_HandleUmpireResourceMan(hypre_handle_));
-
-   hypre_HandleUmpireDevicePoolSize(hypre_handle_) = 4LL * 1024 * 1024 * 1024;
-   hypre_HandleUmpireUMPoolSize(hypre_handle_)     = 4LL * 1024 * 1024 * 1024;
-   hypre_HandleUmpireHostPoolSize(hypre_handle_)   = 4LL * 1024 * 1024 * 1024;
-   hypre_HandleUmpirePinnedPoolSize(hypre_handle_) = 4LL * 1024 * 1024 * 1024;
-
-   hypre_HandleUmpireBlockSize(hypre_handle_) = 512;
-
-   strcpy(hypre_HandleUmpireDevicePoolName(hypre_handle_), "HYPRE_DEVICE_POOL");
-   strcpy(hypre_HandleUmpireUMPoolName(hypre_handle_),     "HYPRE_UM_POOL");
-   strcpy(hypre_HandleUmpireHostPoolName(hypre_handle_),   "HYPRE_HOST_POOL");
-   strcpy(hypre_HandleUmpirePinnedPoolName(hypre_handle_), "HYPRE_PINNED_POOL");
-
-   hypre_HandleOwnUmpireDevicePool(hypre_handle_) = 0;
-   hypre_HandleOwnUmpireUMPool(hypre_handle_)     = 0;
-   hypre_HandleOwnUmpireHostPool(hypre_handle_)   = 0;
-   hypre_HandleOwnUmpirePinnedPool(hypre_handle_) = 0;
-
-   return hypre_error_flag;
-}
+/*--------------------------------------------------------------------------
+ * HYPRE_MemoryPrintUsage
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_UmpireFinalize(hypre_Handle *hypre_handle_)
+HYPRE_MemoryPrintUsage(MPI_Comm    comm,
+                       const char *function,
+                       HYPRE_Int   line)
 {
-   umpire_resourcemanager *rm_ptr = &hypre_HandleUmpireResourceMan(hypre_handle_);
-   umpire_allocator allocator;
-
-#if defined(HYPRE_USING_UMPIRE_HOST)
-   if (hypre_HandleOwnUmpireHostPool(hypre_handle_))
-   {
-      const char *pool_name = hypre_HandleUmpireHostPoolName(hypre_handle_);
-      umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &allocator);
-      umpire_allocator_release(&allocator);
-   }
-#endif
-
-#if defined(HYPRE_USING_UMPIRE_DEVICE)
-   if (hypre_HandleOwnUmpireDevicePool(hypre_handle_))
-   {
-      const char *pool_name = hypre_HandleUmpireDevicePoolName(hypre_handle_);
-      umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &allocator);
-      umpire_allocator_release(&allocator);
-   }
-#endif
-
-#if defined(HYPRE_USING_UMPIRE_UM)
-   if (hypre_HandleOwnUmpireUMPool(hypre_handle_))
-   {
-      const char *pool_name = hypre_HandleUmpireUMPoolName(hypre_handle_);
-      umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &allocator);
-      umpire_allocator_release(&allocator);
-   }
-#endif
-
-#if defined(HYPRE_USING_UMPIRE_PINNED)
-   if (hypre_HandleOwnUmpirePinnedPool(hypre_handle_))
-   {
-      const char *pool_name = hypre_HandleUmpirePinnedPoolName(hypre_handle_);
-      umpire_resourcemanager_get_allocator_by_name(rm_ptr, pool_name, &allocator);
-      umpire_allocator_release(&allocator);
-   }
-#endif
-
-   return hypre_error_flag;
+   return hypre_MemoryPrintUsage(comm, function, line);
 }
-
-HYPRE_Int
-HYPRE_SetUmpireDevicePoolSize(size_t nbytes)
-{
-   hypre_HandleUmpireDevicePoolSize(hypre_handle()) = nbytes;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-HYPRE_SetUmpireUMPoolSize(size_t nbytes)
-{
-   hypre_HandleUmpireUMPoolSize(hypre_handle()) = nbytes;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-HYPRE_SetUmpireHostPoolSize(size_t nbytes)
-{
-   hypre_HandleUmpireHostPoolSize(hypre_handle()) = nbytes;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-HYPRE_SetUmpirePinnedPoolSize(size_t nbytes)
-{
-   hypre_HandleUmpirePinnedPoolSize(hypre_handle()) = nbytes;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-HYPRE_SetUmpireDevicePoolName(const char *pool_name)
-{
-   if (strlen(pool_name) > HYPRE_UMPIRE_POOL_NAME_MAX_LEN)
-   {
-      hypre_error_in_arg(1);
-
-      return hypre_error_flag;
-   }
-
-   strcpy(hypre_HandleUmpireDevicePoolName(hypre_handle()), pool_name);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-HYPRE_SetUmpireUMPoolName(const char *pool_name)
-{
-   if (strlen(pool_name) > HYPRE_UMPIRE_POOL_NAME_MAX_LEN)
-   {
-      hypre_error_in_arg(1);
-
-      return hypre_error_flag;
-   }
-
-   strcpy(hypre_HandleUmpireUMPoolName(hypre_handle()), pool_name);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-HYPRE_SetUmpireHostPoolName(const char *pool_name)
-{
-   if (strlen(pool_name) > HYPRE_UMPIRE_POOL_NAME_MAX_LEN)
-   {
-      hypre_error_in_arg(1);
-
-      return hypre_error_flag;
-   }
-
-   strcpy(hypre_HandleUmpireHostPoolName(hypre_handle()), pool_name);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-HYPRE_SetUmpirePinnedPoolName(const char *pool_name)
-{
-   if (strlen(pool_name) > HYPRE_UMPIRE_POOL_NAME_MAX_LEN)
-   {
-      hypre_error_in_arg(1);
-
-      return hypre_error_flag;
-   }
-
-   strcpy(hypre_HandleUmpirePinnedPoolName(hypre_handle()), pool_name);
-
-   return hypre_error_flag;
-}
-
-#endif /* #if defined(HYPRE_USING_UMPIRE) */
 
 /******************************************************************************
  *
