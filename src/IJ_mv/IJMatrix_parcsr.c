@@ -295,22 +295,20 @@ hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix, HYPRE_MemoryLocation m
          {
             for (i = 0; i < local_num_rows; i++)
             {
-               hypre_CSRMatrixI(diag)[i + 1] = hypre_CSRMatrixI(diag)[i] + hypre_AuxParCSRMatrixDiagSizes(
-                                                  aux_matrix)[i];
+               hypre_CSRMatrixI(diag)[i + 1] = hypre_CSRMatrixI(diag)[i] +
+                                               hypre_AuxParCSRMatrixDiagSizes(aux_matrix)[i];
             }
             hypre_CSRMatrixNumNonzeros(diag) = hypre_CSRMatrixI(diag)[local_num_rows];
-            hypre_CSRMatrixInitialize(diag);
          }
 
          if (hypre_AuxParCSRMatrixOffdSizes(aux_matrix))
          {
             for (i = 0; i < local_num_rows; i++)
             {
-               hypre_CSRMatrixI(offd)[i + 1] = hypre_CSRMatrixI(offd)[i] + hypre_AuxParCSRMatrixOffdSizes(
-                                                  aux_matrix)[i];
+               hypre_CSRMatrixI(offd)[i + 1] = hypre_CSRMatrixI(offd)[i] +
+                                               hypre_AuxParCSRMatrixOffdSizes(aux_matrix)[i];
             }
             hypre_CSRMatrixNumNonzeros(offd) = hypre_CSRMatrixI(offd)[local_num_rows];
-            hypre_CSRMatrixInitialize(offd);
          }
       }
 
@@ -847,6 +845,7 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
          if (row >= row_partitioning[0] && row < row_partitioning[1])
          {
             row_local = (HYPRE_Int)(row - row_partitioning[0]);
+
             /* compute local row number */
             if (need_aux)
             {
@@ -1033,6 +1032,8 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
          }
       }
    }
+
+   hypre_MemoryPrintUsage(comm, __FUNCTION__, __LINE__);
 
    return hypre_error_flag;
 }
@@ -1622,6 +1623,8 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix       *matrix,
          }
       }
    }
+
+   hypre_MemoryPrintUsage(comm, __FUNCTION__, __LINE__);
 
    return hypre_error_flag;
 }
@@ -2951,6 +2954,7 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
    hypre_AuxParCSRMatrixDestroy(aux_matrix);
    hypre_IJMatrixTranslator(matrix) = NULL;
 
+   hypre_MemoryPrintUsage(comm, __FUNCTION__, __LINE__);
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
