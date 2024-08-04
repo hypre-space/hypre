@@ -760,8 +760,8 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    HYPRE_Int               part_fine = 1;
 
    HYPRE_Real              xweight1, xweight2;
-   HYPRE_Real              yweight1, yweight2 = 0.0;
-   HYPRE_Real              zweight1, zweight2 = 0.0;
+   HYPRE_Real              yweight1 = 0.0, yweight2 = 0.0;
+   HYPRE_Real              zweight1 = 0.0, zweight2 = 0.0;
 
    /*-----------------------------------------------------------------------
     * Initialize some things
