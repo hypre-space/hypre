@@ -312,8 +312,32 @@ hypreGPUKernel_PMISCoarseningInit(hypre_DeviceItem &item,
 
    if (CF_init == 1)
    {
-      // TODO
-      hypre_device_assert(0);
+      CF_marker_i = read_only_load(&CF_marker_diag[i]);
+
+      if (CF_marker_i != SF_PT)
+      {
+         if (read_only_load(&S_offd_i[i + 1]) - read_only_load(&S_offd_i[i]) > 0 ||
+             CF_marker_i == F_PT)
+         {
+            CF_marker_i = 0;
+         }
+         if (CF_marker_i == Z_PT)
+         {
+            if (measure_diag[i] > 1.0 ||
+                read_only_load(&S_diag_i[i + 1]) - read_only_load(&S_diag_i[i]))
+            {
+               CF_marker_i = 0;
+            }
+            else
+            {
+               CF_marker_i = SF_PT;
+            }
+         }
+      }
+      else
+      {
+         measure_diag[i] = 0.0;
+      }
    }
    else
    {
@@ -626,4 +650,3 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
 }
 
 #endif // #if defined(HYPRE_USING_GPU)
-
