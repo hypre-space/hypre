@@ -1753,7 +1753,7 @@ hypre_ILUSetupLDUtoCusparse(hypre_ParCSRMatrix  *L,
    HYPRE_Int            *LDU_diag_j;
    HYPRE_Real           *LDU_diag_a;
 
-   HYPRE_Int             i, j, pos;
+   HYPRE_Int             i, j, pos, pos1;
 
    /* Create matrix */
    LDU = hypre_ParCSRMatrixCreate(comm,
@@ -1773,6 +1773,7 @@ hypre_ILUSetupLDUtoCusparse(hypre_ParCSRMatrix  *L,
    pos = 0;
    for (i = 0; i < n; i++)
    {
+      pos1              = pos + 1;
       LDU_diag_i[i]     = pos;
       LDU_diag_j[pos]   = i;
       LDU_diag_a[pos++] = 1.0 / D[i];
@@ -1786,6 +1787,9 @@ hypre_ILUSetupLDUtoCusparse(hypre_ParCSRMatrix  *L,
          LDU_diag_j[pos]   = U_diag_j[j];
          LDU_diag_a[pos++] = U_diag_a[j];
       }
+
+      /* Sort columns after the first entry (diagonal) */
+      hypre_qsort1(LDU_diag_j, LDU_diag_a, pos1, pos - 1);
    }
    LDU_diag_i[n] = pos;
 

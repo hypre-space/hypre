@@ -2875,12 +2875,17 @@ hypre_BoomerAMGCoarsenHMIS( hypre_ParCSRMatrix    *S,
    }
    else
    {
+      CF_memory_location = HYPRE_MEMORY_HOST;
       CF_marker = hypre_IntArrayCreate(hypre_ParCSRMatrixNumRows(A));
-      hypre_IntArrayInitialize_v2(CF_marker, HYPRE_MEMORY_HOST);
+      hypre_IntArrayInitialize_v2(CF_marker, CF_memory_location);
    }
 
    /* Perform Ruge coarsening on the host */
    hypre_BoomerAMGCoarsenRuge(h_S, h_A, measure_type, 10, cut_factor, debug_flag, &CF_marker);
+
+   /* Free cloned matrices on the host */
+   if (h_S != S) { hypre_ParCSRMatrixDestroy(h_S); }
+   if (h_A != A) { hypre_ParCSRMatrixDestroy(h_A); }
 
    /* Move CF_marker to device if needed */
 #if defined(HYPRE_USING_GPU)
@@ -2889,10 +2894,18 @@ hypre_BoomerAMGCoarsenHMIS( hypre_ParCSRMatrix    *S,
       if (*CF_marker_ptr)
       {
          hypre_IntArrayCopy(*CF_marker_ptr, CF_marker);
+         hypre_IntArrayDestroy(CF_marker);
+         CF_marker = NULL;
       }
       else
       {
          *CF_marker_ptr = hypre_IntArrayCloneDeep_v2(CF_marker, HYPRE_MEMORY_DEVICE);
+      }
+
+      /* Free host CF_marker */
+      if (hypre_GetActualMemLocation(CF_memory_location) == hypre_MEMORY_DEVICE)
+      {
+         hypre_IntArrayDestroy(CF_marker);
       }
    }
    else
