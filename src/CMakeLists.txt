@@ -147,6 +147,9 @@ option(TPL_BLAS_LIBRARIES            "Optional list of absolute paths to BLAS li
 option(TPL_LAPACK_LIBRARIES          "Optional list of absolute paths to LAPACK libraries, otherwise use FindLAPACK to locate [].")
 option(TPL_FEI_INCLUDE_DIRS          "List of absolute paths to FEI include directories [].")
 
+# Autoconf style functions
+include(CheckSymbolExists)
+
 # Set config name values
 if (HYPRE_ENABLE_SHARED)
   set(HYPRE_SHARED ON CACHE BOOL "" FORCE)
@@ -632,6 +635,21 @@ if (HYPRE_USING_UMPIRE)
   target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_UMPIRE_INCLUDE_DIRS})
 endif ()
 
+# Set MPI compile flags
+if (NOT HYPRE_SEQUENTIAL)
+  find_program(MPIEXEC_EXECUTABLE NAMES mpiexec mpirun)
+  find_package(MPI REQUIRED)
+  target_link_libraries(${PROJECT_NAME} PUBLIC MPI::MPI_C)
+  set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} MPI::MPI_C)
+  check_symbol_exists(MPI_Comm_f2c "mpi.h" HYPRE_HAVE_MPI_COMM_F2C)
+endif (NOT HYPRE_SEQUENTIAL)
+
+# Set OpenMP compile flags
+if (HYPRE_USING_OPENMP)
+  find_package(OpenMP REQUIRED)
+  target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_C)
+endif (HYPRE_USING_OPENMP)
+
 # Configure a header file to pass CMake settings to the source code
 configure_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/config/HYPRE_config.h.cmake.in"
@@ -662,19 +680,6 @@ endif ()
 if (HYPRE_USING_SYCL)
   set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE CXX)
 endif ()
-
-# Set MPI compile flags
-if (NOT HYPRE_SEQUENTIAL)
-  find_program(MPIEXEC_EXECUTABLE NAMES mpiexec mpirun)
-  find_package(MPI REQUIRED)
-  target_link_libraries(${PROJECT_NAME} PUBLIC MPI::MPI_C)
-endif (NOT HYPRE_SEQUENTIAL)
-
-# Set OpenMP compile flags
-if (HYPRE_USING_OPENMP)
-  find_package(OpenMP REQUIRED)
-  target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_C)
-endif (HYPRE_USING_OPENMP)
 
 if (MSVC)
   target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
