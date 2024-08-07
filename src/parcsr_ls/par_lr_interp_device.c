@@ -19,6 +19,9 @@
 // S_*_j is the special j-array from device SoC
 // -1: weak, -2: diag, >=0 (== A_diag_j) : strong
 // add weak and the diagonal entries of F-rows
+#if defined(HYPRE_USING_SYCL)
+SYCL_EXTERNAL
+#endif
 __global__
 void hypreGPUKernel_compute_weak_rowsums( hypre_DeviceItem    &item,
                                           HYPRE_Int      nr_of_rows,
@@ -709,6 +712,9 @@ void hypreGPUKernel_compute_aff_afc_epe( hypre_DeviceItem    &item,
 
 //-----------------------------------------------------------------------
 // For Ext+e Interp, compute D_lambda and D_tmp = D_mu / D_lambda
+#if defined(HYPRE_USING_SYCL)
+SYCL_EXTERNAL
+#endif
 __global__
 void hypreGPUKernel_compute_dlam_dtmp( hypre_DeviceItem    &item,
                                        HYPRE_Int      nr_of_rows,

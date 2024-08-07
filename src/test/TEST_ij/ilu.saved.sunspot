@@ -12,7 +12,7 @@ Final Relative Residual Norm = 5.512717e-09
 
 # Output file: ilu.out.303
 hypre_ILU Iterations = 64
-Final Relative Residual Norm = 8.558467e-09
+Final Relative Residual Norm = 8.558468e-09
 
 # Output file: ilu.out.304
 hypre_ILU Iterations = 52
@@ -20,7 +20,7 @@ Final Relative Residual Norm = 9.189235e-09
 
 # Output file: ilu.out.305
 hypre_ILU Iterations = 39
-Final Relative Residual Norm = 8.838453e-09
+Final Relative Residual Norm = 8.838452e-09
 
 # Output file: ilu.out.306
 hypre_ILU Iterations = 27
