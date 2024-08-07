@@ -170,7 +170,19 @@ HYPRE_Int HYPRE_BoomerAMGGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
  * The default is 1, i.e. a scalar system.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetNumFunctions(HYPRE_Solver solver,
-                                         HYPRE_Int          num_functions);
+                                         HYPRE_Int    num_functions);
+
+/**
+ * (Optional) Sets filtering for system of PDEs (\e num_functions > 1).
+ *
+ * \param filter_functions An integer flag to enable or disable filtering of inter-variable
+ * connections in the input matrix used for preconditioning.
+ *   - A value of 0 (default) indicates no filtering, preserving all inter-variable connections.
+ *   - A value of 1 enables filtering, removing inter-variable connections to lower
+ *     operator and memory complexities.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFilterFunctions(HYPRE_Solver solver,
+                                            HYPRE_Int    filter_functions);
 
 /**
  * (Optional) Sets the mapping that assigns the function to each variable,
