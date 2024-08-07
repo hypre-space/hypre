@@ -206,7 +206,7 @@ hypre_ParCSRMatrixBlkFilter( hypre_ParCSRMatrix  *A,
    if (exec == HYPRE_EXEC_DEVICE)
    {
       /* TODO (VPM): device implementation */
-      h_A = hypre_ParCSRMatrixClone(A, 1, HYPRE_MEMORY_HOST);
+      h_A = hypre_ParCSRMatrixClone_v2(A, 1, HYPRE_MEMORY_HOST);
       hypre_ParCSRMatrixBlkFilterHost(h_A, block_size, B_ptr);
 
       hypre_ParCSRMatrixDestroy(h_A);
