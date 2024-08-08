@@ -845,7 +845,7 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
 
    hypre_IJMatrixAssembleCommunicateAndCompressDevice(matrix, 1);
 
-   hypre_AuxParCSRMatrixStackPrintInfo(matrix);
+   // hypre_AuxParCSRMatrixStackPrintInfo(matrix);
 
    HYPRE_Int      nelms      = hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix);
    HYPRE_BigInt  *stack_i    = hypre_AuxParCSRMatrixStackI(aux_matrix);
