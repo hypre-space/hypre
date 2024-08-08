@@ -270,7 +270,7 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       /* temporarily disable early assembly in the next line */
       hypre_AuxParCSRMatrixEarlyAssemble(aux_matrix) = 2;
       hypre_IJMatrixAssembleCommunicateAndCompressDevice(matrix, 0);
-      /* resore early assembly */
+      /* restore early assembly */
       hypre_AuxParCSRMatrixEarlyAssemble(aux_matrix) = early_assemble;
 
       stack_elmts_current = hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix);
@@ -283,7 +283,7 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
          hypre_AuxParCSRMatrixStackReallocate(aux_matrix, stack_elmts_max_new);
       }
 
-      hypre_AuxParCSRMatrixStackPrintInfo(matrix);
+      //hypre_AuxParCSRMatrixStackPrintInfo(matrix);
    }
 
    hypre_TFree(row_ptr, HYPRE_MEMORY_DEVICE);
