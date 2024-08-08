@@ -323,6 +323,20 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
    return hypre_error_flag;
 }
 
+HYPRE_Int
+HYPRE_SStructMatrixSetEarlyAssembly( HYPRE_SStructMatrix matrix,
+                                     HYPRE_Int           early_assemble )
+{
+   HYPRE_IJMatrix ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
+
+   if (ijmatrix)
+   {
+      HYPRE_IJMatrixSetEarlyAssemble(ijmatrix, early_assemble);
+   }
+
+   return hypre_error_flag;
+}
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
