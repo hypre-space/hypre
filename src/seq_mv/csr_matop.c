@@ -1055,7 +1055,7 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
    HYPRE_Int             num_nnzs_A = hypre_CSRMatrixNumNonzeros(A);
    HYPRE_MemoryLocation  memory_location = hypre_CSRMatrixMemoryLocation(A);
 
-   HYPRE_Complex        *AT_data;
+   HYPRE_Complex        *AT_data = NULL;
    HYPRE_Int            *AT_j;
    HYPRE_Int             num_rows_AT;
    HYPRE_Int             num_cols_AT;

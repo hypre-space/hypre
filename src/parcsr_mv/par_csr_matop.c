@@ -694,7 +694,7 @@ hypre_ParMatmul( hypre_ParCSRMatrix  *A,
          HYPRE_Int i_begin, i_end;
          hypre_GetSimpleThreadPartition(&i_begin, &i_end, num_cols_offd_C);
 
-         HYPRE_Int cnt;
+         HYPRE_Int cnt = 0;
          if (i_end > i_begin)
          {
             cnt = hypre_BigLowerBound(col_map_offd_B,
@@ -1275,10 +1275,10 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
    HYPRE_BigInt *B_int_j;
    HYPRE_Int *B_ext_i;
    HYPRE_BigInt * B_ext_j;
-   HYPRE_Complex * B_ext_data;
+   HYPRE_Complex * B_ext_data = NULL;
    HYPRE_Complex * B_int_data = NULL;
-   HYPRE_BigInt * B_int_row_map;
-   HYPRE_BigInt * B_ext_row_map;
+   HYPRE_BigInt * B_int_row_map = NULL;
+   HYPRE_BigInt * B_ext_row_map = NULL;
    HYPRE_Int num_procs, my_id;
    HYPRE_Int *jdata_recv_vec_starts;
    HYPRE_Int *jdata_send_map_starts;
@@ -3528,7 +3528,7 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
 
    HYPRE_BigInt    *temp;
    HYPRE_Int       *send_map_starts_A = NULL;
-   HYPRE_Int       *send_map_elmts_A;
+   HYPRE_Int       *send_map_elmts_A = NULL;
    HYPRE_Int        num_sends_A = 0;
 
    HYPRE_Int        num_cols_offd_C = 0;

@@ -33,6 +33,11 @@ hypre_DSLUData;
 
 #endif
 */
+
+/*--------------------------------------------------------------------------
+ * hypre_SLUDistSetup
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SLUDistSetup(HYPRE_Solver       *solver,
                    hypre_ParCSRMatrix *A,
@@ -53,7 +58,7 @@ hypre_SLUDistSetup(HYPRE_Solver       *solver,
    HYPRE_Int          i;
 
    /* SuperLU_Dist variables. Note it uses "int_t" to denote integer types */
-   int_t              slu_info = 0;
+   hypre_int          slu_info = 0;
    int_t             *slu_rowptr;
    int_t             *slu_colidx;
    hypre_double      *slu_data;
@@ -193,6 +198,10 @@ hypre_SLUDistSetup(HYPRE_Solver       *solver,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_SLUDistSolve
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SLUDistSolve(void            *solver,
                    hypre_ParVector *b,
@@ -200,17 +209,18 @@ hypre_SLUDistSolve(void            *solver,
 {
    hypre_DSLUData  *dslu_data = (hypre_DSLUData *) solver;
    HYPRE_Real      *x_data;
-   hypre_ParVector *x_host = NULL;
    HYPRE_Int        size = hypre_VectorSize(hypre_ParVectorLocalVector(x));
    HYPRE_Int        nrhs = 1;
    HYPRE_Int        i;
 
-   int_t            slu_info;
+   hypre_int        slu_info;
    hypre_double    *slu_data;
 
    hypre_ParVectorCopy(b, x);
 
 #if defined(HYPRE_USING_GPU)
+   hypre_ParVector *x_host = NULL;
+
    if (hypre_GetActualMemLocation(hypre_ParVectorMemoryLocation(x)) != hypre_MEMORY_HOST)
    {
       x_host = hypre_ParVectorCloneDeep_v2(x, HYPRE_MEMORY_HOST);
@@ -265,6 +275,10 @@ hypre_SLUDistSolve(void            *solver,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_SLUDistDestroy
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SLUDistDestroy(void* solver)

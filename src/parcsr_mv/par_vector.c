@@ -1179,7 +1179,7 @@ hypre_ParVectorReadIJ( MPI_Comm          comm,
    hypre_Vector     *local_vector;
    HYPRE_Complex    *local_data;
    HYPRE_BigInt      big_local_size;
-   HYPRE_BigInt      partitioning[2];
+   HYPRE_BigInt      partitioning[2] = {0, 0};
    HYPRE_Int         base_j;
 
    HYPRE_Int         myid, num_procs, j;

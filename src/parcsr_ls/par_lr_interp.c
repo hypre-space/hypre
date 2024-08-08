@@ -1245,6 +1245,8 @@ hypre_BoomerAMGBuildExtPIInterpHost(hypre_ParCSRMatrix   *A,
        */
 
       /* initialize thread-wise variables */
+      P_marker = NULL;
+      P_marker_offd = NULL;
       strong_f_marker = -2;
       coarse_counter = 0;
       jj_counter = start_indexing;

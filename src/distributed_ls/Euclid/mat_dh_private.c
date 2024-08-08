@@ -884,7 +884,7 @@ void mat_dh_transpose_reuse_private_private(bool allocateMem, HYPRE_Int m,
   START_FUNC_DH
   HYPRE_Int *rp, *cval, *tmp;
   HYPRE_Int i, j, nz = RP[m];
-  HYPRE_Real *aval;
+  HYPRE_Real *aval = NULL;
 
   if (allocateMem) {
     rp = *rpOUT = (HYPRE_Int *)MALLOC_DH((1+m)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
