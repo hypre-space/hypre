@@ -61,14 +61,14 @@ save="sunspot"
 
 # SYCL with UM in debug mode [ij, struct]
 # WM: I suppress all warnings for sycl files for now
-co="--enable-debug --with-sycl --enable-unified-memory CC=mpicc CXX=mpicxx --disable-fortran --with-extra-CFLAGS=\\'-Wno-unused-but-set-variable -Wno-unused-variable -Wno-builtin-macro-redefined -Rno-debug-disables-optimization\\' --with-extra-CUFLAGS=\\'-w\\' --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib"
-ro="-ij-gpu -struct -rt -save ${save} -script gpu_tile_compact.sh -rtol ${rtol} -atol ${atol}"
+co="--enable-debug --with-sycl --enable-unified-memory CC=mpicc CXX=mpicxx --disable-fortran --with-extra-CFLAGS=\\'-Wno-unused-but-set-variable -Wno-unused-variable -Wno-builtin-macro-redefined -Rno-debug-disables-optimization\\' --with-extra-CUFLAGS=\\'-w\\' --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib --with-lapack-lib=\\'-L ${MKLROOT}/lib -lmkl_sycl_lapack\\'"
+ro="-ij-gpu -ams -struct -rt -save ${save} -script gpu_tile_compact.sh -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-sycl-um
 
 # SYCL with bigint (compile only)
 # WM: I suppress all warnings for sycl files for now
-co="--enable-bigint --with-sycl --enable-unified-memory CC=mpicc CXX=mpicxx --disable-fortran --with-extra-CFLAGS=\\'-Wno-unused-but-set-variable -Wno-unused-variable -Wno-builtin-macro-redefined -Rno-debug-disables-optimization\\' --with-extra-CUFLAGS=\\'-w\\' --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib"
+co="--enable-bigint --with-sycl --enable-unified-memory CC=mpicc CXX=mpicxx --disable-fortran --with-extra-CFLAGS=\\'-Wno-unused-but-set-variable -Wno-unused-variable -Wno-builtin-macro-redefined -Rno-debug-disables-optimization\\' --with-extra-CUFLAGS=\\'-w\\' --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib --with-lapack-lib=\\'-L ${MKLROOT}/lib -lmkl_sycl_lapack\\'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-sycl-bigint
 
