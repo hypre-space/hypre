@@ -78,7 +78,7 @@ hypre_ParCSRMatrixFillSmooth(HYPRE_Int nsamples, HYPRE_Real *samples,
    HYPRE_Int i, j, k, ii, index, start;
    HYPRE_Int num_cols_offd;
    HYPRE_Int num_sends;
-   HYPRE_Int *dof_func_offd;
+   HYPRE_Int *dof_func_offd = NULL;
    HYPRE_Int *int_buf_data;
    HYPRE_Real temp;
    HYPRE_Real *p;

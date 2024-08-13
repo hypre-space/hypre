@@ -137,9 +137,7 @@ main( hypre_int argc,
    //mgr_level_interp_type[0] = 2;
    //mgr_level_interp_type[1] = 2;
 
-   HYPRE_Int *mgr_coarse_grid_method = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
-   mgr_coarse_grid_method[0] = 0;
-   mgr_coarse_grid_method[1] = 0;
+   HYPRE_Int *coarse_grid_method = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
 
    mgr_cindexes = hypre_CTAlloc(HYPRE_Int*, mgr_nlevels, HYPRE_MEMORY_HOST);
    HYPRE_Int *lv1 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
@@ -525,7 +523,7 @@ main( hypre_int argc,
       HYPRE_MGRSetRestrictType(pcg_precond, mgr_restrict_type);
       HYPRE_MGRSetNumRestrictSweeps(pcg_precond, mgr_num_restrict_sweeps);
       /* set coarse grid method */
-      HYPRE_MGRSetCoarseGridMethod(pcg_precond, mgr_coarse_grid_method);
+      HYPRE_MGRSetCoarseGridMethod(pcg_precond, coarse_grid_method);
       /* set print level */
       HYPRE_MGRSetPrintLevel(pcg_precond, 1);
       /* set max iterations */
@@ -709,7 +707,7 @@ main( hypre_int argc,
    //hypre_TFree(mgr_frelax_num_functions, HYPRE_MEMORY_HOST);
    hypre_TFree(mgr_idx_array, HYPRE_MEMORY_HOST);
    hypre_TFree(mgr_point_marker_array, HYPRE_MEMORY_HOST);
-   hypre_TFree(mgr_coarse_grid_method, HYPRE_MEMORY_HOST);
+   hypre_TFree(coarse_grid_method, HYPRE_MEMORY_HOST);
    hypre_TFree(lv1, HYPRE_MEMORY_HOST);
    hypre_TFree(lv2, HYPRE_MEMORY_HOST);
    hypre_TFree(mgr_cindexes, HYPRE_MEMORY_HOST);

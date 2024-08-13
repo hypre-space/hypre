@@ -1907,7 +1907,7 @@ hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
 {
    HYPRE_UNUSED_VAR(A);
 
-   hypre_ParCSRMatrix *Pix, *Piy, *Piz = NULL;
+   hypre_ParCSRMatrix *Pix, *Piy = NULL, *Piz = NULL;
 
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(G) );
@@ -2378,11 +2378,13 @@ hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
 #endif
          {
             if (G_offd_ncols)
+            {
                for (i = 0; i < G_offd_nrows + 1; i++)
                {
                   Pix_offd_I[i] = G_offd_I[i];
                   Piy_offd_I[i] = G_offd_I[i];
                }
+            }
 
             for (i = 0; i < G_offd_nnz; i++)
             {
@@ -2391,11 +2393,13 @@ hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
             }
 
             for (i = 0; i < G_offd_nrows; i++)
+            {
                for (j = G_offd_I[i]; j < G_offd_I[i + 1]; j++)
                {
                   *Pix_offd_data++ = hypre_abs(G_offd_data[j]) * 0.5 * Gx_data[i];
                   *Piy_offd_data++ = hypre_abs(G_offd_data[j]) * 0.5 * Gy_data[i];
                }
+            }
          }
 
          for (i = 0; i < G_offd_ncols; i++)

@@ -234,7 +234,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
    HYPRE_Int             *RAP_int_i;
    HYPRE_BigInt          *RAP_int_j;
 
-   hypre_CSRBlockMatrix  *RAP_ext;
+   hypre_CSRBlockMatrix  *RAP_ext       = NULL;
 
    HYPRE_Complex         *RAP_ext_data  = NULL;
    HYPRE_Int             *RAP_ext_i     = NULL;
