@@ -475,7 +475,6 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
       col_map_offd = hypre_ParCSRMatrixColMapOffd(par_matrix);
    }
 
-   /* WM: question - what does rows < 0 signify? Do I need to add row_indexes here? */
    if (nrows < 0)
    {
       nrows = -nrows;

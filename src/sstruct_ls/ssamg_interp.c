@@ -9,6 +9,8 @@
 #include "_hypre_struct_mv.hpp"
 #include "ssamg.h"
 
+//#define DEBUG_INTERP
+
 /*--------------------------------------------------------------------------
  * TODO:
  *       1) Consider inter-variable coupling
@@ -473,16 +475,19 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       hypre_CSRMatrix *A_u_offd = hypre_ParCSRMatrixOffd(A_u);
       hypre_ParCSRMatrix *A_u_aug;
       hypre_ParCSRMatrix *P_u;
+
+#ifdef DEBUG_INTERP
       /* WM: debug */
       char filename[256];
       hypre_sprintf(filename, "A_u_diag_%d", hypre_CSRMatrixNumRows(A_u_diag));
       hypre_CSRMatrixPrintIJ(A_u_diag, 0, 0, filename);
+#endif
 
       /* Convert boundary of A to IJ matrix */
       hypre_IJMatrix *A_struct_bndry_ij;
 
       /* WM: todo - don't rely on a halo here but rather connections in A_u */
-#if 1
+#ifndef DEBUG_INTERP
       hypre_SStructMatrixHaloToUMatrix(A, grid, &A_struct_bndry_ij, 1);
 #else
       HYPRE_Int              num_indices = 0;
@@ -539,7 +544,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                   hypre_printf("WM: debug - cnt = %d\n", cnt);
                   hypre_BoxLoopGetIndex(index);
                   hypre_printf("WM: debug - index = (%d, %d)\n", index[0] + start[0], index[1] + start[1]);
-                  if (hypre_CSRMatrixI(A_u_diag)[cnt+1] - hypre_CSRMatrixI(A_u_diag)[cnt] + 
+                  if (hypre_CSRMatrixI(A_u_diag)[cnt+1] - hypre_CSRMatrixI(A_u_diag)[cnt] +
                         hypre_CSRMatrixI(A_u_offd)[cnt+1] - hypre_CSRMatrixI(A_u_offd)[cnt] > 0)
                   {
                      /* hypre_BoxLoopGetIndex(index); */
@@ -562,8 +567,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       hypre_SStructMatrixBoxesToUMatrix(A, grid, &A_struct_bndry_ij, convert_boxa);
       /* WM: todo - cleanup memory: convert_boxa, indices, etc. */
 #endif
-
-
 
       /* Add structured boundary portion to unstructured portion */
       hypre_ParCSRMatrix *A_struct_bndry = hypre_IJMatrixObject(A_struct_bndry_ij);
