@@ -476,7 +476,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       hypre_ParCSRMatrix *A_u_aug;
       hypre_ParCSRMatrix *P_u;
 
-#ifdef DEBUG_INTERP
+#if defined(DEBUG_INTERP)
       /* WM: debug */
       char filename[256];
       hypre_sprintf(filename, "A_u_diag_%d", hypre_CSRMatrixNumRows(A_u_diag));
@@ -484,7 +484,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 #endif
 
       /* Convert boundary of A to IJ matrix */
-      hypre_IJMatrix *A_struct_bndry_ij;
+      hypre_IJMatrix *A_struct_bndry_ij = NULL;
 
       /* WM: todo - don't rely on a halo here but rather connections in A_u */
 #ifndef DEBUG_INTERP
