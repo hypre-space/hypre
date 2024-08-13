@@ -3220,6 +3220,8 @@ main( hypre_int argc,
 
       HYPRE_SStructMatrixInitialize(A);
 
+      HYPRE_SStructMatrixSetEarlyAssembly(A, 1);
+
       if (data.nstencils > 0)
       {
          /* StencilSetEntry: set stencil values */
