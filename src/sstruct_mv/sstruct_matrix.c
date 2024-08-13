@@ -1405,7 +1405,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
                         rows[mi] += loop_index[d] * rs[d] * dom_stride[d];
                         cols[ci] += loop_index[d] * cs[d];
                      }
-                     /* WM: note - if doing a get, don't need to manipulate ijvalues here, right? 
+                     /* WM: note - if doing a get, don't need to manipulate ijvalues here, right?
                       *            likewise, if doing a set, don't need the values_map */
                      ijvalues[ci] = values[ei + vi * nentries];
                      values_map[ei + vi * nentries] = ci;
@@ -1440,7 +1440,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
             if (action == -2)
             {
                /* Zero out entries gotten */
-               HYPRE_IJMatrixGetValuesAndZero(ijmatrix, nrows, ncols, rows, row_indexes, cols, ijvalues);
+               HYPRE_IJMatrixGetValuesAndZeroOut(ijmatrix, nrows, ncols, rows, row_indexes, cols, ijvalues);
             }
             else
             {
@@ -2038,7 +2038,7 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A )
             hypre_SStructUMatrixSetBoxValues(A, part, grid_box, var, nSentries, Sentries, grid_box, values, -2);
 
             /* ADD values to structured matrix */
-            /* WM: todo - just call to hypre_SStructMatrixSetBoxValues() instead of 
+            /* WM: todo - just call to hypre_SStructMatrixSetBoxValues() instead of
              * hypre_SStructPMatrixSetBoxValues() and hypre_SStructMatrixSetInterPartValues()? */
             hypre_SStructPMatrixSetBoxValues(pmatrix, grid_box, var, nSentries, Sentries, grid_box, values, 1);
             if (nvneighbors[part][var] > 0)
@@ -2215,7 +2215,7 @@ hypre_SStructMatrixUBoxes( hypre_SStructMatrix   *A,
 
          hypre_ForBoxI(i, grid_boxes)
          {
-            
+
          }
       }
    }

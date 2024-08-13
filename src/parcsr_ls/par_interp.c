@@ -123,7 +123,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix      *A,
    HYPRE_Int local_numrows = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_BigInt col_n = col_1 + (HYPRE_BigInt)local_numrows;
 
-   HYPRE_Real       wall_time;  /* for debugging instrumentation  */
+   HYPRE_Real       wall_time = 0.0;  /* for debugging instrumentation  */
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -1090,7 +1090,7 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
    HYPRE_Int local_numrows = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_BigInt col_n = col_1 + local_numrows;
 
-   HYPRE_Real       wall_time;  /* for debugging instrumentation  */
+   HYPRE_Real       wall_time = 0.0;  /* for debugging instrumentation  */
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -2623,7 +2623,7 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
 {
    if (trunc_factor <= 0.0 && max_elmts == 0)
    {
-      return 0;
+      return hypre_error_flag;
    }
 
 #if defined(HYPRE_USING_GPU)
@@ -2759,7 +2759,7 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
    HYPRE_Int local_numrows = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_BigInt col_n = col_1 + local_numrows;
 
-   HYPRE_Real       wall_time;  /* for debugging instrumentation  */
+   HYPRE_Real       wall_time = 0.0;  /* for debugging instrumentation  */
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);

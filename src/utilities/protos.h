@@ -363,6 +363,9 @@ HYPRE_Int hypre_bind_device_id(HYPRE_Int device_id_in, HYPRE_Int myid,
                                HYPRE_Int nproc, MPI_Comm comm);
 HYPRE_Int hypre_bind_device(HYPRE_Int myid, HYPRE_Int nproc, MPI_Comm comm);
 
+/* stl_ops.c */
+HYPRE_Int hypre_IntSequence(HYPRE_MemoryLocation memory_location, HYPRE_Int size, HYPRE_Int *data);
+
 /* nvtx.c */
 void hypre_GpuProfilingPushRangeColor(const char *name, HYPRE_Int cid);
 void hypre_GpuProfilingPushRange(const char *name);

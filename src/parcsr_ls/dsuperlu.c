@@ -46,7 +46,6 @@ hypre_SLUDistSetup(HYPRE_Solver       *solver,
    HYPRE_Int          pcols = 1;
    HYPRE_Int          prows = 1;
    hypre_DSLUData    *dslu_data = NULL;
-   HYPRE_Int          info = 0;
    HYPRE_Int          nrhs = 0;
 
    HYPRE_Int          num_rows;
@@ -54,6 +53,7 @@ hypre_SLUDistSetup(HYPRE_Solver       *solver,
    HYPRE_Int          i;
 
    /* SuperLU_Dist variables. Note it uses "int_t" to denote integer types */
+   int_t              slu_info = 0;
    int_t             *slu_rowptr;
    int_t             *slu_colidx;
    hypre_double      *slu_data;
@@ -185,7 +185,7 @@ hypre_SLUDistSetup(HYPRE_Solver       *solver,
    pdgssvx(&(dslu_data->dslu_options), &(dslu_data->A_dslu),
            &(dslu_data->dslu_ScalePermstruct), NULL, num_rows, nrhs,
            &(dslu_data->dslu_data_grid), &(dslu_data->dslu_data_LU),
-           &(dslu_data->dslu_solve), dslu_data->berr, &(dslu_data->dslu_data_stat), &info);
+           &(dslu_data->dslu_solve), dslu_data->berr, &(dslu_data->dslu_data_stat), &slu_info);
 
    dslu_data->dslu_options.Fact = FACTORED;
    *solver = (HYPRE_Solver) dslu_data;
@@ -199,13 +199,13 @@ hypre_SLUDistSolve(void            *solver,
                    hypre_ParVector *x)
 {
    hypre_DSLUData  *dslu_data = (hypre_DSLUData *) solver;
-   HYPRE_Int        info = 0;
    HYPRE_Real      *x_data;
    hypre_ParVector *x_host = NULL;
    HYPRE_Int        size = hypre_VectorSize(hypre_ParVectorLocalVector(x));
    HYPRE_Int        nrhs = 1;
    HYPRE_Int        i;
 
+   int_t            slu_info;
    hypre_double    *slu_data;
 
    hypre_ParVectorCopy(b, x);
@@ -247,7 +247,7 @@ hypre_SLUDistSolve(void            *solver,
            &(dslu_data->dslu_solve),
            dslu_data->berr,
            &(dslu_data->dslu_data_stat),
-           &info);
+           &slu_info);
 
    /* Free memory */
    if ((void*) slu_data != (void*) x_data)
