@@ -708,7 +708,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       hypre_IJMatrixDestroyParCSR(hypre_SStructMatrixIJMatrix(P));
       hypre_IJMatrixSetObject(hypre_SStructMatrixIJMatrix(P), P_u);
       hypre_SStructMatrixParCSRMatrix(P) = P_u;
-      hypre_IJMatrixAssembleFlag(P_u) = 1;
+      hypre_IJMatrixAssembleFlag(hypre_SStructMatrixIJMatrix(P)) = 1;
 
       /* Zero out C-point injection entries and entries in P_u outside of P_u_boxa and delete zeros */
       hypre_CSRMatrix *P_u_diag = hypre_ParCSRMatrixDiag(P_u);
