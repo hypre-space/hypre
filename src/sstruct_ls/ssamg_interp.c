@@ -461,6 +461,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       hypre_CSRMatrix *A_u_offd = hypre_ParCSRMatrixOffd(A_u);
       hypre_ParCSRMatrix *A_u_aug;
       hypre_ParCSRMatrix *P_u;
+
       /* WM: debug */
       /* char filename[256]; */
       /* hypre_sprintf(filename, "A_u_%d", hypre_ParCSRMatrixNumRows(A_u)); */
@@ -469,6 +470,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       /* Convert boundary of A to IJ matrix */
       hypre_IJMatrix *A_struct_bndry_ij = NULL;
 
+      /* WM: todo - don't rely on a halo here but rather connections in A_u */
       HYPRE_Int              num_indices = 0;
       HYPRE_Int             *indices[ndim];
       hypre_BoxArray        *indices_boxa = NULL;
@@ -557,8 +559,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       }
       hypre_SStructMatrixBoxesToUMatrix(A, grid, &A_struct_bndry_ij, convert_boxa);
       /* WM: todo - cleanup memory: convert_boxa, indices, etc. */
-
-
 
       /* Add structured boundary portion to unstructured portion */
       hypre_ParCSRMatrix *A_struct_bndry = hypre_IJMatrixObject(A_struct_bndry_ij);

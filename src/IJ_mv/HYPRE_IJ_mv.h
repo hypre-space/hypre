@@ -245,13 +245,13 @@ HYPRE_Int HYPRE_IJMatrixGetValues2(HYPRE_IJMatrix  matrix,
  * Same as IJMatrixGetValues2, but zeros out the entries after getting them.
  *
  **/
-HYPRE_Int HYPRE_IJMatrixGetValuesAndZero(HYPRE_IJMatrix  matrix,
-                                         HYPRE_Int       nrows,
-                                         HYPRE_Int      *ncols,
-                                         HYPRE_BigInt   *rows,
-                                         HYPRE_Int      *row_indexes,
-                                         HYPRE_BigInt   *cols,
-                                         HYPRE_Complex  *values);
+HYPRE_Int HYPRE_IJMatrixGetValuesAndZeroOut(HYPRE_IJMatrix  matrix,
+                                            HYPRE_Int       nrows,
+                                            HYPRE_Int      *ncols,
+                                            HYPRE_BigInt   *rows,
+                                            HYPRE_Int      *row_indexes,
+                                            HYPRE_BigInt   *cols,
+                                            HYPRE_Complex  *values);
 
 /**
  * Set the storage type of the matrix object to be constructed.

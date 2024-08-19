@@ -927,14 +927,25 @@ HYPRE_IJMatrixGetValues2( HYPRE_IJMatrix matrix,
       return hypre_error_flag;
    }
 
-   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypre_IJMatrixGetValuesParCSR( ijmatrix, nrows, ncols,
-                                     rows, row_indexes, cols, values, 0 );
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "HYPRE_IJMatrixGetValues2 not implemented for GPUs!");
    }
    else
+#endif
    {
-      hypre_error_in_arg(1);
+      if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+      {
+         hypre_IJMatrixGetValuesParCSR( ijmatrix, nrows, ncols,
+                                        rows, row_indexes, cols, values, 0 );
+      }
+      else
+      {
+         hypre_error_in_arg(1);
+      }
    }
 
    return hypre_error_flag;
@@ -945,13 +956,13 @@ HYPRE_IJMatrixGetValues2( HYPRE_IJMatrix matrix,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_IJMatrixGetValuesAndZero( HYPRE_IJMatrix matrix,
-                                HYPRE_Int      nrows,
-                                HYPRE_Int     *ncols,
-                                HYPRE_BigInt  *rows,
-                                HYPRE_Int     *row_indexes,
-                                HYPRE_BigInt  *cols,
-                                HYPRE_Complex *values )
+HYPRE_IJMatrixGetValuesAndZeroOut( HYPRE_IJMatrix matrix,
+                                   HYPRE_Int      nrows,
+                                   HYPRE_Int     *ncols,
+                                   HYPRE_BigInt  *rows,
+                                   HYPRE_Int     *row_indexes,
+                                   HYPRE_BigInt  *cols,
+                                   HYPRE_Complex *values )
 {
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
@@ -990,14 +1001,25 @@ HYPRE_IJMatrixGetValuesAndZero( HYPRE_IJMatrix matrix,
       return hypre_error_flag;
    }
 
-   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypre_IJMatrixGetValuesParCSR( ijmatrix, nrows, ncols,
-                                     rows, row_indexes, cols, values, 1 );
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "HYPRE_IJMatrixGetValuesAndZeroOut not implemented for GPUs!");
    }
    else
+#endif
    {
-      hypre_error_in_arg(1);
+      if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+      {
+         hypre_IJMatrixGetValuesParCSR( ijmatrix, nrows, ncols,
+                                        rows, row_indexes, cols, values, 1 );
+      }
+      else
+      {
+         hypre_error_in_arg(1);
+      }
    }
 
    return hypre_error_flag;

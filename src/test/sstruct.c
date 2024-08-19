@@ -5368,6 +5368,7 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetTol(precond, 0.0);
          HYPRE_SStructSSAMGSetZeroGuess(precond);
          HYPRE_SStructSSAMGSetSkipRelax(precond, skip);
+         HYPRE_SStructSSAMGSetInterpType(precond, interp_type);
          HYPRE_SStructSSAMGSetRelaxType(precond, relax[0]);
          HYPRE_SStructSSAMGSetNonGalerkinRAP(precond, rap);
          if (usr_jacobi_weight)
@@ -5618,6 +5619,7 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetTol(precond, 0.0);
          HYPRE_SStructSSAMGSetZeroGuess(precond);
          HYPRE_SStructSSAMGSetSkipRelax(precond, skip);
+         HYPRE_SStructSSAMGSetInterpType(precond, interp_type);
          HYPRE_SStructSSAMGSetRelaxType(precond, relax[0]);
          HYPRE_SStructSSAMGSetNonGalerkinRAP(precond, rap);
          if (usr_jacobi_weight)
@@ -5868,6 +5870,7 @@ main( hypre_int argc,
          HYPRE_SStructSSAMGSetTol(precond, 0.0);
          HYPRE_SStructSSAMGSetZeroGuess(precond);
          HYPRE_SStructSSAMGSetSkipRelax(precond, skip);
+         HYPRE_SStructSSAMGSetInterpType(precond, interp_type);
          HYPRE_SStructSSAMGSetRelaxType(precond, relax[0]);
          HYPRE_SStructSSAMGSetNonGalerkinRAP(precond, rap);
          if (usr_jacobi_weight)
@@ -6927,6 +6930,7 @@ main( hypre_int argc,
                HYPRE_SStructSSAMGSetTol(precond, 0.0);
                HYPRE_SStructSSAMGSetZeroGuess(precond);
                HYPRE_SStructSSAMGSetSkipRelax(precond, skip);
+               HYPRE_SStructSSAMGSetInterpType(precond, interp_type);
                HYPRE_SStructSSAMGSetRelaxType(precond, relax[0]);
                HYPRE_SStructSSAMGSetNonGalerkinRAP(precond, rap);
                if (usr_jacobi_weight)
@@ -7072,6 +7076,7 @@ main( hypre_int argc,
                HYPRE_SStructSSAMGSetTol(precond, 0.0);
                HYPRE_SStructSSAMGSetZeroGuess(precond);
                HYPRE_SStructSSAMGSetSkipRelax(precond, skip);
+               HYPRE_SStructSSAMGSetInterpType(precond, interp_type);
                HYPRE_SStructSSAMGSetRelaxType(precond, relax[0]);
                HYPRE_SStructSSAMGSetNonGalerkinRAP(precond, rap);
                if (usr_jacobi_weight)

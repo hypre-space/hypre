@@ -284,6 +284,9 @@ typedef struct
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+/* csr_filter.c */
+HYPRE_Int hypre_CSRMatrixTruncateDiag(hypre_CSRMatrix *A);
+
 /* csr_matop.c */
 HYPRE_Int hypre_CSRMatrixAddFirstPass ( HYPRE_Int firstrow, HYPRE_Int lastrow, HYPRE_Int *marker,
                                         HYPRE_Int *twspace, HYPRE_Int *map_A2C, HYPRE_Int *map_B2C,

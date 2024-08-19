@@ -18,22 +18,41 @@ HYPRE_Int
 hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
                      hypre_ParCSRMatrix   *A_FF,
                      hypre_ParCSRMatrix   *A_FC,
-                     HYPRE_Int            *CF_marker,
-                     hypre_ParCSRMatrix   *aux_mat,
+                     hypre_ParCSRMatrix   *S,
+                     hypre_IntArray       *CF_marker,
                      HYPRE_BigInt         *num_cpts_global,
                      HYPRE_Real            trunc_factor,
                      HYPRE_Int             max_elmts,
                      HYPRE_Int             blk_size,
-                     hypre_ParCSRMatrix  **P_ptr,
                      HYPRE_Int             interp_type,
-                     HYPRE_Int             num_sweeps_post)
+                     HYPRE_Int             num_sweeps_post,
+                     hypre_ParCSRMatrix  **Wp_ptr,
+                     hypre_ParCSRMatrix  **P_ptr)
 {
+   HYPRE_Int             *CF_marker_data  = hypre_IntArrayData(CF_marker);
    hypre_ParCSRMatrix    *P = NULL;
+   hypre_ParCSRMatrix    *Wp = NULL;
+
 #if defined (HYPRE_USING_GPU)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
+   HYPRE_MemoryLocation   memory_location = hypre_ParCSRMatrixMemoryLocation(A);
+   HYPRE_ExecutionPolicy  exec = hypre_GetExecPolicy1(memory_location);
 #endif
 
+   /* Sanity checks */
+   if (!Wp_ptr)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Wp_ptr is not NULL!");
+      return hypre_error_flag;
+   }
+
+   if (!P_ptr)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "P_ptr is not NULL!");
+      return hypre_error_flag;
+   }
+
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("Interp");
 
    /* Interpolation for each level */
    if (interp_type < 3)
@@ -41,12 +60,12 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
 #if defined (HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         hypre_MGRBuildPDevice(A, CF_marker, num_cpts_global, interp_type, &P);
+         hypre_MGRBuildPDevice(A, CF_marker_data, num_cpts_global, interp_type, &P);
       }
       else
 #endif
       {
-         hypre_MGRBuildPHost(A, CF_marker, num_cpts_global, interp_type, &P);
+         hypre_MGRBuildPHost(A, CF_marker_data, num_cpts_global, interp_type, &P);
 
          /* TODO (VPM): Revisit Prolongation post-smoothing */
 #if 0
@@ -58,7 +77,7 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
 
             for (i = 0; i < num_sweeps_post; i++)
             {
-               hypre_BoomerAMGJacobiInterp(A, &P, S, 1, NULL, CF_marker, 0,
+               hypre_BoomerAMGJacobiInterp(A, &P, S, 1, NULL, CF_marker_data, 0,
                                            jac_trunc_threshold, jac_trunc_threshold_minus);
             }
             hypre_BoomerAMGInterpTruncation(P, trunc_factor, max_elmts);
@@ -73,47 +92,54 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
 #if defined (HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "No GPU support!");
-
-         HYPRE_ANNOTATE_FUNC_END;
-         return hypre_error_flag;
+         hypre_IntArrayMigrate(CF_marker, HYPRE_MEMORY_HOST);
+         hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_HOST);
+         hypre_MGRBuildInterpApproximateInverse(A, CF_marker_data, num_cpts_global, &P);
+         hypre_ParCSRMatrixMigrate(A, memory_location);
+         hypre_IntArrayMigrate(CF_marker, memory_location);
       }
       else
 #endif
       {
-         hypre_MGRBuildInterpApproximateInverse(A, CF_marker, num_cpts_global, &P);
-         hypre_BoomerAMGInterpTruncation(P, trunc_factor, max_elmts);
+         hypre_MGRBuildInterpApproximateInverse(A, CF_marker_data, num_cpts_global, &P);
       }
+
+      /* Perform truncation */
+      hypre_BoomerAMGInterpTruncation(P, trunc_factor, max_elmts);
    }
    else if (interp_type == 5)
    {
-      hypre_BoomerAMGBuildModExtInterp(A, CF_marker, aux_mat, num_cpts_global,
+      hypre_BoomerAMGBuildModExtInterp(A, CF_marker_data, S, num_cpts_global,
                                        1, NULL, 0, trunc_factor, max_elmts, &P);
    }
    else if (interp_type == 6)
    {
-      hypre_BoomerAMGBuildModExtPIInterp(A, CF_marker, aux_mat, num_cpts_global,
+      hypre_BoomerAMGBuildModExtPIInterp(A, CF_marker_data, S, num_cpts_global,
                                          1, NULL, 0, trunc_factor, max_elmts, &P);
    }
    else if (interp_type == 7)
    {
-      hypre_BoomerAMGBuildModExtPEInterp(A, CF_marker, aux_mat, num_cpts_global,
+      hypre_BoomerAMGBuildModExtPEInterp(A, CF_marker_data, S, num_cpts_global,
                                          1, NULL, 0, trunc_factor, max_elmts, &P);
    }
    else if (interp_type == 12)
    {
-      hypre_MGRBuildPBlockJacobi(A, A_FF, A_FC, aux_mat, blk_size, CF_marker, &P);
+      /* Block diagonal interpolation */
+      hypre_MGRBuildBlockJacobiWp(A_FF, A_FC, blk_size, &Wp);
+      hypre_MGRBuildBlockJacobiP(A, A_FF, A_FC, Wp, blk_size, CF_marker_data, &P);
    }
    else
    {
       /* Classical modified interpolation */
-      hypre_BoomerAMGBuildInterp(A, CF_marker, aux_mat, num_cpts_global,
-                                 1, NULL, 0, trunc_factor, max_elmts, &P);
+      hypre_BoomerAMGBuildInterp(A, CF_marker_data, S, num_cpts_global, 1, NULL, 0,
+                                 trunc_factor, max_elmts, &P);
    }
 
-   /* set pointer to P */
+   /* set pointer to Wp and P */
+   *Wp_ptr = Wp;
    *P_ptr = P;
 
+   hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
@@ -164,6 +190,7 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
 #endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("Restrict");
 
    /* Build AT (transpose A) */
    if (restrict_type > 0 && restrict_type != 14)
@@ -215,9 +242,36 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
       hypre_MGRBuildInterpApproximateInverse(AT, CF_marker_data, num_cpts_global, &RT);
       hypre_BoomerAMGInterpTruncation(RT, trunc_factor, max_elmts);
    }
+   else if (restrict_type == 4 || restrict_type == 5)
+   {
+      /* Approximate Ideal Restriction (AIR) */
+      HYPRE_Real    filter_thresholdR = 0.0;
+      HYPRE_Int     gmres_switch = 64;
+      HYPRE_Int     is_triangular = 0;
+      HYPRE_Int    *dofunc_buff_data = NULL;
+      HYPRE_Int     air15_flag = 1;
+      HYPRE_Int     debug = 0;
+
+      hypre_BoomerAMGCreateSabs(A, strong_threshold, 1.0, 1, NULL, &ST);
+
+      if (restrict_type == 4)
+      {
+         /* distance-1 AIR */
+         hypre_BoomerAMGBuildRestrAIR(A, CF_marker_data, ST, num_cpts_global, 1,
+                                      dofunc_buff_data, filter_thresholdR, debug, &R,
+                                      is_triangular, gmres_switch);
+      }
+      else
+      {
+         /* distance-1.5 AIR - distance 2 locally and distance 1 across procs. */
+         hypre_BoomerAMGBuildRestrDist2AIR(A, CF_marker_data, ST, num_cpts_global, 1,
+                                           dofunc_buff_data, filter_thresholdR, debug, &R,
+                                           air15_flag, is_triangular, gmres_switch);
+      }
+   }
    else if (restrict_type == 12)
    {
-      hypre_MGRBuildPBlockJacobi(AT, A_FFT, A_FCT, NULL, blk_size, CF_marker_data, &RT);
+      hypre_MGRBuildBlockJacobiP(AT, A_FFT, A_FCT, NULL, blk_size, CF_marker_data, &RT);
    }
    else if (restrict_type == 13) // CPR-like restriction operator
    {
@@ -232,6 +286,7 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
       {
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "No GPU support!");
 
+         hypre_GpuProfilingPopRange();
          HYPRE_ANNOTATE_FUNC_END;
          return hypre_error_flag;
       }
@@ -296,17 +351,12 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
    *W_ptr  = W;
 
    /* Free memory */
-   if (restrict_type > 0)
-   {
-      hypre_ParCSRMatrixDestroy(AT);
-      hypre_ParCSRMatrixDestroy(A_FFT);
-      hypre_ParCSRMatrixDestroy(A_FCT);
-   }
-   if (restrict_type > 5)
-   {
-      hypre_ParCSRMatrixDestroy(ST);
-   }
+   hypre_ParCSRMatrixDestroy(AT);
+   hypre_ParCSRMatrixDestroy(A_FFT);
+   hypre_ParCSRMatrixDestroy(A_FCT);
+   hypre_ParCSRMatrixDestroy(ST);
 
+   hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
@@ -501,7 +551,7 @@ hypre_MGRBuildPFromWpHost( hypre_ParCSRMatrix    *A,
 /*--------------------------------------------------------------------------
  * hypre_MGRBuildBlockJacobiWp
  *
- * TODO: Move this to hypre_MGRBuildPBlockJacobi? (VPM)
+ * TODO: Move this to hypre_MGRBuildBlockJacobiP? (VPM)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -533,11 +583,11 @@ hypre_MGRBuildBlockJacobiWp( hypre_ParCSRMatrix   *A_FF,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MGRBuildPBlockJacobi
+ * hypre_MGRBuildBlockJacobiP
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRBuildPBlockJacobi( hypre_ParCSRMatrix   *A,
+hypre_MGRBuildBlockJacobiP( hypre_ParCSRMatrix   *A,
                             hypre_ParCSRMatrix   *A_FF,
                             hypre_ParCSRMatrix   *A_FC,
                             hypre_ParCSRMatrix   *Wp,

@@ -1411,7 +1411,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
                         rows[mi] += loop_index[d] * rs[d] * dom_stride[d];
                         cols[ci] += loop_index[d] * cs[d];
                      }
-                     /* WM: note - if doing a get, don't need to manipulate ijvalues here, right? 
+                     /* WM: note - if doing a get, don't need to manipulate ijvalues here, right?
                       *            likewise, if doing a set, don't need the values_map */
                      ijvalues[ci] = values[ei + vi * nentries];
                      values_map[ei + vi * nentries] = ci;
@@ -1446,7 +1446,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
             if (action == -2)
             {
                /* Zero out entries gotten */
-               HYPRE_IJMatrixGetValuesAndZero(ijmatrix, nrows, ncols, rows, row_indexes, cols, ijvalues);
+               HYPRE_IJMatrixGetValuesAndZeroOut(ijmatrix, nrows, ncols, rows, row_indexes, cols, ijvalues);
             }
             else
             {
