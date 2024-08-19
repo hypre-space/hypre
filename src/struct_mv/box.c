@@ -905,6 +905,10 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
    /* Exit in trivial case */
    if (num_indices_in <= 0)
    {
+      if (*box_array_ptr == NULL)
+      {
+         *box_array_ptr = hypre_BoxArrayCreate(0, ndim);
+      }
       return hypre_error_flag;
    }
 
@@ -933,7 +937,7 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
    {
       if (*box_array_ptr == NULL)
       {
-         *box_array_ptr = hypre_BoxArrayCreate(1, ndim);
+         *box_array_ptr = hypre_BoxArrayCreate(0, ndim);
       }
       hypre_AppendBox(bbox, *box_array_ptr);
       hypre_BoxDestroy(bbox);

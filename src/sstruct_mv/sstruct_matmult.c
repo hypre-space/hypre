@@ -8,7 +8,7 @@
 #include "_hypre_sstruct_mv.h"
 #include "sstruct_matmult.h"
 
-//#define DEBUG_MATMULT
+#define DEBUG_MATMULT
 
 /*==========================================================================
  * SStructPMatrix routines
@@ -836,9 +836,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uP);
    diag_uP = hypre_ParCSRMatrixDiag(parcsr_uP);
    num_nonzeros_uP = hypre_CSRMatrixNumNonzeros(diag_uP);
-   /* WM: debug */
    if (nterms == 3 && (num_nonzeros_uP == 0))
-   /* if (0) */
    {
       /* Specialization for RAP when P has only the structured component */
       m = terms[1];
@@ -1030,9 +1028,10 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    ij_M = hypre_SStructMatrixIJMatrix(M);
    hypre_IJMatrixDestroyParCSR(ij_M);
    hypre_IJMatrixSetObject(ij_M, parcsr_uM);
+   hypre_SStructMatrixParCSRMatrix(M) = parcsr_uM;
    hypre_IJMatrixAssembleFlag(ij_M) = 1;
 
-   hypre_SStructMatrixCompressUToS(M);
+   hypre_SStructMatrixCompressUToS(M, 1);
 
    /* WM: should I do this here? What tolerance? Smarter way to avoid a bunch of zero entries? */
    /*     note that once I'm not converting the entire struct matrix, most of these should go away, I think... */
@@ -1279,215 +1278,6 @@ hypre_SStructMatrixRTtAP( hypre_SStructMatrix  *RT,
    *M_ptr = M;
 
    HYPRE_ANNOTATE_FUNC_END;
-
-   return hypre_error_flag;
-}
-
-
-
-
-
-/*--------------------------------------------------------------------------
- * hypre_SStructMatmatMarkSConvertLeft
- *
- * Mark points that need to be converted due to multiplying on the left.
- * Generate vectors marking required points for all matrices in the product.
- *
- *--------------------------------------------------------------------------*/
-
-/* hypre_SStructVector ** */
-/* hypre_SStructMatmatMarkSConvertLeft ( hypre_SStructMatrix **matrices, */
-/*                                       HYPRE_Int nmatrices ) */
-/* { */
-/*    MPI_Comm comm; */
-/*    HYPRE_Int ndim; */
-/*    HYPRE_Int i, m, part, var, nparts, nvars; */
-
-/*    hypre_ParCSRMatrix         *parcsr_U; */
-/*    hypre_SStructPMatrix       *pmatrix; */
-/*    hypre_SStructPGrid         *pgrid; */
-/*    HYPRE_SStructVariable      *vartypes; */
-
-/*    hypre_SStructVector **left_markers = hypre_CTAlloc(HYPRE_SStructVector*, nmatrices, HYPRE_MEMORY_HOST); */
-
-
-/*    /1* Get some general info *1/ */
-/*    comm   = hypre_SStructMatrixComm(matrices[0]); */
-/*    ndim   = hypre_SStructMatrixNDim(matrices[0]); */
-/*    nparts = hypre_SStructMatrixNParts(matrices[0]); */
-
-
-/*    /1* Create the grid for M */
-/*     * WM: Is the grid not just available somewhere??? Why do I need to create it? (Copy/paste from hypre_SStructMatmultSetup) */ 
-/*     * WM: Should be the same grid for all matrices, yes? How are coarse/fine spaces handled? When setting up the vector, how do I specify coarse/fine space? *1/ */
-/*    HYPRE_SStructGrid grid; */
-/*    HYPRE_SStructGridCreate(comm, ndim, nparts, &grid); */
-/*    for (part = 0; part < nparts; part++) */
-/*    { */
-/*       pmatrix = hypre_SStructMatrixPMatrix(matrices[0], part); */
-/*       pgrid = hypre_SStructPMatrixPGrid(pmatrix); */
-/*       nvars = hypre_SStructPGridNVars(pgrid); */
-/*       vartypes = hypre_SStructPGridVarTypes(pgrid); */
-
-/*       HYPRE_SStructGridSetVariables(grid, part, nvars, vartypes); */
-/*    } */
-
-
-/*    for (m = nmatrices - 1; m > 0; m++) */
-/*    { */
-/*       /1* Get parcsr unstructured portion of matrix *1/ */
-/*       HYPRE_IJMatrixGetObject(hypre_SStructMatrixIJMatrix(matrices[m]), (void **) &parcsr_U); */
-
-/*       /1* Create the vector *1/ */
-/*       HYPRE_SStructVectorCreate( hypre_SStructMatrixComm(matrices[m]), */
-/*                                  grid, */
-/*                                  (HYPRE_SStructVector)  &(left_markers[m]) ); */
-
-/*       /1* Set constant values *1/ */
-/*       HYPRE_SStructVectorSetConstantValues( HYPRE_SStructVector vector, */
-/*                                       HYPRE_Complex       value ) */
-/*       /1* Get the parvector *1/ */
-/*       par_vector = hypre_SStructVectorParVector(left_markers[m]); */
-
-/*    } */
-
-
-/*    return left_markers; */
-/* } */
-
-/*--------------------------------------------------------------------------
- * hypre_SStructMatmatConvertSToU
- *
- * Convert the necessary rows of the structured part of matrix S in
- * preparation for multiplying with U in unstructured format.
- *
- * Required points should already be marked in the convert_points vector.
- *
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int hypre_SStructMatmatConvertSToU ( hypre_SStructMatrix *S, hypre_IJMatrix *U,
-                                           hypre_IJMatrix **ij_S_ptr, HYPRE_Int left_right)
-{
-
-
-   HYPRE_Int ndim;
-   HYPRE_Int i, part, var;
-
-   /* Indices correspond to rows of S to be converted */
-   /* WM: todo - indices are per box? So I need more arrays here... */
-   /* something like indices[part][var][box][dim1]? */
-   HYPRE_Int num_indices;
-   HYPRE_Int **indices;
-
-   HYPRE_Real threshold;
-
-   /* WM: question - what's the data layout with part/var, boxarray, boxarrayarrays? */
-   hypre_BoxArrayArray ***convert_boxaa;
-
-   /* Get parcsr object for unstructured matrix U */
-   hypre_ParCSRMatrix *parcsr_U;
-   HYPRE_IJMatrixGetObject(U, (void **) &parcsr_U);
-
-   /* Get diag and offd matrices for U */
-   hypre_CSRMatrix *U_diag = hypre_ParCSRMatrixDiag(parcsr_U);
-   hypre_CSRMatrix *U_offd = hypre_ParCSRMatrixOffd(parcsr_U);
-
-
-
-
-   /* WM: debug */
-   hypre_SStructPGrid          *pgrid;
-   hypre_SStructPMatrix        *pmatrix;
-   HYPRE_Int nparts = hypre_SStructMatrixNParts(S);
-   HYPRE_Int nvars;
-   HYPRE_Int ***offsets = hypre_CTAlloc(HYPRE_Int**, nparts, HYPRE_MEMORY_HOST); // offsets[part][var][box]
-   HYPRE_Int cnt = 0;
-   for (part = 0; part < nparts; part++)
-   {
-      pmatrix = hypre_SStructMatrixPMatrix(S, part);
-      pgrid = hypre_SStructPMatrixPGrid(pmatrix);
-      nvars = hypre_SStructPGridNVars(pgrid);
-      offsets[part] = hypre_CTAlloc(HYPRE_Int*, nvars, HYPRE_MEMORY_HOST);
-      for (var = 0; var < nvars; var++)
-      {
-         hypre_StructMatrix *smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, var);
-         /* WM: what's the difference between data_space and data_boxes??? */
-         hypre_BoxArray *data_space = hypre_StructMatrixDataSpace(smatrix);
-         hypre_BoxArray *data_boxes = hypre_StructMatrixDataBoxes(smatrix);
-         offsets[part][var] = hypre_CTAlloc(HYPRE_Int, hypre_BoxArraySize(data_boxes), HYPRE_MEMORY_HOST);
-         hypre_ForBoxI(i, data_boxes)
-         {
-            hypre_Box *box = hypre_BoxArrayBox(data_boxes, i);
-            offsets[part][var][i] = cnt;
-            hypre_printf("WM: debug - offsets[%d][%d][%d] = %d\n", part, var, i, cnt);
-            cnt += hypre_BoxVolume(box);
-
-            hypre_printf("WM: debug - data_boxes[%d] = (%d %d) x (%d %d)\n", i, 
-                  hypre_BoxIMinD(box, 0),
-                  hypre_BoxIMinD(box, 1),
-                  hypre_BoxIMaxD(box, 0),
-                  hypre_BoxIMaxD(box, 1));
-            box = hypre_BoxArrayBox(data_space, i);
-            hypre_printf("WM: debug - data_space[%d] = (%d %d) x (%d %d)\n", i, 
-                  hypre_BoxIMinD(box, 0),
-                  hypre_BoxIMinD(box, 1),
-                  hypre_BoxIMaxD(box, 0),
-                  hypre_BoxIMaxD(box, 1));
-
-         }
-      }
-   }
-   return 0;
-
-
-
-
-
-
-   
-      
-
-   /* Accumulate indices needed for U * S multiplication */
-   if (left_right == 0 || left_right == 2)
-   {
-      /* Loop over diag column indices of U */
-      /* WM: question - don't need offd here, correct? */
-      for (i = 0; i < hypre_CSRMatrixNumNonzeros(U_diag); i++)
-      {
-         /* WM: todo - Get mapping from col index (domain U) to part/var/box/idx (in range grid of S) */
-      }
-
-   }
-
-   /* Accumulate indices needed for S * U multiplication */
-   if (left_right == 1 || left_right == 2)
-   {
-      /* Loop over rows of U */
-      for (i = 0; i < hypre_CSRMatrixNumRows(U_diag); i++)
-      {
-         /* If nonzero row... */
-         if (hypre_CSRMatrixI(U_diag)[i+1] - hypre_CSRMatrixI(U_diag)[i] + hypre_CSRMatrixI(U_offd)[i+1] - hypre_CSRMatrixI(U_offd)[i] > 0)
-         {
-            /* Convert all rows of S that have nonzeros in the corresponding column of S. */
-            /* Since S is structured, we can get these rows via the stencil pattern */
-            /* WM: todo - Get mapping from row index (range U) to part/var/box/idx (in domain grid of S) */ 
-            /* WM: todo - for each index in the domain grid above, find indices in the range grid connected through the stencil */
-            /*            The resulting indices in the range grid are the ones to convert */
-         }
-      }
-
-   }
-
-
-   /* Use indices to generate a set of boxes */
-   /* WM: todo - need to loop over part/var here? */
-   /* hypre_BoxArrayCreateFromIndices(ndim, num_indices, indices, threshold, &(convert_boxaa[part][var])); */
-
-   /* Convert rows of S in the boxes */
-   /* WM: question - why is the grid a separate arg here? It should be the grid associated with the matrix, correct? */
-   hypre_SStructGraph     *graph  = hypre_SStructMatrixGraph(S);
-   hypre_SStructGrid      *grid   = hypre_SStructGraphGrid(graph);
-   /* hypre_SStructMatrixBoxesToUMatrix(S, grid, ij_S_ptr, convert_boxaa); */
 
    return hypre_error_flag;
 }

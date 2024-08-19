@@ -399,19 +399,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
                         /* Only do the renormalization at boundaries if interp_type < 0
                          * (that is, if no unstructured interpolation is used) */
-                        if (interp_type >= 0)
-                        {
-                           /* If handling all interpolation at part boundaries with unstructured, zero out the structured weights */
-                           /* WM: todo - this zeros out the boundary weights, but we should not rely on a halo here...
-                            *            Move this later, and loop over the same boxes that get converted for A_u_aug */
-                           hypre_BoxLoop1Begin(ndim, loop_size, P_dbox, Pstart, Pstride, Pi);
-                           {
-                              Pp1[Pi] = 0.0;
-                              Pp2[Pi] = 0.0;
-                           }
-                           hypre_BoxLoop1End(Pi);
-                        }
-                        else
+                        if (interp_type < 0)
                         {
 
                            if (hypre_IndexD(loop_size, cdir) > 1)
@@ -474,26 +462,19 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       hypre_ParCSRMatrix *A_u_aug;
       hypre_ParCSRMatrix *P_u;
       /* WM: debug */
-      char filename[256];
-      hypre_sprintf(filename, "A_u_diag_%d", hypre_CSRMatrixNumRows(A_u_diag));
-      hypre_CSRMatrixPrintIJ(A_u_diag, 0, 0, filename);
+      /* char filename[256]; */
+      /* hypre_sprintf(filename, "A_u_%d", hypre_ParCSRMatrixNumRows(A_u)); */
+      /* hypre_ParCSRMatrixPrintIJ(A_u, 0, 0, filename); */
 
       /* Convert boundary of A to IJ matrix */
-      hypre_IJMatrix *A_struct_bndry_ij;
+      hypre_IJMatrix *A_struct_bndry_ij = NULL;
 
-      /* WM: todo - don't rely on a halo here but rather connections in A_u */
-#if 1
-      hypre_SStructMatrixHaloToUMatrix(A, grid, &A_struct_bndry_ij, 1);
-#else
       HYPRE_Int              num_indices = 0;
       HYPRE_Int             *indices[ndim];
+      hypre_BoxArray        *indices_boxa = NULL;
       hypre_Index            index, start;
-      hypre_printf("WM: debug - num rows A_u_diag = %d\n", hypre_CSRMatrixNumRows(A_u_diag));
-      for (i = 0; i < ndim; i++)
-      {
-         indices[i] = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A_u_diag), HYPRE_MEMORY_HOST);
-      }
       HYPRE_Real             threshold = 1.0; // WM: todo - what should this be?
+      hypre_BoxArray      ***P_u_boxa = hypre_TAlloc(hypre_BoxArray**, nparts, HYPRE_MEMORY_HOST);
       hypre_BoxArray      ***convert_boxa = hypre_TAlloc(hypre_BoxArray**, nparts, HYPRE_MEMORY_HOST);
       HYPRE_Int cnt = 0;
       for (part = 0; part < nparts; part++)
@@ -501,6 +482,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          pgrid = hypre_SStructGridPGrid(grid, part);
          nvars = hypre_SStructPGridNVars(pgrid);
 
+         P_u_boxa[part] = hypre_CTAlloc(hypre_BoxArray*, nvars, HYPRE_MEMORY_HOST);
          convert_boxa[part] = hypre_CTAlloc(hypre_BoxArray*, nvars, HYPRE_MEMORY_HOST);
 
          /* Loop over variables */
@@ -512,62 +494,82 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
             /* but NOT on the coarse grid... need to do grid box and then add the ghosts... why? */
             /* compute_boxes = hypre_StructMatrixDataSpace(A_s); */
             compute_boxes = hypre_StructGridBoxes(sgrid);
+            compute_box = hypre_BoxCreate(ndim);
+
+            convert_boxa[part][vi] = hypre_BoxArrayCreate(0, ndim);
+            P_u_boxa[part][vi] = hypre_BoxArrayCreate(0, ndim);
 
             /* Loop over boxes */
             hypre_ForBoxI(i, compute_boxes)
             {
-               compute_box = hypre_BoxArrayBox(compute_boxes, i);
-               /* WM: todo - adding ghosts here... why can't I just use the DataSpace of the matrix? */
+               num_indices = 0;
+               for (j = 0; j < ndim; j++)
+               {
+                  indices[j] = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A_u_diag), HYPRE_MEMORY_HOST);
+               }
+               hypre_CopyBox(hypre_BoxArrayBox(compute_boxes, i), compute_box);
                HYPRE_Int *num_ghost = hypre_StructGridNumGhost(sgrid);
-               hypre_printf("WM: debug - compute_box before growing = (%d %d) x (%d %d)\n",
-                     hypre_BoxIMin(compute_box)[0],
-                     hypre_BoxIMin(compute_box)[1],
-                     hypre_BoxIMax(compute_box)[0],
-                     hypre_BoxIMax(compute_box)[1]);
-               hypre_printf("WM: debug - num_ghost = %d %d\n", num_ghost[0], num_ghost[1]);
                hypre_BoxGrowByArray(compute_box, num_ghost);
-               hypre_printf("WM: debug - compute_box = (%d %d) x (%d %d)\n",
-                     hypre_BoxIMin(compute_box)[0],
-                     hypre_BoxIMin(compute_box)[1],
-                     hypre_BoxIMax(compute_box)[0],
-                     hypre_BoxIMax(compute_box)[1]);
                hypre_BoxGetSize(compute_box, loop_size);
                hypre_SetIndex(stride, 1);
                hypre_CopyToIndex(hypre_BoxIMin(compute_box), ndim, start);
                hypre_BoxLoop1Begin(ndim, loop_size, compute_box, start, stride, ii);
                {
-                  hypre_printf("WM: debug - cnt = %d\n", cnt);
-                  hypre_BoxLoopGetIndex(index);
-                  hypre_printf("WM: debug - index = (%d, %d)\n", index[0] + start[0], index[1] + start[1]);
+                  /* WM: todo - this mapping to the unstructured indices only works with no inter-variable couplings? */
                   if (hypre_CSRMatrixI(A_u_diag)[cnt+1] - hypre_CSRMatrixI(A_u_diag)[cnt] + 
                         hypre_CSRMatrixI(A_u_offd)[cnt+1] - hypre_CSRMatrixI(A_u_offd)[cnt] > 0)
                   {
-                     /* hypre_BoxLoopGetIndex(index); */
+                     hypre_BoxLoopGetIndex(index);
                      for (j = 0; j < ndim; j++)
                      {
                         indices[j][num_indices] = index[j] + start[j];
                      }
-                     hypre_printf("WM: debug - indices[%d] = (%d, %d)\n", num_indices, index[0], index[1]);
                      num_indices++;
                   }
                   cnt++;
                }
                hypre_BoxLoop1End(ii);
+
+               /* Create P_u_boxa box array from indices marking where A_u is non-trivial (we want P_u here) */
+               hypre_BoxArrayCreateFromIndices(ndim, num_indices, indices, threshold, &indices_boxa);
+               tmp_box = hypre_BoxCreate(ndim);
+               hypre_ForBoxI(j, indices_boxa)
+               {
+                  hypre_CopyBox(hypre_BoxArrayBox(indices_boxa, j), tmp_box);
+                  hypre_AppendBox(tmp_box, P_u_boxa[part][vi]);
+                  /* WM: todo - need 2 for distance 2 interp below? Make this dependent on interpolation or just hardcode to 2? */
+                  hypre_BoxGrowByValue(tmp_box, 2);
+                  /* WM: intersect with the struct grid box... is that right? NOTE: if you change to DataSpace of the matrix above, you'll need to change this line */
+                  hypre_IntersectBoxes(tmp_box, hypre_BoxArrayBox(compute_boxes, i), tmp_box);
+                  hypre_AppendBox(tmp_box, convert_boxa[part][vi]);
+               }
+               hypre_BoxDestroy(tmp_box);
+               hypre_BoxArrayDestroy(indices_boxa);
+               indices_boxa = NULL;
+
+               for (j = 0; j < ndim; j++)
+               {
+                  indices[j] = hypre_TFree(indices[j], HYPRE_MEMORY_HOST);
+               }
             }
-            /* hypre_printf("WM: debug - %s : %d\n", __FILE__, __LINE__); */
-            hypre_BoxArrayCreateFromIndices(ndim, num_indices, indices, threshold, &(convert_boxa[part][vi]));
-            /* hypre_printf("WM: debug - %s : %d\n", __FILE__, __LINE__); */
+            hypre_BoxDestroy(compute_box);
          }
       }
       hypre_SStructMatrixBoxesToUMatrix(A, grid, &A_struct_bndry_ij, convert_boxa);
       /* WM: todo - cleanup memory: convert_boxa, indices, etc. */
-#endif
 
 
 
       /* Add structured boundary portion to unstructured portion */
       hypre_ParCSRMatrix *A_struct_bndry = hypre_IJMatrixObject(A_struct_bndry_ij);
       hypre_ParCSRMatrix *A_bndry;
+
+      /* WM: debug */
+      /* hypre_sprintf(filename, "A_u_%d", hypre_ParCSRMatrixNumRows(A_u)); */
+      /* hypre_ParCSRMatrixPrintIJ(A_u, 0, 0, filename); */
+      /* hypre_sprintf(filename, "A_struct_bndry_%d", hypre_ParCSRMatrixNumRows(A_u)); */
+      /* hypre_ParCSRMatrixPrintIJ(A_struct_bndry, 0, 0, filename); */
+
       hypre_ParCSRMatrixAdd(1.0, A_struct_bndry, 1.0, A_u, &A_bndry);
 
       /* WM: todo - I'm adding a zero diagonal here because if BoomerAMG interpolation gets a */
@@ -680,39 +682,9 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          }
       }
 
-      /* WM: todo - this is kind of a hacky workaround for now... just looping through */
-      /* WM: todo - test without this now that I have compressSToU */
-      /* A_u_aug and looking for missing/negative diagonals and removing those rows */
-      HYPRE_Int *A_u_aug_diag_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A_u_aug));
-      HYPRE_Int *A_u_aug_offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(A_u_aug));
-      HYPRE_Int *A_u_aug_diag_j = hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(A_u_aug));
-      HYPRE_Complex *A_u_aug_diag_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A_u_aug));
-      HYPRE_Complex *A_u_aug_offd_data = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(A_u_aug));
-      HYPRE_Int zero_this_row;
-
-      for (i = 0; i < hypre_ParCSRMatrixNumRows(A_u_aug); i++)
-      {
-         /* Zero out the row unless you find a positive diagonal element */
-         zero_this_row = 1;
-         for (j = A_u_aug_diag_i[i]; j < A_u_aug_diag_i[i+1]; j++)
-         {
-            if (A_u_aug_diag_j[j] == i && A_u_aug_diag_data[j] > 0.0)
-            {
-               zero_this_row = 0;
-            }
-         }
-         if (zero_this_row)
-         {
-            for (j = A_u_aug_diag_i[i]; j < A_u_aug_diag_i[i+1]; j++)
-            {
-               A_u_aug_diag_data[j] = 0.0;
-            }
-            for (j = A_u_aug_offd_i[i]; j < A_u_aug_offd_i[i+1]; j++)
-            {
-               A_u_aug_offd_data[j] = 0.0;
-            }
-         }
-      }
+      /* WM: debug */
+      /* hypre_sprintf(filename, "A_u_aug_%d", hypre_ParCSRMatrixNumRows(A_u)); */
+      /* hypre_ParCSRMatrixPrintIJ(A_u_aug, 0, 0, filename); */
 
       /* Generate unstructured interpolation */
       /* WM: todo - experiment with strenght matrix that counts only the P_s stencil entries and all inter-part connections as strong; */
@@ -732,24 +704,38 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                                  max_elmts,
                                  &P_u);
 
-      /* WM: postprocess P_u to remove injection entries. These should already be accounted for in P_s. Is this the best way to do this? */
-      /* WM: todo - yeah, once I have the functionality for compressing unstructured -> structured entries, I can use that here */
-      for (i = 0; i < hypre_ParCSRMatrixNumRows(P_u); i++)
+      /* Set P_u as unstructured component of P */
+      hypre_IJMatrixDestroyParCSR(hypre_SStructMatrixIJMatrix(P));
+      hypre_IJMatrixSetObject(hypre_SStructMatrixIJMatrix(P), P_u);
+      hypre_SStructMatrixParCSRMatrix(P) = P_u;
+      hypre_IJMatrixAssembleFlag(P_u) = 1;
+
+      /* Zero out C-point injection entries and entries in P_u outside of P_u_boxa and delete zeros */
+      hypre_CSRMatrix *P_u_diag = hypre_ParCSRMatrixDiag(P_u);
+      hypre_CSRMatrix *P_u_offd = hypre_ParCSRMatrixOffd(P_u);
+      for (i = 0; i < hypre_CSRMatrixNumRows(A_u_diag); i++)
       {
-         if (CF_marker[i] == 1)
+         /* If this is a C-point or a zero row in A_u, zero out P_u */
+         if (CF_marker[i] == 1 || hypre_CSRMatrixI(A_u_diag)[i+1] - hypre_CSRMatrixI(A_u_diag)[i] + 
+               hypre_CSRMatrixI(A_u_offd)[i+1] - hypre_CSRMatrixI(A_u_offd)[i] == 0)
          {
-            hypre_CSRMatrixData( hypre_ParCSRMatrixDiag(P_u) )[ hypre_CSRMatrixI( hypre_ParCSRMatrixDiag(P_u) )[i] ] = 0.0;
+            for (j = hypre_CSRMatrixI(P_u_diag)[i]; j < hypre_CSRMatrixI(P_u_diag)[i+1]; j++)
+            {
+               hypre_CSRMatrixData(P_u_diag)[j] = 0.0;
+            }
+            for (j = hypre_CSRMatrixI(P_u_offd)[i]; j < hypre_CSRMatrixI(P_u_offd)[i+1]; j++)
+            {
+               hypre_CSRMatrixData(P_u_offd)[j] = 0.0;
+            }
          }
       }
-
-      /* WM: todo - should I do this here? What tolerance? Smarter way to avoid a bunch of zero entries? */
-      hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(P_u), 1e-20);
+      hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(P_u), HYPRE_REAL_MIN);
       if (delete_zeros)
       {
          hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(P_u));
          hypre_ParCSRMatrixDiag(P_u) = delete_zeros;
       }
-      delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(P_u), 1e-20);
+      delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(P_u), HYPRE_REAL_MIN);
       if (delete_zeros)
       {
          hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(P_u));
@@ -757,14 +743,33 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       }
       hypre_ParCSRMatrixSetNumNonzeros(P_u);
 
-      /* WM: question - is this the right way to set the U matrix? */
-      hypre_IJMatrixDestroyParCSR(hypre_SStructMatrixIJMatrix(P));
-      hypre_SStructMatrixParCSRMatrix(P) = P_u;
-      hypre_IJMatrixSetObject(hypre_SStructMatrixIJMatrix(P), P_u);
+      /* WM: debug */
+      /* hypre_sprintf(filename, "P_before_compress_%d", hypre_ParCSRMatrixNumRows(A_u)); */
+      /* HYPRE_SStructMatrixPrint(filename, P, 0); */
+
+      /* Overwrite entries in P_s where appropriate with values of P_u */
+      hypre_SStructMatrixCompressUToS(P, 0);
+
+      /* Remove zeros from P_u again after the compression above */
+      /* WM: todo - Currently I have to get rid of zeros twice... is there a better way? */
+      delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(P_u), HYPRE_REAL_MIN);
+      if (delete_zeros)
+      {
+         hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(P_u));
+         hypre_ParCSRMatrixDiag(P_u) = delete_zeros;
+      }
+      delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(P_u), HYPRE_REAL_MIN);
+      if (delete_zeros)
+      {
+         hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(P_u));
+         hypre_ParCSRMatrixOffd(P_u) = delete_zeros;
+      }
+      hypre_ParCSRMatrixSetNumNonzeros(P_u);
 
       /* Clean up */
       HYPRE_IJMatrixDestroy(A_struct_bndry_ij);
       hypre_ParCSRMatrixDestroy(A_u_aug);
+      hypre_TFree(CF_marker, HYPRE_MEMORY_DEVICE);
    }
 
    return hypre_error_flag;
