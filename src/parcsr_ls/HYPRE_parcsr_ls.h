@@ -180,6 +180,11 @@ HYPRE_Int HYPRE_BoomerAMGSetNumFunctions(HYPRE_Solver solver,
  *   - A value of 0 (default) indicates no filtering, preserving all inter-variable connections.
  *   - A value of 1 enables filtering, removing inter-variable connections to lower
  *     operator and memory complexities.
+ *
+ * @note This option assumes that variables are stored in an interleaved format,
+ *       where multiple variables are combined in a single vector. Enabling filtering
+ *       can be beneficial when the problem has multiple coupled variables (functions)
+ *       that are not strongly coupled.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFilterFunctions(HYPRE_Solver solver,
                                             HYPRE_Int    filter_functions);
