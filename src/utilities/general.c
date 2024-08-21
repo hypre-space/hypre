@@ -31,9 +31,8 @@ hypre_Handle*
 hypre_HandleCreate(void)
 {
    hypre_Handle *hypre_handle_ = hypre_CTAlloc(hypre_Handle, 1, HYPRE_MEMORY_HOST);
-   const char* env_log_level = getenv("HYPRE_LOG_LEVEL");
 
-   hypre_HandleLogLevel(hypre_handle_) = (env_log_level) ? (HYPRE_Int) atoi(env_log_level) : 0;
+   hypre_HandleLogLevel(hypre_handle_) = 0;
    hypre_HandleMemoryLocation(hypre_handle_) = HYPRE_MEMORY_DEVICE;
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)

@@ -1460,6 +1460,7 @@ extern hypre_MemoryTracker *_hypre_memory_tracker;
 
 #endif /* #if defined(HYPRE_USING_MEMORY_TRACKER) */
 #endif /* #ifndef hypre_MEMORY_TRACKER_HEADER */
+
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -2414,6 +2415,7 @@ HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
 HYPRE_Int hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle);
 
 /* handle.c */
+HYPRE_Int hypre_SetLogLevel( HYPRE_Int log_level );
 HYPRE_Int hypre_SetSpTransUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int hypre_SetSpMVUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int hypre_SetSpGemmUseVendor( HYPRE_Int use_vendor );
