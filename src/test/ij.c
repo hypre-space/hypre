@@ -112,6 +112,7 @@ main( hypre_int argc,
 {
    HYPRE_Int           arg_index;
    HYPRE_Int           print_usage;
+   HYPRE_Int           log_level = 0;
    HYPRE_Int           sparsity_known = 0;
    HYPRE_Int           add = 0;
    HYPRE_Int           check_constant = 0;
@@ -694,7 +695,12 @@ main( hypre_int argc,
 
    while ( (arg_index < argc) && (!print_usage) )
    {
-      if ( strcmp(argv[arg_index], "-frombinfile") == 0 )
+      if ( strcmp(argv[arg_index], "-ll") == 0 )
+      {
+         arg_index++;
+         log_level = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-frombinfile") == 0 )
       {
          arg_index++;
          build_matrix_type      = -2;
@@ -2302,6 +2308,10 @@ main( hypre_int argc,
          hypre_printf("\n");
          hypre_printf("Usage: %s [<options>]\n", argv[0]);
          hypre_printf("\n");
+         hypre_printf("  -ll                        : hypre's log level. \n");
+         hypre_printf("      0 = (default) No messaging.\n");
+         hypre_printf("      1 = Display memory usage statistics for each MPI rank.\n");
+         hypre_printf("      2 = Display aggregate memory usage statistics over MPI ranks.\n");
          hypre_printf("  -fromfile <filename>       : ");
          hypre_printf("matrix read from multiple files (IJ format)\n");
          hypre_printf("  -frombinfile <filename>    : ");
@@ -2745,6 +2755,9 @@ main( hypre_int argc,
       hypre_MemoryTrackerSetFileName(mem_tracker_name);
    }
 #endif
+
+   /* Set log level */
+   HYPRE_SetLogLevel(log_level);
 
    /* default memory location */
    HYPRE_SetMemoryLocation(memory_location);
