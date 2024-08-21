@@ -158,20 +158,20 @@ Final Relative Residual Norm = 7.167937e-09
                    cycle = 5.473918
 
 # Output file: solvers.out.27
-Iterations = 12
-Final Relative Residual Norm = 5.893893e-09
+Iterations = 17
+Final Relative Residual Norm = 4.472032e-09
 
 # Output file: solvers.out.28
-Iterations = 18
-Final Relative Residual Norm = 3.448418e-09
+Iterations = 25
+Final Relative Residual Norm = 4.134529e-09
 
 # Output file: solvers.out.29
-Iterations = 13
-Final Relative Residual Norm = 4.536558e-09
+Iterations = 17
+Final Relative Residual Norm = 7.555200e-09
 
 # Output file: solvers.out.30
-Iterations = 19
-Final Relative Residual Norm = 3.853111e-09
+Iterations = 23
+Final Relative Residual Norm = 8.408484e-09
 
 # Output file: solvers.out.101
 LGMRES Iterations = 83
