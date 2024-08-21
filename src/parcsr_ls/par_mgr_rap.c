@@ -101,6 +101,9 @@ hypre_MGRNonGalerkinTruncate(hypre_ParCSRMatrix *A,
 
       for (i = 0; i < nrows; i++)
       {
+         row_start = i - (i % blk_dim);
+         row_stop  = row_start + blk_dim - 1;
+
          /* Copy (block) diagonal data to new arrays */
          for (jj = A_diag_i[i]; jj < A_diag_i[i + 1]; jj++)
          {
@@ -117,9 +120,6 @@ hypre_MGRNonGalerkinTruncate(hypre_ParCSRMatrix *A,
          if (max_elmts > 0)
          {
             cnt = 0;
-            row_start = i - (i % blk_dim);
-            row_stop  = row_start + blk_dim - 1;
-
             for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
             {
                aux_j[cnt] = A_offd_j[jj] + ncol_diag;
@@ -274,6 +274,7 @@ hypre_MGRBuildNonGalerkinCoarseOperatorHost(hypre_ParCSRMatrix    *A_FF,
          hypre_ParCSRMatrixBlockDiagMatrix(A_FF, blk_inv_size, -1, NULL, 1, &A_FF_inv);
 
          /* TODO (VPM): We shouldn't need to compute Wr_tmp since we are passing in Wr already */
+         HYPRE_UNUSED_VAR(Wr);
          Wr_tmp = hypre_ParCSRMatMat(A_CF_truncated, A_FF_inv);
          A_Hc = hypre_ParCSRMatMat(Wr_tmp, A_FC);
          hypre_ParCSRMatrixDestroy(Wr_tmp);
@@ -533,6 +534,7 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
             Restriction is not the injection operator (Wr != NULL) */
          RAP_c = hypre_ParCSRMatMat(Wr, A_FC);
          hypre_ParCSRMatrixAdd(1.0, A_CC, -1.0, RAP_c, &RAP);
+         hypre_ParCSRMatrixDestroy(RAP_c);
       }
       else if (RT)
       {

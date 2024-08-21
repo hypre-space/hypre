@@ -3000,8 +3000,8 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
    HYPRE_Int num_procs, my_id;
    HYPRE_BigInt col_0, col_n, first;
    //HYPRE_Int cancel_indx;
-   HYPRE_BigInt **aux_j;
-   HYPRE_Complex **aux_data;
+   HYPRE_BigInt **aux_j = NULL;
+   HYPRE_Complex **aux_data = NULL;
    HYPRE_Int *row_length, *row_space;
    HYPRE_Int need_aux;
    HYPRE_Int *diag_i = NULL;
@@ -3647,8 +3647,8 @@ hypre_IJMatrixAddToValuesOMPParCSR( hypre_IJMatrix       *matrix,
    MPI_Comm comm = hypre_IJMatrixComm(matrix);
    HYPRE_Int num_procs, my_id;
    HYPRE_BigInt col_0, col_n, first;
-   HYPRE_BigInt **aux_j;
-   HYPRE_Complex **aux_data;
+   HYPRE_BigInt **aux_j = NULL;
+   HYPRE_Complex **aux_data = NULL;
    HYPRE_Int *row_length, *row_space;
    HYPRE_Int need_aux;
    HYPRE_Int *diag_i = NULL;

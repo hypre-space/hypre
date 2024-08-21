@@ -205,6 +205,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    hypre_BoxInit(&intersect_box, ndim);
    hypre_BoxInit(&loop_box, ndim);
    hypre_BoxInit(&coarse_cell_box, ndim);
+   hypre_SetIndex3(lindex, 0, 0, 0);
 
    /*--------------------------------------------------------------------------
     * Task: Coarsen the fbox and f/c connections to form the coarse grid
