@@ -1033,7 +1033,7 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
       }
    }
 
-   HYPRE_PRINT_MEMORY_USAGE;
+   HYPRE_PRINT_MEMORY_USAGE(comm);
 
    return hypre_error_flag;
 }
@@ -1624,7 +1624,7 @@ hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix       *matrix,
       }
    }
 
-   HYPRE_PRINT_MEMORY_USAGE;
+   HYPRE_PRINT_MEMORY_USAGE(comm);
 
    return hypre_error_flag;
 }
@@ -2954,7 +2954,7 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
    hypre_AuxParCSRMatrixDestroy(aux_matrix);
    hypre_IJMatrixTranslator(matrix) = NULL;
 
-   HYPRE_PRINT_MEMORY_USAGE;
+   HYPRE_PRINT_MEMORY_USAGE(comm);
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
