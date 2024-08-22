@@ -1292,7 +1292,8 @@ hypre_HostMemoryGetUsage(HYPRE_Real *mem)
    free_mem = (size_t) vm_stat.free_count * (size_t) vm_page_size;
 
    /* Get the task info */
-   if (task_info(mach_task_self(), TASK_BASIC_INFO, (task_info_t)&t_info, &t_info_count) != KERN_SUCCESS)
+   if (task_info(mach_task_self(), TASK_BASIC_INFO, (task_info_t)&t_info,
+                 &t_info_count) != KERN_SUCCESS)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem running task_info!");
       return hypre_error_flag;
@@ -1424,8 +1425,8 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
       {
          for (j = 0; j < ne; j++)
          {
-            if (gmem[ne * i + j] < min[j]) min[j] = gmem[ne * i + j];
-            if (gmem[ne * i + j] > max[j]) max[j] = gmem[ne * i + j];
+            if (gmem[ne * i + j] < min[j]) { min[j] = gmem[ne * i + j]; }
+            if (gmem[ne * i + j] > max[j]) { max[j] = gmem[ne * i + j]; }
             avg[j] += gmem[ne * i + j];
          }
       }

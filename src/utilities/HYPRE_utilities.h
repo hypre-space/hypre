@@ -267,7 +267,8 @@ HYPRE_Int HYPRE_PrintDeviceInfo(void);
  *                      on Windows platforms.
  */
 
-HYPRE_Int HYPRE_MemoryPrintUsage(MPI_Comm comm, HYPRE_Int level, const char *function, HYPRE_Int line);
+HYPRE_Int HYPRE_MemoryPrintUsage(MPI_Comm comm, HYPRE_Int level, const char *function,
+                                 HYPRE_Int line);
 
 /*--------------------------------------------------------------------------
  * HYPRE Version routines
