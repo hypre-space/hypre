@@ -142,7 +142,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("MGRSetup");
    hypre_GpuProfilingPushRange("MGRSetup-Init");
-   hypre_MemoryPrintUsage(comm, "MGR setup begin", 0);
+   hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "MGR setup begin", 0);
 
    block_size = (mgr_data -> block_size);
    block_jacobi_bsize = (mgr_data -> block_jacobi_bsize);
@@ -1706,7 +1706,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    /* Print MGR and linear system info according to print level */
    hypre_MGRDataPrint(mgr_vdata);
 
-   hypre_MemoryPrintUsage(comm, "MGR setup end", 0);
+   hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "MGR setup end", 0);
    HYPRE_ANNOTATE_FUNC_END;
    hypre_GpuProfilingPopRange();
 

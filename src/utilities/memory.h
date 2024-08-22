@@ -197,8 +197,12 @@ HYPRE_Int hypre_UmpireFinalize(hypre_Handle *hypre_handle_);
 HYPRE_Int hypre_UmpireGetCurrentMemoryUsage(MPI_Comm comm, HYPRE_Real *current);
 HYPRE_Int hypre_UmpireMemoryGetUsage(HYPRE_Real *memory);
 HYPRE_Int hypre_HostMemoryGetUsage(HYPRE_Real *mem);
-HYPRE_Int hypre_MemoryPrintUsage(MPI_Comm comm, const char *function, HYPRE_Int line);
-
+HYPRE_Int hypre_MemoryPrintUsage(MPI_Comm comm, HYPRE_Int level,
+                                 const char *function, HYPRE_Int line);
+#define HYPRE_PRINT_MEMORY_USAGE hypre_MemoryPrintUsage(comm,\
+                                                        hypre_HandleLogLevel(hypre_handle()),\
+                                                        __FUNCTION__,\
+                                                        __LINE__)
 /* memory_dmalloc.c */
 HYPRE_Int hypre_InitMemoryDebugDML( HYPRE_Int id );
 HYPRE_Int hypre_FinalizeMemoryDebugDML( void );

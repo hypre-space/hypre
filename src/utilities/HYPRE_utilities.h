@@ -232,8 +232,42 @@ HYPRE_Int HYPRE_PrintErrorMessages(MPI_Comm comm);
 /* Print GPU information */
 HYPRE_Int HYPRE_PrintDeviceInfo(void);
 
-/* Print memory usage */
-HYPRE_Int HYPRE_MemoryPrintUsage(MPI_Comm comm, const char *function, HYPRE_Int line);
+/**
+ * @brief Prints the memory usage of the current process.
+ *
+ * This function prints the memory usage details of the process to standard output.
+ * It provides information such as the virtual memory size, resident set size,
+ * and other related statistics including GPU memory usage for device builds.
+ *
+ * @param[in] comm      The MPI communicator. This parameter allows the function
+ *                      to print memory usage information for the process within
+ *                      the context of an MPI program.
+ *
+ * @param[in] level     The level of detail in the memory statistics output.
+ *                        - 1 : Display memory usage statistics for each MPI rank.
+ *                        - 2 : Display aggregate memory usage statistics over MPI ranks.
+ *
+ * @param[in] function  The name of the function from which `HYPRE_MemoryPrintUsage`
+ *                      is called. This is typically set to `__func__`, which
+ *                      automatically captures the name of the calling function.
+ *                      This variable can also be used to denote a region name.
+ *
+ * @param[in] line      The line number in the source file where `HYPRE_MemoryPrintUsage`
+ *                      is called. This is typically set to `__LINE__`, which
+ *                      automatically captures the line number. The line number can be
+ *                      omitted by passing a negative value to this variable.
+ *
+ * @return              Returns an integer status code. `0` indicates success, while
+ *                      a non-zero value indicates an error occurred.
+ *
+ * @note                The function is designed to be platform-independent but
+ *                      may provide different levels of detail depending on the
+ *                      underlying operating system (e.g., Linux, macOS). However,
+ *                      this function does not lead to correct memory usage statistics
+ *                      on Windows platforms.
+ */
+
+HYPRE_Int HYPRE_MemoryPrintUsage(MPI_Comm comm, HYPRE_Int level, const char *function, HYPRE_Int line);
 
 /*--------------------------------------------------------------------------
  * HYPRE Version routines

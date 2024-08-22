@@ -13,7 +13,12 @@
 
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
-#if !defined(_WIN32)
+#if defined(__APPLE__)
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#include <mach/mach.h>
+#include <mach/task_info.h>
+#elif defined(__linux__)
 #include <sys/sysinfo.h>
 #endif
 
@@ -1252,16 +1257,13 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
 HYPRE_Int
 hypre_HostMemoryGetUsage(HYPRE_Real *mem)
 {
-   size_t           vm_size  = 0;
-   size_t           vm_rss   = 0;
-   size_t           vm_hwm   = 0;
-   size_t           vm_peak  = 0;
-   size_t           tot_mem  = 0;
-   size_t           free_mem = 0;
-   HYPRE_Real       kb_to_gb = (HYPRE_Real) (1 << 20);
-   HYPRE_Real       b_to_gb  = (HYPRE_Real) (1 << 30);
-   char             line[512];
-   FILE            *file;
+   size_t       vm_size  = 0;
+   size_t       vm_rss   = 0;
+   size_t       vm_hwm   = 0;
+   size_t       vm_peak  = 0;
+   size_t       tot_mem  = 0;
+   size_t       free_mem = 0;
+   HYPRE_Real   b_to_gb  = (HYPRE_Real) (1 << 30);
 
    /* Sanity check */
    if (!mem)
@@ -1271,8 +1273,41 @@ hypre_HostMemoryGetUsage(HYPRE_Real *mem)
    }
 
    /* Get system memory info */
-#if !defined(_WIN32)
-   struct sysinfo info;
+#if defined(__APPLE__)
+   struct task_basic_info   t_info;
+   mach_msg_type_number_t   t_info_count = TASK_BASIC_INFO_COUNT;
+   mach_msg_type_number_t   count = HOST_VM_INFO_COUNT;
+   vm_statistics_data_t     vm_stat;
+   kern_return_t            kr;
+   hypre_int                mib[2] = {CTL_HW, HW_MEMSIZE};
+   size_t                   length = sizeof(size_t);
+
+   if (sysctl(mib, 2, &tot_mem, &length, NULL, 0))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem running sysctl!");
+      return hypre_error_flag;
+   }
+
+   kr = host_statistics(mach_host_self(), HOST_VM_INFO, (host_info_t)&vm_stat, &count);
+   free_mem = (size_t) vm_stat.free_count * (size_t) vm_page_size;
+
+   /* Get the task info */
+   if (task_info(mach_task_self(), TASK_BASIC_INFO, (task_info_t)&t_info, &t_info_count) != KERN_SUCCESS)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem running task_info!");
+      return hypre_error_flag;
+   }
+
+   /* vm_peak is not directly available, so we set it to vm_size */
+   vm_size = vm_peak = (size_t) t_info.virtual_size;
+
+   /* vm_hwm is not directly available, so we set it to vm_rss */
+   vm_rss = vm_hwm = (size_t) t_info.resident_size;
+
+#elif defined(__linux__)
+   struct sysinfo   info;
+   char             line[512];
+   FILE            *file;
 
    if (sysinfo(&info) != 0)
    {
@@ -1281,7 +1316,6 @@ hypre_HostMemoryGetUsage(HYPRE_Real *mem)
    }
    tot_mem  = info.totalram * info.mem_unit;
    free_mem = info.freeram  * info.mem_unit;
-#endif
 
    /* Function to get process memory info */
    file = fopen("/proc/self/status", "r");
@@ -1300,11 +1334,18 @@ hypre_HostMemoryGetUsage(HYPRE_Real *mem)
    }
    fclose(file);
 
-   /* Convert data to GB (double) */
-   mem[0] = vm_size  / kb_to_gb;
-   mem[1] = vm_peak  / kb_to_gb;
-   mem[2] = vm_rss   / kb_to_gb;
-   mem[3] = vm_hwm   / kb_to_gb;
+   /* Convert KB to bytes */
+   vm_peak *= 1024;
+   vm_size *= 1024;
+   vm_rss  *= 1024;
+   vm_hwm  *= 1024;
+#endif
+
+   /* Convert data from bytes to GB (double) */
+   mem[0] = vm_size  / b_to_gb;
+   mem[1] = vm_peak  / b_to_gb;
+   mem[2] = vm_rss   / b_to_gb;
+   mem[3] = vm_hwm   / b_to_gb;
    mem[4] = free_mem / b_to_gb;
    mem[5] = tot_mem  / b_to_gb;
 
@@ -1317,6 +1358,7 @@ hypre_HostMemoryGetUsage(HYPRE_Real *mem)
 
 HYPRE_Int
 hypre_MemoryPrintUsage(MPI_Comm    comm,
+                       HYPRE_Int   log_level,
                        const char *function,
                        HYPRE_Int   line)
 {
@@ -1325,7 +1367,6 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
 #else
    HYPRE_Int    ne = 6;
 #endif
-   HYPRE_Int    log_level = hypre_HandleLogLevel(hypre_handle());
    HYPRE_Real   lmem[14];
    HYPRE_Real   min[14];
    HYPRE_Real   max[14];

@@ -497,10 +497,11 @@ HYPRE_PrintDeviceInfo(void)
 
 HYPRE_Int
 HYPRE_MemoryPrintUsage(MPI_Comm    comm,
+                       HYPRE_Int   level,
                        const char *function,
                        HYPRE_Int   line)
 {
-   return hypre_MemoryPrintUsage(comm, function, line);
+   return hypre_MemoryPrintUsage(comm, level, function, line);
 }
 
 /******************************************************************************
