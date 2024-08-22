@@ -65,6 +65,12 @@ mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 > solvers.out.sysu
 mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 -nodal 1 -smtype 6 -smlv 10 -dom 1 -ov 0 > solvers.out.sysh
 mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 -interptype 10 -Pmx 6 > solvers.out.sysn
 
+#systems AMG using unknown approach and filtering
+mpirun -np 1 ./ij -solver 1 -n 8 8 8 -sysL 2 -nf 2 -ff 1 > solvers.out.27
+mpirun -np 1 ./ij -solver 1 -n 8 8 8 -sysL 3 -nf 3 -ff 1 > solvers.out.28
+mpirun -np 4 ./ij -solver 1 -n 8 8 8 -sysL 2 -nf 2 -ff 1 > solvers.out.29
+mpirun -np 4 ./ij -solver 1 -n 8 8 8 -sysL 3 -nf 3 -ff 1 > solvers.out.30
+
 #LGMRS and FlexGMRES
 mpirun -np 2 ./ij -solver 50 -rhsrand > solvers.out.101
 mpirun -np 2 ./ij -solver 51 -rhsrand > solvers.out.102

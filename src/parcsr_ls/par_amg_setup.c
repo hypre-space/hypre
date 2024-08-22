@@ -31,8 +31,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                       hypre_ParVector    *f,
                       hypre_ParVector    *u )
 {
-   MPI_Comm            comm = hypre_ParCSRMatrixComm(A);
-   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
+   MPI_Comm             comm = hypre_ParCSRMatrixComm(A);
+   hypre_ParAMGData    *amg_data = (hypre_ParAMGData*) amg_vdata;
+   hypre_ParCSRMatrix  *A_tilde = A;
 
    /* Data Structure variables */
    HYPRE_Int            num_vectors;
@@ -135,6 +136,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #endif
    HYPRE_Int      *grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
    HYPRE_Int       num_functions = hypre_ParAMGDataNumFunctions(amg_data);
+   HYPRE_Int       filter_functions = hypre_ParAMGDataFilterFunctions(amg_data);
    HYPRE_Int       nodal = hypre_ParAMGDataNodal(amg_data);
    HYPRE_Int       nodal_levels = hypre_ParAMGDataNodalLevels(amg_data);
    HYPRE_Int       nodal_diag = hypre_ParAMGDataNodalDiag(amg_data);
@@ -769,7 +771,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
    }
 
-   A_array[0] = A;
+   /* Eliminate inter-variable connections among functions for preconditioning purposes */
+   if (num_functions > 1 && filter_functions)
+   {
+      hypre_ParCSRMatrixBlkFilter(A, num_functions, &A_tilde);
+   }
+
+   A_array[0] = A_tilde;
 
    /* interp vectors setup */
    if (interp_vec_variant == 1)
@@ -777,7 +785,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       num_levels_interp_vectors = interp_vec_first_level + 1;
       hypre_ParAMGNumLevelsInterpVectors(amg_data) = num_levels_interp_vectors;
    }
-   if ( interp_vec_variant > 0 &&  num_interp_vectors > 0)
+   if (interp_vec_variant > 0 && num_interp_vectors > 0)
    {
       interp_vectors_array =  hypre_CTAlloc(hypre_ParVector**, num_levels_interp_vectors,
                                             HYPRE_MEMORY_HOST);
@@ -3811,6 +3819,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
              (additive > -1 && additive < num_levels) )
    {
       hypre_CreateLambda(amg_data);
+   }
+
+   /* Destroy filtered matrix */
+   if (A_tilde != A)
+   {
+      hypre_ParCSRMatrixDestroy(A_tilde);
+      A_array[0] = A;
    }
 
    if (cum_nnz_AP > 0.0)
