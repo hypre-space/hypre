@@ -2783,6 +2783,7 @@ hypre_FillResponseParToCSRMatrix( void       *p_recv_contact_buf,
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixUnion
+ *
  * Creates and returns a new matrix whose elements are the union of A and B.
  * Data is not copied, only structural information is created.
  * A and B must have the same communicator, numbers and distributions of rows
@@ -2851,14 +2852,17 @@ hypre_ParCSRMatrixUnion( hypre_ParCSRMatrix *A,
  * hypre_ParCSRMatrixTruncate
  *
  * Perform dual truncation of ParCSR matrix.
+ *
  * This code is adapted from original BoomerAMGInterpTruncate()
+ *
  * A: parCSR matrix to be modified
  * tol: relative tolerance or truncation factor for dropping small terms
  * max_row_elmts: maximum number of (largest) nonzero elements to keep.
  * rescale: Boolean on whether or not to scale resulting matrix. Scaling for
- * each row satisfies: sum(nonzero values before dropping)/ sum(nonzero values after dropping),
- * this way, the application of the truncated matrix on a constant vector is the same as that of
- * the original matrix.
+ *   each row satisfies: sum(nonzero values before dropping) /
+ *                       sum(nonzero values after dropping),
+ *   this way, the application of the truncated matrix on a constant vector
+ *   is the same as that of the original matrix.
  * nrm_type: type of norm used for dropping with tol.
  * -- 0 = infinity-norm
  * -- 1 = 1-norm
