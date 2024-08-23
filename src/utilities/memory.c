@@ -1342,7 +1342,7 @@ hypre_HostMemoryGetUsage(HYPRE_Real *mem)
    vm_hwm  *= 1024;
 #endif
 
-   /* Convert data from bytes to GB (double) */
+   /* Convert data from bytes to GB (HYPRE_Real) */
    mem[0] = vm_size  / b_to_gb;
    mem[1] = vm_peak  / b_to_gb;
    mem[2] = vm_rss   / b_to_gb;

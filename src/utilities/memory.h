@@ -201,7 +201,7 @@ HYPRE_Int hypre_MemoryPrintUsage(MPI_Comm comm, HYPRE_Int level,
                                  const char *function, HYPRE_Int line);
 #define HYPRE_PRINT_MEMORY_USAGE(comm) hypre_MemoryPrintUsage(comm,\
                                                               hypre_HandleLogLevel(hypre_handle()),\
-                                                              __FUNCTION__,\
+                                                              __func__,\
                                                               __LINE__)
 /* memory_dmalloc.c */
 HYPRE_Int hypre_InitMemoryDebugDML( HYPRE_Int id );
