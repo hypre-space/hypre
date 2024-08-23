@@ -1278,7 +1278,6 @@ hypre_HostMemoryGetUsage(HYPRE_Real *mem)
    mach_msg_type_number_t   t_info_count = TASK_BASIC_INFO_COUNT;
    mach_msg_type_number_t   count = HOST_VM_INFO_COUNT;
    vm_statistics_data_t     vm_stat;
-   kern_return_t            kr;
    hypre_int                mib[2] = {CTL_HW, HW_MEMSIZE};
    size_t                   length = sizeof(size_t);
 
@@ -1288,7 +1287,13 @@ hypre_HostMemoryGetUsage(HYPRE_Real *mem)
       return hypre_error_flag;
    }
 
-   kr = host_statistics(mach_host_self(), HOST_VM_INFO, (host_info_t)&vm_stat, &count);
+   if (host_statistics(mach_host_self(), HOST_VM_INFO, (host_info_t)&vm_stat, &count) !=
+       KERN_SUCCESS)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Problem running host_statistics!");
+      return hypre_error_flag;
+   }
+
    free_mem = (size_t) vm_stat.free_count * (size_t) vm_page_size;
 
    /* Get the task info */
