@@ -343,6 +343,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    }
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "BoomerAMG setup begin", 0);
 
    /* change in definition of standard and multipass interpolation, by
       eliminating interp_type 9 and 5 and setting sep_weight instead
@@ -4038,6 +4039,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    }
 #endif
 
+   hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "BoomerAMG setup end", 0);
    HYPRE_ANNOTATE_FUNC_END;
 
    return (hypre_error_flag);

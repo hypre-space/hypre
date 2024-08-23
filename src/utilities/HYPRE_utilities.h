@@ -232,6 +232,44 @@ HYPRE_Int HYPRE_PrintErrorMessages(MPI_Comm comm);
 /* Print GPU information */
 HYPRE_Int HYPRE_PrintDeviceInfo(void);
 
+/**
+ * @brief Prints the memory usage of the current process.
+ *
+ * This function prints the memory usage details of the process to standard output.
+ * It provides information such as the virtual memory size, resident set size,
+ * and other related statistics including GPU memory usage for device builds.
+ *
+ * @param[in] comm      The MPI communicator. This parameter allows the function
+ *                      to print memory usage information for the process within
+ *                      the context of an MPI program.
+ *
+ * @param[in] level     The level of detail in the memory statistics output.
+ *                        - 1 : Display memory usage statistics for each MPI rank.
+ *                        - 2 : Display aggregate memory usage statistics over MPI ranks.
+ *
+ * @param[in] function  The name of the function from which `HYPRE_MemoryPrintUsage`
+ *                      is called. This is typically set to `__func__`, which
+ *                      automatically captures the name of the calling function.
+ *                      This variable can also be used to denote a region name.
+ *
+ * @param[in] line      The line number in the source file where `HYPRE_MemoryPrintUsage`
+ *                      is called. This is typically set to `__LINE__`, which
+ *                      automatically captures the line number. The line number can be
+ *                      omitted by passing a negative value to this variable.
+ *
+ * @return              Returns an integer status code. `0` indicates success, while
+ *                      a non-zero value indicates an error occurred.
+ *
+ * @note                The function is designed to be platform-independent but
+ *                      may provide different levels of detail depending on the
+ *                      underlying operating system (e.g., Linux, macOS). However,
+ *                      this function does not lead to correct memory usage statistics
+ *                      on Windows platforms.
+ */
+
+HYPRE_Int HYPRE_MemoryPrintUsage(MPI_Comm comm, HYPRE_Int level, const char *function,
+                                 HYPRE_Int line);
+
 /*--------------------------------------------------------------------------
  * HYPRE Version routines
  *--------------------------------------------------------------------------*/
@@ -341,12 +379,111 @@ HYPRE_Int HYPRE_SetGPUMemoryPoolSize(HYPRE_Int bin_growth, HYPRE_Int min_bin, HY
  * HYPRE handle
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_SetSpTransUseVendor( HYPRE_Int use_vendor );
-HYPRE_Int HYPRE_SetSpMVUseVendor( HYPRE_Int use_vendor );
+/**
+ * Sets the logging level for the HYPRE library.
+ *
+ * The following options are available for \e log_level:
+ *
+ *    - 0 : (default) No messaging.
+ *    - 1 : Display memory usage statistics for each MPI rank.
+ *    - 2 : Display aggregate memory usage statistics over MPI ranks.
+ *
+ * @note Log level codes can be combined using bitwise OR to enable multiple
+ *       logging behaviors simultaneously.
+ *
+ * @param log_level The logging level to set.
+ *
+ * @return Returns hypre's global error code, where 0 indicates success.
+ **/
+HYPRE_Int HYPRE_SetLogLevel(HYPRE_Int log_level);
+
+/**
+ * Specifies the algorithm used for sparse matrix transposition in device builds.
+ *
+ * The following options are available for \e use_vendor:
+ *
+ *    - 0 : Use hypre's internal implementation.
+ *    - 1 : (default) Use the vendor library's implementation. This includes:
+ *          - cuSPARSE for CUDA (HYPRE_USING_CUSPARSE)
+ *          - rocSPARSE for HIP (HYPRE_USING_ROCSPARSE)
+ *          - oneMKL for SYCL   (HYPRE_USING_ONEMKLSPARSE)
+ *
+ * @param use_vendor Indicates whether to use the internal or vendor-provided implementation.
+ *
+ * @return Returns hypre's global error code, where 0 indicates success.
+ **/
+HYPRE_Int HYPRE_SetSpTransUseVendor(HYPRE_Int use_vendor);
+
+/**
+ * Specifies the algorithm used for sparse matrix/vector multiplication in device builds.
+ *
+ * The following options are available for \e use_vendor:
+ *
+ *    - 0 : Use hypre's internal implementation.
+ *    - 1 : (default) Use the vendor library's implementation. This includes:
+ *          - cuSPARSE for CUDA (HYPRE_USING_CUSPARSE)
+ *          - rocSPARSE for HIP (HYPRE_USING_ROCSPARSE)
+ *          - oneMKL for SYCL   (HYPRE_USING_ONEMKLSPARSE)
+ *
+ * @param use_vendor Indicates whether to use the internal or vendor-provided implementation.
+ *
+ * @return Returns hypre's global error code, where 0 indicates success.
+ **/
+HYPRE_Int HYPRE_SetSpMVUseVendor(HYPRE_Int use_vendor);
+
+/**
+ * Specifies the algorithm used for sparse matrix/matrix multiplication in device builds.
+ *
+ * The following options are available for \e use_vendor:
+ *
+ *    - 0 : Use hypre's internal implementation.
+ *    - 1 : Use the vendor library's implementation. This includes:
+ *          - cuSPARSE for CUDA (HYPRE_USING_CUSPARSE)
+ *          - rocSPARSE for HIP (HYPRE_USING_ROCSPARSE)
+ *          - oneMKL for SYCL   (HYPRE_USING_ONEMKLSPARSE)
+ *
+ * @param use_vendor Indicates whether to use the internal or vendor-provided implementation.
+ *
+ * @note The default value is 1, except for CUDA builds, which is zero.
+ *
+ * @return Returns hypre's global error code, where 0 indicates success.
+ **/
+HYPRE_Int HYPRE_SetSpGemmUseVendor( HYPRE_Int use_vendor );
 /* Backwards compatibility with HYPRE_SetSpGemmUseCusparse() */
 #define HYPRE_SetSpGemmUseCusparse(use_vendor) HYPRE_SetSpGemmUseVendor(use_vendor)
-HYPRE_Int HYPRE_SetSpGemmUseVendor( HYPRE_Int use_vendor );
+
+/**
+ * Specifies the algorithm used for generating random numbers in device builds.
+ *
+ * The following options are available for \e use_curand:
+ *
+ *    - 0 : random numbers are generated on the host and copied to device memory.
+ *    - 1 : (default) Use the vendor library's implementation. This includes:
+ *          - cuSPARSE for CUDA (HYPRE_USING_CUSPARSE)
+ *          - rocSPARSE for HIP (HYPRE_USING_ROCSPARSE)
+ *          - oneMKL for SYCL   (HYPRE_USING_ONEMKLSPARSE)
+ *
+ * @param use_curand Indicates whether to use the vendor-provided implementation or not.
+ *
+ * @return Returns hypre's global error code, where 0 indicates success.
+ **/
+
 HYPRE_Int HYPRE_SetUseGpuRand( HYPRE_Int use_curand );
+
+/**
+ * Configures the usage of GPU-aware MPI for communication in device builds.
+ *
+ * The following options are available for \e use_gpu_aware_mpi:
+ *
+ *    - 0 : MPI buffers are transferred between device and host memory. Communication occurs on the host.
+ *    - 1 : MPI communication is performed directly from the device using device-resident buffers.
+ *
+ * @param use_gpu_aware_mpi Specifies whether to enable GPU-aware MPI communication or not.
+ *
+ * @note This option requires hypre to be configured with GPU-aware MPI support for it to take effect.
+ *
+ * @return Returns hypre's global error code, where 0 indicates success.
+ **/
 HYPRE_Int HYPRE_SetGpuAwareMPI( HYPRE_Int use_gpu_aware_mpi );
 
 /*--------------------------------------------------------------------------
