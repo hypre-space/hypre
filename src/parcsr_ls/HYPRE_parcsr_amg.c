@@ -1509,21 +1509,47 @@ HYPRE_BoomerAMGSetFSAIKapTolerance( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetNumFunctions, HYPRE_BoomerAMGGetNumFunctions
+ * HYPRE_BoomerAMGSetNumFunctions
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_BoomerAMGSetNumFunctions( HYPRE_Solver  solver,
-                                HYPRE_Int          num_functions  )
+                                HYPRE_Int     num_functions  )
 {
    return ( hypre_BoomerAMGSetNumFunctions( (void *) solver, num_functions ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGGetNumFunctions
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 HYPRE_BoomerAMGGetNumFunctions( HYPRE_Solver  solver,
-                                HYPRE_Int        * num_functions  )
+                                HYPRE_Int     *num_functions  )
 {
    return ( hypre_BoomerAMGGetNumFunctions( (void *) solver, num_functions ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetFilterFunctions
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFilterFunctions( HYPRE_Solver  solver,
+                                   HYPRE_Int     filter_functions  )
+{
+   return ( hypre_BoomerAMGSetFilterFunctions( (void *) solver, filter_functions ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGGetFilterFunctions
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGGetFilterFunctions( HYPRE_Solver  solver,
+                                   HYPRE_Int    *filter_functions  )
+{
+   return ( hypre_BoomerAMGGetFilterFunctions( (void *) solver, filter_functions ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -1546,7 +1572,6 @@ HYPRE_BoomerAMGSetNodalLevels( HYPRE_Solver  solver,
 {
    return ( hypre_BoomerAMGSetNodalLevels( (void *) solver, nodal_levels ) );
 }
-
 
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetNodalDiag

@@ -273,6 +273,10 @@ HYPRE_Int hypre_ParCSRFindExtendCommPkg(MPI_Comm comm, HYPRE_BigInt global_num_c
                                         hypre_IJAssumedPart *apart, HYPRE_Int indices_len, HYPRE_BigInt *indices,
                                         hypre_ParCSRCommPkg **extend_comm_pkg);
 
+/* par_csr_filter.c */
+HYPRE_Int hypre_ParCSRMatrixBlkFilter(hypre_ParCSRMatrix *A,
+                                      HYPRE_Int block_size, hypre_ParCSRMatrix **B_ptr);
+
 /* par_csr_matop.c */
 HYPRE_Int hypre_ParCSRMatrixScale(hypre_ParCSRMatrix *A, HYPRE_Complex scalar);
 void hypre_ParMatmul_RowSizes ( HYPRE_MemoryLocation memory_location, HYPRE_Int **C_diag_i,

@@ -2237,6 +2237,8 @@ hypre_BoomerAMGBuildDirInterpHost( hypre_ParCSRMatrix   *A,
    {
       HYPRE_Int       *P_marker, *P_marker_offd;
 
+      alfa = 1.0;
+      beta = 1.0;
       size = n_fine / num_threads;
       rest = n_fine - size * num_threads;
       if (jl < rest)
