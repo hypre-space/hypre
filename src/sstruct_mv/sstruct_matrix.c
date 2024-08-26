@@ -2085,35 +2085,38 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
             hypre_BoxLoop1End(ii);
 
             /* WM: todo - make sure threshold is set such that there are no extra rows here! */
-            hypre_BoxArrayCreateFromIndices(ndim, num_indices, indices, threshold, &indices_boxa);
-            hypre_ForBoxI(j, indices_boxa)
+            if (num_indices)
             {
-               HYPRE_Int size = hypre_BoxVolume(hypre_BoxArrayBox(indices_boxa, j)) * nSentries;
-               HYPRE_Complex *values = hypre_CTAlloc(HYPRE_Complex, size, HYPRE_MEMORY_DEVICE);
-
-               /* INIT values from the structured matrix if action = 0 (need current stencil values for entries that don't exist in U matrix) */
-               if (action == 0)
+               hypre_BoxArrayCreateFromIndices(ndim, num_indices, indices, threshold, &indices_boxa);
+               hypre_ForBoxI(j, indices_boxa)
                {
-                  hypre_SStructPMatrixSetBoxValues(pmatrix, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries, hypre_BoxArrayBox(indices_boxa, j), values, -1);
-               }
+                  HYPRE_Int size = hypre_BoxVolume(hypre_BoxArrayBox(indices_boxa, j)) * nSentries;
+                  HYPRE_Complex *values = hypre_CTAlloc(HYPRE_Complex, size, HYPRE_MEMORY_DEVICE);
 
-               /* GET values from unstructured matrix */
-               /* WM: note - I'm passing the entire box here, so I expect to get back ALL intra-part connections in A_u */
-               /* WM: question - What about inter-part connections? I hope that they are always excluded here? Double check this. */
-               hypre_SStructUMatrixSetBoxValues(A, part, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries, hypre_BoxArrayBox(indices_boxa, j), values, -2);
+                  /* INIT values from the structured matrix if action = 0 (need current stencil values for entries that don't exist in U matrix) */
+                  if (action == 0)
+                  {
+                     hypre_SStructPMatrixSetBoxValues(pmatrix, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries, hypre_BoxArrayBox(indices_boxa, j), values, -1);
+                  }
 
-               /* ADD values to structured matrix */
-               /* WM: todo - just call to hypre_SStructMatrixSetBoxValues() instead of 
-                * hypre_SStructPMatrixSetBoxValues() and hypre_SStructMatrixSetInterPartValues()? */
-               hypre_SStructPMatrixSetBoxValues(pmatrix, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries, hypre_BoxArrayBox(indices_boxa, j), values, action);
-               if (nvneighbors[part][var] > 0)
-               {
-                  hypre_SStructMatrixSetInterPartValues(A, part, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries,
-                                                        hypre_BoxArrayBox(indices_boxa, j), values, 1);
+                  /* GET values from unstructured matrix */
+                  /* WM: note - I'm passing the entire box here, so I expect to get back ALL intra-part connections in A_u */
+                  /* WM: question - What about inter-part connections? I hope that they are always excluded here? Double check this. */
+                  hypre_SStructUMatrixSetBoxValues(A, part, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries, hypre_BoxArrayBox(indices_boxa, j), values, -2);
+
+                  /* ADD values to structured matrix */
+                  /* WM: todo - just call to hypre_SStructMatrixSetBoxValues() instead of 
+                   * hypre_SStructPMatrixSetBoxValues() and hypre_SStructMatrixSetInterPartValues()? */
+                  hypre_SStructPMatrixSetBoxValues(pmatrix, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries, hypre_BoxArrayBox(indices_boxa, j), values, action);
+                  if (nvneighbors[part][var] > 0)
+                  {
+                     hypre_SStructMatrixSetInterPartValues(A, part, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries,
+                                                           hypre_BoxArrayBox(indices_boxa, j), values, 1);
+                  }
                }
+               hypre_BoxArrayDestroy(indices_boxa);
+               indices_boxa = NULL;
             }
-            hypre_BoxArrayDestroy(indices_boxa);
-            indices_boxa = NULL;
 
          } /* Loop over boxes */
       } /* Loop over vars */
