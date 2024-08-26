@@ -8,7 +8,7 @@
 #include "_hypre_sstruct_mv.h"
 #include "sstruct_matmult.h"
 
-#define DEBUG_MATMULT
+//#define DEBUG_MATMULT
 
 /*==========================================================================
  * SStructPMatrix routines
@@ -1031,12 +1031,27 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_SStructMatrixParCSRMatrix(M) = parcsr_uM;
    hypre_IJMatrixAssembleFlag(ij_M) = 1;
 
+   /* WM: extra delete zeros... I'm getting zero diagonals everywhere in the U matrices? */
+   hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(parcsr_uM), HYPRE_REAL_MIN);
+   if (delete_zeros)
+   {
+      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(parcsr_uM));
+      hypre_ParCSRMatrixDiag(parcsr_uM) = delete_zeros;
+   }
+   delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(parcsr_uM), HYPRE_REAL_MIN);
+   if (delete_zeros)
+   {
+      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(parcsr_uM));
+      hypre_ParCSRMatrixOffd(parcsr_uM) = delete_zeros;
+   }
+   hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
+
    hypre_SStructMatrixCompressUToS(M, 1);
 
    /* WM: should I do this here? What tolerance? Smarter way to avoid a bunch of zero entries? */
    /*     note that once I'm not converting the entire struct matrix, most of these should go away, I think... */
    /* WM: todo - CAREFUL HERE! This can screw things up if you throw away entries that are actually non-trivial and should be there... */
-   hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(parcsr_uM), HYPRE_REAL_MIN);
+   delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(parcsr_uM), HYPRE_REAL_MIN);
    if (delete_zeros)
    {
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(parcsr_uM));

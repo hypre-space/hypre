@@ -1458,6 +1458,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
 
       /* WM: do backwards mapping from ijvalues to values if doing a get */
       /* WM: todo - put this in a boxloop to avoid unnecessary copies? */
+      nrows       = hypre_BoxVolume(set_box);
       if (action < 0)
       {
          for (i = 0; i < nrows * nentries; i++)
@@ -2091,7 +2092,10 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
                HYPRE_Complex *values = hypre_CTAlloc(HYPRE_Complex, size, HYPRE_MEMORY_DEVICE);
 
                /* INIT values from the structured matrix if action = 0 (need current stencil values for entries that don't exist in U matrix) */
-               hypre_SStructPMatrixSetBoxValues(pmatrix, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries, hypre_BoxArrayBox(indices_boxa, j), values, -1);
+               if (action == 0)
+               {
+                  hypre_SStructPMatrixSetBoxValues(pmatrix, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries, hypre_BoxArrayBox(indices_boxa, j), values, -1);
+               }
 
                /* GET values from unstructured matrix */
                /* WM: note - I'm passing the entire box here, so I expect to get back ALL intra-part connections in A_u */
