@@ -932,7 +932,7 @@ HYPRE_IJMatrixGetValues2( HYPRE_IJMatrix matrix,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "HYPRE_IJMatrixGetValues2 not implemented for GPUs!");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "HYPRE_IJMatrixGetValues not implemented for GPUs!");
    }
    else
 #endif
@@ -1006,7 +1006,7 @@ HYPRE_IJMatrixGetValuesAndZeroOut( HYPRE_IJMatrix matrix,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "HYPRE_IJMatrixGetValuesAndZeroOut not implemented for GPUs!");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "HYPRE_IJMatrixGetValues not implemented for GPUs!");
    }
    else
 #endif

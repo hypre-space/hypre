@@ -462,21 +462,14 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       hypre_ParCSRMatrix *A_u_aug;
       hypre_ParCSRMatrix *P_u;
 
-      /* WM: debug */
-      /* char filename[256]; */
-      /* hypre_sprintf(filename, "A_u_%d", hypre_ParCSRMatrixNumRows(A_u)); */
-      /* hypre_ParCSRMatrixPrintIJ(A_u, 0, 0, filename); */
-
       /* Convert boundary of A to IJ matrix */
       hypre_IJMatrix *A_struct_bndry_ij = NULL;
 
-      /* WM: todo - don't rely on a halo here but rather connections in A_u */
       HYPRE_Int              num_indices = 0;
       HYPRE_Int             *indices[ndim];
       hypre_BoxArray        *indices_boxa = NULL;
       hypre_Index            index, start;
       HYPRE_Real             threshold = 1.0; // WM: todo - what should this be?
-      hypre_BoxArray      ***P_u_boxa = hypre_TAlloc(hypre_BoxArray**, nparts, HYPRE_MEMORY_HOST);
       hypre_BoxArray      ***convert_boxa = hypre_TAlloc(hypre_BoxArray**, nparts, HYPRE_MEMORY_HOST);
       HYPRE_Int cnt = 0;
       for (part = 0; part < nparts; part++)
@@ -484,7 +477,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          pgrid = hypre_SStructGridPGrid(grid, part);
          nvars = hypre_SStructPGridNVars(pgrid);
 
-         P_u_boxa[part] = hypre_CTAlloc(hypre_BoxArray*, nvars, HYPRE_MEMORY_HOST);
          convert_boxa[part] = hypre_CTAlloc(hypre_BoxArray*, nvars, HYPRE_MEMORY_HOST);
 
          /* Loop over variables */
@@ -499,7 +491,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
             compute_box = hypre_BoxCreate(ndim);
 
             convert_boxa[part][vi] = hypre_BoxArrayCreate(0, ndim);
-            P_u_boxa[part][vi] = hypre_BoxArrayCreate(0, ndim);
 
             /* Loop over boxes */
             hypre_ForBoxI(i, compute_boxes)
@@ -532,13 +523,12 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                }
                hypre_BoxLoop1End(ii);
 
-               /* Create P_u_boxa box array from indices marking where A_u is non-trivial (we want P_u here) */
+               /* Create box array from indices marking where A_u is non-trivial */
                hypre_BoxArrayCreateFromIndices(ndim, num_indices, indices, threshold, &indices_boxa);
                tmp_box = hypre_BoxCreate(ndim);
                hypre_ForBoxI(j, indices_boxa)
                {
                   hypre_CopyBox(hypre_BoxArrayBox(indices_boxa, j), tmp_box);
-                  hypre_AppendBox(tmp_box, P_u_boxa[part][vi]);
                   /* WM: todo - need 2 for distance 2 interp below? Make this dependent on interpolation or just hardcode to 2? */
                   hypre_BoxGrowByValue(tmp_box, 2);
                   /* WM: intersect with the struct grid box... is that right? NOTE: if you change to DataSpace of the matrix above, you'll need to change this line */
@@ -558,17 +548,19 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          }
       }
       hypre_SStructMatrixBoxesToUMatrix(A, grid, &A_struct_bndry_ij, convert_boxa);
-      /* WM: todo - cleanup memory: convert_boxa, indices, etc. */
+      for (part = 0; part < nparts; part++)
+      {
+         for (vi = 0; vi < nvars; vi++)
+         {
+            hypre_BoxArrayDestroy(convert_boxa[part][vi]);
+         }
+         hypre_TFree(convert_boxa[part], HYPRE_MEMORY_HOST);
+      }
+      hypre_TFree(convert_boxa, HYPRE_MEMORY_HOST);
 
       /* Add structured boundary portion to unstructured portion */
       hypre_ParCSRMatrix *A_struct_bndry = hypre_IJMatrixObject(A_struct_bndry_ij);
       hypre_ParCSRMatrix *A_bndry;
-
-      /* WM: debug */
-      /* hypre_sprintf(filename, "A_u_%d", hypre_ParCSRMatrixNumRows(A_u)); */
-      /* hypre_ParCSRMatrixPrintIJ(A_u, 0, 0, filename); */
-      /* hypre_sprintf(filename, "A_struct_bndry_%d", hypre_ParCSRMatrixNumRows(A_u)); */
-      /* hypre_ParCSRMatrixPrintIJ(A_struct_bndry, 0, 0, filename); */
 
       hypre_ParCSRMatrixAdd(1.0, A_struct_bndry, 1.0, A_u, &A_bndry);
 
@@ -682,10 +674,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          }
       }
 
-      /* WM: debug */
-      /* hypre_sprintf(filename, "A_u_aug_%d", hypre_ParCSRMatrixNumRows(A_u)); */
-      /* hypre_ParCSRMatrixPrintIJ(A_u_aug, 0, 0, filename); */
-
       /* Generate unstructured interpolation */
       /* WM: todo - experiment with strenght matrix that counts only the P_s stencil entries and all inter-part connections as strong; */
       /*            this keeps the same sparsity pattern inside the structured part */
@@ -710,7 +698,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       hypre_SStructMatrixParCSRMatrix(P) = P_u;
       hypre_IJMatrixAssembleFlag(hypre_SStructMatrixIJMatrix(P)) = 1;
 
-      /* Zero out C-point injection entries and entries in P_u outside of P_u_boxa and delete zeros */
+      /* Zero out C-point injection entries and entries in P_u outside of non-zero rows of A_u and delete zeros */
       hypre_CSRMatrix *P_u_diag = hypre_ParCSRMatrixDiag(P_u);
       hypre_CSRMatrix *P_u_offd = hypre_ParCSRMatrixOffd(P_u);
       for (i = 0; i < hypre_CSRMatrixNumRows(A_u_diag); i++)
@@ -742,10 +730,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          hypre_ParCSRMatrixOffd(P_u) = delete_zeros;
       }
       hypre_ParCSRMatrixSetNumNonzeros(P_u);
-
-      /* WM: debug */
-      /* hypre_sprintf(filename, "P_before_compress_%d", hypre_ParCSRMatrixNumRows(A_u)); */
-      /* HYPRE_SStructMatrixPrint(filename, P, 0); */
 
       /* Overwrite entries in P_s where appropriate with values of P_u */
       hypre_SStructMatrixCompressUToS(P, 0);
