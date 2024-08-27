@@ -99,9 +99,6 @@ hypre_SSAMGCoarseSolverSetup( void *ssamg_vdata )
       {
          HYPRE_BoomerAMGSetMaxIter(csolver, num_crelax);
       }
-      /* WM: commenting out the large max coarse size and Jacobi coarse solver... why is this here? */
-      /* HYPRE_BoomerAMGSetMaxCoarseSize(csolver, 1000); */
-      /* HYPRE_BoomerAMGSetCycleRelaxType(csolver, 0, 3); /1* Coarse solver - Jacobi *1/ */
       HYPRE_BoomerAMGSetTol(csolver, 0.0);
       HYPRE_BoomerAMGSetPrintLevel(csolver, 0);
       HYPRE_BoomerAMGSetLogging(csolver, 1);

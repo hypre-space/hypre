@@ -169,8 +169,6 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       num_rownnz = hypre_IntArraySize(&arr_rownnz);
       rownnz     = hypre_IntArrayData(&arr_rownnz);
 
-
-
       if (myid == 0)
       {
          global_num_rows[l]     = hypre_ParCSRMatrixGlobalNumRows(umatrix);

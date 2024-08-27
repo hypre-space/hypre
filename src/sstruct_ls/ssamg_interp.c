@@ -722,12 +722,14 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       {
          hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(P_u));
          hypre_ParCSRMatrixDiag(P_u) = delete_zeros;
+         hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixDiag(P_u));
       }
       delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(P_u), HYPRE_REAL_MIN);
       if (delete_zeros)
       {
          hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(P_u));
          hypre_ParCSRMatrixOffd(P_u) = delete_zeros;
+         hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixOffd(P_u));
       }
       hypre_ParCSRMatrixSetNumNonzeros(P_u);
 
@@ -741,12 +743,14 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       {
          hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(P_u));
          hypre_ParCSRMatrixDiag(P_u) = delete_zeros;
+         hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixDiag(P_u));
       }
       delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(P_u), HYPRE_REAL_MIN);
       if (delete_zeros)
       {
          hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(P_u));
          hypre_ParCSRMatrixOffd(P_u) = delete_zeros;
+         hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixOffd(P_u));
       }
       hypre_ParCSRMatrixSetNumNonzeros(P_u);
 

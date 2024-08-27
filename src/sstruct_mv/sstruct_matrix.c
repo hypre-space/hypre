@@ -1411,7 +1411,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
                         rows[mi] += loop_index[d] * rs[d] * dom_stride[d];
                         cols[ci] += loop_index[d] * cs[d];
                      }
-                     /* WM: note - if doing a get, don't need to manipulate ijvalues here, right?
+                     /* WM: todo - if doing a get, don't need to manipulate ijvalues here, right?
                       *            likewise, if doing a set, don't need the values_map */
                      ijvalues[ci] = values[ei + vi * nentries];
                      values_map[ei + vi * nentries] = ci;
@@ -2336,15 +2336,6 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
          grid_boxes = hypre_StructGridBoxes(sgrid);
          num_ghost  = hypre_StructGridNumGhost(sgrid);
 
-         /* WM: shouldn't the nnzs here just be the stencil size? */
-         /* nnzs = 0; */
-         /* for (entry = 0; entry < hypre_SStructStencilSize(stencil); entry++) */
-         /* { */
-         /*    if (split[entry] > -1) */
-         /*    { */
-         /*       nnzs++; */
-         /*    } */
-         /* } */
          nnzs = hypre_SStructStencilSize(stencil);
 
          hypre_ForBoxI(i, grid_boxes)
@@ -2367,9 +2358,6 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
                hypre_BoxLoop1End(mi);
                nvalues = hypre_max(nvalues, nnzs * hypre_BoxVolume(convert_box));
             } /* Loop over convert_boxa[part][var] */
-
-            /* WM: doesn't seem like the right way to do nvalues? Should be a max, not a sum, correct? */
-            /* nvalues += nnzs * hypre_BoxVolume(convert_box); */
 
             m += hypre_BoxVolume(ghost_box);
 
@@ -2396,7 +2384,6 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
    }
 
    /* Allocate memory */
-   /* WM: this seems too large for nvalues??? Can I set this a different way? */
    values = hypre_CTAlloc(HYPRE_Complex, nvalues, HYPRE_MEMORY_HOST);
 
    /* Set entries of ij_Ahat */

@@ -1037,12 +1037,14 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    {
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(parcsr_uM));
       hypre_ParCSRMatrixDiag(parcsr_uM) = delete_zeros;
+      hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixDiag(parcsr_uM));
    }
    delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(parcsr_uM), HYPRE_REAL_MIN);
    if (delete_zeros)
    {
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(parcsr_uM));
       hypre_ParCSRMatrixOffd(parcsr_uM) = delete_zeros;
+      hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixOffd(parcsr_uM));
    }
    hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
 
@@ -1056,12 +1058,14 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    {
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(parcsr_uM));
       hypre_ParCSRMatrixDiag(parcsr_uM) = delete_zeros;
+      hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixDiag(parcsr_uM));
    }
    delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(parcsr_uM), HYPRE_REAL_MIN);
    if (delete_zeros)
    {
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(parcsr_uM));
       hypre_ParCSRMatrixOffd(parcsr_uM) = delete_zeros;
+      hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixOffd(parcsr_uM));
    }
    hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
 
