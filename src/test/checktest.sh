@@ -4,6 +4,8 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+summary=0
+
 # Echo usage information
 case $1 in
    -h|-help)
@@ -25,6 +27,10 @@ cat <<EOF
 
 EOF
    exit
+   ;;
+   -summary)
+      summary=1
+      shift
    ;;
 esac
 
@@ -50,8 +56,12 @@ do
          SZ=`ls -l $file | awk '{print $5}'`
          if [ $SZ != 0 ]
          then
-            echo -e "FAILED : $file  ($SZ)\n"
-            cat $file
+            echo -e "FAILED : $file  ($SZ)"
+            if [ $summary -eq 0 ]
+            then
+               echo
+               cat $file
+            fi
             error_code=1
          else
             echo "    OK : $file"

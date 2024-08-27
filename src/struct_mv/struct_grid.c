@@ -1116,17 +1116,13 @@ hypre_StructGridPrint( FILE             *file,
                        hypre_StructGrid *grid )
 {
    HYPRE_Int   ndim = hypre_StructGridNDim(grid);
-   HYPRE_Int   d;
 
    /* Print box array */
    hypre_BoxArrayPrintToFile(file, hypre_StructGridBoxes(grid));
 
    /* Print line of the form: "Periodic: %d %d %d\n" */
-   hypre_fprintf(file, "\nPeriodic:");
-   for (d = 0; d < ndim; d++)
-   {
-      hypre_fprintf(file, " %d", hypre_StructGridPeriodic(grid)[d]);
-   }
+   hypre_fprintf(file, "\nPeriodic: ");
+   hypre_IndexPrint(file, ndim, hypre_StructGridPeriodic(grid));
    hypre_fprintf(file, "\n");
 
    return hypre_error_flag;
@@ -1141,7 +1137,6 @@ hypre_StructGridRead( MPI_Comm           comm,
                       FILE              *file,
                       hypre_StructGrid **grid_ptr )
 {
-
    hypre_StructGrid *grid;
 
    hypre_Index       ilower;
@@ -1158,6 +1153,7 @@ hypre_StructGridRead( MPI_Comm           comm,
 
    hypre_fscanf(file, "%d\n", &num_boxes);
 
+   /* TODO: Put this in a BoxArrayReadFromFile() function */
    /* Read lines of the form: "%d:  (%d, %d, %d)  x  (%d, %d, %d)\n" */
    for (i = 0; i < num_boxes; i++)
    {
@@ -1179,11 +1175,8 @@ hypre_StructGridRead( MPI_Comm           comm,
    periodic = hypre_StructGridPeriodic(grid);
 
    /* Read line of the form: "Periodic: %d %d %d\n" */
-   hypre_fscanf(file, "Periodic:");
-   for (d = 0; d < ndim; d++)
-   {
-      hypre_fscanf(file, " %d", &hypre_IndexD(periodic, d));
-   }
+   hypre_fscanf(file, "\nPeriodic: ");
+   hypre_IndexRead(file, ndim, periodic);
    hypre_fscanf(file, "\n");
 
    hypre_StructGridAssemble(grid);

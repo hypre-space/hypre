@@ -2171,6 +2171,7 @@ hypre_StructMatrixPrintData( FILE               *file,
    }
 
    /* Print variable data to file */
+   hypre_fprintf(file, "\nData:\n");
    h_vdata = h_data + hypre_StructMatrixVDataOffset(matrix);
    hypre_PrintBoxArrayData(file, boxes, data_space, num_values, value_ids, ndim, h_vdata);
 
@@ -2315,12 +2316,9 @@ hypre_StructMatrixPrint( const char         *filename,
    HYPRE_Int             ndim          = hypre_StructMatrixNDim(matrix);
    HYPRE_Int            *symm_entries  = hypre_StructMatrixSymmEntries(matrix);
    hypre_StructStencil  *stencil       = hypre_StructMatrixStencil(matrix);
-   hypre_Index          *stencil_shape = hypre_StructStencilShape(stencil);
-   HYPRE_Int             stencil_size  = hypre_StructStencilSize(stencil);
 
    FILE                 *file;
    char                  new_filename[255];
-   HYPRE_Int             i;
    HYPRE_Int             myid;
 
    /*----------------------------------------
@@ -2357,26 +2355,14 @@ hypre_StructMatrixPrint( const char         *filename,
    hypre_fprintf(file, "\nDomain Stride: ");
    hypre_IndexPrint(file, ndim, hypre_StructMatrixDomStride(matrix));
 
-   /* print stencil info
-      TODO: Move this to a separate function (hypre_StructStencilPrint) */
-   hypre_fprintf(file, "\nStencil: %d \n", stencil_size);
-
-   for (i = 0; i < stencil_size; i++)
-   {
-      if (symm_entries[i] < 0)
-      {
-         /* Print line of the form: "%d: [%d %d %d]\n" */
-         hypre_fprintf(file, "%d: ", i);
-         hypre_IndexPrint(file, ndim, stencil_shape[i]);
-         hypre_fprintf(file, "\n");
-      }
-   }
+   /* print stencil info */
+   hypre_fprintf(file, "\n\nStencil:\n");
+   hypre_StructStencilPrint(file, stencil, symm_entries);
 
    /*----------------------------------------
     * Print data
     *----------------------------------------*/
 
-   hypre_fprintf(file, "\nData:\n");
    hypre_StructMatrixPrintData(file, matrix, all);
 
    /*----------------------------------------
@@ -2409,14 +2395,10 @@ hypre_StructMatrixRead( MPI_Comm    comm,
    HYPRE_Int             ndim;
 
    hypre_StructStencil  *stencil;
-   hypre_Index          *stencil_shape;
-   HYPRE_Int             stencil_size;
    HYPRE_Int             symmetric;
    HYPRE_Int             constant_coefficient;
    hypre_Index           ran_stride;
    hypre_Index           dom_stride;
-
-   HYPRE_Int             i, d, idummy;
 
    HYPRE_Int             myid;
 
@@ -2455,20 +2437,8 @@ hypre_StructMatrixRead( MPI_Comm    comm,
    hypre_IndexRead(file, ndim, dom_stride);
 
    /* read stencil info */
-
-   hypre_fscanf(file, "\nStencil: %d\n", &stencil_size);
-   stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size, HYPRE_MEMORY_HOST);
-   for (i = 0; i < stencil_size; i++)
-   {
-      /* Read line of the form: "%d: %d %d %d\n" */
-      hypre_fscanf(file, "%d:", &idummy);
-      for (d = 0; d < ndim; d++)
-      {
-         hypre_fscanf(file, " %d", &hypre_IndexD(stencil_shape[i], d));
-      }
-      hypre_fscanf(file, "\n");
-   }
-   stencil = hypre_StructStencilCreate(ndim, stencil_size, stencil_shape);
+   hypre_fscanf(file, "\n\nStencil:\n");
+   hypre_StructStencilRead(file, ndim, &stencil);
 
    /*----------------------------------------
     * Initialize the matrix
@@ -2485,6 +2455,8 @@ hypre_StructMatrixRead( MPI_Comm    comm,
    /*----------------------------------------
     * Read data
     *----------------------------------------*/
+
+   hypre_fscanf(file, "\nConstant Data:\n\n");
 
    hypre_fscanf(file, "\nData:\n");
    hypre_StructMatrixReadData(file, matrix);

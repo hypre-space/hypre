@@ -74,6 +74,66 @@ hypre_StructStencilDestroy( hypre_StructStencil *stencil )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_StructStencilPrint
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructStencilPrint( FILE                *file,
+                          hypre_StructStencil *stencil,
+                          HYPRE_Int           *symm_entries )
+{
+   hypre_Index  *stencil_shape = hypre_StructStencilShape(stencil);
+   HYPRE_Int     stencil_size  = hypre_StructStencilSize(stencil);
+   HYPRE_Int     ndim          = hypre_StructStencilNDim(stencil);
+   HYPRE_Int     i;
+
+   hypre_fprintf(file, "%d\n", stencil_size);
+   for (i = 0; i < stencil_size; i++)
+   {
+      if ((symm_entries == NULL) || (symm_entries[i] < 0))
+      {
+         /* Print line of the form: "%d: (%d %d %d)\n" */
+         hypre_fprintf(file, "%d: ", i);
+         hypre_IndexPrint(file, ndim, stencil_shape[i]);
+         hypre_fprintf(file, "\n");
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructStencilRead
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructStencilRead( FILE                 *file,
+                         HYPRE_Int             ndim,
+                         hypre_StructStencil **stencil_ptr )
+{
+   hypre_StructStencil *stencil;
+
+   hypre_Index  *stencil_shape;
+   HYPRE_Int     stencil_size;
+   HYPRE_Int     i, idummy;
+
+   hypre_fscanf(file, "%d\n", &stencil_size);
+   stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size, HYPRE_MEMORY_HOST);
+   for (i = 0; i < stencil_size; i++)
+   {
+      /* Read line of the form: "%d: %d %d %d\n" */
+      hypre_fscanf(file, "%d: ", &idummy);
+      hypre_IndexRead(file, ndim, stencil_shape[i]);
+      hypre_fscanf(file, "\n");
+   }
+   stencil = hypre_StructStencilCreate(ndim, stencil_size, stencil_shape);
+
+   *stencil_ptr = stencil;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_StructStencilOffsetEntry
  *
  * Returns the entry number of the 'stencil_offset' in 'stencil'.  If the offset

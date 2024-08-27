@@ -226,12 +226,12 @@ hypre_IndexPrint( FILE        *file,
 {
    HYPRE_Int d;
 
-   hypre_fprintf(file, "[%d", hypre_IndexD(index, 0));
+   hypre_fprintf(file, "(%d", hypre_IndexD(index, 0));
    for (d = 1; d < ndim; d++)
    {
-      hypre_fprintf(file, " %d", hypre_IndexD(index, d));
+      hypre_fprintf(file, ", %d", hypre_IndexD(index, d));
    }
-   hypre_fprintf(file, "]");
+   hypre_fprintf(file, ")");
 
    return hypre_error_flag;
 }
@@ -246,12 +246,12 @@ hypre_IndexRead( FILE        *file,
 {
    HYPRE_Int d;
 
-   hypre_fscanf(file, "[%d", &hypre_IndexD(index, 0));
+   hypre_fscanf(file, "(%d", &hypre_IndexD(index, 0));
    for (d = 1; d < ndim; d++)
    {
-      hypre_fscanf(file, " %d", &hypre_IndexD(index, d));
+      hypre_fscanf(file, ", %d", &hypre_IndexD(index, d));
    }
-   hypre_fscanf(file, "]");
+   hypre_fscanf(file, ")");
 
    for (d = ndim; d < HYPRE_MAXDIM; d++)
    {
@@ -1211,7 +1211,7 @@ hypre_BoxArrayPrintToFile( FILE            *file,
 
    HYPRE_Int  ndim;
    HYPRE_Int  size;
-   HYPRE_Int  i, d;
+   HYPRE_Int  i;
 
    ndim = hypre_BoxArrayNDim(box_array);
    hypre_fprintf(file, "%d\n", ndim);
@@ -1223,17 +1223,11 @@ hypre_BoxArrayPrintToFile( FILE            *file,
    hypre_ForBoxI(i, box_array)
    {
       box = hypre_BoxArrayBox(box_array, i);
-      hypre_fprintf(file, "%d:  (%d", i, hypre_BoxIMinD(box, 0));
-      for (d = 1; d < ndim; d++)
-      {
-         hypre_fprintf(file, ", %d", hypre_BoxIMinD(box, d));
-      }
-      hypre_fprintf(file, ")  x  (%d", hypre_BoxIMaxD(box, 0));
-      for (d = 1; d < ndim; d++)
-      {
-         hypre_fprintf(file, ", %d", hypre_BoxIMaxD(box, d));
-      }
-      hypre_fprintf(file, ")\n");
+      hypre_fprintf(file, "%d:  ", i);
+      hypre_IndexPrint(file, ndim, hypre_BoxIMin(box));
+      hypre_fprintf(file, "  x  ");
+      hypre_IndexPrint(file, ndim, hypre_BoxIMax(box));
+      hypre_fprintf(file, "\n");
    }
 
    return hypre_error_flag;

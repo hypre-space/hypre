@@ -1996,6 +1996,8 @@ HYPRE_Int hypre_StructCoarsen ( hypre_StructGrid *fgrid, hypre_IndexRef origin, 
 hypre_CommStencil *hypre_CommStencilCreate ( HYPRE_Int  ndim );
 HYPRE_Int hypre_CommStencilSetEntry ( hypre_CommStencil *comm_stencil, hypre_Index offset );
 HYPRE_Int hypre_CommStencilDestroy ( hypre_CommStencil *comm_stencil );
+HYPRE_Int hypre_StructStencilPrint( FILE *file, hypre_StructStencil *stencil, HYPRE_Int *symm_entries );
+HYPRE_Int hypre_StructStencilRead( FILE *file, HYPRE_Int ndim, hypre_StructStencil **stencil_ptr );
 HYPRE_Int hypre_CommStencilCreateNumGhost ( hypre_CommStencil *comm_stencil,
                                             HYPRE_Int **num_ghost_ptr );
 HYPRE_Int hypre_CommInfoCreate ( hypre_BoxArrayArray *send_boxes, hypre_BoxArrayArray *recv_boxes,
