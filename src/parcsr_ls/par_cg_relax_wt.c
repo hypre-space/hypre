@@ -27,7 +27,7 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
    hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    MPI_Comm comm;
-   HYPRE_Solver *smoother;
+   HYPRE_Solver *smoother = NULL;
    /* Data Structure variables */
 
    /* hypre_ParCSRMatrix **A_array = hypre_ParAMGDataAArray(amg_data); */
