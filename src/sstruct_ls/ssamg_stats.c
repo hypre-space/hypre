@@ -171,6 +171,10 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
 
       if (myid == 0)
       {
+         if (hypre_ParCSRMatrixNumNonzeros(umatrix) < 0)
+         {
+            hypre_ParCSRMatrixSetNumNonzeros(umatrix);
+         }
          global_num_rows[l]     = hypre_ParCSRMatrixGlobalNumRows(umatrix);
          global_num_rownnz[l]   = hypre_ParCSRMatrixGlobalNumRownnz(umatrix);
          global_num_nonzeros[l] = hypre_ParCSRMatrixNumNonzeros(umatrix);
