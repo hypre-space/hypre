@@ -79,8 +79,7 @@ hypre_StructStencilDestroy( hypre_StructStencil *stencil )
 
 HYPRE_Int
 hypre_StructStencilPrint( FILE                *file,
-                          hypre_StructStencil *stencil,
-                          HYPRE_Int           *symm_entries )
+                          hypre_StructStencil *stencil )
 {
    hypre_Index  *stencil_shape = hypre_StructStencilShape(stencil);
    HYPRE_Int     stencil_size  = hypre_StructStencilSize(stencil);
@@ -90,13 +89,10 @@ hypre_StructStencilPrint( FILE                *file,
    hypre_fprintf(file, "%d\n", stencil_size);
    for (i = 0; i < stencil_size; i++)
    {
-      if ((symm_entries == NULL) || (symm_entries[i] < 0))
-      {
-         /* Print line of the form: "%d: (%d %d %d)\n" */
-         hypre_fprintf(file, "%d: ", i);
-         hypre_IndexPrint(file, ndim, stencil_shape[i]);
-         hypre_fprintf(file, "\n");
-      }
+      /* Print line of the form: "%d: (%d %d %d)\n" */
+      hypre_fprintf(file, "%d: ", i);
+      hypre_IndexPrint(file, ndim, stencil_shape[i]);
+      hypre_fprintf(file, "\n");
    }
 
    return hypre_error_flag;

@@ -1237,6 +1237,42 @@ hypre_BoxArrayPrintToFile( FILE            *file,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_BoxArrayReadFromFile( FILE             *file,
+                            hypre_BoxArray  **box_array_ptr )
+{
+   hypre_BoxArray  *box_array;
+   hypre_Box       *box;
+
+   HYPRE_Int  ndim;
+   HYPRE_Int  size;
+   HYPRE_Int  i, idummy;
+
+   hypre_fscanf(file, "%d\n", &ndim);
+
+   hypre_fscanf(file, "%d\n", &size);
+
+   box_array = hypre_BoxArrayCreate(size, ndim);
+
+   /* Print lines of the form: "%d:  (%d, %d, %d)  x  (%d, %d, %d)\n" */
+   hypre_ForBoxI(i, box_array)
+   {
+      box = hypre_BoxArrayBox(box_array, i);
+      hypre_fscanf(file, "%d:  ", &idummy);
+      hypre_IndexRead(file, ndim, hypre_BoxIMin(box));
+      hypre_fscanf(file, "  x  ");
+      hypre_IndexRead(file, ndim, hypre_BoxIMax(box));
+      hypre_fprintf(file, "\n");
+   }
+
+   *box_array_ptr = box_array;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_BoxArrayPrint( MPI_Comm         comm,
                      const char      *filename,
                      hypre_BoxArray  *box_array )
@@ -1434,6 +1470,23 @@ hypre_AppendBoxArray( hypre_BoxArray *box_array_0,
    }
 
    return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoxArrayVolume( hypre_BoxArray *box_array )
+{
+   HYPRE_Int  volume, i;
+
+   volume = 0;
+   hypre_ForBoxI(i, box_array)
+   {
+      volume += hypre_BoxVolume(hypre_BoxArrayBox(box_array, i));
+   }
+
+   return volume;
 }
 
 /*==========================================================================

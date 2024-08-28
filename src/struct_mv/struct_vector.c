@@ -1512,7 +1512,7 @@ hypre_StructVectorPrintData( FILE               *file,
    boxes = (all) ? data_space : grid_boxes;
 
    /* Print data to file */
-   hypre_PrintBoxArrayData(file, boxes, data_space, num_values, value_ids, ndim, h_data);
+   hypre_PrintBoxArrayData(file, ndim, boxes, data_space, num_values, value_ids, h_data);
 
    /* Free memory */
    if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
@@ -1531,35 +1531,33 @@ HYPRE_Int
 hypre_StructVectorReadData( FILE               *file,
                             hypre_StructVector *vector )
 {
-   HYPRE_Int            ndim            = hypre_StructVectorNDim(vector);
-   hypre_StructGrid    *grid            = hypre_StructVectorGrid(vector);
-   hypre_BoxArray      *grid_boxes      = hypre_StructGridBoxes(grid);
-   hypre_BoxArray      *data_space      = hypre_StructVectorDataSpace(vector);
-   HYPRE_Int            data_size       = hypre_StructVectorDataSize(vector);
-   HYPRE_Complex       *data            = hypre_StructVectorData(vector);
-   HYPRE_MemoryLocation memory_location = hypre_StructVectorMemoryLocation(vector);
-   HYPRE_Complex       *h_data;
+   HYPRE_Int             ndim  = hypre_StructVectorNDim(vector);
+   hypre_StructGrid     *grid  = hypre_StructVectorGrid(vector);
+   hypre_BoxArray       *boxes = hypre_StructGridBoxes(grid);
 
-   /* Allocate/Point to data on the host memory */
-   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
-   {
-      h_data = hypre_CTAlloc(HYPRE_Complex, data_size, HYPRE_MEMORY_HOST);
-   }
-   else
-   {
-      h_data = data;
-   }
+   hypre_Box            *box;
+   HYPRE_Int             num_values;
+   HYPRE_Complex        *values;
+   HYPRE_Int            *value_ids;
+   HYPRE_Int             i, vi;
 
    /* Read data from file */
-   hypre_ReadBoxArrayData(file, grid_boxes, data_space, 1, ndim, h_data);
+   hypre_fscanf(file, "\nData:\n");
+   hypre_ReadBoxArrayData(file, ndim, boxes, &num_values, &value_ids, &values);
 
-   /* Move data to the device memory if necessary and free host data */
-   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
+   /* Set vector values */
+   HYPRE_StructVectorInitialize(vector);
+   vi = 0;
+   hypre_ForBoxI(i, boxes)
    {
-      hypre_TMemcpy(data, h_data, HYPRE_Complex, data_size,
-                    memory_location, HYPRE_MEMORY_HOST);
-      hypre_TFree(h_data, HYPRE_MEMORY_HOST);
+      box = hypre_BoxArrayBox(boxes, i);
+      HYPRE_StructVectorSetBoxValues(vector, hypre_BoxIMin(box), hypre_BoxIMax(box), &values[vi]);
+      vi += hypre_BoxVolume(box);
    }
+
+   /* Clean up */
+   hypre_TFree(value_ids, HYPRE_MEMORY_HOST);
+   hypre_TFree(values, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -1667,15 +1665,13 @@ hypre_StructVectorRead( MPI_Comm    comm,
     * Initialize the vector
     *----------------------------------------*/
 
-   vector = hypre_StructVectorCreate(comm, grid);
-   hypre_StructVectorSetNumGhost(vector, num_ghost);
-   hypre_StructVectorInitialize(vector);
+   HYPRE_StructVectorCreate(comm, grid, &vector);
+   hypre_StructVectorSetNumGhost(vector, num_ghost);  // RDF Is this needed?
 
    /*----------------------------------------
     * Read data
     *----------------------------------------*/
 
-   hypre_fscanf(file, "\nData:\n");
    hypre_StructVectorReadData(file, vector);
 
    /*----------------------------------------
