@@ -2179,6 +2179,10 @@ hypre_StructMatrixPrintData( FILE               *file,
 
    hypre_TFree(value_ids, HYPRE_MEMORY_HOST);
    hypre_TFree(cvalue_ids, HYPRE_MEMORY_HOST);
+   if (!all)
+   {
+      hypre_BoxArrayDestroy(boxes);
+   }
    if (h_data != data)
    {
       hypre_TFree(h_data, HYPRE_MEMORY_HOST);
