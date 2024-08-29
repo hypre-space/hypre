@@ -1465,6 +1465,11 @@ main( hypre_int argc,
                HYPRE_StructVectorAssemble(x);
             }
          } /* finish the read of matrix */
+
+         if (grid == NULL)
+         {
+            grid = readgrid;
+         }
       }
       /* linear system complete */
 
