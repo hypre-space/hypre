@@ -200,17 +200,9 @@ hypre_ParCSRMatrixBlkFilter( hypre_ParCSRMatrix  *A,
                              hypre_ParCSRMatrix **B_ptr )
 {
 #if defined(HYPRE_USING_GPU)
-   hypre_ParCSRMatrix     *h_A;
-   HYPRE_ExecutionPolicy   exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
-
-   if (exec == HYPRE_EXEC_DEVICE)
+   if (hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A)) == HYPRE_EXEC_DEVICE)
    {
-      /* TODO (VPM): device implementation */
-      h_A = hypre_ParCSRMatrixClone_v2(A, 1, HYPRE_MEMORY_HOST);
-      hypre_ParCSRMatrixBlkFilterHost(h_A, block_size, B_ptr);
-
-      hypre_ParCSRMatrixDestroy(h_A);
-      hypre_ParCSRMatrixMigrate(*B_ptr, HYPRE_MEMORY_DEVICE);
+      hypre_ParCSRMatrixBlkFilterDevice(A, block_size, B_ptr);
    }
    else
 #endif
