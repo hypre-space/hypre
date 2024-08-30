@@ -98,17 +98,17 @@ hypreGPUKernel_ParCSRMatrixBlkFilterFill(hypre_DeviceItem &item,
                                          HYPRE_Int         A_num_cols_offd,
                                          HYPRE_Int        *A_diag_i,
                                          HYPRE_Int        *A_diag_j,
-                                         HYPRE_Complex    *A_diag_data,
+                                         HYPRE_Complex    *A_diag_a,
                                          HYPRE_Int        *A_offd_i,
                                          HYPRE_Int        *A_offd_j,
-                                         HYPRE_Complex    *A_offd_data,
+                                         HYPRE_Complex    *A_offd_a,
                                          HYPRE_BigInt     *A_col_map_offd,
                                          HYPRE_Int        *B_diag_i,
                                          HYPRE_Int        *B_diag_j,
-                                         HYPRE_Complex    *B_diag_data,
+                                         HYPRE_Complex    *B_diag_a,
                                          HYPRE_Int        *B_offd_i,
                                          HYPRE_Int        *B_offd_j,
-                                         HYPRE_Complex    *B_offd_data,
+                                         HYPRE_Complex    *B_offd_a,
                                          HYPRE_Int        *col_map_marker)
 {
    const HYPRE_Int  row = hypre_gpu_get_grid_warp_id<1, 1>(item);
@@ -145,7 +145,7 @@ hypreGPUKernel_ParCSRMatrixBlkFilterFill(hypre_DeviceItem &item,
       {
          HYPRE_Int idx = diag_offset + laneoff;
          B_diag_j[idx] = col;
-         B_diag_data[idx] = A_diag_data[j];
+         B_diag_a[idx] = A_diag_a[j];
       }
 
       diag_offset += hypre_popc(ballot);
@@ -169,7 +169,7 @@ hypreGPUKernel_ParCSRMatrixBlkFilterFill(hypre_DeviceItem &item,
          {
             HYPRE_Int idx = offd_offset + laneoff;
             B_offd_j[idx] = col;
-            B_offd_data[idx] = A_offd_data[j];
+            B_offd_a[idx] = A_offd_a[j];
 
 #ifndef HYPRE_USING_SYCL
             if (col < A_num_cols_offd)
@@ -193,42 +193,54 @@ hypre_ParCSRMatrixBlkFilterDevice(hypre_ParCSRMatrix  *A,
                                   HYPRE_Int            block_size,
                                   hypre_ParCSRMatrix **B_ptr)
 {
-   MPI_Comm             comm              = hypre_ParCSRMatrixComm(A);
-   HYPRE_BigInt         global_num_rows   = hypre_ParCSRMatrixGlobalNumRows(A);
-   HYPRE_BigInt         global_num_cols   = hypre_ParCSRMatrixGlobalNumCols(A);
-   HYPRE_BigInt        *row_starts        = hypre_ParCSRMatrixRowStarts(A);
-   HYPRE_BigInt        *col_starts        = hypre_ParCSRMatrixColStarts(A);
-   HYPRE_BigInt        *A_col_map_offd    = hypre_ParCSRMatrixDeviceColMapOffd(A);
-   HYPRE_MemoryLocation memory_location   = hypre_ParCSRMatrixMemoryLocation(A);
+   MPI_Comm             comm            = hypre_ParCSRMatrixComm(A);
+   HYPRE_BigInt         global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_BigInt         global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
+   HYPRE_BigInt        *row_starts      = hypre_ParCSRMatrixRowStarts(A);
+   HYPRE_BigInt        *col_starts      = hypre_ParCSRMatrixColStarts(A);
+   HYPRE_BigInt        *A_col_map_offd  = hypre_ParCSRMatrixDeviceColMapOffd(A);
+   HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
-   hypre_CSRMatrix     *A_diag            = hypre_ParCSRMatrixDiag(A);
-   HYPRE_Int            num_rows          = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int           *A_diag_i          = hypre_CSRMatrixI(A_diag);
-   HYPRE_Int           *A_diag_j          = hypre_CSRMatrixJ(A_diag);
-   HYPRE_Complex       *A_diag_data       = hypre_CSRMatrixData(A_diag);
+   hypre_CSRMatrix     *A_diag          = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Int            num_rows        = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int           *A_diag_i        = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int           *A_diag_j        = hypre_CSRMatrixJ(A_diag);
+   HYPRE_Complex       *A_diag_a        = hypre_CSRMatrixData(A_diag);
 
-   hypre_CSRMatrix     *A_offd            = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Int           *A_offd_i          = hypre_CSRMatrixI(A_offd);
-   HYPRE_Int           *A_offd_j          = hypre_CSRMatrixJ(A_offd);
-   HYPRE_Complex       *A_offd_data       = hypre_CSRMatrixData(A_offd);
-   HYPRE_Int            num_cols_offd     = hypre_CSRMatrixNumCols(A_offd);
+   hypre_CSRMatrix     *A_offd          = hypre_ParCSRMatrixOffd(A);
+   HYPRE_Int           *A_offd_i        = hypre_CSRMatrixI(A_offd);
+   HYPRE_Int           *A_offd_j        = hypre_CSRMatrixJ(A_offd);
+   HYPRE_Complex       *A_offd_a        = hypre_CSRMatrixData(A_offd);
+   HYPRE_Int            num_cols_offd   = hypre_CSRMatrixNumCols(A_offd);
 
    hypre_ParCSRMatrix  *B;
    hypre_CSRMatrix     *B_diag;
    hypre_CSRMatrix     *B_offd;
    HYPRE_Int           *B_diag_i;
    HYPRE_Int           *B_diag_j;
-   HYPRE_Complex       *B_diag_data;
+   HYPRE_Complex       *B_diag_a;
    HYPRE_Int           *B_offd_i;
    HYPRE_Int           *B_offd_j;
-   HYPRE_Complex       *B_offd_data;
+   HYPRE_Complex       *B_offd_a;
 
    HYPRE_Int            B_diag_nnz, B_offd_nnz;
    HYPRE_BigInt        *B_col_map_offd;
    HYPRE_Int           *col_map_marker;
    HYPRE_BigInt        *col_map_end;
 
+   const dim3           bDim = hypre_GetDefaultDeviceBlockDimension();
+   const dim3           gDim = hypre_GetDefaultDeviceGridDimension(num_rows,
+                                                                   "w", bDim);
+
    hypre_GpuProfilingPushRange("ParCSRMatrixBlkFilter");
+
+   /* Create A's device column map */
+   if (!hypre_ParCSRMatrixDeviceColMapOffd(A) &&
+       hypre_ParCSRMatrixColMapOffd(A))
+   {
+      hypre_ParCSRMatrixCopyColMapOffdToDevice(A);
+      A_col_map_offd = hypre_ParCSRMatrixDeviceColMapOffd(A);
+   }
 
    /* Create and initialize output matrix B */
    B = hypre_ParCSRMatrixCreate(comm, global_num_rows, global_num_cols,
@@ -243,8 +255,6 @@ hypre_ParCSRMatrixBlkFilterDevice(hypre_ParCSRMatrix  *A,
    B_offd_i = hypre_CSRMatrixI(B_offd);
 
    /* First pass: count nonzeros */
-   const dim3 bDim = hypre_GetDefaultDeviceBlockDimension();
-   const dim3 gDim = hypre_GetDefaultDeviceGridDimension(num_rows, "warp", bDim);
    HYPRE_GPU_LAUNCH( hypreGPUKernel_ParCSRMatrixBlkFilterCount, gDim, bDim,
                      num_rows, block_size,
                      A_diag_i, A_diag_j,
@@ -261,10 +271,10 @@ hypre_ParCSRMatrixBlkFilterDevice(hypre_ParCSRMatrix  *A,
                  HYPRE_MEMORY_HOST, memory_location);
 
    /* Allocate memory for B */
-   B_diag_j    = hypre_TAlloc(HYPRE_Int, B_diag_nnz, memory_location);
-   B_offd_j    = hypre_TAlloc(HYPRE_Int, B_offd_nnz, memory_location);
-   B_diag_data = hypre_TAlloc(HYPRE_Complex, B_diag_nnz, memory_location);
-   B_offd_data = hypre_TAlloc(HYPRE_Complex, B_offd_nnz, memory_location);
+   B_diag_j = hypre_TAlloc(HYPRE_Int, B_diag_nnz, memory_location);
+   B_offd_j = hypre_TAlloc(HYPRE_Int, B_offd_nnz, memory_location);
+   B_diag_a = hypre_TAlloc(HYPRE_Complex, B_diag_nnz, memory_location);
+   B_offd_a = hypre_TAlloc(HYPRE_Complex, B_offd_nnz, memory_location);
 
    /* Create a marker for used columns */
    if (num_cols_offd > 0)
@@ -279,38 +289,28 @@ hypre_ParCSRMatrixBlkFilterDevice(hypre_ParCSRMatrix  *A,
    /* Second pass: fill B */
    HYPRE_GPU_LAUNCH( hypreGPUKernel_ParCSRMatrixBlkFilterFill, gDim, bDim,
                      num_rows, block_size, num_cols_offd,
-                     A_diag_i, A_diag_j, A_diag_data,
-                     A_offd_i, A_offd_j, A_offd_data,
+                     A_diag_i, A_diag_j, A_diag_a,
+                     A_offd_i, A_offd_j, A_offd_a,
                      A_col_map_offd,
-                     B_diag_i, B_diag_j, B_diag_data,
-                     B_offd_i, B_offd_j, B_offd_data,
+                     B_diag_i, B_diag_j, B_diag_a,
+                     B_offd_i, B_offd_j, B_offd_a,
                      col_map_marker );
 
    /* Update CSR matrix structures */
    hypre_CSRMatrixJ(B_diag)           = B_diag_j;
-   hypre_CSRMatrixData(B_diag)        = B_diag_data;
+   hypre_CSRMatrixData(B_diag)        = B_diag_a;
    hypre_CSRMatrixNumNonzeros(B_diag) = B_diag_nnz;
    hypre_CSRMatrixJ(B_offd)           = B_offd_j;
-   hypre_CSRMatrixData(B_offd)        = B_offd_data;
+   hypre_CSRMatrixData(B_offd)        = B_offd_a;
    hypre_CSRMatrixNumNonzeros(B_offd) = B_offd_nnz;
 
    /* Set up B's col_map_offd */
    if (B_offd_nnz > 0)
    {
-      /* Create A's device column map */
-      if (!hypre_ParCSRMatrixDeviceColMapOffd(A))
-      {
-         hypre_ParCSRMatrixCopyColMapOffdToDevice(A);
-         A_col_map_offd = hypre_ParCSRMatrixDeviceColMapOffd(A);
-      }
-
       /* Create B's device column map */
-      if (!hypre_ParCSRMatrixDeviceColMapOffd(B))
-      {
-         hypre_ParCSRMatrixDeviceColMapOffd(B) = hypre_CTAlloc(HYPRE_BigInt,
-                                                               num_cols_offd,
-                                                               HYPRE_MEMORY_DEVICE);
-      }
+      hypre_ParCSRMatrixDeviceColMapOffd(B) = hypre_CTAlloc(HYPRE_BigInt,
+                                                            num_cols_offd,
+                                                            HYPRE_MEMORY_DEVICE);
       B_col_map_offd = hypre_ParCSRMatrixDeviceColMapOffd(B);
 
 #ifndef HYPRE_USING_SYCL
