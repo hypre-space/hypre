@@ -2355,15 +2355,15 @@ hypre_BoomerAMGCoarsenPMISHost( hypre_ParCSRMatrix    *S,
       cnt = 0;
       for (i = 0; i < num_variables; i++)
       {
-         if ( CF_marker[i] != SF_PT )
+         if (CF_marker[i] != SF_PT)
          {
-            if ( S_offd_i[i + 1] - S_offd_i[i] > 0 || CF_marker[i] == -1 )
+            if (S_offd_i[i + 1] - S_offd_i[i] > 0 || CF_marker[i] == -1)
             {
                CF_marker[i] = 0;
             }
-            if ( CF_marker[i] == Z_PT)
+            if (CF_marker[i] == Z_PT)
             {
-               if ( measure_array[i] >= 1.0 || S_diag_i[i + 1] - S_diag_i[i] > 0 )
+               if (measure_array[i] >= 1.0 || S_diag_i[i + 1] - S_diag_i[i] > 0)
                {
                   CF_marker[i] = 0;
                   graph_array[cnt++] = i;
@@ -2821,24 +2821,22 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 {
    hypre_GpuProfilingPushRange("PMIS");
 
-   HYPRE_Int ierr = 0;
-
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      ierr = hypre_BoomerAMGCoarsenPMISDevice( S, A, CF_init, debug_flag, CF_marker_ptr );
+      hypre_BoomerAMGCoarsenPMISDevice(S, A, CF_init, debug_flag, CF_marker_ptr);
    }
    else
 #endif
    {
-      ierr = hypre_BoomerAMGCoarsenPMISHost( S, A, CF_init, debug_flag, CF_marker_ptr );
+      hypre_BoomerAMGCoarsenPMISHost(S, A, CF_init, debug_flag, CF_marker_ptr);
    }
 
    hypre_GpuProfilingPopRange();
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -2891,20 +2889,15 @@ hypre_BoomerAMGCoarsenHMIS( hypre_ParCSRMatrix    *S,
 #if defined(HYPRE_USING_GPU)
    if (hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A)) == HYPRE_EXEC_DEVICE)
    {
-      if (*CF_marker_ptr)
+      if (*CF_marker_ptr && (*CF_marker_ptr != CF_marker))
       {
-         hypre_IntArrayCopy(*CF_marker_ptr, CF_marker);
+         hypre_IntArrayCopy(CF_marker, *CF_marker_ptr);
          hypre_IntArrayDestroy(CF_marker);
          CF_marker = NULL;
       }
-      else
+      else if (*CF_marker_ptr == NULL)
       {
          *CF_marker_ptr = hypre_IntArrayCloneDeep_v2(CF_marker, HYPRE_MEMORY_DEVICE);
-      }
-
-      /* Free host CF_marker */
-      if (hypre_GetActualMemLocation(CF_memory_location) == hypre_MEMORY_DEVICE)
-      {
          hypre_IntArrayDestroy(CF_marker);
       }
    }

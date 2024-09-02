@@ -222,10 +222,6 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
          hypre_ParILUExtractEBFC(hypre_ParCSRMatrixDiag(ALU), nLU,
                                  BLUptr, &SLU, Eptr, Fptr);
          hypre_ParCSRMatrixDestroy(ALU);
-         hypre_CSRMatrixMigrate(*BLUptr, HYPRE_MEMORY_DEVICE);
-         hypre_CSRMatrixMigrate(SLU, HYPRE_MEMORY_DEVICE);
-         hypre_CSRMatrixMigrate(*Eptr, HYPRE_MEMORY_DEVICE);
-         hypre_CSRMatrixMigrate(*Fptr, HYPRE_MEMORY_DEVICE);
       }
    }
    else

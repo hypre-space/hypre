@@ -330,7 +330,6 @@ hypre_ILUSetup( void               *ilu_vdata,
          else
 #endif
          {
-
             hypre_ILUSetupILUT(matA, max_row_elmts, droptol, perm, perm, nLU, nLU,
                                &matL, &matD, &matU, &matS, &u_end);
          }
@@ -1793,6 +1792,9 @@ hypre_ILUSetupLDUtoCusparse(hypre_ParCSRMatrix  *L,
    }
    LDU_diag_i[n] = pos;
 
+   /* Migrate to device (abstract memory space) */
+   hypre_ParCSRMatrixMigrate(LDU, HYPRE_MEMORY_DEVICE);
+
    *LDUp = LDU;
 
    return hypre_error_flag;
@@ -1830,7 +1832,7 @@ hypre_ILUSetupRAPMILU0(hypre_ParCSRMatrix  *A,
 
    /* Free memory */
    hypre_ParCSRMatrixDestroy(L);
-   hypre_TFree(D, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(D, hypre_ParCSRMatrixMemoryLocation(A));
    hypre_ParCSRMatrixDestroy(U);
 
    *ALUp = ALU;
@@ -3957,9 +3959,9 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix  *A,
    HYPRE_Int                *S_diag_j        = NULL;
    HYPRE_Int                *S_offd_i        = NULL;
    HYPRE_Int                *S_offd_j        = NULL;
-   HYPRE_BigInt                *S_offd_colmap   = NULL;
+   HYPRE_BigInt             *S_offd_colmap   = NULL;
    HYPRE_Real               *S_offd_data;
-   HYPRE_BigInt                *send_buf        = NULL;
+   HYPRE_BigInt             *send_buf        = NULL;
    HYPRE_Int                *u_end_array;
 
    /* reverse permutation */
@@ -4651,8 +4653,8 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix  *A,
                                     0,
                                     L_diag_i[n],
                                     0 );
-   hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(matL)) = HYPRE_MEMORY_HOST;
-   hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(matL)) = HYPRE_MEMORY_HOST;
+   hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(matL)) = memory_location;
+   hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(matL)) = memory_location;
 
    L_diag = hypre_ParCSRMatrixDiag(matL);
    hypre_CSRMatrixI(L_diag) = L_diag_i;
@@ -4680,8 +4682,8 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix  *A,
                                     0,
                                     U_diag_i[n],
                                     0 );
-   hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(matU)) = HYPRE_MEMORY_HOST;
-   hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(matU)) = HYPRE_MEMORY_HOST;
+   hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixDiag(matU)) = memory_location;
+   hypre_CSRMatrixMemoryLocation(hypre_ParCSRMatrixOffd(matU)) = memory_location;
 
    U_diag = hypre_ParCSRMatrixDiag(matU);
    hypre_CSRMatrixI(U_diag) = U_diag_i;
