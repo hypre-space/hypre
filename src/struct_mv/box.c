@@ -1140,6 +1140,10 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
             }
          }
          hypre_assert(num_lbox_indices > 0);
+         /* WM: debug */
+         HYPRE_Int  myid;
+         hypre_MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+         hypre_printf("WM: debug - rank %d, num_rbox_indices = %d\n", myid, num_rbox_indices);
          hypre_assert(num_rbox_indices > 0);
 
          /* Copy splitted indices to leaf nodes */

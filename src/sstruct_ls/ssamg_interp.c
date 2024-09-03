@@ -453,6 +453,10 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
    hypre_BoxDestroy(tmp_box);
 
+   /* WM: debug */
+   HYPRE_Int  myid;
+   hypre_MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+
    /* Unstructured interpolation */
    if (interp_type >= 0)
    {
@@ -491,6 +495,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
             compute_box = hypre_BoxCreate(ndim);
 
             convert_boxa[part][vi] = hypre_BoxArrayCreate(0, ndim);
+            hypre_printf("WM: debug - rank %d, part %d, var %d, data space num compute boxes = %d\n", myid, part, vi, hypre_BoxArraySize(hypre_StructMatrixDataSpace(A_s))); 
 
             /* Loop over boxes */
             hypre_ForBoxI(i, compute_boxes)
@@ -506,6 +511,25 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                hypre_BoxGetSize(compute_box, loop_size);
                hypre_SetIndex(stride, 1);
                hypre_CopyToIndex(hypre_BoxIMin(compute_box), ndim, start);
+               if (myid == 0) hypre_printf("WM: debug - A_u_diag num rows = %d\n", hypre_CSRMatrixNumRows(A_u_diag)); 
+               if (myid == 0) hypre_printf("WM: debug - part %d, i %d, ndim = %d, loop_size = (%d %d %d), compute box = (%d %d %d) (%d %d %d), start = (%d %d %d) stride = (%d %d %d), cnt = %d\n",
+                     part, i, ndim,
+                     loop_size[0],
+                     loop_size[1],
+                     loop_size[2],
+                     hypre_BoxIMin(compute_box)[0],
+                     hypre_BoxIMin(compute_box)[1],
+                     hypre_BoxIMin(compute_box)[2],
+                     hypre_BoxIMax(compute_box)[0],
+                     hypre_BoxIMax(compute_box)[1],
+                     hypre_BoxIMax(compute_box)[2],
+                     start[0],
+                     start[1],
+                     start[2],
+                     stride[0],
+                     stride[1],
+                     stride[2],
+                     cnt);
                hypre_BoxLoop1Begin(ndim, loop_size, compute_box, start, stride, ii);
                {
                   /* WM: todo - this mapping to the unstructured indices only works with no inter-variable couplings? */
@@ -524,24 +548,34 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                hypre_BoxLoop1End(ii);
 
                /* Create box array from indices marking where A_u is non-trivial */
-               hypre_BoxArrayCreateFromIndices(ndim, num_indices, indices, threshold, &indices_boxa);
-               tmp_box = hypre_BoxCreate(ndim);
-               hypre_ForBoxI(j, indices_boxa)
+               if (myid == 0) hypre_printf("WM: debug - num_indices = %d\n", num_indices);
+               if (num_indices)
                {
-                  hypre_CopyBox(hypre_BoxArrayBox(indices_boxa, j), tmp_box);
-                  /* WM: todo - need 2 for distance 2 interp below? Make this dependent on interpolation or just hardcode to 2? */
-                  hypre_BoxGrowByValue(tmp_box, 2);
-                  /* WM: intersect with the struct grid box... is that right? NOTE: if you change to DataSpace of the matrix above, you'll need to change this line */
-                  hypre_IntersectBoxes(tmp_box, hypre_BoxArrayBox(compute_boxes, i), tmp_box);
-                  hypre_AppendBox(tmp_box, convert_boxa[part][vi]);
-               }
-               hypre_BoxDestroy(tmp_box);
-               hypre_BoxArrayDestroy(indices_boxa);
-               indices_boxa = NULL;
+                  if (myid == 0)
+                  {
+                     hypre_printf("WM: debug - indices =\n");
+                     for (j = 0; j < num_indices; j++)
+                        hypre_printf("%d %d\n", indices[0][j], indices[1][j], indices[2][j]);
+                  }
+                  hypre_BoxArrayCreateFromIndices(ndim, num_indices, indices, threshold, &indices_boxa);
+                  tmp_box = hypre_BoxCreate(ndim);
+                  hypre_ForBoxI(j, indices_boxa)
+                  {
+                     hypre_CopyBox(hypre_BoxArrayBox(indices_boxa, j), tmp_box);
+                     /* WM: todo - need 2 for distance 2 interp below? Make this dependent on interpolation or just hardcode to 2? */
+                     hypre_BoxGrowByValue(tmp_box, 2);
+                     /* WM: intersect with the struct grid box... is that right? NOTE: if you change to DataSpace of the matrix above, you'll need to change this line */
+                     hypre_IntersectBoxes(tmp_box, hypre_BoxArrayBox(compute_boxes, i), tmp_box);
+                     hypre_AppendBox(tmp_box, convert_boxa[part][vi]);
+                  }
+                  hypre_BoxDestroy(tmp_box);
+                  hypre_BoxArrayDestroy(indices_boxa);
+                  indices_boxa = NULL;
 
-               for (j = 0; j < ndim; j++)
-               {
-                  indices[j] = hypre_TFree(indices[j], HYPRE_MEMORY_HOST);
+                  for (j = 0; j < ndim; j++)
+                  {
+                     indices[j] = hypre_TFree(indices[j], HYPRE_MEMORY_HOST);
+                  }
                }
             }
             hypre_BoxDestroy(compute_box);
@@ -604,6 +638,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          nvars = hypre_SStructPGridNVars(pgrid);
 
          A_p   = hypre_SStructMatrixPMatrix(A, part);
+         /* WM: todo - cdir can be -1, indicating no coarsening... need to account for this case */
          cdir  = cdir_p[part];
 
          /* Loop over variables */
@@ -646,6 +681,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                hypre_IndexRef shrink_start = hypre_BoxIMin(shrink_box);
 
                /* WM: define the start by even/odd coordinate... is this right? */
+               hypre_printf("WM: debug - cdir = %d\n", cdir);
                if (hypre_IndexD(shrink_start, cdir) % 2 == 0)
                {
                   hypre_IndexD(shrink_start, cdir)++;

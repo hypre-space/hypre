@@ -153,6 +153,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    for (l = 0; l < (num_levels - 1); l++)
    {
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
+      hypre_printf("WM: debug - level %d\n", l);
 
       // Build prolongation matrix
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
