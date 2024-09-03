@@ -48,6 +48,7 @@ FILES =\
  par_csr_matop.c\
  par_csr_matrix.c\
  par_csr_matrix_stats.c\
+ par_csr_matmat.c\
  par_csr_matvec.c\
  par_csr_matop_marked.c\
  par_csr_triplemat.c\
@@ -58,6 +59,7 @@ FILES =\
 CUFILES =\
  par_csr_fffc_device.c\
  par_csr_matop_device.c\
+ par_csr_matmat_device.c\
  par_csr_matvec_device.c\
  par_csr_triplemat_device.c\
  par_vector_device.c

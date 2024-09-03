@@ -1186,6 +1186,14 @@ HYPRE_Int hypre_ParCSRMatrixStatsArrayCompute( HYPRE_Int num_matrices,
                                                hypre_ParCSRMatrix **matrices,
                                                hypre_MatrixStatsArray *stats_array );
 
+/* par_csr_matmat_device.c */
+HYPRE_Int hypre_ParCSRMatMatDiagDevice( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B,
+                                        hypre_ParCSRMatrix *C );
+
+/* par_csr_matmat.c */
+HYPRE_Int hypre_ParCSRMatMatDiag( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B,
+                                  hypre_ParCSRMatrix **C_ptr );
+
 /* par_csr_matvec.c */
 // y = alpha*A*x + beta*b
 HYPRE_Int hypre_ParCSRMatrixMatvecOutOfPlace ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
