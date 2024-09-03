@@ -1907,7 +1907,7 @@ hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
 {
    HYPRE_UNUSED_VAR(A);
 
-   hypre_ParCSRMatrix *Pix, *Piy, *Piz = NULL;
+   hypre_ParCSRMatrix *Pix, *Piy = NULL, *Piz = NULL;
 
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(G) );
@@ -2378,11 +2378,13 @@ hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
 #endif
          {
             if (G_offd_ncols)
+            {
                for (i = 0; i < G_offd_nrows + 1; i++)
                {
                   Pix_offd_I[i] = G_offd_I[i];
                   Piy_offd_I[i] = G_offd_I[i];
                }
+            }
 
             for (i = 0; i < G_offd_nnz; i++)
             {
@@ -2391,11 +2393,13 @@ hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
             }
 
             for (i = 0; i < G_offd_nrows; i++)
+            {
                for (j = G_offd_I[i]; j < G_offd_I[i + 1]; j++)
                {
                   *Pix_offd_data++ = hypre_abs(G_offd_data[j]) * 0.5 * Gx_data[i];
                   *Piy_offd_data++ = hypre_abs(G_offd_data[j]) * 0.5 * Gy_data[i];
                }
+            }
          }
 
          for (i = 0; i < G_offd_ncols; i++)
@@ -4550,7 +4554,7 @@ hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
    HYPRE_Real *A_offd_data = hypre_CSRMatrixData(A_offd);
    HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
-   HYPRE_Real diag = 1.0;
+   HYPRE_Real diag = 0.0;
    HYPRE_Real *l1_norm = hypre_TAlloc(HYPRE_Real, num_rows, hypre_ParCSRMatrixMemoryLocation(A));
    HYPRE_Int ii, ns, ne, rest, size;
 
@@ -4730,6 +4734,7 @@ hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
             if (cf_marker == NULL)
             {
                /* Add the diagonal and the local off-thread part of the ith row */
+               diag = 0.0;
                for (j = A_diag_I[i]; j < A_diag_I[i + 1]; j++)
                {
                   ii = A_diag_J[j];
@@ -4760,6 +4765,7 @@ hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
             {
                cf_diag = cf_marker[i];
                /* Add the diagonal and the local off-thread part of the ith row */
+               diag = 0.0;
                for (j = A_diag_I[i]; j < A_diag_I[i + 1]; j++)
                {
                   ii = A_diag_J[j];
@@ -4792,7 +4798,7 @@ hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
             }
 
             /* Truncate according to Remark 6.2 */
-            if (l1_norm[i] <= 4.0 / 3.0 * diag)
+            if (l1_norm[i] <= (4.0 / 3.0) * diag)
             {
                l1_norm[i] = diag;
             }
@@ -4816,6 +4822,7 @@ hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
             if (cf_marker == NULL)
             {
                /* Add the diagonal and the local off-thread part of the ith row */
+               diag = 0.0;
                for (j = A_diag_I[i]; j < A_diag_I[i + 1]; j++)
                {
                   ii = A_diag_J[j];
@@ -4846,6 +4853,7 @@ hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
             {
                cf_diag = cf_marker[i];
                /* Add the diagonal and the local off-thread part of the ith row */
+               diag = 0.0;
                for (j = A_diag_I[i]; j < A_diag_I[i + 1]; j++)
                {
                   ii = A_diag_J[j];

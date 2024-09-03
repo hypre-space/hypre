@@ -161,6 +161,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
       }
       else
       {
+         col_ind1 = NULL;
          size1 = 0;
       }
 

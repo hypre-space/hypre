@@ -78,6 +78,7 @@ hypre_MGRSolve( void               *mgr_vdata,
       return hypre_error_flag;
    }
 
+   A_array[0] = A;
    U_array[0] = u;
    F_array[0] = f;
 
@@ -705,7 +706,6 @@ hypre_MGRCycle( void              *mgr_vdata,
                                               level_diaginv, Vtemp);
                   }
                }
-               hypre_ParVectorAllZeros(U_array[fine_grid]) = 0;
             }
             else if ((level_smooth_type[fine_grid] > 1) &&
                      (level_smooth_type[fine_grid] < 7))
@@ -733,16 +733,17 @@ hypre_MGRCycle( void              *mgr_vdata,
 
                   /* Update solution */
                   hypre_ParVectorAxpy(fp_one, Utemp, U_array[fine_grid]);
-                  hypre_ParVectorAllZeros(U_array[fine_grid]) = 0;
                }
             }
-            else if (level_smooth_type[fine_grid] == 16)
+            else if ((mgr_data -> level_smoother)[fine_grid])
             {
-               /* hypre_ILU smoother */
-               HYPRE_ILUSolve((mgr_data -> level_smoother)[fine_grid],
-                              A_array[fine_grid], F_array[fine_grid],
-                              U_array[fine_grid]);
-               hypre_ParVectorAllZeros(U_array[fine_grid]) = 0;
+               /* Generic smoother object */
+               hypre_Solver *base = (hypre_Solver*) (mgr_data -> level_smoother)[fine_grid];
+
+               hypre_SolverSolve(base)((mgr_data -> level_smoother)[fine_grid],
+                                       (HYPRE_Matrix) A_array[fine_grid],
+                                       (HYPRE_Vector) F_array[fine_grid],
+                                       (HYPRE_Vector) U_array[fine_grid]);
             }
             else
             {
@@ -755,6 +756,7 @@ hypre_MGRCycle( void              *mgr_vdata,
                                        U_array[fine_grid], Vtemp, Ztemp);
                }
             }
+            hypre_ParVectorAllZeros(U_array[fine_grid]) = 0;
 
             /* Error checking */
             if (HYPRE_GetError())
@@ -813,8 +815,8 @@ hypre_MGRCycle( void              *mgr_vdata,
                   {
                      hypre_MGRBlockRelaxSolveDevice(B_FF_array[fine_grid],
                                                     A_ff_array[fine_grid],
-                                                    F_fine_array[fine_grid],
-                                                    U_fine_array[fine_grid],
+                                                    F_fine_array[coarse_grid],
+                                                    U_fine_array[coarse_grid],
                                                     Vtemp, fp_one);
                   }
                   else
@@ -848,20 +850,25 @@ hypre_MGRCycle( void              *mgr_vdata,
                if (relax_type == 18)
                {
 #if defined(HYPRE_USING_GPU)
-                  for (i = 0; i < nsweeps[fine_grid]; i++)
+                  if (exec == HYPRE_EXEC_DEVICE)
                   {
-                     hypre_MGRRelaxL1JacobiDevice(A_array[fine_grid], F_array[fine_grid],
-                                                  CF_marker_data, relax_points, relax_weight,
-                                                  l1_norms, U_array[fine_grid], Vtemp);
+                     for (i = 0; i < nsweeps[fine_grid]; i++)
+                     {
+                        hypre_MGRRelaxL1JacobiDevice(A_array[fine_grid], F_array[fine_grid],
+                                                     CF_marker_data, relax_points, relax_weight,
+                                                     l1_norms, U_array[fine_grid], Vtemp);
+                     }
                   }
-#else
-                  for (i = 0; i < nsweeps[fine_grid]; i++)
-                  {
-                     hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid],
-                                                 CF_marker_data, relax_points, relax_weight,
-                                                 l1_norms, U_array[fine_grid], Vtemp);
-                  }
+                  else
 #endif
+                  {
+                     for (i = 0; i < nsweeps[fine_grid]; i++)
+                     {
+                        hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid],
+                                                    CF_marker_data, relax_points, relax_weight,
+                                                    l1_norms, U_array[fine_grid], Vtemp);
+                     }
+                  }
                }
                else
                {
@@ -885,8 +892,8 @@ hypre_MGRCycle( void              *mgr_vdata,
             //                                    F_array[fine_grid], Vtemp);
             //  convergence_factor_frelax = hypre_ParVectorInnerProd(Vtemp, Vtemp);
 
-            HYPRE_Real resnorm, init_resnorm;
-            HYPRE_Real rhs_norm, old_resnorm;
+            HYPRE_Real resnorm = 0.0, init_resnorm;
+            HYPRE_Real rhs_norm = 0.0, old_resnorm;
             HYPRE_Real rel_resnorm = fp_one;
             HYPRE_Real conv_factor = fp_one;
             if (frelax_print_level > 1)
@@ -971,13 +978,18 @@ hypre_MGRCycle( void              *mgr_vdata,
                                                F_array[fine_grid], Vtemp);
 
             /* Restrict to F points */
-#if defined (HYPRE_USING_GPU)
-            hypre_ParCSRMatrixMatvecT(fp_one, P_FF_array[fine_grid], Vtemp,
-                                      fp_zero, F_fine_array[coarse_grid]);
-#else
-            hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, fp_one, Vtemp,
-                                fp_zero, &(F_fine_array[coarse_grid]));
+#if defined(HYPRE_USING_GPU)
+            if (exec == HYPRE_EXEC_DEVICE)
+            {
+               hypre_ParCSRMatrixMatvecT(fp_one, P_FF_array[fine_grid], Vtemp,
+                                         fp_zero, F_fine_array[coarse_grid]);
+            }
+            else
 #endif
+            {
+               hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, fp_one, Vtemp,
+                                   fp_zero, &(F_fine_array[coarse_grid]));
+            }
 
             /* Set initial guess to zeros */
             hypre_ParVectorSetZeros(U_fine_array[coarse_grid]);
@@ -1011,15 +1023,20 @@ hypre_MGRCycle( void              *mgr_vdata,
             }
 
             /* Interpolate the solution back to the fine grid level */
-#if defined (HYPRE_USING_GPU)
-            hypre_ParCSRMatrixMatvec(fp_one, P_FF_array[fine_grid],
-                                     U_fine_array[coarse_grid], fp_one,
-                                     U_array[fine_grid]);
-#else
-            hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, fp_one,
-                                U_fine_array[coarse_grid], fp_one,
-                                &(U_array[fine_grid]));
+#if defined(HYPRE_USING_GPU)
+            if (exec == HYPRE_EXEC_DEVICE)
+            {
+               hypre_ParCSRMatrixMatvec(fp_one, P_FF_array[fine_grid],
+                                        U_fine_array[coarse_grid], fp_one,
+                                        U_array[fine_grid]);
+            }
+            else
 #endif
+            {
+               hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, fp_one,
+                                   U_fine_array[coarse_grid], fp_one,
+                                   &(U_array[fine_grid]));
+            }
          }
          else
          {
@@ -1213,6 +1230,16 @@ hypre_MGRCycle( void              *mgr_vdata,
                HYPRE_ILUSolve((mgr_data -> level_smoother)[fine_grid],
                               A_array[fine_grid], F_array[fine_grid],
                               U_array[fine_grid]);
+            }
+            else if ((mgr_data -> level_smoother)[fine_grid])
+            {
+               /* User smoother */
+               hypre_Solver *base = (hypre_Solver*) (mgr_data -> level_smoother)[fine_grid];
+
+               hypre_SolverSolve(base)((mgr_data -> level_smoother)[fine_grid],
+                                       (HYPRE_Matrix) A_array[fine_grid],
+                                       (HYPRE_Vector) F_array[fine_grid],
+                                       (HYPRE_Vector) U_array[fine_grid]);
             }
             else
             {

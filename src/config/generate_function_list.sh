@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 ## Call from directory where multiprecision functions are.
-# generate file containing function names in current folder.
+# Generate file containing function names in current folder.
 # This will be used to generate a header file for transforming 
 # multiprecision function names. It will also be useful for 
 # regression testing for the multiprecision build. 

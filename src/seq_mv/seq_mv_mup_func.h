@@ -16,6 +16,7 @@
 
 #include "multiprecision.h"
 
+#define hypre_CSRMatrixTruncateDiag HYPRE_MULTIPRECISION_FUNC ( hypre_CSRMatrixTruncateDiag )
 #define hypre_CSRMatrixAdd HYPRE_MULTIPRECISION_FUNC ( hypre_CSRMatrixAdd )
 #define hypre_CSRMatrixAddFirstPass HYPRE_MULTIPRECISION_FUNC ( hypre_CSRMatrixAddFirstPass )
 #define hypre_CSRMatrixAddHost HYPRE_MULTIPRECISION_FUNC ( hypre_CSRMatrixAddHost )

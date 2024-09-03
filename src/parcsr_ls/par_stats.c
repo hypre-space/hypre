@@ -65,6 +65,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
 
    HYPRE_Int      num_levels;
+   HYPRE_Int      num_functions;
+   HYPRE_Int      filter_functions;
    HYPRE_Int      coarsen_type;
    HYPRE_Int      interp_type;
    HYPRE_Int      restri_type;
@@ -160,6 +162,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    A_array = hypre_ParAMGDataAArray(amg_data);
    P_array = hypre_ParAMGDataPArray(amg_data);
    num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   num_functions = hypre_ParAMGDataNumFunctions(amg_data);
+   filter_functions = hypre_ParAMGDataFilterFunctions(amg_data);
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
    interp_type = hypre_ParAMGDataInterpType(amg_data);
    restri_type = hypre_ParAMGDataRestriction(amg_data); /* RL */
@@ -401,6 +405,12 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       {
          hypre_printf(" Restriction = local approximate ideal restriction (Neumann AIR-%d)\n",
                       restri_type - 3);
+      }
+
+      if (num_functions > 1)
+      {
+         hypre_printf(" Number of functions = %d\n", num_functions);
+         hypre_printf(" Functions filtering is %s\n", (filter_functions > 0) ? "on" : "off");
       }
 
       if (block_mode)

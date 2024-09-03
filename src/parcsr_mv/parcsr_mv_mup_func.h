@@ -160,6 +160,8 @@
 #define hypre_ParCSRCommPkgCreate_core HYPRE_MULTIPRECISION_FUNC ( hypre_ParCSRCommPkgCreate_core )
 #define hypre_ParCSRCommPkgUpdateVecStarts HYPRE_MULTIPRECISION_FUNC ( hypre_ParCSRCommPkgUpdateVecStarts )
 #define hypre_ParCSRFindExtendCommPkg HYPRE_MULTIPRECISION_FUNC ( hypre_ParCSRFindExtendCommPkg )
+#define hypre_ParCSRMatrixBlkFilter HYPRE_MULTIPRECISION_FUNC ( hypre_ParCSRMatrixBlkFilter )
+#define hypre_ParCSRMatrixBlkFilterHost HYPRE_MULTIPRECISION_FUNC ( hypre_ParCSRMatrixBlkFilterHost )
 #define hypre_ParCSRMatrixCopy_C HYPRE_MULTIPRECISION_FUNC ( hypre_ParCSRMatrixCopy_C )
 #define hypre_ParCSRMatrixZero_F HYPRE_MULTIPRECISION_FUNC ( hypre_ParCSRMatrixZero_F )
 #define hypre_ParMatMinus_F HYPRE_MULTIPRECISION_FUNC ( hypre_ParMatMinus_F )

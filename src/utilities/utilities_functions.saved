@@ -83,6 +83,7 @@ hypre_handle
 hypre_HandleCreate
 hypre_HandleDestroy
 HYPRE_Initialize
+HYPRE_MemoryPrintUsage
 HYPRE_PrintDeviceInfo
 hypre_SetDevice
 HYPRE_SetExecutionPolicy
@@ -90,6 +91,7 @@ HYPRE_SetMemoryLocation
 hypre_GetGpuAwareMPI
 hypre_SetGaussSeidelMethod
 hypre_SetGpuAwareMPI
+hypre_SetLogLevel
 hypre_SetSpGemmAlgorithm
 hypre_SetSpGemmBinned
 hypre_SetSpGemmRownnzEstimateMethod
@@ -112,6 +114,7 @@ hypre_UnorderedIntSetCopyToArray
 hypre_UnorderedIntSetCreate
 hypre_UnorderedIntSetDestroy
 HYPRE_SetGpuAwareMPI
+HYPRE_SetLogLevel
 HYPRE_SetSpGemmUseVendor
 HYPRE_SetSpMVUseVendor
 HYPRE_SetSpTransUseVendor
@@ -157,9 +160,11 @@ hypre_GetExecPolicy1
 hypre_GetExecPolicy2
 hypre_GetMemoryLocationName
 hypre_GetPointerLocation
+hypre_HostMemoryGetUsage
 _hypre_MAlloc
 hypre_MAlloc
 hypre_Memcpy
+hypre_MemoryPrintUsage
 hypre_MemPrefetch
 hypre_Memset
 hypre_ReAlloc
@@ -290,6 +295,7 @@ hypre_Initialized
 HYPRE_Initialized
 hypre_SetFinalized
 hypre_SetInitialized
+hypre_IntSequence
 hypre_GetSimpleThreadPartition
 time_getCPUSeconds
 time_getWallclockSeconds

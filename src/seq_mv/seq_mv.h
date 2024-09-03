@@ -327,6 +327,9 @@ typedef struct
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+/* csr_filter.c */
+HYPRE_Int hypre_CSRMatrixTruncateDiag(hypre_CSRMatrix *A);
+
 /* csr_matop.c */
 HYPRE_Int hypre_CSRMatrixAddFirstPass ( HYPRE_Int firstrow, HYPRE_Int lastrow, HYPRE_Int *marker,
                                         HYPRE_Int *twspace, HYPRE_Int *map_A2C, HYPRE_Int *map_B2C,
@@ -690,6 +693,22 @@ hypre_GpuMatData* hypre_CSRMatrixGetGPUMatData(hypre_CSRMatrix *matrix);
 #endif
 
 HYPRE_Int hypre_CSRMatrixSpMVAnalysisDevice(hypre_CSRMatrix *matrix);
+
+/* vector_device.c */
+HYPRE_Int hypre_SeqVectorSetConstantValuesDevice ( hypre_Vector *v, HYPRE_Complex value );
+HYPRE_Int hypre_SeqVectorScaleDevice( HYPRE_Complex alpha, hypre_Vector *y );
+HYPRE_Int hypre_SeqVectorAxpyDevice ( HYPRE_Complex alpha, hypre_Vector *x, hypre_Vector *y );
+HYPRE_Int hypre_SeqVectorAxpyzDevice ( HYPRE_Complex alpha, hypre_Vector *x,
+                                       HYPRE_Complex beta, hypre_Vector *y,
+                                       hypre_Vector *z );
+HYPRE_Int hypre_SeqVectorElmdivpyDevice( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y,
+                                         HYPRE_Int *marker, HYPRE_Int marker_val );
+HYPRE_Real hypre_SeqVectorInnerProdDevice ( hypre_Vector *x, hypre_Vector *y );
+HYPRE_Complex hypre_SeqVectorSumEltsDevice ( hypre_Vector *vector );
+HYPRE_Int hypre_SeqVectorStridedCopyDevice( hypre_Vector *vector,
+                                            HYPRE_Int istride, HYPRE_Int ostride,
+                                            HYPRE_Int size, HYPRE_Complex *data );
+HYPRE_Int hypre_SeqVectorPrefetch(hypre_Vector *x, HYPRE_MemoryLocation memory_location);
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
@@ -713,22 +732,6 @@ hypre_SeqVectorAxpy_mp( hypre_double alpha,
                      hypre_Vector_mp *y     );
                      
 #endif
-
-/* vector_device.c */
-HYPRE_Int hypre_SeqVectorSetConstantValuesDevice ( hypre_Vector *v, HYPRE_Complex value );
-HYPRE_Int hypre_SeqVectorScaleDevice( HYPRE_Complex alpha, hypre_Vector *y );
-HYPRE_Int hypre_SeqVectorAxpyDevice ( HYPRE_Complex alpha, hypre_Vector *x, hypre_Vector *y );
-HYPRE_Int hypre_SeqVectorAxpyzDevice ( HYPRE_Complex alpha, hypre_Vector *x,
-                                       HYPRE_Complex beta, hypre_Vector *y,
-                                       hypre_Vector *z );
-HYPRE_Int hypre_SeqVectorElmdivpyDevice( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y,
-                                         HYPRE_Int *marker, HYPRE_Int marker_val );
-HYPRE_Real hypre_SeqVectorInnerProdDevice ( hypre_Vector *x, hypre_Vector *y );
-HYPRE_Complex hypre_SeqVectorSumEltsDevice ( hypre_Vector *vector );
-HYPRE_Int hypre_SeqVectorStridedCopyDevice( hypre_Vector *vector,
-                                            HYPRE_Int istride, HYPRE_Int ostride,
-                                            HYPRE_Int size, HYPRE_Complex *data );
-HYPRE_Int hypre_SeqVectorPrefetch(hypre_Vector *x, HYPRE_MemoryLocation memory_location);
 
 #ifdef __cplusplus
 }

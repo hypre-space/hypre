@@ -69,6 +69,7 @@ MuP_FILES = \
  par_csr_bool_matop.c\
  par_csr_bool_matrix.c\
  par_csr_communication.c\
+ par_csr_filter.c\
  par_csr_matop.c\
  par_csr_matrix.c\
  par_csr_matrix_stats.c\

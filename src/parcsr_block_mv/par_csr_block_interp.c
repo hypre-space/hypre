@@ -131,7 +131,7 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix  *A,
    HYPRE_Int local_numrows = hypre_CSRBlockMatrixNumRows(A_diag);
    HYPRE_BigInt col_n = col_1 + (HYPRE_BigInt)local_numrows;
 
-   HYPRE_Real       wall_time;  /* for debugging instrumentation  */
+   HYPRE_Real       wall_time = 0.0;  /* for debugging instrumentation  */
 
    HYPRE_Real       *identity_block;
    HYPRE_Real       *zero_block;
@@ -1700,7 +1700,7 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix  *A,
    HYPRE_Int local_numrows = hypre_CSRBlockMatrixNumRows(A_diag);
    HYPRE_BigInt col_n = col_1 + (HYPRE_BigInt)local_numrows;
 
-   HYPRE_Real       wall_time;  /* for debugging instrumentation  */
+   HYPRE_Real       wall_time = 0.0;  /* for debugging instrumentation  */
 
 
    HYPRE_Real       *identity_block;
@@ -2826,7 +2826,7 @@ hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix    *A,
    HYPRE_Int local_numrows = hypre_CSRBlockMatrixNumRows(A_diag);
    HYPRE_BigInt col_n = col_1 + (HYPRE_BigInt)local_numrows;
 
-   HYPRE_Real       wall_time;  /* for debugging instrumentation  */
+   HYPRE_Real       wall_time = 0.0;  /* for debugging instrumentation  */
 
 
    HYPRE_Real       *identity_block;
@@ -3884,7 +3884,7 @@ hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
    HYPRE_Int local_numrows = hypre_CSRBlockMatrixNumRows(A_diag);
    HYPRE_BigInt col_n = col_1 + (HYPRE_BigInt)local_numrows;
 
-   HYPRE_Real       wall_time;  /* for debugging instrumentation  */
+   HYPRE_Real       wall_time = 0.0;  /* for debugging instrumentation  */
 
 
    HYPRE_Real       *identity_block;
@@ -4899,7 +4899,7 @@ hypre_BoomerAMGBuildBlockDirInterp( hypre_ParCSRBlockMatrix    *A,
    HYPRE_Int            *int_buf_data = NULL;
    HYPRE_BigInt         *big_buf_data = NULL;
 
-   HYPRE_Real       wall_time;  /* for debugging instrumentation  */
+   HYPRE_Real       wall_time = 0.0;  /* for debugging instrumentation  */
 
    HYPRE_Real       *identity_block;
    HYPRE_Real       *zero_block;

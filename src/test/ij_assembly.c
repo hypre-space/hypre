@@ -303,6 +303,13 @@ main( hypre_int  argc,
    hypre_HandleDefaultExecPolicy(hypre_handle()) = default_exec_policy;
 #endif
 
+#if defined(HYPRE_USING_OPENMP)
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_HOST)
+   {
+      mode = mode & ~2; /* skip AddTranspose with OMP */
+   }
+#endif
+
    /*-----------------------------------------------------------
     * Build matrix entries
     *-----------------------------------------------------------*/
@@ -827,6 +834,7 @@ test_AddTranspose(MPI_Comm             comm,
 
 
 {
+   HYPRE_UNUSED_VAR(nnzrow);
    hypre_assert(option == 2);
 
    HYPRE_IJMatrix  ij_AT;

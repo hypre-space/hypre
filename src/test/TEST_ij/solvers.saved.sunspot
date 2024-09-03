@@ -157,6 +157,22 @@ Final Relative Residual Norm = 4.168189e-09
                 operator = 2.725611
                    cycle = 5.451054
 
+# Output file: solvers.out.27
+Iterations = 17
+Final Relative Residual Norm = 4.472032e-09
+
+# Output file: solvers.out.28
+Iterations = 25
+Final Relative Residual Norm = 4.134529e-09
+
+# Output file: solvers.out.29
+Iterations = 17
+Final Relative Residual Norm = 7.555200e-09
+
+# Output file: solvers.out.30
+Iterations = 23
+Final Relative Residual Norm = 8.408484e-09
+
 # Output file: solvers.out.101
 LGMRES Iterations = 83
 Final LGMRES Relative Residual Norm = 8.591967e-09
@@ -251,7 +267,7 @@ Final Relative Residual Norm = 1.247303e-09
 
 # Output file: solvers.out.201
 MGR Iterations = 9
-Final Relative Residual Norm = 3.697256e-09
+Final Relative Residual Norm = 3.708381e-09
 
 # Output file: solvers.out.202
 MGR Iterations = 9
@@ -259,7 +275,7 @@ Final Relative Residual Norm = 1.247303e-09
 
 # Output file: solvers.out.203
 MGR Iterations = 9
-Final Relative Residual Norm = 3.697256e-09
+Final Relative Residual Norm = 3.708381e-09
 
 # Output file: solvers.out.204
 MGR Iterations = 74
@@ -308,4 +324,3 @@ Final Relative Residual Norm = 8.560163e-09
 # Output file: solvers.out.405
 Iterations = 22
 Final Relative Residual Norm = 7.991509e-09
-

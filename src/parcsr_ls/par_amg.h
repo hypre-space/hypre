@@ -92,6 +92,7 @@ typedef struct
    hypre_ParCSRMatrix  *A;
    HYPRE_Int            num_variables;
    HYPRE_Int            num_functions;
+   HYPRE_Int            filter_functions;
    HYPRE_Int            nodal;
    HYPRE_Int            nodal_levels;
    HYPRE_Int            nodal_diag;
@@ -362,8 +363,9 @@ typedef struct
 #define hypre_ParAMGDataOuterWt(amg_data) ((amg_data)->outer_wt)
 
 /* problem data parameters */
-#define  hypre_ParAMGDataNumVariables(amg_data)  ((amg_data)->num_variables)
+#define hypre_ParAMGDataNumVariables(amg_data)  ((amg_data)->num_variables)
 #define hypre_ParAMGDataNumFunctions(amg_data) ((amg_data)->num_functions)
+#define hypre_ParAMGDataFilterFunctions(amg_data) ((amg_data)->filter_functions)
 #define hypre_ParAMGDataNodal(amg_data) ((amg_data)->nodal)
 #define hypre_ParAMGDataNodalLevels(amg_data) ((amg_data)->nodal_levels)
 #define hypre_ParAMGDataNodalDiag(amg_data) ((amg_data)->nodal_diag)

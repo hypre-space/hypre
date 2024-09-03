@@ -16,7 +16,7 @@ HYPRE_MGRCreate( HYPRE_Solver *solver )
 {
    if (!solver)
    {
-      hypre_error_in_arg(2);
+      hypre_error_in_arg(1);
       return hypre_error_flag;
    }
    *solver = ( (HYPRE_Solver) hypre_MGRCreate( ) );
@@ -99,7 +99,7 @@ HYPRE_MGRDirectSolverCreate( HYPRE_Solver *solver )
 {
    if (!solver)
    {
-      hypre_error_in_arg(2);
+      hypre_error_in_arg(1);
       return hypre_error_flag;
    }
    *solver = ( (HYPRE_Solver) hypre_MGRDirectSolverCreate( ) );
@@ -211,11 +211,23 @@ HYPRE_MGRSetNonCpointsToFpoints( HYPRE_Solver solver, HYPRE_Int nonCptToFptFlag)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetFSolver(HYPRE_Solver          solver,
+HYPRE_MGRSetFSolver(HYPRE_Solver             solver,
                     HYPRE_PtrToParSolverFcn  fine_grid_solver_solve,
                     HYPRE_PtrToParSolverFcn  fine_grid_solver_setup,
-                    HYPRE_Solver          fsolver )
+                    HYPRE_Solver             fsolver )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   else if (!fsolver)
+   {
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
+   }
+
+
    return ( hypre_MGRSetFSolver( (void *) solver,
                                  (HYPRE_Int (*)(void*, void*, void*, void*)) fine_grid_solver_solve,
                                  (HYPRE_Int (*)(void*, void*, void*, void*)) fine_grid_solver_setup,
@@ -227,13 +239,24 @@ HYPRE_MGRSetFSolver(HYPRE_Solver          solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetFSolverAtLevel(HYPRE_Int     level,
-                           HYPRE_Solver  solver,
-                           HYPRE_Solver  fsolver )
+HYPRE_MGRSetFSolverAtLevel(HYPRE_Solver  solver,
+                           HYPRE_Solver  fsolver,
+                           HYPRE_Int     level )
 {
-   return ( hypre_MGRSetFSolverAtLevel( level,
-                                        (void *) solver,
-                                        (void *) fsolver ) );
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   else if (!fsolver)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   return ( hypre_MGRSetFSolverAtLevel( (void *) solver,
+                                        (void *) fsolver,
+                                        level ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -254,11 +277,22 @@ HYPRE_MGRBuildAff(HYPRE_ParCSRMatrix A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetCoarseSolver(HYPRE_Solver          solver,
+HYPRE_MGRSetCoarseSolver(HYPRE_Solver             solver,
                          HYPRE_PtrToParSolverFcn  coarse_grid_solver_solve,
                          HYPRE_PtrToParSolverFcn  coarse_grid_solver_setup,
-                         HYPRE_Solver          coarse_grid_solver )
+                         HYPRE_Solver             coarse_grid_solver )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   else if (!coarse_grid_solver)
+   {
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
+   }
+
    return ( hypre_MGRSetCoarseSolver( (void *) solver,
                                       (HYPRE_Int (*)(void*, void*, void*, void*)) coarse_grid_solver_solve,
                                       (HYPRE_Int (*)(void*, void*, void*, void*)) coarse_grid_solver_setup,
@@ -270,8 +304,15 @@ HYPRE_MGRSetCoarseSolver(HYPRE_Solver          solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetMaxCoarseLevels( HYPRE_Solver solver, HYPRE_Int maxlev )
+HYPRE_MGRSetMaxCoarseLevels( HYPRE_Solver solver,
+                             HYPRE_Int    maxlev )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetMaxCoarseLevels(solver, maxlev);
 }
 
@@ -280,8 +321,15 @@ HYPRE_MGRSetMaxCoarseLevels( HYPRE_Solver solver, HYPRE_Int maxlev )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize )
+HYPRE_MGRSetBlockSize( HYPRE_Solver solver,
+                       HYPRE_Int    bsize )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetBlockSize(solver, bsize );
 }
 
@@ -290,10 +338,27 @@ HYPRE_MGRSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size,
-                                 HYPRE_BigInt *reserved_coarse_indexes )
+HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver  solver,
+                                 HYPRE_Int     reserved_coarse_size,
+                                 HYPRE_BigInt *reserved_coarse_indices )
 {
-   return hypre_MGRSetReservedCoarseNodes(solver, reserved_coarse_size, reserved_coarse_indexes );
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   else if (reserved_coarse_size < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+   else if (!reserved_coarse_indices)
+   {
+      hypre_error_in_arg(3);
+      return hypre_error_flag;
+   }
+
+   return hypre_MGRSetReservedCoarseNodes(solver, reserved_coarse_size, reserved_coarse_indices);
 }
 
 /*--------------------------------------------------------------------------
@@ -301,8 +366,15 @@ HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver, HYPRE_Int reserved_coarse_
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetReservedCpointsLevelToKeep( HYPRE_Solver solver, HYPRE_Int level)
+HYPRE_MGRSetReservedCpointsLevelToKeep( HYPRE_Solver solver,
+                                        HYPRE_Int    level)
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetReservedCpointsLevelToKeep((void *) solver, level);
 }
 
@@ -311,8 +383,15 @@ HYPRE_MGRSetReservedCpointsLevelToKeep( HYPRE_Solver solver, HYPRE_Int level)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetRestrictType(HYPRE_Solver solver, HYPRE_Int restrict_type )
+HYPRE_MGRSetRestrictType(HYPRE_Solver solver,
+                         HYPRE_Int    restrict_type )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetRestrictType(solver, restrict_type );
 }
 
@@ -321,8 +400,15 @@ HYPRE_MGRSetRestrictType(HYPRE_Solver solver, HYPRE_Int restrict_type )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetLevelRestrictType( HYPRE_Solver solver, HYPRE_Int *restrict_type )
+HYPRE_MGRSetLevelRestrictType( HYPRE_Solver  solver,
+                               HYPRE_Int    *restrict_type )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetLevelRestrictType( solver, restrict_type );
 }
 
@@ -331,8 +417,15 @@ HYPRE_MGRSetLevelRestrictType( HYPRE_Solver solver, HYPRE_Int *restrict_type )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver, HYPRE_Int relax_method )
+HYPRE_MGRSetFRelaxMethod( HYPRE_Solver solver,
+                          HYPRE_Int    relax_method )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetFRelaxMethod(solver, relax_method );
 }
 
@@ -341,8 +434,15 @@ HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver, HYPRE_Int relax_method )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetLevelFRelaxMethod( HYPRE_Solver solver, HYPRE_Int *relax_method )
+HYPRE_MGRSetLevelFRelaxMethod( HYPRE_Solver  solver,
+                               HYPRE_Int    *relax_method )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetLevelFRelaxMethod( solver, relax_method );
 }
 
@@ -351,8 +451,15 @@ HYPRE_MGRSetLevelFRelaxMethod( HYPRE_Solver solver, HYPRE_Int *relax_method )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetLevelFRelaxType( HYPRE_Solver solver, HYPRE_Int *relax_type )
+HYPRE_MGRSetLevelFRelaxType( HYPRE_Solver  solver,
+                             HYPRE_Int    *relax_type )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetLevelFRelaxType( solver, relax_type );
 }
 
@@ -363,7 +470,33 @@ HYPRE_MGRSetLevelFRelaxType( HYPRE_Solver solver, HYPRE_Int *relax_type )
 HYPRE_Int
 HYPRE_MGRSetCoarseGridMethod( HYPRE_Solver solver, HYPRE_Int *cg_method )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetCoarseGridMethod( solver, cg_method );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetNonGalerkinMaxElmts
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetNonGalerkinMaxElmts( HYPRE_Solver solver, HYPRE_Int max_elmts )
+{
+   return hypre_MGRSetNonGalerkinMaxElmts( solver, max_elmts );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetLevelNonGalerkinMaxElmts
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetLevelNonGalerkinMaxElmts( HYPRE_Solver solver, HYPRE_Int *max_elmts )
+{
+   return hypre_MGRSetLevelNonGalerkinMaxElmts( solver, max_elmts );
 }
 
 /*--------------------------------------------------------------------------
@@ -371,8 +504,15 @@ HYPRE_MGRSetCoarseGridMethod( HYPRE_Solver solver, HYPRE_Int *cg_method )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetLevelFRelaxNumFunctions( HYPRE_Solver solver, HYPRE_Int *num_functions )
+HYPRE_MGRSetLevelFRelaxNumFunctions( HYPRE_Solver  solver,
+                                     HYPRE_Int    *num_functions )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetLevelFRelaxNumFunctions( solver, num_functions );
 }
 
@@ -381,8 +521,15 @@ HYPRE_MGRSetLevelFRelaxNumFunctions( HYPRE_Solver solver, HYPRE_Int *num_functio
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetRelaxType(HYPRE_Solver solver, HYPRE_Int relax_type )
+HYPRE_MGRSetRelaxType( HYPRE_Solver solver,
+                       HYPRE_Int    relax_type )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetRelaxType(solver, relax_type );
 }
 
@@ -391,17 +538,32 @@ HYPRE_MGRSetRelaxType(HYPRE_Solver solver, HYPRE_Int relax_type )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetNumRelaxSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps )
+HYPRE_MGRSetNumRelaxSweeps( HYPRE_Solver solver,
+                            HYPRE_Int    nsweeps )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetNumRelaxSweeps(solver, nsweeps);
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetLevelNumRelaxSweeps
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-HYPRE_MGRSetLevelNumRelaxSweeps( HYPRE_Solver solver, HYPRE_Int *nsweeps )
+HYPRE_MGRSetLevelNumRelaxSweeps( HYPRE_Solver  solver,
+                                 HYPRE_Int    *nsweeps )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetLevelNumRelaxSweeps(solver, nsweeps);
 }
 
@@ -410,8 +572,15 @@ HYPRE_MGRSetLevelNumRelaxSweeps( HYPRE_Solver solver, HYPRE_Int *nsweeps )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetInterpType( HYPRE_Solver solver, HYPRE_Int interpType )
+HYPRE_MGRSetInterpType( HYPRE_Solver solver,
+                        HYPRE_Int    interpType )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetInterpType(solver, interpType);
 }
 
@@ -420,8 +589,15 @@ HYPRE_MGRSetInterpType( HYPRE_Solver solver, HYPRE_Int interpType )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetLevelInterpType( HYPRE_Solver solver, HYPRE_Int *interpType )
+HYPRE_MGRSetLevelInterpType( HYPRE_Solver  solver,
+                             HYPRE_Int    *interpType )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetLevelInterpType(solver, interpType);
 }
 
@@ -430,8 +606,15 @@ HYPRE_MGRSetLevelInterpType( HYPRE_Solver solver, HYPRE_Int *interpType )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetNumInterpSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps )
+HYPRE_MGRSetNumInterpSweeps( HYPRE_Solver solver,
+                             HYPRE_Int    nsweeps )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetNumInterpSweeps(solver, nsweeps);
 }
 
@@ -440,8 +623,15 @@ HYPRE_MGRSetNumInterpSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetNumRestrictSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps )
+HYPRE_MGRSetNumRestrictSweeps( HYPRE_Solver solver,
+                               HYPRE_Int    nsweeps )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetNumRestrictSweeps(solver, nsweeps);
 }
 
@@ -450,17 +640,37 @@ HYPRE_MGRSetNumRestrictSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetTruncateCoarseGridThreshold( HYPRE_Solver solver, HYPRE_Real threshold)
+HYPRE_MGRSetTruncateCoarseGridThreshold( HYPRE_Solver solver,
+                                         HYPRE_Real   threshold)
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetTruncateCoarseGridThreshold( solver, threshold );
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetBlockJacobiBlockSize
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-HYPRE_MGRSetBlockJacobiBlockSize( HYPRE_Solver solver, HYPRE_Int blk_size )
+HYPRE_MGRSetBlockJacobiBlockSize( HYPRE_Solver solver,
+                                  HYPRE_Int    blk_size )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   else if (blk_size < 1)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetBlockJacobiBlockSize(solver, blk_size);
 }
 
@@ -469,8 +679,15 @@ HYPRE_MGRSetBlockJacobiBlockSize( HYPRE_Solver solver, HYPRE_Int blk_size )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetFrelaxPrintLevel( HYPRE_Solver solver, HYPRE_Int print_level )
+HYPRE_MGRSetFrelaxPrintLevel( HYPRE_Solver solver,
+                              HYPRE_Int    print_level )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetFrelaxPrintLevel( solver, print_level );
 }
 
@@ -479,8 +696,15 @@ HYPRE_MGRSetFrelaxPrintLevel( HYPRE_Solver solver, HYPRE_Int print_level )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetCoarseGridPrintLevel( HYPRE_Solver solver, HYPRE_Int print_level )
+HYPRE_MGRSetCoarseGridPrintLevel( HYPRE_Solver solver,
+                                  HYPRE_Int    print_level )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetCoarseGridPrintLevel( solver, print_level );
 }
 
@@ -489,8 +713,15 @@ HYPRE_MGRSetCoarseGridPrintLevel( HYPRE_Solver solver, HYPRE_Int print_level )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetPrintLevel( HYPRE_Solver solver, HYPRE_Int print_level )
+HYPRE_MGRSetPrintLevel( HYPRE_Solver solver,
+                        HYPRE_Int    print_level )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetPrintLevel( solver, print_level );
 }
 
@@ -499,8 +730,15 @@ HYPRE_MGRSetPrintLevel( HYPRE_Solver solver, HYPRE_Int print_level )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
+HYPRE_MGRSetLogging( HYPRE_Solver solver,
+                     HYPRE_Int    logging )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetLogging(solver, logging );
 }
 
@@ -509,8 +747,20 @@ HYPRE_MGRSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
+HYPRE_MGRSetMaxIter( HYPRE_Solver solver,
+                     HYPRE_Int    max_iter )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   else if (max_iter < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetMaxIter( solver, max_iter );
 }
 
@@ -519,8 +769,20 @@ HYPRE_MGRSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetTol( HYPRE_Solver solver, HYPRE_Real tol )
+HYPRE_MGRSetTol( HYPRE_Solver solver,
+                 HYPRE_Real   tol )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   else if (tol < 0.0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetTol( solver, tol );
 }
 
@@ -529,45 +791,112 @@ HYPRE_MGRSetTol( HYPRE_Solver solver, HYPRE_Real tol )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetMaxGlobalSmoothIters( HYPRE_Solver solver, HYPRE_Int max_iter )
+HYPRE_MGRSetMaxGlobalSmoothIters( HYPRE_Solver solver,
+                                  HYPRE_Int    max_iter )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   else if (max_iter < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetMaxGlobalSmoothIters(solver, max_iter);
 }
+
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetLevelsmoothIters
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver solver,
-                              HYPRE_Int *smooth_iters )
+HYPRE_MGRSetLevelSmoothIters( HYPRE_Solver  solver,
+                              HYPRE_Int    *smooth_iters )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetLevelSmoothIters(solver, smooth_iters);
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetGlobalsmoothType
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-HYPRE_MGRSetGlobalSmoothType( HYPRE_Solver solver, HYPRE_Int smooth_type )
+HYPRE_MGRSetGlobalSmoothType( HYPRE_Solver solver,
+                              HYPRE_Int    smooth_type )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetGlobalSmoothType(solver, smooth_type);
 }
+
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetLevelsmoothType
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-HYPRE_MGRSetLevelSmoothType( HYPRE_Solver solver,
-                             HYPRE_Int *smooth_type )
+HYPRE_MGRSetLevelSmoothType( HYPRE_Solver  solver,
+                             HYPRE_Int    *smooth_type )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetLevelSmoothType(solver, smooth_type);
 }
+
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetGlobalSmoothCycle
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 HYPRE_MGRSetGlobalSmoothCycle( HYPRE_Solver solver,
-                               HYPRE_Int global_smooth_cycle )
+                               HYPRE_Int    global_smooth_cycle )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetGlobalSmoothCycle(solver, global_smooth_cycle);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetGlobalSmootherAtLevel
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_MGRSetGlobalSmootherAtLevel( HYPRE_Solver  solver,
+                                   HYPRE_Solver  smoother,
+                                   HYPRE_Int     level )
+{
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   else if (!smoother)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   return hypre_MGRSetGlobalSmootherAtLevel((void*) solver, smoother, level);
 }
 
 /*--------------------------------------------------------------------------
@@ -575,8 +904,15 @@ HYPRE_MGRSetGlobalSmoothCycle( HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetPMaxElmts( HYPRE_Solver solver, HYPRE_Int P_max_elmts )
+HYPRE_MGRSetPMaxElmts( HYPRE_Solver solver,
+                       HYPRE_Int    P_max_elmts )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetPMaxElmts(solver, P_max_elmts);
 }
 
@@ -585,8 +921,15 @@ HYPRE_MGRSetPMaxElmts( HYPRE_Solver solver, HYPRE_Int P_max_elmts )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRSetLevelPMaxElmts( HYPRE_Solver solver, HYPRE_Int *P_max_elmts )
+HYPRE_MGRSetLevelPMaxElmts( HYPRE_Solver  solver,
+                            HYPRE_Int    *P_max_elmts )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRSetLevelPMaxElmts(solver, P_max_elmts);
 }
 
@@ -595,8 +938,15 @@ HYPRE_MGRSetLevelPMaxElmts( HYPRE_Solver solver, HYPRE_Int *P_max_elmts )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRGetCoarseGridConvergenceFactor( HYPRE_Solver solver, HYPRE_Real *conv_factor )
+HYPRE_MGRGetCoarseGridConvergenceFactor( HYPRE_Solver solver,
+                                         HYPRE_Real  *conv_factor )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRGetCoarseGridConvergenceFactor( solver, conv_factor );
 }
 
@@ -605,8 +955,15 @@ HYPRE_MGRGetCoarseGridConvergenceFactor( HYPRE_Solver solver, HYPRE_Real *conv_f
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations )
+HYPRE_MGRGetNumIterations( HYPRE_Solver  solver,
+                           HYPRE_Int    *num_iterations )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRGetNumIterations( solver, num_iterations );
 }
 
@@ -615,7 +972,14 @@ HYPRE_MGRGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_MGRGetFinalRelativeResidualNorm( HYPRE_Solver solver, HYPRE_Real *res_norm )
+HYPRE_MGRGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
+                                       HYPRE_Real   *res_norm )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
    return hypre_MGRGetFinalRelativeResidualNorm(solver, res_norm);
 }

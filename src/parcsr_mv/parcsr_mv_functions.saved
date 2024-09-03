@@ -142,6 +142,8 @@ hypre_ParCSRCommPkgCreateAndFill
 hypre_ParCSRCommPkgCreate_core
 hypre_ParCSRCommPkgUpdateVecStarts
 hypre_ParCSRFindExtendCommPkg
+hypre_ParCSRMatrixBlkFilter
+hypre_ParCSRMatrixBlkFilterHost
 hypre_ParCSRMatrixCopy_C
 hypre_ParCSRMatrixZero_F
 hypre_ParMatMinus_F

@@ -30,6 +30,7 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)/../../parcsr_mv\
  -I$(srcdir)/../../parcsr_ls\
  -I$(srcdir)/../../seq_mv\
+ -I$(srcdir)/../../seq_block_mv\
  -I$(srcdir)/../../distributed_matrix\
  -I$(srcdir)/../../distributed_ls\
  -I$(srcdir)/../fei-base\
@@ -49,6 +50,7 @@ CXX_COMPILE_FLAGS = \
  -I$(srcdir)/../../krylov\
  -I$(srcdir)/../../parcsr_block_mv\
  -I$(srcdir)/../../parcsr_mv\
+ -I$(srcdir)/../../seq_block_mv\
  -I$(srcdir)/../../parcsr_ls\
  -I$(srcdir)/../../seq_mv\
  -I$(srcdir)/../../distributed_matrix\

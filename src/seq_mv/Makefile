@@ -69,6 +69,7 @@ CUFILES =\
 # Multiprecision files
 #######################
 MuP_FILES = \
+ csr_filter.c\
  csr_matop.c\
  csr_matrix.c\
  csr_matvec.c\

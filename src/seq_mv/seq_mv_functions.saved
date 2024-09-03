@@ -1,3 +1,4 @@
+hypre_CSRMatrixTruncateDiag
 hypre_CSRMatrixAdd
 hypre_CSRMatrixAddFirstPass
 hypre_CSRMatrixAddHost

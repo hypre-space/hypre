@@ -50,9 +50,12 @@ HYPRE_IJMatrixGetObject
 HYPRE_IJMatrixGetObjectType
 HYPRE_IJMatrixGetRowCounts
 HYPRE_IJMatrixGetValues
+HYPRE_IJMatrixGetValues2
+HYPRE_IJMatrixGetValuesAndZeroOut
 HYPRE_IJMatrixInitialize
 HYPRE_IJMatrixInitialize_v2
 HYPRE_IJMatrixNorm
+HYPRE_IJMatrixPartialClone
 HYPRE_IJMatrixPrint
 HYPRE_IJMatrixPrintBinary
 HYPRE_IJMatrixRead

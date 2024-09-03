@@ -82,7 +82,8 @@ CUFILES=\
  int_array_device.c\
  memory.c\
  omp_device.c\
- nvtx.c
+ nvtx.c\
+ stl_ops.c
 
 ifeq (${MP_BUILD}, 1) 
    COBJS = ${FILES:.c=.o}
