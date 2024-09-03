@@ -8,6 +8,9 @@
 *.out
 *.perf
 *.btr
+.gdbinit
+build.sh
+make.log
 config.log
 config.status
 Makefile.config
@@ -16,6 +19,8 @@ autom4te.cache
 src/TAGS
 hypre/
 cmbuild/
+install/
+test/
 .vscode
 
 ###############
