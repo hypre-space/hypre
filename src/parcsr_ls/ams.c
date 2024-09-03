@@ -4554,7 +4554,7 @@ hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
    HYPRE_Real *A_offd_data = hypre_CSRMatrixData(A_offd);
    HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
-   HYPRE_Real diag = 1.0;
+   HYPRE_Real diag = 0.0;
    HYPRE_Real *l1_norm = hypre_TAlloc(HYPRE_Real, num_rows, hypre_ParCSRMatrixMemoryLocation(A));
    HYPRE_Int ii, ns, ne, rest, size;
 
@@ -4734,6 +4734,7 @@ hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
             if (cf_marker == NULL)
             {
                /* Add the diagonal and the local off-thread part of the ith row */
+               diag = 0.0;
                for (j = A_diag_I[i]; j < A_diag_I[i + 1]; j++)
                {
                   ii = A_diag_J[j];
@@ -4764,6 +4765,7 @@ hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
             {
                cf_diag = cf_marker[i];
                /* Add the diagonal and the local off-thread part of the ith row */
+               diag = 0.0;
                for (j = A_diag_I[i]; j < A_diag_I[i + 1]; j++)
                {
                   ii = A_diag_J[j];
@@ -4796,7 +4798,7 @@ hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
             }
 
             /* Truncate according to Remark 6.2 */
-            if (l1_norm[i] <= 4.0 / 3.0 * diag)
+            if (l1_norm[i] <= (4.0 / 3.0) * diag)
             {
                l1_norm[i] = diag;
             }
@@ -4820,6 +4822,7 @@ hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
             if (cf_marker == NULL)
             {
                /* Add the diagonal and the local off-thread part of the ith row */
+               diag = 0.0;
                for (j = A_diag_I[i]; j < A_diag_I[i + 1]; j++)
                {
                   ii = A_diag_J[j];
@@ -4850,6 +4853,7 @@ hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
             {
                cf_diag = cf_marker[i];
                /* Add the diagonal and the local off-thread part of the ith row */
+               diag = 0.0;
                for (j = A_diag_I[i]; j < A_diag_I[i + 1]; j++)
                {
                   ii = A_diag_J[j];
