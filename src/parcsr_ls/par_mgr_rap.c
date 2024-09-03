@@ -247,6 +247,9 @@ hypre_MGRBuildNonGalerkinCoarseOperatorHost(hypre_ParCSRMatrix    *A_FF,
       /* Free memory */
       hypre_ParCSRMatrixDestroy(A_Hc);
 
+      /* Set output pointer */
+      *A_H_ptr = A_H;
+
       return hypre_error_flag;
    }
 
@@ -398,6 +401,33 @@ hypre_MGRBuildNonGalerkinCoarseOperatorDevice(hypre_ParCSRMatrix    *A_FF,
    /* Compute A_Hc (the correction for A_H) */
    if (Wp_tmp)
    {
+      if (max_elmts > 0)
+      {
+         /* A_Hc = diag(A_CF * Wp) */
+         hypre_ParCSRMatMatDiag(A_CF_trunc, Wp_tmp, &A_Hc);
+
+         /* Coarse grid / Schur complement */
+         hypre_ParCSRMatrixAdd(1.0, A_CC, -1.0, A_Hc, &A_H);
+
+         /* Free memory */
+         hypre_ParCSRMatrixDestroy(A_Hc);
+         if (method == 2 || method == 3)
+         {
+            hypre_ParCSRMatrixDestroy(A_CF_trunc);
+         }
+         if (Wp_tmp != Wp)
+         {
+            hypre_ParCSRMatrixDestroy(Wp_tmp);
+         }
+
+         /* Set output pointer */
+         *A_H_ptr = A_H;
+
+         hypre_GpuProfilingPopRange();
+
+         return hypre_error_flag;
+      }
+
       A_Hc = hypre_ParCSRMatMat(A_CF_trunc, Wp_tmp);
    }
    else if (Wr)
@@ -563,6 +593,7 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
       }
       else
       {
+         hypre_GpuProfilingPopRange();
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Expected either R or RT!");
          return hypre_error_flag;
       }

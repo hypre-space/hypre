@@ -221,6 +221,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
       HYPRE_ANNOTATE_FUNC_END;
       hypre_GpuProfilingPopRange();
+      hypre_GpuProfilingPopRange();
 
       return hypre_error_flag;
    }
@@ -1188,7 +1189,10 @@ hypre_MGRSetup( void               *mgr_vdata,
                                                    -1, CF_marker, inv_size, 1, diag_inv);
             frelax_diaginv[lev] = diag_inv;
             blk_size[lev] = block_jacobi_bsize;
-            hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_FF);
+            if (!A_FF)
+            {
+               hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_FF);
+            }
          }
 
          /* Set A_ff pointer */
@@ -1219,8 +1223,6 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_ParCSRMatrixDestroy(Wr); Wr = NULL;
       if (Wp)
       {
-         hypre_ParCSRMatrixDeviceColMapOffd(Wp) = NULL;
-         hypre_ParCSRMatrixColMapOffd(Wp) = NULL;
          hypre_ParCSRMatrixDestroy(Wp); Wp = NULL;
       }
 
@@ -1246,6 +1248,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                                        "F-relaxation solver has not been setup\n");
                      HYPRE_ANNOTATE_FUNC_END;
+                     hypre_GpuProfilingPopRange();
                      hypre_GpuProfilingPopRange();
 
                      return hypre_error_flag;
@@ -1707,8 +1710,8 @@ hypre_MGRSetup( void               *mgr_vdata,
    hypre_MGRDataPrint(mgr_vdata);
 
    hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "MGR setup end", 0);
-   HYPRE_ANNOTATE_FUNC_END;
    hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

@@ -534,9 +534,13 @@ hypre_MGRBuildPFromWpHost( hypre_ParCSRMatrix    *A,
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
 
    hypre_ParCSRMatrixDeviceColMapOffd(P) = hypre_ParCSRMatrixDeviceColMapOffd(Wp);
-   hypre_ParCSRMatrixColMapOffd(P)       = hypre_ParCSRMatrixColMapOffd(Wp);
-   //hypre_ParCSRMatrixDeviceColMapOffd(Wp) = NULL;
-   //hypre_ParCSRMatrixColMapOffd(Wp)       = NULL;
+   hypre_ParCSRMatrixColMapOffd(P)       =
+     hypre_TAlloc(HYPRE_BigInt,
+                  hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(Wp)),
+                  memory_location_P);
+   hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(P), hypre_ParCSRMatrixColMapOffd(Wp),
+                 HYPRE_BigInt, hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(Wp)),
+                 memory_location_P, memory_location_P);
 
    hypre_ParCSRMatrixNumNonzeros(P)  = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(P)) +
                                        hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(P));
@@ -885,7 +889,6 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
    /* Set output pointer */
    *Wp_ptr = Wp;
    *P_ptr  = P;
-   *Wp_ptr = NULL;
 
    return hypre_error_flag;
 }
