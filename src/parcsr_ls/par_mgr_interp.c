@@ -733,8 +733,13 @@ hypre_ExtendWtoPHost(HYPRE_Int      P_nr_of_rows,
  * hypre_MGRBuildPHost
  *
  * Interpolation for MGR - Adapted from BoomerAMGBuildInterp
+ *
+ * This function computes:
+ *   - *Wp_ptr: Pointer to the constructed auxiliary matrix Wp
+ *              (NULL if method == 0, meaning Wp is an empty matrix)
+ *   - *P_ptr: Pointer to the constructed interpolation matrix P
+ *             (Always non-NULL if successful)
  *--------------------------------------------------------------------------*/
-
 HYPRE_Int
 hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
                      hypre_ParCSRMatrix   *A_FF,
