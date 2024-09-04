@@ -46,6 +46,15 @@ mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.yidle   -ma
 mpirun -np 5 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.yidle.5 -mat-mat 3 3T 0 3 -r 4 1 -P 1 5 > structmat.out.2D1.yidle.5
 
 #=============================================================================
+# 2D one proc RA and AP (to test the print routine)
+#=============================================================================
+
+# RA (interpolate in x direction)
+mpirun -np 1 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.x.RA -mat-mat 2 1T 0 -r 10 10 > structmat.out.2D3.x.RA
+# AP (interpolate in x direction)
+mpirun -np 1 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.x.AP -mat-mat 2 0 1 -r 10 10 > structmat.out.2D3.x.AP
+
+#=============================================================================
 # 2D one proc Matvec
 #=============================================================================
 
@@ -186,3 +195,4 @@ mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.ab1.mv2 -mat-ve
 mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.ab2.mv0 -mat-vec 0 0 0 -r 8 7 -ab -0.3 1.7 > structmat.out.ab2.mv0
 mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.ab2.mv1 -mat-vec 1 1 0 -r 8 7 -ab -0.3 1.7 > structmat.out.ab2.mv1
 mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.ab2.mv2 -mat-vec 2 0 1 -r 8 7 -ab -0.3 1.7 > structmat.out.ab2.mv2
+

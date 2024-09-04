@@ -30,6 +30,8 @@ FILESmatmat="\
  ${TNAME}.out.2D1.xidle.4\
  ${TNAME}.out.2D1.yidle\
  ${TNAME}.out.2D1.yidle.5\
+ ${TNAME}.out.2D3.x.RA\
+ ${TNAME}.out.2D3.x.AP\
 "
 FILESmatvec="\
  ${TNAME}.out.2D0.mv0\

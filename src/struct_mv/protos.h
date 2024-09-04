@@ -106,6 +106,7 @@ HYPRE_Int hypre_BoxArrayCreateFromIndices ( HYPRE_Int ndim, HYPRE_Int num_indice
                                             HYPRE_Int **indices_in, HYPRE_Real threshold, hypre_BoxArray **box_array_ptr );
 HYPRE_Int hypre_BoxArrayDestroy ( hypre_BoxArray *box_array );
 HYPRE_Int hypre_BoxArrayPrintToFile ( FILE *file, hypre_BoxArray *box_array );
+HYPRE_Int hypre_BoxArrayReadFromFile( FILE *file, hypre_BoxArray **box_array_ptr );
 HYPRE_Int hypre_BoxArrayPrint ( MPI_Comm comm, const char *filename, hypre_BoxArray *box_array );
 HYPRE_Int hypre_BoxArraySetSize ( hypre_BoxArray *box_array, HYPRE_Int size );
 hypre_BoxArray *hypre_BoxArrayClone ( hypre_BoxArray *box_array );
@@ -114,6 +115,7 @@ HYPRE_Int hypre_DeleteBox ( hypre_BoxArray *box_array, HYPRE_Int index );
 HYPRE_Int hypre_DeleteMultipleBoxes ( hypre_BoxArray *box_array, HYPRE_Int *indices,
                                       HYPRE_Int num );
 HYPRE_Int hypre_AppendBoxArray ( hypre_BoxArray *box_array_0, hypre_BoxArray *box_array_1 );
+HYPRE_Int hypre_BoxArrayVolume( hypre_BoxArray *box_array );
 hypre_BoxArrayArray *hypre_BoxArrayArrayCreate ( HYPRE_Int size, HYPRE_Int ndim );
 HYPRE_Int hypre_BoxArrayArrayDestroy ( hypre_BoxArrayArray *box_array_array );
 hypre_BoxArrayArray *hypre_BoxArrayArrayClone ( hypre_BoxArrayArray *box_array_array );
@@ -218,6 +220,8 @@ HYPRE_Int hypre_StructCoarsen ( hypre_StructGrid *fgrid, hypre_IndexRef origin, 
 hypre_CommStencil *hypre_CommStencilCreate ( HYPRE_Int  ndim );
 HYPRE_Int hypre_CommStencilSetEntry ( hypre_CommStencil *comm_stencil, hypre_Index offset );
 HYPRE_Int hypre_CommStencilDestroy ( hypre_CommStencil *comm_stencil );
+HYPRE_Int hypre_StructStencilPrint( FILE *file, hypre_StructStencil *stencil );
+HYPRE_Int hypre_StructStencilRead( FILE *file, HYPRE_Int ndim, hypre_StructStencil **stencil_ptr );
 HYPRE_Int hypre_CommStencilCreateNumGhost ( hypre_CommStencil *comm_stencil,
                                             HYPRE_Int **num_ghost_ptr );
 HYPRE_Int hypre_CommInfoCreate ( hypre_BoxArrayArray *send_boxes, hypre_BoxArrayArray *recv_boxes,
@@ -344,14 +348,9 @@ HYPRE_Real hypre_StructInnerProdLocal ( hypre_StructVector *x, hypre_StructVecto
 HYPRE_Real hypre_StructInnerProd ( hypre_StructVector *x, hypre_StructVector *y );
 
 /* struct_io.c */
-HYPRE_Int hypre_PrintBoxArrayData ( FILE *file, hypre_BoxArray *box_array,
-                                    hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int *value_ids, HYPRE_Int dim,
-                                    HYPRE_Complex *data );
-HYPRE_Int hypre_ReadBoxArrayData ( FILE *file, hypre_BoxArray *box_array,
-                                   hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int dim, HYPRE_Complex *data );
-HYPRE_Int hypre_ReadBoxArrayData_CC ( FILE *file, hypre_BoxArray *box_array,
-                                      hypre_BoxArray *data_space, HYPRE_Int stencil_size, HYPRE_Int real_stencil_size,
-                                      HYPRE_Int constant_coefficient, HYPRE_Int dim, HYPRE_Complex *data );
+HYPRE_Int hypre_PrintBoxArrayData ( FILE *file, HYPRE_Int dim, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int *value_ids, HYPRE_Complex *data );
+HYPRE_Int
+hypre_ReadBoxArrayData( FILE *file, HYPRE_Int ndim, hypre_BoxArray *box_array, HYPRE_Int *num_values_ptr, HYPRE_Int **value_ids_ptr, HYPRE_Complex **values_ptr );
 
 /* struct_matmult.c */
 HYPRE_Int hypre_StructMatmultCreate ( HYPRE_Int nmatrices_in, hypre_StructMatrix **matrices_in,
