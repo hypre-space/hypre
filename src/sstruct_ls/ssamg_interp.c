@@ -736,7 +736,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          hypre_ParCSRMatrixOffd(P_u) = delete_zeros;
          hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixOffd(P_u));
       }
-      hypre_ParCSRMatrixSetNumNonzeros(P_u);
 
       /* Overwrite entries in P_s where appropriate with values of P_u */
       hypre_SStructMatrixCompressUToS(P, 0);

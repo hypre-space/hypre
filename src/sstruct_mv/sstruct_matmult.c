@@ -821,7 +821,6 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_ParCSRMatrix      *parcsr_uM;
    hypre_ParCSRMatrix      *parcsr_uMold;
    hypre_ParCSRMatrix      *parcsr_sMold;
-   hypre_CSRMatrix         *diag_uP;
    hypre_IJMatrix          *ijmatrix;
    hypre_IJMatrix          *ij_tmp = NULL;
    hypre_IJMatrix         **ij_sA;
@@ -834,8 +833,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    m = terms[2];
    ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
    HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uP);
-   diag_uP = hypre_ParCSRMatrixDiag(parcsr_uP);
-   num_nonzeros_uP = hypre_CSRMatrixNumNonzeros(diag_uP);
+   num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
    if (nterms == 3 && (num_nonzeros_uP == 0))
    {
       /* Specialization for RAP when P has only the structured component */
