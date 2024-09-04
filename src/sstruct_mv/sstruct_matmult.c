@@ -821,9 +821,8 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_ParCSRMatrix      *parcsr_uM;
    hypre_ParCSRMatrix      *parcsr_uMold;
    hypre_ParCSRMatrix      *parcsr_sMold;
-   hypre_CSRMatrix         *diag_uP;
    hypre_IJMatrix          *ijmatrix;
-   hypre_IJMatrix          *ij_tmp;
+   hypre_IJMatrix          *ij_tmp = NULL;
    hypre_IJMatrix         **ij_sA;
 
    HYPRE_Int                m, t;
@@ -834,8 +833,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    m = terms[2];
    ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
    HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uP);
-   diag_uP = hypre_ParCSRMatrixDiag(parcsr_uP);
-   num_nonzeros_uP = hypre_CSRMatrixNumNonzeros(diag_uP);
+   num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
    if (nterms == 3 && (num_nonzeros_uP == 0))
    {
       /* Specialization for RAP when P has only the structured component */
@@ -846,7 +844,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
       HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_sA);
 
       m = terms[2];
-      hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_tmp);
+      hypre_SStructMatrixHaloToUMatrix(matrices[m], grid, &ij_tmp, 2);
       HYPRE_IJMatrixGetObject(ij_tmp, (void **) &parcsr_sP);
 
       if (!hypre_ParCSRMatrixCommPkg(parcsr_sP))
@@ -877,7 +875,10 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
       m = terms[nterms - 1];
       ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
       HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uMold);
-      hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_sA[m]);
+      /* WM: todo - converting the whole matrix for now to be safe... */
+      /* hypre_SStructMatrixHaloToUMatrix(matrices[m], grid, &ij_sA[m], 2); */
+      ij_sA[m] = hypre_SStructMatrixToUMatrix(matrices[m], 0);
+
       HYPRE_IJMatrixGetObject(ij_sA[m], (void **) &parcsr_sMold);
 
 #if defined(DEBUG_MATMULT)
@@ -898,7 +899,10 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
             graph = hypre_SStructMatrixGraph(matrices[terms[t + 1]]);
             grid  = hypre_SStructGraphGrid(graph);
 
-            hypre_SStructMatrixBoundaryToUMatrix(matrices[m], grid, &ij_sA[m]);
+            /* WM: todo - converting the whole matrix for now to be safe... */
+            /* hypre_SStructMatrixHaloToUMatrix(matrices[m], grid, &ij_sA[m], 2); */
+            ij_sA[m] = hypre_SStructMatrixToUMatrix(matrices[m], 0);
+
          }
          HYPRE_IJMatrixGetObject(ij_sA[m], (void **) &parcsr_sA);
 #if defined(DEBUG_MATMULT)
@@ -1022,7 +1026,46 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    ij_M = hypre_SStructMatrixIJMatrix(M);
    hypre_IJMatrixDestroyParCSR(ij_M);
    hypre_IJMatrixSetObject(ij_M, parcsr_uM);
+   hypre_SStructMatrixParCSRMatrix(M) = parcsr_uM;
    hypre_IJMatrixAssembleFlag(ij_M) = 1;
+
+   /* WM: extra delete zeros... I'm getting zero diagonals everywhere in the U matrices? */
+   hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(parcsr_uM), HYPRE_REAL_MIN);
+   if (delete_zeros)
+   {
+      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(parcsr_uM));
+      hypre_ParCSRMatrixDiag(parcsr_uM) = delete_zeros;
+      hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixDiag(parcsr_uM));
+   }
+   delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(parcsr_uM), HYPRE_REAL_MIN);
+   if (delete_zeros)
+   {
+      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(parcsr_uM));
+      hypre_ParCSRMatrixOffd(parcsr_uM) = delete_zeros;
+      hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixOffd(parcsr_uM));
+   }
+   hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
+
+   hypre_SStructMatrixCompressUToS(M, 1);
+
+   /* WM: should I do this here? What tolerance? Smarter way to avoid a bunch of zero entries? */
+   /*     note that once I'm not converting the entire struct matrix, most of these should go away, I think... */
+   /* WM: todo - CAREFUL HERE! This can screw things up if you throw away entries that are actually non-trivial and should be there... */
+   delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(parcsr_uM), HYPRE_REAL_MIN);
+   if (delete_zeros)
+   {
+      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(parcsr_uM));
+      hypre_ParCSRMatrixDiag(parcsr_uM) = delete_zeros;
+      hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixDiag(parcsr_uM));
+   }
+   delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixOffd(parcsr_uM), HYPRE_REAL_MIN);
+   if (delete_zeros)
+   {
+      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(parcsr_uM));
+      hypre_ParCSRMatrixOffd(parcsr_uM) = delete_zeros;
+      hypre_CSRMatrixSetRownnz(hypre_ParCSRMatrixOffd(parcsr_uM));
+   }
+   hypre_ParCSRMatrixSetNumNonzeros(parcsr_uM);
 
    HYPRE_ANNOTATE_FUNC_END;
 

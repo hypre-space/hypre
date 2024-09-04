@@ -99,8 +99,6 @@ hypre_SSAMGCoarseSolverSetup( void *ssamg_vdata )
       {
          HYPRE_BoomerAMGSetMaxIter(csolver, num_crelax);
       }
-      HYPRE_BoomerAMGSetMaxCoarseSize(csolver, 1000);
-      HYPRE_BoomerAMGSetCycleRelaxType(csolver, 0, 3); /* Coarse solver - Jacobi */
       HYPRE_BoomerAMGSetTol(csolver, 0.0);
       HYPRE_BoomerAMGSetPrintLevel(csolver, 0);
       HYPRE_BoomerAMGSetLogging(csolver, 1);

@@ -22,7 +22,7 @@ mpirun -np 2  ./sstruct -P 1 1 2 -solver 39 > solvers.out.10
 mpirun -np 2  ./sstruct -P 1 1 2 -solver 40 > solvers.out.11
 #mpirun -np 2  ./sstruct -P 1 1 2 -solver 41 > solvers.out.12
 #mpirun -np 2  ./sstruct -P 1 1 2 -solver 42 > solvers.out.13
-mpirun -np 2  ./sstruct -in sstruct.in.laps -P 2 1 1 -solver 3 > solvers.out.14
+#mpirun -np 2  ./sstruct -in sstruct.in.laps -P 2 1 1 -solver 3 > solvers.out.14
 mpirun -np 1  ./sstruct -in sstruct.in.marinak -P 1 1 1 -solver 20 > solvers.out.15
 mpirun -np 2  ./sstruct -P 1 1 2 -solver 70 > solvers.out.16
 mpirun -np 2  ./sstruct -P 1 1 2 -solver 71 > solvers.out.17
@@ -54,6 +54,24 @@ mpirun -np 3  ./sstruct -in sstruct.in.miller_3blk -r 4 4 1 -solver 4 -pooldist 
 mpirun -np 1  ./sstruct -in sstruct.in.cubes2 -r 4 4 4 -solver 4 -pooldist 1 > solvers.out.41
 mpirun -np 2  ./sstruct -in sstruct.in.cubes2 -r 4 4 4 -solver 4 -pooldist 0 > solvers.out.42
 mpirun -np 2  ./sstruct -in sstruct.in.cubes2 -r 4 4 4 -solver 4 -pooldist 0 -skip 1 > solvers.out.43
+
+# SSAMG with unstructured interpolation
+mpirun -np 1  ./sstruct -in sstruct.in.cube -P 1 1 1 -r 4 4 4 -solver 4 -interp 0 > solvers.out.44
+mpirun -np 8  ./sstruct -in sstruct.in.cube -P 2 2 2 -r 2 2 2 -solver 4 -interp 0 > solvers.out.45
+mpirun -np 1  ./sstruct -in sstruct.in.cube21 -r 2 2 2 -solver 4 -interp 0 > solvers.out.46
+mpirun -np 8  ./sstruct -in sstruct.in.cube21 -P 2 2 2 -r 1 1 1 -solver 4 -interp 0 > solvers.out.47
+mpirun -np 1  ./sstruct -in sstruct.in.cubes4_7pt -r 2 2 2 -solver 4 -pooldist 1 -interp 0 > solvers.out.48
+mpirun -np 4  ./sstruct -in sstruct.in.cubes4_7pt -r 2 2 2 -solver 4 -pooldist 0 -interp 0 > solvers.out.49
+mpirun -np 1  ./sstruct -in sstruct.in.cubes4_27pt -r 2 2 2 -solver 4 -pooldist 1 -interp 0 > solvers.out.50
+mpirun -np 4  ./sstruct -in sstruct.in.cubes4_27pt -r 2 2 2 -solver 4 -pooldist 0 -interp 0 > solvers.out.51
+mpirun -np 1  ./sstruct -in sstruct.in.cubes2_aniso -r 4 4 4 -solver 4 -pooldist 1 -interp 0 > solvers.out.52
+mpirun -np 2  ./sstruct -in sstruct.in.cubes2_aniso -r 4 4 4 -solver 4 -pooldist 0 -interp 0 > solvers.out.53
+#mpirun -np 1  ./sstruct -in sstruct.in.marinak -P 1 1 1 -solver 4 -interp 0 > solvers.out.54
+#mpirun -np 8  ./sstruct -in sstruct.in.marinak -P 1 1 1 -solver 4 -pooldist 1 -interp 0 > solvers.out.55
+mpirun -np 1  ./sstruct -in sstruct.in.miller_3blk -r 4 4 1 -solver 4 -pooldist 0 -interp 0 > solvers.out.56
+mpirun -np 3  ./sstruct -in sstruct.in.miller_3blk -r 4 4 1 -solver 4 -pooldist 1 -interp 0 > solvers.out.57
+mpirun -np 1  ./sstruct -in sstruct.in.cubes2 -r 4 4 4 -solver 4 -pooldist 1 -interp 0 > solvers.out.58
+mpirun -np 2  ./sstruct -in sstruct.in.cubes2 -r 4 4 4 -solver 4 -pooldist 0 -interp 0 > solvers.out.59
 
 # SSAMG-PCG
 mpirun -np 1  ./sstruct -in sstruct.in.cube -P 1 1 1 -r 4 4 4 -solver 14 > solvers.out.121

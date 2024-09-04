@@ -139,6 +139,16 @@ HYPRE_SStructSSAMGSetRelaxType( HYPRE_SStructSolver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructSSAMGSetInterpType( HYPRE_SStructSolver solver,
+                                HYPRE_Int           interp_type )
+{
+   return ( hypre_SSAMGSetInterpType( (void *) solver, interp_type) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructSSAMGSetSkipRelax( HYPRE_SStructSolver solver,
                                 HYPRE_Int           skip_relax )
 {

@@ -8,8 +8,9 @@
 #include "_hypre_sstruct_ls.h"
 #include "ssamg.h"
 
-#define DEBUG_SYMMETRY
-#define DEBUG_MATMULT
+//#define DEBUG_SETUP
+//#define DEBUG_SYMMETRY
+//#define DEBUG_MATMULT
 //#define DEBUG_WITH_GLVIS
 
 /*--------------------------------------------------------------------------
@@ -40,6 +41,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    HYPRE_Int              non_galerkin = hypre_SSAMGDataNonGalerkin(ssamg_data);
    HYPRE_Int              max_iter     = hypre_SSAMGDataMaxIter(ssamg_data);
    HYPRE_Int              max_levels   = hypre_SSAMGDataMaxLevels(ssamg_data);
+   HYPRE_Int              interp_type  = hypre_SSAMGDataInterpType(ssamg_data);
    HYPRE_Int              relax_type   = hypre_SSAMGDataRelaxType(ssamg_data);
    HYPRE_Real           **dxyz         = hypre_SSAMGDataDxyz(ssamg_data);
    HYPRE_Int            **active_l;
@@ -156,7 +158,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
       P_l[l]  = hypre_SSAMGCreateInterpOp(A_l[l], grid_l[l + 1], cdir_l[l]);
       //HYPRE_SStructMatrixSetTranspose(P_l[l], 1);
-      hypre_SSAMGSetupInterpOp(A_l[l], cdir_l[l], P_l[l]);
+      hypre_SSAMGSetupInterpOp(A_l[l], cdir_l[l], P_l[l], interp_type);
 
       // Build restriction matrix
       hypre_SStructMatrixRef(P_l[l], &RT_l[l]);
@@ -252,8 +254,9 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    hypre_SStructVector  **Pones_l;
    hypre_SStructPGrid    *pgrid;
    HYPRE_Int              mypid, part;
-   HYPRE_Int              min_level = hypre_min(12, num_levels - 1);
+   HYPRE_Int              min_level = 0;
    char                   filename[255];
+   FILE                  *file;
 
    hypre_MPI_Comm_rank(hypre_SStructMatrixComm(A), &mypid);
 
@@ -266,7 +269,9 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
 #ifdef DEBUG_WITH_GLVIS
    hypre_SStructGridPrintGLVis(grid_l[min_level], filename, NULL, NULL);
 #else
-   hypre_SStructGridPrint(grid_l[min_level], filename);
+   file = fopen(filename, "w");
+   hypre_SStructGridPrint(file, grid_l[min_level]);
+   fclose(file);
 #endif
 
    /* Print part boundary data */
@@ -311,7 +316,9 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
 #ifdef DEBUG_WITH_GLVIS
       hypre_SStructGridPrintGLVis(grid_l[l + 1], filename, NULL, NULL);
 #else
-      hypre_SStructGridPrint(grid_l[l + 1], filename);
+      file = fopen(filename, "w");
+      hypre_SStructGridPrint(file, grid_l[l + 1]);
+      fclose(file);
 #endif
 
       /* Print part boundary data */
@@ -356,6 +363,11 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       HYPRE_SStructVectorCreate(comm, grid_l[l + 1], &Aones_l[l + 1]);
       HYPRE_SStructVectorInitialize(Aones_l[l + 1]);
       HYPRE_SStructVectorAssemble(Aones_l[l + 1]);
+      if (hypre_SSAMGDataCSolverType(ssamg_data) && l == num_levels - 2)
+      {
+         hypre_SStructMatvecCreate(&matvec_data_l[l + 1]);
+         hypre_SStructMatvecSetup(matvec_data_l[l + 1], A_l[l + 1], x_l[l + 1]);
+      }
       hypre_SStructMatvecCompute(matvec_data_l[l + 1], 1.0, A_l[l + 1], ones_l[l + 1],
                                  0.0, Aones_l[l + 1], Aones_l[l + 1]);
 

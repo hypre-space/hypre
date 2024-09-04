@@ -31,6 +31,7 @@ typedef struct hypre_SSAMGData_struct
    HYPRE_Int               num_post_relax;     /* number of post relaxation sweeps */
    HYPRE_Int               skip_relax;         /* skip relaxation flag */
    HYPRE_Int               relax_type;         /* relaxation type flag */
+   HYPRE_Int               interp_type;        /* interp type flag */
    HYPRE_Real              usr_relax_weight;   /* user relax weight */
    HYPRE_Real              usr_set_rweight;    /* user sets relax weight */
    HYPRE_Real             *dxyz[HYPRE_MAXDIM]; /* nparts array used to determine cdir */
@@ -96,6 +97,7 @@ typedef struct hypre_SSAMGData_struct
 #define hypre_SSAMGDataNumIterations(ssamg_data)   ((ssamg_data) -> num_iterations)
 #define hypre_SSAMGDataSkipRelax(ssamg_data)       ((ssamg_data) -> skip_relax)
 #define hypre_SSAMGDataRelaxType(ssamg_data)       ((ssamg_data) -> relax_type)
+#define hypre_SSAMGDataInterpType(ssamg_data)      ((ssamg_data) -> interp_type)
 #define hypre_SSAMGDataUsrRelaxWeight(ssamg_data)  ((ssamg_data) -> usr_relax_weight)
 #define hypre_SSAMGDataUsrSetRWeight(ssamg_data)   ((ssamg_data) -> usr_set_rweight)
 #define hypre_SSAMGDataRelaxWeights(ssamg_data)    ((ssamg_data) -> relax_weights)
