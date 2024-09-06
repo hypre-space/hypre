@@ -25,7 +25,7 @@ hypre_DeviceDataCreate()
 {
    /* Note: this allocation is done directly with calloc in order to
       avoid a segmentation fault when building with HYPRE_USING_UMPIRE_HOST */
-   hypre_DeviceData *data = (hypre_DeviceData*) calloc(sizeof(hypre_DeviceData), 1);
+   hypre_DeviceData *data = (hypre_DeviceData*) calloc(1, sizeof(hypre_DeviceData));
 
 #if defined(HYPRE_USING_SYCL)
    hypre_DeviceDataDevice(data)           = nullptr;

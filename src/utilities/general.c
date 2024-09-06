@@ -32,7 +32,7 @@ hypre_HandleCreate(void)
 {
    /* Note: this allocation is done directly with calloc in order to
       avoid a segmentation fault when building with HYPRE_USING_UMPIRE_HOST */
-   hypre_Handle *hypre_handle_ = (hypre_Handle*) calloc(sizeof(hypre_Handle), 1);
+   hypre_Handle *hypre_handle_ = (hypre_Handle*) calloc(1, sizeof(hypre_Handle));
 
    hypre_HandleLogLevel(hypre_handle_) = 0;
    hypre_HandleMemoryLocation(hypre_handle_) = HYPRE_MEMORY_DEVICE;
