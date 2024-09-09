@@ -469,7 +469,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       HYPRE_Int             *indices[ndim];
       hypre_BoxArray        *indices_boxa = NULL;
       hypre_Index            index, start;
-      HYPRE_Real             threshold = 1.0; // WM: todo - what should this be?
+      HYPRE_Real             threshold = 0.8; // WM: todo - what should this be?
       hypre_BoxArray      ***convert_boxa = hypre_TAlloc(hypre_BoxArray**, nparts, HYPRE_MEMORY_HOST);
       HYPRE_Int cnt = 0;
       for (part = 0; part < nparts; part++)
