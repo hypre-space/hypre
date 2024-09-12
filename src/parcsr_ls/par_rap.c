@@ -1625,7 +1625,8 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
             HYPRE_Int i = hypre_UnorderedIntMapGet(&send_map_elmts_RT_inverse_map, ic);
             if (i != -1)
             {
-               for (j = send_map_elmts_starts_RT_aggregated[i]; j < send_map_elmts_starts_RT_aggregated[i + 1];
+               for (j = send_map_elmts_starts_RT_aggregated[i];
+                    j < send_map_elmts_starts_RT_aggregated[i + 1];
                     j++)
                {
                   HYPRE_Int jj = send_map_elmts_RT_aggregated[j];
@@ -1860,8 +1861,8 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
 
          for (jj1 = ra_row_begin_diag; jj1 < RA_diag.num_nonzeros; jj1++)
          {
-            HYPRE_Int i1 = RA_diag.j[jj1 - ra_row_begin_diag];
-            HYPRE_Real r_a_product = RA_diag.data[jj1 - ra_row_begin_diag];
+            i1 = RA_diag.j[jj1 - ra_row_begin_diag];
+            r_a_product = RA_diag.data[jj1 - ra_row_begin_diag];
 
             /*-----------------------------------------------------------------
              *  Loop over entries in row i1 of P_diag.

@@ -1132,9 +1132,9 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       {
          S_ext      = hypre_ParCSRMatrixExtractBExt(S, S, 0);
       }
-      S_ext_i    = hypre_CSRMatrixI(S_ext);
-      S_ext_j    = hypre_CSRMatrixBigJ(S_ext);
-      HYPRE_Int num_nonzeros = S_ext_i[num_cols_offd];
+      S_ext_i      = hypre_CSRMatrixI(S_ext);
+      S_ext_j      = hypre_CSRMatrixBigJ(S_ext);
+      num_nonzeros = S_ext_i[num_cols_offd];
       /*first_col = hypre_ParCSRMatrixFirstColDiag(S);
         col_0 = first_col-1;
         col_n = col_0+num_variables; */

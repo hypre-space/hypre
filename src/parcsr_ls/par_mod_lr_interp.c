@@ -851,7 +851,6 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
          if (num_functions > 1)
          {
             HYPRE_Int *int_buf_data = NULL;
-            HYPRE_Int num_sends, startc;
             HYPRE_Int num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
             dof_func_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_A_offd, HYPRE_MEMORY_HOST);
             index = 0;
@@ -1433,7 +1432,6 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
          if (num_functions > 1)
          {
             HYPRE_Int *int_buf_data = NULL;
-            HYPRE_Int num_sends, startc;
             HYPRE_Int num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
             dof_func_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_A_offd, HYPRE_MEMORY_HOST);
             index = 0;

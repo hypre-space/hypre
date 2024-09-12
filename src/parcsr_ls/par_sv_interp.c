@@ -1446,9 +1446,9 @@ hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
    if (num_procs > 1)
    {
       HYPRE_Int count;
-      HYPRE_Int num_cols_P_offd = 0;
       HYPRE_Int P_offd_new_size = P_offd_i_new[num_rows_P];
 
+      num_cols_P_offd = 0;
       if (P_offd_new_size)
       {
 

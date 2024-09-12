@@ -752,7 +752,7 @@ hypre_MGRCycle( void              *mgr_vdata,
                {
                   hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid],
                                        NULL, level_smooth_type[fine_grid],
-                                       0, fp_one, fp_one, l1_norms,
+                                       0, fp_one, fp_one, l1_norms, //NULL,
                                        U_array[fine_grid], Vtemp, Ztemp);
                }
             }
