@@ -2348,7 +2348,6 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix       *matrix,
                                                    HYPRE_MEMORY_HOST);
             }
 
-            HYPRE_Int i;
             for (i = 0; i < num_elements; i++)
             {
                off_proc_i_recv[off_proc_nelm_recv_cur + i] = row;
