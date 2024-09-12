@@ -71,7 +71,8 @@ HYPRE_Int hypre_IJMatrixInitializeParCSR ( hypre_IJMatrix *matrix );
 HYPRE_Int hypre_IJMatrixGetRowCountsParCSR ( hypre_IJMatrix *matrix, HYPRE_Int nrows,
                                              HYPRE_BigInt *rows, HYPRE_Int *ncols );
 HYPRE_Int hypre_IJMatrixGetValuesParCSR ( hypre_IJMatrix *matrix, HYPRE_Int nrows, HYPRE_Int *ncols,
-                                          HYPRE_BigInt *rows, HYPRE_BigInt *cols, HYPRE_Complex *values );
+                                          HYPRE_BigInt *rows,
+                                          HYPRE_Int *row_indexes, HYPRE_BigInt *cols, HYPRE_Complex *values, HYPRE_Int zero_out );
 HYPRE_Int hypre_IJMatrixSetValuesParCSR ( hypre_IJMatrix *matrix, HYPRE_Int nrows, HYPRE_Int *ncols,
                                           const HYPRE_BigInt *rows, const HYPRE_Int *row_indexes, const HYPRE_BigInt *cols,
                                           const HYPRE_Complex *values );
@@ -169,6 +170,7 @@ HYPRE_Int hypre_IJVectorUpdateValuesDevice( hypre_IJVector *vector, HYPRE_Int nu
 /* HYPRE_IJMatrix.c */
 HYPRE_Int HYPRE_IJMatrixCreate ( MPI_Comm comm, HYPRE_BigInt ilower, HYPRE_BigInt iupper,
                                  HYPRE_BigInt jlower, HYPRE_BigInt jupper, HYPRE_IJMatrix *matrix );
+HYPRE_Int HYPRE_IJMatrixPartialClone ( HYPRE_IJMatrix matrix_in, HYPRE_IJMatrix *matrix_out );
 HYPRE_Int HYPRE_IJMatrixDestroy ( HYPRE_IJMatrix matrix );
 HYPRE_Int HYPRE_IJMatrixInitialize ( HYPRE_IJMatrix matrix );
 HYPRE_Int HYPRE_IJMatrixSetPrintLevel ( HYPRE_IJMatrix matrix, HYPRE_Int print_level );

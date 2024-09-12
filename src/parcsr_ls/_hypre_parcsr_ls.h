@@ -110,6 +110,7 @@ typedef struct
    hypre_ParCSRMatrix  *A;
    HYPRE_Int            num_variables;
    HYPRE_Int            num_functions;
+   HYPRE_Int            filter_functions;
    HYPRE_Int            nodal;
    HYPRE_Int            nodal_levels;
    HYPRE_Int            nodal_diag;
@@ -159,6 +160,8 @@ typedef struct
    HYPRE_Real           pi_drop_tol;
    HYPRE_Real           eu_sparse_A;
    char                *euclidfile;
+
+   /* ILU parameters */
    HYPRE_Int            ilu_lfil;
    HYPRE_Int            ilu_type;
    HYPRE_Int            ilu_max_row_nnz;
@@ -168,7 +171,12 @@ typedef struct
    HYPRE_Int            ilu_lower_jacobi_iters;
    HYPRE_Int            ilu_upper_jacobi_iters;
    HYPRE_Int            ilu_reordering_type;
+   HYPRE_Int            ilu_iter_setup_type;
+   HYPRE_Int            ilu_iter_setup_option;
+   HYPRE_Int            ilu_iter_setup_max_iter;
+   HYPRE_Real           ilu_iter_setup_tolerance;
 
+   /* FSAI parameters */
    HYPRE_Int            fsai_algo_type;
    HYPRE_Int            fsai_local_solve_type;
    HYPRE_Int            fsai_max_steps;
@@ -373,8 +381,9 @@ typedef struct
 #define hypre_ParAMGDataOuterWt(amg_data) ((amg_data)->outer_wt)
 
 /* problem data parameters */
-#define  hypre_ParAMGDataNumVariables(amg_data)  ((amg_data)->num_variables)
+#define hypre_ParAMGDataNumVariables(amg_data)  ((amg_data)->num_variables)
 #define hypre_ParAMGDataNumFunctions(amg_data) ((amg_data)->num_functions)
+#define hypre_ParAMGDataFilterFunctions(amg_data) ((amg_data)->filter_functions)
 #define hypre_ParAMGDataNodal(amg_data) ((amg_data)->nodal)
 #define hypre_ParAMGDataNodalLevels(amg_data) ((amg_data)->nodal_levels)
 #define hypre_ParAMGDataNodalDiag(amg_data) ((amg_data)->nodal_diag)
@@ -428,6 +437,10 @@ typedef struct
 #define hypre_ParAMGDataILUUpperJacobiIters(amg_data) ((amg_data)->ilu_upper_jacobi_iters)
 #define hypre_ParAMGDataILUMaxIter(amg_data) ((amg_data)->ilu_max_iter)
 #define hypre_ParAMGDataILULocalReordering(amg_data) ((amg_data)->ilu_reordering_type)
+#define hypre_ParAMGDataILUIterSetupType(amg_data) ((amg_data)->ilu_iter_setup_type)
+#define hypre_ParAMGDataILUIterSetupOption(amg_data) ((amg_data)->ilu_iter_setup_option)
+#define hypre_ParAMGDataILUIterSetupMaxIter(amg_data) ((amg_data)->ilu_iter_setup_max_iter)
+#define hypre_ParAMGDataILUIterSetupTolerance(amg_data) ((amg_data)->ilu_iter_setup_tolerance)
 #define hypre_ParAMGDataFSAIAlgoType(amg_data) ((amg_data)->fsai_algo_type)
 #define hypre_ParAMGDataFSAILocalSolveType(amg_data) ((amg_data)->fsai_local_solve_type)
 #define hypre_ParAMGDataFSAIMaxSteps(amg_data) ((amg_data)->fsai_max_steps)
@@ -1169,6 +1182,14 @@ typedef struct hypre_ParILUData_struct
    HYPRE_Int             nI;
    HYPRE_Int            *u_end; /* used when schur block is formed */
 
+   /* Iterative ILU parameters */
+   HYPRE_Int             iter_setup_type;
+   HYPRE_Int             iter_setup_option;
+   HYPRE_Int             setup_max_iter;
+   HYPRE_Int             setup_num_iter;
+   HYPRE_Real            setup_tolerance;
+   HYPRE_Complex        *setup_history;
+
    /* temp vectors for solve phase */
    hypre_ParVector      *Utemp;
    hypre_ParVector      *Ftemp;
@@ -1309,6 +1330,17 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataRhs(ilu_data)                          ((ilu_data) -> rhs)
 #define hypre_ParILUDataX(ilu_data)                            ((ilu_data) -> x)
 #define hypre_ParILUDataReorderingType(ilu_data)               ((ilu_data) -> reordering_type)
+
+/* Iterative ILU setup */
+#define hypre_ParILUDataIterativeSetupType(ilu_data)           ((ilu_data) -> iter_setup_type)
+#define hypre_ParILUDataIterativeSetupOption(ilu_data)         ((ilu_data) -> iter_setup_option)
+#define hypre_ParILUDataIterativeSetupMaxIter(ilu_data)        ((ilu_data) -> setup_max_iter)
+#define hypre_ParILUDataIterativeSetupNumIter(ilu_data)        ((ilu_data) -> setup_num_iter)
+#define hypre_ParILUDataIterativeSetupTolerance(ilu_data)      ((ilu_data) -> setup_tolerance)
+#define hypre_ParILUDataIterativeSetupHistory(ilu_data)        ((ilu_data) -> setup_history)
+#define hypre_ParILUDataIterSetupCorrectionNorm(ilu_data,i)    ((ilu_data) -> setup_history[i])
+#define hypre_ParILUDataIterSetupResidualNorm(ilu_data,i)      (((ilu_data) -> setup_history + \
+                                                                 (ilu_data) -> setup_num_iter)[i])
 
 /* Schur System */
 #define hypre_ParILUDataSchurGMRESKDim(ilu_data)               ((ilu_data) -> ss_kDim)
@@ -1950,6 +1982,8 @@ HYPRE_Int HYPRE_BoomerAMGSetFSAIThreshold ( HYPRE_Solver solver, HYPRE_Real thre
 HYPRE_Int HYPRE_BoomerAMGSetFSAIKapTolerance ( HYPRE_Solver solver, HYPRE_Real kap_tolerance );
 HYPRE_Int HYPRE_BoomerAMGSetNumFunctions ( HYPRE_Solver solver, HYPRE_Int num_functions );
 HYPRE_Int HYPRE_BoomerAMGGetNumFunctions ( HYPRE_Solver solver, HYPRE_Int *num_functions );
+HYPRE_Int HYPRE_BoomerAMGSetFilterFunctions ( HYPRE_Solver solver, HYPRE_Int filter_functions );
+HYPRE_Int HYPRE_BoomerAMGGetFilterFunctions ( HYPRE_Solver solver, HYPRE_Int *filter_functions );
 HYPRE_Int HYPRE_BoomerAMGSetNodal ( HYPRE_Solver solver, HYPRE_Int nodal );
 HYPRE_Int HYPRE_BoomerAMGSetNodalLevels ( HYPRE_Solver solver, HYPRE_Int nodal_levels );
 HYPRE_Int HYPRE_BoomerAMGSetNodalDiag ( HYPRE_Solver solver, HYPRE_Int nodal );
@@ -2538,6 +2572,8 @@ HYPRE_Int hypre_BoomerAMGSetCoordinates ( void *data, float *coordinates );
 HYPRE_Int hypre_BoomerAMGGetGridHierarchy(void *data, HYPRE_Int *cgrid );
 HYPRE_Int hypre_BoomerAMGSetNumFunctions ( void *data, HYPRE_Int num_functions );
 HYPRE_Int hypre_BoomerAMGGetNumFunctions ( void *data, HYPRE_Int *num_functions );
+HYPRE_Int hypre_BoomerAMGSetFilterFunctions ( void *data, HYPRE_Int filter_functions );
+HYPRE_Int hypre_BoomerAMGGetFilterFunctions ( void *data, HYPRE_Int *filter_functions );
 HYPRE_Int hypre_BoomerAMGSetNodal ( void *data, HYPRE_Int nodal );
 HYPRE_Int hypre_BoomerAMGSetNodalLevels ( void *data, HYPRE_Int nodal_levels );
 HYPRE_Int hypre_BoomerAMGSetNodalDiag ( void *data, HYPRE_Int nodal );
@@ -2596,6 +2632,11 @@ HYPRE_Int hypre_BoomerAMGSetILUUpperJacobiIters( void *data, HYPRE_Int ilu_upper
 HYPRE_Int hypre_BoomerAMGSetILUMaxIter( void *data, HYPRE_Int ilu_max_iter );
 HYPRE_Int hypre_BoomerAMGSetILUMaxRowNnz( void *data, HYPRE_Int ilu_max_row_nnz );
 HYPRE_Int hypre_BoomerAMGSetILULocalReordering( void *data, HYPRE_Int ilu_reordering_type );
+HYPRE_Int hypre_BoomerAMGSetILUIterSetupType( void *data, HYPRE_Int ilu_iter_setup_type );
+HYPRE_Int hypre_BoomerAMGSetILUIterSetupOption( void *data, HYPRE_Int ilu_iter_setup_option );
+HYPRE_Int hypre_BoomerAMGSetILUIterSetupMaxIter( void *data, HYPRE_Int ilu_iter_setup_max_iter );
+HYPRE_Int hypre_BoomerAMGSetILUIterSetupTolerance( void *data,
+                                                   HYPRE_Real ilu_iter_setup_tolerance );
 HYPRE_Int hypre_BoomerAMGSetFSAIAlgoType ( void *data, HYPRE_Int fsai_algo_type );
 HYPRE_Int hypre_BoomerAMGSetFSAILocalSolveType ( void *data, HYPRE_Int local_solve_type );
 HYPRE_Int hypre_BoomerAMGSetFSAIMaxSteps ( void *data, HYPRE_Int fsai_max_steps );
@@ -3571,7 +3612,7 @@ HYPRE_Int hypre_MGRSetFSolver( void *mgr_vdata,
                                HYPRE_Int (*fine_grid_solver_solve)(void*, void*, void*, void*),
                                HYPRE_Int (*fine_grid_solver_setup)(void*, void*, void*, void*),
                                void *fsolver );
-HYPRE_Int hypre_MGRSetFSolverAtLevel( HYPRE_Int level, void *mgr_vdata, void *fsolver );
+HYPRE_Int hypre_MGRSetFSolverAtLevel( void *mgr_vdata, void *fsolver, HYPRE_Int level );
 HYPRE_Int hypre_MGRSetup( void *mgr_vdata, hypre_ParCSRMatrix *A,
                           hypre_ParVector *f, hypre_ParVector *u );
 HYPRE_Int hypre_MGRSolve( void *mgr_vdata, hypre_ParCSRMatrix *A,
@@ -3613,14 +3654,6 @@ HYPRE_Int hypre_MGRAddVectorR( hypre_IntArray *CF_marker, HYPRE_Int point_type, 
                                hypre_ParVector **toVector );
 HYPRE_Int hypre_MGRTruncateAcfCPRDevice( hypre_ParCSRMatrix  *A_CF,
                                          hypre_ParCSRMatrix **A_CF_new_ptr );
-HYPRE_Int hypre_MGRComputeNonGalerkinCoarseGrid(hypre_ParCSRMatrix *A_FF,
-                                                hypre_ParCSRMatrix *A_FC,
-                                                hypre_ParCSRMatrix *A_CF,
-                                                hypre_ParCSRMatrix *A_CC,
-                                                hypre_ParCSRMatrix *Wp, hypre_ParCSRMatrix *Wr,
-                                                HYPRE_Int bsize, HYPRE_Int ordering,
-                                                HYPRE_Int method, HYPRE_Int max_elmts,
-                                                hypre_ParCSRMatrix **A_H_ptr);
 HYPRE_Int hypre_MGRSetAffSolverType( void *systg_vdata, HYPRE_Int *aff_solver_type );
 HYPRE_Int hypre_MGRSetCoarseSolverType( void *systg_vdata, HYPRE_Int coarse_solver_type );
 HYPRE_Int hypre_MGRSetCoarseSolverIter( void *systg_vdata, HYPRE_Int coarse_solver_iter );
@@ -3634,6 +3667,8 @@ HYPRE_Int hypre_MGRSetLevelFRelaxMethod( void *mgr_vdata, HYPRE_Int *relax_metho
 HYPRE_Int hypre_MGRSetLevelFRelaxType( void *mgr_vdata, HYPRE_Int *relax_type );
 HYPRE_Int hypre_MGRSetLevelFRelaxNumFunctions( void *mgr_vdata, HYPRE_Int *num_functions );
 HYPRE_Int hypre_MGRSetCoarseGridMethod( void *mgr_vdata, HYPRE_Int *cg_method );
+HYPRE_Int hypre_MGRSetNonGalerkinMaxElmts( void *mgr_vdata, HYPRE_Int max_elmts );
+HYPRE_Int hypre_MGRSetLevelNonGalerkinMaxElmts( void *mgr_vdata, HYPRE_Int *max_elmts );
 HYPRE_Int hypre_MGRSetRestrictType( void *mgr_vdata, HYPRE_Int restrictType );
 HYPRE_Int hypre_MGRSetLevelRestrictType( void *mgr_vdata, HYPRE_Int *restrictType );
 HYPRE_Int hypre_MGRSetInterpType( void *mgr_vdata, HYPRE_Int interpType );
@@ -3645,6 +3680,8 @@ HYPRE_Int hypre_MGRSetNumRestrictSweeps( void *mgr_vdata, HYPRE_Int nsweeps );
 HYPRE_Int hypre_MGRSetLevelSmoothType( void *mgr_vdata, HYPRE_Int *level_smooth_type );
 HYPRE_Int hypre_MGRSetLevelSmoothIters( void *mgr_vdata, HYPRE_Int *level_smooth_iters );
 HYPRE_Int hypre_MGRSetGlobalSmoothCycle( void *mgr_vdata, HYPRE_Int global_smooth_cycle );
+HYPRE_Int hypre_MGRSetGlobalSmootherAtLevel( void *mgr_vdata, HYPRE_Solver smoother,
+                                             HYPRE_Int level );
 HYPRE_Int hypre_MGRSetPrintLevel( void *mgr_vdata, HYPRE_Int print_level );
 HYPRE_Int hypre_MGRSetFrelaxPrintLevel( void *mgr_vdata, HYPRE_Int print_level );
 HYPRE_Int hypre_MGRSetCoarseGridPrintLevel( void *mgr_vdata, HYPRE_Int print_level );
@@ -3671,12 +3708,12 @@ HYPRE_Int hypre_MGRGetCoarseGridConvergenceFactor( void *mgr_data, HYPRE_Real *c
 
 /* par_mgr_interp.c */
 HYPRE_Int hypre_MGRBuildInterp( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
-                                hypre_ParCSRMatrix *A_FC, HYPRE_Int *CF_marker,
-                                hypre_ParCSRMatrix *S, HYPRE_BigInt *num_cpts_global,
+                                hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *S,
+                                hypre_IntArray *CF_marker, HYPRE_BigInt *num_cpts_global,
                                 HYPRE_Real trunc_factor, HYPRE_Int max_elmts,
-                                HYPRE_Int block_jacobi_bsize,
-                                hypre_ParCSRMatrix **P_tr, HYPRE_Int method,
-                                HYPRE_Int num_sweeps_post );
+                                HYPRE_Int block_jacobi_bsize, HYPRE_Int method,
+                                HYPRE_Int num_sweeps_post, hypre_ParCSRMatrix **Wp_ptr,
+                                hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_MGRBuildRestrict( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
                                   hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *A_CF,
                                   hypre_IntArray *CF_marker, HYPRE_BigInt *num_cpts_global,
@@ -3691,7 +3728,7 @@ HYPRE_Int hypre_MGRBuildPFromWpHost( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *
                                      HYPRE_Int *CF_marker, hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_MGRBuildBlockJacobiWp( hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC,
                                        HYPRE_Int blk_size, hypre_ParCSRMatrix **Wp_ptr );
-HYPRE_Int hypre_MGRBuildPBlockJacobi( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
+HYPRE_Int hypre_MGRBuildBlockJacobiP( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
                                       hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *Wp,
                                       HYPRE_Int blk_size, HYPRE_Int *CF_marker,
                                       hypre_ParCSRMatrix **P_ptr );
@@ -3705,17 +3742,23 @@ HYPRE_Int hypre_MGRBuildInterpApproximateInverse( hypre_ParCSRMatrix *A, HYPRE_I
                                                   HYPRE_BigInt *num_cpts_global,
                                                   hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_MGRTruncateAcfCPR( hypre_ParCSRMatrix *A_CF, hypre_ParCSRMatrix **A_CF_new_ptr );
-HYPRE_Int hypre_MGRBuildRFromW( HYPRE_Int *C_map, HYPRE_Int *F_map,
+HYPRE_Int hypre_MGRBuildRFromW( hypre_IntArray *C_map, hypre_IntArray *F_map,
                                 HYPRE_BigInt global_num_rows_R, HYPRE_BigInt global_num_cols_R,
                                 HYPRE_BigInt *row_starts_R, HYPRE_BigInt *col_starts_R,
                                 hypre_ParCSRMatrix *W, hypre_ParCSRMatrix **R_ptr );
 HYPRE_Int hypre_MGRBlockColLumpedRestrict( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
                                            hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker,
-                                           HYPRE_Int block_dim, hypre_ParCSRMatrix **W_ptr,
+                                           HYPRE_Int blk_dim, hypre_ParCSRMatrix **W_ptr,
                                            hypre_ParCSRMatrix **R_ptr);
 HYPRE_Int hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
                                      hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker,
                                      hypre_ParCSRMatrix **W_ptr, hypre_ParCSRMatrix **R_ptr);
+
+/* par_mgr_rap.c */
+HYPRE_Int hypre_MGRBuildCoarseOperator(void *mgr_data, hypre_ParCSRMatrix *A_FF,
+                                       hypre_ParCSRMatrix *A_FC, hypre_ParCSRMatrix *A_CF,
+                                       hypre_ParCSRMatrix **A_CC_ptr, hypre_ParCSRMatrix *Wp,
+                                       hypre_ParCSRMatrix *Wr, HYPRE_Int level);
 
 /* par_mgr_coarsen.c */
 HYPRE_Int hypre_MGRCoarseParms( MPI_Comm comm, HYPRE_Int num_rows, hypre_IntArray *CF_marker,
@@ -3741,12 +3784,6 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix *A, HYPRE_
                                                    HYPRE_Int point_type, HYPRE_Int *CF_marker,
                                                    HYPRE_Int diag_type,
                                                    hypre_ParCSRMatrix **B_ptr );
-HYPRE_Int hypre_MGRComputeNonGalerkinCGDevice( hypre_ParCSRMatrix *A_FF, hypre_ParCSRMatrix *A_FC,
-                                               hypre_ParCSRMatrix *A_CF, hypre_ParCSRMatrix *A_CC,
-                                               hypre_ParCSRMatrix *Wp, hypre_ParCSRMatrix *Wr,
-                                               HYPRE_Int blk_size, HYPRE_Int method,
-                                               HYPRE_Complex threshold,
-                                               hypre_ParCSRMatrix **A_H_ptr );
 
 /* par_mgr_stats.c */
 HYPRE_Int hypre_MGRSetupStats( void *mgr_vdata );
@@ -3761,6 +3798,12 @@ HYPRE_Int hypre_ILUSetDropThresholdArray( void *ilu_vdata, HYPRE_Real *threshold
 HYPRE_Int hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type );
 HYPRE_Int hypre_ILUSetMaxIter( void *ilu_vdata, HYPRE_Int max_iter );
 HYPRE_Int hypre_ILUSetTol( void *ilu_vdata, HYPRE_Real tol );
+HYPRE_Int hypre_ILUSetIterativeSetupType( void *ilu_vdata, HYPRE_Int iter_setup_type );
+HYPRE_Int hypre_ILUSetIterativeSetupOption( void *ilu_vdata, HYPRE_Int iter_setup_option );
+HYPRE_Int hypre_ILUSetIterativeSetupMaxIter( void *ilu_vdata, HYPRE_Int iter_setup_max_iter );
+HYPRE_Int hypre_ILUSetIterativeSetupTolerance( void *ilu_vdata, HYPRE_Real iter_setup_tolerance );
+HYPRE_Int hypre_ILUGetIterativeSetupHistory( void *ilu_vdata,
+                                             HYPRE_Complex **iter_setup_history );
 HYPRE_Int hypre_ILUSetTriSolve( void *ilu_vdata, HYPRE_Int tri_solve );
 HYPRE_Int hypre_ILUSetLowerJacobiIters( void *ilu_vdata, HYPRE_Int lower_jacobi_iters );
 HYPRE_Int hypre_ILUSetUpperJacobiIters( void *ilu_vdata, HYPRE_Int upper_jacobi_iters );
@@ -3970,12 +4013,17 @@ HYPRE_Int hypre_ILUSetupILUTRAS( hypre_ParCSRMatrix *A, HYPRE_Int lfil,
                                  hypre_ParCSRMatrix **Uptr );
 
 /* par_ilu_setup_device.c */
-HYPRE_Int hypre_ILUSetupILUDevice( HYPRE_Int ilu_type, hypre_ParCSRMatrix *A,
-                                   HYPRE_Int lfil, HYPRE_Real *tol, HYPRE_Int *perm_data,
-                                   HYPRE_Int *qperm_data, HYPRE_Int n, HYPRE_Int nLU,
-                                   hypre_CSRMatrix **BLUptr, hypre_ParCSRMatrix **matSptr,
-                                   hypre_CSRMatrix **Eptr, hypre_CSRMatrix **Fptr,
-                                   HYPRE_Int tri_solve );
+#if defined(HYPRE_USING_GPU)
+HYPRE_Int hypre_ILUSetupDevice(hypre_ParILUData *ilu_data, hypre_ParCSRMatrix *A,
+                               HYPRE_Int *perm_data, HYPRE_Int *qperm_data,
+                               HYPRE_Int n, HYPRE_Int nLU, hypre_CSRMatrix **BLUptr,
+                               hypre_ParCSRMatrix **matSptr, hypre_CSRMatrix **Eptr,
+                               hypre_CSRMatrix **Fptr);
+HYPRE_Int hypre_ILUSetupIterativeILU0Device( hypre_CSRMatrix *A, HYPRE_Int type,
+                                             HYPRE_Int option, HYPRE_Int max_iter,
+                                             HYPRE_Real tolerance, HYPRE_Int *num_iter_ptr,
+                                             HYPRE_Real **history_ptr );
+#endif
 
 /* par_ilu_solve.c */
 HYPRE_Int hypre_ILUSolve( void *ilu_vdata, hypre_ParCSRMatrix *A,

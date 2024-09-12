@@ -31,21 +31,6 @@ hypreGPUKernel_IntArrayInverseMapping( hypre_DeviceItem  &item,
 }
 #endif
 
-/* Functors  */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-struct hypre_cycle_functor
-{
-   HYPRE_Int cycle_length;
-
-   hypre_cycle_functor(HYPRE_Int _cycle_length) : cycle_length(_cycle_length) {}
-
-   __host__ __device__ HYPRE_Int operator()(HYPRE_Int x) const
-   {
-      return x % cycle_length;
-   }
-};
-#endif
-
 /* Functions */
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 
@@ -183,7 +168,7 @@ hypre_IntArraySetInterleavedValuesDevice( hypre_IntArray *v,
                       hypre_IntArrayData(v),
                       hypre_IntArrayData(v) + hypre_IntArraySize(v),
                       hypre_IntArrayData(v),
-                      hypre_cycle_functor(cycle) );
+                      hypreFunctor_IndexCycle(cycle) );
 
 #else
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented yet!");

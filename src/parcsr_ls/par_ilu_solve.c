@@ -1380,7 +1380,7 @@ hypre_ILUSolveRAPGMRESHost(hypre_ParCSRMatrix *A,
    hypre_Vector      *rhs_local;
    HYPRE_Real        *rhs_data;
    hypre_Vector      *x_local = NULL;
-   HYPRE_Real        *x_data;
+   HYPRE_Real        *x_data  = NULL;
 
    /* xtemp might be null when we have no Schur complement */
    if (xtemp)

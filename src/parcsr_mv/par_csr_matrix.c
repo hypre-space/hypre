@@ -618,10 +618,10 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
    HYPRE_MemoryLocation  memory_location = hypre_ParVectorMemoryLocation(b);
 
    /* Auxiliary variables */
-   HYPRE_Int             num_rows        = (HYPRE_Int) row_starts[1] - row_starts[0];
-   HYPRE_Int             num_cols        = (HYPRE_Int) col_starts[1] - col_starts[0];
+   HYPRE_Int             num_rows        = (HYPRE_Int) (row_starts[1] - row_starts[0]);
+   HYPRE_Int             num_cols        = (HYPRE_Int) (col_starts[1] - col_starts[0]);
    HYPRE_Int             num_nonzeros    = hypre_ParVectorLocalSize(b);
-   HYPRE_Int             rows_block_dim  = num_rows / num_cols;
+   HYPRE_Int             blk_dim         = num_rows / num_cols;
 
    /* Output matrix variables */
    hypre_ParCSRMatrix   *A;
@@ -661,7 +661,7 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
    if (hypre_VectorOwnsData(local_vector))
    {
       hypre_CSRMatrixData(A_diag) = hypre_VectorData(local_vector);
-      hypre_VectorOwnsData(b) = 0;
+      hypre_VectorOwnsData(local_vector) = 0;
    }
    else
    {
@@ -676,28 +676,21 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
    A_diag_i = hypre_CTAlloc(HYPRE_Int, num_rows + 1, HYPRE_MEMORY_HOST);
    A_diag_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros, HYPRE_MEMORY_HOST);
 
-   if (num_rows == num_cols)
-   {
 #ifdef HYPRE_USING_OPENMP
-      #pragma omp parallel for HYPRE_SMP_SCHEDULE
+   #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
-      for (i = 0; i < num_rows; i++)
-      {
-         A_diag_i[i] = A_diag_j[i] = i;
-      }
-   }
-   else
+   for (i = 0; i < num_nonzeros; i++)
    {
-      for (i = 0; i < num_rows; i++)
-      {
-         A_diag_i[i] = i;
-         for (j = 0; j < rows_block_dim; j++)
-         {
-            A_diag_j[i] = i / rows_block_dim;
-         }
-      }
+      A_diag_i[i] = A_diag_j[i] = i;
    }
-   A_diag_i[num_rows] = num_nonzeros;
+
+#ifdef HYPRE_USING_OPENMP
+   #pragma omp parallel for HYPRE_SMP_SCHEDULE
+#endif
+   for (i = num_nonzeros; i < num_rows + 1; i++)
+   {
+      A_diag_i[i] = num_nonzeros;
+   }
 
    /* Initialize offd portion */
    hypre_CSRMatrixInitialize_v2(A_offd, 0, memory_location);
@@ -715,6 +708,9 @@ hypre_ParCSRMatrixCreateFromParVector(hypre_ParVector *b,
       hypre_TMemcpy(hypre_CSRMatrixJ(A_diag), A_diag_j,
                     HYPRE_Int, num_nonzeros,
                     memory_location, HYPRE_MEMORY_HOST);
+
+      hypre_TFree(A_diag_i, HYPRE_MEMORY_HOST);
+      hypre_TFree(A_diag_j, HYPRE_MEMORY_HOST);
    }
    else
    {
@@ -2795,6 +2791,7 @@ hypre_FillResponseParToCSRMatrix( void       *p_recv_contact_buf,
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixUnion
+ *
  * Creates and returns a new matrix whose elements are the union of A and B.
  * Data is not copied, only structural information is created.
  * A and B must have the same communicator, numbers and distributions of rows
@@ -2863,14 +2860,17 @@ hypre_ParCSRMatrixUnion( hypre_ParCSRMatrix *A,
  * hypre_ParCSRMatrixTruncate
  *
  * Perform dual truncation of ParCSR matrix.
+ *
  * This code is adapted from original BoomerAMGInterpTruncate()
+ *
  * A: parCSR matrix to be modified
  * tol: relative tolerance or truncation factor for dropping small terms
  * max_row_elmts: maximum number of (largest) nonzero elements to keep.
  * rescale: Boolean on whether or not to scale resulting matrix. Scaling for
- * each row satisfies: sum(nonzero values before dropping)/ sum(nonzero values after dropping),
- * this way, the application of the truncated matrix on a constant vector is the same as that of
- * the original matrix.
+ *   each row satisfies: sum(nonzero values before dropping) /
+ *                       sum(nonzero values after dropping),
+ *   this way, the application of the truncated matrix on a constant vector
+ *   is the same as that of the original matrix.
  * nrm_type: type of norm used for dropping with tol.
  * -- 0 = infinity-norm
  * -- 1 = 1-norm
