@@ -92,6 +92,21 @@
 /* Use if executing on device with SYCL */
 #cmakedefine HYPRE_USING_SYCL 1
 
+/* Use rocBLAS */
+#cmakedefine HYPRE_USING_ROCBLAS 1
+
+/* Use rocRAND */
+#cmakedefine HYPRE_USING_ROCRAND 1
+
+/* Use rocSPARSE */
+#cmakedefine HYPRE_USING_ROCSPARSE 1
+
+/* Use rocSOLVER */
+#cmakedefine HYPRE_USING_ROCSOLVER 1
+
+/* Use rocTX profiling */
+#cmakedefine HYPRE_USING_ROCTX 1
+
 /* Use cuBLAS */
 #cmakedefine HYPRE_USING_CUBLAS 1
 

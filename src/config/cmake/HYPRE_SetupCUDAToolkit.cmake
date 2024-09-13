@@ -4,10 +4,10 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 # This handles the non-compiler aspect of the CUDA toolkit.
-# Uses cmake find_package to locate the NVIDIA CUDA C tools 
+# Uses cmake find_package to locate the NVIDIA CUDA C tools
 # for shared libraries. Otherwise for static libraries, assumes
 # the libraries are located in ${CUDA_TOOLKIT_ROOT_DIR}/lib64.
-# Please set cmake variable CUDA_TOOLKIT_ROOT_DIR. 
+# Please set cmake variable CUDA_TOOLKIT_ROOT_DIR.
 
 # Collection of CUDA optional libraries
 set(EXPORT_INTERFACE_CUDA_LIBS "")
@@ -23,7 +23,6 @@ else()
 endif()
 
 if (CMAKE_VERSION VERSION_LESS 3.17)
-
   if (HYPRE_ENABLE_CUSPARSE)
     set(HYPRE_USING_CUSPARSE ON CACHE BOOL "" FORCE)
     if (HYPRE_SHARED)

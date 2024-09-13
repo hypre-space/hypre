@@ -11,6 +11,12 @@ else ()
   cmake_policy(VERSION 3.16)
 endif ()
 
+# Set CMP0146 policy to NEW. This policy setting ensures we use the
+# modern CUDA language support instead of the deprecated FindCUDA module
+if(POLICY CMP0146)
+  cmake_policy(SET CMP0146 NEW)
+endif()
+
 # The version number.
 set(HYPRE_VERSION 2.31.0)
 set(HYPRE_NUMBER  23100)
@@ -110,6 +116,7 @@ set(HYPRE_WITH_EXTRA_CFLAGS       "" CACHE STRING "Define extra C compile flags"
 set(HYPRE_WITH_EXTRA_CXXFLAGS     "" CACHE STRING "Define extra CXX compile flags")
 # GPU options
 option(HYPRE_WITH_CUDA               "Use CUDA. Require cuda-8.0 or higher" OFF)
+option(HYPRE_WITH_HIP                "Use HIP" OFF)
 option(HYPRE_WITH_SYCL               "Use SYCL" OFF)
 option(HYPRE_ENABLE_UNIFIED_MEMORY   "Use unified memory for allocating the memory" OFF)
 option(HYPRE_ENABLE_DEVICE_MALLOC_ASYNC "Use device async malloc" OFF)
@@ -122,6 +129,11 @@ option(HYPRE_ENABLE_CUBLAS           "Use cuBLAS" OFF)
 option(HYPRE_ENABLE_CURAND           "Use cuRAND" ON)
 option(HYPRE_ENABLE_GPU_PROFILING    "Use NVTX on CUDA" OFF)
 set(HYPRE_CUDA_SM "70" CACHE STRING  "Target CUDA architecture.")
+# HIP options
+option(HYPRE_ENABLE_ROCBLAS          "Use rocBLAS" ON)
+option(HYPRE_ENABLE_ROCSPARSE        "Use rocSPARSE" ON)
+option(HYPRE_ENABLE_ROCRAND          "Use rocRAND" ON)
+option(HYPRE_ENABLE_ROCSOLVER        "Use rocSOLVER" ON)
 # oneAPI options
 option(HYPRE_ENABLE_ONEMKLSPARSE     "Use oneMKL sparse" ON)
 option(HYPRE_ENABLE_ONEMKLBLAS       "Use oneMKL blas" ON)
@@ -262,164 +274,74 @@ if (HYPRE_WITH_UMPIRE_PINNED)
   set(HYPRE_USING_UMPIRE_PINNED ON CACHE BOOL "" FORCE)
 endif ()
 
-# CUDA
-if (HYPRE_WITH_CUDA)
+if (HYPRE_WITH_CUDA OR HYPRE_WITH_HIP OR HYPRE_WITH_SYCL)
   enable_language(CXX)
   message(STATUS "Enabled support for CXX.")
 
-  # Enforce C++11
-  if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 11)
-    set(CMAKE_CXX_STANDARD 11)
-  endif ()
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-  message(STATUS "Using CXX standard: c++${CMAKE_CXX_STANDARD}")
-
-  # Add any extra CXX compiler flags HYPRE_WITH_EXTRA_CXXFLAGS
-  if (NOT HYPRE_WITH_EXTRA_CXXFLAGS STREQUAL "")
-    string(REPLACE " " ";" HYPRE_WITH_EXTRA_CXXFLAGS "${HYPRE_WITH_EXTRA_CXXFLAGS}")
-    add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${HYPRE_WITH_EXTRA_CXXFLAGS}>")
-  endif ()
-
-  # Check if CUDA is available, then enable it
-  include(CheckLanguage)
-  check_language(CUDA)
-
-  # Use ${CMAKE_CXX_COMPILER} as the cuda host compiler.
-  if (NOT CMAKE_CUDA_HOST_COMPILER)
-    set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER})
-  endif ()
-
-  if (CMAKE_CUDA_COMPILER)
-
-    enable_language(CUDA)
-    message(STATUS "Enabled support for CUDA.")
-
-    if (NOT CMAKE_CUDA_STANDARD OR CMAKE_CUDA_STANDARD EQUAL 98)
-      set(CMAKE_CUDA_STANDARD 11)
-    endif ()
-
-    set(CMAKE_CUDA_STANDARD_REQUIRED ON CACHE BOOL "" FORCE)
-
-    if (HYPRE_ENABLE_DEVICE_MALLOC_ASYNC)
-      set(HYPRE_USING_DEVICE_MALLOC_ASYNC ON CACHE BOOL "" FORCE)
-    endif ()
-
-    set(HYPRE_USING_CUDA ON CACHE BOOL "" FORCE)
-    set(HYPRE_USING_GPU ON CACHE BOOL "" FORCE)
-
-    if (HYPRE_ENABLE_UNIFIED_MEMORY)
-      set(HYPRE_USING_UNIFIED_MEMORY ON CACHE BOOL "" FORCE)
-    else ()
-      set(HYPRE_USING_DEVICE_MEMORY ON CACHE BOOL "" FORCE)
-    endif ()
-
-    # Check if examples are enabled, but not unified memory
-    if (HYPRE_BUILD_EXAMPLES AND NOT HYPRE_ENABLE_UNIFIED_MEMORY)
-      message(WARNING "Running the examples on GPUs requires Unified Memory!
-        Examples will not be built!")
-      set(HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-    endif ()
-
-    if (CMAKE_VERSION VERSION_LESS 3.18.0)
-      add_compile_options("$<$<COMPILE_LANGUAGE:CUDA>:-arch=sm_${HYPRE_CUDA_SM}>")
-    else ()
-      set(CMAKE_CUDA_ARCHITECTURES "${HYPRE_CUDA_SM}")
-    endif ()
-    message(STATUS "Using CUDA architecture: ${HYPRE_CUDA_SM}")
-
-    add_compile_options("$<$<COMPILE_LANGUAGE:CUDA>:-expt-extended-lambda>")
-
-    set(HYPRE_USING_HOST_MEMORY OFF CACHE BOOL "" FORCE)
-
-    if (HYPRE_ENABLE_CUDA_STREAMS)
-      set(HYPRE_USING_CUDA_STREAMS ON CACHE BOOL "" FORCE)
-    endif (HYPRE_ENABLE_CUDA_STREAMS)
-
-    if (HYPRE_ENABLE_DEVICE_POOL)
-      set(HYPRE_USING_DEVICE_POOL ON CACHE BOOL "" FORCE)
-    endif (HYPRE_ENABLE_DEVICE_POOL)
-
-    # TODO Eventually should require cmake>=3.17
-    # and use cmake's FindCUDAToolkit. Now collect
-    # CUDA optional libraries.
-    include(HYPRE_SetupCUDAToolkit)
-  else ()
-    message(WARNING "No CUDA support!")
-    set(HYPRE_USING_HOST_MEMORY ON CACHE BOOL "" FORCE)
-  endif (CMAKE_CUDA_COMPILER)
-endif (HYPRE_WITH_CUDA)
-
-# SYCL
-if (HYPRE_WITH_SYCL)
-  enable_language(CXX)
-  message(STATUS "Enabled support for CXX.")
-
-  # Enforce C++17
-  if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 17)
-    set(CMAKE_CXX_STANDARD 17)
-  endif ()
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-  message(STATUS "Using CXX standard: c++${CMAKE_CXX_STANDARD}")
-
-  # Set CXX compiler to dpcpp
-  # WM: note that dpcpp is deprecated, but for now oneMKL looks for the dpcpp compiler to configure things appropriately for the sycl backend
-  set(CMAKE_CXX_COMPILER "dpcpp")
-
-  # Set linker to dpcpp
-  set(CMAKE_LINKER "dpcpp")
-  set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_LINKER> <FLAGS> <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> <LINK_LIBRARIES>")
-  set(CMAKE_CXX_LINKER_WRAPPER_FLAG " ")
-  set(CMAKE_CXX_LINKER_WRAPPER_FLAG_SEP " ")
-
-  # Add any extra CXX compiler flags HYPRE_WITH_EXTRA_CXXFLAGS
-  if (NOT HYPRE_WITH_EXTRA_CXXFLAGS STREQUAL "")
-    string(REPLACE " " ";" HYPRE_WITH_EXTRA_CXXFLAGS "${HYPRE_WITH_EXTRA_CXXFLAGS}")
-    add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${HYPRE_WITH_EXTRA_CXXFLAGS}>")
-  endif ()
-
-  set(HYPRE_USING_SYCL ON CACHE BOOL "" FORCE)
   set(HYPRE_USING_GPU ON CACHE BOOL "" FORCE)
 
+  if (HYPRE_WITH_CUDA)
+    set(HYPRE_USING_CUDA TRUE)
+    enable_language(CUDA)
+    include(HYPRE_SetupCUDAToolkit)
+
+    # Enforce C++11
+    if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 11)
+      set(CMAKE_CXX_STANDARD 11)
+    endif ()
+  elseif (HYPRE_WITH_HIP)
+    set(HYPRE_USING_HIP TRUE)
+    enable_language(HIP)
+    include(HYPRE_SetupHIPToolkit)
+
+    # Enforce C++14
+    if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 14)
+      set(CMAKE_CXX_STANDARD 14)
+    endif ()
+  elseif (HYPRE_WITH_SYCL)
+    set(HYPRE_USING_SYCL TRUE)
+    enable_language(SYCL)
+    include(HYPRE_SetupSYCLToolkit)
+
+    # Enforce C++14
+    if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 14)
+      set(CMAKE_CXX_STANDARD 14)
+    endif ()
+  endif ()
+
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  message(STATUS "Using CXX standard: c++${CMAKE_CXX_STANDARD}")
+
+  # Add any extra CXX compiler flags HYPRE_WITH_EXTRA_CXXFLAGS
+  if (NOT HYPRE_WITH_EXTRA_CXXFLAGS STREQUAL "")
+    string(REPLACE " " ";" HYPRE_WITH_EXTRA_CXXFLAGS_LIST ${HYPRE_WITH_EXTRA_CXXFLAGS})
+    add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${HYPRE_WITH_EXTRA_CXXFLAGS_LIST}>")
+  endif ()
+
+  if (HYPRE_ENABLE_GPU_STREAMS)
+    set(HYPRE_USING_GPU_STREAMS ON CACHE BOOL "" FORCE)
+  endif ()
+
+  if (HYPRE_ENABLE_DEVICE_POOL)
+    set(HYPRE_USING_DEVICE_POOL ON CACHE BOOL "" FORCE)
+  endif ()
+
+  set(HYPRE_USING_HOST_MEMORY OFF CACHE BOOL "" FORCE)
   if (HYPRE_ENABLE_UNIFIED_MEMORY)
     set(HYPRE_USING_UNIFIED_MEMORY ON CACHE BOOL "" FORCE)
   else ()
     set(HYPRE_USING_DEVICE_MEMORY ON CACHE BOOL "" FORCE)
   endif ()
 
-  # Check if examples are enabled, but not unified memory
-  if (HYPRE_BUILD_EXAMPLES AND NOT HYPRE_ENABLE_UNIFIED_MEMORY)
-    message(WARNING "Running the examples on GPUs requires Unified Memory!
-      Examples will not be built!")
-    set(HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-  endif ()
-
-  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl>")
-  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-fsycl-unnamed-lambda>")
-  add_link_options("-fsycl")
-  add_link_options("-fsycl-device-code-split=per_kernel")
-  add_link_options("-Wl,--no-relax")
-
-  if (HYPRE_SYCL_TARGET)
-    add_link_options("SHELL:-fsycl-targets=${HYPRE_SYCL_TARGET}")
-  endif ()
-  if (HYPRE_SYCL_TARGET_BACKEND)
-    add_link_options("SHELL:-Xsycl-target-backend '${HYPRE_SYCL_TARGET_BACKEND}'")
-  endif ()
-
-  set(HYPRE_USING_HOST_MEMORY OFF CACHE BOOL "" FORCE)
-
-  if (HYPRE_ENABLE_CUDA_STREAMS)
-    set(HYPRE_USING_CUDA_STREAMS ON CACHE BOOL "" FORCE)
-  endif (HYPRE_ENABLE_CUDA_STREAMS)
-
-endif (HYPRE_WITH_SYCL)
+else ()
+  message(STATUS "No GPU support enabled.")
+  set(HYPRE_USING_HOST_MEMORY ON CACHE BOOL "" FORCE)
+endif ()
 
 # Add any extra C compiler flags HYPRE_WITH_EXTRA_CFLAGS
 if (NOT HYPRE_WITH_EXTRA_CFLAGS STREQUAL "")
-  string(REPLACE " " ";" HYPRE_WITH_EXTRA_CFLAGS "${HYPRE_WITH_EXTRA_CFLAGS}")
-  add_compile_options("$<$<COMPILE_LANGUAGE:C>:${HYPRE_WITH_EXTRA_CFLAGS}>")
+  string(REPLACE " " ";" HYPRE_WITH_EXTRA_CFLAGS_LIST ${HYPRE_WITH_EXTRA_CFLAGS})
+  add_compile_options("$<$<COMPILE_LANGUAGE:C>:${HYPRE_WITH_EXTRA_CFLAGS_LIST}>")
 endif ()
 
 # Set library build type (must appear before add_library calls)
@@ -577,27 +499,6 @@ if (HYPRE_USING_CUDA)
   endif ()
 endif ()
 
-if (HYPRE_USING_SYCL)
-  target_include_directories(${PROJECT_NAME} PUBLIC $ENV{DPLROOT}/include)
-  if (HYPRE_ENABLE_ONEMKLSPARSE)
-    set(HYPRE_USING_ONEMKLSPARSE ON CACHE BOOL "" FORCE)
-  endif()
-  if (HYPRE_ENABLE_ONEMKLBLAS)
-    set(HYPRE_USING_ONEMKLBLAS ON CACHE BOOL "" FORCE)
-  endif()
-  if (HYPRE_ENABLE_ONEMKLRAND)
-    set(HYPRE_USING_ONEMKLRAND ON CACHE BOOL "" FORCE)
-  endif()
-  if (HYPRE_USING_ONEMKLSPARSE OR HYPRE_USING_ONEMKLBLAS OR HYPRE_USING_ONEMKLRAND)
-    set(MKL_LINK static)
-    set(MKL_THREADING sequential)
-    find_package(MKL CONFIG REQUIRED HINTS "$ENV{MKLROOT}/lib/cmake/mkl")
-    target_compile_options(${PROJECT_NAME} PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_COMPILE_OPTIONS>)
-    target_include_directories(${PROJECT_NAME} PUBLIC $<TARGET_PROPERTY:MKL::MKL,INTERFACE_INCLUDE_DIRECTORIES>)
-    target_link_libraries(${PROJECT_NAME} PUBLIC $<LINK_ONLY:MKL::MKL>)
-  endif()
-endif()
-
 if (HYPRE_USING_CALIPER)
   if (NOT TPL_CALIPER_LIBRARIES OR NOT TPL_CALIPER_INCLUDE_DIRS)
     message(FATAL_ERROR "Both TPL_CALIPER_LIBRARIES and TPL_CALIPER_INCLUDE_DIRS options must be set for Caliper support.")
@@ -612,7 +513,6 @@ if (HYPRE_USING_CALIPER)
   message(STATUS "Enabled support for using Caliper.")
   target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_CALIPER_LIBRARIES})
   target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_CALIPER_INCLUDE_DIRS})
-
 endif()
 
 # Find Umpire, if requested
@@ -655,19 +555,30 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   $<INSTALL_INTERFACE:include>
   )
 
-if (HYPRE_USING_CUDA)
-  set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE CUDA)
-endif ()
-
-if (HYPRE_USING_SYCL)
-  set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE CXX)
-endif ()
-
 # Set MPI compile flags
 if (NOT HYPRE_SEQUENTIAL)
   find_program(MPIEXEC_EXECUTABLE NAMES mpiexec mpirun)
   find_package(MPI REQUIRED)
   target_link_libraries(${PROJECT_NAME} PUBLIC MPI::MPI_C)
+
+  # Determine the correct MPI include directory
+  if(MPI_CXX_INCLUDE_DIRS)
+    set(MPI_INCLUDE_DIRS ${MPI_CXX_INCLUDE_DIRS})
+  elseif(MPI_CXX_INCLUDE_PATH)
+    set(MPI_INCLUDE_DIRS ${MPI_CXX_INCLUDE_PATH})
+  elseif(MPI_CXX_COMPILER_INCLUDE_DIRS)
+    set(MPI_INCLUDE_DIRS ${MPI_CXX_COMPILER_INCLUDE_DIRS})
+  elseif(MPI_C_COMPILER_INCLUDE_DIRS)
+    set(MPI_INCLUDE_DIRS ${MPI_C_COMPILER_INCLUDE_DIRS})
+  elseif(MPI_C_INCLUDE_DIRS)
+    set(MPI_INCLUDE_DIRS ${MPI_C_INCLUDE_DIRS})
+  elseif(MPI_C_INCLUDE_PATH)
+    set(MPI_INCLUDE_DIRS ${MPI_C_INCLUDE_PATH})
+  elseif(MPI_INCLUDE_PATH)
+    set(MPI_INCLUDE_DIRS ${MPI_INCLUDE_PATH})
+  else()
+    message(WARNING "MPI include directory not found. Compilation may fail.")
+  endif()
 endif (NOT HYPRE_SEQUENTIAL)
 
 # Set OpenMP compile flags
@@ -675,6 +586,16 @@ if (HYPRE_USING_OPENMP)
   find_package(OpenMP REQUIRED)
   target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_C)
 endif (HYPRE_USING_OPENMP)
+
+if (HYPRE_WITH_CUDA)
+  set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE CUDA)
+elseif (HYPRE_WITH_HIP)
+  set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE HIP)
+  target_link_libraries(${PROJECT_NAME} PUBLIC ${EXPORT_INTERFACE_HIP_LIBS})
+  target_include_directories(${PROJECT_NAME} PUBLIC ${MPI_INCLUDE_DIRS}) # Ensure MPI headers are included for HIP compilation
+elseif (HYPRE_WITH_SYCL)
+  set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE SYCL)
+endif ()
 
 if (MSVC)
   target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)

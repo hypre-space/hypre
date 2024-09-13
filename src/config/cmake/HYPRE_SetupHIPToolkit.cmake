@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 # This handles the non-compiler aspect of the HIP toolkit.
-# Uses cmake find_package to locate the AMD HIP tools 
+# Uses cmake find_package to locate the AMD HIP tools
 # for shared libraries. Otherwise for static libraries, assumes
 # the libraries are located in ${ROCM_PATH}/lib or ${ROCM_PATH}/lib64.
 # Please set environment variable ROCM_PATH or HIP_PATH.
@@ -25,7 +25,6 @@ list(APPEND CMAKE_PREFIX_PATH ${HIP_PATH})
 find_package(hip REQUIRED CONFIG)
 
 # Set HIP-specific variables
-set(CMAKE_HIP_ARCHITECTURES "gfx940" CACHE STRING "target HIP architectures")
 set(CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} -fPIC" CACHE STRING "HIP compiler flags" FORCE)
 
 # Collection of HIP optional libraries
@@ -39,8 +38,10 @@ endif()
 
 # Function to find and add libraries
 function(find_and_add_hip_library LIB_NAME)
-  if(HYPRE_ENABLE_${LIB_NAME})
-    set(HYPRE_USING_${LIB_NAME} ON CACHE BOOL "" FORCE)
+  string(TOUPPER ${LIB_NAME} LIB_NAME_UPPER)
+  if(HYPRE_ENABLE_${LIB_NAME_UPPER})
+    find_package(${LIB_NAME} REQUIRED)
+    set(HYPRE_USING_${LIB_NAME_UPPER} ON CACHE BOOL "" FORCE)
     if(HYPRE_HIP_TOOLKIT_STATIC)
       list(APPEND EXPORT_INTERFACE_HIP_LIBS roc::${LIB_NAME}_static)
     else()
