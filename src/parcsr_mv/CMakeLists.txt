@@ -46,7 +46,7 @@ target_sources(${PROJECT_NAME}
           ${HDRS}
 )
 
-if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
+if (HYPRE_USING_GPU)
   set(GPU_SRCS
     par_csr_matvec_device.c
     par_csr_fffc_device.c
