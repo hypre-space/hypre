@@ -12,9 +12,15 @@
 # Collection of CUDA optional libraries
 set(EXPORT_INTERFACE_CUDA_LIBS "")
 
-if (NOT CUDA_FOUND)
-  find_package(CUDA REQUIRED)
-endif ()
+if (CMAKE_VERSION VERSION_LESS 3.17)
+  if (NOT CUDA_FOUND)
+    find_package(CUDA REQUIRED)
+  endif ()
+else()
+  if (NOT CUDAToolkit_FOUND)
+    find_package(CUDAToolkit REQUIRED)
+  endif ()
+endif()
 
 if (CMAKE_VERSION VERSION_LESS 3.17)
 
