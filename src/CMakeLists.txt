@@ -556,7 +556,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 # Set MPI compile flags
 if (HYPRE_WITH_MPI)
-  find_program(MPIEXEC_EXECUTABLE NAMES mpiexec mpirun)
   find_package(MPI REQUIRED)
   target_link_libraries(${PROJECT_NAME} PUBLIC MPI::MPI_C)
 
