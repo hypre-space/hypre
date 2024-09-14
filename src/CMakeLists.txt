@@ -112,8 +112,6 @@ option(HYPRE_TIMING                  "Use HYPRE timing routines" OFF)
 option(HYPRE_BUILD_EXAMPLES          "Build examples" OFF)
 option(HYPRE_BUILD_TESTS             "Build tests" OFF)
 option(HYPRE_USING_HOST_MEMORY       "Use host memory" ON)
-set(HYPRE_WITH_EXTRA_CFLAGS       "" CACHE STRING "Define extra C compile flags")
-set(HYPRE_WITH_EXTRA_CXXFLAGS     "" CACHE STRING "Define extra CXX compile flags")
 # GPU options
 option(HYPRE_WITH_CUDA               "Use CUDA. Require cuda-8.0 or higher" OFF)
 option(HYPRE_WITH_HIP                "Use HIP" OFF)
@@ -138,17 +136,15 @@ option(HYPRE_ENABLE_ROCSOLVER        "Use rocSOLVER" ON)
 option(HYPRE_ENABLE_ONEMKLSPARSE     "Use oneMKL sparse" ON)
 option(HYPRE_ENABLE_ONEMKLBLAS       "Use oneMKL blas" ON)
 option(HYPRE_ENABLE_ONEMKLRAND       "Use oneMKL rand" ON)
-set(HYPRE_SYCL_TARGET            ""   CACHE STRING  "Target SYCL architecture, e.g. 'spir64_gen'.")
-set(HYPRE_SYCL_TARGET_BACKEND    ""   CACHE STRING  "Additional SYCL backend options, e.g. '-device 12.1.0,12.4.0'.")
 # Umpire resource management options
 option(HYPRE_WITH_UMPIRE             "Use Umpire Allocator for device and unified memory" OFF)
 option(HYPRE_WITH_UMPIRE_HOST        "Use Umpire Allocator for host memory" OFF)
 option(HYPRE_WITH_UMPIRE_DEVICE      "Use Umpire Allocator for device memory" OFF)
 option(HYPRE_WITH_UMPIRE_UM          "Use Umpire Allocator for unified memory" OFF)
 option(HYPRE_WITH_UMPIRE_PINNED      "Use Umpire Allocator for pinned memory" OFF)
+# TPL options 
 option(TPL_UMPIRE_LIBRARIES          "List of absolute paths to Umpire link libraries [].")
 option(TPL_UMPIRE_INCLUDE_DIRS       "List of absolute paths to Umpire include directories [].")
-
 option(TPL_SUPERLU_LIBRARIES         "List of absolute paths to SuperLU link libraries [].")
 option(TPL_SUPERLU_INCLUDE_DIRS      "List of absolute paths to SuperLU include directories [].")
 option(TPL_DSUPERLU_LIBRARIES        "List of absolute paths to SuperLU_Dist link libraries [].")
@@ -158,6 +154,11 @@ option(TPL_MAGMA_INCLUDE_DIRS        "List of absolute paths to MAGMA include di
 option(TPL_BLAS_LIBRARIES            "Optional list of absolute paths to BLAS libraries, otherwise use FindBLAS to locate [].")
 option(TPL_LAPACK_LIBRARIES          "Optional list of absolute paths to LAPACK libraries, otherwise use FindLAPACK to locate [].")
 option(TPL_FEI_INCLUDE_DIRS          "List of absolute paths to FEI include directories [].")
+# Extra flags
+set(HYPRE_WITH_EXTRA_CFLAGS       "" CACHE STRING "Define extra C compile flags")
+set(HYPRE_WITH_EXTRA_CXXFLAGS     "" CACHE STRING "Define extra CXX compile flags")
+set(HYPRE_SYCL_TARGET             "" CACHE STRING "Target SYCL architecture, e.g. 'spir64_gen'.")
+set(HYPRE_SYCL_TARGET_BACKEND     "" CACHE STRING "Additional SYCL backend options, e.g. '-device 12.1.0,12.4.0'.")
 
 # Set config name values
 if (HYPRE_ENABLE_SHARED)
@@ -354,6 +355,13 @@ endif ()
 # Create the HYPRE library object
 add_library(${PROJECT_NAME})
 
+# Set output directory for the library
+set_target_properties(HYPRE PROPERTIES
+  ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
+
 # Headers and sources
 set(HYPRE_HEADERS "")
 
@@ -419,10 +427,6 @@ if (HYPRE_USING_SUPERLU)
   target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_SUPERLU_INCLUDE_DIRS})
 endif (HYPRE_USING_SUPERLU)
 
-if (SUPERLU_FOUND)
-  set(HYPRE_USING_SUPERLU TRUE)
-endif ()
-
 # Find DSUPERLU, if requested
 if (HYPRE_USING_DSUPERLU)
   if (NOT TPL_DSUPERLU_LIBRARIES)
@@ -444,10 +448,6 @@ if (HYPRE_USING_DSUPERLU)
   target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_DSUPERLU_LIBRARIES} stdc++)
   target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_DSUPERLU_INCLUDE_DIRS})
 endif (HYPRE_USING_DSUPERLU)
-
-if (DSUPERLU_FOUND)
-  set(HYPRE_USING_DSUPERLU TRUE)
-endif ()
 
 # TODO: Check for case if MAGMA without CUDA/HIP
 # Find MAGMA, if requested
@@ -491,14 +491,7 @@ if (HYPRE_USING_FEI)
   target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_FEI_INCLUDE_DIRS})
 endif(HYPRE_USING_FEI)
 
-if (HYPRE_USING_CUDA)
-  target_link_libraries(${PROJECT_NAME} PUBLIC "${EXPORT_INTERFACE_CUDA_LIBS}")
-  if (HYPRE_HAVE_MPI)
-    target_include_directories(${PROJECT_NAME} PUBLIC
-      ${MPI_CXX_INCLUDE_DIRS})
-  endif ()
-endif ()
-
+# Find Caliper, if requested
 if (HYPRE_USING_CALIPER)
   if (NOT TPL_CALIPER_LIBRARIES OR NOT TPL_CALIPER_INCLUDE_DIRS)
     message(FATAL_ERROR "Both TPL_CALIPER_LIBRARIES and TPL_CALIPER_INCLUDE_DIRS options must be set for Caliper support.")
@@ -547,16 +540,23 @@ foreach (DIR IN LISTS HYPRE_DIRS)
 endforeach ()
 
 # BINARY must be first in order to get the correct HYPRE_config.h file
+#target_include_directories(${PROJECT_NAME} PUBLIC
+#  $<BUILD_INTERFACE:${HYPRE_BINARY_DIR}>
+#  $<BUILD_INTERFACE:${HYPRE_SOURCE_DIR}>
+#  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/blas>
+#  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lapack>
+#  $<INSTALL_INTERFACE:include>
+#  )
+
+# Include directories
 target_include_directories(${PROJECT_NAME} PUBLIC
-  $<BUILD_INTERFACE:${HYPRE_BINARY_DIR}>
-  $<BUILD_INTERFACE:${HYPRE_SOURCE_DIR}>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/blas>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lapack>
-  $<INSTALL_INTERFACE:include>
-  )
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include>
+)
 
 # Set MPI compile flags
-if (NOT HYPRE_SEQUENTIAL)
+if (HYPRE_WITH_MPI)
   find_program(MPIEXEC_EXECUTABLE NAMES mpiexec mpirun)
   find_package(MPI REQUIRED)
   target_link_libraries(${PROJECT_NAME} PUBLIC MPI::MPI_C)
@@ -579,7 +579,7 @@ if (NOT HYPRE_SEQUENTIAL)
   else()
     message(WARNING "MPI include directory not found. Compilation may fail.")
   endif()
-endif (NOT HYPRE_SEQUENTIAL)
+endif ()
 
 # Set OpenMP compile flags
 if (HYPRE_USING_OPENMP)
@@ -589,13 +589,19 @@ endif (HYPRE_USING_OPENMP)
 
 if (HYPRE_WITH_CUDA)
   set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE CUDA)
+  target_link_libraries(${PROJECT_NAME} PUBLIC ${EXPORT_INTERFACE_CUDA_LIBS})
 elseif (HYPRE_WITH_HIP)
   set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE HIP)
   target_link_libraries(${PROJECT_NAME} PUBLIC ${EXPORT_INTERFACE_HIP_LIBS})
-  target_include_directories(${PROJECT_NAME} PUBLIC ${MPI_INCLUDE_DIRS}) # Ensure MPI headers are included for HIP compilation
+  target_include_directories(${PROJECT_NAME} PUBLIC ${MPI_INCLUDE_DIRS})
 elseif (HYPRE_WITH_SYCL)
   set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE SYCL)
 endif ()
+
+# Ensure MPI headers are included for device compilation
+if (HYPRE_HAVE_MPI AND HYPRE_USING_GPU)
+  target_include_directories(${PROJECT_NAME} PUBLIC ${MPI_INCLUDE_DIRS})
+endif ()    
 
 if (MSVC)
   target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
@@ -637,14 +643,15 @@ endif ()
 if (HYPRE_BUILD_TESTS)
   add_subdirectory(test)
 endif ()
-
+# Installation
 include(GNUInstallDirs)
-install(TARGETS ${PROJECT_NAME}
+install(TARGETS HYPRE
   EXPORT HYPRETargets
-  LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-  ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-  RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-  INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
 install(FILES ${HYPRE_HEADERS} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
 include(CMakePackageConfigHelpers)
@@ -652,32 +659,54 @@ write_basic_package_version_file(
   HYPREConfigVersion.cmake
   VERSION ${PACKAGE_VERSION}
   COMPATIBILITY SameMajorVersion
-  )
+)
 
+# Install the CMake export file
 install(EXPORT HYPRETargets
   FILE HYPRETargets.cmake
   NAMESPACE HYPRE::
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/HYPRE"
-  )
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/HYPRE
+)
 
 configure_package_config_file(
   config/HYPREConfig.cmake.in HYPREConfig.cmake
-  INSTALL_DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/HYPREConfig.cmake"
-  )
-install(
-  FILES
-      "${CMAKE_CURRENT_BINARY_DIR}/HYPREConfig.cmake"
-      "${CMAKE_CURRENT_BINARY_DIR}/HYPREConfigVersion.cmake"
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/HYPRE"
-  )
+  INSTALL_DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/HYPREConfig.cmake
+)
 
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/HYPREConfig.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/HYPREConfigVersion.cmake
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/HYPRE
+)
+
+# Export from build tree
 export(EXPORT HYPRETargets
   FILE "${CMAKE_CURRENT_BINARY_DIR}/HYPRETargets.cmake"
   NAMESPACE HYPRE::
-  )
+)
 
 # Declare an alias so that consumers can depend on HYPRE::HYPRE target
 # also when using HYPRE via add_directory or FetchContent
 add_library(HYPRE::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
+# Export the package
 export(PACKAGE ${PROJECT_NAME})
+
+# Print the status of the options for debugging purposes
+print_option_status(
+    HYPRE_ENABLE_SHARED
+    HYPRE_ENABLE_BIGINT
+    HYPRE_ENABLE_MIXEDINT
+    HYPRE_ENABLE_SINGLE
+    HYPRE_ENABLE_LONG_DOUBLE
+    HYPRE_ENABLE_COMPLEX
+    HYPRE_ENABLE_HYPRE_BLAS
+    HYPRE_ENABLE_HYPRE_LAPACK
+    HYPRE_ENABLE_PERSISTENT_COMM
+    HYPRE_ENABLE_FEI
+    HYPRE_WITH_MPI
+    HYPRE_WITH_OPENMP
+    HYPRE_WITH_CUDA
+    HYPRE_WITH_HIP
+    HYPRE_WITH_SYCL
+)

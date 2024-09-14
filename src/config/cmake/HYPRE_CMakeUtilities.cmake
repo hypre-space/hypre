@@ -47,3 +47,58 @@ function(add_hypre_executables EXE_SRCS)
     target_link_libraries(${EXE_NAME} PRIVATE "${HYPRE_LIBS}")
   endforeach(SRC_FILE)
 endfunction()
+
+function(print_option_status)
+  # Define column widths
+  set(COLUMN1_WIDTH 40)
+  set(COLUMN2_WIDTH 10)
+  math(EXPR HEADER1_PAD "${COLUMN1_WIDTH} - 3")
+  math(EXPR HEADER2_PAD "${COLUMN2_WIDTH} - 1")
+
+  # Create separator line
+  string(REPEAT "-" ${HEADER1_PAD} SEPARATOR1)
+  string(REPEAT "-" ${HEADER2_PAD} SEPARATOR2)
+  set(separator "+${SEPARATOR1}+${SEPARATOR2}+")
+
+  # Create header and separator
+  message(STATUS "")
+  message(STATUS "HYPRE Configuration Summary:")
+  message(STATUS "${separator}")
+  message(STATUS "| Option                              | Status  |")
+  message(STATUS "${separator}")
+
+  # Iterate through each option and display its status
+  foreach(opt ${ARGN})
+    # Determine the status string
+    if(${${opt}})
+      set(status "ON")
+    else()
+      set(status "OFF")
+    endif()
+
+    # Calculate padding for the option name
+    string(LENGTH "${opt}" opt_length)
+    math(EXPR padding "${COLUMN1_WIDTH} - ${opt_length} - 5") # 5 accounts for "| Option | Status |"
+    if(${padding} GREATER 0)
+      string(REPEAT " " ${padding} pad_spaces)
+    else()
+      set(pad_spaces "")
+    endif()
+
+    # Calculate padding for the status
+    string(LENGTH "${status}" status_length)
+    math(EXPR status_padding "${COLUMN2_WIDTH} - ${status_length} - 3") # 3 accounts for "| " and space
+    if(${status_padding} GREATER 0)
+      string(REPEAT " " ${status_padding} status_pad_spaces)
+    else()
+      set(status_pad_spaces "")
+    endif()
+
+    # Print the formatted row
+    message(STATUS "| ${opt}${pad_spaces} | ${status}${status_pad_spaces} |")
+  endforeach()
+
+  # Print the footer separator
+  message(STATUS "${separator}")
+  message(STATUS "")
+endfunction()
