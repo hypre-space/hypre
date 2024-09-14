@@ -3,6 +3,30 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+function(configure_mpi_target)
+  find_package(MPI REQUIRED)
+  target_link_libraries(${PROJECT_NAME} PUBLIC MPI::MPI_C)
+
+  # Determine the correct MPI include directory
+  if(MPI_CXX_INCLUDE_DIRS)
+    set(MPI_INCLUDE_DIRS ${MPI_CXX_INCLUDE_DIRS})
+  elseif(MPI_CXX_INCLUDE_PATH)
+    set(MPI_INCLUDE_DIRS ${MPI_CXX_INCLUDE_PATH})
+  elseif(MPI_CXX_COMPILER_INCLUDE_DIRS)
+    set(MPI_INCLUDE_DIRS ${MPI_CXX_COMPILER_INCLUDE_DIRS})
+  elseif(MPI_C_COMPILER_INCLUDE_DIRS)
+    set(MPI_INCLUDE_DIRS ${MPI_C_COMPILER_INCLUDE_DIRS})
+  elseif(MPI_C_INCLUDE_DIRS)
+    set(MPI_INCLUDE_DIRS ${MPI_C_INCLUDE_DIRS})
+  elseif(MPI_C_INCLUDE_PATH)
+    set(MPI_INCLUDE_DIRS ${MPI_C_INCLUDE_PATH})
+  elseif(MPI_INCLUDE_PATH)
+    set(MPI_INCLUDE_DIRS ${MPI_INCLUDE_PATH})
+  else()
+    message(WARNING "MPI include directory not found. Compilation may fail.")
+  endif()
+endfunction()
+
 # A handy function to add the current source directory to a local
 # filename. To be used for creating a list of sources.
 function(convert_filenames_to_full_paths NAMES)

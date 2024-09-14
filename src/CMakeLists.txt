@@ -30,6 +30,9 @@ project(${PROJECT_NAME}
   VERSION ${HYPRE_VERSION}
   LANGUAGES C)
 
+# Create the HYPRE library object
+add_library(${PROJECT_NAME})
+
 # We use C99 by default, but users are free to specify any newer standard version
 set(CMAKE_C_STANDARD 99)
 
@@ -275,6 +278,18 @@ if (HYPRE_WITH_UMPIRE_PINNED)
   set(HYPRE_USING_UMPIRE_PINNED ON CACHE BOOL "" FORCE)
 endif ()
 
+# Set MPI compile flags
+if (HYPRE_WITH_MPI)
+  configure_mpi_target()
+endif ()
+
+# Set OpenMP compile flags
+if (HYPRE_USING_OPENMP)
+  find_package(OpenMP REQUIRED)
+  target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_C)
+endif (HYPRE_USING_OPENMP)
+
+# Set GPU compile flags
 if (HYPRE_WITH_CUDA OR HYPRE_WITH_HIP OR HYPRE_WITH_SYCL)
   enable_language(CXX)
   message(STATUS "Enabled support for CXX.")
@@ -351,9 +366,6 @@ if (HYPRE_SHARED)
 else ()
   set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "" FORCE)
 endif ()
-
-# Create the HYPRE library object
-add_library(${PROJECT_NAME})
 
 # Set output directory for the library
 set_target_properties(HYPRE PROPERTIES
@@ -551,39 +563,10 @@ endforeach ()
 target_include_directories(${PROJECT_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/blas>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lapack>
     $<INSTALL_INTERFACE:include>
 )
-
-# Set MPI compile flags
-if (HYPRE_WITH_MPI)
-  find_package(MPI REQUIRED)
-  target_link_libraries(${PROJECT_NAME} PUBLIC MPI::MPI_C)
-
-  # Determine the correct MPI include directory
-  if(MPI_CXX_INCLUDE_DIRS)
-    set(MPI_INCLUDE_DIRS ${MPI_CXX_INCLUDE_DIRS})
-  elseif(MPI_CXX_INCLUDE_PATH)
-    set(MPI_INCLUDE_DIRS ${MPI_CXX_INCLUDE_PATH})
-  elseif(MPI_CXX_COMPILER_INCLUDE_DIRS)
-    set(MPI_INCLUDE_DIRS ${MPI_CXX_COMPILER_INCLUDE_DIRS})
-  elseif(MPI_C_COMPILER_INCLUDE_DIRS)
-    set(MPI_INCLUDE_DIRS ${MPI_C_COMPILER_INCLUDE_DIRS})
-  elseif(MPI_C_INCLUDE_DIRS)
-    set(MPI_INCLUDE_DIRS ${MPI_C_INCLUDE_DIRS})
-  elseif(MPI_C_INCLUDE_PATH)
-    set(MPI_INCLUDE_DIRS ${MPI_C_INCLUDE_PATH})
-  elseif(MPI_INCLUDE_PATH)
-    set(MPI_INCLUDE_DIRS ${MPI_INCLUDE_PATH})
-  else()
-    message(WARNING "MPI include directory not found. Compilation may fail.")
-  endif()
-endif ()
-
-# Set OpenMP compile flags
-if (HYPRE_USING_OPENMP)
-  find_package(OpenMP REQUIRED)
-  target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_C)
-endif (HYPRE_USING_OPENMP)
 
 if (HYPRE_WITH_CUDA)
   set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE CUDA)
