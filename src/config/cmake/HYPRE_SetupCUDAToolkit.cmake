@@ -3,14 +3,44 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-# Collection of CUDA optional libraries
-set(CUDA_LIBS "")
+message(STATUS "Enabling CUDA toolkit")
+
+# Check for CUDA_PATH, CUDA_HOME or CUDA_DIR
+if(DEFINED CUDA_DIR)
+  set(CUDA_DIR ${CUDA_DIR})
+elseif(DEFINED ENV{CUDA_DIR})
+  set(CUDA_DIR $ENV{CUDA_DIR})
+elseif(DEFINED CUDA_PATH)
+  set(CUDA_DIR ${CUDA_PATH})
+elseif(DEFINED ENV{CUDA_PATH})
+  set(CUDA_DIR $ENV{CUDA_PATH})
+elseif(DEFINED CUDA_HOME)
+  set(CUDA_DIR ${CUDA_HOME})
+elseif(DEFINED ENV{CUDA_HOME})
+  set(CUDA_DIR $ENV{CUDA_HOME})
+elseif(EXISTS "/opt/cuda")
+  set(CUDA_DIR "/opt/cuda")
+elseif(EXISTS "/usr/bin/nvcc")
+  set(CUDA_DIR "/usr")
+else()
+  message(FATAL_ERROR "CUDA_PATH or CUDA_HOME not set. Please set one of them to point to your CUDA installation.")
+endif()
+message(STATUS "Using CUDA installation: ${CUDA_DIR}")
+
+# Specify the path to the custom nvcc compiler
+set(CMAKE_CUDA_COMPILER "${CUDA_DIR}/bin/nvcc" CACHE FILEPATH "CUDA compiler")
+
+# Specify the CUDA Toolkit root directory
+set(CUDAToolkit_ROOT "${CUDA_DIR}" CACHE PATH "Path to the CUDA toolkit")
+
+# Optionally, prioritize the custom CUDA path in CMAKE_PREFIX_PATH
+list(APPEND CMAKE_PREFIX_PATH "${CUDA_DIR}")
 
 # Check if CUDA is available and enable it if found
 include(CheckLanguage)
 check_language(CUDA)
 if(CMAKE_CUDA_COMPILER)
-  enable_language(CUDA)
+   enable_language(CUDA)
 else()
   message(FATAL_ERROR "CUDA language not found. Please check your CUDA installation.")
 endif()
@@ -50,16 +80,23 @@ else()
   message(FATAL_ERROR "CUDA Thrust headers not found! Please check your CUDA installation.")
 endif()
 
+# Collection of CUDA optional libraries
+set(CUDA_LIBS "")
+
 # Function to handle CUDA libraries
 function(find_and_add_cuda_library LIB_NAME HYPRE_ENABLE_VAR)
+  string(TOUPPER ${LIB_NAME} LIB_NAME_UPPER)
   if(${HYPRE_ENABLE_VAR})
-    string(TOUPPER ${LIB_NAME} LIB_NAME_UPPER)
     set(HYPRE_USING_${LIB_NAME_UPPER} ON CACHE BOOL "" FORCE)
+
+    # Use CUDAToolkit to find the component
+    find_package(CUDAToolkit REQUIRED COMPONENTS ${LIB_NAME})
+
     if(TARGET CUDAToolkit::${LIB_NAME})
       message(STATUS "CUDAToolkit::${LIB_NAME} target found")
       list(APPEND CUDA_LIBS CUDAToolkit::${LIB_NAME})
     else()
-      message(WARNING "CUDAToolkit::${LIB_NAME} target not found. Attempting manual linking.")
+      #message(WARNING "CUDAToolkit::${LIB_NAME} target not found. Attempting manual linking.")
       find_library(${LIB_NAME}_LIBRARY ${LIB_NAME} HINTS ${CUDAToolkit_LIBRARY_DIR})
       if(${LIB_NAME}_LIBRARY)
         message(STATUS "Found ${LIB_NAME} library: ${${LIB_NAME}_LIBRARY}")
@@ -72,6 +109,7 @@ function(find_and_add_cuda_library LIB_NAME HYPRE_ENABLE_VAR)
         message(FATAL_ERROR "Could not find ${LIB_NAME} library. Please check your CUDA installation.")
       endif()
     endif()
+
     set(CUDA_LIBS ${CUDA_LIBS} PARENT_SCOPE)
   endif()
 endfunction()
@@ -90,10 +128,7 @@ if(HYPRE_ENABLE_GPU_PROFILING)
   list(APPEND CUDA_LIBS CUDA::nvToolsExt)
 endif()
 
-# Return the list of CUDA libraries
-set(EXPORT_INTERFACE_CUDA_LIBS ${CUDA_LIBS})
-
-# Add CUDA Toolkit include directories to the target  
+# Add CUDA Toolkit include directories to the target
 target_include_directories(HYPRE PUBLIC ${CUDAToolkit_INCLUDE_DIRS})
 
 # Add Thrust include directory
@@ -101,6 +136,7 @@ target_include_directories(HYPRE PUBLIC ${THRUST_INCLUDE_DIR})
 
 # Link CUDA libraries to the target
 target_link_libraries(HYPRE PUBLIC ${CUDA_LIBS})
+message(STATUS "Linking to CUDA libraries: ${CUDA_LIBS}")
 
 # Set CUDA flags
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -ccbin=${CMAKE_CXX_COMPILER} -expt-extended-lambda")
@@ -108,4 +144,3 @@ set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -ccbin=${CMAKE_CXX_COMPILER} -expt-ext
 # Print CUDA info
 message(STATUS "CUDA Standard: ${CMAKE_CUDA_STANDARD}")
 message(STATUS "CUDA FLAGS: ${CMAKE_CUDA_FLAGS}")
-message(STATUS "NVCC FLAGS: ${CUDA_NVCC_FLAGS}")

@@ -4,10 +4,16 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 cmake_minimum_required(VERSION 3.21)
+message(STATUS "CMake Version: ${CMAKE_VERSION}")
+message(STATUS "CMake Executable: ${CMAKE_COMMAND}")
 
 # Set cmake policies
-cmake_policy(SET CMP0146 NEW) # Ensure CUDA toolkit is found
-cmake_policy(SET CMP0104 NEW) # CUDA_ARCHITECTURES is allowed to be set in cache
+if(POLICY CMP0146)
+  cmake_policy(SET CMP0146 NEW) # Ensure CUDA toolkit is found
+endif()
+if(POLICY CMP0104)
+  cmake_policy(SET CMP0104 NEW) # CUDA_ARCHITECTURES is allowed to be set in cache
+endif()
 
 # The version number.
 set(HYPRE_VERSION 2.31.0)
@@ -297,13 +303,11 @@ if (HYPRE_WITH_CUDA OR HYPRE_WITH_HIP OR HYPRE_WITH_SYCL)
   enable_language(CXX)
   message(STATUS "Enabled support for CXX.")
 
+  # Setup GPU libraries and include directories
   set(HYPRE_USING_GPU ON CACHE BOOL "" FORCE)
   include(HYPRE_SetupGPUToolkit)
 
-  # Link device libraries
-  message(STATUS "Exported device libraries: ${EXPORT_DEVICE_LIBS}")
-  #target_link_libraries(${PROJECT_NAME} PUBLIC ${EXPORT_DEVICE_LIBS})
-
+  # CXX standard info
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
   message(STATUS "Using CXX standard: c++${CMAKE_CXX_STANDARD}")
 

@@ -15,12 +15,7 @@ elseif(HYPRE_WITH_HIP)
   if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 14)
     set(CMAKE_CXX_STANDARD 14)
   endif ()
-
-  message(STATUS "Enabling HIP toolkit")
-  set(HYPRE_USING_HIP ON)
-  enable_language(HIP)
   include(HYPRE_SetupHIPToolkit)
-  set(EXPORT_DEVICE_LIBS ${EXPORT_INTERFACE_HIP_LIBS})
 
 elseif(HYPRE_WITH_SYCL)
   # Enforce C++14 at least
