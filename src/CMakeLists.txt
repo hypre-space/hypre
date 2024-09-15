@@ -3,19 +3,11 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-cmake_minimum_required(VERSION 3.13...3.16)
+cmake_minimum_required(VERSION 3.21)
 
-if (${CMAKE_VERSION} VERSION_LESS 3.16)
-  cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
-else ()
-  cmake_policy(VERSION 3.16)
-endif ()
-
-# Set CMP0146 policy to NEW. This policy setting ensures we use the
-# modern CUDA language support instead of the deprecated FindCUDA module
-if(POLICY CMP0146)
-  cmake_policy(SET CMP0146 NEW)
-endif()
+# Set cmake policies
+cmake_policy(SET CMP0146 NEW) # Ensure CUDA toolkit is found
+cmake_policy(SET CMP0104 NEW) # CUDA_ARCHITECTURES is allowed to be set in cache
 
 # The version number.
 set(HYPRE_VERSION 2.31.0)
@@ -129,7 +121,6 @@ option(HYPRE_ENABLE_DEVICE_POOL      "Use device memory pool" OFF)
 option(HYPRE_ENABLE_CUBLAS           "Use cuBLAS" OFF)
 option(HYPRE_ENABLE_CURAND           "Use cuRAND" ON)
 option(HYPRE_ENABLE_GPU_PROFILING    "Use NVTX on CUDA" OFF)
-set(HYPRE_CUDA_SM "70" CACHE STRING  "Target CUDA architecture.")
 # HIP options
 option(HYPRE_ENABLE_ROCBLAS          "Use rocBLAS" ON)
 option(HYPRE_ENABLE_ROCSPARSE        "Use rocSPARSE" ON)
@@ -145,7 +136,7 @@ option(HYPRE_WITH_UMPIRE_HOST        "Use Umpire Allocator for host memory" OFF)
 option(HYPRE_WITH_UMPIRE_DEVICE      "Use Umpire Allocator for device memory" OFF)
 option(HYPRE_WITH_UMPIRE_UM          "Use Umpire Allocator for unified memory" OFF)
 option(HYPRE_WITH_UMPIRE_PINNED      "Use Umpire Allocator for pinned memory" OFF)
-# TPL options 
+# TPL options
 option(TPL_UMPIRE_LIBRARIES          "List of absolute paths to Umpire link libraries [].")
 option(TPL_UMPIRE_INCLUDE_DIRS       "List of absolute paths to Umpire include directories [].")
 option(TPL_SUPERLU_LIBRARIES         "List of absolute paths to SuperLU link libraries [].")
@@ -217,6 +208,18 @@ endif ()
 
 if (HYPRE_ENABLE_HOPSCOTCH)
   set(HYPRE_HOPSCOTCH ON CACHE BOOL "" FORCE)
+endif ()
+
+if (HYPRE_WITH_CUDA)
+  set(HYPRE_USING_CUDA ON CACHE BOOL "" FORCE)
+endif ()
+
+if (HYPRE_WITH_HIP)
+  set(HYPRE_USING_HIP ON CACHE BOOL "" FORCE)
+endif ()
+
+if (HYPRE_WITH_SYCL)
+  set(HYPRE_USING_SYCL ON CACHE BOOL "" FORCE)
 endif ()
 
 if (HYPRE_WITH_SUPERLU)
@@ -295,38 +298,21 @@ if (HYPRE_WITH_CUDA OR HYPRE_WITH_HIP OR HYPRE_WITH_SYCL)
   message(STATUS "Enabled support for CXX.")
 
   set(HYPRE_USING_GPU ON CACHE BOOL "" FORCE)
+  include(HYPRE_SetupGPUToolkit)
 
-  if (HYPRE_WITH_CUDA)
-    set(HYPRE_USING_CUDA TRUE)
-    enable_language(CUDA)
-    include(HYPRE_SetupCUDAToolkit)
-
-    # Enforce C++11
-    if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 11)
-      set(CMAKE_CXX_STANDARD 11)
-    endif ()
-  elseif (HYPRE_WITH_HIP)
-    set(HYPRE_USING_HIP TRUE)
-    enable_language(HIP)
-    include(HYPRE_SetupHIPToolkit)
-
-    # Enforce C++14
-    if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 14)
-      set(CMAKE_CXX_STANDARD 14)
-    endif ()
-  elseif (HYPRE_WITH_SYCL)
-    set(HYPRE_USING_SYCL TRUE)
-    enable_language(SYCL)
-    include(HYPRE_SetupSYCLToolkit)
-
-    # Enforce C++14
-    if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 14)
-      set(CMAKE_CXX_STANDARD 14)
-    endif ()
-  endif ()
+  # Link device libraries
+  message(STATUS "Exported device libraries: ${EXPORT_DEVICE_LIBS}")
+  #target_link_libraries(${PROJECT_NAME} PUBLIC ${EXPORT_DEVICE_LIBS})
 
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
   message(STATUS "Using CXX standard: c++${CMAKE_CXX_STANDARD}")
+
+  # Check if examples are enabled, but not unified memory
+  if (HYPRE_BUILD_EXAMPLES AND NOT HYPRE_ENABLE_UNIFIED_MEMORY)
+    message(WARNING "Running the examples on GPUs requires Unified Memory!
+      Examples will not be built!")
+    set(HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+  endif ()
 
   # Add any extra CXX compiler flags HYPRE_WITH_EXTRA_CXXFLAGS
   if (NOT HYPRE_WITH_EXTRA_CXXFLAGS STREQUAL "")
@@ -570,19 +556,17 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 if (HYPRE_WITH_CUDA)
   set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE CUDA)
-  target_link_libraries(${PROJECT_NAME} PUBLIC ${EXPORT_INTERFACE_CUDA_LIBS})
 elseif (HYPRE_WITH_HIP)
   set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE HIP)
-  target_link_libraries(${PROJECT_NAME} PUBLIC ${EXPORT_INTERFACE_HIP_LIBS})
-  target_include_directories(${PROJECT_NAME} PUBLIC ${MPI_INCLUDE_DIRS})
 elseif (HYPRE_WITH_SYCL)
   set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE SYCL)
 endif ()
 
 # Ensure MPI headers are included for device compilation
-if (HYPRE_HAVE_MPI AND HYPRE_USING_GPU)
-  target_include_directories(${PROJECT_NAME} PUBLIC ${MPI_INCLUDE_DIRS})
-endif ()    
+#if (HYPRE_WITH_MPI AND HYPRE_USING_GPU)
+#  message(STATUS "Adding MPI include directory: ${MPI_INCLUDE_DIRS}")
+#  target_include_directories(${PROJECT_NAME} PUBLIC ${MPI_INCLUDE_DIRS})
+#endif ()
 
 if (MSVC)
   target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)

@@ -25,6 +25,11 @@ function(configure_mpi_target)
   else()
     message(WARNING "MPI include directory not found. Compilation may fail.")
   endif()
+
+  if (HYPRE_WITH_CUDA OR HYPRE_WITH_HIP OR HYPRE_WITH_SYCL)
+    message(STATUS "Adding MPI include directory: ${MPI_INCLUDE_DIRS}")
+    target_include_directories(${PROJECT_NAME} PUBLIC ${MPI_INCLUDE_DIRS})
+  endif ()
 endfunction()
 
 # A handy function to add the current source directory to a local
@@ -35,6 +40,14 @@ function(convert_filenames_to_full_paths NAMES)
     list(APPEND tmp_names ${CMAKE_CURRENT_SOURCE_DIR}/${name})
   endforeach()
   set(${NAMES} ${tmp_names} PARENT_SCOPE)
+endfunction()
+
+# A function to add hypre subdirectories to the build
+function(add_hypre_subdirectories DIRS)
+  foreach(DIR IN LISTS DIRS)
+    add_subdirectory(${DIR})
+    target_include_directories(${PROJECT_NAME} PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${DIR}>)
+  endforeach()
 endfunction()
 
 # A function to add each executable in the list to the build with the
