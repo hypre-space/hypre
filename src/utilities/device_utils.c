@@ -202,9 +202,10 @@ HYPRE_Int
 hypre_ResetCudaDevice(hypre_Handle *hypre_handle)
 {
 #if defined(HYPRE_USING_CUDA)
-   cudaDeviceReset();
+   HYPRE_CUDA_CALL(cudaDeviceReset());
+
 #elif defined(HYPRE_USING_HIP)
-   hipDeviceReset();
+   HYPRE_HIP_CALL(hipDeviceReset());
 #endif
    return hypre_error_flag;
 }
@@ -2674,7 +2675,7 @@ hypre_CudaCompileFlagCheck()
    hypre_GetDevice(&device);
 
    struct cudaDeviceProp props;
-   cudaGetDeviceProperties(&props, device);
+   HYPRE_CUDA_CALL(cudaGetDeviceProperties(&props, device));
    hypre_int cuda_arch_actual = props.major * 100 + props.minor * 10;
    hypre_int cuda_arch_compile = -1;
    dim3 gDim(1, 1, 1), bDim(1, 1, 1);
@@ -3025,4 +3026,3 @@ hypre_bind_device( HYPRE_Int myid,
 {
    return hypre_bind_device_id(-1, myid, nproc, comm);
 }
-

@@ -147,11 +147,21 @@ hypre_GetDeviceMaxShmemSize(hypre_int  device_id,
       }
 
 #if defined(HYPRE_USING_CUDA)
-      cudaDeviceGetAttribute(&max_size, cudaDevAttrMaxSharedMemoryPerBlock, device_id);
-      cudaDeviceGetAttribute(&max_size_optin, cudaDevAttrMaxSharedMemoryPerBlockOptin, device_id);
+      HYPRE_CUDA_CALL(cudaDeviceGetAttribute(
+         &max_size,
+         cudaDevAttrMaxSharedMemoryPerBlock,
+         device_id));
+
+      HYPRE_CUDA_CALL(cudaDeviceGetAttribute(
+         &max_size_optin,
+         cudaDevAttrMaxSharedMemoryPerBlockOptin,
+         device_id));
 
 #elif defined(HYPRE_USING_HIP)
-      hipDeviceGetAttribute(&max_size, hipDeviceAttributeMaxSharedMemoryPerBlock, device_id);
+      HYPRE_HIP_CALL(hipDeviceGetAttribute(
+         &max_size,
+         hipDeviceAttributeMaxSharedMemoryPerBlock,
+         device_id));
 
 #elif defined(HYPRE_USING_SYCL)
       auto device = *hypre_HandleDevice(hypre_handle());
