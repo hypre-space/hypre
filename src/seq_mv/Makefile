@@ -21,10 +21,11 @@ HEADERS =\
  multiblock_matrix.h\
  seq_mv.h\
  seq_mv.hpp\
- vector.h
+ vector.h\
+ protos_mp.h
 
 FILES =\
- hypre_seq_mv_mp.c
+ seq_mv_mp.c
 
 CUFILES =\
  csr_matop_device.c\
@@ -106,14 +107,14 @@ lib: libHYPRE_seq_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/seq_mv.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/seq_mv_mup_func.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/hypre_seq_mv_mp.h $(HYPRE_BUILD_DIR)/include
+#	cp -fR $(srcdir)/protos_mp.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_seq_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/seq_mv.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/seq_mv_mup_func.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/hypre_seq_mv_mp.h $(HYPRE_INC_INSTALL)
+#	cp -fR $(srcdir)/protos_mp.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean: deleteautogen clean_mup

@@ -11,12 +11,7 @@
  *
  *****************************************************************************/
 
-#include "HYPRE_parcsr_ls_mp.h"
-#include "hypre_parcsr_ls_mup.h"
-#include "hypre_parcsr_mv_mup.h"
-#include "HYPRE_parcsr_mv_mp.h"
-#include "hypre_utilities_mup.h"
-
+#include "_hypre_parcsr_ls.h"
 
 #ifdef HYPRE_MIXED_PRECISION
 

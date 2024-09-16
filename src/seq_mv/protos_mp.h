@@ -5,8 +5,6 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#include "seq_mv.h"
-
 /* Mixed precision function protos */
 /* hypre_seq_mv_mp.h */
 

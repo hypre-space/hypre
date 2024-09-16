@@ -20,16 +20,18 @@ C_COMPILE_FLAGS = \
 
 HEADERS =\
  HYPRE_parcsr_mv.h\
+ HYPRE_parcsr_mv_mp.h\
  _hypre_parcsr_mv.h\
  new_commpkg.h\
  numbers.h\
  par_chord_matrix.h\
  par_csr_communication.h\
  par_csr_matrix.h\
- par_vector.h
+ par_vector.h\
+ protos_mp.h
 
 FILES =\
- hypre_parcsr_mv_mp.c\
+ parcsr_mv_mp.c\
  HYPRE_parcsr_mv_mp.c
 
 CUFILES =\
@@ -103,8 +105,8 @@ all: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_parcsr_mv.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/parcsr_mv_mup_func.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/hypre_parcsr_mv_mp.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/HYPRE_parcsr_mv_mp.h $(HYPRE_BUILD_DIR)/include
+#	cp -fR $(srcdir)/protos_mp.h $(HYPRE_BUILD_DIR)/include
+#	cp -fR $(srcdir)/HYPRE_parcsr_mv_mp.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/hypre_parcsr_mv_mup.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
@@ -121,7 +123,7 @@ driver_matmul: driver_matmul.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	${CC} -o driver_matmul driver_matmul.o ${LFLAGS}
 
 driver_boolmatmul: driver_boolmatmul.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
-	@echo  "Linking" $@ "... "
+	@echo  "Linking" $@ "... "s
 	${CC} -o driver_boolmatmul driver_boolmatmul.o ${LFLAGS}
 
 driver_aat: driver_aat.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
@@ -136,8 +138,8 @@ install: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/_hypre_parcsr_mv.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/parcsr_mv_mup_func.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/hypre_parcsr_mv_mp.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/HYPRE_parcsr_mv_mp.h $(HYPRE_INC_INSTALL)
+#	cp -fR $(srcdir)/protos_mp.h $(HYPRE_INC_INSTALL)
+#	cp -fR $(srcdir)/HYPRE_parcsr_mv_mp.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/hypre_parcsr_mv_mup.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 

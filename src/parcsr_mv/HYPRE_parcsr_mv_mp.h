@@ -14,8 +14,6 @@
 #ifndef HYPRE_PARCSR_MV_MP_HEADER
 #define HYPRE_PARCSR_MV_MP_HEADER
 
-#include "_hypre_parcsr_mv.h"
-
 #ifdef HYPRE_MIXED_PRECISION
 
 #ifdef __cplusplus

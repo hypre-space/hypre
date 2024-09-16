@@ -23,6 +23,7 @@ cat > $INTERNAL_HEADER <<@
 #include "_hypre_seq_block_mv.h"
 #include "seq_mv.h"
 
+#include "HYPRE_parcsr_mv_mp.h"
 #ifdef HYPRE_MIXED_PRECISION
 #include "parcsr_mv_mup_func.h"
 #endif
@@ -46,7 +47,7 @@ cat numbers.h                 >> $INTERNAL_HEADER
 cat par_chord_matrix.h        >> $INTERNAL_HEADER
 cat par_make_system.h         >> $INTERNAL_HEADER
 cat protos.h                  >> $INTERNAL_HEADER
-cat hypre_parcsr_mv_mp.h      >> $INTERNAL_HEADER
+cat protos_mp.h               >> $INTERNAL_HEADER
 
 #../utilities/protos [!F]*.c                   >> $INTERNAL_HEADER
 

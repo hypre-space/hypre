@@ -10,6 +10,7 @@
 #include "krylov.h"
 #include "HYPRE_lobpcg.h"
 
+#include "HYPRE_parcsr_ls_mp.h"
 #ifdef HYPRE_MIXED_PRECISION
 #include "parcsr_ls_mup_func.h"
 #endif

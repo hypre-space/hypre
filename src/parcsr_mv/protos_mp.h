@@ -5,10 +5,8 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#include "_hypre_parcsr_mv.h"
-
 /* Mixed precision function protos */
-/* hypre_parcsr_mv_mp.h */
+/* parcsr_mv_mp.c */
 
 #ifdef HYPRE_MIXED_PRECISION
 HYPRE_Int

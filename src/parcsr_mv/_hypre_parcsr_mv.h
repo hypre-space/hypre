@@ -10,6 +10,7 @@
 #include "_hypre_seq_block_mv.h"
 #include "seq_mv.h"
 
+#include "HYPRE_parcsr_mv_mp.h"
 #ifdef HYPRE_MIXED_PRECISION
 #include "parcsr_mv_mup_func.h"
 #endif
@@ -1345,10 +1346,8 @@ HYPRE_Int hypre_ParVectorGetValuesDevice(hypre_ParVector *vector, HYPRE_Int num_
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#include "_hypre_parcsr_mv.h"
-
 /* Mixed precision function protos */
-/* hypre_parcsr_mv_mp.h */
+/* parcsr_mv_mp.c */
 
 #ifdef HYPRE_MIXED_PRECISION
 HYPRE_Int
