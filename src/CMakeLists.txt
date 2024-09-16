@@ -599,6 +599,7 @@ if (MSVC)
   endif()
 endif ()
 
+# Build FEI, if requested (to be phased out)
 if (HYPRE_USING_FEI)
   add_subdirectory(FEI_mv)
 endif ()
@@ -612,6 +613,7 @@ endif ()
 if (HYPRE_BUILD_TESTS)
   add_subdirectory(test)
 endif ()
+
 # Installation
 include(GNUInstallDirs)
 install(TARGETS HYPRE

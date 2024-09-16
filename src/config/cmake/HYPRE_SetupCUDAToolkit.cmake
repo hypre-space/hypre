@@ -36,6 +36,13 @@ set(CUDAToolkit_ROOT "${CUDA_DIR}" CACHE PATH "Path to the CUDA toolkit")
 # Optionally, prioritize the custom CUDA path in CMAKE_PREFIX_PATH
 list(APPEND CMAKE_PREFIX_PATH "${CUDA_DIR}")
 
+# Set CUDA standard to match C++ standard if not already set
+if(NOT DEFINED CMAKE_CUDA_STANDARD)
+  set(CMAKE_CUDA_STANDARD ${CMAKE_CXX_STANDARD})
+endif()
+set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+set(CMAKE_CUDA_EXTENSIONS OFF)
+
 # Check if CUDA is available and enable it if found
 include(CheckLanguage)
 check_language(CUDA)
@@ -48,12 +55,50 @@ endif()
 # Find the CUDA Toolkit
 find_package(CUDAToolkit REQUIRED)
 
-# Set CUDA standard to match C++ standard if not already set
-if(NOT DEFINED CMAKE_CUDA_STANDARD)
-  set(CMAKE_CUDA_STANDARD ${CMAKE_CXX_STANDARD})
-  set(CMAKE_CUDA_STANDARD_REQUIRED ON)
-  set(CMAKE_CUDA_EXTENSIONS OFF)
+# Detection CUDA architecture if not given by the user
+if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+  message(STATUS "Detecting CUDA GPU architectures using nvidia-smi...")
+
+  # Execute nvidia-smi to get GPU compute capabilities
+  execute_process(
+    COMMAND nvidia-smi --query-gpu=compute_cap --format=csv,noheader
+    OUTPUT_VARIABLE NVIDIA_SMI_OUTPUT
+    RESULT_VARIABLE NVIDIA_SMI_RESULT
+    ERROR_VARIABLE NVIDIA_SMI_ERROR
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+
+  if(NOT NVIDIA_SMI_RESULT EQUAL 0)
+    message(WARNING "nvidia-smi failed to execute: ${NVIDIA_SMI_ERROR}")
+    set(CMAKE_CUDA_ARCHITECTURES "70" CACHE STRING "Default CUDA architectures" FORCE)
+    message(STATUS "Setting CMAKE_CUDA_ARCHITECTURES to default '70'")
+  else()
+    # Clean the output (remove extra newlines and spaces)
+    string(STRIP "${NVIDIA_SMI_OUTPUT}" CUDA_ARCHS)     # Remove trailing/leading whitespaces
+    string(REPLACE "." "" CUDA_ARCHS "${CUDA_ARCHS}")   # Replace '.' with nothing to format '7.0' as '70'
+    string(REPLACE "\n" ";" CUDA_ARCHS "${CUDA_ARCHS}") # Replace newline with semicolon for list format
+
+    # Remove any duplicates CUDA archictectures
+    list(REMOVE_DUPLICATES CUDA_ARCHS)
+
+    if(CUDA_ARCHS)
+      string(REPLACE ";" "," CUDA_ARCHS_STR "${CUDA_ARCHS}")
+      set(CMAKE_CUDA_ARCHITECTURES "${CUDA_ARCHS_STR}" CACHE STRING "Detected CUDA architectures" FORCE)
+      message(STATUS "Detected CUDA GPU architectures: ${CMAKE_CUDA_ARCHITECTURES}")
+    else()
+      message(WARNING "No GPUs detected. Setting CMAKE_CUDA_ARCHITECTURES to default '70'")
+      set(CMAKE_CUDA_ARCHITECTURES "70" CACHE STRING "Default CUDA architectures" FORCE)
+    endif()
+  endif()
+else()
+  # Remove duplicates from the pre-set CMAKE_CUDA_ARCHITECTURES
+  string(REPLACE "," ";" CUDA_ARCH_LIST "${CMAKE_CUDA_ARCHITECTURES}")
+  list(REMOVE_DUPLICATES CUDA_ARCH_LIST)
+  string(REPLACE ";" "," CUDA_ARCH_STR "${CUDA_ARCH_LIST}")
+  set(CMAKE_CUDA_ARCHITECTURES "${CUDA_ARCH_STR}" CACHE STRING "Detected CUDA architectures" FORCE)
+  message(STATUS "CMAKE_CUDA_ARCHITECTURES is already set to: ${CMAKE_CUDA_ARCHITECTURES}")
 endif()
+set_property(TARGET HYPRE PROPERTY CUDA_ARCHITECTURES "${CMAKE_CUDA_ARCHITECTURES}")
 
 # Show CUDA Toolkit location
 if(CUDAToolkit_FOUND)
@@ -77,7 +122,7 @@ find_path(THRUST_INCLUDE_DIR thrust/version.h
 if(THRUST_INCLUDE_DIR)
   message(STATUS "CUDA Thrust headers found in: ${THRUST_INCLUDE_DIR}")
 else()
-  message(FATAL_ERROR "CUDA Thrust headers not found! Please check your CUDA installation.")
+  message(FATAL_ERROR "CUDA Thrust headers not found! Please specify -DTHRUST_INCLUDE_DIR.")
 endif()
 
 # Collection of CUDA optional libraries
@@ -93,7 +138,7 @@ function(find_and_add_cuda_library LIB_NAME HYPRE_ENABLE_VAR)
     find_package(CUDAToolkit REQUIRED COMPONENTS ${LIB_NAME})
 
     if(TARGET CUDAToolkit::${LIB_NAME})
-      message(STATUS "CUDAToolkit::${LIB_NAME} target found")
+      message(STATUS "Found ${LIB_NAME} library: ${${LIB_NAME}_LIBRARY}")
       list(APPEND CUDA_LIBS CUDAToolkit::${LIB_NAME})
     else()
       #message(WARNING "CUDAToolkit::${LIB_NAME} target not found. Attempting manual linking.")
@@ -143,4 +188,5 @@ set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -ccbin=${CMAKE_CXX_COMPILER} -expt-ext
 
 # Print CUDA info
 message(STATUS "CUDA Standard: ${CMAKE_CUDA_STANDARD}")
+message(STATUS "CUDA Archs: ${CMAKE_CUDA_ARCHITECTURES}")
 message(STATUS "CUDA FLAGS: ${CMAKE_CUDA_FLAGS}")

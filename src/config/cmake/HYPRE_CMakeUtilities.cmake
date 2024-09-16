@@ -8,27 +8,29 @@ function(configure_mpi_target)
   target_link_libraries(${PROJECT_NAME} PUBLIC MPI::MPI_C)
 
   # Determine the correct MPI include directory
-  if(MPI_CXX_INCLUDE_DIRS)
-    set(MPI_INCLUDE_DIRS ${MPI_CXX_INCLUDE_DIRS})
+  if(MPI_CXX_INCLUDE_DIR)
+    set(MPI_INCLUDE_DIR ${MPI_CXX_INCLUDE_DIR})
   elseif(MPI_CXX_INCLUDE_PATH)
-    set(MPI_INCLUDE_DIRS ${MPI_CXX_INCLUDE_PATH})
-  elseif(MPI_CXX_COMPILER_INCLUDE_DIRS)
-    set(MPI_INCLUDE_DIRS ${MPI_CXX_COMPILER_INCLUDE_DIRS})
-  elseif(MPI_C_COMPILER_INCLUDE_DIRS)
-    set(MPI_INCLUDE_DIRS ${MPI_C_COMPILER_INCLUDE_DIRS})
-  elseif(MPI_C_INCLUDE_DIRS)
-    set(MPI_INCLUDE_DIRS ${MPI_C_INCLUDE_DIRS})
+    set(MPI_INCLUDE_DIR ${MPI_CXX_INCLUDE_PATH})
+  elseif(MPI_CXX_COMPILER_INCLUDE_DIR)
+    set(MPI_INCLUDE_DIR ${MPI_CXX_COMPILER_INCLUDE_DIR})
+  elseif(MPI_C_COMPILER_INCLUDE_DIR)
+    set(MPI_INCLUDE_DIR ${MPI_C_COMPILER_INCLUDE_DIR})
+  elseif(MPI_C_INCLUDE_DIR)
+    set(MPI_INCLUDE_DIR ${MPI_C_INCLUDE_DIR})
   elseif(MPI_C_INCLUDE_PATH)
-    set(MPI_INCLUDE_DIRS ${MPI_C_INCLUDE_PATH})
+    set(MPI_INCLUDE_DIR ${MPI_C_INCLUDE_PATH})
   elseif(MPI_INCLUDE_PATH)
-    set(MPI_INCLUDE_DIRS ${MPI_INCLUDE_PATH})
+    set(MPI_INCLUDE_DIR ${MPI_INCLUDE_PATH})
+  elseif(MPICH_DIR)
+    set(MPI_INCLUDE_DIR ${MPICH_DIR}/include)
   else()
-    message(WARNING "MPI include directory not found. Compilation may fail.")
+    message(WARNING "MPI include directory not found. Please specify -DMPI_INCLUDE_DIR or the compilation may fail.")
   endif()
 
   if (HYPRE_WITH_CUDA OR HYPRE_WITH_HIP OR HYPRE_WITH_SYCL)
-    message(STATUS "Adding MPI include directory: ${MPI_INCLUDE_DIRS}")
-    target_include_directories(${PROJECT_NAME} PUBLIC ${MPI_INCLUDE_DIRS})
+    message(STATUS "Adding MPI include directory: ${MPI_INCLUDE_DIR}")
+    target_include_directories(${PROJECT_NAME} PUBLIC ${MPI_INCLUDE_DIR})
   endif ()
 endfunction()
 
@@ -57,20 +59,31 @@ function(add_hypre_executables EXE_SRCS)
   foreach(SRC_FILE IN LISTS ${EXE_SRCS})
     get_filename_component(SRC_FILENAME ${SRC_FILE} NAME)
 
+    # If CUDA is enabled, tag source files to be compiled with nvcc.
     if (HYPRE_USING_CUDA)
-      # If CUDA is enabled, tag source files to be compiled with nvcc.
       set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
-    endif (HYPRE_USING_CUDA)
+    endif()
 
+    # If HIP is enabled, tag source files to be compiled with hipcc/clang
+    if (HYPRE_USING_HIP)
+      set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE HIP)
+    endif()
+
+    # If SYCL is enabled, tag source files to be compiled with dpcpp.
     if (HYPRE_USING_SYCL)
-      # If SYCL is enabled, tag source files to be compiled with dpcpp.
       set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CXX)
-    endif (HYPRE_USING_SYCL)
+    endif()
 
-
+    # Get executable name
     string(REPLACE ".c" "" EXE_NAME ${SRC_FILENAME})
-    # Actually add the exe
+
+    # Add the executable
     add_executable(${EXE_NAME} ${SRC_FILE})
+
+    # Explicitly specify the linker
+    if (HYPRE_USING_CUDA OR HYPRE_USING_HIP OR HYPRE_USING_SYCL)
+      set_target_properties(${EXE_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+    endif()
 
     # Link libraries
     set(HYPRE_LIBS "HYPRE")
