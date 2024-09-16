@@ -56,7 +56,7 @@ endif()
 find_package(CUDAToolkit REQUIRED)
 
 # Detection CUDA architecture if not given by the user
-if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR CMAKE_CUDA_ARCHITECTURES STREQUAL "52")
   message(STATUS "Detecting CUDA GPU architectures using nvidia-smi...")
 
   # Execute nvidia-smi to get GPU compute capabilities
