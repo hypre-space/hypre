@@ -3,6 +3,14 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+# Function to set conditional variables
+function(set_conditional_var condition var_name)
+  if(${condition})
+    set(${var_name} ON CACHE BOOL "" FORCE)
+  endif()
+endfunction()
+
+# Function to configure MPI target
 function(configure_mpi_target)
   find_package(MPI REQUIRED)
   target_link_libraries(${PROJECT_NAME} PUBLIC MPI::MPI_C)

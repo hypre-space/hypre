@@ -187,6 +187,6 @@ message(STATUS "Linking to CUDA libraries: ${CUDA_LIBS}")
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -ccbin=${CMAKE_CXX_COMPILER} -expt-extended-lambda")
 
 # Print CUDA info
-message(STATUS "CUDA Standard: ${CMAKE_CUDA_STANDARD}")
-message(STATUS "CUDA Archs: ${CMAKE_CUDA_ARCHITECTURES}")
-message(STATUS "CUDA FLAGS: ${CMAKE_CUDA_FLAGS}")
+message(STATUS "CUDA C++ standard: ${CMAKE_CUDA_STANDARD}")
+message(STATUS "CUDA architectures: ${CMAKE_CUDA_ARCHITECTURES}")
+message(STATUS "CUDA flags: ${CMAKE_CUDA_FLAGS}")

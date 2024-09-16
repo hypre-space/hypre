@@ -161,71 +161,29 @@ set(HYPRE_SYCL_TARGET             "" CACHE STRING "Target SYCL architecture, e.g
 set(HYPRE_SYCL_TARGET_BACKEND     "" CACHE STRING "Additional SYCL backend options, e.g. '-device 12.1.0,12.4.0'.")
 
 # Set config name values
-if (HYPRE_ENABLE_SHARED)
-  set(HYPRE_SHARED ON CACHE BOOL "" FORCE)
-endif ()
-
-if (HYPRE_ENABLE_BIGINT)
-  set(HYPRE_BIGINT ON CACHE BOOL "" FORCE)
-endif ()
-
-if (HYPRE_ENABLE_MIXEDINT)
-  set(HYPRE_MIXEDINT ON CACHE BOOL "" FORCE)
-endif ()
-
-if (HYPRE_ENABLE_SINGLE)
-  set(HYPRE_SINGLE ON CACHE BOOL "" FORCE)
-endif ()
-
-if (HYPRE_ENABLE_LONG_DOUBLE)
-  set(HYPRE_LONG_DOUBLE ON CACHE BOOL "" FORCE)
-endif ()
-
-if (HYPRE_ENABLE_COMPLEX)
-  set(HYPRE_COMPLEX ON CACHE BOOL "" FORCE)
-endif ()
-
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-  set(HYPRE_DEBUG ON CACHE BOOL "" FORCE)
-endif ()
-
-if (HYPRE_ENABLE_HYPRE_BLAS)
-  set(HYPRE_USING_HYPRE_BLAS ON CACHE BOOL "" FORCE)
-endif ()
-
-if (HYPRE_ENABLE_HYPRE_LAPACK)
-  set(HYPRE_USING_HYPRE_LAPACK ON CACHE BOOL "" FORCE)
-endif ()
-
-if (HYPRE_ENABLE_PERSISTENT_COMM)
-  set(HYPRE_USING_PERSISTENT_COMM ON CACHE BOOL "" FORCE)
-endif ()
+set_conditional_var(HYPRE_ENABLE_SHARED HYPRE_SHARED)
+set_conditional_var(HYPRE_ENABLE_BIGINT HYPRE_BIGINT)
+set_conditional_var(HYPRE_ENABLE_MIXEDINT HYPRE_MIXEDINT)
+set_conditional_var(HYPRE_ENABLE_SINGLE HYPRE_SINGLE)
+set_conditional_var(HYPRE_ENABLE_LONG_DOUBLE HYPRE_LONG_DOUBLE)
+set_conditional_var(HYPRE_ENABLE_COMPLEX HYPRE_COMPLEX)
+set_conditional_var(CMAKE_BUILD_TYPE STREQUAL "Debug" HYPRE_DEBUG)
+set_conditional_var(HYPRE_ENABLE_HYPRE_BLAS HYPRE_USING_HYPRE_BLAS)
+set_conditional_var(HYPRE_ENABLE_HYPRE_LAPACK HYPRE_USING_HYPRE_LAPACK)
+set_conditional_var(HYPRE_ENABLE_PERSISTENT_COMM HYPRE_USING_PERSISTENT_COMM)
+set_conditional_var(HYPRE_WITH_OPENMP HYPRE_USING_OPENMP)
+set_conditional_var(HYPRE_ENABLE_HOPSCOTCH HYPRE_HOPSCOTCH)
+set_conditional_var(HYPRE_WITH_CUDA HYPRE_USING_CUDA)
+set_conditional_var(HYPRE_WITH_HIP HYPRE_USING_HIP)
+set_conditional_var(HYPRE_WITH_SYCL HYPRE_USING_SYCL)
+set_conditional_var(HYPRE_WITH_MAGMA HYPRE_USING_MAGMA)
+set_conditional_var(HYPRE_WITH_CALIPER HYPRE_USING_CALIPER)
 
 if (HYPRE_WITH_MPI)
   set(HYPRE_HAVE_MPI ON CACHE BOOL "" FORCE)
   set(HYPRE_SEQUENTIAL OFF CACHE BOOL "" FORCE)
 else ()
   set(HYPRE_SEQUENTIAL ON CACHE BOOL "" FORCE)
-endif ()
-
-if (HYPRE_WITH_OPENMP)
-  set(HYPRE_USING_OPENMP ON CACHE BOOL "" FORCE)
-endif ()
-
-if (HYPRE_ENABLE_HOPSCOTCH)
-  set(HYPRE_HOPSCOTCH ON CACHE BOOL "" FORCE)
-endif ()
-
-if (HYPRE_WITH_CUDA)
-  set(HYPRE_USING_CUDA ON CACHE BOOL "" FORCE)
-endif ()
-
-if (HYPRE_WITH_HIP)
-  set(HYPRE_USING_HIP ON CACHE BOOL "" FORCE)
-endif ()
-
-if (HYPRE_WITH_SYCL)
-  set(HYPRE_USING_SYCL ON CACHE BOOL "" FORCE)
 endif ()
 
 if (HYPRE_WITH_SUPERLU)
@@ -239,21 +197,13 @@ if (HYPRE_WITH_DSUPERLU)
   set(HYPRE_USING_HYPRE_LAPACK OFF CACHE BOOL "" FORCE)
 endif ()
 
-if (HYPRE_WITH_MAGMA)
-  set(HYPRE_USING_MAGMA ON CACHE BOOL "" FORCE)
-endif ()
-
 if (HYPRE_ENABLE_FEI)
   set(HYPRE_USING_FEI ON CACHE BOOL "" FORCE)
   message(WARNING "CMake support for FEI is not complete!")
 endif ()
 
-if (HYPRE_WITH_CALIPER)
-  set(HYPRE_USING_CALIPER ON CACHE BOOL "" FORCE)
-endif ()
-
+# FEI doesn't currently compile with shared
 if (HYPRE_SHARED OR HYPRE_BIGINT OR HYPRE_SINGLE OR HYPRE_LONG_DOUBLE)
-  # FEI doesn't currently compile with shared
   set(HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
 endif ()
 
@@ -300,45 +250,7 @@ endif (HYPRE_USING_OPENMP)
 
 # Set GPU compile flags
 if (HYPRE_WITH_CUDA OR HYPRE_WITH_HIP OR HYPRE_WITH_SYCL)
-  enable_language(CXX)
-  message(STATUS "Enabled support for CXX.")
-
-  # Setup GPU libraries and include directories
-  set(HYPRE_USING_GPU ON CACHE BOOL "" FORCE)
   include(HYPRE_SetupGPUToolkit)
-
-  # CXX standard info
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
-  message(STATUS "Using CXX standard: c++${CMAKE_CXX_STANDARD}")
-
-  # Check if examples are enabled, but not unified memory
-  if (HYPRE_BUILD_EXAMPLES AND NOT HYPRE_ENABLE_UNIFIED_MEMORY)
-    message(WARNING "Running the examples on GPUs requires Unified Memory!
-      Examples will not be built!")
-    set(HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-  endif ()
-
-  # Add any extra CXX compiler flags HYPRE_WITH_EXTRA_CXXFLAGS
-  if (NOT HYPRE_WITH_EXTRA_CXXFLAGS STREQUAL "")
-    string(REPLACE " " ";" HYPRE_WITH_EXTRA_CXXFLAGS_LIST ${HYPRE_WITH_EXTRA_CXXFLAGS})
-    add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${HYPRE_WITH_EXTRA_CXXFLAGS_LIST}>")
-  endif ()
-
-  if (HYPRE_ENABLE_GPU_STREAMS)
-    set(HYPRE_USING_GPU_STREAMS ON CACHE BOOL "" FORCE)
-  endif ()
-
-  if (HYPRE_ENABLE_DEVICE_POOL)
-    set(HYPRE_USING_DEVICE_POOL ON CACHE BOOL "" FORCE)
-  endif ()
-
-  set(HYPRE_USING_HOST_MEMORY OFF CACHE BOOL "" FORCE)
-  if (HYPRE_ENABLE_UNIFIED_MEMORY)
-    set(HYPRE_USING_UNIFIED_MEMORY ON CACHE BOOL "" FORCE)
-  else ()
-    set(HYPRE_USING_DEVICE_MEMORY ON CACHE BOOL "" FORCE)
-  endif ()
-
 else ()
   message(STATUS "No GPU support enabled.")
   set(HYPRE_USING_HOST_MEMORY ON CACHE BOOL "" FORCE)
@@ -367,13 +279,14 @@ set_target_properties(HYPRE PROPERTIES
 # Headers and sources
 set(HYPRE_HEADERS "")
 
-# Headers and sources: .
+# Main headers
 set(HYPRE_MAIN_HEADERS
   ${CMAKE_CURRENT_BINARY_DIR}/HYPRE_config.h
   HYPREf.h
   HYPRE.h
   )
 
+# All headers
 set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HYPRE_MAIN_HEADERS})
 
 # Headers and sources: blas

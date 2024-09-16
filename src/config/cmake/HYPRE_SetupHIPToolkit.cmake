@@ -154,6 +154,6 @@ message(STATUS "Linking to ROCm libraries: ${ROCM_LIBS}")
 target_compile_options(HYPRE PUBLIC $<$<COMPILE_LANGUAGE:HIP>:-fPIC>)
 
 # Print HIP info
-message(STATUS "HIP Standard: ${CMAKE_HIP_STANDARD}")
-message(STATUS "HIP Archs: ${CMAKE_HIP_ARCHITECTURES}")
-message(STATUS "HIP FLAGS: ${CMAKE_HIP_FLAGS}")
+message(STATUS "HIP C++ standard: ${CMAKE_HIP_STANDARD}")
+message(STATUS "HIP architectures: ${CMAKE_HIP_ARCHITECTURES}")
+message(STATUS "HIP flags: ${CMAKE_HIP_FLAGS}")

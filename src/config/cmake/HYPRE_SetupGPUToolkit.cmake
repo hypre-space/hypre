@@ -3,26 +3,50 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+# Enable CXX language
+enable_language(CXX)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# Enforce C++14 at least
+if(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 14)
+  set(CMAKE_CXX_STANDARD 14)
+  set_property(TARGET HYPRE PROPERTY CXX_STANDARD 14)
+endif()
+message(STATUS "Enabled support for CXX.")
+message(STATUS "Using CXX standard: C++${CMAKE_CXX_STANDARD}")
+
+# Set GPU-related variables
+set(HYPRE_USING_GPU ON CACHE BOOL "" FORCE)
+set(HYPRE_USING_HOST_MEMORY OFF CACHE BOOL "" FORCE)
+
+if(HYPRE_ENABLE_UNIFIED_MEMORY)
+  set(HYPRE_USING_UNIFIED_MEMORY ON CACHE BOOL "" FORCE)
+else()
+  set(HYPRE_USING_DEVICE_MEMORY ON CACHE BOOL "" FORCE)
+endif()
+
+# Check if examples are enabled, but not unified memory
+if(HYPRE_BUILD_EXAMPLES AND NOT HYPRE_ENABLE_UNIFIED_MEMORY)
+  message(WARNING "Running the examples on GPUs requires Unified Memory! Examples will not be built!")
+  set(HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+endif()
+
+# Add any extra CXX compiler flags
+if(NOT HYPRE_WITH_EXTRA_CXXFLAGS STREQUAL "")
+  string(REPLACE " " ";" HYPRE_WITH_EXTRA_CXXFLAGS_LIST ${HYPRE_WITH_EXTRA_CXXFLAGS})
+  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${HYPRE_WITH_EXTRA_CXXFLAGS_LIST}>")
+endif()
+
+# Set conditional variables
+set_conditional_var(HYPRE_ENABLE_GPU_STREAMS HYPRE_USING_GPU_STREAMS)
+set_conditional_var(HYPRE_ENABLE_DEVICE_POOL HYPRE_USING_DEVICE_POOL)
+
 if(HYPRE_WITH_CUDA)
-  # Enforce C++11 at least
-  if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 11)
-    set(CMAKE_CXX_STANDARD 11)
-  endif ()
   include(HYPRE_SetupCUDAToolkit)
 
 elseif(HYPRE_WITH_HIP)
-  # Enforce C++14 at least
-  if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 14)
-    set(CMAKE_CXX_STANDARD 14)
-  endif ()
   include(HYPRE_SetupHIPToolkit)
 
 elseif(HYPRE_WITH_SYCL)
-  # Enforce C++14 at least
-  if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 14)
-    set(CMAKE_CXX_STANDARD 14)
-  endif ()
-
   message(STATUS "Enabling SYCL toolkit")
   enable_language(SYCL)
   include(HYPRE_SetupSYCLToolkit)
