@@ -1605,6 +1605,11 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                m = rfactor[2];
                break;
             }
+
+            default:
+            {
+               m = 0;
+            }
          }
 
          for (i = nEdges; i < nEdges + j; i++) /*fill in the column size for Edge */

@@ -127,6 +127,7 @@ FILES =\
  par_mgr.c\
  par_mgr_coarsen.c\
  par_mgr_interp.c\
+ par_mgr_rap.c\
  par_mgr_setup.c\
  par_mgr_solve.c\
  par_mgr_stats.c\

@@ -834,6 +834,7 @@ test_AddTranspose(MPI_Comm             comm,
 
 
 {
+   HYPRE_UNUSED_VAR(nnzrow);
    hypre_assert(option == 2);
 
    HYPRE_IJMatrix  ij_AT;
