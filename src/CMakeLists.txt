@@ -263,11 +263,7 @@ if (NOT HYPRE_WITH_EXTRA_CFLAGS STREQUAL "")
 endif ()
 
 # Set library build type (must appear before add_library calls)
-if (HYPRE_SHARED)
-  set(BUILD_SHARED_LIBS ON CACHE INTERNAL "" FORCE)
-else ()
-  set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "" FORCE)
-endif ()
+set(BUILD_SHARED_LIBS ${HYPRE_SHARED} CACHE INTERNAL "Build shared libraries" FORCE)
 
 # Set output directory for the library
 set_target_properties(HYPRE PROPERTIES
@@ -276,115 +272,13 @@ set_target_properties(HYPRE PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
 
-# Headers and sources
-set(HYPRE_HEADERS "")
-
-# Main headers
+# Set headers
 set(HYPRE_MAIN_HEADERS
   ${CMAKE_CURRENT_BINARY_DIR}/HYPRE_config.h
   HYPREf.h
   HYPRE.h
-  )
-
-# All headers
-set(HYPRE_HEADERS ${HYPRE_HEADERS} ${HYPRE_MAIN_HEADERS})
-
-# Headers and sources: blas
-if (HYPRE_USING_HYPRE_BLAS)
-  add_subdirectory(blas)
-else ()
-  # Use TPL_BLAS_LIBRARIES if set.
-  if (TPL_BLAS_LIBRARIES)
-    message(STATUS "Using TPL_BLAS_LIBRARIES='${TPL_BLAS_LIBRARIES}'")
-    target_link_libraries(${PROJECT_NAME} PUBLIC "${TPL_BLAS_LIBRARIES}")
-  else ()
-    # Find system blas
-    find_package(BLAS REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PUBLIC "${BLAS_LIBRARIES}")
-  endif ()
-  target_compile_definitions(${PROJECT_NAME} PUBLIC "USE_VENDOR_BLAS")
-endif ()
-
-# Headers and sources: lapack
-if (HYPRE_USING_HYPRE_LAPACK)
-  add_subdirectory(lapack)
-else ()
-  # Use TPL_LAPACK_LIBRARIES if set.
-  if (TPL_LAPACK_LIBRARIES)
-    message(STATUS "Using TPL_LAPACK_LIBRARIES='${TPL_LAPACK_LIBRARIES}'")
-    target_link_libraries(${PROJECT_NAME} PUBLIC "${TPL_LAPACK_LIBRARIES}")
-  else ()
-    # Find system lapack
-    find_package(LAPACK REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PUBLIC "${LAPACK_LIBRARIES}")
-  endif ()
-endif ()
-
-# Find SUPERLU, if requested
-if (HYPRE_USING_SUPERLU)
-  if (NOT TPL_SUPERLU_LIBRARIES)
-    message(FATAL_ERROR "TPL_SUPERLU_LIBRARIES option should be set for SuperLU support.")
-  endif ()
-
-  if (NOT TPL_SUPERLU_INCLUDE_DIRS)
-    message(FATAL_ERROR "TPL_SUPERLU_INCLUDE_DIRS option be set for SuperLU support.")
-  endif ()
-
-  foreach (dir ${TPL_SUPERLU_INCLUDE_DIRS})
-    if (NOT EXISTS ${dir})
-      message(FATAL_ERROR "SuperLU include directory not found: ${dir}")
-    endif ()
-    target_compile_options(${PROJECT_NAME} PUBLIC -I${dir})
-  endforeach ()
-  message(STATUS "Enabled support for using SUPERLU.")
-  set(SUPERLU_FOUND TRUE)
-  target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_SUPERLU_LIBRARIES} stdc++)
-  target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_SUPERLU_INCLUDE_DIRS})
-endif (HYPRE_USING_SUPERLU)
-
-# Find DSUPERLU, if requested
-if (HYPRE_USING_DSUPERLU)
-  if (NOT TPL_DSUPERLU_LIBRARIES)
-    message(FATAL_ERROR "TPL_DSUPERLU_LIBRARIES option should be set for SuperLU_Dist support.")
-  endif ()
-
-  if (NOT TPL_DSUPERLU_INCLUDE_DIRS)
-    message(FATAL_ERROR "TPL_DSUPERLU_INCLUDE_DIRS option be set for SuperLU_Dist support.")
-  endif ()
-
-  foreach (dir ${TPL_DSUPERLU_INCLUDE_DIRS})
-    if (NOT EXISTS ${dir})
-      message(FATAL_ERROR "SuperLU_Dist include directory not found: ${dir}")
-    endif ()
-    target_compile_options(${PROJECT_NAME} PUBLIC -I${dir})
-  endforeach ()
-  message(STATUS "Enabled support for using DSUPERLU.")
-  set(DSUPERLU_FOUND TRUE)
-  target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_DSUPERLU_LIBRARIES} stdc++)
-  target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_DSUPERLU_INCLUDE_DIRS})
-endif (HYPRE_USING_DSUPERLU)
-
-# TODO: Check for case if MAGMA without CUDA/HIP
-# Find MAGMA, if requested
-if (HYPRE_USING_MAGMA)
-  if (NOT TPL_MAGMA_LIBRARIES)
-    message(FATAL_ERROR "TPL_MAGMA_LIBRARIES option should be set for MAGMA support.")
-  endif ()
-
-  if (NOT TPL_MAGMA_INCLUDE_DIRS)
-    message(FATAL_ERROR "TPL_MAGMA_INCLUDE_DIRS option be set for MAGMA support.")
-  endif ()
-
-  foreach (dir ${TPL_MAGMA_INCLUDE_DIRS})
-    if (NOT EXISTS ${dir})
-      message(FATAL_ERROR "MAGMA include directory not found: ${dir}")
-    endif ()
-    target_compile_options(${PROJECT_NAME} PUBLIC -I${dir})
-  endforeach ()
-  message(STATUS "Enabled support for using MAGMA.")
-  target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_MAGMA_LIBRARIES} stdc++)
-  target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_MAGMA_INCLUDE_DIRS})
-endif (HYPRE_USING_MAGMA)
+)
+list(APPEND HYPRE_HEADERS ${HYPRE_MAIN_HEADERS})
 
 # Find FEI, if requested
 if (HYPRE_USING_FEI)
@@ -405,39 +299,14 @@ if (HYPRE_USING_FEI)
   target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_FEI_INCLUDE_DIRS})
 endif(HYPRE_USING_FEI)
 
-# Find Caliper, if requested
-if (HYPRE_USING_CALIPER)
-  if (NOT TPL_CALIPER_LIBRARIES OR NOT TPL_CALIPER_INCLUDE_DIRS)
-    message(FATAL_ERROR "Both TPL_CALIPER_LIBRARIES and TPL_CALIPER_INCLUDE_DIRS options must be set for Caliper support.")
-  endif ()
-
-  foreach (dir ${TPL_CALIPER_INCLUDE_DIRS})
-    if (NOT EXISTS ${dir})
-      message(FATAL_ERROR "Caliper include directory not found: ${dir}")
-    endif ()
-    target_compile_options(${PROJECT_NAME} PUBLIC -I${dir})
-  endforeach ()
-  message(STATUS "Enabled support for using Caliper.")
-  target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_CALIPER_LIBRARIES})
-  target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_CALIPER_INCLUDE_DIRS})
-endif()
-
-# Find Umpire, if requested
-if (HYPRE_USING_UMPIRE)
-  if (NOT TPL_UMPIRE_LIBRARIES OR NOT TPL_UMPIRE_INCLUDE_DIRS)
-    message(FATAL_ERROR "Both TPL_UMPIRE_LIBRARIES and TPL_UMPIRE_INCLUDE_DIRS options must be set for Umpire support.")
-  endif ()
-
-  foreach (dir ${TPL_UMPIRE_INCLUDE_DIRS})
-    if (NOT EXISTS ${dir})
-      message(FATAL_ERROR "Umpire include directory not found: ${dir}")
-    endif ()
-    target_compile_options(${PROJECT_NAME} PUBLIC -I${dir})
-  endforeach ()
-  message(STATUS "Enabled support for using Umpire.")
-  target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_UMPIRE_LIBRARIES})
-  target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_UMPIRE_INCLUDE_DIRS})
-endif ()
+# Setup TPLs
+setup_tpl_or_internal(blas)
+setup_tpl_or_internal(lapack)
+setup_tpl(SUPERLU)
+setup_tpl(DSUPERLU)
+setup_tpl(MAGMA)
+setup_tpl(CALIPER)
+setup_tpl(UMPIRE)
 
 # Configure a header file to pass CMake settings to the source code
 configure_file(
@@ -453,14 +322,14 @@ foreach (DIR IN LISTS HYPRE_DIRS)
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${DIR}>)
 endforeach ()
 
-# BINARY must be first in order to get the correct HYPRE_config.h file
-#target_include_directories(${PROJECT_NAME} PUBLIC
-#  $<BUILD_INTERFACE:${HYPRE_BINARY_DIR}>
-#  $<BUILD_INTERFACE:${HYPRE_SOURCE_DIR}>
-#  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/blas>
-#  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lapack>
-#  $<INSTALL_INTERFACE:include>
-#  )
+# Set the language for GPU sources (has to be done after the subdirectories are added)
+if (HYPRE_WITH_CUDA)
+  set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE CUDA)
+elseif (HYPRE_WITH_HIP)
+  set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE HIP)
+elseif (HYPRE_WITH_SYCL)
+  set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE SYCL)
+endif ()
 
 # Include directories
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -471,20 +340,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 
-if (HYPRE_WITH_CUDA)
-  set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE CUDA)
-elseif (HYPRE_WITH_HIP)
-  set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE HIP)
-elseif (HYPRE_WITH_SYCL)
-  set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE SYCL)
-endif ()
-
-# Ensure MPI headers are included for device compilation
-#if (HYPRE_WITH_MPI AND HYPRE_USING_GPU)
-#  message(STATUS "Adding MPI include directory: ${MPI_INCLUDE_DIRS}")
-#  target_include_directories(${PROJECT_NAME} PUBLIC ${MPI_INCLUDE_DIRS})
-#endif ()
-
+# Set file properties for MSVC
 if (MSVC)
   target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
   if (MSVC_VERSION LESS 1928) # Visual Studio 2019 version 16.8 claims full C11 support
@@ -553,7 +409,8 @@ install(EXPORT HYPRETargets
 )
 
 configure_package_config_file(
-  config/HYPREConfig.cmake.in HYPREConfig.cmake
+  ${CMAKE_CURRENT_SOURCE_DIR}/config/HYPREConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/HYPREConfig.cmake
   INSTALL_DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/HYPREConfig.cmake
 )
 

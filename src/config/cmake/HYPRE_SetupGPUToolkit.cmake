@@ -11,7 +11,7 @@ if(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 14)
   set(CMAKE_CXX_STANDARD 14)
   set_property(TARGET HYPRE PROPERTY CXX_STANDARD 14)
 endif()
-message(STATUS "Enabled support for CXX.")
+message(STATUS "Enabling support for CXX.")
 message(STATUS "Using CXX standard: C++${CMAKE_CXX_STANDARD}")
 
 # Set GPU-related variables

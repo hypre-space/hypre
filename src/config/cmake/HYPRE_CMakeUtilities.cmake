@@ -42,6 +42,87 @@ function(configure_mpi_target)
   endif ()
 endfunction()
 
+# Function to handle TPL (Third-Party Library) setup
+function(setup_tpl NAME)
+  if(HYPRE_USING_${NAME})
+    if(NOT TPL_${NAME}_LIBRARIES OR NOT TPL_${NAME}_INCLUDE_DIRS)
+      message(FATAL_ERROR "Both TPL_${NAME}_LIBRARIES and TPL_${NAME}_INCLUDE_DIRS must be set for ${NAME} support.")
+    endif()
+
+    foreach(dir ${TPL_${NAME}_INCLUDE_DIRS})
+      if(NOT EXISTS ${dir})
+        message(FATAL_ERROR "${NAME} include directory not found: ${dir}")
+      endif()
+    endforeach()
+
+    message(STATUS "Enabled support for using ${NAME}.")
+    
+    foreach(lib ${TPL_${NAME}_LIBRARIES})
+      if(EXISTS ${lib})
+        message(STATUS "${NAME} library found: ${lib}")
+      else()
+        message(WARNING "${NAME} library not found at specified path: ${lib}")
+      endif()
+    endforeach()
+
+    target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_${NAME}_LIBRARIES})
+    target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_${NAME}_INCLUDE_DIRS})
+    
+    if(${NAME} STREQUAL "SUPERLU" OR ${NAME} STREQUAL "DSUPERLU" OR ${NAME} STREQUAL "UMPIRE")
+      target_link_libraries(${PROJECT_NAME} PUBLIC stdc++)
+    endif()
+
+    set(${NAME}_FOUND TRUE PARENT_SCOPE)
+  endif()
+endfunction()
+
+# Function to setup TPL or internal library implementation
+function(setup_tpl_or_internal LIB_NAME)
+  string(TOUPPER ${LIB_NAME} LIB_NAME_UPPER)
+  
+  if(HYPRE_USING_HYPRE_${LIB_NAME_UPPER})
+    # Use internal library
+    add_subdirectory(${LIB_NAME})
+    message(STATUS "Using internal ${LIB_NAME_UPPER}")
+    target_include_directories(${PROJECT_NAME} PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME}>
+      $<INSTALL_INTERFACE:include>
+    )
+  else()
+    # Use external library
+    if(TPL_${LIB_NAME_UPPER}_LIBRARIES)
+      # Use specified TPL libraries
+      message(STATUS "Enabled support for using ${LIB_NAME_UPPER}.")
+      foreach(lib ${TPL_${LIB_NAME_UPPER}_LIBRARIES})
+        if(EXISTS ${lib})
+          message(STATUS "${LIB_NAME_UPPER} library found: ${lib}")
+        else()
+          message(WARNING "${LIB_NAME_UPPER} library not found at specified path: ${lib}")
+        endif()
+      endforeach()
+      target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_${LIB_NAME_UPPER}_LIBRARIES})
+    else()
+      # Find system library
+      find_package(${LIB_NAME_UPPER} REQUIRED)
+      if(${LIB_NAME_UPPER}_FOUND)
+        message(STATUS "Using system ${LIB_NAME_UPPER}")
+        if(TARGET ${LIB_NAME_UPPER}::${LIB_NAME_UPPER})
+          target_link_libraries(${PROJECT_NAME} PUBLIC ${LIB_NAME_UPPER}::${LIB_NAME_UPPER})
+        else()
+          target_link_libraries(${PROJECT_NAME} PUBLIC ${${LIB_NAME_UPPER}_LIBRARIES})
+        endif()
+      else()
+        message(FATAL_ERROR "${LIB_NAME_UPPER} not found")
+      endif()
+    endif()
+    
+    # Add USE_VENDOR_BLAS definition for BLAS
+    if(${LIB_NAME_UPPER} STREQUAL "BLAS")
+      target_compile_definitions(${PROJECT_NAME} PUBLIC "USE_VENDOR_BLAS")
+    endif()
+  endif()
+endfunction()
+
 # A handy function to add the current source directory to a local
 # filename. To be used for creating a list of sources.
 function(convert_filenames_to_full_paths NAMES)
