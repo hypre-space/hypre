@@ -267,6 +267,8 @@ set(BUILD_SHARED_LIBS ${HYPRE_SHARED} CACHE INTERNAL "Build shared libraries" FO
 
 # Set output directory for the library
 set_target_properties(HYPRE PROPERTIES
+  VERSION ${HYPRE_VERSION}
+  SOVERSION ${HYPRE_NUMBER}
   ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
@@ -394,30 +396,28 @@ install(TARGETS HYPRE
 )
 install(FILES ${HYPRE_HEADERS} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
+# Export the package
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
-  HYPREConfigVersion.cmake
+  "${CMAKE_CURRENT_BINARY_DIR}/HYPREConfigVersion.cmake"
   VERSION ${PACKAGE_VERSION}
   COMPATIBILITY SameMajorVersion
 )
-
+configure_package_config_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/config/HYPREConfig.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/HYPREConfig.cmake"
+  INSTALL_DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/HYPREConfig.cmake
+)
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/HYPREConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/HYPREConfigVersion.cmake"
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/HYPRE
+)
 # Install the CMake export file
 install(EXPORT HYPRETargets
   FILE HYPRETargets.cmake
   NAMESPACE HYPRE::
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/HYPRE
-)
-
-configure_package_config_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/config/HYPREConfig.cmake.in
-  ${CMAKE_CURRENT_BINARY_DIR}/HYPREConfig.cmake
-  INSTALL_DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/HYPREConfig.cmake
-)
-
-install(FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/HYPREConfig.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/HYPREConfigVersion.cmake
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/HYPRE
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/HYPRE"
 )
 
 # Export from build tree
