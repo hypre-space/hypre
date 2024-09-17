@@ -1920,6 +1920,8 @@ HYPRE_Int hypre_BoomerAMGCreate2ndSDevice( hypre_ParCSRMatrix *S, HYPRE_Int *CF_
                                            HYPRE_Int num_paths, HYPRE_BigInt *coarse_row_starts, hypre_ParCSRMatrix **C_ptr);
 HYPRE_Int hypre_BoomerAMGMakeSocFromSDevice( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *S);
 HYPRE_Int hypre_BoomerAMGCreateAuxS(hypre_ParCSRMatrix    *A, hypre_ParCSRMatrix    *S, hypre_ParCSRMatrix   **S_aux_ptr, HYPRE_Int method);
+HYPRE_Int hypre_BoomerAMGCreateSDualThresholdHost(hypre_ParCSRMatrix *A, HYPRE_Real strength_threshold, HYPRE_Int max_row_nnz,
+                           HYPRE_Int num_functions, HYPRE_Int *dof_func, hypre_ParCSRMatrix  **S_ptr);
 
 /* par_sv_interp.c */
 HYPRE_Int hypre_BoomerAMGSmoothInterpVectors ( hypre_ParCSRMatrix *A, HYPRE_Int num_smooth_vecs,

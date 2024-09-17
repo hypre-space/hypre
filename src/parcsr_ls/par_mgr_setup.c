@@ -1146,8 +1146,24 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
       else if(interp_type[lev] == 8)
       {
-         hypre_BoomerAMGBuildInterpTwoPntsHost(A_array[lev], CF_marker, coarse_pnts_global, 1, dof_func_buff_data, 
-                              mgr_data->interp_offsets, debug_flag, &P);    
+
+         hypre_BoomerAMGCreateSDualThresholdHost(A_array[lev], strong_threshold, 2, 1, NULL, &S);
+         
+         hypre_BoomerAMGBuildInterp(A_array[lev], CF_marker, S, coarse_pnts_global, 1, dof_func_buff_data,
+                                         0, 0.0, 0, &P);
+/*
+      char fname[256];
+      sprintf(fname, "S_lev_%d", lev);
+      hypre_ParCSRMatrixPrintIJ(S, 0, 0, fname);
+      sprintf(fname, "A_lev_%d", lev);
+      hypre_ParCSRMatrixPrintIJ(A_array[lev], 0, 0, fname);      
+      sprintf(fname, "P_lev_%d", lev);
+      hypre_ParCSRMatrixPrintIJ(P, 0, 0, fname);   
+*/
+//         hypre_BoomerAMGBuildInterpTwoPntsHost(A_array[lev], CF_marker, coarse_pnts_global, 1, dof_func_buff_data, 
+//                              mgr_data->interp_offsets, debug_flag, &P);    
+
+
       }
       else
       {

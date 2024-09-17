@@ -12,7 +12,7 @@
  * hypre_DoubleQuickSplit
  * C version of the routine "qsplit" from SPARSKIT
  * Uses a quicksort-type algorithm to split data into
- * highest "NumberCut" values without completely sorting them.
+ * highest "NumberKept" values without completely sorting them.
  * Data is HYPRE_Real precision data.
  *--------------------------------------------------------------------------*/
 
