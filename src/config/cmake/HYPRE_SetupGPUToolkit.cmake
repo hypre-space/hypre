@@ -6,11 +6,10 @@
 # Enable CXX language
 enable_language(CXX)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-# Enforce C++14 at least
 if(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 14)
-  set(CMAKE_CXX_STANDARD 14)
-  set_property(TARGET HYPRE PROPERTY CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD 14) # Enforce C++14 at least
 endif()
+set_property(TARGET HYPRE PROPERTY CXX_STANDARD ${CMAKE_CXX_STANDARD})
 message(STATUS "Enabling support for CXX.")
 message(STATUS "Using CXX standard: C++${CMAKE_CXX_STANDARD}")
 

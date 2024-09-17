@@ -302,11 +302,11 @@ endif(HYPRE_USING_FEI)
 # Setup TPLs
 setup_tpl_or_internal(blas)
 setup_tpl_or_internal(lapack)
-setup_tpl(SUPERLU)
-setup_tpl(DSUPERLU)
-setup_tpl(MAGMA)
-setup_tpl(CALIPER)
-setup_tpl(UMPIRE)
+setup_tpl(superlu)
+setup_tpl(dsuperlu)
+setup_tpl(magma)
+setup_tpl(caliper)
+setup_tpl(umpire)
 
 # Configure a header file to pass CMake settings to the source code
 configure_file(

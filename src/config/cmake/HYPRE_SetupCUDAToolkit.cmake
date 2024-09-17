@@ -45,6 +45,7 @@ set(CMAKE_CUDA_EXTENSIONS OFF)
 
 # Check if CUDA is available and enable it if found
 include(CheckLanguage)
+set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER} CACHE STRING "" FORCE)
 check_language(CUDA)
 if(CMAKE_CUDA_COMPILER)
    enable_language(CUDA)
@@ -54,6 +55,11 @@ endif()
 
 # Find the CUDA Toolkit
 find_package(CUDAToolkit REQUIRED)
+
+# Add a dummy cuda target if it doesn't exist (avoid error when building with BLT dependencies)
+if(NOT TARGET cuda)
+  add_library(cuda INTERFACE)
+endif()
 
 # Detection CUDA architecture if not given by the user
 if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR CMAKE_CUDA_ARCHITECTURES STREQUAL "52")

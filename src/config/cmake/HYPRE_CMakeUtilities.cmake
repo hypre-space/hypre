@@ -44,42 +44,67 @@ endfunction()
 
 # Function to handle TPL (Third-Party Library) setup
 function(setup_tpl NAME)
-  if(HYPRE_USING_${NAME})
-    if(NOT TPL_${NAME}_LIBRARIES OR NOT TPL_${NAME}_INCLUDE_DIRS)
-      message(FATAL_ERROR "Both TPL_${NAME}_LIBRARIES and TPL_${NAME}_INCLUDE_DIRS must be set for ${NAME} support.")
+  string(TOUPPER ${NAME} NAME_UPPER)
+  if(HYPRE_USING_${NAME_UPPER})
+    if(TPL_${NAME_UPPER}_LIBRARIES AND TPL_${NAME_UPPER}_INCLUDE_DIRS)
+      # Use specified TPL libraries and include dirs
+      foreach(dir ${TPL_${NAME_UPPER}_INCLUDE_DIRS})
+        if(NOT EXISTS ${dir})
+          message(FATAL_ERROR "${NAME_UPPER} include directory not found: ${dir}")
+        endif()
+      endforeach()
+
+      foreach(lib ${TPL_${NAME_UPPER}_LIBRARIES})
+        if(EXISTS ${lib})
+          message(STATUS "${NAME_UPPER} library found: ${lib}")
+        else()
+          message(WARNING "${NAME_UPPER} library not found at specified path: ${lib}")
+        endif()
+      endforeach()
+
+      target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_${NAME_UPPER}_LIBRARIES})
+      target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_${NAME_UPPER}_INCLUDE_DIRS})
+    else()
+      # Use find_package
+      find_package(${NAME} REQUIRED CONFIG)
+      if(${NAME}_FOUND)
+        message(STATUS "Found ${NAME_UPPER}")
+
+        target_link_libraries(${PROJECT_NAME} PUBLIC ${NAME})
+        target_include_directories(${PROJECT_NAME} PUBLIC ${${NAME}_INCLUDE_DIRS})
+
+        # Get and display information about the umpire target
+        get_target_property(INTERFACE_LINK_LIBRARIES ${NAME} INTERFACE_LINK_LIBRARIES)
+        get_target_property(INTERFACE_INCLUDE_DIRS ${NAME} INTERFACE_INCLUDE_DIRECTORIES)
+
+        message(STATUS "  linked libraries: ${INTERFACE_LINK_LIBRARIES}")
+        message(STATUS "  include directories: ${INTERFACE_INCLUDE_DIRS}")
+      else()
+        message(FATAL_ERROR "${NAME_UPPER} target not found. Please check your ${NAME_UPPER} installation.")
+      endif()
+
+      if(DEFINED ${NAME}_VERSION)
+        message(STATUS "  Version: ${${NAME}_VERSION}")
+      endif()
+      if(DEFINED ${NAME}_DIR)
+        message(STATUS "  Config directory: ${${NAME}_DIR}")
+      endif()
     endif()
 
-    foreach(dir ${TPL_${NAME}_INCLUDE_DIRS})
-      if(NOT EXISTS ${dir})
-        message(FATAL_ERROR "${NAME} include directory not found: ${dir}")
-      endif()
-    endforeach()
+    message(STATUS "Enabled support for using ${NAME_UPPER}.")
 
-    message(STATUS "Enabled support for using ${NAME}.")
-    
-    foreach(lib ${TPL_${NAME}_LIBRARIES})
-      if(EXISTS ${lib})
-        message(STATUS "${NAME} library found: ${lib}")
-      else()
-        message(WARNING "${NAME} library not found at specified path: ${lib}")
-      endif()
-    endforeach()
-
-    target_link_libraries(${PROJECT_NAME} PUBLIC ${TPL_${NAME}_LIBRARIES})
-    target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_${NAME}_INCLUDE_DIRS})
-    
-    if(${NAME} STREQUAL "SUPERLU" OR ${NAME} STREQUAL "DSUPERLU" OR ${NAME} STREQUAL "UMPIRE")
+    if(${NAME_UPPER} STREQUAL "SUPERLU" OR ${NAME_UPPER} STREQUAL "DSUPERLU" OR ${NAME_UPPER} STREQUAL "UMPIRE")
       target_link_libraries(${PROJECT_NAME} PUBLIC stdc++)
     endif()
 
-    set(${NAME}_FOUND TRUE PARENT_SCOPE)
+    set(${NAME_UPPER}_FOUND TRUE PARENT_SCOPE)
   endif()
 endfunction()
 
 # Function to setup TPL or internal library implementation
 function(setup_tpl_or_internal LIB_NAME)
   string(TOUPPER ${LIB_NAME} LIB_NAME_UPPER)
-  
+
   if(HYPRE_USING_HYPRE_${LIB_NAME_UPPER})
     # Use internal library
     add_subdirectory(${LIB_NAME})
@@ -114,11 +139,6 @@ function(setup_tpl_or_internal LIB_NAME)
       else()
         message(FATAL_ERROR "${LIB_NAME_UPPER} not found")
       endif()
-    endif()
-    
-    # Add USE_VENDOR_BLAS definition for BLAS
-    if(${LIB_NAME_UPPER} STREQUAL "BLAS")
-      target_compile_definitions(${PROJECT_NAME} PUBLIC "USE_VENDOR_BLAS")
     endif()
   endif()
 endfunction()
