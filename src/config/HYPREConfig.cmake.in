@@ -7,6 +7,7 @@
 
 include(CMakeFindDependencyMacro)
 
+set(HYPRE_DEPENDENCY_DIRS "@HYPRE_DEPENDENCY_DIRS@")
 set(HYPRE_ENABLE_SHARED @HYPRE_ENABLE_SHARED@)
 set(HYPRE_ENABLE_BIGINT @HYPRE_ENABLE_BIGINT@)
 set(HYPRE_ENABLE_MIXEDINT @HYPRE_ENABLE_MIXEDINT@)
@@ -48,6 +49,19 @@ set(HYPRE_WITH_UMPIRE_PINNED @HYPRE_WITH_UMPIRE_PINNED@)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
+if (UNIX)
+  list(APPEND TPL_LIBRARIES m)
+endif()
+
+if(HYPRE_WITH_CALIPER)
+  find_dependency(caliper REQUIRED HINTS ${HYPRE_DEPENDENCY_DIRS})
+  if(caliper_FOUND)
+      message(STATUS "Caliper found: ${caliper_DIR}")
+  else()
+      message(FATAL_ERROR "Caliper not found.")
+  endif()
+endif()
+
 if(NOT HYPRE_ENABLE_HYPRE_BLAS)
   find_dependency(BLAS)
 endif()
@@ -66,7 +80,7 @@ endif()
 
 if(HYPRE_WITH_MPI)
   enable_language(C)
-  find_dependency(MPI @MPI_C_VERSION@ EXACT COMPONENTS C)
+  find_dependency(MPI @MPI_C_VERSION@ COMPONENTS C)
 endif()
 
 if(HYPRE_WITH_OPENMP)
@@ -74,9 +88,18 @@ if(HYPRE_WITH_OPENMP)
 endif()
 
 if(HYPRE_WITH_CUDA)
-  find_dependency(CUDA REQUIRED)
-  if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.17)
-    find_dependency(CUDAToolkit REQUIRED)
+  find_dependency(CUDAToolkit REQUIRED COMPONENTS cusparse cublas curand)
+  
+  # Diagnostic Messages
+  if(CUDAToolkit_FOUND)
+      message(STATUS "CUDAToolkit found: ${CUDAToolkit_VERSION}")
+      if(TARGET CUDAToolkit::cusparse AND TARGET CUDAToolkit::cublas AND TARGET CUDAToolkit::curand)
+          message(STATUS "Required CUDA components found: cusparse, cublas, curand.")
+      else()
+          message(FATAL_ERROR "One or more required CUDA components (cusparse, cublas, curand) not found.")
+      endif()
+  else()
+      message(FATAL_ERROR "CUDAToolkit not found.")
   endif()
 endif()
 

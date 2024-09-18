@@ -67,6 +67,12 @@ else ()
   message(STATUS "NOTE: Could not find .git directory")
 endif ()
 
+# Ensure RPATH/RUNPATH is set properly during the build
+set(CMAKE_SKIP_BUILD_RPATH FALSE)                       # Includes rpath in the binaries being built
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)               # Use different paths for build and install
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)             # Use link-time paths
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")  # Where binaries can look for shared libraries
+
 # Set cmake module path
 set(CMAKE_MODULE_PATH "${HYPRE_SOURCE_DIR}/config/cmake" "${CMAKE_MODULE_PATH}")
 include(HYPRE_CMakeUtilities)
@@ -90,7 +96,7 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif ()
 
 # Configuration options
-option(HYPRE_ENABLE_SHARED           "Build a shared library" OFF)
+option(HYPRE_ENABLE_SHARED           "Build a shared library" ${BUILD_SHARED_LIBS})
 option(HYPRE_ENABLE_BIGINT           "Use long long int for HYPRE_Int" OFF)
 option(HYPRE_ENABLE_MIXEDINT         "Use long long int for HYPRE_BigInt, int for HYPRE_INT" OFF)
 option(HYPRE_ENABLE_SINGLE           "Use float for HYPRE_Real" OFF)
@@ -237,6 +243,17 @@ if (HYPRE_WITH_UMPIRE_PINNED)
   set(HYPRE_USING_UMPIRE_PINNED ON CACHE BOOL "" FORCE)
 endif ()
 
+# Ensure that HYPRE_ENABLE_SHARED and HYPRE_SHARED do not conflict with BUILD_SHARED_LIBS
+if(DEFINED CACHE{BUILD_SHARED_LIBS} AND (DEFINED CACHE{HYPRE_ENABLE_SHARED} OR DEFINED CACHE{HYPRE_SHARED}))
+  if ((HYPRE_ENABLE_SHARED AND NOT BUILD_SHARED_LIBS) OR
+      (NOT HYPRE_ENABLE_SHARED AND BUILD_SHARED_LIBS))
+    message(FATAL_ERROR "Incompatible options: HYPRE_ENABLE_SHARED (${HYPRE_ENABLE_SHARED}) and BUILD_SHARED_LIBS (${BUILD_SHARED_LIBS}) must have the same value.")
+  elseif ((HYPRE_SHARED AND NOT BUILD_SHARED_LIBS) OR
+          (NOT HYPRE_SHARED AND BUILD_SHARED_LIBS))
+    message(FATAL_ERROR "Incompatible options: HYPRE_SHARED (${HYPRE_SHARED}) and BUILD_SHARED_LIBS (${BUILD_SHARED_LIBS}) must have the same value.")
+  endif()
+endif()
+
 # Set MPI compile flags
 if (HYPRE_WITH_MPI)
   configure_mpi_target()
@@ -267,8 +284,8 @@ set(BUILD_SHARED_LIBS ${HYPRE_SHARED} CACHE INTERNAL "Build shared libraries" FO
 
 # Set output directory for the library
 set_target_properties(HYPRE PROPERTIES
-  VERSION ${HYPRE_VERSION}
-  SOVERSION ${HYPRE_NUMBER}
+  VERSION "${HYPRE_VERSION}"
+  SOVERSION "${HYPRE_VERSION}"
   ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
@@ -301,6 +318,10 @@ if (HYPRE_USING_FEI)
   target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_FEI_INCLUDE_DIRS})
 endif(HYPRE_USING_FEI)
 
+# TPL variables
+set(HYPRE_DEPENDENCY_DIRS "" CACHE INTERNAL "List of absolute paths to TPL directories")
+set(HYPRE_NEEDS_CXX OFF CACHE INTERNAL "Flag to indicate if C++ is needed for TPLs")
+
 # Setup TPLs
 setup_tpl_or_internal(blas)
 setup_tpl_or_internal(lapack)
@@ -309,6 +330,14 @@ setup_tpl(dsuperlu)
 setup_tpl(magma)
 setup_tpl(caliper)
 setup_tpl(umpire)
+
+# Some TPLs need C++ to be enabled
+if(HYPRE_NEEDS_CXX)
+  enable_language(CXX)
+endif()
+
+# Print the directories used to hint the user about the active TPLs
+message(STATUS "Dependency directories: ${HYPRE_DEPENDENCY_DIRS}")
 
 # Configure a header file to pass CMake settings to the source code
 configure_file(
@@ -435,6 +464,7 @@ export(PACKAGE ${PROJECT_NAME})
 
 # Print the status of the options for debugging purposes
 print_option_status(
+    BUILD_SHARED_LIBS
     HYPRE_ENABLE_SHARED
     HYPRE_ENABLE_BIGINT
     HYPRE_ENABLE_MIXEDINT
