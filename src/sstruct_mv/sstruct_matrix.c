@@ -2066,11 +2066,12 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
             hypre_BoxGetSize(grid_box, loop_size);
             hypre_SetIndex(stride, 1);
             hypre_CopyToIndex(hypre_BoxIMin(grid_box), ndim, start);
+#ifndef FIX_GPU_COMPILATION
             hypre_BoxLoop1Begin(ndim, loop_size, grid_box, start, stride, ii);
             {
                hypre_BoxLoopGetIndex(index);
                /* WM: todo - this mapping to the unstructured indices only works with no inter-variable couplings? */
-               if (hypre_CSRMatrixI(A_u_diag)[cnt+1] - hypre_CSRMatrixI(A_u_diag)[cnt] + 
+               if (hypre_CSRMatrixI(A_u_diag)[cnt+1] - hypre_CSRMatrixI(A_u_diag)[cnt] +
                      hypre_CSRMatrixI(A_u_offd)[cnt+1] - hypre_CSRMatrixI(A_u_offd)[cnt] > 0)
                {
                   hypre_BoxLoopGetIndex(index);
@@ -2083,7 +2084,7 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
                cnt++;
             }
             hypre_BoxLoop1End(ii);
-
+#endif
             /* WM: todo - make sure threshold is set such that there are no extra rows here! */
             if (num_indices)
             {
@@ -2105,7 +2106,7 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
                   hypre_SStructUMatrixSetBoxValues(A, part, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries, hypre_BoxArrayBox(indices_boxa, j), values, -2);
 
                   /* ADD values to structured matrix */
-                  /* WM: todo - just call to hypre_SStructMatrixSetBoxValues() instead of 
+                  /* WM: todo - just call to hypre_SStructMatrixSetBoxValues() instead of
                    * hypre_SStructPMatrixSetBoxValues() and hypre_SStructMatrixSetInterPartValues()? */
                   hypre_SStructPMatrixSetBoxValues(pmatrix, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries, hypre_BoxArrayBox(indices_boxa, j), values, action);
                   if (nvneighbors[part][var] > 0)

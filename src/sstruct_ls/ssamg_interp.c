@@ -507,10 +507,11 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                hypre_BoxGetSize(compute_box, loop_size);
                hypre_SetIndex(stride, 1);
                hypre_CopyToIndex(hypre_BoxIMin(compute_box), ndim, start);
+#ifndef FIX_GPU_COMPILATION
                hypre_BoxLoop1Begin(ndim, loop_size, compute_box, start, stride, ii);
                {
                   /* WM: todo - this mapping to the unstructured indices only works with no inter-variable couplings? */
-                  if (hypre_CSRMatrixI(A_u_diag)[cnt+1] - hypre_CSRMatrixI(A_u_diag)[cnt] + 
+                  if (hypre_CSRMatrixI(A_u_diag)[cnt+1] - hypre_CSRMatrixI(A_u_diag)[cnt] +
                         hypre_CSRMatrixI(A_u_offd)[cnt+1] - hypre_CSRMatrixI(A_u_offd)[cnt] > 0)
                   {
                      hypre_BoxLoopGetIndex(index);
@@ -523,6 +524,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                   cnt++;
                }
                hypre_BoxLoop1End(ii);
+#endif
 
                /* Create box array from indices marking where A_u is non-trivial */
                if (num_indices)
@@ -563,9 +565,12 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       hypre_TFree(convert_boxa, HYPRE_MEMORY_HOST);
 
       /* Add structured boundary portion to unstructured portion */
-      hypre_ParCSRMatrix *A_struct_bndry = hypre_IJMatrixObject(A_struct_bndry_ij);
+      void               *A_obj;
+      hypre_ParCSRMatrix *A_struct_bndry;
       hypre_ParCSRMatrix *A_bndry;
 
+      HYPRE_IJMatrixGetObject(A_struct_bndry_ij, &A_obj);
+      A_struct_bndry = (hypre_ParCSRMatrix *) A_obj;
       hypre_ParCSRMatrixAdd(1.0, A_struct_bndry, 1.0, A_u, &A_bndry);
 
       /* WM: todo - I'm adding a zero diagonal here because if BoomerAMG interpolation gets a */
@@ -709,7 +714,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       for (i = 0; i < hypre_CSRMatrixNumRows(A_u_diag); i++)
       {
          /* If this is a C-point or a zero row in A_u, zero out P_u */
-         if (CF_marker[i] == 1 || hypre_CSRMatrixI(A_u_diag)[i+1] - hypre_CSRMatrixI(A_u_diag)[i] + 
+         if (CF_marker[i] == 1 || hypre_CSRMatrixI(A_u_diag)[i+1] - hypre_CSRMatrixI(A_u_diag)[i] +
                hypre_CSRMatrixI(A_u_offd)[i+1] - hypre_CSRMatrixI(A_u_offd)[i] == 0)
          {
             for (j = hypre_CSRMatrixI(P_u_diag)[i]; j < hypre_CSRMatrixI(P_u_diag)[i+1]; j++)
