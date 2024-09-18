@@ -160,8 +160,13 @@ HYPRE_Int hypre_IJVectorGetValuesPar ( hypre_IJVector *vector, HYPRE_Int num_val
 HYPRE_Int hypre_IJVectorAssembleOffProcValsPar ( hypre_IJVector *vector,
                                                  HYPRE_Int max_off_proc_elmts, HYPRE_Int current_num_elmts, HYPRE_MemoryLocation memory_location,
                                                  HYPRE_BigInt *off_proc_i, HYPRE_Complex *off_proc_data );
+HYPRE_Int hypre_IJVectorAssembleOffProcValsParMultiVec ( hypre_IJVector *vector,
+																			HYPRE_Int max_off_proc_elmts, HYPRE_Int current_num_elmts, HYPRE_MemoryLocation memory_location,
+																			HYPRE_BigInt *off_proc_i, HYPRE_Int *off_proc_comp, HYPRE_Complex *off_proc_data );
 HYPRE_Int hypre_IJVectorSetAddValuesParDevice(hypre_IJVector *vector, HYPRE_Int num_values,
                                               const HYPRE_BigInt *indices, const HYPRE_Complex *values, const char *action);
+HYPRE_Int hypre_IJVectorSetAddValuesParMultiVecDevice(hypre_IJVector *vector, HYPRE_Int num_values,
+																		const HYPRE_BigInt *indices, const HYPRE_BigInt *components, const HYPRE_Complex *values, const char *action);
 HYPRE_Int hypre_IJVectorAssembleParDevice(hypre_IJVector *vector);
 
 HYPRE_Int hypre_IJVectorUpdateValuesDevice( hypre_IJVector *vector, HYPRE_Int num_values,
