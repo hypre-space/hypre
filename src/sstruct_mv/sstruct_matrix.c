@@ -2017,7 +2017,7 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
    HYPRE_Int                ndim         = hypre_SStructGridNDim(grid);
    hypre_BoxArray          *grid_boxes;
    hypre_Box               *grid_box = hypre_BoxCreate(ndim);
-   HYPRE_Int                i, j, ii, cnt, var, entry, part, nvars, nSentries, num_indices;
+   HYPRE_Int                i, j, cnt, var, entry, part, nvars, nSentries, num_indices;
    HYPRE_Real               threshold = 1.0;
    HYPRE_Int               *indices[ndim];
    hypre_BoxArray          *indices_boxa = NULL;
@@ -2149,12 +2149,9 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
    MPI_Comm                 comm     = hypre_SStructMatrixComm(matrix);
    HYPRE_Int                ndim     = hypre_SStructMatrixNDim(matrix);
    HYPRE_Int                nparts   = hypre_SStructMatrixNParts(matrix);
-   HYPRE_Int               *Sentries = hypre_SStructMatrixSEntries(matrix);
-   HYPRE_Int                mat_type = hypre_SStructMatrixObjectType(matrix);
    HYPRE_IJMatrix           ij_A     = hypre_SStructMatrixIJMatrix(matrix);
    hypre_SStructGraph      *graph    = hypre_SStructMatrixGraph(matrix);
    hypre_SStructGrid       *grid     = hypre_SStructGraphGrid(graph);
-   hypre_SStructGrid       *dom_grid = hypre_SStructGraphDomGrid(graph);
    hypre_SStructPGrid      *pgrid;
    hypre_StructGrid        *sgrid;
    hypre_BoxArray          *grid_boxes;
@@ -2490,10 +2487,6 @@ hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_IJMatrix         ij_A     = hypre_SStructMatrixIJMatrix(A);
    hypre_SStructPGrid    *pgrid;
    hypre_StructGrid      *sgrid;
-   hypre_SStructStencil  *stencil;
-
-   hypre_SStructPMatrix  *pA;
-   hypre_AuxParCSRMatrix *aux_matrix;
 
    hypre_BoxArrayArray ***convert_boxaa;
    hypre_BoxArrayArray   *pbnd_boxaa;
@@ -2505,24 +2498,14 @@ hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix   *A,
    hypre_Box             *grid_box;
    hypre_Box             *convert_box;
 
-   hypre_Index            ustride;
-   hypre_Index            loop_size;
-   hypre_IndexRef         start;
-
-   HYPRE_Int              nrows;
-   HYPRE_Int              ncols;
-   HYPRE_Int             *row_sizes;
-
    HYPRE_BigInt           sizes[4];
-   HYPRE_Int              entry, part, var, nvars;
-   HYPRE_Int              nnzs;
-   HYPRE_Int              i, j, k, kk, m;
+   HYPRE_Int              part, var, nvars;
+   HYPRE_Int              i, j, k, kk;
    HYPRE_Int              num_boxes;
    HYPRE_Int              pbnd_boxaa_size;
    HYPRE_Int              convert_boxaa_size;
    HYPRE_Int              grid_box_id;
    HYPRE_Int              convert_box_id;
-   HYPRE_Int             *num_ghost;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -2535,8 +2518,6 @@ hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix   *A,
 
    /* Get row and column ranges */
    HYPRE_IJMatrixGetLocalRange(ij_A, &sizes[0], &sizes[1], &sizes[2], &sizes[3]);
-   nrows = (HYPRE_Int) (sizes[1] - sizes[0] + 1);
-   ncols = (HYPRE_Int) (sizes[3] - sizes[2] + 1);
 
    /* Find boxes to be converted */
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "Find boxes");

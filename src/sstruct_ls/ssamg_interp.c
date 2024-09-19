@@ -544,7 +544,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
                   for (j = 0; j < ndim; j++)
                   {
-                     indices[j] = hypre_TFree(indices[j], HYPRE_MEMORY_HOST);
+                     hypre_TFree(indices[j], HYPRE_MEMORY_HOST);
                   }
                }
             }
