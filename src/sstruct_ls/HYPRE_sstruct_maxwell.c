@@ -111,7 +111,7 @@ HYPRE_SStructMaxwellSetGrad( HYPRE_SStructSolver  solver,
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_SStructMaxwellSetRfactors( HYPRE_SStructSolver  solver,
-                                 HYPRE_Int            rfactors[3] )
+                                 HYPRE_Int           *rfactors )
 {
    return ( hypre_MaxwellSetRfactors( (void *)         solver,
                                       rfactors ) );
@@ -234,7 +234,7 @@ HYPRE_SStructMaxwellGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
 HYPRE_Int
 HYPRE_SStructMaxwellPhysBdy( HYPRE_SStructGrid  *grid_l,
                              HYPRE_Int           num_levels,
-                             HYPRE_Int           rfactors[3],
+                             HYPRE_Int          *rfactors,
                              HYPRE_Int        ***BdryRanks_ptr,
                              HYPRE_Int         **BdryRanksCnt_ptr )
 {
