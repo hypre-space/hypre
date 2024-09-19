@@ -3536,7 +3536,7 @@ main( hypre_int argc,
       values_size = 1;
       values_size = hypre_max(values_size, data.fem_nvars * data.fem_nvars);
       values_size = hypre_max(values_size, data.max_boxsize);
-      values_size = hypre_max(values_size, data.fem_nsparse);
+      values_size = hypre_max(values_size, data.max_boxsize * data.fem_nsparse);
       for (part = 0; part < nparts; part++)
       {
          pdata = data.pdata[part];
