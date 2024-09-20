@@ -25,15 +25,26 @@ StencilCreate: 1 [7]
 StencilSetEntry: 0  0 [ 0  0  0] 0 6.0
 StencilSetEntry: 0  1 [-1  0  0] 0 -1.0
 StencilSetEntry: 0  2 [ 1  0  0] 0 -1.0
-StencilSetEntry: 0  3 [ 0  1  0] 0 -1.0
-StencilSetEntry: 0  4 [ 0 -1  0] 0 -1.0
-StencilSetEntry: 0  5 [ 0  0  1] 0 -1.0
-StencilSetEntry: 0  6 [ 0  0 -1] 0 -1.0
+StencilSetEntry: 0  3 [ 0 -1  0] 0 -1.0
+StencilSetEntry: 0  4 [ 0  1  0] 0 -1.0
+StencilSetEntry: 0  5 [ 0  0 -1] 0 -1.0
+StencilSetEntry: 0  6 [ 0  0  1] 0 -1.0
 
 ###########################################################
 
 # GraphSetStencil: part var stencil_num
 GraphSetStencil: 0 0 0
+
+###########################################################
+
+# MatrixSetValues: \
+#   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
+MatrixSetValues: 0 (1- 1- 1-) (1- 4+ 4+) [1 1 1] 0 1 0.0
+MatrixSetValues: 0 (4+ 1- 1-) (4+ 4+ 4+) [1 1 1] 0 2 0.0
+MatrixSetValues: 0 (1- 1- 1-) (4+ 1- 4+) [1 1 1] 0 3 0.0
+MatrixSetValues: 0 (1- 4+ 1-) (4+ 4+ 4+) [1 1 1] 0 4 0.0
+MatrixSetValues: 0 (1- 1- 1-) (4+ 4+ 1-) [1 1 1] 0 5 0.0
+MatrixSetValues: 0 (1- 1- 4+) (4+ 4+ 4+) [1 1 1] 0 6 0.0
 
 ###########################################################
 

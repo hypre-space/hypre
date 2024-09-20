@@ -547,6 +547,10 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                      hypre_TFree(indices[j], HYPRE_MEMORY_HOST);
                   }
                }
+               for (j = 0; j < ndim; j++)
+               {
+                  hypre_TFree(indices[j], HYPRE_MEMORY_HOST);
+               }
             }
             hypre_BoxDestroy(compute_box);
          }
@@ -588,6 +592,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       }
       hypre_CSRMatrixI(zero_diag)[ hypre_CSRMatrixNumRows(zero_diag) ] = hypre_CSRMatrixNumRows(zero_diag);
       hypre_ParCSRMatrixAdd(1.0, zero, 1.0, A_bndry, &A_u_aug);
+      hypre_ParCSRMatrixDestroy(A_bndry);
       hypre_ParCSRMatrixDestroy(zero);
 
       /* Get CF splitting */
@@ -675,6 +680,10 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
                /* Increment box start index */
                box_start_index += hypre_BoxVolume(compute_box);
+
+               /* Clean up */
+               hypre_BoxDestroy(compute_box);
+               hypre_BoxDestroy(shrink_box);
             }
          }
       }
