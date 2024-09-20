@@ -52,6 +52,20 @@ FILES="\
  ${TNAME}.out.41\
  ${TNAME}.out.42\
  ${TNAME}.out.43\
+ ${TNAME}.out.44\
+ ${TNAME}.out.45\
+ ${TNAME}.out.46\
+ ${TNAME}.out.47\
+ ${TNAME}.out.48\
+ ${TNAME}.out.49\
+ ${TNAME}.out.50\
+ ${TNAME}.out.51\
+ ${TNAME}.out.52\
+ ${TNAME}.out.53\
+ ${TNAME}.out.56\
+ ${TNAME}.out.57\
+ ${TNAME}.out.58\
+ ${TNAME}.out.59\
  ${TNAME}.out.121\
  ${TNAME}.out.122\
  ${TNAME}.out.123\
