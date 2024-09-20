@@ -2113,9 +2113,14 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
                      hypre_SStructMatrixSetInterPartValues(A, part, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries,
                                                            hypre_BoxArrayBox(indices_boxa, j), values, 1);
                   }
+                  hypre_TFree(values, HYPRE_MEMORY_DEVICE);
                }
                hypre_BoxArrayDestroy(indices_boxa);
                indices_boxa = NULL;
+            }
+            for (j = 0; j < ndim; j++)
+            {
+                hypre_TFree(indices[j], HYPRE_MEMORY_HOST);
             }
 
          } /* Loop over boxes */
