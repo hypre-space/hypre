@@ -149,7 +149,7 @@ co="--enable-bigint --enable-debug"
 # ./renametest.sh basic $output_dir/basic--enable-mixedint
 
 co="--enable-debug --with-print-errors"
-RO="-sstruct -struct -sstructmat -structmat"
+RO="-sstruct-recmat -struct -sstructmat -structmat"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO -error -rt -valgrind
 ./renametest.sh basic $output_dir/basic--valgrind
 
@@ -157,7 +157,7 @@ RO="-sstruct -struct -sstructmat -structmat"
 #
 # # CMake build and run tests
 # mo="-j"
-# ro="-ams -ij -sstruct -struct -lobpcg"
+# ro="-ams -ij -sstruct-recmat -struct -lobpcg"
 # eo=""
 # 
 # co=""
