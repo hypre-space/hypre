@@ -20,23 +20,6 @@ extern "C" {
 #endif
 
 /*--------------------------------------------------------------------------
- *  HYPRE_SStructSetRandomValues
- *
- * TODO: This does not belong here
- *--------------------------------------------------------------------------*/
-
-void
-hypre_F90_IFACE(hypre_sstructsetrandomvalues, HYPRE_SSTRUCTSETRANDOMVALUES)
-(hypre_F90_Obj *v,
- hypre_F90_Int *seed,
- hypre_F90_Int *ierr)
-{
-   *ierr = (hypre_F90_Int)
-           ( hypre_SStructSetRandomValues(
-                (void *) v, hypre_F90_PassInt (seed) ));
-}
-
-/*--------------------------------------------------------------------------
  *  HYPRE_SStructVectorSetupInterpreter
  *--------------------------------------------------------------------------*/
 

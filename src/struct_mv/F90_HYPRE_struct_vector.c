@@ -257,6 +257,22 @@ hypre_F90_IFACE(hypre_structvectorsetconstantva, HYPRE_STRUCTVECTORSETCONSTANTVA
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructVectorSetRandomValues
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structvectorsetrandomvalu, HYPRE_STRUCTVECTORSETRANDOMVALU)
+(hypre_F90_Obj *vector,
+ hypre_F90_Int *seed,
+ hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+           ( hypre_StructVectorSetRandomValues(
+                (hypre_StructVector *) vector,
+                hypre_F90_PassInt (seed) ));
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructVectorGetMigrateCommPkg
  *--------------------------------------------------------------------------*/
 

@@ -403,7 +403,6 @@ HYPRE_Int HYPRE_SStructGMRESGetFinalRelativeResidualNorm ( HYPRE_SStructSolver s
 HYPRE_Int HYPRE_SStructGMRESGetResidual ( HYPRE_SStructSolver solver, void **residual );
 
 /* HYPRE_sstruct_int.c */
-HYPRE_Int hypre_SStructSetRandomValues ( void *v, HYPRE_Int seed );
 HYPRE_Int HYPRE_SStructSetupInterpreter ( mv_InterfaceInterpreter *i );
 HYPRE_Int HYPRE_SStructSetupMatvec ( HYPRE_MatvecFunctions *mv );
 

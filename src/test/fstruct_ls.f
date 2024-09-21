@@ -776,23 +776,6 @@
 
 
 !***********************************************************************
-!     fhypre_structsetrandomvalues
-!***********************************************************************
-      subroutine fhypre_structsetrandomvalues(fvector, fseed)
-      integer ierr
-      integer fseed
-      integer*8 fvector
-
-      call hypre_StructSetRandomValues(fvector, fseed, ierr)
-      if (ierr .ne. 0) then
-         print *, 'fhypre_structsetrandomvalues: err = ', ierr
-      endif
-
-      return
-      end
-
-
-!***********************************************************************
 !     fhypre_structsetupinterpreter
 !***********************************************************************
       subroutine fhypre_structsetupinterpreter(fi)

@@ -71,9 +71,6 @@ HYPRE_Int hypre_HybridSetup ( void *hybrid_vdata, hypre_StructMatrix *A, hypre_S
 HYPRE_Int hypre_HybridSolve ( void *hybrid_vdata, hypre_StructMatrix *A, hypre_StructVector *b,
                               hypre_StructVector *x );
 
-/* HYPRE_struct_int.c */
-HYPRE_Int hypre_StructSetRandomValues ( void *v, HYPRE_Int seed );
-
 /* HYPRE_struct_pfmg.c */
 HYPRE_Int hypre_PFMGSetDeviceLevel( void *pfmg_vdata, HYPRE_Int   device_level  );
 
