@@ -479,8 +479,8 @@ hypre_SStructGridRef( hypre_SStructGrid  *grid,
  * hypre_SStructGridComputeGlobalSizes
  *
  * Computes the global sizes of the semi-struct grid, part grids, and struct
- * grids. It reduces the number of calls to MPI_Allreduce to a single one in
- * contrast to nparts*nvars when calling hypre_StructGridComputeGlobalSize
+ * grids. It reduces the number of calls to hypre_MPI_Allreduce to a single one
+ * in contrast to nparts*nvars when calling hypre_StructGridComputeGlobalSize
  * for each StructGrid.
  *--------------------------------------------------------------------------*/
 

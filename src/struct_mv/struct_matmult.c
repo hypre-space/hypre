@@ -1165,7 +1165,7 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
 /*--------------------------------------------------------------------------
  * hypre_StructMatmultCompute_core_double
  *
- * Core function for computing the double product of coefficients.
+ * Core function for computing the double-product of coefficients.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1404,7 +1404,7 @@ hypre_StructMatmultCompute_core_double( hypre_StructMatmultHelper *a,
 /*--------------------------------------------------------------------------
  * hypre_StructMatmultCompute_core_triple
  *
- * Core function for computing the triple product of coefficients
+ * Core function for computing the triple-product of coefficients
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -2043,12 +2043,12 @@ hypre_StructMatmultCompute_core_generic( hypre_StructMatmultHelper *a,
 /*--------------------------------------------------------------------------
  * hypre_StructMatmultCompute_core_1d
  *
- * Core function for computing the double product of variable coefficients
+ * Core function for computing the double-product of variable coefficients
  * living on the same data space.
  *
  * "1d" means:
  *   "1": single data space.
- *   "d": double product.
+ *   "d": double-product.
  *
  * This can be used for the scenarios:
  *   1) VCF * VCF.
@@ -2222,12 +2222,12 @@ hypre_StructMatmultCompute_core_1d( hypre_StructMatmultHelper *a,
 /*--------------------------------------------------------------------------
  * hypre_StructMatmultCompute_core_1db
  *
- * Core function for computing the double product of a variable coefficient
+ * Core function for computing the double-product of a variable coefficient
  * and a constant coefficient living on the same data space.
  *
  * "1db" means:
  *   "1": single data space.
- *   "d": double product.
+ *   "d": double-product.
  *   "b": single bitmask.
  *
  * This can be used for the scenarios:
@@ -2408,7 +2408,7 @@ hypre_StructMatmultCompute_core_1db( hypre_StructMatmultHelper *a,
  *
  * "1dbb" means:
  *   "1" : single data space.
- *   "d" : double product.
+ *   "d" : double-product.
  *   "bb": two bitmasks.
  *
  * This can be used for the scenario:
@@ -2582,12 +2582,12 @@ hypre_StructMatmultCompute_core_1dbb( hypre_StructMatmultHelper *a,
 /*--------------------------------------------------------------------------
  * hypre_StructMatmultCompute_core_2d
  *
- * Core function for computing the double product of variable coefficients
+ * Core function for computing the double-product of variable coefficients
  * living on data spaces "g" and "h", respectively.
  *
  * "2d" means:
  *   "2": two data spaces.
- *   "d": double product.
+ *   "d": double-product.
  *
  * This can be used for the scenarios:
  *   1) VCF * VCC.
@@ -2758,7 +2758,7 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
  *
  * "2db" means:
  *   "2": two data spaces.
- *   "d": double product.
+ *   "d": double-product.
  *   "b": single bitmask.
  *
  * This can be used for the scenarios:
@@ -2926,12 +2926,12 @@ hypre_StructMatmultCompute_core_2db( hypre_StructMatmultHelper *a,
 /*--------------------------------------------------------------------------
  * hypre_StructMatmultCompute_core_1t
  *
- * Core function for computing the triple product of variable coefficients
+ * Core function for computing the triple-product of variable coefficients
  * living on the same data space.
  *
  * "1t" means:
  *   "1": single data space.
- *   "t": triple product.
+ *   "t": triple-product.
  *
  * This can be used for the scenarios:
  *   1) VCF * VCF * CCF.
@@ -3105,13 +3105,13 @@ hypre_StructMatmultCompute_core_1t( hypre_StructMatmultHelper *a,
 /*--------------------------------------------------------------------------
  * hypre_StructMatmultCompute_core_1tb
  *
- * Core function for computing the triple product of two variable coefficients
+ * Core function for computing the triple-product of two variable coefficients
  * living on the same data space and one constant coefficient that requires
  * the usage of a bitmask.
  *
  * "1tb" means:
  *   "1": single data space.
- *   "t": triple product.
+ *   "t": triple-product.
  *   "b": single bitmask.
  *
  * This can be used for the scenarios:
@@ -3294,7 +3294,7 @@ hypre_StructMatmultCompute_core_1tb( hypre_StructMatmultHelper *a,
  *
  * "1tbb" means:
  *   "1" : single data space.
- *   "t" : triple product.
+ *   "t" : triple-product.
  *   "bb": two bitmasks.
  *
  * This can be used for the scenarios:
@@ -3476,7 +3476,7 @@ hypre_StructMatmultCompute_core_1tbb( hypre_StructMatmultHelper *a,
  *
  * "1tbb" means:
  *   "1" : single data space.
- *   "t" : triple product.
+ *   "t" : triple-product.
  *   "bbb": three bitmasks.
  *
  * This can be used for the scenario:
@@ -3650,13 +3650,13 @@ hypre_StructMatmultCompute_core_1tbbb( hypre_StructMatmultHelper *a,
 /*--------------------------------------------------------------------------
  * hypre_StructMatmultCompute_core_2t
  *
- * Core function for computing the triple product of variable coefficients
+ * Core function for computing the triple-product of variable coefficients
  * in which two of them live on the same data space "g" and the other lives
  * on data space "h"
  *
  * "2t" means:
  *   "2": two data spaces.
- *   "t": triple product.
+ *   "t": triple-product.
  *
  * This can be used for the scenarios:
  *   1) VCF * VCF * VCC.
@@ -3833,7 +3833,7 @@ hypre_StructMatmultCompute_core_2t( hypre_StructMatmultHelper *a,
  *
  * "2tb" means:
  *   "2": two data spaces.
- *   "t": triple product.
+ *   "t": triple-product.
  *   "b": single bitmask.
  *
  * This can be used for the scenarios:
@@ -4013,7 +4013,7 @@ hypre_StructMatmultCompute_core_2tb( hypre_StructMatmultHelper *a,
  * "2etb" means:
  *   "2": two data spaces.
  *   "e": data spaces for variable coefficients are the same.
- *   "t": triple product.
+ *   "t": triple-product.
  *   "b": single bitmask.
  *
  * This can be used for the scenarios:
@@ -4189,7 +4189,7 @@ hypre_StructMatmultCompute_core_2etb( hypre_StructMatmultHelper *a,
  *
  * "2etb" means:
  *   "2" : two data spaces.
- *   "t" : triple product.
+ *   "t" : triple-product.
  *   "bb": two bitmasks.
  *--------------------------------------------------------------------------*/
 
