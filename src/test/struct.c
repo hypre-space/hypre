@@ -2978,7 +2978,7 @@ SetValuesVector( hypre_StructGrid   *grid,
 
    ndim  = hypre_StructGridNDim(grid);
    boxes = hypre_StructGridBoxes(grid);
-   hypre_SeedRand(value);
+   hypre_SeedRand((HYPRE_Int)value);
 
    /* Compute max. volume among boxes, so we allocate values only once */
    max_volume = 0;

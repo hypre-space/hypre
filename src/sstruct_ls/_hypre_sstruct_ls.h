@@ -716,7 +716,7 @@ HYPRE_Int hypre_SSAMGDestroy ( void *ssamg_vdata );
 HYPRE_Int hypre_SSAMGSetTol ( void *ssamg_vdata , HYPRE_Real tol );
 HYPRE_Int hypre_SSAMGSetMaxIter ( void *ssamg_vdata , HYPRE_Int max_iter );
 HYPRE_Int hypre_SSAMGSetMaxLevels ( void *ssamg_vdata , HYPRE_Int max_levels );
-HYPRE_Int hypre_SSAMGSetRelChange ( void *ssamg_vdata , HYPRE_Real rel_change );
+HYPRE_Int hypre_SSAMGSetRelChange ( void *ssamg_vdata , HYPRE_Int rel_change );
 HYPRE_Int hypre_SSAMGSetZeroGuess ( void *ssamg_vdata , HYPRE_Int zero_guess );
 HYPRE_Int hypre_SSAMGSetNonGalerkinRAP ( void *ssamg_vdata , HYPRE_Int non_galerkin );
 HYPRE_Int hypre_SSAMGSetDxyz ( void *ssamg_vdata , HYPRE_Int nparts , HYPRE_Real **dxyz );

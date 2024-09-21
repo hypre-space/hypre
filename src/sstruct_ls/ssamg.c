@@ -191,7 +191,7 @@ hypre_SSAMGSetMaxLevels( void       *ssamg_vdata,
 
 HYPRE_Int
 hypre_SSAMGSetRelChange( void       *ssamg_vdata,
-                         HYPRE_Real  rel_change)
+                         HYPRE_Int   rel_change)
 {
    hypre_SSAMGData *ssamg_data = (hypre_SSAMGData *) ssamg_vdata;
 

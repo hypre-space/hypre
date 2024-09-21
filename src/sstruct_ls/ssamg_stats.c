@@ -247,7 +247,8 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       min_stsize = HYPRE_INT_MAX;
       max_stsize = HYPRE_INT_MIN;
 
-      num_ghrows = num_dofs = num_boxes = num_parts = avg_stsize = 0;
+      num_ghrows = num_dofs = num_boxes = num_parts = 0;
+      avg_stsize = 0.0;
       for (part = 0; part < nparts; part++)
       {
          pmatrix = hypre_SStructMatrixPMatrix(A_l[l], part);
@@ -421,7 +422,8 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
          ndigits_S[2] = hypre_max(hypre_ndigits(global_num_dofs[l]) + offset, ndigits_S[2]);
          ndigits_S[3] = hypre_max(hypre_ndigits(global_min_stsize[l]) + offset, ndigits_S[3]);
          ndigits_S[4] = hypre_max(hypre_ndigits(global_max_stsize[l]) + offset, ndigits_S[4]);
-         ndigits_S[5] = hypre_max(hypre_ndigits(global_avg_stsize[l]) + offset, ndigits_S[5]);
+         ndigits_S[5] = hypre_max(hypre_ndigits((HYPRE_BigInt)global_avg_stsize[l]) + offset,
+                                  ndigits_S[5]);
       }
 
       header[0]  = 3 + (ndigits_S[0] + ndigits_S[1]) / 2;
@@ -479,7 +481,8 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
          ndigits_U[3] = hypre_max(hypre_ndigits(global_num_nonzeros[l]) + offset, ndigits_U[3]);
          ndigits_U[4] = hypre_max(hypre_ndigits(global_min_entries[l]) + offset, ndigits_U[4]);
          ndigits_U[5] = hypre_max(hypre_ndigits(global_max_entries[l]) + offset, ndigits_U[5]);
-         ndigits_U[6] = hypre_max(hypre_ndigits(global_avg_entries[l]) + offset, ndigits_U[6]);
+         ndigits_U[6] = hypre_max(hypre_ndigits((HYPRE_BigInt)global_avg_entries[l]) +
+                                  offset, ndigits_U[6]);
       }
 
       header[0] = 3 + ndigits_U[0] + ndigits_U[1];

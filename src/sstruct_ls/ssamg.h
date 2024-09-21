@@ -33,7 +33,7 @@ typedef struct hypre_SSAMGData_struct
    HYPRE_Int               relax_type;         /* relaxation type flag */
    HYPRE_Int               interp_type;        /* interp type flag */
    HYPRE_Real              usr_relax_weight;   /* user relax weight */
-   HYPRE_Real              usr_set_rweight;    /* user sets relax weight */
+   HYPRE_Int               usr_set_rweight;    /* user sets relax weight */
    HYPRE_Real             *dxyz[HYPRE_MAXDIM]; /* nparts array used to determine cdir */
 
    /* Coarse solver data */
