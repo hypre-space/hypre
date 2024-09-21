@@ -567,7 +567,8 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       hypre_TFree(convert_boxa, HYPRE_MEMORY_HOST);
 
       /* Add structured boundary portion to unstructured portion */
-      hypre_ParCSRMatrix *A_struct_bndry = hypre_IJMatrixObject(A_struct_bndry_ij);
+      hypre_ParCSRMatrix *A_struct_bndry =
+         (hypre_ParCSRMatrix *)hypre_IJMatrixObject(A_struct_bndry_ij);
       hypre_ParCSRMatrix *A_bndry;
 
       hypre_ParCSRMatrixAdd(1.0, A_struct_bndry, 1.0, A_u, &A_bndry);
