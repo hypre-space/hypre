@@ -3,6 +3,18 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+# Function to set hypre build options
+function(set_hypre_option category name description default_value)
+  option(${name} "${description}" ${default_value})
+  if (${category} STREQUAL "CUDA" OR ${category} STREQUAL "HIP" OR ${category} STREQUAL "SYCL")
+    if (HYPRE_WITH_${category} STREQUAL "ON")
+      set(GPU_OPTIONS ${GPU_OPTIONS} ${name} PARENT_SCOPE)
+    endif()
+  else()
+    set(${category}_OPTIONS ${${category}_OPTIONS} ${name} PARENT_SCOPE)
+  endif()
+endfunction()
+
 # Function to set generic variables based on condition
 function(set_conditional_var condition var_name)
   if(${condition})
@@ -12,7 +24,7 @@ function(set_conditional_var condition var_name)
 endfunction()
 
 # Function to set conditional hypre build options
-function(set_conditional_option condition_prefix var_prefix var_name)
+function(set_conditional_hypre_option condition_prefix var_prefix var_name)
   if(HYPRE_${condition_prefix}_${var_name})
     if(var_prefix STREQUAL "")
       set(HYPRE_${var_name} ON CACHE BOOL "" FORCE)
@@ -178,7 +190,7 @@ endfunction()
 function(setup_tpl_or_internal LIB_NAME)
   string(TOUPPER ${LIB_NAME} LIB_NAME_UPPER)
 
-  if(HYPRE_USING_HYPRE_${LIB_NAME_UPPER})
+  if(HYPRE_USING_INTERNAL_${LIB_NAME_UPPER})
     # Use internal library
     add_subdirectory(${LIB_NAME})
     message(STATUS "Using internal ${LIB_NAME_UPPER}")

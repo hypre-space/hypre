@@ -80,71 +80,71 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif ()
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}") 
 
-# Configuration options
-option(HYPRE_ENABLE_SHARED               "Build a shared library" ${BUILD_SHARED_LIBS})
-option(HYPRE_ENABLE_BIGINT               "Use long long int for HYPRE_Int" OFF)
-option(HYPRE_ENABLE_MIXEDINT             "Use long long int for HYPRE_BigInt, int for HYPRE_INT" OFF)
-option(HYPRE_ENABLE_SINGLE               "Use float for HYPRE_Real" OFF)
-option(HYPRE_ENABLE_LONG_DOUBLE          "Use long double for HYPRE_Real" OFF)
-option(HYPRE_ENABLE_COMPLEX              "Use complex values" OFF)
-option(HYPRE_ENABLE_HYPRE_BLAS           "Use internal BLAS library" ON)
-option(HYPRE_ENABLE_HYPRE_LAPACK         "Use internal LAPACK library" ON)
-option(HYPRE_ENABLE_PERSISTENT_COMM      "Use persistent communication" OFF)
-option(HYPRE_ENABLE_FEI                  "Use FEI" OFF) # TODO: Add this cmake feature
-option(HYPRE_WITH_MPI                    "Compile with MPI" ON)
-option(HYPRE_WITH_GPU_AWARE_MPI          "Compile with device aware GPU support" OFF)
-option(HYPRE_WITH_OPENMP                 "Use OpenMP" OFF)
-option(HYPRE_ENABLE_HOPSCOTCH            "Use hopscotch hashing with OpenMP" OFF)
-option(HYPRE_WITH_SUPERLU                "Use TPL SuperLU" OFF)
-option(HYPRE_WITH_DSUPERLU               "Use TPL SuperLU_Dist" OFF)
-option(HYPRE_WITH_MAGMA                  "Use TPL MAGMA" OFF)
-option(HYPRE_WITH_CALIPER                "Use Caliper" OFF)
-option(HYPRE_PRINT_ERRORS                "Print HYPRE errors" OFF)
-option(HYPRE_TIMING                      "Use HYPRE timing routines" OFF)
-option(HYPRE_BUILD_EXAMPLES              "Build examples" OFF)
-option(HYPRE_BUILD_TESTS                 "Build tests" OFF)
-option(HYPRE_USING_HOST_MEMORY           "Use host memory" ON)
+# Base configuration options
+set_hypre_option(BASE HYPRE_ENABLE_SHARED               "Build a shared library" ${BUILD_SHARED_LIBS})
+set_hypre_option(BASE HYPRE_ENABLE_BIGINT               "Use long long int for HYPRE_Int" OFF)
+set_hypre_option(BASE HYPRE_ENABLE_MIXEDINT             "Use long long int for HYPRE_BigInt, int for HYPRE_INT" OFF)
+set_hypre_option(BASE HYPRE_ENABLE_SINGLE               "Use float for HYPRE_Real" OFF)
+set_hypre_option(BASE HYPRE_ENABLE_LONG_DOUBLE          "Use long double for HYPRE_Real" OFF)
+set_hypre_option(BASE HYPRE_ENABLE_COMPLEX              "Use complex values" OFF)
+set_hypre_option(BASE HYPRE_ENABLE_INTERNAL_BLAS        "Use internal BLAS library" ON)
+set_hypre_option(BASE HYPRE_ENABLE_INTERNAL_LAPACK      "Use internal LAPACK library" ON)
+set_hypre_option(BASE HYPRE_ENABLE_PERSISTENT_COMM      "Use persistent communication" OFF)
+set_hypre_option(BASE HYPRE_ENABLE_FEI                  "Use FEI" OFF) # TODO: Add this cmake feature
+set_hypre_option(BASE HYPRE_WITH_MPI                    "Compile with MPI" ON)
+set_hypre_option(BASE HYPRE_WITH_GPU_AWARE_MPI          "Compile with device aware GPU support" OFF)
+set_hypre_option(BASE HYPRE_WITH_OPENMP                 "Use OpenMP" OFF)
+set_hypre_option(BASE HYPRE_ENABLE_HOPSCOTCH            "Use hopscotch hashing with OpenMP" OFF)
+set_hypre_option(BASE HYPRE_PRINT_ERRORS                "Print HYPRE errors" OFF)
+set_hypre_option(BASE HYPRE_TIMING                      "Use HYPRE timing routines" OFF)
+set_hypre_option(BASE HYPRE_BUILD_EXAMPLES              "Build examples" OFF)
+set_hypre_option(BASE HYPRE_BUILD_TESTS                 "Build tests" OFF)
+set_hypre_option(BASE HYPRE_USING_HOST_MEMORY           "Use host memory" ON)
 # GPU options
-option(HYPRE_WITH_CUDA                   "Use CUDA. Require cuda-8.0 or higher" OFF)
-option(HYPRE_WITH_HIP                    "Use HIP" OFF)
-option(HYPRE_WITH_SYCL                   "Use SYCL" OFF)
-option(HYPRE_ENABLE_UNIFIED_MEMORY       "Use unified memory for allocating the memory" OFF)
-option(HYPRE_ENABLE_DEVICE_MALLOC_ASYNC  "Use device async malloc" OFF)
+set_hypre_option(GPU  HYPRE_WITH_CUDA                   "Use CUDA. Require cuda-8.0 or higher" OFF)
+set_hypre_option(GPU  HYPRE_WITH_HIP                    "Use HIP" OFF)
+set_hypre_option(GPU  HYPRE_WITH_SYCL                   "Use SYCL" OFF)
+set_hypre_option(GPU  HYPRE_ENABLE_UNIFIED_MEMORY       "Use unified memory for allocating the memory" OFF)
+set_hypre_option(GPU  HYPRE_ENABLE_DEVICE_MALLOC_ASYNC  "Use device async malloc" OFF)
 # CUDA options
-option(HYPRE_ENABLE_CUDA_STREAMS         "Use CUDA streams" ON)
-option(HYPRE_ENABLE_CUSPARSE             "Use cuSPARSE" ON)
-option(HYPRE_ENABLE_CUSOLVER             "Use cuSOLVER" OFF)
-option(HYPRE_ENABLE_DEVICE_POOL          "Use device memory pool" OFF)
-option(HYPRE_ENABLE_CUBLAS               "Use cuBLAS" OFF)
-option(HYPRE_ENABLE_CURAND               "Use cuRAND" ON)
-option(HYPRE_ENABLE_GPU_PROFILING        "Use NVTX on CUDA" OFF)
+set_hypre_option(CUDA HYPRE_ENABLE_CUDA_STREAMS         "Use CUDA streams" ON)
+set_hypre_option(CUDA HYPRE_ENABLE_CUSPARSE             "Use cuSPARSE" ON)
+set_hypre_option(CUDA HYPRE_ENABLE_CUSOLVER             "Use cuSOLVER" OFF)
+set_hypre_option(CUDA HYPRE_ENABLE_DEVICE_POOL          "Use device memory pool" OFF)
+set_hypre_option(CUDA HYPRE_ENABLE_CUBLAS               "Use cuBLAS" OFF)
+set_hypre_option(CUDA HYPRE_ENABLE_CURAND               "Use cuRAND" ON)
+set_hypre_option(CUDA HYPRE_ENABLE_GPU_PROFILING        "Use NVTX on CUDA" OFF)
 # HIP options
-option(HYPRE_ENABLE_ROCBLAS              "Use rocBLAS" ON)
-option(HYPRE_ENABLE_ROCSPARSE            "Use rocSPARSE" ON)
-option(HYPRE_ENABLE_ROCRAND              "Use rocRAND" ON)
-option(HYPRE_ENABLE_ROCSOLVER            "Use rocSOLVER" ON)
+set_hypre_option(HIP  HYPRE_ENABLE_ROCBLAS              "Use rocBLAS" ON)
+set_hypre_option(HIP  HYPRE_ENABLE_ROCSPARSE            "Use rocSPARSE" ON)
+set_hypre_option(HIP  HYPRE_ENABLE_ROCRAND              "Use rocRAND" ON)
+set_hypre_option(HIP  HYPRE_ENABLE_ROCSOLVER            "Use rocSOLVER" ON)
 # oneAPI options
-option(HYPRE_ENABLE_ONEMKLSPARSE         "Use oneMKL sparse" ON)
-option(HYPRE_ENABLE_ONEMKLBLAS           "Use oneMKL blas" ON)
-option(HYPRE_ENABLE_ONEMKLRAND           "Use oneMKL rand" ON)
-# Umpire resource management options
-option(HYPRE_WITH_UMPIRE                 "Use Umpire Allocator for device and unified memory" OFF)
-option(HYPRE_WITH_UMPIRE_HOST            "Use Umpire Allocator for host memory" OFF)
-option(HYPRE_WITH_UMPIRE_DEVICE          "Use Umpire Allocator for device memory" OFF)
-option(HYPRE_WITH_UMPIRE_UM              "Use Umpire Allocator for unified memory" OFF)
-option(HYPRE_WITH_UMPIRE_PINNED          "Use Umpire Allocator for pinned memory" OFF)
+set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLSPARSE         "Use oneMKL sparse" ON)
+set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLBLAS           "Use oneMKL blas" ON)
+set_hypre_option(SYCL HYPRE_ENABLE_ONEMKLRAND           "Use oneMKL rand" ON)
 # TPL options
-option(TPL_UMPIRE_LIBRARIES              "List of absolute paths to Umpire link libraries [].")
-option(TPL_UMPIRE_INCLUDE_DIRS           "List of absolute paths to Umpire include directories [].")
-option(TPL_SUPERLU_LIBRARIES             "List of absolute paths to SuperLU link libraries [].")
-option(TPL_SUPERLU_INCLUDE_DIRS          "List of absolute paths to SuperLU include directories [].")
-option(TPL_DSUPERLU_LIBRARIES            "List of absolute paths to SuperLU_Dist link libraries [].")
-option(TPL_DSUPERLU_INCLUDE_DIRS         "List of absolute paths to SuperLU_Dist include directories [].")
-option(TPL_MAGMA_LIBRARIES               "List of absolute paths to MAGMA link libraries [].")
-option(TPL_MAGMA_INCLUDE_DIRS            "List of absolute paths to MAGMA include directories [].")
-option(TPL_BLAS_LIBRARIES                "Optional list of absolute paths to BLAS libraries, otherwise use FindBLAS to locate [].")
-option(TPL_LAPACK_LIBRARIES              "Optional list of absolute paths to LAPACK libraries, otherwise use FindLAPACK to locate [].")
-option(TPL_FEI_INCLUDE_DIRS              "List of absolute paths to FEI include directories [].")
+set_hypre_option(TPL  HYPRE_WITH_UMPIRE                 "Use Umpire Allocator for device and unified memory" OFF)
+set_hypre_option(TPL  HYPRE_WITH_UMPIRE_HOST            "Use Umpire Allocator for host memory" OFF)
+set_hypre_option(TPL  HYPRE_WITH_UMPIRE_PINNED          "Use Umpire Allocator for pinned memory" OFF)
+set_hypre_option(TPL  HYPRE_WITH_UMPIRE_DEVICE          "Use Umpire Allocator for device memory" OFF)
+set_hypre_option(TPL  HYPRE_WITH_UMPIRE_UM              "Use Umpire Allocator for unified memory" OFF)
+set_hypre_option(TPL  HYPRE_WITH_SUPERLU                "Use TPL SuperLU" OFF)
+set_hypre_option(TPL  HYPRE_WITH_DSUPERLU               "Use TPL SuperLU_Dist" OFF)
+set_hypre_option(TPL  HYPRE_WITH_MAGMA                  "Use TPL MAGMA" OFF)
+set_hypre_option(SKIP TPL_UMPIRE_LIBRARIES              "Optional list of absolute paths to Umpire link libraries []." "")
+set_hypre_option(SKIP TPL_UMPIRE_INCLUDE_DIRS           "Optional list of absolute paths to Umpire include directories []." "")
+set_hypre_option(SKIP TPL_SUPERLU_LIBRARIES             "Optional list of absolute paths to SuperLU link libraries []." "")
+set_hypre_option(SKIP TPL_SUPERLU_INCLUDE_DIRS          "Optional list of absolute paths to SuperLU include directories []." "")
+set_hypre_option(SKIP TPL_DSUPERLU_LIBRARIES            "Optional list of absolute paths to SuperLU_Dist link libraries []." "")
+set_hypre_option(SKIP TPL_DSUPERLU_INCLUDE_DIRS         "Optional list of absolute paths to SuperLU_Dist include directories []." "")
+set_hypre_option(SKIP TPL_MAGMA_LIBRARIES               "Optional list of absolute paths to MAGMA link libraries []." "")
+set_hypre_option(SKIP TPL_MAGMA_INCLUDE_DIRS            "Optional list of absolute paths to MAGMA include directories []." "")
+set_hypre_option(SKIP TPL_CALIPER_LIBRARIES             "Optional list of absolute paths to Caliper link libraries []." "")
+set_hypre_option(SKIP TPL_CALIPER_INCLUDE_DIRS          "Optional list of absolute paths to Caliper include directories []." "")
+set_hypre_option(SKIP TPL_BLAS_LIBRARIES                "Optional list of absolute paths to BLAS libraries, otherwise use FindBLAS to locate []." "")
+set_hypre_option(SKIP TPL_LAPACK_LIBRARIES              "Optional list of absolute paths to LAPACK libraries, otherwise use FindLAPACK to locate []." "")
+set_hypre_option(SKIP TPL_FEI_INCLUDE_DIRS              "Optional list of absolute paths to FEI include directories []." "")
 # Extra flags
 set(HYPRE_WITH_EXTRA_CFLAGS              "" CACHE STRING "Define extra C compile flags")
 set(HYPRE_WITH_EXTRA_CXXFLAGS            "" CACHE STRING "Define extra CXX compile flags")
@@ -152,21 +152,21 @@ set(HYPRE_SYCL_TARGET                    "" CACHE STRING "Target SYCL architectu
 set(HYPRE_SYCL_TARGET_BACKEND            "" CACHE STRING "Additional SYCL backend options, e.g. '-device 12.1.0,12.4.0'.")
 
 # Set config name values
-set_conditional_option(ENABLE "" SHARED)
-set_conditional_option(ENABLE "" BIGINT)
-set_conditional_option(ENABLE "" MIXEDINT)
-set_conditional_option(ENABLE "" SINGLE)
-set_conditional_option(ENABLE "" LONG_DOUBLE)
-set_conditional_option(ENABLE "" COMPLEX)
-set_conditional_option(ENABLE USING HYPRE_BLAS)
-set_conditional_option(ENABLE USING HYPRE_LAPACK)
-set_conditional_option(ENABLE "" HOPSCOTCH)
-set_conditional_option(WITH USING OPENMP)
-set_conditional_option(WITH USING CUDA)
-set_conditional_option(WITH USING HIP)
-set_conditional_option(WITH USING SYCL)
-set_conditional_option(WITH USING MAGMA)
-set_conditional_option(WITH USING CALIPER)
+set_conditional_hypre_option(ENABLE "" SHARED)
+set_conditional_hypre_option(ENABLE "" BIGINT)
+set_conditional_hypre_option(ENABLE "" MIXEDINT)
+set_conditional_hypre_option(ENABLE "" SINGLE)
+set_conditional_hypre_option(ENABLE "" LONG_DOUBLE)
+set_conditional_hypre_option(ENABLE "" COMPLEX)
+set_conditional_hypre_option(ENABLE USING HYPRE_BLAS)
+set_conditional_hypre_option(ENABLE USING HYPRE_LAPACK)
+set_conditional_hypre_option(ENABLE "" HOPSCOTCH)
+set_conditional_hypre_option(WITH USING OPENMP)
+set_conditional_hypre_option(WITH USING CUDA)
+set_conditional_hypre_option(WITH USING HIP)
+set_conditional_hypre_option(WITH USING SYCL)
+set_conditional_hypre_option(WITH USING MAGMA)
+set_conditional_hypre_option(WITH USING CALIPER)
 
 if (HYPRE_WITH_MPI)
   set(HYPRE_HAVE_MPI ON CACHE BOOL "" FORCE)
@@ -428,70 +428,5 @@ add_library(HYPRE::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 # Export the package
 export(PACKAGE ${PROJECT_NAME})
 
-# Set the base options for printing
-set(BASE_OPTIONS
-    BUILD_SHARED_LIBS
-    HYPRE_ENABLE_SHARED
-    HYPRE_ENABLE_BIGINT
-    HYPRE_ENABLE_MIXEDINT
-    HYPRE_ENABLE_SINGLE
-    HYPRE_ENABLE_LONG_DOUBLE
-    HYPRE_ENABLE_COMPLEX
-    HYPRE_ENABLE_HYPRE_BLAS
-    HYPRE_ENABLE_HYPRE_LAPACK
-    HYPRE_ENABLE_PERSISTENT_COMM
-    HYPRE_ENABLE_FEI
-    HYPRE_ENABLE_HOPSCOTCH
-    HYPRE_USING_GPU
-    HYPRE_WITH_MPI
-    HYPRE_WITH_OPENMP
-)
-
-# Set the dependency libraries options for printing
-set(TPL_OPTIONS
-    HYPRE_WITH_CALIPER
-    HYPRE_WITH_UMPIRE
-    HYPRE_WITH_UMPIRE_HOST
-    HYPRE_WITH_UMPIRE_DEVICE
-    HYPRE_WITH_UMPIRE_UM
-    HYPRE_WITH_UMPIRE_PINNED
-    HYPRE_WITH_MAGMA
-    HYPRE_WITH_DSUPERLU
-)
-
-# Set the GPU options for printing
-if(HYPRE_WITH_CUDA)
-  set(GPU_OPTIONS
-      HYPRE_WITH_CUDA
-      HYPRE_WITH_GPU_AWARE_MPI
-      HYPRE_ENABLE_CUDA_STREAMS
-      HYPRE_ENABLE_CUSPARSE
-      HYPRE_ENABLE_CUSOLVER
-      HYPRE_ENABLE_DEVICE_POOL
-      HYPRE_ENABLE_CUBLAS
-      HYPRE_ENABLE_CURAND
-      HYPRE_ENABLE_GPU_PROFILING
-  )
-elseif(HYPRE_WITH_HIP)
-  set(GPU_OPTIONS
-      HYPRE_WITH_HIP
-      HYPRE_WITH_GPU_AWARE_MPI
-      HYPRE_ENABLE_ROCBLAS
-      HYPRE_ENABLE_ROCSPARSE
-      HYPRE_ENABLE_ROCRAND
-      HYPRE_ENABLE_ROCSOLVER
-      HYPRE_ENABLE_GPU_PROFILING
-  )
-elseif(HYPRE_WITH_SYCL)
-  set(GPU_OPTIONS
-      HYPRE_WITH_SYCL
-      HYPRE_WITH_GPU_AWARE_MPI
-      HYPRE_ENABLE_ONEMKLSPARSE
-      HYPRE_ENABLE_ONEMKLBLAS
-      HYPRE_ENABLE_ONEMKLRAND
-      HYPRE_ENABLE_GPU_PROFILING
-  )
-endif()
-
-# Print the status of the options for debugging purposes
+# Print status of the build options
 print_option_status(${BASE_OPTIONS} ${GPU_OPTIONS} ${TPL_OPTIONS})
