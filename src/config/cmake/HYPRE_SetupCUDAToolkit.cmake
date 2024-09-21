@@ -6,7 +6,11 @@
 message(STATUS "Enabling CUDA toolkit")
 
 # Check for CUDA_PATH, CUDA_HOME or CUDA_DIR
-if(DEFINED CUDA_DIR)
+if(DEFINED CUDAToolkit_ROOT)
+  set(CUDA_DIR ${CUDAToolkit_ROOT})
+elseif(DEFINED ENV{CUDAToolkit_ROOT})
+  set(CUDA_DIR $ENV{CUDAToolkit_ROOT})
+elseif(DEFINED CUDA_DIR)
   set(CUDA_DIR ${CUDA_DIR})
 elseif(DEFINED ENV{CUDA_DIR})
   set(CUDA_DIR $ENV{CUDA_DIR})
@@ -144,20 +148,20 @@ function(find_and_add_cuda_library LIB_NAME HYPRE_ENABLE_VAR)
     find_package(CUDAToolkit REQUIRED COMPONENTS ${LIB_NAME})
 
     if(TARGET CUDAToolkit::${LIB_NAME})
-      message(STATUS "Found ${LIB_NAME} library: ${${LIB_NAME}_LIBRARY}")
+      message(STATUS "Found ${LIB_NAME_UPPER} library: ${${LIB_NAME}_LIBRARY}")
       list(APPEND CUDA_LIBS CUDAToolkit::${LIB_NAME})
     else()
       #message(WARNING "CUDAToolkit::${LIB_NAME} target not found. Attempting manual linking.")
       find_library(${LIB_NAME}_LIBRARY ${LIB_NAME} HINTS ${CUDAToolkit_LIBRARY_DIR})
       if(${LIB_NAME}_LIBRARY)
-        message(STATUS "Found ${LIB_NAME} library: ${${LIB_NAME}_LIBRARY}")
+        message(STATUS "Found ${LIB_NAME_UPPER} library: ${${LIB_NAME}_LIBRARY}")
         add_library(CUDAToolkit::${LIB_NAME} UNKNOWN IMPORTED)
         set_target_properties(CUDAToolkit::${LIB_NAME} PROPERTIES
           IMPORTED_LOCATION "${${LIB_NAME}_LIBRARY}"
           INTERFACE_INCLUDE_DIRECTORIES "${CUDAToolkit_INCLUDE_DIRS}")
         list(APPEND CUDA_LIBS CUDAToolkit::${LIB_NAME})
       else()
-        message(FATAL_ERROR "Could not find ${LIB_NAME} library. Please check your CUDA installation.")
+        message(FATAL_ERROR "Could not find ${LIB_NAME_UPPER} library. Please check your CUDA installation.")
       endif()
     endif()
 

@@ -3,11 +3,51 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-# Function to set conditional variables
+# Function to set generic variables based on condition
 function(set_conditional_var condition var_name)
   if(${condition})
     #set(${var_name} ON CACHE INTERNAL "${var_name} set to ON because ${condition} is true")
     set(${var_name} ON CACHE BOOL "" FORCE)
+  endif()
+endfunction()
+
+# Function to set conditional hypre build options
+function(set_conditional_option condition_prefix var_prefix var_name)
+  if(HYPRE_${condition_prefix}_${var_name})
+    if(var_prefix STREQUAL "")
+      set(HYPRE_${var_name} ON CACHE BOOL "" FORCE)
+    else()
+      set(HYPRE_${var_prefix}_${var_name} ON CACHE BOOL "" FORCE)
+    endif()
+  endif()
+endfunction()
+
+# Function to setup git version info
+function(setup_git_version_info HYPRE_GIT_DIR)
+  set(GIT_VERSION_FOUND FALSE PARENT_SCOPE)
+  if (EXISTS "${HYPRE_GIT_DIR}")
+    execute_process(COMMAND git -C ${HYPRE_GIT_DIR} describe --match v* --long --abbrev=9
+                    OUTPUT_VARIABLE develop_string
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
+                    RESULT_VARIABLE git_result)
+    if (git_result EQUAL 0)
+      set(GIT_VERSION_FOUND TRUE PARENT_SCOPE)
+      execute_process(COMMAND git -C ${HYPRE_GIT_DIR} describe --match v* --abbrev=0
+                      OUTPUT_VARIABLE develop_lastag
+                      OUTPUT_STRIP_TRAILING_WHITESPACE)
+      execute_process(COMMAND git -C ${HYPRE_GIT_DIR} rev-list --count ${develop_lastag}..HEAD
+                      OUTPUT_VARIABLE develop_number
+                      OUTPUT_STRIP_TRAILING_WHITESPACE)
+      execute_process(COMMAND git -C ${HYPRE_GIT_DIR} rev-parse --abbrev-ref HEAD
+                      OUTPUT_VARIABLE develop_branch
+                      OUTPUT_STRIP_TRAILING_WHITESPACE)
+      set(HYPRE_DEVELOP_STRING  ${develop_string} PARENT_SCOPE)
+      set(HYPRE_DEVELOP_NUMBER  ${develop_number} PARENT_SCOPE)
+      set(HYPRE_BRANCH_NAME     ${develop_branch} PARENT_SCOPE)
+      if (develop_branch MATCHES "master")
+        set(HYPRE_DEVELOP_BRANCH  ${develop_branch} PARENT_SCOPE)
+      endif ()
+    endif()
   endif()
 endfunction()
 
@@ -43,9 +83,36 @@ function(configure_mpi_target)
   endif ()
 endfunction()
 
+# Function to get dependency library version
+function(get_library_version LIBNAME)
+  if(TARGET ${LIBNAME}::${LIBNAME})
+    get_target_property(LIB_VERSION ${LIBNAME}::${LIBNAME} VERSION)
+  endif()
+  if(NOT LIB_VERSION)
+    if(DEFINED ${LIBNAME}_VERSION)
+      set(LIB_VERSION "${${LIBNAME}_VERSION}")
+    elseif(DEFINED ${LIBNAME}_VERSION_STRING)
+      set(LIB_VERSION "${${LIBNAME}_VERSION_STRING}")
+    elseif(DEFINED ${LIBNAME}_VERSION_MAJOR AND DEFINED ${LIBNAME}_VERSION_MINOR)
+      set(LIB_VERSION "${${LIBNAME}_VERSION_MAJOR}.${${LIBNAME}_VERSION_MINOR}")
+      if(DEFINED ${LIBNAME}_VERSION_PATCH)
+        set(LIB_VERSION "${LIB_VERSION}.${${LIBNAME}_VERSION_PATCH}")
+      endif()
+    endif()
+  endif()
+  if(LIB_VERSION)
+    message(STATUS "  ${LIBNAME} version: ${LIB_VERSION}")
+  else()
+    message(STATUS "  ${LIBNAME} version: unknown")
+  endif()
+endfunction()
+
 # Function to handle TPL (Third-Party Library) setup
 function(setup_tpl LIBNAME)
   string(TOUPPER ${LIBNAME} LIBNAME_UPPER)
+
+  # Note we need to check for "USING" instead of "WITH" because
+  # we want to allow for post-processing of build options via cmake
   if(HYPRE_USING_${LIBNAME_UPPER})
     if(TPL_${LIBNAME_UPPER}_LIBRARIES AND TPL_${LIBNAME_UPPER}_INCLUDE_DIRS)
       # Use specified TPL libraries and include dirs
@@ -71,7 +138,7 @@ function(setup_tpl LIBNAME)
       # Use find_package
       find_package(${LIBNAME} REQUIRED CONFIG)
       if(${LIBNAME}_FOUND)
-        message(STATUS "Found ${LIBNAME_UPPER}")
+        message(STATUS "Found ${LIBNAME_UPPER} library")
         list(APPEND HYPRE_DEPENDENCY_DIRS "${${LIBNAME}_ROOT}")
         set(HYPRE_DEPENDENCY_DIRS "${HYPRE_DEPENDENCY_DIRS}" CACHE INTERNAL "" FORCE)
 
@@ -84,21 +151,20 @@ function(setup_tpl LIBNAME)
         elseif(TARGET ${LIBNAME})
           target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBNAME})
         else()
-          message(FATAL_ERROR "${LIBNAME} target not found. Please check your ${LIBNAME} installation.")
+          message(FATAL_ERROR "${LIBNAME} target not found. Please check your ${LIBNAME} installation")
         endif()
       else()
-        message(FATAL_ERROR "${LIBNAME_UPPER} target not found. Please check your ${LIBNAME_UPPER} installation.")
+        message(FATAL_ERROR "${LIBNAME_UPPER} target not found. Please check your ${LIBNAME_UPPER} installation")
       endif()
 
-      if(DEFINED ${LIBNAME}_VERSION)
-        message(STATUS "  Version: ${${LIBNAME}_VERSION}")
-      endif()
+      # Display library info
+      get_library_version(${LIBNAME})
       if(DEFINED ${LIBNAME}_DIR)
         message(STATUS "  Config directory: ${${LIBNAME}_DIR}")
       endif()
     endif()
 
-    message(STATUS "Enabled support for using ${LIBNAME_UPPER}.")
+    message(STATUS "Enabled support for using ${LIBNAME_UPPER}")
 
     if(${LIBNAME_UPPER} STREQUAL "SUPERLU" OR ${LIBNAME_UPPER} STREQUAL "DSUPERLU" OR ${LIBNAME_UPPER} STREQUAL "UMPIRE")
       target_link_libraries(${PROJECT_NAME} PUBLIC stdc++)
@@ -111,7 +177,7 @@ endfunction()
 # Function to setup TPL or internal library implementation
 function(setup_tpl_or_internal LIB_NAME)
   string(TOUPPER ${LIB_NAME} LIB_NAME_UPPER)
-  
+
   if(HYPRE_USING_HYPRE_${LIB_NAME_UPPER})
     # Use internal library
     add_subdirectory(${LIB_NAME})
@@ -147,6 +213,28 @@ function(setup_tpl_or_internal LIB_NAME)
         message(FATAL_ERROR "${LIB_NAME_UPPER} not found")
       endif()
     endif()
+  endif()
+endfunction()
+
+# Function to setup FEI (to be phased out)
+function(setup_fei)
+  if (HYPRE_USING_FEI)
+    set(HYPRE_NEEDS_CXX TRUE PARENT_SCOPE)
+
+    if (NOT TPL_FEI_INCLUDE_DIRS)
+      message(FATAL_ERROR "TPL_FEI_INCLUDE_DIRS option should be set for FEI support.")
+    endif ()
+
+    foreach (dir ${TPL_FEI_INCLUDE_DIRS})
+      if (NOT EXISTS ${dir})
+        message(FATAL_ERROR "FEI include directory not found: ${dir}")
+      endif ()
+      target_compile_options(${PROJECT_NAME} PUBLIC -I${dir})
+    endforeach ()
+    
+    message(STATUS "Enabled support for using FEI.")
+    set(FEI_FOUND TRUE PARENT_SCOPE)
+    target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_FEI_INCLUDE_DIRS})
   endif()
 endfunction()
 
@@ -214,6 +302,7 @@ function(add_hypre_executables EXE_SRCS)
   endforeach(SRC_FILE)
 endfunction()
 
+# Function to print the status of build options
 function(print_option_status)
   # Define column widths
   set(COLUMN1_WIDTH 40)
@@ -226,45 +315,56 @@ function(print_option_status)
   string(REPEAT "-" ${HEADER2_PAD} SEPARATOR2)
   set(separator "+${SEPARATOR1}+${SEPARATOR2}+")
 
-  # Create header and separator
+  # Function to print a block of options
+  function(print_option_block title options)
+    message(STATUS "")
+    message(STATUS " ${title}:")
+    message(STATUS " ${separator}")
+    message(STATUS " | Option                              | Status  |")
+    message(STATUS " ${separator}")
+
+    foreach(opt ${options})
+      if(${${opt}})
+        set(status "ON")
+      else()
+        set(status "OFF")
+      endif()
+
+      string(LENGTH "${opt}" opt_length)
+      math(EXPR padding "${COLUMN1_WIDTH} - ${opt_length} - 5")
+      if(${padding} GREATER 0)
+        string(REPEAT " " ${padding} pad_spaces)
+      else()
+        set(pad_spaces "")
+      endif()
+
+      string(LENGTH "${status}" status_length)
+      math(EXPR status_padding "${COLUMN2_WIDTH} - ${status_length} - 3")
+      if(${status_padding} GREATER 0)
+        string(REPEAT " " ${status_padding} status_pad_spaces)
+      else()
+        set(status_pad_spaces "")
+      endif()
+
+      message(STATUS " | ${opt}${pad_spaces} | ${status}${status_pad_spaces} |")
+    endforeach()
+
+    message(STATUS " ${separator}")
+  endfunction()
+
   message(STATUS "")
   message(STATUS "HYPRE Configuration Summary:")
-  message(STATUS "${separator}")
-  message(STATUS "| Option                              | Status  |")
-  message(STATUS "${separator}")
 
-  # Iterate through each option and display its status
-  foreach(opt ${ARGN})
-    # Determine the status string
-    if(${${opt}})
-      set(status "ON")
-    else()
-      set(status "OFF")
-    endif()
+  # Print BASE_OPTIONS
+  print_option_block("Base Options" "${BASE_OPTIONS}")
 
-    # Calculate padding for the option name
-    string(LENGTH "${opt}" opt_length)
-    math(EXPR padding "${COLUMN1_WIDTH} - ${opt_length} - 5") # 5 accounts for "| Option | Status |"
-    if(${padding} GREATER 0)
-      string(REPEAT " " ${padding} pad_spaces)
-    else()
-      set(pad_spaces "")
-    endif()
+  # Print GPU_OPTIONS
+  if(HYPRE_WITH_CUDA OR HYPRE_WITH_HIP OR HYPRE_WITH_SYCL)
+    print_option_block("GPU Options" "${GPU_OPTIONS}")
+  endif()
 
-    # Calculate padding for the status
-    string(LENGTH "${status}" status_length)
-    math(EXPR status_padding "${COLUMN2_WIDTH} - ${status_length} - 3") # 3 accounts for "| " and space
-    if(${status_padding} GREATER 0)
-      string(REPEAT " " ${status_padding} status_pad_spaces)
-    else()
-      set(status_pad_spaces "")
-    endif()
+  # Print TPL_OPTIONS
+  print_option_block("Third-Party Library Options" "${TPL_OPTIONS}")
 
-    # Print the formatted row
-    message(STATUS "| ${opt}${pad_spaces} | ${status}${status_pad_spaces} |")
-  endforeach()
-
-  # Print the footer separator
-  message(STATUS "${separator}")
   message(STATUS "")
 endfunction()

@@ -4,8 +4,11 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 cmake_minimum_required(VERSION 3.21)
-message(STATUS "CMake Version: ${CMAKE_VERSION}")
 message(STATUS "CMake Executable: ${CMAKE_COMMAND}")
+message(STATUS "CMake Version: ${CMAKE_VERSION}")
+
+# Include hypre's CMake utilities
+include("${CMAKE_CURRENT_SOURCE_DIR}/config/cmake/HYPRE_CMakeUtilities.cmake")
 
 # Set cmake policies
 if(POLICY CMP0146)
@@ -23,6 +26,16 @@ set(HYPRE_TIME    00:00:00)
 set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
 
+# Display the hypre version
+setup_git_version_info("${CMAKE_CURRENT_SOURCE_DIR}/../.git")
+if (GIT_VERSION_FOUND)
+  message(STATUS "Hypre Version: ${HYPRE_DEVELOP_STRING} (${HYPRE_BRANCH_NAME})")
+else()
+  message(STATUS "NOTE: Could not find .git directory")
+  message(STATUS "Hypre Version: ${HYPRE_VERSION}")
+endif()
+
+# Set the project name
 set(PROJECT_NAME HYPRE)
 project(${PROJECT_NAME}
   VERSION ${HYPRE_VERSION}
@@ -32,39 +45,11 @@ project(${PROJECT_NAME}
 add_library(${PROJECT_NAME})
 
 # We use C99 by default, but users are free to specify any newer standard version
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD 99 CACHE STRING "Standard to use for the C compiler")
 
+# Raise an error if the source and binary directories are the same
 if (${HYPRE_SOURCE_DIR} STREQUAL ${HYPRE_BINARY_DIR})
   message(FATAL_ERROR "In-place build not allowed! Please use a separate build directory. See the Users Manual or INSTALL file for details.")
-endif ()
-
-if (EXISTS ${HYPRE_SOURCE_DIR}/../.git)
-  execute_process(COMMAND git -C ${HYPRE_SOURCE_DIR} describe --match v* --long --abbrev=9
-                  OUTPUT_VARIABLE develop_string
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
-  execute_process(COMMAND git -C ${HYPRE_SOURCE_DIR} describe --match v* --abbrev=0
-                  OUTPUT_VARIABLE develop_lastag
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
-  execute_process(COMMAND git -C ${HYPRE_SOURCE_DIR} rev-list --count ${develop_lastag}..HEAD
-                  OUTPUT_VARIABLE develop_number
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
-  execute_process(COMMAND git -C ${HYPRE_SOURCE_DIR} rev-parse --abbrev-ref HEAD
-                  OUTPUT_VARIABLE develop_branch
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
-  if (${develop_string} MATCHES ".*")
-    set(HYPRE_DEVELOP_STRING  ${develop_string})
-    set(HYPRE_DEVELOP_NUMBER  ${develop_number})
-    set(HYPRE_BRANCH_NAME     ${develop_branch})
-    if (develop_branch MATCHES "master")
-      set(HYPRE_DEVELOP_BRANCH  ${develop_branch})
-    else ()
-      message(STATUS "NOTE: On branch ${develop_branch}, not the main development branch")
-    endif ()
-  else ()
-    message(STATUS "NOTE: Could not describe development branch")
-  endif ()
-else ()
-  message(STATUS "NOTE: Could not find .git directory")
 endif ()
 
 # Ensure RPATH/RUNPATH is set properly during the build
@@ -75,7 +60,6 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")  # Where binaries can loo
 
 # Set cmake module path
 set(CMAKE_MODULE_PATH "${HYPRE_SOURCE_DIR}/config/cmake" "${CMAKE_MODULE_PATH}")
-include(HYPRE_CMakeUtilities)
 
 # Set default installation directory, but provide a means for users to change
 set(HYPRE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/hypre" CACHE PATH
@@ -94,96 +78,95 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
     "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif ()
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}") 
 
 # Configuration options
-option(HYPRE_ENABLE_SHARED           "Build a shared library" ${BUILD_SHARED_LIBS})
-option(HYPRE_ENABLE_BIGINT           "Use long long int for HYPRE_Int" OFF)
-option(HYPRE_ENABLE_MIXEDINT         "Use long long int for HYPRE_BigInt, int for HYPRE_INT" OFF)
-option(HYPRE_ENABLE_SINGLE           "Use float for HYPRE_Real" OFF)
-option(HYPRE_ENABLE_LONG_DOUBLE      "Use long double for HYPRE_Real" OFF)
-option(HYPRE_ENABLE_COMPLEX          "Use complex values" OFF)
-option(HYPRE_ENABLE_HYPRE_BLAS       "Use internal BLAS library" ON)
-option(HYPRE_ENABLE_HYPRE_LAPACK     "Use internal LAPACK library" ON)
-option(HYPRE_ENABLE_PERSISTENT_COMM  "Use persistent communication" OFF)
-option(HYPRE_ENABLE_FEI              "Use FEI" OFF) # TODO: Add this cmake feature
-option(HYPRE_WITH_MPI                "Compile with MPI" ON)
-option(HYPRE_WITH_GPU_AWARE_MPI      "Compile with device aware GPU support" OFF)
-option(HYPRE_WITH_OPENMP             "Use OpenMP" OFF)
-option(HYPRE_ENABLE_HOPSCOTCH        "Use hopscotch hashing with OpenMP" OFF)
-option(HYPRE_WITH_SUPERLU            "Use TPL SuperLU" OFF)
-option(HYPRE_WITH_DSUPERLU           "Use TPL SuperLU_Dist" OFF)
-option(HYPRE_WITH_MAGMA              "Use TPL MAGMA" OFF)
-option(HYPRE_WITH_CALIPER            "Use Caliper" OFF)
-option(HYPRE_PRINT_ERRORS            "Print HYPRE errors" OFF)
-option(HYPRE_TIMING                  "Use HYPRE timing routines" OFF)
-option(HYPRE_BUILD_EXAMPLES          "Build examples" OFF)
-option(HYPRE_BUILD_TESTS             "Build tests" OFF)
-option(HYPRE_USING_HOST_MEMORY       "Use host memory" ON)
+option(HYPRE_ENABLE_SHARED               "Build a shared library" ${BUILD_SHARED_LIBS})
+option(HYPRE_ENABLE_BIGINT               "Use long long int for HYPRE_Int" OFF)
+option(HYPRE_ENABLE_MIXEDINT             "Use long long int for HYPRE_BigInt, int for HYPRE_INT" OFF)
+option(HYPRE_ENABLE_SINGLE               "Use float for HYPRE_Real" OFF)
+option(HYPRE_ENABLE_LONG_DOUBLE          "Use long double for HYPRE_Real" OFF)
+option(HYPRE_ENABLE_COMPLEX              "Use complex values" OFF)
+option(HYPRE_ENABLE_HYPRE_BLAS           "Use internal BLAS library" ON)
+option(HYPRE_ENABLE_HYPRE_LAPACK         "Use internal LAPACK library" ON)
+option(HYPRE_ENABLE_PERSISTENT_COMM      "Use persistent communication" OFF)
+option(HYPRE_ENABLE_FEI                  "Use FEI" OFF) # TODO: Add this cmake feature
+option(HYPRE_WITH_MPI                    "Compile with MPI" ON)
+option(HYPRE_WITH_GPU_AWARE_MPI          "Compile with device aware GPU support" OFF)
+option(HYPRE_WITH_OPENMP                 "Use OpenMP" OFF)
+option(HYPRE_ENABLE_HOPSCOTCH            "Use hopscotch hashing with OpenMP" OFF)
+option(HYPRE_WITH_SUPERLU                "Use TPL SuperLU" OFF)
+option(HYPRE_WITH_DSUPERLU               "Use TPL SuperLU_Dist" OFF)
+option(HYPRE_WITH_MAGMA                  "Use TPL MAGMA" OFF)
+option(HYPRE_WITH_CALIPER                "Use Caliper" OFF)
+option(HYPRE_PRINT_ERRORS                "Print HYPRE errors" OFF)
+option(HYPRE_TIMING                      "Use HYPRE timing routines" OFF)
+option(HYPRE_BUILD_EXAMPLES              "Build examples" OFF)
+option(HYPRE_BUILD_TESTS                 "Build tests" OFF)
+option(HYPRE_USING_HOST_MEMORY           "Use host memory" ON)
 # GPU options
-option(HYPRE_WITH_CUDA               "Use CUDA. Require cuda-8.0 or higher" OFF)
-option(HYPRE_WITH_HIP                "Use HIP" OFF)
-option(HYPRE_WITH_SYCL               "Use SYCL" OFF)
-option(HYPRE_ENABLE_UNIFIED_MEMORY   "Use unified memory for allocating the memory" OFF)
-option(HYPRE_ENABLE_DEVICE_MALLOC_ASYNC "Use device async malloc" OFF)
+option(HYPRE_WITH_CUDA                   "Use CUDA. Require cuda-8.0 or higher" OFF)
+option(HYPRE_WITH_HIP                    "Use HIP" OFF)
+option(HYPRE_WITH_SYCL                   "Use SYCL" OFF)
+option(HYPRE_ENABLE_UNIFIED_MEMORY       "Use unified memory for allocating the memory" OFF)
+option(HYPRE_ENABLE_DEVICE_MALLOC_ASYNC  "Use device async malloc" OFF)
 # CUDA options
-option(HYPRE_ENABLE_CUDA_STREAMS     "Use CUDA streams" ON)
-option(HYPRE_ENABLE_CUSPARSE         "Use cuSPARSE" ON)
-option(HYPRE_ENABLE_CUSOLVER         "Use cuSOLVER" OFF)
-option(HYPRE_ENABLE_DEVICE_POOL      "Use device memory pool" OFF)
-option(HYPRE_ENABLE_CUBLAS           "Use cuBLAS" OFF)
-option(HYPRE_ENABLE_CURAND           "Use cuRAND" ON)
-option(HYPRE_ENABLE_GPU_PROFILING    "Use NVTX on CUDA" OFF)
+option(HYPRE_ENABLE_CUDA_STREAMS         "Use CUDA streams" ON)
+option(HYPRE_ENABLE_CUSPARSE             "Use cuSPARSE" ON)
+option(HYPRE_ENABLE_CUSOLVER             "Use cuSOLVER" OFF)
+option(HYPRE_ENABLE_DEVICE_POOL          "Use device memory pool" OFF)
+option(HYPRE_ENABLE_CUBLAS               "Use cuBLAS" OFF)
+option(HYPRE_ENABLE_CURAND               "Use cuRAND" ON)
+option(HYPRE_ENABLE_GPU_PROFILING        "Use NVTX on CUDA" OFF)
 # HIP options
-option(HYPRE_ENABLE_ROCBLAS          "Use rocBLAS" ON)
-option(HYPRE_ENABLE_ROCSPARSE        "Use rocSPARSE" ON)
-option(HYPRE_ENABLE_ROCRAND          "Use rocRAND" ON)
-option(HYPRE_ENABLE_ROCSOLVER        "Use rocSOLVER" ON)
+option(HYPRE_ENABLE_ROCBLAS              "Use rocBLAS" ON)
+option(HYPRE_ENABLE_ROCSPARSE            "Use rocSPARSE" ON)
+option(HYPRE_ENABLE_ROCRAND              "Use rocRAND" ON)
+option(HYPRE_ENABLE_ROCSOLVER            "Use rocSOLVER" ON)
 # oneAPI options
-option(HYPRE_ENABLE_ONEMKLSPARSE     "Use oneMKL sparse" ON)
-option(HYPRE_ENABLE_ONEMKLBLAS       "Use oneMKL blas" ON)
-option(HYPRE_ENABLE_ONEMKLRAND       "Use oneMKL rand" ON)
+option(HYPRE_ENABLE_ONEMKLSPARSE         "Use oneMKL sparse" ON)
+option(HYPRE_ENABLE_ONEMKLBLAS           "Use oneMKL blas" ON)
+option(HYPRE_ENABLE_ONEMKLRAND           "Use oneMKL rand" ON)
 # Umpire resource management options
-option(HYPRE_WITH_UMPIRE             "Use Umpire Allocator for device and unified memory" OFF)
-option(HYPRE_WITH_UMPIRE_HOST        "Use Umpire Allocator for host memory" OFF)
-option(HYPRE_WITH_UMPIRE_DEVICE      "Use Umpire Allocator for device memory" OFF)
-option(HYPRE_WITH_UMPIRE_UM          "Use Umpire Allocator for unified memory" OFF)
-option(HYPRE_WITH_UMPIRE_PINNED      "Use Umpire Allocator for pinned memory" OFF)
+option(HYPRE_WITH_UMPIRE                 "Use Umpire Allocator for device and unified memory" OFF)
+option(HYPRE_WITH_UMPIRE_HOST            "Use Umpire Allocator for host memory" OFF)
+option(HYPRE_WITH_UMPIRE_DEVICE          "Use Umpire Allocator for device memory" OFF)
+option(HYPRE_WITH_UMPIRE_UM              "Use Umpire Allocator for unified memory" OFF)
+option(HYPRE_WITH_UMPIRE_PINNED          "Use Umpire Allocator for pinned memory" OFF)
 # TPL options
-option(TPL_UMPIRE_LIBRARIES          "List of absolute paths to Umpire link libraries [].")
-option(TPL_UMPIRE_INCLUDE_DIRS       "List of absolute paths to Umpire include directories [].")
-option(TPL_SUPERLU_LIBRARIES         "List of absolute paths to SuperLU link libraries [].")
-option(TPL_SUPERLU_INCLUDE_DIRS      "List of absolute paths to SuperLU include directories [].")
-option(TPL_DSUPERLU_LIBRARIES        "List of absolute paths to SuperLU_Dist link libraries [].")
-option(TPL_DSUPERLU_INCLUDE_DIRS     "List of absolute paths to SuperLU_Dist include directories [].")
-option(TPL_MAGMA_LIBRARIES           "List of absolute paths to MAGMA link libraries [].")
-option(TPL_MAGMA_INCLUDE_DIRS        "List of absolute paths to MAGMA include directories [].")
-option(TPL_BLAS_LIBRARIES            "Optional list of absolute paths to BLAS libraries, otherwise use FindBLAS to locate [].")
-option(TPL_LAPACK_LIBRARIES          "Optional list of absolute paths to LAPACK libraries, otherwise use FindLAPACK to locate [].")
-option(TPL_FEI_INCLUDE_DIRS          "List of absolute paths to FEI include directories [].")
+option(TPL_UMPIRE_LIBRARIES              "List of absolute paths to Umpire link libraries [].")
+option(TPL_UMPIRE_INCLUDE_DIRS           "List of absolute paths to Umpire include directories [].")
+option(TPL_SUPERLU_LIBRARIES             "List of absolute paths to SuperLU link libraries [].")
+option(TPL_SUPERLU_INCLUDE_DIRS          "List of absolute paths to SuperLU include directories [].")
+option(TPL_DSUPERLU_LIBRARIES            "List of absolute paths to SuperLU_Dist link libraries [].")
+option(TPL_DSUPERLU_INCLUDE_DIRS         "List of absolute paths to SuperLU_Dist include directories [].")
+option(TPL_MAGMA_LIBRARIES               "List of absolute paths to MAGMA link libraries [].")
+option(TPL_MAGMA_INCLUDE_DIRS            "List of absolute paths to MAGMA include directories [].")
+option(TPL_BLAS_LIBRARIES                "Optional list of absolute paths to BLAS libraries, otherwise use FindBLAS to locate [].")
+option(TPL_LAPACK_LIBRARIES              "Optional list of absolute paths to LAPACK libraries, otherwise use FindLAPACK to locate [].")
+option(TPL_FEI_INCLUDE_DIRS              "List of absolute paths to FEI include directories [].")
 # Extra flags
-set(HYPRE_WITH_EXTRA_CFLAGS       "" CACHE STRING "Define extra C compile flags")
-set(HYPRE_WITH_EXTRA_CXXFLAGS     "" CACHE STRING "Define extra CXX compile flags")
-set(HYPRE_SYCL_TARGET             "" CACHE STRING "Target SYCL architecture, e.g. 'spir64_gen'.")
-set(HYPRE_SYCL_TARGET_BACKEND     "" CACHE STRING "Additional SYCL backend options, e.g. '-device 12.1.0,12.4.0'.")
+set(HYPRE_WITH_EXTRA_CFLAGS              "" CACHE STRING "Define extra C compile flags")
+set(HYPRE_WITH_EXTRA_CXXFLAGS            "" CACHE STRING "Define extra CXX compile flags")
+set(HYPRE_SYCL_TARGET                    "" CACHE STRING "Target SYCL architecture, e.g. 'spir64_gen'.")
+set(HYPRE_SYCL_TARGET_BACKEND            "" CACHE STRING "Additional SYCL backend options, e.g. '-device 12.1.0,12.4.0'.")
 
 # Set config name values
-set_conditional_var(HYPRE_ENABLE_SHARED HYPRE_SHARED)
-set_conditional_var(HYPRE_ENABLE_BIGINT HYPRE_BIGINT)
-set_conditional_var(HYPRE_ENABLE_MIXEDINT HYPRE_MIXEDINT)
-set_conditional_var(HYPRE_ENABLE_SINGLE HYPRE_SINGLE)
-set_conditional_var(HYPRE_ENABLE_LONG_DOUBLE HYPRE_LONG_DOUBLE)
-set_conditional_var(HYPRE_ENABLE_COMPLEX HYPRE_COMPLEX)
-set_conditional_var(CMAKE_BUILD_TYPE STREQUAL "Debug" HYPRE_DEBUG)
-set_conditional_var(HYPRE_ENABLE_HYPRE_BLAS HYPRE_USING_HYPRE_BLAS)
-set_conditional_var(HYPRE_ENABLE_HYPRE_LAPACK HYPRE_USING_HYPRE_LAPACK)
-set_conditional_var(HYPRE_ENABLE_PERSISTENT_COMM HYPRE_USING_PERSISTENT_COMM)
-set_conditional_var(HYPRE_WITH_OPENMP HYPRE_USING_OPENMP)
-set_conditional_var(HYPRE_ENABLE_HOPSCOTCH HYPRE_HOPSCOTCH)
-set_conditional_var(HYPRE_WITH_CUDA HYPRE_USING_CUDA)
-set_conditional_var(HYPRE_WITH_HIP HYPRE_USING_HIP)
-set_conditional_var(HYPRE_WITH_SYCL HYPRE_USING_SYCL)
-set_conditional_var(HYPRE_WITH_MAGMA HYPRE_USING_MAGMA)
-set_conditional_var(HYPRE_WITH_CALIPER HYPRE_USING_CALIPER)
+set_conditional_option(ENABLE "" SHARED)
+set_conditional_option(ENABLE "" BIGINT)
+set_conditional_option(ENABLE "" MIXEDINT)
+set_conditional_option(ENABLE "" SINGLE)
+set_conditional_option(ENABLE "" LONG_DOUBLE)
+set_conditional_option(ENABLE "" COMPLEX)
+set_conditional_option(ENABLE USING HYPRE_BLAS)
+set_conditional_option(ENABLE USING HYPRE_LAPACK)
+set_conditional_option(ENABLE "" HOPSCOTCH)
+set_conditional_option(WITH USING OPENMP)
+set_conditional_option(WITH USING CUDA)
+set_conditional_option(WITH USING HIP)
+set_conditional_option(WITH USING SYCL)
+set_conditional_option(WITH USING MAGMA)
+set_conditional_option(WITH USING CALIPER)
 
 if (HYPRE_WITH_MPI)
   set(HYPRE_HAVE_MPI ON CACHE BOOL "" FORCE)
@@ -211,6 +194,7 @@ endif ()
 # FEI doesn't currently compile with shared
 if (HYPRE_SHARED OR HYPRE_BIGINT OR HYPRE_SINGLE OR HYPRE_LONG_DOUBLE)
   set(HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
+  set(HYPRE_ENABLE_FEI OFF CACHE BOOL "" FORCE)
 endif ()
 
 if (HYPRE_SEQUENTIAL)
@@ -269,7 +253,7 @@ endif (HYPRE_USING_OPENMP)
 if (HYPRE_WITH_CUDA OR HYPRE_WITH_HIP OR HYPRE_WITH_SYCL)
   include(HYPRE_SetupGPUToolkit)
 else ()
-  message(STATUS "No GPU support enabled.")
+  message(STATUS "GPU support disabled")
   set(HYPRE_USING_HOST_MEMORY ON CACHE BOOL "" FORCE)
 endif ()
 
@@ -285,7 +269,7 @@ set(BUILD_SHARED_LIBS ${HYPRE_SHARED} CACHE INTERNAL "Build shared libraries" FO
 # Set output directory for the library
 set_target_properties(HYPRE PROPERTIES
   VERSION "${HYPRE_VERSION}"
-  SOVERSION "${HYPRE_VERSION}"
+  SOVERSION "${HYPRE_VERSION_MAJOR}"
   ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
@@ -299,30 +283,12 @@ set(HYPRE_MAIN_HEADERS
 )
 list(APPEND HYPRE_HEADERS ${HYPRE_MAIN_HEADERS})
 
-# Find FEI, if requested
-if (HYPRE_USING_FEI)
-  enable_language(CXX)
-
-  if (NOT TPL_FEI_INCLUDE_DIRS)
-    message(FATAL_ERROR "TPL_FEI_INCLUDE_DIRS option should be set for FEI support.")
-  endif ()
-
-  foreach (dir ${TPL_FEI_INCLUDE_DIRS})
-    if (NOT EXISTS ${dir})
-      message(FATAL_ERROR "FEI include directory not found: ${dir}")
-    endif ()
-    target_compile_options(${PROJECT_NAME} PUBLIC -I${dir})
-  endforeach ()
-  message(STATUS "Enabled support for using FEI.")
-  set(FEI_FOUND TRUE)
-  target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_FEI_INCLUDE_DIRS})
-endif(HYPRE_USING_FEI)
-
 # TPL variables
 set(HYPRE_DEPENDENCY_DIRS "" CACHE INTERNAL "List of absolute paths to TPL directories")
 set(HYPRE_NEEDS_CXX OFF CACHE INTERNAL "Flag to indicate if C++ is needed for TPLs")
 
 # Setup TPLs
+setup_fei()
 setup_tpl_or_internal(blas)
 setup_tpl_or_internal(lapack)
 setup_tpl(superlu)
@@ -360,7 +326,7 @@ elseif (HYPRE_WITH_HIP)
   set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE HIP)
 elseif (HYPRE_WITH_SYCL)
   set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE SYCL)
-endif ()
+endif()
 
 # Include directories
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -462,8 +428,8 @@ add_library(HYPRE::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 # Export the package
 export(PACKAGE ${PROJECT_NAME})
 
-# Print the status of the options for debugging purposes
-print_option_status(
+# Set the base options for printing
+set(BASE_OPTIONS
     BUILD_SHARED_LIBS
     HYPRE_ENABLE_SHARED
     HYPRE_ENABLE_BIGINT
@@ -475,9 +441,57 @@ print_option_status(
     HYPRE_ENABLE_HYPRE_LAPACK
     HYPRE_ENABLE_PERSISTENT_COMM
     HYPRE_ENABLE_FEI
+    HYPRE_ENABLE_HOPSCOTCH
+    HYPRE_USING_GPU
     HYPRE_WITH_MPI
     HYPRE_WITH_OPENMP
-    HYPRE_WITH_CUDA
-    HYPRE_WITH_HIP
-    HYPRE_WITH_SYCL
 )
+
+# Set the dependency libraries options for printing
+set(TPL_OPTIONS
+    HYPRE_WITH_CALIPER
+    HYPRE_WITH_UMPIRE
+    HYPRE_WITH_UMPIRE_HOST
+    HYPRE_WITH_UMPIRE_DEVICE
+    HYPRE_WITH_UMPIRE_UM
+    HYPRE_WITH_UMPIRE_PINNED
+    HYPRE_WITH_MAGMA
+    HYPRE_WITH_DSUPERLU
+)
+
+# Set the GPU options for printing
+if(HYPRE_WITH_CUDA)
+  set(GPU_OPTIONS
+      HYPRE_WITH_CUDA
+      HYPRE_WITH_GPU_AWARE_MPI
+      HYPRE_ENABLE_CUDA_STREAMS
+      HYPRE_ENABLE_CUSPARSE
+      HYPRE_ENABLE_CUSOLVER
+      HYPRE_ENABLE_DEVICE_POOL
+      HYPRE_ENABLE_CUBLAS
+      HYPRE_ENABLE_CURAND
+      HYPRE_ENABLE_GPU_PROFILING
+  )
+elseif(HYPRE_WITH_HIP)
+  set(GPU_OPTIONS
+      HYPRE_WITH_HIP
+      HYPRE_WITH_GPU_AWARE_MPI
+      HYPRE_ENABLE_ROCBLAS
+      HYPRE_ENABLE_ROCSPARSE
+      HYPRE_ENABLE_ROCRAND
+      HYPRE_ENABLE_ROCSOLVER
+      HYPRE_ENABLE_GPU_PROFILING
+  )
+elseif(HYPRE_WITH_SYCL)
+  set(GPU_OPTIONS
+      HYPRE_WITH_SYCL
+      HYPRE_WITH_GPU_AWARE_MPI
+      HYPRE_ENABLE_ONEMKLSPARSE
+      HYPRE_ENABLE_ONEMKLBLAS
+      HYPRE_ENABLE_ONEMKLRAND
+      HYPRE_ENABLE_GPU_PROFILING
+  )
+endif()
+
+# Print the status of the options for debugging purposes
+print_option_status(${BASE_OPTIONS} ${GPU_OPTIONS} ${TPL_OPTIONS})
