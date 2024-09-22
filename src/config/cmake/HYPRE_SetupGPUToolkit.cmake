@@ -35,10 +35,6 @@ if(NOT HYPRE_WITH_EXTRA_CXXFLAGS STREQUAL "")
   add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${HYPRE_WITH_EXTRA_CXXFLAGS_LIST}>")
 endif()
 
-# Set conditional variables
-set_conditional_var(HYPRE_ENABLE_GPU_STREAMS HYPRE_USING_GPU_STREAMS)
-set_conditional_var(HYPRE_ENABLE_DEVICE_POOL HYPRE_USING_DEVICE_POOL)
-
 if(HYPRE_WITH_CUDA)
   include(HYPRE_SetupCUDAToolkit)
 

@@ -15,21 +15,13 @@ function(set_hypre_option category name description default_value)
   endif()
 endfunction()
 
-# Function to set generic variables based on condition
-function(set_conditional_var condition var_name)
-  if(${condition})
-    #set(${var_name} ON CACHE INTERNAL "${var_name} set to ON because ${condition} is true")
-    set(${var_name} ON CACHE BOOL "" FORCE)
-  endif()
-endfunction()
-
-# Function to set conditional hypre build options
-function(set_conditional_hypre_option condition_prefix var_prefix var_name)
+# Function to set internal hypre build options
+function(set_internal_hypre_option condition_prefix var_prefix var_name)
   if(HYPRE_${condition_prefix}_${var_name})
     if(var_prefix STREQUAL "")
-      set(HYPRE_${var_name} ON CACHE BOOL "" FORCE)
+      set(HYPRE_${var_name} ON CACHE INTERNAL "")
     else()
-      set(HYPRE_${var_prefix}_${var_name} ON CACHE BOOL "" FORCE)
+      set(HYPRE_${var_prefix}_${var_name} ON CACHE INTERNAL "")
     endif()
   endif()
 endfunction()
@@ -59,6 +51,40 @@ function(setup_git_version_info HYPRE_GIT_DIR)
       if (develop_branch MATCHES "master")
         set(HYPRE_DEVELOP_BRANCH  ${develop_branch} PARENT_SCOPE)
       endif ()
+    endif()
+  endif()
+endfunction()
+
+# Function to check if two options have the same value
+function(ensure_options_match option1 option2)
+  if(DEFINED CACHE{${option1}} AND DEFINED CACHE{${option2}})
+    #if ((${option1} AND NOT ${option2}) OR (NOT ${option1} AND ${option2}))
+    if(NOT (${option1} STREQUAL ${option2}) AND NOT (${option1} STREQUAL "OFF" AND ${option2} STREQUAL "OFF"))
+      # Save the value of the conflicting options
+      set(saved_value1 "${${option1}}")
+      set(saved_value2 "${${option2}}")
+
+      # Unset conflicting options
+      unset(${option1} CACHE)
+      unset(${option2} CACHE)
+      message(FATAL_ERROR "Incompatible options: ${option1} (${saved_value1}) and ${option2} (${saved_value2}) must have the same value. Unsetting both options.")
+    endif()
+  endif()
+endfunction()
+
+# Function to check if two options have different values
+function(ensure_options_differ option1 option2)
+  if(DEFINED ${option1} AND DEFINED ${option2})
+    if(${option1} AND ${${option2}})
+      # Save the value of the conflicting options
+      set(saved_value1 "${${option1}}")
+      set(saved_value2 "${${option2}}")
+
+      # Unset conflicting options
+      unset(${option1} CACHE)
+      unset(${option2} CACHE)
+
+      message(FATAL_ERROR "Error: ${option1} (${saved_value1}) and ${option2} (${saved_value2}) are mutually exclusive. Only one can be set to ON. Unsetting both options.")
     endif()
   endif()
 endfunction()

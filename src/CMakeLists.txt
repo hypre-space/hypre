@@ -62,11 +62,17 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")  # Where binaries can loo
 set(CMAKE_MODULE_PATH "${HYPRE_SOURCE_DIR}/config/cmake" "${CMAKE_MODULE_PATH}")
 
 # Set default installation directory, but provide a means for users to change
-set(HYPRE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/hypre" CACHE PATH
-    "Installation directory for HYPRE")
-if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX "${HYPRE_INSTALL_PREFIX}" CACHE INTERNAL "" FORCE)
-endif ()
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR NOT DEFINED HYPRE_INSTALL_PREFIX)
+  if (NOT DEFINED HYPRE_INSTALL_PREFIX)
+    set(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/hypre" CACHE PATH "Installation directory for HYPRE" FORCE)
+  else()
+    set(CMAKE_INSTALL_PREFIX "${HYPRE_INSTALL_PREFIX}" CACHE PATH "Installation directory for HYPRE" FORCE)
+  endif()
+else()
+  if (NOT DEFINED HYPRE_INSTALL_PREFIX)
+    set(HYPRE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Installation directory for HYPRE" FORCE)
+  endif()
+endif()
 
 # Set default compile optimization flag
 set(HYPRE_BUILD_TYPE "Release" CACHE STRING
@@ -80,7 +86,7 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif ()
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}") 
 
-# Base configuration options
+# Base boolean configuration options
 set_hypre_option(BASE HYPRE_ENABLE_SHARED               "Build a shared library" ${BUILD_SHARED_LIBS})
 set_hypre_option(BASE HYPRE_ENABLE_BIGINT               "Use long long int for HYPRE_Int" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_MIXEDINT             "Use long long int for HYPRE_BigInt, int for HYPRE_INT" OFF)
@@ -91,12 +97,11 @@ set_hypre_option(BASE HYPRE_ENABLE_INTERNAL_BLAS        "Use internal BLAS libra
 set_hypre_option(BASE HYPRE_ENABLE_INTERNAL_LAPACK      "Use internal LAPACK library" ON)
 set_hypre_option(BASE HYPRE_ENABLE_PERSISTENT_COMM      "Use persistent communication" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_FEI                  "Use FEI" OFF) # TODO: Add this cmake feature
-set_hypre_option(BASE HYPRE_WITH_MPI                    "Compile with MPI" ON)
-set_hypre_option(BASE HYPRE_WITH_GPU_AWARE_MPI          "Compile with device aware GPU support" OFF)
-set_hypre_option(BASE HYPRE_WITH_OPENMP                 "Use OpenMP" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_HOPSCOTCH            "Use hopscotch hashing with OpenMP" OFF)
+set_hypre_option(BASE HYPRE_WITH_OPENMP                 "Use OpenMP" OFF)
+set_hypre_option(BASE HYPRE_WITH_MPI                    "Compile with MPI" ON)
 set_hypre_option(BASE HYPRE_PRINT_ERRORS                "Print HYPRE errors" OFF)
-set_hypre_option(BASE HYPRE_TIMING                      "Use HYPRE timing routines" OFF)
+set_hypre_option(SKIP HYPRE_TIMING                      "Use HYPRE timing routines" OFF)
 set_hypre_option(BASE HYPRE_BUILD_EXAMPLES              "Build examples" OFF)
 set_hypre_option(BASE HYPRE_BUILD_TESTS                 "Build tests" OFF)
 set_hypre_option(BASE HYPRE_USING_HOST_MEMORY           "Use host memory" ON)
@@ -104,6 +109,7 @@ set_hypre_option(BASE HYPRE_USING_HOST_MEMORY           "Use host memory" ON)
 set_hypre_option(GPU  HYPRE_WITH_CUDA                   "Use CUDA. Require cuda-8.0 or higher" OFF)
 set_hypre_option(GPU  HYPRE_WITH_HIP                    "Use HIP" OFF)
 set_hypre_option(GPU  HYPRE_WITH_SYCL                   "Use SYCL" OFF)
+set_hypre_option(GPU  HYPRE_WITH_GPU_AWARE_MPI          "Compile with device aware GPU support" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_UNIFIED_MEMORY       "Use unified memory for allocating the memory" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_DEVICE_MALLOC_ASYNC  "Use device async malloc" OFF)
 # CUDA options
@@ -152,21 +158,23 @@ set(HYPRE_SYCL_TARGET                    "" CACHE STRING "Target SYCL architectu
 set(HYPRE_SYCL_TARGET_BACKEND            "" CACHE STRING "Additional SYCL backend options, e.g. '-device 12.1.0,12.4.0'.")
 
 # Set config name values
-set_conditional_hypre_option(ENABLE "" SHARED)
-set_conditional_hypre_option(ENABLE "" BIGINT)
-set_conditional_hypre_option(ENABLE "" MIXEDINT)
-set_conditional_hypre_option(ENABLE "" SINGLE)
-set_conditional_hypre_option(ENABLE "" LONG_DOUBLE)
-set_conditional_hypre_option(ENABLE "" COMPLEX)
-set_conditional_hypre_option(ENABLE USING HYPRE_BLAS)
-set_conditional_hypre_option(ENABLE USING HYPRE_LAPACK)
-set_conditional_hypre_option(ENABLE "" HOPSCOTCH)
-set_conditional_hypre_option(WITH USING OPENMP)
-set_conditional_hypre_option(WITH USING CUDA)
-set_conditional_hypre_option(WITH USING HIP)
-set_conditional_hypre_option(WITH USING SYCL)
-set_conditional_hypre_option(WITH USING MAGMA)
-set_conditional_hypre_option(WITH USING CALIPER)
+set_internal_hypre_option(ENABLE "" SHARED)
+set_internal_hypre_option(ENABLE "" BIGINT)
+set_internal_hypre_option(ENABLE "" MIXEDINT)
+set_internal_hypre_option(ENABLE "" SINGLE)
+set_internal_hypre_option(ENABLE "" LONG_DOUBLE)
+set_internal_hypre_option(ENABLE "" COMPLEX)
+set_internal_hypre_option(ENABLE USING HYPRE_BLAS)
+set_internal_hypre_option(ENABLE USING HYPRE_LAPACK)
+set_internal_hypre_option(ENABLE "" HOPSCOTCH)
+set_internal_hypre_option(ENABLE USING GPU_STREAMS)
+set_internal_hypre_option(ENABLE USING DEVICE_POOL)
+set_internal_hypre_option(WITH USING OPENMP)
+set_internal_hypre_option(WITH USING CUDA)
+set_internal_hypre_option(WITH USING HIP)
+set_internal_hypre_option(WITH USING SYCL)
+set_internal_hypre_option(WITH USING MAGMA)
+set_internal_hypre_option(WITH USING CALIPER)
 
 if (HYPRE_WITH_MPI)
   set(HYPRE_HAVE_MPI ON CACHE BOOL "" FORCE)
@@ -227,16 +235,13 @@ if (HYPRE_WITH_UMPIRE_PINNED)
   set(HYPRE_USING_UMPIRE_PINNED ON CACHE BOOL "" FORCE)
 endif ()
 
-# Ensure that HYPRE_ENABLE_SHARED and HYPRE_SHARED do not conflict with BUILD_SHARED_LIBS
-if(DEFINED CACHE{BUILD_SHARED_LIBS} AND (DEFINED CACHE{HYPRE_ENABLE_SHARED} OR DEFINED CACHE{HYPRE_SHARED}))
-  if ((HYPRE_ENABLE_SHARED AND NOT BUILD_SHARED_LIBS) OR
-      (NOT HYPRE_ENABLE_SHARED AND BUILD_SHARED_LIBS))
-    message(FATAL_ERROR "Incompatible options: HYPRE_ENABLE_SHARED (${HYPRE_ENABLE_SHARED}) and BUILD_SHARED_LIBS (${BUILD_SHARED_LIBS}) must have the same value.")
-  elseif ((HYPRE_SHARED AND NOT BUILD_SHARED_LIBS) OR
-          (NOT HYPRE_SHARED AND BUILD_SHARED_LIBS))
-    message(FATAL_ERROR "Incompatible options: HYPRE_SHARED (${HYPRE_SHARED}) and BUILD_SHARED_LIBS (${BUILD_SHARED_LIBS}) must have the same value.")
-  endif()
-endif()
+# Check for conflicting options
+ensure_options_match(HYPRE_ENABLE_SHARED BUILD_SHARED_LIBS)
+ensure_options_match(HYPRE_INSTALL_PREFIX CMAKE_INSTALL_PREFIX)
+ensure_options_match(HYPRE_BUILD_TYPE CMAKE_BUILD_TYPE)
+ensure_options_differ(HYPRE_WITH_CUDA HYPRE_WITH_HIP)
+ensure_options_differ(HYPRE_WITH_CUDA HYPRE_WITH_SYCL)
+ensure_options_differ(HYPRE_WITH_HIP HYPRE_WITH_SYCL)
 
 # Set MPI compile flags
 if (HYPRE_WITH_MPI)
@@ -249,11 +254,11 @@ if (HYPRE_USING_OPENMP)
   target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_C)
 endif (HYPRE_USING_OPENMP)
 
-# Set GPU compile flags
+# Setup GPU build options: CUDA, HIP, SYCL are mutually exclusive
 if (HYPRE_WITH_CUDA OR HYPRE_WITH_HIP OR HYPRE_WITH_SYCL)
   include(HYPRE_SetupGPUToolkit)
 else ()
-  message(STATUS "GPU support disabled")
+  message(STATUS "GPU support not enabled")
   set(HYPRE_USING_HOST_MEMORY ON CACHE BOOL "" FORCE)
 endif ()
 
@@ -284,10 +289,10 @@ set(HYPRE_MAIN_HEADERS
 list(APPEND HYPRE_HEADERS ${HYPRE_MAIN_HEADERS})
 
 # TPL variables
-set(HYPRE_DEPENDENCY_DIRS "" CACHE INTERNAL "List of absolute paths to TPL directories")
+set(HYPRE_DEPENDENCY_DIRS "" CACHE INTERNAL "List of absolute paths to third-party libraries (TPLs) directories")
 set(HYPRE_NEEDS_CXX OFF CACHE INTERNAL "Flag to indicate if C++ is needed for TPLs")
 
-# Setup TPLs
+# Setup third-party libraries (TPLs)
 setup_fei()
 setup_tpl_or_internal(blas)
 setup_tpl_or_internal(lapack)
@@ -297,8 +302,8 @@ setup_tpl(magma)
 setup_tpl(caliper)
 setup_tpl(umpire)
 
-# Some TPLs need C++ to be enabled
-if(HYPRE_NEEDS_CXX)
+# Some TPLs need C++ to be enabled (GPU already enables C++)
+if(HYPRE_NEEDS_CXX AND NOT HYPRE_USING_GPU)
   enable_language(CXX)
 endif()
 
