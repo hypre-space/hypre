@@ -462,13 +462,41 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       hypre_ParCSRMatrix *A_u_aug;
       hypre_ParCSRMatrix *P_u;
 
+#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_SYCL)
+      /* WM: todo - sycl */
+#else
+      /* Get nonzero rows of A_u (that is, all rows with nonzeros in either diag or offd) */
+      if (!hypre_CSRMatrixRownnz(A_u_diag))
+      {
+         hypre_CSRMatrixSetRownnz(A_u_diag);
+      }
+      if (!hypre_CSRMatrixRownnz(A_u_offd))
+      {
+         hypre_CSRMatrixSetRownnz(A_u_offd);
+      }
+      HYPRE_Int max_num_rownnz = hypre_CSRMatrixNumRownnz(A_u_diag) + hypre_CSRMatrixNumRownnz(A_u_offd);
+      HYPRE_Int *nonzero_rows = hypre_TAlloc(HYPRE_Int, max_num_rownnz, HYPRE_MEMORY_DEVICE);
+      HYPRE_THRUST_CALL( merge,
+                         hypre_CSRMatrixRownnz(A_u_diag),
+                         hypre_CSRMatrixRownnz(A_u_diag) + hypre_CSRMatrixNumRownnz(A_u_diag),
+                         hypre_CSRMatrixRownnz(A_u_offd),
+                         hypre_CSRMatrixRownnz(A_u_offd) + hypre_CSRMatrixNumRownnz(A_u_offd),
+                         nonzero_rows );
+      HYPRE_Int *nonzero_rows_end = HYPRE_THRUST_CALL( unique,
+                                                       nonzero_rows,
+                                                       nonzero_rows + max_num_rownnz );
+#endif // defined(HYPRE_USING_SYCL)
+#endif // defined(HYPRE_USING_GPU)
+
       /* Convert boundary of A to IJ matrix */
       hypre_IJMatrix *A_struct_bndry_ij = NULL;
 
       HYPRE_Int              num_indices = 0;
+      HYPRE_Int              volume;
       HYPRE_Int             *indices[ndim];
       hypre_BoxArray        *indices_boxa = NULL;
-      hypre_Index            index, start;
+      hypre_Index            start;
       HYPRE_Real             threshold = 0.8; // WM: todo - what should this be?
       hypre_BoxArray      ***convert_boxa = hypre_TAlloc(hypre_BoxArray**, nparts, HYPRE_MEMORY_HOST);
       HYPRE_Int cnt = 0;
@@ -496,24 +524,96 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
             /* Loop over boxes */
             hypre_ForBoxI(i, compute_boxes)
             {
-               num_indices = 0;
-               for (j = 0; j < ndim; j++)
-               {
-                  indices[j] = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(A_u_diag), HYPRE_MEMORY_HOST);
-               }
                hypre_CopyBox(hypre_BoxArrayBox(compute_boxes, i), compute_box);
                HYPRE_Int *num_ghost = hypre_StructGridNumGhost(sgrid);
                hypre_BoxGrowByArray(compute_box, num_ghost);
                hypre_BoxGetSize(compute_box, loop_size);
+               volume = hypre_BoxVolume(compute_box);
                hypre_SetIndex(stride, 1);
                hypre_CopyToIndex(hypre_BoxIMin(compute_box), ndim, start);
-#ifndef FIX_GPU_COMPILATION
+
+#if defined(HYPRE_USING_GPU)
+
+               /* Get ALL the indices */
+               HYPRE_Int *all_indices[HYPRE_MAXDIM];
+               for (j = 0; j < ndim; j++)
+               {
+                  all_indices[j] = hypre_CTAlloc(HYPRE_Int, volume, HYPRE_MEMORY_DEVICE);
+               }
+               hypre_BoxLoop1Begin(ndim, loop_size, compute_box, start, stride, ii);
+               {
+                  hypre_Index index;
+                  hypre_BoxLoopGetIndex(index);
+                  if (ndim > 0)
+                  {
+                     all_indices[0][ii] = index[0] + start[0];
+                  }
+                  if (ndim > 1)
+                  {
+                     all_indices[1][ii] = index[1] + start[1];
+                  }
+                  if (ndim > 2)
+                  {
+                     all_indices[2][ii] = index[2] + start[2];
+                  }
+               }
+               hypre_BoxLoop1End(ii);
+
+#if defined(HYPRE_USING_SYCL)
+               /* WM: todo - sycl */
+#else
+               /* Get the nonzero rows for this box */
+               HYPRE_Int *box_nonzero_rows = hypre_TAlloc(HYPRE_Int, volume, HYPRE_MEMORY_DEVICE);
+               HYPRE_Int *box_nonzero_rows_end = HYPRE_THRUST_CALL( copy_if,
+                                                                    nonzero_rows,
+                                                                    nonzero_rows_end,
+                                                                    box_nonzero_rows,
+                                                                    in_range<HYPRE_Int>(cnt, cnt+volume) );
+               HYPRE_THRUST_CALL( transform,
+                                  box_nonzero_rows,
+                                  box_nonzero_rows_end,
+                                  thrust::make_constant_iterator(cnt),
+                                  box_nonzero_rows,
+                                  thrust::minus<HYPRE_Int>() );
+               num_indices = box_nonzero_rows_end - box_nonzero_rows;
+               /* WM: todo - these offsets for the unstructured indices only work with no inter-variable couplings? */
+               cnt += volume;
+               for (j = 0; j < ndim; j++)
+               {
+                  indices[j] = hypre_CTAlloc(HYPRE_Int, num_indices, HYPRE_MEMORY_DEVICE);
+               }
+               /* Gather indices at non-zero rows of A_u */
+               for (j = 0; j < ndim; j++)
+               {
+                  HYPRE_THRUST_CALL( gather,
+                                     box_nonzero_rows,
+                                     box_nonzero_rows_end,
+                                     all_indices[j],
+                                     indices[j] );
+               }
+               for (j = 0; j < ndim; j++)
+               {
+                  all_indices[j] = hypre_TFree(all_indices[j], HYPRE_MEMORY_DEVICE);
+               }
+               hypre_TFree(box_nonzero_rows, HYPRE_MEMORY_DEVICE);
+
+#endif // defined(HYPRE_USING_SYCL)
+
+#else // defined(HYPRE_USING_GPU)
+
+               /* WM: old implementation */
+               num_indices = 0;
+               for (j = 0; j < ndim; j++)
+               {
+                  indices[j] = hypre_CTAlloc(HYPRE_Int, volume, HYPRE_MEMORY_DEVICE);
+               }
                hypre_BoxLoop1Begin(ndim, loop_size, compute_box, start, stride, ii);
                {
                   /* WM: todo - this mapping to the unstructured indices only works with no inter-variable couplings? */
                   if (hypre_CSRMatrixI(A_u_diag)[cnt+1] - hypre_CSRMatrixI(A_u_diag)[cnt] +
                         hypre_CSRMatrixI(A_u_offd)[cnt+1] - hypre_CSRMatrixI(A_u_offd)[cnt] > 0)
                   {
+                     hypre_Index index;
                      hypre_BoxLoopGetIndex(index);
                      for (j = 0; j < ndim; j++)
                      {
@@ -524,7 +624,8 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                   cnt++;
                }
                hypre_BoxLoop1End(ii);
-#endif
+
+#endif // defined(HYPRE_USING_GPU)
 
                /* Create box array from indices marking where A_u is non-trivial */
                if (num_indices)
@@ -546,7 +647,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
                   for (j = 0; j < ndim; j++)
                   {
-                     indices[j] = hypre_TFree(indices[j], HYPRE_MEMORY_HOST);
+                     indices[j] = hypre_TFree(indices[j], HYPRE_MEMORY_DEVICE);
                   }
                }
             }
@@ -767,6 +868,9 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       HYPRE_IJMatrixDestroy(A_struct_bndry_ij);
       hypre_ParCSRMatrixDestroy(A_u_aug);
       hypre_TFree(CF_marker, HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_USING_GPU)
+      hypre_TFree(nonzero_rows, HYPRE_MEMORY_DEVICE);
+#endif
    }
 
    return hypre_error_flag;
