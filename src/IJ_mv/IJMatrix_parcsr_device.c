@@ -317,10 +317,10 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
 #else
    HYPRE_THRUST_CALL(
       exclusive_scan_by_key,
-      make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0 + N0, J0 + N0))),
-      make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0,    J0))),
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X) + N0),
+      thrust::make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0 + N0, J0 + N0))),
+      thrust::make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0,    J0))),
+      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),
+      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X) + N0),
       char(0),
       thrust::equal_to< thrust::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
       thrust::maximum<char>() );
@@ -485,10 +485,10 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    /* output in X0: 0: keep, 1: zero-out */
    HYPRE_THRUST_CALL(
       inclusive_scan_by_key,
-      make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0 + N0, J0 + N0))),
-      make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0,    J0))),
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),
+      thrust::make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0 + N0, J0 + N0))),
+      thrust::make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0,    J0))),
+      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),
+      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),
       thrust::equal_to< thrust::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
       thrust::maximum<char>() );
 
@@ -547,10 +547,10 @@ hypre_IJMatrixAssembleSortAndRemove(HYPRE_Int N0, HYPRE_BigInt *I0, HYPRE_BigInt
    /* output in X0: 0: keep, 1: remove */
    HYPRE_THRUST_CALL(
       inclusive_scan_by_key,
-      make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0 + N0, J0 + N0))),
-      make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0,    J0))),
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),
+      thurst::make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0 + N0, J0 + N0))),
+      thurst::make_reverse_iterator(thrust::make_zip_iterator(thrust::make_tuple(I0,    J0))),
+      thurst::make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),
+      thurst::make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),
       thrust::equal_to< thrust::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
       thrust::maximum<char>() );
 
