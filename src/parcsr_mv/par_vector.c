@@ -67,6 +67,10 @@ hypre_ParVectorCreate( MPI_Comm      comm,
    hypre_ParVectorOwnsData(vector)         = 1;
    hypre_ParVectorActualLocalSize(vector)  = 0;
 
+#if defined(HYPRE_MIXED_PRECISION)   
+   hypre_ParVectorPrecision(vector) = HYPRE_OBJECT_PRECISION;
+#endif
+
    return vector;
 }
 

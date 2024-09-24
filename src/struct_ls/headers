@@ -27,6 +27,10 @@ cat > $INTERNAL_HEADER <<@
 #include "HYPRE_MatvecFunctions.h"
  /* ... needed to make sense of functions in HYPRE_parcsr_int.c */
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "struct_ls_mup_func.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

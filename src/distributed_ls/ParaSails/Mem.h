@@ -13,6 +13,10 @@
 
 #include <stdio.h>
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "ParaSails_mup_func.h"
+#endif
+
 #ifndef _MEM_H
 #define _MEM_H
 

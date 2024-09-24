@@ -35,6 +35,7 @@
 #include <time.h>
 
 #include "HYPRE_lobpcg.h"
+#include "lobpcg.h"
 
 HYPRE_Int
 BuildParIsoLaplacian( HYPRE_Int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr );
