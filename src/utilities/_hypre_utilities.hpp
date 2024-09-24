@@ -186,6 +186,7 @@ struct hypre_device_allocator
 
    void deallocate(char *ptr, size_t n)
    {
+      HYPRE_UNUSED_VAR(n);
       hypre_TFree(ptr, HYPRE_MEMORY_DEVICE);
    }
 };
@@ -3301,3 +3302,4 @@ struct hypre_cub_CachingDeviceAllocator
 #endif
 
 #endif
+

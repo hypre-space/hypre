@@ -195,11 +195,11 @@ hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
 }
 
 /*--------------------------------------------------------------------
- * hypre_ResetCudaDevice
+ * hypre_ResetDevice
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ResetCudaDevice(hypre_Handle *hypre_handle)
+hypre_ResetDevice()
 {
 #if defined(HYPRE_USING_CUDA)
    cudaDeviceReset();
@@ -3025,4 +3025,3 @@ hypre_bind_device( HYPRE_Int myid,
 {
    return hypre_bind_device_id(-1, myid, nproc, comm);
 }
-

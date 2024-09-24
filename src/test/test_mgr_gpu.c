@@ -718,8 +718,8 @@ main( hypre_int argc,
    HYPRE_Finalize();
    hypre_MPI_Finalize();
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-   hypre_ResetCudaDevice(hypre_handle());
+#if defined(HYPRE_USING_GPU)
+   hypre_ResetDevice();
 #endif
 
    return (0);
