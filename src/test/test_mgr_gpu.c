@@ -571,7 +571,7 @@ main( hypre_int argc,
       }
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-      hypre_SyncCudaDevice(hypre_handle());
+      hypre_SyncDevice(hypre_handle());
 #endif
 
       // Setup main solver
@@ -587,7 +587,7 @@ main( hypre_int argc,
       hypre_ClearTiming();
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-      hypre_SyncCudaDevice(hypre_handle());
+      hypre_SyncDevice(hypre_handle());
 #endif
 
       time_index = hypre_InitializeTiming("FlexGMRES Solve");
@@ -604,7 +604,7 @@ main( hypre_int argc,
       hypre_ClearTiming();
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
-      hypre_SyncCudaDevice(hypre_handle());
+      hypre_SyncDevice(hypre_handle());
 #endif
 
       if (print_system)

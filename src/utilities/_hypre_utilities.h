@@ -2325,7 +2325,7 @@ void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPR
 /* device_utils.c */
 #if defined(HYPRE_USING_GPU)
 HYPRE_Int hypre_SyncComputeStream(hypre_Handle *hypre_handle);
-HYPRE_Int hypre_SyncCudaDevice(hypre_Handle *hypre_handle);
+HYPRE_Int hypre_SyncDevice(hypre_Handle *hypre_handle);
 HYPRE_Int hypre_ResetDevice();
 HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int num_vectors, HYPRE_Int num_rows,
                                       HYPRE_Int *A_i, HYPRE_Complex *A_data,

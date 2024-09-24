@@ -169,11 +169,11 @@ hypre_DeviceDataDestroy(hypre_DeviceData *data)
 }
 
 /*--------------------------------------------------------------------
- * hypre_SyncCudaDevice
+ * hypre_SyncDevice
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SyncCudaDevice(hypre_Handle *hypre_handle)
+hypre_SyncDevice(hypre_Handle *hypre_handle)
 {
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
