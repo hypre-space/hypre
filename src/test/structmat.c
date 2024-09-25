@@ -598,6 +598,9 @@ main( hypre_int  argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
+   /* Initialize hypre */
+   HYPRE_Initialize();
+
    infile  = infile_default;
    outfile = outfile_default;
    outlev  = 1;
@@ -1066,7 +1069,8 @@ main( hypre_int  argc,
 
    DestroyData(data);
 
-   /* Finalize MPI */
+   /* Finalize libraries */
+   HYPRE_Finalize();
    hypre_MPI_Finalize();
 
    return (0);
