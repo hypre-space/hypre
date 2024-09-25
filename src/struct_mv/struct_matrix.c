@@ -1818,10 +1818,11 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
  * nentries - number of stencil entries
  * entries  - array of stencil entries
  *
- * The following three possibilites are supported for backward compatibility:
+ * The following four possibilites are supported for backward compatibility:
  * - no entries constant                 (constant_coefficient==0)
  * - all entries constant                (constant_coefficient==1)
  * - all but the diagonal entry constant (constant_coefficient==2)
+ * - anything else                       (constant_coefficient==3)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1861,23 +1862,15 @@ hypre_StructMatrixSetConstantEntries( hypre_StructMatrix *matrix,
    {
       constant_coefficient = 1;
    }
+   else if ( (constant[stencil_diag_entry] == 0) && (nconst == (stencil_size - 1)) )
+   {
+      constant_coefficient = 2;
+   }
    else
    {
-      stencil_diag_entry = hypre_StructStencilDiagEntry(stencil);
-      if (constant[stencil_diag_entry] == 0)
-      {
-         constant_coefficient = 2;
-         if (nconst != (stencil_size - 1))
-         {
-            hypre_error(HYPRE_ERROR_GENERIC);
-         }
-      }
-      else
-      {
-         constant_coefficient = 0;
-         /* TODO: Fix this for rectangular matrices */
-         //hypre_error(HYPRE_ERROR_GENERIC);
-      }
+      constant_coefficient = 3;
+      /* TODO: Fix this for rectangular matrices */
+      //hypre_error(HYPRE_ERROR_GENERIC);
    }
 
    hypre_StructMatrixConstantCoefficient(matrix) = constant_coefficient;
