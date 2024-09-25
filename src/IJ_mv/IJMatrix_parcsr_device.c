@@ -17,6 +17,8 @@
 
 #if defined(HYPRE_USING_GPU)
 
+HYPRE_Int counter = 0;
+
 __global__ void
 hypreGPUKernel_IJMatrixValues_dev1(hypre_DeviceItem &item, HYPRE_Int n, HYPRE_Int *rowind,
                                    HYPRE_Int *row_ptr,
@@ -267,9 +269,12 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
 
    if (early_assemble_flag)
    {
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_IJMatrixComm(matrix), &myid );
+   printf("Proc %d, %d, Early Assemble\n", myid, counter++);
       /* temporarily disable early assembly in the next line */
       hypre_AuxParCSRMatrixEarlyAssemble(aux_matrix) = 2;
-      hypre_IJMatrixAssembleCommunicateAndCompressDevice(matrix, 0);
+      hypre_IJMatrixAssembleCompressDevice(matrix, 0);
       /* restore early assembly */
       hypre_AuxParCSRMatrixEarlyAssemble(aux_matrix) = early_assemble;
 
@@ -672,8 +677,7 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int       N0,
 }
 
 HYPRE_Int
-hypre_IJMatrixAssembleCommunicateAndCompressDevice(hypre_IJMatrix *matrix,
-                                                   HYPRE_Int       reduce_stack_size)
+hypre_IJMatrixAssembleCommunicate(hypre_IJMatrix *matrix)
 {
    MPI_Comm               comm             = hypre_IJMatrixComm(matrix);
    HYPRE_BigInt          *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
@@ -779,23 +783,36 @@ hypre_IJMatrixAssembleCommunicateAndCompressDevice(hypre_IJMatrix *matrix,
       hypre_TFree(off_proc_j,    HYPRE_MEMORY_DEVICE);
       hypre_TFree(off_proc_data, HYPRE_MEMORY_DEVICE);
    }
+   return hypre_error_flag;
+}
 
-   /* Note: the stack might have been changed in hypre_IJMatrixAssembleOffProcValsParCSR,
-    * so must get the size and the pointers again */
-   nelms      = hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix);
-   stack_i    = hypre_AuxParCSRMatrixStackI(aux_matrix);
-   stack_j    = hypre_AuxParCSRMatrixStackJ(aux_matrix);
-   stack_data = hypre_AuxParCSRMatrixStackData(aux_matrix);
-   stack_sora = hypre_AuxParCSRMatrixStackSorA(aux_matrix);
+HYPRE_Int
+hypre_IJMatrixAssembleCompressDevice(hypre_IJMatrix *matrix,
+                                     HYPRE_Int       reduce_stack_size)
+{
+   HYPRE_BigInt          *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
+   HYPRE_BigInt           row_start        = row_partitioning[0];
+   HYPRE_BigInt           row_end          = row_partitioning[1];
+   hypre_AuxParCSRMatrix *aux_matrix = (hypre_AuxParCSRMatrix*) hypre_IJMatrixTranslator(matrix);
 
-   /* the stack should only have on-proc elements now */
+   HYPRE_Int      nelms      = hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix);
+   HYPRE_BigInt  *stack_i    = hypre_AuxParCSRMatrixStackI(aux_matrix);
+   HYPRE_BigInt  *stack_j    = hypre_AuxParCSRMatrixStackJ(aux_matrix);
+   HYPRE_Complex *stack_data = hypre_AuxParCSRMatrixStackData(aux_matrix);
+   char          *stack_sora = hypre_AuxParCSRMatrixStackSorA(aux_matrix);
+
 #if defined(HYPRE_DEBUG)
+   /* in the final assembly, at this stage, the stack should only have on-proc elements */
+   if (reduce_stack_size)
+   {
+      in_range<HYPRE_BigInt> pred(row_start, row_end - 1);
 #if defined(HYPRE_USING_SYCL)
-   HYPRE_Int tmp = HYPRE_ONEDPL_CALL(std::count_if, stack_i, stack_i + nelms, pred);
+      HYPRE_Int tmp = HYPRE_ONEDPL_CALL(std::count_if, stack_i, stack_i + nelms, pred);
 #else
-   HYPRE_Int tmp = HYPRE_THRUST_CALL(count_if, stack_i, stack_i + nelms, pred);
+      HYPRE_Int tmp = HYPRE_THRUST_CALL(count_if, stack_i, stack_i + nelms, pred);
 #endif
-   hypre_assert(nelms == tmp);
+      hypre_assert(nelms == tmp);
+   }
 #endif
 
    if (nelms)
@@ -843,7 +860,8 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
       return hypre_error_flag;
    }
 
-   hypre_IJMatrixAssembleCommunicateAndCompressDevice(matrix, 1);
+   hypre_IJMatrixAssembleCommunicate(matrix);
+   hypre_IJMatrixAssembleCompressDevice(matrix, 1);
 
    // hypre_AuxParCSRMatrixStackPrintInfo(matrix);
 
