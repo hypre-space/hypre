@@ -18,6 +18,26 @@
 #include "_hypre_sstruct_ls.h"
 
 /*--------------------------------------------------------------------------
+ * Adding a local FineToCoarse function to fix --with-print-errors issues
+ * when using the hypre_StructMapFineToCoarse() function
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+maxwell_MapFineToCoarse( hypre_Index findex,
+                         hypre_Index index,
+                         hypre_Index stride,
+                         hypre_Index cindex )
+{
+   hypre_IndexX(cindex) =
+      (hypre_IndexX(findex) - hypre_IndexX(index)) / hypre_IndexX(stride);
+   hypre_IndexY(cindex) =
+      (hypre_IndexY(findex) - hypre_IndexY(index)) / hypre_IndexY(stride);
+   hypre_IndexZ(cindex) =
+      (hypre_IndexZ(findex) - hypre_IndexZ(index)) / hypre_IndexZ(stride);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_Maxwell_Interp.c
  *--------------------------------------------------------------------------*/
 HYPRE_Int
@@ -407,10 +427,10 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
          fbox = hypre_BoxArrayBox(fboxes, j);
          hypre_CopyBox(fbox, &copy_box);
          hypre_ProjectBox(&copy_box, zero_index, rfactor);
-         hypre_StructMapFineToCoarse(hypre_BoxIMin(&copy_box), zero_index,
-                                     rfactor, hypre_BoxIMin(&copy_box));
-         hypre_StructMapFineToCoarse(hypre_BoxIMax(&copy_box), zero_index,
-                                     rfactor, hypre_BoxIMax(&copy_box));
+         maxwell_MapFineToCoarse(hypre_BoxIMin(&copy_box), zero_index,
+                                 rfactor, hypre_BoxIMin(&copy_box));
+         maxwell_MapFineToCoarse(hypre_BoxIMax(&copy_box), zero_index,
+                                 rfactor, hypre_BoxIMax(&copy_box));
 
          /* since the ordering of the cboxes was determined by the fbox
             ordering, we only have to check if the first cbox in the
@@ -462,8 +482,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
          /* record the cstarts of the cbox */
          hypre_ProjectBox(cbox, zero_index, rfactor);
          hypre_CopyIndex(hypre_BoxIMin(cbox), Edge_cstarts[i][j]);
-         hypre_StructMapFineToCoarse(Edge_cstarts[i][j], zero_index, rfactor,
-                                     Edge_cstarts[i][j]);
+         maxwell_MapFineToCoarse(Edge_cstarts[i][j], zero_index, rfactor,
+                                 Edge_cstarts[i][j]);
 
          hypre_BoxDestroy(cbox);
       }
@@ -2311,8 +2331,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
             }
 
             hypre_BoxGetSize(&copy_box, loop_size);
-            hypre_StructMapFineToCoarse(loop_size, zero_index, stride,
-                                        loop_size);
+            maxwell_MapFineToCoarse(loop_size, zero_index, stride,
+                                    loop_size);
 
             /* extend the loop_size so that upper boundary of the box are reached. */
             hypre_AddIndexes(loop_size, hi_index, 3, loop_size);
@@ -2435,8 +2455,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                            hypre_BoxIMin(&copy_box));
 
                      hypre_BoxGetSize(&copy_box, loop_size);
-                     hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                                 loop_size);
+                     maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                             loop_size);
 
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
@@ -2512,8 +2532,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                            hypre_BoxIMin(&copy_box));
 
                      hypre_BoxGetSize(&copy_box, loop_size);
-                     hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                                 loop_size);
+                     maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                             loop_size);
 
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
                      loop_size[1]++;
@@ -2611,8 +2631,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                            hypre_BoxIMin(&copy_box));
 
                      hypre_BoxGetSize(&copy_box, loop_size);
-                     hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                                 loop_size);
+                     maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                             loop_size);
 
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
@@ -2687,8 +2707,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                            hypre_BoxIMin(&copy_box));
 
                      hypre_BoxGetSize(&copy_box, loop_size);
-                     hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                                 loop_size);
+                     maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                             loop_size);
 
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
@@ -2786,8 +2806,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                            hypre_BoxIMin(&copy_box));
 
                      hypre_BoxGetSize(&copy_box, loop_size);
-                     hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                                 loop_size);
+                     maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                             loop_size);
 
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
@@ -2866,8 +2886,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                            hypre_BoxIMin(&copy_box));
 
                      hypre_BoxGetSize(&copy_box, loop_size);
-                     hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                                 loop_size);
+                     maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                             loop_size);
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                      loop_size[1]++;
@@ -2960,8 +2980,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                         hypre_BoxIMin(&copy_box));
 
                   hypre_BoxGetSize(&copy_box, loop_size);
-                  hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                              loop_size);
+                  maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                          loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
@@ -3016,8 +3036,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                         hypre_BoxIMin(&copy_box));
 
                   hypre_BoxGetSize(&copy_box, loop_size);
-                  hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                              loop_size);
+                  maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                          loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
@@ -3073,8 +3093,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                         hypre_BoxIMin(&copy_box));
 
                   hypre_BoxGetSize(&copy_box, loop_size);
-                  hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                              loop_size);
+                  maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                          loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
@@ -3140,8 +3160,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                         hypre_BoxIMin(&copy_box));
 
                   hypre_BoxGetSize(&copy_box, loop_size);
-                  hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                              loop_size);
+                  maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                          loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
@@ -3208,8 +3228,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                         hypre_BoxIMin(&copy_box));
 
                   hypre_BoxGetSize(&copy_box, loop_size);
-                  hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                              loop_size);
+                  maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                          loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
@@ -3442,15 +3462,15 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
                   /* also modify cstart */
                   hypre_AddIndexes(boxoffset[j], one_index, 3, boxoffset[j]);
-                  hypre_StructMapFineToCoarse(boxoffset[j], zero_index, rfactor,
-                                              boxoffset[j]);
+                  maxwell_MapFineToCoarse(boxoffset[j], zero_index, rfactor,
+                                          boxoffset[j]);
                   hypre_AddIndexes(cstart, boxoffset[j], 3, cstart);
                }
             }
 
             hypre_BoxGetSize(&copy_box, loop_size);
-            hypre_StructMapFineToCoarse(loop_size, zero_index, stride,
-                                        loop_size);
+            maxwell_MapFineToCoarse(loop_size, zero_index, stride,
+                                    loop_size);
 
             /* extend the loop_size so that upper boundary of the box are reached. */
             hypre_AddIndexes(loop_size, hi_index, 3, loop_size);
@@ -3481,8 +3501,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_SubtractIndexes(findex, start, 3, findex);
 
                   /* determine where the edge lies- coarsening required. */
-                  hypre_StructMapFineToCoarse(findex, zero_index, rfactor,
-                                              cindex);
+                  maxwell_MapFineToCoarse(findex, zero_index, rfactor,
+                                          cindex);
                   hypre_AddIndexes(cindex, cstart, 3, cindex);
                   hypre_AddIndexes(findex, start, 3, findex);
 
@@ -3605,8 +3625,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                            hypre_BoxIMin(&copy_box));
 
                      hypre_BoxGetSize(&copy_box, loop_size);
-                     hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                                 loop_size);
+                     maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                             loop_size);
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                      /* increase the loop_size by one in the Z plane direction */
@@ -3744,8 +3764,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                            hypre_BoxIMin(&copy_box));
 
                      hypre_BoxGetSize(&copy_box, loop_size);
-                     hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                                 loop_size);
+                     maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                             loop_size);
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                      loop_size[1]++;
@@ -3907,8 +3927,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                            hypre_BoxIMin(&copy_box));
 
                      hypre_BoxGetSize(&copy_box, loop_size);
-                     hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                                 loop_size);
+                     maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                             loop_size);
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                      /* increase the loop_size by one in the Z plane direction */
@@ -4041,8 +4061,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                            hypre_BoxIMin(&copy_box));
 
                      hypre_BoxGetSize(&copy_box, loop_size);
-                     hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                                 loop_size);
+                     maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                             loop_size);
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                      loop_size[0]++;
@@ -4203,8 +4223,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                            hypre_BoxIMin(&copy_box));
 
                      hypre_BoxGetSize(&copy_box, loop_size);
-                     hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                                 loop_size);
+                     maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                             loop_size);
 
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
@@ -4337,8 +4357,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                            hypre_BoxIMin(&copy_box));
 
                      hypre_BoxGetSize(&copy_box, loop_size);
-                     hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                                 loop_size);
+                     maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                             loop_size);
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                      loop_size[1]++;
@@ -4499,8 +4519,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                         hypre_BoxIMin(&copy_box));
 
                   hypre_BoxGetSize(&copy_box, loop_size);
-                  hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                              loop_size);
+                  maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                          loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
@@ -4582,8 +4602,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                         hypre_BoxIMin(&copy_box));
 
                   hypre_BoxGetSize(&copy_box, loop_size);
-                  hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                              loop_size);
+                  maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                          loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
@@ -4665,8 +4685,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                         hypre_BoxIMin(&copy_box));
 
                   hypre_BoxGetSize(&copy_box, loop_size);
-                  hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                              loop_size);
+                  maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                          loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
@@ -4819,8 +4839,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                         hypre_BoxIMin(&copy_box));
 
                   hypre_BoxGetSize(&copy_box, loop_size);
-                  hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                              loop_size);
+                  maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                          loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
@@ -4974,8 +4994,8 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                         hypre_BoxIMin(&copy_box));
 
                   hypre_BoxGetSize(&copy_box, loop_size);
-                  hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
-                                              loop_size);
+                  maxwell_MapFineToCoarse(loop_size, zero_index, rfactor,
+                                          loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
