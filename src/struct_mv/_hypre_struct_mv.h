@@ -2135,8 +2135,8 @@ HYPRE_Int hypre_StructMatmultCreate ( HYPRE_Int nmatrices_in, hypre_StructMatrix
                                       HYPRE_Int nterms, HYPRE_Int *terms_in, HYPRE_Int *transposes_in,
                                       hypre_StructMatmultData **mmdata_ptr );
 HYPRE_Int hypre_StructMatmultDestroy ( hypre_StructMatmultData *mmdata );
-HYPRE_Int hypre_StructMatmultSetup ( hypre_StructMatmultData  *mmdata, hypre_StructMatrix **M_ptr );
-HYPRE_Int hypre_StructMatmultCommunicate ( hypre_StructMatmultData *mmdata, hypre_StructMatrix *M );
+HYPRE_Int hypre_StructMatmultSetup ( hypre_StructMatmultData  *mmdata, HYPRE_Int assemble_grid, hypre_StructMatrix **M_ptr );
+HYPRE_Int hypre_StructMatmultCommunicate ( hypre_StructMatmultData *mmdata );
 HYPRE_Int hypre_StructMatmultCompute ( hypre_StructMatmultData *mmdata, hypre_StructMatrix *M );
 HYPRE_Int hypre_StructMatmultCompute_core_double ( hypre_StructMatmultHelper *a, HYPRE_Int na,
                                                    HYPRE_Int ndim, hypre_Index loop_size, HYPRE_Int stencil_size, hypre_Box *fdbox,
