@@ -397,6 +397,10 @@ hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
       hypre_StructCoarsen(grid, NULL, coarsen_stride, 1, &Mgrid);
       hypre_MapToCoarseIndex(Mran_stride, NULL, coarsen_stride, ndim);
       hypre_MapToCoarseIndex(Mdom_stride, NULL, coarsen_stride, ndim);
+      /* Assemble the grid. Note: StructGridGlobalSize is updated to zero so that
+       * its computation is triggered in hypre_StructGridAssemble */
+      hypre_StructGridGlobalSize(grid) = 0;
+      hypre_StructGridAssemble(grid);
    }
    else
    {
@@ -887,10 +891,13 @@ hypre_StructMatmultCommunicate( hypre_StructMatmultData  *mmdata,
    hypre_CommHandle   *comm_handle;
    HYPRE_Int           i, j, nb;
 
+#if 0
+   /* Moved this to hypre_StructMatmultSetup */
    /* Assemble the grid. Note: StructGridGlobalSize is updated to zero so that
     * its computation is triggered in hypre_StructGridAssemble */
    hypre_StructGridGlobalSize(grid) = 0;
    hypre_StructGridAssemble(grid);
+#endif
 
    /* If all constant coefficients, return */
    if (mmdata -> na == 0)
