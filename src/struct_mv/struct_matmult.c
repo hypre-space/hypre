@@ -399,8 +399,8 @@ hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
       hypre_MapToCoarseIndex(Mdom_stride, NULL, coarsen_stride, ndim);
       /* Assemble the grid. Note: StructGridGlobalSize is updated to zero so that
        * its computation is triggered in hypre_StructGridAssemble */
-      hypre_StructGridGlobalSize(grid) = 0;
-      hypre_StructGridAssemble(grid);
+      hypre_StructGridGlobalSize(Mgrid) = 0;
+      hypre_StructGridAssemble(Mgrid);
    }
    else
    {
@@ -879,7 +879,7 @@ HYPRE_Int
 hypre_StructMatmultCommunicate( hypre_StructMatmultData  *mmdata,
                                 hypre_StructMatrix       *M )
 {
-   hypre_StructGrid   *grid = hypre_StructMatrixGrid(M);
+//   hypre_StructGrid   *grid = hypre_StructMatrixGrid(M);
 
    hypre_CommPkg      *comm_pkg        = (mmdata -> comm_pkg);
    HYPRE_Complex     **comm_data       = (mmdata -> comm_data);
