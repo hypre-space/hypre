@@ -41,7 +41,7 @@ using hypre_DeviceItem = void*;
 
 #if defined(HYPRE_USING_CUSPARSE)
 /* Note (VPM) : As of cuSPARSE 12, ILU functionalities have been marked as deprecated.
-   The following definitaion avoids compilation warnings regarding the use of ILU routines */
+   The following definition avoids compilation warnings regarding the use of ILU routines */
 #define DISABLE_CUSPARSE_DEPRECATED
 #include <cusparse.h>
 #endif
