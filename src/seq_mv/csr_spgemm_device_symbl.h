@@ -493,6 +493,9 @@ hypre_spgemm_symbolic_rownnz( HYPRE_Int  m,
    HYPRE_SPGEMM_PRINT("kernel spec [%d %d %d] x [%d %d %d]\n", gDim.x, gDim.y, gDim.z, bDim.x, bDim.y,
                       bDim.z);
 #endif
+#else
+   HYPRE_UNUSED_VAR(k);
+   HYPRE_UNUSED_VAR(n);
 #endif
 
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM) || defined(HYPRE_USING_SYCL)

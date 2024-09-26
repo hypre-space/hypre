@@ -33,6 +33,9 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
                                   HYPRE_Int              debug_flag,
                                   hypre_IntArray       **CF_marker_ptr )
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+   HYPRE_UNUSED_VAR(CF_init);
+
    MPI_Comm                  comm            = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg      *comm_pkg        = hypre_ParCSRMatrixCommPkg(S);
    hypre_ParCSRCommHandle   *comm_handle;
@@ -173,7 +176,7 @@ hypre_BoomerAMGCoarsenPMISDevice( hypre_ParCSRMatrix    *S,
          /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
          if (hypre_GetGpuAwareMPI())
          {
-            hypre_ForceSyncComputeStream(hypre_handle());
+            hypre_ForceSyncComputeStream();
          }
 #endif
 
@@ -248,6 +251,8 @@ hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix  *S,
                               HYPRE_Real          *measure_offd,
                               HYPRE_Real          *real_send_buf )
 {
+   HYPRE_UNUSED_VAR(CF_init);
+
    hypre_ParCSRCommHandle   *comm_handle;
    HYPRE_Int                 num_sends       = hypre_ParCSRCommPkgNumSends(comm_pkg);
    hypre_CSRMatrix          *S_diag          = hypre_ParCSRMatrixDiag(S);
@@ -260,7 +265,7 @@ hypre_GetGlobalMeasureDevice( hypre_ParCSRMatrix  *S,
    if (hypre_GetGpuAwareMPI())
    {
       /* RL: make sure measure_offd is ready before issuing GPU-GPU MPI */
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 
    /* send local column nnz of the offd part to neighbors */
@@ -389,7 +394,7 @@ hypre_PMISCoarseningInitDevice( hypre_ParCSRMatrix  *S,               /* in */
    /* RL: make sure real_send_buf is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 #endif
 
@@ -542,6 +547,8 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
                                     HYPRE_Real          *real_send_buf,
                                     HYPRE_Int           *int_send_buf )
 {
+   HYPRE_UNUSED_VAR(int_send_buf);
+
    hypre_CSRMatrix *S_diag    = hypre_ParCSRMatrixDiag(S);
    HYPRE_Int       *S_diag_i  = hypre_CSRMatrixI(S_diag);
    HYPRE_Int       *S_diag_j  = hypre_CSRMatrixJ(S_diag);
@@ -587,7 +594,7 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
    /* RL: make sure real_send_buf is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 #endif
 
@@ -611,7 +618,7 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
    /* RL: make sure int_send_buf is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 #endif
 
@@ -626,4 +633,3 @@ hypre_PMISCoarseningUpdateCFDevice( hypre_ParCSRMatrix  *S,               /* in 
 }
 
 #endif // #if defined(HYPRE_USING_GPU)
-

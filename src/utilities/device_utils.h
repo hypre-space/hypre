@@ -241,7 +241,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_DEBUG)
-#define GPU_LAUNCH_SYNC { hypre_SyncComputeStream(hypre_handle()); hypre_GetDeviceLastError(); }
+#define GPU_LAUNCH_SYNC { hypre_SyncComputeStream(); hypre_GetDeviceLastError(); }
 #else
 #define GPU_LAUNCH_SYNC
 #endif

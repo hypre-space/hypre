@@ -173,7 +173,7 @@ hypre_DeviceDataDestroy(hypre_DeviceData *data)
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SyncDevice(hypre_Handle *hypre_handle)
+hypre_SyncDevice()
 {
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaDeviceSynchronize() );
@@ -182,7 +182,7 @@ hypre_SyncDevice(hypre_Handle *hypre_handle)
 #elif defined(HYPRE_USING_SYCL)
    try
    {
-      HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle)->wait_and_throw() );
+      HYPRE_SYCL_CALL( hypre_HandleComputeStream(hypre_handle())->wait_and_throw() );
    }
    catch (sycl::exception const &exc)
    {
@@ -314,9 +314,9 @@ hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr)
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SyncComputeStream(hypre_Handle *hypre_handle)
+hypre_SyncComputeStream()
 {
-   hypre_SyncComputeStream_core(4, hypre_handle, NULL);
+   hypre_SyncComputeStream_core(4, hypre_handle(), NULL);
 
    return hypre_error_flag;
 }
@@ -326,12 +326,12 @@ hypre_SyncComputeStream(hypre_Handle *hypre_handle)
  *--------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle)
+hypre_ForceSyncComputeStream()
 {
    HYPRE_Int sync_stream;
    hypre_GetSyncCudaCompute(&sync_stream);
    hypre_SetSyncCudaCompute(1);
-   hypre_SyncComputeStream_core(4, hypre_handle, NULL);
+   hypre_SyncComputeStream_core(4, hypre_handle(), NULL);
    hypre_SetSyncCudaCompute(sync_stream);
 
    return hypre_error_flag;
@@ -1141,6 +1141,8 @@ hypreDevice_CopyParCSRRows( HYPRE_Int      nrows,
                             HYPRE_BigInt  *d_jb,
                             HYPRE_Complex *d_ab )
 {
+   HYPRE_UNUSED_VAR(job);
+
    /* trivial case */
    if (nrows <= 0)
    {
