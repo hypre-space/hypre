@@ -226,7 +226,9 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
             hypre_StructMatrixDestroy(sM);
 
             /* This sets up the grid and stencil of the (vi,vj)-block of the PMatrix */
-            hypre_StructMatmultSetup(smmdata[vi][vj], &sM);
+            /* NOTE: Do not assemble the sM grid here.  Assemble the grids later
+             * in HYPRE_SStructGridAssemble(Mgrid) to reduce box manager overhead. */
+            hypre_StructMatmultSetup(smmdata[vi][vj], 0, &sM);
             hypre_SStructPMatrixSMatrix(pM, vi, vj) = sM;
 
             /* Update struct stencil of the (vi,vj)-block with actual stencils */
