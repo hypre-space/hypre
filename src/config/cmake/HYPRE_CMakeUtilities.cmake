@@ -176,7 +176,6 @@ function(setup_tpl LIBNAME)
       # Use find_package
       find_package(${LIBNAME} REQUIRED CONFIG)
       if(${LIBNAME}_FOUND)
-        message(STATUS "Found ${LIBNAME_UPPER} library")
         list(APPEND HYPRE_DEPENDENCY_DIRS "${${LIBNAME}_ROOT}")
         set(HYPRE_DEPENDENCY_DIRS "${HYPRE_DEPENDENCY_DIRS}" CACHE INTERNAL "" FORCE)
 
@@ -186,8 +185,10 @@ function(setup_tpl LIBNAME)
 
         if(TARGET ${LIBNAME}::${LIBNAME})
           target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBNAME}::${LIBNAME})
+          message(STATUS "Found ${LIBNAME} target: ${LIBNAME}::${LIBNAME}")
         elseif(TARGET ${LIBNAME})
           target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBNAME})
+          message(STATUS "Found ${LIBNAME} target: ${LIBNAME}")
         else()
           message(FATAL_ERROR "${LIBNAME} target not found. Please check your ${LIBNAME} installation")
         endif()

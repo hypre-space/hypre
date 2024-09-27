@@ -75,21 +75,29 @@ else()
 endif()
 
 # Set default compile optimization flag
-set(HYPRE_BUILD_TYPE "Release" CACHE STRING
-    "Optimization flags: set to Debug, Release, RelWithDebInfo, or MinSizeRel")
+if(NOT CMAKE_BUILD_TYPE AND NOT DEFINED HYPRE_BUILD_TYPE)
+  set(HYPRE_BUILD_TYPE "Release" CACHE STRING
+      "Optimization flags: set to Debug, Release, RelWithDebInfo, or MinSizeRel")
+endif()
 
-if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  set(CMAKE_BUILD_TYPE "${HYPRE_BUILD_TYPE}" CACHE INTERNAL "" FORCE)
-  # Set the possible values of build type for cmake-gui
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-    "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
-endif ()
-message(STATUS "Build type: ${CMAKE_BUILD_TYPE}") 
+# Set the possible values of build type for cmake-gui
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+  "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+
+# If CMAKE_BUILD_TYPE is not set, use HYPRE_BUILD_TYPE
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "${HYPRE_BUILD_TYPE}" CACHE STRING
+      "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
+      FORCE)
+endif()
+
+# Print the build type
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 # Base boolean configuration options
 set_hypre_option(BASE HYPRE_ENABLE_SHARED               "Build a shared library" ${BUILD_SHARED_LIBS})
-set_hypre_option(BASE HYPRE_ENABLE_BIGINT               "Use long long int for HYPRE_Int" OFF)
-set_hypre_option(BASE HYPRE_ENABLE_MIXEDINT             "Use long long int for HYPRE_BigInt, int for HYPRE_INT" OFF)
+set_hypre_option(BASE HYPRE_ENABLE_BIGINT               "Use long long int for HYPRE_Int and HYPRE_BigInt" OFF)
+set_hypre_option(BASE HYPRE_ENABLE_MIXEDINT             "Use long long int for HYPRE_BigInt, int for HYPRE_Int" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_SINGLE               "Use float for HYPRE_Real" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_LONG_DOUBLE          "Use long double for HYPRE_Real" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_COMPLEX              "Use complex values" OFF)
@@ -112,14 +120,14 @@ set_hypre_option(GPU  HYPRE_WITH_SYCL                   "Use SYCL" OFF)
 set_hypre_option(GPU  HYPRE_WITH_GPU_AWARE_MPI          "Compile with device aware GPU support" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_UNIFIED_MEMORY       "Use unified memory for allocating the memory" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_DEVICE_MALLOC_ASYNC  "Use device async malloc" OFF)
+set_hypre_option(GPU  HYPRE_ENABLE_GPU_PROFILING        "Use NVTX on CUDA or rocTX on HIP" OFF)
 # CUDA options
 set_hypre_option(CUDA HYPRE_ENABLE_CUDA_STREAMS         "Use CUDA streams" ON)
 set_hypre_option(CUDA HYPRE_ENABLE_CUSPARSE             "Use cuSPARSE" ON)
-set_hypre_option(CUDA HYPRE_ENABLE_CUSOLVER             "Use cuSOLVER" OFF)
-set_hypre_option(CUDA HYPRE_ENABLE_DEVICE_POOL          "Use device memory pool" OFF)
-set_hypre_option(CUDA HYPRE_ENABLE_CUBLAS               "Use cuBLAS" OFF)
+set_hypre_option(CUDA HYPRE_ENABLE_CUSOLVER             "Use cuSOLVER" ON)
+set_hypre_option(CUDA HYPRE_ENABLE_CUBLAS               "Use cuBLAS" ON)
 set_hypre_option(CUDA HYPRE_ENABLE_CURAND               "Use cuRAND" ON)
-set_hypre_option(CUDA HYPRE_ENABLE_GPU_PROFILING        "Use NVTX on CUDA" OFF)
+set_hypre_option(CUDA HYPRE_ENABLE_DEVICE_POOL          "Use CUB's device memory pool" OFF)
 # HIP options
 set_hypre_option(HIP  HYPRE_ENABLE_ROCBLAS              "Use rocBLAS" ON)
 set_hypre_option(HIP  HYPRE_ENABLE_ROCSPARSE            "Use rocSPARSE" ON)
@@ -138,19 +146,20 @@ set_hypre_option(TPL  HYPRE_WITH_UMPIRE_UM              "Use Umpire Allocator fo
 set_hypre_option(TPL  HYPRE_WITH_SUPERLU                "Use TPL SuperLU" OFF)
 set_hypre_option(TPL  HYPRE_WITH_DSUPERLU               "Use TPL SuperLU_Dist" OFF)
 set_hypre_option(TPL  HYPRE_WITH_MAGMA                  "Use TPL MAGMA" OFF)
-set_hypre_option(SKIP TPL_UMPIRE_LIBRARIES              "Optional list of absolute paths to Umpire link libraries []." "")
-set_hypre_option(SKIP TPL_UMPIRE_INCLUDE_DIRS           "Optional list of absolute paths to Umpire include directories []." "")
-set_hypre_option(SKIP TPL_SUPERLU_LIBRARIES             "Optional list of absolute paths to SuperLU link libraries []." "")
-set_hypre_option(SKIP TPL_SUPERLU_INCLUDE_DIRS          "Optional list of absolute paths to SuperLU include directories []." "")
-set_hypre_option(SKIP TPL_DSUPERLU_LIBRARIES            "Optional list of absolute paths to SuperLU_Dist link libraries []." "")
-set_hypre_option(SKIP TPL_DSUPERLU_INCLUDE_DIRS         "Optional list of absolute paths to SuperLU_Dist include directories []." "")
-set_hypre_option(SKIP TPL_MAGMA_LIBRARIES               "Optional list of absolute paths to MAGMA link libraries []." "")
-set_hypre_option(SKIP TPL_MAGMA_INCLUDE_DIRS            "Optional list of absolute paths to MAGMA include directories []." "")
-set_hypre_option(SKIP TPL_CALIPER_LIBRARIES             "Optional list of absolute paths to Caliper link libraries []." "")
-set_hypre_option(SKIP TPL_CALIPER_INCLUDE_DIRS          "Optional list of absolute paths to Caliper include directories []." "")
-set_hypre_option(SKIP TPL_BLAS_LIBRARIES                "Optional list of absolute paths to BLAS libraries, otherwise use FindBLAS to locate []." "")
-set_hypre_option(SKIP TPL_LAPACK_LIBRARIES              "Optional list of absolute paths to LAPACK libraries, otherwise use FindLAPACK to locate []." "")
-set_hypre_option(SKIP TPL_FEI_INCLUDE_DIRS              "Optional list of absolute paths to FEI include directories []." "")
+set_hypre_option(TPL  HYPRE_WITH_CALIPER                "Use TPL Caliper" OFF)
+set_hypre_option(SKIP TPL_UMPIRE_LIBRARIES              "Absolute paths to Umpire link libraries [Optional]." "")
+set_hypre_option(SKIP TPL_UMPIRE_INCLUDE_DIRS           "Absolute paths to Umpire include directories [Optional]." "")
+set_hypre_option(SKIP TPL_SUPERLU_LIBRARIES             "Absolute paths to SuperLU link libraries [Optional]." "")
+set_hypre_option(SKIP TPL_SUPERLU_INCLUDE_DIRS          "Absolute paths to SuperLU include directories [Optional]." "")
+set_hypre_option(SKIP TPL_DSUPERLU_LIBRARIES            "Absolute paths to SuperLU_Dist link libraries [Optional]." "")
+set_hypre_option(SKIP TPL_DSUPERLU_INCLUDE_DIRS         "Absolute paths to SuperLU_Dist include directories [Optional]." "")
+set_hypre_option(SKIP TPL_MAGMA_LIBRARIES               "Absolute paths to MAGMA link libraries [Optional]." "")
+set_hypre_option(SKIP TPL_MAGMA_INCLUDE_DIRS            "Absolute paths to MAGMA include directories [Optional]." "")
+set_hypre_option(SKIP TPL_CALIPER_LIBRARIES             "Absolute paths to Caliper link libraries [Optional]." "")
+set_hypre_option(SKIP TPL_CALIPER_INCLUDE_DIRS          "Absolute paths to Caliper include directories [Optional]." "")
+set_hypre_option(SKIP TPL_BLAS_LIBRARIES                "Absolute paths to BLAS link libraries [Optional]." "")
+set_hypre_option(SKIP TPL_LAPACK_LIBRARIES              "Absolute paths to LAPACK link libraries [Optional]." "")
+set_hypre_option(SKIP TPL_FEI_INCLUDE_DIRS              "Absolute paths to FEI include directories [Optional]." "")
 # Extra flags
 set(HYPRE_WITH_EXTRA_CFLAGS              "" CACHE STRING "Define extra C compile flags")
 set(HYPRE_WITH_EXTRA_CXXFLAGS            "" CACHE STRING "Define extra CXX compile flags")
@@ -216,21 +225,25 @@ if (HYPRE_WITH_UMPIRE)
 endif ()
 
 if (HYPRE_WITH_UMPIRE_HOST)
+  set(HYPRE_WITH_UMPIRE ON CACHE BOOL "" FORCE)
   set(HYPRE_USING_UMPIRE ON CACHE BOOL "" FORCE)
   set(HYPRE_USING_UMPIRE_HOST ON CACHE BOOL "" FORCE)
 endif ()
 
 if (HYPRE_WITH_UMPIRE_DEVICE)
+  set(HYPRE_WITH_UMPIRE ON CACHE BOOL "" FORCE)
   set(HYPRE_USING_UMPIRE ON CACHE BOOL "" FORCE)
   set(HYPRE_USING_UMPIRE_DEVICE ON CACHE BOOL "" FORCE)
 endif ()
 
 if (HYPRE_WITH_UMPIRE_UM)
+  set(HYPRE_WITH_UMPIRE ON CACHE BOOL "" FORCE)
   set(HYPRE_USING_UMPIRE ON CACHE BOOL "" FORCE)
   set(HYPRE_USING_UMPIRE_UM ON CACHE BOOL "" FORCE)
 endif ()
 
 if (HYPRE_WITH_UMPIRE_PINNED)
+  set(HYPRE_WITH_UMPIRE ON CACHE BOOL "" FORCE)
   set(HYPRE_USING_UMPIRE ON CACHE BOOL "" FORCE)
   set(HYPRE_USING_UMPIRE_PINNED ON CACHE BOOL "" FORCE)
 endif ()
@@ -241,7 +254,9 @@ ensure_options_match(HYPRE_INSTALL_PREFIX CMAKE_INSTALL_PREFIX)
 ensure_options_match(HYPRE_BUILD_TYPE CMAKE_BUILD_TYPE)
 ensure_options_differ(HYPRE_WITH_CUDA HYPRE_WITH_HIP)
 ensure_options_differ(HYPRE_WITH_CUDA HYPRE_WITH_SYCL)
+ensure_options_differ(HYPRE_WITH_CUDA HYPRE_BIGINT)
 ensure_options_differ(HYPRE_WITH_HIP HYPRE_WITH_SYCL)
+ensure_options_differ(HYPRE_WITH_HIP HYPRE_BIGINT)
 
 # Set MPI compile flags
 if (HYPRE_WITH_MPI)
@@ -406,12 +421,12 @@ write_basic_package_version_file(
 configure_package_config_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/config/HYPREConfig.cmake.in"
   "${CMAKE_CURRENT_BINARY_DIR}/HYPREConfig.cmake"
-  INSTALL_DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/HYPREConfig.cmake
+  INSTALL_DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/HYPREConfig.cmake"
 )
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/HYPREConfig.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/HYPREConfigVersion.cmake"
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/HYPRE
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/HYPRE"
 )
 # Install the CMake export file
 install(EXPORT HYPRETargets
