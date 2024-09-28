@@ -1482,7 +1482,9 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
             {
                hypre_printf("[%*d]: %s", ndigits, i, function);
             }
-            hypre_printf(" | Vm[Size,RSS]/[Peak,HWM]: (%.2f, %.2f / %.2f, %.2f) GB", gmem[ne * i + 0], gmem[ne * i + 2], gmem[ne * i + 1], gmem[ne * i + 3]);
+            hypre_printf(" | Vm[Size,RSS]/[Peak,HWM]: (%.2f, %.2f / %.2f, %.2f) GB",
+                         gmem[ne * i + 0], gmem[ne * i + 2],
+                         gmem[ne * i + 1], gmem[ne * i + 3]);
             hypre_printf(" | Free/Total: (%.2f / %.2f)", gmem[ne * i + 4], gmem[ne * i + 5]);
 #if defined(HYPRE_USING_UMPIRE)
             if (gmem[ne * i + 7])
