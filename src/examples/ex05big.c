@@ -6,22 +6,30 @@
  ******************************************************************************/
 
 /*
-   Example 5
+   Example 5big
 
    Interface:    Linear-Algebraic (IJ)
 
-   Compile with: make ex5
+   Compile with: make ex05big
 
-   Sample run:   mpirun -np 4 ex5
+   Sample run:   mpirun -np 4 ex05big
 
-   Description:  This example solves the 2-D Laplacian problem with zero boundary
-                 conditions on an n x n grid.  The number of unknowns is N=n^2.
-                 The standard 5-point stencil is used, and we solve for the
-                 interior nodes only.
+   Description:  This example is a slight modification of Example 5 that
+                 illustrates the 64-bit integer support in hypre needed to run
+                 problems with more than 2B unknowns.
 
-                 This example solves the same problem as Example 3.  Available
-                 solvers are AMG, PCG, and PCG with AMG or Parasails
-                 preconditioners.  */
+                 Specifically, the changes compared to Example 5 are as follows:
+
+                 1) All integer arguments to HYPRE functions should be declared
+                    of type HYPRE_Int.
+
+                 2) Variables of type HYPRE_Int are 64-bit integers, so they
+                    should be printed in the %lld format (not %d).
+
+                 To enable the 64-bit integer support, you need to build hypre
+                 with the --enable-bigint option of the configure script.  We
+                 recommend comparing this example with Example 5.
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,11 +38,6 @@
 #include "HYPRE_krylov.h"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_ls.h"
-#include "ex.h"
-
-#ifdef HYPRE_EXVIS
-#include "vis.c"
-#endif
 
 int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations,
                                       double rel_residual_norm);
@@ -43,15 +46,15 @@ int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations,
 
 int main (int argc, char *argv[])
 {
-   int i;
+   HYPRE_Int i;
    int myid, num_procs;
    int N, n;
 
-   int ilower, iupper;
-   int local_size, extra;
+   HYPRE_Int ilower, iupper;
+   HYPRE_Int local_size, extra;
 
    int solver_id;
-   int vis, print_system;
+   int print_system;
 
    double h, h2;
 
@@ -72,17 +75,9 @@ int main (int argc, char *argv[])
    /* Initialize HYPRE */
    HYPRE_Initialize();
 
-   /* Print GPU info */
-   /* HYPRE_PrintDeviceInfo(); */
-#if defined(HYPRE_USING_GPU)
-   /* use vendor implementation for SpGEMM */
-   HYPRE_SetSpGemmUseVendor(0);
-#endif
-
    /* Default problem parameters */
    n = 33;
    solver_id = 0;
-   vis = 0;
    print_system = 0;
 
 
@@ -102,11 +97,6 @@ int main (int argc, char *argv[])
          {
             arg_index++;
             solver_id = atoi(argv[arg_index++]);
-         }
-         else if ( strcmp(argv[arg_index], "-vis") == 0 )
-         {
-            arg_index++;
-            vis = 1;
          }
          else if ( strcmp(argv[arg_index], "-print_system") == 0 )
          {
@@ -136,7 +126,6 @@ int main (int argc, char *argv[])
          printf("                        8  - ParaSails-PCG\n");
          printf("                        50 - PCG\n");
          printf("                        61 - AMG-FlexGMRES\n");
-         printf("  -vis                : save the solution for GLVis visualization\n");
          printf("  -print_system       : print the matrix and rhs\n");
          printf("\n");
       }
@@ -191,14 +180,9 @@ int main (int argc, char *argv[])
       one could set all the rows together (see the User's Manual).
    */
    {
-      int nnz;
-      /* OK to use constant-length arrays for CPUs
+      HYPRE_Int nnz;
       double values[5];
-      int cols[5];
-      */
-      double *values = (double *) custom_malloc(5 * sizeof(double));
-      int *cols = (int *) custom_malloc(5 * sizeof(int));
-      int *tmp = (int *) custom_malloc(2 * sizeof(int));
+      HYPRE_Int cols[5];
 
       for (i = ilower; i <= iupper; i++)
       {
@@ -242,14 +226,8 @@ int main (int argc, char *argv[])
          }
 
          /* Set the values for row i */
-         tmp[0] = nnz;
-         tmp[1] = i;
-         HYPRE_IJMatrixSetValues(A, 1, &tmp[0], &tmp[1], cols, values);
+         HYPRE_IJMatrixSetValues(A, 1, &nnz, &i, cols, values);
       }
-
-      custom_free(values);
-      custom_free(cols);
-      custom_free(tmp);
    }
 
    /* Assemble after setting the coefficients */
@@ -285,11 +263,11 @@ int main (int argc, char *argv[])
    /* Set the rhs values to h^2 and the solution to zero */
    {
       double *rhs_values, *x_values;
-      int    *rows;
+      HYPRE_Int *rows;
 
-      rhs_values =  (double*) custom_calloc(local_size, sizeof(double));
-      x_values =  (double*) custom_calloc(local_size, sizeof(double));
-      rows = (int*) custom_calloc(local_size, sizeof(int));
+      rhs_values = (double*) calloc(local_size, sizeof(double));
+      x_values = (double*) calloc(local_size, sizeof(double));
+      rows = (HYPRE_Int*) calloc(local_size, sizeof(HYPRE_Int));
 
       for (i = 0; i < local_size; i++)
       {
@@ -301,9 +279,9 @@ int main (int argc, char *argv[])
       HYPRE_IJVectorSetValues(b, local_size, rows, rhs_values);
       HYPRE_IJVectorSetValues(x, local_size, rows, x_values);
 
-      custom_free(x_values);
-      custom_free(rhs_values);
-      custom_free(rows);
+      free(x_values);
+      free(rhs_values);
+      free(rows);
    }
 
 
@@ -335,7 +313,7 @@ int main (int argc, char *argv[])
    /* AMG */
    if (solver_id == 0)
    {
-      int num_iterations;
+      HYPRE_Int num_iterations;
       double final_res_norm;
 
       /* Create solver */
@@ -343,9 +321,9 @@ int main (int argc, char *argv[])
 
       /* Set some parameters (See Reference Manual for more parameters) */
       HYPRE_BoomerAMGSetPrintLevel(solver, 3);  /* print solve info + parameters */
-      HYPRE_BoomerAMGSetOldDefault(solver); /* Falgout coarsening with modified classical interpolaiton */
+      HYPRE_BoomerAMGSetOldDefault(solver); /* Falgout coarsening with modified classical interpolation */
       HYPRE_BoomerAMGSetRelaxType(solver, 3);   /* G-S/Jacobi hybrid relaxation */
-      HYPRE_BoomerAMGSetRelaxOrder(solver, 1);   /* uses C/F relaxation */
+      HYPRE_BoomerAMGSetRelaxOrder(solver, 1);   /* Uses C/F relaxation */
       HYPRE_BoomerAMGSetNumSweeps(solver, 1);   /* Sweeeps on each level */
       HYPRE_BoomerAMGSetMaxLevels(solver, 20);  /* maximum number of levels */
       HYPRE_BoomerAMGSetTol(solver, 1e-7);      /* conv. tolerance */
@@ -360,7 +338,7 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          printf("\n");
-         printf("Iterations = %d\n", num_iterations);
+         printf("Iterations = %lld\n", num_iterations);
          printf("Final Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
@@ -371,7 +349,7 @@ int main (int argc, char *argv[])
    /* PCG */
    else if (solver_id == 50)
    {
-      int num_iterations;
+      HYPRE_Int num_iterations;
       double final_res_norm;
 
       /* Create solver */
@@ -394,7 +372,7 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          printf("\n");
-         printf("Iterations = %d\n", num_iterations);
+         printf("Iterations = %lld\n", num_iterations);
          printf("Final Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
@@ -405,7 +383,7 @@ int main (int argc, char *argv[])
    /* PCG with AMG preconditioner */
    else if (solver_id == 1)
    {
-      int num_iterations;
+      HYPRE_Int num_iterations;
       double final_res_norm;
 
       /* Create solver */
@@ -442,7 +420,7 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          printf("\n");
-         printf("Iterations = %d\n", num_iterations);
+         printf("Iterations = %lld\n", num_iterations);
          printf("Final Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
@@ -454,7 +432,7 @@ int main (int argc, char *argv[])
    /* PCG with Parasails Preconditioner */
    else if (solver_id == 8)
    {
-      int    num_iterations;
+      HYPRE_Int num_iterations;
       double final_res_norm;
 
       int      sai_max_levels = 1;
@@ -496,7 +474,7 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          printf("\n");
-         printf("Iterations = %d\n", num_iterations);
+         printf("Iterations = %lld\n", num_iterations);
          printf("Final Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
@@ -508,7 +486,7 @@ int main (int argc, char *argv[])
    /* Flexible GMRES with  AMG Preconditioner */
    else if (solver_id == 61)
    {
-      int    num_iterations;
+      HYPRE_Int num_iterations;
       double final_res_norm;
       int    restart = 30;
       int    modify = 1;
@@ -560,7 +538,7 @@ int main (int argc, char *argv[])
       if (myid == 0)
       {
          printf("\n");
-         printf("Iterations = %d\n", num_iterations);
+         printf("Iterations = %lld\n", num_iterations);
          printf("Final Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
@@ -573,53 +551,6 @@ int main (int argc, char *argv[])
    else
    {
       if (myid == 0) { printf("Invalid solver id specified.\n"); }
-   }
-
-   /* Save the solution for GLVis visualization, see vis/glvis-ex5.sh */
-   if (vis)
-   {
-#ifdef HYPRE_EXVIS
-      FILE *file;
-      char filename[255];
-
-      int nvalues = local_size;
-      int *rows = (int*) custom_calloc(nvalues, sizeof(int));
-      double *values =  (double*) custom_calloc(nvalues, sizeof(double));
-
-      for (i = 0; i < nvalues; i++)
-      {
-         rows[i] = ilower + i;
-      }
-
-      /* get the local solution */
-      HYPRE_IJVectorGetValues(x, nvalues, rows, values);
-
-      sprintf(filename, "%s.%06d", "vis/ex5.sol", myid);
-      if ((file = fopen(filename, "w")) == NULL)
-      {
-         printf("Error: can't open output file %s\n", filename);
-         MPI_Finalize();
-         exit(1);
-      }
-
-      /* save solution */
-      for (i = 0; i < nvalues; i++)
-      {
-         fprintf(file, "%.14e\n", values[i]);
-      }
-
-      fflush(file);
-      fclose(file);
-
-      custom_free(rows);
-      custom_free(values);
-
-      /* save global finite element mesh */
-      if (myid == 0)
-      {
-         GLVis_PrintGlobalSquareMesh("vis/ex5.mesh", n - 1);
-      }
-#endif
    }
 
    /* Clean up */

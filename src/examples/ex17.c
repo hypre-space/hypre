@@ -24,7 +24,7 @@
 #include <string.h>
 #include <math.h>
 #include "HYPRE_struct_ls.h"
-#include "ex.h"
+#include "ex.h" //* custom_malloc, custom_calloc, custom_free *//
 
 #define NDIM 4
 #define NSTENC (2*NDIM+1)

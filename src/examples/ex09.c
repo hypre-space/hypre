@@ -10,11 +10,11 @@
 
    Interface:      Semi-Structured interface (SStruct)
 
-   Compile with:   make ex9
+   Compile with:   make ex09
 
-   Sample run:     mpirun -np 16 ex9 -n 33 -solver 0 -v 1 1
+   Sample run:     mpirun -np 16 ex09 -n 33 -solver 0 -v 1 1
 
-   To see options: ex9 -help
+   To see options: ex09 -help
 
    Description:    This code solves a system corresponding to a discretization
                    of the biharmonic problem treated as a system of equations
@@ -44,7 +44,7 @@
 #include <math.h>
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE_krylov.h"
-#include "ex.h"
+#include "ex.h" //* custom_malloc, custom_calloc, custom_free *//
 
 #ifdef HYPRE_EXVIS
 #include "vis.c"
@@ -671,7 +671,7 @@ int main (int argc, char *argv[])
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
          HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
-         HYPRE_BoomerAMGSetPrintFileName(par_precond, "ex9.out.log");
+         HYPRE_BoomerAMGSetPrintFileName(par_precond, "ex09.out.log");
          HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
 
          /* set the preconditioner */
@@ -702,7 +702,7 @@ int main (int argc, char *argv[])
          HYPRE_BoomerAMGSetStrongThreshold(par_solver, 0.25);
          HYPRE_BoomerAMGSetTol(par_solver, 1.9e-6);
          HYPRE_BoomerAMGSetPrintLevel(par_solver, 1);
-         HYPRE_BoomerAMGSetPrintFileName(par_solver, "ex9.out.log");
+         HYPRE_BoomerAMGSetPrintFileName(par_solver, "ex09.out.log");
          HYPRE_BoomerAMGSetMaxIter(par_solver, 50);
 
          /* do the setup */
@@ -747,7 +747,7 @@ int main (int argc, char *argv[])
          HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
                                          var, values);
 
-         sprintf(filename, "%s.%06d", "vis/ex9-u.sol", myid);
+         sprintf(filename, "%s.%06d", "vis/ex09-u.sol", myid);
          if ((file = fopen(filename, "w")) == NULL)
          {
             printf("Error: can't open output file %s\n", filename);
@@ -771,7 +771,7 @@ int main (int argc, char *argv[])
          HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
                                          var, values);
 
-         sprintf(filename, "%s.%06d", "vis/ex9-v.sol", myid);
+         sprintf(filename, "%s.%06d", "vis/ex09-v.sol", myid);
          if ((file = fopen(filename, "w")) == NULL)
          {
             printf("Error: can't open output file %s\n", filename);
@@ -795,7 +795,7 @@ int main (int argc, char *argv[])
          /* save global finite element mesh */
          if (myid == 0)
          {
-            GLVis_PrintGlobalSquareMesh("vis/ex9.mesh", N * n - 1);
+            GLVis_PrintGlobalSquareMesh("vis/ex09.mesh", N * n - 1);
          }
 #endif
       }

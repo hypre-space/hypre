@@ -10,9 +10,9 @@
 
    Interface:    Structured interface (Struct)
 
-   Compile with: make ex1 (may need to edit HYPRE_DIR in Makefile)
+   Compile with: make ex01 (may need to edit HYPRE_DIR in Makefile)
 
-   Sample run:   mpirun -np 2 ex1
+   Sample run:   mpirun -np 2 ex01
 
    Description:  This is a two processor example.  Each processor owns one
                  box in the grid.  For reference, the two grid boxes are those
@@ -32,7 +32,7 @@
 
 /* Struct linear solvers header */
 #include "HYPRE_struct_ls.h"
-#include "ex.h"
+#include "ex.h" /* custom_malloc, custom_calloc, custom_free */
 
 #ifdef HYPRE_EXVIS
 #include "vis.c"
@@ -364,13 +364,13 @@ int main (int argc, char *argv[])
       HYPRE_StructPCGSolve(solver, A, b, x);
    }
 
-   /* Save the solution for GLVis visualization, see vis/glvis-ex1.sh */
+   /* Save the solution for GLVis visualization, see vis/glvis-ex01.sh */
    if (vis)
    {
 #ifdef HYPRE_EXVIS
-      GLVis_PrintStructGrid(grid, "vis/ex1.mesh", myid, NULL, NULL);
-      GLVis_PrintStructVector(x, "vis/ex1.sol", myid);
-      GLVis_PrintData("vis/ex1.data", myid, num_procs);
+      GLVis_PrintStructGrid(grid, "vis/ex01.mesh", myid, NULL, NULL);
+      GLVis_PrintStructVector(x, "vis/ex01.sol", myid);
+      GLVis_PrintData("vis/ex01.data", myid, num_procs);
 #endif
    }
 

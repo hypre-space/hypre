@@ -46,7 +46,7 @@
 #include "HYPRE_sstruct_mv.h"
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE.h"
-#include "ex.h"
+#include "ex.h" //* custom_malloc, custom_calloc, custom_free *//
 
 #ifdef HYPRE_EXVIS
 #include "vis.c"

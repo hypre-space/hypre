@@ -10,11 +10,11 @@
 
    Interface:      Structured interface (Struct)
 
-   Compile with:   make ex3
+   Compile with:   make ex03
 
-   Sample run:     mpirun -np 16 ex3 -n 33 -solver 0 -v 1 1
+   Sample run:     mpirun -np 16 ex03 -n 33 -solver 0 -v 1 1
 
-   To see options: ex3 -help
+   To see options: ex03 -help
 
    Description:    This code solves a system corresponding to a discretization
                    of the Laplace equation -Delta u = 1 with zero boundary
@@ -48,7 +48,7 @@
 #include <string.h>
 #include <math.h>
 #include "HYPRE_struct_ls.h"
-#include "ex.h"
+#include "ex.h" /* custom_malloc, custom_calloc, custom_free */
 
 #ifdef HYPRE_EXVIS
 #include "vis.c"
@@ -424,7 +424,7 @@ int main (int argc, char *argv[])
       HYPRE_StructSMGDestroy(solver);
    }
 
-   /* Save the solution for GLVis visualization, see vis/glvis-ex3.sh */
+   /* Save the solution for GLVis visualization, see vis/glvis-ex03.sh */
    if (vis)
    {
 #ifdef HYPRE_EXVIS
@@ -437,7 +437,7 @@ int main (int argc, char *argv[])
       /* get the local solution */
       HYPRE_StructVectorGetBoxValues(x, ilower, iupper, values);
 
-      sprintf(filename, "%s.%06d", "vis/ex3.sol", myid);
+      sprintf(filename, "%s.%06d", "vis/ex03.sol", myid);
       if ((file = fopen(filename, "w")) == NULL)
       {
          printf("Error: can't open output file %s\n", filename);
@@ -460,7 +460,7 @@ int main (int argc, char *argv[])
       /* save global finite element mesh */
       if (myid == 0)
       {
-         GLVis_PrintGlobalSquareMesh("vis/ex3.mesh", N * n - 1);
+         GLVis_PrintGlobalSquareMesh("vis/ex03.mesh", N * n - 1);
       }
 #endif
    }

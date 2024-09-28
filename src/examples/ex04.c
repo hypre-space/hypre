@@ -6,27 +6,31 @@
  ******************************************************************************/
 
 /*
-   Example 7
+   Example 4
 
-   Interface:      SStructured interface (SStruct)
+   Interface:      Structured interface (Struct)
 
-   Compile with:   make ex7
+   Compile with:   make ex04
 
-   Sample run:     mpirun -np 16 ex7 -n 33 -solver 10 -K 3 -B 0 -C 1 -U0 2 -F 4
+   Sample run:     mpirun -np 16 ex04 -n 33 -solver 10 -K 3 -B 0 -C 1 -U0 2 -F 4
 
-   To see options: ex7 -help
+   To see options: ex04 -help
 
-   Description:    This example uses the sstruct interface to solve the same
-                   problem as was solved in Example 4 with the struct interface.
-                   Therefore, there is only one part and one variable.
+   Description:    This example differs from the previous structured example
+                   (Example 3) in that a more sophisticated stencil and
+                   boundary conditions are implemented. The method illustrated
+                   here to implement the boundary conditions is much more general
+                   than that in the previous example.  Also symmetric storage is
+                   utilized when applicable.
 
                    This code solves the convection-reaction-diffusion problem
                    div (-K grad u + B u) + C u = F in the unit square with
                    boundary condition u = U0.  The domain is split into N x N
                    processor grid.  Thus, the given number of processors should
                    be a perfect square. Each processor has a n x n grid, with
-                   nodes connected by a 5-point stencil.  We use cell-centered
-                   variables, and, therefore, the nodes are not shared.
+                   nodes connected by a 5-point stencil. Note that the struct
+                   interface assumes a cell-centered grid, and, therefore, the
+                   nodes are not shared.
 
                    To incorporate the boundary conditions, we do the following:
                    Let x_i and x_b be the interior and boundary parts of the
@@ -34,16 +38,18 @@
                              A = [A_ii A_ib; A_bi A_bb],
                    then we solve
                              [A_ii 0; 0 I] [x_i ; x_b] = [b_i - A_ib u_0; u_0].
-                   Note that this differs from Example 3 in that we
+                   Note that this differs from the previous example in that we
                    are actually solving for the boundary conditions (so they
                    may not be exact as in ex3, where we only solved for the
                    interior).  This approach is useful for more general types
                    of b.c.
 
-                   As in the previous example (Example 6), we use a structured
-                   solver.  A number of structured solvers are available.
-                   More information can be found in the Solvers and Preconditioners
-                   chapter of the User's Manual.
+                   A number of solvers are available. More information can be
+                   found in the Solvers and Preconditioners chapter of the
+                   User's Manual.
+
+                   We recommend viewing examples 1, 2, and 3 before viewing this
+                   example.
 */
 
 #include <stdio.h>
@@ -51,8 +57,8 @@
 #include <string.h>
 #include <math.h>
 #include "HYPRE_krylov.h"
-#include "HYPRE_sstruct_ls.h"
-#include "ex.h"
+#include "HYPRE_struct_ls.h"
+#include "ex.h" /* custom_malloc, custom_calloc, custom_free */
 
 #ifdef M_PI
 #define PI M_PI
@@ -105,6 +111,8 @@ double K(double x, double y)
 /* Convection vector, first component */
 double B1(double x, double y)
 {
+   (void) x;
+   (void) y;
    switch (optionB)
    {
       case 0:
@@ -123,6 +131,8 @@ double B1(double x, double y)
 /* Convection vector, second component */
 double B2(double x, double y)
 {
+   (void) x;
+   (void) y;
    switch (optionB)
    {
       case 0:
@@ -141,6 +151,8 @@ double B2(double x, double y)
 /* Reaction coefficient */
 double C(double x, double y)
 {
+   (void) x;
+   (void) y;
    switch (optionC)
    {
       case 0:
@@ -220,21 +232,16 @@ int main (int argc, char *argv[])
    double mytime = 0.0;
    double walltime = 0.0;
 
-   int object_type;
-
    int num_iterations;
    double final_res_norm;
 
    int vis;
 
-   HYPRE_SStructGrid     grid;
-   HYPRE_SStructStencil  stencil;
-   HYPRE_SStructGraph    graph;
-   HYPRE_SStructMatrix   A;
-   HYPRE_SStructVector   b;
-   HYPRE_SStructVector   x;
-
-   /* We are using struct solvers for this example */
+   HYPRE_StructGrid     grid;
+   HYPRE_StructStencil  stencil;
+   HYPRE_StructMatrix   A;
+   HYPRE_StructVector   b;
+   HYPRE_StructVector   x;
    HYPRE_StructSolver   solver;
    HYPRE_StructSolver   precond;
 
@@ -419,119 +426,60 @@ int main (int argc, char *argv[])
    iupper[0] = ilower[0] + n - 1;
    iupper[1] = ilower[1] + n - 1;
 
-   /* 1. Set up a 2D grid */
+   /* 1. Set up a grid */
    {
-      int ndim = 2;
-      int nparts = 1;
-      int nvars = 1;
-      int part = 0;
-      int i;
-
       /* Create an empty 2D grid object */
-      HYPRE_SStructGridCreate(MPI_COMM_WORLD, ndim, nparts, &grid);
+      HYPRE_StructGridCreate(MPI_COMM_WORLD, 2, &grid);
 
       /* Add a new box to the grid */
-      HYPRE_SStructGridSetExtents(grid, part, ilower, iupper);
-
-      /* Set the variable type for each part */
-      {
-         HYPRE_SStructVariable vartypes[1] = {HYPRE_SSTRUCT_VARIABLE_CELL};
-
-         for (i = 0; i < nparts; i++)
-         {
-            HYPRE_SStructGridSetVariables(grid, i, nvars, vartypes);
-         }
-      }
+      HYPRE_StructGridSetExtents(grid, ilower, iupper);
 
       /* This is a collective call finalizing the grid assembly.
          The grid is now ``ready to be used'' */
-      HYPRE_SStructGridAssemble(grid);
+      HYPRE_StructGridAssemble(grid);
    }
 
    /* 2. Define the discretization stencil */
+   if (sym == 0)
    {
-      int ndim = 2;
-      int var = 0;
+      /* Define the geometry of the stencil */
+      int offsets[5][2] = {{0, 0}, {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
-      if (sym == 0)
+      /* Create an empty 2D, 5-pt stencil object */
+      HYPRE_StructStencilCreate(2, 5, &stencil);
+
+      /* Assign stencil entries */
+      for (i = 0; i < 5; i++)
       {
-         /* Define the geometry of the stencil */
-         int offsets[5][2] = {{0, 0}, {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-
-         /* Create an empty 2D, 5-pt stencil object */
-         HYPRE_SStructStencilCreate(ndim, 5, &stencil);
-
-         /* Assign stencil entries */
-         for (i = 0; i < 5; i++)
-         {
-            HYPRE_SStructStencilSetEntry(stencil, i, offsets[i], var);
-         }
+         HYPRE_StructStencilSetElement(stencil, i, offsets[i]);
       }
-      else /* Symmetric storage */
+   }
+   else /* Symmetric storage */
+   {
+      /* Define the geometry of the stencil */
+      int offsets[3][2] = {{0, 0}, {1, 0}, {0, 1}};
+
+      /* Create an empty 2D, 3-pt stencil object */
+      HYPRE_StructStencilCreate(2, 3, &stencil);
+
+      /* Assign stencil entries */
+      for (i = 0; i < 3; i++)
       {
-         /* Define the geometry of the stencil */
-         int offsets[3][2] = {{0, 0}, {1, 0}, {0, 1}};
-
-         /* Create an empty 2D, 3-pt stencil object */
-         HYPRE_SStructStencilCreate(ndim, 3, &stencil);
-
-         /* Assign stencil entries */
-         for (i = 0; i < 3; i++)
-         {
-            HYPRE_SStructStencilSetEntry(stencil, i, offsets[i], var);
-         }
+         HYPRE_StructStencilSetElement(stencil, i, offsets[i]);
       }
    }
 
-   /* 3. Set up the Graph  - this determines the non-zero structure
-      of the matrix */
-   {
-      int var = 0;
-      int part = 0;
-
-      /* Create the graph object */
-      HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
-
-      /* See MatrixSetObjectType below */
-      object_type = HYPRE_STRUCT;
-      HYPRE_SStructGraphSetObjectType(graph, object_type);
-
-      /* Now we need to tell the graph which stencil to use for each
-         variable on each part (we only have one variable and one part)*/
-      HYPRE_SStructGraphSetStencil(graph, part, var, stencil);
-
-      /* Here we could establish connections between parts if we
-         had more than one part. */
-
-      /* Assemble the graph */
-      HYPRE_SStructGraphAssemble(graph);
-   }
-
-   /* 4. Set up SStruct Vectors for b and x */
+   /* 3. Set up Struct Vectors for b and x */
    {
       double *values;
 
-      /* We have one part and one variable. */
-      int part = 0;
-      int var = 0;
-
       /* Create an empty vector object */
-      HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &b);
-      HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &x);
-
-      /* Set the object type (by default HYPRE_SSTRUCT). This determines the
-         data structure used to store the matrix.  If you want to use unstructured
-         solvers, e.g. BoomerAMG, the object type should be HYPRE_PARCSR.
-         If the problem is purely structured (with one part), you may want to use
-         HYPRE_STRUCT to access the structured solvers. Here we have a purely
-         structured example. */
-      object_type = HYPRE_STRUCT;
-      HYPRE_SStructVectorSetObjectType(b, object_type);
-      HYPRE_SStructVectorSetObjectType(x, object_type);
+      HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, &b);
+      HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, &x);
 
       /* Indicate that the vector coefficients are ready to be set */
-      HYPRE_SStructVectorInitialize(b);
-      HYPRE_SStructVectorInitialize(x);
+      HYPRE_StructVectorInitialize(b);
+      HYPRE_StructVectorInitialize(x);
 
       values = (double*) custom_calloc((n * n), sizeof(double));
 
@@ -541,40 +489,30 @@ int main (int argc, char *argv[])
          {
             values[k] = h2 * Eval(F, i, j);
          }
-      HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper, var, values);
+      HYPRE_StructVectorSetBoxValues(b, ilower, iupper, values);
 
       /* Set x = 0 */
       for (i = 0; i < (n * n); i ++)
       {
          values[i] = 0.0;
       }
-      HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
+      HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
 
       custom_free(values);
 
       /* Assembling is postponed since the vectors will be further modified */
    }
 
-   /* 4. Set up a SStruct Matrix */
+   /* 4. Set up a Struct Matrix */
    {
-      /* We have one part and one variable. */
-      int part = 0;
-      int var = 0;
-
       /* Create an empty matrix object */
-      HYPRE_SStructMatrixCreate(MPI_COMM_WORLD, graph, &A);
+      HYPRE_StructMatrixCreate(MPI_COMM_WORLD, grid, stencil, &A);
 
-      /* Use symmetric storage? The function below is for symmetric stencil entries
-         (use HYPRE_SStructMatrixSetNSSymmetric for non-stencil entries) */
-      HYPRE_SStructMatrixSetSymmetric(A, part, var, var, sym);
-
-      /* As with the vectors,  set the object type for the vectors
-         to be the struct type */
-      object_type = HYPRE_STRUCT;
-      HYPRE_SStructMatrixSetObjectType(A, object_type);
+      /* Use symmetric storage? */
+      HYPRE_StructMatrixSetSymmetric(A, sym);
 
       /* Indicate that the matrix coefficients are ready to be set */
-      HYPRE_SStructMatrixInitialize(A);
+      HYPRE_StructMatrixInitialize(A);
 
       /* Set the stencil values in the interior. Here we set the values
          at every node. We will modify the boundary nodes later. */
@@ -605,9 +543,8 @@ int main (int argc, char *argv[])
                            - Eval(B2, i, j - 0.5) + Eval(B2, i, j + 0.5);
             }
 
-         HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
-                                         var, 5,
-                                         stencil_indices, values);
+         HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 5,
+                                        stencil_indices, values);
 
          custom_free(values);
       }
@@ -629,9 +566,8 @@ int main (int argc, char *argv[])
                            + Eval(K, i - 0.5, j) + Eval(K, i, j - 0.5);
             }
 
-         HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
-                                         var, 3,
-                                         stencil_indices, values);
+         HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 3,
+                                        stencil_indices, values);
 
          custom_free(values);
       }
@@ -648,11 +584,6 @@ int main (int argc, char *argv[])
       double *values, *bvalues;
 
       int nentries;
-
-      /* We have one part and one variable. */
-      int part = 0;
-      int var = 0;
-
       if (sym == 0)
       {
          nentries = 5;
@@ -686,9 +617,8 @@ int main (int argc, char *argv[])
          bc_iupper[1] = bc_ilower[1];
 
          /* Modify the matrix */
-         HYPRE_SStructMatrixSetBoxValues(A, part, bc_ilower, bc_iupper,
-                                         var, nentries,
-                                         stencil_indices, values);
+         HYPRE_StructMatrixSetBoxValues(A, bc_ilower, bc_iupper, nentries,
+                                        stencil_indices, values);
 
          /* Put the boundary conditions in b */
          for (i = 0; i < n; i++)
@@ -696,8 +626,7 @@ int main (int argc, char *argv[])
             bvalues[i] = bcEval(U0, i, 0);
          }
 
-         HYPRE_SStructVectorSetBoxValues(b, part, bc_ilower,
-                                         bc_iupper, var, bvalues);
+         HYPRE_StructVectorSetBoxValues(b, bc_ilower, bc_iupper, bvalues);
       }
 
       /* Processors at y = 1 */
@@ -710,9 +639,8 @@ int main (int argc, char *argv[])
          bc_iupper[1] = bc_ilower[1];
 
          /* Modify the matrix */
-         HYPRE_SStructMatrixSetBoxValues(A, part, bc_ilower, bc_iupper,
-                                         var, nentries,
-                                         stencil_indices, values);
+         HYPRE_StructMatrixSetBoxValues(A, bc_ilower, bc_iupper, nentries,
+                                        stencil_indices, values);
 
          /* Put the boundary conditions in b */
          for (i = 0; i < n; i++)
@@ -720,7 +648,7 @@ int main (int argc, char *argv[])
             bvalues[i] = bcEval(U0, i, 0);
          }
 
-         HYPRE_SStructVectorSetBoxValues(b, part, bc_ilower, bc_iupper, var, bvalues);
+         HYPRE_StructVectorSetBoxValues(b, bc_ilower, bc_iupper, bvalues);
       }
 
       /* Processors at x = 0 */
@@ -733,9 +661,8 @@ int main (int argc, char *argv[])
          bc_iupper[1] = bc_ilower[1] + n - 1;
 
          /* Modify the matrix */
-         HYPRE_SStructMatrixSetBoxValues(A, part, bc_ilower, bc_iupper,
-                                         var, nentries,
-                                         stencil_indices, values);
+         HYPRE_StructMatrixSetBoxValues(A, bc_ilower, bc_iupper, nentries,
+                                        stencil_indices, values);
 
          /* Put the boundary conditions in b */
          for (j = 0; j < n; j++)
@@ -743,8 +670,7 @@ int main (int argc, char *argv[])
             bvalues[j] = bcEval(U0, 0, j);
          }
 
-         HYPRE_SStructVectorSetBoxValues(b, part, bc_ilower, bc_iupper,
-                                         var, bvalues);
+         HYPRE_StructVectorSetBoxValues(b, bc_ilower, bc_iupper, bvalues);
       }
 
       /* Processors at x = 1 */
@@ -757,9 +683,8 @@ int main (int argc, char *argv[])
          bc_iupper[1] = bc_ilower[1] + n - 1;
 
          /* Modify the matrix */
-         HYPRE_SStructMatrixSetBoxValues(A, part, bc_ilower, bc_iupper,
-                                         var, nentries,
-                                         stencil_indices, values);
+         HYPRE_StructMatrixSetBoxValues(A, bc_ilower, bc_iupper, nentries,
+                                        stencil_indices, values);
 
          /* Put the boundary conditions in b */
          for (j = 0; j < n; j++)
@@ -767,8 +692,7 @@ int main (int argc, char *argv[])
             bvalues[j] = bcEval(U0, 0, j);
          }
 
-         HYPRE_SStructVectorSetBoxValues(b, part, bc_ilower, bc_iupper,
-                                         var, bvalues);
+         HYPRE_StructVectorSetBoxValues(b, bc_ilower, bc_iupper, bvalues);
       }
 
       /* Recall that the system we are solving is:
@@ -798,9 +722,8 @@ int main (int argc, char *argv[])
          }
 
          if (sym == 0)
-            HYPRE_SStructMatrixSetBoxValues(A, part, bc_ilower, bc_iupper,
-                                            var, 1,
-                                            stencil_indices, bvalues);
+            HYPRE_StructMatrixSetBoxValues(A, bc_ilower, bc_iupper, 1,
+                                           stencil_indices, bvalues);
 
          /* Eliminate the boundary conditions in b */
          for (i = 0; i < n; i++)
@@ -820,8 +743,7 @@ int main (int argc, char *argv[])
 
          /* Note the use of AddToBoxValues (because we have already set values
             at these nodes) */
-         HYPRE_SStructVectorAddToBoxValues(b, part, bc_ilower, bc_iupper,
-                                           var, bvalues);
+         HYPRE_StructVectorAddToBoxValues(b, bc_ilower, bc_iupper, bvalues);
       }
 
       /* Processors at x = 0, neighbors of boundary nodes */
@@ -842,9 +764,8 @@ int main (int argc, char *argv[])
          }
 
          if (sym == 0)
-            HYPRE_SStructMatrixSetBoxValues(A, part, bc_ilower, bc_iupper,
-                                            var, 1,
-                                            stencil_indices, bvalues);
+            HYPRE_StructMatrixSetBoxValues(A, bc_ilower, bc_iupper, 1,
+                                           stencil_indices, bvalues);
 
          /* Eliminate the boundary conditions in b */
          for (j = 0; j < n; j++)
@@ -862,7 +783,7 @@ int main (int argc, char *argv[])
             bvalues[n - 1] = 0.0;
          }
 
-         HYPRE_SStructVectorAddToBoxValues(b, part, bc_ilower, bc_iupper, var, bvalues);
+         HYPRE_StructVectorAddToBoxValues(b, bc_ilower, bc_iupper, bvalues);
       }
 
       /* Processors at y = 1, neighbors of boundary nodes */
@@ -889,8 +810,8 @@ int main (int argc, char *argv[])
             bvalues[i] = 0.0;
          }
 
-         HYPRE_SStructMatrixSetBoxValues(A, part, bc_ilower, bc_iupper, var, 1,
-                                         stencil_indices, bvalues);
+         HYPRE_StructMatrixSetBoxValues(A, bc_ilower, bc_iupper, 1,
+                                        stencil_indices, bvalues);
 
          /* Eliminate the boundary conditions in b */
          for (i = 0; i < n; i++)
@@ -908,8 +829,7 @@ int main (int argc, char *argv[])
             bvalues[n - 1] = 0.0;
          }
 
-         HYPRE_SStructVectorAddToBoxValues(b, part, bc_ilower, bc_iupper,
-                                           var, bvalues);
+         HYPRE_StructVectorAddToBoxValues(b, bc_ilower, bc_iupper, bvalues);
       }
 
       /* Processors at x = 1, neighbors of boundary nodes */
@@ -936,9 +856,8 @@ int main (int argc, char *argv[])
             bvalues[j] = 0.0;
          }
 
-         HYPRE_SStructMatrixSetBoxValues(A, part, bc_ilower, bc_iupper,
-                                         var, 1,
-                                         stencil_indices, bvalues);
+         HYPRE_StructMatrixSetBoxValues(A, bc_ilower, bc_iupper, 1,
+                                        stencil_indices, bvalues);
 
          /* Eliminate the boundary conditions in b */
          for (j = 0; j < n; j++)
@@ -956,7 +875,7 @@ int main (int argc, char *argv[])
             bvalues[n - 1] = 0.0;
          }
 
-         HYPRE_SStructVectorAddToBoxValues(b, part, bc_ilower, bc_iupper, var, bvalues);
+         HYPRE_StructVectorAddToBoxValues(b, bc_ilower, bc_iupper, bvalues);
       }
 
       custom_free(values);
@@ -964,370 +883,354 @@ int main (int argc, char *argv[])
    }
 
    /* Finalize the vector and matrix assembly */
-   HYPRE_SStructMatrixAssemble(A);
-   HYPRE_SStructVectorAssemble(b);
-   HYPRE_SStructVectorAssemble(x);
+   HYPRE_StructMatrixAssemble(A);
+   HYPRE_StructVectorAssemble(b);
+   HYPRE_StructVectorAssemble(x);
 
    /* 6. Set up and use a solver */
+   if (solver_id == 0) /* SMG */
    {
-      HYPRE_StructMatrix    sA;
-      HYPRE_StructVector    sb;
-      HYPRE_StructVector    sx;
+      /* Start timing */
+      mytime -= MPI_Wtime();
 
-      /* Because we are using a struct solver, we need to get the
-         object of the matrix and vectors to pass in to the struct solvers */
+      /* Options and setup */
+      HYPRE_StructSMGCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_StructSMGSetMemoryUse(solver, 0);
+      HYPRE_StructSMGSetMaxIter(solver, 50);
+      HYPRE_StructSMGSetTol(solver, 1.0e-06);
+      HYPRE_StructSMGSetRelChange(solver, 0);
+      HYPRE_StructSMGSetNumPreRelax(solver, n_pre);
+      HYPRE_StructSMGSetNumPostRelax(solver, n_post);
+      HYPRE_StructSMGSetPrintLevel(solver, 1);
+      HYPRE_StructSMGSetLogging(solver, 1);
+      HYPRE_StructSMGSetup(solver, A, b, x);
 
-      HYPRE_SStructMatrixGetObject(A, (void **) &sA);
-      HYPRE_SStructVectorGetObject(b, (void **) &sb);
-      HYPRE_SStructVectorGetObject(x, (void **) &sx);
-
-      if (solver_id == 0) /* SMG */
+      /* Finalize current timing */
+      mytime += MPI_Wtime();
+      MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+      if (myid == 0)
       {
-         /* Start timing */
-         mytime -= MPI_Wtime();
-
-         /* Options and setup */
-         HYPRE_StructSMGCreate(MPI_COMM_WORLD, &solver);
-         HYPRE_StructSMGSetMemoryUse(solver, 0);
-         HYPRE_StructSMGSetMaxIter(solver, 50);
-         HYPRE_StructSMGSetTol(solver, 1.0e-06);
-         HYPRE_StructSMGSetRelChange(solver, 0);
-         HYPRE_StructSMGSetNumPreRelax(solver, n_pre);
-         HYPRE_StructSMGSetNumPostRelax(solver, n_post);
-         HYPRE_StructSMGSetPrintLevel(solver, 1);
-         HYPRE_StructSMGSetLogging(solver, 1);
-         HYPRE_StructSMGSetup(solver, sA, sb, sx);
-
-         /* Finalize current timing */
-         mytime += MPI_Wtime();
-         MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
-         if (myid == 0)
-         {
-            printf("\nSMG Setup time = %f seconds\n\n", walltime);
-         }
-
-         /* Start timing again */
-         mytime -= MPI_Wtime();
-
-         /* Solve */
-         HYPRE_StructSMGSolve(solver, sA, sb, sx);
-
-         /* Finalize current timing */
-         mytime += MPI_Wtime();
-         MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
-         if (myid == 0)
-         {
-            printf("\nSMG Solve time = %f seconds\n\n", walltime);
-         }
-
-         /* Get info and release memory */
-         HYPRE_StructSMGGetNumIterations(solver, &num_iterations);
-         HYPRE_StructSMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
-         HYPRE_StructSMGDestroy(solver);
+         printf("\nSMG Setup time = %f seconds\n\n", walltime);
       }
 
-      if (solver_id == 1) /* PFMG */
+      /* Start timing again */
+      mytime -= MPI_Wtime();
+
+      /* Solve */
+      HYPRE_StructSMGSolve(solver, A, b, x);
+
+      /* Finalize current timing */
+      mytime += MPI_Wtime();
+      MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+      if (myid == 0)
       {
-         /* Start timing */
-         mytime -= MPI_Wtime();
-
-         /* Options and setup */
-         HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &solver);
-         HYPRE_StructPFMGSetMaxIter(solver, 50);
-         HYPRE_StructPFMGSetTol(solver, 1.0e-06);
-         HYPRE_StructPFMGSetRelChange(solver, 0);
-         HYPRE_StructPFMGSetRAPType(solver, rap);
-         HYPRE_StructPFMGSetRelaxType(solver, relax);
-         HYPRE_StructPFMGSetNumPreRelax(solver, n_pre);
-         HYPRE_StructPFMGSetNumPostRelax(solver, n_post);
-         HYPRE_StructPFMGSetSkipRelax(solver, skip);
-         HYPRE_StructPFMGSetPrintLevel(solver, 1);
-         HYPRE_StructPFMGSetLogging(solver, 1);
-         HYPRE_StructPFMGSetup(solver, sA, sb, sx);
-
-         /* Finalize current timing */
-         mytime += MPI_Wtime();
-         MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
-         if (myid == 0)
-         {
-            printf("\nPFMG Setup time = %f seconds\n\n", walltime);
-         }
-
-         /* Start timing again */
-         mytime -= MPI_Wtime();
-
-         /* Solve */
-         HYPRE_StructPFMGSolve(solver, sA, sb, sx);
-
-         /* Finalize current timing */
-         mytime += MPI_Wtime();
-         MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
-         if (myid == 0)
-         {
-            printf("\nPFMG Solve time = %f seconds\n\n", walltime);
-         }
-
-         /* Get info and release memory */
-         HYPRE_StructPFMGGetNumIterations(solver, &num_iterations);
-         HYPRE_StructPFMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
-         HYPRE_StructPFMGDestroy(solver);
+         printf("\nSMG Solve time = %f seconds\n\n", walltime);
       }
 
-      /* Preconditioned CG */
-      if ((solver_id > 9) && (solver_id < 20))
+      /* Get info and release memory */
+      HYPRE_StructSMGGetNumIterations(solver, &num_iterations);
+      HYPRE_StructSMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
+      HYPRE_StructSMGDestroy(solver);
+   }
+
+   if (solver_id == 1) /* PFMG */
+   {
+      /* Start timing */
+      mytime -= MPI_Wtime();
+
+      /* Options and setup */
+      HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_StructPFMGSetMaxIter(solver, 50);
+      HYPRE_StructPFMGSetTol(solver, 1.0e-06);
+      HYPRE_StructPFMGSetRelChange(solver, 0);
+      HYPRE_StructPFMGSetRAPType(solver, rap);
+      HYPRE_StructPFMGSetRelaxType(solver, relax);
+      HYPRE_StructPFMGSetNumPreRelax(solver, n_pre);
+      HYPRE_StructPFMGSetNumPostRelax(solver, n_post);
+      HYPRE_StructPFMGSetSkipRelax(solver, skip);
+      HYPRE_StructPFMGSetPrintLevel(solver, 1);
+      HYPRE_StructPFMGSetLogging(solver, 1);
+      HYPRE_StructPFMGSetup(solver, A, b, x);
+
+      /* Finalize current timing */
+      mytime += MPI_Wtime();
+      MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+      if (myid == 0)
       {
-         mytime -= MPI_Wtime();
+         printf("\nPFMG Setup time = %f seconds\n\n", walltime);
+      }
 
-         HYPRE_StructPCGCreate(MPI_COMM_WORLD, &solver);
-         HYPRE_StructPCGSetMaxIter(solver, 200 );
-         HYPRE_StructPCGSetTol(solver, 1.0e-06 );
-         HYPRE_StructPCGSetTwoNorm(solver, 1 );
-         HYPRE_StructPCGSetRelChange(solver, 0 );
-         HYPRE_StructPCGSetPrintLevel(solver, 2 );
+      /* Start timing again */
+      mytime -= MPI_Wtime();
 
-         if (solver_id == 10)
-         {
-            /* use symmetric SMG as preconditioner */
-            HYPRE_StructSMGCreate(MPI_COMM_WORLD, &precond);
-            HYPRE_StructSMGSetMemoryUse(precond, 0);
-            HYPRE_StructSMGSetMaxIter(precond, 1);
-            HYPRE_StructSMGSetTol(precond, 0.0);
-            HYPRE_StructSMGSetZeroGuess(precond);
-            HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
-            HYPRE_StructSMGSetNumPostRelax(precond, n_post);
-            HYPRE_StructSMGSetPrintLevel(precond, 0);
-            HYPRE_StructSMGSetLogging(precond, 0);
-            HYPRE_StructPCGSetPrecond(solver,
-                                      HYPRE_StructSMGSolve,
-                                      HYPRE_StructSMGSetup,
-                                      precond);
-         }
+      /* Solve */
+      HYPRE_StructPFMGSolve(solver, A, b, x);
 
-         else if (solver_id == 11)
-         {
-            /* use symmetric PFMG as preconditioner */
-            HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &precond);
-            HYPRE_StructPFMGSetMaxIter(precond, 1);
-            HYPRE_StructPFMGSetTol(precond, 0.0);
-            HYPRE_StructPFMGSetZeroGuess(precond);
-            HYPRE_StructPFMGSetRAPType(precond, rap);
-            HYPRE_StructPFMGSetRelaxType(precond, relax);
-            HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
-            HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
-            HYPRE_StructPFMGSetSkipRelax(precond, skip);
-            HYPRE_StructPFMGSetPrintLevel(precond, 0);
-            HYPRE_StructPFMGSetLogging(precond, 0);
-            HYPRE_StructPCGSetPrecond(solver,
+      /* Finalize current timing */
+      mytime += MPI_Wtime();
+      MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+      if (myid == 0)
+      {
+         printf("\nPFMG Solve time = %f seconds\n\n", walltime);
+      }
+
+      /* Get info and release memory */
+      HYPRE_StructPFMGGetNumIterations(solver, &num_iterations);
+      HYPRE_StructPFMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
+      HYPRE_StructPFMGDestroy(solver);
+   }
+
+   /* Preconditioned CG */
+   if ((solver_id > 9) && (solver_id < 20))
+   {
+      mytime -= MPI_Wtime();
+
+      HYPRE_StructPCGCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_StructPCGSetMaxIter(solver, 200 );
+      HYPRE_StructPCGSetTol(solver, 1.0e-06 );
+      HYPRE_StructPCGSetTwoNorm(solver, 1 );
+      HYPRE_StructPCGSetRelChange(solver, 0 );
+      HYPRE_StructPCGSetPrintLevel(solver, 2 );
+
+      if (solver_id == 10)
+      {
+         /* use symmetric SMG as preconditioner */
+         HYPRE_StructSMGCreate(MPI_COMM_WORLD, &precond);
+         HYPRE_StructSMGSetMemoryUse(precond, 0);
+         HYPRE_StructSMGSetMaxIter(precond, 1);
+         HYPRE_StructSMGSetTol(precond, 0.0);
+         HYPRE_StructSMGSetZeroGuess(precond);
+         HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
+         HYPRE_StructSMGSetNumPostRelax(precond, n_post);
+         HYPRE_StructSMGSetPrintLevel(precond, 0);
+         HYPRE_StructSMGSetLogging(precond, 0);
+         HYPRE_StructPCGSetPrecond(solver,
+                                   HYPRE_StructSMGSolve,
+                                   HYPRE_StructSMGSetup,
+                                   precond);
+      }
+
+      else if (solver_id == 11)
+      {
+         /* use symmetric PFMG as preconditioner */
+         HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &precond);
+         HYPRE_StructPFMGSetMaxIter(precond, 1);
+         HYPRE_StructPFMGSetTol(precond, 0.0);
+         HYPRE_StructPFMGSetZeroGuess(precond);
+         HYPRE_StructPFMGSetRAPType(precond, rap);
+         HYPRE_StructPFMGSetRelaxType(precond, relax);
+         HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
+         HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
+         HYPRE_StructPFMGSetSkipRelax(precond, skip);
+         HYPRE_StructPFMGSetPrintLevel(precond, 0);
+         HYPRE_StructPFMGSetLogging(precond, 0);
+         HYPRE_StructPCGSetPrecond(solver,
+                                   HYPRE_StructPFMGSolve,
+                                   HYPRE_StructPFMGSetup,
+                                   precond);
+      }
+
+      else if (solver_id == 17)
+      {
+         /* use two-step Jacobi as preconditioner */
+         HYPRE_StructJacobiCreate(MPI_COMM_WORLD, &precond);
+         HYPRE_StructJacobiSetMaxIter(precond, 2);
+         HYPRE_StructJacobiSetTol(precond, 0.0);
+         HYPRE_StructJacobiSetZeroGuess(precond);
+         HYPRE_StructPCGSetPrecond( solver,
+                                    HYPRE_StructJacobiSolve,
+                                    HYPRE_StructJacobiSetup,
+                                    precond);
+      }
+
+      else if (solver_id == 18)
+      {
+         /* use diagonal scaling as preconditioner */
+         precond = NULL;
+         HYPRE_StructPCGSetPrecond(solver,
+                                   HYPRE_StructDiagScale,
+                                   HYPRE_StructDiagScaleSetup,
+                                   precond);
+      }
+
+      /* PCG Setup */
+      HYPRE_StructPCGSetup(solver, A, b, x );
+
+      mytime += MPI_Wtime();
+      MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+      if (myid == 0)
+      {
+         printf("\nPCG Setup time = %f seconds\n\n", walltime);
+      }
+
+      mytime -= MPI_Wtime();
+
+      /* PCG Solve */
+      HYPRE_StructPCGSolve(solver, A, b, x);
+
+      mytime += MPI_Wtime();
+      MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+      if (myid == 0)
+      {
+         printf("\nPCG Solve time = %f seconds\n\n", walltime);
+      }
+
+      /* Get info and release memory */
+      HYPRE_StructPCGGetNumIterations( solver, &num_iterations );
+      HYPRE_StructPCGGetFinalRelativeResidualNorm( solver, &final_res_norm );
+      HYPRE_StructPCGDestroy(solver);
+
+      if (solver_id == 10)
+      {
+         HYPRE_StructSMGDestroy(precond);
+      }
+      else if (solver_id == 11 )
+      {
+         HYPRE_StructPFMGDestroy(precond);
+      }
+      else if (solver_id == 17)
+      {
+         HYPRE_StructJacobiDestroy(precond);
+      }
+   }
+
+   /* Preconditioned GMRES */
+   if ((solver_id > 29) && (solver_id < 40))
+   {
+      mytime -= MPI_Wtime();
+
+      HYPRE_StructGMRESCreate(MPI_COMM_WORLD, &solver);
+
+      /* Note that GMRES can be used with all the interfaces - not
+         just the struct.  So here we demonstrate the
+         more generic GMRES interface functions. Since we have chosen
+         a struct solver then we must type cast to the more generic
+         HYPRE_Solver when setting options with these generic functions.
+         Note that one could declare the solver to be
+         type HYPRE_Solver, and then the casting would not be necessary.*/
+
+      HYPRE_GMRESSetMaxIter((HYPRE_Solver) solver, 500 );
+      HYPRE_GMRESSetKDim((HYPRE_Solver) solver, 30);
+      HYPRE_GMRESSetTol((HYPRE_Solver) solver, 1.0e-06 );
+      HYPRE_GMRESSetPrintLevel((HYPRE_Solver) solver, 2 );
+      HYPRE_GMRESSetLogging((HYPRE_Solver) solver, 1 );
+
+      if (solver_id == 30)
+      {
+         /* use symmetric SMG as preconditioner */
+         HYPRE_StructSMGCreate(MPI_COMM_WORLD, &precond);
+         HYPRE_StructSMGSetMemoryUse(precond, 0);
+         HYPRE_StructSMGSetMaxIter(precond, 1);
+         HYPRE_StructSMGSetTol(precond, 0.0);
+         HYPRE_StructSMGSetZeroGuess(precond);
+         HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
+         HYPRE_StructSMGSetNumPostRelax(precond, n_post);
+         HYPRE_StructSMGSetPrintLevel(precond, 0);
+         HYPRE_StructSMGSetLogging(precond, 0);
+         HYPRE_StructGMRESSetPrecond(solver,
+                                     HYPRE_StructSMGSolve,
+                                     HYPRE_StructSMGSetup,
+                                     precond);
+      }
+
+      else if (solver_id == 31)
+      {
+         /* use symmetric PFMG as preconditioner */
+         HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &precond);
+         HYPRE_StructPFMGSetMaxIter(precond, 1);
+         HYPRE_StructPFMGSetTol(precond, 0.0);
+         HYPRE_StructPFMGSetZeroGuess(precond);
+         HYPRE_StructPFMGSetRAPType(precond, rap);
+         HYPRE_StructPFMGSetRelaxType(precond, relax);
+         HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
+         HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
+         HYPRE_StructPFMGSetSkipRelax(precond, skip);
+         HYPRE_StructPFMGSetPrintLevel(precond, 0);
+         HYPRE_StructPFMGSetLogging(precond, 0);
+         HYPRE_StructGMRESSetPrecond( solver,
                                       HYPRE_StructPFMGSolve,
                                       HYPRE_StructPFMGSetup,
                                       precond);
-         }
+      }
 
-         else if (solver_id == 17)
-         {
-            /* use two-step Jacobi as preconditioner */
-            HYPRE_StructJacobiCreate(MPI_COMM_WORLD, &precond);
-            HYPRE_StructJacobiSetMaxIter(precond, 2);
-            HYPRE_StructJacobiSetTol(precond, 0.0);
-            HYPRE_StructJacobiSetZeroGuess(precond);
-            HYPRE_StructPCGSetPrecond( solver,
-                                       HYPRE_StructJacobiSolve,
-                                       HYPRE_StructJacobiSetup,
-                                       precond);
-         }
+      else if (solver_id == 37)
+      {
+         /* use two-step Jacobi as preconditioner */
+         HYPRE_StructJacobiCreate(MPI_COMM_WORLD, &precond);
+         HYPRE_StructJacobiSetMaxIter(precond, 2);
+         HYPRE_StructJacobiSetTol(precond, 0.0);
+         HYPRE_StructJacobiSetZeroGuess(precond);
+         HYPRE_StructGMRESSetPrecond( solver,
+                                      HYPRE_StructJacobiSolve,
+                                      HYPRE_StructJacobiSetup,
+                                      precond);
+      }
 
-         else if (solver_id == 18)
-         {
-            /* use diagonal scaling as preconditioner */
-            precond = NULL;
-            HYPRE_StructPCGSetPrecond(solver,
+      else if (solver_id == 38)
+      {
+         /* use diagonal scaling as preconditioner */
+         precond = NULL;
+         HYPRE_StructGMRESSetPrecond( solver,
                                       HYPRE_StructDiagScale,
                                       HYPRE_StructDiagScaleSetup,
                                       precond);
-         }
-
-         /* PCG Setup */
-         HYPRE_StructPCGSetup(solver, sA, sb, sx );
-
-         mytime += MPI_Wtime();
-         MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
-         if (myid == 0)
-         {
-            printf("\nPCG Setup time = %f seconds\n\n", walltime);
-         }
-
-         mytime -= MPI_Wtime();
-
-         /* PCG Solve */
-         HYPRE_StructPCGSolve(solver, sA, sb, sx);
-
-         mytime += MPI_Wtime();
-         MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
-         if (myid == 0)
-         {
-            printf("\nPCG Solve time = %f seconds\n\n", walltime);
-         }
-
-         /* Get info and release memory */
-         HYPRE_StructPCGGetNumIterations( solver, &num_iterations );
-         HYPRE_StructPCGGetFinalRelativeResidualNorm( solver, &final_res_norm );
-         HYPRE_StructPCGDestroy(solver);
-
-         if (solver_id == 10)
-         {
-            HYPRE_StructSMGDestroy(precond);
-         }
-         else if (solver_id == 11 )
-         {
-            HYPRE_StructPFMGDestroy(precond);
-         }
-         else if (solver_id == 17)
-         {
-            HYPRE_StructJacobiDestroy(precond);
-         }
       }
 
-      /* Preconditioned GMRES */
-      if ((solver_id > 29) && (solver_id < 40))
+      /* GMRES Setup */
+      HYPRE_StructGMRESSetup(solver, A, b, x );
+
+      mytime += MPI_Wtime();
+      MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+      if (myid == 0)
       {
-         mytime -= MPI_Wtime();
-
-         HYPRE_StructGMRESCreate(MPI_COMM_WORLD, &solver);
-
-         /* Note that GMRES can be used with all the interfaces - not
-            just the struct.  So here we demonstrate the
-            more generic GMRES interface functions. Since we have chosen
-            a struct solver then we must type cast to the more generic
-            HYPRE_Solver when setting options with these generic functions.
-            Note that one could declare the solver to be
-            type HYPRE_Solver, and then the casting would not be necessary.*/
-
-         HYPRE_GMRESSetMaxIter((HYPRE_Solver) solver, 500 );
-         HYPRE_GMRESSetKDim((HYPRE_Solver) solver, 30);
-         HYPRE_GMRESSetTol((HYPRE_Solver) solver, 1.0e-06 );
-         HYPRE_GMRESSetPrintLevel((HYPRE_Solver) solver, 2 );
-         HYPRE_GMRESSetLogging((HYPRE_Solver) solver, 1 );
-
-         if (solver_id == 30)
-         {
-            /* use symmetric SMG as preconditioner */
-            HYPRE_StructSMGCreate(MPI_COMM_WORLD, &precond);
-            HYPRE_StructSMGSetMemoryUse(precond, 0);
-            HYPRE_StructSMGSetMaxIter(precond, 1);
-            HYPRE_StructSMGSetTol(precond, 0.0);
-            HYPRE_StructSMGSetZeroGuess(precond);
-            HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
-            HYPRE_StructSMGSetNumPostRelax(precond, n_post);
-            HYPRE_StructSMGSetPrintLevel(precond, 0);
-            HYPRE_StructSMGSetLogging(precond, 0);
-            HYPRE_StructGMRESSetPrecond(solver,
-                                        HYPRE_StructSMGSolve,
-                                        HYPRE_StructSMGSetup,
-                                        precond);
-         }
-
-         else if (solver_id == 31)
-         {
-            /* use symmetric PFMG as preconditioner */
-            HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &precond);
-            HYPRE_StructPFMGSetMaxIter(precond, 1);
-            HYPRE_StructPFMGSetTol(precond, 0.0);
-            HYPRE_StructPFMGSetZeroGuess(precond);
-            HYPRE_StructPFMGSetRAPType(precond, rap);
-            HYPRE_StructPFMGSetRelaxType(precond, relax);
-            HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
-            HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
-            HYPRE_StructPFMGSetSkipRelax(precond, skip);
-            HYPRE_StructPFMGSetPrintLevel(precond, 0);
-            HYPRE_StructPFMGSetLogging(precond, 0);
-            HYPRE_StructGMRESSetPrecond( solver,
-                                         HYPRE_StructPFMGSolve,
-                                         HYPRE_StructPFMGSetup,
-                                         precond);
-         }
-
-         else if (solver_id == 37)
-         {
-            /* use two-step Jacobi as preconditioner */
-            HYPRE_StructJacobiCreate(MPI_COMM_WORLD, &precond);
-            HYPRE_StructJacobiSetMaxIter(precond, 2);
-            HYPRE_StructJacobiSetTol(precond, 0.0);
-            HYPRE_StructJacobiSetZeroGuess(precond);
-            HYPRE_StructGMRESSetPrecond( solver,
-                                         HYPRE_StructJacobiSolve,
-                                         HYPRE_StructJacobiSetup,
-                                         precond);
-         }
-
-         else if (solver_id == 38)
-         {
-            /* use diagonal scaling as preconditioner */
-            precond = NULL;
-            HYPRE_StructGMRESSetPrecond( solver,
-                                         HYPRE_StructDiagScale,
-                                         HYPRE_StructDiagScaleSetup,
-                                         precond);
-         }
-
-         /* GMRES Setup */
-         HYPRE_StructGMRESSetup(solver, sA, sb, sx );
-
-         mytime += MPI_Wtime();
-         MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
-         if (myid == 0)
-         {
-            printf("\nGMRES Setup time = %f seconds\n\n", walltime);
-         }
-
-         mytime -= MPI_Wtime();
-
-         /* GMRES Solve */
-         HYPRE_StructGMRESSolve(solver, sA, sb, sx);
-
-         mytime += MPI_Wtime();
-         MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
-         if (myid == 0)
-         {
-            printf("\nGMRES Solve time = %f seconds\n\n", walltime);
-         }
-
-         /* Get info and release memory */
-         HYPRE_StructGMRESGetNumIterations(solver, &num_iterations);
-         HYPRE_StructGMRESGetFinalRelativeResidualNorm(solver, &final_res_norm);
-         HYPRE_StructGMRESDestroy(solver);
-
-         if (solver_id == 30)
-         {
-            HYPRE_StructSMGDestroy(precond);
-         }
-         else if (solver_id == 31)
-         {
-            HYPRE_StructPFMGDestroy(precond);
-         }
-         else if (solver_id == 37)
-         {
-            HYPRE_StructJacobiDestroy(precond);
-         }
+         printf("\nGMRES Setup time = %f seconds\n\n", walltime);
       }
 
+      mytime -= MPI_Wtime();
+
+      /* GMRES Solve */
+      HYPRE_StructGMRESSolve(solver, A, b, x);
+
+      mytime += MPI_Wtime();
+      MPI_Allreduce(&mytime, &walltime, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+      if (myid == 0)
+      {
+         printf("\nGMRES Solve time = %f seconds\n\n", walltime);
+      }
+
+      /* Get info and release memory */
+      HYPRE_StructGMRESGetNumIterations(solver, &num_iterations);
+      HYPRE_StructGMRESGetFinalRelativeResidualNorm(solver, &final_res_norm);
+      HYPRE_StructGMRESDestroy(solver);
+
+      if (solver_id == 30)
+      {
+         HYPRE_StructSMGDestroy(precond);
+      }
+      else if (solver_id == 31)
+      {
+         HYPRE_StructPFMGDestroy(precond);
+      }
+      else if (solver_id == 37)
+      {
+         HYPRE_StructJacobiDestroy(precond);
+      }
    }
 
-   /* Save the solution for GLVis visualization, see vis/glvis-ex7.sh */
+   /* Save the solution for GLVis visualization, see vis/glvis-ex04.sh */
    if (vis)
    {
 #ifdef HYPRE_EXVIS
       FILE *file;
       char filename[255];
 
-      int part = 0, var = 0;
       int nvalues = n * n;
-      double *values = (double*) custom_calloc(nvalues, sizeof(double));
+      double *values =  (double*) custom_calloc(nvalues, sizeof(double));
 
-      /* get all local data (including a local copy of the shared values) */
-      HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
-                                      var, values);
+      /* get the local solution */
+      HYPRE_StructVectorGetBoxValues(x, ilower, iupper, values);
 
-      sprintf(filename, "%s.%06d", "vis/ex7.sol", myid);
+      sprintf(filename, "%s.%06d", "vis/ex04.sol", myid);
       if ((file = fopen(filename, "w")) == NULL)
       {
          printf("Error: can't open output file %s\n", filename);
@@ -1350,7 +1253,7 @@ int main (int argc, char *argv[])
       /* save global finite element mesh */
       if (myid == 0)
       {
-         GLVis_PrintGlobalSquareMesh("vis/ex7.mesh", N * n - 1);
+         GLVis_PrintGlobalSquareMesh("vis/ex04.mesh", N * n - 1);
       }
 #endif
    }
@@ -1364,12 +1267,11 @@ int main (int argc, char *argv[])
    }
 
    /* Free memory */
-   HYPRE_SStructGridDestroy(grid);
-   HYPRE_SStructStencilDestroy(stencil);
-   HYPRE_SStructGraphDestroy(graph);
-   HYPRE_SStructMatrixDestroy(A);
-   HYPRE_SStructVectorDestroy(b);
-   HYPRE_SStructVectorDestroy(x);
+   HYPRE_StructGridDestroy(grid);
+   HYPRE_StructStencilDestroy(stencil);
+   HYPRE_StructMatrixDestroy(A);
+   HYPRE_StructVectorDestroy(b);
+   HYPRE_StructVectorDestroy(x);
 
    /* Finalize HYPRE */
    HYPRE_Finalize();

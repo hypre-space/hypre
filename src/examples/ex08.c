@@ -10,9 +10,9 @@
 
    Interface:    Semi-Structured interface (SStruct)
 
-   Compile with: make ex8
+   Compile with: make ex08
 
-   Sample run:   mpirun -np 2 ex8
+   Sample run:   mpirun -np 2 ex08
 
    Description:  This is a two processor example which solves a similar
                  problem to the one in Example 2, and Example 6 (The grid
@@ -31,7 +31,7 @@
 
 /* SStruct linear solvers headers */
 #include "HYPRE_sstruct_ls.h"
-#include "ex.h"
+#include "ex.h" /* custom_malloc, custom_calloc, custom_free */
 
 #ifdef HYPRE_EXVIS
 #include "vis.c"
@@ -813,13 +813,13 @@ int main (int argc, char *argv[])
       HYPRE_SStructPCGSolve(solver, A, b, x);
    }
 
-   /* Save the solution for GLVis visualization, see vis/glvis-ex8.sh */
+   /* Save the solution for GLVis visualization, see vis/glvis-ex08.sh */
    if (vis)
    {
 #ifdef HYPRE_EXVIS
-      GLVis_PrintSStructGrid(grid, "vis/ex8.mesh", myid, NULL, NULL);
-      GLVis_PrintSStructVector(x, 0, "vis/ex8.sol", myid);
-      GLVis_PrintData("vis/ex8.data", myid, num_procs);
+      GLVis_PrintSStructGrid(grid, "vis/ex08.mesh", myid, NULL, NULL);
+      GLVis_PrintSStructVector(x, 0, "vis/ex08.sol", myid);
+      GLVis_PrintData("vis/ex08.data", myid, num_procs);
 #endif
    }
 

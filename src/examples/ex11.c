@@ -31,7 +31,7 @@
 #include "HYPRE.h"
 #include "HYPRE_parcsr_ls.h"
 #include "HYPRE_krylov.h"
-#include "ex.h"
+#include "ex.h" //* custom_malloc, custom_calloc, custom_free *//
 
 /* lobpcg stuff */
 #include "HYPRE_lobpcg.h"

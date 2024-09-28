@@ -5,9 +5,10 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 
-ex=ex9
+ex=ex09
 dir=`basename \`pwd\``
 keys=Aaamc
+glvis=${1:-"glvis"}
 
 if [ "$dir" = "vis" ]; then
    dir=.
@@ -43,4 +44,4 @@ echo "Ordering: 0" >> $solv
 echo "" >> $solv
 find $dir -name "$ex-v.sol.??????" | sort | xargs cat | sort | awk '{ print $2 }' >> $solv
 
-glvis -m $mesh -g $solv -k $keys
+${glvis} -m $mesh -g $solv -k $keys

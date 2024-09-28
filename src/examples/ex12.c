@@ -34,7 +34,7 @@
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE_parcsr_ls.h"
 #include "HYPRE_krylov.h"
-#include "ex.h"
+#include "ex.h" //* custom_malloc, custom_calloc, custom_free *//
 
 #ifdef HYPRE_EXVIS
 #include "vis.c"
