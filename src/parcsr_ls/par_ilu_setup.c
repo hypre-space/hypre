@@ -1464,8 +1464,8 @@ hypre_ParILUExtractEBFC(hypre_CSRMatrix   *A_diag,
          }
          for (; j < A_diag_i[i + 1]; j++)
          {
-            col = A_diag_j[j];
-            col = col - nLU;
+            col = A_diag_j[j] - nLU;
+            hypre_assert(col >= 0);
             F_j[ctrF] = col;
             F_data[ctrF++] = A_diag_data[j];
             if (ctrF >= capacity_F)
@@ -1512,8 +1512,8 @@ hypre_ParILUExtractEBFC(hypre_CSRMatrix   *A_diag,
          }
          for (; j < A_diag_i[i + 1]; j++)
          {
-            col = A_diag_j[j];
-            col = col - nLU;
+            col = A_diag_j[j] - nLU;
+            hypre_assert(col >= 0);
             C_j[ctrC] = col;
             C_data[ctrC++] = A_diag_data[j];
             if (ctrC >= capacity_C)
@@ -1752,7 +1752,7 @@ hypre_ILUSetupLDUtoCusparse(hypre_ParCSRMatrix  *L,
    HYPRE_Int            *LDU_diag_j;
    HYPRE_Real           *LDU_diag_a;
 
-   HYPRE_Int             i, j, pos, pos1;
+   HYPRE_Int             i, j, pos;
 
    /* Create matrix */
    LDU = hypre_ParCSRMatrixCreate(comm,
@@ -1772,28 +1772,28 @@ hypre_ILUSetupLDUtoCusparse(hypre_ParCSRMatrix  *L,
    pos = 0;
    for (i = 0; i < n; i++)
    {
-      pos1              = pos + 1;
-      LDU_diag_i[i]     = pos;
-      LDU_diag_j[pos]   = i;
-      LDU_diag_a[pos++] = 1.0 / D[i];
+      LDU_diag_i[i] = pos;
       for (j = L_diag_i[i]; j < L_diag_i[i + 1]; j++)
       {
          LDU_diag_j[pos]   = L_diag_j[j];
          LDU_diag_a[pos++] = L_diag_a[j];
       }
+      LDU_diag_j[pos]   = i;
+      LDU_diag_a[pos++] = 1.0 / D[i];
       for (j = U_diag_i[i]; j < U_diag_i[i + 1]; j++)
       {
          LDU_diag_j[pos]   = U_diag_j[j];
          LDU_diag_a[pos++] = U_diag_a[j];
       }
-
-      /* Sort columns after the first entry (diagonal) */
-      hypre_qsort1(LDU_diag_j, LDU_diag_a, pos1, pos - 1);
    }
    LDU_diag_i[n] = pos;
 
    /* Migrate to device (abstract memory space) */
    hypre_ParCSRMatrixMigrate(LDU, HYPRE_MEMORY_DEVICE);
+
+#if defined(HYPRE_USING_GPU)
+   hypre_CSRMatrixSortRow(hypre_ParCSRMatrixDiag(LDU));
+#endif
 
    *LDUp = LDU;
 
