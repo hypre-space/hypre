@@ -30,7 +30,9 @@ hypre_handle(void)
 hypre_Handle*
 hypre_HandleCreate(void)
 {
-   hypre_Handle *hypre_handle_ = hypre_CTAlloc(hypre_Handle, 1, HYPRE_MEMORY_HOST);
+   /* Note: this allocation is done directly with calloc in order to
+      avoid a segmentation fault when building with HYPRE_USING_UMPIRE_HOST */
+   hypre_Handle *hypre_handle_ = (hypre_Handle*) calloc(1, sizeof(hypre_Handle));
 
    hypre_HandleLogLevel(hypre_handle_) = 0;
    hypre_HandleMemoryLocation(hypre_handle_) = HYPRE_MEMORY_DEVICE;
@@ -71,7 +73,8 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
    hypre_HandleDeviceData(hypre_handle_) = NULL;
 #endif
 
-   hypre_TFree(hypre_handle_, HYPRE_MEMORY_HOST);
+   /* Note: Directly using free since this variable was allocated with calloc */
+   free((void*) hypre_handle_);
 
    return hypre_error_flag;
 }

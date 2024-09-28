@@ -114,22 +114,10 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
                         "ILUK setup on device runs requires unified memory!");
       return hypre_error_flag;
    }
-   else if (ilu_type == 1)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "ILUT setup on device runs requires unified memory!");
-      return hypre_error_flag;
-   }
    else if (ilu_type == 10 && fill_level)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                         "GMRES+ILUK setup on device runs requires unified memory!");
-      return hypre_error_flag;
-   }
-   else if (ilu_type == 11)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                        "GMRES+ILUT setup on device runs requires unified memory!");
       return hypre_error_flag;
    }
 #endif
@@ -210,6 +198,7 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
          }
          else if ((ilu_type % 10) == 1)
          {
+            hypre_ParCSRMatrixMigrate(Apq, HYPRE_MEMORY_HOST);
             hypre_ILUSetupILUT(Apq, max_row_nnz, droptol, NULL, NULL, n, n,
                                &parL, &parD, &parU, &parS, &uend);
          }
@@ -219,14 +208,19 @@ hypre_ILUSetupDevice(hypre_ParILUData       *ilu_data,
          hypre_ParCSRMatrixDestroy(parS);
 
          hypre_ILUSetupLDUtoCusparse(parL, parD, parU, &ALU);
-
+         if ((ilu_type % 10) == 1)
+         {
+            hypre_TFree(parD, HYPRE_MEMORY_HOST);
+         }
+         else
+         {
+            hypre_TFree(parD, HYPRE_MEMORY_DEVICE);
+         }
          hypre_ParCSRMatrixDestroy(parL);
          hypre_ParCSRMatrixDestroy(parU);
-         hypre_TFree(parD, HYPRE_MEMORY_DEVICE);
 
          hypre_ParILUExtractEBFC(hypre_ParCSRMatrixDiag(ALU), nLU,
                                  BLUptr, &SLU, Eptr, Fptr);
-
          hypre_ParCSRMatrixDestroy(ALU);
       }
    }

@@ -8,8 +8,10 @@
 *.out
 *.perf
 *.btr
+*.patch
 .gdbinit
 build.sh
+update.sh
 make.log
 config.log
 config.status
@@ -21,6 +23,7 @@ hypre/
 cmbuild/
 install/
 test/
+AUTOTEST/*.dir
 .vscode
 
 ###############

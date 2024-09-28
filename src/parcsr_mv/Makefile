@@ -58,6 +58,7 @@ FILES =\
 
 CUFILES =\
  par_csr_fffc_device.c\
+ par_csr_filter_device.c\
  par_csr_matop_device.c\
  par_csr_matmat_device.c\
  par_csr_matvec_device.c\
