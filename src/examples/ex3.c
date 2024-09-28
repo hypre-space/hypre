@@ -218,7 +218,7 @@ int main (int argc, char *argv[])
       /* Indicate that the matrix coefficients are ready to be set */
       HYPRE_StructMatrixInitialize(A);
 
-      values = (double*) calloc(nvalues, sizeof(double));
+      values = (double*) custom_calloc(nvalues, sizeof(double));
 
       for (j = 0; j < nentries; j++)
       {
@@ -239,7 +239,7 @@ int main (int argc, char *argv[])
       HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
                                      stencil_indices, values);
 
-      free(values);
+      custom_free(values);
    }
 
    /* 4. Incorporate the zero boundary conditions: go along each edge of
@@ -254,7 +254,7 @@ int main (int argc, char *argv[])
       double *values;
       int stencil_indices[1];
 
-      values = (double*) calloc(nvalues, sizeof(double));
+      values = (double*) custom_calloc(nvalues, sizeof(double));
       for (j = 0; j < nvalues; j++)
       {
          values[j] = 0.0;
@@ -321,7 +321,7 @@ int main (int argc, char *argv[])
                                         stencil_indices, values);
       }
 
-      free(values);
+      custom_free(values);
    }
 
    /* This is a collective call finalizing the matrix assembly.
@@ -333,7 +333,7 @@ int main (int argc, char *argv[])
       int    nvalues = n * n;
       double *values;
 
-      values = (double*) calloc(nvalues, sizeof(double));
+      values = (double*) custom_calloc(nvalues, sizeof(double));
 
       /* Create an empty vector object */
       HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, &b);
@@ -356,7 +356,7 @@ int main (int argc, char *argv[])
       }
       HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
 
-      free(values);
+      custom_free(values);
 
       /* This is a collective call finalizing the vector assembly.
          The vector is now ``ready to be used'' */
@@ -432,7 +432,7 @@ int main (int argc, char *argv[])
       char filename[255];
 
       int k, nvalues = n * n;
-      double *values = (double*) calloc(nvalues, sizeof(double));
+      double *values = (double*) custom_calloc(nvalues, sizeof(double));
 
       /* get the local solution */
       HYPRE_StructVectorGetBoxValues(x, ilower, iupper, values);
@@ -455,7 +455,7 @@ int main (int argc, char *argv[])
 
       fflush(file);
       fclose(file);
-      free(values);
+      custom_free(values);
 
       /* save global finite element mesh */
       if (myid == 0)

@@ -265,9 +265,9 @@ int main (int argc, char *argv[])
       double *rhs_values, *x_values;
       HYPRE_Int *rows;
 
-      rhs_values = (double*) calloc(local_size, sizeof(double));
-      x_values = (double*) calloc(local_size, sizeof(double));
-      rows = (HYPRE_Int*) calloc(local_size, sizeof(HYPRE_Int));
+      rhs_values = (double*) custom_calloc(local_size, sizeof(double));
+      x_values = (double*) custom_calloc(local_size, sizeof(double));
+      rows = (HYPRE_Int*) custom_calloc(local_size, sizeof(HYPRE_Int));
 
       for (i = 0; i < local_size; i++)
       {
@@ -279,9 +279,9 @@ int main (int argc, char *argv[])
       HYPRE_IJVectorSetValues(b, local_size, rows, rhs_values);
       HYPRE_IJVectorSetValues(x, local_size, rows, x_values);
 
-      free(x_values);
-      free(rhs_values);
-      free(rows);
+      custom_free(x_values);
+      custom_free(rhs_values);
+      custom_free(rows);
    }
 
 

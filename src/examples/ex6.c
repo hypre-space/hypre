@@ -264,7 +264,7 @@ int main (int argc, char *argv[])
             int nentries = 5;
             int nvalues  = 30; /* 6 grid points, each with 5 stencil entries */
             /* double values[30]; OK to use constant-length array for CPUs */
-            double *values = (double *) malloc(30 * sizeof(double));
+            double *values = (double *) custom_malloc(30 * sizeof(double));
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++) /* label the stencil indices -
@@ -287,7 +287,7 @@ int main (int argc, char *argv[])
                                             var, nentries,
                                             stencil_indices, values);
 
-            free(values);
+            custom_free(values);
          }
 
          /* Set the matrix coefficients for some set of stencil entries
@@ -299,7 +299,7 @@ int main (int argc, char *argv[])
             int nentries = 5;
             int nvalues  = 60; /* 12 grid points, each with 5 stencil entries */
             /* double values[60]; OK to use constant-length array for CPUs */
-            double *values = (double *) malloc(60 * sizeof(double));
+            double *values = (double *) custom_malloc(60 * sizeof(double));
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++)
@@ -320,7 +320,7 @@ int main (int argc, char *argv[])
                                             var, nentries,
                                             stencil_indices, values);
 
-            free(values);
+            custom_free(values);
          }
       }
       else if (myid == 1)
@@ -334,7 +334,7 @@ int main (int argc, char *argv[])
             int nentries = 5;
             int nvalues  = 80; /* 16 grid points, each with 5 stencil entries */
             /* double values[80]; OK to use constant-length array for CPUs */
-            double *values = (double *) malloc(80 * sizeof(double));
+            double *values = (double *) custom_malloc(80 * sizeof(double));
 
             int stencil_indices[5];
             for (j = 0; j < nentries; j++)
@@ -355,7 +355,7 @@ int main (int argc, char *argv[])
                                             var, nentries,
                                             stencil_indices, values);
 
-            free(values);
+            custom_free(values);
          }
       }
 
@@ -365,7 +365,7 @@ int main (int argc, char *argv[])
       {
          int maxnvalues = 6;
          /* double values[6]; OK to use constant-length array for CPUs */
-         double *values = (double *) malloc(6 * sizeof(double));
+         double *values = (double *) custom_malloc(6 * sizeof(double));
 
          for (i = 0; i < maxnvalues; i++)
          {
@@ -433,13 +433,13 @@ int main (int argc, char *argv[])
                                             stencil_indices, values);
          }
 
-         free(values);
+         custom_free(values);
       }
       else if (myid == 1)
       {
          int maxnvalues = 4;
          /* double values[4]; OK to use constant-length array for CPUs */
-         double *values = (double *) malloc(4 * sizeof(double));
+         double *values = (double *) custom_malloc(4 * sizeof(double));
 
          for (i = 0; i < maxnvalues; i++)
          {
@@ -482,7 +482,7 @@ int main (int argc, char *argv[])
                                             stencil_indices, values);
          }
 
-         free(values);
+         custom_free(values);
       }
 
       /* This is a collective call finalizing the matrix assembly.
@@ -522,7 +522,7 @@ int main (int argc, char *argv[])
 
             int nvalues = 6;  /* 6 grid points */
             /* double values[6]; OK to use constant-length array for CPUs */
-            double *values = (double *) malloc(6 * sizeof(double));
+            double *values = (double *) custom_malloc(6 * sizeof(double));
 
             for (i = 0; i < nvalues; i ++)
             {
@@ -536,7 +536,7 @@ int main (int argc, char *argv[])
             }
             HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
 
-            free(values);
+            custom_free(values);
          }
 
          /* Set the vector coefficients over the gridpoints in my second box */
@@ -546,7 +546,7 @@ int main (int argc, char *argv[])
 
             int nvalues = 12; /* 12 grid points */
             /* double values[12]; OK to use constant-length array for CPUs */
-            double *values = (double *) malloc(12 * sizeof(double));
+            double *values = (double *) custom_malloc(12 * sizeof(double));
 
             for (i = 0; i < nvalues; i ++)
             {
@@ -560,7 +560,7 @@ int main (int argc, char *argv[])
             }
             HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
 
-            free(values);
+            custom_free(values);
          }
       }
       else if (myid == 1)
@@ -572,7 +572,7 @@ int main (int argc, char *argv[])
 
             int nvalues = 16; /* 16 grid points */
             /* double values[16]; OK to use constant-length array for CPUs */
-            double *values = (double *) malloc(16 * sizeof(double));
+            double *values = (double *) custom_malloc(16 * sizeof(double));
 
             for (i = 0; i < nvalues; i ++)
             {
@@ -586,7 +586,7 @@ int main (int argc, char *argv[])
             }
             HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
 
-            free(values);
+            custom_free(values);
          }
       }
 

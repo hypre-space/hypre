@@ -242,7 +242,7 @@ int main (int argc, char *argv[])
       /* Get ready to set values */
       HYPRE_SStructMatrixInitialize(A);
 
-      values = (HYPRE_Complex*) calloc(nvalues, sizeof(HYPRE_Complex));
+      values = (HYPRE_Complex*) custom_calloc(nvalues, sizeof(HYPRE_Complex));
 
       /* Set intra-variable values; fix boundaries later */
       for (j = 0; j < nentries; j++)
@@ -288,7 +288,7 @@ int main (int argc, char *argv[])
       HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper, var1,
                                       nentries, stencil_indices, values);
 
-      free(values);
+      custom_free(values);
    }
 
    /* 5. Incorporate zero boundary conditions: go along each edge of the domain
@@ -304,7 +304,7 @@ int main (int argc, char *argv[])
       HYPRE_Complex *values;
       int stencil_indices[1];
 
-      values = (HYPRE_Complex*) calloc(nvalues, sizeof(HYPRE_Complex));
+      values = (HYPRE_Complex*) custom_calloc(nvalues, sizeof(HYPRE_Complex));
       for (j = 0; j < nvalues; j++)
       {
          values[j] = 0.0;
@@ -357,7 +357,7 @@ int main (int argc, char *argv[])
          }
       }
 
-      free(values);
+      custom_free(values);
    }
 
    /* The matrix is now ready to use */
@@ -370,7 +370,7 @@ int main (int argc, char *argv[])
       int nvalues = NVARS * nvol;
       HYPRE_Complex *values;
 
-      values = (HYPRE_Complex*) calloc(nvalues, sizeof(HYPRE_Complex));
+      values = (HYPRE_Complex*) custom_calloc(nvalues, sizeof(HYPRE_Complex));
 
       /* Create an empty vector object */
       HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &b);
@@ -399,7 +399,7 @@ int main (int argc, char *argv[])
       HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var0, values);
       HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var1, values);
 
-      free(values);
+      custom_free(values);
 
       /* The vector is now ready to use */
       HYPRE_SStructVectorAssemble(b);

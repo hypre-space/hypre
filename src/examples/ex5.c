@@ -196,9 +196,9 @@ int main (int argc, char *argv[])
       double values[5];
       int cols[5];
       */
-      double *values = (double *) malloc(5 * sizeof(double));
-      int *cols = (int *) malloc(5 * sizeof(int));
-      int *tmp = (int *) malloc(2 * sizeof(int));
+      double *values = (double *) custom_malloc(5 * sizeof(double));
+      int *cols = (int *) custom_malloc(5 * sizeof(int));
+      int *tmp = (int *) custom_malloc(2 * sizeof(int));
 
       for (i = ilower; i <= iupper; i++)
       {
@@ -247,9 +247,9 @@ int main (int argc, char *argv[])
          HYPRE_IJMatrixSetValues(A, 1, &tmp[0], &tmp[1], cols, values);
       }
 
-      free(values);
-      free(cols);
-      free(tmp);
+      custom_free(values);
+      custom_free(cols);
+      custom_free(tmp);
    }
 
    /* Assemble after setting the coefficients */
@@ -287,9 +287,9 @@ int main (int argc, char *argv[])
       double *rhs_values, *x_values;
       int    *rows;
 
-      rhs_values =  (double*) calloc(local_size, sizeof(double));
-      x_values =  (double*) calloc(local_size, sizeof(double));
-      rows = (int*) calloc(local_size, sizeof(int));
+      rhs_values =  (double*) custom_calloc(local_size, sizeof(double));
+      x_values =  (double*) custom_calloc(local_size, sizeof(double));
+      rows = (int*) custom_calloc(local_size, sizeof(int));
 
       for (i = 0; i < local_size; i++)
       {
@@ -301,9 +301,9 @@ int main (int argc, char *argv[])
       HYPRE_IJVectorSetValues(b, local_size, rows, rhs_values);
       HYPRE_IJVectorSetValues(x, local_size, rows, x_values);
 
-      free(x_values);
-      free(rhs_values);
-      free(rows);
+      custom_free(x_values);
+      custom_free(rhs_values);
+      custom_free(rows);
    }
 
 
@@ -583,8 +583,8 @@ int main (int argc, char *argv[])
       char filename[255];
 
       int nvalues = local_size;
-      int *rows = (int*) calloc(nvalues, sizeof(int));
-      double *values =  (double*) calloc(nvalues, sizeof(double));
+      int *rows = (int*) custom_calloc(nvalues, sizeof(int));
+      double *values =  (double*) custom_calloc(nvalues, sizeof(double));
 
       for (i = 0; i < nvalues; i++)
       {
@@ -611,8 +611,8 @@ int main (int argc, char *argv[])
       fflush(file);
       fclose(file);
 
-      free(rows);
-      free(values);
+      custom_free(rows);
+      custom_free(values);
 
       /* save global finite element mesh */
       if (myid == 0)

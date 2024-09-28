@@ -430,8 +430,8 @@ int main (int argc, char *argv[])
          /* local stifness matrix and load vector */
          /* OK to use constant-length arrays for CPUs */
          /* double S[4][4], F[4]; */
-         double *F = (double *) malloc(4 * sizeof(double));
-         double *S_flat = (double *) malloc(16 * sizeof(double));
+         double *F = (double *) custom_malloc(4 * sizeof(double));
+         double *S_flat = (double *) custom_malloc(16 * sizeof(double));
          double *S[4];
          S[0] = S_flat; S[1] = S[0] + 4; S[2] = S[1] + 4; S[3] = S[2] + 4;
 
@@ -530,8 +530,8 @@ int main (int argc, char *argv[])
                   HYPRE_SStructVectorAddFEMValues(b, part, index, F);
                }
          }
-         free(F);
-         free(S_flat);
+         custom_free(F);
+         custom_free(S_flat);
       }
    }
 
@@ -552,7 +552,7 @@ int main (int argc, char *argv[])
       int ilower[2] = {0, 0};
       int iupper[2] = {n, n};
 
-      values = (double*) calloc(nvalues, sizeof(double));
+      values = (double*) custom_calloc(nvalues, sizeof(double));
 
       /* Create an empty vector object */
       HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &x);
@@ -563,7 +563,7 @@ int main (int argc, char *argv[])
       /* Set the values for the initial guess */
       HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
 
-      free(values);
+      custom_free(values);
 
       /* Finalize the vector assembly */
       HYPRE_SStructVectorAssemble(x);
@@ -618,7 +618,7 @@ int main (int argc, char *argv[])
 
          int i, part = myid, var = 0;
          int nvalues = (n + 1) * (n + 1);
-         double *values = (double*) calloc(nvalues, sizeof(double));
+         double *values = (double*) custom_calloc(nvalues, sizeof(double));
          int ilower[2] = {0, 0};
          int iupper[2] = {n, n};
 
@@ -648,7 +648,7 @@ int main (int argc, char *argv[])
 
          fflush(file);
          fclose(file);
-         free(values);
+         custom_free(values);
 
          /* save local finite element mesh */
          GLVis_PrintLocalRhombusMesh("vis/ex14.mesh", n, myid, gamma);

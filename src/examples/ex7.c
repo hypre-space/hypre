@@ -533,7 +533,7 @@ int main (int argc, char *argv[])
       HYPRE_SStructVectorInitialize(b);
       HYPRE_SStructVectorInitialize(x);
 
-      values = (double*) calloc((n * n), sizeof(double));
+      values = (double*) custom_calloc((n * n), sizeof(double));
 
       /* Set the values of b in left-to-right, bottom-to-top order */
       for (k = 0, j = 0; j < n; j++)
@@ -550,7 +550,7 @@ int main (int argc, char *argv[])
       }
       HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
 
-      free(values);
+      custom_free(values);
 
       /* Assembling is postponed since the vectors will be further modified */
    }
@@ -584,7 +584,7 @@ int main (int argc, char *argv[])
                                                       to the offsets */
          double *values;
 
-         values = (double*) calloc(5 * (n * n), sizeof(double));
+         values = (double*) custom_calloc(5 * (n * n), sizeof(double));
 
          /* The order is left-to-right, bottom-to-top */
          for (k = 0, j = 0; j < n; j++)
@@ -609,14 +609,14 @@ int main (int argc, char *argv[])
                                          var, 5,
                                          stencil_indices, values);
 
-         free(values);
+         custom_free(values);
       }
       else /* Symmetric storage */
       {
          int stencil_indices[3] = {0, 1, 2};
          double *values;
 
-         values = (double*) calloc(3 * (n * n), sizeof(double));
+         values = (double*) custom_calloc(3 * (n * n), sizeof(double));
 
          /* The order is left-to-right, bottom-to-top */
          for (k = 0, j = 0; j < n; j++)
@@ -633,7 +633,7 @@ int main (int argc, char *argv[])
                                          var, 3,
                                          stencil_indices, values);
 
-         free(values);
+         custom_free(values);
       }
    }
 
@@ -662,8 +662,8 @@ int main (int argc, char *argv[])
          nentries = 3;
       }
 
-      values  = (double*) calloc(nentries * n, sizeof(double));
-      bvalues = (double*) calloc(n, sizeof(double));
+      values  = (double*) custom_calloc(nentries * n, sizeof(double));
+      bvalues = (double*) custom_calloc(n, sizeof(double));
 
       /* The stencil at the boundary nodes is 1-0-0-0-0. Because
          we have I x_b = u_0; */
@@ -959,8 +959,8 @@ int main (int argc, char *argv[])
          HYPRE_SStructVectorAddToBoxValues(b, part, bc_ilower, bc_iupper, var, bvalues);
       }
 
-      free(values);
-      free(bvalues);
+      custom_free(values);
+      custom_free(bvalues);
    }
 
    /* Finalize the vector and matrix assembly */
@@ -1321,7 +1321,7 @@ int main (int argc, char *argv[])
 
       int part = 0, var = 0;
       int nvalues = n * n;
-      double *values = (double*) calloc(nvalues, sizeof(double));
+      double *values = (double*) custom_calloc(nvalues, sizeof(double));
 
       /* get all local data (including a local copy of the shared values) */
       HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
@@ -1345,7 +1345,7 @@ int main (int argc, char *argv[])
 
       fflush(file);
       fclose(file);
-      free(values);
+      custom_free(values);
 
       /* save global finite element mesh */
       if (myid == 0)

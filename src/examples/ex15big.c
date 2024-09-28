@@ -725,7 +725,7 @@ int main (int argc, char *argv[])
          double *values;
          HYPRE_Int stencil_indices[2] = {0, 1}; /* the nodes of each edge */
 
-         values = (double*) calloc(2 * nedges, sizeof(double));
+         values = (double*) custom_calloc(2 * nedges, sizeof(double));
 
          /* The edge orientation is fixed: from first to second node */
          for (i = 0; i < nedges; i++)
@@ -762,7 +762,7 @@ int main (int argc, char *argv[])
                                             values);
          }
 
-         free(values);
+         custom_free(values);
       }
 
       /* Finalize the matrix assembly */
@@ -819,7 +819,7 @@ int main (int argc, char *argv[])
       int nvalues = n * (n + 1) * (n + 1);
       double *values;
 
-      values = (double*) calloc(nvalues, sizeof(double));
+      values = (double*) custom_calloc(nvalues, sizeof(double));
 
       /* Create an empty vector object */
       HYPRE_SStructVectorCreate(MPI_COMM_WORLD, edge_grid, &x);
@@ -850,7 +850,7 @@ int main (int argc, char *argv[])
          HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
       }
 
-      free(values);
+      custom_free(values);
 
       /* Finalize the vector assembly */
       HYPRE_SStructVectorAssemble(x);

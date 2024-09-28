@@ -3,299 +3,212 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-########################################################################
-# Compiler and external dependences
-########################################################################
+####################################################################
+# Compiler and External Dependencies
+####################################################################
+
+# Include the main Makefile configuration
+include ../config/Makefile.config
+
+# Compiler Definitions
 CC        = mpicc
 F77       = mpif77
 CXX       = mpicxx
 F90       = mpif90
 CUF       = mpixlcuf
-LINK_CC   = ${CC}
-LINK_CXX  = ${CXX}
-LINK_FC   = ${F77}
-LINK_CUF  = ${CUF}
+LINK_CC   = $(CXX)
+LINK_CXX  = $(CXX)
+LINK_FC   = $(F77)
+LINK_CUF  = $(CUF)
 
-XL_DIR=$(dir $(shell which xlc))..
+####################################################################
+# Feature Detection and Flag Configuration
+####################################################################
 
-HYPRE_DIR = ../hypre
+# Initialize Feature Flags
+USE_CUDA = 0
+USE_HIP  = 0
+USE_SYCL = 0
 
-########################################################################
-# CUDA
-########################################################################
-ifeq ($(use_cuda), 1)
-   CUDA_INCL = -I${CUDA_HOME}/include
-   CUDA_LIBS = -L${CUDA_HOME}/lib64 -lcudart -lcublas -lcusparse -lcurand -lstdc++ -L$(XL_DIR)/xlC/16.1.1/lib -libmc++
-   CUDA_ARCH = -gencode arch=compute_60,code=sm_60 -gencode arch=compute_70,code=sm_70
-   NVCC_LDFLAGS = -ccbin=${CXX} ${CUDA_ARCH}
-   COPTS_CUDA = -DHYPRE_EXAMPLE_USING_CUDA
-   FOPTS_CUDA = -DHYPRE_EXAMPLE_USING_CUDA -qsuppress=cmpmsg
+# Feature Detection and Flag Configuration using elseif for mutual exclusivity
+ifeq ($(strip $(HYPRE_WITH_CUDA)),ON)
+    USE_CUDA = 1
+else ifeq ($(strip $(HYPRE_WITH_HIP)),ON)
+    USE_HIP  = 1
+else ifeq ($(strip $(HYPRE_WITH_SYCL)),ON)
+    USE_SYCL = 1
 endif
 
-ifeq ($(use_cuf), 1)
-   CUDA_LIBS = -L${CUDA_HOME}/lib64 -lcudart -lcublas -lcusparse -lcurand -lstdc++ -L$(XL_DIR)/xlC/16.1.1/lib -libmc++
-endif
+####################################################################
+# Compiler and Linker Flags
+####################################################################
 
-########################################################################
-# Device OMP
-########################################################################
-ifeq ($(use_domp), 1)
-   DOMP_LIBS = -L${CUDA_HOME}/lib64 -lcudart -lcublas -lcusparse -lcurand -lstdc++ -L$(XL_DIR)/xlC/16.1.1/lib -libmc++
-   COPTS_DOMP = -DHYPRE_EXAMPLE_USING_DEVICE_OMP
-   FOPTS_DOMP = -qoffload -W@,-v -qsmp=omp -qinfo=omperrtrace -DHYPRE_EXAMPLE_USING_DEVICE_OMP
-   LOPTS_DOMP = -qoffload -W@,-v -qsmp=omp
-endif
+# Include Paths
+CINCLUDES   = -I$(HYPRE_BUILD_DIR)/include\
+              -I$(CALIPER_DIR)/include\
+              -I$(HYPRE_CUDA_DIR)/include\
+              -I$(HYPRE_HIP_DIR)/include\
+              -I$(HYPRE_SYCL_DIR)/include\
+              -I$(HYPRE_RAJA_DIR)/include\
+              -I$(HYPRE_KOKKOS_DIR)/include\
+              -I$(HYPRE_UMPIRE_DIR)/include\
+              -I$(HYPRE_MAGMA_DIR)/include\
+              -I$(HYPRE_NAP_DIR)/include
+CXXINCLUDES = $(CINCLUDES)
 
-########################################################################
-# Compiling and linking options
-########################################################################
-CINCLUDES = -I$(HYPRE_DIR)/include $(CUDA_INCL)
-#CDEFS = -DHYPRE_EXVIS
-CDEFS =
-COPTS = -g -Wall $(COPTS_CUDA) $(COPTS_DOMP)
-FOPTS = -g $(FOPTS_CUDA) $(FOPTS_DOMP)
-CFLAGS = $(COPTS) $(CINCLUDES) $(CDEFS)
-FINCLUDES = $(CINCLUDES)
-FFLAGS = $(FOPTS) $(FINCLUDES)
-CUFFLAGS = -qcuda
-CXXOPTS = $(COPTS) -Wno-deprecated
-CXXINCLUDES = $(CINCLUDES) -I..
+# Compiler Definitions
+CDEFS   = -DHYPRE_TIMING
 CXXDEFS = $(CDEFS)
-IFLAGS_BXX =
-CXXFLAGS  = $(CXXOPTS) $(CXXINCLUDES) $(CXXDEFS) $(IFLAGS_BXX)
-IF90FLAGS =
-F90FLAGS = $(FFLAGS) $(IF90FLAGS)
+FDEFS   = -DHYPRE_FORTRAN
 
-LINKOPTS = $(LOPTS_CUDA) $(LOPTS_DOMP)
-LIBS = -L$(HYPRE_DIR)/lib -lHYPRE -lm $(CUDA_LIBS) $(DOMP_LIBS)
-LFLAGS = $(LINKOPTS) $(LIBS)
-LFLAGS_B =\
- -L${HYPRE_DIR}/lib\
- -lbHYPREClient-C\
- -lbHYPREClient-CX\
- -lbHYPREClient-F\
- -lbHYPRE\
- -lsidl -ldl -lxml2
-LFLAGS77 = $(LFLAGS)
-LFLAGS90 =
+# Feature-Specific Compiler Options
+COPTS =
+FOPTS = 
 
-########################################################################
-# Rules for compiling the source files
-########################################################################
-.SUFFIXES: .c .f .cuf .cxx
-
-.c.o:
-	$(CC) $(CFLAGS) -c $<
-.f.o:
-	$(F77) $(FFLAGS) -c $<
-.f.mod:
-	$(F77) $(FFLAGS) -c $<
-.cuf.o:
-	$(CUF) $(FFLAGS) $(CUFFLAGS) -c $<
-.cxx.o:
-	$(CXX) $(CXXFLAGS) -c $<
-
-########################################################################
-# List of all programs to be compiled
-########################################################################
-ALLPROGS = ex1 ex2 ex3 ex4 ex5 ex5f ex6 ex7 ex8 ex9 ex11 ex12 ex12f \
-           ex13 ex14 ex15 ex16
-BIGINTPROGS = ex5big ex15big
-FORTRANPROGS = ex5f ex12f
-MAXDIMPROGS = ex17 ex18
-COMPLEXPROGS = ex18comp
-
-all: $(ALLPROGS)
-
-default: all
-
-gpu: all
-
-bigint: $(BIGINTPROGS)
-
-fortran: $(FORTRANPROGS)
-
-maxdim: $(MAXDIMPROGS)
-
-complex: $(COMPLEXPROGS)
-
-########################################################################
-# Example 1
-########################################################################
-ex1: ex1.o
-	$(LINK_CC) -o $@ $^ $(LFLAGS)
-
-########################################################################
-# Example 2
-########################################################################
-ex2: ex2.o
-	$(LINK_CC) -o $@ $^ $(LFLAGS)
-
-########################################################################
-# Example 3
-########################################################################
-ex3: ex3.o
-	$(LINK_CC) -o $@ $^ $(LFLAGS)
-
-########################################################################
-# Example 4
-########################################################################
-ex4: ex4.o
-	$(LINK_CC) -o $@ $^ $(LFLAGS)
-
-########################################################################
-# Example 5
-########################################################################
-ex5: ex5.o
-	$(LINK_CC) -o $@ $^ $(LFLAGS)
-
-########################################################################
-# Example 5 with 64-bit integers
-########################################################################
-ex5big: ex5big.o
-	$(LINK_CC) -o $@ $^ $(LFLAGS)
-
-########################################################################
-# Example 5 Fortran 77
-########################################################################
-ifeq ($(use_cuda), 1)
-ex5f_cptr.o : ex5f_cptr.f cudaf.mod
-	$(F77) $(FFLAGS) -c $<
-ex5f: ex5f_cptr.o cudaf.o
-	$(LINK_FC) -o $@ $^ $(LFLAGS77)
-else
-ifeq ($(use_cuf), 1)
-ex5f: ex5cuf.o
-	$(LINK_CUF) -o $@ $^ $(LFLAGS77)
-else
-ex5f: ex5f.o
-	$(LINK_FC) -o $@ $^ $(LFLAGS77)
-endif
+ifeq ($(USE_CUDA),1)
+    COPTS += -DHYPRE_EXAMPLE_USING_CUDA
+    FOPTS += -DHYPRE_EXAMPLE_USING_CUDA
 endif
 
-########################################################################
-# Example 6
-########################################################################
-ex6: ex6.o
+ifeq ($(USE_HIP),1)
+    COPTS += -DHYPRE_EXAMPLE_USING_HIP
+    FOPTS += -DHYPRE_EXAMPLE_USING_HIP
+endif
+
+ifeq ($(USE_SYCL),1)
+    COPTS += -DHYPRE_EXAMPLE_USING_SYCL
+    FOPTS += -DHYPRE_EXAMPLE_USING_SYCL
+endif
+
+# Compiler Flags
+CFLAGS    += $(COPTS) $(CINCLUDES) $(CDEFS)
+CXXFLAGS  += $(COPTS) $(CXXINCLUDES) $(CXXDEFS)
+FFLAGS    += $(FOPTS) $(CINCLUDES) $(FDEFS)
+
+# Linker Flags
+LIBS   = -L$(HYPRE_BUILD_DIR)/lib\
+          -lHYPRE\
+          -lm\
+          $(CALIPER_LIBS)\
+          $(HYPRE_CUDA_LIBS)\
+          $(HYPRE_HIP_LIBS)\
+          $(HYPRE_SYCL_LIBS)\
+          $(HYPRE_RAJA_LIB)\
+          $(HYPRE_KOKKOS_LIB)\
+          $(HYPRE_UMPIRE_LIB)\
+          $(HYPRE_MAGMA_LIB)
+LFLAGS = $(LIBS)
+
+####################################################################
+# Target Definitions
+####################################################################
+
+# Example Executables
+EXAMPLES =\
+    ex12f\
+    ex13\
+    ex14\
+    ex15\
+    ex15big\
+    ex16\
+    ex17\
+    ex18\
+    ex18comp
+
+# Fortran Examples
+FORTRAN_EXAMPLES =\
+    ex12f\
+    ex1_for\
+    ex3_for\
+    ex5_for\
+    ex6_for\
+    ex7_for
+
+# C++ Examples
+CXX_EXAMPLES =\
+    cxx_ij\
+    cxx_sstruct\
+    cxx_struct
+
+####################################################################
+# Compilation Rules
+####################################################################
+
+# Compilation Rules for C Programs
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Compilation Rules for C++ Programs
+%.o: %.cxx
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Compilation Rules for Fortran Programs
+%.o: %.f
+	$(F77) $(FFLAGS) -c $< -o $@
+
+####################################################################
+# Linking Rules
+####################################################################
+
+# Linking C Executables
+%: %.o
+	@echo "Building $@ ..."
 	$(LINK_CC) -o $@ $^ $(LFLAGS)
 
-########################################################################
-# Example 7
-########################################################################
-ex7: ex7.o
-	$(LINK_CC) -o $@ $^ $(LFLAGS)
-
-########################################################################
-# Example 8
-########################################################################
-ex8: ex8.o
-	$(LINK_CC) -o $@ $^ $(LFLAGS)
-
-########################################################################
-# Example 9
-########################################################################
-ex9: ex9.o
-	$(LINK_CC) -o $@ $^ $(LFLAGS)
-
-########################################################################
-# Example 10
-########################################################################
-ex10: ex10.o
+# Linking C++ Executables
+cxx_%: cxx_%.o
+	@echo "Building $@ ..."
 	$(LINK_CXX) -o $@ $^ $(LFLAGS)
 
-########################################################################
-# Example 11
-########################################################################
-ex11: ex11.o
-	$(LINK_CC) -o $@ $^ $(LFLAGS)
+# Linking Fortran Executables
+f77_%: %.o
+	@echo "Building $@ ..."
+	$(LINK_FC) -o $@ $^ $(LFLAGS)
 
-########################################################################
-# Example 12
-########################################################################
-ex12: ex12.o
-	$(LINK_CC) -o $@ $^ $(LFLAGS)
+####################################################################
+# Build Targets
+####################################################################
 
-########################################################################
-# Example 12 Fortran 77
-########################################################################
-ifeq ($(use_cuda), 1)
-ex12f_cptr.o : ex12f_cptr.f cudaf.mod
-	$(F77) $(FFLAGS) -c $<
-ex12f: ex12f_cptr.o cudaf.o
-	$(LINK_FC) -o $@ $^ $(LFLAGS77)
-else
-ifeq ($(use_cuf), 1)
+all: $(EXAMPLES) $(CXX_EXAMPLES) $(FORTRAN_EXAMPLES)
+
+# Phony Targets
+.PHONY: clean distclean install
+
+####################################################################
+# Clean Targets
+####################################################################
+
+clean:
+	rm -f *.o $(EXAMPLES) $(CXX_EXAMPLES) $(FORTRAN_EXAMPLES)
+
+distclean: clean
+	rm -f *.mod cudaf.o
+
+####################################################################
+# Installation Target
+####################################################################
+
+install: all
+	@echo "Installing examples..."
+	@mkdir -p $(HYPRE_INSTALL_DIR)/bin
+	@cp -f $(EXAMPLES) $(CXX_EXAMPLES) $(FORTRAN_EXAMPLES) $(HYPRE_INSTALL_DIR)/bin/
+	@chmod +x $(HYPRE_INSTALL_DIR)/bin/*
+	@echo "Installation complete."
+
+####################################################################
+# Example-Specific Rules
+####################################################################
+
+# Example 12 Fortran with CUF Support
+ifeq ($(USE_CUF),1)
 ex12f: ex12cuf.o
-	$(LINK_CUF) -o $@ $^ $(LFLAGS77)
+	@echo "Building $@ ..."
+	$(LINK_CUF) -o $@ $^ $(LFLAGS)
 else
 ex12f: ex12f.o
-	$(LINK_FC) -o $@ $^ $(LFLAGS77)
+	@echo "Building $@ ..."
+	$(LINK_FC) -o $@ $^ $(LFLAGS)
 endif
-endif
 
-########################################################################
-# Example 13
-########################################################################
-ex13: ex13.o
-	$(LINK_CC) -o $@ $^ $(LFLAGS)
-
-########################################################################
-# Example 14
-########################################################################
-ex14: ex14.o
-	$(LINK_CC) -o $@ $^ $(LFLAGS)
-
-########################################################################
-# Example 15
-########################################################################
-ex15: ex15.o
-	$(LINK_CC) -o $@ $^ $(LFLAGS)
-
-########################################################################
-# Example 15 with 64-bit integers
-########################################################################
-ex15big: ex15big.o
-	$(LINK_CC) -o $@ $^ $(LFLAGS)
-
-########################################################################
-# Example 16
-########################################################################
-ex16: ex16.o
-	$(LINK_CC) -o $@ $^ $(LFLAGS)
-
-########################################################################
-# Example 17
-########################################################################
-ex17: ex17.o
-	$(LINK_CC) -o $@ $^ $(LFLAGS)
-
-########################################################################
-# Example 18
-########################################################################
-ex18: ex18.o
-	$(LINK_CC) -o $@ $^ $(LFLAGS)
-
-########################################################################
-# Example 18 (complex)
-########################################################################
-ex18comp: ex18comp.o
-	$(LINK_CC) -o $@ $^ $(LFLAGS)
-
-########################################################################
-# Clean up
-########################################################################
-clean:
-	rm -f $(ALLPROGS:=.o)
-	rm -f $(BIGINTPROGS:=.o)
-	rm -f $(FORTRANPROGS:=.o)
-	rm -f $(MAXDIMPROGS:=.o)
-	rm -f $(COMPLEXPROGS:=.o)
-	rm -f cudaf.o cudaf.mod ex*.o
-	cd vis; make clean
-distclean: clean
-	rm -f $(ALLPROGS) $(ALLPROGS:=*~)
-	rm -f $(BIGINTPROGS) $(BIGINTPROGS:=*~)
-	rm -f $(FORTRANLPROGS) $(FORTRANPROGS:=*~)
-	rm -f $(MAXDIMPROGS) $(MAXDIMPROGS:=*~)
-	rm -f $(COMPLEXPROGS) $(COMPLEXPROGS:=*~)
-	rm -fr README*
+# Add more specific rules as needed
+# Ensure that dependencies like cudaf.mod are correctly handled

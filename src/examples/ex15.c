@@ -555,8 +555,8 @@ int main (int argc, char *argv[])
          /* local stiffness matrix and load vector */
          /* OK to use constant-length arrays for CPUs */
          /* double S[12][12], F[12]; */
-         double *F = (double *) malloc(12 * sizeof(double));
-         double *S_flat = (double *) malloc(12 * 12 * sizeof(double));
+         double *F = (double *) custom_malloc(12 * sizeof(double));
+         double *S_flat = (double *) custom_malloc(12 * 12 * sizeof(double));
          double *S[12];
 
          int i, j, k;
@@ -674,8 +674,8 @@ int main (int argc, char *argv[])
                }
             }
          }
-         free(F);
-         free(S_flat);
+         custom_free(F);
+         custom_free(S_flat);
       }
 
       /* Collective calls finalizing the matrix and vector assembly */
@@ -757,7 +757,7 @@ int main (int argc, char *argv[])
          double *values;
          int stencil_indices[2] = {0, 1}; /* the nodes of each edge */
 
-         values = (double*) calloc(2 * nedges, sizeof(double));
+         values = (double*) custom_calloc(2 * nedges, sizeof(double));
 
          /* The edge orientation is fixed: from first to second node */
          for (i = 0; i < nedges; i++)
@@ -794,7 +794,7 @@ int main (int argc, char *argv[])
                                             values);
          }
 
-         free(values);
+         custom_free(values);
       }
 
       /* Finalize the matrix assembly */
@@ -808,7 +808,7 @@ int main (int argc, char *argv[])
       int part = 0;
       int var = 0; /* the node variable */
       int index[3];
-      double *xyzval = (double *) malloc(3 * sizeof(double));
+      double *xyzval = (double *) custom_malloc(3 * sizeof(double));
 
       /* Create empty vector objects */
       HYPRE_SStructVectorCreate(MPI_COMM_WORLD, node_grid, &xcoord);
@@ -843,7 +843,7 @@ int main (int argc, char *argv[])
       HYPRE_SStructVectorAssemble(xcoord);
       HYPRE_SStructVectorAssemble(ycoord);
       HYPRE_SStructVectorAssemble(zcoord);
-      free(xyzval);
+      custom_free(xyzval);
    }
 
    /* 5. Set up a SStruct Vector for the solution vector x */
@@ -852,7 +852,7 @@ int main (int argc, char *argv[])
       int nvalues = n * (n + 1) * (n + 1);
       double *values;
 
-      values = (double*) calloc(nvalues, sizeof(double));
+      values = (double*) custom_calloc(nvalues, sizeof(double));
 
       /* Create an empty vector object */
       HYPRE_SStructVectorCreate(MPI_COMM_WORLD, edge_grid, &x);
@@ -883,7 +883,7 @@ int main (int argc, char *argv[])
          HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
       }
 
-      free(values);
+      custom_free(values);
 
       /* Finalize the vector assembly */
       HYPRE_SStructVectorAssemble(x);
@@ -1028,9 +1028,9 @@ int main (int argc, char *argv[])
          int nvalues = n * (n + 1) * (n + 1);
          double *xvalues, *yvalues, *zvalues;
 
-         xvalues = (double*) calloc(nvalues, sizeof(double));
-         yvalues = (double*) calloc(nvalues, sizeof(double));
-         zvalues = (double*) calloc(nvalues, sizeof(double));
+         xvalues = (double*) custom_calloc(nvalues, sizeof(double));
+         yvalues = (double*) custom_calloc(nvalues, sizeof(double));
+         zvalues = (double*) custom_calloc(nvalues, sizeof(double));
 
          /* Get local solution in the x-edges */
          {
@@ -1105,9 +1105,9 @@ int main (int argc, char *argv[])
 
          fflush(file);
          fclose(file);
-         free(xvalues);
-         free(yvalues);
-         free(zvalues);
+         custom_free(xvalues);
+         custom_free(yvalues);
+         custom_free(zvalues);
 
          /* Save local finite element mesh */
          GLVis_PrintLocalCubicMesh("vis/ex15.mesh", n, n, n, h,

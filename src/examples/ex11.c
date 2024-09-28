@@ -179,8 +179,8 @@ int main (int argc, char *argv[])
       int nnz;
       /* double values[5];
        * int cols[5]; OK to use constant-length arrays for CPUs */
-      double *values = (double *) malloc(5 * sizeof(double));
-      int *cols = (int *) malloc(5 * sizeof(int));
+      double *values = (double *) custom_malloc(5 * sizeof(double));
+      int *cols = (int *) custom_malloc(5 * sizeof(int));
 
       for (i = ilower; i <= iupper; i++)
       {
@@ -227,8 +227,8 @@ int main (int argc, char *argv[])
          HYPRE_IJMatrixSetValues(A, 1, &nnz, &i, cols, values);
       }
 
-      free(values);
-      free(cols);
+      custom_free(values);
+      custom_free(cols);
    }
 
    /* Assemble after setting the coefficients */
@@ -279,7 +279,7 @@ int main (int argc, char *argv[])
       }
 
       /* define an interpreter for the ParCSR interface */
-      interpreter = (mv_InterfaceInterpreter *) calloc(1, sizeof(mv_InterfaceInterpreter));
+      interpreter = (mv_InterfaceInterpreter *) custom_calloc(1, sizeof(mv_InterfaceInterpreter));
       HYPRE_ParCSRSetupInterpreter(interpreter);
       HYPRE_ParCSRSetupMatvec(&matvec_fn);
 
@@ -289,7 +289,7 @@ int main (int argc, char *argv[])
       mv_MultiVectorSetRandom (eigenvectors, lobpcgSeed);
 
       /* eigenvalues - allocate space */
-      eigenvalues = (double*) calloc( blockSize, sizeof(double) );
+      eigenvalues = (double*) custom_calloc( blockSize, sizeof(double) );
 
       HYPRE_LOBPCGCreate(interpreter, &matvec_fn, &lobpcg_solver);
       HYPRE_LOBPCGSetMaxIter(lobpcg_solver, maxIterations);
@@ -320,8 +320,8 @@ int main (int argc, char *argv[])
       /* clean-up */
       HYPRE_BoomerAMGDestroy(precond);
       HYPRE_LOBPCGDestroy(lobpcg_solver);
-      free(eigenvalues);
-      free(interpreter);
+      custom_free(eigenvalues);
+      custom_free(interpreter);
    }
 
    /* Save the solution for GLVis visualization, see vis/glvis-ex11.sh */

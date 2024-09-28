@@ -39,9 +39,8 @@ gpu_calloc(size_t num, size_t size)
    return ptr;
 }
 
-#define malloc(size) gpu_malloc(size)
-#define calloc(num, size) gpu_calloc(num, size)
-#define free(ptr) ( cudaFree(ptr), ptr = NULL )
+#define custom_malloc(size) gpu_malloc(size)
+#define custom_calloc(num, size) gpu_calloc(num, size)
+#define custom_free(ptr) ( cudaFree(ptr), ptr = NULL )
 #endif /* #if defined(HYPRE_EXAMPLE_USING_CUDA) */
 #endif /* #ifndef HYPRE_EXAMPLES_INCLUDES */
-
