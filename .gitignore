@@ -16,6 +16,7 @@ autom4te.cache
 src/TAGS
 hypre/
 cmbuild/
+AUTOTEST/*.dir
 .vscode
 
 ###############
