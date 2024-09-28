@@ -23,7 +23,9 @@
 hypre_DeviceData*
 hypre_DeviceDataCreate()
 {
-   hypre_DeviceData *data = hypre_CTAlloc(hypre_DeviceData, 1, HYPRE_MEMORY_HOST);
+   /* Note: this allocation is done directly with calloc in order to
+      avoid a segmentation fault when building with HYPRE_USING_UMPIRE_HOST */
+   hypre_DeviceData *data = (hypre_DeviceData*) calloc(1, sizeof(hypre_DeviceData));
 
 #if defined(HYPRE_USING_SYCL)
    hypre_DeviceDataDevice(data)           = nullptr;
@@ -165,7 +167,8 @@ hypre_DeviceDataDestroy(hypre_DeviceData *data)
    data->device = nullptr;
 #endif
 
-   hypre_TFree(data, HYPRE_MEMORY_HOST);
+   /* Note: Directly using free since this variable was allocated with calloc */
+   free((void*) data);
 }
 
 /*--------------------------------------------------------------------
@@ -3025,4 +3028,3 @@ hypre_bind_device( HYPRE_Int myid,
 {
    return hypre_bind_device_id(-1, myid, nproc, comm);
 }
-
