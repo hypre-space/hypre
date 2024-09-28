@@ -8,6 +8,8 @@
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
+#if defined(HYPRE_USING_GPU)
+
 /*--------------------------------------------------------------------------
  * hypreGPUKernel_ParCSRMatMatDiag
  *--------------------------------------------------------------------------*/
@@ -140,3 +142,5 @@ hypre_ParCSRMatMatDiagDevice(hypre_ParCSRMatrix  *A,
 
    return hypre_error_flag;
 }
+
+#endif /* if defined(HYPRE_USING_GPU) */
