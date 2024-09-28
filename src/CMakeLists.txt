@@ -147,9 +147,6 @@ option(TPL_BLAS_LIBRARIES            "Optional list of absolute paths to BLAS li
 option(TPL_LAPACK_LIBRARIES          "Optional list of absolute paths to LAPACK libraries, otherwise use FindLAPACK to locate [].")
 option(TPL_FEI_INCLUDE_DIRS          "List of absolute paths to FEI include directories [].")
 
-# Autoconf style functions
-include(CheckSymbolExists)
-
 # Set config name values
 if (HYPRE_ENABLE_SHARED)
   set(HYPRE_SHARED ON CACHE BOOL "" FORCE)
@@ -641,7 +638,16 @@ if (NOT HYPRE_SEQUENTIAL)
   find_package(MPI REQUIRED)
   target_link_libraries(${PROJECT_NAME} PUBLIC MPI::MPI_C)
   set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} MPI::MPI_C)
-  check_symbol_exists(MPI_Comm_f2c "mpi.h" HYPRE_HAVE_MPI_COMM_F2C)
+
+  # Check if MPI supports the MPI_Comm_f2c function
+  include(CheckCSourceCompiles)
+  check_c_source_compiles("
+    #include <mpi.h>
+    int main() {
+      MPI_Comm c = MPI_Comm_f2c(0);
+      return 0;
+    }
+  " HYPRE_HAVE_MPI_COMM_F2C)
 endif (NOT HYPRE_SEQUENTIAL)
 
 # Set OpenMP compile flags
