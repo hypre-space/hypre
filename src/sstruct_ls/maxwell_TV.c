@@ -169,7 +169,7 @@ hypre_MaxwellTVDestroy( void *maxwell_vdata )
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_MaxwellSetRfactors(void         *maxwell_vdata,
-                         HYPRE_Int     rfactor[3] )
+                         HYPRE_Int     rfactor[HYPRE_MAXDIM] )
 {
    hypre_MaxwellData *maxwell_data   = (hypre_MaxwellData *)maxwell_vdata;
    hypre_Index       *maxwell_rfactor = (maxwell_data -> rfactor);
