@@ -3110,6 +3110,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          fflush(NULL);
       }
 
+      /* Destroy filtered matrix */
+      if (!level && (A_tilde != A))
+      {
+         hypre_ParCSRMatrixDestroy(A_tilde);
+         A_array[0] = A;
+      }
+
       HYPRE_ANNOTATE_MGLEVEL_END(level);
       hypre_GpuProfilingPopRange();
       ++level;
@@ -3134,13 +3141,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParCSRMatrixSetDNumNonzeros(A_H);
          }
          A_array[level] = A_H;
-      }
-
-      /* Destroy filtered matrix */
-      if (!level && (A_tilde != A))
-      {
-         hypre_ParCSRMatrixDestroy(A_tilde);
-         A_array[0] = A;
       }
 
 #if defined(HYPRE_USING_GPU)
