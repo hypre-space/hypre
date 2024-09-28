@@ -48,6 +48,7 @@ hypre_BoomerAMGCreate( void )
    HYPRE_Int    setup_type;
    HYPRE_Int    P_max_elmts;
    HYPRE_Int    num_functions;
+   HYPRE_Int    filter_functions;
    HYPRE_Int    nodal, nodal_levels, nodal_diag;
    HYPRE_Int    keep_same_sign;
    HYPRE_Int    num_paths;
@@ -182,6 +183,7 @@ hypre_BoomerAMGCreate( void )
    agg_P_max_elmts = 0;
    agg_P12_max_elmts = 0;
    num_functions = 1;
+   filter_functions = 0;
    nodal = 0;
    nodal_levels = max_levels;
    nodal_diag = 0;
@@ -359,6 +361,7 @@ hypre_BoomerAMGCreate( void )
    hypre_BoomerAMGSetAggPMaxElmts(amg_data, agg_P_max_elmts);
    hypre_BoomerAMGSetAggP12MaxElmts(amg_data, agg_P12_max_elmts);
    hypre_BoomerAMGSetNumFunctions(amg_data, num_functions);
+   hypre_BoomerAMGSetFilterFunctions(amg_data, filter_functions);
    hypre_BoomerAMGSetNodal(amg_data, nodal);
    hypre_BoomerAMGSetNodalLevels(amg_data, nodal_levels);
    hypre_BoomerAMGSetNodal(amg_data, nodal_diag);
@@ -3201,9 +3204,13 @@ hypre_BoomerAMGSetNumFunctions( void     *data,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_BoomerAMGGetNumFunctions
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_BoomerAMGGetNumFunctions( void     *data,
-                                HYPRE_Int     * num_functions )
+hypre_BoomerAMGGetNumFunctions( void      *data,
+                                HYPRE_Int *num_functions )
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
@@ -3213,6 +3220,51 @@ hypre_BoomerAMGGetNumFunctions( void     *data,
       return hypre_error_flag;
    }
    *num_functions = hypre_ParAMGDataNumFunctions(amg_data);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_BoomerAMGSetFilterFunctions
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGSetFilterFunctions( void      *data,
+                                   HYPRE_Int  filter_functions )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (filter_functions < 0 || filter_functions > 1)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+   hypre_ParAMGDataFilterFunctions(amg_data) = filter_functions;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_BoomerAMGGetFilterFunctions
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGGetFilterFunctions( void      *data,
+                                   HYPRE_Int *filter_functions )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   *filter_functions = hypre_ParAMGDataFilterFunctions(amg_data);
 
    return hypre_error_flag;
 }

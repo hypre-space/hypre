@@ -33,6 +33,7 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
+cat handle.h                   >> $INTERNAL_HEADER
 cat state.h                    >> $INTERNAL_HEADER
 cat general.h                  >> $INTERNAL_HEADER
 cat base.h                     >> $INTERNAL_HEADER
@@ -50,7 +51,6 @@ cat timing.h                   >> $INTERNAL_HEADER
 cat amg_linklist.h             >> $INTERNAL_HEADER
 cat exchange_data.h            >> $INTERNAL_HEADER
 cat caliper_instrumentation.h  >> $INTERNAL_HEADER
-cat handle.h                   >> $INTERNAL_HEADER
 cat gselim.h                   >> $INTERNAL_HEADER
 cat int_array.h                >> $INTERNAL_HEADER
 cat protos.h                   >> $INTERNAL_HEADER

@@ -194,6 +194,11 @@ if (hypre__num_blocks > 0)\
 {\
    hypre__div = hypre__tot / hypre__num_blocks;\
    hypre__mod = hypre__tot % hypre__num_blocks;\
+}\
+else\
+{\
+   hypre__div = 0;\
+   hypre__mod = 0;\
 }
 
 #define zypre_BoxLoopInitK(k, dboxk, startk, stridek, ik) \
@@ -391,4 +396,3 @@ for (I = 0; I < n[0]; I++)
 
 #endif
 #endif /* #ifndef hypre_BOX_HEADER */
-

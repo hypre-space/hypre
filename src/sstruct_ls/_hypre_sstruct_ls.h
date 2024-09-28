@@ -484,7 +484,7 @@ HYPRE_Int HYPRE_SStructMaxwellSolve2 ( HYPRE_SStructSolver solver, HYPRE_SStruct
 HYPRE_Int HYPRE_MaxwellGrad ( HYPRE_SStructGrid grid, HYPRE_ParCSRMatrix *T );
 HYPRE_Int HYPRE_SStructMaxwellSetGrad ( HYPRE_SStructSolver solver, HYPRE_ParCSRMatrix T );
 HYPRE_Int HYPRE_SStructMaxwellSetRfactors ( HYPRE_SStructSolver solver,
-                                            HYPRE_Int rfactors [HYPRE_MAXDIM]);
+                                            HYPRE_Int *rfactors);
 HYPRE_Int HYPRE_SStructMaxwellSetTol ( HYPRE_SStructSolver solver, HYPRE_Real tol );
 HYPRE_Int HYPRE_SStructMaxwellSetConstantCoef ( HYPRE_SStructSolver solver,
                                                 HYPRE_Int constant_coef );
@@ -502,7 +502,7 @@ HYPRE_Int HYPRE_SStructMaxwellGetNumIterations ( HYPRE_SStructSolver solver,
 HYPRE_Int HYPRE_SStructMaxwellGetFinalRelativeResidualNorm ( HYPRE_SStructSolver solver,
                                                              HYPRE_Real *norm );
 HYPRE_Int HYPRE_SStructMaxwellPhysBdy ( HYPRE_SStructGrid *grid_l, HYPRE_Int num_levels,
-                                        HYPRE_Int rfactors [HYPRE_MAXDIM], HYPRE_Int ***BdryRanks_ptr, HYPRE_Int **BdryRanksCnt_ptr );
+                                        HYPRE_Int *rfactors, HYPRE_Int ***BdryRanks_ptr, HYPRE_Int **BdryRanksCnt_ptr );
 HYPRE_Int HYPRE_SStructMaxwellEliminateRowsCols ( HYPRE_ParCSRMatrix parA, HYPRE_Int nrows,
                                                   HYPRE_Int *rows );
 HYPRE_Int HYPRE_SStructMaxwellZeroVector ( HYPRE_ParVector v, HYPRE_Int *rows, HYPRE_Int nrows );
