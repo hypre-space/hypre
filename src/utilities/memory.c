@@ -1180,6 +1180,12 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
    {
       *memory_location = hypre_MEMORY_HOST_PINNED;
    }
+#if (HIP_VERSION_MAJOR >= 6)
+   else if (attr.type == hipMemoryTypeUnregistered)
+   {
+      *memory_location = hypre_MEMORY_HOST;
+   }
+#endif
 #endif // defined(HYPRE_USING_HIP)
 
 #if defined(HYPRE_USING_SYCL)
