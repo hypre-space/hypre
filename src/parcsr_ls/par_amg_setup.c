@@ -3136,6 +3136,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          A_array[level] = A_H;
       }
 
+      /* Destroy filtered matrix */
+      if (!level && (A_tilde != A))
+      {
+         hypre_ParCSRMatrixDestroy(A_tilde);
+         A_array[0] = A;
+      }
+
 #if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_HOST)
 #endif
@@ -3819,13 +3826,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
              (additive > -1 && additive < num_levels) )
    {
       hypre_CreateLambda(amg_data);
-   }
-
-   /* Destroy filtered matrix */
-   if (A_tilde != A)
-   {
-      hypre_ParCSRMatrixDestroy(A_tilde);
-      A_array[0] = A;
    }
 
    if (cum_nnz_AP > 0.0)
