@@ -224,6 +224,5 @@ distclean: clean
 	@rm -fv $(FORTRAN_EXAMPLES) $(FORTRAN_EXAMPLES:=*~)
 	@rm -fv $(MAXDIM_EXAMPLES) $(MAXDIM_EXAMPLES:=*~)
 	@rm -fv $(COMPLEX_EXAMPLES) $(COMPLEX_EXAMPLES:=*~)
-	@rm -fr README*
 
 .PHONY: clean distclean install
