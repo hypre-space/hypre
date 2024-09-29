@@ -25,24 +25,28 @@ mpirun -np 2 ./ex02
 
 ## Example Descriptions
 
-1. **ex01**: Basic example demonstrating the use of HYPRE's struct interface.
-2. **ex02**: Struct interface - 2D Poisson - SMG-PCG solver.
-3. **ex03**: Struct interface - NxN 2D Poisson - SMG and SMG-PCG solvers.
-4. **ex04**: Struct interface - NxN 2D Convection-Reaction-Diffusion.
-5. **ex05**: IJ interface - NxN 2D Poisson - AMG-PCG solver.
-6. **ex06**: SStruct interface - 2D Poisson - SMG-PCG solver.
-7. **ex07**: SStruct interface - NxN 2D Convection-Reaction-Diffusion.
-8. **ex08**: SStruct interface - 3-parts 2D Poisson - Split-PCG solver.
-9. **ex09**: SStruct interface - 2D biharmonic - sysPFMG solver.
-10. **ex11**: IJ interface - NxN 2D Poisson eigenvalue problem - AMG-LOBPCG solver.
-11. **ex12**: SStruct interface - Nodal 2D Poisson - PFMG and AMG solvers.
-12. **ex13**: SStruct interface - 6-parts 2D Poisson - AMG solver.
-13. **ex14**: SStruct interface - 6-parts 2D Poisson SStruct FEM - AMG solver.
-14. **ex15**: SStruct interface - 3D electromagnetic diffusion - AMS solver.
-15. **ex16**: SStruct interface - 2D high order Q3 FEM Poisson - AMG solver.
-15. **ex17**: Struct interface - 4D Poisson - CG solver.
-15. **ex18**: SStruct interface - 4D Poisson - CG solver.
-15. **ex18comp**: SStruct interface - Complex 4D Poisson - CG solver.
+## Example Descriptions
+
+| Example | Interface | Problem Type | Solver(s) |
+|---------|-----------|--------------|-----------|
+| ex01 | Struct | Basic demonstration | - |
+| ex02 | Struct | 2D Poisson | SMG-PCG |
+| ex03 | Struct | NxN 2D Poisson | SMG, SMG-PCG |
+| ex04 | Struct | NxN 2D Convection-Reaction-Diffusion | SMG/PFMG - CG/GMRES |
+| ex05 | IJ | NxN 2D Poisson | AMG-PCG |
+| ex06 | SStruct | 2D Poisson | SMG-PCG |
+| ex07 | SStruct | NxN 2D Convection-Reaction-Diffusion | SMG/PFMG - CG/GMRES |
+| ex08 | SStruct | 3-parts 2D Poisson | Split-PCG |
+| ex09 | SStruct | 2D biharmonic | sysPFMG |
+| ex11 | IJ | NxN 2D Poisson eigenvalue problem | AMG-LOBPCG |
+| ex12 | SStruct | Nodal 2D Poisson | PFMG, AMG |
+| ex13 | SStruct | 6-parts 2D Poisson | AMG |
+| ex14 | SStruct | 6-parts 2D Poisson SStruct FEM | AMG |
+| ex15 | SStruct | 3D electromagnetic diffusion | AMS |
+| ex16 | SStruct | 2D high order Q3 FEM Poisson | AMG |
+| ex17 | Struct | 4D Poisson | CG |
+| ex18 | SStruct | 4D Poisson | CG |
+| ex18comp | SStruct | Complex 4D Poisson | CG |
 
 ## GPU Support
 

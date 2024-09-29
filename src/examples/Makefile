@@ -39,7 +39,7 @@ CINCLUDES   = -I${HYPRE_BUILD_DIR}/include\
 CXXINCLUDES = -I${HYPRE_BUILD_DIR}/include\
               -I$(srcdir)/../FEI_mv/fei-base\
               $(INCLUDES)\
-	      $(MPIINCLUDE)\
+	          $(MPIINCLUDE)\
               $(SUPERLU_INCLUDE)\
               $(DSUPERLU_INCLUDE)
 
