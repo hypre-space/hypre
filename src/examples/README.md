@@ -25,8 +25,6 @@ mpirun -np 2 ./ex02
 
 ## Example Descriptions
 
-## Example Descriptions
-
 | Example | Interface | Problem Type | Solver(s) |
 |---------|-----------|--------------|-----------|
 | ex01 | Struct | Basic demonstration | - |
@@ -46,7 +44,6 @@ mpirun -np 2 ./ex02
 | ex16 | SStruct | 2D high order Q3 FEM Poisson | AMG |
 | ex17 | Struct | 4D Poisson | CG |
 | ex18 | SStruct | 4D Poisson | CG |
-| ex18comp | SStruct | Complex 4D Poisson | CG |
 
 ## GPU Support
 
