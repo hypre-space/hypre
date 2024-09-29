@@ -65,7 +65,8 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
       else
 #endif
       {
-         hypre_MGRBuildPHost(A, A_FF, A_FC, CF_marker_data, num_cpts_global, interp_type, &Wp, &P);
+         hypre_MGRBuildPHost(A, A_FF, A_FC, CF_marker_data, num_cpts_global,
+                             interp_type, &Wp, &P);
 
          /* TODO (VPM): Revisit Prolongation post-smoothing */
 #if 0
@@ -533,11 +534,10 @@ hypre_MGRBuildPFromWpHost( hypre_ParCSRMatrix    *A,
    hypre_CSRMatrixI(P_offd) = P_offd_i;
    hypre_CSRMatrixJ(P_offd) = P_offd_j;
 
-   hypre_ParCSRMatrixDeviceColMapOffd(P) = hypre_ParCSRMatrixDeviceColMapOffd(Wp);
-   hypre_ParCSRMatrixColMapOffd(P)       =
-     hypre_TAlloc(HYPRE_BigInt,
-                  hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(Wp)),
-                  memory_location_P);
+   hypre_ParCSRMatrixColMapOffd(P) =
+      hypre_TAlloc(HYPRE_BigInt,
+                   hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(Wp)),
+                   memory_location_P);
    hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(P), hypre_ParCSRMatrixColMapOffd(Wp),
                  HYPRE_BigInt, hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(Wp)),
                  memory_location_P, memory_location_P);
@@ -718,7 +718,6 @@ hypre_ExtendWtoPHost(HYPRE_Int      P_nr_of_rows,
 
          row_counter++;
       }
-
       /* update off-diagonal row pointer */
       P_offd_i[i + 1] = jj_counter_offd;
    }
@@ -733,13 +732,8 @@ hypre_ExtendWtoPHost(HYPRE_Int      P_nr_of_rows,
  * hypre_MGRBuildPHost
  *
  * Interpolation for MGR - Adapted from BoomerAMGBuildInterp
- *
- * This function computes:
- *   - *Wp_ptr: Pointer to the constructed auxiliary matrix Wp
- *              (NULL if method == 0, meaning Wp is an empty matrix)
- *   - *P_ptr: Pointer to the constructed interpolation matrix P
- *             (Always non-NULL if successful)
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
                      hypre_ParCSRMatrix   *A_FF,
@@ -750,7 +744,7 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
                      hypre_ParCSRMatrix  **Wp_ptr,
                      hypre_ParCSRMatrix  **P_ptr)
 {
-   MPI_Comm             comm         = hypre_ParCSRMatrixComm(A);
+   MPI_Comm             comm = hypre_ParCSRMatrixComm(A);
    HYPRE_Int            num_rows_A   = hypre_ParCSRMatrixNumRows(A);
    HYPRE_Int            num_rows_AFF = hypre_ParCSRMatrixNumRows(A_FF);
    HYPRE_Int            num_procs, my_id;
@@ -767,7 +761,7 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrix     *P_diag = NULL, *P_offd = NULL;
    HYPRE_Int            P_diag_nnz;
    HYPRE_Int           *P_diag_i = NULL, *P_diag_j = NULL, *P_offd_i = NULL;
-   HYPRE_Complex       *P_diag_data = NULL, *diag = NULL, *diag_FF = NULL;
+   HYPRE_Complex       *P_diag_a = NULL, *diag = NULL, *diag_FF = NULL;
    HYPRE_Int            i;
    HYPRE_Complex        dsum;
 
@@ -781,9 +775,6 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
       diag = hypre_CTAlloc(HYPRE_Complex, num_rows_AFF, memory_location_P);
       if (method == 1)
       {
-         // extract diag inverse sqrt
-         //        hypre_CSRMatrixExtractDiagonalHost(hypre_ParCSRMatrixDiag(A_FF), diag, 3);
-
          // L1-Jacobi-type interpolation
          diag_FF = hypre_CTAlloc(HYPRE_Complex, num_rows_AFF, memory_location_P);
          hypre_CSRMatrixExtractDiagonalHost(hypre_ParCSRMatrixDiag(A_FF), diag, 0);
@@ -832,7 +823,7 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
    P_diag_nnz  = hypre_CSRMatrixNumNonzeros(W_diag) + hypre_CSRMatrixNumCols(W_diag);
    P_diag_i    = hypre_CTAlloc(HYPRE_Int,     num_rows_A + 1, memory_location_P);
    P_diag_j    = hypre_CTAlloc(HYPRE_Int,     P_diag_nnz,     memory_location_P);
-   P_diag_data = hypre_CTAlloc(HYPRE_Complex, P_diag_nnz,     memory_location_P);
+   P_diag_a    = hypre_CTAlloc(HYPRE_Complex, P_diag_nnz,     memory_location_P);
    P_offd_i    = hypre_CTAlloc(HYPRE_Int,     num_rows_A + 1, memory_location_P);
 
    /* Extend W data to P data */
@@ -843,7 +834,7 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
                         hypre_CSRMatrixData(W_diag),
                         P_diag_i,
                         P_diag_j,
-                        P_diag_data,
+                        P_diag_a,
                         hypre_CSRMatrixI(W_offd),
                         P_offd_i);
 
@@ -863,7 +854,7 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrixMemoryLocation(P_offd) = memory_location_P;
    hypre_CSRMatrixI(P_diag)              = P_diag_i;
    hypre_CSRMatrixJ(P_diag)              = P_diag_j;
-   hypre_CSRMatrixData(P_diag)           = P_diag_data;
+   hypre_CSRMatrixData(P_diag)           = P_diag_a;
    hypre_CSRMatrixI(P_offd)              = P_offd_i;
    hypre_CSRMatrixJ(P_offd)              = hypre_TAlloc(HYPRE_Int,
                                                         hypre_CSRMatrixNumNonzeros(W_offd),
@@ -892,8 +883,8 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
    hypre_MatvecCommPkgCreate(P);
 
    /* Set output pointer */
-   *Wp_ptr = Wp;
    *P_ptr  = P;
+   *Wp_ptr = Wp;
 
    return hypre_error_flag;
 }

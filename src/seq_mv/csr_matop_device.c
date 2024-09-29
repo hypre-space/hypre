@@ -3331,15 +3331,15 @@ hypre_CSRMatrixILU0(hypre_CSRMatrix *A)
    HYPRE_Int                 zero_pivot;
    char                      errmsg[1024];
 
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-   hypre_GpuProfilingPushRange("CSRMatrixILU0");
-
    /* Sanity check */
    if (num_rows != num_cols)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not a square matrix!");
       return hypre_error_flag;
    }
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("CSRMatrixILU0");
 
    /*-------------------------------------------------------------------------------------
     * 1. Sort columns inside each row first, we can't assume that's sorted

@@ -1191,7 +1191,7 @@ HYPRE_Int hypre_ParCSRMatrixStatsArrayCompute( HYPRE_Int num_matrices,
                                                hypre_MatrixStatsArray *stats_array );
 
 /* par_csr_matmat_device.c */
-HYPRE_Int hypre_ParCSRMatMatDiagDevice( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B,
+HYPRE_Int hypre_ParCSRMatMatDiagDevice( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BT,
                                         hypre_ParCSRMatrix *C );
 
 /* par_csr_matmat.c */

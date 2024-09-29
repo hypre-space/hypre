@@ -42,7 +42,7 @@ hypreGPUKernel_ParCSRMatMatDiag(hypre_DeviceItem &item,
       /* Process diagonal part of A */
       HYPRE_Int kA = A_diag_i[row];
       HYPRE_Int kB = BT_diag_i[row];
-      while (kA < A_diag_i[row+1] && kB < BT_diag_i[row+1])
+      while (kA < A_diag_i[row + 1] && kB < BT_diag_i[row + 1])
       {
          if (A_diag_j[kA] < BT_diag_j[kB])
          {
@@ -63,7 +63,7 @@ hypreGPUKernel_ParCSRMatMatDiag(hypre_DeviceItem &item,
       /* Process off-diagonal part of A */
       kA = A_offd_i[row];
       kB = BT_offd_i[row];
-      while (kA < A_offd_i[row+1] && kB < BT_offd_i[row+1])
+      while (kA < A_offd_i[row + 1] && kB < BT_offd_i[row + 1])
       {
          HYPRE_BigInt col_A = A_col_map_offd[A_offd_j[kA]];
          HYPRE_BigInt col_B = BT_col_map_offd[BT_offd_j[kB]];
