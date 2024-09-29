@@ -1,3 +1,10 @@
+<!--
+Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+
+SPDX-License-Identifier: (Apache-2.0 OR MIT)
+-->
+
 # HYPRE Examples
 
 This directory contains example codes demonstrating the usage of HYPRE, a library for solving large, sparse linear systems of equations on massively parallel computers.
