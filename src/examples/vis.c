@@ -512,11 +512,11 @@ void GLVis_PrintSStructVector(HYPRE_SStructVector sol,
 
          if (dim == 2)
          {
-            values = (double*) custom_malloc((ni + var_off) * (nj + var_off) * sizeof(double));
+            values = (double*) malloc((ni + var_off) * (nj + var_off) * sizeof(double));
          }
          else
          {
-            values = (double*) custom_malloc((ni + var_off) * (nj + var_off) * (nk + var_off) * sizeof(double));
+            values = (double*) malloc((ni + var_off) * (nj + var_off) * (nk + var_off) * sizeof(double));
             ilower[2] = hypre_BoxIMinD(box, 2) - var_off;
             iupper[2] = hypre_BoxIMaxD(box, 2);
          }
@@ -563,7 +563,7 @@ void GLVis_PrintSStructVector(HYPRE_SStructVector sol,
             }
          }
 
-         custom_free(values);
+         free(values);
       }
    }
 
@@ -798,11 +798,11 @@ void GLVis_PrintStructVector(HYPRE_StructVector sol,
 
       if (dim == 2)
       {
-         values = (double*) custom_malloc(ni * nj * sizeof(double));
+         values = (double*) malloc(ni * nj * sizeof(double));
       }
       else
       {
-         values = (double*) custom_malloc(ni * nj * nk * sizeof(double));
+         values = (double*) malloc(ni * nj * nk * sizeof(double));
          ilower[2] = hypre_BoxIMinD(box, 2);
          iupper[2] = hypre_BoxIMaxD(box, 2);
       }
@@ -816,7 +816,7 @@ void GLVis_PrintStructVector(HYPRE_StructVector sol,
                fprintf(file, "%.14e\n", values[i + j * ni]);
             }
 
-      custom_free(values);
+      free(values);
    }
 
    fflush(file);
