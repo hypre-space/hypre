@@ -163,7 +163,7 @@ $(CXX_EXAMPLES): %: cxx_%.o
 install: all
 	@echo "Installing examples..."
 	@mkdir -p $(HYPRE_INSTALL_DIR)/bin
-	@cp -f $(EXAMPLES) $(CXX_EXAMPLES) $(FORTRAN_EXAMPLES) $(HYPRE_INSTALL_DIR)/bin/
+	@cp -f $(EXAMPLES) $(HYPRE_INSTALL_DIR)/bin/
 	@chmod +x $(HYPRE_INSTALL_DIR)/bin/*
 	@echo "Installation complete."
 
