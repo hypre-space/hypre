@@ -3110,13 +3110,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          fflush(NULL);
       }
 
-      /* Destroy filtered matrix */
-      if (!level && (A_tilde != A))
-      {
-         hypre_ParCSRMatrixDestroy(A_tilde);
-         A_array[0] = A;
-      }
-
       HYPRE_ANNOTATE_MGLEVEL_END(level);
       hypre_GpuProfilingPopRange();
       ++level;
@@ -3849,8 +3842,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_BoomerAMGSetupStats(amg_data, A);
    }
 
-   /* print out CF info to plot grids in matlab (see 'tools/AMGgrids.m') */
+   /* Destroy filtered matrix */
+   if (A_tilde != A)
+   {
+      hypre_ParCSRMatrixDestroy(A_tilde);
+      A_array[0] = A;
+   }
 
+   /* Print out CF info to plot grids in matlab (see 'tools/AMGgrids.m') */
    if (hypre_ParAMGDataPlotGrids(amg_data))
    {
       HYPRE_Int *CF, *CFc, *itemp;
