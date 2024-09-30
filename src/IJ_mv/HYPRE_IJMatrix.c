@@ -1104,6 +1104,48 @@ HYPRE_IJMatrixGetLocalRange( HYPRE_IJMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+HYPRE_Int
+HYPRE_IJMatrixGetGlobalInfo( HYPRE_IJMatrix matrix,
+                             HYPRE_BigInt  *global_num_rows,
+                             HYPRE_BigInt  *global_num_cols,
+                             HYPRE_BigInt  *global_num_nonzeros )
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *global_num_rows = hypre_IJMatrixGlobalNumRows(ijmatrix);
+   *global_num_cols = hypre_IJMatrixGlobalNumCols(ijmatrix);
+
+   if (hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR)
+   {
+      hypre_ParCSRMatrix *par_matrix = (hypre_ParCSRMatrix *) hypre_IJMatrixObject(ijmatrix);
+
+      if (!par_matrix)
+      {
+         hypre_error_in_arg(1);
+         return hypre_error_flag;
+      }
+
+      hypre_ParCSRMatrixSetNumNonzeros(par_matrix);
+      *global_num_nonzeros = hypre_ParCSRMatrixNumNonzeros(par_matrix);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 /**
    Returns a pointer to an underlying ijmatrix type used to implement IJMatrix.
    Assumes that the implementation has an underlying matrix, so it would not
