@@ -141,6 +141,7 @@ main( hypre_int argc,
    HYPRE_Int           ioutdat;
    HYPRE_Int           poutdat;
    HYPRE_Int           poutusr = 0; /* if user selects pout */
+   HYPRE_Int           print_matrix_info = 0;
    HYPRE_Int           debug_flag;
    HYPRE_Int           ierr = 0;
    HYPRE_Int           i, j, c;
@@ -804,6 +805,11 @@ main( hypre_int argc,
          arg_index++;
          build_funcs_type      = 2;
          build_funcs_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-mat-info") == 0 )
+      {
+         arg_index++;
+         print_matrix_info = 1;
       }
       else if ( strcmp(argv[arg_index], "-exact_size") == 0 )
       {
@@ -3331,6 +3337,42 @@ main( hypre_int argc,
       if (partitioning)
       {
          hypre_TFree(partitioning, HYPRE_MEMORY_HOST);
+      }
+   }
+
+   /* Print matrix information */
+   if (print_matrix_info)
+   {
+      HYPRE_BigInt global_num_rows, global_num_cols, global_num_nonzeros;
+
+      if (parcsr_A)
+      {
+         HYPRE_BigInt ilower, iupper, jlower, jupper;
+
+         HYPRE_ParCSRMatrixGetLocalRange(parcsr_A, &ilower, &iupper, &jlower, &jupper);
+         HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &ij_A);
+         HYPRE_IJMatrixSetObjectType(ij_A, HYPRE_PARCSR);
+         hypre_IJMatrixObject(ij_A) = parcsr_A;
+         hypre_IJMatrixAssembleFlag(ij_A) = 1;
+      }
+
+      HYPRE_IJMatrixGetGlobalInfo(ij_A,
+                                  &global_num_rows,
+                                  &global_num_cols,
+                                  &global_num_nonzeros);
+
+      if (parcsr_A)
+      {
+         hypre_IJMatrixObject(ij_A) = NULL;
+         HYPRE_IJMatrixDestroy(ij_A);
+      }
+
+      if (myid == 0)
+      {
+         hypre_printf("  Matrix Information:\n");
+         hypre_printf("    Global number of rows:     %lld\n", global_num_rows);
+         hypre_printf("    Global number of columns:  %lld\n", global_num_cols);
+         hypre_printf("    Global number of nonzeros: %lld\n", global_num_nonzeros);
       }
    }
 
