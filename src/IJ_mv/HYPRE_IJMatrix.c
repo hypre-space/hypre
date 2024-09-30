@@ -230,7 +230,6 @@ HYPRE_IJMatrixInitialize( HYPRE_IJMatrix matrix )
    }
 
    return hypre_error_flag;
-
 }
 
 HYPRE_Int
@@ -516,6 +515,8 @@ HYPRE_IJMatrixSetValues2( HYPRE_IJMatrix       matrix,
       }
    }
 
+   HYPRE_PRINT_MEMORY_USAGE(hypre_IJMatrixComm(ijmatrix));
+
    return hypre_error_flag;
 }
 
@@ -724,6 +725,8 @@ HYPRE_IJMatrixAddToValues2( HYPRE_IJMatrix       matrix,
       }
    }
 
+   HYPRE_PRINT_MEMORY_USAGE(hypre_IJMatrixComm(ijmatrix));
+
    return hypre_error_flag;
 }
 
@@ -741,25 +744,27 @@ HYPRE_IJMatrixAssemble( HYPRE_IJMatrix matrix )
       return hypre_error_flag;
    }
 
-   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+   if (hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR)
    {
 #if defined(HYPRE_USING_GPU)
-      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJMatrixMemoryLocation(matrix) );
+      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_IJMatrixMemoryLocation(matrix));
 
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         return ( hypre_IJMatrixAssembleParCSRDevice( ijmatrix ) );
+         hypre_IJMatrixAssembleParCSRDevice(ijmatrix);
       }
       else
 #endif
       {
-         return ( hypre_IJMatrixAssembleParCSR( ijmatrix ) );
+         hypre_IJMatrixAssembleParCSR(ijmatrix);
       }
    }
    else
    {
       hypre_error_in_arg(1);
    }
+
+   HYPRE_PRINT_MEMORY_USAGE(hypre_IJMatrixComm(ijmatrix));
 
    return hypre_error_flag;
 }

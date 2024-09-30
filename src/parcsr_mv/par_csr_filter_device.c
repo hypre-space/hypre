@@ -32,7 +32,7 @@ hypreGPUKernel_ParCSRMatrixBlkFilterCount(hypre_DeviceItem  &item,
 
    if (row < num_rows)
    {
-      HYPRE_Int p, q, pA, qA;
+      HYPRE_Int p = 0, q = 0, pA, qA;
 
       if (lane < 2)
       {
@@ -113,7 +113,7 @@ hypreGPUKernel_ParCSRMatrixBlkFilterFill(hypre_DeviceItem &item,
 {
    const HYPRE_Int  row = hypre_gpu_get_grid_warp_id<1, 1>(item);
    const HYPRE_Int  lane = hypre_gpu_get_lane_id<1>(item);
-   HYPRE_Int        p, q, pA, qA;
+   HYPRE_Int        p = 0, q = 0, pA, qA;
    HYPRE_BigInt     big_block_size = (HYPRE_BigInt) block_size;
 
    if (row >= num_rows)
