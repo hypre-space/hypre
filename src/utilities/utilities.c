@@ -202,3 +202,66 @@ hypre_CreateNextDirOfSequence(const char *basepath, const char *prefix, char **f
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------
+ * hypre_ConvertIndicesToString
+ *
+ * Converts an array of integers (indices) into a formatted string.
+ * The function creates a string representing the array in a comma-
+ * separated format, enclosed within square brackets ("[]").
+ *
+ * - If the input array is empty (size = 0), it returns a string "[]".
+ * - The resulting string includes the list of integers with proper
+ *   formatting: each integer is separated by a comma and a space.
+ *
+ * Parameters:
+ * - size: Number of elements in the input array.
+ * - indices: Pointer to the array of integers (HYPRE_Int) to convert.
+ *
+ * Returns:
+ * - A dynamically allocated string representing the integer array.
+ *--------------------------------------------------------------------*/
+
+char*
+hypre_ConvertIndicesToString(HYPRE_Int  size,
+                             HYPRE_Int *indices)
+{
+   HYPRE_Int    max_length;
+   HYPRE_Int    i, length;
+   char        *string;
+   char        *pos;
+
+   if (!size)
+   {
+      string = hypre_TAlloc(char, 3, HYPRE_MEMORY_HOST);
+      hypre_sprintf(string, "[]");
+
+      return string;
+   }
+
+   /* Estimate maximum string needed */
+   max_length = 12 * size + 3;
+   string = hypre_TAlloc(char, max_length, HYPRE_MEMORY_HOST);
+
+   pos    = string;
+   length = hypre_sprintf(pos, "[");
+   pos    += length;
+
+   for (i = 0; i < size; i++)
+   {
+      /* Add comma before all but the first element */
+      if (i > 0)
+      {
+         length = hypre_sprintf(pos, ", ");
+         pos += length;
+      }
+
+      /* Write integer as string */
+      length = hypre_sprintf(pos, "%d", indices[i]);
+      pos += length;
+   }
+
+   hypre_sprintf(pos, "]");
+
+   return string;
+}
