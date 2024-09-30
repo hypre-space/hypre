@@ -508,5 +508,4 @@
 !     Finalize MPI
       call MPI_Finalize(ierr)
 
-      stop
       end
