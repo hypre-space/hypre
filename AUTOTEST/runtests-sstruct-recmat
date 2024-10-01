@@ -5,6 +5,7 @@ TEST_sstruct/cube.sh
 TEST_sstruct/cycred.sh
 TEST_sstruct/default2d.sh
 TEST_sstruct/default3d.sh
+TEST_sstruct/emptyProc.sh
 TEST_sstruct/maxwell.sh
 TEST_sstruct/miller.sh
 TEST_sstruct/neighborpart.sh

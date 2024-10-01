@@ -11,6 +11,8 @@
  *--------------------------------------------------------------------------*/
 
 #if 0
+
+/* Original version (maybe never worked?) */
 hypre_SStructPMatrix*
 hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
                              hypre_SStructPGrid   *cgrid,
@@ -103,7 +105,8 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
 
    return P;
 }
-#else
+
+/* Version from Nov 2020 (doesn't fully work with Struct PFMG code) */
 hypre_SStructPMatrix *
 hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
                              hypre_SStructPGrid   *cgrid,
@@ -126,7 +129,7 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
    stencil_shape = hypre_CTAlloc(hypre_Index,  stencil_size, HYPRE_MEMORY_HOST);
    for (i = 0; i < stencil_size; i++)
    {
-      hypre_SetIndex3(stencil_shape[i], 0, 0, 0);
+      hypre_SetIndex(stencil_shape[i], 0);
    }
    hypre_IndexD(stencil_shape[0], cdir) = -1;
    hypre_IndexD(stencil_shape[1], cdir) =  1;
@@ -153,6 +156,57 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
 
    return P;
 }
+
+#else
+
+hypre_SStructPMatrix *
+hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
+                             hypre_SStructPGrid   *cgrid,
+                             HYPRE_Int             cdir  )
+{
+   hypre_SStructPMatrix  *P;
+
+   hypre_Index           *stencil_shape;
+   HYPRE_Int              stencil_size;
+
+   HYPRE_Int              ndim;
+
+   HYPRE_Int              nvars;
+   hypre_SStructStencil **P_stencils;
+
+   HYPRE_Int              i, s;
+
+   /* set up stencil_shape */
+   stencil_size = 3;
+   stencil_shape = hypre_CTAlloc(hypre_Index,  stencil_size, HYPRE_MEMORY_HOST);
+   for (i = 0; i < stencil_size; i++)
+   {
+      hypre_SetIndex(stencil_shape[i], 0);
+   }
+   hypre_IndexD(stencil_shape[1], cdir) = -1;
+   hypre_IndexD(stencil_shape[2], cdir) =  1;
+
+   /* set up P_stencils */
+   ndim = hypre_StructStencilNDim(hypre_SStructPMatrixSStencil(A, 0, 0));
+   nvars = hypre_SStructPMatrixNVars(A);
+   P_stencils = hypre_CTAlloc(hypre_SStructStencil *,  nvars, HYPRE_MEMORY_HOST);
+   for (s = 0; s < nvars; s++)
+   {
+      HYPRE_SStructStencilCreate(ndim, stencil_size, &P_stencils[s]);
+      for (i = 0; i < stencil_size; i++)
+      {
+         HYPRE_SStructStencilSetEntry(P_stencils[s], i, stencil_shape[i], s);
+      }
+   }
+
+   /* create interpolation matrix */
+   hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A), cgrid, P_stencils, &P);
+
+   hypre_TFree(stencil_shape, HYPRE_MEMORY_HOST);
+
+   return P;
+}
+
 #endif
 
 /*--------------------------------------------------------------------------

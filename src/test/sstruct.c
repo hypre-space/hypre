@@ -1232,7 +1232,8 @@ DistributeData( MPI_Comm      comm,
    }
 
    /* check number of processes */
-   if (pool_procs[data.npools] != num_procs)
+   /* RDF TODO: Try changing this to '>' to allow for having more procs than needed */
+   if (pool_procs[data.npools] > num_procs)
    {
       hypre_printf("%d,  %d \n", pool_procs[data.npools], num_procs);
       hypre_printf("Error: Invalid number of processes or process topology \n");
