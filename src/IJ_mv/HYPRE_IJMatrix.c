@@ -1318,6 +1318,8 @@ HYPRE_Int
 HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
                      const char     *filename )
 {
+   void   *object;
+
    if (!matrix)
    {
       hypre_error_in_arg(1);
@@ -1330,11 +1332,8 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
       return hypre_error_flag;
    }
 
-   void *object;
    HYPRE_IJMatrixGetObject(matrix, &object);
-   hypre_ParCSRMatrix *par_csr = (hypre_ParCSRMatrix*) object;
-
-   hypre_ParCSRMatrixPrintIJ(par_csr, 0, 0, filename);
+   hypre_ParCSRMatrixPrintIJ((hypre_ParCSRMatrix*) object, 0, 0, filename);
 
    return hypre_error_flag;
 }

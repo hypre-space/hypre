@@ -22,7 +22,6 @@ src/TAGS
 hypre/
 cmbuild/
 install/
-test/
 AUTOTEST/*.dir
 .vscode
 

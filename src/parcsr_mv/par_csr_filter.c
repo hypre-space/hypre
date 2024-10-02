@@ -199,6 +199,8 @@ hypre_ParCSRMatrixBlkFilter( hypre_ParCSRMatrix  *A,
                              HYPRE_Int            block_size,
                              hypre_ParCSRMatrix **B_ptr )
 {
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
 #if defined(HYPRE_USING_GPU)
    if (hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A)) == HYPRE_EXEC_DEVICE)
    {
@@ -209,6 +211,8 @@ hypre_ParCSRMatrixBlkFilter( hypre_ParCSRMatrix  *A,
    {
       hypre_ParCSRMatrixBlkFilterHost(A, block_size, B_ptr);
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

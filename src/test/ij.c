@@ -3370,9 +3370,9 @@ main( hypre_int argc,
       if (myid == 0)
       {
          hypre_printf("  Matrix Information:\n");
-         hypre_printf("    Global number of rows:     %lld\n", global_num_rows);
-         hypre_printf("    Global number of columns:  %lld\n", global_num_cols);
-         hypre_printf("    Global number of nonzeros: %lld\n", global_num_nonzeros);
+         hypre_printf("    Global number of rows:     %b\n", global_num_rows);
+         hypre_printf("    Global number of columns:  %b\n", global_num_cols);
+         hypre_printf("    Global number of nonzeros: %b\n", global_num_nonzeros);
       }
    }
 
@@ -4429,6 +4429,8 @@ main( hypre_int argc,
 
    if (solver_id == 0 || solver_id == 90)
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
+
       if (solver_id == 0)
       {
          if (myid == 0) { hypre_printf("Solver:  AMG\n"); }
@@ -4682,9 +4684,11 @@ main( hypre_int argc,
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
 
       if (second_time)
       {
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-2");
          HYPRE_SetExecutionPolicy(exec2_policy);
 
          /* run a second time [for timings, to check for memory leaks] */
@@ -4740,6 +4744,7 @@ main( hypre_int argc,
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
 
+         HYPRE_ANNOTATE_REGION_END("%s", "Run-2");
 #if defined(HYPRE_USING_CUDA)
          cudaProfilerStop();
 #endif
@@ -4994,6 +4999,7 @@ main( hypre_int argc,
                        solver_id == 43 || solver_id == 71))
       /*end lobpcg */
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
 
@@ -5547,9 +5553,11 @@ main( hypre_int argc,
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
 
       if (second_time)
       {
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-2");
          HYPRE_SetExecutionPolicy(exec2_policy);
 
          /* run a second time [for timings, to check for memory leaks] */
@@ -5593,6 +5601,7 @@ main( hypre_int argc,
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
 
+         HYPRE_ANNOTATE_REGION_END("%s", "Run-2");
 #if defined(HYPRE_USING_CUDA)
          cudaProfilerStop();
 #endif
@@ -6692,6 +6701,7 @@ main( hypre_int argc,
        solver_id == 15 || solver_id == 18 || solver_id == 44 ||
        solver_id == 81 || solver_id == 91)
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
 
@@ -7246,9 +7256,11 @@ main( hypre_int argc,
          hypre_TFree(indices_d, memory_location);
          hypre_TFree(values_d, memory_location);
       }
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
 
       if (second_time)
       {
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-2");
          /* run a second time [for timings, to check for memory leaks] */
          HYPRE_ParVectorSetRandomValues(x, 775);
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
@@ -7256,10 +7268,15 @@ main( hypre_int argc,
 #endif
          hypre_ParVectorCopy(x0_save, x);
 
-         HYPRE_GMRESSetup(pcg_solver, (HYPRE_Matrix)parcsr_M, (HYPRE_Vector)b,
-                          (HYPRE_Vector)x);
-         HYPRE_GMRESSolve(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b,
-                          (HYPRE_Vector)x);
+         HYPRE_GMRESSetup(pcg_solver,
+                          (HYPRE_Matrix) parcsr_M,
+                          (HYPRE_Vector) b,
+                          (HYPRE_Vector) x);
+         HYPRE_GMRESSolve(pcg_solver,
+                          (HYPRE_Matrix) parcsr_A,
+                          (HYPRE_Vector) b,
+                          (HYPRE_Vector) x);
+         HYPRE_ANNOTATE_REGION_END("%s", "Run-2");
       }
 
       HYPRE_GMRESGetNumIterations(pcg_solver, &num_iterations);
@@ -7310,6 +7327,7 @@ main( hypre_int argc,
 
    if (solver_id == 50 || solver_id == 51 )
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("LGMRES Setup");
       hypre_BeginTiming(time_index);
 
@@ -7527,6 +7545,7 @@ main( hypre_int argc,
          hypre_printf("Final LGMRES Relative Residual Norm = %e\n", final_res_norm);
          hypre_printf("\n");
       }
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
    }
 
    /*-----------------------------------------------------------
@@ -7535,6 +7554,7 @@ main( hypre_int argc,
 
    if (solver_id == 60 || solver_id == 61 || solver_id == 72 || solver_id == 82 || solver_id == 47)
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("FlexGMRES Setup");
       hypre_BeginTiming(time_index);
 
@@ -7962,6 +7982,7 @@ main( hypre_int argc,
          hypre_printf("Final FlexGMRES Relative Residual Norm = %e\n", final_res_norm);
          hypre_printf("\n");
       }
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
    }
 
    /*-----------------------------------------------------------
@@ -7970,6 +7991,7 @@ main( hypre_int argc,
 
    if (solver_id == 9 || solver_id == 10 || solver_id == 11 || solver_id == 45 || solver_id == 73)
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("BiCGSTAB Setup");
       hypre_BeginTiming(time_index);
 
@@ -8307,20 +8329,27 @@ main( hypre_int argc,
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
 
       if (second_time)
       {
          /* run a second time [for timings, to check for memory leaks] */
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-2");
          HYPRE_ParVectorSetRandomValues(x, 775);
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
 #endif
          hypre_ParVectorCopy(x0_save, x);
 
-         HYPRE_BiCGSTABSetup(pcg_solver, (HYPRE_Matrix) parcsr_M,
-                             (HYPRE_Vector) b, (HYPRE_Vector) x);
-         HYPRE_BiCGSTABSolve(pcg_solver, (HYPRE_Matrix) parcsr_A,
-                             (HYPRE_Vector) b, (HYPRE_Vector) x);
+         HYPRE_BiCGSTABSetup(pcg_solver,
+                             (HYPRE_Matrix) parcsr_M,
+                             (HYPRE_Vector) b,
+                             (HYPRE_Vector) x);
+         HYPRE_BiCGSTABSolve(pcg_solver,
+                             (HYPRE_Matrix) parcsr_A,
+                             (HYPRE_Vector) b,
+                             (HYPRE_Vector) x);
+         HYPRE_ANNOTATE_REGION_END("%s", "Run-2");
       }
 
       HYPRE_BiCGSTABGetNumIterations(pcg_solver, &num_iterations);
@@ -8386,6 +8415,7 @@ main( hypre_int argc,
 
    if (solver_id == 16 || solver_id == 17 || solver_id == 46 || solver_id == 74)
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("COGMRES Setup");
       hypre_BeginTiming(time_index);
 
@@ -8685,20 +8715,27 @@ main( hypre_int argc,
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
 
       if (second_time)
       {
          /* run a second time [for timings, to check for memory leaks] */
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-2");
          HYPRE_ParVectorSetRandomValues(x, 775);
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
 #endif
          hypre_ParVectorCopy(x0_save, x);
 
-         HYPRE_COGMRESSetup(pcg_solver, (HYPRE_Matrix) parcsr_M,
-                            (HYPRE_Vector) b, (HYPRE_Vector) x);
-         HYPRE_COGMRESSolve(pcg_solver, (HYPRE_Matrix) parcsr_A,
-                            (HYPRE_Vector) b, (HYPRE_Vector) x);
+         HYPRE_COGMRESSetup(pcg_solver,
+                            (HYPRE_Matrix) parcsr_M,
+                            (HYPRE_Vector) b,
+                            (HYPRE_Vector) x);
+         HYPRE_COGMRESSolve(pcg_solver,
+                            (HYPRE_Matrix) parcsr_A,
+                            (HYPRE_Vector) b,
+                            (HYPRE_Vector) x);
+         HYPRE_ANNOTATE_REGION_END("%s", "Run-2");
       }
 
       HYPRE_COGMRESGetNumIterations(pcg_solver, &num_iterations);
@@ -8759,6 +8796,7 @@ main( hypre_int argc,
 
    if (solver_id == 5 || solver_id == 6)
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("CGNR Setup");
       hypre_BeginTiming(time_index);
 
@@ -8921,20 +8959,27 @@ main( hypre_int argc,
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
 
       if (second_time)
       {
          /* run a second time [for timings, to check for memory leaks] */
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-2");
          HYPRE_ParVectorSetRandomValues(x, 775);
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
 #endif
          hypre_ParVectorCopy(x0_save, x);
 
-         HYPRE_CGNRSetup(pcg_solver, (HYPRE_Matrix) parcsr_M,
-                         (HYPRE_Vector) b, (HYPRE_Vector) x);
-         HYPRE_CGNRSolve(pcg_solver, (HYPRE_Matrix) parcsr_A,
-                         (HYPRE_Vector) b, (HYPRE_Vector) x);
+         HYPRE_CGNRSetup(pcg_solver,
+                         (HYPRE_Matrix) parcsr_M,
+                         (HYPRE_Vector) b,
+                         (HYPRE_Vector) x);
+         HYPRE_CGNRSolve(pcg_solver,
+                         (HYPRE_Matrix) parcsr_A,
+                         (HYPRE_Vector) b,
+                         (HYPRE_Vector) x);
+         HYPRE_ANNOTATE_REGION_END("%s", "Run-2");
       }
 
       HYPRE_CGNRGetNumIterations(pcg_solver, &num_iterations);
