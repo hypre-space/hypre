@@ -101,7 +101,7 @@ function MpirunString
          # RunString="${RunString} -nodes $POE_NUM_NODES $MY_ARGS"
          RunString="poe $MY_ARGS -rmpool pdebug -procs $POE_NUM_PROCS -nodes $POE_NUM_NODES"
          ;;
-      rztopaz*|aztec*|cab*|quartz*|sierra*|syrah*|vulcan*)
+      rzhound*|aztec*|cab*|quartz*|sierra*|syrah*|vulcan*)
          shift
          if [ $NumThreads -gt 0 ] ; then
             export OMP_NUM_THREADS=$NumThreads
