@@ -23,7 +23,6 @@ src/TAGS
 hypre/
 cmbuild/
 install/
-test/
 AUTOTEST/*.dir
 .vscode
 
@@ -50,8 +49,10 @@ src/test/ij_mv
 src/test/ij_mm
 src/test/maxwell_unscaled
 src/test/sstruct
+src/test/sstructmat
 src/test/sstruct_fac
 src/test/struct
+src/test/structmat
 src/test/struct_migrate
 src/test/zboxloop
 src/examples/ex[0-9]
