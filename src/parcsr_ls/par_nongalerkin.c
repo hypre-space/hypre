@@ -1019,6 +1019,8 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
    HYPRE_Int           i, j, Cpt, row_start, row_end;
    HYPRE_BigInt        global_row, global_col;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /* Other Setup */
    if (num_cols_RAP_offd)
    {
@@ -1233,6 +1235,8 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
       hypre_TFree(ijbuf_sym_numcols, memory_location_RAP);
    }
 
+   HYPRE_ANNOTATE_FUNC_END;
+
    return Pattern_CSR;
 }
 
@@ -1367,6 +1371,8 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
    HYPRE_Real          *ijbuf_sym_data;
    HYPRE_BigInt        *ijbuf_sym_cols, *ijbuf_sym_rownums;
    HYPRE_Int           *ijbuf_sym_numcols;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* Further Initializations */
    if (num_cols_RAP_offd)
@@ -2351,6 +2357,8 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
    hypre_ParCSRMatrixDestroy(S);
    HYPRE_IJMatrixSetObjectType(ijmatrix, -1);
    HYPRE_IJMatrixDestroy(ijmatrix);
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
