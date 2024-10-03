@@ -281,6 +281,24 @@ HYPRE_Int HYPRE_IJMatrixGetLocalRange(HYPRE_IJMatrix  matrix,
                                       HYPRE_BigInt   *jupper);
 
 /**
+ * Gets global information about the matrix, including the total number of rows,
+ * columns, and nonzero elements across all processes.
+ *
+ * @param matrix The IJMatrix object to query.
+ * @param global_num_rows Pointer to store the total number of rows in the matrix.
+ * @param global_num_cols Pointer to store the total number of columns in the matrix.
+ * @param global_num_nonzeros Pointer to store the total number of nonzero elements in the matrix.
+ *
+ * @return HYPRE_Int Error code.
+ *
+ * Collective (must be called by all processes).
+ **/
+HYPRE_Int HYPRE_IJMatrixGetGlobalInfo(HYPRE_IJMatrix  matrix,
+                                      HYPRE_BigInt   *global_num_rows,
+                                      HYPRE_BigInt   *global_num_cols,
+                                      HYPRE_BigInt   *global_num_nonzeros);
+
+/**
  * Get a reference to the constructed matrix object.
  *
  * @see HYPRE_IJMatrixSetObjectType
