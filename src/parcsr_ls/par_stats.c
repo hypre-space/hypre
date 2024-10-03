@@ -1775,6 +1775,10 @@ hypre_BoomerAMGPrintGeneralInfo(hypre_ParAMGData *amg_data,
                              hypre_ParAMGDataNumFunctions(amg_data));
 
    HYPRE_PRINT_SHIFTED_PARAM(shift,
+                             "Functions filtering is %s\n",
+                             (hypre_ParAMGDataFilterFunctions(amg_data) > 0) ? "on" : "off");
+
+   HYPRE_PRINT_SHIFTED_PARAM(shift,
                              "Coarsening type = %s\n",
                              hypre_BoomerAMGGetCoarseningName(amg_data));
 

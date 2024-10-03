@@ -1078,6 +1078,10 @@ HYPRE_Int hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix *A, HYPRE_Int row_ma
                                          hypre_DenseBlockMatrix **B_ptr );
 HYPRE_Int hypre_ParCSRMatrixColSum( hypre_ParCSRMatrix *A, hypre_ParVector **B_ptr );
 
+/* par_csr_filter_device.c */
+HYPRE_Int hypre_ParCSRMatrixBlkFilterDevice(hypre_ParCSRMatrix *A, HYPRE_Int block_size,
+                                            hypre_ParCSRMatrix **B_ptr);
+
 /* par_csr_matop_device.c */
 HYPRE_Int hypre_ParCSRMatrixDiagScaleDevice ( hypre_ParCSRMatrix *par_A, hypre_ParVector *par_ld,
                                               hypre_ParVector *par_rd );
@@ -1185,6 +1189,14 @@ void hypre_ParCSRMatrixCopyColMapOffdToHost(hypre_ParCSRMatrix *A);
 HYPRE_Int hypre_ParCSRMatrixStatsArrayCompute( HYPRE_Int num_matrices,
                                                hypre_ParCSRMatrix **matrices,
                                                hypre_MatrixStatsArray *stats_array );
+
+/* par_csr_matmat_device.c */
+HYPRE_Int hypre_ParCSRMatMatDiagDevice( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BT,
+                                        hypre_ParCSRMatrix *C );
+
+/* par_csr_matmat.c */
+HYPRE_Int hypre_ParCSRMatMatDiag( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B,
+                                  hypre_ParCSRMatrix **C_ptr );
 
 /* par_csr_matvec.c */
 // y = alpha*A*x + beta*b
