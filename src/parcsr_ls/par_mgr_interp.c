@@ -749,6 +749,8 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
    HYPRE_Int            num_rows_AFF = hypre_ParCSRMatrixNumRows(A_FF);
    HYPRE_Int            num_procs, my_id;
 
+   HYPRE_Real           zero      = 0.0;
+   HYPRE_Real           one       = 1.0;
    HYPRE_Complex        scal      = 1.0;
    hypre_CSRMatrix     *A_FF_diag = hypre_ParCSRMatrixDiag(A_FF);
    hypre_CSRMatrix     *A_FC_diag = hypre_ParCSRMatrixDiag(A_FC);
@@ -786,7 +788,8 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
          for (i = 0; i < num_rows_AFF; i++)
          {
             dsum = diag[i] + scal * (diag_FF[i] - hypre_cabs(diag[i]));
-            diag[i] = (dsum > 0.0 || dsum < 0.0) ? (1.0 / dsum) : 1.0;
+            diag[i] = (hypre_cabs(dsum) > zero || hypre_cabs(dsum) < zero) ?
+                      (one / dsum) : one;
          }
          hypre_TFree(diag_FF, memory_location_P);
       }
