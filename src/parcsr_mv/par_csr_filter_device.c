@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
@@ -138,7 +139,7 @@ hypreGPUKernel_ParCSRMatrixBlkFilterFill(hypre_DeviceItem &item,
    {
       const HYPRE_Int col     = (j < pA) ? read_only_load(A_diag_j + j) : 0;
       HYPRE_Int       write   = (j < pA && (col % block_size) == (row % block_size));
-      hypre_mask      ballot  = hypre_ballot_sync(HYPRE_WARP_FULL_MASK, write);
+      hypre_mask      ballot  = hypre_ballot_sync(item, HYPRE_WARP_FULL_MASK, write);
       HYPRE_Int       laneoff = hypre_popc(ballot & ((hypre_mask_one << lane) - 1));
 
       if (write)
@@ -162,7 +163,7 @@ hypreGPUKernel_ParCSRMatrixBlkFilterFill(hypre_DeviceItem &item,
          const HYPRE_BigInt global_col = (j < qA) ? read_only_load(A_col_map_offd + col) : 0;
          HYPRE_Int          write      = (j < qA) &&
                                          (HYPRE_Int) (global_col % big_block_size) == (row % block_size);
-         hypre_mask         ballot     = hypre_ballot_sync(HYPRE_WARP_FULL_MASK, write);
+         hypre_mask         ballot     = hypre_ballot_sync(item, HYPRE_WARP_FULL_MASK, write);
          HYPRE_Int          laneoff    = hypre_popc(ballot & ((hypre_mask_one << lane) - 1));
 
          if (write)
@@ -171,12 +172,18 @@ hypreGPUKernel_ParCSRMatrixBlkFilterFill(hypre_DeviceItem &item,
             B_offd_j[idx] = col;
             B_offd_a[idx] = A_offd_a[j];
 
-#ifndef HYPRE_USING_SYCL
             if (col < A_num_cols_offd)
             {
+#if defined(HYPRE_USING_SYCL)
+               auto atomic_key = sycl::atomic_ref <
+                                 HYPRE_Int, sycl::memory_order::relaxed,
+                                 sycl::memory_scope::device,
+                                 sycl::access::address_space::local_space > (col_map_marker[col]);
+               atomic_key.fetch_or(1);
+#else
                atomicOr(col_map_marker + col, 1);
-            }
 #endif
+            }
          }
 
          offd_offset += hypre_popc(ballot);
@@ -313,7 +320,14 @@ hypre_ParCSRMatrixBlkFilterDevice(hypre_ParCSRMatrix  *A,
                                                             HYPRE_MEMORY_DEVICE);
       B_col_map_offd = hypre_ParCSRMatrixDeviceColMapOffd(B);
 
-#ifndef HYPRE_USING_SYCL
+#if defined(HYPRE_USING_SYCL)
+      /* Copy used columns to B's col_map_offd */
+      col_map_end = hypreSycl_copy_if(A_col_map_offd,
+                                      A_col_map_offd + num_cols_offd,
+                                      col_map_marker,
+                                      B_col_map_offd,
+      [] (const auto & x) {return x;} );
+#else
       /* Copy used columns to B's col_map_offd */
       col_map_end = HYPRE_THRUST_CALL(copy_if,
                                       A_col_map_offd,
@@ -321,6 +335,7 @@ hypre_ParCSRMatrixBlkFilterDevice(hypre_ParCSRMatrix  *A,
                                       col_map_marker,
                                       B_col_map_offd,
                                       thrust::identity<HYPRE_Int>());
+#endif
 
       hypre_CSRMatrixNumCols(B_offd) = (HYPRE_Int) (col_map_end - B_col_map_offd);
 
@@ -331,11 +346,6 @@ hypre_ParCSRMatrixBlkFilterDevice(hypre_ParCSRMatrix  *A,
                     hypre_CSRMatrixNumCols(B_offd),
                     HYPRE_MEMORY_HOST,
                     HYPRE_MEMORY_DEVICE);
-#else
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "SYCL path not implemented!");
-      hypre_GpuProfilingPopRange();
-      return hypre_error_flag;
-#endif
    }
 
    /* Update global nonzeros */

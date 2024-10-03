@@ -1324,7 +1324,7 @@ void __syncwarp()
 #endif // #if defined(HYPRE_USING_HIP) || (CUDA_VERSION < 9000)
 
 static __device__ __forceinline__
-hypre_mask hypre_ballot_sync(hypre_mask mask, hypre_int predicate)
+hypre_mask hypre_ballot_sync(hypre_DeviceItem &item, hypre_mask mask, hypre_int predicate)
 {
 #if defined(HYPRE_USING_CUDA)
    return __ballot_sync(mask, predicate);
@@ -1842,12 +1842,12 @@ T warp_prefix_sum(hypre_DeviceItem &item, hypre_int lane_id, T in, T &all_sum)
 }
 
 static __device__ __forceinline__
-hypre_mask hypre_ballot_sync(unsigned int mask, int predicate, hypre_DeviceItem &item_ct1)
+hypre_mask hypre_ballot_sync(hypre_DeviceItem &item, unsigned int mask, int predicate)
 {
    return sycl::reduce_over_group(
-       item_ct1.get_sub_group(),
-       (mask & (0x1 << item_ct1.get_sub_group().get_local_linear_id())) &&
-               predicate ? (0x1 << item_ct1.get_sub_group().get_local_linear_id()) : 0,
+       item.get_sub_group(),
+       (mask & (0x1 << item.get_sub_group().get_local_linear_id())) &&
+               predicate ? (0x1 << item.get_sub_group().get_local_linear_id()) : 0,
        sycl::ext::oneapi::plus<>());
 }
 
