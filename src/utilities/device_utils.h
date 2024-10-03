@@ -187,6 +187,7 @@ using namespace thrust::placeholders;
 #if defined(HYPRE_USING_SYCL)
 
 #include <sycl/sycl.hpp>
+#include <dpct/dpct.hpp>
 #if defined(HYPRE_USING_ONEMKLSPARSE)
 #include <oneapi/mkl/spblas.hpp>
 #endif
@@ -920,6 +921,13 @@ hypre_int next_power_of_2(hypre_int n)
    return n;
 }
 
+/* Flip n-th bit of bitmask (0 becomes 1. 1 becomes 0) */
+static __device__ __forceinline__
+hypre_mask hypre_mask_flip_at(hypre_mask bitmask, hypre_int n)
+{
+   return bitmask ^ (hypre_mask_one << n);
+}
+
 #endif // defined(HYPRE_USING_GPU)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1148,13 +1156,6 @@ HYPRE_Int hypre_ffs(hypre_mask mask)
 #else
    return (HYPRE_Int) __ffsll(mask);
 #endif
-}
-
-/* Flip n-th bit of bitmask (0 becomes 1. 1 becomes 0) */
-static __device__ __forceinline__
-hypre_mask hypre_mask_flip_at(hypre_mask bitmask, hypre_int n)
-{
-   return bitmask ^ (hypre_mask_one << n);
 }
 
 #if defined(HYPRE_USING_HIP)
@@ -1643,6 +1644,28 @@ T warp_prefix_sum(hypre_DeviceItem &item, hypre_int lane_id, T in, T &all_sum)
       }
    }
    return in;
+}
+
+static __device__ __forceinline__
+hypre_mask hypre_ballot_sync(unsigned int mask, int predicate, hypre_DeviceItem &item_ct1)
+{
+   return sycl::reduce_over_group(
+       item_ct1.get_sub_group(),
+       (mask & (0x1 << item_ct1.get_sub_group().get_local_linear_id())) &&
+               predicate ? (0x1 << item_ct1.get_sub_group().get_local_linear_id()) : 0,
+       sycl::ext::oneapi::plus<>());
+}
+
+static __device__ __forceinline__
+HYPRE_Int hypre_popc(hypre_mask mask)
+{
+   return (HYPRE_Int) sycl::popcount(mask);
+}
+
+static __device__ __forceinline__
+HYPRE_Int hypre_ffs(hypre_mask mask)
+{
+   return (HYPRE_Int)dpct::ffs<HYPRE_Int>(mask);
 }
 
 static __device__ __forceinline__
