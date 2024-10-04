@@ -551,6 +551,7 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
    }
    else
    {
+      indx = 0;
       for (ii = 0; ii < nrows; ii++)
       {
          row = rows[ii];
@@ -559,7 +560,7 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
          {
             continue;
          }
-         indx = row_indexes[ii];
+         indx = (row_indexes) ? row_indexes[ii] : indx;
          if (row >= row_partitioning[0] && row < row_partitioning[1])
          {
             row_local = (HYPRE_Int)(row - row_partitioning[0]);
