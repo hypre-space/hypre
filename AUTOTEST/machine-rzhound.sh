@@ -11,14 +11,14 @@ case $1 in
    -h|-help)
       cat <<EOF
 
-   **** Only run this script on the rztopaz machine ****
+   **** Only run this script on the rzhound machine ****
 
    $0 [-h|-help] {src_dir}
 
    where: -h|-help   prints this usage information and exits
           {src_dir}  is the hypre source directory
 
-   This script runs a number of tests suitable for the rztopaz machine.
+   This script runs a number of tests suitable for the rzhound machine.
 
    Example usage: $0 ../src
 

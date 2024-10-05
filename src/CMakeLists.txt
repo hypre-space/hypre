@@ -53,10 +53,11 @@ if (${HYPRE_SOURCE_DIR} STREQUAL ${HYPRE_BINARY_DIR})
 endif ()
 
 # Ensure RPATH/RUNPATH is set properly during the build
-set(CMAKE_SKIP_BUILD_RPATH FALSE)                       # Includes rpath in the binaries being built
-set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)               # Use different paths for build and install
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)             # Use link-time paths
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")  # Where binaries can look for shared libraries
+set(CMAKE_SKIP_BUILD_RPATH FALSE)                         # Includes rpath in the binaries being built
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)                 # Use different paths for build and install
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)               # Use link-time paths
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")    # Where binaries can look for shared libraries
+set(BUILD_SHARED_LIBS "Build using shared libraries" OFF) # Build static library by default
 
 # Set cmake module path
 set(CMAKE_MODULE_PATH "${HYPRE_SOURCE_DIR}/config/cmake" "${CMAKE_MODULE_PATH}")

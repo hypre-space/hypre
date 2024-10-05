@@ -119,6 +119,18 @@ function(configure_mpi_target)
     message(STATUS "Adding MPI include directory: ${MPI_INCLUDE_DIR}")
     target_include_directories(${PROJECT_NAME} PUBLIC ${MPI_INCLUDE_DIR})
   endif ()
+
+  set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} MPI::MPI_C)
+
+  # Check if MPI supports the MPI_Comm_f2c function
+  include(CheckCSourceCompiles)
+  check_c_source_compiles("
+    #include <mpi.h>
+    int main() {
+      MPI_Comm c = MPI_Comm_f2c(0);
+      return 0;
+    }
+  " HYPRE_HAVE_MPI_COMM_F2C)
 endfunction()
 
 # Function to get dependency library version
@@ -270,7 +282,7 @@ function(setup_fei)
       endif ()
       target_compile_options(${PROJECT_NAME} PUBLIC -I${dir})
     endforeach ()
-    
+
     message(STATUS "Enabled support for using FEI.")
     set(FEI_FOUND TRUE PARENT_SCOPE)
     target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_FEI_INCLUDE_DIRS})
