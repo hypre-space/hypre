@@ -94,10 +94,7 @@ FILES =\
  sys_pfmg_relax.c\
  sys_pfmg_setup.c\
  sys_pfmg_setup_interp.c\
- sys_pfmg_setup_rap.c\
  sys_pfmg_solve.c\
- sys_semi_interp.c\
- sys_semi_restrict.c\
  ssamg.c\
  ssamg_csolver.c\
  ssamg_stats.c\
