@@ -13,6 +13,7 @@ endif ()
 
 # The version number.
 set(HYPRE_VERSION 2.31.0)
+set(HYPRE_SOVERSION 2)
 set(HYPRE_NUMBER  23100)
 set(HYPRE_DATE    2024/02/14)
 set(HYPRE_TIME    00:00:00)
@@ -431,6 +432,7 @@ endif ()
 
 # Create the HYPRE library object
 add_library(${PROJECT_NAME})
+set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${HYPRE_SOVERSION})
 
 # Headers and sources
 set(HYPRE_HEADERS "")
