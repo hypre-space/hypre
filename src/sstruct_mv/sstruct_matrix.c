@@ -609,6 +609,35 @@ hypre_SStructPMatrixAssemble( hypre_SStructPMatrix *pmatrix )
 }
 
 /*--------------------------------------------------------------------------
+ * This routine may be called at any time.  The boolean 'resize' is returned to
+ * indicate whether a MatrixResize() is needed.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructPMatrixSetTranspose( hypre_SStructPMatrix *pmatrix,
+                                  HYPRE_Int             transpose,
+                                  HYPRE_Int            *resize )
+{
+   HYPRE_Int              nvars    = hypre_SStructPMatrixNVars(pmatrix);
+   hypre_StructMatrix    *smatrix;
+   HYPRE_Int              vi, vj;
+
+   for (vi = 0; vi < nvars; vi++)
+   {
+      for (vj = 0; vj < nvars; vj++)
+      {
+         smatrix = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
+         if (smatrix != NULL)
+         {
+            hypre_StructMatrixSetTranspose(smatrix, transpose, resize);
+         }
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * TODO: Deprecate this function. var == -1 or to_var == -1 are never used.
  *       These cases are used only in HYPRE_SStructMatrixSetSymmetric.
  *
@@ -2066,7 +2095,7 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
             hypre_BoxGetSize(grid_box, loop_size);
             hypre_SetIndex(stride, 1);
             hypre_CopyToIndex(hypre_BoxIMin(grid_box), ndim, start);
-            hypre_BoxLoop1Begin(ndim, loop_size, grid_box, start, stride, ii);
+            hypre_SerialBoxLoop0Begin(ndim, loop_size);
             {
                hypre_BoxLoopGetIndex(index);
                /* WM: todo - this mapping to the unstructured indices only works with no inter-variable couplings? */
@@ -2082,7 +2111,7 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
                }
                cnt++;
             }
-            hypre_BoxLoop1End(ii);
+            hypre_SerialBoxLoop0End();
 
             /* WM: todo - make sure threshold is set such that there are no extra rows here! */
             if (num_indices)

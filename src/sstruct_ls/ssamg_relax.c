@@ -487,7 +487,7 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
    hypre_StructVector     *sx;
    hypre_SStructPMatrix   *pA;
    hypre_StructMatrix     *sA;
-   hypre_SStructVector    *z;
+   hypre_SStructVector    *z = NULL;
 
    hypre_ComputePkg    ****svec_compute_pkgs;
    hypre_CommHandle     ***comm_handle;

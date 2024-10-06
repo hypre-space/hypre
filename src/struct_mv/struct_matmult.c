@@ -136,8 +136,6 @@ hypre_StructMatmultDestroy( hypre_StructMatmultData *mmdata )
       hypre_TFree(mmdata -> mtypes, HYPRE_MEMORY_HOST);
 
       hypre_TFree(mmdata -> a, HYPRE_MEMORY_HOST);
-      hypre_TFree(mmdata -> comm_pkg_a, HYPRE_MEMORY_HOST);
-      hypre_TFree(mmdata -> comm_data_a, HYPRE_MEMORY_HOST);
 
       hypre_BoxArrayDestroy(mmdata -> fdata_space);
       hypre_BoxArrayDestroy(mmdata -> cdata_space);
@@ -887,10 +885,7 @@ hypre_StructMatmultCommunicate( hypre_StructMatmultData  *mmdata )
    hypre_CommPkg     **comm_pkg_a      = (mmdata -> comm_pkg_a);
    HYPRE_Complex    ***comm_data_a     = (mmdata -> comm_data_a);
    HYPRE_Int           num_comm_pkgs   = (mmdata -> num_comm_pkgs);
-   HYPRE_Int           num_comm_blocks = (mmdata -> num_comm_blocks);
-
    hypre_CommHandle   *comm_handle;
-   HYPRE_Int           i, j, nb;
 
    /* If all constant coefficients, return */
    if (mmdata -> na == 0)
@@ -900,26 +895,17 @@ hypre_StructMatmultCommunicate( hypre_StructMatmultData  *mmdata )
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   /* Agglomerate communication packages if needed */
+   /* Agglomerate communication packages and data if needed */
    HYPRE_ANNOTATE_REGION_BEGIN("%s", "CommSetup");
-   if (!comm_pkg || !comm_data)
+   if (!comm_pkg)
    {
       hypre_CommPkgAgglomerate(num_comm_pkgs, comm_pkg_a, &comm_pkg);
-      comm_data = hypre_TAlloc(HYPRE_Complex *, num_comm_blocks, HYPRE_MEMORY_HOST);
-      nb = 0;
-      for (i = 0; i < num_comm_pkgs; i++)
-      {
-         for (j = 0; j < hypre_CommPkgNumBlocks(comm_pkg_a[i]); j++)
-         {
-            comm_data[nb++] = comm_data_a[i][j];
-         }
-         hypre_CommPkgDestroy(comm_pkg_a[i]);
-         hypre_TFree(comm_data_a[i], HYPRE_MEMORY_HOST);
-      }
-
-      /* Update communication info */
-      mmdata -> comm_pkg  = comm_pkg;
-      mmdata -> comm_data = comm_data;
+      hypre_CommPkgAgglomData(num_comm_pkgs, comm_pkg_a, comm_data_a, comm_pkg, &comm_data);
+      hypre_CommPkgAgglomDestroy(num_comm_pkgs, comm_pkg_a, comm_data_a);
+      (mmdata -> comm_pkg_a)  = NULL;
+      (mmdata -> comm_data_a) = NULL;
+      (mmdata -> comm_pkg)    = comm_pkg;
+      (mmdata -> comm_data)   = comm_data;
    }
    HYPRE_ANNOTATE_REGION_END("%s", "CommSetup");
 
@@ -2629,10 +2615,9 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
       switch (depth)
       {
          case 7:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
+            hypre_BoxLoop2Begin(ndim, loop_size,
                                 gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                Mdbox, Mdstart, Mdstride, Mi);
             {
                HYPRE_Complex val = HYPRE_SMMCORE_2D(k + 0) +
                                    HYPRE_SMMCORE_2D(k + 1) +
@@ -2643,14 +2628,13 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2D(k + 6);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 6:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
+            hypre_BoxLoop2Begin(ndim, loop_size,
                                 gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                Mdbox, Mdstart, Mdstride, Mi);
             {
                HYPRE_Complex val = HYPRE_SMMCORE_2D(k + 0) +
                                    HYPRE_SMMCORE_2D(k + 1) +
@@ -2660,14 +2644,13 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2D(k + 5);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 5:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
+            hypre_BoxLoop2Begin(ndim, loop_size,
                                 gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                Mdbox, Mdstart, Mdstride, Mi);
             {
                HYPRE_Complex val = HYPRE_SMMCORE_2D(k + 0) +
                                    HYPRE_SMMCORE_2D(k + 1) +
@@ -2676,14 +2659,13 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
                                    HYPRE_SMMCORE_2D(k + 4);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 4:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
+            hypre_BoxLoop2Begin(ndim, loop_size,
                                 gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                Mdbox, Mdstart, Mdstride, Mi);
             {
                HYPRE_Complex val = HYPRE_SMMCORE_2D(k + 0) +
                                    HYPRE_SMMCORE_2D(k + 1) +
@@ -2692,14 +2674,13 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 3:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
+            hypre_BoxLoop2Begin(ndim, loop_size,
                                 gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                Mdbox, Mdstart, Mdstride, Mi);
             {
                HYPRE_Complex val = HYPRE_SMMCORE_2D(k + 0) +
                                    HYPRE_SMMCORE_2D(k + 1) +
@@ -2707,34 +2688,32 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 2:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
+            hypre_BoxLoop2Begin(ndim, loop_size,
                                 gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                Mdbox, Mdstart, Mdstride, Mi);
             {
                HYPRE_Complex val = HYPRE_SMMCORE_2D(k + 0) +
                                    HYPRE_SMMCORE_2D(k + 1);
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          case 1:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
+            hypre_BoxLoop2Begin(ndim, loop_size,
                                 gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                Mdbox, Mdstart, Mdstride, Mi);
             {
                HYPRE_Complex val = HYPRE_SMMCORE_2D(k + 0);
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop2End(Mi, gi);
             break;
 
          default:
@@ -4353,7 +4332,7 @@ hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultHelper *a,
 /*--------------------------------------------------------------------------
  * hypre_StructMatmult
  *
- * Computes the product of "nmatrices" of type hypre_StructMatrix
+ * Computes the product of several StructMatrix matrices
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -4370,8 +4349,9 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
    hypre_StructMatmultSetup(mmdata, 1, M_ptr);
    hypre_StructMatmultCommunicate(mmdata);
    hypre_StructMatmultCompute(mmdata, *M_ptr);
-   HYPRE_StructMatrixAssemble(*M_ptr);
    hypre_StructMatmultDestroy(mmdata);
+
+   HYPRE_StructMatrixAssemble(*M_ptr);
 
    return hypre_error_flag;
 }
@@ -4379,7 +4359,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
 /*--------------------------------------------------------------------------
  * hypre_StructMatmat
  *
- * Computes the product of two hypre_StructMatrix objects: M = A*B
+ * Computes the product of two StructMatrix matrices: M = A*B
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -4387,23 +4367,13 @@ hypre_StructMatmat( hypre_StructMatrix  *A,
                     hypre_StructMatrix  *B,
                     hypre_StructMatrix **M_ptr )
 {
-   hypre_StructMatmultData *mmdata;
-
    HYPRE_Int           nmatrices   = 2;
    HYPRE_StructMatrix  matrices[2] = {A, B};
    HYPRE_Int           nterms      = 2;
    HYPRE_Int           terms[3]    = {0, 1};
    HYPRE_Int           trans[2]    = {0, 0};
 
-   /* Compute resulting matrix M */
-   hypre_StructMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
-   hypre_StructMatmultSetup(mmdata, 1, M_ptr);
-   hypre_StructMatmultCommunicate(mmdata);
-   hypre_StructMatmultCompute(mmdata, *M_ptr);
-   hypre_StructMatmultDestroy(mmdata);
-
-   /* Assemble matrix M */
-   HYPRE_StructMatrixAssemble(*M_ptr);
+   hypre_StructMatmult(nmatrices, matrices, nterms, terms, trans, M_ptr);
 
    return hypre_error_flag;
 }
@@ -4419,23 +4389,13 @@ hypre_StructMatrixPtAP( hypre_StructMatrix  *A,
                         hypre_StructMatrix  *P,
                         hypre_StructMatrix **M_ptr)
 {
-   hypre_StructMatmultData *mmdata;
-
    HYPRE_Int           nmatrices   = 2;
    HYPRE_StructMatrix  matrices[2] = {A, P};
    HYPRE_Int           nterms      = 3;
    HYPRE_Int           terms[3]    = {1, 0, 1};
    HYPRE_Int           trans[3]    = {1, 0, 0};
 
-   /* Compute resulting matrix M */
-   hypre_StructMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
-   hypre_StructMatmultSetup(mmdata, 1, M_ptr);
-   hypre_StructMatmultCommunicate(mmdata);
-   hypre_StructMatmultCompute(mmdata, *M_ptr);
-   hypre_StructMatmultDestroy(mmdata);
-
-   /* Assemble matrix M */
-   HYPRE_StructMatrixAssemble(*M_ptr);
+   hypre_StructMatmult(nmatrices, matrices, nterms, terms, trans, M_ptr);
 
    return hypre_error_flag;
 }
@@ -4452,23 +4412,13 @@ hypre_StructMatrixRAP( hypre_StructMatrix  *R,
                        hypre_StructMatrix  *P,
                        hypre_StructMatrix **M_ptr)
 {
-   hypre_StructMatmultData *mmdata;
-
    HYPRE_Int           nmatrices   = 3;
    HYPRE_StructMatrix  matrices[3] = {A, P, R};
    HYPRE_Int           nterms      = 3;
    HYPRE_Int           terms[3]    = {2, 0, 1};
    HYPRE_Int           trans[3]    = {0, 0, 0};
 
-   /* Compute resulting matrix M */
-   hypre_StructMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
-   hypre_StructMatmultSetup(mmdata, 1, M_ptr);
-   hypre_StructMatmultCommunicate(mmdata);
-   hypre_StructMatmultCompute(mmdata, *M_ptr);
-   hypre_StructMatmultDestroy(mmdata);
-
-   /* Assemble matrix M */
-   HYPRE_StructMatrixAssemble(*M_ptr);
+   hypre_StructMatmult(nmatrices, matrices, nterms, terms, trans, M_ptr);
 
    return hypre_error_flag;
 }
@@ -4485,23 +4435,13 @@ hypre_StructMatrixRTtAP( hypre_StructMatrix  *RT,
                          hypre_StructMatrix  *P,
                          hypre_StructMatrix **M_ptr)
 {
-   hypre_StructMatmultData *mmdata;
-
    HYPRE_Int           nmatrices   = 3;
    HYPRE_StructMatrix  matrices[3] = {A, P, RT};
    HYPRE_Int           nterms      = 3;
    HYPRE_Int           terms[3]    = {2, 0, 1};
    HYPRE_Int           trans[3]    = {1, 0, 0};
 
-   /* Compute resulting matrix M */
-   hypre_StructMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
-   hypre_StructMatmultSetup(mmdata, 1, M_ptr);
-   hypre_StructMatmultCommunicate(mmdata);
-   hypre_StructMatmultCompute(mmdata, *M_ptr);
-   hypre_StructMatmultDestroy(mmdata);
-
-   /* Assemble matrix M */
-   HYPRE_StructMatrixAssemble(*M_ptr);
+   hypre_StructMatmult(nmatrices, matrices, nterms, terms, trans, M_ptr);
 
    return hypre_error_flag;
 }

@@ -814,6 +814,71 @@ typedef struct hypre_SStructVector_struct
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+/******************************************************************************
+ *
+ * Header info for the semi-structured matrix/matrix multiplication structures
+ *
+ *****************************************************************************/
+
+#ifndef hypre_SSTRUCT_MATMULT_HEADER
+#define hypre_SSTRUCT_MATMULT_HEADER
+
+/*--------------------------------------------------------------------------
+ * SStructPMatmult data structure
+ *--------------------------------------------------------------------------*/
+
+typedef struct hypre_SStructPMatmultData_struct
+{
+   hypre_StructMatmultData  ***smmdata;   /* pointer to (nvars x nvars) array */
+   HYPRE_Int                   nvars;
+
+   HYPRE_Int                   nmatrices;
+   hypre_SStructPMatrix      **pmatrices;  /* matrices we are multiplying */
+   HYPRE_Int                   nterms;
+   HYPRE_Int                  *terms;
+   HYPRE_Int                  *transposes;
+
+   hypre_CommPkg              *comm_pkg;        /* pointer to agglomerated communication package */
+   hypre_CommPkg             **comm_pkg_a;      /* pointer to communication packages */
+   HYPRE_Complex             **comm_data;       /* pointer to agglomerated communication data */
+   HYPRE_Complex            ***comm_data_a;     /* pointer to communication data */
+   HYPRE_Int                   num_comm_pkgs;   /* number of comm. packages to agglomerate */
+   HYPRE_Int                   num_comm_blocks; /* total number of communication blocks */
+
+} hypre_SStructPMatmultData;
+
+/*--------------------------------------------------------------------------
+ * SStructMatmult data structure
+ *--------------------------------------------------------------------------*/
+
+typedef struct hypre_SStructMatmultData_struct
+{
+   hypre_SStructPMatmultData  **pmmdata;   /* pointer to nparts array */
+   HYPRE_Int                    nparts;
+
+   HYPRE_Int                    nmatrices;
+   hypre_SStructMatrix        **matrices;  /* matrices we are multiplying */
+   HYPRE_Int                    nterms;
+   HYPRE_Int                   *terms;
+   HYPRE_Int                   *transposes;
+
+   hypre_CommPkg               *comm_pkg;        /* pointer to agglomerated communication package */
+   hypre_CommPkg              **comm_pkg_a;      /* pointer to communication packages */
+   HYPRE_Complex              **comm_data;       /* pointer to agglomerated communication data */
+   HYPRE_Complex             ***comm_data_a;     /* pointer to communication data */
+   HYPRE_Int                    num_comm_pkgs;   /* number of comm. packages to agglomerate */
+   HYPRE_Int                    num_comm_blocks; /* total number of communication blocks */
+
+} hypre_SStructMatmultData;
+
+#endif
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
 /* HYPRE_sstruct_graph.c */
 HYPRE_Int HYPRE_SStructGraphCreate ( MPI_Comm comm, HYPRE_SStructGrid grid,
                                      HYPRE_SStructGraph *graph_ptr );
@@ -1079,6 +1144,8 @@ HYPRE_Int hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix, hypre
                                             HYPRE_Int action );
 HYPRE_Int hypre_SStructPMatrixAccumulate ( hypre_SStructPMatrix *pmatrix );
 HYPRE_Int hypre_SStructPMatrixAssemble ( hypre_SStructPMatrix *pmatrix );
+HYPRE_Int hypre_SStructPMatrixSetTranspose( hypre_SStructPMatrix *pmatrix, HYPRE_Int transpose,
+                                            HYPRE_Int *resize );
 HYPRE_Int hypre_SStructPMatrixSetSymmetric ( hypre_SStructPMatrix *pmatrix, HYPRE_Int var,
                                              HYPRE_Int to_var, HYPRE_Int symmetric );
 HYPRE_Int hypre_SStructPMatrixSetCEntries( hypre_SStructPMatrix *pmatrix, HYPRE_Int var,
@@ -1151,8 +1218,30 @@ HYPRE_Int hypre_SStructMatvec ( HYPRE_Complex alpha, hypre_SStructMatrix *A, hyp
                                 HYPRE_Complex beta, hypre_SStructVector *y );
 
 /* sstruct_matmult.c */
+HYPRE_Int hypre_SStructPMatmultCreate(HYPRE_Int nmatrices_input,
+                                      hypre_SStructPMatrix **pmatrices_input, HYPRE_Int nterms,
+                                      HYPRE_Int *terms_input, HYPRE_Int *trans_input,
+                                      hypre_SStructPMatmultData **pmmdata_ptr);
+HYPRE_Int hypre_SStructPMatmultDestroy( hypre_SStructPMatmultData *pmmdata );
+HYPRE_Int hypre_SStructPMatmultSetup( hypre_SStructPMatmultData *pmmdata,
+                                      hypre_SStructPMatrix **pM_ptr );
+HYPRE_Int hypre_SStructPMatmultCommunicate( hypre_SStructPMatmultData *pmmdata );
+HYPRE_Int hypre_SStructPMatmultCompute( hypre_SStructPMatmultData *pmmdata,
+                                        hypre_SStructPMatrix *pM );
+HYPRE_Int hypre_SStructPMatmult(HYPRE_Int nmatrices, hypre_SStructPMatrix **matrices,
+                                HYPRE_Int nterms, HYPRE_Int *terms, HYPRE_Int *trans,
+                                hypre_SStructPMatrix **M_ptr );
+HYPRE_Int hypre_SStructPMatmat( hypre_SStructPMatrix *A, hypre_SStructPMatrix *B,
+                                hypre_SStructPMatrix **M_ptr );
+HYPRE_Int hypre_SStructPMatrixPtAP( hypre_SStructPMatrix *A, hypre_SStructPMatrix *P,
+                                    hypre_SStructPMatrix **M_ptr );
+HYPRE_Int hypre_SStructPMatrixRAP( hypre_SStructPMatrix *R, hypre_SStructPMatrix *A,
+                                   hypre_SStructPMatrix *P, hypre_SStructPMatrix **M_ptr );
+HYPRE_Int hypre_SStructPMatrixRTtAP( hypre_SStructPMatrix *RT, hypre_SStructPMatrix *A,
+                                     hypre_SStructPMatrix *P, hypre_SStructPMatrix **M_ptr );
 HYPRE_Int hypre_SStructMatmult ( HYPRE_Int nmatrices, hypre_SStructMatrix **matrices,
-                                 HYPRE_Int nterms, HYPRE_Int *terms, HYPRE_Int *trans, hypre_SStructMatrix **M_ptr );
+                                 HYPRE_Int nterms, HYPRE_Int *terms, HYPRE_Int *trans,
+                                 hypre_SStructMatrix **M_ptr );
 HYPRE_Int hypre_SStructMatmat ( hypre_SStructMatrix *A, hypre_SStructMatrix *B,
                                 hypre_SStructMatrix **M_ptr );
 HYPRE_Int hypre_SStructMatrixPtAP ( hypre_SStructMatrix *A, hypre_SStructMatrix *P,

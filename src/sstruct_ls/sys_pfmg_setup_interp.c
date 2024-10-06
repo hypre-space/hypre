@@ -50,7 +50,7 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
 
    /* Set up the P matrix */
    hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A),
-                              hypre_SStructPMatrixGrid(A), P_stencils, &P);
+                              hypre_SStructPMatrixPGrid(A), P_stencils, &P);
    hypre_SStructPMatrixSetDomainStride(P, stride);
 
    hypre_StructMatrixDestroy(sP);

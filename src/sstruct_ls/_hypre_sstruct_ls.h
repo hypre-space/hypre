@@ -851,14 +851,17 @@ HYPRE_Int hypre_SysPFMGRelaxSetTempVec ( void *sys_pfmg_relax_vdata, hypre_SStru
 /* sys_pfmg_setup.c */
 HYPRE_Int hypre_SysPFMGSetup ( void *sys_pfmg_vdata, hypre_SStructMatrix *A_in,
                                hypre_SStructVector *b_in, hypre_SStructVector *x_in );
+HYPRE_Int hypre_SysPFMGZeroDiagonal( hypre_SStructPMatrix *A );
+#if 0
 HYPRE_Int hypre_SysStructCoarsen ( hypre_SStructPGrid *fgrid, hypre_Index index, hypre_Index stride,
                                    HYPRE_Int prune, hypre_SStructPGrid **cgrid_ptr );
+#endif
 
 /* sys_pfmg_setup_interp.c */
-hypre_SStructPMatrix *hypre_SysPFMGCreateInterpOp ( hypre_SStructPMatrix *A,
-                                                    hypre_SStructPGrid *cgrid, HYPRE_Int cdir );
-HYPRE_Int hypre_SysPFMGSetupInterpOp ( hypre_SStructPMatrix *A, HYPRE_Int cdir, hypre_Index findex,
-                                       hypre_Index stride, hypre_SStructPMatrix *P );
+hypre_SStructPMatrix *hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A, HYPRE_Int cdir,
+                                                   hypre_Index stride );
+HYPRE_Int hypre_SysPFMGSetupInterpOp( hypre_SStructPMatrix *P, hypre_SStructPMatrix *A,
+                                      HYPRE_Int cdir );
 
 /* sys_pfmg_setup_rap.c */
 hypre_SStructPMatrix *hypre_SysPFMGCreateRAPOp ( hypre_SStructPMatrix *R, hypre_SStructPMatrix *A,

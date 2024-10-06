@@ -73,7 +73,7 @@ hypre_SStructInnerProd( hypre_SStructVector *x,
 {
    HYPRE_Int    nparts = hypre_SStructVectorNParts(x);
    HYPRE_Real   local_result;
-   HYPRE_Real   result;
+   HYPRE_Real   result = 0.0;
    HYPRE_Real   presult;
    HYPRE_Int    part;
 

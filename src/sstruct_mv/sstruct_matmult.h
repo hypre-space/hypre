@@ -28,6 +28,14 @@ typedef struct hypre_SStructPMatmultData_struct
    HYPRE_Int                   nterms;
    HYPRE_Int                  *terms;
    HYPRE_Int                  *transposes;
+
+   hypre_CommPkg              *comm_pkg;        /* pointer to agglomerated communication package */
+   hypre_CommPkg             **comm_pkg_a;      /* pointer to communication packages */
+   HYPRE_Complex             **comm_data;       /* pointer to agglomerated communication data */
+   HYPRE_Complex            ***comm_data_a;     /* pointer to communication data */
+   HYPRE_Int                   num_comm_pkgs;   /* number of comm. packages to agglomerate */
+   HYPRE_Int                   num_comm_blocks; /* total number of communication blocks */
+
 } hypre_SStructPMatmultData;
 
 /*--------------------------------------------------------------------------
@@ -51,6 +59,7 @@ typedef struct hypre_SStructMatmultData_struct
    HYPRE_Complex             ***comm_data_a;     /* pointer to communication data */
    HYPRE_Int                    num_comm_pkgs;   /* number of comm. packages to agglomerate */
    HYPRE_Int                    num_comm_blocks; /* total number of communication blocks */
+
 } hypre_SStructMatmultData;
 
 #endif

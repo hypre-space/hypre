@@ -72,18 +72,14 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
 
    hypre_SStructPGrid    *grid;
    hypre_StructGrid      *sgrid;
-   HYPRE_Int              dim;
-   HYPRE_Int              full_periodic;
+   HYPRE_Int              resize;
 
    hypre_Box             *cbox;
 
    HYPRE_Real            *relax_weights;
-   HYPRE_Real             alpha, beta;
    HYPRE_Int              dxyz_flag;
-   HYPRE_Real             min_dxyz;
-   HYPRE_Int              cdir, periodic, cmaxsize;
-   HYPRE_Int              d, l;
-   HYPRE_Int              i;
+   HYPRE_Int              cdir, cmaxsize;
+   HYPRE_Int              d, l, i;
    HYPRE_Real             var_dxyz[3];
    HYPRE_Int              nvars;
 
@@ -155,7 +151,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    r_l  = tx_l;
    e_l  = tx_l;
 
-   hypre_SStructPGridRef(grid, &grid_l[0]);
+//   hypre_SStructPGridRef(grid, &grid_l[0]);
    hypre_SStructPMatrixRef(A, &A_l[0]);
    hypre_SStructPVectorRef(b, &b_l[0]);
    hypre_SStructPVectorRef(x, &x_l[0]);
@@ -180,7 +176,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
          RT_l[l] = hypre_SysPFMGCreateRestrictOp(A_l[l], cdir, stride);
       }
 #endif
-      HYPRE_SStructPMatrixSetTranspose(RT_l[l], 1);
+      hypre_SStructPMatrixSetTranspose(RT_l[l], 1, &resize);
       hypre_SStructPMatrixInitialize(P_l[l]);
       hypre_SysPFMGSetupInterpOp(P_l[l], A_l[l], cdir);
 #if 0 /* TODO: Allow RT != P */
@@ -200,7 +196,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       {
          hypre_SStructPMatrixPtAP(A_l[l], P_l[l], &A_l[l + 1]);
       }
-      hypre_SStructPGridRef(hypre_SStructPMatrixPGrid(A_l[l + 1]), &grid_l[l + 1]);
+//      hypre_SStructPGridRef(hypre_SStructPMatrixPGrid(A_l[l + 1]), &grid_l[l + 1]);
 
       hypre_SStructPVectorCreate(comm, grid_l[l + 1], &b_l[l + 1]);
       hypre_SStructPVectorInitialize(b_l[l + 1]);
@@ -365,6 +361,38 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    hypre_SStructPVectorDestroy(b);
 
    return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Returns 1 if there is a zero on the diagonal, otherwise returns 0.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SysPFMGZeroDiagonal( hypre_SStructPMatrix *A )
+{
+   HYPRE_Int              zero_diag = 0;
+   HYPRE_Int              nvars     = hypre_SStructPMatrixNVars(A);
+   hypre_StructMatrix    *sA;
+   HYPRE_Int              vi;
+
+   for (vi = 0; vi < nvars; vi++)
+   {
+      sA = hypre_SStructPMatrixSMatrix(A, vi, vi);
+      if (sA != NULL)
+      {
+         zero_diag += hypre_PFMGZeroDiagonal(sA);
+      }
+      else
+      {
+         zero_diag += 1;
+      }
+   }
+   if (zero_diag > 0)
+   {
+      zero_diag = 1;
+   }
+
+   return zero_diag;
 }
 
 #if 0  // RDF: Should be able to delete this

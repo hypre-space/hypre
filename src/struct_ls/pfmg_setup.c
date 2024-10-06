@@ -737,8 +737,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * Returns 1 if there is a diagonal coefficient that is zero,
- * otherwise returns 0.
+ * Returns 1 if there is a zero on the diagonal, otherwise returns 0.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
