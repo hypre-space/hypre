@@ -1241,7 +1241,7 @@ hypre_CommPkgAgglomDestroy( HYPRE_Int         num_comm_pkgs,
 
    if (num_comm_pkgs > 0)
    {
-      if (!comm_pkg_a)
+      if (comm_pkg_a)
       {
          for (i = 0; i < num_comm_pkgs; i++)
          {
@@ -1249,7 +1249,7 @@ hypre_CommPkgAgglomDestroy( HYPRE_Int         num_comm_pkgs,
          }
          hypre_TFree(comm_pkg_a, HYPRE_MEMORY_HOST);
       }
-      if (!comm_data_a)
+      if (comm_data_a)
       {
          for (i = 0; i < num_comm_pkgs; i++)
          {

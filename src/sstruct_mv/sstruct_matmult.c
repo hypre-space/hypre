@@ -671,7 +671,6 @@ hypre_SStructMatmultSetup( hypre_SStructMatmultData   *mmdata,
    HYPRE_Int                   np, num_comm_pkgs, num_comm_blocks;
    hypre_CommPkg             **comm_pkg_a;
    HYPRE_Complex            ***comm_data_a;
-   HYPRE_Complex             **comm_data;
 
    /* Local variables */
    MPI_Comm                    comm;
@@ -803,10 +802,8 @@ hypre_SStructMatmultSetup( hypre_SStructMatmultData   *mmdata,
    /* Allocate communication packages and data */
    comm_pkg_a  = hypre_TAlloc(hypre_CommPkg *, num_comm_pkgs, HYPRE_MEMORY_HOST);
    comm_data_a = hypre_TAlloc(HYPRE_Complex **, num_comm_pkgs, HYPRE_MEMORY_HOST);
-   comm_data   = hypre_TAlloc(HYPRE_Complex *, num_comm_blocks, HYPRE_MEMORY_HOST);
    (mmdata -> comm_pkg_a)  = comm_pkg_a;
    (mmdata -> comm_data_a) = comm_data_a;
-   (mmdata -> comm_data)   = comm_data;
 
    /* Update pointers to communication packages and data */
    num_comm_pkgs = num_comm_blocks = 0;

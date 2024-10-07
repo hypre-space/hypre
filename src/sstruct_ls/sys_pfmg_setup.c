@@ -10,12 +10,6 @@
 
 #define DEBUG 0
 
-#define hypre_PFMGSetCIndex(cdir, cindex)       \
-   {                                            \
-      hypre_SetIndex3(cindex, 0, 0, 0);          \
-      hypre_IndexD(cindex, cdir) = 0;           \
-   }
-
 #define hypre_PFMGSetStride(cdir, stride)       \
    {                                            \
       hypre_SetIndex3(stride, 1, 1, 1);          \
@@ -46,7 +40,6 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    HYPRE_Int               max_levels;
    HYPRE_Int               num_levels;
 
-   hypre_Index             cindex;
    hypre_Index             stride;
    hypre_Index             periodic;
 
@@ -164,7 +157,6 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    {
       cdir = cdir_l[l];
 
-      hypre_PFMGSetCIndex(cdir, cindex);
       hypre_PFMGSetStride(cdir, stride);
 
       /* set up interpolation and restriction operators */
@@ -234,7 +226,6 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    {
       cdir = cdir_l[l];
 
-      hypre_PFMGSetCIndex(cdir, cindex);
       hypre_PFMGSetStride(cdir, stride);
 
       /* set up the interpolation operator */
