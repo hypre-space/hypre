@@ -329,6 +329,14 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
          hypre_MGRColLumpedRestrict(A, A_FF, A_CF, CF_marker, &W, &R);
       }
    }
+   else if (restrict_type == 8)
+   {
+      /* Build strength matrix */
+      hypre_BoomerAMGCreateSDualThresholdHost(A, strong_threshold, 2, 1, NULL, &ST);
+      /* Classical modified interpolation */
+      hypre_BoomerAMGBuildInterp(A, CF_marker_data, ST, num_cpts_global, 1, NULL, 0,
+                                 trunc_factor, max_elmts, &RT);
+   }
    else
    {
       /* Build new strength matrix */

@@ -260,7 +260,8 @@ hypre_MGRDestroy( void *data )
             hypre_ParCSRMatrixDestroy((mgr_data -> R_array)[i - 1]);
          }
 
-         if ((mgr_data -> RT_array)[i - 1])
+         if (((mgr_data -> restrict_type)[i-1] != 999) && (mgr_data -> RT_array)[i - 1])
+         //if ((mgr_data -> RT_array)[i - 1])
          {
             hypre_ParCSRMatrixDestroy((mgr_data -> RT_array)[i - 1]);
          }

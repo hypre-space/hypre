@@ -1151,11 +1151,17 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
          restrict_type[lev] = 2;
       }      
+      if (restrict_type[lev] == 999)
+      {
+         RT = P;
+      }
+      else
+      {      
       hypre_MGRBuildRestrict(A_array[lev], A_FF, A_FC, A_CF, CF_marker_array[lev],
                              coarse_pnts_global, trunc_factor, P_max_elmts[lev],
                              strong_threshold, max_row_sum, block_jacobi_bsize,
                              restrict_type[lev], &Wr, &R, &RT);      
-      
+      }
       R_array[lev]  = R;
       RT_array[lev] = RT;
 
