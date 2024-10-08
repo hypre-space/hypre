@@ -83,7 +83,6 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
    (sys_pfmg_data -> num_iterations) = 0;
 
    /* if max_iter is zero, return */
-   /* RDF: Why should we support max_iter = 0? I think we should throw an error. */
    if (max_iter == 0)
    {
       /* if using a zero initial guess, return zero */
@@ -125,11 +124,10 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
             rel_norms[0] = 0.0;
          }
 
-         hypre_EndTiming(ssamg_data -> time_index);
+         hypre_EndTiming(sys_pfmg_data -> time_index);
          HYPRE_ANNOTATE_FUNC_END;
          return hypre_error_flag;
       }
-
    }
 
    /* Print initial solution and residual */
@@ -200,11 +198,11 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
          hypre_SStructPMatvecCompute(restrict_data_l[0], 1.0, RT_l[0], r_l[1], 0.0,
                                      b_l[1], b_l[1]);
 #if DEBUG
-         hypre_sprintf(filename, "zout_xdown.%02d", 0);
+         hypre_sprintf(filename, "syspfmg_xdown.%02d", 0);
          hypre_SStructPVectorPrint(filename, x_l[0], 0);
-         hypre_sprintf(filename, "zout_rdown.%02d", 0);
+         hypre_sprintf(filename, "syspfmg_rdown.%02d", 0);
          hypre_SStructPVectorPrint(filename, r_l[0], 0);
-         hypre_sprintf(filename, "zout_b.%02d", 1);
+         hypre_sprintf(filename, "syspfmg_b.%02d", 1);
          hypre_SStructPVectorPrint(filename, b_l[1], 0);
 #endif
          HYPRE_ANNOTATE_MGLEVEL_END(0);
@@ -236,11 +234,11 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
             hypre_SStructPMatvecCompute(restrict_data_l[l], 1.0, RT_l[l], r_l[l], 0.0,
                                         b_l[l + 1], b_l[l + 1]);
 #if DEBUG
-            hypre_sprintf(filename, "zout_xdown.%02d", l);
+            hypre_sprintf(filename, "syspfmg_xdown.%02d", l);
             hypre_SStructPVectorPrint(filename, x_l[l], 0);
-            hypre_sprintf(filename, "zout_rdown.%02d", l);
+            hypre_sprintf(filename, "syspfmg_rdown.%02d", l);
             hypre_SStructPVectorPrint(filename, r_l[l], 0);
-            hypre_sprintf(filename, "zout_b.%02d", l + 1);
+            hypre_sprintf(filename, "syspfmg_b.%02d", l + 1);
             hypre_SStructPVectorPrint(filename, b_l[l + 1], 0);
 #endif
             HYPRE_ANNOTATE_MGLEVEL_END(l);
@@ -252,10 +250,17 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
 
          HYPRE_ANNOTATE_MGLEVEL_BEGIN(num_levels - 1);
 
-         hypre_SysPFMGRelaxSetZeroGuess(relax_data_l[l], 1);
-         hypre_SysPFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+         if (active_l[l])
+         {
+            hypre_SysPFMGRelaxSetZeroGuess(relax_data_l[l], 1);
+            hypre_SysPFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+         }
+         else
+         {
+            hypre_SStructPVectorSetConstantValues(x_l[l], 0.0);
+         }
 #if DEBUG
-         hypre_sprintf(filename, "zout_xbottom.%02d", l);
+         hypre_sprintf(filename, "syspfmg_xbottom.%02d", l);
          hypre_SStructPVectorPrint(filename, x_l[l], 0);
 #endif
 
@@ -271,9 +276,9 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
             hypre_SStructPAxpy(1.0, e_l[l], x_l[l]);
             HYPRE_ANNOTATE_MGLEVEL_END(l + 1);
 #if DEBUG
-            hypre_sprintf(filename, "zout_eup.%02d", l);
+            hypre_sprintf(filename, "syspfmg_eup.%02d", l);
             hypre_SStructPVectorPrint(filename, e_l[l], 0);
-            hypre_sprintf(filename, "zout_xup.%02d", l);
+            hypre_sprintf(filename, "syspfmg_xup.%02d", l);
             hypre_SStructPVectorPrint(filename, x_l[l], 0);
 #endif
             HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
@@ -293,9 +298,9 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
          hypre_SStructPAxpy(1.0, e_l[0], x_l[0]);
          HYPRE_ANNOTATE_MGLEVEL_END(1);
 #if DEBUG
-         hypre_sprintf(filename, "zout_eup.%02d", 0);
+         hypre_sprintf(filename, "syspfmg_eup.%02d", 0);
          hypre_SStructPVectorPrint(filename, e_l[0], 0);
-         hypre_sprintf(filename, "zout_xup.%02d", 0);
+         hypre_sprintf(filename, "syspfmg_xup.%02d", 0);
          hypre_SStructPVectorPrint(filename, x_l[0], 0);
 #endif
          HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
@@ -325,6 +330,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       (sys_pfmg_data -> num_iterations) = (i + 1);
       HYPRE_ANNOTATE_MGLEVEL_END(0);
 
+#if 1
       /* RDF: In PFMG, we don't do any of this */
       if ((logging > 0) || (print_level > 1))
       {
@@ -369,6 +375,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
             }
          }
       }
+#endif
    }
 
    /*-----------------------------------------------------

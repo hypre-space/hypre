@@ -24,8 +24,9 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
    HYPRE_Int              stencil_size;
    hypre_Index           *stencil_shape;
 
-   HYPRE_Int              nvars, ndim, i, s;
+   HYPRE_Int              nvars, ndim, i, s, vi;
    hypre_SStructStencil **P_stencils;
+   HYPRE_Int              centries[1] = {0};
 
    /* Create struct interpolation matrix sP first */
    sA = hypre_SStructPMatrixSMatrix(A, 0, 0);
@@ -52,6 +53,12 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
    hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A),
                               hypre_SStructPMatrixPGrid(A), P_stencils, &P);
    hypre_SStructPMatrixSetDomainStride(P, stride);
+
+   /* Make the diagonal constant */
+   for (vi = 0; vi < nvars; vi++)
+   {
+      hypre_StructMatrixSetConstantEntries(hypre_SStructPMatrixSMatrix(P, vi, vi), 1, centries);
+   }
 
    hypre_StructMatrixDestroy(sP);
 
