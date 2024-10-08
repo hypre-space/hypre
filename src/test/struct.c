@@ -3065,7 +3065,7 @@ SetValuesMatrix( HYPRE_StructMatrix A,
                  HYPRE_Real         conz )
 {
 #if defined(HYPRE_USING_GPU)
-  HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(A);
+   HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(A);
 #endif
 
    HYPRE_Int            *stencil_indices;
@@ -3232,8 +3232,8 @@ SetValuesMatrix( HYPRE_StructMatrix A,
          }
 
 #if defined(HYPRE_USING_GPU)
-            hypre_TMemcpy(cvalues, cvalues_h, HYPRE_Real, stencil_size,
-                          memory_location, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(cvalues, cvalues_h, HYPRE_Real, stencil_size,
+                       memory_location, HYPRE_MEMORY_HOST);
 #endif
 
          if (hypre_BoxArraySize(boxes) > 0)
@@ -3265,8 +3265,8 @@ SetValuesMatrix( HYPRE_StructMatrix A,
          }
 
 #if defined(HYPRE_USING_GPU)
-            hypre_TMemcpy(cvalues, cvalues_h, HYPRE_Real, stencil_size - 1,
-                          memory_location, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(cvalues, cvalues_h, HYPRE_Real, stencil_size - 1,
+                       memory_location, HYPRE_MEMORY_HOST);
 #endif
 
          if (hypre_BoxArraySize(boxes) > 0)

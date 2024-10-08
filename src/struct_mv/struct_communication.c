@@ -911,6 +911,8 @@ hypre_CommPkgSetPrefixSizes( hypre_CommPkg  *comm_pkg )
  * first_comm arguments are all 1.  The ordering of the agglomerated blocks
  * starts with the blocks in comm_pkg[0] and continues with comm_pkg[1], etc.
  * The original comm_pkgs are left intact so that they can be used separately.
+ *
+ * See companion functions CommPkgAgglomData() and CommPkgAgglomDestroy().
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1184,6 +1186,87 @@ hypre_CommPkgAgglomerate( HYPRE_Int        num_comm_pkgs,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * Companion function to CommPkgAgglomerate() for agglomerating data pointers
+ * before communication.  For any given agglomerated CommPkg, this function can
+ * be used multiple times to agglomerate new data pointers.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CommPkgAgglomData( HYPRE_Int         num_comm_pkgs,
+                         hypre_CommPkg   **comm_pkg_a,
+                         HYPRE_Complex  ***comm_data_a,
+                         hypre_CommPkg    *comm_pkg,
+                         HYPRE_Complex  ***agg_comm_data_ptr )
+{
+   HYPRE_Complex  **agg_comm_data = NULL;
+   HYPRE_Int        i, j, nb;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   if (num_comm_pkgs > 0)
+   {
+      agg_comm_data = hypre_TAlloc(HYPRE_Complex *, hypre_CommPkgNumBlocks(comm_pkg),
+                                   HYPRE_MEMORY_HOST);
+      nb = 0;
+      for (i = 0; i < num_comm_pkgs; i++)
+      {
+         for (j = 0; j < hypre_CommPkgNumBlocks(comm_pkg_a[i]); j++)
+         {
+            agg_comm_data[nb++] = comm_data_a[i][j];
+         }
+      }
+   }
+
+   *agg_comm_data_ptr = agg_comm_data;
+
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Free up CommPkg and/or CommPkg data arrays used in Agglomerate() function.
+ * Use NULL arguments to control which arrays to free.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CommPkgAgglomDestroy( HYPRE_Int         num_comm_pkgs,
+                            hypre_CommPkg   **comm_pkg_a,
+                            HYPRE_Complex  ***comm_data_a )
+{
+   HYPRE_Int  i;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   if (num_comm_pkgs > 0)
+   {
+      if (comm_pkg_a)
+      {
+         for (i = 0; i < num_comm_pkgs; i++)
+         {
+            hypre_CommPkgDestroy(comm_pkg_a[i]);
+         }
+         hypre_TFree(comm_pkg_a, HYPRE_MEMORY_HOST);
+      }
+      if (comm_data_a)
+      {
+         for (i = 0; i < num_comm_pkgs; i++)
+         {
+            hypre_TFree(comm_data_a[i], HYPRE_MEMORY_HOST);
+         }
+         hypre_TFree(comm_data_a, HYPRE_MEMORY_HOST);
+      }
+   }
+
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Complex *
 hypre_StructCommunicationGetBuffer(HYPRE_MemoryLocation memory_location,
                                    HYPRE_Int            size)
@@ -1212,6 +1295,9 @@ hypre_StructCommunicationGetBuffer(HYPRE_MemoryLocation memory_location,
 
    return ptr;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_StructCommunicationReleaseBuffer(HYPRE_Complex       *buffer,

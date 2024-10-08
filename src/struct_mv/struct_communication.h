@@ -19,6 +19,7 @@ typedef struct hypre_CommStencil_struct
    hypre_Index stride;
    HYPRE_Int   mgrow[HYPRE_MAXDIM]; /* amount to grow in the minus direction */
    HYPRE_Int   pgrow[HYPRE_MAXDIM]; /* amount to grow in the plus direction */
+
 } hypre_CommStencil;
 
 /*--------------------------------------------------------------------------
@@ -63,6 +64,7 @@ typedef struct hypre_CommEntry_struct
    HYPRE_Int   length_array[HYPRE_MAXDIM + 1];
    HYPRE_Int   stride_array[HYPRE_MAXDIM + 1];
    HYPRE_Int  *imap;                         /* index map for last dim values */
+
 } hypre_CommEntry;
 
 /*--------------------------------------------------------------------------
@@ -82,6 +84,7 @@ typedef struct hypre_CommBlock_struct
    HYPRE_Int        *rem_boxnums; /* entry remote box numbers */
    hypre_Box        *rem_boxes;   /* entry remote boxes */
    HYPRE_Int        *rem_orders;  /* length = (num_entries*num_values) */
+
 } hypre_CommBlock;
 
 /*--------------------------------------------------------------------------
@@ -95,6 +98,7 @@ typedef struct hypre_CommType_struct
    HYPRE_Int         ndim;
    HYPRE_Int         num_blocks;
    hypre_CommBlock  *blocks;
+
 } hypre_CommType;
 
 /*--------------------------------------------------------------------------
@@ -132,6 +136,7 @@ typedef struct hypre_CommPkg_struct
    hypre_Index          identity_coord;
    hypre_Index          identity_dir;
    HYPRE_Int           *identity_order;
+
 } hypre_CommPkg;
 
 /*--------------------------------------------------------------------------
@@ -153,6 +158,7 @@ typedef struct hypre_CommHandle_struct
    HYPRE_Complex     **recv_buffers_data;
 
    HYPRE_Int           action; /* set = 0, add = 1 */
+
 } hypre_CommHandle;
 
 /*--------------------------------------------------------------------------

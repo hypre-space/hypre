@@ -138,10 +138,11 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       diag_a = hypre_CSRMatrixData(diag);
       offd_a = hypre_CSRMatrixData(offd);
 
-      /* WM: todo - can have the case where all rows have nonzero, which causes issues below... best way to fix this? */ 
+      /* WM: todo - can have the case where all rows have nonzero, which causes issues below... best way to fix this? */
       if (!hypre_CSRMatrixRownnz(diag) && hypre_CSRMatrixNumRownnz(diag))
       {
-         hypre_CSRMatrixRownnz(diag) = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(diag), HYPRE_MEMORY_HOST);
+         hypre_CSRMatrixRownnz(diag) = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(diag),
+                                                     HYPRE_MEMORY_HOST);
          for (i = 0; i < hypre_CSRMatrixNumRows(diag); i++)
          {
             hypre_CSRMatrixRownnz(diag)[i] = i;
@@ -149,7 +150,8 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
       }
       if (!hypre_CSRMatrixRownnz(offd) && hypre_CSRMatrixNumRownnz(offd))
       {
-         hypre_CSRMatrixRownnz(offd) = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(offd), HYPRE_MEMORY_HOST);
+         hypre_CSRMatrixRownnz(offd) = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumRows(offd),
+                                                     HYPRE_MEMORY_HOST);
          for (i = 0; i < hypre_CSRMatrixNumRows(offd); i++)
          {
             hypre_CSRMatrixRownnz(offd)[i] = i;

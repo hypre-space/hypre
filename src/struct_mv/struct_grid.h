@@ -38,9 +38,7 @@ typedef struct hypre_StructGrid_struct
 
    hypre_Index         *pshifts;      /* shifts of periodicity */
 
-
    HYPRE_Int            ref_count;
-
 
    HYPRE_Int            ghlocal_size; /* Number of vars in box including ghosts */
    HYPRE_Int            num_ghost[2 * HYPRE_MAXDIM]; /* ghost layer size */

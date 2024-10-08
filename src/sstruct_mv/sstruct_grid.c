@@ -105,6 +105,7 @@ hypre_SStructPGridCreate( MPI_Comm             comm,
 
    hypre_SStructPGridLocalSize(pgrid)  = 0;
    hypre_SStructPGridGlobalSize(pgrid) = 0;
+   hypre_SStructPGridRefCount(pgrid)   = 1;
 
    /* GEC0902 ghost addition to the grid */
    hypre_SStructPGridGhlocalSize(pgrid) = 0;
@@ -124,6 +125,19 @@ hypre_SStructPGridCreate( MPI_Comm             comm,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructPGridRef( hypre_SStructPGrid  *pgrid,
+                       hypre_SStructPGrid **pgrid_ref)
+{
+   hypre_SStructPGridRefCount(pgrid) ++;
+   *pgrid_ref = pgrid;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_SStructPGridDestroy( hypre_SStructPGrid *pgrid )
 {
    hypre_StructGrid      **sgrids;
@@ -133,19 +147,23 @@ hypre_SStructPGridDestroy( hypre_SStructPGrid *pgrid )
 
    if (pgrid)
    {
-      sgrids     = hypre_SStructPGridSGrids(pgrid);
-      iboxarrays = hypre_SStructPGridIBoxArrays(pgrid);
-      pbnd_boxaa = hypre_SStructPGridPBndBoxArrayArrays(pgrid);
-      hypre_TFree(hypre_SStructPGridVarTypes(pgrid), HYPRE_MEMORY_HOST);
-      for (t = 0; t < 8; t++)
+      hypre_SStructPGridRefCount(pgrid) --;
+      if (hypre_SStructPGridRefCount(pgrid) == 0)
       {
-         HYPRE_StructGridDestroy(sgrids[t]);
-         hypre_BoxArrayDestroy(iboxarrays[t]);
-         hypre_BoxArrayArrayDestroy(pbnd_boxaa[t]);
+         sgrids     = hypre_SStructPGridSGrids(pgrid);
+         iboxarrays = hypre_SStructPGridIBoxArrays(pgrid);
+         pbnd_boxaa = hypre_SStructPGridPBndBoxArrayArrays(pgrid);
+         hypre_TFree(hypre_SStructPGridVarTypes(pgrid), HYPRE_MEMORY_HOST);
+         for (t = 0; t < 8; t++)
+         {
+            HYPRE_StructGridDestroy(sgrids[t]);
+            hypre_BoxArrayDestroy(iboxarrays[t]);
+            hypre_BoxArrayArrayDestroy(pbnd_boxaa[t]);
+         }
+         hypre_BoxArrayDestroy(hypre_SStructPGridPNeighbors(pgrid));
+         hypre_TFree(hypre_SStructPGridPNborOffsets(pgrid), HYPRE_MEMORY_HOST);
+         hypre_TFree(pgrid, HYPRE_MEMORY_HOST);
       }
-      hypre_BoxArrayDestroy(hypre_SStructPGridPNeighbors(pgrid));
-      hypre_TFree(hypre_SStructPGridPNborOffsets(pgrid), HYPRE_MEMORY_HOST);
-      hypre_TFree(pgrid, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
@@ -391,6 +409,7 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
    /*-------------------------------------------------------------
     * compute iboxarrays and allocate pboxarrays
     *-------------------------------------------------------------*/
+
    for (t = 0; t < 8; t++)
    {
       sgrid = sgrids[t];

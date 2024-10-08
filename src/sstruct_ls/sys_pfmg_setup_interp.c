@@ -12,34 +12,33 @@
 
 hypre_SStructPMatrix *
 hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
-                             hypre_SStructPGrid   *cgrid,
-                             HYPRE_Int             cdir  )
+                             HYPRE_Int             cdir,
+                             hypre_Index           stride )
 {
    hypre_SStructPMatrix  *P;
 
-   hypre_Index           *stencil_shape;
+   HYPRE_Int              rap_type = 0;
+   hypre_StructMatrix    *sA;
+   hypre_StructMatrix    *sP;
+
    HYPRE_Int              stencil_size;
+   hypre_Index           *stencil_shape;
 
-   HYPRE_Int              ndim;
-
-   HYPRE_Int              nvars;
+   HYPRE_Int              nvars, ndim, i, s, vi;
    hypre_SStructStencil **P_stencils;
+   HYPRE_Int              centries[1] = {0};
 
-   HYPRE_Int              i, s;
+   /* Create struct interpolation matrix sP first */
+   sA = hypre_SStructPMatrixSMatrix(A, 0, 0);
+   sP = hypre_zPFMGCreateInterpOp(sA, cdir, stride, rap_type);
+   hypre_StructMatrixInitializeShell(sP);  /* Don't allocate data */
 
-   /* set up stencil_shape */
-   stencil_size = 3;
-   stencil_shape = hypre_CTAlloc(hypre_Index,  stencil_size, HYPRE_MEMORY_HOST);
-   for (i = 0; i < stencil_size; i++)
-   {
-      hypre_SetIndex(stencil_shape[i], 0);
-   }
-   hypre_IndexD(stencil_shape[1], cdir) = -1;
-   hypre_IndexD(stencil_shape[2], cdir) =  1;
+   stencil_size  = hypre_StructStencilSize(hypre_StructMatrixStencil(sP));
+   stencil_shape = hypre_StructStencilShape(hypre_StructMatrixStencil(sP));
 
-   /* set up P_stencils */
-   ndim = hypre_StructStencilNDim(hypre_SStructPMatrixSStencil(A, 0, 0));
+   /* Set up P_stencils */
    nvars = hypre_SStructPMatrixNVars(A);
+   ndim  = hypre_SStructPMatrixNDim(A);
    P_stencils = hypre_CTAlloc(hypre_SStructStencil *,  nvars, HYPRE_MEMORY_HOST);
    for (s = 0; s < nvars; s++)
    {
@@ -50,10 +49,18 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
       }
    }
 
-   /* create interpolation matrix */
-   hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A), cgrid, P_stencils, &P);
+   /* Set up the P matrix */
+   hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A),
+                              hypre_SStructPMatrixPGrid(A), P_stencils, &P);
+   hypre_SStructPMatrixSetDomainStride(P, stride);
 
-   hypre_TFree(stencil_shape, HYPRE_MEMORY_HOST);
+   /* Make the diagonal constant */
+   for (vi = 0; vi < nvars; vi++)
+   {
+      hypre_StructMatrixSetConstantEntries(hypre_SStructPMatrixSMatrix(P, vi, vi), 1, centries);
+   }
+
+   hypre_StructMatrixDestroy(sP);
 
    return P;
 }
@@ -62,23 +69,17 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SysPFMGSetupInterpOp( hypre_SStructPMatrix *A,
-                            HYPRE_Int             cdir,
-                            hypre_Index           findex,
-                            hypre_Index           stride,
-                            hypre_SStructPMatrix *P      )
+hypre_SysPFMGSetupInterpOp( hypre_SStructPMatrix *P,
+                            hypre_SStructPMatrix *A,
+                            HYPRE_Int             cdir )
 {
-   HYPRE_Int              nvars = hypre_SStructPMatrixNVars(A);
-   hypre_StructMatrix    *A_s;
-   hypre_StructMatrix    *P_s;
-   HYPRE_Int              vi;
+   HYPRE_Int  nvars = hypre_SStructPMatrixNVars(P);
+   HYPRE_Int  vi;
 
    for (vi = 0; vi < nvars; vi++)
    {
-      A_s = hypre_SStructPMatrixSMatrix(A, vi, vi);
-      P_s = hypre_SStructPMatrixSMatrix(P, vi, vi);
-      //hypre_PFMGSetupInterpOp(A_s, cdir, findex, stride, P_s, 0);
-      hypre_zPFMGSetupInterpOp(P_s, A_s, cdir);
+      hypre_zPFMGSetupInterpOp(hypre_SStructPMatrixSMatrix(P, vi, vi),
+                               hypre_SStructPMatrixSMatrix(A, vi, vi), cdir);
    }
 
    return hypre_error_flag;

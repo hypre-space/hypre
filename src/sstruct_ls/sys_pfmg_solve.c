@@ -67,6 +67,8 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
     * Refs to A,x,b (the PMatrix & PVectors within
     * the input SStructMatrix & SStructVectors)
     *-----------------------------------------------------*/
+
+   /* RDF: Why do we need the '_in' objects? */
    hypre_SStructPMatrixRef(hypre_SStructMatrixPMatrix(A_in, 0), &A);
    hypre_SStructPVectorRef(hypre_SStructVectorPVector(b_in, 0), &b);
    hypre_SStructPVectorRef(hypre_SStructVectorPVector(x_in, 0), &x);
@@ -95,15 +97,18 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       return hypre_error_flag;
    }
 
+#if 0
+   /* RDF: Not needed if max_iter > 0 */
    if (((tol > 0.) && (logging > 0)) || (print_level > 1))
    {
       /* Compute fine grid residual (r = b - Ax) */
       hypre_SStructPMatvecCompute(matvec_data_l[0], -1.0,
                                   A_l[0], x_l[0], 1.0, b_l[0], r_l[0]);
    }
+#endif
 
    /* part of convergence check */
-   if (tol > 0.)
+   if (tol > 0.0)
    {
       /* eps = (tol^2) */
       hypre_SStructPInnerProd(b_l[0], b_l[0], &b_dot_b);
@@ -112,23 +117,16 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       /* if rhs is zero, return a zero solution */
       if (!(b_dot_b > 0.0))
       {
-#if 0
          hypre_SStructPVectorSetConstantValues(x_l[0], 0.0);
-         hypre_EndTiming(ssamg_data -> time_index);
+         if (logging > 0)
+         {
+            norms[0]     = 0.0;
+            rel_norms[0] = 0.0;
+         }
+
+         hypre_EndTiming(sys_pfmg_data -> time_index);
          HYPRE_ANNOTATE_FUNC_END;
-
          return hypre_error_flag;
-#else
-         b_dot_b = 1.0;
-#endif
-      }
-
-      if (logging > 0)
-      {
-         hypre_SStructPInnerProd(r_l[0], r_l[0], &r_dot_r);
-
-         norms[0] = sqrt(r_dot_r);
-         rel_norms[0] = sqrt(r_dot_r / b_dot_b);
       }
    }
 
@@ -151,6 +149,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       /*--------------------------------------------------
        * Down cycle
        *--------------------------------------------------*/
+
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
 
       /* fine grid pre-relaxation */
@@ -161,8 +160,8 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       zero_guess = 0;
 
       /* compute fine grid residual (r = b - Ax) */
-      hypre_SStructPMatvecCompute(matvec_data_l[0], -1.0, A_l[0], x_l[0],
-                                  1.0, b_l[0], r_l[0]);
+      /* RDF: I don't think we should have a different interface for matvec as elsewhere */
+      hypre_SStructPMatvecCompute(matvec_data_l[0], -1.0, A_l[0], x_l[0], 1.0, b_l[0], r_l[0]);
 
       /* convergence check */
       if (tol > 0.0)
@@ -196,13 +195,14 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       if (num_levels > 1)
       {
          /* restrict fine grid residual */
-         hypre_SysSemiRestrict(restrict_data_l[0], RT_l[0], r_l[0], b_l[1]);
+         hypre_SStructPMatvecCompute(restrict_data_l[0], 1.0, RT_l[0], r_l[0], 0.0,
+                                     b_l[1], b_l[1]);
 #if DEBUG
-         hypre_sprintf(filename, "zout_xdown.%02d", 0);
+         hypre_sprintf(filename, "syspfmg_xdown.%02d", 0);
          hypre_SStructPVectorPrint(filename, x_l[0], 0);
-         hypre_sprintf(filename, "zout_rdown.%02d", 0);
+         hypre_sprintf(filename, "syspfmg_rdown.%02d", 0);
          hypre_SStructPVectorPrint(filename, r_l[0], 0);
-         hypre_sprintf(filename, "zout_b.%02d", 1);
+         hypre_sprintf(filename, "syspfmg_b.%02d", 1);
          hypre_SStructPVectorPrint(filename, b_l[1], 0);
 #endif
          HYPRE_ANNOTATE_MGLEVEL_END(0);
@@ -231,14 +231,14 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
             }
 
             /* restrict residual */
-            hypre_SysSemiRestrict(restrict_data_l[l],
-                                  RT_l[l], r_l[l], b_l[l + 1]);
+            hypre_SStructPMatvecCompute(restrict_data_l[l], 1.0, RT_l[l], r_l[l], 0.0,
+                                        b_l[l + 1], b_l[l + 1]);
 #if DEBUG
-            hypre_sprintf(filename, "zout_xdown.%02d", l);
+            hypre_sprintf(filename, "syspfmg_xdown.%02d", l);
             hypre_SStructPVectorPrint(filename, x_l[l], 0);
-            hypre_sprintf(filename, "zout_rdown.%02d", l);
+            hypre_sprintf(filename, "syspfmg_rdown.%02d", l);
             hypre_SStructPVectorPrint(filename, r_l[l], 0);
-            hypre_sprintf(filename, "zout_b.%02d", l + 1);
+            hypre_sprintf(filename, "syspfmg_b.%02d", l + 1);
             hypre_SStructPVectorPrint(filename, b_l[l + 1], 0);
 #endif
             HYPRE_ANNOTATE_MGLEVEL_END(l);
@@ -247,12 +247,20 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
          /*--------------------------------------------------
           * Bottom
           *--------------------------------------------------*/
+
          HYPRE_ANNOTATE_MGLEVEL_BEGIN(num_levels - 1);
 
-         hypre_SysPFMGRelaxSetZeroGuess(relax_data_l[l], 1);
-         hypre_SysPFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+         if (active_l[l])
+         {
+            hypre_SysPFMGRelaxSetZeroGuess(relax_data_l[l], 1);
+            hypre_SysPFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+         }
+         else
+         {
+            hypre_SStructPVectorSetConstantValues(x_l[l], 0.0);
+         }
 #if DEBUG
-         hypre_sprintf(filename, "zout_xbottom.%02d", l);
+         hypre_sprintf(filename, "syspfmg_xbottom.%02d", l);
          hypre_SStructPVectorPrint(filename, x_l[l], 0);
 #endif
 
@@ -263,13 +271,14 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
          for (l = (num_levels - 2); l >= 1; l--)
          {
             /* interpolate error and correct (x = x + Pe_c) */
-            hypre_SysSemiInterp(interp_data_l[l], P_l[l], x_l[l + 1], e_l[l]);
+            hypre_SStructPMatvecCompute(interp_data_l[l], 1.0, P_l[l], x_l[l + 1], 0.0,
+                                        e_l[l], e_l[l]);
             hypre_SStructPAxpy(1.0, e_l[l], x_l[l]);
             HYPRE_ANNOTATE_MGLEVEL_END(l + 1);
 #if DEBUG
-            hypre_sprintf(filename, "zout_eup.%02d", l);
+            hypre_sprintf(filename, "syspfmg_eup.%02d", l);
             hypre_SStructPVectorPrint(filename, e_l[l], 0);
-            hypre_sprintf(filename, "zout_xup.%02d", l);
+            hypre_sprintf(filename, "syspfmg_xup.%02d", l);
             hypre_SStructPVectorPrint(filename, x_l[l], 0);
 #endif
             HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
@@ -284,13 +293,14 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
          }
 
          /* interpolate error and correct on fine grid (x = x + Pe_c) */
-         hypre_SysSemiInterp(interp_data_l[0], P_l[0], x_l[1], e_l[0]);
+         hypre_SStructPMatvecCompute(interp_data_l[0], 1.0, P_l[0], x_l[1], 0.0,
+                                     e_l[0], e_l[0]);
          hypre_SStructPAxpy(1.0, e_l[0], x_l[0]);
          HYPRE_ANNOTATE_MGLEVEL_END(1);
 #if DEBUG
-         hypre_sprintf(filename, "zout_eup.%02d", 0);
+         hypre_sprintf(filename, "syspfmg_eup.%02d", 0);
          hypre_SStructPVectorPrint(filename, e_l[0], 0);
-         hypre_sprintf(filename, "zout_xup.%02d", 0);
+         hypre_sprintf(filename, "syspfmg_xup.%02d", 0);
          hypre_SStructPVectorPrint(filename, x_l[0], 0);
 #endif
          HYPRE_ANNOTATE_MGLEVEL_BEGIN(0);
@@ -304,6 +314,11 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
             hypre_SStructPInnerProd(e_l[0], e_l[0], &e_dot_e);
             hypre_SStructPInnerProd(x_l[0], x_l[0], &x_dot_x);
          }
+         else
+         {
+            e_dot_e = 0.0;
+            x_dot_x = 1.0;
+         }
       }
 
       /* fine grid post-relaxation */
@@ -312,11 +327,15 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       hypre_SysPFMGRelaxSetZeroGuess(relax_data_l[0], 0);
       hypre_SysPFMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
 
+      (sys_pfmg_data -> num_iterations) = (i + 1);
+      HYPRE_ANNOTATE_MGLEVEL_END(0);
+
+#if 1
+      /* RDF: In PFMG, we don't do any of this */
       if ((logging > 0) || (print_level > 1))
       {
          /* Recompute fine grid residual (r = b - Ax) after post-smoothing */
-         hypre_SStructPMatvecCompute(matvec_data_l[0], -1.0,
-                                     A_l[0], x_l[0], 1.0, b_l[0], r_l[0]);
+         hypre_SStructPMatvecCompute(matvec_data_l[0], -1.0, A_l[0], x_l[0], 1.0, b_l[0], r_l[0]);
 
          if (logging > 0)
          {
@@ -340,11 +359,10 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       else
       {
          /* r_l[0] is the fine grid residual computed after pre-smoothing */
+         /* RDF: This is redundant unless the next convergence check passes,
+          * which will never happen because it's already been checked above */
          hypre_SStructPInnerProd(r_l[0], r_l[0], &r_dot_r);
       }
-
-      HYPRE_ANNOTATE_MGLEVEL_END(0);
-      (sys_pfmg_data -> num_iterations) = (i + 1);
 
       /* convergence check */
       if (tol > 0.0)
@@ -357,12 +375,14 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
             }
          }
       }
+#endif
    }
 
    /*-----------------------------------------------------
     * Destroy Refs to A,x,b (the PMatrix & PVectors within
     * the input SStructMatrix & SStructVectors).
     *-----------------------------------------------------*/
+
    hypre_SStructPMatrixDestroy(A);
    hypre_SStructPVectorDestroy(x);
    hypre_SStructPVectorDestroy(b);

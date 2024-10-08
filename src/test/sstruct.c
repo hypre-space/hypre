@@ -3458,8 +3458,8 @@ main( hypre_int argc,
             /* set stencils */
             for (var = 0; var < pdata.nvars; var++)
             {
-                HYPRE_SStructGraphSetStencil(graph, part, var,
-                                             stencils[pdata.stencil_num[var]]);
+               HYPRE_SStructGraphSetStencil(graph, part, var,
+                                            stencils[pdata.stencil_num[var]]);
             }
          }
          else if (data.fem_nvars > 0)

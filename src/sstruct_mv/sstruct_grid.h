@@ -60,6 +60,8 @@ typedef struct
    HYPRE_Int               local_size;       /* Number of variables locally */
    HYPRE_BigInt            global_size;      /* Total number of variables */
 
+   HYPRE_Int               ref_count;
+
    hypre_Index             periodic;         /* Indicates if pgrid is periodic */
 
    /* GEC0902 additions for ghost expansion of boxes */
@@ -70,6 +72,7 @@ typedef struct
    /* Geometrical data */
    HYPRE_Real              coords_origin[HYPRE_MAXDIM]; /* Origin coordinates */
    hypre_Index             coords_stride;
+
 } hypre_SStructPGrid;
 
 typedef struct
@@ -93,6 +96,7 @@ typedef struct
    HYPRE_Int     type;
    HYPRE_BigInt  offset;
    HYPRE_BigInt  ghoffset;
+
 } hypre_SStructBoxManInfo;
 
 typedef struct
@@ -165,6 +169,7 @@ typedef struct hypre_SStructGrid_struct
    // TODO: deprecate these ones. SStructMatrix should hold these data instead
    HYPRE_Int               ghlocal_size;  /* GEC0902 Number of vars including ghosts */
    HYPRE_Int               ghstart_rank;  /* GEC0902 start rank including ghosts  */
+
 } hypre_SStructGrid;
 
 /*--------------------------------------------------------------------------
@@ -247,6 +252,7 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructPGridPNborOffsets(pgrid)     ((pgrid) -> pnbor_offsets)
 #define hypre_SStructPGridLocalSize(pgrid)        ((pgrid) -> local_size)
 #define hypre_SStructPGridGlobalSize(pgrid)       ((pgrid) -> global_size)
+#define hypre_SStructPGridRefCount(pgrid)         ((pgrid) -> ref_count)
 #define hypre_SStructPGridPeriodic(pgrid)         ((pgrid) -> periodic)
 #define hypre_SStructPGridGhlocalSize(pgrid)      ((pgrid) -> ghlocal_size)
 

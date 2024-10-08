@@ -45,12 +45,12 @@ typedef struct hypre_SStructPMatrix_struct
 
 } hypre_SStructPMatrix;
 
-
 /*--------------------------------------------------------------------------
  * hypre_SStructMatrix:
  *
  * - Storage of parts id dictated by the coarse grid
  *--------------------------------------------------------------------------*/
+
 typedef struct hypre_SStructMatrix_struct
 {
    MPI_Comm                comm;
@@ -91,6 +91,7 @@ typedef struct hypre_SStructMatrix_struct
 
    /* GEC0902   adding an object type to the matrix  */
    HYPRE_Int               object_type;
+
 } hypre_SStructMatrix;
 
 /*--------------------------------------------------------------------------
