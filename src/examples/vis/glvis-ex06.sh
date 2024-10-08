@@ -5,9 +5,10 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 
-ex=ex5
+ex=ex06
 dir=`basename \`pwd\``
 keys=Aaamc
+glvis=${1:-"glvis"}
 
 if [ "$dir" = "vis" ]; then
    dir=.
@@ -19,17 +20,12 @@ else
    sol=vis/$ex.sol
 fi
 
-if [ ! -e $mesh ]
+if [ ! -e $mesh.000000 ]
 then
    echo "Can't find visualization data for $ex!"
    exit
 fi
 
-echo "FiniteElementSpace" > $sol
-echo "FiniteElementCollection: H1_2D_P1" >> $sol
-echo "VDim: 1" >> $sol
-echo "Ordering: 0" >> $sol
-echo "" >> $sol
-find $dir -name "$ex.sol.??????" | sort | xargs cat >> $sol
+np=`cat $dir/$ex.data | head -n 1 | awk '{ print $2 }'`
 
-glvis -m $mesh -g $sol -k $keys
+${glvis} -np $np -m $mesh -g $sol -k $keys
