@@ -195,7 +195,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       if (num_levels > 1)
       {
          /* restrict fine grid residual */
-         hypre_SStructPMatvecCompute(restrict_data_l[0], 1.0, RT_l[0], r_l[1], 0.0,
+         hypre_SStructPMatvecCompute(restrict_data_l[0], 1.0, RT_l[0], r_l[0], 0.0,
                                      b_l[1], b_l[1]);
 #if DEBUG
          hypre_sprintf(filename, "syspfmg_xdown.%02d", 0);
