@@ -29,6 +29,10 @@ hypre_BoomerAMGRelaxHybridGaussSeidelDevice( hypre_ParCSRMatrix *A,
                                              HYPRE_Int           GS_order,
                                              HYPRE_Int           Symm )
 {
+   HYPRE_UNUSED_VAR(cf_marker);
+   HYPRE_UNUSED_VAR(relax_points);
+   HYPRE_UNUSED_VAR(omega);
+
    /* Vtemp, Ztemp have the fine-grid size. Create two shell vectors that have the correct size */
    hypre_ParVector *w1 = hypre_ParVectorCloneShallow(f);
    hypre_ParVector *w2 = hypre_ParVectorCloneShallow(u);
@@ -90,16 +94,18 @@ hypre_BoomerAMGRelaxHybridGaussSeidelDevice( hypre_ParCSRMatrix *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice ( hypre_ParCSRMatrix *A,
-                                                hypre_ParVector    *f,
-                                                HYPRE_Real          relax_weight,
-                                                HYPRE_Real          omega,
-                                                HYPRE_Real         *A_diag_diag,
-                                                hypre_ParVector    *u,
-                                                hypre_ParVector    *r,
-                                                hypre_ParVector    *z,
-                                                HYPRE_Int           num_inner_iters)
+hypre_BoomerAMGRelaxTwoStageGaussSeidelDevice( hypre_ParCSRMatrix *A,
+                                               hypre_ParVector    *f,
+                                               HYPRE_Real          relax_weight,
+                                               HYPRE_Real          omega,
+                                               HYPRE_Real         *A_diag_diag,
+                                               hypre_ParVector    *u,
+                                               hypre_ParVector    *r,
+                                               hypre_ParVector    *z,
+                                               HYPRE_Int           num_inner_iters )
 {
+   HYPRE_UNUSED_VAR(omega);
+
    hypre_CSRMatrix *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int        num_rows     = hypre_CSRMatrixNumRows(A_diag);
 

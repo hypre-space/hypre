@@ -191,6 +191,8 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
                                                 HYPRE_Int      *nnzC_out )
 
 {
+   HYPRE_UNUSED_VAR(exact_rownnz);
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_SPGEMM_NUMERIC] -= hypre_MPI_Wtime();
 #endif
@@ -217,7 +219,7 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperbound( HYPRE_Int       m,
    }
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_ForceSyncComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream();
    HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
    HYPRE_SPGEMM_PRINT("SpGemmNumerical time %f\n", t2);
 #endif

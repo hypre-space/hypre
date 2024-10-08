@@ -36,7 +36,7 @@ hypre_SeqVectorSetConstantValuesDevice( hypre_Vector *v,
 #if defined(HYPRE_USING_GPU)
    hypreDevice_ComplexFilln( vector_data, total_size, value );
 
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
@@ -80,7 +80,7 @@ hypre_SeqVectorScaleDevice( HYPRE_Complex alpha,
    hypreDevice_ComplexScalen( y_data, total_size, y_data, alpha );
 #endif
 
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
@@ -126,7 +126,7 @@ hypre_SeqVectorAxpyDevice( HYPRE_Complex alpha,
    hypreDevice_ComplexAxpyn(x_data, total_size, y_data, y_data, alpha);
 #endif
 
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
@@ -163,7 +163,7 @@ hypre_SeqVectorAxpyzDevice( HYPRE_Complex  alpha,
 #if defined(HYPRE_USING_GPU)
    hypreDevice_ComplexAxpyzn(total_size, x_data, y_data, z_data, alpha, beta);
 
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
@@ -241,7 +241,7 @@ hypre_SeqVectorElmdivpyDevice( hypre_Vector *x,
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "num_vectors_b != 1 not supported!\n");
    }
 
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
    hypre_GpuProfilingPopRange();
 
 #elif defined(HYPRE_USING_OPENMP)
@@ -293,7 +293,7 @@ hypre_SeqVectorInnerProdDevice( hypre_Vector *x,
 #endif
 #endif
 
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
@@ -324,7 +324,7 @@ hypre_SeqVectorSumEltsDevice( hypre_Vector *vector )
 #if defined(HYPRE_USING_GPU)
    sum = hypreDevice_ComplexReduceSum(total_size, data);
 
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 
 #elif HYPRE_USING_DEVICE_OPENMP
    HYPRE_Int i;

@@ -795,6 +795,10 @@ hypre_BoomerAMGBuildExtInterpDevice(hypre_ParCSRMatrix  *A,
                                     HYPRE_Int            max_elmts,
                                     hypre_ParCSRMatrix **P_ptr)
 {
+   HYPRE_UNUSED_VAR(num_functions);
+   HYPRE_UNUSED_VAR(debug_flag);
+   HYPRE_UNUSED_VAR(dof_func);
+
    HYPRE_Int           A_nr_of_rows = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);
@@ -999,6 +1003,11 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
                                        HYPRE_Int            max_elmts,
                                        hypre_ParCSRMatrix **P_ptr)
 {
+   HYPRE_UNUSED_VAR(num_cpts_global);
+   HYPRE_UNUSED_VAR(num_functions);
+   HYPRE_UNUSED_VAR(dof_func);
+   HYPRE_UNUSED_VAR(debug_flag);
+
    HYPRE_Int           A_nr_of_rows = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);
@@ -1105,7 +1114,7 @@ hypre_BoomerAMGBuildExtPIInterpDevice( hypre_ParCSRMatrix  *A,
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 #endif
 
@@ -1274,6 +1283,11 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
                                       HYPRE_Int            max_elmts,
                                       hypre_ParCSRMatrix **P_ptr)
 {
+   HYPRE_UNUSED_VAR(num_cpts_global);
+   HYPRE_UNUSED_VAR(num_functions);
+   HYPRE_UNUSED_VAR(dof_func);
+   HYPRE_UNUSED_VAR(debug_flag);
+
    HYPRE_Int           A_nr_of_rows = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);
@@ -1405,7 +1419,7 @@ hypre_BoomerAMGBuildExtPEInterpDevice(hypre_ParCSRMatrix  *A,
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 #endif
 

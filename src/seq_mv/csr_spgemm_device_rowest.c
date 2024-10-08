@@ -374,7 +374,7 @@ void hypre_spgemm_rownnz_cohen( HYPRE_Int  M,
    hypre_CurandUniformSingle(nsamples * N, d_V1, 0, 0, 0, 0);
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_ForceSyncComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream();
    t2 = hypre_MPI_Wtime() - t1;
    HYPRE_SPGEMM_PRINT("Curand time %f\n", t2);
 #endif
@@ -511,7 +511,7 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
    }
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_ForceSyncComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream();
    HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
    HYPRE_SPGEMM_PRINT("RownnzEst time %f\n", t2);
 #endif

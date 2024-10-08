@@ -336,6 +336,8 @@ hypre_ParILUSchurGMRESMatvecDevice(void          *matvec_data,
                                    HYPRE_Complex  beta,
                                    void          *y)
 {
+   HYPRE_UNUSED_VAR(matvec_data);
+
    /* Get matrix information first */
    hypre_ParILUData    *ilu_data       = (hypre_ParILUData*) ilu_vdata;
    hypre_ParCSRMatrix  *S              = hypre_ParILUDataMatS(ilu_data);
@@ -425,6 +427,8 @@ hypre_ILUSolveSchurGMRESDevice(hypre_ParCSRMatrix  *A,
                                hypre_CSRMatrix     *matE_d,
                                hypre_CSRMatrix     *matF_d)
 {
+   HYPRE_UNUSED_VAR(u_end);
+
    /* If we don't have S block, just do one L solve and one U solve */
    if (!S)
    {
@@ -597,6 +601,8 @@ hypre_ILUSolveSchurGMRESJacIterDevice(hypre_ParCSRMatrix *A,
                                       HYPRE_Int           lower_jacobi_iters,
                                       HYPRE_Int           upper_jacobi_iters)
 {
+   HYPRE_UNUSED_VAR(u_end);
+
    /* If we don't have S block, just do one L solve and one U solve */
    if (!S)
    {
@@ -811,6 +817,8 @@ hypre_ParILUSchurGMRESMatvecJacIterDevice(void          *matvec_data,
                                           HYPRE_Complex  beta,
                                           void          *y)
 {
+   HYPRE_UNUSED_VAR(matvec_data);
+
    /* get matrix information first */
    hypre_ParILUData    *ilu_data           = (hypre_ParILUData*) ilu_vdata;
    hypre_ParCSRMatrix  *S                  = hypre_ParILUDataMatS(ilu_data);
@@ -916,6 +924,9 @@ hypre_ILUSolveRAPGMRESDevice(hypre_ParCSRMatrix   *A,
                              hypre_CSRMatrix      *matF_d,
                              HYPRE_Int             test_opt)
 {
+   HYPRE_UNUSED_VAR(ytemp);
+   HYPRE_UNUSED_VAR(u_end);
+
    /* If we don't have S block, just do one L/U solve */
    if (!S)
    {

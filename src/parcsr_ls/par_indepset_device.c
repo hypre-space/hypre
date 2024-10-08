@@ -182,7 +182,7 @@ hypre_BoomerAMGIndepSetDevice( hypre_ParCSRMatrix  *S,
    /* RL: make sure IS_marker_offd is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 
    comm_handle = hypre_ParCSRCommHandleCreate_v2(12, comm_pkg,

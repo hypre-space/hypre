@@ -211,7 +211,7 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
    /* RL: make sure x_buf_data is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 #endif
 
@@ -253,7 +253,7 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
     * Synchronize calls
     *--------------------------------------------------------------------*/
    hypre_SetSyncCudaCompute(sync_stream);
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 
    /*---------------------------------------------------------------------
     * Performance profiling
@@ -436,7 +436,7 @@ hypre_ParCSRMatrixMatvecTDevice( HYPRE_Complex       alpha,
    /* RL: make sure y_tmp is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 
    /* when using GPUs, start local matvec first in order to overlap with communication */
@@ -506,7 +506,7 @@ hypre_ParCSRMatrixMatvecTDevice( HYPRE_Complex       alpha,
 
 #if defined(HYPRE_USING_GPU)
    hypre_SetSyncCudaCompute(sync_stream);
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 #endif
 
    /*---------------------------------------------------------------------
