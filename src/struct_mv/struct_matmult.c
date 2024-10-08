@@ -2616,8 +2616,8 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
       {
          case 7:
             hypre_BoxLoop2Begin(ndim, loop_size,
-                                gdbox, gdstart, gdstride, gi,
-                                Mdbox, Mdstart, Mdstride, Mi);
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                gdbox, gdstart, gdstride, gi);
             {
                HYPRE_Complex val = HYPRE_SMMCORE_2D(k + 0) +
                                    HYPRE_SMMCORE_2D(k + 1) +
@@ -2633,8 +2633,8 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
 
          case 6:
             hypre_BoxLoop2Begin(ndim, loop_size,
-                                gdbox, gdstart, gdstride, gi,
-                                Mdbox, Mdstart, Mdstride, Mi);
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                gdbox, gdstart, gdstride, gi);
             {
                HYPRE_Complex val = HYPRE_SMMCORE_2D(k + 0) +
                                    HYPRE_SMMCORE_2D(k + 1) +
@@ -2649,8 +2649,8 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
 
          case 5:
             hypre_BoxLoop2Begin(ndim, loop_size,
-                                gdbox, gdstart, gdstride, gi,
-                                Mdbox, Mdstart, Mdstride, Mi);
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                gdbox, gdstart, gdstride, gi);
             {
                HYPRE_Complex val = HYPRE_SMMCORE_2D(k + 0) +
                                    HYPRE_SMMCORE_2D(k + 1) +
@@ -2664,8 +2664,8 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
 
          case 4:
             hypre_BoxLoop2Begin(ndim, loop_size,
-                                gdbox, gdstart, gdstride, gi,
-                                Mdbox, Mdstart, Mdstride, Mi);
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                gdbox, gdstart, gdstride, gi);
             {
                HYPRE_Complex val = HYPRE_SMMCORE_2D(k + 0) +
                                    HYPRE_SMMCORE_2D(k + 1) +
@@ -2679,8 +2679,8 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
 
          case 3:
             hypre_BoxLoop2Begin(ndim, loop_size,
-                                gdbox, gdstart, gdstride, gi,
-                                Mdbox, Mdstart, Mdstride, Mi);
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                gdbox, gdstart, gdstride, gi);
             {
                HYPRE_Complex val = HYPRE_SMMCORE_2D(k + 0) +
                                    HYPRE_SMMCORE_2D(k + 1) +
@@ -2693,8 +2693,8 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
 
          case 2:
             hypre_BoxLoop2Begin(ndim, loop_size,
-                                gdbox, gdstart, gdstride, gi,
-                                Mdbox, Mdstart, Mdstride, Mi);
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                gdbox, gdstart, gdstride, gi);
             {
                HYPRE_Complex val = HYPRE_SMMCORE_2D(k + 0) +
                                    HYPRE_SMMCORE_2D(k + 1);
@@ -2706,8 +2706,8 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a,
 
          case 1:
             hypre_BoxLoop2Begin(ndim, loop_size,
-                                gdbox, gdstart, gdstride, gi,
-                                Mdbox, Mdstart, Mdstride, Mi);
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                gdbox, gdstart, gdstride, gi);
             {
                HYPRE_Complex val = HYPRE_SMMCORE_2D(k + 0);
 
