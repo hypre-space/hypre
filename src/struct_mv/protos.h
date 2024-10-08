@@ -356,9 +356,11 @@ HYPRE_Real hypre_StructInnerProdLocal ( hypre_StructVector *x, hypre_StructVecto
 HYPRE_Real hypre_StructInnerProd ( hypre_StructVector *x, hypre_StructVector *y );
 
 /* struct_io.c */
-HYPRE_Int hypre_PrintBoxArrayData ( FILE *file, HYPRE_Int dim, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int *value_ids, HYPRE_Complex *data );
+HYPRE_Int hypre_PrintBoxArrayData ( FILE *file, HYPRE_Int dim, hypre_BoxArray *box_array,
+                                    hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int *value_ids, HYPRE_Complex *data );
 HYPRE_Int
-hypre_ReadBoxArrayData( FILE *file, HYPRE_Int ndim, hypre_BoxArray *box_array, HYPRE_Int *num_values_ptr, HYPRE_Int **value_ids_ptr, HYPRE_Complex **values_ptr );
+hypre_ReadBoxArrayData( FILE *file, HYPRE_Int ndim, hypre_BoxArray *box_array,
+                        HYPRE_Int *num_values_ptr, HYPRE_Int **value_ids_ptr, HYPRE_Complex **values_ptr );
 
 /* struct_matmult.c */
 HYPRE_Int hypre_StructMatmultCreate ( HYPRE_Int nmatrices_in, hypre_StructMatrix **matrices_in,

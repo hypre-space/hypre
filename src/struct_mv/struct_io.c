@@ -142,7 +142,7 @@ hypre_ReadBoxArrayData( FILE             *file,
             }
 #ifdef HYPRE_COMPLEX
             hypre_fscanf(file, "; %d) %le , %le\n", &value_ids[j], &rvalue, &ivalue);
-            value = rvalue + I*ivalue;
+            value = rvalue + I * ivalue;
 #else
             hypre_fscanf(file, "; %d) %le\n", &value_ids[j], &value);
 #endif

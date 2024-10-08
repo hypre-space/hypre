@@ -947,7 +947,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    hypre_SStructMatrixTmpColCoords(matrix)       = hypre_CTAlloc(HYPRE_BigInt,  max_size,
                                                                  HYPRE_MEMORY_HOST);
    hypre_SStructMatrixTmpCoeffs(matrix)          = hypre_CTAlloc(HYPRE_Complex, max_size,
-                                                                  HYPRE_MEMORY_HOST);
+                                                                 HYPRE_MEMORY_HOST);
 #if defined (HYPRE_USING_GPU)
    hypre_SStructMatrixTmpRowCoordsDevice(matrix) = hypre_CTAlloc(HYPRE_BigInt,  max_size,
                                                                  HYPRE_MEMORY_DEVICE);
@@ -1864,7 +1864,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
    HYPRE_Int                entry, sentry, ei, fri, toi, i;
    HYPRE_Int                tvalues_size, tvalues_new_size;
    HYPRE_MemoryLocation     memory_location = hypre_IJMatrixMemoryLocation(
-                                                hypre_SStructMatrixIJMatrix(matrix));
+                                                 hypre_SStructMatrixIJMatrix(matrix));
 
    box   = hypre_BoxCreate(ndim);
    ibox0 = hypre_BoxCreate(ndim);
@@ -2100,8 +2100,8 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
             {
                hypre_BoxLoopGetIndex(index);
                /* WM: todo - this mapping to the unstructured indices only works with no inter-variable couplings? */
-               if (hypre_CSRMatrixI(A_u_diag)[cnt+1] - hypre_CSRMatrixI(A_u_diag)[cnt] + 
-                     hypre_CSRMatrixI(A_u_offd)[cnt+1] - hypre_CSRMatrixI(A_u_offd)[cnt] > 0)
+               if (hypre_CSRMatrixI(A_u_diag)[cnt + 1] - hypre_CSRMatrixI(A_u_diag)[cnt] +
+                   hypre_CSRMatrixI(A_u_offd)[cnt + 1] - hypre_CSRMatrixI(A_u_offd)[cnt] > 0)
                {
                   hypre_BoxLoopGetIndex(index);
                   for (j = 0; j < ndim; j++)
@@ -2126,21 +2126,25 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
                   /* INIT values from the structured matrix if action = 0 (need current stencil values for entries that don't exist in U matrix) */
                   if (action == 0)
                   {
-                     hypre_SStructPMatrixSetBoxValues(pmatrix, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries, hypre_BoxArrayBox(indices_boxa, j), values, -1);
+                     hypre_SStructPMatrixSetBoxValues(pmatrix, hypre_BoxArrayBox(indices_boxa, j), var, nSentries,
+                                                      Sentries, hypre_BoxArrayBox(indices_boxa, j), values, -1);
                   }
 
                   /* GET values from unstructured matrix */
                   /* WM: note - I'm passing the entire box here, so I expect to get back ALL intra-part connections in A_u */
                   /* WM: question - What about inter-part connections? I hope that they are always excluded here? Double check this. */
-                  hypre_SStructUMatrixSetBoxValues(A, part, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries, hypre_BoxArrayBox(indices_boxa, j), values, -2);
+                  hypre_SStructUMatrixSetBoxValues(A, part, hypre_BoxArrayBox(indices_boxa, j), var, nSentries,
+                                                   Sentries, hypre_BoxArrayBox(indices_boxa, j), values, -2);
 
                   /* ADD values to structured matrix */
-                  /* WM: todo - just call to hypre_SStructMatrixSetBoxValues() instead of 
+                  /* WM: todo - just call to hypre_SStructMatrixSetBoxValues() instead of
                    * hypre_SStructPMatrixSetBoxValues() and hypre_SStructMatrixSetInterPartValues()? */
-                  hypre_SStructPMatrixSetBoxValues(pmatrix, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries, hypre_BoxArrayBox(indices_boxa, j), values, action);
+                  hypre_SStructPMatrixSetBoxValues(pmatrix, hypre_BoxArrayBox(indices_boxa, j), var, nSentries,
+                                                   Sentries, hypre_BoxArrayBox(indices_boxa, j), values, action);
                   if (nvneighbors[part][var] > 0)
                   {
-                     hypre_SStructMatrixSetInterPartValues(A, part, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries,
+                     hypre_SStructMatrixSetInterPartValues(A, part, hypre_BoxArrayBox(indices_boxa, j), var, nSentries,
+                                                           Sentries,
                                                            hypre_BoxArrayBox(indices_boxa, j), values, 1);
                   }
                   hypre_TFree(values, HYPRE_MEMORY_DEVICE);
@@ -2150,7 +2154,7 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
             }
             for (j = 0; j < ndim; j++)
             {
-                hypre_TFree(indices[j], HYPRE_MEMORY_HOST);
+               hypre_TFree(indices[j], HYPRE_MEMORY_HOST);
             }
 
          } /* Loop over boxes */
@@ -2631,7 +2635,8 @@ hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix   *A,
    HYPRE_ANNOTATE_REGION_END("%s", "Find boxes");
 
    /* Flatten the convert_boxaa to convert_boxa_flattened (that is ArrayArray to Array). */
-   hypre_BoxArray ***convert_boxaa_flattened = hypre_TAlloc(hypre_BoxArray **, nparts, HYPRE_MEMORY_HOST);
+   hypre_BoxArray ***convert_boxaa_flattened = hypre_TAlloc(hypre_BoxArray **, nparts,
+                                                            HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       convert_boxaa_flattened[part] = hypre_TAlloc(hypre_BoxArray *, nvars, HYPRE_MEMORY_HOST);

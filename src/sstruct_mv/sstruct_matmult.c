@@ -111,7 +111,7 @@ hypre_SStructPMatmultCreate(HYPRE_Int                   nmatrices_input,
    (pmmdata -> comm_pkg)   = NULL;
    (pmmdata -> comm_pkg_a) = NULL;
    (pmmdata -> comm_data)  = NULL;
-   (pmmdata -> comm_data_a)= NULL;
+   (pmmdata -> comm_data_a) = NULL;
    (pmmdata -> num_comm_pkgs)   = 0;
    (pmmdata -> num_comm_blocks) = 0;
 
@@ -335,7 +335,7 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
    (pmmdata -> num_comm_blocks) = num_comm_blocks;
 
    /* Allocate communication packages and data */
-   comm_pkg_a  = hypre_TAlloc(hypre_CommPkg * , num_comm_pkgs, HYPRE_MEMORY_HOST);
+   comm_pkg_a  = hypre_TAlloc(hypre_CommPkg *, num_comm_pkgs, HYPRE_MEMORY_HOST);
    comm_data_a = hypre_TAlloc(HYPRE_Complex **, num_comm_pkgs, HYPRE_MEMORY_HOST);
    (pmmdata -> comm_pkg_a)  = comm_pkg_a;
    (pmmdata -> comm_data_a) = comm_data_a;
@@ -1220,7 +1220,8 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_IJMatrixAssembleFlag(ij_M) = 1;
 
    /* WM: extra delete zeros... I'm getting zero diagonals everywhere in the U matrices? */
-   hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(parcsr_uM), HYPRE_REAL_MIN);
+   hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(parcsr_uM),
+                                                              HYPRE_REAL_MIN);
    if (delete_zeros)
    {
       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(parcsr_uM));

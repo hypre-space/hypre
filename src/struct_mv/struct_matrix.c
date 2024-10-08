@@ -2215,7 +2215,7 @@ hypre_StructMatrixReadData( FILE               *file,
    {
 #ifdef HYPRE_COMPLEX
       hypre_fscanf(file, "*: (*; %d) %le, %le\n", &i, &rvalue, &ivalue);
-      value = rvalue + I*ivalue;
+      value = rvalue + I * ivalue;
 #else
       hypre_fscanf(file, "*: (*; %d) %le\n", &i, &value);
 #endif

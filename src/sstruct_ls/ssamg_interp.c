@@ -510,8 +510,8 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                hypre_SerialBoxLoop0Begin(ndim, loop_size);
                {
                   /* WM: todo - this mapping to the unstructured indices only works with no inter-variable couplings? */
-                  if (hypre_CSRMatrixI(A_u_diag)[cnt+1] - hypre_CSRMatrixI(A_u_diag)[cnt] + 
-                        hypre_CSRMatrixI(A_u_offd)[cnt+1] - hypre_CSRMatrixI(A_u_offd)[cnt] > 0)
+                  if (hypre_CSRMatrixI(A_u_diag)[cnt + 1] - hypre_CSRMatrixI(A_u_diag)[cnt] +
+                      hypre_CSRMatrixI(A_u_offd)[cnt + 1] - hypre_CSRMatrixI(A_u_offd)[cnt] > 0)
                   {
                      hypre_BoxLoopGetIndex(index);
                      for (j = 0; j < ndim; j++)
@@ -576,13 +576,13 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       /* WM: todo - I'm adding a zero diagonal here because if BoomerAMG interpolation gets a */
       /* totally empty matrix (no nonzeros and a NULL data array) you run into seg faults... this is kind of a dirty fix for now */
       hypre_ParCSRMatrix *zero = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A_u),
-                                                            hypre_ParCSRMatrixGlobalNumRows(A_u),
-                                                            hypre_ParCSRMatrixGlobalNumCols(A_u),
-                                                            hypre_ParCSRMatrixRowStarts(A_u),
-                                                            hypre_ParCSRMatrixRowStarts(A_u),
-                                                            0,
-                                                            hypre_ParCSRMatrixNumRows(A_u),
-                                                            0);
+                                                          hypre_ParCSRMatrixGlobalNumRows(A_u),
+                                                          hypre_ParCSRMatrixGlobalNumCols(A_u),
+                                                          hypre_ParCSRMatrixRowStarts(A_u),
+                                                          hypre_ParCSRMatrixRowStarts(A_u),
+                                                          0,
+                                                          hypre_ParCSRMatrixNumRows(A_u),
+                                                          0);
       hypre_ParCSRMatrixInitialize(zero);
       hypre_CSRMatrix *zero_diag = hypre_ParCSRMatrixDiag(zero);
       for (i = 0; i < hypre_CSRMatrixNumRows(zero_diag); i++)
@@ -591,13 +591,15 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          hypre_CSRMatrixJ(zero_diag)[i] = i;
          hypre_CSRMatrixData(zero_diag)[i] = 0.0;
       }
-      hypre_CSRMatrixI(zero_diag)[ hypre_CSRMatrixNumRows(zero_diag) ] = hypre_CSRMatrixNumRows(zero_diag);
+      hypre_CSRMatrixI(zero_diag)[ hypre_CSRMatrixNumRows(zero_diag) ] = hypre_CSRMatrixNumRows(
+                                                                            zero_diag);
       hypre_ParCSRMatrixAdd(1.0, zero, 1.0, A_bndry, &A_u_aug);
       hypre_ParCSRMatrixDestroy(A_bndry);
       hypre_ParCSRMatrixDestroy(zero);
 
       /* Get CF splitting */
-      HYPRE_Int *CF_marker = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A_u), HYPRE_MEMORY_DEVICE);
+      HYPRE_Int *CF_marker = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A_u),
+                                           HYPRE_MEMORY_DEVICE);
 
       /* Initialize CF_marker to all C-point (F-points marked below) */
       for (i = 0; i < hypre_ParCSRMatrixNumRows(A_u); i++)
@@ -719,20 +721,21 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       for (i = 0; i < hypre_CSRMatrixNumRows(A_u_diag); i++)
       {
          /* If this is a C-point or a zero row in A_u, zero out P_u */
-         if (CF_marker[i] == 1 || hypre_CSRMatrixI(A_u_diag)[i+1] - hypre_CSRMatrixI(A_u_diag)[i] + 
-               hypre_CSRMatrixI(A_u_offd)[i+1] - hypre_CSRMatrixI(A_u_offd)[i] == 0)
+         if (CF_marker[i] == 1 || hypre_CSRMatrixI(A_u_diag)[i + 1] - hypre_CSRMatrixI(A_u_diag)[i] +
+             hypre_CSRMatrixI(A_u_offd)[i + 1] - hypre_CSRMatrixI(A_u_offd)[i] == 0)
          {
-            for (j = hypre_CSRMatrixI(P_u_diag)[i]; j < hypre_CSRMatrixI(P_u_diag)[i+1]; j++)
+            for (j = hypre_CSRMatrixI(P_u_diag)[i]; j < hypre_CSRMatrixI(P_u_diag)[i + 1]; j++)
             {
                hypre_CSRMatrixData(P_u_diag)[j] = 0.0;
             }
-            for (j = hypre_CSRMatrixI(P_u_offd)[i]; j < hypre_CSRMatrixI(P_u_offd)[i+1]; j++)
+            for (j = hypre_CSRMatrixI(P_u_offd)[i]; j < hypre_CSRMatrixI(P_u_offd)[i + 1]; j++)
             {
                hypre_CSRMatrixData(P_u_offd)[j] = 0.0;
             }
          }
       }
-      hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(P_u), HYPRE_REAL_MIN);
+      hypre_CSRMatrix *delete_zeros = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(P_u),
+                                                                 HYPRE_REAL_MIN);
       if (delete_zeros)
       {
          hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(P_u));
