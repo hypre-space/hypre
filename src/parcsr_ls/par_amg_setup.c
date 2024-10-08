@@ -3139,6 +3139,22 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_HOST)
 #endif
+
+#ifdef HYPRE_USING_NODE_AWARE_MPI
+      //hypre_printf("%d\n", hypre_HandleNodeAwareSwitchoverThreshold(hypre_handle()));
+      if (level >= hypre_HandleNodeAwareSwitchoverThreshold(hypre_handle()))
+      {
+         hypre_ParCSRMatrixCommPkg(A_array[level])->use_neighbor = 1;
+         //hypre_printf("Level %d: use neighbor\n", level);
+         hypre_ParCSRCreateCommGraph( hypre_ParCSRMatrixFirstColDiag(A_array[level]),
+                                      hypre_ParCSRMatrixColMapOffd(A_array[level]),
+                                      hypre_ParCSRMatrixComm(A_array[level]),
+                                      hypre_ParCSRMatrixCommPkg(A_array[level]));
+         // Create comm handle in setup, so cost doesn't contribute to solve time
+         hypre_ParCSRCommPkgGetPersistentCommHandle(1, hypre_ParCSRMatrixCommPkg(A_array[level]));
+      }
+#endif
+
       {
          HYPRE_Real size = ((HYPRE_Real)fine_size) * .75;
          if (coarsen_type > 0 && coarse_size >= (HYPRE_BigInt)size)
