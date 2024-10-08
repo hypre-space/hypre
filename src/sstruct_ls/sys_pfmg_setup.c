@@ -73,7 +73,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    HYPRE_Int              dxyz_flag;
    HYPRE_Int              cdir, cmaxsize;
    HYPRE_Int              d, l, i;
-   HYPRE_Real             var_dxyz[3];
+   HYPRE_Real             var_dxyz[3] = {0.0, 0.0, 0.0};
    HYPRE_Int              nvars;
 
 #if DEBUG
@@ -144,7 +144,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    r_l  = tx_l;
    e_l  = tx_l;
 
-//   hypre_SStructPGridRef(grid, &grid_l[0]);
+   hypre_SStructPGridRef(grid, &grid_l[0]);
    hypre_SStructPMatrixRef(A, &A_l[0]);
    hypre_SStructPVectorRef(b, &b_l[0]);
    hypre_SStructPVectorRef(x, &x_l[0]);
@@ -188,7 +188,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       {
          hypre_SStructPMatrixPtAP(A_l[l], P_l[l], &A_l[l + 1]);
       }
-//      hypre_SStructPGridRef(hypre_SStructPMatrixPGrid(A_l[l + 1]), &grid_l[l + 1]);
+      hypre_SStructPGridRef(hypre_SStructPMatrixPGrid(A_l[l + 1]), &grid_l[l + 1]);
 
       hypre_SStructPVectorCreate(comm, grid_l[l + 1], &b_l[l + 1]);
       hypre_SStructPVectorInitialize(b_l[l + 1]);
@@ -267,18 +267,21 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       for (l = 1; l < num_levels; l++)
       {
          /* set relaxation parameters */
-         relax_data_l[l] = hypre_SysPFMGRelaxCreate(comm);
-         hypre_SysPFMGRelaxSetTol(relax_data_l[l], 0.0);
-         if (usr_jacobi_weight)
+         if (active_l[l])
          {
-            hypre_SysPFMGRelaxSetJacobiWeight(relax_data_l[l], jacobi_weight);
+            relax_data_l[l] = hypre_SysPFMGRelaxCreate(comm);
+            hypre_SysPFMGRelaxSetTol(relax_data_l[l], 0.0);
+            if (usr_jacobi_weight)
+            {
+               hypre_SysPFMGRelaxSetJacobiWeight(relax_data_l[l], jacobi_weight);
+            }
+            else
+            {
+               hypre_SysPFMGRelaxSetJacobiWeight(relax_data_l[l], relax_weights[l]);
+            }
+            hypre_SysPFMGRelaxSetType(relax_data_l[l], relax_type);
+            hypre_SysPFMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
          }
-         else
-         {
-            hypre_SysPFMGRelaxSetJacobiWeight(relax_data_l[l], relax_weights[l]);
-         }
-         hypre_SysPFMGRelaxSetType(relax_data_l[l], relax_type);
-         hypre_SysPFMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
       }
 
       /* change coarsest grid relaxation parameters */
@@ -342,14 +345,6 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    hypre_sprintf(filename, "syspfmg_A.%02d", l);
    hypre_SStructPMatrixPrint(filename, A_l[l], 0);
 #endif
-
-   /*-----------------------------------------------------
-    * Destroy Refs to A,x,b (the PMatrix & PVectors within
-    * the input SStructMatrix & SStructVectors).
-    *-----------------------------------------------------*/
-   hypre_SStructPMatrixDestroy(A);
-   hypre_SStructPVectorDestroy(x);
-   hypre_SStructPVectorDestroy(b);
 
    return hypre_error_flag;
 }

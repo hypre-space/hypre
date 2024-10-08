@@ -80,6 +80,8 @@ typedef struct
    HYPRE_Int               local_size;       /* Number of variables locally */
    HYPRE_BigInt            global_size;      /* Total number of variables */
 
+   HYPRE_Int               ref_count;
+
    hypre_Index             periodic;         /* Indicates if pgrid is periodic */
 
    /* GEC0902 additions for ghost expansion of boxes */
@@ -90,6 +92,7 @@ typedef struct
    /* Geometrical data */
    HYPRE_Real              coords_origin[HYPRE_MAXDIM]; /* Origin coordinates */
    hypre_Index             coords_stride;
+
 } hypre_SStructPGrid;
 
 typedef struct
@@ -113,6 +116,7 @@ typedef struct
    HYPRE_Int     type;
    HYPRE_BigInt  offset;
    HYPRE_BigInt  ghoffset;
+
 } hypre_SStructBoxManInfo;
 
 typedef struct
@@ -185,6 +189,7 @@ typedef struct hypre_SStructGrid_struct
    // TODO: deprecate these ones. SStructMatrix should hold these data instead
    HYPRE_Int               ghlocal_size;  /* GEC0902 Number of vars including ghosts */
    HYPRE_Int               ghstart_rank;  /* GEC0902 start rank including ghosts  */
+
 } hypre_SStructGrid;
 
 /*--------------------------------------------------------------------------
@@ -267,6 +272,7 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructPGridPNborOffsets(pgrid)     ((pgrid) -> pnbor_offsets)
 #define hypre_SStructPGridLocalSize(pgrid)        ((pgrid) -> local_size)
 #define hypre_SStructPGridGlobalSize(pgrid)       ((pgrid) -> global_size)
+#define hypre_SStructPGridRefCount(pgrid)         ((pgrid) -> ref_count)
 #define hypre_SStructPGridPeriodic(pgrid)         ((pgrid) -> periodic)
 #define hypre_SStructPGridGhlocalSize(pgrid)      ((pgrid) -> ghlocal_size)
 
@@ -592,12 +598,12 @@ typedef struct hypre_SStructPMatrix_struct
 
 } hypre_SStructPMatrix;
 
-
 /*--------------------------------------------------------------------------
  * hypre_SStructMatrix:
  *
  * - Storage of parts id dictated by the coarse grid
  *--------------------------------------------------------------------------*/
+
 typedef struct hypre_SStructMatrix_struct
 {
    MPI_Comm                comm;
@@ -638,6 +644,7 @@ typedef struct hypre_SStructMatrix_struct
 
    /* GEC0902   adding an object type to the matrix  */
    HYPRE_Int               object_type;
+
 } hypre_SStructMatrix;
 
 /*--------------------------------------------------------------------------
@@ -838,11 +845,11 @@ typedef struct hypre_SStructPMatmultData_struct
    HYPRE_Int                  *terms;
    HYPRE_Int                  *transposes;
 
-   hypre_CommPkg              *comm_pkg;        /* pointer to agglomerated communication package */
-   hypre_CommPkg             **comm_pkg_a;      /* pointer to communication packages */
-   HYPRE_Complex             **comm_data;       /* pointer to agglomerated communication data */
-   HYPRE_Complex            ***comm_data_a;     /* pointer to communication data */
-   HYPRE_Int                   num_comm_pkgs;   /* number of comm. packages to agglomerate */
+   hypre_CommPkg              *comm_pkg;        /* agglomerated communication package */
+   HYPRE_Complex             **comm_data;       /* agglomerated communication data */
+   hypre_CommPkg             **comm_pkg_a;      /* array of communication packages */
+   HYPRE_Complex            ***comm_data_a;     /* array of communication data */
+   HYPRE_Int                   num_comm_pkgs;   /* array size of comm_pkg_a and comm_data_a */
    HYPRE_Int                   num_comm_blocks; /* total number of communication blocks */
 
 } hypre_SStructPMatmultData;
@@ -862,11 +869,11 @@ typedef struct hypre_SStructMatmultData_struct
    HYPRE_Int                   *terms;
    HYPRE_Int                   *transposes;
 
-   hypre_CommPkg               *comm_pkg;        /* pointer to agglomerated communication package */
-   hypre_CommPkg              **comm_pkg_a;      /* pointer to communication packages */
-   HYPRE_Complex              **comm_data;       /* pointer to agglomerated communication data */
-   HYPRE_Complex             ***comm_data_a;     /* pointer to communication data */
-   HYPRE_Int                    num_comm_pkgs;   /* number of comm. packages to agglomerate */
+   hypre_CommPkg               *comm_pkg;        /* agglomerated communication package */
+   HYPRE_Complex              **comm_data;       /* agglomerated communication data */
+   hypre_CommPkg              **comm_pkg_a;      /* array of communication packages */
+   HYPRE_Complex             ***comm_data_a;     /* array of communication data */
+   HYPRE_Int                    num_comm_pkgs;   /* array size of comm_pkg_a and comm_data_a */
    HYPRE_Int                    num_comm_blocks; /* total number of communication blocks */
 
 } hypre_SStructMatmultData;
@@ -1055,6 +1062,7 @@ HYPRE_Int hypre_SStructVariableGetOffset ( HYPRE_SStructVariable vartype, HYPRE_
                                            hypre_Index varoffset );
 HYPRE_Int hypre_SStructPGridCreate ( MPI_Comm comm, HYPRE_Int ndim,
                                      hypre_SStructPGrid **pgrid_ptr );
+HYPRE_Int hypre_SStructPGridRef( hypre_SStructPGrid *pgrid, hypre_SStructPGrid **pgrid_ref);
 HYPRE_Int hypre_SStructPGridDestroy ( hypre_SStructPGrid *pgrid );
 HYPRE_Int hypre_SStructPGridSetExtents ( hypre_SStructPGrid *pgrid, hypre_Index ilower,
                                          hypre_Index iupper );
@@ -1223,7 +1231,7 @@ HYPRE_Int hypre_SStructPMatmultCreate(HYPRE_Int nmatrices_input,
                                       HYPRE_Int *terms_input, HYPRE_Int *trans_input,
                                       hypre_SStructPMatmultData **pmmdata_ptr);
 HYPRE_Int hypre_SStructPMatmultDestroy( hypre_SStructPMatmultData *pmmdata );
-HYPRE_Int hypre_SStructPMatmultSetup( hypre_SStructPMatmultData *pmmdata,
+HYPRE_Int hypre_SStructPMatmultSetup( hypre_SStructPMatmultData *pmmdata, HYPRE_Int assemble_grid,
                                       hypre_SStructPMatrix **pM_ptr );
 HYPRE_Int hypre_SStructPMatmultCommunicate( hypre_SStructPMatmultData *pmmdata );
 HYPRE_Int hypre_SStructPMatmultCompute( hypre_SStructPMatmultData *pmmdata,

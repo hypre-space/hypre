@@ -197,8 +197,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       if (num_levels > 1)
       {
          /* restrict fine grid residual */
-//         hypre_SysSemiRestrict(restrict_data_l[0], RT_l[0], r_l[0], b_l[1]);
-         hypre_SStructPMatvecCompute(restrict_data_l[0], 1.0, RT_l[0], r_l[l], 0.0,
+         hypre_SStructPMatvecCompute(restrict_data_l[0], 1.0, RT_l[0], r_l[1], 0.0,
                                      b_l[1], b_l[1]);
 #if DEBUG
          hypre_sprintf(filename, "zout_xdown.%02d", 0);
@@ -234,7 +233,6 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
             }
 
             /* restrict residual */
-//            hypre_SysSemiRestrict(restrict_data_l[l], RT_l[l], r_l[l], b_l[l + 1]);
             hypre_SStructPMatvecCompute(restrict_data_l[l], 1.0, RT_l[l], r_l[l], 0.0,
                                         b_l[l + 1], b_l[l + 1]);
 #if DEBUG
@@ -268,7 +266,6 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
          for (l = (num_levels - 2); l >= 1; l--)
          {
             /* interpolate error and correct (x = x + Pe_c) */
-//            hypre_SysSemiInterp(interp_data_l[l], P_l[l], x_l[l + 1], e_l[l]);
             hypre_SStructPMatvecCompute(interp_data_l[l], 1.0, P_l[l], x_l[l + 1], 0.0,
                                         e_l[l], e_l[l]);
             hypre_SStructPAxpy(1.0, e_l[l], x_l[l]);
@@ -291,7 +288,6 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
          }
 
          /* interpolate error and correct on fine grid (x = x + Pe_c) */
-//         hypre_SysSemiInterp(interp_data_l[0], P_l[0], x_l[1], e_l[0]);
          hypre_SStructPMatvecCompute(interp_data_l[0], 1.0, P_l[0], x_l[1], 0.0,
                                      e_l[0], e_l[0]);
          hypre_SStructPAxpy(1.0, e_l[0], x_l[0]);

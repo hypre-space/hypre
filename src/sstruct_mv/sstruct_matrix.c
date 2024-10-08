@@ -72,7 +72,7 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
    pmatrix = hypre_TAlloc(hypre_SStructPMatrix, 1, HYPRE_MEMORY_HOST);
 
    hypre_SStructPMatrixComm(pmatrix)     = comm;
-   hypre_SStructPMatrixPGrid(pmatrix)    = pgrid;
+   hypre_SStructPGridRef(pgrid, &hypre_SStructPMatrixPGrid(pmatrix));
    hypre_SStructPMatrixStencils(pmatrix) = stencils;
    hypre_SStructPMatrixNVars(pmatrix)    = nvars;
 
@@ -234,6 +234,7 @@ hypre_SStructPMatrixDestroy( hypre_SStructPMatrix *pmatrix )
             hypre_TFree(num_centries[vi], HYPRE_MEMORY_HOST);
             hypre_TFree(centries[vi], HYPRE_MEMORY_HOST);
          }
+         hypre_SStructPGridDestroy(hypre_SStructPMatrixPGrid(pmatrix));
          hypre_TFree(stencils, HYPRE_MEMORY_HOST);
          hypre_TFree(smaps, HYPRE_MEMORY_HOST);
          hypre_TFree(sstencils, HYPRE_MEMORY_HOST);
@@ -251,6 +252,7 @@ hypre_SStructPMatrixDestroy( hypre_SStructPMatrix *pmatrix )
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
 {
@@ -702,6 +704,7 @@ hypre_SStructPMatrixSetSymmetric( hypre_SStructPMatrix *pmatrix,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SStructPMatrixSetCEntries( hypre_SStructPMatrix *pmatrix,
                                  HYPRE_Int             var,
@@ -1542,7 +1545,6 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-
 HYPRE_Int
 hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                                   HYPRE_Int            part,
@@ -1592,6 +1594,7 @@ hypre_SStructUMatrixAssemble( hypre_SStructMatrix *matrix )
  * Note: Since off-diagonal components of the SStructMatrix are being stored
  *       in the UMatrix, this function does not change map_vbox when vi != vj
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SStructMatrixMapDataBox( hypre_SStructMatrix  *matrix,
                                HYPRE_Int             part,
@@ -2014,8 +2017,6 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
    return hypre_error_flag;
 }
 
-
-
 /*--------------------------------------------------------------------------
  * hypre_SStructMatrixCompressUToS
  *
@@ -2024,8 +2025,8 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
  * (action > 0): add-to values
  * (action = 0): set values
  *
- * WM: TODO - what if there are constant stencil entries? Not sure what the expected behavior should be.
- *            For now, avoid this case.
+ * WM: TODO - what if there are constant stencil entries? Not sure what the
+ *            expected behavior should be.  For now, avoid this case.
  *
  *--------------------------------------------------------------------------*/
 
@@ -2163,7 +2164,6 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
    return hypre_error_flag;
 }
 
-
 /*--------------------------------------------------------------------------
  * hypre_SStructMatrixToUMatrix
  *
@@ -2293,6 +2293,7 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
  *
  * TODO (VPM): Test with device build
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
                                    hypre_SStructGrid     *grid,
@@ -2510,6 +2511,7 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
  *
  * TODO (VPM): Test with device build
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix   *A,
                                   hypre_SStructGrid     *grid,

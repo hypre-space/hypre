@@ -68,7 +68,10 @@ hypre_SysPFMGDestroy( void *sys_pfmg_vdata )
       {
          for (l = 0; l < (sys_pfmg_data -> num_levels); l++)
          {
-            hypre_SysPFMGRelaxDestroy(sys_pfmg_data -> relax_data_l[l]);
+            if (sys_pfmg_data -> active_l[l])
+            {
+               hypre_SysPFMGRelaxDestroy(sys_pfmg_data -> relax_data_l[l]);
+            }
             hypre_SStructPMatvecDestroy(sys_pfmg_data -> matvec_data_l[l]);
          }
          for (l = 0; l < ((sys_pfmg_data -> num_levels) - 1); l++)
@@ -82,14 +85,13 @@ hypre_SysPFMGDestroy( void *sys_pfmg_vdata )
          hypre_TFree(sys_pfmg_data -> interp_data_l, HYPRE_MEMORY_HOST);
 
          hypre_SStructPVectorDestroy(sys_pfmg_data -> tx_l[0]);
-         /*hypre_SStructPGridDestroy(sys_pfmg_data -> grid_l[0]);*/
+         hypre_SStructPGridDestroy(sys_pfmg_data -> grid_l[0]);
          hypre_SStructPMatrixDestroy(sys_pfmg_data -> A_l[0]);
          hypre_SStructPVectorDestroy(sys_pfmg_data -> b_l[0]);
          hypre_SStructPVectorDestroy(sys_pfmg_data -> x_l[0]);
          for (l = 0; l < ((sys_pfmg_data -> num_levels) - 1); l++)
          {
             hypre_SStructPGridDestroy(sys_pfmg_data -> grid_l[l + 1]);
-            hypre_SStructPGridDestroy(sys_pfmg_data -> P_grid_l[l + 1]);
             hypre_SStructPMatrixDestroy(sys_pfmg_data -> A_l[l + 1]);
             hypre_SStructPMatrixDestroy(sys_pfmg_data -> P_l[l]);
             hypre_SStructPVectorDestroy(sys_pfmg_data -> b_l[l + 1]);
@@ -100,7 +102,6 @@ hypre_SysPFMGDestroy( void *sys_pfmg_vdata )
          hypre_TFree(sys_pfmg_data -> cdir_l, HYPRE_MEMORY_HOST);
          hypre_TFree(sys_pfmg_data -> active_l, HYPRE_MEMORY_HOST);
          hypre_TFree(sys_pfmg_data -> grid_l, HYPRE_MEMORY_HOST);
-         hypre_TFree(sys_pfmg_data -> P_grid_l, HYPRE_MEMORY_HOST);
          hypre_TFree(sys_pfmg_data -> A_l, HYPRE_MEMORY_HOST);
          hypre_TFree(sys_pfmg_data -> P_l, HYPRE_MEMORY_HOST);
          hypre_TFree(sys_pfmg_data -> RT_l, HYPRE_MEMORY_HOST);

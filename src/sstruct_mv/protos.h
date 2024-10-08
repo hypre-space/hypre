@@ -181,6 +181,7 @@ HYPRE_Int hypre_SStructVariableGetOffset ( HYPRE_SStructVariable vartype, HYPRE_
                                            hypre_Index varoffset );
 HYPRE_Int hypre_SStructPGridCreate ( MPI_Comm comm, HYPRE_Int ndim,
                                      hypre_SStructPGrid **pgrid_ptr );
+HYPRE_Int hypre_SStructPGridRef( hypre_SStructPGrid *pgrid, hypre_SStructPGrid **pgrid_ref);
 HYPRE_Int hypre_SStructPGridDestroy ( hypre_SStructPGrid *pgrid );
 HYPRE_Int hypre_SStructPGridSetExtents ( hypre_SStructPGrid *pgrid, hypre_Index ilower,
                                          hypre_Index iupper );
@@ -349,7 +350,7 @@ HYPRE_Int hypre_SStructPMatmultCreate(HYPRE_Int nmatrices_input,
                                       HYPRE_Int *terms_input, HYPRE_Int *trans_input,
                                       hypre_SStructPMatmultData **pmmdata_ptr);
 HYPRE_Int hypre_SStructPMatmultDestroy( hypre_SStructPMatmultData *pmmdata );
-HYPRE_Int hypre_SStructPMatmultSetup( hypre_SStructPMatmultData *pmmdata,
+HYPRE_Int hypre_SStructPMatmultSetup( hypre_SStructPMatmultData *pmmdata, HYPRE_Int assemble_grid,
                                       hypre_SStructPMatrix **pM_ptr );
 HYPRE_Int hypre_SStructPMatmultCommunicate( hypre_SStructPMatmultData *pmmdata );
 HYPRE_Int hypre_SStructPMatmultCompute( hypre_SStructPMatmultData *pmmdata,
