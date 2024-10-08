@@ -65,6 +65,8 @@ hypre_SemiRestrictSetup( void               *restrict_vdata,
     * Set up the compute package
     *----------------------------------------------------------*/
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    grid    = hypre_StructVectorGrid(r);
    stencil = hypre_StructMatrixStencil(R);
 
@@ -84,6 +86,8 @@ hypre_SemiRestrictSetup( void               *restrict_vdata,
    (restrict_data -> compute_pkg) = compute_pkg;
    hypre_CopyIndex(cindex, (restrict_data -> cindex));
    hypre_CopyIndex(stride, (restrict_data -> stride));
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -140,6 +144,8 @@ hypre_SemiRestrict( void               *restrict_vdata,
    /*-----------------------------------------------------------------------
     * Initialize some things.
     *-----------------------------------------------------------------------*/
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    hypre_BeginTiming(restrict_data -> time_index);
 
@@ -309,6 +315,8 @@ hypre_SemiRestrict( void               *restrict_vdata,
 
    hypre_IncFLOPCount(4 * hypre_StructVectorGlobalSize(rc));
    hypre_EndTiming(restrict_data -> time_index);
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

@@ -65,6 +65,8 @@ hypre_SemiInterpSetup( void               *interp_vdata,
     * Set up the compute package
     *----------------------------------------------------------*/
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    grid    = hypre_StructVectorGrid(e);
    stencil = hypre_StructMatrixStencil(P);
 
@@ -85,6 +87,8 @@ hypre_SemiInterpSetup( void               *interp_vdata,
    hypre_CopyIndex(cindex, (interp_data -> cindex));
    hypre_CopyIndex(findex, (interp_data -> findex));
    hypre_CopyIndex(stride, (interp_data -> stride));
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -143,6 +147,8 @@ hypre_SemiInterp( void               *interp_vdata,
    /*-----------------------------------------------------------------------
     * Initialize some things
     *-----------------------------------------------------------------------*/
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    hypre_BeginTiming(interp_data -> time_index);
 
@@ -338,6 +344,8 @@ hypre_SemiInterp( void               *interp_vdata,
 
    hypre_IncFLOPCount(3 * hypre_StructVectorGlobalSize(xc));
    hypre_EndTiming(interp_data -> time_index);
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

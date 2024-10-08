@@ -11,13 +11,13 @@
 #   |                         /    |
 #   |       part 1          /      |
 #   |                     /        |
-#   | j                 /          | 
-#   | |               /            | 
+#   | j                 /          |
+#   | |               /            |
 #   | ---i          /              |
-#   ---------------      part 2    | 
+#   ---------------      part 2    |
 #   |             |                |
 #   |   part 0    |                |
-#   |             |                | 
+#   |             |                |
 #   | j           | j              |
 #   | |           | |              |
 #   | ---i        | ---i           |
@@ -125,5 +125,12 @@ ProcessPoolSetPart: 0 0
 ProcessPoolSetPart: 0 1
 ProcessPoolSetPart: 0 2
 
-###########################################################
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 3
 
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+ProcessPoolSetPart: 1 1
+ProcessPoolSetPart: 2 2
+
+###########################################################

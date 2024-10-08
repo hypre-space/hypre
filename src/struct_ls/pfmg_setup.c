@@ -582,6 +582,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    for (l = 0; l < (num_levels - 1); l++)
    {
+      HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
       if (l == num_level_GPU)
       {
@@ -618,6 +619,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       restrict_data_l[l] = hypre_SemiRestrictCreate();
       hypre_SemiRestrictSetup(restrict_data_l[l], RT_l[l], 1, r_l[l], b_l[l + 1],
                               cindex, findex, stride);
+
+      HYPRE_ANNOTATE_MGLEVEL_END(l);
    }
 
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
