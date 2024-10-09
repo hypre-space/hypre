@@ -114,7 +114,8 @@ HYPRE_Int hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix,
 HYPRE_Int hypre_IJMatrixSetConstantValuesParCSRDevice( hypre_IJMatrix *matrix,
                                                        HYPRE_Complex value );
 
-HYPRE_Int hypre_IJMatrixAssembleCommunicateAndCompressDevice(hypre_IJMatrix *matrix, HYPRE_Int reduce_stack_size);
+HYPRE_Int hypre_IJMatrixAssembleCommunicate(hypre_IJMatrix *matrix);
+HYPRE_Int hypre_IJMatrixAssembleCompressDevice(hypre_IJMatrix *matrix, HYPRE_Int reduce_stack_size);
 
 /* IJMatrix_petsc.c */
 HYPRE_Int hypre_IJMatrixSetLocalSizePETSc ( hypre_IJMatrix *matrix, HYPRE_Int local_m,

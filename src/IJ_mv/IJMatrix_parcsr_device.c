@@ -269,14 +269,7 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
 
    if (early_assemble_flag)
    {
-   HYPRE_Int myid;
-   hypre_MPI_Comm_rank(hypre_IJMatrixComm(matrix), &myid );
-   printf("Proc %d, %d, Early Assemble\n", myid, counter++);
-      /* temporarily disable early assembly in the next line */
-      hypre_AuxParCSRMatrixEarlyAssemble(aux_matrix) = 2;
       hypre_IJMatrixAssembleCompressDevice(matrix, 0);
-      /* restore early assembly */
-      hypre_AuxParCSRMatrixEarlyAssemble(aux_matrix) = early_assemble;
 
       stack_elmts_current = hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix);
       stack_elmts_max = hypre_AuxParCSRMatrixMaxStackElmts(aux_matrix);
