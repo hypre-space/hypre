@@ -765,6 +765,9 @@ test_all(MPI_Comm             comm,
    HYPRE_Int       time_index;
    HYPRE_Int      *h_rowptr = hypre_CTAlloc(HYPRE_Int, nrows + 1, HYPRE_MEMORY_HOST);
    HYPRE_Int       cmd_len = strlen(cmd_sequence);
+   HYPRE_Int       myid;
+
+   hypre_MPI_Comm_rank(comm, &myid);
 
    for (i = 1; i < nrows + 1; i++)
    {
@@ -776,6 +779,7 @@ test_all(MPI_Comm             comm,
    HYPRE_IJMatrixSetObjectType(ij_A, HYPRE_PARCSR);
    HYPRE_IJMatrixInitialize_v2(ij_A, memory_location);
    HYPRE_IJMatrixSetOMPFlag(ij_A, 1);
+   grow_factor= myid ? grow_factor : 2 * grow_factor;
    if (init_alloc >= 0)
    {
       HYPRE_IJMatrixSetInitAllocation(ij_A, init_alloc);
