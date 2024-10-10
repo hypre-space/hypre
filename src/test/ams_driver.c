@@ -163,6 +163,9 @@ main (hypre_int argc,
 #endif
    /* use vendor implementation for SpGEMM */
    HYPRE_SetSpGemmUseVendor(0);
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_SetSpGemmUseVendor(1);
+#endif
    /* use cuRand for PMIS */
    HYPRE_SetUseGpuRand(1);
 #endif

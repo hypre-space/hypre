@@ -208,7 +208,7 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
                A_col = -1;
             }
 
-            bitmask = hypre_ballot_sync(HYPRE_WARP_FULL_MASK, A_col == P_col);
+            bitmask = hypre_ballot_sync(item, HYPRE_WARP_FULL_MASK, A_col == P_col);
             if (bitmask > 0)
             {
                if (lane == (hypre_ffs(bitmask) - 1))
@@ -252,7 +252,7 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
                   A_col = -1;
                }
 
-               bitmask = hypre_ballot_sync(HYPRE_WARP_FULL_MASK, A_col == P_col);
+               bitmask = hypre_ballot_sync(item, HYPRE_WARP_FULL_MASK, A_col == P_col);
                if (bitmask > 0)
                {
                   if (lane == (hypre_ffs(bitmask) - 1))
@@ -456,7 +456,7 @@ hypreGPUKernel_FSAITruncateCandidateOrdered( hypre_DeviceItem &item,
          warp_max_val = warp_allreduce_max(item, max_val);
 
          /* Reorder col/val entries associated with warp_max_val */
-         bitmask = hypre_ballot_sync(HYPRE_WARP_FULL_MASK, warp_max_val == max_val);
+         bitmask = hypre_ballot_sync(item, HYPRE_WARP_FULL_MASK, warp_max_val == max_val);
          if (warp_max_val > 0.0)
          {
             cnt = min(hypre_popc(bitmask), max_nonzeros_row - k);
@@ -582,7 +582,7 @@ hypreGPUKernel_FSAITruncateCandidateUnordered( hypre_DeviceItem &item,
          warp_max_val = warp_allreduce_max(item, max_val);
 
          /* Reorder col/val entries associated with warp_max_val */
-         bitmask = hypre_ballot_sync(HYPRE_WARP_FULL_MASK, warp_max_val == max_val);
+         bitmask = hypre_ballot_sync(item, HYPRE_WARP_FULL_MASK, warp_max_val == max_val);
          if (warp_max_val > 0.0)
          {
             cnt = min(hypre_popc(bitmask), max_nonzeros_row - k);

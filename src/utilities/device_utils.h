@@ -187,6 +187,7 @@ using namespace thrust::placeholders;
 #if defined(HYPRE_USING_SYCL)
 
 #include <sycl/sycl.hpp>
+#include <dpct/dpct.hpp>
 #if defined(HYPRE_USING_ONEMKLSPARSE)
 #include <oneapi/mkl/spblas.hpp>
 #endif
@@ -287,6 +288,28 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    }                                                                                         \
 }
 
+#define HYPRE_CPU_LAUNCH(kernel_name, gridsize, blocksize, ...)                              \
+{                                                                                            \
+   if ( gridsize[2] == 0 || blocksize[2] == 0 )                                              \
+   {                                                                                         \
+     /* hypre_printf("Warning %s %d: Zero SYCL 1D launch parameters grid/block (%d) (%d)\n", \
+                  __FILE__, __LINE__,                                                        \
+                  gridsize[0], blocksize[0]); */                                             \
+   }                                                                                         \
+   else                                                                                      \
+   {                                                                                         \
+      HPYRE_Int compute_stream = hypre_HandleComputeStreamNum(hypre_handle());               \
+      hypre_HandleComputeStreamNum(hypre_handle) = HYPRE_MAX_NUM_STREAMS - 1;                \
+      hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
+         cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
+            [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
+               { (kernel_name)(item, __VA_ARGS__);                                           \
+         });                                                                                 \
+      }).wait_and_throw();                                                                   \
+      hypre_HandleComputeStreamNum(hypre_handle) = compute_stream;                           \
+   }                                                                                         \
+}
+
 #define HYPRE_GPU_LAUNCH2(kernel_name, gridsize, blocksize, shmem_size, ...)                 \
 {                                                                                            \
    if ( gridsize[2] == 0 || blocksize[2] == 0 )                                              \
@@ -299,8 +322,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    {                                                                                         \
       hypre_HandleComputeStream(hypre_handle())->submit([&] (sycl::handler& cgh) {           \
          sycl::range<1> shmem_range(shmem_size);                                             \
-         sycl::accessor<char, 1, sycl::access_mode::read_write,                              \
-            sycl::target::local> shmem_accessor(shmem_range, cgh);                           \
+         sycl::local_accessor<char, 1> shmem_accessor(shmem_range, cgh);                     \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
             [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item, shmem_accessor.get_pointer(), __VA_ARGS__);             \
@@ -615,9 +637,15 @@ using hypre_DeviceItem = sycl::nd_item<3>;
    thrust::func_name(thrust::hip::par(hypre_HandleDeviceAllocator(hypre_handle())).on(hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
 
 #elif defined(HYPRE_USING_SYCL)
+
 #define HYPRE_ONEDPL_CALL(func_name, ...)                                                    \
   func_name(oneapi::dpl::execution::make_device_policy(                                      \
            *hypre_HandleComputeStream(hypre_handle())), __VA_ARGS__);
+
+#define HYPRE_ONEDPL_CPU_CALL(func_name, ...)                                                \
+   func_name(oneapi::dpl::execution::make_device_policy(                                     \
+             *hypre_DeviceDataStream(hypre_HandleDeviceData(hypre_handle()), HYPRE_MAX_NUM_STREAMS - 1)), __VA_ARGS__);
+
 #endif
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -893,6 +921,13 @@ hypre_int next_power_of_2(hypre_int n)
    return n;
 }
 
+/* Flip n-th bit of bitmask (0 becomes 1. 1 becomes 0) */
+static __device__ __forceinline__
+hypre_mask hypre_mask_flip_at(hypre_mask bitmask, hypre_int n)
+{
+   return bitmask ^ (hypre_mask_one << n);
+}
+
 #endif // defined(HYPRE_USING_GPU)
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1094,7 +1129,7 @@ void __syncwarp()
 #endif // #if defined(HYPRE_USING_HIP) || (CUDA_VERSION < 9000)
 
 static __device__ __forceinline__
-hypre_mask hypre_ballot_sync(hypre_mask mask, hypre_int predicate)
+hypre_mask hypre_ballot_sync(hypre_DeviceItem &item, hypre_mask mask, hypre_int predicate)
 {
 #if defined(HYPRE_USING_CUDA)
    return __ballot_sync(mask, predicate);
@@ -1121,13 +1156,6 @@ HYPRE_Int hypre_ffs(hypre_mask mask)
 #else
    return (HYPRE_Int) __ffsll(mask);
 #endif
-}
-
-/* Flip n-th bit of bitmask (0 becomes 1. 1 becomes 0) */
-static __device__ __forceinline__
-hypre_mask hypre_mask_flip_at(hypre_mask bitmask, hypre_int n)
-{
-   return bitmask ^ (hypre_mask_one << n);
 }
 
 #if defined(HYPRE_USING_HIP)
@@ -1616,6 +1644,28 @@ T warp_prefix_sum(hypre_DeviceItem &item, hypre_int lane_id, T in, T &all_sum)
       }
    }
    return in;
+}
+
+static __device__ __forceinline__
+hypre_mask hypre_ballot_sync(hypre_DeviceItem &item, unsigned int mask, int predicate)
+{
+   return sycl::reduce_over_group(
+       item.get_sub_group(),
+       (mask & (0x1 << item.get_sub_group().get_local_linear_id())) &&
+               predicate ? (0x1 << item.get_sub_group().get_local_linear_id()) : 0,
+       sycl::ext::oneapi::plus<>());
+}
+
+static __device__ __forceinline__
+HYPRE_Int hypre_popc(hypre_mask mask)
+{
+   return (HYPRE_Int) sycl::popcount(mask);
+}
+
+static __device__ __forceinline__
+HYPRE_Int hypre_ffs(hypre_mask mask)
+{
+   return (HYPRE_Int)dpct::ffs<HYPRE_Int>(mask);
 }
 
 static __device__ __forceinline__

@@ -15,13 +15,12 @@ case $1 in
    **** Test with:                                                ****
    ****     export SYCL_CACHE_PERSISTENT=1                        ****
    ****     export SYCL_CACHE_THRESHOLD=0                         ****
-   ****     module load oneapi/eng-compiler/2023.05.15.007        ****
-   ****     module load mpich/52.2/icc-all-pmix-gpu               ****
+   ****     module load oneapi/release/2023.12.15.001             ****
 
    **** A custom oneDPL install is also required:                 ****
    ****    git clone https://github.com/oneapi-src/oneDPL.git     ****
    ****    cd oneDPL                                              ****
-   ****    git checkout fda906e3994782bbe9e898582b129a7525c4428c  ****
+   ****    git checkout d5cfe25e7b1b43dcdd64780eb4b73727b6ae0054  ****
    ****    export DPLROOT=$(pwd)                                  ****
 
    $0 [-h|-help] {src_dir}
@@ -62,14 +61,14 @@ save="sunspot"
 
 # SYCL with UM in debug mode [ij, struct]
 # WM: I suppress all warnings for sycl files for now
-co="--enable-debug --with-sycl --enable-unified-memory CC=mpicc CXX=mpicxx --disable-fortran --with-extra-CFLAGS=\\'-Wno-unused-but-set-variable -Wno-unused-variable -Wno-builtin-macro-redefined -Rno-debug-disables-optimization\\' --with-extra-CUFLAGS=\\'-w\\' --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib"
-ro="-ij-gpu -struct -rt -save ${save} -script gpu_tile_compact.sh -rtol ${rtol} -atol ${atol}"
+co="--enable-debug --with-sycl --enable-unified-memory CC=mpicc CXX=mpicxx --disable-fortran --with-extra-CFLAGS=\\'-Wno-unused-but-set-variable -Wno-unused-variable -Wno-builtin-macro-redefined -Rno-debug-disables-optimization\\' --with-extra-CUFLAGS=\\'-w\\' --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib --with-lapack-lib=\\'-L ${MKLROOT}/lib -lmkl_sycl_lapack\\'"
+ro="-ij-gpu -ams -struct -rt -save ${save} -script gpu_tile_compact.sh -rtol ${rtol} -atol ${atol}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-sycl-um
 
 # SYCL with bigint (compile only)
 # WM: I suppress all warnings for sycl files for now
-co="--enable-bigint --with-sycl --enable-unified-memory CC=mpicc CXX=mpicxx --disable-fortran --with-extra-CFLAGS=\\'-Wno-unused-but-set-variable -Wno-unused-variable -Wno-builtin-macro-redefined -Rno-debug-disables-optimization\\' --with-extra-CUFLAGS=\\'-w\\' --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib"
+co="--enable-bigint --with-sycl --enable-unified-memory CC=mpicc CXX=mpicxx --disable-fortran --with-extra-CFLAGS=\\'-Wno-unused-but-set-variable -Wno-unused-variable -Wno-builtin-macro-redefined -Rno-debug-disables-optimization\\' --with-extra-CUFLAGS=\\'-w\\' --with-MPI-include=${MPI_ROOT}/include --with-MPI-libs=mpi --with-MPI-lib-dirs=${MPI_ROOT}/lib --with-lapack-lib=\\'-L ${MKLROOT}/lib -lmkl_sycl_lapack\\'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-sycl-bigint
 

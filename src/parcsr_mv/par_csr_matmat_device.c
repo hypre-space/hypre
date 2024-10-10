@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#include "_hypre_onedpl.hpp"
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_utilities.hpp"
 
@@ -109,8 +110,13 @@ hypre_ParCSRMatMatDiagDevice(hypre_ParCSRMatrix  *A,
    hypre_GpuProfilingPushRange("ParCSRMatMatDiag");
 
    /* Set up C_diag_i and C_diag_j */
+#if defined(HYPRE_USING_SYCL)
+   hypreSycl_sequence(C_diag_i, C_diag_i + num_rows + 1, 0);
+   hypreSycl_sequence(C_diag_j, C_diag_j + num_rows, 0);
+#else
    HYPRE_THRUST_CALL(sequence, C_diag_i, C_diag_i + num_rows + 1, 0);
    HYPRE_THRUST_CALL(sequence, C_diag_j, C_diag_j + num_rows, 0);
+#endif
 
    /* Update device column maps if needed */
    hypre_ParCSRMatrixCopyColMapOffdToDevice(A);
