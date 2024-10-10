@@ -112,6 +112,7 @@ main( hypre_int argc,
 {
    HYPRE_Int           arg_index;
    HYPRE_Int           print_usage;
+   HYPRE_Int           log_level = 0;
    HYPRE_Int           sparsity_known = 0;
    HYPRE_Int           add = 0;
    HYPRE_Int           check_constant = 0;
@@ -140,6 +141,7 @@ main( hypre_int argc,
    HYPRE_Int           ioutdat;
    HYPRE_Int           poutdat;
    HYPRE_Int           poutusr = 0; /* if user selects pout */
+   HYPRE_Int           print_matrix_info = 0;
    HYPRE_Int           debug_flag;
    HYPRE_Int           ierr = 0;
    HYPRE_Int           i, j, c;
@@ -189,6 +191,7 @@ main( hypre_int argc,
    HYPRE_Int          *ncols;
    HYPRE_BigInt       *col_inds;
    HYPRE_Int          *dof_func;
+   HYPRE_Int           filter_functions = 0;
    HYPRE_Int           num_functions = 1;
    HYPRE_Int           num_paths = 1;
    HYPRE_Int           agg_num_levels = 0;
@@ -694,7 +697,12 @@ main( hypre_int argc,
 
    while ( (arg_index < argc) && (!print_usage) )
    {
-      if ( strcmp(argv[arg_index], "-frombinfile") == 0 )
+      if ( strcmp(argv[arg_index], "-ll") == 0 )
+      {
+         arg_index++;
+         log_level = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-frombinfile") == 0 )
       {
          arg_index++;
          build_matrix_type      = -2;
@@ -797,6 +805,11 @@ main( hypre_int argc,
          arg_index++;
          build_funcs_type      = 2;
          build_funcs_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-mat-info") == 0 )
+      {
+         arg_index++;
+         print_matrix_info = 1;
       }
       else if ( strcmp(argv[arg_index], "-exact_size") == 0 )
       {
@@ -1147,6 +1160,11 @@ main( hypre_int argc,
       {
          arg_index++;
          num_functions = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ff") == 0 )
+      {
+         arg_index++;
+         filter_functions = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-agg_nl") == 0 )
       {
@@ -2302,6 +2320,10 @@ main( hypre_int argc,
          hypre_printf("\n");
          hypre_printf("Usage: %s [<options>]\n", argv[0]);
          hypre_printf("\n");
+         hypre_printf("  -ll                        : hypre's log level. \n");
+         hypre_printf("      0 = (default) No messaging.\n");
+         hypre_printf("      1 = Display memory usage statistics for each MPI rank.\n");
+         hypre_printf("      2 = Display aggregate memory usage statistics over MPI ranks.\n");
          hypre_printf("  -fromfile <filename>       : ");
          hypre_printf("matrix read from multiple files (IJ format)\n");
          hypre_printf("  -frombinfile <filename>    : ");
@@ -2492,6 +2514,7 @@ main( hypre_int argc,
          hypre_printf("  -jtr  <val>            : set truncation threshold for Jacobi interpolation = val \n");
          hypre_printf("  -Ssw  <val>            : set S-commpkg-switch = val \n");
          hypre_printf("  -mxrs <val>            : set AMG maximum row sum threshold for dependency weakening \n");
+         hypre_printf("  -ff <0/1>              : set filtering based on functions for systems AMG\n");
          hypre_printf("  -nf <val>              : set number of functions for systems AMG\n");
          hypre_printf("  -numsamp <val>         : set number of sample vectors for GSMG\n");
 
@@ -2745,6 +2768,9 @@ main( hypre_int argc,
       hypre_MemoryTrackerSetFileName(mem_tracker_name);
    }
 #endif
+
+   /* Set log level */
+   HYPRE_SetLogLevel(log_level);
 
    /* default memory location */
    HYPRE_SetMemoryLocation(memory_location);
@@ -3311,6 +3337,42 @@ main( hypre_int argc,
       if (partitioning)
       {
          hypre_TFree(partitioning, HYPRE_MEMORY_HOST);
+      }
+   }
+
+   /* Print matrix information */
+   if (print_matrix_info)
+   {
+      HYPRE_BigInt global_num_rows, global_num_cols, global_num_nonzeros;
+
+      if (parcsr_A)
+      {
+         HYPRE_BigInt ilower, iupper, jlower, jupper;
+
+         HYPRE_ParCSRMatrixGetLocalRange(parcsr_A, &ilower, &iupper, &jlower, &jupper);
+         HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &ij_A);
+         HYPRE_IJMatrixSetObjectType(ij_A, HYPRE_PARCSR);
+         hypre_IJMatrixObject(ij_A) = parcsr_A;
+         hypre_IJMatrixAssembleFlag(ij_A) = 1;
+      }
+
+      HYPRE_IJMatrixGetGlobalInfo(ij_A,
+                                  &global_num_rows,
+                                  &global_num_cols,
+                                  &global_num_nonzeros);
+
+      if (parcsr_A)
+      {
+         hypre_IJMatrixObject(ij_A) = NULL;
+         HYPRE_IJMatrixDestroy(ij_A);
+      }
+
+      if (myid == 0)
+      {
+         hypre_printf("  Matrix Information:\n");
+         hypre_printf("    Global number of rows:     %b\n", global_num_rows);
+         hypre_printf("    Global number of columns:  %b\n", global_num_cols);
+         hypre_printf("    Global number of nonzeros: %b\n", global_num_nonzeros);
       }
    }
 
@@ -4367,6 +4429,8 @@ main( hypre_int argc,
 
    if (solver_id == 0 || solver_id == 90)
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
+
       if (solver_id == 0)
       {
          if (myid == 0) { hypre_printf("Solver:  AMG\n"); }
@@ -4511,7 +4575,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetFSAIThreshold(amg_solver, fsai_threshold);
       HYPRE_BoomerAMGSetFSAIEigMaxIters(amg_solver, fsai_eig_max_iters);
       HYPRE_BoomerAMGSetFSAIKapTolerance(amg_solver, fsai_kap_tolerance);
-
+      HYPRE_BoomerAMGSetFilterFunctions(amg_solver, filter_functions);
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
       HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
       HYPRE_BoomerAMGSetAggInterpType(amg_solver, agg_interp_type);
@@ -4620,9 +4684,11 @@ main( hypre_int argc,
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
 
       if (second_time)
       {
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-2");
          HYPRE_SetExecutionPolicy(exec2_policy);
 
          /* run a second time [for timings, to check for memory leaks] */
@@ -4678,6 +4744,7 @@ main( hypre_int argc,
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
 
+         HYPRE_ANNOTATE_REGION_END("%s", "Run-2");
 #if defined(HYPRE_USING_CUDA)
          cudaProfilerStop();
 #endif
@@ -4831,6 +4898,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetFSAIThreshold(amg_solver, fsai_threshold);
       HYPRE_BoomerAMGSetFSAIEigMaxIters(amg_solver, fsai_eig_max_iters);
       HYPRE_BoomerAMGSetFSAIKapTolerance(amg_solver, fsai_kap_tolerance);
+      HYPRE_BoomerAMGSetFilterFunctions(amg_solver, filter_functions);
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
       HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
       HYPRE_BoomerAMGSetAggInterpType(amg_solver, agg_interp_type);
@@ -4931,6 +4999,7 @@ main( hypre_int argc,
                        solver_id == 43 || solver_id == 71))
       /*end lobpcg */
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
 
@@ -5019,6 +5088,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
+         HYPRE_BoomerAMGSetFilterFunctions(pcg_precond, filter_functions);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
@@ -5250,6 +5320,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
+         HYPRE_BoomerAMGSetFilterFunctions(pcg_precond, filter_functions);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
@@ -5482,9 +5553,11 @@ main( hypre_int argc,
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
 
       if (second_time)
       {
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-2");
          HYPRE_SetExecutionPolicy(exec2_policy);
 
          /* run a second time [for timings, to check for memory leaks] */
@@ -5528,6 +5601,7 @@ main( hypre_int argc,
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
 
+         HYPRE_ANNOTATE_REGION_END("%s", "Run-2");
 #if defined(HYPRE_USING_CUDA)
          cudaProfilerStop();
 #endif
@@ -5814,6 +5888,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
             HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
             HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
+            HYPRE_BoomerAMGSetFilterFunctions(pcg_precond, filter_functions);
             HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
             HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
             HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
@@ -5923,6 +5998,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
             HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
             HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
+            HYPRE_BoomerAMGSetFilterFunctions(pcg_precond, filter_functions);
             HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
             HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
             HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
@@ -6240,6 +6316,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
             HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
             HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
+            HYPRE_BoomerAMGSetFilterFunctions(pcg_precond, filter_functions);
             HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
             HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
             HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
@@ -6360,6 +6437,7 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
             HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
             HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
+            HYPRE_BoomerAMGSetFilterFunctions(pcg_precond, filter_functions);
             HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
             HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
             HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
@@ -6623,6 +6701,7 @@ main( hypre_int argc,
        solver_id == 15 || solver_id == 18 || solver_id == 44 ||
        solver_id == 81 || solver_id == 91)
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
 
@@ -6740,6 +6819,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMaxLevels(amg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(amg_precond, max_row_sum);
          HYPRE_BoomerAMGSetDebugFlag(amg_precond, debug_flag);
+         HYPRE_BoomerAMGSetFilterFunctions(amg_precond, filter_functions);
          HYPRE_BoomerAMGSetNumFunctions(amg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(amg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetAggInterpType(amg_precond, agg_interp_type);
@@ -6984,6 +7064,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
+         HYPRE_BoomerAMGSetFilterFunctions(pcg_precond, filter_functions);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
@@ -7175,9 +7256,11 @@ main( hypre_int argc,
          hypre_TFree(indices_d, memory_location);
          hypre_TFree(values_d, memory_location);
       }
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
 
       if (second_time)
       {
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-2");
          /* run a second time [for timings, to check for memory leaks] */
          HYPRE_ParVectorSetRandomValues(x, 775);
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
@@ -7185,10 +7268,15 @@ main( hypre_int argc,
 #endif
          hypre_ParVectorCopy(x0_save, x);
 
-         HYPRE_GMRESSetup(pcg_solver, (HYPRE_Matrix)parcsr_M, (HYPRE_Vector)b,
-                          (HYPRE_Vector)x);
-         HYPRE_GMRESSolve(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b,
-                          (HYPRE_Vector)x);
+         HYPRE_GMRESSetup(pcg_solver,
+                          (HYPRE_Matrix) parcsr_M,
+                          (HYPRE_Vector) b,
+                          (HYPRE_Vector) x);
+         HYPRE_GMRESSolve(pcg_solver,
+                          (HYPRE_Matrix) parcsr_A,
+                          (HYPRE_Vector) b,
+                          (HYPRE_Vector) x);
+         HYPRE_ANNOTATE_REGION_END("%s", "Run-2");
       }
 
       HYPRE_GMRESGetNumIterations(pcg_solver, &num_iterations);
@@ -7239,6 +7327,7 @@ main( hypre_int argc,
 
    if (solver_id == 50 || solver_id == 51 )
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("LGMRES Setup");
       hypre_BeginTiming(time_index);
 
@@ -7325,6 +7414,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
+         HYPRE_BoomerAMGSetFilterFunctions(pcg_precond, filter_functions);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
@@ -7455,6 +7545,7 @@ main( hypre_int argc,
          hypre_printf("Final LGMRES Relative Residual Norm = %e\n", final_res_norm);
          hypre_printf("\n");
       }
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
    }
 
    /*-----------------------------------------------------------
@@ -7463,6 +7554,7 @@ main( hypre_int argc,
 
    if (solver_id == 60 || solver_id == 61 || solver_id == 72 || solver_id == 82 || solver_id == 47)
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("FlexGMRES Setup");
       hypre_BeginTiming(time_index);
 
@@ -7548,6 +7640,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
+         HYPRE_BoomerAMGSetFilterFunctions(pcg_precond, filter_functions);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
@@ -7889,6 +7982,7 @@ main( hypre_int argc,
          hypre_printf("Final FlexGMRES Relative Residual Norm = %e\n", final_res_norm);
          hypre_printf("\n");
       }
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
    }
 
    /*-----------------------------------------------------------
@@ -7897,6 +7991,7 @@ main( hypre_int argc,
 
    if (solver_id == 9 || solver_id == 10 || solver_id == 11 || solver_id == 45 || solver_id == 73)
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("BiCGSTAB Setup");
       hypre_BeginTiming(time_index);
 
@@ -7980,6 +8075,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
+         HYPRE_BoomerAMGSetFilterFunctions(pcg_precond, filter_functions);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
@@ -8233,20 +8329,27 @@ main( hypre_int argc,
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
 
       if (second_time)
       {
          /* run a second time [for timings, to check for memory leaks] */
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-2");
          HYPRE_ParVectorSetRandomValues(x, 775);
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
 #endif
          hypre_ParVectorCopy(x0_save, x);
 
-         HYPRE_BiCGSTABSetup(pcg_solver, (HYPRE_Matrix) parcsr_M,
-                             (HYPRE_Vector) b, (HYPRE_Vector) x);
-         HYPRE_BiCGSTABSolve(pcg_solver, (HYPRE_Matrix) parcsr_A,
-                             (HYPRE_Vector) b, (HYPRE_Vector) x);
+         HYPRE_BiCGSTABSetup(pcg_solver,
+                             (HYPRE_Matrix) parcsr_M,
+                             (HYPRE_Vector) b,
+                             (HYPRE_Vector) x);
+         HYPRE_BiCGSTABSolve(pcg_solver,
+                             (HYPRE_Matrix) parcsr_A,
+                             (HYPRE_Vector) b,
+                             (HYPRE_Vector) x);
+         HYPRE_ANNOTATE_REGION_END("%s", "Run-2");
       }
 
       HYPRE_BiCGSTABGetNumIterations(pcg_solver, &num_iterations);
@@ -8312,6 +8415,7 @@ main( hypre_int argc,
 
    if (solver_id == 16 || solver_id == 17 || solver_id == 46 || solver_id == 74)
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("COGMRES Setup");
       hypre_BeginTiming(time_index);
 
@@ -8398,6 +8502,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
+         HYPRE_BoomerAMGSetFilterFunctions(pcg_precond, filter_functions);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
@@ -8610,20 +8715,27 @@ main( hypre_int argc,
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
 
       if (second_time)
       {
          /* run a second time [for timings, to check for memory leaks] */
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-2");
          HYPRE_ParVectorSetRandomValues(x, 775);
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
 #endif
          hypre_ParVectorCopy(x0_save, x);
 
-         HYPRE_COGMRESSetup(pcg_solver, (HYPRE_Matrix) parcsr_M,
-                            (HYPRE_Vector) b, (HYPRE_Vector) x);
-         HYPRE_COGMRESSolve(pcg_solver, (HYPRE_Matrix) parcsr_A,
-                            (HYPRE_Vector) b, (HYPRE_Vector) x);
+         HYPRE_COGMRESSetup(pcg_solver,
+                            (HYPRE_Matrix) parcsr_M,
+                            (HYPRE_Vector) b,
+                            (HYPRE_Vector) x);
+         HYPRE_COGMRESSolve(pcg_solver,
+                            (HYPRE_Matrix) parcsr_A,
+                            (HYPRE_Vector) b,
+                            (HYPRE_Vector) x);
+         HYPRE_ANNOTATE_REGION_END("%s", "Run-2");
       }
 
       HYPRE_COGMRESGetNumIterations(pcg_solver, &num_iterations);
@@ -8684,6 +8796,7 @@ main( hypre_int argc,
 
    if (solver_id == 5 || solver_id == 6)
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("CGNR Setup");
       hypre_BeginTiming(time_index);
 
@@ -8760,6 +8873,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
+         HYPRE_BoomerAMGSetFilterFunctions(pcg_precond, filter_functions);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
@@ -8845,20 +8959,27 @@ main( hypre_int argc,
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
 
       if (second_time)
       {
          /* run a second time [for timings, to check for memory leaks] */
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-2");
          HYPRE_ParVectorSetRandomValues(x, 775);
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
 #endif
          hypre_ParVectorCopy(x0_save, x);
 
-         HYPRE_CGNRSetup(pcg_solver, (HYPRE_Matrix) parcsr_M,
-                         (HYPRE_Vector) b, (HYPRE_Vector) x);
-         HYPRE_CGNRSolve(pcg_solver, (HYPRE_Matrix) parcsr_A,
-                         (HYPRE_Vector) b, (HYPRE_Vector) x);
+         HYPRE_CGNRSetup(pcg_solver,
+                         (HYPRE_Matrix) parcsr_M,
+                         (HYPRE_Vector) b,
+                         (HYPRE_Vector) x);
+         HYPRE_CGNRSolve(pcg_solver,
+                         (HYPRE_Matrix) parcsr_A,
+                         (HYPRE_Vector) b,
+                         (HYPRE_Vector) x);
+         HYPRE_ANNOTATE_REGION_END("%s", "Run-2");
       }
 
       HYPRE_CGNRGetNumIterations(pcg_solver, &num_iterations);

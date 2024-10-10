@@ -14,11 +14,26 @@
 #ifndef HYPRE_HANDLE_H
 #define HYPRE_HANDLE_H
 
+#if defined(HYPRE_USING_UMPIRE)
+#include "umpire/config.hpp"
+#if UMPIRE_VERSION_MAJOR >= 2022
+#include "umpire/interface/c_fortran/umpire.h"
+#define hypre_umpire_resourcemanager_make_allocator_pool umpire_resourcemanager_make_allocator_quick_pool
+#else
+#include "umpire/interface/umpire.h"
+#define hypre_umpire_resourcemanager_make_allocator_pool umpire_resourcemanager_make_allocator_pool
+#endif /* UMPIRE_VERSION_MAJOR >= 2022 */
+#define HYPRE_UMPIRE_POOL_NAME_MAX_LEN 1024
+#endif /* defined(HYPRE_USING_UMPIRE) */
+
 struct hypre_DeviceData;
 typedef struct hypre_DeviceData hypre_DeviceData;
+typedef void (*GPUMallocFunc)(void **, size_t);
+typedef void (*GPUMfreeFunc)(void *);
 
 typedef struct
 {
+   HYPRE_Int              log_level;
    HYPRE_Int              hypre_error;
    HYPRE_MemoryLocation   memory_location;
    HYPRE_ExecutionPolicy  default_exec_policy;
@@ -66,6 +81,7 @@ typedef struct
 } hypre_Handle;
 
 /* accessor macros to hypre_Handle */
+#define hypre_HandleLogLevel(hypre_handle)                       ((hypre_handle) -> log_level)
 #define hypre_HandleMemoryLocation(hypre_handle)                 ((hypre_handle) -> memory_location)
 #define hypre_HandleDefaultExecPolicy(hypre_handle)              ((hypre_handle) -> default_exec_policy)
 

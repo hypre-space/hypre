@@ -4432,7 +4432,7 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix  *A,
    hypre_CSRMatrix         *M_offd;
    HYPRE_Int               *M_offd_i;
 
-   HYPRE_Real              time_s, time_e;
+   HYPRE_Real              time_s = 0.0, time_e;
 
    HYPRE_Int               n = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Int               i;

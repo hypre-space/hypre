@@ -115,6 +115,10 @@ if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
 fi
 
 FILES="\
+ ${TNAME}.out.27\
+ ${TNAME}.out.28\
+ ${TNAME}.out.29\
+ ${TNAME}.out.30\
  ${TNAME}.out.101\
  ${TNAME}.out.102\
  ${TNAME}.out.103\

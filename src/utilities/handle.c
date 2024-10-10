@@ -14,7 +14,22 @@
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
 
-/* GPU SpTrans */
+/*--------------------------------------------------------------------------
+ * hypre_SetLogLevel
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SetLogLevel(HYPRE_Int log_level)
+{
+   hypre_HandleLogLevel(hypre_handle()) = log_level;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SetSpTransUseVendor
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SetSpTransUseVendor( HYPRE_Int use_vendor )
 {
@@ -27,7 +42,10 @@ hypre_SetSpTransUseVendor( HYPRE_Int use_vendor )
    return hypre_error_flag;
 }
 
-/* GPU SpMV */
+/*--------------------------------------------------------------------------
+ * hypre_SetSpMVUseVendor
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SetSpMVUseVendor( HYPRE_Int use_vendor )
 {
@@ -40,7 +58,10 @@ hypre_SetSpMVUseVendor( HYPRE_Int use_vendor )
    return hypre_error_flag;
 }
 
-/* GPU SpGemm */
+/*--------------------------------------------------------------------------
+ * hypre_SetSpGemmUseVendor
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SetSpGemmUseVendor( HYPRE_Int use_vendor )
 {
@@ -52,6 +73,10 @@ hypre_SetSpGemmUseVendor( HYPRE_Int use_vendor )
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_SetSpGemmAlgorithm
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SetSpGemmAlgorithm( HYPRE_Int value )
@@ -72,6 +97,10 @@ hypre_SetSpGemmAlgorithm( HYPRE_Int value )
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_SetSpGemmBinned
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SetSpGemmBinned( HYPRE_Int value )
 {
@@ -83,6 +112,10 @@ hypre_SetSpGemmBinned( HYPRE_Int value )
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_SetSpGemmRownnzEstimateMethod
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SetSpGemmRownnzEstimateMethod( HYPRE_Int value )
@@ -103,6 +136,10 @@ hypre_SetSpGemmRownnzEstimateMethod( HYPRE_Int value )
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_SetSpGemmRownnzEstimateNSamples
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SetSpGemmRownnzEstimateNSamples( HYPRE_Int value )
 {
@@ -114,6 +151,10 @@ hypre_SetSpGemmRownnzEstimateNSamples( HYPRE_Int value )
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_SetSpGemmRownnzEstimateMultFactor
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SetSpGemmRownnzEstimateMultFactor( HYPRE_Real value )
@@ -134,7 +175,10 @@ hypre_SetSpGemmRownnzEstimateMultFactor( HYPRE_Real value )
    return hypre_error_flag;
 }
 
-/* GPU Rand */
+/*--------------------------------------------------------------------------
+ * hypre_SetUseGpuRand
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SetUseGpuRand( HYPRE_Int use_gpurand )
 {
@@ -146,6 +190,10 @@ hypre_SetUseGpuRand( HYPRE_Int use_gpurand )
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_SetGaussSeidelMethod
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SetGaussSeidelMethod( HYPRE_Int gs_method )
@@ -159,6 +207,10 @@ hypre_SetGaussSeidelMethod( HYPRE_Int gs_method )
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_SetUserDeviceMalloc
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SetUserDeviceMalloc(GPUMallocFunc func)
 {
@@ -170,6 +222,10 @@ hypre_SetUserDeviceMalloc(GPUMallocFunc func)
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_SetUserDeviceMfree
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SetUserDeviceMfree(GPUMfreeFunc func)
@@ -183,6 +239,10 @@ hypre_SetUserDeviceMfree(GPUMfreeFunc func)
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_SetGpuAwareMPI
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SetGpuAwareMPI( HYPRE_Int use_gpu_aware_mpi )
 {
@@ -193,6 +253,10 @@ hypre_SetGpuAwareMPI( HYPRE_Int use_gpu_aware_mpi )
 #endif
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_GetGpuAwareMPI
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_GetGpuAwareMPI(void)

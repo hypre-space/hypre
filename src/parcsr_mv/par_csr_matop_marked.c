@@ -460,11 +460,7 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
       }
    }
 
-   if (num_cols_offd_C)
-   {
-      col_map_offd_C = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_HOST);
-   }
-
+   col_map_offd_C = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_HOST);
    for (i = 0; i < num_cols_offd_C; i++)
    {
       col_map_offd_C[i] = temp[i];
@@ -475,21 +471,26 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
       hypre_TFree(temp, HYPRE_MEMORY_HOST);
    }
 
-   for (i = 0 ; i < P_ext_offd_size; i++)
+   for (i = 0; i < P_ext_offd_size; i++)
+   {
       P_ext_offd_j[i] = hypre_BigBinarySearch(col_map_offd_C,
                                               Ps_ext_j[i],
                                               num_cols_offd_C);
+   }
+
    if (num_cols_offd_P)
    {
       map_P_to_C = hypre_CTAlloc(HYPRE_Int, num_cols_offd_P, HYPRE_MEMORY_HOST);
 
       cnt = 0;
       for (i = 0; i < num_cols_offd_C; i++)
+      {
          if (col_map_offd_C[i] == col_map_offd_P[cnt])
          {
             map_P_to_C[cnt++] = i;
             if (cnt == num_cols_offd_P) { break; }
          }
+      }
    }
 
    if (num_procs > 1) { hypre_CSRMatrixDestroy(Ps_ext); }

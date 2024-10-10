@@ -79,7 +79,7 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *int_buf_data = NULL;
    HYPRE_BigInt    *big_buf_data = NULL;
    HYPRE_Int       *send_map_start = NULL;
-   HYPRE_Int       *send_map_elmt;
+   HYPRE_Int       *send_map_elmt = NULL;
    HYPRE_Int       *send_procs = NULL;
    HYPRE_Int        num_recvs = 0;
    HYPRE_Int       *recv_vec_start = NULL;
@@ -888,6 +888,7 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
           * P_marker, are initialized and de-allocated internally to the
           * parallel region. */
 
+         P_marker_offd = NULL;
          my_thread_num = hypre_GetThreadNum();
          num_threads = hypre_NumActiveThreads();
          thread_start = (pass_length / num_threads) * my_thread_num;
@@ -1186,6 +1187,8 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
           * weights only over each thread's range of rows.  Rows are divided
           * up evenly amongst the threads. */
 
+         alfa = beta = 1.0;
+         P_marker_offd = C_array_offd = NULL;
          P_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
          for (i = 0; i < n_fine; i++)
          {   P_marker[i] = -1; }
@@ -1393,6 +1396,8 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
              * weights only over each thread's range of rows.  Rows are divided
              * up evenly amongst the threads. */
 
+            alfa = beta = 1.0;
+            P_marker_offd = NULL;
             P_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
             for (i = 0; i < n_fine; i++)
             {   P_marker[i] = -1; }
@@ -1623,6 +1628,7 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
           * up evenly amongst the threads. */
 
          /* Initialize thread-wise variables */
+         alfa = 1.0;
          tmp_marker = NULL;
          if (n_fine)
          {   tmp_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST); }
@@ -1790,6 +1796,7 @@ hypre_BoomerAMGBuildMultipassHost( hypre_ParCSRMatrix  *A,
              * up evenly amongst the threads. */
 
             /* Initialize thread-wise variables */
+            alfa = beta = 1.0;
             tmp_marker = NULL;
             if (n_fine)
             {    tmp_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST); }
