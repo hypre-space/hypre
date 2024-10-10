@@ -511,6 +511,10 @@ HYPRE_SStructMatrixDestroy(HYPRE_SStructMatrix matrix);
 HYPRE_Int
 HYPRE_SStructMatrixInitialize(HYPRE_SStructMatrix matrix);
 
+HYPRE_Int
+HYPRE_SStructMatrixSetEarlyAssembly( HYPRE_SStructMatrix matrix,
+                                     HYPRE_Int           early_assemble );
+
 /**
  * Set matrix coefficients index by index.  The \e values array is of length
  * \e nentries.
