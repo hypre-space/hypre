@@ -207,6 +207,20 @@ hypre_IJVectorDistributePar(hypre_IJVector  *vector,
 HYPRE_Int
 hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
 {
+    return hypre_IJVectorSetConstantValuesPar(vector, 0.0);
+}
+
+/******************************************************************************
+ *
+ * hypre_IJVectorSetConstantValuesPar
+ *
+ * sets all local components of an IJVectorPar to value
+ *
+ *****************************************************************************/
+
+HYPRE_Int
+hypre_IJVectorSetConstantValuesPar(hypre_IJVector *vector, HYPRE_Complex value)
+{
    HYPRE_Int my_id;
    HYPRE_BigInt vec_start, vec_stop;
 
@@ -226,7 +240,7 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
       if (print_level)
       {
          hypre_printf("par_vector == NULL -- ");
-         hypre_printf("hypre_IJVectorZeroValuesPar\n");
+         hypre_printf("hypre_IJVectorSetConstantValuesPar\n");
          hypre_printf("**** Vector storage is either unallocated or orphaned ****\n");
       }
       hypre_error_in_arg(1);
@@ -239,7 +253,7 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
       if (print_level)
       {
          hypre_printf("local_vector == NULL -- ");
-         hypre_printf("hypre_IJVectorZeroValuesPar\n");
+         hypre_printf("hypre_IJVectorSetConstantValuesPar\n");
          hypre_printf("**** Vector local data is either unallocated or orphaned ****\n");
       }
       hypre_error_in_arg(1);
@@ -254,7 +268,7 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
       if (print_level)
       {
          hypre_printf("vec_start > vec_stop -- ");
-         hypre_printf("hypre_IJVectorZeroValuesPar\n");
+         hypre_printf("hypre_IJVectorSetConstantValuesPar\n");
          hypre_printf("**** This vector partitioning should not occur ****\n");
       }
       hypre_error_in_arg(1);
@@ -263,7 +277,7 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
 
    hypre_assert(hypre_VectorSize(local_vector) == (HYPRE_Int)(vec_stop - vec_start));
 
-   hypre_SeqVectorSetConstantValues(local_vector, 0.0);
+   hypre_SeqVectorSetConstantValues(local_vector, value);
 
    return hypre_error_flag;
 }
