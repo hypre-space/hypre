@@ -2047,7 +2047,7 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
    HYPRE_Int                ndim         = hypre_SStructGridNDim(grid);
    hypre_BoxArray          *grid_boxes;
    hypre_Box               *grid_box = hypre_BoxCreate(ndim);
-   HYPRE_Int                i, j, cnt, var, entry, part, nvars, nSentries, num_indices;
+   HYPRE_Int                i, j, offset, var, entry, part, nvars, nSentries, num_indices;
    HYPRE_Real               threshold = 1.0;
    HYPRE_Int               *indices[ndim];
    hypre_BoxArray          *indices_boxa = NULL;
@@ -2056,7 +2056,7 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
    hypre_CSRMatrix        *A_u_offd      = hypre_ParCSRMatrixOffd(A_u);
 
    /* Set entries of ij_Ahat */
-   cnt = 0;
+   offset = 0;
    for (part = 0; part < nparts; part++)
    {
       pmatrix = hypre_SStructMatrixPMatrix(A, part);
@@ -2096,12 +2096,14 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
             hypre_BoxGetSize(grid_box, loop_size);
             hypre_SetIndex(stride, 1);
             hypre_CopyToIndex(hypre_BoxIMin(grid_box), ndim, start);
-            hypre_SerialBoxLoop0Begin(ndim, loop_size);
+            hypre_BoxLoop1ReductionBegin(ndim, loop_size,
+                                         grid_box, start, stride,
+                                         ii, num_indices);
             {
                hypre_BoxLoopGetIndex(index);
                /* WM: todo - this mapping to the unstructured indices only works with no inter-variable couplings? */
-               if (hypre_CSRMatrixI(A_u_diag)[cnt + 1] - hypre_CSRMatrixI(A_u_diag)[cnt] +
-                   hypre_CSRMatrixI(A_u_offd)[cnt + 1] - hypre_CSRMatrixI(A_u_offd)[cnt] > 0)
+               if (hypre_CSRMatrixI(A_u_diag)[offset + ii + 1] - hypre_CSRMatrixI(A_u_diag)[offset + ii] +
+                   hypre_CSRMatrixI(A_u_offd)[offset + ii + 1] - hypre_CSRMatrixI(A_u_offd)[offset + ii] > 0)
                {
                   hypre_BoxLoopGetIndex(index);
                   for (j = 0; j < ndim; j++)
@@ -2110,9 +2112,9 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
                   }
                   num_indices++;
                }
-               cnt++;
             }
-            hypre_SerialBoxLoop0End();
+            hypre_BoxLoop1ReductionEnd(ii, num_indices);
+            offset += hypre_BoxVolume(grid_box);
 
             /* WM: todo - make sure threshold is set such that there are no extra rows here! */
             if (num_indices)

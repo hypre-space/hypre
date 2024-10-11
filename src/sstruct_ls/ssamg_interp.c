@@ -466,12 +466,12 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       hypre_IJMatrix *A_struct_bndry_ij = NULL;
 
       HYPRE_Int              num_indices = 0;
+      HYPRE_Int              offset = 0;
       HYPRE_Int             *indices[ndim];
       hypre_BoxArray        *indices_boxa = NULL;
       hypre_Index            index, start;
       HYPRE_Real             threshold = 0.8; // WM: todo - what should this be?
       hypre_BoxArray      ***convert_boxa = hypre_TAlloc(hypre_BoxArray**, nparts, HYPRE_MEMORY_HOST);
-      HYPRE_Int cnt = 0;
       for (part = 0; part < nparts; part++)
       {
          A_p   = hypre_SStructMatrixPMatrix(A, part);
@@ -507,11 +507,13 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                hypre_BoxGetSize(compute_box, loop_size);
                hypre_SetIndex(stride, 1);
                hypre_CopyToIndex(hypre_BoxIMin(compute_box), ndim, start);
-               hypre_SerialBoxLoop0Begin(ndim, loop_size);
+               hypre_BoxLoop1ReductionBegin(ndim, loop_size,
+                                            compute_box, start, stride, ii,
+                                            num_indices);
                {
                   /* WM: todo - this mapping to the unstructured indices only works with no inter-variable couplings? */
-                  if (hypre_CSRMatrixI(A_u_diag)[cnt + 1] - hypre_CSRMatrixI(A_u_diag)[cnt] +
-                      hypre_CSRMatrixI(A_u_offd)[cnt + 1] - hypre_CSRMatrixI(A_u_offd)[cnt] > 0)
+                  if (hypre_CSRMatrixI(A_u_diag)[offset + ii + 1] - hypre_CSRMatrixI(A_u_diag)[offset + ii] +
+                      hypre_CSRMatrixI(A_u_offd)[offset + ii + 1] - hypre_CSRMatrixI(A_u_offd)[offset + ii] > 0)
                   {
                      hypre_BoxLoopGetIndex(index);
                      for (j = 0; j < ndim; j++)
@@ -520,9 +522,9 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                      }
                      num_indices++;
                   }
-                  cnt++;
                }
-               hypre_SerialBoxLoop0End();
+               hypre_BoxLoop1ReductionEnd(ii, num_indices);
+               offset += hypre_BoxVolume(compute_box);
 
                /* Create box array from indices marking where A_u is non-trivial */
                if (num_indices)
