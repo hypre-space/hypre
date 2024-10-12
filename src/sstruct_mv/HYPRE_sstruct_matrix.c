@@ -954,6 +954,7 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
    if (num_comm_pkgs > 0)
    {
       /* Agglomerate comm_pkgs into one comm_pkg */
+      comm_pkg = NULL;
       if (num_comm_pkgs > 1)
       {
          hypre_CommPkgAgglomerate(num_comm_pkgs, comm_pkgs, &comm_pkg);

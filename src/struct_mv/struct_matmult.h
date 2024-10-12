@@ -33,6 +33,7 @@ typedef struct hypre_StructMatmulthelper_struct
    HYPRE_Complex  *tptrs[MAXTERMS];   /* pointers to matrix data for each term */
    HYPRE_Int       offsets[MAXTERMS]; /* */
    HYPRE_Complex  *mptr;              /* pointer to matrix data for M */
+
 } hypre_StructMatmultHelper;
 
 /*--------------------------------------------------------------------------
@@ -66,6 +67,7 @@ typedef struct hypre_StructMatmultData_struct
    HYPRE_Complex      ***comm_data_a;     /* pointer to communication data */
    HYPRE_Int             num_comm_pkgs;   /* number of communication packages to be agglomerated */
    HYPRE_Int             num_comm_blocks; /* total number of communication blocks */
+
 } hypre_StructMatmultData;
 
 #endif

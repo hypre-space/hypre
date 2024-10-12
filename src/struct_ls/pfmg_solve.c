@@ -153,8 +153,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       /* compute fine grid residual (b - Ax) */
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Residual");
       hypre_StructCopy(b_l[0], r_l[0]);
-      hypre_StructMatvecCompute(matvec_data_l[0],
-                                -1.0, A_l[0], x_l[0], 1.0, r_l[0]);
+      hypre_StructMatvecCompute(matvec_data_l[0], -1.0, A_l[0], x_l[0], 1.0, r_l[0]);
       HYPRE_ANNOTATE_REGION_END("%s", "Residual");
 
       /* convergence check */
@@ -261,6 +260,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          /*--------------------------------------------------
           * Bottom
           *--------------------------------------------------*/
+
          HYPRE_ANNOTATE_MGLEVEL_BEGIN(num_levels - 1);
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarse solve");
          if (active_l[l])

@@ -285,17 +285,25 @@ HYPRE_Int hypre_StructVectorElmdivpy ( HYPRE_Complex alpha, hypre_StructVector *
 
 /* struct_communication.c */
 HYPRE_Int hypre_CommPkgCreate ( hypre_CommInfo *comm_info, hypre_BoxArray *send_data_space,
-                                hypre_BoxArray *recv_data_space, HYPRE_Int num_values, HYPRE_Int **orders, HYPRE_Int reverse,
+                                hypre_BoxArray *recv_data_space, HYPRE_Int num_values,
+                                HYPRE_Int **orders, HYPRE_Int reverse,
                                 MPI_Comm comm, hypre_CommPkg **comm_pkg_ptr );
 HYPRE_Int hypre_CommBlockSetEntries ( hypre_CommBlock *comm_block, HYPRE_Int *boxnums,
-                                      hypre_Box *boxes, HYPRE_Int *orders, hypre_Index stride, hypre_BoxArray *data_space,
+                                      hypre_Box *boxes, HYPRE_Int *orders, hypre_Index stride,
+                                      hypre_BoxArray *data_space,
                                       HYPRE_Int *data_offsets );
 HYPRE_Int hypre_CommBlockSetEntry ( hypre_CommBlock *comm_block, HYPRE_Int comm_num, hypre_Box *box,
-                                    hypre_Index stride, hypre_Index coord, hypre_Index dir, HYPRE_Int *order, HYPRE_Int *rem_order,
+                                    hypre_Index stride, hypre_Index coord, hypre_Index dir,
+                                    HYPRE_Int *order, HYPRE_Int *rem_order,
                                     hypre_Box *data_box, HYPRE_Int data_box_offset );
 HYPRE_Int hypre_CommPkgSetPrefixSizes ( hypre_CommPkg  *comm_pkg );
 HYPRE_Int hypre_CommPkgAgglomerate ( HYPRE_Int num_comm_pkgs, hypre_CommPkg **comm_pkgs,
                                      hypre_CommPkg **agg_comm_pkg_ptr );
+HYPRE_Int hypre_CommPkgAgglomData( HYPRE_Int num_comm_pkgs, hypre_CommPkg **comm_pkg_a,
+                                   HYPRE_Complex ***comm_data_a, hypre_CommPkg *comm_pkg,
+                                   HYPRE_Complex ***agg_comm_data_ptr );
+HYPRE_Int hypre_CommPkgAgglomDestroy( HYPRE_Int num_comm_pkgs, hypre_CommPkg **comm_pkg_a,
+                                      HYPRE_Complex ***comm_data_a );
 HYPRE_Int hypre_InitializeCommunication ( hypre_CommPkg *comm_pkg, HYPRE_Complex **send_data,
                                           HYPRE_Complex **recv_data, HYPRE_Int action, HYPRE_Int tag, hypre_CommHandle **comm_handle_ptr );
 HYPRE_Int hypre_FinalizeCommunication ( hypre_CommHandle *comm_handle );
@@ -348,16 +356,20 @@ HYPRE_Real hypre_StructInnerProdLocal ( hypre_StructVector *x, hypre_StructVecto
 HYPRE_Real hypre_StructInnerProd ( hypre_StructVector *x, hypre_StructVector *y );
 
 /* struct_io.c */
-HYPRE_Int hypre_PrintBoxArrayData ( FILE *file, HYPRE_Int dim, hypre_BoxArray *box_array, hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int *value_ids, HYPRE_Complex *data );
+HYPRE_Int hypre_PrintBoxArrayData ( FILE *file, HYPRE_Int dim, hypre_BoxArray *box_array,
+                                    hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int *value_ids, HYPRE_Complex *data );
 HYPRE_Int
-hypre_ReadBoxArrayData( FILE *file, HYPRE_Int ndim, hypre_BoxArray *box_array, HYPRE_Int *num_values_ptr, HYPRE_Int **value_ids_ptr, HYPRE_Complex **values_ptr );
+hypre_ReadBoxArrayData( FILE *file, HYPRE_Int ndim, hypre_BoxArray *box_array,
+                        HYPRE_Int *num_values_ptr, HYPRE_Int **value_ids_ptr, HYPRE_Complex **values_ptr );
 
 /* struct_matmult.c */
 HYPRE_Int hypre_StructMatmultCreate ( HYPRE_Int nmatrices_in, hypre_StructMatrix **matrices_in,
-                                      HYPRE_Int nterms, HYPRE_Int *terms_in, HYPRE_Int *transposes_in,
+                                      HYPRE_Int nterms, HYPRE_Int *terms_in,
+                                      HYPRE_Int *transposes_in,
                                       hypre_StructMatmultData **mmdata_ptr );
 HYPRE_Int hypre_StructMatmultDestroy ( hypre_StructMatmultData *mmdata );
-HYPRE_Int hypre_StructMatmultSetup ( hypre_StructMatmultData  *mmdata, HYPRE_Int assemble_grid, hypre_StructMatrix **M_ptr );
+HYPRE_Int hypre_StructMatmultSetup ( hypre_StructMatmultData  *mmdata, HYPRE_Int assemble_grid,
+                                     hypre_StructMatrix **M_ptr );
 HYPRE_Int hypre_StructMatmultCommunicate ( hypre_StructMatmultData *mmdata );
 HYPRE_Int hypre_StructMatmultCompute ( hypre_StructMatmultData *mmdata, hypre_StructMatrix *M );
 HYPRE_Int hypre_StructMatmultCompute_core_double ( hypre_StructMatmultHelper *a, HYPRE_Int na,
@@ -431,7 +443,8 @@ HYPRE_Int hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultHelper *a, HY
                                                 hypre_Box *hdbox, hypre_Index hdstart, hypre_Index hdstride, hypre_Box *Mdbox, hypre_Index Mdstart,
                                                 hypre_Index Mdstride );
 HYPRE_Int hypre_StructMatmult ( HYPRE_Int nmatrices, hypre_StructMatrix **matrices,
-                                HYPRE_Int nterms, HYPRE_Int *terms, HYPRE_Int *trans, hypre_StructMatrix **M_ptr );
+                                HYPRE_Int nterms, HYPRE_Int *terms, HYPRE_Int *trans,
+                                hypre_StructMatrix **M_ptr );
 HYPRE_Int hypre_StructMatmat ( hypre_StructMatrix *A, hypre_StructMatrix *B,
                                hypre_StructMatrix **M_ptr );
 HYPRE_Int hypre_StructMatrixPtAP ( hypre_StructMatrix *A, hypre_StructMatrix *P,

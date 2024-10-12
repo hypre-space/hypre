@@ -15,12 +15,6 @@
       hypre_IndexD(cindex, cdir) = 0;           \
    }
 
-#define hypre_PFMGSetFIndex(cdir, findex)       \
-   {                                            \
-      hypre_SetIndex(findex, 0);                \
-      hypre_IndexD(findex, cdir) = 1;           \
-   }
-
 #define hypre_PFMGSetStride(cdir, stride)       \
    {                                            \
       hypre_SetIndex(stride, 1);                \
@@ -95,6 +89,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    /*-----------------------------------------------------
     * Set up coarse grids
     *-----------------------------------------------------*/
+
    grid  = hypre_StructMatrixGrid(A);
 
    /* Initialize periodic */
@@ -134,10 +129,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
     * Set up matrix and vector structures
     *-----------------------------------------------------*/
 
-   /*-----------------------------------------------------
-    * Modify the rap_type if red-black Gauss-Seidel is used.
-    * Red-black gs is used only in the non-Galerkin case.
-    *-----------------------------------------------------*/
+   /* Modify the rap_type if red-black Gauss-Seidel is used.  Red-black gs is
+    * used only in the non-Galerkin case. */
    if (relax_type == 2 || relax_type == 3)   /* red-black gs */
    {
       (pfmg_data -> rap_type) = 1;
@@ -215,8 +208,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       else
       {
          /* RDF: The coarse grid should be computed in CreateRAPOp() */
-         hypre_PFMGSetCIndex(cdir, cindex);
-         hypre_PFMGSetStride(cdir, stride);
          hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l + 1]);
          hypre_StructGridAssemble(grid_l[l + 1]);
 
@@ -271,26 +262,22 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    {
       cdir = cdir_l[l];
 
-      /* set up the interpolation routine */
+      /* set up the interpolation operator */
       interp_data_l[l] = hypre_StructMatvecCreate();
       hypre_StructMatvecSetup(interp_data_l[l], P_l[l], x_l[l + 1]);
 
-      /* set up the restriction routine */
+      /* set up the restriction operator */
       restrict_data_l[l] = hypre_StructMatvecCreate();
       hypre_StructMatvecSetTranspose(restrict_data_l[l], 1);
       hypre_StructMatvecSetup(restrict_data_l[l], RT_l[l], r_l[l]);
    }
 
-   /*-----------------------------------------------------
-    * Check for zero diagonal on coarsest grid, occurs with
-    * singular problems like full Neumann or full periodic.
-    * Note that a processor with zero diagonal will set
-    * active_l =0, other processors will not. This is OK
-    * as we only want to avoid the division by zero on the
-    * one processor which owns the single coarse grid point.
-    *-----------------------------------------------------*/
-
-   if (hypre_ZeroDiagonal(A_l[l]))
+   /* Check for zero diagonal on coarsest grid, occurs with singular problems
+    * like full Neumann or full periodic.  Note that a processor with zero
+    * diagonal will set active_l = 0, other processors will not. This is OK as
+    * we only want to avoid the division by zero on the one processor that owns
+    * the single coarse grid point. */
+   if (hypre_PFMGZeroDiagonal(A_l[l]))
    {
       active_l[l] = 0;
    }
@@ -750,12 +737,11 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * Returns 1 if there is a diagonal coefficient that is zero,
- * otherwise returns 0.
+ * Returns 1 if there is a zero on the diagonal, otherwise returns 0.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ZeroDiagonal( hypre_StructMatrix *A )
+hypre_PFMGZeroDiagonal( hypre_StructMatrix *A )
 {
    hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
 
@@ -925,7 +911,7 @@ hypre_PFMGCoarsen( hypre_Box     *cbox,
       }
       hypre_IndexD(coarsen, cdir) = 1;
 
-      /* set cindex, findex, and stride */
+      /* set cindex and stride */
       hypre_PFMGSetCIndex(cdir, cindex);
       hypre_PFMGSetStride(cdir, stride);
 
