@@ -1231,8 +1231,8 @@ DistributeData( MPI_Comm      comm,
       pool_procs[pool] = pool_procs[pool - 1] + pool_procs[pool];
    }
 
-   /* check number of processes */
-   if (pool_procs[data.npools] != num_procs)
+   /* check number of processes (allow for having more procs than needed) */
+   if (pool_procs[data.npools] > num_procs)
    {
       hypre_printf("%d,  %d \n", pool_procs[data.npools], num_procs);
       hypre_printf("Error: Invalid number of processes or process topology \n");
@@ -3544,7 +3544,7 @@ main( hypre_int argc,
          values_size = 1;
          values_size = hypre_max(values_size, data.fem_nvars * data.fem_nvars);
          values_size = hypre_max(values_size, data.max_boxsize);
-         values_size = hypre_max(values_size, data.fem_nsparse);
+         values_size = hypre_max(values_size, data.max_boxsize * data.fem_nsparse);
          for (part = 0; part < nparts; part++)
          {
             pdata = data.pdata[part];
