@@ -96,9 +96,9 @@ Final FlexGMRES Relative Residual Norm = 3.782082e-09
 
 # Output file: ilu.out.324
 BoomerAMG Iterations = 10
-Final Relative Residual Norm = 7.351929e-09
+Final Relative Residual Norm = 7.955485e-09
 
 # Output file: ilu.out.325
 BoomerAMG Iterations = 9
-Final Relative Residual Norm = 1.815059e-09
+Final Relative Residual Norm = 2.327436e-09
 
