@@ -372,6 +372,8 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
     * Initialize some things
     *----------------------------------------------------------*/
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
    stencil_size  = hypre_StructStencilSize(stencil);
@@ -469,6 +471,8 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
 #else
    hypre_StructInterpAssemble(A, P, 0, cdir, findex, stride);
 #endif
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
