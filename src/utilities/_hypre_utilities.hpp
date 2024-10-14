@@ -519,7 +519,8 @@ using hypre_DeviceItem = sycl::nd_item<3>;
          sycl::local_accessor<char, 1> shmem_accessor(shmem_range, cgh);                     \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
             [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
-               { (kernel_name)(item, shmem_accessor.get_pointer(), __VA_ARGS__);             \
+               { (kernel_name)(item,                                                         \
+                  shmem_accessor.get_multi_ptr<sycl::access::decorated::yes>(), __VA_ARGS__);\
          });                                                                                 \
       }).wait_and_throw();                                                                   \
    }                                                                                         \
@@ -562,7 +563,8 @@ using hypre_DeviceItem = sycl::nd_item<3>;
             sycl::target::local> shmem_accessor(shmem_range, cgh);                           \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
             [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
-               { (kernel_name)(item, debug_stream, shmem_accessor.get_pointer(), __VA_ARGS__);\
+               { (kernel_name)(item, debug_stream,                                           \
+                  shmem_accessor.get_multi_ptr<sycl::access::decorated::yes>(), __VA_ARGS__);\
          });                                                                                 \
       }).wait_and_throw();                                                                   \
    }                                                                                         \
@@ -1788,14 +1790,14 @@ hypre_int hypre_gpu_get_grid_warp_id(hypre_DeviceItem &item)
 static __device__ __forceinline__
 void block_sync(hypre_DeviceItem &item)
 {
-   item.barrier();
+   sycl::group_barrier(item.get_group());
 }
 
 /* sync the warp */
 static __device__ __forceinline__
 void warp_sync(hypre_DeviceItem &item)
 {
-   item.get_sub_group().barrier();
+   sycl::group_barrier(item.get_sub_group());
 }
 
 /* exclusive prefix scan */
@@ -1851,7 +1853,8 @@ static __device__ __forceinline__
 T warp_shuffle_sync(hypre_DeviceItem &item, hypre_mask mask, T val, hypre_int src_line)
 {
    /* WM: todo - I'm still getting bad results if I try to remove this barrier. Needs investigation. */
-   item.get_sub_group().barrier();
+   /* item.get_sub_group().barrier(); */
+   sycl::group_barrier(item.get_sub_group());
    return sycl::group_broadcast(item.get_sub_group(), val, src_line);
 }
 
