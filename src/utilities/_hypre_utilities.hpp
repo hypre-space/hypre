@@ -1875,9 +1875,6 @@ template <typename T>
 static __device__ __forceinline__
 T warp_shuffle_sync(hypre_DeviceItem &item, hypre_mask mask, T val, hypre_int src_line)
 {
-   /* WM: todo - I'm still getting bad results if I try to remove this barrier. Needs investigation. */
-   /* item.get_sub_group().barrier(); */
-   sycl::group_barrier(item.get_sub_group());
    return sycl::group_broadcast(item.get_sub_group(), val, src_line);
 }
 
