@@ -68,7 +68,7 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
 
    HYPRE_Int            *restrict_count;
 
-   HYPRE_Real            b_dot_b, r_dot_r, eps;
+   HYPRE_Real            b_dot_b = 0.0, r_dot_r, eps = 0.0;
    HYPRE_Real            e_dot_e = 1.0, x_dot_x = 1.0;
 
    HYPRE_Int             i, l, lx, ly, lz;
@@ -164,7 +164,7 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
          if (logging > 0)
          {
             norms[i] = hypre_sqrt(r_dot_r);
-            if (b_dot_b > 0)
+            if (b_dot_b > 0.0)
             {
                rel_norms[i] = hypre_sqrt(r_dot_r / b_dot_b);
             }

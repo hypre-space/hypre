@@ -994,11 +994,10 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix  *A,
    /* Definitions */
    HYPRE_Real       zero = 0.0;
    HYPRE_Real       one  = 1.0;
-   HYPRE_Real       wall_time;
-   HYPRE_Real       wall_1 = 0;
-   HYPRE_Real       wall_2 = 0;
-   HYPRE_Real       wall_3 = 0;
-
+   HYPRE_Real       wall_time = 0.0;
+   HYPRE_Real       wall_1 = 0.0;
+   HYPRE_Real       wall_2 = 0.0;
+   HYPRE_Real       wall_3 = 0.0;
 
    hypre_ParCSRCommPkg   *extend_comm_pkg = NULL;
 
@@ -2003,8 +2002,7 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    /* Definitions */
    HYPRE_Real       zero = 0.0;
    HYPRE_Real       one  = 1.0;
-   HYPRE_Real       wall_time;
-
+   HYPRE_Real       wall_time = 0.0;
 
    hypre_ParCSRCommPkg   *extend_comm_pkg = NULL;
 

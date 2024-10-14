@@ -51,7 +51,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    HYPRE_Int              num_recvs_RT = 0;
    HYPRE_Int              num_sends_RT = 0;
    HYPRE_Int             *send_map_starts_RT = NULL;
-   HYPRE_Int             *send_map_elmts_RT;
+   HYPRE_Int             *send_map_elmts_RT = NULL;
 
    hypre_CSRMatrix       *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex         *A_diag_data = hypre_CSRMatrixData(A_diag);
@@ -93,7 +93,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    HYPRE_Int             *RAP_int_i;
    HYPRE_BigInt          *RAP_int_j;
 
-   hypre_CSRMatrix       *RAP_ext;
+   hypre_CSRMatrix       *RAP_ext = NULL;
    HYPRE_Complex         *RAP_ext_data = NULL;
    HYPRE_Int             *RAP_ext_i = NULL;
    HYPRE_BigInt          *RAP_ext_j = NULL;
@@ -123,10 +123,10 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    HYPRE_Int             *R_diag_i;
    HYPRE_Int             *R_diag_j;
 
-   hypre_CSRMatrix       *R_offd;
-   HYPRE_Complex         *R_offd_data;
-   HYPRE_Int             *R_offd_i;
-   HYPRE_Int             *R_offd_j;
+   hypre_CSRMatrix       *R_offd = NULL;
+   HYPRE_Complex         *R_offd_data = NULL;
+   HYPRE_Int             *R_offd_i = NULL;
+   HYPRE_Int             *R_offd_j = NULL;
 
    HYPRE_Real            *RA_diag_data_array = NULL;
    HYPRE_Int             *RA_diag_j_array = NULL;
@@ -573,6 +573,10 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
                                              HYPRE_MEMORY_HOST);
             P_marker = P_mark_array[ii];
          }
+         else
+         {
+            P_marker = NULL;
+         }
          A_mark_array[ii] = hypre_CTAlloc(HYPRE_Int,  num_nz_cols_A, HYPRE_MEMORY_HOST);
          A_marker = A_mark_array[ii];
          /*-----------------------------------------------------------------------
@@ -761,6 +765,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
 #endif
       for (ii = 0; ii < num_threads; ii++)
       {
+         P_marker = NULL;
          size = num_cols_offd_RT / num_threads;
          rest = num_cols_offd_RT - size * num_threads;
          if (ii < rest)

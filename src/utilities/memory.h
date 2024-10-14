@@ -75,18 +75,6 @@
 //#pragma omp requires unified_shared_memory
 #endif
 
-#if defined(HYPRE_USING_UMPIRE)
-#include "umpire/config.hpp"
-#if UMPIRE_VERSION_MAJOR >= 2022
-#include "umpire/interface/c_fortran/umpire.h"
-#define hypre_umpire_resourcemanager_make_allocator_pool umpire_resourcemanager_make_allocator_quick_pool
-#else
-#include "umpire/interface/umpire.h"
-#define hypre_umpire_resourcemanager_make_allocator_pool umpire_resourcemanager_make_allocator_pool
-#endif
-#define HYPRE_UMPIRE_POOL_NAME_MAX_LEN 1024
-#endif
-
 /* stringification:
  * _Pragma(string-literal), so we need to cast argument to a string
  * The three dots as last argument of the macro tells compiler that this is a variadic macro.
@@ -204,7 +192,17 @@ HYPRE_Int hypre_umpire_um_pooled_allocate(void **ptr, size_t nbytes);
 HYPRE_Int hypre_umpire_um_pooled_free(void *ptr);
 HYPRE_Int hypre_umpire_pinned_pooled_allocate(void **ptr, size_t nbytes);
 HYPRE_Int hypre_umpire_pinned_pooled_free(void *ptr);
-
+HYPRE_Int hypre_UmpireInit(hypre_Handle *hypre_handle_);
+HYPRE_Int hypre_UmpireFinalize(hypre_Handle *hypre_handle_);
+HYPRE_Int hypre_UmpireGetCurrentMemoryUsage(MPI_Comm comm, HYPRE_Real *current);
+HYPRE_Int hypre_UmpireMemoryGetUsage(HYPRE_Real *memory);
+HYPRE_Int hypre_HostMemoryGetUsage(HYPRE_Real *mem);
+HYPRE_Int hypre_MemoryPrintUsage(MPI_Comm comm, HYPRE_Int level,
+                                 const char *function, HYPRE_Int line);
+#define HYPRE_PRINT_MEMORY_USAGE(comm) hypre_MemoryPrintUsage(comm,\
+                                                              hypre_HandleLogLevel(hypre_handle()),\
+                                                              __func__,\
+                                                              __LINE__)
 /* memory_dmalloc.c */
 HYPRE_Int hypre_InitMemoryDebugDML( HYPRE_Int id );
 HYPRE_Int hypre_FinalizeMemoryDebugDML( void );
@@ -212,10 +210,6 @@ char *hypre_MAllocDML( HYPRE_Int size, char *file, HYPRE_Int line );
 char *hypre_CAllocDML( HYPRE_Int count, HYPRE_Int elt_size, char *file, HYPRE_Int line );
 char *hypre_ReAllocDML( char *ptr, HYPRE_Int size, char *file, HYPRE_Int line );
 void hypre_FreeDML( char *ptr, char *file, HYPRE_Int line );
-
-/* GPU malloc prototype */
-typedef void (*GPUMallocFunc)(void **, size_t);
-typedef void (*GPUMfreeFunc)(void *);
 
 #ifdef __cplusplus
 }
