@@ -174,17 +174,7 @@ hypreGPUKernel_ParCSRMatrixBlkFilterFill(hypre_DeviceItem &item,
 
             if (col < A_num_cols_offd)
             {
-#if defined(HYPRE_USING_SYCL)
-               /* WM: question - why is the atomic necessary here? */
                col_map_marker[col] = 1;
-               /* auto atomic_key = sycl::atomic_ref < */
-               /*                   HYPRE_Int, sycl::memory_order::relaxed, */
-               /*                   sycl::memory_scope::device, */
-               /*                   sycl::access::address_space::local_space > (col_map_marker[col]); */
-               /* atomic_key.fetch_or(1); */
-#else
-               atomicOr(col_map_marker + col, 1);
-#endif
             }
          }
 
