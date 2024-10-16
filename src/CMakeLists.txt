@@ -57,7 +57,9 @@ set(CMAKE_SKIP_BUILD_RPATH FALSE)                         # Includes rpath in th
 set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)                 # Use different paths for build and install
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)               # Use link-time paths
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")    # Where binaries can look for shared libraries
-set(BUILD_SHARED_LIBS "Build using shared libraries" OFF) # Build static library by default
+if(NOT BUILD_SHARED_LIBS)
+  set(BUILD_SHARED_LIBS OFF)                              # Build static library by default
+endif()
 
 # Set cmake module path
 set(CMAKE_MODULE_PATH "${HYPRE_SOURCE_DIR}/config/cmake" "${CMAKE_MODULE_PATH}")
@@ -284,13 +286,10 @@ if (NOT HYPRE_WITH_EXTRA_CFLAGS STREQUAL "")
   add_compile_options("$<$<COMPILE_LANGUAGE:C>:${HYPRE_WITH_EXTRA_CFLAGS_LIST}>")
 endif ()
 
-# Set library build type (must appear before add_library calls)
-set(BUILD_SHARED_LIBS ${HYPRE_SHARED} CACHE INTERNAL "Build shared libraries" FORCE)
-
 # Set output directory for the library
 set_target_properties(HYPRE PROPERTIES
   VERSION "${HYPRE_VERSION}"
-  SOVERSION "${HYPRE_VERSION_MAJOR}"
+  SOVERSION "${HYPRE_VERSION_MAJOR}.${HYPRE_VERSION_MINOR}"
   ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
