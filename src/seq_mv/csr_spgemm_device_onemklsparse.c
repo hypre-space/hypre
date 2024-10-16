@@ -191,7 +191,6 @@ hypreDevice_CSRSpGemmOnemklsparse(HYPRE_Int                            m,
    nnzC_h = hypre_TAlloc(std::int64_t, 1, HYPRE_MEMORY_HOST);
    hypre_TMemcpy(nnzC_h, nnzC_d, std::int64_t, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
-   hypre_printf("WM: debug - nnzC_h = %u\n", *nnzC_h);
    if (*nnzC_h > 0)
    {
 #if defined(HYPRE_BIGINT)
