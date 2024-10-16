@@ -19,9 +19,9 @@ if(POLICY CMP0104)
 endif()
 
 # The version number.
-set(HYPRE_VERSION 2.31.0)
-set(HYPRE_NUMBER  23100)
-set(HYPRE_DATE    2024/02/14)
+set(HYPRE_VERSION 2.32.0)
+set(HYPRE_NUMBER  23200)
+set(HYPRE_DATE    2024/10/08)
 set(HYPRE_TIME    00:00:00)
 set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
