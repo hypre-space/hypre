@@ -23,7 +23,9 @@
 hypre_DeviceData*
 hypre_DeviceDataCreate()
 {
-   hypre_DeviceData *data = hypre_CTAlloc(hypre_DeviceData, 1, HYPRE_MEMORY_HOST);
+   /* Note: this allocation is done directly with calloc in order to
+      avoid a segmentation fault when building with HYPRE_USING_UMPIRE_HOST */
+   hypre_DeviceData *data = (hypre_DeviceData*) calloc(1, sizeof(hypre_DeviceData));
 
 #if defined(HYPRE_USING_SYCL)
    hypre_DeviceDataDevice(data)           = nullptr;
@@ -165,7 +167,8 @@ hypre_DeviceDataDestroy(hypre_DeviceData *data)
    data->device = nullptr;
 #endif
 
-   hypre_TFree(data, HYPRE_MEMORY_HOST);
+   /* Note: Directly using free since this variable was allocated with calloc */
+   free((void*) data);
 }
 
 /*--------------------------------------------------------------------
@@ -405,29 +408,37 @@ hypre_DeviceDataStream(hypre_DeviceData *data, HYPRE_Int i)
 #elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL(hipStreamCreateWithFlags(&stream, hipStreamDefault));
 #elif defined(HYPRE_USING_SYCL)
-   auto sycl_asynchandler = [] (sycl::exception_list exceptions)
+   /* Reserve the last stream as a debugging stream on the CPU */
+   if (i == HYPRE_MAX_NUM_STREAMS - 1)
    {
-      for (std::exception_ptr const& e : exceptions)
-      {
-         try
-         {
-            std::rethrow_exception(e);
-         }
-         catch (sycl::exception const& ex)
-         {
-            std::cout << "Caught asynchronous SYCL exception:" << std::endl
-                      << ex.what() << ", SYCL code: " << ex.code() << std::endl;
-         }
-      }
-   };
-
-   if (!data->device)
-   {
-      HYPRE_DeviceInitialize();
+      stream = new sycl::queue(sycl::cpu_selector_v, sycl::property_list{sycl::property::queue::in_order{}});
    }
-   sycl::device* sycl_device = data->device;
-   sycl::context sycl_ctxt   = sycl::context(*sycl_device, sycl_asynchandler);
-   stream = new sycl::queue(sycl_ctxt, *sycl_device, sycl::property_list{sycl::property::queue::in_order{}});
+   else
+   {
+      auto sycl_asynchandler = [] (sycl::exception_list exceptions)
+      {
+         for (std::exception_ptr const& e : exceptions)
+         {
+            try
+            {
+               std::rethrow_exception(e);
+            }
+            catch (sycl::exception const& ex)
+            {
+               std::cout << "Caught asynchronous SYCL exception:" << std::endl
+                         << ex.what() << ", SYCL code: " << ex.code() << std::endl;
+            }
+         }
+      };
+
+      if (!data->device)
+      {
+         HYPRE_DeviceInitialize();
+      }
+      sycl::device* sycl_device = data->device;
+      sycl::context sycl_ctxt   = sycl::context(*sycl_device, sycl_asynchandler);
+      stream = new sycl::queue(sycl_ctxt, *sycl_device, sycl::property_list{sycl::property::queue::in_order{}});
+   }
 #endif
 
    data->streams[i] = stream;
@@ -906,7 +917,7 @@ hypreDevice_CsrRowIndicesToPtrs_v2( HYPRE_Int  nrows,
                                     HYPRE_Int *d_row_ptr )
 {
 #if defined(HYPRE_USING_SYCL)
-   /* WM: if nnz <= 0, then dpl::lower_bound is a no-op, which means we still need to zero out the row pointer */
+   /* Note: if nnz <= 0, then dpl::lower_bound is a no-op, which means we still need to zero out the row pointer */
    /* Note that this is different from thrust's behavior, where lower_bound zeros out the row pointer when nnz = 0 */
    if (nnz <= 0)
    {
@@ -1176,12 +1187,7 @@ hypreDevice_IntegerExclusiveScan( HYPRE_Int  n,
                                   HYPRE_Int *d_i )
 {
 #if defined(HYPRE_USING_SYCL)
-   /* WM: todo - this is a workaround since oneDPL's exclusive_scan gives incorrect results when doing the scan in place */
-   HYPRE_Int *tmp = hypre_CTAlloc(HYPRE_Int, n, HYPRE_MEMORY_DEVICE);
-   /* HYPRE_ONEDPL_CALL(std::exclusive_scan, d_i, d_i + n, d_i, 0); */
-   HYPRE_ONEDPL_CALL(std::exclusive_scan, d_i, d_i + n, tmp, 0);
-   hypre_TMemcpy(d_i, tmp, HYPRE_Int, n, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(tmp, HYPRE_MEMORY_DEVICE);
+   HYPRE_ONEDPL_CALL(std::exclusive_scan, d_i, d_i + n, d_i, 0);
 #else
    HYPRE_THRUST_CALL(exclusive_scan, d_i, d_i + n, d_i);
 #endif
@@ -1472,19 +1478,12 @@ hypreDevice_GenScatterAdd( HYPRE_Real  *x,
       HYPRE_ONEDPL_CALL(std::sort, zipped_begin, zipped_begin + ny,
       [](auto lhs, auto rhs) {return std::get<0>(lhs) < std::get<0>(rhs);});
 
-      // WM: todo - ABB: The below code has issues because of name mangling issues,
-      //       similar to https://github.com/oneapi-src/oneDPL/pull/166
-      //       https://github.com/oneapi-src/oneDPL/issues/507
-      //       should be fixed by now?
-      /* auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment, */
-      /*                                   map2, */
-      /*                                   map2 + ny, */
-      /*                                   y, */
-      /*                                   reduced_map, */
-      /*                                   reduced_y ); */
-      std::pair<HYPRE_Int*, HYPRE_Real*> new_end = oneapi::dpl::reduce_by_segment(
-                                                      oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream(
-                                                               hypre_handle())), map2, map2 + ny, y, reduced_map, reduced_y );
+      auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
+                                        map2,
+                                        map2 + ny,
+                                        y,
+                                        reduced_map,
+                                        reduced_y );
 #else
       HYPRE_THRUST_CALL(sort_by_key, map2, map2 + ny, y);
 
@@ -1770,7 +1769,7 @@ hypre_CurandUniform_core( HYPRE_Int          n,
                           HYPRE_Int          set_offset,
                           hypre_ulonglongint offset)
 {
-   /* WM: if n is zero, onemkl rand throws an error */
+   /* Note: if n is zero, onemkl rand throws an error */
    if (n <= 0)
    {
       return hypre_error_flag;
@@ -2951,7 +2950,7 @@ HYPRE_SetSYCLDevice(sycl::device user_device)
  * users' GPU binding approaches
  * It is supposed to be called before HYPRE_Init,
  * so that HYPRE_Init can get the wanted device id
- * WM: note - sycl has no analogue to cudaSetDevice(),
+ * Note - sycl has no analogue to cudaSetDevice(),
  * so this has no effect on the sycl implementation.
  *--------------------------------------------------------------------*/
 
@@ -3025,4 +3024,3 @@ hypre_bind_device( HYPRE_Int myid,
 {
    return hypre_bind_device_id(-1, myid, nproc, comm);
 }
-

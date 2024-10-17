@@ -140,6 +140,8 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
 #endif
    stencil = hypre_StructMatrixStencil(A);
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    if (rap_type == 0)
    {
       switch (hypre_StructStencilNDim(stencil))
@@ -234,6 +236,8 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
       hypre_StructMatrixDestroy(Ac_tmp);
    }
 #endif
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

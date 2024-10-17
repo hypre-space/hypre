@@ -279,7 +279,8 @@ hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix, HYPRE_MemoryLocation m
 
       if (!aux_matrix)
       {
-         hypre_AuxParCSRMatrixCreate(&aux_matrix, local_num_rows, hypre_ParCSRMatrixNumCols(par_matrix),
+         hypre_AuxParCSRMatrixCreate(&aux_matrix, local_num_rows,
+                                     hypre_ParCSRMatrixNumCols(par_matrix),
                                      NULL);
          hypre_IJMatrixTranslator(matrix) = aux_matrix;
       }
@@ -299,7 +300,7 @@ hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix, HYPRE_MemoryLocation m
                                                hypre_AuxParCSRMatrixDiagSizes(aux_matrix)[i];
             }
             hypre_CSRMatrixNumNonzeros(diag) = hypre_CSRMatrixI(diag)[local_num_rows];
-            hypre_CSRMatrixInitialize(diag);
+            hypre_CSRMatrixInitialize_v2(diag, 0, memory_location);
          }
 
          if (hypre_AuxParCSRMatrixOffdSizes(aux_matrix))
@@ -310,7 +311,7 @@ hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix, HYPRE_MemoryLocation m
                                                hypre_AuxParCSRMatrixOffdSizes(aux_matrix)[i];
             }
             hypre_CSRMatrixNumNonzeros(offd) = hypre_CSRMatrixI(offd)[local_num_rows];
-            hypre_CSRMatrixInitialize(offd);
+            hypre_CSRMatrixInitialize_v2(offd, 0, memory_location);
          }
       }
 
@@ -550,6 +551,7 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
    }
    else
    {
+      indx = 0;
       for (ii = 0; ii < nrows; ii++)
       {
          row = rows[ii];
@@ -558,7 +560,7 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
          {
             continue;
          }
-         indx = row_indexes[ii];
+         indx = (row_indexes) ? row_indexes[ii] : indx;
          if (row >= row_partitioning[0] && row < row_partitioning[1])
          {
             row_local = (HYPRE_Int)(row - row_partitioning[0]);

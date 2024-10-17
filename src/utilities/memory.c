@@ -605,6 +605,11 @@ static inline void
 hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_dst,
                   hypre_MemoryLocation loc_src)
 {
+   if (size == 0)
+   {
+      return;
+   }
+
 #if defined(HYPRE_USING_SYCL)
    sycl::queue* q = hypre_HandleComputeStream(hypre_handle());
 #endif
@@ -658,7 +663,10 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 #endif
 
 #if defined(HYPRE_USING_HIP)
-      HYPRE_HIP_CALL( hipMemcpy(dst, src, size, hipMemcpyDeviceToDevice) );
+      // hipMemcpy(DtoD) causes a host-side synchronization, unlike cudaMemcpy(DtoD),
+      // use hipMemcpyAsync to get cuda's more performant behavior. For more info see:
+      // https://github.com/mfem/mfem/pull/2780
+      HYPRE_HIP_CALL( hipMemcpyAsync(dst, src, size, hipMemcpyDeviceToDevice) );
 #endif
 
 #if defined(HYPRE_USING_SYCL)
@@ -786,7 +794,10 @@ hypre_Memcpy_core(void *dst, void *src, size_t size, hypre_MemoryLocation loc_ds
 #endif
 
 #if defined(HYPRE_USING_HIP)
-      HYPRE_HIP_CALL( hipMemcpy(dst, src, size, hipMemcpyDeviceToDevice) );
+      // hipMemcpy(DtoD) causes a host-side synchronization, unlike cudaMemcpy(DtoD),
+      // use hipMemcpyAsync to get cuda's more performant behavior. For more info see:
+      // https://github.com/mfem/mfem/pull/2780
+      HYPRE_HIP_CALL( hipMemcpyAsync(dst, src, size, hipMemcpyDeviceToDevice) );
 #endif
 
 #if defined(HYPRE_USING_SYCL)
@@ -1477,19 +1488,30 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
             {
                hypre_printf("[%*d]: %s", ndigits, i, function);
             }
-            hypre_printf(" | VmSize/Peak: (%5.2f / %5.2f) GB", gmem[ne * i + 0], gmem[ne * i + 1]);
-            hypre_printf(" | VmRSS/HWM: (%5.2f / %5.2f) GB", gmem[ne * i + 2], gmem[ne * i + 3]);
-            hypre_printf(" | Free/Total: (%5.2f / %6.2f) GB", gmem[ne * i + 4], gmem[ne * i + 5]);
+            hypre_printf(" | Vm[Size,RSS]/[Peak,HWM]: (%.2f, %.2f / %.2f, %.2f) GB",
+                         gmem[ne * i + 0], gmem[ne * i + 2],
+                         gmem[ne * i + 1], gmem[ne * i + 3]);
+            hypre_printf(" | Free/Total: (%.2f / %.2f)", gmem[ne * i + 4], gmem[ne * i + 5]);
 #if defined(HYPRE_USING_UMPIRE)
-            if (gmem[ne * i + 8] && gmem[ne * i + 9])
+            if (gmem[ne * i + 7])
             {
-               hypre_printf(" | DevSize/DevPeak: (%5.2f / %5.2f) GB",
+               hypre_printf(" | UmpHSize/UmpHPeak: (%.2f / %.2f)",
+                            gmem[ne * i + 6], gmem[ne * i + 7]);
+            }
+            if (gmem[ne * i + 9])
+            {
+               hypre_printf(" | UmpDPeak/UmpDPeak: (%.2f / %.2f)",
                             gmem[ne * i + 8], gmem[ne * i + 9]);
             }
-            if (gmem[ne * i + 10] && gmem[ne * i + 11])
+            if (gmem[ne * i + 11])
             {
-               hypre_printf(" | UVmSize/UVmPeak: (%5.2f / %5.2f) GB",
+               hypre_printf(" | UmpUPeak/UmpUPeak: (%.2f / %.2f)",
                             gmem[ne * i + 10], gmem[ne * i + 11]);
+            }
+            if (gmem[ne * i + 13])
+            {
+               hypre_printf(" | UmpPSize/UmpPPeak: (%.2f / %.2f)",
+                            gmem[ne * i + 12], gmem[ne * i + 13]);
             }
 #endif
             hypre_printf("\n");
@@ -1509,47 +1531,57 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
             hypre_printf("%s\n\n", function);
          }
 
+         /* Print header */
+         hypre_printf("       | %11s | %11s | %11s | %11s",
+                      "VmSize (GB)", "VmPeak (GB)", "VmRSS (GB)", "VmHWM (GB)");
+#if defined(HYPRE_USING_UMPIRE_HOST)
+         hypre_printf(" | %13s | %13s", "UmpHSize (GB)", "UmpHPeak (GB)");
+#endif
+#if defined(HYPRE_USING_UMPIRE_DEVICE)
+         hypre_printf(" | %13s | %13s", "UmpDSize (GB)", "UmpDPeak (GB)");
+#endif
 #if defined(HYPRE_USING_UMPIRE_UM)
-         hypre_printf("       | %-11s | %-11s | %-11s | %-11s | %-12s | %-12s | %-12s | %-12s\n",
-                      "VmSize (GB)", "VmPeak (GB)", "VmRSS (GB)", "VmHWM (GB)",
-                      "DevSize (GB)", "DevPeak (GB)", "UVmSize (GB)", "UVmPeak (GB)");
-         hypre_printf("   ----");
-         hypre_printf("+-------------+-------------+-------------+-------------");
-         hypre_printf("+--------------+--------------+--------------+-------------\n");
+         hypre_printf(" | %13s | %13s", "UmpUSize (GB)", "UmpUPeak (GB)");
+#endif
+#if defined(HYPRE_USING_UMPIRE_PINNED)
+         hypre_printf(" | %13s | %13s", "UmpPSize (GB)", "UmpPPeak (GB)")
+#endif
+         hypre_printf("\n");
+         hypre_printf("   ----+-------------+-------------+-------------+------------");
+#if defined(HYPRE_USING_UMPIRE_HOST)
+         hypre_printf("-+---------------+--------------");
+#endif
+#if defined(HYPRE_USING_UMPIRE_DEVICE)
+         hypre_printf("-+---------------+--------------");
+#endif
+#if defined(HYPRE_USING_UMPIRE_UM)
+         hypre_printf("-+---------------+--------------");
+#endif
+#if defined(HYPRE_USING_UMPIRE_PINNED)
+         hypre_printf("-+---------------+--------------");
+#endif
+         hypre_printf("\n");
+
+         /* Print table */
          for (i = 0; i < 4; i++)
          {
             hypre_printf("   %-3s", labels[i]);
             hypre_printf(" | %11.3f | %11.3f | %11.3f | %11.3f",
                          data[i][0], data[i][1], data[i][2], data[i][3]);
-            hypre_printf(" | %12.3f | %12.3f | %12.3f | %12.3f\n",
-                         data[i][8], data[i][9], data[i][10], data[i][11]);
-         }
-
-#elif defined(HYPRE_USING_UMPIRE_DEVICE)
-         hypre_printf("       | %-11s | %-11s | %-11s | %-11s | %-12s | %-12s\n",
-                      "VmSize (GB)", "VmPeak (GB)", "VmRSS (GB)", "VmHWM (GB)",
-                      "DevSize (GB)", "DevPeak (GB)");
-         hypre_printf("   ----");
-         hypre_printf("+-------------+-------------+-------------+-------------");
-         hypre_printf("+--------------+--------------\n");
-         for (i = 0; i < 4; i++)
-         {
-            hypre_printf("   %-3s", labels[i]);
-            hypre_printf(" | %11.3f | %11.3f | %11.3f | %11.3f | %12.3f | %12.3f\n",
-                         data[i][0], data[i][1], data[i][2], data[i][3], data[i][8], data[i][9]);
-         }
-
-#else
-         hypre_printf("       | %11s | %11s | %11s | %11s\n",
-                      "VmSize (GB)", "VmPeak (GB)", "VmRSS (GB)", "VmHWM (GB)");
-         hypre_printf("   ----+-------------+-------------+-------------+------------\n");
-         for (i = 0; i < 4; i++)
-         {
-            hypre_printf("   %3s | %11.3f | %11.3f | %11.3f | %11.3f\n",
-                         labels[i], data[i][0], data[i][1], data[i][2], data[i][3]);
-         }
+#if defined(HYPRE_USING_UMPIRE_HOST)
+            hypre_printf(" | %13.3f | %13.3f", data[i][6], data[i][7]);
 #endif
-         hypre_printf("\n");
+#if defined(HYPRE_USING_UMPIRE_DEVICE)
+            hypre_printf(" | %13.3f | %13.3f", data[i][8], data[i][9]);
+#endif
+#if defined(HYPRE_USING_UMPIRE_UM)
+            hypre_printf(" | %13.3f | %13.3f", data[i][10], data[i][11]);
+#endif
+#if defined(HYPRE_USING_UMPIRE_PINNED)
+            hypre_printf(" | %13.3f | %13.3f", data[i][12], data[i][13]);
+#endif
+            hypre_printf("\n");
+         }
       }
    }
    hypre_MPI_Barrier(comm);

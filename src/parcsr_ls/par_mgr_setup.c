@@ -221,6 +221,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
       HYPRE_ANNOTATE_FUNC_END;
       hypre_GpuProfilingPopRange();
+      hypre_GpuProfilingPopRange();
 
       return hypre_error_flag;
    }
@@ -1188,7 +1189,10 @@ hypre_MGRSetup( void               *mgr_vdata,
                                                    -1, CF_marker, inv_size, 1, diag_inv);
             frelax_diaginv[lev] = diag_inv;
             blk_size[lev] = block_jacobi_bsize;
-            hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_FF);
+            if (!A_FF)
+            {
+               hypre_MGRBuildAff(A_array[lev], CF_marker, debug_flag, &A_FF);
+            }
          }
 
          /* Set A_ff pointer */
@@ -1219,8 +1223,6 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_ParCSRMatrixDestroy(Wr); Wr = NULL;
       if (Wp)
       {
-         hypre_ParCSRMatrixDeviceColMapOffd(Wp) = NULL;
-         hypre_ParCSRMatrixColMapOffd(Wp) = NULL;
          hypre_ParCSRMatrixDestroy(Wp); Wp = NULL;
       }
 
@@ -1246,6 +1248,7 @@ hypre_MGRSetup( void               *mgr_vdata,
                      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                                        "F-relaxation solver has not been setup\n");
                      HYPRE_ANNOTATE_FUNC_END;
+                     hypre_GpuProfilingPopRange();
                      hypre_GpuProfilingPopRange();
 
                      return hypre_error_flag;
@@ -1707,8 +1710,8 @@ hypre_MGRSetup( void               *mgr_vdata,
    hypre_MGRDataPrint(mgr_vdata);
 
    hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "MGR setup end", 0);
-   HYPRE_ANNOTATE_FUNC_END;
    hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -1729,6 +1732,7 @@ hypre_MGRSetupFrelaxVcycleData( void               *mgr_vdata,
    MPI_Comm           comm = hypre_ParCSRMatrixComm(A);
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    hypre_ParAMGData    **FrelaxVcycleData = mgr_data -> FrelaxVcycleData;
+   HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
    HYPRE_Int i, j, num_procs, my_id;
 
@@ -1902,7 +1906,7 @@ hypre_MGRSetupFrelaxVcycleData( void               *mgr_vdata,
 
    while (not_finished)
    {
-      local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array_local[lev_local]));
+      local_size = hypre_ParCSRMatrixNumRows(A_array_local[lev_local]);
       dof_func_data = NULL;
       if (dof_func_array[lev_local])
       {
@@ -1911,12 +1915,14 @@ hypre_MGRSetupFrelaxVcycleData( void               *mgr_vdata,
 
       if (lev_local == 0)
       {
-         /* use the CF_marker from the outer MGR cycle to create the strength connection matrix */
-         hypre_BoomerAMGCreateSFromCFMarker(A_array_local[lev_local], strong_threshold,
+         /* use the CF_marker from the outer MGR cycle
+            to create the strength connection matrix */
+         hypre_BoomerAMGCreateSFromCFMarker(A_array_local[lev_local],
+                                            strong_threshold,
                                             max_row_sum,
                                             hypre_IntArrayData(CF_marker_array[lev]),
-                                            num_functions, dof_func_data, smrk_local, &S_local);
-         //hypre_ParCSRMatrixPrintIJ(S_local, 0, 0, "S_mat");
+                                            num_functions, dof_func_data,
+                                            smrk_local, &S_local);
       }
       else if (lev_local > 0)
       {
@@ -1926,7 +1932,7 @@ hypre_MGRSetupFrelaxVcycleData( void               *mgr_vdata,
       }
 
       CF_marker_array_local[lev_local] = hypre_IntArrayCreate(local_size);
-      hypre_IntArrayInitialize(CF_marker_array_local[lev_local]);
+      hypre_IntArrayInitialize_v2(CF_marker_array_local[lev_local], memory_location);
       CF_marker_local = hypre_IntArrayData(CF_marker_array_local[lev_local]);
 
       hypre_BoomerAMGCoarsenHMIS(S_local, A_array_local[lev_local], measure_type,
