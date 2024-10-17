@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: @HYPRE_NAME@
+Description: Parallel solvers for sparse linear systems featuring multigrid methods.
+Version: @HYPRE_VERSION@
+Libs: -L${libdir} -Wl,-rpath,${libdir} -lHYPRE @LIBS@ @CALIPER_LIBS@ @HYPRE_CUDA_LIBS@ @HYPRE_HIP_LIBS@ @HYPRE_SYCL_LIBS@ @HYPRE_RAJA_LIB_DIR@ @HYPRE_RAJA_LIB@ @HYPRE_KOKKOS_LIB_DIR@ @HYPRE_KOKKOS_LIB@ @HYPRE_UMPIRE_LIB_DIR@ @HYPRE_UMPIRE_LIB@ @HYPRE_MAGMA_LIB_DIR@ @HYPRE_MAGMA_LIB@
+Cflags: -I${includedir} @CALIPER_INCLUDE@ @HYPRE_CUDA_INCLUDE@ @HYPRE_HIP_INCL@ @HYPRE_SYCL_INCL@ @HYPRE_RAJA_INCLUDE@ @HYPRE_KOKKOS_INCLUDE@ @HYPRE_UMPIRE_INCLUDE@ @HYPRE_MAGMA_INCLUDE@ @HYPRE_NAP_INCLUDE@
