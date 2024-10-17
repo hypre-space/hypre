@@ -3691,7 +3691,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #if DEBUG_SAVE_ALL_OPS
          {
             char filename[256];
-            hypre_sprintf(file, "G_%02d.IJ.out", j);
+            hypre_sprintf(filename, "G_%02d.IJ.out", j);
             hypre_ParCSRMatrixPrintIJ(hypre_ParFSAIDataGmat((hypre_ParFSAIData*) smoother[j]),
                                       0, 0, filename);
          }
