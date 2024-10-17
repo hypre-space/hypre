@@ -62,6 +62,8 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
    hypre_ComputeInfo       *compute_info;
    hypre_ComputePkg        *compute_pkg;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /*----------------------------------------------------------
     * Set up the compute package
     *----------------------------------------------------------*/
@@ -80,6 +82,8 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
    (matvec_data -> A)           = hypre_StructMatrixRef(A);
    (matvec_data -> x)           = hypre_StructVectorRef(x);
    (matvec_data -> compute_pkg) = compute_pkg;
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -124,6 +128,8 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    /*-----------------------------------------------------------------------
     * Initialize some things
     *-----------------------------------------------------------------------*/
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
    if (constant_coefficient) { hypre_StructVectorClearBoundGhostValues(x, 0); }
@@ -274,6 +280,8 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       hypre_StructVectorDestroy(x_tmp);
       x = y;
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
