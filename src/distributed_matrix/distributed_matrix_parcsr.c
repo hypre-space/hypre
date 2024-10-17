@@ -103,7 +103,7 @@ hypre_DistributedMatrixGetRowParCSR( hypre_DistributedMatrix *dm,
 
    // RL: if HYPRE_ParCSRMatrixGetRow was on device, need the next line to guarantee it's done
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 #endif
 
    return(ierr);

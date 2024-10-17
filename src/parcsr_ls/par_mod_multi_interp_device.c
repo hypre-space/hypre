@@ -387,7 +387,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
       if (hypre_GetGpuAwareMPI())
       {
-         hypre_ForceSyncComputeStream(hypre_handle());
+         hypre_ForceSyncComputeStream();
       }
 #endif
 
@@ -425,7 +425,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
       if (hypre_GetGpuAwareMPI())
       {
-         hypre_ForceSyncComputeStream(hypre_handle());
+         hypre_ForceSyncComputeStream();
       }
 #endif
 
@@ -582,7 +582,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
          /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
          if (hypre_GetGpuAwareMPI())
          {
-            hypre_ForceSyncComputeStream(hypre_handle());
+            hypre_ForceSyncComputeStream();
          }
 #endif
 
@@ -1100,7 +1100,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
       /* RL: make sure big_buf_data is ready before issuing GPU-GPU MPI */
       if (hypre_GetGpuAwareMPI())
       {
-         hypre_ForceSyncComputeStream(hypre_handle());
+         hypre_ForceSyncComputeStream();
       }
 #endif
 
@@ -1390,7 +1390,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
       /* RL: make sure big_buf_data is ready before issuing GPU-GPU MPI */
       if (hypre_GetGpuAwareMPI())
       {
-         hypre_ForceSyncComputeStream(hypre_handle());
+         hypre_ForceSyncComputeStream();
       }
 #endif
 

@@ -51,6 +51,8 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
                                                HYPRE_Int            max_elmts,
                                                hypre_ParCSRMatrix **P_ptr )
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
    HYPRE_Int           A_nr_local   = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);
@@ -109,7 +111,7 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 #endif
 
@@ -335,6 +337,8 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
                                                  HYPRE_Int            max_elmts,
                                                  hypre_ParCSRMatrix **P_ptr )
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
    HYPRE_Int           A_nr_local   = hypre_ParCSRMatrixNumRows(A);
    hypre_CSRMatrix    *A_diag       = hypre_ParCSRMatrixDiag(A);
    HYPRE_Complex      *A_diag_data  = hypre_CSRMatrixData(A_diag);
@@ -430,7 +434,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 #endif
 
@@ -455,7 +459,7 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 #endif
 

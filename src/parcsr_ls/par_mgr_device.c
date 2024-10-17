@@ -562,6 +562,9 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                           HYPRE_Int            *B_diag_j,
                                           HYPRE_Complex        *B_diag_data )
 {
+   HYPRE_UNUSED_VAR(CF_marker);
+   HYPRE_UNUSED_VAR(diag_size);
+
    /* Matrix variables */
    HYPRE_BigInt          num_rows_A   = hypre_ParCSRMatrixGlobalNumRows(A);
    hypre_CSRMatrix      *A_diag       = hypre_ParCSRMatrixDiag(A);

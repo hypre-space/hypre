@@ -115,11 +115,11 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
 #else
    HYPRE_THRUST_CALL(
       exclusive_scan_by_key,
-      make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0) + N0), /* key begin */
-      make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),      /* key end */
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),         /* input value begin */
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X) + N0),          /* output value begin */
-      char(0),                                                                   /* init */
+      thrust::make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0) + N0), /* key begin */
+      thrust::make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),      /* key end */
+      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),         /* input value begin */
+      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X) + N0),          /* output value begin */
+      char(0),                                                                           /* init */
       thrust::equal_to<HYPRE_BigInt>(),
       thrust::maximum<char>() );
 
@@ -196,10 +196,10 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
 #else
    HYPRE_THRUST_CALL(
       inclusive_scan_by_key,
-      make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0) + N0), /* key begin */
-      make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),    /* key end */
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),       /* input value begin */
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),       /* output value begin */
+      thrust::make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0) + N0), /* key begin */
+      thrust::make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),      /* key end */
+      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),         /* input value begin */
+      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),         /* output value begin */
       thrust::equal_to<HYPRE_BigInt>(),
       thrust::maximum<char>() );
 
@@ -658,4 +658,3 @@ hypre_IJVectorUpdateValuesDevice( hypre_IJVector      *vector,
 }
 
 #endif
-

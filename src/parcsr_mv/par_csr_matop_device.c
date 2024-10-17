@@ -684,6 +684,9 @@ hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix   *A,
                                        HYPRE_Int             want_data,
                                        void                **request_ptr)
 {
+   HYPRE_UNUSED_VAR(indices);
+   HYPRE_UNUSED_VAR(indices_len);
+
    HYPRE_Int      i, j;
    HYPRE_Int      num_sends, num_rows_send, num_nnz_send, num_recvs, num_rows_recv, num_nnz_recv;
    HYPRE_Int     *d_send_i, *send_i, *d_send_map, *d_recv_i, *recv_i;
@@ -840,7 +843,7 @@ hypre_ParcsrGetExternalRowsDeviceInit( hypre_ParCSRMatrix   *A,
    /* RL: make sure d_send_j/d_send_a is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 
    /* init communication */
@@ -1319,7 +1322,7 @@ hypre_MergeDiagAndOffdDevice(hypre_ParCSRMatrix *A)
    hypre_CSRMatrixData(B) = B_a;
    hypre_CSRMatrixMemoryLocation(B) = HYPRE_MEMORY_DEVICE;
 
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 
    return B;
 }
@@ -1440,7 +1443,7 @@ hypre_ParCSRMatrixGetRowDevice( hypre_ParCSRMatrix  *mat,
       *values = hypre_ParCSRMatrixRowvalues(mat);
    }
 
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 
    return hypre_error_flag;
 }
@@ -1496,7 +1499,7 @@ hypre_ParCSRMatrixTransposeDevice( hypre_ParCSRMatrix  *A,
       /* RL: make sure A_offdT is ready before issuing GPU-GPU MPI */
       if (hypre_GetGpuAwareMPI())
       {
-         hypre_ForceSyncComputeStream(hypre_handle());
+         hypre_ForceSyncComputeStream();
       }
 #endif
 
@@ -1740,7 +1743,6 @@ hypre_ParCSRMatrixAddDevice( HYPRE_Complex        alpha,
 
       hypreDevice_CSRSpAdd( hypre_CSRMatrixNumRows(A_offd),
                             hypre_CSRMatrixNumRows(B_offd),
-                            num_cols_offd_C,
                             hypre_CSRMatrixNumNonzeros(A_offd),
                             hypre_CSRMatrixNumNonzeros(B_offd),
                             hypre_CSRMatrixI(A_offd),
@@ -1938,7 +1940,7 @@ hypre_ParCSRMatrixDiagScaleDevice( hypre_ParCSRMatrix *par_A,
    /* make sure send_rdbuf_data is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 #endif
 
@@ -1959,7 +1961,7 @@ hypre_ParCSRMatrixDiagScaleDevice( hypre_ParCSRMatrix *par_A,
     * Synchronize calls
     *--------------------------------------------------------------------*/
    hypre_SetSyncCudaCompute(sync_stream);
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 #endif
 
    /* Free memory */
