@@ -1844,13 +1844,13 @@ T warp_prefix_sum(hypre_DeviceItem &item, hypre_int lane_id, T in, T &all_sum)
 }
 
 static __device__ __forceinline__
-hypre_mask hypre_ballot_sync(hypre_DeviceItem &item, unsigned int mask, int predicate)
+hypre_mask hypre_ballot_sync(hypre_DeviceItem &item, hypre_mask mask, hypre_int predicate)
 {
    return sycl::reduce_over_group(
-       item.get_sub_group(),
-       (mask & (0x1 << item.get_sub_group().get_local_linear_id())) &&
-               predicate ? (0x1 << item.get_sub_group().get_local_linear_id()) : 0,
-       sycl::ext::oneapi::plus<>());
+             item.get_sub_group(),
+             (mask & (0x1 << item.get_sub_group().get_local_linear_id())) &&
+             predicate ? (0x1 << item.get_sub_group().get_local_linear_id()) : 0,
+             sycl::ext::oneapi::plus<>());
 }
 
 static __device__ __forceinline__
