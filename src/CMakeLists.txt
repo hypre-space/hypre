@@ -64,19 +64,9 @@ endif ()
 set(CMAKE_MODULE_PATH "${HYPRE_SOURCE_DIR}/config/cmake" "${CMAKE_MODULE_PATH}")
 include(HYPRE_CMakeUtilities)
 
-# Set default installation directory, but provide a means for users to change
-set(HYPRE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/hypre" CACHE PATH
-    "Installation directory for HYPRE")
-if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX "${HYPRE_INSTALL_PREFIX}" CACHE INTERNAL "" FORCE)
-endif ()
-
 # Set default compile optimization flag
-set(HYPRE_BUILD_TYPE "Release" CACHE STRING
-    "Optimization flags: set to Debug, Release, RelWithDebInfo, or MinSizeRel")
-
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  set(CMAKE_BUILD_TYPE "${HYPRE_BUILD_TYPE}" CACHE INTERNAL "" FORCE)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Optimization flags: set to Debug, Release, RelWithDebInfo, or MinSizeRel")
   # Set the possible values of build type for cmake-gui
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
     "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
@@ -174,6 +164,8 @@ endif ()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(HYPRE_DEBUG ON CACHE BOOL "" FORCE)
+else ()
+  set(HYPRE_DEBUG OFF CACHE BOOL "" FORCE)
 endif ()
 
 if (HYPRE_ENABLE_HYPRE_BLAS)
@@ -310,7 +302,9 @@ if (HYPRE_WITH_CUDA)
 
     if (HYPRE_ENABLE_UNIFIED_MEMORY)
       set(HYPRE_USING_UNIFIED_MEMORY ON CACHE BOOL "" FORCE)
+      set(HYPRE_USING_DEVICE_MEMORY OFF CACHE BOOL "" FORCE)
     else ()
+      set(HYPRE_USING_UNIFIED_MEMORY OFF CACHE BOOL "" FORCE)
       set(HYPRE_USING_DEVICE_MEMORY ON CACHE BOOL "" FORCE)
     endif ()
 
@@ -384,7 +378,9 @@ if (HYPRE_WITH_SYCL)
 
   if (HYPRE_ENABLE_UNIFIED_MEMORY)
     set(HYPRE_USING_UNIFIED_MEMORY ON CACHE BOOL "" FORCE)
+    set(HYPRE_USING_DEVICE_MEMORY OFF CACHE BOOL "" FORCE)
   else ()
+    set(HYPRE_USING_UNIFIED_MEMORY OFF CACHE BOOL "" FORCE)
     set(HYPRE_USING_DEVICE_MEMORY ON CACHE BOOL "" FORCE)
   endif ()
 
