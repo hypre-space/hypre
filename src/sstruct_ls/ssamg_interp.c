@@ -639,10 +639,10 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                hypre_BoxLoop1ReductionBegin(ndim, loop_size, compute_box, start, stride,
                                             ii, num_indices);
                {
-                  if (hypre_CSRMatrixI(A_u_diag)[offset + ii + 1] -
-                      hypre_CSRMatrixI(A_u_diag)[offset + ii]
-                      hypre_CSRMatrixI(A_u_offd)[offset + ii + 1] -
-                      hypre_CSRMatrixI(A_u_offd)[offset + ii] > 0)
+                  if (hypre_CSRMatrixI(A_ud)[offset + ii + 1] -
+                      hypre_CSRMatrixI(A_ud)[offset + ii] +
+                      hypre_CSRMatrixI(A_uo)[offset + ii + 1] -
+                      hypre_CSRMatrixI(A_uo)[offset + ii] > 0)
                   {
                      hypre_Index index;
                      hypre_BoxLoopGetIndex(index);

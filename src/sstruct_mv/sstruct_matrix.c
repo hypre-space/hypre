@@ -2059,7 +2059,7 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
    hypre_BoxArray          *grid_boxes;
    hypre_Box               *grid_box;
    HYPRE_Int               *num_ghost;
-   HYPRE_Int                i, j, offset, var, entry, part, nvars, nSentries, num_indices;
+   HYPRE_Int                i, j, offset, volume, var, entry, part, nvars, nSentries, num_indices;
    HYPRE_Real               threshold = 1.0;
    HYPRE_Int               *indices[HYPRE_MAXDIM];
    hypre_BoxArray          *indices_boxa = NULL;
@@ -2067,7 +2067,6 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
    HYPRE_Complex           *values;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_Int                volume;
    HYPRE_Int                max_num_rownnz;
    HYPRE_Int               *nonzero_rows;
    HYPRE_Int               *nonzero_rows_end;
