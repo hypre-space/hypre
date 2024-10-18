@@ -415,7 +415,7 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 #endif
 
@@ -1600,7 +1600,7 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
    /* RL: make sure send_buf is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 #endif
 
