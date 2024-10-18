@@ -2059,7 +2059,7 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
    hypre_BoxArray          *grid_boxes;
    hypre_Box               *grid_box;
    HYPRE_Int               *num_ghost;
-   HYPRE_Int                i, j, cnt, var, entry, part, nvars, nSentries, num_indices;
+   HYPRE_Int                i, j, offset, var, entry, part, nvars, nSentries, num_indices;
    HYPRE_Real               threshold = 1.0;
    HYPRE_Int               *indices[HYPRE_MAXDIM];
    hypre_BoxArray          *indices_boxa = NULL;
@@ -2104,7 +2104,7 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
 #endif
 
    /* Set entries of ij_Ahat */
-   cnt = 0;
+   offset = 0;
    for (part = 0; part < nparts; part++)
    {
       pmatrix = hypre_SStructMatrixPMatrix(A, part);
@@ -2138,12 +2138,12 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
             num_ghost = hypre_StructGridNumGhost(sgrid);
             hypre_BoxGrowByArray(grid_box, num_ghost);
             hypre_BoxGetSize(grid_box, loop_size);
+            volume = hypre_BoxVolume(grid_box);
             hypre_SetIndex(stride, 1);
             hypre_CopyToIndex(hypre_BoxIMin(grid_box), ndim, start);
 
 #if defined(HYPRE_USING_GPU)
             /* Get ALL the indices */
-            volume = hypre_BoxVolume(grid_box);
             for (j = 0; j < ndim; j++)
             {
                all_indices[j] = hypre_CTAlloc(HYPRE_Int, volume, HYPRE_MEMORY_DEVICE);
@@ -2176,17 +2176,14 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
                                                       nonzero_rows,
                                                       nonzero_rows_end,
                                                       box_nonzero_rows,
-                                                      in_range<HYPRE_Int>(cnt, cnt + volume) );
+                                                      in_range<HYPRE_Int>(offset, offset + volume) );
             HYPRE_THRUST_CALL( transform,
                                box_nonzero_rows,
                                box_nonzero_rows_end,
-                               thrust::make_constant_iterator(cnt),
+                               thrust::make_constant_iterator(offset),
                                box_nonzero_rows,
                                thrust::minus<HYPRE_Int>() );
             num_indices = box_nonzero_rows_end - box_nonzero_rows;
-            /* WM: todo - these offsets for the unstructured indices only work
-               with no inter-variable couplings? */
-            cnt += volume;
             for (j = 0; j < ndim; j++)
             {
                indices[j] = hypre_CTAlloc(HYPRE_Int, num_indices, HYPRE_MEMORY_DEVICE);
@@ -2217,17 +2214,14 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
                                           HYPRE_MEMORY_DEVICE);
             }
 
-            hypre_BoxLoop1Begin(ndim, loop_size, grid_box, start, stride, ii);
+            hypre_BoxLoop1ReductionBegin(ndim, loop_size, grid_box, start, stride, ii, num_indices);
             {
-               hypre_Index index;
-               hypre_BoxLoopGetIndex(index);
-               HYPRE_UNUSED_VAR(ii);
-
-               /* WM: todo - this mapping to the unstructured indices
-                  only works with no inter-variable couplings? */
-               if (hypre_CSRMatrixI(A_ud)[cnt + 1] - hypre_CSRMatrixI(A_ud)[cnt] +
-                   hypre_CSRMatrixI(A_uo)[cnt + 1] - hypre_CSRMatrixI(A_uo)[cnt] > 0)
+               if (hypre_CSRMatrixI(A_ud)[offset + ii + 1] -
+                   hypre_CSRMatrixI(A_ud)[offset + ii] +
+                   hypre_CSRMatrixI(A_uo)[offset + ii + 1]
+                   - hypre_CSRMatrixI(A_uo)[offset + ii] > 0)
                {
+                  hypre_Index index;
                   hypre_BoxLoopGetIndex(index);
                   for (j = 0; j < ndim; j++)
                   {
@@ -2235,11 +2229,13 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
                   }
                   num_indices++;
                }
-               cnt++;
             }
-            hypre_BoxLoop1End(ii);
+            hypre_BoxLoop1ReductionEnd(ii, num_indices);
 
 #endif // defined(HYPRE_USING_GPU)
+            /* WM: todo - these offsets for the unstructured indices only work
+               with no inter-variable couplings? */
+            offset += volume;
 
             /* WM: todo - make sure threshold is set such that
                there are no extra rows here! */

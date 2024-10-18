@@ -218,7 +218,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
    HYPRE_Int                part, nvars;
    HYPRE_Int                box_id;
    HYPRE_Int                d, i, ii, j, si, vi;
-   HYPRE_Int                vol, cnt;
+   HYPRE_Int                vol, offset;
    HYPRE_Int                box_start_index;
 
    HYPRE_Int                debug_flag = 0;
@@ -523,10 +523,10 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 #endif
 
       /* Convert boundary of A to IJ matrix */
-      num_indices  = 0;
+      offset       = 0;
       threshold    = 0.8; // WM: todo - what should this be?
       convert_boxa = hypre_TAlloc(hypre_BoxArray**, nparts, HYPRE_MEMORY_HOST);
-      for (cnt = 0, part = 0; part < nparts; part++)
+      for (part = 0; part < nparts; part++)
       {
          A_p   = hypre_SStructMatrixPMatrix(A, part);
          pgrid = hypre_SStructGridPGrid(grid, part);
@@ -595,18 +595,15 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                                                    nonzero_rows,
                                                    nonzero_rows_end,
                                                    box_nnzrows,
-                                                   in_range<HYPRE_Int>(cnt, cnt + vol));
+                                                   in_range<HYPRE_Int>(offset, offset + vol));
                HYPRE_THRUST_CALL(transform,
                                  box_nnzrows,
                                  box_nnzrows_end,
-                                 thrust::make_constant_iterator(cnt),
+                                 thrust::make_constant_iterator(offset),
                                  box_nnzrows,
                                  thrust::minus<HYPRE_Int>());
                num_indices = box_nnzrows_end - box_nnzrows;
 
-               /* WM: todo - these offsets for the unstructured indices only
-                  work with no inter-variable couplings? */
-               cnt += vol;
                for (j = 0; j < ndim; j++)
                {
                   indices[j] = hypre_CTAlloc(HYPRE_Int, num_indices,
@@ -633,21 +630,19 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
 #else // defined(HYPRE_USING_GPU)
 
-               /* WM: old implementation */
                num_indices = 0;
                for (j = 0; j < ndim; j++)
                {
                   indices[j] = hypre_CTAlloc(HYPRE_Int, vol, HYPRE_MEMORY_DEVICE);
                }
 
-               hypre_BoxLoop1Begin(ndim, loop_size, compute_box, start, stride, ii);
+               hypre_BoxLoop1ReductionBegin(ndim, loop_size, compute_box, start, stride,
+                                            ii, num_indices);
                {
-                  HYPRE_UNUSED_VAR(ii);
-
-                  /* WM: todo - this mapping to the unstructured indices only works
-                      with no inter-variable couplings? */
-                  if (hypre_CSRMatrixI(A_ud)[cnt + 1] - hypre_CSRMatrixI(A_ud)[cnt] +
-                      hypre_CSRMatrixI(A_uo)[cnt + 1] - hypre_CSRMatrixI(A_uo)[cnt] > 0)
+                  if (hypre_CSRMatrixI(A_u_diag)[offset + ii + 1] -
+                      hypre_CSRMatrixI(A_u_diag)[offset + ii]
+                      hypre_CSRMatrixI(A_u_offd)[offset + ii + 1] -
+                      hypre_CSRMatrixI(A_u_offd)[offset + ii] > 0)
                   {
                      hypre_Index index;
                      hypre_BoxLoopGetIndex(index);
@@ -657,11 +652,13 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                      }
                      num_indices++;
                   }
-                  cnt++;
                }
-               hypre_BoxLoop1End(ii);
+               hypre_BoxLoop1ReductionEnd(ii, num_indices);
 
 #endif // defined(HYPRE_USING_GPU)
+               /* WM: todo - these offsets for the unstructured indices only
+                  work with no inter-variable couplings? */
+               offset += vol;
 
                /* Create box array from indices marking where A_u is non-trivial */
                if (num_indices)
