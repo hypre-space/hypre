@@ -2563,10 +2563,10 @@ main( hypre_int argc,
 #endif
 
 #if defined(HYPRE_TEST_USING_HOST)
-   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_HOST;
+   HYPRE_MemoryLocation  memory_location     = HYPRE_MEMORY_HOST;
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
 #else
-   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
+   HYPRE_MemoryLocation  memory_location     = HYPRE_MEMORY_DEVICE;
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
 #endif
 
@@ -3315,7 +3315,7 @@ main( hypre_int argc,
       }
    }
 
-   for (rep = 0; rep < reps; ++rep)
+   for (rep = 0; rep < reps; rep++)
    {
       /*-----------------------------------------------------------
        * Build Matrix
@@ -3328,7 +3328,8 @@ main( hypre_int argc,
       {
          if (!myid)
          {
-            hypre_printf("Reading SStructMatrix A from file: %s\n", argv[read_fromfile_index[0]]);
+            hypre_printf("Reading SStructMatrix A from file: %s\n",
+                         argv[read_fromfile_index[0]]);
          }
 
          HYPRE_SStructMatrixRead(comm, argv[read_fromfile_index[0]], &A);
@@ -3340,7 +3341,8 @@ main( hypre_int argc,
           * Distribute data
           *-----------------------------------------------------------*/
 
-         DistributeData(comm, global_data, pooldist, refine, distribute, block, &data);
+         DistributeData(comm, global_data, pooldist,
+                        refine, distribute, block, &data);
 
          /*-----------------------------------------------------------
           * Check a few things
@@ -3369,6 +3371,7 @@ main( hypre_int argc,
          /*-----------------------------------------------------------
           * Build grid
           *-----------------------------------------------------------*/
+
          HYPRE_SStructGridCreate(comm, data.ndim, data.nparts, &grid);
          if (data.numghost != NULL)
          {
@@ -3679,7 +3682,7 @@ main( hypre_int argc,
 
                hypre_TMemcpy(d_values, values,
                              HYPRE_Real, pdata.graph_boxsizes[box],
-                             HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                             memory_location, HYPRE_MEMORY_HOST);
 
                HYPRE_SStructMatrixSetBoxValues(A, part,
                                                pdata.graph_ilowers[box],
@@ -3758,7 +3761,7 @@ main( hypre_int argc,
                                                     pdata.matadd_iuppers[box],
                                                     pdata.matadd_vars[box],
                                                     1, &pdata.matadd_entries[box][entry],
-                                                    values);
+                                                    d_values);
                }
             }
          }
@@ -3843,7 +3846,8 @@ main( hypre_int argc,
       {
          if (!myid)
          {
-            hypre_printf("Reading SStructVector b from file: %s\n", argv[read_fromfile_index[1]]);
+            hypre_printf("Reading SStructVector b from file: %s\n",
+                         argv[read_fromfile_index[1]]);
          }
 
          HYPRE_SStructVectorRead(comm, argv[read_fromfile_index[1]], &b);
@@ -3976,7 +3980,7 @@ main( hypre_int argc,
             for (box = 0; box < pdata.fem_rhsadd_nboxes; box++)
             {
                hypre_TMemcpy(d_values, pdata.fem_rhsadd_values[box], HYPRE_Real,
-                             data.fem_nvars, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                             data.fem_nvars, memory_location, HYPRE_MEMORY_HOST);
 
                for (index[2] = pdata.fem_rhsadd_ilowers[box][2];
                     index[2] <= pdata.fem_rhsadd_iuppers[box][2]; index[2]++)
@@ -4029,7 +4033,7 @@ main( hypre_int argc,
                            size = BoxVolume(ilower, iupper);
 
                            hypre_TMemcpy(d_values, values, HYPRE_Real, size,
-                                         HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                                         memory_location, HYPRE_MEMORY_HOST);
 
                            HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
                         }
@@ -4105,7 +4109,8 @@ main( hypre_int argc,
       {
          if (!myid)
          {
-            hypre_printf("Reading SStructVector x0 from file: %s\n", argv[read_fromfile_index[2]]);
+            hypre_printf("Reading SStructVector x0 from file: %s\n",
+                         argv[read_fromfile_index[2]]);
          }
 
          HYPRE_SStructVectorRead(comm, argv[read_fromfile_index[2]], &x);
@@ -4170,7 +4175,6 @@ main( hypre_int argc,
          HYPRE_Real stencil_values[2] = {1.0, -1.0};
 
          /* Set up the domain grid */
-
          HYPRE_SStructGridCreate(comm, data.ndim, data.nparts, &G_grid);
          for (part = 0; part < data.nparts; part++)
          {
@@ -4392,6 +4396,7 @@ main( hypre_int argc,
          hypre_SStructCopy(b, x);
          hypre_sprintf(filename, "sstruct.out.gatherpre.%05d", myid);
          file = fopen(filename, "w");
+
          for (part = 0; part < data.nparts; part++)
          {
             pdata = data.pdata[part];
@@ -4492,7 +4497,6 @@ main( hypre_int argc,
 
          HYPRE_SStructSysPFMGDestroy(solver);
       }
-
       else if (solver_id == 4)
       {
          time_index = hypre_InitializeTiming("SSAMG Setup");
@@ -4542,7 +4546,6 @@ main( hypre_int argc,
 
          HYPRE_SStructSSAMGDestroy(solver);
       }
-
       else if (solver_id == 5)
       {
          time_index = hypre_InitializeTiming("BoomerAMG Setup");
@@ -4602,7 +4605,6 @@ main( hypre_int argc,
          HYPRE_BoomerAMGGetFinalRelativeResidualNorm(par_solver, &final_res_norm);
          HYPRE_BoomerAMGDestroy(par_solver);
       }
-
       else if ((solver_id >= 0) && (solver_id < 10) && (solver_id != 3))
       {
          time_index = hypre_InitializeTiming("Split Setup");
@@ -4801,7 +4803,6 @@ main( hypre_int argc,
 
       if ( lobpcgFlag && (solver_id >= 10) && (solver_id < 20) )
       {
-
          interpreter = hypre_CTAlloc(mv_InterfaceInterpreter, 1, HYPRE_MEMORY_HOST);
 
          HYPRE_SStructSetupInterpreter( interpreter );
@@ -7397,7 +7398,7 @@ main( hypre_int argc,
          HYPRE_SStructVectorInitialize(xnew);
 
          /* get/set replicated shared data */
-         values = hypre_TAlloc(HYPRE_Real,  data.max_boxsize, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         values = hypre_TAlloc(HYPRE_Real, data.max_boxsize, HYPRE_MEMORY_HOST);
          for (part = 0; part < data.nparts; part++)
          {
             pdata = data.pdata[part];
@@ -7463,6 +7464,7 @@ main( hypre_int argc,
       HYPRE_SStructVectorDestroy(b);
       HYPRE_SStructVectorDestroy(x);
       HYPRE_SStructVectorDestroy(r);
+
       if (gradient_matrix)
       {
          for (s = 0; s < data.ndim; s++)
@@ -7515,7 +7517,8 @@ main( hypre_int argc,
 #if defined(HYPRE_USING_MEMORY_TRACKER)
    if (memory_location == HYPRE_MEMORY_HOST)
    {
-      if (hypre_total_bytes[hypre_MEMORY_DEVICE] || hypre_total_bytes[hypre_MEMORY_UNIFIED])
+      if (hypre_total_bytes[hypre_MEMORY_DEVICE] ||
+          hypre_total_bytes[hypre_MEMORY_UNIFIED])
       {
          hypre_printf("Error: nonzero GPU memory allocated with the HOST mode\n");
          hypre_assert(0);

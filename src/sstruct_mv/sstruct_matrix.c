@@ -1105,8 +1105,8 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
       }
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+#if defined(HYPRE_USING_GPU)
+   if ( hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE )
    {
       if (!hypre_SStructMatrixTmpRowCoordsDevice(matrix))
       {

@@ -260,6 +260,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    for (l = 0; l < (num_levels - 1); l++)
    {
+      HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
       cdir = cdir_l[l];
 
       /* set up the interpolation operator */
@@ -270,6 +271,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       restrict_data_l[l] = hypre_StructMatvecCreate();
       hypre_StructMatvecSetTranspose(restrict_data_l[l], 1);
       hypre_StructMatvecSetup(restrict_data_l[l], RT_l[l], r_l[l]);
+
+      HYPRE_ANNOTATE_MGLEVEL_END(l);
    }
 
    /* Check for zero diagonal on coarsest grid, occurs with singular problems

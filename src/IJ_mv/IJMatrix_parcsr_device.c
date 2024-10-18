@@ -269,32 +269,16 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
 
    /* output X: 0: keep, 1: zero-out */
 #if defined(HYPRE_USING_SYCL)
-   /* WM: oneDPL currently does not have a reverse iterator */
-   /*     should be able to do this with a reverse operation defined in a struct */
-   /*     instead of explicitly allocating and generating the reverse_perm, */
-   /*     but I can't get that to work for some reason */
-   HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
-   HYPRE_ONEDPL_CALL( std::transform,
-                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
-                      oneapi::dpl::counting_iterator<HYPRE_Int>(N0),
-                      reverse_perm,
-   [N0] (auto i) { return N0 - i - 1; });
-
-   auto I0_J0_reversed = oneapi::dpl::make_permutation_iterator(
-                            oneapi::dpl::make_zip_iterator(I0, J0), reverse_perm);
-   auto X0_reversed = oneapi::dpl::make_permutation_iterator(X0, reverse_perm);
-   auto X_reversed = oneapi::dpl::make_permutation_iterator(X, reverse_perm);
-
    HYPRE_ONEDPL_CALL( oneapi::dpl::exclusive_scan_by_segment,
-                      I0_J0_reversed,      /* key begin */
-                      I0_J0_reversed + N0, /* key end */
-                      X0_reversed,      /* input value begin */
-                      X_reversed,       /* output value begin */
-                      char(0),          /* init */
+                      oneapi::dpl::make_reverse_iterator(
+                         oneapi::dpl::make_zip_iterator(I0 + N0, J0 + N0)), /* key begin */
+                      oneapi::dpl::make_reverse_iterator(
+                         oneapi::dpl::make_zip_iterator(I0, J0)),           /* key end */
+                      oneapi::dpl::make_reverse_iterator(X0 + N0),          /* input value begin */
+                      oneapi::dpl::make_reverse_iterator(X + N0),           /* output value begin */
+                      char(0),                                              /* init */
                       std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
                       oneapi::dpl::maximum<char>() );
-
-   hypre_TFree(reverse_perm, HYPRE_MEMORY_DEVICE);
 
    hypreSycl_transform_if(A0,
                           A0 + N0,
@@ -440,30 +424,15 @@ hypre_IJMatrixAssembleSortAndReduce3(HYPRE_Int  N0, HYPRE_BigInt  *I0, HYPRE_Big
    HYPRE_Complex *A = hypre_TAlloc(HYPRE_Complex, N0, HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: oneDPL currently does not have a reverse iterator */
-   /*     should be able to do this with a reverse operation defined in a struct */
-   /*     instead of explicitly allocating and generating the reverse_perm, */
-   /*     but I can't get that to work for some reason */
-   HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
-   HYPRE_ONEDPL_CALL( std::transform,
-                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
-                      oneapi::dpl::counting_iterator<HYPRE_Int>(N0),
-                      reverse_perm,
-   [N0] (auto i) { return N0 - i - 1; });
-
-   auto I0_J0_reversed = oneapi::dpl::make_permutation_iterator(
-                            oneapi::dpl::make_zip_iterator(I0, J0), reverse_perm);
-   auto X0_reversed = oneapi::dpl::make_permutation_iterator(X0, reverse_perm);
-
    HYPRE_ONEDPL_CALL( oneapi::dpl::inclusive_scan_by_segment,
-                      I0_J0_reversed,      /* key begin */
-                      I0_J0_reversed + N0, /* key end */
-                      X0_reversed,         /* input value begin */
-                      X0_reversed,         /* output value begin */
+                      oneapi::dpl::make_reverse_iterator(
+                         oneapi::dpl::make_zip_iterator(I0 + N0, J0 + N0)), /* key begin */
+                      oneapi::dpl::make_reverse_iterator(
+                         oneapi::dpl::make_zip_iterator(I0, J0)),           /* key end */
+                      oneapi::dpl::make_reverse_iterator(X0 + N0),          /* input value begin */
+                      oneapi::dpl::make_reverse_iterator(X0 + N0),          /* output value begin */
                       std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),
                       oneapi::dpl::maximum<char>() );
-
-   hypre_TFree(reverse_perm, HYPRE_MEMORY_DEVICE);
 
    hypreSycl_transform_if(A0,
                           A0 + N0,
