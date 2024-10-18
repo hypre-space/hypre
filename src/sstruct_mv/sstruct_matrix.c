@@ -1490,7 +1490,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
 
       /* WM: do backwards mapping from ijvalues to values if doing a get */
       /* WM: todo - put this in a boxloop to avoid unnecessary copies? */
-      nrows       = hypre_BoxVolume(set_box);
+      nrows = hypre_BoxVolume(set_box);
       if (action < 0)
       {
          for (i = 0; i < nrows * nentries; i++)
@@ -2020,63 +2020,82 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
 /*--------------------------------------------------------------------------
  * hypre_SStructMatrixCompressUToS
  *
- * Add to or set (overwrite) entries in S with entries from U where the sparsity pattern permits.
+ * Add to or set (overwrite) entries in S with entries from U where
+ * the sparsity pattern permits.
  *
  * (action > 0): add-to values
  * (action = 0): set values
  *
- * WM: TODO - what if there are constant stencil entries? Not sure what the expected behavior should be.
- *            For now, avoid this case.
- *
+ * WM: TODO - what if there are constant stencil entries?
+ * Not sure what the expected behavior should be. For now, avoid this case.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
+hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
+                                 HYPRE_Int           action )
 {
    HYPRE_Int               *Sentries     = hypre_SStructMatrixSEntries(A);
    HYPRE_SStructGraph       graph        = hypre_SStructMatrixGraph(A);
    hypre_SStructGrid       *grid         = hypre_SStructGraphGrid(graph);
    HYPRE_Int              **nvneighbors  = hypre_SStructGridNVNeighbors(grid);
+   HYPRE_Int                ndim         = hypre_SStructGridNDim(grid);
    HYPRE_Int                nparts       = hypre_SStructMatrixNParts(A);
+
+   hypre_ParCSRMatrix      *A_u          = hypre_SStructMatrixParCSRMatrix(A);
+   hypre_CSRMatrix         *A_ud         = hypre_ParCSRMatrixDiag(A_u);
+   hypre_CSRMatrix         *A_uo         = hypre_ParCSRMatrixOffd(A_u);
+
    hypre_SStructPMatrix    *pmatrix;
    hypre_StructMatrix      *smatrix;
    hypre_StructGrid        *sgrid;
    hypre_SStructStencil    *stencil;
    HYPRE_Int               *split;
    hypre_Index              start, stride, loop_size;
-   HYPRE_Int                ndim         = hypre_SStructGridNDim(grid);
    hypre_BoxArray          *grid_boxes;
-   hypre_Box               *grid_box = hypre_BoxCreate(ndim);
+   hypre_Box               *grid_box;
+   HYPRE_Int               *num_ghost;
    HYPRE_Int                i, j, cnt, var, entry, part, nvars, nSentries, num_indices;
    HYPRE_Real               threshold = 1.0;
-   HYPRE_Int               *indices[ndim];
+   HYPRE_Int               *indices[HYPRE_MAXDIM];
    hypre_BoxArray          *indices_boxa = NULL;
-   hypre_ParCSRMatrix      *A_u           = hypre_SStructMatrixParCSRMatrix(A);
-   hypre_CSRMatrix         *A_u_diag      = hypre_ParCSRMatrixDiag(A_u);
-   hypre_CSRMatrix         *A_u_offd      = hypre_ParCSRMatrixOffd(A_u);
+   HYPRE_Int                size;
+   HYPRE_Complex           *values;
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_Int                volume;
+   HYPRE_Int                max_num_rownnz;
+   HYPRE_Int               *nonzero_rows;
+   HYPRE_Int               *nonzero_rows_end;
+   HYPRE_Int               *all_indices[HYPRE_MAXDIM];
+   HYPRE_Int               *box_nonzero_rows;
+   HYPRE_Int               *box_nonzero_rows_end;
+#endif
+
+   grid_box = hypre_BoxCreate(ndim);
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    /* Get nonzero rows of A_u (that is, all rows with nonzeros in diag or offd) */
-   if (!hypre_CSRMatrixRownnz(A_u_diag))
+   if (!hypre_CSRMatrixRownnz(A_ud))
    {
-      hypre_CSRMatrixSetRownnz(A_u_diag);
+      hypre_CSRMatrixSetRownnz(A_ud);
    }
-   if (!hypre_CSRMatrixRownnz(A_u_offd))
+   if (!hypre_CSRMatrixRownnz(A_uo))
    {
-      hypre_CSRMatrixSetRownnz(A_u_offd);
+      hypre_CSRMatrixSetRownnz(A_uo);
    }
 
-   HYPRE_Int   max_num_rownnz = hypre_CSRMatrixNumRownnz(A_u_diag) + hypre_CSRMatrixNumRownnz(A_u_offd);
-   HYPRE_Int *nonzero_rows = hypre_TAlloc(HYPRE_Int, max_num_rownnz, HYPRE_MEMORY_DEVICE);
+   max_num_rownnz = hypre_CSRMatrixNumRownnz(A_ud) +
+                    hypre_CSRMatrixNumRownnz(A_uo);
+   nonzero_rows = hypre_TAlloc(HYPRE_Int, max_num_rownnz, HYPRE_MEMORY_DEVICE);
    HYPRE_THRUST_CALL( merge,
-                      hypre_CSRMatrixRownnz(A_u_diag),
-                      hypre_CSRMatrixRownnz(A_u_diag) + hypre_CSRMatrixNumRownnz(A_u_diag),
-                      hypre_CSRMatrixRownnz(A_u_offd),
-                      hypre_CSRMatrixRownnz(A_u_offd) + hypre_CSRMatrixNumRownnz(A_u_offd),
+                      hypre_CSRMatrixRownnz(A_ud),
+                      hypre_CSRMatrixRownnz(A_ud) + hypre_CSRMatrixNumRownnz(A_ud),
+                      hypre_CSRMatrixRownnz(A_uo),
+                      hypre_CSRMatrixRownnz(A_uo) + hypre_CSRMatrixNumRownnz(A_uo),
                       nonzero_rows );
-   HYPRE_Int *nonzero_rows_end = HYPRE_THRUST_CALL(unique,
-                                                   nonzero_rows,
-                                                   nonzero_rows + max_num_rownnz);
+   nonzero_rows_end = HYPRE_THRUST_CALL(unique,
+                                        nonzero_rows,
+                                        nonzero_rows + max_num_rownnz);
 #endif
 
    /* Set entries of ij_Ahat */
@@ -2111,16 +2130,15 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
             /* WM: todo - I'm using the struct grid box grown by
                num_ghosts instead of the matrix data space again here */
             hypre_CopyBox(hypre_BoxArrayBox(grid_boxes, i), grid_box);
-            HYPRE_Int *num_ghost = hypre_StructGridNumGhost(sgrid);
+            num_ghost = hypre_StructGridNumGhost(sgrid);
             hypre_BoxGrowByArray(grid_box, num_ghost);
             hypre_BoxGetSize(grid_box, loop_size);
             hypre_SetIndex(stride, 1);
             hypre_CopyToIndex(hypre_BoxIMin(grid_box), ndim, start);
-            HYPRE_Int volume = hypre_BoxVolume(grid_box);
 
 #if defined(HYPRE_USING_GPU)
             /* Get ALL the indices */
-            HYPRE_Int *all_indices[HYPRE_MAXDIM];
+            volume = hypre_BoxVolume(grid_box);
             for (j = 0; j < ndim; j++)
             {
                all_indices[j] = hypre_CTAlloc(HYPRE_Int, volume, HYPRE_MEMORY_DEVICE);
@@ -2148,12 +2166,12 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
             /* WM: todo - sycl */
 #else
             /* Get the nonzero rows for this box */
-            HYPRE_Int *box_nonzero_rows = hypre_TAlloc(HYPRE_Int, volume, HYPRE_MEMORY_DEVICE);
-            HYPRE_Int *box_nonzero_rows_end = HYPRE_THRUST_CALL( copy_if,
-                                                                 nonzero_rows,
-                                                                 nonzero_rows_end,
-                                                                 box_nonzero_rows,
-                                                                 in_range<HYPRE_Int>(cnt, cnt+volume) );
+            box_nonzero_rows = hypre_TAlloc(HYPRE_Int, volume, HYPRE_MEMORY_DEVICE);
+            box_nonzero_rows_end = HYPRE_THRUST_CALL( copy_if,
+                                                      nonzero_rows,
+                                                      nonzero_rows_end,
+                                                      box_nonzero_rows,
+                                                      in_range<HYPRE_Int>(cnt, cnt + volume) );
             HYPRE_THRUST_CALL( transform,
                                box_nonzero_rows,
                                box_nonzero_rows_end,
@@ -2190,7 +2208,7 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
             for (j = 0; j < ndim; j++)
             {
                indices[j] = hypre_CTAlloc(HYPRE_Int,
-                                          hypre_CSRMatrixNumRows(A_u_diag),
+                                          hypre_CSRMatrixNumRows(A_ud),
                                           HYPRE_MEMORY_DEVICE);
             }
 
@@ -2198,10 +2216,12 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
             {
                hypre_Index index;
                hypre_BoxLoopGetIndex(index);
+               HYPRE_UNUSED_VAR(ii);
+
                /* WM: todo - this mapping to the unstructured indices
                   only works with no inter-variable couplings? */
-               if (hypre_CSRMatrixI(A_u_diag)[cnt+1] - hypre_CSRMatrixI(A_u_diag)[cnt] +
-                   hypre_CSRMatrixI(A_u_offd)[cnt+1] - hypre_CSRMatrixI(A_u_offd)[cnt] > 0)
+               if (hypre_CSRMatrixI(A_ud)[cnt + 1] - hypre_CSRMatrixI(A_ud)[cnt] +
+                   hypre_CSRMatrixI(A_uo)[cnt + 1] - hypre_CSRMatrixI(A_uo)[cnt] > 0)
                {
                   hypre_BoxLoopGetIndex(index);
                   for (j = 0; j < ndim; j++)
@@ -2220,38 +2240,55 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A, HYPRE_Int action )
                there are no extra rows here! */
             if (num_indices)
             {
-               hypre_BoxArrayCreateFromIndices(ndim, num_indices, indices, threshold,
-                                               &indices_boxa);
+               hypre_BoxArrayCreateFromIndices(ndim, num_indices, indices,
+                                               threshold, &indices_boxa);
                hypre_ForBoxI(j, indices_boxa)
                {
-                  HYPRE_Int size = hypre_BoxVolume(hypre_BoxArrayBox(indices_boxa, j)) * nSentries;
-                  HYPRE_Complex *values = hypre_CTAlloc(HYPRE_Complex, size, HYPRE_MEMORY_DEVICE);
+                  size   = hypre_BoxVolume(hypre_BoxArrayBox(indices_boxa, j)) * nSentries;
+                  values = hypre_CTAlloc(HYPRE_Complex, size, HYPRE_MEMORY_DEVICE);
 
-                  /* INIT values from the structured matrix if action = 0 (need current stencil values for entries that don't exist in U matrix) */
+                  /* INIT values from the structured matrix if action = 0
+                     (need current stencil values for entries that don't exist in U matrix) */
                   if (action == 0)
                   {
-                     hypre_SStructPMatrixSetBoxValues(pmatrix, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries, hypre_BoxArrayBox(indices_boxa, j), values, -1);
+                     hypre_SStructPMatrixSetBoxValues(pmatrix,
+                                                      hypre_BoxArrayBox(indices_boxa, j),
+                                                      var, nSentries, Sentries,
+                                                      hypre_BoxArrayBox(indices_boxa, j),
+                                                      values, -1);
                   }
 
                   /* GET values from unstructured matrix */
-                  /* WM: note - I'm passing the entire box here, so I expect to get back ALL intra-part connections in A_u */
-                  /* WM: question - What about inter-part connections? I hope that they are always excluded here? Double check this. */
-                  hypre_SStructUMatrixSetBoxValues(A, part, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries, hypre_BoxArrayBox(indices_boxa, j), values, -2);
+                  /* WM: note - I'm passing the entire box here, so I expect to get back
+                                ALL intra-part connections in A_u */
+                  /* WM: question - What about inter-part connections? I hope that they are
+                                    always excluded here? Double check this. */
+                  hypre_SStructUMatrixSetBoxValues(A, part,
+                                                   hypre_BoxArrayBox(indices_boxa, j),
+                                                   var, nSentries, Sentries,
+                                                   hypre_BoxArrayBox(indices_boxa, j),
+                                                   values, -2);
 
                   /* ADD values to structured matrix */
                   /* WM: todo - just call to hypre_SStructMatrixSetBoxValues() instead of
                    * hypre_SStructPMatrixSetBoxValues() and hypre_SStructMatrixSetInterPartValues()? */
-                  hypre_SStructPMatrixSetBoxValues(pmatrix, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries, hypre_BoxArrayBox(indices_boxa, j), values, action);
+                  hypre_SStructPMatrixSetBoxValues(pmatrix,
+                                                   hypre_BoxArrayBox(indices_boxa, j),
+                                                   var, nSentries, Sentries,
+                                                   hypre_BoxArrayBox(indices_boxa, j),
+                                                   values, action);
                   if (nvneighbors[part][var] > 0)
                   {
-                     hypre_SStructMatrixSetInterPartValues(A, part, hypre_BoxArrayBox(indices_boxa, j), var, nSentries, Sentries,
-                                                           hypre_BoxArrayBox(indices_boxa, j), values, 1);
+                     hypre_SStructMatrixSetInterPartValues(A, part,
+                                                           hypre_BoxArrayBox(indices_boxa, j),
+                                                           var, nSentries, Sentries,
+                                                           hypre_BoxArrayBox(indices_boxa, j),
+                                                           values, 1);
                   }
                }
                hypre_BoxArrayDestroy(indices_boxa);
                indices_boxa = NULL;
             }
-
          } /* Loop over boxes */
       } /* Loop over vars */
    } /* Loop over parts */

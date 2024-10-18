@@ -595,7 +595,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                                                    nonzero_rows,
                                                    nonzero_rows_end,
                                                    box_nnzrows,
-                                                   in_range<HYPRE_Int>(cnt, cnt+vol));
+                                                   in_range<HYPRE_Int>(cnt, cnt + vol));
                HYPRE_THRUST_CALL(transform,
                                  box_nnzrows,
                                  box_nnzrows_end,
@@ -642,10 +642,12 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
                hypre_BoxLoop1Begin(ndim, loop_size, compute_box, start, stride, ii);
                {
+                  HYPRE_UNUSED_VAR(ii);
+
                   /* WM: todo - this mapping to the unstructured indices only works
                       with no inter-variable couplings? */
-                  if (hypre_CSRMatrixI(A_ud)[cnt+1] - hypre_CSRMatrixI(A_ud)[cnt] +
-                      hypre_CSRMatrixI(A_uo)[cnt+1] - hypre_CSRMatrixI(A_uo)[cnt] > 0)
+                  if (hypre_CSRMatrixI(A_ud)[cnt + 1] - hypre_CSRMatrixI(A_ud)[cnt] +
+                      hypre_CSRMatrixI(A_uo)[cnt + 1] - hypre_CSRMatrixI(A_uo)[cnt] > 0)
                   {
                      hypre_Index index;
                      hypre_BoxLoopGetIndex(index);
@@ -731,7 +733,8 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          hypre_CSRMatrixJ(zero_diag)[i] = i;
          hypre_CSRMatrixData(zero_diag)[i] = 0.0;
       }
-      hypre_CSRMatrixI(zero_diag)[ hypre_CSRMatrixNumRows(zero_diag) ] = hypre_CSRMatrixNumRows(zero_diag);
+      hypre_CSRMatrixI(zero_diag)[ hypre_CSRMatrixNumRows(zero_diag) ] =
+         hypre_CSRMatrixNumRows(zero_diag);
       hypre_ParCSRMatrixAdd(1.0, zero, 1.0, A_bndry, &A_aug);
       hypre_ParCSRMatrixDestroy(zero);
 
@@ -858,11 +861,11 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
              (hypre_CSRMatrixI(A_ud)[i + 1] - hypre_CSRMatrixI(A_ud)[i] +
               hypre_CSRMatrixI(A_uo)[i + 1] - hypre_CSRMatrixI(A_uo)[i]) == 0)
          {
-            for (j = hypre_CSRMatrixI(P_ud)[i]; j < hypre_CSRMatrixI(P_ud)[i+1]; j++)
+            for (j = hypre_CSRMatrixI(P_ud)[i]; j < hypre_CSRMatrixI(P_ud)[i + 1]; j++)
             {
                hypre_CSRMatrixData(P_ud)[j] = 0.0;
             }
-            for (j = hypre_CSRMatrixI(P_uo)[i]; j < hypre_CSRMatrixI(P_uo)[i+1]; j++)
+            for (j = hypre_CSRMatrixI(P_uo)[i]; j < hypre_CSRMatrixI(P_uo)[i + 1]; j++)
             {
                hypre_CSRMatrixData(P_uo)[j] = 0.0;
             }
