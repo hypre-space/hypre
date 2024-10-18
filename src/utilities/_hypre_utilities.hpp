@@ -186,6 +186,7 @@ struct hypre_device_allocator
 
    void deallocate(char *ptr, size_t n)
    {
+      HYPRE_UNUSED_VAR(n);
       hypre_TFree(ptr, HYPRE_MEMORY_DEVICE);
    }
 };
@@ -235,6 +236,9 @@ using hypre_DeviceItem = void*;
 #endif
 
 #if defined(HYPRE_USING_CUSPARSE)
+/* Note (VPM) : As of cuSPARSE 12, ILU functionalities have been marked as deprecated.
+   The following definition avoids compilation warnings regarding the use of ILU routines */
+#define DISABLE_CUSPARSE_DEPRECATED
 #include <cusparse.h>
 #endif
 
@@ -434,7 +438,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_DEBUG)
-#define GPU_LAUNCH_SYNC { hypre_SyncComputeStream(hypre_handle()); hypre_GetDeviceLastError(); }
+#define GPU_LAUNCH_SYNC { hypre_SyncComputeStream(); hypre_GetDeviceLastError(); }
 #else
 #define GPU_LAUNCH_SYNC
 #endif

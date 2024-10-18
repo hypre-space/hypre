@@ -32,6 +32,8 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
                                            HYPRE_Int             debug_flag,
                                            hypre_ParCSRMatrix  **R_ptr)
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommHandle  *comm_handle;
 
@@ -287,7 +289,7 @@ hypre_BoomerAMGBuildRestrNeumannAIRDevice( hypre_ParCSRMatrix   *A,
       /* RL: make sure send_buf_i is ready before issuing GPU-GPU MPI */
       if (hypre_GetGpuAwareMPI())
       {
-         hypre_ForceSyncComputeStream(hypre_handle());
+         hypre_ForceSyncComputeStream();
       }
 #endif
 
