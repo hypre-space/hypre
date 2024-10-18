@@ -1219,7 +1219,7 @@ hypre_SeqVectorMax( HYPRE_Complex alpha,
 
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();

@@ -11,18 +11,13 @@ case $1 in
    -h|-help)
       cat <<EOF
 
-   **** Only run this script on sunspot nodes                     ****
+   **** Only run this script on Aurora nodes                      ****
+   **** Successful regressions with default software env          ****
+   **** as of 10/14/2024                                          ****
    **** Test with:                                                ****
    ****     export SYCL_CACHE_PERSISTENT=1                        ****
    ****     export SYCL_CACHE_THRESHOLD=0                         ****
-   ****     module load oneapi/eng-compiler/2023.05.15.007        ****
-   ****     module load mpich/52.2/icc-all-pmix-gpu               ****
-
-   **** A custom oneDPL install is also required:                 ****
-   ****    git clone https://github.com/oneapi-src/oneDPL.git     ****
-   ****    cd oneDPL                                              ****
-   ****    git checkout fda906e3994782bbe9e898582b129a7525c4428c  ****
-   ****    export DPLROOT=$(pwd)                                  ****
+   ****     module load oneapi/eng-compiler/2024.07.30.002        ****
 
    $0 [-h|-help] {src_dir}
 
@@ -54,7 +49,7 @@ rtol="0.0"
 atol="3e-15"
 
 #save=`echo $(hostname) | sed 's/[0-9]\+$//'`
-save="sunspot"
+save="aurora"
 
 ##########
 ## SYCL ##

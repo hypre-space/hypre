@@ -434,7 +434,7 @@ ReadData( MPI_Comm      comm,
       if ((file = fopen(filename, "r")) == NULL)
       {
          hypre_printf("Error: can't open input file %s\n", filename);
-         exit(1);
+         MPI_Abort(comm, -1);
       }
 
       /* allocate initial space, and read first input line */
@@ -457,12 +457,14 @@ ReadData( MPI_Comm      comm,
          /* read the next input line */
          sdata_line = fgets((sdata + sdata_size), maxline, file);
       }
+
+      fclose(file);
    }
    /* broadcast the data size */
    hypre_MPI_Bcast(&sdata_size, 1, HYPRE_MPI_INT, 0, comm);
 
    /* broadcast the data */
-   sdata = hypre_TReAlloc(sdata,  char,  sdata_size, HYPRE_MEMORY_HOST);
+   sdata = hypre_TReAlloc(sdata, char, sdata_size, HYPRE_MEMORY_HOST);
    hypre_MPI_Bcast(sdata, sdata_size, hypre_MPI_CHAR, 0, comm);
 
    /*-----------------------------------------------------------
@@ -538,7 +540,7 @@ ReadData( MPI_Comm      comm,
             if ( (il != 0) || (iu != 1) )
             {
                hypre_printf("Error: Invalid use of `+-' in GridSetExtents\n");
-               exit(1);
+               MPI_Abort(comm, -1);
             }
             pdata.boxsizes[pdata.nboxes] = 1;
             for (i = 0; i < 3; i++)
@@ -565,7 +567,7 @@ ReadData( MPI_Comm      comm,
          {
             /* TODO */
             hypre_printf("GridAddVariables not yet implemented!\n");
-            exit(1);
+            MPI_Abort(comm, -1);
          }
          else if ( strcmp(key, "GridSetNeighborPart:") == 0 ||
                    strcmp(key, "GridSetSharedPart:") == 0 )
@@ -667,7 +669,7 @@ ReadData( MPI_Comm      comm,
             if (data.fem_nvars > 0)
             {
                hypre_printf("Stencil and FEMStencil cannot be used together\n");
-               exit(1);
+               MPI_Abort(comm, -1);
             }
             data.nstencils = strtol(sdata_ptr, &sdata_ptr, 10);
             data.stencil_sizes   = hypre_CTAlloc(HYPRE_Int,  data.nstencils, HYPRE_MEMORY_HOST);
@@ -712,7 +714,7 @@ ReadData( MPI_Comm      comm,
             if (data.nstencils > 0)
             {
                hypre_printf("Stencil and FEMStencil cannot be used together\n");
-               exit(1);
+               MPI_Abort(comm, -1);
             }
             data.fem_nvars = strtol(sdata_ptr, &sdata_ptr, 10);
             data.fem_offsets = hypre_CTAlloc(Index,  data.fem_nvars, HYPRE_MEMORY_HOST);
@@ -1236,7 +1238,7 @@ DistributeData( MPI_Comm      comm,
    {
       hypre_printf("%d,  %d \n", pool_procs[data.npools], num_procs);
       hypre_printf("Error: Invalid number of processes or process topology \n");
-      exit(1);
+      MPI_Abort(comm, -1);
    }
 
    /* modify part data */
@@ -2563,10 +2565,10 @@ main( hypre_int argc,
 #endif
 
 #if defined(HYPRE_TEST_USING_HOST)
-   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_HOST;
+   HYPRE_MemoryLocation  memory_location     = HYPRE_MEMORY_HOST;
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_HOST;
 #else
-   HYPRE_MemoryLocation memory_location = HYPRE_MEMORY_DEVICE;
+   HYPRE_MemoryLocation  memory_location     = HYPRE_MEMORY_DEVICE;
    HYPRE_ExecutionPolicy default_exec_policy = HYPRE_EXEC_DEVICE;
 #endif
 
@@ -3315,7 +3317,7 @@ main( hypre_int argc,
       }
    }
 
-   for (rep = 0; rep < reps; ++rep)
+   for (rep = 0; rep < reps; rep++)
    {
       /*-----------------------------------------------------------
        * Build Matrix
@@ -3328,7 +3330,8 @@ main( hypre_int argc,
       {
          if (!myid)
          {
-            hypre_printf("Reading SStructMatrix A from file: %s\n", argv[read_fromfile_index[0]]);
+            hypre_printf("Reading SStructMatrix A from file: %s\n",
+                         argv[read_fromfile_index[0]]);
          }
 
          HYPRE_SStructMatrixRead(comm, argv[read_fromfile_index[0]], &A);
@@ -3340,7 +3343,8 @@ main( hypre_int argc,
           * Distribute data
           *-----------------------------------------------------------*/
 
-         DistributeData(comm, global_data, pooldist, refine, distribute, block, &data);
+         DistributeData(comm, global_data, pooldist,
+                        refine, distribute, block, &data);
 
          /*-----------------------------------------------------------
           * Check a few things
@@ -3369,6 +3373,7 @@ main( hypre_int argc,
          /*-----------------------------------------------------------
           * Build grid
           *-----------------------------------------------------------*/
+
          HYPRE_SStructGridCreate(comm, data.ndim, data.nparts, &grid);
          if (data.numghost != NULL)
          {
@@ -3466,8 +3471,8 @@ main( hypre_int argc,
                /* set stencils */
                for (var = 0; var < pdata.nvars; var++)
                {
-                   HYPRE_SStructGraphSetStencil(graph, part, var,
-                                                stencils[pdata.stencil_num[var]]);
+                  HYPRE_SStructGraphSetStencil(graph, part, var,
+                                               stencils[pdata.stencil_num[var]]);
                }
             }
             else if (data.fem_nvars > 0)
@@ -3679,7 +3684,7 @@ main( hypre_int argc,
 
                hypre_TMemcpy(d_values, values,
                              HYPRE_Real, pdata.graph_boxsizes[box],
-                             HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                             memory_location, HYPRE_MEMORY_HOST);
 
                HYPRE_SStructMatrixSetBoxValues(A, part,
                                                pdata.graph_ilowers[box],
@@ -3758,7 +3763,7 @@ main( hypre_int argc,
                                                     pdata.matadd_iuppers[box],
                                                     pdata.matadd_vars[box],
                                                     1, &pdata.matadd_entries[box][entry],
-                                                    values);
+                                                    d_values);
                }
             }
          }
@@ -3843,7 +3848,8 @@ main( hypre_int argc,
       {
          if (!myid)
          {
-            hypre_printf("Reading SStructVector b from file: %s\n", argv[read_fromfile_index[1]]);
+            hypre_printf("Reading SStructVector b from file: %s\n",
+                         argv[read_fromfile_index[1]]);
          }
 
          HYPRE_SStructVectorRead(comm, argv[read_fromfile_index[1]], &b);
@@ -3976,7 +3982,7 @@ main( hypre_int argc,
             for (box = 0; box < pdata.fem_rhsadd_nboxes; box++)
             {
                hypre_TMemcpy(d_values, pdata.fem_rhsadd_values[box], HYPRE_Real,
-                             data.fem_nvars, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                             data.fem_nvars, memory_location, HYPRE_MEMORY_HOST);
 
                for (index[2] = pdata.fem_rhsadd_ilowers[box][2];
                     index[2] <= pdata.fem_rhsadd_iuppers[box][2]; index[2]++)
@@ -4029,7 +4035,7 @@ main( hypre_int argc,
                            size = BoxVolume(ilower, iupper);
 
                            hypre_TMemcpy(d_values, values, HYPRE_Real, size,
-                                         HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+                                         memory_location, HYPRE_MEMORY_HOST);
 
                            HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
                         }
@@ -4105,7 +4111,8 @@ main( hypre_int argc,
       {
          if (!myid)
          {
-            hypre_printf("Reading SStructVector x0 from file: %s\n", argv[read_fromfile_index[2]]);
+            hypre_printf("Reading SStructVector x0 from file: %s\n",
+                         argv[read_fromfile_index[2]]);
          }
 
          HYPRE_SStructVectorRead(comm, argv[read_fromfile_index[2]], &x);
@@ -4170,7 +4177,6 @@ main( hypre_int argc,
          HYPRE_Real stencil_values[2] = {1.0, -1.0};
 
          /* Set up the domain grid */
-
          HYPRE_SStructGridCreate(comm, data.ndim, data.nparts, &G_grid);
          for (part = 0; part < data.nparts; part++)
          {
@@ -4392,6 +4398,7 @@ main( hypre_int argc,
          hypre_SStructCopy(b, x);
          hypre_sprintf(filename, "sstruct.out.gatherpre.%05d", myid);
          file = fopen(filename, "w");
+
          for (part = 0; part < data.nparts; part++)
          {
             pdata = data.pdata[part];
@@ -4492,7 +4499,6 @@ main( hypre_int argc,
 
          HYPRE_SStructSysPFMGDestroy(solver);
       }
-
       else if (solver_id == 4)
       {
          time_index = hypre_InitializeTiming("SSAMG Setup");
@@ -4542,7 +4548,6 @@ main( hypre_int argc,
 
          HYPRE_SStructSSAMGDestroy(solver);
       }
-
       else if (solver_id == 5)
       {
          time_index = hypre_InitializeTiming("BoomerAMG Setup");
@@ -4602,7 +4607,6 @@ main( hypre_int argc,
          HYPRE_BoomerAMGGetFinalRelativeResidualNorm(par_solver, &final_res_norm);
          HYPRE_BoomerAMGDestroy(par_solver);
       }
-
       else if ((solver_id >= 0) && (solver_id < 10) && (solver_id != 3))
       {
          time_index = hypre_InitializeTiming("Split Setup");
@@ -4801,7 +4805,6 @@ main( hypre_int argc,
 
       if ( lobpcgFlag && (solver_id >= 10) && (solver_id < 20) )
       {
-
          interpreter = hypre_CTAlloc(mv_InterfaceInterpreter, 1, HYPRE_MEMORY_HOST);
 
          HYPRE_SStructSetupInterpreter( interpreter );
@@ -7273,7 +7276,11 @@ main( hypre_int argc,
          time_index = hypre_InitializeTiming("Matvec");
          hypre_BeginTiming(time_index);
 
-         hypre_SStructMatvecCompute(matvec_data, -1.0, A, x, 1.0, b, r);
+         for (i = 0; i < reps; i++)
+         {
+            hypre_SStructMatvecCompute(matvec_data, -1.0, A, x, 1.0, b, r);
+         }
+         reps = 1; // Trigger exit in the outer loop
 
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Total Matvec time", comm);
@@ -7397,7 +7404,7 @@ main( hypre_int argc,
          HYPRE_SStructVectorInitialize(xnew);
 
          /* get/set replicated shared data */
-         values = hypre_TAlloc(HYPRE_Real,  data.max_boxsize, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         values = hypre_TAlloc(HYPRE_Real, data.max_boxsize, HYPRE_MEMORY_HOST);
          for (part = 0; part < data.nparts; part++)
          {
             pdata = data.pdata[part];
@@ -7463,6 +7470,7 @@ main( hypre_int argc,
       HYPRE_SStructVectorDestroy(b);
       HYPRE_SStructVectorDestroy(x);
       HYPRE_SStructVectorDestroy(r);
+
       if (gradient_matrix)
       {
          for (s = 0; s < data.ndim; s++)
@@ -7515,7 +7523,8 @@ main( hypre_int argc,
 #if defined(HYPRE_USING_MEMORY_TRACKER)
    if (memory_location == HYPRE_MEMORY_HOST)
    {
-      if (hypre_total_bytes[hypre_MEMORY_DEVICE] || hypre_total_bytes[hypre_MEMORY_UNIFIED])
+      if (hypre_total_bytes[hypre_MEMORY_DEVICE] ||
+          hypre_total_bytes[hypre_MEMORY_UNIFIED])
       {
          hypre_printf("Error: nonzero GPU memory allocated with the HOST mode\n");
          hypre_assert(0);

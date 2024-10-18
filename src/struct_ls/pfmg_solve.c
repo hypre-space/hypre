@@ -265,8 +265,10 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          HYPRE_ANNOTATE_REGION_BEGIN("%s", "Coarse solve");
          if (active_l[l])
          {
+            HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
             hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 1);
             hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+            HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
          }
          else
          {
@@ -317,10 +319,12 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             if (active_l[l])
             {
                /* post-relaxation */
+               HYPRE_ANNOTATE_REGION_BEGIN("%s", "Relaxation");
                hypre_PFMGRelaxSetPostRelax(relax_data_l[l]);
                hypre_PFMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
                hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 0);
                hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+               HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
             }
             HYPRE_ANNOTATE_REGION_END("%s", "Relaxation");
          }

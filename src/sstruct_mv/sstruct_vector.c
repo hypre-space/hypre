@@ -245,6 +245,11 @@ hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector,
    /* set values inside the grid */
    hypre_StructVectorSetBoxValues(svector, set_box, value_box, values, action, -1, 0);
 
+   /* TODO: Why need DeviceSync? */
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncDevice();
+#endif
+
    /* set (AddTo/Get) or clear (Set) values outside the grid in ghost zones */
    if (action != 0)
    {
