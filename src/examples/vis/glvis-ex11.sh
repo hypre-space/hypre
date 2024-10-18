@@ -8,6 +8,7 @@
 ex=ex11
 dir=`basename \`pwd\``
 keys=Aaamc
+glvis=${1:-"glvis"}
 
 if [ "$dir" = "vis" ]; then
    dir=.
@@ -32,4 +33,4 @@ echo "Ordering: 0" >> $sol
 echo "" >> $sol
 find $dir -name "$ex.sol.??????" | sort | xargs cat >> $sol
 
-glvis -m $mesh -g $sol -k $keys
+${glvis} -m $mesh -g $sol -k $keys

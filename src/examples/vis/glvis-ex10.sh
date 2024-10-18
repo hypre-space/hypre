@@ -8,6 +8,7 @@
 ex=ex10
 dir=`basename \`pwd\``
 keys=Aaamc
+glvis=${1:-"glvis"}
 
 if [ "$dir" = "vis" ]; then
    dir=.
@@ -27,5 +28,4 @@ fi
 
 np=`cat $dir/$ex.data | head -n 1 | awk '{ print $2 }'`
 
-glvis -np $np -m $mesh -g $sol -k $keys
-
+${glvis} -np $np -m $mesh -g $sol -k $keys
