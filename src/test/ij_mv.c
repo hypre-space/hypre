@@ -89,11 +89,10 @@ main( hypre_int argc,
     * Initialize some stuff
     *-----------------------------------------------------------*/
 
-   /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
-
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+   HYPRE_Initialize();
 
    /*-----------------------------------------------------------
     * Set defaults
@@ -821,6 +820,7 @@ main( hypre_int argc,
    HYPRE_IJVectorDestroy(ij_b);
    HYPRE_IJVectorDestroy(ij_x);
 
+   HYPRE_Finalize();
    hypre_MPI_Finalize();
 
    return (0);
