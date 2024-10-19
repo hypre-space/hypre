@@ -620,6 +620,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                                     indices[j]);
                }
 
+               /* Free memory */
                for (j = 0; j < ndim; j++)
                {
                   hypre_TFree(all_indices[j], HYPRE_MEMORY_DEVICE);
@@ -685,11 +686,12 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                   hypre_BoxDestroy(tmp_box);
                   hypre_BoxArrayDestroy(indices_boxa);
                   indices_boxa = NULL;
+               }
 
-                  for (j = 0; j < ndim; j++)
-                  {
-                     hypre_TFree(indices[j], HYPRE_MEMORY_DEVICE);
-                  }
+               /* Free memory */
+               for (j = 0; j < ndim; j++)
+               {
+                  hypre_TFree(indices[j], HYPRE_MEMORY_DEVICE);
                }
             }
             hypre_BoxDestroy(compute_box);
@@ -733,7 +735,10 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
       hypre_CSRMatrixI(zero_diag)[ hypre_CSRMatrixNumRows(zero_diag) ] =
          hypre_CSRMatrixNumRows(zero_diag);
       hypre_ParCSRMatrixAdd(1.0, zero, 1.0, A_bndry, &A_aug);
+
+      /* Free memory */
       hypre_ParCSRMatrixDestroy(zero);
+      hypre_ParCSRMatrixDestroy(A_bndry);
 
       /* Get CF splitting */
       CF_marker = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A_u),
@@ -820,6 +825,10 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
                /* Increment box start index */
                box_start_index += hypre_BoxVolume(compute_box);
+
+               /* Free memory */
+               hypre_BoxDestroy(compute_box);
+               hypre_BoxDestroy(shrink_box);
             }
          }
       }

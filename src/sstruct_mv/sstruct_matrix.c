@@ -2039,12 +2039,13 @@ HYPRE_Int
 hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
                                  HYPRE_Int           action )
 {
+   HYPRE_MemoryLocation     memloc       = hypre_SStructMatrixMemoryLocation(A);
+   HYPRE_Int                nparts       = hypre_SStructMatrixNParts(A);
    HYPRE_Int               *Sentries     = hypre_SStructMatrixSEntries(A);
    HYPRE_SStructGraph       graph        = hypre_SStructMatrixGraph(A);
    hypre_SStructGrid       *grid         = hypre_SStructGraphGrid(graph);
    HYPRE_Int              **nvneighbors  = hypre_SStructGridNVNeighbors(grid);
    HYPRE_Int                ndim         = hypre_SStructGridNDim(grid);
-   HYPRE_Int                nparts       = hypre_SStructMatrixNParts(A);
 
    hypre_ParCSRMatrix      *A_u          = hypre_SStructMatrixParCSRMatrix(A);
    hypre_CSRMatrix         *A_ud         = hypre_ParCSRMatrixDiag(A_u);
@@ -2187,6 +2188,7 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
             {
                indices[j] = hypre_CTAlloc(HYPRE_Int, num_indices, HYPRE_MEMORY_DEVICE);
             }
+
             /* Gather indices at non-zero rows of A_u */
             for (j = 0; j < ndim; j++)
             {
@@ -2196,6 +2198,8 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
                                   all_indices[j],
                                   indices[j] );
             }
+
+            /* Free memory */
             for (j = 0; j < ndim; j++)
             {
                hypre_TFree(all_indices[j], HYPRE_MEMORY_DEVICE);
@@ -2285,9 +2289,18 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
                                                            hypre_BoxArrayBox(indices_boxa, j),
                                                            values, 1);
                   }
+
+                  /* Free memory */
+                  hypre_TFree(values, HYPRE_MEMORY_DEVICE);
                }
                hypre_BoxArrayDestroy(indices_boxa);
                indices_boxa = NULL;
+            }
+
+            /* Free memory */
+            for (j = 0; j < ndim; j++)
+            {
+               hypre_TFree(indices[j], memloc);
             }
          } /* Loop over boxes */
       } /* Loop over vars */
