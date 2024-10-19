@@ -10,9 +10,9 @@
 
    Interface:    Structured interface (Struct)
 
-   Compile with: make ex1 (may need to edit HYPRE_DIR in Makefile)
+   Compile with: make ex01 (may need to edit HYPRE_DIR in Makefile)
 
-   Sample run:   mpirun -np 2 ex1
+   Sample run:   mpirun -np 2 ex01
 
    Description:  This is a two processor example.  Each processor owns one
                  box in the grid.  For reference, the two grid boxes are those
@@ -32,7 +32,7 @@
 
 /* Struct linear solvers header */
 #include "HYPRE_struct_ls.h"
-#include "ex.h"
+#include "ex.h" /* custom_malloc, custom_calloc, custom_free */
 
 #ifdef HYPRE_EXVIS
 #include "vis.c"
@@ -174,7 +174,7 @@ int main (int argc, char *argv[])
          int nentries = 5;
          int nvalues  = 30; /* 6 grid points, each with 5 stencil entries */
          /* double values[30]; OK to use constant-length arrays for CPUs */
-         double *values = (double *) malloc(30 * sizeof(double));
+         double *values = (double *) custom_malloc(30 * sizeof(double));
 
          /* We have 6 grid points, each with 5 stencil entries */
          for (i = 0; i < nvalues; i += nentries)
@@ -189,7 +189,7 @@ int main (int argc, char *argv[])
          HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
                                         stencil_indices, values);
 
-         free(values);
+         custom_free(values);
       }
       else if (myid == 1)
       {
@@ -198,7 +198,7 @@ int main (int argc, char *argv[])
          int nentries = 5;
          int nvalues  = 60; /* 12 grid points, each with 5 stencil entries */
          /* double values[60]; OK to use constant-length arrays for CPUs */
-         double *values = (double *) malloc(60 * sizeof(double));
+         double *values = (double *) custom_malloc(60 * sizeof(double));
 
          for (i = 0; i < nvalues; i += nentries)
          {
@@ -212,14 +212,14 @@ int main (int argc, char *argv[])
          HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
                                         stencil_indices, values);
 
-         free(values);
+         custom_free(values);
       }
 
       /* Set the coefficients reaching outside of the boundary to 0 */
       if (myid == 0)
       {
          /* double values[3]; OK to use constant-length arrays for CPUs */
-         double *values = (double *) malloc(3 * sizeof(double));
+         double *values = (double *) custom_malloc(3 * sizeof(double));
          for (i = 0; i < 3; i++)
          {
             values[i] = 0.0;
@@ -245,12 +245,12 @@ int main (int argc, char *argv[])
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices, values);
          }
-         free(values);
+         custom_free(values);
       }
       else if (myid == 1)
       {
          /* double values[4]; OK to use constant-length arrays for CPUs */
-         double *values = (double *) malloc(4 * sizeof(double));
+         double *values = (double *) custom_malloc(4 * sizeof(double));
          for (i = 0; i < 4; i++)
          {
             values[i] = 0.0;
@@ -284,7 +284,7 @@ int main (int argc, char *argv[])
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices, values);
          }
-         free(values);
+         custom_free(values);
       }
 
       /* This is a collective call finalizing the matrix assembly.
@@ -308,7 +308,7 @@ int main (int argc, char *argv[])
       {
          int ilower[2] = {-3, 1}, iupper[2] = {-1, 2};
          /* double values[6]; OK to use constant-length arrays for CPUs */
-         double *values = (double *) malloc(6 * sizeof(double)); /* 6 grid points */
+         double *values = (double *) custom_malloc(6 * sizeof(double)); /* 6 grid points */
 
          for (i = 0; i < 6; i ++)
          {
@@ -321,13 +321,13 @@ int main (int argc, char *argv[])
             values[i] = 0.0;
          }
          HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
-         free(values);
+         custom_free(values);
       }
       else if (myid == 1)
       {
          int ilower[2] = {0, 1}, iupper[2] = {2, 4};
          /* double values[12]; OK to use constant-length arrays for CPUs */
-         double *values = (double *) malloc(12 * sizeof(double)); /* 12 grid points */
+         double *values = (double *) custom_malloc(12 * sizeof(double)); /* 12 grid points */
 
          for (i = 0; i < 12; i ++)
          {
@@ -340,7 +340,7 @@ int main (int argc, char *argv[])
             values[i] = 0.0;
          }
          HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
-         free(values);
+         custom_free(values);
       }
 
       /* This is a collective call finalizing the vector assembly.
@@ -364,13 +364,13 @@ int main (int argc, char *argv[])
       HYPRE_StructPCGSolve(solver, A, b, x);
    }
 
-   /* Save the solution for GLVis visualization, see vis/glvis-ex1.sh */
+   /* Save the solution for GLVis visualization, see vis/glvis-ex01.sh */
    if (vis)
    {
 #ifdef HYPRE_EXVIS
-      GLVis_PrintStructGrid(grid, "vis/ex1.mesh", myid, NULL, NULL);
-      GLVis_PrintStructVector(x, "vis/ex1.sol", myid);
-      GLVis_PrintData("vis/ex1.data", myid, num_procs);
+      GLVis_PrintStructGrid(grid, "vis/ex01.mesh", myid, NULL, NULL);
+      GLVis_PrintStructVector(x, "vis/ex01.sol", myid);
+      GLVis_PrintData("vis/ex01.data", myid, num_procs);
 #endif
    }
 
