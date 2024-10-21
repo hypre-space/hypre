@@ -27,10 +27,12 @@ hypre_SStructPMatmultCreate(HYPRE_Int                   nmatrices_input,
                             hypre_SStructPMatmultData **pmmdata_ptr)
 {
    hypre_SStructPMatmultData  *pmmdata;
-   hypre_StructMatmultData    *smmdata;
+   hypre_StructMatmultData   **smmdata;
+   HYPRE_Int                   smmdasz;
 
    hypre_SStructPMatrix      **pmatrices;
    hypre_StructMatrix        **smatrices;
+   HYPRE_Int                  *sterms;
 
    HYPRE_Int                  *terms;
    HYPRE_Int                  *trans;
@@ -38,6 +40,9 @@ hypre_SStructPMatmultCreate(HYPRE_Int                   nmatrices_input,
    HYPRE_Int                   nmatrices;
    HYPRE_Int                   nvars;
    HYPRE_Int                   m, t, vi, vj;
+
+   HYPRE_Int                  *i, *n, k, nn, ii;   /* Nested for-loop variables */
+   HYPRE_Int                   zero_product;
 
    pmmdata = hypre_CTAlloc(hypre_SStructPMatmultData, 1, HYPRE_MEMORY_HOST);
 
@@ -59,7 +64,6 @@ hypre_SStructPMatmultCreate(HYPRE_Int                   nmatrices_input,
       }
    }
    pmatrices = hypre_CTAlloc(hypre_SStructPMatrix *, nmatrices, HYPRE_MEMORY_HOST);
-   smatrices = hypre_CTAlloc(hypre_StructMatrix *, nmatrices, HYPRE_MEMORY_HOST);
    terms     = hypre_CTAlloc(HYPRE_Int, nterms, HYPRE_MEMORY_HOST);
    trans     = hypre_CTAlloc(HYPRE_Int, nterms, HYPRE_MEMORY_HOST);
    for (t = 0; t < nterms; t++)
@@ -75,32 +79,105 @@ hypre_SStructPMatmultCreate(HYPRE_Int                   nmatrices_input,
    nvars = hypre_SStructPMatrixNVars(pmatrices[0]);
    (pmmdata -> nvars) = nvars;
 
-   /* Create SStructPMatmultData object */
-   (pmmdata -> smmdata) = hypre_TAlloc(hypre_StructMatmultData **, nvars, HYPRE_MEMORY_HOST);
+   /* This mimics the following nested for-loop (similar to BoxLoop) to compute
+    * the all-at-once PMatrix product M = A1 * A2 * ... * AN, where N = nterms:
+    *
+    *    for i ...
+    *    {
+    *       for j ...
+    *       {
+    *          M_ij = 0
+    *          for k1 ...
+    *             for k2 ...
+    *                ...
+    *                   for km ...  // where m = N-1
+    *                   {
+    *                      M_ij += A1_{i,k1} * A2_{k1,k2} * ... * AN_{km,j}
+    *                   }
+    *       }
+    *    }
+    *
+    */
 
-   /* TODO: This won't work for cases with inter-variable coupling */
+   i = hypre_CTAlloc(HYPRE_Int, (nterms + 1), HYPRE_MEMORY_HOST);
+   n = hypre_CTAlloc(HYPRE_Int, (nterms + 1), HYPRE_MEMORY_HOST);
+
+   /* In general, we need to have the same number of matrices as terms */
+   smatrices = hypre_CTAlloc(hypre_StructMatrix *, nterms, HYPRE_MEMORY_HOST);
+   sterms = hypre_CTAlloc(HYPRE_Int, nterms, HYPRE_MEMORY_HOST);
+   for (k = 0; k < nterms; k++)
+   {
+      sterms[k] = k;
+   }
+
+   (pmmdata -> smmdata) = hypre_TAlloc(hypre_StructMatmultData ***, nvars, HYPRE_MEMORY_HOST);
+   (pmmdata -> smmdasz) = hypre_TAlloc(HYPRE_Int *, nvars, HYPRE_MEMORY_HOST);
    for (vi = 0; vi < nvars; vi++)
    {
-      (pmmdata -> smmdata)[vi] = hypre_TAlloc(hypre_StructMatmultData *, nvars, HYPRE_MEMORY_HOST);
+      (pmmdata -> smmdata)[vi] = hypre_TAlloc(hypre_StructMatmultData **, nvars, HYPRE_MEMORY_HOST);
+      (pmmdata -> smmdasz)[vi] = hypre_TAlloc(HYPRE_Int, nvars, HYPRE_MEMORY_HOST);
       for (vj = 0; vj < nvars; vj++)
       {
-         for (m = 0; m < nmatrices; m++)
+         /* Initialize loop variables */
+         nn = 1;
+         for (k = 1; k < nterms; k++)
          {
-            smatrices[m] = hypre_SStructPMatrixSMatrix(pmatrices[m], vi, vj);
+            nn *= nvars;
+            i[k] = 0;
+            n[k] = nvars - 2;  /* offsetting by 2 produces a simpler comparison below */
          }
+         i[0]      = vi;
+         i[nterms] = vj;
+         n[nterms] = nvars;  /* This ensures that the below loop-index update terminates */
 
-         if (smatrices[0])
+         /* Initialize the array entries to NULL */
+         smmdata = hypre_CTAlloc(hypre_StructMatmultData *, nn, HYPRE_MEMORY_HOST);
+         smmdasz = 0;
+         /* Run through the nested for-loop */
+         for (ii = 0; ii < nn; ii++)
          {
-            hypre_StructMatmultCreate(nmatrices, smatrices, nterms, terms, trans, &smmdata);
-            (pmmdata -> smmdata)[vi][vj] = smmdata;
+            /* M_ij += A1_{i,k1} * A2_{k1,k2} * ... * AN_{km,j} */
+
+            zero_product = 0;
+            for (k = 0; k < nterms; k++)
+            {
+               if (trans[k])
+               {
+                  /* Use the transpose matrix (reverse the indices) */
+                  smatrices[k] = hypre_SStructPMatrixSMatrix(pmatrices[terms[k]], i[k + 1], i[k]);
+               }
+               else
+               {
+                  smatrices[k] = hypre_SStructPMatrixSMatrix(pmatrices[terms[k]], i[k], i[k + 1]);
+               }
+               if (smatrices[k] == NULL)
+               {
+                  zero_product = 1;
+                  break;
+               }
+            }
+            /* The zero_product case is already initialized to NULL above */
+            if (!zero_product)
+            {
+               hypre_StructMatmultCreate(nterms, smatrices, nterms, sterms, trans, &smmdata[smmdasz]);
+               smmdasz++;
+            }
+
+            /* Update loop indices */
+            for (k = 1; i[k] > n[k]; k++)
+            {
+               i[k] = 0;
+            }
+            i[k]++;
          }
-         else
-         {
-            (pmmdata -> smmdata)[vi][vj] = NULL;
-         }
+         (pmmdata -> smmdata)[vi][vj] = smmdata;
+         (pmmdata -> smmdasz)[vi][vj] = smmdasz;
       }
    }
+   hypre_TFree(i, HYPRE_MEMORY_HOST);
+   hypre_TFree(n, HYPRE_MEMORY_HOST);
    hypre_TFree(smatrices, HYPRE_MEMORY_HOST);
+   hypre_TFree(sterms, HYPRE_MEMORY_HOST);
 
    /* Set SStructPMatmultData object */
    (pmmdata -> nterms)     = nterms;
@@ -129,7 +206,7 @@ hypre_SStructPMatmultCreate(HYPRE_Int                   nmatrices_input,
 HYPRE_Int
 hypre_SStructPMatmultDestroy( hypre_SStructPMatmultData *pmmdata )
 {
-   HYPRE_Int vi, vj, nvars;
+   HYPRE_Int vi, vj, nvars, smmi;
 
    if (pmmdata)
    {
@@ -138,11 +215,17 @@ hypre_SStructPMatmultDestroy( hypre_SStructPMatmultData *pmmdata )
       {
          for (vj = 0; vj < nvars; vj++)
          {
-            hypre_StructMatmultDestroy((pmmdata -> smmdata)[vi][vj]);
+            for (smmi = 0; smmi < (pmmdata -> smmdasz)[vi][vj]; smmi++)
+            {
+               hypre_StructMatmultDestroy((pmmdata -> smmdata)[vi][vj][smmi]);
+            }
+            hypre_TFree(pmmdata -> smmdata[vi][vj], HYPRE_MEMORY_HOST);
          }
          hypre_TFree(pmmdata -> smmdata[vi], HYPRE_MEMORY_HOST);
+         hypre_TFree(pmmdata -> smmdasz[vi], HYPRE_MEMORY_HOST);
       }
       hypre_TFree(pmmdata -> smmdata, HYPRE_MEMORY_HOST);
+      hypre_TFree(pmmdata -> smmdasz, HYPRE_MEMORY_HOST);
 
       hypre_TFree(pmmdata -> pmatrices, HYPRE_MEMORY_HOST);
       hypre_TFree(pmmdata -> transposes, HYPRE_MEMORY_HOST);
@@ -166,7 +249,8 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
                             HYPRE_Int                   assemble_grid,
                             hypre_SStructPMatrix      **pM_ptr )
 {
-   hypre_StructMatmultData   ***smmdata = (pmmdata -> smmdata);
+   hypre_StructMatmultData  ****smmdata = (pmmdata -> smmdata);
+   HYPRE_Int                  **smmdasz = (pmmdata -> smmdasz);
    HYPRE_Int                    nvars   = (pmmdata -> nvars);
    hypre_SStructPMatrix        *pmatrix = pmmdata -> pmatrices[0];
 
@@ -232,8 +316,17 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
       coarsen_stride = NULL;
       for (vj = 0; vj < nvars; vj++)
       {
+         /* This currently only works if smmdasz[vi][vj] <= 1.  Need to write a
+          * matrix sum routine and extend this to work in general. */
+         if (smmdasz[vi][vj] > 1)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "SStructPMatmult currently supports only one StructMatmult product \n");
+            return hypre_error_flag;
+         }
+
          /* Check if this SMatrix exists */
-         if (smmdata[vi][vj])
+         if (smmdata[vi][vj][0])
          {
             /* Destroy placeholder data */
             sM = hypre_SStructPMatrixSMatrix(pM, vi, vj);
@@ -242,7 +335,7 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
             /* This sets up the grid and stencil of the (vi,vj)-block of the PMatrix */
             /* NOTE: Do not assemble the sM grid here.  Assemble the grids later
              * in HYPRE_SStructGridAssemble(Mgrid) to reduce box manager overhead. */
-            hypre_StructMatmultSetup(smmdata[vi][vj], 0, &sM);
+            hypre_StructMatmultSetup(smmdata[vi][vj][0], 0, &sM);
             hypre_SStructPMatrixSMatrix(pM, vi, vj) = sM;
 
             /* Update struct stencil of the (vi,vj)-block with actual stencils */
@@ -255,8 +348,8 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
             /* Get coarsening information from the diagonal block */
             if (vi == vj)
             {
-               coarsen = (smmdata[vi][vj] -> coarsen);
-               coarsen_stride = (smmdata[vi][vj] -> coarsen_stride);
+               coarsen = (smmdata[vi][vj][0] -> coarsen);
+               coarsen_stride = (smmdata[vi][vj][0] -> coarsen_stride);
             }
          }
       }
@@ -324,10 +417,10 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
    {
       for (vj = 0; vj < nvars; vj++)
       {
-         if (smmdata[vi][vj])
+         if (smmdata[vi][vj][0])
          {
-            num_comm_pkgs   += (smmdata[vi][vj] -> num_comm_pkgs);
-            num_comm_blocks += (smmdata[vi][vj] -> num_comm_blocks);
+            num_comm_pkgs   += (smmdata[vi][vj][0] -> num_comm_pkgs);
+            num_comm_blocks += (smmdata[vi][vj][0] -> num_comm_blocks);
          }
       }
    }
@@ -346,17 +439,17 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
    {
       for (vj = 0; vj < nvars; vj++)
       {
-         if (smmdata[vi][vj])
+         if (smmdata[vi][vj][0])
          {
-            for (np = 0; np < (smmdata[vi][vj] -> num_comm_pkgs); np++)
+            for (np = 0; np < (smmdata[vi][vj][0] -> num_comm_pkgs); np++)
             {
-               comm_pkg_a[num_comm_pkgs]  = (smmdata[vi][vj] -> comm_pkg_a[np]);
-               comm_data_a[num_comm_pkgs] = (smmdata[vi][vj] -> comm_data_a[np]);
+               comm_pkg_a[num_comm_pkgs]  = (smmdata[vi][vj][0] -> comm_pkg_a[np]);
+               comm_data_a[num_comm_pkgs] = (smmdata[vi][vj][0] -> comm_data_a[np]);
                num_comm_pkgs++;
             }
 
-            hypre_TFree(smmdata[vi][vj] -> comm_pkg_a, HYPRE_MEMORY_HOST);
-            hypre_TFree(smmdata[vi][vj] -> comm_data_a, HYPRE_MEMORY_HOST);
+            hypre_TFree(smmdata[vi][vj][0] -> comm_pkg_a, HYPRE_MEMORY_HOST);
+            hypre_TFree(smmdata[vi][vj][0] -> comm_data_a, HYPRE_MEMORY_HOST);
          }
       }
    }
@@ -417,7 +510,7 @@ hypre_SStructPMatmultCompute( hypre_SStructPMatmultData *pmmdata,
                               hypre_SStructPMatrix      *pM )
 {
    HYPRE_Int                   nvars   = (pmmdata -> nvars);
-   hypre_StructMatmultData  ***smmdata = (pmmdata -> smmdata);
+   hypre_StructMatmultData ****smmdata = (pmmdata -> smmdata);
 
    hypre_StructMatrix         *sM;
    HYPRE_Int                   vi, vj;
@@ -427,10 +520,10 @@ hypre_SStructPMatmultCompute( hypre_SStructPMatmultData *pmmdata,
       for (vj = 0; vj < nvars; vj++)
       {
          /* This computes the coefficients of the (vi,vj)-block of the PMatrix */
-         if (smmdata[vi][vj])
+         if (smmdata[vi][vj][0])
          {
             sM = hypre_SStructPMatrixSMatrix(pM, vi, vj);
-            hypre_StructMatmultCompute(smmdata[vi][vj], sM);
+            hypre_StructMatmultCompute(smmdata[vi][vj][0], sM);
          }
       }
    }
