@@ -434,7 +434,7 @@ ReadData( MPI_Comm      comm,
       if ((file = fopen(filename, "r")) == NULL)
       {
          hypre_printf("Error: can't open input file %s\n", filename);
-         MPI_Abort(comm, -1);
+         hypre_MPI_Abort(comm, -1);
       }
 
       /* allocate initial space, and read first input line */
@@ -540,7 +540,7 @@ ReadData( MPI_Comm      comm,
             if ( (il != 0) || (iu != 1) )
             {
                hypre_printf("Error: Invalid use of `+-' in GridSetExtents\n");
-               MPI_Abort(comm, -1);
+               hypre_MPI_Abort(comm, -1);
             }
             pdata.boxsizes[pdata.nboxes] = 1;
             for (i = 0; i < 3; i++)
@@ -567,7 +567,7 @@ ReadData( MPI_Comm      comm,
          {
             /* TODO */
             hypre_printf("GridAddVariables not yet implemented!\n");
-            MPI_Abort(comm, -1);
+            hypre_MPI_Abort(comm, -1);
          }
          else if ( strcmp(key, "GridSetNeighborPart:") == 0 ||
                    strcmp(key, "GridSetSharedPart:") == 0 )
@@ -669,7 +669,7 @@ ReadData( MPI_Comm      comm,
             if (data.fem_nvars > 0)
             {
                hypre_printf("Stencil and FEMStencil cannot be used together\n");
-               MPI_Abort(comm, -1);
+               hypre_MPI_Abort(comm, -1);
             }
             data.nstencils = strtol(sdata_ptr, &sdata_ptr, 10);
             data.stencil_sizes   = hypre_CTAlloc(HYPRE_Int,  data.nstencils, HYPRE_MEMORY_HOST);
@@ -714,7 +714,7 @@ ReadData( MPI_Comm      comm,
             if (data.nstencils > 0)
             {
                hypre_printf("Stencil and FEMStencil cannot be used together\n");
-               MPI_Abort(comm, -1);
+               hypre_MPI_Abort(comm, -1);
             }
             data.fem_nvars = strtol(sdata_ptr, &sdata_ptr, 10);
             data.fem_offsets = hypre_CTAlloc(Index,  data.fem_nvars, HYPRE_MEMORY_HOST);
@@ -1238,7 +1238,7 @@ DistributeData( MPI_Comm      comm,
    {
       hypre_printf("%d,  %d \n", pool_procs[data.npools], num_procs);
       hypre_printf("Error: Invalid number of processes or process topology \n");
-      MPI_Abort(comm, -1);
+      hypre_MPI_Abort(comm, -1);
    }
 
    /* modify part data */
