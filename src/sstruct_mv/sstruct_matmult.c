@@ -159,7 +159,8 @@ hypre_SStructPMatmultCreate(HYPRE_Int                   nmatrices_input,
             /* The zero_product case is already initialized to NULL above */
             if (!zero_product)
             {
-               hypre_StructMatmultCreate(nterms, smatrices, nterms, sterms, trans, &smmdata[smmdasz]);
+               hypre_StructMatmultCreate(nterms, smatrices, nterms, sterms, trans,
+                                         &smmdata[smmdasz]);
                smmdasz++;
             }
 
@@ -302,13 +303,16 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
    /* Create part grid data structure */
    hypre_SStructPGridCreate(comm, ndim, &pgrid);
    hypre_SStructPGridSetVariables(pgrid, nvars, vartp);
+   /* RDF: Need to figure out how to handle the cell grid (see below also) */
+   hypre_StructGridDestroy(hypre_SStructPGridCellSGrid(pgrid));
+   hypre_SStructPGridCellSGrid(pgrid) = NULL;
 
    /* Create part matrix data structure */
    hypre_SStructPMatrixCreate(comm, pgrid, pstencils, &pM);
    smaps = hypre_SStructPMatrixSMaps(pM);
 
    /* Setup part matrix data structure */
-   max_stencil_size = cnt = 0;
+   max_stencil_size = 0;
    for (vi = 0; vi < nvars; vi++)
    {
       pstencil_size = 0;
@@ -321,7 +325,7 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
          if (smmdasz[vi][vj] > 1)
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
-                              "SStructPMatmult currently supports only one StructMatmult product \n");
+                              "SStructPMatmult currently supports only one StructMatmult term\n");
             return hypre_error_flag;
          }
 
@@ -333,7 +337,7 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
             hypre_StructMatrixDestroy(sM);
 
             /* This sets up the grid and stencil of the (vi,vj)-block of the PMatrix */
-            /* NOTE: Do not assemble the sM grid here.  Assemble the grids later
+            /* NOTE: Do not assemble the sM grid here.  Assemble the grids either below or
              * in HYPRE_SStructGridAssemble(Mgrid) to reduce box manager overhead. */
             hypre_StructMatmultSetup(smmdata[vi][vj][0], 0, &sM);
             hypre_SStructPMatrixSMatrix(pM, vi, vj) = sM;
@@ -345,37 +349,45 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
             /* Update the part stencil size */
             pstencil_size += hypre_StructStencilSize(stencil);
 
-            /* Get coarsening information from the diagonal block */
-            if (vi == vj)
+            /* Set up the struct grids in pgrid */
+            /* RDF: This may only work when there is a cell variable type.  We need to
+             * either construct a cell grid from the struct matmult grids somehow, or
+             * do something entirely different. */
+            if (hypre_SStructPGridSGrid(pgrid, vi) == NULL)
             {
-               coarsen = (smmdata[vi][vj][0] -> coarsen);
-               coarsen_stride = (smmdata[vi][vj][0] -> coarsen_stride);
+               /* Set a reference to the grid in sM */
+               sgrid = hypre_StructMatrixGrid(sM);
+               hypre_StructGridRef(sgrid, &hypre_SStructPGridSGrid(pgrid, vi));
+
+               /* Build part boundaries array */
+               num_boxes   = hypre_StructGridNumBoxes(sgrid);
+               grid_boxes  = hypre_StructGridBoxes(sgrid);
+               fpbnd_boxaa = hypre_SStructPGridPBndBoxArrayArray(pfgrid, vi);
+               if (num_boxes)
+               {
+                  coarsen = (smmdata[vi][vj][0] -> coarsen);
+                  if (coarsen)
+                  {
+                     coarsen_stride = (smmdata[vi][vj][0] -> coarsen_stride);
+                     hypre_CoarsenBoxArrayArrayNeg(fpbnd_boxaa, grid_boxes, origin,
+                                                   coarsen_stride, &cpbnd_boxaa);
+                  }
+                  else
+                  {
+                     cpbnd_boxaa = hypre_BoxArrayArrayClone(fpbnd_boxaa);
+                  }
+                  hypre_SStructPGridPBndBoxArrayArray(pgrid, vi) = cpbnd_boxaa;
+               }
+            }
+            else
+            {
+               /* Replace the grid in sM */
+               hypre_StructGridDestroy(hypre_StructMatrixGrid(sM));
+               hypre_StructGridRef(hypre_SStructPGridSGrid(pgrid, vi), &hypre_StructMatrixGrid(sM));
             }
          }
       }
       max_stencil_size = hypre_max(pstencil_size, max_stencil_size);
-
-      /* Destroy placeholder grid and update with new StructGrid */
-      sgrid = hypre_StructMatrixGrid(sM);
-      hypre_SStructPGridSetSGrid(sgrid, pgrid, vi);
-
-      /* Build part boundaries array */
-      num_boxes   = hypre_StructGridNumBoxes(sgrid);
-      grid_boxes  = hypre_StructGridBoxes(sgrid);
-      fpbnd_boxaa = hypre_SStructPGridPBndBoxArrayArray(pfgrid, vi);
-      if (num_boxes)
-      {
-         if (coarsen)
-         {
-            hypre_CoarsenBoxArrayArrayNeg(fpbnd_boxaa, grid_boxes, origin,
-                                          coarsen_stride, &cpbnd_boxaa);
-         }
-         else
-         {
-            cpbnd_boxaa = hypre_BoxArrayArrayClone(fpbnd_boxaa);
-         }
-         hypre_SStructPGridPBndBoxArrayArray(pgrid, vi) = cpbnd_boxaa;
-      }
 
       /* Update smaps array */
       smaps[vi] = hypre_TReAlloc(smaps[vi], HYPRE_Int, pstencil_size, HYPRE_MEMORY_HOST);
@@ -383,6 +395,7 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
       /* Destroy placeholder semi-struct stencil and update with actual one */
       HYPRE_SStructStencilDestroy(pstencils[vi]);
       HYPRE_SStructStencilCreate(ndim, pstencil_size, &pstencils[vi]);
+      cnt = 0;
       for (vj = 0; vj < nvars; vj++)
       {
          sM = hypre_SStructPMatrixSMatrix(pM, vi, vj);
