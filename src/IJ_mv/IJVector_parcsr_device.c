@@ -88,31 +88,14 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
 
    /* output X: 0: keep, 1: zero-out */
 #if defined(HYPRE_USING_SYCL)
-   /* WM: todo - oneDPL currently does not have a reverse iterator */
-   /*     should be able to do this with a reverse operation defined in a struct */
-   /*     instead of explicitly allocating and generating the reverse_perm, */
-   /*     but I can't get that to work for some reason */
-   HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
-   HYPRE_ONEDPL_CALL( std::transform,
-                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
-                      oneapi::dpl::counting_iterator<HYPRE_Int>(N0),
-                      reverse_perm,
-   [N0] (auto i) { return N0 - i - 1; });
-
-   auto I0_reversed = oneapi::dpl::make_permutation_iterator(I0, reverse_perm);
-   auto X0_reversed = oneapi::dpl::make_permutation_iterator(X0, reverse_perm);
-   auto X_reversed = oneapi::dpl::make_permutation_iterator(X, reverse_perm);
-
    HYPRE_ONEDPL_CALL( oneapi::dpl::exclusive_scan_by_segment,
-                      I0_reversed,      /* key begin */
-                      I0_reversed + N0, /* key end */
-                      X0_reversed,      /* input value begin */
-                      X_reversed,       /* output value begin */
-                      char(0),          /* init */
+                      oneapi::dpl::make_reverse_iterator(I0 + N0), /* key begin */
+                      oneapi::dpl::make_reverse_iterator(I0),      /* key end */
+                      oneapi::dpl::make_reverse_iterator(X0 + N0), /* input value begin */
+                      oneapi::dpl::make_reverse_iterator(X + N0),  /* output value begin */
+                      char(0),                                     /* init */
                       std::equal_to<HYPRE_BigInt>(),
                       oneapi::dpl::maximum<char>() );
-
-   hypre_TFree(reverse_perm, HYPRE_MEMORY_DEVICE);
 
    hypreSycl_transform_if(A0,
                           A0 + N0,
@@ -132,11 +115,11 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
 #else
    HYPRE_THRUST_CALL(
       exclusive_scan_by_key,
-      make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0) + N0), /* key begin */
-      make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),      /* key end */
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),         /* input value begin */
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X) + N0),          /* output value begin */
-      char(0),                                                                   /* init */
+      thrust::make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0) + N0), /* key begin */
+      thrust::make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),      /* key end */
+      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),         /* input value begin */
+      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X) + N0),          /* output value begin */
+      char(0),                                                                           /* init */
       thrust::equal_to<HYPRE_BigInt>(),
       thrust::maximum<char>() );
 
@@ -189,29 +172,13 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
 
    /* output in X0: 0: keep, 1: zero-out */
 #if defined(HYPRE_USING_SYCL)
-   /* WM: todo - oneDPL currently does not have a reverse iterator */
-   /*     should be able to do this with a reverse operation defined in a struct */
-   /*     instead of explicitly allocating and generating the reverse_perm, */
-   /*     but I can't get that to work for some reason */
-   HYPRE_Int *reverse_perm = hypre_TAlloc(HYPRE_Int, N0, HYPRE_MEMORY_DEVICE);
-   HYPRE_ONEDPL_CALL( std::transform,
-                      oneapi::dpl::counting_iterator<HYPRE_Int>(0),
-                      oneapi::dpl::counting_iterator<HYPRE_Int>(N0),
-                      reverse_perm,
-   [N0] (auto i) { return N0 - i - 1; });
-
-   auto I0_reversed = oneapi::dpl::make_permutation_iterator(I0, reverse_perm);
-   auto X0_reversed = oneapi::dpl::make_permutation_iterator(X0, reverse_perm);
-
    HYPRE_ONEDPL_CALL( oneapi::dpl::inclusive_scan_by_segment,
-                      I0_reversed,      /* key begin */
-                      I0_reversed + N0, /* key end */
-                      X0_reversed,      /* input value begin */
-                      X0_reversed,      /* output value begin */
+                      oneapi::dpl::make_reverse_iterator(I0 + N0),      /* key begin */
+                      oneapi::dpl::make_reverse_iterator(I0),           /* key end */
+                      oneapi::dpl::make_reverse_iterator(X0 + N0),      /* input value begin */
+                      oneapi::dpl::make_reverse_iterator(X0 + N0),      /* output value begin */
                       std::equal_to<HYPRE_BigInt>(),
                       oneapi::dpl::maximum<char>() );
-
-   hypre_TFree(reverse_perm, HYPRE_MEMORY_DEVICE);
 
    hypreSycl_transform_if(A0,
                           A0 + N0,
@@ -220,22 +187,19 @@ hypre_IJVectorAssembleSortAndReduce3( HYPRE_Int      N0,
    [] (const auto & x) {return 0.0;},
    [] (const auto & x) {return x;} );
 
-   /* WM: todo - why don't I use the HYPRE_ONEDPL_CALL macro here? Compile issue? */
-   auto new_end = oneapi::dpl::reduce_by_segment(
-                     oneapi::dpl::execution::make_device_policy<class devutils>(*hypre_HandleComputeStream(
-                                                                                   hypre_handle())),
-                     I0,      /* keys_first */
-                     I0 + N0, /* keys_last */
-                     A0,      /* values_first */
-                     I,       /* keys_output */
-                     A        /* values_output */);
+   auto new_end = HYPRE_ONEDPL_CALL( oneapi::dpl::reduce_by_segment,
+                                     I0,      /* keys_first */
+                                     I0 + N0, /* keys_last */
+                                     A0,      /* values_first */
+                                     I,       /* keys_output */
+                                     A );     /* values_output */
 #else
    HYPRE_THRUST_CALL(
       inclusive_scan_by_key,
-      make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0) + N0), /* key begin */
-      make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),    /* key end */
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),       /* input value begin */
-      make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),       /* output value begin */
+      thrust::make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0) + N0), /* key begin */
+      thrust::make_reverse_iterator(thrust::device_pointer_cast<HYPRE_BigInt>(I0)),      /* key end */
+      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),         /* input value begin */
+      thrust::make_reverse_iterator(thrust::device_pointer_cast<char>(X0) + N0),         /* output value begin */
       thrust::equal_to<HYPRE_BigInt>(),
       thrust::maximum<char>() );
 
@@ -694,4 +658,3 @@ hypre_IJVectorUpdateValuesDevice( hypre_IJVector      *vector,
 }
 
 #endif
-

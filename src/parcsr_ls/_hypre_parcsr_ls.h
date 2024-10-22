@@ -3735,9 +3735,10 @@ HYPRE_Int hypre_MGRBuildBlockJacobiP( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix 
 HYPRE_Int hypre_MGRBuildP( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                            HYPRE_BigInt *num_cpts_global, HYPRE_Int method,
                            HYPRE_Int debug_flag, hypre_ParCSRMatrix **P_ptr );
-HYPRE_Int hypre_MGRBuildPHost( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
+HYPRE_Int hypre_MGRBuildPHost( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
+                               hypre_ParCSRMatrix *A_FC, HYPRE_Int *CF_marker,
                                HYPRE_BigInt *num_cpts_global, HYPRE_Int method,
-                               hypre_ParCSRMatrix **P_ptr );
+                               hypre_ParCSRMatrix **Wp_ptr, hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_MGRBuildInterpApproximateInverse( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                                                   HYPRE_BigInt *num_cpts_global,
                                                   hypre_ParCSRMatrix **P_ptr );

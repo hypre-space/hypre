@@ -20,25 +20,25 @@
                    cycle = 7.015102
 
 # Output file: interp.out.3
- Average Convergence Factor = 0.469473
+ Average Convergence Factor = 0.469524
 
      Complexity:    grid = 1.410222
-                operator = 2.565374
-                   cycle = 5.129048
+                operator = 2.566327
+                   cycle = 5.131565
 
 # Output file: interp.out.4
- Average Convergence Factor = 0.474824
+ Average Convergence Factor = 0.474961
 
-     Complexity:    grid = 1.406667
-                operator = 2.527959
-                   cycle = 5.054218
+     Complexity:    grid = 1.409778
+                operator = 2.539456
+                   cycle = 5.075578
 
 # Output file: interp.out.5
- Average Convergence Factor = 0.490011
+ Average Convergence Factor = 0.484045
 
-     Complexity:    grid = 1.403556
-                operator = 2.558503
-                   cycle = 5.116735
+     Complexity:    grid = 1.403111
+                operator = 2.556667
+                   cycle = 5.113061
 
 # Output file: interp.out.6
  Average Convergence Factor = 0.284534
@@ -55,9 +55,9 @@
                    cycle = 7.531293
 
 # Output file: interp.out.8
- Average Convergence Factor = 0.469473
+ Average Convergence Factor = 0.469524
 
      Complexity:    grid = 1.410222
-                operator = 2.565374
-                   cycle = 5.129048
+                operator = 2.566327
+                   cycle = 5.131565
 

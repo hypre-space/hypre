@@ -505,7 +505,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
             /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
             if (hypre_GetGpuAwareMPI())
             {
-               hypre_ForceSyncComputeStream(hypre_handle());
+               hypre_ForceSyncComputeStream();
             }
 #endif
          }

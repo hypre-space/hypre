@@ -314,6 +314,9 @@ hypre_MGRSetupStats(void *mgr_vdata)
    HYPRE_Solver               coarse_solver   = hypre_ParMGRDataCoarseGridSolver(mgr_data);
    HYPRE_Solver             **A_FF_solver     = hypre_ParMGRDataAFFsolver(mgr_data);
    HYPRE_Int                 *Frelax_type     = hypre_ParMGRDataFRelaxType(mgr_data);
+   HYPRE_Int                  block_size      = hypre_ParMGRDataBlockSize(mgr_data);
+   HYPRE_Int                 *block_num_Cpts  = hypre_ParMGRDataBlockNumCoarseIndexes(mgr_data);
+   HYPRE_Int                **block_CF_marker = hypre_ParMGRDataBlockCFMarker(mgr_data);
 
    /* Finest matrix variables */
    MPI_Comm                   comm            = hypre_ParCSRMatrixComm(A_finest);
@@ -332,6 +335,9 @@ hypre_MGRSetupStats(void *mgr_vdata)
    HYPRE_Real                *gridcomp;
    HYPRE_Real                *opcomp;
    HYPRE_Real                *memcomp;
+
+   HYPRE_Int                  max_length;
+   char                      *coarse_dofs_str = NULL;
 
    HYPRE_Int                  coarsest_mgr_level;
    HYPRE_Int                  num_levels_total;
@@ -404,6 +410,18 @@ hypre_MGRSetupStats(void *mgr_vdata)
 
    if (!myid)
    {
+      /* Determine max_length for printing coarse DOFs */
+      if (block_num_Cpts)
+      {
+         coarse_dofs_str = hypre_ConvertIndicesToString(block_num_Cpts[0], block_CF_marker[0]);
+         max_length = hypre_min(strlen(coarse_dofs_str) + 2, 50);
+         hypre_TFree(coarse_dofs_str, HYPRE_MEMORY_HOST);
+      }
+      else
+      {
+         max_length = 10;
+      }
+
       hypre_printf("\n\n");
       hypre_printf(" Num MPI tasks = %d\n",  num_procs);
       hypre_printf(" Num OpenMP threads = %d\n", num_threads);
@@ -414,22 +432,34 @@ hypre_MGRSetupStats(void *mgr_vdata)
       hypre_printf(" coarse AMG num levels = %d\n", num_sublevels_amg[coarsest_mgr_level]);
       hypre_printf("      Total num levels = %d\n\n", num_levels_total);
 
-      divisors[0] = 84;
+      divisors[0] = 83 + max_length;
       //hypre_printf("\nMGR level options:\n\n");
-      hypre_printf("%18s %14s %16s\n", "Global", "Fine", "Coarse");
-      hypre_printf("%3s %14s %14s %16s %16s %16s\n", "lev",
-                   "relaxation", "relaxation", "grid method",
-                   "Prolongation", "Restriction");
+      hypre_printf("%10s %*s %11s %14s %14s\n",
+                   "Total", max_length, "Coarse", "Global", "Fine", "Coarse");
+      hypre_printf("%3s %6s %*s %11s %14s %14s %14s %14s\n", "lev",
+                   "DOFs", max_length, "DOFs", "relaxation", "relaxation",
+                   "grid method", "Prolongation", "Restriction");
       HYPRE_PRINT_TOP_DIVISOR(1, divisors);
       for (i = 0; i < num_levels_mgr; i++)
       {
-         hypre_printf("%3d %14s %14s %16s %16s %16s\n",
+         if (block_num_Cpts)
+         {
+            coarse_dofs_str = hypre_ConvertIndicesToString(block_num_Cpts[i],
+                                                           block_CF_marker[i]);
+         }
+
+         hypre_printf("%3d %6d %*s %11s %14s %14s %14s %14s\n",
                       i,
+                      (i > 0 && block_num_Cpts) ? block_num_Cpts[i - 1] : block_size,
+                      max_length,
+                      (block_num_Cpts) ? coarse_dofs_str : "--",
                       hypre_MGRGetGlobalRelaxName(mgr_data, i),
                       hypre_MGRGetFRelaxName(mgr_data, i),
                       hypre_MGRGetCoarseGridName(mgr_data, i),
                       hypre_MGRGetProlongationName(mgr_data, i),
                       hypre_MGRGetRestrictionName(mgr_data, i));
+
+         hypre_TFree(coarse_dofs_str, HYPRE_MEMORY_HOST);
       }
       hypre_printf("\n\n");
    }

@@ -7,6 +7,16 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
+Version 2.32.0 released 2024/10/08
+
+- New MGR features and updates
+- New filtering option to AMG for block-diagonal preconditioning
+- New memory usage monitoring functions
+- Added non-UVM support for ILUT and HMIS coarsening
+- Various bug fixes
+
+#====================================
+
 Version 2.31.0 released 2024/02/14
 
 - Added iterative ILU0 option

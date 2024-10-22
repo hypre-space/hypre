@@ -160,7 +160,7 @@ void runjob1( HYPRE_ParCSRMatrix parcsr_A,
       if (i == rep - 1)
       {
 #if defined(HYPRE_USING_GPU)
-         hypre_SyncCudaDevice(hypre_handle());
+         hypre_SyncDevice();
 #endif
          //cudaProfilerStop();
          hypre_EndTiming(time_index);
@@ -291,7 +291,7 @@ void runjob2( HYPRE_ParCSRMatrix parcsr_A,
       if (i == rep - 1)
       {
 #if defined(HYPRE_USING_GPU)
-         hypre_SyncCudaDevice(hypre_handle());
+         hypre_SyncDevice();
 #endif
          //cudaProfilerStop();
          hypre_EndTiming(time_index);
@@ -475,7 +475,7 @@ void runjob3( HYPRE_ParCSRMatrix parcsr_A,
       if (i == rep - 1)
       {
 #if defined(HYPRE_USING_GPU)
-         hypre_SyncCudaDevice(hypre_handle());
+         hypre_SyncDevice();
 #endif
          //cudaProfilerStop();
          hypre_EndTiming(time_index);
@@ -657,7 +657,7 @@ void runjob5( HYPRE_ParCSRMatrix parcsr_A,
          if (i == rep - 1)
          {
 #if defined(HYPRE_USING_GPU)
-            hypre_SyncCudaDevice(hypre_handle());
+            hypre_SyncDevice();
 #endif
             hypre_EndTiming(time_index);
             hypre_PrintTiming("Device Parcsr DiagScale Matrix", hypre_MPI_COMM_WORLD);
@@ -686,7 +686,7 @@ void runjob5( HYPRE_ParCSRMatrix parcsr_A,
       if (i == rep - 1)
       {
 #if defined(HYPRE_USING_GPU)
-         hypre_SyncCudaDevice(hypre_handle());
+         hypre_SyncDevice();
 #endif
          hypre_EndTiming(time_index);
          hypre_PrintTiming("Device Parcsr Matrix-by-Matrix, Diag(A)*A", hypre_MPI_COMM_WORLD);

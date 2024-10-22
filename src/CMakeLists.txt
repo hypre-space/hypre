@@ -12,9 +12,9 @@ else ()
 endif ()
 
 # The version number.
-set(HYPRE_VERSION 2.31.0)
-set(HYPRE_NUMBER  23100)
-set(HYPRE_DATE    2024/02/14)
+set(HYPRE_VERSION 2.32.0)
+set(HYPRE_NUMBER  23200)
+set(HYPRE_DATE    2024/10/08)
 set(HYPRE_TIME    00:00:00)
 set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -632,6 +632,30 @@ if (HYPRE_USING_UMPIRE)
   target_include_directories(${PROJECT_NAME} PUBLIC ${TPL_UMPIRE_INCLUDE_DIRS})
 endif ()
 
+# Set MPI compile flags
+if (NOT HYPRE_SEQUENTIAL)
+  find_program(MPIEXEC_EXECUTABLE NAMES mpiexec mpirun)
+  find_package(MPI REQUIRED)
+  target_link_libraries(${PROJECT_NAME} PUBLIC MPI::MPI_C)
+  set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} MPI::MPI_C)
+
+  # Check if MPI supports the MPI_Comm_f2c function
+  include(CheckCSourceCompiles)
+  check_c_source_compiles("
+    #include <mpi.h>
+    int main() {
+      MPI_Comm c = MPI_Comm_f2c(0);
+      return 0;
+    }
+  " HYPRE_HAVE_MPI_COMM_F2C)
+endif (NOT HYPRE_SEQUENTIAL)
+
+# Set OpenMP compile flags
+if (HYPRE_USING_OPENMP)
+  find_package(OpenMP REQUIRED)
+  target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_C)
+endif (HYPRE_USING_OPENMP)
+
 # Configure a header file to pass CMake settings to the source code
 configure_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/config/HYPRE_config.h.cmake.in"
@@ -662,19 +686,6 @@ endif ()
 if (HYPRE_USING_SYCL)
   set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE CXX)
 endif ()
-
-# Set MPI compile flags
-if (NOT HYPRE_SEQUENTIAL)
-  find_program(MPIEXEC_EXECUTABLE NAMES mpiexec mpirun)
-  find_package(MPI REQUIRED)
-  target_link_libraries(${PROJECT_NAME} PUBLIC MPI::MPI_C)
-endif (NOT HYPRE_SEQUENTIAL)
-
-# Set OpenMP compile flags
-if (HYPRE_USING_OPENMP)
-  find_package(OpenMP REQUIRED)
-  target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_C)
-endif (HYPRE_USING_OPENMP)
 
 if (MSVC)
   target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
