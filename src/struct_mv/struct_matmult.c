@@ -50,7 +50,7 @@ hypre_StructMatmultCreate( HYPRE_Int                  nmatrices_in,
    HYPRE_Complex           ***comm_data_a;
 
    HYPRE_Int                  nmatrices, *matmap;
-   HYPRE_Int                  m, t;
+   HYPRE_Int                  m, t, nu, u, unique;
 
    /* Allocate data structure */
    mmdata = hypre_CTAlloc(hypre_StructMatmultData, 1, HYPRE_MEMORY_HOST);
@@ -84,6 +84,36 @@ hypre_StructMatmultCreate( HYPRE_Int                  nmatrices_in,
       transposes[t] = transposes_in[t];
    }
    hypre_TFree(matmap, HYPRE_MEMORY_HOST);
+
+   /* Make sure that each entry in matrices[] is unique */
+   nu = 1;
+   for (m = 1; m < nmatrices; m++)
+   {
+      /* Check matrices[m] against the matrices already marked as unique */
+      unique = 1;
+      for (u = 0; u < nu; u++)
+      {
+         if (matrices[m] == matrices[u])
+         {
+            /* Not a unique matrix, so adjust terms[] and remove from matrices[] */
+            for (t = 0; t < nterms; t++)
+            {
+               if (terms[t] == m)
+               {
+                  terms[t] = u;
+               }
+            }
+            unique = 0;
+            break;
+         }
+      }
+      if (unique)
+      {
+         matrices[nu] = matrices[m];
+         nu++;
+      }
+   }
+   nmatrices = nu;
 
    /* Initialize */
    comm_pkg_a  = hypre_TAlloc(hypre_CommPkg *, nmatrices + 1, HYPRE_MEMORY_HOST);
