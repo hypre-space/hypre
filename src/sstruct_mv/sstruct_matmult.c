@@ -11,7 +11,21 @@
 //#define DEBUG_MATMULT
 
 /*==========================================================================
- * SStructPMatrix routines
+ * SStructPMatrix matrix-multiply routines
+ *
+ * The pmatrix (SStructPMatrix) contains an nvars x nvars array of struct
+ * (StructMatrix) matrices.  The multiply is then a block-matrix multiply
+ * involving these struct matrices.
+ *
+ * NOTE: This only works for cell-centered variable types (see below comment).
+ * This is also restricted to cases where there is only one struct matrix term
+ * to compute M_ij of the pmatrix M.
+ *
+ * RDF: The struct matmult requires a common base grid, but the base grid in a
+ * pmatrix will differ depending on the variable types involved (see the sgrids
+ * construction in SStructPGridAssemble).  Need to figure out how to handle this
+ * (note that the "Engwer trick" would be a good solution and also minimizes the
+ * box manager requirements).
  *==========================================================================*/
 
 /*--------------------------------------------------------------------------
@@ -320,8 +334,10 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
       coarsen_stride = NULL;
       for (vj = 0; vj < nvars; vj++)
       {
-         /* This currently only works if smmdasz[vi][vj] <= 1.  Need to write a
-          * matrix sum routine and extend this to work in general. */
+         /* This currently only works if smmdasz[vi][vj] <= 1.  That is, either
+          * M_ij = 0 or M_ij = A1_{vi,k1} * A2_{k1,k2} * ... * AN_{km,vj} (only
+          * one product in the sum).  TODO: Need to write a matrix sum routine
+          * and extend this to work in general. */
          if (smmdasz[vi][vj] > 1)
          {
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
@@ -662,7 +678,7 @@ hypre_SStructPMatrixRTtAP( hypre_SStructPMatrix  *RT,
 }
 
 /*==========================================================================
- * SStructMatrix routines
+ * SStructMatrix matrix-multiply routines
  *==========================================================================*/
 
 /*--------------------------------------------------------------------------
