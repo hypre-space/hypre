@@ -380,57 +380,63 @@ dbox1, start1, stride1, i1,
  * Idea 2: Simple version of Idea 3 below
  *----------------------------------------*/
 
-N = 1;
-for (d = 0; d < ndim; d++)
+void Idea2()  /* This function line allows astyle to indent the following correctly */
 {
-N *= n[d];
-   i[d] = 0;
-   n[d] -= 2; /* this produces a simpler comparison below */
-}
-i[ndim] = 0;
-n[ndim] = 0;
-for (I = 0; I < N; I++)
-{
-/* loop body */
-
-for (d = 0; i[d] > n[d]; d++)
+   N = 1;
+   for (d = 0; d < ndim; d++)
    {
+      N *= n[d];
       i[d] = 0;
+      n[d] -= 2; /* this produces a simpler comparison below */
    }
-   i[d]++;
-   i1 += s1[d]; /* NOTE: These are different from hypre__sx1, etc. above */
-   i2 += s2[d]; /* The lengths of i, n, and s must be (ndim+1) */
+   i[ndim] = 0;
+   n[ndim] = 0;
+   for (I = 0; I < N; I++)
+   {
+      /* loop body */
+
+      for (d = 0; i[d] > n[d]; d++)
+      {
+         i[d] = 0;
+      }
+      i[d]++;
+      i1 += s1[d]; /* NOTE: These are different from hypre__sx1, etc. above */
+      i2 += s2[d]; /* The lengths of i, n, and s must be (ndim+1) */
+   }
 }
 
 /*----------------------------------------
  * Idea 3: Approach used in the box loops
  *----------------------------------------*/
 
-N = 1;
-for (d = 1; d < ndim; d++)
+void Idea3()  /* This function line allows astyle to indent the following correctly */
 {
-N *= n[d];
-   i[d] = 0;
-   n[d] -= 2; /* this produces a simpler comparison below */
-}
-i[ndim] = 0;
-n[ndim] = 0;
-for (J = 0; J < N; J++)
-{
-for (I = 0; I < n[0]; I++)
+   N = 1;
+   for (d = 1; d < ndim; d++)
    {
-      /* loop body */
-
-      i1 += s1[0];
-      i2 += s2[0];
-   }
-   for (d = 1; i[d] > n[d]; d++)
-   {
+      N *= n[d];
       i[d] = 0;
+      n[d] -= 2; /* this produces a simpler comparison below */
    }
-   i[d]++;
-   i1 += s1[d]; /* NOTE: These are different from hypre__sx1, etc. above */
-   i2 += s2[d]; /* The lengths of i, n, and s must be (ndim+1) */
+   i[ndim] = 0;
+   n[ndim] = 0;
+   for (J = 0; J < N; J++)
+   {
+      for (I = 0; I < n[0]; I++)
+      {
+         /* loop body */
+
+         i1 += s1[0];
+         i2 += s2[0];
+      }
+      for (d = 1; i[d] > n[d]; d++)
+      {
+         i[d] = 0;
+      }
+      i[d]++;
+      i1 += s1[d]; /* NOTE: These are different from hypre__sx1, etc. above */
+      i2 += s2[d]; /* The lengths of i, n, and s must be (ndim+1) */
+   }
 }
 
 #endif

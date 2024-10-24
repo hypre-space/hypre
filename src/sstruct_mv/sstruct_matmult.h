@@ -20,7 +20,8 @@
 
 typedef struct hypre_SStructPMatmultData_struct
 {
-   hypre_StructMatmultData  ***smmdata;   /* pointer to (nvars x nvars) array */
+   hypre_StructMatmultData ****smmdata;    /* (nvars x nvars) array of smmdata arrays */
+   HYPRE_Int                 **smmdasz;    /* (nvars x nvars) array of smmdata-array sizes */
    HYPRE_Int                   nvars;
 
    HYPRE_Int                   nmatrices;
