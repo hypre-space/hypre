@@ -12,6 +12,7 @@
  *****************************************************************************/
 
 #include "seq_mv.h"
+#include "hypre_utilities_mup.h"
 
 #if defined(HYPRE_MIXED_PRECISION)
 
@@ -111,7 +112,6 @@ hypre_SeqVectorCopy_mp( hypre_Vector_mp *x,
             ((hypre_long_double *)hypre_VectorData(y))[i] = (hypre_long_double)((hypre_double *)hypre_VectorData(x))[i];
       break;
       default:
-//         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type for Vector Copy!\n");
          hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type for Vector Copy!\n");
    }
    
@@ -169,7 +169,6 @@ hypre_SeqVectorAxpy_mp( hypre_double alpha,
             ((hypre_long_double *)hypre_VectorData(y))[i] += (hypre_long_double)(alpha * ((hypre_double *)hypre_VectorData(x))[i]);
       break;
       default:
-//         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: Undefined precision type for Vector Axpy!\n");
          hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type for Vector Axpy!\n");
    }
 /*
