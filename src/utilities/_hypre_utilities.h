@@ -656,6 +656,7 @@ typedef struct
    HYPRE_Int  error_flag;
    HYPRE_Int  temp_error_flag;
    HYPRE_Int  print_to_memory;
+   HYPRE_Int  verbosity;
    char      *memory;
    HYPRE_Int  mem_sz;
    HYPRE_Int  msg_sz;
