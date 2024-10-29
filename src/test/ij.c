@@ -663,9 +663,9 @@ main( hypre_int argc,
 #endif
 
    HYPRE_SetPrintErrorMode(1);
-//   HYPRE_SetPrintErrorVerbosity(HYPRE_ERROR_GENERIC, 0);  /* turn generic errors off */
-//   HYPRE_SetPrintErrorVerbosity(-1, 0);                   /* turn all errors off */
-//   HYPRE_SetPrintErrorVerbosity(HYPRE_ERROR_CONV, 1);     /* turn convergence errors on */
+   //HYPRE_SetPrintErrorVerbosity(HYPRE_ERROR_GENERIC, 0);  /* turn generic errors off */
+   //HYPRE_SetPrintErrorVerbosity(-1, 0);                   /* turn all errors off */
+   //HYPRE_SetPrintErrorVerbosity(HYPRE_ERROR_CONV, 1);     /* turn convergence errors on */
 
    /*-----------------------------------------------------------
     * Set defaults
