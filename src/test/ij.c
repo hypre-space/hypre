@@ -9386,7 +9386,10 @@ final:
    }
    else
    {
-      HYPRE_PrintErrorMessages(comm);
+      if (myid == 0)
+      {
+         HYPRE_PrintErrorMessages(comm);
+      }
    }
 
    /* Finalize Hypre */

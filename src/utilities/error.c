@@ -261,6 +261,7 @@ HYPRE_GetErrorMessages(char **buffer, HYPRE_Int *bufsz)
 }
 
 /*--------------------------------------------------------------------------
+ * This routine can be called from any rank; it is NOT collective
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -270,8 +271,6 @@ HYPRE_PrintErrorMessages(MPI_Comm comm)
 
    HYPRE_Int myid;
    char *msg;
-
-   hypre_MPI_Barrier(comm);
 
    hypre_MPI_Comm_rank(comm, &myid);
    for (msg = err.memory; msg < (err.memory + err.msg_sz); msg += strlen(msg) + 1)
