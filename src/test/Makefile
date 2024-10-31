@@ -69,7 +69,6 @@ HYPRE_DRIVERS =\
  maxwell_unscaled.c\
  struct_migrate.c\
  sstruct_fac.c\
- ij_mv.c\
  ij_mm.c\
  zboxloop.c
 
@@ -87,7 +86,6 @@ HYPRE_F77_EXAMPLES_DRIVERS =\
 
 HYPRE_DRIVERS_F77 =\
  f77_ij.f\
- f77_ij_mv.f\
  f77_struct.f
 
 HYPRE_DRIVER_EXECS=${HYPRE_DRIVERS:.c=}
@@ -164,10 +162,6 @@ sstruct_fac: sstruct_fac.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-ij_mv: ij_mv.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-
 ij_device: ij_device.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
@@ -181,14 +175,6 @@ zboxloop: zboxloop.obj
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
 struct_newboxloop: struct_newboxloop.o $(KOKKOS_LINK_DEPENDS)
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-
-test_mgr: test_mgr.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-
-test_mgr_gpu: test_mgr_gpu.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
@@ -236,10 +222,6 @@ cxx_struct.cxx: struct.c
 # Fortran
 
 f77_ij: f77_ij.o
-	@echo  "Building" $@ "... "
-	${LINK_FC} -o $@ $@.o ${LFLAGS}
-
-f77_ij_mv: f77_ij_mv.o
 	@echo  "Building" $@ "... "
 	${LINK_FC} -o $@ $@.o ${LFLAGS}
 
