@@ -107,11 +107,7 @@ typedef struct
 
 typedef struct
 {
-   HYPRE_Real   tol;
-   HYPRE_Real   atolf;
-   HYPRE_Real   cf_tol;
-   HYPRE_Real   a_tol;
-   HYPRE_Real   rtol;
+   void        *conv_params;
    HYPRE_Int    max_iter;
    HYPRE_Int    two_norm;
    HYPRE_Int    rel_change;
@@ -139,7 +135,7 @@ typedef struct
 
    /* log info (always logged) */
    HYPRE_Int    num_iterations;
-   HYPRE_Real   rel_residual_norm;
+//   HYPRE_Real   rel_residual_norm;
 
    HYPRE_Int    print_level; /* printing when print_level>0 */
    HYPRE_Int    logging;  /* extra computations for logging when logging>0 */
