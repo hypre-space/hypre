@@ -9,7 +9,6 @@
 ./src/test/ams_driver
 ./src/test/zboxloop
 ./src/test/ij
-./src/test/ij_mv
 ./src/test/struct
 ./src/test/sstruct
 ./src/zerr
