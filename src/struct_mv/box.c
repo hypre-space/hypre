@@ -909,9 +909,7 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
    }
 
    /* Set defaults */
-   /* WM: what's the reason for box_minvol? */
    box_minvol = 1;
-   /* box_minvol = (HYPRE_Real) hypre_pow2(ndim); */
 
    /* Compute bounding box */
    bbox = hypre_BoxCreate(ndim);
