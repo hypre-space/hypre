@@ -44,6 +44,8 @@ hypre_StructDataCopy( HYPRE_Complex   *fr_data,        /* from */
       return hypre_error_flag;
    }
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    hypre_SetIndex(stride, 1);
    int_box = hypre_BoxCreate(ndim);
 
@@ -93,6 +95,8 @@ hypre_StructDataCopy( HYPRE_Complex   *fr_data,        /* from */
    }
 
    hypre_BoxDestroy(int_box);
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

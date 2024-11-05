@@ -104,7 +104,8 @@ main( hypre_int  argc,
    hypre_bind_device(myid, nprocs, comm);
 
    /* Initialize hypre */
-   HYPRE_Init();
+   HYPRE_Initialize();
+   HYPRE_DeviceInitialize();
 
    /* Initialize some input parameters */
    nmatrices = 1;
