@@ -893,7 +893,7 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
    HYPRE_Int         *indices[HYPRE_MAXDIM];
    HYPRE_Int         *lbox_indices[HYPRE_MAXDIM];
    HYPRE_Int         *rbox_indices[HYPRE_MAXDIM];
-   HYPRE_Int          splitdir, dir, d, i;
+   HYPRE_Int          splitdir, dir, sign_change, d, i;
    HYPRE_Int          index, size, capacity, change;
    HYPRE_Int          num_indices;
    HYPRE_Int          num_lbox_indices, num_rbox_indices;
@@ -1095,12 +1095,14 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
             }
 
             /* Look for largest sign change among all directions */
-            dir = -1;
+            dir = 0;
+            sign_change = 0;
             for (d = 1; d < ndim; d++)
             {
                if (hypre_IndexD(sign, dir) < hypre_IndexD(sign, d))
                {
                   dir = d;
+                  sign_change = 1;
                }
             }
 
@@ -1109,7 +1111,7 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
             splitdir = dir;
 
             /* If no change of sign in the Laplacian was found, just cut the longest dim in half */
-            if (dir < 0)
+            if (!sign_change)
             {
                change = 0;
                for (d = 0; d < ndim; d++)
