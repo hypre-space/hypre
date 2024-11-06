@@ -972,7 +972,11 @@ hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
    /* Set a.types[] values */
    for (iM = 0; iM < nmatmults; iM++)
    {
-      a = (Mdata -> a);
+      Mdata  = &(mmdata -> matmults[iM]);
+      nterms = (Mdata -> nterms);
+      terms  = (Mdata -> terms);
+      na     = (Mdata -> na);
+      a      = (Mdata -> a);
 
       for (i = 0; i < na; i++)
       {

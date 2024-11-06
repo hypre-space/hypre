@@ -1189,9 +1189,9 @@ hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix,
    }
    else
    {
-      hypre_StructMatrixData(matrix) = data;
       hypre_StructMatrixDataAlloced(matrix) = 0;
    }
+   hypre_StructMatrixData(matrix) = data;
 
    return hypre_error_flag;
 }
