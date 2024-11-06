@@ -223,7 +223,7 @@ hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
 
    HYPRE_Int                 *matmap;
    HYPRE_Int                  m, t, nu, u, unique;
-   
+
    hypre_StructStencil       *Mstencil;
    hypre_StructGrid          *Mgrid;
    hypre_Index                Mran_stride, Mdom_stride;
@@ -1121,7 +1121,7 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
 
    /* Allocate the data for M */
    hypre_StructMatrixInitializeData(M, NULL);
-   
+
    /* Set constant values in M */
    for (i = 0; i < nconst; i++)
    {
@@ -1220,16 +1220,16 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
                   hypre_StructMatrixMapDataIndex(matrix, tdstart); /* now on data space */
                   a[i].tptrs[t] = hypre_StructMatrixBoxData(matrix, b, entry) +
                                   hypre_BoxIndexRank(fdbox, tdstart);
-//                  a[i].offsets[t] = hypre_StructMatrixDataIndices(matrix)[b][entry] +
-//                                    hypre_BoxIndexRank(fdbox, tdstart);
+                  //a[i].offsets[t] = hypre_StructMatrixDataIndices(matrix)[b][entry] +
+                  //                  hypre_BoxIndexRank(fdbox, tdstart);
                   break;
 
                case 1: /* variable coefficient on coarse data space */
                   hypre_StructMatrixMapDataIndex(matrix, tdstart); /* now on data space */
                   a[i].tptrs[t] = hypre_StructMatrixBoxData(matrix, b, entry) +
                                   hypre_BoxIndexRank(cdbox, tdstart);
-//                  a[i].offsets[t] = hypre_StructMatrixDataIndices(matrix)[b][entry] +
-//                                    hypre_BoxIndexRank(cdbox, tdstart);
+                  //a[i].offsets[t] = hypre_StructMatrixDataIndices(matrix)[b][entry] +
+                  //                  hypre_BoxIndexRank(cdbox, tdstart);
                   break;
 
                case 2: /* constant coefficient - point to bit mask */
@@ -1242,8 +1242,8 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
                   hypre_StructVectorMapDataIndex(mask, tdstart); /* now on data space */
                   a[i].tptrs[t] = hypre_StructVectorBoxData(mask, b) +
                                   hypre_BoxIndexRank(fdbox, tdstart);
-//                  a[i].offsets[t] = hypre_StructVectorDataIndices(mask)[b] +
-//                                    hypre_BoxIndexRank(fdbox, tdstart);
+                  //a[i].offsets[t] = hypre_StructVectorDataIndices(mask)[b] +
+                  //                  hypre_BoxIndexRank(fdbox, tdstart);
                   break;
             }
          }
@@ -4506,8 +4506,8 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
    hypre_StructMatmultData *mmdata;
    HYPRE_Int                iM;
 
-//   hypre_StructMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
-//   hypre_StructMatmultSetup(mmdata, 1, M_ptr);
+   //hypre_StructMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
+   //hypre_StructMatmultSetup(mmdata, 1, M_ptr);
    hypre_StructMatmultCreate(1, nmatrices, &mmdata);
    hypre_StructMatmultSetup(mmdata, nmatrices, matrices, nterms, terms, trans, &iM);
    hypre_StructMatmultInit(mmdata, 1);

@@ -31,7 +31,7 @@ typedef struct hypre_StructMatmultDataMH_struct
    HYPRE_Complex   cprod;             /* product of the constant terms */
    HYPRE_Int       types[MAXTERMS];   /* types of computations to do for each term */
    HYPRE_Complex  *tptrs[MAXTERMS];   /* pointers to matrix data for each term */
-//   HYPRE_Int       offsets[MAXTERMS]; /* (RDF: Needed? Similar to tptrs and not used.) */
+   //HYPRE_Int       offsets[MAXTERMS]; /* (RDF: Needed? Similar to tptrs and not used.) */
    HYPRE_Complex  *mptr;              /* pointer to matrix data for M */
 
 } hypre_StructMatmultDataMH;
