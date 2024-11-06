@@ -25,7 +25,11 @@
  * pmatrix will differ depending on the variable types involved (see the sgrids
  * construction in SStructPGridAssemble).  Need to figure out how to handle this
  * (note that the "Engwer trick" would be a good solution and also minimizes the
- * box manager requirements).
+ * box manager requirements).  Another note: Stencil entries are currently split
+ * such that inter-variable-type couplings are put in the unstructured matrix.
+ * Hence, with the exception of the above term size restriction, this could be
+ * made to work in general.  We ultimately want to have all of the structured
+ * stencil entries to go in the pmatrix, of course.
  *==========================================================================*/
 
 /*--------------------------------------------------------------------------
@@ -173,8 +177,10 @@ hypre_SStructPMatmultCreate(HYPRE_Int                   nmatrices_input,
             /* The zero_product case is already initialized to NULL above */
             if (!zero_product)
             {
-               hypre_StructMatmultCreate(nterms, smatrices, nterms, sterms, trans,
-                                         &smmdata[smmdasz]);
+               HYPRE_Int  iM;
+               hypre_StructMatmultCreate(1, nterms, &smmdata[smmdasz]);
+               hypre_StructMatmultSetup(smmdata[smmdasz], nterms, smatrices, nterms, sterms, trans,
+                                        &iM);
                smmdasz++;
             }
 
@@ -355,7 +361,8 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
             /* This sets up the grid and stencil of the (vi,vj)-block of the PMatrix */
             /* NOTE: Do not assemble the sM grid here.  Assemble the grids either below or
              * in HYPRE_SStructGridAssemble(Mgrid) to reduce box manager overhead. */
-            hypre_StructMatmultSetup(smmdata[vi][vj][0], 0, &sM);
+            hypre_StructMatmultInit(smmdata[vi][vj][0], 0);
+            hypre_StructMatmultGetMatrix(smmdata[vi][vj][0], 0, &sM);
             hypre_SStructPMatrixSMatrix(pM, vi, vj) = sM;
 
             /* Update struct stencil of the (vi,vj)-block with actual stencils */
@@ -541,7 +548,6 @@ hypre_SStructPMatmultCompute( hypre_SStructPMatmultData *pmmdata,
    HYPRE_Int                   nvars   = (pmmdata -> nvars);
    hypre_StructMatmultData ****smmdata = (pmmdata -> smmdata);
 
-   hypre_StructMatrix         *sM;
    HYPRE_Int                   vi, vj;
 
    for (vi = 0; vi < nvars; vi++)
@@ -551,8 +557,7 @@ hypre_SStructPMatmultCompute( hypre_SStructPMatmultData *pmmdata,
          /* This computes the coefficients of the (vi,vj)-block of the PMatrix */
          if (smmdata[vi][vj][0])
          {
-            sM = hypre_SStructPMatrixSMatrix(pM, vi, vj);
-            hypre_StructMatmultCompute(smmdata[vi][vj][0], sM);
+            hypre_StructMatmultCompute(smmdata[vi][vj][0], 0);
          }
       }
    }

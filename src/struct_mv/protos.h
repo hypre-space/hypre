@@ -363,85 +363,102 @@ hypre_ReadBoxArrayData( FILE *file, HYPRE_Int ndim, hypre_BoxArray *box_array,
                         HYPRE_Int *num_values_ptr, HYPRE_Int **value_ids_ptr, HYPRE_Complex **values_ptr );
 
 /* struct_matmult.c */
-HYPRE_Int hypre_StructMatmultCreate ( HYPRE_Int nmatrices_in, hypre_StructMatrix **matrices_in,
-                                      HYPRE_Int nterms, HYPRE_Int *terms_in,
-                                      HYPRE_Int *transposes_in,
-                                      hypre_StructMatmultData **mmdata_ptr );
-HYPRE_Int hypre_StructMatmultDestroy ( hypre_StructMatmultData *mmdata );
-HYPRE_Int hypre_StructMatmultSetup ( hypre_StructMatmultData  *mmdata, HYPRE_Int assemble_grid,
-                                     hypre_StructMatrix **M_ptr );
-HYPRE_Int hypre_StructMatmultCommunicate ( hypre_StructMatmultData *mmdata );
-HYPRE_Int hypre_StructMatmultCompute ( hypre_StructMatmultData *mmdata, hypre_StructMatrix *M );
-HYPRE_Int hypre_StructMatmultCompute_core_double ( hypre_StructMatmultHelper *a, HYPRE_Int na,
+HYPRE_Int
+hypre_StructMatmultCreate( HYPRE_Int                  max_matmults,
+                           HYPRE_Int                  max_matrices,
+                           hypre_StructMatmultData  **mmdata_ptr );
+HYPRE_Int
+hypre_StructMatmultDestroy( hypre_StructMatmultData *mmdata );
+HYPRE_Int
+hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
+                          HYPRE_Int                 nmatrices_in,
+                          hypre_StructMatrix      **matrices_in,
+                          HYPRE_Int                 nterms,
+                          HYPRE_Int                *terms_in,
+                          HYPRE_Int                *transposes_in,
+                          HYPRE_Int                *iM_ptr );
+HYPRE_Int
+hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
+                         HYPRE_Int                 assemble_grid );
+HYPRE_Int
+hypre_StructMatmultCommunicate( hypre_StructMatmultData  *mmdata );
+HYPRE_Int
+hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
+                            HYPRE_Int                 iM );
+HYPRE_Int hypre_StructMatmultCompute_core_double ( hypre_StructMatmultDataMH *a, HYPRE_Int na,
                                                    HYPRE_Int ndim, hypre_Index loop_size, HYPRE_Int stencil_size, hypre_Box *fdbox,
                                                    hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart,
                                                    hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_triple ( hypre_StructMatmultHelper *a, HYPRE_Int na,
+HYPRE_Int hypre_StructMatmultCompute_core_triple ( hypre_StructMatmultDataMH *a, HYPRE_Int na,
                                                    HYPRE_Int ndim, hypre_Index loop_size, HYPRE_Int stencil_size, hypre_Box *fdbox,
                                                    hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart,
                                                    hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_generic ( hypre_StructMatmultHelper *a, HYPRE_Int na,
+HYPRE_Int hypre_StructMatmultCompute_core_generic ( hypre_StructMatmultDataMH *a, HYPRE_Int na,
                                                     HYPRE_Int nterms, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart,
                                                     hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox,
                                                     hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_1d ( hypre_StructMatmultHelper *a, HYPRE_Int ncomponents,
+HYPRE_Int hypre_StructMatmultCompute_core_1d ( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
                                                HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr, HYPRE_Int ndim,
                                                hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
                                                hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_1db ( hypre_StructMatmultHelper *a, HYPRE_Int ncomponents,
+HYPRE_Int hypre_StructMatmultCompute_core_1db ( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
                                                 HYPRE_Int **order, HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr,
                                                 HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
                                                 hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_1dbb( hypre_StructMatmultHelper *a, HYPRE_Int ncomponents,
+HYPRE_Int hypre_StructMatmultCompute_core_1dbb( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
                                                 HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr, HYPRE_Int ndim,
                                                 hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
                                                 hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_2d( hypre_StructMatmultHelper *a, HYPRE_Int ncomponents,
+HYPRE_Int hypre_StructMatmultCompute_core_2d( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
                                               HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr, HYPRE_Int ndim,
                                               hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
                                               hypre_Box *hdbox, hypre_Index hdstart, hypre_Index hdstride, hypre_Box *Mdbox, hypre_Index Mdstart,
                                               hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_2db ( hypre_StructMatmultHelper *a, HYPRE_Int ncomponents,
+HYPRE_Int hypre_StructMatmultCompute_core_2db ( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
                                                 HYPRE_Int **order, HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr,
                                                 HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
                                                 hypre_Box *hdbox, hypre_Index hdstart, hypre_Index hdstride, hypre_Box *Mdbox, hypre_Index Mdstart,
                                                 hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_1t ( hypre_StructMatmultHelper *a, HYPRE_Int ncomponents,
+HYPRE_Int hypre_StructMatmultCompute_core_1t ( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
                                                HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr, HYPRE_Int ndim,
                                                hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
                                                hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_1tb ( hypre_StructMatmultHelper *a, HYPRE_Int ncomponents,
+HYPRE_Int hypre_StructMatmultCompute_core_1tb ( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
                                                 HYPRE_Int **order, HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr,
                                                 HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
                                                 hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_1tbb( hypre_StructMatmultHelper *a, HYPRE_Int ncomponents,
+HYPRE_Int hypre_StructMatmultCompute_core_1tbb( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
                                                 HYPRE_Int **order, HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr,
                                                 HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
                                                 hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_1tbbb( hypre_StructMatmultHelper *a,
+HYPRE_Int hypre_StructMatmultCompute_core_1tbbb( hypre_StructMatmultDataMH *a,
                                                  HYPRE_Int ncomponents, HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr,
                                                  HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
                                                  hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_2t( hypre_StructMatmultHelper *a, HYPRE_Int ncomponents,
+HYPRE_Int hypre_StructMatmultCompute_core_2t( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
                                               HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr, HYPRE_Int ndim,
                                               hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
                                               hypre_Box *hdbox, hypre_Index hdstart, hypre_Index hdstride, hypre_Box *Mdbox, hypre_Index Mdstart,
                                               hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_2tb( hypre_StructMatmultHelper *a, HYPRE_Int ncomponents,
+HYPRE_Int hypre_StructMatmultCompute_core_2tb( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
                                                HYPRE_Int **order, HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr,
                                                HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
                                                hypre_Box *hdbox, hypre_Index hdstart, hypre_Index hdstride, hypre_Box *Mdbox, hypre_Index Mdstart,
                                                hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_2etb( hypre_StructMatmultHelper *a, HYPRE_Int ncomponents,
+HYPRE_Int hypre_StructMatmultCompute_core_2etb( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
                                                 HYPRE_Int **order, HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr,
                                                 HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
                                                 hypre_Box *hdbox, hypre_Index hdstart, hypre_Index hdstride, hypre_Box *Mdbox, hypre_Index Mdstart,
                                                 hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultHelper *a, HYPRE_Int ncomponents,
+HYPRE_Int hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
                                                 HYPRE_Int **order, HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr,
                                                 HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
                                                 hypre_Box *hdbox, hypre_Index hdstart, hypre_Index hdstride, hypre_Box *Mdbox, hypre_Index Mdstart,
                                                 hypre_Index Mdstride );
+HYPRE_Int
+hypre_StructMatmultGetMatrix( hypre_StructMatmultData  *mmdata,
+                              HYPRE_Int                 iM,
+                              hypre_StructMatrix      **M_ptr );
 HYPRE_Int hypre_StructMatmult ( HYPRE_Int nmatrices, hypre_StructMatrix **matrices,
                                 HYPRE_Int nterms, HYPRE_Int *terms, HYPRE_Int *trans,
                                 hypre_StructMatrix **M_ptr );

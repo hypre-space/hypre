@@ -1181,8 +1181,17 @@ HYPRE_Int
 hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix,
                                   HYPRE_Complex      *data   )
 {
-   hypre_StructMatrixData(matrix) = data;
-   hypre_StructMatrixDataAlloced(matrix) = 0;
+   if (data == NULL)
+   {
+      data = hypre_CTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix),
+                           hypre_StructMatrixMemoryLocation(matrix));
+      hypre_StructMatrixDataAlloced(matrix) = 1;
+   }
+   else
+   {
+      hypre_StructMatrixData(matrix) = data;
+      hypre_StructMatrixDataAlloced(matrix) = 0;
+   }
 
    return hypre_error_flag;
 }
@@ -1193,15 +1202,8 @@ hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix,
 HYPRE_Int
 hypre_StructMatrixInitialize( hypre_StructMatrix *matrix )
 {
-   HYPRE_Complex *data;
-
    hypre_StructMatrixInitializeShell(matrix);
-
-   data = hypre_CTAlloc(HYPRE_Complex,
-                        hypre_StructMatrixDataSize(matrix),
-                        hypre_StructMatrixMemoryLocation(matrix));
-   hypre_StructMatrixInitializeData(matrix, data);
-   hypre_StructMatrixDataAlloced(matrix) = 1;
+   hypre_StructMatrixInitializeData(matrix, NULL);
 
    return hypre_error_flag;
 }
