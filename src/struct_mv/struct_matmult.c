@@ -4628,3 +4628,50 @@ hypre_StructMatrixRTtAP( hypre_StructMatrix  *RT,
 
    return hypre_error_flag;
 }
+
+
+/*--------------------------------------------------------------------------
+ * StructMatrixAdd functions
+ *
+ * RDF: Implement this for more than just one matrix.
+ * RDF: Move this to another place later.
+ *--------------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixAddInit( HYPRE_Int                  nmatrices,
+                           hypre_StructMatrix       **matrices,
+                           hypre_StructMatrix       **A_ptr )
+{
+   hypre_StructMatrix  *A = NULL;
+
+   /* RDF: Assume there is only one matrix (for now).  This would normally
+    * compute a valid stencil for A and initialize it to zero. */
+
+   if (nmatrices > 0)
+   {
+      A = hypre_StructMatrixRef(matrices[0]);
+   }
+
+   *A_ptr = A;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixAddMat( hypre_StructMatrix       *A,
+                          HYPRE_Complex             alpha,
+                          hypre_StructMatrix       *B )
+{
+   /* RDF: Assume there is only one matrix (for now) and alpha = 1 */
+
+   /* Compute A += alpha * B */
+
+   return hypre_error_flag;
+}
+
