@@ -475,7 +475,27 @@ HYPRE_Int HYPRE_IJVectorCreate(MPI_Comm        comm,
 HYPRE_Int HYPRE_IJVectorDestroy(HYPRE_IJVector vector);
 
 /**
- * Prepare a vector object for setting coefficient values.  This
+ * This function should be called before `HYPRE_IJVectorInitializeData`
+ * if users intend to reuse an existing data pointer, thereby avoiding
+ * unnecessary memory copies. It configures the vector to accept external
+ * data without allocating new storage.
+ **/
+HYPRE_Int HYPRE_IJVectorInitializeShell(HYPRE_IJVector vector);
+
+/**
+ * This function sets the internal data pointer of the vector to an external
+ * array, allowing direct control over the vector's data storage. Users
+ * should call `HYPRE_IJVectorInitializeShell` before this function to
+ * prepare the vector for external data. The memory location of the `data`
+ * array is expected to be on the host when hypre is configured without GPU
+ * support. If hypre is configured with GPU support, it is assumed that `data`
+ * resides in device memory.
+ **/
+HYPRE_Int HYPRE_IJVectorInitializeData(HYPRE_IJVector  vector,
+                                       HYPRE_Complex  *data);
+
+/**
+ * Prepare a vector object for setting coefficient values. This
  * routine will also re-initialize an already assembled vector,
  * allowing users to modify coefficient values.
  **/

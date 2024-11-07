@@ -86,9 +86,6 @@ hypre_IJVectorInitializeParShell(hypre_IJVector *vector)
 
    HYPRE_Int           my_id;
 
-   HYPRE_MemoryLocation memory_location_aux =
-      hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_HOST ? HYPRE_MEMORY_HOST : HYPRE_MEMORY_DEVICE;
-
    hypre_MPI_Comm_rank(comm, &my_id);
 
    if (!partitioning)
@@ -119,8 +116,8 @@ hypre_IJVectorInitializeParShell(hypre_IJVector *vector)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_IJVectorInitializeParData( hypre_IJVector *vector,
-                                 HYPRE_Complex  *data)
+hypre_IJVectorInitializeParData(hypre_IJVector *vector,
+                                HYPRE_Complex  *data)
 {
    hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
 
@@ -144,18 +141,20 @@ hypre_IJVectorInitializePar(hypre_IJVector *vector)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_IJVectorInitializePar_v2(hypre_IJVector *vector,
-                               HYPRE_MemoryLocation memory_location)
+hypre_IJVectorInitializePar_v2(hypre_IJVector       *vector,
+                               HYPRE_MemoryLocation  memory_location)
 {
-   hypre_ParVector    *par_vector   = (hypre_ParVector*) hypre_IJVectorObject(vector);
-   hypre_AuxParVector *aux_vector   = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
+   hypre_ParVector      *par_vector;
+   hypre_AuxParVector   *aux_vector;
 
    /* Set up the basic structure and metadata for the vector */
-   hypre_IJVectorInitializeShell(vector);
+   hypre_IJVectorInitializeParShell(vector);
+   par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
+   aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
 
    /* Memory allocations */
    hypre_ParVectorInitialize_v2(par_vector, memory_location);
-   hypre_AuxParVectorInitialize_v2(aux_vector, memory_location_aux);
+   hypre_AuxParVectorInitialize_v2(aux_vector, memory_location);
 
    return hypre_error_flag;
 }
