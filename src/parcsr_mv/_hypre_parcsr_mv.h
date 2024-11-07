@@ -1355,7 +1355,7 @@ hypre_ParVectorCopy_mp( hypre_ParVector *x,
                      hypre_ParVector *y );
 
 HYPRE_Int
-hypre_ParVectorAxpy_mp( HYPRE_Complex    alpha,
+hypre_ParVectorAxpy_mp( hypre_double    alpha,
                      hypre_ParVector *x,
                      hypre_ParVector *y );
 
