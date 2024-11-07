@@ -1017,8 +1017,8 @@ hypre_StructMatmultCommunicate( hypre_StructMatmultData  *mmdata )
    HYPRE_Int           num_comm_pkgs   = (mmdata -> num_comm_pkgs);
    hypre_CommHandle   *comm_handle;
 
-   /* If all constant coefficients, return */
-   if (mmdata -> mask == NULL)
+   /* If no communication, return */
+   if (mmdata -> num_comm_pkgs == 0)
    {
       return hypre_error_flag;
    }
