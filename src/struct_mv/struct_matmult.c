@@ -108,8 +108,6 @@ hypre_StructMatmultDestroy( hypre_StructMatmultData *mmdata )
 
       hypre_CommPkgDestroy(mmdata -> comm_pkg);
       hypre_TFree(mmdata -> comm_data, HYPRE_MEMORY_HOST);
-      hypre_TFree(mmdata -> comm_pkg_a, HYPRE_MEMORY_HOST);
-      hypre_TFree(mmdata -> comm_data_a, HYPRE_MEMORY_HOST);
 
       hypre_TFree(mmdata, HYPRE_MEMORY_HOST);
    }

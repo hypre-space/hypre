@@ -130,8 +130,8 @@ hypre_SStructPMatmultCreate(HYPRE_Int                   nmatrices_input,
       sterms[k] = k;
    }
 
-   max_matmults = (nterms - 1) * hypre_pow(nvars, (nterms + 1));
-   max_matrices = nmatrices * nvars * nvars;
+   max_matmults = hypre_pow(nvars, (nterms + 1));
+   max_matrices = nterms * nvars * nvars;
    hypre_StructMatmultCreate(max_matmults, max_matrices, &smmdata);
    smmid = hypre_TAlloc(HYPRE_Int **, nvars, HYPRE_MEMORY_HOST);
    smmsz = hypre_TAlloc(HYPRE_Int * , nvars, HYPRE_MEMORY_HOST);
@@ -251,6 +251,9 @@ hypre_SStructPMatmultDestroy( hypre_SStructPMatmultData *pmmdata )
       hypre_TFree(pmmdata -> pmatrices, HYPRE_MEMORY_HOST);
       hypre_TFree(pmmdata -> transposes, HYPRE_MEMORY_HOST);
       hypre_TFree(pmmdata -> terms, HYPRE_MEMORY_HOST);
+
+      hypre_CommPkgDestroy(pmmdata -> comm_pkg);
+      hypre_TFree(pmmdata -> comm_data, HYPRE_MEMORY_HOST);
 
       hypre_TFree(pmmdata, HYPRE_MEMORY_HOST);
    }
