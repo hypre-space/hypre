@@ -5,6 +5,9 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 # Generate multiprecision type protos
+# Run from folder where multiprecision functions reside.
+# Usage: ../config/genMPHeader.sh <function prototypes header file> <output file> <multiprecision functions saved file>
+# Example (struct_ls): ../config/genMPHeader.sh protos.h hypre_struct_ls_mup.h struct_mv_functions.saved
 
 FNAME=$1
 FOUT=$2

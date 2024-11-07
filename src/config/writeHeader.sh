@@ -4,6 +4,9 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+# Write hypre copyright header to file "filename"
+# Usage: writeHeader.sh <filename>
+
 FNAME=$1
 cat >> $FNAME <<@
 
