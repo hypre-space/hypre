@@ -183,6 +183,61 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJVectorInitializeShell
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorInitializeShell(HYPRE_IJVector vector)
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (!vec)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+   {
+      hypre_IJVectorInitializeParShell(vec);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorInitializeData
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorInitializeData(HYPRE_IJVector  vector,
+                             HYPRE_Complex  *data)
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (!vec)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+   {
+      hypre_IJVectorInitializeParData(vec, data);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJVectorInitialize
  *--------------------------------------------------------------------------*/
 
@@ -214,8 +269,13 @@ HYPRE_IJVectorInitialize( HYPRE_IJVector vector )
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorInitialize_v2
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-HYPRE_IJVectorInitialize_v2( HYPRE_IJVector vector, HYPRE_MemoryLocation memory_location )
+HYPRE_IJVectorInitialize_v2( HYPRE_IJVector       vector,
+                             HYPRE_MemoryLocation memory_location )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 

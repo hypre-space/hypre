@@ -260,6 +260,8 @@ HYPRE_Int hypre_MultiblockMatrixSetSubmatrix ( hypre_MultiblockMatrix *matrix, H
 hypre_Vector *hypre_SeqVectorCreate ( HYPRE_Int size );
 hypre_Vector *hypre_SeqMultiVectorCreate ( HYPRE_Int size, HYPRE_Int num_vectors );
 HYPRE_Int hypre_SeqVectorDestroy ( hypre_Vector *vector );
+HYPRE_Int hypre_SeqVectorInitializeShell( hypre_Vector *vector );
+HYPRE_Int hypre_SeqVectorInitializeData( hypre_Vector *vector, HYPRE_Complex *data );
 HYPRE_Int hypre_SeqVectorInitialize_v2( hypre_Vector *vector,
                                         HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_SeqVectorInitialize ( hypre_Vector *vector );

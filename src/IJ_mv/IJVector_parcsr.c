@@ -67,14 +67,13 @@ hypre_IJVectorDestroyPar(hypre_IJVector *vector)
  * initializes ParVector of IJVectorPar
  *
  *****************************************************************************/
-HYPRE_Int
-hypre_IJVectorInitializePar(hypre_IJVector *vector)
-{
-   return hypre_IJVectorInitializePar_v2(vector, hypre_IJVectorMemoryLocation(vector));
-}
+
+/*--------------------------------------------------------------------------
+ * hypre_IJVectorInitializeParShell
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_IJVectorInitializePar_v2(hypre_IJVector *vector, HYPRE_MemoryLocation memory_location)
+hypre_IJVectorInitializeParShell(hypre_IJVector *vector)
 {
    MPI_Comm            comm         = hypre_IJVectorComm(vector);
    hypre_ParVector    *par_vector   = (hypre_ParVector*) hypre_IJVectorObject(vector);
@@ -86,9 +85,6 @@ hypre_IJVectorInitializePar_v2(hypre_IJVector *vector, HYPRE_MemoryLocation memo
    hypre_Vector       *local_vector = hypre_ParVectorLocalVector(par_vector);
 
    HYPRE_Int           my_id;
-
-   HYPRE_MemoryLocation memory_location_aux =
-      hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_HOST ? HYPRE_MEMORY_HOST : HYPRE_MEMORY_DEVICE;
 
    hypre_MPI_Comm_rank(comm, &my_id);
 
@@ -106,14 +102,59 @@ hypre_IJVectorInitializePar_v2(hypre_IJVector *vector, HYPRE_MemoryLocation memo
    hypre_VectorNumVectors(local_vector) = num_vectors;
    hypre_VectorSize(local_vector) = (HYPRE_Int)(partitioning[1] - partitioning[0]);
 
-   hypre_ParVectorInitialize_v2(par_vector, memory_location);
-
    if (!aux_vector)
    {
       hypre_AuxParVectorCreate(&aux_vector);
       hypre_IJVectorTranslator(vector) = aux_vector;
    }
-   hypre_AuxParVectorInitialize_v2(aux_vector, memory_location_aux);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IJVectorInitializeParData
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IJVectorInitializeParData(hypre_IJVector *vector,
+                                HYPRE_Complex  *data)
+{
+   hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
+
+   hypre_ParVectorInitializeData(par_vector, data);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IJVectorInitializePar
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IJVectorInitializePar(hypre_IJVector *vector)
+{
+   return hypre_IJVectorInitializePar_v2(vector, hypre_IJVectorMemoryLocation(vector));
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IJVectorInitializePar_v2
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IJVectorInitializePar_v2(hypre_IJVector       *vector,
+                               HYPRE_MemoryLocation  memory_location)
+{
+   hypre_ParVector      *par_vector;
+   hypre_AuxParVector   *aux_vector;
+
+   /* Set up the basic structure and metadata for the vector */
+   hypre_IJVectorInitializeParShell(vector);
+   par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
+   aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
+
+   /* Memory allocations */
+   hypre_ParVectorInitialize_v2(par_vector, memory_location);
+   hypre_AuxParVectorInitialize_v2(aux_vector, memory_location);
 
    return hypre_error_flag;
 }
