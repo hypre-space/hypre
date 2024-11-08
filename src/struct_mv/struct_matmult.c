@@ -84,7 +84,7 @@ HYPRE_Int
 hypre_StructMatmultDestroy( hypre_StructMatmultData *mmdata )
 {
    hypre_StructMatmultDataM  *Mdata;
-   HYPRE_Int                  iM;
+   HYPRE_Int                  iM, m;
    if (mmdata)
    {
       for (iM = 0; iM < (mmdata -> nmatmults); iM++)
@@ -99,6 +99,11 @@ hypre_StructMatmultDestroy( hypre_StructMatmultData *mmdata )
          hypre_TFree(Mdata -> a, HYPRE_MEMORY_HOST);
       }
       hypre_TFree(mmdata -> matmults, HYPRE_MEMORY_HOST);
+      /* Restore the matrices */
+      for (m = 0; m < (mmdata -> nmatrices); m++)
+      {
+         hypre_StructMatrixRestore(mmdata -> matrices[m]);
+      }
       hypre_TFree(mmdata -> matrices, HYPRE_MEMORY_HOST);
       hypre_TFree(mmdata -> mtypes, HYPRE_MEMORY_HOST);
 
@@ -281,7 +286,7 @@ hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
       {
          if (matrices[m] == matrices[u])
          {
-            /* Not a unique matrix, so adjust terms[] and remove from matrices[] */
+            /* Not a unique matrix, so remove from matrices[] and adjust terms[] */
             for (t = 0; t < nterms; t++)
             {
                if (terms[t] == m)
@@ -295,7 +300,15 @@ hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
       }
       if (unique)
       {
+         /* Unique matrix, so reposition in matrices[] and adjust terms[] */
          matrices[nu] = matrices[m];
+         for (t = 0; t < nterms; t++)
+         {
+            if (terms[t] == m)
+            {
+               terms[t] = nu;
+            }
+         }
          nu++;
       }
    }
@@ -1075,7 +1088,6 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
                             HYPRE_Int                 iM )
 {
    hypre_StructMatmultDataM  *Mdata          = &(mmdata -> matmults[iM]);
-   HYPRE_Int                  nmatrices      = (mmdata -> nmatrices);
    hypre_StructMatrix       **matrices       = (mmdata -> matrices);
    hypre_IndexRef             coarsen_stride = (mmdata -> coarsen_stride);
    hypre_IndexRef             fstride        = (mmdata -> fstride);
@@ -1293,12 +1305,6 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
       }
    } /* end loop over matrix M range boxes */
    HYPRE_ANNOTATE_REGION_END("%s", "Computation");
-
-   /* Restore the matrices */
-   for (m = 0; m < nmatrices; m++)
-   {
-      hypre_StructMatrixRestore(matrices[m]);
-   }
 
    /* Free memory */
    hypre_BoxDestroy(loop_box);
