@@ -47,14 +47,19 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
    HYPRE_Real             *rel_norms       = (sys_pfmg_data -> rel_norms);
    HYPRE_Int              *active_l        = (sys_pfmg_data -> active_l);
    HYPRE_Int               logging         = (sys_pfmg_data -> logging);
+
+   HYPRE_Real              b_dot_b, r_dot_r, eps = 0;
+   HYPRE_Real              e_dot_e = 0, x_dot_x = 1;
+
+   HYPRE_Int               i, l;
+#if 0
    HYPRE_Int               print_level     = (sys_pfmg_data -> print_level);
    HYPRE_Int               print_freq      = (sys_pfmg_data -> print_freq);
-
-   HYPRE_Real            b_dot_b, r_dot_r, eps = 0;
-   HYPRE_Real            e_dot_e = 0, x_dot_x = 1;
-
-   HYPRE_Int             i, l;
-   char                  filename[255];
+   char                    filename[255];
+#endif
+#if DEBUG
+   char                    filename[255];
+#endif
 
    /*-----------------------------------------------------
     * Initialize some things and deal with special cases
@@ -330,7 +335,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       (sys_pfmg_data -> num_iterations) = (i + 1);
       HYPRE_ANNOTATE_MGLEVEL_END(0);
 
-#if 1
+#if 0
       /* RDF: In PFMG, we don't do any of this */
       if ((logging > 0) || (print_level > 1))
       {
