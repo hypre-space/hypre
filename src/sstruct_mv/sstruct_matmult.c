@@ -389,6 +389,9 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
                sgrid = hypre_StructMatrixGrid(sM);
                hypre_StructGridRef(sgrid, &hypre_SStructPGridSGrid(pgrid, vi));
 
+               /* Set periodic based on struct grid (which could be coarsened) */
+               hypre_CopyIndex(hypre_StructGridPeriodic(sgrid), hypre_SStructPGridPeriodic(pgrid));
+
                /* Build part boundaries array */
                num_boxes   = hypre_StructGridNumBoxes(sgrid);
                grid_boxes  = hypre_StructGridBoxes(sgrid);
