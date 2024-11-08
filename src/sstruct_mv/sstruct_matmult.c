@@ -134,11 +134,11 @@ hypre_SStructPMatmultCreate(HYPRE_Int                   nmatrices_input,
    max_matrices = nterms * nvars * nvars;
    hypre_StructMatmultCreate(max_matmults, max_matrices, &smmdata);
    smmid = hypre_TAlloc(HYPRE_Int **, nvars, HYPRE_MEMORY_HOST);
-   smmsz = hypre_TAlloc(HYPRE_Int * , nvars, HYPRE_MEMORY_HOST);
+   smmsz = hypre_TAlloc(HYPRE_Int *, nvars, HYPRE_MEMORY_HOST);
    for (vi = 0; vi < nvars; vi++)
    {
       smmid[vi] = hypre_TAlloc(HYPRE_Int *, nvars, HYPRE_MEMORY_HOST);
-      smmsz[vi] = hypre_TAlloc(HYPRE_Int  , nvars, HYPRE_MEMORY_HOST);
+      smmsz[vi] = hypre_TAlloc(HYPRE_Int, nvars, HYPRE_MEMORY_HOST);
       for (vj = 0; vj < nvars; vj++)
       {
          /* Initialize loop variables */
