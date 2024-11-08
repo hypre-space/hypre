@@ -51,20 +51,20 @@ Iterations = 18
 Final Relative Residual Norm = 5.252407e-07
 
 # Output file: amr2d.out.14
-Iterations = 28
-Final Relative Residual Norm = 8.819880e-07
+Iterations = 35
+Final Relative Residual Norm = 9.882763e-07
 
 # Output file: amr2d.out.15
-Iterations = 28
-Final Relative Residual Norm = 8.819880e-07
+Iterations = 35
+Final Relative Residual Norm = 9.882763e-07
 
 # Output file: amr2d.out.16
-Iterations = 10
-Final Relative Residual Norm = 7.820153e-07
+Iterations = 11
+Final Relative Residual Norm = 8.466675e-07
 
 # Output file: amr2d.out.17
-Iterations = 10
-Final Relative Residual Norm = 7.820153e-07
+Iterations = 11
+Final Relative Residual Norm = 8.466675e-07
 
 # Output file: amr2d.out.18
 Iterations = 6
