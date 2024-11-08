@@ -52,53 +52,35 @@ if (${HYPRE_SOURCE_DIR} STREQUAL ${HYPRE_BINARY_DIR})
   message(FATAL_ERROR "In-place build not allowed! Please use a separate build directory. See the Users Manual or INSTALL file for details.")
 endif ()
 
+# Set default installation directory, but provide a means for users to change
+set(CMAKE_INSTALL_PREFIX "${HYPRE_SOURCE_DIR}/hypre" CACHE PATH "Installation directory for HYPRE" FORCE)
+
 # Ensure RPATH/RUNPATH is set properly during the build
-set(CMAKE_SKIP_BUILD_RPATH FALSE)                         # Includes rpath in the binaries being built
-set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)                 # Use different paths for build and install
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)               # Use link-time paths
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")    # Where binaries can look for shared libraries
-if(NOT BUILD_SHARED_LIBS)
-  set(BUILD_SHARED_LIBS OFF)                              # Build static library by default
-endif()
+set(CMAKE_SKIP_BUILD_RPATH FALSE CACHE BOOL "Include rpath in the binaries being built")
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE CACHE BOOL "Use different paths for build and install")
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE CACHE BOOL "Use link-time paths for install rpath")
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib" CACHE STRING "Where binaries look for shared libraries")
+
+# Build static library by default
+option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
 # Set cmake module path
 set(CMAKE_MODULE_PATH "${HYPRE_SOURCE_DIR}/config/cmake" "${CMAKE_MODULE_PATH}")
 
-# Set default installation directory, but provide a means for users to change
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR NOT DEFINED HYPRE_INSTALL_PREFIX)
-  if (NOT DEFINED HYPRE_INSTALL_PREFIX)
-    set(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/hypre" CACHE PATH "Installation directory for HYPRE" FORCE)
-  else()
-    set(CMAKE_INSTALL_PREFIX "${HYPRE_INSTALL_PREFIX}" CACHE PATH "Installation directory for HYPRE" FORCE)
-  endif()
-else()
-  if (NOT DEFINED HYPRE_INSTALL_PREFIX)
-    set(HYPRE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Installation directory for HYPRE" FORCE)
-  endif()
+# Set CMAKE_BUILD_TYPE to default to Release if not already specified
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type options: Debug, Release, RelWithDebInfo, or MinSizeRel." FORCE)
 endif()
 
-# Set default compile optimization flag
-if(NOT CMAKE_BUILD_TYPE AND NOT DEFINED HYPRE_BUILD_TYPE)
-  set(HYPRE_BUILD_TYPE "Release" CACHE STRING
-      "Optimization flags: set to Debug, Release, RelWithDebInfo, or MinSizeRel")
-endif()
+# Set the possible values of build type for ccmake/cmake-gui
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 
-# Set the possible values of build type for cmake-gui
-set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-  "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
-
-# If CMAKE_BUILD_TYPE is not set, use HYPRE_BUILD_TYPE
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "${HYPRE_BUILD_TYPE}" CACHE STRING
-      "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
-      FORCE)
-endif()
-
-# Print the build type
+# Print the configuration
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "Shared library: ${BUILD_SHARED_LIBS}")
+message(STATUS "Installation directory: ${CMAKE_INSTALL_PREFIX}")
 
 # Base boolean configuration options
-set_hypre_option(BASE HYPRE_ENABLE_SHARED               "Build a shared library" ${BUILD_SHARED_LIBS})
 set_hypre_option(BASE HYPRE_ENABLE_BIGINT               "Use long long int for HYPRE_Int and HYPRE_BigInt" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_MIXEDINT             "Use long long int for HYPRE_BigInt, int for HYPRE_Int" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_SINGLE               "Use float for HYPRE_Real" OFF)
@@ -170,7 +152,6 @@ set(HYPRE_SYCL_TARGET                    "" CACHE STRING "Target SYCL architectu
 set(HYPRE_SYCL_TARGET_BACKEND            "" CACHE STRING "Additional SYCL backend options, e.g. '-device 12.1.0,12.4.0'.")
 
 # Set config name values
-set_internal_hypre_option(ENABLE "" SHARED)
 set_internal_hypre_option(ENABLE "" BIGINT)
 set_internal_hypre_option(ENABLE "" MIXEDINT)
 set_internal_hypre_option(ENABLE "" SINGLE)
@@ -188,73 +169,74 @@ set_internal_hypre_option(WITH USING SYCL)
 set_internal_hypre_option(WITH USING MAGMA)
 set_internal_hypre_option(WITH USING CALIPER)
 
+if (BUILD_SHARED_LIBS)
+  set(HYPRE_SHARED ON CACHE INTERNAL "")
+endif ()
+
 if (HYPRE_WITH_MPI)
-  set(HYPRE_HAVE_MPI ON CACHE BOOL "" FORCE)
-  set(HYPRE_SEQUENTIAL OFF CACHE BOOL "" FORCE)
+  set(HYPRE_HAVE_MPI ON CACHE INTERNAL "")
+  set(HYPRE_SEQUENTIAL OFF CACHE INTERNAL "")
 else ()
-  set(HYPRE_SEQUENTIAL ON CACHE BOOL "" FORCE)
+  set(HYPRE_SEQUENTIAL ON CACHE INTERNAL "")
 endif ()
 
 if (HYPRE_WITH_SUPERLU)
-  set(HYPRE_USING_SUPERLU ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_SUPERLU ON CACHE INTERNAL "")
   add_compile_definitions(HAVE_SUPERLU)
 endif ()
 
 if (HYPRE_WITH_DSUPERLU)
-  set(HYPRE_USING_DSUPERLU ON CACHE BOOL "" FORCE)
-  set(HYPRE_USING_HYPRE_BLAS OFF CACHE BOOL "" FORCE)
-  set(HYPRE_USING_HYPRE_LAPACK OFF CACHE BOOL "" FORCE)
+  set(HYPRE_USING_DSUPERLU ON CACHE INTERNAL "")
+  set(HYPRE_USING_HYPRE_BLAS OFF CACHE INTERNAL "")
+  set(HYPRE_USING_HYPRE_LAPACK OFF CACHE INTERNAL "")
 endif ()
 
 if (HYPRE_ENABLE_FEI)
-  set(HYPRE_USING_FEI ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_FEI ON CACHE INTERNAL "")
   message(WARNING "CMake support for FEI is not complete!")
 endif ()
 
 # FEI doesn't currently compile with shared
 if (HYPRE_SHARED OR HYPRE_BIGINT OR HYPRE_SINGLE OR HYPRE_LONG_DOUBLE)
-  set(HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
-  set(HYPRE_ENABLE_FEI OFF CACHE BOOL "" FORCE)
+  set(HYPRE_USING_FEI OFF CACHE INTERNAL "")
+  set(HYPRE_ENABLE_FEI OFF CACHE INTERNAL "")
 endif ()
 
 if (HYPRE_SEQUENTIAL)
-  set(HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+  set(HYPRE_BUILD_EXAMPLES OFF CACHE INTERNAL "")
 endif ()
 
 if (HYPRE_WITH_UMPIRE)
-  set(HYPRE_USING_UMPIRE ON CACHE BOOL "" FORCE)
-  set(HYPRE_USING_UMPIRE_DEVICE ON CACHE BOOL "" FORCE)
-  set(HYPRE_USING_UMPIRE_UM ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_UMPIRE ON CACHE INTERNAL "")
+  set(HYPRE_USING_UMPIRE_DEVICE ON CACHE INTERNAL "")
+  set(HYPRE_USING_UMPIRE_UM ON CACHE INTERNAL "")
 endif ()
 
 if (HYPRE_WITH_UMPIRE_HOST)
-  set(HYPRE_WITH_UMPIRE ON CACHE BOOL "" FORCE)
-  set(HYPRE_USING_UMPIRE ON CACHE BOOL "" FORCE)
-  set(HYPRE_USING_UMPIRE_HOST ON CACHE BOOL "" FORCE)
+  set(HYPRE_WITH_UMPIRE ON CACHE INTERNAL "")
+  set(HYPRE_USING_UMPIRE ON CACHE INTERNAL "")
+  set(HYPRE_USING_UMPIRE_HOST ON CACHE INTERNAL "")
 endif ()
 
 if (HYPRE_WITH_UMPIRE_DEVICE)
-  set(HYPRE_WITH_UMPIRE ON CACHE BOOL "" FORCE)
-  set(HYPRE_USING_UMPIRE ON CACHE BOOL "" FORCE)
-  set(HYPRE_USING_UMPIRE_DEVICE ON CACHE BOOL "" FORCE)
+  set(HYPRE_WITH_UMPIRE ON CACHE INTERNAL "")
+  set(HYPRE_USING_UMPIRE ON CACHE INTERNAL "")
+  set(HYPRE_USING_UMPIRE_DEVICE ON CACHE INTERNAL "")
 endif ()
 
 if (HYPRE_WITH_UMPIRE_UM)
-  set(HYPRE_WITH_UMPIRE ON CACHE BOOL "" FORCE)
-  set(HYPRE_USING_UMPIRE ON CACHE BOOL "" FORCE)
-  set(HYPRE_USING_UMPIRE_UM ON CACHE BOOL "" FORCE)
+  set(HYPRE_WITH_UMPIRE ON CACHE INTERNAL "")
+  set(HYPRE_USING_UMPIRE ON CACHE INTERNAL "")
+  set(HYPRE_USING_UMPIRE_UM ON CACHE INTERNAL "")
 endif ()
 
 if (HYPRE_WITH_UMPIRE_PINNED)
-  set(HYPRE_WITH_UMPIRE ON CACHE BOOL "" FORCE)
-  set(HYPRE_USING_UMPIRE ON CACHE BOOL "" FORCE)
-  set(HYPRE_USING_UMPIRE_PINNED ON CACHE BOOL "" FORCE)
+  set(HYPRE_WITH_UMPIRE ON CACHE INTERNAL "")
+  set(HYPRE_USING_UMPIRE ON CACHE INTERNAL "")
+  set(HYPRE_USING_UMPIRE_PINNED ON CACHE INTERNAL "")
 endif ()
 
 # Check for conflicting options
-ensure_options_match(HYPRE_ENABLE_SHARED BUILD_SHARED_LIBS)
-ensure_options_match(HYPRE_INSTALL_PREFIX CMAKE_INSTALL_PREFIX)
-ensure_options_match(HYPRE_BUILD_TYPE CMAKE_BUILD_TYPE)
 ensure_options_differ(HYPRE_WITH_CUDA HYPRE_WITH_HIP)
 ensure_options_differ(HYPRE_WITH_CUDA HYPRE_WITH_SYCL)
 ensure_options_differ(HYPRE_WITH_CUDA HYPRE_BIGINT)

@@ -241,7 +241,7 @@ function(setup_tpl_or_internal LIB_NAME)
     # Use external library
     if(TPL_${LIB_NAME_UPPER}_LIBRARIES)
       # Use specified TPL libraries
-      message(STATUS "Enabled support for using ${LIB_NAME_UPPER}.")
+      message(STATUS "Enabled support for using external ${LIB_NAME_UPPER}.")
       foreach(lib ${TPL_${LIB_NAME_UPPER}_LIBRARIES})
         if(EXISTS ${lib})
           message(STATUS "${LIB_NAME_UPPER} library found: ${lib}")
