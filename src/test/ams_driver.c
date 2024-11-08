@@ -19,6 +19,7 @@
 #include "_hypre_IJ_mv.h"
 #include "HYPRE.h"
 #if defined(HYPRE_USING_CUSPARSE)
+#define DISABLE_CUSPARSE_DEPRECATED
 #include <cusparse.h>
 #endif
 

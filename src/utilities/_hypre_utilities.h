@@ -656,6 +656,7 @@ typedef struct
    HYPRE_Int  error_flag;
    HYPRE_Int  temp_error_flag;
    HYPRE_Int  print_to_memory;
+   HYPRE_Int  verbosity;
    char      *memory;
    HYPRE_Int  mem_sz;
    HYPRE_Int  msg_sz;
@@ -2324,9 +2325,10 @@ void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPR
 
 /* device_utils.c */
 #if defined(HYPRE_USING_GPU)
-HYPRE_Int hypre_SyncComputeStream(hypre_Handle *hypre_handle);
-HYPRE_Int hypre_SyncCudaDevice(hypre_Handle *hypre_handle);
-HYPRE_Int hypre_ResetCudaDevice(hypre_Handle *hypre_handle);
+HYPRE_Int hypre_ForceSyncComputeStream();
+HYPRE_Int hypre_SyncComputeStream();
+HYPRE_Int hypre_SyncDevice();
+HYPRE_Int hypre_ResetDevice();
 HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int num_vectors, HYPRE_Int num_rows,
                                       HYPRE_Int *A_i, HYPRE_Complex *A_data,
                                       HYPRE_Complex *x, HYPRE_Complex beta,
@@ -2417,7 +2419,6 @@ char* hypre_ConvertIndicesToString(HYPRE_Int size, HYPRE_Int *indices);
 HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
 HYPRE_Int hypre_RestoreSyncCudaCompute(void);
 HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
-HYPRE_Int hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle);
 
 /* handle.c */
 HYPRE_Int hypre_SetLogLevel( HYPRE_Int log_level );
