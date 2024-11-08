@@ -31,14 +31,89 @@
  *--------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------
+ * General notes:
+ *
+ * The code uses the StMatrix routines to determine if the operation is
+ * allowable and to compute the stencil and stencil formulas for M.
+ *
+ * All of the matrices must be defined on a common base grid (fine index space),
+ * and each matrix must have a unitary stride for either its domain or range (or
+ * both).  RDF: Need to remove the latter requirement.  Think of P*C for
+ * example, where P is interpolation and C is a square matrix on the coarse
+ * grid.  Another approach (maybe the most flexible) is to temporarily modify
+ * the matrices in this routine so that they have a common fine index space.
+ * This will require mapping the matrix strides, the grid extents, and the
+ * stencil offsets.
+ *
+ * This routines assume there are only two data-map strides in the product.
+ * This means that at least two matrices can always be multiplied together
+ * (assuming it is a valid stencil matrix multiply), hence longer products can
+ * be broken up into smaller components (the latter is not yet implemented).
+ * The fine and coarse data-map strides are denoted by fstride and cstride.
+ * Note that both fstride and cstride are given on the same base index space and
+ * may be equal.  The range and domain strides for M are denoted by ran_stride
+ * and dom_stride and are also given on the base index space.  The grid for M is
+ * coarsened by factor coarsen_stride, which is the smaller of ran_stride and
+ * dom_stride.  The computation for each stencil coefficient of M happens on the
+ * base index space with stride loop_stride, which is the larger of ran_stride
+ * and dom_stride.  Since we require that either ran_stride or dom_stride is
+ * larger than all other matrix strides in the product (this is how we guarantee
+ * that M has only one stencil), and since the data-map stride for a matrix is
+ * currently the largest of its two strides, then we have loop_stride = cstride.
+ * In general, the data strides for the boxloop below are as follows:
+ *
+ *   Mdstride = stride 1
+ *   cdstride = loop_stride / cstride (= stride 1)
+ *   fdstride = loop_stride / fstride
+ *
+ * Here are some examples:
+ *
+ *   fstride = 2, cstride = 6
+ *   ran_stride = 6, dom_stride = 6, coarsen_stride = 6, loop_stride = 6
+ *   Mdstride = 1, cdstride = 1, fdstride = 3
+ *
+ *   6     6   6               2 2               2 2     6   <-- domain/range strides
+ *   |     |   |               | |               | |     |
+ *   |  M  | = |       R       | |       A       | |  P  |
+ *   |     |   |               | |               | |     |
+ *                               |               | |     |
+ *                               |               | |     |
+ *                               |               | |     |
+ *
+ *   fstride = 2, cstride = 6
+ *   ran_stride = 2, dom_stride = 6, coarsen_stride = 2, loop_stride = 6
+ *   Mdstride = 1, cdstride = 1, fdstride = 3
+ *
+ *   2     6   2     6 6     6
+ *   |     |   |     | |     |
+ *   |  M  | = |  A  | |  B  |
+ *   |     |   |     | |     |
+ *   |     |   |     |
+ *   |     |   |     |
+ *   |     |   |     |
+ *
+ *   fstride = 4, cstride = 8
+ *   ran_stride = 8, dom_stride = 2, coarsen_stride = 2, loop_stride = 8
+ *   Mdstride = 1, cdstride = 1, fdstride = 2
+ *
+ *   8               2   8       4 4               2
+ *   |       M       | = |   A   | |               |
+ *                                 |       B       |
+ *                                 |               |
+ *
+ *
+ * RDF: Provide more info here about the algorithm below
+ * - Each coefficient in the sum is a product of nterms terms
+ * - Assumes there are at most two grid index spaces in the product
+ *
+ * RDF TODO: Compute symmetric matrix.  Make sure to compute comm_pkg correctly
+ * using sym_ghost or similar idea.
+ *--------------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------------
  * hypre_StructMatmultCreate
  *
- * Creates the data structure for computing struct matrix-matrix
- * multiplication.
- *
- * The matrix product has 'nterms' terms constructed from the matrices
- * in the 'matrices' array. Each term t is given by the matrix
- * matrices[terms[t]] transposed according to the boolean transposes[t].
+ * Creates the initial data structure for the matmult collection.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -123,83 +198,14 @@ hypre_StructMatmultDestroy( hypre_StructMatmultData *mmdata )
 /*--------------------------------------------------------------------------
  * hypre_StructMatmultSetup
  *
- * Compute and assemble the StructGrid of the resulting matrix
+ * This routine is called successively for each matmult in the collection.
  *
- * This routine uses the StMatrix routines to determine if the operation is
- * allowable and to compute the stencil and stencil formulas for M.
+ * Computes various information related to a specific matmult in the collection,
+ * creates an initial product matrix M, and returns an ID for M (iM).
  *
- * All of the matrices must be defined on a common base grid (fine index space),
- * and each matrix must have a unitary stride for either its domain or range (or
- * both).  RDF: Need to remove the latter requirement.  Think of P*C for
- * example, where P is interpolation and C is a square matrix on the coarse
- * grid.  Another approach (maybe the most flexible) is to temporarily modify
- * the matrices in this routine so that they have a common fine index space.
- * This will require mapping the matrix strides, the grid extents, and the
- * stencil offsets.
- *
- * This routine assumes there are only two data-map strides in the product.
- * This means that at least two matrices can always be multiplied together
- * (assuming it is a valid stencil matrix multiply), hence longer products can
- * be broken up into smaller components (the latter is not yet implemented).
- * The fine and coarse data-map strides are denoted by fstride and cstride.
- * Note that both fstride and cstride are given on the same base index space and
- * may be equal.  The range and domain strides for M are denoted by ran_stride
- * and dom_stride and are also given on the base index space.  The grid for M is
- * coarsened by factor coarsen_stride, which is the smaller of ran_stride and
- * dom_stride.  The computation for each stencil coefficient of M happens on the
- * base index space with stride loop_stride, which is the larger of ran_stride
- * and dom_stride.  Since we require that either ran_stride or dom_stride is
- * larger than all other matrix strides in the product (this is how we guarantee
- * that M has only one stencil), and since the data-map stride for a matrix is
- * currently the largest of its two strides, then we have loop_stride = cstride.
- * In general, the data strides for the boxloop below are as follows:
- *
- *   Mdstride = stride 1
- *   cdstride = loop_stride / cstride (= stride 1)
- *   fdstride = loop_stride / fstride
- *
- * Here are some examples:
- *
- *   fstride = 2, cstride = 6
- *   ran_stride = 6, dom_stride = 6, coarsen_stride = 6, loop_stride = 6
- *   Mdstride = 1, cdstride = 1, fdstride = 3
- *
- *   6     6   6               2 2               2 2     6   <-- domain/range strides
- *   |     |   |               | |               | |     |
- *   |  M  | = |       R       | |       A       | |  P  |
- *   |     |   |               | |               | |     |
- *                               |               | |     |
- *                               |               | |     |
- *                               |               | |     |
- *
- *   fstride = 2, cstride = 6
- *   ran_stride = 2, dom_stride = 6, coarsen_stride = 2, loop_stride = 6
- *   Mdstride = 1, cdstride = 1, fdstride = 3
- *
- *   2     6   2     6 6     6
- *   |     |   |     | |     |
- *   |  M  | = |  A  | |  B  |
- *   |     |   |     | |     |
- *   |     |   |     |
- *   |     |   |     |
- *   |     |   |     |
- *
- *   fstride = 4, cstride = 8
- *   ran_stride = 8, dom_stride = 2, coarsen_stride = 2, loop_stride = 8
- *   Mdstride = 1, cdstride = 1, fdstride = 2
- *
- *   8               2   8       4 4               2
- *   |       M       | = |   A   | |               |
- *                                 |       B       |
- *                                 |               |
- *
- *
- * RDF: Provide more info here about the algorithm below
- * - Each coefficient in the sum is a product of nterms terms
- * - Assumes there are at most two grid index spaces in the product
- *
- * RDF TODO: Compute symmetric matrix.  Make sure to compute comm_pkg correctly
- * using sym_ghost or similar idea.
+ * Each matmult has 'nterms' terms constructed from matrices in the 'matrices'
+ * array. Each term t is given by the matrix matrices[terms[t]] transposed
+ * according to the boolean transposes[t].
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -461,7 +467,12 @@ hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
 /*--------------------------------------------------------------------------
  * StructMatmultInit
  *
- * Computes data spaces, resizes matrices, and computes comm packages
+ * This routine is called once for the entire matmult collection.
+ *
+ * Computes additional information needed to do the matmults in the collection,
+ * including data spaces and communication packages.  It resizes all of the
+ * matrices involved in the matmults and creates fully initialized shells for
+ * the product matrices M (no data allocated yet).
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1029,7 +1040,9 @@ hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
 /*--------------------------------------------------------------------------
  * StructMatmultCommunicate
  *
- * Communicates matrix and mask info with a single commpkg.
+ * This routine is called once for the entire matmult collection.
+ *
+ * Communicates matrix and mask boundary data with a single comm_pkg.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1075,7 +1088,10 @@ hypre_StructMatmultCommunicate( hypre_StructMatmultData  *mmdata )
 /*--------------------------------------------------------------------------
  * StructMatmultCompute
  *
- * Computes coefficients of the resulting matrix M. * where:
+ * This routine is called successively for each matmult in the collection.
+ *
+ * Computes the coefficients for matmult M, indicated by ID iM.  Data for M is
+ * allocated here, but M is not assembled (RDF: Why?  We probably should.).
  *
  * Nomenclature used in the kernel functions:
  *   1) VCC stands for "Variable Coefficient on Coarse data space".

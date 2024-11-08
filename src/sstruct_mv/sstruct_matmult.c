@@ -329,8 +329,8 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
    smaps = hypre_SStructPMatrixSMaps(pM);
 
    /* Initialize the struct matmults for this part */
-   /* NOTE: This does not assemble the struct grids.  They are assembled below
-    * or in HYPRE_SStructGridAssemble(Mgrid) to reduce box manager overhead.
+   /* RDF NOTE: This does not assemble the struct grids.  They are assembled
+    * below or in HYPRE_SStructGridAssemble() to reduce box manager overhead.
     * It's not clear if this is useful anymore. */
    hypre_StructMatmultInit(smmdata, 0);
 
