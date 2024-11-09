@@ -122,19 +122,24 @@ How to get started
 Installing hypre
 ------------------------------------------------------------------------------
 
-As previously noted, on most systems hypre can be built by simply typing
-``configure`` followed by ``make`` in the top-level source directory.
-Alternatively, the CMake system [CMakeWeb]_ can be used, and is the best
-approach for building hypre on Windows systems in particular.  For more detailed
-instructions, read the ``INSTALL`` file provided with the hypre distribution or
-the :ref:`ch-General` section of this manual.  Note the following requirements:
+As previously noted, on most systems hypre can be built by typing
+``./configure`` followed by ``make`` in the top-level source directory.
+Alternatively, `CMake <https://cmake.org/>`_ can be used and is the recommended
+method for building hypre on Windows. For more detailed instructions, refer to
+the `INSTALL <https://github.com/hypre-space/hypre/blob/master/INSTALL.md>`_ file
+provided in the hypre distribution or see the :ref:`ch-General` section of this manual.
 
-* To run in parallel, hypre requires an installation of MPI.
+.. note::
 
-* Configuration of hypre with threads requires an implementation of OpenMP.
-  Currently, only a subset of hypre is threaded.
+   * To run in parallel, hypre requires an installation of MPI.
 
-* The hypre library currently does not directly support complex-valued systems.
+   * Configuration of hypre with threads requires an implementation of OpenMP.
+     Currently, only a subset of hypre is threaded.
+
+   * To run on GPUs, hypre must be configured with support for the appropriate GPU toolkit.
+     Available options are CUDA for NVIDIA GPUs, HIP for AMD GPUs, and SYCL for Intel GPUs.
+
+   * The hypre library currently does not directly support complex-valued systems.
 
 
 .. _choosing-interface:
