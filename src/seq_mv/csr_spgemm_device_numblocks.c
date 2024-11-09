@@ -21,15 +21,15 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetBlockNumDim()
 
 #if defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL(cudaDeviceGetAttribute(
-      &multiProcessorCount,
-      cudaDevAttrMultiProcessorCount,
-      hypre_HandleDevice(hypre_handle())));
+                      &multiProcessorCount,
+                      cudaDevAttrMultiProcessorCount,
+                      hypre_HandleDevice(hypre_handle())));
 
 #elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL(hipDeviceGetAttribute(
-      &multiProcessorCount,
-      hipDeviceAttributeMultiprocessorCount,
-      hypre_HandleDevice(hypre_handle())));
+                     &multiProcessorCount,
+                     hipDeviceAttributeMultiprocessorCount,
+                     hypre_HandleDevice(hypre_handle())));
 
 #elif defined(HYPRE_USING_SYCL)
    multiProcessorCount =
