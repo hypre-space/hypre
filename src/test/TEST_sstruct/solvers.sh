@@ -23,6 +23,7 @@ FILES="\
  ${TNAME}.out.9\
  ${TNAME}.out.10\
  ${TNAME}.out.11\
+ ${TNAME}.out.14\
  ${TNAME}.out.15\
  ${TNAME}.out.16\
  ${TNAME}.out.17\
