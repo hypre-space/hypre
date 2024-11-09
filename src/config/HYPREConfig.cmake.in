@@ -50,11 +50,11 @@ set(HYPRE_HAVE_MPI_COMM_F2C @HYPRE_HAVE_MPI_COMM_F2C@)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
 if(NOT HYPRE_ENABLE_HYPRE_BLAS)
-  find_dependency(BLAS)
+  find_dependency(BLAS REQUIRED)
 endif()
 
 if(NOT HYPRE_ENABLE_HYPRE_LAPACK)
-  find_dependency(LAPACK)
+  find_dependency(LAPACK REQUIRED)
 endif()
 
 if(HYPRE_USING_DSUPERLU)
@@ -67,11 +67,11 @@ endif()
 
 if(HYPRE_WITH_MPI)
   enable_language(C)
-  find_dependency(MPI @MPI_C_VERSION@ EXACT COMPONENTS C)
+  find_dependency(MPI @MPI_C_VERSION@ EXACT REQUIRED COMPONENTS C)
 endif()
 
 if(HYPRE_WITH_OPENMP)
-  find_dependency(OpenMP)
+  find_dependency(OpenMP REQUIRED)
 endif()
 
 if(HYPRE_WITH_CUDA)
