@@ -130,7 +130,7 @@ hypre_SStructPMatmultCreate(HYPRE_Int                   nmatrices_input,
       sterms[k] = k;
    }
 
-   max_matmults = hypre_pow(nvars, (nterms + 1));
+   max_matmults = (HYPRE_Int) hypre_pow(nvars, (nterms + 1));
    max_matrices = nterms * nvars * nvars;
    hypre_StructMatmultCreate(max_matmults, max_matrices, &smmdata);
    smmid = hypre_TAlloc(HYPRE_Int **, nvars, HYPRE_MEMORY_HOST);
