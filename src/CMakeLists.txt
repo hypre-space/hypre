@@ -97,7 +97,9 @@ set_hypre_option(BASE HYPRE_PRINT_ERRORS                "Print HYPRE errors" OFF
 set_hypre_option(SKIP HYPRE_TIMING                      "Use HYPRE timing routines" OFF)
 set_hypre_option(BASE HYPRE_BUILD_EXAMPLES              "Build examples" OFF)
 set_hypre_option(BASE HYPRE_BUILD_TESTS                 "Build tests" OFF)
+set_hypre_option(BASE HYPRE_WITH_TEST_USING_HOST        "Execute tests on host (CPU)" OFF)
 set_hypre_option(BASE HYPRE_USING_HOST_MEMORY           "Use host memory" ON)
+
 # GPU options
 set_hypre_option(GPU  HYPRE_WITH_CUDA                   "Use CUDA. Require cuda-8.0 or higher" OFF)
 set_hypre_option(GPU  HYPRE_WITH_HIP                    "Use HIP" OFF)
@@ -105,6 +107,7 @@ set_hypre_option(GPU  HYPRE_WITH_SYCL                   "Use SYCL" OFF)
 set_hypre_option(GPU  HYPRE_WITH_GPU_AWARE_MPI          "Compile with device aware GPU support" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_UNIFIED_MEMORY       "Use unified memory for allocating the memory" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_DEVICE_MALLOC_ASYNC  "Use device async malloc" OFF)
+set_hypre_option(GPU  HYPRE_ENABLE_THRUST_ASYNC         "Use Thrust par_nosync policy" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_GPU_PROFILING        "Use NVTX on CUDA or rocTX on HIP" OFF)
 # CUDA options
 set_hypre_option(CUDA HYPRE_ENABLE_CUDA_STREAMS         "Use CUDA streams" ON)
@@ -162,12 +165,19 @@ set_internal_hypre_option(ENABLE USING HYPRE_LAPACK)
 set_internal_hypre_option(ENABLE "" HOPSCOTCH)
 set_internal_hypre_option(ENABLE USING GPU_STREAMS)
 set_internal_hypre_option(ENABLE USING DEVICE_POOL)
+set_internal_hypre_option(WITH "" TEST_USING_HOST)
 set_internal_hypre_option(WITH USING OPENMP)
 set_internal_hypre_option(WITH USING CUDA)
 set_internal_hypre_option(WITH USING HIP)
 set_internal_hypre_option(WITH USING SYCL)
 set_internal_hypre_option(WITH USING MAGMA)
 set_internal_hypre_option(WITH USING CALIPER)
+
+# Enable CTest support if tests are being built
+if(HYPRE_BUILD_TESTS)
+  include(CTest)
+  enable_testing()
+endif()
 
 if (BUILD_SHARED_LIBS)
   set(HYPRE_SHARED ON CACHE INTERNAL "")
@@ -265,11 +275,12 @@ endif ()
 # Add any extra C compiler flags HYPRE_WITH_EXTRA_CFLAGS
 if (NOT HYPRE_WITH_EXTRA_CFLAGS STREQUAL "")
   string(REPLACE " " ";" HYPRE_WITH_EXTRA_CFLAGS_LIST ${HYPRE_WITH_EXTRA_CFLAGS})
-  add_compile_options("$<$<COMPILE_LANGUAGE:C>:${HYPRE_WITH_EXTRA_CFLAGS_LIST}>")
+  target_compile_options(${PROJECT_NAME} PRIVATE 
+    $<$<COMPILE_LANGUAGE:C>:${HYPRE_WITH_EXTRA_CFLAGS_LIST}>)
 endif ()
 
 # Set output directory for the library
-set_target_properties(HYPRE PROPERTIES
+set_target_properties(${PROJECT_NAME} PROPERTIES
   VERSION "${HYPRE_VERSION}"
   SOVERSION "${HYPRE_VERSION_MAJOR}${HYPRE_VERSION_MINOR}"
   ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
@@ -299,7 +310,7 @@ setup_tpl(magma)
 setup_tpl(caliper)
 setup_tpl(umpire)
 
-# Some TPLs need C++ to be enabled (GPU already enables C++)
+# Some TPLs need C++ to be enabled (GPU already enables C++ by default)
 if(HYPRE_NEEDS_CXX AND NOT HYPRE_USING_GPU)
   enable_language(CXX)
 endif()
@@ -384,7 +395,7 @@ endif ()
 
 # Installation
 include(GNUInstallDirs)
-install(TARGETS HYPRE
+install(TARGETS ${PROJECT_NAME}
   EXPORT HYPRETargets
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}

@@ -35,6 +35,9 @@
 /* Use cudaMallocAsync */
 #cmakedefine HYPRE_USING_DEVICE_MALLOC_ASYNC 1
 
+/* Use Thrust par_nosync policy */
+#cmakedefine HYPRE_ENABLE_THRUST_ASYNC 1
+
 /* Use GPU-aware MPI */
 #cmakedefine HYPRE_WITH_GPU_AWARE_MPI 1
 
@@ -140,6 +143,9 @@
 /* Use if executing on GPU device */
 #cmakedefine HYPRE_USING_GPU 1
 
+/* Use if executing hypre tests on host (CPU) */
+#cmakedefine HYPRE_TEST_USING_HOST 1
+
 /* Use HIP */
 #cmakedefine HYPRE_USING_HIP 1
 
@@ -163,9 +169,6 @@
 
 /* Use SuperLU */
 #cmakedefine HAVE_SUPERLU 1
-
-/* Use MAGMA */
-#cmakedefine HYPRE_USING_MAGMA 1
 
 /* Use MPI */
 #cmakedefine HYPRE_HAVE_MPI 1

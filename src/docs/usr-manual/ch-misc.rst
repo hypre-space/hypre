@@ -10,16 +10,19 @@
 General Information
 ******************************************************************************
 
+In this and the following sections, we discuss how to obtain and build hypre,
+interpret error flags, report bugs, and call hypre from different programming languages.
+We provide instructions for two build systems: autotools (configure & make) and CMake.
+While autotools is traditionally used on Unix-like systems (Linux, macOS, etc.),
+CMake provides cross-platform support and is required for Windows builds.
+Both systems are actively maintained and supported.
+
 .. _getting-source:
 
 Getting the Source Code
 ==============================================================================
 
-In this and the following sections, we discuss how to obtain and build hypre. We provide 
-instructions for two build systems: autotools (configure & make) and CMake. While autotools 
-is traditionally used on Unix-like systems (Linux, macOS, etc.), CMake provides 
-cross-platform support and is required for Windows builds. Both systems are actively 
-maintained and supported. There are two ways to obtain hypre:
+There are two ways to obtain hypre:
 
 1. **Clone from GitHub (recommended)**::
 
@@ -48,10 +51,10 @@ The simplest method is to use the traditional configure and make:
 
 .. code-block:: bash
 
-   cd src           # Move to the source directory
-   ./configure      # Configure the build system
-   make -j 4        # Use threads for a faster parallel build
-   make install     # (Optional) Install hypre on a user-specified path via --prefix=<path>
+   cd ${HYPRE_HOME}/src   # Move to the source directory
+   ./configure            # Configure the build system
+   make -j 4              # Use threads for a faster parallel build
+   make install           # (Optional) Install hypre on a user-specified path via --prefix=<path>
 
 This will build and install hypre in the default locations:
 
@@ -105,10 +108,10 @@ The simplest way to build hypre using CMake is:
 
 .. code-block:: bash
 
-   cd cmbuild           # Use a separate build directory to keep source clean
-   cmake ../src         # Generate build system
-   make -j              # Build the library in parallel
-   make install         # (Optional) Install to specified location via -DCMAKE_INSTALL_PREFIX=<path>
+   cd ${HYPRE_HOME}/cmbuild    # Use a separate build directory to keep source clean
+   cmake ..                    # Generate build system
+   make -j                     # Build the library in parallel
+   make install                # (Optional) Install to specified location via -DCMAKE_INSTALL_PREFIX=<path>
 
 During the configure step, CMake will detect your compiler and build tools,
 it will find required dependencies, set up platform-specific build flags, and
@@ -129,7 +132,7 @@ hypre's CMake build provides several options. For more information, see :ref:`bu
 
    CMake GUI (``ccmake`` or ``cmake-gui``) provides an interactive way to change build options:
 
-   - **Unix**: From the ``src/cmbuild`` directory:
+   - **Unix**: From the ``${HYPRE_HOME}/src/cmbuild`` directory:
      
      1. Run ``ccmake ..``
      2. Change options:
@@ -191,8 +194,7 @@ For GPU-specific options, see the :ref:`gpu_build` section below.
      - ``--enable-mixedint``
      - ``-DHYPRE_ENABLE_MIXEDINT=ON``
    * - | Single FP precision
-       | (default is off,
-       | no GPU support)
+       | (default is off)
      - ``--enable-single``
      - ``-DHYPRE_ENABLE_SINGLE=ON``
    * - | Long double precision
@@ -221,11 +223,13 @@ For GPU-specific options, see the :ref:`gpu_build` section below.
        | (default is on)
      - ``--enable-fortran``
      - ``-DHYPRE_ENABLE_FORTRAN=ON``
-   * - External BLAS
+   * - | External BLAS
+       | (default is off)
      - | ``--with-blas-lib=<lib>``
        | ``--with-blas-lib-dirs=<path>``
      - ``-DHYPRE_ENABLE_INTERNAL_BLAS=OFF``
-   * - External LAPACK
+   * - | External LAPACK
+       | (default is off)
      - | ``--with-lapack-lib=<lib>``
        | ``--with-lapack-lib-dirs=<path>``
      - ``-DHYPRE_ENABLE_INTERNAL_LAPACK=OFF``
@@ -265,18 +269,16 @@ For GPU-specific options, see the :ref:`gpu_build` section below.
         configuration files
 
      2. **Manual specification**:
-        
+
         a. **Autotools**:
-           Use the pair:
-           
+
            .. code-block:: bash
            
               --with-pkg-include=/path/to/pkg-include
               --with-pkg-lib=/path/to/pkg-lib
 
         b. **CMake**:
-           Use the pair:
-           
+
            .. code-block:: bash
            
               -DTPL_PACKAGE_INCLUDE_DIRS=/path/to/pkg-include
@@ -319,11 +321,13 @@ build systems.
      - ``--with-sycl``
      - ``-DHYPRE_WITH_SYCL=ON``
    * - | SYCL Target
-       | (default is empty, **SYCL** only)
+       | (default is empty,
+       | **SYCL** only)
      - ``--with-sycl-target=ARG``
      - ``-DCMAKE_SYCL_TARGET=ARG``
    * - | SYCL Target Backend
-       | (default is empty, **SYCL** only)
+       | (default is empty,
+       | **SYCL** only)
      - ``--with-sycl-target-backend=ARG``
      - ``-DCMAKE_SYCL_TARGET_BACKEND=ARG``
    * - | GPU architecture
@@ -340,6 +344,14 @@ build systems.
        | (default is off)
      - ``--enable-unified-memory``
      - ``-DHYPRE_ENABLE_UNIFIED_MEMORY=ON``
+   * - | Device async malloc
+       | (default is off)
+     - ``--enable-device-malloc-async``
+     - ``-DHYPRE_ENABLE_DEVICE_MALLOC_ASYNC=ON``
+   * - | Thrust async execution
+       | (default is off)
+     - ``--enable-thrust-async``
+     - ``-DHYPRE_ENABLE_THRUST_ASYNC=ON``
    * - | cuSPARSE Support
        | (default is on, **CUDA** only)
      - ``--enable-cusparse``
@@ -399,7 +411,7 @@ build systems.
 
 .. warning::
 
-   Allocations and deallocations of GPU memory are expensive. Memory pooling is a
+   Allocations and deallocations of GPU memory can be slow. Memory pooling is a
    common approach to reduce such overhead and improve performance. We recommend using 
    [Umpire]_ for memory management, which provides robust pooling capabilities for both 
    device and unified memory. For Umpire support, the Umpire library must be installed 
@@ -496,7 +508,7 @@ hypre provides CMake configuration files that enable easy integration. Create a
 
 .. code-block:: cmake
 
-   cmake_minimum_required(VERSION 3.23)
+   cmake_minimum_required(VERSION 3.21)
    project(MyApp LANGUAGES C)
    
    find_package(HYPRE REQUIRED)
@@ -537,13 +549,13 @@ If hypre was built as a shared library, you have several options:
    .. code-block:: bash
 
       # Linux/Unix
-      export LD_LIBRARY_PATH=${HYPRE_ROOT}/lib:${LD_LIBRARY_PATH}
+      export LD_LIBRARY_PATH=${HYPRE_INSTALL_DIR}/lib:${LD_LIBRARY_PATH}
       
       # macOS
-      export DYLD_LIBRARY_PATH=${HYPRE_ROOT}/lib:${DYLD_LIBRARY_PATH}
+      export DYLD_LIBRARY_PATH=${HYPRE_INSTALL_DIR}/lib:${DYLD_LIBRARY_PATH}
       
       # Windows
-      set PATH=%HYPRE_ROOT%\lib;%PATH%
+      set PATH=%HYPRE_INSTALL_DIR%\lib;%PATH%
 
 2. **RPATH/RUNPATH**:
    Set the runtime search path during linking. With CMake:
@@ -551,12 +563,12 @@ If hypre was built as a shared library, you have several options:
    .. code-block:: cmake
 
       # Use RPATH (searched before LD_LIBRARY_PATH)
-      set(CMAKE_INSTALL_RPATH "${HYPRE_ROOT}/lib")
+      set(CMAKE_INSTALL_RPATH "${HYPRE_INSTALL_DIR}/lib")
       set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
       
       # Or use RUNPATH (searched after LD_LIBRARY_PATH)
       set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--enable-new-dtags")
-      set(CMAKE_INSTALL_RPATH "${HYPRE_ROOT}/lib")
+      set(CMAKE_INSTALL_RPATH "${HYPRE_INSTALL_DIR}/lib")
       set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
    Or with manual linking:
@@ -564,10 +576,10 @@ If hypre was built as a shared library, you have several options:
    .. code-block:: bash
 
       # RPATH
-      -Wl,-rpath,${HYPRE_ROOT}/lib
+      -Wl,-rpath,${HYPRE_INSTALL_DIR}/lib
       
       # RUNPATH
-      -Wl,--enable-new-dtags,-rpath,${HYPRE_ROOT}/lib
+      -Wl,--enable-new-dtags,-rpath,${HYPRE_INSTALL_DIR}/lib
 
    ``RPATH`` is searched before ``LD_LIBRARY_PATH`` while ``RUNPATH`` is searched 
    after, giving you flexibility in controlling library resolution precedence.

@@ -32,9 +32,11 @@ endif()
 # Add any extra CXX compiler flags
 if(NOT HYPRE_WITH_EXTRA_CXXFLAGS STREQUAL "")
   string(REPLACE " " ";" HYPRE_WITH_EXTRA_CXXFLAGS_LIST ${HYPRE_WITH_EXTRA_CXXFLAGS})
-  add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${HYPRE_WITH_EXTRA_CXXFLAGS_LIST}>")
+  target_compile_options(HYPRE PRIVATE 
+    $<$<COMPILE_LANGUAGE:CXX>:${HYPRE_WITH_EXTRA_CXXFLAGS_LIST}>)
 endif()
 
+# Include the toolkit setup file for the selected GPU architecture
 if(HYPRE_WITH_CUDA)
   include(HYPRE_SetupCUDAToolkit)
 

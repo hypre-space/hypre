@@ -68,6 +68,27 @@ ro="-ij-noilu -ams -struct -sstruct -rt -D HYPRE_NO_SAVED"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-hip-cpu
 
+####################################
+## HIP + CMake build (only) tests ##
+####################################
+
+module -q load cmake/3.24.2
+
+# HIP without UM + CMake (no run)
+co="-DCMAKE_C_COMPILER=cc -DCMAKE_CXX_COMPILER=CC -DMPI_C_COMPILER=cc -DMPI_CXX_COMPILER=CC -DHYPRE_WITH_HIP=ON -DCMAKE_HIP_ARCHITECTURES=gfx90a -DCMAKE_BUILD_TYPE=Debug -DHYPRE_BUILD_TESTS=ON"
+./test.sh cmake.sh $src_dir -co: $co -mo: $mo
+./renametest.sh cmake $output_dir/cmake-hip-nonum
+
+# HIP with UM + Shared library + CMake (no run)
+co="-DBUILD_SHARED_LIBS=ON -DCMAKE_C_COMPILER=cc -DCMAKE_CXX_COMPILER=CC -DMPI_C_COMPILER=cc -DMPI_CXX_COMPILER=CC -DHYPRE_WITH_HIP=ON -DCMAKE_HIP_ARCHITECTURES=gfx90a -DHYPRE_ENABLE_UNIFIED_MEMORY=ON -DCMAKE_BUILD_TYPE=Debug -DHYPRE_BUILD_TESTS=ON"
+./test.sh cmake.sh $src_dir -co: $co -mo: $mo
+./renametest.sh cmake $output_dir/cmake-hip-um-shared
+
+# CPU + CMake (no run)
+co="-DCMAKE_C_COMPILER=cc -DCMAKE_CXX_COMPILER=CC -DMPI_C_COMPILER=cc -DMPI_CXX_COMPILER=CC -DCMAKE_BUILD_TYPE=Debug -DHYPRE_BUILD_TESTS=ON"
+./test.sh cmake.sh $src_dir -co: $co -mo: $mo
+./renametest.sh cmake $output_dir/cmake-cpu
+
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do
