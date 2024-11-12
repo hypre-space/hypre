@@ -164,15 +164,10 @@ hypre_SStructPMatmultCreate(HYPRE_Int                   nmatrices_input,
             zero_product = 0;
             for (k = 0; k < nterms; k++)
             {
-               if (trans[k])
-               {
-                  /* Use the transpose matrix (reverse the indices) */
-                  smatrices[k] = hypre_SStructPMatrixSMatrix(pmatrices[terms[k]], i[k + 1], i[k]);
-               }
-               else
-               {
-                  smatrices[k] = hypre_SStructPMatrixSMatrix(pmatrices[terms[k]], i[k], i[k + 1]);
-               }
+               /* If (trans[k] > 0), use the transpose matrix (reverse the indices) */
+               smatrices[k] = hypre_SStructPMatrixSMatrix(pmatrices[terms[k]],
+                                                          trans[k] ? i[k + 1] : i[k],
+                                                          trans[k] ? i[k] : i[k + 1]);
                if (smatrices[k] == NULL)
                {
                   zero_product = 1;
@@ -310,6 +305,17 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
    vartypes  = hypre_SStructPGridVarTypes(pfgrid);
    hypre_SetIndex(origin, 0);
 
+   /* Check: This currently only works for cell-centered variable types */
+   for (vi = 0; vi < nvars; vi++)
+   {
+      if (vartypes[vi] != HYPRE_SSTRUCT_VARIABLE_CELL)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "SStructPMatmult currently supports only cell variable types\n");
+         return hypre_error_flag;
+      }
+   }
+
    /* Create temporary semi-struct stencil data structure */
    pstencils = hypre_TAlloc(hypre_SStructStencil *, nvars, HYPRE_MEMORY_HOST);
    for (vi = 0; vi < nvars; vi++)
@@ -331,7 +337,7 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
    /* Initialize the struct matmults for this part */
    /* RDF NOTE: This does not assemble the struct grids.  They are assembled
     * below or in HYPRE_SStructGridAssemble() to reduce box manager overhead.
-    * It's not clear if this is useful anymore. */
+    * Check: The struct 'assemble_grid' feature may not be needed anymore. */
    hypre_StructMatmultInit(smmdata, 0);
 
    /* Setup part matrix data structure */
