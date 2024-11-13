@@ -8,7 +8,7 @@
 #include "_hypre_utilities.h"
 
 /* Global variable for error handling */
-hypre_Error hypre__global_error = {0, 0, 0, NULL, 0, 0};
+hypre_Error hypre__global_error = {0, 0, 0, HYPRE_INT_MAX, NULL, 0, 0};
 
 /*--------------------------------------------------------------------------
  * Process the error raised on the given line of the given source file
@@ -25,57 +25,61 @@ hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const 
 
 #if defined(HYPRE_PRINT_ERRORS)
 
-   /* Error format strings without and with a message */
-   const char  fmt_wo[] = "hypre error in file \"%s\", line %d, error code = %d\n";
-   const char  fmt_wm[] = "hypre error in file \"%s\", line %d, error code = %d - %s\n";
-   char       *buffer;
-   HYPRE_Int   bufsz;
-
-   /* Print error message to local buffer first */
-
-   if (msg)
+   /* process the error message only if verbosity is turned on for that error code */
+   if (ierr & hypre__global_error.verbosity)
    {
-      bufsz = hypre_snprintf(NULL, 0, fmt_wm, filename, line, ierr, msg);
-   }
-   else
-   {
-      bufsz = hypre_snprintf(NULL, 0, fmt_wo, filename, line, ierr);
-   }
+      /* Error format strings without and with a message */
+      const char  fmt_wo[] = "hypre error in file \"%s\", line %d, error code = %d\n";
+      const char  fmt_wm[] = "hypre error in file \"%s\", line %d, error code = %d - %s\n";
+      char       *buffer;
+      HYPRE_Int   bufsz;
 
-   bufsz += 1;
-   buffer = hypre_TAlloc(char, bufsz, HYPRE_MEMORY_HOST);
+      /* Print error message to local buffer first */
 
-   if (msg)
-   {
-      hypre_snprintf(buffer, bufsz, fmt_wm, filename, line, ierr, msg);
-   }
-   else
-   {
-      hypre_snprintf(buffer, bufsz, fmt_wo, filename, line, ierr);
-   }
-
-   /* Now print buffer to either memory or stderr */
-   if (err.print_to_memory)
-   {
-      HYPRE_Int  msg_sz = err.msg_sz; /* Store msg_sz for snprintf below */
-
-      /* Make sure there is enough memory for the new message */
-      err.msg_sz += bufsz;
-      if ( err.msg_sz > err.mem_sz )
+      if (msg)
       {
-         err.mem_sz = err.msg_sz + 1024; /* Add some excess */
-         err.memory = hypre_TReAlloc(err.memory, char, err.mem_sz, HYPRE_MEMORY_HOST);
+         bufsz = hypre_snprintf(NULL, 0, fmt_wm, filename, line, ierr, msg);
+      }
+      else
+      {
+         bufsz = hypre_snprintf(NULL, 0, fmt_wo, filename, line, ierr);
       }
 
-      hypre_snprintf((err.memory + msg_sz), bufsz, "%s", buffer);
-   }
-   else
-   {
-      hypre_fprintf(stderr, "%s", buffer);
-   }
+      bufsz += 1;
+      buffer = hypre_TAlloc(char, bufsz, HYPRE_MEMORY_HOST);
 
-   /* Free buffer */
-   hypre_TFree(buffer, HYPRE_MEMORY_HOST);
+      if (msg)
+      {
+         hypre_snprintf(buffer, bufsz, fmt_wm, filename, line, ierr, msg);
+      }
+      else
+      {
+         hypre_snprintf(buffer, bufsz, fmt_wo, filename, line, ierr);
+      }
+
+      /* Now print buffer to either memory or stderr */
+      if (err.print_to_memory)
+      {
+         HYPRE_Int  msg_sz = err.msg_sz; /* Store msg_sz for snprintf below */
+
+         /* Make sure there is enough memory for the new message */
+         err.msg_sz += bufsz;
+         if ( err.msg_sz > err.mem_sz )
+         {
+            err.mem_sz = err.msg_sz + 1024; /* Add some excess */
+            err.memory = hypre_TReAlloc(err.memory, char, err.mem_sz, HYPRE_MEMORY_HOST);
+         }
+
+         hypre_snprintf((err.memory + msg_sz), bufsz, "%s", buffer);
+      }
+      else
+      {
+         hypre_fprintf(stderr, "%s", buffer);
+      }
+
+      /* Free buffer */
+      hypre_TFree(buffer, HYPRE_MEMORY_HOST);
+   }
 #else
    HYPRE_UNUSED_VAR(filename);
    HYPRE_UNUSED_VAR(line);
@@ -218,6 +222,28 @@ HYPRE_SetPrintErrorMode(HYPRE_Int mode)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SetPrintErrorVerbosity(HYPRE_Int code,
+                             HYPRE_Int verbosity)
+{
+   if (code < 0)
+   {
+      /* Change all error codes */
+      code = HYPRE_INT_MAX;
+   }
+   /* First turn the bit(s) on with bitwise or */
+   hypre__global_error.verbosity |= code;
+   if (!verbosity)
+   {
+      /* Turn the bit(s) off with bitwise xor (this works because they were first turned on */
+      hypre__global_error.verbosity ^= code;
+   }
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_GetErrorMessages(char **buffer, HYPRE_Int *bufsz)
 {
    hypre_Error err = hypre__global_error;
@@ -235,6 +261,7 @@ HYPRE_GetErrorMessages(char **buffer, HYPRE_Int *bufsz)
 }
 
 /*--------------------------------------------------------------------------
+ * This routine can be called from any rank; it is NOT collective
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -244,8 +271,6 @@ HYPRE_PrintErrorMessages(MPI_Comm comm)
 
    HYPRE_Int myid;
    char *msg;
-
-   hypre_MPI_Barrier(comm);
 
    hypre_MPI_Comm_rank(comm, &myid);
    for (msg = err.memory; msg < (err.memory + err.msg_sz); msg += strlen(msg) + 1)
