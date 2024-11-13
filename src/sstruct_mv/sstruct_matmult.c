@@ -11,7 +11,25 @@
 //#define DEBUG_MATMULT
 
 /*==========================================================================
- * SStructPMatrix routines
+ * SStructPMatrix matrix-multiply routines
+ *
+ * The pmatrix (SStructPMatrix) contains an nvars x nvars array of struct
+ * (StructMatrix) matrices.  The multiply is then a block-matrix multiply
+ * involving these struct matrices.
+ *
+ * NOTE: This only works for cell-centered variable types (see below comment).
+ * This is also restricted to cases where there is only one struct matrix term
+ * to compute M_ij of the pmatrix M.
+ *
+ * RDF: The struct matmult requires a common base grid, but the base grid in a
+ * pmatrix will differ depending on the variable types involved (see the sgrids
+ * construction in SStructPGridAssemble).  Need to figure out how to handle this
+ * (note that the "Engwer trick" would be a good solution and also minimizes the
+ * box manager requirements).  Another note: Stencil entries are currently split
+ * such that inter-variable-type couplings are put in the unstructured matrix.
+ * Hence, with the exception of the above term size restriction, this could be
+ * made to work in general.  We ultimately want to have all of the structured
+ * stencil entries to go in the pmatrix, of course.
  *==========================================================================*/
 
 /*--------------------------------------------------------------------------
@@ -28,16 +46,23 @@ hypre_SStructPMatmultCreate(HYPRE_Int                   nmatrices_input,
 {
    hypre_SStructPMatmultData  *pmmdata;
    hypre_StructMatmultData    *smmdata;
+   HYPRE_Int                ***smmid;
+   HYPRE_Int                 **smmsz;
 
    hypre_SStructPMatrix      **pmatrices;
    hypre_StructMatrix        **smatrices;
+   HYPRE_Int                  *sterms;
 
    HYPRE_Int                  *terms;
    HYPRE_Int                  *trans;
    HYPRE_Int                  *matmap;
    HYPRE_Int                   nmatrices;
    HYPRE_Int                   nvars;
+   HYPRE_Int                   max_matmults, max_matrices;
    HYPRE_Int                   m, t, vi, vj;
+
+   HYPRE_Int                  *i, *n, k, nn, ii;   /* Nested for-loop variables */
+   HYPRE_Int                   zero_product;
 
    pmmdata = hypre_CTAlloc(hypre_SStructPMatmultData, 1, HYPRE_MEMORY_HOST);
 
@@ -59,7 +84,6 @@ hypre_SStructPMatmultCreate(HYPRE_Int                   nmatrices_input,
       }
    }
    pmatrices = hypre_CTAlloc(hypre_SStructPMatrix *, nmatrices, HYPRE_MEMORY_HOST);
-   smatrices = hypre_CTAlloc(hypre_StructMatrix *, nmatrices, HYPRE_MEMORY_HOST);
    terms     = hypre_CTAlloc(HYPRE_Int, nterms, HYPRE_MEMORY_HOST);
    trans     = hypre_CTAlloc(HYPRE_Int, nterms, HYPRE_MEMORY_HOST);
    for (t = 0; t < nterms; t++)
@@ -75,37 +99,109 @@ hypre_SStructPMatmultCreate(HYPRE_Int                   nmatrices_input,
    nvars = hypre_SStructPMatrixNVars(pmatrices[0]);
    (pmmdata -> nvars) = nvars;
 
-   /* Create SStructPMatmultData object */
-   (pmmdata -> smmdata) = hypre_TAlloc(hypre_StructMatmultData **, nvars, HYPRE_MEMORY_HOST);
+   /* This mimics the following nested for-loop (similar to BoxLoop) to compute
+    * the all-at-once PMatrix product M = A1 * A2 * ... * AN, where N = nterms:
+    *
+    *    for i ...
+    *    {
+    *       for j ...
+    *       {
+    *          M_ij = 0
+    *          for k1 ...
+    *             for k2 ...
+    *                ...
+    *                   for km ...  // where m = N-1
+    *                   {
+    *                      M_ij += A1_{i,k1} * A2_{k1,k2} * ... * AN_{km,j}
+    *                   }
+    *       }
+    *    }
+    *
+    */
 
-   /* TODO: This won't work for cases with inter-variable coupling */
+   i = hypre_CTAlloc(HYPRE_Int, (nterms + 1), HYPRE_MEMORY_HOST);
+   n = hypre_CTAlloc(HYPRE_Int, (nterms + 1), HYPRE_MEMORY_HOST);
+
+   /* In general, we need to have the same number of matrices as terms */
+   smatrices = hypre_CTAlloc(hypre_StructMatrix *, nterms, HYPRE_MEMORY_HOST);
+   sterms = hypre_CTAlloc(HYPRE_Int, nterms, HYPRE_MEMORY_HOST);
+   for (k = 0; k < nterms; k++)
+   {
+      sterms[k] = k;
+   }
+
+   max_matmults = (HYPRE_Int) hypre_pow(nvars, (nterms + 1));
+   max_matrices = nterms * nvars * nvars;
+   hypre_StructMatmultCreate(max_matmults, max_matrices, &smmdata);
+   smmid = hypre_TAlloc(HYPRE_Int **, nvars, HYPRE_MEMORY_HOST);
+   smmsz = hypre_TAlloc(HYPRE_Int *, nvars, HYPRE_MEMORY_HOST);
    for (vi = 0; vi < nvars; vi++)
    {
-      (pmmdata -> smmdata)[vi] = hypre_TAlloc(hypre_StructMatmultData *, nvars, HYPRE_MEMORY_HOST);
+      smmid[vi] = hypre_TAlloc(HYPRE_Int *, nvars, HYPRE_MEMORY_HOST);
+      smmsz[vi] = hypre_TAlloc(HYPRE_Int, nvars, HYPRE_MEMORY_HOST);
       for (vj = 0; vj < nvars; vj++)
       {
-         for (m = 0; m < nmatrices; m++)
+         /* Initialize loop variables */
+         nn = 1;
+         for (k = 1; k < nterms; k++)
          {
-            smatrices[m] = hypre_SStructPMatrixSMatrix(pmatrices[m], vi, vj);
+            nn *= nvars;
+            i[k] = 0;
+            n[k] = nvars - 2;  /* offsetting by 2 produces a simpler comparison below */
          }
+         i[0]      = vi;
+         i[nterms] = vj;
+         n[nterms] = nvars;  /* This ensures that the below loop-index update terminates */
 
-         if (smatrices[0])
+         /* Initialize the array entries to NULL */
+         smmid[vi][vj] = hypre_CTAlloc(HYPRE_Int, nn, HYPRE_MEMORY_HOST);
+         smmsz[vi][vj] = 0;
+         /* Run through the nested for-loop */
+         for (ii = 0; ii < nn; ii++)
          {
-            hypre_StructMatmultCreate(nmatrices, smatrices, nterms, terms, trans, &smmdata);
-            (pmmdata -> smmdata)[vi][vj] = smmdata;
-         }
-         else
-         {
-            (pmmdata -> smmdata)[vi][vj] = NULL;
+            /* M_ij += A1_{i,k1} * A2_{k1,k2} * ... * AN_{km,j} */
+
+            zero_product = 0;
+            for (k = 0; k < nterms; k++)
+            {
+               /* If (trans[k] > 0), use the transpose matrix (reverse the indices) */
+               smatrices[k] = hypre_SStructPMatrixSMatrix(pmatrices[terms[k]],
+                                                          trans[k] ? i[k + 1] : i[k],
+                                                          trans[k] ? i[k] : i[k + 1]);
+               if (smatrices[k] == NULL)
+               {
+                  zero_product = 1;
+                  break;
+               }
+            }
+            if (!zero_product)
+            {
+               hypre_StructMatmultSetup(smmdata, nterms, smatrices, nterms, sterms, trans,
+                                        &smmid[vi][vj][smmsz[vi][vj]]);
+               smmsz[vi][vj]++;
+            }
+
+            /* Update loop indices */
+            for (k = 1; i[k] > n[k]; k++)
+            {
+               i[k] = 0;
+            }
+            i[k]++;
          }
       }
    }
+   hypre_TFree(i, HYPRE_MEMORY_HOST);
+   hypre_TFree(n, HYPRE_MEMORY_HOST);
    hypre_TFree(smatrices, HYPRE_MEMORY_HOST);
+   hypre_TFree(sterms, HYPRE_MEMORY_HOST);
 
    /* Set SStructPMatmultData object */
-   (pmmdata -> nterms)     = nterms;
+   (pmmdata -> smmdata)    = smmdata;
+   (pmmdata -> smmid)      = smmid;
+   (pmmdata -> smmsz)      = smmsz;
    (pmmdata -> nmatrices)  = nmatrices;
    (pmmdata -> pmatrices)  = pmatrices;
+   (pmmdata -> nterms)     = nterms;
    (pmmdata -> terms)      = terms;
    (pmmdata -> transposes) = trans;
    (pmmdata -> comm_pkg)   = NULL;
@@ -133,16 +229,19 @@ hypre_SStructPMatmultDestroy( hypre_SStructPMatmultData *pmmdata )
 
    if (pmmdata)
    {
+      hypre_StructMatmultDestroy(pmmdata -> smmdata);
       nvars = (pmmdata -> nvars);
       for (vi = 0; vi < nvars; vi++)
       {
          for (vj = 0; vj < nvars; vj++)
          {
-            hypre_StructMatmultDestroy((pmmdata -> smmdata)[vi][vj]);
+            hypre_TFree(pmmdata -> smmid[vi][vj], HYPRE_MEMORY_HOST);
          }
-         hypre_TFree(pmmdata -> smmdata[vi], HYPRE_MEMORY_HOST);
+         hypre_TFree(pmmdata -> smmid[vi], HYPRE_MEMORY_HOST);
+         hypre_TFree(pmmdata -> smmsz[vi], HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(pmmdata -> smmdata, HYPRE_MEMORY_HOST);
+      hypre_TFree(pmmdata -> smmid, HYPRE_MEMORY_HOST);
+      hypre_TFree(pmmdata -> smmsz, HYPRE_MEMORY_HOST);
 
       hypre_TFree(pmmdata -> pmatrices, HYPRE_MEMORY_HOST);
       hypre_TFree(pmmdata -> transposes, HYPRE_MEMORY_HOST);
@@ -166,7 +265,9 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
                             HYPRE_Int                   assemble_grid,
                             hypre_SStructPMatrix      **pM_ptr )
 {
-   hypre_StructMatmultData   ***smmdata = (pmmdata -> smmdata);
+   hypre_StructMatmultData     *smmdata = (pmmdata -> smmdata);
+   HYPRE_Int                 ***smmid   = (pmmdata -> smmid);
+   HYPRE_Int                  **smmsz   = (pmmdata -> smmsz);
    HYPRE_Int                    nvars   = (pmmdata -> nvars);
    hypre_SStructPMatrix        *pmatrix = pmmdata -> pmatrices[0];
 
@@ -183,7 +284,7 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
    HYPRE_Int                    num_boxes;
    hypre_BoxArray              *grid_boxes;
 
-   HYPRE_SStructVariable       *vartp;
+   HYPRE_SStructVariable       *vartypes;
    hypre_SStructStencil       **pstencils;
    hypre_SStructPGrid          *pgrid;
    hypre_SStructPGrid          *pfgrid;
@@ -193,20 +294,27 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
    HYPRE_Int                  **smaps;
    HYPRE_Int                   *sentries;
 
-   HYPRE_Int                    np, num_comm_pkgs, num_comm_blocks;
-   hypre_CommPkg              **comm_pkg_a;
-   HYPRE_Complex             ***comm_data_a;
-
-   HYPRE_Int                    vi, vj, e, cnt;
+   HYPRE_Int                    vi, vj, e, cnt, k;
    HYPRE_Int                    pstencil_size;
    HYPRE_Int                    max_stencil_size;
 
    /* Initialize variables */
-   ndim   = hypre_SStructPMatrixNDim(pmatrix);
-   comm   = hypre_SStructPMatrixComm(pmatrix);
-   pfgrid = hypre_SStructPMatrixPGrid(pmatrix); /* Same grid for all input matrices */
-   vartp  = hypre_SStructPGridVarTypes(pfgrid);
+   ndim      = hypre_SStructPMatrixNDim(pmatrix);
+   comm      = hypre_SStructPMatrixComm(pmatrix);
+   pfgrid    = hypre_SStructPMatrixPGrid(pmatrix); /* Same grid for all input matrices */
+   vartypes  = hypre_SStructPGridVarTypes(pfgrid);
    hypre_SetIndex(origin, 0);
+
+   /* Check: This currently only works for cell-centered variable types */
+   for (vi = 0; vi < nvars; vi++)
+   {
+      if (vartypes[vi] != HYPRE_SSTRUCT_VARIABLE_CELL)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                           "SStructPMatmult currently supports only cell variable types\n");
+         return hypre_error_flag;
+      }
+   }
 
    /* Create temporary semi-struct stencil data structure */
    pstencils = hypre_TAlloc(hypre_SStructStencil *, nvars, HYPRE_MEMORY_HOST);
@@ -217,14 +325,23 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
 
    /* Create part grid data structure */
    hypre_SStructPGridCreate(comm, ndim, &pgrid);
-   hypre_SStructPGridSetVariables(pgrid, nvars, vartp);
+   hypre_SStructPGridSetVariables(pgrid, nvars, vartypes);
+   /* RDF: Need to figure out how to handle the cell grid (see 'RDF' below also) */
+   hypre_StructGridDestroy(hypre_SStructPGridCellSGrid(pgrid));
+   hypre_SStructPGridCellSGrid(pgrid) = NULL;
 
    /* Create part matrix data structure */
    hypre_SStructPMatrixCreate(comm, pgrid, pstencils, &pM);
    smaps = hypre_SStructPMatrixSMaps(pM);
 
+   /* Initialize the struct matmults for this part */
+   /* RDF NOTE: This does not assemble the struct grids.  They are assembled
+    * below or in HYPRE_SStructGridAssemble() to reduce box manager overhead.
+    * Check: The struct 'assemble_grid' feature may not be needed anymore. */
+   hypre_StructMatmultInit(smmdata, 0);
+
    /* Setup part matrix data structure */
-   max_stencil_size = cnt = 0;
+   max_stencil_size = 0;
    for (vi = 0; vi < nvars; vi++)
    {
       pstencil_size = 0;
@@ -232,57 +349,78 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
       coarsen_stride = NULL;
       for (vj = 0; vj < nvars; vj++)
       {
-         /* Check if this SMatrix exists */
-         if (smmdata[vi][vj])
+         /* This currently only works if smmsz[vi][vj] <= 1.  That is, either
+          * M_ij = 0 or M_ij = A1_{vi,k1} * A2_{k1,k2} * ... * AN_{km,vj} (only
+          * one product in the sum).  TODO: Need to write a matrix sum routine
+          * and extend this to work in general. */
+         if (smmsz[vi][vj] > 1)
          {
-            /* Destroy placeholder data */
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                              "SStructPMatmult currently supports only one StructMatmult term\n");
+            return hypre_error_flag;
+         }
+
+         if (smmsz[vi][vj] > 0)
+         {
+            hypre_StructMatrix  **smatrices;
+
+            /* Destroy the default struct matrix for the (vi,vj)-block of the PMatrix */
             sM = hypre_SStructPMatrixSMatrix(pM, vi, vj);
             hypre_StructMatrixDestroy(sM);
 
-            /* This sets up the grid and stencil of the (vi,vj)-block of the PMatrix */
-            /* NOTE: Do not assemble the sM grid here.  Assemble the grids later
-             * in HYPRE_SStructGridAssemble(Mgrid) to reduce box manager overhead. */
-            hypre_StructMatmultSetup(smmdata[vi][vj], 0, &sM);
+            /* Replace the default struct matrix for the (vi,vj)-block of the PMatrix */
+            smatrices = hypre_CTAlloc(hypre_StructMatrix *, smmsz[vi][vj], HYPRE_MEMORY_HOST);
+            for (k = 0; k < smmsz[vi][vj]; k++)
+            {
+               hypre_StructMatmultGetMatrix(smmdata, smmid[vi][vj][k], &smatrices[k]);
+            }
+            hypre_StructMatrixAddInit(smmsz[vi][vj], smatrices, &sM);
             hypre_SStructPMatrixSMatrix(pM, vi, vj) = sM;
+            hypre_TFree(smatrices, HYPRE_MEMORY_HOST);
 
-            /* Update struct stencil of the (vi,vj)-block with actual stencils */
+            /* Replace the struct stencil for the (vi,vj)-block with actual stencils */
             stencil = hypre_StructMatrixStencil(sM);
             hypre_SStructPMatrixSStencil(pM, vi, vj) = hypre_StructStencilRef(stencil);
 
             /* Update the part stencil size */
             pstencil_size += hypre_StructStencilSize(stencil);
 
-            /* Get coarsening information from the diagonal block */
-            if (vi == vj)
+            /* Set up the struct grids for the part */
+            /* RDF: This may only work when there is a cell variable type.  We need to
+             * either construct a cell grid from the struct matmult grids somehow, or
+             * do something entirely different. */
+            if (hypre_SStructPGridSGrid(pgrid, vi) == NULL)
             {
-               coarsen = (smmdata[vi][vj] -> coarsen);
-               coarsen_stride = (smmdata[vi][vj] -> coarsen_stride);
+               /* Set a reference to the grid in sM */
+               sgrid = hypre_StructMatrixGrid(sM);
+               hypre_StructGridRef(sgrid, &hypre_SStructPGridSGrid(pgrid, vi));
+
+               /* Set periodic based on struct grid (which could be coarsened) */
+               hypre_CopyIndex(hypre_StructGridPeriodic(sgrid), hypre_SStructPGridPeriodic(pgrid));
+
+               /* Build part boundaries array */
+               num_boxes   = hypre_StructGridNumBoxes(sgrid);
+               grid_boxes  = hypre_StructGridBoxes(sgrid);
+               fpbnd_boxaa = hypre_SStructPGridPBndBoxArrayArray(pfgrid, vi);
+               if (num_boxes)
+               {
+                  coarsen = (smmdata -> coarsen);
+                  if (coarsen)
+                  {
+                     coarsen_stride = (smmdata -> coarsen_stride);
+                     hypre_CoarsenBoxArrayArrayNeg(fpbnd_boxaa, grid_boxes, origin,
+                                                   coarsen_stride, &cpbnd_boxaa);
+                  }
+                  else
+                  {
+                     cpbnd_boxaa = hypre_BoxArrayArrayClone(fpbnd_boxaa);
+                  }
+                  hypre_SStructPGridPBndBoxArrayArray(pgrid, vi) = cpbnd_boxaa;
+               }
             }
          }
       }
       max_stencil_size = hypre_max(pstencil_size, max_stencil_size);
-
-      /* Destroy placeholder grid and update with new StructGrid */
-      sgrid = hypre_StructMatrixGrid(sM);
-      hypre_SStructPGridSetSGrid(sgrid, pgrid, vi);
-
-      /* Build part boundaries array */
-      num_boxes   = hypre_StructGridNumBoxes(sgrid);
-      grid_boxes  = hypre_StructGridBoxes(sgrid);
-      fpbnd_boxaa = hypre_SStructPGridPBndBoxArrayArray(pfgrid, vi);
-      if (num_boxes)
-      {
-         if (coarsen)
-         {
-            hypre_CoarsenBoxArrayArrayNeg(fpbnd_boxaa, grid_boxes, origin,
-                                          coarsen_stride, &cpbnd_boxaa);
-         }
-         else
-         {
-            cpbnd_boxaa = hypre_BoxArrayArrayClone(fpbnd_boxaa);
-         }
-         hypre_SStructPGridPBndBoxArrayArray(pgrid, vi) = cpbnd_boxaa;
-      }
 
       /* Update smaps array */
       smaps[vi] = hypre_TReAlloc(smaps[vi], HYPRE_Int, pstencil_size, HYPRE_MEMORY_HOST);
@@ -290,6 +428,7 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
       /* Destroy placeholder semi-struct stencil and update with actual one */
       HYPRE_SStructStencilDestroy(pstencils[vi]);
       HYPRE_SStructStencilCreate(ndim, pstencil_size, &pstencils[vi]);
+      cnt = 0;
       for (vj = 0; vj < nvars; vj++)
       {
          sM = hypre_SStructPMatrixSMatrix(pM, vi, vj);
@@ -318,48 +457,11 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
    }
    hypre_SStructPGridDestroy(pgrid);  /* The grid will remain in the pM matrix */
 
-   /* Find total number of communication packages and blocks */
-   num_comm_pkgs = num_comm_blocks = 0;
-   for (vi = 0; vi < nvars; vi++)
-   {
-      for (vj = 0; vj < nvars; vj++)
-      {
-         if (smmdata[vi][vj])
-         {
-            num_comm_pkgs   += (smmdata[vi][vj] -> num_comm_pkgs);
-            num_comm_blocks += (smmdata[vi][vj] -> num_comm_blocks);
-         }
-      }
-   }
-   (pmmdata -> num_comm_pkgs)   = num_comm_pkgs;
-   (pmmdata -> num_comm_blocks) = num_comm_blocks;
-
-   /* Allocate communication packages and data */
-   comm_pkg_a  = hypre_TAlloc(hypre_CommPkg *, num_comm_pkgs, HYPRE_MEMORY_HOST);
-   comm_data_a = hypre_TAlloc(HYPRE_Complex **, num_comm_pkgs, HYPRE_MEMORY_HOST);
-   (pmmdata -> comm_pkg_a)  = comm_pkg_a;
-   (pmmdata -> comm_data_a) = comm_data_a;
-
-   /* Update pointers to communication packages and data */
-   num_comm_pkgs = num_comm_blocks = 0;
-   for (vi = 0; vi < nvars; vi++)
-   {
-      for (vj = 0; vj < nvars; vj++)
-      {
-         if (smmdata[vi][vj])
-         {
-            for (np = 0; np < (smmdata[vi][vj] -> num_comm_pkgs); np++)
-            {
-               comm_pkg_a[num_comm_pkgs]  = (smmdata[vi][vj] -> comm_pkg_a[np]);
-               comm_data_a[num_comm_pkgs] = (smmdata[vi][vj] -> comm_data_a[np]);
-               num_comm_pkgs++;
-            }
-
-            hypre_TFree(smmdata[vi][vj] -> comm_pkg_a, HYPRE_MEMORY_HOST);
-            hypre_TFree(smmdata[vi][vj] -> comm_data_a, HYPRE_MEMORY_HOST);
-         }
-      }
-   }
+   /* Point to the smmdata communication fields (RDF: Remove later, it's redundant ) */
+   (pmmdata -> comm_pkg_a)      = (smmdata -> comm_pkg_a);
+   (pmmdata -> comm_data_a)     = (smmdata -> comm_data_a);
+   (pmmdata -> num_comm_pkgs)   = (smmdata -> num_comm_pkgs);
+   (pmmdata -> num_comm_blocks) = (smmdata -> num_comm_blocks);
 
    /* Point to resulting matrix */
    *pM_ptr = pM;
@@ -382,6 +484,8 @@ hypre_SStructPMatmultCommunicate( hypre_SStructPMatmultData *pmmdata )
    hypre_CommHandle        *comm_handle;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   /* RDF: We could just call hypre_StructMatmultCommunicate() here */
 
    if (num_comm_pkgs > 0)
    {
@@ -416,21 +520,26 @@ HYPRE_Int
 hypre_SStructPMatmultCompute( hypre_SStructPMatmultData *pmmdata,
                               hypre_SStructPMatrix      *pM )
 {
+   hypre_StructMatmultData    *smmdata = (pmmdata -> smmdata);
+   HYPRE_Int                ***smmid   = (pmmdata -> smmid);
+   HYPRE_Int                 **smmsz   = (pmmdata -> smmsz);
    HYPRE_Int                   nvars   = (pmmdata -> nvars);
-   hypre_StructMatmultData  ***smmdata = (pmmdata -> smmdata);
 
-   hypre_StructMatrix         *sM;
-   HYPRE_Int                   vi, vj;
+   hypre_StructMatrix         *sM, *sMk;
+   HYPRE_Int                   vi, vj, k;
 
    for (vi = 0; vi < nvars; vi++)
    {
       for (vj = 0; vj < nvars; vj++)
       {
          /* This computes the coefficients of the (vi,vj)-block of the PMatrix */
-         if (smmdata[vi][vj])
+         sM = hypre_SStructPMatrixSMatrix(pM, vi, vj);
+         for (k = 0; k < smmsz[vi][vj]; k++)
          {
-            sM = hypre_SStructPMatrixSMatrix(pM, vi, vj);
-            hypre_StructMatmultCompute(smmdata[vi][vj], sM);
+            hypre_StructMatmultCompute(smmdata, smmid[vi][vj][k]);
+            hypre_StructMatmultGetMatrix(smmdata, smmid[vi][vj][k], &sMk);
+            hypre_StructMatrixAddMat(sM, 1.0, sMk);  /* Compute sM += alpha * sMk */
+            hypre_StructMatrixDestroy(sMk);
          }
       }
    }
@@ -556,7 +665,7 @@ hypre_SStructPMatrixRTtAP( hypre_SStructPMatrix  *RT,
 }
 
 /*==========================================================================
- * SStructMatrix routines
+ * SStructMatrix matrix-multiply routines
  *==========================================================================*/
 
 /*--------------------------------------------------------------------------

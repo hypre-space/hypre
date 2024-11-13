@@ -11,6 +11,7 @@ TEST_sstruct/miller.sh
 TEST_sstruct/neighborpart.sh
 TEST_sstruct/neumann.sh
 TEST_sstruct/nonmixedint.sh
+TEST_sstruct/periodic.sh
 TEST_sstruct/sharedpart.sh
 TEST_sstruct/solvers.sh
 TEST_sstruct/sstruct_struct.sh
