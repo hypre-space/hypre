@@ -1681,8 +1681,10 @@ hypre_StructVectorRead( MPI_Comm    comm,
    hypre_StructVectorAssemble(vector);
 
    /*----------------------------------------
-    * Close file
+    * Clean up and close file
     *----------------------------------------*/
+
+   HYPRE_StructGridDestroy(grid);
 
    fclose(file);
 

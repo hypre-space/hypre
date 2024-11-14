@@ -75,7 +75,7 @@ main( hypre_int argc,
    /*HYPRE_Real          dxyz[3];*/
 
    HYPRE_Int           A_num_ghost[6] = {0, 0, 0, 0, 0, 0};
-   HYPRE_Int           v_num_ghost[3] = {0, 0, 0};
+   HYPRE_Int           v_num_ghost[6] = {0, 0, 0, 0, 0, 0};
 
    HYPRE_StructMatrix  A;
    HYPRE_StructVector  b;
@@ -123,7 +123,7 @@ main( hypre_int argc,
    HYPRE_Int           stencil_size;
    HYPRE_Int           stencil_diag_entry;
 
-   HYPRE_StructGrid    grid;
+   HYPRE_StructGrid    grid = NULL;
    HYPRE_StructGrid    readgrid;
    HYPRE_StructStencil stencil;
 
@@ -1098,17 +1098,14 @@ main( hypre_int argc,
             v_num_ghost[2 * i + 1] = 1;
          }
 
-         HYPRE_StructMatrixRead(comm,
-                                argv[read_fromfile_index],
-                                A_num_ghost, &A);
+         HYPRE_StructMatrixRead(comm, argv[read_fromfile_index], A_num_ghost, &A);
 
-         HYPRE_StructVectorRead(comm,
-                                argv[read_rhsfromfile_index],
-                                v_num_ghost, &b);
+         HYPRE_StructVectorRead(comm, argv[read_rhsfromfile_index], v_num_ghost, &b);
 
-         HYPRE_StructVectorRead(comm,
-                                argv[read_x0fromfile_index],
-                                v_num_ghost, &x);
+         HYPRE_StructVectorRead(comm, argv[read_x0fromfile_index], v_num_ghost, &x);
+
+         readgrid     = hypre_StructMatrixGrid(A);
+         readperiodic = hypre_StructGridPeriodic(readgrid);
       }
 
       /* beginning of sum == 0  */
@@ -1295,9 +1292,7 @@ main( hypre_int argc,
                hypre_printf("\ninitial rhs from file prefix :%s\n",
                             argv[read_rhsfromfile_index]);
 
-               HYPRE_StructVectorRead(comm,
-                                      argv[read_rhsfromfile_index],
-                                      v_num_ghost, &b);
+               HYPRE_StructVectorRead(comm, argv[read_rhsfromfile_index], v_num_ghost, &b);
 
                readgrid = hypre_StructVectorGrid(b) ;
                readperiodic = hypre_StructGridPeriodic(readgrid);
@@ -1335,9 +1330,7 @@ main( hypre_int argc,
                hypre_printf("\ninitial x0 from file prefix :%s\n",
                             argv[read_x0fromfile_index]);
 
-               HYPRE_StructVectorRead(comm,
-                                      argv[read_x0fromfile_index],
-                                      v_num_ghost, &x);
+               HYPRE_StructVectorRead(comm, argv[read_x0fromfile_index], v_num_ghost, &x);
 
                readgrid = hypre_StructVectorGrid(x) ;
                readperiodic = hypre_StructGridPeriodic(readgrid);
@@ -1376,13 +1369,9 @@ main( hypre_int argc,
                hypre_printf("\ninitial x0  from file prefix :%s\n",
                             argv[read_x0fromfile_index]);
 
-               HYPRE_StructVectorRead(comm,
-                                      argv[read_rhsfromfile_index],
-                                      v_num_ghost, &b);
+               HYPRE_StructVectorRead(comm, argv[read_rhsfromfile_index], v_num_ghost, &b);
 
-               HYPRE_StructVectorRead(comm,
-                                      argv[read_x0fromfile_index],
-                                      v_num_ghost, &x);
+               HYPRE_StructVectorRead(comm, argv[read_x0fromfile_index], v_num_ghost, &x);
 
                readgrid = hypre_StructVectorGrid(b);
                readperiodic = hypre_StructGridPeriodic(readgrid);
@@ -1415,9 +1404,7 @@ main( hypre_int argc,
             hypre_printf("\nreading matrix from file:%s\n",
                          argv[read_fromfile_index]);
 
-            HYPRE_StructMatrixRead(comm,
-                                   argv[read_fromfile_index],
-                                   A_num_ghost, &A);
+            HYPRE_StructMatrixRead(comm, argv[read_fromfile_index], A_num_ghost, &A);
 
             readgrid     = hypre_StructMatrixGrid(A);
             readperiodic = hypre_StructGridPeriodic(readgrid);
@@ -1428,9 +1415,7 @@ main( hypre_int argc,
                hypre_printf("\ninitial rhs from file prefix :%s\n",
                             argv[read_rhsfromfile_index]);
 
-               HYPRE_StructVectorRead(comm,
-                                      argv[read_rhsfromfile_index],
-                                      v_num_ghost, &b);
+               HYPRE_StructVectorRead(comm, argv[read_rhsfromfile_index], v_num_ghost, &b);
 
                HYPRE_StructVectorCreate(comm, readgrid, &x);
                HYPRE_StructVectorInitialize(x);
@@ -1444,9 +1429,7 @@ main( hypre_int argc,
                hypre_printf("\ninitial x0 from file prefix :%s\n",
                             argv[read_x0fromfile_index]);
 
-               HYPRE_StructVectorRead(comm,
-                                      argv[read_x0fromfile_index],
-                                      v_num_ghost, &x);
+               HYPRE_StructVectorRead(comm, argv[read_x0fromfile_index], v_num_ghost, &x);
 
                HYPRE_StructVectorCreate(comm, readgrid, &b);
                HYPRE_StructVectorInitialize(b);
@@ -1468,13 +1451,14 @@ main( hypre_int argc,
                HYPRE_StructVectorAssemble(x);
             }
          } /* finish the read of matrix */
-
-         if (grid == NULL)
-         {
-            grid = readgrid;
-         }
       }
       /* linear system complete */
+
+      /* RDF: Why do we need both a readgrid and a grid? */
+      if (grid == NULL)
+      {
+         grid = readgrid;
+      }
 
       hypre_EndTiming(time_index);
       if (reps == 1 || (solver_id != 0 && solver_id != 1 && solver_id != 3 && solver_id != 4))

@@ -1544,6 +1544,13 @@ HYPRE_SStructMatrixRead( MPI_Comm              comm,
             smatrix = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
             if (data_size > 0)
             {
+               /* Free up old data pointer because ReadData calls Initialize.
+                * RDF: This is a bit hacky.  If we could call Initialize in
+                * StructMatrixRead() instead, that would be better; we would
+                * need to modify the io file to do that.  Alternatively, adding
+                * InitializeShell() and InitializeData() to SStructMatrix and
+                * PMatrix could provide another solution. */
+               hypre_TFree(hypre_StructMatrixData(smatrix), HYPRE_MEMORY_HOST);
                hypre_StructMatrixReadData(file, smatrix);
             }
          }
