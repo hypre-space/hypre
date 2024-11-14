@@ -17,7 +17,7 @@ tail -3 ${TNAME}.out.1RA > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 tail -3 ${TNAME}.out.1RAb > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
-tail -3 ${TNAME}.out.1RABx > ${TNAME}.testdata.temp
+tail -3 ${TNAME}.out.1RAbx > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 tail -3 ${TNAME}.out.3P > ${TNAME}.testdata
@@ -25,7 +25,7 @@ tail -3 ${TNAME}.out.3RA > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 tail -3 ${TNAME}.out.3RAb > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
-tail -3 ${TNAME}.out.3RABx > ${TNAME}.testdata.temp
+tail -3 ${TNAME}.out.3RAbx > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 tail -3 ${TNAME}.out.4P > ${TNAME}.testdata
@@ -33,7 +33,7 @@ tail -3 ${TNAME}.out.4RA > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 tail -3 ${TNAME}.out.4RAb > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
-tail -3 ${TNAME}.out.4RABx > ${TNAME}.testdata.temp
+tail -3 ${TNAME}.out.4RAbx > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 tail -3 ${TNAME}.out.101P > ${TNAME}.testdata

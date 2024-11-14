@@ -2410,8 +2410,11 @@ hypre_StructMatrixRead( MPI_Comm    comm,
    hypre_StructMatrixAssemble(matrix);
 
    /*----------------------------------------
-    * Close file
+    * Clean up and close file
     *----------------------------------------*/
+
+   HYPRE_StructGridDestroy(grid);
+   HYPRE_StructStencilDestroy(stencil);
 
    fclose(file);
 
