@@ -75,7 +75,7 @@ main( hypre_int argc,
    /*HYPRE_Real          dxyz[3];*/
 
    HYPRE_Int           A_num_ghost[6] = {0, 0, 0, 0, 0, 0};
-   HYPRE_Int           v_num_ghost[3] = {0, 0, 0};
+   HYPRE_Int           v_num_ghost[6] = {0, 0, 0, 0, 0, 0};
 
    HYPRE_StructMatrix  A;
    HYPRE_StructVector  b;
