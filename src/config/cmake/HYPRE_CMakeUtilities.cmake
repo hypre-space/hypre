@@ -231,7 +231,7 @@ endfunction()
 function(setup_tpl_or_internal LIB_NAME)
   string(TOUPPER ${LIB_NAME} LIB_NAME_UPPER)
 
-  if(HYPRE_USING_INTERNAL_${LIB_NAME_UPPER})
+  if(HYPRE_USING_HYPRE_${LIB_NAME_UPPER})
     # Use internal library
     add_subdirectory(${LIB_NAME})
     message(STATUS "Using internal ${LIB_NAME_UPPER}")

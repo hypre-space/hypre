@@ -69,11 +69,11 @@ if (UNIX)
   list(APPEND TPL_LIBRARIES m)
 endif()
 
-if(NOT HYPRE_ENABLE_INTERNAL_BLAS)
+if(NOT HYPRE_ENABLE_HYPRE_BLAS)
   find_dependency(BLAS)
 endif()
 
-if(NOT HYPRE_ENABLE_INTERNAL_LAPACK)
+if(NOT HYPRE_ENABLE_HYPRE_LAPACK)
   find_dependency(LAPACK)
 endif()
 
