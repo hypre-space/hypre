@@ -160,8 +160,8 @@ set_internal_hypre_option(ENABLE "" MIXEDINT)
 set_internal_hypre_option(ENABLE "" SINGLE)
 set_internal_hypre_option(ENABLE "" LONG_DOUBLE)
 set_internal_hypre_option(ENABLE "" COMPLEX)
-set_internal_hypre_option(ENABLE USING HYPRE_BLAS)
-set_internal_hypre_option(ENABLE USING HYPRE_LAPACK)
+set_internal_hypre_option(ENABLE USING INTERNAL_BLAS)
+set_internal_hypre_option(ENABLE USING INTERNAL_LAPACK)
 set_internal_hypre_option(ENABLE "" HOPSCOTCH)
 set_internal_hypre_option(ENABLE USING GPU_STREAMS)
 set_internal_hypre_option(ENABLE USING DEVICE_POOL)
@@ -275,7 +275,7 @@ endif ()
 # Add any extra C compiler flags HYPRE_WITH_EXTRA_CFLAGS
 if (NOT HYPRE_WITH_EXTRA_CFLAGS STREQUAL "")
   string(REPLACE " " ";" HYPRE_WITH_EXTRA_CFLAGS_LIST ${HYPRE_WITH_EXTRA_CFLAGS})
-  target_compile_options(${PROJECT_NAME} PRIVATE 
+  target_compile_options(${PROJECT_NAME} PRIVATE
     $<$<COMPILE_LANGUAGE:C>:${HYPRE_WITH_EXTRA_CFLAGS_LIST}>)
 endif ()
 
