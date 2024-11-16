@@ -146,7 +146,7 @@ hypre_ReadBoxArrayData( FILE             *file,
 #else
             hypre_fscanf(file, "; %d) %le\n", &value_ids[j], &value);
 #endif
-            values[vi + bi] = value;
+            values[vi + num_values * bi + j] = value;
          }
       }
       hypre_SerialBoxLoop1End(bi);

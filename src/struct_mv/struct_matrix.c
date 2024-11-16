@@ -2209,7 +2209,7 @@ hypre_StructMatrixReadData( FILE               *file,
 
 
    /* Read constant data from file */
-   hypre_fscanf(file, "\nConstant Data:\n\n");
+   hypre_fscanf(file, "\nConstant Data:\n");
    hypre_fscanf(file, "%d\n", &num_cvalues);
    cvalue_ids = hypre_TAlloc(HYPRE_Int, num_cvalues, HYPRE_MEMORY_HOST);
    cvalues    = hypre_TAlloc(HYPRE_Complex, num_cvalues, HYPRE_MEMORY_HOST);
@@ -2410,8 +2410,11 @@ hypre_StructMatrixRead( MPI_Comm    comm,
    hypre_StructMatrixAssemble(matrix);
 
    /*----------------------------------------
-    * Close file
+    * Clean up and close file
     *----------------------------------------*/
+
+   HYPRE_StructGridDestroy(grid);
+   HYPRE_StructStencilDestroy(stencil);
 
    fclose(file);
 
