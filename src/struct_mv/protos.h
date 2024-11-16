@@ -49,6 +49,7 @@ HYPRE_Int hypre_SubtractBoxArrays ( hypre_BoxArray *box_array1, hypre_BoxArray *
                                     hypre_BoxArray *tmp_box_array );
 HYPRE_Int hypre_UnionBoxes ( hypre_BoxArray *boxes );
 HYPRE_Int hypre_MinUnionBoxes ( hypre_BoxArray *boxes );
+HYPRE_Int hypre_BoxArrayContains( hypre_BoxArray *box_array1, hypre_BoxArray *box_array2 );
 
 /* box_boundary.c */
 HYPRE_Int hypre_BoxBoundaryIntersect ( hypre_Box *box, hypre_StructGrid *grid, HYPRE_Int d,

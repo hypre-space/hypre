@@ -14,7 +14,7 @@
 #include "_hypre_struct_mv.h"
 #include "_hypre_struct_mv.hpp"
 
-#define UNROLL_MAXDEPTH 4
+#define UNROLL_MAXDEPTH 9
 
 /*--------------------------------------------------------------------------
  * Matvec data structure
@@ -236,6 +236,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    HYPRE_Int                ndim        = hypre_StructMatrixNDim(A);
 
    hypre_BoxArray          *data_space;
+   hypre_BoxArray          *old_data_space;
    hypre_BoxArrayArray     *compute_box_aa;
    hypre_BoxArray          *compute_box_a;
    hypre_Box               *compute_box;
@@ -256,6 +257,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    hypre_StructStencil     *stencil;
    hypre_Index             *stencil_shape;
    HYPRE_Int                stencil_size;
+   HYPRE_Int                old_data_size;
 
    hypre_StructGrid        *grid;
    HYPRE_Int                ran_nboxes;
@@ -349,7 +351,30 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    /* This resizes the data for x using the data_space computed during setup */
    data_space = hypre_BoxArrayClone(matvec_data -> data_space);
    hypre_StructVectorReindex(x, grid, dom_stride);
-   hypre_StructVectorResize(x, data_space);
+   if (hypre_StructVectorResizeBehavior(x))
+   {
+      if (!hypre_BoxArrayContains(hypre_StructVectorDataSpace(x), data_space))
+      {
+         if (hypre_StructVectorResizeBehavior(x) > 1)
+         {
+            old_data_space = hypre_StructVectorSaveDataSpace(x);
+            old_data_size = hypre_StructVectorSaveDataSize(x);
+         }
+
+         hypre_StructVectorForget(x);
+         hypre_StructVectorResize(x, data_space);
+
+         if (hypre_StructVectorResizeBehavior(x) > 1)
+         {
+            hypre_StructVectorSaveDataSpace(x) = old_data_space;
+            hypre_StructVectorSaveDataSize(x)  = old_data_size;
+         }
+      }
+   }
+   else
+   {
+      hypre_StructVectorResize(x, data_space);
+   }
 
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
@@ -600,8 +625,19 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    }
    else
    {
-      /* Restore the original grid and data layout for x */
-      hypre_StructVectorRestore(x);
+      if (hypre_StructVectorResizeBehavior(x))
+      {
+         /* Just restore the grid (call restore with SaveDataSpace set to NULL) */
+         old_data_space = hypre_StructVectorSaveDataSpace(x);
+         hypre_StructVectorSaveDataSpace(x) = NULL;
+         hypre_StructVectorRestore(x);
+         hypre_StructVectorSaveDataSpace(x) = old_data_space;
+      }
+      else
+      {
+         /* Restore the original grid and data layout for x */
+         hypre_StructVectorRestore(x);
+      }
    }
    hypre_BoxDestroy(compute_box);
 
