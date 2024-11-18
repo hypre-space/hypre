@@ -352,6 +352,12 @@ function(add_hypre_executables EXE_SRCS)
 
     # Append the additional libraries and options
     target_link_libraries(${EXE_NAME} PRIVATE "${HYPRE_LIBS}")
+
+    # Copy executable to original source directory
+    add_custom_command(TARGET ${EXE_NAME} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${EXE_NAME}> ${CMAKE_CURRENT_SOURCE_DIR}
+      COMMENT "Copied ${EXE_NAME}"
+    )
   endforeach(SRC_FILE)
 endfunction()
 
