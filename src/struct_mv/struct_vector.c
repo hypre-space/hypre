@@ -402,25 +402,6 @@ hypre_StructVectorResize( hypre_StructVector *vector,
          HYPRE_Int  *old_ids = hypre_StructGridIDs(hypre_StructVectorSaveGrid(vector));
          HYPRE_Int  *ids     = hypre_StructGridIDs(hypre_StructVectorGrid(vector));
 
-         hypre_printf("WM: debug - hypre_StructVectorResize(), old_data_space = %d %d %d, %d %d %d, data_space = %d %d %d, %d %d %d, grid boxes = %d %d %d, %d %d %d\n",
-                      hypre_BoxIMin(hypre_BoxArrayBox(old_data_space, 0))[0],
-                      hypre_BoxIMin(hypre_BoxArrayBox(old_data_space, 0))[2],
-                      hypre_BoxIMin(hypre_BoxArrayBox(old_data_space, 0))[2],
-                      hypre_BoxIMax(hypre_BoxArrayBox(old_data_space, 0))[0],
-                      hypre_BoxIMax(hypre_BoxArrayBox(old_data_space, 0))[2],
-                      hypre_BoxIMax(hypre_BoxArrayBox(old_data_space, 0))[2],
-                      hypre_BoxIMin(hypre_BoxArrayBox(data_space, 0))[0],
-                      hypre_BoxIMin(hypre_BoxArrayBox(data_space, 0))[2],
-                      hypre_BoxIMin(hypre_BoxArrayBox(data_space, 0))[2],
-                      hypre_BoxIMax(hypre_BoxArrayBox(data_space, 0))[0],
-                      hypre_BoxIMax(hypre_BoxArrayBox(data_space, 0))[2],
-                      hypre_BoxIMax(hypre_BoxArrayBox(data_space, 0))[2],
-                      hypre_BoxIMin(hypre_BoxArrayBox(hypre_StructGridBoxes(hypre_StructVectorGrid(vector)), 0))[0],
-                      hypre_BoxIMin(hypre_BoxArrayBox(hypre_StructGridBoxes(hypre_StructVectorGrid(vector)), 0))[2],
-                      hypre_BoxIMin(hypre_BoxArrayBox(hypre_StructGridBoxes(hypre_StructVectorGrid(vector)), 0))[2],
-                      hypre_BoxIMax(hypre_BoxArrayBox(hypre_StructGridBoxes(hypre_StructVectorGrid(vector)), 0))[0],
-                      hypre_BoxIMax(hypre_BoxArrayBox(hypre_StructGridBoxes(hypre_StructVectorGrid(vector)), 0))[2],
-                      hypre_BoxIMax(hypre_BoxArrayBox(hypre_StructGridBoxes(hypre_StructVectorGrid(vector)), 0))[2]);
          hypre_StructDataCopy(old_data, old_data_space, old_ids, data, data_space, ids, ndim, 1);
       }
 
