@@ -514,6 +514,17 @@ HYPRE_Int HYPRE_StructVectorCreate(MPI_Comm            comm,
  **/
 HYPRE_Int HYPRE_StructVectorDestroy(HYPRE_StructVector vector);
 
+/**
+ * Set the resize behavior for the struct vector.
+ *    0 = resize/restore on every matvec
+ *    1 = resize only when necessary, retain
+ *        initial data space in save_data_space
+ *    2 = resize only when necessary, retain
+ *        most recent data space in save_data_space
+ **/
+HYPRE_Int HYPRE_StructVectorSetResizeBehavior(HYPRE_StructVector vector,
+                                              HYPRE_Int          resize_behavior);
+
 /* RDF: Need a good user interface for setting the grid. */
 
 /**

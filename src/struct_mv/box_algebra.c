@@ -662,3 +662,56 @@ hypre_MinUnionBoxes( hypre_BoxArray *boxes )
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_BoxArrayContains
+ *
+ * Check whether box_array1 contains (is a superset of) box_array2
+ * WM: NOTE - this is really checking whether there is a box in box_array1
+ *            that can cover each box in box_array2... so we don't check
+ *            whether a union of multiple boxes from box_array1 will cover
+ *            boxes in box_array2.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoxArrayContains( hypre_BoxArray *box_array1,
+                        hypre_BoxArray *box_array2 )
+{
+   /* WM: TODO - test this function! */
+   HYPRE_Int i, j, d, covered = 0;
+   HYPRE_Int ndim = hypre_BoxArrayNDim(box_array2);
+   hypre_Box *box1;
+   hypre_Box *box2;
+
+   hypre_ForBoxI(i, box_array2)
+   {
+      box2 = hypre_BoxArrayBox(box_array2, i);
+      covered = 0;
+      hypre_ForBoxI(j, box_array1)
+      {
+         box1 = hypre_BoxArrayBox(box_array1, j);
+         for (d = 0; d < ndim; d++)
+         {
+            if ( hypre_BoxIMinD(box1, d) <= hypre_BoxIMinD(box2, d)
+                 && hypre_BoxIMaxD(box1, d) >= hypre_BoxIMaxD(box2, d) )
+            {
+               covered++;
+            }
+         }
+         if (covered == ndim)
+         {
+            break;
+         }
+         else
+         {
+            covered = 0;
+         }
+      }
+      if (!covered)
+      {
+         return 0;
+      }
+   }
+
+   return 1;
+}

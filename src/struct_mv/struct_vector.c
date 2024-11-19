@@ -178,6 +178,7 @@ hypre_StructVectorCreate( MPI_Comm          comm,
    hypre_StructVectorDataAlloced(vector)    = 0;
    hypre_StructVectorBGhostNotClear(vector) = 0;
    hypre_StructVectorRefCount(vector)       = 1;
+   hypre_StructVectorResizeBehavior(vector) = 0;
 
    /* set defaults */
    for (i = 0; i < 2 * ndim; i++)
@@ -405,6 +406,7 @@ hypre_StructVectorResize( hypre_StructVector *vector,
       }
 
       /* Free up some things */
+      /* WM: question - won't the if below always be true (since DataAlloced is check above in order to get here)? */
       if (hypre_StructVectorDataAlloced(vector) == 1)
       {
          hypre_TFree(old_data, memory_location);
@@ -412,6 +414,7 @@ hypre_StructVectorResize( hypre_StructVector *vector,
       hypre_TFree(old_data_indices, HYPRE_MEMORY_HOST);
 
       /* Save old data */
+      /* WM: quesetion - related to the above, isn't old_data always just a null pointer? */
       hypre_StructVectorSaveData(vector)      = old_data;
       hypre_StructVectorSaveDataSpace(vector) = old_data_space;
       hypre_StructVectorSaveDataSize(vector)  = old_data_size;

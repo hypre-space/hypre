@@ -52,6 +52,11 @@ typedef struct hypre_StructVector_struct
    HYPRE_Int             ref_count;
 
    /* Information needed to Restore() after Reindex() and Resize() */
+   HYPRE_Int             resize_behavior;             /* 0 = resize/restore on every matvec
+                                                         1 = resize when necessary, keep most
+                                                             recent data space in save_data_space
+                                                         2 = resize when necessary, keep initial
+                                                             data space in save_data_space */
    hypre_StructGrid     *save_grid;
    hypre_Index           save_stride;
    HYPRE_Complex        *save_data;                   /* Only needed to support InitializeData() */
@@ -79,6 +84,7 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorBGhostNotClear(vector) ((vector) -> bghost_not_clear)
 #define hypre_StructVectorGlobalSize(vector)     ((vector) -> global_size)
 #define hypre_StructVectorRefCount(vector)       ((vector) -> ref_count)
+#define hypre_StructVectorResizeBehavior(vector) ((vector) -> resize_behavior)
 #define hypre_StructVectorSaveGrid(vector)      ((vector) -> save_grid)
 #define hypre_StructVectorSaveStride(vector)    ((vector) -> save_stride)
 #define hypre_StructVectorSaveData(vector)      ((vector) -> save_data)
