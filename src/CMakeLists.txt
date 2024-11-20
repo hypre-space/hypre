@@ -396,7 +396,7 @@ endif ()
 # Add targets for tags, distclean, and uninstall
 add_hypre_target_tags()
 add_hypre_target_distclean()
-add_hypre_target_uninstall()
+#add_hypre_target_uninstall()
 
 # Installation
 include(GNUInstallDirs)
