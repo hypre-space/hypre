@@ -12,9 +12,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=1")
 # Find Intel SYCL
 find_package(IntelSYCL REQUIRED)
 
-# Find Intel SYCL
-find_package(IntelSYCL REQUIRED)
-
 # Set up SYCL flags
 if(IntelSYCL_FOUND)
   # Standard SYCL flags
