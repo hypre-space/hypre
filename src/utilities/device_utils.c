@@ -2924,6 +2924,8 @@ HYPRE_SetSYCLDevice(sycl::device user_device)
    {
       delete data->device;
    }
+
+#if defined(HYPRE_USING_CUDA_STREAMS)
    for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
    {
       if (data->streams[i])
@@ -2932,6 +2934,7 @@ HYPRE_SetSYCLDevice(sycl::device user_device)
          data->streams[i] = nullptr;
       }
    }
+#endif
 
    /* Setup new device and compute stream */
    data->device = new sycl::device(user_device);

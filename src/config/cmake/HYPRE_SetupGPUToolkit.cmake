@@ -6,8 +6,21 @@
 # Enable CXX language
 enable_language(CXX)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-if(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 14)
-  set(CMAKE_CXX_STANDARD 14) # Enforce C++14 at least
+if(HYPRE_WITH_SYCL)
+  # We enforce the use of Intel's oneAPI DPC++/C++ Compiler
+  if(NOT CMAKE_CXX_COMPILER MATCHES "dpcpp|icpx")
+    message(FATAL_ERROR "SYCL requires DPC++ or Intel C++ compiler")
+  endif()
+
+  # Enforce C++17 at least for SYCL
+  if(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 17)
+    set(CMAKE_CXX_STANDARD 17)
+  endif()
+else()
+  # Enforce C++14 at least for CUDA and HIP
+  if(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 14)
+    set(CMAKE_CXX_STANDARD 14)
+  endif()
 endif()
 set_property(TARGET HYPRE PROPERTY CXX_STANDARD ${CMAKE_CXX_STANDARD})
 message(STATUS "Enabling support for CXX.")
@@ -32,7 +45,7 @@ endif()
 # Add any extra CXX compiler flags
 if(NOT HYPRE_WITH_EXTRA_CXXFLAGS STREQUAL "")
   string(REPLACE " " ";" HYPRE_WITH_EXTRA_CXXFLAGS_LIST ${HYPRE_WITH_EXTRA_CXXFLAGS})
-  target_compile_options(HYPRE PRIVATE 
+  target_compile_options(HYPRE PRIVATE
     $<$<COMPILE_LANGUAGE:CXX>:${HYPRE_WITH_EXTRA_CXXFLAGS_LIST}>)
 endif()
 
@@ -44,8 +57,6 @@ elseif(HYPRE_WITH_HIP)
   include(HYPRE_SetupHIPToolkit)
 
 elseif(HYPRE_WITH_SYCL)
-  message(STATUS "Enabling SYCL toolkit")
-  enable_language(SYCL)
   include(HYPRE_SetupSYCLToolkit)
   set(EXPORT_DEVICE_LIBS ${EXPORT_INTERFACE_SYCL_LIBS})
 

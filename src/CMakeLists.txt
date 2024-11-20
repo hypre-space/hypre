@@ -338,7 +338,7 @@ if (HYPRE_WITH_CUDA)
 elseif (HYPRE_WITH_HIP)
   set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE HIP)
 elseif (HYPRE_WITH_SYCL)
-  set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE SYCL)
+  set_source_files_properties(${HYPRE_GPU_SOURCES} PROPERTIES LANGUAGE CXX)
 endif()
 
 # Include directories

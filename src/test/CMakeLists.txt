@@ -87,7 +87,7 @@ add_custom_target(checkpar
 
 # Add CTest support
 if(BUILD_TESTING)
-  message(STATUS "Building tests with CTest") 
+  message(STATUS "Building tests with CTest support")
 
   # IJ tests
   add_test(NAME test_ij_solvers
