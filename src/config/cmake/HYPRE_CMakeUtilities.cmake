@@ -361,6 +361,86 @@ function(add_hypre_executables EXE_SRCS)
   endforeach(SRC_FILE)
 endfunction()
 
+# Function to add a tags target if etags is found
+function(add_hypre_target_tags)
+  find_program(ETAGS_EXECUTABLE etags)
+  if(ETAGS_EXECUTABLE)
+    add_custom_target(tags
+      COMMAND find ${CMAKE_CURRENT_SOURCE_DIR}
+              -type f
+              "(" -name "*.h" -o -name "*.c" -o -name "*.cpp"
+              -o -name "*.hpp" -o -name "*.cxx"
+              -o -name "*.f" -o -name "*.f90" ")"
+              -not -path "*/build/*" -not -path "*/cmbuild/*"
+              -print | ${ETAGS_EXECUTABLE}
+              --declarations
+              --ignore-indentation
+              --no-members
+              -
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      COMMENT "Generating TAGS file with etags"
+      VERBATIM
+    )
+  endif()
+endfunction()
+
+# Function to add a distclean target
+function(add_hypre_target_distclean)
+  add_custom_target(distclean
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/bin
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/lib
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/include
+    COMMAND find ${CMAKE_BINARY_DIR} -name "CMakeFiles" -type d -exec rm -rf {} +
+    COMMAND find ${CMAKE_BINARY_DIR} -name "*.cmake" -type f -delete
+    COMMAND find ${CMAKE_BINARY_DIR} -name "CMakeCache.txt" -type f -delete
+    COMMAND find ${CMAKE_BINARY_DIR} -name "Makefile" -type f -delete
+    COMMAND find ${CMAKE_SOURCE_DIR} -name "*.o" -type f -delete
+    COMMAND find ${CMAKE_SOURCE_DIR} -name "*.mod" -type f -delete
+    COMMAND find ${CMAKE_SOURCE_DIR} -name "*~" -type f -delete
+    COMMAND find ${CMAKE_SOURCE_DIR}/test -name "*.out*" -type f -delete
+    COMMAND find ${CMAKE_SOURCE_DIR}/test -name "*.err*" -type f -delete
+    COMMAND find ${CMAKE_SOURCE_DIR}/test -name "*.txt*" -type f -delete
+    COMMAND find ${CMAKE_SOURCE_DIR}/test -name "vectors.*" -type f -delete
+    COMMAND find ${CMAKE_SOURCE_DIR}/examples -name "ex[0-9]*" -type f -delete
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Removing all build artifacts and generated files"
+    VERBATIM
+  )
+endfunction()
+
+# Function to add an uninstall target
+function(add_hypre_target_uninstall)
+  # Get the install manifest if it exists
+  set(manifest "${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt")
+  if(NOT EXISTS ${manifest})
+    message(FATAL_ERROR "Cannot find install manifest: ${manifest}")
+  endif()
+
+  # Read the install manifest
+  file(STRINGS ${manifest} installed_files)
+
+  # Create the uninstall target
+  add_custom_target(uninstall
+    COMMAND ${CMAKE_COMMAND} -E remove ${installed_files}
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/include/HYPRE"
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/lib/cmake/HYPRE"
+    COMMAND ${CMAKE_COMMAND} -E remove "${CMAKE_INSTALL_PREFIX}/lib/libHYPRE.so"
+    COMMAND ${CMAKE_COMMAND} -E remove "${CMAKE_INSTALL_PREFIX}/lib/libHYPRE.dylib"
+    COMMAND ${CMAKE_COMMAND} -E remove "${CMAKE_INSTALL_PREFIX}/lib/libHYPRE.a"
+    COMMAND ${CMAKE_COMMAND} -E remove "${CMAKE_INSTALL_PREFIX}/lib/libHYPRE.dll"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT "Uninstalling HYPRE"
+    VERBATIM
+  )
+
+  # Add a check to ensure files exist before trying to remove them
+  foreach(installed_file ${installed_files})
+    if(NOT EXISTS ${installed_file})
+      message(STATUS "File ${installed_file} does not exist.")
+    endif()
+  endforeach()
+endfunction()
+
 # Function to print the status of build options
 function(print_option_status)
   # Define column widths

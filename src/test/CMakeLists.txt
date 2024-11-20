@@ -10,8 +10,8 @@ if (MSVC)
 endif ()
 
 # Set default tolerance if not defined
-if(NOT DEFINED HYPRE_CHECKPAR_TOL)
-  set(HYPRE_CHECKPAR_TOL 1.0e-6)
+if(NOT DEFINED HYPRE_CHECK_TOL)
+  set(HYPRE_CHECK_TOL 1.0e-6)
 endif()
 
 set(TEST_SRCS
@@ -54,28 +54,28 @@ add_custom_target(checkpar
 
   COMMAND ${CMAKE_COMMAND} -E echo_append "Testing IJ... "
   COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh
-          -atol ${HYPRE_CHECKPAR_TOL}
+          -atol ${HYPRE_CHECK_TOL}
           -mpi "${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}"
           ${CMAKE_CURRENT_SOURCE_DIR}/TEST_ij/solvers.sh
-  COMMAND sh -c "${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh && echo -n OK || echo -n Failed"
+  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh
   COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh
   COMMAND echo ""
 
   COMMAND ${CMAKE_COMMAND} -E echo_append "Testing Struct... "
   COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh
-          -atol ${HYPRE_CHECKPAR_TOL}
+          -atol ${HYPRE_CHECK_TOL}
           -mpi "${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}"
           ${CMAKE_CURRENT_SOURCE_DIR}/TEST_struct/solvers.sh
-  COMMAND sh -c "${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh && echo -n OK || echo -n Failed"
+  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh
   COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh
   COMMAND echo ""
 
   COMMAND ${CMAKE_COMMAND} -E echo_append "Testing SStruct... "
   COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh
-          -atol ${HYPRE_CHECKPAR_TOL}
+          -atol ${HYPRE_CHECK_TOL}
           -mpi "${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}"
           ${CMAKE_CURRENT_SOURCE_DIR}/TEST_sstruct/solvers.sh
-  COMMAND sh -c "${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh && echo -n OK || echo -n Failed"
+  COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh
   COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh
   COMMAND echo ""
 
@@ -91,37 +91,39 @@ if(BUILD_TESTING)
 
   # IJ tests
   add_test(NAME test_ij_solvers
-    COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh
-            -atol ${HYPRE_CHECKPAR_TOL}
-            -mpi "${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}"
-            ${CMAKE_CURRENT_SOURCE_DIR}/TEST_ij/solvers.sh
+    COMMAND ${BASH_PROGRAM} -c "\
+      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh \
+        -atol ${HYPRE_CHECK_TOL} \
+        -mpi \"${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}\" \
+        ${CMAKE_CURRENT_SOURCE_DIR}/TEST_ij/solvers.sh && \
+      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh && \
+      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh"
   )
   set_tests_properties(test_ij_solvers PROPERTIES
-    PASS_REGULAR_EXPRESSION ".*"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    DEPENDS ij
     FAIL_REGULAR_EXPRESSION "Failed"
   )
 
   # Struct tests
-  add_test(NAME test_struct_solvers
-    COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh
-            -atol ${HYPRE_CHECKPAR_TOL}
-            -mpi "${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}"
-            ${CMAKE_CURRENT_SOURCE_DIR}/TEST_struct/solvers.sh
-  )
-  set_tests_properties(test_struct_solvers PROPERTIES
-    PASS_REGULAR_EXPRESSION ".*"
-    FAIL_REGULAR_EXPRESSION "Failed"
-  )
+  # add_test(NAME test_struct_solvers
+  #   COMMAND ${CMAKE_COMMAND} -E bash -c "\
+  #     ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh \
+  #       -atol ${HYPRE_CHECK_TOL} \
+  #       -mpi \"${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}\" \
+  #       ${CMAKE_CURRENT_SOURCE_DIR}/TEST_struct/solvers.sh && \
+  #     ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh && \
+  #     ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh"
+  # )
 
-  # SStruct tests
-  add_test(NAME test_sstruct_solvers
-    COMMAND ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh
-            -atol ${HYPRE_CHECKPAR_TOL}
-            -mpi "${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}"
-            ${CMAKE_CURRENT_SOURCE_DIR}/TEST_sstruct/solvers.sh
-  )
-  set_tests_properties(test_sstruct_solvers PROPERTIES
-    PASS_REGULAR_EXPRESSION ".*"
-    FAIL_REGULAR_EXPRESSION "Failed"
-  )
+  # # SStruct tests
+  # add_test(NAME test_sstruct_solvers
+  #   COMMAND ${CMAKE_COMMAND} -E bash -c "\
+  #     ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh \
+  #       -atol ${HYPRE_CHECK_TOL} \
+  #       -mpi \"${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}\" \
+  #       ${CMAKE_CURRENT_SOURCE_DIR}/TEST_sstruct/solvers.sh && \
+  #     ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh && \
+  #     ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh"
+  # )
 endif()
