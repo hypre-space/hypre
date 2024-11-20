@@ -44,22 +44,22 @@ if(IntelSYCL_FOUND)
 endif()
 
 # Find Intel DPCT
-if(NOT DPCT_ROOT)
-  if(DEFINED ENV{DPCT_ROOT})
-    set(DPCT_ROOT $ENV{DPCT_ROOT})
+if(NOT DPCTROOT)
+  if(DEFINED ENV{DPCTROOT})
+    set(DPCTROOT $ENV{DPCTROOT})
   elseif(DEFINED ENV{ONEAPI_ROOT})
-    set(DPCT_ROOT "$ENV{ONEAPI_ROOT}/dpcpp-ct/latest")
+    set(DPCTROOT "$ENV{ONEAPI_ROOT}/dpcpp-ct/latest")
   endif()
 endif()
 
 # Check if DPCT is found
-if(NOT EXISTS "${DPCT_ROOT}/include/dpct/dpct.hpp")
-  message(FATAL_ERROR "Could not find DPCT installation. Please set DPCT_ROOT")
+if(NOT EXISTS "${DPCTROOT}/include/dpct/dpct.hpp")
+  message(FATAL_ERROR "Could not find DPCT installation. Please set DPCTROOT")
 endif()
 
 # Add DPCT include directory
-target_include_directories(${PROJECT_NAME} PUBLIC "${DPCT_ROOT}/include")
-message(STATUS "DPCT include directory: ${DPCT_ROOT}/include")
+target_include_directories(${PROJECT_NAME} PUBLIC "${DPCTROOT}/include")
+message(STATUS "DPCT include directory: ${DPCTROOT}/include")
 
 if (HYPRE_ENABLE_ONEMKLSPARSE)
   set(HYPRE_USING_ONEMKLSPARSE ON CACHE BOOL "" FORCE)
