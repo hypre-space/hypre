@@ -466,8 +466,8 @@ include:
                 builds the test drivers; linking to the temporary locations to
                 simulate how application codes will link to HYPRE
 
-Testing the Library
-=========================
+Using the Library
+=================
 
 The ``examples`` subdirectory contains several codes that demonstrate hypre's features
 and can be used to test the library. These examples can be built in two ways:
@@ -497,6 +497,59 @@ HTML documentation in the ``examples/docs`` directory.
 
    The examples are designed to mimic real application codes and can serve as
    templates for your own implementations.
+
+Testing the Library
+===================
+
+hypre provides several approaches to test the library, in increasing order of comprehensiveness:
+
+1. **Basic Tests** (Recommended first step):
+   Quick tests to check library functionality (CMake requires ``-DBUILD_TESTING=ON``):
+
+   .. code-block:: bash
+
+      # Single test for each linear system interface
+      make check
+
+      # Test IJ, Struct and SStruct linear solvers in parallel
+      make checkpar
+
+2. **Comprehensive Tests** (CMake only):
+   Test linear solvers for all linear system interfaces (linear-algebraic, Struct and SStruct):
+
+   .. code-block:: bash
+
+      cmake -DBUILD_TESTING=ON ..
+      make -j
+      make test # or ctest
+
+3. **Automated Testing** (Developers only):
+   For thorough testing across different configurations and machines:
+
+   .. code-block:: bash
+
+      cd src/AUTOTEST
+      ./machine_name.sh ../src
+
+   The AUTOTEST system provides:
+
+   * Predefined test configurations for various machines
+   * Comprehensive testing of different build options
+   * Parallel and sequential builds
+   * GPU and CPU configurations
+   * Regression testing against previous versions
+
+.. note::
+
+   * Test tolerance can be adjusted using ``-DHYPRE_CHECK_TOL=<value>`` during CMake configuration. Default tolerance is 1.0e-6
+   * Test output files with ``.err`` extension contain error messages and diagnostics
+   * AUTOTEST configurations can be customized by modifying machine-specific files in the AUTOTEST directory
+
+For detailed test results and logs:
+
+* Make check results: ``build/test/*.err`` (CMake) or ``src/test/TEST_(ij|struct|ssstruct)/*.err`` (Autotools)
+* CTest results: ``build/Testing/Temporary/LastTest.log``
+* AUTOTEST results: ``src/AUTOTEST/machine_name.dir/machine_name.err``
 
 Linking to the Library
 ==============================================================================

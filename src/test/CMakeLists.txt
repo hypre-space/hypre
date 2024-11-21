@@ -106,24 +106,34 @@ if(BUILD_TESTING)
   )
 
   # Struct tests
-  # add_test(NAME test_struct_solvers
-  #   COMMAND ${CMAKE_COMMAND} -E bash -c "\
-  #     ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh \
-  #       -atol ${HYPRE_CHECK_TOL} \
-  #       -mpi \"${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}\" \
-  #       ${CMAKE_CURRENT_SOURCE_DIR}/TEST_struct/solvers.sh && \
-  #     ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh && \
-  #     ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh"
-  # )
+  add_test(NAME test_struct_solvers
+    COMMAND ${BASH_PROGRAM} -c "\
+      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh \
+        -atol ${HYPRE_CHECK_TOL} \
+        -mpi \"${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}\" \
+        ${CMAKE_CURRENT_SOURCE_DIR}/TEST_struct/solvers.sh && \
+      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh && \
+      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh"
+  )
+  set_tests_properties(test_struct_solvers PROPERTIES
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    DEPENDS struct
+    FAIL_REGULAR_EXPRESSION "Failed"
+  )
 
-  # # SStruct tests
-  # add_test(NAME test_sstruct_solvers
-  #   COMMAND ${CMAKE_COMMAND} -E bash -c "\
-  #     ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh \
-  #       -atol ${HYPRE_CHECK_TOL} \
-  #       -mpi \"${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}\" \
-  #       ${CMAKE_CURRENT_SOURCE_DIR}/TEST_sstruct/solvers.sh && \
-  #     ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh && \
-  #     ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh"
-  # )
+  # SStruct tests
+  add_test(NAME test_sstruct_solvers
+    COMMAND ${BASH_PROGRAM} -c "\
+      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/runtest.sh \
+        -atol ${HYPRE_CHECK_TOL} \
+        -mpi \"${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG}\" \
+        ${CMAKE_CURRENT_SOURCE_DIR}/TEST_sstruct/solvers.sh && \
+      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/checktest.sh && \
+      ${BASH_PROGRAM} ${CMAKE_CURRENT_SOURCE_DIR}/cleantest.sh"
+  )
+  set_tests_properties(test_sstruct_solvers PROPERTIES
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    DEPENDS sstruct
+    FAIL_REGULAR_EXPRESSION "Failed"
+  )
 endif()
