@@ -7,7 +7,9 @@
 message(STATUS "Enabling SYCL toolkit")
 
 # limit C++ errors to one
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=1")
+if(CMAKE_CXX_COMPILER_ID MATCHES "Intel|Clang")
+  target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-ferror-limit=1>)
+endif()
 
 # Find Intel SYCL
 find_package(IntelSYCL REQUIRED)

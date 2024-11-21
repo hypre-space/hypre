@@ -2997,14 +2997,15 @@ hypre_bind_device_id( HYPRE_Int device_id_in,
    /* set device */
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    omp_set_default_device(device_id);
-#endif
 
-#if defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
-#endif
 
-#if defined(HYPRE_USING_HIP)
+#elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipSetDevice(device_id) );
+
+#elif defined(HYPRE_USING_SYCL)
+   HYPRE_UNUSED_VAR(device_id);
 #endif
 
 #if defined(HYPRE_DEBUG) && defined(HYPRE_PRINT_ERRORS)

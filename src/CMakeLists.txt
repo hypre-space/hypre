@@ -75,6 +75,51 @@ endif()
 # Set the possible values of build type for ccmake/cmake-gui
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 
+# Set debug flags based on compiler
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  if(CMAKE_C_COMPILER_ID MATCHES "Intel")
+    target_compile_options(${PROJECT_NAME} PRIVATE
+      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wremarks>
+      $<$<COMPILE_LANGUAGE:CXX>:
+        -O0 -Wall -Wremarks
+        -Wno-unused-lambda-capture
+        -Wno-unused-local-typedef
+        -Wno-unused-variable
+        -Wno-unused-parameter
+        -Wno-unused-function
+      >)
+
+  elseif(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(${PROJECT_NAME} PRIVATE
+      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall>
+      $<$<COMPILE_LANGUAGE:CXX>:-O0 -Wall>
+      $<$<COMPILE_LANGUAGE:CUDA>:-O0 -Xcompiler=-Wall>
+      $<$<COMPILE_LANGUAGE:HIP>:-O0 -Wall>)
+
+  elseif(CMAKE_C_COMPILER_ID MATCHES "MSVC")
+    target_compile_options(${PROJECT_NAME} PRIVATE
+      $<$<COMPILE_LANGUAGE:C>:/Od /Zi /W4>
+      $<$<COMPILE_LANGUAGE:CXX>:/Od /Zi /W4>)
+
+  elseif(CMAKE_C_COMPILER_ID MATCHES "PGI|NVHPC")
+    target_compile_options(${PROJECT_NAME} PRIVATE
+      $<$<COMPILE_LANGUAGE:C>:-O0 -Minform=warn>
+      $<$<COMPILE_LANGUAGE:CXX>:-O0 -Minform=warn>
+      $<$<COMPILE_LANGUAGE:CUDA>:-O0 -g -Minform=warn>)
+
+  elseif(CMAKE_C_COMPILER_ID MATCHES "XL|XLClang")
+    target_compile_options(${PROJECT_NAME} PRIVATE
+      $<$<COMPILE_LANGUAGE:C>:-O0-qinfo=all>
+      $<$<COMPILE_LANGUAGE:CXX>:-O0 -qinfo=all>)
+
+  else()
+    message(WARNING "Unknown C compiler '${CMAKE_C_COMPILER_ID}', using default debug flags")
+    target_compile_options(${PROJECT_NAME} PRIVATE
+      $<$<COMPILE_LANGUAGE:C>:-O0>
+      $<$<COMPILE_LANGUAGE:CXX>:-O0>)
+  endif()
+endif()
+
 # Print the configuration
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Shared library: ${BUILD_SHARED_LIBS}")
