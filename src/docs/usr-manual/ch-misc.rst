@@ -179,7 +179,7 @@ For GPU-specific options, see the :ref:`gpu_build` section below.
    * - | Print Errors
        | (default is off)
      - ``--with-print-errors``
-     - ``-DHYPRE_WITH_PRINT_ERRORS=ON``
+     - ``-DHYPRE_ENABLE_PRINT_ERRORS=ON``
    * - | Shared Library
        | (default is off)
      - ``--enable-shared``
@@ -213,7 +213,7 @@ For GPU-specific options, see the :ref:`gpu_build` section below.
    * - | OpenMP Support
        | (default is off)
      - ``--with-openmp``
-     - ``-DHYPRE_WITH_OPENMP=ON``
+     - ``-DHYPRE_ENABLE_OPENMP=ON``
    * - | Hopscotch hashing
        | (requires OpenMP)
        | (default is off)
@@ -311,35 +311,38 @@ build systems.
    * - | CUDA Support
        | (default is off)
      - ``--with-cuda``
-     - ``-DHYPRE_WITH_CUDA=ON``
+     - ``-DHYPRE_ENABLE_CUDA=ON``
    * - | HIP Support
        | (default is off)
      - ``--with-hip``
-     - ``-DHYPRE_WITH_HIP=ON``
+     - ``-DHYPRE_ENABLE_HIP=ON``
    * - | SYCL Support
        | (default is off)
      - ``--with-sycl``
-     - ``-DHYPRE_WITH_SYCL=ON``
+     - ``-DHYPRE_ENABLE_SYCL=ON``
    * - | SYCL Target
        | (default is empty,
        | **SYCL** only)
      - ``--with-sycl-target=ARG``
-     - ``-DCMAKE_SYCL_TARGET=ARG``
+     - ``-DHYPRE_SYCL_TARGET=ARG``
    * - | SYCL Target Backend
        | (default is empty,
        | **SYCL** only)
      - ``--with-sycl-target-backend=ARG``
-     - ``-DCMAKE_SYCL_TARGET_BACKEND=ARG``
+     - ``-DHYPRE_SYCL_TARGET_BACKEND=ARG``
    * - | GPU architecture
        | (determined automatically)
      - ``--with-gpu-arch=ARG``
      - | ``-DCMAKE_CUDA_ARCHITECTURES=ARG``
        | ``-DCMAKE_HIP_ARCHITECTURES=ARG``
-       | ``-DCMAKE_SYCL_ARCHITECTURES=ARG``
    * - | GPU Profiling
        | (default is off)
      - ``--enable-gpu-profiling``
      - ``-DHYPRE_ENABLE_GPU_PROFILING=ON``
+   * - | GPU-aware MPI
+       | (default is off)
+     - ``--enable-gpu-aware-mpi``
+     - ``-DHYPRE_ENABLE_GPU_AWARE_MPI=ON``
    * - | Unified Memory
        | (default is off)
      - ``--enable-unified-memory``
@@ -650,7 +653,7 @@ The global error flag can be cleared manually by calling
 ``HYPRE_ClearAllErrors()``, which will essentially ignore all previous hypre
 errors. To only clear a specific error code, the user can call
 ``HYPRE_ClearError(HYPRE_ERROR_CODE)``.  Finally, if hypre was configured with
-``--with-print-errors`` or ``-DHYPRE_WITH_PRINT_ERRORS=ON``, additional error
+``--with-print-errors`` or ``-DHYPRE_ENABLE_PRINT_ERRORS=ON``, additional error
 information will be printed to the standard error during execution.
 
 

@@ -7,7 +7,7 @@
 function(set_hypre_option category name description default_value)
   option(${name} "${description}" ${default_value})
   if (${category} STREQUAL "CUDA" OR ${category} STREQUAL "HIP" OR ${category} STREQUAL "SYCL")
-    if (HYPRE_WITH_${category} STREQUAL "ON")
+    if (HYPRE_ENABLE_${category} STREQUAL "ON")
       set(GPU_OPTIONS ${GPU_OPTIONS} ${name} PARENT_SCOPE)
     endif()
   else()
@@ -117,7 +117,7 @@ function(configure_mpi_target)
     message(WARNING "MPI include directory not found. Please specify -DMPI_INCLUDE_DIR or the compilation may fail.")
   endif()
 
-  if (HYPRE_WITH_CUDA OR HYPRE_WITH_HIP OR HYPRE_WITH_SYCL)
+  if (HYPRE_ENABLE_CUDA OR HYPRE_ENABLE_HIP OR HYPRE_ENABLE_SYCL)
     message(STATUS "Adding MPI include directory: ${MPI_INCLUDE_DIR}")
     target_include_directories(${PROJECT_NAME} PUBLIC ${MPI_INCLUDE_DIR})
   endif ()
@@ -498,7 +498,7 @@ function(print_option_status)
   print_option_block("Base Options" "${BASE_OPTIONS}")
 
   # Print GPU_OPTIONS
-  if(HYPRE_WITH_CUDA OR HYPRE_WITH_HIP OR HYPRE_WITH_SYCL)
+  if(HYPRE_ENABLE_CUDA OR HYPRE_ENABLE_HIP OR HYPRE_ENABLE_SYCL)
     print_option_block("GPU Options" "${GPU_OPTIONS}")
   endif()
 

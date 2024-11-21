@@ -6,7 +6,7 @@
 # Enable CXX language
 enable_language(CXX)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-if(HYPRE_WITH_SYCL)
+if(HYPRE_ENABLE_SYCL)
   # We enforce the use of Intel's oneAPI DPC++/C++ Compiler
   if(NOT CMAKE_CXX_COMPILER MATCHES "dpcpp|icpx")
     message(FATAL_ERROR "SYCL requires DPC++ or Intel C++ compiler")
@@ -50,13 +50,13 @@ if(NOT HYPRE_WITH_EXTRA_CXXFLAGS STREQUAL "")
 endif()
 
 # Include the toolkit setup file for the selected GPU architecture
-if(HYPRE_WITH_CUDA)
+if(HYPRE_ENABLE_CUDA)
   include(HYPRE_SetupCUDAToolkit)
 
-elseif(HYPRE_WITH_HIP)
+elseif(HYPRE_ENABLE_HIP)
   include(HYPRE_SetupHIPToolkit)
 
-elseif(HYPRE_WITH_SYCL)
+elseif(HYPRE_ENABLE_SYCL)
   include(HYPRE_SetupSYCLToolkit)
   set(EXPORT_DEVICE_LIBS ${EXPORT_INTERFACE_SYCL_LIBS})
 
