@@ -140,6 +140,7 @@ set_hypre_option(BASE HYPRE_ENABLE_OPENMP               "Use OpenMP" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_MPI                  "Use MPI" ON)
 set_hypre_option(BASE HYPRE_ENABLE_PRINT_ERRORS         "Print HYPRE errors" OFF)
 set_hypre_option(SKIP HYPRE_ENABLE_TIMING               "Use HYPRE timing routines" OFF)
+set_hypre_option(SKIP HYPRE_ENABLE_STRICT_CHECKING      "Enable strict error checking (Sequential only)" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_TEST_USING_HOST      "Execute tests on host (CPU)" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_HOST_MEMORY          "Use host memory" ON)
 set_hypre_option(BASE HYPRE_BUILD_EXAMPLES              "Build examples" OFF)
@@ -219,8 +220,20 @@ set_internal_hypre_option(ENABLE USING SYCL)
 set_internal_hypre_option(ENABLE USING MAGMA)
 set_internal_hypre_option(ENABLE USING CALIPER)
 
+# Check for conflicting options
+ensure_options_differ(HYPRE_ENABLE_SINGLE HYPRE_ENABLE_LONG_DOUBLE)
+ensure_options_differ(HYPRE_ENABLE_CUDA   HYPRE_ENABLE_HIP)
+ensure_options_differ(HYPRE_ENABLE_CUDA   HYPRE_ENABLE_SYCL)
+ensure_options_differ(HYPRE_ENABLE_CUDA   HYPRE_ENABLE_BIGINT)
+ensure_options_differ(HYPRE_ENABLE_CUDA   HYPRE_ENABLE_LONG_DOUBLE)
+ensure_options_differ(HYPRE_ENABLE_SYCL   HYPRE_ENABLE_HIP )
+ensure_options_differ(HYPRE_ENABLE_SYCL   HYPRE_ENABLE_BIGINT)
+ensure_options_differ(HYPRE_ENABLE_SYCL   HYPRE_ENABLE_LONG_DOUBLE)
+ensure_options_differ(HYPRE_ENABLE_HIP    HYPRE_ENABLE_BIGINT)
+ensure_options_differ(HYPRE_ENABLE_HIP    HYPRE_ENABLE_LONG_DOUBLE)
+
 # Enable CTest support if tests are being built
-if(HYPRE_BUILD_TESTS)
+if (HYPRE_BUILD_TESTS)
   include(CTest)
   enable_testing()
 endif()
@@ -235,6 +248,37 @@ if (HYPRE_ENABLE_MPI)
 else ()
   set(HYPRE_SEQUENTIAL ON CACHE INTERNAL "")
 endif ()
+
+# Add strict checking option
+if (HYPRE_ENABLE_STRICT_CHECKING)
+  set(HYPRE_ENABLE_MPI OFF CACHE INTERNAL "")
+  set(HYPRE_HAVE_MPI OFF CACHE INTERNAL "")
+  set(HYPRE_SEQUENTIAL ON CACHE INTERNAL "")
+  set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "" FORCE)
+  if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(${PROJECT_NAME} PRIVATE
+      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wextra -pedantic -Wfloat-conversion -fsingle-precision-constant -Werror>
+      $<$<COMPILE_LANGUAGE:CXX>:-Wall -Wshadow -fno-implicit-templates -Woverloaded-virtual -ansi -pedantic>)
+
+  elseif(CMAKE_C_COMPILER_ID MATCHES "Intel")
+    target_compile_options(${PROJECT_NAME} PRIVATE
+      $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Werror>
+      $<$<COMPILE_LANGUAGE:CXX>:-O0 -Wall -Werror>)
+
+  elseif(CMAKE_C_COMPILER_ID MATCHES "XL|XLClang")
+    target_compile_options(${PROJECT_NAME} PRIVATE
+      $<$<COMPILE_LANGUAGE:C>:-O0 -qinfo=all>
+      $<$<COMPILE_LANGUAGE:CXX>:-O0 -qinfo=all>)
+
+  else()
+    message(WARNING "Unknown C compiler '${CMAKE_C_COMPILER_ID}', using default debug flags")
+    target_compile_options(${PROJECT_NAME} PRIVATE
+      $<$<COMPILE_LANGUAGE:C>:-O0>
+      $<$<COMPILE_LANGUAGE:CXX>:-O0>)
+  endif()
+
+  message(STATUS "Enabled strict error checking")
+endif()
 
 if (HYPRE_WITH_SUPERLU)
   set(HYPRE_USING_SUPERLU ON CACHE INTERNAL "")
@@ -291,17 +335,6 @@ if (HYPRE_WITH_UMPIRE_PINNED)
   set(HYPRE_USING_UMPIRE ON CACHE INTERNAL "")
   set(HYPRE_USING_UMPIRE_PINNED ON CACHE INTERNAL "")
 endif ()
-
-# Check for conflicting options
-ensure_options_differ(HYPRE_ENABLE_CUDA HYPRE_ENABLE_HIP)
-ensure_options_differ(HYPRE_ENABLE_CUDA HYPRE_ENABLE_SYCL)
-ensure_options_differ(HYPRE_ENABLE_CUDA HYPRE_BIGINT)
-ensure_options_differ(HYPRE_ENABLE_CUDA HYPRE_LONG_DOUBLE)
-ensure_options_differ(HYPRE_ENABLE_SYCL HYPRE_ENABLE_HIP )
-ensure_options_differ(HYPRE_ENABLE_SYCL HYPRE_BIGINT)
-ensure_options_differ(HYPRE_ENABLE_SYCL HYPRE_LONG_DOUBLE)
-ensure_options_differ(HYPRE_ENABLE_HIP  HYPRE_BIGINT)
-ensure_options_differ(HYPRE_ENABLE_HIP  HYPRE_LONG_DOUBLE)
 
 # Set MPI compile flags
 if (HYPRE_ENABLE_MPI)
