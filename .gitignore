@@ -53,6 +53,6 @@ src/test/struct
 src/test/struct_migrate
 src/test/zboxloop
 src/examples/ex[0-9]
-src/examples/ex1[0-6]
+src/examples/ex1[0-8]
 src/examples/ex5f
 src/examples/ex12f

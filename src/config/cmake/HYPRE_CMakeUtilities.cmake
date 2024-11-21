@@ -385,23 +385,17 @@ function(add_hypre_target_tags)
 endfunction()
 
 # Function to add a distclean target
+# Function to add a distclean target
 function(add_hypre_target_distclean)
   add_custom_target(distclean
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/bin
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/lib
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/include
-    COMMAND find ${CMAKE_BINARY_DIR} -name "CMakeFiles" -type d -exec rm -rf {} +
-    COMMAND find ${CMAKE_BINARY_DIR} -name "*.cmake" -type f -delete
-    COMMAND find ${CMAKE_BINARY_DIR} -name "CMakeCache.txt" -type f -delete
-    COMMAND find ${CMAKE_BINARY_DIR} -name "Makefile" -type f -delete
+    COMMAND find ${CMAKE_BINARY_DIR} -mindepth 1 -delete
     COMMAND find ${CMAKE_SOURCE_DIR} -name "*.o" -type f -delete
     COMMAND find ${CMAKE_SOURCE_DIR} -name "*.mod" -type f -delete
     COMMAND find ${CMAKE_SOURCE_DIR} -name "*~" -type f -delete
     COMMAND find ${CMAKE_SOURCE_DIR}/test -name "*.out*" -type f -delete
     COMMAND find ${CMAKE_SOURCE_DIR}/test -name "*.err*" -type f -delete
-    COMMAND find ${CMAKE_SOURCE_DIR}/test -name "*.txt*" -type f -delete
-    COMMAND find ${CMAKE_SOURCE_DIR}/test -name "vectors.*" -type f -delete
-    COMMAND find ${CMAKE_SOURCE_DIR}/examples -name "ex[0-9]*" -type f -delete
+    COMMAND find ${CMAKE_SOURCE_DIR}/examples -type f -name "ex[0-9]" -name "ex[10-19]" -delete
+    COMMAND find ${CMAKE_SOURCE_DIR}/test -type f -name "ij|struct|sstruct|ams_driver|maxwell_unscalled|struct_migrate|sstruct_fac|ij_assembly" -delete
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Removing all build artifacts and generated files"
     VERBATIM
