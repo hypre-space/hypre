@@ -53,7 +53,9 @@ if (${HYPRE_SOURCE_DIR} STREQUAL ${HYPRE_BINARY_DIR})
 endif ()
 
 # Set default installation directory, but provide a means for users to change
-set(CMAKE_INSTALL_PREFIX "${HYPRE_SOURCE_DIR}/hypre" CACHE PATH "Installation directory for HYPRE" FORCE)
+if (NOT CMAKE_INSTALL_PREFIX)
+  set(CMAKE_INSTALL_PREFIX "${HYPRE_SOURCE_DIR}/hypre" CACHE PATH "Installation directory for HYPRE" FORCE)
+endif ()
 
 # Ensure RPATH/RUNPATH is set properly during the build
 set(CMAKE_SKIP_BUILD_RPATH FALSE CACHE BOOL "Include rpath in the binaries being built")
@@ -479,7 +481,7 @@ endif ()
 # Add targets for tags, distclean, and uninstall
 add_hypre_target_tags()
 add_hypre_target_distclean()
-#add_hypre_target_uninstall()
+add_hypre_target_uninstall()
 
 # Installation
 include(GNUInstallDirs)

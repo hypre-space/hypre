@@ -385,7 +385,6 @@ function(add_hypre_target_tags)
 endfunction()
 
 # Function to add a distclean target
-# Function to add a distclean target
 function(add_hypre_target_distclean)
   add_custom_target(distclean
     COMMAND find ${CMAKE_BINARY_DIR} -mindepth 1 -delete
@@ -404,35 +403,13 @@ endfunction()
 
 # Function to add an uninstall target
 function(add_hypre_target_uninstall)
-  # Get the install manifest if it exists
-  set(manifest "${CMAKE_CURRENT_BINARY_DIR}/install_manifest.txt")
-  if(NOT EXISTS ${manifest})
-    message(FATAL_ERROR "Cannot find install manifest: ${manifest}")
-  endif()
-
-  # Read the install manifest
-  file(STRINGS ${manifest} installed_files)
-
-  # Create the uninstall target
   add_custom_target(uninstall
-    COMMAND ${CMAKE_COMMAND} -E remove ${installed_files}
-    COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/include/HYPRE"
-    COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}/lib/cmake/HYPRE"
-    COMMAND ${CMAKE_COMMAND} -E remove "${CMAKE_INSTALL_PREFIX}/lib/libHYPRE.so"
-    COMMAND ${CMAKE_COMMAND} -E remove "${CMAKE_INSTALL_PREFIX}/lib/libHYPRE.dylib"
-    COMMAND ${CMAKE_COMMAND} -E remove "${CMAKE_INSTALL_PREFIX}/lib/libHYPRE.a"
-    COMMAND ${CMAKE_COMMAND} -E remove "${CMAKE_INSTALL_PREFIX}/lib/libHYPRE.dll"
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_INSTALL_PREFIX}"
+    COMMAND ${CMAKE_COMMAND} -E echo "Removed installation directory: ${CMAKE_INSTALL_PREFIX}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Uninstalling HYPRE"
     VERBATIM
   )
-
-  # Add a check to ensure files exist before trying to remove them
-  foreach(installed_file ${installed_files})
-    if(NOT EXISTS ${installed_file})
-      message(STATUS "File ${installed_file} does not exist.")
-    endif()
-  endforeach()
 endfunction()
 
 # Function to print the status of build options
