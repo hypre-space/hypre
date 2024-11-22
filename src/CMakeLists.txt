@@ -126,6 +126,7 @@ endif()
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Shared library: ${BUILD_SHARED_LIBS}")
 message(STATUS "Installation directory: ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "Using C standard: ${CMAKE_C_STANDARD}")
 
 # Base boolean configuration options
 set_hypre_option(BASE HYPRE_ENABLE_BIGINT               "Use long long int for HYPRE_Int and HYPRE_BigInt" OFF)
