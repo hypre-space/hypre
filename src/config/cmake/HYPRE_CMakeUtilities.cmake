@@ -159,6 +159,18 @@ function(get_library_version LIBNAME)
   endif()
 endfunction()
 
+# Macro to extract language flags
+macro(get_language_flags in_var out_var lang_type)
+  string(REGEX MATCHALL "\\$<\\$<COMPILE_LANGUAGE:${lang_type}>:([^>]*)>" matches "${in_var}")
+  if(matches)
+    string(REGEX REPLACE "\\$<\\$<COMPILE_LANGUAGE:${lang_type}>:" "" temp "${matches}")
+    string(REGEX REPLACE ">" "" temp "${temp}")
+    set(${out_var} ${temp})
+  else()
+    set(${out_var} "")
+  endif()
+endmacro()
+
 # Function to handle TPL (Third-Party Library) setup
 function(setup_tpl LIBNAME)
   string(TOUPPER ${LIBNAME} LIBNAME_UPPER)
@@ -337,21 +349,32 @@ function(add_hypre_executables EXE_SRCS)
     # Add the executable
     add_executable(${EXE_NAME} ${SRC_FILE})
 
+    # Link with HYPRE and inherit its compile properties
+    target_link_libraries(${EXE_NAME} PUBLIC HYPRE)
+
+    # For Unix systems, also link with math library
+    if (UNIX)
+      target_link_libraries(${EXE_NAME} PUBLIC m)
+    endif()
+
     # Explicitly specify the linker
     if (HYPRE_USING_CUDA OR HYPRE_USING_HIP OR HYPRE_USING_SYCL)
       set_target_properties(${EXE_NAME} PROPERTIES LINKER_LANGUAGE CXX)
     endif()
 
-    # Link libraries
-    set(HYPRE_LIBS "HYPRE")
-
-    # Link libraries for Unix systems
-    if (UNIX)
-      list(APPEND HYPRE_LIBS m)
-    endif (UNIX)
-
-    # Append the additional libraries and options
-    target_link_libraries(${EXE_NAME} PRIVATE "${HYPRE_LIBS}")
+    # Inherit compile definitions and options from HYPRE target
+    get_target_property(HYPRE_COMPILE_OPTS HYPRE COMPILE_OPTIONS)
+    if(HYPRE_COMPILE_OPTS)
+      if (HYPRE_USING_CUDA OR HYPRE_USING_HIP OR HYPRE_USING_SYCL)
+        get_language_flags("${HYPRE_COMPILE_OPTS}" CXX_OPTS "CXX")
+        target_compile_options(${EXE_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${CXX_OPTS}>)
+        #message(STATUS "Added CXX compile options: ${CXX_OPTS} to ${EXE_NAME}")
+      else()
+        get_language_flags("${HYPRE_COMPILE_OPTS}" C_OPTS "C")
+        target_compile_options(${EXE_NAME} PRIVATE $<$<COMPILE_LANGUAGE:C>:${C_OPTS}>)
+        #message(STATUS "Added C compile options: ${C_OPTS} to ${EXE_NAME}")
+      endif()
+    endif()
 
     # Copy executable to original source directory
     add_custom_command(TARGET ${EXE_NAME} POST_BUILD
