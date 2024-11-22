@@ -524,20 +524,13 @@ hypre provides several approaches to test the library, in increasing order of co
       make test # or ctest
 
 3. **Automated Testing** (Developers only):
-   For thorough testing across different configurations and machines:
-
-   .. code-block:: bash
-
-      cd src/AUTOTEST
-      ./machine_name.sh ../src
-
-   The AUTOTEST system provides:
-
-   * Predefined test configurations for various machines
-   * Comprehensive testing of different build options
-   * Parallel and sequential builds
-   * GPU and CPU configurations
-   * Regression testing against previous versions
+   For thorough testing across different configurations and machines including regression
+   tests, and performance benchmarks, with support for both CPU and GPU executions. Test
+   results are automatically compared against saved baseline outputs, with the ability to
+   update these baselines when legitimate changes occur. The automated testing
+   infrastructure is particularly focused on ensuring consistency across different build
+   configurations and execution environments. For more information, see the `README
+   <https://github.com/hypre-space/hypre/blob/master/AUTOTEST/README.txt>`_ file.
 
 .. note::
 
