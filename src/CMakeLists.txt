@@ -45,7 +45,10 @@ project(${PROJECT_NAME}
 add_library(${PROJECT_NAME})
 
 # We use C99 by default, but users are free to specify any newer standard version
-set(CMAKE_C_STANDARD 99 CACHE STRING "Standard to use for the C compiler")
+if (NOT CMAKE_C_STANDARD)
+  set(CMAKE_C_STANDARD 99 CACHE STRING "Standard to use for the C compiler")
+  set(CMAKE_C_STANDARD_REQUIRED ON)
+endif ()
 
 # Raise an error if the source and binary directories are the same
 if (${HYPRE_SOURCE_DIR} STREQUAL ${HYPRE_BINARY_DIR})
@@ -126,6 +129,7 @@ endif()
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Shared library: ${BUILD_SHARED_LIBS}")
 message(STATUS "Installation directory: ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "Using C standard: ${CMAKE_C_STANDARD}")
 
 # Base boolean configuration options
 set_hypre_option(BASE HYPRE_ENABLE_BIGINT               "Use long long int for HYPRE_Int and HYPRE_BigInt" OFF)
@@ -527,6 +531,11 @@ export(EXPORT HYPRETargets
 # Declare an alias so that consumers can depend on HYPRE::HYPRE target
 # also when using HYPRE via add_directory or FetchContent
 add_library(HYPRE::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+
+# Ensure the C standard is set on the target
+set_target_properties(${PROJECT_NAME} PROPERTIES
+  C_STANDARD ${CMAKE_C_STANDARD}
+  C_STANDARD_REQUIRED ON)
 
 # Export the package
 export(PACKAGE ${PROJECT_NAME})
