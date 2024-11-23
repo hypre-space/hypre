@@ -56,7 +56,7 @@ if (${HYPRE_SOURCE_DIR} STREQUAL ${HYPRE_BINARY_DIR})
 endif ()
 
 # Set default installation directory, but provide a means for users to change
-if (NOT CMAKE_INSTALL_PREFIX)
+if (NOT CMAKE_INSTALL_PREFIX OR CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX "${HYPRE_SOURCE_DIR}/hypre" CACHE PATH "Installation directory for HYPRE" FORCE)
 endif ()
 

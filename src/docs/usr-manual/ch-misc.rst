@@ -168,10 +168,6 @@ For GPU-specific options, see the :ref:`gpu_build` section below.
    * - Install Path
      - ``--prefix=<path>``
      - ``-DCMAKE_INSTALL_PREFIX=<path>``
-   * - | MPI build
-       | (default is on)
-     - ``--enable-mpi``
-     - ``-DHYPRE_ENABLE_MPI=ON``
    * - | Debug Build
        | (default is off)
      - ``--enable-debug``
