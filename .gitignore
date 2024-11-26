@@ -20,7 +20,6 @@ HYPRE_config.h
 autom4te.cache
 src/TAGS
 hypre/
-cmbuild/
 install/
 AUTOTEST/*.dir
 .vscode
