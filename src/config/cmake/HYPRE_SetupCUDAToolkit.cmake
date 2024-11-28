@@ -53,7 +53,7 @@ set(CMAKE_CUDA_EXTENSIONS OFF)
 
 # Visual Studio does not support CMAKE_CUDA_HOST_COMPILER
 if (NOT MSVC)
-  set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER} CACHE STRING "" FORCE)
+  set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER} CACHE STRING "CXX compiler used by CUDA" FORCE)
 endif()
 
 # Check if CUDA is available and enable it if found
@@ -178,7 +178,7 @@ set(CUDA_LIBS "")
 function(find_and_add_cuda_library LIB_NAME HYPRE_ENABLE_VAR)
   string(TOUPPER ${LIB_NAME} LIB_NAME_UPPER)
   if(${HYPRE_ENABLE_VAR})
-    set(HYPRE_USING_${LIB_NAME_UPPER} ON CACHE BOOL "" FORCE)
+    set(HYPRE_USING_${LIB_NAME_UPPER} ON CACHE INTERNAL "")
 
     # Use CUDAToolkit to find the component
     find_package(CUDAToolkit REQUIRED COMPONENTS ${LIB_NAME})

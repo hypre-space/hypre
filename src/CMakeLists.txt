@@ -153,7 +153,7 @@ set_hypre_option(BASE HYPRE_BUILD_EXAMPLES              "Build examples" OFF)
 set_hypre_option(BASE HYPRE_BUILD_TESTS                 "Build tests" OFF)
 
 # GPU options
-set_hypre_option(GPU  HYPRE_ENABLE_CUDA                 "Use CUDA. Require cuda-8.0 or higher" OFF)
+set_hypre_option(GPU  HYPRE_ENABLE_CUDA                 "Use CUDA. Require cuda-10.0 or higher" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_HIP                  "Use HIP" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_SYCL                 "Use SYCL" OFF)
 set_hypre_option(GPU  HYPRE_ENABLE_GPU_AWARE_MPI        "Use device aware MPI support" OFF)
@@ -305,11 +305,11 @@ endif ()
 # FEI doesn't currently compile with shared
 if (HYPRE_SHARED OR HYPRE_BIGINT OR HYPRE_SINGLE OR HYPRE_LONG_DOUBLE)
   set(HYPRE_USING_FEI OFF CACHE INTERNAL "")
-  set(HYPRE_ENABLE_FEI OFF CACHE INTERNAL "")
+  set(HYPRE_ENABLE_FEI OFF CACHE BOOL "Add FEI support" FORCE)
 endif ()
 
 if (HYPRE_SEQUENTIAL)
-  set(HYPRE_BUILD_EXAMPLES OFF CACHE INTERNAL "")
+  set(HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "Build examples" FORCE)
 endif ()
 
 if (HYPRE_WITH_UMPIRE)
@@ -358,7 +358,7 @@ if (HYPRE_ENABLE_CUDA OR HYPRE_ENABLE_HIP OR HYPRE_ENABLE_SYCL)
   include(HYPRE_SetupGPUToolkit)
 else ()
   message(STATUS "GPU support not enabled")
-  set(HYPRE_USING_HOST_MEMORY ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_HOST_MEMORY ON CACHE INTERNAL "")
 endif ()
 
 # Add any extra C compiler flags HYPRE_WITH_EXTRA_CFLAGS
