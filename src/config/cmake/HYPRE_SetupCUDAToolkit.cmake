@@ -79,40 +79,59 @@ if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR CMAKE_CUDA_ARCHITECTURES STREQUAL "52
 
   # Platform-specific NVIDIA smi command
   if (WIN32)
-    set(NVIDIA_SMI_CMD "${CUDA_DIR}/bin/nvidia-smi.exe")
+    # Try multiple possible locations on Windows
+    find_program(NVIDIA_SMI_CMD
+      NAMES nvidia-smi.exe
+      PATHS
+      "${CUDA_DIR}/bin"
+      "$ENV{ProgramFiles}/NVIDIA Corporation/NVSMI"
+      "$ENV{ProgramFiles}/NVIDIA GPU Computing Toolkit/CUDA/v*/bin"
+      "$ENV{ProgramW6432}/NVIDIA Corporation/NVSMI"
+      NO_DEFAULT_PATH
+    )
+
+    if(NOT NVIDIA_SMI_CMD)
+      find_program(NVIDIA_SMI_CMD nvidia-smi.exe)
+    endif()
+    message(STATUS "Found nvidia-smi: ${NVIDIA_SMI_CMD}")
   else()
     set(NVIDIA_SMI_CMD "nvidia-smi")
   endif()
 
-  # Execute nvidia-smi to get GPU compute capabilities
-  execute_process(
-    COMMAND ${NVIDIA_SMI_CMD} --query-gpu=compute_cap --format=csv,noheader
-    OUTPUT_VARIABLE NVIDIA_SMI_OUTPUT
-    RESULT_VARIABLE NVIDIA_SMI_RESULT
-    ERROR_VARIABLE NVIDIA_SMI_ERROR
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
-
-  if(NOT NVIDIA_SMI_RESULT EQUAL 0)
-    message(WARNING "${NVIDIA_SMI_CMD} failed to execute: ${NVIDIA_SMI_ERROR}")
+  if(NOT NVIDIA_SMI_CMD)
+    message(WARNING "nvidia-smi not found. Using default CUDA architecture 70.")
     set(CMAKE_CUDA_ARCHITECTURES "70" CACHE STRING "Default CUDA architectures" FORCE)
-    message(STATUS "Setting CMAKE_CUDA_ARCHITECTURES to default '70'")
   else()
-    # Clean the output (remove extra newlines and spaces)
-    string(STRIP "${NVIDIA_SMI_OUTPUT}" CUDA_ARCHS)     # Remove trailing/leading whitespaces
-    string(REPLACE "." "" CUDA_ARCHS "${CUDA_ARCHS}")   # Replace '.' with nothing to format '7.0' as '70'
-    string(REPLACE "\n" ";" CUDA_ARCHS "${CUDA_ARCHS}") # Replace newline with semicolon for list format
+    # Execute nvidia-smi to get GPU compute capabilities
+    execute_process(
+      COMMAND ${NVIDIA_SMI_CMD} --query-gpu=compute_cap --format=csv,noheader
+      OUTPUT_VARIABLE NVIDIA_SMI_OUTPUT
+      RESULT_VARIABLE NVIDIA_SMI_RESULT
+      ERROR_VARIABLE NVIDIA_SMI_ERROR
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
 
-    # Remove any duplicates CUDA archictectures
-    list(REMOVE_DUPLICATES CUDA_ARCHS)
-
-    if(CUDA_ARCHS)
-      string(REPLACE ";" "," CUDA_ARCHS_STR "${CUDA_ARCHS}")
-      set(CMAKE_CUDA_ARCHITECTURES "${CUDA_ARCHS_STR}" CACHE STRING "Detected CUDA architectures" FORCE)
-      message(STATUS "Detected CUDA GPU architectures: ${CMAKE_CUDA_ARCHITECTURES}")
-    else()
-      message(WARNING "No GPUs detected. Setting CMAKE_CUDA_ARCHITECTURES to default '70'")
+    if(NOT NVIDIA_SMI_RESULT EQUAL 0)
+      message(WARNING "${NVIDIA_SMI_CMD} failed to execute: ${NVIDIA_SMI_ERROR}")
       set(CMAKE_CUDA_ARCHITECTURES "70" CACHE STRING "Default CUDA architectures" FORCE)
+      message(STATUS "Setting CMAKE_CUDA_ARCHITECTURES to default '70'")
+    else()
+      # Clean the output (remove extra newlines and spaces)
+      string(STRIP "${NVIDIA_SMI_OUTPUT}" CUDA_ARCHS)     # Remove trailing/leading whitespaces
+      string(REPLACE "." "" CUDA_ARCHS "${CUDA_ARCHS}")   # Replace '.' with nothing to format '7.0' as '70'
+      string(REPLACE "\n" ";" CUDA_ARCHS "${CUDA_ARCHS}") # Replace newline with semicolon for list format
+
+      # Remove any duplicates CUDA archictectures
+      list(REMOVE_DUPLICATES CUDA_ARCHS)
+
+      if(CUDA_ARCHS)
+        string(REPLACE ";" "," CUDA_ARCHS_STR "${CUDA_ARCHS}")
+        set(CMAKE_CUDA_ARCHITECTURES "${CUDA_ARCHS_STR}" CACHE STRING "Detected CUDA architectures" FORCE)
+        message(STATUS "Detected CUDA GPU architectures: ${CMAKE_CUDA_ARCHITECTURES}")
+      else()
+        message(WARNING "No GPUs detected. Setting CMAKE_CUDA_ARCHITECTURES to default '70'")
+        set(CMAKE_CUDA_ARCHITECTURES "70" CACHE STRING "Default CUDA architectures" FORCE)
+      endif()
     endif()
   endif()
 else()
@@ -123,6 +142,8 @@ else()
   set(CMAKE_CUDA_ARCHITECTURES "${CUDA_ARCH_STR}" CACHE STRING "Detected CUDA architectures" FORCE)
   message(STATUS "CMAKE_CUDA_ARCHITECTURES is already set to: ${CMAKE_CUDA_ARCHITECTURES}")
 endif()
+
+# Set the CUDA architectures to the HYPRE target
 set_property(TARGET HYPRE PROPERTY CUDA_ARCHITECTURES "${CMAKE_CUDA_ARCHITECTURES}")
 
 # Show CUDA Toolkit location
