@@ -22,7 +22,9 @@ src/TAGS
 hypre/
 install/
 AUTOTEST/*.dir
+out/
 .vscode
+.vs
 
 ###############
 # Documentation

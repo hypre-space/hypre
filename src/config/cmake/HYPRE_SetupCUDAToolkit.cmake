@@ -32,7 +32,11 @@ endif()
 message(STATUS "Using CUDA installation: ${CUDA_DIR}")
 
 # Specify the path to the custom nvcc compiler
-set(CMAKE_CUDA_COMPILER "${CUDA_DIR}/bin/nvcc" CACHE FILEPATH "CUDA compiler")
+if(WIN32)
+  set(CMAKE_CUDA_COMPILER "${CUDA_DIR}/bin/nvcc.exe" CACHE FILEPATH "CUDA compiler")
+else()
+  set(CMAKE_CUDA_COMPILER "${CUDA_DIR}/bin/nvcc" CACHE FILEPATH "CUDA compiler")
+endif()
 
 # Specify the CUDA Toolkit root directory
 set(CUDAToolkit_ROOT "${CUDA_DIR}" CACHE PATH "Path to the CUDA toolkit")
@@ -47,11 +51,15 @@ endif()
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 set(CMAKE_CUDA_EXTENSIONS OFF)
 
+# Visual Studio does not support CMAKE_CUDA_HOST_COMPILER
+if (NOT MSVC)
+  set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER} CACHE STRING "" FORCE)
+endif()
+
 # Check if CUDA is available and enable it if found
 include(CheckLanguage)
-set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER} CACHE STRING "" FORCE)
 check_language(CUDA)
-if(CMAKE_CUDA_COMPILER)
+if(DEFINED CMAKE_CUDA_COMPILER)
    enable_language(CUDA)
 else()
   message(FATAL_ERROR "CUDA language not found. Please check your CUDA installation.")
@@ -69,9 +77,16 @@ endif()
 if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR CMAKE_CUDA_ARCHITECTURES STREQUAL "52")
   message(STATUS "Detecting CUDA GPU architectures using nvidia-smi...")
 
+  # Platform-specific NVIDIA smi command
+  if (WIN32)
+    set(NVIDIA_SMI_CMD "${CUDA_DIR}/bin/nvidia-smi.exe")
+  else()
+    set(NVIDIA_SMI_CMD "nvidia-smi")
+  endif()
+
   # Execute nvidia-smi to get GPU compute capabilities
   execute_process(
-    COMMAND nvidia-smi --query-gpu=compute_cap --format=csv,noheader
+    COMMAND ${NVIDIA_SMI_CMD} --query-gpu=compute_cap --format=csv,noheader
     OUTPUT_VARIABLE NVIDIA_SMI_OUTPUT
     RESULT_VARIABLE NVIDIA_SMI_RESULT
     ERROR_VARIABLE NVIDIA_SMI_ERROR
@@ -79,7 +94,7 @@ if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR CMAKE_CUDA_ARCHITECTURES STREQUAL "52
   )
 
   if(NOT NVIDIA_SMI_RESULT EQUAL 0)
-    message(WARNING "nvidia-smi failed to execute: ${NVIDIA_SMI_ERROR}")
+    message(WARNING "${NVIDIA_SMI_CMD} failed to execute: ${NVIDIA_SMI_ERROR}")
     set(CMAKE_CUDA_ARCHITECTURES "70" CACHE STRING "Default CUDA architectures" FORCE)
     message(STATUS "Setting CMAKE_CUDA_ARCHITECTURES to default '70'")
   else()
@@ -193,8 +208,11 @@ target_include_directories(HYPRE PUBLIC ${THRUST_INCLUDE_DIR})
 target_link_libraries(HYPRE PUBLIC ${CUDA_LIBS})
 message(STATUS "Linking to CUDA libraries: ${CUDA_LIBS}")
 
-# Set CUDA flags
-set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -ccbin=${CMAKE_CXX_COMPILER} -expt-extended-lambda")
+# Set additional CUDA compiler flags
+set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --extended-lambda")
+if(NOT MSVC)
+  string(APPEND CMAKE_CUDA_FLAGS " -ccbin=${CMAKE_CXX_COMPILER}")
+endif()
 
 # Print CUDA info
 message(STATUS "CUDA C++ standard: ${CMAKE_CUDA_STANDARD}")
