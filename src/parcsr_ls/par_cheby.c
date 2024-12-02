@@ -51,7 +51,9 @@ HYPRE_ParCSRChebyCreate( HYPRE_Solver *solver)
 
    hypre_ParChebyData *cheby_data = hypre_CTAlloc(hypre_ParChebyData, 1, HYPRE_MEMORY_HOST);
    
-   hypre_ParChebyDataFraction(cheby_data) = .3;
+   /* WM: todo - set good defaults here. So far, I've changed the fraction to 0
+    * (for when this is used as a preconditioner instead of smoohter) */
+   hypre_ParChebyDataFraction(cheby_data) = 0.0;
    hypre_ParChebyDataOrder(cheby_data) = 2;
    hypre_ParChebyDataScale(cheby_data) = 1;
    hypre_ParChebyDataVariant(cheby_data) = 0;
