@@ -231,8 +231,24 @@ message(STATUS "Linking to CUDA libraries: ${CUDA_LIBS}")
 
 # Set additional CUDA compiler flags
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --extended-lambda")
-if(NOT MSVC)
-  string(APPEND CMAKE_CUDA_FLAGS " -ccbin=${CMAKE_CXX_COMPILER}")
+
+# Ensure LTO-specific flags are included
+if (HYPRE_ENABLE_LTO AND CUDAToolkit_VERSION VERSION_LESS 11.2)
+  # See https://developer.nvidia.com/blog/improving-gpu-app-performance-with-cuda-11-2-device-lto
+  message(WARNING "Device LTO not available on CUDAToolkit_VERSION (${CUDAToolkit_VERSION}) < 11.2. Turning it off...")
+
+elseif (HYPRE_ENABLE_LTO AND CMAKE_VERSION VERSION_LESS 3.25)
+  # See https://gitlab.kitware.com/cmake/cmake/-/commit/96bc59b1ca01be231347404d178445263687dd22
+  message(WARNING "Device LTO not available with CUDA on CMAKE_VERSION (${CMAKE_VERSION}) < 3.25. Turning it off...")
+
+elseif (HYPRE_ENABLE_LTO)
+  message(STATUS "Enabling Device LTO")
+
+  # Enable LTO for the target
+  set_target_properties(${PROJECT_NAME} PROPERTIES
+      CUDA_SEPARABLE_COMPILATION ON
+      CUDA_RESOLVE_DEVICE_SYMBOLS ON
+  )
 endif()
 
 # Print CUDA info

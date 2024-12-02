@@ -149,6 +149,44 @@ hypre's CMake build provides several options. For more information, see :ref:`bu
      2. Click "Configure"
      3. Click "Generate"
 
+3. Using Spack (Recommended for HPC environments)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+[Spack_](https://spack.io/) is a package manager designed for supercomputers, Linux, and macOS.
+It makes installing scientific software easy and handles dependencies automatically. To build hypre using Spack:
+
+.. code-block:: bash
+
+   # Install Spack if you haven't already
+   git clone -c feature.manyFiles=true --depth=2 https://github.com/spack/spack.git
+   . spack/share/spack/setup-env.sh
+
+   # Install hypre with default options
+   spack install hypre
+
+   # Or install with specific options (e.g., with CUDA support)
+   spack install hypre+cuda
+
+Common Spack variants for hypre include:
+
+* ``+mpi`` / ``~mpi`` - Enable/disable MPI support (default: +mpi)
+* ``+cuda`` / ``~cuda`` - Enable/disable CUDA support (default: ~cuda)
+* ``+openmp`` / ``~openmp`` - Enable/disable OpenMP support (default: ~openmp)
+* ``+shared`` / ``~shared`` - Build shared libraries (default: ~shared)
+* ``+debug`` / ``~debug`` - Build with debug flags (default: ~debug)
+
+To see all available build options:
+
+.. code-block:: bash
+
+   spack info hypre
+
+.. note::
+
+   Spack will automatically handle dependencies and choose appropriate versions based on
+   your system and requirements. It's particularly useful in HPC environments where you
+   need to manage multiple versions or build configurations of hypre and its dependencies.
+
 .. _build_options:
 
 Build System Options
@@ -215,6 +253,10 @@ For GPU-specific options, see the :ref:`gpu_build` section below.
        | (default is off)
      - ``--enable-hopscotch``
      - ``-DHYPRE_ENABLE_HOPSCOTCH=ON``
+   * - Link-time optimization
+       | (default is off)
+     - N/A
+     - ``-DHYPRE_ENABLE_LTO=ON``
    * - | Fortran Support
        | (default is on)
      - ``--enable-fortran``

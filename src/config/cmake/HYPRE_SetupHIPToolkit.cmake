@@ -90,7 +90,7 @@ else()
   set(CMAKE_HIP_ARCHITECTURES "${HIP_ARCH_STR}" CACHE STRING "Detected HIP architectures" FORCE)
   message(STATUS "CMAKE_HIP_ARCHITECTURES is already set to: ${CMAKE_HIP_ARCHITECTURES}")
 endif()
-set_property(TARGET HYPRE PROPERTY HIP_ARCHITECTURES "${CMAKE_HIP_ARCHITECTURES}")
+set_property(TARGET ${PROJECT_NAME} PROPERTY HIP_ARCHITECTURES "${CMAKE_HIP_ARCHITECTURES}")
 
 # Collection of ROCm optional libraries
 set(ROCM_LIBS "")
@@ -104,7 +104,7 @@ function(find_and_add_rocm_library LIB_NAME)
     find_package(${LIB_NAME} REQUIRED)
     if(TARGET roc::${LIB_NAME})
       message(STATUS "Found target: ${${LIB_NAME}_LIBRARY}")
-      list(APPEND ROCM_LIBS roc::${LIB_NAME})
+      list(APPEND ROCM_LIBS ${${LIB_NAME}_LIBRARY})
     else()
       #message(WARNING "roc::${LIB_NAME} target not found. Attempting manual linking.")
       find_library(${LIB_NAME}_LIBRARY ${LIB_NAME} HINTS ${HIP_PATH}/lib ${HIP_PATH}/lib64)
@@ -144,14 +144,47 @@ if(HYPRE_ENABLE_GPU_PROFILING)
 endif()
 
 # Add HIP include directory
-target_include_directories(HYPRE PUBLIC ${HIP_PATH}/include)
+target_include_directories(${PROJECT_NAME} PUBLIC ${HIP_PATH}/include)
 
 # Link HIP libraries to the target
-target_link_libraries(HYPRE PUBLIC ${ROCM_LIBS})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${ROCM_LIBS})
 message(STATUS "Linking to ROCm libraries: ${ROCM_LIBS}")
 
-# Set HIP-specific variables
-target_compile_options(HYPRE PUBLIC $<$<COMPILE_LANGUAGE:HIP>:-fPIC>)
+# Turn on Position Independent Code (PIC) by default
+set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+
+# Signal to downstream targets that they need PIC
+set_target_properties(${PROJECT_NAME} PROPERTIES INTERFACE_POSITION_INDEPENDENT_CODE TRUE)
+
+# Ensure LTO-specific flags are included
+if (HYPRE_ENABLE_LTO AND NOT MSVC)
+  if (CMAKE_C_COMPILER_ID MATCHES "Clang")
+    message(STATUS "Enabling Device LTO")
+  else ()
+    message(FATAL_ERROR "HIP Device LTO available only with Clang")
+  endif ()
+
+  # HIP compilation options
+  target_compile_options(${PROJECT_NAME}
+    PRIVATE
+      $<$<COMPILE_LANGUAGE:HIP>:-fgpu-rdc -foffload-lto>
+      $<$<COMPILE_LANGUAGE:CXX>:-foffload-lto>
+    INTERFACE
+      $<$<COMPILE_LANGUAGE:HIP>:-foffload-lto>
+      $<$<COMPILE_LANGUAGE:CXX>:-foffload-lto>
+  )
+
+  # Link options need to be more specific
+  target_link_options(${PROJECT_NAME}
+    PRIVATE
+      -fgpu-rdc
+      -foffload-lto
+      --hip-link
+      -Wl,--no-as-needed  # Ensure all symbols are kept
+    INTERFACE
+      -foffload-lto
+  )
+endif ()
 
 # Print HIP info
 message(STATUS "HIP C++ standard: ${CMAKE_HIP_STANDARD}")

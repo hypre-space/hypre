@@ -133,6 +133,40 @@ function(configure_mpi_target)
       return 0;
     }
   " HYPRE_HAVE_MPI_COMM_F2C)
+
+  # Define a pattern for LTO-related flags (compiler-specific)
+  set(LTO_FLAG_PATTERNS ".*lto.*" ".*ipo.*" ".*-fthinlto.*" ".*fat-lto-objects.*")
+
+  # Remove LTO-related flags from MPI target properties if applicable
+  foreach (mpi_target MPI::MPI_C MPI::MPI_CXX)
+    if (TARGET ${mpi_target})
+      get_target_property(target_options ${mpi_target} INTERFACE_COMPILE_OPTIONS)
+      if (target_options)
+        #message(STATUS "target_options: ${target_options}")
+        set(original_options "${target_options}") # Save for comparison
+        list(APPEND target_options) # Ensure it's treated as a list
+
+        # Remove matching flags
+        set(removed_flags "")
+        list(APPEND removed_flags)
+        foreach (pattern IN LISTS LTO_FLAG_PATTERNS)
+          foreach (flag IN LISTS target_options)
+            if("${flag}" MATCHES "${pattern}")
+              list(REMOVE_ITEM target_options "${flag}")
+              list(APPEND removed_flags "${flag}")
+            endif()
+          endforeach()
+        endforeach()
+        #message(STATUS "removed_flags: ${removed_flags}")
+        list(LENGTH removed_flags removed_flags_length)
+        if (removed_flags_length GREATER 0)
+          set(target_options "${target_options}" CACHE STRING "Updated ${target_options} without LTO-related flags" FORCE)
+          set_target_properties(${mpi_target} PROPERTIES INTERFACE_COMPILE_OPTIONS "${target_options}")
+          message(STATUS "Removed LTO-related flags from ${mpi_target}: ${removed_flags}")
+        endif()
+      endif()
+    endif()
+  endforeach()
 endfunction()
 
 # Function to get dependency library version
@@ -331,17 +365,17 @@ function(add_hypre_executables EXE_SRCS)
     # If CUDA is enabled, tag source files to be compiled with nvcc.
     if (HYPRE_USING_CUDA)
       set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
-    endif()
+    endif ()
 
     # If HIP is enabled, tag source files to be compiled with hipcc/clang
     if (HYPRE_USING_HIP)
       set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE HIP)
-    endif()
+    endif ()
 
     # If SYCL is enabled, tag source files to be compiled with dpcpp.
     if (HYPRE_USING_SYCL)
       set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CXX)
-    endif()
+    endif ()
 
     # Get executable name
     string(REPLACE ".c" "" EXE_NAME ${SRC_FILENAME})
@@ -355,34 +389,40 @@ function(add_hypre_executables EXE_SRCS)
     # For Unix systems, also link with math library
     if (UNIX)
       target_link_libraries(${EXE_NAME} PUBLIC m)
-    endif()
+    endif ()
 
     # Explicitly specify the linker
-    if (HYPRE_USING_CUDA OR HYPRE_USING_HIP OR HYPRE_USING_SYCL)
+    if ((HYPRE_USING_CUDA AND NOT HYPRE_ENABLE_LTO) OR HYPRE_USING_HIP OR HYPRE_USING_SYCL)
       set_target_properties(${EXE_NAME} PROPERTIES LINKER_LANGUAGE CXX)
-    endif()
+    endif ()
+
+    # Turn on LTO if requested
+    if (HYPRE_ENABLE_LTO)
+      set_target_properties(${EXE_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
+    endif ()
 
     # Inherit compile definitions and options from HYPRE target
     get_target_property(HYPRE_COMPILE_OPTS HYPRE COMPILE_OPTIONS)
-    if(HYPRE_COMPILE_OPTS)
+    #message(STATUS "${EXE_NAME}: ${HYPRE_COMPILE_OPTS}")
+    if (HYPRE_COMPILE_OPTS)
       if (HYPRE_USING_CUDA OR HYPRE_USING_HIP OR HYPRE_USING_SYCL)
         get_language_flags("${HYPRE_COMPILE_OPTS}" CXX_OPTS "CXX")
         target_compile_options(${EXE_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${CXX_OPTS}>)
         #message(STATUS "Added CXX compile options: ${CXX_OPTS} to ${EXE_NAME}")
-      else()
+      else ()
         get_language_flags("${HYPRE_COMPILE_OPTS}" C_OPTS "C")
         target_compile_options(${EXE_NAME} PRIVATE $<$<COMPILE_LANGUAGE:C>:${C_OPTS}>)
         #message(STATUS "Added C compile options: ${C_OPTS} to ${EXE_NAME}")
-      endif()
-    endif()
+      endif ()
+    endif ()
 
     # Copy executable to original source directory
     add_custom_command(TARGET ${EXE_NAME} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${EXE_NAME}> ${CMAKE_CURRENT_SOURCE_DIR}
-      COMMENT "Copied ${EXE_NAME}"
+      COMMENT "Copied ${EXE_NAME} to ${CMAKE_CURRENT_SOURCE_DIR}"
     )
-  endforeach(SRC_FILE)
-endfunction()
+  endforeach (SRC_FILE)
+endfunction ()
 
 # Function to add a tags target if etags is found
 function(add_hypre_target_tags)

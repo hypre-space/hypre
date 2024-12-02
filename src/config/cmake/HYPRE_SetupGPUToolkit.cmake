@@ -39,7 +39,7 @@ endif()
 
 # Check if examples are enabled, but not unified memory
 if(HYPRE_BUILD_EXAMPLES AND NOT HYPRE_ENABLE_UNIFIED_MEMORY)
-  message(WARNING "Running the examples on GPUs requires Unified Memory! Examples will not be built!")
+  message(WARNING "Running the examples on GPUs requires Unified Memory!\nExamples will not be built!\n")
   set(HYPRE_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 endif()
 

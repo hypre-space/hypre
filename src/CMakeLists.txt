@@ -144,9 +144,10 @@ set_hypre_option(BASE HYPRE_ENABLE_FEI                  "Use FEI" OFF) # TODO: A
 set_hypre_option(BASE HYPRE_ENABLE_HOPSCOTCH            "Use hopscotch hashing with OpenMP" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_OPENMP               "Use OpenMP" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_MPI                  "Use MPI" ON)
+set_hypre_option(BASE HYPRE_ENABLE_LTO                  "Use Link-Time Optimization (LTO)" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_PRINT_ERRORS         "Print HYPRE errors" OFF)
 set_hypre_option(SKIP HYPRE_ENABLE_TIMING               "Use HYPRE timing routines" OFF)
-set_hypre_option(SKIP HYPRE_ENABLE_STRICT_CHECKING      "Enable strict error checking (Sequential only)" OFF)
+set_hypre_option(SKIP HYPRE_ENABLE_STRICT_CHECKING      "Use strict error checking (Sequential only)" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_TEST_USING_HOST      "Execute tests on host (CPU)" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_HOST_MEMORY          "Use host memory" ON)
 set_hypre_option(BASE HYPRE_BUILD_EXAMPLES              "Build examples" OFF)
@@ -237,6 +238,7 @@ ensure_options_differ(HYPRE_ENABLE_SYCL   HYPRE_ENABLE_BIGINT)
 ensure_options_differ(HYPRE_ENABLE_SYCL   HYPRE_ENABLE_LONG_DOUBLE)
 ensure_options_differ(HYPRE_ENABLE_HIP    HYPRE_ENABLE_BIGINT)
 ensure_options_differ(HYPRE_ENABLE_HIP    HYPRE_ENABLE_LONG_DOUBLE)
+ensure_options_differ(HYPRE_ENABLE_LTO    HYPRE_ENABLE_SYCL) # TODO: allow LTO with SYCL
 
 # Enable CTest support if tests are being built
 if (HYPRE_BUILD_TESTS)
@@ -351,6 +353,25 @@ endif ()
 if (HYPRE_ENABLE_OPENMP)
   find_package(OpenMP REQUIRED)
   target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_C)
+endif ()
+
+# Add LTO-related flags to hypre if requested
+if (HYPRE_ENABLE_LTO)
+  # Additional checks before enabling LTO
+  include(CheckIPOSupported)
+  check_ipo_supported(RESULT LTO_SUPPORTED OUTPUT LTO_ERROR)
+
+  if (LTO_SUPPORTED)
+    message(STATUS "Link-Time Optimization (LTO) enabled for Hypre")
+  else ()
+    message(WARNING "Link-Time Optimization (LTO) requested but not supported: ${LTO_ERROR}. Turning it off...")
+    set(HYPRE_ENABLE_LTO OFF)
+  endif ()
+
+  set_target_properties(${PROJECT_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
+else ()
+  set_target_properties(${PROJECT_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION FALSE)
+  message(STATUS "Link-Time Optimization (LTO) disabled")
 endif ()
 
 # Setup GPU build options: CUDA, HIP, SYCL are mutually exclusive
