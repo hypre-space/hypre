@@ -90,6 +90,22 @@ hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const 
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_error_handler_destroy
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_error_handler_destroy(void)
+{
+   hypre_Error  err = hypre__global_error;
+
+   hypre_TFree(err.memory, HYPRE_MEMORY_HOST);
+   err.mem_sz = 0;
+   err.msg_sz = 0;
+
+   hypre__global_error = err;
+}
+
+/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 void
@@ -252,11 +268,6 @@ HYPRE_GetErrorMessages(char **buffer, HYPRE_Int *bufsz)
    *buffer = hypre_CTAlloc(char, *bufsz, HYPRE_MEMORY_HOST);
    hypre_TMemcpy(*buffer, err.memory, char, *bufsz, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
-   hypre_TFree(err.memory, HYPRE_MEMORY_HOST);
-   err.mem_sz = 0;
-   err.msg_sz = 0;
-
-   hypre__global_error = err;
    return hypre_error_flag;
 }
 
@@ -267,10 +278,9 @@ HYPRE_GetErrorMessages(char **buffer, HYPRE_Int *bufsz)
 HYPRE_Int
 HYPRE_PrintErrorMessages(MPI_Comm comm)
 {
-   hypre_Error err = hypre__global_error;
-
-   HYPRE_Int myid;
-   char *msg;
+   hypre_Error  err = hypre__global_error;
+   HYPRE_Int    myid;
+   char        *msg;
 
    hypre_MPI_Comm_rank(comm, &myid);
    for (msg = err.memory; msg < (err.memory + err.msg_sz); msg += strlen(msg) + 1)
@@ -278,10 +288,5 @@ HYPRE_PrintErrorMessages(MPI_Comm comm)
       hypre_fprintf(stderr, "%d: %s", myid, msg);
    }
 
-   hypre_TFree(err.memory, HYPRE_MEMORY_HOST);
-   err.mem_sz = 0;
-   err.msg_sz = 0;
-
-   hypre__global_error = err;
    return hypre_error_flag;
 }
