@@ -90,11 +90,11 @@ hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const 
 }
 
 /*--------------------------------------------------------------------------
- * hypre_error_handler_destroy
+ * hypre_error_handler_clear_messages
  *--------------------------------------------------------------------------*/
 
 void
-hypre_error_handler_destroy(void)
+hypre_error_handler_clear_messages(void)
 {
    hypre_Error  err = hypre__global_error;
 

@@ -35,7 +35,7 @@ extern hypre_Error hypre__global_error;
  *--------------------------------------------------------------------------*/
 
 void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const char *msg);
-void hypre_error_handler_destroy(void);
+void hypre_error_handler_clear_messages(void);
 void hypre_error_code_save(void);
 void hypre_error_code_restore(void);
 
