@@ -30,9 +30,9 @@ hypre_NumThreads( void )
 /*--------------------------------------------------------------------------
  * hypre_NumOptimalThreads
  *
- * Returns the optimal number of threads for the given problem size. Considers
- * the minimum work per thread and the maximum number of threads to avoid
- * thread creation overhead. Must be called from outside of a parallel region.
+ * Returns the optimal number of threads for the given problem size. Ensures
+ * each thread has at least min_rows_per_thread amount of work.
+ * Must be called from outside of a parallel region.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -41,9 +41,13 @@ hypre_NumOptimalThreads(HYPRE_Int size)
    /* Minimum work per thread */
    const HYPRE_Int min_rows_per_thread = 500;
 
-   HYPRE_Int optimal_threads = size / min_rows_per_thread;
+   /* Calculate threads needed to maintain minimum workload per thread */
+   HYPRE_Int       max_available_threads = omp_get_max_threads();
+   HYPRE_Int       desired_threads       = (size + min_rows_per_thread - 1) /
+                                           min_rows_per_thread;
 
-   return hypre_max(1, hypre_min(optimal_threads, omp_get_max_threads()));
+   /* Return minimum of desired and available threads, but at least 1 */
+   return hypre_max(1, hypre_min(desired_threads, max_available_threads));
 }
 
 /*--------------------------------------------------------------------------
