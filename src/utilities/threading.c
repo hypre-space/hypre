@@ -11,6 +11,12 @@
 
 #ifdef HYPRE_USING_OPENMP
 
+/*--------------------------------------------------------------------------
+ * hypre_NumThreads
+ *
+ * Returns the maximum number of threads that can be used.
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_NumThreads( void )
 {
@@ -21,7 +27,44 @@ hypre_NumThreads( void )
    return num_threads;
 }
 
-/* This next function must be called from within a parallel region! */
+/*--------------------------------------------------------------------------
+ * hypre_NumOptimalThreads
+ *
+ * Returns the optimal number of threads for the given problem size. Considers
+ * the minimum work per thread and the maximum number of threads to avoid
+ * thread creation overhead. Must be called from outside of a parallel region.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_NumOptimalThreads(HYPRE_Int size)
+{
+   /* Minimum work per thread */
+   const HYPRE_Int min_rows_per_thread = 500;
+
+   HYPRE_Int optimal_threads = size / min_rows_per_thread;
+
+   return hypre_max(1, hypre_min(optimal_threads, omp_get_max_threads()));
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SetNumThreads
+ *
+ * Sets the number of threads to use. Must be called from outside of a
+ * parallel region.
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_SetNumThreads( HYPRE_Int nt )
+{
+   omp_set_num_threads(nt);
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_NumActiveThreads
+ *
+ * Returns the number of threads currently active. Must be called from within
+ * a parallel region.
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_NumActiveThreads( void )
@@ -33,7 +76,12 @@ hypre_NumActiveThreads( void )
    return num_threads;
 }
 
-/* This next function must be called from within a parallel region! */
+/*--------------------------------------------------------------------------
+ * hypre_GetThreadNum
+ *
+ * Returns the thread ID of the calling thread. Must be called from within a
+ * parallel region.
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_GetThreadNum( void )
@@ -45,15 +93,14 @@ hypre_GetThreadNum( void )
    return my_thread_num;
 }
 
-void
-hypre_SetNumThreads( HYPRE_Int nt )
-{
-   omp_set_num_threads(nt);
-}
-
 #endif
 
-/* This next function must be called from within a parallel region! */
+/*--------------------------------------------------------------------------
+ * hypre_GetSimpleThreadPartition
+ *
+ * Partitions the rows of a matrix into a simple thread partition. Must be
+ * called from within a parallel region.
+ *--------------------------------------------------------------------------*/
 
 void
 hypre_GetSimpleThreadPartition( HYPRE_Int *begin, HYPRE_Int *end, HYPRE_Int n )

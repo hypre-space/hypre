@@ -1120,17 +1120,16 @@ hypre_BoomerAMGBuildExtPIInterpHost(hypre_ParCSRMatrix   *A,
    HYPRE_Int        strong_f_marker;
 
    /* Loop variables */
-   /*HYPRE_Int              index;*/
    HYPRE_Int        start_indexing = 0;
    HYPRE_Int        i, i1, i2, jj, kk, k1, jj1;
    HYPRE_BigInt     big_k1;
 
    /* Threading variables */
-   HYPRE_Int my_thread_num, num_threads, start, stop;
-   HYPRE_Int * max_num_threads = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_HOST);
-   HYPRE_Int * diag_offset;
-   HYPRE_Int * fine_to_coarse_offset;
-   HYPRE_Int * offd_offset;
+   HYPRE_Int        num_threads = hypre_NumOptimalThreads(n_fine);
+   HYPRE_Int        my_thread_num, start, stop;
+   HYPRE_Int       *diag_offset;
+   HYPRE_Int       *fine_to_coarse_offset;
+   HYPRE_Int       *offd_offset;
 
    /* Definitions */
    HYPRE_Real       zero = 0.0;
@@ -1209,11 +1208,10 @@ hypre_BoomerAMGBuildExtPIInterpHost(hypre_ParCSRMatrix   *A,
    /*-----------------------------------------------------------------------
     *  Initialize threading variables
     *-----------------------------------------------------------------------*/
-   max_num_threads[0] = hypre_NumThreads();
-   diag_offset           = hypre_CTAlloc(HYPRE_Int, max_num_threads[0], HYPRE_MEMORY_HOST);
-   fine_to_coarse_offset = hypre_CTAlloc(HYPRE_Int, max_num_threads[0], HYPRE_MEMORY_HOST);
-   offd_offset           = hypre_CTAlloc(HYPRE_Int, max_num_threads[0], HYPRE_MEMORY_HOST);
-   for (i = 0; i < max_num_threads[0]; i++)
+   diag_offset           = hypre_CTAlloc(HYPRE_Int, num_threads, HYPRE_MEMORY_HOST);
+   fine_to_coarse_offset = hypre_CTAlloc(HYPRE_Int, num_threads, HYPRE_MEMORY_HOST);
+   offd_offset           = hypre_CTAlloc(HYPRE_Int, num_threads, HYPRE_MEMORY_HOST);
+   for (i = 0; i < num_threads; i++)
    {
       diag_offset[i] = 0;
       fine_to_coarse_offset[i] = 0;
@@ -1224,7 +1222,7 @@ hypre_BoomerAMGBuildExtPIInterpHost(hypre_ParCSRMatrix   *A,
     *  Loop over fine grid.
     *-----------------------------------------------------------------------*/
 #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel private(i,my_thread_num,num_threads,start,stop,coarse_counter,jj_counter,jj_counter_offd, P_marker, P_marker_offd,jj,kk,i1,k1,loc_col,jj_begin_row,jj_begin_row_offd,jj_end_row,jj_end_row_offd,diagonal,sum,sgn,jj1,i2,distribute,strong_f_marker, big_k1)
+   #pragma omp parallel num_threads(num_threads) private(i,my_thread_num,start,stop,coarse_counter,jj_counter,jj_counter_offd, P_marker, P_marker_offd,jj,kk,i1,k1,loc_col,jj_begin_row,jj_begin_row_offd,jj_end_row,jj_end_row_offd,diagonal,sum,sgn,jj1,i2,distribute,strong_f_marker, big_k1)
 #endif
    {
 
@@ -1253,20 +1251,19 @@ hypre_BoomerAMGBuildExtPIInterpHost(hypre_ParCSRMatrix   *A,
       jj_counter_offd = start_indexing;
       if (n_fine)
       {
-         P_marker = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST);
+         P_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
          for (i = 0; i < n_fine; i++)
          {  P_marker[i] = -1; }
       }
       if (full_off_procNodes)
       {
-         P_marker_offd = hypre_CTAlloc(HYPRE_Int,  full_off_procNodes, HYPRE_MEMORY_HOST);
+         P_marker_offd = hypre_CTAlloc(HYPRE_Int, full_off_procNodes, HYPRE_MEMORY_HOST);
          for (i = 0; i < full_off_procNodes; i++)
          {  P_marker_offd[i] = -1;}
       }
 
       /* this thread's row range */
       my_thread_num = hypre_GetThreadNum();
-      num_threads = hypre_NumActiveThreads();
       start = (n_fine / num_threads) * my_thread_num;
       if (my_thread_num == num_threads - 1)
       {  stop = n_fine; }
@@ -1895,7 +1892,6 @@ hypre_BoomerAMGBuildExtPIInterpHost(hypre_ParCSRMatrix   *A,
    *P_ptr = P;
 
    /* Deallocate memory */
-   hypre_TFree(max_num_threads, HYPRE_MEMORY_HOST);
    hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST);
    hypre_TFree(diag_offset, HYPRE_MEMORY_HOST);
    hypre_TFree(offd_offset, HYPRE_MEMORY_HOST);
