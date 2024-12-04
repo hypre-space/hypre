@@ -389,11 +389,6 @@ hypre_ParCSRAAt(hypre_ParCSRMatrix  *A)
    n_rows_A = hypre_ParCSRMatrixGlobalNumRows(A);
    n_cols_A = hypre_ParCSRMatrixGlobalNumCols(A);
 
-   if (n_cols_A != n_rows_A)
-   {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, " Error! Incompatible matrix dimensions!\n");
-      return NULL;
-   }
    /*-----------------------------------------------------------------------
     *  Extract A_ext, i.e. portion of A that is stored on neighbor procs
     *  and needed locally for A^T in the matrix matrix product A*A^T
@@ -405,7 +400,7 @@ hypre_ParCSRAAt(hypre_ParCSRMatrix  *A)
        * If there exists no CommPkg for A, a CommPkg is generated using
        * equally load balanced partitionings
        *--------------------------------------------------------------------*/
-      if (!hypre_ParCSRMatrixCommPkg(A))
+      if (!hypre_ParCSRMatrixCommPkgT(A))
       {
          hypre_MatTCommPkgCreate(A);
       }
