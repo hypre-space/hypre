@@ -268,7 +268,7 @@ HYPRE_GetErrorMessages(char **buffer, HYPRE_Int *bufsz)
    *buffer = hypre_CTAlloc(char, *bufsz, HYPRE_MEMORY_HOST);
    hypre_TMemcpy(*buffer, err.memory, char, *bufsz, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
-   /* Deallocate error messages */
+   /* Clear error messages */
    hypre_error_handler_clear_messages();
 
    return hypre_error_flag;
@@ -291,7 +291,7 @@ HYPRE_PrintErrorMessages(MPI_Comm comm)
       hypre_fprintf(stderr, "%d: %s", myid, msg);
    }
 
-   /* Deallocate error messages */
+   /* Clear error messages */
    hypre_error_handler_clear_messages();
 
    return hypre_error_flag;
