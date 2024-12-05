@@ -1164,7 +1164,7 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
       ierr = 1;
 
       /* clear the error */
-      hipGetLastError();
+      (void) hipGetLastError();
 
       if (err == hipErrorInvalidValue)
       {
