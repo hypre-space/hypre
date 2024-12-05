@@ -296,3 +296,14 @@ HYPRE_PrintErrorMessages(MPI_Comm comm)
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ClearErrorMessages(void)
+{
+   hypre_error_handler_clear_messages();
+
+   return hypre_error_flag;
+}
