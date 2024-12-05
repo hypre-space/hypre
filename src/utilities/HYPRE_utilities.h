@@ -222,9 +222,6 @@ HYPRE_Int HYPRE_ClearError(HYPRE_Int hypre_error_code);
 /* Set behavior for printing errors: mode 0 = stderr, mode 1 = memory buffer */
 HYPRE_Int HYPRE_SetPrintErrorMode(HYPRE_Int mode);
 
-/* Free the memory buffer allocated for storing error messages when using mode 1 for printing errors */
-HYPRE_Int HYPRE_ClearErrorMessages(void);
-
 /* Set which error code messages to record for printing: code is an error code
  * such as HYPRE_ERROR_CONV, code -1 = all codes, verbosity 0 = do not record */
 HYPRE_Int HYPRE_SetPrintErrorVerbosity(HYPRE_Int code, HYPRE_Int verbosity);
@@ -234,6 +231,9 @@ HYPRE_Int HYPRE_GetErrorMessages(char **buffer, HYPRE_Int *bufsz);
 
 /* Print the error messages and clear them in hypre */
 HYPRE_Int HYPRE_PrintErrorMessages(MPI_Comm comm);
+
+/* Clear the error messages in hypre and free any related memory allocated */
+HYPRE_Int HYPRE_ClearErrorMessages(void);
 
 /* Print GPU information */
 HYPRE_Int HYPRE_PrintDeviceInfo(void);
