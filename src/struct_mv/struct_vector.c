@@ -368,6 +368,15 @@ hypre_StructVectorResize( hypre_StructVector *vector,
       return hypre_error_flag;
    }
 
+   if (old_data_space != NULL)
+   {
+      if (hypre_BoxArrayEqual(old_data_space, data_space))
+      {
+         HYPRE_ANNOTATE_FUNC_END;
+         return hypre_error_flag;
+      }
+   }
+
    /* Set up data_indices and data_size */
    data_indices = hypre_CTAlloc(HYPRE_Int, hypre_BoxArraySize(data_space), HYPRE_MEMORY_HOST);
    data_size = 0;

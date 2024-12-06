@@ -78,7 +78,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             dxyz_flag;
 
    HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
-   HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
+   HYPRE_Int            *x_num_ghost    = hypre_CTAlloc(HYPRE_Int, HYPRE_MAXDIM, HYPRE_MEMORY_HOST);
 
 #if DEBUG
    char                  filename[255];
@@ -151,6 +151,9 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    A_l[0] = hypre_StructMatrixRef(A);
    b_l[0] = hypre_StructVectorRef(b);
    x_l[0] = hypre_StructVectorRef(x);
+
+   /* WM: todo - do I want to do things based on the stencil of A? I think I do on the fine grid at least. */
+   hypre_StructNumGhostFromStencil(hypre_StructMatrixStencil(A_l[0]), &x_num_ghost);
 
    tx_l[0] = hypre_StructVectorCreate(comm, grid_l[0]);
    hypre_StructVectorSetNumGhost(tx_l[0], x_num_ghost);
@@ -225,6 +228,9 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_StructVectorSetNumGhost(b_l[l + 1], b_num_ghost);
       hypre_StructVectorInitialize(b_l[l + 1]);
       hypre_StructVectorAssemble(b_l[l + 1]);
+
+      /* WM: todo - do I want to do things based on the stencil of A? */
+      hypre_StructNumGhostFromStencil(hypre_StructMatrixStencil(A_l[l + 1]), &x_num_ghost);
 
       x_l[l + 1] = hypre_StructVectorCreate(comm, grid_l[l + 1]);
       hypre_StructVectorSetNumGhost(x_l[l + 1], x_num_ghost);

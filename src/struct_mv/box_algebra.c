@@ -662,3 +662,49 @@ hypre_MinUnionBoxes( hypre_BoxArray *boxes )
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_BoxArrayEqual
+ *
+ * Check whether box_array1 is equal to box_array2
+ * WM: question - do I need to worry about the box IDs here?
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoxArrayEqual( hypre_BoxArray *box_array1,
+                     hypre_BoxArray *box_array2 )
+{
+   /* WM: TODO - test this function! */
+   HYPRE_Int i, d, equal = 0;
+   HYPRE_Int ndim = hypre_BoxArrayNDim(box_array2);
+   hypre_Box *box1;
+   hypre_Box *box2;
+
+   if (hypre_BoxArraySize(box_array1) != hypre_BoxArraySize(box_array2) ||
+         hypre_BoxArrayNDim(box_array1) != hypre_BoxArrayNDim(box_array2))
+   {
+      return 0;
+   }
+
+   hypre_ForBoxI(i, box_array2)
+   {
+      /* Note that the ordering of the boxes must be the same */
+      box1 = hypre_BoxArrayBox(box_array1, i);
+      box2 = hypre_BoxArrayBox(box_array2, i);
+      equal = 0;
+      for (d = 0; d < ndim; d++)
+      {
+         if ( hypre_BoxIMinD(box1, d) == hypre_BoxIMinD(box2, d)
+              && hypre_BoxIMaxD(box1, d) == hypre_BoxIMaxD(box2, d) )
+         {
+            equal++;
+         }
+      }
+      if (equal != ndim)
+      {
+         return 0;
+      }
+   }
+
+   return 1;
+}
