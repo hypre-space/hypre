@@ -489,6 +489,15 @@ HYPRE_Int HYPRE_SetUseGpuRand( HYPRE_Int use_curand );
  **/
 HYPRE_Int HYPRE_SetGpuAwareMPI( HYPRE_Int use_gpu_aware_mpi );
 
+/**
+ * Sets the number of threads to use in parallel regions.
+ * Must be called from outside of a parallel region.
+ *
+ * @param num_threads The number of threads to use
+ * @return Returns hypre's global error code
+ */
+HYPRE_Int HYPRE_SetNumThreads( HYPRE_Int num_threads );
+
 /*--------------------------------------------------------------------------
  * Base objects
  *--------------------------------------------------------------------------*/

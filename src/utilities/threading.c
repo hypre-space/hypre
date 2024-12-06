@@ -117,3 +117,18 @@ hypre_GetSimpleThreadPartition( HYPRE_Int *begin, HYPRE_Int *end, HYPRE_Int n )
    *begin = hypre_min(n_per_thread * my_thread_num, n);
    *end = hypre_min(*begin + n_per_thread, n);
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SetNumThreads
+ *
+ * Sets the number of threads to use. Must be called from outside of a
+ * parallel region.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SetNumThreads( HYPRE_Int num_threads )
+{
+   hypre_SetNumThreads(num_threads);
+
+   return hypre_error_flag;
+}
