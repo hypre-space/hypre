@@ -5680,7 +5680,7 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         for ac_prog in xlf_r ifort ifx gfortran g77 g95 pgf77 pgfortran f77
+         for ac_prog in xlf_r ifx ifort gfortran g77 g95 pgf77 pgfortran f77
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5728,7 +5728,7 @@ fi
 done
 
       else
-         for ac_prog in xlf ifort ifx gfortran g77 g95 pgf77 pgfortran f77
+         for ac_prog in xlf ifx ifort gfortran g77 g95 pgf77 pgfortran f77
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5779,7 +5779,7 @@ done
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         for ac_prog in mpxlf mpixlf77_r mpiifort mpiifx mpif77 mpipgf77 mpipgifort
+         for ac_prog in mpxlf mpixlf77_r mpiifx mpiifort mpif77 mpipgf77 mpipgifort
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5827,7 +5827,7 @@ fi
 done
 
       else
-         for ac_prog in mpxlf mpixlf77 mpiifort mpiifx mpif77 mpipgf77 mpipgifort
+         for ac_prog in mpxlf mpixlf77 mpiifx mpiifort mpif77 mpipgf77 mpipgifort
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
