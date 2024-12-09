@@ -17,7 +17,7 @@ target_sources(${PROJECT_NAME}
           ${HDRS}
 )
 
-# if (HYPRE_USING_CUDA OR HYPRE_USING_HIP)
+# if (HYPRE_USING_GPU)
 #   set(GPU_SRCS
 #      # File name here
 #   )
