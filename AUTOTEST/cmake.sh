@@ -73,7 +73,7 @@ src_dir=`pwd`
 
 # Clean up the cmbuild directories (do it from src_dir as a precaution)
 cd $src_dir
-rm -fr `echo cmbuild/* | sed 's/[^ ]*README.txt//g'`
+rm -fr cmbuild/*
 
 # Clean up the previous install
 cd $src_dir
@@ -83,11 +83,6 @@ rm -fr hypre
 cd $src_dir/cmbuild
 eval cmake $copts ..
 make $mopts install
-
-# Make
-cd $src_dir/cmbuild/test
-make $mopts
-mv -f $drivers ../../test
 
 cd $test_dir
 
