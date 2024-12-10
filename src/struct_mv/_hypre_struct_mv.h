@@ -58,6 +58,7 @@ typedef struct hypre_Box_struct
    hypre_Index imin;           /* min bounding indices */
    hypre_Index imax;           /* max bounding indices */
    HYPRE_Int   ndim;           /* number of dimensions */
+
 } hypre_Box;
 
 /*--------------------------------------------------------------------------
@@ -73,6 +74,7 @@ typedef struct hypre_BoxArray_struct
    HYPRE_Int   alloc_size;    /* Size of currently alloced space */
    HYPRE_Int   ndim;          /* number of dimensions */
    HYPRE_Int  *ids;           /* box identifiers */
+
 } hypre_BoxArray;
 
 #define hypre_BoxArrayExcess 10
@@ -90,6 +92,7 @@ typedef struct hypre_BoxArrayArray_struct
    HYPRE_Int         alloc_size;    /* Size of currently alloced space */
    HYPRE_Int         ndim;          /* number of dimensions */
    HYPRE_Int        *ids;           /* box array identifiers */
+
 } hypre_BoxArrayArray;
 
 /*--------------------------------------------------------------------------
@@ -1677,6 +1680,8 @@ typedef struct hypre_StructVector_struct
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_StructVector
+ *
+ * Notation: 'i' is a grid box index and 'b' is a base-grid box index
  *--------------------------------------------------------------------------*/
 
 #define hypre_StructVectorComm(vector)           ((vector) -> comm)
@@ -1695,16 +1700,18 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorBGhostNotClear(vector) ((vector) -> bghost_not_clear)
 #define hypre_StructVectorGlobalSize(vector)     ((vector) -> global_size)
 #define hypre_StructVectorRefCount(vector)       ((vector) -> ref_count)
-#define hypre_StructVectorSaveGrid(vector)      ((vector) -> save_grid)
-#define hypre_StructVectorSaveStride(vector)    ((vector) -> save_stride)
-#define hypre_StructVectorSaveData(vector)      ((vector) -> save_data)
-#define hypre_StructVectorSaveDataSpace(vector) ((vector) -> save_data_space)
-#define hypre_StructVectorSaveDataSize(vector)  ((vector) -> save_data_size)
+#define hypre_StructVectorSaveGrid(vector)       ((vector) -> save_grid)
+#define hypre_StructVectorSaveStride(vector)     ((vector) -> save_stride)
+#define hypre_StructVectorSaveData(vector)       ((vector) -> save_data)
+#define hypre_StructVectorSaveDataSpace(vector)  ((vector) -> save_data_space)
+#define hypre_StructVectorSaveDataSize(vector)   ((vector) -> save_data_size)
 
 #define hypre_StructVectorNDim(vector) \
 hypre_StructGridNDim(hypre_StructVectorGrid(vector))
 
-#define hypre_StructVectorBox(vector, b) \
+/* The following use a base-grid box index */
+
+#define hypre_StructVectorDataSpaceBox(vector, b) \
 hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
 
 #define hypre_StructVectorBoxData(vector, b) \
@@ -1712,7 +1719,25 @@ hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
 
 #define hypre_StructVectorBoxDataValue(vector, b, index) \
 (hypre_StructVectorBoxData(vector, b) + \
- hypre_BoxIndexRank(hypre_StructVectorBox(vector, b), index))
+ hypre_BoxIndexRank(hypre_StructVectorDataSpaceBox(vector, b), index))
+
+/* The following "Grid" macros use a grid box index */
+
+#define hypre_StructVectorGridBaseBox(vector, i) \
+hypre_StructGridBox(hypre_StructVectorGrid(vector), hypre_StructVectorBoxnum(vector, i))
+
+#define hypre_StructVectorGridBoxCopy(vector, i, box) \
+hypre_CopyBox(hypre_StructVectorGridBaseBox(x, i), box); /* on base-grid index space */ \
+hypre_StructVectorMapDataBox(x, box);                    /* maps to data index space */
+
+#define hypre_StructVectorGridDataBox(vector, i) \
+hypre_StructVectorDataSpaceBox(vector, hypre_StructVectorBoxnum(vector, i))
+
+#define hypre_StructVectorGridData(vector, i) \
+hypre_StructVectorBoxData(vector, hypre_StructVectorBoxnum(vector, i))
+
+#define hypre_StructVectorGridDataValue(vector, i, index) \
+hypre_StructVectorBoxDataValue(vector, hypre_StructVectorGridDataBox(vector, i), index)
 
 #endif
 /******************************************************************************
