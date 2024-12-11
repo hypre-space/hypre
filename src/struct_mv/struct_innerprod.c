@@ -16,12 +16,18 @@
 
 /*--------------------------------------------------------------------------
  * hypre_StructInnerProdLocal
+ *
+ * The vectors x and y may have different base grids, but the grid boxes for
+ * each vector (defined by grid, stride, nboxes, boxnums) must be the same.
+ * Only nboxes is checked, the rest is assumed to be true.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Real
 hypre_StructInnerProdLocal( hypre_StructVector *x,
                             hypre_StructVector *y )
 {
+   HYPRE_Int        ndim = hypre_StructVectorNDim(x);
+
    HYPRE_Real       result = 0.0;
 
    hypre_Box       *x_data_box;
@@ -30,30 +36,39 @@ hypre_StructInnerProdLocal( hypre_StructVector *x,
    HYPRE_Complex   *xp;
    HYPRE_Complex   *yp;
 
-   hypre_BoxArray  *boxes;
-   hypre_Box       *box;
+   HYPRE_Int        nboxes;
+   hypre_Box       *loop_box;
    hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      unit_stride;
 
-   HYPRE_Int        ndim = hypre_StructVectorNDim(x);
    HYPRE_Int        i;
 
+   nboxes = hypre_StructVectorNBoxes(x);
+
+   /* Return if nboxes is not the same for x and y */
+   if (nboxes != hypre_StructVectorNBoxes(y))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "StructInnerProd: nboxes for x and y do not match!");
+
+      return hypre_error_flag;
+   }
+
+   loop_box = hypre_BoxCreate(ndim);
    hypre_SetIndex(unit_stride, 1);
 
-   boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
-   hypre_ForBoxI(i, boxes)
+   for (i = 0; i < nboxes; i++)
    {
-      box   = hypre_BoxArrayBox(boxes, i);
-      start = hypre_BoxIMin(box);
+      hypre_StructVectorGridBoxCopy(x, i, loop_box);
+      start = hypre_BoxIMin(loop_box);
 
-      x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-      y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
+      x_data_box = hypre_StructVectorGridDataBox(x, i);
+      y_data_box = hypre_StructVectorGridDataBox(y, i);
 
-      xp = hypre_StructVectorBoxData(x, i);
-      yp = hypre_StructVectorBoxData(y, i);
+      xp = hypre_StructVectorGridData(x, i);
+      yp = hypre_StructVectorGridData(y, i);
 
-      hypre_BoxGetSize(box, loop_size);
+      hypre_BoxGetSize(loop_box, loop_size);
 
 #if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
       HYPRE_Real box_sum = 0.0;
@@ -88,6 +103,8 @@ hypre_StructInnerProdLocal( hypre_StructVector *x,
 
       result += (HYPRE_Real) box_sum;
    }
+
+   hypre_BoxDestroy(loop_box);
 
    return result;
 }
