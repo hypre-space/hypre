@@ -135,6 +135,7 @@ hypre_StructJacobiSetup( void               *jacobi_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * RDF TODO: Partially supports non-unitary strides.  Need to fix matrix part.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -154,15 +155,15 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
    HYPRE_Real              tol2             = tol * tol;
    HYPRE_Int               ndim             = hypre_StructMatrixNDim(A);
 
-   hypre_BoxArray         *boxes;
-   hypre_Box              *compute_box;
    hypre_Box              *A_data_box, *x_data_box, *r_data_box;
 
    HYPRE_Real             *Ap, *xp, *rp;
 
-   hypre_IndexRef          dstart;
-   hypre_Index             dstride;
+   HYPRE_Int               nboxes;
+   hypre_Box              *loop_box;
    hypre_Index             loop_size;
+   hypre_IndexRef          start;
+   hypre_Index             unit_stride;
 
    HYPRE_Int               iter, i, stencil_diag;
    HYPRE_Real              bsumsq, rsumsq;
@@ -203,9 +204,10 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
       bsumsq = hypre_StructInnerProd( b, b );
    }
 
+   nboxes = hypre_StructVectorNBoxes(x);
    stencil_diag = hypre_StructStencilDiagEntry(hypre_StructMatrixStencil(A));
-   compute_box = hypre_BoxCreate(ndim);
-   hypre_SetIndex(dstride, 1);
+   loop_box = hypre_BoxCreate(ndim);
+   hypre_SetIndex(unit_stride, 1);
 
    /*----------------------------------------------------------
     * Do zero_guess iteration
@@ -217,29 +219,28 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
    {
       /* Compute x <-- weight D^-1 b */
 
-      boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(x));
-      hypre_ForBoxI(i, boxes)
+      for (i = 0; i < nboxes; i++)
       {
-         hypre_CopyBox(hypre_BoxArrayBox(boxes, i), compute_box);
-         hypre_StructVectorMapDataBox(x, compute_box);
-         hypre_BoxGetSize(compute_box, loop_size);
-         dstart = hypre_BoxIMin(compute_box);
+         hypre_StructVectorGridBoxCopy(x, i, loop_box);
+         start = hypre_BoxIMin(loop_box);
 
          A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-         x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-         r_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i); /* r = b */
+         x_data_box = hypre_StructVectorGridDataBox(x, i);
+         r_data_box = hypre_StructVectorGridDataBox(b, i); /* r = b */
 
          Ap = hypre_StructMatrixBoxData(A, i, stencil_diag);
-         xp = hypre_StructVectorBoxData(x, i);
-         rp = hypre_StructVectorBoxData(b, i); /* r = b */
+         xp = hypre_StructVectorGridData(x, i);
+         rp = hypre_StructVectorGridData(b, i); /* r = b */
+
+         hypre_BoxGetSize(loop_box, loop_size);
 
          if (hypre_StructMatrixConstEntry(A, stencil_diag))
          {
             /* Constant coefficient case */
             HYPRE_Real scale = weight / Ap[0];
             hypre_BoxLoop2Begin(ndim, loop_size,
-                                x_data_box, dstart, dstride, xi,
-                                r_data_box, dstart, dstride, ri);
+                                x_data_box, start, unit_stride, xi,
+                                r_data_box, start, unit_stride, ri);
             {
                xp[xi] = scale * rp[ri];
             }
@@ -249,9 +250,9 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
          {
             /* Variable coefficient case */
             hypre_BoxLoop3Begin(ndim, loop_size,
-                                A_data_box, dstart, dstride, Ai,
-                                x_data_box, dstart, dstride, xi,
-                                r_data_box, dstart, dstride, ri);
+                                A_data_box, start, unit_stride, Ai,
+                                x_data_box, start, unit_stride, xi,
+                                r_data_box, start, unit_stride, ri);
             {
                xp[xi] = weight * rp[ri] / Ap[Ai];
             }
@@ -288,29 +289,28 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
 
       /* Compute x <-- x + weight D^-1 r */
 
-      boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(x));
-      hypre_ForBoxI(i, boxes)
+      for (i = 0; i < nboxes; i++)
       {
-         hypre_CopyBox(hypre_BoxArrayBox(boxes, i), compute_box);
-         hypre_StructVectorMapDataBox(x, compute_box);
-         hypre_BoxGetSize(compute_box, loop_size);
-         dstart = hypre_BoxIMin(compute_box);
+         hypre_StructVectorGridBoxCopy(x, i, loop_box);
+         start = hypre_BoxIMin(loop_box);
 
          A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-         x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-         r_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(r), i);
+         x_data_box = hypre_StructVectorGridDataBox(x, i);
+         r_data_box = hypre_StructVectorGridDataBox(r, i);
 
          Ap = hypre_StructMatrixBoxData(A, i, stencil_diag);
-         xp = hypre_StructVectorBoxData(x, i);
-         rp = hypre_StructVectorBoxData(r, i);
+         xp = hypre_StructVectorGridData(x, i);
+         rp = hypre_StructVectorGridData(r, i);
+
+         hypre_BoxGetSize(loop_box, loop_size);
 
          if (hypre_StructMatrixConstEntry(A, stencil_diag))
          {
             /* Constant coefficient case */
             HYPRE_Real scale = weight / Ap[0];
             hypre_BoxLoop2Begin(ndim, loop_size,
-                                x_data_box, dstart, dstride, xi,
-                                r_data_box, dstart, dstride, ri);
+                                x_data_box, start, unit_stride, xi,
+                                r_data_box, start, unit_stride, ri);
             {
                xp[xi] += scale * rp[ri];
             }
@@ -320,9 +320,9 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
          {
             /* Variable coefficient case */
             hypre_BoxLoop3Begin(ndim, loop_size,
-                                A_data_box, dstart, dstride, Ai,
-                                x_data_box, dstart, dstride, xi,
-                                r_data_box, dstart, dstride, ri);
+                                A_data_box, start, unit_stride, Ai,
+                                x_data_box, start, unit_stride, xi,
+                                r_data_box, start, unit_stride, ri);
             {
                xp[xi] += weight * rp[ri] / Ap[Ai];
             }
@@ -351,7 +351,7 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
    }
    (jacobi_data -> num_iterations) = iter;
 
-   hypre_BoxDestroy(compute_box);
+   hypre_BoxDestroy(loop_box);
 
    /*-----------------------------------------------------------------------
     * Return

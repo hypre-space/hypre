@@ -646,6 +646,8 @@ HYPRE_Int
 hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
                                hypre_ParVector     **parvector_ptr )
 {
+   HYPRE_Int             ndim = hypre_SStructVectorNDim(vector);
+
    hypre_ParVector      *parvector;
    HYPRE_Complex        *pardata;
    HYPRE_Int             pari;
@@ -654,16 +656,17 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
    hypre_StructVector   *y;
    hypre_Box            *y_data_box;
    HYPRE_Complex        *yp;
-   hypre_BoxArray       *boxes;
-   hypre_Box            *box;
+   HYPRE_Int             nboxes;
+   hypre_Box            *loop_box;
    hypre_Index           loop_size;
    hypre_IndexRef        start;
-   hypre_Index           stride;
+   hypre_Index           unit_stride;
 
    HYPRE_Int             nparts, nvars;
    HYPRE_Int             part, var, i;
 
-   hypre_SetIndex(stride, 1);
+   loop_box = hypre_BoxCreate(ndim);
+   hypre_SetIndex(unit_stride, 1);
 
    parvector = hypre_SStructVectorParVector(vector);
    pardata = hypre_VectorData(hypre_ParVectorLocalVector(parvector));
@@ -677,23 +680,22 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
       {
          y = hypre_SStructPVectorSVector(pvector, var);
 
-         boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
-         hypre_ForBoxI(i, boxes)
+         nboxes = hypre_StructVectorNBoxes(y);
+         for (i = 0; i < nboxes; i++)
          {
-            box   = hypre_BoxArrayBox(boxes, i);
-            start = hypre_BoxIMin(box);
+            hypre_StructVectorGridBoxCopy(y, i, loop_box);
+            start = hypre_BoxIMin(loop_box);
 
-            y_data_box =
-               hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
-            yp = hypre_StructVectorBoxData(y, i);
+            y_data_box = hypre_StructVectorGridDataBox(y, i);
+            yp = hypre_StructVectorGridData(y, i);
 
-            hypre_BoxGetSize(box, loop_size);
+            hypre_BoxGetSize(loop_box, loop_size);
 
 #undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(pardata,yp)
-            hypre_BoxLoop2Begin(hypre_SStructVectorNDim(vector), loop_size,
-                                y_data_box, start, stride, yi,
-                                box,        start, stride, bi);
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                y_data_box, start, unit_stride, yi,
+                                loop_box,   start, unit_stride, bi);
             {
                pardata[pari + bi] = yp[yi];
             }
@@ -701,10 +703,12 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
 #undef DEVICE_VAR
 #define DEVICE_VAR
 
-            pari += hypre_BoxVolume(box);
+            pari += hypre_BoxVolume(loop_box);
          }
       }
    }
+
+   hypre_BoxDestroy(loop_box);
 
    *parvector_ptr = hypre_SStructVectorParVector(vector);
 
@@ -734,6 +738,8 @@ HYPRE_Int
 hypre_SStructVectorParRestore( hypre_SStructVector *vector,
                                hypre_ParVector     *parvector )
 {
+   HYPRE_Int             ndim = hypre_SStructVectorNDim(vector);
+
    HYPRE_Complex        *pardata;
    HYPRE_Int             pari;
 
@@ -741,18 +747,19 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
    hypre_StructVector   *y;
    hypre_Box            *y_data_box;
    HYPRE_Complex        *yp;
-   hypre_BoxArray       *boxes;
-   hypre_Box            *box;
+   HYPRE_Int             nboxes;
+   hypre_Box            *loop_box;
    hypre_Index           loop_size;
    hypre_IndexRef        start;
-   hypre_Index           stride;
+   hypre_Index           unit_stride;
 
    HYPRE_Int             nparts, nvars;
    HYPRE_Int             part, var, i;
 
    if (parvector != NULL)
    {
-      hypre_SetIndex(stride, 1);
+      loop_box = hypre_BoxCreate(ndim);
+      hypre_SetIndex(unit_stride, 1);
 
       parvector = hypre_SStructVectorParVector(vector);
       pardata = hypre_VectorData(hypre_ParVectorLocalVector(parvector));
@@ -766,23 +773,22 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
          {
             y = hypre_SStructPVectorSVector(pvector, var);
 
-            boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
-            hypre_ForBoxI(i, boxes)
+            nboxes = hypre_StructVectorNBoxes(y);
+            for (i = 0; i < nboxes; i++)
             {
-               box   = hypre_BoxArrayBox(boxes, i);
-               start = hypre_BoxIMin(box);
+               hypre_StructVectorGridBoxCopy(y, i, loop_box);
+               start = hypre_BoxIMin(loop_box);
+               
+               y_data_box = hypre_StructVectorGridDataBox(y, i);
+               yp = hypre_StructVectorGridData(y, i);
 
-               y_data_box =
-                  hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
-               yp = hypre_StructVectorBoxData(y, i);
-
-               hypre_BoxGetSize(box, loop_size);
+               hypre_BoxGetSize(loop_box, loop_size);
 
 #undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(yp,pardata)
                hypre_BoxLoop2Begin(hypre_SStructVectorNDim(vector), loop_size,
-                                   y_data_box, start, stride, yi,
-                                   box,        start, stride, bi);
+                                   y_data_box, start, unit_stride, yi,
+                                   loop_box,   start, unit_stride, bi);
                {
                   yp[yi] = pardata[pari + bi];
                }
@@ -790,10 +796,12 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
 #undef DEVICE_VAR
 #define DEVICE_VAR
 
-               pari += hypre_BoxVolume(box);
+               pari += hypre_BoxVolume(loop_box);
             }
          }
       }
+
+      hypre_BoxDestroy(loop_box);
    }
 
    return hypre_error_flag;
@@ -908,6 +916,8 @@ hypre_SStructVectorClearGhostValues(hypre_SStructVector *vector)
  *
  * Print vector to a format readable by GLVis.
  * This is mainly for debugging purposes.
+ *
+ * RDF TODO: Update to use non-unitary stride?
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
