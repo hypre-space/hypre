@@ -662,8 +662,6 @@ main( hypre_int argc,
    size_t umpire_host_pool_size   = 4294967296; // 4 GiB
 #endif
 
-   HYPRE_SetPrintErrorMode(1);
-
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
@@ -2742,6 +2740,17 @@ main( hypre_int argc,
 
       hypre_printf("Running with these driver parameters:\n");
       hypre_printf("  solver ID    = %d\n\n", solver_id);
+   }
+
+   /*-----------------------------------------------------------
+    * Set various things
+    *-----------------------------------------------------------*/
+
+   HYPRE_SetPrintErrorMode(1);
+   if (test_error == 1)
+   {
+      HYPRE_SetPrintErrorVerbosity(-1, 0);                   /* turn all errors off */
+      HYPRE_SetPrintErrorVerbosity(HYPRE_ERROR_GENERIC, 1);  /* turn generic errors on */
    }
 
 #if defined(HYPRE_USING_DEVICE_POOL)
@@ -9383,8 +9392,15 @@ final:
    }
    else
    {
-      HYPRE_PrintErrorMessages(comm);
+      if (myid == 0)
+      {
+         HYPRE_PrintErrorMessages(comm);
+      }
    }
+
+   /* Free the memory buffer allocated for storing error messages when using mode 1 for printing errors
+      Note: This call is redundant since the cleanup is already handled in HYPRE_Finalize. */
+   HYPRE_ClearErrorMessages();
 
    /* Finalize Hypre */
    HYPRE_Finalize();

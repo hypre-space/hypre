@@ -73,6 +73,9 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
    hypre_HandleDeviceData(hypre_handle_) = NULL;
 #endif
 
+   /* Deallocate error messages in error handler */
+   hypre_error_handler_clear_messages();
+
    /* Note: Directly using free since this variable was allocated with calloc */
    free((void*) hypre_handle_);
 

@@ -460,6 +460,9 @@ ReadData( char         *filename,
          /* read the next input line */
          sdata_line = fgets((sdata + sdata_size), maxline, file);
       }
+
+      /* Close file handle */
+      fclose(file);
    }
    /* broadcast the data size */
    hypre_MPI_Bcast(&sdata_size, 1, HYPRE_MPI_INT, 0, hypre_MPI_COMM_WORLD);
@@ -3969,6 +3972,7 @@ main( hypre_int argc,
                }
             }
          }
+         fclose(file);
 
          /* re-initializes x to 0 */
          hypre_SStructAxpy(-1.0, b, x);

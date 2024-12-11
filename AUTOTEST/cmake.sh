@@ -6,7 +6,7 @@
 
 testname=`basename $0 .sh`
 
-drivers="ij sstruct struct ams_driver maxwell_unscaled sstruct_fac ij_mv struct_migrate ij_assembly"
+drivers="ij sstruct struct ams_driver maxwell_unscaled sstruct_fac struct_migrate ij_assembly"
 
 # Echo usage information
 case $1 in
@@ -114,4 +114,3 @@ cd $src_dir
 rm -fr `echo cmbuild/* | sed 's/[^ ]*README.txt//g'`
 rm -fr hypre
 ( cd $src_dir/test; rm -f $drivers; ./cleantest.sh )
-

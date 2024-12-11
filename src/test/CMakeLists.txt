@@ -17,9 +17,7 @@ set(TEST_SRCS
   maxwell_unscaled.c
   struct_migrate.c
   sstruct_fac.c
-  ij_mv.c
   ij_assembly.c
 )
 
 add_hypre_executables(TEST_SRCS)
- 
