@@ -778,7 +778,7 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
             {
                hypre_StructVectorGridBoxCopy(y, i, loop_box);
                start = hypre_BoxIMin(loop_box);
-               
+
                y_data_box = hypre_StructVectorGridDataBox(y, i);
                yp = hypre_StructVectorGridData(y, i);
 
