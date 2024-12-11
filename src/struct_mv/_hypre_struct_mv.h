@@ -1727,8 +1727,8 @@ hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
 hypre_StructGridBox(hypre_StructVectorGrid(vector), hypre_StructVectorBoxnum(vector, i))
 
 #define hypre_StructVectorGridBoxCopy(vector, i, box) \
-hypre_CopyBox(hypre_StructVectorGridBaseBox(x, i), box); /* on base-grid index space */ \
-hypre_StructVectorMapDataBox(x, box);                    /* maps to data index space */
+hypre_CopyBox(hypre_StructVectorGridBaseBox(vector, i), box); /* on base-grid index space */ \
+hypre_StructVectorMapDataBox(vector, box);                    /* maps to data index space */
 
 #define hypre_StructVectorGridDataBox(vector, i) \
 hypre_StructVectorDataSpaceBox(vector, hypre_StructVectorBoxnum(vector, i))
@@ -2464,7 +2464,6 @@ HYPRE_Int hypre_StructVectorSetNumGhost ( hypre_StructVector *vector, HYPRE_Int 
 HYPRE_Int hypre_StructVectorSetDataSize(hypre_StructVector *vector, HYPRE_Int *data_size,
                                         HYPRE_Int *data_host_size);
 HYPRE_Int hypre_StructVectorAssemble ( hypre_StructVector *vector );
-HYPRE_Int hypre_StructVectorCopy ( hypre_StructVector *x, hypre_StructVector *y );
 HYPRE_Int hypre_StructVectorSetConstantValues ( hypre_StructVector *vector, HYPRE_Complex value );
 HYPRE_Int hypre_StructVectorSetRandomValues ( hypre_StructVector *vector, HYPRE_Int seed );
 HYPRE_Int hypre_StructVectorSetFunctionValues ( hypre_StructVector *vector,

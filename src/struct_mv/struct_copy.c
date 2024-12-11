@@ -9,6 +9,9 @@
  *
  * Structured copy routine
  *
+ * RDF TODO: The names for the vector class functions needs to be revisited.
+ * Should this be hypre_StructVectorCopy?  What should our user interface
+ * conventions be for these routines?
  *****************************************************************************/
 
 #include "_hypre_struct_mv.h"
@@ -100,6 +103,9 @@ hypre_StructCopy( hypre_StructVector *x,
  * hypre_StructPartialCopy: copy only the components on a subset of the grid.
  * A BoxArrayArray of boxes are needed- for each box of x, only an array
  * of subboxes (i.e., a boxarray for each box of x) are copied.
+ *
+ * RDF TODO: Remove this routine and the SStruct routine that calls it.  Need to
+ * remove the FAC solver as well (it's the only thing that uses it).
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

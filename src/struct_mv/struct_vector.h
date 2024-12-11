@@ -108,8 +108,8 @@ hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
 hypre_StructGridBox(hypre_StructVectorGrid(vector), hypre_StructVectorBoxnum(vector, i))
 
 #define hypre_StructVectorGridBoxCopy(vector, i, box) \
-hypre_CopyBox(hypre_StructVectorGridBaseBox(x, i), box); /* on base-grid index space */ \
-hypre_StructVectorMapDataBox(x, box);                    /* maps to data index space */
+hypre_CopyBox(hypre_StructVectorGridBaseBox(vector, i), box); /* on base-grid index space */ \
+hypre_StructVectorMapDataBox(vector, box);                    /* maps to data index space */
 
 #define hypre_StructVectorGridDataBox(vector, i) \
 hypre_StructVectorDataSpaceBox(vector, hypre_StructVectorBoxnum(vector, i))

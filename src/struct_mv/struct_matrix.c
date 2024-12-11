@@ -2581,9 +2581,12 @@ hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
 /*--------------------------------------------------------------------------
  * hypre_StructMatrixGetDiagonal
  *
- * Returns the diagonal of a StructMatrix as a StructVector
+ * Returns the diagonal of a square StructMatrix as a StructVector
  *
  * TODO: Create StructVector if diag is NULL
+ *
+ * RDF TODO: This routine should assume that the base grid for matrix and diag
+ * are the same.  Extend it to work when the matrix has non-unitary stride.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
