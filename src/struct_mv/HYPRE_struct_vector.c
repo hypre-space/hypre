@@ -347,15 +347,12 @@ HYPRE_StructVectorSetNumGhost( HYPRE_StructVector  vector,
 
 /*--------------------------------------------------------------------------
  * HYPRE_StructVectorCopy
- * copies data from x to y
- * y has its own data array, so this is a deep copy in that sense.
- * The grid and other size information are not copied - they are
- * assumed to be consistent already.
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 HYPRE_StructVectorCopy( HYPRE_StructVector x, HYPRE_StructVector y )
 {
-   return ( hypre_StructVectorCopy( x, y ) );
+   return ( hypre_StructCopy( x, y ) );
 }
 
 /*--------------------------------------------------------------------------
