@@ -1262,8 +1262,8 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
  *      that the process has had in CPU RAM at any point in time, aka.
  *      high water mark.
  *
- *    - mem[4]: free
- *      The amount of free CPU RAM available in the system.
+ *    - mem[4]: used
+ *      The amount of used CPU RAM in the system.
  *
  *    - mem[5]: total
  *      The total amount of CPU RAM installed in the system.
@@ -1280,7 +1280,7 @@ hypre_HostMemoryGetUsage(HYPRE_Real *mem)
    size_t       vm_peak  = 0;
    size_t       tot_mem  = 0;
    size_t       free_mem = 0;
-   HYPRE_Real   b_to_gb  = (HYPRE_Real) (1 << 30);
+   HYPRE_Real   b_to_gb  = (HYPRE_Real) (1e9);
 
    /* Sanity check */
    if (!mem)
@@ -1369,7 +1369,7 @@ hypre_HostMemoryGetUsage(HYPRE_Real *mem)
    mem[1] = vm_peak  / b_to_gb;
    mem[2] = vm_rss   / b_to_gb;
    mem[3] = vm_hwm   / b_to_gb;
-   mem[4] = free_mem / b_to_gb;
+   mem[4] = (tot_mem - free_mem) / b_to_gb;
    mem[5] = tot_mem  / b_to_gb;
 
    return hypre_error_flag;
@@ -1385,21 +1385,25 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
                        const char *function,
                        HYPRE_Int   line)
 {
-#if defined(HYPRE_USING_UMPIRE)
-   HYPRE_Int    ne = 14;
-#else
    HYPRE_Int    ne = 6;
-#endif
-   HYPRE_Real   lmem[14];
-   HYPRE_Real   min[14];
-   HYPRE_Real   max[14];
-   HYPRE_Real   avg[14];
-   HYPRE_Real   ssq[14];
-   HYPRE_Real   std[14];
+   HYPRE_Real   lmem[16];
+   HYPRE_Real   min[16];
+   HYPRE_Real   max[16];
+   HYPRE_Real   avg[16];
+   HYPRE_Real   ssq[16];
+   HYPRE_Real   std[16];
    HYPRE_Real  *gmem = NULL;
    HYPRE_Int    i, j, myid, nprocs, ndigits;
    const char  *labels[] = {"Min", "Max", "Avg", "Std"};
    HYPRE_Real  *data[]   = {min, max, avg, std};
+
+#if defined(HYPRE_USING_UMPIRE)
+   ne += 8;
+#endif
+
+#if defined(HYPRE_USING_GPU)
+   ne += 2;
+#endif
 
    /* Return if neither the 1st nor 2nd bits of log_level are set */
    if (!(log_level & 0x3))
@@ -1432,9 +1436,14 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
    /* Get host memory info */
    hypre_HostMemoryGetUsage(lmem);
 
+   /* Get device memory info */
+#if defined(HYPRE_USING_GPU)
+   hypre_DeviceMemoryGetUsage(&lmem[6]);
+#endif
+
    /* Get umpire memory info */
 #if defined(HYPRE_USING_UMPIRE)
-   hypre_UmpireMemoryGetUsage(&lmem[6]);
+   hypre_UmpireMemoryGetUsage(&lmem[8]);
 #endif
 
    /* Gather memory info to rank 0 */
@@ -1491,27 +1500,30 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
             hypre_printf(" | Vm[Size,RSS]/[Peak,HWM]: (%.2f, %.2f / %.2f, %.2f) GB",
                          gmem[ne * i + 0], gmem[ne * i + 2],
                          gmem[ne * i + 1], gmem[ne * i + 3]);
-            hypre_printf(" | Free/Total: (%.2f / %.2f)", gmem[ne * i + 4], gmem[ne * i + 5]);
+            hypre_printf(" | Used/Total: (%.2f / %.2f)", gmem[ne * i + 4], gmem[ne * i + 5]);
+#if defined(HYPRE_USING_GPU)
+            hypre_printf(" | Used/Total VRAM: (%.2f / %.2f)", gmem[ne * i + 6], gmem[ne * i + 7]);
+#endif
 #if defined(HYPRE_USING_UMPIRE)
-            if (gmem[ne * i + 7])
-            {
-               hypre_printf(" | UmpHSize/UmpHPeak: (%.2f / %.2f)",
-                            gmem[ne * i + 6], gmem[ne * i + 7]);
-            }
             if (gmem[ne * i + 9])
             {
-               hypre_printf(" | UmpDPeak/UmpDPeak: (%.2f / %.2f)",
+               hypre_printf(" | UmpHSize/UmpHPeak: (%.2f / %.2f)",
                             gmem[ne * i + 8], gmem[ne * i + 9]);
             }
             if (gmem[ne * i + 11])
             {
-               hypre_printf(" | UmpUPeak/UmpUPeak: (%.2f / %.2f)",
+               hypre_printf(" | UmpDSize/UmpDPeak: (%.2f / %.2f)",
                             gmem[ne * i + 10], gmem[ne * i + 11]);
             }
             if (gmem[ne * i + 13])
             {
-               hypre_printf(" | UmpPSize/UmpPPeak: (%.2f / %.2f)",
+               hypre_printf(" | UmpUSize/UmpUPeak: (%.2f / %.2f)",
                             gmem[ne * i + 12], gmem[ne * i + 13]);
+            }
+            if (gmem[ne * i + 15])
+            {
+               hypre_printf(" | UmpPSize/UmpPPeak: (%.2f / %.2f)",
+                            gmem[ne * i + 14], gmem[ne * i + 15]);
             }
 #endif
             hypre_printf("\n");
@@ -1534,6 +1546,9 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
          /* Print header */
          hypre_printf("       | %11s | %11s | %11s | %11s",
                       "VmSize (GB)", "VmPeak (GB)", "VmRSS (GB)", "VmHWM (GB)");
+#if defined(HYPRE_USING_GPU)
+         hypre_printf(" | %13s | %14s", "VRAMsize (GB)", "VRAMtotal (GB)");
+#endif
 #if defined(HYPRE_USING_UMPIRE_HOST)
          hypre_printf(" | %13s | %13s", "UmpHSize (GB)", "UmpHPeak (GB)");
 #endif
@@ -1541,13 +1556,19 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
          hypre_printf(" | %13s | %13s", "UmpDSize (GB)", "UmpDPeak (GB)");
 #endif
 #if defined(HYPRE_USING_UMPIRE_UM)
-         hypre_printf(" | %13s | %13s", "UmpUSize (GB)", "UmpUPeak (GB)");
+         if (max[12] > 0.0)
+         {
+            hypre_printf(" | %13s | %13s", "UmpUSize (GB)", "UmpUPeak (GB)");
+         }
 #endif
 #if defined(HYPRE_USING_UMPIRE_PINNED)
          hypre_printf(" | %13s | %13s", "UmpPSize (GB)", "UmpPPeak (GB)")
 #endif
          hypre_printf("\n");
          hypre_printf("   ----+-------------+-------------+-------------+------------");
+#if defined(HYPRE_USING_GPU)
+         hypre_printf("-+---------------+---------------");
+#endif
 #if defined(HYPRE_USING_UMPIRE_HOST)
          hypre_printf("-+---------------+--------------");
 #endif
@@ -1555,7 +1576,10 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
          hypre_printf("-+---------------+--------------");
 #endif
 #if defined(HYPRE_USING_UMPIRE_UM)
-         hypre_printf("-+---------------+--------------");
+         if (max[12] > 0.0)
+         {
+            hypre_printf("-+---------------+--------------");
+         }
 #endif
 #if defined(HYPRE_USING_UMPIRE_PINNED)
          hypre_printf("-+---------------+--------------");
@@ -1568,17 +1592,23 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
             hypre_printf("   %-3s", labels[i]);
             hypre_printf(" | %11.3f | %11.3f | %11.3f | %11.3f",
                          data[i][0], data[i][1], data[i][2], data[i][3]);
-#if defined(HYPRE_USING_UMPIRE_HOST)
-            hypre_printf(" | %13.3f | %13.3f", data[i][6], data[i][7]);
+#if defined(HYPRE_USING_GPU)
+            hypre_printf(" | %13.3f | %14.3f", data[i][6], data[i][7]);
 #endif
-#if defined(HYPRE_USING_UMPIRE_DEVICE)
+#if defined(HYPRE_USING_UMPIRE_HOST)
             hypre_printf(" | %13.3f | %13.3f", data[i][8], data[i][9]);
 #endif
-#if defined(HYPRE_USING_UMPIRE_UM)
+#if defined(HYPRE_USING_UMPIRE_DEVICE)
             hypre_printf(" | %13.3f | %13.3f", data[i][10], data[i][11]);
 #endif
+#if defined(HYPRE_USING_UMPIRE_UM)
+            if (max[12] > 0.0)
+            {
+               hypre_printf(" | %13.3f | %13.3f", data[i][12], data[i][13]);
+            }
+#endif
 #if defined(HYPRE_USING_UMPIRE_PINNED)
-            hypre_printf(" | %13.3f | %13.3f", data[i][12], data[i][13]);
+            hypre_printf(" | %13.3f | %13.3f", data[i][14], data[i][15]);
 #endif
             hypre_printf("\n");
          }
@@ -2016,10 +2046,10 @@ hypre_UmpireInit(hypre_Handle *hypre_handle_)
 {
    umpire_resourcemanager_get_instance(&hypre_HandleUmpireResourceMan(hypre_handle_));
 
-   hypre_HandleUmpireDevicePoolSize(hypre_handle_) = 4LL * (1 << 30); // 4 GB
-   hypre_HandleUmpireUMPoolSize(hypre_handle_)     = 4LL * (1 << 30); // 4 GB
-   hypre_HandleUmpireHostPoolSize(hypre_handle_)   = 4LL * (1 << 30); // 4 GB
-   hypre_HandleUmpirePinnedPoolSize(hypre_handle_) = 4LL * (1 << 30); // 4 GB
+   hypre_HandleUmpireDevicePoolSize(hypre_handle_) = 4LL * (1 << 30); // 4 GiB
+   hypre_HandleUmpireUMPoolSize(hypre_handle_)     = 4LL * (1 << 30); // 4 GiB
+   hypre_HandleUmpireHostPoolSize(hypre_handle_)   = 4LL * (1 << 30); // 4 GiB
+   hypre_HandleUmpirePinnedPoolSize(hypre_handle_) = 4LL * (1 << 30); // 4 GiB
 
    hypre_HandleUmpireBlockSize(hypre_handle_) = 512;
 
@@ -2149,7 +2179,7 @@ hypre_UmpireMemoryGetUsage(HYPRE_Real *memory)
    /* Convert bytes to GB */
    for (i = 0; i < 8; i++)
    {
-      memory[i] = ((HYPRE_Real) memoryB[i]) / ((HYPRE_Real) (1 << 30));
+      memory[i] = ((HYPRE_Real) memoryB[i]) / ((HYPRE_Real) (1e9));
    }
 
    return hypre_error_flag;

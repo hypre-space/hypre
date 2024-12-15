@@ -348,6 +348,51 @@ hypre_ForceSyncComputeStream()
 
 #if defined(HYPRE_USING_GPU)
 
+/*--------------------------------------------------------------------------
+ * hypre_DeviceMemoryGetUsage
+ *
+ * Retrieves memory usage statistics for the current GPU device. The function
+ * fills an array with memory data, converted to gigabytes (GB):
+ *
+ *    - mem[0]: Current memory usage (allocated by the process).
+ *    - mem[1]: Total device memory available on the GPU.
+ *
+ * This implementation supports NVIDIA GPUs using CUDA and AMD GPUs using HIP.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_DeviceMemoryGetUsage(HYPRE_Real *mem)
+{
+   size_t       free_mem  = 0;
+   size_t       total_mem = 0;
+   HYPRE_Real   b_to_gb   = (HYPRE_Real)(1e9);
+
+   /* Sanity check */
+   if (!mem)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Mem is a NULL pointer!");
+      return hypre_error_flag;
+   }
+
+   /* Get free and total memory available on the device */
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_CUDA_CALL(cudaMemGetInfo(&free_mem, &total_mem));
+
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL(hipMemGetInfo(&free_mem, &total_mem));
+
+#else
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "No supported GPU backend found!");
+   return hypre_error_flag;
+#endif
+
+   /* Convert data from bytes to GB (HYPRE_Real) */
+   mem[0] = (total_mem - free_mem) / b_to_gb;
+   mem[1] = total_mem / b_to_gb;
+
+   return hypre_error_flag;
+}
+
 /*--------------------------------------------------------------------
  * hypre_DeviceDataComputeStream
  *--------------------------------------------------------------------*/

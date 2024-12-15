@@ -304,7 +304,9 @@ HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
  * HYPRE AP user functions
  *--------------------------------------------------------------------------*/
 
-/*Checks whether the AP is on */
+/* Checks whether the AP is on */
+/* TODO (VPM): this function is provided for backwards compatibility
+   and will be removed in a future release */
 HYPRE_Int HYPRE_AssumedPartitionCheck(void);
 
 /*--------------------------------------------------------------------------
