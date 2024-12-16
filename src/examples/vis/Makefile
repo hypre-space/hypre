@@ -4,4 +4,4 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 clean:
-	rm -f *mesh* *sol* *data*
+	@rm -fv *mesh* *sol* *data*

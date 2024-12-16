@@ -33,7 +33,6 @@
 #include <fstream>
 #include "_hypre_utilities.h"
 #include "LLNL_FEI_Impl.h"
-#include "ex.h"
 
 using namespace std;
 

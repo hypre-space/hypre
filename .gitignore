@@ -1,5 +1,6 @@
 *.o
 *.obj
+*.mod
 *.a
 *.so
 *.out.*
@@ -52,7 +53,10 @@ src/test/sstruct_fac
 src/test/struct
 src/test/struct_migrate
 src/test/zboxloop
-src/examples/ex[0-9]
-src/examples/ex1[0-6]
-src/examples/ex5f
+src/examples/ex0[0-9]
+src/examples/ex1[0-8]
+src/examples/ex05big
+src/examples/ex15big
+src/examples/ex18comp
+src/examples/ex05f
 src/examples/ex12f

@@ -78,7 +78,7 @@
       integer*8  solver
       integer*8  precond
 
-      character*32  matfile
+!     character*32  matfile
 
       stat = device_malloc_managed(int(100 * 8, int64), p_values)
 
@@ -248,6 +248,8 @@
          iupper(2) =  4
 !        12 grid points, each with 5 stencil entries
          nvalues = 100
+      else
+         nvalues = 0
       endif
 
       do i = 1, nvalues, nentries

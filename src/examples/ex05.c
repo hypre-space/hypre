@@ -10,9 +10,9 @@
 
    Interface:    Linear-Algebraic (IJ)
 
-   Compile with: make ex5
+   Compile with: make ex05
 
-   Sample run:   mpirun -np 4 ex5
+   Sample run:   mpirun -np 4 ex05
 
    Description:  This example solves the 2-D Laplacian problem with zero boundary
                  conditions on an n x n grid.  The number of unknowns is N=n^2.
@@ -30,7 +30,7 @@
 #include "HYPRE_krylov.h"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_ls.h"
-#include "ex.h"
+#include "ex.h" /* custom_malloc, custom_calloc, custom_free */
 
 #ifdef HYPRE_EXVIS
 #include "vis.c"
@@ -196,9 +196,9 @@ int main (int argc, char *argv[])
       double values[5];
       int cols[5];
       */
-      double *values = (double *) malloc(5 * sizeof(double));
-      int *cols = (int *) malloc(5 * sizeof(int));
-      int *tmp = (int *) malloc(2 * sizeof(int));
+      double *values = (double *) custom_malloc(5 * sizeof(double));
+      int *cols = (int *) custom_malloc(5 * sizeof(int));
+      int *tmp = (int *) custom_malloc(2 * sizeof(int));
 
       for (i = ilower; i <= iupper; i++)
       {
@@ -247,9 +247,9 @@ int main (int argc, char *argv[])
          HYPRE_IJMatrixSetValues(A, 1, &tmp[0], &tmp[1], cols, values);
       }
 
-      free(values);
-      free(cols);
-      free(tmp);
+      custom_free(values);
+      custom_free(cols);
+      custom_free(tmp);
    }
 
    /* Assemble after setting the coefficients */
@@ -287,9 +287,9 @@ int main (int argc, char *argv[])
       double *rhs_values, *x_values;
       int    *rows;
 
-      rhs_values =  (double*) calloc(local_size, sizeof(double));
-      x_values =  (double*) calloc(local_size, sizeof(double));
-      rows = (int*) calloc(local_size, sizeof(int));
+      rhs_values =  (double*) custom_calloc(local_size, sizeof(double));
+      x_values =  (double*) custom_calloc(local_size, sizeof(double));
+      rows = (int*) custom_calloc(local_size, sizeof(int));
 
       for (i = 0; i < local_size; i++)
       {
@@ -301,9 +301,9 @@ int main (int argc, char *argv[])
       HYPRE_IJVectorSetValues(b, local_size, rows, rhs_values);
       HYPRE_IJVectorSetValues(x, local_size, rows, x_values);
 
-      free(x_values);
-      free(rhs_values);
-      free(rows);
+      custom_free(x_values);
+      custom_free(rhs_values);
+      custom_free(rows);
    }
 
 
@@ -575,7 +575,7 @@ int main (int argc, char *argv[])
       if (myid == 0) { printf("Invalid solver id specified.\n"); }
    }
 
-   /* Save the solution for GLVis visualization, see vis/glvis-ex5.sh */
+   /* Save the solution for GLVis visualization, see vis/glvis-ex05.sh */
    if (vis)
    {
 #ifdef HYPRE_EXVIS
@@ -583,8 +583,8 @@ int main (int argc, char *argv[])
       char filename[255];
 
       int nvalues = local_size;
-      int *rows = (int*) calloc(nvalues, sizeof(int));
-      double *values =  (double*) calloc(nvalues, sizeof(double));
+      int *rows = (int*) custom_calloc(nvalues, sizeof(int));
+      double *values =  (double*) custom_calloc(nvalues, sizeof(double));
 
       for (i = 0; i < nvalues; i++)
       {
@@ -594,7 +594,7 @@ int main (int argc, char *argv[])
       /* get the local solution */
       HYPRE_IJVectorGetValues(x, nvalues, rows, values);
 
-      sprintf(filename, "%s.%06d", "vis/ex5.sol", myid);
+      sprintf(filename, "%s.%06d", "vis/ex05.sol", myid);
       if ((file = fopen(filename, "w")) == NULL)
       {
          printf("Error: can't open output file %s\n", filename);
@@ -611,13 +611,13 @@ int main (int argc, char *argv[])
       fflush(file);
       fclose(file);
 
-      free(rows);
-      free(values);
+      custom_free(rows);
+      custom_free(values);
 
       /* save global finite element mesh */
       if (myid == 0)
       {
-         GLVis_PrintGlobalSquareMesh("vis/ex5.mesh", n - 1);
+         GLVis_PrintGlobalSquareMesh("vis/ex05.mesh", n - 1);
       }
 #endif
    }
@@ -649,8 +649,7 @@ int main (int argc, char *argv[])
 int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations,
                                       double rel_residual_norm)
 {
-
-
+   (void) iterations;
    if (rel_residual_norm > .1)
    {
       HYPRE_BoomerAMGSetNumSweeps((HYPRE_Solver)precond_data, 10);
@@ -659,7 +658,6 @@ int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations,
    {
       HYPRE_BoomerAMGSetNumSweeps((HYPRE_Solver)precond_data, 1);
    }
-
 
    return 0;
 }

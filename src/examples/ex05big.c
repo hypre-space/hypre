@@ -10,9 +10,9 @@
 
    Interface:    Linear-Algebraic (IJ)
 
-   Compile with: make ex5big
+   Compile with: make ex05big
 
-   Sample run:   mpirun -np 4 ex5big
+   Sample run:   mpirun -np 4 ex05big
 
    Description:  This example is a slight modification of Example 5 that
                  illustrates the 64-bit integer support in hypre needed to run

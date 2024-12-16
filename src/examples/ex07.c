@@ -10,11 +10,11 @@
 
    Interface:      SStructured interface (SStruct)
 
-   Compile with:   make ex7
+   Compile with:   make ex07
 
-   Sample run:     mpirun -np 16 ex7 -n 33 -solver 10 -K 3 -B 0 -C 1 -U0 2 -F 4
+   Sample run:     mpirun -np 16 ex07 -n 33 -solver 10 -K 3 -B 0 -C 1 -U0 2 -F 4
 
-   To see options: ex7 -help
+   To see options: ex07 -help
 
    Description:    This example uses the sstruct interface to solve the same
                    problem as was solved in Example 4 with the struct interface.
@@ -52,7 +52,7 @@
 #include <math.h>
 #include "HYPRE_krylov.h"
 #include "HYPRE_sstruct_ls.h"
-#include "ex.h"
+#include "ex.h" /* custom_malloc, custom_calloc, custom_free */
 
 #ifdef M_PI
 #define PI M_PI
@@ -105,6 +105,8 @@ double K(double x, double y)
 /* Convection vector, first component */
 double B1(double x, double y)
 {
+   (void) x;
+   (void) y;
    switch (optionB)
    {
       case 0:
@@ -123,6 +125,8 @@ double B1(double x, double y)
 /* Convection vector, second component */
 double B2(double x, double y)
 {
+   (void) x;
+   (void) y;
    switch (optionB)
    {
       case 0:
@@ -141,6 +145,8 @@ double B2(double x, double y)
 /* Reaction coefficient */
 double C(double x, double y)
 {
+   (void) x;
+   (void) y;
    switch (optionC)
    {
       case 0:
@@ -533,7 +539,7 @@ int main (int argc, char *argv[])
       HYPRE_SStructVectorInitialize(b);
       HYPRE_SStructVectorInitialize(x);
 
-      values = (double*) calloc((n * n), sizeof(double));
+      values = (double*) custom_calloc((n * n), sizeof(double));
 
       /* Set the values of b in left-to-right, bottom-to-top order */
       for (k = 0, j = 0; j < n; j++)
@@ -550,7 +556,7 @@ int main (int argc, char *argv[])
       }
       HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
 
-      free(values);
+      custom_free(values);
 
       /* Assembling is postponed since the vectors will be further modified */
    }
@@ -584,7 +590,7 @@ int main (int argc, char *argv[])
                                                       to the offsets */
          double *values;
 
-         values = (double*) calloc(5 * (n * n), sizeof(double));
+         values = (double*) custom_calloc(5 * (n * n), sizeof(double));
 
          /* The order is left-to-right, bottom-to-top */
          for (k = 0, j = 0; j < n; j++)
@@ -609,14 +615,14 @@ int main (int argc, char *argv[])
                                          var, 5,
                                          stencil_indices, values);
 
-         free(values);
+         custom_free(values);
       }
       else /* Symmetric storage */
       {
          int stencil_indices[3] = {0, 1, 2};
          double *values;
 
-         values = (double*) calloc(3 * (n * n), sizeof(double));
+         values = (double*) custom_calloc(3 * (n * n), sizeof(double));
 
          /* The order is left-to-right, bottom-to-top */
          for (k = 0, j = 0; j < n; j++)
@@ -633,7 +639,7 @@ int main (int argc, char *argv[])
                                          var, 3,
                                          stencil_indices, values);
 
-         free(values);
+         custom_free(values);
       }
    }
 
@@ -662,8 +668,8 @@ int main (int argc, char *argv[])
          nentries = 3;
       }
 
-      values  = (double*) calloc(nentries * n, sizeof(double));
-      bvalues = (double*) calloc(n, sizeof(double));
+      values  = (double*) custom_calloc(nentries * n, sizeof(double));
+      bvalues = (double*) custom_calloc(n, sizeof(double));
 
       /* The stencil at the boundary nodes is 1-0-0-0-0. Because
          we have I x_b = u_0; */
@@ -959,8 +965,8 @@ int main (int argc, char *argv[])
          HYPRE_SStructVectorAddToBoxValues(b, part, bc_ilower, bc_iupper, var, bvalues);
       }
 
-      free(values);
-      free(bvalues);
+      custom_free(values);
+      custom_free(bvalues);
    }
 
    /* Finalize the vector and matrix assembly */
@@ -1312,7 +1318,7 @@ int main (int argc, char *argv[])
 
    }
 
-   /* Save the solution for GLVis visualization, see vis/glvis-ex7.sh */
+   /* Save the solution for GLVis visualization, see vis/glvis-ex07.sh */
    if (vis)
    {
 #ifdef HYPRE_EXVIS
@@ -1321,13 +1327,13 @@ int main (int argc, char *argv[])
 
       int part = 0, var = 0;
       int nvalues = n * n;
-      double *values = (double*) calloc(nvalues, sizeof(double));
+      double *values = (double*) custom_calloc(nvalues, sizeof(double));
 
       /* get all local data (including a local copy of the shared values) */
       HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
                                       var, values);
 
-      sprintf(filename, "%s.%06d", "vis/ex7.sol", myid);
+      sprintf(filename, "%s.%06d", "vis/ex07.sol", myid);
       if ((file = fopen(filename, "w")) == NULL)
       {
          printf("Error: can't open output file %s\n", filename);
@@ -1345,12 +1351,12 @@ int main (int argc, char *argv[])
 
       fflush(file);
       fclose(file);
-      free(values);
+      custom_free(values);
 
       /* save global finite element mesh */
       if (myid == 0)
       {
-         GLVis_PrintGlobalSquareMesh("vis/ex7.mesh", N * n - 1);
+         GLVis_PrintGlobalSquareMesh("vis/ex07.mesh", N * n - 1);
       }
 #endif
    }

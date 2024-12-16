@@ -24,7 +24,7 @@
 #include <string.h>
 #include <math.h>
 #include "HYPRE_struct_ls.h"
-#include "ex.h"
+#include "ex.h" //* custom_malloc, custom_calloc, custom_free *//
 
 #define NDIM 4
 #define NSTENC (2*NDIM+1)
@@ -191,7 +191,7 @@ int main (int argc, char *argv[])
       /* Indicate that the matrix coefficients are ready to be set */
       HYPRE_StructMatrixInitialize(A);
 
-      values = (double*) calloc(nvalues, sizeof(double));
+      values = (double*) custom_calloc(nvalues, sizeof(double));
 
       for (j = 0; j < nentries; j++)
       {
@@ -211,7 +211,7 @@ int main (int argc, char *argv[])
       HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, nentries,
                                      stencil_indices, values);
 
-      free(values);
+      custom_free(values);
    }
 
    /* 4. Incorporate zero boundary conditions: go along each edge of the domain
@@ -225,7 +225,7 @@ int main (int argc, char *argv[])
       double *values;
       int stencil_indices[1];
 
-      values = (double*) calloc(nvalues, sizeof(double));
+      values = (double*) custom_calloc(nvalues, sizeof(double));
       for (j = 0; j < nvalues; j++)
       {
          values[j] = 0.0;
@@ -260,7 +260,7 @@ int main (int argc, char *argv[])
          stencil_indices[0]++;
       }
 
-      free(values);
+      custom_free(values);
    }
 
    /* This is a collective call finalizing the matrix assembly.
@@ -272,7 +272,7 @@ int main (int argc, char *argv[])
       int     nvalues = nvol;
       double *values;
 
-      values = (double*) calloc(nvalues, sizeof(double));
+      values = (double*) custom_calloc(nvalues, sizeof(double));
 
       /* Create an empty vector object */
       HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, &b);
@@ -295,7 +295,7 @@ int main (int argc, char *argv[])
       }
       HYPRE_StructVectorSetBoxValues(x, ilower, iupper, values);
 
-      free(values);
+      custom_free(values);
 
       /* This is a collective call finalizing the vector assembly.
          The vector is now ``ready to be used'' */

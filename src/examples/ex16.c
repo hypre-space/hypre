@@ -31,7 +31,7 @@
 #include "HYPRE_sstruct_mv.h"
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE.h"
-#include "ex.h"
+#include "ex.h" //* custom_malloc, custom_calloc, custom_free *//
 
 #ifdef HYPRE_EXVIS
 #include "vis.c"
@@ -517,7 +517,7 @@ int main (int argc, char *argv[])
       int nvalues = (n + 1) * (n + 1);
       double *values;
 
-      values = (double*) calloc(nvalues, sizeof(double));
+      values = (double*) custom_calloc(nvalues, sizeof(double));
 
       /* Create an empty vector object */
       HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &x);
@@ -551,7 +551,7 @@ int main (int argc, char *argv[])
          HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
       }
 
-      free(values);
+      custom_free(values);
 
       /* Finalize the vector assembly */
       HYPRE_SStructVectorAssemble(x);
@@ -612,7 +612,7 @@ int main (int argc, char *argv[])
          /* GLVis-to-hypre local renumbering */
          int g2h[16] = {0, 3, 15, 12, 1, 2, 7, 11, 14, 13, 8, 4, 5, 6, 9, 10};
 
-         values = (double*) calloc(nvalues, sizeof(double));
+         values = (double*) custom_calloc(nvalues, sizeof(double));
 
          nvalues = 0;
          for (j = 1; j <= n; j++)
@@ -656,7 +656,7 @@ int main (int argc, char *argv[])
 
          fflush(file);
          fclose(file);
-         free(values);
+         custom_free(values);
 
          /* Save local finite element mesh */
          GLVis_PrintLocalSquareMesh("vis/ex16.mesh", n, n, h,
