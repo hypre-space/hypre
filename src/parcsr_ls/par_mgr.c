@@ -2704,7 +2704,7 @@ hypre_MGRSetFSolverAtLevel( void       *mgr_vdata,
    }
 
    aff_solver[level] = (HYPRE_Solver *) fsolver;
-   (mgr_data -> fsolver_mode)  = 0;
+   (mgr_data -> fsolver_mode) = 1;
 
    return hypre_error_flag;
 }
@@ -4406,6 +4406,11 @@ hypre_MGRDataPrint(void *mgr_vdata)
  ***************************************************************************/
 
 #ifdef HYPRE_USING_DSUPERLU
+
+/*--------------------------------------------------------------------------
+ * hypre_MGRDirectSolverCreate
+ *--------------------------------------------------------------------------*/
+
 void *
 hypre_MGRDirectSolverCreate()
 {
@@ -4414,33 +4419,44 @@ hypre_MGRDirectSolverCreate()
    return NULL;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_MGRDirectSolverSetup
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_MGRDirectSolverSetup( void                *solver,
                             hypre_ParCSRMatrix  *A,
                             hypre_ParVector     *f,
                             hypre_ParVector     *u )
 {
-   HYPRE_Int ierr;
-   ierr = hypre_SLUDistSetup( solver, A, 0);
+   HYPRE_UNUSED_VAR(f);
+   HYPRE_UNUSED_VAR(u);
 
-   return ierr;
+   return hypre_SLUDistSetup(solver, A, 0);
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_MGRDirectSolverSolve
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_MGRDirectSolverSolve( void                *solver,
                             hypre_ParCSRMatrix  *A,
                             hypre_ParVector     *f,
                             hypre_ParVector     *u )
 {
-   hypre_SLUDistSolve(solver, f, u);
+   HYPRE_UNUSED_VAR(A);
 
-   return hypre_error_flag;
+   return hypre_SLUDistSolve(solver, f, u);
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_MGRDirectSolverDestroy
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_MGRDirectSolverDestroy( void *solver )
 {
-   hypre_SLUDistDestroy(solver);
-
-   return hypre_error_flag;
+   return hypre_SLUDistDestroy(solver);
 }
 #endif

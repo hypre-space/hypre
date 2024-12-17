@@ -3013,6 +3013,9 @@ hypre_ParILUSchurGMRESDummySolveDevice( void             *ilu_vdata,
                                         hypre_ParVector  *f,
                                         hypre_ParVector  *u )
 {
+   HYPRE_UNUSED_VAR(ilu_vdata);
+   HYPRE_UNUSED_VAR(ilu_vdata2);
+
    hypre_ParILUData    *ilu_data = (hypre_ParILUData*) ilu_vdata;
    hypre_ParCSRMatrix  *S        = hypre_ParILUDataMatS(ilu_data);
    HYPRE_Int            n_local  = hypre_ParCSRMatrixNumRows(S);
@@ -3058,6 +3061,9 @@ hypre_ParILURAPSchurGMRESSolveDevice( void               *ilu_vdata,
                                       hypre_ParVector    *par_f,
                                       hypre_ParVector    *par_u )
 {
+   HYPRE_UNUSED_VAR(ilu_vdata);
+   HYPRE_UNUSED_VAR(ilu_vdata2);
+
    hypre_ParILUData        *ilu_data  = (hypre_ParILUData*) ilu_vdata;
    hypre_ParCSRMatrix      *S         = hypre_ParILUDataMatS(ilu_data);
    hypre_CSRMatrix         *SLU       = hypre_ParCSRMatrixDiag(S);
@@ -3092,6 +3098,8 @@ hypre_ParILURAPSchurGMRESMatvecDevice( void           *matvec_data,
                                        HYPRE_Complex   beta,
                                        void           *y )
 {
+   HYPRE_UNUSED_VAR(matvec_data);
+
    /* Get matrix information first */
    hypre_ParILUData       *ilu_data    = (hypre_ParILUData*) ilu_vdata;
    HYPRE_Int               test_opt    = hypre_ParILUDataTestOption(ilu_data);
@@ -4432,7 +4440,7 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix  *A,
    hypre_CSRMatrix         *M_offd;
    HYPRE_Int               *M_offd_i;
 
-   HYPRE_Real              time_s, time_e;
+   HYPRE_Real              time_s = 0.0, time_e;
 
    HYPRE_Int               n = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Int               i;

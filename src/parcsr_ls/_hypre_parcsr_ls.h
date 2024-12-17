@@ -119,6 +119,7 @@ typedef struct
    hypre_ParCSRMatrix  *A;
    HYPRE_Int            num_variables;
    HYPRE_Int            num_functions;
+   HYPRE_Int            filter_functions;
    HYPRE_Int            nodal;
    HYPRE_Int            nodal_levels;
    HYPRE_Int            nodal_diag;
@@ -398,8 +399,9 @@ typedef struct
 #define hypre_ParAMGDataOuterWt(amg_data) ((amg_data)->outer_wt)
 
 /* problem data parameters */
-#define  hypre_ParAMGDataNumVariables(amg_data)  ((amg_data)->num_variables)
+#define hypre_ParAMGDataNumVariables(amg_data)  ((amg_data)->num_variables)
 #define hypre_ParAMGDataNumFunctions(amg_data) ((amg_data)->num_functions)
+#define hypre_ParAMGDataFilterFunctions(amg_data) ((amg_data)->filter_functions)
 #define hypre_ParAMGDataNodal(amg_data) ((amg_data)->nodal)
 #define hypre_ParAMGDataNodalLevels(amg_data) ((amg_data)->nodal_levels)
 #define hypre_ParAMGDataNodalDiag(amg_data) ((amg_data)->nodal_diag)
@@ -2013,6 +2015,8 @@ HYPRE_Int HYPRE_BoomerAMGSetFSAIThreshold ( HYPRE_Solver solver, HYPRE_Real thre
 HYPRE_Int HYPRE_BoomerAMGSetFSAIKapTolerance ( HYPRE_Solver solver, HYPRE_Real kap_tolerance );
 HYPRE_Int HYPRE_BoomerAMGSetNumFunctions ( HYPRE_Solver solver, HYPRE_Int num_functions );
 HYPRE_Int HYPRE_BoomerAMGGetNumFunctions ( HYPRE_Solver solver, HYPRE_Int *num_functions );
+HYPRE_Int HYPRE_BoomerAMGSetFilterFunctions ( HYPRE_Solver solver, HYPRE_Int filter_functions );
+HYPRE_Int HYPRE_BoomerAMGGetFilterFunctions ( HYPRE_Solver solver, HYPRE_Int *filter_functions );
 HYPRE_Int HYPRE_BoomerAMGSetNodal ( HYPRE_Solver solver, HYPRE_Int nodal );
 HYPRE_Int HYPRE_BoomerAMGSetNodalLevels ( HYPRE_Solver solver, HYPRE_Int nodal_levels );
 HYPRE_Int HYPRE_BoomerAMGSetNodalDiag ( HYPRE_Solver solver, HYPRE_Int nodal );
@@ -2616,6 +2620,8 @@ HYPRE_Int hypre_BoomerAMGSetCoordinates ( void *data, float *coordinates );
 HYPRE_Int hypre_BoomerAMGGetGridHierarchy(void *data, HYPRE_Int *cgrid );
 HYPRE_Int hypre_BoomerAMGSetNumFunctions ( void *data, HYPRE_Int num_functions );
 HYPRE_Int hypre_BoomerAMGGetNumFunctions ( void *data, HYPRE_Int *num_functions );
+HYPRE_Int hypre_BoomerAMGSetFilterFunctions ( void *data, HYPRE_Int filter_functions );
+HYPRE_Int hypre_BoomerAMGGetFilterFunctions ( void *data, HYPRE_Int *filter_functions );
 HYPRE_Int hypre_BoomerAMGSetNodal ( void *data, HYPRE_Int nodal );
 HYPRE_Int hypre_BoomerAMGSetNodalLevels ( void *data, HYPRE_Int nodal_levels );
 HYPRE_Int hypre_BoomerAMGSetNodalDiag ( void *data, HYPRE_Int nodal );
@@ -3777,9 +3783,10 @@ HYPRE_Int hypre_MGRBuildBlockJacobiP( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix 
 HYPRE_Int hypre_MGRBuildP( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                            HYPRE_BigInt *num_cpts_global, HYPRE_Int method,
                            HYPRE_Int debug_flag, hypre_ParCSRMatrix **P_ptr );
-HYPRE_Int hypre_MGRBuildPHost( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
+HYPRE_Int hypre_MGRBuildPHost( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
+                               hypre_ParCSRMatrix *A_FC, HYPRE_Int *CF_marker,
                                HYPRE_BigInt *num_cpts_global, HYPRE_Int method,
-                               hypre_ParCSRMatrix **P_ptr );
+                               hypre_ParCSRMatrix **Wp_ptr, hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_MGRBuildInterpApproximateInverse( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
                                                   HYPRE_BigInt *num_cpts_global,
                                                   hypre_ParCSRMatrix **P_ptr );

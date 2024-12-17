@@ -101,6 +101,9 @@ hypre_MGRNonGalerkinTruncate(hypre_ParCSRMatrix *A,
 
       for (i = 0; i < nrows; i++)
       {
+         row_start = i - (i % blk_dim);
+         row_stop  = row_start + blk_dim - 1;
+
          /* Copy (block) diagonal data to new arrays */
          for (jj = A_diag_i[i]; jj < A_diag_i[i + 1]; jj++)
          {
@@ -117,9 +120,6 @@ hypre_MGRNonGalerkinTruncate(hypre_ParCSRMatrix *A,
          if (max_elmts > 0)
          {
             cnt = 0;
-            row_start = i - (i % blk_dim);
-            row_stop  = row_start + blk_dim - 1;
-
             for (jj = A_offd_i[i]; jj < A_offd_i[i + 1]; jj++)
             {
                aux_j[cnt] = A_offd_j[jj] + ncol_diag;
@@ -235,12 +235,32 @@ hypre_MGRBuildNonGalerkinCoarseOperatorHost(hypre_ParCSRMatrix    *A_FF,
    HYPRE_Int              blk_inv_size;
    HYPRE_Real             neg_one = -1.0;
    HYPRE_Real             one = 1.0;
+   HYPRE_Real             beta = neg_one;
+
+   if (Wp != NULL && max_elmts > 0)
+   {
+      /* A_Hc = diag(A_CF * Wp) */
+      hypre_ParCSRMatMatDiag(A_CF, Wp, &A_Hc);
+
+      /* Coarse grid / Schur complement
+         Note that beta is one since A_Hc has positive sign */
+      hypre_ParCSRMatrixAdd(one, A_CC, one, A_Hc, &A_H);
+
+      /* Free memory */
+      hypre_ParCSRMatrixDestroy(A_Hc);
+
+      /* Set output pointer */
+      *A_H_ptr = A_H;
+
+      return hypre_error_flag;
+   }
 
    if (method == 1)
    {
       if (Wp != NULL)
       {
          A_Hc = hypre_ParCSRMatMat(A_CF, Wp);
+         beta = one;
       }
       else
       {
@@ -274,6 +294,7 @@ hypre_MGRBuildNonGalerkinCoarseOperatorHost(hypre_ParCSRMatrix    *A_FF,
          hypre_ParCSRMatrixBlockDiagMatrix(A_FF, blk_inv_size, -1, NULL, 1, &A_FF_inv);
 
          /* TODO (VPM): We shouldn't need to compute Wr_tmp since we are passing in Wr already */
+         HYPRE_UNUSED_VAR(Wr);
          Wr_tmp = hypre_ParCSRMatMat(A_CF_truncated, A_FF_inv);
          A_Hc = hypre_ParCSRMatMat(Wr_tmp, A_FC);
          hypre_ParCSRMatrixDestroy(Wr_tmp);
@@ -296,7 +317,7 @@ hypre_MGRBuildNonGalerkinCoarseOperatorHost(hypre_ParCSRMatrix    *A_FF,
    hypre_MGRNonGalerkinTruncate(A_Hc, ordering, coarse_blk_dim, max_elmts);
 
    /* Coarse grid / Schur complement */
-   hypre_ParCSRMatrixAdd(one, A_CC, neg_one, A_Hc, &A_H);
+   hypre_ParCSRMatrixAdd(one, A_CC, beta, A_Hc, &A_H);
 
    /* Free memory */
    hypre_ParCSRMatrixDestroy(A_Hc);
@@ -347,24 +368,26 @@ hypre_MGRBuildNonGalerkinCoarseOperatorDevice(hypre_ParCSRMatrix    *A_FF,
    /* Compute Wp/Wr if not passed in */
    if (!Wp && (method == 1 || method == 2))
    {
-      hypre_Vector         *D_FF_inv;
+      hypre_ParVector      *D_FF_inv;
       HYPRE_Complex        *data;
 
       /* Create vector to store A_FF's diagonal inverse  */
-      D_FF_inv = hypre_SeqVectorCreate(hypre_ParCSRMatrixNumRows(A_FF));
-      hypre_SeqVectorInitialize_v2(D_FF_inv, HYPRE_MEMORY_DEVICE);
-      data = hypre_VectorData(D_FF_inv);
+      D_FF_inv = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_FF),
+                                       hypre_ParCSRMatrixGlobalNumRows(A_FF),
+                                       hypre_ParCSRMatrixRowStarts(A_FF));
+      hypre_ParVectorInitialize_v2(D_FF_inv, HYPRE_MEMORY_DEVICE);
+      data = hypre_ParVectorLocalData(D_FF_inv);
 
       /* Compute the inverse of A_FF and compute its inverse */
       hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(A_FF), data, 2);
+      hypre_ParVectorScale(-1.0, D_FF_inv);
 
       /* Compute D_FF_inv*A_FC */
       Wp_tmp = hypre_ParCSRMatrixClone(A_FC, 1);
-      hypre_CSRMatrixDiagScale(hypre_ParCSRMatrixDiag(Wp_tmp), D_FF_inv, NULL);
-      hypre_CSRMatrixDiagScale(hypre_ParCSRMatrixOffd(Wp_tmp), D_FF_inv, NULL);
+      hypre_ParCSRMatrixDiagScale(Wp_tmp, D_FF_inv, NULL);
 
       /* Free memory */
-      hypre_SeqVectorDestroy(D_FF_inv);
+      hypre_ParVectorDestroy(D_FF_inv);
    }
    else if (!Wp && (method == 3))
    {
@@ -375,6 +398,7 @@ hypre_MGRBuildNonGalerkinCoarseOperatorDevice(hypre_ParCSRMatrix    *A_FF,
 
       /* Compute Wp = A_FF_inv * A_FC */
       Wp_tmp = hypre_ParCSRMatMat(B_FF_inv, A_FC);
+      hypre_ParCSRMatrixScale(Wp_tmp, -1.0);
 
       /* Free memory */
       hypre_ParCSRMatrixDestroy(B_FF_inv);
@@ -383,6 +407,33 @@ hypre_MGRBuildNonGalerkinCoarseOperatorDevice(hypre_ParCSRMatrix    *A_FF,
    /* Compute A_Hc (the correction for A_H) */
    if (Wp_tmp)
    {
+      if (max_elmts > 0)
+      {
+         /* A_Hc = diag(A_CF * Wp) */
+         hypre_ParCSRMatMatDiag(A_CF_trunc, Wp_tmp, &A_Hc);
+
+         /* Coarse grid / Schur complement */
+         hypre_ParCSRMatrixAdd(1.0, A_CC, 1.0, A_Hc, &A_H);
+
+         /* Free memory */
+         hypre_ParCSRMatrixDestroy(A_Hc);
+         if (method == 2 || method == 3)
+         {
+            hypre_ParCSRMatrixDestroy(A_CF_trunc);
+         }
+         if (Wp_tmp != Wp)
+         {
+            hypre_ParCSRMatrixDestroy(Wp_tmp);
+         }
+
+         /* Set output pointer */
+         *A_H_ptr = A_H;
+
+         hypre_GpuProfilingPopRange();
+
+         return hypre_error_flag;
+      }
+
       A_Hc = hypre_ParCSRMatMat(A_CF_trunc, Wp_tmp);
    }
    else if (Wr)
@@ -520,6 +571,7 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
    HYPRE_Int              fine_blk_dim = (level) ? blk_dims[level - 1] - blk_dims[level] :
                                          block_size - blk_dims[level];
    HYPRE_Int              coarse_blk_dim = blk_dims[level];
+   HYPRE_Int              rebuild_commpkg = 0;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("RAP");
@@ -533,6 +585,7 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
             Restriction is not the injection operator (Wr != NULL) */
          RAP_c = hypre_ParCSRMatMat(Wr, A_FC);
          hypre_ParCSRMatrixAdd(1.0, A_CC, -1.0, RAP_c, &RAP);
+         hypre_ParCSRMatrixDestroy(RAP_c);
       }
       else if (RT)
       {
@@ -547,6 +600,7 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
       }
       else
       {
+         hypre_GpuProfilingPopRange();
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Expected either R or RT!");
          return hypre_error_flag;
       }
@@ -574,6 +628,7 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
       if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
       {
          hypre_ParCSRMatrixDropSmallEntriesDevice(RAP, threshold, -1);
+         rebuild_commpkg = 1;
       }
       else
 #endif
@@ -582,7 +637,15 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
       }
    }
 
-   /* Compute communication package when necessary */
+   /* Compute/rebuild communication package */
+   if (rebuild_commpkg)
+   {
+      if (hypre_ParCSRMatrixCommPkg(RAP))
+      {
+         hypre_MatvecCommPkgDestroy(hypre_ParCSRMatrixCommPkg(RAP));
+      }
+      hypre_MatvecCommPkgCreate(RAP);
+   }
    if (!hypre_ParCSRMatrixCommPkg(RAP))
    {
       hypre_MatvecCommPkgCreate(RAP);

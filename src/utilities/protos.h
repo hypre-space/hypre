@@ -53,8 +53,6 @@ HYPRE_Int hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_);
 HYPRE_Int hypre_GetDevice(hypre_int *device_id);
 HYPRE_Int hypre_GetDeviceCount(hypre_int *device_count);
 HYPRE_Int hypre_GetDeviceLastError(void);
-HYPRE_Int hypre_UmpireInit(hypre_Handle *hypre_handle_);
-HYPRE_Int hypre_UmpireFinalize(hypre_Handle *hypre_handle_);
 HYPRE_Int hypre_GetDeviceMaxShmemSize(hypre_int device_id, hypre_int *max_size_ptr,
                                       hypre_int *max_size_optin_ptr);
 
@@ -287,9 +285,10 @@ void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPR
 
 /* device_utils.c */
 #if defined(HYPRE_USING_GPU)
-HYPRE_Int hypre_SyncComputeStream(hypre_Handle *hypre_handle);
-HYPRE_Int hypre_SyncCudaDevice(hypre_Handle *hypre_handle);
-HYPRE_Int hypre_ResetCudaDevice(hypre_Handle *hypre_handle);
+HYPRE_Int hypre_ForceSyncComputeStream();
+HYPRE_Int hypre_SyncComputeStream();
+HYPRE_Int hypre_SyncDevice();
+HYPRE_Int hypre_ResetDevice();
 HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int num_vectors, HYPRE_Int num_rows,
                                       HYPRE_Int *A_i, HYPRE_Complex *A_data,
                                       HYPRE_Complex *x, HYPRE_Complex beta,
@@ -375,13 +374,14 @@ HYPRE_Int hypre_CheckDirExists(const char *path);
 HYPRE_Int hypre_CreateDir(const char *path);
 HYPRE_Int hypre_CreateNextDirOfSequence(const char *basepath, const char *prefix,
                                         char **fullpath_ptr);
+char* hypre_ConvertIndicesToString(HYPRE_Int size, HYPRE_Int *indices);
 
 HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
 HYPRE_Int hypre_RestoreSyncCudaCompute(void);
 HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
-HYPRE_Int hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle);
 
 /* handle.c */
+HYPRE_Int hypre_SetLogLevel( HYPRE_Int log_level );
 HYPRE_Int hypre_SetSpTransUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int hypre_SetSpMVUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int hypre_SetSpGemmUseVendor( HYPRE_Int use_vendor );

@@ -48,7 +48,7 @@ hypre_IntArraySetConstantValuesDevice( hypre_IntArray *v,
 #if defined(HYPRE_USING_GPU)
    hypreDevice_IntFilln( array_data, size, value );
 
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
@@ -79,6 +79,7 @@ hypre_IntArrayInverseMappingDevice( hypre_IntArray  *v,
    dim3 gDim = hypre_GetDefaultDeviceGridDimension(size, "thread", bDim);
 
    HYPRE_GPU_LAUNCH( hypreGPUKernel_IntArrayInverseMapping, gDim, bDim, size, v_data, w_data );
+   hypre_SyncComputeStream();
 
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int i;
