@@ -5717,8 +5717,8 @@ main( hypre_int argc,
             // set cycle structure from usr inputs 
             HYPRE_BoomerAMGSetCycleStruct(pcg_precond,iconfig_ptr[i].cycle_struct,iconfig_ptr[i].cycle_num_nodes);
             HYPRE_BoomerAMGSetRelaxNodeTypes(pcg_precond,iconfig_ptr[i].relax_node_types);
-            HYPRE_BoomerAMGSetRelaxNodeOrder(amg_solver,iconfig_ptr[i].relax_node_order);
-            HYPRE_BoomerAMGSetRelaxNodeOuterWeights(amg_solver,iconfig_ptr[i].relax_node_outerweights);
+            HYPRE_BoomerAMGSetRelaxNodeOrder(pcg_precond,iconfig_ptr[i].relax_node_order);
+            HYPRE_BoomerAMGSetRelaxNodeOuterWeights(pcg_precond,iconfig_ptr[i].relax_node_outerweights);
             HYPRE_BoomerAMGSetRelaxNodeWeights(pcg_precond,iconfig_ptr[i].relax_node_weights);
             HYPRE_BoomerAMGSetRelaxEdgeWeights(pcg_precond,iconfig_ptr[i].relax_edge_weights);
             HYPRE_BoomerAMGSetNodeNumSweeps(pcg_precond,iconfig_ptr[i].node_num_sweeps);
@@ -5803,6 +5803,8 @@ main( hypre_int argc,
       if (solver_id == 1)
       {
          HYPRE_BoomerAMGDestroy(pcg_precond);
+         if (cycle_type==4)
+            hypre_TFree(iconfig_ptr, HYPRE_MEMORY_HOST);
          if (n_rlxwts > 0)
          {
             hypre_TFree(rlxwts, HYPRE_MEMORY_HOST);
@@ -7380,7 +7382,38 @@ main( hypre_int argc,
       hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
-
+      
+      // loop over amg precond input configurations (from evostencils)
+      for (i = 0; i < n_configs; i++)
+      {     
+         // get the initial residual norm
+         if (i==0)
+         {
+            residual = hypre_ParVectorCloneDeep_v2(b, hypre_ParVectorMemoryLocation(b));
+            hypre_ParVectorCopy(b, residual);
+            HYPRE_ParCSRMatrixMatvec(1.0, parcsr_A, x, -1.0, residual);
+            init_res_norm = hypre_sqrt(hypre_ParVectorInnerProd( residual, residual ));
+            b_norm = hypre_sqrt(hypre_ParVectorInnerProd( b, b ));
+            if (b_norm == 0)
+               b_norm = 1;       
+            init_res_norm = init_res_norm/b_norm;
+         }
+         if (cycle_type==4)
+         {
+            // reset the initial guess
+            if (build_x0_type == -1)
+               HYPRE_ParVectorSetConstantValues(x,0);
+            else if (build_x0_type == 1)
+               HYPRE_ParVectorSetRandomValues(x,0);
+            // set cycle structure from usr inputs 
+            HYPRE_BoomerAMGSetCycleStruct(amg_precond,iconfig_ptr[i].cycle_struct,iconfig_ptr[i].cycle_num_nodes);
+            HYPRE_BoomerAMGSetRelaxNodeTypes(amg_precond,iconfig_ptr[i].relax_node_types);
+            HYPRE_BoomerAMGSetRelaxNodeOrder(amg_precond,iconfig_ptr[i].relax_node_order);
+            HYPRE_BoomerAMGSetRelaxNodeOuterWeights(amg_precond,iconfig_ptr[i].relax_node_outerweights);
+            HYPRE_BoomerAMGSetRelaxNodeWeights(amg_precond,iconfig_ptr[i].relax_node_weights);
+            HYPRE_BoomerAMGSetRelaxEdgeWeights(amg_precond,iconfig_ptr[i].relax_edge_weights);
+            HYPRE_BoomerAMGSetNodeNumSweeps(amg_precond,iconfig_ptr[i].node_num_sweeps);
+         }
       time_index = hypre_InitializeTiming("GMRES Solve");
       hypre_BeginTiming(time_index);
 
@@ -7451,12 +7484,25 @@ main( hypre_int argc,
 
       HYPRE_GMRESGetNumIterations(pcg_solver, &num_iterations);
       HYPRE_GMRESGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
-
+      if (myid == 0)
+      {
+         hypre_printf("\n");
+         hypre_printf("GMRES Iterations = %d\n", num_iterations);
+         hypre_printf("Final GMRES Relative Residual Norm = %e\n", final_res_norm);
+         if (cycle_type==4 || cycle_type==3) 
+         {
+            hypre_printf("Average Convergence Factor = %f\n", hypre_pow(final_res_norm/init_res_norm, (1.0 / (HYPRE_Real) num_iterations)));
+         }
+         hypre_printf("\n");
+      }
+   }
       HYPRE_ParCSRGMRESDestroy(pcg_solver);
 
       if (solver_id == 3)
       {
          HYPRE_BoomerAMGDestroy(amg_precond);
+         if (cycle_type==4)
+            hypre_TFree(iconfig_ptr, HYPRE_MEMORY_HOST);
       }
       else if (solver_id == 15)
       {
@@ -7483,13 +7529,6 @@ main( hypre_int argc,
          HYPRE_BoomerAMGDDDestroy(pcg_precond);
       }
 
-      if (myid == 0)
-      {
-         hypre_printf("\n");
-         hypre_printf("GMRES Iterations = %d\n", num_iterations);
-         hypre_printf("Final GMRES Relative Residual Norm = %e\n", final_res_norm);
-         hypre_printf("\n");
-      }
    }
    /*-----------------------------------------------------------
     * Solve the system using LGMRES
