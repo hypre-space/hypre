@@ -1747,16 +1747,16 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(FC, [xlf_r ifort ifx gfortran g77 g95 pgf77 pgfortran f77])
+         AC_CHECK_PROGS(FC, [xlf_r ifx ifort gfortran g77 g95 pgf77 pgfortran f77])
       else
-         AC_CHECK_PROGS(FC, [xlf ifort ifx gfortran g77 g95 pgf77 pgfortran f77])
+         AC_CHECK_PROGS(FC, [xlf ifx ifort gfortran g77 g95 pgf77 pgfortran f77])
       fi
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(FC, [mpxlf mpixlf77_r mpiifort mpiifx mpif77 mpipgf77 mpipgifort])
+         AC_CHECK_PROGS(FC, [mpxlf mpixlf77_r mpiifx mpiifort mpif77 mpipgf77 mpipgifort])
       else
-         AC_CHECK_PROGS(FC, [mpxlf mpixlf77 mpiifort mpiifx mpif77 mpipgf77 mpipgifort])
+         AC_CHECK_PROGS(FC, [mpxlf mpixlf77 mpiifx mpiifort mpif77 mpipgf77 mpipgifort])
       fi
    fi
 
