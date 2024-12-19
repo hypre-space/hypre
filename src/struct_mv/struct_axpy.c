@@ -39,7 +39,7 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
    hypre_Box        *loop_box;
    hypre_Index       loop_size;
    hypre_IndexRef    start;
-   hypre_Index       unit_stride;
+   hypre_Index       ustride;
 
    HYPRE_Int         i;
 
@@ -57,7 +57,7 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
    }
 
    loop_box = hypre_BoxCreate(ndim);
-   hypre_SetIndex(unit_stride, 1);
+   hypre_SetIndex(ustride, 1);
 
    for (i = 0; i < nboxes; i++)
    {
@@ -75,8 +75,8 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
 #if 0
       HYPRE_BOXLOOP (
          hypre_BoxLoop2Begin, (ndim, loop_size,
-                               x_data_box, start, unit_stride, xi,
-                               y_data_box, start, unit_stride, yi),
+                               x_data_box, start, ustride, xi,
+                               y_data_box, start, ustride, yi),
       {
          yp[yi] += alpha * xp[xi];
       },
@@ -86,8 +86,8 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
 
 #define DEVICE_VAR is_device_ptr(yp,xp)
       hypre_BoxLoop2Begin(ndim, loop_size,
-                          x_data_box, start, unit_stride, xi,
-                          y_data_box, start, unit_stride, yi);
+                          x_data_box, start, ustride, xi,
+                          y_data_box, start, ustride, yi);
       {
          yp[yi] += alpha * xp[xi];
       }
@@ -127,13 +127,13 @@ hypre_StructVectorElmdivpy( HYPRE_Complex       alpha,
    hypre_Box          *box;
    hypre_Index         loop_size;
    hypre_IndexRef      start;
-   hypre_Index         unit_stride;
+   hypre_Index         ustride;
 
    HYPRE_Int           i;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   hypre_SetIndex(unit_stride, 1);
+   hypre_SetIndex(ustride, 1);
    hypre_ForBoxI(i, boxes)
    {
       box   = hypre_BoxArrayBox(boxes, i);
@@ -150,9 +150,9 @@ hypre_StructVectorElmdivpy( HYPRE_Complex       alpha,
       hypre_BoxGetSize(box, loop_size);
 #define DEVICE_VAR is_device_ptr(zp, yp,xp)
       hypre_BoxLoop3Begin(ndim, loop_size,
-                          xdbox, start, unit_stride, xi,
-                          ydbox, start, unit_stride, yi,
-                          zdbox, start, unit_stride, zi);
+                          xdbox, start, ustride, xi,
+                          ydbox, start, ustride, yi,
+                          zdbox, start, ustride, zi);
       {
          yp[yi] = alpha * xp[xi] / zp[zi] + beta * yp[yi];
       }

@@ -2071,12 +2071,21 @@ HYPRE_Int hypre_CommInfoProjectRecv ( hypre_CommInfo *comm_info, hypre_Index ind
                                       hypre_Index stride );
 HYPRE_Int hypre_CommInfoDestroy ( hypre_CommInfo *comm_info );
 HYPRE_Int hypre_CommInfoClone( hypre_CommInfo *comm_info, hypre_CommInfo **clone_ptr );
-HYPRE_Int hypre_CreateCommInfo ( hypre_StructGrid *grid, hypre_CommStencil *comm_stencil,
-                                 hypre_CommInfo **comm_info_ptr );
-HYPRE_Int hypre_CreateCommInfoFromStencil ( hypre_StructGrid *grid, hypre_StructStencil *stencil,
-                                            hypre_CommInfo **comm_info_ptr );
-HYPRE_Int hypre_CreateCommInfoFromNumGhost ( hypre_StructGrid *grid, HYPRE_Int *num_ghost,
-                                             hypre_CommInfo **comm_info_ptr );
+HYPRE_Int
+hypre_CreateCommInfo( hypre_StructGrid   *bgrid,
+                      hypre_Index         stride,
+                      hypre_CommStencil  *comm_stencil,
+                      hypre_CommInfo    **comm_info_ptr );
+HYPRE_Int
+hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
+                                 hypre_Index            stride,
+                                 hypre_StructStencil   *stencil,
+                                 hypre_CommInfo       **comm_info_ptr );
+HYPRE_Int
+hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
+                                  hypre_Index            stride,
+                                  HYPRE_Int             *num_ghost,
+                                  hypre_CommInfo       **comm_info_ptr );
 HYPRE_Int hypre_CreateCommInfoFromGrids ( hypre_StructGrid *from_grid, hypre_StructGrid *to_grid,
                                           hypre_CommInfo **comm_info_ptr );
 
@@ -2090,8 +2099,11 @@ HYPRE_Int hypre_ComputeInfoProjectRecv ( hypre_ComputeInfo *compute_info, hypre_
 HYPRE_Int hypre_ComputeInfoProjectComp ( hypre_ComputeInfo *compute_info, hypre_Index index,
                                          hypre_Index stride );
 HYPRE_Int hypre_ComputeInfoDestroy ( hypre_ComputeInfo *compute_info );
-HYPRE_Int hypre_CreateComputeInfo ( hypre_StructGrid *grid, hypre_StructStencil *stencil,
-                                    hypre_ComputeInfo **compute_info_ptr );
+HYPRE_Int
+hypre_CreateComputeInfo( hypre_StructGrid      *grid,
+                         hypre_Index            stride,
+                         hypre_StructStencil   *stencil,
+                         hypre_ComputeInfo    **compute_info_ptr );
 HYPRE_Int hypre_ComputePkgCreate ( hypre_ComputeInfo *compute_info, hypre_BoxArray *data_space,
                                    HYPRE_Int num_values, hypre_StructGrid *grid, hypre_ComputePkg **compute_pkg_ptr );
 HYPRE_Int hypre_ComputePkgDestroy ( hypre_ComputePkg *compute_pkg );
@@ -2323,6 +2335,12 @@ HYPRE_Int hypre_StructMatrixComputeRowSum_core_VC ( hypre_StructMatrix *A,
                                                     hypre_Box *box, hypre_Box *Adbox, hypre_Box *rdbox, HYPRE_Int type );
 
 /* struct_matrix.c */
+HYPRE_Int
+hypre_StructMatrixGetCStride( hypre_StructMatrix *matrix,
+                              hypre_IndexRef     *cstride );
+HYPRE_Int
+hypre_StructMatrixGetDataMapStride( hypre_StructMatrix *matrix,
+                                    hypre_IndexRef     *stride );
 HYPRE_Int hypre_StructMatrixGetDataMapStride ( hypre_StructMatrix *matrix, hypre_IndexRef *stride );
 HYPRE_Int hypre_StructMatrixMapDataIndex ( hypre_StructMatrix *matrix, hypre_Index dindex );
 HYPRE_Int hypre_StructMatrixMapDataBox ( hypre_StructMatrix *matrix, hypre_Box *dbox );

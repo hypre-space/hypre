@@ -51,6 +51,7 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    hypre_CommPkg        *comm_pkg;
    hypre_CommHandle     *comm_handle;
    HYPRE_Complex        *data;
+   hypre_Index           ustride;
 
    HYPRE_Int             num_ghost[] = {0, 0, 0, 0, 0, 0};
    HYPRE_Int             i, j, s, dim;
@@ -59,6 +60,8 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    {
       return hypre_error_flag;
    }
+
+   hypre_SetIndex(ustride, 1);
 
    /* set num_ghost */
    dim = hypre_StructGridNDim(grid);
@@ -75,7 +78,7 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
 
    /* comm_info <-- From fine grid grown by num_ghost */
 
-   hypre_CreateCommInfoFromNumGhost(grid, num_ghost, &comm_info);
+   hypre_CreateCommInfoFromNumGhost(grid, ustride, num_ghost, &comm_info);
 
    /* Project and map comm_info onto coarsened index space */
 

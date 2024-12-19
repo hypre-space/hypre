@@ -215,14 +215,14 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
    hypre_Box            *loop_box;
    hypre_Index           loop_size;
    hypre_IndexRef        start;
-   hypre_Index           unit_stride;
+   hypre_Index           ustride;
 
    HYPRE_Int             i;
 
    nboxes = hypre_StructVectorNBoxes(x);
 
    loop_box = hypre_BoxCreate(ndim);
-   hypre_SetIndex(unit_stride, 1);
+   hypre_SetIndex(ustride, 1);
 
    for (i = 0; i < nboxes; i++)
    {
@@ -242,9 +242,9 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
 
 #define DEVICE_VAR is_device_ptr(xp,yp,Ap)
       hypre_BoxLoop3Begin(ndim, loop_size,
-                          A_data_box, start, unit_stride, Ai,
-                          x_data_box, start, unit_stride, xi,
-                          y_data_box, start, unit_stride, yi);
+                          A_data_box, start, ustride, Ai,
+                          x_data_box, start, ustride, xi,
+                          y_data_box, start, ustride, yi);
       {
          xp[xi] = yp[yi] / Ap[Ai];
       }

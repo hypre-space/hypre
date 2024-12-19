@@ -493,6 +493,7 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
    hypre_CommHandle     ***comm_handle;
    hypre_ComputePkg     ***compute_pkgs;
    hypre_ComputeInfo      *compute_info;
+   hypre_Index             ustride;
 
    HYPRE_Real            **bp;
    HYPRE_Real            **xp;
@@ -526,6 +527,8 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
    HYPRE_Int               i, j, k, m, s, vi, vj, part;
    HYPRE_Int               nvars;
    HYPRE_Int               set;
+
+   hypre_SetIndex(ustride, 1);
 
    /*----------------------------------------------------------
     * Set up the temp vector
@@ -702,7 +705,7 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
             sstencil_union = hypre_StructStencilCreate(ndim,
                                                        sstencil_union_count,
                                                        sstencil_union_shape);
-            hypre_CreateComputeInfo(sgrid, sstencil_union, &compute_info);
+            hypre_CreateComputeInfo(sgrid, ustride, sstencil_union, &compute_info);
             orig_indt_boxes = hypre_ComputeInfoIndtBoxes(compute_info);
             orig_dept_boxes = hypre_ComputeInfoDeptBoxes(compute_info);
             stride = nodeset_strides[set];

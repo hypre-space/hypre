@@ -537,12 +537,15 @@ hypre_SStructPMatrixAccumulate( hypre_SStructPMatrix *pmatrix )
    hypre_CommPkg         *comm_pkg;
    hypre_CommHandle      *comm_handle;
    HYPRE_Complex         *data;
+   hypre_Index            ustride;
 
    /* if values already accumulated, just return */
    if (hypre_SStructPMatrixAccumulated(pmatrix))
    {
       return hypre_error_flag;
    }
+
+   hypre_SetIndex(ustride, 1);
 
    for (d = ndim; d < HYPRE_MAXDIM; d++)
    {
@@ -564,7 +567,7 @@ hypre_SStructPMatrixAccumulate( hypre_SStructPMatrix *pmatrix )
             }
 
             /* accumulate values from AddTo */
-            hypre_CreateCommInfoFromNumGhost(sgrid, num_ghost, &comm_info);
+            hypre_CreateCommInfoFromNumGhost(sgrid, ustride, num_ghost, &comm_info);
             hypre_CommPkgCreate(comm_info,
                                 hypre_StructMatrixDataSpace(smatrix),
                                 hypre_StructMatrixDataSpace(smatrix),

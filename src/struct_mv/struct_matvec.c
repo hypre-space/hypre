@@ -30,6 +30,7 @@ typedef struct
 
    HYPRE_Int            nentries;
    HYPRE_Int           *stentries;
+
 } hypre_StructMatvecData;
 
 /*--------------------------------------------------------------------------
@@ -98,11 +99,14 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
    hypre_BoxArray          *data_space;
    HYPRE_Int               *num_ghost;
    hypre_IndexRef           dom_stride;
+   hypre_Index              ustride;
    HYPRE_Int                stencil_diag;
    HYPRE_Int                stencil_size;
    HYPRE_Int                i;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   hypre_SetIndex(ustride, 1);
 
    /* Make sure that the transpose coefficients are stored in A (note that the
     * resizing will provide no option to restore A to its previous state) */
@@ -145,7 +149,7 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
    hypre_TFree(num_ghost, HYPRE_MEMORY_HOST);
 
    /* This computes the communication pattern for the new x data_space */
-   hypre_CreateComputeInfo(grid, stencil, &compute_info);
+   hypre_CreateComputeInfo(grid, ustride, stencil, &compute_info);
    hypre_StructVectorMapCommInfo(x, hypre_ComputeInfoCommInfo(compute_info));
    /* Compute boxes will be appropriately projected in MatvecCompute */
    hypre_ComputePkgCreate(compute_info, data_space, 1, grid, &compute_pkg);
@@ -348,8 +352,8 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
    /* This resizes the data for x using the data_space computed during setup */
    data_space = hypre_BoxArrayClone(matvec_data -> data_space);
-   hypre_StructVectorReindex(x, grid, dom_stride);
-   hypre_StructVectorResize(x, data_space);
+   hypre_StructVectorReindex(x, grid, dom_stride);  /* ZZZ reindex to finest base grid? */
+   hypre_StructVectorResize(x, data_space);         /* ZZZ Want this to be a no-op for forget */
 
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);

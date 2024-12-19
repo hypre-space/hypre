@@ -15,18 +15,46 @@
 #include "_hypre_struct_mv.hpp"
 
 /*--------------------------------------------------------------------------
- * Matrix data is currently stored relative to the largest matrix stride
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixGetFStride( hypre_StructMatrix *matrix,
+                              hypre_IndexRef     *fstride )
+{
+   *fstride = hypre_StructMatrixRanStride(matrix);
+   if (hypre_StructMatrixRangeIsCoarse(matrix))
+   {
+      *fstride = hypre_StructMatrixDomStride(matrix);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixGetCStride( hypre_StructMatrix *matrix,
+                              hypre_IndexRef     *cstride )
+{
+   *cstride = hypre_StructMatrixRanStride(matrix);
+   if (hypre_StructMatrixDomainIsCoarse(matrix))
+   {
+      *cstride = hypre_StructMatrixDomStride(matrix);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Matrix data is currently stored relative to the coarse matrix stride
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_StructMatrixGetDataMapStride( hypre_StructMatrix *matrix,
                                     hypre_IndexRef     *stride )
 {
-   *stride = hypre_StructMatrixRanStride(matrix);
-   if (hypre_StructMatrixDomainIsCoarse(matrix))
-   {
-      *stride = hypre_StructMatrixDomStride(matrix);
-   }
+   hypre_StructMatrixGetCStride(matrix, stride);
 
    return hypre_error_flag;
 }
@@ -1796,6 +1824,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
       hypre_CommPkg     *comm_pkg;
       hypre_CommHandle  *comm_handle;
       HYPRE_Complex    **comm_data;
+      hypre_IndexRef     fstride;
       HYPRE_Int          i, tot_num_ghost[2 * HYPRE_MAXDIM];
 
       /* RDF TODO: Use CommStencil to do communication */
@@ -1804,7 +1833,9 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
          tot_num_ghost[i] = hypre_max(num_ghost[i] + sym_ghost[i], trn_ghost[i]);
       }
 
-      hypre_CreateCommInfoFromNumGhost(hypre_StructMatrixGrid(matrix), tot_num_ghost, &comm_info);
+      hypre_StructMatrixGetFStride(matrix, &fstride);
+      hypre_CreateCommInfoFromNumGhost(hypre_StructMatrixGrid(matrix), fstride,
+                                       tot_num_ghost, &comm_info);
       hypre_StructMatrixCreateCommPkg(matrix, comm_info, &comm_pkg, &comm_data);
 
       hypre_InitializeCommunication(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
@@ -2001,7 +2032,7 @@ hypre_StructMatrixClearGhostValues( hypre_StructMatrix *matrix )
    hypre_Box            *diff_box;
    hypre_Index           loop_size;
    hypre_IndexRef        start;
-   hypre_Index           unit_stride;
+   hypre_Index           ustride;
 
    HYPRE_Int             i, j, s;
 
@@ -2009,7 +2040,7 @@ hypre_StructMatrixClearGhostValues( hypre_StructMatrix *matrix )
     * Set the matrix coefficients
     *-----------------------------------------------------------------------*/
 
-   hypre_SetIndex(unit_stride, 1);
+   hypre_SetIndex(ustride, 1);
 
    grid_data_box = hypre_BoxCreate(ndim);
 
@@ -2043,7 +2074,7 @@ hypre_StructMatrixClearGhostValues( hypre_StructMatrix *matrix )
                hypre_BoxGetSize(diff_box, loop_size);
 
                hypre_BoxLoop1Begin(ndim, loop_size,
-                                   data_box, start, unit_stride, mi);
+                                   data_box, start, ustride, mi);
                {
                   mp[mi] = 0.0;
                }

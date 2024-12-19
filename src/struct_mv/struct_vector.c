@@ -1083,13 +1083,13 @@ hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
    hypre_Box          *loop_box;
    hypre_Index         loop_size;
    hypre_IndexRef      start;
-   hypre_Index         unit_stride;
+   hypre_Index         ustride;
    HYPRE_Int           i;
 
    nboxes = hypre_StructVectorNBoxes(vector);
 
    loop_box = hypre_BoxCreate(ndim);
-   hypre_SetIndex(unit_stride, 1);
+   hypre_SetIndex(ustride, 1);
 
    for (i = 0; i < nboxes; i++)
    {
@@ -1102,7 +1102,7 @@ hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
       hypre_BoxGetSize(loop_box, loop_size);
 
 #define DEVICE_VAR is_device_ptr(vp)
-      hypre_BoxLoop1Begin(ndim, loop_size, dbox, start, unit_stride, vi);
+      hypre_BoxLoop1Begin(ndim, loop_size, dbox, start, ustride, vi);
       {
          vp[vi] = value;
       }
@@ -1134,7 +1134,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
    hypre_Box          *loop_box;
    hypre_Index         loop_size;
    hypre_IndexRef      start;
-   hypre_Index         unit_stride;
+   hypre_Index         ustride;
    HYPRE_Int           i;
 
    hypre_SeedRand(seed);
@@ -1142,7 +1142,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
    nboxes = hypre_StructVectorNBoxes(vector);
 
    loop_box = hypre_BoxCreate(ndim);
-   hypre_SetIndex(unit_stride, 1);
+   hypre_SetIndex(ustride, 1);
 
    for (i = 0; i < nboxes; i++)
    {
@@ -1177,7 +1177,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
 
 #define DEVICE_VAR is_device_ptr(vp, rand_device)
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
-                          dbox, start, unit_stride, vi);
+                          dbox, start, ustride, vi);
       {
 #if defined(HYPRE_USING_GPU)
          vp[vi] = rand_device[idx];
@@ -1217,7 +1217,7 @@ hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
    hypre_Box          *diff_box;
    hypre_Index         loop_size;
    hypre_IndexRef      start;
-   hypre_Index         unit_stride;
+   hypre_Index         ustride;
 
    HYPRE_Int           i, j;
 
@@ -1225,7 +1225,7 @@ hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
     * Set the vector coefficients
     *-----------------------------------------------------------------------*/
 
-   hypre_SetIndex(unit_stride, 1);
+   hypre_SetIndex(ustride, 1);
 
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
    diff_boxes = hypre_BoxArrayCreate(0, ndim);
@@ -1246,7 +1246,7 @@ hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
 
 #define DEVICE_VAR is_device_ptr(vp)
          hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
-                             v_data_box, start, unit_stride, vi);
+                             v_data_box, start, ustride, vi);
          {
             vp[vi] = 0.0;
          }
@@ -1672,7 +1672,7 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
    hypre_BoxArray   *boxes;
    hypre_Box        *box;
    hypre_Index       loop_size;
-   hypre_Index       unit_stride;
+   hypre_Index       ustride;
 
    HYPRE_Int         i, ndim;
    HYPRE_Real        maxvalue;
@@ -1687,7 +1687,7 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
       hypre_error(HYPRE_ERROR_GENERIC);
       return hypre_error_flag;
    }
-   hypre_SetIndex(unit_stride, 1);
+   hypre_SetIndex(ustride, 1);
    hypre_ForBoxI(i, boxes)
    {
       box  = hypre_BoxArrayBox(boxes, i);
@@ -1702,7 +1702,7 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
       hypre_SetIndex(max_xyz_index, 0);
 
       hypre_SerialBoxLoop1Begin(ndim, loop_size,
-                                box, imin, unit_stride, datai);
+                                box, imin, ustride, datai);
       {
          if ( data[datai] > maxvalue )
          {

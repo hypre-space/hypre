@@ -32,7 +32,7 @@ hypre_StructScale( HYPRE_Complex       alpha,
    hypre_Box       *loop_box;
    hypre_Index      loop_size;
    hypre_IndexRef   start;
-   hypre_Index      unit_stride;
+   hypre_Index      ustride;
 
    HYPRE_Int        i;
 
@@ -45,7 +45,7 @@ hypre_StructScale( HYPRE_Complex       alpha,
    nboxes = hypre_StructVectorNBoxes(y);
 
    loop_box = hypre_BoxCreate(ndim);
-   hypre_SetIndex(unit_stride, 1);
+   hypre_SetIndex(ustride, 1);
 
    for (i = 0; i < nboxes; i++)
    {
@@ -59,7 +59,7 @@ hypre_StructScale( HYPRE_Complex       alpha,
 
 #define DEVICE_VAR is_device_ptr(yp)
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(y), loop_size,
-                          y_data_box, start, unit_stride, yi);
+                          y_data_box, start, ustride, yi);
       {
          yp[yi] *= alpha;
       }

@@ -93,7 +93,7 @@ hypre_ComputeInfoDestroy( hypre_ComputeInfo  *compute_info )
 
 /*--------------------------------------------------------------------------
  * Return descriptions of communications and computations patterns for
- * a given grid-stencil computation.  If HYPRE\_OVERLAP\_COMM\_COMP is
+ * a given grid-stencil computation.  If HYPRE_OVERLAP_COMM_COMP is
  * defined, then the patterns are computed to allow for overlapping
  * communications and computations.  The default is no overlap.
  *
@@ -102,6 +102,7 @@ hypre_ComputeInfoDestroy( hypre_ComputeInfo  *compute_info )
 
 HYPRE_Int
 hypre_CreateComputeInfo( hypre_StructGrid      *grid,
+                         hypre_Index            stride,
                          hypre_StructStencil   *stencil,
                          hypre_ComputeInfo    **compute_info_ptr )
 {
@@ -135,7 +136,7 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
     * Get communication info
     *------------------------------------------------------*/
 
-   hypre_CreateCommInfoFromStencil(grid, stencil, &comm_info);
+   hypre_CreateCommInfoFromStencil(grid, stride, stencil, &comm_info);
 
 #ifdef HYPRE_OVERLAP_COMM_COMP
 

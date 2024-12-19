@@ -968,7 +968,7 @@ hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
 
          if (hypre_StructMatrixNumValues(matrix) > 0)
          {
-            hypre_CreateCommInfo(grid, comm_stencils[m], &comm_info);
+            hypre_CreateCommInfo(grid, fstride, comm_stencils[m], &comm_info);
             hypre_StructMatrixCreateCommPkg(matrix, comm_info, &comm_pkg_a[num_comm_pkgs],
                                             &comm_data_a[num_comm_pkgs]);
             num_comm_blocks += hypre_CommPkgNumBlocks(comm_pkg_a[num_comm_pkgs]);
@@ -979,7 +979,7 @@ hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
       /* Compute mask communications */
       if (need_mask)
       {
-         hypre_CreateCommInfo(grid, comm_stencils[nmatrices], &comm_info);
+         hypre_CreateCommInfo(grid, fstride, comm_stencils[nmatrices], &comm_info);
          hypre_StructVectorMapCommInfo(mask, comm_info);
          hypre_CommPkgCreate(comm_info,
                              hypre_StructVectorDataSpace(mask),

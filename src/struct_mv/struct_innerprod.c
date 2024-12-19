@@ -40,7 +40,7 @@ hypre_StructInnerProdLocal( hypre_StructVector *x,
    hypre_Box       *loop_box;
    hypre_Index      loop_size;
    hypre_IndexRef   start;
-   hypre_Index      unit_stride;
+   hypre_Index      ustride;
 
    HYPRE_Int        i;
 
@@ -55,7 +55,7 @@ hypre_StructInnerProdLocal( hypre_StructVector *x,
    }
 
    loop_box = hypre_BoxCreate(ndim);
-   hypre_SetIndex(unit_stride, 1);
+   hypre_SetIndex(ustride, 1);
 
    for (i = 0; i < nboxes; i++)
    {
@@ -92,8 +92,8 @@ hypre_StructInnerProdLocal( hypre_StructVector *x,
 
 #define DEVICE_VAR is_device_ptr(yp,xp)
       hypre_BoxLoop2ReductionBegin(ndim, loop_size,
-                                   x_data_box, start, unit_stride, xi,
-                                   y_data_box, start, unit_stride, yi,
+                                   x_data_box, start, ustride, xi,
+                                   y_data_box, start, ustride, yi,
                                    box_sum)
       {
          HYPRE_Real tmp = xp[xi] * hypre_conj(yp[yi]);

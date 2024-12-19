@@ -65,7 +65,6 @@ hypre_SMGResidualSetup( void               *residual_vdata,
 
    hypre_IndexRef          base_index  = (residual_data -> base_index);
    hypre_IndexRef          base_stride = (residual_data -> base_stride);
-   hypre_Index             unit_stride;
 
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;
@@ -73,6 +72,9 @@ hypre_SMGResidualSetup( void               *residual_vdata,
    hypre_BoxArray         *base_points;
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
+   hypre_Index             ustride;
+
+   hypre_SetIndex(ustride, 1);
 
    /*----------------------------------------------------------
     * Set up base points and the compute package
@@ -81,12 +83,12 @@ hypre_SMGResidualSetup( void               *residual_vdata,
    grid    = hypre_StructMatrixGrid(A);
    stencil = hypre_StructMatrixStencil(A);
 
-   hypre_SetIndex3(unit_stride, 1, 1, 1);
+   hypre_SetIndex3(ustride, 1, 1, 1);
 
    base_points = hypre_BoxArrayClone(hypre_StructGridBoxes(grid));
    hypre_ProjectBoxArray(base_points, base_index, base_stride);
 
-   hypre_CreateComputeInfo(grid, stencil, &compute_info);
+   hypre_CreateComputeInfo(grid, ustride, stencil, &compute_info);
    hypre_ComputeInfoProjectComp(compute_info, base_index, base_stride);
    hypre_ComputePkgCreate(compute_info, hypre_StructVectorDataSpace(x), 1,
                           grid, &compute_pkg);
