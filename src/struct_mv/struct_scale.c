@@ -22,15 +22,17 @@ HYPRE_Int
 hypre_StructScale( HYPRE_Complex       alpha,
                    hypre_StructVector *y     )
 {
+   HYPRE_Int        ndim = hypre_StructVectorNDim(y);
+
    hypre_Box       *y_data_box;
 
    HYPRE_Complex   *yp;
 
-   hypre_BoxArray  *boxes;
-   hypre_Box       *box;
+   HYPRE_Int        nboxes;
+   hypre_Box       *loop_box;
    hypre_Index      loop_size;
    hypre_IndexRef   start;
-   hypre_Index      unit_stride;
+   hypre_Index      ustride;
 
    HYPRE_Int        i;
 
@@ -40,27 +42,32 @@ hypre_StructScale( HYPRE_Complex       alpha,
       return hypre_error_flag;
    }
 
-   hypre_SetIndex(unit_stride, 1);
-   boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
-   hypre_ForBoxI(i, boxes)
+   nboxes = hypre_StructVectorNBoxes(y);
+
+   loop_box = hypre_BoxCreate(ndim);
+   hypre_SetIndex(ustride, 1);
+
+   for (i = 0; i < nboxes; i++)
    {
-      box   = hypre_BoxArrayBox(boxes, i);
-      start = hypre_BoxIMin(box);
+      hypre_StructVectorGridBoxCopy(y, i, loop_box);
+      start = hypre_BoxIMin(loop_box);
 
-      y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
-      yp = hypre_StructVectorBoxData(y, i);
+      y_data_box = hypre_StructVectorGridDataBox(y, i);
+      yp = hypre_StructVectorGridData(y, i);
 
-      hypre_BoxGetSize(box, loop_size);
+      hypre_BoxGetSize(loop_box, loop_size);
 
 #define DEVICE_VAR is_device_ptr(yp)
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(y), loop_size,
-                          y_data_box, start, unit_stride, yi);
+                          y_data_box, start, ustride, yi);
       {
          yp[yi] *= alpha;
       }
       hypre_BoxLoop1End(yi);
 #undef DEVICE_VAR
    }
+
+   hypre_BoxDestroy(loop_box);
 
    return hypre_error_flag;
 }

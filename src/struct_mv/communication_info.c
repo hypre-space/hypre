@@ -463,13 +463,30 @@ hypre_CommInfoClone( hypre_CommInfo   *comm_info,
 /*--------------------------------------------------------------------------
  * Return descriptions of communications patterns for a given grid-stencil
  * computation.  These patterns are defined by intersecting the data
- * dependencies of each box (including data dependencies within the box) with
- * its neighbor boxes.
+ * dependencies of each grid box (including data dependencies within the box)
+ * with its neighbor boxes.
  *
  * An inconsistent ordering of the boxes in the send/recv data regions is
  * returned.  That is, the ordering of the boxes on process p for receives from
  * process q is not guaranteed to be the same as the ordering of the boxes on
  * process q for sends to process p.
+ *
+ * The grid is defined by the triple (bgrid, origin, stride) where bgrid is a
+ * base grid coarsened by origin and stride.  For now, the origin is assumed to
+ * be the zero origin.
+ *
+ * The comm_info structure is set up in terms of the box numbering in bgrid,
+ * even if a coarsened box is empty and does not participate in the computation.
+ * The main reason for doing this is because we need to use the box manager to
+ * get box number information for neighbors, and that is associated with bgrid.
+ * The overhead in the rest of the code for looping over these empty boxes is
+ * extremely small.
+ *
+ * The routine works on the index space for bgrid by using (origin, stride) to
+ * adjust bgrid box growth and ensure that box extents line up with the grid.
+ * The resulting comm_info is given on the index space for the grid.  Note that
+ * the period of a periodic dimension must be evenly divisible by the stride in
+ * that dimension, so it is okay to adjust boxes before shifting by the period.
  *
  * The routine uses a grow-the-box-and-intersect-with-neighbors style algorithm.
  *
@@ -532,7 +549,7 @@ hypre_CommInfoClone( hypre_CommInfo   *comm_info,
  * 4. Box Manager (added by AHB on 9/2006)
  *
  * The box manager is used to determine neighbors.  It is assumed that the
- * grid's box manager contains sufficient neighbor information.
+ * bgrid's box manager contains sufficient neighbor information.
  *
  * NOTES:
  *
@@ -544,11 +561,12 @@ hypre_CommInfoClone( hypre_CommInfo   *comm_info,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CreateCommInfo( hypre_StructGrid   *grid,
+hypre_CreateCommInfo( hypre_StructGrid   *bgrid,
+                      hypre_Index         stride,
                       hypre_CommStencil  *comm_stencil,
                       hypre_CommInfo    **comm_info_ptr )
 {
-   HYPRE_Int              ndim   = hypre_StructGridNDim(grid);
+   HYPRE_Int              ndim   = hypre_StructGridNDim(bgrid);
    hypre_Box             *csbox  = hypre_CommStencilBox(comm_stencil);
    HYPRE_Int             *csdata = hypre_CommStencilData(comm_stencil);
    HYPRE_Int             *mgrow  = hypre_CommStencilMGrow(comm_stencil);
@@ -611,12 +629,12 @@ hypre_CreateCommInfo( hypre_StructGrid   *grid,
     * Initializations
     *------------------------------------------------------*/
 
-   local_boxes = hypre_StructGridBoxes(grid);
+   local_boxes = hypre_StructGridBoxes(bgrid);
    num_boxes   = hypre_BoxArraySize(local_boxes);
-   num_periods = hypre_StructGridNumPeriods(grid);
+   num_periods = hypre_StructGridNumPeriods(bgrid);
 
-   boxman = hypre_StructGridBoxMan(grid);
-   comm   = hypre_StructGridComm(grid);
+   boxman = hypre_StructGridBoxMan(bgrid);
+   comm   = hypre_StructGridComm(bgrid);
 
    hypre_MPI_Comm_rank(comm, &myid);
 
@@ -639,10 +657,10 @@ hypre_CreateCommInfo( hypre_StructGrid   *grid,
    recv_rboxnums = hypre_CTAlloc(HYPRE_Int *, num_boxes, HYPRE_MEMORY_HOST);
    recv_rboxes   = hypre_BoxArrayArrayCreate(num_boxes, ndim);
 
-   grow_box = hypre_BoxCreate(hypre_StructGridNDim(grid));
-   extend_box = hypre_BoxCreate(hypre_StructGridNDim(grid));
-   int_box  = hypre_BoxCreate(hypre_StructGridNDim(grid));
-   periodic_box =  hypre_BoxCreate(hypre_StructGridNDim(grid));
+   grow_box = hypre_BoxCreate(hypre_StructGridNDim(bgrid));
+   extend_box = hypre_BoxCreate(hypre_StructGridNDim(bgrid));
+   int_box  = hypre_BoxCreate(hypre_StructGridNDim(bgrid));
+   periodic_box =  hypre_BoxCreate(hypre_StructGridNDim(bgrid));
 
    /* storage we will use and keep track of the neighbors */
    neighbor_alloc = 30; /* initial guess at max size */
@@ -668,30 +686,43 @@ hypre_CreateCommInfo( hypre_StructGrid   *grid,
       box = hypre_BoxArrayBox(local_boxes, i);
       box_id = i;
 
-      /* grow box local i according to the stencil */
+      /* check for an empty grid box (coarsened bgrid box) */
       hypre_CopyBox(box, grow_box);
+      hypre_CoarsenBox(grow_box, NULL, stride);
+      if (hypre_BoxVolume(grow_box) == 0)
+      {
+         /* skip the rest of this loop - no communication needed for this box */
+         continue;
+      }
+
+      /* grow_box - grow the local box according to the stencil */
+      hypre_CopyBox(box, grow_box);
+      hypre_ProjectBox(grow_box, NULL, stride);  /* ensure box extents line up with the grid */
       for (d = 0; d < ndim; d++)
       {
-         hypre_BoxIMinD(grow_box, d) -= mgrow[d];
-         hypre_BoxIMaxD(grow_box, d) += pgrow[d];
+         /* adjust growth by stride */
+         hypre_BoxIMinD(grow_box, d) -= stride[d] * mgrow[d];
+         hypre_BoxIMaxD(grow_box, d) += stride[d] * pgrow[d];
       }
 
       /* extend_box - to find the list of potential neighbors, we need to grow
          the local box a bit differently in case, for example, the stencil grows
          in one dimension [0] and not the other [1] */
       hypre_CopyBox(box, extend_box);
+      hypre_ProjectBox(extend_box, NULL, stride);  /* ensure box extents line up with the grid */
       for (d = 0; d < ndim; d++)
       {
-         hypre_BoxIMinD(extend_box, d) -= hypre_max(mgrow[d], pgrow[d]);
-         hypre_BoxIMaxD(extend_box, d) += hypre_max(mgrow[d], pgrow[d]);
+         /* adjust growth by stride */
+         hypre_BoxIMinD(extend_box, d) -= stride[d] * hypre_max(mgrow[d], pgrow[d]);
+         hypre_BoxIMaxD(extend_box, d) += stride[d] * hypre_max(mgrow[d], pgrow[d]);
       }
 
       /*------------------------------------------------
        * Determine the neighbors of box i
        *------------------------------------------------*/
 
-      /* Do this by intersecting the extend box with the BoxManager.
-         We must also check for periodic neighbors. */
+      /* Do this by intersecting the extend box with the BoxManager, and also
+         check for periodic neighbors */
 
       neighbor_count = 0;
       hypre_BoxArraySetSize(neighbor_boxes, 0);
@@ -699,7 +730,7 @@ hypre_CreateCommInfo( hypre_StructGrid   *grid,
       for (k = 0; k < num_periods; k++)
       {
          hypre_CopyBox(extend_box, periodic_box);
-         pshift = hypre_StructGridPShift(grid, k);
+         pshift = hypre_StructGridPShift(bgrid, k);
          hypre_BoxShiftPos(periodic_box, pshift);
 
          /* get the intersections */
@@ -812,7 +843,7 @@ hypre_CreateCommInfo( hypre_StructGrid   *grid,
          si = hypre_BoxIndexRank(csbox, csindex);
          if (csdata[si])
          {
-            /* intersect - result is int_box */
+            /* intersect - result is int_box - don't need to project hood_box */
             hypre_IntersectBoxes(grow_box, hood_box, int_box);
             /* if we have a positive volume box, this is a recv region */
             if (hypre_BoxVolume(int_box))
@@ -827,7 +858,7 @@ hypre_CreateCommInfo( hypre_StructGrid   *grid,
          }
       } /* end of loop through each neighbor */
 
-      /* create recv_box_array and recv_procs for box i */
+      /* create recv_box_array and recv_procs for box i - coarsen comm boxes here */
       recv_box_array = hypre_BoxArrayArrayBoxArray(recv_boxes, i);
       hypre_BoxArraySetSize(recv_box_array, num_cboxes);
       recv_procs[i] = hypre_CTAlloc(HYPRE_Int, num_cboxes, HYPRE_MEMORY_HOST);
@@ -841,14 +872,16 @@ hypre_CreateCommInfo( hypre_StructGrid   *grid,
          recv_procs[i][m] = neighbor_procs[loc];
          recv_rboxnums[i][m] = neighbor_ids[loc];
          hypre_CopyBox(cboxes[m], hypre_BoxArrayBox(recv_box_array, m));
+         hypre_CoarsenBox(hypre_BoxArrayBox(recv_box_array, m), NULL, stride);
 
          /* if periodic, positive shift before copying to the rbox_array */
          if (neighbor_shifts[loc]) /* periodic if shift != 0 */
          {
-            pshift = hypre_StructGridPShift(grid, neighbor_shifts[loc]);
+            pshift = hypre_StructGridPShift(bgrid, neighbor_shifts[loc]);
             hypre_BoxShiftPos(cboxes[m], pshift);
          }
          hypre_CopyBox(cboxes[m], hypre_BoxArrayBox(recv_rbox_array, m));
+         hypre_CoarsenBox(hypre_BoxArrayBox(recv_rbox_array, m), NULL, stride);
 
          cboxes[m] = NULL;
       }
@@ -888,11 +921,14 @@ hypre_CreateCommInfo( hypre_StructGrid   *grid,
          {
             /* grow the neighbor box and intersect */
             hypre_CopyBox(hood_box, grow_box);
+            hypre_ProjectBox(grow_box, NULL, stride);  /* ensure box extents line up with the grid */
             for (d = 0; d < ndim; d++)
             {
-               hypre_BoxIMinD(grow_box, d) -= mgrow[d];
-               hypre_BoxIMaxD(grow_box, d) += pgrow[d];
+               /* adjust growth by stride */
+               hypre_BoxIMinD(grow_box, d) -= stride[d] * mgrow[d];
+               hypre_BoxIMaxD(grow_box, d) += stride[d] * pgrow[d];
             }
+            /* intersect - result is int_box - don't need to project box */
             hypre_IntersectBoxes(box, grow_box, int_box);
             /* if we have a positive volume box, this is a send region */
             if (hypre_BoxVolume(int_box))
@@ -907,7 +943,7 @@ hypre_CreateCommInfo( hypre_StructGrid   *grid,
          }
       }/* end of loop through neighbors */
 
-      /* create send_box_array and send_procs for box i */
+      /* create send_box_array and send_procs for box i - coarsen comm boxes here */
       send_box_array = hypre_BoxArrayArrayBoxArray(send_boxes, i);
       hypre_BoxArraySetSize(send_box_array, num_cboxes);
       send_procs[i] = hypre_CTAlloc(HYPRE_Int, num_cboxes, HYPRE_MEMORY_HOST);
@@ -921,14 +957,16 @@ hypre_CreateCommInfo( hypre_StructGrid   *grid,
          send_procs[i][m] = neighbor_procs[loc];
          send_rboxnums[i][m] = neighbor_ids[loc];
          hypre_CopyBox(cboxes[m], hypre_BoxArrayBox(send_box_array, m));
+         hypre_CoarsenBox(hypre_BoxArrayBox(send_box_array, m), NULL, stride);
 
          /* if periodic, positive shift before copying to the rbox_array */
          if (neighbor_shifts[loc]) /* periodic if shift != 0 */
          {
-            pshift = hypre_StructGridPShift(grid, neighbor_shifts[loc]);
+            pshift = hypre_StructGridPShift(bgrid, neighbor_shifts[loc]);
             hypre_BoxShiftPos(cboxes[m], pshift);
          }
          hypre_CopyBox(cboxes[m], hypre_BoxArrayBox(send_rbox_array, m));
+         hypre_CoarsenBox(hypre_BoxArrayBox(send_rbox_array, m), NULL, stride);
 
          cboxes[m] = NULL;
       }
@@ -966,6 +1004,7 @@ hypre_CreateCommInfo( hypre_StructGrid   *grid,
 
 HYPRE_Int
 hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
+                                 hypre_Index            stride,
                                  hypre_StructStencil   *stencil,
                                  hypre_CommInfo       **comm_info_ptr )
 {
@@ -983,7 +1022,7 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
       hypre_CommStencilSetEntry(comm_stencil, stencil_offset);
    }
 
-   hypre_CreateCommInfo(grid, comm_stencil, comm_info_ptr );
+   hypre_CreateCommInfo(grid, stride, comm_stencil, comm_info_ptr );
    hypre_CommStencilDestroy(comm_stencil);
 
    return hypre_error_flag;
@@ -996,6 +1035,7 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
 
 HYPRE_Int
 hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
+                                  hypre_Index            stride,
                                   HYPRE_Int             *num_ghost,
                                   hypre_CommInfo       **comm_info_ptr )
 {
@@ -1023,7 +1063,7 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
       pgrow[d] = num_ghost[2 * d + 1];
    }
 
-   hypre_CreateCommInfo(grid, comm_stencil, comm_info_ptr);
+   hypre_CreateCommInfo(grid, stride, comm_stencil, comm_info_ptr);
    hypre_CommStencilDestroy(comm_stencil);
 
    return hypre_error_flag;

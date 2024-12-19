@@ -12,6 +12,10 @@
 
 /*--------------------------------------------------------------------------
  * hypre_StructMatrixComputeRowSum
+ *
+ * RDF TODO: This routine should assume that the base grid for A and rowsum are
+ * the same.  It should use the range boxes of A and work for general
+ * rectangular matrices.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

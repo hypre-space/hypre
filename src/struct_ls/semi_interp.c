@@ -60,17 +60,20 @@ hypre_SemiInterpSetup( void               *interp_vdata,
 
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
+   hypre_Index             ustride;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   hypre_SetIndex(ustride, 1);
 
    /*----------------------------------------------------------
     * Set up the compute package
     *----------------------------------------------------------*/
 
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-
    grid    = hypre_StructVectorGrid(e);
    stencil = hypre_StructMatrixStencil(P);
 
-   hypre_CreateComputeInfo(grid, stencil, &compute_info);
+   hypre_CreateComputeInfo(grid, ustride, stencil, &compute_info);
    hypre_ComputeInfoProjectSend(compute_info, cindex, stride);
    hypre_ComputeInfoProjectRecv(compute_info, cindex, stride);
    hypre_ComputeInfoProjectComp(compute_info, findex, stride);

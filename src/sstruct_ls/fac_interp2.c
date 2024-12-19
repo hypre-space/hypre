@@ -201,6 +201,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
       num_ghost = hypre_StructVectorNumGhost(e_var);
 
       hypre_CreateCommInfoFromNumGhost(hypre_StructVectorGrid(e_var),
+                                       hypre_StructVectorStride(e_var),
                                        num_ghost, &comm_info);
       hypre_CommPkgCreate(comm_info,
                           hypre_StructVectorDataSpace(e_var),

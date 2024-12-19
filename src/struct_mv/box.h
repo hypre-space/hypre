@@ -41,6 +41,7 @@ typedef struct hypre_Box_struct
    hypre_Index imin;           /* min bounding indices */
    hypre_Index imax;           /* max bounding indices */
    HYPRE_Int   ndim;           /* number of dimensions */
+
 } hypre_Box;
 
 /*--------------------------------------------------------------------------
@@ -56,6 +57,7 @@ typedef struct hypre_BoxArray_struct
    HYPRE_Int   alloc_size;    /* Size of currently alloced space */
    HYPRE_Int   ndim;          /* number of dimensions */
    HYPRE_Int  *ids;           /* box identifiers */
+
 } hypre_BoxArray;
 
 #define hypre_BoxArrayExcess 10
@@ -73,6 +75,7 @@ typedef struct hypre_BoxArrayArray_struct
    HYPRE_Int         alloc_size;    /* Size of currently alloced space */
    HYPRE_Int         ndim;          /* number of dimensions */
    HYPRE_Int        *ids;           /* box array identifiers */
+
 } hypre_BoxArrayArray;
 
 /*--------------------------------------------------------------------------
