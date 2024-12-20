@@ -434,7 +434,7 @@ function(add_hypre_target_tags)
               "(" -name "*.h" -o -name "*.c" -o -name "*.cpp"
               -o -name "*.hpp" -o -name "*.cxx"
               -o -name "*.f" -o -name "*.f90" ")"
-              -not -path "*/build/*" -not -path "*/cmbuild/*"
+              -not -path "*/build/*"
               -print | ${ETAGS_EXECUTABLE}
               --declarations
               --ignore-indentation

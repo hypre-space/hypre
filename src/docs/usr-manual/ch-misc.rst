@@ -108,8 +108,8 @@ The simplest way to build hypre using CMake is:
 
 .. code-block:: bash
 
-   cd ${HYPRE_HOME}/cmbuild    # Use a separate build directory to keep source clean
-   cmake ..                    # Generate build system
+   cd ${HYPRE_HOME}/build      # Use a separate build directory to keep source clean
+   cmake ../src                # Generate build system
    make -j                     # Build the library in parallel
    make install                # (Optional) Install to specified location via -DCMAKE_INSTALL_PREFIX=<path>
 
@@ -132,9 +132,9 @@ hypre's CMake build provides several options. For more information, see :ref:`bu
 
    CMake GUI (``ccmake`` or ``cmake-gui``) provides an interactive way to change build options:
 
-   - **Unix**: From the ``${HYPRE_HOME}/src/cmbuild`` directory:
+   - **Unix**: From the ``${HYPRE_HOME}/build`` directory:
 
-     1. Run ``ccmake ..``
+     1. Run ``ccmake ../src``
      2. Change options:
         - Press Enter to modify a variable
         - Boolean options (ON/OFF) toggle with Enter
