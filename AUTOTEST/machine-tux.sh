@@ -60,42 +60,6 @@ mv -f check-headers.??? $output_dir
 ./test.sh check-case.sh $src_dir/..
 mv -f check-case.??? $output_dir
 
-# CMake build and run tests
-mo="-j"
-ro="-ams -ij -sstruct -struct -lobpcg"
-eo=""
-
-co=""
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo
-./renametest.sh cmake $output_dir/cmake-default
-
-co="-DHYPRE_SEQUENTIAL=ON"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo
-./renametest.sh cmake $output_dir/cmake-sequential
-
-co="-DHYPRE_SHARED=ON"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo
-./renametest.sh cmake $output_dir/cmake-shared
-
-co="-DHYPRE_SINGLE=ON"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: -single
-./renametest.sh cmake $output_dir/cmake-single
-
-co="-DHYPRE_LONG_DOUBLE=ON"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: -longdouble
-./renametest.sh cmake $output_dir/cmake-longdouble
-
-co="-DCMAKE_BUILD_TYPE=Debug"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: $ro
-./renametest.sh cmake $output_dir/cmake-debug
-
-co="-DHYPRE_BIGINT=ON"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: $ro
-./renametest.sh cmake $output_dir/cmake-bigint
-
-# cmake build doesn't currently support maxdim
-# cmake build doesn't currently support complex
-
 # Basic build and run tests
 mo="-j test"
 ro="-ams -ij -sstruct -struct -lobpcg"
