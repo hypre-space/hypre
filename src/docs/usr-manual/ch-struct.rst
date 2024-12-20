@@ -52,7 +52,7 @@ To describe each of these steps in more detail, consider solving the
    \right .
 
 Assume :eq:`eqn-laplacian` is discretized using standard 5-pt finite-volumes on
-the uniform grid pictured in :ref:`fig-struct-example`, and assume that the
+the uniform grid pictured in :numref:`fig-struct-example`, and assume that the
 problem data is distributed across two processes as depicted.
 
 

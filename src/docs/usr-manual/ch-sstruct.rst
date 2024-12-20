@@ -125,17 +125,19 @@ user and simply described (in parallel) through the interface.
 .. |figSStructGrid6| image:: figSStructGrid6.svg
    :width: 100%
 
-.. _fig-sstruct-grid:
++----------------------+----------------------+----------------------+
+| 1: |figSStructGrid1| | 2: |figSStructGrid2| | 3: |figSStructGrid3| |
++----------------------+----------------------+----------------------+
+| 4: |figSStructGrid4| | 5: |figSStructGrid5| | 6: |figSStructGrid6| |
++----------------------+----------------------+----------------------+
 
-.. table:: : Grid Setup Process. The "icons" illustrate the result of the numbered lines of code.
+.. figure:: dummy.png
+   :align: center
+   :name: fig-sstruct-grid
+   :figclass: align-center
+   :figwidth: 100%
 
-   +----------------------+----------------------+----------------------+
-   | 1: |figSStructGrid1| | 2: |figSStructGrid2| | 3: |figSStructGrid3| |
-   +----------------------+----------------------+----------------------+
-   | 4: |figSStructGrid4| | 5: |figSStructGrid5| | 6: |figSStructGrid6| |
-   +----------------------+----------------------+----------------------+
-
-Code on process 3 for setting up the grid in :numref:`fig-sstruct-example`:
+   : Grid Setup Process. The "icons" illustrate the result of the numbered lines of code.
 
 .. code-block:: c
 
@@ -165,8 +167,10 @@ Code on process 3 for setting up the grid in :numref:`fig-sstruct-example`:
 
    6:  HYPRE_SStructGridAssemble(grid);
 
+Code on process 3 for setting up the grid in :numref:`fig-sstruct-example`.
+
 As with the ``Struct`` interface, each process describes that portion of the grid that it
-"owns", one box at a time. `Table 1 <#fig-sstruct-grid>`_ shows the code for setting up the
+"owns", one box at a time. :numref:`fig-sstruct-grid` shows the code for setting up the
 grid on process 3 (the code for the other processes is similar).  The "icons" at the top
 of the figure illustrate the result of the numbered lines of code.  Process 3 needs to
 describe the data pictured in the bottom-right of the figure.  That is, it needs to
@@ -180,7 +184,7 @@ At this stage, the description of the data on part 3 is complete. However, the s
 relationship between this data and the data on neighboring parts is not yet defined.  To
 do this, we need to relate the index space for part 3 with the index spaces of parts 2
 and 4.  More specifically, we need to tell the interface that the two grey boxes
-neighboring part 3 in the bottom-right of `Table 1 <#fig-sstruct-grid>`_ also correspond to
+neighboring part 3 in the bottom-right of :numref:`fig-sstruct-grid` also correspond to
 boxes on parts 2 and 4.  This is done through the two calls to the ``SetNeighborPart()``
 routine.  We discuss only the first call, which describes the grey box on the right of the
 figure.  Note that this grey box lives outside of the box extents for the grid on part 3,
@@ -223,7 +227,7 @@ described relative to the "center" of the stencil.  This process is illustrated 
 for the :math:`x`-face variable (the variable to which this entry couples).  Recall from
 :numref:`fig-gridvars` the convention used for referencing variables of different types.
 The geometry description uses the same convention, but with indices numbered relative to
-the referencing index :math:`(0,0)` for the stencil's center. `Table 2 <#fig-sstruct-graph>`_
+the referencing index :math:`(0,0)` for the stencil's center. :numref:`fig-sstruct-graph`
 shows the code for setting up the graph.
 
 .. figure:: figSStructStenc0.svg
@@ -245,15 +249,17 @@ shows the code for setting up the graph.
 .. |figSStructGraph5| image:: figSStructGraph5.svg
    :width: 100%
 
-.. _fig-sstruct-graph:
++-----------------------+-----------------------+-----------------------+
+| 1: |figSStructGraph1| | 2: |figSStructGraph2| | 3: |figSStructGraph5| |
++-----------------------+-----------------------+-----------------------+
 
-.. table:: : Graph Setup Process. The "icons" illustrate the result of the numbered lines of code.
+.. figure:: dummy.png
+   :align: center
+   :name: fig-sstruct-graph
+   :figclass: align-center
+   :figwidth: 100%
 
-   +-----------------------+-----------------------+-----------------------+
-   | 1: |figSStructGraph1| | 2: |figSStructGraph2| | 3: |figSStructGraph5| |
-   +-----------------------+-----------------------+-----------------------+
-
-Code on process 3 for setting up the graph for :numref:`fig-sstruct-example`:
+   : Graph Setup Process. The icons illustrate the result of the numbered lines of code.
 
 .. code-block:: c
 
@@ -273,6 +279,8 @@ Code on process 3 for setting up the graph for :numref:`fig-sstruct-example`:
        }
 
    3:  HYPRE_SStructGraphAssemble(graph);
+
+Code on process 3 for setting up the graph for :numref:`fig-sstruct-example`.
 
 With the above, we now have a complete description of the nonzero structure for
 the matrix.  The matrix coefficients are then easily set in a manner similar to
@@ -347,15 +355,19 @@ with part :math:`p` lives on process :math:`p`.
 .. |figSStructGridFEM6| image:: figSStructGridFEM6.svg
    :width: 100%
 
-.. _fig-sstruct-fem-grid:
++-------------------------+-------------------------+-------------------------+
+| 1: |figSStructGridFEM1| | 2: |figSStructGridFEM2| | 3: |figSStructGridFEM3| |
++-------------------------+-------------------------+-------------------------+
+| 4: |figSStructGridFEM4| | 5: |figSStructGridFEM5| | 6: |figSStructGridFEM6| |
++-------------------------+-------------------------+-------------------------+
 
-.. table:: : FEM Grid Setup Process. The "icons" illustrate the result of the numbered lines of code.
+.. figure:: dummy.png
+   :align: center
+   :name: fig-sstruct-fem-grid
+   :figclass: align-center
+   :figwidth: 100%
 
-   +-------------------------+-------------------------+-------------------------+
-   | 1: |figSStructGridFEM1| | 2: |figSStructGridFEM2| | 3: |figSStructGridFEM3| |
-   +-------------------------+-------------------------+-------------------------+
-   | 4: |figSStructGridFEM4| | 5: |figSStructGridFEM5| | 6: |figSStructGridFEM6| |
-   +-------------------------+-------------------------+-------------------------+
+   : FEM Grid Setup Process. The "icons" illustrate the result of the numbered lines of code.
 
 .. code-block:: c
 
@@ -386,15 +398,15 @@ with part :math:`p` lives on process :math:`p`.
 
 Code on process 0 for setting up the grid in :numref:`fig-sstruct-fem-example`.
 
-As in Section :ref:`sec-Block-Structured-Grids`, each process describes that
-portion of the grid that it "owns", one box at a time. `Table 3 <#fig-sstruct-fem-grid>`_
-shows the code for setting up the grid on process 0 (the code for the other processes is similar).
-Process 0 needs to describe the data pictured in the bottom-right of the figure. That is, it needs
-to describe part 0 plus some additional information about shared data with other
-parts on the grid.  The ``SetFEMOrdering()`` routine sets the ordering of the
-unknowns in an element (an element is always a grid cell in hypre).  This
-determines the ordering of the data passed into the routines
-``MatrixAddFEMValues()`` and ``VectorAddFEMValues()`` discussed later.
+As in Section :ref:`sec-Block-Structured-Grids`, each process describes that portion of
+the grid that it "owns", one box at a time. :numref:`fig-sstruct-fem-grid` shows the code
+for setting up the grid on process 0 (the code for the other processes is similar).
+Process 0 needs to describe the data pictured in the bottom-right of the figure. That is,
+it needs to describe part 0 plus some additional information about shared data with other
+parts on the grid.  The ``SetFEMOrdering()`` routine sets the ordering of the unknowns in
+an element (an element is always a grid cell in hypre).  This determines the ordering of
+the data passed into the routines ``MatrixAddFEMValues()`` and ``VectorAddFEMValues()``
+discussed later.
 
 At this point, the layout of the data on part 0 is complete, but there is no
 relationship to the rest of the grid.  To couple the parts, we need to tell
@@ -409,7 +421,7 @@ in the cell (no nonzeros in offset); all variables on a face (only 1 nonzero);
 all variables on an edge (2 nonzeros); all variables at a point (3 nonzeros).
 The two offsets must be consistent with each other.
 
-The graph is set up similarly to `Table 2 <#fig-sstruct-graph>`_, except that the stencil
+The graph is set up similarly to :numref:`fig-sstruct-graph`, except that the stencil
 calls are replaced by calls to ``GraphSetFEM()``. The nonzero pattern of the stiffness
 matrix can also be set by calling the optional routine ``GraphSetFEMSparsity()``.
 
@@ -459,7 +471,7 @@ in this region).
 In the example, parts are distributed across the same two processes with process 0 having
 the "left" half of both parts.  The composite grid is then set up part-by-part by making
 calls to ``GridSetExtents()`` just as was done in Section
-:ref:`sec-Block-Structured-Grids` and `Table 1 <#fig-sstruct-grid>`_ (no ``SetNeighborPart``
+:ref:`sec-Block-Structured-Grids` and :numref:`fig-sstruct-grid` (no ``SetNeighborPart``
 calls are made in this example).  Note that in the interface there is no required rule
 relating the indexing on the refinement patch to that on the global coarse grid; they are
 separate parts and thus each has its own index space.  In this example, we have chosen the
