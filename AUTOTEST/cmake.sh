@@ -70,18 +70,19 @@ rm -fr $output_dir
 mkdir -p $output_dir
 cd $src_dir
 src_dir=`pwd`
+build_dir=$src_dir/../build
 
-# Clean up the cmbuild directories (do it from src_dir as a precaution)
+# Clean up the build directories (do it from src_dir as a precaution)
 cd $src_dir
-rm -fr cmbuild/*
+rm -fr ../build/*
 
 # Clean up the previous install
 cd $src_dir
 rm -fr hypre
 
 # Configure
-cd $src_dir/cmbuild
-eval cmake $copts ..
+cd $build_dir
+eval cmake $copts -B ${build_dir} -S ${src_dir}
 make $mopts install
 
 cd $test_dir
@@ -106,6 +107,6 @@ done
 
 # Clean up
 cd $src_dir
-rm -fr `echo cmbuild/* | sed 's/[^ ]*README.txt//g'`
+rm -fr `echo ../build/*`
 rm -fr hypre
 ( cd $src_dir/test; rm -f $drivers; ./cleantest.sh )

@@ -153,12 +153,12 @@ represent the way that applications developers naturally think of their linear
 problem and to provide natural interfaces for them to pass the data that defines
 their linear system into hypre.  Essentially, these conceptual interfaces can be
 considered convenient utilities for helping a user build a matrix data structure
-for hypre solvers and preconditioners.  The top row of :ref:`fig-ls-interface`
+for hypre solvers and preconditioners.  The top row of :numref:`fig-ls-interface`
 illustrates a number of conceptual interfaces.  Generally, the conceptual
 interfaces are denoted by different types of computational grids, but other
 application features might also be used, such as geometrical information.  For
 example, applications that use structured grids (such as in the left-most
-interface in :ref:`fig-ls-interface`) typically view their linear problems in
+interface in :numref:`fig-ls-interface`) typically view their linear problems in
 terms of stencils and grids.  On the other hand, applications that use
 unstructured grids and finite elements typically view their linear problems in
 terms of elements and element stiffness matrices. Finally, the right-most
