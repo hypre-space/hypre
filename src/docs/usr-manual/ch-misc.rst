@@ -42,7 +42,7 @@ There are two ways to obtain hypre:
 Building the Library
 ==============================================================================
 
-After obtaining the source code (see :ref:`getting-source`), there are two main ways to build hypre:
+After obtaining the source code (see :ref:`getting-source`), there are three main ways to build hypre:
 
 1. Using autotools (Configure & Make)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -152,7 +152,7 @@ hypre's CMake build provides several options. For more information, see :ref:`bu
 3. Using Spack (Recommended for HPC environments)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-[Spack_](https://spack.io/) is a package manager designed for supercomputers, Linux, and macOS.
+`Spack <https://spack.io/>`_  is a package manager designed for supercomputers, Linux, and macOS.
 It makes installing scientific software easy and handles dependencies automatically. To build hypre using Spack:
 
 .. code-block:: bash
@@ -327,10 +327,11 @@ For GPU-specific options, see the :ref:`gpu_build` section below.
 GPU Build Options
 ==============================================================
 
-hypre provides support for multiple GPU architectures through different programming models:
-CUDA (for NVIDIA GPUs), HIP (for AMD GPUs), and SYCL (for Intel GPUs). Each model has its
-own set of build options and requirements. Some solvers and features may have different
-levels of support across these platforms. Key considerations when building for GPUs are:
+The hypre library provides support for multiple GPU architectures through different
+programming models: CUDA (for NVIDIA GPUs), HIP (for AMD GPUs), and SYCL (for Intel
+GPUs). Each model has its own set of build options and requirements. Some solvers and
+features may have different levels of support across these platforms. Key considerations
+when building for GPUs are:
 
 1. Only one GPU backend can be enabled at a time (CUDA, HIP, or SYCL)
 2. Some features like full support for 64-bit integers (`BigInt`) are not available
@@ -466,7 +467,7 @@ build systems.
    not accessible from the CPUs. Hypre's structured solvers can run with device
    memory, whereas only selected unstructured solvers can run with device memory.
    See :ref:`ch-boomeramg-gpu` for details. Some solver options for BoomerAMG
-   require unified (CUDA managed) memory.
+   require unified (managed) memory.
 
 Make Targets
 =====================
@@ -590,7 +591,7 @@ There are two main approaches to link your application with hypre:
 Using CMake
 ^^^^^^^^^^^
 
-hypre provides CMake configuration files that enable easy integration. Create a
+The hypre library provides CMake configuration files that enable easy integration. Create a
 ``CMakeLists.txt`` with:
 
 .. code-block:: cmake

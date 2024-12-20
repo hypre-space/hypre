@@ -200,36 +200,31 @@ application.
   for building matrices in particular formats, find the IJ interface relatively
   easy to use. See Chapter :ref:`ch-IJ` for details.
 
-.. _fig-ls-interface:
-
-.. figure:: figConcepIface.*
+.. figure:: figConcepIface.svg
    :align: center
+   :name: fig-ls-interface
 
-   Figure 1
-
-   Graphic illustrating the notion of conceptual linear system interfaces.
+   : Graphic illustrating the notion of conceptual linear system interfaces.
 
 Generally, a user should choose the most specific interface that matches their
-application, because this will allow them to use specialized and more efficient
-solvers and preconditioners without losing access to more general solvers.  For
-example, the second row of Figure :ref:`fig-ls-interface` is a set of linear
-solver algorithms.  Each linear solver group requires different information from
-the user through the conceptual interfaces.  So, the geometric multigrid
-algorithm (GMG) listed in the left-most box, for example, can only be used with
-the left-most conceptual interface.  On the other hand, the ILU algorithm in the
-right-most box may be used with any conceptual interface.  Matrix requirements
-for each solver and preconditioner are provided in Chapter :ref:`ch-Solvers` and
-in Chapter :ref:`ch-API`.  Your desired solver strategy may influence your
-choice of conceptual interface.  A typical user will select a single Krylov
-method and a single preconditioner to solve their system.
+application, because this will allow them to use specialized and more efficient solvers
+and preconditioners without losing access to more general solvers.  For example, the
+second row of :numref:`fig-ls-interface` is a set of linear solver algorithms.  Each linear
+solver group requires different information from the user through the conceptual
+interfaces.  So, the geometric multigrid algorithm (GMG) listed in the left-most box, for
+example, can only be used with the left-most conceptual interface. On the other hand, the
+ILU algorithm in the right-most box may be used with any conceptual interface.  Matrix
+requirements for each solver and preconditioner are provided in Chapter :ref:`ch-Solvers`
+and in Chapter :ref:`ch-API`. Your desired solver strategy may influence your choice of
+conceptual interface.  A typical user will select a single Krylov method and a single
+preconditioner to solve their system.
 
-The third row of Figure :ref:`fig-ls-interface` is a list of data layouts or
-matrix/vector storage schemes.  The relationship between linear solver and
-storage scheme is similar to that of the conceptual interface and linear solver.
-Note that some of the interfaces in hypre currently only support one
-matrix/vector storage scheme choice.  The conceptual interface, the desired
-solvers and preconditioners, and the matrix storage class must all be
-compatible.
+The third row of :numref:`fig-ls-interface` is a list of data layouts or matrix/vector
+storage schemes. The relationship between linear solver and storage scheme is similar to
+that of the conceptual interface and linear solver.  Note that some of the interfaces in
+hypre currently only support one matrix/vector storage scheme choice. The conceptual
+interface, the desired solvers and preconditioners, and the matrix storage class must all
+be compatible.
 
 
 .. _writing-your-code:
@@ -275,4 +270,3 @@ fully understand the function of each conceptual interface and each solver.
 Remember that a comprehensive list of all available functions is provided in
 Chapter :ref:`ch-API`, and the provided example codes may prove helpful as
 templates for your specific application.
-
