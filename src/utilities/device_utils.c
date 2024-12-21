@@ -365,7 +365,7 @@ hypre_DeviceMemoryGetUsage(HYPRE_Real *mem)
 {
    size_t       free_mem  = 0;
    size_t       total_mem = 0;
-   HYPRE_Real   b_to_gb   = (HYPRE_Real)(1e9);
+   HYPRE_Real   b_to_gib   = (HYPRE_Real)(1 << 30);
 
    /* Sanity check */
    if (!mem)
@@ -386,9 +386,9 @@ hypre_DeviceMemoryGetUsage(HYPRE_Real *mem)
    return hypre_error_flag;
 #endif
 
-   /* Convert data from bytes to GB (HYPRE_Real) */
-   mem[0] = (total_mem - free_mem) / b_to_gb;
-   mem[1] = total_mem / b_to_gb;
+   /* Convert data from bytes to GiB (HYPRE_Real) */
+   mem[0] = (total_mem - free_mem) / b_to_gib;
+   mem[1] = total_mem / b_to_gib;
 
    return hypre_error_flag;
 }

@@ -1280,7 +1280,7 @@ hypre_HostMemoryGetUsage(HYPRE_Real *mem)
    size_t       vm_peak  = 0;
    size_t       tot_mem  = 0;
    size_t       free_mem = 0;
-   HYPRE_Real   b_to_gb  = (HYPRE_Real) (1e9);
+   HYPRE_Real   b_to_gib  = (HYPRE_Real) (1 << 30);
 
    /* Sanity check */
    if (!mem)
@@ -1364,13 +1364,13 @@ hypre_HostMemoryGetUsage(HYPRE_Real *mem)
    vm_hwm  *= 1024;
 #endif
 
-   /* Convert data from bytes to GB (HYPRE_Real) */
-   mem[0] = vm_size  / b_to_gb;
-   mem[1] = vm_peak  / b_to_gb;
-   mem[2] = vm_rss   / b_to_gb;
-   mem[3] = vm_hwm   / b_to_gb;
-   mem[4] = (tot_mem - free_mem) / b_to_gb;
-   mem[5] = tot_mem  / b_to_gb;
+   /* Convert data from bytes to GiB (HYPRE_Real) */
+   mem[0] = vm_size  / b_to_gib;
+   mem[1] = vm_peak  / b_to_gib;
+   mem[2] = vm_rss   / b_to_gib;
+   mem[3] = vm_hwm   / b_to_gib;
+   mem[4] = (tot_mem - free_mem) / b_to_gib;
+   mem[5] = tot_mem  / b_to_gib;
 
    return hypre_error_flag;
 }
@@ -1497,10 +1497,10 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
             {
                hypre_printf("[%*d]: %s", ndigits, i, function);
             }
-            hypre_printf(" | Vm[Size,RSS]/[Peak,HWM]: (%.2f, %.2f / %.2f, %.2f) GB",
+            hypre_printf(" | Vm[Size,RSS]/[Peak,HWM]: (%.2f, %.2f / %.2f, %.2f) GiB",
                          gmem[ne * i + 0], gmem[ne * i + 2],
                          gmem[ne * i + 1], gmem[ne * i + 3]);
-            hypre_printf(" | Used/Total: (%.2f / %.2f)", gmem[ne * i + 4], gmem[ne * i + 5]);
+            hypre_printf(" | Used/Total RAM: (%.2f / %.2f)", gmem[ne * i + 4], gmem[ne * i + 5]);
 #if defined(HYPRE_USING_GPU)
             hypre_printf(" | Used/Total VRAM: (%.2f / %.2f)", gmem[ne * i + 6], gmem[ne * i + 7]);
 #endif
@@ -1544,25 +1544,25 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
          }
 
          /* Print header */
-         hypre_printf("       | %11s | %11s | %11s | %11s",
-                      "VmSize (GB)", "VmPeak (GB)", "VmRSS (GB)", "VmHWM (GB)");
+         hypre_printf("       | %12s | %12s | %12s | %12s",
+                      "VmSize (GiB)", "VmPeak (GiB)", "VmRSS (GiB)", "VmHWM (GiB)");
 #if defined(HYPRE_USING_GPU)
-         hypre_printf(" | %13s | %14s", "VRAMsize (GB)", "VRAMtotal (GB)");
+         hypre_printf(" | %14s | %15s", "VRAMsize (GiB)", "VRAMtotal (GiB)");
 #endif
 #if defined(HYPRE_USING_UMPIRE_HOST)
-         hypre_printf(" | %13s | %13s", "UmpHSize (GB)", "UmpHPeak (GB)");
+         hypre_printf(" | %14s | %14s", "UmpHSize (GiB)", "UmpHPeak (GiB)");
 #endif
 #if defined(HYPRE_USING_UMPIRE_DEVICE)
-         hypre_printf(" | %13s | %13s", "UmpDSize (GB)", "UmpDPeak (GB)");
+         hypre_printf(" | %14s | %14s", "UmpDSize (GiB)", "UmpDPeak (GiB)");
 #endif
 #if defined(HYPRE_USING_UMPIRE_UM)
          if (max[12] > 0.0)
          {
-            hypre_printf(" | %13s | %13s", "UmpUSize (GB)", "UmpUPeak (GB)");
+            hypre_printf(" | %13s | %13s", "UmpUSize (GiB)", "UmpUPeak (GiB)");
          }
 #endif
 #if defined(HYPRE_USING_UMPIRE_PINNED)
-         hypre_printf(" | %13s | %13s", "UmpPSize (GB)", "UmpPPeak (GB)")
+         hypre_printf(" | %13s | %13s", "UmpPSize (GiB)", "UmpPPeak (GiB)")
 #endif
          hypre_printf("\n");
          hypre_printf("   ----+-------------+-------------+-------------+------------");
@@ -1570,10 +1570,16 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
          hypre_printf("-+---------------+---------------");
 #endif
 #if defined(HYPRE_USING_UMPIRE_HOST)
-         hypre_printf("-+---------------+--------------");
+         if (max[8] > 0.0)
+         {
+            hypre_printf("-+---------------+--------------");
+         }
 #endif
 #if defined(HYPRE_USING_UMPIRE_DEVICE)
-         hypre_printf("-+---------------+--------------");
+         if (max[10] > 0.0)
+         {
+            hypre_printf("-+---------------+--------------");
+         }
 #endif
 #if defined(HYPRE_USING_UMPIRE_UM)
          if (max[12] > 0.0)
@@ -1582,7 +1588,10 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
          }
 #endif
 #if defined(HYPRE_USING_UMPIRE_PINNED)
-         hypre_printf("-+---------------+--------------");
+         if (max[14] > 0.0)
+         {
+            hypre_printf("-+---------------+--------------");
+         }
 #endif
          hypre_printf("\n");
 
@@ -1590,25 +1599,34 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
          for (i = 0; i < 4; i++)
          {
             hypre_printf("   %-3s", labels[i]);
-            hypre_printf(" | %11.3f | %11.3f | %11.3f | %11.3f",
+            hypre_printf(" | %12.3f | %12.3f | %12.3f | %12.3f",
                          data[i][0], data[i][1], data[i][2], data[i][3]);
 #if defined(HYPRE_USING_GPU)
-            hypre_printf(" | %13.3f | %14.3f", data[i][6], data[i][7]);
+            hypre_printf(" | %14.3f | %15.3f", data[i][6], data[i][7]);
 #endif
 #if defined(HYPRE_USING_UMPIRE_HOST)
-            hypre_printf(" | %13.3f | %13.3f", data[i][8], data[i][9]);
+            if (max[8] > 0.0)
+            {
+               hypre_printf(" | %14.3f | %14.3f", data[i][8], data[i][9]);
+            }
 #endif
 #if defined(HYPRE_USING_UMPIRE_DEVICE)
-            hypre_printf(" | %13.3f | %13.3f", data[i][10], data[i][11]);
+            if (max[10] > 0.0)
+            {
+               hypre_printf(" | %14.3f | %14.3f", data[i][10], data[i][11]);
+            }
 #endif
 #if defined(HYPRE_USING_UMPIRE_UM)
             if (max[12] > 0.0)
             {
-               hypre_printf(" | %13.3f | %13.3f", data[i][12], data[i][13]);
+               hypre_printf(" | %14.3f | %14.3f", data[i][12], data[i][13]);
             }
 #endif
 #if defined(HYPRE_USING_UMPIRE_PINNED)
-            hypre_printf(" | %13.3f | %13.3f", data[i][14], data[i][15]);
+            if (max[14] > 0.0)
+            {
+               hypre_printf(" | %14.3f | %14.3f", data[i][14], data[i][15]);
+            }
 #endif
             hypre_printf("\n");
          }
@@ -2176,10 +2194,10 @@ hypre_UmpireMemoryGetUsage(HYPRE_Real *memory)
    }
 #endif
 
-   /* Convert bytes to GB */
+   /* Convert bytes to GiB */
    for (i = 0; i < 8; i++)
    {
-      memory[i] = ((HYPRE_Real) memoryB[i]) / ((HYPRE_Real) (1e9));
+      memory[i] = ((HYPRE_Real) memoryB[i]) / ((HYPRE_Real) (1 << 30));
    }
 
    return hypre_error_flag;
