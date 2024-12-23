@@ -43,6 +43,7 @@
 #ifndef hypre_HOPSCOTCH_HASH_HEADER
 #define hypre_HOPSCOTCH_HASH_HEADER
 
+#ifdef HYPRE_HOPSCOTCH
 //#include <strings.h>
 #include <string.h>
 #include <stdio.h>
@@ -1296,4 +1297,5 @@ hypre_UnorderedBigIntMapPutIfAbsent( hypre_UnorderedBigIntMap *m,
 } // extern "C"
 #endif
 
+#endif // HYPRE_HOPSCOTCH
 #endif // hypre_HOPSCOTCH_HASH_HEADER

@@ -7,6 +7,8 @@
 
 #include "_hypre_utilities.h"
 
+#if defined(HYPRE_HOPSCOTCH)
+
 static HYPRE_Int NearestPowerOfTwo( HYPRE_Int value )
 {
    HYPRE_Int rc = 1;
@@ -349,3 +351,5 @@ HYPRE_BigInt *hypre_UnorderedBigIntSetCopyToArray( hypre_UnorderedBigIntSet *s, 
 
    return ret_array;
 }
+
+#endif /* if defined(HYPRE_HOPSCOTCH) */

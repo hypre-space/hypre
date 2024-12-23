@@ -205,6 +205,7 @@ extern hypre_State hypre__global_state;
 /* #include <stdio.h> */
 /* #include <stdlib.h> */
 #include <stdint.h>
+#include <limits.h>
 #include <math.h>
 
 /*--------------------------------------------------------------------------
@@ -227,6 +228,17 @@ typedef double                 hypre_double;
 /*--------------------------------------------------------------------------
  * Define macros
  *--------------------------------------------------------------------------*/
+
+/* Macro for silencing unused function warning */
+#if defined(__cplusplus) && __cplusplus >= 201703L
+#define HYPRE_MAYBE_UNUSED_FUNC [[maybe_unused]]
+#elif defined(__GNUC__) || defined(__clang__)
+#define HYPRE_MAYBE_UNUSED_FUNC __attribute__((unused))
+#elif defined(_MSC_VER)
+#define HYPRE_MAYBE_UNUSED_FUNC
+#else
+#define HYPRE_MAYBE_UNUSED_FUNC
+#endif
 
 /* Macro for silencing unused variable warning */
 #define HYPRE_UNUSED_VAR(var) ((void) var)
@@ -1176,7 +1188,7 @@ typedef enum _hypre_MemoryLocation
  * hypre_GetActualMemLocation
  *   return actual location based on the selected memory model
  *-------------------------------------------------------*/
-static inline hypre_MemoryLocation
+static inline HYPRE_MAYBE_UNUSED_FUNC hypre_MemoryLocation
 hypre_GetActualMemLocation(HYPRE_MemoryLocation location)
 {
    if (location == HYPRE_MEMORY_HOST)
@@ -2554,6 +2566,7 @@ HYPRE_Int hypre_MagmaFinalize(void);
 #ifndef hypre_HOPSCOTCH_HASH_HEADER
 #define hypre_HOPSCOTCH_HASH_HEADER
 
+#ifdef HYPRE_HOPSCOTCH
 //#include <strings.h>
 #include <string.h>
 #include <stdio.h>
@@ -3807,6 +3820,7 @@ hypre_UnorderedBigIntMapPutIfAbsent( hypre_UnorderedBigIntMap *m,
 } // extern "C"
 #endif
 
+#endif // HYPRE_HOPSCOTCH
 #endif // hypre_HOPSCOTCH_HASH_HEADER
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
