@@ -806,8 +806,6 @@ void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len,
 #endif
 }
 
-#if defined(HYPRE_HOPSCOTCH)
-
 /*--------------------------------------------------------------------------
  * hypre_big_sort_and_create_inverse_map
  *--------------------------------------------------------------------------*/
@@ -874,5 +872,3 @@ hypre_big_sort_and_create_inverse_map(HYPRE_BigInt              *in,
    hypre_profile_times[HYPRE_TIMER_ID_MERGE] += hypre_MPI_Wtime();
 #endif
 }
-
-#endif /* if defined(HYPRE_HOPSCOTCH) */
