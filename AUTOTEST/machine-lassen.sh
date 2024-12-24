@@ -138,7 +138,7 @@ co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_
 ./renametest.sh cmake $output_dir/cmake-cuda-um-ij
 
 # CUDA with UM [shared library] + CMake
-co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_CUDA_COMPILER=$(which nvcc) -DMPI_C_COMPILER=$(which mpicc) -DMPI_CXX_COMPILER=$(which mpicxx) -DHYPRE_ENABLE_CUDA=ON -DHYPRE_ENABLE_UNIFIED_MEMORY=ON -DCMAKE_BUILD_TYPE=Debug -DHYPRE_ENABLE_OPENMP=ON -DHYPRE_ENABLE_HOPSCOTCH=ON -DHYPRE_ENABLE_SHARED=ON -DHYPRE_WITH_EXTRA_CFLAGS="\'"-qsuppress=1500-029"\'" -DHYPRE_WITH_EXTRA_CXXFLAGS="\'"-qsuppress=1500-029 "\'" -DCMAKE_CUDA_ARCHITECTURES=70"
+co="-DCMAKE_C_COMPILER=$(which xlc) -DCMAKE_CXX_COMPILER=$(which xlc++) -DCMAKE_CUDA_COMPILER=$(which nvcc) -DMPI_C_COMPILER=$(which mpicc) -DMPI_CXX_COMPILER=$(which mpicxx) -DHYPRE_ENABLE_CUDA=ON -DHYPRE_ENABLE_UNIFIED_MEMORY=ON -DCMAKE_BUILD_TYPE=Debug -DHYPRE_ENABLE_OPENMP=ON -DHYPRE_ENABLE_HOPSCOTCH=ON -DBUILD_SHARED_LIBS=ON -DHYPRE_WITH_EXTRA_CFLAGS="\'"-qsuppress=1500-029"\'" -DHYPRE_WITH_EXTRA_CXXFLAGS="\'"-qsuppress=1500-029 "\'" -DCMAKE_CUDA_ARCHITECTURES=70"
 ./test.sh cmake.sh $root_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-cuda-um-shared
 

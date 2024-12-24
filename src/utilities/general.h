@@ -42,9 +42,7 @@ typedef double                 hypre_double;
  *--------------------------------------------------------------------------*/
 
 /* Macro for silencing unused function warning */
-#if defined(__cplusplus) && __cplusplus >= 201703L
-#define HYPRE_MAYBE_UNUSED_FUNC [[maybe_unused]]
-#elif defined(__GNUC__) || defined(__clang__)
+#if defined(__GNUC__) || defined(__clang__)
 #define HYPRE_MAYBE_UNUSED_FUNC __attribute__((unused))
 #elif defined(_MSC_VER)
 #define HYPRE_MAYBE_UNUSED_FUNC

@@ -224,8 +224,8 @@ set_internal_hypre_option(ENABLE USING OPENMP)
 set_internal_hypre_option(ENABLE USING CUDA)
 set_internal_hypre_option(ENABLE USING HIP)
 set_internal_hypre_option(ENABLE USING SYCL)
-set_internal_hypre_option(ENABLE USING MAGMA)
-set_internal_hypre_option(ENABLE USING CALIPER)
+set_internal_hypre_option(WITH   USING MAGMA)
+set_internal_hypre_option(WITH   USING CALIPER)
 
 # Check for conflicting options
 ensure_options_differ(HYPRE_ENABLE_SINGLE HYPRE_ENABLE_LONG_DOUBLE)
