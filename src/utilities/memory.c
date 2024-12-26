@@ -1241,7 +1241,7 @@ hypre_GetPointerLocation(const void *ptr, hypre_MemoryLocation *memory_location)
  * hypre_HostMemoryGetUsage
  *
  * Retrieves various memory usage statistics involving CPU RAM. The function
- * fills an array with the memory data, converted to gigabytes (GB).
+ * fills an array with the memory data, converted to gibibytes (GiB).
  * Detailed info is given below:
  *
  *    - mem[0]: VmSize
@@ -1385,6 +1385,7 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
                        const char *function,
                        HYPRE_Int   line)
 {
+   HYPRE_Int    offset = 0;
    HYPRE_Int    ne = 6;
    HYPRE_Real   lmem[16];
    HYPRE_Real   min[16];
@@ -1397,12 +1398,13 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
    const char  *labels[] = {"Min", "Max", "Avg", "Std"};
    HYPRE_Real  *data[]   = {min, max, avg, std};
 
-#if defined(HYPRE_USING_UMPIRE)
-   ne += 8;
+#if defined(HYPRE_USING_GPU)
+   offset = 2;
+   ne += offset;
 #endif
 
-#if defined(HYPRE_USING_GPU)
-   ne += 2;
+#if defined(HYPRE_USING_UMPIRE)
+   ne += 8;
 #endif
 
    /* Return if neither the 1st nor 2nd bits of log_level are set */
@@ -1443,7 +1445,7 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
 
    /* Get umpire memory info */
 #if defined(HYPRE_USING_UMPIRE)
-   hypre_UmpireMemoryGetUsage(&lmem[8]);
+   hypre_UmpireMemoryGetUsage(&lmem[6 + offset]);
 #endif
 
    /* Gather memory info to rank 0 */
@@ -1565,32 +1567,32 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
          hypre_printf(" | %13s | %13s", "UmpPSize (GiB)", "UmpPPeak (GiB)")
 #endif
          hypre_printf("\n");
-         hypre_printf("   ----+-------------+-------------+-------------+------------");
+         hypre_printf("   ----+--------------+--------------+--------------+-------------");
 #if defined(HYPRE_USING_GPU)
-         hypre_printf("-+---------------+---------------");
+         hypre_printf("-+----------------+----------------");
 #endif
 #if defined(HYPRE_USING_UMPIRE_HOST)
          if (max[8] > 0.0)
          {
-            hypre_printf("-+---------------+--------------");
+            hypre_printf("-+----------------+---------------");
          }
 #endif
 #if defined(HYPRE_USING_UMPIRE_DEVICE)
          if (max[10] > 0.0)
          {
-            hypre_printf("-+---------------+--------------");
+            hypre_printf("-+----------------+---------------");
          }
 #endif
 #if defined(HYPRE_USING_UMPIRE_UM)
          if (max[12] > 0.0)
          {
-            hypre_printf("-+---------------+--------------");
+            hypre_printf("-+----------------+---------------");
          }
 #endif
 #if defined(HYPRE_USING_UMPIRE_PINNED)
          if (max[14] > 0.0)
          {
-            hypre_printf("-+---------------+--------------");
+            hypre_printf("-+----------------+---------------");
          }
 #endif
          hypre_printf("\n");
