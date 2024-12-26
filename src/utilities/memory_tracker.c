@@ -38,7 +38,7 @@ hypre_memory_tracker(void)
 size_t hypre_total_bytes[hypre_NUM_MEMORY_LOCATION];
 size_t hypre_peak_bytes[hypre_NUM_MEMORY_LOCATION];
 size_t hypre_current_bytes[hypre_NUM_MEMORY_LOCATION];
-HYPRE_Int hypre_memory_tracker_print = 1;
+HYPRE_Int hypre_memory_tracker_print = 0;
 char hypre_memory_tracker_filename[HYPRE_MAX_FILE_NAME_LEN] = "HypreMemoryTrack.log";
 
 char *hypre_basename(const char *name)
@@ -634,4 +634,3 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
 }
 
 #endif
-
