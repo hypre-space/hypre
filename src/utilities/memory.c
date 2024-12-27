@@ -1446,6 +1446,9 @@ hypre_MemoryPrintUsage(MPI_Comm    comm,
    /* Get umpire memory info */
 #if defined(HYPRE_USING_UMPIRE)
    hypre_UmpireMemoryGetUsage(&lmem[6 + offset]);
+
+#elif !defined(HYPRE_USING_GPU)
+   HYPRE_UNUSED_VAR(offset);
 #endif
 
    /* Gather memory info to rank 0 */
