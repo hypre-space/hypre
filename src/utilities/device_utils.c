@@ -352,7 +352,7 @@ hypre_ForceSyncComputeStream()
  * hypre_DeviceMemoryGetUsage
  *
  * Retrieves memory usage statistics for the current GPU device. The function
- * fills an array with memory data, converted to gigabytes (GB):
+ * fills an array with memory data, converted to gibibytes (GiB):
  *
  *    - mem[0]: Current memory usage (allocated by the process).
  *    - mem[1]: Total device memory available on the GPU.
@@ -365,7 +365,7 @@ hypre_DeviceMemoryGetUsage(HYPRE_Real *mem)
 {
    size_t       free_mem  = 0;
    size_t       total_mem = 0;
-   HYPRE_Real   b_to_gib   = (HYPRE_Real)(1 << 30);
+   HYPRE_Real   b_to_gib  = (HYPRE_Real)(1 << 30);
 
    /* Sanity check */
    if (!mem)

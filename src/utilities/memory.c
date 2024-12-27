@@ -1280,7 +1280,7 @@ hypre_HostMemoryGetUsage(HYPRE_Real *mem)
    size_t       vm_peak  = 0;
    size_t       tot_mem  = 0;
    size_t       free_mem = 0;
-   HYPRE_Real   b_to_gib  = (HYPRE_Real) (1 << 30);
+   HYPRE_Real   b_to_gib = (HYPRE_Real) (1 << 30);
 
    /* Sanity check */
    if (!mem)
