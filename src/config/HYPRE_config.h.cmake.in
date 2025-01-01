@@ -165,13 +165,13 @@
  * 3 = two underscores
  * 4 = caps, no underscores
  * 5 = one underscore before and after */
-#define HYPRE_FMANGLE 0
+#define HYPRE_FMANGLE @HYPRE_FMANGLE@
 
 /* Define as in HYPRE_FMANGLE to set the BLAS name mangling scheme */
-#define HYPRE_FMANGLE_BLAS 0
+#define HYPRE_FMANGLE_BLAS @HYPRE_FMANGLE_BLAS@
 
 /* Define as in HYPRE_FMANGLE to set the LAPACK name mangling scheme */
-#define HYPRE_FMANGLE_LAPACK 0
+#define HYPRE_FMANGLE_LAPACK @HYPRE_FMANGLE_LAPACK@
 
 /* Define to a macro mangling the given C identifier (in lower and upper
  * case), which must not contain underscores, for linking with Fortran. */
