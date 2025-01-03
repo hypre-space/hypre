@@ -207,6 +207,15 @@ set(HYPRE_WITH_EXTRA_CXXFLAGS            "" CACHE STRING "Define extra CXX compi
 set(HYPRE_SYCL_TARGET                    "" CACHE STRING "Target SYCL architecture, e.g. 'spir64_gen'.")
 set(HYPRE_SYCL_TARGET_BACKEND            "" CACHE STRING "Additional SYCL backend options, e.g. '-device 12.1.0,12.4.0'.")
 
+set(HYPRE_FMANGLE 0 CACHE STRING "Set the HYPRE Fortran name mangling scheme")
+set_property(CACHE HYPRE_FMANGLE PROPERTY STRINGS 0 1 2 3 4)
+
+set(HYPRE_FMANGLE_BLAS 0 CACHE STRING "Set the BLAS name mangling scheme")
+set_property(CACHE HYPRE_FMANGLE_BLAS PROPERTY STRINGS 0 1 2 3 4)
+
+set(HYPRE_FMANGLE_LAPACK 0 CACHE STRING "Set the LAPACK name mangling scheme")
+set_property(CACHE HYPRE_FMANGLE_LAPACK PROPERTY STRINGS 0 1 2 3 4)
+
 # Set config name values
 set_internal_hypre_option(ENABLE "" BIGINT)
 set_internal_hypre_option(ENABLE "" MIXEDINT)
