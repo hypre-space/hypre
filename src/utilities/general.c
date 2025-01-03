@@ -48,7 +48,7 @@ hypre_HandleCreate(void)
 #endif
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-#if defined(HYPRE_WITH_GPU_AWARE_MPI)
+#if defined(HYPRE_USING_GPU_AWARE_MPI)
    hypre_HandleUseGpuAwareMPI(hypre_handle_) = 1;
 #else
    hypre_HandleUseGpuAwareMPI(hypre_handle_) = 0;

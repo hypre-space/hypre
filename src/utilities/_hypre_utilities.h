@@ -2225,7 +2225,7 @@ void hypre_prefix_sum_multiple(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n,
 
 #endif // HYPRE_USING_OPENMP
 
-#ifdef HYPRE_HOPSCOTCH
+#ifdef HYPRE_USING_HOPSCOTCH
 #ifdef HYPRE_USING_ATOMIC
 // concurrent hopscotch hashing is possible only with atomic supports
 #define HYPRE_CONCURRENT_HOPSCOTCH
@@ -3946,4 +3946,3 @@ HYPRE_Int hypre_mm_read_mtx_crd_size(FILE *f, HYPRE_Int *M, HYPRE_Int *N, HYPRE_
 #endif
 
 #endif
-

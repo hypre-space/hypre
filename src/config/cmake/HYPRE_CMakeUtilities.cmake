@@ -16,8 +16,8 @@ function(set_hypre_option category name description default_value)
 endfunction()
 
 # Function to set internal hypre build options
-function(set_internal_hypre_option condition_prefix var_prefix var_name)
-  if(HYPRE_${condition_prefix}_${var_name})
+function(set_internal_hypre_option var_prefix var_name)
+  if(HYPRE_ENABLE_${var_name})
     if(var_prefix STREQUAL "")
       set(HYPRE_${var_name} ON CACHE INTERNAL "")
     else()

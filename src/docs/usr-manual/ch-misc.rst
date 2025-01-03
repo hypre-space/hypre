@@ -289,15 +289,15 @@ For GPU-specific options, see the :ref:`gpu_build` section below.
    * - | SuperLU_DIST Support
        | (default is off)
      - ``--with-dsuperlu``
-     - ``-DHYPRE_WITH_DSUPERLU=ON``
+     - ``-DHYPRE_ENABLE_DSUPERLU=ON``
    * - | MAGMA Support
        | (default is off)
      - ``--with-magma``
-     - ``-DHYPRE_WITH_MAGMA=ON``
+     - ``-DHYPRE_ENABLE_MAGMA=ON``
    * - | Caliper Support
        | (default is off)
      - ``--with-caliper``
-     - ``-DHYPRE_WITH_CALIPER=ON``
+     - ``-DHYPRE_ENABLE_CALIPER=ON``
    * - Build Examples
      - N/A
      - ``-DHYPRE_BUILD_EXAMPLES=ON``
@@ -456,15 +456,15 @@ build systems.
    * - | Umpire Support
        | (default is off)
      - ``--with-umpire``
-     - ``-DHYPRE_WITH_UMPIRE=ON``
+     - ``-DHYPRE_ENABLE_UMPIRE=ON``
    * - | Umpire Unified Memory
        | (default is off)
      - ``--with-umpire-um``
-     - ``-DHYPRE_WITH_UMPIRE_UM=ON``
+     - ``-DHYPRE_ENABLE_UMPIRE_UM=ON``
    * - | Umpire Device Memory
        | (default is off)
      - ``--with-umpire-device``
-     - ``-DHYPRE_WITH_UMPIRE_DEVICE=ON``
+     - ``-DHYPRE_ENABLE_UMPIRE_DEVICE=ON``
 
 .. warning::
 

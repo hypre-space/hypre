@@ -644,7 +644,7 @@ void hypre_merge_sort( HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int 
 #endif
 }
 
-#if defined(HYPRE_HOPSCOTCH)
+#if defined(HYPRE_USING_HOPSCOTCH)
 
 /*--------------------------------------------------------------------------
  * hypre_sort_and_create_inverse_map
@@ -718,7 +718,7 @@ hypre_sort_and_create_inverse_map(HYPRE_Int              *in,
 #endif
 }
 
-#endif /* if defined(HYPRE_HOPSCOTCH) */
+#endif /* if defined(HYPRE_USING_HOPSCOTCH) */
 
 /*--------------------------------------------------------------------------
  * hypre_big_merge_sort
