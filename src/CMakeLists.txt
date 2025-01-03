@@ -147,6 +147,15 @@ option(TPL_BLAS_LIBRARIES            "Optional list of absolute paths to BLAS li
 option(TPL_LAPACK_LIBRARIES          "Optional list of absolute paths to LAPACK libraries, otherwise use FindLAPACK to locate [].")
 option(TPL_FEI_INCLUDE_DIRS          "List of absolute paths to FEI include directories [].")
 
+set(HYPRE_FMANGLE 0 CACHE STRING "Set the HYPRE Fortran name mangling scheme")
+set_property(CACHE HYPRE_FMANGLE PROPERTY STRINGS 0 1 2 3 4)
+
+set(HYPRE_FMANGLE_BLAS 0 CACHE STRING "Set the BLAS name mangling scheme")
+set_property(CACHE HYPRE_FMANGLE_BLAS PROPERTY STRINGS 0 1 2 3 4)
+
+set(HYPRE_FMANGLE_LAPACK 0 CACHE STRING "Set the LAPACK name mangling scheme")
+set_property(CACHE HYPRE_FMANGLE_LAPACK PROPERTY STRINGS 0 1 2 3 4)
+
 # Set config name values
 if (HYPRE_ENABLE_SHARED)
   set(HYPRE_SHARED ON CACHE BOOL "" FORCE)
