@@ -209,7 +209,7 @@ set(HYPRE_SYCL_TARGET "" CACHE STRING                   "Target SYCL architectur
 set(HYPRE_SYCL_TARGET_BACKEND "" CACHE STRING           "Additional SYCL backend options, e.g. '-device 12.1.0,12.4.0'.")
 
 # Set possible values for the Fortran name mangling schemes
-set(HYPRE_ENABLE_FMANGLE "UNSPECFIED" CACHE STRING         "Set the Fortran name mangling scheme")
+set(HYPRE_ENABLE_FMANGLE "UNSPECIFIED" CACHE STRING         "Set the Fortran name mangling scheme")
 set(HYPRE_ENABLE_FMANGLE_BLAS "UNSPECIFIED" CACHE STRING   "Set the Fortran BLAS name mangling scheme")
 set(HYPRE_ENABLE_FMANGLE_LAPACK "UNSPECIFIED" CACHE STRING "Set the Fortran LAPACK name mangling scheme")
 foreach(VARNAME IN ITEMS FMANGLE FMANGLE_BLAS FMANGLE_LAPACK)
