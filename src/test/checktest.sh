@@ -49,13 +49,14 @@ do
       for file in $files
       do
          SZ=`ls -l $file | awk '{print $5}'`
+         relative_path=$(echo "$file" | sed 's|.*test/||')
          if [ $SZ != 0 ]
          then
-            echo -e "FAILED : $file  ($SZ)\n"
+            echo -e "FAILED : $relative_path  ($SZ)\n"
             cat $file
             error_code=1
          else
-            echo "    OK : $file"
+            echo "    OK : $relative_path"
          fi
       done
       echo ""
