@@ -205,6 +205,7 @@ extern hypre_State hypre__global_state;
 /* #include <stdio.h> */
 /* #include <stdlib.h> */
 #include <stdint.h>
+#include <limits.h>
 #include <math.h>
 
 /*--------------------------------------------------------------------------
@@ -227,6 +228,15 @@ typedef double                 hypre_double;
 /*--------------------------------------------------------------------------
  * Define macros
  *--------------------------------------------------------------------------*/
+
+/* Macro for silencing unused function warning */
+#if defined(__GNUC__) || defined(__clang__)
+#define HYPRE_MAYBE_UNUSED_FUNC __attribute__((unused))
+#elif defined(_MSC_VER)
+#define HYPRE_MAYBE_UNUSED_FUNC
+#else
+#define HYPRE_MAYBE_UNUSED_FUNC
+#endif
 
 /* Macro for silencing unused variable warning */
 #define HYPRE_UNUSED_VAR(var) ((void) var)
@@ -1176,7 +1186,7 @@ typedef enum _hypre_MemoryLocation
  * hypre_GetActualMemLocation
  *   return actual location based on the selected memory model
  *-------------------------------------------------------*/
-static inline hypre_MemoryLocation
+static inline HYPRE_MAYBE_UNUSED_FUNC hypre_MemoryLocation
 hypre_GetActualMemLocation(HYPRE_MemoryLocation location)
 {
    if (location == HYPRE_MEMORY_HOST)
@@ -2215,7 +2225,7 @@ void hypre_prefix_sum_multiple(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n,
 
 #endif // HYPRE_USING_OPENMP
 
-#ifdef HYPRE_HOPSCOTCH
+#ifdef HYPRE_USING_HOPSCOTCH
 #ifdef HYPRE_USING_ATOMIC
 // concurrent hopscotch hashing is possible only with atomic supports
 #define HYPRE_CONCURRENT_HOPSCOTCH
@@ -2583,7 +2593,7 @@ extern "C" {
  ******************************************************************************/
 
 #ifdef HYPRE_USING_ATOMIC
-static inline HYPRE_Int
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_Int
 hypre_compare_and_swap( HYPRE_Int *ptr, HYPRE_Int oldval, HYPRE_Int newval )
 {
 #if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__) && (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) > 40100
@@ -2598,7 +2608,7 @@ hypre_compare_and_swap( HYPRE_Int *ptr, HYPRE_Int oldval, HYPRE_Int newval )
 #endif
 }
 
-static inline HYPRE_Int
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_Int
 hypre_fetch_and_add( HYPRE_Int *ptr, HYPRE_Int value )
 {
 #if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__) && (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) > 40100
@@ -2612,7 +2622,7 @@ hypre_fetch_and_add( HYPRE_Int *ptr, HYPRE_Int value )
 #endif
 }
 #else // !HYPRE_USING_ATOMIC
-static inline HYPRE_Int
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_Int
 hypre_compare_and_swap( HYPRE_Int *ptr, HYPRE_Int oldval, HYPRE_Int newval )
 {
    if (*ptr == oldval)
@@ -2623,7 +2633,7 @@ hypre_compare_and_swap( HYPRE_Int *ptr, HYPRE_Int oldval, HYPRE_Int newval )
    else { return *ptr; }
 }
 
-static inline HYPRE_Int
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_Int
 hypre_fetch_and_add( HYPRE_Int *ptr, HYPRE_Int value )
 {
    HYPRE_Int oldval = *ptr;
@@ -2642,7 +2652,7 @@ hypre_fetch_and_add( HYPRE_Int *ptr, HYPRE_Int value )
 #define HYPRE_HOPSCOTCH_HASH_BUSY  (1)
 
 // Small Utilities ..........................................................
-static inline HYPRE_Int
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_Int
 first_lsb_bit_indx( hypre_uint x )
 {
    HYPRE_Int pos;
@@ -2719,7 +2729,7 @@ first_lsb_bit_indx( hypre_uint x )
 #define HYPRE_XXH_rotl64(x,r) ((x << r) | (x >> (64 - r)))
 
 #if defined(HYPRE_MIXEDINT) || defined(HYPRE_BIGINT)
-static inline HYPRE_BigInt
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_BigInt
 hypre_BigHash( HYPRE_BigInt input )
 {
    hypre_ulonglongint h64 = HYPRE_XXH_PRIME64_5 + sizeof(input);
@@ -2749,7 +2759,7 @@ hypre_BigHash( HYPRE_BigInt input )
 }
 
 #else
-static inline HYPRE_Int
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_Int
 hypre_BigHash(HYPRE_Int input)
 {
    hypre_uint h32 = HYPRE_XXH_PRIME32_5 + sizeof(input);
@@ -2773,7 +2783,7 @@ hypre_BigHash(HYPRE_Int input)
 #endif
 
 #ifdef HYPRE_BIGINT
-static inline HYPRE_Int
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_Int
 hypre_Hash(HYPRE_Int input)
 {
    hypre_ulonglongint h64 = HYPRE_XXH_PRIME64_5 + sizeof(input);
@@ -2803,7 +2813,7 @@ hypre_Hash(HYPRE_Int input)
 }
 
 #else
-static inline HYPRE_Int
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_Int
 hypre_Hash(HYPRE_Int input)
 {
    hypre_uint h32 = HYPRE_XXH_PRIME32_5 + sizeof(input);
@@ -2826,7 +2836,7 @@ hypre_Hash(HYPRE_Int input)
 }
 #endif
 
-static inline void
+static inline HYPRE_MAYBE_UNUSED_FUNC void
 hypre_UnorderedIntSetFindCloserFreeBucket( hypre_UnorderedIntSet *s,
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
                                            hypre_HopscotchSegment *start_seg,
@@ -2901,7 +2911,7 @@ hypre_UnorderedIntSetFindCloserFreeBucket( hypre_UnorderedIntSet *s,
    *free_dist = 0;
 }
 
-static inline void
+static inline HYPRE_MAYBE_UNUSED_FUNC void
 hypre_UnorderedBigIntSetFindCloserFreeBucket( hypre_UnorderedBigIntSet *s,
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
                                               hypre_HopscotchSegment   *start_seg,
@@ -2976,7 +2986,7 @@ hypre_UnorderedBigIntSetFindCloserFreeBucket( hypre_UnorderedBigIntSet *s,
    *free_dist = 0;
 }
 
-static inline void
+static inline HYPRE_MAYBE_UNUSED_FUNC void
 hypre_UnorderedIntMapFindCloserFreeBucket( hypre_UnorderedIntMap  *m,
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
                                            hypre_HopscotchSegment *start_seg,
@@ -3054,7 +3064,7 @@ hypre_UnorderedIntMapFindCloserFreeBucket( hypre_UnorderedIntMap  *m,
    *free_dist = 0;
 }
 
-static inline void
+static inline HYPRE_MAYBE_UNUSED_FUNC void
 hypre_UnorderedBigIntMapFindCloserFreeBucket( hypre_UnorderedBigIntMap   *m,
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
                                               hypre_HopscotchSegment     *start_seg,
@@ -3151,7 +3161,7 @@ void hypre_UnorderedIntMapDestroy( hypre_UnorderedIntMap *m );
 void hypre_UnorderedBigIntMapDestroy( hypre_UnorderedBigIntMap *m );
 
 // Query Operations .........................................................
-static inline HYPRE_Int
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_Int
 hypre_UnorderedIntSetContains( hypre_UnorderedIntSet *s,
                                HYPRE_Int              key )
 {
@@ -3215,7 +3225,7 @@ hypre_UnorderedIntSetContains( hypre_UnorderedIntSet *s,
    return 0;
 }
 
-static inline HYPRE_Int
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_Int
 hypre_UnorderedBigIntSetContains( hypre_UnorderedBigIntSet *s,
                                   HYPRE_BigInt key )
 {
@@ -3282,7 +3292,7 @@ hypre_UnorderedBigIntSetContains( hypre_UnorderedBigIntSet *s,
 /**
  * @ret -1 if key doesn't exist
  */
-static inline HYPRE_Int
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_Int
 hypre_UnorderedIntMapGet( hypre_UnorderedIntMap *m,
                           HYPRE_Int key )
 {
@@ -3345,7 +3355,7 @@ hypre_UnorderedIntMapGet( hypre_UnorderedIntMap *m,
    return -1;
 }
 
-static inline
+static inline HYPRE_MAYBE_UNUSED_FUNC
 HYPRE_Int hypre_UnorderedBigIntMapGet( hypre_UnorderedBigIntMap *m,
                                        HYPRE_BigInt key )
 {
@@ -3409,7 +3419,7 @@ HYPRE_Int hypre_UnorderedBigIntMapGet( hypre_UnorderedBigIntMap *m,
 }
 
 //status Operations .........................................................
-static inline
+static inline HYPRE_MAYBE_UNUSED_FUNC
 HYPRE_Int hypre_UnorderedIntSetSize( hypre_UnorderedIntSet *s )
 {
    HYPRE_Int counter = 0;
@@ -3425,7 +3435,7 @@ HYPRE_Int hypre_UnorderedIntSetSize( hypre_UnorderedIntSet *s )
    return counter;
 }
 
-static inline
+static inline HYPRE_MAYBE_UNUSED_FUNC
 HYPRE_Int hypre_UnorderedBigIntSetSize( hypre_UnorderedBigIntSet *s )
 {
    HYPRE_Int counter = 0;
@@ -3441,7 +3451,7 @@ HYPRE_Int hypre_UnorderedBigIntSetSize( hypre_UnorderedBigIntSet *s )
    return counter;
 }
 
-static inline HYPRE_Int
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_Int
 hypre_UnorderedIntMapSize( hypre_UnorderedIntMap *m )
 {
    HYPRE_Int counter = 0;
@@ -3457,7 +3467,7 @@ hypre_UnorderedIntMapSize( hypre_UnorderedIntMap *m )
    return counter;
 }
 
-static inline HYPRE_Int
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_Int
 hypre_UnorderedBigIntMapSize( hypre_UnorderedBigIntMap *m )
 {
    HYPRE_Int counter = 0;
@@ -3477,7 +3487,7 @@ HYPRE_Int *hypre_UnorderedIntSetCopyToArray( hypre_UnorderedIntSet *s, HYPRE_Int
 HYPRE_BigInt *hypre_UnorderedBigIntSetCopyToArray( hypre_UnorderedBigIntSet *s, HYPRE_Int *len );
 
 //modification Operations ...................................................
-static inline void
+static inline HYPRE_MAYBE_UNUSED_FUNC void
 hypre_UnorderedIntSetPut( hypre_UnorderedIntSet *s,
                           HYPRE_Int key )
 {
@@ -3559,7 +3569,7 @@ hypre_UnorderedIntSetPut( hypre_UnorderedIntSet *s,
    return;
 }
 
-static inline void
+static inline HYPRE_MAYBE_UNUSED_FUNC void
 hypre_UnorderedBigIntSetPut( hypre_UnorderedBigIntSet *s,
                              HYPRE_BigInt key )
 {
@@ -3641,7 +3651,7 @@ hypre_UnorderedBigIntSetPut( hypre_UnorderedBigIntSet *s,
    return;
 }
 
-static inline HYPRE_Int
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_Int
 hypre_UnorderedIntMapPutIfAbsent( hypre_UnorderedIntMap *m,
                                   HYPRE_Int key, HYPRE_Int data )
 {
@@ -3723,7 +3733,7 @@ hypre_UnorderedIntMapPutIfAbsent( hypre_UnorderedIntMap *m,
    return HYPRE_HOPSCOTCH_HASH_EMPTY;
 }
 
-static inline HYPRE_Int
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_Int
 hypre_UnorderedBigIntMapPutIfAbsent( hypre_UnorderedBigIntMap *m,
                                      HYPRE_BigInt key, HYPRE_Int data)
 {
@@ -3936,4 +3946,3 @@ HYPRE_Int hypre_mm_read_mtx_crd_size(FILE *f, HYPRE_Int *M, HYPRE_Int *N, HYPRE_
 #endif
 
 #endif
-

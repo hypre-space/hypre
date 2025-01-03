@@ -3671,7 +3671,7 @@ fi
 if test "$hypre_using_hopscotch" = "yes"
 then
 
-printf "%s\n" "#define HYPRE_HOPSCOTCH 1" >>confdefs.h
+printf "%s\n" "#define HYPRE_USING_HOPSCOTCH 1" >>confdefs.h
 
 fi
 
@@ -11120,7 +11120,7 @@ fi
 if test "$hypre_gpu_mpi" = "yes"
 then
 
-printf "%s\n" "#define HYPRE_WITH_GPU_AWARE_MPI 1" >>confdefs.h
+printf "%s\n" "#define HYPRE_USING_GPU_AWARE_MPI 1" >>confdefs.h
 
 fi
 

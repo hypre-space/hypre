@@ -205,9 +205,10 @@ HYPRE_Int
 hypre_ResetDevice()
 {
 #if defined(HYPRE_USING_CUDA)
-   cudaDeviceReset();
+   HYPRE_CUDA_CALL(cudaDeviceReset());
+
 #elif defined(HYPRE_USING_HIP)
-   hipDeviceReset();
+   HYPRE_HIP_CALL(hipDeviceReset());
 #endif
    return hypre_error_flag;
 }
@@ -2720,7 +2721,7 @@ hypre_CudaCompileFlagCheck()
    hypre_GetDevice(&device);
 
    struct cudaDeviceProp props;
-   cudaGetDeviceProperties(&props, device);
+   HYPRE_CUDA_CALL(cudaGetDeviceProperties(&props, device));
    hypre_int cuda_arch_actual = props.major * 100 + props.minor * 10;
    hypre_int cuda_arch_compile = -1;
    dim3 gDim(1, 1, 1), bDim(1, 1, 1);
@@ -2968,6 +2969,8 @@ HYPRE_SetSYCLDevice(sycl::device user_device)
    {
       delete data->device;
    }
+
+#if defined(HYPRE_USING_CUDA_STREAMS)
    for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
    {
       if (data->streams[i])
@@ -2976,6 +2979,7 @@ HYPRE_SetSYCLDevice(sycl::device user_device)
          data->streams[i] = nullptr;
       }
    }
+#endif
 
    /* Setup new device and compute stream */
    data->device = new sycl::device(user_device);
@@ -3038,14 +3042,15 @@ hypre_bind_device_id( HYPRE_Int device_id_in,
    /* set device */
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    omp_set_default_device(device_id);
-#endif
 
-#if defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
-#endif
 
-#if defined(HYPRE_USING_HIP)
+#elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipSetDevice(device_id) );
+
+#elif defined(HYPRE_USING_SYCL)
+   HYPRE_UNUSED_VAR(device_id);
 #endif
 
 #if defined(HYPRE_DEBUG) && defined(HYPRE_PRINT_ERRORS)
