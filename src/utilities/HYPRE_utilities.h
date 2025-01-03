@@ -232,6 +232,9 @@ HYPRE_Int HYPRE_GetErrorMessages(char **buffer, HYPRE_Int *bufsz);
 /* Print the error messages and clear them in hypre */
 HYPRE_Int HYPRE_PrintErrorMessages(MPI_Comm comm);
 
+/* Clear the error messages in hypre and free any related memory allocated */
+HYPRE_Int HYPRE_ClearErrorMessages(void);
+
 /* Print GPU information */
 HYPRE_Int HYPRE_PrintDeviceInfo(void);
 
@@ -301,7 +304,9 @@ HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
  * HYPRE AP user functions
  *--------------------------------------------------------------------------*/
 
-/*Checks whether the AP is on */
+/* Checks whether the AP is on */
+/* TODO (VPM): this function is provided for backwards compatibility
+   and will be removed in a future release */
 HYPRE_Int HYPRE_AssumedPartitionCheck(void);
 
 /*--------------------------------------------------------------------------
@@ -362,13 +367,76 @@ const char* HYPRE_GetExecutionPolicyName(HYPRE_ExecutionPolicy exec_policy);
  * HYPRE UMPIRE
  *--------------------------------------------------------------------------*/
 
+/**
+ * @brief Sets the size of the Umpire device memory pool.
+ *
+ * @param[in] nbytes The size of the device memory pool in bytes.
+ *
+ * @return Returns hypre's global error code, where 0 indicates success.
+ **/
 HYPRE_Int HYPRE_SetUmpireDevicePoolSize(size_t nbytes);
+
+/**
+ * @brief Sets the size of the Umpire unified memory pool.
+ *
+ * @param[in] nbytes The size of the unified memory pool in bytes.
+ *
+ * @return Returns hypre's global error code, where 0 indicates success.
+ **/
 HYPRE_Int HYPRE_SetUmpireUMPoolSize(size_t nbytes);
+
+/**
+ * @brief Sets the size of the Umpire host memory pool.
+ *
+ * @param[in] nbytes The size of the host memory pool in bytes.
+ *
+ * @return Returns hypre's global error code, where 0 indicates success.
+ **/
 HYPRE_Int HYPRE_SetUmpireHostPoolSize(size_t nbytes);
+
+/**
+ * @brief Sets the size of the Umpire pinned memory pool.
+ *
+ * @param[in] nbytes The size of the pinned memory pool in bytes.
+ *
+ * @return Returns hypre's global error code, where 0 indicates success.
+ **/
 HYPRE_Int HYPRE_SetUmpirePinnedPoolSize(size_t nbytes);
+
+/**
+ * @brief Sets the name of the Umpire device memory pool.
+ *
+ * @param[in] pool_name The name to assign to the device memory pool.
+ *
+ * @return Returns hypre's global error code, where 0 indicates success.
+ **/
 HYPRE_Int HYPRE_SetUmpireDevicePoolName(const char *pool_name);
+
+/**
+ * @brief Sets the name of the Umpire unified memory pool.
+ *
+ * @param[in] pool_name The name to assign to the unified memory pool.
+ *
+ * @return Returns hypre's global error code, where 0 indicates success.
+ **/
 HYPRE_Int HYPRE_SetUmpireUMPoolName(const char *pool_name);
+
+/**
+ * @brief Sets the name of the Umpire host memory pool.
+ *
+ * @param[in] pool_name The name to assign to the host memory pool.
+ *
+ * @return Returns hypre's global error code, where 0 indicates success.
+ **/
 HYPRE_Int HYPRE_SetUmpireHostPoolName(const char *pool_name);
+
+/**
+ * @brief Sets the name of the Umpire pinned memory pool.
+ *
+ * @param[in] pool_name The name to assign to the pinned memory pool.
+ *
+ * @return Returns hypre's global error code, where 0 indicates success.
+ **/
 HYPRE_Int HYPRE_SetUmpirePinnedPoolName(const char *pool_name);
 
 /*--------------------------------------------------------------------------

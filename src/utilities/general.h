@@ -17,6 +17,7 @@
 /* #include <stdio.h> */
 /* #include <stdlib.h> */
 #include <stdint.h>
+#include <limits.h>
 #include <math.h>
 
 /*--------------------------------------------------------------------------
@@ -39,6 +40,15 @@ typedef double                 hypre_double;
 /*--------------------------------------------------------------------------
  * Define macros
  *--------------------------------------------------------------------------*/
+
+/* Macro for silencing unused function warning */
+#if defined(__GNUC__) || defined(__clang__)
+#define HYPRE_MAYBE_UNUSED_FUNC __attribute__((unused))
+#elif defined(_MSC_VER)
+#define HYPRE_MAYBE_UNUSED_FUNC
+#else
+#define HYPRE_MAYBE_UNUSED_FUNC
+#endif
 
 /* Macro for silencing unused variable warning */
 #define HYPRE_UNUSED_VAR(var) ((void) var)
