@@ -89,6 +89,52 @@ function(ensure_options_differ option1 option2)
   endif()
 endfunction()
 
+# Helper function to process Fortran mangling scheme
+function(process_fmangling_scheme varname description)
+  set(mangling_map
+    UNSPECIFIED 0
+    NONE 1
+    ONE_UNDERSCORE 2
+    TWO_UNDERSCORES 3
+    CAPS 4
+    PRE_POST_UNDERSCORE 5
+  )
+  list(LENGTH mangling_map map_length)
+  math(EXPR last_index "${map_length} - 1")
+
+  # Check if varname is a numeric value
+  if (HYPRE_ENABLE_${varname} MATCHES "^[0-9]+$")
+    foreach(i RANGE 0 ${last_index} 2)
+      math(EXPR next_index "${i} + 1")
+      list(GET mangling_map ${next_index} value)
+      if (HYPRE_ENABLE_${varname} STREQUAL ${value})
+        list(GET mangling_map ${i} key)
+        message(STATUS "HYPRE_ENABLE_${varname} corresponds to Fortran ${description} mangling scheme: ${key}")
+        set(HYPRE_${varname} ${value} CACHE INTERNAL "Set the Fortran ${description} mangling scheme")
+        return()
+      endif()
+    endforeach()
+  endif()
+
+  # Check if varname matches any string key
+  foreach(i RANGE 0 ${last_index} 2)
+    list(GET mangling_map ${i} key)
+    math(EXPR next_index "${i} + 1")
+    list(GET mangling_map ${next_index} value)
+    if (HYPRE_ENABLE_${varname} MATCHES ${key})
+      if (NOT HYPRE_ENABLE_${varname} MATCHES "UNSPECIFIED")
+        message(STATUS "Using Fortran ${description} mangling scheme: ${key}")
+      endif()
+      set(HYPRE_${varname} ${value} CACHE INTERNAL "Set the Fortran ${description} mangling scheme")
+      return()
+    endif()
+  endforeach()
+
+  # Default case
+  message(STATUS "Unknown value for HYPRE_ENABLE_${varname}. Defaulting to UNSPECIFIED (0)")
+  set(HYPRE_${varname} 0 CACHE INTERNAL "Set the Fortran ${description} mangling scheme")
+endfunction()
+
 # Function to configure MPI target
 function(configure_mpi_target)
   find_package(MPI REQUIRED)

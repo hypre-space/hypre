@@ -236,6 +236,10 @@ For GPU-specific options, see the :ref:`gpu_build` section below.
        | no GPU support)
      - ``--enable-long-double``
      - ``-DHYPRE_ENABLE_LONG_DOUBLE=ON``
+   * - | Link-time optimization
+       | (default is off)
+     - N/A
+     - ``-DHYPRE_ENABLE_LTO=ON``
    * - | MPI Support
        | (default is on)
      - ``--enable-mpi``
@@ -253,14 +257,25 @@ For GPU-specific options, see the :ref:`gpu_build` section below.
        | (default is off)
      - ``--enable-hopscotch``
      - ``-DHYPRE_ENABLE_HOPSCOTCH=ON``
-   * - Link-time optimization
-       | (default is off)
-     - N/A
-     - ``-DHYPRE_ENABLE_LTO=ON``
    * - | Fortran Support
        | (default is on)
      - ``--enable-fortran``
      - ``-DHYPRE_ENABLE_FORTRAN=ON``
+   * - | Fortran mangling
+       | (default is 0)
+       | (values are 0...5)
+     - ``--with-fmangle``
+     - ``-DHYPRE_ENABLE_FMANGLE=0``
+   * - | Fortran BLAS mangling
+       | (default is 0)
+       | (values are 0...5)
+     - ``--with-fmangle-blas``
+     - ``-DHYPRE_ENABLE_FMANGLE_BLAS=0``
+   * - | Fortran LAPACK mangling
+       | (default is 0)
+       | (values are 0...5)
+     - ``--with-fmangle-lapack``
+     - ``-DHYPRE_ENABLE_FMANGLE_LAPACK=0``
    * - | External BLAS
        | (default is off)
      - | ``--with-blas-lib=<lib>``

@@ -201,20 +201,25 @@ set_hypre_option(SKIP TPL_CALIPER_INCLUDE_DIRS          "Absolute paths to Calip
 set_hypre_option(SKIP TPL_BLAS_LIBRARIES                "Absolute paths to BLAS link libraries [Optional]." "")
 set_hypre_option(SKIP TPL_LAPACK_LIBRARIES              "Absolute paths to LAPACK link libraries [Optional]." "")
 set_hypre_option(SKIP TPL_FEI_INCLUDE_DIRS              "Absolute paths to FEI include directories [Optional]." "")
+
 # Extra flags
-set(HYPRE_WITH_EXTRA_CFLAGS              "" CACHE STRING "Define extra C compile flags")
-set(HYPRE_WITH_EXTRA_CXXFLAGS            "" CACHE STRING "Define extra CXX compile flags")
-set(HYPRE_SYCL_TARGET                    "" CACHE STRING "Target SYCL architecture, e.g. 'spir64_gen'.")
-set(HYPRE_SYCL_TARGET_BACKEND            "" CACHE STRING "Additional SYCL backend options, e.g. '-device 12.1.0,12.4.0'.")
+set(HYPRE_WITH_EXTRA_CFLAGS "" CACHE STRING             "Define extra C compile flags")
+set(HYPRE_WITH_EXTRA_CXXFLAGS "" CACHE STRING           "Define extra CXX compile flags")
+set(HYPRE_SYCL_TARGET "" CACHE STRING                   "Target SYCL architecture, e.g. 'spir64_gen'.")
+set(HYPRE_SYCL_TARGET_BACKEND "" CACHE STRING           "Additional SYCL backend options, e.g. '-device 12.1.0,12.4.0'.")
 
-set(HYPRE_FMANGLE 0 CACHE STRING "Set the HYPRE Fortran name mangling scheme")
-set_property(CACHE HYPRE_FMANGLE PROPERTY STRINGS 0 1 2 3 4)
+# Set possible values for the Fortran name mangling schemes
+set(HYPRE_ENABLE_FMANGLE "UNSPECFIED" CACHE STRING         "Set the Fortran name mangling scheme")
+set(HYPRE_ENABLE_FMANGLE_BLAS "UNSPECIFIED" CACHE STRING   "Set the Fortran BLAS name mangling scheme")
+set(HYPRE_ENABLE_FMANGLE_LAPACK "UNSPECIFIED" CACHE STRING "Set the Fortran LAPACK name mangling scheme")
+foreach(VARNAME IN ITEMS FMANGLE FMANGLE_BLAS FMANGLE_LAPACK)
+  set_property(CACHE HYPRE_ENABLE_${VARNAME} PROPERTY STRINGS UNSPECIFIED NONE ONE_UNDERSCORE TWO_UNDERSCORES CAPS PRE_POST_UNDERSCORE 0 1 2 3 4 5)
+endforeach()
 
-set(HYPRE_FMANGLE_BLAS 0 CACHE STRING "Set the BLAS name mangling scheme")
-set_property(CACHE HYPRE_FMANGLE_BLAS PROPERTY STRINGS 0 1 2 3 4)
-
-set(HYPRE_FMANGLE_LAPACK 0 CACHE STRING "Set the LAPACK name mangling scheme")
-set_property(CACHE HYPRE_FMANGLE_LAPACK PROPERTY STRINGS 0 1 2 3 4)
+# Set internal hypre variable for each Fortran mangling scheme
+process_fmangling_scheme(FMANGLE "name")
+process_fmangling_scheme(FMANGLE_BLAS "BLAS")
+process_fmangling_scheme(FMANGLE_LAPACK "LAPACK")
 
 # Set config name values
 set_internal_hypre_option(ENABLE "" BIGINT)
