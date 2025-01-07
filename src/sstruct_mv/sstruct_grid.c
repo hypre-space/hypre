@@ -454,7 +454,7 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
    hypre_StructGrid          *sgrid;
    hypre_Box                 *bounding_box;
 
-   HYPRE_Int                 offsets[2];
+   HYPRE_BigInt              offsets[2];
 
    hypre_SStructBoxManInfo   *entry_info;
 
@@ -468,11 +468,11 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
 
    hypre_Box                 *ghostbox, *box;
    HYPRE_Int                 * num_ghost;
-   HYPRE_Int                  ghoffsets[2];
+   HYPRE_BigInt               ghoffsets[2];
    HYPRE_Int                  ghlocal_size  = hypre_SStructGridGhlocalSize(grid);
 
    HYPRE_Int                  info_size;
-   HYPRE_Int                  box_offset, ghbox_offset;
+   HYPRE_BigInt               box_offset, ghbox_offset;
 
    /*------------------------------------------------------
     * Build box manager info for grid boxes
@@ -483,12 +483,12 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
 
    /*find offset and ghost offsets */
    {
-      HYPRE_Int scan_recv;
+      HYPRE_BigInt scan_recv;
 
       /* offsets */
 
       hypre_MPI_Scan(
-         &local_size, &scan_recv, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+         &local_size, &scan_recv, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       /* first point in my range */
       offsets[0] = scan_recv - local_size;
       /* first point in next proc's range */
@@ -498,7 +498,7 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
 
       /* ghost offsets */
       hypre_MPI_Scan(
-         &ghlocal_size, &scan_recv, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+         &ghlocal_size, &scan_recv, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
       /* first point in my range */
       ghoffsets[0] = scan_recv - ghlocal_size;
       /* first point in next proc's range */
