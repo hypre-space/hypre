@@ -333,13 +333,7 @@ hypre_CSRMatrixAddSecondPass( HYPRE_Int          firstrow,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixAdd:
- *
- * Adds two CSR Matrices A and B and returns a CSR Matrix C = alpha*A + beta*B;
- *
- * Note: The routine does not check for 0-elements which might be generated
- *       through cancellation of elements in A and B or already contained
- *       in A and B. To remove those, use hypre_CSRMatrixDeleteZeros
+ * hypre_CSRMatrixAddHost
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix*
@@ -366,6 +360,7 @@ hypre_CSRMatrixAddHost ( HYPRE_Complex    alpha,
    HYPRE_Int        *rownnz_C;
    HYPRE_Int         nnzrows_C;
 
+   HYPRE_Int         num_threads;
    HYPRE_Int        *twspace;
 
    HYPRE_MemoryLocation memory_location_A = hypre_CSRMatrixMemoryLocation(A);
@@ -387,12 +382,7 @@ hypre_CSRMatrixAddHost ( HYPRE_Complex    alpha,
       return NULL;
    }
 
-   /* Allocate memory */
-   twspace = hypre_TAlloc(HYPRE_Int, hypre_NumThreads(), HYPRE_MEMORY_HOST);
-   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A + 1, memory_location_C);
-
    /* Set nonzero rows data of diag_C */
-   nnzrows_C = nrows_A;
    if ((nnzrows_A < nrows_A) && (nnzrows_B < nrows_B))
    {
       hypre_IntArray arr_A;
@@ -412,17 +402,23 @@ hypre_CSRMatrixAddHost ( HYPRE_Complex    alpha,
    }
    else
    {
-      rownnz_C = NULL;
+      nnzrows_C = nrows_A;
+      rownnz_C  = NULL;
    }
 
+   /* Allocate memory */
+   num_threads = hypre_NumOptimalThreads(nnzrows_C);
+   twspace = hypre_TAlloc(HYPRE_Int, num_threads, HYPRE_MEMORY_HOST);
+   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A + 1, memory_location_C);
+
 #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel
+   #pragma omp parallel num_threads(num_threads)
 #endif
    {
       HYPRE_Int   ns, ne;
       HYPRE_Int  *marker = NULL;
 
-      hypre_partition1D(nnzrows_C, hypre_NumActiveThreads(), hypre_GetThreadNum(), &ns, &ne);
+      hypre_partition1D(nnzrows_C, num_threads, hypre_GetThreadNum(), &ns, &ne);
 
       marker = hypre_CTAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_HOST);
 
@@ -441,6 +437,16 @@ hypre_CSRMatrixAddHost ( HYPRE_Complex    alpha,
 
    return C;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixAdd
+ *
+ * Adds two CSR Matrices A and B and returns a CSR Matrix C = alpha*A + beta*B;
+ *
+ * Note: The routine does not check for 0-elements which might be generated
+ *       through cancellation of elements in A and B or already contained
+ *       in A and B. To remove those, use hypre_CSRMatrixDeleteZeros
+ *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix*
 hypre_CSRMatrixAdd( HYPRE_Complex    alpha,
@@ -503,6 +509,7 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
    HYPRE_Int        *C_i;
    HYPRE_BigInt     *C_j;
    HYPRE_Int        *twspace;
+   HYPRE_Int         num_threads = hypre_NumOptimalThreads(nrows_A);
 
    HYPRE_MemoryLocation memory_location_A = hypre_CSRMatrixMemoryLocation(A);
    HYPRE_MemoryLocation memory_location_B = hypre_CSRMatrixMemoryLocation(B);
@@ -524,22 +531,21 @@ hypre_CSRMatrixBigAdd( hypre_CSRMatrix *A,
    }
 
    /* Allocate memory */
-   twspace = hypre_TAlloc(HYPRE_Int, hypre_NumThreads(), HYPRE_MEMORY_HOST);
+   twspace = hypre_TAlloc(HYPRE_Int, num_threads, HYPRE_MEMORY_HOST);
    C_i = hypre_CTAlloc(HYPRE_Int, nrows_A + 1, memory_location_C);
 
 #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel
+   #pragma omp parallel num_threads(num_threads)
 #endif
    {
       HYPRE_Int     ia, ib, ic, num_nonzeros;
       HYPRE_Int     ns, ne, pos;
       HYPRE_BigInt  jcol;
-      HYPRE_Int     ii, num_threads;
+      HYPRE_Int     ii;
       HYPRE_Int     jj;
       HYPRE_Int    *marker = NULL;
 
       ii = hypre_GetThreadNum();
-      num_threads = hypre_NumActiveThreads();
       hypre_partition1D(nrows_A, num_threads, ii, &ns, &ne);
 
       marker = hypre_CTAlloc(HYPRE_Int, ncols_A, HYPRE_MEMORY_HOST);
@@ -694,6 +700,7 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
    HYPRE_Complex         a_entry, b_entry;
    HYPRE_Int             allsquare = 0;
    HYPRE_Int            *twspace;
+   HYPRE_Int             num_threads = hypre_NumOptimalThreads(nnzrows_A);
 
    /* RL: TODO cannot guarantee, maybe should never assert
    hypre_assert(memory_location_A == memory_location_B);
@@ -726,20 +733,18 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
    }
 
    /* Allocate memory */
-   twspace = hypre_TAlloc(HYPRE_Int, hypre_NumThreads(), HYPRE_MEMORY_HOST);
+   twspace = hypre_TAlloc(HYPRE_Int, num_threads, HYPRE_MEMORY_HOST);
    C_i = hypre_CTAlloc(HYPRE_Int, nrows_A + 1, memory_location_C);
 
 #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel private(ia, ib, ic, ja, jb, num_nonzeros, counter, a_entry, b_entry)
+   #pragma omp parallel private(ia, ib, ic, ja, jb, num_nonzeros, counter, a_entry, b_entry) num_threads(num_threads)
 #endif
    {
       HYPRE_Int  *B_marker = NULL;
       HYPRE_Int   ns, ne, ii, jj;
-      HYPRE_Int   num_threads;
       HYPRE_Int   i1, iic;
 
       ii = hypre_GetThreadNum();
-      num_threads = hypre_NumActiveThreads();
       hypre_partition1D(nnzrows_A, num_threads, ii, &ns, &ne);
 
       B_marker = hypre_CTAlloc(HYPRE_Int, ncols_B, HYPRE_MEMORY_HOST);
@@ -926,6 +931,16 @@ hypre_CSRMatrixMultiplyHost( hypre_CSRMatrix *A,
    return C;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixMultiply
+ *
+ * Multiplies two CSR Matrices A and B and returns a CSR Matrix C;
+ *
+ * Note: The routine does not check for 0-elements which might be generated
+ *       through cancellation of elements in A and B or already contained
+ *       in A and B. To remove those, use hypre_CSRMatrixDeleteZeros
+ *--------------------------------------------------------------------------*/
+
 hypre_CSRMatrix*
 hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
                          hypre_CSRMatrix *B)
@@ -1061,6 +1076,8 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
    HYPRE_Int             num_cols_AT;
    HYPRE_Int             num_nnzs_AT;
 
+   HYPRE_Int            *bucket;
+   HYPRE_Int             num_threads;
    HYPRE_Int             max_col;
    HYPRE_Int             i, j;
 
@@ -1119,14 +1136,14 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
    /*-----------------------------------------------------------------
     * Parallel count sort
     *-----------------------------------------------------------------*/
-   HYPRE_Int *bucket = hypre_CTAlloc(HYPRE_Int, (num_cols_A + 1) * hypre_NumThreads(),
-                                     HYPRE_MEMORY_HOST);
+   num_threads = hypre_NumOptimalThreads(nnzrows_A);
+   bucket = hypre_CTAlloc(HYPRE_Int, (num_cols_A + 1) * num_threads, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel
+   #pragma omp parallel num_threads(num_threads)
 #endif
    {
-      HYPRE_Int   ii, num_threads, ns, ne;
+      HYPRE_Int   ii, ns, ne;
       HYPRE_Int   i, j, j0, j1, ir;
       HYPRE_Int   idx, offset;
       HYPRE_Int   transpose_i;
@@ -1136,7 +1153,6 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
       HYPRE_Int   transpose_j1;
 
       ii = hypre_GetThreadNum();
-      num_threads = hypre_NumActiveThreads();
       hypre_partition1D(nnzrows_A, num_threads, ii, &ns, &ne);
 
       /*-----------------------------------------------------------------
@@ -1252,8 +1268,8 @@ hypre_CSRMatrixTransposeHost(hypre_CSRMatrix  *A,
    } /* end parallel region */
 
    hypre_CSRMatrixI(*AT) = hypre_TAlloc(HYPRE_Int, num_cols_A + 1, memory_location);
-   hypre_TMemcpy(hypre_CSRMatrixI(*AT), bucket, HYPRE_Int, num_cols_A + 1, memory_location,
-                 HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(hypre_CSRMatrixI(*AT), bucket, HYPRE_Int, num_cols_A + 1,
+                 memory_location, HYPRE_MEMORY_HOST);
    hypre_CSRMatrixI(*AT)[num_cols_A] = num_nnzs_A;
    hypre_TFree(bucket, HYPRE_MEMORY_HOST);
 
@@ -1313,47 +1329,46 @@ hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
                      hypre_CSRMatrix **Bext_diag_ptr,
                      hypre_CSRMatrix **Bext_offd_ptr)
 {
-   HYPRE_Complex   *Bs_ext_data = hypre_CSRMatrixData(Bs_ext);
-   HYPRE_Int       *Bs_ext_i    = hypre_CSRMatrixI(Bs_ext);
-   HYPRE_BigInt    *Bs_ext_j    = hypre_CSRMatrixBigJ(Bs_ext);
-   HYPRE_Int        num_rows_Bext = hypre_CSRMatrixNumRows(Bs_ext);
+   HYPRE_Complex   *Bs_ext_data     = hypre_CSRMatrixData(Bs_ext);
+   HYPRE_Int       *Bs_ext_i        = hypre_CSRMatrixI(Bs_ext);
+   HYPRE_BigInt    *Bs_ext_j        = hypre_CSRMatrixBigJ(Bs_ext);
+   HYPRE_Int        num_rows_Bext   = hypre_CSRMatrixNumRows(Bs_ext);
    HYPRE_Int        B_ext_diag_size = 0;
    HYPRE_Int        B_ext_offd_size = 0;
-   HYPRE_Int       *B_ext_diag_i = NULL;
-   HYPRE_Int       *B_ext_diag_j = NULL;
+   HYPRE_Int       *B_ext_diag_i    = NULL;
+   HYPRE_Int       *B_ext_diag_j    = NULL;
    HYPRE_Complex   *B_ext_diag_data = NULL;
-   HYPRE_Int       *B_ext_offd_i = NULL;
-   HYPRE_Int       *B_ext_offd_j = NULL;
+   HYPRE_Int       *B_ext_offd_i    = NULL;
+   HYPRE_Int       *B_ext_offd_j    = NULL;
    HYPRE_BigInt    *B_ext_offd_bigj = NULL;
    HYPRE_Complex   *B_ext_offd_data = NULL;
+
    HYPRE_Int       *my_diag_array;
    HYPRE_Int       *my_offd_array;
    HYPRE_BigInt    *temp = NULL;
-   HYPRE_Int        max_num_threads;
+   HYPRE_Int        num_threads = hypre_NumOptimalThreads(num_rows_Bext);
+
    HYPRE_Int        cnt = 0;
    hypre_CSRMatrix *Bext_diag = NULL;
    hypre_CSRMatrix *Bext_offd = NULL;
    HYPRE_BigInt    *col_map_offd_C = NULL;
    HYPRE_Int        num_cols_offd_C = 0;
 
-   B_ext_diag_i = hypre_CTAlloc(HYPRE_Int, num_rows_Bext + 1, HYPRE_MEMORY_HOST);
-   B_ext_offd_i = hypre_CTAlloc(HYPRE_Int, num_rows_Bext + 1, HYPRE_MEMORY_HOST);
-
-   max_num_threads = hypre_NumThreads();
-   my_diag_array = hypre_CTAlloc(HYPRE_Int, max_num_threads, HYPRE_MEMORY_HOST);
-   my_offd_array = hypre_CTAlloc(HYPRE_Int, max_num_threads, HYPRE_MEMORY_HOST);
+   B_ext_diag_i  = hypre_CTAlloc(HYPRE_Int, num_rows_Bext + 1, HYPRE_MEMORY_HOST);
+   B_ext_offd_i  = hypre_CTAlloc(HYPRE_Int, num_rows_Bext + 1, HYPRE_MEMORY_HOST);
+   my_diag_array = hypre_CTAlloc(HYPRE_Int, num_threads, HYPRE_MEMORY_HOST);
+   my_offd_array = hypre_CTAlloc(HYPRE_Int, num_threads, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
-   #pragma omp parallel
+   #pragma omp parallel num_threads(num_threads)
 #endif
    {
-      HYPRE_Int ns, ne, ii, num_threads;
+      HYPRE_Int ns, ne, ii;
       HYPRE_Int i1, i, j;
       HYPRE_Int my_offd_size, my_diag_size;
       HYPRE_Int cnt_offd, cnt_diag;
 
       ii = hypre_GetThreadNum();
-      num_threads = hypre_NumActiveThreads();
       hypre_partition1D(num_rows_Bext, num_threads, ii, &ns, &ne);
 
       my_diag_size = 0;
@@ -1536,13 +1551,13 @@ hypre_CSRMatrixSplit(hypre_CSRMatrix  *Bs_ext,
 HYPRE_Int
 hypre_CSRMatrixReorderHost(hypre_CSRMatrix *A)
 {
-   HYPRE_Complex *A_data     = hypre_CSRMatrixData(A);
-   HYPRE_Int     *A_i        = hypre_CSRMatrixI(A);
-   HYPRE_Int     *A_j        = hypre_CSRMatrixJ(A);
-   HYPRE_Int     *rownnz_A   = hypre_CSRMatrixRownnz(A);
-   HYPRE_Int      nnzrows_A  = hypre_CSRMatrixNumRownnz(A);
-   HYPRE_Int      num_rows_A = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int      num_cols_A = hypre_CSRMatrixNumCols(A);
+   HYPRE_Complex *A_data      = hypre_CSRMatrixData(A);
+   HYPRE_Int     *A_i         = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j         = hypre_CSRMatrixJ(A);
+   HYPRE_Int     *rownnz_A    = hypre_CSRMatrixRownnz(A);
+   HYPRE_Int      nnzrows_A   = hypre_CSRMatrixNumRownnz(A);
+   HYPRE_Int      num_rows_A  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int      num_cols_A  = hypre_CSRMatrixNumCols(A);
 
    HYPRE_Int      i, ii, j;
 
