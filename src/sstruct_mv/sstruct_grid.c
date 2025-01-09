@@ -446,7 +446,7 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
    MPI_Comm                   comm        = hypre_SStructGridComm(grid);
    HYPRE_Int                  ndim        = hypre_SStructGridNDim(grid);
    HYPRE_Int                  nparts      = hypre_SStructGridNParts(grid);
-   HYPRE_Int                  local_size  = hypre_SStructGridLocalSize(grid);
+   HYPRE_BigInt               local_size  = (HYPRE_BigInt) hypre_SStructGridLocalSize(grid);
    hypre_BoxManager        ***managers;
    hypre_SStructBoxManInfo    info_obj;
    hypre_SStructPGrid        *pgrid;
@@ -469,7 +469,7 @@ hypre_SStructGridAssembleBoxManagers( hypre_SStructGrid *grid )
    hypre_Box                 *ghostbox, *box;
    HYPRE_Int                 * num_ghost;
    HYPRE_BigInt               ghoffsets[2];
-   HYPRE_Int                  ghlocal_size  = hypre_SStructGridGhlocalSize(grid);
+   HYPRE_BigInt               ghlocal_size  = (HYPRE_BigInt) hypre_SStructGridGhlocalSize(grid);
 
    HYPRE_Int                  info_size;
    HYPRE_BigInt               box_offset, ghbox_offset;
