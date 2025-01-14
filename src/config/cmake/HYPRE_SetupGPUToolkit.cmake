@@ -22,7 +22,29 @@ else()
     set(CMAKE_CXX_STANDARD 14)
   endif()
 endif()
+
+# Set C++ standard for HYPRE
 set_property(TARGET HYPRE PROPERTY CXX_STANDARD ${CMAKE_CXX_STANDARD})
+
+# Add C++ standard library to interface
+if(MSVC OR (CMAKE_CXX_COMPILER_ID MATCHES "Intel" AND WIN32))
+  # MSVC and Intel on Windows link the C++ standard library automatically
+  message(STATUS "${CMAKE_CXX_COMPILER_ID} on Windows: C++ standard library linked automatically")
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang" AND APPLE)
+  # Apple Clang specifically uses c++
+  target_link_libraries(HYPRE INTERFACE "-lc++")
+else()
+  # Most other compilers use stdc++
+  if(NOT (MSVC OR (CMAKE_CXX_COMPILER_ID MATCHES "Intel" AND WIN32)))
+    target_link_libraries(HYPRE INTERFACE "-lstdc++")
+    if(NOT CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang|Intel|PGI|NVHPC|XL|XLClang")
+      message(WARNING "Unknown compiler: ${CMAKE_CXX_COMPILER_ID}. Attempting to link -lstdc++")
+    endif()
+  endif()
+endif()
+message(STATUS "C++ standard library configuration completed for ${CMAKE_CXX_COMPILER_ID}")
+
+# Print C++ info
 message(STATUS "Enabling support for CXX.")
 message(STATUS "Using CXX standard: C++${CMAKE_CXX_STANDARD}")
 
