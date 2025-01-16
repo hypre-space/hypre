@@ -154,6 +154,7 @@ HYPRE_Int hypre_IJVectorZeroValuesPar ( hypre_IJVector *vector );
 HYPRE_Int hypre_IJVectorSetComponentPar ( hypre_IJVector *vector, HYPRE_Int component);
 HYPRE_Int hypre_IJVectorSetValuesPar ( hypre_IJVector *vector, HYPRE_Int num_values,
                                        const HYPRE_BigInt *indices, const HYPRE_Complex *values );
+HYPRE_Int hypre_IJVectorSetConstantValuesPar ( hypre_IJVector *vector, HYPRE_Complex value );
 HYPRE_Int hypre_IJVectorAddToValuesPar ( hypre_IJVector *vector, HYPRE_Int num_values,
                                          const HYPRE_BigInt *indices, const HYPRE_Complex *values );
 HYPRE_Int hypre_IJVectorAssemblePar ( hypre_IJVector *vector );
@@ -219,6 +220,7 @@ HYPRE_Int HYPRE_IJVectorInitialize ( HYPRE_IJVector vector );
 HYPRE_Int HYPRE_IJVectorSetPrintLevel ( HYPRE_IJVector vector, HYPRE_Int print_level );
 HYPRE_Int HYPRE_IJVectorSetValues ( HYPRE_IJVector vector, HYPRE_Int nvalues,
                                     const HYPRE_BigInt *indices, const HYPRE_Complex *values );
+HYPRE_Int HYPRE_IJVectorSetConstantValues ( HYPRE_IJVector vector, HYPRE_Complex value );
 HYPRE_Int HYPRE_IJVectorAddToValues ( HYPRE_IJVector vector, HYPRE_Int nvalues,
                                       const HYPRE_BigInt *indices, const HYPRE_Complex *values );
 HYPRE_Int HYPRE_IJVectorAssemble ( HYPRE_IJVector vector );

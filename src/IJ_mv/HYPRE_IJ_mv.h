@@ -130,7 +130,7 @@ HYPRE_Int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix       matrix,
                                   const HYPRE_Complex *values);
 
 /**
- * Sets all  matrix coefficients of an already assembled matrix to
+ * Sets all matrix coefficients of an already assembled matrix to
  * \e value
  **/
 HYPRE_Int HYPRE_IJMatrixSetConstantValues(HYPRE_IJMatrix matrix,
@@ -556,6 +556,12 @@ HYPRE_Int HYPRE_IJVectorSetValues(HYPRE_IJVector       vector,
                                   HYPRE_Int            nvalues,
                                   const HYPRE_BigInt  *indices,
                                   const HYPRE_Complex *values);
+
+/**
+ * Sets all vector coefficients to \e value
+ **/
+HYPRE_Int HYPRE_IJVectorSetConstantValues(HYPRE_IJVector vector,
+                                          HYPRE_Complex  value);
 
 /**
  * Adds to values in vector.  Usage details are analogous to
