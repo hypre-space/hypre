@@ -967,6 +967,7 @@ hypre_MGRCycle( void              *mgr_vdata,
             //hypre_printf("F-relaxation V-cycle convergence factor: %5f\n", convergence_factor_frelax);
          }
          else if (Frelax_type[level] == 2  ||
+                  Frelax_type[level] == 32 ||
                   Frelax_type[level] == 9  ||
                   Frelax_type[level] == 99 ||
                   Frelax_type[level] == 199)
@@ -994,26 +995,14 @@ hypre_MGRCycle( void              *mgr_vdata,
             /* Set initial guess to zeros */
             hypre_ParVectorSetZeros(U_fine_array[coarse_grid]);
 
-            if (Frelax_type[level] == 2)
+            if (Frelax_type[level] == 2 || Frelax_type[level] == 32)
             {
-               /* Do F-relaxation using AMG */
-               if (level == 0)
-               {
-                  /* TODO (VPM): unify with the next block */
-                  fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid],
-                                         A_ff_array[fine_grid],
-                                         F_fine_array[coarse_grid],
-                                         U_fine_array[coarse_grid]);
-               }
-               else
-               {
-                  aff_base = (hypre_Solver*) (mgr_data -> aff_solver)[level];
+               aff_base = (hypre_Solver*) (mgr_data -> aff_solver)[level];
 
-                  hypre_SolverSolve(aff_base)((HYPRE_Solver) (mgr_data -> aff_solver)[level],
-                                              (HYPRE_Matrix) A_ff_array[level],
-                                              (HYPRE_Vector) F_fine_array[level + 1],
-                                              (HYPRE_Vector) U_fine_array[level + 1]);
-               }
+               hypre_SolverSolve(aff_base)((HYPRE_Solver) (mgr_data -> aff_solver)[level],
+                                           (HYPRE_Matrix) A_ff_array[level],
+                                           (HYPRE_Vector) F_fine_array[coarse_grid],
+                                           (HYPRE_Vector) U_fine_array[coarse_grid]);
             }
             else
             {

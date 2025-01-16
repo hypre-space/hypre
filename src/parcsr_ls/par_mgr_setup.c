@@ -1228,15 +1228,16 @@ hypre_MGRSetup( void               *mgr_vdata,
 
       /* User-prescribed F-solver */
       if (Frelax_type[lev] == 2  ||
+          Frelax_type[lev] == 32 ||
           Frelax_type[lev] == 9  ||
           Frelax_type[lev] == 99 ||
           Frelax_type[lev] == 199)
       {
          if (lev == 0 && (mgr_data -> fsolver_mode) == 0)
          {
-            if (Frelax_type[lev] == 2)
+            if (Frelax_type[lev] == 2 || Frelax_type[lev] == 32)
             {
-               if (((hypre_ParAMGData*)aff_solver[lev])->A_array != NULL)
+               if (Frelax_type[lev] == 2 && ((hypre_ParAMGData*)aff_solver[lev])->A_array != NULL)
                {
                   if (((hypre_ParAMGData*)aff_solver[lev])->A_array[0] != NULL)
                   {
