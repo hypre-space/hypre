@@ -658,7 +658,8 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    hypre_SStructStencil   *stencil;
    HYPRE_Int              *split;
    HYPRE_Int               nvars;
-   HYPRE_Int               nrows, rowstart, nnzs ;
+   HYPRE_Int               nrows, nnzs ;
+   HYPRE_BigInt            rowstart;
    HYPRE_Int               part, var, entry, b, m, mi;
    HYPRE_Int              *row_sizes;
    HYPRE_Int               max_row_size;

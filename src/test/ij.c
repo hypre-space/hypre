@@ -9398,6 +9398,10 @@ final:
       }
    }
 
+   /* Free the memory buffer allocated for storing error messages when using mode 1 for printing errors
+      Note: This call is redundant since the cleanup is already handled in HYPRE_Finalize. */
+   HYPRE_ClearErrorMessages();
+
    /* Finalize Hypre */
    HYPRE_Finalize();
 

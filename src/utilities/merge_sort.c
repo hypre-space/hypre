@@ -644,6 +644,8 @@ void hypre_merge_sort( HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int 
 #endif
 }
 
+#if defined(HYPRE_USING_HOPSCOTCH)
+
 /*--------------------------------------------------------------------------
  * hypre_sort_and_create_inverse_map
  *
@@ -653,8 +655,11 @@ void hypre_merge_sort( HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int 
  *      inverse_map[i] = j iff (*out)[j] = i
  *--------------------------------------------------------------------------*/
 
-void hypre_sort_and_create_inverse_map(HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out,
-                                       hypre_UnorderedIntMap *inverse_map)
+void
+hypre_sort_and_create_inverse_map(HYPRE_Int              *in,
+                                  HYPRE_Int               len,
+                                  HYPRE_Int             **out,
+                                  hypre_UnorderedIntMap  *inverse_map)
 {
    if (len == 0)
    {
@@ -712,6 +717,8 @@ void hypre_sort_and_create_inverse_map(HYPRE_Int *in, HYPRE_Int len, HYPRE_Int *
    hypre_profile_times[HYPRE_TIMER_ID_MERGE] += hypre_MPI_Wtime();
 #endif
 }
+
+#endif /* if defined(HYPRE_USING_HOPSCOTCH) */
 
 /*--------------------------------------------------------------------------
  * hypre_big_merge_sort
@@ -803,8 +810,11 @@ void hypre_big_merge_sort(HYPRE_BigInt *in, HYPRE_BigInt *temp, HYPRE_Int len,
  * hypre_big_sort_and_create_inverse_map
  *--------------------------------------------------------------------------*/
 
-void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPRE_BigInt **out,
-                                           hypre_UnorderedBigIntMap *inverse_map)
+void
+hypre_big_sort_and_create_inverse_map(HYPRE_BigInt              *in,
+                                      HYPRE_Int                  len,
+                                      HYPRE_BigInt             **out,
+                                      hypre_UnorderedBigIntMap  *inverse_map)
 {
    if (len == 0)
    {
@@ -862,5 +872,3 @@ void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPR
    hypre_profile_times[HYPRE_TIMER_ID_MERGE] += hypre_MPI_Wtime();
 #endif
 }
-
-/* vim: set tabstop=8 softtabstop=3 sw=3 expandtab: */

@@ -235,6 +235,17 @@ html_css_files = ["custom.css"]
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'hypredoc'
 
+# Enable figure numbers
+numfig = True
+
+# Customize numbering format
+numfig_format = {
+    'figure': 'Figure %s',
+    'table': 'Table %s',
+    'code-block': 'Listing %s',
+    'section': 'Section %s',
+}
+
 
 # -- Options for LaTeX output --------------------------------------------------
 

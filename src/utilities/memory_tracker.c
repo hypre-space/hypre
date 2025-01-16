@@ -634,4 +634,3 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
 }
 
 #endif
-
