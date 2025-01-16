@@ -167,7 +167,7 @@ function(configure_mpi_target)
     message(STATUS "Adding MPI include directory: ${MPI_INCLUDE_DIR}")
     target_include_directories(${PROJECT_NAME} PUBLIC ${MPI_INCLUDE_DIR})
   endif ()
-  message(STATUS "MPI execution commad: ${MPIEXEC_EXECUTABLE}")
+  message(STATUS "MPI execution command: ${MPIEXEC_EXECUTABLE}")
 
   set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} MPI::MPI_C)
 
