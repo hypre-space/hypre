@@ -273,35 +273,28 @@ int main (int argc, char *argv[])
    HYPRE_IJMatrixGetObject(A, (void**) &parcsr_A);
 
 
-   /* Create the rhs and solution */
+   /* Create the rhs */
    HYPRE_IJVectorCreate(MPI_COMM_WORLD, ilower, iupper, &b);
    HYPRE_IJVectorSetObjectType(b, HYPRE_PARCSR);
    HYPRE_IJVectorInitialize(b);
 
-   HYPRE_IJVectorCreate(MPI_COMM_WORLD, ilower, iupper, &x);
-   HYPRE_IJVectorSetObjectType(x, HYPRE_PARCSR);
-   HYPRE_IJVectorInitialize(x);
 
-   /* Set the rhs values to h^2 and the solution to zero */
+   /* Set the rhs values to h^2 */
    {
-      double *rhs_values, *x_values;
+      double *rhs_values;
       int    *rows;
 
       rhs_values =  (double*) calloc(local_size, sizeof(double));
-      x_values =  (double*) calloc(local_size, sizeof(double));
       rows = (int*) calloc(local_size, sizeof(int));
 
       for (i = 0; i < local_size; i++)
       {
          rhs_values[i] = h2;
-         x_values[i] = 0.0;
          rows[i] = ilower + i;
       }
 
       HYPRE_IJVectorSetValues(b, local_size, rows, rhs_values);
-      HYPRE_IJVectorSetValues(x, local_size, rows, x_values);
 
-      free(x_values);
       free(rhs_values);
       free(rows);
    }
@@ -317,7 +310,12 @@ int main (int argc, char *argv[])
    */
    HYPRE_IJVectorGetObject(b, (void **) &par_b);
 
+   /* Create the solution vector with all values set to zero */
+   HYPRE_IJVectorCreate(MPI_COMM_WORLD, ilower, iupper, &x);
+   HYPRE_IJVectorSetObjectType(x, HYPRE_PARCSR);
+   HYPRE_IJVectorInitialize(x);
    HYPRE_IJVectorAssemble(x);
+   HYPRE_IJVectorSetConstantValues(x, 0.0);
    HYPRE_IJVectorGetObject(x, (void **) &par_x);
 
 
