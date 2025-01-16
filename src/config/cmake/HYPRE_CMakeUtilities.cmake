@@ -496,7 +496,7 @@ endfunction()
 # Function to add a distclean target
 function(add_hypre_target_distclean)
   add_custom_target(distclean
-    COMMAND find ${CMAKE_BINARY_DIR} -mindepth 1 -delete
+    COMMAND find ${CMAKE_BINARY_DIR} -mindepth 1 -not -name ".gitignore" -delete
     COMMAND find ${CMAKE_SOURCE_DIR} -name "*.o" -type f -delete
     COMMAND find ${CMAKE_SOURCE_DIR} -name "*.mod" -type f -delete
     COMMAND find ${CMAKE_SOURCE_DIR} -name "*~" -type f -delete
