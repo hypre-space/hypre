@@ -199,6 +199,11 @@ HYPRE_IJVectorInitializeShell(HYPRE_IJVector vector)
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
+      if (!hypre_IJVectorObject(vec))
+      {
+         hypre_IJVectorCreatePar(vec, hypre_IJVectorPartitioning(vec));
+      }
+
       hypre_IJVectorInitializeParShell(vec);
    }
    else
@@ -210,12 +215,12 @@ HYPRE_IJVectorInitializeShell(HYPRE_IJVector vector)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_IJVectorInitializeData
+ * HYPRE_IJVectorSetData
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_IJVectorInitializeData(HYPRE_IJVector  vector,
-                             HYPRE_Complex  *data)
+HYPRE_IJVectorSetData(HYPRE_IJVector  vector,
+                      HYPRE_Complex  *data)
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
@@ -227,7 +232,7 @@ HYPRE_IJVectorInitializeData(HYPRE_IJVector  vector,
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
-      hypre_IJVectorInitializeParData(vec, data);
+      hypre_IJVectorSetParData(vec, data);
    }
    else
    {

@@ -134,14 +134,14 @@ hypre_ParVectorInitializeShell(hypre_ParVector *vector)
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParVectorInitializeData
+ * hypre_ParVectorSetData
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParVectorInitializeData(hypre_ParVector *vector,
-                              HYPRE_Complex   *data)
+hypre_ParVectorSetData(hypre_ParVector *vector,
+                       HYPRE_Complex   *data)
 {
-   hypre_SeqVectorInitializeData(hypre_ParVectorLocalVector(vector), data);
+   hypre_SeqVectorSetData(hypre_ParVectorLocalVector(vector), data);
 
    return hypre_error_flag;
 }

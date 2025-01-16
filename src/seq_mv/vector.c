@@ -104,15 +104,15 @@ hypre_SeqVectorInitializeShell( hypre_Vector *vector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SeqVectorInitializeData
+ * hypre_SeqVectorSetData
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorInitializeData( hypre_Vector  *vector,
-                               HYPRE_Complex *data )
+hypre_SeqVectorSetData( hypre_Vector  *vector,
+                        HYPRE_Complex *data )
 {
    /* Free data array if already present */
-   if (hypre_VectorData(vector))
+   if (hypre_VectorData(vector) && hypre_VectorOwnsData(vector))
    {
       hypre_TFree(hypre_VectorData(vector), hypre_VectorMemoryLocation(vector));
    }
@@ -120,7 +120,7 @@ hypre_SeqVectorInitializeData( hypre_Vector  *vector,
    /* Set data pointer passed via input  */
    hypre_VectorData(vector) = data;
 
-   /* Reset data pointer ownership */
+   /* Remove data pointer ownership */
    hypre_VectorOwnsData(vector) = 0;
 
    return hypre_error_flag;

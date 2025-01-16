@@ -102,26 +102,20 @@ hypre_IJVectorInitializeParShell(hypre_IJVector *vector)
    hypre_VectorNumVectors(local_vector) = num_vectors;
    hypre_VectorSize(local_vector) = (HYPRE_Int)(partitioning[1] - partitioning[0]);
 
-   if (!aux_vector)
-   {
-      hypre_AuxParVectorCreate(&aux_vector);
-      hypre_IJVectorTranslator(vector) = aux_vector;
-   }
-
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_IJVectorInitializeParData
+ * hypre_IJVectorSetParData
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_IJVectorInitializeParData(hypre_IJVector *vector,
-                                HYPRE_Complex  *data)
+hypre_IJVectorSetParData(hypre_IJVector *vector,
+                         HYPRE_Complex  *data)
 {
    hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
 
-   hypre_ParVectorInitializeData(par_vector, data);
+   hypre_ParVectorSetData(par_vector, data);
 
    return hypre_error_flag;
 }
@@ -151,6 +145,13 @@ hypre_IJVectorInitializePar_v2(hypre_IJVector       *vector,
    hypre_IJVectorInitializeParShell(vector);
    par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
    aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
+
+   /* Check if auxiliary vectors needs to be created */
+   if (!aux_vector)
+   {
+      hypre_AuxParVectorCreate(&aux_vector);
+      hypre_IJVectorTranslator(vector) = aux_vector;
+   }
 
    /* Memory allocations */
    hypre_ParVectorInitialize_v2(par_vector, memory_location);
