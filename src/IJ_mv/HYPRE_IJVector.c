@@ -183,6 +183,66 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJVectorInitializeShell
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorInitializeShell(HYPRE_IJVector vector)
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (!vec)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+   {
+      if (!hypre_IJVectorObject(vec))
+      {
+         hypre_IJVectorCreatePar(vec, hypre_IJVectorPartitioning(vec));
+      }
+
+      hypre_IJVectorInitializeParShell(vec);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorSetData
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorSetData(HYPRE_IJVector  vector,
+                      HYPRE_Complex  *data)
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (!vec)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+   {
+      hypre_IJVectorSetParData(vec, data);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJVectorInitialize
  *--------------------------------------------------------------------------*/
 
@@ -214,8 +274,13 @@ HYPRE_IJVectorInitialize( HYPRE_IJVector vector )
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorInitialize_v2
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-HYPRE_IJVectorInitialize_v2( HYPRE_IJVector vector, HYPRE_MemoryLocation memory_location )
+HYPRE_IJVectorInitialize_v2( HYPRE_IJVector       vector,
+                             HYPRE_MemoryLocation memory_location )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
@@ -308,6 +373,45 @@ HYPRE_IJVectorSetValues( HYPRE_IJVector        vector,
 #endif
       {
          return ( hypre_IJVectorSetValuesPar(vec, nvalues, indices, values) );
+      }
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorSetConstantValues
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorSetConstantValues( HYPRE_IJVector  vector,
+                                 HYPRE_Complex   value )
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (!vec)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+   {
+#if defined(HYPRE_USING_GPU)
+      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
+
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         return ( hypre_IJVectorSetConstantValuesParDevice(vec, value) );
+      }
+      else
+#endif
+      {
+         return ( hypre_IJVectorSetConstantValuesPar(vec, value) );
       }
    }
    else
