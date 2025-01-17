@@ -74,6 +74,7 @@ ro="-ij-noilu -ams -struct -sstruct -rt -D HYPRE_NO_SAVED"
 ####################################
 
 module -q load cmake/3.24.2
+module -q load rocm/6.2.1
 
 # Basic build and check library
 mo="-j all check"
