@@ -39,6 +39,20 @@ endif()
 # Find HIP package
 find_package(hip REQUIRED CONFIG)
 
+# Minimum supported HIP version for HYPRE
+set(REQUIRED_HIP_VERSION "5.2.0")
+
+if(NOT DEFINED hip_VERSION)
+  message(WARNING
+    "Cannot detect HIP version from the 'hip' package. Skipping the minimum version check. "
+    "Proceed at your own risk!!!")
+else()
+  if(hip_VERSION VERSION_LESS REQUIRED_HIP_VERSION)
+    message(FATAL_ERROR
+      "HYPRE requires HIP >= ${REQUIRED_HIP_VERSION}, but found ${hip_VERSION}.")
+  endif()
+endif()
+
 # Function to detect GPU architectures using rocm-smi
 if(NOT DEFINED CMAKE_HIP_ARCHITECTURES)
   message(STATUS "Detecting GPU architectures using rocm-smi...")
@@ -187,6 +201,11 @@ if (HYPRE_ENABLE_LTO AND NOT MSVC)
 endif ()
 
 # Print HIP info
+if (DEFINED hip_VERSION)
+  message(STATUS "HIP version: ${hip_VERSION}")
+endif()
 message(STATUS "HIP C++ standard: ${CMAKE_HIP_STANDARD}")
 message(STATUS "HIP architectures: ${CMAKE_HIP_ARCHITECTURES}")
-message(STATUS "HIP flags: ${CMAKE_HIP_FLAGS}")
+if (DEFINED CMAKE_HIP_FLAGS)
+  message(STATUS "HIP common flags: ${CMAKE_HIP_FLAGS}")
+endif()
