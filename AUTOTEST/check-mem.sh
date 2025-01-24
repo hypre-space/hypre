@@ -32,13 +32,14 @@ shift
 cd $src_dir
 
 find . -type f -print | egrep '[.]*[.](c|cc|cpp|cxx|C|h|hpp|hxx|H)$' |
-  egrep -v '/cmbuild' |
   egrep -v '/docs' |
   egrep -v '/examples' |
   egrep -v '/FEI_mv' |
   egrep -v '/hypre/include' |
   egrep -v '/utilities/memory_tracker.c' |
-  egrep -v '/utilities/memory.c' > check-mem.files
+  egrep -v '/utilities/memory.c' |
+  egrep -v '/utilities/general.c' |
+  egrep -v '/utilities/device_utils.c' > check-mem.files
 
 egrep '(^|[^[:alnum:]_]+)malloc[[:space:]]*\('  `cat check-mem.files` >&2
 egrep '(^|[^[:alnum:]_]+)calloc[[:space:]]*\('  `cat check-mem.files` >&2

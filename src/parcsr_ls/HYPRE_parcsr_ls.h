@@ -170,7 +170,24 @@ HYPRE_Int HYPRE_BoomerAMGGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
  * The default is 1, i.e. a scalar system.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetNumFunctions(HYPRE_Solver solver,
-                                         HYPRE_Int          num_functions);
+                                         HYPRE_Int    num_functions);
+
+/**
+ * (Optional) Sets filtering for system of PDEs (\e num_functions > 1).
+ *
+ * \param filter_functions An integer flag to enable or disable filtering of inter-variable
+ * connections in the input matrix used for preconditioning.
+ *   - A value of 0 (default) indicates no filtering, preserving all inter-variable connections.
+ *   - A value of 1 enables filtering, removing inter-variable connections to lower
+ *     operator and memory complexities.
+ *
+ * @note This option assumes that variables are stored in an interleaved format,
+ *       where multiple variables are combined in a single vector. Enabling filtering
+ *       can be beneficial when the problem has multiple coupled variables (functions)
+ *       that are not strongly coupled.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetFilterFunctions(HYPRE_Solver solver,
+                                            HYPRE_Int    filter_functions);
 
 /**
  * (Optional) Sets the mapping that assigns the function to each variable,
@@ -4085,10 +4102,10 @@ HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver,
  * The default is 0 (no reduction, i.e. keep the reserved cpoints in the coarse grid solve).
  *
  * The default setup for the reduction is as follows:
- *    interp_type = 2
- *    restrict_type = 0
- *    F-relax method = 99
- *    Galerkin coarse grid
+ *    - Interpolation type: Jacobi (2)
+ *    - Restriction type: Injection (0)
+ *    - F-relaxation type: LU factorization with pivoting (99)
+ *    - Coarse grid type: galerkin (0)
  **/
 HYPRE_Int
 HYPRE_MGRSetReservedCpointsLevelToKeep( HYPRE_Solver solver, HYPRE_Int level);
@@ -4145,16 +4162,37 @@ HYPRE_MGRSetLevelFRelaxType(HYPRE_Solver solver,
  * Options for \e cg_method are:
  *
  *    - 0 : Galerkin coarse grid computation using RAP.
- *    - 5 : Galerkin coarse grid computation using RAI (injective prolongation).
- *    - 1 - 4 : Non-Galerkin coarse grid computation with dropping strategy.
+ *    - 1 - 5 : Non-Galerkin coarse grid computation with dropping strategy.
  *         - 1: inv(A_FF) approximated by its (block) diagonal inverse
  *         - 2: CPR-like approximation with inv(A_FF) approximated by its diagonal inverse
  *         - 3: CPR-like approximation with inv(A_FF) approximated by its block diagonal inverse
  *         - 4: inv(A_FF) approximated by sparse approximate inverse
+ *         - 5: inv(A_FF) is an empty matrix and coarse level matrix is set to A_CC
  **/
 HYPRE_Int
 HYPRE_MGRSetCoarseGridMethod(HYPRE_Solver solver,
                              HYPRE_Int *cg_method );
+
+/**
+ * (Optional) Set the maximum number of nonzeros per row of the coarse grid correction
+ * operator computed in the Non-Galerkin approach. Options for \e max_elmts are:
+ *
+ *     - 0: keep only the (block) diagonal portion of the correction matrix (default).
+ *     - k > 0: keep the (block) diagonal plus the k-th largest entries per row
+ *              of the correction matrix.
+ **/
+HYPRE_Int
+HYPRE_MGRSetNonGalerkinMaxElmts(HYPRE_Solver solver,
+                                HYPRE_Int    max_elmts);
+
+/**
+ * (Optional) Set the maximum number of nonzeros per row of the coarse grid correction
+ * operator computed in the Non-Galerkin approach at each MGR level. For options, see
+ * \e HYPRE_MGRSetNonGalerkinMaxElmts.
+ **/
+HYPRE_Int
+HYPRE_MGRSetLevelNonGalerkinMaxElmts(HYPRE_Solver  solver,
+                                     HYPRE_Int    *max_elmts);
 
 /**
  * (Optional) Set the number of functions for F-relaxation V-cycle.
@@ -4465,14 +4503,14 @@ HYPRE_MGRSetLevelSmoothType(HYPRE_Solver  solver,
 /**
  * @brief Sets the global smoother method for a specified MGR level using a HYPRE solver object.
  *
- * This function enables solvers within hypre to be used as complex smoothers for a specific level 
- * within the multigrid reduction (MGR) scheme. Users can configure the solver options and pass the 
+ * This function enables solvers within hypre to be used as complex smoothers for a specific level
+ * within the multigrid reduction (MGR) scheme. Users can configure the solver options and pass the
  * solver in as the smoother. Currently supported solver options via this interface are ILU and AMG.
  *
  * @note Unlike some other setup functions that might require an array to set options across multiple
  *       levels, this function focuses on a single level, identified by the \e level parameter.
  *
- * @warning The smoother passed to function takes precedence over the smoother type set for that level 
+ * @warning The smoother passed to function takes precedence over the smoother type set for that level
  *       in the MGR hierarchy.
  *
  * @param[in,out] \e solver A pointer to the MGR solver object. This object is modified to include the

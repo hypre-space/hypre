@@ -53,8 +53,6 @@ HYPRE_Int hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_);
 HYPRE_Int hypre_GetDevice(hypre_int *device_id);
 HYPRE_Int hypre_GetDeviceCount(hypre_int *device_count);
 HYPRE_Int hypre_GetDeviceLastError(void);
-HYPRE_Int hypre_UmpireInit(hypre_Handle *hypre_handle_);
-HYPRE_Int hypre_UmpireFinalize(hypre_Handle *hypre_handle_);
 HYPRE_Int hypre_GetDeviceMaxShmemSize(hypre_int device_id, hypre_int *max_size_ptr,
                                       hypre_int *max_size_optin_ptr);
 
@@ -176,7 +174,7 @@ void hypre_prefix_sum_multiple(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n,
 
 #endif // HYPRE_USING_OPENMP
 
-#ifdef HYPRE_HOPSCOTCH
+#ifdef HYPRE_USING_HOPSCOTCH
 #ifdef HYPRE_USING_ATOMIC
 // concurrent hopscotch hashing is possible only with atomic supports
 #define HYPRE_CONCURRENT_HOPSCOTCH
@@ -287,9 +285,12 @@ void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPR
 
 /* device_utils.c */
 #if defined(HYPRE_USING_GPU)
-HYPRE_Int hypre_SyncComputeStream(hypre_Handle *hypre_handle);
-HYPRE_Int hypre_SyncCudaDevice(hypre_Handle *hypre_handle);
-HYPRE_Int hypre_ResetCudaDevice(hypre_Handle *hypre_handle);
+HYPRE_Int hypre_DeviceMemoryGetUsage(HYPRE_Real *mem);
+HYPRE_Int hypre_ForceSyncComputeStream();
+HYPRE_Int hypre_SyncComputeStream();
+HYPRE_Int hypre_SyncDevice();
+HYPRE_Int hypre_ResetDevice();
+
 HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int num_vectors, HYPRE_Int num_rows,
                                       HYPRE_Int *A_i, HYPRE_Complex *A_data,
                                       HYPRE_Complex *x, HYPRE_Complex beta,
@@ -359,6 +360,9 @@ HYPRE_Int hypre_bind_device_id(HYPRE_Int device_id_in, HYPRE_Int myid,
                                HYPRE_Int nproc, MPI_Comm comm);
 HYPRE_Int hypre_bind_device(HYPRE_Int myid, HYPRE_Int nproc, MPI_Comm comm);
 
+/* stl_ops.c */
+HYPRE_Int hypre_IntSequence(HYPRE_MemoryLocation memory_location, HYPRE_Int size, HYPRE_Int *data);
+
 /* nvtx.c */
 void hypre_GpuProfilingPushRangeColor(const char *name, HYPRE_Int cid);
 void hypre_GpuProfilingPushRange(const char *name);
@@ -372,13 +376,14 @@ HYPRE_Int hypre_CheckDirExists(const char *path);
 HYPRE_Int hypre_CreateDir(const char *path);
 HYPRE_Int hypre_CreateNextDirOfSequence(const char *basepath, const char *prefix,
                                         char **fullpath_ptr);
+char* hypre_ConvertIndicesToString(HYPRE_Int size, HYPRE_Int *indices);
 
 HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
 HYPRE_Int hypre_RestoreSyncCudaCompute(void);
 HYPRE_Int hypre_GetSyncCudaCompute(HYPRE_Int *cuda_compute_stream_sync_ptr);
-HYPRE_Int hypre_ForceSyncComputeStream(hypre_Handle *hypre_handle);
 
 /* handle.c */
+HYPRE_Int hypre_SetLogLevel( HYPRE_Int log_level );
 HYPRE_Int hypre_SetSpTransUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int hypre_SetSpMVUseVendor( HYPRE_Int use_vendor );
 HYPRE_Int hypre_SetSpGemmUseVendor( HYPRE_Int use_vendor );

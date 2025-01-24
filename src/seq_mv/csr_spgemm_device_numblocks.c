@@ -20,19 +20,20 @@ HYPRE_Int hypreDevice_CSRSpGemmBinnedGetBlockNumDim()
    hypre_HandleSpgemmNumBin(hypre_handle()) = num_bins;
 
 #if defined(HYPRE_USING_CUDA)
-   cudaDeviceGetAttribute(&multiProcessorCount, cudaDevAttrMultiProcessorCount,
-                          hypre_HandleDevice(hypre_handle()));
-#endif
+   HYPRE_CUDA_CALL(cudaDeviceGetAttribute(
+                      &multiProcessorCount,
+                      cudaDevAttrMultiProcessorCount,
+                      hypre_HandleDevice(hypre_handle())));
 
-#if defined(HYPRE_USING_HIP)
-   hipDeviceGetAttribute(&multiProcessorCount, hipDeviceAttributeMultiprocessorCount,
-                         hypre_HandleDevice(hypre_handle()));
-#endif
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL(hipDeviceGetAttribute(
+                     &multiProcessorCount,
+                     hipDeviceAttributeMultiprocessorCount,
+                     hypre_HandleDevice(hypre_handle())));
 
-#if defined(HYPRE_USING_SYCL)
-   /* WM: todo - is this right? */
-   multiProcessorCount = hypre_HandleDevice(
-                            hypre_handle())->get_info<sycl::info::device::max_compute_units>();
+#elif defined(HYPRE_USING_SYCL)
+   multiProcessorCount =
+      hypre_HandleDevice(hypre_handle())->get_info<sycl::info::device::max_compute_units>();
 #endif
 
    typedef HYPRE_Int arrType[4][HYPRE_SPGEMM_MAX_NBIN + 1];

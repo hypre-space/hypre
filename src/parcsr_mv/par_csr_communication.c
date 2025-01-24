@@ -170,6 +170,7 @@ hypre_ParCSRCommHandleCreate ( HYPRE_Int            job,
 /*------------------------------------------------------------------
  * hypre_ParCSRCommHandleCreate_v2
  *------------------------------------------------------------------*/
+
 hypre_ParCSRCommHandle*
 hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
                                   hypre_ParCSRCommPkg *comm_pkg,

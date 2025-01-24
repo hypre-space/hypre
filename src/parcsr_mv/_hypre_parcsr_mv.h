@@ -203,7 +203,7 @@ typedef struct _hypre_ParCSRCommPkg
 #define hypre_ParCSRCommPkgMatrixE(comm_pkg)                     ((comm_pkg) -> matrix_E)
 #endif
 
-static inline void
+static inline HYPRE_MAYBE_UNUSED_FUNC void
 hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRCommPkg *comm_pkg)
 {
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -343,7 +343,7 @@ typedef struct hypre_ParVector_struct
 
 #define hypre_ParVectorAssumedPartition(vector) ((vector) -> assumed_partition)
 
-static inline HYPRE_MemoryLocation
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_MemoryLocation
 hypre_ParVectorMemoryLocation(hypre_ParVector *vector)
 {
    return hypre_VectorMemoryLocation(hypre_ParVectorLocalVector(vector));
@@ -476,7 +476,7 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixNumRows(matrix) hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixNumCols(matrix) hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 
-static inline HYPRE_MemoryLocation
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_MemoryLocation
 hypre_ParCSRMatrixMemoryLocation(hypre_ParCSRMatrix *matrix)
 {
    if (!matrix) { return HYPRE_MEMORY_UNDEFINED; }
@@ -1007,6 +1007,10 @@ HYPRE_Int hypre_ParCSRFindExtendCommPkg(MPI_Comm comm, HYPRE_BigInt global_num_c
                                         hypre_IJAssumedPart *apart, HYPRE_Int indices_len, HYPRE_BigInt *indices,
                                         hypre_ParCSRCommPkg **extend_comm_pkg);
 
+/* par_csr_filter.c */
+HYPRE_Int hypre_ParCSRMatrixBlkFilter(hypre_ParCSRMatrix *A,
+                                      HYPRE_Int block_size, hypre_ParCSRMatrix **B_ptr);
+
 /* par_csr_matop.c */
 HYPRE_Int hypre_ParCSRMatrixScale(hypre_ParCSRMatrix *A, HYPRE_Complex scalar);
 void hypre_ParMatmul_RowSizes ( HYPRE_MemoryLocation memory_location, HYPRE_Int **C_diag_i,
@@ -1150,6 +1154,10 @@ HYPRE_Int hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix *A, HYPRE_Int row_ma
                                          hypre_DenseBlockMatrix **B_ptr );
 HYPRE_Int hypre_ParCSRMatrixColSum( hypre_ParCSRMatrix *A, hypre_ParVector **B_ptr );
 
+/* par_csr_filter_device.c */
+HYPRE_Int hypre_ParCSRMatrixBlkFilterDevice(hypre_ParCSRMatrix *A, HYPRE_Int block_size,
+                                            hypre_ParCSRMatrix **B_ptr);
+
 /* par_csr_matop_device.c */
 HYPRE_Int hypre_ParCSRMatrixDiagScaleDevice ( hypre_ParCSRMatrix *par_A, hypre_ParVector *par_ld,
                                               hypre_ParVector *par_rd );
@@ -1257,6 +1265,14 @@ void hypre_ParCSRMatrixCopyColMapOffdToHost(hypre_ParCSRMatrix *A);
 HYPRE_Int hypre_ParCSRMatrixStatsArrayCompute( HYPRE_Int num_matrices,
                                                hypre_ParCSRMatrix **matrices,
                                                hypre_MatrixStatsArray *stats_array );
+
+/* par_csr_matmat_device.c */
+HYPRE_Int hypre_ParCSRMatMatDiagDevice( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *BT,
+                                        hypre_ParCSRMatrix *C );
+
+/* par_csr_matmat.c */
+HYPRE_Int hypre_ParCSRMatMatDiag( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B,
+                                  hypre_ParCSRMatrix **C_ptr );
 
 /* par_csr_matvec.c */
 // y = alpha*A*x + beta*b

@@ -187,7 +187,7 @@ typedef struct _hypre_ParCSRCommPkg
 #define hypre_ParCSRCommPkgMatrixE(comm_pkg)                     ((comm_pkg) -> matrix_E)
 #endif
 
-static inline void
+static inline HYPRE_MAYBE_UNUSED_FUNC void
 hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRCommPkg *comm_pkg)
 {
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)

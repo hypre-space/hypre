@@ -392,7 +392,7 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
                                   values, action, -1, 0);
    /* TODO: Why need DeviceSync? */
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaDevice(hypre_handle());
+   hypre_SyncDevice();
 #endif
    /* set (AddTo/Get) or clear (Set) values outside the grid in ghost zones */
    if (action != 0)
@@ -658,7 +658,8 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    hypre_SStructStencil   *stencil;
    HYPRE_Int              *split;
    HYPRE_Int               nvars;
-   HYPRE_Int               nrows, rowstart, nnzs ;
+   HYPRE_Int               nrows, nnzs ;
+   HYPRE_BigInt            rowstart;
    HYPRE_Int               part, var, entry, b, m, mi;
    HYPRE_Int              *row_sizes;
    HYPRE_Int               max_row_size;
@@ -908,7 +909,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
       }
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    if ( hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE )
    {
       if (!hypre_SStructMatrixTmpRowCoordsDevice(matrix))

@@ -98,6 +98,7 @@ set(SRCS
   par_mgr.c
   par_mgr_coarsen.c
   par_mgr_interp.c
+  par_mgr_rap.c
   par_mgr_setup.c
   par_mgr_solve.c
   par_mgr_stats.c
@@ -154,7 +155,7 @@ target_sources(${PROJECT_NAME}
           ${HDRS}
 )
 
-if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
+if (HYPRE_USING_GPU)
   set(GPU_SRCS
     ams.c
     ads.c
