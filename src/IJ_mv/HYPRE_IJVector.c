@@ -401,18 +401,7 @@ HYPRE_IJVectorSetConstantValues( HYPRE_IJVector  vector,
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
-#if defined(HYPRE_USING_GPU)
-      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_IJVectorMemoryLocation(vector) );
-
-      if (exec == HYPRE_EXEC_DEVICE)
-      {
-         return ( hypre_IJVectorSetConstantValuesParDevice(vec, value) );
-      }
-      else
-#endif
-      {
-         return ( hypre_IJVectorSetConstantValuesPar(vec, value) );
-      }
+      return ( hypre_IJVectorSetConstantValuesPar(vec, value) );
    }
    else
    {
