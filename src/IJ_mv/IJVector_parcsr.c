@@ -1235,3 +1235,19 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector       *vector,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_IJVectorMigrateParCSR
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IJVectorMigrateParCSR(hypre_IJVector       *vector,
+                            HYPRE_MemoryLocation  memory_location)
+{
+   hypre_ParVector *par_vector = (hypre_ParVector *) hypre_IJVectorObject(vector);
+
+   /* Migrate the ParVector */
+   hypre_ParVectorMigrate(par_vector, memory_location);
+
+   return hypre_error_flag;
+}

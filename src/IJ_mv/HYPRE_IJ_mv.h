@@ -430,6 +430,12 @@ HYPRE_Int HYPRE_IJMatrixReadBinary(const char     *filename,
                                    HYPRE_Int       type,
                                    HYPRE_IJMatrix *matrix_ptr);
 
+/**
+ * Migrate the matrix to a given memory location.
+ **/
+HYPRE_Int HYPRE_IJMatrixMigrate(HYPRE_IJMatrix       matrix,
+                                HYPRE_MemoryLocation memory_location);
+
 /**@}*/
 
 /*--------------------------------------------------------------------------
@@ -681,6 +687,12 @@ HYPRE_Int HYPRE_IJVectorPrintBinary(HYPRE_IJVector  vector,
 HYPRE_Int HYPRE_IJVectorInnerProd(HYPRE_IJVector  x,
                                   HYPRE_IJVector  y,
                                   HYPRE_Real     *prod);
+
+/**
+ * Migrate the vector to a given memory location.
+ **/
+HYPRE_Int HYPRE_IJVectorMigrate(HYPRE_IJVector       vector,
+                                HYPRE_MemoryLocation memory_location);
 
 /**@}*/
 /**@}*/

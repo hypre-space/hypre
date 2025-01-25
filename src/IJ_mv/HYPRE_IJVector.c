@@ -946,3 +946,34 @@ HYPRE_IJVectorInnerProd( HYPRE_IJVector  x,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorMigrate
+ *
+ * Migrates an IJVector to the specified memory location
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorMigrate(HYPRE_IJVector       vector,
+                      HYPRE_MemoryLocation memory_location)
+{
+   hypre_IJVector *ijvector = (hypre_IJVector *) vector;
+
+   if (!ijvector)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   /* Only implemented for ParVector */
+   if (hypre_IJVectorObjectType(ijvector) == HYPRE_PARCSR)
+   {
+      hypre_IJVectorMigrateParCSR(ijvector, memory_location);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
