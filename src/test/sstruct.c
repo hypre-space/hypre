@@ -2250,6 +2250,10 @@ PrintUsage( char *progname,
       hypre_printf("  -repeats <r>       : number of times to repeat\n");
       hypre_printf("  -pout <val>        : print level for the preconditioner\n");
       hypre_printf("  -sout <val>        : print level for the solver\n");
+      hypre_printf("  -ll <val>          : hypre's log level\n");
+      hypre_printf("                        0 - (default) No messaging.\n");
+      hypre_printf("                        1 - Display memory usage statistics for each MPI rank.\n");
+      hypre_printf("                        2 - Display aggregate memory usage statistics over MPI ranks.\n");
       hypre_printf("  -print             : print out the system\n");
       hypre_printf("  -rhsfromcosine     : solution is cosine function (default)\n");
       hypre_printf("  -rhsone            : rhs is vector with unit components\n");
@@ -2347,6 +2351,7 @@ main( hypre_int argc,
    HYPRE_Int             repeats, rep;
    HYPRE_Int             prec_print_level;
    HYPRE_Int             solver_print_level;
+   HYPRE_Int             log_level;
    HYPRE_Int             print_system;
    HYPRE_Int             cosine;
    HYPRE_Real            scale;
@@ -2535,6 +2540,7 @@ main( hypre_int argc,
    repeats = 1;
    prec_print_level = 0;
    solver_print_level = 0;
+   log_level = 0;
    print_system = 0;
    cosine = 1;
    skip = 0;
@@ -2736,6 +2742,11 @@ main( hypre_int argc,
       {
          arg_index++;
          solver_print_level = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ll") == 0 )
+      {
+         arg_index++;
+         log_level = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-print") == 0 )
       {
@@ -2947,6 +2958,9 @@ main( hypre_int argc,
    hypre_MemoryTrackerSetPrint(print_mem_tracker);
    if (mem_tracker_name[0]) { hypre_MemoryTrackerSetFileName(mem_tracker_name); }
 #endif
+
+   /* Set library log level */
+   HYPRE_SetLogLevel(log_level);
 
    /* default memory location */
    HYPRE_SetMemoryLocation(memory_location);
