@@ -522,7 +522,7 @@ do
          ;;
       -valgrind)
          shift
-         Valgrind="valgrind -q --suppressions=`pwd`/runtest.valgrind --leak-check=yes --track-origins=yes"
+         Valgrind="valgrind -q --suppressions=`pwd`/runtest.valgrind --track-origins=yes --leak-check=full --show-leak-kinds=all"
          ;;
       -cudamemcheck)
          shift
@@ -606,6 +606,8 @@ CleanUp $TestDirNames $ExecFileNames
 
 # Filter misleading error messages
 cat > runtest.filters <<EOF
+PMIX ERROR: PMIX_ERR_NOT_FOUND in file dstore_base.c at line 1567
+PMIX ERROR: PMIX_ERROR in file dstore_base.c at line 2334
 lrun warning: default mapping forced to idle
 srun: Warning: can't run 1 processes on 2 nodes, setting nnodes to 1
 hypre_MPI_Init

@@ -19,6 +19,7 @@
 #include "_hypre_IJ_mv.h"
 #include "HYPRE.h"
 #if defined(HYPRE_USING_CUSPARSE)
+#define DISABLE_CUSPARSE_DEPRECATED
 #include <cusparse.h>
 #endif
 
@@ -163,6 +164,9 @@ main (hypre_int argc,
 #endif
    /* use vendor implementation for SpGEMM */
    HYPRE_SetSpGemmUseVendor(0);
+#if defined(HYPRE_USING_SYCL)
+   HYPRE_SetSpGemmUseVendor(1);
+#endif
    /* use cuRand for PMIS */
    HYPRE_SetUseGpuRand(1);
 #endif

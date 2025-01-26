@@ -268,7 +268,7 @@ HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int  m,
                                   HYPRE_Int *h_bin_ptr )
 {
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_ForceSyncComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream();
    HYPRE_Real t1 = hypre_MPI_Wtime();
 #endif
 
@@ -329,7 +329,7 @@ HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int  m,
    hypre_TFree(d_bin_ptr, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_ForceSyncComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream();
    HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
    HYPRE_SPGEMM_PRINT("%s[%d]: Binning time %f\n", __FILE__, __LINE__, t2);
 #endif

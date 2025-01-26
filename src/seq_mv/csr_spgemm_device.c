@@ -49,7 +49,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
 #endif
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_ForceSyncComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream();
    HYPRE_Real ta = hypre_MPI_Wtime();
 #endif
 
@@ -116,7 +116,7 @@ hypreDevice_CSRSpGemm(hypre_CSRMatrix  *A,
    }
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_ForceSyncComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream();
    HYPRE_Real tb = hypre_MPI_Wtime() - ta;
    HYPRE_SPGEMM_PRINT("SpGemm time %f\n", tb);
 #endif

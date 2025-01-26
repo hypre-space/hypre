@@ -1245,7 +1245,7 @@ hypre_BoomerAMGRelax7Jacobi( hypre_ParCSRMatrix *A,
 
 #if defined(HYPRE_USING_GPU)
    hypre_SetSyncCudaCompute(sync_stream);
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 #endif
 
    hypre_GpuProfilingPopRange();

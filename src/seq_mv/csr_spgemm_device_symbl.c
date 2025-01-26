@@ -61,6 +61,8 @@ hypreDevice_CSRSpGemmRownnzUpperboundBinned( HYPRE_Int  m,
                                              HYPRE_Int *d_rc,
                                              char      *d_rf )
 {
+   HYPRE_UNUSED_VAR(in_rc);
+
    const bool CAN_FAIL = true;
 
    /* Binning (bins 3-10) with d_rc */
@@ -103,6 +105,8 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
                                        HYPRE_Int *d_rc,
                                        HYPRE_Int *rownnz_exact_ptr)
 {
+   HYPRE_UNUSED_VAR(in_rc);
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_SPGEMM_SYMBOLIC] -= hypre_MPI_Wtime();
 #endif
@@ -146,7 +150,7 @@ hypreDevice_CSRSpGemmRownnzUpperbound( HYPRE_Int  m,
    hypre_TFree(d_rf, HYPRE_MEMORY_DEVICE);
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_ForceSyncComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream();
    HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
    HYPRE_SPGEMM_PRINT("RownnzBound time %f\n", t2);
 #endif
@@ -260,6 +264,8 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
                                    HYPRE_Int  in_rc,
                                    HYPRE_Int *d_rc )
 {
+   HYPRE_UNUSED_VAR(in_rc);
+
    const char s = 32, t = 1, u = 5;
    HYPRE_Int  h_bin_ptr[HYPRE_SPGEMM_MAX_NBIN + 1];
 #if 0
@@ -282,7 +288,7 @@ hypreDevice_CSRSpGemmRownnzBinned( HYPRE_Int  m,
    hypre_CSRMatrixIntSpMVDevice(m, nnzA, 1, d_ia, d_ja, NULL, d_rind + 1, 0, d_rc);
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_ForceSyncComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream();
    HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
    HYPRE_SPGEMM_PRINT("RownnzEst time %f\n", t2);
 #endif
@@ -373,6 +379,8 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
                              HYPRE_Int  in_rc,
                              HYPRE_Int *d_rc )
 {
+   HYPRE_UNUSED_VAR(in_rc);
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_SPGEMM_SYMBOLIC] -= hypre_MPI_Wtime();
 #endif
@@ -399,7 +407,7 @@ hypreDevice_CSRSpGemmRownnz( HYPRE_Int  m,
    }
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_ForceSyncComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream();
    HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
    HYPRE_SPGEMM_PRINT("Rownnz time %f\n", t2);
 #endif
