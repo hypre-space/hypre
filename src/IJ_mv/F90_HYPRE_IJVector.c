@@ -79,7 +79,7 @@ hypre_F90_IFACE(hypre_ijvectorinitialize_v2, HYPRE_IJVECTORINITIALIZE_V2)
    *ierr = (hypre_F90_Int)
            ( HYPRE_IJVectorInitialize_v2(
                 hypre_F90_PassObj (HYPRE_IJVector, vector),
-                hypre_F90_PassInt (memory_location) ) );
+                hypre_F90_PassObj (HYPRE_MemoryLocation, memory_location) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -95,7 +95,7 @@ hypre_F90_IFACE(hypre_ijvectormigrate, HYPRE_IJVECTORMIGRATE)
    *ierr = (hypre_F90_Int)
            ( HYPRE_IJVectorMigrate(
                 hypre_F90_PassObj (HYPRE_IJVector, vector),
-                hypre_F90_PassInt (memory_location) ) );
+                hypre_F90_PassObj (HYPRE_MemoryLocation, memory_location) ) );
 }
 
 /*--------------------------------------------------------------------------
