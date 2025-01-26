@@ -3234,7 +3234,7 @@ main( hypre_int argc,
 
          HYPRE_SStructMatrixInitialize(A);
 
-      HYPRE_SStructMatrixSetEarlyAssembly(A, 0);
+         HYPRE_SStructMatrixSetEarlyAssembly(A, 0);
 
          if (data.nstencils > 0)
          {
