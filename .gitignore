@@ -21,10 +21,11 @@ autom4te.cache
 *.TVD.v4breakpoints*
 src/TAGS
 hypre/
-cmbuild/
 install/
 AUTOTEST/*.dir
+out/
 .vscode
+.vs
 
 ###############
 # Documentation
@@ -43,19 +44,34 @@ src/docs/usr-manual/_build/
 # Executables
 ###############
 src/test/ams_driver
+src/test/ams_driver.exe
 src/test/ij
+src/test/ij.exe
 src/test/ij_assembly
+src/test/ij_assembly.exe
 src/test/ij_mv
+src/test/ij_mv.exe
 src/test/ij_mm
+src/test/ij_mm.exe
 src/test/maxwell_unscaled
+src/test/maxwell_unscaled.exe
 src/test/sstruct
 src/test/sstructmat
+src/test/sstruct.exe
 src/test/sstruct_fac
+src/test/sstruct_fac.exe
 src/test/struct
 src/test/structmat
+src/test/struct.exe
 src/test/struct_migrate
+src/test/struct_migrate.exe
 src/test/zboxloop
+src/test/zboxloop.exe
 src/examples/ex[0-9]
-src/examples/ex1[0-6]
+src/examples/ex[0-9].exe
+src/examples/ex1[0-8]
+src/examples/ex1[0-8].exe
 src/examples/ex5f
+src/examples/ex5f.exe
 src/examples/ex12f
+src/examples/ex12f.exe

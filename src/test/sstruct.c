@@ -458,6 +458,7 @@ ReadData( MPI_Comm      comm,
          sdata_line = fgets((sdata + sdata_size), maxline, file);
       }
 
+      /* Close file handle */
       fclose(file);
    }
    /* broadcast the data size */
@@ -4443,6 +4444,7 @@ main( hypre_int argc,
                }
             }
          }
+         fclose(file);
 
          /* re-initializes x to 0 */
          hypre_SStructAxpy(-1.0, b, x);

@@ -32,7 +32,6 @@ shift
 cd $src_dir
 
 find . -type f -print | egrep '[.]*[.](c|cc|cpp|cxx|C|h|hpp|hxx|H)$' |
-  egrep -v '/cmbuild' |
   egrep -v '/docs' |
   egrep -v '/examples' |
   egrep -v '/FEI_mv' |

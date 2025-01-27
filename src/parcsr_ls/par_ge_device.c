@@ -102,6 +102,10 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
    /**************
     * TODO (VPM) *
     **************/
+   HYPRE_UNUSED_VAR(A_piv);
+   HYPRE_UNUSED_VAR(A_mat);
+   HYPRE_UNUSED_VAR(A_work);
+   HYPRE_UNUSED_VAR(buffer_size);
 
 #else
    /* Silence declared but never referenced warnings */
@@ -312,6 +316,11 @@ hypre_GaussElimSolveDevice(hypre_ParAMGData *amg_data,
    /**************
     * TODO (VPM) *
     **************/
+   HYPRE_UNUSED_VAR(A_piv);
+   HYPRE_UNUSED_VAR(A_mat);
+   HYPRE_UNUSED_VAR(i_one);
+   HYPRE_UNUSED_VAR(d_one);
+   HYPRE_UNUSED_VAR(zero);
 
 #else
    /* Silence declared but never referenced warnings */
