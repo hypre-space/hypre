@@ -232,6 +232,9 @@ HYPRE_Int HYPRE_GetErrorMessages(char **buffer, HYPRE_Int *bufsz);
 /* Print the error messages and clear them in hypre */
 HYPRE_Int HYPRE_PrintErrorMessages(MPI_Comm comm);
 
+/* Clear the error messages in hypre and free any related memory allocated */
+HYPRE_Int HYPRE_ClearErrorMessages(void);
+
 /* Print GPU information */
 HYPRE_Int HYPRE_PrintDeviceInfo(void);
 
