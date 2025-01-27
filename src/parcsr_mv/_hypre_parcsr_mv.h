@@ -121,7 +121,7 @@ typedef struct _hypre_ParCSRCommPkg
 #define hypre_ParCSRCommPkgMatrixE(comm_pkg)             ((comm_pkg) -> matrix_E)
 #endif
 
-static inline void
+static inline HYPRE_MAYBE_UNUSED_FUNC void
 hypre_ParCSRCommPkgCopySendMapElmtsToDevice(hypre_ParCSRCommPkg *comm_pkg)
 {
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
@@ -278,7 +278,7 @@ typedef struct hypre_ParVector_struct
 
 #define hypre_ParVectorAssumedPartition(vector) ((vector) -> assumed_partition)
 
-static inline HYPRE_MemoryLocation
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_MemoryLocation
 hypre_ParVectorMemoryLocation(hypre_ParVector *vector)
 {
    return hypre_VectorMemoryLocation(hypre_ParVectorLocalVector(vector));
@@ -411,7 +411,7 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixNumRows(matrix) hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixNumCols(matrix) hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 
-static inline HYPRE_MemoryLocation
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_MemoryLocation
 hypre_ParCSRMatrixMemoryLocation(hypre_ParCSRMatrix *matrix)
 {
    if (!matrix) { return HYPRE_MEMORY_UNDEFINED; }
@@ -1259,7 +1259,7 @@ hypre_ParVector *hypre_ParMultiVectorCreate ( MPI_Comm comm, HYPRE_BigInt global
                                               HYPRE_BigInt *partitioning, HYPRE_Int num_vectors );
 HYPRE_Int hypre_ParVectorDestroy ( hypre_ParVector *vector );
 HYPRE_Int hypre_ParVectorInitializeShell( hypre_ParVector *vector );
-HYPRE_Int hypre_ParVectorInitializeData( hypre_ParVector *vector, HYPRE_Complex *data );
+HYPRE_Int hypre_ParVectorSetData( hypre_ParVector *vector, HYPRE_Complex *data );
 HYPRE_Int hypre_ParVectorInitialize ( hypre_ParVector *vector );
 HYPRE_Int hypre_ParVectorInitialize_v2( hypre_ParVector *vector,
                                         HYPRE_MemoryLocation memory_location );

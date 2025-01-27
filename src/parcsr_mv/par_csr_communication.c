@@ -408,7 +408,7 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
     *           datatypes need to point to absolute
     *           addresses, e.g. generated using hypre_MPI_Address .
     *--------------------------------------------------------------------*/
-#ifndef HYPRE_WITH_GPU_AWARE_MPI
+#if !defined(HYPRE_USING_GPU_AWARE_MPI)
    switch (job)
    {
       case 1:
@@ -466,7 +466,7 @@ hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int            job,
    {
       recv_data = recv_data_in;
    }
-#else /* #ifndef HYPRE_WITH_GPU_AWARE_MPI */
+#else /* #ifndef HYPRE_USING_GPU_AWARE_MPI */
    send_data = send_data_in;
    recv_data = recv_data_in;
 #endif
@@ -662,7 +662,7 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
       hypre_TFree(status0, HYPRE_MEMORY_HOST);
    }
 
-#ifndef HYPRE_WITH_GPU_AWARE_MPI
+#if !defined(HYPRE_USING_GPU_AWARE_MPI)
    hypre_MemoryLocation act_send_memory_location = hypre_GetActualMemLocation(
                                                       hypre_ParCSRCommHandleSendMemoryLocation(comm_handle));
    if ( act_send_memory_location == hypre_MEMORY_DEVICE ||

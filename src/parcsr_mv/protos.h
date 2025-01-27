@@ -598,7 +598,7 @@ hypre_ParVector *hypre_ParMultiVectorCreate ( MPI_Comm comm, HYPRE_BigInt global
                                               HYPRE_BigInt *partitioning, HYPRE_Int num_vectors );
 HYPRE_Int hypre_ParVectorDestroy ( hypre_ParVector *vector );
 HYPRE_Int hypre_ParVectorInitializeShell( hypre_ParVector *vector );
-HYPRE_Int hypre_ParVectorInitializeData( hypre_ParVector *vector, HYPRE_Complex *data );
+HYPRE_Int hypre_ParVectorSetData( hypre_ParVector *vector, HYPRE_Complex *data );
 HYPRE_Int hypre_ParVectorInitialize ( hypre_ParVector *vector );
 HYPRE_Int hypre_ParVectorInitialize_v2( hypre_ParVector *vector,
                                         HYPRE_MemoryLocation memory_location );

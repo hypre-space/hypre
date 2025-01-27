@@ -205,9 +205,10 @@ HYPRE_Int
 hypre_ResetDevice()
 {
 #if defined(HYPRE_USING_CUDA)
-   cudaDeviceReset();
+   HYPRE_CUDA_CALL(cudaDeviceReset());
+
 #elif defined(HYPRE_USING_HIP)
-   hipDeviceReset();
+   HYPRE_HIP_CALL(hipDeviceReset());
 #endif
    return hypre_error_flag;
 }
@@ -347,6 +348,51 @@ hypre_ForceSyncComputeStream()
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 #if defined(HYPRE_USING_GPU)
+
+/*--------------------------------------------------------------------------
+ * hypre_DeviceMemoryGetUsage
+ *
+ * Retrieves memory usage statistics for the current GPU device. The function
+ * fills an array with memory data, converted to gibibytes (GiB):
+ *
+ *    - mem[0]: Current memory usage (allocated by the process).
+ *    - mem[1]: Total device memory available on the GPU.
+ *
+ * This implementation supports NVIDIA GPUs using CUDA and AMD GPUs using HIP.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_DeviceMemoryGetUsage(HYPRE_Real *mem)
+{
+   size_t       free_mem  = 0;
+   size_t       total_mem = 0;
+   HYPRE_Real   b_to_gib  = (HYPRE_Real)(1 << 30);
+
+   /* Sanity check */
+   if (!mem)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Mem is a NULL pointer!");
+      return hypre_error_flag;
+   }
+
+   /* Get free and total memory available on the device */
+#if defined(HYPRE_USING_CUDA)
+   HYPRE_CUDA_CALL(cudaMemGetInfo(&free_mem, &total_mem));
+
+#elif defined(HYPRE_USING_HIP)
+   HYPRE_HIP_CALL(hipMemGetInfo(&free_mem, &total_mem));
+
+#else
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "No supported GPU backend found!");
+   return hypre_error_flag;
+#endif
+
+   /* Convert data from bytes to GiB (HYPRE_Real) */
+   mem[0] = (total_mem - free_mem) / b_to_gib;
+   mem[1] = total_mem / b_to_gib;
+
+   return hypre_error_flag;
+}
 
 /*--------------------------------------------------------------------
  * hypre_DeviceDataComputeStream
@@ -2675,7 +2721,7 @@ hypre_CudaCompileFlagCheck()
    hypre_GetDevice(&device);
 
    struct cudaDeviceProp props;
-   cudaGetDeviceProperties(&props, device);
+   HYPRE_CUDA_CALL(cudaGetDeviceProperties(&props, device));
    hypre_int cuda_arch_actual = props.major * 100 + props.minor * 10;
    hypre_int cuda_arch_compile = -1;
    dim3 gDim(1, 1, 1), bDim(1, 1, 1);
@@ -2923,6 +2969,8 @@ HYPRE_SetSYCLDevice(sycl::device user_device)
    {
       delete data->device;
    }
+
+#if defined(HYPRE_USING_CUDA_STREAMS)
    for (HYPRE_Int i = 0; i < HYPRE_MAX_NUM_STREAMS; i++)
    {
       if (data->streams[i])
@@ -2931,6 +2979,7 @@ HYPRE_SetSYCLDevice(sycl::device user_device)
          data->streams[i] = nullptr;
       }
    }
+#endif
 
    /* Setup new device and compute stream */
    data->device = new sycl::device(user_device);
@@ -2993,14 +3042,15 @@ hypre_bind_device_id( HYPRE_Int device_id_in,
    /* set device */
 #if defined(HYPRE_USING_DEVICE_OPENMP)
    omp_set_default_device(device_id);
-#endif
 
-#if defined(HYPRE_USING_CUDA)
+#elif defined(HYPRE_USING_CUDA)
    HYPRE_CUDA_CALL( cudaSetDevice(device_id) );
-#endif
 
-#if defined(HYPRE_USING_HIP)
+#elif defined(HYPRE_USING_HIP)
    HYPRE_HIP_CALL( hipSetDevice(device_id) );
+
+#elif defined(HYPRE_USING_SYCL)
+   HYPRE_UNUSED_VAR(device_id);
 #endif
 
 #if defined(HYPRE_DEBUG) && defined(HYPRE_PRINT_ERRORS)
