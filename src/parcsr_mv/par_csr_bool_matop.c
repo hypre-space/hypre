@@ -43,7 +43,7 @@ hypre_ParBooleanMatmul( hypre_ParCSRBooleanMatrix *A,
    HYPRE_Int   num_cols_offd_B = hypre_CSRBooleanMatrix_Get_NCols(B_offd);
 
    hypre_ParCSRBooleanMatrix *C;
-   HYPRE_BigInt            *col_map_offd_C;
+   HYPRE_BigInt            *col_map_offd_C = NULL;
    HYPRE_Int            *map_B_to_C = NULL;
 
    hypre_CSRBooleanMatrix *C_diag;

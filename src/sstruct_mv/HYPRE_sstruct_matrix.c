@@ -283,8 +283,8 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
    hypre_BoxArray         *boxes;
    hypre_Box              *box;
    HYPRE_Int              *num_ghost;
-   HYPRE_Int               nrows, ncols;
-   HYPRE_Int               ilower, iupper, jlower, jupper;
+   HYPRE_BigInt            nrows, ncols;
+   HYPRE_BigInt            ilower, iupper, jlower, jupper;
 
    /* S-matrix */
    for (part = 0; part < nparts; part++)
@@ -417,8 +417,8 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
    }
 
    hypre_BoxDestroy(box);
-   hypre_MPI_Scan(&nrows, &iupper, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
-   hypre_MPI_Scan(&ncols, &jupper, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+   hypre_MPI_Scan(&nrows, &iupper, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
+   hypre_MPI_Scan(&ncols, &jupper, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
 
    ilower = iupper - nrows;
    jlower = jupper - ncols;

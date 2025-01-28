@@ -522,7 +522,7 @@ do
          ;;
       -valgrind)
          shift
-         Valgrind="valgrind -q --suppressions=`pwd`/runtest.valgrind --leak-check=yes --track-origins=yes"
+         Valgrind="valgrind -q --suppressions=`pwd`/runtest.valgrind --track-origins=yes --leak-check=full --show-leak-kinds=all"
          ;;
       -cudamemcheck)
          shift

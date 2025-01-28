@@ -49,7 +49,6 @@ fi
 
 # Generate list of source files to indent
 find . -type f -print | egrep '[.]*[.](c|cc|cpp|cxx|C|h|hpp|hxx|H)$' |
-  egrep -v '/cmbuild' |
   egrep -v '/docs' |
   egrep -v '/FEI_mv' |
   egrep -v '/blas' |

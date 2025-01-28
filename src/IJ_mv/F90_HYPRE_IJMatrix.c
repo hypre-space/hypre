@@ -71,6 +71,38 @@ hypre_F90_IFACE(hypre_ijmatrixinitialize, HYPRE_IJMATRIXINITIALIZE)
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixInitialize_v2
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_ijmatrixinitialize_v2, HYPRE_IJMATRIXINITIALIZE_V2)
+( hypre_F90_Obj *matrix,
+  hypre_F90_Int *memory_location,
+  hypre_F90_Int *ierr    )
+{
+   *ierr = (hypre_F90_Int)
+           ( HYPRE_IJMatrixInitialize_v2(
+                hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+                hypre_F90_PassObj (HYPRE_MemoryLocation, memory_location) ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixMigrate
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_ijmatrixmigrate, HYPRE_IJMATRIXMIGRATE)
+( hypre_F90_Obj *matrix,
+  hypre_F90_Int *memory_location,
+  hypre_F90_Int *ierr    )
+{
+   *ierr = (hypre_F90_Int)
+           ( HYPRE_IJMatrixMigrate(
+                hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+                hypre_F90_PassObj (HYPRE_MemoryLocation, memory_location) ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJMatrixSetValues
  *--------------------------------------------------------------------------*/
 

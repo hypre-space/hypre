@@ -34,6 +34,7 @@ output_dir=`pwd`/$testname.dir
 rm -fr $output_dir
 mkdir -p $output_dir
 src_dir=`cd $1; pwd`
+root_dir=`cd $src_dir/..; pwd`
 shift
 
 # Organizing the tests from "fast" to "slow"
@@ -153,31 +154,31 @@ ro="-ams -ij -sstruct -struct -lobpcg"
 eo=""
 
 co=""
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-default
 
 co="-DHYPRE_SEQUENTIAL=ON"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-sequential
 
 co="-DHYPRE_SHARED=ON"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-shared
 
 co="-DHYPRE_SINGLE=ON"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: -single
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo -ro: -single
 ./renametest.sh cmake $output_dir/cmake-single
 
 co="-DHYPRE_LONG_DOUBLE=ON"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: -longdouble
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo -ro: -longdouble
 ./renametest.sh cmake $output_dir/cmake-longdouble
 
 co="-DCMAKE_BUILD_TYPE=Debug"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh cmake $output_dir/cmake-debug
 
 co="-DHYPRE_BIGINT=ON"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh cmake $output_dir/cmake-bigint
 
 # cmake build doesn't currently support maxdim

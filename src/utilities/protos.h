@@ -178,7 +178,7 @@ void hypre_prefix_sum_multiple(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n,
 
 #endif // HYPRE_USING_OPENMP
 
-#ifdef HYPRE_HOPSCOTCH
+#ifdef HYPRE_USING_HOPSCOTCH
 #ifdef HYPRE_USING_ATOMIC
 // concurrent hopscotch hashing is possible only with atomic supports
 #define HYPRE_CONCURRENT_HOPSCOTCH
@@ -289,10 +289,12 @@ void hypre_big_sort_and_create_inverse_map(HYPRE_BigInt *in, HYPRE_Int len, HYPR
 
 /* device_utils.c */
 #if defined(HYPRE_USING_GPU)
+HYPRE_Int hypre_DeviceMemoryGetUsage(HYPRE_Real *mem);
 HYPRE_Int hypre_ForceSyncComputeStream();
 HYPRE_Int hypre_SyncComputeStream();
 HYPRE_Int hypre_SyncDevice();
 HYPRE_Int hypre_ResetDevice();
+
 HYPRE_Int hypreDevice_DiagScaleVector(HYPRE_Int num_vectors, HYPRE_Int num_rows,
                                       HYPRE_Int *A_i, HYPRE_Complex *A_data,
                                       HYPRE_Complex *x, HYPRE_Complex beta,
