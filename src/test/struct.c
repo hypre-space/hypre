@@ -140,8 +140,9 @@ main( hypre_int argc,
    HYPRE_Int          *readperiodic;
    HYPRE_Int           sum;
 
-   HYPRE_Int           print_level;
-   HYPRE_Int           krylov_print_level;
+   HYPRE_Int           prec_print_level = 0;
+   HYPRE_Int           solver_print_level = 0;
+   HYPRE_Int           log_level = 0;
    HYPRE_Int           print_system = 0;
    HYPRE_Int           print_vtk = 0;
 
@@ -284,8 +285,6 @@ main( hypre_int argc,
    solver_id = 1;
    solver_type = 1;
    max_iterations = 100;
-   print_level = 0;
-   krylov_print_level = 0;
    recompute_res = 0;   /* What should be the default here? */
 
    istart[0] = -3;
@@ -429,16 +428,6 @@ main( hypre_int argc,
          arg_index++;
          x0_type  = 0;
       }
-      else if ( strcmp(argv[arg_index], "-kprint") == 0 )
-      {
-         arg_index++;
-         krylov_print_level = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-plevel") == 0 )
-      {
-         arg_index++;
-         print_level = atoi(argv[arg_index++]);
-      }
       else if ( strcmp(argv[arg_index], "-lvl") == 0 )
       {
          arg_index++;
@@ -531,6 +520,21 @@ main( hypre_int argc,
       {
          arg_index++;
          print_vtk = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-pout") == 0 )
+      {
+         arg_index++;
+         prec_print_level = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-sout") == 0 )
+      {
+         arg_index++;
+         solver_print_level = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ll") == 0 )
+      {
+         arg_index++;
+         log_level = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
@@ -647,6 +651,9 @@ main( hypre_int argc,
    if (mem_tracker_name[0]) { hypre_MemoryTrackerSetFileName(mem_tracker_name); }
 #endif
 
+   /* Set library log level */
+   HYPRE_SetLogLevel(log_level);
+
    /* default memory location */
    HYPRE_SetMemoryLocation(memory_location);
 
@@ -690,8 +697,6 @@ main( hypre_int argc,
       hypre_printf("  -x0zero             : initial solution (x0) has zero components \n");
       hypre_printf("  -x0one              : initial solution (x0) has unit components \n");
       hypre_printf("  -x0rand             : initial solution (x0) has random components \n");
-      hypre_printf("  -kprint <val>       : print level for krylov solvers\n");
-      hypre_printf("  -plevel <val>       : print level for prec/solvers\n");
       hypre_printf("  -lvl <val>          : maximum number of levels (default 100);\n");
       hypre_printf("  -repeats <reps>     : number of times to repeat the run, default 1. For solver -1,0,1,3\n");
       hypre_printf("  -solver <ID>        : solver ID\n");
@@ -746,6 +751,13 @@ main( hypre_int argc,
       hypre_printf("  -itr <val>          : maximal number of iterations (default 100)\n");
       hypre_printf("  -recompute <bool>   : Recompute residual in PCG?\n");
       hypre_printf("  -cf <cf>            : convergence factor for Hybrid\n");
+      hypre_printf("  -print              : print out the system\n");
+      hypre_printf("  -pout <val>         : print level for the preconditioner\n");
+      hypre_printf("  -sout <val>         : print level for the solver\n");
+      hypre_printf("  -ll <val>           : hypre's log level\n");
+      hypre_printf("                        0 - (default) No messaging.\n");
+      hypre_printf("                        1 - Display memory usage statistics for each MPI rank.\n");
+      hypre_printf("                        2 - Display aggregate memory usage statistics over MPI ranks.\n");
       hypre_printf("\n");
 
       /* begin lobpcg */
@@ -1536,7 +1548,7 @@ main( hypre_int argc,
          HYPRE_StructSMGSetRelChange(solver, 0);
          HYPRE_StructSMGSetNumPreRelax(solver, n_pre);
          HYPRE_StructSMGSetNumPostRelax(solver, n_post);
-         HYPRE_StructSMGSetPrintLevel(solver, print_level);
+         HYPRE_StructSMGSetPrintLevel(solver, solver_print_level);
          HYPRE_StructSMGSetLogging(solver, 1);
 #if 0//defined(HYPRE_USING_CUDA)
          HYPRE_StructSMGSetDeviceLevel(solver, device_level);
@@ -1612,7 +1624,7 @@ main( hypre_int argc,
          HYPRE_StructPFMGSetNumPostRelax(solver, n_post);
          HYPRE_StructPFMGSetSkipRelax(solver, skip);
          /*HYPRE_StructPFMGSetDxyz(solver, dxyz);*/
-         HYPRE_StructPFMGSetPrintLevel(solver, print_level);
+         HYPRE_StructPFMGSetPrintLevel(solver, solver_print_level);
          HYPRE_StructPFMGSetLogging(solver, 1);
 
 #if 0//defined(HYPRE_USING_CUDA)
@@ -1706,7 +1718,7 @@ main( hypre_int argc,
          HYPRE_PCGSetTol( (HYPRE_Solver)solver, tol );
          HYPRE_PCGSetTwoNorm( (HYPRE_Solver)solver, 1 );
          HYPRE_PCGSetRelChange( (HYPRE_Solver)solver, 0 );
-         HYPRE_PCGSetPrintLevel( (HYPRE_Solver)solver, krylov_print_level );
+         HYPRE_PCGSetPrintLevel( (HYPRE_Solver)solver, solver_print_level );
 
          if (solver_id == 10)
          {
@@ -1718,7 +1730,7 @@ main( hypre_int argc,
             HYPRE_StructSMGSetZeroGuess(precond);
             HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
             HYPRE_StructSMGSetNumPostRelax(precond, n_post);
-            HYPRE_StructSMGSetPrintLevel(precond, 0);
+            HYPRE_StructSMGSetPrintLevel(precond, prec_print_level);
             HYPRE_StructSMGSetLogging(precond, 0);
 
 #if 0//defined(HYPRE_USING_CUDA)
@@ -1748,7 +1760,7 @@ main( hypre_int argc,
             HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
             HYPRE_StructPFMGSetSkipRelax(precond, skip);
             /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
-            HYPRE_StructPFMGSetPrintLevel(precond, 0);
+            HYPRE_StructPFMGSetPrintLevel(precond, prec_print_level);
             HYPRE_StructPFMGSetLogging(precond, 0);
 #if 0//defined(HYPRE_USING_CUDA)
             HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
@@ -1850,7 +1862,7 @@ main( hypre_int argc,
             HYPRE_PCGSetTol( (HYPRE_Solver)solver, pcgTol );
             HYPRE_PCGSetTwoNorm( (HYPRE_Solver)solver, 1 );
             HYPRE_PCGSetRelChange( (HYPRE_Solver)solver, 0 );
-            HYPRE_PCGSetPrintLevel( (HYPRE_Solver)solver, 0 );
+            HYPRE_PCGSetPrintLevel( (HYPRE_Solver)solver, solver_print_level );
 
             if (solver_id == 10)
             {
@@ -1862,7 +1874,7 @@ main( hypre_int argc,
                HYPRE_StructSMGSetZeroGuess(precond);
                HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
                HYPRE_StructSMGSetNumPostRelax(precond, n_post);
-               HYPRE_StructSMGSetPrintLevel(precond, 0);
+               HYPRE_StructSMGSetPrintLevel(precond, prec_print_level);
                HYPRE_StructSMGSetLogging(precond, 0);
 #if 0 //defined(HYPRE_USING_CUDA)
                HYPRE_StructSMGSetDeviceLevel(precond, device_level);
@@ -1891,7 +1903,7 @@ main( hypre_int argc,
                HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
                HYPRE_StructPFMGSetSkipRelax(precond, skip);
                /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
-               HYPRE_StructPFMGSetPrintLevel(precond, 0);
+               HYPRE_StructPFMGSetPrintLevel(precond, prec_print_level);
                HYPRE_StructPFMGSetLogging(precond, 0);
 #if 0 //defined(HYPRE_USING_CUDA)
                HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
@@ -2084,7 +2096,7 @@ main( hypre_int argc,
                HYPRE_StructSMGSetZeroGuess(precond);
                HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
                HYPRE_StructSMGSetNumPostRelax(precond, n_post);
-               HYPRE_StructSMGSetPrintLevel(precond, 0);
+               HYPRE_StructSMGSetPrintLevel(precond, prec_print_level);
                HYPRE_StructSMGSetLogging(precond, 0);
 #if 0 //defined(HYPRE_USING_CUDA)
                HYPRE_StructSMGSetDeviceLevel(precond, device_level);
@@ -2113,7 +2125,7 @@ main( hypre_int argc,
                HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
                HYPRE_StructPFMGSetSkipRelax(precond, skip);
                /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
-               HYPRE_StructPFMGSetPrintLevel(precond, 0);
+               HYPRE_StructPFMGSetPrintLevel(precond, prec_print_level);
                HYPRE_StructPFMGSetLogging(precond, 0);
 #if 0 //defined(HYPRE_USING_CUDA)
                HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
@@ -2301,7 +2313,7 @@ main( hypre_int argc,
             HYPRE_StructHybridSetStopCrit(solver, 0);
             HYPRE_StructHybridSetKDim(solver, 10);
          }
-         HYPRE_StructHybridSetPrintLevel(solver, print_level);
+         HYPRE_StructHybridSetPrintLevel(solver, solver_print_level);
          HYPRE_StructHybridSetLogging(solver, 1);
          HYPRE_StructHybridSetSolverType(solver, solver_type);
          HYPRE_StructHybridSetRecomputeResidual(solver, recompute_res);
@@ -2316,7 +2328,7 @@ main( hypre_int argc,
             HYPRE_StructSMGSetZeroGuess(precond);
             HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
             HYPRE_StructSMGSetNumPostRelax(precond, n_post);
-            HYPRE_StructSMGSetPrintLevel(precond, 0);
+            HYPRE_StructSMGSetPrintLevel(precond, prec_print_level);
             HYPRE_StructSMGSetLogging(precond, 0);
 #if 0 //defined(HYPRE_USING_CUDA)
             HYPRE_StructSMGSetDeviceLevel(precond, device_level);
@@ -2345,7 +2357,7 @@ main( hypre_int argc,
             HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
             HYPRE_StructPFMGSetSkipRelax(precond, skip);
             /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
-            HYPRE_StructPFMGSetPrintLevel(precond, 0);
+            HYPRE_StructPFMGSetPrintLevel(precond, prec_print_level);
             HYPRE_StructPFMGSetLogging(precond, 0);
 #if 0 //defined(HYPRE_USING_CUDA)
             HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
@@ -2401,7 +2413,7 @@ main( hypre_int argc,
          HYPRE_GMRESSetMaxIter( (HYPRE_Solver)solver, max_iterations );
          HYPRE_GMRESSetTol( (HYPRE_Solver)solver, tol );
          HYPRE_GMRESSetRelChange( (HYPRE_Solver)solver, 0 );
-         HYPRE_GMRESSetPrintLevel( (HYPRE_Solver)solver, krylov_print_level );
+         HYPRE_GMRESSetPrintLevel( (HYPRE_Solver)solver, solver_print_level );
          HYPRE_GMRESSetLogging( (HYPRE_Solver)solver, 1 );
 
          if (solver_id == 30)
@@ -2414,7 +2426,7 @@ main( hypre_int argc,
             HYPRE_StructSMGSetZeroGuess(precond);
             HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
             HYPRE_StructSMGSetNumPostRelax(precond, n_post);
-            HYPRE_StructSMGSetPrintLevel(precond, 0);
+            HYPRE_StructSMGSetPrintLevel(precond, prec_print_level);
             HYPRE_StructSMGSetLogging(precond, 0);
 #if 0 //defined(HYPRE_USING_CUDA)
             HYPRE_StructSMGSetDeviceLevel(precond, device_level);
@@ -2443,7 +2455,7 @@ main( hypre_int argc,
             HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
             HYPRE_StructPFMGSetSkipRelax(precond, skip);
             /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
-            HYPRE_StructPFMGSetPrintLevel(precond, 0);
+            HYPRE_StructPFMGSetPrintLevel(precond, prec_print_level);
             HYPRE_StructPFMGSetLogging(precond, 0);
 #if 0 //defined(HYPRE_USING_CUDA)
             HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
@@ -2526,7 +2538,7 @@ main( hypre_int argc,
          HYPRE_StructBiCGSTABCreate(comm, &solver);
          HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver)solver, max_iterations );
          HYPRE_BiCGSTABSetTol( (HYPRE_Solver)solver, tol );
-         HYPRE_BiCGSTABSetPrintLevel( (HYPRE_Solver)solver, krylov_print_level );
+         HYPRE_BiCGSTABSetPrintLevel( (HYPRE_Solver)solver, solver_print_level );
          HYPRE_BiCGSTABSetLogging( (HYPRE_Solver)solver, 1 );
 
          if (solver_id == 40)
@@ -2539,7 +2551,7 @@ main( hypre_int argc,
             HYPRE_StructSMGSetZeroGuess(precond);
             HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
             HYPRE_StructSMGSetNumPostRelax(precond, n_post);
-            HYPRE_StructSMGSetPrintLevel(precond, 0);
+            HYPRE_StructSMGSetPrintLevel(precond, prec_print_level);
             HYPRE_StructSMGSetLogging(precond, 0);
 #if 0 //defined(HYPRE_USING_CUDA)
             HYPRE_StructSMGSetDeviceLevel(precond, device_level);
@@ -2568,7 +2580,7 @@ main( hypre_int argc,
             HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
             HYPRE_StructPFMGSetSkipRelax(precond, skip);
             /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
-            HYPRE_StructPFMGSetPrintLevel(precond, 0);
+            HYPRE_StructPFMGSetPrintLevel(precond, prec_print_level);
             HYPRE_StructPFMGSetLogging(precond, 0);
 #if 0 //defined(HYPRE_USING_CUDA)
             HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
@@ -2651,7 +2663,7 @@ main( hypre_int argc,
          HYPRE_LGMRESSetKDim( (HYPRE_Solver) solver, 5 );
          HYPRE_LGMRESSetMaxIter( (HYPRE_Solver)solver, max_iterations );
          HYPRE_LGMRESSetTol( (HYPRE_Solver)solver, tol );
-         HYPRE_LGMRESSetPrintLevel( (HYPRE_Solver)solver, krylov_print_level );
+         HYPRE_LGMRESSetPrintLevel( (HYPRE_Solver)solver, solver_print_level );
          HYPRE_LGMRESSetLogging( (HYPRE_Solver)solver, 1 );
 
          if (solver_id == 50)
@@ -2664,7 +2676,7 @@ main( hypre_int argc,
             HYPRE_StructSMGSetZeroGuess(precond);
             HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
             HYPRE_StructSMGSetNumPostRelax(precond, n_post);
-            HYPRE_StructSMGSetPrintLevel(precond, 0);
+            HYPRE_StructSMGSetPrintLevel(precond, prec_print_level);
             HYPRE_StructSMGSetLogging(precond, 0);
 #if 0 //defined(HYPRE_USING_CUDA)
             HYPRE_StructSMGSetDeviceLevel(precond, device_level);
@@ -2693,7 +2705,7 @@ main( hypre_int argc,
             HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
             HYPRE_StructPFMGSetSkipRelax(precond, skip);
             /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
-            HYPRE_StructPFMGSetPrintLevel(precond, 0);
+            HYPRE_StructPFMGSetPrintLevel(precond, prec_print_level);
             HYPRE_StructPFMGSetLogging(precond, 0);
 #if 0 //defined(HYPRE_USING_CUDA)
             HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
@@ -2750,7 +2762,7 @@ main( hypre_int argc,
          HYPRE_FlexGMRESSetKDim( (HYPRE_Solver) solver, 5 );
          HYPRE_FlexGMRESSetMaxIter( (HYPRE_Solver)solver, max_iterations );
          HYPRE_FlexGMRESSetTol( (HYPRE_Solver)solver, tol );
-         HYPRE_FlexGMRESSetPrintLevel( (HYPRE_Solver)solver, krylov_print_level );
+         HYPRE_FlexGMRESSetPrintLevel( (HYPRE_Solver)solver, solver_print_level );
          HYPRE_FlexGMRESSetLogging( (HYPRE_Solver)solver, 1 );
 
          if (solver_id == 60)
@@ -2763,7 +2775,7 @@ main( hypre_int argc,
             HYPRE_StructSMGSetZeroGuess(precond);
             HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
             HYPRE_StructSMGSetNumPostRelax(precond, n_post);
-            HYPRE_StructSMGSetPrintLevel(precond, 0);
+            HYPRE_StructSMGSetPrintLevel(precond, prec_print_level);
             HYPRE_StructSMGSetLogging(precond, 0);
 #if 0 //defined(HYPRE_USING_CUDA)
             HYPRE_StructSMGSetDeviceLevel(precond, device_level);
@@ -2792,7 +2804,7 @@ main( hypre_int argc,
             HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
             HYPRE_StructPFMGSetSkipRelax(precond, skip);
             /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
-            HYPRE_StructPFMGSetPrintLevel(precond, 0);
+            HYPRE_StructPFMGSetPrintLevel(precond, prec_print_level);
             HYPRE_StructPFMGSetLogging(precond, 0);
 #if 0 //defined(HYPRE_USING_CUDA)
             HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
