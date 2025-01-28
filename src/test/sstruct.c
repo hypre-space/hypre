@@ -3838,7 +3838,7 @@ main( hypre_int argc,
 
       if (myid == 0)
       {
-         hypre_printf("Global num dofs: %d\n\n", global_num_dofs);
+         hypre_printf("Global num dofs: %b\n\n", global_num_dofs);
       }
 
       /*-----------------------------------------------------------
