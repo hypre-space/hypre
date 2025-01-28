@@ -1202,17 +1202,34 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
       for (i = 0; i < num_recvs; i++)
       {
          comm_type = hypre_CommPkgRecvType(comm_pkg, i);
+
+         /* Assign the entries to the comm_type */
          hypre_CommTypeEntries(comm_type) = ct_entries;
-         ct_entries += hypre_CommTypeNumEntries(comm_type);
+         num_entries = hypre_CommTypeNumEntries(comm_type);
+         ct_entries += num_entries;
 
          qptr = (HYPRE_Int *) recv_buffers_mpi[i];
-         //num_entries = *qptr;
-         num_entries = hypre_CommTypeNumEntries(comm_type);
-         qptr ++;
-         boxnums = qptr;
-         qptr += num_entries;
-         boxes = (hypre_Box *) qptr;
-         //TODO boxnums
+         qptr++;
+
+         /* Set boxnums and boxes from MPI recv buffer */
+         if (!hypre_GetGpuAwareMPI())
+         {
+            boxnums = (HYPRE_Int*) qptr;
+            qptr += num_entries;
+            boxes = (hypre_Box*) qptr;
+         }
+         else
+         {
+            boxnums = hypre_TAlloc(HYPRE_Int, num_entries, HYPRE_MEMORY_HOST);
+            hypre_TMemcpy(boxnums, qptr, HYPRE_Int, num_entries,
+                          HYPRE_MEMORY_HOST, memory_location_mpi);
+            qptr += num_entries;
+            boxes = hypre_TAlloc(hypre_Box, num_entries, HYPRE_MEMORY_HOST);
+            hypre_TMemcpy(boxes, qptr, hypre_Box, num_entries,
+                          HYPRE_MEMORY_HOST, memory_location_mpi);
+         }
+
+         /* Set the entries for the comm_type */
          hypre_CommTypeSetEntries(comm_type, boxnums, boxes,
                                   hypre_CommPkgRecvStride(comm_pkg),
                                   hypre_CommPkgIdentityCoord(comm_pkg),
@@ -1220,6 +1237,13 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
                                   hypre_CommPkgIdentityOrder(comm_pkg),
                                   hypre_CommPkgRecvDataSpace(comm_pkg),
                                   hypre_CommPkgRecvDataOffsets(comm_pkg));
+
+         /* Free allocated memory if using GPU-aware MPI */
+         if (hypre_GetGpuAwareMPI())
+         {
+            hypre_TFree(boxnums, HYPRE_MEMORY_HOST);
+            hypre_TFree(boxes, HYPRE_MEMORY_HOST);
+         }
       }
    }
 
