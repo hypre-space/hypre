@@ -402,74 +402,78 @@ function(add_hypre_subdirectories DIRS)
   endforeach()
 endfunction()
 
-# A function to add each executable in the list to the build with the
-# correct flags, includes, and linkage.
-function(add_hypre_executables EXE_SRCS)
-  # Add one executable per cpp file
-  foreach(SRC_FILE IN LISTS ${EXE_SRCS})
-    get_filename_component(SRC_FILENAME ${SRC_FILE} NAME)
+# A function to add an executable to the build with the correct flags, includes, and linkage.
+function(add_hypre_executable SRC_FILE DEP_SRC_FILE)
+  get_filename_component(SRC_FILENAME ${SRC_FILE} NAME)
 
-    # If CUDA is enabled, tag source files to be compiled with nvcc.
-    if (HYPRE_USING_CUDA)
-      set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
-    endif ()
+  # If CUDA is enabled, tag source files to be compiled with nvcc.
+  if (HYPRE_USING_CUDA)
+    set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CUDA)
+  endif ()
 
-    # If HIP is enabled, tag source files to be compiled with hipcc/clang
-    if (HYPRE_USING_HIP)
-      set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE HIP)
-    endif ()
+  # If HIP is enabled, tag source files to be compiled with hipcc/clang
+  if (HYPRE_USING_HIP)
+    set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE HIP)
+  endif ()
 
-    # If SYCL is enabled, tag source files to be compiled with dpcpp.
-    if (HYPRE_USING_SYCL)
-      set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CXX)
-    endif ()
+  # If SYCL is enabled, tag source files to be compiled with dpcpp.
+  if (HYPRE_USING_SYCL)
+    set_source_files_properties(${SRC_FILENAME} PROPERTIES LANGUAGE CXX)
+  endif ()
 
-    # Get executable name
-    string(REPLACE ".c" "" EXE_NAME ${SRC_FILENAME})
+  # Get executable name
+  string(REPLACE ".c" "" EXE_NAME ${SRC_FILENAME})
 
-    # Add the executable
+  # Add the executable, including DEP_SRC_FILE if provided
+  if (DEP_SRC_FILE)
+    add_executable(${EXE_NAME} ${SRC_FILE} ${DEP_SRC_FILE})
+  else ()
     add_executable(${EXE_NAME} ${SRC_FILE})
+  endif ()
 
-    # Link with HYPRE and inherit its compile properties
-    target_link_libraries(${EXE_NAME} PUBLIC HYPRE)
+  # Link with HYPRE and inherit its compile properties
+  target_link_libraries(${EXE_NAME} PUBLIC HYPRE)
 
-    # For Unix systems, also link with math library
-    if (UNIX)
-      target_link_libraries(${EXE_NAME} PUBLIC m)
+  # For Unix systems, also link with math library
+  if (UNIX)
+    target_link_libraries(${EXE_NAME} PUBLIC m)
+  endif ()
+
+  # Explicitly specify the linker
+  if ((HYPRE_USING_CUDA AND NOT HYPRE_ENABLE_LTO) OR HYPRE_USING_HIP OR HYPRE_USING_SYCL)
+    set_target_properties(${EXE_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+  endif ()
+
+  # Turn on LTO if requested
+  if (HYPRE_ENABLE_LTO)
+    set_target_properties(${EXE_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
+  endif ()
+
+  # Inherit compile definitions and options from HYPRE target
+  get_target_property(HYPRE_COMPILE_OPTS HYPRE COMPILE_OPTIONS)
+  if (HYPRE_COMPILE_OPTS)
+    if (HYPRE_USING_CUDA OR HYPRE_USING_HIP OR HYPRE_USING_SYCL)
+      get_language_flags("${HYPRE_COMPILE_OPTS}" CXX_OPTS "CXX")
+      target_compile_options(${EXE_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${CXX_OPTS}>)
+    else ()
+      get_language_flags("${HYPRE_COMPILE_OPTS}" C_OPTS "C")
+      target_compile_options(${EXE_NAME} PRIVATE $<$<COMPILE_LANGUAGE:C>:${C_OPTS}>)
     endif ()
+  endif ()
 
-    # Explicitly specify the linker
-    if ((HYPRE_USING_CUDA AND NOT HYPRE_ENABLE_LTO) OR HYPRE_USING_HIP OR HYPRE_USING_SYCL)
-      set_target_properties(${EXE_NAME} PROPERTIES LINKER_LANGUAGE CXX)
-    endif ()
+  # Copy executable to original source directory
+  add_custom_command(TARGET ${EXE_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${EXE_NAME}> ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Copied ${EXE_NAME} to ${CMAKE_CURRENT_SOURCE_DIR}"
+  )
+endfunction()
 
-    # Turn on LTO if requested
-    if (HYPRE_ENABLE_LTO)
-      set_target_properties(${EXE_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
-    endif ()
-
-    # Inherit compile definitions and options from HYPRE target
-    get_target_property(HYPRE_COMPILE_OPTS HYPRE COMPILE_OPTIONS)
-    #message(STATUS "${EXE_NAME}: ${HYPRE_COMPILE_OPTS}")
-    if (HYPRE_COMPILE_OPTS)
-      if (HYPRE_USING_CUDA OR HYPRE_USING_HIP OR HYPRE_USING_SYCL)
-        get_language_flags("${HYPRE_COMPILE_OPTS}" CXX_OPTS "CXX")
-        target_compile_options(${EXE_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${CXX_OPTS}>)
-        #message(STATUS "Added CXX compile options: ${CXX_OPTS} to ${EXE_NAME}")
-      else ()
-        get_language_flags("${HYPRE_COMPILE_OPTS}" C_OPTS "C")
-        target_compile_options(${EXE_NAME} PRIVATE $<$<COMPILE_LANGUAGE:C>:${C_OPTS}>)
-        #message(STATUS "Added C compile options: ${C_OPTS} to ${EXE_NAME}")
-      endif ()
-    endif ()
-
-    # Copy executable to original source directory
-    add_custom_command(TARGET ${EXE_NAME} POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${EXE_NAME}> ${CMAKE_CURRENT_SOURCE_DIR}
-      COMMENT "Copied ${EXE_NAME} to ${CMAKE_CURRENT_SOURCE_DIR}"
-    )
-  endforeach (SRC_FILE)
-endfunction ()
+# Function to process a list of executable source files
+function(add_hypre_executables EXE_SRCS)
+  foreach(SRC_FILE IN LISTS EXE_SRCS)
+    add_hypre_executable(${SRC_FILE} "")
+  endforeach()
+endfunction()
 
 # Function to add a tags target if etags is found
 function(add_hypre_target_tags)
