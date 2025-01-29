@@ -79,10 +79,8 @@ hypre_StructMatvecSetTranspose( void *matvec_vdata,
 }
 
 /*--------------------------------------------------------------------------
- *
  * If needed, resize x and set up the compute package.  Assume that the same
  * matrix is passed into setup and compute, but the vector x may change.
- *
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -138,8 +136,11 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
    hypre_StructVectorComputeDataSpace(x, xfstride, num_ghost, &data_space);
    hypre_TFree(num_ghost, HYPRE_MEMORY_HOST);
 
-   /* RDF: Is a resize is needed (is data_space contained in DataSpace(x))?
+   /* RDF: Is a resize needed (is data_space not contained in DataSpace(x))?
     * This may require modifying data_space before the resize. */
+
+   /* If needed, resize */
+   hypre_StructVectorResize(x, data_space);
 
    /* This computes the communication pattern for the new x data_space */
    hypre_CreateComputeInfo(xgrid, xfstride, stencil, &compute_info);
@@ -148,16 +149,6 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
    hypre_CommInfoRefine(hypre_ComputeInfoCommInfo(compute_info), NULL, xfstride);
    hypre_StructVectorMapCommInfo(x, hypre_ComputeInfoCommInfo(compute_info));
    hypre_ComputePkgCreate(compute_info, data_space, 1, grid, &compute_pkg);
-
-   /* RDF NOTES - Revisit this
-    *
-    * - Assume that the same matrix is passed into matvec setup and compute, but
-    *   note that the vector may change.
-    *
-    */
-
-   /* If needed, resize */
-   hypre_StructVectorResize(x, data_space);
 
    /* Save compute_pkg */
    if ((matvec_data -> compute_pkg) != NULL)

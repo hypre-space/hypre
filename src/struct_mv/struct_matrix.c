@@ -814,8 +814,6 @@ hypre_StructMatrixResize( hypre_StructMatrix *matrix,
    data = NULL;
    if (old_data != NULL)
    {
-      HYPRE_Int  *old_ids = hypre_StructGridIDs(hypre_StructMatrixGrid(matrix));
-      HYPRE_Int  *ids = hypre_StructGridIDs(hypre_StructMatrixGrid(matrix));
       HYPRE_Int   nval = hypre_StructMatrixNumValues(matrix);
 
       data = hypre_CTAlloc(HYPRE_Complex, data_size, memory_location);
@@ -827,8 +825,8 @@ hypre_StructMatrixResize( hypre_StructMatrix *matrix,
       }
 
       /* Copy the data */
-      hypre_StructDataCopy(old_data + stencil_size, old_data_space, old_ids,
-                           data + stencil_size, data_space, ids, ndim, nval);
+      hypre_StructDataCopy(old_data + stencil_size, old_data_space,
+                           data + stencil_size, data_space, ndim, nval);
       if (hypre_StructMatrixDataAlloced(matrix))
       {
          hypre_TFree(old_data, memory_location);
@@ -881,8 +879,6 @@ hypre_StructMatrixRestore( hypre_StructMatrix *matrix )
 
    if (data_space != NULL)
    {
-      HYPRE_Int  *old_ids = hypre_StructGridIDs(hypre_StructMatrixGrid(matrix));
-      HYPRE_Int  *ids = hypre_StructGridIDs(hypre_StructMatrixGrid(matrix));
       HYPRE_Int   ndim = hypre_StructMatrixNDim(matrix);
       HYPRE_Int   nval = hypre_StructMatrixNumValues(matrix);
       HYPRE_Int   i;
@@ -897,8 +893,8 @@ hypre_StructMatrixRestore( hypre_StructMatrix *matrix )
       {
          data[i] = old_data[i];
       }
-      hypre_StructDataCopy(old_data + stencil_size, old_data_space, old_ids,
-                           data + stencil_size, data_space, ids, ndim, nval);
+      hypre_StructDataCopy(old_data + stencil_size, old_data_space,
+                           data + stencil_size, data_space, ndim, nval);
       hypre_TFree(old_data, memory_location);
 
       /* Reset certain fields to enable the Resize call below */

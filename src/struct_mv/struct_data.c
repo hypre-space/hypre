@@ -21,15 +21,15 @@
 HYPRE_Int
 hypre_StructDataCopy( HYPRE_Complex   *fr_data,        /* from */
                       hypre_BoxArray  *fr_data_space,
-                      HYPRE_Int       *fr_ids,
                       HYPRE_Complex   *to_data,        /* to */
                       hypre_BoxArray  *to_data_space,
-                      HYPRE_Int       *to_ids,
                       HYPRE_Int        ndim,
                       HYPRE_Int        nval )
 {
    HYPRE_Int       fr_nboxes = hypre_BoxArraySize(fr_data_space);
    HYPRE_Int       to_nboxes = hypre_BoxArraySize(to_data_space);
+   HYPRE_Int      *fr_ids    = hypre_BoxArrayIDs(fr_data_space);
+   HYPRE_Int      *to_ids    = hypre_BoxArrayIDs(to_data_space);
    hypre_Box      *fr_data_box, *to_data_box;
    HYPRE_Int       fr_data_off,  to_data_off;
    HYPRE_Int       fr_data_vol,  to_data_vol;

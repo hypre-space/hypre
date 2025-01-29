@@ -361,9 +361,13 @@ HYPRE_Int hypre_StructPartialCopy ( hypre_StructVector *x, hypre_StructVector *y
                                     hypre_BoxArrayArray *array_boxes );
 
 /* struct_data.c */
-HYPRE_Int hypre_StructDataCopy ( HYPRE_Complex *fr_data, hypre_BoxArray *fr_data_space,
-                                 HYPRE_Int *fr_ids, HYPRE_Complex *to_data, hypre_BoxArray *to_data_space, HYPRE_Int *to_ids,
-                                 HYPRE_Int ndim, HYPRE_Int nval );
+HYPRE_Int
+hypre_StructDataCopy( HYPRE_Complex   *fr_data,        /* from */
+                      hypre_BoxArray  *fr_data_space,
+                      HYPRE_Complex   *to_data,        /* to */
+                      hypre_BoxArray  *to_data_space,
+                      HYPRE_Int        ndim,
+                      HYPRE_Int        nval );
 HYPRE_Int hypre_StructNumGhostFromStencil ( hypre_StructStencil *stencil,
                                             HYPRE_Int **num_ghost_ptr );
 

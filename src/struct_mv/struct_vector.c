@@ -322,6 +322,15 @@ hypre_StructVectorComputeDataSpace( hypre_StructVector *vector,
       hypre_StructVectorMapDataBox(vector, data_box);
    }
 
+#if 0
+   /* RDF: Write loop to merge data spaces */
+   if (hypre_StructVectorMemoryMode(vector) == 2)
+   {
+      hypre_BoxGrowByBox(hypre_BoxArrayBox(fdata_space, b),
+                         hypre_BoxArrayBox(data_space, b));
+   }
+#endif
+
    *data_space_ptr = data_space;
 
    return hypre_error_flag;
@@ -398,10 +407,7 @@ hypre_StructVectorResize( hypre_StructVector *vector,
       {
          /* At this point we have either called or mimiced Rebase(), so the
           * saved grid corresponds to the old data */
-         HYPRE_Int  *old_ids = hypre_StructGridIDs(hypre_StructVectorSaveGrid(vector));
-         HYPRE_Int  *ids     = hypre_StructGridIDs(hypre_StructVectorGrid(vector));
-
-         hypre_StructDataCopy(old_data, old_data_space, old_ids, data, data_space, ids, ndim, 1);
+         hypre_StructDataCopy(old_data, old_data_space, data, data_space, ndim, 1);
       }
 
       /* Free up some things */
@@ -453,8 +459,6 @@ hypre_StructVectorRestore( hypre_StructVector *vector )
 
    if (data_space != NULL)
    {
-      HYPRE_Int  *old_ids = hypre_StructGridIDs(old_grid);
-      HYPRE_Int  *ids = hypre_StructGridIDs(grid);
       HYPRE_Int   ndim = hypre_StructVectorNDim(vector);
 
       /* Move old_data to data */
@@ -462,7 +466,7 @@ hypre_StructVectorRestore( hypre_StructVector *vector )
       {
          data = hypre_CTAlloc(HYPRE_Complex, data_size, memory_location);
       }
-      hypre_StructDataCopy(old_data, old_data_space, old_ids, data, data_space, ids, ndim, 1);
+      hypre_StructDataCopy(old_data, old_data_space, data, data_space, ndim, 1);
       hypre_TFree(old_data, memory_location);
 
       /* Reset certain fields to enable the Resize call below */
