@@ -4371,3 +4371,19 @@ hypre_IJMatrixAddToValuesOMPParCSR( hypre_IJMatrix       *matrix,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_IJMatrixMigrateParCSR
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IJMatrixMigrateParCSR(hypre_IJMatrix       *matrix,
+                            HYPRE_MemoryLocation  memory_location)
+{
+   hypre_ParCSRMatrix *par_matrix = (hypre_ParCSRMatrix *) hypre_IJMatrixObject(matrix);
+
+   /* Migrate the ParCSR matrix */
+   hypre_ParCSRMatrixMigrate(par_matrix, memory_location);
+
+   return hypre_error_flag;
+}
