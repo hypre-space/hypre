@@ -23,7 +23,6 @@
 typedef struct
 {
    hypre_StructMatrix  *A;
-   hypre_StructVector  *x;
    hypre_ComputePkg    *compute_pkg;
    HYPRE_Int            transpose;
 
@@ -57,7 +56,6 @@ hypre_StructMatvecDestroy( void *matvec_vdata )
    if (matvec_data)
    {
       hypre_StructMatrixDestroy(matvec_data -> A);
-      hypre_StructVectorDestroy(matvec_data -> x);
       hypre_ComputePkgDestroy(matvec_data -> compute_pkg);
       hypre_TFree(matvec_data -> stentries, HYPRE_MEMORY_HOST);
       hypre_TFree(matvec_data, HYPRE_MEMORY_HOST);
@@ -81,14 +79,17 @@ hypre_StructMatvecSetTranspose( void *matvec_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * Set up the compute package
+ *
+ * If needed, resize x and set up the compute package.  Assume that the same
+ * matrix is passed into setup and compute, but the vector x may change.
+ *
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data )
+hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
+                          hypre_StructVector      *x )
 {
    hypre_StructMatrix      *A = (matvec_data -> A);
-   hypre_StructVector      *x = (matvec_data -> x);
    HYPRE_Int                ndim = hypre_StructMatrixNDim(A);
 
    hypre_StructGrid        *grid, *xgrid;
@@ -150,11 +151,8 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data )
 
    /* RDF NOTES - Revisit this
     *
-    * - Assume that the same vector is passed into the matvec setup and compute,
-    *   but note that its base grid might change
-    *
-    * - rebase needs to be done every time to allow for possible restore
-    * - data_space needs to be computed every time to allow memory mode > 0
+    * - Assume that the same matrix is passed into matvec setup and compute, but
+    *   note that the vector may change.
     *
     */
 
@@ -192,7 +190,6 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
 
    /* This is needed in MatvecResize() */
    (matvec_data -> A) = hypre_StructMatrixRef(A);
-   (matvec_data -> x) = hypre_StructVectorRef(x);
 
    /* Make sure that the transpose coefficients are stored in A (note that the
     * resizing will provide no option to restore A to its previous state) */
@@ -232,7 +229,7 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
    (matvec_data -> nentries) = stencil_size;
 
    /* If needed, resize and set up the compute package */
-   hypre_StructMatvecResize(matvec_data);
+   hypre_StructMatvecResize(matvec_data, x);
 
    /* Restore the original grid and data layout (depending on VectorMemoryMode) */
    hypre_StructVectorRestore(x);
@@ -400,7 +397,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
     *-----------------------------------------------------------------------*/
 
    /* If needed, resize and set up the compute package */
-   hypre_StructMatvecResize(matvec_data);
+   hypre_StructMatvecResize(matvec_data, x);
    compute_pkg = (matvec_data -> compute_pkg);
 
    stencil       = hypre_StructMatrixStencil(A);
