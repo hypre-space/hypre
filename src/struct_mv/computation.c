@@ -98,6 +98,8 @@ hypre_ComputeInfoDestroy( hypre_ComputeInfo  *compute_info )
  * communications and computations.  The default is no overlap.
  *
  * Note: This routine assumes that the grid boxes do not overlap.
+ *
+ * RDF NOTE: HYPRE_OVERLAP_COMM_COMP does not yet support arbitrary stride.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -139,6 +141,8 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
    hypre_CreateCommInfoFromStencil(grid, stride, stencil, &comm_info);
 
 #ifdef HYPRE_OVERLAP_COMM_COMP
+
+   /* RDF NOTE: This ifdef code has not yet been ported to support non-unit stride */
 
    /*------------------------------------------------------
     * Compute border info
@@ -250,6 +254,7 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
       hypre_BoxArraySetSize(cbox_array, 1);
       cbox = hypre_BoxArrayBox(cbox_array, 0);
       hypre_CopyBox(hypre_BoxArrayBox(boxes, i), cbox);
+      hypre_CoarsenBox(cbox, NULL, stride);
    }
 
 #endif
@@ -289,12 +294,9 @@ hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
    hypre_CommInfoDestroy(hypre_ComputeInfoCommInfo(compute_info));
    hypre_ComputePkgCommPkg(compute_pkg) = comm_pkg;
 
-   hypre_ComputePkgIndtBoxes(compute_pkg) =
-      hypre_ComputeInfoIndtBoxes(compute_info);
-   hypre_ComputePkgDeptBoxes(compute_pkg) =
-      hypre_ComputeInfoDeptBoxes(compute_info);
-   hypre_CopyIndex(hypre_ComputeInfoStride(compute_info),
-                   hypre_ComputePkgStride(compute_pkg));
+   hypre_ComputePkgIndtBoxes(compute_pkg) = hypre_ComputeInfoIndtBoxes(compute_info);
+   hypre_ComputePkgDeptBoxes(compute_pkg) = hypre_ComputeInfoDeptBoxes(compute_info);
+   hypre_CopyIndex(hypre_ComputeInfoStride(compute_info), hypre_ComputePkgStride(compute_pkg));
 
    hypre_StructGridRef(grid, &hypre_ComputePkgGrid(compute_pkg));
    hypre_ComputePkgNumValues(compute_pkg) = num_values;

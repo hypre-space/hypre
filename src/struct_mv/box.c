@@ -220,6 +220,29 @@ hypre_IndexesEqual( hypre_Index  index1,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_IndexesGreater( hypre_Index  index1,
+                      hypre_Index  index2,
+                      HYPRE_Int    ndim )
+{
+   HYPRE_Int d, greater;
+
+   greater = 1;
+   for (d = 0; d < ndim; d++)
+   {
+      if ( !(hypre_IndexD(index1, d) > hypre_IndexD(index2, d)) )
+      {
+         greater = 0;
+         break;
+      }
+   }
+
+   return greater;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_IndexPrint( FILE        *file,
                   HYPRE_Int    ndim,
                   hypre_Index  index )

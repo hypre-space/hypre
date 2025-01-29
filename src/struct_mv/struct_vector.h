@@ -23,7 +23,7 @@
  * same as in the base grid, even though nboxes may be smaller.
  *
  * NOTE/TODO: The 'data_alloced=2' and 'save_data' aspects of the vector are
- * only needed to support InitizeData(). Consider removing this feature,
+ * only needed to support InitializeData(). Consider removing this feature,
  * especially since it creates an issue with Forget().
  *--------------------------------------------------------------------------*/
 
@@ -38,25 +38,26 @@ typedef struct hypre_StructVector_struct
    HYPRE_Int            *boxnums;                     /* Grid boxnums in base grid */
 
    HYPRE_MemoryLocation  memory_location;             /* memory location of data */
+   HYPRE_Int             memory_mode;                 /* memory management mode */
    hypre_BoxArray       *data_space;
    HYPRE_Complex        *data;                        /* Pointer to vector data on device*/
    HYPRE_Int             data_alloced;                /* TODO (VPM): change this to owns_data */
    HYPRE_Int             data_size;                   /* Size of vector data */
-   HYPRE_Int            *data_indices;                /* num-boxes array of indices into
-                                                         the data array.  data_indices[b]
-                                                         is the starting index of vector
-                                                         data corresponding to box b. */
+   HYPRE_Int            *data_indices;                /* Array of indices into the data array.
+                                                         data_indices[b] is the starting index of
+                                                         data for boxnum b. */
    HYPRE_Int             num_ghost[2 * HYPRE_MAXDIM]; /* Num ghost layers in each direction */
    HYPRE_Int             bghost_not_clear;            /* Are boundary ghosts clear? */
    HYPRE_BigInt          global_size;                 /* Total number coefficients */
    HYPRE_Int             ref_count;
 
-   /* Information needed to Restore() after Reindex() and Resize() */
+   /* Information needed to Restore() after Rebase() and Resize() */
    hypre_StructGrid     *save_grid;
    hypre_Index           save_stride;
    HYPRE_Complex        *save_data;                   /* Only needed to support InitializeData() */
    hypre_BoxArray       *save_data_space;
    HYPRE_Int             save_data_size;
+
 } hypre_StructVector;
 
 /*--------------------------------------------------------------------------
@@ -72,6 +73,7 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorBoxnums(vector)        ((vector) -> boxnums)
 #define hypre_StructVectorBoxnum(vector, i)      ((vector) -> boxnums[i])
 #define hypre_StructVectorMemoryLocation(vector) ((vector) -> memory_location)
+#define hypre_StructVectorMemoryMode(vector)     ((vector) -> memory_mode)
 #define hypre_StructVectorDataSpace(vector)      ((vector) -> data_space)
 #define hypre_StructVectorData(vector)           ((vector) -> data)
 #define hypre_StructVectorDataAlloced(vector)    ((vector) -> data_alloced)

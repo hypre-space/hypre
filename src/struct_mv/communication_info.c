@@ -216,10 +216,8 @@ hypre_CommInfoProjectSend( hypre_CommInfo  *comm_info,
                            hypre_Index      index,
                            hypre_Index      stride )
 {
-   hypre_ProjectBoxArrayArray(hypre_CommInfoSendBoxes(comm_info),
-                              index, stride);
-   hypre_ProjectBoxArrayArray(hypre_CommInfoSendRBoxes(comm_info),
-                              index, stride);
+   hypre_ProjectBoxArrayArray(hypre_CommInfoSendBoxes(comm_info), index, stride);
+   hypre_ProjectBoxArrayArray(hypre_CommInfoSendRBoxes(comm_info), index, stride);
    hypre_CopyIndex(stride, hypre_CommInfoSendStride(comm_info));
 
    return hypre_error_flag;
@@ -233,11 +231,93 @@ hypre_CommInfoProjectRecv( hypre_CommInfo  *comm_info,
                            hypre_Index      index,
                            hypre_Index      stride )
 {
-   hypre_ProjectBoxArrayArray(hypre_CommInfoRecvBoxes(comm_info),
-                              index, stride);
-   hypre_ProjectBoxArrayArray(hypre_CommInfoRecvRBoxes(comm_info),
-                              index, stride);
+   hypre_ProjectBoxArrayArray(hypre_CommInfoRecvBoxes(comm_info), index, stride);
+   hypre_ProjectBoxArrayArray(hypre_CommInfoRecvRBoxes(comm_info), index, stride);
    hypre_CopyIndex(stride, hypre_CommInfoRecvStride(comm_info));
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CommInfoCoarsenSend( hypre_CommInfo     *comm_info,
+                           hypre_Index         index,
+                           hypre_Index         stride )
+{
+   hypre_CoarsenBoxArrayArray(hypre_CommInfoSendBoxes(comm_info), index, stride);
+   hypre_CoarsenBoxArrayArray(hypre_CommInfoSendRBoxes(comm_info), index, stride);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CommInfoCoarsenRecv( hypre_CommInfo     *comm_info,
+                           hypre_Index         index,
+                           hypre_Index         stride )
+{
+   hypre_CoarsenBoxArrayArray(hypre_CommInfoRecvBoxes(comm_info), index, stride);
+   hypre_CoarsenBoxArrayArray(hypre_CommInfoRecvRBoxes(comm_info), index, stride);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CommInfoRefineSend( hypre_CommInfo     *comm_info,
+                          hypre_Index         index,
+                          hypre_Index         stride )
+{
+   hypre_RefineBoxArrayArray(hypre_CommInfoSendBoxes(comm_info), index, stride);
+   hypre_RefineBoxArrayArray(hypre_CommInfoSendRBoxes(comm_info), index, stride);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CommInfoRefineRecv( hypre_CommInfo     *comm_info,
+                          hypre_Index         index,
+                          hypre_Index         stride )
+{
+   hypre_RefineBoxArrayArray(hypre_CommInfoRecvBoxes(comm_info), index, stride);
+   hypre_RefineBoxArrayArray(hypre_CommInfoRecvRBoxes(comm_info), index, stride);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CommInfoCoarsen( hypre_CommInfo     *comm_info,
+                       hypre_Index         index,
+                       hypre_Index         stride )
+{
+   hypre_CommInfoCoarsenSend(comm_info, index, stride);
+   hypre_CommInfoCoarsenRecv(comm_info, index, stride);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CommInfoRefine( hypre_CommInfo     *comm_info,
+                      hypre_Index         index,
+                      hypre_Index         stride )
+{
+   hypre_CommInfoRefineSend(comm_info, index, stride);
+   hypre_CommInfoRefineRecv(comm_info, index, stride);
 
    return hypre_error_flag;
 }
@@ -526,12 +606,12 @@ hypre_CommInfoClone( hypre_CommInfo   *comm_info,
  *
  * Before looping over the neighbors in the above algorithm, do a preliminary
  * sweep through the neighbors to select a subset of neighbors to do the
- * intersections with.  To select the subset, compute a so-called "distance
- * index" and check the corresponding entry in the so-called comm-stencil to
- * decide whether or not to use the box.
+ * intersections with.  To select the subset, compute a "distance index" and
+ * check the corresponding entry in the comm-stencil (described next) to decide
+ * whether or not to use the box.
  *
- * The comm-stencil consists of 3x3x3 array in 3D that is built from the stencil
- * as follows:
+ * The comm-stencil consists of a 3x3x3 array in 3D that is built from the
+ * stencil as follows:
  *
  *   // assume for simplicity that i,j,k are -1, 0, or 1
  *   for each stencil entry (i,j,k)

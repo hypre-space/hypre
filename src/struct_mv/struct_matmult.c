@@ -796,6 +796,11 @@ hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
       hypre_CommStencilCreateNumGhost(comm_stencils[m], &num_ghost);
       /* RDF TODO: Make sure num_ghost is at least as large as before, so that
        * when we call Restore() below, we don't lose any data */
+      /* RDF TODO: Does the following potentially add too many ghost points?
+       * Consider the multiplication of M=P*Ac.  The domain_is_coarse variable
+       * is defined based on the result matrix M.  The loop below seems to add
+       * (dom_stride-1) ghost layers to all matrices, including Ac, but that
+       * matrix lives on a coarse index space. */
       if (domain_is_coarse)
       {
          /* Increase num_ghost (on both sides) to ensure that data spaces are
@@ -817,12 +822,12 @@ hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
    /* Compute initial mask data space */
    if (need_mask)
    {
-      HYPRE_Int  *num_ghost;
+      HYPRE_Int   *num_ghost;
 
       HYPRE_StructVectorCreate(comm, grid, &mask);
       HYPRE_StructVectorSetStride(mask, fstride); /* same stride as fine data-map stride */
       hypre_CommStencilCreateNumGhost(comm_stencils[nmatrices], &num_ghost);
-      hypre_StructVectorComputeDataSpace(mask, num_ghost, &data_spaces[nmatrices]);
+      hypre_StructVectorComputeDataSpace(mask, NULL, num_ghost, &data_spaces[nmatrices]);
       hypre_TFree(num_ghost, HYPRE_MEMORY_HOST);
       (mmdata -> mask) = mask;
    }
