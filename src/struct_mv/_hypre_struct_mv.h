@@ -834,6 +834,7 @@ typedef struct hypre_StructGrid_struct
    HYPRE_Int            num_ghost[2 * HYPRE_MAXDIM]; /* ghost layer size */
 
    hypre_BoxManager    *boxman;
+
 } hypre_StructGrid;
 
 /*--------------------------------------------------------------------------
@@ -1924,6 +1925,9 @@ HYPRE_Int hypre_BoxStrideVolume ( hypre_Box *box, hypre_Index stride );
 HYPRE_Int hypre_BoxPartialVolume ( hypre_Box *box, hypre_Index partial_volume);
 HYPRE_Int hypre_BoxNnodes ( hypre_Box *box );
 HYPRE_Int hypre_IndexInBox ( hypre_Index index, hypre_Box *box );
+HYPRE_Int
+hypre_BoxInBox( hypre_Box  *box1,
+                hypre_Box  *box2 );
 HYPRE_Int hypre_BoxMaxSize ( hypre_Box *box );
 HYPRE_Int hypre_BoxGetSize ( hypre_Box *box, hypre_Index size );
 HYPRE_Int hypre_BoxGetStrideSize ( hypre_Box *box, hypre_Index stride, hypre_Index size );
@@ -1954,6 +1958,12 @@ HYPRE_Int hypre_DeleteMultipleBoxes ( hypre_BoxArray *box_array, HYPRE_Int *indi
                                       HYPRE_Int num );
 HYPRE_Int hypre_AppendBoxArray ( hypre_BoxArray *box_array_0, hypre_BoxArray *box_array_1 );
 HYPRE_Int hypre_BoxArrayVolume( hypre_BoxArray *box_array );
+HYPRE_Int
+hypre_BoxArrayInBoxArray( hypre_BoxArray *box_array1,
+                          hypre_BoxArray *box_array2 );
+HYPRE_Int
+hypre_BoxArraysEqual( hypre_BoxArray *box_array1,
+                      hypre_BoxArray *box_array2 );
 hypre_BoxArrayArray *hypre_BoxArrayArrayCreate ( HYPRE_Int size, HYPRE_Int ndim );
 HYPRE_Int hypre_BoxArrayArrayDestroy ( hypre_BoxArrayArray *box_array_array );
 hypre_BoxArrayArray *hypre_BoxArrayArrayClone ( hypre_BoxArrayArray *box_array_array );
@@ -2516,7 +2526,12 @@ hypre_StructVectorComputeDataSpace( hypre_StructVector *vector,
                                     hypre_IndexRef      stride,
                                     HYPRE_Int          *num_ghost,
                                     hypre_BoxArray    **data_space_ptr );
-HYPRE_Int hypre_StructVectorResize ( hypre_StructVector *vector, hypre_BoxArray     *data_space );
+HYPRE_Int
+hypre_StructVectorNeedResize( hypre_StructVector *vector,
+                              hypre_BoxArray     *data_space );
+HYPRE_Int
+hypre_StructVectorResize( hypre_StructVector *vector,
+                          hypre_BoxArray     *data_space );
 HYPRE_Int hypre_StructVectorRestore ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorForget ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorInitializeShell ( hypre_StructVector *vector );

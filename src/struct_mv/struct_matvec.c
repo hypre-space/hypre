@@ -24,6 +24,7 @@ typedef struct
 {
    hypre_StructMatrix  *A;
    hypre_ComputePkg    *compute_pkg;
+   hypre_BoxArray      *data_space;
    HYPRE_Int            transpose;
 
    HYPRE_Int            nentries;
@@ -57,6 +58,7 @@ hypre_StructMatvecDestroy( void *matvec_vdata )
    {
       hypre_StructMatrixDestroy(matvec_data -> A);
       hypre_ComputePkgDestroy(matvec_data -> compute_pkg);
+      hypre_BoxArrayDestroy(matvec_data -> data_space);
       hypre_TFree(matvec_data -> stentries, HYPRE_MEMORY_HOST);
       hypre_TFree(matvec_data, HYPRE_MEMORY_HOST);
    }
@@ -98,7 +100,7 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
    HYPRE_Int               *num_ghost;
    hypre_IndexRef           dom_stride, xstride, fstride;
    hypre_Index              xfstride;
-   HYPRE_Int                d;
+   HYPRE_Int                d, need_resize, need_computepkg;
 
    /* Ensure that the base grid for x is at least as fine as the one for A */
    grid = hypre_StructMatrixGrid(A);
@@ -136,26 +138,64 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
    hypre_StructVectorComputeDataSpace(x, xfstride, num_ghost, &data_space);
    hypre_TFree(num_ghost, HYPRE_MEMORY_HOST);
 
-   /* RDF: Is a resize needed (is data_space not contained in DataSpace(x))?
-    * This may require modifying data_space before the resize. */
+   /* Determine if a resize is needed */
+   need_resize = hypre_StructVectorNeedResize(x, data_space);
 
-   /* If needed, resize */
-   hypre_StructVectorResize(x, data_space);
-
-   /* This computes the communication pattern for the new x data_space */
-   hypre_CreateComputeInfo(xgrid, xfstride, stencil, &compute_info);
-   /* First refine commm_info to put it on the index space of xgrid, then map */
-   /* NOTE: Compute boxes will be appropriately projected in MatvecCompute */
-   hypre_CommInfoRefine(hypre_ComputeInfoCommInfo(compute_info), NULL, xfstride);
-   hypre_StructVectorMapCommInfo(x, hypre_ComputeInfoCommInfo(compute_info));
-   hypre_ComputePkgCreate(compute_info, data_space, 1, grid, &compute_pkg);
-
-   /* Save compute_pkg */
-   if ((matvec_data -> compute_pkg) != NULL)
+   /* Determine if a compute package needs to be created */
+   need_computepkg = 0;
+   if ((matvec_data -> compute_pkg) == NULL)
    {
-      hypre_ComputePkgDestroy(matvec_data -> compute_pkg);
+      /* compute package hasn't been created yet */
+      need_computepkg = 1;
    }
-   (matvec_data -> compute_pkg) = compute_pkg;
+   else if (need_resize)
+   {
+      /* a resize was needed */
+      need_computepkg = 1;
+   }
+   else if ( !hypre_BoxArraysEqual(data_space, (matvec_data -> data_space)) )
+   {
+      /* the data space has changed */
+      need_computepkg = 1;
+   }
+
+   /* Resize if needed */
+   if (need_resize)
+   {
+      hypre_StructVectorResize(x, data_space);
+   }
+   else
+   {
+      hypre_BoxArrayDestroy(data_space);
+      hypre_StructVectorRestore(x);
+   }
+
+   /* Create a compute package if needed */
+   if (need_computepkg)
+   {
+      /* Note: It's important to use the data_space in x in case there is no resize */
+      data_space = hypre_StructVectorDataSpace(x);
+
+      /* This computes the communication pattern for the new x data_space */
+      hypre_CreateComputeInfo(xgrid, xfstride, stencil, &compute_info);
+      /* First refine commm_info to put it on the index space of xgrid, then map */
+      /* NOTE: Compute boxes will be appropriately projected in MatvecCompute */
+      hypre_CommInfoRefine(hypre_ComputeInfoCommInfo(compute_info), NULL, xfstride);
+      hypre_StructVectorMapCommInfo(x, hypre_ComputeInfoCommInfo(compute_info));
+      hypre_ComputePkgCreate(compute_info, data_space, 1, grid, &compute_pkg);
+
+      /* Save compute_pkg */
+      if ((matvec_data -> compute_pkg) != NULL)
+      {
+         hypre_ComputePkgDestroy(matvec_data -> compute_pkg);
+      }
+      if ((matvec_data -> data_space) != NULL)
+      {
+         hypre_BoxArrayDestroy(matvec_data -> data_space);
+      }
+      (matvec_data -> compute_pkg) = compute_pkg;
+      (matvec_data -> data_space) = hypre_BoxArrayClone(data_space);
+   }
 
    HYPRE_ANNOTATE_FUNC_END;
 

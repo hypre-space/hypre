@@ -493,6 +493,43 @@ hypre_IndexInBox( hypre_Index   index,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_BoxInBox( hypre_Box  *box1,
+                hypre_Box  *box2 )
+{
+   HYPRE_Int inbox = 0;
+
+   if ( hypre_IndexInBox(hypre_BoxIMin(box1), box2) &&
+        hypre_IndexInBox(hypre_BoxIMax(box1), box2) )
+   {
+      inbox = 1;
+   }
+
+   return inbox;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoxesEqual( hypre_Box  *box1,
+                  hypre_Box  *box2 )
+{
+   HYPRE_Int ndim  = hypre_BoxNDim(box1);
+   HYPRE_Int equal = 0;
+
+   if ( hypre_IndexesEqual(hypre_BoxIMin(box1), hypre_BoxIMin(box2), ndim) &&
+        hypre_IndexesEqual(hypre_BoxIMax(box1), hypre_BoxIMax(box2), ndim) )
+   {
+      equal = 1;
+   }
+
+   return equal;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_BoxMaxSize( hypre_Box   *box)
 {
    HYPRE_Int  d, ndim = hypre_BoxNDim(box);
@@ -1528,6 +1565,64 @@ hypre_BoxArrayVolume( hypre_BoxArray *box_array )
    }
 
    return volume;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoxArrayInBoxArray( hypre_BoxArray *box_array1,
+                          hypre_BoxArray *box_array2 )
+{
+   HYPRE_Int  i, inboxarray = 1;
+
+   if (hypre_BoxArraySize(box_array1) != hypre_BoxArraySize(box_array1))
+   {
+      inboxarray = 0;
+   }
+   else
+   {
+      hypre_ForBoxI(i, box_array1)
+      {
+         if ( !hypre_BoxInBox(hypre_BoxArrayBox(box_array1, i),
+                              hypre_BoxArrayBox(box_array2, i)) )
+         {
+            inboxarray = 0;
+            break;
+         }
+      }
+   }
+
+   return inboxarray;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoxArraysEqual( hypre_BoxArray *box_array1,
+                      hypre_BoxArray *box_array2 )
+{
+   HYPRE_Int  i, equal = 1;
+
+   if (hypre_BoxArraySize(box_array1) != hypre_BoxArraySize(box_array1))
+   {
+      equal = 0;
+   }
+   else
+   {
+      hypre_ForBoxI(i, box_array1)
+      {
+         if ( !hypre_BoxesEqual(hypre_BoxArrayBox(box_array1, i),
+                                hypre_BoxArrayBox(box_array2, i)) )
+         {
+            equal = 0;
+            break;
+         }
+      }
+   }
+
+   return equal;
 }
 
 /*==========================================================================

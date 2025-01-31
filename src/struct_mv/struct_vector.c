@@ -291,7 +291,7 @@ hypre_StructVectorComputeDataSpace( hypre_StructVector *vector,
 {
    HYPRE_Int          ndim      = hypre_StructVectorNDim(vector);
    hypre_StructGrid  *grid      = hypre_StructVectorGrid(vector);
-   hypre_BoxArray    *data_space;
+   hypre_BoxArray    *data_space, *cdata_space;
    hypre_Box         *data_box;
    HYPRE_Int          i, d;
 
@@ -322,18 +322,68 @@ hypre_StructVectorComputeDataSpace( hypre_StructVector *vector,
       hypre_StructVectorMapDataBox(vector, data_box);
    }
 
-#if 0
-   /* RDF: Write loop to merge data spaces */
-   if (hypre_StructVectorMemoryMode(vector) == 2)
+   /* Assume that the index space for the vector base grid (grid) is at least as
+    * fine as that of the saved base grid (call it sgrid).  Rebase ensures this.
+    * In other words, since the vector's grid is given by both (grid, stride)
+    * and (sgrid, sstride), we assume that stride >= sstride.  As a consequence,
+    * we can assume that all box ids in cdata_space (the current data space) are
+    * also in data_space, and that cdata_space has at most as many boxes as
+    * data_space. */
+   cdata_space = hypre_StructVectorDataSpace(vector);
+   if ((hypre_StructVectorMemoryMode(vector) == 2) && (cdata_space != NULL))
    {
-      hypre_BoxGrowByBox(hypre_BoxArrayBox(fdata_space, b),
-                         hypre_BoxArrayBox(data_space, b));
+      HYPRE_Int  *cids = hypre_BoxArrayIDs(cdata_space);
+      HYPRE_Int  *ids  = hypre_BoxArrayIDs(data_space);
+      HYPRE_Int   ci;
+
+      i = 0;
+      hypre_ForBoxI(ci, cdata_space)
+      {
+         while (ids[i] != cids[ci])
+         {
+            i++;
+         }
+         hypre_BoxGrowByBox(hypre_BoxArrayBox(data_space, i),
+                            hypre_BoxArrayBox(cdata_space, ci));
+      }
    }
-#endif
 
    *data_space_ptr = data_space;
 
    return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Check to see if a resize is needed
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorNeedResize( hypre_StructVector *vector,
+                              hypre_BoxArray     *data_space )
+{
+   hypre_BoxArray  *cdata_space = hypre_StructVectorDataSpace(vector);
+   hypre_IndexRef   stride      = hypre_StructVectorStride(vector);
+   hypre_IndexRef   sstride     = hypre_StructVectorSaveStride(vector);
+   HYPRE_Int        ndim        = hypre_StructVectorNDim(vector);
+   HYPRE_Int        need_resize = 0;
+
+   if (cdata_space == NULL)
+   {
+      /* resize if no current data space (cdata_space) */
+      need_resize = 1;
+   }
+   else if ( !hypre_IndexesEqual(stride, sstride, ndim) )
+   {
+      /* resize if stride and saved stride are different */
+      need_resize = 1;
+   }
+   else if ( !hypre_BoxArrayInBoxArray(data_space, cdata_space) )
+   {
+      /* resize if data_space is not contained in cdata_space */
+      need_resize = 1;
+   }
+
+   return need_resize;
 }
 
 /*--------------------------------------------------------------------------
@@ -493,7 +543,7 @@ hypre_StructVectorRestore( hypre_StructVector *vector )
       /* Set the data pointer */
       hypre_StructVectorData(vector) = data;
    }
-   else if (old_grid != NULL)
+   else if ((old_grid != NULL) && (grid != NULL))
    {
       /* Only a Rebase was called */
       hypre_StructVectorSaveGrid(vector) = NULL;
