@@ -2879,6 +2879,21 @@ main( hypre_int argc,
          arg_index++;
          log_level = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-pout") == 0 )
+      {
+         arg_index++;
+         prec_print_level = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-sout") == 0 )
+      {
+         arg_index++;
+         solver_print_level = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ll") == 0 )
+      {
+         arg_index++;
+         log_level = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-print") == 0 )
       {
          arg_index++;
