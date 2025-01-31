@@ -1601,6 +1601,9 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixSaveDataSpace(matrix)       ((matrix) -> save_data_space)
 #define hypre_StructMatrixSaveDataSize(matrix)        ((matrix) -> save_data_size)
 
+#define hypre_StructMatrixBoxIDs(matrix) \
+hypre_BoxArrayIDs(hypre_StructMatrixDataSpace(matrix))
+
 #define hypre_StructMatrixNDim(matrix) \
 hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))
 
@@ -1707,6 +1710,9 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorSaveData(vector)       ((vector) -> save_data)
 #define hypre_StructVectorSaveDataSpace(vector)  ((vector) -> save_data_space)
 #define hypre_StructVectorSaveDataSize(vector)   ((vector) -> save_data_size)
+
+#define hypre_StructVectorBoxIDs(vector) \
+hypre_BoxArrayIDs(hypre_StructVectorDataSpace(vector))
 
 #define hypre_StructVectorNDim(vector) \
 hypre_StructGridNDim(hypre_StructVectorGrid(vector))

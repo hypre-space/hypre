@@ -23,6 +23,7 @@
 typedef struct
 {
    hypre_StructMatrix  *A;
+   hypre_Index          xfstride;
    hypre_ComputePkg    *compute_pkg;
    hypre_BoxArray      *data_space;
    HYPRE_Int            transpose;
@@ -89,7 +90,8 @@ HYPRE_Int
 hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
                           hypre_StructVector      *x )
 {
-   hypre_StructMatrix      *A = (matvec_data -> A);
+   hypre_StructMatrix      *A        = (matvec_data -> A);
+   hypre_IndexRef           xfstride = (matvec_data -> xfstride);
    HYPRE_Int                ndim = hypre_StructMatrixNDim(A);
 
    hypre_StructGrid        *grid, *xgrid;
@@ -99,7 +101,6 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
    hypre_BoxArray          *data_space;
    HYPRE_Int               *num_ghost;
    hypre_IndexRef           dom_stride, xstride, fstride;
-   hypre_Index              xfstride;
    HYPRE_Int                d, need_resize, need_computepkg;
 
    /* Ensure that the base grid for x is at least as fine as the one for A */
@@ -315,6 +316,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 {
    hypre_StructMatvecData  *matvec_data = (hypre_StructMatvecData  *)matvec_vdata;
 
+   hypre_IndexRef           xfstride    = (matvec_data -> xfstride);
    HYPRE_Int                transpose   = (matvec_data -> transpose);
    HYPRE_Int                nentries    = (matvec_data -> nentries);
    HYPRE_Int               *stentries   = (matvec_data -> stentries);
@@ -510,17 +512,23 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       hypre_CopyToIndex(stride, ndim, ydstride);
       hypre_MapToCoarseIndex(ydstride, NULL, ran_stride, ndim);
 
-      yb = 0;
+      xb = 0;
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Computation-Ax");
       for (i = 0; i < ran_nboxes; i++)
       {
+         HYPRE_Int   *Aids = hypre_StructMatrixBoxIDs(A);
+         HYPRE_Int   *xids = hypre_StructVectorBoxIDs(x);
          hypre_Index  Adstart;
          hypre_Index  xdstart;
          hypre_Index  ydstart;
 
          /* The corresponding box IDs for the following boxnums should match */
          Ab = ran_boxnums[i];
-         xb = Ab;  /* Rebase ensures that A and x have the same grid boxes */ /* ZZZ */
+         /* Rebase ensures that all box ids in A are also in x */
+         while (xids[xb] != Aids[Ab])
+         {
+            xb++;
+         }
          yb = hypre_StructVectorBoxnum(y, i);
 
          compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, Ab);
@@ -571,11 +579,13 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                      hypre_SubtractIndexes(start, stencil_shape[ssi], ndim, Adstart);
                      hypre_StructMatrixMapDataIndex(A, Adstart);
                      hypre_SubtractIndexes(start, stencil_shape[ssi], ndim, xdstart);
+                     hypre_MapToFineIndex(xdstart, NULL, xfstride, ndim);
                      hypre_StructVectorMapDataIndex(x, xdstart);
                   }
                   else /* Set Adstart above and xdstart here */
                   {
                      hypre_AddIndexes(start, stencil_shape[ssi], ndim, xdstart);
+                     hypre_MapToFineIndex(xdstart, NULL, xfstride, ndim);
                      hypre_StructVectorMapDataIndex(x, xdstart);
                   }
 

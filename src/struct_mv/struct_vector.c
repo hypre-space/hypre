@@ -396,6 +396,9 @@ hypre_StructVectorNeedResize( hypre_StructVector *vector,
  *
  * This routine serves to both "size" and a "re-size" a vector, so it can also
  * be used to set the initial data space information.
+ *
+ * RDF NOTE: I'm not sure if this works correctly when DataAlloced = 0 because
+ * of the check for it in the second 'if' below.  Look at this later.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -482,6 +485,12 @@ hypre_StructVectorResize( hypre_StructVector *vector,
    hypre_StructVectorDataSpace(vector)   = data_space;
    hypre_StructVectorDataSize(vector)    = data_size;
    hypre_StructVectorDataIndices(vector) = data_indices;
+
+   /* For (MemoryMode > 0), don't restore */
+   if (hypre_StructVectorMemoryMode(vector) > 0)
+   {
+      hypre_StructVectorForget(vector);
+   }
 
    HYPRE_ANNOTATE_FUNC_END;
 

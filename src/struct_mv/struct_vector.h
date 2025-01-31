@@ -89,6 +89,9 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorSaveDataSpace(vector)  ((vector) -> save_data_space)
 #define hypre_StructVectorSaveDataSize(vector)   ((vector) -> save_data_size)
 
+#define hypre_StructVectorBoxIDs(vector) \
+hypre_BoxArrayIDs(hypre_StructVectorDataSpace(vector))
+
 #define hypre_StructVectorNDim(vector) \
 hypre_StructGridNDim(hypre_StructVectorGrid(vector))
 
