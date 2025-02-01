@@ -76,6 +76,10 @@ HYPRE_Int
 hypre_IndexesGreater( hypre_Index  index1,
                       hypre_Index  index2,
                       HYPRE_Int    ndim );
+HYPRE_Int
+hypre_IndexesGreaterEqual( hypre_Index  index1,
+                           hypre_Index  index2,
+                           HYPRE_Int    ndim );
 HYPRE_Int hypre_IndexPrint ( FILE *file, HYPRE_Int ndim, hypre_Index index );
 HYPRE_Int hypre_IndexRead ( FILE *file, HYPRE_Int ndim, hypre_Index index );
 hypre_Box *hypre_BoxCreate ( HYPRE_Int ndim );

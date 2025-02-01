@@ -263,7 +263,7 @@ hypre_StructVectorRebase( hypre_StructVector *vector,
    if (hypre_StructVectorMemoryMode(vector) == 2)
    {
       /* If stride is not greater than the current stride, keep the current base grid */
-      if ( !hypre_IndexesGreater(stride, old_stride, hypre_StructVectorNDim(vector)) )
+      if ( !hypre_IndexesGreaterEqual(stride, old_stride, hypre_StructVectorNDim(vector)) )
       {
          return hypre_error_flag;
       }

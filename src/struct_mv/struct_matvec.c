@@ -508,6 +508,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       hypre_CopyToIndex(stride, ndim, Adstride);
       hypre_StructMatrixMapDataStride(A, Adstride);
       hypre_CopyToIndex(stride, ndim, xdstride);
+      hypre_MapToFineIndex(xdstride, NULL, xfstride, ndim);
       hypre_StructVectorMapDataStride(x, xdstride);
       hypre_CopyToIndex(stride, ndim, ydstride);
       hypre_MapToCoarseIndex(ydstride, NULL, ran_stride, ndim);
