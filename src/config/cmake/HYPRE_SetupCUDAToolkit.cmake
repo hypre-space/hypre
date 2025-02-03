@@ -206,6 +206,7 @@ function(find_and_add_cuda_library LIB_NAME HYPRE_ENABLE_VAR)
 endfunction()
 
 # Handle CUDA libraries
+list(APPEND CUDA_LIBS CUDA::cudart) # Add cudart first since other CUDA libraries may depend on it
 find_and_add_cuda_library(cusparse HYPRE_ENABLE_CUSPARSE)
 find_and_add_cuda_library(curand HYPRE_ENABLE_CURAND)
 find_and_add_cuda_library(cublas HYPRE_ENABLE_CUBLAS)
