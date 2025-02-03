@@ -38,6 +38,18 @@ HYPRE_StructVectorDestroy( HYPRE_StructVector struct_vector )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructVectorSetResizeBehavior
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructVectorSetResizeBehavior(HYPRE_StructVector vector,
+                                    HYPRE_Int          resize_behavior)
+{
+   hypre_StructVectorResizeBehavior(vector) = resize_behavior;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 /* RDF: Need a good user interface for setting the grid. */
