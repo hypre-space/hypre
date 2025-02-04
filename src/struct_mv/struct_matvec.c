@@ -532,7 +532,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
          }
          yb = hypre_StructVectorBoxnum(y, i);
 
-         compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, Ab);
+         compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, xb);
 
          A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), Ab);
          x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), xb);
