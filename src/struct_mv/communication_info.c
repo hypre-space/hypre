@@ -766,18 +766,15 @@ hypre_CreateCommInfo( hypre_StructGrid   *bgrid,
       box = hypre_BoxArrayBox(local_boxes, i);
       box_id = i;
 
-      /* check for an empty grid box (coarsened bgrid box) */
+      /* grow_box - grow the local box according to the stencil */
       hypre_CopyBox(box, grow_box);
-      hypre_CoarsenBox(grow_box, NULL, stride);
+      hypre_ProjectBox(grow_box, NULL, stride);  /* ensure box extents line up with the grid */
+      /* check for an empty grid box (coarsened or projected bgrid box) */
       if (hypre_BoxVolume(grow_box) == 0)
       {
          /* skip the rest of this loop - no communication needed for this box */
          continue;
       }
-
-      /* grow_box - grow the local box according to the stencil */
-      hypre_CopyBox(box, grow_box);
-      hypre_ProjectBox(grow_box, NULL, stride);  /* ensure box extents line up with the grid */
       for (d = 0; d < ndim; d++)
       {
          /* adjust growth by stride */
@@ -849,13 +846,20 @@ hypre_CreateCommInfo( hypre_StructGrid   *bgrid,
             }
 
             hypre_BoxManEntryGetExtents(entry, ilower, iupper);
-            hypre_BoxSetExtents(hypre_BoxArrayBox(neighbor_boxes, neighbor_count),
-                                ilower, iupper);
+            hood_box = hypre_BoxArrayBox(neighbor_boxes, neighbor_count);
+            hypre_BoxSetExtents(hood_box, ilower, iupper);
             /* shift the periodic boxes (needs to be the opposite of above) */
             if (k)
             {
-               hypre_BoxShiftNeg(
-                  hypre_BoxArrayBox(neighbor_boxes, neighbor_count), pshift);
+               hypre_BoxShiftNeg(hood_box, pshift);
+            }
+
+            hypre_ProjectBox(hood_box, NULL, stride);  /* ensure box extents line up with the grid */
+            /* check for an empty hood_box */
+            if (hypre_BoxVolume(hood_box) == 0)
+            {
+               /* don't keep this hood_box - no communication needed with it */
+               continue;
             }
 
             neighbor_procs[neighbor_count] = proc_id;
