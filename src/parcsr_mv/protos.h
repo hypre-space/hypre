@@ -237,12 +237,20 @@ HYPRE_Int hypre_BooleanGenerateDiagAndOffd ( hypre_CSRBooleanMatrix *A,
 /* par_csr_communication.c */
 hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate ( HYPRE_Int job, hypre_ParCSRCommPkg *comm_pkg,
                                                        void *send_data, void *recv_data );
+hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate_core ( HYPRE_Int persistent,
+                                                            HYPRE_Int job,
+                                                            hypre_ParCSRCommPkg *comm_pkg,
+                                                            HYPRE_MemoryLocation send_memory_location,
+                                                            void *send_data_in,
+                                                            HYPRE_MemoryLocation recv_memory_location,
+                                                            void *recv_data_in );
 hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate_v2 ( HYPRE_Int job,
                                                           hypre_ParCSRCommPkg *comm_pkg,
                                                           HYPRE_MemoryLocation send_memory_location,
                                                           void *send_data_in,
                                                           HYPRE_MemoryLocation recv_memory_location,
                                                           void *recv_data_in );
+HYPRE_Int hypre_ParCSRCommHandleWait(hypre_ParCSRCommHandle *comm_handle);
 HYPRE_Int hypre_ParCSRCommHandleDestroy ( hypre_ParCSRCommHandle *comm_handle );
 void hypre_ParCSRCommPkgCreate_core ( MPI_Comm comm, HYPRE_BigInt *col_map_offd,
                                       HYPRE_BigInt first_col_diag, HYPRE_BigInt *col_starts, HYPRE_Int num_cols_diag,
@@ -373,15 +381,18 @@ HYPRE_Int hypre_ParCSRMatrixDropSmallEntriesDevice( hypre_ParCSRMatrix *A, HYPRE
 HYPRE_Int hypre_ParCSRCommPkgCreateMatrixE( hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int local_ncols );
 
 #ifdef HYPRE_USING_PERSISTENT_COMM
-hypre_ParCSRPersistentCommHandle* hypre_ParCSRPersistentCommHandleCreate(HYPRE_Int job,
-                                                                         hypre_ParCSRCommPkg *comm_pkg);
-hypre_ParCSRPersistentCommHandle* hypre_ParCSRCommPkgGetPersistentCommHandle(HYPRE_Int job,
-                                                                             hypre_ParCSRCommPkg *comm_pkg);
-void hypre_ParCSRPersistentCommHandleDestroy(hypre_ParCSRPersistentCommHandle *comm_handle);
-void hypre_ParCSRPersistentCommHandleStart(hypre_ParCSRPersistentCommHandle *comm_handle,
-                                           HYPRE_MemoryLocation send_memory_location, void *send_data);
-void hypre_ParCSRPersistentCommHandleWait(hypre_ParCSRPersistentCommHandle *comm_handle,
-                                          HYPRE_MemoryLocation recv_memory_location, void *recv_data);
+hypre_ParCSRCommHandle* hypre_ParCSRPersistentCommHandleCreate(HYPRE_Int job,
+                                                               hypre_ParCSRCommPkg *comm_pkg,
+                                                               HYPRE_MemoryLocation send_memory_location,
+                                                               HYPRE_MemoryLocation recv_memory_location);
+hypre_ParCSRCommHandle* hypre_ParCSRCommPkgGetPersistentCommHandle(HYPRE_Int job,
+                                                                   hypre_ParCSRCommPkg *comm_pkg,
+                                                                   HYPRE_MemoryLocation send_memory_location,
+                                                                   HYPRE_MemoryLocation recv_memory_location);
+#define hypre_ParCSRPersistentCommHandleWait hypre_ParCSRCommHandleWait
+#define hypre_ParCSRPersistentCommHandleDestroy hypre_ParCSRCommHandleDestroy
+
+HYPRE_Int hypre_ParCSRPersistentCommHandleStart(hypre_ParCSRCommHandle *comm_handle);
 #endif
 
 HYPRE_Int hypre_ParcsrGetExternalRowsInit( hypre_ParCSRMatrix *A, HYPRE_Int indices_len,

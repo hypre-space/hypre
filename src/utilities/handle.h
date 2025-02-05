@@ -31,6 +31,8 @@ typedef struct hypre_DeviceData hypre_DeviceData;
 typedef void (*GPUMallocFunc)(void **, size_t);
 typedef void (*GPUMfreeFunc)(void *);
 
+#define HYPRE_MAX_NUM_COMM_KEYS 8
+
 typedef struct
 {
    HYPRE_Int              log_level;
@@ -44,10 +46,14 @@ typedef struct
    HYPRE_Int              struct_comm_recv_buffer_size;
    HYPRE_Int              struct_comm_send_buffer_size;
 
-   /* GPU MPI */
+   /* MPI */
+   HYPRE_Int              comm_keys[HYPRE_MAX_NUM_COMM_KEYS];
+
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int              use_gpu_aware_mpi;
 #endif
+
+   hypre_MemoryLocation   mpi_host_buffer_location;
 
 #if defined(HYPRE_USING_GPU)
    hypre_DeviceData      *device_data;
@@ -92,7 +98,17 @@ typedef struct
 
 #define hypre_HandleDeviceData(hypre_handle)                     ((hypre_handle) -> device_data)
 #define hypre_HandleDeviceGSMethod(hypre_handle)                 ((hypre_handle) -> device_gs_method)
+
+#define hypre_HandleMPICommKeys(hypre_handle)                    ((hypre_handle) -> comm_keys)
+#define hypre_HandleMPICommKeySendLocation(hypre_handle)         ((hypre_handle) -> comm_keys[0])
+#define hypre_HandleMPICommKeyRecvLocation(hypre_handle)         ((hypre_handle) -> comm_keys[1])
+#define hypre_HandleMPICommKeySendBufferLocation(hypre_handle)   ((hypre_handle) -> comm_keys[2])
+#define hypre_HandleMPICommKeyRecvBufferLocation(hypre_handle)   ((hypre_handle) -> comm_keys[3])
+#define hypre_HandleMPICommKeySendBuffer(hypre_handle)           ((hypre_handle) -> comm_keys[4])
+#define hypre_HandleMPICommKeyRecvBuffer(hypre_handle)           ((hypre_handle) -> comm_keys[5])
+
 #define hypre_HandleUseGpuAwareMPI(hypre_handle)                 ((hypre_handle) -> use_gpu_aware_mpi)
+#define hypre_HandleMPIHostBufferLocation(hypre_handle)          ((hypre_handle) -> mpi_host_buffer_location)
 
 #define hypre_HandleCurandGenerator(hypre_handle)                hypre_DeviceDataCurandGenerator(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCublasHandle(hypre_handle)                   hypre_DeviceDataCublasHandle(hypre_HandleDeviceData(hypre_handle))
