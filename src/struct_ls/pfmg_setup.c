@@ -87,6 +87,11 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
+   /* RDF: For now, set memory mode to 0 if using R/B GS relaxation */
+   if (relax_type > 1)
+   {
+      v_memory_mode = 0;
+   }
    /*-----------------------------------------------------
     * Set up coarse grids
     *-----------------------------------------------------*/
