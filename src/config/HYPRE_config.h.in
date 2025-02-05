@@ -97,8 +97,8 @@
 /* Define to 1 if the routine MPI_Comm_f2c is found */
 #undef HYPRE_HAVE_MPI_COMM_F2C
 
-/* Define to 1 if hopscotch hashing */
-#undef HYPRE_HOPSCOTCH
+/* Define to 1 if using hopscotch hashing */
+#undef HYPRE_USING_HOPSCOTCH
 
 /* Define to 1 for HP platforms */
 #undef HYPRE_HPPA
@@ -290,7 +290,7 @@
 #undef HYPRE_USING_UNIFIED_MEMORY
 
 /* Define to 1 if using GPU aware MPI */
-#undef HYPRE_WITH_GPU_AWARE_MPI
+#undef HYPRE_USING_GPU_AWARE_MPI
 
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
