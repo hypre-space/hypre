@@ -131,19 +131,21 @@ typedef struct hypre_CommPkg_struct
 
 typedef struct hypre_CommHandle_struct
 {
-   hypre_CommPkg     *comm_pkg;
-   HYPRE_Complex     *send_data;
-   HYPRE_Complex     *recv_data;
+   hypre_CommPkg        *comm_pkg;
+   HYPRE_Complex        *send_data;
+   HYPRE_Complex        *recv_data;
 
-   HYPRE_Int          num_requests;
-   hypre_MPI_Request *requests;
-   hypre_MPI_Status  *status;
+   HYPRE_Int             num_requests;
+   hypre_MPI_Request    *requests;
+   hypre_MPI_Status     *status;
 
-   HYPRE_Complex    **send_buffers;
-   HYPRE_Complex    **recv_buffers;
+   HYPRE_Complex       **send_buffers;
+   HYPRE_Complex       **recv_buffers;
 
-   HYPRE_Complex    **send_buffers_mpi;
-   HYPRE_Complex    **recv_buffers_mpi;
+   void                 *send_buffers_mpi;
+   void                 *recv_buffers_mpi;
+   hypre_MemoryLocation  send_buffers_mpi_location;
+   hypre_MemoryLocation  recv_buffers_mpi_location;
 
    /* set = 0, add = 1 */
    HYPRE_Int          action;
@@ -245,16 +247,18 @@ typedef struct hypre_CommHandle_struct
  * Accessor macros: hypre_CommHandle
  *--------------------------------------------------------------------------*/
 
-#define hypre_CommHandleCommPkg(comm_handle)              (comm_handle -> comm_pkg)
-#define hypre_CommHandleSendData(comm_handle)             (comm_handle -> send_data)
-#define hypre_CommHandleRecvData(comm_handle)             (comm_handle -> recv_data)
-#define hypre_CommHandleNumRequests(comm_handle)          (comm_handle -> num_requests)
-#define hypre_CommHandleRequests(comm_handle)             (comm_handle -> requests)
-#define hypre_CommHandleStatus(comm_handle)               (comm_handle -> status)
-#define hypre_CommHandleSendBuffers(comm_handle)          (comm_handle -> send_buffers)
-#define hypre_CommHandleRecvBuffers(comm_handle)          (comm_handle -> recv_buffers)
-#define hypre_CommHandleAction(comm_handle)               (comm_handle -> action)
-#define hypre_CommHandleSendBuffersMPI(comm_handle)       (comm_handle -> send_buffers_mpi)
-#define hypre_CommHandleRecvBuffersMPI(comm_handle)       (comm_handle -> recv_buffers_mpi)
+#define hypre_CommHandleCommPkg(comm_handle)                 (comm_handle -> comm_pkg)
+#define hypre_CommHandleSendData(comm_handle)                (comm_handle -> send_data)
+#define hypre_CommHandleRecvData(comm_handle)                (comm_handle -> recv_data)
+#define hypre_CommHandleNumRequests(comm_handle)             (comm_handle -> num_requests)
+#define hypre_CommHandleRequests(comm_handle)                (comm_handle -> requests)
+#define hypre_CommHandleStatus(comm_handle)                  (comm_handle -> status)
+#define hypre_CommHandleSendBuffers(comm_handle)             (comm_handle -> send_buffers)
+#define hypre_CommHandleRecvBuffers(comm_handle)             (comm_handle -> recv_buffers)
+#define hypre_CommHandleAction(comm_handle)                  (comm_handle -> action)
+#define hypre_CommHandleSendBuffersMPI(comm_handle)          (comm_handle -> send_buffers_mpi)
+#define hypre_CommHandleRecvBuffersMPI(comm_handle)          (comm_handle -> recv_buffers_mpi)
+#define hypre_CommHandleSendBuffersMPILocation(comm_handle)  (comm_handle -> send_buffers_mpi_location)
+#define hypre_CommHandleRecvBuffersMPILocation(comm_handle)  (comm_handle -> recv_buffers_mpi_location)
 
 #endif

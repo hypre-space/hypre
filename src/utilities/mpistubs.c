@@ -1534,11 +1534,14 @@ hypre_MPI_Irecv_Multiple( void               *buf,
                           hypre_MPI_Request  *requests,
                           hypre_MPI_Request  *extra_request)
 {
-   *extra_request = hypre_MPI_REQUEST_NULL;
-
    if (!num)
    {
       return hypre_error_flag;
+   }
+
+   if (extra_request)
+   {
+      *extra_request = hypre_MPI_REQUEST_NULL;
    }
 
    HYPRE_Int data_size, i;
@@ -1660,11 +1663,14 @@ hypre_MPI_Recv_init_Multiple( void               *buf,
                               hypre_MPI_Request  *requests,
                               hypre_MPI_Request  *extra_request)
 {
-   *extra_request = hypre_MPI_REQUEST_NULL;
-
    if (!num)
    {
       return hypre_error_flag;
+   }
+
+   if (extra_request)
+   {
+      *extra_request = hypre_MPI_REQUEST_NULL;
    }
 
    HYPRE_Int data_size, i;

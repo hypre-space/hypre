@@ -33,7 +33,6 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
-cat handle.h                   >> $INTERNAL_HEADER
 cat state.h                    >> $INTERNAL_HEADER
 cat general.h                  >> $INTERNAL_HEADER
 cat base.h                     >> $INTERNAL_HEADER
@@ -43,6 +42,7 @@ cat printf.h                   >> $INTERNAL_HEADER
 cat error.h                    >> $INTERNAL_HEADER
 cat smp.h                      >> $INTERNAL_HEADER
 cat memory.h                   >> $INTERNAL_HEADER
+cat handle.h                   >> $INTERNAL_HEADER
 cat memory_tracker.h           >> $INTERNAL_HEADER
 cat mpistubs.h                 >> $INTERNAL_HEADER
 cat omp_device.h               >> $INTERNAL_HEADER
