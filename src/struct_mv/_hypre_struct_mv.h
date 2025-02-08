@@ -944,10 +944,12 @@ typedef struct hypre_CommHandle_struct
    void                 *recv_buffers_mpi;
    hypre_MemoryLocation  send_buffers_mpi_location;
    hypre_MemoryLocation  recv_buffers_mpi_location;
+   HYPRE_Int             num_extra_requests;
+   hypre_MPI_Request    *extra_requests;
 
    /* set = 0, add = 1 */
-   HYPRE_Int          action;
-
+   HYPRE_Int             action;
+   MPI_Comm              comm;
 } hypre_CommHandle;
 
 /*--------------------------------------------------------------------------
@@ -1058,6 +1060,10 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommHandleRecvBuffersMPI(comm_handle)          (comm_handle -> recv_buffers_mpi)
 #define hypre_CommHandleSendBuffersMPILocation(comm_handle)  (comm_handle -> send_buffers_mpi_location)
 #define hypre_CommHandleRecvBuffersMPILocation(comm_handle)  (comm_handle -> recv_buffers_mpi_location)
+#define hypre_CommHandleNumExtraRequests(comm_handle)        (comm_handle -> num_extra_requests)
+#define hypre_CommHandleExtraRequests(comm_handle)           (comm_handle -> extra_requests)
+#define hypre_CommHandleExtraRequest(comm_handle, i)         (comm_handle -> extra_requests[i])
+#define hypre_CommHandleComm(comm_handle)                    (comm_handle -> comm)
 
 #endif
 /******************************************************************************

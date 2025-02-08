@@ -813,7 +813,6 @@ hypre_CommHandleAllocateBuffers( HYPRE_MemoryLocation    send_memory_location,
                                  HYPRE_Int               size_of_elem,
                                  hypre_CommHandle       *comm_handle )
 {
-   hypre_CommPkg *comm_pkg = hypre_CommHandleCommPkg(comm_handle);
    hypre_MemoryLocation send_memory_alocation = hypre_GetActualMemLocation(send_memory_location);
    hypre_MemoryLocation recv_memory_alocation = hypre_GetActualMemLocation(recv_memory_location);
 
@@ -833,15 +832,14 @@ hypre_CommHandleAllocateBuffers( HYPRE_MemoryLocation    send_memory_location,
                                                                   location);
    }
 
-   hypre_MPICommSetSendLocation(hypre_CommPkgComm(comm_pkg), send_memory_alocation);
-   hypre_MPICommSetSendBuffer(hypre_CommPkgComm(comm_pkg), hypre_CommHandleSendBuffersMPI(comm_handle));
-   hypre_MPICommSetSendBufferLocation(hypre_CommPkgComm(comm_pkg),
-                                      hypre_CommHandleSendBuffersMPILocation(comm_handle));
+   MPI_Comm comm = hypre_CommHandleComm(comm_handle);
+   hypre_MPICommSetSendLocation(comm, send_memory_alocation);
+   hypre_MPICommSetSendBuffer(comm, hypre_CommHandleSendBuffersMPI(comm_handle));
+   hypre_MPICommSetSendBufferLocation(comm, hypre_CommHandleSendBuffersMPILocation(comm_handle));
 
-   hypre_MPICommSetRecvLocation(hypre_CommPkgComm(comm_pkg), recv_memory_alocation);
-   hypre_MPICommSetRecvBuffer(hypre_CommPkgComm(comm_pkg), hypre_CommHandleRecvBuffersMPI(comm_handle));
-   hypre_MPICommSetRecvBufferLocation(hypre_CommPkgComm(comm_pkg),
-                                      hypre_CommHandleRecvBuffersMPILocation(comm_handle));
+   hypre_MPICommSetRecvLocation(comm, recv_memory_alocation);
+   hypre_MPICommSetRecvBuffer(comm, hypre_CommHandleRecvBuffersMPI(comm_handle));
+   hypre_MPICommSetRecvBufferLocation(comm, hypre_CommHandleRecvBuffersMPILocation(comm_handle));
 
    return hypre_error_flag;
 }
@@ -871,7 +869,8 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
    HYPRE_Int            num_values = hypre_CommPkgNumValues(comm_pkg);
    HYPRE_Int            num_sends  = hypre_CommPkgNumSends(comm_pkg);
    HYPRE_Int            num_recvs  = hypre_CommPkgNumRecvs(comm_pkg);
-   MPI_Comm             comm       = hypre_CommPkgComm(comm_pkg);
+   MPI_Comm             comm_orig  = hypre_CommPkgComm(comm_pkg);
+   MPI_Comm             comm;
 
    HYPRE_Int            num_requests;
    hypre_MPI_Request   *requests;
@@ -879,8 +878,6 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
 
    HYPRE_Complex      **send_buffers;
    HYPRE_Complex      **recv_buffers;
-   HYPRE_Complex      *send_buffers_mpi = NULL;
-   HYPRE_Complex      *recv_buffers_mpi = NULL;
 
    hypre_CommType      *comm_type, *from_type, *to_type;
    hypre_CommEntryType *comm_entry;
@@ -897,10 +894,10 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
    HYPRE_Int            size;
 
    HYPRE_MemoryLocation memory_location     = hypre_HandleMemoryLocation(hypre_handle());
-   HYPRE_MemoryLocation memory_location_mpi = memory_location;
    HYPRE_Int            persistent          = 0;
 
-   hypre_CommHandleCommPkg(comm_handle) = comm_pkg;
+   hypre_MPI_Comm_dup(comm_orig, &comm);
+   hypre_CommHandleComm(comm_handle) = comm;
 
    /*--------------------------------------------------------------------
     * allocate requests and status
@@ -1004,7 +1001,6 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
       }
    }
 
-
    for (i = 0; i < num_sends; i++)
    {
       comm_type = hypre_CommPkgSendType(comm_pkg, i);
@@ -1014,35 +1010,24 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
       {
          qptr = (HYPRE_Int *) (send_buffers[0] + (send_buffers[i] - send_buffers[0]));
          hypre_TMemcpy(qptr, &num_entries,
-                       HYPRE_Int, 1, memory_location_mpi, HYPRE_MEMORY_HOST);
+                       HYPRE_Int, 1, memory_location, HYPRE_MEMORY_HOST);
          qptr ++;
          hypre_TMemcpy(qptr, hypre_CommTypeRemBoxnums(comm_type),
-                       HYPRE_Int, num_entries, memory_location_mpi, HYPRE_MEMORY_HOST);
+                       HYPRE_Int, num_entries, memory_location, HYPRE_MEMORY_HOST);
          qptr += num_entries;
          hypre_TMemcpy(qptr, hypre_CommTypeRemBoxes(comm_type),
-                       hypre_Box, num_entries, memory_location_mpi, HYPRE_MEMORY_HOST);
+                       hypre_Box, num_entries, memory_location, HYPRE_MEMORY_HOST);
          hypre_CommTypeRemBoxnums(comm_type) = NULL;
          hypre_CommTypeRemBoxes(comm_type) = NULL;
       }
    }
 
-   {
-         memory_location_mpi = HYPRE_MEMORY_HOST;
-
-         if (num_sends > 0)
-         {
-            size = hypre_CommPkgSendBufsize(comm_pkg);
-            send_buffers_mpi = hypre_CTAlloc(HYPRE_Complex, size, memory_location_mpi);
-            hypre_TMemcpy(send_buffers_mpi, send_buffers[0], HYPRE_Complex, size, HYPRE_MEMORY_HOST,
-                          memory_location);
-         }
-
-         if (num_recvs > 0)
-         {
-            size = hypre_CommPkgRecvBufsize(comm_pkg);
-            recv_buffers_mpi = hypre_CTAlloc(HYPRE_Complex, size, memory_location_mpi);
-         }
-   }
+   hypre_CommHandleAllocateBuffers(memory_location,
+                                   memory_location,
+                                   hypre_CommPkgSendBufsize(comm_pkg),
+                                   hypre_CommPkgRecvBufsize(comm_pkg),
+                                   sizeof(HYPRE_Complex),
+                                   comm_handle);
 
 
 #if 0
@@ -1094,8 +1079,8 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
    HYPRE_Int *displs_send = NULL;
    HYPRE_Int *procs_send  = NULL;
    HYPRE_Int *counts_send = NULL;
-   HYPRE_Int num_extra_requests = 0;
-   hypre_MPI_Request *extra_requests = NULL;
+   HYPRE_Int num_extra_requests =  persistent ? 2 : 1;
+   hypre_MPI_Request *extra_requests = hypre_CTAlloc(hypre_MPI_Request, num_extra_requests, HYPRE_MEMORY_HOST);
 
    if (num_recvs)
    {
@@ -1109,8 +1094,6 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
          displs_recv[i] = (recv_buffers[i] - recv_buffers[0]) * sizeof(HYPRE_Complex);
          procs_recv[i] = hypre_CommTypeProc(comm_type);
       }
-      num_extra_requests = persistent ? 2 : 1;
-      extra_requests = hypre_CTAlloc(hypre_MPI_Request, num_extra_requests, HYPRE_MEMORY_HOST);
    }
 
    if (num_sends)
@@ -1127,7 +1110,7 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
       }
    }
 
-   hypre_MPI_Irecv_Multiple(recv_buffers_mpi,
+   hypre_MPI_Irecv_Multiple(recv_buffers ? recv_buffers[0] : NULL,
                             num_recvs,
                             displs_recv,
                             counts_recv,
@@ -1138,7 +1121,7 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
                             requests,
                             extra_requests);
 
-   hypre_MPI_Isend_Multiple(send_buffers_mpi,
+   hypre_MPI_Isend_Multiple(send_buffers ? send_buffers[0] : NULL,
                             num_sends,
                             displs_send,
                             counts_send,
@@ -1173,7 +1156,6 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
    hypre_TFree(displs_send, HYPRE_MEMORY_HOST);
    hypre_TFree(counts_send, HYPRE_MEMORY_HOST);
    hypre_TFree(procs_send,  HYPRE_MEMORY_HOST);
-   hypre_TFree(extra_requests, HYPRE_MEMORY_HOST);
 
    /*--------------------------------------------------------------------
     * set up CopyToType and exchange local data
@@ -1206,16 +1188,17 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
     * set up comm_handle and return
     *--------------------------------------------------------------------*/
 
-   hypre_CommHandleSendData(comm_handle)       = send_data;
-   hypre_CommHandleRecvData(comm_handle)       = recv_data;
-   hypre_CommHandleNumRequests(comm_handle)    = num_requests;
-   hypre_CommHandleRequests(comm_handle)       = requests;
-   hypre_CommHandleStatus(comm_handle)         = status;
-   hypre_CommHandleSendBuffers(comm_handle)    = send_buffers;
-   hypre_CommHandleRecvBuffers(comm_handle)    = recv_buffers;
-   hypre_CommHandleAction(comm_handle)         = action;
-   hypre_CommHandleSendBuffersMPI(comm_handle) = send_buffers_mpi;
-   hypre_CommHandleRecvBuffersMPI(comm_handle) = recv_buffers_mpi;
+   hypre_CommHandleCommPkg(comm_handle)          = comm_pkg;
+   hypre_CommHandleSendData(comm_handle)         = send_data;
+   hypre_CommHandleRecvData(comm_handle)         = recv_data;
+   hypre_CommHandleNumRequests(comm_handle)      = num_requests;
+   hypre_CommHandleRequests(comm_handle)         = requests;
+   hypre_CommHandleNumExtraRequests(comm_handle) = num_extra_requests;
+   hypre_CommHandleExtraRequests(comm_handle)    = extra_requests;
+   hypre_CommHandleStatus(comm_handle)           = status;
+   hypre_CommHandleSendBuffers(comm_handle)      = send_buffers;
+   hypre_CommHandleRecvBuffers(comm_handle)      = recv_buffers;
+   hypre_CommHandleAction(comm_handle)           = action;
 
    *comm_handle_ptr = comm_handle;
 
@@ -1236,8 +1219,6 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    hypre_CommPkg       *comm_pkg         = hypre_CommHandleCommPkg(comm_handle);
    HYPRE_Complex      **send_buffers     = hypre_CommHandleSendBuffers(comm_handle);
    HYPRE_Complex      **recv_buffers     = hypre_CommHandleRecvBuffers(comm_handle);
-   HYPRE_Complex       *send_buffers_mpi = hypre_CommHandleSendBuffersMPI(comm_handle);
-   HYPRE_Complex       *recv_buffers_mpi = hypre_CommHandleRecvBuffersMPI(comm_handle);
    HYPRE_Int            action           = hypre_CommHandleAction(comm_handle);
 
    HYPRE_Int            ndim         = hypre_CommPkgNDim(comm_pkg);
@@ -1261,15 +1242,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    HYPRE_Int            i, j, d, ll;
 
-   HYPRE_MemoryLocation memory_location     = hypre_HandleMemoryLocation(hypre_handle());
-   HYPRE_MemoryLocation memory_location_mpi = memory_location;
-
-#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-   if (!hypre_GetGpuAwareMPI())
-   {
-      memory_location_mpi = HYPRE_MEMORY_HOST;
-   }
-#endif
+   HYPRE_MemoryLocation memory_location = hypre_HandleMemoryLocation(hypre_handle());
 
    /*--------------------------------------------------------------------
     * finish communications
@@ -1281,6 +1254,9 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
                         hypre_CommHandleRequests(comm_handle),
                         hypre_CommHandleStatus(comm_handle));
    }
+
+   printf("%d %p\n", hypre_CommHandleNumExtraRequests(comm_handle), &hypre_CommHandleExtraRequest(comm_handle, 0));
+   hypre_MPI_Wait(&hypre_CommHandleExtraRequest(comm_handle, 0), MPI_STATUS_IGNORE);
 
    /*--------------------------------------------------------------------
     * if FirstComm, unpack prefix information and set 'num_entries' and
@@ -1296,10 +1272,8 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
       {
          comm_type = hypre_CommPkgRecvType(comm_pkg, i);
 
-         qptr = (HYPRE_Int *) (recv_buffers_mpi + (recv_buffers[i] - recv_buffers[0]));
-
-         hypre_TMemcpy(&hypre_CommTypeNumEntries(comm_type), qptr,
-                       HYPRE_Int, 1, HYPRE_MEMORY_HOST, memory_location_mpi);
+         hypre_TMemcpy(&hypre_CommTypeNumEntries(comm_type), recv_buffers[i],
+                       HYPRE_Int, 1, HYPRE_MEMORY_HOST, memory_location);
 
          num_entries += hypre_CommTypeNumEntries(comm_type);
       }
@@ -1317,25 +1291,18 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
          num_entries = hypre_CommTypeNumEntries(comm_type);
          ct_entries += num_entries;
 
-         qptr = (HYPRE_Int *) (recv_buffers_mpi + (recv_buffers[i] - recv_buffers[0]));
+         qptr = (HYPRE_Int *) recv_buffers[i];
          qptr++;
 
          /* Set boxnums and boxes from MPI recv buffer */
-         if (!hypre_GetGpuAwareMPI())
-         {
-            boxnums = (HYPRE_Int*) qptr;
-            qptr += num_entries;
-            boxes = (hypre_Box*) qptr;
-         }
-         else
          {
             boxnums = hypre_TAlloc(HYPRE_Int, num_entries, HYPRE_MEMORY_HOST);
             hypre_TMemcpy(boxnums, qptr, HYPRE_Int, num_entries,
-                          HYPRE_MEMORY_HOST, memory_location_mpi);
+                          HYPRE_MEMORY_HOST, memory_location);
             qptr += num_entries;
             boxes = hypre_TAlloc(hypre_Box, num_entries, HYPRE_MEMORY_HOST);
             hypre_TMemcpy(boxes, qptr, hypre_Box, num_entries,
-                          HYPRE_MEMORY_HOST, memory_location_mpi);
+                          HYPRE_MEMORY_HOST, memory_location);
          }
 
          /* Set the entries for the comm_type */
@@ -1347,8 +1314,6 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
                                   hypre_CommPkgRecvDataSpace(comm_pkg),
                                   hypre_CommPkgRecvDataOffsets(comm_pkg));
 
-         /* Free allocated memory if using GPU-aware MPI */
-         if (hypre_GetGpuAwareMPI())
          {
             hypre_TFree(boxnums, HYPRE_MEMORY_HOST);
             hypre_TFree(boxes, HYPRE_MEMORY_HOST);
@@ -1359,18 +1324,6 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    /*--------------------------------------------------------------------
     * unpack receive buffer data
     *--------------------------------------------------------------------*/
-
-   /* Note: hypre_CommPkgRecvBufsize is different in the first comm */
-   if (num_recvs > 0 && recv_buffers[0] != recv_buffers_mpi)
-   {
-      HYPRE_Int recv_buf_size;
-
-      recv_buf_size = hypre_CommPkgFirstComm(comm_pkg) ? hypre_CommPkgRecvBufsizeFirstComm(comm_pkg) :
-                      hypre_CommPkgRecvBufsize(comm_pkg);
-
-      hypre_TMemcpy(recv_buffers[0], recv_buffers_mpi, HYPRE_Complex, recv_buf_size,
-                    memory_location, memory_location_mpi);
-   }
 
    for (i = 0; i < num_recvs; i++)
    {
@@ -1435,6 +1388,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    hypre_TFree(hypre_CommHandleRequests(comm_handle), HYPRE_MEMORY_HOST);
    hypre_TFree(hypre_CommHandleStatus(comm_handle), HYPRE_MEMORY_HOST);
+
    if (num_sends > 0)
    {
       hypre_StructCommunicationReleaseBuffer(send_buffers[0], memory_location);
@@ -1444,16 +1398,11 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
       hypre_StructCommunicationReleaseBuffer(recv_buffers[0], memory_location);
    }
 
-   hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
+   _hypre_TFree(hypre_CommHandleSendBuffersMPI(comm_handle), hypre_CommHandleSendBuffersMPILocation(comm_handle));
+   _hypre_TFree(hypre_CommHandleRecvBuffersMPI(comm_handle), hypre_CommHandleRecvBuffersMPILocation(comm_handle));
 
-   if (num_sends > 0 && send_buffers[0] != send_buffers_mpi)
-   {
-      hypre_TFree(send_buffers_mpi, memory_location_mpi);
-   }
-   if (num_recvs > 0 && recv_buffers[0] != recv_buffers_mpi)
-   {
-      hypre_TFree(recv_buffers_mpi, memory_location_mpi);
-   }
+   hypre_MPI_Comm_free(&hypre_CommHandleComm(comm_handle));
+   hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
 
    hypre_TFree(send_buffers, HYPRE_MEMORY_HOST);
    hypre_TFree(recv_buffers, HYPRE_MEMORY_HOST);
