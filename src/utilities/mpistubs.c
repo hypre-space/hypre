@@ -1534,14 +1534,14 @@ hypre_MPI_Irecv_Multiple( void               *buf,
                           hypre_MPI_Request  *requests,
                           hypre_MPI_Request  *extra_request)
 {
-   if (!num)
-   {
-      return hypre_error_flag;
-   }
-
    if (extra_request)
    {
       *extra_request = hypre_MPI_REQUEST_NULL;
+   }
+
+   if (!num)
+   {
+      return hypre_error_flag;
    }
 
    HYPRE_Int data_size, i;
@@ -1600,7 +1600,10 @@ hypre_MPI_Send_init_Multiple( void               *buf,
                               hypre_MPI_Request  *requests,
                               hypre_MPI_Request  *extra_request)
 {
-   *extra_request = hypre_MPI_REQUEST_NULL;
+   if (extra_request)
+   {
+      *extra_request = hypre_MPI_REQUEST_NULL;
+   }
 
    if (!num)
    {
@@ -1974,7 +1977,10 @@ hypre_MPINeedHostBuffer(hypre_MemoryLocation memory_location)
            memory_location != hypre_MEMORY_HOST         &&
            memory_location != hypre_MEMORY_HOST_PINNED;
 #else
-   /* RL: return 1 for debugging purpose */
+   /* RL: return 1 for debugging without GPUs,
+      so we always has a host buffer for MPI.
+      O.w. make sure return Z E R O!
+    */
    return 1;
 #endif
 }
@@ -2248,7 +2254,7 @@ hypre_MPI_GRequestProcessAction(hypre_MPI_GRequest_Action *action)
          char dname[32],sname[32];
          hypre_GetMemoryLocationName(dest_location, dname);
          hypre_GetMemoryLocationName(src_location, sname);
-         hypre_printf(" copying %s %p <-- %s %p\n", dname, dest, sname, src);
+         hypre_printf(" copying %s %p <-- %s %p, %d bytes\n", dname, dest, sname, src, num_bytes);
 #endif
          _hypre_TMemcpy(dest, src, char, num_bytes, dest_location, src_location);
          hypre_GpuProfilingPopRange();

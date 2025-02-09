@@ -764,6 +764,7 @@ hypre_CommTypeSetEntry( hypre_Box           *box,
    return hypre_error_flag;
 }
 
+//TODO size is confusing
 HYPRE_Complex *
 hypre_StructCommunicationGetBuffer(HYPRE_MemoryLocation memory_location,
                                    HYPRE_Int            size)
@@ -863,7 +864,7 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
                                HYPRE_Int             tag,
                                hypre_CommHandle    **comm_handle_ptr )
 {
-   hypre_CommHandle    *comm_handle = hypre_TAlloc(hypre_CommHandle, 1, HYPRE_MEMORY_HOST);
+   hypre_CommHandle    *comm_handle = hypre_CTAlloc(hypre_CommHandle, 1, HYPRE_MEMORY_HOST);
 
    HYPRE_Int            ndim       = hypre_CommPkgNDim(comm_pkg);
    HYPRE_Int            num_values = hypre_CommPkgNumValues(comm_pkg);
@@ -1084,30 +1085,32 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
 
    if (num_recvs)
    {
-      displs_recv = hypre_CTAlloc(HYPRE_Int, num_recvs, HYPRE_MEMORY_HOST);
-      procs_recv  = hypre_CTAlloc(HYPRE_Int, num_recvs, HYPRE_MEMORY_HOST);
-      counts_recv = hypre_CTAlloc(HYPRE_Int, num_recvs, HYPRE_MEMORY_HOST);
+      displs_recv = hypre_CTAlloc(HYPRE_Int, num_recvs + 1, HYPRE_MEMORY_HOST);
+      procs_recv  = hypre_CTAlloc(HYPRE_Int, num_recvs,     HYPRE_MEMORY_HOST);
+      counts_recv = hypre_CTAlloc(HYPRE_Int, num_recvs,     HYPRE_MEMORY_HOST);
       for (i = 0; i < num_recvs; i++)
       {
          comm_type = hypre_CommPkgRecvType(comm_pkg, i);
-         counts_recv[i] = hypre_CommTypeBufsize(comm_type) * sizeof(HYPRE_Complex);
          displs_recv[i] = (recv_buffers[i] - recv_buffers[0]) * sizeof(HYPRE_Complex);
          procs_recv[i] = hypre_CommTypeProc(comm_type);
+         counts_recv[i] = hypre_CommTypeBufsize(comm_type) * sizeof(HYPRE_Complex);
       }
+      displs_recv[num_recvs] = hypre_CommPkgRecvBufsize(comm_pkg) * sizeof(HYPRE_Complex);
    }
 
    if (num_sends)
    {
-      displs_send = hypre_CTAlloc(HYPRE_Int, num_sends, HYPRE_MEMORY_HOST);
-      procs_send  = hypre_CTAlloc(HYPRE_Int, num_sends, HYPRE_MEMORY_HOST);
-      counts_send = hypre_CTAlloc(HYPRE_Int, num_sends, HYPRE_MEMORY_HOST);
+      displs_send = hypre_CTAlloc(HYPRE_Int, num_sends + 1, HYPRE_MEMORY_HOST);
+      procs_send  = hypre_CTAlloc(HYPRE_Int, num_sends,     HYPRE_MEMORY_HOST);
+      counts_send = hypre_CTAlloc(HYPRE_Int, num_sends,     HYPRE_MEMORY_HOST);
       for (i = 0; i < num_sends; i++)
       {
          comm_type = hypre_CommPkgSendType(comm_pkg, i);
-         counts_send[i] = hypre_CommTypeBufsize(comm_type) * sizeof(HYPRE_Complex);
          displs_send[i] = (send_buffers[i] - send_buffers[0]) * sizeof(HYPRE_Complex);
          procs_send[i] = hypre_CommTypeProc(comm_type);
+         counts_send[i] = hypre_CommTypeBufsize(comm_type) * sizeof(HYPRE_Complex);
       }
+      displs_send[num_sends] = hypre_CommPkgSendBufsize(comm_pkg) * sizeof(HYPRE_Complex);
    }
 
    hypre_MPI_Irecv_Multiple(recv_buffers ? recv_buffers[0] : NULL,
@@ -1255,7 +1258,6 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
                         hypre_CommHandleStatus(comm_handle));
    }
 
-   printf("%d %p\n", hypre_CommHandleNumExtraRequests(comm_handle), &hypre_CommHandleExtraRequest(comm_handle, 0));
    hypre_MPI_Wait(&hypre_CommHandleExtraRequest(comm_handle, 0), MPI_STATUS_IGNORE);
 
    /*--------------------------------------------------------------------
@@ -1400,6 +1402,8 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    _hypre_TFree(hypre_CommHandleSendBuffersMPI(comm_handle), hypre_CommHandleSendBuffersMPILocation(comm_handle));
    _hypre_TFree(hypre_CommHandleRecvBuffersMPI(comm_handle), hypre_CommHandleRecvBuffersMPILocation(comm_handle));
+
+   hypre_TFree(hypre_CommHandleExtraRequests(comm_handle), HYPRE_MEMORY_HOST);
 
    hypre_MPI_Comm_free(&hypre_CommHandleComm(comm_handle));
    hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
