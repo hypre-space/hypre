@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -35,6 +35,8 @@ cat par_amg.h             >> $INTERNAL_HEADER
 cat par_amgdd_comp_grid.h >> $INTERNAL_HEADER
 cat par_amgdd.h           >> $INTERNAL_HEADER
 cat par_fsai.h            >> $INTERNAL_HEADER
+cat ams.h                 >> $INTERNAL_HEADER
+cat par_ilu.h             >> $INTERNAL_HEADER
 cat protos.h              >> $INTERNAL_HEADER
 
 #===========================================================================

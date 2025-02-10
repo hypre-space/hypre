@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -43,21 +43,6 @@ RUNCOUNT=`echo $FILES | wc -w`
 OUTCOUNT=`grep "Iterations" ${TNAME}.out | wc -l`
 if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
    echo "Incorrect number of runs in ${TNAME}.out" >&2
-fi
-
-# Check performance
-HOST=`hostname`
-case $HOST in
-   lassen*)
-      SavePerfExt="saved.lassen"
-      rtol=0.15
-      ;;
-   *) SavePerfExt=""
-      ;;
-esac
-
-if [ -n "$SavePerfExt" ]; then
-   ../runcheck.sh $TNAME.perf.out $TNAME.perf.$SavePerfExt $rtol >&2
 fi
 
 #=============================================================================

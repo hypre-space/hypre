@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -19,6 +19,8 @@ cat <<EOF
    script is being run from within the hypre 'test' directory, and all of the
    'TEST_*' directories are checked.
 
+   Returns 0 if all tests pass, 1 if any test fails.
+
    Example usage: $0 TEST_struct TEST_ij
 
 EOF
@@ -26,16 +28,18 @@ EOF
    ;;
 esac
 
-RESET=`shopt -p nullglob`  # Save current nullglob setting
-shopt -s nullglob          # Return an empty string for failed wildcard matches 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+RESET=`shopt -p nullglob`                # Save current nullglob setting
+shopt -s nullglob                        # Return an empty string for failed wildcard matches
 if [ "x$1" = "x" ]
 then
-   testdirs=`echo TEST*`   # All TEST directories
+   testdirs=`echo ${SCRIPT_DIR}/TEST*`   # All TEST directories
 else
-   testdirs=`echo $*`      # Only the specified test directories
+   testdirs=`echo $*`                    # Only the specified test directories
 fi
-$RESET                     # Restore nullglob setting
+$RESET                                   # Restore nullglob setting
 
+error_code=0
 echo ""
 for testdir in $testdirs
 do
@@ -45,13 +49,17 @@ do
       for file in $files
       do
          SZ=`ls -l $file | awk '{print $5}'`
+         relative_path=$(echo "$file" | sed 's|.*test/||')
          if [ $SZ != 0 ]
          then
-            echo "FAILED : $file  ($SZ)"
+            echo -e "FAILED : $relative_path  ($SZ)\n"
+            cat $file
+            error_code=1
          else
-            echo "    OK : $file"
+            echo "    OK : $relative_path"
          fi
       done
       echo ""
    fi
 done
+exit $error_code

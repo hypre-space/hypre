@@ -21,7 +21,7 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
    hypre_ParCSRMatrix  **P_array;
    hypre_ParVector     **F_array;
    hypre_ParVector     **U_array;
-   hypre_ParVector      *res;
+   hypre_ParVector      *res = NULL;
    hypre_ParVector      *Vtemp;
    hypre_ParVector      *Ztemp;
 
@@ -37,9 +37,9 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
    HYPRE_Int             amg_print_level;
    HYPRE_Int             amg_logging;
    HYPRE_Real            tol;
-   HYPRE_Real            resid_nrm;
-   HYPRE_Real            resid_nrm_init;
-   HYPRE_Real            rhs_norm;
+   HYPRE_Real            resid_nrm = 0.0;
+   HYPRE_Real            resid_nrm_init = 1.0;
+   HYPRE_Real            rhs_norm = 1.0;
    HYPRE_Real            old_resid;
    HYPRE_Real            relative_resid;
    HYPRE_Real            conv_factor;
@@ -123,7 +123,7 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
          {
             hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, res);
          }
-         resid_nrm = sqrt(hypre_ParVectorInnerProd(res, res));
+         resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(res, res));
       }
       else
       {
@@ -132,10 +132,10 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
          {
             hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Vtemp);
          }
-         resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+         resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
       }
 
-      /* Since it is does not diminish performance, attempt to return an error flag
+      /* Since it does not diminish performance, attempt to return an error flag
          and notify users when they supply bad input. */
       if (resid_nrm != 0.)
       {
@@ -166,7 +166,7 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
 
       if (0 == converge_type)
       {
-         rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
+         rhs_norm = hypre_sqrt(hypre_ParVectorInnerProd(f, f));
          if (rhs_norm)
          {
             relative_resid = resid_nrm_init / rhs_norm;
@@ -286,13 +286,13 @@ hypre_BoomerAMGDDSolve( void               *amgdd_vdata,
          {
             hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta,
                                                F_array[0], res);
-            resid_nrm = sqrt(hypre_ParVectorInnerProd(res, res));
+            resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(res, res));
          }
          else
          {
             hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta,
                                                F_array[0], Vtemp);
-            resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
+            resid_nrm = hypre_sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
          }
 
          if (old_resid)

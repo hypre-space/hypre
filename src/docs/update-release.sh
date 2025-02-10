@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -8,8 +8,8 @@
 usrconf="usr-manual/conf.py"
 refconf="ref-manual/conf.doxygen"
 
-version=`../utilities/version -version`
-reldate=`../utilities/version -date`
+version=`../utilities/version.sh -version`
+reldate=`../utilities/version.sh -date`
 if type -p gdate > /dev/null; then
     usrdate=`gdate --date=$reldate +'%B %d, %Y'`;
 else

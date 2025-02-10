@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 examplesdir="$1"
 currentdir=`pwd`

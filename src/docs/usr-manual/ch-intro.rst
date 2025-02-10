@@ -83,15 +83,16 @@ Getting More Information
 ==============================================================================
 
 This user's manual consists of chapters describing each conceptual interface, a
-chapter detailing the various linear solver options available, and detailed
-installation information.  In addition to this manual, a number of other
-information sources for hypre are available.
+chapter detailing the various linear solver options available, detailed
+installation information, and the API reference.  In addition to this manual, a
+number of other information sources for hypre are available.
 
-* **Reference Manual:** The reference manual comprehensively lists all of the
-  interface and solver functions available in hypre.  The reference manual is
-  ideal for determining the various options available for a particular solver or
-  for viewing the functions provided to describe a problem for a particular
-  interface.
+* **Reference Manual:** This is equivalent to Chapter :ref:`ch-API` in this user
+  manual, but it can also be built as a separate document.  The reference manual
+  comprehensively lists all of the interface and solver functions available in
+  hypre.  It is ideal for determining the various options available for a
+  particular solver or for viewing the functions provided to describe a problem
+  for a particular interface.
 
 * **Example Problems:** A suite of example problems is provided with the hypre
   installation.  These examples reside in the ``examples`` subdirectory and
@@ -121,19 +122,24 @@ How to get started
 Installing hypre
 ------------------------------------------------------------------------------
 
-As previously noted, on most systems hypre can be built by simply typing
-``configure`` followed by ``make`` in the top-level source directory.
-Alternatively, the CMake system [CMakeWeb]_ can be used, and is the best
-approach for building hypre on Windows systems in particular.  For more detailed
-instructions, read the ``INSTALL`` file provided with the hypre distribution or
-refer to the last chapter in this manual.  Note the following requirements:
+As previously noted, on most systems hypre can be built by typing
+``./configure`` followed by ``make`` in the top-level source directory.
+Alternatively, `CMake <https://cmake.org/>`_ can be used and is the recommended
+method for building hypre on Windows. For more detailed instructions, refer to
+the `INSTALL <https://github.com/hypre-space/hypre/blob/master/INSTALL.md>`_ file
+provided in the hypre distribution or see the :ref:`ch-General` section of this manual.
 
-* To run in parallel, hypre requires an installation of MPI.
+.. note::
 
-* Configuration of hypre with threads requires an implementation of OpenMP.
-  Currently, only a subset of hypre is threaded.
+   * To run in parallel, hypre requires an installation of MPI.
 
-* The hypre library currently does not directly support complex-valued systems.
+   * Configuration of hypre with threads requires an implementation of OpenMP.
+     Currently, only a subset of hypre is threaded.
+
+   * To run on GPUs, hypre must be configured with support for the appropriate GPU toolkit.
+     Available options are CUDA for NVIDIA GPUs, HIP for AMD GPUs, and SYCL for Intel GPUs.
+
+   * The hypre library currently does not directly support complex-valued systems.
 
 
 .. _choosing-interface:
@@ -147,12 +153,12 @@ represent the way that applications developers naturally think of their linear
 problem and to provide natural interfaces for them to pass the data that defines
 their linear system into hypre.  Essentially, these conceptual interfaces can be
 considered convenient utilities for helping a user build a matrix data structure
-for hypre solvers and preconditioners.  The top row of :ref:`fig-ls-interface`
+for hypre solvers and preconditioners.  The top row of :numref:`fig-ls-interface`
 illustrates a number of conceptual interfaces.  Generally, the conceptual
 interfaces are denoted by different types of computational grids, but other
 application features might also be used, such as geometrical information.  For
 example, applications that use structured grids (such as in the left-most
-interface in :ref:`fig-ls-interface`) typically view their linear problems in
+interface in :numref:`fig-ls-interface`) typically view their linear problems in
 terms of stencils and grids.  On the other hand, applications that use
 unstructured grids and finite elements typically view their linear problems in
 terms of elements and element stiffness matrices. Finally, the right-most
@@ -194,36 +200,31 @@ application.
   for building matrices in particular formats, find the IJ interface relatively
   easy to use. See Chapter :ref:`ch-IJ` for details.
 
-.. _fig-ls-interface:
-
-.. figure:: figConcepIface.*
+.. figure:: figConcepIface.svg
    :align: center
+   :name: fig-ls-interface
 
-   Figure 1
-
-   Graphic illustrating the notion of conceptual linear system interfaces.
+   : Graphic illustrating the notion of conceptual linear system interfaces.
 
 Generally, a user should choose the most specific interface that matches their
-application, because this will allow them to use specialized and more efficient
-solvers and preconditioners without losing access to more general solvers.  For
-example, the second row of Figure :ref:`fig-ls-interface` is a set of linear
-solver algorithms.  Each linear solver group requires different information from
-the user through the conceptual interfaces.  So, the geometric multigrid
-algorithm (GMG) listed in the left-most box, for example, can only be used with
-the left-most conceptual interface.  On the other hand, the ILU algorithm in the
-right-most box may be used with any conceptual interface.  Matrix requirements
-for each solver and preconditioner are provided in Chapter :ref:`ch-Solvers` and
-in the hypre Reference Manual.  Your desired solver strategy may influence your
-choice of conceptual interface.  A typical user will select a single Krylov
-method and a single preconditioner to solve their system.
+application, because this will allow them to use specialized and more efficient solvers
+and preconditioners without losing access to more general solvers.  For example, the
+second row of :numref:`fig-ls-interface` is a set of linear solver algorithms.  Each linear
+solver group requires different information from the user through the conceptual
+interfaces.  So, the geometric multigrid algorithm (GMG) listed in the left-most box, for
+example, can only be used with the left-most conceptual interface. On the other hand, the
+ILU algorithm in the right-most box may be used with any conceptual interface.  Matrix
+requirements for each solver and preconditioner are provided in Chapter :ref:`ch-Solvers`
+and in Chapter :ref:`ch-API`. Your desired solver strategy may influence your choice of
+conceptual interface.  A typical user will select a single Krylov method and a single
+preconditioner to solve their system.
 
-The third row of Figure :ref:`fig-ls-interface` is a list of data layouts or
-matrix/vector storage schemes.  The relationship between linear solver and
-storage scheme is similar to that of the conceptual interface and linear solver.
-Note that some of the interfaces in hypre currently only support one
-matrix/vector storage scheme choice.  The conceptual interface, the desired
-solvers and preconditioners, and the matrix storage class must all be
-compatible.
+The third row of :numref:`fig-ls-interface` is a list of data layouts or matrix/vector
+storage schemes. The relationship between linear solver and storage scheme is similar to
+that of the conceptual interface and linear solver.  Note that some of the interfaces in
+hypre currently only support one matrix/vector storage scheme choice. The conceptual
+interface, the desired solvers and preconditioners, and the matrix storage class must all
+be compatible.
 
 
 .. _writing-your-code:
@@ -234,7 +235,7 @@ Writing your code
 As discussed in the previous section, the following decisions should be made
 before writing any code:
 
-* Choose a conceptual interface. 
+* Choose a conceptual interface.
 * Choose your desired solver strategy.
 * Look up matrix requirements for each solver and preconditioner.
 * Choose a matrix storage class that is compatible with your solvers and
@@ -266,7 +267,6 @@ demonstrate the following general structure of the application calls to hypre:
 
 The subsequent chapters of this User's Manual provide the details needed to more
 fully understand the function of each conceptual interface and each solver.
-Remember that a comprehensive list of all available functions is provided in the
-hypre Reference Manual, and the provided example codes may prove helpful as
+Remember that a comprehensive list of all available functions is provided in
+Chapter :ref:`ch-API`, and the provided example codes may prove helpful as
 templates for your specific application.
-

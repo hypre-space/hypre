@@ -1,11 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-hypre_version="2.24.0"
-hypre_reldate="2022/02/11"
+hypre_version="2.32.0"
+hypre_reldate="2024/10/08"
 
 hypre_major=`echo $hypre_version | cut -d. -f 1`
 hypre_minor=`echo $hypre_version | cut -d. -f 2`

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -40,8 +40,11 @@ FILES="\
  ${TNAME}.out.17\
  ${TNAME}.out.18\
  ${TNAME}.out.19\
+ ${TNAME}.out.19.1\
+ ${TNAME}.out.19.2\
  ${TNAME}.out.20\
  ${TNAME}.out.21\
+ ${TNAME}.out.22\
 "
 
 for i in $FILES

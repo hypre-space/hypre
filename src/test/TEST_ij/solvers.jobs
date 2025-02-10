@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -50,10 +50,26 @@ mpirun -np 2 ./ij -solver 17 -rhsrand -unroll 4 > solvers.out.16
 mpirun -np 2 ./ij -solver 3 -rhsrand -check_residual > solvers.out.17
 mpirun -np 2 ./ij -solver 4 -rhsrand -check_residual > solvers.out.18
 
+mpirun -np 3 ./ij -n 23 29 31 -solver 1 -rhsrand -precon_cycles 2 -rlx 18 > solvers.out.19
+mpirun -np 4 ./ij -n 23 29 31 -solver 3 -rhsrand -precon_cycles 3 -rlx 18 > solvers.out.20
+mpirun -np 2 ./ij -n 23 29 31 -solver 0 -rhsrand -mu 2            -rlx 18 > solvers.out.21
+mpirun -np 2 ./ij -n 23 29 31 -solver 3 -rhsrand -mu 2            -rlx 18 > solvers.out.22
+mpirun -np 2 ./ij -n 23 29 31 -solver 0 -rhsrand -fmg             -rlx 18 > solvers.out.23
+mpirun -np 2 ./ij -n 23 29 31 -solver 3 -rhsrand -fmg             -rlx 18 > solvers.out.24
+#flexible CG vs CG; AMG with CG smoother
+mpirun -np 2 ./ij -solver 1 -rlx 15 -flex 1 > solvers.out.25
+mpirun -np 2 ./ij -solver 1 -rlx 15 > solvers.out.26
+
 #systems AMG run ...unknown approach, hybrid approach, nodal approach
 mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 > solvers.out.sysu
 mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 -nodal 1 -smtype 6 -smlv 10 -dom 1 -ov 0 > solvers.out.sysh
 mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 -interptype 10 -Pmx 6 > solvers.out.sysn
+
+#systems AMG using unknown approach and filtering
+mpirun -np 1 ./ij -solver 1 -n 8 8 8 -sysL 2 -nf 2 -ff 1 > solvers.out.27
+mpirun -np 1 ./ij -solver 1 -n 8 8 8 -sysL 3 -nf 3 -ff 1 > solvers.out.28
+mpirun -np 4 ./ij -solver 1 -n 8 8 8 -sysL 2 -nf 2 -ff 1 > solvers.out.29
+mpirun -np 4 ./ij -solver 1 -n 8 8 8 -sysL 3 -nf 3 -ff 1 > solvers.out.30
 
 #LGMRS and FlexGMRES
 mpirun -np 2 ./ij -solver 50 -rhsrand > solvers.out.101
@@ -116,57 +132,6 @@ mpirun -np 2 ./ij -solver 70 -mgr_nlevels 5 -mgr_bsize 2 -mgr_non_c_to_f 0 -mgr_
 mpirun -np 2 ./ij -solver 71 -mgr_nlevels 0 -mgr_bsize 2 -mgr_non_c_to_f 0 -mgr_frelax_method 0 -mgr_num_reserved_nodes 0 > solvers.out.212
 mpirun -np 2 ./ij -solver 71 -mgr_nlevels 1 -mgr_bsize 2 -mgr_non_c_to_f 0 -mgr_frelax_method 0 -mgr_num_reserved_nodes 0 > solvers.out.213
 
-#
-# hypre_ILU tests
-# Tests ILU(0), ILUK and ILUK solvers sequentially
-# Tests Parallel combination of ILU solvers
-# Tests ILU-(Flex)GMRES
-# Test AMG with ILU as a complex smoother
-#
-mpirun -np 1  ./ij -solver 80 -ilu_type 0 -ilu_lfil 0 > solvers.out.300
-mpirun -np 1  ./ij -solver 80 -ilu_type 0 -ilu_lfil 1 > solvers.out.301
-mpirun -np 1  ./ij -solver 80 -ilu_type 1 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000 > solvers.out.302
-# parallel ILU
-# BJ
-mpirun -np 2  ./ij -solver 80 -ilu_type 0 -ilu_lfil 1 > solvers.out.303
-mpirun -np 2  ./ij -solver 80 -ilu_type 1 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000  > solvers.out.304
-# GMRES+ILU
-mpirun -np 2  ./ij -solver 80 -ilu_type 10 -ilu_lfil 1 -ilu_schur_max_iter 5 > solvers.out.305
-mpirun -np 2  ./ij -solver 80 -ilu_type 11 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000 -ilu_schur_max_iter 5  > solvers.out.306
-# NSH+ILU
-mpirun -np 2  ./ij -solver 80 -ilu_type 20 -ilu_lfil 1 -ilu_schur_max_iter 5 > solvers.out.307
-mpirun -np 2  ./ij -solver 80 -ilu_type 21 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000 -ilu_schur_max_iter 5  > solvers.out.308
-# RAS+ILU
-mpirun -np 2  ./ij -solver 80 -ilu_type 30 -ilu_lfil 1 > solvers.out.309
-mpirun -np 2  ./ij -solver 80 -ilu_type 31 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000 > solvers.out.310
-# ddPQ-GMRES+ILU
-mpirun -np 2  ./ij -solver 80 -ilu_type 40 -ilu_lfil 1 -ilu_schur_max_iter 5 > solvers.out.311
-mpirun -np 2  ./ij -solver 80 -ilu_type 41 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000 -ilu_schur_max_iter 5  > solvers.out.312
-##  ILU-GMRES
-mpirun -np 2  ./ij -solver 81 -ilu_type 0 -ilu_lfil 0 > solvers.out.313
-mpirun -np 2  ./ij -solver 81 -ilu_type 1 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000  > solvers.out.314
-mpirun -np 2  ./ij -solver 81 -ilu_type 30 -ilu_lfil 0 > solvers.out.315
-mpirun -np 2  ./ij -solver 81 -ilu_type 31 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000  > solvers.out.316
-##  ILU-FlexGMRES
-mpirun -np 2  ./ij -solver 82 -ilu_type 10 -ilu_lfil 0 -ilu_schur_max_iter 5 > solvers.out.317
-mpirun -np 2  ./ij -solver 82 -ilu_type 11 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000 -ilu_schur_max_iter 5  > solvers.out.318
-mpirun -np 2  ./ij -solver 82 -ilu_type 20 -ilu_lfil 0 -ilu_schur_max_iter 5 > solvers.out.319
-mpirun -np 2  ./ij -solver 82 -ilu_type 21 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000 -ilu_schur_max_iter 5  > solvers.out.320
-mpirun -np 2  ./ij -solver 82 -ilu_type 40 -ilu_lfil 0 -ilu_schur_max_iter 5 > solvers.out.321
-mpirun -np 2  ./ij -solver 82 -ilu_type 41 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000 -ilu_schur_max_iter 5  > solvers.out.322
-## RAP-ILU
-mpirun -np 2  ./ij -solver 82 -ilu_type 50 -ilu_lfil 0 > solvers.out.323
-## ILU smoother for AMG
-mpirun -np 2  ./ij -solver 0 -smtype 5  -smlv 1 -ilu_type 30 > solvers.out.324
-mpirun -np 2  ./ij -solver 0 -smtype 15 -smlv 1 -ilu_type 30 > solvers.out.325
-
-## Solve Ax=b and -Ax=b, convergence should be the same
-mpirun -np 2 ./ij -solver 0 -rhsrand -negA 0 > solvers.out.400.p
-mpirun -np 2 ./ij -solver 0 -rhsrand -negA 1 > solvers.out.400.n
-mpirun -np 3 ./ij -solver 3 -rhsrand -negA 0 > solvers.out.401.p
-mpirun -np 3 ./ij -solver 3 -rhsrand -negA 1 > solvers.out.401.n
-mpirun -np 4 ./ij -cheby_eig_est 10 -cheby_order 4 -cheby_variant 0 -cheby_scale 1 -rlx 16 -negA 0 > solvers.out.402.p
-mpirun -np 4 ./ij -cheby_eig_est 10 -cheby_order 4 -cheby_variant 0 -cheby_scale 1 -rlx 16 -negA 1 > solvers.out.402.n
-mpirun -np 4 ./ij -solver 3 -cheby_eig_est 0 -cheby_order 3 -cheby_variant 1 -cheby_scale 1 -rlx 16 -negA 0 > solvers.out.403.p
-mpirun -np 4 ./ij -solver 3 -cheby_eig_est 0 -cheby_order 3 -cheby_variant 1 -cheby_scale 1 -rlx 16 -negA 1 > solvers.out.403.n
-
+## Test relaxation methods 88 (L1 hybrid Symm. Gauss-Seidel with a convergent l1 term) and 89 (L1 Symm. hybrid Gauss-Seidel)
+mpirun -np 4 ./ij -fromfile data/tucker21935/IJ.A -solver 1 -rlx 88 > solvers.out.404
+mpirun -np 4 ./ij -fromfile data/tucker21935/IJ.A -solver 1 -rlx 89 > solvers.out.405

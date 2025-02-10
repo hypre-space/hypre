@@ -15,7 +15,7 @@
 #include "par_amg.h"
 
 /*--------------------------------------------------------------------------
- * hypre_BoomerAMGCycle
+ * hypre_BoomerAMGCGRelaxWt
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -27,7 +27,7 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
    hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    MPI_Comm comm;
-   HYPRE_Solver *smoother;
+   HYPRE_Solver *smoother = NULL;
    /* Data Structure variables */
 
    /* hypre_ParCSRMatrix **A_array = hypre_ParAMGDataAArray(amg_data); */
@@ -35,14 +35,14 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
    hypre_ParCSRMatrix *A = hypre_ParAMGDataAArray(amg_data)[level];
    /* hypre_ParVector    **F_array = hypre_ParAMGDataFArray(amg_data); */
    /* hypre_ParVector    **U_array = hypre_ParAMGDataUArray(amg_data); */
-   hypre_ParVector    *Utemp;
+   hypre_ParVector    *Utemp = NULL;
    hypre_ParVector    *Vtemp;
    hypre_ParVector    *Ptemp;
    hypre_ParVector    *Rtemp;
    hypre_ParVector    *Ztemp;
    hypre_ParVector    *Qtemp = NULL;
 
-   HYPRE_Int    *CF_marker = hypre_IntArrayData(hypre_ParAMGDataCFMarkerArray(amg_data)[level]);
+   HYPRE_Int    *CF_marker;
    HYPRE_Real   *Ptemp_data;
    HYPRE_Real   *Ztemp_data;
 
@@ -87,7 +87,7 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
    HYPRE_Real   *S_vec;
 #endif
 
-#if !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
+#if !defined(HYPRE_USING_GPU)
    HYPRE_Int num_threads = hypre_NumThreads();
 #endif
 
@@ -123,16 +123,18 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
       l1_norms = hypre_ParAMGDataL1Norms(amg_data)[level];
    }
 
-#if !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
+#if !defined(HYPRE_USING_GPU)
    if (num_threads > 1)
 #endif
    {
       needQ = 1;
    }
 
-   grid_relax_type     = hypre_ParAMGDataGridRelaxType(amg_data);
-   smooth_type         = hypre_ParAMGDataSmoothType(amg_data);
-   smooth_num_levels   = hypre_ParAMGDataSmoothNumLevels(amg_data);
+   grid_relax_type   = hypre_ParAMGDataGridRelaxType(amg_data);
+   smooth_type       = hypre_ParAMGDataSmoothType(amg_data);
+   smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
+   CF_marker         = (hypre_ParAMGDataCFMarkerArray(amg_data)[level] != NULL) ?
+                       hypre_IntArrayData(hypre_ParAMGDataCFMarkerArray(amg_data)[level]) : NULL;
 
    /* Initialize */
 
@@ -202,43 +204,50 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
    for (jj = 0; jj < num_cg_sweeps; jj++)
    {
       hypre_ParVectorSetConstantValues(Ztemp, 0.0);
+
       for (j = 0; j < num_sweeps; j++)
       {
-         if (smooth_option > 6)
+         if (smooth_num_levels > level)
          {
-
-            hypre_ParVectorCopy(Rtemp, Vtemp);
-            alpha = -1.0;
-            beta = 1.0;
-            hypre_ParCSRMatrixMatvec(alpha, A,
-                                     Ztemp, beta, Vtemp);
-            if (smooth_option == 8)
-               HYPRE_ParCSRParaSailsSolve(smoother[level],
-                                          (HYPRE_ParCSRMatrix) A,
-                                          (HYPRE_ParVector) Vtemp,
-                                          (HYPRE_ParVector) Utemp);
-            else if (smooth_option == 7)
+            if (smooth_option > 6)
             {
-               HYPRE_ParCSRPilutSolve(smoother[level],
-                                      (HYPRE_ParCSRMatrix) A,
-                                      (HYPRE_ParVector) Vtemp,
-                                      (HYPRE_ParVector) Utemp);
-               hypre_ParVectorAxpy(1.0, Utemp, Ztemp);
+               hypre_ParVectorCopy(Rtemp, Vtemp);
+               alpha = -1.0;
+               beta = 1.0;
+               hypre_ParCSRMatrixMatvec(alpha, A,
+                                        Ztemp, beta, Vtemp);
+               if (smooth_option == 8)
+               {
+                  HYPRE_ParCSRParaSailsSolve(smoother[level],
+                                             (HYPRE_ParCSRMatrix) A,
+                                             (HYPRE_ParVector) Vtemp,
+                                             (HYPRE_ParVector) Utemp);
+               }
+               else if (smooth_option == 7)
+               {
+                  HYPRE_ParCSRPilutSolve(smoother[level],
+                                         (HYPRE_ParCSRMatrix) A,
+                                         (HYPRE_ParVector) Vtemp,
+                                         (HYPRE_ParVector) Utemp);
+                  hypre_ParVectorAxpy(1.0, Utemp, Ztemp);
+               }
+               else if (smooth_option == 9)
+               {
+                  HYPRE_EuclidSolve(smoother[level],
+                                    (HYPRE_ParCSRMatrix) A,
+                                    (HYPRE_ParVector) Vtemp,
+                                    (HYPRE_ParVector) Utemp);
+                  hypre_ParVectorAxpy(1.0, Utemp, Ztemp);
+               }
             }
-            else if (smooth_option == 9)
+            else if (smooth_option == 6)
             {
-               HYPRE_EuclidSolve(smoother[level],
-                                 (HYPRE_ParCSRMatrix) A,
-                                 (HYPRE_ParVector) Vtemp,
-                                 (HYPRE_ParVector) Utemp);
-               hypre_ParVectorAxpy(1.0, Utemp, Ztemp);
+               HYPRE_SchwarzSolve(smoother[level],
+                                  (HYPRE_ParCSRMatrix) A,
+                                  (HYPRE_ParVector) Rtemp,
+                                  (HYPRE_ParVector) Ztemp);
             }
          }
-         else if (smooth_option == 6)
-            HYPRE_SchwarzSolve(smoother[level],
-                               (HYPRE_ParCSRMatrix) A,
-                               (HYPRE_ParVector) Rtemp,
-                               (HYPRE_ParVector) Ztemp);
          else
          {
             Solve_err_flag = hypre_BoomerAMGRelax(A,
@@ -262,6 +271,7 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
             return (Solve_err_flag);
          }
       }
+
       gammaold = gamma;
       gamma = hypre_ParVectorInnerProd(Rtemp, Ztemp);
       if (jj == 0)
@@ -278,19 +288,19 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
          }
       }
       hypre_ParCSRMatrixMatvec(1.0, A, Ptemp, 0.0, Vtemp);
-      alpha = gamma / hypre_ParVectorInnerProd(Ptemp, Vtemp);
-      alphinv = 1.0 / alpha;
+      alpha = gamma / (hypre_ParVectorInnerProd(Ptemp, Vtemp) + HYPRE_REAL_MIN);
+      alphinv = 1.0 / (alpha + HYPRE_REAL_MIN);
       tridiag[jj + 1] = alphinv;
       tridiag[jj] *= beta;
       tridiag[jj] += alphinv;
-      trioffd[jj] *= sqrt(beta);
+      trioffd[jj] *= hypre_sqrt(beta);
       trioffd[jj + 1] = -alphinv;
-      row_sum = fabs(tridiag[jj]) + fabs(trioffd[jj]);
+      row_sum = hypre_abs(tridiag[jj]) + hypre_abs(trioffd[jj]);
       if (row_sum > max_row_sum) { max_row_sum = row_sum; }
       if (jj > 0)
       {
-         row_sum = fabs(tridiag[jj - 1]) + fabs(trioffd[jj - 1])
-                   + fabs(trioffd[jj]);
+         row_sum = hypre_abs(tridiag[jj - 1]) + hypre_abs(trioffd[jj - 1])
+                   + hypre_abs(trioffd[jj]);
          if (row_sum > max_row_sum) { max_row_sum = row_sum; }
          /* lambda_min_old = lambda_min; */
          lambda_max_old = lambda_max;
@@ -301,7 +311,7 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
          /* hypre_Bisection(jj+1, tridiag, trioffd, 0.0, lambda_min_old,
             1.e-3, 1, &lambda_min);
          rlx_wt = 2.0/(lambda_min+lambda_max); */
-         if (fabs(rlx_wt - rlx_wt_old) < 1.e-3 )
+         if (hypre_abs(rlx_wt - rlx_wt_old) < 1.e-3 )
          {
             /* if (my_id == 0) hypre_printf (" cg sweeps : %d\n", (jj+1)); */
             break;
@@ -318,14 +328,14 @@ hypre_BoomerAMGCGRelaxWt( void       *amg_vdata,
    /*if (my_id == 0)
      hypre_printf (" lambda-min: %f  lambda-max: %f\n", lambda_min, lambda_max);
 
-   rlx_wt = fabs(tridiag[0])+fabs(trioffd[1]);
+   rlx_wt = hypre_abs(tridiag[0])+hypre_abs(trioffd[1]);
 
    for (i=1; i < num_cg_sweeps-1; i++)
    {
-      row_sum = fabs(tridiag[i]) + fabs(trioffd[i]) + fabs(trioffd[i+1]);
+      row_sum = hypre_abs(tridiag[i]) + hypre_abs(trioffd[i]) + hypre_abs(trioffd[i+1]);
       if (row_sum > rlx_wt) rlx_wt = row_sum;
    }
-   row_sum = fabs(tridiag[num_cg_sweeps-1]) + fabs(trioffd[num_cg_sweeps-1]);
+   row_sum = hypre_abs(tridiag[num_cg_sweeps-1]) + hypre_abs(trioffd[num_cg_sweeps-1]);
    if (row_sum > rlx_wt) rlx_wt = row_sum;
 
    hypre_Bisection(num_cg_sweeps, tridiag, trioffd, 0.0, rlx_wt, 1.e-3, 1,
@@ -375,7 +385,7 @@ hypre_Bisection(HYPRE_Int n, HYPRE_Real *diag, HYPRE_Real *offd,
    HYPRE_Int i;
    HYPRE_Real p0, p1, p2;
 
-   while (fabs(y - z) > tol * (fabs(y) + fabs(z)))
+   while (hypre_abs(y - z) > tol * (hypre_abs(y) + hypre_abs(z)))
    {
       x = (y + z) / 2;
 

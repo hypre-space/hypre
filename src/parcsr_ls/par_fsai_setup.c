@@ -9,8 +9,6 @@
 #include "_hypre_blas.h"
 #include "_hypre_lapack.h"
 
-#define DEBUG 0
-
 /*****************************************************************************
  *
  * Routine for driving the setup phase of FSAI
@@ -142,6 +140,7 @@ hypre_FindKapGrad( hypre_CSRMatrix  *A_diag,
                    HYPRE_Int         row_num,
                    HYPRE_Int        *kg_marker )
 {
+   HYPRE_UNUSED_VAR(max_row_size);
 
    HYPRE_Int      *A_i = hypre_CSRMatrixI(A_diag);
    HYPRE_Int      *A_j = hypre_CSRMatrixJ(A_diag);
@@ -409,6 +408,9 @@ hypre_FSAISetupNative( void               *fsai_vdata,
                        hypre_ParVector    *f,
                        hypre_ParVector    *u )
 {
+   HYPRE_UNUSED_VAR(f);
+   HYPRE_UNUSED_VAR(u);
+
    /* Data structure variables */
    hypre_ParFSAIData      *fsai_data        = (hypre_ParFSAIData*) fsai_vdata;
    HYPRE_Real              kap_tolerance    = hypre_ParFSAIDataKapTolerance(fsai_data);
@@ -420,8 +422,6 @@ hypre_FSAISetupNative( void               *fsai_vdata,
    HYPRE_Int              *A_i              = hypre_CSRMatrixI(A_diag);
    HYPRE_Complex          *A_a              = hypre_CSRMatrixData(A_diag);
    HYPRE_Int               num_rows_diag_A  = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int               num_nnzs_diag_A  = hypre_CSRMatrixNumNonzeros(A_diag);
-   HYPRE_Int               avg_nnzrow_diag_A;
 
    /* Matrix G variables */
    hypre_ParCSRMatrix     *G = hypre_ParFSAIDataGmat(fsai_data);
@@ -430,16 +430,13 @@ hypre_FSAISetupNative( void               *fsai_vdata,
    HYPRE_Int              *G_j;
    HYPRE_Complex          *G_a;
    HYPRE_Int               max_nnzrow_diag_G;   /* Max. number of nonzeros per row in G_diag */
-   HYPRE_Int               max_cand_size;       /* Max size of kg_pos */
 
    /* Local variables */
-   char                     msg[512];    /* Warning message */
-   HYPRE_Complex           *twspace;     /* shared work space for omp threads */
+   char                    msg[512];    /* Warning message */
+   HYPRE_Int              *twspace;     /* shared work space for omp threads */
 
    /* Initalize some variables */
-   avg_nnzrow_diag_A = (num_rows_diag_A > 0) ? num_nnzs_diag_A / num_rows_diag_A : 0;
    max_nnzrow_diag_G = max_steps * max_step_size + 1;
-   max_cand_size     = avg_nnzrow_diag_A * max_nnzrow_diag_G;
 
    G_diag = hypre_ParCSRMatrixDiag(G);
    G_a = hypre_CSRMatrixData(G_diag);
@@ -447,7 +444,7 @@ hypre_FSAISetupNative( void               *fsai_vdata,
    G_j = hypre_CSRMatrixJ(G_diag);
 
    /* Allocate shared work space array for OpenMP threads */
-   twspace = hypre_CTAlloc(HYPRE_Complex, hypre_NumThreads() + 1, HYPRE_MEMORY_HOST);
+   twspace = hypre_CTAlloc(HYPRE_Int, hypre_NumThreads() + 1, HYPRE_MEMORY_HOST);
 
    /**********************************************************************
    * Start of Adaptive FSAI algorithm
@@ -488,17 +485,17 @@ hypre_FSAISetupNative( void               *fsai_vdata,
       /* Allocate and initialize local vector variables */
       G_temp    = hypre_SeqVectorCreate(max_nnzrow_diag_G);
       A_subrow  = hypre_SeqVectorCreate(max_nnzrow_diag_G);
-      kap_grad  = hypre_SeqVectorCreate(max_cand_size);
+      kap_grad  = hypre_SeqVectorCreate(num_rows_diag_A);
       A_sub     = hypre_SeqVectorCreate(max_nnzrow_diag_G * max_nnzrow_diag_G);
       pattern   = hypre_CTAlloc(HYPRE_Int, max_nnzrow_diag_G, HYPRE_MEMORY_HOST);
-      kg_pos    = hypre_CTAlloc(HYPRE_Int, max_cand_size, HYPRE_MEMORY_HOST);
+      kg_pos    = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST);
       kg_marker = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST);
       marker    = hypre_TAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST);
 
-      hypre_SeqVectorInitialize(G_temp);
-      hypre_SeqVectorInitialize(A_subrow);
-      hypre_SeqVectorInitialize(kap_grad);
-      hypre_SeqVectorInitialize(A_sub);
+      hypre_SeqVectorInitialize_v2(G_temp, HYPRE_MEMORY_HOST);
+      hypre_SeqVectorInitialize_v2(A_subrow, HYPRE_MEMORY_HOST);
+      hypre_SeqVectorInitialize_v2(kap_grad, HYPRE_MEMORY_HOST);
+      hypre_SeqVectorInitialize_v2(A_sub, HYPRE_MEMORY_HOST);
       hypre_Memset(marker, -1, num_rows_diag_A * sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
 
       /* Setting data variables for vectors */
@@ -568,7 +565,7 @@ hypre_FSAISetupNative( void               *fsai_vdata,
                /* Solve A[P, P] G[i, P]' = -A[i, P] */
                hypre_DenseSPDSystemSolve(A_sub, A_subrow, G_temp);
 
-               /* Determine psi_{k+1} = G_temp[i]*A*G_temp[i]' */
+               /* Determine psi_{k+1} = G_temp[i] * A[P, P] * G_temp[i]' */
                new_psi = A_a[A_i[i]];
                for (j = 0; j < patt_size; j++)
                {
@@ -690,6 +687,9 @@ hypre_FSAISetupOMPDyn( void               *fsai_vdata,
                        hypre_ParVector    *f,
                        hypre_ParVector    *u )
 {
+   HYPRE_UNUSED_VAR(f);
+   HYPRE_UNUSED_VAR(u);
+
    /* Data structure variables */
    hypre_ParFSAIData      *fsai_data        = (hypre_ParFSAIData*) fsai_vdata;
    HYPRE_Real              kap_tolerance    = hypre_ParFSAIDataKapTolerance(fsai_data);
@@ -701,8 +701,6 @@ hypre_FSAISetupOMPDyn( void               *fsai_vdata,
    HYPRE_Int              *A_i              = hypre_CSRMatrixI(A_diag);
    HYPRE_Complex          *A_a              = hypre_CSRMatrixData(A_diag);
    HYPRE_Int               num_rows_diag_A  = hypre_CSRMatrixNumRows(A_diag);
-   HYPRE_Int               num_nnzs_diag_A  = hypre_CSRMatrixNumNonzeros(A_diag);
-   HYPRE_Int               avg_nnzrow_diag_A;
 
    /* Matrix G variables */
    hypre_ParCSRMatrix     *G = hypre_ParFSAIDataGmat(fsai_data);
@@ -712,17 +710,14 @@ hypre_FSAISetupOMPDyn( void               *fsai_vdata,
    HYPRE_Complex          *G_a;
    HYPRE_Int              *G_nnzcnt;          /* Array holding number of nonzeros of row G[i,:] */
    HYPRE_Int               max_nnzrow_diag_G; /* Max. number of nonzeros per row in G_diag */
-   HYPRE_Int               max_cand_size;     /* Max size of kg_pos */
 
    /* Local variables */
-   HYPRE_Int                i, j, jj;
-   char                     msg[512];    /* Warning message */
-   HYPRE_Complex           *twspace;     /* shared work space for omp threads */
+   HYPRE_Int               i, j, jj;
+   char                    msg[512];    /* Warning message */
+   HYPRE_Complex          *twspace;     /* shared work space for omp threads */
 
    /* Initalize some variables */
-   avg_nnzrow_diag_A = num_nnzs_diag_A / num_rows_diag_A;
    max_nnzrow_diag_G = max_steps * max_step_size + 1;
-   max_cand_size     = avg_nnzrow_diag_A * max_nnzrow_diag_G;
 
    G_diag = hypre_ParCSRMatrixDiag(G);
    G_a = hypre_CSRMatrixData(G_diag);
@@ -760,21 +755,20 @@ hypre_FSAISetupOMPDyn( void               *fsai_vdata,
       HYPRE_Complex  *G_temp_data;
       HYPRE_Complex  *A_subrow_data;
 
-
       /* Allocate and initialize local vector variables */
       G_temp    = hypre_SeqVectorCreate(max_nnzrow_diag_G);
       A_subrow  = hypre_SeqVectorCreate(max_nnzrow_diag_G);
-      kap_grad  = hypre_SeqVectorCreate(max_cand_size);
+      kap_grad  = hypre_SeqVectorCreate(num_rows_diag_A);
       A_sub     = hypre_SeqVectorCreate(max_nnzrow_diag_G * max_nnzrow_diag_G);
       pattern   = hypre_CTAlloc(HYPRE_Int, max_nnzrow_diag_G, HYPRE_MEMORY_HOST);
-      kg_pos    = hypre_CTAlloc(HYPRE_Int, max_cand_size, HYPRE_MEMORY_HOST);
+      kg_pos    = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST);
       kg_marker = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST);
       marker    = hypre_TAlloc(HYPRE_Int, num_rows_diag_A, HYPRE_MEMORY_HOST);
 
-      hypre_SeqVectorInitialize(G_temp);
-      hypre_SeqVectorInitialize(A_subrow);
-      hypre_SeqVectorInitialize(kap_grad);
-      hypre_SeqVectorInitialize(A_sub);
+      hypre_SeqVectorInitialize_v2(G_temp, HYPRE_MEMORY_HOST);
+      hypre_SeqVectorInitialize_v2(A_subrow, HYPRE_MEMORY_HOST);
+      hypre_SeqVectorInitialize_v2(kap_grad, HYPRE_MEMORY_HOST);
+      hypre_SeqVectorInitialize_v2(A_sub, HYPRE_MEMORY_HOST);
       hypre_Memset(marker, -1, num_rows_diag_A * sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
 
       /* Setting data variables for vectors */
@@ -827,7 +821,7 @@ hypre_FSAISetupOMPDyn( void               *fsai_vdata,
                /* Solve A[P, P] G[i, P]' = -A[i, P] */
                hypre_DenseSPDSystemSolve(A_sub, A_subrow, G_temp);
 
-               /* Determine psi_{k+1} = G_temp[i]*A*G_temp[i]' */
+               /* Determine psi_{k+1} = G_temp[i] * A[P, P] * G_temp[i]' */
                new_psi = A_a[A_i[i]];
                for (j = 0; j < patt_size; j++)
                {
@@ -928,6 +922,7 @@ hypre_FSAISetup( void               *fsai_vdata,
    hypre_ParFSAIData       *fsai_data     = (hypre_ParFSAIData*) fsai_vdata;
    HYPRE_Int                max_steps     = hypre_ParFSAIDataMaxSteps(fsai_data);
    HYPRE_Int                max_step_size = hypre_ParFSAIDataMaxStepSize(fsai_data);
+   HYPRE_Int                max_nnz_row   = hypre_ParFSAIDataMaxNnzRow(fsai_data);
    HYPRE_Int                algo_type     = hypre_ParFSAIDataAlgoType(fsai_data);
    HYPRE_Int                print_level   = hypre_ParFSAIDataPrintLevel(fsai_data);
    HYPRE_Int                eig_max_iters = hypre_ParFSAIDataEigMaxIters(fsai_data);
@@ -952,6 +947,13 @@ hypre_FSAISetup( void               *fsai_vdata,
    HYPRE_Int                max_nnzrow_diag_G;   /* Max. number of nonzeros per row in G_diag */
    HYPRE_Int                max_nonzeros_diag_G; /* Max. number of nonzeros in G_diag */
 
+   /* Sanity check */
+   if (f && hypre_ParVectorNumVectors(f) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "FSAI doesn't support multicomponent vectors");
+      return hypre_error_flag;
+   }
+
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* Create and initialize work vectors used in the solve phase */
@@ -964,28 +966,52 @@ hypre_FSAISetup( void               *fsai_vdata,
    hypre_ParFSAIDataRWork(fsai_data) = r_work;
    hypre_ParFSAIDataZWork(fsai_data) = z_work;
 
-   /* Create and initialize the matrix G */
-   max_nnzrow_diag_G   = max_steps * max_step_size + 1;
+   /* Create the matrix G */
+   if (algo_type == 1 || algo_type == 2)
+   {
+      max_nnzrow_diag_G = max_steps * max_step_size + 1;
+   }
+   else
+   {
+      max_nnzrow_diag_G = max_nnz_row + 1;
+   }
    max_nonzeros_diag_G = num_rows_diag_A * max_nnzrow_diag_G;
    G = hypre_ParCSRMatrixCreate(comm, num_rows_A, num_cols_A,
                                 row_starts_A, col_starts_A,
                                 0, max_nonzeros_diag_G, 0);
-   hypre_ParCSRMatrixInitialize(G);
    hypre_ParFSAIDataGmat(fsai_data) = G;
 
-   /* Compute G */
-   switch (algo_type)
+   /* Initialize and compute lower triangular factor G */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_MemoryLocation  memloc_A = hypre_ParCSRMatrixMemoryLocation(A);
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memloc_A);
+
+   if (exec == HYPRE_EXEC_DEVICE)
    {
-      case 1:
-         hypre_FSAISetupNative(fsai_vdata, A, f, u);
-         break;
+      hypre_FSAISetupDevice(fsai_vdata, A, f, u);
+   }
+   else
+#endif
+   {
+      /* Initialize matrix */
+      hypre_ParCSRMatrixInitialize(G);
 
-      case 2:
-         hypre_FSAISetupOMPDyn(fsai_vdata, A, f, u);
-         break;
+      switch (algo_type)
+      {
+         case 1:
+            // TODO: Change name to hypre_FSAISetupAdaptive
+            hypre_FSAISetupNative(fsai_vdata, A, f, u);
+            break;
 
-      default:
-         hypre_FSAISetupNative(fsai_vdata, A, f, u);
+         case 2:
+            // TODO: Change name to hypre_FSAISetupAdaptiveOMPDynamic
+            hypre_FSAISetupOMPDyn(fsai_vdata, A, f, u);
+            break;
+
+         default:
+            hypre_FSAISetupNative(fsai_vdata, A, f, u);
+            break;
+      }
    }
 
    /* Compute G^T */
@@ -998,15 +1024,22 @@ hypre_FSAISetup( void               *fsai_vdata,
       hypre_FSAIComputeOmega(fsai_vdata, A);
    }
 
-   /* Print Setup info */
+   /* Print setup info */
    if (print_level == 1)
    {
       hypre_FSAIPrintStats(fsai_data, A);
    }
+   else if (print_level > 2)
+   {
+      char filename[] = "FSAI.out.G.ij";
+      hypre_ParCSRMatrixPrintIJ(G, 0, 0, filename);
+   }
 
-#if DEBUG
-   char filename[] = "FSAI.out.G.ij";
-   hypre_ParCSRMatrixPrintIJ(G, 0, 0, filename);
+#if defined (DEBUG_FSAI)
+#if !defined (HYPRE_USING_GPU) ||
+   (defined (HYPRE_USING_GPU) && defined (HYPRE_USING_UNIFIED_MEMORY))
+   hypre_FSAIDumpLocalLSDense(fsai_vdata, "fsai_dense_ls.out", A);
+#endif
 #endif
 
    HYPRE_ANNOTATE_FUNC_END;
@@ -1023,12 +1056,16 @@ hypre_FSAIPrintStats( void *fsai_vdata,
                       hypre_ParCSRMatrix *A )
 {
    /* Data structure variables */
-   hypre_ParFSAIData      *fsai_data      = (hypre_ParFSAIData*) fsai_vdata;
-   HYPRE_Int               algo_type      = hypre_ParFSAIDataAlgoType(fsai_data);
-   HYPRE_Real              kap_tolerance  = hypre_ParFSAIDataKapTolerance(fsai_data);
-   HYPRE_Int               max_steps      = hypre_ParFSAIDataMaxSteps(fsai_data);
-   HYPRE_Int               max_step_size  = hypre_ParFSAIDataMaxStepSize(fsai_data);
-   HYPRE_Int               eig_max_iters  = hypre_ParFSAIDataEigMaxIters(fsai_data);
+   hypre_ParFSAIData      *fsai_data        = (hypre_ParFSAIData*) fsai_vdata;
+   HYPRE_Int               algo_type        = hypre_ParFSAIDataAlgoType(fsai_data);
+   HYPRE_Int               local_solve_type = hypre_ParFSAIDataLocalSolveType(fsai_data);
+   HYPRE_Real              kap_tolerance    = hypre_ParFSAIDataKapTolerance(fsai_data);
+   HYPRE_Int               max_steps        = hypre_ParFSAIDataMaxSteps(fsai_data);
+   HYPRE_Int               max_step_size    = hypre_ParFSAIDataMaxStepSize(fsai_data);
+   HYPRE_Int               max_nnz_row      = hypre_ParFSAIDataMaxNnzRow(fsai_data);
+   HYPRE_Int               num_levels       = hypre_ParFSAIDataNumLevels(fsai_data);
+   HYPRE_Real              threshold        = hypre_ParFSAIDataThreshold(fsai_data);
+   HYPRE_Int               eig_max_iters    = hypre_ParFSAIDataEigMaxIters(fsai_data);
    HYPRE_Real              density;
 
    hypre_ParCSRMatrix     *G = hypre_ParFSAIDataGmat(fsai_data);
@@ -1057,9 +1094,19 @@ hypre_FSAIPrintStats( void *fsai_vdata,
       hypre_printf("| No. MPI tasks:     %6d |\n", nprocs);
       hypre_printf("| No. threads:       %6d |\n", hypre_NumThreads());
       hypre_printf("| Algorithm type:    %6d |\n", algo_type);
-      hypre_printf("| Max no. steps:     %6d |\n", max_steps);
-      hypre_printf("| Max step size:     %6d |\n", max_step_size);
-      hypre_printf("| Kap grad tol:    %8.1e |\n", kap_tolerance);
+      hypre_printf("| Local solve type:  %6d |\n", local_solve_type);
+      if (algo_type == 1 || algo_type == 2)
+      {
+         hypre_printf("| Max no. steps:     %6d |\n", max_steps);
+         hypre_printf("| Max step size:     %6d |\n", max_step_size);
+         hypre_printf("| Kap grad tol:    %8.1e |\n", kap_tolerance);
+      }
+      else
+      {
+         hypre_printf("| Max nnz. row:      %6d |\n", max_nnz_row);
+         hypre_printf("| Number of levels:  %6d |\n", num_levels);
+         hypre_printf("| Threshold:       %8.1e |\n", threshold);
+      }
       hypre_printf("| Prec. density:   %8.3f |\n", density);
       hypre_printf("| Eig max iters:     %6d |\n", eig_max_iters);
       hypre_printf("| Omega factor:    %8.3f |\n", hypre_ParFSAIDataOmega(fsai_data));
@@ -1080,16 +1127,16 @@ hypre_FSAIPrintStats( void *fsai_vdata,
  ******************************************************************************/
 
 HYPRE_Int
-hypre_FSAIComputeOmega( void *fsai_vdata,
+hypre_FSAIComputeOmega( void               *fsai_vdata,
                         hypre_ParCSRMatrix *A )
 {
-   hypre_ParFSAIData    *fsai_data = (hypre_ParFSAIData*) fsai_vdata;
-
-   hypre_ParCSRMatrix   *G  =  hypre_ParFSAIDataGmat(fsai_data);
-   hypre_ParCSRMatrix   *GT =  hypre_ParFSAIDataGTmat(fsai_data);
-   hypre_ParVector      *r_work = hypre_ParFSAIDataRWork(fsai_data);
-   hypre_ParVector      *z_work = hypre_ParFSAIDataZWork(fsai_data);
-   HYPRE_Int             eig_max_iters = hypre_ParFSAIDataEigMaxIters(fsai_data);
+   hypre_ParFSAIData    *fsai_data       = (hypre_ParFSAIData*) fsai_vdata;
+   hypre_ParCSRMatrix   *G               = hypre_ParFSAIDataGmat(fsai_data);
+   hypre_ParCSRMatrix   *GT              = hypre_ParFSAIDataGTmat(fsai_data);
+   hypre_ParVector      *r_work          = hypre_ParFSAIDataRWork(fsai_data);
+   hypre_ParVector      *z_work          = hypre_ParFSAIDataZWork(fsai_data);
+   HYPRE_Int             eig_max_iters   = hypre_ParFSAIDataEigMaxIters(fsai_data);
+   HYPRE_MemoryLocation  memory_location = hypre_ParCSRMatrixMemoryLocation(A);
 
    hypre_ParVector      *eigvec;
    hypre_ParVector      *eigvec_old;
@@ -1100,18 +1147,33 @@ hypre_FSAIComputeOmega( void *fsai_vdata,
    eigvec_old = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                       hypre_ParCSRMatrixGlobalNumRows(A),
                                       hypre_ParCSRMatrixRowStarts(A));
-   hypre_ParVectorInitialize(eigvec_old);
    eigvec = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                   hypre_ParCSRMatrixGlobalNumRows(A),
                                   hypre_ParCSRMatrixRowStarts(A));
-   hypre_ParVectorInitialize(eigvec);
-   hypre_ParVectorSetRandomValues(eigvec, 256);
+   hypre_ParVectorInitialize_v2(eigvec, memory_location);
+   hypre_ParVectorInitialize_v2(eigvec_old, memory_location);
+
+#if defined(HYPRE_USING_GPU)
+   /* Make random number generation faster on GPUs */
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      hypre_Vector  *eigvec_local = hypre_ParVectorLocalVector(eigvec);
+      HYPRE_Complex *eigvec_data  = hypre_VectorData(eigvec_local);
+      HYPRE_Int      eigvec_size  = hypre_VectorSize(eigvec_local);
+
+      hypre_CurandUniform(eigvec_size, eigvec_data, 0, 0, 0, 0);
+   }
+   else
+#endif
+   {
+      hypre_ParVectorSetRandomValues(eigvec, 256);
+   }
 
    /* Power method iteration */
    for (i = 0; i < eig_max_iters; i++)
    {
       norm = hypre_ParVectorInnerProd(eigvec, eigvec);
-      invnorm = 1.0 / sqrt(norm);
+      invnorm = 1.0 / hypre_sqrt(norm);
       hypre_ParVectorScale(invnorm, eigvec);
 
       if (i == (eig_max_iters - 1))
@@ -1125,7 +1187,14 @@ hypre_FSAIComputeOmega( void *fsai_vdata,
       hypre_ParCSRMatrixMatvec(1.0, GT, z_work, 0.0, eigvec);
    }
    norm = hypre_ParVectorInnerProd(eigvec, eigvec_old);
-   lambda = sqrt(norm);
+   lambda = hypre_sqrt(norm);
+
+   /* Check lambda */
+   if (lambda < HYPRE_REAL_EPSILON)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Found small lambda. Reseting it to one!");
+      lambda = 1.0;
+   }
 
    /* Free memory */
    hypre_ParVectorDestroy(eigvec_old);
@@ -1134,6 +1203,155 @@ hypre_FSAIComputeOmega( void *fsai_vdata,
    /* Update omega */
    omega = 1.0 / lambda;
    hypre_FSAISetOmega(fsai_vdata, omega);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_FSAIDumpLocalLSDense
+ *
+ * Dump local linear systems to file. Matrices are written in dense format.
+ * This functions serves for debugging.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_FSAIDumpLocalLSDense( void               *fsai_vdata,
+                            const char         *filename,
+                            hypre_ParCSRMatrix *A )
+{
+   hypre_ParFSAIData      *fsai_data = (hypre_ParFSAIData*) fsai_vdata;
+
+   /* Data structure variables */
+   MPI_Comm                comm = hypre_ParCSRMatrixComm(A);
+   HYPRE_Int               max_steps = hypre_ParFSAIDataMaxSteps(fsai_data);
+   HYPRE_Int               max_step_size = hypre_ParFSAIDataMaxStepSize(fsai_data);
+   hypre_ParCSRMatrix     *G = hypre_ParFSAIDataGmat(fsai_data);
+   hypre_CSRMatrix        *G_diag = hypre_ParCSRMatrixDiag(G);
+   HYPRE_Int              *G_i = hypre_CSRMatrixI(G_diag);
+   HYPRE_Int              *G_j = hypre_CSRMatrixJ(G_diag);
+   HYPRE_Int               num_rows_diag_G = hypre_CSRMatrixNumRows(G_diag);
+
+   /* CSRMatrix A_diag variables */
+   hypre_CSRMatrix        *A_diag           = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Int              *A_i              = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int              *A_j              = hypre_CSRMatrixJ(A_diag);
+   HYPRE_Complex          *A_a              = hypre_CSRMatrixData(A_diag);
+
+   FILE                   *fp;
+   char                    new_filename[1024];
+   HYPRE_Int               myid;
+   HYPRE_Int               i, j, k, m, n;
+   HYPRE_Int               ii, jj;
+   HYPRE_Int               nnz, col, index;
+   HYPRE_Int              *indices;
+   HYPRE_Int              *marker;
+   HYPRE_Real             *data;
+   HYPRE_Int               data_size;
+   HYPRE_Real              density;
+   HYPRE_Int               width = 20; //6
+   HYPRE_Int               prec  = 16; //2
+
+   hypre_MPI_Comm_rank(comm, &myid);
+   hypre_sprintf(new_filename, "%s.%05d", filename, myid);
+   if ((fp = fopen(new_filename, "w")) == NULL)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error: can't open output file %s\n");
+      return hypre_error_flag;
+   }
+
+   /* Allocate memory */
+   data_size = (max_steps * max_step_size) *
+               (max_steps * max_step_size + 1);
+   indices = hypre_CTAlloc(HYPRE_Int, data_size, HYPRE_MEMORY_HOST);
+   data    = hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_HOST);
+   marker  = hypre_TAlloc(HYPRE_Int, num_rows_diag_G, HYPRE_MEMORY_HOST);
+   hypre_Memset(marker, -1, num_rows_diag_G * sizeof(HYPRE_Int), HYPRE_MEMORY_HOST);
+
+   /* Write header info */
+   hypre_fprintf(fp, "num_linear_sys = %d\n", num_rows_diag_G);
+   hypre_fprintf(fp, "max_data_size = %d\n", data_size);
+   hypre_fprintf(fp, "max_num_steps = %d\n", hypre_ParFSAIDataMaxSteps(fsai_data));
+   hypre_fprintf(fp, "max_step_size = %d\n", hypre_ParFSAIDataMaxStepSize(fsai_data));
+   hypre_fprintf(fp, "max_step_size = %g\n", hypre_ParFSAIDataKapTolerance(fsai_data));
+   hypre_fprintf(fp, "algo_type = %d\n\n", hypre_ParFSAIDataAlgoType(fsai_data));
+
+   /* Write local full linear systems */
+   for (i = 0; i < num_rows_diag_G; i++)
+   {
+      /* Build marker array */
+      n = G_i[i + 1] - G_i[i] - 1;
+      m = n + 1;
+      for (j = (G_i[i] + 1); j < G_i[i + 1]; j++)
+      {
+         marker[G_j[j]] = j - G_i[i] - 1;
+      }
+
+      /* Gather matrix coefficients */
+      nnz = 0;
+      for (j = (G_i[i] + 1); j < G_i[i + 1]; j++)
+      {
+         for (k = A_i[G_j[j]]; k < A_i[G_j[j] + 1]; k++)
+         {
+            if ((col = marker[A_j[k]]) >= 0)
+            {
+               /* Add A(i,j) entry */
+               index = (j - G_i[i] - 1) * n + col;
+               data[index] = A_a[k];
+               indices[nnz] = index;
+               nnz++;
+            }
+         }
+      }
+      density = (n > 0) ? (HYPRE_Real) nnz / (n * n) : 0.0;
+
+      /* Gather RHS coefficients */
+      for (j = A_i[i]; j < A_i[i + 1]; j++)
+      {
+         if ((col = marker[A_j[j]]) >= 0)
+         {
+            index = (m - 1) * n + col;
+            data[index] = A_a[j];
+            indices[nnz] = index;
+            nnz++;
+         }
+      }
+
+      /* Write coefficients to file */
+      hypre_fprintf(fp, "id = %d, (m, n) = (%d, %d), rho = %.3f\n", i, m, n, density);
+      for (ii = 0; ii < n; ii++)
+      {
+         for (jj = 0; jj < n; jj++)
+         {
+            hypre_fprintf(fp, "%*.*f ", width, prec, data[ii * n + jj]);
+         }
+         hypre_fprintf(fp, "\n");
+      }
+      for (jj = 0; jj < n; jj++)
+      {
+         hypre_fprintf(fp, "%*.*f ", width, prec, data[ii * n + jj]);
+      }
+      hypre_fprintf(fp, "\n");
+
+
+      /* Reset work arrays */
+      for (j = (G_i[i] + 1); j < G_i[i + 1]; j++)
+      {
+         marker[G_j[j]] = -1;
+      }
+
+      for (k = 0; k < nnz; k++)
+      {
+         data[indices[k]] = 0.0;
+      }
+   }
+
+   /* Close stream */
+   fclose(fp);
+
+   /* Free memory */
+   hypre_TFree(indices, HYPRE_MEMORY_HOST);
+   hypre_TFree(marker, HYPRE_MEMORY_HOST);
+   hypre_TFree(data, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

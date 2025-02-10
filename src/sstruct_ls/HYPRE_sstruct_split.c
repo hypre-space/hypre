@@ -20,6 +20,9 @@
 
 #include "_hypre_sstruct_ls.h"
 
+typedef HYPRE_Int (*HYPRE_PtrToVoid1Fcn)(void*);
+typedef HYPRE_Int (*HYPRE_PtrToVoid4Fcn)(void*, void*, void*, void*);
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
@@ -32,8 +35,8 @@ typedef struct hypre_SStructSolver_struct
 
    void                 ****smatvec_data;
 
-   HYPRE_Int            (***ssolver_solve)();
-   HYPRE_Int            (***ssolver_destroy)();
+   HYPRE_PtrToVoid1Fcn    **ssolver_destroy;
+   HYPRE_PtrToVoid4Fcn    **ssolver_solve;
    void                  ***ssolver_data;
 
    HYPRE_Real               tol;
@@ -54,6 +57,8 @@ HYPRE_Int
 HYPRE_SStructSplitCreate( MPI_Comm             comm,
                           HYPRE_SStructSolver *solver_ptr )
 {
+   HYPRE_UNUSED_VAR(comm);
+
    hypre_SStructSolver *solver;
 
    solver = hypre_TAlloc(hypre_SStructSolver,  1, HYPRE_MEMORY_HOST);
@@ -88,11 +93,11 @@ HYPRE_SStructSplitDestroy( HYPRE_SStructSolver solver )
    HYPRE_Int                nparts;
    HYPRE_Int               *nvars;
    void                 ****smatvec_data;
-   HYPRE_Int            (***ssolver_solve)();
-   HYPRE_Int            (***ssolver_destroy)();
+   HYPRE_PtrToVoid4Fcn    **ssolver_solve;
+   HYPRE_PtrToVoid1Fcn    **ssolver_destroy;
    void                  ***ssolver_data;
 
-   HYPRE_Int              (*sdestroy)(void *);
+   HYPRE_PtrToVoid1Fcn      sdestroy;
    void                    *sdata;
 
    HYPRE_Int                part, vi, vj;
@@ -120,7 +125,7 @@ HYPRE_SStructSplitDestroy( HYPRE_SStructSolver solver )
                }
             }
             hypre_TFree(smatvec_data[part][vi], HYPRE_MEMORY_HOST);
-            sdestroy = (HYPRE_Int (*)(void *))ssolver_destroy[part][vi];
+            sdestroy = ssolver_destroy[part][vi];
             sdata = ssolver_data[part][vi];
             sdestroy(sdata);
          }
@@ -150,14 +155,14 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
                          HYPRE_SStructVector b,
                          HYPRE_SStructVector x )
 {
+   HYPRE_Int                ssolver = (solver -> ssolver);
    hypre_SStructVector     *y;
    HYPRE_Int                nparts;
    HYPRE_Int               *nvars;
    void                 ****smatvec_data;
-   HYPRE_Int            (***ssolver_solve)();
-   HYPRE_Int            (***ssolver_destroy)();
+   HYPRE_PtrToVoid4Fcn    **ssolver_solve;
+   HYPRE_PtrToVoid1Fcn    **ssolver_destroy;
    void                  ***ssolver_data;
-   HYPRE_Int                ssolver          = (solver -> ssolver);
 
    MPI_Comm                 comm;
    hypre_SStructGrid       *grid;
@@ -170,8 +175,9 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
    HYPRE_StructMatrix      sAH;
    HYPRE_StructVector      sxH;
    HYPRE_StructVector      syH;
-   HYPRE_Int              (*ssolve)();
-   HYPRE_Int              (*sdestroy)();
+
+   HYPRE_PtrToVoid4Fcn      ssolve;
+   HYPRE_PtrToVoid1Fcn      sdestroy;
    void                    *sdata;
 
    HYPRE_Int                part, vi, vj;
@@ -183,13 +189,13 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
    HYPRE_SStructVectorAssemble(y);
 
    nparts = hypre_SStructMatrixNParts(A);
-   nvars = hypre_TAlloc(HYPRE_Int,  nparts, HYPRE_MEMORY_HOST);
-   smatvec_data    = hypre_TAlloc(void ***,  nparts, HYPRE_MEMORY_HOST);
-   ssolver_solve   = (HYPRE_Int (***)()) hypre_MAlloc((sizeof(HYPRE_Int (**)()) * nparts),
-                                                      HYPRE_MEMORY_HOST);
-   ssolver_destroy = (HYPRE_Int (***)()) hypre_MAlloc((sizeof(HYPRE_Int (**)()) * nparts),
-                                                      HYPRE_MEMORY_HOST);
-   ssolver_data    = hypre_TAlloc(void **,  nparts, HYPRE_MEMORY_HOST);
+   nvars  = hypre_TAlloc(HYPRE_Int, nparts, HYPRE_MEMORY_HOST);
+
+   smatvec_data    = hypre_TAlloc(void***, nparts, HYPRE_MEMORY_HOST);
+   ssolver_solve   = hypre_TAlloc(HYPRE_PtrToVoid4Fcn*, nparts, HYPRE_MEMORY_HOST);
+   ssolver_destroy = hypre_TAlloc(HYPRE_PtrToVoid1Fcn*, nparts, HYPRE_MEMORY_HOST);
+   ssolver_data    = hypre_TAlloc(void**,  nparts, HYPRE_MEMORY_HOST);
+
    for (part = 0; part < nparts; part++)
    {
       pA = hypre_SStructMatrixPMatrix(A, part);
@@ -197,15 +203,13 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
       py = hypre_SStructVectorPVector(y, part);
       nvars[part] = hypre_SStructPMatrixNVars(pA);
 
-      smatvec_data[part]    = hypre_TAlloc(void **,  nvars[part], HYPRE_MEMORY_HOST);
-      ssolver_solve[part]   =
-         (HYPRE_Int (**)()) hypre_MAlloc((sizeof(HYPRE_Int (*)()) * nvars[part]), HYPRE_MEMORY_HOST);
-      ssolver_destroy[part] =
-         (HYPRE_Int (**)()) hypre_MAlloc((sizeof(HYPRE_Int (*)()) * nvars[part]), HYPRE_MEMORY_HOST);
-      ssolver_data[part]    = hypre_TAlloc(void *,  nvars[part], HYPRE_MEMORY_HOST);
+      smatvec_data[part]    = hypre_TAlloc(void**, nvars[part], HYPRE_MEMORY_HOST);
+      ssolver_solve[part]   = hypre_TAlloc(HYPRE_PtrToVoid4Fcn, nvars[part], HYPRE_MEMORY_HOST);
+      ssolver_destroy[part] = hypre_TAlloc(HYPRE_PtrToVoid1Fcn, nvars[part], HYPRE_MEMORY_HOST);
+      ssolver_data[part]    = hypre_TAlloc(void*, nvars[part], HYPRE_MEMORY_HOST);
       for (vi = 0; vi < nvars[part]; vi++)
       {
-         smatvec_data[part][vi] = hypre_TAlloc(void *,  nvars[part], HYPRE_MEMORY_HOST);
+         smatvec_data[part][vi] = hypre_TAlloc(void*,  nvars[part], HYPRE_MEMORY_HOST);
          for (vj = 0; vj < nvars[part]; vj++)
          {
             sA = hypre_SStructPMatrixSMatrix(pA, vi, vj);
@@ -231,7 +235,9 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
                if (ssolver != HYPRE_Jacobi)
                {
                   hypre_error(HYPRE_ERROR_GENERIC);
-               } /* don't break */
+               }
+            /* fall through */
+
             case HYPRE_Jacobi:
                HYPRE_StructJacobiCreate(comm, (HYPRE_StructSolver *)&sdata);
                HYPRE_StructJacobiSetMaxIter((HYPRE_StructSolver)sdata, 1);
@@ -241,9 +247,10 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
                   HYPRE_StructJacobiSetZeroGuess((HYPRE_StructSolver)sdata);
                }
                HYPRE_StructJacobiSetup((HYPRE_StructSolver)sdata, sAH, syH, sxH);
-               ssolve = (HYPRE_Int (*)())HYPRE_StructJacobiSolve;
-               sdestroy = (HYPRE_Int (*)())HYPRE_StructJacobiDestroy;
+               ssolve   = (HYPRE_PtrToVoid4Fcn) HYPRE_StructJacobiSolve;
+               sdestroy = (HYPRE_PtrToVoid1Fcn) HYPRE_StructJacobiDestroy;
                break;
+
             case HYPRE_SMG:
                HYPRE_StructSMGCreate(comm, (HYPRE_StructSolver *)&sdata);
                HYPRE_StructSMGSetMemoryUse((HYPRE_StructSolver)sdata, 0);
@@ -258,9 +265,10 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
                HYPRE_StructSMGSetLogging((HYPRE_StructSolver)sdata, 0);
                HYPRE_StructSMGSetPrintLevel((HYPRE_StructSolver)sdata, 0);
                HYPRE_StructSMGSetup((HYPRE_StructSolver)sdata, sAH, syH, sxH);
-               ssolve = (HYPRE_Int (*)())HYPRE_StructSMGSolve;
-               sdestroy = (HYPRE_Int (*)())HYPRE_StructSMGDestroy;
+               ssolve   = (HYPRE_PtrToVoid4Fcn) HYPRE_StructSMGSolve;
+               sdestroy = (HYPRE_PtrToVoid1Fcn) HYPRE_StructSMGDestroy;
                break;
+
             case HYPRE_PFMG:
                HYPRE_StructPFMGCreate(comm, (HYPRE_StructSolver *)&sdata);
                HYPRE_StructPFMGSetMaxIter((HYPRE_StructSolver)sdata, 1);
@@ -275,8 +283,8 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
                HYPRE_StructPFMGSetLogging((HYPRE_StructSolver)sdata, 0);
                HYPRE_StructPFMGSetPrintLevel((HYPRE_StructSolver)sdata, 0);
                HYPRE_StructPFMGSetup((HYPRE_StructSolver)sdata, sAH, syH, sxH);
-               ssolve = (HYPRE_Int (*)())HYPRE_StructPFMGSolve;
-               sdestroy = (HYPRE_Int (*)())HYPRE_StructPFMGDestroy;
+               ssolve   = (HYPRE_PtrToVoid4Fcn) HYPRE_StructPFMGSolve;
+               sdestroy = (HYPRE_PtrToVoid1Fcn) HYPRE_StructPFMGDestroy;
                break;
          }
          ssolver_solve[part][vi]   = ssolve;
@@ -310,16 +318,16 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
                          HYPRE_SStructVector b,
                          HYPRE_SStructVector x )
 {
-   hypre_SStructVector     *y                = (solver -> y);
-   HYPRE_Int                nparts           = (solver -> nparts);
-   HYPRE_Int               *nvars            = (solver -> nvars);
-   void                 ****smatvec_data     = (solver -> smatvec_data);
-   HYPRE_Int            (***ssolver_solve)() = (solver -> ssolver_solve);
-   void                  ***ssolver_data     = (solver -> ssolver_data);
-   HYPRE_Real               tol              = (solver -> tol);
-   HYPRE_Int                max_iter         = (solver -> max_iter);
-   HYPRE_Int                zero_guess       = (solver -> zero_guess);
-   void                    *matvec_data      = (solver -> matvec_data);
+   hypre_SStructVector     *y                     = (solver -> y);
+   HYPRE_Int                nparts                = (solver -> nparts);
+   HYPRE_Int               *nvars                 = (solver -> nvars);
+   void                 ****smatvec_data          = (solver -> smatvec_data);
+   HYPRE_PtrToVoid4Fcn    **ssolver_solve         = (solver -> ssolver_solve);
+   void                  ***ssolver_data          = (solver -> ssolver_data);
+   HYPRE_Real               tol                   = (solver -> tol);
+   HYPRE_Int                max_iter              = (solver -> max_iter);
+   HYPRE_Int                zero_guess            = (solver -> zero_guess);
+   void                    *matvec_data           = (solver -> matvec_data);
 
    hypre_SStructPMatrix    *pA;
    hypre_SStructPVector    *px;
@@ -327,8 +335,8 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
    hypre_StructMatrix      *sA;
    hypre_StructVector      *sx;
    hypre_StructVector      *sy;
-   HYPRE_Int              (*ssolve)(void*, hypre_StructMatrix*, hypre_StructVector*,
-                                    hypre_StructVector*);
+
+   HYPRE_PtrToVoid4Fcn      ssolve;
    void                    *sdata;
    hypre_ParCSRMatrix      *parcsrA;
    hypre_ParVector         *parx;
@@ -336,8 +344,6 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
 
    HYPRE_Int                iter, part, vi, vj;
    HYPRE_Real               b_dot_b = 0, r_dot_r;
-
-
 
    /* part of convergence check */
    if (tol > 0.0)
@@ -364,7 +370,7 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
          hypre_SStructCopy(b, y);
          hypre_SStructMatvecCompute(matvec_data, -1.0, A, x, 1.0, y);
          hypre_SStructInnerProd(y, y, &r_dot_r);
-         (solver -> rel_norm) = sqrt(r_dot_r / b_dot_b);
+         (solver -> rel_norm) = hypre_sqrt(r_dot_r / b_dot_b);
 
          if ((solver -> rel_norm) < tol)
          {
@@ -414,13 +420,13 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
          py = hypre_SStructVectorPVector(y, part);
          for (vi = 0; vi < nvars[part]; vi++)
          {
-            ssolve = (HYPRE_Int (*)(void *, hypre_StructMatrix *, hypre_StructVector *,
-                                    hypre_StructVector *))ssolver_solve[part][vi];
+            ssolve = ssolver_solve[part][vi];
             sdata  = ssolver_data[part][vi];
             sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);
             sx = hypre_SStructPVectorSVector(px, vi);
             sy = hypre_SStructPVectorSVector(py, vi);
-            ssolve(sdata, sA, sy, sx);
+
+            ssolve(sdata, (void*) sA, (void*) sy, (void*) sx);
          }
       }
    }

@@ -14,6 +14,8 @@
 HYPRE_Int
 HYPRE_ParCSRPCGCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
+   HYPRE_UNUSED_VAR(comm);
+
    hypre_PCGFunctions * pcg_functions;
 
    if (!solver)
@@ -148,15 +150,26 @@ HYPRE_ParCSRPCGSetRelChange( HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_ParCSRPCGSetPrecond( HYPRE_Solver         solver,
+HYPRE_ParCSRPCGSetPrecond( HYPRE_Solver            solver,
                            HYPRE_PtrToParSolverFcn precond,
                            HYPRE_PtrToParSolverFcn precond_setup,
-                           HYPRE_Solver         precond_solver )
+                           HYPRE_Solver            precond_solver )
 {
    return ( HYPRE_PCGSetPrecond( solver,
                                  (HYPRE_PtrToSolverFcn) precond,
                                  (HYPRE_PtrToSolverFcn) precond_setup,
                                  precond_solver ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRPCGSetPreconditioner
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRPCGSetPreconditioner( HYPRE_Solver solver,
+                                  HYPRE_Solver precond )
+{
+   return ( HYPRE_PCGSetPreconditioner( solver, precond ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -238,7 +251,12 @@ HYPRE_ParCSRDiagScaleSetup( HYPRE_Solver solver,
                             HYPRE_ParVector y,
                             HYPRE_ParVector x      )
 {
-   return 0;
+   HYPRE_UNUSED_VAR(solver);
+   HYPRE_UNUSED_VAR(A);
+   HYPRE_UNUSED_VAR(y);
+   HYPRE_UNUSED_VAR(x);
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -251,49 +269,9 @@ HYPRE_ParCSRDiagScale( HYPRE_Solver solver,
                        HYPRE_ParVector Hy,
                        HYPRE_ParVector Hx      )
 {
-   return hypre_ParCSRDiagScaleVector(HA, Hy, Hx);
+   HYPRE_UNUSED_VAR(solver);
+
+   return hypre_ParCSRDiagScaleVector((hypre_ParCSRMatrix *) HA,
+                                      (hypre_ParVector *)    Hy,
+                                      (hypre_ParVector *)    Hx);
 }
-
-/*--------------------------------------------------------------------------
- * HYPRE_ParCSRSymPrecondSetup
- *--------------------------------------------------------------------------*/
-
-/*
-
-HYPRE_Int
-HYPRE_ParCSRSymPrecondSetup( HYPRE_Solver solver,
-                             HYPRE_ParCSRMatrix A,
-                             HYPRE_ParVector b,
-                             HYPRE_ParVector x      )
-{
-   hypre_ParCSRMatrix *A = (hypre_ParCSRMatrix *) A;
-   hypre_ParVector    *y = (hypre_ParVector *) b;
-   hypre_ParVector    *x = (hypre_ParVector *) x;
-
-   HYPRE_Real *x_data = hypre_VectorData(hypre_ParVectorLocalVector(x));
-   HYPRE_Real *y_data = hypre_VectorData(hypre_ParVectorLocalVector(y));
-   HYPRE_Real *A_diag = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
-   HYPRE_Real *A_offd = hypre_CSRMatrixData(hypre_ParCSRMatrixOffD(A));
-
-   HYPRE_Int i, ierr = 0;
-   hypre_ParCSRMatrix *Asym;
-   MPI_Comm comm;
-   HYPRE_Int global_num_rows;
-   HYPRE_Int global_num_cols;
-   HYPRE_Int *row_starts;
-   HYPRE_Int *col_starts;
-   HYPRE_Int num_cols_offd;
-   HYPRE_Int num_nonzeros_diag;
-   HYPRE_Int num_nonzeros_offd;
-
-   Asym = hypre_ParCSRMatrixCreate(comm, global_num_rows, global_num_cols,
-                                   row_starts, col_starts, num_cols_offd,
-                                   num_nonzeros_diag, num_nonzeros_offd);
-
-   for (i=0; i < hypre_VectorSize(hypre_ParVectorLocalVector(x)); i++)
-   {
-      x_data[i] = y_data[i]/A_data[A_i[i]];
-   }
-
-   return ierr;
-} */

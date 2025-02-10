@@ -46,7 +46,7 @@
  *
  *--------------------------------------------------------------------------*/
 hypre_ParCSRMatrix *
-hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
+hypre_Maxwell_Grad(hypre_SStructGrid *grid)
 {
    MPI_Comm               comm = (grid ->  comm);
 
@@ -92,9 +92,9 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    HYPRE_BigInt           jlower, jupper;
 
    HYPRE_BigInt           start_rank1, start_rank2, rank;
-
    HYPRE_Int              myproc;
-   HYPRE_Int              ierr = 0;
+
+   HYPRE_MemoryLocation   memory_location;
 
    hypre_BoxInit(&layer, ndim);
    hypre_BoxInit(&interior_box, ndim);
@@ -102,10 +102,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    hypre_MPI_Comm_rank(comm, &myproc);
 
    hypre_ClearIndex(shift);
-   for (i = 0; i < ndim; i++)
-   {
-      hypre_IndexD(shift, i) = -1;
-   }
+   hypre_SetIndex(shift, -1);
+   hypre_SetIndex(lindex, 0);
 
    /* To get the correct ranks, separate node & edge grids must be formed.
       Note that the edge vars must be ordered the same way as is in grid.*/
@@ -237,6 +235,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    HYPRE_IJMatrixSetObjectType(T_grad, HYPRE_PARCSR);
    HYPRE_IJMatrixInitialize(T_grad);
 
+   memory_location = hypre_IJMatrixMemoryLocation(T_grad);
+
    /*------------------------------------------------------------------------------
     * fill up the parcsr matrix.
     *------------------------------------------------------------------------------*/
@@ -312,7 +312,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
          i = hypre_BoxVolume(box);
 
          tmp_box_array1 = hypre_BoxArrayCreate(0, ndim);
-         ierr         += hypre_BoxBoundaryG(box, var_grid, tmp_box_array1);
+         hypre_BoxBoundaryG(box, var_grid, tmp_box_array1);
 
          for (m = 0; m < hypre_BoxArraySize(tmp_box_array1); m++)
          {
@@ -400,6 +400,11 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                direction[1] = 1;
                break;
             }
+
+            default:
+            {
+               ndirection = 0;
+            }
          }  /* switch(j) */
 
          hypre_ForBoxI(j, boxes)
@@ -412,8 +417,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
             {
                tmp_box_array1 = hypre_BoxArrayCreate(0, ndim);
                tmp_box_array2 = hypre_BoxArrayCreate(0, ndim);
-               ierr += hypre_BoxBoundaryDG(box, var_grid, tmp_box_array1,
-                                           tmp_box_array2, direction[d]);
+               hypre_BoxBoundaryDG(box, var_grid, tmp_box_array1,
+                                   tmp_box_array2, direction[d]);
 
                for (k = 0; k < hypre_BoxArraySize(tmp_box_array1); k++)
                {
@@ -471,13 +476,13 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
 
    /* set vals. Will have more memory than is needed- extra allotted
       for repeated nodes. */
-   inode = hypre_CTAlloc(HYPRE_BigInt,  nrows, HYPRE_MEMORY_DEVICE);
-   ncols = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_DEVICE);
+   inode = hypre_CTAlloc(HYPRE_BigInt, nrows, memory_location);
+   ncols = hypre_CTAlloc(HYPRE_Int, nrows, memory_location);
 
    /* each row can have at most two columns */
    k = 2 * nrows;
-   jedge = hypre_CTAlloc(HYPRE_BigInt,  k, HYPRE_MEMORY_DEVICE);
-   vals = hypre_TAlloc(HYPRE_Real,  k, HYPRE_MEMORY_DEVICE);
+   jedge = hypre_CTAlloc(HYPRE_BigInt, k, memory_location);
+   vals = hypre_TAlloc(HYPRE_Real, k, memory_location);
    for (i = 0; i < k; i++)
    {
       vals[i] = -1.0;
@@ -732,10 +737,10 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
 
    hypre_TFree(eflag, HYPRE_MEMORY_HOST);
    hypre_TFree(nflag, HYPRE_MEMORY_HOST);
-   hypre_TFree(ncols, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(inode, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(jedge, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(vals,  HYPRE_MEMORY_DEVICE);
+   hypre_TFree(ncols, memory_location);
+   hypre_TFree(inode, memory_location);
+   hypre_TFree(jedge, memory_location);
+   hypre_TFree(vals, memory_location);
 
    parcsr_grad = (hypre_ParCSRMatrix *) hypre_IJMatrixObject(T_grad);
    HYPRE_IJMatrixSetObjectType(T_grad, -1);

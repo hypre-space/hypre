@@ -50,7 +50,7 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   HYPRE_Init();
+   HYPRE_Initialize();
 
 #if defined(HYPRE_USING_KOKKOS)
    Kokkos::initialize (argc, argv);
@@ -210,7 +210,6 @@ main( hypre_int argc,
 
    zypre_BoxLoop1Begin(dim, loop_size,
                        x1_data_box, start, unit_stride, xi1);
-   zypre_BoxLoop1For(xi1)
    {
       xp1[xi1] ++;
    }
@@ -222,7 +221,7 @@ main( hypre_int argc,
    hypre_SerialBoxLoop1Begin(3, loop_size,
                              x1_data_box, start, unit_stride, xi1);
    {
-      sum += xp1[xi1];
+      sum += (HYPRE_Int)xp1[xi1];
       if (xp1[xi1] != 1)
       {
          zypre_BoxLoopGetIndex(index);
@@ -250,7 +249,7 @@ main( hypre_int argc,
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
 
    /*-----------------------------------------------------------
-    * Time old boxloops [Device]
+    * Time (device) boxloops
     *-----------------------------------------------------------*/
 
    /* Time BoxLoop0 */
@@ -340,12 +339,12 @@ main( hypre_int argc,
    }
    hypre_EndTiming(time_index);
 
-   hypre_PrintTiming("Old BoxLoop times [DEVICE]", hypre_MPI_COMM_WORLD);
+   hypre_PrintTiming("BoxLoop times [DEVICE]", hypre_MPI_COMM_WORLD);
    hypre_FinalizeAllTimings();
    hypre_ClearTiming();
 
    /*-----------------------------------------------------------
-    * Time new boxloops [Host]
+    * Time host boxloops
     *-----------------------------------------------------------*/
 
    /* Time BoxLoop0 */
@@ -354,11 +353,9 @@ main( hypre_int argc,
    for (rep = 0; rep < reps; rep++)
    {
       xi1 = 0;
+#undef HYPRE_OMP_CLAUSE
+#define HYPRE_OMP_CLAUSE firstprivate(xi1)
       zypre_BoxLoop0Begin(dim, loop_size);
-#ifdef HYPRE_USING_OPENMP
-      #pragma omp parallel for private(ZYPRE_BOX_PRIVATE) firstprivate(xi1) HYPRE_SMP_SCHEDULE
-#endif
-      zypre_BoxLoop0For()
       {
          xp1[xi1] += xp1[xi1];
          xi1++;
@@ -374,10 +371,6 @@ main( hypre_int argc,
    {
       zypre_BoxLoop1Begin(dim, loop_size,
                           x1_data_box, start, unit_stride, xi1);
-#ifdef HYPRE_USING_OPENMP
-      #pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      zypre_BoxLoop1For(xi1)
       {
          xp1[xi1] += xp1[xi1];
       }
@@ -393,10 +386,6 @@ main( hypre_int argc,
       zypre_BoxLoop2Begin(dim, loop_size,
                           x1_data_box, start, unit_stride, xi1,
                           x2_data_box, start, unit_stride, xi2);
-#ifdef HYPRE_USING_OPENMP
-      #pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      zypre_BoxLoop2For(xi1, xi2)
       {
          xp1[xi1] += xp1[xi1] + xp2[xi2];
       }
@@ -413,10 +402,6 @@ main( hypre_int argc,
                           x1_data_box, start, unit_stride, xi1,
                           x2_data_box, start, unit_stride, xi2,
                           x3_data_box, start, unit_stride, xi3);
-#ifdef HYPRE_USING_OPENMP
-      #pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      zypre_BoxLoop3For(xi1, xi2, xi3)
       {
          xp1[xi1] += xp1[xi1] + xp2[xi2] + xp3[xi3];
       }
@@ -434,10 +419,6 @@ main( hypre_int argc,
                           x2_data_box, start, unit_stride, xi2,
                           x3_data_box, start, unit_stride, xi3,
                           x4_data_box, start, unit_stride, xi4);
-#ifdef HYPRE_USING_OPENMP
-      #pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      zypre_BoxLoop4For(xi1, xi2, xi3, xi4)
       {
          xp1[xi1] += xp1[xi1] + xp2[xi2] + xp3[xi3] + xp4[xi4];
       }
@@ -445,7 +426,7 @@ main( hypre_int argc,
    }
    hypre_EndTiming(time_index);
 
-   hypre_PrintTiming("New BoxLoop times [HOST]", hypre_MPI_COMM_WORLD);
+   hypre_PrintTiming("BoxLoop times [HOST]", hypre_MPI_COMM_WORLD);
    hypre_FinalizeAllTimings();
    hypre_ClearTiming();
 
@@ -456,8 +437,8 @@ main( hypre_int argc,
       HYPRE_Int i;
       for (i = 0; i < size; i++)
       {
-         xp1[i] = cos(i + 1.0);
-         xp2[i] = sin(i + 2.0);
+         xp1[i] = hypre_cos(i + 1.0);
+         xp2[i] = hypre_sin(i + 2.0);
       }
       hypre_TMemcpy(d_xp1, xp1, HYPRE_Real, size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
       hypre_TMemcpy(d_xp2, xp2, HYPRE_Real, size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
@@ -482,7 +463,7 @@ main( hypre_int argc,
 #endif
 
    /*-----------------------------------------------------------
-    * Time old boxloops [Device]
+    * Time (device) boxloops
     *-----------------------------------------------------------*/
 
    /* Time BoxLoop1Reduction */
@@ -524,12 +505,12 @@ main( hypre_int argc,
    }
    hypre_EndTiming(time_index);
 
-   hypre_PrintTiming("New BoxLoopReduction times [DEVICE]", hypre_MPI_COMM_WORLD);
+   hypre_PrintTiming("BoxLoopReduction times [DEVICE]", hypre_MPI_COMM_WORLD);
    hypre_FinalizeAllTimings();
    hypre_ClearTiming();
 
    /*-----------------------------------------------------------
-    * Time new boxloops [Host]
+    * Time host boxloops
     *-----------------------------------------------------------*/
    HYPRE_Real zbox_sum1 = 0.0, zbox_sum2 = 0.0;
 
@@ -538,12 +519,10 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
    for (rep = 0; rep < reps; rep++)
    {
+#undef HYPRE_BOX_REDUCTION
+#define HYPRE_BOX_REDUCTION reduction(+:zbox_sum1)
       zypre_BoxLoop1Begin(dim, loop_size,
                           x1_data_box, start, unit_stride, xi1);
-#ifdef HYPRE_USING_OPENMP
-      #pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE reduction(+:zbox_sum1)
-#endif
-      zypre_BoxLoop1For(xi1)
       {
          zbox_sum1 += 1.0 / xp1[xi1];
       }
@@ -556,13 +535,11 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
    for (rep = 0; rep < reps; rep++)
    {
+#undef HYPRE_BOX_REDUCTION
+#define HYPRE_BOX_REDUCTION reduction(+:zbox_sum2)
       zypre_BoxLoop2Begin(dim, loop_size,
                           x1_data_box, start, unit_stride, xi1,
                           x2_data_box, start, unit_stride, xi2);
-#ifdef HYPRE_USING_OPENMP
-      #pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE reduction(+:zbox_sum2)
-#endif
-      zypre_BoxLoop2For(xi1, xi2)
       {
          zbox_sum2 += 1.0 / xp1[xi1] + xp2[xi2] * 3.1415926;
       }
@@ -570,7 +547,7 @@ main( hypre_int argc,
    }
    hypre_EndTiming(time_index);
 
-   hypre_PrintTiming("New BoxLoopReduction times [HOST]", hypre_MPI_COMM_WORLD);
+   hypre_PrintTiming("BoxLoopReduction times [HOST]", hypre_MPI_COMM_WORLD);
    hypre_FinalizeAllTimings();
    hypre_ClearTiming();
 
@@ -607,4 +584,3 @@ main( hypre_int argc,
 
    return (0);
 }
-

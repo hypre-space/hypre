@@ -8,6 +8,7 @@
 #include "seq_mv.h"
 #include "_hypre_utilities.hpp"
 #include "seq_mv.hpp"
+#include "csr_spgemm_device.h"
 
 #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE)
 
@@ -36,6 +37,9 @@ hypreDevice_CSRSpGemmCusparse(HYPRE_Int          m,
                                            nnzA, d_ia, d_ja, d_a,
                                            nnzB, d_ib, d_jb, d_b,
                                            nnzC_out, d_ic_out, d_jc_out, d_c_out);
+   HYPRE_UNUSED_VAR(descr_A);
+   HYPRE_UNUSED_VAR(descr_B);
+   HYPRE_UNUSED_VAR(descr_C);
 #else
    hypreDevice_CSRSpGemmCusparseOldAPI(m, k, n,
                                        descr_A, nnzA, d_ia, d_ja, d_a,
@@ -87,9 +91,10 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
    cusparseHandle_t cusparsehandle = hypre_HandleCusparseHandle(hypre_handle());
 
    //Initialize the descriptors for the mats
+   HYPRE_Int *d_ic = hypre_TAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_DEVICE);
    cusparseSpMatDescr_t matA = hypre_CSRMatrixToCusparseSpMat_core(m, k, 0, nnzA, d_ia, d_ja, d_a);
    cusparseSpMatDescr_t matB = hypre_CSRMatrixToCusparseSpMat_core(k, n, 0, nnzB, d_ib, d_jb, d_b);
-   cusparseSpMatDescr_t matC = hypre_CSRMatrixToCusparseSpMat_core(m, n, 0, 0,    NULL, NULL, NULL);
+   cusparseSpMatDescr_t matC = hypre_CSRMatrixToCusparseSpMat_core(m, n, 0, 0,    d_ic, NULL, NULL);
    cusparseOperation_t opA = CUSPARSE_OPERATION_NON_TRANSPOSE;
    cusparseOperation_t opB = CUSPARSE_OPERATION_NON_TRANSPOSE;
 
@@ -105,6 +110,15 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
    void *dBuffer1 = NULL;
    void *dBuffer2 = NULL;
 
+#ifdef HYPRE_SPGEMM_TIMING
+   HYPRE_Real t1, t2;
+#endif
+
+#ifdef HYPRE_SPGEMM_TIMING
+   hypre_ForceSyncComputeStream();
+   t1 = hypre_MPI_Wtime();
+#endif
+
    /* Do work estimation */
    HYPRE_CUSPARSE_CALL( cusparseSpGEMM_workEstimation(cusparsehandle, opA, opB,
                                                       &alpha, matA, matB, &beta, matC,
@@ -116,6 +130,16 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
                                                       &alpha, matA, matB, &beta, matC,
                                                       computeType, CUSPARSE_SPGEMM_DEFAULT,
                                                       spgemmDesc, &bufferSize1, dBuffer1) );
+
+#ifdef HYPRE_SPGEMM_TIMING
+   hypre_ForceSyncComputeStream();
+   t2 = hypre_MPI_Wtime() - t1;
+   hypre_printf("WorkEst %f\n", t2);
+#endif
+
+#ifdef HYPRE_SPGEMM_TIMING
+   t1 = hypre_MPI_Wtime();
+#endif
 
    /* Do computation */
    HYPRE_CUSPARSE_CALL( cusparseSpGEMM_compute(cusparsehandle, opA, opB,
@@ -130,9 +154,19 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
                                                computeType, CUSPARSE_SPGEMM_DEFAULT,
                                                spgemmDesc, &bufferSize2, dBuffer2) );
 
+#ifdef HYPRE_SPGEMM_TIMING
+   hypre_ForceSyncComputeStream();
+   t2 = hypre_MPI_Wtime() - t1;
+   hypre_printf("Compute %f\n", t2);
+#endif
+
+#ifdef HYPRE_SPGEMM_TIMING
+   t1 = hypre_MPI_Wtime();
+#endif
+
    /* Required by cusparse api (as of 11) to be int64_t */
    int64_t C_num_rows, C_num_cols, nnzC;
-   HYPRE_Int *d_ic, *d_jc;
+   HYPRE_Int *d_jc;
    HYPRE_Complex *d_c;
 
    /* Get required information for C */
@@ -141,9 +175,8 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
    hypre_assert(C_num_rows == m);
    hypre_assert(C_num_cols == n);
 
-   d_ic = hypre_TAlloc(HYPRE_Int,     C_num_rows + 1, HYPRE_MEMORY_DEVICE);
-   d_jc = hypre_TAlloc(HYPRE_Int,     nnzC,         HYPRE_MEMORY_DEVICE);
-   d_c  = hypre_TAlloc(HYPRE_Complex, nnzC,         HYPRE_MEMORY_DEVICE);
+   d_jc = hypre_TAlloc(HYPRE_Int,     nnzC, HYPRE_MEMORY_DEVICE);
+   d_c  = hypre_TAlloc(HYPRE_Complex, nnzC, HYPRE_MEMORY_DEVICE);
 
    /* Setup the required descriptor for C */
    HYPRE_CUSPARSE_CALL(cusparseCsrSetPointers(matC, d_ic, d_jc, d_c));
@@ -153,6 +186,12 @@ hypreDevice_CSRSpGemmCusparseGenericAPI(HYPRE_Int       m,
                                             &alpha, matA, matB, &beta, matC,
                                             computeType, CUSPARSE_SPGEMM_DEFAULT,
                                             spgemmDesc) );
+
+#ifdef HYPRE_SPGEMM_TIMING
+   hypre_ForceSyncComputeStream();
+   t2 = hypre_MPI_Wtime() - t1;
+   hypre_printf("Copy %f\n", t2);
+#endif
 
    /* Cleanup the data */
    HYPRE_CUSPARSE_CALL( cusparseSpGEMM_destroyDescr(spgemmDesc) );
@@ -198,6 +237,14 @@ hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int          m,
    HYPRE_Int  *d_ja_sorted, *d_jb_sorted;
    HYPRE_Complex *d_c, *d_a_sorted, *d_b_sorted;
 
+#ifdef HYPRE_SPGEMM_TIMING
+   HYPRE_Real t1, t2;
+#endif
+
+#ifdef HYPRE_SPGEMM_TIMING
+   t1 = hypre_MPI_Wtime();
+#endif
+
    /* Allocate space for sorted arrays */
    d_a_sorted  = hypre_TAlloc(HYPRE_Complex, nnzA, HYPRE_MEMORY_DEVICE);
    d_b_sorted  = hypre_TAlloc(HYPRE_Complex, nnzB, HYPRE_MEMORY_DEVICE);
@@ -217,6 +264,16 @@ hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int          m,
    /* Sort each of the CSR matrices */
    hypre_SortCSRCusparse(m, k, nnzA, descr_A, d_ia, d_ja_sorted, d_a_sorted);
    hypre_SortCSRCusparse(k, n, nnzB, descr_B, d_ib, d_jb_sorted, d_b_sorted);
+
+#ifdef HYPRE_SPGEMM_TIMING
+   hypre_ForceSyncComputeStream();
+   t2 = hypre_MPI_Wtime() - t1;
+   hypre_printf("sort %f\n", t2);
+#endif
+
+#ifdef HYPRE_SPGEMM_TIMING
+   t1 = hypre_MPI_Wtime();
+#endif
 
    // nnzTotalDevHostPtr points to host memory
    HYPRE_Int *nnzTotalDevHostPtr = &nnzC;
@@ -242,25 +299,28 @@ hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int          m,
       nnzC -= baseC;
    }
 
+#ifdef HYPRE_SPGEMM_TIMING
+   hypre_ForceSyncComputeStream();
+   t2 = hypre_MPI_Wtime() - t1;
+   hypre_printf("csrgemmNnz %f\n", t2);
+#endif
+
+#ifdef HYPRE_SPGEMM_TIMING
+   t1 = hypre_MPI_Wtime();
+#endif
+
    d_jc = hypre_TAlloc(HYPRE_Int,     nnzC, HYPRE_MEMORY_DEVICE);
    d_c  = hypre_TAlloc(HYPRE_Complex, nnzC, HYPRE_MEMORY_DEVICE);
 
-#if !defined(HYPRE_COMPLEX)
-#if !defined(HYPRE_SINGLE) && !defined(HYPRE_LONG_DOUBLE)
-   {
-      HYPRE_CUSPARSE_CALL( cusparseDcsrgemm(cusparsehandle, transA, transB, m, n, k,
-                                            descr_A, nnzA, d_a_sorted, d_ia, d_ja_sorted,
-                                            descr_B, nnzB, d_b_sorted, d_ib, d_jb_sorted,
-                                            descr_C,       d_c, d_ic, d_jc) );
-   }
-#elif defined(HYPRE_SINGLE)
-   {
-      HYPRE_CUSPARSE_CALL( cusparseScsrgemm(cusparsehandle, transA, transB, m, n, k,
-                                            descr_A, nnzA, d_a_sorted, d_ia, d_ja_sorted,
-                                            descr_B, nnzB, d_b_sorted, d_ib, d_jb_sorted,
-                                            descr_C, d_c, d_ic, d_jc) );
-   }
-#endif
+   HYPRE_CUSPARSE_CALL( hypre_cusparse_csrgemm(cusparsehandle, transA, transB, m, n, k,
+                                               descr_A, nnzA, d_a_sorted, d_ia, d_ja_sorted,
+                                               descr_B, nnzB, d_b_sorted, d_ib, d_jb_sorted,
+                                               descr_C,       d_c, d_ic, d_jc) );
+
+#ifdef HYPRE_SPGEMM_TIMING
+   hypre_ForceSyncComputeStream();
+   t2 = hypre_MPI_Wtime() - t1;
+   hypre_printf("csrgemm %f\n", t2);
 #endif
 
    *d_ic_out = d_ic;
@@ -278,4 +338,3 @@ hypreDevice_CSRSpGemmCusparseOldAPI(HYPRE_Int          m,
 
 #endif /* #if CUSPARSE_VERSION >= CUSPARSE_NEWAPI_VERSION */
 #endif /* #if defined(HYPRE_USING_CUDA) && defined(HYPRE_USING_CUSPARSE) */
-

@@ -38,17 +38,7 @@ MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS}
 LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
 LIBFLAGS = ${LDFLAGS} ${LIBS}
-
-# WM: currently have to add the absolute path to libHYPRE.a when building sycl code; RL: reorg
-ifeq ($(notdir $(firstword ${LINK_CC})), dpcpp)
-   LIBHYPRE = ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
-else ifeq ($(notdir $(firstword ${LINK_CC})), mpiicx)
-   LIBHYPRE = ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
-else ifeq ($(notdir $(firstword ${LINK_CC})), mpiicpx)
-   LIBHYPRE = ${HYPRE_BUILD_DIR}/lib/libHYPRE.a
-else
-   LIBHYPRE = -L${HYPRE_BUILD_DIR}/lib -lHYPRE
-endif
+LIBHYPRE = -L${HYPRE_BUILD_DIR}/lib -lHYPRE
 
 ifeq ($(notdir $(firstword ${LINK_CC})), nvcc)
    XLINK = -Xlinker=-rpath,${HYPRE_BUILD_DIR}/lib
@@ -73,15 +63,15 @@ LFLAGS =\
 HYPRE_DRIVERS =\
  ij.c\
  ij_assembly.c\
- cogent_proxy_2d_RIPS.c\
  sstruct.c\
  struct.c\
  ams_driver.c\
  maxwell_unscaled.c\
  struct_migrate.c\
  sstruct_fac.c\
- ij_mv.c\
+ ij_mm.c\
  zboxloop.c
+# cogent_proxy_2d_RIPS.c\
 
 HYPRE_DRIVERS_CXX =\
  cxx_ij.cxx\
@@ -97,7 +87,6 @@ HYPRE_F77_EXAMPLES_DRIVERS =\
 
 HYPRE_DRIVERS_F77 =\
  f77_ij.f\
- f77_ij_mv.f\
  f77_struct.f
 
 HYPRE_DRIVER_EXECS=${HYPRE_DRIVERS:.c=}
@@ -114,7 +103,7 @@ all++: ${HYPRE_DRIVER_CXX_EXECS}
 install:
 
 clean:
-	rm -f *.o *.obj
+	rm -f *.o *.obj *.csv
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -170,15 +159,11 @@ maxwell_unscaled: maxwell_unscaled.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-struct_migrate: struct_migrate.obj
+struct_migrate: struct_migrate.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
 sstruct_fac: sstruct_fac.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-
-ij_mv: ij_mv.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
@@ -195,14 +180,6 @@ zboxloop: zboxloop.obj
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
 struct_newboxloop: struct_newboxloop.o $(KOKKOS_LINK_DEPENDS)
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-
-test_mgr: test_mgr.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-
-test_mgr_gpu: test_mgr_gpu.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
@@ -250,10 +227,6 @@ cxx_struct.cxx: struct.c
 # Fortran
 
 f77_ij: f77_ij.o
-	@echo  "Building" $@ "... "
-	${LINK_FC} -o $@ $@.o ${LFLAGS}
-
-f77_ij_mv: f77_ij_mv.o
 	@echo  "Building" $@ "... "
 	${LINK_FC} -o $@ $@.o ${LFLAGS}
 

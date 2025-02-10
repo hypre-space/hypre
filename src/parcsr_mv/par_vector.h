@@ -37,6 +37,8 @@ typedef struct hypre_ParVector_struct
 
    /* Does the Vector create/destroy `data'? */
    HYPRE_Int             owns_data;
+   /* If the vector is all zeros */
+   HYPRE_Int             all_zeros;
 
    hypre_IJAssumedPart  *assumed_partition; /* only populated if this partition needed
                                               (for setting off-proc elements, for example)*/
@@ -52,13 +54,19 @@ typedef struct hypre_ParVector_struct
 #define hypre_ParVectorLastIndex(vector)        ((vector) -> last_index)
 #define hypre_ParVectorPartitioning(vector)     ((vector) -> partitioning)
 #define hypre_ParVectorActualLocalSize(vector)  ((vector) -> actual_local_size)
-#define hypre_ParVectorLocalVector(vector)      ((vector) -> local_vector)
 #define hypre_ParVectorOwnsData(vector)         ((vector) -> owns_data)
-#define hypre_ParVectorNumVectors(vector)       (hypre_VectorNumVectors(hypre_ParVectorLocalVector(vector)))
+#define hypre_ParVectorAllZeros(vector)         ((vector) -> all_zeros)
+#define hypre_ParVectorLocalVector(vector)      ((vector) -> local_vector)
+#define hypre_ParVectorLocalSize(vector)        ((vector) -> local_vector -> size)
+#define hypre_ParVectorLocalData(vector)        ((vector) -> local_vector -> data)
+#define hypre_ParVectorLocalStorage(vector)     ((vector) -> local_vector -> multivec_storage_method)
+#define hypre_ParVectorNumVectors(vector)       ((vector) -> local_vector -> num_vectors)
+#define hypre_ParVectorEntryI(vector, i)        (hypre_VectorEntryI((vector) -> local_vector, i))
+#define hypre_ParVectorEntryIJ(vector, i, j)    (hypre_VectorEntryIJ((vector) -> local_vector, i, j))
 
 #define hypre_ParVectorAssumedPartition(vector) ((vector) -> assumed_partition)
 
-static inline HYPRE_MemoryLocation
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_MemoryLocation
 hypre_ParVectorMemoryLocation(hypre_ParVector *vector)
 {
    return hypre_VectorMemoryLocation(hypre_ParVectorLocalVector(vector));

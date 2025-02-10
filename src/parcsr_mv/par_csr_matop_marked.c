@@ -287,7 +287,7 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
 
    hypre_ParCSRMatrix *C;
    HYPRE_BigInt       *col_map_offd_C;
-   HYPRE_Int          *map_P_to_C;
+   HYPRE_Int          *map_P_to_C = NULL;
 
    hypre_CSRMatrix    *C_diag;
 
@@ -305,18 +305,18 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
    HYPRE_Int           C_offd_size;
    HYPRE_Int           num_cols_offd_C = 0;
 
-   hypre_CSRMatrix    *Ps_ext;
+   hypre_CSRMatrix    *Ps_ext = NULL;
 
-   HYPRE_Complex      *Ps_ext_data;
-   HYPRE_Int          *Ps_ext_i;
-   HYPRE_BigInt       *Ps_ext_j;
+   HYPRE_Complex      *Ps_ext_data = NULL;
+   HYPRE_Int          *Ps_ext_i = NULL;
+   HYPRE_BigInt       *Ps_ext_j = NULL;
 
-   HYPRE_Complex      *P_ext_diag_data;
+   HYPRE_Complex      *P_ext_diag_data = NULL;
    HYPRE_Int          *P_ext_diag_i;
-   HYPRE_Int          *P_ext_diag_j;
+   HYPRE_Int          *P_ext_diag_j = NULL;
    HYPRE_Int           P_ext_diag_size;
 
-   HYPRE_Complex      *P_ext_offd_data;
+   HYPRE_Complex      *P_ext_offd_data = NULL;
    HYPRE_Int          *P_ext_offd_i;
    HYPRE_Int          *P_ext_offd_j = NULL;
    HYPRE_BigInt       *P_ext_tmp_j = NULL;
@@ -460,11 +460,7 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
       }
    }
 
-   if (num_cols_offd_C)
-   {
-      col_map_offd_C = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_HOST);
-   }
-
+   col_map_offd_C = hypre_CTAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_HOST);
    for (i = 0; i < num_cols_offd_C; i++)
    {
       col_map_offd_C[i] = temp[i];
@@ -475,21 +471,26 @@ hypre_ParCSRMatrix * hypre_ParMatmul_FC(
       hypre_TFree(temp, HYPRE_MEMORY_HOST);
    }
 
-   for (i = 0 ; i < P_ext_offd_size; i++)
+   for (i = 0; i < P_ext_offd_size; i++)
+   {
       P_ext_offd_j[i] = hypre_BigBinarySearch(col_map_offd_C,
                                               Ps_ext_j[i],
                                               num_cols_offd_C);
+   }
+
    if (num_cols_offd_P)
    {
       map_P_to_C = hypre_CTAlloc(HYPRE_Int, num_cols_offd_P, HYPRE_MEMORY_HOST);
 
       cnt = 0;
       for (i = 0; i < num_cols_offd_C; i++)
+      {
          if (col_map_offd_C[i] == col_map_offd_P[cnt])
          {
             map_P_to_C[cnt++] = i;
             if (cnt == num_cols_offd_P) { break; }
          }
+      }
    }
 
    if (num_procs > 1) { hypre_CSRMatrixDestroy(Ps_ext); }

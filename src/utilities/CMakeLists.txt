@@ -6,6 +6,7 @@
 set(HDRS
   HYPRE_utilities.h
   _hypre_utilities.h
+  _hypre_utilities.hpp
   HYPRE_error_f.h
   fortran.h
   fortran_matrix.h
@@ -28,9 +29,14 @@ set(SRCS
   general.c
   handle.c
   int_array.c
+  int_array_device.c
   hopscotch_hash.c
+  matrix_stats.c
+  magma.c
   memory.c
+  memory_tracker.c
   merge_sort.c
+  mmio.c
   mpi_comm_f2c.c
   nvtx.c
   omp_device.c
@@ -41,6 +47,8 @@ set(SRCS
   mpistubs.c
   qsplit.c
   random.c
+  state.c
+  stl_ops.c
   threading.c
   timer.c
   timing.c
@@ -51,16 +59,18 @@ target_sources(${PROJECT_NAME}
           ${HDRS}
 )
 
-if (HYPRE_USING_CUDA OR HYPRE_USING_SYCL)
+if (HYPRE_USING_GPU)
   set(GPU_SRCS
-    HYPRE_handle.c
     device_utils.c
-    handle.c
-    int_array.c
     general.c
+    handle.c
+    int_array_device.c
     memory.c
-    omp_device.c
+    memory_tracker.c
     nvtx.c
+    omp_device.c
+    stl_ops.c
+    HYPRE_handle.c
   )
   convert_filenames_to_full_paths(GPU_SRCS)
   set(HYPRE_GPU_SOURCES ${HYPRE_GPU_SOURCES} ${GPU_SRCS} PARENT_SCOPE)

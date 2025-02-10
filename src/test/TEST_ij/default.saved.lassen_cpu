@@ -1,0 +1,21 @@
+# Output file: default.out.0
+ Average Convergence Factor = 0.678738
+
+     Complexity:    grid = 1.407000
+                operator = 3.252344
+                   cycle = 6.499062
+
+# Output file: default.out.1
+ Average Convergence Factor = 0.678738
+
+     Complexity:    grid = 1.407000
+                operator = 3.252344
+                   cycle = 6.499062
+
+# Output file: default.out.2
+ Average Convergence Factor = 0.678738
+
+     Complexity:    grid = 1.407000
+                operator = 3.252344
+                   cycle = 6.499062
+

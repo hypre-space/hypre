@@ -396,7 +396,7 @@ int HYPRE_FEVectorSetSol( HYPRE_FEVector vector, void *object );
 /*@{*/
 
 /**
-  * Here the various options for solvers and perconditioners
+  * Here the various options for solvers and preconditioners
   * are defined.
   * 
   *\begin{description}

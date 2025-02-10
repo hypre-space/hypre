@@ -20,6 +20,8 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
                     hypre_SStructVector *f,
                     hypre_SStructVector *u )
 {
+   HYPRE_UNUSED_VAR(A_in);
+
    hypre_MaxwellData     *maxwell_data = (hypre_MaxwellData *) maxwell_vdata;
 
    hypre_ParVector       *f_edge;
@@ -86,7 +88,7 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
    /* added for the relaxation routines */
    hypre_ParVector *ze = NULL;
 
-#if !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP)
+#if !defined(HYPRE_USING_CUDA) && !defined(HYPRE_USING_HIP) &&!defined(HYPRE_USING_SYCL)
    /* GPU impl. needs ze */
    if (hypre_NumThreads() > 1)
 #endif
@@ -232,10 +234,10 @@ hypre_MaxwellSolve( void                *maxwell_vdata,
 
          if (logging > 0)
          {
-            norms[i] = sqrt(r_dot_r);
+            norms[i] = hypre_sqrt(r_dot_r);
             if (b_dot_b > 0)
             {
-               rel_norms[i] = sqrt(r_dot_r / b_dot_b);
+               rel_norms[i] = hypre_sqrt(r_dot_r / b_dot_b);
             }
             else
             {

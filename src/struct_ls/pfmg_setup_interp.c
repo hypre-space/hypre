@@ -124,6 +124,8 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
     * Initialize some things
     *----------------------------------------------------------*/
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
    stencil_size  = hypre_StructStencilSize(stencil);
@@ -267,6 +269,8 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
    hypre_StructInterpAssemble(A, P, 0, cdir, findex, stride);
 #endif
 
+   HYPRE_ANNOTATE_FUNC_END;
+
    return hypre_error_flag;
 }
 
@@ -292,33 +296,30 @@ hypre_PFMGSetupInterpOp_CC0
   HYPRE_Int           si0,
   HYPRE_Int           si1 )
 {
-   hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
-   hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-   HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
-   HYPRE_Int              warning_cnt = 0;
+   hypre_StructStencil *stencil = hypre_StructMatrixStencil(A);
+   hypre_Index         *stencil_shape = hypre_StructStencilShape(stencil);
+   HYPRE_Int            stencil_size = hypre_StructStencilSize(stencil);
+   HYPRE_Int            warning_cnt = 0;
+   HYPRE_Int            data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
+   HYPRE_Int          **data_indices = hypre_StructMatrixDataIndices(A);
+   HYPRE_Complex       *matrixA_data = hypre_StructMatrixData(A);
+   HYPRE_Int           *data_indices_boxi_d;
+   hypre_Index         *stencil_shape_d;
+   HYPRE_MemoryLocation memory_location = hypre_StructMatrixMemoryLocation(A);
 
-#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_Int              data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
-#endif
-
-   HYPRE_Int     **data_indices = hypre_StructMatrixDataIndices(A);
-   HYPRE_Complex  *matrixA_data = hypre_StructMatrixData(A);
-   HYPRE_Int      *data_indices_boxi_d; /* On device */
-   hypre_Index    *stencil_shape_d;
-
-   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
-      data_indices_boxi_d = hypre_TAlloc(HYPRE_Int,   stencil_size, HYPRE_MEMORY_DEVICE);
-      stencil_shape_d     = hypre_TAlloc(hypre_Index, stencil_size, HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(data_indices_boxi_d, data_indices[i], HYPRE_Int, stencil_size, HYPRE_MEMORY_DEVICE,
+      data_indices_boxi_d = hypre_TAlloc(HYPRE_Int, stencil_size, memory_location);
+      stencil_shape_d = hypre_TAlloc(hypre_Index, stencil_size, memory_location);
+      hypre_TMemcpy(data_indices_boxi_d, data_indices[i], HYPRE_Int, stencil_size, memory_location,
                     HYPRE_MEMORY_HOST);
-      hypre_TMemcpy(stencil_shape_d, stencil_shape, hypre_Index, stencil_size, HYPRE_MEMORY_DEVICE,
+      hypre_TMemcpy(stencil_shape_d, stencil_shape, hypre_Index, stencil_size, memory_location,
                     HYPRE_MEMORY_HOST);
    }
    else
    {
       data_indices_boxi_d = data_indices[i];
-      stencil_shape_d     = stencil_shape;
+      stencil_shape_d = stencil_shape;
    }
 
 #define DEVICE_VAR is_device_ptr(Pp0,Pp1,matrixA_data,stencil_shape_d,data_indices_boxi_d)
@@ -413,10 +414,10 @@ hypre_PFMGSetupInterpOp_CC0
                         "Warning 0 center in interpolation. Setting interp = 0.");
    }
 
-   if (hypre_GetActualMemLocation(HYPRE_MEMORY_DEVICE) != hypre_MEMORY_HOST)
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
-      hypre_TFree(data_indices_boxi_d, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(stencil_shape_d,     HYPRE_MEMORY_DEVICE);
+      hypre_TFree(data_indices_boxi_d, memory_location);
+      hypre_TFree(stencil_shape_d, memory_location);
    }
 
    return hypre_error_flag;
@@ -452,16 +453,13 @@ hypre_PFMGSetupInterpOp_CC0
    HYPRE_Int              warning_cnt = 0;
    HYPRE_Int              dim, si, loop_length = 1, Astenc;
    HYPRE_Real            *Ap, *center, *Ap0, *Ap1;
-
-#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_Int data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
-#endif
+   HYPRE_MemoryLocation   memory_location = hypre_StructMatrixMemoryLocation(A);
 
    for (dim = 0; dim < hypre_StructMatrixNDim(A); dim++)
    {
       loop_length *= loop_size[dim];
    }
-   center = hypre_CTAlloc(HYPRE_Real, loop_length, HYPRE_MEMORY_DEVICE);
+   center = hypre_CTAlloc(HYPRE_Real, loop_length, memory_location);
 
    for (si = 0; si < stencil_size; si++)
    {
@@ -533,7 +531,7 @@ hypre_PFMGSetupInterpOp_CC0
                         "Warning 0 center in interpolation. Setting interp = 0.");
    }
 
-   hypre_TFree(center, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(center, memory_location);
 
    return hypre_error_flag;
 }
@@ -561,6 +559,15 @@ hypre_PFMGSetupInterpOp_CC1
   HYPRE_Int           si0,
   HYPRE_Int           si1 )
 {
+   HYPRE_UNUSED_VAR(A_dbox);
+   HYPRE_UNUSED_VAR(stride);
+   HYPRE_UNUSED_VAR(stridec);
+   HYPRE_UNUSED_VAR(start);
+   HYPRE_UNUSED_VAR(startc);
+   HYPRE_UNUSED_VAR(loop_size);
+   HYPRE_UNUSED_VAR(P_dbox);
+   HYPRE_UNUSED_VAR(rap_type);
+
    HYPRE_Int              si;
    HYPRE_Int              Ai, Pi;
    HYPRE_Real            *Ap;
@@ -835,6 +842,9 @@ hypre_PFMGSetupInterpOp_CC0_SS5
   HYPRE_Int           rap_type,
   hypre_Index        *P_stencil_shape )
 {
+   HYPRE_UNUSED_VAR(rap_type);
+   HYPRE_UNUSED_VAR(Pstenc1);
+
    //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    //hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
@@ -886,7 +896,7 @@ hypre_PFMGSetupInterpOp_CC0_SS5
             left   = -a_cw[Ai];
             right  = -a_ce[Ai];
             break;
-         case 1:
+      case 1: default:
             center = a_cc[Ai] + a_cw[Ai] + a_ce[Ai];
             left   = -a_cs[Ai];
             right  = -a_cn[Ai];
@@ -960,6 +970,9 @@ hypre_PFMGSetupInterpOp_CC0_SS9
   HYPRE_Int           rap_type,
   hypre_Index        *P_stencil_shape )
 {
+   HYPRE_UNUSED_VAR(rap_type);
+   HYPRE_UNUSED_VAR(Pstenc1);
+
    //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    //hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
@@ -1032,7 +1045,7 @@ hypre_PFMGSetupInterpOp_CC0_SS9
             left   = -a_cw[Ai] - a_csw[Ai] - a_cnw[Ai];
             right  = -a_ce[Ai] - a_cse[Ai] - a_cne[Ai];
             break;
-         case 1:
+      case 1: default:
             center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai];
             left   = -a_cs[Ai] - a_csw[Ai] - a_cse[Ai];
             right  = -a_cn[Ai] - a_cnw[Ai] - a_cne[Ai];
@@ -1097,6 +1110,9 @@ hypre_PFMGSetupInterpOp_CC0_SS7
   HYPRE_Int           rap_type,
   hypre_Index        *P_stencil_shape )
 {
+   HYPRE_UNUSED_VAR(rap_type);
+   HYPRE_UNUSED_VAR(Pstenc1);
+
    //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    //hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
@@ -1161,7 +1177,7 @@ hypre_PFMGSetupInterpOp_CC0_SS7
             left   = -a_cs[Ai];
             right  = -a_cn[Ai];
             break;
-         case 2:
+      case 2: default:
             center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_cs[Ai] + a_cn[Ai] ;
             left   = -a_bc[Ai];
             right  = -a_ac[Ai];
@@ -1229,6 +1245,9 @@ hypre_PFMGSetupInterpOp_CC0_SS15
   HYPRE_Int           rap_type,
   hypre_Index        *P_stencil_shape )
 {
+   HYPRE_UNUSED_VAR(rap_type);
+   HYPRE_UNUSED_VAR(Pstenc1);
+
    hypre_Index           index;
    HYPRE_Int             stencil_type15;
    HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn, *a_ac, *a_bc;
@@ -1365,7 +1384,7 @@ hypre_PFMGSetupInterpOp_CC0_SS15
                left   = -a_cs[Ai] - a_csw[Ai] - a_cse[Ai]; /* front */
                right  = -a_cn[Ai] - a_cnw[Ai] - a_cne[Ai]; /* back */
                break;
-            case 2:
+         case 2: default:
                center =   a_cc[Ai] +  a_cw[Ai] +   a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] +
                           a_csw[Ai] + a_cse[Ai] +  a_cnw[Ai] - a_cne[Ai];
                left   =  -a_bc[Ai] -  a_bw[Ai] -   a_be[Ai]; /* below */
@@ -1425,7 +1444,7 @@ hypre_PFMGSetupInterpOp_CC0_SS15
                left   = -a_cs[Ai] - a_as[Ai] - a_bs[Ai] - a_csw[Ai] - a_cse[Ai]; /* front */
                right  = -a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai]; /* back */
                break;
-            case 2:
+         case 2: default:
                center =  a_cc[Ai] + a_cw[Ai] + a_ce[Ai] + a_cs[Ai] + a_cn[Ai] +
                          a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai];
                left   = -a_bc[Ai] - a_bs[Ai] - a_bn[Ai]; /* below */
@@ -1486,7 +1505,7 @@ hypre_PFMGSetupInterpOp_CC0_SS15
                left   = -a_cs[Ai] - a_as[Ai] - a_bs[Ai]; /* front */
                right  = -a_cn[Ai] - a_an[Ai] - a_bn[Ai]; /* back */
                break;
-            case 2:
+         case 2: default:
                center =  a_cc[Ai] + a_cw[Ai] + a_ce[Ai] + a_cs[Ai] + a_cn[Ai];
                left   = -a_bc[Ai] - a_bw[Ai] - a_be[Ai] - a_bs[Ai] - a_bn[Ai]; /* below */
                right  = -a_ac[Ai] - a_aw[Ai] - a_ae[Ai] - a_as[Ai] - a_an[Ai]; /* above */
@@ -1549,6 +1568,9 @@ hypre_PFMGSetupInterpOp_CC0_SS19
   HYPRE_Int           rap_type,
   hypre_Index        *P_stencil_shape )
 {
+   HYPRE_UNUSED_VAR(Pstenc1);
+   HYPRE_UNUSED_VAR(rap_type);
+
    //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    // hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
@@ -1670,7 +1692,7 @@ hypre_PFMGSetupInterpOp_CC0_SS19
             left   = -a_cs[Ai] - a_as[Ai] - a_bs[Ai] - a_csw[Ai] - a_cse[Ai];
             right  = -a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai];
             break;
-         case 2:
+      case 2: default:
             center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai]
                      + a_cne[Ai];
             left   = -a_bc[Ai] - a_bw[Ai] - a_be[Ai] - a_bs[Ai] - a_bn[Ai];
@@ -1736,6 +1758,9 @@ hypre_PFMGSetupInterpOp_CC0_SS27
   HYPRE_Int           rap_type,
   hypre_Index        *P_stencil_shape )
 {
+   HYPRE_UNUSED_VAR(rap_type);
+   HYPRE_UNUSED_VAR(Pstenc1);
+
    //hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    //hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    //HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
@@ -1899,7 +1924,7 @@ hypre_PFMGSetupInterpOp_CC0_SS27
             right  = -a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai] - a_anw[Ai] - a_ane[Ai] - a_bnw[Ai]
                      - a_bne[Ai];
             break;
-         case 2:
+      case 2: default:
             center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai]
                      + a_cne[Ai];
             left   = -a_bc[Ai] - a_bw[Ai] - a_be[Ai] - a_bs[Ai] - a_bn[Ai] - a_bsw[Ai] - a_bse[Ai] - a_bnw[Ai] -
@@ -1950,4 +1975,3 @@ hypre_PFMGSetupInterpOp_CC0_SS27
 }
 
 #endif
-

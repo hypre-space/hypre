@@ -1,0 +1,49 @@
+#!/bin/bash
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#
+# hypre_ILU tests
+# Tests ILU(0), ILUK and ILUK solvers sequentially
+# Tests Parallel combination of ILU solvers
+# Tests ILU-(Flex)GMRES
+# Test AMG with ILU as a complex smoother
+#
+mpirun -np 1  ./ij -solver 80 -ilu_type 0 -ilu_lfil 0 > ilu.out.300
+mpirun -np 1  ./ij -solver 80 -ilu_type 0 -ilu_lfil 1 > ilu.out.301
+mpirun -np 1  ./ij -solver 80 -ilu_type 1 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000 > ilu.out.302
+# parallel ILU
+# BJ
+mpirun -np 2  ./ij -solver 80 -ilu_type 0 -ilu_lfil 1 > ilu.out.303
+mpirun -np 2  ./ij -solver 80 -ilu_type 1 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000  > ilu.out.304
+# GMRES+ILU
+mpirun -np 2  ./ij -solver 80 -ilu_type 10 -ilu_lfil 1 -ilu_schur_max_iter 5 > ilu.out.305
+mpirun -np 2  ./ij -solver 80 -ilu_type 11 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000 -ilu_schur_max_iter 5  > ilu.out.306
+# NSH+ILU
+mpirun -np 2  ./ij -solver 80 -ilu_type 20 -ilu_lfil 1 -ilu_schur_max_iter 5 > ilu.out.307
+mpirun -np 2  ./ij -solver 80 -ilu_type 21 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000 -ilu_schur_max_iter 5  > ilu.out.308
+# RAS+ILU
+mpirun -np 2  ./ij -solver 80 -ilu_type 30 -ilu_lfil 1 > ilu.out.309
+mpirun -np 2  ./ij -solver 80 -ilu_type 31 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000 > ilu.out.310
+# ddPQ-GMRES+ILU
+mpirun -np 2  ./ij -solver 80 -ilu_type 40 -ilu_lfil 1 -ilu_schur_max_iter 5 > ilu.out.311
+mpirun -np 2  ./ij -solver 80 -ilu_type 41 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000 -ilu_schur_max_iter 5  > ilu.out.312
+##  ILU-GMRES
+mpirun -np 2  ./ij -solver 81 -ilu_type 0 -ilu_lfil 0 > ilu.out.313
+mpirun -np 2  ./ij -solver 81 -ilu_type 1 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000  > ilu.out.314
+mpirun -np 2  ./ij -solver 81 -ilu_type 30 -ilu_lfil 0 > ilu.out.315
+mpirun -np 2  ./ij -solver 81 -ilu_type 31 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000  > ilu.out.316
+##  ILU-FlexGMRES
+mpirun -np 2  ./ij -solver 82 -ilu_type 10 -ilu_lfil 0 -ilu_schur_max_iter 5 > ilu.out.317
+mpirun -np 2  ./ij -solver 82 -ilu_type 11 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000 -ilu_schur_max_iter 5  > ilu.out.318
+mpirun -np 2  ./ij -solver 82 -ilu_type 20 -ilu_lfil 0 -ilu_schur_max_iter 5 > ilu.out.319
+mpirun -np 2  ./ij -solver 82 -ilu_type 21 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000 -ilu_schur_max_iter 5  > ilu.out.320
+mpirun -np 2  ./ij -solver 82 -ilu_type 40 -ilu_lfil 0 -ilu_schur_max_iter 5 > ilu.out.321
+mpirun -np 2  ./ij -solver 82 -ilu_type 41 -ilu_droptol 1.0e-2 -ilu_max_row_nnz 1000 -ilu_schur_max_iter 5  > ilu.out.322
+## RAP-ILU
+mpirun -np 2  ./ij -solver 82 -ilu_type 50 -ilu_lfil 0 > ilu.out.323
+## ILU smoother for AMG
+mpirun -np 2  ./ij -solver 0 -smtype 5  -smlv 1 -ilu_type 30 > ilu.out.324
+mpirun -np 2  ./ij -solver 0 -smtype 15 -smlv 1 -ilu_type 30 > ilu.out.325

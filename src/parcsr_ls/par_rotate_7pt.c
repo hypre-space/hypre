@@ -31,8 +31,8 @@ GenerateRotate7pt( MPI_Comm       comm,
    HYPRE_Real *diag_data;
 
    HYPRE_Int    *offd_i;
-   HYPRE_Int    *offd_j;
-   HYPRE_Real *offd_data;
+   HYPRE_Int    *offd_j = NULL;
+   HYPRE_Real *offd_data = NULL;
 
    HYPRE_Real *value;
    HYPRE_Real ac, bc, cc, s, c, pi, x;
@@ -60,10 +60,10 @@ GenerateRotate7pt( MPI_Comm       comm,
    grid_size = nx * ny;
 
    value = hypre_CTAlloc(HYPRE_Real, 4, HYPRE_MEMORY_HOST);
-   pi = 4.0 * atan(1.0);
+   pi = 4.0 * hypre_atan(1.0);
    x = pi * alpha / 180.0;
-   s = sin(x);
-   c = cos(x);
+   s = hypre_sin(x);
+   c = hypre_cos(x);
    ac = -(c * c + eps * s * s);
    bc = 2.0 * (1.0 - eps) * s * c;
    cc = -(s * s + eps * c * c);

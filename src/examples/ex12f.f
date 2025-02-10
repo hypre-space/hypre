@@ -71,7 +71,7 @@
       integer*8  solver
       integer*8  precond
 
-      character*32  matfile
+!     character*32  matfile
 
 !     We only have one part and one variable
       nparts = 1
@@ -84,7 +84,7 @@
       call MPI_Comm_rank(MPI_COMM_WORLD, myid, ierr)
       call MPI_Comm_size(MPI_COMM_WORLD, num_procs, ierr)
 
-      call HYPRE_Init(ierr)
+      call HYPRE_Initialize(ierr)
 
       if (num_procs .ne. 2) then
          if (myid .eq. 0) then
@@ -239,6 +239,8 @@
          iupper(2) =  4
 !        12 grid points, each with 5 stencil entries
          nvalues = 100
+      else
+         nvalues = 0
       endif
 
       do i = 1, nvalues, nentries
@@ -508,6 +510,4 @@
 !     Finalize MPI
       call MPI_Finalize(ierr)
 
-      stop
       end
-

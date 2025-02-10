@@ -88,7 +88,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
    hypre_StructMatrix     *smatrix_var;
    hypre_StructStencil    *stencils, *stencils_last;
-   HYPRE_Int               stencil_size, stencil_last_size;
+   HYPRE_Int               stencil_size = 0, stencil_last_size;
    hypre_Index             stencil_shape_i, stencil_last_shape_i;
    hypre_Index             loop_size;
    hypre_Box               loop_box;
@@ -136,20 +136,20 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    HYPRE_Int               falseV = 0;
    HYPRE_Int               found, sort;
    HYPRE_Int               stencil_marker;
-   HYPRE_Int              *stencil_ranks, *rank_stencils;
-   HYPRE_Int              *stencil_contrib_cnt;
-   HYPRE_Int             **stencil_contrib_i;
-   HYPRE_Real            **weight_contrib_i;
+   HYPRE_Int              *stencil_ranks = NULL, *rank_stencils = NULL;
+   HYPRE_Int              *stencil_contrib_cnt = NULL;
+   HYPRE_Int             **stencil_contrib_i = NULL;
+   HYPRE_Real            **weight_contrib_i = NULL;
    HYPRE_Real              weights[4] = {1.0, 0.25, 0.125, 0.0625};
    HYPRE_Real              sum;
    HYPRE_Int               abs_stencil_shape;
-   hypre_Box             **shift_box;
+   hypre_Box             **shift_box = NULL;
    hypre_Box               coarse_cell_box;
    HYPRE_Int               volume_coarse_cell_box;
-   HYPRE_Int              *volume_shift_box;
-   HYPRE_Int               max_contribut_size, stencil_i;
+   HYPRE_Int              *volume_shift_box = NULL;
+   HYPRE_Int               max_contribut_size = 0, stencil_i;
    HYPRE_BigInt            startrank, rank;
-   HYPRE_Real             *vals, *vals2;
+   HYPRE_Real             *vals = NULL, *vals2 = NULL;
 
    HYPRE_Int               i, j, k, l, m, n, ll, kk, jj;
    HYPRE_Int               nvars, var1, var2, var2_start;
@@ -205,6 +205,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    hypre_BoxInit(&intersect_box, ndim);
    hypre_BoxInit(&loop_box, ndim);
    hypre_BoxInit(&coarse_cell_box, ndim);
+   hypre_SetIndex3(lindex, 0, 0, 0);
 
    /*--------------------------------------------------------------------------
     * Task: Coarsen the fbox and f/c connections to form the coarse grid
@@ -213,11 +214,16 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
    if (graph_type == HYPRE_SSTRUCT)
    {
-      startrank   = hypre_SStructGridGhstartRank(grid);
+      startrank = hypre_SStructGridGhstartRank(grid);
    }
-   if (graph_type == HYPRE_PARCSR)
+   else if (graph_type == HYPRE_PARCSR)
    {
-      startrank   = hypre_SStructGridStartRank(grid);
+      startrank = hypre_SStructGridStartRank(grid);
+   }
+   else
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported graph_type!");
+      return hypre_error_flag;
    }
 
    /*--------------------------------------------------------------------------
@@ -2670,6 +2676,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                hypre_StructMapFineToCoarse(index, index_temp, stridef, Uv_cindex[i]);
                hypre_BoxSetExtents(&fine_box, Uv_cindex[i], Uv_cindex[i]);
 
+               ci = 0;
                for (j = 0; j < cboxi_fcnt[var1][fi]; j++)
                {
                   ci = cboxi_fboxes[var1][fi][j];
@@ -3614,4 +3621,3 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
    return 0;
 }
-

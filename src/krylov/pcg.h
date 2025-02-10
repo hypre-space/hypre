@@ -102,6 +102,7 @@ typedef struct
  every "recompute_residual_p" iterations.  This can be expensive and degrade the
  convergence. Use it only if you have seen a problem with the regular residual
  computation.
+ - skip_break means that cg will not stop for very small alpha and gamma. default: 0
 */
 
 typedef struct
@@ -119,12 +120,16 @@ typedef struct
    HYPRE_Int    stop_crit;
    HYPRE_Int    converged;
    HYPRE_Int    hybrid;
+   HYPRE_Int    skip_break;
+   HYPRE_Int    flex;
 
    void    *A;
    void    *p;
    void    *s;
    void    *r; /* ...contains the residual.  This is currently kept permanently.
                   If that is ever changed, it still must be kept if logging>1 */
+   void    *r_old; /* old residual needed for flexible CG, PR method */
+   void    *v; /* work vector only needed if recompute_residual_p uis used */
 
    HYPRE_Int  owns_matvec_data;  /* normally 1; if 0, don't delete it */
    void      *matvec_data;

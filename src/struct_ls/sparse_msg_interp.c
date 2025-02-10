@@ -30,7 +30,7 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_SparseMSGInterpCreate( )
+hypre_SparseMSGInterpCreate( void )
 {
    hypre_SparseMSGInterpData *interp_data;
 
@@ -54,6 +54,8 @@ hypre_SparseMSGInterpSetup( void               *interp_vdata,
                             hypre_Index         stride,
                             hypre_Index         strideP       )
 {
+   HYPRE_UNUSED_VAR(xc);
+
    hypre_SparseMSGInterpData   *interp_data = (hypre_SparseMSGInterpData   *)interp_vdata;
 
    hypre_StructGrid       *grid;
@@ -294,4 +296,3 @@ hypre_SparseMSGInterpDestroy( void *interp_vdata )
 
    return ierr;
 }
-

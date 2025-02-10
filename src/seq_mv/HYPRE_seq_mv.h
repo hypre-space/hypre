@@ -30,11 +30,6 @@ struct hypre_MappedMatrix_struct;
 typedef struct hypre_MappedMatrix_struct *HYPRE_MappedMatrix;
 struct hypre_MultiblockMatrix_struct;
 typedef struct hypre_MultiblockMatrix_struct *HYPRE_MultiblockMatrix;
-#ifndef HYPRE_VECTOR_STRUCT
-#define HYPRE_VECTOR_STRUCT
-struct hypre_Vector_struct;
-typedef struct hypre_Vector_struct *HYPRE_Vector;
-#endif
 
 /*--------------------------------------------------------------------------
  * Prototypes
@@ -125,12 +120,12 @@ typedef enum HYPRE_TimerID
    HYPRE_TIMER_ID_MERGE,
 
    // csr matop
-   HYPRE_TIMER_ID_SPMM_ROWNNZ,
-   HYPRE_TIMER_ID_SPMM_ATTEMPT1,
-   HYPRE_TIMER_ID_SPMM_ATTEMPT2,
-   HYPRE_TIMER_ID_SPMM_SYMBOLIC,
-   HYPRE_TIMER_ID_SPMM_NUMERIC,
-   HYPRE_TIMER_ID_SPMM,
+   HYPRE_TIMER_ID_SPGEMM_ROWNNZ,
+   HYPRE_TIMER_ID_SPGEMM_ATTEMPT1,
+   HYPRE_TIMER_ID_SPGEMM_ATTEMPT2,
+   HYPRE_TIMER_ID_SPGEMM_SYMBOLIC,
+   HYPRE_TIMER_ID_SPGEMM_NUMERIC,
+   HYPRE_TIMER_ID_SPGEMM,
    HYPRE_TIMER_ID_SPADD,
    HYPRE_TIMER_ID_SPTRANS,
 

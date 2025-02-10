@@ -26,7 +26,7 @@ hypre_SeqMultivectorCreate( HYPRE_Int size, HYPRE_Int num_vectors  )
 {
    hypre_Multivector *mvector;
 
-   mvector = (hypre_Multivector *) hypre_MAlloc(sizeof(hypre_Multivector), HYPRE_MEMORY_HOST);
+   mvector = hypre_TAlloc(hypre_Multivector, 1, HYPRE_MEMORY_HOST);
 
    hypre_MultivectorNumVectors(mvector) = num_vectors;
    hypre_MultivectorSize(mvector) = size;
@@ -54,12 +54,12 @@ hypre_SeqMultivectorInitialize( hypre_Multivector *mvector )
 
    if (NULL == hypre_MultivectorData(mvector))
       hypre_MultivectorData(mvector) =
-         (HYPRE_Complex *) hypre_MAlloc(sizeof(HYPRE_Complex) * size * num_vectors, HYPRE_MEMORY_HOST);
+         hypre_TAlloc(HYPRE_Complex, size * num_vectors, HYPRE_MEMORY_HOST);
 
    /* now we create a "mask" of "active" vectors; initially all active */
    if (NULL == mvector->active_indices)
    {
-      mvector->active_indices hypre_CTAlloc(HYPRE_Int,  num_vectors, HYPRE_MEMORY_HOST);
+      mvector->active_indices hypre_CTAlloc(HYPRE_Int, num_vectors, HYPRE_MEMORY_HOST);
 
       for (i = 0; i < num_vectors; i++) { mvector->active_indices[i] = i; }
       mvector->num_active_vectors = num_vectors;
@@ -120,7 +120,7 @@ hypre_SeqMultivectorSetMask(hypre_Multivector *mvector, HYPRE_Int * mask)
    HYPRE_Int  i, num_vectors = mvector->num_vectors;
 
    if (mvector->active_indices != NULL) { hypre_TFree(mvector->active_indices, HYPRE_MEMORY_HOST); }
-   mvector->active_indices hypre_CTAlloc(HYPRE_Int,  num_vectors, HYPRE_MEMORY_HOST);
+   mvector->active_indices hypre_CTAlloc(HYPRE_Int, num_vectors, HYPRE_MEMORY_HOST);
 
    mvector->num_active_vectors = 0;
 
@@ -249,7 +249,7 @@ hypre_SeqMultivectorCopy(hypre_Multivector *x, hypre_Multivector *y)
       {
          src = x_data + size * x_active_ind[i];
          dest = y_data + size * y_active_ind[i];
-         hypre_Memcpy(dest, src, HYPRE_Complex, num_bytes, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy(dest, src, HYPRE_Complex, num_bytes, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       }
    }
    return 0;
@@ -263,7 +263,7 @@ hypre_SeqMultivectorCopyWithoutMask(hypre_Multivector *x,
 
    hypre_assert (x->size == y->size && x->num_vectors == y->num_vectors);
    byte_count = x->size * x->num_vectors;
-   hypre_Memcpy(y->data, x->data, HYPRE_Complex, byte_count, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(y->data, x->data, HYPRE_Complex, byte_count, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
    return 0;
 }
 
@@ -465,21 +465,22 @@ HYPRE_Int hypre_SeqMultivectorInnerProdDiag(hypre_Multivector *x,
 }
 
 HYPRE_Int
-hypre_SeqMultivectorByMatrix(hypre_Multivector *x, HYPRE_Int rGHeight, HYPRE_Int rHeight,
+hypre_SeqMultivectorByMatrix(hypre_Multivector *x, HYPRE_BigInt rGHeight, HYPRE_Int rHeight,
                              HYPRE_Int rWidth, HYPRE_Complex* rVal, hypre_Multivector *y)
 {
-   HYPRE_Int    i, j, k, size, gap, *x_active_ind, *y_active_ind;
-   HYPRE_Complex *x_data, *y_data, *x_ptr, *y_ptr, current_coef;
+   HYPRE_Complex  *x_data, *y_data, *x_ptr, *y_ptr, current_coef;
+   HYPRE_Int       i, j, k, size, *x_active_ind, *y_active_ind;
+   HYPRE_BigInt    gap;
 
    hypre_assert(rHeight > 0);
-   hypre_assert (rHeight == x->num_active_vectors && rWidth == y->num_active_vectors);
+   hypre_assert(rHeight == x->num_active_vectors && rWidth == y->num_active_vectors);
 
    x_data = x->data;
    y_data = y->data;
    size = x->size;
    x_active_ind = x->active_indices;
    y_active_ind = y->active_indices;
-   gap = rGHeight - rHeight;
+   gap = rGHeight - (HYPRE_BigInt) rHeight;
 
    for (j = 0; j < rWidth; j++)
    {
@@ -519,20 +520,21 @@ hypre_SeqMultivectorByMatrix(hypre_Multivector *x, HYPRE_Int rGHeight, HYPRE_Int
 }
 
 HYPRE_Int
-hypre_SeqMultivectorXapy (hypre_Multivector *x, HYPRE_Int rGHeight, HYPRE_Int rHeight,
+hypre_SeqMultivectorXapy (hypre_Multivector *x, HYPRE_BigInt rGHeight, HYPRE_Int rHeight,
                           HYPRE_Int rWidth, HYPRE_Complex* rVal, hypre_Multivector *y)
 {
-   HYPRE_Complex *x_data, *y_data, *x_ptr, *y_ptr, current_coef;
-   HYPRE_Int    i, j, k, size, gap, *x_active_ind, *y_active_ind;
+   HYPRE_Complex  *x_data, *y_data, *x_ptr, *y_ptr, current_coef;
+   HYPRE_Int       i, j, k, size, *x_active_ind, *y_active_ind;
+   HYPRE_BigInt    gap;
 
-   hypre_assert (rHeight == x->num_active_vectors && rWidth == y->num_active_vectors);
+   hypre_assert(rHeight == x->num_active_vectors && rWidth == y->num_active_vectors);
 
    x_data = x->data;
    y_data = y->data;
    size = x->size;
    x_active_ind = x->active_indices;
    y_active_ind = y->active_indices;
-   gap = rGHeight - rHeight;
+   gap = rGHeight - (HYPRE_BigInt) rHeight;
 
    for (j = 0; j < rWidth; j++)
    {

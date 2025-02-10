@@ -23,7 +23,7 @@ ParCSRHybrid, if used through the ``IJ`` interface and is used here with
 BoomerAMG.  The user can determine the average convergence speed by setting a
 convergence tolerance :math:`0 \leq \theta < 1` via the routine
 ``HYPRE_StructHybridSetConvergenceTol`` or
-``HYPRE_StructParCSRHybridSetConvergenceTol``.  The default setting is 0.9.
+``HYPRE_ParCSRHybridSetConvergenceTol``.  The default setting is 0.9.
 
 The average convergence factor :math:`\rho_i = \left({{\| r_i \|} \over {\| r_0
 \|}}\right)^{1/i}` is monitored within the chosen Krylov solver, where
@@ -37,3 +37,16 @@ considered too slow when
 When this condition is fulfilled the hybrid solver switches from a diagonally
 scaled Krylov solver to a preconditioned solver.
 
+.. Add blank lines to help with navigation pane formatting
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|

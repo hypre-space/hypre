@@ -7,6 +7,115 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
+Version 2.32.0 released 2024/10/08
+
+- New MGR features and updates
+- New filtering option to AMG for block-diagonal preconditioning
+- New memory usage monitoring functions
+- Added non-UVM support for ILUT and HMIS coarsening
+- Various bug fixes
+
+#====================================
+
+Version 2.31.0 released 2024/02/14
+
+- Added iterative ILU0 option
+- Refactored MGR interpolation, added column-sum restriction, improved robustness
+- Added new print level options for MGR
+- Updated IJ vector I/O functions
+- Updated default compiler list for configure
+- Added a feature to avoid GPU device initialization for CPU runs
+- Improved FSAI performance on GPUs
+- Added MGR function to set the F-relaxation solver on a specific level
+- Various bug fixes
+
+#====================================
+
+Version 2.30.0 released 2023/11/06
+
+- Added FSAI support with CUDA and HIP
+- Added MAGMA option to FSAI
+- Added Binary I/O functions for IJ matrices and vectors
+- Added a convergent l1-hybrid symmetric Gauss-Seidel smoother to BoomerAMG
+- Added CUDA support to dense direct solver options in BoomerAMG and MGR
+- Added SYCL support for triangular solves (enabling Gauss-Seidel, ILU, etc.)
+  and Chebyshev relaxation
+- Improved MGR statistics and data printing
+- Added CG options to ignore errors, and added a flexible CG version
+- Added superlu_dist support on GPUs
+- Various bug fixes
+
+#====================================
+
+Version 2.29.0 released 2023/06/22
+
+- Added ILU support for AMD GPUs
+- Added new error handling feature to print messages to a memory buffer
+- Enabled more support with SYCL: MGR, AMS/ADS/ADE, AIR, ...
+- Added MAGMA support
+- Added support for CUDA 12
+- Added HYPRE_Initialized/HYPRE_Finalized functions
+- Ported MGR features to CUDA and HIP: Non-Galerkin options, block diagonal
+  interpolation, and block Jacobi relaxation
+- Added non-UVM device support for ILU and MGR
+- Added cuSOLVER and rocSOLVER support
+- Various bug fixes
+
+#====================================
+
+Version 2.28.0 released 2023/03/17
+
+- Added new Gaussian elimination options for F-relaxation in MGR.
+- Switched to read-the-docs theme for documentation.
+- Using autoconf 2.71 now to generate 'configure' script.
+- Improved error handling for multi-component vectors.
+- Various bug fixes
+
+#====================================
+
+Version 2.27.0 released 2022/12/20
+
+- New SStructMatrix and SStructVector AddFEMBoxValues() routines to set finite
+  element stiffness matrices a box at a time for better performance.
+- Added environment variable HYPRE_BRANCH_NAME.
+- Added HIP support to the MGR solver.
+- Added Jacobi iterative solver approach for ILU smoothing/preconditioning.
+- Various optimizations for IJ solvers
+- Various CMake build system updates
+- Various bug fixes
+
+#====================================
+
+Version 2.26.0 released 2022/10/14
+
+- Added a new feature of BoomerAMG (L1-Jacobi and Chebyshev smoothers) and
+  Krylov subspace solvers with multiple right-hand-side vectors;
+- Optimized parallel sparse matrix/multi-component vector multiplication
+  on CPUs and GPUs.
+- Added SYCL support for the IJ interface and various AMG operators;
+- Added a runtime switch feature between CPU and GPU;
+- Added CMAKE support for CUDA;
+- Optimized the performance of AMG interpolation truncation routines with CUDA/HIP;
+- Optimized the performance of hypre's SpGEMM kernels on NVIDIA/AMD GPUs;
+- Various bug fixes
+
+#====================================
+
+Version 2.25.0 released 2022/06/15
+
+- New features in MGR: multilevel assignment of solver options, block Jacobi for
+  smoothers and inter-grid transfer, CPR, non-Galerkin.
+- New factorized sparse approximate inverse (FSAI) solver/preconditioner.  Can
+  also be used as a smoother in BoomerAMG.
+- Added various optimizations for Nvidia and AMD GPUs by removing synchronizations,
+  reducing memory transfers, and adding faster custom kernels.
+- Ported parallel matrix matrix multiplicaton to SYCL.
+- Infrastructure changes to unify GPU implementations across CUDA/HIP/SYCL.
+- Added SStruct I/O routines.
+- Various bug fixes.
+
+#====================================
+
 Version 2.24.0 released 2022/02/11
 
 - Added SYCL support for the structured interface and solvers
@@ -19,6 +128,7 @@ Version 2.24.0 released 2022/02/11
 - Various bug fixes.
 
 #====================================
+
 Version 2.23.0 released 2021/10/01
 
 - Added GPU support for multipass interpolation.

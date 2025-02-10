@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -26,21 +26,22 @@ EOF
    ;;
 esac
 
-RESET=`shopt -p nullglob`  # Save current nullglob setting
-shopt -s nullglob          # Return an empty string for failed wildcard matches 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+RESET=`shopt -p nullglob`                # Save current nullglob setting
+shopt -s nullglob                        # Return an empty string for failed wildcard matches
 if [ "x$1" = "x" ]
 then
-   testdirs=`echo TEST*`   # All TEST directories
+   testdirs=`echo ${SCRIPT_DIR}/TEST*`   # All TEST directories
 else
-   testdirs=`echo $*`      # Only the specified test directories
+   testdirs=`echo $*`                    # Only the specified test directories
 fi
-$RESET                     # Restore nullglob setting
+$RESET                                   # Restore nullglob setting
 
 for testdir in $testdirs
 do
-   rm -f $testdir/*err*
-   rm -f $testdir/*out*
-   rm -f $testdir/*log*
+   rm -f $testdir/*.err*
+   rm -f $testdir/*.out*
+   rm -f $testdir/*.log*
    rm -f $testdir/*.fil
    rm -f $testdir/*.core
 done

@@ -26,10 +26,8 @@ extern "C" {
 /**
  * @defgroup SStructSolvers SStruct Solvers
  *
- * These solvers use matrix/vector storage schemes that are taylored
- * to semi-structured grid problems.
- *
- * @memo Linear solvers for semi-structured grids
+ * Linear solvers for semi-structured grids. These solvers use matrix/vector
+ * storage schemes that are taylored to semi-structured grid problems.
  *
  * @{
  **/
@@ -57,12 +55,6 @@ typedef HYPRE_Int (*HYPRE_PtrToSStructSolverFcn)(HYPRE_SStructSolver,
 #ifndef HYPRE_MODIFYPC
 #define HYPRE_MODIFYPC
 /* if pc not defined, then may need HYPRE_SOLVER also */
-
-#ifndef HYPRE_SOLVER_STRUCT
-#define HYPRE_SOLVER_STRUCT
-struct hypre_Solver_struct;
-typedef struct hypre_Solver_struct *HYPRE_Solver;
-#endif
 
 typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
                                             HYPRE_Int,
@@ -626,7 +618,7 @@ HYPRE_SStructMaxwellSetGrad(HYPRE_SStructSolver solver,
  **/
 HYPRE_Int
 HYPRE_SStructMaxwellSetRfactors(HYPRE_SStructSolver solver,
-                                HYPRE_Int           rfactors[HYPRE_MAXDIM]);
+                                HYPRE_Int          *rfactors);
 
 /**
  * Finds the physical boundary row ranks on all levels.
@@ -634,7 +626,7 @@ HYPRE_SStructMaxwellSetRfactors(HYPRE_SStructSolver solver,
 HYPRE_Int
 HYPRE_SStructMaxwellPhysBdy(HYPRE_SStructGrid  *grid_l,
                             HYPRE_Int           num_levels,
-                            HYPRE_Int           rfactors[HYPRE_MAXDIM],
+                            HYPRE_Int          *rfactors,
                             HYPRE_Int        ***BdryRanks_ptr,
                             HYPRE_Int         **BdryRanksCnt_ptr );
 

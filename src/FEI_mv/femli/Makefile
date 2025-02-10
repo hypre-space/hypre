@@ -20,6 +20,7 @@ MLI_INCLUDES = \
  -I$(srcdir)/../../parcsr_mv\
  -I$(srcdir)/../../parcsr_ls\
  -I$(srcdir)/../../seq_mv\
+ -I$(srcdir)/../../seq_block_mv\
  -I$(srcdir)/../../distributed_matrix\
  -I$(srcdir)/../../distributed_ls\
  -I$(srcdir)/../../FEI_mv/fei-hypre\
@@ -152,6 +153,6 @@ libHYPRE_mli.a: ${OBJS}
 libHYPRE_mli.so libHYPRE_mli.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
-	ln -s ${SONAME} $@
+	ln -s -f ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

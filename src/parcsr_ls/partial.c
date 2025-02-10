@@ -13,12 +13,17 @@
  *  Comment:
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
-                                       hypre_ParCSRMatrix   *S, HYPRE_BigInt *num_cpts_global,
-                                       HYPRE_BigInt *num_old_cpts_global,
-                                       HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag,
-                                       HYPRE_Real trunc_factor, HYPRE_Int max_elmts,
-                                       hypre_ParCSRMatrix  **P_ptr)
+hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix  *A,
+                                       HYPRE_Int           *CF_marker,
+                                       hypre_ParCSRMatrix  *S,
+                                       HYPRE_BigInt        *num_cpts_global,
+                                       HYPRE_BigInt        *num_old_cpts_global,
+                                       HYPRE_Int            num_functions,
+                                       HYPRE_Int           *dof_func,
+                                       HYPRE_Int            debug_flag,
+                                       HYPRE_Real           trunc_factor,
+                                       HYPRE_Int            max_elmts,
+                                       hypre_ParCSRMatrix **P_ptr)
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PARTIAL_INTERP] -= hypre_MPI_Wtime();
@@ -79,10 +84,10 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
    HYPRE_Int       *dof_func_offd = NULL;
 
    /* Full row information for columns of A that are off diag*/
-   hypre_CSRMatrix *A_ext;
-   HYPRE_Real      *A_ext_data;
-   HYPRE_Int       *A_ext_i;
-   HYPRE_BigInt    *A_ext_j;
+   hypre_CSRMatrix *A_ext      = NULL;
+   HYPRE_Real      *A_ext_data = NULL;
+   HYPRE_Int       *A_ext_i    = NULL;
+   HYPRE_BigInt    *A_ext_j    = NULL;
 
    HYPRE_Int       *fine_to_coarse = NULL;
    HYPRE_BigInt    *fine_to_coarse_offd = NULL;
@@ -90,9 +95,9 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
 
    HYPRE_Int        full_off_procNodes;
 
-   hypre_CSRMatrix *Sop;
-   HYPRE_Int       *Sop_i;
-   HYPRE_BigInt    *Sop_j;
+   hypre_CSRMatrix *Sop   = NULL;
+   HYPRE_Int       *Sop_i = NULL;
+   HYPRE_BigInt    *Sop_j = NULL;
 
    HYPRE_Int        sgn;
 
@@ -874,18 +879,23 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
-                                     hypre_ParCSRMatrix   *S, HYPRE_BigInt *num_cpts_global,
-                                     HYPRE_BigInt *num_old_cpts_global,
-                                     HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag,
-                                     HYPRE_Real trunc_factor, HYPRE_Int max_elmts,
-                                     HYPRE_Int sep_weight,
-                                     hypre_ParCSRMatrix  **P_ptr)
+hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix  *A,
+                                     HYPRE_Int           *CF_marker,
+                                     hypre_ParCSRMatrix  *S,
+                                     HYPRE_BigInt        *num_cpts_global,
+                                     HYPRE_BigInt        *num_old_cpts_global,
+                                     HYPRE_Int            num_functions,
+                                     HYPRE_Int           *dof_func,
+                                     HYPRE_Int            debug_flag,
+                                     HYPRE_Real           trunc_factor,
+                                     HYPRE_Int            max_elmts,
+                                     HYPRE_Int            sep_weight,
+                                     hypre_ParCSRMatrix **P_ptr)
 {
    /* Communication Variables */
    MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-   HYPRE_Int              my_id, num_procs;
+   HYPRE_Int                my_id, num_procs;
 
    /* Variables to store input variables */
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -935,10 +945,10 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    HYPRE_Int       *dof_func_offd = NULL;
 
    /* Full row information for columns of A that are off diag*/
-   hypre_CSRMatrix *A_ext;
-   HYPRE_Real      *A_ext_data;
-   HYPRE_Int       *A_ext_i;
-   HYPRE_BigInt    *A_ext_j;
+   hypre_CSRMatrix *A_ext = NULL;
+   HYPRE_Real      *A_ext_data = NULL;
+   HYPRE_Int       *A_ext_i = NULL;
+   HYPRE_BigInt    *A_ext_j = NULL;
 
    HYPRE_Int       *fine_to_coarse = NULL;
    HYPRE_BigInt    *fine_to_coarse_offd = NULL;
@@ -947,16 +957,16 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    HYPRE_Int        loc_col;
    HYPRE_Int        full_off_procNodes;
 
-   hypre_CSRMatrix *Sop;
-   HYPRE_Int       *Sop_i;
-   HYPRE_BigInt    *Sop_j;
+   hypre_CSRMatrix *Sop   = NULL;
+   HYPRE_Int       *Sop_i = NULL;
+   HYPRE_BigInt    *Sop_j = NULL;
 
    /* Variables to keep count of interpolatory points */
    HYPRE_Int        jj_counter, jj_counter_offd;
    HYPRE_Int        jj_begin_row, jj_end_row;
    HYPRE_Int        jj_begin_row_offd = 0;
    HYPRE_Int        jj_end_row_offd = 0;
-   HYPRE_Int        coarse_counter;
+   //HYPRE_Int        coarse_counter;
    HYPRE_Int        n_coarse_old;
    HYPRE_BigInt     total_old_global_cpts;
 
@@ -971,7 +981,7 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    HYPRE_Real      *ahat_offd = NULL;
    HYPRE_Real       sum_pos, sum_pos_C, sum_neg, sum_neg_C, sum, sum_C;
    HYPRE_Real       diagonal, distribute;
-   HYPRE_Real       alfa, beta;
+   HYPRE_Real       alpha, beta;
 
    /* Loop variables */
    /*HYPRE_Int              index;*/
@@ -984,11 +994,10 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    /* Definitions */
    HYPRE_Real       zero = 0.0;
    HYPRE_Real       one  = 1.0;
-   HYPRE_Real       wall_time;
-   HYPRE_Real       wall_1 = 0;
-   HYPRE_Real       wall_2 = 0;
-   HYPRE_Real       wall_3 = 0;
-
+   HYPRE_Real       wall_time = 0.0;
+   HYPRE_Real       wall_1 = 0.0;
+   HYPRE_Real       wall_2 = 0.0;
+   HYPRE_Real       wall_3 = 0.0;
 
    hypre_ParCSRCommPkg   *extend_comm_pkg = NULL;
 
@@ -1071,7 +1080,7 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
 
    jj_counter = start_indexing;
    jj_counter_offd = start_indexing;
-   coarse_counter = 0;
+   //coarse_counter = 0;
 
    cnt = 0;
    old_cnt = 0;
@@ -1104,7 +1113,7 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
       if (CF_marker[i] > 0)
       {
          jj_counter++;
-         coarse_counter++;
+         //coarse_counter++;
       }
 
       /*--------------------------------------------------------------------
@@ -1662,6 +1671,7 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                }
                ahat[jj] = 0;
             }
+
             if (num_procs > 1)
             {
                for (jj = cnt_c_offd; jj < cnt_f_offd; jj++)
@@ -1677,8 +1687,9 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                   ahat_offd[jj] = 0;
                }
             }
-            if (sum_neg_C * diagonal != 0.0) { alfa = sum_neg / sum_neg_C / diagonal; }
-            if (sum_pos_C * diagonal != 0.0) { beta = sum_pos / sum_pos_C / diagonal; }
+
+            alpha = (sum_neg_C * diagonal != 0.0) ? (sum_neg / sum_neg_C / diagonal) : 1.0;
+            beta  = (sum_pos_C * diagonal != 0.0) ? (sum_pos / sum_pos_C / diagonal) : 1.0;
 
             /*-----------------------------------------------------------------
              * Set interpolation weight by dividing by the diagonal.
@@ -1693,7 +1704,7 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                }
                else
                {
-                  P_diag_data[jj] = -alfa * ahat[j1];
+                  P_diag_data[jj] = -alpha * ahat[j1];
                }
 
                P_diag_j[jj] = fine_to_coarse[P_diag_j[jj]];
@@ -1710,11 +1721,11 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                   j1 = ihat_offd[P_offd_j[jj]];
                   if (ahat_offd[j1] > 0)
                   {
-                     P_offd_data[jj] = -beta * ahat_offd[j1];
+                     P_offd_data[jj] = - beta * ahat_offd[j1];
                   }
                   else
                   {
-                     P_offd_data[jj] = -alfa * ahat_offd[j1];
+                     P_offd_data[jj] = - alpha * ahat_offd[j1];
                   }
 
                   ahat_offd[j1] = 0;
@@ -1752,7 +1763,7 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                   ahat_offd[jj] = 0;
                }
             }
-            if (sum_C * diagonal != 0.0) { alfa = sum / sum_C / diagonal; }
+            alpha = (sum_C * diagonal != 0.0) ? (sum / sum_C / diagonal) : 1.0;
 
             /*-----------------------------------------------------------------
              * Set interpolation weight by dividing by the diagonal.
@@ -1761,7 +1772,7 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
             for (jj = jj_begin_row; jj < jj_end_row; jj++)
             {
                j1 = ihat[P_diag_j[jj]];
-               P_diag_data[jj] = -alfa * ahat[j1];
+               P_diag_data[jj] = - alpha * ahat[j1];
                P_diag_j[jj] = fine_to_coarse[P_diag_j[jj]];
                ahat[j1] = 0;
             }
@@ -1774,7 +1785,7 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
                for (jj = jj_begin_row_offd; jj < jj_end_row_offd; jj++)
                {
                   j1 = ihat_offd[P_offd_j[jj]];
-                  P_offd_data[jj] = -alfa * ahat_offd[j1];
+                  P_offd_data[jj] = - alpha * ahat_offd[j1];
                   ahat_offd[j1] = 0;
                }
                for (jj = 0; jj < cnt_f_offd; jj++)
@@ -1950,10 +1961,10 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    HYPRE_Int       *dof_func_offd = NULL;
 
    /* Full row information for columns of A that are off diag*/
-   hypre_CSRMatrix *A_ext;
-   HYPRE_Real      *A_ext_data;
-   HYPRE_Int       *A_ext_i;
-   HYPRE_BigInt    *A_ext_j;
+   hypre_CSRMatrix *A_ext      = NULL;
+   HYPRE_Real      *A_ext_data = NULL;
+   HYPRE_Int       *A_ext_i    = NULL;
+   HYPRE_BigInt    *A_ext_j    = NULL;
 
    HYPRE_Int       *fine_to_coarse = NULL;
    HYPRE_BigInt    *fine_to_coarse_offd = NULL;
@@ -1962,9 +1973,9 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    HYPRE_Int        loc_col;
    HYPRE_Int        full_off_procNodes;
 
-   hypre_CSRMatrix *Sop;
-   HYPRE_Int       *Sop_i;
-   HYPRE_BigInt    *Sop_j;
+   hypre_CSRMatrix *Sop   = NULL;
+   HYPRE_Int       *Sop_i = NULL;
+   HYPRE_BigInt    *Sop_j = NULL;
 
    HYPRE_Int        sgn;
 
@@ -1973,7 +1984,7 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    HYPRE_Int        jj_begin_row, jj_end_row;
    HYPRE_Int        jj_begin_row_offd = 0;
    HYPRE_Int        jj_end_row_offd = 0;
-   HYPRE_Int        coarse_counter;
+   //HYPRE_Int        coarse_counter;
    HYPRE_Int        n_coarse_old;
    HYPRE_BigInt     total_old_global_cpts;
 
@@ -1991,8 +2002,7 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    /* Definitions */
    HYPRE_Real       zero = 0.0;
    HYPRE_Real       one  = 1.0;
-   HYPRE_Real       wall_time;
-
+   HYPRE_Real       wall_time = 0.0;
 
    hypre_ParCSRCommPkg   *extend_comm_pkg = NULL;
 
@@ -2074,7 +2084,7 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
 
    jj_counter = start_indexing;
    jj_counter_offd = start_indexing;
-   coarse_counter = 0;
+   //coarse_counter = 0;
 
    cnt = 0;
    old_cnt = 0;
@@ -2107,7 +2117,7 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
       if (CF_marker[i] > 0)
       {
          jj_counter++;
-         coarse_counter++;
+         //coarse_counter++;
       }
 
       /*--------------------------------------------------------------------

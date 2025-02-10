@@ -60,9 +60,6 @@ hypre_StructGridCreate( MPI_Comm           comm,
       hypre_StructGridNumGhost(grid)[i] = 1;
    }
 
-#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   hypre_StructGridDataLocation(grid) = HYPRE_MEMORY_DEVICE;
-#endif
    *grid_ptr = grid;
 
    return hypre_error_flag;
@@ -703,7 +700,8 @@ hypre_ComputeBoxnums(hypre_BoxArray *boxes,
 
    HYPRE_Int         *boxnums;
    HYPRE_Int          num_boxes;
-   HYPRE_Int          p, b, boxnum;
+   HYPRE_Int          p, b;
+   HYPRE_Int          boxnum = 0;
 
    /*-----------------------------------------------------
     *-----------------------------------------------------*/

@@ -24,6 +24,8 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
                                      HYPRE_Int            max_elmts,
                                      hypre_ParCSRMatrix **P_ptr)
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
    /* Communication Variables */
    MPI_Comm              comm = hypre_ParCSRMatrixComm(A);
    HYPRE_MemoryLocation  memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
@@ -122,7 +124,7 @@ hypre_BoomerAMGBuildModExtInterpHost(hypre_ParCSRMatrix  *A,
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    n_Cpts = num_cpts_global[1] - num_cpts_global[0];
 
-   hypre_ParCSRMatrixGenerateFFFC(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
+   hypre_ParCSRMatrixGenerateFFFCHost(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
 
    As_FC_diag = hypre_ParCSRMatrixDiag(As_FC);
    As_FC_diag_i = hypre_CSRMatrixI(As_FC_diag);
@@ -550,13 +552,11 @@ hypre_BoomerAMGBuildModExtInterp(hypre_ParCSRMatrix  *A,
                                  HYPRE_Int            max_elmts,
                                  hypre_ParCSRMatrix **P_ptr)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("ModExtInterp");
-#endif
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -571,9 +571,7 @@ hypre_BoomerAMGBuildModExtInterp(hypre_ParCSRMatrix  *A,
                                                   debug_flag, trunc_factor, max_elmts, P_ptr);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }
@@ -595,6 +593,8 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
                                        HYPRE_Int            max_elmts,
                                        hypre_ParCSRMatrix **P_ptr)
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
    /* Communication Variables */
    MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -706,7 +706,7 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    n_Cpts = num_cpts_global[1] - num_cpts_global[0];
 
-   hypre_ParCSRMatrixGenerateFFFC(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
+   hypre_ParCSRMatrixGenerateFFFCHost(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
 
    if (num_procs > 1)
    {
@@ -1223,13 +1223,11 @@ hypre_BoomerAMGBuildModExtPIInterp(hypre_ParCSRMatrix  *A,
                                    HYPRE_Int            max_elmts,
                                    hypre_ParCSRMatrix **P_ptr)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("ModExtPIInterp");
-#endif
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -1244,9 +1242,7 @@ hypre_BoomerAMGBuildModExtPIInterp(hypre_ParCSRMatrix  *A,
                                                     trunc_factor, max_elmts, P_ptr);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }
@@ -1267,6 +1263,8 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
                                        HYPRE_Int             max_elmts,
                                        hypre_ParCSRMatrix  **P_ptr)
 {
+   HYPRE_UNUSED_VAR(debug_flag);
+
    /* Communication Variables */
    MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
    HYPRE_MemoryLocation memory_location_P = hypre_ParCSRMatrixMemoryLocation(A);
@@ -1371,7 +1369,7 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
    hypre_MPI_Bcast(&total_global_cpts, 1, HYPRE_MPI_BIG_INT, num_procs - 1, comm);
    n_Cpts = num_cpts_global[1] - num_cpts_global[0];
 
-   hypre_ParCSRMatrixGenerateFFFC(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
+   hypre_ParCSRMatrixGenerateFFFCHost(A, CF_marker, num_cpts_global, S, &As_FC, &As_FF);
 
    As_FC_diag = hypre_ParCSRMatrixDiag(As_FC);
    As_FC_diag_i = hypre_CSRMatrixI(As_FC_diag);
@@ -1864,13 +1862,11 @@ hypre_BoomerAMGBuildModExtPEInterp(hypre_ParCSRMatrix  *A,
                                    HYPRE_Int            max_elmts,
                                    hypre_ParCSRMatrix **P_ptr)
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPushRange("ModExtPEInterp");
-#endif
 
    HYPRE_Int ierr = 0;
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -1885,9 +1881,7 @@ hypre_BoomerAMGBuildModExtPEInterp(hypre_ParCSRMatrix  *A,
                                                     debug_flag, trunc_factor, max_elmts, P_ptr);
    }
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    hypre_GpuProfilingPopRange();
-#endif
 
    return ierr;
 }

@@ -28,17 +28,17 @@ hypre_ParCSRBlockMatrixMatvec(HYPRE_Complex alpha,
                               HYPRE_Complex beta,
                               hypre_ParVector *y)
 {
-   hypre_ParCSRCommHandle *comm_handle;
+   hypre_ParCSRCommHandle *comm_handle = NULL;
    hypre_ParCSRCommPkg    *comm_pkg;
    hypre_CSRBlockMatrix   *diag, *offd;
-   hypre_Vector           *x_local, *y_local, *x_tmp;
+   hypre_Vector           *x_local, *y_local, *x_tmp = NULL;
    HYPRE_BigInt            num_rows, num_cols;
    HYPRE_Int               i, j, k, index;
    HYPRE_Int               blk_size, size;
    HYPRE_BigInt            x_size, y_size;
    HYPRE_Int               num_cols_offd, start, finish, elem;
    HYPRE_Int               ierr = 0, nprocs, num_sends, mypid;
-   HYPRE_Complex          *x_tmp_data, *x_buf_data, *x_local_data;
+   HYPRE_Complex          *x_tmp_data, *x_buf_data = NULL, *x_local_data;
 
    hypre_MPI_Comm_size(hypre_ParCSRBlockMatrixComm(A), &nprocs);
    hypre_MPI_Comm_rank(hypre_ParCSRBlockMatrixComm(A), &mypid);

@@ -76,6 +76,12 @@ the user and reference manuals (adjust the path as needed):
     file:///home/falgout2/hypre/src/docs/usr-manual-html/index.html
     file:///home/falgout2/hypre/src/docs/ref-manual-html/index.html
 
+Alternatively, run a (local) webserver:
+
+    python3 -m http.server --directory usr-manual-html
+
+and open http://localhost:8000 in a browser.
+
 ## Some useful links
 
 Sphinx:
@@ -96,3 +102,9 @@ Breathe:
 
 - https://breathe.readthedocs.io/en/latest/index.html
 
+## Some notes on customization
+
+After compilation, the CSS style files that control the HTML formatting will be
+in the folder `usr-manual-html/_static`.  To override any of these settings, add
+the appropriate lines to the file `usr-manual/_static/custom.css`.  Use the web
+to get information on CSS.

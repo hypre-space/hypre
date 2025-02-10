@@ -95,7 +95,7 @@
       call MPI_Comm_rank(MPI_COMM_WORLD, myid, ierr)
       call MPI_Comm_size(MPI_COMM_WORLD, num_procs, ierr)
 
-      call HYPRE_Init(ierr)
+      call HYPRE_Initialize(ierr)
 
       if (num_procs .ne. 2) then
          if (myid .eq. 0) then
@@ -499,6 +499,4 @@
 
       stat = device_free(p_values)
 
-      stop
       end
-

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -26,6 +26,7 @@
 #    18: 2s-mod-ext interpolation all levels for systems problem hybrid approach
 #    19: 2s-mod-ee interpolation 1 levels (agg_tr 0.3)
 #    20: 2s-mod-ee interpolation all levels (agg_Pmx 4 agg_P12_mx 4)
+#    22: multipass interpolation all levels (agg_Pmx 4 agg_P12_mx 4)
 #=============================================================================
 
 mpirun -np 8 ./ij    -rhsrand -n 30 29 31 -P 2 2 2 -agg_nl 1 -agg_interp 1 -agg_Pmx 4 -solver 1 -rlx 6 \
@@ -109,8 +110,17 @@ mpirun -np 8 ./ij    -rhsrand -n 20 19 22 -P 2 2 2 -sysL 3 -nf 3 -agg_nl 10 -int
 mpirun -np 8 ./ij    -rhsrand -n 30 29 31 -P 2 2 2 -agg_nl 1 -agg_interp 7 -interptype 18 -agg_tr 0.3 -solver 1 -rlx 8 \
  >> agg_interp.out.19
 
+mpirun -np 8 ./ij    -rhsrand -n 30 29 31 -P 2 2 2 -agg_nl 1 -agg_interp 7 -interptype 18 -agg_tr 0.3 -solver 1 -rlx 88 \
+ >> agg_interp.out.19.1
+
+mpirun -np 8 ./ij    -rhsrand -n 30 29 31 -P 2 2 2 -agg_nl 1 -agg_interp 7 -interptype 18 -agg_tr 0.3 -solver 1 -rlx 89 \
+ >> agg_interp.out.19.2
+
 mpirun -np 8 ./ij    -rhsrand -n 30 29 31 -P 2 2 2 -agg_nl 10 -agg_interp 7 -agg_Pmx 4 -agg_P12_mx 4 -solver 1 -rlx 6 \
  >> agg_interp.out.20
 
 mpirun -np 2 ./ij -fromfile tst -agg_nl 1 -agg_interp 8 \
  >> agg_interp.out.21
+
+mpirun -np 8 ./ij    -rhsrand -n 30 29 31 -P 2 2 2 -agg_nl 10 -agg_interp 8 -agg_Pmx 4 -agg_P12_mx 4 -solver 1 -rlx 6 \
+ >> agg_interp.out.22

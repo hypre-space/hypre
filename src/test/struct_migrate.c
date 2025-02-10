@@ -13,7 +13,6 @@
 #include "HYPRE_struct_mv.h"
 /* RDF: This include is only needed for AddValuesVector() */
 #include "_hypre_struct_mv.h"
-#include "_hypre_struct_mv.hpp"
 
 HYPRE_Int AddValuesVector( hypre_StructGrid   *grid,
                            hypre_StructVector *vector,
@@ -47,7 +46,7 @@ main( hypre_int argc,
 
    HYPRE_Int           p, q, r;
    HYPRE_Int           dim;
-   HYPRE_Int           nblocks ;
+   HYPRE_Int           nblocks = 0;
    HYPRE_Int         **ilower, **iupper, **iupper2;
    HYPRE_Int           istart[3];
    HYPRE_Int           i, ix, iy, iz, ib;
@@ -66,14 +65,15 @@ main( hypre_int argc,
 
    /*-----------------------------------------------------------------
     * GPU Device binding
-    * Must be done before HYPRE_Init() and should not be changed after
+    * Must be done before HYPRE_Initialize() and should not be changed after
     *-----------------------------------------------------------------*/
-   hypre_bind_device(myid, num_procs, hypre_MPI_COMM_WORLD);
+   hypre_bind_device_id(-1, myid, num_procs, hypre_MPI_COMM_WORLD);
 
    /*-----------------------------------------------------------
     * Initialize : must be the first HYPRE function to call
     *-----------------------------------------------------------*/
-   HYPRE_Init();
+   HYPRE_Initialize();
+   HYPRE_DeviceInitialize();
 
 #if defined(HYPRE_USING_KOKKOS)
    Kokkos::initialize (argc, argv);
@@ -92,6 +92,8 @@ main( hypre_int argc,
    P  = num_procs;
    Q  = 1;
    R  = 1;
+
+   p = q = r = 1;
 
    bx = 1;
    by = 1;
@@ -440,38 +442,41 @@ AddValuesVector( hypre_StructGrid   *grid,
                  hypre_StructVector *vector,
                  HYPRE_Real          value )
 {
-   HYPRE_Int          ierr = 0;
+   HYPRE_Int          i, ierr = 0;
    hypre_BoxArray    *gridboxes;
    HYPRE_Int          ib;
    hypre_IndexRef     ilower;
    hypre_IndexRef     iupper;
    hypre_Box         *box;
    HYPRE_Real        *values;
+   HYPRE_Real        *values_h;
    HYPRE_Int          volume;
 
-   gridboxes =  hypre_StructGridBoxes(grid);
+   HYPRE_MemoryLocation memory_location = hypre_StructVectorMemoryLocation(vector);
+
+   gridboxes = hypre_StructGridBoxes(grid);
 
    ib = 0;
    hypre_ForBoxI(ib, gridboxes)
    {
-      box      = hypre_BoxArrayBox(gridboxes, ib);
-      volume   = hypre_BoxVolume(box);
-      values   =  hypre_CTAlloc(HYPRE_Real,  volume, HYPRE_MEMORY_DEVICE);
+      box    = hypre_BoxArrayBox(gridboxes, ib);
+      volume = hypre_BoxVolume(box);
+      values = hypre_CTAlloc(HYPRE_Real, volume, memory_location);
+      values_h = hypre_CTAlloc(HYPRE_Real, volume, HYPRE_MEMORY_HOST);
 
-#define DEVICE_VAR is_device_ptr(values)
-      hypre_LoopBegin(volume, i)
+      for (i = 0; i < volume; i++)
       {
-         values[i] = value;
+         values_h[i] = value;
       }
-      hypre_LoopEnd();
-#undef DEVICE_VAR
+
+      hypre_TMemcpy(values, values_h, HYPRE_Real, volume, memory_location, HYPRE_MEMORY_HOST);
 
       ilower = hypre_BoxIMin(box);
       iupper = hypre_BoxIMax(box);
       HYPRE_StructVectorSetBoxValues(vector, ilower, iupper, values);
-      hypre_TFree(values, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(values, memory_location);
+      hypre_TFree(values_h, HYPRE_MEMORY_HOST);
    }
 
    return ierr;
 }
-

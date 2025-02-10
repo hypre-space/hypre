@@ -17,6 +17,8 @@
 #include "_hypre_utilities.h"
 #include "fortran.h"
 
+#include <HYPRE_config.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -27,6 +29,29 @@ extern "C" {
 
 #ifndef HYPRE_USING_HYPRE_BLAS
 
+#if defined(HYPRE_SINGLE)
+#define hypre_dasum   hypre_F90_NAME_BLAS(sasum ,SASUM )
+#define hypre_daxpy   hypre_F90_NAME_BLAS(saxpy ,SAXPY )
+#define hypre_dcopy   hypre_F90_NAME_BLAS(scopy ,SCOPY )
+#define hypre_ddot    hypre_F90_NAME_BLAS(sdot  ,SDOT  )
+#define hypre_dgemm   hypre_F90_NAME_BLAS(sgemm ,SGEMM )
+#define hypre_dgemv   hypre_F90_NAME_BLAS(sgemv ,SGEMV )
+#define hypre_dger    hypre_F90_NAME_BLAS(sger  ,SGER  )
+#define hypre_dnrm2   hypre_F90_NAME_BLAS(snrm2 ,SNRM2 )
+#define hypre_drot    hypre_F90_NAME_BLAS(srot  ,SROT  )
+#define hypre_dscal   hypre_F90_NAME_BLAS(sscal ,SSCAL )
+#define hypre_dswap   hypre_F90_NAME_BLAS(sswap ,SSWAP )
+#define hypre_dsymm   hypre_F90_NAME_BLAS(ssymm ,SSYMM )
+#define hypre_dsymv   hypre_F90_NAME_BLAS(ssymv ,SSYMV )
+#define hypre_dsyr2   hypre_F90_NAME_BLAS(ssyr2 ,SSYR2 )
+#define hypre_dsyr2k  hypre_F90_NAME_BLAS(ssyr2k,SSYR2K)
+#define hypre_dsyrk   hypre_F90_NAME_BLAS(ssyrk ,SSYRK )
+#define hypre_dtrmm   hypre_F90_NAME_BLAS(strmm ,STRMM )
+#define hypre_dtrmv   hypre_F90_NAME_BLAS(strmv ,STRMV )
+#define hypre_dtrsm   hypre_F90_NAME_BLAS(strsm ,STRSM )
+#define hypre_dtrsv   hypre_F90_NAME_BLAS(strsv ,STRSV )
+#define hypre_idamax  hypre_F90_NAME_BLAS(isamax,ISAMAX)
+#else
 #define hypre_dasum   hypre_F90_NAME_BLAS(dasum ,DASUM )
 #define hypre_daxpy   hypre_F90_NAME_BLAS(daxpy ,DAXPY )
 #define hypre_dcopy   hypre_F90_NAME_BLAS(dcopy ,DCOPY )
@@ -48,6 +73,7 @@ extern "C" {
 #define hypre_dtrsm   hypre_F90_NAME_BLAS(dtrsm ,DTRSM )
 #define hypre_dtrsv   hypre_F90_NAME_BLAS(dtrsv ,DTRSV )
 #define hypre_idamax  hypre_F90_NAME_BLAS(idamax,IDAMAX)
+#endif
 
 #endif
 

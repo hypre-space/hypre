@@ -28,7 +28,7 @@ HYPRE_SStructVectorCreate( MPI_Comm              comm,
    hypre_SStructPGrid    *pgrid;
    HYPRE_Int              part;
 
-   vector = hypre_TAlloc(hypre_SStructVector,  1, HYPRE_MEMORY_HOST);
+   vector = hypre_TAlloc(hypre_SStructVector, 1, HYPRE_MEMORY_HOST);
 
    hypre_SStructVectorComm(vector) = comm;
    hypre_SStructVectorNDim(vector) = hypre_SStructGridNDim(grid);
@@ -36,7 +36,7 @@ HYPRE_SStructVectorCreate( MPI_Comm              comm,
    hypre_SStructVectorObjectType(vector) = HYPRE_SSTRUCT;
    nparts = hypre_SStructGridNParts(grid);
    hypre_SStructVectorNParts(vector) = nparts;
-   pvectors = hypre_TAlloc(hypre_SStructPVector *,  nparts, HYPRE_MEMORY_HOST);
+   pvectors = hypre_TAlloc(hypre_SStructPVector *, nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       pgrid = hypre_SStructGridPGrid(grid, part);
@@ -79,11 +79,13 @@ HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector )
    hypre_SStructPVector **pvectors;
    HYPRE_Int              part;
    HYPRE_Int              vector_type;
+   HYPRE_MemoryLocation   memory_location;
 
    /* GEC1002 destroying data indices and data in vector  */
-
    if (vector)
    {
+      memory_location = hypre_SStructVectorMemoryLocation(vector);
+
       vector_type = hypre_SStructVectorObjectType(vector);
       hypre_SStructVectorRefCount(vector) --;
       if (hypre_SStructVectorRefCount(vector) == 0)
@@ -99,16 +101,16 @@ HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector )
          HYPRE_IJVectorDestroy(hypre_SStructVectorIJVector(vector));
 
          /* GEC1002 the ijdestroy takes care of the data when the
-          *  vector is type HYPRE_SSTRUCT. This is a result that the
+          * vector is type HYPRE_SSTRUCT. This is a result that the
           * ijvector does not use the owndata flag in the data structure
-          * unlike the structvector                               */
+          * unlike the struct vector                               */
 
          /* GEC if data has been allocated then free the pointer */
          hypre_TFree(hypre_SStructVectorDataIndices(vector), HYPRE_MEMORY_HOST);
 
          if (hypre_SStructVectorData(vector) && (vector_type == HYPRE_PARCSR))
          {
-            hypre_TFree(hypre_SStructVectorData(vector), HYPRE_MEMORY_DEVICE);
+            hypre_TFree(hypre_SStructVectorData(vector), memory_location);
          }
 
          hypre_TFree(vector, HYPRE_MEMORY_HOST);
@@ -145,9 +147,10 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
    HYPRE_IJVector          ijvector;
    hypre_SStructPGrid     *pgrid;
    HYPRE_SStructVariable  *vartypes;
+   HYPRE_MemoryLocation    memory_location = hypre_HandleMemoryLocation(hypre_handle());
 
    /* GEC0902 addition of variables for ilower and iupper   */
-   HYPRE_Int               ilower, iupper;
+   HYPRE_BigInt            ilower, iupper;
    hypre_ParVector        *par_vector;
    hypre_Vector           *parlocal_vector;
 
@@ -158,11 +161,11 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 
    datasize = hypre_SStructVectorDataSize(vector);
 
-   data = hypre_CTAlloc(HYPRE_Complex, datasize, HYPRE_MEMORY_DEVICE);
+   data = hypre_CTAlloc(HYPRE_Complex, datasize, memory_location);
 
    dataindices = hypre_SStructVectorDataIndices(vector);
 
-   hypre_SStructVectorData(vector)  = data;
+   hypre_SStructVectorData(vector) = data;
 
    for (part = 0; part < nparts; part++)
    {
@@ -201,11 +204,15 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
       ilower = hypre_SStructGridStartRank(grid);
       iupper = ilower + hypre_SStructGridLocalSize(grid) - 1;
    }
-
-   if (vector_type == HYPRE_SSTRUCT || vector_type == HYPRE_STRUCT)
+   else if (vector_type == HYPRE_SSTRUCT || vector_type == HYPRE_STRUCT)
    {
       ilower = hypre_SStructGridGhstartRank(grid);
       iupper = ilower + hypre_SStructGridGhlocalSize(grid) - 1;
+   }
+   else
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid vector type!\n");
+      return hypre_error_flag;
    }
 
    HYPRE_IJVectorCreate(comm, ilower, iupper,
@@ -220,9 +227,8 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
    ijvector = hypre_SStructVectorIJVector(vector);
 
    HYPRE_IJVectorSetObjectType(ijvector, HYPRE_PARCSR);
-
    HYPRE_IJVectorInitialize(ijvector);
-
+   HYPRE_IJVectorGetObject(ijvector, (void **) &hypre_SStructVectorParVector(vector));
 
    /* GEC1002 for HYPRE_SSTRUCT type of vector, we do not need data allocated
     * inside the parvector piece of the structure. We make that pointer within
@@ -235,9 +241,9 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 
    if (vector_type == HYPRE_SSTRUCT || vector_type == HYPRE_STRUCT)
    {
-      par_vector = (hypre_ParVector        *)hypre_IJVectorObject(ijvector);
+      par_vector = (hypre_ParVector *) hypre_IJVectorObject(ijvector);
       parlocal_vector = hypre_ParVectorLocalVector(par_vector);
-      hypre_TFree(hypre_VectorData(parlocal_vector), HYPRE_MEMORY_DEVICE);
+      hypre_TFree(hypre_VectorData(parlocal_vector), hypre_VectorMemoryLocation(parlocal_vector));
       hypre_VectorData(parlocal_vector) = data ;
    }
 
@@ -303,7 +309,7 @@ HYPRE_SStructVectorAddToValues( HYPRE_SStructVector  vector,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-/* ONLY3D */
+/* ONLY3D - RDF: Why? */
 
 HYPRE_Int
 HYPRE_SStructVectorAddFEMValues( HYPRE_SStructVector  vector,
@@ -316,8 +322,9 @@ HYPRE_SStructVectorAddFEMValues( HYPRE_SStructVector  vector,
    HYPRE_Int           fem_nvars    = hypre_SStructGridFEMPNVars(grid, part);
    HYPRE_Int          *fem_vars     = hypre_SStructGridFEMPVars(grid, part);
    hypre_Index        *fem_offsets  = hypre_SStructGridFEMPOffsets(grid, part);
-   HYPRE_Int           i, d, vindex[3];
+   HYPRE_Int           i, d, vindex[HYPRE_MAXDIM];
 
+   /* Set one variable at a time */
    for (i = 0; i < fem_nvars; i++)
    {
       for (d = 0; d < ndim; d++)
@@ -363,7 +370,7 @@ HYPRE_SStructVectorGetValues( HYPRE_SStructVector  vector,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-/* ONLY3D */
+/* ONLY3D - RDF: Why? */
 
 HYPRE_Int
 HYPRE_SStructVectorGetFEMValues( HYPRE_SStructVector  vector,
@@ -377,7 +384,7 @@ HYPRE_SStructVectorGetFEMValues( HYPRE_SStructVector  vector,
    HYPRE_Int             fem_nvars    = hypre_SStructGridFEMPNVars(grid, part);
    HYPRE_Int            *fem_vars     = hypre_SStructGridFEMPVars(grid, part);
    hypre_Index          *fem_offsets  = hypre_SStructGridFEMPOffsets(grid, part);
-   HYPRE_Int             i, d, vindex[3];
+   HYPRE_Int             i, d, vindex[HYPRE_MAXDIM];
 
    hypre_SetIndex(vindex, 0);
    for (i = 0; i < fem_nvars; i++)
@@ -559,6 +566,70 @@ HYPRE_SStructVectorGetBoxValues2(HYPRE_SStructVector  vector,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructVectorAddFEMBoxValues(HYPRE_SStructVector  vector,
+                                   HYPRE_Int            part,
+                                   HYPRE_Int           *ilower,
+                                   HYPRE_Int           *iupper,
+                                   HYPRE_Complex       *values)
+{
+   HYPRE_Int             ndim            = hypre_SStructVectorNDim(vector);
+   hypre_SStructGrid    *grid            = hypre_SStructVectorGrid(vector);
+   HYPRE_MemoryLocation  memory_location = hypre_SStructVectorMemoryLocation(vector);
+
+   HYPRE_Int             fem_nvars       = hypre_SStructGridFEMPNVars(grid, part);
+   HYPRE_Int            *fem_vars        = hypre_SStructGridFEMPVars(grid, part);
+   hypre_Index          *fem_offsets     = hypre_SStructGridFEMPOffsets(grid, part);
+
+   HYPRE_Complex        *tvalues;
+   hypre_Box            *box;
+
+   HYPRE_Int             i, d, vilower[HYPRE_MAXDIM], viupper[HYPRE_MAXDIM];
+   HYPRE_Int             ei, vi, nelts;
+
+   /* Set one variable at a time */
+   box = hypre_BoxCreate(ndim);
+   hypre_BoxSetExtents(box, ilower, iupper);
+   nelts = hypre_BoxVolume(box);
+   tvalues = hypre_TAlloc(HYPRE_Complex, nelts, memory_location);
+
+   for (i = 0; i < fem_nvars; i++)
+   {
+      for (d = 0; d < ndim; d++)
+      {
+         /* note: these offsets are different from what the user passes in */
+         vilower[d] = ilower[d] + hypre_IndexD(fem_offsets[i], d);
+         viupper[d] = iupper[d] + hypre_IndexD(fem_offsets[i], d);
+      }
+
+#if defined(HYPRE_USING_GPU)
+      if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+      {
+         hypreDevice_ComplexStridedCopy(nelts, fem_nvars, values + i, tvalues);
+      }
+      else
+#endif
+      {
+         for (ei = 0, vi = i; ei < nelts; ei ++, vi += fem_nvars)
+         {
+            tvalues[ei] = values[vi];
+         }
+      }
+
+      HYPRE_SStructVectorAddToBoxValues(vector, part, vilower, viupper,
+                                        fem_vars[i], tvalues);
+   }
+
+   /* Free memory */
+   hypre_TFree(tvalues, memory_location);
+   hypre_BoxDestroy(box);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructVectorAssemble( HYPRE_SStructVector vector )
 {
    hypre_SStructGrid      *grid            = hypre_SStructVectorGrid(vector);
@@ -628,9 +699,6 @@ HYPRE_SStructVectorAssemble( HYPRE_SStructVector vector )
 
    /* u-vector */
    HYPRE_IJVectorAssemble(ijvector);
-
-   HYPRE_IJVectorGetObject(ijvector,
-                           (void **) &hypre_SStructVectorParVector(vector));
 
    /*------------------------------------------------------
     *------------------------------------------------------*/

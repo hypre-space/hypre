@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -34,6 +34,7 @@ output_dir=`pwd`/$testname.dir
 rm -fr $output_dir
 mkdir -p $output_dir
 src_dir=`cd $1; pwd`
+root_dir=`cd $src_dir/..; pwd`
 shift
 
 # Organizing the tests from "fast" to "slow"
@@ -96,7 +97,7 @@ co="--enable-shared"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic--enable-shared
 
-co="--enable-debug"
+co="--enable-debug --with-extra-CFLAGS=\\'-Wstrict-prototypes\\'"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: $eo
 ./renametest.sh basic $output_dir/basic-debug1
 
@@ -144,7 +145,7 @@ RO="-ams -ij-mixed -sstruct-mixed -struct -lobpcg-mixed"
 ./renametest.sh basic $output_dir/basic--enable-mixedint
 
 co="--enable-debug --with-print-errors"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -error -rt -valgrind
 ./renametest.sh basic $output_dir/basic--valgrind
 
 # CMake build and run tests
@@ -153,31 +154,31 @@ ro="-ams -ij -sstruct -struct -lobpcg"
 eo=""
 
 co=""
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-default
 
 co="-DHYPRE_SEQUENTIAL=ON"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-sequential
 
 co="-DHYPRE_SHARED=ON"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-shared
 
 co="-DHYPRE_SINGLE=ON"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: -single
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo -ro: -single
 ./renametest.sh cmake $output_dir/cmake-single
 
 co="-DHYPRE_LONG_DOUBLE=ON"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: -longdouble
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo -ro: -longdouble
 ./renametest.sh cmake $output_dir/cmake-longdouble
 
 co="-DCMAKE_BUILD_TYPE=Debug"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh cmake $output_dir/cmake-debug
 
 co="-DHYPRE_BIGINT=ON"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh cmake $output_dir/cmake-bigint
 
 # cmake build doesn't currently support maxdim

@@ -1,0 +1,51 @@
+#!/bin/bash
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+#=============================================================================
+# A. set/get: multi-component vector tests
+#=============================================================================
+
+mpirun -np 1 ./ij -test_multivec 1 -solver -2 -rhsisone -nc 2 > vector.out.A0
+mpirun -np 1 ./ij -test_multivec 1 -solver -2 -rhsisone -nc 4 > vector.out.A1
+mpirun -np 1 ./ij -test_multivec 1 -solver -2 -rhsisone -nc 7 > vector.out.A2
+mpirun -np 2 ./ij -test_multivec 1 -solver -2 -rhsisone -nc 7 > vector.out.A3
+mpirun -np 4 ./ij -test_multivec 1 -solver -2 -rhsisone -nc 7 > vector.out.A4
+mpirun -np 1 ./ij -test_multivec 1 -solver -2 -rhsrand  -nc 3 > vector.out.A5
+mpirun -np 2 ./ij -test_multivec 1 -solver -2 -rhsrand  -nc 3 > vector.out.A6
+mpirun -np 1 ./ij -test_multivec 1 -solver -2 -rhszero  -nc 2 > vector.out.A7
+mpirun -np 2 ./ij -test_multivec 1 -solver -2 -rhszero  -nc 2 > vector.out.A8
+mpirun -np 1 ./ij -test_multivec 1 -solver -2 -xisone   -nc 2 > vector.out.A9
+mpirun -np 2 ./ij -test_multivec 1 -solver -2 -xisone   -nc 2 > vector.out.A10
+
+#=============================================================================
+# B. krylov solvers: multi-component vector tests
+#=============================================================================
+
+# Diagonal scaling (sequential)
+mpirun -np 1 ./ij -n 8 8 8 -solver 2  -rhsisone -nc 4  > vector.out.B0
+mpirun -np 1 ./ij -n 8 8 8 -solver 4  -rhsisone -nc 4  > vector.out.B1
+mpirun -np 1 ./ij -n 8 8 8 -solver 6  -rhsisone -nc 4  > vector.out.B2
+mpirun -np 1 ./ij -n 8 8 8 -solver 10 -rhsisone -nc 4  > vector.out.B3
+mpirun -np 1 ./ij -n 8 8 8 -solver 50 -rhsisone -nc 4  > vector.out.B4
+mpirun -np 1 ./ij -n 8 8 8 -solver 60 -rhsisone -nc 4  > vector.out.B5
+mpirun -np 1 ./ij -n 8 8 8 -solver 2  -rhsisone -nc 3  > vector.out.B6
+mpirun -np 1 ./ij -n 8 8 8 -solver 2  -rhsisone -nc 7  > vector.out.B7
+mpirun -np 1 ./ij -n 8 8 8 -solver 2  -rhsisone -nc 10 > vector.out.B8
+mpirun -np 1 ./ij -n 8 8 8 -solver 2  -rhsisone -nc 15 > vector.out.B9
+mpirun -np 1 ./ij -n 8 8 8 -solver 2  -rhsisone -nc 32 > vector.out.B10
+
+# Diagonal scaling (parallel)
+mpirun -np 4 ./ij -n 8 8 8 -solver 2  -rhsisone -nc 6  > vector.out.B100
+mpirun -np 4 ./ij -n 8 8 8 -solver 4  -rhsisone -nc 6  > vector.out.B101
+mpirun -np 4 ./ij -n 8 8 8 -solver 6  -rhsisone -nc 6  > vector.out.B102
+mpirun -np 4 ./ij -n 8 8 8 -solver 10 -rhsisone -nc 6  > vector.out.B103
+mpirun -np 4 ./ij -n 8 8 8 -solver 50 -rhsisone -nc 6  > vector.out.B104
+mpirun -np 4 ./ij -n 8 8 8 -solver 60 -rhsisone -nc 6  > vector.out.B105
+mpirun -np 4 ./ij -n 8 8 8 -solver 2  -rhsisone -nc 3  > vector.out.B106
+mpirun -np 4 ./ij -n 8 8 8 -solver 2  -rhsisone -nc 7  > vector.out.B107
+mpirun -np 4 ./ij -n 8 8 8 -solver 2  -rhsisone -nc 10 > vector.out.B108
+mpirun -np 4 ./ij -n 8 8 8 -solver 2  -rhsisone -nc 15 > vector.out.B109
+mpirun -np 4 ./ij -n 8 8 8 -solver 2  -rhsisone -nc 32 > vector.out.B110

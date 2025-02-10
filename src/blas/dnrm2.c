@@ -32,7 +32,7 @@ doublereal dnrm2_(integer*n,doublereal* dx,integer* incx)
     /*doublereal sqrt(doublereal);*/
 
     /* Local variables */
-     doublereal xmax;
+     doublereal xmax = zero;
      integer next, i__, j, ix;
      doublereal hitest, sum;
 
@@ -70,7 +70,7 @@ doublereal dnrm2_(integer*n,doublereal* dx,integer* incx)
 /*     values for cutlo and cuthi.. */
 /*     from the environmental parameters listed in the imsl converter */
 /*     document the limiting values are as follows.. */
-/*     cutlo, s.p.   u/eps = 2**(-102) for  honeywell.  close seconds are 
+/*     cutlo, s.p.   u/eps = 2**(-102) for  honeywell.  close seconds are
 */
 /*                   univac and dec at 2**(-103) */
 /*                   thus cutlo = 2**(-51) = 4.44089e-16 */
@@ -141,7 +141,7 @@ L70:
     }
 
 /*                     common code for phases 2 and 4. */
-/*                     in phase 4 sum is large.  scale to avoid overflow. 
+/*                     in phase 4 sum is large.  scale to avoid overflow.
 */
 
 L110:
@@ -171,7 +171,7 @@ L75:
 /*     for complex      set hitest = cuthi/(2*n) */
 
 L85:
-    hitest = cuthi / (real) (*n);
+    hitest = cuthi / (doublereal) (*n);
 
 /*                   phase 3.  sum is mid-range.  no scaling. */
 

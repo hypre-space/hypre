@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -31,23 +31,6 @@ tail -17 ${TNAME}.out.200 | head -6 > ${TNAME}.mgr_testdata
 
 tail -17 ${TNAME}.out.202 | head -6 > ${TNAME}.mgr_testdata.temp
 diff ${TNAME}.mgr_testdata ${TNAME}.mgr_testdata.temp >&2
-
-#=============================================================================
-tail -3 ${TNAME}.out.400.p | head -2 > ${TNAME}.testdata
-tail -3 ${TNAME}.out.400.n | head -2 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
-
-tail -3 ${TNAME}.out.401.p | head -2 > ${TNAME}.testdata
-tail -3 ${TNAME}.out.401.n | head -2 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
-
-tail -3 ${TNAME}.out.402.p | head -2 > ${TNAME}.testdata
-tail -3 ${TNAME}.out.402.n | head -2 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
-
-tail -3 ${TNAME}.out.403.p | head -2 > ${TNAME}.testdata
-tail -3 ${TNAME}.out.403.n | head -2 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
 # compare with baseline case
@@ -89,6 +72,14 @@ FILES="\
  ${TNAME}.out.16\
  ${TNAME}.out.17\
  ${TNAME}.out.18\
+ ${TNAME}.out.19\
+ ${TNAME}.out.20\
+ ${TNAME}.out.21\
+ ${TNAME}.out.22\
+ ${TNAME}.out.23\
+ ${TNAME}.out.24\
+ ${TNAME}.out.25\
+ ${TNAME}.out.26
 "
 
 for i in $FILES
@@ -124,6 +115,10 @@ if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
 fi
 
 FILES="\
+ ${TNAME}.out.27\
+ ${TNAME}.out.28\
+ ${TNAME}.out.29\
+ ${TNAME}.out.30\
  ${TNAME}.out.101\
  ${TNAME}.out.102\
  ${TNAME}.out.103\
@@ -176,6 +171,8 @@ FILES="\
  ${TNAME}.out.211\
  ${TNAME}.out.212\
  ${TNAME}.out.213\
+ ${TNAME}.out.404\
+ ${TNAME}.out.405\
 "
 
 for i in $FILES
@@ -187,48 +184,6 @@ done > ${TNAME}.out.e
 # Make sure that the output file is reasonable
 RUNCOUNT=`echo $FILES | wc -w`
 OUTCOUNT=`grep "Iterations" ${TNAME}.out.e | wc -l`
-if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
-   echo "Incorrect number of runs in ${TNAME}.out" >&2
-fi
-
-FILES="\
- ${TNAME}.out.300\
- ${TNAME}.out.301\
- ${TNAME}.out.302\
- ${TNAME}.out.303\
- ${TNAME}.out.304\
- ${TNAME}.out.305\
- ${TNAME}.out.306\
- ${TNAME}.out.307\
- ${TNAME}.out.308\
- ${TNAME}.out.309\
- ${TNAME}.out.310\
- ${TNAME}.out.311\
- ${TNAME}.out.312\
- ${TNAME}.out.313\
- ${TNAME}.out.314\
- ${TNAME}.out.315\
- ${TNAME}.out.316\
- ${TNAME}.out.317\
- ${TNAME}.out.318\
- ${TNAME}.out.319\
- ${TNAME}.out.320\
- ${TNAME}.out.321\
- ${TNAME}.out.322\
- ${TNAME}.out.323\
- ${TNAME}.out.324\
- ${TNAME}.out.325\
-"
-
-for i in $FILES
-do
-  echo "# Output file: $i"
-  tail -3 $i
-done > ${TNAME}.out.f
-
-# Make sure that the output file is reasonable
-RUNCOUNT=`echo $FILES | wc -w`
-OUTCOUNT=`grep "Iterations" ${TNAME}.out.f | wc -l`
 if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
    echo "Incorrect number of runs in ${TNAME}.out" >&2
 fi

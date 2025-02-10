@@ -30,6 +30,9 @@ hypre_BoomerAMGCoarsenCR1( hypre_ParCSRMatrix    *A,
                            HYPRE_Int              IS_type,
                            HYPRE_Int              CRaddCpoints)
 {
+   HYPRE_UNUSED_VAR(num_CR_relax_steps);
+   HYPRE_UNUSED_VAR(IS_type);
+
    HYPRE_Int i;
    /* HYPRE_Real theta_global;*/
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -122,10 +125,10 @@ HYPRE_Int hypre_cr(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Real *A_data, HYPRE_Int
       rho = 0.0e0; rho0 = 0.0e0; rho1 = 0.0e0;
       for (i = 0; i < n; i++)
       {
-         rho0 += pow(e0[i], 2);
-         rho1 += pow(e1[i], 2);
+         rho0 += hypre_pow(e0[i], 2);
+         rho1 += hypre_pow(e1[i], 2);
       }
-      rho = sqrt(rho1) / sqrt(rho0);
+      rho = hypre_sqrt(rho1) / hypre_sqrt(rho0);
 
       if (rho > tg)
       {
@@ -551,16 +554,16 @@ HYPRE_Int hypre_formu(HYPRE_Int *cf, HYPRE_Int n, HYPRE_Real *e1, HYPRE_Int *A_i
    HYPRE_Real thresh = 1 - rho;
 
    for (i = 0; i < n; i++)
-      if (fabs(e1[i]) > max)
+      if (hypre_abs(e1[i]) > max)
       {
-         max = fabs(e1[i]);
+         max = hypre_abs(e1[i]);
       }
 
    for (i = 0; i < n; i++)
    {
       if (cf[i] == fpt)
       {
-         candmeas = pow(fabs(e1[i]), 1.0) / max;
+         candmeas = hypre_pow(hypre_abs(e1[i]), 1.0) / max;
          if (candmeas > thresh && A_i[i + 1] - A_i[i] > 1)
          {
             cf[i] = cand;
@@ -591,16 +594,16 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
                         HYPRE_Int              debug_flag,
                         HYPRE_Int             *CF_marker)
 {
-   MPI_Comm         comm          = hypre_ParCSRMatrixComm(S);
-   hypre_ParCSRCommPkg   *comm_pkg      = hypre_ParCSRMatrixCommPkg(S);
-   hypre_CSRMatrix *S_diag        = hypre_ParCSRMatrixDiag(S);
-   hypre_CSRMatrix *S_offd        = hypre_ParCSRMatrixOffd(S);
-   HYPRE_Int       *S_i           = hypre_CSRMatrixI(S_diag);
-   HYPRE_Int       *S_j           = hypre_CSRMatrixJ(S_diag);
-   HYPRE_Int       *S_offd_i      = hypre_CSRMatrixI(S_offd);
-   HYPRE_Int       *S_offd_j;
-   HYPRE_Int        num_variables = hypre_CSRMatrixNumRows(S_diag);
-   HYPRE_Int        num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
+   MPI_Comm             comm          = hypre_ParCSRMatrixComm(S);
+   hypre_ParCSRCommPkg *comm_pkg      = hypre_ParCSRMatrixCommPkg(S);
+   hypre_CSRMatrix     *S_diag        = hypre_ParCSRMatrixDiag(S);
+   hypre_CSRMatrix     *S_offd        = hypre_ParCSRMatrixOffd(S);
+   HYPRE_Int           *S_i           = hypre_CSRMatrixI(S_diag);
+   HYPRE_Int           *S_j           = hypre_CSRMatrixJ(S_diag);
+   HYPRE_Int           *S_offd_i      = hypre_CSRMatrixI(S_offd);
+   HYPRE_Int           *S_offd_j      = NULL;
+   HYPRE_Int            num_variables = hypre_CSRMatrixNumRows(S_diag);
+   HYPRE_Int            num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
 
    hypre_ParCSRCommHandle *comm_handle;
    hypre_CSRMatrix *ST;
@@ -1074,16 +1077,16 @@ hypre_BoomerAMGIndepRSa( hypre_ParCSRMatrix    *S,
                          HYPRE_Int                    debug_flag,
                          HYPRE_Int                   *CF_marker)
 {
-   MPI_Comm         comm          = hypre_ParCSRMatrixComm(S);
-   hypre_ParCSRCommPkg   *comm_pkg      = hypre_ParCSRMatrixCommPkg(S);
-   hypre_CSRMatrix *S_diag        = hypre_ParCSRMatrixDiag(S);
-   hypre_CSRMatrix *S_offd        = hypre_ParCSRMatrixOffd(S);
-   HYPRE_Int       *S_i           = hypre_CSRMatrixI(S_diag);
-   HYPRE_Int       *S_j           = hypre_CSRMatrixJ(S_diag);
-   HYPRE_Int       *S_offd_i      = hypre_CSRMatrixI(S_offd);
-   HYPRE_Int       *S_offd_j;
-   HYPRE_Int        num_variables = hypre_CSRMatrixNumRows(S_diag);
-   HYPRE_Int        num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
+   MPI_Comm             comm          = hypre_ParCSRMatrixComm(S);
+   hypre_ParCSRCommPkg *comm_pkg      = hypre_ParCSRMatrixCommPkg(S);
+   hypre_CSRMatrix     *S_diag        = hypre_ParCSRMatrixDiag(S);
+   hypre_CSRMatrix     *S_offd        = hypre_ParCSRMatrixOffd(S);
+   HYPRE_Int           *S_i           = hypre_CSRMatrixI(S_diag);
+   HYPRE_Int           *S_j           = hypre_CSRMatrixJ(S_diag);
+   HYPRE_Int           *S_offd_i      = hypre_CSRMatrixI(S_offd);
+   HYPRE_Int           *S_offd_j      = NULL;
+   HYPRE_Int            num_variables = hypre_CSRMatrixNumRows(S_diag);
+   HYPRE_Int            num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
 
    hypre_ParCSRCommHandle *comm_handle;
    hypre_CSRMatrix *ST;
@@ -1549,48 +1552,54 @@ hypre_BoomerAMGIndepRSa( hypre_ParCSRMatrix    *S,
 
 HYPRE_Int
 hypre_BoomerAMGIndepHMIS( hypre_ParCSRMatrix    *S,
-                          HYPRE_Int                    measure_type,
-                          HYPRE_Int                    debug_flag,
-                          HYPRE_Int                   *CF_marker)
+                          HYPRE_Int              measure_type,
+                          HYPRE_Int              debug_flag,
+                          HYPRE_Int             *CF_marker)
 {
-   HYPRE_Int                num_procs;
-   MPI_Comm comm = hypre_ParCSRMatrixComm(S);
+   HYPRE_UNUSED_VAR(measure_type);
+
+   HYPRE_Int    num_procs;
+   MPI_Comm     comm = hypre_ParCSRMatrixComm(S);
 
    hypre_MPI_Comm_size(comm, &num_procs);
+
    /*-------------------------------------------------------
     * Perform Ruge coarsening followed by CLJP coarsening
     *-------------------------------------------------------*/
 
-   hypre_BoomerAMGIndepRS (S, 2, debug_flag,
-                           CF_marker);
+   hypre_BoomerAMGIndepRS(S, 2, debug_flag, CF_marker);
 
    if (num_procs > 1)
-      hypre_BoomerAMGIndepPMIS (S, 0, debug_flag,
-                                CF_marker);
+   {
+      hypre_BoomerAMGIndepPMIS(S, 0, debug_flag, CF_marker);
+   }
 
    return hypre_error_flag;
 }
 
 HYPRE_Int
 hypre_BoomerAMGIndepHMISa( hypre_ParCSRMatrix    *S,
-                           HYPRE_Int                    measure_type,
-                           HYPRE_Int                    debug_flag,
-                           HYPRE_Int                   *CF_marker)
+                           HYPRE_Int              measure_type,
+                           HYPRE_Int              debug_flag,
+                           HYPRE_Int             *CF_marker)
 {
-   HYPRE_Int                num_procs;
-   MPI_Comm comm = hypre_ParCSRMatrixComm(S);
+   HYPRE_UNUSED_VAR(measure_type);
+
+   HYPRE_Int    num_procs;
+   MPI_Comm     comm = hypre_ParCSRMatrixComm(S);
 
    hypre_MPI_Comm_size(comm, &num_procs);
+
    /*-------------------------------------------------------
     * Perform Ruge coarsening followed by CLJP coarsening
     *-------------------------------------------------------*/
 
-   hypre_BoomerAMGIndepRSa (S, 2, debug_flag,
-                            CF_marker);
+   hypre_BoomerAMGIndepRSa(S, 2, debug_flag, CF_marker);
 
    if (num_procs > 1)
-      hypre_BoomerAMGIndepPMISa (S, 0, debug_flag,
-                                 CF_marker);
+   {
+      hypre_BoomerAMGIndepPMISa(S, 0, debug_flag, CF_marker);
+   }
 
    return hypre_error_flag;
 }
@@ -1617,20 +1626,20 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
                           HYPRE_Int              debug_flag,
                           HYPRE_Int             *CF_marker)
 {
-   MPI_Comm            comm            = hypre_ParCSRMatrixComm(S);
-   hypre_ParCSRCommPkg      *comm_pkg        = hypre_ParCSRMatrixCommPkg(S);
-   hypre_ParCSRCommHandle   *comm_handle;
+   MPI_Comm                comm          = hypre_ParCSRMatrixComm(S);
+   hypre_ParCSRCommPkg    *comm_pkg      = hypre_ParCSRMatrixCommPkg(S);
+   hypre_ParCSRCommHandle *comm_handle;
 
-   hypre_CSRMatrix    *S_diag          = hypre_ParCSRMatrixDiag(S);
-   HYPRE_Int          *S_diag_i        = hypre_CSRMatrixI(S_diag);
-   HYPRE_Int          *S_diag_j        = hypre_CSRMatrixJ(S_diag);
+   hypre_CSRMatrix        *S_diag        = hypre_ParCSRMatrixDiag(S);
+   HYPRE_Int              *S_diag_i      = hypre_CSRMatrixI(S_diag);
+   HYPRE_Int              *S_diag_j      = hypre_CSRMatrixJ(S_diag);
 
-   hypre_CSRMatrix    *S_offd          = hypre_ParCSRMatrixOffd(S);
-   HYPRE_Int          *S_offd_i        = hypre_CSRMatrixI(S_offd);
-   HYPRE_Int          *S_offd_j;
+   hypre_CSRMatrix        *S_offd        = hypre_ParCSRMatrixOffd(S);
+   HYPRE_Int              *S_offd_i      = hypre_CSRMatrixI(S_offd);
+   HYPRE_Int              *S_offd_j      = NULL;
 
-   HYPRE_Int           num_variables   = hypre_CSRMatrixNumRows(S_diag);
-   HYPRE_Int           num_cols_offd = 0;
+   HYPRE_Int               num_variables = hypre_CSRMatrixNumRows(S_diag);
+   HYPRE_Int               num_cols_offd = 0;
 
    HYPRE_Int           num_sends = 0;
    HYPRE_Int          *int_buf_data;
@@ -1650,7 +1659,6 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
 
 
    HYPRE_Real       wall_time;
-   HYPRE_Int   iter = 0;
 
 
 
@@ -2076,7 +2084,9 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
          }
       }
 
+#if 0 /* debugging */
       iter++;
+#endif
       /*------------------------------------------------
        * Set C-pts and F-pts.
        *------------------------------------------------*/
@@ -2234,20 +2244,20 @@ hypre_BoomerAMGIndepPMISa( hypre_ParCSRMatrix    *S,
                            HYPRE_Int              debug_flag,
                            HYPRE_Int             *CF_marker)
 {
-   MPI_Comm            comm            = hypre_ParCSRMatrixComm(S);
-   hypre_ParCSRCommPkg      *comm_pkg        = hypre_ParCSRMatrixCommPkg(S);
-   hypre_ParCSRCommHandle   *comm_handle;
+   MPI_Comm                comm          = hypre_ParCSRMatrixComm(S);
+   hypre_ParCSRCommPkg    *comm_pkg      = hypre_ParCSRMatrixCommPkg(S);
+   hypre_ParCSRCommHandle *comm_handle;
 
-   hypre_CSRMatrix    *S_diag          = hypre_ParCSRMatrixDiag(S);
-   HYPRE_Int          *S_diag_i        = hypre_CSRMatrixI(S_diag);
-   HYPRE_Int          *S_diag_j        = hypre_CSRMatrixJ(S_diag);
+   hypre_CSRMatrix        *S_diag        = hypre_ParCSRMatrixDiag(S);
+   HYPRE_Int              *S_diag_i      = hypre_CSRMatrixI(S_diag);
+   HYPRE_Int              *S_diag_j      = hypre_CSRMatrixJ(S_diag);
 
-   hypre_CSRMatrix    *S_offd          = hypre_ParCSRMatrixOffd(S);
-   HYPRE_Int          *S_offd_i        = hypre_CSRMatrixI(S_offd);
-   HYPRE_Int          *S_offd_j;
+   hypre_CSRMatrix        *S_offd        = hypre_ParCSRMatrixOffd(S);
+   HYPRE_Int              *S_offd_i      = hypre_CSRMatrixI(S_offd);
+   HYPRE_Int              *S_offd_j      = NULL;
 
-   HYPRE_Int           num_variables   = hypre_CSRMatrixNumRows(S_diag);
-   HYPRE_Int           num_cols_offd = 0;
+   HYPRE_Int               num_variables = hypre_CSRMatrixNumRows(S_diag);
+   HYPRE_Int               num_cols_offd = 0;
 
    HYPRE_Int           num_sends = 0;
    HYPRE_Int          *int_buf_data;
@@ -2267,7 +2277,6 @@ hypre_BoomerAMGIndepPMISa( hypre_ParCSRMatrix    *S,
 
 
    HYPRE_Real       wall_time;
-   HYPRE_Int   iter = 0;
 
 
 
@@ -2562,7 +2571,7 @@ hypre_BoomerAMGIndepPMISa( hypre_ParCSRMatrix    *S,
 
       HYPRE_BigInt big_graph_size = (HYPRE_BigInt) graph_size;
       /* stop the coarsening if nothing left to be coarsened */
-      hypre_MPI_Allreduce(&big_graph_size, &global_graph_size, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+      hypre_MPI_Allreduce(&big_graph_size, &global_graph_size, 1, HYPRE_MPI_BIG_INT, hypre_MPI_SUM, comm);
 
       if (global_graph_size == 0)
       {
@@ -2687,7 +2696,9 @@ hypre_BoomerAMGIndepPMISa( hypre_ParCSRMatrix    *S,
          }
       }
 
+#if 0 /* debugging */
       iter++;
+#endif
       /*------------------------------------------------
        * Set C-pts and F-pts.
        *------------------------------------------------*/
@@ -3068,20 +3079,20 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
             rho0 = hypre_ParVectorInnerProd(e0_vec, e0_vec);
             rho1 = hypre_ParVectorInnerProd(e1_vec, e1_vec);
             rho_old = rho;
-            rho = sqrt(rho1) / sqrt(rho0);
-            relrho = fabs(rho - rho_old) / rho;
+            rho = hypre_sqrt(rho1) / hypre_sqrt(rho0);
+            relrho = hypre_abs(rho - rho_old) / rho;
             i++;
          }
       }
       /*rho=0.0e0; rho0=0.0e0; rho1=0.0e0;*/
       /*for(i=0;i<num_variables;i++){
-        rho0 += pow(e0[i],2);
-        rho1 += pow(e1[i],2);
+        rho0 += hypre_pow(e0[i],2);
+        rho1 += hypre_pow(e1[i],2);
         }*/
 
       /*rho0 = hypre_ParVectorInnerProd(e0_vec,e0_vec);
         rho1 = hypre_ParVectorInnerProd(e1_vec,e1_vec);
-        rho = sqrt(rho1)/sqrt(rho0);*/
+        rho = hypre_sqrt(rho1)/hypre_sqrt(rho0);*/
       for (j = 0; j < num_variables; j++)
          if (CF_marker[j] == fpt) { e1[j] = e2[j]; }
       if (rho > theta)
@@ -3158,9 +3169,9 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
          {
             local_max = 0.0;
             for (i = 0; i < num_variables; i++)
-               if (fabs(e1[i]) > local_max)
+               if (hypre_abs(e1[i]) > local_max)
                {
-                  local_max = fabs(e1[i]);
+                  local_max = hypre_abs(e1[i]);
                }
          }
          else
@@ -3170,11 +3181,11 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
             for (i = 0; i < num_nodes; i++)
             {
                /*CF_marker[jj] = CFN_marker[i];*/
-               sum[i] = fabs(e1[jj++]);
+               sum[i] = hypre_abs(e1[jj++]);
                for (j = 1; j < num_functions; j++)
                {
                   /*CF_marker[jj] = CFN_marker[i];*/
-                  sum[i] += fabs(e1[jj++]);
+                  sum[i] += hypre_abs(e1[jj++]);
                }
                if (sum[i] > local_max)
                {
@@ -3191,7 +3202,7 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
             {
                if (CF_marker[i] == fpt)
                {
-                  candmeas = pow(fabs(e1[i]), 1.0) / global_max;
+                  candmeas = hypre_pow(hypre_abs(e1[i]), 1.0) / global_max;
                   if (candmeas > thresh &&
                       (A_i[i + 1] - A_i[i] + A_offd_i[i + 1] - A_offd_i[i]) > 1)
                   {

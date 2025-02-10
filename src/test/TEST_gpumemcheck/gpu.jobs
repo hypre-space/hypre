@@ -1,0 +1,13 @@
+#!/bin/bash
+# Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+# HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+mpirun -np 4 ./ij -n 20 20 10 -P 2 2 1 -solver 1 > gpu.out.1
+
+mpirun -np 4 ./ij -n 20 20 10 -P 2 2 1 -solver 3 > gpu.out.2
+
+mpirun -np 4 ./struct -P 2 2 1 -solver 0 > gpu.out.3
+
+mpirun -np 4 ./struct -P 2 2 1 -solver 1 > gpu.out.4

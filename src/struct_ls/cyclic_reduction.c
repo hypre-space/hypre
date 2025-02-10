@@ -66,6 +66,7 @@ typedef struct
    hypre_BoxArray       *base_points;
    hypre_BoxArray      **fine_points_l;
 
+   HYPRE_MemoryLocation  memory_location; /* memory location of data */
    HYPRE_Real           *data;
    HYPRE_Real           *data_const;
    hypre_StructMatrix  **A_l;
@@ -99,6 +100,8 @@ hypre_CyclicReductionCreate( MPI_Comm  comm )
    /* set defaults */
    hypre_SetIndex3((cyc_red_data -> base_index), 0, 0, 0);
    hypre_SetIndex3((cyc_red_data -> base_stride), 1, 1, 1);
+
+   (cyc_red_data -> memory_location) = hypre_HandleMemoryLocation(hypre_handle());
 
    return (void *) cyc_red_data;
 }
@@ -235,7 +238,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
    hypre_Box              *Ac_dbox;
 
    HYPRE_Real             *a_cc, *a_cw, *a_ce;
-   HYPRE_Real             *ac_cc, *ac_cw, *ac_ce;
+   HYPRE_Real             *ac_cc, *ac_cw, *ac_ce = NULL;
 
    HYPRE_Int               offsetA;
 
@@ -467,6 +470,8 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
                             hypre_StructVector *b,
                             hypre_StructVector *x             )
 {
+   HYPRE_UNUSED_VAR(b);
+
    hypre_CyclicReductionData *cyc_red_data = (hypre_CyclicReductionData *) cyc_red_vdata;
 
    MPI_Comm                comm        = (cyc_red_data -> comm);
@@ -494,16 +499,12 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    hypre_Index             stride;
 
    hypre_StructGrid       *grid;
-
    hypre_Box              *cbox;
-
    HYPRE_Int               l;
    HYPRE_Int               flop_divisor;
-
    HYPRE_Int               x_num_ghost[] = {0, 0, 0, 0, 0, 0};
-#if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_MemoryLocation    data_location = HYPRE_MEMORY_DEVICE;
-#endif
+
+   HYPRE_MemoryLocation    memory_location = hypre_StructMatrixMemoryLocation(A);
 
    /*-----------------------------------------------------
     * Set up coarse grids
@@ -621,8 +622,10 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_StructVectorSetDataSize(x_l[l + 1], &data_size, &data_size_const);
    }
 
-   data =  hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_DEVICE);
+   data = hypre_CTAlloc(HYPRE_Real, data_size, memory_location);
    data_const = hypre_CTAlloc(HYPRE_Real, data_size_const, HYPRE_MEMORY_HOST);
+
+   (cyc_red_data -> memory_location) = memory_location;
    (cyc_red_data -> data) = data;
    (cyc_red_data -> data_const) = data_const;
 
@@ -1212,6 +1215,8 @@ hypre_CyclicReductionDestroy( void *cyc_red_vdata )
 
    if (cyc_red_data)
    {
+      HYPRE_MemoryLocation memory_location = cyc_red_data -> memory_location;
+
       hypre_BoxArrayDestroy(cyc_red_data -> base_points);
       hypre_StructGridDestroy(cyc_red_data -> grid_l[0]);
       hypre_StructMatrixDestroy(cyc_red_data -> A_l[0]);
@@ -1226,7 +1231,7 @@ hypre_CyclicReductionDestroy( void *cyc_red_vdata )
          hypre_ComputePkgDestroy(cyc_red_data -> up_compute_pkg_l[l]);
       }
       hypre_BoxArrayDestroy(cyc_red_data -> fine_points_l[l]);
-      hypre_TFree(cyc_red_data -> data, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(cyc_red_data -> data, memory_location);
       hypre_TFree(cyc_red_data -> grid_l, HYPRE_MEMORY_HOST);
       hypre_TFree(cyc_red_data -> fine_points_l, HYPRE_MEMORY_HOST);
       hypre_TFree(cyc_red_data -> A_l, HYPRE_MEMORY_HOST);

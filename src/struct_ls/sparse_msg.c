@@ -47,6 +47,8 @@ hypre_SparseMSGCreate( MPI_Comm  comm )
    (smsg_data -> num_grids[1])     = 1;
    (smsg_data -> num_grids[2])     = 1;
 
+   (smsg_data -> memory_location)  = hypre_HandleMemoryLocation(hypre_handle());
+
    return (void *) smsg_data;
 }
 
@@ -142,6 +144,8 @@ hypre_SparseMSGDestroy( void *smsg_vdata )
       hypre_FinalizeTiming(smsg_data -> time_index);
       hypre_TFree(smsg_data, HYPRE_MEMORY_HOST);
    }
+#else
+   HYPRE_UNUSED_VAR(smsg_vdata);
 #endif
    /* RDF */
 
@@ -427,5 +431,3 @@ hypre_SparseMSGGetFinalRelativeResidualNorm( void   *smsg_vdata,
 
    return ierr;
 }
-
-

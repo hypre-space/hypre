@@ -110,6 +110,8 @@ void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, H
 void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, HYPRE_Int *cval,
                     HYPRE_Real *aval, HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, FILE* fp)
 {
+  HYPRE_UNUSED_VAR(aval);
+
   START_FUNC_DH
   HYPRE_Int i, j, row, col;
   bool private_n2o = false;
@@ -587,7 +589,7 @@ void fix_diags_private(Mat_dh A)
   for (i=0; i<m; ++i) {
     HYPRE_Real sum = 0;
     for (j=rp[i]; j<rp[i+1]; ++j) {
-      sum = MAX(sum, fabs(aval[j]));
+      sum = MAX(sum, hypre_abs(aval[j]));
     }
     for (j=rp[i]; j<rp[i+1]; ++j) {
       if (cval[j] == i) {
@@ -882,7 +884,7 @@ void mat_dh_transpose_reuse_private_private(bool allocateMem, HYPRE_Int m,
   START_FUNC_DH
   HYPRE_Int *rp, *cval, *tmp;
   HYPRE_Int i, j, nz = RP[m];
-  HYPRE_Real *aval;
+  HYPRE_Real *aval = NULL;
 
   if (allocateMem) {
     rp = *rpOUT = (HYPRE_Int *)MALLOC_DH((1+m)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
@@ -1504,7 +1506,7 @@ void profileMat(Mat_dh A)
   HYPRE_Int m;
   HYPRE_Int i, j;
   HYPRE_Int *work1=NULL;
-  HYPRE_Real *work2;
+  HYPRE_Real *work2=NULL;
   bool isStructurallySymmetric = true;
   bool isNumericallySymmetric = true;
   bool is_Triangular = false;

@@ -247,7 +247,7 @@ hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector,
 
    /* TODO: Why need DeviceSync? */
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaDevice(hypre_handle());
+   hypre_SyncDevice();
 #endif
    /* set (AddTo/Get) or clear (Set) values outside the grid in ghost zones */
    if (action != 0)
@@ -667,6 +667,9 @@ HYPRE_Int
 hypre_SStructVectorRestore( hypre_SStructVector *vector,
                             hypre_ParVector     *parvector )
 {
+   HYPRE_UNUSED_VAR(vector);
+   HYPRE_UNUSED_VAR(parvector);
+
    return hypre_error_flag;
 }
 
@@ -842,4 +845,32 @@ hypre_SStructVectorClearGhostValues(hypre_SStructVector *vector)
    }
 
    return hypre_error_flag;
+}
+
+HYPRE_MemoryLocation
+hypre_SStructVectorMemoryLocation(hypre_SStructVector *vector)
+{
+   HYPRE_Int type = hypre_SStructVectorObjectType(vector);
+
+   if (type == HYPRE_SSTRUCT)
+   {
+      hypre_ParVector *parvector;
+      hypre_SStructVectorConvert(vector, &parvector);
+      return hypre_ParVectorMemoryLocation(parvector);
+   }
+
+   void *object;
+   HYPRE_SStructVectorGetObject(vector, &object);
+
+   if (type == HYPRE_PARCSR)
+   {
+      return hypre_ParVectorMemoryLocation((hypre_ParVector *) object);
+   }
+
+   if (type == HYPRE_STRUCT)
+   {
+      return hypre_StructVectorMemoryLocation((hypre_StructVector *) object);
+   }
+
+   return HYPRE_MEMORY_UNDEFINED;
 }

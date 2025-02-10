@@ -40,7 +40,7 @@ Final Relative Residual Norm = 5.359205e-09
 
 # Output file: smoother.out.7
 BoomerAMG Iterations = 18
-Final Relative Residual Norm = 7.334920e-09
+Final Relative Residual Norm = 7.334921e-09
 
 # Output file: smoother.out.8
 BoomerAMG Iterations = 11
@@ -57,6 +57,14 @@ Final Relative Residual Norm = 8.254191e-09
 # Output file: smoother.out.11
 Iterations = 6
 Final Relative Residual Norm = 2.509163e-09
+
+# Output file: smoother.out.11.1
+Iterations = 6
+Final Relative Residual Norm = 2.881634e-09
+
+# Output file: smoother.out.11.2
+Iterations = 6
+Final Relative Residual Norm = 3.877871e-10
 
 # Output file: smoother.out.12
 Iterations = 6

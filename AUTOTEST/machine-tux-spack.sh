@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -37,7 +37,9 @@ src_dir=`cd $1; pwd`
 shift
 
 # OpenMPI limits the number of processes available by default - override
+# RDF: The first environment variable didn't work for me
 export OMPI_MCA_rmaps_base_oversubscribe=1
+export PRTE_MCA_rmaps_default_mapping_policy=:oversubscribe
 
 # Basic build and run tests
 
@@ -53,19 +55,21 @@ export OMPI_MCA_rmaps_base_oversubscribe=1
 # Use the develop branch for superlu-dist
 superludistspec="superlu-dist@develop"
 spackspec="hypre@develop~debug+superlu-dist ^$superludistspec"
-spack install $spackspec
+# The --fresh option will ensure the latest versions of dependencies are used
+spack install --fresh $spackspec
 spack load    $spackspec
 spackdir=`spack location -i $spackspec`
 test.sh basic.sh ../src -co: -mo: -spack $spackdir -ro: -superlu
 ./renametest.sh basic $output_dir/basic-dsuperlu
 
 # Clean-up spack build
-spack spec --yaml $spackspec > test.yaml
-grep ' hash:' test.yaml | sed -e 's/^.*: /\//' | xargs spack mark -e
-spack gc -y
-grep ' hash:' test.yaml | sed -e 's/^.*: /\//' | xargs spack mark -i
-rm -f test.yaml
-spack clean --all
+# RDF: Commenting out PR #481 (for now) to test the '--fresh' option above (faster)
+# spack spec --yaml $spackspec > test.yaml
+# grep ' hash:' test.yaml | sed -e 's/^.*: /\//' | xargs spack mark -e
+# spack gc -y
+# grep ' hash:' test.yaml | sed -e 's/^.*: /\//' | xargs spack mark -i
+# rm -f test.yaml
+# spack clean --all
 spack uninstall -yR $superludistspec
 
 # Echo to stderr all nonempty error files in $output_dir

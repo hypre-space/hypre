@@ -21,7 +21,7 @@
  * hypre_BlockTridiagCreate
  *--------------------------------------------------------------------------*/
 
-void *hypre_BlockTridiagCreate()
+void *hypre_BlockTridiagCreate(void)
 {
    hypre_BlockTridiagData *b_data;
    b_data = hypre_CTAlloc(hypre_BlockTridiagData,  1, HYPRE_MEMORY_HOST);
@@ -114,19 +114,25 @@ HYPRE_Int hypre_BlockTridiagDestroy(void *data)
  * Routines to setup the preconditioner
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
-                                  hypre_ParVector *b, hypre_ParVector *x)
+HYPRE_Int
+hypre_BlockTridiagSetup(void               *data,
+                        hypre_ParCSRMatrix *A,
+                        hypre_ParVector    *b,
+                        hypre_ParVector    *x)
 {
-   HYPRE_Int                i, j, *index_set1, print_level, nsweeps, relax_type;
-   HYPRE_Int                nrows, nrows1, nrows2, start1, start2, *index_set2;
-   HYPRE_Int                count, ierr;
-   HYPRE_Real         threshold;
-   hypre_ParCSRMatrix **submatrices;
-   HYPRE_Solver       precon1;
-   HYPRE_Solver       precon2;
-   HYPRE_IJVector     ij_u1, ij_u2, ij_f1, ij_f2;
-   hypre_ParVector    *vector;
-   MPI_Comm           comm;
+   HYPRE_UNUSED_VAR(b);
+   HYPRE_UNUSED_VAR(x);
+
+   HYPRE_Int               i, j, *index_set1, print_level, nsweeps, relax_type;
+   HYPRE_Int               nrows, nrows1, nrows2, start1, start2, *index_set2;
+   HYPRE_Int               count, ierr;
+   HYPRE_Real              threshold;
+   hypre_ParCSRMatrix    **submatrices;
+   HYPRE_Solver            precon1;
+   HYPRE_Solver            precon2;
+   HYPRE_IJVector          ij_u1, ij_u2, ij_f1, ij_f2;
+   hypre_ParVector        *vector;
+   MPI_Comm                comm;
    hypre_BlockTridiagData *b_data = (hypre_BlockTridiagData *) data;
 
    HYPRE_ParCSRMatrixGetComm((HYPRE_ParCSRMatrix) A, &comm);
@@ -230,15 +236,20 @@ HYPRE_Int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
  * Routines to solve the preconditioner
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_BlockTridiagSolve(void *data, hypre_ParCSRMatrix *A,
-                                  hypre_ParVector *b, hypre_ParVector *x)
+HYPRE_Int
+hypre_BlockTridiagSolve(void               *data,
+                        hypre_ParCSRMatrix *A,
+                        hypre_ParVector    *b,
+                        hypre_ParVector    *x)
 {
+   HYPRE_UNUSED_VAR(A);
+
    HYPRE_Int                i, ind, nrows1, nrows2, *index_set1, *index_set2;
-   HYPRE_Real         *ffv, *uuv, *f1v, *f2v, *u1v, *u2v;
-   HYPRE_ParCSRMatrix A21, A11, A22;
-   hypre_ParVector    *F1, *U1, *F2, *U2;
-   HYPRE_Solver       precon1, precon2;
-   hypre_BlockTridiagData *b_data = (hypre_BlockTridiagData *) data;
+   HYPRE_Real              *ffv, *uuv, *f1v, *f2v, *u1v, *u2v;
+   HYPRE_ParCSRMatrix       A21, A11, A22;
+   hypre_ParVector         *F1, *U1, *F2, *U2;
+   HYPRE_Solver             precon1, precon2;
+   hypre_BlockTridiagData  *b_data = (hypre_BlockTridiagData *) data;
 
    index_set1 = b_data->index_set1;
    index_set2 = b_data->index_set2;
@@ -350,4 +361,3 @@ HYPRE_Int hypre_BlockTridiagSetPrintLevel(void *data, HYPRE_Int print_level)
    b_data->print_level = print_level;
    return (0);
 }
-

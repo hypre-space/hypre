@@ -52,7 +52,7 @@ hypre_AuxParCSRMatrixCreate( hypre_AuxParCSRMatrix **aux_matrix,
    hypre_AuxParCSRMatrixOffProcJ(matrix) = NULL;
    hypre_AuxParCSRMatrixOffProcData(matrix) = NULL;
    hypre_AuxParCSRMatrixMemoryLocation(matrix) = HYPRE_MEMORY_HOST;
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    hypre_AuxParCSRMatrixMaxStackElmts(matrix) = 0;
    hypre_AuxParCSRMatrixCurrentStackElmts(matrix) = 0;
    hypre_AuxParCSRMatrixStackI(matrix) = NULL;
@@ -61,8 +61,8 @@ hypre_AuxParCSRMatrixCreate( hypre_AuxParCSRMatrix **aux_matrix,
    hypre_AuxParCSRMatrixStackSorA(matrix) = NULL;
    hypre_AuxParCSRMatrixUsrOnProcElmts(matrix) = -1;
    hypre_AuxParCSRMatrixUsrOffProcElmts(matrix) = -1;
-   hypre_AuxParCSRMatrixInitAllocFactor(matrix) = 5.0;
-   hypre_AuxParCSRMatrixGrowFactor(matrix) = 2.0;
+   hypre_AuxParCSRMatrixInitAllocFactor(matrix) = 5;
+   hypre_AuxParCSRMatrixGrowFactor(matrix) = 2;
 #endif
 
    *aux_matrix = matrix;
@@ -142,7 +142,7 @@ hypre_AuxParCSRMatrixDestroy( hypre_AuxParCSRMatrix *matrix )
       hypre_TFree(hypre_AuxParCSRMatrixOffProcJ(matrix),    HYPRE_MEMORY_HOST);
       hypre_TFree(hypre_AuxParCSRMatrixOffProcData(matrix), HYPRE_MEMORY_HOST);
 
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
       hypre_TFree(hypre_AuxParCSRMatrixStackI(matrix),    hypre_AuxParCSRMatrixMemoryLocation(matrix));
       hypre_TFree(hypre_AuxParCSRMatrixStackJ(matrix),    hypre_AuxParCSRMatrixMemoryLocation(matrix));
       hypre_TFree(hypre_AuxParCSRMatrixStackData(matrix), hypre_AuxParCSRMatrixMemoryLocation(matrix));
@@ -264,8 +264,7 @@ hypre_AuxParCSRMatrixInitialize_v2( hypre_AuxParCSRMatrix *matrix,
       return 0;
    }
 
-   /* WM: Q - added the macro guards here (since IJ assembly not yet ported to sycl)... is this OK/correct? */
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    if (memory_location != HYPRE_MEMORY_HOST)
    {
       /* GPU assembly */
@@ -359,8 +358,8 @@ hypre_AuxParCSRMatrixInitialize_v2( hypre_AuxParCSRMatrix *matrix,
             for (i = 0; i < local_num_rows; i++)
             {
                row_space[i] = 30;
-               aux_j[i] = hypre_CTAlloc(HYPRE_BigInt, 30, HYPRE_MEMORY_HOST);
-               aux_data[i] = hypre_CTAlloc(HYPRE_Complex, 30, HYPRE_MEMORY_HOST);
+               aux_j[i] = hypre_CTAlloc(HYPRE_BigInt, row_space[i], HYPRE_MEMORY_HOST);
+               aux_data[i] = hypre_CTAlloc(HYPRE_Complex, row_space[i], HYPRE_MEMORY_HOST);
             }
             hypre_AuxParCSRMatrixRowSpace(matrix) = row_space;
          }

@@ -9,10 +9,11 @@
 ./src/test/ams_driver
 ./src/test/zboxloop
 ./src/test/ij
-./src/test/ij_mv
 ./src/test/struct
 ./src/test/sstruct
 ./src/zerr
 ./src/config.log
 ./src/config.status
+.gitignore
 TVD.v3breakpoints
+.vscode

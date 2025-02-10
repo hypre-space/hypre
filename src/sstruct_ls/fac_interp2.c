@@ -752,7 +752,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    HYPRE_Int               nvars, var;
 
    HYPRE_Int               i, j, k, offset_ip1, offset_jp1, offset_kp1;
-   HYPRE_Int               ishift, jshift, kshift;
+   HYPRE_Int               ishift, jshift = 0, kshift = 0;
    HYPRE_Int               ptr_ishift, ptr_jshift, ptr_kshift;
    HYPRE_Int               imax, jmax, kmax;
    HYPRE_Int               jsize, ksize;
@@ -760,8 +760,8 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    HYPRE_Int               part_fine = 1;
 
    HYPRE_Real              xweight1, xweight2;
-   HYPRE_Real              yweight1, yweight2;
-   HYPRE_Real              zweight1, zweight2;
+   HYPRE_Real              yweight1 = 0.0, yweight2 = 0.0;
+   HYPRE_Real              zweight1 = 0.0, zweight2 = 0.0;
 
    /*-----------------------------------------------------------------------
     * Initialize some things
@@ -770,9 +770,10 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    hypre_BoxInit(&refined_box, ndim);
    hypre_BoxInit(&intersect_box, ndim);
 
-   stride        = (interp_data -> stride);
+   stride = (interp_data -> stride);
 
    hypre_SetIndex3(zero_index, 0, 0, 0);
+   hypre_SetIndex3(lindex, 0, 0, 0);
    hypre_CopyIndex(stride, refine_factors);
    for (i = ndim; i < 3; i++)
    {
@@ -1008,7 +1009,6 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                         }
                         zweight1 = 1.0 - zweight2;
                      }
-
                      else
                      {
                         if (offset_kp1 > refine_factors_half[2] &&

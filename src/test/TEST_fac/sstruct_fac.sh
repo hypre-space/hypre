@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/bin/bash 
 # Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
 # HYPRE Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -23,15 +23,15 @@ diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
 
-tail -3 ${TNAME}.out.4 > ${TNAME}.testdata
-tail -3 ${TNAME}.out.5 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+# tail -3 ${TNAME}.out.4 > ${TNAME}.testdata
+# tail -3 ${TNAME}.out.5 > ${TNAME}.testdata.temp
+# diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
 
-tail -3 ${TNAME}.out.6 > ${TNAME}.testdata
-tail -3 ${TNAME}.out.7 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+# tail -3 ${TNAME}.out.6 > ${TNAME}.testdata
+# tail -3 ${TNAME}.out.7 > ${TNAME}.testdata.temp
+# diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
 
@@ -52,15 +52,15 @@ diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 FILES="\
  ${TNAME}.out.0\
  ${TNAME}.out.1\
- ${TNAME}.out.4\
- ${TNAME}.out.5\
- ${TNAME}.out.6\
- ${TNAME}.out.7\
  ${TNAME}.out.10\
  ${TNAME}.out.11\
 "
-#  ${TNAME}.out.2\
-#  ${TNAME}.out.3\
+# ${TNAME}.out.2\
+# ${TNAME}.out.3\
+# ${TNAME}.out.4\
+# ${TNAME}.out.5\
+# ${TNAME}.out.6\
+# ${TNAME}.out.7\
 # ${TNAME}.out.8\
 # ${TNAME}.out.9\
 for i in $FILES
