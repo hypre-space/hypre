@@ -669,7 +669,7 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
    if (!hypre_GetGpuAwareMPI())
    {
       hypre_MemoryLocation act_send_memory_location =
-	hypre_GetActualMemLocation(hypre_ParCSRCommHandleSendMemoryLocation(comm_handle));
+         hypre_GetActualMemLocation(hypre_ParCSRCommHandleSendMemoryLocation(comm_handle));
 
       if ( act_send_memory_location == hypre_MEMORY_DEVICE ||
            act_send_memory_location == hypre_MEMORY_UNIFIED )
@@ -679,7 +679,7 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
       }
 
       hypre_MemoryLocation act_recv_memory_location =
-	hypre_GetActualMemLocation(hypre_ParCSRCommHandleRecvMemoryLocation(comm_handle));
+         hypre_GetActualMemLocation(hypre_ParCSRCommHandleRecvMemoryLocation(comm_handle));
 
       if ( act_recv_memory_location == hypre_MEMORY_DEVICE ||
            act_recv_memory_location == hypre_MEMORY_UNIFIED )
