@@ -66,7 +66,7 @@ hypre_BoomerAMGCreate( void )
    HYPRE_Int    rap2;
    HYPRE_Int    keepT;
    HYPRE_Int    modu_rap;
-   HYPRE_Int	use_aux_strength_mat;
+   HYPRE_Int   use_aux_strength_mat;
 
    /* solve params */
    HYPRE_Int    min_iter;
@@ -305,7 +305,7 @@ hypre_BoomerAMGCreate( void )
    rap2 = 0;
    keepT = 0;
    modu_rap = 0;
-   
+
    use_aux_strength_mat = -1;
 
    if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
@@ -548,7 +548,7 @@ hypre_BoomerAMGCreate( void )
    hypre_ParAMGDataRAP2(amg_data)              = rap2;
    hypre_ParAMGDataKeepTranspose(amg_data)     = keepT;
    hypre_ParAMGDataModularizedMatMat(amg_data) = modu_rap;
-   
+
    hypre_ParAMGDataUseAuxStrengthMatrix(amg_data) = use_aux_strength_mat;
 
    /* information for preserving indices as coarse grid points */
@@ -5224,7 +5224,7 @@ hypre_BoomerAMGSetFPoints(void         *data,
 
 HYPRE_Int
 hypre_BoomerAMGSetUseAuxStrengthMatrix( void       *data,
-                                 HYPRE_Int   use_aux_strength_mat)
+                                        HYPRE_Int   use_aux_strength_mat)
 {
    hypre_ParAMGData *amg_data = (hypre_ParAMGData*) data;
 

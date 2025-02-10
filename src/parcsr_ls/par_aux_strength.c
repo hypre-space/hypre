@@ -14,11 +14,13 @@
 /*==========================================================================*/
 /*==========================================================================*/
 /**
-  Generates an auxiilliary matrix, S_aux, with  M-matrix properties such that S_aux = A - B, 
-  where B is obtained by distributing positive off-diagonal contributions to 'strong' neighbors.
-  
-  NOTE:: Current implementation assumes A is a square matrix with a regular partitioning of 
-              row and columns.
+  Generates an auxiilliary matrix, S_aux, with M-matrix properties such that
+  S_aux = A - B, where B is obtained by distributing positive off-diagonal
+  contributions to 'strong' neighbors ("positive" here means having the same
+  sign as the diagonal).
+
+  NOTE: Current implementation assumes A is a square matrix with a regular
+        partitioning of rows and columns.
 
   {\bf Input files:}
   _hypre_parcsr_ls.h
@@ -62,7 +64,7 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
    hypre_CSRMatrix    *S_diag   = NULL;
    HYPRE_Int          *S_diag_i = NULL;
    HYPRE_Int          *S_diag_j = NULL;
-//   HYPRE_Int           skip_diag = S ? 0 : 1;
+   //   HYPRE_Int           skip_diag = S ? 0 : 1;
    /* off-diag part of S */
    hypre_CSRMatrix    *S_offd   = NULL;
    HYPRE_Int          *S_offd_i = NULL;
@@ -79,7 +81,7 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
 
    HYPRE_Int                A_diag_nnz = A_diag_i[num_variables];
    HYPRE_Int                A_offd_nnz = A_offd_i[num_variables];
-   
+
    HYPRE_Int           num_nonzeros_diag;
    HYPRE_Int           num_nonzeros_offd = 0;
    HYPRE_Int           num_cols_offd = 0;
@@ -88,23 +90,23 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
    hypre_CSRMatrix    *S_aux_diag;
    HYPRE_Int          *S_aux_diag_i = NULL;
    HYPRE_Int          *S_aux_diag_j = NULL;
-   HYPRE_Complex      *S_aux_diag_data = NULL;      
+   HYPRE_Complex      *S_aux_diag_data = NULL;
    /* HYPRE_Real         *S_diag_data; */
    hypre_CSRMatrix    *S_aux_offd;
    HYPRE_Int          *S_aux_offd_i = NULL;
    HYPRE_Int          *S_aux_offd_j = NULL;
-   HYPRE_Complex      *S_aux_offd_data = NULL;   
-   HYPRE_BigInt   *S_aux_offd_colmap = NULL;      
+   HYPRE_Complex      *S_aux_offd_data = NULL;
+   HYPRE_BigInt   *S_aux_offd_colmap = NULL;
    /* HYPRE_Real         *S_offd_data; */
    /* off processor portions of S */
    hypre_CSRMatrix    *A_ext                 = NULL;
    HYPRE_Int          *A_ext_i               = NULL;
    HYPRE_Real         *A_ext_data            = NULL;
    HYPRE_BigInt       *A_ext_j               = NULL;
-   HYPRE_Int                A_ext_nnz = 0;  
-   
+   HYPRE_Int                A_ext_nnz = 0;
+
    HYPRE_Real          diag, row_scale, row_sum;
-   HYPRE_Int           i,j,k,jj, jA, jS, kp, kn, m, n, P_n_max, N_n_max, cnt_n, cnt_p;
+   HYPRE_Int           i, j, k, jj, jA, jS, kp, kn, m, n, P_n_max, N_n_max, cnt_n, cnt_p;
 
    HYPRE_Int           ierr = 0;
 
@@ -114,29 +116,29 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
    HYPRE_Int           index, start;
 
    HYPRE_Int          *P_i     = NULL;
-   HYPRE_Int          *P_n     = NULL;   
+   HYPRE_Int          *P_n     = NULL;
    HYPRE_BigInt       *N_i     = NULL;
-   HYPRE_Int          *N_n     = NULL;   
-   HYPRE_BigInt       *B_i     = NULL;   
-   HYPRE_Int          *B_n     = NULL;   
-   HYPRE_Complex      *B_a     = NULL;   
-   HYPRE_Complex      *B_a_sum = NULL;   
-   
+   HYPRE_Int          *N_n     = NULL;
+   HYPRE_BigInt       *B_i     = NULL;
+   HYPRE_Int          *B_n     = NULL;
+   HYPRE_Complex      *B_a     = NULL;
+   HYPRE_Complex      *B_a_sum = NULL;
+
    HYPRE_Complex pval, bval;
-   
+
    HYPRE_Int *prefix_sum_workspace;
 
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
-   
+
    HYPRE_Int num_procs, my_id;
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   
+
    // Begin:
    /* Allocate memory for auxilliary strength matrix */
    S_aux = hypre_ParCSRMatrixCreate(comm, global_num_vars, global_num_vars,
-                                row_starts, row_starts,
-                                num_cols_A_offd, A_diag_nnz, A_offd_nnz);
+                                    row_starts, row_starts,
+                                    num_cols_A_offd, A_diag_nnz, A_offd_nnz);
 
    S_aux_diag = hypre_ParCSRMatrixDiag(S_aux);
    hypre_CSRMatrixI(S_aux_diag) = hypre_CTAlloc(HYPRE_Int, num_variables + 1, memory_location);
@@ -144,8 +146,8 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
    hypre_CSRMatrixData(S_aux_diag) = hypre_CTAlloc(HYPRE_Complex, A_diag_nnz, memory_location);
 
    S_aux_diag_i = hypre_CSRMatrixI(S_aux_diag);
-   S_aux_diag_j = hypre_CSRMatrixJ(S_aux_diag);   
-   S_aux_diag_data = hypre_CSRMatrixData(S_aux_diag); 
+   S_aux_diag_j = hypre_CSRMatrixJ(S_aux_diag);
+   S_aux_diag_data = hypre_CSRMatrixData(S_aux_diag);
 
    S_aux_offd = hypre_ParCSRMatrixOffd(S_aux);
    hypre_CSRMatrixI(S_aux_offd) = hypre_CTAlloc(HYPRE_Int, num_variables + 1, memory_location);
@@ -158,8 +160,8 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
       hypre_CSRMatrixJ(S_aux_offd) = hypre_CTAlloc(HYPRE_Int, A_offd_nnz, memory_location);
       hypre_CSRMatrixData(S_aux_offd) = hypre_CTAlloc(HYPRE_Complex, A_offd_nnz, memory_location);
 
-      S_aux_offd_j = hypre_CSRMatrixJ(S_aux_offd);   
-      S_aux_offd_data = hypre_CSRMatrixData(S_aux_offd); 
+      S_aux_offd_j = hypre_CSRMatrixJ(S_aux_offd);
+      S_aux_offd_data = hypre_CSRMatrixData(S_aux_offd);
 
       S_aux_offd_colmap  = hypre_TAlloc(HYPRE_BigInt, num_cols_A_offd, memory_location);
       hypre_ParCSRMatrixColMapOffd(S_aux) = S_aux_offd_colmap;
@@ -180,10 +182,10 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
       A_ext_data = hypre_CSRMatrixData(A_ext);
       A_ext_i    = hypre_CSRMatrixI(A_ext);
       A_ext_j    = hypre_CSRMatrixBigJ(A_ext);
-      A_ext_nnz = A_ext_i[num_cols_A_offd]; 
-      
+      A_ext_nnz = A_ext_i[num_cols_A_offd];
+
    }
-   
+
    /* allocate work arrays */
    HYPRE_Int P_nnz = A_diag_nnz + A_offd_nnz;
    HYPRE_Int N_nnz = A_diag_nnz + A_offd_nnz + A_ext_nnz;
@@ -191,21 +193,24 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
    P_n    = hypre_CTAlloc(HYPRE_Int, (num_variables + 1), memory_location);
    N_i    = hypre_CTAlloc(HYPRE_BigInt, N_nnz, memory_location);
    N_n    = hypre_CTAlloc(HYPRE_Int, (num_variables + num_cols_A_offd + 1), memory_location);
-      
+
    /* 1. Loop over matrix rows to extract positive and negative neighbors */
-   P_n_max=0;
-   N_n_max=0;
+   P_n_max = 0;
+   N_n_max = 0;
    kp = 0;
    kn = 0;
-   for(i = 0; i<num_variables; i++)
+   for (i = 0; i < num_variables; i++)
    {
       cnt_p = kp;
       cnt_n = kn;
+
+      diag = A_diag_data[A_diag_i[i]];
+
       // diagonal part
       // Check for positive off-diagonal entry
-      for(j=A_diag_i[i]; j<A_diag_i[i+1]; j++)
+      for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
       {
-         if( (A_diag_data[j] > 0) && (A_diag_j[j] != i))
+         if ( (diag * A_diag_data[j] > 0) && (A_diag_j[j] != i))
          {
             // position of positive neighbor. Store position for quick and easy access
             P_i[kp++] = j; //A_diag_j[j];
@@ -216,83 +221,82 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
          }
       }
       // Off-diagonal part
-      for(j=A_offd_i[i]; j<A_offd_i[i+1]; j++)
+      for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
       {
-         if( A_offd_data[j] > 0)
+         if ( diag * A_offd_data[j] > 0 )
          {
             // position of positive neighbor. Offset to distinguish from diag part columns
             P_i[kp++] = j + A_diag_nnz;
          }
          else
          {
-            N_i[kn++] = A_offd_colmap[A_offd_j[j]]; 
+            N_i[kn++] = A_offd_colmap[A_offd_j[j]];
          }
       }
       cnt_p = kp - cnt_p;
       cnt_n = kn - cnt_n;
-      P_n_max = P_n_max > cnt_p ? P_n_max : cnt_p;      
+      P_n_max = P_n_max > cnt_p ? P_n_max : cnt_p;
       N_n_max = N_n_max > cnt_n ? N_n_max : cnt_n;
       // sort neighbor arrays
-      hypre_BigQsort0(N_i, N_n[i], (kn-1));
+      hypre_BigQsort0(N_i, N_n[i], (kn - 1));
       // update index pointer arrays
       P_n[i + 1] = kp;
       N_n[i + 1] = kn;
    }
    // add negative neighbors list of external rows
    kn = N_n[num_variables];
-   for(i=0; i<num_cols_A_offd; i++)
+   for (i = 0; i < num_cols_A_offd; i++)
    {
-      for(j=A_ext_i[i]; j<A_ext_i[i+1]; j++)
+      diag = A_diag_data[A_diag_i[i]];
+
+      for (j = A_ext_i[i]; j < A_ext_i[i + 1]; j++)
       {
-         if( A_ext_data[j] < 0)
+         if ( diag * A_ext_data[j] < 0 )
          {
             // get negative neighbor list
-            N_i[kn++] = A_ext_j[j]; 
+            N_i[kn++] = A_ext_j[j];
          }
       }
-      jj = num_variables + i;      
+      jj = num_variables + i;
       // sort neighbor arrays
-      hypre_BigQsort0(N_i, N_n[jj], (kn-1));
+      hypre_BigQsort0(N_i, N_n[jj], (kn - 1));
       // update index pointer arrays
-      N_n[jj + 1] = kn;            
+      N_n[jj + 1] = kn;
    }
-   hypre_CSRMatrixDestroy(A_ext);   
+   hypre_CSRMatrixDestroy(A_ext);
    /* 2. Loop to compute intersections of strong (negative) neighbors of common weak (positive) entry */
    B_i     = hypre_CTAlloc(HYPRE_BigInt, (N_n_max * P_n[num_variables]), memory_location);
-   B_n     = hypre_CTAlloc(HYPRE_Int, P_n[num_variables] + 1, memory_location);   
+   B_n     = hypre_CTAlloc(HYPRE_Int, P_n[num_variables] + 1, memory_location);
    if (method % 10 == 2)
    {
-      B_a     = hypre_CTAlloc(HYPRE_Complex, (N_n_max * P_n[num_variables]), memory_location);   
-      B_a_sum = hypre_CTAlloc(HYPRE_Complex, P_n[num_variables], memory_location);   
+      B_a     = hypre_CTAlloc(HYPRE_Complex, (N_n_max * P_n[num_variables]), memory_location);
+      B_a_sum = hypre_CTAlloc(HYPRE_Complex, P_n[num_variables], memory_location);
    }
    kn = 0;
    kp = 0;
-   for(i = 0; i<num_variables; i++)
+   for (i = 0; i < num_variables; i++)
    {
-      // loop over positive neighbor list 
-      for(j = P_n[i]; j< P_n[i+1]; j++)
+      // loop over positive neighbor list
+      for (j = P_n[i]; j < P_n[i + 1]; j++)
       {
          jA = P_i[j] - A_diag_nnz;
          // Local row (assumes square matrix)
-         if( jA < 0 )
+         if ( jA < 0 )
          {
             k = A_diag_j[P_i[j]] ;
          }
          else
          {
             // external row. Access external variable range of N.
-            k = A_offd_j[jA] + num_variables;           
+            k = A_offd_j[jA] + num_variables;
          }
          // get intersection of N_i [i] and N_i[k]
          m = N_n[i + 1] - N_n[i];
          n = N_n[k + 1] - N_n[k];
-         hypre_IntersectTwoBigIntegerArrays(&N_i[N_n[i]], m, &N_i[N_n[k]], n, &B_i[kn], &kp); 
+         hypre_IntersectTwoBigIntegerArrays(&N_i[N_n[i]], m, &N_i[N_n[k]], n, &B_i[kn], &kp);
          // update position of intersection of strong neighbors
-         kn += kp;         
-         B_n[j + 1] = kn;            
-
-
-
+         kn += kp;
+         B_n[j + 1] = kn;
 
          // WM: get sum of entries in A for the intersection
          // WM: todo - switching around variables to use as my indices, which is kind of ugly...
@@ -303,10 +307,10 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
             // if positive connection, m, is local
             if ( m < num_variables )
             {
-               for (k = B_n[j]; k < B_n[j+1]; k++)
+               for (k = B_n[j]; k < B_n[j + 1]; k++)
                {
                   HYPRE_BigInt big_col = B_i[k];
-                  if( big_col >= A_col_starts[0] && big_col < A_col_starts[1])
+                  if ( big_col >= A_col_starts[0] && big_col < A_col_starts[1])
                   {
                      // neighbor of positive entry is in diag part
                      jA = A_diag_i[m];
@@ -330,8 +334,8 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
             {
                m -= num_variables;
                /* m is now a row index for A_ext? */
-               /* it's a col index for A_offd, so I think these correspond to rows of A_ext, right? */
-               for (k = B_n[j]; k < B_n[j+1]; k++)
+               /* it's a col index for A_offd, so these correspond to rows of A_ext, right? */
+               for (k = B_n[j]; k < B_n[j + 1]; k++)
                {
                   HYPRE_BigInt big_col = B_i[k];
                   jA = A_ext_i[m];
@@ -341,10 +345,6 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
                }
             }
          }
-            
-
-
-
       }
    }
    hypre_TFree(N_i, memory_location);
@@ -352,64 +352,66 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
    /* 3. Fill in data for S_aux */
    kp = 0;
    kn = 0;
-   for(i = 0; i<num_variables; i++)
-   {    
+   for (i = 0; i < num_variables; i++)
+   {
+      diag = A_diag_data[A_diag_i[i]];
+
       // diagonal part
-      for(j=A_diag_i[i]; j<A_diag_i[i+1]; j++)
+      for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
       {
          // Skip positive off-diagonal entry
-         if( (A_diag_data[j] > 0) && (A_diag_j[j] != i)) continue;
-         
+         if ( (diag * A_diag_data[j] > 0) && (A_diag_j[j] != i)) { continue; }
+
          S_aux_diag_data[kp] = A_diag_data[j];
          S_aux_diag_j[kp++] = A_diag_j[j];
       }
       // Off-diagonal part
-      for(j=A_offd_i[i]; j<A_offd_i[i+1]; j++)
+      for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
       {
          // Skip positive off-diagonal entry
-         if( A_offd_data[j] > 0) continue;
-         
+         if ( diag * A_offd_data[j] > 0 ) { continue; }
+
          S_aux_offd_data[kn] = A_offd_data[j];
-         S_aux_offd_j[kn++] = A_offd_j[j]; 
+         S_aux_offd_j[kn++] = A_offd_j[j];
       }
-             
+
       // update index pointer arrays
       S_aux_diag_i[i + 1] = kp;
       S_aux_offd_i[i + 1] = kn;
-   }     
+   }
    /* Distribute positive contributions to strong neighbors */
-   for(i = 0; i<num_variables; i++)
-   {   
+   for (i = 0; i < num_variables; i++)
+   {
       // loop over positive neighbors and compute contributions to (strong) negative neighbors
-      for(j = P_n[i]; j< P_n[i+1]; j++)
+      for (j = P_n[i]; j < P_n[i + 1]; j++)
       {
-        jA = P_i[j] - A_diag_nnz;
+         jA = P_i[j] - A_diag_nnz;
          // positive entry is in diag part
-         if( jA < 0 )
+         if ( jA < 0 )
          {
             pval = A_diag_data[P_i[j]] ;
          }
          else
          {
             // positive entry is in offd part
-            pval = A_offd_data[jA];           
+            pval = A_offd_data[jA];
          }
 
-         // compute distribution to negative neighbors 
-         bval = -2.0 * pval / (HYPRE_Complex) (B_n[ j+1 ] - B_n[ j ]);
+         // compute distribution to negative neighbors
+         bval = -2.0 * pval / (HYPRE_Complex) (B_n[ j + 1 ] - B_n[ j ]);
 
-         // Loop over negative connections to positive neighbor and distribute 
-         for(k = B_n[ j ]; k<B_n[ j+1 ]; k++)
-         {         
+         // Loop over negative connections to positive neighbor and distribute
+         for (k = B_n[ j ]; k < B_n[ j + 1 ]; k++)
+         {
             HYPRE_BigInt big_col = B_i[k];
 
             // WM: compute bval weigthed by connections in A
             if (method % 10 == 2)
             {
-               bval = -2.0 * pval * B_a[k] / B_a_sum[j]; 
+               bval = -2.0 * pval * B_a[k] / B_a_sum[j];
             }
 
-            if( big_col >= A_col_starts[0] && big_col < A_col_starts[1])
+            if ( big_col >= A_col_starts[0] && big_col < A_col_starts[1])
             {
                // neighbor is in diag part
                jS = S_aux_diag_i[i] + 1;
@@ -421,13 +423,13 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
             {
                // neighbor is in offd part
                jj = hypre_BigBinarySearch( A_offd_colmap, big_col, num_cols_A_offd);
-               jS = S_aux_offd_i[i];               
+               jS = S_aux_offd_i[i];
                while (S_aux_offd_j[jS] != jj) { jS++; }
-               S_aux_offd_data[jS] -= bval;               
+               S_aux_offd_data[jS] -= bval;
             }
-        }
+         }
          // update diagonal entry
-        S_aux_diag_data[S_aux_diag_i[i]] -= pval;          
+         S_aux_diag_data[S_aux_diag_i[i]] -= pval;
       }
    }
 
@@ -439,7 +441,7 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
    hypre_CSRMatrixMemoryLocation(S_aux_diag) = memory_location;
    hypre_CSRMatrixMemoryLocation(S_aux_offd) = memory_location;
 
-//   hypre_ParCSRMatrixCommPkg(S_aux) = NULL;
+   //   hypre_ParCSRMatrixCommPkg(S_aux) = NULL;
 
    *S_aux_ptr = S_aux;
 
@@ -452,18 +454,18 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
       hypre_TFree(B_a, memory_location);
       hypre_TFree(B_a_sum, memory_location);
    }
-   
+
    return (ierr);
 }
 
 /*==========================================================================*/
 /*==========================================================================*/
 /**
-  Generates an auxiilliary matrix, S_aux, with  M-matrix properties such that S_aux = A - B, 
+  Generates an auxiilliary matrix, S_aux, with  M-matrix properties such that S_aux = A - B,
   where B is obtained by distributing positive off-diagonal contributions to 'strong' neighbors.
   Here, strong neighbors are defined by the pattern of a strength matrix S.
-  
-  NOTE:: Current implementation assumes A is a square matrix with a regular partitioning of 
+
+  NOTE:: Current implementation assumes A is a square matrix with a regular partitioning of
               row and columns.
 
   {\bf Input files:}
@@ -480,8 +482,8 @@ hypre_BoomerAMGCreateAuxMMatrix(hypre_ParCSRMatrix    *A,
 /*--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_BoomerAMGCreateAuxMMatrixFromS(hypre_ParCSRMatrix    *A,
-                           hypre_ParCSRMatrix    *S,
-                           hypre_ParCSRMatrix   **S_aux_ptr)
+                                     hypre_ParCSRMatrix    *S,
+                                     hypre_ParCSRMatrix   **S_aux_ptr)
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_CREATES] -= hypre_MPI_Wtime();
@@ -532,7 +534,7 @@ hypre_BoomerAMGCreateAuxMMatrixFromS(hypre_ParCSRMatrix    *A,
 
    HYPRE_Int                S_diag_nnz = S_diag_i[num_variables];
    HYPRE_Int                S_offd_nnz = S_offd_i[num_variables];
-   
+
    HYPRE_Int           num_nonzeros_diag;
    HYPRE_Int           num_nonzeros_offd = 0;
    HYPRE_Int           num_cols_offd = 0;
@@ -541,23 +543,23 @@ hypre_BoomerAMGCreateAuxMMatrixFromS(hypre_ParCSRMatrix    *A,
    hypre_CSRMatrix    *S_aux_diag;
    HYPRE_Int          *S_aux_diag_i = NULL;
    HYPRE_Int          *S_aux_diag_j = NULL;
-   HYPRE_Complex      *S_aux_diag_data = NULL;      
+   HYPRE_Complex      *S_aux_diag_data = NULL;
    /* HYPRE_Real         *S_diag_data; */
    hypre_CSRMatrix    *S_aux_offd;
    HYPRE_Int          *S_aux_offd_i = NULL;
    HYPRE_Int          *S_aux_offd_j = NULL;
-   HYPRE_Complex      *S_aux_offd_data = NULL;   
-   HYPRE_BigInt   *S_aux_offd_colmap = NULL;      
+   HYPRE_Complex      *S_aux_offd_data = NULL;
+   HYPRE_BigInt   *S_aux_offd_colmap = NULL;
    /* HYPRE_Real         *S_offd_data; */
    /* off processor portions of S */
    hypre_CSRMatrix    *S_ext                 = NULL;
    HYPRE_Int          *S_ext_i               = NULL;
    HYPRE_Real         *S_ext_data            = NULL;
    HYPRE_BigInt       *S_ext_j               = NULL;
-   HYPRE_Int                S_ext_nnz = 0;  
-   
+   HYPRE_Int                S_ext_nnz = 0;
+
    HYPRE_Real          diag, row_scale, row_sum;
-   HYPRE_Int           i,j,k,jj, jA, jS, kp, kn, m, n, P_n_max, N_n_max, cnt_n, cnt_p;
+   HYPRE_Int           i, j, k, jj, jA, jS, kp, kn, m, n, P_n_max, N_n_max, cnt_n, cnt_p;
 
    HYPRE_Int           ierr = 0;
 
@@ -567,27 +569,27 @@ hypre_BoomerAMGCreateAuxMMatrixFromS(hypre_ParCSRMatrix    *A,
    HYPRE_Int           index, start;
 
    HYPRE_Int          *P_i = NULL;
-   HYPRE_Int          *P_n = NULL;   
+   HYPRE_Int          *P_n = NULL;
    HYPRE_BigInt          *N_i = NULL;
-   HYPRE_Int          *N_n = NULL;   
-   HYPRE_BigInt          *B_i = NULL;   
-   HYPRE_Int          *B_n = NULL;   
-   
+   HYPRE_Int          *N_n = NULL;
+   HYPRE_BigInt          *B_i = NULL;
+   HYPRE_Int          *B_n = NULL;
+
    HYPRE_Complex pval, bval;
-   
+
    HYPRE_Int *prefix_sum_workspace;
 
    HYPRE_MemoryLocation memory_location = hypre_ParCSRMatrixMemoryLocation(A);
-   
+
    HYPRE_Int num_procs, my_id;
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
-   
+
    // Begin:
    /* Allocate memory for auxilliary strength matrix */
    S_aux = hypre_ParCSRMatrixCreate(comm, global_num_vars, global_num_vars,
-                                row_starts, row_starts,
-                                num_cols_A_offd, A_diag_nnz, A_offd_nnz);
+                                    row_starts, row_starts,
+                                    num_cols_A_offd, A_diag_nnz, A_offd_nnz);
 
    S_aux_diag = hypre_ParCSRMatrixDiag(S_aux);
    hypre_CSRMatrixI(S_aux_diag) = hypre_CTAlloc(HYPRE_Int, num_variables + 1, memory_location);
@@ -595,8 +597,8 @@ hypre_BoomerAMGCreateAuxMMatrixFromS(hypre_ParCSRMatrix    *A,
    hypre_CSRMatrixData(S_aux_diag) = hypre_CTAlloc(HYPRE_Complex, A_diag_nnz, memory_location);
 
    S_aux_diag_i = hypre_CSRMatrixI(S_aux_diag);
-   S_aux_diag_j = hypre_CSRMatrixJ(S_aux_diag);   
-   S_aux_diag_data = hypre_CSRMatrixData(S_aux_diag); 
+   S_aux_diag_j = hypre_CSRMatrixJ(S_aux_diag);
+   S_aux_diag_data = hypre_CSRMatrixData(S_aux_diag);
 
    S_aux_offd = hypre_ParCSRMatrixOffd(S_aux);
    hypre_CSRMatrixI(S_aux_offd) = hypre_CTAlloc(HYPRE_Int, num_variables + 1, memory_location);
@@ -609,8 +611,8 @@ hypre_BoomerAMGCreateAuxMMatrixFromS(hypre_ParCSRMatrix    *A,
       hypre_CSRMatrixJ(S_aux_offd) = hypre_CTAlloc(HYPRE_Int, A_offd_nnz, memory_location);
       hypre_CSRMatrixData(S_aux_offd) = hypre_CTAlloc(HYPRE_Complex, A_offd_nnz, memory_location);
 
-      S_aux_offd_j = hypre_CSRMatrixJ(S_aux_offd);   
-      S_aux_offd_data = hypre_CSRMatrixData(S_aux_offd); 
+      S_aux_offd_j = hypre_CSRMatrixJ(S_aux_offd);
+      S_aux_offd_data = hypre_CSRMatrixData(S_aux_offd);
 
       S_aux_offd_colmap  = hypre_TAlloc(HYPRE_BigInt, num_cols_A_offd, memory_location);
       hypre_ParCSRMatrixColMapOffd(S_aux) = S_aux_offd_colmap;
@@ -629,8 +631,8 @@ hypre_BoomerAMGCreateAuxMMatrixFromS(hypre_ParCSRMatrix    *A,
       S_ext      = hypre_ParCSRMatrixExtractBExt(S, A, 0);
       S_ext_i    = hypre_CSRMatrixI(S_ext);
       S_ext_j    = hypre_CSRMatrixBigJ(S_ext);
-      S_ext_nnz = S_ext_i[num_cols_A_offd]; 
-      
+      S_ext_nnz = S_ext_i[num_cols_A_offd];
+
    }
    /* allocate work arrays */
    HYPRE_Int P_nnz = S_diag_nnz + S_offd_nnz + num_variables;
@@ -639,30 +641,33 @@ hypre_BoomerAMGCreateAuxMMatrixFromS(hypre_ParCSRMatrix    *A,
    P_n    = hypre_CTAlloc(HYPRE_Int, (num_variables + 1), memory_location);
    N_i    = hypre_CTAlloc(HYPRE_BigInt, N_nnz, memory_location);
    N_n    = hypre_CTAlloc(HYPRE_Int, (num_variables + num_cols_A_offd + 1), memory_location);
-      
+
    /* 1. Loop over matrix rows to extract positive and negative neighbors */
-   P_n_max=0;
-   N_n_max=0;
+   P_n_max = 0;
+   N_n_max = 0;
    kp = 0;
    kn = 0;
-   for(i = 0; i<num_variables; i++)
+   for (i = 0; i < num_variables; i++)
    {
       cnt_p = kp;
       cnt_n = kn;
+
+      diag = A_diag_data[A_diag_i[i]];
+
       // diagonal part
       // Check for positive off-diagonal entry
-      for(j=A_diag_i[i]; j<A_diag_i[i+1]; j++)
+      for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
       {
-         if( (A_diag_data[j] > 0) && (A_diag_j[j] != i))
+         if ( (diag * A_diag_data[j] > 0) && (A_diag_j[j] != i))
          {
             // position of positive neighbor. Store position for quick and easy access
             P_i[kp++] = j; //A_diag_j[j];
          }
       }
       // Off-diagonal part
-      for(j=A_offd_i[i]; j<A_offd_i[i+1]; j++)
+      for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
       {
-         if( A_offd_data[j] > 0)
+         if ( diag * A_offd_data[j] > 0 )
          {
             // position of positive neighbor. Offset to distinguish from diag part columns
             P_i[kp++] = j + A_diag_nnz;
@@ -670,69 +675,69 @@ hypre_BoomerAMGCreateAuxMMatrixFromS(hypre_ParCSRMatrix    *A,
       }
       // Populate negative neighbor list from S. We need this so we can sort it.
       // diagonal part
-      for(j=S_diag_i[i]; j<S_diag_i[i+1]; j++)
+      for (j = S_diag_i[i]; j < S_diag_i[i + 1]; j++)
       {
          N_i[kn++] = S_diag_j[j] + S_col_starts[0];
       }
-       // Off-diagonal part
-      for(j=S_offd_i[i]; j<S_offd_i[i+1]; j++)
+      // Off-diagonal part
+      for (j = S_offd_i[i]; j < S_offd_i[i + 1]; j++)
       {
-         N_i[kn++] = S_offd_colmap[S_offd_j[j]]; 
-      }     
-            
+         N_i[kn++] = S_offd_colmap[S_offd_j[j]];
+      }
+
       cnt_p = kp - cnt_p;
       cnt_n = kn - cnt_n;
-      P_n_max = P_n_max > cnt_p ? P_n_max : cnt_p;      
+      P_n_max = P_n_max > cnt_p ? P_n_max : cnt_p;
       N_n_max = N_n_max > cnt_n ? N_n_max : cnt_n;
       // sort neighbor arrays
-      hypre_BigQsort0(N_i, N_n[i], (kn-1));
+      hypre_BigQsort0(N_i, N_n[i], (kn - 1));
       // update index pointer arrays
       P_n[i + 1] = kp;
       N_n[i + 1] = kn;
    }
    // add negative neighbors list of external rows
    kn = N_n[num_variables];
-   for(i=0; i<num_cols_A_offd; i++)
+   for (i = 0; i < num_cols_A_offd; i++)
    {
-      for(j=S_ext_i[i]; j<S_ext_i[i+1]; j++)
+      for (j = S_ext_i[i]; j < S_ext_i[i + 1]; j++)
       {
-         N_i[kn++] = S_ext_j[j]; 
+         N_i[kn++] = S_ext_j[j];
       }
-      jj = num_variables + i;      
+      jj = num_variables + i;
       // sort neighbor arrays
-      hypre_BigQsort0(N_i, N_n[jj], (kn-1));
+      hypre_BigQsort0(N_i, N_n[jj], (kn - 1));
       // update index pointer arrays
-      N_n[jj + 1] = kn;            
+      N_n[jj + 1] = kn;
    }
-   hypre_CSRMatrixDestroy(S_ext);   
+   hypre_CSRMatrixDestroy(S_ext);
    /* 2. Loop to compute intersections of strong (negative) neighbors of common weak (positive) entry */
    B_i    = hypre_CTAlloc(HYPRE_BigInt, (N_n_max * P_n[num_variables]), memory_location);
-   B_n    = hypre_CTAlloc(HYPRE_Int, (P_n_max * num_variables + 1), memory_location);   
+   B_n    = hypre_CTAlloc(HYPRE_Int, (P_n_max * num_variables + 1), memory_location);
    kn = 0;
    kp = 0;
-   for(i = 0; i<num_variables; i++)
+   for (i = 0; i < num_variables; i++)
    {
-      // loop over positive neighbor list 
-      for(j = P_n[i]; j< P_n[i+1]; j++)
+      // loop over positive neighbor list
+      for (j = P_n[i]; j < P_n[i + 1]; j++)
       {
          jA = P_i[j] - A_diag_nnz;
          // Local row (assumes square matrix)
-         if( jA < 0 )
+         if ( jA < 0 )
          {
             k = A_diag_j[P_i[j]] ;
          }
          else
          {
             // external row. Access external variable range of N.
-            k = A_offd_j[jA] + num_variables;           
+            k = A_offd_j[jA] + num_variables;
          }
          // get intersection of N_i [i] and N_i[k]
          m = N_n[i + 1] - N_n[i];
          n = N_n[k + 1] - N_n[k];
-         hypre_IntersectTwoBigIntegerArrays(&N_i[N_n[i]], m, &N_i[N_n[k]], n, &B_i[kn], &kp); 
+         hypre_IntersectTwoBigIntegerArrays(&N_i[N_n[i]], m, &N_i[N_n[k]], n, &B_i[kn], &kp);
          // update position of intersection of strong neighbors
-         kn += kp;         
-         B_n[j + 1] = kn;            
+         kn += kp;
+         B_n[j + 1] = kn;
       }
    }
    hypre_TFree(N_i, memory_location);
@@ -740,29 +745,29 @@ hypre_BoomerAMGCreateAuxMMatrixFromS(hypre_ParCSRMatrix    *A,
    /* 3. Fill in data for S_aux */
    kp = 0;
    kn = 0;
-   for(i = 0; i<num_variables; i++)
+   for (i = 0; i < num_variables; i++)
    {
-      // first insert diagonal entry 
+      // first insert diagonal entry
       S_aux_diag_data[kp] = A_diag_data[A_diag_i[i] ];
-      S_aux_diag_j[kp++] = A_diag_j[A_diag_i[i] ];    
+      S_aux_diag_j[kp++] = A_diag_j[A_diag_i[i] ];
       // diagonal part
       S_diag = hypre_ParCSRMatrixDiag(S);
       S_diag_i = hypre_CSRMatrixI(S_diag);
       S_diag_j = hypre_CSRMatrixJ(S_diag);
-        
-      for(j=S_diag_i[i]; j<S_diag_i[i+1]; j++)
+
+      for (j = S_diag_i[i]; j < S_diag_i[i + 1]; j++)
       {
          jA = A_diag_i[i] + 1;
          jS = S_diag_j[j];
-         while (A_diag_j[jA] != jS) { jA++; }     
+         while (A_diag_j[jA] != jS) { jA++; }
          S_aux_diag_data[kp] = A_diag_data[jA];
-         S_aux_diag_j[kp++] = A_diag_j[jA];                   
-      }         
-       // Off-diagonal part
+         S_aux_diag_j[kp++] = A_diag_j[jA];
+      }
+      // Off-diagonal part
       S_offd   = hypre_ParCSRMatrixOffd(S) ;
       S_offd_i = hypre_CSRMatrixI(S_offd);
       S_offd_j = hypre_CSRMatrixJ(S_offd);
-     
+
       for (j = S_offd_i[i]; j < S_offd_i[i + 1]; j++)
       {
          jA = A_offd_i[i];
@@ -770,37 +775,37 @@ hypre_BoomerAMGCreateAuxMMatrixFromS(hypre_ParCSRMatrix    *A,
          while (jS != A_offd_j[jA]) { jA++; }
          S_aux_offd_data[kn] = A_offd_data[jA];
          S_aux_offd_j[kn++] = A_offd_j[jA];
-      }       
+      }
       // update index pointer arrays
       S_aux_diag_i[i + 1] = kp;
       S_aux_offd_i[i + 1] = kn;
-   }     
+   }
    /* Distribute positive contributions to strong neighbors */
-   for(i = 0; i<num_variables; i++)
-   {   
+   for (i = 0; i < num_variables; i++)
+   {
       // loop over positive neighbors and compute contributions to (strong) negative neighbors
-      for(j = P_n[i]; j< P_n[i+1]; j++)
+      for (j = P_n[i]; j < P_n[i + 1]; j++)
       {
-        jA = P_i[j] - A_diag_nnz;
+         jA = P_i[j] - A_diag_nnz;
          // positive entry is in diag part
-         if( jA < 0 )
+         if ( jA < 0 )
          {
             pval = A_diag_data[P_i[j]] ;
          }
          else
          {
             // positive entry is in offd part
-            pval = A_offd_data[jA];           
+            pval = A_offd_data[jA];
          }
 
-         // compute distribution to negative neighbors 
-         bval = -2.0 * pval / (HYPRE_Complex) (B_n[ j+1 ] - B_n[ j ]);
+         // compute distribution to negative neighbors
+         bval = -2.0 * pval / (HYPRE_Complex) (B_n[ j + 1 ] - B_n[ j ]);
 
-         // Loop over negative connections to positive neighbor and distribute 
-         for(k = B_n[ j ]; k<B_n[ j+1 ]; k++)
-         {         
-           HYPRE_BigInt big_col = B_i[k];
-            if( big_col >= A_col_starts[0] && big_col < A_col_starts[1])
+         // Loop over negative connections to positive neighbor and distribute
+         for (k = B_n[ j ]; k < B_n[ j + 1 ]; k++)
+         {
+            HYPRE_BigInt big_col = B_i[k];
+            if ( big_col >= A_col_starts[0] && big_col < A_col_starts[1])
             {
                // neighbor is in diag part
                jS = S_aux_diag_i[i] + 1;
@@ -812,13 +817,13 @@ hypre_BoomerAMGCreateAuxMMatrixFromS(hypre_ParCSRMatrix    *A,
             {
                // neighbor is in offd part
                jj = hypre_BigBinarySearch( A_offd_colmap, big_col, num_cols_A_offd);
-               jS = S_aux_offd_i[i];               
+               jS = S_aux_offd_i[i];
                while (S_aux_offd_j[jS] != jj) { jS++; }
-               S_aux_offd_data[jS] -= bval;               
+               S_aux_offd_data[jS] -= bval;
             }
-        }
+         }
          // update diagonal entry
-        S_aux_diag_data[S_aux_diag_i[i]] -= pval;          
+         S_aux_diag_data[S_aux_diag_i[i]] -= pval;
       }
    }
 
@@ -830,7 +835,7 @@ hypre_BoomerAMGCreateAuxMMatrixFromS(hypre_ParCSRMatrix    *A,
    hypre_CSRMatrixMemoryLocation(S_aux_diag) = memory_location;
    hypre_CSRMatrixMemoryLocation(S_aux_offd) = memory_location;
 
-//   hypre_ParCSRMatrixCommPkg(S_aux) = NULL;
+   //   hypre_ParCSRMatrixCommPkg(S_aux) = NULL;
 
    *S_aux_ptr = S_aux;
 
@@ -838,16 +843,17 @@ hypre_BoomerAMGCreateAuxMMatrixFromS(hypre_ParCSRMatrix    *A,
    hypre_TFree(P_n, memory_location);
    hypre_TFree(B_i, memory_location);
    hypre_TFree(B_n, memory_location);
-   
+
    return (ierr);
 }
 
-HYPRE_Int hypre_BoomerAMGCreateAuxS(hypre_ParCSRMatrix    *A, hypre_ParCSRMatrix    *S, hypre_ParCSRMatrix   **S_aux_ptr, HYPRE_Int method)
+HYPRE_Int hypre_BoomerAMGCreateAuxS(hypre_ParCSRMatrix    *A, hypre_ParCSRMatrix    *S,
+                                    hypre_ParCSRMatrix   **S_aux_ptr, HYPRE_Int method)
 {
    int ierr;
-   if(method == 0)
+   if (method == 0)
    {
-       ierr = hypre_BoomerAMGCreateAuxMMatrix(A, S_aux_ptr, method);
+      ierr = hypre_BoomerAMGCreateAuxMMatrix(A, S_aux_ptr, method);
    }
    else if (method == 1)
    {
@@ -855,9 +861,9 @@ HYPRE_Int hypre_BoomerAMGCreateAuxS(hypre_ParCSRMatrix    *A, hypre_ParCSRMatrix
    }
    else // default
    {
-       ierr = hypre_BoomerAMGCreateAuxMMatrix(A, S_aux_ptr, method);
+      ierr = hypre_BoomerAMGCreateAuxMMatrix(A, S_aux_ptr, method);
    }
-   
+
    return (ierr);
 }
 
@@ -878,11 +884,11 @@ HYPRE_Int hypre_BoomerAMGCreateAuxS(hypre_ParCSRMatrix    *A, hypre_ParCSRMatrix
  * */
 HYPRE_Int
 hypre_IntersectTwoIntegerArrays(HYPRE_Int *x,
-                         HYPRE_Int  x_length,
-                         HYPRE_Int *y,
-                         HYPRE_Int  y_length,
-                         HYPRE_Int *z,
-                         HYPRE_Int  *intersect_length)
+                                HYPRE_Int  x_length,
+                                HYPRE_Int *y,
+                                HYPRE_Int  y_length,
+                                HYPRE_Int *z,
+                                HYPRE_Int  *intersect_length)
 {
    HYPRE_Int x_index = 0;
    HYPRE_Int y_index = 0;
@@ -913,11 +919,11 @@ hypre_IntersectTwoIntegerArrays(HYPRE_Int *x,
 
 HYPRE_Int
 hypre_IntersectTwoBigIntegerArrays(HYPRE_BigInt *x,
-                            HYPRE_Int  x_length,
-                            HYPRE_BigInt *y,
-                            HYPRE_Int  y_length,
-                            HYPRE_BigInt *z,
-                            HYPRE_Int  *intersect_length)
+                                   HYPRE_Int  x_length,
+                                   HYPRE_BigInt *y,
+                                   HYPRE_Int  y_length,
+                                   HYPRE_BigInt *z,
+                                   HYPRE_Int  *intersect_length)
 {
    HYPRE_Int x_index = 0;
    HYPRE_Int y_index = 0;

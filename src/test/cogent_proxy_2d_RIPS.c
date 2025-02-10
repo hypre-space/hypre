@@ -70,9 +70,9 @@ int main (int argc, char *argv[])
    HYPRE_SStructVector   x;
 
    HYPRE_Solver          par_solver;
-   
+
    /* solver params */
-   int max_iter = 10;   
+   int max_iter = 10;
    double tol = 1.e-6;
    int print_level = 3;
    int print_cgrid = 0;
@@ -86,7 +86,7 @@ int main (int argc, char *argv[])
    double ILU_Schur_drop_threshold = -1.;
    int ILU_max_nnz_per_row = 1000;
    int ILU_max_schur_iter = 5;
-   
+
    /* MGR params */
    HYPRE_Int mgr_bsize = 2;
    HYPRE_Int mgr_nlevels = 1;
@@ -101,18 +101,18 @@ int main (int argc, char *argv[])
    HYPRE_Int mgr_gsmooth_type = 0;
    HYPRE_Int mgr_num_gsmooth_sweeps = 0;
    HYPRE_Int mgr_restrict_type = 0;
-   HYPRE_Int mgr_num_restrict_sweeps = 0;  
-   HYPRE_Int mgr_cpoint = 0; 
-   HYPRE_Real mgr_csolve_threshold = 0.25; 
-   HYPRE_Real mgr_csolve_max_iter = 20; 
+   HYPRE_Int mgr_num_restrict_sweeps = 0;
+   HYPRE_Int mgr_cpoint = 0;
+   HYPRE_Real mgr_csolve_threshold = 0.25;
+   HYPRE_Real mgr_csolve_max_iter = 20;
    HYPRE_Int mgr_use_non_galerkin = 0;
-   HYPRE_Int mgr_pmax= 0;
-   
+   HYPRE_Int mgr_pmax = 0;
+
    HYPRE_Int strength_method = -1;
 
    HYPRE_Int semicoarsening_dir = 0;
    HYPRE_Int semicoarsening_offset = 0;
-   
+
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
@@ -190,7 +190,7 @@ int main (int argc, char *argv[])
          else if ( strcmp(argv[arg_index], "-print_cgrid") == 0 )
          {
             arg_index++;
-            print_cgrid= atoi(argv[arg_index++]);
+            print_cgrid = atoi(argv[arg_index++]);
          }
          /* ILU options */
          else if ( strcmp(argv[arg_index], "-ilu_type") == 0 )
@@ -234,107 +234,127 @@ int main (int argc, char *argv[])
             ILU_max_schur_iter = atoi(argv[arg_index++]);
          }
          /* MGR options */
-        else if ( strcmp(argv[arg_index], "-mgr_bsize") == 0 )
-         {                /* mgr block size */
+         else if ( strcmp(argv[arg_index], "-mgr_bsize") == 0 )
+         {
+            /* mgr block size */
             arg_index++;
             mgr_bsize = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-mgr_nlevels") == 0 )
-         {                /* mgr number of coarsening levels */
+         {
+            /* mgr number of coarsening levels */
             arg_index++;
             mgr_nlevels = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-mgr_cpoint") == 0 )
-         {                /* coarse point index in block system */
+         {
+            /* coarse point index in block system */
             arg_index++;
             mgr_cpoint = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-mgr_non_c_to_f") == 0 )
-         {                /* mgr intermediate coarse grid strategy */
+         {
+            /* mgr intermediate coarse grid strategy */
             arg_index++;
             mgr_non_c_to_f = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-mgr_frelax_method") == 0 )
-         {                /* mgr F-relaxation strategy: single/ multi level */
+         {
+            /* mgr F-relaxation strategy: single/ multi level */
             arg_index++;
             mgr_frelax_method = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-mgr_relax_type") == 0 )
-         {                /* relax type for "single level" F-relaxation */
+         {
+            /* relax type for "single level" F-relaxation */
             arg_index++;
             mgr_relax_type = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-mgr_relax_sweeps") == 0 )
-         {                /* number of relaxation sweeps */
+         {
+            /* number of relaxation sweeps */
             arg_index++;
             mgr_num_relax_sweeps = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-mgr_interp_type") == 0 )
-         {                /* interpolation type */
+         {
+            /* interpolation type */
             arg_index++;
             mgr_interp_type = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-mgr_interp_sweeps") == 0 )
-         {                /* number of interpolation sweeps*/
+         {
+            /* number of interpolation sweeps*/
             arg_index++;
             mgr_num_interp_sweeps = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-mgr_gsmooth_type") == 0 )
-         {                /* global smoother type */
+         {
+            /* global smoother type */
             arg_index++;
             mgr_gsmooth_type = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-mgr_gsmooth_sweeps") == 0 )
-         {                /* number of global smooth sweeps*/
+         {
+            /* number of global smooth sweeps*/
             arg_index++;
             mgr_num_gsmooth_sweeps = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-mgr_restrict_type") == 0 )
-         {                /* restriction type */
+         {
+            /* restriction type */
             arg_index++;
             mgr_restrict_type = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-mgr_restrict_sweeps") == 0 )
-         {                /* number of restriction sweeps*/
+         {
+            /* number of restriction sweeps*/
             arg_index++;
             mgr_num_restrict_sweeps = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-mgr_csolve_threshold") == 0 )
-         {                /* number of restriction sweeps*/
+         {
+            /* number of restriction sweeps*/
             arg_index++;
             mgr_csolve_threshold = atof(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-mgr_csolve_max_iter") == 0 )
-         {                /* number of restriction sweeps*/
+         {
+            /* number of restriction sweeps*/
             arg_index++;
             mgr_csolve_max_iter = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-mgr_use_non_galerkin") == 0 )
-         {                /* use non Galerkin coarse grid */
+         {
+            /* use non Galerkin coarse grid */
             arg_index++;
             mgr_use_non_galerkin = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-mgr_pmax") == 0 )
-         {                /* Pmax elements for non Galerkin case */
+         {
+            /* Pmax elements for non Galerkin case */
             arg_index++;
             mgr_pmax = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-strength_method") == 0 )
-         {                /* Strength of connection method */
+         {
+            /* Strength of connection method */
             arg_index++;
             strength_method = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-sdir") == 0 )
-         {                /* Semicoarsening direction */
+         {
+            /* Semicoarsening direction */
             arg_index++;
             semicoarsening_dir = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-soffset") == 0 )
-         {                /* Semicoarsening offset */
+         {
+            /* Semicoarsening offset */
             arg_index++;
             semicoarsening_offset = atoi(argv[arg_index++]);
          }
-         /* end mgr options */         
+         /* end mgr options */
          else if ( strcmp(argv[arg_index], "-help") == 0 )
          {
             print_usage = 1;
@@ -359,7 +379,7 @@ int main (int argc, char *argv[])
          printf("  -solver <int>         : solver ID\n");
          printf("  -max_iter <int>       : max solver iterations (default 20) \n");
          printf("  -tol <double>         : solver convergence tolerance (default 1.e-7) \n");
-         printf("  -print_level <int>    : print level (default 3) \n");         
+         printf("  -print_level <int>    : print level (default 3) \n");
          printf("                          0  - hypre-ILU (default)\n");
          printf("                          1  - AMG \n");
          printf("                          2  - MGR \n");
@@ -387,7 +407,7 @@ int main (int argc, char *argv[])
          hypre_printf("  -mgr_csolve_threshold <val>      : AMG coarse solve strong threshold = val\n");
          hypre_printf("  -mgr_csolve_max_iter <val>       : AMG coarse solve max iterations = val\n");
          hypre_printf("  -strength_method <val>       : method for creating AMG strength matrix= val\n");
-         /* end MGR options */         
+         /* end MGR options */
          printf("\n");
       }
 
@@ -406,18 +426,18 @@ int main (int argc, char *argv[])
    pi = myid;
 
    /* Figure out the extents of each processor's piece of the grid. */
-   ilower[0] = pi*nx;
-   ilower[1] = pj*ny;
+   ilower[0] = pi * nx;
+   ilower[1] = pj * ny;
 
-   iupper[0] = ilower[0] + nx-1;
-   iupper[1] = ilower[1] + ny-1;
+   iupper[0] = ilower[0] + nx - 1;
+   iupper[1] = ilower[1] + ny - 1;
 
    /* Get the mesh size */
-   
-   hx  = 0.3 * axisym_fac / (Nx*nx);
+
+   hx  = 0.3 * axisym_fac / (Nx * nx);
    hy  = 3.77 * axisym_fac / ny;
-   hx2 = hx*hx;
-   hy2 = hy*hy;
+   hx2 = hx * hx;
+   hy2 = hy * hy;
 
    /* 1. Set up a grid - we have one part and two variables */
    {
@@ -437,10 +457,13 @@ int main (int argc, char *argv[])
          int i;
          int nvars = 2;
          HYPRE_SStructVariable vartypes[2] = {HYPRE_SSTRUCT_VARIABLE_CELL,
-                                              HYPRE_SSTRUCT_VARIABLE_CELL };
+                                              HYPRE_SSTRUCT_VARIABLE_CELL
+                                             };
 
-         for (i = 0; i< nparts; i++)
+         for (i = 0; i < nparts; i++)
+         {
             HYPRE_SStructGridSetVariables(grid, i, nvars, vartypes);
+         }
       }
 
       /* Make the second direction periodic */
@@ -460,27 +483,31 @@ int main (int argc, char *argv[])
       int var;
       int ndim = 2;
 
-      int M_offsets[5][2] = {{0,-1}, {-1,0}, {0,0}, {1,0}, {0,1}};
-      int N_offsets[3][2] = {{0,-1}, {0,0}, {0,1}};
-      int I_offsets[1][2] = {{0,0}};
+      int M_offsets[5][2] = {{0, -1}, {-1, 0}, {0, 0}, {1, 0}, {0, 1}};
+      int N_offsets[3][2] = {{0, -1}, {0, 0}, {0, 1}};
+      int I_offsets[1][2] = {{0, 0}};
 
       /* Stencil object for variable u (labeled as variable 0) */
       {
          int stencil_size_uu = 5;
          int stencil_size_uv = 3;
          stencil_size = stencil_size_uu + stencil_size_uv;
-      
+
          HYPRE_SStructStencilCreate(ndim, stencil_size, &stencil_u);
-      
+
          /* The first stencil_size_uu entries are for the u-u connections */
          var = 0; /* connect to variable 0 */
          for (entry = 0; entry < stencil_size_uu; entry++)
+         {
             HYPRE_SStructStencilSetEntry(stencil_u, entry, M_offsets[entry], var);
-      
+         }
+
          /* The last stencil_size_uv entries are for the u-v connections */
          var = 1;  /* connect to variable 1 */
-         for (entry = stencil_size_uu, j=0; entry < stencil_size; entry++, j++)
+         for (entry = stencil_size_uu, j = 0; entry < stencil_size; entry++, j++)
+         {
             HYPRE_SStructStencilSetEntry(stencil_u, entry, N_offsets[j], var);
+         }
       }
 
       /* Stencil object for variable v  (variable 1) */
@@ -488,18 +515,22 @@ int main (int argc, char *argv[])
          int stencil_size_vu = 5;
          int stencil_size_vv = 1;
          stencil_size = stencil_size_vu + stencil_size_vv;
-         
+
          HYPRE_SStructStencilCreate(ndim, stencil_size, &stencil_v);
-         
+
          /* These are the v-u connections */
          var = 0; /* Connect to variable 0 */
          for (entry = 0; entry < stencil_size_vu; entry++)
+         {
             HYPRE_SStructStencilSetEntry(stencil_v, entry, M_offsets[entry], var);
-         
+         }
+
          /* These are the v-v connections */
          var = 1; /* Connect to variable 1 */
-         for (entry = stencil_size_vu, j=0; entry < stencil_size; entry++, j++)
+         for (entry = stencil_size_vu, j = 0; entry < stencil_size; entry++, j++)
+         {
             HYPRE_SStructStencilSetEntry(stencil_v, entry, I_offsets[j], var);
+         }
       }
    }
 
@@ -531,7 +562,7 @@ int main (int argc, char *argv[])
       int nvalues;
       int var;
       int part = 0;
-      int num_local_cells = nx*ny;
+      int num_local_cells = nx * ny;
       double M_stencil[5];
       double N1_stencil[3];
       double N2_stencil[3];
@@ -542,13 +573,13 @@ int main (int argc, char *argv[])
       M_stencil[3]  = -a_fac * ( 1. / hx2  );
       M_stencil[4]  = 0.;
 
-      N1_stencil[0] =   -b_fac/hy2;
-      N1_stencil[1] = 2.*b_fac/hy2;
-      N1_stencil[2] =   -b_fac/hy2;
+      N1_stencil[0] =   -b_fac / hy2;
+      N1_stencil[1] = 2.*b_fac / hy2;
+      N1_stencil[2] =   -b_fac / hy2;
 
-      N2_stencil[0] =   -c_fac/hy2;
-      N2_stencil[1] = 2.*c_fac/hy2;
-      N2_stencil[2] =   -c_fac/hy2;
+      N2_stencil[0] =   -c_fac / hy2;
+      N2_stencil[1] = 2.*c_fac / hy2;
+      N2_stencil[2] =   -c_fac / hy2;
 
       /* Create an empty matrix object */
       HYPRE_SStructMatrixCreate(MPI_COMM_WORLD, graph, &A);
@@ -562,7 +593,7 @@ int main (int argc, char *argv[])
 
       /* Indicate that the matrix coefficients are ready to be set */
       HYPRE_SStructMatrixInitialize(A);
-     
+
       /* Each processor must set the stencil values for their boxes on each part.
          In this example, we only set stencil entries and therefore use
          HYPRE_SStructMatrixSetBoxValues.  If we need to set non-stencil entries,
@@ -583,39 +614,43 @@ int main (int argc, char *argv[])
 
          /*  First the u-u connections */
          nentries = 5;
-         nvalues = nentries*num_local_cells;
+         nvalues = nentries * num_local_cells;
          u_values = (HYPRE_Real*) calloc(nvalues, sizeof(HYPRE_Real));
 
-         for (i=0; i<nvalues; i+=nentries) {
-            for (j=0; j<nentries; ++j) {
-               u_values[i+j] = 0.;//M_stencil[j];
+         for (i = 0; i < nvalues; i += nentries)
+         {
+            for (j = 0; j < nentries; ++j)
+            {
+               u_values[i + j] = 0.; //M_stencil[j];
             }
 
             u_values[i] += 0.;//N1_stencil[0];
-            u_values[i+2] += 0.;//N1_stencil[1];
-            u_values[i+4] += 0.;//N1_stencil[2];
+            u_values[i + 2] += 0.; //N1_stencil[1];
+            u_values[i + 4] += 0.; //N1_stencil[2];
          }
 
          HYPRE_SStructMatrixAddToBoxValues(A, part, ilower, iupper,
-                                         var, nentries,
-                                         u_u_indices, u_values);
+                                           var, nentries,
+                                           u_u_indices, u_values);
          free(u_values);
 
          /* Next the u-v connections */
          int u_v_indices[3] = {5, 6, 7};
          nentries = 3;
-         nvalues = nentries*num_local_cells;
+         nvalues = nentries * num_local_cells;
          u_values = (HYPRE_Real*) calloc(nvalues, sizeof(HYPRE_Real));
 
-         for (i=0; i<nvalues; i+=nentries) {
-            for (j=0; j<nentries; ++j) {
-               u_values[i+j] = -N2_stencil[j];
+         for (i = 0; i < nvalues; i += nentries)
+         {
+            for (j = 0; j < nentries; ++j)
+            {
+               u_values[i + j] = -N2_stencil[j];
             }
          }
 
          HYPRE_SStructMatrixAddToBoxValues(A, part, ilower, iupper,
-                                         var, nentries,
-                                         u_v_indices, u_values);
+                                           var, nentries,
+                                           u_v_indices, u_values);
          free(u_values);
       }
       /*  Now set the v-stencil entries */
@@ -628,34 +663,37 @@ int main (int argc, char *argv[])
 
          /* the v-u connections */
          nentries = 5;
-         nvalues = nentries*num_local_cells;
+         nvalues = nentries * num_local_cells;
          v_values = (HYPRE_Real*) calloc(nvalues, sizeof(HYPRE_Real));
 
-         for (i=0; i<nvalues; i+=nentries) {
-            for (j=0; j<nentries; ++j) {
-               v_values[i+j] = M_stencil[j];
+         for (i = 0; i < nvalues; i += nentries)
+         {
+            for (j = 0; j < nentries; ++j)
+            {
+               v_values[i + j] = M_stencil[j];
             }
          }
 
          HYPRE_SStructMatrixAddToBoxValues(A, part, ilower, iupper,
-                                         var, nentries,
-                                         v_u_indices, v_values);
+                                           var, nentries,
+                                           v_u_indices, v_values);
 
          free(v_values);
 
          /* the v-v connections */
          int v_v_indices[1] = {5};
          nentries = 1;
-         nvalues = nentries*num_local_cells;
+         nvalues = nentries * num_local_cells;
          v_values = (HYPRE_Real*) calloc(nvalues, sizeof(HYPRE_Real));
 
-         for (i=0; i<nvalues; i+=nentries) {
+         for (i = 0; i < nvalues; i += nentries)
+         {
             v_values[i] = 1.;
          }
 
          HYPRE_SStructMatrixAddToBoxValues(A, part, ilower, iupper,
-                                         var, nentries,
-                                         v_v_indices, v_values);
+                                           var, nentries,
+                                           v_v_indices, v_values);
 
          free(v_values);
       }
@@ -675,19 +713,21 @@ int main (int argc, char *argv[])
       /* Recall: pi, pj describe position in the processor grid */
       if (pi == 0)
       {
-         int nvalues  = nentries*ny; /*  number of stencil entries times the length
+         int nvalues  = nentries * ny; /*  number of stencil entries times the length
                                          of one side of my grid box */
 
          HYPRE_Real* values = (HYPRE_Real*) calloc(nvalues, sizeof(HYPRE_Real));
          for (j = 0; j < nvalues; j++)
+         {
             values[j] = 0.0;
+         }
 
          /* Bottom plane of grid points */
-         bc_ilower[0] = pi*nx;
-         bc_ilower[1] = pj*ny;
+         bc_ilower[0] = pi * nx;
+         bc_ilower[1] = pj * ny;
 
          bc_iupper[0] = bc_ilower[0];
-         bc_iupper[1] = bc_ilower[1] + ny-1;
+         bc_iupper[1] = bc_ilower[1] + ny - 1;
 
          stencil_indices[0] = 1;
 
@@ -703,21 +743,23 @@ int main (int argc, char *argv[])
          free(values);
       }
 
-      if (pi == Nx-1)
+      if (pi == Nx - 1)
       {
-         int nvalues  = nentries*ny; /*  number of stencil entries times the length
+         int nvalues  = nentries * ny; /*  number of stencil entries times the length
                                          of one side of my grid box */
 
          HYPRE_Real* values = (HYPRE_Real*) calloc(nvalues, sizeof(HYPRE_Real));
          for (j = 0; j < nvalues; j++)
+         {
             values[j] = 0.0;
+         }
 
          /* upper plane of grid points */
-         bc_ilower[0] = pi*nx + nx-1;
-         bc_ilower[1] = pj*ny;
+         bc_ilower[0] = pi * nx + nx - 1;
+         bc_ilower[1] = pj * ny;
 
          bc_iupper[0] = bc_ilower[0];
-         bc_iupper[1] = bc_ilower[1] + ny-1;
+         bc_iupper[1] = bc_ilower[1] + ny - 1;
 
          stencil_indices[0] = 3;
 
@@ -748,7 +790,7 @@ int main (int argc, char *argv[])
 
    /* 5. Set up SStruct Vectors for b and x */
    {
-      int    nvalues = nx*ny;
+      int    nvalues = nx * ny;
       HYPRE_Real *values;
       int part = 0;
       int var;
@@ -771,39 +813,45 @@ int main (int argc, char *argv[])
       /* Set the values for b */
       /* project out kernel for a consistent rhs (for 4th-order problem) */
       /* This is hardcoded to use semicoarsening in y */
-      HYPRE_Real gamma = (double)1./ny;
+      HYPRE_Real gamma = (double)1. / ny;
       HYPRE_Real *pvalues = (HYPRE_Real*) calloc(nvalues, sizeof(HYPRE_Real));
       for (i = 0; i < nvalues; i ++)
-         values[i] = 1.0;//(double)rand() / (double)RAND_MAX; //1.0;
-      memcpy(pvalues, values, nvalues*sizeof(HYPRE_Real));
-      for (HYPRE_Int j = 0; j<ny; j++)
       {
-         for (i = 0; i<nx; i++)
+         values[i] = 1.0;   //(double)rand() / (double)RAND_MAX; //1.0;
+      }
+      memcpy(pvalues, values, nvalues * sizeof(HYPRE_Real));
+      for (HYPRE_Int j = 0; j < ny; j++)
+      {
+         for (i = 0; i < nx; i++)
          {
-            HYPRE_Int idx = i + j*nx;
-            for (HYPRE_Int k = 0; k<ny; k++)
+            HYPRE_Int idx = i + j * nx;
+            for (HYPRE_Int k = 0; k < ny; k++)
             {
                HYPRE_Int pos = idx + k * semicoarsening_offset;
-               HYPRE_Real val = pos >= nvalues ? pvalues[pos%nvalues] : pvalues[pos];
+               HYPRE_Real val = pos >= nvalues ? pvalues[pos % nvalues] : pvalues[pos];
                values[idx] -= gamma * val;
             }
          }
       }
       free(pvalues);
-      for(i=0; i<nvalues; i++)
+      for (i = 0; i < nvalues; i++)
+      {
          printf("values[%d] = %f, gamma = %f \n", i, values[i], gamma);
+      }
 
       var = 0;
       HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper, var, values);
 
       for (i = 0; i < nvalues; i ++)
+      {
          values[i] = 0.0;
+      }
       var = 1;
       HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper, var, values);
 
       /* Set the values for the initial guess */
-//      for (i = 0; i < nvalues; i ++)
-//         values[i] = (double)rand() / (double)RAND_MAX;
+      //      for (i = 0; i < nvalues; i ++)
+      //         values[i] = (double)rand() / (double)RAND_MAX;
       var = 0;
       HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
 
@@ -853,20 +901,24 @@ int main (int argc, char *argv[])
 
          HYPRE_ILUSetType(par_solver, ILU_type);
 
-         if (ILU_fill_level >= 0) {
+         if (ILU_fill_level >= 0)
+         {
             HYPRE_ILUSetLevelOfFill(par_solver, ILU_fill_level);
          }
 
-         if (ILU_drop_threshold >= 0.) {
+         if (ILU_drop_threshold >= 0.)
+         {
             HYPRE_ILUSetDropThreshold(par_solver, ILU_drop_threshold);
          }
 
-         if (ILU_B_drop_threshold >=0. &&
+         if (ILU_B_drop_threshold >= 0. &&
              ILU_EF_drop_threshold >= 0. &&
-             ILU_Schur_drop_threshold >= 0. ) {
+             ILU_Schur_drop_threshold >= 0. )
+         {
             double ILU_drop_threshold_array[3] = {ILU_B_drop_threshold,
                                                   ILU_EF_drop_threshold,
-                                                  ILU_Schur_drop_threshold};
+                                                  ILU_Schur_drop_threshold
+                                                 };
             HYPRE_ILUSetDropThresholdArray(par_solver, ILU_drop_threshold_array);
          }
 
@@ -899,7 +951,7 @@ int main (int argc, char *argv[])
          HYPRE_BoomerAMGSetPrintLevel(par_solver, 3);
          HYPRE_BoomerAMGSetPrintFileName(par_solver, "polcor.out.log");
          HYPRE_BoomerAMGSetMaxIter(par_solver, max_iter);
- //        HYPRE_BoomerAMGSetUseAuxStrengthMatrix(par_solver, 1);
+         //        HYPRE_BoomerAMGSetUseAuxStrengthMatrix(par_solver, 1);
          /* do the setup */
          HYPRE_BoomerAMGSetup(par_solver, par_A, par_b, par_x);
 
@@ -918,17 +970,19 @@ int main (int argc, char *argv[])
          HYPRE_MGRCreate(&par_solver);
 
          mgr_num_cindexes = hypre_CTAlloc(HYPRE_Int,  mgr_nlevels, HYPRE_MEMORY_HOST);
-         for(i=0; i<mgr_nlevels; i++)
-         { /* assume 1 coarse index per level */
+         for (i = 0; i < mgr_nlevels; i++)
+         {
+            /* assume 1 coarse index per level */
             mgr_num_cindexes[i] = 1;
          }
          mgr_cindexes = hypre_CTAlloc(HYPRE_Int*,  mgr_nlevels, HYPRE_MEMORY_HOST);
-         for(i=0; i<mgr_nlevels; i++)
+         for (i = 0; i < mgr_nlevels; i++)
          {
             mgr_cindexes[i] = hypre_CTAlloc(HYPRE_Int,  mgr_num_cindexes[i], HYPRE_MEMORY_HOST);
          }
-         for(i=0; i<mgr_nlevels; i++)
-         { /* assume coarse point is at index 0 */
+         for (i = 0; i < mgr_nlevels; i++)
+         {
+            /* assume coarse point is at index 0 */
             mgr_cindexes[i][0] = mgr_cpoint;
          }
 
@@ -937,197 +991,209 @@ int main (int argc, char *argv[])
          {
             HYPRE_BigInt rowstart = hypre_ParCSRMatrixFirstRowIndex(par_A);
             HYPRE_BigInt rowend = hypre_ParCSRMatrixLastRowIndex(par_A);
-            HYPRE_Int fsize = (rowend - rowstart + 1)/2 ;
+            HYPRE_Int fsize = (rowend - rowstart + 1) / 2 ;
             HYPRE_BigInt next_block = rowstart + fsize;
             //        hypre_printf("%d: row_start = %d, next_block = %d, diff = %d \n",myid, rowstart, next_block,(rowend - rowstart + 1) );
 
-            HYPRE_BigInt idx_array[2] = {rowstart,next_block};
-            HYPRE_MGRSetCpointsByContiguousBlock( par_solver, mgr_bsize, mgr_nlevels, idx_array, mgr_num_cindexes,mgr_cindexes);
+            HYPRE_BigInt idx_array[2] = {rowstart, next_block};
+            HYPRE_MGRSetCpointsByContiguousBlock( par_solver, mgr_bsize, mgr_nlevels, idx_array,
+                                                  mgr_num_cindexes, mgr_cindexes);
          }
 #else
          {
             int var, n;
-            HYPRE_Int* CF_index = (HYPRE_Int*) calloc(nx*ny*2, sizeof(HYPRE_Int));
+            HYPRE_Int* CF_index = (HYPRE_Int*) calloc(nx * ny * 2, sizeof(HYPRE_Int));
             HYPRE_Int* ptr = CF_index;
-            for (var=0; var<2; ++var) {
-               for (n=0; n<nx*ny; ++n) *ptr++ = var;
+            for (var = 0; var < 2; ++var)
+            {
+               for (n = 0; n < nx * ny; ++n) { *ptr++ = var; }
             }
-            HYPRE_MGRSetCpointsByPointMarkerArray(par_solver, mgr_bsize, mgr_nlevels, mgr_num_cindexes,mgr_cindexes, CF_index);
+            HYPRE_MGRSetCpointsByPointMarkerArray(par_solver, mgr_bsize, mgr_nlevels, mgr_num_cindexes,
+                                                  mgr_cindexes, CF_index);
          }
 #endif
 
          //         HYPRE_MGRSetBlockJacobiBlockSize(par_solver, 3);
-         
-        /* set intermediate coarse grid strategy */
-        HYPRE_MGRSetNonCpointsToFpoints(par_solver, mgr_non_c_to_f);
-        /* set F relaxation strategy */
-        HYPRE_MGRSetFRelaxMethod(par_solver, mgr_frelax_method);
-        /* set relax type for single level F-relaxation and post-relaxation */
-        HYPRE_MGRSetRelaxType(par_solver, mgr_relax_type);
-        HYPRE_MGRSetNumRelaxSweeps(par_solver, mgr_num_relax_sweeps);
-        /* set interpolation type */
-        HYPRE_MGRSetRestrictType(par_solver, mgr_restrict_type);
-        HYPRE_MGRSetNumRestrictSweeps(par_solver, mgr_num_restrict_sweeps);
-        HYPRE_MGRSetInterpType(par_solver, mgr_interp_type);
-        HYPRE_MGRSetNumInterpSweeps(par_solver, mgr_num_interp_sweeps);
-        /* set print level */
-        HYPRE_MGRSetPrintLevel(par_solver, print_level);
-        /* set max iterations */
-        HYPRE_MGRSetMaxIter(par_solver, max_iter);
-        HYPRE_MGRSetTol(par_solver, tol);
 
-        HYPRE_MGRSetGlobalSmoothType(par_solver, mgr_gsmooth_type);
-        HYPRE_MGRSetMaxGlobalSmoothIters( par_solver, mgr_num_gsmooth_sweeps );
-        
-        HYPRE_MGRSetCoarseGridMethod(par_solver, &mgr_use_non_galerkin);
-        HYPRE_MGRSetPMaxElmts(par_solver, mgr_pmax);  // no truncation        
-        //HYPRE_Int num_functions = 1;
-        //HYPRE_MGRSetLevelFRelaxNumFunctions(par_solver, &num_functions);
+         /* set intermediate coarse grid strategy */
+         HYPRE_MGRSetNonCpointsToFpoints(par_solver, mgr_non_c_to_f);
+         /* set F relaxation strategy */
+         HYPRE_MGRSetFRelaxMethod(par_solver, mgr_frelax_method);
+         /* set relax type for single level F-relaxation and post-relaxation */
+         HYPRE_MGRSetRelaxType(par_solver, mgr_relax_type);
+         HYPRE_MGRSetNumRelaxSweeps(par_solver, mgr_num_relax_sweeps);
+         /* set interpolation type */
+         HYPRE_MGRSetRestrictType(par_solver, mgr_restrict_type);
+         HYPRE_MGRSetNumRestrictSweeps(par_solver, mgr_num_restrict_sweeps);
+         HYPRE_MGRSetInterpType(par_solver, mgr_interp_type);
+         HYPRE_MGRSetNumInterpSweeps(par_solver, mgr_num_interp_sweeps);
+         /* set print level */
+         HYPRE_MGRSetPrintLevel(par_solver, print_level);
+         /* set max iterations */
+         HYPRE_MGRSetMaxIter(par_solver, max_iter);
+         HYPRE_MGRSetTol(par_solver, tol);
 
-        /* Create the coarse grid solver */
+         HYPRE_MGRSetGlobalSmoothType(par_solver, mgr_gsmooth_type);
+         HYPRE_MGRSetMaxGlobalSmoothIters( par_solver, mgr_num_gsmooth_sweeps );
 
-        HYPRE_Solver coarse_solver;
-        HYPRE_BoomerAMGCreate(&coarse_solver);
-        HYPRE_BoomerAMGSetCGCIts(coarse_solver, 1);
-        HYPRE_BoomerAMGSetInterpType(coarse_solver, 0);
-        HYPRE_BoomerAMGSetPostInterpType(coarse_solver, 0);
-        HYPRE_BoomerAMGSetCoarsenType(coarse_solver, 6);
-        HYPRE_BoomerAMGSetPMaxElmts(coarse_solver, 0);  // no truncation
-        HYPRE_BoomerAMGSetCycleType(coarse_solver, 1);
-        HYPRE_BoomerAMGSetFCycle(coarse_solver, 0);
-        HYPRE_BoomerAMGSetNumSweeps(coarse_solver, 1);
-        HYPRE_BoomerAMGSetRelaxType(coarse_solver, 3);
-        HYPRE_BoomerAMGSetRelaxOrder(coarse_solver, 1);
-        HYPRE_BoomerAMGSetMaxLevels(coarse_solver, 25);
-        HYPRE_BoomerAMGSetStrongThreshold(coarse_solver, mgr_csolve_threshold);
-        HYPRE_BoomerAMGSetMaxIter(coarse_solver, mgr_csolve_max_iter);
-        HYPRE_BoomerAMGSetTol(coarse_solver, 1.e-12 );
-        HYPRE_BoomerAMGSetPrintLevel(coarse_solver, 3);
-//        HYPRE_BoomerAMGSetUseAuxStrengthMatrix(coarse_solver, strength_method);
-//        HYPRE_BoomerAMGSetMinCoarseSize(coarse_solver, 100);
-//        HYPRE_BoomerAMGSetMaxCoarseSize(coarse_solver, 500);
-        /* set the MGR coarse solver. Comment out to use default Coarse Grid solver in MGR */
-        HYPRE_MGRSetCoarseSolver( par_solver, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, coarse_solver);
+         HYPRE_MGRSetCoarseGridMethod(par_solver, &mgr_use_non_galerkin);
+         HYPRE_MGRSetPMaxElmts(par_solver, mgr_pmax);  // no truncation
+         //HYPRE_Int num_functions = 1;
+         //HYPRE_MGRSetLevelFRelaxNumFunctions(par_solver, &num_functions);
+
+         /* Create the coarse grid solver */
+
+         HYPRE_Solver coarse_solver;
+         HYPRE_BoomerAMGCreate(&coarse_solver);
+         HYPRE_BoomerAMGSetCGCIts(coarse_solver, 1);
+         HYPRE_BoomerAMGSetInterpType(coarse_solver, 0);
+         HYPRE_BoomerAMGSetPostInterpType(coarse_solver, 0);
+         HYPRE_BoomerAMGSetCoarsenType(coarse_solver, 6);
+         HYPRE_BoomerAMGSetPMaxElmts(coarse_solver, 0);  // no truncation
+         HYPRE_BoomerAMGSetCycleType(coarse_solver, 1);
+         HYPRE_BoomerAMGSetFCycle(coarse_solver, 0);
+         HYPRE_BoomerAMGSetNumSweeps(coarse_solver, 1);
+         HYPRE_BoomerAMGSetRelaxType(coarse_solver, 3);
+         HYPRE_BoomerAMGSetRelaxOrder(coarse_solver, 1);
+         HYPRE_BoomerAMGSetMaxLevels(coarse_solver, 25);
+         HYPRE_BoomerAMGSetStrongThreshold(coarse_solver, mgr_csolve_threshold);
+         HYPRE_BoomerAMGSetMaxIter(coarse_solver, mgr_csolve_max_iter);
+         HYPRE_BoomerAMGSetTol(coarse_solver, 1.e-12 );
+         HYPRE_BoomerAMGSetPrintLevel(coarse_solver, 3);
+         //        HYPRE_BoomerAMGSetUseAuxStrengthMatrix(coarse_solver, strength_method);
+         //        HYPRE_BoomerAMGSetMinCoarseSize(coarse_solver, 100);
+         //        HYPRE_BoomerAMGSetMaxCoarseSize(coarse_solver, 500);
+         /* set the MGR coarse solver. Comment out to use default Coarse Grid solver in MGR */
+         HYPRE_MGRSetCoarseSolver( par_solver, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, coarse_solver);
 
          hypre_MGRSetFrelaxPrintLevel(par_solver, 3);
 
-        /* setup MGR solver */
-        HYPRE_MGRSetup(par_solver, par_A, par_b, par_x);
-        
-        if(print_cgrid)
-        {
-           HYPRE_Int* cgrid = (HYPRE_Int*) calloc(nx*ny, sizeof(HYPRE_Int));
-           HYPRE_BoomerAMGGetGridHierarchy (coarse_solver, cgrid);
+         /* setup MGR solver */
+         HYPRE_MGRSetup(par_solver, par_A, par_b, par_x);
 
-           FILE* fd = fopen ("cgrid", "w");
+         if (print_cgrid)
+         {
+            HYPRE_Int* cgrid = (HYPRE_Int*) calloc(nx * ny, sizeof(HYPRE_Int));
+            HYPRE_BoomerAMGGetGridHierarchy (coarse_solver, cgrid);
 
-           fprintf(fd,"%d %d\n", nx, ny);
-           for (i=0; i<nx*ny; ++i) {
-              fprintf(fd,"%d\n", cgrid[i]);
-           }
+            FILE* fd = fopen ("cgrid", "w");
 
-           fclose(fd);
-           free(cgrid);
-        }
-        /* MGR solve */
-        HYPRE_MGRSolve(par_solver, par_A, par_b, par_x);
-      
-        HYPRE_MGRGetNumIterations(par_solver, &its);
-        HYPRE_MGRGetFinalRelativeResidualNorm(par_solver, &final_res_norm);
+            fprintf(fd, "%d %d\n", nx, ny);
+            for (i = 0; i < nx * ny; ++i)
+            {
+               fprintf(fd, "%d\n", cgrid[i]);
+            }
 
-        /* free memory */
-        if(mgr_num_cindexes)
-           hypre_TFree(mgr_num_cindexes, HYPRE_MEMORY_HOST);
-        mgr_num_cindexes = NULL;
+            fclose(fd);
+            free(cgrid);
+         }
+         /* MGR solve */
+         HYPRE_MGRSolve(par_solver, par_A, par_b, par_x);
 
-        if(mgr_cindexes)
-        {
-           for( i=0; i<mgr_nlevels; i++)
-           {
-              if(mgr_cindexes[i])
-                 hypre_TFree(mgr_cindexes[i], HYPRE_MEMORY_HOST);
-           }
-           hypre_TFree(mgr_cindexes, HYPRE_MEMORY_HOST);
-           mgr_cindexes = NULL;
-        }
+         HYPRE_MGRGetNumIterations(par_solver, &its);
+         HYPRE_MGRGetFinalRelativeResidualNorm(par_solver, &final_res_norm);
 
-        HYPRE_BoomerAMGDestroy(coarse_solver);
-        HYPRE_MGRDestroy(par_solver);
+         /* free memory */
+         if (mgr_num_cindexes)
+         {
+            hypre_TFree(mgr_num_cindexes, HYPRE_MEMORY_HOST);
+         }
+         mgr_num_cindexes = NULL;
+
+         if (mgr_cindexes)
+         {
+            for ( i = 0; i < mgr_nlevels; i++)
+            {
+               if (mgr_cindexes[i])
+               {
+                  hypre_TFree(mgr_cindexes[i], HYPRE_MEMORY_HOST);
+               }
+            }
+            hypre_TFree(mgr_cindexes, HYPRE_MEMORY_HOST);
+            mgr_cindexes = NULL;
+         }
+
+         HYPRE_BoomerAMGDestroy(coarse_solver);
+         HYPRE_MGRDestroy(par_solver);
       }
       else if (solver_id == 3) /* semicoarsening MGR (sMGR) */
       {
- 
+
          HYPRE_MGRCreate(&par_solver);
 
          mgr_num_cindexes = hypre_CTAlloc(HYPRE_Int,  mgr_nlevels, HYPRE_MEMORY_HOST);
-         for(i=0; i<mgr_nlevels; i++)
-         { /* assume 1 coarse index per level */
+         for (i = 0; i < mgr_nlevels; i++)
+         {
+            /* assume 1 coarse index per level */
             mgr_num_cindexes[i] = 1;
          }
          mgr_cindexes = hypre_CTAlloc(HYPRE_Int*,  mgr_nlevels, HYPRE_MEMORY_HOST);
-         for(i=0; i<mgr_nlevels; i++)
+         for (i = 0; i < mgr_nlevels; i++)
          {
             mgr_cindexes[i] = hypre_CTAlloc(HYPRE_Int,  mgr_num_cindexes[i], HYPRE_MEMORY_HOST);
          }
-         for(i=0; i<mgr_nlevels; i++)
-         { /* assume coarse point is at index 0 */
+         for (i = 0; i < mgr_nlevels; i++)
+         {
+            /* assume coarse point is at index 0 */
             mgr_cindexes[i][0] = mgr_cpoint;
          }
 
          /* set MGR data by marker array */
          int var, n;
-         HYPRE_Int* CF_index = (HYPRE_Int*) calloc(nx*ny*2, sizeof(HYPRE_Int));
+         HYPRE_Int* CF_index = (HYPRE_Int*) calloc(nx * ny * 2, sizeof(HYPRE_Int));
          HYPRE_Int* ptr = CF_index;
-         for (var=0; var<2; ++var) {
-            for (n=0; n<nx*ny; ++n) *ptr++ = var;
+         for (var = 0; var < 2; ++var)
+         {
+            for (n = 0; n < nx * ny; ++n) { *ptr++ = var; }
          }
-         HYPRE_MGRSetCpointsByPointMarkerArray(par_solver, mgr_bsize, mgr_nlevels, mgr_num_cindexes,mgr_cindexes, CF_index);
-         
-        /* set intermediate coarse grid strategy */
-        HYPRE_MGRSetNonCpointsToFpoints(par_solver, mgr_non_c_to_f);
-        /* set F relaxation strategy */
-        HYPRE_MGRSetFRelaxMethod(par_solver, 0);
-        /* set relax type for single level F-relaxation and post-relaxation */
-        HYPRE_MGRSetRelaxType(par_solver, 0);
-        HYPRE_MGRSetNumRelaxSweeps(par_solver, 1);
-        /* set interpolation type */
-        HYPRE_MGRSetRestrictType(par_solver, 0);
-        HYPRE_MGRSetInterpType(par_solver, 4);
-        HYPRE_MGRSetNumInterpSweeps(par_solver, mgr_num_interp_sweeps);
-        /* set print level */
-        HYPRE_MGRSetPrintLevel(par_solver, print_level);
-        /* set max iterations */
-        HYPRE_MGRSetMaxIter(par_solver, 1);
-        HYPRE_MGRSetTol(par_solver, 0.);
-        
-        hypre_MGRPrintCoarseSystem(par_solver, 1);
+         HYPRE_MGRSetCpointsByPointMarkerArray(par_solver, mgr_bsize, mgr_nlevels, mgr_num_cindexes,
+                                               mgr_cindexes, CF_index);
+
+         /* set intermediate coarse grid strategy */
+         HYPRE_MGRSetNonCpointsToFpoints(par_solver, mgr_non_c_to_f);
+         /* set F relaxation strategy */
+         HYPRE_MGRSetFRelaxMethod(par_solver, 0);
+         /* set relax type for single level F-relaxation and post-relaxation */
+         HYPRE_MGRSetRelaxType(par_solver, 0);
+         HYPRE_MGRSetNumRelaxSweeps(par_solver, 1);
+         /* set interpolation type */
+         HYPRE_MGRSetRestrictType(par_solver, 0);
+         HYPRE_MGRSetInterpType(par_solver, 4);
+         HYPRE_MGRSetNumInterpSweeps(par_solver, mgr_num_interp_sweeps);
+         /* set print level */
+         HYPRE_MGRSetPrintLevel(par_solver, print_level);
+         /* set max iterations */
+         HYPRE_MGRSetMaxIter(par_solver, 1);
+         HYPRE_MGRSetTol(par_solver, 0.);
+
+         hypre_MGRPrintCoarseSystem(par_solver, 1);
 
 
-        /* Create the inner MGR coarse grid solver */
-        HYPRE_Solver mgr_coarse_solver;
-        HYPRE_MGRCreate(&mgr_coarse_solver);
-        HYPRE_MGRSetPrintLevel(mgr_coarse_solver, print_level);
-        hypre_MGRSetFrelaxPrintLevel(mgr_coarse_solver, 3);
+         /* Create the inner MGR coarse grid solver */
+         HYPRE_Solver mgr_coarse_solver;
+         HYPRE_MGRCreate(&mgr_coarse_solver);
+         HYPRE_MGRSetPrintLevel(mgr_coarse_solver, print_level);
+         hypre_MGRSetFrelaxPrintLevel(mgr_coarse_solver, 3);
 #if 1
-        /* set coarsening data for inner mgr solver */
-        {
+         /* set coarsening data for inner mgr solver */
+         {
             HYPRE_Int smgr_nblocks = semicoarsening_dir == 0 ? nx : ny;
             HYPRE_Int smgr_nlevels = ceil(log2(smgr_nblocks));
-            printf("smgr_nblocks = %d, smgr_nlevels = %d \n",smgr_nblocks, smgr_nlevels);
+            printf("smgr_nblocks = %d, smgr_nlevels = %d \n", smgr_nblocks, smgr_nlevels);
 
             /* Assume C-labels come first. So C F C F C F C ... */
             HYPRE_Int *lvl_num_cpts = (int*)calloc(smgr_nlevels, sizeof(int));
-            HYPRE_Int **lvl_cpts = (int**)malloc(smgr_nlevels*sizeof(int*));
+            HYPRE_Int **lvl_cpts = (int**)malloc(smgr_nlevels * sizeof(int*));
             HYPRE_Int num_c_pts = smgr_nblocks;
             HYPRE_Int skip = 1;
-            for (i=0; i<smgr_nlevels; i++)
+            for (i = 0; i < smgr_nlevels; i++)
             {
-               num_c_pts = (num_c_pts+1) / 2; // ensure we have ceiling of num_c_pts / 2
+               num_c_pts = (num_c_pts + 1) / 2; // ensure we have ceiling of num_c_pts / 2
                lvl_cpts[i] = (int*)calloc(num_c_pts, sizeof(int));
                lvl_num_cpts[i] = num_c_pts;
-               printf("lvl_num_cpts[%d] = %d \n",i, num_c_pts);
+               printf("lvl_num_cpts[%d] = %d \n", i, num_c_pts);
                skip *= 2;
-               int jc=0;
+               int jc = 0;
                int counter = 0;
                /* populate coarse point labels for each level */
                while (counter < smgr_nblocks)
@@ -1138,15 +1204,15 @@ int main (int argc, char *argv[])
                }
             }
             /* now generate marker labels for domain points */
-            HYPRE_Int* smgr_CF_index = (HYPRE_Int*) calloc(nx*ny, sizeof(HYPRE_Int));
+            HYPRE_Int* smgr_CF_index = (HYPRE_Int*) calloc(nx * ny, sizeof(HYPRE_Int));
             ptr = smgr_CF_index;
             HYPRE_Int ctr = 0;
-            for (j=0; j<ny; j++)
+            for (j = 0; j < ny; j++)
             {
-               for (i=0; i<nx; i++)
+               for (i = 0; i < nx; i++)
                {
                   *ptr++ = semicoarsening_dir == 0 ? i : j;
-               //   printf("smgr_CF_index[%d] = %d \n", i+j*nx, smgr_CF_index[ctr++]);
+                  //   printf("smgr_CF_index[%d] = %d \n", i+j*nx, smgr_CF_index[ctr++]);
                }
             }
 
@@ -1162,9 +1228,10 @@ int main (int argc, char *argv[])
             }
             */
 
-            /* set inner MGR options */   
-            HYPRE_MGRSetCpointsByPointMarkerArray(mgr_coarse_solver, smgr_nblocks, smgr_nlevels, lvl_num_cpts, lvl_cpts, smgr_CF_index);
-            
+            /* set inner MGR options */
+            HYPRE_MGRSetCpointsByPointMarkerArray(mgr_coarse_solver, smgr_nblocks, smgr_nlevels, lvl_num_cpts,
+                                                  lvl_cpts, smgr_CF_index);
+
             /* set intermediate coarse grid strategy */
             HYPRE_MGRSetNonCpointsToFpoints(mgr_coarse_solver, mgr_non_c_to_f);
             /* set F relaxation strategy */
@@ -1176,14 +1243,15 @@ int main (int argc, char *argv[])
             HYPRE_MGRSetRestrictType(mgr_coarse_solver, mgr_restrict_type);
             /* set interpolation type */
             HYPRE_Int *mgr_level_interp_type = (int*)calloc(smgr_nlevels, sizeof(int));
-            for(i=0; i<smgr_nlevels; i++)
+            for (i = 0; i < smgr_nlevels; i++)
             {
                mgr_level_interp_type[i] = 8;
             }
             HYPRE_MGRSetLevelInterpType(mgr_coarse_solver, mgr_level_interp_type);
             //HYPRE_MGRSetInterpType(mgr_coarse_solver, mgr_interp_type);
 
-            HYPRE_MGRSetTwoPointInterpOffsets(mgr_coarse_solver, (-semicoarsening_offset), semicoarsening_offset);
+            HYPRE_MGRSetTwoPointInterpOffsets(mgr_coarse_solver, (-semicoarsening_offset),
+                                              semicoarsening_offset);
 
             /* set print level */
             HYPRE_MGRSetPrintLevel(mgr_coarse_solver, print_level);
@@ -1195,86 +1263,92 @@ int main (int argc, char *argv[])
             hypre_ParVectorPrintIJ(par_b, 1, "IJ.rhs");
             hypre_ParVectorPrintIJ(par_x, 1, "IJ.sol");
             hypre_MGRPrintCoarseSystem(mgr_coarse_solver, 1);
-        
+
             /* Free memory */
-            if(lvl_num_cpts) free(lvl_num_cpts);
-            if(lvl_cpts) free(lvl_cpts);
-            if(mgr_level_interp_type) free(mgr_level_interp_type);
+            if (lvl_num_cpts) { free(lvl_num_cpts); }
+            if (lvl_cpts) { free(lvl_cpts); }
+            if (mgr_level_interp_type) { free(mgr_level_interp_type); }
          }
 #endif
-        /* Create the coarse grid solver (for inner MGR solver)*/
-        HYPRE_Solver coarse_solver;
-        HYPRE_BoomerAMGCreate(&coarse_solver);
-        HYPRE_BoomerAMGSetCGCIts(coarse_solver, 1);
-        HYPRE_BoomerAMGSetInterpType(coarse_solver, 0);
-        HYPRE_BoomerAMGSetPostInterpType(coarse_solver, 0);
-        HYPRE_BoomerAMGSetCoarsenType(coarse_solver, 6);
-        HYPRE_BoomerAMGSetPMaxElmts(coarse_solver, 0);  // no truncation
-        HYPRE_BoomerAMGSetCycleType(coarse_solver, 1);
-        HYPRE_BoomerAMGSetFCycle(coarse_solver, 0);
-        HYPRE_BoomerAMGSetNumSweeps(coarse_solver, 1);
-        HYPRE_BoomerAMGSetRelaxType(coarse_solver, 3);
-        HYPRE_BoomerAMGSetRelaxOrder(coarse_solver, 1);
-        HYPRE_BoomerAMGSetMaxLevels(coarse_solver, 25);
-        HYPRE_BoomerAMGSetStrongThreshold(coarse_solver, mgr_csolve_threshold);
-        HYPRE_BoomerAMGSetMaxIter(coarse_solver, mgr_csolve_max_iter);
-        HYPRE_BoomerAMGSetTol(coarse_solver, 0.);
-        HYPRE_BoomerAMGSetPrintLevel(coarse_solver, 3);
-//        HYPRE_BoomerAMGSetUseAuxStrengthMatrix(coarse_solver, strength_method);
-//        HYPRE_BoomerAMGSetMinCoarseSize(coarse_solver, 100);
-//        HYPRE_BoomerAMGSetMaxCoarseSize(coarse_solver, 500);
-        /* set the inner MGR coarse solver. Comment out to use default Coarse Grid solver in MGR */
-        HYPRE_MGRSetCoarseSolver( mgr_coarse_solver, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, coarse_solver);
+         /* Create the coarse grid solver (for inner MGR solver)*/
+         HYPRE_Solver coarse_solver;
+         HYPRE_BoomerAMGCreate(&coarse_solver);
+         HYPRE_BoomerAMGSetCGCIts(coarse_solver, 1);
+         HYPRE_BoomerAMGSetInterpType(coarse_solver, 0);
+         HYPRE_BoomerAMGSetPostInterpType(coarse_solver, 0);
+         HYPRE_BoomerAMGSetCoarsenType(coarse_solver, 6);
+         HYPRE_BoomerAMGSetPMaxElmts(coarse_solver, 0);  // no truncation
+         HYPRE_BoomerAMGSetCycleType(coarse_solver, 1);
+         HYPRE_BoomerAMGSetFCycle(coarse_solver, 0);
+         HYPRE_BoomerAMGSetNumSweeps(coarse_solver, 1);
+         HYPRE_BoomerAMGSetRelaxType(coarse_solver, 3);
+         HYPRE_BoomerAMGSetRelaxOrder(coarse_solver, 1);
+         HYPRE_BoomerAMGSetMaxLevels(coarse_solver, 25);
+         HYPRE_BoomerAMGSetStrongThreshold(coarse_solver, mgr_csolve_threshold);
+         HYPRE_BoomerAMGSetMaxIter(coarse_solver, mgr_csolve_max_iter);
+         HYPRE_BoomerAMGSetTol(coarse_solver, 0.);
+         HYPRE_BoomerAMGSetPrintLevel(coarse_solver, 3);
+         //        HYPRE_BoomerAMGSetUseAuxStrengthMatrix(coarse_solver, strength_method);
+         //        HYPRE_BoomerAMGSetMinCoarseSize(coarse_solver, 100);
+         //        HYPRE_BoomerAMGSetMaxCoarseSize(coarse_solver, 500);
+         /* set the inner MGR coarse solver. Comment out to use default Coarse Grid solver in MGR */
+         HYPRE_MGRSetCoarseSolver( mgr_coarse_solver, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup,
+                                   coarse_solver);
 
-        /* set the outer MGR coarse solver. Comment out to use default Coarse Grid solver in MGR */
-        HYPRE_MGRSetCoarseSolver( par_solver, HYPRE_MGRSolve, HYPRE_MGRSetup, mgr_coarse_solver);
-        /* setup MGR solver */
-        HYPRE_MGRSetup(par_solver, par_A, par_b, par_x);
-        
-        if(print_cgrid)
-        {
-           HYPRE_Int* cgrid = (HYPRE_Int*) calloc(nx*ny, sizeof(HYPRE_Int));
-           HYPRE_MGRGetGridHierarchy (mgr_coarse_solver, cgrid);
+         /* set the outer MGR coarse solver. Comment out to use default Coarse Grid solver in MGR */
+         HYPRE_MGRSetCoarseSolver( par_solver, HYPRE_MGRSolve, HYPRE_MGRSetup, mgr_coarse_solver);
+         /* setup MGR solver */
+         HYPRE_MGRSetup(par_solver, par_A, par_b, par_x);
 
-           FILE* fd = fopen ("mgrcgrid", "w");
+         if (print_cgrid)
+         {
+            HYPRE_Int* cgrid = (HYPRE_Int*) calloc(nx * ny, sizeof(HYPRE_Int));
+            HYPRE_MGRGetGridHierarchy (mgr_coarse_solver, cgrid);
 
-           fprintf(fd,"%d %d\n", nx, ny);
-           for (i=0; i<nx*ny; ++i) {
-              fprintf(fd,"%d\n", cgrid[i]);
-           }
+            FILE* fd = fopen ("mgrcgrid", "w");
 
-           fclose(fd);
-           free(cgrid);
-        }
-        /* MGR solve */
-        HYPRE_MGRSolve(par_solver, par_A, par_b, par_x);
-      
-        HYPRE_MGRGetNumIterations(par_solver, &its);
-        HYPRE_MGRGetFinalRelativeResidualNorm(par_solver, &final_res_norm);
+            fprintf(fd, "%d %d\n", nx, ny);
+            for (i = 0; i < nx * ny; ++i)
+            {
+               fprintf(fd, "%d\n", cgrid[i]);
+            }
 
-        /* free memory */
-        if(mgr_num_cindexes)
-           hypre_TFree(mgr_num_cindexes, HYPRE_MEMORY_HOST);
-        mgr_num_cindexes = NULL;
+            fclose(fd);
+            free(cgrid);
+         }
+         /* MGR solve */
+         HYPRE_MGRSolve(par_solver, par_A, par_b, par_x);
 
-        if(mgr_cindexes)
-        {
-           for( i=0; i<mgr_nlevels; i++)
-           {
-              if(mgr_cindexes[i])
-                 hypre_TFree(mgr_cindexes[i], HYPRE_MEMORY_HOST);
-           }
-           hypre_TFree(mgr_cindexes, HYPRE_MEMORY_HOST);
-           mgr_cindexes = NULL;
-        }
-        
-        HYPRE_BoomerAMGDestroy(coarse_solver);
-        HYPRE_MGRDestroy(mgr_coarse_solver);        
-        HYPRE_MGRDestroy(par_solver);        
-      }      
+         HYPRE_MGRGetNumIterations(par_solver, &its);
+         HYPRE_MGRGetFinalRelativeResidualNorm(par_solver, &final_res_norm);
+
+         /* free memory */
+         if (mgr_num_cindexes)
+         {
+            hypre_TFree(mgr_num_cindexes, HYPRE_MEMORY_HOST);
+         }
+         mgr_num_cindexes = NULL;
+
+         if (mgr_cindexes)
+         {
+            for ( i = 0; i < mgr_nlevels; i++)
+            {
+               if (mgr_cindexes[i])
+               {
+                  hypre_TFree(mgr_cindexes[i], HYPRE_MEMORY_HOST);
+               }
+            }
+            hypre_TFree(mgr_cindexes, HYPRE_MEMORY_HOST);
+            mgr_cindexes = NULL;
+         }
+
+         HYPRE_BoomerAMGDestroy(coarse_solver);
+         HYPRE_MGRDestroy(mgr_coarse_solver);
+         HYPRE_MGRDestroy(par_solver);
+      }
       else
       {
-         if (myid ==0) printf("\n ERROR: Invalid solver id specified.\n");
+         if (myid == 0) { printf("\n ERROR: Invalid solver id specified.\n"); }
       }
 
       if (myid == 0)
@@ -1288,26 +1362,29 @@ int main (int argc, char *argv[])
 
 #if 0
    /* Write out the solution */
-   if ( num_procs == 1 ) {
+   if ( num_procs == 1 )
+   {
       int i, j, m;
-      double* x_data = (HYPRE_Real*) calloc(nx*ny, sizeof(HYPRE_Real));
+      double* x_data = (HYPRE_Real*) calloc(nx * ny, sizeof(HYPRE_Real));
 
       HYPRE_SStructVectorGather(x);
 
       HYPRE_SStructVectorGetBoxValues(x, 0, ilower, iupper, 0, x_data);
 
-      FILE* fd = fopen ("y", "w"); 
-      
+      FILE* fd = fopen ("y", "w");
+
       m = 0;
-      for (j=0; j<ny; ++j) {
-         for (i=0; i<nx; ++i) {
-            fprintf(fd,"%20.12e ", x_data[m++]);
+      for (j = 0; j < ny; ++j)
+      {
+         for (i = 0; i < nx; ++i)
+         {
+            fprintf(fd, "%20.12e ", x_data[m++]);
          }
-         fprintf(fd,"\n");
+         fprintf(fd, "\n");
       }
 
       fclose(fd);
-      
+
       free(x_data);
    }
 #endif

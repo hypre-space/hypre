@@ -1479,7 +1479,7 @@ HYPRE_Int HYPRE_BoomerAMGSetIsolatedFPoints(HYPRE_Solver  solver,
  **/
 HYPRE_Int
 HYPRE_BoomerAMGSetUseAuxStrengthMatrix(HYPRE_Solver   solver,
-                                  HYPRE_Int      use_aux_strength_mat);
+                                       HYPRE_Int      use_aux_strength_mat);
 
 /**
  * (Optional) if Sabs equals 1, the strength of connection test is based

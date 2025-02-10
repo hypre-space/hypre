@@ -2247,10 +2247,10 @@ HYPRE_BoomerAMGSetIsolatedFPoints(HYPRE_Solver   solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGSetUseAuxStrengthMatrix(HYPRE_Solver   solver,
-                                  HYPRE_Int      use_aux_strength_mat)
+                                       HYPRE_Int      use_aux_strength_mat)
 {
    return (hypre_BoomerAMGSetUseAuxStrengthMatrix( (void *) solver,
-                                      use_aux_strength_mat) );
+                                                   use_aux_strength_mat) );
 }
 
 /*--------------------------------------------------------------------------

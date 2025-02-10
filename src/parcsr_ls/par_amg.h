@@ -291,7 +291,7 @@ typedef struct
    HYPRE_Int dslu_threshold;
    HYPRE_Solver dslu_solver;
 #endif
-   
+
    /* use auxilliary strength matrix */
    HYPRE_Int use_aux_strength_matrix;
 
