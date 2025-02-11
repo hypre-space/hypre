@@ -1966,7 +1966,7 @@ hypre_NeedMPICopyBuffer(hypre_MemoryLocation memory_location)
       so we always has a host buffer for MPI.
       O.w. make sure return Z E R O!
     */
-   return 1;
+   return 0;
 #endif
 }
 

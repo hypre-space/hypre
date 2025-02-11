@@ -49,18 +49,34 @@ hypre_ParCSRCommHandleAllocateBuffers( HYPRE_MemoryLocation    send_memory_locat
    hypre_MemoryLocation send_memory_alocation = hypre_GetActualMemLocation(send_memory_location);
    hypre_MemoryLocation recv_memory_alocation = hypre_GetActualMemLocation(recv_memory_location);
 
-   if (!hypre_ParCSRCommHandleSendBuffer(comm_handle) && hypre_MPINeedHostBuffer(send_memory_alocation))
+   if (hypre_NeedMPICopyBuffer(send_memory_alocation))
    {
-      hypre_MemoryLocation location = hypre_HandleMPIHostBufferLocation(hypre_handle());
-      hypre_ParCSRCommHandleSendBufferLocation(comm_handle) = location;
-      hypre_ParCSRCommHandleSendBuffer(comm_handle) = _hypre_TAlloc(char, num_send_elems * size_of_elem, location);
+      if (!hypre_ParCSRCommHandleSendBuffer(comm_handle))
+      {
+         hypre_MemoryLocation location = hypre_HandleMPICopyBufferLocation(hypre_handle());
+         hypre_ParCSRCommHandleSendBufferLocation(comm_handle) = location;
+         hypre_ParCSRCommHandleSendBuffer(comm_handle) = _hypre_TAlloc(char, num_send_elems * size_of_elem,
+                                                                       location);
+      }
+      else
+      {
+         hypre_printf("[%s, %d] ParCSRCommHandleSendBuffer existed!\n", __FILE__, __LINE__);
+      }
    }
 
-   if (!hypre_ParCSRCommHandleRecvBuffer(comm_handle) && hypre_MPINeedHostBuffer(recv_memory_alocation))
+   if (hypre_NeedMPICopyBuffer(recv_memory_alocation))
    {
-      hypre_MemoryLocation location = hypre_HandleMPIHostBufferLocation(hypre_handle());
-      hypre_ParCSRCommHandleRecvBufferLocation(comm_handle) = location;
-      hypre_ParCSRCommHandleRecvBuffer(comm_handle) = _hypre_TAlloc(char, num_recv_elems * size_of_elem, location);
+      if (!hypre_ParCSRCommHandleRecvBuffer(comm_handle))
+      {
+         hypre_MemoryLocation location = hypre_HandleMPICopyBufferLocation(hypre_handle());
+         hypre_ParCSRCommHandleRecvBufferLocation(comm_handle) = location;
+         hypre_ParCSRCommHandleRecvBuffer(comm_handle) = _hypre_TAlloc(char, num_recv_elems * size_of_elem,
+                                                                       location);
+      }
+      else
+      {
+         hypre_printf("[%s, %d] ParCSRCommHandleRecvBuffer existed!\n", __FILE__, __LINE__);
+      }
    }
 
    if (hypre_ParCSRCommHandlePersistent(comm_handle))
@@ -76,13 +92,39 @@ hypre_ParCSRCommHandleAllocateBuffers( HYPRE_MemoryLocation    send_memory_locat
       }
    }
 
-   hypre_MPICommSetSendLocation(hypre_ParCSRCommHandleComm(comm_handle), send_memory_alocation);
-   hypre_MPICommSetSendBuffer(hypre_ParCSRCommHandleComm(comm_handle), hypre_ParCSRCommHandleSendBuffer(comm_handle));
-   hypre_MPICommSetSendBufferLocation(hypre_ParCSRCommHandleComm(comm_handle), hypre_ParCSRCommHandleSendBufferLocation(comm_handle));
-
-   hypre_MPICommSetRecvLocation(hypre_ParCSRCommHandleComm(comm_handle), recv_memory_alocation);
-   hypre_MPICommSetRecvBuffer(hypre_ParCSRCommHandleComm(comm_handle), hypre_ParCSRCommHandleRecvBuffer(comm_handle));
-   hypre_MPICommSetRecvBufferLocation(hypre_ParCSRCommHandleComm(comm_handle), hypre_ParCSRCommHandleRecvBufferLocation(comm_handle));
+   MPI_Comm comm = hypre_ParCSRCommHandleComm(comm_handle);
+#if defined(HYPRE_DEBUG)
+   if (hypre_MPICommGetSendLocation(comm) != hypre_MEMORY_UNDEFINED)
+   {
+      hypre_printf("[%s, %d] MPI_Comm SendLocation existed!\n", __FILE__, __LINE__);
+   }
+   if (hypre_MPICommGetRecvLocation(comm) != hypre_MEMORY_UNDEFINED)
+   {
+      hypre_printf("[%s, %d] MPI_Comm RecvLocation existed!\n", __FILE__, __LINE__);
+   }
+   if (hypre_MPICommGetSendBuffer(comm))
+   {
+      hypre_printf("[%s, %d] MPI_Comm SendBuffer existed!\n", __FILE__, __LINE__);
+   }
+   if (hypre_MPICommGetRecvBuffer(comm))
+   {
+      hypre_printf("[%s, %d] MPI_Comm RecvBuffer existed!\n", __FILE__, __LINE__);
+   }
+   if (hypre_MPICommGetSendBufferLocation(comm) != hypre_MEMORY_UNDEFINED)
+   {
+      hypre_printf("[%s, %d] MPI_Comm SendBufferLocation existed!\n", __FILE__, __LINE__);
+   }
+   if (hypre_MPICommGetRecvBufferLocation(comm) != hypre_MEMORY_UNDEFINED)
+   {
+      hypre_printf("[%s, %d] MPI_Comm RecvBufferLocation existed!\n", __FILE__, __LINE__);
+   }
+#endif
+   hypre_MPICommSetSendLocation(comm, send_memory_alocation);
+   hypre_MPICommSetRecvLocation(comm, recv_memory_alocation);
+   hypre_MPICommSetSendBuffer(comm, hypre_ParCSRCommHandleSendBuffer(comm_handle));
+   hypre_MPICommSetRecvBuffer(comm, hypre_ParCSRCommHandleRecvBuffer(comm_handle));
+   hypre_MPICommSetSendBufferLocation(comm, hypre_ParCSRCommHandleSendBufferLocation(comm_handle));
+   hypre_MPICommSetRecvBufferLocation(comm, hypre_ParCSRCommHandleRecvBufferLocation(comm_handle));
 
    return hypre_error_flag;
 }
@@ -141,7 +183,7 @@ hypre_ParCSRPersistentCommHandleStart( hypre_ParCSRCommHandle *comm_handle )
 
    if (pre_send_request)
    {
-      hypre_MPI_Request_get_status(pre_send_request, &flag, MPI_STATUS_IGNORE);
+      hypre_MPI_Request_get_status(*pre_send_request, &flag, MPI_STATUS_IGNORE);
    }
 
    if (hypre_ParCSRCommHandleNumRequests(comm_handle) > 0)
@@ -417,17 +459,18 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
       if (pre_send_request) { hypre_MPI_Request_free(pre_send_request); }
    }
 
-   /* attributes should be deleted when the communicator is being freed */
-   /*
-   hypre_MPICommDeleteSendLocation(hypre_ParCSRCommHandleComm(comm_handle));
-   hypre_MPICommDeleteRecvLocation(hypre_ParCSRCommHandleComm(comm_handle));
-   hypre_MPICommDeleteSendBufferLocation(hypre_ParCSRCommHandleComm(comm_handle));
-   hypre_MPICommDeleteRecvBufferLocation(hypre_ParCSRCommHandleComm(comm_handle));
-   hypre_MPICommDeleteSendBuffer(hypre_ParCSRCommHandleComm(comm_handle));
-   hypre_MPICommDeleteRecvBuffer(hypre_ParCSRCommHandleComm(comm_handle));
-   hypre_MPICommDeletePostRecvRequest(hypre_ParCSRCommHandleComm(comm_handle));
-   hypre_MPICommDeletePreSendRequest(hypre_ParCSRCommHandleComm(comm_handle));
-   */
+   /* attributes should be deleted when the communicator is being freed *
+    * but since we delete comm right after, so we don't ....            */
+   #if 0
+   hypre_MPICommDeleteSendLocation(comm);
+   hypre_MPICommDeleteRecvLocation(comm);
+   hypre_MPICommDeleteSendBufferLocation(comm);
+   hypre_MPICommDeleteRecvBufferLocation(comm);
+   hypre_MPICommDeleteSendBuffer(comm);
+   hypre_MPICommDeleteRecvBuffer(comm);
+   if (post_recv_request) { hypre_MPICommDeletePostRecvRequest(comm); }
+   if (pre_send_request) { hypre_MPICommDeletePreSendRequest(comm); }
+   #endif
 
    hypre_TFree(post_recv_request, HYPRE_MEMORY_HOST);
    hypre_TFree(pre_send_request, HYPRE_MEMORY_HOST);
