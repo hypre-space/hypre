@@ -135,8 +135,14 @@ hypre_ParCSRCommPkgGetPersistentCommHandle( HYPRE_Int            job,
 HYPRE_Int
 hypre_ParCSRPersistentCommHandleStart( hypre_ParCSRCommHandle *comm_handle )
 {
-   HYPRE_Int flag;
-   hypre_MPI_Request_get_status(hypre_ParCSRCommHandleExtraRequest(comm_handle, 1), &flag, MPI_STATUS_IGNORE);
+   MPI_Comm           comm             = hypre_ParCSRCommHandleComm(comm_handle);
+   hypre_MPI_Request *pre_send_request = hypre_MPICommGetPreSendRequest(comm);
+   HYPRE_Int          flag;
+
+   if (pre_send_request)
+   {
+      hypre_MPI_Request_get_status(pre_send_request, &flag, MPI_STATUS_IGNORE);
+   }
 
    if (hypre_ParCSRCommHandleNumRequests(comm_handle) > 0)
    {
