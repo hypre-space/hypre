@@ -850,6 +850,8 @@ typedef struct
 #define hypre_HandleMPICommKeyRecvBufferLocation(hypre_handle)   ((hypre_handle) -> comm_keys[3])
 #define hypre_HandleMPICommKeySendBuffer(hypre_handle)           ((hypre_handle) -> comm_keys[4])
 #define hypre_HandleMPICommKeyRecvBuffer(hypre_handle)           ((hypre_handle) -> comm_keys[5])
+#define hypre_HandleMPICommKeyPreSendRequest(hypre_handle)        ((hypre_handle) -> comm_keys[6])
+#define hypre_HandleMPICommKeyPostRecvRequest(hypre_handle)       ((hypre_handle) -> comm_keys[7])
 
 #define hypre_HandleUseGpuAwareMPI(hypre_handle)                 ((hypre_handle) -> use_gpu_aware_mpi)
 #define hypre_HandleMPIHostBufferLocation(hypre_handle)          ((hypre_handle) -> mpi_host_buffer_location)
@@ -1487,14 +1489,11 @@ HYPRE_Int hypre_MPINeedHostBuffer(hypre_MemoryLocation memory_location);
 HYPRE_Int hypre_MPI_Isend_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
 hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests );
 HYPRE_Int hypre_MPI_Irecv_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
-hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests,
-hypre_MPI_Request *extra_request );
+hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests );
 HYPRE_Int hypre_MPI_Send_init_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
-hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests,
-hypre_MPI_Request  *extra_request );
+hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests );
 HYPRE_Int hypre_MPI_Recv_init_Multiple( void *buf, HYPRE_Int num, HYPRE_Int *displs, HYPRE_Int *counts,
-hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests,
-hypre_MPI_Request  *extra_request );
+hypre_MPI_Datatype datatype, HYPRE_Int *procs, HYPRE_Int tag, hypre_MPI_Comm comm, hypre_MPI_Request *requests );
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int hypre_MPI_Comm_split_type(hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key,
@@ -1520,6 +1519,8 @@ hypre_MemoryLocation hypre_MPICommGetSendBufferLocation(hypre_MPI_Comm comm);
 hypre_MemoryLocation hypre_MPICommGetRecvBufferLocation(hypre_MPI_Comm comm);
 void* hypre_MPICommGetSendBuffer(hypre_MPI_Comm comm);
 void* hypre_MPICommGetRecvBuffer(hypre_MPI_Comm comm);
+hypre_MPI_Request* hypre_MPICommGetPreSendRequest(hypre_MPI_Comm comm);
+hypre_MPI_Request* hypre_MPICommGetPostRecvRequest(hypre_MPI_Comm comm);
 
 HYPRE_Int hypre_MPICommSetSendLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
 HYPRE_Int hypre_MPICommSetRecvLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
@@ -1527,6 +1528,8 @@ HYPRE_Int hypre_MPICommSetSendBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLo
 HYPRE_Int hypre_MPICommSetRecvBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation);
 HYPRE_Int hypre_MPICommSetSendBuffer(hypre_MPI_Comm comm, void*);
 HYPRE_Int hypre_MPICommSetRecvBuffer(hypre_MPI_Comm comm, void*);
+HYPRE_Int hypre_MPICommSetPreSendRequest(hypre_MPI_Comm comm, hypre_MPI_Request *request);
+HYPRE_Int hypre_MPICommSetPostRecvRequest(hypre_MPI_Comm comm, hypre_MPI_Request *request);
 
 HYPRE_Int hypre_MPICommDeleteSendLocation(hypre_MPI_Comm comm);
 HYPRE_Int hypre_MPICommDeleteRecvLocation(hypre_MPI_Comm comm);
@@ -1534,6 +1537,8 @@ HYPRE_Int hypre_MPICommDeleteSendBufferLocation(hypre_MPI_Comm comm);
 HYPRE_Int hypre_MPICommDeleteRecvBufferLocation(hypre_MPI_Comm comm);
 HYPRE_Int hypre_MPICommDeleteSendBuffer(hypre_MPI_Comm comm);
 HYPRE_Int hypre_MPICommDeleteRecvBuffer(hypre_MPI_Comm comm);
+HYPRE_Int hypre_MPICommDeletePreSendRequest(hypre_MPI_Comm comm);
+HYPRE_Int hypre_MPICommDeletePostRecvRequest(hypre_MPI_Comm comm);
 
 hypre_int hypre_grequest_free_fn(void *extra_state);
 hypre_int hypre_grequest_query_fn(void *extra_state, hypre_MPI_Status *status);
