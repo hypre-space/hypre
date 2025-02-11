@@ -826,10 +826,12 @@ hypre_CommHandleAllocateBuffers( HYPRE_MemoryLocation    send_memory_location,
          hypre_CommHandleSendBuffersMPI(comm_handle) = _hypre_TAlloc(char, num_send_elems *size_of_elem,
                                                                      location);
       }
+#if defined(HYPRE_DEBUG)
       else
       {
          hypre_printf("[%s, %d] CommHandleSendBufferMPI existed!\n", __FILE__, __LINE__);
       }
+#endif
    }
 
    if (hypre_NeedMPICopyBuffer(recv_memory_alocation))
@@ -841,10 +843,12 @@ hypre_CommHandleAllocateBuffers( HYPRE_MemoryLocation    send_memory_location,
          hypre_CommHandleRecvBuffersMPI(comm_handle) = _hypre_TAlloc(char, num_recv_elems *size_of_elem,
                                                                      location);
       }
+#if defined(HYPRE_DEBUG)
       else
       {
          hypre_printf("[%s, %d] CommHandleRecvBufferMPI existed!\n", __FILE__, __LINE__);
       }
+#endif
    }
 
    MPI_Comm comm = hypre_CommHandleComm(comm_handle);

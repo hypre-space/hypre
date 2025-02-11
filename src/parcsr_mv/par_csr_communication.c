@@ -58,10 +58,12 @@ hypre_ParCSRCommHandleAllocateBuffers( HYPRE_MemoryLocation    send_memory_locat
          hypre_ParCSRCommHandleSendBuffer(comm_handle) = _hypre_TAlloc(char, num_send_elems * size_of_elem,
                                                                        location);
       }
+   #if defined(HYPRE_DEBUG)
       else
       {
          hypre_printf("[%s, %d] ParCSRCommHandleSendBuffer existed!\n", __FILE__, __LINE__);
       }
+   #endif
    }
 
    if (hypre_NeedMPICopyBuffer(recv_memory_alocation))
@@ -73,10 +75,12 @@ hypre_ParCSRCommHandleAllocateBuffers( HYPRE_MemoryLocation    send_memory_locat
          hypre_ParCSRCommHandleRecvBuffer(comm_handle) = _hypre_TAlloc(char, num_recv_elems * size_of_elem,
                                                                        location);
       }
+   #if defined(HYPRE_DEBUG)
       else
       {
          hypre_printf("[%s, %d] ParCSRCommHandleRecvBuffer existed!\n", __FILE__, __LINE__);
       }
+   #endif
    }
 
    if (hypre_ParCSRCommHandlePersistent(comm_handle))
