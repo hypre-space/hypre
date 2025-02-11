@@ -53,7 +53,7 @@ typedef struct
    HYPRE_Int              use_gpu_aware_mpi;
 #endif
 
-   hypre_MemoryLocation   mpi_host_buffer_location;
+   hypre_MemoryLocation   mpi_copy_buffer_location;
 
 #if defined(HYPRE_USING_GPU)
    hypre_DeviceData      *device_data;
@@ -106,11 +106,11 @@ typedef struct
 #define hypre_HandleMPICommKeyRecvBufferLocation(hypre_handle)   ((hypre_handle) -> comm_keys[3])
 #define hypre_HandleMPICommKeySendBuffer(hypre_handle)           ((hypre_handle) -> comm_keys[4])
 #define hypre_HandleMPICommKeyRecvBuffer(hypre_handle)           ((hypre_handle) -> comm_keys[5])
-#define hypre_HandleMPICommKeyPreSendRequest(hypre_handle)        ((hypre_handle) -> comm_keys[6])
-#define hypre_HandleMPICommKeyPostRecvRequest(hypre_handle)       ((hypre_handle) -> comm_keys[7])
+#define hypre_HandleMPICommKeyPreSendRequest(hypre_handle)       ((hypre_handle) -> comm_keys[6])
+#define hypre_HandleMPICommKeyPostRecvRequest(hypre_handle)      ((hypre_handle) -> comm_keys[7])
 
 #define hypre_HandleUseGpuAwareMPI(hypre_handle)                 ((hypre_handle) -> use_gpu_aware_mpi)
-#define hypre_HandleMPIHostBufferLocation(hypre_handle)          ((hypre_handle) -> mpi_host_buffer_location)
+#define hypre_HandleMPICopyBufferLocation(hypre_handle)          ((hypre_handle) -> mpi_copy_buffer_location)
 
 #define hypre_HandleCurandGenerator(hypre_handle)                hypre_DeviceDataCurandGenerator(hypre_HandleDeviceData(hypre_handle))
 #define hypre_HandleCublasHandle(hypre_handle)                   hypre_DeviceDataCublasHandle(hypre_HandleDeviceData(hypre_handle))

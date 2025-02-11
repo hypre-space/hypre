@@ -1955,7 +1955,7 @@ hypre_MPI_Info_free( hypre_MPI_Info *info )
 #endif
 
 HYPRE_Int
-hypre_MPINeedHostBuffer(hypre_MemoryLocation memory_location)
+hypre_NeedMPICopyBuffer(hypre_MemoryLocation memory_location)
 {
 #if defined(HYPRE_USING_GPU)
    return !hypre_GetGpuAwareMPI()                       &&
