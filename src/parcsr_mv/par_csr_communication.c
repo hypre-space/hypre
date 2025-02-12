@@ -46,41 +46,23 @@ hypre_ParCSRCommHandleAllocateBuffers( HYPRE_MemoryLocation    send_memory_locat
                                        HYPRE_Int               size_of_elem,
                                        hypre_ParCSRCommHandle *comm_handle )
 {
-   hypre_MemoryLocation send_memory_alocation = hypre_GetActualMemLocation(send_memory_location);
-   hypre_MemoryLocation recv_memory_alocation = hypre_GetActualMemLocation(recv_memory_location);
+   hypre_MemoryLocation  send_memory_alocation = hypre_GetActualMemLocation(send_memory_location);
+   hypre_MemoryLocation  recv_memory_alocation = hypre_GetActualMemLocation(recv_memory_location);
+   hypre_MemoryLocation  send_buffer_location  = hypre_MEMORY_UNDEFINED;
+   hypre_MemoryLocation  recv_buffer_location  = hypre_MEMORY_UNDEFINED;
+   void                 *send_buffer           = NULL;
+   void                 *recv_buffer           = NULL;
 
    if (hypre_NeedMPICopyBuffer(send_memory_alocation))
    {
-      if (!hypre_ParCSRCommHandleSendBuffer(comm_handle))
-      {
-         hypre_MemoryLocation location = hypre_HandleMPICopyBufferLocation(hypre_handle());
-         hypre_ParCSRCommHandleSendBufferLocation(comm_handle) = location;
-         hypre_ParCSRCommHandleSendBuffer(comm_handle) = _hypre_TAlloc(char, num_send_elems * size_of_elem,
-                                                                       location);
-      }
-   #if defined(HYPRE_DEBUG)
-      else
-      {
-         hypre_printf("[%s, %d] ParCSRCommHandleSendBuffer existed!\n", __FILE__, __LINE__);
-      }
-   #endif
+      send_buffer_location = hypre_HandleMPICopyBufferLocation(hypre_handle());
+      send_buffer = _hypre_TAlloc(char, num_send_elems * size_of_elem, send_buffer_location);
    }
 
    if (hypre_NeedMPICopyBuffer(recv_memory_alocation))
    {
-      if (!hypre_ParCSRCommHandleRecvBuffer(comm_handle))
-      {
-         hypre_MemoryLocation location = hypre_HandleMPICopyBufferLocation(hypre_handle());
-         hypre_ParCSRCommHandleRecvBufferLocation(comm_handle) = location;
-         hypre_ParCSRCommHandleRecvBuffer(comm_handle) = _hypre_TAlloc(char, num_recv_elems * size_of_elem,
-                                                                       location);
-      }
-   #if defined(HYPRE_DEBUG)
-      else
-      {
-         hypre_printf("[%s, %d] ParCSRCommHandleRecvBuffer existed!\n", __FILE__, __LINE__);
-      }
-   #endif
+      recv_buffer_location = hypre_HandleMPICopyBufferLocation(hypre_handle());
+      recv_buffer = _hypre_TAlloc(char, num_recv_elems * size_of_elem, recv_buffer_location);
    }
 
    if (hypre_ParCSRCommHandlePersistent(comm_handle))
@@ -97,6 +79,7 @@ hypre_ParCSRCommHandleAllocateBuffers( HYPRE_MemoryLocation    send_memory_locat
    }
 
    MPI_Comm comm = hypre_ParCSRCommHandleComm(comm_handle);
+
 #if defined(HYPRE_DEBUG)
    if (hypre_MPICommGetSendLocation(comm) != hypre_MEMORY_UNDEFINED)
    {
@@ -123,12 +106,13 @@ hypre_ParCSRCommHandleAllocateBuffers( HYPRE_MemoryLocation    send_memory_locat
       hypre_printf("[%s, %d] MPI_Comm RecvBufferLocation existed!\n", __FILE__, __LINE__);
    }
 #endif
+
    hypre_MPICommSetSendLocation(comm, send_memory_alocation);
    hypre_MPICommSetRecvLocation(comm, recv_memory_alocation);
-   hypre_MPICommSetSendBuffer(comm, hypre_ParCSRCommHandleSendBuffer(comm_handle));
-   hypre_MPICommSetRecvBuffer(comm, hypre_ParCSRCommHandleRecvBuffer(comm_handle));
-   hypre_MPICommSetSendBufferLocation(comm, hypre_ParCSRCommHandleSendBufferLocation(comm_handle));
-   hypre_MPICommSetRecvBufferLocation(comm, hypre_ParCSRCommHandleRecvBufferLocation(comm_handle));
+   hypre_MPICommSetSendBuffer(comm, send_buffer);
+   hypre_MPICommSetRecvBuffer(comm, recv_buffer);
+   hypre_MPICommSetSendBufferLocation(comm, send_buffer_location);
+   hypre_MPICommSetRecvBufferLocation(comm, recv_buffer_location);
 
    return hypre_error_flag;
 }
@@ -416,8 +400,13 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
       hypre_ParCSRCommHandleWait(comm_handle);
    }
 
-   _hypre_TFree(hypre_ParCSRCommHandleSendBuffer(comm_handle), hypre_ParCSRCommHandleSendBufferLocation(comm_handle));
-   _hypre_TFree(hypre_ParCSRCommHandleRecvBuffer(comm_handle), hypre_ParCSRCommHandleRecvBufferLocation(comm_handle));
+   hypre_MemoryLocation  send_buffer_location  = hypre_MPICommGetSendBufferLocation(comm);
+   hypre_MemoryLocation  recv_buffer_location  = hypre_MPICommGetRecvBufferLocation(comm);
+   void                 *send_buffer           = hypre_MPICommGetSendBuffer(comm);
+   void                 *recv_buffer           = hypre_MPICommGetRecvBuffer(comm);
+
+   _hypre_TFree(send_buffer, send_buffer_location);
+   _hypre_TFree(recv_buffer, recv_buffer_location);
 
 
    if (persistent)

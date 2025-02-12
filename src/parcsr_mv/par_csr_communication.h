@@ -117,13 +117,8 @@ typedef struct
    HYPRE_Int                    persistent;
    void                        *send_data;
    void                        *recv_data;
-   /* send/recv buffers to copy to/from */
-   void                        *send_buffer;
-   void                        *recv_buffer;
    HYPRE_MemoryLocation         send_location;
    HYPRE_MemoryLocation         recv_location;
-   hypre_MemoryLocation         send_buffer_location;
-   hypre_MemoryLocation         recv_buffer_location;
    HYPRE_Int                    num_requests;
    hypre_MPI_Request           *requests;
    MPI_Comm                     comm;
@@ -137,12 +132,8 @@ typedef struct
 #define hypre_ParCSRCommHandlePersistent(comm_handle)             (comm_handle -> persistent)
 #define hypre_ParCSRCommHandleSendData(comm_handle)               (comm_handle -> send_data)
 #define hypre_ParCSRCommHandleRecvData(comm_handle)               (comm_handle -> recv_data)
-#define hypre_ParCSRCommHandleSendBuffer(comm_handle)             (comm_handle -> send_buffer)
-#define hypre_ParCSRCommHandleRecvBuffer(comm_handle)             (comm_handle -> recv_buffer)
 #define hypre_ParCSRCommHandleSendLocation(comm_handle)           (comm_handle -> send_location)
 #define hypre_ParCSRCommHandleRecvLocation(comm_handle)           (comm_handle -> recv_location)
-#define hypre_ParCSRCommHandleSendBufferLocation(comm_handle)     (comm_handle -> send_buffer_location)
-#define hypre_ParCSRCommHandleRecvBufferLocation(comm_handle)     (comm_handle -> recv_buffer_location)
 #define hypre_ParCSRCommHandleNumRequests(comm_handle)            (comm_handle -> num_requests)
 #define hypre_ParCSRCommHandleRequests(comm_handle)               (comm_handle -> requests)
 #define hypre_ParCSRCommHandleRequest(comm_handle, i)             (comm_handle -> requests[i])
