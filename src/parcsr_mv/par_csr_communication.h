@@ -53,6 +53,33 @@ hypre_ParCSRCommHandleGetJobType(HYPRE_Int job)
    return job_type;
 }
 
+static inline HYPRE_Int
+hypre_ParCSRCommHandleIsTransposeJob(HYPRE_Int job)
+{
+   HYPRE_Int trans = 0;
+
+   switch (hypre_ParCSRCommHandleGetJobType(job))
+   {
+      case HYPRE_COMM_PKG_JOB_COMPLEX:
+      case HYPRE_COMM_PKG_JOB_INT:
+      case HYPRE_COMM_PKG_JOB_BIGINT:
+      {
+         trans = 0;
+         break;
+      }
+      case HYPRE_COMM_PKG_JOB_COMPLEX_TRANSPOSE:
+      case HYPRE_COMM_PKG_JOB_INT_TRANSPOSE:
+      case HYPRE_COMM_PKG_JOB_BIGINT_TRANSPOSE:
+      {
+         trans = 1;
+         break;
+      }
+      default:
+         break;
+   }
+   return trans;
+}
+
 static inline hypre_MPI_Datatype
 hypre_ParCSRCommHandleGetMPIDataType(HYPRE_Int job)
 {

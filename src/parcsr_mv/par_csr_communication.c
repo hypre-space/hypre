@@ -260,6 +260,12 @@ hypre_ParCSRCommHandleCreate_core ( HYPRE_Int            persistent,
    HYPRE_Int               num_send_elems     = 0;
    HYPRE_Int               num_recv_elems     = 0;
    HYPRE_Int               data_size;
+   HYPRE_Int               mpi_num_recvs      = 0;
+   HYPRE_Int               mpi_num_sends      = 0;
+   HYPRE_Int              *mpi_send_displs    = NULL;
+   HYPRE_Int              *mpi_recv_displs    = NULL;
+   HYPRE_Int              *mpi_send_procs     = NULL;
+   HYPRE_Int              *mpi_recv_procs     = NULL;
 
    hypre_MPI_Comm_dup(comm_orig, &comm);
    hypre_MPI_Type_size(mpi_dtype, &data_size);
@@ -267,96 +273,61 @@ hypre_ParCSRCommHandleCreate_core ( HYPRE_Int            persistent,
    hypre_ParCSRCommHandlePersistent(comm_handle) = persistent;
    hypre_ParCSRCommHandleComm(comm_handle) = comm;
 
-   switch (hypre_ParCSRCommHandleGetJobType(job))
+   if (hypre_ParCSRCommHandleIsTransposeJob(job))
    {
-      case HYPRE_COMM_PKG_JOB_COMPLEX:
-      case HYPRE_COMM_PKG_JOB_INT:
-      case HYPRE_COMM_PKG_JOB_BIGINT:
-      {
-         num_send_elems = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
-         num_recv_elems = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs);
-         hypre_ParCSRCommHandleAllocateBuffers(send_memory_location, recv_memory_location,
-                                               num_send_elems, num_recv_elems, data_size, comm_handle);
+      mpi_num_recvs = num_sends;
+      mpi_num_sends = num_recvs;
+      mpi_recv_displs = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
+      mpi_send_displs = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
+      mpi_recv_procs = hypre_ParCSRCommPkgSendProcs(comm_pkg);
+      mpi_send_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
+   }
+   else
+   {
+      mpi_num_recvs = num_recvs;
+      mpi_num_sends = num_sends;
+      mpi_recv_displs = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
+      mpi_send_displs = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
+      mpi_recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
+      mpi_send_procs = hypre_ParCSRCommPkgSendProcs(comm_pkg);
+   }
+   num_recv_elems = mpi_recv_displs[mpi_num_recvs];
+   num_send_elems = mpi_send_displs[mpi_num_sends];
 
-         if (persistent)
-         {
-            hypre_MPI_Recv_init_Multiple(hypre_ParCSRCommHandleRecvData(comm_handle),
-                                         num_recvs,
-                                         hypre_ParCSRCommPkgRecvVecStarts(comm_pkg),
-                                         NULL, mpi_dtype,
-                                         hypre_ParCSRCommPkgRecvProcs(comm_pkg),
-                                         0, comm, requests);
+   hypre_ParCSRCommHandleAllocateBuffers(send_memory_location, recv_memory_location,
+                                         num_send_elems, num_recv_elems, data_size, comm_handle);
 
-            hypre_MPI_Send_init_Multiple(hypre_ParCSRCommHandleSendData(comm_handle),
-                                         num_sends,
-                                         hypre_ParCSRCommPkgSendMapStarts(comm_pkg),
-                                         NULL, mpi_dtype,
-                                         hypre_ParCSRCommPkgSendProcs(comm_pkg),
-                                         0, comm, requests + num_recvs);
-         }
-         else
-         {
-            hypre_MPI_Irecv_Multiple(recv_data, num_recvs,
-                                     hypre_ParCSRCommPkgRecvVecStarts(comm_pkg),
-                                     NULL, mpi_dtype,
-                                     hypre_ParCSRCommPkgRecvProcs(comm_pkg),
-                                     0, comm, requests);
+   if (persistent)
+   {
+      hypre_MPI_Recv_init_Multiple(hypre_ParCSRCommHandleRecvData(comm_handle),
+                                   mpi_num_recvs,
+                                   mpi_recv_displs,
+                                   NULL, mpi_dtype,
+                                   mpi_recv_procs,
+                                   0, comm, requests);
 
-            hypre_MPI_Isend_Multiple(send_data, num_sends,
-                                     hypre_ParCSRCommPkgSendMapStarts(comm_pkg),
-                                     NULL, mpi_dtype,
-                                     hypre_ParCSRCommPkgSendProcs(comm_pkg),
-                                     0, comm, requests + num_recvs);
-         }
+      hypre_MPI_Send_init_Multiple(hypre_ParCSRCommHandleSendData(comm_handle),
+                                   mpi_num_sends,
+                                   mpi_send_displs,
+                                   NULL, mpi_dtype,
+                                   mpi_send_procs,
+                                   0, comm, requests + mpi_num_recvs);
+   }
+   else
+   {
+      hypre_MPI_Irecv_Multiple(recv_data,
+                               mpi_num_recvs,
+                               mpi_recv_displs,
+                               NULL, mpi_dtype,
+                               mpi_recv_procs,
+                               0, comm, requests);
 
-         break;
-      }
-
-      case HYPRE_COMM_PKG_JOB_COMPLEX_TRANSPOSE:
-      case HYPRE_COMM_PKG_JOB_INT_TRANSPOSE:
-      case HYPRE_COMM_PKG_JOB_BIGINT_TRANSPOSE:
-      {
-         num_send_elems = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs);
-         num_recv_elems = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
-         hypre_ParCSRCommHandleAllocateBuffers(send_memory_location, recv_memory_location,
-                                               num_send_elems, num_recv_elems, data_size, comm_handle);
-
-         if (persistent)
-         {
-            hypre_MPI_Recv_init_Multiple(hypre_ParCSRCommHandleRecvData(comm_handle),
-                                         num_sends,
-                                         hypre_ParCSRCommPkgSendMapStarts(comm_pkg),
-                                         NULL, mpi_dtype,
-                                         hypre_ParCSRCommPkgSendProcs(comm_pkg),
-                                         0, comm, requests);
-
-            hypre_MPI_Send_init_Multiple(hypre_ParCSRCommHandleSendData(comm_handle),
-                                         num_recvs,
-                                         hypre_ParCSRCommPkgRecvVecStarts(comm_pkg),
-                                         NULL, mpi_dtype,
-                                         hypre_ParCSRCommPkgRecvProcs(comm_pkg),
-                                         0, comm, requests + num_sends);
-         }
-         else
-         {
-            hypre_MPI_Irecv_Multiple(recv_data, num_sends,
-                                     hypre_ParCSRCommPkgSendMapStarts(comm_pkg),
-                                     NULL, mpi_dtype,
-                                     hypre_ParCSRCommPkgSendProcs(comm_pkg),
-                                     0, comm, requests);
-
-            hypre_MPI_Isend_Multiple(send_data, num_recvs,
-                                     hypre_ParCSRCommPkgRecvVecStarts(comm_pkg),
-                                     NULL, mpi_dtype,
-                                     hypre_ParCSRCommPkgRecvProcs(comm_pkg),
-                                     0, comm, requests + num_sends);
-         }
-
-         break;
-      }
-
-      default:
-         break;
+      hypre_MPI_Isend_Multiple(send_data,
+                               mpi_num_sends,
+                               mpi_send_displs,
+                               NULL, mpi_dtype,
+                               mpi_send_procs,
+                               0, comm, requests + mpi_num_recvs);
    }
 
    /*--------------------------------------------------------------------
