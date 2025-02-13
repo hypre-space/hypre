@@ -784,12 +784,6 @@ typedef struct
    HYPRE_MemoryLocation   memory_location;
    HYPRE_ExecutionPolicy  default_exec_policy;
 
-   /* the device buffers needed to do MPI communication for struct comm */
-   HYPRE_Complex         *struct_comm_recv_buffer;
-   HYPRE_Complex         *struct_comm_send_buffer;
-   HYPRE_Int              struct_comm_recv_buffer_size;
-   HYPRE_Int              struct_comm_send_buffer_size;
-
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int              use_gpu_aware_mpi;
 #endif
@@ -831,11 +825,6 @@ typedef struct
 #define hypre_HandleLogLevel(hypre_handle)                       ((hypre_handle) -> log_level)
 #define hypre_HandleMemoryLocation(hypre_handle)                 ((hypre_handle) -> memory_location)
 #define hypre_HandleDefaultExecPolicy(hypre_handle)              ((hypre_handle) -> default_exec_policy)
-
-#define hypre_HandleStructCommRecvBuffer(hypre_handle)           ((hypre_handle) -> struct_comm_recv_buffer)
-#define hypre_HandleStructCommSendBuffer(hypre_handle)           ((hypre_handle) -> struct_comm_send_buffer)
-#define hypre_HandleStructCommRecvBufferSize(hypre_handle)       ((hypre_handle) -> struct_comm_recv_buffer_size)
-#define hypre_HandleStructCommSendBufferSize(hypre_handle)       ((hypre_handle) -> struct_comm_send_buffer_size)
 
 #define hypre_HandleDeviceData(hypre_handle)                     ((hypre_handle) -> device_data)
 #define hypre_HandleDeviceGSMethod(hypre_handle)                 ((hypre_handle) -> device_gs_method)
@@ -2659,6 +2648,8 @@ HYPRE_Int hypre_MemoryTrackerSetFileName(const char *file_name);
 HYPRE_Int hypre_MagmaInitialize(void);
 HYPRE_Int hypre_MagmaFinalize(void);
 #endif
+
+char *hypre_StructCommunicationManageBuffer(HYPRE_MemoryLocation memory_location, size_t size, HYPRE_Int action);
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.

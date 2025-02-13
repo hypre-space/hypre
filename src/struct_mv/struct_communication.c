@@ -764,73 +764,112 @@ hypre_CommTypeSetEntry( hypre_Box           *box,
    return hypre_error_flag;
 }
 
-//TODO size is confusing
-HYPRE_Complex *
-hypre_StructCommunicationGetBuffer(HYPRE_MemoryLocation memory_location,
-                                   HYPRE_Int            size)
-{
-   HYPRE_Complex *ptr;
+/**
+ * @brief Manages memory buffers for structured communication
+ *
+ * This function handles buffer allocation and deallocation based on the `action` parameter.
+ * - If `action == 0`, it returns a buffer that is enough for the specified `size`
+ *                     in the given `memory_location`.
+ * - If `action == 1`, it releases the buffer.
+ * - There is only one pointer managed. The same ptr will be returned unless a realloc is needed.
+ *
+ * @param memory_location The memory location where the buffer should be allocated
+ *                        (e.g., host or device memory).
+ * @param size The size of the buffer in BYTES (used for allocation).
+ * @param action The action to perform:
+ *               - `0`: Return buffer.
+ *               - `1`: Free buffer.
+ *
+ * @return Pointer to the buffer if `action == 0`, or `NULL` if `action == 1`.
+ */
 
-#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-   if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
+char *
+hypre_StructCommunicationManageBuffer(HYPRE_MemoryLocation memory_location,
+                                      size_t               size,
+                                      HYPRE_Int            action)
+{
+   static char *buffer_ptr = NULL;
+   static size_t buffer_size = 0;
+
+   if (0 == action)
    {
-      if (size > hypre_HandleStructCommSendBufferSize(hypre_handle()))
+      if (size > buffer_size)
       {
-         HYPRE_Int new_size = 5 * size;
-         hypre_HandleStructCommSendBufferSize(hypre_handle()) = new_size;
-         hypre_TFree(hypre_HandleStructCommSendBuffer(hypre_handle()), memory_location);
-         hypre_HandleStructCommSendBuffer(hypre_handle()) = hypre_CTAlloc(HYPRE_Complex, new_size,
-                                                                          memory_location);
+         buffer_size = 2 * size;
+         hypre_TFree(buffer_ptr, memory_location);
+         buffer_ptr = hypre_TAlloc(char, buffer_size, memory_location);
       }
-
-      ptr = hypre_HandleStructCommSendBuffer(hypre_handle());
+      return buffer_ptr;
    }
-   else
-#endif
+   else if (1 == action)
    {
-      ptr = hypre_CTAlloc(HYPRE_Complex, size, memory_location);
+      buffer_size = 0;
+      hypre_TFree(buffer_ptr, memory_location);
    }
-
-   return ptr;
+   return NULL;
 }
 
 HYPRE_Int
-hypre_StructCommunicationReleaseBuffer(HYPRE_Complex       *buffer,
-                                       HYPRE_MemoryLocation memory_location)
+hypre_CommHandleAllocateBuffers( HYPRE_MemoryLocation  memory_location,
+                                 hypre_CommPkg        *comm_pkg,
+                                 hypre_CommHandle     *comm_handle )
 {
-   if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_HOST)
+   hypre_MemoryLocation  send_memory_alocation = hypre_GetActualMemLocation(memory_location);
+   hypre_MemoryLocation  recv_memory_alocation = hypre_GetActualMemLocation(memory_location);
+   hypre_MemoryLocation  send_copy_location    = hypre_MEMORY_UNDEFINED;
+   hypre_MemoryLocation  recv_copy_location    = hypre_MEMORY_UNDEFINED;
+   void                 *send_copy_buffer      = NULL;
+   void                 *recv_copy_buffer      = NULL;
+   HYPRE_Complex       **send_buffers          = NULL;
+   HYPRE_Complex       **recv_buffers          = NULL;
+   HYPRE_Complex        *buffer_ptr            = NULL;
+   HYPRE_Int             num_sends             = hypre_CommPkgNumSends(comm_pkg);
+   HYPRE_Int             num_recvs             = hypre_CommPkgNumRecvs(comm_pkg);
+   HYPRE_Int             num_send_elems        = hypre_CommPkgSendBufsize(comm_pkg);
+   HYPRE_Int             num_recv_elems        = hypre_CommPkgRecvBufsize(comm_pkg);
+   HYPRE_Int             size_of_elem          = sizeof(HYPRE_Complex);
+   HYPRE_Int             i;
+
+   buffer_ptr = (HYPRE_Complex *) hypre_StructCommunicationManageBuffer(memory_location,
+      (num_send_elems + num_recv_elems) * sizeof(HYPRE_Complex), 0);
+
+   /* allocate send buffers */
+   send_buffers = hypre_TAlloc(HYPRE_Complex *, num_sends, HYPRE_MEMORY_HOST);
+   if (num_sends > 0)
    {
-      hypre_TFree(buffer, memory_location);
+      send_buffers[0] = buffer_ptr;
+      for (i = 1; i < num_sends; i++)
+      {
+         hypre_CommType *comm_type = hypre_CommPkgSendType(comm_pkg, i - 1);
+         send_buffers[i] = send_buffers[i - 1] + hypre_CommTypeBufsize(comm_type);
+      }
    }
 
-   return hypre_error_flag;
-}
+   /* allocate recv buffers */
+   recv_buffers = hypre_TAlloc(HYPRE_Complex *, num_recvs, HYPRE_MEMORY_HOST);
+   if (num_recvs > 0)
+   {
+      recv_buffers[0] = buffer_ptr + num_send_elems;
+      for (i = 1; i < num_recvs; i++)
+      {
+         hypre_CommType *comm_type = hypre_CommPkgRecvType(comm_pkg, i - 1);
+         recv_buffers[i] = recv_buffers[i - 1] + hypre_CommTypeBufsize(comm_type);
+      }
+   }
 
-HYPRE_Int
-hypre_CommHandleAllocateBuffers( HYPRE_MemoryLocation    send_memory_location,
-                                 HYPRE_MemoryLocation    recv_memory_location,
-                                 HYPRE_Int               num_send_elems,
-                                 HYPRE_Int               num_recv_elems,
-                                 HYPRE_Int               size_of_elem,
-                                 hypre_CommHandle       *comm_handle )
-{
-   hypre_MemoryLocation  send_memory_alocation = hypre_GetActualMemLocation(send_memory_location);
-   hypre_MemoryLocation  recv_memory_alocation = hypre_GetActualMemLocation(recv_memory_location);
-   hypre_MemoryLocation  send_buffer_location  = hypre_MEMORY_UNDEFINED;
-   hypre_MemoryLocation  recv_buffer_location  = hypre_MEMORY_UNDEFINED;
-   void                 *send_buffer           = NULL;
-   void                 *recv_buffer           = NULL;
+   hypre_CommHandleSendBuffers(comm_handle) = send_buffers;
+   hypre_CommHandleRecvBuffers(comm_handle) = recv_buffers;
 
    if (hypre_NeedMPICopyBuffer(send_memory_alocation))
    {
-      send_buffer_location = hypre_HandleMPICopyBufferLocation(hypre_handle());
-      send_buffer = _hypre_TAlloc(char, num_send_elems * size_of_elem, send_buffer_location);
+      send_copy_location = hypre_HandleMPICopyBufferLocation(hypre_handle());
+      send_copy_buffer = _hypre_TAlloc(char, num_send_elems * size_of_elem, send_copy_location);
    }
 
    if (hypre_NeedMPICopyBuffer(recv_memory_alocation))
    {
-      recv_buffer_location = hypre_HandleMPICopyBufferLocation(hypre_handle());
-      recv_buffer = _hypre_TAlloc(char, num_recv_elems * size_of_elem, recv_buffer_location);
+      recv_copy_location = hypre_HandleMPICopyBufferLocation(hypre_handle());
+      recv_copy_buffer = _hypre_TAlloc(char, num_recv_elems * size_of_elem, recv_copy_location);
    }
 
    hypre_MPICommWrapper *comm = hypre_CommHandleComm(comm_handle);
@@ -864,10 +903,10 @@ hypre_CommHandleAllocateBuffers( HYPRE_MemoryLocation    send_memory_location,
 
    hypre_MPICommSetSendLocation(comm, send_memory_alocation);
    hypre_MPICommSetRecvLocation(comm, recv_memory_alocation);
-   hypre_MPICommSetSendBuffer(comm, send_buffer);
-   hypre_MPICommSetRecvBuffer(comm, recv_buffer);
-   hypre_MPICommSetSendBufferLocation(comm, send_buffer_location);
-   hypre_MPICommSetRecvBufferLocation(comm, recv_buffer_location);
+   hypre_MPICommSetSendBuffer(comm, send_copy_buffer);
+   hypre_MPICommSetRecvBuffer(comm, recv_copy_buffer);
+   hypre_MPICommSetSendBufferLocation(comm, send_copy_location);
+   hypre_MPICommSetRecvBufferLocation(comm, recv_copy_location);
 
    return hypre_error_flag;
 }
@@ -937,33 +976,10 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
     * allocate buffers
     *--------------------------------------------------------------------*/
 
-   /* allocate send buffers */
-   send_buffers = hypre_TAlloc(HYPRE_Complex *, num_sends, HYPRE_MEMORY_HOST);
-   if (num_sends > 0)
-   {
-      size = hypre_CommPkgSendBufsize(comm_pkg);
-      send_buffers[0] = hypre_StructCommunicationGetBuffer(memory_location, size);
-      for (i = 1; i < num_sends; i++)
-      {
-         comm_type = hypre_CommPkgSendType(comm_pkg, i - 1);
-         size = hypre_CommTypeBufsize(comm_type);
-         send_buffers[i] = send_buffers[i - 1] + size;
-      }
-   }
+   hypre_CommHandleAllocateBuffers(memory_location, comm_pkg, comm_handle);
 
-   /* allocate recv buffers */
-   recv_buffers = hypre_TAlloc(HYPRE_Complex *, num_recvs, HYPRE_MEMORY_HOST);
-   if (num_recvs > 0)
-   {
-      size = hypre_CommPkgRecvBufsize(comm_pkg);
-      recv_buffers[0] = hypre_StructCommunicationGetBuffer(memory_location, size);
-      for (i = 1; i < num_recvs; i++)
-      {
-         comm_type = hypre_CommPkgRecvType(comm_pkg, i - 1);
-         size = hypre_CommTypeBufsize(comm_type);
-         recv_buffers[i] = recv_buffers[i - 1] + size;
-      }
-   }
+   send_buffers = hypre_CommHandleSendBuffers(comm_handle);
+   recv_buffers = hypre_CommHandleRecvBuffers(comm_handle);
 
    /*--------------------------------------------------------------------
     * pack send buffers
@@ -1047,13 +1063,6 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
          hypre_CommTypeRemBoxes(comm_type) = NULL;
       }
    }
-
-   hypre_CommHandleAllocateBuffers(memory_location,
-                                   memory_location,
-                                   hypre_CommPkgSendBufsize(comm_pkg),
-                                   hypre_CommPkgRecvBufsize(comm_pkg),
-                                   sizeof(HYPRE_Complex),
-                                   comm_handle);
 
    /*--------------------------------------------------------------------
     * post receives and initiate sends
@@ -1171,8 +1180,6 @@ hypre_InitializeCommunication( hypre_CommPkg        *comm_pkg,
    hypre_CommHandleNumRequests(comm_handle)      = num_requests;
    hypre_CommHandleRequests(comm_handle)         = requests;
    hypre_CommHandleStatus(comm_handle)           = status;
-   hypre_CommHandleSendBuffers(comm_handle)      = send_buffers;
-   hypre_CommHandleRecvBuffers(comm_handle)      = recv_buffers;
    hypre_CommHandleAction(comm_handle)           = action;
 
    *comm_handle_ptr = comm_handle;
@@ -1199,7 +1206,6 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    HYPRE_Int             ndim         = hypre_CommPkgNDim(comm_pkg);
    HYPRE_Int             num_values   = hypre_CommPkgNumValues(comm_pkg);
-   HYPRE_Int             num_sends    = hypre_CommPkgNumSends(comm_pkg);
    HYPRE_Int             num_recvs    = hypre_CommPkgNumRecvs(comm_pkg);
 
    hypre_CommType      *comm_type;
@@ -1367,15 +1373,6 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    hypre_TFree(hypre_CommHandleRequests(comm_handle), HYPRE_MEMORY_HOST);
    hypre_TFree(hypre_CommHandleStatus(comm_handle), HYPRE_MEMORY_HOST);
-
-   if (num_sends > 0)
-   {
-      hypre_StructCommunicationReleaseBuffer(send_buffers[0], memory_location);
-   }
-   if (num_recvs > 0)
-   {
-      hypre_StructCommunicationReleaseBuffer(recv_buffers[0], memory_location);
-   }
 
    hypre_MemoryLocation  send_buffer_location  = hypre_MPICommGetSendBufferLocation(comm);
    hypre_MemoryLocation  recv_buffer_location  = hypre_MPICommGetRecvBufferLocation(comm);
