@@ -47,13 +47,6 @@ hypre_HandleCreate(void)
    hypre_HandleDeviceGSMethod(hypre_handle_) = 1; /* CPU: 0; Cusparse: 1 */
 #endif
 
-   HYPRE_Int i;
-   for (i = 0; i < HYPRE_MAX_NUM_COMM_KEYS; i++)
-   {
-      hypre_MPI_Comm_create_keyval( hypre_MPI_COMM_NULL_COPY_FN, hypre_MPI_COMM_NULL_DELETE_FN,
-                                    &hypre_HandleMPICommKeys(hypre_handle_)[i], (void *)0 );
-   }
-
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
 #if defined(HYPRE_USING_GPU_AWARE_MPI)
    hypre_HandleUseGpuAwareMPI(hypre_handle_) = 1;
@@ -80,12 +73,6 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
    hypre_DeviceDataDestroy(hypre_HandleDeviceData(hypre_handle_));
    hypre_HandleDeviceData(hypre_handle_) = NULL;
 #endif
-
-   HYPRE_Int i;
-   for (i = 0; i < HYPRE_MAX_NUM_COMM_KEYS; i++)
-   {
-      hypre_MPI_Comm_free_keyval(&hypre_HandleMPICommKeys(hypre_handle_)[i]);
-   }
 
    /* Deallocate error messages in error handler */
    hypre_error_handler_clear_messages();

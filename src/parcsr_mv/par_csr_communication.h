@@ -121,7 +121,7 @@ typedef struct
    HYPRE_MemoryLocation         recv_location;
    HYPRE_Int                    num_requests;
    hypre_MPI_Request           *requests;
-   MPI_Comm                     comm;
+   hypre_MPICommWrapper        *comm;
 } hypre_ParCSRCommHandle;
 
 /*--------------------------------------------------------------------------

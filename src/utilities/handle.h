@@ -46,9 +46,6 @@ typedef struct
    HYPRE_Int              struct_comm_recv_buffer_size;
    HYPRE_Int              struct_comm_send_buffer_size;
 
-   /* MPI */
-   HYPRE_Int              comm_keys[HYPRE_MAX_NUM_COMM_KEYS];
-
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_Int              use_gpu_aware_mpi;
 #endif
@@ -98,16 +95,6 @@ typedef struct
 
 #define hypre_HandleDeviceData(hypre_handle)                     ((hypre_handle) -> device_data)
 #define hypre_HandleDeviceGSMethod(hypre_handle)                 ((hypre_handle) -> device_gs_method)
-
-#define hypre_HandleMPICommKeys(hypre_handle)                    ((hypre_handle) -> comm_keys)
-#define hypre_HandleMPICommKeySendLocation(hypre_handle)         ((hypre_handle) -> comm_keys[0])
-#define hypre_HandleMPICommKeyRecvLocation(hypre_handle)         ((hypre_handle) -> comm_keys[1])
-#define hypre_HandleMPICommKeySendBufferLocation(hypre_handle)   ((hypre_handle) -> comm_keys[2])
-#define hypre_HandleMPICommKeyRecvBufferLocation(hypre_handle)   ((hypre_handle) -> comm_keys[3])
-#define hypre_HandleMPICommKeySendBuffer(hypre_handle)           ((hypre_handle) -> comm_keys[4])
-#define hypre_HandleMPICommKeyRecvBuffer(hypre_handle)           ((hypre_handle) -> comm_keys[5])
-#define hypre_HandleMPICommKeyPreSendRequest(hypre_handle)       ((hypre_handle) -> comm_keys[6])
-#define hypre_HandleMPICommKeyPostRecvRequest(hypre_handle)      ((hypre_handle) -> comm_keys[7])
 
 #define hypre_HandleUseGpuAwareMPI(hypre_handle)                 ((hypre_handle) -> use_gpu_aware_mpi)
 #define hypre_HandleMPICopyBufferLocation(hypre_handle)          ((hypre_handle) -> mpi_copy_buffer_location)

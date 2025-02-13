@@ -144,7 +144,7 @@ typedef struct hypre_CommHandle_struct
 
    /* set = 0, add = 1 */
    HYPRE_Int             action;
-   MPI_Comm              comm;
+   hypre_MPICommWrapper *comm;
 } hypre_CommHandle;
 
 /*--------------------------------------------------------------------------

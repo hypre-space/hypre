@@ -1477,15 +1477,15 @@ hypre_MPI_Irecv( void               *buf,
 }
 
 HYPRE_Int
-hypre_MPI_Isend_Multiple( void               *buf,
-                          HYPRE_Int           num,
-                          HYPRE_Int          *displs,
-                          HYPRE_Int          *counts,
-                          hypre_MPI_Datatype  datatype,
-                          HYPRE_Int          *procs,
-                          HYPRE_Int           tag,
-                          hypre_MPI_Comm      comm,
-                          hypre_MPI_Request  *requests )
+hypre_MPI_Isend_Multiple( void                 *buf,
+                          HYPRE_Int             num,
+                          HYPRE_Int            *displs,
+                          HYPRE_Int            *counts,
+                          hypre_MPI_Datatype    datatype,
+                          HYPRE_Int            *procs,
+                          HYPRE_Int             tag,
+                          hypre_MPICommWrapper *comm,
+                          hypre_MPI_Request    *requests )
 {
    if (!num)
    {
@@ -1513,22 +1513,22 @@ hypre_MPI_Isend_Multiple( void               *buf,
    {
       HYPRE_Int start = displs[i];
       HYPRE_Int len = counts ? counts[i] : displs[i + 1] - start;
-      hypre_MPI_Isend((char *) sbuf + start * data_size, len, datatype, procs[i], tag, comm, &requests[i]);
+      hypre_MPI_Isend((char *) sbuf + start * data_size, len, datatype, procs[i], tag, hypre_MPICommWrapperComm(comm), &requests[i]);
    }
 
    return hypre_error_flag;
 }
 
 HYPRE_Int
-hypre_MPI_Irecv_Multiple( void               *buf,
-                          HYPRE_Int           num,
-                          HYPRE_Int          *displs,
-                          HYPRE_Int          *counts,
-                          hypre_MPI_Datatype  datatype,
-                          HYPRE_Int          *procs,
-                          HYPRE_Int           tag,
-                          hypre_MPI_Comm      comm,
-                          hypre_MPI_Request  *requests)
+hypre_MPI_Irecv_Multiple( void                 *buf,
+                          HYPRE_Int             num,
+                          HYPRE_Int            *displs,
+                          HYPRE_Int            *counts,
+                          hypre_MPI_Datatype    datatype,
+                          HYPRE_Int            *procs,
+                          HYPRE_Int             tag,
+                          hypre_MPICommWrapper *comm,
+                          hypre_MPI_Request    *requests)
 {
    if (!num)
    {
@@ -1545,7 +1545,7 @@ hypre_MPI_Irecv_Multiple( void               *buf,
    {
       HYPRE_Int start = displs[i];
       HYPRE_Int len = counts ? counts[i] : displs[i + 1] - start;
-      hypre_MPI_Irecv((char *) rbuf + start * data_size, len, datatype, procs[i], tag, comm, &requests[i]);
+      hypre_MPI_Irecv((char *) rbuf + start * data_size, len, datatype, procs[i], tag, hypre_MPICommWrapperComm(comm), &requests[i]);
    }
 
    if (rbuf != buf)
@@ -1582,15 +1582,15 @@ hypre_MPI_Send_init( void               *buf,
 }
 
 HYPRE_Int
-hypre_MPI_Send_init_Multiple( void               *buf,
-                              HYPRE_Int           num,
-                              HYPRE_Int          *displs,
-                              HYPRE_Int          *counts,
-                              hypre_MPI_Datatype  datatype,
-                              HYPRE_Int          *procs,
-                              HYPRE_Int           tag,
-                              hypre_MPI_Comm      comm,
-                              hypre_MPI_Request  *requests )
+hypre_MPI_Send_init_Multiple( void                 *buf,
+                              HYPRE_Int             num,
+                              HYPRE_Int            *displs,
+                              HYPRE_Int            *counts,
+                              hypre_MPI_Datatype    datatype,
+                              HYPRE_Int            *procs,
+                              HYPRE_Int             tag,
+                              hypre_MPICommWrapper *comm,
+                              hypre_MPI_Request    *requests )
 {
    if (!num)
    {
@@ -1623,7 +1623,7 @@ hypre_MPI_Send_init_Multiple( void               *buf,
    {
       HYPRE_Int start = displs[i];
       HYPRE_Int len = counts ? counts[i] : displs[i + 1] - start;
-      hypre_MPI_Send_init((char *) sbuf + start * data_size, len, datatype, procs[i], tag, comm, &requests[i]);
+      hypre_MPI_Send_init((char *) sbuf + start * data_size, len, datatype, procs[i], tag, hypre_MPICommWrapperComm(comm), &requests[i]);
    }
 
    return hypre_error_flag;
@@ -1644,15 +1644,15 @@ hypre_MPI_Recv_init( void               *buf,
 }
 
 HYPRE_Int
-hypre_MPI_Recv_init_Multiple( void               *buf,
-                              HYPRE_Int           num,
-                              HYPRE_Int          *displs,
-                              HYPRE_Int          *counts,
-                              hypre_MPI_Datatype  datatype,
-                              HYPRE_Int          *procs,
-                              HYPRE_Int           tag,
-                              hypre_MPI_Comm      comm,
-                              hypre_MPI_Request  *requests )
+hypre_MPI_Recv_init_Multiple( void                 *buf,
+                              HYPRE_Int             num,
+                              HYPRE_Int            *displs,
+                              HYPRE_Int            *counts,
+                              hypre_MPI_Datatype    datatype,
+                              HYPRE_Int            *procs,
+                              HYPRE_Int             tag,
+                              hypre_MPICommWrapper *comm,
+                              hypre_MPI_Request    *requests )
 {
    if (!num)
    {
@@ -1669,7 +1669,7 @@ hypre_MPI_Recv_init_Multiple( void               *buf,
    {
       HYPRE_Int start = displs[i];
       HYPRE_Int len = counts ? counts[i] : displs[i + 1] - start;
-      hypre_MPI_Recv_init((char *) rbuf + start * data_size, len, datatype, procs[i], tag, comm, &requests[i]);
+      hypre_MPI_Recv_init((char *) rbuf + start * data_size, len, datatype, procs[i], tag, hypre_MPICommWrapperComm(comm), &requests[i]);
    }
 
    if (rbuf != buf)
@@ -1971,232 +1971,170 @@ hypre_NeedMPICopyBuffer(hypre_MemoryLocation memory_location)
 }
 
 HYPRE_Int
-hypre_MPICommSetSendLocation(hypre_MPI_Comm       comm,
-                             hypre_MemoryLocation location)
+hypre_MPICommSetSendLocation(hypre_MPICommWrapper *comm,
+                             hypre_MemoryLocation  location)
 {
-   hypre_Handle *handle = hypre_handle();
-   hypre_MPI_Comm_set_attr(comm, hypre_HandleMPICommKeySendLocation(handle), (void *) location);
+   hypre_MPICommWrapperSendLocation(comm) = location;
    return hypre_error_flag;
 }
 
 hypre_MemoryLocation
-hypre_MPICommGetSendLocation(hypre_MPI_Comm comm)
+hypre_MPICommGetSendLocation(hypre_MPICommWrapper *comm)
 {
-   HYPRE_Int flag, *atrr_val;
-   hypre_MemoryLocation location = hypre_MEMORY_UNDEFINED;
-   hypre_MPI_Comm_get_attr(comm, hypre_HandleMPICommKeySendLocation(hypre_handle()), &atrr_val, &flag);
-   if (flag)
-   {
-      location = (hypre_MPI_Aint) atrr_val;
-   }
-   return (location);
+   return hypre_MPICommWrapperSendLocation(comm);
 }
 
 HYPRE_Int
-hypre_MPICommDeleteSendLocation(hypre_MPI_Comm comm)
+hypre_MPICommDeleteSendLocation(hypre_MPICommWrapper *comm)
 {
-   hypre_Handle *handle = hypre_handle();
-   hypre_MPI_Comm_delete_attr(comm, hypre_HandleMPICommKeySendLocation(handle));
+   hypre_MPICommWrapperSendLocation(comm) = hypre_MEMORY_UNDEFINED;
    return hypre_error_flag;
 }
 
 HYPRE_Int
-hypre_MPICommSetRecvLocation(hypre_MPI_Comm       comm,
-                             hypre_MemoryLocation location)
+hypre_MPICommSetRecvLocation(hypre_MPICommWrapper *comm,
+                             hypre_MemoryLocation  location)
 {
-   hypre_Handle *handle = hypre_handle();
-   hypre_MPI_Comm_set_attr(comm, hypre_HandleMPICommKeyRecvLocation(handle), (void *) location);
+   hypre_MPICommWrapperRecvLocation(comm) = location;
    return hypre_error_flag;
 }
 
 hypre_MemoryLocation
-hypre_MPICommGetRecvLocation(hypre_MPI_Comm comm)
+hypre_MPICommGetRecvLocation(hypre_MPICommWrapper *comm)
 {
-   HYPRE_Int flag, *atrr_val;
-   hypre_MemoryLocation location = hypre_MEMORY_UNDEFINED;
-   hypre_MPI_Comm_get_attr(comm, hypre_HandleMPICommKeyRecvLocation(hypre_handle()), &atrr_val, &flag);
-   if (flag)
-   {
-      location = (hypre_MPI_Aint) atrr_val;
-   }
-   return (location);
+   return hypre_MPICommWrapperRecvLocation(comm);
 }
 
 HYPRE_Int
-hypre_MPICommDeleteRecvLocation(hypre_MPI_Comm comm)
+hypre_MPICommDeleteRecvLocation(hypre_MPICommWrapper *comm)
 {
-   hypre_Handle *handle = hypre_handle();
-   hypre_MPI_Comm_delete_attr(comm, hypre_HandleMPICommKeyRecvLocation(handle));
+   hypre_MPICommWrapperRecvLocation(comm) = hypre_MEMORY_UNDEFINED;
    return hypre_error_flag;
 }
 
 HYPRE_Int
-hypre_MPICommSetSendBufferLocation(hypre_MPI_Comm       comm,
-                                   hypre_MemoryLocation location)
+hypre_MPICommSetSendBufferLocation(hypre_MPICommWrapper *comm,
+                                   hypre_MemoryLocation  location)
 {
-   hypre_Handle *handle = hypre_handle();
-   hypre_MPI_Comm_set_attr(comm, hypre_HandleMPICommKeySendBufferLocation(handle), (void *) location);
+   hypre_MPICommWrapperSendBufferLocation(comm) = location;
    return hypre_error_flag;
 }
 
 hypre_MemoryLocation
-hypre_MPICommGetSendBufferLocation(hypre_MPI_Comm comm)
+hypre_MPICommGetSendBufferLocation(hypre_MPICommWrapper *comm)
 {
-   HYPRE_Int flag, *atrr_val;
-   hypre_MemoryLocation location = hypre_MEMORY_UNDEFINED;
-   hypre_MPI_Comm_get_attr(comm, hypre_HandleMPICommKeySendBufferLocation(hypre_handle()), &atrr_val, &flag);
-   if (flag)
-   {
-      location = (hypre_MPI_Aint) atrr_val;
-   }
-   return (location);
+   return hypre_MPICommWrapperSendBufferLocation(comm);
 }
 
 HYPRE_Int
-hypre_MPICommDeleteSendBufferLocation(hypre_MPI_Comm comm)
+hypre_MPICommDeleteSendBufferLocation(hypre_MPICommWrapper *comm)
 {
-   hypre_Handle *handle = hypre_handle();
-   hypre_MPI_Comm_delete_attr(comm, hypre_HandleMPICommKeySendBufferLocation(handle));
+   hypre_MPICommWrapperSendBufferLocation(comm) = hypre_MEMORY_UNDEFINED;
    return hypre_error_flag;
 }
 
 HYPRE_Int
-hypre_MPICommSetRecvBufferLocation(hypre_MPI_Comm comm, hypre_MemoryLocation location)
+hypre_MPICommSetRecvBufferLocation(hypre_MPICommWrapper *comm,
+                                   hypre_MemoryLocation  location)
 {
-   hypre_Handle *handle = hypre_handle();
-   hypre_MPI_Comm_set_attr(comm, hypre_HandleMPICommKeyRecvBufferLocation(handle), (void *) location);
+   hypre_MPICommWrapperRecvBufferLocation(comm) = location;
    return hypre_error_flag;
 }
 
 hypre_MemoryLocation
-hypre_MPICommGetRecvBufferLocation(hypre_MPI_Comm comm)
+hypre_MPICommGetRecvBufferLocation(hypre_MPICommWrapper *comm)
 {
-   HYPRE_Int flag, *atrr_val;
-   hypre_MemoryLocation location = hypre_MEMORY_UNDEFINED;
-   hypre_MPI_Comm_get_attr(comm, hypre_HandleMPICommKeyRecvBufferLocation(hypre_handle()), &atrr_val, &flag);
-   if (flag)
-   {
-      location = (hypre_MPI_Aint) atrr_val;
-   }
-   return (location);
+   return hypre_MPICommWrapperRecvBufferLocation(comm);
 }
 
 HYPRE_Int
-hypre_MPICommDeleteRecvBufferLocation(hypre_MPI_Comm comm)
+hypre_MPICommDeleteRecvBufferLocation(hypre_MPICommWrapper *comm)
 {
-   hypre_Handle *handle = hypre_handle();
-   hypre_MPI_Comm_delete_attr(comm, hypre_HandleMPICommKeyRecvBufferLocation(handle));
+   hypre_MPICommWrapperRecvBufferLocation(comm) = hypre_MEMORY_UNDEFINED;
    return hypre_error_flag;
 }
 
 HYPRE_Int
-hypre_MPICommSetSendBuffer(hypre_MPI_Comm comm,
-                           void          *buffer)
+hypre_MPICommSetSendBuffer(hypre_MPICommWrapper *comm,
+                           void                 *buffer)
 {
-   hypre_MPI_Comm_set_attr(comm, hypre_HandleMPICommKeySendBuffer(hypre_handle()), buffer);
+   hypre_MPICommWrapperSendBuffer(comm) = buffer;
    return hypre_error_flag;
 }
 
 void *
-hypre_MPICommGetSendBuffer(hypre_MPI_Comm comm)
+hypre_MPICommGetSendBuffer(hypre_MPICommWrapper *comm)
 {
-   HYPRE_Int flag;
-   void *buffer = NULL;
-   hypre_MPI_Comm_get_attr(comm, hypre_HandleMPICommKeySendBuffer(hypre_handle()), &buffer, &flag);
-   if (!flag)
-   {
-      buffer = NULL;
-   }
-   return (buffer);
+   return hypre_MPICommWrapperSendBuffer(comm);
 }
 
 HYPRE_Int
-hypre_MPICommDeleteSendBuffer(hypre_MPI_Comm comm)
+hypre_MPICommDeleteSendBuffer(hypre_MPICommWrapper *comm)
 {
-   hypre_MPI_Comm_delete_attr(comm, hypre_HandleMPICommKeySendBuffer(hypre_handle()));
+   hypre_MPICommWrapperSendBuffer(comm) = NULL;
    return hypre_error_flag;
 }
 
 HYPRE_Int
-hypre_MPICommSetRecvBuffer(hypre_MPI_Comm comm, void *buffer)
+hypre_MPICommSetRecvBuffer(hypre_MPICommWrapper *comm,
+                           void                 *buffer)
 {
-   hypre_MPI_Comm_set_attr(comm, hypre_HandleMPICommKeyRecvBuffer(hypre_handle()), buffer);
+   hypre_MPICommWrapperRecvBuffer(comm) = buffer;
    return hypre_error_flag;
 }
 
 void *
-hypre_MPICommGetRecvBuffer(hypre_MPI_Comm comm)
+hypre_MPICommGetRecvBuffer(hypre_MPICommWrapper *comm)
 {
-   HYPRE_Int flag;
-   void *buffer = NULL;
-   hypre_MPI_Comm_get_attr(comm, hypre_HandleMPICommKeyRecvBuffer(hypre_handle()), &buffer, &flag);
-   if (!flag)
-   {
-      buffer = NULL;
-   }
-   return (buffer);
+   return hypre_MPICommWrapperRecvBuffer(comm);
 }
 
 HYPRE_Int
-hypre_MPICommDeleteRecvBuffer(hypre_MPI_Comm comm)
+hypre_MPICommDeleteRecvBuffer(hypre_MPICommWrapper *comm)
 {
-   hypre_MPI_Comm_delete_attr(comm, hypre_HandleMPICommKeyRecvBuffer(hypre_handle()));
+   hypre_MPICommWrapperRecvBuffer(comm) = NULL;
    return hypre_error_flag;
 }
 
 HYPRE_Int
-hypre_MPICommSetPreSendRequest(hypre_MPI_Comm     comm,
-                               hypre_MPI_Request *request)
+hypre_MPICommSetPreSendRequest(hypre_MPICommWrapper *comm,
+                               hypre_MPI_Request    *request)
 {
-   hypre_MPI_Comm_set_attr(comm, hypre_HandleMPICommKeyPreSendRequest(hypre_handle()), request);
+   hypre_MPICommWrapperPreSendRequest(comm) = request;
    return hypre_error_flag;
 }
 
 hypre_MPI_Request *
-hypre_MPICommGetPreSendRequest(hypre_MPI_Comm comm)
+hypre_MPICommGetPreSendRequest(hypre_MPICommWrapper *comm)
 {
-   HYPRE_Int flag;
-   hypre_MPI_Request *request = NULL;
-   hypre_MPI_Comm_get_attr(comm, hypre_HandleMPICommKeyPreSendRequest(hypre_handle()), &request, &flag);
-   if (!flag)
-   {
-      request = NULL;
-   }
-   return (request);
+   return hypre_MPICommWrapperPreSendRequest(comm);
 }
 
 HYPRE_Int
-hypre_MPICommDeletePreSendRequest(hypre_MPI_Comm comm)
+hypre_MPICommDeletePreSendRequest(hypre_MPICommWrapper *comm)
 {
-   hypre_MPI_Comm_delete_attr(comm, hypre_HandleMPICommKeyPreSendRequest(hypre_handle()));
+   hypre_MPICommWrapperPreSendRequest(comm) = NULL;
    return hypre_error_flag;
 }
 
 HYPRE_Int
-hypre_MPICommSetPostRecvRequest(hypre_MPI_Comm     comm,
-                                hypre_MPI_Request *request)
+hypre_MPICommSetPostRecvRequest(hypre_MPICommWrapper *comm,
+                                hypre_MPI_Request    *request)
 {
-   hypre_MPI_Comm_set_attr(comm, hypre_HandleMPICommKeyPostRecvRequest(hypre_handle()), request);
+   hypre_MPICommWrapperPostRecvRequest(comm) = request;
    return hypre_error_flag;
 }
 
 hypre_MPI_Request *
-hypre_MPICommGetPostRecvRequest(hypre_MPI_Comm comm)
+hypre_MPICommGetPostRecvRequest(hypre_MPICommWrapper *comm)
 {
-   HYPRE_Int flag;
-   hypre_MPI_Request *request = NULL;
-   hypre_MPI_Comm_get_attr(comm, hypre_HandleMPICommKeyPostRecvRequest(hypre_handle()), &request, &flag);
-   if (!flag)
-   {
-      request = NULL;
-   }
-   return (request);
+   return hypre_MPICommWrapperPostRecvRequest(comm);
 }
 
 HYPRE_Int
-hypre_MPICommDeletePostRecvRequest(hypre_MPI_Comm comm)
+hypre_MPICommDeletePostRecvRequest(hypre_MPICommWrapper *comm)
 {
-   hypre_MPI_Comm_delete_attr(comm, hypre_HandleMPICommKeyPostRecvRequest(hypre_handle()));
+   hypre_MPICommWrapperPostRecvRequest(comm) = NULL;
    return hypre_error_flag;
 }
 
@@ -2344,3 +2282,16 @@ hypre_grequest_query_fn(void *extra_state, hypre_MPI_Status *status)
 
 hypre_int
 hypre_grequest_noop_cancel_fn(void *extra_state, hypre_int complete) { return hypre_MPI_SUCCESS; }
+
+hypre_MPICommWrapper *
+hypre_MPICommWrapperCreate(hypre_MPI_Comm comm)
+{
+   hypre_MPICommWrapper *wrapper = hypre_CTAlloc(hypre_MPICommWrapper, 1, HYPRE_MEMORY_HOST);
+   hypre_MPICommWrapperComm(wrapper) = comm;
+   hypre_MPICommWrapperSendLocation(wrapper) = hypre_MEMORY_UNDEFINED;
+   hypre_MPICommWrapperRecvLocation(wrapper) = hypre_MEMORY_UNDEFINED;
+   hypre_MPICommWrapperSendBufferLocation(wrapper) = hypre_MEMORY_UNDEFINED;
+   hypre_MPICommWrapperRecvBufferLocation(wrapper) = hypre_MEMORY_UNDEFINED;
+
+   return wrapper;
+}
