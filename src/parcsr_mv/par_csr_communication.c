@@ -353,7 +353,7 @@ hypre_ParCSRCommHandleWait( hypre_ParCSRCommHandle *comm_handle )
       if (hypre_MPI_SUCCESS != ret)
       {
          char errmsg[256];
-         hypre_sprintf(errmsg, "MPI error %d in %s (%s, line %u)\n", ret, __FUNCTION__, __FILE__, __LINE__);
+         hypre_sprintf(errmsg, "MPI error %d in %s (%s, line %u)\n", ret, __func__, __FILE__, __LINE__);
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, errmsg);
       }
    }
