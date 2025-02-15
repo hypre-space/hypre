@@ -208,7 +208,7 @@ hypre_ParCSRBlockMatrixMatvecT( HYPRE_Complex    alpha,
    hypre_CSRBlockMatrixMatvecT(alpha, diag, x_local, beta, y_local);
 
 
-   hypre_ParCSRCommHandleDestroy(comm_handle);
+   hypre_ParCSRBlockCommHandleDestroy(comm_handle);
    comm_handle = NULL;
 
    index = 0;
