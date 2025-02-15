@@ -171,7 +171,7 @@ hypre_ParCSRPersistentCommHandleStart( hypre_ParCSRCommHandle *comm_handle )
 
    if (pre_send_request)
    {
-      hypre_MPI_Request_get_status(*pre_send_request, &flag, MPI_STATUS_IGNORE);
+      hypre_MPI_Request_get_status(*pre_send_request, &flag, hypre_MPI_STATUS_IGNORE);
    }
 
    if (hypre_ParCSRCommHandleNumRequests(comm_handle) > 0)
@@ -370,7 +370,7 @@ hypre_ParCSRCommHandleWait( hypre_ParCSRCommHandle *comm_handle )
       }
       else
       {
-         hypre_MPI_Wait(post_recv_request, MPI_STATUS_IGNORE);
+         hypre_MPI_Wait(post_recv_request, hypre_MPI_STATUS_IGNORE);
       }
    }
 
