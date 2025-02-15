@@ -964,57 +964,57 @@ hypre_MPI_Type_size(hypre_MPI_Datatype datatype, HYPRE_Int *size)
 }
 
 HYPRE_Int
-hypre_MPI_Isend_Multiple( void               *buf,
-                          HYPRE_Int           num,
-                          HYPRE_Int          *displs,
-                          HYPRE_Int          *counts,
-                          hypre_MPI_Datatype  datatype,
-                          HYPRE_Int          *procs,
-                          HYPRE_Int           tag,
-                          hypre_MPI_Comm      comm,
-                          hypre_MPI_Request  *requests )
+hypre_MPI_Isend_Multiple( void                 *buf,
+                          HYPRE_Int             num,
+                          HYPRE_Int            *displs,
+                          HYPRE_Int            *counts,
+                          hypre_MPI_Datatype    datatype,
+                          HYPRE_Int            *procs,
+                          HYPRE_Int             tag,
+                          hypre_MPICommWrapper *comm,
+                          hypre_MPI_Request    *requests )
 {
    return (0);
 }
 
 HYPRE_Int
-hypre_MPI_Irecv_Multiple( void               *buf,
-                          HYPRE_Int           num,
-                          HYPRE_Int          *displs,
-                          HYPRE_Int          *counts,
-                          hypre_MPI_Datatype  datatype,
-                          HYPRE_Int          *procs,
-                          HYPRE_Int           tag,
-                          hypre_MPI_Comm      comm,
-                          hypre_MPI_Request  *requests)
+hypre_MPI_Irecv_Multiple( void                 *buf,
+                          HYPRE_Int             num,
+                          HYPRE_Int            *displs,
+                          HYPRE_Int            *counts,
+                          hypre_MPI_Datatype    datatype,
+                          HYPRE_Int            *procs,
+                          HYPRE_Int             tag,
+                          hypre_MPICommWrapper *comm,
+                          hypre_MPI_Request    *requests)
 {
    return (0);
 }
 
 HYPRE_Int
-hypre_MPI_Send_init_Multiple( void               *buf,
-                              HYPRE_Int           num,
-                              HYPRE_Int          *displs,
-                              HYPRE_Int          *counts,
-                              hypre_MPI_Datatype  datatype,
-                              HYPRE_Int          *procs,
-                              HYPRE_Int           tag,
-                              hypre_MPI_Comm      comm,
-                              hypre_MPI_Request  *requests)
+hypre_MPI_Send_init_Multiple( void                 *buf,
+                              HYPRE_Int             num,
+                              HYPRE_Int            *displs,
+                              HYPRE_Int            *counts,
+                              hypre_MPI_Datatype    datatype,
+                              HYPRE_Int            *procs,
+                              HYPRE_Int             tag,
+                              hypre_MPICommWrapper *comm,
+                              hypre_MPI_Request    *requests)
 {
    return (0);
 }
 
 HYPRE_Int
-hypre_MPI_Recv_init_Multiple( void               *buf,
-                              HYPRE_Int           num,
-                              HYPRE_Int          *displs,
-                              HYPRE_Int          *counts,
-                              hypre_MPI_Datatype  datatype,
-                              HYPRE_Int          *procs,
-                              HYPRE_Int           tag,
-                              hypre_MPI_Comm      comm,
-                              hypre_MPI_Request  *requests)
+hypre_MPI_Recv_init_Multiple( void                 *buf,
+                              HYPRE_Int             num,
+                              HYPRE_Int            *displs,
+                              HYPRE_Int            *counts,
+                              hypre_MPI_Datatype    datatype,
+                              HYPRE_Int            *procs,
+                              HYPRE_Int             tag,
+                              hypre_MPICommWrapper *comm,
+                              hypre_MPI_Request    *requests)
 {
    return (0);
 }
@@ -1966,7 +1966,7 @@ hypre_NeedMPICopyBuffer(hypre_MemoryLocation memory_location)
       so we always has a host buffer for MPI.
       O.w. make sure return Z E R O!
     */
-   return 1;
+   return 0;
 #endif
 }
 
