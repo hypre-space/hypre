@@ -1186,7 +1186,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    if (post_recv_request)
    {
-      hypre_MPI_Wait(post_recv_request, MPI_STATUS_IGNORE);
+      hypre_MPI_Wait(post_recv_request, hypre_MPI_STATUS_IGNORE);
    }
 
    /*--------------------------------------------------------------------
