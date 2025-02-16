@@ -764,51 +764,6 @@ hypre_CommTypeSetEntry( hypre_Box           *box,
    return hypre_error_flag;
 }
 
-/**
- * @brief Manages memory buffers for structured communication
- *
- * This function handles buffer allocation and deallocation based on the `action` parameter.
- * - If `action == 0`, it returns a buffer that is enough for the specified `size`
- *                     in the given `memory_location`.
- * - If `action == 1`, it releases the buffer.
- * - There is only one pointer managed. The same ptr will be returned unless a realloc is needed.
- *
- * @param memory_location The memory location where the buffer should be allocated
- *                        (e.g., host or device memory).
- * @param size The size of the buffer in BYTES (used for allocation).
- * @param action The action to perform:
- *               - `0`: Return buffer.
- *               - `1`: Free buffer.
- *
- * @return Pointer to the buffer if `action == 0`, or `NULL` if `action == 1`.
- */
-
-char *
-hypre_StructCommunicationManageBuffer(HYPRE_MemoryLocation memory_location,
-                                      size_t               size,
-                                      HYPRE_Int            action)
-{
-   static char *buffer_ptr = NULL;
-   static size_t buffer_size = 0;
-
-   if (0 == action)
-   {
-      if (size > buffer_size)
-      {
-         buffer_size = 2 * size;
-         hypre_TFree(buffer_ptr, memory_location);
-         buffer_ptr = hypre_TAlloc(char, buffer_size, memory_location);
-      }
-      return buffer_ptr;
-   }
-   else if (1 == action)
-   {
-      buffer_size = 0;
-      hypre_TFree(buffer_ptr, memory_location);
-   }
-   return NULL;
-}
-
 HYPRE_Int
 hypre_CommHandleAllocateBuffers( HYPRE_MemoryLocation  memory_location,
                                  hypre_CommPkg        *comm_pkg,
@@ -830,8 +785,7 @@ hypre_CommHandleAllocateBuffers( HYPRE_MemoryLocation  memory_location,
    HYPRE_Int             size_of_elem          = sizeof(HYPRE_Complex);
    HYPRE_Int             i;
 
-   buffer_ptr = (HYPRE_Complex *) hypre_StructCommunicationManageBuffer(memory_location,
-      (num_send_elems + num_recv_elems) * sizeof(HYPRE_Complex), 0);
+   buffer_ptr = hypre_TAlloc(HYPRE_Complex, num_send_elems + num_recv_elems, memory_location);
 
    /* allocate send buffers */
    send_buffers = hypre_TAlloc(HYPRE_Complex *, num_sends + 1, HYPRE_MEMORY_HOST);
@@ -1190,13 +1144,14 @@ HYPRE_Int
 hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 {
    hypre_MPICommWrapper *comm         = hypre_CommHandleComm(comm_handle);
-   hypre_CommPkg       *comm_pkg         = hypre_CommHandleCommPkg(comm_handle);
-   HYPRE_Complex      **send_buffers     = hypre_CommHandleSendBuffers(comm_handle);
-   HYPRE_Complex      **recv_buffers     = hypre_CommHandleRecvBuffers(comm_handle);
-   HYPRE_Int            action           = hypre_CommHandleAction(comm_handle);
+   hypre_CommPkg       *comm_pkg      = hypre_CommHandleCommPkg(comm_handle);
+   HYPRE_Complex      **send_buffers  = hypre_CommHandleSendBuffers(comm_handle);
+   HYPRE_Complex      **recv_buffers  = hypre_CommHandleRecvBuffers(comm_handle);
+   HYPRE_Int            action        = hypre_CommHandleAction(comm_handle);
 
    HYPRE_Int            ndim         = hypre_CommPkgNDim(comm_pkg);
    HYPRE_Int            num_values   = hypre_CommPkgNumValues(comm_pkg);
+   HYPRE_Int            num_sends    = hypre_CommPkgNumSends(comm_pkg);
    HYPRE_Int            num_recvs    = hypre_CommPkgNumRecvs(comm_pkg);
 
    hypre_CommType      *comm_type;
@@ -1215,7 +1170,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    HYPRE_Int            i, j, d, ll;
 
-   HYPRE_MemoryLocation memory_location     = hypre_HandleMemoryLocation(hypre_handle());
+   HYPRE_MemoryLocation memory_location   = hypre_HandleMemoryLocation(hypre_handle());
    hypre_MPI_Request   *post_recv_request = hypre_MPICommGetPostRecvRequest(comm);
 
    /*--------------------------------------------------------------------
@@ -1367,11 +1322,11 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    hypre_MemoryLocation  send_buffer_location  = hypre_MPICommGetSendBufferLocation(comm);
    hypre_MemoryLocation  recv_buffer_location  = hypre_MPICommGetRecvBufferLocation(comm);
-   void                 *send_buffer           = hypre_MPICommGetSendBuffer(comm);
-   void                 *recv_buffer           = hypre_MPICommGetRecvBuffer(comm);
+   void                 *send_copy_buffer      = hypre_MPICommGetSendBuffer(comm);
+   void                 *recv_copy_buffer      = hypre_MPICommGetRecvBuffer(comm);
 
-   _hypre_TFree(send_buffer, send_buffer_location);
-   _hypre_TFree(recv_buffer, recv_buffer_location);
+   _hypre_TFree(send_copy_buffer, send_buffer_location);
+   _hypre_TFree(recv_copy_buffer, recv_buffer_location);
 
   /* attributes should be deleted when the communicator is being freed *
     * but since we delete comm right after, so we don't ....            */
@@ -1389,6 +1344,15 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    hypre_TFree(comm, HYPRE_MEMORY_HOST);
    hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
+
+   if (num_sends > 0)
+   {
+      hypre_TFree(send_buffers[0], memory_location);
+   }
+   else if (num_recvs > 0)
+   {
+      hypre_TFree(recv_buffers[0], memory_location);
+   }
 
    hypre_TFree(send_buffers, HYPRE_MEMORY_HOST);
    hypre_TFree(recv_buffers, HYPRE_MEMORY_HOST);

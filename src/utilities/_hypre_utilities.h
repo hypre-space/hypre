@@ -2648,8 +2648,6 @@ HYPRE_Int hypre_MemoryTrackerSetFileName(const char *file_name);
 HYPRE_Int hypre_MagmaInitialize(void);
 HYPRE_Int hypre_MagmaFinalize(void);
 #endif
-
-char *hypre_StructCommunicationManageBuffer(HYPRE_MemoryLocation memory_location, size_t size, HYPRE_Int action);
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.

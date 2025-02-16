@@ -524,6 +524,3 @@ HYPRE_Int hypre_MemoryTrackerSetFileName(const char *file_name);
 HYPRE_Int hypre_MagmaInitialize(void);
 HYPRE_Int hypre_MagmaFinalize(void);
 #endif
-
-/* Consider refactoring or relocating this prototype */
-char *hypre_StructCommunicationManageBuffer(HYPRE_MemoryLocation memory_location, size_t size, HYPRE_Int action);

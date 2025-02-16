@@ -68,9 +68,6 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
       return hypre_error_flag;
    }
 
-   /* free struct communication buffer memory */
-   hypre_StructCommunicationManageBuffer(hypre_HandleMemoryLocation(hypre_handle_), 0, 1);
-
 #if defined(HYPRE_USING_GPU)
    hypre_DeviceDataDestroy(hypre_HandleDeviceData(hypre_handle_));
    hypre_HandleDeviceData(hypre_handle_) = NULL;
