@@ -777,7 +777,6 @@ hypre_CommHandleAllocateBuffers( HYPRE_MemoryLocation  memory_location,
    void                 *recv_copy_buffer      = NULL;
    HYPRE_Complex       **send_buffers          = NULL;
    HYPRE_Complex       **recv_buffers          = NULL;
-   HYPRE_Complex        *buffer_ptr            = NULL;
    HYPRE_Int             num_sends             = hypre_CommPkgNumSends(comm_pkg);
    HYPRE_Int             num_recvs             = hypre_CommPkgNumRecvs(comm_pkg);
    HYPRE_Int             num_send_elems        = hypre_CommPkgSendBufsize(comm_pkg);
@@ -785,13 +784,11 @@ hypre_CommHandleAllocateBuffers( HYPRE_MemoryLocation  memory_location,
    HYPRE_Int             size_of_elem          = sizeof(HYPRE_Complex);
    HYPRE_Int             i;
 
-   buffer_ptr = hypre_TAlloc(HYPRE_Complex, num_send_elems + num_recv_elems, memory_location);
-
    /* allocate send buffers */
    send_buffers = hypre_TAlloc(HYPRE_Complex *, num_sends + 1, HYPRE_MEMORY_HOST);
    if (num_sends > 0)
    {
-      send_buffers[0] = buffer_ptr;
+      send_buffers[0] = hypre_TAlloc(HYPRE_Complex, num_send_elems, memory_location);
       for (i = 1; i <= num_sends; i++)
       {
          hypre_CommType *comm_type = hypre_CommPkgSendType(comm_pkg, i - 1);
@@ -803,7 +800,7 @@ hypre_CommHandleAllocateBuffers( HYPRE_MemoryLocation  memory_location,
    recv_buffers = hypre_TAlloc(HYPRE_Complex *, num_recvs + 1, HYPRE_MEMORY_HOST);
    if (num_recvs > 0)
    {
-      recv_buffers[0] = buffer_ptr + num_send_elems;
+      recv_buffers[0] = hypre_TAlloc(HYPRE_Complex, num_recv_elems, memory_location);
       for (i = 1; i <= num_recvs; i++)
       {
          hypre_CommType *comm_type = hypre_CommPkgRecvType(comm_pkg, i - 1);
@@ -1349,7 +1346,8 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    {
       hypre_TFree(send_buffers[0], memory_location);
    }
-   else if (num_recvs > 0)
+
+   if (num_recvs > 0)
    {
       hypre_TFree(recv_buffers[0], memory_location);
    }
