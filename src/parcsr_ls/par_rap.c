@@ -48,6 +48,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    HYPRE_Int              num_cols_offd_RT = hypre_CSRMatrixNumCols(RT_offd);
    HYPRE_Int              num_rows_offd_RT = hypre_CSRMatrixNumRows(RT_offd);
    hypre_ParCSRCommPkg   *comm_pkg_RT = hypre_ParCSRMatrixCommPkg(RT);
+   HYPRE_Int              num_recvs_RT = 0;
    HYPRE_Int              num_sends_RT = 0;
    HYPRE_Int             *send_map_starts_RT = NULL;
    HYPRE_Int             *send_map_elmts_RT = NULL;
@@ -191,6 +192,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
 
    if (comm_pkg_RT)
    {
+      num_recvs_RT = hypre_ParCSRCommPkgNumRecvs(comm_pkg_RT);
       num_sends_RT = hypre_ParCSRCommPkgNumSends(comm_pkg_RT);
       send_map_starts_RT = hypre_ParCSRCommPkgSendMapStarts(comm_pkg_RT);
       send_map_elmts_RT = hypre_ParCSRCommPkgSendMapElmts(comm_pkg_RT);
@@ -199,6 +201,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    {
       hypre_MatvecCommPkgCreate(RT);
       comm_pkg_RT = hypre_ParCSRMatrixCommPkg(RT);
+      num_recvs_RT = hypre_ParCSRCommPkgNumRecvs(comm_pkg_RT);
       num_sends_RT = hypre_ParCSRCommPkgNumSends(comm_pkg_RT);
       send_map_starts_RT = hypre_ParCSRCommPkgSendMapStarts(comm_pkg_RT);
       send_map_elmts_RT = hypre_ParCSRCommPkgSendMapElmts(comm_pkg_RT);
@@ -1037,15 +1040,16 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
 #endif
 
    RAP_ext_size = 0;
-
-   void *request;
-   hypre_ExchangeExternalRowsInit(RAP_int, comm_pkg_RT, &request);
-   RAP_ext = hypre_ExchangeExternalRowsWait(request);
-   RAP_ext_i = hypre_CSRMatrixI(RAP_ext);
-   RAP_ext_j = hypre_CSRMatrixBigJ(RAP_ext);
-   RAP_ext_data = hypre_CSRMatrixData(RAP_ext);
-   RAP_ext_size = RAP_ext_i[hypre_CSRMatrixNumRows(RAP_ext)];
-
+   if (num_sends_RT || num_recvs_RT)
+   {
+      void *request;
+      hypre_ExchangeExternalRowsInit(RAP_int, comm_pkg_RT, &request);
+      RAP_ext = hypre_ExchangeExternalRowsWait(request);
+      RAP_ext_i = hypre_CSRMatrixI(RAP_ext);
+      RAP_ext_j = hypre_CSRMatrixBigJ(RAP_ext);
+      RAP_ext_data = hypre_CSRMatrixData(RAP_ext);
+      RAP_ext_size = RAP_ext_i[hypre_CSRMatrixNumRows(RAP_ext)];
+   }
    if (num_cols_offd_RT)
    {
       hypre_CSRMatrixDestroy(RAP_int);
@@ -2035,8 +2039,11 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
       R_offd = NULL;
    }
 
-   hypre_CSRMatrixDestroy(RAP_ext);
-   RAP_ext = NULL;
+   if (num_sends_RT || num_recvs_RT)
+   {
+      hypre_CSRMatrixDestroy(RAP_ext);
+      RAP_ext = NULL;
+   }
    hypre_TFree(P_mark_array, HYPRE_MEMORY_HOST);
    hypre_TFree(A_mark_array, HYPRE_MEMORY_HOST);
    hypre_TFree(P_ext_diag_i, HYPRE_MEMORY_HOST);
