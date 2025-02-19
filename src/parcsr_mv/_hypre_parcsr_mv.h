@@ -1084,8 +1084,6 @@ HYPRE_Int hypre_ParCSRMatrixExtractSubmatrixFC( hypre_ParCSRMatrix *A, HYPRE_Int
                                                 HYPRE_Real strength_thresh);
 HYPRE_Int hypre_ParCSRMatrixDiagScale( hypre_ParCSRMatrix *par_A, hypre_ParVector *par_ld,
                                        hypre_ParVector *par_rd );
-HYPRE_Int hypre_ParCSRMatrixDiagScaleHost( hypre_ParCSRMatrix *par_A,  hypre_ParVector *par_ld,
-                                       hypre_ParVector *par_rd );                                       
 HYPRE_Int hypre_ParCSRMatrixReorder ( hypre_ParCSRMatrix *A );
 HYPRE_Int hypre_ParCSRMatrixAdd( HYPRE_Complex alpha, hypre_ParCSRMatrix *A, HYPRE_Complex beta,
                                  hypre_ParCSRMatrix *B, hypre_ParCSRMatrix **Cout);
@@ -1151,7 +1149,6 @@ HYPRE_Int hypre_ParCSRMatrixInitialize_v2( hypre_ParCSRMatrix *matrix,
                                            HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_ParCSRMatrixInitialize ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixSetNumNonzeros ( hypre_ParCSRMatrix *matrix );
-HYPRE_Int hypre_ParCSRMatrixSetNumNonzeros_core( hypre_ParCSRMatrix *matrix, const char* format );
 HYPRE_Int hypre_ParCSRMatrixSetDNumNonzeros ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixSetNumRownnz ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixSetDataOwner ( hypre_ParCSRMatrix *matrix, HYPRE_Int owns_data );
@@ -1179,9 +1176,6 @@ HYPRE_Int hypre_ParCSRMatrixGetLocalRange ( hypre_ParCSRMatrix *matrix, HYPRE_Bi
                                             HYPRE_BigInt *row_end, HYPRE_BigInt *col_start, HYPRE_BigInt *col_end );
 HYPRE_Int hypre_ParCSRMatrixGetRow ( hypre_ParCSRMatrix *mat, HYPRE_BigInt row, HYPRE_Int *size,
                                      HYPRE_BigInt **col_ind, HYPRE_Complex **values );
-HYPRE_Int hypre_ParCSRMatrixGetRowHost( hypre_ParCSRMatrix  *mat, HYPRE_BigInt row,
-                                     HYPRE_Int *size, HYPRE_BigInt **col_ind,
-                                     HYPRE_Complex **values );
 HYPRE_Int hypre_ParCSRMatrixRestoreRow ( hypre_ParCSRMatrix *matrix, HYPRE_BigInt row,
                                          HYPRE_Int *size, HYPRE_BigInt **col_ind, HYPRE_Complex **values );
 hypre_ParCSRMatrix *hypre_CSRMatrixToParCSRMatrix ( MPI_Comm comm, hypre_CSRMatrix *A,
@@ -1232,12 +1226,6 @@ HYPRE_Int hypre_ParCSRMatrixMatvecOutOfPlace ( HYPRE_Complex alpha, hypre_ParCSR
 HYPRE_Int hypre_ParCSRMatrixMatvecOutOfPlaceDevice ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
                                                      hypre_ParVector *x, HYPRE_Complex beta,
                                                      hypre_ParVector *b, hypre_ParVector *y );
-HYPRE_Int hypre_ParCSRMatrixMatvecOutOfPlaceHost( HYPRE_Complex       alpha,
-                                        hypre_ParCSRMatrix *A,
-                                        hypre_ParVector    *x,
-                                        HYPRE_Complex       beta,
-                                        hypre_ParVector    *b,
-                                        hypre_ParVector    *y );
 // y = alpha*A*x + beta*y
 HYPRE_Int hypre_ParCSRMatrixMatvec ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A, hypre_ParVector *x,
                                      HYPRE_Complex beta, hypre_ParVector *y );
@@ -1246,9 +1234,6 @@ HYPRE_Int hypre_ParCSRMatrixMatvecT ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A
 HYPRE_Int hypre_ParCSRMatrixMatvecTDevice ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
                                             hypre_ParVector *x, HYPRE_Complex beta,
                                             hypre_ParVector *y );
-HYPRE_Int hypre_ParCSRMatrixMatvecTHost( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
-                               		    hypre_ParVector    *x, HYPRE_Complex beta,
-                                            hypre_ParVector    *y );                                            
 HYPRE_Int hypre_ParCSRMatrixMatvecT_unpack( hypre_ParCSRCommPkg *comm_pkg, HYPRE_Int num_cols,
                                             HYPRE_Complex *recv_data, HYPRE_Complex *local_data );
 HYPRE_Int hypre_ParCSRMatrixMatvec_FF ( HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
