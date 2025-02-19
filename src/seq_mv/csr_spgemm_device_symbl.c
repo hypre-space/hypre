@@ -36,9 +36,9 @@ hypreDevice_CSRSpGemmRownnzUpperboundNoBin( HYPRE_Int  m,
                                             HYPRE_Int *d_rc,
                                             char      *d_rf )
 {
-   constexpr HYPRE_Int SHMEM_HASH_SIZE = SYMBL_HASH_SIZE[5];
-   constexpr HYPRE_Int GROUP_SIZE = T_GROUP_SIZE[5];
-   const HYPRE_Int BIN = 5;
+   static constexpr HYPRE_Int SHMEM_HASH_SIZE = SYMBL_HASH_SIZE[5];
+   static constexpr HYPRE_Int GROUP_SIZE = T_GROUP_SIZE[5];
+   static constexpr HYPRE_Int BIN = 5;
 
    const bool need_ghash = in_rc > 0;
    const bool can_fail = in_rc < 2;

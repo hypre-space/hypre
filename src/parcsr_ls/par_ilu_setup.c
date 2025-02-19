@@ -39,7 +39,9 @@ hypre_ILUSetup( void               *ilu_vdata,
 
    /* Pointers to device data, note that they are not NULL only when needed */
 #if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_UNIFIED_MEMORY)
    HYPRE_Int             test_opt            = hypre_ParILUDataTestOption(ilu_data);
+#endif
    hypre_ParCSRMatrix   *Aperm               = hypre_ParILUDataAperm(ilu_data);
    hypre_ParCSRMatrix   *R                   = hypre_ParILUDataR(ilu_data);
    hypre_ParCSRMatrix   *P                   = hypre_ParILUDataP(ilu_data);
