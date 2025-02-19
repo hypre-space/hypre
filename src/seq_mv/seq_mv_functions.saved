@@ -132,6 +132,7 @@ hypre_SeqVectorElmdivpy
 hypre_SeqVectorElmdivpyHost
 hypre_SeqVectorElmdivpyMarked
 hypre_SeqVectorInitialize
+hypre_SeqVectorInitializeShell
 hypre_SeqVectorInitialize_v2
 hypre_SeqVectorInnerProd
 hypre_SeqVectorInnerProdHost
@@ -143,6 +144,7 @@ hypre_SeqVectorScale
 hypre_SeqVectorScaleHost
 hypre_SeqVectorSetConstantValues
 hypre_SeqVectorSetConstantValuesHost
+hypre_SeqVectorSetData
 hypre_SeqVectorSetDataOwner
 hypre_SeqVectorSetRandomValues
 hypre_SeqVectorSetSize

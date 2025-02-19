@@ -144,6 +144,8 @@ hypre_ParCSRCommPkgUpdateVecStarts
 hypre_ParCSRFindExtendCommPkg
 hypre_ParCSRMatrixBlkFilter
 hypre_ParCSRMatrixBlkFilterHost
+hypre_ParCSRMatMatDiag
+hypre_ParCSRMatMatDiagHost
 hypre_ParCSRMatrixCopy_C
 hypre_ParCSRMatrixZero_F
 hypre_ParMatMinus_F
@@ -265,6 +267,7 @@ hypre_ParVectorGetValues
 hypre_ParVectorGetValues2
 hypre_ParVectorGetValuesHost
 hypre_ParVectorInitialize
+hypre_ParVectorInitializeShell
 hypre_ParVectorInitialize_v2
 hypre_ParVectorInnerProd
 hypre_ParVectorLocalSumElts
@@ -278,6 +281,7 @@ hypre_ParVectorResize
 hypre_ParVectorScale
 hypre_ParVectorSetComponent
 hypre_ParVectorSetConstantValues
+hypre_ParVectorSetData
 hypre_ParVectorSetDataOwner
 hypre_ParVectorSetLocalSize
 hypre_ParVectorSetRandomValues

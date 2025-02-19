@@ -16,6 +16,8 @@ hypre_ijmatrixgetobjecttype
 hypre_ijmatrixgetrowcounts
 hypre_ijmatrixgetvalues
 hypre_ijmatrixinitialize
+hypre_ijmatrixinitialize_v2
+hypre_ijmatrixmigrate
 hypre_ijmatrixprint
 hypre_ijmatrixread
 hypre_ijmatrixsetconstantvalues
@@ -33,6 +35,8 @@ hypre_ijvectorgetobject
 hypre_ijvectorgetobjecttype
 hypre_ijvectorgetvalues
 hypre_ijvectorinitialize
+hypre_ijvectorinitialize_v2
+hypre_ijvectormigrate
 hypre_ijvectorprint
 hypre_ijvectorread
 hypre_ijvectorsetmaxoffprocelmt
@@ -45,6 +49,7 @@ HYPRE_IJMatrixAddToValues2
 HYPRE_IJMatrixAssemble
 HYPRE_IJMatrixCreate
 HYPRE_IJMatrixDestroy
+HYPRE_IJMatrixGetGlobalInfo
 HYPRE_IJMatrixGetLocalRange
 HYPRE_IJMatrixGetObject
 HYPRE_IJMatrixGetObjectType
@@ -54,6 +59,7 @@ HYPRE_IJMatrixGetValues2
 HYPRE_IJMatrixGetValuesAndZeroOut
 HYPRE_IJMatrixInitialize
 HYPRE_IJMatrixInitialize_v2
+HYPRE_IJMatrixMigrate
 HYPRE_IJMatrixNorm
 HYPRE_IJMatrixPartialClone
 HYPRE_IJMatrixPrint
@@ -81,13 +87,17 @@ HYPRE_IJVectorGetObject
 HYPRE_IJVectorGetObjectType
 HYPRE_IJVectorGetValues
 HYPRE_IJVectorInitialize
+HYPRE_IJVectorInitializeShell
 HYPRE_IJVectorInitialize_v2
 HYPRE_IJVectorInnerProd
+HYPRE_IJVectorMigrate
 HYPRE_IJVectorPrint
 HYPRE_IJVectorPrintBinary
 HYPRE_IJVectorRead
 HYPRE_IJVectorReadBinary
 HYPRE_IJVectorSetComponent
+HYPRE_IJVectorSetConstantValues
+HYPRE_IJVectorSetData
 HYPRE_IJVectorSetMaxOffProcElmts
 HYPRE_IJVectorSetNumComponents
 HYPRE_IJVectorSetObjectType
@@ -114,6 +124,7 @@ hypre_IJMatrixGetRowCountsParCSR
 hypre_IJMatrixGetValuesParCSR
 hypre_IJMatrixInitializeParCSR
 hypre_IJMatrixInitializeParCSR_v2
+hypre_IJMatrixMigrateParCSR
 hypre_IJMatrixNormParCSR
 hypre_IJMatrixSetConstantValuesParCSR
 hypre_IJMatrixSetConstantValuesParCSRHost
@@ -135,8 +146,12 @@ hypre_IJVectorDestroyPar
 hypre_IJVectorDistributePar
 hypre_IJVectorGetValuesPar
 hypre_IJVectorInitializePar
+hypre_IJVectorInitializeParShell
 hypre_IJVectorInitializePar_v2
+hypre_IJVectorMigrateParCSR
 hypre_IJVectorSetComponentPar
+hypre_IJVectorSetConstantValuesPar
 hypre_IJVectorSetMaxOffProcElmtsPar
+hypre_IJVectorSetParData
 hypre_IJVectorSetValuesPar
 hypre_IJVectorZeroValuesPar

@@ -13,9 +13,13 @@
 # Assumes hypre has been built (non-multiprecision) to generate object files
 ###
 #  * make distclean
-#  * ./configure --enable-debug --enable-complex --with-timing
+#  * ./configure --enable-debug --enable-complex --enable-hopscotch --with-timing
 #  * make -s 
 ###
+
+ make distclean
+ ./configure --enable-debug --enable-complex --enable-hopscotch --with-timing
+ make -s -j
 
 # output: prints out directories whose saved files need updating
 # Suggested next steps:

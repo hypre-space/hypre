@@ -18,16 +18,19 @@ hypre_bind_device_id
 HYPRE_CheckError
 HYPRE_ClearAllErrors
 HYPRE_ClearError
+HYPRE_ClearErrorMessages
 HYPRE_DescribeError
 hypre_error_code_restore
 hypre_error_code_save
 hypre_error_handler
+hypre_error_handler_clear_messages
 HYPRE_GetError
 HYPRE_GetErrorArg
 HYPRE_GetErrorMessages
 HYPRE_GetGlobalError
 HYPRE_PrintErrorMessages
 HYPRE_SetPrintErrorMode
+HYPRE_SetPrintErrorVerbosity
 hypre_CreateBinaryTree
 hypre_DataExchangeList
 hypre_DestroyBinaryTree
@@ -309,6 +312,7 @@ hypre_IncFLOPCount
 hypre_InitializeTiming
 hypre_PrintTiming
 hypre_CheckDirExists
+hypre_ConvertIndicesToString
 hypre_CreateDir
 hypre_CreateNextDirOfSequence
 hypre_multmod
