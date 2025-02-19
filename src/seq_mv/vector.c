@@ -78,28 +78,15 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SeqVectorInitialize_v2
- *
- * Initialize a vector at a given memory location
+ * hypre_SeqVectorInitializeShell
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorInitialize_v2( hypre_Vector *vector, HYPRE_MemoryLocation memory_location )
+hypre_SeqVectorInitializeShell( hypre_Vector *vector )
 {
    HYPRE_Int  size = hypre_VectorSize(vector);
    HYPRE_Int  num_vectors = hypre_VectorNumVectors(vector);
    HYPRE_Int  multivec_storage_method = hypre_VectorMultiVecStorageMethod(vector);
-
-   hypre_VectorMemoryLocation(vector) = memory_location;
-
-   /* Caveat: for pre-existing data, the memory location must be guaranteed
-    * to be consistent with `memory_location'
-    * Otherwise, mismatches will exist and problems will be encountered
-    * when being used, and freed */
-   if (!hypre_VectorData(vector))
-   {
-      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, num_vectors * size, memory_location);
-   }
 
    if (multivec_storage_method == 0)
    {
@@ -121,6 +108,60 @@ hypre_SeqVectorInitialize_v2( hypre_Vector *vector, HYPRE_MemoryLocation memory_
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SeqVectorSetData
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorSetData( hypre_Vector  *vector,
+                        HYPRE_Complex *data )
+{
+   /* Free data array if already present */
+   if (hypre_VectorData(vector) && hypre_VectorOwnsData(vector))
+   {
+      hypre_TFree(hypre_VectorData(vector), hypre_VectorMemoryLocation(vector));
+   }
+
+   /* Set data pointer passed via input  */
+   hypre_VectorData(vector) = data;
+
+   /* Remove data pointer ownership */
+   hypre_VectorOwnsData(vector) = 0;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorInitialize_v2
+ *
+ * Initialize a vector at a given memory location
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorInitialize_v2( hypre_Vector         *vector,
+                              HYPRE_MemoryLocation  memory_location )
+{
+   HYPRE_Int  size        = hypre_VectorSize(vector);
+   HYPRE_Int  num_vectors = hypre_VectorNumVectors(vector);
+
+   /* Set up the basic structure and metadata for the local vector */
+   hypre_SeqVectorInitializeShell(vector);
+
+   /* Set memory location */
+   hypre_VectorMemoryLocation(vector) = memory_location;
+
+   /* Caveat: for pre-existing data, the memory location must be guaranteed
+    * to be consistent with `memory_location'
+    * Otherwise, mismatches will exist and problems will be encountered
+    * when being used, and freed */
+   if (!hypre_VectorData(vector))
+   {
+      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, num_vectors * size, memory_location);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SeqVectorInitialize
  *--------------------------------------------------------------------------*/
 
@@ -136,7 +177,7 @@ hypre_SeqVectorInitialize( hypre_Vector *vector )
 
 HYPRE_Int
 hypre_SeqVectorSetDataOwner( hypre_Vector *vector,
-                             HYPRE_Int     owns_data   )
+                             HYPRE_Int     owns_data )
 {
    hypre_VectorOwnsData(vector) = owns_data;
 
@@ -1223,7 +1264,7 @@ hypre_SeqVectorMax( HYPRE_Complex alpha,
 
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();

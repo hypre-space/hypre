@@ -35,9 +35,11 @@ FILES =\
  HYPRE_parcsr_mv_mp.c
 
 CUFILES =\
- par_csr_matvec_device.c\
  par_csr_fffc_device.c\
+ par_csr_filter_device.c\
  par_csr_matop_device.c\
+ par_csr_matmat_device.c\
+ par_csr_matvec_device.c\
  par_csr_triplemat_device.c\
  par_vector_device.c
 
@@ -63,6 +65,8 @@ MuP_FILES = \
  F90_HYPRE_parcsr_vector.c\
  F90_parcsr_matrix.c\
  F90_par_vector.c\
+ HYPRE_parcsr_matrix.c\
+ HYPRE_parcsr_vector.c\
  gen_fffc.c\
  new_commpkg.c\
  numbers.c\
@@ -75,14 +79,13 @@ MuP_FILES = \
  par_csr_matop.c\
  par_csr_matrix.c\
  par_csr_matrix_stats.c\
+ par_csr_matmat.c\
  par_csr_matvec.c\
  par_csr_matop_marked.c\
  par_csr_triplemat.c\
  par_make_system.c\
  par_vector.c\
- par_vector_batched.c\
- HYPRE_parcsr_matrix.c\
- HYPRE_parcsr_vector.c
+ par_vector_batched.c
 
 ifeq (${MP_BUILD}, 1) 
    COBJS = ${FILES:.c=.o}

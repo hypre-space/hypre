@@ -18,12 +18,12 @@
 
 #undef __FUNC__
 #define __FUNC__ "EuclidGetRow (HYPRE_GET_ROW)"
-void EuclidGetRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val) 
+void EuclidGetRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val)
 {
   START_FUNC_DH
   HYPRE_Int ierr;
   HYPRE_ParCSRMatrix mat = (HYPRE_ParCSRMatrix) A;
-  ierr = HYPRE_ParCSRMatrixGetRow(mat, row, len, ind, val); 
+  ierr = HYPRE_ParCSRMatrixGetRow(mat, row, len, (HYPRE_BigInt **) ind, val);
   if (ierr) {
     hypre_sprintf(msgBuf_dh, "HYPRE_ParCSRMatrixRestoreRow(row= %i) returned %i", row+1, ierr);
     SET_V_ERROR(msgBuf_dh);
@@ -33,12 +33,12 @@ void EuclidGetRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE
 
 #undef __FUNC__
 #define __FUNC__ "EuclidRestoreRow (HYPRE_GET_ROW)"
-void EuclidRestoreRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val) 
+void EuclidRestoreRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val)
 {
   START_FUNC_DH
   HYPRE_Int ierr;
   HYPRE_ParCSRMatrix mat = (HYPRE_ParCSRMatrix) A;
-  ierr = HYPRE_ParCSRMatrixRestoreRow(mat, row, len, ind, val); 
+  ierr = HYPRE_ParCSRMatrixRestoreRow(mat, row, len, (HYPRE_BigInt **) ind, val);
   if (ierr) {
     hypre_sprintf(msgBuf_dh, "HYPRE_ParCSRMatrixRestoreRow(row= %i) returned %i", row+1, ierr);
     SET_V_ERROR(msgBuf_dh);
@@ -51,8 +51,8 @@ void EuclidRestoreRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, H
 void EuclidGetDimensions(void *A, HYPRE_Int *beg_row, HYPRE_Int *rowsLocal, HYPRE_Int *rowsGlobal)
 {
   START_FUNC_DH
-  HYPRE_Int ierr, m, n;
-  HYPRE_Int row_start, row_end, col_start, col_end;
+  HYPRE_Int ierr;
+  HYPRE_BigInt m, n, row_start, row_end, col_start, col_end;
   HYPRE_ParCSRMatrix mat = (HYPRE_ParCSRMatrix) A;
 
   ierr = HYPRE_ParCSRMatrixGetDims(mat, &m, &n);
@@ -61,8 +61,8 @@ void EuclidGetDimensions(void *A, HYPRE_Int *beg_row, HYPRE_Int *rowsLocal, HYPR
     SET_V_ERROR(msgBuf_dh);
   }
 
-  ierr = HYPRE_ParCSRMatrixGetLocalRange(mat, &row_start, &row_end, 
-                                       &col_start, &col_end);
+  ierr = HYPRE_ParCSRMatrixGetLocalRange(mat, &row_start, &row_end,
+                                         &col_start, &col_end);
   if (ierr) {
     hypre_sprintf(msgBuf_dh, "HYPRE_ParCSRMatrixGetLocalRange() returned %i", ierr);
     SET_V_ERROR(msgBuf_dh);
@@ -98,14 +98,14 @@ HYPRE_Int EuclidReadLocalNz(void *A)
 
 #undef __FUNC__
 #define __FUNC__ "EuclidGetRow (PETSC_GET_ROW)"
-void EuclidGetRow(void *Ain, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val) 
+void EuclidGetRow(void *Ain, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val)
 {
   START_FUNC_DH
   Mat A = Ain;
   HYPRE_Int ierr;
 
   ierr = MatGetRow(A, row, len, ind, val);
-  if (ierr) { 
+  if (ierr) {
     hypre_sprintf(msgBuf_dh, "PETSc's MatGetRow bombed for row= %i", row);
     SET_V_ERROR(msgBuf_dh);
   }
@@ -115,7 +115,7 @@ void EuclidGetRow(void *Ain, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYP
 
 #undef __FUNC__
 #define __FUNC__ "EuclidRestoreRow (PETSC_GET_ROW)"
-void EuclidRestoreRow(void *Ain, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val) 
+void EuclidRestoreRow(void *Ain, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val)
 {
   START_FUNC_DH
   Mat A = (Mat)Ain;
@@ -143,7 +143,7 @@ void EuclidGetDimensions(void *Ain, HYPRE_Int *beg_row, HYPRE_Int *rowsLocal, HY
     hypre_sprintf(msgBuf_dh, "PETSc's MatGetOwnershipRange failed");
     SET_V_ERROR(msgBuf_dh);
   }
-  ierr = MatGetSize(A, &rows, &cols); 
+  ierr = MatGetSize(A, &rows, &cols);
   if (ierr) {
     hypre_sprintf(msgBuf_dh, "PETSc'MatGetSize failed");
     SET_V_ERROR(msgBuf_dh);
@@ -167,7 +167,7 @@ HYPRE_Int EuclidReadLocalNz(void *Ain)
   Mat A = (Mat)Ain;
   HYPRE_Int m, n, ierr;
 
-  ierr = MatGetLocalSize(Ain, &m, &n); 
+  ierr = MatGetLocalSize(Ain, &m, &n);
   if (ierr) SET_ERROR(-1, "PETSc::MatGetLocalSize failed!\n");
   END_FUNC_VAL(m)
 }
@@ -175,17 +175,17 @@ HYPRE_Int EuclidReadLocalNz(void *Ain)
 
 
 /*-------------------------------------------------------------------
- *  Euclid  
+ *  Euclid
  *-------------------------------------------------------------------*/
 #elif defined(EUCLID_GET_ROW)
 
 
 #undef __FUNC__
 #define __FUNC__ "EuclidGetRow (EUCLID_GET_ROW)"
-void EuclidGetRow(void *A, HYPRE_Int globalRow, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val) 
+void EuclidGetRow(void *A, HYPRE_Int globalRow, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val)
 {
   START_FUNC_DH
-  Mat_dh B = (Mat_dh)A;  
+  Mat_dh B = (Mat_dh)A;
   HYPRE_Int row = globalRow - B->beg_row;
   if (row > B->m) {
     hypre_sprintf(msgBuf_dh, "requested globalRow= %i, which is local row= %i, but only have %i rows!",
@@ -193,14 +193,14 @@ void EuclidGetRow(void *A, HYPRE_Int globalRow, HYPRE_Int *len, HYPRE_Int **ind,
     SET_V_ERROR(msgBuf_dh);
   }
   *len = B->rp[row+1] - B->rp[row];
-  if (ind != NULL) *ind = B->cval + B->rp[row]; 
-  if (val != NULL) *val = B->aval + B->rp[row]; 
+  if (ind != NULL) *ind = B->cval + B->rp[row];
+  if (val != NULL) *val = B->aval + B->rp[row];
   END_FUNC_DH
 }
 
 #undef __FUNC__
 #define __FUNC__ "EuclidRestoreRow (EUCLID_GET_ROW)"
-void EuclidRestoreRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val) 
+void EuclidRestoreRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val)
 {
   START_FUNC_DH
   END_FUNC_DH
@@ -211,7 +211,7 @@ void EuclidRestoreRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, H
 void EuclidGetDimensions(void *A, HYPRE_Int *beg_row, HYPRE_Int *rowsLocal, HYPRE_Int *rowsGlobal)
 {
   START_FUNC_DH
-  Mat_dh B = (Mat_dh)A;  
+  Mat_dh B = (Mat_dh)A;
   *beg_row = B->beg_row;
   *rowsLocal = B->m;
   *rowsGlobal = B->n;
@@ -223,7 +223,7 @@ void EuclidGetDimensions(void *A, HYPRE_Int *beg_row, HYPRE_Int *rowsLocal, HYPR
 HYPRE_Int EuclidReadLocalNz(void *A)
 {
   START_FUNC_DH
-  Mat_dh B = (Mat_dh)A;  
+  Mat_dh B = (Mat_dh)A;
   HYPRE_Int nz = B->rp[B->m];
   END_FUNC_VAL(nz)
 }
@@ -235,7 +235,7 @@ HYPRE_Int EuclidReadLocalNz(void *A)
 
 #undef __FUNC__
 #define __FUNC__ "EuclidGetRow (ERROR)"
-void EuclidGetRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val) 
+void EuclidGetRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val)
 {
   START_FUNC_DH
   SET_ERROR(EUCLID_ERROR, "Oops; missing XXX_GET_ROW definition!");
@@ -244,7 +244,7 @@ void EuclidGetRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE
 
 #undef __FUNC__
 #define __FUNC__ "EuclidRestoreRow (ERROR)"
-void EuclidRestoreRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val) 
+void EuclidRestoreRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val)
 {
   START_FUNC_DH
   SET_ERROR(EUCLID_ERROR, "Oops; missing XXX_GET_ROW definition!");
@@ -321,7 +321,7 @@ void PrintMatUsingGetRow(void* A, HYPRE_Int beg_row, HYPRE_Int m,
           newRow = n2o_row[i] + beg_row;
           EuclidGetRow(A, newRow, &len, &cval, &aval); CHECK_V_ERROR;
           for (j=0; j<len; ++j) {
-            newCol = o2n_col[cval[j]-beg_row] + beg_row; 
+            newCol = o2n_col[cval[j]-beg_row] + beg_row;
             hypre_fprintf(fp, "%i %i %g\n", i+1, newCol, aval[j]);
           }
           EuclidRestoreRow(A, i, &len, &cval, &aval); CHECK_V_ERROR;
@@ -347,8 +347,7 @@ void PrintMatUsingGetRow(void* A, HYPRE_Int beg_row, HYPRE_Int m,
 void Euclid_dhInputHypreMat(Euclid_dh ctx, HYPRE_ParCSRMatrix A)
 {
   START_FUNC_DH
-  HYPRE_Int M, N;
-  HYPRE_Int beg_row, end_row, junk;
+  HYPRE_BigInt M, N, beg_row, end_row, junk;
 
   /* get dimension and ownership information */
   HYPRE_ParCSRMatrixGetDims(A, &M , &N);

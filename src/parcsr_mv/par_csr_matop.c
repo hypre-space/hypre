@@ -3487,7 +3487,7 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
 
    hypre_ParCSRMatrix *C;
    HYPRE_BigInt       *col_map_offd_C = NULL;
-   HYPRE_Int          *map_B_to_C;
+   HYPRE_Int          *map_B_to_C = NULL;
 
    hypre_CSRMatrix *C_diag = NULL;
    hypre_CSRMatrix *C_tmp_diag = NULL;
@@ -4161,7 +4161,7 @@ hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    if ( hypre_GetExecPolicy2(memory_location_A, memory_location_B) == HYPRE_EXEC_DEVICE )
    {
       hypre_CSRMatrixMoveDiagFirstDevice(hypre_ParCSRMatrixDiag(C));
-      hypre_SyncComputeStream(hypre_handle());
+      hypre_SyncComputeStream();
    }
 #endif
 

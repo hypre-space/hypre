@@ -61,7 +61,7 @@ hypre_spgemm_hash_insert_numer(
       auto atomic_key = sycl::atomic_ref <
                         HYPRE_Int, sycl::memory_order::relaxed,
                         sycl::memory_scope::device,
-                        sycl::access::address_space::generic_space > (HashKeys[j]);
+                        sycl::access::address_space::local_space > (HashKeys[j]);
       old = -1;
       atomic_key.compare_exchange_strong(old, key);
 #else
@@ -75,8 +75,11 @@ hypre_spgemm_hash_insert_numer(
          auto atomic_val = sycl::atomic_ref <
                            HYPRE_Complex, sycl::memory_order::relaxed,
                            sycl::memory_scope::device,
-                           sycl::access::address_space::generic_space > (HashVals[j]);
-         atomic_val.fetch_add(val);
+                           sycl::access::address_space::local_space > (HashVals[j]);
+         /* WM: replacing fetch_add(), which has slow performance due to poor compiler interpretation */
+         /* atomic_val.fetch_add(val); */
+         auto curr = atomic_val.load(sycl::memory_order::relaxed);
+         while (!atomic_val.compare_exchange_strong(curr, curr + val, sycl::memory_order::relaxed)) {}
 #else
          atomicAdd((HYPRE_Complex*)(HashVals + j), val);
 #endif
@@ -121,7 +124,7 @@ hypre_spgemm_hash_insert_numer( HYPRE_Int               HashSize,
       auto atomic_key = sycl::atomic_ref <
                         HYPRE_Int, sycl::memory_order::relaxed,
                         sycl::memory_scope::device,
-                        sycl::access::address_space::generic_space > (HashKeys[j]);
+                        sycl::access::address_space::local_space > (HashKeys[j]);
       old = -1;
       atomic_key.compare_exchange_strong(old, key);
 #else
@@ -135,8 +138,11 @@ hypre_spgemm_hash_insert_numer( HYPRE_Int               HashSize,
          auto atomic_val = sycl::atomic_ref <
                            HYPRE_Complex, sycl::memory_order::relaxed,
                            sycl::memory_scope::device,
-                           sycl::access::address_space::generic_space > (HashVals[j]);
-         atomic_val.fetch_add(val);
+                           sycl::access::address_space::local_space > (HashVals[j]);
+         /* WM: replacing fetch_add(), which has slow performance due to poor compiler interpretation */
+         /* atomic_val.fetch_add(val); */
+         auto curr = atomic_val.load(sycl::memory_order::relaxed);
+         while (!atomic_val.compare_exchange_strong(curr, curr + val, sycl::memory_order::relaxed)) {}
 #else
          atomicAdd((HYPRE_Complex*)(HashVals + j), val);
 #endif
@@ -393,9 +399,9 @@ hypre_spgemm_numeric( hypre_DeviceItem                 &item,
    hypre_device_assert(blockDim.x * blockDim.y == GROUP_SIZE);
 #endif
 
-   /* WM: note - in cuda/hip, exited threads are not required to reach collective calls like
-    *            syncthreads(), but this is not true for sycl (all threads must call the collective).
-    *            Thus, all threads in the block must enter the loop (which is not ensured for cuda). */
+   /* Note - in cuda/hip, exited threads are not required to reach collective calls like
+    *        syncthreads(), but this is not true for sycl (all threads must call the collective).
+    *        Thus, all threads in the block must enter the loop (which is not ensured for cuda). */
 #if defined(HYPRE_USING_SYCL)
    for (HYPRE_Int i = grid_group_id; sycl::any_of_group(item.get_group(), i < M);
         i += grid_num_groups)
@@ -631,6 +637,9 @@ hypre_spgemm_numerical_with_rownnz( HYPRE_Int      m,
    HYPRE_SPGEMM_PRINT("kernel spec [%d %d %d] x [%d %d %d]\n", gDim.x, gDim.y, gDim.z, bDim.x, bDim.y,
                       bDim.z);
 #endif
+#else
+   HYPRE_UNUSED_VAR(k);
+   HYPRE_UNUSED_VAR(n);
 #endif
 
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM) || defined(HYPRE_USING_SYCL)
@@ -810,7 +819,7 @@ HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int  multiProcessorCount,
    const HYPRE_Int num_groups_per_block = hypre_spgemm_get_num_groups_per_block<GROUP_SIZE>();
    const HYPRE_Int block_size = num_groups_per_block * GROUP_SIZE;
    hypre_int numBlocksPerSm = 0;
-   /* WM: note - for now, sycl shmem is alwasy dynamic */
+   /* Note - sycl shmem is alwasy dynamic */
 #if defined(HYPRE_SPGEMM_DEVICE_USE_DSHMEM) || defined(HYPRE_USING_SYCL)
    const hypre_int shmem_bytes = num_groups_per_block * SHMEM_HASH_SIZE *
                                  (sizeof(HYPRE_Int) + sizeof(HYPRE_Complex));
@@ -853,17 +862,17 @@ HYPRE_Int hypre_spgemm_numerical_max_num_blocks( HYPRE_Int  multiProcessorCount,
 #endif
 
 #if defined(HYPRE_USING_CUDA)
-   cudaOccupancyMaxActiveBlocksPerMultiprocessor(
-      &numBlocksPerSm,
-      hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
-      block_size, dynamic_shmem_size);
+   HYPRE_CUDA_CALL(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
+                      &numBlocksPerSm,
+                      hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
+                      block_size, dynamic_shmem_size));
 #endif
 
 #if defined(HYPRE_USING_HIP)
-   hipOccupancyMaxActiveBlocksPerMultiprocessor(
-      &numBlocksPerSm,
-      hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
-      block_size, dynamic_shmem_size);
+   HYPRE_HIP_CALL(hipOccupancyMaxActiveBlocksPerMultiprocessor(
+                     &numBlocksPerSm,
+                     hypre_spgemm_numeric<num_groups_per_block, GROUP_SIZE, SHMEM_HASH_SIZE, true, false, HASH_TYPE, true>,
+                     block_size, dynamic_shmem_size));
 #endif
 
 #if defined(HYPRE_USING_SYCL)

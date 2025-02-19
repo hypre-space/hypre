@@ -101,7 +101,7 @@ typedef enum _hypre_MemoryLocation
  * hypre_GetActualMemLocation
  *   return actual location based on the selected memory model
  *-------------------------------------------------------*/
-static inline hypre_MemoryLocation
+static inline HYPRE_MAYBE_UNUSED_FUNC hypre_MemoryLocation
 hypre_GetActualMemLocation(HYPRE_MemoryLocation location)
 {
    if (location == HYPRE_MEMORY_HOST)

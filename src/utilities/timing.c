@@ -287,7 +287,7 @@ hypre_EndTiming( HYPRE_Int time_index )
       hypre_Handle *hypre_handle_ = hypre_handle();
       if (hypre_HandleDefaultExecPolicy(hypre_handle_) == HYPRE_EXEC_DEVICE)
       {
-         hypre_SyncCudaDevice(hypre_handle_);
+         hypre_SyncDevice();
       }
 #endif
       hypre_StopTiming();

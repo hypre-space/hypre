@@ -71,7 +71,7 @@
       integer*8  solver
       integer*8  precond
 
-      character*32  matfile
+!     character*32  matfile
 
 !     We only have one part and one variable
       nparts = 1
@@ -239,6 +239,8 @@
          iupper(2) =  4
 !        12 grid points, each with 5 stencil entries
          nvalues = 100
+      else
+         nvalues = 0
       endif
 
       do i = 1, nvalues, nentries
@@ -508,5 +510,4 @@
 !     Finalize MPI
       call MPI_Finalize(ierr)
 
-      stop
       end

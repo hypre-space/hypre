@@ -132,7 +132,7 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixPrecision(matrix)          ((matrix) -> matrix_precision)
 #endif
 
-static inline HYPRE_MemoryLocation
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_MemoryLocation
 hypre_ParCSRMatrixMemoryLocation(hypre_ParCSRMatrix *matrix)
 {
    if (!matrix) { return HYPRE_MEMORY_UNDEFINED; }

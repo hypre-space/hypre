@@ -32,7 +32,9 @@ hypre_handle(void)
 hypre_Handle*
 hypre_HandleCreate(void)
 {
-   hypre_Handle *hypre_handle_ = hypre_CTAlloc(hypre_Handle, 1, HYPRE_MEMORY_HOST);
+   /* Note: this allocation is done directly with calloc in order to
+      avoid a segmentation fault when building with HYPRE_USING_UMPIRE_HOST */
+   hypre_Handle *hypre_handle_ = (hypre_Handle*) calloc(1, sizeof(hypre_Handle));
 
    hypre_HandleLogLevel(hypre_handle_) = 0;
    hypre_HandleMemoryLocation(hypre_handle_) = HYPRE_MEMORY_DEVICE;
@@ -48,7 +50,7 @@ hypre_HandleCreate(void)
 #endif
 
 #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
-#if defined(HYPRE_WITH_GPU_AWARE_MPI)
+#if defined(HYPRE_USING_GPU_AWARE_MPI)
    hypre_HandleUseGpuAwareMPI(hypre_handle_) = 1;
 #else
    hypre_HandleUseGpuAwareMPI(hypre_handle_) = 0;
@@ -73,7 +75,11 @@ hypre_HandleDestroy(hypre_Handle *hypre_handle_)
    hypre_HandleDeviceData(hypre_handle_) = NULL;
 #endif
 
-   hypre_TFree(hypre_handle_, HYPRE_MEMORY_HOST);
+   /* Deallocate error messages in error handler */
+   hypre_error_handler_clear_messages();
+
+   /* Note: Directly using free since this variable was allocated with calloc */
+   free((void*) hypre_handle_);
 
    return hypre_error_flag;
 }
@@ -98,7 +104,7 @@ hypre_SetDevice(hypre_int device_id, hypre_Handle *hypre_handle_)
       if (!hypre_HandleDevice(hypre_handle_))
       {
          /* Note: this enforces "explicit scaling," i.e. we treat each tile of a multi-tile GPU as a separate device */
-         sycl::platform platform(sycl::gpu_selector{});
+         sycl::platform platform(sycl::gpu_selector_v);
          auto gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
          hypre_int n_devices = 0;
          hypre_GetDeviceCount(&n_devices);
@@ -149,11 +155,21 @@ hypre_GetDeviceMaxShmemSize(hypre_int  device_id,
       }
 
 #if defined(HYPRE_USING_CUDA)
-      cudaDeviceGetAttribute(&max_size, cudaDevAttrMaxSharedMemoryPerBlock, device_id);
-      cudaDeviceGetAttribute(&max_size_optin, cudaDevAttrMaxSharedMemoryPerBlockOptin, device_id);
+      HYPRE_CUDA_CALL(cudaDeviceGetAttribute(
+                         &max_size,
+                         cudaDevAttrMaxSharedMemoryPerBlock,
+                         device_id));
+
+      HYPRE_CUDA_CALL(cudaDeviceGetAttribute(
+                         &max_size_optin,
+                         cudaDevAttrMaxSharedMemoryPerBlockOptin,
+                         device_id));
 
 #elif defined(HYPRE_USING_HIP)
-      hipDeviceGetAttribute(&max_size, hipDeviceAttributeMaxSharedMemoryPerBlock, device_id);
+      HYPRE_HIP_CALL(hipDeviceGetAttribute(
+                        &max_size,
+                        hipDeviceAttributeMaxSharedMemoryPerBlock,
+                        device_id));
 
 #elif defined(HYPRE_USING_SYCL)
       auto device = *hypre_HandleDevice(hypre_handle());
@@ -207,7 +223,7 @@ hypre_GetDevice(hypre_int *device_id)
    HYPRE_HIP_CALL( hipGetDevice(device_id) );
 
 #elif defined(HYPRE_USING_SYCL)
-   /* WM: note - no sycl call to get which device is setup for use (if the user has already setup a device at all)
+   /* Note - no sycl call to get which device is setup for use (if the user has already setup a device at all)
     * Assume the rank/device binding below */
    HYPRE_Int my_id;
    hypre_int n_devices;
@@ -236,7 +252,7 @@ hypre_GetDeviceCount(hypre_int *device_count)
 
 #elif defined(HYPRE_USING_SYCL)
    (*device_count) = 0;
-   sycl::platform platform(sycl::gpu_selector{});
+   sycl::platform platform(sycl::gpu_selector_v);
    auto const& gpu_devices = platform.get_devices(sycl::info::device_type::gpu);
    HYPRE_Int i;
    for (i = 0; i < gpu_devices.size(); i++)
@@ -458,16 +474,16 @@ HYPRE_PrintDeviceInfo(void)
 
    HYPRE_CUDA_CALL( cudaGetDevice(&dev) );
    HYPRE_CUDA_CALL( cudaGetDeviceProperties(&deviceProp, dev) );
-   hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GB\n", deviceProp.name,
-                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem / 1e9);
+   hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GiB\n", deviceProp.name,
+                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem / (1 << 30));
 
 #elif defined(HYPRE_USING_HIP)
    hipDeviceProp_t deviceProp;
 
    HYPRE_HIP_CALL( hipGetDevice(&dev) );
    HYPRE_HIP_CALL( hipGetDeviceProperties(&deviceProp, dev) );
-   hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GB\n", deviceProp.name,
-                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem / 1e9);
+   hypre_printf("Running on \"%s\", major %d, minor %d, total memory %.2f GiB\n", deviceProp.name,
+                deviceProp.major, deviceProp.minor, deviceProp.totalGlobalMem / (1 << 30));
 
 #elif defined(HYPRE_USING_SYCL)
    auto device = *hypre_HandleDevice(hypre_handle());
