@@ -33,6 +33,9 @@ if(MSVC OR (CMAKE_CXX_COMPILER_ID MATCHES "Intel" AND WIN32))
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang" AND APPLE)
   # Apple Clang specifically uses c++
   target_link_libraries(HYPRE INTERFACE "-lc++")
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "XL|XLClang")
+  # IBM XL C++ needs `-libmc++`
+  target_link_libraries(HYPRE INTERFACE "-libmc++ -lstdc++")
 else()
   # Most other compilers use stdc++
   if(NOT (MSVC OR (CMAKE_CXX_COMPILER_ID MATCHES "Intel" AND WIN32)))
