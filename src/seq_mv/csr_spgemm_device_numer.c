@@ -32,9 +32,9 @@ hypreDevice_CSRSpGemmNumerWithRownnzUpperboundNoBin( HYPRE_Int       m,
                                                      HYPRE_Complex **d_c_out,
                                                      HYPRE_Int      *nnzC_out )
 {
-   constexpr HYPRE_Int SHMEM_HASH_SIZE = NUMER_HASH_SIZE[HYPRE_SPGEMM_DEFAULT_BIN];
-   constexpr HYPRE_Int GROUP_SIZE = T_GROUP_SIZE[HYPRE_SPGEMM_DEFAULT_BIN];
-   const HYPRE_Int BIN = HYPRE_SPGEMM_DEFAULT_BIN;
+   static constexpr HYPRE_Int SHMEM_HASH_SIZE = NUMER_HASH_SIZE[HYPRE_SPGEMM_DEFAULT_BIN];
+   static constexpr HYPRE_Int GROUP_SIZE = T_GROUP_SIZE[HYPRE_SPGEMM_DEFAULT_BIN];
+   static constexpr HYPRE_Int BIN = HYPRE_SPGEMM_DEFAULT_BIN;
 
 #ifdef HYPRE_SPGEMM_PRINTF
 #if defined(HYPRE_USING_SYCL)
