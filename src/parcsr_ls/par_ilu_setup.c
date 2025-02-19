@@ -427,11 +427,11 @@ hypre_ILUSetup( void               *ilu_vdata,
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "GMRES+ILU0-RAP setup on device runs requires unified memory!");
             return hypre_error_flag;
-#endif
-
+#else
             hypre_ILUSetupRAPILU0Device(matA, perm, n, nLU,
                                         &Aperm, &matS, &matALU_d, &matBLU_d,
                                         &matSLU_d, &matE_d, &matF_d, test_opt);
+#endif
          }
          else
 #endif
