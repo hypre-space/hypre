@@ -169,10 +169,7 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
          if (early_assemble)
          {
             stack_elmts_max_new = stack_elmts_required;
-            if (early_assemble == 1)
-            {
-               early_assemble_flag = 1;
-            }
+            early_assemble_flag = 1;
          }
          else
          {
