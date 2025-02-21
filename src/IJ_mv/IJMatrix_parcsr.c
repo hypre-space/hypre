@@ -296,6 +296,9 @@ hypre_IJMatrixSetEarlyAssembleParCSR(hypre_IJMatrix *matrix,
       hypre_IJMatrixTranslator(matrix) = aux_matrix;
    }
    hypre_AuxParCSRMatrixEarlyAssemble(aux_matrix) = early_assemble;
+#else
+   HYPRE_UNUSED_VAR(matrix);
+   HYPRE_UNUSED_VAR(early_assemble);
 #endif
 
    return hypre_error_flag;
