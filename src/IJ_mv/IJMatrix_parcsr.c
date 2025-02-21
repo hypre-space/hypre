@@ -265,6 +265,9 @@ hypre_IJMatrixSetInitAllocationParCSR(hypre_IJMatrix *matrix,
       hypre_IJMatrixTranslator(matrix) = aux_matrix;
    }
    hypre_AuxParCSRMatrixInitAllocFactor(aux_matrix) = factor;
+#else
+   HYPRE_UNUSED_VAR(matrix);
+   HYPRE_UNUSED_VAR(factor);
 #endif
 
    return hypre_error_flag;
