@@ -344,12 +344,29 @@ HYPRE_Int HYPRE_IJMatrixSetDiagOffdSizes(HYPRE_IJMatrix   matrix,
 HYPRE_Int HYPRE_IJMatrixSetMaxOffProcElmts(HYPRE_IJMatrix matrix,
                                            HYPRE_Int      max_off_proc_elmts);
 
+/**
+ * (Optional, GPU only) Sets the initial memory allocation for matrix
+ * assemble, which factor * local number of rows
+ * Not collective.
+ **/
 HYPRE_Int HYPRE_IJMatrixSetInitAllocation(HYPRE_IJMatrix matrix,
                                           HYPRE_Int      factor);
 
+/**
+ * (Optional, GPU only) Sets if matrix assemble routine does reductions
+ * during the accumulation of the entries before calling HYPRE_IJMatrixAssemble.
+ * This early assemble feature may save the peak memory usage but requires
+ * extra work.
+ * Not collective.
+ **/
 HYPRE_Int HYPRE_IJMatrixSetEarlyAssemble(HYPRE_IJMatrix matrix,
                                          HYPRE_Int      early_assemble);
 
+/**
+ * (Optional, GPU only) Sets the grow factor of memory in matrix assemble when
+ * running out of memory.
+ * Not collective.
+ **/
 HYPRE_Int HYPRE_IJMatrixSetGrowFactor(HYPRE_IJMatrix matrix,
                                       HYPRE_Real     factor);
 

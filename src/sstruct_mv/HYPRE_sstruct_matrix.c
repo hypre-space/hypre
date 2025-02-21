@@ -324,7 +324,7 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
 }
 
 HYPRE_Int
-HYPRE_SStructMatrixSetEarlyAssembly( HYPRE_SStructMatrix matrix,
+HYPRE_SStructMatrixSetEarlyAssemble( HYPRE_SStructMatrix matrix,
                                      HYPRE_Int           early_assemble )
 {
    HYPRE_IJMatrix ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
