@@ -37,7 +37,7 @@ HYPRE_Int getParCSRMatrixData(HYPRE_ParCSRMatrix  A, HYPRE_Int base, HYPRE_Int *
 
 HYPRE_Real checkMatrix(HYPRE_ParCSRMatrix parcsr_ref, HYPRE_IJMatrix ij_A);
 
-HYPRE_Int test_all(MPI_Comm comm, char *test_name, HYPRE_MemoryLocation memory_location, HYPRE_Int option, char *cmd_sequence, HYPRE_BigInt ilower, HYPRE_BigInt iupper, HYPRE_BigInt jlower, HYPRE_BigInt jupper, HYPRE_Int nrows, HYPRE_BigInt num_nonzeros, HYPRE_Int nchunks, HYPRE_Int init_alloc, HYPRE_Int early_assemble, HYPRE_Real grow_factor, HYPRE_Int *h_nnzrow, HYPRE_Int *nnzrow, HYPRE_BigInt *rows, HYPRE_BigInt *cols, HYPRE_Real *coefs, HYPRE_IJMatrix *ij_A_ptr);
+HYPRE_Int test_all(MPI_Comm comm, const char *test_name, HYPRE_MemoryLocation memory_location, HYPRE_Int option, const char *cmd_sequence, HYPRE_BigInt ilower, HYPRE_BigInt iupper, HYPRE_BigInt jlower, HYPRE_BigInt jupper, HYPRE_Int nrows, HYPRE_BigInt num_nonzeros, HYPRE_Int nchunks, HYPRE_Int init_alloc, HYPRE_Int early_assemble, HYPRE_Real grow_factor, HYPRE_Int *h_nnzrow, HYPRE_Int *nnzrow, HYPRE_BigInt *rows, HYPRE_BigInt *cols, HYPRE_Real *coefs, HYPRE_IJMatrix *ij_A_ptr);
 
 hypre_int
 main( hypre_int  argc,
@@ -739,10 +739,10 @@ checkMatrix(HYPRE_ParCSRMatrix h_parcsr_ref, HYPRE_IJMatrix ij_A)
 /* set values */
 HYPRE_Int
 test_all(MPI_Comm             comm,
-         char                *test_name,
+         const char          *test_name,
          HYPRE_MemoryLocation memory_location,
          HYPRE_Int            option,
-         char                *cmd_sequence,
+         const char          *cmd_sequence,
          HYPRE_BigInt         ilower,
          HYPRE_BigInt         iupper,
          HYPRE_BigInt         jlower,
@@ -846,7 +846,7 @@ test_all(MPI_Comm             comm,
    }
 
 #if defined(HYPRE_USING_GPU)
-   hypre_SyncCudaDevice(hypre_handle());
+   hypre_SyncDevice();
 #if defined(CUDA_PROFILER)
    cudaProfilerStop();
 #endif

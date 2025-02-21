@@ -440,7 +440,9 @@ if(HYPRE_NEEDS_CXX AND NOT HYPRE_USING_GPU)
 endif()
 
 # Print the directories used to hint the user about the active TPLs
-message(STATUS "Dependency directories: ${HYPRE_DEPENDENCY_DIRS}")
+if (HYPRE_DEPENDENCY_DIRS)
+  message(STATUS "Dependency directories: ${HYPRE_DEPENDENCY_DIRS}")
+endif()
 
 # Configure a header file to pass CMake settings to the source code
 configure_file(

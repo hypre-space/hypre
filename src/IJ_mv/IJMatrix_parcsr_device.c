@@ -750,21 +750,20 @@ HYPRE_Int
 hypre_IJMatrixAssembleCompressDevice(hypre_IJMatrix *matrix,
                                      HYPRE_Int       reduce_stack_size)
 {
-   HYPRE_BigInt          *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
-   HYPRE_BigInt           row_start        = row_partitioning[0];
-   HYPRE_BigInt           row_end          = row_partitioning[1];
    hypre_AuxParCSRMatrix *aux_matrix = (hypre_AuxParCSRMatrix*) hypre_IJMatrixTranslator(matrix);
-
-   HYPRE_Int      nelms      = hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix);
-   HYPRE_BigInt  *stack_i    = hypre_AuxParCSRMatrixStackI(aux_matrix);
-   HYPRE_BigInt  *stack_j    = hypre_AuxParCSRMatrixStackJ(aux_matrix);
-   HYPRE_Complex *stack_data = hypre_AuxParCSRMatrixStackData(aux_matrix);
-   char          *stack_sora = hypre_AuxParCSRMatrixStackSorA(aux_matrix);
+   HYPRE_Int              nelms      = hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix);
+   HYPRE_BigInt          *stack_i    = hypre_AuxParCSRMatrixStackI(aux_matrix);
+   HYPRE_BigInt          *stack_j    = hypre_AuxParCSRMatrixStackJ(aux_matrix);
+   HYPRE_Complex         *stack_data = hypre_AuxParCSRMatrixStackData(aux_matrix);
+   char                  *stack_sora = hypre_AuxParCSRMatrixStackSorA(aux_matrix);
 
 #if defined(HYPRE_DEBUG)
    /* in the final assembly, at this stage, the stack should only have on-proc elements */
    if (reduce_stack_size)
    {
+      HYPRE_BigInt *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
+      HYPRE_BigInt  row_start        = row_partitioning[0];
+      HYPRE_BigInt  row_end          = row_partitioning[1];
       in_range<HYPRE_BigInt> pred(row_start, row_end - 1);
 #if defined(HYPRE_USING_SYCL)
       HYPRE_Int tmp = HYPRE_ONEDPL_CALL(std::count_if, stack_i, stack_i + nelms, pred);
