@@ -69,9 +69,8 @@ typedef struct hypre_StructMatrix_struct
    hypre_BoxArray       *data_space;       /* Layout of data (coarse index space) */
    hypre_BoxArray       *data_boxes;       /* Data extents on fine index space */
    HYPRE_Int           **data_indices;     /* Array of indices into the data array.
-                                              data_indices[b][s] is the starting
-                                              index of data for boxnum b and
-                                              stencil coefficient s */
+                                              data_indices[b][s] is the starting index of
+                                              data for boxnum b and stencil coefficient s */
    HYPRE_Int             data_alloced;     /* Boolean used for freeing data */
    HYPRE_Int             data_size;        /* Size of matrix data */
    HYPRE_BigInt          global_size;      /* Total number of nonzero coeffs */
@@ -150,6 +149,9 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixSaveData(matrix)            ((matrix) -> save_data)
 #define hypre_StructMatrixSaveDataSpace(matrix)       ((matrix) -> save_data_space)
 #define hypre_StructMatrixSaveDataSize(matrix)        ((matrix) -> save_data_size)
+
+#define hypre_StructMatrixBoxIDs(matrix) \
+hypre_BoxArrayIDs(hypre_StructMatrixDataSpace(matrix))
 
 #define hypre_StructMatrixNDim(matrix) \
 hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))

@@ -152,6 +152,20 @@ hypre_CoarsenBox( hypre_Box      *box,
 }
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_RefineBox( hypre_Box      *box,
+                 hypre_IndexRef  origin,
+                 hypre_Index     stride )
+{
+   hypre_MapToFineIndex(hypre_BoxIMin(box), origin, stride, hypre_BoxNDim(box));
+   hypre_MapToFineIndex(hypre_BoxIMax(box), origin, stride, hypre_BoxNDim(box));
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_CoarsenBoxNeg
  *
  * This functions snaps in place the box extents of 'box' in the negative
@@ -215,20 +229,6 @@ hypre_CoarsenBoxNeg( hypre_Box      *box,
 }
 
 /*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_RefineBox( hypre_Box      *box,
-                 hypre_IndexRef  origin,
-                 hypre_Index     stride )
-{
-   hypre_MapToFineIndex(hypre_BoxIMin(box), origin, stride, hypre_BoxNDim(box));
-   hypre_MapToFineIndex(hypre_BoxIMax(box), origin, stride, hypre_BoxNDim(box));
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
  * The dimensions of the modified box array are not changed.
  * It is possible to have boxes with volume 0.
  * If 'origin' is NULL, a zero origin is used.
@@ -239,13 +239,29 @@ hypre_CoarsenBoxArray( hypre_BoxArray  *box_array,
                        hypre_IndexRef   origin,
                        hypre_Index      stride )
 {
-   hypre_Box  *box;
    HYPRE_Int   i;
 
    hypre_ForBoxI(i, box_array)
    {
-      box = hypre_BoxArrayBox(box_array, i);
-      hypre_CoarsenBox(box, origin, stride);
+      hypre_CoarsenBox(hypre_BoxArrayBox(box_array, i), origin, stride);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_RefineBoxArray( hypre_BoxArray  *box_array,
+                      hypre_IndexRef   origin,
+                      hypre_Index      stride )
+{
+   HYPRE_Int   i;
+
+   hypre_ForBoxI(i, box_array)
+   {
+      hypre_RefineBox(hypre_BoxArrayBox(box_array, i), origin, stride);
    }
 
    return hypre_error_flag;
@@ -263,17 +279,32 @@ hypre_CoarsenBoxArrayArray( hypre_BoxArrayArray  *box_array_array,
                             hypre_Index           stride )
 {
    hypre_BoxArray  *box_array;
-   hypre_Box       *box;
-   HYPRE_Int        i, j;
+   HYPRE_Int        i;
 
    hypre_ForBoxArrayI(i, box_array_array)
    {
       box_array = hypre_BoxArrayArrayBoxArray(box_array_array, i);
-      hypre_ForBoxI(j, box_array)
-      {
-         box = hypre_BoxArrayBox(box_array, j);
-         hypre_CoarsenBox(box, origin, stride);
-      }
+      hypre_CoarsenBoxArray(box_array, origin, stride);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_RefineBoxArrayArray( hypre_BoxArrayArray  *box_array_array,
+                           hypre_IndexRef        origin,
+                           hypre_Index           stride )
+{
+   hypre_BoxArray  *box_array;
+   HYPRE_Int        i;
+
+   hypre_ForBoxArrayI(i, box_array_array)
+   {
+      box_array = hypre_BoxArrayArrayBoxArray(box_array_array, i);
+      hypre_RefineBoxArray(box_array, origin, stride);
    }
 
    return hypre_error_flag;

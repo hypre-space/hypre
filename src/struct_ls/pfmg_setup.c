@@ -79,6 +79,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
+   HYPRE_Int             v_memory_mode  = 2;
 
 #if DEBUG
    char                  filename[255];
@@ -86,6 +87,11 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
+   /* RDF: For now, set memory mode to 0 if using R/B GS relaxation */
+   if (relax_type > 1)
+   {
+      v_memory_mode = 0;
+   }
    /*-----------------------------------------------------
     * Set up coarse grids
     *-----------------------------------------------------*/
@@ -151,8 +157,10 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    A_l[0] = hypre_StructMatrixRef(A);
    b_l[0] = hypre_StructVectorRef(b);
    x_l[0] = hypre_StructVectorRef(x);
+   hypre_StructVectorSetMemoryMode(x_l[0], v_memory_mode);
 
    tx_l[0] = hypre_StructVectorCreate(comm, grid_l[0]);
+   hypre_StructVectorSetMemoryMode(tx_l[0], v_memory_mode);
    hypre_StructVectorSetNumGhost(tx_l[0], x_num_ghost);
    hypre_StructVectorInitialize(tx_l[0]);
    hypre_StructVectorAssemble(tx_l[0]);
@@ -227,11 +235,13 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_StructVectorAssemble(b_l[l + 1]);
 
       x_l[l + 1] = hypre_StructVectorCreate(comm, grid_l[l + 1]);
+      hypre_StructVectorSetMemoryMode(x_l[l + 1], v_memory_mode);
       hypre_StructVectorSetNumGhost(x_l[l + 1], x_num_ghost);
       hypre_StructVectorInitialize(x_l[l + 1]);
       hypre_StructVectorAssemble(x_l[l + 1]);
 
       tx_l[l + 1] = hypre_StructVectorCreate(comm, grid_l[l + 1]);
+      hypre_StructVectorSetMemoryMode(tx_l[l + 1], v_memory_mode);
       hypre_StructVectorSetNumGhost(tx_l[l + 1], x_num_ghost);
       hypre_StructVectorInitialize(tx_l[l + 1]);
       hypre_StructVectorAssemble(tx_l[l + 1]);

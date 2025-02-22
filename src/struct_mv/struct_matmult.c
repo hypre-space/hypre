@@ -796,6 +796,11 @@ hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
       hypre_CommStencilCreateNumGhost(comm_stencils[m], &num_ghost);
       /* RDF TODO: Make sure num_ghost is at least as large as before, so that
        * when we call Restore() below, we don't lose any data */
+      /* RDF TODO: Does the following potentially add too many ghost points?
+       * Consider the multiplication of M=P*Ac.  The domain_is_coarse variable
+       * is defined based on the result matrix M.  The loop below seems to add
+       * (dom_stride-1) ghost layers to all matrices, including Ac, but that
+       * matrix lives on a coarse index space. */
       if (domain_is_coarse)
       {
          /* Increase num_ghost (on both sides) to ensure that data spaces are
@@ -817,12 +822,12 @@ hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
    /* Compute initial mask data space */
    if (need_mask)
    {
-      HYPRE_Int  *num_ghost;
+      HYPRE_Int   *num_ghost;
 
       HYPRE_StructVectorCreate(comm, grid, &mask);
       HYPRE_StructVectorSetStride(mask, fstride); /* same stride as fine data-map stride */
       hypre_CommStencilCreateNumGhost(comm_stencils[nmatrices], &num_ghost);
-      hypre_StructVectorComputeDataSpace(mask, num_ghost, &data_spaces[nmatrices]);
+      hypre_StructVectorComputeDataSpace(mask, NULL, num_ghost, &data_spaces[nmatrices]);
       hypre_TFree(num_ghost, HYPRE_MEMORY_HOST);
       (mmdata -> mask) = mask;
    }
@@ -968,7 +973,7 @@ hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
 
          if (hypre_StructMatrixNumValues(matrix) > 0)
          {
-            hypre_CreateCommInfo(grid, comm_stencils[m], &comm_info);
+            hypre_CreateCommInfo(grid, fstride, comm_stencils[m], &comm_info);
             hypre_StructMatrixCreateCommPkg(matrix, comm_info, &comm_pkg_a[num_comm_pkgs],
                                             &comm_data_a[num_comm_pkgs]);
             num_comm_blocks += hypre_CommPkgNumBlocks(comm_pkg_a[num_comm_pkgs]);
@@ -979,7 +984,7 @@ hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
       /* Compute mask communications */
       if (need_mask)
       {
-         hypre_CreateCommInfo(grid, comm_stencils[nmatrices], &comm_info);
+         hypre_CreateCommInfo(grid, fstride, comm_stencils[nmatrices], &comm_info);
          hypre_StructVectorMapCommInfo(mask, comm_info);
          hypre_CommPkgCreate(comm_info,
                              hypre_StructVectorDataSpace(mask),

@@ -80,12 +80,15 @@ hypre_RedBlackGSSetup( void               *relax_vdata,
 
    hypre_ComputePkg      *compute_pkg;
    hypre_ComputeInfo     *compute_info;
+   hypre_Index            ustride;
+
+   hypre_SetIndex(ustride, 1);
 
    /*----------------------------------------------------------
     * Set up the compute packages
     *----------------------------------------------------------*/
 
-   hypre_CreateComputeInfo(grid, stencil, &compute_info);
+   hypre_CreateComputeInfo(grid, ustride, stencil, &compute_info);
    hypre_ComputePkgCreate(compute_info, hypre_StructVectorDataSpace(x), 1,
                           grid, &compute_pkg);
 

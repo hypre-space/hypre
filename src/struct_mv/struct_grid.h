@@ -25,7 +25,7 @@ typedef struct hypre_StructGrid_struct
    HYPRE_Int            ndim;         /* Number of grid dimensions */
 
    hypre_BoxArray      *boxes;        /* Array of boxes in this process */
-   HYPRE_Int           *ids;          /* Unique IDs for boxes */
+   HYPRE_Int           *ids;          /* Unique IDs for boxes - RDF TODO: Use boxes IDs instead */
    hypre_Index          max_distance; /* Neighborhood size - in each dimension*/
 
    hypre_Box           *bounding_box; /* Bounding box around grid */
@@ -44,6 +44,7 @@ typedef struct hypre_StructGrid_struct
    HYPRE_Int            num_ghost[2 * HYPRE_MAXDIM]; /* ghost layer size */
 
    hypre_BoxManager    *boxman;
+
 } hypre_StructGrid;
 
 /*--------------------------------------------------------------------------
