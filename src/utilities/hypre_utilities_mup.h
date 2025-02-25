@@ -16,6 +16,10 @@
 
 #include "HYPRE_utilities.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined (HYPRE_MIXED_PRECISION)
 
 hypre_LinkList hypre_create_elt_flt  ( HYPRE_Int Item );
@@ -583,6 +587,10 @@ char *hypre_strcpy_dbl (char *destination, const char *source);
 char *hypre_strcpy_long_dbl (char *destination, const char *source);
 #endif
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

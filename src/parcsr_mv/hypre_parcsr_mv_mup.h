@@ -16,6 +16,10 @@
 
 #include "_hypre_parcsr_mv.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined (HYPRE_MIXED_PRECISION)
 
 HYPRE_Int hypre_MatTCommPkgCreate_flt  ( hypre_ParCSRMatrix *A );
@@ -1372,6 +1376,10 @@ hypre_ParVector *hypre_VectorToParVector_dbl  ( MPI_Comm comm, hypre_Vector *v,
 hypre_ParVector *hypre_VectorToParVector_long_dbl  ( MPI_Comm comm, hypre_Vector *v,
                                            HYPRE_BigInt *vec_starts );
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

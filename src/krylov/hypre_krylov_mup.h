@@ -16,6 +16,10 @@
 
 #include "krylov.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined (HYPRE_MIXED_PRECISION)
 
 void *hypre_BiCGSTABCreate_flt( hypre_BiCGSTABFunctions *bicgstab_functions );
@@ -1699,6 +1703,11 @@ HYPRE_Int hypre_GMRESSetup_long_dbl  ( void *gmres_vdata, void *A, void *b, void
 HYPRE_Int hypre_GMRESSolve_flt  ( void *gmres_vdata, void *A, void *b, void *x );
 HYPRE_Int hypre_GMRESSolve_dbl  ( void *gmres_vdata, void *A, void *b, void *x );
 HYPRE_Int hypre_GMRESSolve_long_dbl  ( void *gmres_vdata, void *A, void *b, void *x );
+
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

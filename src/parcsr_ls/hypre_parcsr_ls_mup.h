@@ -16,6 +16,10 @@
 
 #include "_hypre_parcsr_ls.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined (HYPRE_MIXED_PRECISION)
 
 HYPRE_Int hypre_ADSComputePi_flt  ( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *C, hypre_ParCSRMatrix *G,
@@ -6994,6 +6998,10 @@ HYPRE_Int transpose_matrix_create_long_dbl  ( HYPRE_Int **i_face_element_pointer
                                     HYPRE_Int **j_face_element_pointer, HYPRE_Int *i_element_face, HYPRE_Int *j_element_face,
                                     HYPRE_Int num_elements, HYPRE_Int num_faces );
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

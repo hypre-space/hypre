@@ -16,6 +16,10 @@
 
 #include "_hypre_IJ_mv.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined (HYPRE_MIXED_PRECISION)
 
 HYPRE_Int hypre_AuxParCSRMatrixCreate_flt  ( hypre_AuxParCSRMatrix **aux_matrix,
@@ -439,6 +443,10 @@ HYPRE_Int hypre_IJVectorZeroValuesPar_flt  ( hypre_IJVector *vector );
 HYPRE_Int hypre_IJVectorZeroValuesPar_dbl  ( hypre_IJVector *vector );
 HYPRE_Int hypre_IJVectorZeroValuesPar_long_dbl  ( hypre_IJVector *vector );
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif
