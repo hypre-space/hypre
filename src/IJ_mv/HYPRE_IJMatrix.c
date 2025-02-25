@@ -1548,3 +1548,34 @@ HYPRE_IJMatrixAdd( HYPRE_Complex    alpha,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixMigrate
+ *
+ * Migrates an IJMatrix to the specified memory location
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJMatrixMigrate(HYPRE_IJMatrix       matrix,
+                      HYPRE_MemoryLocation memory_location)
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   /* Only implemented for ParCSR matrices */
+   if (hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR)
+   {
+      hypre_IJMatrixMigrateParCSR(ijmatrix, memory_location);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}

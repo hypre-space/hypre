@@ -39,6 +39,7 @@ hypre_ParVectorCreate( MPI_Comm      comm,
       return NULL;
    }
    vector = hypre_CTAlloc(hypre_ParVector, 1, HYPRE_MEMORY_HOST);
+
    hypre_MPI_Comm_rank(comm, &my_id);
 
    if (!partitioning_in)
@@ -112,22 +113,53 @@ hypre_ParVectorDestroy( hypre_ParVector *vector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParVectorInitialize_v2
- *
- * Initialize a hypre_ParVector at a given memory location
+ * hypre_ParVectorInitializeShell
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParVectorInitialize_v2( hypre_ParVector *vector, HYPRE_MemoryLocation memory_location )
+hypre_ParVectorInitializeShell(hypre_ParVector *vector)
 {
    if (!vector)
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
-   hypre_SeqVectorInitialize_v2(hypre_ParVectorLocalVector(vector), memory_location);
 
-   hypre_ParVectorActualLocalSize(vector) = hypre_VectorSize(hypre_ParVectorLocalVector(vector));
+   hypre_Vector *local_vector = hypre_ParVectorLocalVector(vector);
+
+   hypre_SeqVectorInitializeShell(local_vector);
+   hypre_ParVectorActualLocalSize(vector) = hypre_VectorSize(local_vector);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParVectorSetData
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorSetData(hypre_ParVector *vector,
+                       HYPRE_Complex   *data)
+{
+   hypre_SeqVectorSetData(hypre_ParVectorLocalVector(vector), data);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParVectorInitialize_v2
+ *
+ * Initialize a hypre_ParVector at a given memory location
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorInitialize_v2( hypre_ParVector      *vector,
+                              HYPRE_MemoryLocation  memory_location )
+{
+   hypre_Vector *local_vector = hypre_ParVectorLocalVector(vector);
+
+   hypre_ParVectorInitializeShell(vector);
+   hypre_SeqVectorInitialize_v2(local_vector, memory_location);
 
    return hypre_error_flag;
 }
