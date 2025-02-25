@@ -1111,3 +1111,30 @@ hypre_SStructVectorMemoryLocation(hypre_SStructVector *vector)
 
    return HYPRE_MEMORY_UNDEFINED;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructVectorSetMemoryMode
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructVectorSetMemoryMode( hypre_SStructVector *vector,
+                                  HYPRE_Int           memory_mode )
+{
+   HYPRE_Int               part, var, nparts, nvars;
+   hypre_SStructPVector   *pvector;
+   hypre_StructVector     *svector;
+
+   nparts = hypre_SStructVectorNParts(vector);
+   for (part = 0; part < nparts; part++)
+   {
+      pvector = hypre_SStructVectorPVector(vector, part);
+      nvars = hypre_SStructPVectorNVars(pvector);
+      for (var = 0; var < nvars; var++)
+      {
+         svector = hypre_SStructPVectorSVector(pvector, var);
+         hypre_StructVectorSetMemoryMode(svector, memory_mode);
+      }
+   }
+
+   return hypre_error_flag;
+}
