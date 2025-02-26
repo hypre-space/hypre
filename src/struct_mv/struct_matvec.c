@@ -103,6 +103,8 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
    hypre_IndexRef           dom_stride, xstride, fstride;
    HYPRE_Int                d, need_resize, need_computepkg;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
    /* Ensure that the base grid for x is at least as fine as the one for A */
    grid = hypre_StructMatrixGrid(A);
    if (matvec_data -> transpose)
