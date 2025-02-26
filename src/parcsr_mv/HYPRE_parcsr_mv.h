@@ -17,6 +17,10 @@
 #include "HYPRE_utilities.h"
 #include "HYPRE_seq_mv.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "parcsr_mv_mup_func.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

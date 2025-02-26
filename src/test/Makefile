@@ -61,6 +61,10 @@ LFLAGS =\
 ##################################################################
 
 HYPRE_DRIVERS =\
+ ij_mp.c\
+ test_mp.c\
+ test_mp_pcg.c\
+ test_mp_pcg_3d.c\
  ij.c\
  ij_assembly.c\
  sstruct.c\
@@ -129,6 +133,34 @@ distclean: clean
 ##################################################################
 
 # C
+ifeq (${MP_BUILD}, 1) 
+ij_mp: ij_mp.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+else
+ij_mp:
+endif
+ifeq (${MP_BUILD}, 1) 
+test_mp: test_mp.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+else
+test_mp:
+endif
+ifeq (${MP_BUILD}, 1) 
+test_mp_pcg: test_mp_pcg.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+else
+test_mp_pcg:
+endif
+ifeq (${MP_BUILD}, 1) 
+test_mp_pcg_3d: test_mp_pcg_3d.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+else
+test_mp_pcg_3d:
+endif
 
 ij: ij.o
 	@echo  "Building" $@ "... "

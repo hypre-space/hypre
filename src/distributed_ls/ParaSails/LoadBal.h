@@ -11,6 +11,10 @@
  *
  *****************************************************************************/
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "ParaSails_mup_func.h"
+#endif
+
 #ifndef _LOADBAL_H
 #define _LOADBAL_H
 
