@@ -29,6 +29,8 @@ HEADERS =\
  struct_vector.h
 
 FILES =\
+ hypre_struct_mv_mp.c\
+ HYPRE_struct_mv_mp.c
 
 CUFILES =\
  struct_axpy.c\
@@ -85,12 +87,18 @@ all: libHYPRE_struct_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/_hypre_struct_mv.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_struct_mv.hpp $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/struct_mv_mup_func.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/HYPRE_struct_mv_mp.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/hypre_struct_mv_mp.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/hypre_struct_mv_mup.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_struct_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/_hypre_struct_mv.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/struct_mv_mup_func.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/hypre_struct_mv_mp.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/HYPRE_struct_mv_mp.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/struct_mv_mup_mup.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean: clean_mup

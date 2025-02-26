@@ -1186,8 +1186,55 @@ typedef struct hypre_StructMatrix_struct
    hypre_CommPkg        *comm_pkg;                  /* Info on how to update ghost data */
 
    HYPRE_Int             ref_count;
+#if defined(HYPRE_MIXED_PRECISION)   
+   HYPRE_Precision matrix_precision;
+#endif
 
 } hypre_StructMatrix;
+
+typedef struct 
+{
+   MPI_Comm              comm;
+
+   hypre_StructGrid     *grid;
+   hypre_StructStencil  *user_stencil;
+   hypre_StructStencil  *stencil;
+   HYPRE_Int             num_values;                /* Number of "stored" coefficients */
+
+   hypre_BoxArray       *data_space;
+
+   HYPRE_MemoryLocation  memory_location;           /* memory location of data */
+   void                 *data;                      /* Pointer to variable matrix data */
+   void                 *data_const;                /* Pointer to constant matrix data */
+   void                **stencil_data;              /* Pointer for each stencil */
+   HYPRE_Int             data_alloced;              /* Boolean used for freeing data */
+   HYPRE_Int             data_size;                 /* Size of variable matrix data */
+   HYPRE_Int             data_const_size;           /* Size of constant matrix data */
+   HYPRE_Int           **data_indices;              /* num-boxes by stencil-size array
+                                                       of indices into the data array.
+                                                       data_indices[b][s] is the starting
+                                                       index of matrix data corresponding
+                                                       to box b and stencil coefficient s */
+   HYPRE_Int             constant_coefficient;      /* normally 0; set to 1 for
+                                                       constant coefficient matrices
+                                                       or 2 for constant coefficient
+                                                       with variable diagonal */
+
+   HYPRE_Int             symmetric;                 /* Is the matrix symmetric */
+   HYPRE_Int            *symm_elements;             /* Which elements are "symmetric" */
+   HYPRE_Int             num_ghost[2 * HYPRE_MAXDIM]; /* Num ghost layers in each direction */
+
+   HYPRE_BigInt          global_size;               /* Total number of nonzero coeffs */
+
+   hypre_CommPkg        *comm_pkg;                  /* Info on how to update ghost data */
+
+   HYPRE_Int             ref_count;
+
+#if defined(HYPRE_MIXED_PRECISION)   
+   HYPRE_Precision matrix_precision;
+#endif
+
+} hypre_StructMatrix_mp;
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_StructMatrix
@@ -1232,6 +1279,9 @@ hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
 (hypre_StructMatrixBoxData(matrix, b, s) + \
  hypre_CCBoxIndexRank(hypre_StructMatrixBox(matrix, b), index))
 
+#if defined(HYPRE_MIXED_PRECISION)   
+#define hypre_StructMatrixPrecision(matrix)            ((matrix) -> matrix_precision)
+#endif
 #endif
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
@@ -1278,8 +1328,42 @@ typedef struct hypre_StructVector_struct
 
    HYPRE_Int             ref_count;
 
+#if defined(HYPRE_MIXED_PRECISION)   
+   HYPRE_Precision vector_precision;
+#endif
+
 } hypre_StructVector;
 
+typedef struct 
+{
+   MPI_Comm              comm;
+
+   hypre_StructGrid     *grid;
+
+   hypre_BoxArray       *data_space;
+
+   HYPRE_MemoryLocation  memory_location;             /* memory location of data */
+   void                 *data;                        /* Pointer to vector data on device*/
+   HYPRE_Int             data_alloced;                /* Boolean used for freeing data */
+   HYPRE_Int             data_size;                   /* Size of vector data */
+   HYPRE_Int            *data_indices;                /* num-boxes array of indices into
+                                                         the data array.  data_indices[b]
+                                                         is the starting index of vector
+                                                         data corresponding to box b. */
+
+   HYPRE_Int             num_ghost[2 * HYPRE_MAXDIM]; /* Num ghost layers in each
+                                                       * direction */
+   HYPRE_Int             bghost_not_clear;            /* Are boundary ghosts clear? */
+
+   HYPRE_BigInt          global_size;                 /* Total number coefficients */
+
+   HYPRE_Int             ref_count;
+
+#if defined(HYPRE_MIXED_PRECISION)   
+   HYPRE_Precision vector_precision;
+#endif
+
+} hypre_StructVector_mp;
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_StructVector
  *--------------------------------------------------------------------------*/
@@ -1310,6 +1394,9 @@ hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
 (hypre_StructVectorBoxData(vector, b) + \
  hypre_BoxIndexRank(hypre_StructVectorBox(vector, b), index))
 
+#if defined(HYPRE_MIXED_PRECISION)   
+#define hypre_StructVectorPrecision(vector)       ((vector) -> vector_precision)
+#endif
 #endif
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
@@ -2730,6 +2817,30 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
 
 #endif /* #ifndef HYPRE_BOXLOOP_HOST_HEADER */
 
+
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+/******************************************************************************
+ *
+ * hypre seq_mv mixed-precision interface
+ *
+ *****************************************************************************/
+
+#include "_hypre_struct_mv.h"
+
+#if defined(HYPRE_MIXED_PRECISION)
+HYPRE_Int
+hypre_StructVectorCopy_mp( hypre_StructVector_mp *x,
+                     hypre_StructVector_mp *y );
+/*HYPRE_Int
+hypre_StructVectorConvert_mp( hypre_StructVector_mp *x,
+                     HYPRE_Precision new_precision);*/
+#endif
 
 #ifdef __cplusplus
 }

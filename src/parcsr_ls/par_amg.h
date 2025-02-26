@@ -249,6 +249,8 @@ typedef struct
    hypre_ParVector *Ztemp_flt;
    hypre_ParVector *Ztemp_long_dbl;
 #endif
+   hypre_ParVector *Btemp;
+   hypre_ParVector *Xtemp;
 
    /* HYPRE_Real parameters */
    
@@ -590,5 +592,7 @@ typedef struct
 #define hypre_ParAMGDataZtempFLT(amg_data) ((amg_data)->Ztemp_flt)
 #define hypre_ParAMGDataZtempLONGDBL(amg_data) ((amg_data)->Ztemp_long_dbl)
 #endif
+#define hypre_ParAMGDataBTemp(amg_data) ((amg_data)->Btemp)
+#define hypre_ParAMGDataXTemp(amg_data) ((amg_data)->Xtemp)
 
 #endif

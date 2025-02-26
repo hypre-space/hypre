@@ -715,6 +715,10 @@
 #define HYPRE_BoomerAMGGetConvergeType HYPRE_MULTIPRECISION_FUNC ( HYPRE_BoomerAMGGetConvergeType )
 #define HYPRE_BoomerAMGGetCumNnzAP HYPRE_MULTIPRECISION_FUNC ( HYPRE_BoomerAMGGetCumNnzAP )
 #define HYPRE_BoomerAMGGetCumNumIterations HYPRE_MULTIPRECISION_FUNC ( HYPRE_BoomerAMGGetCumNumIterations )
+#define HYPRE_BoomerAMGSetBTemp HYPRE_MULTIPRECISION_FUNC ( HYPRE_BoomerAMGSetBTemp )
+#define HYPRE_BoomerAMGSetXTemp HYPRE_MULTIPRECISION_FUNC ( HYPRE_BoomerAMGSetXTemp )
+#define HYPRE_BoomerAMGGetBTemp HYPRE_MULTIPRECISION_FUNC ( HYPRE_BoomerAMGGetBTemp )
+#define HYPRE_BoomerAMGGetXTemp HYPRE_MULTIPRECISION_FUNC ( HYPRE_BoomerAMGGetXTemp )
 #define HYPRE_BoomerAMGGetCycleNumSweeps HYPRE_MULTIPRECISION_FUNC ( HYPRE_BoomerAMGGetCycleNumSweeps )
 #define HYPRE_BoomerAMGGetCycleRelaxType HYPRE_MULTIPRECISION_FUNC ( HYPRE_BoomerAMGGetCycleRelaxType )
 #define HYPRE_BoomerAMGGetCycleType HYPRE_MULTIPRECISION_FUNC ( HYPRE_BoomerAMGGetCycleType )
@@ -1447,6 +1451,12 @@
 #define hypre_BoomerAMGSetCRStrongTh HYPRE_MULTIPRECISION_FUNC ( hypre_BoomerAMGSetCRStrongTh )
 #define hypre_BoomerAMGSetCRUseCG HYPRE_MULTIPRECISION_FUNC ( hypre_BoomerAMGSetCRUseCG )
 #define hypre_BoomerAMGSetCumNnzAP HYPRE_MULTIPRECISION_FUNC ( hypre_BoomerAMGSetCumNnzAP )
+
+#define hypre_BoomerAMGSetBTemp HYPRE_MULTIPRECISION_FUNC ( hypre_BoomerAMGSetBTemp )
+#define hypre_BoomerAMGSetXTemp HYPRE_MULTIPRECISION_FUNC ( hypre_BoomerAMGSetXTemp )
+#define hypre_BoomerAMGGetBTemp HYPRE_MULTIPRECISION_FUNC ( hypre_BoomerAMGGetBTemp )
+#define hypre_BoomerAMGGetXTemp HYPRE_MULTIPRECISION_FUNC ( hypre_BoomerAMGGetXTemp )
+
 #define hypre_BoomerAMGSetCycleNumSweeps HYPRE_MULTIPRECISION_FUNC ( hypre_BoomerAMGSetCycleNumSweeps )
 #define hypre_BoomerAMGSetCycleRelaxType HYPRE_MULTIPRECISION_FUNC ( hypre_BoomerAMGSetCycleRelaxType )
 #define hypre_BoomerAMGSetCycleType HYPRE_MULTIPRECISION_FUNC ( hypre_BoomerAMGSetCycleType )

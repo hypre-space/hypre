@@ -547,6 +547,9 @@ hypre_BoomerAMGCreate( void )
    hypre_ParAMGDataDSLUThreshold(amg_data) = 0;
    hypre_ParAMGDataDSLUSolver(amg_data) = NULL;
 #endif
+   /*stuff for single precision preconditioner */
+   hypre_ParAMGDataBTemp(amg_data) = NULL;
+   hypre_ParAMGDataXTemp(amg_data) = NULL;
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -766,6 +769,8 @@ hypre_BoomerAMGDestroy( void *data )
       hypre_ParVectorDestroy(hypre_ParAMGDataRtemp(amg_data));
       hypre_ParVectorDestroy(hypre_ParAMGDataPtemp(amg_data));
       hypre_ParVectorDestroy(hypre_ParAMGDataZtemp(amg_data));
+      hypre_ParVectorDestroy(hypre_ParAMGDataBTemp(amg_data));
+      hypre_ParVectorDestroy(hypre_ParAMGDataXTemp(amg_data));
 
       if (hypre_ParAMGDataDofFuncArray(amg_data))
       {
@@ -5105,5 +5110,42 @@ hypre_BoomerAMGGetCumNnzAP( void         *data,
    }
    *cum_nnz_AP = hypre_ParAMGDataCumNnzAP(amg_data);
 
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetBTemp ( void            *data,
+		          hypre_ParVector *Btemp )
+{
+   hypre_ParAMGData *amg_data = (hypre_ParAMGData *) data;
+   hypre_ParAMGDataBTemp(amg_data) = Btemp;
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetXTemp ( void            *data,
+		          hypre_ParVector *Xtemp )
+{
+   hypre_ParAMGData *amg_data = (hypre_ParAMGData *) data;
+   hypre_ParAMGDataXTemp(amg_data) = Xtemp;
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGGetBTemp ( void            *data,
+		          hypre_ParVector **Btemp )
+{
+   hypre_ParAMGData *amg_data = (hypre_ParAMGData *) data;
+   *Btemp = hypre_ParAMGDataBTemp(amg_data);
+   return hypre_error_flag;
+}
+
+
+HYPRE_Int
+hypre_BoomerAMGGetXTemp ( void            *data,
+		          hypre_ParVector **Xtemp )
+{
+   hypre_ParAMGData *amg_data = (hypre_ParAMGData *) data;
+   *Xtemp = hypre_ParAMGDataXTemp(amg_data);
    return hypre_error_flag;
 }

@@ -41,6 +41,10 @@ hypre_StructVectorCreate( MPI_Comm          comm,
 
    hypre_StructVectorMemoryLocation(vector) = hypre_HandleMemoryLocation(hypre_handle());
 
+#if defined(HYPRE_MIXED_PRECISION)   
+   hypre_StructVectorPrecision(vector) = HYPRE_OBJECT_PRECISION;
+#endif
+
    return vector;
 }
 

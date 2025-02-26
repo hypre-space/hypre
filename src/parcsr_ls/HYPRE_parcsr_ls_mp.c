@@ -45,6 +45,8 @@ HYPRE_BoomerAMGSetup_mp( HYPRE_Solver solver,
                                  &xtemp);
    HYPRE_ParVectorInitialize_flt( xtemp );   
 
+   //HYPRE_BoomerAMGSetBTemp_flt(solver,btemp);
+   //HYPRE_BoomerAMGSetXTemp_flt(solver,xtemp);
 /* copy from double precision {b,x} to single precision {btemp,xtemp} */
    HYPRE_ParVectorCopy_mp(b, btemp);
    HYPRE_ParVectorCopy_mp(x, xtemp);
@@ -73,8 +75,8 @@ HYPRE_BoomerAMGSolve_mp( HYPRE_Solver solver,
                       HYPRE_ParVector b,
                       HYPRE_ParVector x      )
 {
-   hypre_ParVector *btemp = NULL;
-   hypre_ParVector *xtemp = NULL;
+   HYPRE_ParVector btemp;
+   HYPRE_ParVector xtemp;
 
    HYPRE_ParVectorCreate_flt(hypre_ParCSRMatrixComm(A),
                                  hypre_ParCSRMatrixGlobalNumRows(A),
@@ -86,6 +88,8 @@ HYPRE_BoomerAMGSolve_mp( HYPRE_Solver solver,
                                  hypre_ParCSRMatrixRowStarts(A),
                                  &xtemp);
    HYPRE_ParVectorInitialize_flt( xtemp );   
+   //HYPRE_BoomerAMGGetBTemp_flt(solver,&btemp);
+   //HYPRE_BoomerAMGGetXTemp_flt(solver,&xtemp);
 
 /* copy from double precision {b,x} to single precision {btemp,xtemp} */
    HYPRE_ParVectorCopy_mp(b, btemp);

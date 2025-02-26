@@ -2193,3 +2193,47 @@ HYPRE_BoomerAMGGetCumNnzAP( HYPRE_Solver  solver,
 {
    return ( hypre_BoomerAMGGetCumNnzAP( (void *) solver, cum_nnz_AP ) );
 }
+
+/*-------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetBTemp
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetBTemp( HYPRE_Solver    solver,
+                         HYPRE_ParVector Btemp )
+{
+   return ( hypre_BoomerAMGSetBTemp( (void *) solver, (hypre_ParVector *)Btemp ) );
+}
+
+/*-------------------------------------------------------------------------
+ * HYPRE_BoomerAMGGetBTemp
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGGetBTemp( HYPRE_Solver    solver,
+                         HYPRE_ParVector *Btemp )
+{
+   return ( hypre_BoomerAMGGetBTemp( (void *) solver, (hypre_ParVector **)Btemp ) );
+}
+
+/*-------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetXTemp
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetXTemp( HYPRE_Solver    solver,
+                         HYPRE_ParVector Xtemp )
+{
+   return ( hypre_BoomerAMGSetXTemp( (void *) solver, (hypre_ParVector *) Xtemp ) );
+}
+
+/*-------------------------------------------------------------------------
+ * HYPRE_BoomerAMGGetXTemp
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGGetXTemp( HYPRE_Solver    solver,
+                         HYPRE_ParVector *Xtemp )
+{
+   return ( hypre_BoomerAMGGetXTemp( (void *) solver, (hypre_ParVector **) Xtemp ) );
+}

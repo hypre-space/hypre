@@ -603,6 +603,11 @@ HYPRE_Int HYPRE_BoomerAMGSetFPoints( HYPRE_Solver solver, HYPRE_Int num_fpt,
                                      HYPRE_BigInt *fpt_index );
 HYPRE_Int HYPRE_BoomerAMGSetCumNnzAP ( HYPRE_Solver solver, hypre_double cum_nnz_AP );
 HYPRE_Int HYPRE_BoomerAMGGetCumNnzAP ( HYPRE_Solver solver, hypre_double *cum_nnz_AP );
+HYPRE_Int HYPRE_BoomerAMGSetBTemp ( HYPRE_Solver solver, HYPRE_ParVector btemp );
+HYPRE_Int HYPRE_BoomerAMGSetXTemp ( HYPRE_Solver solver, HYPRE_ParVector xtemp );
+HYPRE_Int HYPRE_BoomerAMGGetBTemp ( HYPRE_Solver solver, HYPRE_ParVector *btemp );
+HYPRE_Int HYPRE_BoomerAMGGetXTemp ( HYPRE_Solver solver, HYPRE_ParVector *xtemp );
+
 
 /* HYPRE_parcsr_amgdd.c */
 HYPRE_Int HYPRE_BoomerAMGDDSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
@@ -1219,6 +1224,10 @@ HYPRE_Int hypre_BoomerAMGSetFPoints( void *data, HYPRE_Int isolated, HYPRE_Int n
                                      HYPRE_BigInt *indices );
 HYPRE_Int hypre_BoomerAMGSetCumNnzAP ( void *data, hypre_double cum_nnz_AP );
 HYPRE_Int hypre_BoomerAMGGetCumNnzAP ( void *data, hypre_double *cum_nnz_AP );
+HYPRE_Int hypre_BoomerAMGSetBTemp ( void *data, hypre_ParVector *btemp );
+HYPRE_Int hypre_BoomerAMGSetXTemp ( void *data, hypre_ParVector *xtemp );
+HYPRE_Int hypre_BoomerAMGGetBTemp ( void *data, hypre_ParVector **btemp );
+HYPRE_Int hypre_BoomerAMGGetXTemp ( void *data, hypre_ParVector **xtemp );
 
 /* par_amg_setup.c */
 HYPRE_Int hypre_BoomerAMGSetup ( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f,

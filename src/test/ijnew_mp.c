@@ -85,7 +85,7 @@ int main (int argc, char *argv[])
    int build_rhs_type = 2;
    int build_matrix_arg_index;
    int build_rhs_arg_index;
-   int mg_max_iter = 50;
+   int mg_max_iter = 100;
    int max_iter = 1000;
    int coarsen_type = 10;
    int interp_type = 6;
@@ -115,7 +115,7 @@ int main (int argc, char *argv[])
    double tol = 1.e-8;
    int ioutdat = 0;
    int poutdat = 0;
-   int flex = 0;
+   int flex = 1;
    int num_functions = 1;
    int nodal = 0;
    int nodal_diag = 0;

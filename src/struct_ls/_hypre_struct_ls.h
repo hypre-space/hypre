@@ -6,6 +6,7 @@
 
 #include "_hypre_utilities.h"
 #include "HYPRE_struct_ls.h"
+#include "HYPRE_struct_ls_mp.h"
 #include "_hypre_struct_mv.h"
 #include "krylov.h"
 
