@@ -144,8 +144,10 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
    hypre_SStructMatrixRef(A, &A_l[0]);
    hypre_SStructVectorRef(b, &b_l[0]);
    hypre_SStructVectorRef(x, &x_l[0]);
+   hypre_SStructVectorSetMemoryMode(x_l[0], 2);
 
    HYPRE_SStructVectorCreate(comm, grid_l[0], &tx_l[0]);
+   hypre_SStructVectorSetMemoryMode(tx_l[0], 2);
    HYPRE_SStructVectorInitialize(tx_l[0]);
    HYPRE_SStructVectorAssemble(tx_l[0]);
 
@@ -173,10 +175,12 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       HYPRE_SStructVectorAssemble(b_l[l + 1]);
 
       HYPRE_SStructVectorCreate(comm, grid_l[l + 1], &x_l[l + 1]);
+      hypre_SStructVectorSetMemoryMode(x_l[l + 1], 2);
       HYPRE_SStructVectorInitialize(x_l[l + 1]);
       HYPRE_SStructVectorAssemble(x_l[l + 1]);
 
       HYPRE_SStructVectorCreate(comm, grid_l[l + 1], &tx_l[l + 1]);
+      hypre_SStructVectorSetMemoryMode(tx_l[l + 1], 2);
       HYPRE_SStructVectorInitialize(tx_l[l + 1]);
       HYPRE_SStructVectorAssemble(tx_l[l + 1]);
 
