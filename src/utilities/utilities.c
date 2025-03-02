@@ -13,6 +13,11 @@
 #include <direct.h>
 #define mkdir(path, mode) _mkdir(path)
 #else
+//#define __USE_GNU
+#include <signal.h>
+#include <execinfo.h>
+#include <dlfcn.h>
+#include <unistd.h>
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -264,4 +269,93 @@ hypre_ConvertIndicesToString(HYPRE_Int  size,
    hypre_sprintf(pos, "]");
 
    return string;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_PrintStackTrace
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_PrintStackTrace(HYPRE_Int rank)
+{
+#ifdef _WIN32
+   // Windows implementation not provided
+   hypre_printf("Stack trace not implemented for Windows\n");
+#else
+   void *stack[64];
+   int frames = backtrace(stack, 64);
+
+   // Convert raw addresses into an array of strings that describe them
+   char **symbols = backtrace_symbols(stack, frames);
+
+   /* Print a fancy header for readability */
+   hypre_printf("\n");
+   hypre_printf("============================================================");
+   hypre_printf("============================================================");
+   hypre_printf("\n Stack trace for rank %d\n", rank);
+   hypre_printf("============================================================");
+   hypre_printf("============================================================\n");
+
+   for (int i = 0; i < frames; i++)
+   {
+#ifndef __USE_GNU
+      hypre_printf(" [%02d]: %s\n", i, symbols[i]);
+#else
+      Dl_info info;
+      if (dladdr(stack[i], &info) && info.dli_fname)
+      {
+         // We have a shared object or executable file name
+         const char *obj_path = info.dli_fname;
+
+         // Calculate offset from the base of this object
+         unsigned long base_addr  = (unsigned long)info.dli_fbase;
+         unsigned long frame_addr = (unsigned long)stack[i];
+         unsigned long offset     = frame_addr - base_addr;
+
+         // Attempt to get file and line information using addr2line
+         // The offset alone is typically enough for most debugging setups
+         char cmd[1024];
+         snprintf(cmd, sizeof(cmd),
+                  "addr2line -Cfe %s 0x%lx 2>/dev/null", 
+                  obj_path, offset);
+
+         FILE *pipe = popen(cmd, "r");
+         if (pipe)
+         {
+            char func_line[512] = {0};
+            char file_line[512] = {0};
+
+            // addr2line -f prints the (demangled) function name on the first line
+            // and file:line on the second line
+            if (fgets(func_line, sizeof(func_line), pipe) &&
+                fgets(file_line, sizeof(file_line), pipe))
+            {
+               // Remove trailing newline
+               func_line[strcspn(func_line, "\n")] = 0;
+               file_line[strcspn(file_line, "\n")] = 0;
+
+               if (strcmp(file_line, "??:0") != 0 && strcmp(file_line, "??:?") != 0)
+               {
+                  hypre_printf(" [%02d]: %s (%s)\n", i, file_line, func_line);
+               }
+               else if (strcmp(func_line, "??") != 0)
+               {
+                  // We got some function name but no file:line
+                  hypre_printf(" [%02d]: %s\n", i, func_line);
+               }
+            }
+            pclose(pipe);
+         }
+      }
+#endif
+   }
+
+   /* Print a closing footer */
+   hypre_printf("============================================================");
+   hypre_printf("============================================================\n\n");
+
+   free(symbols);
+#endif
+
+   return hypre_error_flag;
 }

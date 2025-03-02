@@ -253,6 +253,16 @@ hypre_DataExchangeList(HYPRE_Int num_contacts,
       contact_requests = hypre_CTAlloc(hypre_MPI_Request,  num_contacts, HYPRE_MEMORY_HOST);
       contact_statuses = hypre_CTAlloc(hypre_MPI_Status,  num_contacts, HYPRE_MEMORY_HOST);
 
+      /* Abort if contact list is NOT well defined */
+      for (i = 0; i < num_contacts; i++)
+      {
+         if (contact_proc_list[i] < 0 || contact_proc_list[i] > (num_procs - 2))
+         {
+            hypre_PrintStackTrace(myid);
+            hypre_MPI_Abort(comm, -1);
+         }
+      }
+
       /* post receives - could be confirmation or data*/
       /* the size to post is max_response_total_bytes*/
 
@@ -272,7 +282,7 @@ hypre_DataExchangeList(HYPRE_Int num_contacts,
       for (i = 0; i < num_contacts; i++)
       {
          contact_ptrs[i] = start_ptr;
-         size =  contact_send_buf_starts[i + 1] - contact_send_buf_starts[i]  ;
+         size =  contact_send_buf_starts[i + 1] - contact_send_buf_starts[i];
          hypre_MPI_Isend(contact_ptrs[i], size * contact_obj_size,
                          hypre_MPI_BYTE, contact_proc_list[i],
                          contact_tag, comm, &contact_requests[i]);

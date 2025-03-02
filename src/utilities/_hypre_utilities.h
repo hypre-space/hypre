@@ -2428,6 +2428,7 @@ HYPRE_Int hypre_CreateDir(const char *path);
 HYPRE_Int hypre_CreateNextDirOfSequence(const char *basepath, const char *prefix,
                                         char **fullpath_ptr);
 char* hypre_ConvertIndicesToString(HYPRE_Int size, HYPRE_Int *indices);
+HYPRE_Int hypre_PrintStackTrace(HYPRE_Int rank);
 
 HYPRE_Int hypre_SetSyncCudaCompute(HYPRE_Int action);
 HYPRE_Int hypre_RestoreSyncCudaCompute(void);
@@ -3946,3 +3947,4 @@ HYPRE_Int hypre_mm_read_mtx_crd_size(FILE *f, HYPRE_Int *M, HYPRE_Int *N, HYPRE_
 #endif
 
 #endif
+
