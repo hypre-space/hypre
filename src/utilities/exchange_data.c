@@ -256,7 +256,7 @@ hypre_DataExchangeList(HYPRE_Int num_contacts,
       /* Abort if contact list is NOT well defined */
       for (i = 0; i < num_contacts; i++)
       {
-         if (contact_proc_list[i] < 0 || contact_proc_list[i] > (num_procs - 2))
+         if (contact_proc_list[i] < 0 || contact_proc_list[i] > (num_procs - 1))
          {
             hypre_PrintStackTrace(myid);
             hypre_MPI_Abort(comm, -1);
