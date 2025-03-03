@@ -2598,7 +2598,7 @@ BuildVector( MPI_Comm             comm,
                                             pdata.iuppers[box],
                                             ilower, iupper);
             HYPRE_SStructVectorSetBoxValues(vec, part, ilower, iupper,
-                                            var, values);
+                                            var, d_values);
          }
       }
    }
