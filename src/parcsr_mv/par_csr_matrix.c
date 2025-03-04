@@ -1762,12 +1762,12 @@ hypre_ParCSRMatrixGetRow( hypre_ParCSRMatrix  *mat,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      return hypre_ParCSRMatrixGetRowDevice(mat, row, size, col_ind, values);
+      hypre_ParCSRMatrixGetRowDevice(mat, row, size, col_ind, values);
    }
    else
 #endif
    {
-      return hypre_ParCSRMatrixGetRowHost(mat, row, size, col_ind, values);
+      hypre_ParCSRMatrixGetRowHost(mat, row, size, col_ind, values);
    }
 
    return hypre_error_flag;

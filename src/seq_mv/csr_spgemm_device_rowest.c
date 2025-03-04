@@ -440,8 +440,8 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
    HYPRE_Real t1 = hypre_MPI_Wtime();
 #endif
 
+   static constexpr HYPRE_Int shmem_size_per_warp = 128;
    const HYPRE_Int num_warps_per_block =  16;
-   const HYPRE_Int shmem_size_per_warp = 128;
    const HYPRE_Int BDIMX               =   2;
    const HYPRE_Int BDIMY               = HYPRE_WARP_SIZE / BDIMX;
 
@@ -528,4 +528,3 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
 }
 
 #endif /* defined(HYPRE_USING_GPU) */
-
