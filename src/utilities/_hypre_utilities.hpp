@@ -375,6 +375,14 @@ using hypre_DeviceItem = void*;
 #include <thrust/sequence.h>
 #include <thrust/for_each.h>
 #include <thrust/remove.h>
+#include <thrust/version.h>
+
+/* VPM: this is needed to support cuda 10. not_fn is the correct replacement going forward. */
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#define HYPRE_THRUST_NOT(pred) thrust::not1(pred)
+#else
+#define HYPRE_THRUST_NOT(pred) thrust::not_fn(pred)
+#endif
 
 using namespace thrust::placeholders;
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
@@ -1534,7 +1542,11 @@ T warp_allreduce_min(hypre_DeviceItem &item, T in)
 }
 
 template<typename T1, typename T2>
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
 struct type_cast : public thrust::unary_function<T1, T2>
+#else
+struct type_cast
+#endif
 {
    __host__ __device__ T2 operator()(const T1 &x) const
    {
@@ -1543,7 +1555,11 @@ struct type_cast : public thrust::unary_function<T1, T2>
 };
 
 template<typename T>
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
 struct absolute_value : public thrust::unary_function<T, T>
+#else
+struct absolute_value
+#endif
 {
    __host__ __device__ T operator()(const T &x) const
    {
@@ -1594,7 +1610,11 @@ struct TupleComp3
 };
 
 template<typename T>
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
 struct is_negative : public thrust::unary_function<T, bool>
+#else
+struct is_negative
+#endif
 {
    __host__ __device__ bool operator()(const T &x)
    {
@@ -1603,7 +1623,11 @@ struct is_negative : public thrust::unary_function<T, bool>
 };
 
 template<typename T>
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
 struct is_positive : public thrust::unary_function<T, bool>
+#else
+struct is_positive
+#endif
 {
    __host__ __device__ bool operator()(const T &x)
    {
@@ -1612,7 +1636,11 @@ struct is_positive : public thrust::unary_function<T, bool>
 };
 
 template<typename T>
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
 struct is_nonnegative : public thrust::unary_function<T, bool>
+#else
+struct is_nonnegative
+#endif
 {
    __host__ __device__ bool operator()(const T &x)
    {
@@ -1621,7 +1649,11 @@ struct is_nonnegative : public thrust::unary_function<T, bool>
 };
 
 template<typename T>
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
 struct in_range : public thrust::unary_function<T, bool>
+#else
+struct in_range
+#endif
 {
    T low, up;
 
@@ -1634,7 +1666,11 @@ struct in_range : public thrust::unary_function<T, bool>
 };
 
 template<typename T>
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
 struct out_of_range : public thrust::unary_function<T, bool>
+#else
+struct out_of_range
+#endif
 {
    T low, up;
 
@@ -1647,7 +1683,11 @@ struct out_of_range : public thrust::unary_function<T, bool>
 };
 
 template<typename T>
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
 struct less_than : public thrust::unary_function<T, bool>
+#else
+struct less_than
+#endif
 {
    T val;
 
@@ -1660,7 +1700,11 @@ struct less_than : public thrust::unary_function<T, bool>
 };
 
 template<typename T>
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
 struct modulo : public thrust::unary_function<T, T>
+#else
+struct modulo
+#endif
 {
    T val;
 
@@ -1673,7 +1717,11 @@ struct modulo : public thrust::unary_function<T, T>
 };
 
 template<typename T>
+#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
 struct equal : public thrust::unary_function<T, bool>
+#else
+struct equal
+#endif
 {
    T val;
 
