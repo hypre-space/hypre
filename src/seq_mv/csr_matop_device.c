@@ -183,7 +183,9 @@ hypre_GpuMatDataDestroy(hypre_GpuMatData *data)
       HYPRE_ROCSPARSE_CALL( rocsparse_destroy_mat_info(hypre_GpuMatDataMatInfo(data)) );
 
 #elif defined(HYPRE_USING_ONEMKLSPARSE)
-      HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::release_matrix_handle(&hypre_GpuMatDataMatHandle(data)) );
+      HYPRE_ONEMKL_CALL( oneapi::mkl::sparse::release_matrix_handle(*hypre_HandleComputeStream(
+                                                                       hypre_handle()),
+                                                                    &hypre_GpuMatDataMatHandle(data)) );
 #endif
    }
 
@@ -3275,6 +3277,7 @@ hypre_CSRMatrixTriLowerUpperSolveOnemklsparse(char              uplo,
                                                  (uplo == 'L') ? oneapi::mkl::uplo::L : oneapi::mkl::uplo::U,
                                                  oneapi::mkl::transpose::N,
                                                  unit_diag ? oneapi::mkl::diag::U : oneapi::mkl::diag::N,
+                                                 1.0,
                                                  handle_A,
                                                  f_data,
                                                  u_data,
