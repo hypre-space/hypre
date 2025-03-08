@@ -138,7 +138,7 @@ hypre_GaussElimSetupDevice(hypre_ParAMGData *amg_data,
     *  Compute the explicit inverse: A^{-1} = inv(A)
     *-----------------------------------------------------------------*/
 
-   if (solver_type == 198 || solver_type == 199)
+   if (solver_type == 298 || solver_type == 299)
    {
 #if defined(HYPRE_USING_MAGMA)
       /* Determine workspace size */
@@ -252,7 +252,8 @@ hypre_GaussElimSolveDevice(hypre_ParAMGData *amg_data,
    }
 
 #if defined(HYPRE_USING_MAGMA)
-   if (solver_type == 98 || solver_type == 99)
+   if (solver_type ==  98 || solver_type ==  99 ||
+       solver_type == 198 || solver_type == 199)
    {
       HYPRE_MAGMA_CALL(hypre_magma_getrs_gpu(MagmaNoTrans,
                                              global_num_rows,
@@ -264,7 +265,7 @@ hypre_GaussElimSolveDevice(hypre_ParAMGData *amg_data,
                                              global_num_rows,
                                              &ierr));
    }
-   else if (solver_type == 198 || solver_type == 199)
+   else if (solver_type == 298 || solver_type == 299)
    {
       HYPRE_MAGMA_VCALL(hypre_magma_gemv(MagmaNoTrans,
                                          global_num_rows,
@@ -281,7 +282,8 @@ hypre_GaussElimSolveDevice(hypre_ParAMGData *amg_data,
    }
 
 #elif defined(HYPRE_USING_CUSOLVER) && defined(HYPRE_USING_CUBLAS)
-   if (solver_type == 98 || solver_type == 99)
+   if (solver_type ==  98 || solver_type ==  99 ||
+       solver_type == 198 || solver_type == 199)
    {
       d_ierr = hypre_CTAlloc(HYPRE_Int, 1, HYPRE_MEMORY_DEVICE);
       HYPRE_CUSOLVER_CALL(hypre_cusolver_dngetrs(hypre_HandleVendorSolverHandle(hypre_handle()),
@@ -296,7 +298,7 @@ hypre_GaussElimSolveDevice(hypre_ParAMGData *amg_data,
                                                  d_ierr));
       hypre_TMemcpy(&ierr, d_ierr, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
-   else if (solver_type == 198 || solver_type == 199)
+   else if (solver_type == 298 || solver_type == 299)
    {
       HYPRE_CUBLAS_CALL(hypre_cublas_gemv(hypre_HandleCublasHandle(hypre_handle()),
                                           CUBLAS_OP_N,
@@ -343,7 +345,7 @@ hypre_GaussElimSolveDevice(hypre_ParAMGData *amg_data,
    }
 
    /* Copy solution vector to proper variable */
-   work = (solver_type == 198 || solver_type == 199) ? u_vec : b_vec;
+   work = (solver_type == 298 || solver_type == 299) ? u_vec : b_vec;
    hypre_TMemcpy(u_data, work + first_row_index, HYPRE_Complex, num_rows,
                  memory_location, ge_memory_location);
 

@@ -791,12 +791,14 @@ HYPRE_Int HYPRE_BoomerAMGSetRelaxType(HYPRE_Solver  solver,
  *   For coarsest level systems formed via a sub-communicator defined with active ranks:
  *      - 9   : hypre's internal Gaussian elimination (host only).
  *      - 99  : LU factorization with pivoting.
- *      - 199 : explicit (dense) inverse.
+ *      - 199 : LU factorization without pivoting (device only, host falls back to pivoting).
+ *      - 299 : explicit (dense) inverse.
  *
  *   For coarsest level systems formed via hypre_DataExchangeList:
  *      - 19  : hypre's internal Gaussian elimination (host only).
  *      - 98  : LU factorization with pivoting.
- *      - 198 : explicit (dense) inverse.
+ *      - 198 : LU factorization without pivoting (device only, host falls back to pivoting).
+ *      - 298 : explicit (dense) inverse.
  *
  * Options for \e k are
  *

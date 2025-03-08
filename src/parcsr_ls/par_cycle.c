@@ -488,12 +488,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                      (HYPRE_ParVector) Aux_F,
                                      (HYPRE_ParVector) Aux_U);
                }
-               else if (relax_type == 9   ||
-                        relax_type == 19  ||
-                        relax_type == 98  ||
-                        relax_type == 99  ||
-                        relax_type == 198 ||
-                        relax_type == 199)
+               else if (relax_type == 9   || relax_type == 19  ||
+                        relax_type == 98  || relax_type == 99  ||
+                        relax_type == 198 || relax_type == 199 ||
+                        relax_type == 298 || relax_type == 299)
                {
                   /* Gaussian elimination */
                   hypre_GaussElimSolve(amg_data, level, relax_type);

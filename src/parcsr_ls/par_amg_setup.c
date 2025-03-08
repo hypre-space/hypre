@@ -3178,12 +3178,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_ParAMGDataDSLUSolver(amg_data) = dslu_solver;
    }
 #endif
-   else if (grid_relax_type[3] == 9   ||
-            grid_relax_type[3] == 19  ||
-            grid_relax_type[3] == 98  ||
-            grid_relax_type[3] == 99  ||
-            grid_relax_type[3] == 198 ||
-            grid_relax_type[3] == 199)
+   else if (grid_relax_type[3] == 9   || grid_relax_type[3] == 19  ||
+            grid_relax_type[3] == 98  || grid_relax_type[3] == 99  ||
+            grid_relax_type[3] == 198 || grid_relax_type[3] == 199 ||
+            grid_relax_type[3] == 298 || grid_relax_type[3] == 299)
    {
       /* Gaussian elimination on the coarsest level */
       if (coarse_size <= coarse_threshold)

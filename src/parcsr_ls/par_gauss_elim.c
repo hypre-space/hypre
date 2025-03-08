@@ -19,14 +19,16 @@
  *
  *   - 9: hypre's internal Gaussian elimination on the host.
  *   - 99: LU factorization with pivoting.
- *   - 199: explicit (dense) inverse A_inv = U^{-1}*L^{-1}.
+ *   - 199: LU factorization without pivoting.
+ *   - 299: explicit (dense) inverse A_inv = U^{-1}*L^{-1}.
  *
  * Solver options for which local matrices/vectors are formed via
  * hypre_DataExchangeList:
  *
  *   - 19: hypre's internal Gaussian elimination on the host.
  *   - 98: LU factorization with pivoting.
- *   - 198: explicit (dense) inverse A_inv = U^{-1}*L^{-1}.
+ *   - 198: LU factorization without pivoting.
+ *   - 298: explicit (dense) inverse A_inv = U^{-1}*L^{-1}.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -79,8 +81,8 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
     *-----------------------------------------------------------------*/
 
    /* Check for relaxation type */
-   if (solver_type != 9  && solver_type != 99 && solver_type != 199 &&
-       solver_type != 19 && solver_type != 98 && solver_type != 198)
+   if (solver_type != 9  && solver_type != 99 && solver_type != 199 && solver_type != 299 &&
+       solver_type != 19 && solver_type != 98 && solver_type != 198 && solver_type != 298)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported solver type!");
       return hypre_error_flag;
@@ -119,16 +121,16 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
                                                       global_num_rows,
                                                       ge_memory_location);
 
-      /* solver types 198 and 199 need a work space for the solution vector */
-      if (solver_type == 198 || solver_type == 199)
+      /* solver types 298 and 299 (explicit inverse) need a work space for the solution vector */
+      if (solver_type == 298 || solver_type == 299)
       {
          hypre_ParAMGDataUVec(amg_data) = hypre_CTAlloc(HYPRE_Real,
                                                         global_num_rows,
                                                         ge_memory_location);
       }
 
-      /* solver types other than 9 and 19 need an array for storing pivots */
-      if (solver_type != 9 && solver_type != 19)
+      /* solver types 98, 99, 298 and 299 need an array for storing pivots */
+      if (solver_type == 98 || solver_type == 99 || solver_type == 298 || solver_type == 299)
       {
 #if defined(HYPRE_USING_MAGMA)
          /* MAGMA's getrf/getrs expect Apiv to be on the host */
@@ -140,6 +142,11 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
                                                         global_num_rows,
                                                         ge_memory_location);
 #endif
+      }
+      else
+      {
+         /* Null pointer disables pivoting */
+         hypre_ParAMGDataAPiv(amg_data) = NULL;
       }
       A_piv = hypre_ParAMGDataAPiv(amg_data);
    }
@@ -155,7 +162,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("GESetup");
 
-   if (solver_type == 9 || solver_type == 99 || solver_type == 199)
+   if (solver_type == 9 || solver_type == 99 || solver_type == 199 || solver_type == 299)
    {
       /* Generate sub communicator - processes that have nonzero num_rows */
       hypre_GenerateSubComm(comm, num_rows, &new_comm);
@@ -286,7 +293,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
          return hypre_error_flag;
       }
    }
-   else /* if (solver_type == 19 || solver_type = 98 || solver_type == 198) */
+   else /* if (solver_type == 19 || solver_type = 98 || solver_type == 198 || solver_type == 298) */
    {
       /* Generate CSR matrix from ParCSRMatrix A */
       A_CSR = hypre_ParCSRMatrixToCSRMatrixAll_v2(A, HYPRE_MEMORY_HOST);
@@ -387,7 +394,7 @@ hypre_GaussElimSetup(hypre_ParAMGData *amg_data,
          }
 
          /* Compute explicit inverse */
-         if (solver_type == 198 || solver_type == 199)
+         if (solver_type == 298 || solver_type == 299)
          {
             HYPRE_Int     query = -1, lwork;
             HYPRE_Real    lwork_opt;
@@ -512,8 +519,8 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
    }
 
    /* Check for relaxation type */
-   if (solver_type != 9  && solver_type != 99 && solver_type != 199 &&
-       solver_type != 19 && solver_type != 98 && solver_type != 198)
+   if (solver_type != 9  && solver_type != 99 && solver_type != 199 && solver_type != 299 &&
+       solver_type != 19 && solver_type != 98 && solver_type != 198 && solver_type != 298)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported solver type!");
       return hypre_error_flag;
@@ -535,7 +542,7 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
     *  Gather RHS phase
     *-----------------------------------------------------------------*/
 
-   if (solver_type == 9 || solver_type == 99 || solver_type == 199)
+   if (solver_type == 9 || solver_type == 99 || solver_type == 199 || solver_type == 299)
    {
       /* Exit if no rows in this rank */
       if (!num_rows)
@@ -580,7 +587,7 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
          hypre_TFree(f_data_h, HYPRE_MEMORY_HOST);
       }
    }
-   else /* if (solver_type == 19 || solver_type == 98 || solver_type == 198) */
+   else /* if (solver_type == 19 || solver_type == 98 || solver_type == 198 || solver_type == 298) */
    {
       f_all = hypre_ParVectorToVectorAll_v2(f, HYPRE_MEMORY_HOST);
    }
@@ -650,7 +657,8 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
          hypre_TMemcpy(u_data, b_data_h + first_row_index, HYPRE_Real, num_rows,
                        memory_location, HYPRE_MEMORY_HOST);
       }
-      else if (solver_type == 98 || solver_type == 99)
+      else if (solver_type ==  98 || solver_type ==  99 ||
+               solver_type == 198 || solver_type == 199)
       {
          /* Run LAPACK's triangular solver */
          hypre_dgetrs("N", &global_num_rows, &one_i, A_mat,
@@ -664,7 +672,7 @@ hypre_GaussElimSolve(hypre_ParAMGData *amg_data,
          hypre_TMemcpy(u_data, b_data_h + first_row_index, HYPRE_Real, num_rows,
                        memory_location, HYPRE_MEMORY_HOST);
       }
-      else /* if (solver_type == 198 || solver_type == 199) */
+      else /* if (solver_type == 298 || solver_type == 299) */
       {
          hypre_dgemv("N", &global_num_rows, &global_num_rows, &one,
                      A_mat, &global_num_rows, b_vec, &one_i, &zero,
