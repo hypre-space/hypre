@@ -44,4 +44,14 @@ mpirun -np 4  ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 16 -Pmx 12 \
 mpirun -np 4  ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 17 \
  > interp.out.8
 
+mpirun -np 4 ./ij -rhsrand -n 8 8 8 -sysL 2 -nf 2 -interptype 15 \
+ > interp.out.9
 
+mpirun -np 4 ./ij -rhsrand -n 8 8 8 -sysL 2 -nf 2 -interptype 16 \
+ > interp.out.10
+
+mpirun -np 4 ./ij -rhsrand -n 8 8 8 -sysL 2 -nf 2 -interptype 17 \
+ > interp.out.11
+
+mpirun -np 4 ./ij -rhsrand -n 8 8 8 -sysL 2 -nf 2 -interptype 18 \
+ > interp.out.12

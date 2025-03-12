@@ -1840,6 +1840,7 @@ hypre_BoomerAMGBuildModExtPEInterpHost(hypre_ParCSRMatrix   *A,
    hypre_TFree(start_array, HYPRE_MEMORY_HOST);
    hypre_TFree(startf_array, HYPRE_MEMORY_HOST);
    hypre_TFree(buf_data, HYPRE_MEMORY_HOST);
+   hypre_TFree(dof_func_offd, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixDestroy(As_FF);
    hypre_ParCSRMatrixDestroy(As_FC);
    hypre_ParCSRMatrixDestroy(W);
