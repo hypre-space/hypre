@@ -61,3 +61,30 @@
                 operator = 2.681224
                    cycle = 5.360748
 
+# Output file: interp.out.9
+ Average Convergence Factor = 0.522598
+
+     Complexity:    grid = 1.489258
+                operator = 2.126953
+                   cycle = 4.251953
+
+# Output file: interp.out.10
+ Average Convergence Factor = 0.467057
+
+     Complexity:    grid = 1.474609
+                operator = 2.478906
+                   cycle = 4.957109
+
+# Output file: interp.out.11
+ Average Convergence Factor = 0.423068
+
+     Complexity:    grid = 1.478516
+                operator = 2.503750
+                   cycle = 5.005547
+
+# Output file: interp.out.12
+ Average Convergence Factor = 0.428721
+
+     Complexity:    grid = 1.479492
+                operator = 2.506016
+                   cycle = 5.010078

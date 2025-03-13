@@ -11,7 +11,9 @@
 /*--------------------------------------------------------------------------
  * hypre_MGRBuildInterp
  *
- * Build MGR's prolongation matrix
+ * Build MGR's prolongation matrix P = [Wp I]^T where Wp might be computed
+ * explicitly and returned as an output of this function.
+ * Wp approximates [- inv(A_FF) * A_FC]. Note the negative sign.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -149,7 +151,9 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
 /*--------------------------------------------------------------------------
  * hypre_MGRBuildRestrict
  *
- * Setup restriction operator.
+ * Build MGR's restriction matrix R = [Wr I] where Wr might be computed
+ * explicitly and returned as an output of this function.
+ * Wr approximates [- A_CF * inv(A_FF)]. Note the negative sign.
  *
  * TODOs (VPM):
  *   1) Add post-smoothing
@@ -304,10 +308,11 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
          hypre_ParCSRMatrixBlockDiagMatrix(AT, blk_size, -1, CF_marker_data, 1,
                                            &A_FF_blkinv);
 
-         /* Compute WrT = A_FF_blk^{-T} * A_CF^{T}  */
+         /* Compute WrT = -A_FF_blk^{-T} * A_CF^{T}  */
          WrT = hypre_ParCSRMatMat(A_FF_blkinv, A_CFT_blk);
+         hypre_ParCSRMatrixScale(WrT, -1.0);
 
-         /* compute restriction operator RT = [-WrT  I] (transposed for use with RAP) */
+         /* compute restriction operator RT = [WrT  I] (transposed for use with RAP) */
          hypre_MGRBuildPFromWp(AT, WrT, CF_marker_data, &RT);
       }
 
@@ -496,7 +501,7 @@ hypre_MGRBuildPFromWpHost( hypre_ParCSRMatrix    *A,
          for (jj = Wp_diag_i[row_Wp]; jj < Wp_diag_i[row_Wp + 1]; jj++)
          {
             P_diag_j[jj_counter]    = Wp_diag_j[jj];
-            P_diag_data[jj_counter] = - Wp_diag_data[jj];
+            P_diag_data[jj_counter] = Wp_diag_data[jj];
             jj_counter++;
          }
 
@@ -507,7 +512,7 @@ hypre_MGRBuildPFromWpHost( hypre_ParCSRMatrix    *A,
             for (jj = Wp_offd_i[row_Wp]; jj < Wp_offd_i[row_Wp + 1]; jj++)
             {
                P_offd_j[jj_counter_offd]    = Wp_offd_j[jj];
-               P_offd_data[jj_counter_offd] = - Wp_offd_data[jj];
+               P_offd_data[jj_counter_offd] = Wp_offd_data[jj];
                jj_counter_offd++;
             }
          }
@@ -572,8 +577,9 @@ hypre_MGRBuildBlockJacobiWp( hypre_ParCSRMatrix   *A_FF,
    /* Build A_FF_inv */
    hypre_ParCSRMatrixBlockDiagMatrix(A_FF, blk_size, -1, NULL, 1, &A_FF_inv);
 
-   /* Compute Wp = A_FF_inv * A_FC */
+   /* Compute Wp = -A_FF_inv * A_FC */
    Wp = hypre_ParCSRMatMat(A_FF_inv, A_FC);
+   hypre_ParCSRMatrixScale(Wp, -1.0);
 
    /* Free memory */
    hypre_ParCSRMatrixDestroy(A_FF_inv);
