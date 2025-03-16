@@ -24,11 +24,11 @@ extern void sigHandler_dh(hypre_int sig);
   list of signals the Euclid will handle
 */
 #ifdef WIN32
-hypre_int euclid_signals_len = 2;
-hypre_int euclid_signals[] = { SIGSEGV, SIGFPE };
+static hypre_int euclid_signals_len = 2;
+static hypre_int euclid_signals[] = { SIGSEGV, SIGFPE };
 #else
-hypre_int euclid_signals_len = 3;
-hypre_int euclid_signals[] = { SIGSEGV, SIGFPE, SIGBUS };
+static hypre_int euclid_signals_len = 3;
+static hypre_int euclid_signals[] = { SIGSEGV, SIGFPE, SIGBUS };
 #endif
 
 /* 
