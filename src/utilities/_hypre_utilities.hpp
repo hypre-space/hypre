@@ -423,7 +423,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #elif defined(HYPRE_USING_HIP)
 #define HYPRE_WARP_SIZE       64
 #define HYPRE_WARP_BITSHIFT   6
-#define HYPRE_WARP_FULL_MASK  0xFFFFFFFFFFFFFFF
+#define HYPRE_WARP_FULL_MASK  0xFFFFFFFFFFFFFFFF
 #endif
 
 #define HYPRE_MAX_NUM_WARPS   (64 * 64 * 32)
@@ -1292,8 +1292,8 @@ hypre_double atomicAdd(hypre_double* address, hypre_double val)
 }
 #endif
 
-// There are no *_sync functions in HIP
-#if defined(HYPRE_USING_HIP) || (CUDA_VERSION < 9000)
+// There are no *_sync functions in HIP < 6.5
+#if (defined(HYPRE_USING_HIP) && HIP_VERSION < 60500000)
 
 template <typename T>
 static __device__ __forceinline__
@@ -1328,12 +1328,18 @@ void __syncwarp()
 {
 }
 
-#endif // #if defined(HYPRE_USING_HIP) || (CUDA_VERSION < 9000)
+static __device__ __forceinline__
+hypre_int __any_sync(unsigned mask, hypre_int predicate)
+{
+   return __any(predicate);
+}
+
+#endif // if (defined(HYPRE_USING_HIP) && HIP_VERSION < 60500000)
 
 static __device__ __forceinline__
 hypre_mask hypre_ballot_sync(hypre_DeviceItem &item, hypre_mask mask, hypre_int predicate)
 {
-#if defined(HYPRE_USING_CUDA)
+#if defined(HYPRE_USING_CUDA) || (defined(HYPRE_USING_HIP) && HIP_VERSION >= 60500000)
    return __ballot_sync(mask, predicate);
 #else
    return __ballot(predicate);
@@ -1359,14 +1365,6 @@ HYPRE_Int hypre_ffs(hypre_mask mask)
    return (HYPRE_Int) __ffsll(mask);
 #endif
 }
-
-#if defined(HYPRE_USING_HIP)
-static __device__ __forceinline__
-hypre_int __any_sync(unsigned mask, hypre_int predicate)
-{
-   return __any(predicate);
-}
-#endif
 
 /* sync the thread block */
 static __device__ __forceinline__

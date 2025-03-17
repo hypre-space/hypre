@@ -227,7 +227,7 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #elif defined(HYPRE_USING_HIP)
 #define HYPRE_WARP_SIZE       64
 #define HYPRE_WARP_BITSHIFT   6
-#define HYPRE_WARP_FULL_MASK  0xFFFFFFFFFFFFFFF
+#define HYPRE_WARP_FULL_MASK  0xFFFFFFFFFFFFFFFF
 #endif
 
 #define HYPRE_MAX_NUM_WARPS   (64 * 64 * 32)
