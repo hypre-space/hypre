@@ -2410,7 +2410,7 @@ hypre_MGRBuildRFromWr(hypre_IntArray       *C_map,
       hypre_ParCSRMatrixMigrate(R, HYPRE_MEMORY_HOST);
       hypre_IntArrayMigrate(C_map, HYPRE_MEMORY_HOST);
       hypre_IntArrayMigrate(F_map, HYPRE_MEMORY_HOST);
-      hypre_MGRBuildRFromWHost(C_map, F_map, Wr, R);
+      hypre_MGRBuildRFromWrHost(C_map, F_map, Wr, R);
       hypre_ParCSRMatrixMigrate(Wr, HYPRE_MEMORY_DEVICE);
       hypre_ParCSRMatrixMigrate(R, HYPRE_MEMORY_DEVICE);
    }
