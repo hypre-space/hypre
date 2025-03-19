@@ -5,13 +5,14 @@
 
 ##############################################################################
 #
-# This file defines 5 matrices and 4 vectors.
+# This file defines the following matrices and vectors:
 #
 #   A(0): 5-pt Laplacian       ; constant coefficients
 #   P(1): 3-pt x-interpolation ; constant coefficients
 #   R(2): 3-pt x-restriction   ; constant coefficients
 #   P(3): 3-pt y-interpolation ; constant coefficients
 #   R(4): 3-pt y-restriction   ; constant coefficients
+#   A(5): 5-pt Laplacian       ; constant coefficients ; symmetric
 #
 #   x (0): fine grid vector     ; value = 1
 #   xc(1): x-coarse grid vector ; value = 1
@@ -36,7 +37,7 @@ GridSetPeriodic: (1 0)
 ###########################################################
 
 # Matrix: nmatrices
-Matrix: 5
+Matrix: 6
 
 ##### Matrix A (0)
 
@@ -107,6 +108,24 @@ MatrixSetCoeff: 4  2 ( 0  1)  0.5
 
 # MatrixSetConstant: matnum nentries entries(nentries)
 MatrixSetConstant: 4 3 (0 1 2)
+
+##### Matrix A (5)
+
+# MatrixCreate: matnum ncoeffs rmap(ndim) dmap(ndim)
+MatrixCreate: 5 4 (1 1) (1 1)
+
+# MatrixSetCoeff: matnum entry offset(ndim) value
+MatrixSetCoeff: 5  0 ( 0  0)  4.0
+MatrixSetCoeff: 5  1 (-1  0) -1.0
+MatrixSetCoeff: 5  2 ( 1  0) -1.0
+MatrixSetCoeff: 5  3 ( 0 -1) -1.0
+#MatrixSetCoeff: 5  4 ( 0  1) -1.0   # Note subset of full stencil
+
+# MatrixSetConstant: matnum nentries entries(nentries)
+MatrixSetConstant: 5 5 (0 1 2 3 4)
+
+# MatrixSetSymmetric: matnum symmetric
+MatrixSetSymmetric: 5 1
 
 ###########################################################
 

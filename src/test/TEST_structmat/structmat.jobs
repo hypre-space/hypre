@@ -196,3 +196,39 @@ mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.ab2.mv0 -mat-ve
 mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.ab2.mv1 -mat-vec 1 1 0 -r 8 7 -ab -0.3 1.7 > structmat.out.ab2.mv1
 mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.ab2.mv2 -mat-vec 2 0 1 -r 8 7 -ab -0.3 1.7 > structmat.out.ab2.mv2
 
+#=============================================================================
+# Symmetric A - 2D four procs RAP
+#=============================================================================
+
+# interpolate in x direction
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.sym.x.4 -mat-mat 3 1T 5 1 -r 5 5 -P 2 2 > structmat.out.2D0.x.4
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.sym.x.4 -mat-mat 3 1T 5 1 -r 5 5 -P 2 2 > structmat.out.2D1.x.4
+mpirun -np 4 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.sym.x.4 -mat-mat 3 1T 5 1 -r 5 5 -P 2 2 > structmat.out.2D2.x.4
+mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.sym.x.4 -mat-mat 3 1T 5 1 -r 5 5 -P 2 2 > structmat.out.2D3.x.4
+
+#=============================================================================
+# Symmetric A - 2D four procs Matvec
+#=============================================================================
+
+# all constant coefficients
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.sym.mv0.4 -mat-vec 5 0 3 -r 5 5 -P 2 2 > structmat.out.2D0.mv0.4
+
+# all variable coefficients
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.sym.mv0.4 -mat-vec 5 0 3 -r 5 5 -P 2 2 > structmat.out.2D1.mv0.4
+
+# variable diagonal
+mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.sym.mv0.4 -mat-vec 5 0 3 -r 5 5 -P 2 2 > structmat.out.2D3.mv0.4
+
+#=============================================================================
+# Symmetric A - 2D four procs MatvecT
+#=============================================================================
+
+# all constant coefficients
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.sym.mvT0.4 -matTvec 5 0 3 -r 5 5 -P 2 2 > structmat.out.2D0.mvT0.4
+
+# all variable coefficients
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.sym.mvT0.4 -matTvec 5 0 3 -r 5 5 -P 2 2 > structmat.out.2D1.mvT0.4
+
+# variable diagonal
+mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.sym.mvT0.4 -matTvec 5 0 3 -r 5 5 -P 2 2 > structmat.out.2D3.mvT0.4
+

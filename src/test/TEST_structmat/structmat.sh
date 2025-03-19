@@ -33,6 +33,12 @@ FILESmatmat="\
  ${TNAME}.out.2D3.x.RA\
  ${TNAME}.out.2D3.x.AP\
 "
+FILESmatmatsym="\
+ ${TNAME}.out.2D0.sym.x.4\
+ ${TNAME}.out.2D1.sym.x.4\
+ ${TNAME}.out.2D2.sym.x.4\
+ ${TNAME}.out.2D3.sym.x.4\
+"
 FILESmatvec="\
  ${TNAME}.out.2D0.mv0\
  ${TNAME}.out.2D0.mv1\
@@ -120,6 +126,18 @@ do
       diff -U3 -bI"time" $j $saved >&2
    done
 done
+
+# Symmetric Matmat tests
+for i in $FILESmatmatsym
+do
+   for j in ${i}.matmat.*
+   do
+      saved=`echo $j | sed 's/.out/.saved/' | sed 's/.sym//'`
+      diff -U3 -bI"time" $j $saved >&2
+   done
+done
+
+# Symmetric Matvec tests TODO
 
 #=============================================================================
 # remove temporary files
