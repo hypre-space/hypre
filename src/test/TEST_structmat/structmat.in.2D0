@@ -122,7 +122,7 @@ MatrixSetCoeff: 5  3 ( 0 -1) -1.0
 #MatrixSetCoeff: 5  4 ( 0  1) -1.0   # Note subset of full stencil
 
 # MatrixSetConstant: matnum nentries entries(nentries)
-MatrixSetConstant: 5 5 (0 1 2 3 4)
+MatrixSetConstant: 5 4 (0 1 2 3)    # Note subset of full stencil
 
 # MatrixSetSymmetric: matnum symmetric
 MatrixSetSymmetric: 5 1
