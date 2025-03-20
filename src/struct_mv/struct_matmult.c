@@ -519,6 +519,7 @@ hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
    HYPRE_Int                  nboxes;
    HYPRE_Int                 *boxnums;
    hypre_Box                 *box;
+   HYPRE_Int                 *symm;
 
    hypre_StCoeff             *st_coeff;
    hypre_StTerm              *st_term;
@@ -712,6 +713,14 @@ hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
                }
                else
                {
+                  /* Adjust offset for symmetric matrices */
+                  symm = hypre_StructMatrixSymmEntries(matrix);
+                  if (!(symm[entry] < 0))  /* this is not a stored coefficient */
+                  {
+                     stencil = hypre_StructMatrixStencil(matrix);
+                     offsetref = hypre_StructStencilOffset(stencil, entry);
+                     hypre_AddIndexes(offset, offsetref, ndim, offset);
+                  }
                   hypre_CommStencilSetEntry(comm_stencils[m], offset);
                   const_entry = 0;
                   var_term = 1;

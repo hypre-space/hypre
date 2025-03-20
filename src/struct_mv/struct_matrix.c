@@ -1823,7 +1823,8 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
       hypre_IndexRef     fstride;
       HYPRE_Int          i, tot_num_ghost[2 * HYPRE_MAXDIM];
 
-      /* RDF TODO: Use CommStencil to do communication */
+      /* RDF TODO: Use CommStencil to do communication; don't forget to account
+       * for symmetric stencil entries */
       for (i = 0; i < 2 * ndim; i++)
       {
          tot_num_ghost[i] = hypre_max(num_ghost[i] + sym_ghost[i], trn_ghost[i]);
