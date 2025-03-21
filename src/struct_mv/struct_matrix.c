@@ -524,8 +524,6 @@ hypre_StructMatrixCreate( MPI_Comm             comm,
    hypre_StructMatrixRefCount(matrix)    = 1;
 
    /* set defaults */
-   hypre_StructMatrixRanGhsize(matrix) = 0;
-   hypre_StructMatrixDomGhsize(matrix) = 0;
    hypre_StructMatrixRangeIsCoarse(matrix) = 0;
    hypre_StructMatrixDomainIsCoarse(matrix) = 0;
    hypre_StructMatrixSymmetric(matrix) = 0;
