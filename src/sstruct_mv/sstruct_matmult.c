@@ -176,8 +176,8 @@ hypre_SStructPMatmultCreate(HYPRE_Int                   nmatrices_input,
             }
             if (!zero_product)
             {
-               hypre_StructMatmultSetup(smmdata, nterms, smatrices, nterms, sterms, trans,
-                                        &smmid[vi][vj][smmsz[vi][vj]]);
+               hypre_StructMatmultSetProduct(smmdata, nterms, smatrices, nterms, sterms, trans,
+                                             &smmid[vi][vj][smmsz[vi][vj]]);
                smmsz[vi][vj]++;
             }
 
@@ -257,13 +257,13 @@ hypre_SStructPMatmultDestroy( hypre_SStructPMatmultData *pmmdata )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatmultSetup
+ * hypre_SStructPMatmultInitialize
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
-                            HYPRE_Int                   assemble_grid,
-                            hypre_SStructPMatrix      **pM_ptr )
+hypre_SStructPMatmultInitialize( hypre_SStructPMatmultData  *pmmdata,
+                                 HYPRE_Int                   assemble_grid,
+                                 hypre_SStructPMatrix      **pM_ptr )
 {
    hypre_StructMatmultData     *smmdata = (pmmdata -> smmdata);
    HYPRE_Int                 ***smmid   = (pmmdata -> smmid);
@@ -338,7 +338,7 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
    /* RDF NOTE: This does not assemble the struct grids.  They are assembled
     * below or in HYPRE_SStructGridAssemble() to reduce box manager overhead.
     * Check: The struct 'assemble_grid' feature may not be needed anymore. */
-   hypre_StructMatmultInit(smmdata, 0);
+   hypre_StructMatmultInitialize(smmdata, 0);
 
    /* Setup part matrix data structure */
    max_stencil_size = 0;
@@ -564,7 +564,7 @@ hypre_SStructPMatmult(HYPRE_Int               nmatrices,
    hypre_SStructPMatmultData *mmdata;
 
    hypre_SStructPMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
-   hypre_SStructPMatmultSetup(mmdata, 1, M_ptr); /* Make sure to assemble the grid */
+   hypre_SStructPMatmultInitialize(mmdata, 1, M_ptr); /* Make sure to assemble the grid */
    hypre_SStructPMatmultCommunicate(mmdata);
    hypre_SStructPMatmultCompute(mmdata, *M_ptr);
    hypre_SStructPMatmultDestroy(mmdata);
@@ -794,12 +794,12 @@ hypre_SStructMatmultDestroy( hypre_SStructMatmultData *mmdata )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatmultSetup
+ * hypre_SStructMatmultInitialize
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructMatmultSetup( hypre_SStructMatmultData   *mmdata,
-                           hypre_SStructMatrix       **M_ptr )
+hypre_SStructMatmultInitialize( hypre_SStructMatmultData   *mmdata,
+                                hypre_SStructMatrix       **M_ptr )
 {
    HYPRE_Int                   nparts   = (mmdata -> nparts);
    HYPRE_Int                   nterms   = (mmdata -> nterms);
@@ -895,7 +895,7 @@ hypre_SStructMatmultSetup( hypre_SStructMatmultData   *mmdata,
       nvars = hypre_SStructPGridNVars(pgrid);
 
       /* Create resulting part matrix */
-      hypre_SStructPMatmultSetup(pmmdata[part], 0, &pM); /* Don't assemble the grid */
+      hypre_SStructPMatmultInitialize(pmmdata[part], 0, &pM); /* Don't assemble the grid */
 
       /* Update part matrix of M */
       hypre_SStructMatrixPMatrix(M, part) = pM;
@@ -1428,7 +1428,7 @@ hypre_SStructMatmult(HYPRE_Int             nmatrices,
    hypre_SStructMatmultData *mmdata;
 
    hypre_SStructMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
-   hypre_SStructMatmultSetup(mmdata, M_ptr);
+   hypre_SStructMatmultInitialize(mmdata, M_ptr);
    hypre_SStructMatmultCommunicate(mmdata);
    hypre_SStructMatmultCompute(mmdata, *M_ptr);
    hypre_SStructMatmultDestroy(mmdata);
