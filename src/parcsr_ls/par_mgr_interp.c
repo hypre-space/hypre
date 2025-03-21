@@ -2323,6 +2323,11 @@ hypre_MGRBuildRFromWrHost(hypre_IntArray      *C_map,
    R_diag_i[0] = nnz_diag = 0;
    for (i = 0; i < Wr_diag_num_rows; i++)
    {
+      /* Set CC connection */
+      R_diag_j[nnz_diag] = C_map_data[i];
+      R_diag_a[nnz_diag] = one;
+      nnz_diag++;
+
       /* Set CF connections */
       for (j = Wr_diag_i[i]; j < Wr_diag_i[i + 1]; j++)
       {
@@ -2330,11 +2335,6 @@ hypre_MGRBuildRFromWrHost(hypre_IntArray      *C_map,
          R_diag_a[nnz_diag] = Wr_diag_a[j];
          nnz_diag++;
       }
-
-      /* Set CC connection */
-      R_diag_j[nnz_diag] = C_map_data[i];
-      R_diag_a[nnz_diag] = one;
-      nnz_diag++;
 
       /* Update row pointer */
       R_diag_i[i + 1] = nnz_diag;
@@ -2577,7 +2577,7 @@ hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
       /* TODO (VPM): GPU version */
       hypre_DenseBlockMatrixMigrate(b_FF, HYPRE_MEMORY_HOST);
       hypre_BlockDiagInvLapack(hypre_DenseBlockMatrixData(b_FF),
-                               hypre_DenseBlockMatrixNumBlocks(b_FF),
+                               hypre_DenseBlockMatrixNumRows(b_FF),
                                hypre_DenseBlockMatrixNumRowsBlock(b_FF));
       hypre_DenseBlockMatrixMigrate(b_FF, HYPRE_MEMORY_DEVICE);
    }
@@ -2585,7 +2585,7 @@ hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
 #endif
    {
       hypre_BlockDiagInvLapack(hypre_DenseBlockMatrixData(b_FF),
-                               hypre_DenseBlockMatrixNumBlocks(b_FF),
+                               hypre_DenseBlockMatrixNumRows(b_FF),
                                hypre_DenseBlockMatrixNumRowsBlock(b_FF));
    }
 
@@ -2594,6 +2594,7 @@ hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
     *-------------------------------------------------------*/
 
    hypre_DenseBlockMatrixMultiply(b_CF, b_FF, &r_CF);
+   hypre_DenseBlockMatrixPrint(hypre_ParCSRMatrixComm(A), r_CF, "r_CF");
    Wr = hypre_ParCSRMatrixCreateFromDenseBlockMatrix(hypre_ParCSRMatrixComm(A_CF),
                                                      hypre_ParCSRMatrixGlobalNumRows(A_CF),
                                                      hypre_ParCSRMatrixGlobalNumCols(A_CF),
