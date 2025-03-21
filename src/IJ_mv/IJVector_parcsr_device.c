@@ -493,7 +493,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
                             is_on_proc,                                                         /* stencil */
                             thrust::make_zip_iterator(thrust::make_tuple(off_proc_i,      off_proc_data,
                                                                          off_proc_sora)),       /* result */
-                            thrust::not1(thrust::identity<char>()) );
+                            HYPRE_THRUST_NOT(thrust::identity<char>()) );
 
          hypre_assert(thrust::get<0>(new_end1.get_iterator_tuple()) - off_proc_i == nelms_off);
 
@@ -505,7 +505,7 @@ hypre_IJVectorAssembleParDevice(hypre_IJVector *vector)
                             thrust::make_zip_iterator(thrust::make_tuple(stack_i + nelms, stack_data + nelms,
                                                                          stack_sora + nelms)),  /* last */
                             is_on_proc,                                                         /* stencil */
-                            thrust::not1(thrust::identity<char>()) );
+                            HYPRE_THRUST_NOT(thrust::identity<char>()) );
 
          hypre_assert(thrust::get<0>(new_end2.get_iterator_tuple()) - stack_i == nelms_on);
 #endif
