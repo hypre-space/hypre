@@ -141,7 +141,7 @@ for i in $FILESmatmatsym
 do
    for j in ${i}.matmat.*
    do
-      saved=`echo $j | sed 's/.out/.saved/' | sed 's/.sym//'`
+      saved=`echo $j | sed 's/.out/.saved/'`
       diff -U3 -bI"time" $j $saved >&2
    done
 done

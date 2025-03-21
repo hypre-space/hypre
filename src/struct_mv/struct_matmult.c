@@ -231,7 +231,7 @@ hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
    HYPRE_Int                  na;
 
    HYPRE_Int                 *matmap;
-   HYPRE_Int                  m, t, nu, u, unique;
+   HYPRE_Int                  m, t, nu, u, unique, symmetric;
 
    hypre_StructStencil       *Mstencil;
    hypre_StructGrid          *Mgrid;
@@ -434,7 +434,6 @@ hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
    HYPRE_StructMatrixCreate(comm, Mgrid, Mstencil, &M);
    HYPRE_StructMatrixSetRangeStride(M, Mran_stride);
    HYPRE_StructMatrixSetDomainStride(M, Mdom_stride);
-   /* HYPRE_StructMatrixSetSymmetric(M, sym); */
 #if 1 /* This should be set through the matmult interface somehow */
    {
       HYPRE_Int num_ghost[2 * HYPRE_MAXDIM];
@@ -445,6 +444,33 @@ hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
       HYPRE_StructMatrixSetNumGhost(M, num_ghost);
    }
 #endif
+
+   /* Determine if M is symmetric (this can be overridden RDF TODO) */
+   symmetric = 1;
+   for (t = 0; t < ((nterms + 1) / 2); t++)
+   {
+      u = nterms - 1 - t;  /* term t from the right */
+      if (t < u)
+      {
+         if ((terms[t] != terms[u]) || (transposes[t] == transposes[u]) )
+         {
+            /* These two matrices are not transposes of each other */
+            symmetric = 0;
+            break;
+         }
+      }
+      else if (t == u)
+      {
+         m = terms[t];
+         if (!hypre_StructMatrixSymmetric(matrices[m]))
+         {
+            /* This middle-term matrix is not symmetric */
+            symmetric = 0;
+            break;
+         }
+      }
+   }
+   HYPRE_StructMatrixSetSymmetric(M, symmetric);
 
    /* Destroy Mstencil and Mgrid (they will still exist in matrix M) */
    HYPRE_StructStencilDestroy(Mstencil);
@@ -702,25 +728,28 @@ hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
                   /* Accumulate the constant contribution to the product */
                   constp = hypre_StructMatrixConstData(matrix, entry);
                   a[i].cprod *= constp[0];
+                  /* If this is not a transpose coefficient, adjust offset */
                   if (!transposes[id])
                   {
                      stencil = hypre_StructMatrixStencil(matrix);
                      offsetref = hypre_StructStencilOffset(stencil, entry);
                      hypre_AddIndexes(offset, offsetref, ndim, offset);
                   }
+                  /* Update comm_stencil for the mask */
                   hypre_CommStencilSetEntry(comm_stencils[nmatrices], offset);
                   const_term = 1;
                }
                else
                {
-                  /* Adjust offset for symmetric matrices */
+                  /* If this is not a stored symmetric coefficient, adjust offset */
                   symm = hypre_StructMatrixSymmEntries(matrix);
-                  if (!(symm[entry] < 0))  /* this is not a stored coefficient */
+                  if (!(symm[entry] < 0))
                   {
                      stencil = hypre_StructMatrixStencil(matrix);
                      offsetref = hypre_StructStencilOffset(stencil, entry);
                      hypre_AddIndexes(offset, offsetref, ndim, offset);
                   }
+                  /* Update comm_stencil for matrix m */
                   hypre_CommStencilSetEntry(comm_stencils[m], offset);
                   const_entry = 0;
                   var_term = 1;
@@ -758,13 +787,34 @@ hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
          }
          na = i;
       }
+
+      HYPRE_StructMatrixSetConstantEntries(M, nconst, const_entries);
+      hypre_StructMatrixInitializeShell(M); /* Data is initialized in Compute()*/
+
+      /* The above InitializeShell(M) call builds the symmetric entries
+       * information.  Here, we re-arrange the a-array so only the stored
+       * symmetric entries are computed. */
+      if (hypre_StructMatrixSymmetric(M))
+      {
+         symm = hypre_StructMatrixSymmEntries(M);
+         j = 0;
+         for (i = 0; i < na; i++)
+         {
+            /* If this is a stored symmetric coefficient, keep the a-array entry */
+            e = a[i].mentry;
+            if (symm[e] < 0)
+            {
+               a[j] = a[i];
+               j++;
+            }
+         }
+         na = j;
+      }
+
       (Mdata -> nconst)        = nconst;
       (Mdata -> const_entries) = const_entries;
       (Mdata -> const_values)  = const_values;
       (Mdata -> na)            = na;  /* Update na */
-
-      HYPRE_StructMatrixSetConstantEntries(M, nconst, const_entries);
-      hypre_StructMatrixInitializeShell(M); /* Data is initialized in Compute()*/
 
    } /* end (iM < nmatmults) loop */
 
@@ -4558,8 +4608,6 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
    hypre_StructMatmultData *mmdata;
    HYPRE_Int                iM;
 
-   //hypre_StructMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
-   //hypre_StructMatmultSetup(mmdata, 1, M_ptr);
    hypre_StructMatmultCreate(1, nmatrices, &mmdata);
    hypre_StructMatmultSetup(mmdata, nmatrices, matrices, nterms, terms, trans, &iM);
    hypre_StructMatmultInit(mmdata, 1);
