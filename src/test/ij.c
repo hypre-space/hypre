@@ -4840,8 +4840,10 @@ main( hypre_int argc,
             residual = hypre_ParVectorCloneDeep_v2(b, hypre_ParVectorMemoryLocation(b));
             hypre_ParVectorCopy(b, residual);
             HYPRE_ParCSRMatrixMatvec(1.0, parcsr_A, x, -1.0, residual);
-            init_res_norm = hypre_sqrt(hypre_ParVectorInnerProd( residual, residual ));
-            b_norm = hypre_sqrt(hypre_ParVectorInnerProd( b, b ));
+            HYPRE_ParVectorInnerProd( residual, residual, &init_res_norm );
+            init_res_norm = hypre_sqrt(init_res_norm);
+            HYPRE_ParVectorInnerProd( b, b, &b_norm );
+            b_norm = hypre_sqrt( b_norm );
             if (b_norm == 0)
                b_norm = 1;       
             init_res_norm = init_res_norm/b_norm;
@@ -5779,8 +5781,10 @@ main( hypre_int argc,
             residual = hypre_ParVectorCloneDeep_v2(b, hypre_ParVectorMemoryLocation(b));
             hypre_ParVectorCopy(b, residual);
             HYPRE_ParCSRMatrixMatvec(1.0, parcsr_A, x, -1.0, residual);
-            init_res_norm = hypre_sqrt(hypre_ParVectorInnerProd( residual, residual ));
-            b_norm = hypre_sqrt(hypre_ParVectorInnerProd( b, b ));
+            HYPRE_ParVectorInnerProd( residual, residual, &init_res_norm );
+            init_res_norm = hypre_sqrt(init_res_norm);
+            HYPRE_ParVectorInnerProd( b, b, &b_norm );
+            b_norm = hypre_sqrt( b_norm );
             if (b_norm == 0)
                b_norm = 1;       
             init_res_norm = init_res_norm/b_norm;
@@ -5791,7 +5795,7 @@ main( hypre_int argc,
             if (build_x0_type == -1)
                HYPRE_ParVectorSetConstantValues(x,0);
             else if (build_x0_type == 1)
-               HYPRE_ParVectorSetRandomValues(x,0);
+	       HYPRE_ParVectorSetRandomValues(x,0);
             // set cycle structure from usr inputs 
             HYPRE_BoomerAMGSetCycleStruct(pcg_precond,iconfig_ptr[i].cycle_struct,iconfig_ptr[i].cycle_num_nodes);
             HYPRE_BoomerAMGSetRelaxNodeTypes(pcg_precond,iconfig_ptr[i].relax_node_types);
@@ -7480,8 +7484,10 @@ main( hypre_int argc,
             residual = hypre_ParVectorCloneDeep_v2(b, hypre_ParVectorMemoryLocation(b));
             hypre_ParVectorCopy(b, residual);
             HYPRE_ParCSRMatrixMatvec(1.0, parcsr_A, x, -1.0, residual);
-            init_res_norm = hypre_sqrt(hypre_ParVectorInnerProd( residual, residual ));
-            b_norm = hypre_sqrt(hypre_ParVectorInnerProd( b, b ));
+            HYPRE_ParVectorInnerProd( residual, residual, &init_res_norm );
+	    init_res_norm = hypre_sqrt(init_res_norm);
+	    HYPRE_ParVectorInnerProd( b, b, &b_norm );
+	    b_norm = hypre_sqrt( b_norm );
             if (b_norm == 0)
                b_norm = 1;       
             init_res_norm = init_res_norm/b_norm;
