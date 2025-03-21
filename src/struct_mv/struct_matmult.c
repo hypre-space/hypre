@@ -25,9 +25,10 @@
  *
  * These functions compute a collection of matrix products.
  *
- * Each matrix product is specified by a call to the Setup() function.  This
- * provides additional context for optimizations (e.g., reducing communication
- * overhead) in the subsequent functions, Init(), Communicate(), and Compute().
+ * Each matrix product is specified by a call to the SetProduct() function.
+ * This provides additional context for optimizations (e.g., reducing
+ * communication overhead) in the subsequent functions, Initialize(),
+ * Communicate(), and Compute().
  *--------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------
@@ -196,7 +197,7 @@ hypre_StructMatmultDestroy( hypre_StructMatmultData *mmdata )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultSetup
+ * hypre_StructMatmultSetProduct
  *
  * This routine is called successively for each matmult in the collection.
  *
@@ -209,13 +210,13 @@ hypre_StructMatmultDestroy( hypre_StructMatmultData *mmdata )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
-                          HYPRE_Int                 nmatrices_in,
-                          hypre_StructMatrix      **matrices_in,
-                          HYPRE_Int                 nterms,
-                          HYPRE_Int                *terms_in,
-                          HYPRE_Int                *transposes_in,
-                          HYPRE_Int                *iM_ptr )
+hypre_StructMatmultSetProduct( hypre_StructMatmultData  *mmdata,
+                               HYPRE_Int                 nmatrices_in,
+                               hypre_StructMatrix      **matrices_in,
+                               HYPRE_Int                 nterms,
+                               HYPRE_Int                *terms_in,
+                               HYPRE_Int                *transposes_in,
+                               HYPRE_Int                *iM_ptr )
 {
    HYPRE_Int                  iM           = (mmdata -> nmatmults);     /* index for matmult */
    hypre_StructMatmultDataM  *Mdata        = &(mmdata -> matmults[iM]);
@@ -491,7 +492,7 @@ hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
 }
 
 /*--------------------------------------------------------------------------
- * StructMatmultInit
+ * hypre_StructMatmultInitialize
  *
  * This routine is called once for the entire matmult collection.
  *
@@ -502,8 +503,8 @@ hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
-                         HYPRE_Int                 assemble_grid )
+hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
+                               HYPRE_Int                 assemble_grid )
 {
    HYPRE_Int                  nmatmults    = (mmdata -> nmatmults);
    HYPRE_Int                  nmatrices    = (mmdata -> nmatrices);
@@ -1102,7 +1103,7 @@ hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
 }
 
 /*--------------------------------------------------------------------------
- * StructMatmultCommunicate
+ * hypre_StructMatmultCommunicate
  *
  * This routine is called once for the entire matmult collection.
  *
@@ -1150,7 +1151,7 @@ hypre_StructMatmultCommunicate( hypre_StructMatmultData  *mmdata )
 }
 
 /*--------------------------------------------------------------------------
- * StructMatmultCompute
+ * hypre_StructMatmultCompute
  *
  * This routine is called successively for each matmult in the collection.
  *
@@ -4576,7 +4577,7 @@ hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultDataMH *a,
 }
 
 /*--------------------------------------------------------------------------
- * StructMatmultGetMatrix
+ * hypre_StructMatmultGetMatrix
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -4592,10 +4593,50 @@ hypre_StructMatmultGetMatrix( hypre_StructMatmultData  *mmdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmult
+ * hypre_StructMatmult:
+ *    hypre_StructMatmultSetup
+ *    hypre_StructMatmultMultiply
  *
  * Computes the product of several StructMatrix matrices
  *--------------------------------------------------------------------------*/
+
+#if 0  /* Need to think about this a bit more first */
+HYPRE_Int
+hypre_StructMatmultSetup( HYPRE_Int                  nmatrices,
+                          hypre_StructMatrix       **matrices,
+                          HYPRE_Int                  nterms,
+                          HYPRE_Int                 *terms,
+                          HYPRE_Int                 *trans,
+                          hypre_StructMatmultData  **mmdata_ptr )
+{
+   hypre_StructMatmultData *mmdata;
+   HYPRE_Int                iM;
+
+   hypre_StructMatmultCreate(1, nmatrices, &mmdata);
+   hypre_StructMatmultSetProduct(mmdata, nmatrices, matrices, nterms, terms, trans, &iM);
+   hypre_StructMatmultInitialize(mmdata, 1);
+
+   *mmdata_ptr = mmdata;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_StructMatmultMultiply( hypre_StructMatmultData   *mmdata,
+                             hypre_StructMatrix       **M_ptr )
+{
+   HYPRE_Int  iM = (mmdata -> nmatmults) - 1;     /* index for the matmult */
+
+   hypre_StructMatmultCommunicate(mmdata);
+   hypre_StructMatmultCompute(mmdata, iM);
+   hypre_StructMatmultGetMatrix(mmdata, iM, M_ptr);
+   hypre_StructMatmultDestroy(mmdata);
+
+   HYPRE_StructMatrixAssemble(*M_ptr);
+
+   return hypre_error_flag;
+}
+#endif
 
 HYPRE_Int
 hypre_StructMatmult( HYPRE_Int            nmatrices,
@@ -4609,8 +4650,8 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
    HYPRE_Int                iM;
 
    hypre_StructMatmultCreate(1, nmatrices, &mmdata);
-   hypre_StructMatmultSetup(mmdata, nmatrices, matrices, nterms, terms, trans, &iM);
-   hypre_StructMatmultInit(mmdata, 1);
+   hypre_StructMatmultSetProduct(mmdata, nmatrices, matrices, nterms, terms, trans, &iM);
+   hypre_StructMatmultInitialize(mmdata, 1);
    hypre_StructMatmultCommunicate(mmdata);
    hypre_StructMatmultCompute(mmdata, iM);
    hypre_StructMatmultGetMatrix(mmdata, iM, M_ptr);
