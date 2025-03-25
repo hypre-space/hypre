@@ -6,8 +6,8 @@
 
 # Generate multiprecision type protos
 # Run from folder where multiprecision functions reside.
-# Usage: ../config/genMPHeader.sh <function prototypes header file> <output file> <multiprecision functions saved file>
-# Example (struct_ls): ../config/genMPHeader.sh protos.h hypre_struct_ls_mup.h struct_mv_functions.saved
+# Usage: ../config/genMuPFunctionsHeader.sh <function prototypes header file> <output file> <multiprecision functions saved file>
+# Example (struct_ls): ../config/genMuPFunctionsHeader.sh protos.h hypre_struct_ls_mup.h struct_ls_functions.saved
 
 FNAME=$1
 FOUT=$2
