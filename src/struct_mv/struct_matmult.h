@@ -49,12 +49,10 @@ typedef struct hypre_StructMatmultDataM_struct
    hypre_StructMatrix         *M;              /* matmult matrix being computed */
    hypre_StMatrix             *st_M;           /* stencil matrix for M */
 
-   HYPRE_Int                   nconst;         /* number of constant entries in M */
-   HYPRE_Int                  *const_entries;  /* constant entries in M */
-   HYPRE_Complex              *const_values;   /* constant values in M */
-
-   HYPRE_Int                   na;             /* size of the matmult helper */
-   hypre_StructMatmultDataMH  *a;              /* helper for computing the matmult */
+   HYPRE_Int                   nc;             /* size of array c */
+   hypre_StructMatmultDataMH  *c;              /* helper for computing constant entries */
+   HYPRE_Int                   na;             /* size of array a */
+   hypre_StructMatmultDataMH  *a;              /* helper for computing variable entries */
 
 } hypre_StructMatmultDataM;
 
@@ -80,11 +78,8 @@ typedef struct hypre_StructMatmultData_struct
 
    hypre_StructVector   *mask;            /* bit mask for mixed constant-variable coeff multiplies */
    hypre_CommPkg        *comm_pkg;        /* pointer to agglomerated communication package */
-   hypre_CommPkg       **comm_pkg_a;      /* pointer to communication packages */
    HYPRE_Complex       **comm_data;       /* pointer to agglomerated communication data */
-   HYPRE_Complex      ***comm_data_a;     /* pointer to communication data */
-   HYPRE_Int             num_comm_pkgs;   /* number of communication packages to be agglomerated */
-   HYPRE_Int             num_comm_blocks; /* total number of communication blocks */
+   hypre_CommStencil   **comm_stencils;   /* comm stencils used to define communication */
 
 } hypre_StructMatmultData;
 

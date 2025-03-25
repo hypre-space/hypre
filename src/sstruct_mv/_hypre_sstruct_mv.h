@@ -849,6 +849,7 @@ typedef struct hypre_SStructPMatmultData_struct
 
    hypre_CommPkg              *comm_pkg;        /* agglomerated communication package */
    HYPRE_Complex             **comm_data;       /* agglomerated communication data */
+
    hypre_CommPkg             **comm_pkg_a;      /* array of communication packages */
    HYPRE_Complex            ***comm_data_a;     /* array of communication data */
    HYPRE_Int                   num_comm_pkgs;   /* array size of comm_pkg_a and comm_data_a */
@@ -862,8 +863,8 @@ typedef struct hypre_SStructPMatmultData_struct
 
 typedef struct hypre_SStructMatmultData_struct
 {
-   hypre_SStructPMatmultData  **pmmdata;   /* pointer to nparts array */
    HYPRE_Int                    nparts;
+   hypre_SStructPMatmultData  **pmmdata;   /* pointer to nparts array */
 
    HYPRE_Int                    nmatrices;
    hypre_SStructMatrix        **matrices;  /* matrices we are multiplying */
@@ -873,6 +874,7 @@ typedef struct hypre_SStructMatmultData_struct
 
    hypre_CommPkg               *comm_pkg;        /* agglomerated communication package */
    HYPRE_Complex              **comm_data;       /* agglomerated communication data */
+
    hypre_CommPkg              **comm_pkg_a;      /* array of communication packages */
    HYPRE_Complex             ***comm_data_a;     /* array of communication data */
    HYPRE_Int                    num_comm_pkgs;   /* array size of comm_pkg_a and comm_data_a */
@@ -1241,6 +1243,8 @@ HYPRE_Int
 hypre_SStructPMatmultInitialize( hypre_SStructPMatmultData  *pmmdata,
                                  HYPRE_Int                   assemble_grid,
                                  hypre_SStructPMatrix      **pM_ptr );
+HYPRE_Int
+hypre_SStructPMatmultCommSetup( hypre_SStructPMatmultData *pmmdata );
 HYPRE_Int
 hypre_SStructPMatmultCommunicate( hypre_SStructPMatmultData *pmmdata );
 HYPRE_Int

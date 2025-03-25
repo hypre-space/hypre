@@ -359,6 +359,8 @@ hypre_SStructPMatmultInitialize( hypre_SStructPMatmultData  *pmmdata,
                                  HYPRE_Int                   assemble_grid,
                                  hypre_SStructPMatrix      **pM_ptr );
 HYPRE_Int
+hypre_SStructPMatmultCommSetup( hypre_SStructPMatmultData *pmmdata );
+HYPRE_Int
 hypre_SStructPMatmultCommunicate( hypre_SStructPMatmultData *pmmdata );
 HYPRE_Int
 hypre_SStructPMatmultCompute( hypre_SStructPMatmultData *pmmdata,
