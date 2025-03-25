@@ -850,11 +850,6 @@ typedef struct hypre_SStructPMatmultData_struct
    hypre_CommPkg              *comm_pkg;        /* agglomerated communication package */
    HYPRE_Complex             **comm_data;       /* agglomerated communication data */
 
-   hypre_CommPkg             **comm_pkg_a;      /* array of communication packages */
-   HYPRE_Complex            ***comm_data_a;     /* array of communication data */
-   HYPRE_Int                   num_comm_pkgs;   /* array size of comm_pkg_a and comm_data_a */
-   HYPRE_Int                   num_comm_blocks; /* total number of communication blocks */
-
 } hypre_SStructPMatmultData;
 
 /*--------------------------------------------------------------------------
@@ -874,11 +869,6 @@ typedef struct hypre_SStructMatmultData_struct
 
    hypre_CommPkg               *comm_pkg;        /* agglomerated communication package */
    HYPRE_Complex              **comm_data;       /* agglomerated communication data */
-
-   hypre_CommPkg              **comm_pkg_a;      /* array of communication packages */
-   HYPRE_Complex             ***comm_data_a;     /* array of communication data */
-   HYPRE_Int                    num_comm_pkgs;   /* array size of comm_pkg_a and comm_data_a */
-   HYPRE_Int                    num_comm_blocks; /* total number of communication blocks */
 
 } hypre_SStructMatmultData;
 

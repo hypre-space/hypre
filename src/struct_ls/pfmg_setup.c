@@ -224,17 +224,20 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       }
       else
       {
-         /* RDF: The coarse grid should be computed in CreateRAPOp() */
-         hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l + 1]);
-         hypre_StructGridAssemble(grid_l[l + 1]);
-
          hypre_StructMatrixInitialize(P_l[l]);
+         hypre_zPFMGSetupInterpOp(P_l[l], A_l[l], cdir);
 #if 0 /* TODO: Allow RT != P */
          if (nonsymmetric_cycle)
          {
             hypre_StructMatrixInitialize(RT_l[l]);
+            hypre_zPFMGSetupRestrictOp(RT_l[l], A_l[l], cdir);
          }
 #endif
+
+         /* RDF: The coarse grid should be computed in CreateRAPOp() */
+         hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l + 1]);
+         hypre_StructGridAssemble(grid_l[l + 1]);
+
          A_l[l + 1] = hypre_PFMGCreateRAPOp(RT_l[l], A_l[l], P_l[l], grid_l[l + 1], cdir, rap_type);
          hypre_StructMatrixInitialize(A_l[l + 1]);
          hypre_PFMGSetupRAPOp(RT_l[l], A_l[l], P_l[l], cdir, cindex, stride, rap_type, A_l[l + 1]);
