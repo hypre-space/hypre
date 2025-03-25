@@ -3122,9 +3122,11 @@ SetValuesMatrix( HYPRE_StructMatrix A,
    {
       case 3:
          center += 2.0 * cz;
+         HYPRE_FALLTHROUGH;
 
       case 2:
          center += 2.0 * cy;
+         HYPRE_FALLTHROUGH;
 
       default:
          center += 2.0 * cx;

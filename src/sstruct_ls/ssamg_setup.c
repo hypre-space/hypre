@@ -156,7 +156,9 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
 
       // Build prolongation matrix
       HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
-      P_l[l]  = hypre_SSAMGCreateInterpOp(A_l[l], grid_l[l + 1], cdir_l[l]);
+      P_l[l] = hypre_SSAMGCreateInterpOp(A_l[l], grid_l[l + 1], cdir_l[l]);
+      HYPRE_SStructMatrixInitialize(P_l[l]);
+      HYPRE_SStructMatrixAssemble(P_l[l]);
       //HYPRE_SStructMatrixSetTranspose(P_l[l], 1);
       hypre_SSAMGSetupInterpOp(A_l[l], cdir_l[l], P_l[l], interp_type);
 

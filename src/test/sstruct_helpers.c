@@ -2050,7 +2050,6 @@ BuildGrid( MPI_Comm            comm,
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 BuildStencils( ProblemData            data,
-               HYPRE_SStructGrid      grid,
                HYPRE_SStructStencil **stencils_ptr )
 {
    HYPRE_SStructStencil  *stencils;
@@ -2216,7 +2215,6 @@ BuildMatrix( MPI_Comm               comm,
              ProblemData            data,
              HYPRE_SStructGrid      grid,
              HYPRE_Int              object_type,
-             HYPRE_SStructStencil  *stencils,
              HYPRE_SStructGraph     graph,
              HYPRE_SStructMatrix   *A_ptr )
 {
@@ -2598,7 +2596,7 @@ BuildVector( MPI_Comm             comm,
                                             pdata.iuppers[box],
                                             ilower, iupper);
             HYPRE_SStructVectorSetBoxValues(vec, part, ilower, iupper,
-                                            var, values);
+                                            var, d_values);
          }
       }
    }
