@@ -46,9 +46,10 @@ hypre_zPFMGCreateInterpOp( hypre_StructMatrix *A,
    }
    /* If diagonal of A is not constant and using RAP, do variable interpolation.
     *
-    * NOTE: This is important right now because of an issue with MatMult, where
+    * NOTE: This is important right now because of an issue with Matmult, where
     * it computes constant stencil entries that may not truly be constant along
-    * grid boundaries. */
+    * grid boundaries.  RDF: Remove this?  I don't think it's needed anymore,
+    * because Matmult uses a mask. */
    if (!hypre_StructMatrixConstEntry(A, diag_entry) && (rap_type == 0))
    {
       ncentries = 1; /* Make only the diagonal of P constant */

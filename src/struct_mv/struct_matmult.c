@@ -690,7 +690,8 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
       comm_stencils[m] = hypre_CommStencilCreate(ndim);
    }
 
-   /* Compute communication stencils, constant contributions, and if we need a mask */
+   /* Compute communication stencils, identify the constant entries, and
+    * determine if a mask is needed */
    need_mask = 0;
    all_const = 1;
    for (iM = 0; iM < nmatmults; iM++)
@@ -718,8 +719,8 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
          while (st_coeff != NULL)
          {
             a[na + i].cprod = 1.0;
-            const_term = 0;
-            var_term = 0;
+            const_term = 0;  /* Is there a constant term? (RDF: that requires a mask?) */
+            var_term = 0;    /* Is there a variable term? */
             for (t = 0; t < nterms; t++)
             {
                st_term = hypre_StCoeffTerm(st_coeff, t);
@@ -1001,7 +1002,7 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
     * inter-variable couplings in the unstructured matrix until then. */
    if (need_mask)
    {
-      HYPRE_Int  bitval;
+      //HYPRE_Int  bitval;
 
       data_spaces[nmatrices] = hypre_BoxArrayClone(fdata_space);
       hypre_StructVectorResize(mask, data_spaces[nmatrices]);
@@ -1011,11 +1012,11 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
       boxnums = hypre_StructVectorBoxnums(mask);
       stride  = hypre_StructVectorStride(mask);
 
-      bitval = 0;
-      for (t = 0; t < nterms; t++)
-      {
-         bitval |= (1 << t);
-      }
+      //bitval = 0;
+      //for (t = 0; t < nterms; t++)
+      //{
+      //   bitval |= (1 << t);
+      //}
       loop_stride = stride;
       hypre_CopyToIndex(loop_stride, ndim, fdstride);
       hypre_StructVectorMapDataStride(mask, fdstride);
@@ -1039,7 +1040,8 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
          hypre_BoxLoop1Begin(ndim, loop_size,
                              fdbox, fdstart, fdstride, fi);
          {
-            bitptr[fi] = ((HYPRE_Int) bitptr[fi]) | bitval;
+            //bitptr[fi] = ((HYPRE_Int) bitptr[fi]) | bitval;
+            bitptr[fi] = 1.0;
          }
          hypre_BoxLoop1End(fi);
 #undef DEVICE_VAR
@@ -2287,7 +2289,8 @@ hypre_StructMatmultCompute_core_generic( hypre_StructMatmultDataMH *a,
                   break;
 
                case 2: /* constant coefficient - multiply by bit mask value t */
-                  pprod = (((HYPRE_Int) a[i].tptrs[t][fi]) >> t) & 1;
+                  //pprod = (((HYPRE_Int) a[i].tptrs[t][fi]) >> t) & 1;
+                  pprod = a[i].tptrs[t][fi];
                   break;
             }
             prod *= pprod;
