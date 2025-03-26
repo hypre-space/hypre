@@ -189,7 +189,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_PFMGSetStride(cdir, stride);
 
       /* set up interpolation and restriction operators */
-      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
       P_l[l] = hypre_zPFMGCreateInterpOp(A_l[l], cdir, stride, rap_type);
       RT_l[l] = P_l[l];
 #if 0 /* TODO: Allow RT != P */
@@ -199,9 +198,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       }
 #endif
       HYPRE_StructMatrixSetTranspose(RT_l[l], 1);
-      HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
 
-      HYPRE_ANNOTATE_REGION_BEGIN("%s", "RAP");
       if (rap_type == 0)
       {
          hypre_StructMatrixInitializeShell(P_l[l]);
@@ -242,7 +239,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          hypre_StructMatrixInitialize(A_l[l + 1]);
          hypre_PFMGSetupRAPOp(RT_l[l], A_l[l], P_l[l], cdir, cindex, stride, rap_type, A_l[l + 1]);
       }
-      HYPRE_ANNOTATE_REGION_END("%s", "RAP");
 
       //      /* RDF AP Debug */
       //      hypre_StructAssumedPartitionPrint("zAP", hypre_BoxManAssumedPartition(
@@ -275,7 +271,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
       cdir = cdir_l[l];
 
-      HYPRE_ANNOTATE_REGION_BEGIN("%s", "RAP");
       if (rap_type == 0)
       {
          hypre_StructMatrixInitializeData(P_l[l], NULL);
@@ -289,7 +284,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 #endif
          hypre_StructMatmultMultiply(Ammdata_l[l + 1]);
       }
-      HYPRE_ANNOTATE_REGION_END("%s", "RAP");
 
       HYPRE_ANNOTATE_MGLEVEL_END(l);
    }

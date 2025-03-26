@@ -56,7 +56,7 @@
  *
  *    MatrixPtAPSetup()
  *    MatmultMultiply()
- *    
+ *
  *--------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------
@@ -1301,7 +1301,6 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
    hypre_MapToCoarseIndex(cdstride, NULL, cstride, ndim); /* Should be cdstride = 1 */
 
    b = 0;
-   HYPRE_ANNOTATE_REGION_BEGIN("%s", "Computation");
    for (Mj = 0; Mj < hypre_StructMatrixRanNBoxes(M); Mj++)
    {
       Mb = hypre_StructMatrixRanBoxnum(M, Mj);
@@ -1420,7 +1419,6 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
             break;
       }
    } /* end loop over matrix M range boxes */
-   HYPRE_ANNOTATE_REGION_END("%s", "Computation");
 
    /* Free memory */
    hypre_BoxDestroy(loop_box);
