@@ -173,9 +173,9 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    //   hypre_StructAssumedPartitionPrint("zAP", hypre_BoxManAssumedPartition(
    //                                        hypre_StructGridBoxMan(grid_l[0])));
 
-   // RDF START: Use hypre_StructMatrixInitializeShell() and InitializeData()
-   // below to do PtAPSetup() (and RTtAPSetup) first, then use MatmulMultiply()
-   // to allocate data and complete the multiply.  This will avoid copies.
+   /* Use hypre_StructMatrixInitializeShell() and InitializeData() below to do
+    * PtAPSetup() (and RTtAPSetup) first, then use MatmulMultiply() to allocate
+    * data and complete the multiply.  This will avoid copies. */
 
    /* First set up the matrix shells (no data allocated) to adjust data spaces
     * without requiring memory copies */
@@ -214,7 +214,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          if (RT_l[l] != P_l[l])
          {
             /* If restriction is not the same as interpolation, compute RAP */
-            hypre_StructMatrixRTtAP(RT_l[l], A_l[l], P_l[l], &A_l[l + 1]);
+            hypre_StructMatrixRTtAPSetup(RT_l[l], A_l[l], P_l[l], &Ammdata_l[l + 1], &A_l[l + 1]);
          }
          else
          {

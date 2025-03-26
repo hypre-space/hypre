@@ -472,7 +472,7 @@ hypre_StructMatmultSetProduct( hypre_StructMatmultData  *mmdata,
    }
 #endif
 
-   /* Determine if M is symmetric (this can be overridden RDF TODO) */
+   /* Determine if M is symmetric (RDF TODO: think about how to override this */
    symmetric = 1;
    for (t = 0; t < ((nterms + 1) / 2); t++)
    {
@@ -4665,9 +4665,10 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmat( hypre_StructMatrix  *A,
-                    hypre_StructMatrix  *B,
-                    hypre_StructMatrix **M_ptr )
+hypre_StructMatmatSetup( hypre_StructMatrix        *A,
+                         hypre_StructMatrix        *B,
+                         hypre_StructMatmultData  **mmdata_ptr,
+                         hypre_StructMatrix       **M_ptr )
 {
    HYPRE_Int           nmatrices   = 2;
    HYPRE_StructMatrix  matrices[2] = {A, B};
@@ -4675,7 +4676,20 @@ hypre_StructMatmat( hypre_StructMatrix  *A,
    HYPRE_Int           terms[3]    = {0, 1};
    HYPRE_Int           trans[2]    = {0, 0};
 
-   hypre_StructMatmult(nmatrices, matrices, nterms, terms, trans, M_ptr);
+   hypre_StructMatmultSetup(nmatrices, matrices, nterms, terms, trans, mmdata_ptr, M_ptr);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_StructMatmat( hypre_StructMatrix  *A,
+                    hypre_StructMatrix  *B,
+                    hypre_StructMatrix **M_ptr )
+{
+   hypre_StructMatmultData *mmdata;
+
+   hypre_StructMatmatSetup(A, B, &mmdata, M_ptr);
+   hypre_StructMatmultMultiply(mmdata);
 
    return hypre_error_flag;
 }
@@ -4719,10 +4733,11 @@ hypre_StructMatrixPtAP( hypre_StructMatrix  *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatrixRAP( hypre_StructMatrix  *R,
-                       hypre_StructMatrix  *A,
-                       hypre_StructMatrix  *P,
-                       hypre_StructMatrix **M_ptr)
+hypre_StructMatrixRAPSetup( hypre_StructMatrix        *R,
+                            hypre_StructMatrix        *A,
+                            hypre_StructMatrix        *P,
+                            hypre_StructMatmultData  **mmdata_ptr,
+                            hypre_StructMatrix       **M_ptr)
 {
    HYPRE_Int           nmatrices   = 3;
    HYPRE_StructMatrix  matrices[3] = {A, P, R};
@@ -4730,7 +4745,21 @@ hypre_StructMatrixRAP( hypre_StructMatrix  *R,
    HYPRE_Int           terms[3]    = {2, 0, 1};
    HYPRE_Int           trans[3]    = {0, 0, 0};
 
-   hypre_StructMatmult(nmatrices, matrices, nterms, terms, trans, M_ptr);
+   hypre_StructMatmultSetup(nmatrices, matrices, nterms, terms, trans, mmdata_ptr, M_ptr);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_StructMatrixRAP( hypre_StructMatrix  *R,
+                       hypre_StructMatrix  *A,
+                       hypre_StructMatrix  *P,
+                       hypre_StructMatrix **M_ptr)
+{
+   hypre_StructMatmultData *mmdata;
+
+   hypre_StructMatrixRAPSetup(R, A, P, &mmdata, M_ptr);
+   hypre_StructMatmultMultiply(mmdata);
 
    return hypre_error_flag;
 }
@@ -4740,10 +4769,11 @@ hypre_StructMatrixRAP( hypre_StructMatrix  *R,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatrixRTtAP( hypre_StructMatrix  *RT,
-                         hypre_StructMatrix  *A,
-                         hypre_StructMatrix  *P,
-                         hypre_StructMatrix **M_ptr)
+hypre_StructMatrixRTtAPSetup( hypre_StructMatrix        *RT,
+                              hypre_StructMatrix        *A,
+                              hypre_StructMatrix        *P,
+                              hypre_StructMatmultData  **mmdata_ptr,
+                              hypre_StructMatrix       **M_ptr)
 {
    HYPRE_Int           nmatrices   = 3;
    HYPRE_StructMatrix  matrices[3] = {A, P, RT};
@@ -4751,11 +4781,24 @@ hypre_StructMatrixRTtAP( hypre_StructMatrix  *RT,
    HYPRE_Int           terms[3]    = {2, 0, 1};
    HYPRE_Int           trans[3]    = {1, 0, 0};
 
-   hypre_StructMatmult(nmatrices, matrices, nterms, terms, trans, M_ptr);
+   hypre_StructMatmultSetup(nmatrices, matrices, nterms, terms, trans, mmdata_ptr, M_ptr);
 
    return hypre_error_flag;
 }
 
+HYPRE_Int
+hypre_StructMatrixRTtAP( hypre_StructMatrix  *RT,
+                         hypre_StructMatrix  *A,
+                         hypre_StructMatrix  *P,
+                         hypre_StructMatrix **M_ptr)
+{
+   hypre_StructMatmultData *mmdata;
+
+   hypre_StructMatrixRTtAPSetup(RT, A, P, &mmdata, M_ptr);
+   hypre_StructMatmultMultiply(mmdata);
+
+   return hypre_error_flag;
+}
 
 /*--------------------------------------------------------------------------
  * StructMatrixAdd functions
