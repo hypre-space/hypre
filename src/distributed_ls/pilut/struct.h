@@ -30,21 +30,28 @@
  * $Id$
  */
 
-#ifndef __cplusplus
-#ifndef true
-# define true  1
-# define false 0
-#endif
-
+#ifndef __cplusplus  /* In C++, bool is built-in, no need to define it */
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L && __STDC_VERSION__ < 202311L
+/* C99 - C11: Use stdbool.h */
+#include <stdbool.h>
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ < 199901L
+/* Pre-C99: Define bool manually */
 #ifndef bool
-# ifdef Boolean
+#ifdef Boolean
    typedef Boolean bool;
-# else
+#else
    typedef unsigned char bool;
-# endif
 #endif
 #endif
- 
+#ifndef true
+#define true 1
+#endif
+#ifndef false
+#define false 0
+#endif
+#endif
+#endif /* ifndef __cplusplus */
+
 /*************************************************************************
 * This data structure holds the data distribution
 **************************************************************************/
@@ -142,7 +149,7 @@ typedef struct reducematdef ReduceMatType;
 
 
 /*************************************************************************
-* This data structure stores information about the send in each phase 
+* This data structure stores information about the send in each phase
 * of parallel hypre_ILUT
 **************************************************************************/
 struct comminfodef {
