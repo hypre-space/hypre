@@ -6,16 +6,14 @@
  ******************************************************************************/
 
 /* Mixed precision function protos */
-/* seq_mv_mp.c */
+/* struct_mv_mp.c */
 
-#ifdef HYPRE_MIXED_PRECISION
+#if defined(HYPRE_MIXED_PRECISION)
 HYPRE_Int
-hypre_SeqVectorCopy_mp( hypre_Vector_mp *x,
-                     hypre_Vector_mp *y );
-
+hypre_StructVectorCopy_mp( hypre_StructVector_mp *x,
+                     hypre_StructVector_mp *y );
 HYPRE_Int
-hypre_SeqVectorAxpy_mp( hypre_double alpha,
-                     hypre_Vector_mp *x,
-                     hypre_Vector_mp *y     );
-                     
+hypre_StructVectorConvert_mp( hypre_StructVector_mp *x,
+                     HYPRE_Precision new_precision);
 #endif
+

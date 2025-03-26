@@ -69,6 +69,7 @@ HYPRE_DRIVERS =\
  ij_assembly.c\
  sstruct.c\
  struct.c\
+ struct_mp.c\
  ams_driver.c\
  maxwell_unscaled.c\
  struct_migrate.c\
@@ -139,6 +140,13 @@ ij_mp: ij_mp.o
 	${LINK_CC} -o $@ $< ${LFLAGS}
 else
 ij_mp:
+endif
+ifeq (${MP_BUILD}, 1) 
+struct_mp: struct_mp.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+else
+struct_mp:
 endif
 ifeq (${MP_BUILD}, 1) 
 test_mp: test_mp.o

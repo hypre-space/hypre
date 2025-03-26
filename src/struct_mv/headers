@@ -25,6 +25,7 @@ cat > $INTERNAL_HEADER <<@
 #include "HYPRE_struct_mv.h"
 #include "_hypre_utilities.h"
 
+#include "HYPRE_struct_mv_mp.h"
 #ifdef HYPRE_MIXED_PRECISION
 #include "struct_mv_mup_func.h"
 #endif
@@ -51,6 +52,7 @@ cat computation.h          >> $INTERNAL_HEADER
 cat struct_matrix.h        >> $INTERNAL_HEADER
 cat struct_vector.h        >> $INTERNAL_HEADER
 cat protos.h               >> $INTERNAL_HEADER
+cat protos_mp.h            >> $INTERNAL_HEADER
 
 #===========================================================================
 # BoxLoops
