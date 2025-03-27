@@ -1750,6 +1750,377 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultDataMH *a,
                    a[i].types[2] == 1 )
          {
             /* VCF * VCF * VCC */
+            // Map ncomp[5] to ncomp[9] (after reordering)
+            k = ncomp[9];
+            cprod[9][k]    = a[i].cprod;
+            tptrs[9][k][0] = a[i].tptrs[2];
+            tptrs[9][k][1] = a[i].tptrs[0];
+            tptrs[9][k][2] = a[i].tptrs[1];
+            mptrs[9]       = a[i].mptr;
+            ncomp[9]++;
+         }
+         else if ( a[i].types[0] == 0 &&
+                   a[i].types[1] == 0 &&
+                   a[i].types[2] == 2 )
+         {
+            /* VCF * VCF * CCF */
+            // Map ncomp[2] to ncomp[0]
+            k = ncomp[0];
+            cprod[0][k]    = a[i].cprod;
+            tptrs[0][k][0] = a[i].tptrs[0];
+            tptrs[0][k][1] = a[i].tptrs[1];
+            tptrs[0][k][2] = a[i].tptrs[2];
+            mptrs[0]       = a[i].mptr;
+            ncomp[0]++;
+         }
+         else if ( a[i].types[0] == 0 &&
+                   a[i].types[1] == 1 &&
+                   a[i].types[2] == 0 )
+         {
+            /* VCF * VCC * VCF */
+            // Map ncomp[5] to ncomp[9] (after reordering)
+            k = ncomp[9];
+            cprod[9][k]    = a[i].cprod;
+            tptrs[9][k][0] = a[i].tptrs[1];
+            tptrs[9][k][1] = a[i].tptrs[0];
+            tptrs[9][k][2] = a[i].tptrs[2];
+            mptrs[9]       = a[i].mptr;
+            ncomp[9]++;
+         }
+         else if ( a[i].types[0] == 0 &&
+                   a[i].types[1] == 1 &&
+                   a[i].types[2] == 1 )
+         {
+            /* VCF * VCC * VCC */
+            // Map ncomp[6] to ncomp[8] (after reordering)
+            k = ncomp[8];
+            cprod[8][k]    = a[i].cprod;
+            tptrs[8][k][0] = a[i].tptrs[1];//1
+            tptrs[8][k][1] = a[i].tptrs[2];//2
+            tptrs[8][k][2] = a[i].tptrs[0];//0
+            mptrs[8]       = a[i].mptr;
+            ncomp[8]++;
+         }
+         else if ( a[i].types[0] == 0 &&
+                   a[i].types[1] == 1 &&
+                   a[i].types[2] == 2 )
+         {
+            /* VCF * VCC * CCF */
+            // Map ncomp[7] to ncomp[9] (after reordering)
+            k = ncomp[9];
+            cprod[9][k]    = a[i].cprod;
+            tptrs[9][k][0] = a[i].tptrs[1];//0
+            tptrs[9][k][1] = a[i].tptrs[0];//1
+            tptrs[9][k][2] = a[i].tptrs[2];//2
+            mptrs[9]       = a[i].mptr;
+            ncomp[9]++;
+         }
+         else if ( a[i].types[0] == 0 &&
+                   a[i].types[1] == 2 &&
+                   a[i].types[2] == 0 )
+         {
+            /* VCF * CCF * VCF */
+            // Map ncomp[2] to ncomp[0]
+            k = ncomp[0];
+            cprod[0][k]    = a[i].cprod;
+            tptrs[0][k][0] = a[i].tptrs[0];
+            tptrs[0][k][1] = a[i].tptrs[2];
+            tptrs[0][k][2] = a[i].tptrs[1];
+            mptrs[0]       = a[i].mptr;
+            ncomp[0]++;
+         }
+         else if ( a[i].types[0] == 0 &&
+                   a[i].types[1] == 2 &&
+                   a[i].types[2] == 1 )
+         {
+            /* VCF * CCF * VCC */
+            // Map ncomp[7] to ncomp[9] (after reordering)
+            k = ncomp[9];
+            cprod[9][k]    = a[i].cprod;
+            tptrs[9][k][0] = a[i].tptrs[2];//0
+            tptrs[9][k][1] = a[i].tptrs[0];//1
+            tptrs[9][k][2] = a[i].tptrs[1];//2
+            mptrs[9]       = a[i].mptr;
+            ncomp[9]++;
+         }
+         else if ( a[i].types[0] == 0 &&
+                   a[i].types[1] == 2 &&
+                   a[i].types[2] == 2 )
+         {
+            /* VCF * CCF * CCF */
+            // Map ncomp[3] to ncomp[0]
+            k = ncomp[0];
+            cprod[0][k]    = a[i].cprod;
+            tptrs[0][k][0] = a[i].tptrs[0];
+            tptrs[0][k][1] = a[i].tptrs[1];
+            tptrs[0][k][2] = a[i].tptrs[2];
+            mptrs[0]       = a[i].mptr;
+            ncomp[0]++;
+         }
+         else if ( a[i].types[0] == 1 &&
+                   a[i].types[1] == 0 &&
+                   a[i].types[2] == 0 )
+         {
+            /* VCC * VCF * VCF */
+            // Map ncomp[5] to ncomp[9] (after reordering)
+            k = ncomp[9];
+            cprod[9][k]    = a[i].cprod;
+            tptrs[9][k][0] = a[i].tptrs[0];
+            tptrs[9][k][1] = a[i].tptrs[1];
+            tptrs[9][k][2] = a[i].tptrs[2];
+            mptrs[9]       = a[i].mptr;
+            ncomp[9]++;
+         }
+         else if ( a[i].types[0] == 1 &&
+                   a[i].types[1] == 0 &&
+                   a[i].types[2] == 1 )
+         {
+            /* VCC * VCF * VCC */
+            // Map ncomp[6] to ncomp[8] (after reordering)
+            k = ncomp[8];
+            cprod[8][k]    = a[i].cprod;
+            tptrs[8][k][0] = a[i].tptrs[0];//0
+            tptrs[8][k][1] = a[i].tptrs[2];//2
+            tptrs[8][k][2] = a[i].tptrs[1];//1
+            mptrs[8]       = a[i].mptr;
+            ncomp[8]++;
+         }
+         else if ( a[i].types[0] == 1 &&
+                   a[i].types[1] == 0 &&
+                   a[i].types[2] == 2 )
+         {
+            /* VCC * VCF * CCF */
+            // Map ncomp[7] to ncomp[9] (after reordering)
+            k = ncomp[9];
+            cprod[9][k]    = a[i].cprod;
+            tptrs[9][k][0] = a[i].tptrs[0];//1
+            tptrs[9][k][1] = a[i].tptrs[1];//0
+            tptrs[9][k][2] = a[i].tptrs[2];//2
+            mptrs[9]       = a[i].mptr;
+            ncomp[9]++;
+         }
+         else if ( a[i].types[0] == 1 &&
+                   a[i].types[1] == 1 &&
+                   a[i].types[2] == 0 )
+         {
+            /* VCC * VCC * VCF */
+            // Map ncomp[6] to ncomp[8] (after reordering)
+            k = ncomp[8];
+            cprod[8][k]    = a[i].cprod;
+            tptrs[8][k][0] = a[i].tptrs[0];//0
+            tptrs[8][k][1] = a[i].tptrs[1];//1
+            tptrs[8][k][2] = a[i].tptrs[2];//2
+            mptrs[8]       = a[i].mptr;
+            ncomp[8]++;
+         }
+         else if ( a[i].types[0] == 1 &&
+                   a[i].types[1] == 1 &&
+                   a[i].types[2] == 1 )
+         {
+            /* VCC * VCC * VCC */
+            // RDF: This requires fstride = cstride so it can't happen
+            k = ncomp[1];
+            cprod[1][k]    = a[i].cprod;
+            tptrs[1][k][0] = a[i].tptrs[0];
+            tptrs[1][k][1] = a[i].tptrs[1];
+            tptrs[1][k][2] = a[i].tptrs[2];
+            mptrs[1]       = a[i].mptr;
+            ncomp[1]++;
+         }
+         else if ( a[i].types[0] == 1 &&
+                   a[i].types[1] == 1 &&
+                   a[i].types[2] == 2 )
+         {
+            /* VCC * VCC * CCF */
+            k = ncomp[8];
+            cprod[8][k]    = a[i].cprod;
+            tptrs[8][k][0] = a[i].tptrs[0];
+            tptrs[8][k][1] = a[i].tptrs[1];
+            tptrs[8][k][2] = a[i].tptrs[2];
+            mptrs[8]       = a[i].mptr;
+            ncomp[8]++;
+         }
+         else if ( a[i].types[0] == 1 &&
+                   a[i].types[1] == 2 &&
+                   a[i].types[2] == 0 )
+         {
+            /* VCC * CCF * VCF */
+            // Map ncomp[7] to ncomp[9] (after reordering)
+            k = ncomp[9];
+            cprod[9][k]    = a[i].cprod;
+            tptrs[9][k][0] = a[i].tptrs[0];//2
+            tptrs[9][k][1] = a[i].tptrs[1];//0
+            tptrs[9][k][2] = a[i].tptrs[2];//1
+            mptrs[9]       = a[i].mptr;
+            ncomp[9]++;
+         }
+         else if ( a[i].types[0] == 1 &&
+                   a[i].types[1] == 2 &&
+                   a[i].types[2] == 1 )
+         {
+            /* VCC * CCF * VCC */
+            k = ncomp[8];
+            cprod[8][k]    = a[i].cprod;
+            tptrs[8][k][0] = a[i].tptrs[0];
+            tptrs[8][k][1] = a[i].tptrs[2];
+            tptrs[8][k][2] = a[i].tptrs[1];
+            mptrs[8]       = a[i].mptr;
+            ncomp[8]++;
+         }
+         else if ( a[i].types[0] == 1 &&
+                   a[i].types[1] == 2 &&
+                   a[i].types[2] == 2 )
+         {
+            /* VCC * CCF * CCF */
+            k = ncomp[9];
+            cprod[9][k]    = a[i].cprod;
+            tptrs[9][k][0] = a[i].tptrs[0];
+            tptrs[9][k][1] = a[i].tptrs[1];
+            tptrs[9][k][2] = a[i].tptrs[2];
+            mptrs[9]       = a[i].mptr;
+            ncomp[9]++;
+         }
+         else if ( a[i].types[0] == 2 &&
+                   a[i].types[1] == 0 &&
+                   a[i].types[2] == 0 )
+         {
+            /* CCF * VCF * VCF */
+            // Map ncomp[2] to ncomp[0]
+            k = ncomp[0];
+            cprod[0][k]    = a[i].cprod;
+            tptrs[0][k][0] = a[i].tptrs[1];
+            tptrs[0][k][1] = a[i].tptrs[2];
+            tptrs[0][k][2] = a[i].tptrs[0];
+            mptrs[0]       = a[i].mptr;
+            ncomp[0]++;
+         }
+         else if ( a[i].types[0] == 2 &&
+                   a[i].types[1] == 0 &&
+                   a[i].types[2] == 1 )
+         {
+            /* CCF * VCF * VCC */
+            // Map ncomp[7] to ncomp[9] (after reordering)
+            k = ncomp[9];
+            cprod[9][k]    = a[i].cprod;
+            tptrs[9][k][0] = a[i].tptrs[2];//1
+            tptrs[9][k][1] = a[i].tptrs[0];//2
+            tptrs[9][k][2] = a[i].tptrs[1];//0
+            mptrs[9]       = a[i].mptr;
+            ncomp[9]++;
+         }
+         else if ( a[i].types[0] == 2 &&
+                   a[i].types[1] == 0 &&
+                   a[i].types[2] == 2 )
+         {
+            /* CCF * VCF * CCF */
+            // Map ncomp[3] to ncomp[0]
+            k = ncomp[0];
+            cprod[0][k]    = a[i].cprod;
+            tptrs[0][k][0] = a[i].tptrs[1];
+            tptrs[0][k][1] = a[i].tptrs[0];
+            tptrs[0][k][2] = a[i].tptrs[2];
+            mptrs[0]       = a[i].mptr;
+            ncomp[0]++;
+         }
+         else if ( a[i].types[0] == 2 &&
+                   a[i].types[1] == 1 &&
+                   a[i].types[2] == 0 )
+         {
+            /* CCF * VCC * VCF */
+            // Map ncomp[7] to ncomp[9] (after reordering)
+            k = ncomp[9];
+            cprod[9][k]    = a[i].cprod;
+            tptrs[9][k][0] = a[i].tptrs[1];//2
+            tptrs[9][k][1] = a[i].tptrs[0];//1
+            tptrs[9][k][2] = a[i].tptrs[2];//0
+            mptrs[9]       = a[i].mptr;
+            ncomp[9]++;
+         }
+         else if ( a[i].types[0] == 2 &&
+                   a[i].types[1] == 1 &&
+                   a[i].types[2] == 1 )
+         {
+            /* CCF * VCC * VCC */
+            k = ncomp[8];
+            cprod[8][k]    = a[i].cprod;
+            tptrs[8][k][0] = a[i].tptrs[1];
+            tptrs[8][k][1] = a[i].tptrs[2];
+            tptrs[8][k][2] = a[i].tptrs[0];
+            mptrs[8]       = a[i].mptr;
+            ncomp[8]++;
+         }
+         else if ( a[i].types[0] == 2 &&
+                   a[i].types[1] == 1 &&
+                   a[i].types[2] == 2 )
+         {
+            /* CCF * VCC * CCF */
+            k = ncomp[9];
+            cprod[9][k]    = a[i].cprod;
+            tptrs[9][k][0] = a[i].tptrs[1];
+            tptrs[9][k][1] = a[i].tptrs[0];
+            tptrs[9][k][2] = a[i].tptrs[2];
+            mptrs[9]       = a[i].mptr;
+            ncomp[9]++;
+         }
+         else if ( a[i].types[0] == 2 &&
+                   a[i].types[1] == 2 &&
+                   a[i].types[2] == 0 )
+         {
+            /* CCF * CCF * VCF */
+            // Map ncomp[3] to ncomp[0]
+            k = ncomp[0];
+            cprod[0][k]    = a[i].cprod;
+            tptrs[0][k][0] = a[i].tptrs[2];
+            tptrs[0][k][1] = a[i].tptrs[0];
+            tptrs[0][k][2] = a[i].tptrs[1];
+            mptrs[0]       = a[i].mptr;
+            ncomp[0]++;
+         }
+         else if ( a[i].types[0] == 2 &&
+                   a[i].types[1] == 2 &&
+                   a[i].types[2] == 1 )
+         {
+            /* CCF * CCF * VCC */
+            k = ncomp[9];
+            cprod[9][k]    = a[i].cprod;
+            tptrs[9][k][0] = a[i].tptrs[2];
+            tptrs[9][k][1] = a[i].tptrs[0];
+            tptrs[9][k][2] = a[i].tptrs[1];
+            mptrs[9]       = a[i].mptr;
+            ncomp[9]++;
+         }
+         else
+         {
+            /* CCF * CCF * CCF */
+            // Map ncomp[4] to ncomp[0]
+            k = ncomp[0];
+            cprod[0][k]    = a[i].cprod;
+            tptrs[0][k][0] = a[i].tptrs[0];
+            tptrs[0][k][1] = a[i].tptrs[1];
+            tptrs[0][k][2] = a[i].tptrs[2];
+            mptrs[0]       = a[i].mptr;
+            ncomp[0]++;
+         }
+
+#if 0 // Original if/else
+         if ( a[i].types[0] == 0 &&
+              a[i].types[1] == 0 &&
+              a[i].types[2] == 0 )
+         {
+            /* VCF * VCF * VCF */
+            k = ncomp[0];
+            cprod[0][k]    = a[i].cprod;
+            tptrs[0][k][0] = a[i].tptrs[0];
+            tptrs[0][k][1] = a[i].tptrs[1];
+            tptrs[0][k][2] = a[i].tptrs[2];
+            mptrs[0]       = a[i].mptr;
+            ncomp[0]++;
+         }
+         else if ( a[i].types[0] == 0 &&
+                   a[i].types[1] == 0 &&
+                   a[i].types[2] == 1 )
+         {
+            /* VCF * VCF * VCC */
             k = ncomp[5];
             cprod[5][k]    = a[i].cprod;
             order[5][k][0] = 0;
@@ -2153,6 +2524,7 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultDataMH *a,
             mptrs[4]       = a[i].mptr;
             ncomp[4]++;
          }
+#endif // Original if/else
       }
 
       /* Call core functions */
@@ -2162,50 +2534,57 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultDataMH *a,
                                          fdbox, fdstart, fdstride,
                                          Mdbox, Mdstart, Mdstride);
 
-      hypre_StructMatmultCompute_core_1t(a, ncomp[1], cprod[1],
-                                         tptrs[1], mptrs[1],
-                                         ndim, loop_size,
-                                         cdbox, cdstart, cdstride,
-                                         Mdbox, Mdstart, Mdstride);
+      //// RDF: This requires fstride = cstride so it can't happen
+      //hypre_StructMatmultCompute_core_1t(a, ncomp[1], cprod[1],
+      //                                   tptrs[1], mptrs[1],
+      //                                   ndim, loop_size,
+      //                                   cdbox, cdstart, cdstride,
+      //                                   Mdbox, Mdstart, Mdstride);
 
-      hypre_StructMatmultCompute_core_1tb(a, ncomp[2], order[2],
-                                          cprod[2], tptrs[2], mptrs[2],
-                                          ndim, loop_size,
-                                          fdbox, fdstart, fdstride,
-                                          Mdbox, Mdstart, Mdstride);
+      // // Map ncomp[2] to ncomp[0]
+      // hypre_StructMatmultCompute_core_1tb(a, ncomp[2], order[2],
+      //                                     cprod[2], tptrs[2], mptrs[2],
+      //                                     ndim, loop_size,
+      //                                     fdbox, fdstart, fdstride,
+      //                                     Mdbox, Mdstart, Mdstride);
 
-      hypre_StructMatmultCompute_core_1tbb(a, ncomp[3], order[3],
-                                           cprod[3], tptrs[3], mptrs[3],
-                                           ndim, loop_size,
-                                           fdbox, fdstart, fdstride,
-                                           Mdbox, Mdstart, Mdstride);
+      // // Map ncomp[3] to ncomp[0]
+      // hypre_StructMatmultCompute_core_1tbb(a, ncomp[3], order[3],
+      //                                      cprod[3], tptrs[3], mptrs[3],
+      //                                      ndim, loop_size,
+      //                                      fdbox, fdstart, fdstride,
+      //                                      Mdbox, Mdstart, Mdstride);
 
-      hypre_StructMatmultCompute_core_1tbbb(a, ncomp[4], cprod[4],
-                                            tptrs[4], mptrs[4],
-                                            ndim, loop_size,
-                                            fdbox, fdstart, fdstride,
-                                            Mdbox, Mdstart, Mdstride);
+      // // Map ncomp[4] to ncomp[0]
+      // hypre_StructMatmultCompute_core_1tbbb(a, ncomp[4], cprod[4],
+      //                                       tptrs[4], mptrs[4],
+      //                                       ndim, loop_size,
+      //                                       fdbox, fdstart, fdstride,
+      //                                       Mdbox, Mdstart, Mdstride);
 
-      hypre_StructMatmultCompute_core_2t(a, ncomp[5], cprod[5],
-                                         tptrs[5], mptrs[5],
-                                         ndim, loop_size,
-                                         fdbox, fdstart, fdstride,
-                                         cdbox, cdstart, cdstride,
-                                         Mdbox, Mdstart, Mdstride);
+      // // Map ncomp[5] to ncomp[9] (after reordering)
+      // hypre_StructMatmultCompute_core_2t(a, ncomp[5], cprod[5],
+      //                                    tptrs[5], mptrs[5],
+      //                                    ndim, loop_size,
+      //                                    fdbox, fdstart, fdstride,
+      //                                    cdbox, cdstart, cdstride,
+      //                                    Mdbox, Mdstart, Mdstride);
 
-      hypre_StructMatmultCompute_core_2t(a, ncomp[6], cprod[6],
-                                         tptrs[6], mptrs[6],
-                                         ndim, loop_size,
-                                         cdbox, cdstart, cdstride,
-                                         fdbox, fdstart, fdstride,
-                                         Mdbox, Mdstart, Mdstride);
+      // // Map ncomp[6] to ncomp[8] (after reordering) (note cdbox/fdbox reversal vs ncomp[5]!)
+      // hypre_StructMatmultCompute_core_2t(a, ncomp[6], cprod[6],
+      //                                    tptrs[6], mptrs[6],
+      //                                    ndim, loop_size,
+      //                                    cdbox, cdstart, cdstride,
+      //                                    fdbox, fdstart, fdstride,
+      //                                    Mdbox, Mdstart, Mdstride);
 
-      hypre_StructMatmultCompute_core_2tb(a, ncomp[7], order[7],
-                                          cprod[7], tptrs[7], mptrs[7],
-                                          ndim, loop_size,
-                                          fdbox, fdstart, fdstride,
-                                          cdbox, cdstart, cdstride,
-                                          Mdbox, Mdstart, Mdstride);
+      // // Map ncomp[7] to ncomp[9] (after reordering)
+      // hypre_StructMatmultCompute_core_2tb(a, ncomp[7], order[7],
+      //                                     cprod[7], tptrs[7], mptrs[7],
+      //                                     ndim, loop_size,
+      //                                     fdbox, fdstart, fdstride,
+      //                                     cdbox, cdstart, cdstride,
+      //                                     Mdbox, Mdstart, Mdstride);
 
       hypre_StructMatmultCompute_core_2etb(a, ncomp[8], order[8],
                                            cprod[8], tptrs[8], mptrs[8],

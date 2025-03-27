@@ -71,12 +71,14 @@
     tptrs[k][1][gi]*/*mask*/   \
     tptrs[k][2][gi] /*mask*/
 
+// Same as HYPRE_SMMCORE_2TBB (after reordering)
 #define HYPRE_SMMCORE_2T(k) \
     cprod[k]*               \
     tptrs[k][0][gi]*        \
     tptrs[k][1][gi]*        \
     tptrs[k][2][hi]
 
+// Same as HYPRE_SMMCORE_2TBB (after reordering)
 #define HYPRE_SMMCORE_2TB(k) \
     cprod[k]*                \
     tptrs[k][0][gi]*         \
