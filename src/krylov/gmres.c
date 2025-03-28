@@ -31,7 +31,7 @@ hypre_GMRESFunctionsCreate(
    HYPRE_Int    (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
                                    void *x, HYPRE_Complex beta, void *y ),
    HYPRE_Int    (*MatvecDestroy) ( void *matvec_data ),
-   HYPRE_Real   (*InnerProd)     ( void *x, void *y ),
+   HYPRE_Int    (*InnerProd)     ( void *x, void *y, HYPRE_Int *num_tags_ptr, HYPRE_Complex **iprod_ptr ),
    HYPRE_Int    (*CopyVector)    ( void *x, void *y ),
    HYPRE_Int    (*ClearVector)   ( void *x ),
    HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x ),
@@ -98,6 +98,7 @@ hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions )
    (gmres_data -> r)              = NULL;
    (gmres_data -> w)              = NULL;
    (gmres_data -> w_2)            = NULL;
+   (gmres_data -> w_3)            = NULL;
    (gmres_data -> matvec_data)    = NULL;
    (gmres_data -> norms)          = NULL;
    (gmres_data -> log_file_name)  = NULL;
@@ -121,7 +122,7 @@ hypre_GMRESDestroy( void *gmres_vdata )
    if (gmres_data)
    {
       hypre_GMRESFunctions *gmres_functions = gmres_data->functions;
-      if ( (gmres_data->logging > 0) || (gmres_data->print_level) > 0 )
+      if ( (gmres_data -> logging > 0) || (gmres_data->print_level) > 0 )
       {
          if ( (gmres_data -> norms) != NULL )
          {
@@ -134,19 +135,11 @@ hypre_GMRESDestroy( void *gmres_vdata )
          (*(gmres_functions->MatvecDestroy))(gmres_data -> matvec_data);
       }
 
-      if ( (gmres_data -> r) != NULL )
-      {
-         (*(gmres_functions->DestroyVector))(gmres_data -> r);
-      }
-      if ( (gmres_data -> w) != NULL )
-      {
-         (*(gmres_functions->DestroyVector))(gmres_data -> w);
-      }
-      if ( (gmres_data -> w_2) != NULL )
-      {
-         (*(gmres_functions->DestroyVector))(gmres_data -> w_2);
-      }
-
+      /* Destroy work vectors */
+      (*(gmres_functions->DestroyVector))(gmres_data -> r);
+      (*(gmres_functions->DestroyVector))(gmres_data -> w);
+      (*(gmres_functions->DestroyVector))(gmres_data -> w_2);
+      (*(gmres_functions->DestroyVector))(gmres_data -> w_3);
 
       if ( (gmres_data -> p) != NULL )
       {
@@ -233,6 +226,15 @@ hypre_GMRESSetup( void *gmres_vdata,
       }
    }
 
+   /* Additional work vector for computing individual function (DOF) residuals */
+   if ((gmres_data -> print_level) > 2)
+   {
+      if ((gmres_data -> w_3) == NULL)
+      {
+         (gmres_data -> w_3) = (*(gmres_functions->CreateVector))(b);
+      }
+   }
+
    if ((gmres_data -> matvec_data) == NULL)
    {
       (gmres_data -> matvec_data) = (*(gmres_functions->MatvecCreate))(A, x);
@@ -292,8 +294,12 @@ hypre_GMRESSolve(void  *gmres_vdata,
    void                 *r                  = (gmres_data -> r);
    void                 *w                  = (gmres_data -> w);
 
-   /* note: w_2 is only allocated if rel_change = 1 */
+   /* note:
+    *   - w_2 is only allocated if rel_change = 1
+    *   - w_3 is only allocated if print_level > 2
+    */
    void                 *w_2                = (gmres_data -> w_2);
+   void                 *w_3                = (gmres_data -> w_3);
    void                **p                  = (gmres_data -> p);
 
    HYPRE_Int           (*precond)(void*, void*, void*, void*) = (gmres_functions -> precond);
@@ -307,7 +313,10 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
    HYPRE_Int             break_value = 0;
    HYPRE_Int             i, j, k;
-   HYPRE_Real           *rs, **hh, *c, *s, *rs_2 = NULL;
+   HYPRE_Real           *rs, **hh, *c, *s, *rs_2 = NULL, *rs_3 = NULL;
+   HYPRE_Int             tag, num_tags;
+   HYPRE_Complex        *iprod = NULL;
+   HYPRE_Complex        *biprod = NULL;
    HYPRE_Int             iter;
    HYPRE_Int             my_id, num_procs;
    HYPRE_Real            epsilon, gamma, t, r_norm, b_norm, den_norm, x_norm;
@@ -350,6 +359,11 @@ hypre_GMRESSolve(void  *gmres_vdata,
    {
       rs_2 = hypre_CTAllocF(HYPRE_Real, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
    }
+   if (print_level > 2)
+   {
+      /* For tag-specific residual calculation */
+      rs_3 = hypre_CTAllocF(HYPRE_Real, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
+   }
    hh = hypre_CTAllocF(HYPRE_Real*, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
    for (i = 0; i < k_dim + 1; i++)
    {
@@ -361,7 +375,8 @@ hypre_GMRESSolve(void  *gmres_vdata,
    /* compute initial residual */
    (*(gmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, p[0]);
 
-   b_norm = hypre_sqrt((*(gmres_functions->InnerProd))(b, b));
+   (*(gmres_functions->InnerProd))(b, b, &num_tags, &biprod);
+   b_norm = hypre_sqrt(biprod[0]);
    real_r_norm_old = b_norm;
 
    /* Since it does not diminish performance, attempt to return an error flag
@@ -391,7 +406,8 @@ hypre_GMRESSolve(void  *gmres_vdata,
       return hypre_error_flag;
    }
 
-   r_norm = hypre_sqrt((*(gmres_functions->InnerProd))(p[0], p[0]));
+   (*(gmres_functions->InnerProd))(p[0], p[0], &num_tags, &iprod);
+   r_norm = hypre_sqrt(iprod[0]);
    r_norm_0 = r_norm;
 
    /* Since it does not diminish performance, attempt to return an error flag
@@ -421,10 +437,10 @@ hypre_GMRESSolve(void  *gmres_vdata,
       return hypre_error_flag;
    }
 
-   if ( logging > 0 || print_level > 0)
+   if (logging > 0 || print_level > 0)
    {
       norms[0] = r_norm;
-      if ( print_level > 1 && my_id == 0 )
+      if (!my_id)
       {
          hypre_printf("L2 norm of b: %e\n", b_norm);
          if (b_norm == 0.0)
@@ -458,19 +474,48 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
    /* so now our stop criteria is |r_i| <= epsilon */
 
-   if ( print_level > 1 && my_id == 0 )
+   /* Print header for tag-wise residuals if this is the first iteration */
+   if (print_level > 1 && my_id == 0)
    {
-      if (b_norm > 0.0)
+      hypre_printf("=============================================\n\n");
+      if (num_tags <= 1 || print_level == 2)
       {
-         hypre_printf("=============================================\n\n");
-         hypre_printf("Iters     resid.norm     conv.rate  rel.res.norm\n");
-         hypre_printf("-----    ------------    ---------- ------------\n");
+         if (b_norm > 0.0)
+         {
+            hypre_printf("Iters     resid.norm     conv.rate  rel.res.norm\n");
+            hypre_printf("-----    ------------    ---------- ------------\n");
+         }
+         else
+         {
+            hypre_printf("Iters     resid.norm     conv.rate\n");
+            hypre_printf("-----    ------------    ----------\n");
+         }
       }
-      else
+      else if (num_tags > 1)
       {
-         hypre_printf("=============================================\n\n");
-         hypre_printf("Iters     resid.norm     conv.rate\n");
-         hypre_printf("-----    ------------    ----------\n");
+         hypre_printf("  Iters ");
+         if (print_level == 3)
+         {
+            hypre_printf("          ||r||_2");
+            for (tag = 0; tag < num_tags; tag++)
+            {
+               hypre_printf("         ||r%d||_2", tag);
+            }
+         }
+         else if (print_level == 4)
+         {
+            hypre_printf("  ||r||_2/||b||_2");
+            for (tag = 0; tag < num_tags; tag++)
+            {
+               hypre_printf(" ||r%d||_2/||b||_2", tag);
+            }
+         }
+         hypre_printf("\n ------  ");
+         for (tag = 0; tag < num_tags + 1; tag++)
+         {
+            hypre_printf("   ------------- ");
+         }
+         hypre_printf("\n");
       }
    }
 
@@ -506,10 +551,11 @@ hypre_GMRESSolve(void  *gmres_vdata,
          {
             (*(gmres_functions->CopyVector))(b, r);
             (*(gmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
-            r_norm = hypre_sqrt((*(gmres_functions->InnerProd))(r, r));
+            (*(gmres_functions->InnerProd))(r, r, &num_tags, &iprod);
+            r_norm = hypre_sqrt(iprod[0]);
             if (r_norm  <= epsilon)
             {
-               if ( print_level > 1 && my_id == 0)
+               if (print_level > 1 && my_id == 0)
                {
                   hypre_printf("\n\n");
                   hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
@@ -518,7 +564,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
             }
             else
             {
-               if ( print_level > 0 && my_id == 0)
+               if (print_level > 0 && my_id == 0)
                {
                   hypre_printf("false convergence 1\n");
                }
@@ -538,19 +584,23 @@ hypre_GMRESSolve(void  *gmres_vdata,
          (*(gmres_functions->ClearVector))(r);
          precond(precond_data, A, p[i - 1], r);
          (*(gmres_functions->Matvec))(matvec_data, 1.0, A, r, 0.0, p[i]);
+
          /* modified Gram_Schmidt */
          for (j = 0; j < i; j++)
          {
-            hh[j][i - 1] = (*(gmres_functions->InnerProd))(p[j], p[i]);
+            (*(gmres_functions->InnerProd))(p[j], p[i], &num_tags, &iprod);
+            hh[j][i - 1] = iprod[0];
             (*(gmres_functions->Axpy))(-hh[j][i - 1], p[j], p[i]);
          }
-         t = hypre_sqrt((*(gmres_functions->InnerProd))(p[i], p[i]));
+         (*(gmres_functions->InnerProd))(p[i], p[i], &num_tags, &iprod);
+         t = hypre_sqrt(iprod[0]);
          hh[i][i - 1] = t;
          if (t != 0.0)
          {
             t = 1.0 / t;
             (*(gmres_functions->ScaleVector))(t, p[i]);
          }
+
          /* done with modified Gram_schmidt and Arnoldi step.
             update factorization of hh */
          for (j = 1; j < i; j++)
@@ -571,30 +621,94 @@ hypre_GMRESSolve(void  *gmres_vdata,
          rs[i] = -hh[i][i - 1] * rs[i - 1];
          rs[i] /=  gamma;
          rs[i - 1] = c[i - 1] * rs[i - 1];
+
          /* determine residual norm */
          hh[i - 1][i - 1] = s[i - 1] * hh[i][i - 1] + c[i - 1] * hh[i - 1][i - 1];
          r_norm = hypre_abs(rs[i]);
 
-         /* print ? */
-         if ( print_level > 0 )
+         /* Print residual norms? */
+         if (print_level > 0)
          {
             norms[iter] = r_norm;
-            if ( print_level > 1 && my_id == 0 )
+            if ((num_tags <= 1 && print_level > 1) || (print_level == 2))
             {
-               if (b_norm > 0.0)
+               if (!my_id)
                {
-                  hypre_printf("% 5d    %e    %f   %e\n", iter,
-                               norms[iter], norms[iter] / norms[iter - 1],
-                               norms[iter] / b_norm);
+                  if (b_norm > 0.0)
+                  {
+                     hypre_printf("% 5d    %e    %f   %e\n", iter,
+                                  norms[iter], norms[iter] / norms[iter - 1],
+                                  norms[iter] / b_norm);
+                  }
+                  else
+                  {
+                     hypre_printf("% 5d    %e    %f\n", iter, norms[iter],
+                                  norms[iter] / norms[iter - 1]);
+                  }
                }
-               else
+            }
+            else if (num_tags > 1 && print_level > 2)
+            {
+               /* For each tag, we need to compute the residual norm based on the
+                  current GMRES state. The residual vector in GMRES is represented
+                  by rs[i] and the orthogonal basis vectors p[0...i] */
+
+               /* Copy rs values so we don't modify the original solution */
+               for (k = 0; k < i; k++)
                {
-                  hypre_printf("% 5d    %e    %f\n", iter, norms[iter],
-                               norms[iter] / norms[iter - 1]);
+                  rs_3[k] = rs[k];
+               }
+
+               /* Solve the triangular system */
+               for (k = i - 1; k >= 0; k--)
+               {
+                  rs_3[k] = rs_3[k] / hh[k][k];
+                  for (j = 0; j < k; j++)
+                  {
+                     rs_3[j] -= hh[j][k] * rs_3[k];
+                  }
+               }
+
+               /* Compute the solution update vector w_3 = sum_{j=0}^{i-1} rs_3[j] p[j] */
+               (*(gmres_functions->CopyVector))(p[0], w_3);
+               (*(gmres_functions->ScaleVector))(rs_3[0], w_3);
+               for (j = 1; j < i; j++)
+               {
+                  (*(gmres_functions->Axpy))(rs_3[j], p[j], w_3);
+               }
+
+               /* Apply preconditioner to get the correction */
+               (*(gmres_functions->ClearVector))(w);
+               precond(precond_data, A, w_3, w);
+
+               /* Compute current approximate solution x_i = x_0 + correction */
+               (*(gmres_functions->CopyVector))(x, w_3);
+               (*(gmres_functions->Axpy))(1.0, w, w_3);
+
+               /* Now compute real residual r = b - A*x_i */
+               (*(gmres_functions->CopyVector))(b, r);
+               (*(gmres_functions->Matvec))(matvec_data, -1.0, A, w_3, 1.0, r);
+
+               /* Now compute tag-specific residual norms */
+               (*(gmres_functions->InnerProd))(r, r, &num_tags, &iprod);
+
+               /* Print tag-specific residual norms */
+               if (!my_id)
+               {
+                  hypre_printf(" %6d  ", iter);
+                  for (tag = 0; tag < num_tags + 1; tag++)
+                  {
+                     hypre_printf("  %14.6e ",
+                                  print_level == 3 ?
+                                  hypre_sqrt(iprod[tag]) :
+                                  hypre_sqrt(iprod[tag]) / hypre_sqrt(biprod[tag]));
+                  }
+                  hypre_printf("\n");
                }
             }
          }
-         /*convergence factor tolerance */
+
+         /* convergence factor tolerance */
          if (cf_tol > 0.0)
          {
             cf_ave_0 = cf_ave_1;
@@ -613,6 +727,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
                break;
             }
          }
+
          /* should we exit the restart cycle? (conv. check) */
          if (r_norm <= epsilon && iter >= min_iter)
          {
@@ -666,14 +781,14 @@ hypre_GMRESSolve(void  *gmres_vdata,
                /* add the correction */
                (*(gmres_functions->Axpy))(1.0, r, w);
 
-               /* now w is the approx solution  - get the norm*/
-               x_norm = hypre_sqrt( (*(gmres_functions->InnerProd))(w, w) );
+               /* now w is the approx solution - get the norm */
+               (*(gmres_functions->InnerProd))(w, w, &num_tags, &iprod);
+               x_norm = hypre_sqrt(iprod[0]);
 
                if ( !(x_norm <= guard_zero_residual ))
                   /* don't divide by zero */
                {
-                  /* now get  x_i - x_i-1 */
-
+                  /* now get x_i - x_i-1 */
                   if (num_rel_change_check)
                   {
                      /* have already checked once so we can avoid another precond.
@@ -707,7 +822,8 @@ hypre_GMRESSolve(void  *gmres_vdata,
                      /* now r contains x_i - x_i-1 */
                   }
                   /* find the norm of x_i - x_i-1 */
-                  w_norm = hypre_sqrt( (*(gmres_functions->InnerProd))(r, r) );
+                  (*(gmres_functions->InnerProd))(r, r, &num_tags, &iprod);
+                  w_norm = hypre_sqrt(iprod[0]);
                   relative_error = w_norm / x_norm;
                   if (relative_error <= r_tol)
                   {
@@ -775,14 +891,16 @@ hypre_GMRESSolve(void  *gmres_vdata,
          /* calculate actual residual norm*/
          (*(gmres_functions->CopyVector))(b, r);
          (*(gmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
-         real_r_norm_new = r_norm = hypre_sqrt( (*(gmres_functions->InnerProd))(r, r) );
+         (*(gmres_functions->InnerProd))(r, r, &num_tags, &iprod);
+         real_r_norm_new = r_norm = hypre_sqrt(iprod[0]);
 
          if (r_norm <= epsilon)
          {
             if (rel_change && !rel_change_passed) /* calculate the relative change */
             {
                /* calculate the norm of the solution */
-               x_norm = hypre_sqrt( (*(gmres_functions->InnerProd))(x, x) );
+               (*(gmres_functions->InnerProd))(x, x, &num_tags, &iprod);
+               x_norm = hypre_sqrt(iprod[0]);
 
                if ( !(x_norm <= guard_zero_residual ))
                   /* don't divide by zero */
@@ -799,12 +917,14 @@ hypre_GMRESSolve(void  *gmres_vdata,
                   /* apply the preconditioner */
                   precond(precond_data, A, w, r);
                   /* find the norm of x_i - x_i-1 */
-                  w_norm = hypre_sqrt( (*(gmres_functions->InnerProd))(r, r) );
+                  (*(gmres_functions->InnerProd))(r, r, &num_tags, &iprod);
+                  w_norm = hypre_sqrt(iprod[0]);
+
                   relative_error = w_norm / x_norm;
                   if ( relative_error < r_tol )
                   {
                      (gmres_data -> converged) = 1;
-                     if ( print_level > 1 && my_id == 0 )
+                     if (print_level > 1 && my_id == 0)
                      {
                         hypre_printf("\n\n");
                         hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
@@ -815,7 +935,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
                else
                {
                   (gmres_data -> converged) = 1;
-                  if ( print_level > 1 && my_id == 0 )
+                  if (print_level > 1 && my_id == 0)
                   {
                      hypre_printf("\n\n");
                      hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
@@ -826,7 +946,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
             }
             else /* don't need to check rel. change */
             {
-               if ( print_level > 1 && my_id == 0 )
+               if (print_level > 1 && my_id == 0)
                {
                   hypre_printf("\n\n");
                   hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
@@ -850,7 +970,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
             }
 
             /* report discrepancy between real/GMRES residuals and restart */
-            if ( print_level > 0 && my_id == 0)
+            if (print_level > 0 && my_id == 0)
             {
                hypre_printf("false convergence 2, L2 norm of residual: %e\n", r_norm);
             }
@@ -881,7 +1001,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    } /* END of iteration while loop */
 
 
-   if ( print_level > 1 && my_id == 0 )
+   if (print_level > 1 && my_id == 0)
    {
       hypre_printf("\n\n");
    }
@@ -903,6 +1023,9 @@ hypre_GMRESSolve(void  *gmres_vdata,
       hypre_error(HYPRE_ERROR_CONV);
    }
 
+   /* free up memory */
+   hypre_TFree(iprod, HYPRE_MEMORY_HOST);
+   hypre_TFree(biprod, HYPRE_MEMORY_HOST);
    hypre_TFreeF(c, gmres_functions);
    hypre_TFreeF(s, gmres_functions);
    hypre_TFreeF(rs, gmres_functions);
@@ -910,6 +1033,11 @@ hypre_GMRESSolve(void  *gmres_vdata,
    if (rel_change)
    {
       hypre_TFreeF(rs_2, gmres_functions);
+   }
+
+   if (print_level > 2)
+   {
+      hypre_TFreeF(rs_3, gmres_functions);
    }
 
    for (i = 0; i < k_dim + 1; i++)
