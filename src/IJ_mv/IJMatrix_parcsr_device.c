@@ -44,17 +44,25 @@ hypre_AuxParCSRMatrixStackReallocate(hypre_AuxParCSRMatrix *aux_matrix,
 {
    HYPRE_BigInt stack_max = hypre_AuxParCSRMatrixMaxStackElmts(aux_matrix);
 
-   hypre_AuxParCSRMatrixStackI(aux_matrix) = hypre_TReAlloc_v2(hypre_AuxParCSRMatrixStackI(aux_matrix), HYPRE_BigInt,
-                                                               stack_max, HYPRE_BigInt,  new_stack_max, HYPRE_MEMORY_DEVICE);
+   hypre_AuxParCSRMatrixStackI(aux_matrix) =
+     hypre_TReAlloc_v2(hypre_AuxParCSRMatrixStackI(aux_matrix),
+                       HYPRE_BigInt,
+                       stack_max, HYPRE_BigInt,  new_stack_max, HYPRE_MEMORY_DEVICE);
 
-   hypre_AuxParCSRMatrixStackJ(aux_matrix) = hypre_TReAlloc_v2(hypre_AuxParCSRMatrixStackJ(aux_matrix), HYPRE_BigInt,
-                                                               stack_max, HYPRE_BigInt,  new_stack_max, HYPRE_MEMORY_DEVICE);
+   hypre_AuxParCSRMatrixStackJ(aux_matrix) =
+     hypre_TReAlloc_v2(hypre_AuxParCSRMatrixStackJ(aux_matrix),
+                       HYPRE_BigInt,
+                       stack_max, HYPRE_BigInt,  new_stack_max, HYPRE_MEMORY_DEVICE);
 
-   hypre_AuxParCSRMatrixStackData(aux_matrix) = hypre_TReAlloc_v2(hypre_AuxParCSRMatrixStackData(aux_matrix), HYPRE_Complex,
-                                                                  stack_max, HYPRE_Complex, new_stack_max, HYPRE_MEMORY_DEVICE);
+   hypre_AuxParCSRMatrixStackData(aux_matrix) =
+     hypre_TReAlloc_v2(hypre_AuxParCSRMatrixStackData(aux_matrix),
+                       HYPRE_Complex,
+                       stack_max, HYPRE_Complex, new_stack_max, HYPRE_MEMORY_DEVICE);
 
-   hypre_AuxParCSRMatrixStackSorA(aux_matrix) = hypre_TReAlloc_v2(hypre_AuxParCSRMatrixStackSorA(aux_matrix), char,
-                                                                  stack_max, char, new_stack_max, HYPRE_MEMORY_DEVICE);
+   hypre_AuxParCSRMatrixStackSorA(aux_matrix) =
+     hypre_TReAlloc_v2(hypre_AuxParCSRMatrixStackSorA(aux_matrix),
+                       char,
+                       stack_max, char, new_stack_max, HYPRE_MEMORY_DEVICE);
 
    hypre_AuxParCSRMatrixMaxStackElmts(aux_matrix) = new_stack_max;
 
@@ -154,13 +162,16 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       if (stack_elmts_max == 0)
       {
          /* intial allocation */
-         if ( hypre_AuxParCSRMatrixUsrOnProcElmts (aux_matrix) > 0 && hypre_AuxParCSRMatrixUsrOffProcElmts(aux_matrix) > 0 )
+         if ( hypre_AuxParCSRMatrixUsrOnProcElmts (aux_matrix) > 0 &&
+              hypre_AuxParCSRMatrixUsrOffProcElmts(aux_matrix) > 0 )
          {
-            stack_elmts_max_new = hypre_AuxParCSRMatrixUsrOnProcElmts (aux_matrix) + hypre_AuxParCSRMatrixUsrOffProcElmts(aux_matrix);
+            stack_elmts_max_new = hypre_AuxParCSRMatrixUsrOnProcElmts (aux_matrix) +
+                                  hypre_AuxParCSRMatrixUsrOffProcElmts(aux_matrix);
          }
          else
          {
-            stack_elmts_max_new = num_local_rows * hypre_AuxParCSRMatrixInitAllocFactor(aux_matrix);
+            stack_elmts_max_new = num_local_rows *
+              hypre_AuxParCSRMatrixInitAllocFactor(aux_matrix);
          }
          stack_elmts_max_new = hypre_max(stack_elmts_required, stack_elmts_max_new);
       }
@@ -173,7 +184,8 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
          }
          else
          {
-            stack_elmts_max_new = stack_elmts_required * hypre_AuxParCSRMatrixGrowFactor(aux_matrix);
+            stack_elmts_max_new = stack_elmts_required *
+              hypre_AuxParCSRMatrixGrowFactor(aux_matrix);
          }
       }
 
@@ -269,7 +281,8 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
       stack_elmts_current = hypre_AuxParCSRMatrixCurrentStackElmts(aux_matrix);
       stack_elmts_max = hypre_AuxParCSRMatrixMaxStackElmts(aux_matrix);
 
-      HYPRE_BigInt stack_elmts_max_new = stack_elmts_current * hypre_AuxParCSRMatrixGrowFactor(aux_matrix);
+      HYPRE_BigInt stack_elmts_max_new = stack_elmts_current * hypre_AuxParCSRMatrixGrowFactor(
+                                            aux_matrix);
 
       if (stack_elmts_max_new != stack_elmts_max)
       {
@@ -975,7 +988,8 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
 
             hypreDevice_CharFilln(diag_sora_new, diag_nnz_existed, 0);
 
-            hypre_IJMatrixAssembleSortAndReduce2(&diag_nnz, &diag_i_new, &diag_j_new, diag_sora_new, &diag_a_new, 2);
+            hypre_IJMatrixAssembleSortAndReduce2(&diag_nnz, &diag_i_new, &diag_j_new, diag_sora_new,
+                                                 &diag_a_new, 2);
          }
 
          hypre_CSRMatrix *diag = hypre_CSRMatrixCreate(nrows, ncols, diag_nnz);
@@ -1019,7 +1033,8 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
 
             hypreDevice_CharFilln(offd_sora_new, offd_nnz_existed, 0);
 
-            hypre_IJMatrixAssembleSortAndReduce2(&offd_nnz, &offd_i_new, &offd_j_new, offd_sora_new, &offd_a_new, 0);
+            hypre_IJMatrixAssembleSortAndReduce2(&offd_nnz, &offd_i_new, &offd_j_new, offd_sora_new,
+                                                 &offd_a_new, 0);
          }
 
          hypre_CSRMatrix *offd = hypre_CSRMatrixCreate(nrows, num_cols_offd_new, offd_nnz);
@@ -1037,7 +1052,8 @@ hypre_IJMatrixAssembleParCSRDevice(hypre_IJMatrix *matrix)
          hypre_ParCSRMatrixDeviceColMapOffd(par_matrix) = col_map_offd_new;
 
          hypre_TFree(hypre_ParCSRMatrixColMapOffd(par_matrix), HYPRE_MEMORY_HOST);
-         hypre_ParCSRMatrixColMapOffd(par_matrix) = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_new, HYPRE_MEMORY_HOST);
+         hypre_ParCSRMatrixColMapOffd(par_matrix) = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_new,
+                                                                 HYPRE_MEMORY_HOST);
          hypre_TMemcpy(hypre_ParCSRMatrixColMapOffd(par_matrix), col_map_offd_new, HYPRE_BigInt,
                        num_cols_offd_new, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 
