@@ -217,9 +217,19 @@ using hypre_DeviceItem = sycl::nd_item<3>;
  *      device defined values
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+#if HYPRE_WARP_SIZE == 32
+#define HYPRE_WARP_BITSHIFT      5
+#define HYPRE_WARP_FULL_MASK     0xFFFFFFFF
+
+#elif HYPRE_WARP_SIZE == 64
+#define HYPRE_WARP_BITSHIFT      6
+#define HYPRE_WARP_FULL_MASK     0xFFFFFFFFFFFFFFFF
+
+#else
+#error "Unsupported value for HYPRE_WARP_SIZE"
+#endif
+
 #define HYPRE_MAX_NTHREADS_BLOCK 1024
-#define HYPRE_WARP_BITSHIFT      (HYPRE_WARP_SIZE == 32 ? 5 : 6)
-#define HYPRE_WARP_FULL_MASK     (HYPRE_WARP_SIZE == 32 ? 0xFFFFFFFF : 0xFFFFFFFFFFFFFFFF)
 #define HYPRE_MAX_NUM_WARPS      (64 * 64 * 32)
 #define HYPRE_FLT_LARGE          1e30
 #define HYPRE_1D_BLOCK_SIZE      512
