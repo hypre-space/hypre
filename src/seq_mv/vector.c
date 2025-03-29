@@ -603,7 +603,7 @@ HYPRE_Int
 hypre_SeqVectorCopyTags( hypre_Vector *x,
                          hypre_Vector *y )
 {
-   HYPRE_Int  num_tags = hypre_min(hypre_VectorNumTags(x), hypre_VectorNumTags(y));
+   HYPRE_Int  size = hypre_min(hypre_VectorSize(x), hypre_VectorSize(y));
 
    /* Return if x does not have tags */
    if (!hypre_VectorTags(x))
@@ -618,12 +618,12 @@ hypre_SeqVectorCopyTags( hypre_Vector *x,
    }
 
    /* Allocate new tags array */
-   hypre_VectorTags(y) = hypre_TAlloc(HYPRE_Int, num_tags, hypre_VectorMemoryLocation(y));
+   hypre_VectorTags(y) = hypre_TAlloc(HYPRE_Int, size, hypre_VectorMemoryLocation(y));
 
    /* Copy tags */
    hypre_TMemcpy(hypre_VectorTags(y),
                  hypre_VectorTags(x),
-                 HYPRE_Int, num_tags,
+                 HYPRE_Int, size,
                  hypre_VectorMemoryLocation(y),
                  hypre_VectorMemoryLocation(x));
 
