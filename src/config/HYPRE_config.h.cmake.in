@@ -143,6 +143,9 @@
 /* Use if executing on GPU device */
 #cmakedefine HYPRE_USING_GPU 1
 
+/* Define the GPU warp size (default: 32 for CUDA/SYCL, 64 for HIP) */
+#cmakedefine HYPRE_WARP_SIZE @HYPRE_WARP_SIZE@
+
 /* Use if executing hypre tests on host (CPU) */
 #cmakedefine HYPRE_TEST_USING_HOST 1
 
