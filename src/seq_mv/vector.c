@@ -24,16 +24,15 @@ hypre_SeqVectorCreate( HYPRE_Int size )
 
    vector = hypre_CTAlloc(hypre_Vector, 1, HYPRE_MEMORY_HOST);
 
-   hypre_VectorData(vector) = NULL;
-   hypre_VectorSize(vector) = size;
-
-   hypre_VectorNumVectors(vector) = 1;
+   hypre_VectorData(vector)                  = NULL;
+   hypre_VectorSize(vector)                  = size;
+   hypre_VectorNumTags(vector)               = 1;
+   hypre_VectorOwnsTags(vector)              = 1;
+   hypre_VectorTags(vector)                  = NULL;
+   hypre_VectorNumVectors(vector)            = 1;
    hypre_VectorMultiVecStorageMethod(vector) = 0;
-
-   /* set defaults */
-   hypre_VectorOwnsData(vector) = 1;
-
-   hypre_VectorMemoryLocation(vector) = hypre_HandleMemoryLocation(hypre_handle());
+   hypre_VectorOwnsData(vector)              = 1;
+   hypre_VectorMemoryLocation(vector)        = hypre_HandleMemoryLocation(hypre_handle());
 
    return vector;
 }
@@ -61,6 +60,11 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
    if (vector)
    {
       HYPRE_MemoryLocation memory_location = hypre_VectorMemoryLocation(vector);
+
+      if (hypre_VectorOwnsTags(vector))
+      {
+         hypre_TFree(hypre_VectorTags(vector), memory_location);
+      }
 
       if (hypre_VectorOwnsData(vector))
       {
@@ -122,6 +126,95 @@ hypre_SeqVectorSetData( hypre_Vector  *vector,
 
    /* Remove data pointer ownership */
    hypre_VectorOwnsData(vector) = 0;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorSetOwnsTags
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorSetOwnsTags( hypre_Vector *vector,
+                            HYPRE_Int     owns_tags )
+{
+   /* Set owns tags info passed via input */
+   hypre_VectorOwnsTags(vector) = owns_tags;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorSetNumTags
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorSetNumTags( hypre_Vector *vector,
+                           HYPRE_Int     num_tags )
+{
+   /* Set number of tags info passed via input */
+   hypre_VectorNumTags(vector) = num_tags;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorSetTags
+ *
+ * Sets tags array to a SeqVector.
+ * If owns_tags is true, allocates and copies tags.
+ * Otherwise, just points to the input tags array.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorSetTags( hypre_Vector          *vector,
+                        HYPRE_MemoryLocation   memory_location,
+                        HYPRE_Int             *tags )
+{
+   HYPRE_Int  size = hypre_VectorSize(vector);
+   HYPRE_Int *new_tags;
+
+   /* Return if tags array does not exist */
+   if (!tags)
+   {
+      hypre_TFree(hypre_VectorTags(vector), hypre_VectorMemoryLocation(vector));
+      hypre_VectorTags(vector) = NULL;
+
+      return hypre_error_flag;
+   }
+
+   if (hypre_VectorOwnsTags(vector))
+   {
+      /* Deallocate existing tags if present */
+      if (hypre_VectorTags(vector))
+      {
+         hypre_TFree(hypre_VectorTags(vector), hypre_VectorMemoryLocation(vector));
+      }
+
+      /* Allocate new tags array */
+      new_tags = hypre_TAlloc(HYPRE_Int, size, hypre_VectorMemoryLocation(vector));
+
+      /* Copy tags */
+      hypre_TMemcpy(new_tags, tags, HYPRE_Int, size,
+                    hypre_VectorMemoryLocation(vector),
+                    memory_location);
+
+      /* Attach new tags */
+      hypre_VectorTags(vector) = new_tags;
+   }
+   else
+   {
+      /* Just point to the input tags array */
+      hypre_VectorTags(vector) = tags;
+
+      /* Check whether the memory location for the tags array
+         match the memory location used by the vector */
+      if (hypre_GetActualMemLocation(hypre_VectorMemoryLocation(vector)) !=
+          hypre_GetActualMemLocation(memory_location))
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Memory location mismatch!");
+      }
+   }
 
    return hypre_error_flag;
 }
@@ -501,6 +594,37 @@ hypre_SeqVectorCopy( hypre_Vector *x,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SeqVectorCopyTags
+ *
+ * Copy tags array from x to y.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorCopyTags( hypre_Vector *x,
+                         hypre_Vector *y )
+{
+   HYPRE_Int  size = hypre_min(hypre_VectorSize(x), hypre_VectorSize(y));
+
+   /* Deallocate existing tags if present */
+   if (hypre_VectorTags(y))
+   {
+      hypre_TFree(hypre_VectorTags(y), hypre_VectorMemoryLocation(y));
+   }
+
+   /* Allocate new tags array */
+   hypre_VectorTags(y) = hypre_TAlloc(HYPRE_Int, size, hypre_VectorMemoryLocation(y));
+
+   /* Copy tags */
+   hypre_TMemcpy(hypre_VectorTags(y),
+                 hypre_VectorTags(x),
+                 HYPRE_Int, size,
+                 hypre_VectorMemoryLocation(y),
+                 hypre_VectorMemoryLocation(x));
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SeqVectorStridedCopy
  *
  * Perform strided copy from a data array to x->data.
@@ -571,14 +695,17 @@ hypre_SeqVectorCloneDeep_v2( hypre_Vector *x, HYPRE_MemoryLocation memory_locati
    HYPRE_Int      size          = hypre_VectorSize(x);
    HYPRE_Int      num_vectors   = hypre_VectorNumVectors(x);
 
-   hypre_Vector *y = hypre_SeqMultiVectorCreate( size, num_vectors );
+   hypre_Vector  *y = hypre_SeqMultiVectorCreate(size, num_vectors);
 
    hypre_VectorMultiVecStorageMethod(y) = hypre_VectorMultiVecStorageMethod(x);
    hypre_VectorVectorStride(y) = hypre_VectorVectorStride(x);
-   hypre_VectorIndexStride(y) = hypre_VectorIndexStride(x);
+   hypre_VectorIndexStride(y)  = hypre_VectorIndexStride(x);
 
+   hypre_SeqVectorSetNumTags(y, hypre_VectorNumTags(x));
+   hypre_SeqVectorSetOwnsTags(y, 1);
    hypre_SeqVectorInitialize_v2(y, memory_location);
-   hypre_SeqVectorCopy( x, y );
+   hypre_SeqVectorCopy(x, y);
+   hypre_SeqVectorCopyTags(x, y);
 
    return y;
 }
@@ -1135,6 +1262,96 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 #endif
 
    return result;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorInnerProdTaggedHost
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorInnerProdTaggedHost( hypre_Vector  *x,
+                                    hypre_Vector  *y,
+                                    HYPRE_Complex *iprod )
+{
+   HYPRE_Complex *x_data      = hypre_VectorData(x);
+   HYPRE_Complex *y_data      = hypre_VectorData(y);
+   HYPRE_Int     *tags        = hypre_VectorTags(x);
+   HYPRE_Int      num_tags    = hypre_VectorNumTags(x);
+   HYPRE_Int      num_vectors = hypre_VectorNumVectors(x);
+   HYPRE_Int      size        = hypre_VectorSize(x);
+   HYPRE_Int      total_size  = size * num_vectors;
+   HYPRE_Int      i;
+
+   /* Initialize result */
+   for (i = 0; i < num_tags; i++)
+   {
+      iprod[i] = 0.0;
+   }
+
+#if defined(HYPRE_USING_OPENMP)
+   #pragma omp parallel for private(i) reduction(+:iprod) HYPRE_SMP_SCHEDULE
+#endif
+   for (i = 0; i < total_size; i++)
+   {
+      iprod[tags[i]] += hypre_conj(y_data[i]) * x_data[i];
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorInnerProdTagged
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorInnerProdTagged( hypre_Vector  *x,
+                                hypre_Vector  *y,
+                                HYPRE_Complex *iprod )
+{
+   HYPRE_Int      num_tags_x = hypre_VectorNumTags(x);
+   HYPRE_Int      num_tags_y = hypre_VectorNumTags(y);
+
+   /* Sanity checks */
+   if (!iprod)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "iprod not allocated!");
+      return hypre_error_flag;
+   }
+
+   if (num_tags_x != num_tags_y)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Number of tags in x and y don't match!");
+      return hypre_error_flag;
+   }
+
+   if (num_tags_x == 1)
+   {
+      iprod[0] = hypre_SeqVectorInnerProd(x, y);
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy2( hypre_VectorMemoryLocation(x),
+                                                      hypre_VectorMemoryLocation(y) );
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      /* TODO (VPM): add hypre_SeqVectorInnerProdTaggedDevice */
+      hypre_Vector *x_h = hypre_SeqVectorCloneDeep_v2(x, HYPRE_MEMORY_HOST);
+      hypre_Vector *y_h = hypre_SeqVectorCloneDeep_v2(y, HYPRE_MEMORY_HOST);
+      hypre_SeqVectorInnerProdTaggedHost(x_h, y_h, iprod);
+      hypre_SeqVectorCopy(x_h, x);
+      hypre_SeqVectorCopy(y_h, y);
+      hypre_SeqVectorDestroy(x_h);
+      hypre_SeqVectorDestroy(y_h);
+   }
+   else
+#endif
+   {
+      hypre_SeqVectorInnerProdTaggedHost(x, y, iprod);
+   }
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
