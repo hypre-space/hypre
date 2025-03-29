@@ -182,7 +182,8 @@ using hypre_DeviceItem = void*;
 #include <thrust/version.h>
 
 /* VPM: this is needed to support cuda 10. not_fn is the correct replacement going forward. */
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#define THRUST_VERSION_NOTFN 200700
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 #define HYPRE_THRUST_NOT(pred) thrust::not1(pred)
 #else
 #define HYPRE_THRUST_NOT(pred) thrust::not_fn(pred)
@@ -1347,7 +1348,7 @@ T warp_allreduce_min(hypre_DeviceItem &item, T in)
 }
 
 template<typename T1, typename T2>
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct type_cast : public thrust::unary_function<T1, T2>
 #else
 struct type_cast
@@ -1360,7 +1361,7 @@ struct type_cast
 };
 
 template<typename T>
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct absolute_value : public thrust::unary_function<T, T>
 #else
 struct absolute_value
@@ -1415,7 +1416,7 @@ struct TupleComp3
 };
 
 template<typename T>
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct is_negative : public thrust::unary_function<T, bool>
 #else
 struct is_negative
@@ -1428,7 +1429,7 @@ struct is_negative
 };
 
 template<typename T>
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct is_positive : public thrust::unary_function<T, bool>
 #else
 struct is_positive
@@ -1441,7 +1442,7 @@ struct is_positive
 };
 
 template<typename T>
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct is_nonnegative : public thrust::unary_function<T, bool>
 #else
 struct is_nonnegative
@@ -1454,7 +1455,7 @@ struct is_nonnegative
 };
 
 template<typename T>
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct in_range : public thrust::unary_function<T, bool>
 #else
 struct in_range
@@ -1471,7 +1472,7 @@ struct in_range
 };
 
 template<typename T>
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct out_of_range : public thrust::unary_function<T, bool>
 #else
 struct out_of_range
@@ -1488,7 +1489,7 @@ struct out_of_range
 };
 
 template<typename T>
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct less_than : public thrust::unary_function<T, bool>
 #else
 struct less_than
@@ -1505,7 +1506,7 @@ struct less_than
 };
 
 template<typename T>
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct modulo : public thrust::unary_function<T, T>
 #else
 struct modulo
@@ -1522,7 +1523,7 @@ struct modulo
 };
 
 template<typename T>
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct equal : public thrust::unary_function<T, bool>
 #else
 struct equal
