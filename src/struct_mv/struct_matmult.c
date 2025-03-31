@@ -1186,6 +1186,8 @@ hypre_StructMatmultCommunicate( hypre_StructMatmultData  *mmdata )
  *   3) CCF stands for "Constant Coefficient on Fine data space".
  *--------------------------------------------------------------------------*/
 
+#include "struct_matmult_fuse.c"
+
 HYPRE_Int
 hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
                             HYPRE_Int                 iM )
@@ -1398,16 +1400,18 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
       switch (nterms)
       {
          case 2:
-            hypre_StructMatmultCompute_core_double(a, na, ndim,
-                                                   loop_size, stencil_size,
+            hypre_StructMatmultCompute_core_double(a, na, ndim, loop_size, stencil_size,
                                                    fdbox, fdstart, fdstride,
                                                    cdbox, cdstart, cdstride,
                                                    Mdbox, Mdstart, Mdstride);
             break;
 
          case 3:
-            hypre_StructMatmultCompute_core_triple(a, na, ndim,
-                                                   loop_size, stencil_size,
+            //hypre_StructMatmultCompute_core_triple(a, na, ndim, loop_size, stencil_size,
+            //                                       fdbox, fdstart, fdstride,
+            //                                       cdbox, cdstart, cdstride,
+            //                                       Mdbox, Mdstart, Mdstride);
+            hypre_StructMatmultCompute_fuse_triple(a, na, ndim, loop_size, stencil_size,
                                                    fdbox, fdstart, fdstride,
                                                    cdbox, cdstart, cdstride,
                                                    Mdbox, Mdstart, Mdstride);
