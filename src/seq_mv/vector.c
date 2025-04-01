@@ -1288,6 +1288,13 @@ hypre_SeqVectorInnerProdTaggedHost( hypre_Vector  *x,
    HYPRE_Int      total_size  = size * num_vectors;
    HYPRE_Int      i;
 
+#if defined(HYPRE_USING_OPENMP)
+   HYPRE_Int      j, num_threads = hypre_NumThreads();
+   HYPRE_Complex *thread_sums    = hypre_CTAlloc(HYPRE_Complex,
+                                                 num_threads * num_tags,
+                                                 HYPRE_MEMORY_HOST);
+#endif
+
    /* Initialize result */
    for (i = 0; i < num_tags; i++)
    {
@@ -1295,12 +1302,31 @@ hypre_SeqVectorInnerProdTaggedHost( hypre_Vector  *x,
    }
 
 #if defined(HYPRE_USING_OPENMP)
-   #pragma omp parallel for private(i) reduction(+:iprod) HYPRE_SMP_SCHEDULE
-#endif
+   #pragma omp parallel private(i, j)
+   {
+      HYPRE_Int      tid = hypre_GetThreadNum();
+      HYPRE_Complex *sum = &thread_sums[tid * num_tags];
+
+      #pragma omp for HYPRE_SMP_SCHEDULE
+      for (i = 0; i < total_size; i++)
+      {
+         sum[tags[i]] += hypre_conj(y_data[i]) * x_data[i];
+      }
+
+      #pragma omp critical
+      {
+         for (j = 0; j < num_tags; j++)
+         {
+            iprod[j] += sum[j];
+         }
+      }
+   }
+#else
    for (i = 0; i < total_size; i++)
    {
       iprod[tags[i]] += hypre_conj(y_data[i]) * x_data[i];
    }
+#endif
 
    return hypre_error_flag;
 }
