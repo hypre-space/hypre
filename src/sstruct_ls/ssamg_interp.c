@@ -286,7 +286,9 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
          if (hypre_StructMatrixConstEntry(P_s, 1))
          {
             /* Off-diagonal entries are constant */
-            hypre_TMemcpy(hypre_StructMatrixConstData(P_s, 1), &half, HYPRE_Complex, 2,
+            hypre_TMemcpy(hypre_StructMatrixConstData(P_s, 1), &half, HYPRE_Complex, 1,
+                          memory_location_P, HYPRE_MEMORY_HOST);
+            hypre_TMemcpy(hypre_StructMatrixConstData(P_s, 2), &half, HYPRE_Complex, 1,
                           memory_location_P, HYPRE_MEMORY_HOST);
          }
          else
