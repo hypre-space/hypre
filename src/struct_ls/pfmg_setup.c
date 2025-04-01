@@ -42,7 +42,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             rap_type;
    HYPRE_Int             max_levels;
    HYPRE_Int             num_levels;
-   HYPRE_Int             resize;
 
    hypre_Index           cindex;
    hypre_Index           stride;
@@ -188,7 +187,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          RT_l[l] = hypre_zPFMGCreateRestrictOp(A_l[l], cdir, stride);
       }
 #endif
-      hypre_StructMatrixSetTranspose(RT_l[l], 1, &resize);
+      HYPRE_StructMatrixSetTranspose(RT_l[l], 1);
       hypre_StructMatrixInitialize(P_l[l]);
       hypre_zPFMGSetupInterpOp(P_l[l], A_l[l], cdir);
 #if 0 /* TODO: Allow RT != P */
