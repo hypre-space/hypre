@@ -425,7 +425,7 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
    iupper--; jupper--;
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper,
                         &hypre_SStructMatrixIJMatrix(matrix));
-   hypre_SStructUMatrixInitialize(matrix);
+   hypre_SStructUMatrixInitialize(matrix, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }

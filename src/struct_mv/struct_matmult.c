@@ -1368,20 +1368,20 @@ hypre_StructMatmultCompute_core_double( hypre_StructMatmultDataMH *a,
    HYPRE_Int                e, c, i, k, t;
 
    /* Allocate memory */
-   ncomp = hypre_CTAlloc(HYPRE_Int, max_components, HYPRE_MEMORY_HOST);
-   cprod = hypre_TAlloc(HYPRE_Complex *, max_components, HYPRE_MEMORY_HOST);
-   order = hypre_TAlloc(HYPRE_Int **, max_components, HYPRE_MEMORY_HOST);
-   tptrs = hypre_TAlloc(const HYPRE_Complex***, max_components, HYPRE_MEMORY_HOST);
-   mptrs = hypre_TAlloc(HYPRE_Complex*, max_components, HYPRE_MEMORY_HOST);
+   ncomp = hypre_CTAlloc(HYPRE_Int, max_components, HYPRE_MEMORY_DEVICE);
+   cprod = hypre_TAlloc(HYPRE_Complex *, max_components, HYPRE_MEMORY_DEVICE);
+   order = hypre_TAlloc(HYPRE_Int **, max_components, HYPRE_MEMORY_DEVICE);
+   tptrs = hypre_TAlloc(const HYPRE_Complex***, max_components, HYPRE_MEMORY_DEVICE);
+   mptrs = hypre_TAlloc(HYPRE_Complex*, max_components, HYPRE_MEMORY_DEVICE);
    for (c = 0; c < max_components; c++)
    {
-      cprod[c] = hypre_CTAlloc(HYPRE_Complex, na, HYPRE_MEMORY_HOST);
-      order[c] = hypre_TAlloc(HYPRE_Int *, na, HYPRE_MEMORY_HOST);
-      tptrs[c] = hypre_TAlloc(const HYPRE_Complex **, na, HYPRE_MEMORY_HOST);
+      cprod[c] = hypre_CTAlloc(HYPRE_Complex, na, HYPRE_MEMORY_DEVICE);
+      order[c] = hypre_TAlloc(HYPRE_Int *, na, HYPRE_MEMORY_DEVICE);
+      tptrs[c] = hypre_TAlloc(const HYPRE_Complex **, na, HYPRE_MEMORY_DEVICE);
       for (t = 0; t < na; t++)
       {
-         order[c][t] = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
-         tptrs[c][t] = hypre_TAlloc(const HYPRE_Complex *, 2, HYPRE_MEMORY_HOST);
+         order[c][t] = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_DEVICE);
+         tptrs[c][t] = hypre_TAlloc(const HYPRE_Complex *, 2, HYPRE_MEMORY_DEVICE);
       }
    }
 
@@ -1558,18 +1558,18 @@ hypre_StructMatmultCompute_core_double( hypre_StructMatmultDataMH *a,
    {
       for (t = 0; t < na; t++)
       {
-         hypre_TFree(order[c][t], HYPRE_MEMORY_HOST);
-         hypre_TFree(tptrs[c][t], HYPRE_MEMORY_HOST);
+         hypre_TFree(order[c][t], HYPRE_MEMORY_DEVICE);
+         hypre_TFree(tptrs[c][t], HYPRE_MEMORY_DEVICE);
       }
-      hypre_TFree(cprod[c], HYPRE_MEMORY_HOST);
-      hypre_TFree(order[c], HYPRE_MEMORY_HOST);
-      hypre_TFree(tptrs[c], HYPRE_MEMORY_HOST);
+      hypre_TFree(cprod[c], HYPRE_MEMORY_DEVICE);
+      hypre_TFree(order[c], HYPRE_MEMORY_DEVICE);
+      hypre_TFree(tptrs[c], HYPRE_MEMORY_DEVICE);
    }
-   hypre_TFree(ncomp, HYPRE_MEMORY_HOST);
-   hypre_TFree(cprod, HYPRE_MEMORY_HOST);
-   hypre_TFree(order, HYPRE_MEMORY_HOST);
-   hypre_TFree(tptrs, HYPRE_MEMORY_HOST);
-   hypre_TFree(mptrs, HYPRE_MEMORY_HOST);
+   hypre_TFree(ncomp, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(cprod, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(order, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(tptrs, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(mptrs, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }
@@ -1607,20 +1607,20 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultDataMH *a,
    HYPRE_Int                e, c, i, k, t;
 
    /* Allocate memory */
-   ncomp = hypre_CTAlloc(HYPRE_Int, max_components, HYPRE_MEMORY_HOST);
-   cprod = hypre_TAlloc(HYPRE_Complex *, max_components, HYPRE_MEMORY_HOST);
-   order = hypre_TAlloc(HYPRE_Int **, max_components, HYPRE_MEMORY_HOST);
-   tptrs = hypre_TAlloc(const HYPRE_Complex***, max_components, HYPRE_MEMORY_HOST);
-   mptrs = hypre_TAlloc(HYPRE_Complex*, max_components, HYPRE_MEMORY_HOST);
+   ncomp = hypre_CTAlloc(HYPRE_Int, max_components, HYPRE_MEMORY_DEVICE);
+   cprod = hypre_TAlloc(HYPRE_Complex *, max_components, HYPRE_MEMORY_DEVICE);
+   order = hypre_TAlloc(HYPRE_Int **, max_components, HYPRE_MEMORY_DEVICE);
+   tptrs = hypre_TAlloc(const HYPRE_Complex***, max_components, HYPRE_MEMORY_DEVICE);
+   mptrs = hypre_TAlloc(HYPRE_Complex*, max_components, HYPRE_MEMORY_DEVICE);
    for (c = 0; c < max_components; c++)
    {
-      cprod[c] = hypre_CTAlloc(HYPRE_Complex, na, HYPRE_MEMORY_HOST);
-      order[c] = hypre_TAlloc(HYPRE_Int *, na, HYPRE_MEMORY_HOST);
-      tptrs[c] = hypre_TAlloc(const HYPRE_Complex **, na, HYPRE_MEMORY_HOST);
+      cprod[c] = hypre_CTAlloc(HYPRE_Complex, na, HYPRE_MEMORY_DEVICE);
+      order[c] = hypre_TAlloc(HYPRE_Int *, na, HYPRE_MEMORY_DEVICE);
+      tptrs[c] = hypre_TAlloc(const HYPRE_Complex **, na, HYPRE_MEMORY_DEVICE);
       for (t = 0; t < na; t++)
       {
-         order[c][t] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
-         tptrs[c][t] = hypre_TAlloc(const HYPRE_Complex *, 3, HYPRE_MEMORY_HOST);
+         order[c][t] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_DEVICE);
+         tptrs[c][t] = hypre_TAlloc(const HYPRE_Complex *, 3, HYPRE_MEMORY_DEVICE);
       }
    }
 
@@ -2136,18 +2136,18 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultDataMH *a,
    {
       for (t = 0; t < na; t++)
       {
-         hypre_TFree(order[c][t], HYPRE_MEMORY_HOST);
-         hypre_TFree(tptrs[c][t], HYPRE_MEMORY_HOST);
+         hypre_TFree(order[c][t], HYPRE_MEMORY_DEVICE);
+         hypre_TFree(tptrs[c][t], HYPRE_MEMORY_DEVICE);
       }
-      hypre_TFree(cprod[c], HYPRE_MEMORY_HOST);
-      hypre_TFree(order[c], HYPRE_MEMORY_HOST);
-      hypre_TFree(tptrs[c], HYPRE_MEMORY_HOST);
+      hypre_TFree(cprod[c], HYPRE_MEMORY_DEVICE);
+      hypre_TFree(order[c], HYPRE_MEMORY_DEVICE);
+      hypre_TFree(tptrs[c], HYPRE_MEMORY_DEVICE);
    }
-   hypre_TFree(ncomp, HYPRE_MEMORY_HOST);
-   hypre_TFree(cprod, HYPRE_MEMORY_HOST);
-   hypre_TFree(order, HYPRE_MEMORY_HOST);
-   hypre_TFree(tptrs, HYPRE_MEMORY_HOST);
-   hypre_TFree(mptrs, HYPRE_MEMORY_HOST);
+   hypre_TFree(ncomp, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(cprod, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(order, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(tptrs, HYPRE_MEMORY_DEVICE);
+   hypre_TFree(mptrs, HYPRE_MEMORY_DEVICE);
 
    return hypre_error_flag;
 }
@@ -4699,4 +4699,3 @@ hypre_StructMatrixAddMat( hypre_StructMatrix       *A,
 
    return hypre_error_flag;
 }
-

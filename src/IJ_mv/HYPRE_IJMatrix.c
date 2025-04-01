@@ -1011,7 +1011,14 @@ HYPRE_IJMatrixGetValuesAndZeroOut( HYPRE_IJMatrix matrix,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "HYPRE_IJMatrixGetValues not implemented for GPUs!");
+      /* TODO: add device implementation */
+      if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+      {
+         hypre_IJMatrixMigrateParCSR(ijmatrix, HYPRE_MEMORY_HOST);
+         hypre_IJMatrixGetValuesParCSR(ijmatrix, nrows, ncols,
+                                       rows, row_indexes, cols, values, 1);
+         hypre_IJMatrixMigrateParCSR(ijmatrix, HYPRE_MEMORY_DEVICE);
+      }
    }
    else
 #endif
@@ -1028,7 +1035,6 @@ HYPRE_IJMatrixGetValuesAndZeroOut( HYPRE_IJMatrix matrix,
    }
 
    return hypre_error_flag;
-
 }
 
 /*--------------------------------------------------------------------------

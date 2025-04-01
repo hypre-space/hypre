@@ -71,6 +71,7 @@ target_sources(${PROJECT_NAME}
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
     cyclic_reduction.c
+    jacobi.c
     HYPRE_struct_int.c
     HYPRE_struct_pcg.c
     pfmg2_setup_rap.c
