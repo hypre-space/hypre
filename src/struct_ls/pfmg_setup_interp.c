@@ -458,7 +458,9 @@ hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
    if (constant)
    {
       /* Off-diagonal entries are constant */
-      hypre_TMemcpy(hypre_StructMatrixConstData(P, 1), &half, HYPRE_Complex, 2,
+      hypre_TMemcpy(hypre_StructMatrixConstData(P, 1), &half, HYPRE_Complex, 1,
+                    memory_location, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(hypre_StructMatrixConstData(P, 2), &half, HYPRE_Complex, 1,
                     memory_location, HYPRE_MEMORY_HOST);
    }
    else
