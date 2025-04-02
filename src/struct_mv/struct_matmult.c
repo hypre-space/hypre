@@ -1407,14 +1407,14 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
             break;
 
          case 3:
-            //hypre_StructMatmultCompute_core_triple(a, na, ndim, loop_size, stencil_size,
-            //                                       fdbox, fdstart, fdstride,
-            //                                       cdbox, cdstart, cdstride,
-            //                                       Mdbox, Mdstart, Mdstride);
-            hypre_StructMatmultCompute_fuse_triple(a, na, ndim, loop_size, stencil_size,
+            hypre_StructMatmultCompute_core_triple(a, na, ndim, loop_size, stencil_size,
                                                    fdbox, fdstart, fdstride,
                                                    cdbox, cdstart, cdstride,
                                                    Mdbox, Mdstart, Mdstride);
+            //hypre_StructMatmultCompute_fuse_triple(a, na, ndim, loop_size, stencil_size,
+            //                                       fdbox, fdstart, fdstride,
+            //                                       cdbox, cdstart, cdstride,
+            //                                       Mdbox, Mdstart, Mdstride);
             break;
 
          default:
@@ -1461,7 +1461,7 @@ hypre_StructMatmultCompute_core_double( hypre_StructMatmultDataMH *a,
    HYPRE_Complex          **mptrs;
 
    HYPRE_Int                max_components = 10;
-   HYPRE_Int                mentry;
+   HYPRE_Int                mentry, comptype, nf, nc;
    HYPRE_Int                e, c, i, k, t;
 
    /* Allocate memory */
@@ -1499,115 +1499,49 @@ hypre_StructMatmultCompute_core_double( hypre_StructMatmultDataMH *a,
             continue;
          }
 
-         if ( a[i].types[0] == 0 &&
-              a[i].types[1] == 0 )
+         nf = nc = 0;
+         for (t = 0; t < 2; t++)
          {
-            /* VCF * VCF */
-            k = ncomp[0];
-            cprod[0][k]    = a[i].cprod;
-            tptrs[0][k][0] = a[i].tptrs[0];
-            tptrs[0][k][1] = a[i].tptrs[1];
-            mptrs[0]       = a[i].mptr;
-            ncomp[0]++;
+            if (a[i].types[t] == 1)
+            {
+               /* Type 1 -> coarse data space */
+               nc++;
+            }
+            else
+            {
+               /* Type 0 or 2 -> fine data space */
+               nf++;
+            }
          }
-         else if ( a[i].types[0] == 0 &&
-                   a[i].types[1] == 1 )
+         switch (nc)
          {
-            /* VCF * VCC */
-            k = ncomp[1];
-            cprod[1][k]    = a[i].cprod;
-            order[1][k][0] = 0;
-            order[1][k][1] = 1;
-            tptrs[1][k][0] = a[i].tptrs[0];
-            tptrs[1][k][1] = a[i].tptrs[1];
-            mptrs[1]       = a[i].mptr;
-            ncomp[1]++;
+            case 0: /* ff term (call core_1d) */
+               comptype = 0;
+               break;
+            case 1: /* cf term (call core_2db) */
+               comptype = 4;
+               break;
          }
-         else if ( a[i].types[0] == 0 &&
-                   a[i].types[1] == 2 )
+         k = ncomp[comptype];
+         cprod[comptype][k] = a[i].cprod;
+         nf = nc = 0;
+         for (t = 0; t < 2; t++)
          {
-            /* VCF * CCF */
-            k = ncomp[2];
-            cprod[2][k]    = a[i].cprod;
-            order[2][k][0] = 0;
-            order[2][k][1] = 1;
-            tptrs[2][k][0] = a[i].tptrs[0];
-            tptrs[2][k][1] = a[i].tptrs[1];
-            mptrs[2]       = a[i].mptr;
-            ncomp[2]++;
+            if (a[i].types[t] == 1)
+            {
+               /* Type 1 -> coarse data space */
+               tptrs[comptype][k][nc] = a[i].tptrs[t];  /* put first */
+               nc++;
+            }
+            else
+            {
+               /* Type 0 or 2 -> fine data space */
+               tptrs[comptype][k][1 - nf] = a[i].tptrs[t];  /* put last */
+               nf++;
+            }
          }
-         else if ( a[i].types[0] == 1 &&
-                   a[i].types[1] == 0 )
-         {
-            /* VCC * VCF */
-            k = ncomp[1];
-            cprod[1][k]    = a[i].cprod;
-            tptrs[1][k][0] = a[i].tptrs[1];
-            tptrs[1][k][1] = a[i].tptrs[0];
-            mptrs[1]       = a[i].mptr;
-            ncomp[1]++;
-         }
-         else if ( a[i].types[0] == 1 &&
-                   a[i].types[1] == 1 )
-         {
-            /* VCC * VCC */
-            k = ncomp[3];
-            cprod[3][k]    = a[i].cprod;
-            tptrs[3][k][0] = a[i].tptrs[0];
-            tptrs[3][k][1] = a[i].tptrs[1];
-            mptrs[3]       = a[i].mptr;
-            ncomp[3]++;
-         }
-         else if ( a[i].types[0] == 1 &&
-                   a[i].types[1] == 2 )
-         {
-            /* VCC * CCF */
-            k = ncomp[4];
-            cprod[4][k]    = a[i].cprod;
-            order[4][k][0] = 0;
-            order[4][k][1] = 1;
-            tptrs[4][k][0] = a[i].tptrs[0];
-            tptrs[4][k][1] = a[i].tptrs[1];
-            mptrs[4]       = a[i].mptr;
-            ncomp[4]++;
-         }
-         else if ( a[i].types[0] == 2 &&
-                   a[i].types[1] == 0 )
-         {
-            /* CCF * VCF */
-            k = ncomp[2];
-            cprod[2][k]    = a[i].cprod;
-            order[2][k][0] = 1;
-            order[2][k][1] = 0;
-            tptrs[2][k][0] = a[i].tptrs[1];
-            tptrs[2][k][1] = a[i].tptrs[0];
-            mptrs[2]       = a[i].mptr;
-            ncomp[2]++;
-         }
-         else if ( a[i].types[0] == 2 &&
-                   a[i].types[1] == 1 )
-         {
-            /* CCF * VCC */
-            k = ncomp[4];
-            cprod[4][k]    = a[i].cprod;
-            order[4][k][0] = 1;
-            order[4][k][1] = 0;
-            tptrs[4][k][0] = a[i].tptrs[1];
-            tptrs[4][k][1] = a[i].tptrs[0];
-            mptrs[4]       = a[i].mptr;
-            ncomp[4]++;
-         }
-         else if ( a[i].types[0] == 2 &&
-                   a[i].types[1] == 2 )
-         {
-            /* CCF * CCF */
-            k = ncomp[5];
-            cprod[5][k]    = a[i].cprod;
-            tptrs[5][k][0] = a[i].tptrs[0];
-            tptrs[5][k][1] = a[i].tptrs[1];
-            mptrs[5]       = a[i].mptr;
-            ncomp[5]++;
-         }
+         mptrs[comptype] = a[i].mptr;
+         ncomp[comptype]++;
       }
 
       /* Call core functions */
@@ -1617,24 +1551,27 @@ hypre_StructMatmultCompute_core_double( hypre_StructMatmultDataMH *a,
                                          fdbox, fdstart, fdstride,
                                          Mdbox, Mdstart, Mdstride);
 
-      hypre_StructMatmultCompute_core_2d(a, ncomp[1], cprod[1],
-                                         tptrs[1], mptrs[1],
-                                         ndim, loop_size,
-                                         fdbox, fdstart, fdstride,
-                                         cdbox, cdstart, cdstride,
-                                         Mdbox, Mdstart, Mdstride);
+      // // Map ncomp[1] to ncomp[0]
+      // hypre_StructMatmultCompute_core_2d(a, ncomp[1], cprod[1],
+      //                                    tptrs[1], mptrs[1],
+      //                                    ndim, loop_size,
+      //                                    fdbox, fdstart, fdstride,
+      //                                    cdbox, cdstart, cdstride,
+      //                                    Mdbox, Mdstart, Mdstride);
 
-      hypre_StructMatmultCompute_core_1db(a, ncomp[2], order[2],
-                                          cprod[2], tptrs[2],
-                                          mptrs[2], ndim, loop_size,
-                                          fdbox, fdstart, fdstride,
-                                          Mdbox, Mdstart, Mdstride);
+      // // Map ncomp[2] to ncomp[0]
+      // hypre_StructMatmultCompute_core_1db(a, ncomp[2], order[2],
+      //                                     cprod[2], tptrs[2],
+      //                                     mptrs[2], ndim, loop_size,
+      //                                     fdbox, fdstart, fdstride,
+      //                                     Mdbox, Mdstart, Mdstride);
 
-      hypre_StructMatmultCompute_core_1d(a, ncomp[3], cprod[3],
-                                         tptrs[3], mptrs[3],
-                                         ndim, loop_size,
-                                         cdbox, cdstart, cdstride,
-                                         Mdbox, Mdstart, Mdstride);
+      // // RDF: This requires fstride = cstride so it can't happen
+      // hypre_StructMatmultCompute_core_1d(a, ncomp[3], cprod[3],
+      //                                    tptrs[3], mptrs[3],
+      //                                    ndim, loop_size,
+      //                                    cdbox, cdstart, cdstride,
+      //                                    Mdbox, Mdstart, Mdstride);
 
       hypre_StructMatmultCompute_core_2db(a, ncomp[4], order[4],
                                           cprod[4], tptrs[4],
@@ -1643,11 +1580,12 @@ hypre_StructMatmultCompute_core_double( hypre_StructMatmultDataMH *a,
                                           cdbox, cdstart, cdstride,
                                           Mdbox, Mdstart, Mdstride);
 
-      hypre_StructMatmultCompute_core_1dbb(a, ncomp[5], cprod[5],
-                                           tptrs[5], mptrs[5],
-                                           ndim, loop_size,
-                                           fdbox, fdstart, fdstride,
-                                           Mdbox, Mdstart, Mdstride);
+      // // Map ncomp[5] to ncomp[0]
+      // hypre_StructMatmultCompute_core_1dbb(a, ncomp[5], cprod[5],
+      //                                      tptrs[5], mptrs[5],
+      //                                      ndim, loop_size,
+      //                                      fdbox, fdstart, fdstride,
+      //                                      Mdbox, Mdstart, Mdstride);
    } /* loop on M stencil entries */
 
    /* Free memory */
@@ -1791,12 +1729,12 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultDataMH *a,
                                          fdbox, fdstart, fdstride,
                                          Mdbox, Mdstart, Mdstride);
 
-      //// RDF: This requires fstride = cstride so it can't happen
-      //hypre_StructMatmultCompute_core_1t(a, ncomp[1], cprod[1],
-      //                                   tptrs[1], mptrs[1],
-      //                                   ndim, loop_size,
-      //                                   cdbox, cdstart, cdstride,
-      //                                   Mdbox, Mdstart, Mdstride);
+      // // RDF: This requires fstride = cstride so it can't happen
+      // hypre_StructMatmultCompute_core_1t(a, ncomp[1], cprod[1],
+      //                                    tptrs[1], mptrs[1],
+      //                                    ndim, loop_size,
+      //                                    cdbox, cdstart, cdstride,
+      //                                    Mdbox, Mdstart, Mdstride);
 
       // // Map ncomp[2] to ncomp[0]
       // hypre_StructMatmultCompute_core_1tb(a, ncomp[2], order[2],
