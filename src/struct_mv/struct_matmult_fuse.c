@@ -1604,7 +1604,7 @@ hypre_StructMatmultCompute_fuse_triple( hypre_StructMatmultDataMH *a,
                                         fdbox, fdstart, fdstride,
                                         cdbox, cdstart, cdstride,
                                         Mdbox, Mdstart, Mdstride);
-   
+
    hypre_StructMatmultCompute_fuse_1fcc(nprod[2], cprod[2], tptrs[2], mptrs[2],
                                         ndim, loop_size,
                                         fdbox, fdstart, fdstride,
