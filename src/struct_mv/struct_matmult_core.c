@@ -9,11 +9,6 @@
  *
  * Structured matrix-matrix multiply kernel functions
  *
- * Nomenclature used in the kernel functions:
- *   1) VCC stands for "Variable Coefficient on Coarse data space".
- *   2) VCF stands for "Variable Coefficient on Fine data space".
- *   3) CCF stands for "Constant Coefficient on Fine data space".
- *
  *****************************************************************************/
 
 #include "_hypre_struct_mv.h"
@@ -32,60 +27,52 @@
 
 /*--------------------------------------------------------------------------
  * Macros used in the kernel loops below
+ *
+ * F/C means fine/coarse data space.  For example, CFF means the data spaces for
+ * the three terms are respectively coarse, fine, and fine.
  *--------------------------------------------------------------------------*/
 
-#define HYPRE_SMMCORE_1D(k) \
+#define HYPRE_SMMCORE_FF(k) \
    cprod[k]*                \
-   tptrs[k][0][gi]*         \
-   tptrs[k][1][gi]
+   tptrs[k][0][fi]*         \
+   tptrs[k][1][fi]
 
-#define HYPRE_SMMCORE_2DB(k) \
+#define HYPRE_SMMCORE_CF(k) \
+    cprod[k]*               \
+    tptrs[k][0][ci]*        \
+    tptrs[k][1][fi]
+
+#define HYPRE_SMMCORE_FFF(k) \
+   cprod[k]*                 \
+   tptrs[k][0][fi]*          \
+   tptrs[k][1][fi]*          \
+   tptrs[k][2][fi]
+
+#define HYPRE_SMMCORE_CFF(k) \
     cprod[k]*                \
-    tptrs[k][0][hi]*         \
-    tptrs[k][1][gi]
+    tptrs[k][0][ci]*         \
+    tptrs[k][1][fi]*         \
+    tptrs[k][2][fi]
 
-#define HYPRE_SMMCORE_1T(k) \
-   cprod[k]*                \
-   tptrs[k][0][gi]*         \
-   tptrs[k][1][gi]*         \
-   tptrs[k][2][gi]
-
-#define HYPRE_SMMCORE_2ETB(k) \
-    cprod[k]*                 \
-    tptrs[k][0][hi]*          \
-    tptrs[k][1][hi]*          \
-    tptrs[k][2][gi]
-
-#define HYPRE_SMMCORE_2TBB(k) \
-    cprod[k]*                 \
-    tptrs[k][0][hi]*          \
-    tptrs[k][1][gi]*          \
-    tptrs[k][2][gi]
+#define HYPRE_SMMCORE_CCF(k) \
+    cprod[k]*                \
+    tptrs[k][0][ci]*         \
+    tptrs[k][1][ci]*         \
+    tptrs[k][2][fi]
 
 /*--------------------------------------------------------------------------
- * Core function for computing the double-product of variable coefficients
- * living on the same data space.
- *
- * "1d" means:
- *   "1": single data space.
- *   "d": double-product.
- *
- * This can be used for the scenarios:
- *   1) VCF * VCF.
- *   2) VCC * VCC.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultCompute_core_1d( hypre_StructMatmultDataMH *a,
-                                    HYPRE_Int                  ncomponents,
+hypre_StructMatmultCompute_core_ff( HYPRE_Int                  ncomponents,
                                     HYPRE_Complex             *cprod,
                                     const HYPRE_Complex     ***tptrs,
                                     HYPRE_Complex             *mptr,
                                     HYPRE_Int                  ndim,
                                     hypre_Index                loop_size,
-                                    hypre_Box                 *gdbox,
-                                    hypre_Index                gdstart,
-                                    hypre_Index                gdstride,
+                                    hypre_Box                 *fdbox,
+                                    hypre_Index                fdstart,
+                                    hypre_Index                fdstride,
                                     hypre_Box                 *Mdbox,
                                     hypre_Index                Mdstart,
                                     hypre_Index                Mdstride )
@@ -109,121 +96,121 @@ hypre_StructMatmultCompute_core_1d( hypre_StructMatmultDataMH *a,
          case 8:
             hypre_BoxLoop2Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi);
+                                fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_1D(k + 0) +
-                                   HYPRE_SMMCORE_1D(k + 1) +
-                                   HYPRE_SMMCORE_1D(k + 2) +
-                                   HYPRE_SMMCORE_1D(k + 3) +
-                                   HYPRE_SMMCORE_1D(k + 4) +
-                                   HYPRE_SMMCORE_1D(k + 5) +
-                                   HYPRE_SMMCORE_1D(k + 6) +
-                                   HYPRE_SMMCORE_1D(k + 7);
+               HYPRE_Complex val = HYPRE_SMMCORE_FF(k + 0) +
+                                   HYPRE_SMMCORE_FF(k + 1) +
+                                   HYPRE_SMMCORE_FF(k + 2) +
+                                   HYPRE_SMMCORE_FF(k + 3) +
+                                   HYPRE_SMMCORE_FF(k + 4) +
+                                   HYPRE_SMMCORE_FF(k + 5) +
+                                   HYPRE_SMMCORE_FF(k + 6) +
+                                   HYPRE_SMMCORE_FF(k + 7);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi, gi);
+            hypre_BoxLoop2End(Mi, fi);
             break;
 
          case 7:
             hypre_BoxLoop2Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi);
+                                fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_1D(k + 0) +
-                                   HYPRE_SMMCORE_1D(k + 1) +
-                                   HYPRE_SMMCORE_1D(k + 2) +
-                                   HYPRE_SMMCORE_1D(k + 3) +
-                                   HYPRE_SMMCORE_1D(k + 4) +
-                                   HYPRE_SMMCORE_1D(k + 5) +
-                                   HYPRE_SMMCORE_1D(k + 6);
+               HYPRE_Complex val = HYPRE_SMMCORE_FF(k + 0) +
+                                   HYPRE_SMMCORE_FF(k + 1) +
+                                   HYPRE_SMMCORE_FF(k + 2) +
+                                   HYPRE_SMMCORE_FF(k + 3) +
+                                   HYPRE_SMMCORE_FF(k + 4) +
+                                   HYPRE_SMMCORE_FF(k + 5) +
+                                   HYPRE_SMMCORE_FF(k + 6);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi, gi);
+            hypre_BoxLoop2End(Mi, fi);
             break;
 
          case 6:
             hypre_BoxLoop2Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi);
+                                fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_1D(k + 0) +
-                                   HYPRE_SMMCORE_1D(k + 1) +
-                                   HYPRE_SMMCORE_1D(k + 2) +
-                                   HYPRE_SMMCORE_1D(k + 3) +
-                                   HYPRE_SMMCORE_1D(k + 4) +
-                                   HYPRE_SMMCORE_1D(k + 5);
+               HYPRE_Complex val = HYPRE_SMMCORE_FF(k + 0) +
+                                   HYPRE_SMMCORE_FF(k + 1) +
+                                   HYPRE_SMMCORE_FF(k + 2) +
+                                   HYPRE_SMMCORE_FF(k + 3) +
+                                   HYPRE_SMMCORE_FF(k + 4) +
+                                   HYPRE_SMMCORE_FF(k + 5);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi, gi);
+            hypre_BoxLoop2End(Mi, fi);
             break;
 
          case 5:
             hypre_BoxLoop2Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi);
+                                fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_1D(k + 0) +
-                                   HYPRE_SMMCORE_1D(k + 1) +
-                                   HYPRE_SMMCORE_1D(k + 2) +
-                                   HYPRE_SMMCORE_1D(k + 3) +
-                                   HYPRE_SMMCORE_1D(k + 4);
+               HYPRE_Complex val = HYPRE_SMMCORE_FF(k + 0) +
+                                   HYPRE_SMMCORE_FF(k + 1) +
+                                   HYPRE_SMMCORE_FF(k + 2) +
+                                   HYPRE_SMMCORE_FF(k + 3) +
+                                   HYPRE_SMMCORE_FF(k + 4);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi, gi);
+            hypre_BoxLoop2End(Mi, fi);
             break;
 
          case 4:
             hypre_BoxLoop2Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi);
+                                fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_1D(k + 0) +
-                                   HYPRE_SMMCORE_1D(k + 1) +
-                                   HYPRE_SMMCORE_1D(k + 2) +
-                                   HYPRE_SMMCORE_1D(k + 3);
+               HYPRE_Complex val = HYPRE_SMMCORE_FF(k + 0) +
+                                   HYPRE_SMMCORE_FF(k + 1) +
+                                   HYPRE_SMMCORE_FF(k + 2) +
+                                   HYPRE_SMMCORE_FF(k + 3);
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi, gi);
+            hypre_BoxLoop2End(Mi, fi);
             break;
 
          case 3:
             hypre_BoxLoop2Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi);
+                                fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_1D(k + 0) +
-                                   HYPRE_SMMCORE_1D(k + 1) +
-                                   HYPRE_SMMCORE_1D(k + 2);
+               HYPRE_Complex val = HYPRE_SMMCORE_FF(k + 0) +
+                                   HYPRE_SMMCORE_FF(k + 1) +
+                                   HYPRE_SMMCORE_FF(k + 2);
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi, gi);
+            hypre_BoxLoop2End(Mi, fi);
             break;
 
          case 2:
             hypre_BoxLoop2Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi);
+                                fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_1D(k + 0) +
-                                   HYPRE_SMMCORE_1D(k + 1);
+               HYPRE_Complex val = HYPRE_SMMCORE_FF(k + 0) +
+                                   HYPRE_SMMCORE_FF(k + 1);
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi, gi);
+            hypre_BoxLoop2End(Mi, fi);
             break;
 
          case 1:
             hypre_BoxLoop2Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi);
+                                fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_1D(k + 0);
+               HYPRE_Complex val = HYPRE_SMMCORE_FF(k + 0);
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop2End(Mi, gi);
+            hypre_BoxLoop2End(Mi, fi);
             break;
 
          default:
@@ -240,34 +227,347 @@ hypre_StructMatmultCompute_core_1d( hypre_StructMatmultDataMH *a,
 }
 
 /*--------------------------------------------------------------------------
- * Core function for computing the product of two coefficients living on
- * different data spaces. The second coefficients requires usage of a bitmask
- *
- * "2db" means:
- *   "2": two data spaces.
- *   "d": double-product.
- *   "b": single bitmask.
- *
- * This can be used for the scenarios:
- *   1) VCC * CCF.
- *   2) CCF * VCC.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultCompute_core_2db( hypre_StructMatmultDataMH *a,
-                                     HYPRE_Int                  ncomponents,
+hypre_StructMatmultCompute_core_cf( HYPRE_Int                  ncomponents,
+                                    HYPRE_Int                **order,
+                                    HYPRE_Complex             *cprod,
+                                    const HYPRE_Complex     ***tptrs,
+                                    HYPRE_Complex             *mptr,
+                                    HYPRE_Int                  ndim,
+                                    hypre_Index                loop_size,
+                                    hypre_Box                 *fdbox,
+                                    hypre_Index                fdstart,
+                                    hypre_Index                fdstride,
+                                    hypre_Box                 *cdbox,
+                                    hypre_Index                cdstart,
+                                    hypre_Index                cdstride,
+                                    hypre_Box                 *Mdbox,
+                                    hypre_Index                Mdstart,
+                                    hypre_Index                Mdstride )
+{
+   HYPRE_Int     k;
+   HYPRE_Int     depth;
+
+   if (ncomponents < 1)
+   {
+      return hypre_error_flag;
+   }
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   for (k = 0; k < ncomponents; k += HYPRE_UNROLL_MAXDEPTH)
+   {
+      depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (ncomponents - k));
+
+      switch (depth)
+      {
+         case 7:
+            hypre_BoxLoop3Begin(ndim, loop_size,
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
+            {
+               HYPRE_Complex val = HYPRE_SMMCORE_CF(k + 0) +
+                                   HYPRE_SMMCORE_CF(k + 1) +
+                                   HYPRE_SMMCORE_CF(k + 2) +
+                                   HYPRE_SMMCORE_CF(k + 3) +
+                                   HYPRE_SMMCORE_CF(k + 4) +
+                                   HYPRE_SMMCORE_CF(k + 5) +
+                                   HYPRE_SMMCORE_CF(k + 6);
+               mptr[Mi] += val;
+            }
+            hypre_BoxLoop3End(Mi, fi, ci);
+            break;
+
+         case 6:
+            hypre_BoxLoop3Begin(ndim, loop_size,
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
+            {
+               HYPRE_Complex val = HYPRE_SMMCORE_CF(k + 0) +
+                                   HYPRE_SMMCORE_CF(k + 1) +
+                                   HYPRE_SMMCORE_CF(k + 2) +
+                                   HYPRE_SMMCORE_CF(k + 3) +
+                                   HYPRE_SMMCORE_CF(k + 4) +
+                                   HYPRE_SMMCORE_CF(k + 5);
+               mptr[Mi] += val;
+            }
+            hypre_BoxLoop3End(Mi, fi, ci);
+            break;
+
+         case 5:
+            hypre_BoxLoop3Begin(ndim, loop_size,
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
+            {
+               HYPRE_Complex val = HYPRE_SMMCORE_CF(k + 0) +
+                                   HYPRE_SMMCORE_CF(k + 1) +
+                                   HYPRE_SMMCORE_CF(k + 2) +
+                                   HYPRE_SMMCORE_CF(k + 3) +
+                                   HYPRE_SMMCORE_CF(k + 4);
+               mptr[Mi] += val;
+            }
+            hypre_BoxLoop3End(Mi, fi, ci);
+            break;
+
+         case 4:
+            hypre_BoxLoop3Begin(ndim, loop_size,
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
+            {
+               HYPRE_Complex val = HYPRE_SMMCORE_CF(k + 0) +
+                                   HYPRE_SMMCORE_CF(k + 1) +
+                                   HYPRE_SMMCORE_CF(k + 2) +
+                                   HYPRE_SMMCORE_CF(k + 3);
+
+               mptr[Mi] += val;
+            }
+            hypre_BoxLoop3End(Mi, fi, ci);
+            break;
+
+         case 3:
+            hypre_BoxLoop3Begin(ndim, loop_size,
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
+            {
+               HYPRE_Complex val = HYPRE_SMMCORE_CF(k + 0) +
+                                   HYPRE_SMMCORE_CF(k + 1) +
+                                   HYPRE_SMMCORE_CF(k + 2);
+
+               mptr[Mi] += val;
+            }
+            hypre_BoxLoop3End(Mi, fi, ci);
+            break;
+
+         case 2:
+            hypre_BoxLoop3Begin(ndim, loop_size,
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
+            {
+               HYPRE_Complex val = HYPRE_SMMCORE_CF(k + 0) +
+                                   HYPRE_SMMCORE_CF(k + 1);
+
+               mptr[Mi] += val;
+            }
+            hypre_BoxLoop3End(Mi, fi, ci);
+            break;
+
+         case 1:
+            hypre_BoxLoop3Begin(ndim, loop_size,
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
+            {
+               HYPRE_Complex val = HYPRE_SMMCORE_CF(k + 0);
+
+               mptr[Mi] += val;
+            }
+            hypre_BoxLoop3End(Mi, fi, ci);
+            break;
+
+         default:
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported depth of loop unrolling!");
+
+            HYPRE_ANNOTATE_FUNC_END;
+            return hypre_error_flag;
+      }
+   }
+
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_fff( HYPRE_Int                  ncomponents,
+                                     HYPRE_Complex             *cprod,
+                                     const HYPRE_Complex     ***tptrs,
+                                     HYPRE_Complex             *mptr,
+                                     HYPRE_Int                  ndim,
+                                     hypre_Index                loop_size,
+                                     hypre_Box                 *fdbox,
+                                     hypre_Index                fdstart,
+                                     hypre_Index                fdstride,
+                                     hypre_Box                 *Mdbox,
+                                     hypre_Index                Mdstart,
+                                     hypre_Index                Mdstride )
+{
+   HYPRE_Int     k;
+   HYPRE_Int     depth;
+
+   if (ncomponents < 1)
+   {
+      return hypre_error_flag;
+   }
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   for (k = 0; k < ncomponents; k += HYPRE_UNROLL_MAXDEPTH)
+   {
+      depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (ncomponents - k));
+
+      switch (depth)
+      {
+         case 8:
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                fdbox, fdstart, fdstride, fi);
+            {
+               HYPRE_Complex val = HYPRE_SMMCORE_FFF(k + 0) +
+                                   HYPRE_SMMCORE_FFF(k + 1) +
+                                   HYPRE_SMMCORE_FFF(k + 2) +
+                                   HYPRE_SMMCORE_FFF(k + 3) +
+                                   HYPRE_SMMCORE_FFF(k + 4) +
+                                   HYPRE_SMMCORE_FFF(k + 5) +
+                                   HYPRE_SMMCORE_FFF(k + 6) +
+                                   HYPRE_SMMCORE_FFF(k + 7);
+               mptr[Mi] += val;
+            }
+            hypre_BoxLoop2End(Mi, fi);
+            break;
+
+         case 7:
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                fdbox, fdstart, fdstride, fi);
+            {
+               HYPRE_Complex val = HYPRE_SMMCORE_FFF(k + 0) +
+                                   HYPRE_SMMCORE_FFF(k + 1) +
+                                   HYPRE_SMMCORE_FFF(k + 2) +
+                                   HYPRE_SMMCORE_FFF(k + 3) +
+                                   HYPRE_SMMCORE_FFF(k + 4) +
+                                   HYPRE_SMMCORE_FFF(k + 5) +
+                                   HYPRE_SMMCORE_FFF(k + 6);
+               mptr[Mi] += val;
+            }
+            hypre_BoxLoop2End(Mi, fi);
+            break;
+
+         case 6:
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                fdbox, fdstart, fdstride, fi);
+            {
+               HYPRE_Complex val = HYPRE_SMMCORE_FFF(k + 0) +
+                                   HYPRE_SMMCORE_FFF(k + 1) +
+                                   HYPRE_SMMCORE_FFF(k + 2) +
+                                   HYPRE_SMMCORE_FFF(k + 3) +
+                                   HYPRE_SMMCORE_FFF(k + 4) +
+                                   HYPRE_SMMCORE_FFF(k + 5);
+               mptr[Mi] += val;
+            }
+            hypre_BoxLoop2End(Mi, fi);
+            break;
+
+         case 5:
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                fdbox, fdstart, fdstride, fi);
+            {
+               HYPRE_Complex val = HYPRE_SMMCORE_FFF(k + 0) +
+                                   HYPRE_SMMCORE_FFF(k + 1) +
+                                   HYPRE_SMMCORE_FFF(k + 2) +
+                                   HYPRE_SMMCORE_FFF(k + 3) +
+                                   HYPRE_SMMCORE_FFF(k + 4);
+               mptr[Mi] += val;
+            }
+            hypre_BoxLoop2End(Mi, fi);
+            break;
+
+         case 4:
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                fdbox, fdstart, fdstride, fi);
+            {
+               HYPRE_Complex val = HYPRE_SMMCORE_FFF(k + 0) +
+                                   HYPRE_SMMCORE_FFF(k + 1) +
+                                   HYPRE_SMMCORE_FFF(k + 2) +
+                                   HYPRE_SMMCORE_FFF(k + 3);
+
+               mptr[Mi] += val;
+            }
+            hypre_BoxLoop2End(Mi, fi);
+            break;
+
+         case 3:
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                fdbox, fdstart, fdstride, fi);
+            {
+               HYPRE_Complex val = HYPRE_SMMCORE_FFF(k + 0) +
+                                   HYPRE_SMMCORE_FFF(k + 1) +
+                                   HYPRE_SMMCORE_FFF(k + 2);
+
+               mptr[Mi] += val;
+            }
+            hypre_BoxLoop2End(Mi, fi);
+            break;
+
+         case 2:
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                fdbox, fdstart, fdstride, fi);
+            {
+               HYPRE_Complex val = HYPRE_SMMCORE_FFF(k + 0) +
+                                   HYPRE_SMMCORE_FFF(k + 1);
+
+               mptr[Mi] += val;
+            }
+            hypre_BoxLoop2End(Mi, fi);
+            break;
+
+         case 1:
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                Mdbox, Mdstart, Mdstride, Mi,
+                                fdbox, fdstart, fdstride, fi);
+            {
+               HYPRE_Complex val = HYPRE_SMMCORE_FFF(k + 0);
+
+               mptr[Mi] += val;
+            }
+            hypre_BoxLoop2End(Mi, fi);
+            break;
+
+         default:
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported depth of loop unrolling!");
+
+            HYPRE_ANNOTATE_FUNC_END;
+            return hypre_error_flag;
+      }
+   }
+
+   HYPRE_ANNOTATE_FUNC_END;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatmultCompute_core_cff( HYPRE_Int                  ncomponents,
                                      HYPRE_Int                **order,
                                      HYPRE_Complex             *cprod,
                                      const HYPRE_Complex     ***tptrs,
                                      HYPRE_Complex             *mptr,
                                      HYPRE_Int                  ndim,
                                      hypre_Index                loop_size,
-                                     hypre_Box                 *gdbox,
-                                     hypre_Index                gdstart,
-                                     hypre_Index                gdstride,
-                                     hypre_Box                 *hdbox,
-                                     hypre_Index                hdstart,
-                                     hypre_Index                hdstride,
+                                     hypre_Box                 *fdbox,
+                                     hypre_Index                fdstart,
+                                     hypre_Index                fdstride,
+                                     hypre_Box                 *cdbox,
+                                     hypre_Index                cdstart,
+                                     hypre_Index                cdstride,
                                      hypre_Box                 *Mdbox,
                                      hypre_Index                Mdstart,
                                      hypre_Index                Mdstride )
@@ -291,110 +591,110 @@ hypre_StructMatmultCompute_core_2db( hypre_StructMatmultDataMH *a,
          case 7:
             hypre_BoxLoop3Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2DB(k + 0) +
-                                   HYPRE_SMMCORE_2DB(k + 1) +
-                                   HYPRE_SMMCORE_2DB(k + 2) +
-                                   HYPRE_SMMCORE_2DB(k + 3) +
-                                   HYPRE_SMMCORE_2DB(k + 4) +
-                                   HYPRE_SMMCORE_2DB(k + 5) +
-                                   HYPRE_SMMCORE_2DB(k + 6);
+               HYPRE_Complex val = HYPRE_SMMCORE_CFF(k + 0) +
+                                   HYPRE_SMMCORE_CFF(k + 1) +
+                                   HYPRE_SMMCORE_CFF(k + 2) +
+                                   HYPRE_SMMCORE_CFF(k + 3) +
+                                   HYPRE_SMMCORE_CFF(k + 4) +
+                                   HYPRE_SMMCORE_CFF(k + 5) +
+                                   HYPRE_SMMCORE_CFF(k + 6);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop3End(Mi, fi, ci);
             break;
 
          case 6:
             hypre_BoxLoop3Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2DB(k + 0) +
-                                   HYPRE_SMMCORE_2DB(k + 1) +
-                                   HYPRE_SMMCORE_2DB(k + 2) +
-                                   HYPRE_SMMCORE_2DB(k + 3) +
-                                   HYPRE_SMMCORE_2DB(k + 4) +
-                                   HYPRE_SMMCORE_2DB(k + 5);
+               HYPRE_Complex val = HYPRE_SMMCORE_CFF(k + 0) +
+                                   HYPRE_SMMCORE_CFF(k + 1) +
+                                   HYPRE_SMMCORE_CFF(k + 2) +
+                                   HYPRE_SMMCORE_CFF(k + 3) +
+                                   HYPRE_SMMCORE_CFF(k + 4) +
+                                   HYPRE_SMMCORE_CFF(k + 5);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop3End(Mi, fi, ci);
             break;
 
          case 5:
             hypre_BoxLoop3Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2DB(k + 0) +
-                                   HYPRE_SMMCORE_2DB(k + 1) +
-                                   HYPRE_SMMCORE_2DB(k + 2) +
-                                   HYPRE_SMMCORE_2DB(k + 3) +
-                                   HYPRE_SMMCORE_2DB(k + 4);
+               HYPRE_Complex val = HYPRE_SMMCORE_CFF(k + 0) +
+                                   HYPRE_SMMCORE_CFF(k + 1) +
+                                   HYPRE_SMMCORE_CFF(k + 2) +
+                                   HYPRE_SMMCORE_CFF(k + 3) +
+                                   HYPRE_SMMCORE_CFF(k + 4);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop3End(Mi, fi, ci);
             break;
 
          case 4:
             hypre_BoxLoop3Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2DB(k + 0) +
-                                   HYPRE_SMMCORE_2DB(k + 1) +
-                                   HYPRE_SMMCORE_2DB(k + 2) +
-                                   HYPRE_SMMCORE_2DB(k + 3);
+               HYPRE_Complex val = HYPRE_SMMCORE_CFF(k + 0) +
+                                   HYPRE_SMMCORE_CFF(k + 1) +
+                                   HYPRE_SMMCORE_CFF(k + 2) +
+                                   HYPRE_SMMCORE_CFF(k + 3);
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop3End(Mi, fi, ci);
             break;
 
          case 3:
             hypre_BoxLoop3Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2DB(k + 0) +
-                                   HYPRE_SMMCORE_2DB(k + 1) +
-                                   HYPRE_SMMCORE_2DB(k + 2);
+               HYPRE_Complex val = HYPRE_SMMCORE_CFF(k + 0) +
+                                   HYPRE_SMMCORE_CFF(k + 1) +
+                                   HYPRE_SMMCORE_CFF(k + 2);
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop3End(Mi, fi, ci);
             break;
 
          case 2:
             hypre_BoxLoop3Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2DB(k + 0) +
-                                   HYPRE_SMMCORE_2DB(k + 1);
+               HYPRE_Complex val = HYPRE_SMMCORE_CFF(k + 0) +
+                                   HYPRE_SMMCORE_CFF(k + 1);
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop3End(Mi, fi, ci);
             break;
 
          case 1:
             hypre_BoxLoop3Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2DB(k + 0);
+               HYPRE_Complex val = HYPRE_SMMCORE_CFF(k + 0);
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop3End(Mi, fi, ci);
             break;
 
          default:
@@ -411,218 +711,25 @@ hypre_StructMatmultCompute_core_2db( hypre_StructMatmultDataMH *a,
 }
 
 /*--------------------------------------------------------------------------
- * Core function for computing the triple-product of variable coefficients
- * living on the same data space.
- *
- * "1t" means:
- *   "1": single data space.
- *   "t": triple-product.
- *
- * This can be used for the scenarios:
- *   1) VCF * VCF * CCF.
- *   2) VCC * VCC * CCF.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultCompute_core_1t( hypre_StructMatmultDataMH *a,
-                                    HYPRE_Int                  ncomponents,
-                                    HYPRE_Complex             *cprod,
-                                    const HYPRE_Complex     ***tptrs,
-                                    HYPRE_Complex             *mptr,
-                                    HYPRE_Int                  ndim,
-                                    hypre_Index                loop_size,
-                                    hypre_Box                 *gdbox,
-                                    hypre_Index                gdstart,
-                                    hypre_Index                gdstride,
-                                    hypre_Box                 *Mdbox,
-                                    hypre_Index                Mdstart,
-                                    hypre_Index                Mdstride )
-{
-   HYPRE_Int     k;
-   HYPRE_Int     depth;
-
-   if (ncomponents < 1)
-   {
-      return hypre_error_flag;
-   }
-
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-
-   for (k = 0; k < ncomponents; k += HYPRE_UNROLL_MAXDEPTH)
-   {
-      depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (ncomponents - k));
-
-      switch (depth)
-      {
-         case 8:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi);
-            {
-               HYPRE_Complex val = HYPRE_SMMCORE_1T(k + 0) +
-                                   HYPRE_SMMCORE_1T(k + 1) +
-                                   HYPRE_SMMCORE_1T(k + 2) +
-                                   HYPRE_SMMCORE_1T(k + 3) +
-                                   HYPRE_SMMCORE_1T(k + 4) +
-                                   HYPRE_SMMCORE_1T(k + 5) +
-                                   HYPRE_SMMCORE_1T(k + 6) +
-                                   HYPRE_SMMCORE_1T(k + 7);
-               mptr[Mi] += val;
-            }
-            hypre_BoxLoop2End(Mi, gi);
-            break;
-
-         case 7:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi);
-            {
-               HYPRE_Complex val = HYPRE_SMMCORE_1T(k + 0) +
-                                   HYPRE_SMMCORE_1T(k + 1) +
-                                   HYPRE_SMMCORE_1T(k + 2) +
-                                   HYPRE_SMMCORE_1T(k + 3) +
-                                   HYPRE_SMMCORE_1T(k + 4) +
-                                   HYPRE_SMMCORE_1T(k + 5) +
-                                   HYPRE_SMMCORE_1T(k + 6);
-               mptr[Mi] += val;
-            }
-            hypre_BoxLoop2End(Mi, gi);
-            break;
-
-         case 6:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi);
-            {
-               HYPRE_Complex val = HYPRE_SMMCORE_1T(k + 0) +
-                                   HYPRE_SMMCORE_1T(k + 1) +
-                                   HYPRE_SMMCORE_1T(k + 2) +
-                                   HYPRE_SMMCORE_1T(k + 3) +
-                                   HYPRE_SMMCORE_1T(k + 4) +
-                                   HYPRE_SMMCORE_1T(k + 5);
-               mptr[Mi] += val;
-            }
-            hypre_BoxLoop2End(Mi, gi);
-            break;
-
-         case 5:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi);
-            {
-               HYPRE_Complex val = HYPRE_SMMCORE_1T(k + 0) +
-                                   HYPRE_SMMCORE_1T(k + 1) +
-                                   HYPRE_SMMCORE_1T(k + 2) +
-                                   HYPRE_SMMCORE_1T(k + 3) +
-                                   HYPRE_SMMCORE_1T(k + 4);
-               mptr[Mi] += val;
-            }
-            hypre_BoxLoop2End(Mi, gi);
-            break;
-
-         case 4:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi);
-            {
-               HYPRE_Complex val = HYPRE_SMMCORE_1T(k + 0) +
-                                   HYPRE_SMMCORE_1T(k + 1) +
-                                   HYPRE_SMMCORE_1T(k + 2) +
-                                   HYPRE_SMMCORE_1T(k + 3);
-
-               mptr[Mi] += val;
-            }
-            hypre_BoxLoop2End(Mi, gi);
-            break;
-
-         case 3:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi);
-            {
-               HYPRE_Complex val = HYPRE_SMMCORE_1T(k + 0) +
-                                   HYPRE_SMMCORE_1T(k + 1) +
-                                   HYPRE_SMMCORE_1T(k + 2);
-
-               mptr[Mi] += val;
-            }
-            hypre_BoxLoop2End(Mi, gi);
-            break;
-
-         case 2:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi);
-            {
-               HYPRE_Complex val = HYPRE_SMMCORE_1T(k + 0) +
-                                   HYPRE_SMMCORE_1T(k + 1);
-
-               mptr[Mi] += val;
-            }
-            hypre_BoxLoop2End(Mi, gi);
-            break;
-
-         case 1:
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi);
-            {
-               HYPRE_Complex val = HYPRE_SMMCORE_1T(k + 0);
-
-               mptr[Mi] += val;
-            }
-            hypre_BoxLoop2End(Mi, gi);
-            break;
-
-         default:
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported depth of loop unrolling!");
-
-            HYPRE_ANNOTATE_FUNC_END;
-            return hypre_error_flag;
-      }
-   }
-
-   HYPRE_ANNOTATE_FUNC_END;
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * Core function for computing the product of three coefficients.
- * Two coefficients are variable and live on data space "h".
- * The third coefficient is constant, it lives on data space "g", and it
- * requires the usage of a bitmask
- *
- * "2etb" means:
- *   "2": two data spaces.
- *   "e": data spaces for variable coefficients are the same.
- *   "t": triple-product.
- *   "b": single bitmask.
- *
- * This can be used for the scenarios:
- *   1) VCC * VCC * CCF.
- *   2) VCC * CCF * VCC.
- *   3) CCF * VCC * VCC.
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructMatmultCompute_core_2etb( hypre_StructMatmultDataMH *a,
-                                      HYPRE_Int                  ncomponents,
-                                      HYPRE_Int                **order,
-                                      HYPRE_Complex             *cprod,
-                                      const HYPRE_Complex     ***tptrs,
-                                      HYPRE_Complex             *mptr,
-                                      HYPRE_Int                  ndim,
-                                      hypre_Index                loop_size,
-                                      hypre_Box                 *gdbox,
-                                      hypre_Index                gdstart,
-                                      hypre_Index                gdstride,
-                                      hypre_Box                 *hdbox,
-                                      hypre_Index                hdstart,
-                                      hypre_Index                hdstride,
-                                      hypre_Box                 *Mdbox,
-                                      hypre_Index                Mdstart,
-                                      hypre_Index                Mdstride )
+hypre_StructMatmultCompute_core_ccf( HYPRE_Int                  ncomponents,
+                                     HYPRE_Int                **order,
+                                     HYPRE_Complex             *cprod,
+                                     const HYPRE_Complex     ***tptrs,
+                                     HYPRE_Complex             *mptr,
+                                     HYPRE_Int                  ndim,
+                                     hypre_Index                loop_size,
+                                     hypre_Box                 *fdbox,
+                                     hypre_Index                fdstart,
+                                     hypre_Index                fdstride,
+                                     hypre_Box                 *cdbox,
+                                     hypre_Index                cdstart,
+                                     hypre_Index                cdstride,
+                                     hypre_Box                 *Mdbox,
+                                     hypre_Index                Mdstart,
+                                     hypre_Index                Mdstride )
 {
    HYPRE_Int     k;
    HYPRE_Int     depth;
@@ -643,110 +750,110 @@ hypre_StructMatmultCompute_core_2etb( hypre_StructMatmultDataMH *a,
          case 7:
             hypre_BoxLoop3Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2ETB(k + 0) +
-                                   HYPRE_SMMCORE_2ETB(k + 1) +
-                                   HYPRE_SMMCORE_2ETB(k + 2) +
-                                   HYPRE_SMMCORE_2ETB(k + 3) +
-                                   HYPRE_SMMCORE_2ETB(k + 4) +
-                                   HYPRE_SMMCORE_2ETB(k + 5) +
-                                   HYPRE_SMMCORE_2ETB(k + 6);
+               HYPRE_Complex val = HYPRE_SMMCORE_CCF(k + 0) +
+                                   HYPRE_SMMCORE_CCF(k + 1) +
+                                   HYPRE_SMMCORE_CCF(k + 2) +
+                                   HYPRE_SMMCORE_CCF(k + 3) +
+                                   HYPRE_SMMCORE_CCF(k + 4) +
+                                   HYPRE_SMMCORE_CCF(k + 5) +
+                                   HYPRE_SMMCORE_CCF(k + 6);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop3End(Mi, fi, ci);
             break;
 
          case 6:
             hypre_BoxLoop3Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2ETB(k + 0) +
-                                   HYPRE_SMMCORE_2ETB(k + 1) +
-                                   HYPRE_SMMCORE_2ETB(k + 2) +
-                                   HYPRE_SMMCORE_2ETB(k + 3) +
-                                   HYPRE_SMMCORE_2ETB(k + 4) +
-                                   HYPRE_SMMCORE_2ETB(k + 5);
+               HYPRE_Complex val = HYPRE_SMMCORE_CCF(k + 0) +
+                                   HYPRE_SMMCORE_CCF(k + 1) +
+                                   HYPRE_SMMCORE_CCF(k + 2) +
+                                   HYPRE_SMMCORE_CCF(k + 3) +
+                                   HYPRE_SMMCORE_CCF(k + 4) +
+                                   HYPRE_SMMCORE_CCF(k + 5);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop3End(Mi, fi, ci);
             break;
 
          case 5:
             hypre_BoxLoop3Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2ETB(k + 0) +
-                                   HYPRE_SMMCORE_2ETB(k + 1) +
-                                   HYPRE_SMMCORE_2ETB(k + 2) +
-                                   HYPRE_SMMCORE_2ETB(k + 3) +
-                                   HYPRE_SMMCORE_2ETB(k + 4);
+               HYPRE_Complex val = HYPRE_SMMCORE_CCF(k + 0) +
+                                   HYPRE_SMMCORE_CCF(k + 1) +
+                                   HYPRE_SMMCORE_CCF(k + 2) +
+                                   HYPRE_SMMCORE_CCF(k + 3) +
+                                   HYPRE_SMMCORE_CCF(k + 4);
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop3End(Mi, fi, ci);
             break;
 
          case 4:
             hypre_BoxLoop3Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2ETB(k + 0) +
-                                   HYPRE_SMMCORE_2ETB(k + 1) +
-                                   HYPRE_SMMCORE_2ETB(k + 2) +
-                                   HYPRE_SMMCORE_2ETB(k + 3);
+               HYPRE_Complex val = HYPRE_SMMCORE_CCF(k + 0) +
+                                   HYPRE_SMMCORE_CCF(k + 1) +
+                                   HYPRE_SMMCORE_CCF(k + 2) +
+                                   HYPRE_SMMCORE_CCF(k + 3);
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop3End(Mi, fi, ci);
             break;
 
          case 3:
             hypre_BoxLoop3Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2ETB(k + 0) +
-                                   HYPRE_SMMCORE_2ETB(k + 1) +
-                                   HYPRE_SMMCORE_2ETB(k + 2);
+               HYPRE_Complex val = HYPRE_SMMCORE_CCF(k + 0) +
+                                   HYPRE_SMMCORE_CCF(k + 1) +
+                                   HYPRE_SMMCORE_CCF(k + 2);
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop3End(Mi, fi, ci);
             break;
 
          case 2:
             hypre_BoxLoop3Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2ETB(k + 0) +
-                                   HYPRE_SMMCORE_2ETB(k + 1);
+               HYPRE_Complex val = HYPRE_SMMCORE_CCF(k + 0) +
+                                   HYPRE_SMMCORE_CCF(k + 1);
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop3End(Mi, fi, ci);
             break;
 
          case 1:
             hypre_BoxLoop3Begin(ndim, loop_size,
                                 Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
+                                fdbox, fdstart, fdstride, fi,
+                                cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_Complex val = HYPRE_SMMCORE_2ETB(k + 0);
+               HYPRE_Complex val = HYPRE_SMMCORE_CCF(k + 0);
 
                mptr[Mi] += val;
             }
-            hypre_BoxLoop3End(Mi, gi, hi);
+            hypre_BoxLoop3End(Mi, fi, ci);
             break;
 
          default:
@@ -763,176 +870,7 @@ hypre_StructMatmultCompute_core_2etb( hypre_StructMatmultDataMH *a,
 }
 
 /*--------------------------------------------------------------------------
- * Core function for computing the product of three coefficients.
- * One coefficient is variable and live on data space "g".
- * Two coefficients are constant, live on data space "h", and require
- * the usage of a bitmask.
- *
- * "2etb" means:
- *   "2" : two data spaces.
- *   "t" : triple-product.
- *   "bb": two bitmasks.
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultDataMH *a,
-                                      HYPRE_Int                  ncomponents,
-                                      HYPRE_Int                **order,
-                                      HYPRE_Complex             *cprod,
-                                      const HYPRE_Complex     ***tptrs,
-                                      HYPRE_Complex             *mptr,
-                                      HYPRE_Int                  ndim,
-                                      hypre_Index                loop_size,
-                                      hypre_Box                 *gdbox,
-                                      hypre_Index                gdstart,
-                                      hypre_Index                gdstride,
-                                      hypre_Box                 *hdbox,
-                                      hypre_Index                hdstart,
-                                      hypre_Index                hdstride,
-                                      hypre_Box                 *Mdbox,
-                                      hypre_Index                Mdstart,
-                                      hypre_Index                Mdstride )
-{
-   HYPRE_Int     k;
-   HYPRE_Int     depth;
-
-   if (ncomponents < 1)
-   {
-      return hypre_error_flag;
-   }
-
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-
-   for (k = 0; k < ncomponents; k += HYPRE_UNROLL_MAXDEPTH)
-   {
-      depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (ncomponents - k));
-
-      switch (depth)
-      {
-         case 7:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
-            {
-               HYPRE_Complex val = HYPRE_SMMCORE_2TBB(k + 0) +
-                                   HYPRE_SMMCORE_2TBB(k + 1) +
-                                   HYPRE_SMMCORE_2TBB(k + 2) +
-                                   HYPRE_SMMCORE_2TBB(k + 3) +
-                                   HYPRE_SMMCORE_2TBB(k + 4) +
-                                   HYPRE_SMMCORE_2TBB(k + 5) +
-                                   HYPRE_SMMCORE_2TBB(k + 6);
-               mptr[Mi] += val;
-            }
-            hypre_BoxLoop3End(Mi, gi, hi);
-            break;
-
-         case 6:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
-            {
-               HYPRE_Complex val = HYPRE_SMMCORE_2TBB(k + 0) +
-                                   HYPRE_SMMCORE_2TBB(k + 1) +
-                                   HYPRE_SMMCORE_2TBB(k + 2) +
-                                   HYPRE_SMMCORE_2TBB(k + 3) +
-                                   HYPRE_SMMCORE_2TBB(k + 4) +
-                                   HYPRE_SMMCORE_2TBB(k + 5);
-               mptr[Mi] += val;
-            }
-            hypre_BoxLoop3End(Mi, gi, hi);
-            break;
-
-         case 5:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
-            {
-               HYPRE_Complex val = HYPRE_SMMCORE_2TBB(k + 0) +
-                                   HYPRE_SMMCORE_2TBB(k + 1) +
-                                   HYPRE_SMMCORE_2TBB(k + 2) +
-                                   HYPRE_SMMCORE_2TBB(k + 3) +
-                                   HYPRE_SMMCORE_2TBB(k + 4);
-               mptr[Mi] += val;
-            }
-            hypre_BoxLoop3End(Mi, gi, hi);
-            break;
-
-         case 4:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
-            {
-               HYPRE_Complex val = HYPRE_SMMCORE_2TBB(k + 0) +
-                                   HYPRE_SMMCORE_2TBB(k + 1) +
-                                   HYPRE_SMMCORE_2TBB(k + 2) +
-                                   HYPRE_SMMCORE_2TBB(k + 3);
-
-               mptr[Mi] += val;
-            }
-            hypre_BoxLoop3End(Mi, gi, hi);
-            break;
-
-         case 3:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
-            {
-               HYPRE_Complex val = HYPRE_SMMCORE_2TBB(k + 0) +
-                                   HYPRE_SMMCORE_2TBB(k + 1) +
-                                   HYPRE_SMMCORE_2TBB(k + 2);
-
-               mptr[Mi] += val;
-            }
-            hypre_BoxLoop3End(Mi, gi, hi);
-            break;
-
-         case 2:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
-            {
-               HYPRE_Complex val = HYPRE_SMMCORE_2TBB(k + 0) +
-                                   HYPRE_SMMCORE_2TBB(k + 1);
-
-               mptr[Mi] += val;
-            }
-            hypre_BoxLoop3End(Mi, gi, hi);
-            break;
-
-         case 1:
-            hypre_BoxLoop3Begin(ndim, loop_size,
-                                Mdbox, Mdstart, Mdstride, Mi,
-                                gdbox, gdstart, gdstride, gi,
-                                hdbox, hdstart, hdstride, hi);
-            {
-               HYPRE_Complex val = HYPRE_SMMCORE_2TBB(k + 0);
-
-               mptr[Mi] += val;
-            }
-            hypre_BoxLoop3End(Mi, gi, hi);
-            break;
-
-         default:
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported depth of loop unrolling!");
-
-            HYPRE_ANNOTATE_FUNC_END;
-            return hypre_error_flag;
-      }
-   }
-
-   HYPRE_ANNOTATE_FUNC_END;
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * Core function for computing the double-product of coefficients.
+ * Core function for computing the double-product of coefficients
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -957,7 +895,7 @@ hypre_StructMatmultCompute_core_double( hypre_StructMatmultDataMH *a,
    const HYPRE_Complex  ****tptrs;
    HYPRE_Complex          **mptrs;
 
-   HYPRE_Int                max_components = 10;
+   HYPRE_Int                max_components = 2;
    HYPRE_Int                mentry, comptype, nf, nc;
    HYPRE_Int                e, c, i, k, t;
 
@@ -1012,11 +950,11 @@ hypre_StructMatmultCompute_core_double( hypre_StructMatmultDataMH *a,
          }
          switch (nc)
          {
-            case 0: /* ff term (call core_1d) */
+            case 0: /* ff term (call core_ff) */
                comptype = 0;
                break;
-            case 1: /* cf term (call core_2db) */
-               comptype = 4;
+            case 1: /* cf term (call core_cf) */
+               comptype = 1;
                break;
          }
          k = ncomp[comptype];
@@ -1042,18 +980,18 @@ hypre_StructMatmultCompute_core_double( hypre_StructMatmultDataMH *a,
       }
 
       /* Call core functions */
-      hypre_StructMatmultCompute_core_1d(a, ncomp[0], cprod[0],
+      hypre_StructMatmultCompute_core_ff(ncomp[0], cprod[0],
                                          tptrs[0], mptrs[0],
                                          ndim, loop_size,
                                          fdbox, fdstart, fdstride,
                                          Mdbox, Mdstart, Mdstride);
 
-      hypre_StructMatmultCompute_core_2db(a, ncomp[4], order[4],
-                                          cprod[4], tptrs[4],
-                                          mptrs[4], ndim, loop_size,
-                                          fdbox, fdstart, fdstride,
-                                          cdbox, cdstart, cdstride,
-                                          Mdbox, Mdstart, Mdstride);
+      hypre_StructMatmultCompute_core_cf(ncomp[1], order[1],
+                                         cprod[1], tptrs[1],
+                                         mptrs[1], ndim, loop_size,
+                                         fdbox, fdstart, fdstride,
+                                         cdbox, cdstart, cdstride,
+                                         Mdbox, Mdstart, Mdstride);
    } /* loop on M stencil entries */
 
    /* Free memory */
@@ -1103,7 +1041,7 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultDataMH *a,
    const HYPRE_Complex  ****tptrs;
    HYPRE_Complex          **mptrs;
 
-   HYPRE_Int                max_components = 10;
+   HYPRE_Int                max_components = 3;
    HYPRE_Int                mentry, comptype, nf, nc;
    HYPRE_Int                e, c, i, k, t;
 
@@ -1158,14 +1096,14 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultDataMH *a,
          }
          switch (nc)
          {
-            case 0: /* fff term (call core_1t) */
+            case 0: /* fff term (call core_fff) */
                comptype = 0;
                break;
-            case 1: /* cff term (call core_2tbb) */
-               comptype = 9;
+            case 1: /* cff term (call core_cff) */
+               comptype = 1;
                break;
-            case 2: /* ccf term (call core_2etb) */
-               comptype = 8;
+            case 2: /* ccf term (call core_ccf) */
+               comptype = 2;
                break;
          }
          k = ncomp[comptype];
@@ -1191,25 +1129,25 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultDataMH *a,
       }
 
       /* Call core functions */
-      hypre_StructMatmultCompute_core_1t(a, ncomp[0], cprod[0],
-                                         tptrs[0], mptrs[0],
-                                         ndim, loop_size,
-                                         fdbox, fdstart, fdstride,
-                                         Mdbox, Mdstart, Mdstride);
+      hypre_StructMatmultCompute_core_fff(ncomp[0], cprod[0],
+                                          tptrs[0], mptrs[0],
+                                          ndim, loop_size,
+                                          fdbox, fdstart, fdstride,
+                                          Mdbox, Mdstart, Mdstride);
 
-      hypre_StructMatmultCompute_core_2etb(a, ncomp[8], order[8],
-                                           cprod[8], tptrs[8], mptrs[8],
-                                           ndim, loop_size,
-                                           fdbox, fdstart, fdstride,
-                                           cdbox, cdstart, cdstride,
-                                           Mdbox, Mdstart, Mdstride);
+      hypre_StructMatmultCompute_core_cff(ncomp[1], order[1],
+                                          cprod[1], tptrs[1], mptrs[1],
+                                          ndim, loop_size,
+                                          fdbox, fdstart, fdstride,
+                                          cdbox, cdstart, cdstride,
+                                          Mdbox, Mdstart, Mdstride);
 
-      hypre_StructMatmultCompute_core_2tbb(a, ncomp[9], order[9],
-                                           cprod[9], tptrs[9], mptrs[9],
-                                           ndim, loop_size,
-                                           fdbox, fdstart, fdstride,
-                                           cdbox, cdstart, cdstride,
-                                           Mdbox, Mdstart, Mdstride);
+      hypre_StructMatmultCompute_core_ccf(ncomp[2], order[2],
+                                          cprod[2], tptrs[2], mptrs[2],
+                                          ndim, loop_size,
+                                          fdbox, fdstart, fdstride,
+                                          cdbox, cdstart, cdstride,
+                                          Mdbox, Mdstart, Mdstride);
    } /* loop on M stencil entries */
 
    /* Free memory */
