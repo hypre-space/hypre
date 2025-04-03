@@ -655,7 +655,16 @@ HYPRE_Int hypre_ParPrintf(MPI_Comm comm, const char *format, ...);
 #ifndef hypre_ERROR_HEADER
 #define hypre_ERROR_HEADER
 
+#ifdef __cplusplus
+extern "C++"
+{
+#endif
+
 #include <assert.h>
+
+#ifdef __cplusplus
+}
+#endif
 
 /*--------------------------------------------------------------------------
  * Global variable used in hypre error checking
@@ -3946,3 +3955,4 @@ HYPRE_Int hypre_mm_read_mtx_crd_size(FILE *f, HYPRE_Int *M, HYPRE_Int *N, HYPRE_
 #endif
 
 #endif
+

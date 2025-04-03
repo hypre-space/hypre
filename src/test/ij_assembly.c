@@ -37,7 +37,12 @@ HYPRE_Int getParCSRMatrixData(HYPRE_ParCSRMatrix  A, HYPRE_Int base, HYPRE_Int *
 
 HYPRE_Real checkMatrix(HYPRE_ParCSRMatrix parcsr_ref, HYPRE_IJMatrix ij_A);
 
-HYPRE_Int test_all(MPI_Comm comm, const char *test_name, HYPRE_MemoryLocation memory_location, HYPRE_Int option, const char *cmd_sequence, HYPRE_BigInt ilower, HYPRE_BigInt iupper, HYPRE_BigInt jlower, HYPRE_BigInt jupper, HYPRE_Int nrows, HYPRE_BigInt num_nonzeros, HYPRE_Int nchunks, HYPRE_Int init_alloc, HYPRE_Int early_assemble, HYPRE_Real grow_factor, HYPRE_Int *h_nnzrow, HYPRE_Int *nnzrow, HYPRE_BigInt *rows, HYPRE_BigInt *cols, HYPRE_Real *coefs, HYPRE_IJMatrix *ij_A_ptr);
+HYPRE_Int test_all(MPI_Comm comm, const char *test_name, HYPRE_MemoryLocation memory_location,
+                   HYPRE_Int option, const char *cmd_sequence, HYPRE_BigInt ilower, HYPRE_BigInt iupper,
+                   HYPRE_BigInt jlower, HYPRE_BigInt jupper, HYPRE_Int nrows, HYPRE_BigInt num_nonzeros,
+                   HYPRE_Int nchunks, HYPRE_Int init_alloc, HYPRE_Int early_assemble, HYPRE_Real grow_factor,
+                   HYPRE_Int *h_nnzrow, HYPRE_Int *nnzrow, HYPRE_BigInt *rows, HYPRE_BigInt *cols, HYPRE_Real *coefs,
+                   HYPRE_IJMatrix *ij_A_ptr);
 
 hypre_int
 main( hypre_int  argc,
@@ -350,8 +355,10 @@ main( hypre_int  argc,
    /* Test Set */
    if (mode & 1)
    {
-      test_all(comm, "set", memory_location, option, "sA", ilower, iupper, jlower, jupper, nrows, num_nonzeros,
-               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo, cols, coefs, &ij_A);
+      test_all(comm, "set", memory_location, option, "sA", ilower, iupper, jlower, jupper, nrows,
+               num_nonzeros,
+               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo,
+               cols, coefs, &ij_A);
 
       ierr += checkMatrix(parcsr_ref, ij_A) > tol;
       if (print_matrix)
@@ -367,7 +374,8 @@ main( hypre_int  argc,
     */
    if (mode & 2)
    {
-      test_all(comm, "addtrans", memory_location, 2, "aaaaaA", ilower, iupper, jlower, jupper, nrows, num_nonzeros,
+      test_all(comm, "addtrans", memory_location, 2, "aaaaaA", ilower, iupper, jlower, jupper, nrows,
+               num_nonzeros,
                nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, cols, rows_coo, coefs, &ij_AT);
 
       hypre_ParCSRMatrixTranspose(parcsr_ref, &parcsr_trans, 1);
@@ -385,8 +393,10 @@ main( hypre_int  argc,
    /* Test Set/Set */
    if (mode & 4)
    {
-      test_all(comm, "set/set", memory_location, option, "ssA", ilower, iupper, jlower, jupper, nrows, num_nonzeros,
-                  nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo, cols, coefs, &ij_A);
+      test_all(comm, "set/set", memory_location, option, "ssA", ilower, iupper, jlower, jupper, nrows,
+               num_nonzeros,
+               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo,
+               cols, coefs, &ij_A);
 
       ierr += checkMatrix(parcsr_ref, ij_A) > tol;
       if (print_matrix)
@@ -399,8 +409,10 @@ main( hypre_int  argc,
    /* Test Add/Set */
    if (mode & 8)
    {
-      test_all(comm, "add/set", memory_location, option, "asA", ilower, iupper, jlower, jupper, nrows, num_nonzeros,
-                  nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo, cols, coefs, &ij_A);
+      test_all(comm, "add/set", memory_location, option, "asA", ilower, iupper, jlower, jupper, nrows,
+               num_nonzeros,
+               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo,
+               cols, coefs, &ij_A);
 
       ierr += checkMatrix(parcsr_ref, ij_A) > tol;
       if (print_matrix)
@@ -413,8 +425,10 @@ main( hypre_int  argc,
    /* Test Set/Add */
    if (mode & 16)
    {
-      test_all(comm, "set/add", memory_location, option, "saA", ilower, iupper, jlower, jupper, nrows, num_nonzeros,
-               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo, cols, coefs, &ij_A);
+      test_all(comm, "set/add", memory_location, option, "saA", ilower, iupper, jlower, jupper, nrows,
+               num_nonzeros,
+               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo,
+               cols, coefs, &ij_A);
 
       hypre_ParCSRMatrix *parcsr_ref2 = hypre_ParCSRMatrixClone(parcsr_ref, 1);
       hypre_ParCSRMatrixScale(parcsr_ref2, 2.0);
@@ -431,8 +445,10 @@ main( hypre_int  argc,
    /* Test Set/Add/Assemble/Set */
    if (mode & 32)
    {
-      test_all(comm, "set/add/assemble/set", memory_location, option, "saAsA", ilower, iupper, jlower, jupper, nrows, num_nonzeros,
-               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo, cols, coefs, &ij_A);
+      test_all(comm, "set/add/assemble/set", memory_location, option, "saAsA", ilower, iupper, jlower,
+               jupper, nrows, num_nonzeros,
+               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo,
+               cols, coefs, &ij_A);
 
       ierr += checkMatrix(parcsr_ref, ij_A) > tol;
       if (print_matrix)
@@ -445,8 +461,10 @@ main( hypre_int  argc,
    /* Test Adds */
    if (mode & 64)
    {
-      test_all(comm, "5adds/set", memory_location, option, "aaaaasA", ilower, iupper, jlower, jupper, nrows, num_nonzeros,
-               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo, cols, coefs, &ij_A);
+      test_all(comm, "5adds/set", memory_location, option, "aaaaasA", ilower, iupper, jlower, jupper,
+               nrows, num_nonzeros,
+               nchunks, init_alloc, early_assemble, grow_factor, h_nnzrow, nnzrow, option == 1 ? rows : rows_coo,
+               cols, coefs, &ij_A);
 
       hypre_ParCSRMatrix *parcsr_ref2 = hypre_ParCSRMatrixClone(parcsr_ref, 1);
       hypre_ParCSRMatrixScale(parcsr_ref2, 1.);
@@ -779,7 +797,7 @@ test_all(MPI_Comm             comm,
    HYPRE_IJMatrixSetObjectType(ij_A, HYPRE_PARCSR);
    HYPRE_IJMatrixInitialize_v2(ij_A, memory_location);
    HYPRE_IJMatrixSetOMPFlag(ij_A, 1);
-   grow_factor= myid ? grow_factor : 2 * grow_factor;
+   grow_factor = myid ? grow_factor : 2 * grow_factor;
    if (init_alloc >= 0)
    {
       HYPRE_IJMatrixSetInitAllocation(ij_A, init_alloc);
