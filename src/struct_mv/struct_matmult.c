@@ -72,7 +72,7 @@
  * grid.  Another approach (maybe the most flexible) is to temporarily modify
  * the matrices in this routine so that they have a common fine index space.
  * This will require mapping the matrix strides, the grid extents, and the
- * stencil offsets.
+ * stencil offsets.  This latter idea is the same as Rebase() for vectors.
  *
  * This routines assume there are only two data-map strides in the product.
  * This means that at least two matrices can always be multiplied together
@@ -561,7 +561,6 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
 
    MPI_Comm                   comm;
    HYPRE_Int                  ndim, size;
-   HYPRE_Int                  domain_is_coarse;
 
    hypre_StructMatrix        *matrix;
    hypre_StructStencil       *stencil;
@@ -583,7 +582,6 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
    HYPRE_Int                  const_term, var_term; /* booleans used to determine 'need_mask' */
    HYPRE_Int                  all_const;            /* boolean indicating all constant matmults */
 
-   hypre_IndexRef             dom_stride;
    HYPRE_Complex             *bitptr;          /* pointer to bit mask data */
    hypre_Index                offset;          /* CommStencil offset */
    hypre_IndexRef             shift;           /* stencil shift from center for st_term */
@@ -873,10 +871,6 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
     * layer to account for parallelism and periodic boundary conditions. */
 
    loop_box = hypre_BoxCreate(ndim);
-
-   /* Assume DomainIsCoarse is the same for all matmults */
-   Mdata = &(mmdata -> matmults[0]);
-   domain_is_coarse = hypre_StructMatrixDomainIsCoarse(Mdata -> M);
 
    /* Compute initial data spaces for each matrix */
    data_spaces = hypre_CTAlloc(hypre_BoxArray *, nmatrices + 1, HYPRE_MEMORY_HOST);
