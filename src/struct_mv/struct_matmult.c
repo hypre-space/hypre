@@ -152,8 +152,8 @@
  *       t2[fi] = 0/1    (const,coarse)     -> mask for a on fine data space
  *       t3[fi] = 0/1    (const,fine)       -> mask for b on fine data space
  *
- * Note that the mask must be on the fine index space since all of the stencil
- * offsets are on the fine index space.  We can't have a coarse mask!
+ * Note that the mask is on the fine data space.  RDF: It may be possible to
+ * have masks for the fine and coarse data spaces.  This could have benefits.
  *--------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------
