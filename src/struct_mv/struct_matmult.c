@@ -890,25 +890,6 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
       hypre_CommStencilCreateNumGhost(comm_stencils[m], &num_ghost);
       /* RDF TODO: Make sure num_ghost is at least as large as before, so that
        * when we call Restore() below, we don't lose any data */
-      /* RDF TODO: Does the following potentially add too many ghost points?
-       * Consider the multiplication of M=P*Ac.  The domain_is_coarse variable
-       * is defined based on the result matrix M.  The loop below seems to add
-       * (dom_stride-1) ghost layers to all matrices, including Ac, but that
-       * matrix lives on a coarse index space. */
-      if (domain_is_coarse)
-      {
-         /* Increase num_ghost (on both sides) to ensure that data spaces are
-          * large enough to compute the full stencil in one boxloop.  This is
-          * a result of how stencils are stored when the domain is coarse. */
-         Mdata      = &(mmdata -> matmults[0]);
-         st_M       = (Mdata -> st_M);
-         dom_stride = hypre_StMatrixDMap(st_M);
-         for (d = 0; d < ndim; d++)
-         {
-            num_ghost[2 * d]     += dom_stride[d] - 1;
-            num_ghost[2 * d + 1] += dom_stride[d] - 1;
-         }
-      }
       hypre_StructMatrixComputeDataSpace(matrix, num_ghost, &data_spaces[m]);
       hypre_TFree(num_ghost, HYPRE_MEMORY_HOST);
    }
