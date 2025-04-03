@@ -16,3 +16,5 @@ mpirun -np 3  ./ij_assembly > assembly.out.2
 
 mpirun -np 7  ./ij_assembly > assembly.out.3
 
+mpirun -np 7  ./ij_assembly -early 1 > assembly.out.4
+
