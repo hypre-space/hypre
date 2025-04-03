@@ -17,7 +17,7 @@
  * option == 2, T = HYPRE_Int,
  */
 template<HYPRE_Int option, typename T>
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct RAP_functor : public thrust::unary_function<HYPRE_Int, T>
 #else
 struct RAP_functor

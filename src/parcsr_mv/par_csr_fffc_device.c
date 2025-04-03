@@ -21,7 +21,7 @@ typedef thrust::tuple<HYPRE_Int, HYPRE_Int> Tuple;
 /* transform from local F/C index to global F/C index,
  * where F index "x" are saved as "-x-1"
  */
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct FFFC_functor : public thrust::unary_function<Tuple, HYPRE_BigInt>
 #else
 struct FFFC_functor
@@ -48,7 +48,7 @@ struct FFFC_functor
 
 /* this predicate selects A^s_{FF} */
 template<typename T>
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct FF_pred : public thrust::unary_function<Tuple, bool>
 #else
 struct FF_pred
@@ -86,7 +86,7 @@ struct FF_pred
 
 /* this predicate selects A^s_{FC} */
 template<typename T>
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct FC_pred
 #else
 struct FC_pred : public thrust::unary_function<Tuple, bool>
@@ -113,7 +113,7 @@ struct FC_pred : public thrust::unary_function<Tuple, bool>
 
 /* this predicate selects A^s_{CF} */
 template<typename T>
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct CF_pred : public thrust::unary_function<Tuple, bool>
 #else
 struct CF_pred
@@ -140,7 +140,7 @@ struct CF_pred
 
 /* this predicate selects A^s_{CC} */
 template<typename T>
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct CC_pred : public thrust::unary_function<Tuple, bool>
 #else
 struct CC_pred
@@ -166,7 +166,7 @@ struct CC_pred
 };
 
 /* this predicate selects A^s_{C,:} */
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct CX_pred : public thrust::unary_function<Tuple, bool>
 #else
 struct CX_pred
@@ -191,7 +191,7 @@ struct CX_pred
 
 /* this predicate selects A^s_{:,C} */
 template<typename T>
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct XC_pred : public thrust::unary_function<Tuple, bool>
 #else
 struct XC_pred

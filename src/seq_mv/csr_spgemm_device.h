@@ -356,7 +356,7 @@ HYPRE_Int HashFunc(HYPRE_Int key, HYPRE_Int i, HYPRE_Int prev)
 }
 
 template<typename T>
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct spgemm_bin_op : public thrust::unary_function<T, char>
 #else
 struct spgemm_bin_op

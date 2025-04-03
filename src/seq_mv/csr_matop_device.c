@@ -1868,7 +1868,7 @@ struct Int2Unequal
 };
 #else
 typedef thrust::tuple<HYPRE_Int, HYPRE_Int> Int2;
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct Int2Unequal : public thrust::unary_function<Int2, bool>
 #else
 struct Int2Unequal
@@ -2093,7 +2093,7 @@ struct cabsfirst_greaterthan_second_pred
    }
 };
 #else
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct cabsfirst_greaterthan_second_pred : public
    thrust::unary_function<thrust::tuple<HYPRE_Complex, HYPRE_Real>, bool>
 #else
@@ -2357,7 +2357,7 @@ hypre_CSRMatrixDiagMatrixFromMatrixDevice(hypre_CSRMatrix *A, HYPRE_Int type)
  * adj_functor (Used in hypre_CSRMatrixPermuteDevice)
  *--------------------------------------------------------------------------*/
 
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct adj_functor : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
 #else
 struct adj_functor

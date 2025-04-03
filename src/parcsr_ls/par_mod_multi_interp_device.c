@@ -86,7 +86,7 @@ struct local_equal_plus_constant : public
 };
 
 /* transform from local C index to global C index */
-#if (defined(THRUST_VERSION) && THRUST_VERSION < 101000)
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct globalC_functor : public thrust::unary_function<HYPRE_Int, HYPRE_BigInt>
 #else
 struct globalC_functor
