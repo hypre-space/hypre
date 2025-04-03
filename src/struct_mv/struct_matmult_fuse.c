@@ -1,11 +1,22 @@
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
 
-/*** This file should be included in struct_matmult.c and not compiled separately ***/
+/******************************************************************************
+ *
+ * Structured matrix-matrix multiply kernel functions
+ *
+ *****************************************************************************/
+
+#include "_hypre_struct_mv.h"
+#include "_hypre_struct_mv.hpp"
 
 /*--------------------------------------------------------------------------
  * Defines used below
  *--------------------------------------------------------------------------*/
-
-//#include "struct_matmult_fuse.h"
 
 #define HYPRE_FUSE_MAXDEPTH 9
 
