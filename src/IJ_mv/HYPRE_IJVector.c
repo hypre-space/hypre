@@ -243,6 +243,36 @@ HYPRE_IJVectorSetData(HYPRE_IJVector  vector,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJVectorSetTags
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorSetTags(HYPRE_IJVector  vector,
+                      HYPRE_Int       owns_tags,
+                      HYPRE_Int       num_tags,
+                      HYPRE_Int      *tags)
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (!vec)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+   {
+      hypre_IJVectorSetTagsPar(vec, owns_tags, num_tags, tags);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJVectorInitialize
  *--------------------------------------------------------------------------*/
 

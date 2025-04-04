@@ -522,7 +522,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                       hypre_ParILUSchurGMRESMatvecDevice :
                       hypre_ParILUSchurGMRESMatvecJacIterDevice), //parCSR A -> ilu_data
                      hypre_ParKrylovMatvecDestroy, //parCSR A -- inactive
-                     hypre_ParKrylovInnerProd,
+                     hypre_ParKrylovInnerProdTagged,
                      hypre_ParKrylovCopyVector,
                      hypre_ParKrylovClearVector,
                      hypre_ParKrylovScaleVector,
@@ -839,7 +839,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                   hypre_ParKrylovMatvecCreate, //parCSR A -- inactive
                   hypre_ParILURAPSchurGMRESMatvecDevice, //parCSR A -> ilu_data
                   hypre_ParKrylovMatvecDestroy, //parCSR A -- inactive
-                  hypre_ParKrylovInnerProd,
+                  hypre_ParKrylovInnerProdTagged,
                   hypre_ParKrylovCopyVector,
                   hypre_ParKrylovClearVector,
                   hypre_ParKrylovScaleVector,
@@ -963,7 +963,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                      hypre_ParKrylovMatvecCreate, //parCSR A -- inactive
                      hypre_ParILURAPSchurGMRESMatvecHost, //parCSR A -> ilu_data
                      hypre_ParKrylovMatvecDestroy, //parCSR A -- inactive
-                     hypre_ParKrylovInnerProd,
+                     hypre_ParKrylovInnerProdTagged,
                      hypre_ParKrylovCopyVector,
                      hypre_ParKrylovClearVector,
                      hypre_ParKrylovScaleVector,

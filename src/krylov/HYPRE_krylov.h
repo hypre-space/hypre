@@ -391,6 +391,14 @@ HYPRE_Int HYPRE_GMRESSetLogging(HYPRE_Solver solver,
 
 /**
  * (Optional) Set the amount of printing to do to the screen.
+ *
+ * @param solver The solver object
+ * @param level The print level:
+ *        - 0: no output
+ *        - 1: print warnings
+ *        - 2: print convergence history (absolute and relative residual norms)
+ *        - 3: print absolute residual norms for each tag in multi-tag vectors
+ *        - 4: print relative residual norms for each tag in multi-tag vectors
  **/
 HYPRE_Int HYPRE_GMRESSetPrintLevel(HYPRE_Solver solver,
                                    HYPRE_Int    level);
