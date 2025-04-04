@@ -534,8 +534,8 @@ using hypre_DeviceItem = sycl::nd_item<3>;
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
             [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item,                                                         \
-                  shmem_accessor.get_multi_ptr<sycl::access::decorated::yes>(), __VA_ARGS__);\
-         });                                                                                 \
+                  shmem_accessor.get_multi_ptr<sycl::access::decorated::yes>().get(),        \
+                  __VA_ARGS__); });                                                          \
       }).wait_and_throw();                                                                   \
    }                                                                                         \
 }
@@ -577,9 +577,9 @@ using hypre_DeviceItem = sycl::nd_item<3>;
             sycl::target::local> shmem_accessor(shmem_range, cgh);                           \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
             [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
-               { (kernel_name)(item, debug_stream,                                           \
-                  shmem_accessor.get_multi_ptr<sycl::access::decorated::yes>(), __VA_ARGS__);\
-         });                                                                                 \
+               { (kernel_name)(item,                                                         \
+                  shmem_accessor.get_multi_ptr<sycl::access::decorated::yes>().get(),        \
+                  __VA_ARGS__); });                                                          \
       }).wait_and_throw();                                                                   \
    }                                                                                         \
 }
