@@ -25,6 +25,9 @@
 #endif
 #define HYPRE_UNROLL_MAXDEPTH 8
 
+typedef HYPRE_Complex *hypre_3Cptrs[3];
+typedef HYPRE_Complex *hypre_1Cptr;
+
 /*--------------------------------------------------------------------------
  * Macros used in the kernel loops below
  *
@@ -33,63 +36,51 @@
  *--------------------------------------------------------------------------*/
 
 #define HYPRE_SMMCORE_FF(k) \
-   cprod[k]*                \
-   tptrs[k][0][fi]*         \
-   tptrs[k][1][fi]
+   cprod[k] * tptrs[k][0][fi] * tptrs[k][1][fi]
 
 #define HYPRE_SMMCORE_CF(k) \
-    cprod[k]*               \
-    tptrs[k][0][ci]*        \
-    tptrs[k][1][fi]
+   cprod[k] * tptrs[k][0][ci] * tptrs[k][1][fi]
 
 #define HYPRE_SMMCORE_FFF(k) \
-   cprod[k]*                 \
-   tptrs[k][0][fi]*          \
-   tptrs[k][1][fi]*          \
-   tptrs[k][2][fi]
+   cprod[k] * tptrs[k][0][fi] * tptrs[k][1][fi] * tptrs[k][2][fi]
 
 #define HYPRE_SMMCORE_CFF(k) \
-    cprod[k]*                \
-    tptrs[k][0][ci]*         \
-    tptrs[k][1][fi]*         \
-    tptrs[k][2][fi]
+   cprod[k] * tptrs[k][0][ci] * tptrs[k][1][fi] * tptrs[k][2][fi]
 
 #define HYPRE_SMMCORE_CCF(k) \
-    cprod[k]*                \
-    tptrs[k][0][ci]*         \
-    tptrs[k][1][ci]*         \
-    tptrs[k][2][fi]
+   cprod[k] * tptrs[k][0][ci] * tptrs[k][1][ci] * tptrs[k][2][fi]
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultCompute_core_ff( HYPRE_Int                  ncomponents,
-                                    HYPRE_Complex             *cprod,
-                                    const HYPRE_Complex     ***tptrs,
-                                    HYPRE_Complex             *mptr,
-                                    HYPRE_Int                  ndim,
-                                    hypre_Index                loop_size,
-                                    hypre_Box                 *fdbox,
-                                    hypre_Index                fdstart,
-                                    hypre_Index                fdstride,
-                                    hypre_Box                 *Mdbox,
-                                    hypre_Index                Mdstart,
-                                    hypre_Index                Mdstride )
+hypre_StructMatmultCompute_core_ff( HYPRE_Int            nprod,
+                                    HYPRE_Complex       *cprod,
+                                    const hypre_3Cptrs  *tptrs,
+                                    hypre_1Cptr         *mptrs,
+                                    HYPRE_Int            ndim,
+                                    hypre_Index          loop_size,
+                                    hypre_Box           *fdbox,
+                                    hypre_Index          fdstart,
+                                    hypre_Index          fdstride,
+                                    hypre_Box           *Mdbox,
+                                    hypre_Index          Mdstart,
+                                    hypre_Index          Mdstride )
 {
-   HYPRE_Int     k;
-   HYPRE_Int     depth;
+   HYPRE_Complex  *mptr = mptrs[0];  /* Requires all pointers to be the same */
+   HYPRE_Int       k;
+   HYPRE_Int       depth;
 
-   if (ncomponents < 1)
+   if (nprod < 1)
    {
       return hypre_error_flag;
    }
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   for (k = 0; k < ncomponents; k += HYPRE_UNROLL_MAXDEPTH)
+   for (k = 0; k < nprod; k += HYPRE_UNROLL_MAXDEPTH)
    {
-      depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (ncomponents - k));
+      depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (nprod - k));
 
       switch (depth)
       {
@@ -230,36 +221,36 @@ hypre_StructMatmultCompute_core_ff( HYPRE_Int                  ncomponents,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultCompute_core_cf( HYPRE_Int                  ncomponents,
-                                    HYPRE_Int                **order,
-                                    HYPRE_Complex             *cprod,
-                                    const HYPRE_Complex     ***tptrs,
-                                    HYPRE_Complex             *mptr,
-                                    HYPRE_Int                  ndim,
-                                    hypre_Index                loop_size,
-                                    hypre_Box                 *fdbox,
-                                    hypre_Index                fdstart,
-                                    hypre_Index                fdstride,
-                                    hypre_Box                 *cdbox,
-                                    hypre_Index                cdstart,
-                                    hypre_Index                cdstride,
-                                    hypre_Box                 *Mdbox,
-                                    hypre_Index                Mdstart,
-                                    hypre_Index                Mdstride )
+hypre_StructMatmultCompute_core_cf( HYPRE_Int            nprod,
+                                    HYPRE_Complex       *cprod,
+                                    const hypre_3Cptrs  *tptrs,
+                                    hypre_1Cptr         *mptrs,
+                                    HYPRE_Int            ndim,
+                                    hypre_Index          loop_size,
+                                    hypre_Box           *fdbox,
+                                    hypre_Index          fdstart,
+                                    hypre_Index          fdstride,
+                                    hypre_Box           *cdbox,
+                                    hypre_Index          cdstart,
+                                    hypre_Index          cdstride,
+                                    hypre_Box           *Mdbox,
+                                    hypre_Index          Mdstart,
+                                    hypre_Index          Mdstride )
 {
-   HYPRE_Int     k;
-   HYPRE_Int     depth;
+   HYPRE_Complex  *mptr = mptrs[0];  /* Requires all pointers to be the same */
+   HYPRE_Int       k;
+   HYPRE_Int       depth;
 
-   if (ncomponents < 1)
+   if (nprod < 1)
    {
       return hypre_error_flag;
    }
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   for (k = 0; k < ncomponents; k += HYPRE_UNROLL_MAXDEPTH)
+   for (k = 0; k < nprod; k += HYPRE_UNROLL_MAXDEPTH)
    {
-      depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (ncomponents - k));
+      depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (nprod - k));
 
       switch (depth)
       {
@@ -389,32 +380,33 @@ hypre_StructMatmultCompute_core_cf( HYPRE_Int                  ncomponents,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultCompute_core_fff( HYPRE_Int                  ncomponents,
-                                     HYPRE_Complex             *cprod,
-                                     const HYPRE_Complex     ***tptrs,
-                                     HYPRE_Complex             *mptr,
-                                     HYPRE_Int                  ndim,
-                                     hypre_Index                loop_size,
-                                     hypre_Box                 *fdbox,
-                                     hypre_Index                fdstart,
-                                     hypre_Index                fdstride,
-                                     hypre_Box                 *Mdbox,
-                                     hypre_Index                Mdstart,
-                                     hypre_Index                Mdstride )
+hypre_StructMatmultCompute_core_fff( HYPRE_Int            nprod,
+                                     HYPRE_Complex       *cprod,
+                                     const hypre_3Cptrs  *tptrs,
+                                     hypre_1Cptr         *mptrs,
+                                     HYPRE_Int            ndim,
+                                     hypre_Index          loop_size,
+                                     hypre_Box           *fdbox,
+                                     hypre_Index          fdstart,
+                                     hypre_Index          fdstride,
+                                     hypre_Box           *Mdbox,
+                                     hypre_Index          Mdstart,
+                                     hypre_Index          Mdstride )
 {
-   HYPRE_Int     k;
-   HYPRE_Int     depth;
+   HYPRE_Complex  *mptr = mptrs[0];  /* Requires all pointers to be the same */
+   HYPRE_Int       k;
+   HYPRE_Int       depth;
 
-   if (ncomponents < 1)
+   if (nprod < 1)
    {
       return hypre_error_flag;
    }
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   for (k = 0; k < ncomponents; k += HYPRE_UNROLL_MAXDEPTH)
+   for (k = 0; k < nprod; k += HYPRE_UNROLL_MAXDEPTH)
    {
-      depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (ncomponents - k));
+      depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (nprod - k));
 
       switch (depth)
       {
@@ -555,36 +547,36 @@ hypre_StructMatmultCompute_core_fff( HYPRE_Int                  ncomponents,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultCompute_core_cff( HYPRE_Int                  ncomponents,
-                                     HYPRE_Int                **order,
-                                     HYPRE_Complex             *cprod,
-                                     const HYPRE_Complex     ***tptrs,
-                                     HYPRE_Complex             *mptr,
-                                     HYPRE_Int                  ndim,
-                                     hypre_Index                loop_size,
-                                     hypre_Box                 *fdbox,
-                                     hypre_Index                fdstart,
-                                     hypre_Index                fdstride,
-                                     hypre_Box                 *cdbox,
-                                     hypre_Index                cdstart,
-                                     hypre_Index                cdstride,
-                                     hypre_Box                 *Mdbox,
-                                     hypre_Index                Mdstart,
-                                     hypre_Index                Mdstride )
+hypre_StructMatmultCompute_core_cff( HYPRE_Int            nprod,
+                                     HYPRE_Complex       *cprod,
+                                     const hypre_3Cptrs  *tptrs,
+                                     hypre_1Cptr         *mptrs,
+                                     HYPRE_Int            ndim,
+                                     hypre_Index          loop_size,
+                                     hypre_Box           *fdbox,
+                                     hypre_Index          fdstart,
+                                     hypre_Index          fdstride,
+                                     hypre_Box           *cdbox,
+                                     hypre_Index          cdstart,
+                                     hypre_Index          cdstride,
+                                     hypre_Box           *Mdbox,
+                                     hypre_Index          Mdstart,
+                                     hypre_Index          Mdstride )
 {
-   HYPRE_Int     k;
-   HYPRE_Int     depth;
+   HYPRE_Complex  *mptr = mptrs[0];  /* Requires all pointers to be the same */
+   HYPRE_Int       k;
+   HYPRE_Int       depth;
 
-   if (ncomponents < 1)
+   if (nprod < 1)
    {
       return hypre_error_flag;
    }
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   for (k = 0; k < ncomponents; k += HYPRE_UNROLL_MAXDEPTH)
+   for (k = 0; k < nprod; k += HYPRE_UNROLL_MAXDEPTH)
    {
-      depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (ncomponents - k));
+      depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (nprod - k));
 
       switch (depth)
       {
@@ -714,36 +706,36 @@ hypre_StructMatmultCompute_core_cff( HYPRE_Int                  ncomponents,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultCompute_core_ccf( HYPRE_Int                  ncomponents,
-                                     HYPRE_Int                **order,
-                                     HYPRE_Complex             *cprod,
-                                     const HYPRE_Complex     ***tptrs,
-                                     HYPRE_Complex             *mptr,
-                                     HYPRE_Int                  ndim,
-                                     hypre_Index                loop_size,
-                                     hypre_Box                 *fdbox,
-                                     hypre_Index                fdstart,
-                                     hypre_Index                fdstride,
-                                     hypre_Box                 *cdbox,
-                                     hypre_Index                cdstart,
-                                     hypre_Index                cdstride,
-                                     hypre_Box                 *Mdbox,
-                                     hypre_Index                Mdstart,
-                                     hypre_Index                Mdstride )
+hypre_StructMatmultCompute_core_ccf( HYPRE_Int            nprod,
+                                     HYPRE_Complex       *cprod,
+                                     const hypre_3Cptrs  *tptrs,
+                                     hypre_1Cptr         *mptrs,
+                                     HYPRE_Int            ndim,
+                                     hypre_Index          loop_size,
+                                     hypre_Box           *fdbox,
+                                     hypre_Index          fdstart,
+                                     hypre_Index          fdstride,
+                                     hypre_Box           *cdbox,
+                                     hypre_Index          cdstart,
+                                     hypre_Index          cdstride,
+                                     hypre_Box           *Mdbox,
+                                     hypre_Index          Mdstart,
+                                     hypre_Index          Mdstride )
 {
-   HYPRE_Int     k;
-   HYPRE_Int     depth;
+   HYPRE_Complex  *mptr = mptrs[0];  /* Requires all pointers to be the same */
+   HYPRE_Int       k;
+   HYPRE_Int       depth;
 
-   if (ncomponents < 1)
+   if (nprod < 1)
    {
       return hypre_error_flag;
    }
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   for (k = 0; k < ncomponents; k += HYPRE_UNROLL_MAXDEPTH)
+   for (k = 0; k < nprod; k += HYPRE_UNROLL_MAXDEPTH)
    {
-      depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (ncomponents - k));
+      depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (nprod - k));
 
       switch (depth)
       {
@@ -889,43 +881,23 @@ hypre_StructMatmultCompute_core_double( hypre_StructMatmultDataMH *a,
                                         hypre_Index  Mdstart,
                                         hypre_Index  Mdstride )
 {
-   HYPRE_Int               *ncomp;
-   HYPRE_Complex          **cprod;
-   HYPRE_Int             ***order;
-   const HYPRE_Complex  ****tptrs;
-   HYPRE_Complex          **mptrs;
+   HYPRE_Int       nprod[2];
+   HYPRE_Complex   cprod[2][na];
+   hypre_3Cptrs    tptrs[2][na];
+   hypre_1Cptr     mptrs[2][na];
 
-   HYPRE_Int                max_components = 2;
-   HYPRE_Int                mentry, comptype, nf, nc;
-   HYPRE_Int                e, c, i, k, t;
-
-   /* Allocate memory */
-   ncomp = hypre_CTAlloc(HYPRE_Int, max_components, HYPRE_MEMORY_HOST);
-   cprod = hypre_TAlloc(HYPRE_Complex *, max_components, HYPRE_MEMORY_HOST);
-   order = hypre_TAlloc(HYPRE_Int **, max_components, HYPRE_MEMORY_HOST);
-   tptrs = hypre_TAlloc(const HYPRE_Complex***, max_components, HYPRE_MEMORY_HOST);
-   mptrs = hypre_TAlloc(HYPRE_Complex*, max_components, HYPRE_MEMORY_HOST);
-   for (c = 0; c < max_components; c++)
-   {
-      cprod[c] = hypre_CTAlloc(HYPRE_Complex, na, HYPRE_MEMORY_HOST);
-      order[c] = hypre_TAlloc(HYPRE_Int *, na, HYPRE_MEMORY_HOST);
-      tptrs[c] = hypre_TAlloc(const HYPRE_Complex **, na, HYPRE_MEMORY_HOST);
-      for (t = 0; t < na; t++)
-      {
-         order[c][t] = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
-         tptrs[c][t] = hypre_TAlloc(const HYPRE_Complex *, 2, HYPRE_MEMORY_HOST);
-      }
-   }
+   HYPRE_Int       mentry, ptype, nf, nc;
+   HYPRE_Int       e, p, i, k, t;
 
    for (e = 0; e < stencil_size; e++)
    {
-      /* Reset component counters */
-      for (c = 0; c < max_components; c++)
+      /* Reset product counters */
+      for (p = 0; p < 2; p++)
       {
-         ncomp[c] = 0;
+         nprod[p] = 0;
       }
 
-      /* Build components arrays */
+      /* Build products arrays */
       for (i = 0; i < na; i++)
       {
          mentry = a[i].mentry;
@@ -934,6 +906,7 @@ hypre_StructMatmultCompute_core_double( hypre_StructMatmultDataMH *a,
             continue;
          }
 
+         /* Determine number of fine and coarse terms */
          nf = nc = 0;
          for (t = 0; t < 2; t++)
          {
@@ -948,69 +921,53 @@ hypre_StructMatmultCompute_core_double( hypre_StructMatmultDataMH *a,
                nf++;
             }
          }
+
+         /* Determine product type */
          switch (nc)
          {
             case 0: /* ff term (call core_ff) */
-               comptype = 0;
+               ptype = 0;
                break;
             case 1: /* cf term (call core_cf) */
-               comptype = 1;
+               ptype = 1;
                break;
          }
-         k = ncomp[comptype];
-         cprod[comptype][k] = a[i].cprod;
+
+         /* Set array values for product k of product type ptype */
+         k = nprod[ptype];
+         cprod[ptype][k] = a[i].cprod;
          nf = nc = 0;
          for (t = 0; t < 2; t++)
          {
             if (a[i].types[t] == 1)
             {
                /* Type 1 -> coarse data space */
-               tptrs[comptype][k][nc] = a[i].tptrs[t];  /* put first */
+               tptrs[ptype][k][nc] = a[i].tptrs[t];  /* put first */
                nc++;
             }
             else
             {
                /* Type 0 or 2 -> fine data space */
-               tptrs[comptype][k][1 - nf] = a[i].tptrs[t];  /* put last */
+               tptrs[ptype][k][1 - nf] = a[i].tptrs[t];  /* put last */
                nf++;
             }
          }
-         mptrs[comptype] = a[i].mptr;
-         ncomp[comptype]++;
+         mptrs[ptype][k] = a[i].mptr;
+         nprod[ptype]++;
       }
 
       /* Call core functions */
-      hypre_StructMatmultCompute_core_ff(ncomp[0], cprod[0],
-                                         tptrs[0], mptrs[0],
+      hypre_StructMatmultCompute_core_ff(nprod[0], cprod[0], tptrs[0], mptrs[0],
                                          ndim, loop_size,
                                          fdbox, fdstart, fdstride,
                                          Mdbox, Mdstart, Mdstride);
 
-      hypre_StructMatmultCompute_core_cf(ncomp[1], order[1],
-                                         cprod[1], tptrs[1],
-                                         mptrs[1], ndim, loop_size,
+      hypre_StructMatmultCompute_core_cf(nprod[1], cprod[1], tptrs[1], mptrs[1],
+                                         ndim, loop_size,
                                          fdbox, fdstart, fdstride,
                                          cdbox, cdstart, cdstride,
                                          Mdbox, Mdstart, Mdstride);
    } /* loop on M stencil entries */
-
-   /* Free memory */
-   for (c = 0; c < max_components; c++)
-   {
-      for (t = 0; t < na; t++)
-      {
-         hypre_TFree(order[c][t], HYPRE_MEMORY_HOST);
-         hypre_TFree(tptrs[c][t], HYPRE_MEMORY_HOST);
-      }
-      hypre_TFree(cprod[c], HYPRE_MEMORY_HOST);
-      hypre_TFree(order[c], HYPRE_MEMORY_HOST);
-      hypre_TFree(tptrs[c], HYPRE_MEMORY_HOST);
-   }
-   hypre_TFree(ncomp, HYPRE_MEMORY_HOST);
-   hypre_TFree(cprod, HYPRE_MEMORY_HOST);
-   hypre_TFree(order, HYPRE_MEMORY_HOST);
-   hypre_TFree(tptrs, HYPRE_MEMORY_HOST);
-   hypre_TFree(mptrs, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -1035,43 +992,23 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultDataMH *a,
                                         hypre_Index  Mdstart,
                                         hypre_Index  Mdstride )
 {
-   HYPRE_Int               *ncomp;
-   HYPRE_Complex          **cprod;
-   HYPRE_Int             ***order;
-   const HYPRE_Complex  ****tptrs;
-   HYPRE_Complex          **mptrs;
+   HYPRE_Int       nprod[3];
+   HYPRE_Complex   cprod[3][na];
+   hypre_3Cptrs    tptrs[3][na];
+   hypre_1Cptr     mptrs[3][na];
 
-   HYPRE_Int                max_components = 3;
-   HYPRE_Int                mentry, comptype, nf, nc;
-   HYPRE_Int                e, c, i, k, t;
-
-   /* Allocate memory */
-   ncomp = hypre_CTAlloc(HYPRE_Int, max_components, HYPRE_MEMORY_HOST);
-   cprod = hypre_TAlloc(HYPRE_Complex *, max_components, HYPRE_MEMORY_HOST);
-   order = hypre_TAlloc(HYPRE_Int **, max_components, HYPRE_MEMORY_HOST);
-   tptrs = hypre_TAlloc(const HYPRE_Complex***, max_components, HYPRE_MEMORY_HOST);
-   mptrs = hypre_TAlloc(HYPRE_Complex*, max_components, HYPRE_MEMORY_HOST);
-   for (c = 0; c < max_components; c++)
-   {
-      cprod[c] = hypre_CTAlloc(HYPRE_Complex, na, HYPRE_MEMORY_HOST);
-      order[c] = hypre_TAlloc(HYPRE_Int *, na, HYPRE_MEMORY_HOST);
-      tptrs[c] = hypre_TAlloc(const HYPRE_Complex **, na, HYPRE_MEMORY_HOST);
-      for (t = 0; t < na; t++)
-      {
-         order[c][t] = hypre_CTAlloc(HYPRE_Int, 3, HYPRE_MEMORY_HOST);
-         tptrs[c][t] = hypre_TAlloc(const HYPRE_Complex *, 3, HYPRE_MEMORY_HOST);
-      }
-   }
+   HYPRE_Int       mentry, ptype, nf, nc;
+   HYPRE_Int       e, p, i, k, t;
 
    for (e = 0; e < stencil_size; e++)
    {
-      /* Reset component counters */
-      for (c = 0; c < max_components; c++)
+      /* Reset product counters */
+      for (p = 0; p < 3; p++)
       {
-         ncomp[c] = 0;
+         nprod[p] = 0;
       }
 
-      /* Build components arrays */
+      /* Build products arrays */
       for (i = 0; i < na; i++)
       {
          mentry = a[i].mentry;
@@ -1080,6 +1017,7 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultDataMH *a,
             continue;
          }
 
+         /* Determine number of fine and coarse terms */
          nf = nc = 0;
          for (t = 0; t < 3; t++)
          {
@@ -1094,79 +1032,62 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultDataMH *a,
                nf++;
             }
          }
+
+         /* Determine product type */
          switch (nc)
          {
             case 0: /* fff term (call core_fff) */
-               comptype = 0;
+               ptype = 0;
                break;
             case 1: /* cff term (call core_cff) */
-               comptype = 1;
+               ptype = 1;
                break;
             case 2: /* ccf term (call core_ccf) */
-               comptype = 2;
+               ptype = 2;
                break;
          }
-         k = ncomp[comptype];
-         cprod[comptype][k] = a[i].cprod;
+
+         /* Set array values for product k of product type ptype */
+         k = nprod[ptype];
+         cprod[ptype][k] = a[i].cprod;
          nf = nc = 0;
          for (t = 0; t < 3; t++)
          {
             if (a[i].types[t] == 1)
             {
                /* Type 1 -> coarse data space */
-               tptrs[comptype][k][nc] = a[i].tptrs[t];  /* put first */
+               tptrs[ptype][k][nc] = a[i].tptrs[t];  /* put first */
                nc++;
             }
             else
             {
                /* Type 0 or 2 -> fine data space */
-               tptrs[comptype][k][2 - nf] = a[i].tptrs[t];  /* put last */
+               tptrs[ptype][k][2 - nf] = a[i].tptrs[t];  /* put last */
                nf++;
             }
          }
-         mptrs[comptype] = a[i].mptr;
-         ncomp[comptype]++;
+         mptrs[ptype][k] = a[i].mptr;
+         nprod[ptype]++;
       }
 
       /* Call core functions */
-      hypre_StructMatmultCompute_core_fff(ncomp[0], cprod[0],
-                                          tptrs[0], mptrs[0],
+      hypre_StructMatmultCompute_core_fff(nprod[0], cprod[0], tptrs[0], mptrs[0],
                                           ndim, loop_size,
                                           fdbox, fdstart, fdstride,
                                           Mdbox, Mdstart, Mdstride);
 
-      hypre_StructMatmultCompute_core_cff(ncomp[1], order[1],
-                                          cprod[1], tptrs[1], mptrs[1],
+      hypre_StructMatmultCompute_core_cff(nprod[1], cprod[1], tptrs[1], mptrs[1],
                                           ndim, loop_size,
                                           fdbox, fdstart, fdstride,
                                           cdbox, cdstart, cdstride,
                                           Mdbox, Mdstart, Mdstride);
 
-      hypre_StructMatmultCompute_core_ccf(ncomp[2], order[2],
-                                          cprod[2], tptrs[2], mptrs[2],
+      hypre_StructMatmultCompute_core_ccf(nprod[2], cprod[2], tptrs[2], mptrs[2],
                                           ndim, loop_size,
                                           fdbox, fdstart, fdstride,
                                           cdbox, cdstart, cdstride,
                                           Mdbox, Mdstart, Mdstride);
    } /* loop on M stencil entries */
-
-   /* Free memory */
-   for (c = 0; c < max_components; c++)
-   {
-      for (t = 0; t < na; t++)
-      {
-         hypre_TFree(order[c][t], HYPRE_MEMORY_HOST);
-         hypre_TFree(tptrs[c][t], HYPRE_MEMORY_HOST);
-      }
-      hypre_TFree(cprod[c], HYPRE_MEMORY_HOST);
-      hypre_TFree(order[c], HYPRE_MEMORY_HOST);
-      hypre_TFree(tptrs[c], HYPRE_MEMORY_HOST);
-   }
-   hypre_TFree(ncomp, HYPRE_MEMORY_HOST);
-   hypre_TFree(cprod, HYPRE_MEMORY_HOST);
-   hypre_TFree(order, HYPRE_MEMORY_HOST);
-   hypre_TFree(tptrs, HYPRE_MEMORY_HOST);
-   hypre_TFree(mptrs, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

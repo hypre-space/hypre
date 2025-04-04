@@ -27,14 +27,14 @@ typedef HYPRE_Complex *hypre_1Cptr;
  * Macros used in the kernel loops below
  *--------------------------------------------------------------------------*/
 
-#define HYPRE_SMMFUSE_1FFF(k) \
+#define HYPRE_SMMFUSE_FFF(k) \
    mptrs[k][Mi] += cprod[k] * tptrs[k][0][fi] * tptrs[k][1][fi]* tptrs[k][2][fi]
 
-#define HYPRE_SMMFUSE_1FFC(k) \
+#define HYPRE_SMMFUSE_FFC(k) \
    mptrs[k][Mi] += cprod[k] * tptrs[k][0][fi] * tptrs[k][1][fi]* tptrs[k][2][ci]
 //   locmp[k][Mi] += loccp[k] * loctp[k][0][fi] * loctp[k][1][fi]* loctp[k][2][ci]
 
-#define HYPRE_SMMFUSE_1FCC(k) \
+#define HYPRE_SMMFUSE_FCC(k) \
    mptrs[k][Mi] += cprod[k] * tptrs[k][0][fi] * tptrs[k][1][ci]* tptrs[k][2][ci]
 
 #define HYPRE_SMMFUSE_FCC_M1M(k) \
@@ -44,18 +44,18 @@ typedef HYPRE_Complex *hypre_1Cptr;
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultCompute_fuse_1fff( HYPRE_Int        nprod,
-                                      HYPRE_Complex   *cprod,
-                                      hypre_3Cptrs    *tptrs,
-                                      hypre_1Cptr     *mptrs,
-                                      HYPRE_Int        ndim,
-                                      hypre_Index      loop_size,
-                                      hypre_Box       *fdbox,
-                                      hypre_Index      fdstart,
-                                      hypre_Index      fdstride,
-                                      hypre_Box       *Mdbox,
-                                      hypre_Index      Mdstart,
-                                      hypre_Index      Mdstride )
+hypre_StructMatmultCompute_fuse_fff( HYPRE_Int            nprod,
+                                     HYPRE_Complex       *cprod,
+                                     const hypre_3Cptrs  *tptrs,
+                                     hypre_1Cptr         *mptrs,
+                                     HYPRE_Int            ndim,
+                                     hypre_Index          loop_size,
+                                     hypre_Box           *fdbox,
+                                     hypre_Index          fdstart,
+                                     hypre_Index          fdstride,
+                                     hypre_Box           *Mdbox,
+                                     hypre_Index          Mdstart,
+                                     hypre_Index          Mdstride )
 {
    HYPRE_Int     k;
    HYPRE_Int     depth;
@@ -79,22 +79,22 @@ hypre_StructMatmultCompute_fuse_1fff( HYPRE_Int        nprod,
                                 Mdbox, Mdstart, Mdstride, Mi,
                                 fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_SMMFUSE_1FFF(k + 0);
-               HYPRE_SMMFUSE_1FFF(k + 0);
-               HYPRE_SMMFUSE_1FFF(k + 1);
-               HYPRE_SMMFUSE_1FFF(k + 2);
-               HYPRE_SMMFUSE_1FFF(k + 3);
-               HYPRE_SMMFUSE_1FFF(k + 4);
-               HYPRE_SMMFUSE_1FFF(k + 5);
-               HYPRE_SMMFUSE_1FFF(k + 6);
-               HYPRE_SMMFUSE_1FFF(k + 7);
-               HYPRE_SMMFUSE_1FFF(k + 8);
-               HYPRE_SMMFUSE_1FFF(k + 9);
-               HYPRE_SMMFUSE_1FFF(k + 10);
-               HYPRE_SMMFUSE_1FFF(k + 11);
-               HYPRE_SMMFUSE_1FFF(k + 12);
-               HYPRE_SMMFUSE_1FFF(k + 13);
-               HYPRE_SMMFUSE_1FFF(k + 14);
+               HYPRE_SMMFUSE_FFF(k + 0);
+               HYPRE_SMMFUSE_FFF(k + 0);
+               HYPRE_SMMFUSE_FFF(k + 1);
+               HYPRE_SMMFUSE_FFF(k + 2);
+               HYPRE_SMMFUSE_FFF(k + 3);
+               HYPRE_SMMFUSE_FFF(k + 4);
+               HYPRE_SMMFUSE_FFF(k + 5);
+               HYPRE_SMMFUSE_FFF(k + 6);
+               HYPRE_SMMFUSE_FFF(k + 7);
+               HYPRE_SMMFUSE_FFF(k + 8);
+               HYPRE_SMMFUSE_FFF(k + 9);
+               HYPRE_SMMFUSE_FFF(k + 10);
+               HYPRE_SMMFUSE_FFF(k + 11);
+               HYPRE_SMMFUSE_FFF(k + 12);
+               HYPRE_SMMFUSE_FFF(k + 13);
+               HYPRE_SMMFUSE_FFF(k + 14);
             }
             hypre_BoxLoop2End(Mi, fi);
             break;
@@ -104,20 +104,20 @@ hypre_StructMatmultCompute_fuse_1fff( HYPRE_Int        nprod,
                                 Mdbox, Mdstart, Mdstride, Mi,
                                 fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_SMMFUSE_1FFF(k + 0);
-               HYPRE_SMMFUSE_1FFF(k + 1);
-               HYPRE_SMMFUSE_1FFF(k + 2);
-               HYPRE_SMMFUSE_1FFF(k + 3);
-               HYPRE_SMMFUSE_1FFF(k + 4);
-               HYPRE_SMMFUSE_1FFF(k + 5);
-               HYPRE_SMMFUSE_1FFF(k + 6);
-               HYPRE_SMMFUSE_1FFF(k + 7);
-               HYPRE_SMMFUSE_1FFF(k + 8);
-               HYPRE_SMMFUSE_1FFF(k + 9);
-               HYPRE_SMMFUSE_1FFF(k + 10);
-               HYPRE_SMMFUSE_1FFF(k + 11);
-               HYPRE_SMMFUSE_1FFF(k + 12);
-               HYPRE_SMMFUSE_1FFF(k + 13);
+               HYPRE_SMMFUSE_FFF(k + 0);
+               HYPRE_SMMFUSE_FFF(k + 1);
+               HYPRE_SMMFUSE_FFF(k + 2);
+               HYPRE_SMMFUSE_FFF(k + 3);
+               HYPRE_SMMFUSE_FFF(k + 4);
+               HYPRE_SMMFUSE_FFF(k + 5);
+               HYPRE_SMMFUSE_FFF(k + 6);
+               HYPRE_SMMFUSE_FFF(k + 7);
+               HYPRE_SMMFUSE_FFF(k + 8);
+               HYPRE_SMMFUSE_FFF(k + 9);
+               HYPRE_SMMFUSE_FFF(k + 10);
+               HYPRE_SMMFUSE_FFF(k + 11);
+               HYPRE_SMMFUSE_FFF(k + 12);
+               HYPRE_SMMFUSE_FFF(k + 13);
             }
             hypre_BoxLoop2End(Mi, fi);
             break;
@@ -127,19 +127,19 @@ hypre_StructMatmultCompute_fuse_1fff( HYPRE_Int        nprod,
                                 Mdbox, Mdstart, Mdstride, Mi,
                                 fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_SMMFUSE_1FFF(k + 0);
-               HYPRE_SMMFUSE_1FFF(k + 1);
-               HYPRE_SMMFUSE_1FFF(k + 2);
-               HYPRE_SMMFUSE_1FFF(k + 3);
-               HYPRE_SMMFUSE_1FFF(k + 4);
-               HYPRE_SMMFUSE_1FFF(k + 5);
-               HYPRE_SMMFUSE_1FFF(k + 6);
-               HYPRE_SMMFUSE_1FFF(k + 7);
-               HYPRE_SMMFUSE_1FFF(k + 8);
-               HYPRE_SMMFUSE_1FFF(k + 9);
-               HYPRE_SMMFUSE_1FFF(k + 10);
-               HYPRE_SMMFUSE_1FFF(k + 11);
-               HYPRE_SMMFUSE_1FFF(k + 12);
+               HYPRE_SMMFUSE_FFF(k + 0);
+               HYPRE_SMMFUSE_FFF(k + 1);
+               HYPRE_SMMFUSE_FFF(k + 2);
+               HYPRE_SMMFUSE_FFF(k + 3);
+               HYPRE_SMMFUSE_FFF(k + 4);
+               HYPRE_SMMFUSE_FFF(k + 5);
+               HYPRE_SMMFUSE_FFF(k + 6);
+               HYPRE_SMMFUSE_FFF(k + 7);
+               HYPRE_SMMFUSE_FFF(k + 8);
+               HYPRE_SMMFUSE_FFF(k + 9);
+               HYPRE_SMMFUSE_FFF(k + 10);
+               HYPRE_SMMFUSE_FFF(k + 11);
+               HYPRE_SMMFUSE_FFF(k + 12);
             }
             hypre_BoxLoop2End(Mi, fi);
             break;
@@ -149,18 +149,18 @@ hypre_StructMatmultCompute_fuse_1fff( HYPRE_Int        nprod,
                                 Mdbox, Mdstart, Mdstride, Mi,
                                 fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_SMMFUSE_1FFF(k + 0);
-               HYPRE_SMMFUSE_1FFF(k + 1);
-               HYPRE_SMMFUSE_1FFF(k + 2);
-               HYPRE_SMMFUSE_1FFF(k + 3);
-               HYPRE_SMMFUSE_1FFF(k + 4);
-               HYPRE_SMMFUSE_1FFF(k + 5);
-               HYPRE_SMMFUSE_1FFF(k + 6);
-               HYPRE_SMMFUSE_1FFF(k + 7);
-               HYPRE_SMMFUSE_1FFF(k + 8);
-               HYPRE_SMMFUSE_1FFF(k + 9);
-               HYPRE_SMMFUSE_1FFF(k + 10);
-               HYPRE_SMMFUSE_1FFF(k + 11);
+               HYPRE_SMMFUSE_FFF(k + 0);
+               HYPRE_SMMFUSE_FFF(k + 1);
+               HYPRE_SMMFUSE_FFF(k + 2);
+               HYPRE_SMMFUSE_FFF(k + 3);
+               HYPRE_SMMFUSE_FFF(k + 4);
+               HYPRE_SMMFUSE_FFF(k + 5);
+               HYPRE_SMMFUSE_FFF(k + 6);
+               HYPRE_SMMFUSE_FFF(k + 7);
+               HYPRE_SMMFUSE_FFF(k + 8);
+               HYPRE_SMMFUSE_FFF(k + 9);
+               HYPRE_SMMFUSE_FFF(k + 10);
+               HYPRE_SMMFUSE_FFF(k + 11);
             }
             hypre_BoxLoop2End(Mi, fi);
             break;
@@ -170,17 +170,17 @@ hypre_StructMatmultCompute_fuse_1fff( HYPRE_Int        nprod,
                                 Mdbox, Mdstart, Mdstride, Mi,
                                 fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_SMMFUSE_1FFF(k + 0);
-               HYPRE_SMMFUSE_1FFF(k + 1);
-               HYPRE_SMMFUSE_1FFF(k + 2);
-               HYPRE_SMMFUSE_1FFF(k + 3);
-               HYPRE_SMMFUSE_1FFF(k + 4);
-               HYPRE_SMMFUSE_1FFF(k + 5);
-               HYPRE_SMMFUSE_1FFF(k + 6);
-               HYPRE_SMMFUSE_1FFF(k + 7);
-               HYPRE_SMMFUSE_1FFF(k + 8);
-               HYPRE_SMMFUSE_1FFF(k + 9);
-               HYPRE_SMMFUSE_1FFF(k + 10);
+               HYPRE_SMMFUSE_FFF(k + 0);
+               HYPRE_SMMFUSE_FFF(k + 1);
+               HYPRE_SMMFUSE_FFF(k + 2);
+               HYPRE_SMMFUSE_FFF(k + 3);
+               HYPRE_SMMFUSE_FFF(k + 4);
+               HYPRE_SMMFUSE_FFF(k + 5);
+               HYPRE_SMMFUSE_FFF(k + 6);
+               HYPRE_SMMFUSE_FFF(k + 7);
+               HYPRE_SMMFUSE_FFF(k + 8);
+               HYPRE_SMMFUSE_FFF(k + 9);
+               HYPRE_SMMFUSE_FFF(k + 10);
             }
             hypre_BoxLoop2End(Mi, fi);
             break;
@@ -190,16 +190,16 @@ hypre_StructMatmultCompute_fuse_1fff( HYPRE_Int        nprod,
                                 Mdbox, Mdstart, Mdstride, Mi,
                                 fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_SMMFUSE_1FFF(k + 0);
-               HYPRE_SMMFUSE_1FFF(k + 1);
-               HYPRE_SMMFUSE_1FFF(k + 2);
-               HYPRE_SMMFUSE_1FFF(k + 3);
-               HYPRE_SMMFUSE_1FFF(k + 4);
-               HYPRE_SMMFUSE_1FFF(k + 5);
-               HYPRE_SMMFUSE_1FFF(k + 6);
-               HYPRE_SMMFUSE_1FFF(k + 7);
-               HYPRE_SMMFUSE_1FFF(k + 8);
-               HYPRE_SMMFUSE_1FFF(k + 9);
+               HYPRE_SMMFUSE_FFF(k + 0);
+               HYPRE_SMMFUSE_FFF(k + 1);
+               HYPRE_SMMFUSE_FFF(k + 2);
+               HYPRE_SMMFUSE_FFF(k + 3);
+               HYPRE_SMMFUSE_FFF(k + 4);
+               HYPRE_SMMFUSE_FFF(k + 5);
+               HYPRE_SMMFUSE_FFF(k + 6);
+               HYPRE_SMMFUSE_FFF(k + 7);
+               HYPRE_SMMFUSE_FFF(k + 8);
+               HYPRE_SMMFUSE_FFF(k + 9);
             }
             hypre_BoxLoop2End(Mi, fi);
             break;
@@ -209,15 +209,15 @@ hypre_StructMatmultCompute_fuse_1fff( HYPRE_Int        nprod,
                                 Mdbox, Mdstart, Mdstride, Mi,
                                 fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_SMMFUSE_1FFF(k + 0);
-               HYPRE_SMMFUSE_1FFF(k + 1);
-               HYPRE_SMMFUSE_1FFF(k + 2);
-               HYPRE_SMMFUSE_1FFF(k + 3);
-               HYPRE_SMMFUSE_1FFF(k + 4);
-               HYPRE_SMMFUSE_1FFF(k + 5);
-               HYPRE_SMMFUSE_1FFF(k + 6);
-               HYPRE_SMMFUSE_1FFF(k + 7);
-               HYPRE_SMMFUSE_1FFF(k + 8);
+               HYPRE_SMMFUSE_FFF(k + 0);
+               HYPRE_SMMFUSE_FFF(k + 1);
+               HYPRE_SMMFUSE_FFF(k + 2);
+               HYPRE_SMMFUSE_FFF(k + 3);
+               HYPRE_SMMFUSE_FFF(k + 4);
+               HYPRE_SMMFUSE_FFF(k + 5);
+               HYPRE_SMMFUSE_FFF(k + 6);
+               HYPRE_SMMFUSE_FFF(k + 7);
+               HYPRE_SMMFUSE_FFF(k + 8);
             }
             hypre_BoxLoop2End(Mi, fi);
             break;
@@ -227,14 +227,14 @@ hypre_StructMatmultCompute_fuse_1fff( HYPRE_Int        nprod,
                                 Mdbox, Mdstart, Mdstride, Mi,
                                 fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_SMMFUSE_1FFF(k + 0);
-               HYPRE_SMMFUSE_1FFF(k + 1);
-               HYPRE_SMMFUSE_1FFF(k + 2);
-               HYPRE_SMMFUSE_1FFF(k + 3);
-               HYPRE_SMMFUSE_1FFF(k + 4);
-               HYPRE_SMMFUSE_1FFF(k + 5);
-               HYPRE_SMMFUSE_1FFF(k + 6);
-               HYPRE_SMMFUSE_1FFF(k + 7);
+               HYPRE_SMMFUSE_FFF(k + 0);
+               HYPRE_SMMFUSE_FFF(k + 1);
+               HYPRE_SMMFUSE_FFF(k + 2);
+               HYPRE_SMMFUSE_FFF(k + 3);
+               HYPRE_SMMFUSE_FFF(k + 4);
+               HYPRE_SMMFUSE_FFF(k + 5);
+               HYPRE_SMMFUSE_FFF(k + 6);
+               HYPRE_SMMFUSE_FFF(k + 7);
             }
             hypre_BoxLoop2End(Mi, fi);
             break;
@@ -244,13 +244,13 @@ hypre_StructMatmultCompute_fuse_1fff( HYPRE_Int        nprod,
                                 Mdbox, Mdstart, Mdstride, Mi,
                                 fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_SMMFUSE_1FFF(k + 0);
-               HYPRE_SMMFUSE_1FFF(k + 1);
-               HYPRE_SMMFUSE_1FFF(k + 2);
-               HYPRE_SMMFUSE_1FFF(k + 3);
-               HYPRE_SMMFUSE_1FFF(k + 4);
-               HYPRE_SMMFUSE_1FFF(k + 5);
-               HYPRE_SMMFUSE_1FFF(k + 6);
+               HYPRE_SMMFUSE_FFF(k + 0);
+               HYPRE_SMMFUSE_FFF(k + 1);
+               HYPRE_SMMFUSE_FFF(k + 2);
+               HYPRE_SMMFUSE_FFF(k + 3);
+               HYPRE_SMMFUSE_FFF(k + 4);
+               HYPRE_SMMFUSE_FFF(k + 5);
+               HYPRE_SMMFUSE_FFF(k + 6);
             }
             hypre_BoxLoop2End(Mi, fi);
             break;
@@ -260,12 +260,12 @@ hypre_StructMatmultCompute_fuse_1fff( HYPRE_Int        nprod,
                                 Mdbox, Mdstart, Mdstride, Mi,
                                 fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_SMMFUSE_1FFF(k + 0);
-               HYPRE_SMMFUSE_1FFF(k + 1);
-               HYPRE_SMMFUSE_1FFF(k + 2);
-               HYPRE_SMMFUSE_1FFF(k + 3);
-               HYPRE_SMMFUSE_1FFF(k + 4);
-               HYPRE_SMMFUSE_1FFF(k + 5);
+               HYPRE_SMMFUSE_FFF(k + 0);
+               HYPRE_SMMFUSE_FFF(k + 1);
+               HYPRE_SMMFUSE_FFF(k + 2);
+               HYPRE_SMMFUSE_FFF(k + 3);
+               HYPRE_SMMFUSE_FFF(k + 4);
+               HYPRE_SMMFUSE_FFF(k + 5);
             }
             hypre_BoxLoop2End(Mi, fi);
             break;
@@ -275,11 +275,11 @@ hypre_StructMatmultCompute_fuse_1fff( HYPRE_Int        nprod,
                                 Mdbox, Mdstart, Mdstride, Mi,
                                 fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_SMMFUSE_1FFF(k + 0);
-               HYPRE_SMMFUSE_1FFF(k + 1);
-               HYPRE_SMMFUSE_1FFF(k + 2);
-               HYPRE_SMMFUSE_1FFF(k + 3);
-               HYPRE_SMMFUSE_1FFF(k + 4);
+               HYPRE_SMMFUSE_FFF(k + 0);
+               HYPRE_SMMFUSE_FFF(k + 1);
+               HYPRE_SMMFUSE_FFF(k + 2);
+               HYPRE_SMMFUSE_FFF(k + 3);
+               HYPRE_SMMFUSE_FFF(k + 4);
             }
             hypre_BoxLoop2End(Mi, fi);
             break;
@@ -289,10 +289,10 @@ hypre_StructMatmultCompute_fuse_1fff( HYPRE_Int        nprod,
                                 Mdbox, Mdstart, Mdstride, Mi,
                                 fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_SMMFUSE_1FFF(k + 0);
-               HYPRE_SMMFUSE_1FFF(k + 1);
-               HYPRE_SMMFUSE_1FFF(k + 2);
-               HYPRE_SMMFUSE_1FFF(k + 3);
+               HYPRE_SMMFUSE_FFF(k + 0);
+               HYPRE_SMMFUSE_FFF(k + 1);
+               HYPRE_SMMFUSE_FFF(k + 2);
+               HYPRE_SMMFUSE_FFF(k + 3);
             }
             hypre_BoxLoop2End(Mi, fi);
             break;
@@ -302,9 +302,9 @@ hypre_StructMatmultCompute_fuse_1fff( HYPRE_Int        nprod,
                                 Mdbox, Mdstart, Mdstride, Mi,
                                 fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_SMMFUSE_1FFF(k + 0);
-               HYPRE_SMMFUSE_1FFF(k + 1);
-               HYPRE_SMMFUSE_1FFF(k + 2);
+               HYPRE_SMMFUSE_FFF(k + 0);
+               HYPRE_SMMFUSE_FFF(k + 1);
+               HYPRE_SMMFUSE_FFF(k + 2);
             }
             hypre_BoxLoop2End(Mi, fi);
             break;
@@ -314,8 +314,8 @@ hypre_StructMatmultCompute_fuse_1fff( HYPRE_Int        nprod,
                                 Mdbox, Mdstart, Mdstride, Mi,
                                 fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_SMMFUSE_1FFF(k + 0);
-               HYPRE_SMMFUSE_1FFF(k + 1);
+               HYPRE_SMMFUSE_FFF(k + 0);
+               HYPRE_SMMFUSE_FFF(k + 1);
             }
             hypre_BoxLoop2End(Mi, fi);
             break;
@@ -325,7 +325,7 @@ hypre_StructMatmultCompute_fuse_1fff( HYPRE_Int        nprod,
                                 Mdbox, Mdstart, Mdstride, Mi,
                                 fdbox, fdstart, fdstride, fi);
             {
-               HYPRE_SMMFUSE_1FFF(k + 0);
+               HYPRE_SMMFUSE_FFF(k + 0);
             }
             hypre_BoxLoop2End(Mi, fi);
             break;
@@ -349,21 +349,21 @@ hypre_StructMatmultCompute_fuse_1fff( HYPRE_Int        nprod,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultCompute_fuse_1ffc( HYPRE_Int        nprod,
-                                      HYPRE_Complex   *cprod,
-                                      hypre_3Cptrs    *tptrs,
-                                      hypre_1Cptr     *mptrs,
-                                      HYPRE_Int        ndim,
-                                      hypre_Index      loop_size,
-                                      hypre_Box       *fdbox,
-                                      hypre_Index      fdstart,
-                                      hypre_Index      fdstride,
-                                      hypre_Box       *cdbox,
-                                      hypre_Index      cdstart,
-                                      hypre_Index      cdstride,
-                                      hypre_Box       *Mdbox,
-                                      hypre_Index      Mdstart,
-                                      hypre_Index      Mdstride )
+hypre_StructMatmultCompute_fuse_ffc( HYPRE_Int            nprod,
+                                     HYPRE_Complex       *cprod,
+                                     const hypre_3Cptrs  *tptrs,
+                                     hypre_1Cptr         *mptrs,
+                                     HYPRE_Int            ndim,
+                                     hypre_Index          loop_size,
+                                     hypre_Box           *fdbox,
+                                     hypre_Index          fdstart,
+                                     hypre_Index          fdstride,
+                                     hypre_Box           *cdbox,
+                                     hypre_Index          cdstart,
+                                     hypre_Index          cdstride,
+                                     hypre_Box           *Mdbox,
+                                     hypre_Index          Mdstart,
+                                     hypre_Index          Mdstride )
 {
    HYPRE_Int     k;
    HYPRE_Int     depth;
@@ -388,21 +388,21 @@ hypre_StructMatmultCompute_fuse_1ffc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FFC(k + 0);
-               HYPRE_SMMFUSE_1FFC(k + 1);
-               HYPRE_SMMFUSE_1FFC(k + 2);
-               HYPRE_SMMFUSE_1FFC(k + 3);
-               HYPRE_SMMFUSE_1FFC(k + 4);
-               HYPRE_SMMFUSE_1FFC(k + 5);
-               HYPRE_SMMFUSE_1FFC(k + 6);
-               HYPRE_SMMFUSE_1FFC(k + 7);
-               HYPRE_SMMFUSE_1FFC(k + 8);
-               HYPRE_SMMFUSE_1FFC(k + 9);
-               HYPRE_SMMFUSE_1FFC(k + 10);
-               HYPRE_SMMFUSE_1FFC(k + 11);
-               HYPRE_SMMFUSE_1FFC(k + 12);
-               HYPRE_SMMFUSE_1FFC(k + 13);
-               HYPRE_SMMFUSE_1FFC(k + 14);
+               HYPRE_SMMFUSE_FFC(k + 0);
+               HYPRE_SMMFUSE_FFC(k + 1);
+               HYPRE_SMMFUSE_FFC(k + 2);
+               HYPRE_SMMFUSE_FFC(k + 3);
+               HYPRE_SMMFUSE_FFC(k + 4);
+               HYPRE_SMMFUSE_FFC(k + 5);
+               HYPRE_SMMFUSE_FFC(k + 6);
+               HYPRE_SMMFUSE_FFC(k + 7);
+               HYPRE_SMMFUSE_FFC(k + 8);
+               HYPRE_SMMFUSE_FFC(k + 9);
+               HYPRE_SMMFUSE_FFC(k + 10);
+               HYPRE_SMMFUSE_FFC(k + 11);
+               HYPRE_SMMFUSE_FFC(k + 12);
+               HYPRE_SMMFUSE_FFC(k + 13);
+               HYPRE_SMMFUSE_FFC(k + 14);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -413,20 +413,20 @@ hypre_StructMatmultCompute_fuse_1ffc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FFC(k + 0);
-               HYPRE_SMMFUSE_1FFC(k + 1);
-               HYPRE_SMMFUSE_1FFC(k + 2);
-               HYPRE_SMMFUSE_1FFC(k + 3);
-               HYPRE_SMMFUSE_1FFC(k + 4);
-               HYPRE_SMMFUSE_1FFC(k + 5);
-               HYPRE_SMMFUSE_1FFC(k + 6);
-               HYPRE_SMMFUSE_1FFC(k + 7);
-               HYPRE_SMMFUSE_1FFC(k + 8);
-               HYPRE_SMMFUSE_1FFC(k + 9);
-               HYPRE_SMMFUSE_1FFC(k + 10);
-               HYPRE_SMMFUSE_1FFC(k + 11);
-               HYPRE_SMMFUSE_1FFC(k + 12);
-               HYPRE_SMMFUSE_1FFC(k + 13);
+               HYPRE_SMMFUSE_FFC(k + 0);
+               HYPRE_SMMFUSE_FFC(k + 1);
+               HYPRE_SMMFUSE_FFC(k + 2);
+               HYPRE_SMMFUSE_FFC(k + 3);
+               HYPRE_SMMFUSE_FFC(k + 4);
+               HYPRE_SMMFUSE_FFC(k + 5);
+               HYPRE_SMMFUSE_FFC(k + 6);
+               HYPRE_SMMFUSE_FFC(k + 7);
+               HYPRE_SMMFUSE_FFC(k + 8);
+               HYPRE_SMMFUSE_FFC(k + 9);
+               HYPRE_SMMFUSE_FFC(k + 10);
+               HYPRE_SMMFUSE_FFC(k + 11);
+               HYPRE_SMMFUSE_FFC(k + 12);
+               HYPRE_SMMFUSE_FFC(k + 13);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -437,19 +437,19 @@ hypre_StructMatmultCompute_fuse_1ffc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FFC(k + 0);
-               HYPRE_SMMFUSE_1FFC(k + 1);
-               HYPRE_SMMFUSE_1FFC(k + 2);
-               HYPRE_SMMFUSE_1FFC(k + 3);
-               HYPRE_SMMFUSE_1FFC(k + 4);
-               HYPRE_SMMFUSE_1FFC(k + 5);
-               HYPRE_SMMFUSE_1FFC(k + 6);
-               HYPRE_SMMFUSE_1FFC(k + 7);
-               HYPRE_SMMFUSE_1FFC(k + 8);
-               HYPRE_SMMFUSE_1FFC(k + 9);
-               HYPRE_SMMFUSE_1FFC(k + 10);
-               HYPRE_SMMFUSE_1FFC(k + 11);
-               HYPRE_SMMFUSE_1FFC(k + 12);
+               HYPRE_SMMFUSE_FFC(k + 0);
+               HYPRE_SMMFUSE_FFC(k + 1);
+               HYPRE_SMMFUSE_FFC(k + 2);
+               HYPRE_SMMFUSE_FFC(k + 3);
+               HYPRE_SMMFUSE_FFC(k + 4);
+               HYPRE_SMMFUSE_FFC(k + 5);
+               HYPRE_SMMFUSE_FFC(k + 6);
+               HYPRE_SMMFUSE_FFC(k + 7);
+               HYPRE_SMMFUSE_FFC(k + 8);
+               HYPRE_SMMFUSE_FFC(k + 9);
+               HYPRE_SMMFUSE_FFC(k + 10);
+               HYPRE_SMMFUSE_FFC(k + 11);
+               HYPRE_SMMFUSE_FFC(k + 12);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -460,18 +460,18 @@ hypre_StructMatmultCompute_fuse_1ffc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FFC(k + 0);
-               HYPRE_SMMFUSE_1FFC(k + 1);
-               HYPRE_SMMFUSE_1FFC(k + 2);
-               HYPRE_SMMFUSE_1FFC(k + 3);
-               HYPRE_SMMFUSE_1FFC(k + 4);
-               HYPRE_SMMFUSE_1FFC(k + 5);
-               HYPRE_SMMFUSE_1FFC(k + 6);
-               HYPRE_SMMFUSE_1FFC(k + 7);
-               HYPRE_SMMFUSE_1FFC(k + 8);
-               HYPRE_SMMFUSE_1FFC(k + 9);
-               HYPRE_SMMFUSE_1FFC(k + 10);
-               HYPRE_SMMFUSE_1FFC(k + 11);
+               HYPRE_SMMFUSE_FFC(k + 0);
+               HYPRE_SMMFUSE_FFC(k + 1);
+               HYPRE_SMMFUSE_FFC(k + 2);
+               HYPRE_SMMFUSE_FFC(k + 3);
+               HYPRE_SMMFUSE_FFC(k + 4);
+               HYPRE_SMMFUSE_FFC(k + 5);
+               HYPRE_SMMFUSE_FFC(k + 6);
+               HYPRE_SMMFUSE_FFC(k + 7);
+               HYPRE_SMMFUSE_FFC(k + 8);
+               HYPRE_SMMFUSE_FFC(k + 9);
+               HYPRE_SMMFUSE_FFC(k + 10);
+               HYPRE_SMMFUSE_FFC(k + 11);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -482,17 +482,17 @@ hypre_StructMatmultCompute_fuse_1ffc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FFC(k + 0);
-               HYPRE_SMMFUSE_1FFC(k + 1);
-               HYPRE_SMMFUSE_1FFC(k + 2);
-               HYPRE_SMMFUSE_1FFC(k + 3);
-               HYPRE_SMMFUSE_1FFC(k + 4);
-               HYPRE_SMMFUSE_1FFC(k + 5);
-               HYPRE_SMMFUSE_1FFC(k + 6);
-               HYPRE_SMMFUSE_1FFC(k + 7);
-               HYPRE_SMMFUSE_1FFC(k + 8);
-               HYPRE_SMMFUSE_1FFC(k + 9);
-               HYPRE_SMMFUSE_1FFC(k + 10);
+               HYPRE_SMMFUSE_FFC(k + 0);
+               HYPRE_SMMFUSE_FFC(k + 1);
+               HYPRE_SMMFUSE_FFC(k + 2);
+               HYPRE_SMMFUSE_FFC(k + 3);
+               HYPRE_SMMFUSE_FFC(k + 4);
+               HYPRE_SMMFUSE_FFC(k + 5);
+               HYPRE_SMMFUSE_FFC(k + 6);
+               HYPRE_SMMFUSE_FFC(k + 7);
+               HYPRE_SMMFUSE_FFC(k + 8);
+               HYPRE_SMMFUSE_FFC(k + 9);
+               HYPRE_SMMFUSE_FFC(k + 10);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -503,16 +503,16 @@ hypre_StructMatmultCompute_fuse_1ffc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FFC(k + 0);
-               HYPRE_SMMFUSE_1FFC(k + 1);
-               HYPRE_SMMFUSE_1FFC(k + 2);
-               HYPRE_SMMFUSE_1FFC(k + 3);
-               HYPRE_SMMFUSE_1FFC(k + 4);
-               HYPRE_SMMFUSE_1FFC(k + 5);
-               HYPRE_SMMFUSE_1FFC(k + 6);
-               HYPRE_SMMFUSE_1FFC(k + 7);
-               HYPRE_SMMFUSE_1FFC(k + 8);
-               HYPRE_SMMFUSE_1FFC(k + 9);
+               HYPRE_SMMFUSE_FFC(k + 0);
+               HYPRE_SMMFUSE_FFC(k + 1);
+               HYPRE_SMMFUSE_FFC(k + 2);
+               HYPRE_SMMFUSE_FFC(k + 3);
+               HYPRE_SMMFUSE_FFC(k + 4);
+               HYPRE_SMMFUSE_FFC(k + 5);
+               HYPRE_SMMFUSE_FFC(k + 6);
+               HYPRE_SMMFUSE_FFC(k + 7);
+               HYPRE_SMMFUSE_FFC(k + 8);
+               HYPRE_SMMFUSE_FFC(k + 9);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -523,15 +523,15 @@ hypre_StructMatmultCompute_fuse_1ffc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FFC(k + 0);
-               HYPRE_SMMFUSE_1FFC(k + 1);
-               HYPRE_SMMFUSE_1FFC(k + 2);
-               HYPRE_SMMFUSE_1FFC(k + 3);
-               HYPRE_SMMFUSE_1FFC(k + 4);
-               HYPRE_SMMFUSE_1FFC(k + 5);
-               HYPRE_SMMFUSE_1FFC(k + 6);
-               HYPRE_SMMFUSE_1FFC(k + 7);
-               HYPRE_SMMFUSE_1FFC(k + 8);
+               HYPRE_SMMFUSE_FFC(k + 0);
+               HYPRE_SMMFUSE_FFC(k + 1);
+               HYPRE_SMMFUSE_FFC(k + 2);
+               HYPRE_SMMFUSE_FFC(k + 3);
+               HYPRE_SMMFUSE_FFC(k + 4);
+               HYPRE_SMMFUSE_FFC(k + 5);
+               HYPRE_SMMFUSE_FFC(k + 6);
+               HYPRE_SMMFUSE_FFC(k + 7);
+               HYPRE_SMMFUSE_FFC(k + 8);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -542,14 +542,14 @@ hypre_StructMatmultCompute_fuse_1ffc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FFC(k + 0);
-               HYPRE_SMMFUSE_1FFC(k + 1);
-               HYPRE_SMMFUSE_1FFC(k + 2);
-               HYPRE_SMMFUSE_1FFC(k + 3);
-               HYPRE_SMMFUSE_1FFC(k + 4);
-               HYPRE_SMMFUSE_1FFC(k + 5);
-               HYPRE_SMMFUSE_1FFC(k + 6);
-               HYPRE_SMMFUSE_1FFC(k + 7);
+               HYPRE_SMMFUSE_FFC(k + 0);
+               HYPRE_SMMFUSE_FFC(k + 1);
+               HYPRE_SMMFUSE_FFC(k + 2);
+               HYPRE_SMMFUSE_FFC(k + 3);
+               HYPRE_SMMFUSE_FFC(k + 4);
+               HYPRE_SMMFUSE_FFC(k + 5);
+               HYPRE_SMMFUSE_FFC(k + 6);
+               HYPRE_SMMFUSE_FFC(k + 7);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -560,13 +560,13 @@ hypre_StructMatmultCompute_fuse_1ffc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FFC(k + 0);
-               HYPRE_SMMFUSE_1FFC(k + 1);
-               HYPRE_SMMFUSE_1FFC(k + 2);
-               HYPRE_SMMFUSE_1FFC(k + 3);
-               HYPRE_SMMFUSE_1FFC(k + 4);
-               HYPRE_SMMFUSE_1FFC(k + 5);
-               HYPRE_SMMFUSE_1FFC(k + 6);
+               HYPRE_SMMFUSE_FFC(k + 0);
+               HYPRE_SMMFUSE_FFC(k + 1);
+               HYPRE_SMMFUSE_FFC(k + 2);
+               HYPRE_SMMFUSE_FFC(k + 3);
+               HYPRE_SMMFUSE_FFC(k + 4);
+               HYPRE_SMMFUSE_FFC(k + 5);
+               HYPRE_SMMFUSE_FFC(k + 6);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -577,12 +577,12 @@ hypre_StructMatmultCompute_fuse_1ffc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FFC(k + 0);
-               HYPRE_SMMFUSE_1FFC(k + 1);
-               HYPRE_SMMFUSE_1FFC(k + 2);
-               HYPRE_SMMFUSE_1FFC(k + 3);
-               HYPRE_SMMFUSE_1FFC(k + 4);
-               HYPRE_SMMFUSE_1FFC(k + 5);
+               HYPRE_SMMFUSE_FFC(k + 0);
+               HYPRE_SMMFUSE_FFC(k + 1);
+               HYPRE_SMMFUSE_FFC(k + 2);
+               HYPRE_SMMFUSE_FFC(k + 3);
+               HYPRE_SMMFUSE_FFC(k + 4);
+               HYPRE_SMMFUSE_FFC(k + 5);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -593,11 +593,11 @@ hypre_StructMatmultCompute_fuse_1ffc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FFC(k + 0);
-               HYPRE_SMMFUSE_1FFC(k + 1);
-               HYPRE_SMMFUSE_1FFC(k + 2);
-               HYPRE_SMMFUSE_1FFC(k + 3);
-               HYPRE_SMMFUSE_1FFC(k + 4);
+               HYPRE_SMMFUSE_FFC(k + 0);
+               HYPRE_SMMFUSE_FFC(k + 1);
+               HYPRE_SMMFUSE_FFC(k + 2);
+               HYPRE_SMMFUSE_FFC(k + 3);
+               HYPRE_SMMFUSE_FFC(k + 4);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -608,10 +608,10 @@ hypre_StructMatmultCompute_fuse_1ffc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FFC(k + 0);
-               HYPRE_SMMFUSE_1FFC(k + 1);
-               HYPRE_SMMFUSE_1FFC(k + 2);
-               HYPRE_SMMFUSE_1FFC(k + 3);
+               HYPRE_SMMFUSE_FFC(k + 0);
+               HYPRE_SMMFUSE_FFC(k + 1);
+               HYPRE_SMMFUSE_FFC(k + 2);
+               HYPRE_SMMFUSE_FFC(k + 3);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -622,9 +622,9 @@ hypre_StructMatmultCompute_fuse_1ffc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FFC(k + 0);
-               HYPRE_SMMFUSE_1FFC(k + 1);
-               HYPRE_SMMFUSE_1FFC(k + 2);
+               HYPRE_SMMFUSE_FFC(k + 0);
+               HYPRE_SMMFUSE_FFC(k + 1);
+               HYPRE_SMMFUSE_FFC(k + 2);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -635,8 +635,8 @@ hypre_StructMatmultCompute_fuse_1ffc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FFC(k + 0);
-               HYPRE_SMMFUSE_1FFC(k + 1);
+               HYPRE_SMMFUSE_FFC(k + 0);
+               HYPRE_SMMFUSE_FFC(k + 1);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -647,7 +647,7 @@ hypre_StructMatmultCompute_fuse_1ffc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FFC(k + 0);
+               HYPRE_SMMFUSE_FFC(k + 0);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -671,21 +671,21 @@ hypre_StructMatmultCompute_fuse_1ffc( HYPRE_Int        nprod,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultCompute_fuse_1fcc( HYPRE_Int        nprod,
-                                      HYPRE_Complex   *cprod,
-                                      hypre_3Cptrs    *tptrs,
-                                      hypre_1Cptr     *mptrs,
-                                      HYPRE_Int        ndim,
-                                      hypre_Index      loop_size,
-                                      hypre_Box       *fdbox,
-                                      hypre_Index      fdstart,
-                                      hypre_Index      fdstride,
-                                      hypre_Box       *cdbox,
-                                      hypre_Index      cdstart,
-                                      hypre_Index      cdstride,
-                                      hypre_Box       *Mdbox,
-                                      hypre_Index      Mdstart,
-                                      hypre_Index      Mdstride )
+hypre_StructMatmultCompute_fuse_fcc( HYPRE_Int            nprod,
+                                     HYPRE_Complex       *cprod,
+                                     const hypre_3Cptrs  *tptrs,
+                                     hypre_1Cptr         *mptrs,
+                                     HYPRE_Int            ndim,
+                                     hypre_Index          loop_size,
+                                     hypre_Box           *fdbox,
+                                     hypre_Index          fdstart,
+                                     hypre_Index          fdstride,
+                                     hypre_Box           *cdbox,
+                                     hypre_Index          cdstart,
+                                     hypre_Index          cdstride,
+                                     hypre_Box           *Mdbox,
+                                     hypre_Index          Mdstart,
+                                     hypre_Index          Mdstride )
 {
    HYPRE_Int     k;
    HYPRE_Int     depth;
@@ -710,37 +710,37 @@ hypre_StructMatmultCompute_fuse_1fcc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FCC(k + 0);
-               HYPRE_SMMFUSE_1FCC(k + 1);
-               HYPRE_SMMFUSE_1FCC(k + 2);
-               HYPRE_SMMFUSE_1FCC(k + 3);
-               HYPRE_SMMFUSE_1FCC(k + 4);
-               HYPRE_SMMFUSE_1FCC(k + 5);
-               HYPRE_SMMFUSE_1FCC(k + 6);
-               HYPRE_SMMFUSE_1FCC(k + 7);
-               HYPRE_SMMFUSE_1FCC(k + 8);
-               HYPRE_SMMFUSE_1FCC(k + 9);
-               HYPRE_SMMFUSE_1FCC(k + 10);
-               HYPRE_SMMFUSE_1FCC(k + 11);
-               HYPRE_SMMFUSE_1FCC(k + 12);
-               HYPRE_SMMFUSE_1FCC(k + 13);
-               HYPRE_SMMFUSE_1FCC(k + 14);
-               HYPRE_SMMFUSE_1FCC(k + 15);
-               HYPRE_SMMFUSE_1FCC(k + 16);
-               HYPRE_SMMFUSE_1FCC(k + 17);
-               HYPRE_SMMFUSE_1FCC(k + 18);
-               HYPRE_SMMFUSE_1FCC(k + 19);
-               HYPRE_SMMFUSE_1FCC(k + 20);
-               HYPRE_SMMFUSE_1FCC(k + 21);
-               HYPRE_SMMFUSE_1FCC(k + 22);
-               HYPRE_SMMFUSE_1FCC(k + 23);
-               HYPRE_SMMFUSE_1FCC(k + 24);
-               HYPRE_SMMFUSE_1FCC(k + 25);
-               HYPRE_SMMFUSE_1FCC(k + 26);
-               HYPRE_SMMFUSE_1FCC(k + 27);
-               HYPRE_SMMFUSE_1FCC(k + 28);
-               HYPRE_SMMFUSE_1FCC(k + 29);
-               HYPRE_SMMFUSE_1FCC(k + 30);
+               HYPRE_SMMFUSE_FCC(k + 0);
+               HYPRE_SMMFUSE_FCC(k + 1);
+               HYPRE_SMMFUSE_FCC(k + 2);
+               HYPRE_SMMFUSE_FCC(k + 3);
+               HYPRE_SMMFUSE_FCC(k + 4);
+               HYPRE_SMMFUSE_FCC(k + 5);
+               HYPRE_SMMFUSE_FCC(k + 6);
+               HYPRE_SMMFUSE_FCC(k + 7);
+               HYPRE_SMMFUSE_FCC(k + 8);
+               HYPRE_SMMFUSE_FCC(k + 9);
+               HYPRE_SMMFUSE_FCC(k + 10);
+               HYPRE_SMMFUSE_FCC(k + 11);
+               HYPRE_SMMFUSE_FCC(k + 12);
+               HYPRE_SMMFUSE_FCC(k + 13);
+               HYPRE_SMMFUSE_FCC(k + 14);
+               HYPRE_SMMFUSE_FCC(k + 15);
+               HYPRE_SMMFUSE_FCC(k + 16);
+               HYPRE_SMMFUSE_FCC(k + 17);
+               HYPRE_SMMFUSE_FCC(k + 18);
+               HYPRE_SMMFUSE_FCC(k + 19);
+               HYPRE_SMMFUSE_FCC(k + 20);
+               HYPRE_SMMFUSE_FCC(k + 21);
+               HYPRE_SMMFUSE_FCC(k + 22);
+               HYPRE_SMMFUSE_FCC(k + 23);
+               HYPRE_SMMFUSE_FCC(k + 24);
+               HYPRE_SMMFUSE_FCC(k + 25);
+               HYPRE_SMMFUSE_FCC(k + 26);
+               HYPRE_SMMFUSE_FCC(k + 27);
+               HYPRE_SMMFUSE_FCC(k + 28);
+               HYPRE_SMMFUSE_FCC(k + 29);
+               HYPRE_SMMFUSE_FCC(k + 30);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -751,21 +751,21 @@ hypre_StructMatmultCompute_fuse_1fcc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FCC(k + 0);
-               HYPRE_SMMFUSE_1FCC(k + 1);
-               HYPRE_SMMFUSE_1FCC(k + 2);
-               HYPRE_SMMFUSE_1FCC(k + 3);
-               HYPRE_SMMFUSE_1FCC(k + 4);
-               HYPRE_SMMFUSE_1FCC(k + 5);
-               HYPRE_SMMFUSE_1FCC(k + 6);
-               HYPRE_SMMFUSE_1FCC(k + 7);
-               HYPRE_SMMFUSE_1FCC(k + 8);
-               HYPRE_SMMFUSE_1FCC(k + 9);
-               HYPRE_SMMFUSE_1FCC(k + 10);
-               HYPRE_SMMFUSE_1FCC(k + 11);
-               HYPRE_SMMFUSE_1FCC(k + 12);
-               HYPRE_SMMFUSE_1FCC(k + 13);
-               HYPRE_SMMFUSE_1FCC(k + 14);
+               HYPRE_SMMFUSE_FCC(k + 0);
+               HYPRE_SMMFUSE_FCC(k + 1);
+               HYPRE_SMMFUSE_FCC(k + 2);
+               HYPRE_SMMFUSE_FCC(k + 3);
+               HYPRE_SMMFUSE_FCC(k + 4);
+               HYPRE_SMMFUSE_FCC(k + 5);
+               HYPRE_SMMFUSE_FCC(k + 6);
+               HYPRE_SMMFUSE_FCC(k + 7);
+               HYPRE_SMMFUSE_FCC(k + 8);
+               HYPRE_SMMFUSE_FCC(k + 9);
+               HYPRE_SMMFUSE_FCC(k + 10);
+               HYPRE_SMMFUSE_FCC(k + 11);
+               HYPRE_SMMFUSE_FCC(k + 12);
+               HYPRE_SMMFUSE_FCC(k + 13);
+               HYPRE_SMMFUSE_FCC(k + 14);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -776,20 +776,20 @@ hypre_StructMatmultCompute_fuse_1fcc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FCC(k + 0);
-               HYPRE_SMMFUSE_1FCC(k + 1);
-               HYPRE_SMMFUSE_1FCC(k + 2);
-               HYPRE_SMMFUSE_1FCC(k + 3);
-               HYPRE_SMMFUSE_1FCC(k + 4);
-               HYPRE_SMMFUSE_1FCC(k + 5);
-               HYPRE_SMMFUSE_1FCC(k + 6);
-               HYPRE_SMMFUSE_1FCC(k + 7);
-               HYPRE_SMMFUSE_1FCC(k + 8);
-               HYPRE_SMMFUSE_1FCC(k + 9);
-               HYPRE_SMMFUSE_1FCC(k + 10);
-               HYPRE_SMMFUSE_1FCC(k + 11);
-               HYPRE_SMMFUSE_1FCC(k + 12);
-               HYPRE_SMMFUSE_1FCC(k + 13);
+               HYPRE_SMMFUSE_FCC(k + 0);
+               HYPRE_SMMFUSE_FCC(k + 1);
+               HYPRE_SMMFUSE_FCC(k + 2);
+               HYPRE_SMMFUSE_FCC(k + 3);
+               HYPRE_SMMFUSE_FCC(k + 4);
+               HYPRE_SMMFUSE_FCC(k + 5);
+               HYPRE_SMMFUSE_FCC(k + 6);
+               HYPRE_SMMFUSE_FCC(k + 7);
+               HYPRE_SMMFUSE_FCC(k + 8);
+               HYPRE_SMMFUSE_FCC(k + 9);
+               HYPRE_SMMFUSE_FCC(k + 10);
+               HYPRE_SMMFUSE_FCC(k + 11);
+               HYPRE_SMMFUSE_FCC(k + 12);
+               HYPRE_SMMFUSE_FCC(k + 13);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -800,19 +800,19 @@ hypre_StructMatmultCompute_fuse_1fcc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FCC(k + 0);
-               HYPRE_SMMFUSE_1FCC(k + 1);
-               HYPRE_SMMFUSE_1FCC(k + 2);
-               HYPRE_SMMFUSE_1FCC(k + 3);
-               HYPRE_SMMFUSE_1FCC(k + 4);
-               HYPRE_SMMFUSE_1FCC(k + 5);
-               HYPRE_SMMFUSE_1FCC(k + 6);
-               HYPRE_SMMFUSE_1FCC(k + 7);
-               HYPRE_SMMFUSE_1FCC(k + 8);
-               HYPRE_SMMFUSE_1FCC(k + 9);
-               HYPRE_SMMFUSE_1FCC(k + 10);
-               HYPRE_SMMFUSE_1FCC(k + 11);
-               HYPRE_SMMFUSE_1FCC(k + 12);
+               HYPRE_SMMFUSE_FCC(k + 0);
+               HYPRE_SMMFUSE_FCC(k + 1);
+               HYPRE_SMMFUSE_FCC(k + 2);
+               HYPRE_SMMFUSE_FCC(k + 3);
+               HYPRE_SMMFUSE_FCC(k + 4);
+               HYPRE_SMMFUSE_FCC(k + 5);
+               HYPRE_SMMFUSE_FCC(k + 6);
+               HYPRE_SMMFUSE_FCC(k + 7);
+               HYPRE_SMMFUSE_FCC(k + 8);
+               HYPRE_SMMFUSE_FCC(k + 9);
+               HYPRE_SMMFUSE_FCC(k + 10);
+               HYPRE_SMMFUSE_FCC(k + 11);
+               HYPRE_SMMFUSE_FCC(k + 12);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -823,18 +823,18 @@ hypre_StructMatmultCompute_fuse_1fcc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FCC(k + 0);
-               HYPRE_SMMFUSE_1FCC(k + 1);
-               HYPRE_SMMFUSE_1FCC(k + 2);
-               HYPRE_SMMFUSE_1FCC(k + 3);
-               HYPRE_SMMFUSE_1FCC(k + 4);
-               HYPRE_SMMFUSE_1FCC(k + 5);
-               HYPRE_SMMFUSE_1FCC(k + 6);
-               HYPRE_SMMFUSE_1FCC(k + 7);
-               HYPRE_SMMFUSE_1FCC(k + 8);
-               HYPRE_SMMFUSE_1FCC(k + 9);
-               HYPRE_SMMFUSE_1FCC(k + 10);
-               HYPRE_SMMFUSE_1FCC(k + 11);
+               HYPRE_SMMFUSE_FCC(k + 0);
+               HYPRE_SMMFUSE_FCC(k + 1);
+               HYPRE_SMMFUSE_FCC(k + 2);
+               HYPRE_SMMFUSE_FCC(k + 3);
+               HYPRE_SMMFUSE_FCC(k + 4);
+               HYPRE_SMMFUSE_FCC(k + 5);
+               HYPRE_SMMFUSE_FCC(k + 6);
+               HYPRE_SMMFUSE_FCC(k + 7);
+               HYPRE_SMMFUSE_FCC(k + 8);
+               HYPRE_SMMFUSE_FCC(k + 9);
+               HYPRE_SMMFUSE_FCC(k + 10);
+               HYPRE_SMMFUSE_FCC(k + 11);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -845,17 +845,17 @@ hypre_StructMatmultCompute_fuse_1fcc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FCC(k + 0);
-               HYPRE_SMMFUSE_1FCC(k + 1);
-               HYPRE_SMMFUSE_1FCC(k + 2);
-               HYPRE_SMMFUSE_1FCC(k + 3);
-               HYPRE_SMMFUSE_1FCC(k + 4);
-               HYPRE_SMMFUSE_1FCC(k + 5);
-               HYPRE_SMMFUSE_1FCC(k + 6);
-               HYPRE_SMMFUSE_1FCC(k + 7);
-               HYPRE_SMMFUSE_1FCC(k + 8);
-               HYPRE_SMMFUSE_1FCC(k + 9);
-               HYPRE_SMMFUSE_1FCC(k + 10);
+               HYPRE_SMMFUSE_FCC(k + 0);
+               HYPRE_SMMFUSE_FCC(k + 1);
+               HYPRE_SMMFUSE_FCC(k + 2);
+               HYPRE_SMMFUSE_FCC(k + 3);
+               HYPRE_SMMFUSE_FCC(k + 4);
+               HYPRE_SMMFUSE_FCC(k + 5);
+               HYPRE_SMMFUSE_FCC(k + 6);
+               HYPRE_SMMFUSE_FCC(k + 7);
+               HYPRE_SMMFUSE_FCC(k + 8);
+               HYPRE_SMMFUSE_FCC(k + 9);
+               HYPRE_SMMFUSE_FCC(k + 10);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -866,16 +866,16 @@ hypre_StructMatmultCompute_fuse_1fcc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FCC(k + 0);
-               HYPRE_SMMFUSE_1FCC(k + 1);
-               HYPRE_SMMFUSE_1FCC(k + 2);
-               HYPRE_SMMFUSE_1FCC(k + 3);
-               HYPRE_SMMFUSE_1FCC(k + 4);
-               HYPRE_SMMFUSE_1FCC(k + 5);
-               HYPRE_SMMFUSE_1FCC(k + 6);
-               HYPRE_SMMFUSE_1FCC(k + 7);
-               HYPRE_SMMFUSE_1FCC(k + 8);
-               HYPRE_SMMFUSE_1FCC(k + 9);
+               HYPRE_SMMFUSE_FCC(k + 0);
+               HYPRE_SMMFUSE_FCC(k + 1);
+               HYPRE_SMMFUSE_FCC(k + 2);
+               HYPRE_SMMFUSE_FCC(k + 3);
+               HYPRE_SMMFUSE_FCC(k + 4);
+               HYPRE_SMMFUSE_FCC(k + 5);
+               HYPRE_SMMFUSE_FCC(k + 6);
+               HYPRE_SMMFUSE_FCC(k + 7);
+               HYPRE_SMMFUSE_FCC(k + 8);
+               HYPRE_SMMFUSE_FCC(k + 9);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -886,15 +886,15 @@ hypre_StructMatmultCompute_fuse_1fcc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FCC(k + 0);
-               HYPRE_SMMFUSE_1FCC(k + 1);
-               HYPRE_SMMFUSE_1FCC(k + 2);
-               HYPRE_SMMFUSE_1FCC(k + 3);
-               HYPRE_SMMFUSE_1FCC(k + 4);
-               HYPRE_SMMFUSE_1FCC(k + 5);
-               HYPRE_SMMFUSE_1FCC(k + 6);
-               HYPRE_SMMFUSE_1FCC(k + 7);
-               HYPRE_SMMFUSE_1FCC(k + 8);
+               HYPRE_SMMFUSE_FCC(k + 0);
+               HYPRE_SMMFUSE_FCC(k + 1);
+               HYPRE_SMMFUSE_FCC(k + 2);
+               HYPRE_SMMFUSE_FCC(k + 3);
+               HYPRE_SMMFUSE_FCC(k + 4);
+               HYPRE_SMMFUSE_FCC(k + 5);
+               HYPRE_SMMFUSE_FCC(k + 6);
+               HYPRE_SMMFUSE_FCC(k + 7);
+               HYPRE_SMMFUSE_FCC(k + 8);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -905,14 +905,14 @@ hypre_StructMatmultCompute_fuse_1fcc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FCC(k + 0);
-               HYPRE_SMMFUSE_1FCC(k + 1);
-               HYPRE_SMMFUSE_1FCC(k + 2);
-               HYPRE_SMMFUSE_1FCC(k + 3);
-               HYPRE_SMMFUSE_1FCC(k + 4);
-               HYPRE_SMMFUSE_1FCC(k + 5);
-               HYPRE_SMMFUSE_1FCC(k + 6);
-               HYPRE_SMMFUSE_1FCC(k + 7);
+               HYPRE_SMMFUSE_FCC(k + 0);
+               HYPRE_SMMFUSE_FCC(k + 1);
+               HYPRE_SMMFUSE_FCC(k + 2);
+               HYPRE_SMMFUSE_FCC(k + 3);
+               HYPRE_SMMFUSE_FCC(k + 4);
+               HYPRE_SMMFUSE_FCC(k + 5);
+               HYPRE_SMMFUSE_FCC(k + 6);
+               HYPRE_SMMFUSE_FCC(k + 7);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -923,13 +923,13 @@ hypre_StructMatmultCompute_fuse_1fcc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FCC(k + 0);
-               HYPRE_SMMFUSE_1FCC(k + 1);
-               HYPRE_SMMFUSE_1FCC(k + 2);
-               HYPRE_SMMFUSE_1FCC(k + 3);
-               HYPRE_SMMFUSE_1FCC(k + 4);
-               HYPRE_SMMFUSE_1FCC(k + 5);
-               HYPRE_SMMFUSE_1FCC(k + 6);
+               HYPRE_SMMFUSE_FCC(k + 0);
+               HYPRE_SMMFUSE_FCC(k + 1);
+               HYPRE_SMMFUSE_FCC(k + 2);
+               HYPRE_SMMFUSE_FCC(k + 3);
+               HYPRE_SMMFUSE_FCC(k + 4);
+               HYPRE_SMMFUSE_FCC(k + 5);
+               HYPRE_SMMFUSE_FCC(k + 6);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -940,12 +940,12 @@ hypre_StructMatmultCompute_fuse_1fcc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FCC(k + 0);
-               HYPRE_SMMFUSE_1FCC(k + 1);
-               HYPRE_SMMFUSE_1FCC(k + 2);
-               HYPRE_SMMFUSE_1FCC(k + 3);
-               HYPRE_SMMFUSE_1FCC(k + 4);
-               HYPRE_SMMFUSE_1FCC(k + 5);
+               HYPRE_SMMFUSE_FCC(k + 0);
+               HYPRE_SMMFUSE_FCC(k + 1);
+               HYPRE_SMMFUSE_FCC(k + 2);
+               HYPRE_SMMFUSE_FCC(k + 3);
+               HYPRE_SMMFUSE_FCC(k + 4);
+               HYPRE_SMMFUSE_FCC(k + 5);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -956,11 +956,11 @@ hypre_StructMatmultCompute_fuse_1fcc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FCC(k + 0);
-               HYPRE_SMMFUSE_1FCC(k + 1);
-               HYPRE_SMMFUSE_1FCC(k + 2);
-               HYPRE_SMMFUSE_1FCC(k + 3);
-               HYPRE_SMMFUSE_1FCC(k + 4);
+               HYPRE_SMMFUSE_FCC(k + 0);
+               HYPRE_SMMFUSE_FCC(k + 1);
+               HYPRE_SMMFUSE_FCC(k + 2);
+               HYPRE_SMMFUSE_FCC(k + 3);
+               HYPRE_SMMFUSE_FCC(k + 4);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -971,10 +971,10 @@ hypre_StructMatmultCompute_fuse_1fcc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FCC(k + 0);
-               HYPRE_SMMFUSE_1FCC(k + 1);
-               HYPRE_SMMFUSE_1FCC(k + 2);
-               HYPRE_SMMFUSE_1FCC(k + 3);
+               HYPRE_SMMFUSE_FCC(k + 0);
+               HYPRE_SMMFUSE_FCC(k + 1);
+               HYPRE_SMMFUSE_FCC(k + 2);
+               HYPRE_SMMFUSE_FCC(k + 3);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -985,9 +985,9 @@ hypre_StructMatmultCompute_fuse_1fcc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FCC(k + 0);
-               HYPRE_SMMFUSE_1FCC(k + 1);
-               HYPRE_SMMFUSE_1FCC(k + 2);
+               HYPRE_SMMFUSE_FCC(k + 0);
+               HYPRE_SMMFUSE_FCC(k + 1);
+               HYPRE_SMMFUSE_FCC(k + 2);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -998,8 +998,8 @@ hypre_StructMatmultCompute_fuse_1fcc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FCC(k + 0);
-               HYPRE_SMMFUSE_1FCC(k + 1);
+               HYPRE_SMMFUSE_FCC(k + 0);
+               HYPRE_SMMFUSE_FCC(k + 1);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -1010,7 +1010,7 @@ hypre_StructMatmultCompute_fuse_1fcc( HYPRE_Int        nprod,
                                 fdbox, fdstart, fdstride, fi,
                                 cdbox, cdstart, cdstride, ci);
             {
-               HYPRE_SMMFUSE_1FCC(k + 0);
+               HYPRE_SMMFUSE_FCC(k + 0);
             }
             hypre_BoxLoop3End(Mi, fi, ci);
             break;
@@ -1563,13 +1563,13 @@ hypre_StructMatmultCompute_fuse_triple( hypre_StructMatmultDataMH *a,
       /* Determine product type */
       switch (nc)
       {
-         case 0: /* fff term (call core_1t) */
+         case 0: /* fff term (call fuse_fff) */
             ptype = 0;
             break;
-         case 1: /* ffc term (call core_2tbb) */
+         case 1: /* ffc term (call fuse_ffc) */
             ptype = 1;
             break;
-         case 2: /* fcc term (call core_2etb) */
+         case 2: /* fcc term (call fuse_fcc) */
             ptype = 2;
             break;
       }
@@ -1604,23 +1604,23 @@ hypre_StructMatmultCompute_fuse_triple( hypre_StructMatmultDataMH *a,
    hypre_fuse_sort(nprod[1], tptrs[1], mptrs[1]);
    hypre_fuse_sort(nprod[2], tptrs[2], mptrs[2]);
 
-   /* Call core functions */
-   hypre_StructMatmultCompute_fuse_1fff(nprod[0], cprod[0], tptrs[0], mptrs[0],
-                                        ndim, loop_size,
-                                        fdbox, fdstart, fdstride,
-                                        Mdbox, Mdstart, Mdstride);
+   /* Call fuse functions */
+   hypre_StructMatmultCompute_fuse_fff(nprod[0], cprod[0], tptrs[0], mptrs[0],
+                                       ndim, loop_size,
+                                       fdbox, fdstart, fdstride,
+                                       Mdbox, Mdstart, Mdstride);
 
-   hypre_StructMatmultCompute_fuse_1ffc(nprod[1], cprod[1], tptrs[1], mptrs[1],
-                                        ndim, loop_size,
-                                        fdbox, fdstart, fdstride,
-                                        cdbox, cdstart, cdstride,
-                                        Mdbox, Mdstart, Mdstride);
+   hypre_StructMatmultCompute_fuse_ffc(nprod[1], cprod[1], tptrs[1], mptrs[1],
+                                       ndim, loop_size,
+                                       fdbox, fdstart, fdstride,
+                                       cdbox, cdstart, cdstride,
+                                       Mdbox, Mdstart, Mdstride);
 
-   hypre_StructMatmultCompute_fuse_1fcc(nprod[2], cprod[2], tptrs[2], mptrs[2],
-                                        ndim, loop_size,
-                                        fdbox, fdstart, fdstride,
-                                        cdbox, cdstart, cdstride,
-                                        Mdbox, Mdstart, Mdstride);
+   hypre_StructMatmultCompute_fuse_fcc(nprod[2], cprod[2], tptrs[2], mptrs[2],
+                                       ndim, loop_size,
+                                       fdbox, fdstart, fdstride,
+                                       cdbox, cdstart, cdstride,
+                                       Mdbox, Mdstart, Mdstride);
    //hypre_StructMatmultCompute_fuse_fcc_m1m(nprod[2], cprod[2], tptrs[2], mptrs[2],
    //                                        ndim, loop_size,
    //                                        fdbox, fdstart, fdstride,
