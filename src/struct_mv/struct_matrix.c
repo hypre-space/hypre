@@ -524,8 +524,6 @@ hypre_StructMatrixCreate( MPI_Comm             comm,
    hypre_StructMatrixRefCount(matrix)    = 1;
 
    /* set defaults */
-   hypre_StructMatrixRanGhsize(matrix) = 0;
-   hypre_StructMatrixDomGhsize(matrix) = 0;
    hypre_StructMatrixRangeIsCoarse(matrix) = 0;
    hypre_StructMatrixDomainIsCoarse(matrix) = 0;
    hypre_StructMatrixSymmetric(matrix) = 0;
@@ -948,9 +946,7 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    HYPRE_Int            *constant   = hypre_StructMatrixConstant(matrix);
    hypre_IndexRef        ran_stride = hypre_StructMatrixRanStride(matrix);
    hypre_IndexRef        dom_stride = hypre_StructMatrixDomStride(matrix);
-   HYPRE_Int            *num_ghost  = hypre_StructMatrixNumGhost(matrix);
    hypre_IndexRef        periodic   = hypre_StructGridPeriodic(grid);
-   hypre_BoxArray       *grid_boxes = hypre_StructGridBoxes(grid);
 
    hypre_StructStencil  *user_stencil;
    hypre_StructStencil  *stencil;
@@ -960,9 +956,7 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    HYPRE_Int            *symm_entries;
    HYPRE_Int             domain_is_coarse;
    hypre_BoxArray       *data_space;
-   hypre_Box            *ghost_box;
    HYPRE_Int            *sym_ghost;
-   HYPRE_Int             dom_ghsize, ran_ghsize;
    HYPRE_Int             i, j, d, resize;
 
    /*-----------------------------------------------------------------------
@@ -1146,39 +1140,10 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    hypre_StructMatrixSetTranspose(matrix, hypre_StructMatrixTranspose(matrix), &resize);
 
    /*-----------------------------------------------------------------------
-    * Set total number of nonzero coefficients.  For constant coefficients, this
-    * is unrelated to the amount of data actually stored.
+    * Compute global size
     *-----------------------------------------------------------------------*/
 
-   hypre_StructMatrixGlobalSize(matrix) =
-      hypre_StructGridGlobalSize(grid) * stencil_size;
-
-   /* Compute number of variables including ghosts (only num_ghost) */
-   ghost_box  = hypre_BoxCreate(ndim);
-   dom_ghsize = ran_ghsize = 0;
-   hypre_ForBoxI(i, grid_boxes)
-   {
-      /* Domain grid (columns) */
-      hypre_CopyBox(hypre_BoxArrayBox(grid_boxes, i), ghost_box);
-      hypre_CoarsenBox(ghost_box, NULL, dom_stride);
-      if (hypre_BoxVolume(ghost_box))
-      {
-         hypre_BoxGrowByArray(ghost_box, num_ghost);
-         dom_ghsize += hypre_BoxVolume(ghost_box);
-      }
-
-      /* Range grid (columns) */
-      hypre_CopyBox(hypre_BoxArrayBox(grid_boxes, i), ghost_box);
-      hypre_CoarsenBox(ghost_box, NULL, ran_stride);
-      if (hypre_BoxVolume(ghost_box))
-      {
-         hypre_BoxGrowByArray(ghost_box, num_ghost);
-         ran_ghsize += hypre_BoxVolume(ghost_box);
-      }
-   }
-   hypre_StructMatrixDomGhsize(matrix) = dom_ghsize;
-   hypre_StructMatrixRanGhsize(matrix) = ran_ghsize;
-   hypre_BoxDestroy(ghost_box);
+   hypre_StructMatrixGlobalSize(matrix) = hypre_StructGridGlobalSize(grid) * stencil_size;
 
    /*-----------------------------------------------------------------------
     * Set up information related to the data space and data storage
@@ -1823,7 +1788,8 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
       hypre_IndexRef     fstride;
       HYPRE_Int          i, tot_num_ghost[2 * HYPRE_MAXDIM];
 
-      /* RDF TODO: Use CommStencil to do communication */
+      /* RDF TODO: Use CommStencil to do communication; don't forget to account
+       * for symmetric stencil entries */
       for (i = 0; i < 2 * ndim; i++)
       {
          tot_num_ghost[i] = hypre_max(num_ghost[i] + sym_ghost[i], trn_ghost[i]);

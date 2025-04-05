@@ -38,6 +38,8 @@ set(SRCS
   struct_matrix_mask.c
   struct_matvec.c
   struct_matmult.c
+  struct_matmult_core.c
+  struct_matmult_fuse.c
   struct_matop.c
   struct_stmatrix.c
   struct_scale.c
