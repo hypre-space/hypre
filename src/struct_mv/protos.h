@@ -449,36 +449,6 @@ HYPRE_Int
 hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
                             HYPRE_Int                 iM );
 HYPRE_Int
-hypre_StructMatmultCompute_core_double( hypre_StructMatmultDataMH *a,
-                                        HYPRE_Int    na,
-                                        HYPRE_Int    ndim,
-                                        hypre_Index  loop_size,
-                                        HYPRE_Int    stencil_size,
-                                        hypre_Box   *fdbox,
-                                        hypre_Index  fdstart,
-                                        hypre_Index  fdstride,
-                                        hypre_Box   *cdbox,
-                                        hypre_Index  cdstart,
-                                        hypre_Index  cdstride,
-                                        hypre_Box   *Mdbox,
-                                        hypre_Index  Mdstart,
-                                        hypre_Index  Mdstride );
-HYPRE_Int
-hypre_StructMatmultCompute_core_triple( hypre_StructMatmultDataMH *a,
-                                        HYPRE_Int    na,
-                                        HYPRE_Int    ndim,
-                                        hypre_Index  loop_size,
-                                        HYPRE_Int    stencil_size,
-                                        hypre_Box   *fdbox,
-                                        hypre_Index  fdstart,
-                                        hypre_Index  fdstride,
-                                        hypre_Box   *cdbox,
-                                        hypre_Index  cdstart,
-                                        hypre_Index  cdstride,
-                                        hypre_Box   *Mdbox,
-                                        hypre_Index  Mdstart,
-                                        hypre_Index  Mdstride );
-HYPRE_Int
 hypre_StructMatmultCompute_core_generic( hypre_StructMatmultDataMH *a,
                                          HYPRE_Int    na,
                                          HYPRE_Int    nterms,
@@ -558,6 +528,24 @@ HYPRE_Int
 hypre_StructMatrixAddMat( hypre_StructMatrix       *A,
                           HYPRE_Complex             alpha,
                           hypre_StructMatrix       *B );
+
+/* struct_matmult_core.c */
+HYPRE_Int
+hypre_StructMatmultCompute_core( HYPRE_Int                  nterms,
+                                 hypre_StructMatmultDataMH *a,
+                                 HYPRE_Int                  na,
+                                 HYPRE_Int                  ndim,
+                                 hypre_Index                loop_size,
+                                 HYPRE_Int                  stencil_size,
+                                 hypre_Box                 *fdbox,
+                                 hypre_Index                fdstart,
+                                 hypre_Index                fdstride,
+                                 hypre_Box                 *cdbox,
+                                 hypre_Index                cdstart,
+                                 hypre_Index                cdstride,
+                                 hypre_Box                 *Mdbox,
+                                 hypre_Index                Mdstart,
+                                 hypre_Index                Mdstride );
 
 /* struct_matmult_fuse.c */
 HYPRE_Int

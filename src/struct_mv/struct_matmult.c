@@ -152,8 +152,12 @@
  *       t2[fi] = 0/1    (const,coarse)     -> mask for a on fine data space
  *       t3[fi] = 0/1    (const,fine)       -> mask for b on fine data space
  *
- * Note that the mask is on the fine data space.  RDF: It may be possible to
- * have masks for the fine and coarse data spaces.  This could have benefits.
+ * Note that the mask is on the fine data space.  Although it may be possible to
+ * have masks for the fine and coarse data spaces, it's probably not useful.
+ * Consider, for example, the Galerkin RAP product in multigrid where the
+ * diagonal entry of P and R have constant value 1.  We can have a coarse mask
+ * for P because its domain is coarse, but R would require a fine mask, which
+ * involves more memory than currently.
  *--------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------
@@ -736,7 +740,7 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
          while (st_coeff != NULL)
          {
             a[na + i].cprod = 1.0;
-            const_term = 0;  /* Is there a constant term? (RDF: that requires a mask?) */
+            const_term = 0;  /* Is there a constant term that requires a mask? */
             var_term = 0;    /* Is there a variable term? */
             for (t = 0; t < nterms; t++)
             {
@@ -753,20 +757,38 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
                hypre_CopyToIndex(shift, ndim, offset);
                if (hypre_StructMatrixConstEntry(matrix, entry))
                {
-                  a[na + i].types[t] = 2;
-                  /* If this is not a transpose coefficient, adjust offset */
-                  if (!transposes[id])
+                  /*** Constant term (type 2 or 3) ***/
+
+                  stencil = hypre_StructMatrixStencil(matrix);
+                  offsetref = hypre_StructStencilOffset(stencil, entry);
+                  if ( hypre_IndexEqual(offsetref, 0, ndim) )
                   {
-                     stencil = hypre_StructMatrixStencil(matrix);
-                     offsetref = hypre_StructStencilOffset(stencil, entry);
-                     hypre_AddIndexes(offset, offsetref, ndim, offset);
+                     /* This constant term DOES NOT require a mask.  Since the
+                      * stencil offset is zero, it can't reach cross a boundary.
+                      * If its shift puts it outside the boundary, another term
+                      * must either be variable or constant-with-a-mask, and it
+                      * will ensure the product is zero. */
+                     a[na + i].types[t] = 3;
                   }
-                  /* Update comm_stencil for the mask */
-                  hypre_CommStencilSetEntry(comm_stencils[nmatrices], offset);
-                  const_term = 1;
+                  else
+                  {
+                     /* This constant term DOES require a mask */
+                     a[na + i].types[t] = 2;
+                     /* If this is not a transpose coefficient, adjust offset */
+                     if (!transposes[id])
+                     {
+                        hypre_AddIndexes(offset, offsetref, ndim, offset);
+                     }
+                     /* Update comm_stencil for the mask */
+                     hypre_CommStencilSetEntry(comm_stencils[nmatrices], offset);
+
+                     const_term = 1; /* This is a constant term that requires a mask */
+                  }
                }
                else
                {
+                  /*** Variable term (type 0 or 1) ***/
+
                   /* If this is not a stored symmetric coefficient, adjust offset */
                   symm = hypre_StructMatrixSymmEntries(matrix);
                   if (!(symm[entry] < 0))
@@ -777,13 +799,13 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
                   }
                   /* Update comm_stencil for matrix m */
                   hypre_CommStencilSetEntry(comm_stencils[m], offset);
-                  const_entry = 0;
-                  var_term = 1;
-                  all_const = 0;
+
+                  var_term = 1;    /* This is a variable term */
+                  const_entry = 0; /* This can't be a constant entry of M */
+                  all_const = 0;   /* This can't be an all-constant matrix M */
                }
             }
 
-            /* Need a mask if we have a mixed constant-and-variable product term */
             if (const_term && var_term)
             {
                need_mask = 1;
@@ -1352,7 +1374,7 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
                   //                  hypre_BoxIndexRank(cdbox, tdstart);
                   break;
 
-               case 2: /* constant coefficient - point to mask */
+               case 2: /* constant coefficient with a mask */
                   constp = hypre_StructMatrixConstData(matrix, entry);
                   a[i].cprod *= constp[0];
                   if (!transposes[id])
@@ -1367,6 +1389,11 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
                   //a[i].offsets[t] = hypre_StructVectorDataIndices(mask)[b] +
                   //                  hypre_BoxIndexRank(fdbox, tdstart);
                   break;
+
+               case 3: /* constant coefficient without a mask */
+                  constp = hypre_StructMatrixConstData(matrix, entry);
+                  a[i].cprod *= constp[0];
+                  break;
             }
          }
       } /* end loop over a entries */
@@ -1375,21 +1402,16 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
       switch (nterms)
       {
          case 2:
-            hypre_StructMatmultCompute_core_double(a, na, ndim, loop_size, stencil_size,
-                                                   fdbox, fdstart, fdstride,
-                                                   cdbox, cdstart, cdstride,
-                                                   Mdbox, Mdstart, Mdstride);
-            break;
-
          case 3:
-            hypre_StructMatmultCompute_core_triple(a, na, ndim, loop_size, stencil_size,
-                                                   fdbox, fdstart, fdstride,
-                                                   cdbox, cdstart, cdstride,
-                                                   Mdbox, Mdstart, Mdstride);
-            //hypre_StructMatmultCompute_fuse_triple(a, na, ndim, loop_size, stencil_size,
-            //                                       fdbox, fdstart, fdstride,
-            //                                       cdbox, cdstart, cdstride,
-            //                                       Mdbox, Mdstart, Mdstride);
+            hypre_StructMatmultCompute_core(nterms, a, na, ndim, loop_size, stencil_size,
+                                            fdbox, fdstart, fdstride,
+                                            cdbox, cdstart, cdstride,
+                                            Mdbox, Mdstart, Mdstride);
+            // Save this for now
+            // hypre_StructMatmultCompute_fuse_triple(a, na, ndim, loop_size, stencil_size,
+            //                                        fdbox, fdstart, fdstride,
+            //                                        cdbox, cdstart, cdstride,
+            //                                        Mdbox, Mdstart, Mdstride);
             break;
 
          default:
@@ -1454,9 +1476,12 @@ hypre_StructMatmultCompute_core_generic( hypre_StructMatmultDataMH *a,
                   pprod = a[i].tptrs[t][ci];
                   break;
 
-               case 2: /* constant coefficient - multiply by mask value */
+               case 2: /* constant coefficient with a mask - multiply by mask value */
                   pprod = a[i].tptrs[t][fi];
                   break;
+
+               case 3: /* constant coefficient without a mask - do nothing */
+                  continue;
             }
             prod *= pprod;
          }

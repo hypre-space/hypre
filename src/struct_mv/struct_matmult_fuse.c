@@ -25,6 +25,9 @@ typedef HYPRE_Complex *hypre_1Cptr;
 
 /*--------------------------------------------------------------------------
  * Macros used in the kernel loops below
+ *
+ * F/C means fine/coarse data space.  For example, CFF means the data spaces for
+ * the three terms are respectively coarse, fine, and fine.
  *--------------------------------------------------------------------------*/
 
 #define HYPRE_SMMFUSE_FFF(k) \
