@@ -589,6 +589,8 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
    HYPRE_Int              coarse_blk_dim = blk_dims[level];
    HYPRE_Int              rebuild_commpkg = 0;
    HYPRE_Complex          one = 1.0;
+   HYPRE_MemoryLocation   memory_location = hypre_ParCSRMatrixMemoryLocation(A);
+   HYPRE_ExecutionPolicy  exec_policy = hypre_GetExecPolicy1(memory_location);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
    hypre_GpuProfilingPushRange("RAP");
@@ -596,7 +598,7 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
    if (!method)
    {
       /* Galerkin path */
-      if ((interp_type == 0) && Wr)
+      if ((interp_type == 0) && Wr && (exec_policy == HYPRE_EXEC_HOST))
       {
          /* Prolongation is the injection operator and
             Restriction is not the injection operator (Wr != NULL) */
@@ -604,7 +606,7 @@ hypre_MGRBuildCoarseOperator(void                *mgr_vdata,
          hypre_ParCSRMatrixAdd(one, A_CC, one, RAP_c, &RAP);
          hypre_ParCSRMatrixDestroy(RAP_c);
       }
-      else if ((restrict_type == 0) && Wp)
+      else if ((restrict_type == 0) && Wp && (exec_policy == HYPRE_EXEC_HOST))
       {
          /* Prolongation is not the injection operator (Wp != NULL) and
             Restriction is the injection operator */
