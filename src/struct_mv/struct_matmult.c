@@ -3263,6 +3263,10 @@ hypre_StructMatmultCompute_core_1t( hypre_StructMatmultDataMH *a,
       }
    }
 
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncComputeStream();
+#endif
+
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
@@ -3445,6 +3449,10 @@ hypre_StructMatmultCompute_core_1tb( hypre_StructMatmultDataMH *a,
             return hypre_error_flag;
       }
    }
+
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncComputeStream();
+#endif
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -3629,6 +3637,10 @@ hypre_StructMatmultCompute_core_1tbb( hypre_StructMatmultDataMH *a,
       }
    }
 
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncComputeStream();
+#endif
+
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
@@ -3808,6 +3820,10 @@ hypre_StructMatmultCompute_core_1tbbb( hypre_StructMatmultDataMH *a,
       }
    }
 
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncComputeStream();
+#endif
+
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
@@ -3983,6 +3999,10 @@ hypre_StructMatmultCompute_core_2t( hypre_StructMatmultDataMH *a,
             return hypre_error_flag;
       }
    }
+
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncComputeStream();
+#endif
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -4163,6 +4183,10 @@ hypre_StructMatmultCompute_core_2tb( hypre_StructMatmultDataMH *a,
       }
    }
 
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncComputeStream();
+#endif
+
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
@@ -4340,6 +4364,10 @@ hypre_StructMatmultCompute_core_2etb( hypre_StructMatmultDataMH *a,
       }
    }
 
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncComputeStream();
+#endif
+
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
@@ -4510,6 +4538,10 @@ hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultDataMH *a,
             return hypre_error_flag;
       }
    }
+
+#if defined(HYPRE_USING_GPU)
+   hypre_SyncComputeStream();
+#endif
 
    HYPRE_ANNOTATE_FUNC_END;
 
