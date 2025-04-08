@@ -4067,7 +4067,9 @@ main( hypre_int argc,
                            hypre_TMemcpy(d_values, values, HYPRE_Real, size,
                                          memory_location, HYPRE_MEMORY_HOST);
 
-                           HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
+                           HYPRE_SStructVectorSetBoxValues(x, part,
+                                                           ilower, iupper,
+                                                           var, d_values);
                         }
                      }
                   }

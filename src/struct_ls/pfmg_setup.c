@@ -452,7 +452,7 @@ hypre_PFMGComputeMaxLevels( hypre_StructGrid   *grid,
 /*--------------------------------------------------------------------------
  * hypre_PFMGComputeCxyz
  *
- * TODO: Change SerialBoxLoop to BoxLoop
+ * TODO: Change BoxLoopHost to BoxLoop
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
@@ -561,8 +561,8 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
       /* constant_coefficient==0, all coefficients vary with space */
       else
       {
-         hypre_SerialBoxLoop1Begin(ndim, loop_size,
-                                   A_dbox, start, stride, Ai);
+         hypre_BoxLoop1BeginHost(ndim, loop_size,
+                                 A_dbox, start, stride, Ai);
          {
             for (d = 0; d < ndim; d++)
             {
@@ -605,7 +605,7 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
                }
             }
          }
-         hypre_SerialBoxLoop1End(Ai);
+         hypre_BoxLoop1EndHost(Ai);
       }
    }
 

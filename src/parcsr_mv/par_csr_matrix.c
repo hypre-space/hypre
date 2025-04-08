@@ -423,7 +423,8 @@ hypre_ParCSRMatrixSetNumRownnz( hypre_ParCSRMatrix *matrix )
 
    HYPRE_BigInt      local_num_rownnz;
    HYPRE_BigInt      global_num_rownnz;
-   HYPRE_Int         i, j;
+   HYPRE_Int         i = num_rownnz_diag;
+   HYPRE_Int         j = num_rownnz_offd;
 
    if (!matrix)
    {
@@ -431,17 +432,25 @@ hypre_ParCSRMatrixSetNumRownnz( hypre_ParCSRMatrix *matrix )
       return hypre_error_flag;
    }
 
-   local_num_rownnz = i = j = 0;
-   while (i < num_rownnz_diag && j < num_rownnz_offd)
+   local_num_rownnz = 0;
+   if (rownnz_diag && !rownnz_offd)
    {
-      local_num_rownnz++;
-      if (rownnz_diag[i] < rownnz_offd[j])
+      local_num_rownnz = num_rownnz_diag;
+   }
+   else if (rownnz_diag && rownnz_offd)
+   {
+      i = j = 0;
+      while (i < num_rownnz_diag && j < num_rownnz_offd)
       {
-         i++;
-      }
-      else
-      {
-         j++;
+         local_num_rownnz++;
+         if (rownnz_diag[i] < rownnz_offd[j])
+         {
+            i++;
+         }
+         else
+         {
+            j++;
+         }
       }
    }
 
