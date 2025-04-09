@@ -14,25 +14,22 @@
 #ifndef hypre_STRUCT_MATMULT_HEADER
 #define hypre_STRUCT_MATMULT_HEADER
 
-#ifdef MAXTERMS
-#undef MAXTERMS
-#endif
-#define MAXTERMS 3
-
 /*--------------------------------------------------------------------------
  * StructMatmultDataMH data structure
+ *
+ * Note: Only up to 3 matrix terms are currently allowed in the product.
  *--------------------------------------------------------------------------*/
 
 /* product term used to compute the variable stencil entries in M */
 typedef struct hypre_StructMatmultDataMH_struct
 {
-   hypre_StTerm    terms[MAXTERMS];   /* stencil info for each term */
-   HYPRE_Int       mentry;            /* stencil entry for M */
-   HYPRE_Complex   cprod;             /* product of the constant terms */
-   HYPRE_Int       types[MAXTERMS];   /* types of computations to do for each term */
-   HYPRE_Complex  *tptrs[MAXTERMS];   /* pointers to matrix data for each term */
-   //HYPRE_Int       offsets[MAXTERMS]; /* (RDF: Needed? Similar to tptrs and not used.) */
-   HYPRE_Complex  *mptr;              /* pointer to matrix data for M */
+   hypre_StTerm    terms[3];     /* stencil info for each term */
+   HYPRE_Int       mentry;       /* stencil entry for M */
+   HYPRE_Complex   cprod;        /* product of the constant terms */
+   HYPRE_Int       types[3];     /* types of computations to do for each term */
+   HYPRE_Complex  *tptrs[3];     /* pointers to matrix data for each term */
+   //HYPRE_Int       offsets[3];   /* RDF: Not needed - keep for now */
+   HYPRE_Complex  *mptr;         /* pointer to matrix data for M */
 
 } hypre_StructMatmultDataMH;
 
@@ -49,12 +46,10 @@ typedef struct hypre_StructMatmultDataM_struct
    hypre_StructMatrix         *M;              /* matmult matrix being computed */
    hypre_StMatrix             *st_M;           /* stencil matrix for M */
 
-   HYPRE_Int                   nconst;         /* number of constant entries in M */
-   HYPRE_Int                  *const_entries;  /* constant entries in M */
-   HYPRE_Complex              *const_values;   /* constant values in M */
-
-   HYPRE_Int                   na;             /* size of the matmult helper */
-   hypre_StructMatmultDataMH  *a;              /* helper for computing the matmult */
+   HYPRE_Int                   nc;             /* size of array c */
+   hypre_StructMatmultDataMH  *c;              /* helper for computing constant entries */
+   HYPRE_Int                   na;             /* size of array a */
+   hypre_StructMatmultDataMH  *a;              /* helper for computing variable entries */
 
 } hypre_StructMatmultDataM;
 
@@ -80,11 +75,8 @@ typedef struct hypre_StructMatmultData_struct
 
    hypre_StructVector   *mask;            /* bit mask for mixed constant-variable coeff multiplies */
    hypre_CommPkg        *comm_pkg;        /* pointer to agglomerated communication package */
-   hypre_CommPkg       **comm_pkg_a;      /* pointer to communication packages */
    HYPRE_Complex       **comm_data;       /* pointer to agglomerated communication data */
-   HYPRE_Complex      ***comm_data_a;     /* pointer to communication data */
-   HYPRE_Int             num_comm_pkgs;   /* number of communication packages to be agglomerated */
-   HYPRE_Int             num_comm_blocks; /* total number of communication blocks */
+   hypre_CommStencil   **comm_stencils;   /* comm stencils used to define communication */
 
 } hypre_StructMatmultData;
 

@@ -19,7 +19,7 @@
 #include "HYPRE_struct_mv.h"
 
 #define MAXDIM 3
-#define DEBUG 0
+// #define DEBUG 1
 
 /*--------------------------------------------------------------------------
  * Data structures
