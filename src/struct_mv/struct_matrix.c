@@ -701,6 +701,71 @@ hypre_StructMatrixComputeDataSpace( hypre_StructMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * This grows the current matrix data space (if needed) to support the minimum
+ * num_ghost array specified in the argument list.  It is assumed that the
+ * current data space already accounts for symmetric or transpose matrices.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixGrowDataSpace( hypre_StructMatrix *matrix,
+                                 HYPRE_Int          *num_ghost,
+                                 hypre_BoxArray    **data_space_ptr )
+{
+   HYPRE_Int          ndim        = hypre_StructMatrixNDim(matrix);
+   hypre_StructGrid  *grid        = hypre_StructMatrixGrid(matrix);
+   hypre_BoxArray    *cdata_space = hypre_StructMatrixDataSpace(matrix);
+   hypre_BoxArray    *data_space;
+   hypre_Box         *data_box;
+   HYPRE_Int          i, d, d2;
+
+   /* Compute data space based only on num_ghost */
+   data_space = hypre_BoxArrayClone(hypre_StructGridBoxes(grid));
+   hypre_ForBoxI(i, data_space)
+   {
+      data_box = hypre_BoxArrayBox(data_space, i);
+      for (d = 0; d < ndim; d++)
+      {
+         d2 = d * 2;
+         hypre_BoxIMinD(data_box, d) -= num_ghost[d2];
+         d2 = d * 2 + 1;
+         hypre_BoxIMaxD(data_box, d) += num_ghost[d2];
+      }
+      hypre_StructMatrixMapDataBox(matrix, data_box);
+      hypre_BoxGrowByBox(data_box, hypre_BoxArrayBox(cdata_space, i));
+   }
+
+   *data_space_ptr = data_space;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Check to see if a resize is needed
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixNeedResize( hypre_StructMatrix *matrix,
+                              hypre_BoxArray     *data_space )
+{
+   hypre_BoxArray  *cdata_space = hypre_StructMatrixDataSpace(matrix);
+   HYPRE_Int        need_resize = 0;
+
+   if (cdata_space == NULL)
+   {
+      /* resize if no current data space (cdata_space) */
+      need_resize = 1;
+   }
+   else if ( !hypre_BoxArraysEqual(data_space, cdata_space) )
+   {
+      /* resize if data_space is no the same as cdata_space (note that we check
+       * equality here, which we need for StructMatmult()) */
+      need_resize = 1;
+   }
+
+   return need_resize;
+}
+
+/*--------------------------------------------------------------------------
  * This routine takes new data space information and recomputes entries in the
  * matrix that depend on it (e.g., data_indices and data_size).  The routine
  * will also re-allocate the matrix data if their was data to begin with.

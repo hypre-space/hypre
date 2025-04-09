@@ -137,6 +137,9 @@ hypre_PFMGSetup( void               *pfmg_vdata,
     * Set up matrix and vector structures
     *-----------------------------------------------------*/
 
+   /* RDF: Rework this for vectors to avoid data copies in Resize(), similar to
+    * what is being done for matrices. */
+
    /* Modify the rap_type if red-black Gauss-Seidel is used.  Red-black gs is
     * used only in the non-Galerkin case. */
    if (relax_type == 2 || relax_type == 3)   /* red-black gs */

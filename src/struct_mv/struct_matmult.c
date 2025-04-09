@@ -923,9 +923,8 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
 
       /* If matrix is all constant, num_ghost will be all zero */
       hypre_CommStencilCreateNumGhost(comm_stencils[m], &num_ghost);
-      /* RDF TODO: Make sure num_ghost is at least as large as before, so that
-       * when we call Restore() below, we don't lose any data */
-      hypre_StructMatrixComputeDataSpace(matrix, num_ghost, &data_spaces[m]);
+      hypre_StructMatrixGrowDataSpace(matrix, num_ghost, &data_spaces[m]);
+      //hypre_StructMatrixComputeDataSpace(matrix, num_ghost, &data_spaces[m]);
       hypre_TFree(num_ghost, HYPRE_MEMORY_HOST);
    }
 
@@ -1002,8 +1001,15 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
             data_spaces[m] = hypre_BoxArrayClone(cdata_space);
             break;
       }
-      hypre_StructMatrixResize(matrices[m], data_spaces[m]);
-      hypre_StructMatrixForget(matrix); // RDF TODO: Add MemoryMode()to Resize() then remove this
+      if ( hypre_StructMatrixNeedResize(matrices[m], data_spaces[m]) )
+      {
+         hypre_StructMatrixResize(matrices[m], data_spaces[m]);
+         hypre_StructMatrixForget(matrix); // RDF: Add MemoryMode() to Resize() then remove this
+      }
+      else
+      {
+         hypre_BoxArrayDestroy(data_spaces[m]);
+      }
    }
 
    /* Resize the mask data space and initialize */

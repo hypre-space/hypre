@@ -2452,6 +2452,13 @@ HYPRE_Int
 hypre_StructMatrixComputeDataSpace( hypre_StructMatrix *matrix,
                                     HYPRE_Int          *num_ghost,
                                     hypre_BoxArray    **data_space_ptr );
+HYPRE_Int
+hypre_StructMatrixGrowDataSpace( hypre_StructMatrix *matrix,
+                                 HYPRE_Int          *num_ghost,
+                                 hypre_BoxArray    **data_space_ptr );
+HYPRE_Int
+hypre_StructMatrixNeedResize( hypre_StructMatrix *matrix,
+                              hypre_BoxArray     *data_space );
 HYPRE_Int hypre_StructMatrixResize ( hypre_StructMatrix *matrix, hypre_BoxArray *data_space );
 HYPRE_Int hypre_StructMatrixRestore ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixForget ( hypre_StructMatrix *matrix );
