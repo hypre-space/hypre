@@ -17,10 +17,10 @@
  * option == 2, T = HYPRE_Int,
  */
 template<HYPRE_Int option, typename T>
-#if defined(HYPRE_USING_SYCL)
-struct RAP_functor
-#else
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct RAP_functor : public thrust::unary_function<HYPRE_Int, T>
+#else
+struct RAP_functor
 #endif
 {
    HYPRE_Int num_col;
@@ -233,7 +233,7 @@ hypre_ParCSRMatMatDevice( hypre_ParCSRMatrix  *A,
                                                                 hypre_CSRMatrixData(Cbar))) + hypre_CSRMatrixNumNonzeros(Cbar),
                    hypre_CSRMatrixJ(Cbar),
                    thrust::make_zip_iterator(thrust::make_tuple(C_offd_ii, C_offd_j, C_offd_a)),
-                   thrust::not1(pred) );
+                   HYPRE_THRUST_NOT(pred) );
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == C_offd_ii + nnz_C_offd );
 #endif
 
@@ -962,7 +962,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                                                                                      Cext_bigj)) + Cext_nnz,
                                         Cext_bigj,
                                         thrust::make_zip_iterator(thrust::make_tuple(work, big_work)),
-                                        thrust::not1(pred1) );
+                                        HYPRE_THRUST_NOT(pred1) );
 
       HYPRE_Int Cext_offd_nnz = thrust::get<0>(off_end.get_iterator_tuple()) - work;
 #endif
@@ -1224,7 +1224,7 @@ hypre_ParCSRTMatMatPartialAddDevice( hypre_ParCSRCommPkg *comm_pkg,
                                 thrust::make_zip_iterator(thrust::make_tuple(zmp_i, zmp_j, zmp_a)) + local_nnz_C,
                                 zmp_j,
                                 thrust::make_zip_iterator(thrust::make_tuple(C_offd_ii, C_offd_j, C_offd_a)),
-                                thrust::not1(pred) );
+                                HYPRE_THRUST_NOT(pred) );
    hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == C_offd_ii + nnz_C_offd );
 #endif
    hypreDevice_CsrRowIndicesToPtrs_v2(hypre_CSRMatrixNumRows(C_offd), nnz_C_offd, C_offd_ii,

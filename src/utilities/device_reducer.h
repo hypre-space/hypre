@@ -232,7 +232,7 @@ struct ReduceSum
    __host__ __device__
    ReduceSum<T>& operator=(const ReduceSum<T>& other)
    {
-      if (this != &other) 
+      if (this != &other)
       {
          init = other.init;
          __thread_sum = other.__thread_sum;
