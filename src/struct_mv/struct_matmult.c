@@ -17,7 +17,8 @@
 /*--------------------------------------------------------------------------
  * StructMatmult functions
  *
- * These functions compute a collection of matrix products.
+ * These functions compute a collection of matrix products (only up to 3 matrix
+ * terms are currently allowed in the product).
  *
  * Each matrix product is specified by a call to the SetProduct() function.
  * This provides additional context for optimizations (e.g., reducing

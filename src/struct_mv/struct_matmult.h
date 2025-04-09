@@ -14,25 +14,22 @@
 #ifndef hypre_STRUCT_MATMULT_HEADER
 #define hypre_STRUCT_MATMULT_HEADER
 
-#ifdef MAXTERMS
-#undef MAXTERMS
-#endif
-#define MAXTERMS 3
-
 /*--------------------------------------------------------------------------
  * StructMatmultDataMH data structure
+ *
+ * Note: Only up to 3 matrix terms are currently allowed in the product.
  *--------------------------------------------------------------------------*/
 
 /* product term used to compute the variable stencil entries in M */
 typedef struct hypre_StructMatmultDataMH_struct
 {
-   hypre_StTerm    terms[MAXTERMS];   /* stencil info for each term */
-   HYPRE_Int       mentry;            /* stencil entry for M */
-   HYPRE_Complex   cprod;             /* product of the constant terms */
-   HYPRE_Int       types[MAXTERMS];   /* types of computations to do for each term */
-   HYPRE_Complex  *tptrs[MAXTERMS];   /* pointers to matrix data for each term */
-   //HYPRE_Int       offsets[MAXTERMS]; /* (RDF: Needed? Similar to tptrs and not used.) */
-   HYPRE_Complex  *mptr;              /* pointer to matrix data for M */
+   hypre_StTerm    terms[3];     /* stencil info for each term */
+   HYPRE_Int       mentry;       /* stencil entry for M */
+   HYPRE_Complex   cprod;        /* product of the constant terms */
+   HYPRE_Int       types[3];     /* types of computations to do for each term */
+   HYPRE_Complex  *tptrs[3];     /* pointers to matrix data for each term */
+   //HYPRE_Int       offsets[3];   /* RDF: Not needed - keep for now */
+   HYPRE_Complex  *mptr;         /* pointer to matrix data for M */
 
 } hypre_StructMatmultDataMH;
 
