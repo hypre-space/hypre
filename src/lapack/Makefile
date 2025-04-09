@@ -90,22 +90,89 @@ OBJS = ${LAPACK_FILES:.c=.o}
 # Targets
 #################################################################
 
-all: ${OBJS} dlamch.o
+all: lapack_OBJS dlamch_obj
 
 install: all
 	cp -fR $(srcdir)/_hypre_lapack.h $(HYPRE_INC_INSTALL)
 
-clean:
+clean: clean_mup
 	rm -rf *.o
 
 distclean: clean
 
-#################################################################
-# Rules
-#################################################################
+ifeq (${MP_BUILD}, 1) 
+clean_mup:
+	rm -rf ${MuP_OBJDIR}	
+else
+clean_mup:
+endif
 
+##################################################################
+# Build Rules
+##################################################################
+
+ifeq (${MP_BUILD}, 1) 
+
+MuP_OBJDIR = MuP_obj.dir
+MuP_OBJDIR_single = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_flt}
+MuP_OBJDIR_double = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_dbl}
+MuP_OBJDIR_longdouble = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_ldbl}
+#
+#MKDIR_P = mkdir -p
+#mkmpdir: 
+#	${MKDIR_P} ${MuP_OBJDIR}
+#
+ADD_OBJS_single = ${addprefix ${MuP_OBJDIR_single}/, ${notdir ${OBJS}}}
+${ADD_OBJS_single}: CFLAGS += -DMP_BUILD_SINGLE=1
+${MuP_OBJDIR_single}/%.o: %.c ${LAPACK_HEADERS}
+#	@echo  "MuP_OBJDIR is ${ADD_OBJS_single} ... $%"
+	@echo  "processing C object $@ ..."
+	@mkdir -p ${@D}
+	${CC} ${CFLAGS} -c -o $@ $<
+#
+dlamch_single = ${MuP_OBJDIR_single}/dlamch.o
+${dlamch_single}: dlamch.c ${LAPACK_HEADERS}
+	@mkdir -p ${@D}
+	${CC} ${CFLAGS} -DMP_BUILD_SINGLE=1 -c -o $@ dlamch.c
+#
+ADD_OBJS_double = ${addprefix ${MuP_OBJDIR_double}/, ${notdir ${OBJS}}}
+${ADD_OBJS_double}: CFLAGS += -DMP_BUILD_DOUBLE=1
+${MuP_OBJDIR_double}/%.o: %.c ${LAPACK_HEADERS}
+	@echo  "processing C object $@ ..."
+	@mkdir -p ${@D}
+	${CC} ${CFLAGS} -c -o $@ $<
+#
+dlamch_double = ${MuP_OBJDIR_double}/dlamch.o
+${dlamch_double}: dlamch.c ${LAPACK_HEADERS}
+	@mkdir -p ${@D}
+	${CC} ${CFLAGS} -DMP_BUILD_DOUBLE=1 -c -o $@ dlamch.c
+#
+ADD_OBJS_longdouble = ${addprefix ${MuP_OBJDIR_longdouble}/, ${notdir ${OBJS}}}
+${ADD_OBJS_longdouble}: CFLAGS += -DMP_BUILD_LONGDOUBLE=1
+${MuP_OBJDIR_longdouble}/%.o: %.c ${LAPACK_HEADERS}
+	@echo  "processing C object $@ ..."
+	@mkdir -p ${@D}
+	${CC} ${CFLAGS} -c -o $@ $<
+#
+dlamch_longdouble = ${MuP_OBJDIR_longdouble}/dlamch.o
+${dlamch_longdouble}: dlamch.c ${LAPACK_HEADERS}
+	@mkdir -p ${@D}
+	${CC} ${CFLAGS} -DMP_BUILD_LONGDOUBLE=1 -c -o $@ dlamch.c
+#
+# multiprecision object files
+lapack_OBJS: ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
+
+# compile without optimization
+dlamch_obj: ${dlamch_single} ${dlamch_double} ${dlamch_longdouble}
+
+else
 # compile without optimization
 dlamch.o : dlamch.c ${LAPACK_HEADERS}
 	${CC} ${CFLAGS} -c dlamch.c
 
+dlamch_obj: dlamch.o
+
 ${OBJS}: ${LAPACK_HEADERS}
+lapack_OBJS: ${OBJS}
+endif
+

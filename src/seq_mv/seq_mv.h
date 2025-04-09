@@ -14,6 +14,10 @@
 
 #include "_hypre_utilities.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "seq_mv_mup_func.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -75,6 +79,10 @@ typedef struct
    hypre_CsrsvData      *csrsv_data;
    hypre_GpuMatData     *mat_data;
 #endif
+
+#if defined(HYPRE_MIXED_PRECISION)   
+   HYPRE_Precision matrix_precision;
+#endif
 } hypre_CSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -103,8 +111,9 @@ typedef struct
 #define hypre_CSRMatrixGPUMatData(matrix)           ((matrix) -> mat_data)
 #endif
 
-HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin( hypre_CSRMatrix *A );
-HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd( hypre_CSRMatrix *A );
+#ifdef HYPRE_MIXED_PRECISION
+#define hypre_CSRMatrixPrecision(matrix)          ((matrix) -> matrix_precision)
+#endif
 
 /*--------------------------------------------------------------------------
  * CSR Boolean Matrix
@@ -257,7 +266,37 @@ typedef struct
       With rowwise storage, vj[i] = data[ j + num_vectors*i] */
    HYPRE_Int  vecstride, idxstride;
    /* ... so vj[i] = data[ j*vecstride + i*idxstride ] regardless of row_storage.*/
+
+#if defined(HYPRE_MIXED_PRECISION)   
+   HYPRE_Precision vector_precision;
+#endif 
+
 } hypre_Vector;
+
+typedef struct
+{
+   void        *data;
+   HYPRE_Int             size;      /* Number of elements of a single vector component */
+   HYPRE_Int             component; /* Index of a multivector component
+                                    (used for set/get routines )*/
+   HYPRE_Int             owns_data;  /* Does the Vector create/destroy `data'? */
+   HYPRE_MemoryLocation  memory_location; /* memory location of data array */
+
+   /* For multivectors...*/
+   HYPRE_Int   num_vectors;  /* the above "size" is size of one vector */
+   HYPRE_Int   multivec_storage_method;
+   /* ...if 0, store colwise v0[0], v0[1], ..., v1[0], v1[1], ... v2[0]... */
+   /* ...if 1, store rowwise v0[0], v1[0], ..., v0[1], v1[1], ... */
+   /* With colwise storage, vj[i] = data[ j*size + i]
+      With rowwise storage, vj[i] = data[ j + num_vectors*i] */
+   HYPRE_Int  vecstride, idxstride;
+   /* ... so vj[i] = data[ j*vecstride + i*idxstride ] regardless of row_storage.*/
+
+#if defined(HYPRE_MIXED_PRECISION)   
+   HYPRE_Precision vector_precision;
+#endif 
+
+} hypre_Vector_mp;
 
 /*--------------------------------------------------------------------------
  * Accessor functions for the Vector structure
@@ -275,6 +314,10 @@ typedef struct
 #define hypre_VectorEntryI(vector, i)             ((vector) -> data[i])
 #define hypre_VectorEntryIJ(vector, i, j) \
    ((vector) -> data[((vector) -> vecstride) * j + ((vector) -> idxstride) * i])
+
+#if defined(HYPRE_MIXED_PRECISION)   
+#define hypre_VectorPrecision(vector)          ((vector) -> vector_precision)
+#endif
 
 #endif
 /******************************************************************************
@@ -426,6 +469,8 @@ hypre_CSRMatrix *hypre_CSRMatrixUnion( hypre_CSRMatrix *A,
                                        HYPRE_BigInt *col_map_offd_A,
                                        HYPRE_BigInt *col_map_offd_B,
                                        HYPRE_BigInt **col_map_offd_C );
+HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin( hypre_CSRMatrix *A );
+HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd( hypre_CSRMatrix *A );
 HYPRE_Int hypre_CSRMatrixPrefetch( hypre_CSRMatrix *A, HYPRE_MemoryLocation memory_location);
 HYPRE_Int hypre_CSRMatrixCheckSetNumNonzeros( hypre_CSRMatrix *matrix );
 HYPRE_Int hypre_CSRMatrixResize( hypre_CSRMatrix *matrix, HYPRE_Int new_num_rows,
@@ -666,6 +711,27 @@ HYPRE_Int hypre_SeqVectorStridedCopyDevice( hypre_Vector *vector,
                                             HYPRE_Int istride, HYPRE_Int ostride,
                                             HYPRE_Int size, HYPRE_Complex *data );
 HYPRE_Int hypre_SeqVectorPrefetch(hypre_Vector *x, HYPRE_MemoryLocation memory_location);
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+/* Mixed precision function protos */
+/* hypre_seq_mv_mp.h */
+
+#ifdef HYPRE_MIXED_PRECISION
+HYPRE_Int
+hypre_SeqVectorCopy_mp( hypre_Vector_mp *x,
+                     hypre_Vector_mp *y );
+
+HYPRE_Int
+hypre_SeqVectorAxpy_mp( hypre_double alpha,
+                     hypre_Vector_mp *x,
+                     hypre_Vector_mp *y     );
+                     
+#endif
 
 #ifdef __cplusplus
 }

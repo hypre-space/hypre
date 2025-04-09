@@ -48,9 +48,12 @@ void hypre_error_handler_clear_messages(void);
 void hypre_error_code_save(void);
 void hypre_error_code_restore(void);
 
-#define hypre_error(IERR) hypre_error_handler(__FILE__, __LINE__, IERR, NULL)
-#define hypre_error_w_msg(IERR, msg) hypre_error_handler(__FILE__, __LINE__, IERR, msg)
-#define hypre_error_in_arg(IARG) hypre_error(HYPRE_ERROR_ARG | IARG<<3)
+#if defined(HYPRE_MIXED_PRECISION)
+#define hypre_error_w_msg_mp(IERR, msg)  hypre_error_handler_dbl(__FILE__, __LINE__, IERR, msg)
+#endif
+#define hypre_error(IERR)  hypre_error_handler(__FILE__, __LINE__, IERR, NULL)
+#define hypre_error_w_msg(IERR, msg)  hypre_error_handler(__FILE__, __LINE__, IERR, msg)
+#define hypre_error_in_arg(IARG)  hypre_error(HYPRE_ERROR_ARG | IARG<<3)
 
 #if defined(HYPRE_DEBUG)
 /* host assert */
