@@ -689,7 +689,7 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int      job,
                         B_ext_bigj,                                                            /* stencil */
                         thrust::make_zip_iterator(thrust::make_tuple(B_ext_offd_ii, B_ext_offd_bigj, B_ext_offd_data,
                                                                      B_ext_offd_xata)),        /* result */
-                        thrust::not1(pred1) );
+                        HYPRE_THRUST_NOT(pred1) );
 
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == B_ext_offd_ii + B_ext_offd_nnz );
 #endif
@@ -715,7 +715,7 @@ hypre_CSRMatrixSplitDevice_core( HYPRE_Int      job,
                         B_ext_bigj,                                                            /* stencil */
                         thrust::make_zip_iterator(thrust::make_tuple(B_ext_offd_ii, B_ext_offd_bigj,
                                                                      B_ext_offd_data)),        /* result */
-                        thrust::not1(pred1) );
+                        HYPRE_THRUST_NOT(pred1) );
 
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == B_ext_offd_ii + B_ext_offd_nnz );
 #endif
@@ -1868,7 +1868,11 @@ struct Int2Unequal
 };
 #else
 typedef thrust::tuple<HYPRE_Int, HYPRE_Int> Int2;
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct Int2Unequal : public thrust::unary_function<Int2, bool>
+#else
+struct Int2Unequal
+#endif
 {
    __host__ __device__
    bool operator()(const Int2& t) const
@@ -2089,8 +2093,12 @@ struct cabsfirst_greaterthan_second_pred
    }
 };
 #else
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct cabsfirst_greaterthan_second_pred : public
    thrust::unary_function<thrust::tuple<HYPRE_Complex, HYPRE_Real>, bool>
+#else
+struct cabsfirst_greaterthan_second_pred
+#endif
 {
    __host__ __device__
    bool operator()(const thrust::tuple<HYPRE_Complex, HYPRE_Real>& t) const
@@ -2148,7 +2156,7 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
       new_nnz = HYPRE_THRUST_CALL( count_if,
                                    A_data,
                                    A_data + nnz,
-                                   thrust::not1(less_than<HYPRE_Complex>(tol)) );
+                                   HYPRE_THRUST_NOT(less_than<HYPRE_Complex>(tol)) );
    }
    else
    {
@@ -2202,7 +2210,7 @@ hypre_CSRMatrixDropSmallEntriesDevice( hypre_CSRMatrix *A,
                                         thrust::make_zip_iterator(thrust::make_tuple(A_ii, A_j, A_data)) + nnz,
                                         A_data,
                                         thrust::make_zip_iterator(thrust::make_tuple(new_ii, new_j, new_data)),
-                                        thrust::not1(less_than<HYPRE_Complex>(tol)) );
+                                        HYPRE_THRUST_NOT(less_than<HYPRE_Complex>(tol)) );
 
       hypre_assert( thrust::get<0>(new_end.get_iterator_tuple()) == new_ii + new_nnz );
    }
@@ -2349,10 +2357,10 @@ hypre_CSRMatrixDiagMatrixFromMatrixDevice(hypre_CSRMatrix *A, HYPRE_Int type)
  * adj_functor (Used in hypre_CSRMatrixPermuteDevice)
  *--------------------------------------------------------------------------*/
 
-#if defined(HYPRE_USING_SYCL)
-struct adj_functor
-#else
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct adj_functor : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
+#else
+struct adj_functor
 #endif
 {
    HYPRE_Int *ia_;
