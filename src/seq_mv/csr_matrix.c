@@ -920,6 +920,7 @@ hypre_CSRMatrixMigrate( hypre_CSRMatrix     *A,
    /* Input matrix info */
    HYPRE_Int       num_rows     = hypre_CSRMatrixNumRows(A);
    HYPRE_Int       num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int       num_rownnz   = hypre_CSRMatrixNumRownnz(A);
    HYPRE_Int      *A_ri         = hypre_CSRMatrixRownnz(A);
    HYPRE_Int      *A_i          = hypre_CSRMatrixI(A);
    HYPRE_Int      *A_j          = hypre_CSRMatrixJ(A);
@@ -952,8 +953,8 @@ hypre_CSRMatrixMigrate( hypre_CSRMatrix     *A,
    {
       if (A_ri)
       {
-         B_ri = hypre_TAlloc(HYPRE_Int, num_rows, memory_location);
-         hypre_TMemcpy(B_ri, A_ri, HYPRE_Int, num_rows,
+         B_ri = hypre_TAlloc(HYPRE_Int, num_rownnz, memory_location);
+         hypre_TMemcpy(B_ri, A_ri, HYPRE_Int, num_rownnz,
                        memory_location, old_memory_location);
          hypre_TFree(A_ri, old_memory_location);
          hypre_CSRMatrixRownnz(A) = B_ri;

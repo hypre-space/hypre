@@ -50,7 +50,7 @@ save="tioga"
 ## HIP  ##
 ##########
 
-module -q load rocm/5.2.0
+module -q load rocm/6.2.1
 
 # HIP without UM [benchmark, struct, ams]
 co="--with-hip --with-MPI-include=${MPICH_DIR}/include --with-MPI-lib-dirs=${MPICH_DIR}/lib --with-MPI-libs=mpi --with-gpu-arch='gfx90a' CC=cc CXX=CC"
@@ -74,7 +74,6 @@ ro="-ij-noilu -ams -struct -sstruct -rt -D HYPRE_NO_SAVED"
 ####################################
 
 module -q load cmake/3.24.2
-module -q load rocm/6.2.1
 
 # Basic build and check library
 mo="-j all check"
