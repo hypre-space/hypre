@@ -283,6 +283,26 @@ hypre_F90_IFACE(hypre_ijmatrixgetlocalrange, HYPRE_IJMATRIXGETLOCALRANGE)
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixGetGlobalInfo
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_ijmatrixgetglobalinfo, HYPRE_IJMATRIXGETGLOBALINFO)
+( hypre_F90_Obj *matrix,
+  hypre_F90_BigInt *global_num_rows,
+  hypre_F90_BigInt *global_num_cols,
+  hypre_F90_BigInt *global_num_nonzeros,
+  hypre_F90_Int *ierr    )
+{
+  *ierr = (hypre_F90_Int)
+          ( HYPRE_IJMatrixGetGlobalInfo(
+                hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+                hypre_F90_PassBigIntRef (global_num_rows),
+                hypre_F90_PassBigIntRef (global_num_cols),
+                hypre_F90_PassBigIntRef (global_num_nonzeros) ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJMatrixGetObject
  *--------------------------------------------------------------------------*/
 
