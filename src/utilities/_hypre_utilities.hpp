@@ -664,6 +664,8 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_cusolver_dngetrf                 cusolverDnSgetrf
 #define hypre_cusolver_dngetrf_bs              cusolverDnSgetrf_bufferSize
 #define hypre_cusolver_dngetrs                 cusolverDnSgetrs
+#define hypre_cusolver_dnpotrf_batched         cusolverDnSpotrfBatched
+#define hypre_cusolver_dnpotrs_batched         cusolverDnSpotrsBatched
 
 #elif defined(HYPRE_USING_HIP)
 /* rocSPARSE */
@@ -683,10 +685,10 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csritilu0_history      rocsparse_scsritilu0_history
 
 /* rocSOLVER */
-
-/**************
- * TODO (VPM) *
- **************/
+#define hypre_rocsolver_getrf_batched          rocsolver_sgetrf_batched
+#define hypre_rocsolver_getri_batched          rocsolver_sgetri_batched
+#define hypre_rocsolver_potrf_batched          rocsolver_spotrf_batched
+#define hypre_rocsolver_potrs_batched          rocsolver_spotrs_batched
 
 #endif /* if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
@@ -723,6 +725,8 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_cusolver_dngetrf                 cusolverDnDgetrf
 #define hypre_cusolver_dngetrf_bs              cusolverDnDgetrf_bufferSize
 #define hypre_cusolver_dngetrs                 cusolverDnDgetrs
+#define hypre_cusolver_dnpotrf_batched         cusolverDnDpotrfBatched
+#define hypre_cusolver_dnpotrs_batched         cusolverDnDpotrsBatched
 
 #elif defined(HYPRE_USING_HIP)
 /* rocSPARSE */
@@ -742,10 +746,10 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csritilu0_history      rocsparse_dcsritilu0_history
 
 /* rocSOLVER */
-
-/**************
- * TODO (VPM) *
- **************/
+#define hypre_rocsolver_getrf_batched          rocsolver_dgetrf_batched
+#define hypre_rocsolver_getri_batched          rocsolver_dgetri_batched
+#define hypre_rocsolver_potrf_batched          rocsolver_dpotrf_batched
+#define hypre_rocsolver_potrs_batched          rocsolver_dpotrs_batched
 
 #endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)*/
 #endif /* #if defined(HYPRE_COMPLEX) || defined(HYPRE_SINGLE) || defined(HYPRE_LONG_DOUBLE) */

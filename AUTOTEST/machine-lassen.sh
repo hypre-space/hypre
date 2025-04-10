@@ -80,7 +80,7 @@ ro="-gpumemcheck -rt -mpibind -cudamemcheck -save ${save}"
 ./renametest.sh basic $output_dir/basic-cuda-um-shared
 
 # CUDA with UM and single precision
-co="--with-cuda --enable-unified-memory --enable-single --enable-debug --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
+co="--with-cuda --enable-unified-memory --enable-single --enable-cusolver --enable-debug --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
 ro="-single -rt -mpibind -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: ${ro}
 ./renametest.sh basic $output_dir/basic-cuda-um-single
