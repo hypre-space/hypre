@@ -865,6 +865,7 @@ enable_rocblas
 enable_rocsolver
 enable_rocrand
 with_sycl
+with_gpu_warp_size
 with_cuda_home
 with_gpu_arch
 enable_cublas
@@ -1711,6 +1712,9 @@ Optional Packages:
                           NO).
   --with-hip              Use HIP for AMD GPUs. (default is NO).
   --with-sycl             Use SYCL for Intel GPUs. (default is NO).
+  --with-gpu-warp-size=WARP_SIZE
+                          set GPU warp size (default: 32 for CUDA/SYCL, 64 for
+                          HIP) [default=auto]
   --with-cuda-home=DIR    User specifies CUDA_HOME in DIR.
   --with-gpu-arch=ARG     User specifies NVIDIA GPU architecture that the CUDA
                           files will be compiled for in ARG, where ARG is a
@@ -3357,6 +3361,7 @@ hypre_using_umpire_host=no
 hypre_using_umpire_device=no
 hypre_using_umpire_um=no
 hypre_using_umpire_pinned=no
+hypre_warp_size=32
 
 hypre_using_caliper=no
 hypre_user_gave_caliper_lib=no
@@ -4698,6 +4703,17 @@ else $as_nop
 
 fi
 
+
+
+
+# Check whether --with-gpu-warp-size was given.
+if test ${with_gpu_warp_size+y}
+then :
+  withval=$with_gpu_warp_size; hypre_warp_size=$withval
+else $as_nop
+  hypre_warp_size=auto
+
+fi
 
 
 
@@ -10601,6 +10617,55 @@ fi
 
 fi
 
+
+if test "x$hypre_warp_size" = "xauto"
+then
+  if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_sycl" = "xyes"
+  then
+    hypre_warp_size=32
+  elif test "x$hypre_using_hip" = "xyes"
+  then
+    # Check for CDNA vs RDNA architecture
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for GPU architecture using rocm-smi" >&5
+printf %s "checking for GPU architecture using rocm-smi... " >&6; }
+    gfx_versions=$(rocm-smi --showproductname 2>/dev/null | grep 'gfx' | awk '{print $NF}' | tr '\n' ' ')
+    rocm_smi_cmd=$(rocm-smi --showproductname)
+    rocm_smi_status=$?
+
+    if test $rocm_smi_status -eq 0
+    then
+      cdna_found=no
+      for gfx_version in $gfx_versions
+      do
+        case "$gfx_version" in
+          gfx9*)
+            cdna_found=yes
+            break
+            ;;
+        esac
+      done
+
+      if test "$cdna_found" = "yes"
+      then
+        hypre_warp_size=64
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: CDNA detected ($gfx_versions), setting warp size to 64" >&5
+printf "%s\n" "CDNA detected ($gfx_versions), setting warp size to 64" >&6; }
+      else
+        hypre_warp_size=32
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: RDNA detected ($gfx_versions), setting warp size to 32" >&5
+printf "%s\n" "RDNA detected ($gfx_versions), setting warp size to 32" >&6; }
+      fi
+    else
+      hypre_warp_size=64
+      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: AMD GPU detection failed, defaulting to warp size 64" >&5
+printf "%s\n" "AMD GPU detection failed, defaulting to warp size 64" >&6; }
+    fi
+  fi
+fi
+
+printf "%s\n" "#define HYPRE_WARP_SIZE $hypre_warp_size" >>confdefs.h
+
+
 if test "x$hypre_using_raja" = "xyes"
 then
 
@@ -10828,7 +10893,7 @@ printf "%s\n" "#define HYPRE_USING_HIP 1" >>confdefs.h
            HYPRE_CUDA_GENCODE="`echo ${HYPRE_CUDA_GENCODE}|sed 's/,$//'`"
         fi
 
-                                        HIPCXXFLAGS="-x hip -std=c++14 ${HIPCXXFLAGS}"
+                                        HIPCXXFLAGS="-x hip -fPIE -std=c++14 ${HIPCXXFLAGS}"
 
                                 if test x"$hypre_using_debug" == x"yes"
 then :

@@ -257,6 +257,9 @@ elseif (HYPRE_ENABLE_LTO)
   )
 endif()
 
+# Set GPU warp size
+set(HYPRE_WARP_SIZE 32 CACHE INTERNAL "GPU warp size")
+
 # Print CUDA info
 message(STATUS "CUDA C++ standard: ${CMAKE_CUDA_STANDARD}")
 message(STATUS "CUDA architectures: ${CMAKE_CUDA_ARCHITECTURES}")

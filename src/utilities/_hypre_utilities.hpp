@@ -422,24 +422,24 @@ using hypre_DeviceItem = sycl::nd_item<3>;
  *      device defined values
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#define HYPRE_MAX_NTHREADS_BLOCK 1024
+#if HYPRE_WARP_SIZE == 32
+#define HYPRE_WARP_BITSHIFT      5
+#define HYPRE_WARP_FULL_MASK     0xFFFFFFFF
 
-// HYPRE_WARP_BITSHIFT is just log2 of HYPRE_WARP_SIZE
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_SYCL)
-#define HYPRE_WARP_SIZE       32
-#define HYPRE_WARP_BITSHIFT   5
-#define HYPRE_WARP_FULL_MASK  0xFFFFFFFF
-#elif defined(HYPRE_USING_HIP)
-#define HYPRE_WARP_SIZE       64
-#define HYPRE_WARP_BITSHIFT   6
-#define HYPRE_WARP_FULL_MASK  0xFFFFFFFFFFFFFFF
+#elif HYPRE_WARP_SIZE == 64
+#define HYPRE_WARP_BITSHIFT      6
+#define HYPRE_WARP_FULL_MASK     0xFFFFFFFFFFFFFFFF
+
+#else
+#error "Unsupported value for HYPRE_WARP_SIZE"
 #endif
 
-#define HYPRE_MAX_NUM_WARPS   (64 * 64 * 32)
-#define HYPRE_FLT_LARGE       1e30
-#define HYPRE_1D_BLOCK_SIZE   512
-#define HYPRE_MAX_NUM_STREAMS 10
-#define HYPRE_SPGEMM_MAX_NBIN 10
+#define HYPRE_MAX_NTHREADS_BLOCK 1024
+#define HYPRE_MAX_NUM_WARPS      (64 * 64 * 32)
+#define HYPRE_FLT_LARGE          1e30
+#define HYPRE_1D_BLOCK_SIZE      512
+#define HYPRE_MAX_NUM_STREAMS    10
+#define HYPRE_SPGEMM_MAX_NBIN    10
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *       macro for launching GPU kernels
