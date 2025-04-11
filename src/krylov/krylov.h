@@ -406,7 +406,8 @@ typedef struct
    HYPRE_Int    (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
                                    void *x, HYPRE_Complex beta, void *y );
    HYPRE_Int    (*MatvecDestroy) ( void *matvec_data );
-   HYPRE_Real   (*InnerProd)     ( void *x, void *y );
+   HYPRE_Int    (*InnerProd)     ( void *x, void *y, HYPRE_Int *num_tags_ptr,
+                                   HYPRE_Complex **iprod_ptr );
    HYPRE_Int    (*CopyVector)    ( void *x, void *y );
    HYPRE_Int    (*ClearVector)   ( void *x );
    HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x );
@@ -440,6 +441,7 @@ typedef struct
    void  *r;
    void  *w;
    void  *w_2;
+   void  *w_3;
    void  **p;
 
    void    *matvec_data;
@@ -489,7 +491,8 @@ extern "C" {
       HYPRE_Int    (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
                                       void *x, HYPRE_Complex beta, void *y ),
       HYPRE_Int    (*MatvecDestroy) ( void *matvec_data ),
-      HYPRE_Real   (*InnerProd)     ( void *x, void *y ),
+      HYPRE_Int    (*InnerProd)     ( void *x, void *y, HYPRE_Int *num_tags_ptr,
+                                      HYPRE_Complex **iprod_ptr ),
       HYPRE_Int    (*CopyVector)    ( void *x, void *y ),
       HYPRE_Int    (*ClearVector)   ( void *x ),
       HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x ),

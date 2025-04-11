@@ -526,6 +526,8 @@ HYPRE_Int hypre_IJVectorCreatePar ( hypre_IJVector *vector, HYPRE_BigInt *IJpart
 HYPRE_Int hypre_IJVectorDestroyPar ( hypre_IJVector *vector );
 HYPRE_Int hypre_IJVectorInitializeParShell (hypre_IJVector *vector );
 HYPRE_Int hypre_IJVectorSetParData( hypre_IJVector *vector, HYPRE_Complex *data );
+HYPRE_Int hypre_IJVectorSetTagsPar( hypre_IJVector *vector, HYPRE_Int owns_tags,
+                                    HYPRE_Int num_tags, HYPRE_Int *tags );
 HYPRE_Int hypre_IJVectorInitializePar ( hypre_IJVector *vector );
 HYPRE_Int hypre_IJVectorInitializePar_v2(hypre_IJVector *vector,
                                          HYPRE_MemoryLocation memory_location);
