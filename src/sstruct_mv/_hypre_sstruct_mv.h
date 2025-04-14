@@ -1322,6 +1322,7 @@ HYPRE_Int hypre_SStructVectorInitializeShell ( hypre_SStructVector *vector );
 HYPRE_Int hypre_SStructVectorClearGhostValues ( hypre_SStructVector *vector );
 HYPRE_Int hypre_SStructVectorPrintGLVis ( hypre_SStructVector *vector, const char *fileprefix );
 HYPRE_MemoryLocation hypre_SStructVectorMemoryLocation(hypre_SStructVector *vector);
+HYPRE_Int hypre_SStructVectorSetMemoryMode( hypre_SStructVector *vector, HYPRE_Int memory_mode );
 
 #ifdef __cplusplus
 }
