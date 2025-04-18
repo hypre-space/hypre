@@ -684,6 +684,13 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                            hypre_StructVector *x,
                            HYPRE_Complex       beta,
                            hypre_StructVector *y );
+HYPRE_Int hypre_StructMatvecDestroy ( void *matvec_vdata );
+HYPRE_Int hypre_StructMatvec ( HYPRE_Complex alpha, hypre_StructMatrix *A, hypre_StructVector *x,
+                               HYPRE_Complex beta, hypre_StructVector *y );
+HYPRE_Int hypre_StructMatvecT ( HYPRE_Complex alpha, hypre_StructMatrix *A, hypre_StructVector *x,
+                                HYPRE_Complex beta, hypre_StructVector *y );
+
+/* struct_matvec_core.c */
 HYPRE_Int
 hypre_StructMatvecCompute_core_CC( hypre_StructMatrix *A,
                                    hypre_StructVector *x,
@@ -709,11 +716,6 @@ hypre_StructMatvecCompute_core_VC( hypre_StructMatrix *A,
                                    hypre_Box          *A_data_box,
                                    hypre_Box          *x_data_box,
                                    hypre_Box          *y_data_box );
-HYPRE_Int hypre_StructMatvecDestroy ( void *matvec_vdata );
-HYPRE_Int hypre_StructMatvec ( HYPRE_Complex alpha, hypre_StructMatrix *A, hypre_StructVector *x,
-                               HYPRE_Complex beta, hypre_StructVector *y );
-HYPRE_Int hypre_StructMatvecT ( HYPRE_Complex alpha, hypre_StructMatrix *A, hypre_StructVector *x,
-                                HYPRE_Complex beta, hypre_StructVector *y );
 
 /* struct_scale.c */
 HYPRE_Int hypre_StructScale ( HYPRE_Complex alpha, hypre_StructVector *y );

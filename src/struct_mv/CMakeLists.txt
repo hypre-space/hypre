@@ -37,6 +37,7 @@ set(SRCS
   struct_matrix.c
   struct_matrix_mask.c
   struct_matvec.c
+  struct_matvec_core.c
   struct_matmult.c
   struct_matmult_core.c
   struct_matmult_fuse.c
