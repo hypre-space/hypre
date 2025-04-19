@@ -2431,6 +2431,13 @@ HYPRE_Int hypre_StructMatrixPlaceStencil ( hypre_StructMatrix *matrix, HYPRE_Int
 HYPRE_Int hypre_StructMatrixGetStencilStride ( hypre_StructMatrix *matrix, hypre_Index stride );
 HYPRE_Int hypre_StructMatrixGetStencilSpace ( hypre_StructMatrix *matrix, HYPRE_Int entry,
                                               HYPRE_Int transpose, hypre_Index origin, hypre_Index stride );
+HYPRE_Int
+hypre_StructMatrixGetStSpaces( hypre_StructMatrix *matrix,
+                               HYPRE_Int           transpose,
+                               HYPRE_Int          *num_sspaces_ptr,
+                               HYPRE_Int         **sspace_entries_ptr,
+                               hypre_Index       **sspace_origins_ptr,
+                               hypre_Index         stride );
 HYPRE_Int hypre_StructMatrixMapCommInfo ( hypre_StructMatrix *matrix, hypre_IndexRef origin,
                                           hypre_Index stride, hypre_CommInfo *comm_info );
 HYPRE_Int hypre_StructMatrixCreateCommPkg ( hypre_StructMatrix *matrix, hypre_CommInfo *comm_info,

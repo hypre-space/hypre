@@ -254,6 +254,63 @@ hypre_StructMatrixGetStencilSpace( hypre_StructMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * Compute the unique set of "stencil spaces", the stencil entries that belong
+ * to each space, and the corresponding origins and stride (only one).
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixGetStSpaces( hypre_StructMatrix *matrix,
+                               HYPRE_Int           transpose,
+                               HYPRE_Int          *num_sspaces_ptr,
+                               HYPRE_Int         **sspace_entries_ptr,
+                               hypre_Index       **sspace_origins_ptr,
+                               hypre_Index         stride )
+{
+   HYPRE_Int             ndim = hypre_StructMatrixNDim(matrix);
+   hypre_StructStencil  *stencil = hypre_StructMatrixStencil(matrix);
+   HYPRE_Int             stencil_size = hypre_StructStencilSize(stencil);
+
+   HYPRE_Int             num_sspaces;
+   HYPRE_Int            *sspace_entries;
+   hypre_Index          *sspace_origins;
+
+   hypre_Index           origin;
+   HYPRE_Int             e, s;
+
+   sspace_entries = hypre_TAlloc(HYPRE_Int, stencil_size, HYPRE_MEMORY_HOST);
+   sspace_origins = hypre_TAlloc(hypre_Index, stencil_size, HYPRE_MEMORY_HOST);
+   num_sspaces = 0;
+   for (e = 0; e < stencil_size; e++)
+   {
+      hypre_StructMatrixGetStencilSpace(matrix, e, transpose, origin, stride);
+
+      for (s = 0; s < num_sspaces; s++)
+      {
+         /* Only check origin (assume that stride is always the same) */
+         if ( hypre_IndexesEqual(origin, sspace_origins[s], ndim) )
+         {
+            break;
+         }
+      }
+      sspace_entries[e] = s;
+
+      if (s == num_sspaces)
+      {
+         /* This is a new space */
+         hypre_CopyToIndex(origin, ndim, sspace_origins[s]);
+         num_sspaces++;
+      }
+   }
+
+   /* Set return values */
+   *num_sspaces_ptr    = num_sspaces;
+   *sspace_entries_ptr = sspace_entries;
+   *sspace_origins_ptr = sspace_origins;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -354,12 +411,11 @@ hypre_StructMatrixCreateCommPkg( hypre_StructMatrix *matrix,
    {
       hypre_CommInfo       *comm_info_clone;
       hypre_CommPkg       **comm_pkgs;
-      HYPRE_Int             ndim         = hypre_StructMatrixNDim(matrix);
       hypre_StructStencil  *stencil      = hypre_StructMatrixStencil(matrix);
       HYPRE_Int             stencil_size = hypre_StructStencilSize(stencil);
       HYPRE_Int            *constant     = hypre_StructMatrixConstant(matrix);
       HYPRE_Int            *symm         = hypre_StructMatrixSymmEntries(matrix);
-      hypre_Index          *origins, origin, stride;
+      hypre_Index          *origins, stride;
       HYPRE_Int            *v_to_s, *s_to_v, *order;
       HYPRE_Int            *stencil_spaces, num_spaces;
       HYPRE_Int             i, e, s;
@@ -379,33 +435,8 @@ hypre_StructMatrixCreateCommPkg( hypre_StructMatrix *matrix,
          }
       }
 
-      /* Figure out the number of "stencil spaces" and which stencil entries
-       * belong to which space (each space may induce different data boxes for
-       * the communication). */
-      stencil_spaces = hypre_TAlloc(HYPRE_Int, stencil_size, HYPRE_MEMORY_HOST);
-      origins = hypre_TAlloc(hypre_Index, stencil_size, HYPRE_MEMORY_HOST);
-      num_spaces = 0;
-      for (e = 0; e < stencil_size; e++)
-      {
-         hypre_StructMatrixGetStencilSpace(matrix, e, 0, origin, stride);
-
-         for (s = 0; s < num_spaces; s++)
-         {
-            /* Only check origin (assume that stride is always the same) */
-            if ( hypre_IndexesEqual(origin, origins[s], ndim) )
-            {
-               break;
-            }
-         }
-         stencil_spaces[e] = s;
-
-         if (s == num_spaces)
-         {
-            /* This is a new space */
-            hypre_CopyToIndex(origin, ndim, origins[s]);
-            num_spaces++;
-         }
-      }
+      /* Get the stencil spaces (each space may induce different data boxes for communication). */
+      hypre_StructMatrixGetStSpaces(matrix, 0, &num_spaces, &stencil_spaces, &origins, stride);
 
       /* Compute communication packages for each stencil space */
       comm_pkgs = hypre_TAlloc(hypre_CommPkg *, num_spaces, HYPRE_MEMORY_HOST);
