@@ -419,8 +419,10 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
 
       /* Free memory */
       hypre_TFree(mid, memory_location);
-      hypre_BoxDestroy(compute_box);
    }
+
+   /* Free memory */
+   hypre_BoxDestroy(compute_box);
 
 #undef HYPRE_UPDATE_VALUES
 #undef HYPRE_UNROLL_MAXDEPTH
