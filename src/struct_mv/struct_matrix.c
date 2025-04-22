@@ -427,7 +427,9 @@ hypre_StructMatrixCreateCommPkg( hypre_StructMatrix *matrix,
          hypre_CommPkgCreate(comm_info_clone,
                              hypre_StructMatrixDataSpace(matrix),
                              hypre_StructMatrixDataSpace(matrix), num_values, &order, 0,
-                             hypre_StructMatrixComm(matrix), &comm_pkgs[s]);
+                             hypre_StructMatrixComm(matrix),
+                             hypre_StructMatrixMemoryLocation(matrix),
+                             &comm_pkgs[s]);
          comm_data[s] = hypre_StructMatrixVData(matrix);
          hypre_CommInfoDestroy(comm_info_clone);
       }
@@ -459,7 +461,9 @@ hypre_StructMatrixCreateCommPkg( hypre_StructMatrix *matrix,
       hypre_CommPkgCreate(comm_info,
                           hypre_StructMatrixDataSpace(matrix),
                           hypre_StructMatrixDataSpace(matrix), num_values, NULL, 0,
-                          hypre_StructMatrixComm(matrix), &comm_pkg);
+                          hypre_StructMatrixComm(matrix),
+                          hypre_StructMatrixMemoryLocation(matrix),
+                          &comm_pkg);
       comm_data[0] = hypre_StructMatrixVData(matrix);
    }
 
@@ -595,6 +599,18 @@ hypre_StructMatrixDestroy( hypre_StructMatrix *matrix )
          hypre_TFree(matrix, HYPRE_MEMORY_HOST);
       }
    }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixSetMemoryLocation( hypre_StructMatrix   *matrix,
+                                     HYPRE_MemoryLocation  memory_location )
+{
+   hypre_StructMatrixMemoryLocation(matrix) = memory_location;
 
    return hypre_error_flag;
 }
@@ -819,10 +835,8 @@ hypre_StructMatrixResize( hypre_StructMatrix *matrix,
       data = hypre_CTAlloc(HYPRE_Complex, data_size, memory_location);
 
       /* Copy constant data values */
-      for (i = 0; i < stencil_size; i++)
-      {
-         data[i] = old_data[i];
-      }
+      hypre_TMemcpy(data, old_data, HYPRE_Complex, stencil_size,
+                    memory_location, memory_location);
 
       /* Copy the data */
       hypre_StructDataCopy(old_data + stencil_size, old_data_space,
@@ -1401,6 +1415,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                                 HYPRE_Int           boxnum,
                                 HYPRE_Int           outside )
 {
+   HYPRE_Int            ndim         = hypre_StructMatrixNDim(matrix);
    HYPRE_Int           *constant     = hypre_StructMatrixConstant(matrix);
    HYPRE_Int           *symm_entries = hypre_StructMatrixSymmEntries(matrix);
    hypre_BoxArray      *grid_boxes;
@@ -1452,7 +1467,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
 
    hypre_SetIndex(data_stride, 1);
 
-   int_box = hypre_BoxCreate(hypre_StructMatrixNDim(matrix));
+   int_box = hypre_BoxCreate(ndim);
    dval_box = hypre_BoxClone(value_box);
    hypre_StructMatrixMapDataBox(matrix, dval_box);
    hypre_BoxIMinD(dval_box, 0) *= num_stencil_indices;
@@ -1503,7 +1518,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                   else
                   {
                      hypre_BoxGetSize(int_box, loop_size);
-                     hypre_BoxLoop1Begin(hypre_StructMatrixNDim(matrix), loop_size,
+                     hypre_BoxLoop1Begin(ndim, loop_size,
                                          dval_box, dval_start, dval_stride, dvali);
                      {
                         values[dvali] = *datap;
@@ -1522,7 +1537,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
 
                   if (action > 0)
                   {
-                     hypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
+                     hypre_BoxLoop2Begin(ndim, loop_size,
                                          data_box, data_start, data_stride, datai,
                                          dval_box, dval_start, dval_stride, dvali);
                      {
@@ -1532,7 +1547,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                   }
                   else if (action > -1)
                   {
-                     hypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
+                     hypre_BoxLoop2Begin(ndim, loop_size,
                                          data_box, data_start, data_stride, datai,
                                          dval_box, dval_start, dval_stride, dvali);
                      {
@@ -1542,7 +1557,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                   }
                   else
                   {
-                     hypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
+                     hypre_BoxLoop2Begin(ndim, loop_size,
                                          data_box, data_start, data_stride, datai,
                                          dval_box, dval_start, dval_stride, dvali);
                      {
@@ -1708,6 +1723,7 @@ hypre_StructMatrixClearBoxValues( hypre_StructMatrix *matrix,
                                   HYPRE_Int           boxnum,
                                   HYPRE_Int           outside )
 {
+   HYPRE_Int            ndim = hypre_StructMatrixNDim(matrix);
    hypre_BoxArray      *grid_boxes;
    hypre_Box           *grid_box;
    hypre_Box           *int_box;
@@ -1756,7 +1772,7 @@ hypre_StructMatrixClearBoxValues( hypre_StructMatrix *matrix,
 
    symm_entries = hypre_StructMatrixSymmEntries(matrix);
 
-   int_box = hypre_BoxCreate(hypre_StructMatrixNDim(matrix));
+   int_box = hypre_BoxCreate(ndim);
 
    for (i = istart; i < istop; i++)
    {
@@ -1781,7 +1797,7 @@ hypre_StructMatrixClearBoxValues( hypre_StructMatrix *matrix,
 
                hypre_BoxGetSize(int_box, loop_size);
 
-               hypre_BoxLoop1Begin(hypre_StructMatrixNDim(matrix), loop_size,
+               hypre_BoxLoop1Begin(ndim, loop_size,
                                    data_box, data_start, data_stride, datai);
                {
                   datap[datai] = 0.0;
@@ -1804,6 +1820,7 @@ HYPRE_Int
 hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
 {
    HYPRE_Int num_values = hypre_StructMatrixNumValues(matrix);
+
    /*-----------------------------------------------------------------------
     * Update the ghost data
     * This takes care of the communication needs of all known functions
@@ -1816,6 +1833,8 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
       HYPRE_Int         *num_ghost = hypre_StructMatrixNumGhost(matrix);
       HYPRE_Int         *sym_ghost = hypre_StructMatrixSymGhost(matrix);
       HYPRE_Int         *trn_ghost = hypre_StructMatrixTrnGhost(matrix);
+      hypre_StructGrid  *grid      = hypre_StructMatrixGrid(matrix);
+
       hypre_CommInfo    *comm_info;
       hypre_CommPkg     *comm_pkg;
       hypre_CommHandle  *comm_handle;
@@ -1830,12 +1849,11 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
       }
 
       hypre_StructMatrixGetFStride(matrix, &fstride);
-      hypre_CreateCommInfoFromNumGhost(hypre_StructMatrixGrid(matrix), fstride,
-                                       tot_num_ghost, &comm_info);
+      hypre_CreateCommInfoFromNumGhost(grid, fstride, tot_num_ghost, &comm_info);
       hypre_StructMatrixCreateCommPkg(matrix, comm_info, &comm_pkg, &comm_data);
 
-      hypre_InitializeCommunication(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
-      hypre_FinalizeCommunication(comm_handle);
+      hypre_StructCommunicationInitialize(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
+      hypre_StructCommunicationFinalize(comm_handle);
       hypre_CommPkgDestroy(comm_pkg);
       hypre_TFree(comm_data, HYPRE_MEMORY_HOST);
    }
@@ -2506,7 +2524,9 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
                        hypre_StructMatrixDataSpace(from_matrix),
                        hypre_StructMatrixDataSpace(to_matrix),
                        comm_num_values, NULL, 0,
-                       hypre_StructMatrixComm(from_matrix), &comm_pkg);
+                       hypre_StructMatrixComm(from_matrix),
+                       hypre_StructMatrixMemoryLocation(from_matrix),
+                       &comm_pkg);
    hypre_CommInfoDestroy(comm_info);
    /* is this correct for periodic? */
 
@@ -2514,13 +2534,13 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
     * Migrate the matrix data
     *-----------------------------------------------------------------------*/
 
-   if ( constant_coefficient != 1 )
+   if (constant_coefficient != 1)
    {
-      hypre_InitializeCommunication( comm_pkg,
-                                     &matrix_data_comm_from,
-                                     &matrix_data_comm_to, 0, 0,
-                                     &comm_handle );
-      hypre_FinalizeCommunication( comm_handle );
+      hypre_StructCommunicationInitialize(comm_pkg,
+                                          &matrix_data_comm_from,
+                                          &matrix_data_comm_to, 0, 0,
+                                          &comm_handle);
+      hypre_StructCommunicationFinalize(comm_handle);
    }
    hypre_CommPkgDestroy(comm_pkg);
 

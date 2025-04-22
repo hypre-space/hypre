@@ -11,68 +11,102 @@
 #define UNROLL_MAXDEPTH 9
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatrixComputeRowSum
+ * hypre_StructMatrixZeroDiagonal
  *
- * RDF TODO: This routine should assume that the base grid for A and rowsum are
- * the same.  It should use the range boxes of A and work for general
- * rectangular matrices.
+ * Returns 1 if there is a zero on the diagonal, otherwise returns 0.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatrixComputeRowSum( hypre_StructMatrix  *A,
-                                 HYPRE_Int            type,
-                                 hypre_StructVector  *rowsum )
+hypre_StructMatrixZeroDiagonal( hypre_StructMatrix *A )
 {
-   hypre_StructStencil  *stencil = hypre_StructMatrixStencil(A);
-   hypre_StructGrid     *grid    = hypre_StructVectorGrid(A);
-   hypre_BoxArray       *boxes   = hypre_StructGridBoxes(grid);
-   HYPRE_Int             stencil_size = hypre_StructStencilSize(stencil);
+   HYPRE_Int              ndim       = hypre_StructMatrixNDim(A);
+   hypre_StructStencil   *stencil    = hypre_StructMatrixStencil(A);
+   HYPRE_Int              diag_entry = hypre_StructStencilDiagEntry(stencil);
+   HYPRE_MemoryLocation   memory_location = hypre_StructMatrixMemoryLocation(A);
 
-   hypre_Box            *box;
-   hypre_Box            *rdbox;
-   hypre_Box            *Adbox;
-   hypre_Index           loop_size;
-   HYPRE_Int             k, i, si;
-   HYPRE_Int             depth, cdepth, vdepth;
-   HYPRE_Int             csi[UNROLL_MAXDEPTH], vsi[UNROLL_MAXDEPTH];
+   hypre_BoxArray        *compute_boxes;
+   hypre_Box             *compute_box;
 
-   hypre_ForBoxI(i, boxes)
+   hypre_Index            loop_size;
+   hypre_IndexRef         start;
+   hypre_Index            ustride;
+
+   HYPRE_Real            *Ap;
+   hypre_Box             *A_dbox;
+   HYPRE_Int              i;
+   HYPRE_Real             diag_product = 1.0;
+   HYPRE_Int              zero_diag = 0;
+
+   /*----------------------------------------------------------
+    * Initialize some things
+    *----------------------------------------------------------*/
+
+   hypre_SetIndex(ustride, 1);
+
+   compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
+   hypre_ForBoxI(i, compute_boxes)
    {
-      box = hypre_BoxArrayBox(boxes, i);
-      hypre_BoxGetSize(box, loop_size);
+      compute_box = hypre_BoxArrayBox(compute_boxes, i);
+      start  = hypre_BoxIMin(compute_box);
+      A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+      hypre_BoxGetStrideSize(compute_box, ustride, loop_size);
 
-      Adbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-      rdbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(rowsum), i);
-
-      /* unroll up to depth UNROLL_MAXDEPTH */
-      for (si = 0; si < stencil_size; si += UNROLL_MAXDEPTH)
+      Ap = hypre_StructMatrixBoxData(A, i, diag_entry);
+      if (hypre_StructMatrixConstEntry(A, diag_entry))
       {
-         depth = hypre_min(UNROLL_MAXDEPTH, (stencil_size - si));
+         hypre_TMemcpy(&diag_product, Ap, HYPRE_Complex, 1,
+                       HYPRE_MEMORY_HOST, memory_location);
+      }
+      else
+      {
+#if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
+         HYPRE_Real diag_product_local = diag_product;
+#elif defined(HYPRE_USING_RAJA)
+         ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> diag_product_local(diag_product);
+#elif defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         ReduceSum<HYPRE_Real> diag_product_local(diag_product);
+#else
+         HYPRE_Real diag_product_local = diag_product;
+#endif
 
-         cdepth = vdepth = 0;
-         for (k = 0; k < depth; k++)
+#ifdef HYPRE_BOX_REDUCTION
+#undef HYPRE_BOX_REDUCTION
+#endif
+
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+#define HYPRE_BOX_REDUCTION map(tofrom:diag_product_local) reduction(+:diag_product_local)
+#else
+#define HYPRE_BOX_REDUCTION reduction(+:diag_product_local)
+#endif
+
+#define DEVICE_VAR is_device_ptr(Ap)
+         hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox, start, ustride,
+                                      Ai, diag_product_local);
          {
-            if (hypre_StructMatrixConstEntry(A, si + k))
+            HYPRE_Real one  = 1.0;
+            HYPRE_Real zero = 0.0;
+            if (Ap[Ai] == 0.0)
             {
-               csi[cdepth++] = si + k;
+               diag_product_local += one;
             }
             else
             {
-               vsi[vdepth++] = si + k;
+               diag_product_local += zero;
             }
          }
+         hypre_BoxLoop1ReductionEnd(Ai, diag_product_local);
+#undef DEVICE_VAR
 
-         /* Operate on constant coefficients */
-         hypre_StructMatrixComputeRowSum_core_CC(A, rowsum, i, cdepth, csi,
-                                                 box, Adbox, rdbox, type);
-
-         /* Operate on variable coefficients */
-         hypre_StructMatrixComputeRowSum_core_VC(A, rowsum, i, vdepth, vsi,
-                                                 box, Adbox, rdbox, type);
-      } /* loop on stencil entries */
+         diag_product += (HYPRE_Real) diag_product_local;
+      }
    }
 
-   return hypre_error_flag;
+   if (diag_product == 0)
+   {
+      zero_diag = 1;
+   }
+
+   return zero_diag;
 }
 
 /*--------------------------------------------------------------------------
@@ -835,6 +869,71 @@ hypre_StructMatrixComputeRowSum_core_VC(hypre_StructMatrix  *A,
          case 0:
             break;
       } /* switch (nentries) */
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructMatrixComputeRowSum
+ *
+ * RDF TODO: This routine should assume that the base grid for A and rowsum are
+ * the same.  It should use the range boxes of A and work for general
+ * rectangular matrices.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixComputeRowSum( hypre_StructMatrix  *A,
+                                 HYPRE_Int            type,
+                                 hypre_StructVector  *rowsum )
+{
+   hypre_StructStencil  *stencil = hypre_StructMatrixStencil(A);
+   hypre_StructGrid     *grid    = hypre_StructVectorGrid(A);
+   hypre_BoxArray       *boxes   = hypre_StructGridBoxes(grid);
+   HYPRE_Int             stencil_size = hypre_StructStencilSize(stencil);
+
+   hypre_Box            *box;
+   hypre_Box            *rdbox;
+   hypre_Box            *Adbox;
+   hypre_Index           loop_size;
+   HYPRE_Int             k, i, si;
+   HYPRE_Int             depth, cdepth, vdepth;
+   HYPRE_Int             csi[UNROLL_MAXDEPTH], vsi[UNROLL_MAXDEPTH];
+
+   hypre_ForBoxI(i, boxes)
+   {
+      box = hypre_BoxArrayBox(boxes, i);
+      hypre_BoxGetSize(box, loop_size);
+
+      Adbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+      rdbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(rowsum), i);
+
+      /* unroll up to depth UNROLL_MAXDEPTH */
+      for (si = 0; si < stencil_size; si += UNROLL_MAXDEPTH)
+      {
+         depth = hypre_min(UNROLL_MAXDEPTH, (stencil_size - si));
+
+         cdepth = vdepth = 0;
+         for (k = 0; k < depth; k++)
+         {
+            if (hypre_StructMatrixConstEntry(A, si + k))
+            {
+               csi[cdepth++] = si + k;
+            }
+            else
+            {
+               vsi[vdepth++] = si + k;
+            }
+         }
+
+         /* Operate on constant coefficients */
+         hypre_StructMatrixComputeRowSum_core_CC(A, rowsum, i, cdepth, csi,
+                                                 box, Adbox, rdbox, type);
+
+         /* Operate on variable coefficients */
+         hypre_StructMatrixComputeRowSum_core_VC(A, rowsum, i, vdepth, vsi,
+                                                 box, Adbox, rdbox, type);
+      } /* loop on stencil entries */
    }
 
    return hypre_error_flag;

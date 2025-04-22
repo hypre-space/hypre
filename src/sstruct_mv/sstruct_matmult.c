@@ -503,8 +503,8 @@ hypre_SStructPMatmultCommunicate( hypre_SStructPMatmultData *pmmdata )
       }
       HYPRE_ANNOTATE_REGION_END("%s", "CommSetup");
 
-      hypre_InitializeCommunication(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
-      hypre_FinalizeCommunication(comm_handle);
+      hypre_StructCommunicationInitialize(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
+      hypre_StructCommunicationFinalize(comm_handle);
    }
 
    HYPRE_ANNOTATE_FUNC_END;
@@ -1055,8 +1055,8 @@ hypre_SStructMatmultCommunicate( hypre_SStructMatmultData *mmdata )
       }
       HYPRE_ANNOTATE_REGION_END("%s", "CommSetup");
 
-      hypre_InitializeCommunication(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
-      hypre_FinalizeCommunication(comm_handle);
+      hypre_StructCommunicationInitialize(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
+      hypre_StructCommunicationFinalize(comm_handle);
    }
 
    HYPRE_ANNOTATE_FUNC_END;

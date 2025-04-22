@@ -458,9 +458,8 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
 
             sdata = hypre_StructMatrixData(smatrix);
             rdata = hypre_StructMatrixData(fac_smatrix);
-            hypre_InitializeCommunication(amrA_comm_pkg, &sdata, &rdata, 0, 0,
-                                          &comm_handle);
-            hypre_FinalizeCommunication(comm_handle);
+            hypre_StructCommunicationInitialize(amrA_comm_pkg, &sdata, &rdata, 0, 0, &comm_handle);
+            hypre_StructCommunicationFinalize(comm_handle);
 
             hypre_CommPkgDestroy(amrA_comm_pkg);
          }

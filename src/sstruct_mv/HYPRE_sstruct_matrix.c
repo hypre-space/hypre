@@ -951,6 +951,7 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
                              hypre_StructMatrixDataSpace(recv_matrix),
                              num_values, orders, 1,
                              hypre_StructMatrixComm(send_matrix),
+                             hypre_StructMatrixMemoryLocation(send_matrix),
                              &comm_pkgs[num_comm_pkgs]);
          send_data[num_comm_pkgs] = hypre_StructMatrixVData(send_matrix);
          recv_data[num_comm_pkgs] = hypre_StructMatrixVData(recv_matrix);
@@ -983,9 +984,8 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
       }
 
       /* Note reversal of send/recv data */
-      hypre_InitializeCommunication(comm_pkg, recv_data, send_data, 1, 0,
-                                    &comm_handle);
-      hypre_FinalizeCommunication(comm_handle);
+      hypre_StructCommunicationInitialize(comm_pkg, recv_data, send_data, 1, 0, &comm_handle);
+      hypre_StructCommunicationFinalize(comm_handle);
       hypre_CommPkgDestroy(comm_pkg);
    }
 

@@ -573,11 +573,11 @@ hypre_SStructPMatrixAccumulate( hypre_SStructPMatrix *pmatrix )
                                 hypre_StructMatrixDataSpace(smatrix),
                                 hypre_StructMatrixNumValues(smatrix), NULL, 1,
                                 hypre_StructMatrixComm(smatrix),
+                                hypre_StructMatrixMemoryLocation(smatrix),
                                 &comm_pkg);
             data = hypre_StructMatrixVData(smatrix);
-            hypre_InitializeCommunication(comm_pkg, &data, &data, 1, 0,
-                                          &comm_handle);
-            hypre_FinalizeCommunication(comm_handle);
+            hypre_StructCommunicationInitialize(comm_pkg, &data, &data, 1, 0, &comm_handle);
+            hypre_StructCommunicationFinalize(comm_handle);
 
             hypre_CommInfoDestroy(comm_info);
             hypre_CommPkgDestroy(comm_pkg);
@@ -1352,7 +1352,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-            hypreDevice_IntFilln(ncols, num_nonzeros, 0);
+            hypreDevice_IntFilln(ncols, nrows, 0);
             HYPRE_THRUST_CALL( transform,
                                thrust::counting_iterator<HYPRE_Int>(0),
                                thrust::counting_iterator<HYPRE_Int>(nrows),

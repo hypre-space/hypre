@@ -502,6 +502,7 @@ hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
    HYPRE_Int                  nconst;
    HYPRE_Int                 *const_entries;
    HYPRE_Complex             *const_values;
+   HYPRE_Complex              h_constp0;
    HYPRE_Int                  na;
    hypre_StructMatmultDataMH *a;
 
@@ -700,7 +701,10 @@ hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
                {
                   /* Accumulate the constant contribution to the product */
                   constp = hypre_StructMatrixConstData(matrix, entry);
-                  a[i].cprod *= constp[0];
+                  hypre_TMemcpy(&h_constp0, constp,
+                                HYPRE_Complex, 1, HYPRE_MEMORY_HOST,
+                                hypre_StructMatrixMemoryLocation(matrix));
+                  a[i].cprod *= h_constp0;
                   if (!transposes[id])
                   {
                      stencil = hypre_StructMatrixStencil(matrix);
@@ -989,7 +993,9 @@ hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
          hypre_CommPkgCreate(comm_info,
                              hypre_StructVectorDataSpace(mask),
                              hypre_StructVectorDataSpace(mask), 1, NULL, 0,
-                             hypre_StructVectorComm(mask), &comm_pkg_a[num_comm_pkgs]);
+                             hypre_StructVectorComm(mask),
+                             hypre_StructVectorMemoryLocation(mask),
+                             &comm_pkg_a[num_comm_pkgs]);
          hypre_CommInfoDestroy(comm_info);
          comm_data_a[num_comm_pkgs] = hypre_TAlloc(HYPRE_Complex *, 1, HYPRE_MEMORY_HOST);
          comm_data_a[num_comm_pkgs][0] = hypre_StructVectorData(mask);
@@ -1082,8 +1088,8 @@ hypre_StructMatmultCommunicate( hypre_StructMatmultData  *mmdata )
    }
    HYPRE_ANNOTATE_REGION_END("%s", "CommSetup");
 
-   hypre_InitializeCommunication(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
-   hypre_FinalizeCommunication(comm_handle);
+   hypre_StructCommunicationInitialize(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
+   hypre_StructCommunicationFinalize(comm_handle);
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -1091,7 +1097,7 @@ hypre_StructMatmultCommunicate( hypre_StructMatmultData  *mmdata )
 }
 
 /*--------------------------------------------------------------------------
- * StructMatmultCompute
+ * hypre_StructMatmultCompute
  *
  * This routine is called successively for each matmult in the collection.
  *

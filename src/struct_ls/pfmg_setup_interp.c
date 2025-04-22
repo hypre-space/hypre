@@ -18,19 +18,20 @@ hypre_zPFMGCreateInterpOp( hypre_StructMatrix *A,
                            hypre_Index         stride,
                            HYPRE_Int           rap_type )
 {
-   HYPRE_Int             ndim = hypre_StructMatrixNDim(A);
+   MPI_Comm              comm            = hypre_StructMatrixComm(A);
+   HYPRE_Int             ndim            = hypre_StructMatrixNDim(A);
+   hypre_StructGrid     *grid            = hypre_StructMatrixGrid(A);
+   hypre_StructStencil  *stencil         = hypre_StructMatrixStencil(A);
+   hypre_Index          *stencil_shape   = hypre_StructStencilShape(stencil);
+   HYPRE_Int             stencil_size    = hypre_StructStencilSize(stencil);
+   HYPRE_Int             diag_entry      = hypre_StructStencilDiagEntry(stencil);
+   HYPRE_MemoryLocation  memory_location = hypre_StructMatrixMemoryLocation(A);
+
    hypre_StructMatrix   *P;
-   hypre_StructStencil  *stencil;
-   hypre_Index          *stencil_shape;
-   HYPRE_Int             stencil_size, diag_entry;
    HYPRE_Int             centries[3] = {0, 1, 2};
    HYPRE_Int             ncentries, i;
 
    /* Figure out which entries to make constant (ncentries) */
-   stencil       = hypre_StructMatrixStencil(A);
-   stencil_shape = hypre_StructStencilShape(stencil);
-   stencil_size  = hypre_StructStencilSize(stencil);
-   diag_entry    = hypre_StructStencilDiagEntry(stencil);
    ncentries = 3; /* Make all entries in P constant by default */
    for (i = 0; i < stencil_size; i++)
    {
@@ -44,6 +45,7 @@ hypre_zPFMGCreateInterpOp( hypre_StructMatrix *A,
          }
       }
    }
+
    /* If diagonal of A is not constant and using RAP, do variable interpolation.
     *
     * NOTE: This is important right now because of an issue with MatMult, where
@@ -66,9 +68,10 @@ hypre_zPFMGCreateInterpOp( hypre_StructMatrix *A,
    stencil = hypre_StructStencilCreate(ndim, stencil_size, stencil_shape);
 
    /* Set up the P matrix */
-   P = hypre_StructMatrixCreate(hypre_StructMatrixComm(A), hypre_StructMatrixGrid(A), stencil);
+   P = hypre_StructMatrixCreate(comm, grid, stencil);
    hypre_StructMatrixSetDomainStride(P, stride);
    hypre_StructMatrixSetConstantEntries(P, ncentries, centries);
+   hypre_StructMatrixSetMemoryLocation(P, memory_location);
 
    hypre_StructStencilDestroy(stencil);
 
@@ -174,11 +177,11 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
                                  HYPRE_Complex       Pconst2 )
 {
 #define HYPRE_UNROLL_MAXDEPTH 7
-#define HYPRE_UPDATE_VALUES(Ap, As)                  \
-    do {                                             \
-        if      ((As) == 0)       mid[Pi] += Ap[Ai]; \
-        else if ((As) == Pstenc1) Pp1[Pi] -= Ap[Ai]; \
-        else if ((As) == Pstenc2) Pp2[Pi] -= Ap[Ai]; \
+#define HYPRE_UPDATE_VALUES(n)                             \
+    do {                                                   \
+        if      ((As##n) == 0)       mid[Pi] += Ap##n[Ai]; \
+        else if ((As##n) == Pstenc1) Pp1[Pi] -= Ap##n[Ai]; \
+        else if ((As##n) == Pstenc2) Pp2[Pi] -= Ap##n[Ai]; \
     } while (0)
 
    HYPRE_Int              ndim            = hypre_StructMatrixNDim(A);
@@ -311,13 +314,13 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
                                    A_dbox, Astart, Astride, Ai,
                                    P_dbox, Pstart, Pstride, Pi);
                {
-                  HYPRE_UPDATE_VALUES(Ap6, As6);
-                  HYPRE_UPDATE_VALUES(Ap5, As5);
-                  HYPRE_UPDATE_VALUES(Ap4, As4);
-                  HYPRE_UPDATE_VALUES(Ap3, As3);
-                  HYPRE_UPDATE_VALUES(Ap2, As2);
-                  HYPRE_UPDATE_VALUES(Ap1, As1);
-                  HYPRE_UPDATE_VALUES(Ap0, As0);
+                  HYPRE_UPDATE_VALUES(6);
+                  HYPRE_UPDATE_VALUES(5);
+                  HYPRE_UPDATE_VALUES(4);
+                  HYPRE_UPDATE_VALUES(3);
+                  HYPRE_UPDATE_VALUES(2);
+                  HYPRE_UPDATE_VALUES(1);
+                  HYPRE_UPDATE_VALUES(0);
                }
                hypre_BoxLoop2End(Ai, Pi);
                break;
@@ -327,12 +330,12 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
                                    A_dbox, Astart, Astride, Ai,
                                    P_dbox, Pstart, Pstride, Pi);
                {
-                  HYPRE_UPDATE_VALUES(Ap5, As5);
-                  HYPRE_UPDATE_VALUES(Ap4, As4);
-                  HYPRE_UPDATE_VALUES(Ap3, As3);
-                  HYPRE_UPDATE_VALUES(Ap2, As2);
-                  HYPRE_UPDATE_VALUES(Ap1, As1);
-                  HYPRE_UPDATE_VALUES(Ap0, As0);
+                  HYPRE_UPDATE_VALUES(5);
+                  HYPRE_UPDATE_VALUES(4);
+                  HYPRE_UPDATE_VALUES(3);
+                  HYPRE_UPDATE_VALUES(2);
+                  HYPRE_UPDATE_VALUES(1);
+                  HYPRE_UPDATE_VALUES(0);
                }
                hypre_BoxLoop2End(Ai, Pi);
                break;
@@ -342,11 +345,11 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
                                    A_dbox, Astart, Astride, Ai,
                                    P_dbox, Pstart, Pstride, Pi);
                {
-                  HYPRE_UPDATE_VALUES(Ap4, As4);
-                  HYPRE_UPDATE_VALUES(Ap3, As3);
-                  HYPRE_UPDATE_VALUES(Ap2, As2);
-                  HYPRE_UPDATE_VALUES(Ap1, As1);
-                  HYPRE_UPDATE_VALUES(Ap0, As0);
+                  HYPRE_UPDATE_VALUES(4);
+                  HYPRE_UPDATE_VALUES(3);
+                  HYPRE_UPDATE_VALUES(2);
+                  HYPRE_UPDATE_VALUES(1);
+                  HYPRE_UPDATE_VALUES(0);
                }
                hypre_BoxLoop2End(Ai, Pi);
                break;
@@ -356,10 +359,10 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
                                    A_dbox, Astart, Astride, Ai,
                                    P_dbox, Pstart, Pstride, Pi);
                {
-                  HYPRE_UPDATE_VALUES(Ap3, As3);
-                  HYPRE_UPDATE_VALUES(Ap2, As2);
-                  HYPRE_UPDATE_VALUES(Ap1, As1);
-                  HYPRE_UPDATE_VALUES(Ap0, As0);
+                  HYPRE_UPDATE_VALUES(3);
+                  HYPRE_UPDATE_VALUES(2);
+                  HYPRE_UPDATE_VALUES(1);
+                  HYPRE_UPDATE_VALUES(0);
                }
                hypre_BoxLoop2End(Ai, Pi);
                break;
@@ -369,9 +372,9 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
                                    A_dbox, Astart, Astride, Ai,
                                    P_dbox, Pstart, Pstride, Pi);
                {
-                  HYPRE_UPDATE_VALUES(Ap2, As2);
-                  HYPRE_UPDATE_VALUES(Ap1, As1);
-                  HYPRE_UPDATE_VALUES(Ap0, As0);
+                  HYPRE_UPDATE_VALUES(2);
+                  HYPRE_UPDATE_VALUES(1);
+                  HYPRE_UPDATE_VALUES(0);
                }
                hypre_BoxLoop2End(Ai, Pi);
                break;
@@ -381,8 +384,8 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
                                    A_dbox, Astart, Astride, Ai,
                                    P_dbox, Pstart, Pstride, Pi);
                {
-                  HYPRE_UPDATE_VALUES(Ap1, As1);
-                  HYPRE_UPDATE_VALUES(Ap0, As0);
+                  HYPRE_UPDATE_VALUES(1);
+                  HYPRE_UPDATE_VALUES(0);
                }
                hypre_BoxLoop2End(Ai, Pi);
                break;
@@ -392,7 +395,7 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
                                    A_dbox, Astart, Astride, Ai,
                                    P_dbox, Pstart, Pstride, Pi);
                {
-                  HYPRE_UPDATE_VALUES(Ap0, As0);
+                  HYPRE_UPDATE_VALUES(0);
                }
                hypre_BoxLoop2End(Ai, Pi);
                break;
