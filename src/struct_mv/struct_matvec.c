@@ -334,23 +334,18 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    hypre_IndexRef           start;
 
    HYPRE_Complex            temp;
-   HYPRE_Int                compute_i, i, j, si, ssi;
+   HYPRE_Int                compute_i, i, j, si, se;
    HYPRE_Int                cnentries, vnentries;
    HYPRE_Int                centries[nentries], ventries[nentries];
 
    hypre_Box               *A_data_box, *x_data_box, *y_data_box;
-   HYPRE_Complex           *Ap, *xp, *yp;
+   HYPRE_Complex           *xp, *yp;
    HYPRE_Int                Ab, xb, yb;
    hypre_Index              Adstride, xdstride, ydstride, ustride;
-
-   hypre_StructStencil     *stencil;
-   hypre_Index             *stencil_shape;
 
    HYPRE_Int                ran_nboxes;
    HYPRE_Int               *ran_boxnums;
    hypre_IndexRef           ran_stride;
-   HYPRE_Int                dom_is_coarse;
-   HYPRE_Int                ran_is_coarse;
 
    hypre_StructVector      *x_tmp = NULL;
 
@@ -371,16 +366,12 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       ran_stride    = hypre_StructMatrixDomStride(A);
       ran_nboxes    = hypre_StructMatrixDomNBoxes(A);
       ran_boxnums   = hypre_StructMatrixDomBoxnums(A);
-      dom_is_coarse = hypre_StructMatrixRangeIsCoarse(A);
-      ran_is_coarse = hypre_StructMatrixDomainIsCoarse(A);
    }
    else
    {
       ran_stride    = hypre_StructMatrixRanStride(A);
       ran_nboxes    = hypre_StructMatrixRanNBoxes(A);
       ran_boxnums   = hypre_StructMatrixRanBoxnums(A);
-      dom_is_coarse = hypre_StructMatrixDomainIsCoarse(A);
-      ran_is_coarse = hypre_StructMatrixRangeIsCoarse(A);
    }
 
    compute_box = hypre_BoxCreate(ndim);
@@ -432,8 +423,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    hypre_StructMatvecResize(matvec_data, x);
    compute_pkg = (matvec_data -> compute_pkg);
 
-   stencil       = hypre_StructMatrixStencil(A);
-   stencil_shape = hypre_StructStencilShape(stencil);
    for (compute_i = 0; compute_i < 2; compute_i++)
    {
       switch (compute_i)
@@ -517,9 +506,10 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       {
          HYPRE_Int   *Aids = hypre_StructMatrixBoxIDs(A);
          HYPRE_Int   *xids = hypre_StructVectorBoxIDs(x);
-         hypre_Index  Adstart;
-         hypre_Index  xdstart;
-         hypre_Index  ydstart;
+         HYPRE_Int    num_ss;
+         HYPRE_Int   *se_sspaces;
+         hypre_Index *ss_origins;
+         HYPRE_Int    s;
 
          /* The corresponding box IDs for the following boxnums should match */
          Ab = ran_boxnums[i];
@@ -536,119 +526,53 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
          x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), xb);
          y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), yb);
 
-         xp = hypre_StructVectorBoxData(x, xb);
-         yp = hypre_StructVectorBoxData(y, yb);
+         /* Get stencil spaces - then do unrolling for entries in each */
+         hypre_StructMatrixGetStSpaces(A, transpose, &num_ss, &se_sspaces, &ss_origins, stride);
 
-         if (transpose || dom_is_coarse || ran_is_coarse)
+         for (s = 0; s < num_ss; s++)
          {
-            hypre_ForBoxI(j, compute_box_a)
+            /* Only compute with entries in stencil space s */
+            cnentries = vnentries = 0;
+            for (si = 0; si < nentries; si++)
             {
-               /* TODO optimization: Unroll these loops in a separate kernel */
-               for (si = 0; si < nentries; si++)
+               se = stentries[si];
+               if (se_sspaces[se] == s)
                {
-                  /* If the domain grid is coarse, the compute box will change
-                   * based on the stencil entry.  Otherwise, the next code block
-                   * needs to be called only on the first stencil iteration.
-                   *
-                   * Note that the Adstart and xdstart values are set in different
-                   * places depending on the value of transpose. */
-
-                  ssi = stentries[si];
-                  if ((si == 0) || dom_is_coarse)
+                  if (hypre_StructMatrixConstEntry(A, se))
                   {
-                     hypre_CopyBox(hypre_BoxArrayBox(compute_box_a, j), compute_box);
-                     hypre_StructMatrixGetStencilSpace(A, ssi, transpose, origin, stride);
-                     hypre_ProjectBox(compute_box, origin, stride);
-                     start = hypre_BoxIMin(compute_box);
-
-                     if (!transpose) /* Set Adstart here and xdstart below */
-                     {
-                        hypre_CopyToIndex(start, ndim, Adstart);
-                        hypre_StructMatrixMapDataIndex(A, Adstart);
-                     }
-
-                     hypre_CopyToIndex(start, ndim, ydstart);
-                     hypre_MapToCoarseIndex(ydstart, NULL, ran_stride, ndim);
-
-                     hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-                  }
-
-                  if (transpose)
-                  {
-                     hypre_SubtractIndexes(start, stencil_shape[ssi], ndim, Adstart);
-                     hypre_StructMatrixMapDataIndex(A, Adstart);
-                     hypre_SubtractIndexes(start, stencil_shape[ssi], ndim, xdstart);
-                     hypre_MapToFineIndex(xdstart, NULL, xfstride, ndim);
-                     hypre_StructVectorMapDataIndex(x, xdstart);
-                  }
-                  else /* Set Adstart above and xdstart here */
-                  {
-                     hypre_AddIndexes(start, stencil_shape[ssi], ndim, xdstart);
-                     hypre_MapToFineIndex(xdstart, NULL, xfstride, ndim);
-                     hypre_StructVectorMapDataIndex(x, xdstart);
-                  }
-
-                  Ap = hypre_StructMatrixBoxData(A, Ab, ssi);
-#define DEVICE_VAR is_device_ptr(yp,xp,Ap)
-                  if (hypre_StructMatrixConstEntry(A, ssi))
-                  {
-                     /* Constant coefficient case */
-                     hypre_BoxLoop2Begin(ndim, loop_size,
-                                         x_data_box, xdstart, xdstride, xi,
-                                         y_data_box, ydstart, ydstride, yi);
-                     {
-                        yp[yi] -= Ap[0] * xp[xi];
-                     }
-                     hypre_BoxLoop2End(xi, yi);
+                     centries[cnentries++] = se;
                   }
                   else
                   {
-                     /* Variable coefficient case */
-                     hypre_BoxLoop3Begin(ndim, loop_size,
-                                         A_data_box, Adstart, Adstride, Ai,
-                                         x_data_box, xdstart, xdstride, xi,
-                                         y_data_box, ydstart, ydstride, yi);
-                     {
-                        yp[yi] -= Ap[Ai] * xp[xi];
-                     }
-                     hypre_BoxLoop3End(Ai, xi, yi);
-                  }
-#undef DEVICE_VAR
-               } /* loop on stencil vars */
-            } /* hypre_ForBoxI */
-         }
-         else
-         {
-            hypre_ForBoxI(j, compute_box_a)
-            {
-               hypre_CopyBox(hypre_BoxArrayBox(compute_box_a, j), compute_box);
-
-               cnentries = vnentries = 0;
-               for (si = 0; si < nentries; si++)
-               {
-                  if (hypre_StructMatrixConstEntry(A, stentries[si]))
-                  {
-                     centries[cnentries++] = stentries[si];
-                  }
-                  else
-                  {
-                     ventries[vnentries++] = stentries[si];
+                     ventries[vnentries++] = se;
                   }
                }
+            }
+
+            hypre_ForBoxI(j, compute_box_a)
+            {
+
+               hypre_CopyBox(hypre_BoxArrayBox(compute_box_a, j), compute_box);
+               hypre_CopyToIndex(ss_origins[s], ndim, origin);
+               hypre_ProjectBox(compute_box, origin, stride);
+               start = hypre_BoxIMin(compute_box);
+               hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
                /* Operate on constant coefficients */
-               hypre_StructMatvecCompute_core_CC(A, x, y, Ab, xb, yb,
-                                                 cnentries, centries, compute_box,
+               hypre_StructMatvecCompute_core_CC(A, x, y, Ab, xb, yb, transpose, cnentries, centries,
+                                                 start, loop_size, xfstride, ran_stride,
+                                                 xdstride, ydstride,
                                                  x_data_box, y_data_box);
 
                /* Operate on variable coefficients */
-               hypre_StructMatvecCompute_core_VC(A, x, y, Ab, xb, yb,
-                                                 vnentries, ventries, compute_box,
+               hypre_StructMatvecCompute_core_VC(A, x, y, Ab, xb, yb, transpose, vnentries, ventries,
+                                                 start, loop_size, xfstride, ran_stride,
+                                                 Adstride, xdstride, ydstride,
                                                  A_data_box, x_data_box, y_data_box);
 
             } /* hypre_ForBoxI */
-         } /* rectangular/square matrix branch */
-      } /* loop on ran_nboxes */
+         } /* for stencil space s */
+      }
       HYPRE_ANNOTATE_REGION_END("%s", "Computation-Ax");
    }
 

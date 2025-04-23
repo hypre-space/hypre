@@ -236,6 +236,9 @@ hypre_StructMatrixGetStencilSpace( hypre_StructMatrix *matrix,
    /* Initialize origin */
    hypre_SetIndex(origin, 0);
 
+   /* Note that if stride = 1, then ConvertToCanonicalIndex() below would always
+    * set origin = 0, so the 'if' checks for Domain/RangeIsCoarse only eliminate
+    * unecessary computations; they are not strictly needed. */
    hypre_StructMatrixGetStencilStride(matrix, stride);
    if ( !transpose && hypre_StructMatrixDomainIsCoarse(matrix) )
    {
@@ -262,7 +265,7 @@ HYPRE_Int
 hypre_StructMatrixGetStSpaces( hypre_StructMatrix *matrix,
                                HYPRE_Int           transpose,
                                HYPRE_Int          *num_sspaces_ptr,
-                               HYPRE_Int         **sspace_entries_ptr,
+                               HYPRE_Int         **sentry_sspaces_ptr,
                                hypre_Index       **sspace_origins_ptr,
                                hypre_Index         stride )
 {
@@ -271,13 +274,13 @@ hypre_StructMatrixGetStSpaces( hypre_StructMatrix *matrix,
    HYPRE_Int             stencil_size = hypre_StructStencilSize(stencil);
 
    HYPRE_Int             num_sspaces;
-   HYPRE_Int            *sspace_entries;
+   HYPRE_Int            *sentry_sspaces;
    hypre_Index          *sspace_origins;
 
    hypre_Index           origin;
    HYPRE_Int             e, s;
 
-   sspace_entries = hypre_TAlloc(HYPRE_Int, stencil_size, HYPRE_MEMORY_HOST);
+   sentry_sspaces = hypre_TAlloc(HYPRE_Int, stencil_size, HYPRE_MEMORY_HOST);
    sspace_origins = hypre_TAlloc(hypre_Index, stencil_size, HYPRE_MEMORY_HOST);
    num_sspaces = 0;
    for (e = 0; e < stencil_size; e++)
@@ -292,7 +295,7 @@ hypre_StructMatrixGetStSpaces( hypre_StructMatrix *matrix,
             break;
          }
       }
-      sspace_entries[e] = s;
+      sentry_sspaces[e] = s;
 
       if (s == num_sspaces)
       {
@@ -304,7 +307,7 @@ hypre_StructMatrixGetStSpaces( hypre_StructMatrix *matrix,
 
    /* Set return values */
    *num_sspaces_ptr    = num_sspaces;
-   *sspace_entries_ptr = sspace_entries;
+   *sentry_sspaces_ptr = sentry_sspaces;
    *sspace_origins_ptr = sspace_origins;
 
    return hypre_error_flag;

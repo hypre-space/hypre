@@ -2435,7 +2435,7 @@ HYPRE_Int
 hypre_StructMatrixGetStSpaces( hypre_StructMatrix *matrix,
                                HYPRE_Int           transpose,
                                HYPRE_Int          *num_sspaces_ptr,
-                               HYPRE_Int         **sspace_entries_ptr,
+                               HYPRE_Int         **sentry_sspaces_ptr,
                                hypre_Index       **sspace_origins_ptr,
                                hypre_Index         stride );
 HYPRE_Int hypre_StructMatrixMapCommInfo ( hypre_StructMatrix *matrix, hypre_IndexRef origin,
@@ -2534,9 +2534,15 @@ hypre_StructMatvecCompute_core_CC( hypre_StructMatrix *A,
                                    HYPRE_Int           Ab,
                                    HYPRE_Int           xb,
                                    HYPRE_Int           yb,
+                                   HYPRE_Int           transpose,
                                    HYPRE_Int           nentries,
                                    HYPRE_Int          *entries,
-                                   hypre_Box          *compute_box,
+                                   hypre_IndexRef      start,
+                                   hypre_IndexRef      loop_size,
+                                   hypre_IndexRef      xfstride,
+                                   hypre_IndexRef      ran_stride,
+                                   hypre_IndexRef      xdstride,
+                                   hypre_IndexRef      ydstride,
                                    hypre_Box          *x_data_box,
                                    hypre_Box          *y_data_box );
 HYPRE_Int
@@ -2546,13 +2552,19 @@ hypre_StructMatvecCompute_core_VC( hypre_StructMatrix *A,
                                    HYPRE_Int           Ab,
                                    HYPRE_Int           xb,
                                    HYPRE_Int           yb,
+                                   HYPRE_Int           transpose,
                                    HYPRE_Int           nentries,
                                    HYPRE_Int          *entries,
-                                   hypre_Box          *compute_box,
+                                   hypre_IndexRef      start,
+                                   hypre_IndexRef      loop_size,
+                                   hypre_IndexRef      xfstride,
+                                   hypre_IndexRef      ran_stride,
+                                   hypre_IndexRef      Adstride,
+                                   hypre_IndexRef      xdstride,
+                                   hypre_IndexRef      ydstride,
                                    hypre_Box          *A_data_box,
                                    hypre_Box          *x_data_box,
                                    hypre_Box          *y_data_box );
-
 /* struct_scale.c */
 HYPRE_Int hypre_StructScale ( HYPRE_Complex alpha, hypre_StructVector *y );
 
