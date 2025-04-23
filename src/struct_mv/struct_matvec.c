@@ -572,6 +572,9 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
             } /* hypre_ForBoxI */
          } /* for stencil space s */
+
+         hypre_TFree(se_sspaces, HYPRE_MEMORY_HOST);
+         hypre_TFree(ss_origins, HYPRE_MEMORY_HOST);
       }
       HYPRE_ANNOTATE_REGION_END("%s", "Computation-Ax");
    }
