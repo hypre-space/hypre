@@ -14,7 +14,7 @@
 #include "_hypre_struct_mv.h"
 #include "_hypre_struct_mv.hpp"
 
-#define UNROLL_MAXDEPTH 4
+#define UNROLL_MAXDEPTH 7
 
 /*--------------------------------------------------------------------------
  * Macros used in the kernel loops below
