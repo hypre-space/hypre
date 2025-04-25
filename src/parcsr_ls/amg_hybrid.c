@@ -1925,7 +1925,9 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
 
          hypre_PCGSolve(pcg_solver, (void*) A, (void*) b, (void*) x);
 
-         /*---------------------------------------------------------------------
+         tt2 = hypre_MPI_Wtime();
+         AMGhybrid_data->solve_time1 = tt2 - tt1;
+	 /*---------------------------------------------------------------------
           * Get information for DSCG.
           *---------------------------------------------------------------------*/
          hypre_PCGGetNumIterations(pcg_solver, &dscg_num_its);
@@ -1934,8 +1936,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
 
          hypre_PCGGetConverged(pcg_solver, &converged);
 
-         tt2 = hypre_MPI_Wtime();
-         AMGhybrid_data->solve_time1 = tt2 - tt1;
+
+
       }
       else if (solver_type == 2)
       {
@@ -2236,7 +2238,9 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          tt1 = tt2;
 
          hypre_PCGSolve(pcg_solver, (void*) A, (void*) b, (void*) x);
-
+         
+	 tt2 = hypre_MPI_Wtime();
+         AMGhybrid_data->solve_time2 = tt2 - tt1;
          /* Get information from PCG that is always logged in AMGhybrid solver*/
          hypre_PCGGetNumIterations(pcg_solver, &pcg_num_its);
          (AMGhybrid_data -> pcg_num_its)  = pcg_num_its;
@@ -2246,8 +2250,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
             (AMGhybrid_data -> final_rel_res_norm) = res_norm;
          }
 
-         tt2 = hypre_MPI_Wtime();
-         AMGhybrid_data->solve_time2 = tt2 - tt1;
+
+
       }
       else if (solver_type == 2)
       {
