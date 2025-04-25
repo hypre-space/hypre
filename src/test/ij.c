@@ -4464,6 +4464,7 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridCreate(&amg_solver);
       HYPRE_ParCSRHybridSetTol(amg_solver, tol);
       HYPRE_ParCSRHybridSetAbsoluteTol(amg_solver, atol);
+      HYPRE_ParCSRHybridSetTwoNorm(amg_solver, two_norm);
       HYPRE_ParCSRHybridSetConvergenceTol(amg_solver, cf_tol);
       HYPRE_ParCSRHybridSetSolverType(amg_solver, solver_type);
       HYPRE_ParCSRHybridSetRecomputeResidual(amg_solver, recompute_res);
@@ -4531,7 +4532,14 @@ main( hypre_int argc,
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+      HYPRE_Real time[4];
+      HYPRE_ParCSRHybridGetSetupSolveTime(amg_solver, time);
 
+      if (myid == 0)
+      {
+       hypre_printf("ParCSRHybrid: Setup-Time1 %f  Solve-Time1 %f  Setup-Time2 %f  Solve-Time2 %f\n",
+                        time[0], time[1], time[2], time[3]);
+      }
       if (second_time)
       {
          /* run a second time [for timings, to check for memory leaks] */
