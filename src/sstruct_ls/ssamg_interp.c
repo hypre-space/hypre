@@ -244,6 +244,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
     *-------------------------------------------------------*/
 
    tmp_box     = hypre_BoxCreate(ndim);
+   shrink_box  = hypre_BoxCreate(ndim);
    compute_box = hypre_BoxCreate(ndim);
 
    /*-------------------------------------------------------
@@ -443,7 +444,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                need to do grid box and then add the ghosts... why? */
             /* compute_boxes = hypre_StructMatrixDataSpace(A_s); */
             compute_boxes = hypre_StructGridBoxes(sgrid);
-            compute_box = hypre_BoxCreate(ndim);
             convert_boxa[part][vi] = hypre_BoxArrayCreate(0, ndim);
 
             /* Loop over boxes */
@@ -564,7 +564,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                {
                   hypre_BoxArrayCreateFromIndices(ndim, num_indices, indices,
                                                   threshold, &indices_boxa);
-                  tmp_box = hypre_BoxCreate(ndim);
                   hypre_ForBoxI(j, indices_boxa)
                   {
                      hypre_CopyBox(hypre_BoxArrayBox(indices_boxa, j), tmp_box);
@@ -581,7 +580,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                                           tmp_box);
                      hypre_AppendBox(tmp_box, convert_boxa[part][vi]);
                   }
-                  hypre_BoxDestroy(tmp_box);
                   hypre_BoxArrayDestroy(indices_boxa);
                   indices_boxa = NULL;
                }
@@ -592,7 +590,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                   hypre_TFree(indices[j], HYPRE_MEMORY_DEVICE);
                }
             }
-            hypre_BoxDestroy(compute_box);
          }
       }
       hypre_SStructMatrixBoxesToUMatrix(A, grid, &A_struct_bndry_ij, convert_boxa);
@@ -676,9 +673,9 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
                /* WM: how to set loop_size, box, start, stride?
                 *     I guess cdir will be used to set the stride? */
                /* WM: do I need to worry about ghost zones here or anything? */
-               compute_box = hypre_BoxClone(hypre_BoxArrayBox(compute_boxes, i));
                /* compute_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_s), i); */
-               shrink_box = hypre_BoxClone(compute_box);
+               hypre_CopyBox(hypre_BoxArrayBox(compute_boxes, i), compute_box);
+               hypre_CopyBox(hypre_BoxArrayBox(compute_boxes, i), shrink_box);
 
                /* Grow the compute box to include ghosts */
                /* WM: todo - use the below instead? I guess sometimes the number of ghosts is not 1 in all directions? */
@@ -723,10 +720,6 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
                /* Increment box start index */
                box_start_index += hypre_BoxVolume(compute_box);
-
-               /* Free memory */
-               hypre_BoxDestroy(compute_box);
-               hypre_BoxDestroy(shrink_box);
             }
          }
       }
@@ -826,6 +819,7 @@ hypre_SSAMGSetupInterpOp( hypre_SStructMatrix  *A,
 
    /* Free memory */
    hypre_BoxDestroy(tmp_box);
+   hypre_BoxDestroy(shrink_box);
    hypre_BoxDestroy(compute_box);
 
    return hypre_error_flag;

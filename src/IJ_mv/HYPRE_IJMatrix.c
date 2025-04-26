@@ -1037,6 +1037,7 @@ HYPRE_IJMatrixGetValuesAndZeroOut( HYPRE_IJMatrix matrix,
    }
 
    return hypre_error_flag;
+
 }
 
 /*--------------------------------------------------------------------------
