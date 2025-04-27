@@ -1352,7 +1352,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
          if (exec == HYPRE_EXEC_DEVICE)
          {
-            hypreDevice_IntFilln(ncols, nrows, 0);
+            hypreDevice_IntFilln(ncols, num_nonzeros, 0);
             HYPRE_THRUST_CALL( transform,
                                thrust::counting_iterator<HYPRE_Int>(0),
                                thrust::counting_iterator<HYPRE_Int>(nrows),
