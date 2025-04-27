@@ -108,6 +108,20 @@ HYPRE_Int hypre_AMGHybridSetCycleType ( void *AMGhybrid_vdata, HYPRE_Int cycle_t
 HYPRE_Int hypre_AMGHybridSetNumSweeps ( void *AMGhybrid_vdata, HYPRE_Int num_sweeps );
 HYPRE_Int hypre_AMGHybridSetCycleNumSweeps ( void *AMGhybrid_vdata, HYPRE_Int num_sweeps,
                                              HYPRE_Int k );
+
+HYPRE_Int hypre_AMGHybridSetCycleStruct ( void *AMGhybrid_vdata, HYPRE_Int *cycle_struct,
+                                             HYPRE_Int cycle_num_nodes );
+HYPRE_Int hypre_AMGHybridSetRelaxNodeTypes ( void *AMGhybrid_vdata, HYPRE_Int *relax_node_types );
+HYPRE_Int hypre_AMGHybridSetRelaxNodeOrder ( void *AMGhybrid_vdata, HYPRE_Int *relax_node_order );
+HYPRE_Int hypre_AMGHybridSetRelaxNodeOuterWeights ( void *AMGhybrid_vdata,
+                                                     HYPRE_Real *relax_node_outerweights );
+HYPRE_Int hypre_AMGHybridSetRelaxNodeWeights ( void *AMGhybrid_vdata,
+                                                 HYPRE_Real *relax_node_weights );
+HYPRE_Int hypre_AMGHybridSetRelaxEdgeWeights ( void *AMGhybrid_vdata,
+                                                 HYPRE_Real *relax_edge_weights );
+ 
+HYPRE_Int hypre_AMGHybridSetNodeNumSweeps ( void *AMGhybrid_vdata,
+                                                 HYPRE_Int *node_num_sweeps );
 HYPRE_Int hypre_AMGHybridSetRelaxType ( void *AMGhybrid_vdata, HYPRE_Int relax_type );
 HYPRE_Int hypre_AMGHybridSetKeepTranspose ( void *AMGhybrid_vdata, HYPRE_Int keepT );
 HYPRE_Int hypre_AMGHybridSetSplittingStrategy( void *AMGhybrid_vdata,
@@ -819,6 +833,14 @@ HYPRE_Int HYPRE_ParCSRHybridSetMeasureType ( HYPRE_Solver solver, HYPRE_Int meas
 HYPRE_Int HYPRE_ParCSRHybridSetCoarsenType ( HYPRE_Solver solver, HYPRE_Int coarsen_type );
 HYPRE_Int HYPRE_ParCSRHybridSetInterpType ( HYPRE_Solver solver, HYPRE_Int interp_type );
 HYPRE_Int HYPRE_ParCSRHybridSetCycleType ( HYPRE_Solver solver, HYPRE_Int cycle_type );
+HYPRE_Int HYPRE_ParCSRHybridSetCycleStruct( HYPRE_Solver solver, HYPRE_Int *cycle_struct, 
+    HYPRE_Int cycle_num_nodes );
+HYPRE_Int HYPRE_ParCSRHybridSetRelaxNodeTypes ( HYPRE_Solver solver, HYPRE_Int *relax_node_types );
+HYPRE_Int HYPRE_ParCSRHybridSetRelaxNodeOrder ( HYPRE_Solver solver, HYPRE_Int *relax_node_order );
+HYPRE_Int HYPRE_ParCSRHybridSetRelaxNodeOuterWeights ( HYPRE_Solver solver, HYPRE_Real *relax_node_outerweights );
+HYPRE_Int HYPRE_ParCSRHybridSetRelaxNodeWeights ( HYPRE_Solver solver, HYPRE_Real *relax_node_weights );
+HYPRE_Int HYPRE_ParCSRHybridSetRelaxEdgeWeights ( HYPRE_Solver solver, HYPRE_Real *relax_edge_weights );
+HYPRE_Int HYPRE_ParCSRHybridSetNodeNumSweeps ( HYPRE_Solver solver, HYPRE_Int *node_num_sweeps );
 HYPRE_Int HYPRE_ParCSRHybridSetNumGridSweeps ( HYPRE_Solver solver, HYPRE_Int *num_grid_sweeps );
 HYPRE_Int HYPRE_ParCSRHybridSetGridRelaxType ( HYPRE_Solver solver, HYPRE_Int *grid_relax_type );
 HYPRE_Int HYPRE_ParCSRHybridSetGridRelaxPoints ( HYPRE_Solver solver,

@@ -922,16 +922,43 @@ hypre_BoomerAMGDestroy( void *data )
       }
 
       /* destroy inputs for user defined cycle structures */
-      if (cycle_type==4)
+
+      if (hypre_ParAMGDataCycleStruct(amg_data))
       {
          hypre_TFree(hypre_ParAMGDataCycleStruct(amg_data), HYPRE_MEMORY_HOST);
-         hypre_TFree(hypre_ParAMGDataRelaxNodeTypes(amg_data), HYPRE_MEMORY_HOST);
-         hypre_TFree(hypre_ParAMGDataRelaxNodeOrder(amg_data), HYPRE_MEMORY_HOST);
-         hypre_TFree(hypre_ParAMGDataRelaxNodeOuterWeights(amg_data), HYPRE_MEMORY_HOST);
-         hypre_TFree(hypre_ParAMGDataRelaxNodeWeights(amg_data), HYPRE_MEMORY_HOST);
-         hypre_TFree(hypre_ParAMGDataRelaxEdgeWeights(amg_data), HYPRE_MEMORY_HOST);
-         hypre_TFree(hypre_ParAMGDataNodeNumSweeps(amg_data), HYPRE_MEMORY_HOST);
+         hypre_ParAMGDataCycleStruct(amg_data) = NULL;
       }
+      if (hypre_ParAMGDataRelaxNodeTypes(amg_data))
+      {
+         hypre_TFree(hypre_ParAMGDataRelaxNodeTypes(amg_data), HYPRE_MEMORY_HOST);
+         hypre_ParAMGDataRelaxNodeTypes(amg_data) = NULL;
+      }
+      if (hypre_ParAMGDataRelaxNodeOrder(amg_data))
+      {
+         hypre_TFree(hypre_ParAMGDataRelaxNodeOrder(amg_data), HYPRE_MEMORY_HOST);
+         hypre_ParAMGDataRelaxNodeOrder(amg_data) = NULL;
+      }
+      if (hypre_ParAMGDataRelaxNodeOuterWeights(amg_data))
+      {
+         hypre_TFree(hypre_ParAMGDataRelaxNodeOuterWeights(amg_data), HYPRE_MEMORY_HOST);
+         hypre_ParAMGDataRelaxNodeOuterWeights(amg_data) = NULL;
+      }
+      if (hypre_ParAMGDataRelaxNodeWeights(amg_data))
+      {
+         hypre_TFree(hypre_ParAMGDataRelaxNodeWeights(amg_data), HYPRE_MEMORY_HOST);
+         hypre_ParAMGDataRelaxNodeWeights(amg_data) = NULL;
+      }
+      if (hypre_ParAMGDataRelaxEdgeWeights(amg_data))
+      {
+         hypre_TFree(hypre_ParAMGDataRelaxEdgeWeights(amg_data), HYPRE_MEMORY_HOST);
+         hypre_ParAMGDataRelaxEdgeWeights(amg_data) = NULL;
+      }
+      if (hypre_ParAMGDataNodeNumSweeps(amg_data))
+      {
+         hypre_TFree(hypre_ParAMGDataNodeNumSweeps(amg_data), HYPRE_MEMORY_HOST);
+         hypre_ParAMGDataNodeNumSweeps(amg_data) = NULL;
+      }
+
       hypre_TFree(amg_data, HYPRE_MEMORY_HOST);
    }
    HYPRE_ANNOTATE_FUNC_END;

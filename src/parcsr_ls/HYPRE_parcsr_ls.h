@@ -3591,6 +3591,15 @@ HYPRE_ParCSRHybridSetCycleType(HYPRE_Solver solver,
 /*
  *
  **/
+
+HYPRE_Int HYPRE_ParCSRHybridSetCycleStruct( HYPRE_Solver solver, HYPRE_Int *cycle_struct, 
+  HYPRE_Int cycle_num_nodes );
+HYPRE_Int HYPRE_ParCSRHybridSetRelaxNodeTypes ( HYPRE_Solver solver, HYPRE_Int *relax_node_types );
+HYPRE_Int HYPRE_ParCSRHybridSetRelaxNodeOrder ( HYPRE_Solver solver, HYPRE_Int *relax_node_order );
+HYPRE_Int HYPRE_ParCSRHybridSetRelaxNodeOuterWeights ( HYPRE_Solver solver, HYPRE_Real *relax_node_outerweights );
+HYPRE_Int HYPRE_ParCSRHybridSetRelaxNodeWeights ( HYPRE_Solver solver, HYPRE_Real *relax_node_weights );
+HYPRE_Int HYPRE_ParCSRHybridSetRelaxEdgeWeights ( HYPRE_Solver solver, HYPRE_Real *relax_edge_weights );
+HYPRE_Int HYPRE_ParCSRHybridSetNodeNumSweeps ( HYPRE_Solver solver, HYPRE_Int *node_num_sweeps );
 HYPRE_Int
 HYPRE_ParCSRHybridSetGridRelaxType(HYPRE_Solver  solver,
                                    HYPRE_Int    *grid_relax_type);

@@ -4506,6 +4506,19 @@ main( hypre_int argc,
       HYPRE_ParCSRHybridSetSeqThreshold(amg_solver, seq_threshold);
       HYPRE_ParCSRHybridSetRelaxWt(amg_solver, relax_wt);
       HYPRE_ParCSRHybridSetOuterWt(amg_solver, outer_wt);
+      HYPRE_ParCSRHybridSetCycleType(amg_solver, cycle_type);
+      if (cycle_type==4)
+      {
+         // set cycle structure from usr inputs 
+         i=0;
+         HYPRE_ParCSRHybridSetCycleStruct(amg_solver,iconfig_ptr[i].cycle_struct,iconfig_ptr[i].cycle_num_nodes);
+         HYPRE_ParCSRHybridSetRelaxNodeTypes(amg_solver,iconfig_ptr[i].relax_node_types);
+         HYPRE_ParCSRHybridSetRelaxNodeOrder(amg_solver,iconfig_ptr[i].relax_node_order);
+         HYPRE_ParCSRHybridSetRelaxNodeOuterWeights(amg_solver,iconfig_ptr[i].relax_node_outerweights);
+         HYPRE_ParCSRHybridSetRelaxNodeWeights(amg_solver,iconfig_ptr[i].relax_node_weights);
+         HYPRE_ParCSRHybridSetRelaxEdgeWeights(amg_solver,iconfig_ptr[i].relax_edge_weights);
+         HYPRE_ParCSRHybridSetNodeNumSweeps(amg_solver,iconfig_ptr[i].node_num_sweeps);
+      }
       if (level_w > -1)
       {
          HYPRE_ParCSRHybridSetLevelRelaxWt(amg_solver, relax_wt_level, level_w);
@@ -4596,6 +4609,8 @@ main( hypre_int argc,
       }
 
       HYPRE_ParCSRHybridDestroy(amg_solver);
+      if (cycle_type==4)
+         hypre_TFree(iconfig_ptr, HYPRE_MEMORY_HOST);
    }
    /*-----------------------------------------------------------
     * Solve the system using AMG
