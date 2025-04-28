@@ -48,9 +48,9 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([M4_HYPRE_NAME],    [hypre])
-m4_define([M4_HYPRE_VERSION], [2.32.0])
-m4_define([M4_HYPRE_NUMBER],  [23200])
-m4_define([M4_HYPRE_DATE],    [2024/10/08])
+m4_define([M4_HYPRE_VERSION], [2.33.0])
+m4_define([M4_HYPRE_NUMBER],  [23300])
+m4_define([M4_HYPRE_DATE],    [2025/04/03])
 m4_define([M4_HYPRE_TIME],    [00:00:00])
 m4_define([M4_HYPRE_BUGS],    [https://github.com/hypre-space/hypre/issues])
 m4_define([M4_HYPRE_SRCDIR],  [`pwd`])
@@ -184,6 +184,7 @@ hypre_using_umpire_host=no
 hypre_using_umpire_device=no
 hypre_using_umpire_um=no
 hypre_using_umpire_pinned=no
+hypre_warp_size=32
 
 hypre_using_caliper=no
 hypre_user_gave_caliper_lib=no
@@ -1210,6 +1211,13 @@ esac],
 )
 
 dnl ***** CUDA options
+
+AC_ARG_WITH(gpu-warp-size,
+AS_HELP_STRING([--with-gpu-warp-size=WARP_SIZE],
+               [set GPU warp size (default: 32 for CUDA/SYCL, 64 for HIP) @<:@default=auto@:>@]),
+[hypre_warp_size=$withval],
+[hypre_warp_size=auto]
+)
 
 AC_ARG_WITH(cuda-home,
 AS_HELP_STRING([--with-cuda-home=DIR],
@@ -2391,6 +2399,52 @@ AS_IF([ test x"$hypre_using_hip" == x"yes" ],
                          [])
 
 dnl *********************************************************************
+dnl * Set GPU warp size
+dnl *********************************************************************
+
+if test "x$hypre_warp_size" = "xauto"
+then
+  if test "x$hypre_using_cuda" = "xyes" || test "x$hypre_using_sycl" = "xyes"
+  then
+    hypre_warp_size=32
+  elif test "x$hypre_using_hip" = "xyes"
+  then
+    # Check for CDNA vs RDNA architecture
+    AC_MSG_CHECKING([for GPU architecture using rocm-smi])
+    gfx_versions=$(rocm-smi --showproductname 2>/dev/null | grep 'gfx' | awk '{print $NF}' | tr '\n' ' ')
+    rocm_smi_cmd=$(rocm-smi --showproductname)
+    rocm_smi_status=$?
+
+    if test $rocm_smi_status -eq 0
+    then
+      cdna_found=no
+      for gfx_version in $gfx_versions
+      do
+        case "$gfx_version" in
+          gfx9*)
+            cdna_found=yes
+            break
+            ;;
+        esac
+      done
+
+      if test "$cdna_found" = "yes"
+      then
+        hypre_warp_size=64
+        AC_MSG_RESULT([CDNA detected ($gfx_versions), setting warp size to 64])
+      else
+        hypre_warp_size=32
+        AC_MSG_RESULT([RDNA detected ($gfx_versions), setting warp size to 32])
+      fi
+    else
+      hypre_warp_size=64
+      AC_MSG_RESULT([AMD GPU detection failed, defaulting to warp size 64])
+    fi
+  fi
+fi
+AC_DEFINE_UNQUOTED(HYPRE_WARP_SIZE, [$hypre_warp_size], [GPU warp size])
+
+dnl *********************************************************************
 dnl * Set raja options
 dnl *********************************************************************
 if test "x$hypre_using_raja" = "xyes"
@@ -2619,7 +2673,7 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         dnl interprets as C and therefore invokes the C compiler rather than the HIP part
         dnl of clang. Put HIPCXXFLAGS at the end so the user can override from
         dnl from the configure line.
-        HIPCXXFLAGS="-x hip -std=c++14 ${HIPCXXFLAGS}"
+        HIPCXXFLAGS="-x hip -fPIE -std=c++14 ${HIPCXXFLAGS}"
 
         dnl If not in debug mode, at least -O2, but the user can override with
         dnl with HIPCXXFLAGS on the configure line. If in debug mode, -O0 -Wall

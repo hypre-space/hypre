@@ -206,6 +206,7 @@ function(find_and_add_cuda_library LIB_NAME HYPRE_ENABLE_VAR)
 endfunction()
 
 # Handle CUDA libraries
+list(APPEND CUDA_LIBS CUDA::cudart) # Add cudart first since other CUDA libraries may depend on it
 find_and_add_cuda_library(cusparse HYPRE_ENABLE_CUSPARSE)
 find_and_add_cuda_library(curand HYPRE_ENABLE_CURAND)
 find_and_add_cuda_library(cublas HYPRE_ENABLE_CUBLAS)
@@ -214,9 +215,14 @@ find_and_add_cuda_library(cusolver HYPRE_ENABLE_CUSOLVER)
 
 # Handle GPU Profiling with nvToolsExt
 if(HYPRE_ENABLE_GPU_PROFILING)
-  find_package(nvToolsExt REQUIRED)
-  set(HYPRE_USING_NVTX ON CACHE BOOL "" FORCE)
-  list(APPEND CUDA_LIBS CUDA::nvToolsExt)
+  find_library(NVTX_LIBRARY nvToolsExt HINTS ${CUDA_TOOLKIT_ROOT_DIR} PATH_SUFFIXES lib64 lib)
+  if(NVTX_LIBRARY)
+    message(STATUS "Found NVTX library")
+    set(HYPRE_USING_NVTX ON CACHE BOOL "" FORCE)
+    list(APPEND CUDA_LIBS ${NVTX_LIBRARY})
+  else()
+    message(FATAL_ERROR "NVTX library not found! Make sure CUDA is installed correctly.")
+  endif()
 endif()
 
 # Add CUDA Toolkit include directories to the target
@@ -250,6 +256,9 @@ elseif (HYPRE_ENABLE_LTO)
       CUDA_RESOLVE_DEVICE_SYMBOLS ON
   )
 endif()
+
+# Set GPU warp size
+set(HYPRE_WARP_SIZE 32 CACHE INTERNAL "GPU warp size")
 
 # Print CUDA info
 message(STATUS "CUDA C++ standard: ${CMAKE_CUDA_STANDARD}")

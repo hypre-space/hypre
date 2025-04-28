@@ -19,9 +19,9 @@ if(POLICY CMP0104)
 endif()
 
 # The version number.
-set(HYPRE_VERSION 2.32.0)
-set(HYPRE_NUMBER  23200)
-set(HYPRE_DATE    2024/10/08)
+set(HYPRE_VERSION 2.33.0)
+set(HYPRE_NUMBER  23300)
+set(HYPRE_DATE    2025/04/03)
 set(HYPRE_TIME    00:00:00)
 set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -440,7 +440,9 @@ if(HYPRE_NEEDS_CXX AND NOT HYPRE_USING_GPU)
 endif()
 
 # Print the directories used to hint the user about the active TPLs
-message(STATUS "Dependency directories: ${HYPRE_DEPENDENCY_DIRS}")
+if (HYPRE_DEPENDENCY_DIRS)
+  message(STATUS "Dependency directories: ${HYPRE_DEPENDENCY_DIRS}")
+endif()
 
 # Configure a header file to pass CMake settings to the source code
 configure_file(

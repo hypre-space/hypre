@@ -89,8 +89,9 @@ typedef struct
    char                *stack_sora;              /* Set (1) or Add (0) */
    HYPRE_Int            usr_on_proc_elmts;       /* user given num elmt on-proc */
    HYPRE_Int            usr_off_proc_elmts;      /* user given num elmt off-proc */
-   HYPRE_BigInt         init_alloc_factor;
-   HYPRE_BigInt         grow_factor;
+   HYPRE_Int            early_assemble;
+   HYPRE_Int            init_alloc_factor;
+   HYPRE_Real           grow_factor;
 #endif
 } hypre_AuxParCSRMatrix;
 
@@ -133,6 +134,7 @@ typedef struct
 #define hypre_AuxParCSRMatrixStackSorA(matrix)            ((matrix) -> stack_sora)
 #define hypre_AuxParCSRMatrixUsrOnProcElmts(matrix)       ((matrix) -> usr_on_proc_elmts)
 #define hypre_AuxParCSRMatrixUsrOffProcElmts(matrix)      ((matrix) -> usr_off_proc_elmts)
+#define hypre_AuxParCSRMatrixEarlyAssemble(matrix)        ((matrix) -> early_assemble)
 #define hypre_AuxParCSRMatrixInitAllocFactor(matrix)      ((matrix) -> init_alloc_factor)
 #define hypre_AuxParCSRMatrixGrowFactor(matrix)           ((matrix) -> grow_factor)
 #endif
@@ -437,6 +439,12 @@ HYPRE_Int hypre_IJMatrixSetDiagOffdSizesParCSR ( hypre_IJMatrix *matrix,
                                                  const HYPRE_Int *diag_sizes, const HYPRE_Int *offdiag_sizes );
 HYPRE_Int hypre_IJMatrixSetMaxOffProcElmtsParCSR ( hypre_IJMatrix *matrix,
                                                    HYPRE_Int max_off_proc_elmts );
+HYPRE_Int hypre_IJMatrixSetInitAllocationParCSR(hypre_IJMatrix *matrix,
+                                                HYPRE_Int       factor);
+HYPRE_Int hypre_IJMatrixSetEarlyAssembleParCSR(hypre_IJMatrix *matrix,
+                                               HYPRE_Int       early_assemble);
+HYPRE_Int hypre_IJMatrixSetGrowFactorParCSR(hypre_IJMatrix *matrix,
+                                            HYPRE_Real      factor);
 HYPRE_Int hypre_IJMatrixInitializeParCSR ( hypre_IJMatrix *matrix );
 HYPRE_Int hypre_IJMatrixGetRowCountsParCSR ( hypre_IJMatrix *matrix, HYPRE_Int nrows,
                                              HYPRE_BigInt *rows, HYPRE_Int *ncols );
@@ -478,6 +486,10 @@ HYPRE_Int hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix,
                                             HYPRE_MemoryLocation memory_location);
 HYPRE_Int hypre_IJMatrixSetConstantValuesParCSRDevice( hypre_IJMatrix *matrix,
                                                        HYPRE_Complex value );
+HYPRE_Int hypre_IJMatrixMigrateParCSR(hypre_IJMatrix *matrix, HYPRE_MemoryLocation memory_location);
+
+HYPRE_Int hypre_IJMatrixAssembleCommunicate(hypre_IJMatrix *matrix);
+HYPRE_Int hypre_IJMatrixAssembleCompressDevice(hypre_IJMatrix *matrix, HYPRE_Int reduce_stack_size);
 
 /* IJMatrix_petsc.c */
 HYPRE_Int hypre_IJMatrixSetLocalSizePETSc ( hypre_IJMatrix *matrix, HYPRE_Int local_m,
@@ -512,6 +524,8 @@ HYPRE_Int hypre_IJVectorReadBinary ( MPI_Comm comm, const char *filename, HYPRE_
 /* IJVector_parcsr.c */
 HYPRE_Int hypre_IJVectorCreatePar ( hypre_IJVector *vector, HYPRE_BigInt *IJpartitioning );
 HYPRE_Int hypre_IJVectorDestroyPar ( hypre_IJVector *vector );
+HYPRE_Int hypre_IJVectorInitializeParShell (hypre_IJVector *vector );
+HYPRE_Int hypre_IJVectorSetParData( hypre_IJVector *vector, HYPRE_Complex *data );
 HYPRE_Int hypre_IJVectorInitializePar ( hypre_IJVector *vector );
 HYPRE_Int hypre_IJVectorInitializePar_v2(hypre_IJVector *vector,
                                          HYPRE_MemoryLocation memory_location);
@@ -522,6 +536,7 @@ HYPRE_Int hypre_IJVectorZeroValuesPar ( hypre_IJVector *vector );
 HYPRE_Int hypre_IJVectorSetComponentPar ( hypre_IJVector *vector, HYPRE_Int component);
 HYPRE_Int hypre_IJVectorSetValuesPar ( hypre_IJVector *vector, HYPRE_Int num_values,
                                        const HYPRE_BigInt *indices, const HYPRE_Complex *values );
+HYPRE_Int hypre_IJVectorSetConstantValuesPar ( hypre_IJVector *vector, HYPRE_Complex value );
 HYPRE_Int hypre_IJVectorAddToValuesPar ( hypre_IJVector *vector, HYPRE_Int num_values,
                                          const HYPRE_BigInt *indices, const HYPRE_Complex *values );
 HYPRE_Int hypre_IJVectorAssemblePar ( hypre_IJVector *vector );
@@ -533,9 +548,9 @@ HYPRE_Int hypre_IJVectorAssembleOffProcValsPar ( hypre_IJVector *vector,
 HYPRE_Int hypre_IJVectorSetAddValuesParDevice(hypre_IJVector *vector, HYPRE_Int num_values,
                                               const HYPRE_BigInt *indices, const HYPRE_Complex *values, const char *action);
 HYPRE_Int hypre_IJVectorAssembleParDevice(hypre_IJVector *vector);
-
 HYPRE_Int hypre_IJVectorUpdateValuesDevice( hypre_IJVector *vector, HYPRE_Int num_values,
                                             const HYPRE_BigInt *indices, const HYPRE_Complex *values, HYPRE_Int action);
+HYPRE_Int hypre_IJVectorMigrateParCSR(hypre_IJVector *vector, HYPRE_MemoryLocation memory_location);
 
 /* HYPRE_IJMatrix.c */
 HYPRE_Int HYPRE_IJMatrixCreate ( MPI_Comm comm, HYPRE_BigInt ilower, HYPRE_BigInt iupper,
@@ -587,6 +602,7 @@ HYPRE_Int HYPRE_IJVectorInitialize ( HYPRE_IJVector vector );
 HYPRE_Int HYPRE_IJVectorSetPrintLevel ( HYPRE_IJVector vector, HYPRE_Int print_level );
 HYPRE_Int HYPRE_IJVectorSetValues ( HYPRE_IJVector vector, HYPRE_Int nvalues,
                                     const HYPRE_BigInt *indices, const HYPRE_Complex *values );
+HYPRE_Int HYPRE_IJVectorSetConstantValues ( HYPRE_IJVector vector, HYPRE_Complex value );
 HYPRE_Int HYPRE_IJVectorAddToValues ( HYPRE_IJVector vector, HYPRE_Int nvalues,
                                       const HYPRE_BigInt *indices, const HYPRE_Complex *values );
 HYPRE_Int HYPRE_IJVectorAssemble ( HYPRE_IJVector vector );

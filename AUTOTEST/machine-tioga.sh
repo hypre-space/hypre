@@ -50,7 +50,7 @@ save="tioga"
 ## HIP  ##
 ##########
 
-module -q load rocm/5.2.0
+module -q load rocm/6.2.1
 
 # HIP without UM [benchmark, struct, ams]
 co="--with-hip --with-MPI-include=${MPICH_DIR}/include --with-MPI-lib-dirs=${MPICH_DIR}/lib --with-MPI-libs=mpi --with-gpu-arch='gfx90a' CC=cc CXX=CC"
@@ -75,17 +75,25 @@ ro="-ij-noilu -ams -struct -sstruct -rt -D HYPRE_NO_SAVED"
 
 module -q load cmake/3.24.2
 
-# HIP without UM + CMake (no run)
+# Basic build and check library
+mo="-j all check"
+
+# HIP without UM + CMake (no full run, but with basic "make check")
 co="-DCMAKE_C_COMPILER=cc -DCMAKE_CXX_COMPILER=CC -DMPI_C_COMPILER=cc -DMPI_CXX_COMPILER=CC -DHYPRE_ENABLE_HIP=ON -DCMAKE_HIP_ARCHITECTURES=gfx90a -DCMAKE_BUILD_TYPE=Debug -DHYPRE_BUILD_TESTS=ON"
 ./test.sh cmake.sh $root_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-hip-nonum
 
-# HIP with UM + Shared library + CMake (no run)
+# HIP without UM + Single precision + CMake (no full run, but with basic "make check")
+co="-DBUILD_SHARED_LIBS=ON -DCMAKE_C_COMPILER=cc -DCMAKE_CXX_COMPILER=CC -DMPI_C_COMPILER=cc -DMPI_CXX_COMPILER=CC -DHYPRE_ENABLE_HIP=ON -DCMAKE_HIP_ARCHITECTURES=gfx90a -DHYPRE_ENABLE_SINGLE=ON -DCMAKE_BUILD_TYPE=Debug -DHYPRE_BUILD_TESTS=ON"
+./test.sh cmake.sh $root_dir -co: $co -mo: $mo
+./renametest.sh cmake $output_dir/cmake-hip-nonum-single
+
+# HIP with UM + Shared library + CMake (no full run, but with basic "make check")
 co="-DBUILD_SHARED_LIBS=ON -DCMAKE_C_COMPILER=cc -DCMAKE_CXX_COMPILER=CC -DMPI_C_COMPILER=cc -DMPI_CXX_COMPILER=CC -DHYPRE_ENABLE_HIP=ON -DCMAKE_HIP_ARCHITECTURES=gfx90a -DHYPRE_ENABLE_UNIFIED_MEMORY=ON -DCMAKE_BUILD_TYPE=Debug -DHYPRE_BUILD_TESTS=ON"
 ./test.sh cmake.sh $root_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-hip-um-shared
 
-# CPU + CMake (no run)
+# CPU + CMake (no full run, but with basic "make check")
 co="-DCMAKE_C_COMPILER=cc -DCMAKE_CXX_COMPILER=CC -DMPI_C_COMPILER=cc -DMPI_CXX_COMPILER=CC -DCMAKE_BUILD_TYPE=Debug -DHYPRE_BUILD_TESTS=ON"
 ./test.sh cmake.sh $root_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-cpu

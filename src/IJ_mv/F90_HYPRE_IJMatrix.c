@@ -71,6 +71,38 @@ hypre_F90_IFACE(hypre_ijmatrixinitialize, HYPRE_IJMATRIXINITIALIZE)
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixInitialize_v2
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_ijmatrixinitialize_v2, HYPRE_IJMATRIXINITIALIZE_V2)
+( hypre_F90_Obj *matrix,
+  hypre_F90_Int *memory_location,
+  hypre_F90_Int *ierr    )
+{
+   *ierr = (hypre_F90_Int)
+           ( HYPRE_IJMatrixInitialize_v2(
+                hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+                hypre_F90_PassObj (HYPRE_MemoryLocation, memory_location) ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixMigrate
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_ijmatrixmigrate, HYPRE_IJMATRIXMIGRATE)
+( hypre_F90_Obj *matrix,
+  hypre_F90_Int *memory_location,
+  hypre_F90_Int *ierr    )
+{
+   *ierr = (hypre_F90_Int)
+           ( HYPRE_IJMatrixMigrate(
+                hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+                hypre_F90_PassObj (HYPRE_MemoryLocation, memory_location) ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJMatrixSetValues
  *--------------------------------------------------------------------------*/
 
@@ -248,6 +280,26 @@ hypre_F90_IFACE(hypre_ijmatrixgetlocalrange, HYPRE_IJMATRIXGETLOCALRANGE)
                 hypre_F90_PassBigIntRef (iupper),
                 hypre_F90_PassBigIntRef (jlower),
                 hypre_F90_PassBigIntRef (jupper) ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixGetGlobalInfo
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_ijmatrixgetglobalinfo, HYPRE_IJMATRIXGETGLOBALINFO)
+( hypre_F90_Obj *matrix,
+  hypre_F90_BigInt *global_num_rows,
+  hypre_F90_BigInt *global_num_cols,
+  hypre_F90_BigInt *global_num_nonzeros,
+  hypre_F90_Int *ierr    )
+{
+  *ierr = (hypre_F90_Int)
+          ( HYPRE_IJMatrixGetGlobalInfo(
+                hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+                hypre_F90_PassBigIntRef (global_num_rows),
+                hypre_F90_PassBigIntRef (global_num_cols),
+                hypre_F90_PassBigIntRef (global_num_nonzeros) ) );
 }
 
 /*--------------------------------------------------------------------------
