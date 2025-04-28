@@ -857,7 +857,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix  *matrix,
    HYPRE_BigInt            rowstart;
    HYPRE_Int               part, var, entry, b, m, mi;
    HYPRE_Int              *row_sizes;
-   HYPRE_Int               max_size;
+   HYPRE_Int               max_size = 0;
 
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy   exec  = hypre_GetExecPolicy1(memory_location);
@@ -880,7 +880,6 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix  *matrix,
    if (exec == HYPRE_EXEC_DEVICE)
    {
       row_sizes = NULL;
-      max_size  = 0;
    }
    else
 #endif
