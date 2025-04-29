@@ -96,6 +96,7 @@ hypre_PFMGSetupInterpOp_core_CC( hypre_StructMatrix   *P,
    HYPRE_MemoryLocation   memory_location = hypre_StructMatrixMemoryLocation(P);
    HYPRE_ExecutionPolicy  exec            = hypre_GetExecPolicy1(memory_location);
    HYPRE_Complex         *A_data          = hypre_StructMatrixData(A);
+   HYPRE_Int             *A_const_indices = hypre_StructMatrixConstIndices(A);
    hypre_StructStencil   *A_stencil       = hypre_StructMatrixStencil(A);
    HYPRE_Int              A_stencil_size  = hypre_StructStencilSize(A_stencil);
    hypre_Index           *A_stencil_shape = hypre_StructStencilShape(A_stencil);
@@ -134,15 +135,15 @@ hypre_PFMGSetupInterpOp_core_CC( hypre_StructMatrix   *P,
 
          if (Astenc == 0)
          {
-            Pconst0 += A_const_data_h[si];
+            Pconst0 += A_const_data_h[A_const_indices[si]];
          }
          else if (Astenc == Pstenc1)
          {
-            Pconst1 -= A_const_data_h[si];
+            Pconst1 -= A_const_data_h[A_const_indices[si]];
          }
          else if (Astenc == Pstenc2)
          {
-            Pconst2 -= A_const_data_h[si];
+            Pconst2 -= A_const_data_h[A_const_indices[si]];
          }
       }
    }
