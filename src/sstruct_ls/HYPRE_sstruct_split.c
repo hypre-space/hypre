@@ -379,8 +379,8 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
    hypre_ParVector         *pary;
 
    HYPRE_Int                iter, part, vi, vj;
-   HYPRE_Real               b_dot_b = 0, r_dot_r;
-   HYPRE_Real               eps;
+   HYPRE_Real               b_dot_b = 0.0, r_dot_r = 0.0;
+   HYPRE_Real               eps = 0.0;
 #ifdef DEBUG
    char                     filename[255];
 #endif

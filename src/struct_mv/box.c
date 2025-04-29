@@ -994,7 +994,8 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
    HYPRE_Int         *indices[HYPRE_MAXDIM];
    HYPRE_Int         *lbox_indices[HYPRE_MAXDIM];
    HYPRE_Int         *rbox_indices[HYPRE_MAXDIM];
-   HYPRE_Int          splitdir, dir, sign_change, d, i;
+   HYPRE_Int          splitdir = 0;
+   HYPRE_Int          dir, sign_change, d, i;
    HYPRE_Int          index, size, capacity, change;
    HYPRE_Int          num_indices;
    HYPRE_Int          num_lbox_indices, num_rbox_indices;

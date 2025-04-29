@@ -42,10 +42,10 @@ hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A,
    HYPRE_Int             d;
 
    HYPRE_Complex         A_diag_const;
-   HYPRE_Complex        *A_diag;
-   HYPRE_Complex        *Ap0, *Ap1, *Ap2;
-   HYPRE_Complex        *Ap3, *Ap4, *Ap5;
-   HYPRE_Complex        *Ap6, *Ap7, *Ap8;
+   HYPRE_Complex        *A_diag = NULL;
+   HYPRE_Complex        *Ap0 = NULL, *Ap1 = NULL, *Ap2 = NULL;
+   HYPRE_Complex        *Ap3 = NULL, *Ap4 = NULL, *Ap5 = NULL;
+   HYPRE_Complex        *Ap6 = NULL, *Ap7 = NULL, *Ap8 = NULL;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -657,9 +657,9 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
    HYPRE_Complex         A_diag_const;
 
    HYPRE_Complex        *A_diag;
-   HYPRE_Complex         Ap0, Ap1, Ap2;
-   HYPRE_Complex         Ap3, Ap4, Ap5;
-   HYPRE_Complex         Ap6, Ap7, Ap8;
+   HYPRE_Complex         Ap0 = 0.0, Ap1 = 0.0, Ap2 = 0.0;
+   HYPRE_Complex         Ap3 = 0.0, Ap4 = 0.0, Ap5 = 0.0;
+   HYPRE_Complex         Ap6 = 0.0, Ap7 = 0.0, Ap8 = 0.0;
 
    /* Exit if there are no constant coefficients */
    all_zero = 1;

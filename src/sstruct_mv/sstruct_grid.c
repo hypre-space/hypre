@@ -34,30 +34,39 @@ hypre_SStructVariableGetOffset( HYPRE_SStructVariable  vartype,
       case HYPRE_SSTRUCT_VARIABLE_CELL:
          hypre_SetIndex(varoffset, 0);
          break;
+
       case HYPRE_SSTRUCT_VARIABLE_NODE:
          hypre_SetIndex(varoffset, 1);
          break;
+
       case HYPRE_SSTRUCT_VARIABLE_XFACE:
          hypre_SetIndex3(varoffset, 1, 0, 0);
          break;
+
       case HYPRE_SSTRUCT_VARIABLE_YFACE:
          hypre_SetIndex3(varoffset, 0, 1, 0);
          break;
+
       case HYPRE_SSTRUCT_VARIABLE_ZFACE:
          hypre_SetIndex3(varoffset, 0, 0, 1);
          break;
+
       case HYPRE_SSTRUCT_VARIABLE_XEDGE:
          hypre_SetIndex3(varoffset, 0, 1, 1);
          break;
+
       case HYPRE_SSTRUCT_VARIABLE_YEDGE:
          hypre_SetIndex3(varoffset, 1, 0, 1);
          break;
+
       case HYPRE_SSTRUCT_VARIABLE_ZEDGE:
          hypre_SetIndex3(varoffset, 1, 1, 0);
          break;
+
       case HYPRE_SSTRUCT_VARIABLE_UNDEFINED:
          break;
    }
+
    for (d = ndim; d < HYPRE_MAXDIM; d++)
    {
       hypre_IndexD(varoffset, d) = 0;
@@ -495,8 +504,6 @@ hypre_SStructGridRef( hypre_SStructGrid  *grid,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructGridComputeGlobalSizes
- *
  * Computes the global sizes of the semi-struct grid, part grids, and struct
  * grids. It reduces the number of calls to hypre_MPI_Allreduce to a single one
  * in contrast to nparts*nvars when calling hypre_StructGridComputeGlobalSize
@@ -2371,8 +2378,6 @@ hypre_SStructGridIntersect( hypre_SStructGrid   *grid,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructGridPrintGLVis
- *
  * Save a GLVis mesh file with the given prefix corresponding to the input
  * SStruct grid assuming that the cells in each part are the same. The optional
  * trans and origin parameters specify the coordinate transformation for each
@@ -2732,8 +2737,6 @@ hypre_SStructGridPrint( FILE              *file,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructGridRead
- *
  * This function reads a semi-structured grid from file. This is used mainly
  * for debugging purposes.
  *--------------------------------------------------------------------------*/

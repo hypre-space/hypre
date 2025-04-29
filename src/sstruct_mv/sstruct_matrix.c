@@ -1918,7 +1918,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
    HYPRE_Int                box_id;
    HYPRE_Int                nfrentries, ntoentries, frpart, topart;
    HYPRE_Int                entry, sentry, ei, fri, toi, i;
-   HYPRE_Int                tvalues_size, tvalues_new_size;
+   HYPRE_Int                tvalues_size = 0, tvalues_new_size;
 
    box   = hypre_BoxCreate(ndim);
    ibox0 = hypre_BoxCreate(ndim);

@@ -71,8 +71,8 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
 
    hypre_CommPkg        *comm_pkg;
    hypre_CommType       *comm_types;
-   hypre_CommType       *comm_type;
-   hypre_CommBlock      *comm_block;
+   hypre_CommType       *comm_type  = NULL;
+   hypre_CommBlock      *comm_block = NULL;
    HYPRE_Int            *cb_num_entries;
    HYPRE_Int            *comm_boxes_p, *comm_boxes_i, *comm_boxes_j;
    HYPRE_Int             num_boxes, num_entries, num_comms, comm_bufsize;
@@ -231,6 +231,7 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
    hypre_CommTypeNumBlocks(comm_type) = 1;
    hypre_CommTypeBlocks(comm_type)    = hypre_CTAlloc(hypre_CommBlock, 1, HYPRE_MEMORY_HOST);
 
+   k = 0;
    n = p_old = -1;
    num_comms = 0;
    comm_bufsize = 0;
