@@ -665,8 +665,6 @@ hypre_CommPkgCreate( hypre_CommInfo        *comm_info,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CommBlockSetEntries
- *
  * Note that this routine uses an identity coordinate transform.
  *--------------------------------------------------------------------------*/
 

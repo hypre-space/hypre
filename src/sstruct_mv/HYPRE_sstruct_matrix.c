@@ -1297,14 +1297,10 @@ HYPRE_SStructMatrixGetGrid( HYPRE_SStructMatrix   matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructMatrixPrint
- *
  * This function prints a SStructMatrix to file. Assumptions:
  *
  *   1) All StructMatrices have the same number of ghost layers.
  *   2) Range and domain num_ghosts are equal.
- *
- * TODO: Add GPU support
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

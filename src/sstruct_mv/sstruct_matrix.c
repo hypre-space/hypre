@@ -823,7 +823,6 @@ hypre_SStructPMatrixGetDiagonal( hypre_SStructPMatrix  *pmatrix,
  *==========================================================================*/
 
 /*--------------------------------------------------------------------------
- * hypre_SStructUMatrixInitialize
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1644,8 +1643,6 @@ hypre_SStructUMatrixAssemble( hypre_SStructMatrix *matrix )
  *==========================================================================*/
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatrixMapDataBox
- *
  * Maps map_vbox in place to the index space where data is stored for S(vi,vj)
  *
  * Note: Since off-diagonal components of the SStructMatrix are being stored
@@ -2075,8 +2072,6 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatrixCompressUToS
- *
  * Add to or set (overwrite) entries in S with entries from U where
  * the sparsity pattern permits.
  *
@@ -2370,8 +2365,6 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatrixToUMatrix
- *
  * Notes (VPM):
  *       1) Use part and var as arguments to this function?
  *       2) We are not converting the whole SStructMatrix, only the
@@ -2725,13 +2718,9 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatrixHaloToUMatrix
- *
  * Notes:
- *         *) Consider a single variable type for now.
- *         *) Input grid comes from the matrix we are multiplying to A
- *
- * TODO (VPM): Test with device build
+ *   *) Consider a single variable type for now.
+ *   *) Input grid comes from the matrix we are multiplying to A
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -2897,8 +2886,6 @@ hypre_SStructMatrixHaloToUMatrix( hypre_SStructMatrix   *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatrixGetDiagonal
- *
  * Returns the diagonal of a SStructMatrix as a SStructVector
  *--------------------------------------------------------------------------*/
 

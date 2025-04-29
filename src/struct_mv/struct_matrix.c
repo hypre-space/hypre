@@ -2232,7 +2232,6 @@ hypre_StructMatrixPrintData( FILE               *file,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatrixReadData
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -2297,7 +2296,6 @@ hypre_StructMatrixReadData( FILE               *file,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatrixPrint
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -2367,8 +2365,6 @@ hypre_StructMatrixPrint( const char         *filename,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatrixRead
- *
  * NOTE: This will not read files with ghost values in them.
  * RDF TODO: Fix this to use new matrix structure
  *--------------------------------------------------------------------------*/
@@ -2467,7 +2463,6 @@ hypre_StructMatrixRead( MPI_Comm    comm,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatrixMigrate
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -2626,8 +2621,6 @@ hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatrixGetDiagonal
- *
  * Returns the diagonal of a square StructMatrix as a StructVector
  *
  * TODO: Create StructVector if diag is NULL

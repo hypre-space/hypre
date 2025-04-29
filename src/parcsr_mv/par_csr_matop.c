@@ -5286,9 +5286,9 @@ hypre_ParCSRMatrixAddHost( HYPRE_Complex        alpha,
    }
 
    /* Set diag_C */
-/* #ifdef HYPRE_USING_OPENMP */
-/*    #pragma omp parallel */
-/* #endif */
+#ifdef HYPRE_USING_OPENMP
+   #pragma omp parallel
+#endif
    {
       HYPRE_Int   ii, num_threads;
       HYPRE_Int   size, rest, ns, ne;
