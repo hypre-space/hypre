@@ -430,6 +430,9 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 HYPRE_SStructMatrixSetEarlyAssemble( HYPRE_SStructMatrix matrix,
                                      HYPRE_Int           early_assemble )
@@ -1282,7 +1285,6 @@ HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix   matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructMatrixGetGrid
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1433,7 +1435,6 @@ HYPRE_SStructMatrixPrint( const char          *filename,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructMatrixRead
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

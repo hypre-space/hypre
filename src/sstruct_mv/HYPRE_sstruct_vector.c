@@ -855,8 +855,6 @@ HYPRE_SStructVectorGetObject( HYPRE_SStructVector   vector,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructVectorPrint
- *
  * This function prints a SStructVector to file. For the assumptions used
  * here, see HYPRE_SStructMatrixPrint.
  *--------------------------------------------------------------------------*/
@@ -914,7 +912,6 @@ HYPRE_SStructVectorPrint( const char          *filename,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructVectorRead
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

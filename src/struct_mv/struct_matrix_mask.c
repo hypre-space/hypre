@@ -14,7 +14,6 @@
 #include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatrixCreateMask
  *    This routine returns the matrix, `mask', containing pointers to
  *    some of the data in the input matrix `matrix'.  This can be useful,
  *    for example, to construct "splittings" of a matrix for use in

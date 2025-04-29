@@ -33,7 +33,6 @@
  *==========================================================================*/
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatmultCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -217,8 +216,6 @@ hypre_SStructPMatmultCreate(HYPRE_Int                   nmatrices_input,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatmultDestroy
- *
  * Destroys an object of type hypre_SStructPMatmultData
  *--------------------------------------------------------------------------*/
 
@@ -257,7 +254,6 @@ hypre_SStructPMatmultDestroy( hypre_SStructPMatmultData *pmmdata )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatmultSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -470,7 +466,6 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatmultCommunicate
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -513,7 +508,6 @@ hypre_SStructPMatmultCommunicate( hypre_SStructPMatmultData *pmmdata )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatmultCompute
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -548,8 +542,6 @@ hypre_SStructPMatmultCompute( hypre_SStructPMatmultData *pmmdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatmult
- *
  * Computes the product of several SStructPMatrix matrices
  *--------------------------------------------------------------------------*/
 
@@ -575,8 +567,6 @@ hypre_SStructPMatmult(HYPRE_Int               nmatrices,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatmat
- *
  * Computes the product of two SStructPMatrix matrices: M = A*B
  *--------------------------------------------------------------------------*/
 
@@ -597,8 +587,6 @@ hypre_SStructPMatmat( hypre_SStructPMatrix  *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatrixPtAP
- *
  * Computes M = P^T*A*P
  *--------------------------------------------------------------------------*/
 
@@ -619,8 +607,6 @@ hypre_SStructPMatrixPtAP( hypre_SStructPMatrix  *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatrixRAP
- *
  * Computes M = R*A*P
  *--------------------------------------------------------------------------*/
 
@@ -642,8 +628,6 @@ hypre_SStructPMatrixRAP( hypre_SStructPMatrix  *R,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatrixRTtAP
- *
  * Computes M = RT^T*A*P
  *--------------------------------------------------------------------------*/
 
@@ -669,7 +653,6 @@ hypre_SStructPMatrixRTtAP( hypre_SStructPMatrix  *RT,
  *==========================================================================*/
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatmultCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -761,8 +744,6 @@ hypre_SStructMatmultCreate(HYPRE_Int                  nmatrices_input,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatmultDestroy
- *
  * Destroys an object of type hypre_SStructMatmultData
  *--------------------------------------------------------------------------*/
 
@@ -794,7 +775,6 @@ hypre_SStructMatmultDestroy( hypre_SStructMatmultData *mmdata )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatmultSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1021,8 +1001,6 @@ hypre_SStructMatmultSetup( hypre_SStructMatmultData   *mmdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatmultCommunicate
- *
  * Run communication phase for computing the structured component of M
  *--------------------------------------------------------------------------*/
 
@@ -1065,8 +1043,6 @@ hypre_SStructMatmultCommunicate( hypre_SStructMatmultData *mmdata )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatmultComputeS
- *
  * Computes the structured component of the product of SStructMatrices
  *--------------------------------------------------------------------------*/
 
@@ -1090,8 +1066,6 @@ hypre_SStructMatmultComputeS( hypre_SStructMatmultData *mmdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatmultComputeU
- *
  * Computes the unstructured component of the product of SStructMatrices
  *--------------------------------------------------------------------------*/
 
@@ -1116,7 +1090,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    hypre_ParCSRMatrix      *parcsr_uA;
    hypre_ParCSRMatrix      *parcsr_sP;
    hypre_ParCSRMatrix      *parcsr_uP;
-   hypre_ParCSRMatrix      *parcsr_sM;
+   hypre_ParCSRMatrix      *parcsr_sM = NULL;
    hypre_ParCSRMatrix      *parcsr_uM;
    hypre_ParCSRMatrix      *parcsr_uMold;
    hypre_ParCSRMatrix      *parcsr_sMold;
@@ -1373,8 +1347,6 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatmultCompute
- *
  * Iterative multiplication of SStructMatrices A_i (i=1,...,n) computed as
  *
  * M_1 = A_1           = (sA_1 + uA_1)
@@ -1412,8 +1384,6 @@ hypre_SStructMatmultCompute( hypre_SStructMatmultData *mmdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatmult
- *
  * Computes the product of several SStructMatrix matrices
  *--------------------------------------------------------------------------*/
 
@@ -1439,8 +1409,6 @@ hypre_SStructMatmult(HYPRE_Int             nmatrices,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatmat
- *
  * Computes the product of two SStructMatrix matrices: M = A*B
  *--------------------------------------------------------------------------*/
 
@@ -1461,9 +1429,6 @@ hypre_SStructMatmat( hypre_SStructMatrix  *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatrixPtAP
- *
- * Computes M = P^T*A*P
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1483,8 +1448,6 @@ hypre_SStructMatrixPtAP( hypre_SStructMatrix  *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatrixRAP
- *
  * Computes M = R*A*P
  *--------------------------------------------------------------------------*/
 
@@ -1506,8 +1469,6 @@ hypre_SStructMatrixRAP( hypre_SStructMatrix  *R,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatrixRTtAP
- *
  * Computes M = RT^T*A*P
  *--------------------------------------------------------------------------*/
 

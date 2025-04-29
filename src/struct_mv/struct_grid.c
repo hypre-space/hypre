@@ -24,7 +24,6 @@ HYPRE_Int  my_rank;
 static HYPRE_Int time_index = 0;
 
 /*--------------------------------------------------------------------------
- * hypre_StructGridCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -72,7 +71,6 @@ hypre_StructGridCreate( MPI_Comm           comm,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructGridRef
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -86,7 +84,6 @@ hypre_StructGridRef( hypre_StructGrid  *grid,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructGridDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -113,7 +110,6 @@ hypre_StructGridDestroy( hypre_StructGrid *grid )
 
 
 /*--------------------------------------------------------------------------
- * hypre_StructGridSetPeriodic
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -126,7 +122,6 @@ hypre_StructGridSetPeriodic( hypre_StructGrid  *grid,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructGridSetExtents
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -145,7 +140,6 @@ hypre_StructGridSetExtents( hypre_StructGrid  *grid,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructGridSetBoxes
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -160,7 +154,6 @@ hypre_StructGridSetBoxes( hypre_StructGrid *grid,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructGridSetBoundingBox
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -175,7 +168,6 @@ hypre_StructGridSetBoundingBox( hypre_StructGrid *grid,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructGridSetIDs
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -189,7 +181,6 @@ hypre_StructGridSetIDs( hypre_StructGrid *grid,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructGridSetBoxManager
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -204,7 +195,6 @@ hypre_StructGridSetBoxManager( hypre_StructGrid *grid,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructGridSetMaxDistance
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -217,8 +207,6 @@ hypre_StructGridSetMaxDistance( hypre_StructGrid *grid,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructGridComputeGlobalSize
- *
  * Computes the global size of the grid if it has not been computed before.
  *--------------------------------------------------------------------------*/
 
@@ -240,11 +228,9 @@ hypre_StructGridComputeGlobalSize( hypre_StructGrid *grid )
 }
 
 /*--------------------------------------------------------------------------
- * New - hypre_StructGridAssemble
- * AHB 9/06
- * New assemble routine that uses the BoxManager structure
+ * AHB 9/06 - New assemble routine that uses the BoxManager structure
  *
- *   Notes:
+ * Notes:
  *   1. No longer need a different assemble for the assumed partition case
  *--------------------------------------------------------------------------*/
 
@@ -630,7 +616,6 @@ hypre_StructGridComputeBoxnums( hypre_StructGrid *grid,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GatherAllBoxes
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -757,14 +742,11 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ComputeBoxnums
- *
  * It is assumed that, for any process number in 'procs', all of that
  * processes local boxes appear in the 'boxes' array.
  *
  * It is assumed that the boxes in 'boxes' are ordered by associated
  * process number then by their local ordering on that process.
- *
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -803,8 +785,6 @@ hypre_ComputeBoxnums(hypre_BoxArray *boxes,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructGridPrintVTK
- *
  * Notes (VPM):
  *      1) hypre_BoxNnodes may overflow?. Use BigInt from future.
  *      2) It assumes that coordinates can be represented as Int32.
@@ -1108,7 +1088,6 @@ hypre_StructGridPrintVTK( const char       *filename,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructGridPrint
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1129,7 +1108,6 @@ hypre_StructGridPrint( FILE             *file,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructGridRead
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1162,9 +1140,7 @@ hypre_StructGridRead( MPI_Comm           comm,
 }
 
 /*------------------------------------------------------------------------------
- * GEC0902  hypre_StructGridSetNumGhost
- *
- * the purpose is to set num ghost in the structure grid. It is identical
+ * The purpose is to set num ghost in the structure grid. It is identical
  * to the function that is used in the structure vector entity.
  *-----------------------------------------------------------------------------*/
 
@@ -1182,7 +1158,6 @@ hypre_StructGridSetNumGhost( hypre_StructGrid *grid, HYPRE_Int  *num_ghost )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructGridGetMaxBoxSize
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1203,6 +1178,10 @@ hypre_StructGridGetMaxBoxSize( hypre_StructGrid *grid )
 }
 
 #if 0 //defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_MemoryLocation data_location )
 {

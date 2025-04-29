@@ -887,7 +887,6 @@ hypre_SStructVectorInitializeShell( hypre_SStructVector *vector)
 }
 
 /*------------------------------------------------------------------
- *  hypre_SStructVectorClearGhostValues
  *----------------------------------------------------------------*/
 
 HYPRE_Int
@@ -916,8 +915,6 @@ hypre_SStructVectorClearGhostValues(hypre_SStructVector *vector)
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructVectorPrintGLVis
- *
  * Print vector to a format readable by GLVis.
  * This is mainly for debugging purposes.
  *
@@ -1082,7 +1079,6 @@ hypre_SStructVectorPrintGLVis( hypre_SStructVector  *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructVectorMemoryLocation
  *--------------------------------------------------------------------------*/
 
 HYPRE_MemoryLocation

@@ -18,8 +18,6 @@
 #include "_hypre_struct_mv.hpp"
 
 /*--------------------------------------------------------------------------
- * hypre_StructCopy
- *
  * The vectors x and y may have different base grids, but the grid boxes for
  * each vector (defined by grid, stride, nboxes, boxnums) must be the same.
  * Only nboxes is checked, the rest is assumed to be true.
@@ -100,7 +98,8 @@ hypre_StructCopy( hypre_StructVector *x,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructPartialCopy: copy only the components on a subset of the grid.
+ * Copy only the components on a subset of the grid.
+ *
  * A BoxArrayArray of boxes are needed- for each box of x, only an array
  * of subboxes (i.e., a boxarray for each box of x) are copied.
  *

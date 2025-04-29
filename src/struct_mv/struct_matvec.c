@@ -704,8 +704,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatvecCompute_core_CC
- *
  * StructMatrix/Vector multiplication core function for constant coeficients.
  *
  * Note: This function computes -A*x.
@@ -735,9 +733,9 @@ hypre_StructMatvecCompute_core_CC( hypre_StructMatrix *A,
    HYPRE_Complex        *Ap3 = NULL, *Ap4 = NULL, *Ap5 = NULL;
    HYPRE_Complex        *Ap6 = NULL, *Ap7 = NULL, *Ap8 = NULL;
    HYPRE_Complex        *xp  = NULL, *yp  = NULL;
-   HYPRE_Int             xoff0, xoff1, xoff2;
-   HYPRE_Int             xoff3, xoff4, xoff5;
-   HYPRE_Int             xoff6, xoff7, xoff8;
+   HYPRE_Int             xoff0 = 0, xoff1 = 0, xoff2 = 0;
+   HYPRE_Int             xoff3 = 0, xoff4 = 0, xoff5 = 0;
+   HYPRE_Int             xoff6 = 0, xoff7 = 0, xoff8 = 0;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -939,8 +937,6 @@ hypre_StructMatvecCompute_core_CC( hypre_StructMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatvecCompute_core_VC
- *
  * StructMatrix/Vector multiplication core routine for variable coeficients.
  *
  * Note: This function computes -A*x.
@@ -1202,7 +1198,6 @@ hypre_StructMatvec( HYPRE_Complex       alpha,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatvec
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

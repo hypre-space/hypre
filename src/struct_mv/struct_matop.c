@@ -11,8 +11,6 @@
 #define UNROLL_MAXDEPTH 9
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatrixZeroDiagonal
- *
  * Returns 1 if there is a zero on the diagonal, otherwise returns 0.
  *--------------------------------------------------------------------------*/
 
@@ -110,8 +108,6 @@ hypre_StructMatrixZeroDiagonal( hypre_StructMatrix *A )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatrixComputeRowSum_core_CC
- *
  * Core function for computing rowsum for constant coeficients in A.
  *--------------------------------------------------------------------------*/
 
@@ -145,30 +141,39 @@ hypre_StructMatrixComputeRowSum_core_CC(hypre_StructMatrix  *A,
    {
       case 9:
          Ap8 = hypre_StructMatrixBoxData(A, box_id, entries[8]);
+         HYPRE_FALLTHROUGH;
 
       case 8:
          Ap7 = hypre_StructMatrixBoxData(A, box_id, entries[7]);
+         HYPRE_FALLTHROUGH;
 
       case 7:
          Ap6 = hypre_StructMatrixBoxData(A, box_id, entries[6]);
+         HYPRE_FALLTHROUGH;
 
       case 6:
          Ap5 = hypre_StructMatrixBoxData(A, box_id, entries[5]);
+         HYPRE_FALLTHROUGH;
 
       case 5:
          Ap4 = hypre_StructMatrixBoxData(A, box_id, entries[4]);
+         HYPRE_FALLTHROUGH;
 
       case 4:
          Ap3 = hypre_StructMatrixBoxData(A, box_id, entries[3]);
+         HYPRE_FALLTHROUGH;
 
       case 3:
          Ap2 = hypre_StructMatrixBoxData(A, box_id, entries[2]);
+         HYPRE_FALLTHROUGH;
 
       case 2:
          Ap1 = hypre_StructMatrixBoxData(A, box_id, entries[1]);
+         HYPRE_FALLTHROUGH;
 
       case 1:
          Ap0 = hypre_StructMatrixBoxData(A, box_id, entries[0]);
+         HYPRE_FALLTHROUGH;
 
       case 0:
          break;
@@ -479,8 +484,6 @@ hypre_StructMatrixComputeRowSum_core_CC(hypre_StructMatrix  *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatrixComputeRowSum_core_VC
- *
  * Core function for computing rowsum for variable coeficients in A.
  *--------------------------------------------------------------------------*/
 
@@ -500,10 +503,10 @@ hypre_StructMatrixComputeRowSum_core_VC(hypre_StructMatrix  *A,
    hypre_Index           loop_size, ustride;
    hypre_IndexRef        start;
 
-   HYPRE_Complex        *Ap0, *Ap1, *Ap2;
-   HYPRE_Complex        *Ap3, *Ap4, *Ap5;
-   HYPRE_Complex        *Ap6, *Ap7, *Ap8;
-   HYPRE_Complex        *rp;
+   HYPRE_Complex        *Ap0 = NULL, *Ap1 = NULL, *Ap2 = NULL;
+   HYPRE_Complex        *Ap3 = NULL, *Ap4 = NULL, *Ap5 = NULL;
+   HYPRE_Complex        *Ap6 = NULL, *Ap7 = NULL, *Ap8 = NULL;
+   HYPRE_Complex        *rp  = NULL;
 
    start = hypre_BoxIMin(box);
    hypre_BoxGetSize(box, loop_size);
@@ -514,30 +517,39 @@ hypre_StructMatrixComputeRowSum_core_VC(hypre_StructMatrix  *A,
    {
       case 9:
          Ap8 = hypre_StructMatrixBoxData(A, box_id, entries[8]);
+         HYPRE_FALLTHROUGH;
 
       case 8:
          Ap7 = hypre_StructMatrixBoxData(A, box_id, entries[7]);
+         HYPRE_FALLTHROUGH;
 
       case 7:
          Ap6 = hypre_StructMatrixBoxData(A, box_id, entries[6]);
+         HYPRE_FALLTHROUGH;
 
       case 6:
          Ap5 = hypre_StructMatrixBoxData(A, box_id, entries[5]);
+         HYPRE_FALLTHROUGH;
 
       case 5:
          Ap4 = hypre_StructMatrixBoxData(A, box_id, entries[4]);
+         HYPRE_FALLTHROUGH;
 
       case 4:
          Ap3 = hypre_StructMatrixBoxData(A, box_id, entries[3]);
+         HYPRE_FALLTHROUGH;
 
       case 3:
          Ap2 = hypre_StructMatrixBoxData(A, box_id, entries[2]);
+         HYPRE_FALLTHROUGH;
 
       case 2:
          Ap1 = hypre_StructMatrixBoxData(A, box_id, entries[1]);
+         HYPRE_FALLTHROUGH;
 
       case 1:
          Ap0 = hypre_StructMatrixBoxData(A, box_id, entries[0]);
+         HYPRE_FALLTHROUGH;
 
       case 0:
          break;
@@ -875,8 +887,6 @@ hypre_StructMatrixComputeRowSum_core_VC(hypre_StructMatrix  *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatrixComputeRowSum
- *
  * RDF TODO: This routine should assume that the base grid for A and rowsum are
  * the same.  It should use the range boxes of A and work for general
  * rectangular matrices.

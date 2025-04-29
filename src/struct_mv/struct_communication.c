@@ -937,7 +937,8 @@ hypre_CommPkgAgglomerate( HYPRE_Int        num_comm_pkgs,
    HYPRE_Int         ndim = hypre_CommPkgNDim(comm_pkgs[0]);
 
    hypre_CommType   *comm_types;
-   hypre_CommType   *comm_type,  *in_comm_type;
+   hypre_CommType   *comm_type = NULL;
+   hypre_CommType   *in_comm_type;
    hypre_CommBlock  *comm_block, *in_comm_block;
    hypre_CommEntry  *comm_entry;
    HYPRE_Int        *ctype_p, *ctype_i, *ctype_j;
@@ -1870,7 +1871,7 @@ hypre_StructCommunicationFinalize( hypre_CommHandle *comm_handle )
             qptr = (HYPRE_Int *) dptr;
 
             /* Set boxnums and boxes from MPI recv buffer */
-            if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_DEVICE)
+            if (hypre_GetActualMemLocation(memory_location_mpi) != hypre_MEMORY_DEVICE)
             {
                num_entries = *qptr;
                qptr ++;
@@ -1915,7 +1916,7 @@ hypre_StructCommunicationFinalize( hypre_CommHandle *comm_handle )
             dptr += hypre_CommPrefixSize(num_entries, num_values);
 
             /* Free work arrays */
-            if (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE)
+            if (hypre_GetActualMemLocation(memory_location_mpi) == hypre_MEMORY_DEVICE)
             {
                hypre_TFree(boxes, HYPRE_MEMORY_HOST);
                hypre_TFree(orders, HYPRE_MEMORY_HOST);

@@ -511,7 +511,7 @@ hypre_SStructGridRef( hypre_SStructGrid  *grid,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructGridComputeGlobalSizes( hypre_SStructGrid  *grid )
+hypre_SStructGridComputeGlobalSizes(hypre_SStructGrid  *grid)
 {
    MPI_Comm             comm   = hypre_SStructGridComm(grid);
    HYPRE_Int            nparts = hypre_SStructGridNParts(grid);
@@ -573,7 +573,7 @@ hypre_SStructGridComputeGlobalSizes( hypre_SStructGrid  *grid )
       hypre_SStructPGridGlobalSize(pgrid) = pglobal_size;
       global_size += pglobal_size;
    }
-   hypre_SStructGridGlobalSize(pgrid) = global_size;
+   hypre_SStructGridGlobalSize(grid) = global_size;
 
    /* Free memory */
    hypre_TFree(local_sizes, HYPRE_MEMORY_HOST);
@@ -2957,7 +2957,6 @@ hypre_SStructGridCoarsen( hypre_SStructGrid   *fgrid,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructGridSetActiveParts
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -2981,7 +2980,6 @@ hypre_SStructGridSetActiveParts( hypre_SStructGrid *grid,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructGridSetAllPartsActive
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

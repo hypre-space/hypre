@@ -14,8 +14,6 @@
 #include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
- * hypre_PrintBoxArrayData
- *
  * Note: data array is expected to live on the host memory.
  *--------------------------------------------------------------------------*/
 
@@ -90,7 +88,6 @@ hypre_PrintBoxArrayData( FILE            *file,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ReadBoxArrayData
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -160,4 +157,3 @@ hypre_ReadBoxArrayData( FILE             *file,
 
    return hypre_error_flag;
 }
-

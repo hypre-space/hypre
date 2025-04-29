@@ -792,8 +792,6 @@ hypre_SStructPMatrixPrint( const char           *filename,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatrixGetDiagonal
- *
  * Returns the diagonal of a SStructPMatrix as a SStructPVector
  *--------------------------------------------------------------------------*/
 
@@ -2370,8 +2368,6 @@ hypre_SStructMatrixCompressUToS( HYPRE_SStructMatrix A,
  *       2) We are not converting the whole SStructMatrix, only the
  *          structured part. Change function's name?
  *       3) This converts only A(vi, vi). Need to expand to other variables.
- *
- * TODO (VPM): Test with device build
  *--------------------------------------------------------------------------*/
 
 hypre_IJMatrix *
@@ -2483,13 +2479,9 @@ hypre_SStructMatrixToUMatrix( HYPRE_SStructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatrixBoxesToUMatrix
- *
  * Notes:
  *         *) Consider a single variable type for now.
  *         *) Input grid comes from the matrix we are multiplying to A
- *
- * TODO (VPM): Test with device build
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -2966,7 +2958,6 @@ hypre_SStructMatrixGetDiagonal( hypre_SStructMatrix   *matrix,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatrixMemoryLocation
  *--------------------------------------------------------------------------*/
 
 HYPRE_MemoryLocation

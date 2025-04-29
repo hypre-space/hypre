@@ -111,8 +111,6 @@
  *--------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultCreate
- *
  * Creates the initial data structure for the matmult collection.
  *--------------------------------------------------------------------------*/
 
@@ -127,10 +125,12 @@ hypre_StructMatmultCreate( HYPRE_Int                  max_matmults,
    mmdata = hypre_CTAlloc(hypre_StructMatmultData, 1, HYPRE_MEMORY_HOST);
 
    /* Initialize data members */
-   (mmdata -> nmatmults) = 0;
-   (mmdata -> matmults)  = hypre_CTAlloc(hypre_StructMatmultDataM, max_matmults, HYPRE_MEMORY_HOST);
-   (mmdata -> nmatrices) = 0;
-   (mmdata -> matrices)  = hypre_CTAlloc(hypre_StructMatrix *, max_matrices, HYPRE_MEMORY_HOST);
+   (mmdata -> nmatmults)       = 0;
+   (mmdata -> matmults)        = hypre_CTAlloc(hypre_StructMatmultDataM,
+                                               max_matmults, HYPRE_MEMORY_HOST);
+   (mmdata -> nmatrices)       = 0;
+   (mmdata -> matrices)        = hypre_CTAlloc(hypre_StructMatrix *,
+                                               max_matrices, HYPRE_MEMORY_HOST);
    (mmdata -> mtypes)          = NULL;
    (mmdata -> fstride)         = NULL;
    (mmdata -> cstride)         = NULL;
@@ -152,7 +152,6 @@ hypre_StructMatmultCreate( HYPRE_Int                  max_matmults,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -196,8 +195,6 @@ hypre_StructMatmultDestroy( hypre_StructMatmultData *mmdata )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultSetup
- *
  * This routine is called successively for each matmult in the collection.
  *
  * Computes various information related to a specific matmult in the collection,
@@ -465,8 +462,6 @@ hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
 }
 
 /*--------------------------------------------------------------------------
- * StructMatmultInit
- *
  * This routine is called once for the entire matmult collection.
  *
  * Computes additional information needed to do the matmults in the collection,
@@ -1049,8 +1044,6 @@ hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
 }
 
 /*--------------------------------------------------------------------------
- * StructMatmultCommunicate
- *
  * This routine is called once for the entire matmult collection.
  *
  * Communicates matrix and mask boundary data with a single comm_pkg.
@@ -1097,8 +1090,6 @@ hypre_StructMatmultCommunicate( hypre_StructMatmultData  *mmdata )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultCompute
- *
  * This routine is called successively for each matmult in the collection.
  *
  * Computes the coefficients for matmult M, indicated by ID iM.  Data for M is
@@ -1342,8 +1333,6 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultCompute_core_double
- *
  * Core function for computing the double-product of coefficients.
  *--------------------------------------------------------------------------*/
 
@@ -1581,8 +1570,6 @@ hypre_StructMatmultCompute_core_double( hypre_StructMatmultDataMH *a,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultCompute_core_triple
- *
  * Core function for computing the triple-product of coefficients
  *--------------------------------------------------------------------------*/
 
@@ -2159,8 +2146,6 @@ hypre_StructMatmultCompute_core_triple( hypre_StructMatmultDataMH *a,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultCompute_core_generic
- *
  * Core function for computing the product of "nterms" coefficients.
  *--------------------------------------------------------------------------*/
 
@@ -2188,7 +2173,7 @@ hypre_StructMatmultCompute_core_generic( hypre_StructMatmultDataMH *a,
    {
       HYPRE_Int      i, t;
       HYPRE_Complex  prod;
-      HYPRE_Complex  pprod;
+      HYPRE_Complex  pprod = 0.0;
 
       for (i = 0; i < na; i++)
       {
@@ -2220,8 +2205,6 @@ hypre_StructMatmultCompute_core_generic( hypre_StructMatmultDataMH *a,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultCompute_core_1d
- *
  * Core function for computing the double-product of variable coefficients
  * living on the same data space.
  *
@@ -2399,8 +2382,6 @@ hypre_StructMatmultCompute_core_1d( hypre_StructMatmultDataMH *a,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultCompute_core_1db
- *
  * Core function for computing the double-product of a variable coefficient
  * and a constant coefficient living on the same data space.
  *
@@ -2580,8 +2561,6 @@ hypre_StructMatmultCompute_core_1db( hypre_StructMatmultDataMH *a,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultCompute_core_1dbb
- *
  * Core function for computing the product of two constant coefficients that
  * live on the same data space and require the usage of a bitmask.
  *
@@ -2759,8 +2738,6 @@ hypre_StructMatmultCompute_core_1dbb( hypre_StructMatmultDataMH *a,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultCompute_core_2d
- *
  * Core function for computing the double-product of variable coefficients
  * living on data spaces "g" and "h", respectively.
  *
@@ -2923,8 +2900,6 @@ hypre_StructMatmultCompute_core_2d( hypre_StructMatmultDataMH *a,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultCompute_core_2db
- *
  * Core function for computing the product of two coefficients living on
  * different data spaces. The second coefficients requires usage of a bitmask
  *
@@ -3096,8 +3071,6 @@ hypre_StructMatmultCompute_core_2db( hypre_StructMatmultDataMH *a,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultCompute_core_1t
- *
  * Core function for computing the triple-product of variable coefficients
  * living on the same data space.
  *
@@ -3279,8 +3252,6 @@ hypre_StructMatmultCompute_core_1t( hypre_StructMatmultDataMH *a,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultCompute_core_1tb
- *
  * Core function for computing the triple-product of two variable coefficients
  * living on the same data space and one constant coefficient that requires
  * the usage of a bitmask.
@@ -3466,8 +3437,6 @@ hypre_StructMatmultCompute_core_1tb( hypre_StructMatmultDataMH *a,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultCompute_core_1tbb
- *
  * Core function for computing the product of three coefficients that
  * live on the same data space. One is a variable coefficient and the other
  * two are constant coefficient that require the usage of a bitmask.
@@ -3653,8 +3622,6 @@ hypre_StructMatmultCompute_core_1tbb( hypre_StructMatmultDataMH *a,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultCompute_core_1tbbb
- *
  * Core function for computing the product of three constant coefficients that
  * live on the same data space and that require the usage of a bitmask.
  *
@@ -3836,8 +3803,6 @@ hypre_StructMatmultCompute_core_1tbbb( hypre_StructMatmultDataMH *a,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultCompute_core_2t
- *
  * Core function for computing the triple-product of variable coefficients
  * in which two of them live on the same data space "g" and the other lives
  * on data space "h"
@@ -4016,8 +3981,6 @@ hypre_StructMatmultCompute_core_2t( hypre_StructMatmultDataMH *a,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultCompute_core_2tb
- *
  * Core function for computing the product of three coefficients. Two
  * coefficients are variable and live on data spaces "g" and "h". The third
  * coefficient is constant, it lives on data space "g", and it requires the
@@ -4199,8 +4162,6 @@ hypre_StructMatmultCompute_core_2tb( hypre_StructMatmultDataMH *a,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultCompute_core_2etb
- *
  * Core function for computing the product of three coefficients.
  * Two coefficients are variable and live on data space "h".
  * The third coefficient is constant, it lives on data space "g", and it
@@ -4380,8 +4341,6 @@ hypre_StructMatmultCompute_core_2etb( hypre_StructMatmultDataMH *a,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmultCompute_core_2tbb
- *
  * Core function for computing the product of three coefficients.
  * One coefficient is variable and live on data space "g".
  * Two coefficients are constant, live on data space "h", and require
@@ -4571,8 +4530,6 @@ hypre_StructMatmultGetMatrix( hypre_StructMatmultData  *mmdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatmult
- *
  * Computes the product of several StructMatrix matrices
  *--------------------------------------------------------------------------*/
 
@@ -4625,8 +4582,6 @@ hypre_StructMatmat( hypre_StructMatrix  *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatrixPtAP
- *
  * Computes M = P^T*A*P
  *--------------------------------------------------------------------------*/
 
@@ -4647,8 +4602,6 @@ hypre_StructMatrixPtAP( hypre_StructMatrix  *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatrixRAP
- *
  * Computes M = R*A*P
  *--------------------------------------------------------------------------*/
 
@@ -4670,8 +4623,6 @@ hypre_StructMatrixRAP( hypre_StructMatrix  *R,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatrixRTtAP
- *
  * Computes M = RT^T*A*P
  *--------------------------------------------------------------------------*/
 
