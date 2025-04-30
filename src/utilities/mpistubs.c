@@ -1012,6 +1012,9 @@ hypre_MPI_Comm_split( hypre_MPI_Comm  comm,
                       HYPRE_Int       m,
                       hypre_MPI_Comm *comms )
 {
+   hypre_assert(n >= 0);
+   hypre_assert(m >= 0);
+
    return (HYPRE_Int) MPI_Comm_split(comm, (hypre_int)n, (hypre_int)m, comms);
 }
 
@@ -1074,6 +1077,9 @@ hypre_MPI_Alltoall( void               *sendbuf,
                     hypre_MPI_Datatype  recvtype,
                     hypre_MPI_Comm      comm )
 {
+   hypre_assert(sendcount >= 0);
+   hypre_assert(recvcount >= 0);
+
    return (HYPRE_Int) MPI_Alltoall(sendbuf, (hypre_int)sendcount, sendtype,
                                    recvbuf, (hypre_int)recvcount, recvtype, comm);
 }
@@ -1087,6 +1093,9 @@ hypre_MPI_Allgather( void               *sendbuf,
                      hypre_MPI_Datatype  recvtype,
                      hypre_MPI_Comm      comm )
 {
+   hypre_assert(sendcount >= 0);
+   hypre_assert(recvcount >= 0);
+
    return (HYPRE_Int) MPI_Allgather(sendbuf, (hypre_int)sendcount, sendtype,
                                     recvbuf, (hypre_int)recvcount, recvtype, comm);
 }
@@ -1104,6 +1113,8 @@ hypre_MPI_Allgatherv( void               *sendbuf,
    hypre_int *mpi_recvcounts, *mpi_displs, csize;
    HYPRE_Int  i;
    HYPRE_Int  ierr;
+
+   hypre_assert(sendcount >= 0);
 
    MPI_Comm_size(comm, &csize);
    mpi_recvcounts = hypre_TAlloc(hypre_int, csize, HYPRE_MEMORY_HOST);
@@ -1132,6 +1143,10 @@ hypre_MPI_Gather( void               *sendbuf,
                   HYPRE_Int           root,
                   hypre_MPI_Comm      comm )
 {
+   hypre_assert(sendcount >= 0);
+   hypre_assert(recvcount >= 0);
+   hypre_assert(root >= 0);
+
    return (HYPRE_Int) MPI_Gather(sendbuf, (hypre_int) sendcount, sendtype,
                                  recvbuf, (hypre_int) recvcount, recvtype,
                                  (hypre_int)root, comm);
@@ -1150,9 +1165,12 @@ hypre_MPI_Gatherv(void               *sendbuf,
 {
    hypre_int *mpi_recvcounts = NULL;
    hypre_int *mpi_displs = NULL;
-   hypre_int csize, croot;
+   hypre_int  csize, croot;
    HYPRE_Int  i;
    HYPRE_Int  ierr;
+
+   hypre_assert(sendcount >= 0);
+   hypre_assert(root >= 0);
 
    MPI_Comm_size(comm, &csize);
    MPI_Comm_rank(comm, &croot);
@@ -1185,6 +1203,10 @@ hypre_MPI_Scatter( void               *sendbuf,
                    HYPRE_Int           root,
                    hypre_MPI_Comm      comm )
 {
+   hypre_assert(sendcount >= 0);
+   hypre_assert(recvcount >= 0);
+   hypre_assert(root >= 0);
+
    return (HYPRE_Int) MPI_Scatter(sendbuf, (hypre_int)sendcount, sendtype,
                                   recvbuf, (hypre_int)recvcount, recvtype,
                                   (hypre_int)root, comm);
@@ -1206,6 +1228,9 @@ hypre_MPI_Scatterv(void               *sendbuf,
    hypre_int csize, croot;
    HYPRE_Int  i;
    HYPRE_Int  ierr;
+
+   hypre_assert(recvcount >= 0);
+   hypre_assert(root >= 0);
 
    MPI_Comm_size(comm, &csize);
    MPI_Comm_rank(comm, &croot);
@@ -1235,6 +1260,9 @@ hypre_MPI_Bcast( void               *buffer,
                  HYPRE_Int           root,
                  hypre_MPI_Comm      comm )
 {
+   hypre_assert(count >= 0);
+   hypre_assert(root >= 0);
+
    return (HYPRE_Int) MPI_Bcast(buffer, (hypre_int)count, datatype,
                                 (hypre_int)root, comm);
 }
@@ -1247,6 +1275,9 @@ hypre_MPI_Send( void               *buf,
                 HYPRE_Int           tag,
                 hypre_MPI_Comm      comm )
 {
+   hypre_assert(count >= 0);
+   hypre_assert(dest >= 0);
+
    return (HYPRE_Int) MPI_Send(buf, (hypre_int)count, datatype,
                                (hypre_int)dest, (hypre_int)tag, comm);
 }
@@ -1260,6 +1291,9 @@ hypre_MPI_Recv( void               *buf,
                 hypre_MPI_Comm      comm,
                 hypre_MPI_Status   *status )
 {
+   hypre_assert(count >= 0);
+   hypre_assert(source >= 0);
+
    return (HYPRE_Int) MPI_Recv(buf, (hypre_int)count, datatype,
                                (hypre_int)source, (hypre_int)tag, comm, status);
 }
@@ -1273,6 +1307,9 @@ hypre_MPI_Isend( void               *buf,
                  hypre_MPI_Comm      comm,
                  hypre_MPI_Request  *request )
 {
+   hypre_assert(count >= 0);
+   hypre_assert(dest >= 0);
+
    return (HYPRE_Int) MPI_Isend(buf, (hypre_int)count, datatype,
                                 (hypre_int)dest, (hypre_int)tag, comm, request);
 }
@@ -1286,6 +1323,9 @@ hypre_MPI_Irecv( void               *buf,
                  hypre_MPI_Comm      comm,
                  hypre_MPI_Request  *request )
 {
+   hypre_assert(count >= 0);
+   hypre_assert(source >= 0);
+
    return (HYPRE_Int) MPI_Irecv(buf, (hypre_int)count, datatype,
                                 (hypre_int)source, (hypre_int)tag, comm, request);
 }
@@ -1299,6 +1339,8 @@ hypre_MPI_Send_init( void               *buf,
                      hypre_MPI_Comm      comm,
                      hypre_MPI_Request  *request )
 {
+   hypre_assert(count >= 0);
+
    return (HYPRE_Int) MPI_Send_init(buf, (hypre_int)count, datatype,
                                     (hypre_int)dest, (hypre_int)tag,
                                     comm, request);
@@ -1313,6 +1355,8 @@ hypre_MPI_Recv_init( void               *buf,
                      hypre_MPI_Comm      comm,
                      hypre_MPI_Request  *request )
 {
+   hypre_assert(count >= 0);
+
    return (HYPRE_Int) MPI_Recv_init(buf, (hypre_int)count, datatype,
                                     (hypre_int)dest, (hypre_int)tag,
                                     comm, request);
@@ -1327,6 +1371,8 @@ hypre_MPI_Irsend( void               *buf,
                   hypre_MPI_Comm      comm,
                   hypre_MPI_Request  *request )
 {
+   hypre_assert(count >= 0);
+
    return (HYPRE_Int) MPI_Irsend(buf, (hypre_int)count, datatype,
                                  (hypre_int)dest, (hypre_int)tag, comm, request);
 }
@@ -1335,6 +1381,8 @@ HYPRE_Int
 hypre_MPI_Startall( HYPRE_Int          count,
                     hypre_MPI_Request *array_of_requests )
 {
+   hypre_assert(count >= 0);
+
    return (HYPRE_Int) MPI_Startall((hypre_int)count, array_of_requests);
 }
 
@@ -1344,6 +1392,8 @@ hypre_MPI_Probe( HYPRE_Int         source,
                  hypre_MPI_Comm    comm,
                  hypre_MPI_Status *status )
 {
+   hypre_assert(source >= 0);
+
    return (HYPRE_Int) MPI_Probe((hypre_int)source, (hypre_int)tag, comm, status);
 }
 
@@ -1356,9 +1406,13 @@ hypre_MPI_Iprobe( HYPRE_Int         source,
 {
    hypre_int mpi_flag;
    HYPRE_Int ierr;
+
+   /* hypre_assert(source >= 0); */
+
    ierr = (HYPRE_Int) MPI_Iprobe((hypre_int)source, (hypre_int)tag, comm,
                                  &mpi_flag, status);
    *flag = (HYPRE_Int) mpi_flag;
+
    return ierr;
 }
 
@@ -1369,8 +1423,10 @@ hypre_MPI_Test( hypre_MPI_Request *request,
 {
    hypre_int mpi_flag;
    HYPRE_Int ierr;
+
    ierr = (HYPRE_Int) MPI_Test(request, &mpi_flag, status);
    *flag = (HYPRE_Int) mpi_flag;
+
    return ierr;
 }
 
@@ -1382,9 +1438,13 @@ hypre_MPI_Testall( HYPRE_Int          count,
 {
    hypre_int mpi_flag;
    HYPRE_Int ierr;
+
+   hypre_assert(count >= 0);
+
    ierr = (HYPRE_Int) MPI_Testall((hypre_int)count, array_of_requests,
                                   &mpi_flag, array_of_statuses);
    *flag = (HYPRE_Int) mpi_flag;
+
    return ierr;
 }
 
@@ -1400,6 +1460,8 @@ hypre_MPI_Waitall( HYPRE_Int          count,
                    hypre_MPI_Request *array_of_requests,
                    hypre_MPI_Status  *array_of_statuses )
 {
+   hypre_assert(count >= 0);
+
    return (HYPRE_Int) MPI_Waitall((hypre_int)count,
                                   array_of_requests, array_of_statuses);
 }
@@ -1412,9 +1474,13 @@ hypre_MPI_Waitany( HYPRE_Int          count,
 {
    hypre_int mpi_index;
    HYPRE_Int ierr;
+
+   hypre_assert(count >= 0);
+
    ierr = (HYPRE_Int) MPI_Waitany((hypre_int)count, array_of_requests,
                                   &mpi_index, status);
    *index = (HYPRE_Int) mpi_index;
+
    return ierr;
 }
 
@@ -1427,6 +1493,7 @@ hypre_MPI_Allreduce( void              *sendbuf,
                      hypre_MPI_Comm     comm )
 {
    hypre_GpuProfilingPushRange("MPI_Allreduce");
+   hypre_assert(count >= 0);
 
    HYPRE_Int result = MPI_Allreduce(sendbuf, recvbuf, (hypre_int)count,
                                     datatype, op, comm);
@@ -1445,6 +1512,9 @@ hypre_MPI_Reduce( void               *sendbuf,
                   HYPRE_Int           root,
                   hypre_MPI_Comm      comm )
 {
+   hypre_assert(count >= 0);
+   hypre_assert(root >= 0);
+
    return (HYPRE_Int) MPI_Reduce(sendbuf, recvbuf, (hypre_int)count,
                                  datatype, op, (hypre_int)root, comm);
 }
@@ -1457,6 +1527,8 @@ hypre_MPI_Scan( void               *sendbuf,
                 hypre_MPI_Op        op,
                 hypre_MPI_Comm      comm )
 {
+   hypre_assert(count >= 0);
+
    return (HYPRE_Int) MPI_Scan(sendbuf, recvbuf, (hypre_int)count,
                                datatype, op, comm);
 }
@@ -1472,6 +1544,8 @@ hypre_MPI_Type_contiguous( HYPRE_Int           count,
                            hypre_MPI_Datatype  oldtype,
                            hypre_MPI_Datatype *newtype )
 {
+   hypre_assert(count >= 0);
+
    return (HYPRE_Int) MPI_Type_contiguous((hypre_int)count, oldtype, newtype);
 }
 
@@ -1482,6 +1556,10 @@ hypre_MPI_Type_vector( HYPRE_Int           count,
                        hypre_MPI_Datatype  oldtype,
                        hypre_MPI_Datatype *newtype )
 {
+   hypre_assert(count >= 0);
+   hypre_assert(blocklength >= 0);
+   hypre_assert(stride >= 0);
+
    return (HYPRE_Int) MPI_Type_vector((hypre_int)count, (hypre_int)blocklength,
                                       (hypre_int)stride, oldtype, newtype);
 }
@@ -1493,6 +1571,10 @@ hypre_MPI_Type_hvector( HYPRE_Int           count,
                         hypre_MPI_Datatype  oldtype,
                         hypre_MPI_Datatype *newtype )
 {
+   hypre_assert(count >= 0);
+   hypre_assert(blocklength >= 0);
+   hypre_assert(stride >= 0);
+
 #if MPI_VERSION > 1
    return (HYPRE_Int) MPI_Type_create_hvector((hypre_int)count, (hypre_int)blocklength,
                                               stride, oldtype, newtype);
@@ -1512,6 +1594,8 @@ hypre_MPI_Type_struct( HYPRE_Int           count,
    hypre_int *mpi_array_of_blocklengths;
    HYPRE_Int  i;
    HYPRE_Int  ierr;
+
+   hypre_assert(count >= 0);
 
    mpi_array_of_blocklengths = hypre_TAlloc(hypre_int,  count, HYPRE_MEMORY_HOST);
    for (i = 0; i < count; i++)
