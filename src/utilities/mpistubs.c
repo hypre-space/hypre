@@ -1292,7 +1292,7 @@ hypre_MPI_Recv( void               *buf,
                 hypre_MPI_Status   *status )
 {
    hypre_assert(count >= 0);
-   hypre_assert(source >= 0);
+   hypre_assert(source >= 0 || source == hypre_MPI_ANY_SOURCE);
 
    return (HYPRE_Int) MPI_Recv(buf, (hypre_int)count, datatype,
                                (hypre_int)source, (hypre_int)tag, comm, status);
@@ -1392,8 +1392,6 @@ hypre_MPI_Probe( HYPRE_Int         source,
                  hypre_MPI_Comm    comm,
                  hypre_MPI_Status *status )
 {
-   hypre_assert(source >= 0);
-
    return (HYPRE_Int) MPI_Probe((hypre_int)source, (hypre_int)tag, comm, status);
 }
 
@@ -1406,8 +1404,6 @@ hypre_MPI_Iprobe( HYPRE_Int         source,
 {
    hypre_int mpi_flag;
    HYPRE_Int ierr;
-
-   /* hypre_assert(source >= 0); */
 
    ierr = (HYPRE_Int) MPI_Iprobe((hypre_int)source, (hypre_int)tag, comm,
                                  &mpi_flag, status);
