@@ -10906,7 +10906,7 @@ fi
 
                                 if test "$hypre_using_shared" = "yes"
         then
-           HIPCXXFLAGS="${SHARED_COMPILE_FLAG} ${HIPCXXFLAGS}"
+           HIPCXXFLAGS="${HIPCXXFLAGS} ${SHARED_COMPILE_FLAG}"
         fi
 
                         if test "$hypre_user_chose_cuflags" = "no"
@@ -12690,4 +12690,3 @@ fi
 mv HYPRE_config.h HYPRE_config.h.tmp
 sed 's/FC_FUNC/HYPRE_FC_FUNC/g' < HYPRE_config.h.tmp > HYPRE_config.h
 rm -f HYPRE_config.h.tmp
-
