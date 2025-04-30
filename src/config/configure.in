@@ -2688,7 +2688,7 @@ AS_IF([test x"$hypre_using_hip" == x"yes"],
         dnl things that don't play nice, like openmp.
         if test "$hypre_using_shared" = "yes"
         then
-           HIPCXXFLAGS="${SHARED_COMPILE_FLAG} ${HIPCXXFLAGS}"
+           HIPCXXFLAGS="${HIPCXXFLAGS} ${SHARED_COMPILE_FLAG}"
         fi
 
         dnl (Ab)Use CUFLAGS to capture HIP compilation flags
