@@ -370,6 +370,7 @@ main( hypre_int argc,
 
    HYPRE_Int    print_system = 0;
    HYPRE_Int    print_system_binary = 0;
+   HYPRE_Int    print_system_csr = 0;
    HYPRE_Int    rel_change = 0;
    HYPRE_Int    second_time = 0;
    HYPRE_Int    benchmark = 0;
@@ -2195,6 +2196,11 @@ main( hypre_int argc,
       {
          arg_index++;
          print_system_binary = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-printcsr") == 0 )
+      {
+         arg_index++;
+         print_system_csr = 1;
       }
       /* BM Oct 23, 2006 */
       else if ( strcmp(argv[arg_index], "-plot_grids") == 0 )
@@ -4087,6 +4093,31 @@ main( hypre_int argc,
       else if (x)
       {
          HYPRE_ParVectorPrintBinaryIJ(x, "IJ.out.x0");
+      }
+   }
+
+   if (print_system_csr)
+   {
+      if (parcsr_A)
+      {
+         hypre_ParCSRMatrixPrint(parcsr_A, "csr.out.A");
+      }
+      else
+      {
+         if (!myid)
+         {
+            hypre_printf(" Matrix A in parcsr format not found!\n");
+         }
+      }
+
+      if (b)
+      {
+         HYPRE_ParVectorPrint(b, "csr.out.b");
+      }
+
+      if (x)
+      {
+         HYPRE_ParVectorPrint(x, "csr.out.x0");
       }
    }
 
