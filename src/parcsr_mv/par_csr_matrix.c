@@ -2060,8 +2060,6 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
 
       hypre_TFree(requests, HYPRE_MEMORY_HOST);
       hypre_TFree(status, HYPRE_MEMORY_HOST);
-      hypre_TFree(num_rows_proc, HYPRE_MEMORY_HOST);
-      hypre_TFree(num_nonzeros_proc, HYPRE_MEMORY_HOST);
 
       if (free_global_row_starts)
       {
@@ -2084,6 +2082,9 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
       hypre_MPI_Recv(hypre_MPI_BOTTOM, 1, csr_matrix_datatypes[0], 0, 0, comm, &status0);
       hypre_MPI_Type_free(csr_matrix_datatypes);
    }
+
+   hypre_TFree(num_rows_proc, HYPRE_MEMORY_HOST);
+   hypre_TFree(num_nonzeros_proc, HYPRE_MEMORY_HOST);
 
    first_col_diag = hypre_ParCSRMatrixFirstColDiag(parcsr_A);
    last_col_diag  = hypre_ParCSRMatrixLastColDiag(parcsr_A);
