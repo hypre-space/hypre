@@ -66,16 +66,16 @@ HYPRE_Int BuildParDifConv (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                            HYPRE_ParCSRMatrix *A_ptr);
 HYPRE_Int BuildParFromOneFile (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                HYPRE_Int num_functions, HYPRE_ParCSRMatrix *A_ptr );
-HYPRE_Int BuildFuncsFromFiles (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
-                               HYPRE_ParCSRMatrix A, HYPRE_Int **dof_func_ptr );
-HYPRE_Int BuildFuncsFromOneFile (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
-                                 HYPRE_ParCSRMatrix A, HYPRE_Int **dof_func_ptr );
-HYPRE_Int BuildFuncsInterleaved (HYPRE_Int local_size, HYPRE_Int num_functions,
-                                 HYPRE_MemoryLocation memory_location,
-                                 HYPRE_Int **dof_func_ptr );
-HYPRE_Int BuildFuncsContiguous (HYPRE_Int local_size, HYPRE_Int num_functions,
-                                HYPRE_MemoryLocation memory_location,
-                                HYPRE_Int **dof_func_ptr );
+HYPRE_Int BuildFuncTagsFromFiles (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                                   HYPRE_ParCSRMatrix A, HYPRE_Int **dof_func_ptr );
+HYPRE_Int BuildFuncTagsFromOneFile (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                                     HYPRE_ParCSRMatrix A, HYPRE_Int **dof_func_ptr );
+HYPRE_Int BuildFuncTagsInterleaved (HYPRE_Int local_size, HYPRE_Int num_functions,
+                                    HYPRE_MemoryLocation memory_location,
+                                    HYPRE_Int **dof_func_ptr );
+HYPRE_Int BuildFuncTagsContiguous (HYPRE_Int local_size, HYPRE_Int num_functions,
+                                   HYPRE_MemoryLocation memory_location,
+                                   HYPRE_Int **dof_func_ptr );
 HYPRE_Int BuildRhsParFromOneFile (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                   HYPRE_ParCSRMatrix A, HYPRE_ParVector *b_ptr );
 HYPRE_Int BuildBigArrayFromOneFile (HYPRE_Int argc, char *argv [], const char *array_name,
@@ -3997,33 +3997,33 @@ main( hypre_int argc,
       {
          if (myid == 0)
          {
-            hypre_printf("  Calling BuildFuncsFromOneFile\n");
+            hypre_printf("  Calling BuildFuncTagsFromOneFile\n");
          }
-         BuildFuncsFromOneFile(argc, argv, build_funcs_arg_index, parcsr_A, &dof_func);
+         BuildFuncTagsFromOneFile(argc, argv, build_funcs_arg_index, parcsr_A, &dof_func);
       }
       else if (build_funcs_type == 2)
       {
          if (myid == 0)
          {
-            hypre_printf("  Calling BuildFuncsFromFiles\n");
+            hypre_printf("  Calling BuildFuncTagsFromFiles\n");
          }
-         BuildFuncsFromFiles(argc, argv, build_funcs_arg_index, parcsr_A, &dof_func);
+         BuildFuncTagsFromFiles(argc, argv, build_funcs_arg_index, parcsr_A, &dof_func);
       }
       else if (build_funcs_type == 3)
       {
          if (myid == 0)
          {
-            hypre_printf("  Calling BuildFuncsInterleaved with num_functions = %d\n", num_functions);
+            hypre_printf("  Calling BuildFuncTagsInterleaved with num_functions = %d\n", num_functions);
          }
-         BuildFuncsInterleaved(local_num_rows, num_functions, memory_location, &dof_func);
+         BuildFuncTagsInterleaved(local_num_rows, num_functions, memory_location, &dof_func);
       }
       else if (build_funcs_type == 4)
       {
          if (myid == 0)
          {
-            hypre_printf("  Calling BuildFuncsContiguous with num_functions = %d\n", num_functions);
+            hypre_printf("  Calling BuildFuncTagsContiguous with num_functions = %d\n", num_functions);
          }
-         BuildFuncsContiguous(local_num_rows, num_functions, memory_location, &dof_func);
+         BuildFuncTagsContiguous(local_num_rows, num_functions, memory_location, &dof_func);
       }
       else
       {
@@ -10459,11 +10459,11 @@ BuildParFromOneFile( HYPRE_Int                  argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildFuncsFromFiles( HYPRE_Int            argc,
-                     char                *argv[],
-                     HYPRE_Int            arg_index,
-                     HYPRE_ParCSRMatrix   parcsr_A,
-                     HYPRE_Int          **dof_func_ptr )
+BuildFuncTagsFromFiles( HYPRE_Int            argc,
+                        char                *argv[],
+                        HYPRE_Int            arg_index,
+                        HYPRE_ParCSRMatrix   parcsr_A,
+                        HYPRE_Int          **dof_func_ptr )
 {
    HYPRE_UNUSED_VAR(argc);
    HYPRE_UNUSED_VAR(argv);
@@ -10484,11 +10484,11 @@ BuildFuncsFromFiles( HYPRE_Int            argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildFuncsFromOneFile( HYPRE_Int            argc,
-                       char                *argv[],
-                       HYPRE_Int            arg_index,
-                       HYPRE_ParCSRMatrix   parcsr_A,
-                       HYPRE_Int          **dof_func_ptr )
+BuildFuncTagsFromOneFile( HYPRE_Int            argc,
+                          char                *argv[],
+                          HYPRE_Int            arg_index,
+                          HYPRE_ParCSRMatrix   parcsr_A,
+                          HYPRE_Int          **dof_func_ptr )
 {
    char                 *filename;
 
@@ -10594,10 +10594,10 @@ BuildFuncsFromOneFile( HYPRE_Int            argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildFuncsInterleaved( HYPRE_Int              local_size,
-                       HYPRE_Int              num_functions,
-                       HYPRE_MemoryLocation   memory_location,
-                       HYPRE_Int            **dof_func_ptr )
+BuildFuncTagsInterleaved( HYPRE_Int              local_size,
+                          HYPRE_Int              num_functions,
+                          HYPRE_MemoryLocation   memory_location,
+                          HYPRE_Int            **dof_func_ptr )
 {
    HYPRE_Int *dof_func_h, *dof_func;
    HYPRE_Int  i;
@@ -10636,10 +10636,10 @@ BuildFuncsInterleaved( HYPRE_Int              local_size,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildFuncsContiguous( HYPRE_Int              local_size,
-                      HYPRE_Int              num_functions,
-                      HYPRE_MemoryLocation   memory_location,
-                      HYPRE_Int            **dof_func_ptr )
+BuildFuncTagsContiguous( HYPRE_Int              local_size,
+                         HYPRE_Int              num_functions,
+                         HYPRE_MemoryLocation   memory_location,
+                         HYPRE_Int            **dof_func_ptr )
 {
    HYPRE_Int *dof_func_h, *dof_func;
    HYPRE_Int  i;
