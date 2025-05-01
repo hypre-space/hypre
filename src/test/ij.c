@@ -2567,8 +2567,11 @@ main( hypre_int argc,
          hypre_printf("  -nonzeros_to_keep <val>: number of nonzeros in each row to keep\n");
          hypre_printf("\n");
          hypre_printf("  -iout <val>            : set output flag\n");
-         hypre_printf("       0=no output    1=matrix stats\n");
-         hypre_printf("       2=cycle stats  3=matrix & cycle stats\n");
+         hypre_printf("       0 = no output\n");
+         hypre_printf("       1 = matrix stats\n");
+         hypre_printf("       2 = cycle/solver stats\n");
+         hypre_printf("       3 = abs. residual norms for multi-tag vectors (GMRES only)\n");
+         hypre_printf("       4 = rel. residual norms for multi-tag vectors (GMRES only)\n");
          hypre_printf("\n");
          hypre_printf("  -dbg <val>             : set debug flag\n");
          hypre_printf("       0=no debugging\n       1=internal timing\n       2=interpolation truncation\n       3=more detailed timing in coarsening routine\n");
