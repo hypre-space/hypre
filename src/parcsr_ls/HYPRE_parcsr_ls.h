@@ -491,13 +491,14 @@ HYPRE_Int HYPRE_BoomerAMGSetSepWeight(HYPRE_Solver solver,
  * The default is 4, i.e. multipass interpolation.
  * The following options exist:
  *
- *    - 1 : 2-stage extended+i interpolation
- *    - 2 : 2-stage standard interpolation
- *    - 3 : 2-stage extended interpolation
- *    - 4 : multipass interpolation
- *    - 5 : 2-stage extended interpolation in matrix-matrix form
- *    - 6 : 2-stage extended+i interpolation in matrix-matrix form
- *    - 7 : 2-stage extended+e interpolation in matrix-matrix form
+ *    - 1 : 2-stage extended+i
+ *    - 2 : 2-stage standard
+ *    - 3 : 2-stage extended
+ *    - 4 : multipass (default)
+ *    - 5 : 2-stage extended in matrix-matrix form
+ *    - 6 : 2-stage extended+i in matrix-matrix form
+ *    - 7 : 2-stage extended+e in matrix-matrix form
+ *    - 8 : multipass in matrix-matrix form
  **/
 HYPRE_Int HYPRE_BoomerAMGSetAggInterpType(HYPRE_Solver solver,
                                           HYPRE_Int    agg_interp_type);
