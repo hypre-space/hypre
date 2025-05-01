@@ -4630,7 +4630,7 @@ HYPRE_ILUSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter );
  * (Optional) Set the algorithm type to compute the ILU factorization. Options are:
  *
  *    -  0 : Non-iterative algorithm (default)
- *    -  1 : Asynchronous with in-place storage
+ *    -  1 : Asynchronous with in-place storage (recommended for iterative version)
  *    -  2 : Asynchronous with explicit storage splitting
  *    -  3 : Synchronous with explicit storage splitting
  *    -  4 : Semi-synchronous with explicit storage splitting

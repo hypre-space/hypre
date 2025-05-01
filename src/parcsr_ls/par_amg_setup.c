@@ -174,6 +174,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int     ilu_upper_jacobi_iters;
    HYPRE_Real    ilu_droptol;
    HYPRE_Int     ilu_reordering_type;
+   HYPRE_Int     ilu_iter_setup_type;
+   HYPRE_Int     ilu_iter_setup_option;
+   HYPRE_Int     ilu_iter_setup_max_iter;
+   HYPRE_Real    ilu_iter_setup_tolerance;
    HYPRE_Int     fsai_algo_type;
    HYPRE_Int     fsai_local_solve_type;
    HYPRE_Int     fsai_max_steps;
@@ -278,6 +282,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    ilu_upper_jacobi_iters = hypre_ParAMGDataILUUpperJacobiIters(amg_data);
    ilu_max_iter = hypre_ParAMGDataILUMaxIter(amg_data);
    ilu_reordering_type = hypre_ParAMGDataILULocalReordering(amg_data);
+   ilu_iter_setup_type = hypre_ParAMGDataILUIterSetupType(amg_data);
+   ilu_iter_setup_option = hypre_ParAMGDataILUIterSetupOption(amg_data);
+   ilu_iter_setup_max_iter = hypre_ParAMGDataILUIterSetupMaxIter(amg_data);
+   ilu_iter_setup_tolerance = hypre_ParAMGDataILUIterSetupTolerance(amg_data);
    fsai_algo_type = hypre_ParAMGDataFSAIAlgoType(amg_data);
    fsai_local_solve_type = hypre_ParAMGDataFSAILocalSolveType(amg_data);
    fsai_max_steps = hypre_ParAMGDataFSAIMaxSteps(amg_data);
@@ -3687,9 +3695,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          HYPRE_ILUSetTol(smoother[j], 0.);
          HYPRE_ILUSetDropThreshold(smoother[j], ilu_droptol);
          HYPRE_ILUSetLogging(smoother[j], 0);
-         HYPRE_ILUSetPrintLevel(smoother[j], 0);
+         HYPRE_ILUSetPrintLevel(smoother[j], ilu_iter_setup_option && amg_print_level ? 1 : 0);
          HYPRE_ILUSetLevelOfFill(smoother[j], ilu_lfil);
          HYPRE_ILUSetMaxNnzPerRow(smoother[j], ilu_max_row_nnz);
+         HYPRE_ILUSetIterativeSetupType(smoother[j], ilu_iter_setup_type);
+         HYPRE_ILUSetIterativeSetupOption(smoother[j], ilu_iter_setup_option);
+         HYPRE_ILUSetIterativeSetupMaxIter(smoother[j], ilu_iter_setup_max_iter);
+         HYPRE_ILUSetIterativeSetupTolerance(smoother[j], ilu_iter_setup_tolerance);
          HYPRE_ILUSetup(smoother[j],
                         (HYPRE_ParCSRMatrix) A_array[j],
                         (HYPRE_ParVector) F_array[j],
