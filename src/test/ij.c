@@ -3949,7 +3949,7 @@ main( hypre_int argc,
       }
       ij_x = NULL;
 
-      BuildSolParFromOneFile(argc, argv, build_rhs_arg_index, parcsr_A, &x);
+      BuildSolParFromOneFile(argc, argv, build_x0_arg_index, parcsr_A, &x);
    }
    else if (build_x0_type == 7)
    {
