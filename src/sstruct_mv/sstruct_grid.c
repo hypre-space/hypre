@@ -1774,7 +1774,8 @@ hypre_SStructBoxManEntryGetGlobalCSRank( hypre_BoxManEntry *entry,
    hypre_Index              imin;
    hypre_Index              imax;
    hypre_Index              strides;
-   HYPRE_Int                offset, d;
+   HYPRE_BigInt             offset;
+   HYPRE_Int                d;
 
    hypre_BoxManEntryGetInfo(entry, (void **) &entry_info);
    hypre_BoxManEntryGetExtents(entry, imin, imax);
