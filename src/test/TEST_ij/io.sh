@@ -21,6 +21,11 @@ FILES="\
  ${TNAME}.out.103\
  ${TNAME}.out.150\
  ${TNAME}.out.151\
+ ${TNAME}.out.200\
+ ${TNAME}.out.201\
+ ${TNAME}.out.202\
+ ${TNAME}.out.203\
+ ${TNAME}.out.204\
 "
 
 for i in $FILES
