@@ -98,6 +98,11 @@ hypre_StructMatvecCompute_core_CC( hypre_StructMatrix *A,
 
    hypre_CopyToIndex(start, ndim, xdstart);
    hypre_MapToFineIndex(xdstart, NULL, xfstride, ndim);
+   /* The next line is only used to avoid 'print error' messages.  It ensures
+    * that xdstart is aligned with the vector data space before mapping.  The
+    * choice, Neg vs Pos, doesn't matter because an offset will be used to index
+    * into the vector x (xoff = index - xdstart). */
+   hypre_SnapIndexNeg(xdstart, NULL, hypre_StructVectorStride(x), ndim);
    hypre_StructVectorMapDataIndex(x, xdstart);
    hypre_CopyToIndex(start, ndim, ydstart);
    hypre_MapToCoarseIndex(ydstart, NULL, ran_stride, ndim);
@@ -378,6 +383,11 @@ hypre_StructMatvecCompute_core_VC( hypre_StructMatrix *A,
    hypre_StructMatrixMapDataIndex(A, Adstart);
    hypre_CopyToIndex(start, ndim, xdstart);
    hypre_MapToFineIndex(xdstart, NULL, xfstride, ndim);
+   /* The next line is only used to avoid 'print error' messages.  It ensures
+    * that xdstart is aligned with the vector data space before mapping.  The
+    * choice, Neg vs Pos, doesn't matter because an offset will be used to index
+    * into the vector x (xoff = index - xdstart). */
+   hypre_SnapIndexNeg(xdstart, NULL, hypre_StructVectorStride(x), ndim);
    hypre_StructVectorMapDataIndex(x, xdstart);
    hypre_CopyToIndex(start, ndim, ydstart);
    hypre_MapToCoarseIndex(ydstart, NULL, ran_stride, ndim);
