@@ -560,13 +560,13 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
                /* Operate on constant coefficients */
                hypre_StructMatvecCompute_core_CC(A, x, y, Ab, xb, yb, transpose, cnentries, centries,
-                                                 start, loop_size, xfstride, ran_stride,
+                                                 start, stride, loop_size, xfstride, ran_stride,
                                                  xdstride, ydstride,
                                                  x_data_box, y_data_box);
 
                /* Operate on variable coefficients */
                hypre_StructMatvecCompute_core_VC(A, x, y, Ab, xb, yb, transpose, vnentries, ventries,
-                                                 start, loop_size, xfstride, ran_stride,
+                                                 start, stride, loop_size, xfstride, ran_stride,
                                                  Adstride, xdstride, ydstride,
                                                  A_data_box, x_data_box, y_data_box);
 
