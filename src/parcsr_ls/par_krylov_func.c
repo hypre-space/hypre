@@ -47,7 +47,11 @@ hypre_ParKrylovCreateVector( void *vvector )
                                             hypre_ParVectorGlobalSize(vector),
                                             hypre_ParVectorPartitioning(vector),
                                             hypre_ParVectorNumVectors(vector) );
-
+   hypre_ParVectorSetNumTags(new_vector, hypre_ParVectorNumTags(vector));
+   hypre_ParVectorSetOwnsTags(new_vector, 0);
+   hypre_ParVectorSetTags(new_vector,
+                          hypre_ParVectorMemoryLocation(vector),
+                          hypre_ParVectorTags(vector));
    hypre_ParVectorInitialize_v2(new_vector, hypre_ParVectorMemoryLocation(vector));
 
    return ( (void *) new_vector );
@@ -80,6 +84,11 @@ hypre_ParKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
                                                   hypre_ParVectorGlobalSize(vector),
                                                   hypre_ParVectorPartitioning(vector),
                                                   hypre_ParVectorNumVectors(vector) );
+      hypre_ParVectorSetNumTags(new_vector[i], hypre_ParVectorNumTags(vector));
+      hypre_ParVectorSetOwnsTags(new_vector[i], 0);
+      hypre_ParVectorSetTags(new_vector[i],
+                             hypre_ParVectorMemoryLocation(vector),
+                             hypre_ParVectorTags(vector));
       hypre_VectorData(hypre_ParVectorLocalVector(new_vector[i])) = &array_data[i * size * num_vectors];
       hypre_ParVectorInitialize_v2(new_vector[i], memory_location);
       if (i)
@@ -186,6 +195,22 @@ hypre_ParKrylovInnerProd( void *x,
 {
    return ( hypre_ParVectorInnerProd( (hypre_ParVector *) x,
                                       (hypre_ParVector *) y ) );
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParKrylovInnerProdTagged
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParKrylovInnerProdTagged( void           *x,
+                                void           *y,
+                                HYPRE_Int      *num_tags_ptr,
+                                HYPRE_Complex **iprod_ptr )
+{
+   return ( hypre_ParVectorInnerProdTagged( (hypre_ParVector *) x,
+                                            (hypre_ParVector *) y,
+                                            num_tags_ptr,
+                                            iprod_ptr ) );
 }
 
 /*--------------------------------------------------------------------------
