@@ -71,7 +71,7 @@ mpirun -np 4 ./ij -solver 2 -tol 1e-2 -printbin \
  -x0frombinfile IJ.out.x0 > io.out.151
 
 #=============================================================================
-# csr output tests - Sequential
+# csr output tests
 #=============================================================================
 
 mpirun -np 1 ./ij -printcsr > io.out.200
