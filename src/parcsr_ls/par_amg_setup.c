@@ -1842,9 +1842,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                      debug_flag,
                                                      agg_P12_trunc_factor, agg_P12_max_elmts, &P1);
                }
-               else
+
+               if (agg_interp_type != 4 && agg_interp_type != 8 && agg_interp_type != 9)
                {
-                  hypre_BoomerAMGCorrectCFMarker2 (CF_marker_array[level], (CFN_marker));
+                  hypre_BoomerAMGCorrectCFMarker2(CF_marker_array[level], CFN_marker);
                   hypre_IntArrayDestroy(CFN_marker);
                   CFN_marker = NULL;
                   hypre_BoomerAMGCoarseParms(comm, local_num_vars,
