@@ -159,6 +159,24 @@ hypre_IndexMax( hypre_Index  index,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_IndexElementMult( hypre_Index  index,
+                        HYPRE_Int    ndim )
+{
+   HYPRE_Int d, mult;
+
+   mult = 1;
+   for (d = 0; d < ndim; d++)
+   {
+      mult *= hypre_IndexD(index, d);
+   }
+
+   return mult;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_AddIndexes( hypre_Index  index1,
                   hypre_Index  index2,
                   HYPRE_Int    ndim,
@@ -976,7 +994,8 @@ hypre_BoxArrayCreateFromIndices( HYPRE_Int         ndim,
    HYPRE_Int         *indices[HYPRE_MAXDIM];
    HYPRE_Int         *lbox_indices[HYPRE_MAXDIM];
    HYPRE_Int         *rbox_indices[HYPRE_MAXDIM];
-   HYPRE_Int          splitdir, dir, sign_change, d, i;
+   HYPRE_Int          splitdir = 0;
+   HYPRE_Int          dir, sign_change, d, i;
    HYPRE_Int          index, size, capacity, change;
    HYPRE_Int          num_indices;
    HYPRE_Int          num_lbox_indices, num_rbox_indices;

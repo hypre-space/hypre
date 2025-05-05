@@ -597,6 +597,10 @@ hypre_SSAMGRelaxSetup( void                *relax_vdata,
          sA = hypre_SStructPMatrixSMatrix(pA, 0, 0);
          sgrid = hypre_StructMatrixGrid(sA);
       }
+      else
+      {
+         sgrid = NULL;
+      }
 
       svec_compute_pkgs[part] = hypre_CTAlloc(hypre_ComputePkg **, num_nodesets,
                                               HYPRE_MEMORY_HOST);
@@ -910,6 +914,7 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
 
    hypre_IndexRef           stride;
    hypre_IndexRef           start;
+   hypre_Index              ustride;
    hypre_Index              loop_size;
 
    HYPRE_Int                iter;
@@ -1053,6 +1058,7 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
    /*----------------------------------------------------------
     * Do regular iterations
     *----------------------------------------------------------*/
+   hypre_SetIndex(ustride, 1);
    for (; iter < max_iter; iter++)
    {
       for (part = 0; part < nparts; part++)
@@ -1207,7 +1213,7 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
                {
                   compute_box = hypre_BoxArrayBox(compute_box_a, i);
                   start  = hypre_BoxIMin(compute_box);
-                  hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+                  hypre_BoxGetStrideSize(compute_box, ustride, loop_size);
 
                   A_data_box =  hypre_BoxArrayBox(hypre_StructMatrixDataSpace(sA), i);
                   x_data_box =  hypre_BoxArrayBox(hypre_StructVectorDataSpace(sx), i);
@@ -1218,9 +1224,9 @@ hypre_SSAMGRelaxGeneric( void                *relax_vdata,
                   tp = hypre_StructVectorBoxData(st, i);
 
                   hypre_BoxLoop3Begin(ndim, loop_size,
-                                      A_data_box, start, stride, Ai,
-                                      x_data_box, start, stride, xi,
-                                      t_data_box, start, stride, ti);
+                                      A_data_box, start, ustride, Ai,
+                                      x_data_box, start, ustride, xi,
+                                      t_data_box, start, ustride, ti);
                   {
                      xp[xi] += weights[part] * tp[ti] / Ap[Ai];
                   }

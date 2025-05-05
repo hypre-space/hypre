@@ -50,20 +50,20 @@ hypre_SSAMGPrintStats( void *ssamg_vdata )
    HYPRE_Int              *rownnz;
    HYPRE_Int               num_rownnz;
 
-   HYPRE_Int              *global_num_rows;
-   HYPRE_Int              *global_num_rownnz;
-   HYPRE_Int              *global_num_nonzeros;
-   HYPRE_Int              *global_min_entries;
-   HYPRE_Int              *global_max_entries;
-   HYPRE_Real             *global_avg_entries;
-   HYPRE_Complex          *global_min_rowsum;
-   HYPRE_Complex          *global_max_rowsum;
-   HYPRE_Int              *global_num_boxes;
-   HYPRE_Int              *global_num_dofs;
-   HYPRE_Int              *global_num_ghrows;
-   HYPRE_Int              *global_min_stsize;
-   HYPRE_Int              *global_max_stsize;
-   HYPRE_Real             *global_avg_stsize;
+   HYPRE_Int              *global_num_rows = NULL;
+   HYPRE_Int              *global_num_rownnz = NULL;
+   HYPRE_Int              *global_num_nonzeros = NULL;
+   HYPRE_Int              *global_min_entries = NULL;
+   HYPRE_Int              *global_max_entries = NULL;
+   HYPRE_Real             *global_avg_entries = NULL;
+   HYPRE_Complex          *global_min_rowsum = NULL;
+   HYPRE_Complex          *global_max_rowsum = NULL;
+   HYPRE_Int              *global_num_boxes = NULL;
+   HYPRE_Int              *global_num_dofs = NULL;
+   HYPRE_Int              *global_num_ghrows = NULL;
+   HYPRE_Int              *global_min_stsize = NULL;
+   HYPRE_Int              *global_max_stsize = NULL;
+   HYPRE_Real             *global_avg_stsize = NULL;
 
    HYPRE_Int               stencil_size;
    HYPRE_Int               min_entries;

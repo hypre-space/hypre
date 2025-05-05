@@ -680,12 +680,14 @@ HYPRE_SStructVectorAssemble( HYPRE_SStructVector vector )
                           hypre_StructVectorDataSpace(send_vector),
                           hypre_StructVectorDataSpace(recv_vector),
                           1, NULL, 1, hypre_StructVectorComm(send_vector),
+                          hypre_StructVectorMemoryLocation(send_vector),
                           &comm_pkg);
+
       /* note reversal of send/recv data here */
       sdata = hypre_StructVectorData(send_vector);
       rdata = hypre_StructVectorData(recv_vector);
-      hypre_InitializeCommunication(comm_pkg, &rdata, &sdata, 1, 0, &comm_handle);
-      hypre_FinalizeCommunication(comm_handle);
+      hypre_StructCommunicationInitialize(comm_pkg, &rdata, &sdata, 1, 0, &comm_handle);
+      hypre_StructCommunicationFinalize(comm_handle);
       hypre_CommPkgDestroy(comm_pkg);
    }
 
@@ -772,11 +774,12 @@ HYPRE_SStructVectorGather( HYPRE_SStructVector vector )
                           hypre_StructVectorDataSpace(send_vector),
                           hypre_StructVectorDataSpace(recv_vector),
                           1, NULL, 0, hypre_StructVectorComm(send_vector),
+                          hypre_StructVectorMemoryLocation(send_vector),
                           &comm_pkg);
       sdata = hypre_StructVectorData(send_vector);
       rdata = hypre_StructVectorData(recv_vector);
-      hypre_InitializeCommunication(comm_pkg, &sdata, &rdata, 0, 0, &comm_handle);
-      hypre_FinalizeCommunication(comm_handle);
+      hypre_StructCommunicationInitialize(comm_pkg, &sdata, &rdata, 0, 0, &comm_handle);
+      hypre_StructCommunicationFinalize(comm_handle);
       hypre_CommPkgDestroy(comm_pkg);
 
       /* boundary ghost values may not be clear */

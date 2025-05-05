@@ -75,9 +75,9 @@ main( hypre_int  argc,
    Index                  *distribute;
    Index                  *block;
    HYPRE_Int               print;
-   HYPRE_Int               nterms;
-   HYPRE_Int              *terms = NULL;
-   HYPRE_Int              *trans = NULL;
+   HYPRE_Int               nterms = 0;
+   HYPRE_Int              *terms  = NULL;
+   HYPRE_Int              *trans  = NULL;
 
    /* Local variables */
    HYPRE_Int               myid, nprocs;

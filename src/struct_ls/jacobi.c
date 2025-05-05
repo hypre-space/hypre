@@ -198,7 +198,7 @@ hypre_StructJacobiSolve( void               *jacobi_vdata,
 
    //   hypre_StructVectorClearBoundGhostValues(x, 0); /* RDF: Shouldn't need this */
 
-   rsumsq = 0.0;
+   bsumsq = rsumsq = 0.0;
    if (tol > 0.0)
    {
       bsumsq = hypre_StructInnerProd( b, b );

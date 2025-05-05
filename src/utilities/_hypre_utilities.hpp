@@ -2278,6 +2278,35 @@ cusparseIndexType_t hypre_HYPREIntToCusparseIndexType();
 
 template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
 
+struct HYPRE_Real2
+{
+   HYPRE_Real x, y;
+
+   __host__ __device__
+   HYPRE_Real2() {}
+
+   __host__ __device__
+   HYPRE_Real2(HYPRE_Real x1, HYPRE_Real x2)
+   {
+      x = x1;
+      y = x2;
+   }
+
+   __host__ __device__
+   void operator=(HYPRE_Real val)
+   {
+      x = y = val;
+   }
+
+   __host__ __device__
+   void operator+=(HYPRE_Real2 rhs)
+   {
+      x += rhs.x;
+      y += rhs.y;
+   }
+
+};
+
 struct HYPRE_double4
 {
    HYPRE_Real x, y, z, w;
@@ -2357,6 +2386,19 @@ HYPRE_Real warpReduceSum(HYPRE_Real val)
    for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
    {
       val += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val, offset);
+   }
+#endif
+   return val;
+}
+
+__inline__ __host__ __device__
+HYPRE_Real2 warpReduceSum(HYPRE_Real2 val)
+{
+#if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
+   for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
+   {
+      val.x += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.x, offset);
+      val.y += __shfl_down_sync(HYPRE_WARP_FULL_MASK, val.y, offset);
    }
 #endif
    return val;

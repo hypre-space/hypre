@@ -464,6 +464,7 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
                           hypre_StructVectorDataSpace(s_rc),
                           num_values, NULL, 0,
                           hypre_StructVectorComm(s_rc),
+                          hypre_StructVectorMemoryLocation(s_rc),
                           &interlevel_comm[vars]);
       hypre_CommInfoDestroy(comm_info);
    }
@@ -806,10 +807,8 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
       xc_var = hypre_SStructPVectorSVector(xc, var);
       sdata = hypre_StructVectorData(xc_temp);
       rdata = hypre_StructVectorData(xc_var);
-      hypre_InitializeCommunication(interlevel_comm[var], &sdata, &rdata, 0, 0,
-                                    &comm_handle);
-
-      hypre_FinalizeCommunication(comm_handle);
+      hypre_StructCommunicationInitialize(interlevel_comm[var], &sdata, &rdata, 0, 0, &comm_handle);
+      hypre_StructCommunicationFinalize(comm_handle);
    }
 
    /*------------------------------------------------------------------

@@ -127,12 +127,13 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
                        hypre_StructMatrixDataSpace(P),
                        hypre_StructMatrixNumValues(P), NULL, 0,
                        hypre_StructMatrixComm(P),
+                       hypre_StructMatrixMemoryLocation(P),
                        &comm_pkg);
    hypre_CommInfoDestroy(comm_info);
 
    data = hypre_StructMatrixVData(P);
-   hypre_InitializeCommunication(comm_pkg, &data, &data, 0, 0, &comm_handle);
-   hypre_FinalizeCommunication(comm_handle);
+   hypre_StructCommunicationInitialize(comm_pkg, &data, &data, 0, 0, &comm_handle);
+   hypre_StructCommunicationFinalize(comm_handle);
    hypre_CommPkgDestroy(comm_pkg);
 
    return hypre_error_flag;

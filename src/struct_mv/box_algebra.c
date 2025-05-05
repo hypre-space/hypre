@@ -30,9 +30,8 @@ hypre_BoxSplit( hypre_Box    *box,
 
    hypre_Box   *lbox;
    hypre_Box   *rbox;
-   HYPRE_Int    meaningful;
-   HYPRE_Int    splitdir;
-   HYPRE_Int    d;
+   HYPRE_Int    d, meaningful;
+   HYPRE_Int    splitdir = 0;
 
    /* Find split direction */
    meaningful = 0;

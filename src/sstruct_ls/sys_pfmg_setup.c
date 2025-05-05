@@ -366,7 +366,7 @@ hypre_SysPFMGZeroDiagonal( hypre_SStructPMatrix *A )
       sA = hypre_SStructPMatrixSMatrix(A, vi, vi);
       if (sA != NULL)
       {
-         zero_diag += hypre_PFMGZeroDiagonal(sA);
+         zero_diag += hypre_StructMatrixZeroDiagonal(sA);
       }
       else
       {

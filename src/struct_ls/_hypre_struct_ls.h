@@ -229,6 +229,14 @@ HYPRE_Int hypre_PFMGPrintLogging ( void *pfmg_vdata );
 HYPRE_Int hypre_PFMGGetFinalRelativeResidualNorm ( void *pfmg_vdata,
                                                    HYPRE_Real *relative_residual_norm );
 
+/* pfmg_coarsen.c */
+HYPRE_Int hypre_PFMGComputeCxyz ( hypre_StructMatrix *A, HYPRE_Real *cxyz, HYPRE_Real *sqcxyz );
+HYPRE_Int hypre_PFMGComputeDxyz ( hypre_StructMatrix *A, HYPRE_Real *dxyz, HYPRE_Int *dxyz_flag );
+HYPRE_Int hypre_PFMGCoarsen ( hypre_Box *cbox, hypre_Index periodic, HYPRE_Int max_levels,
+                              HYPRE_Int dxyz_flag, HYPRE_Real *dxyz, HYPRE_Int **cdir_l_ptr,
+                              HYPRE_Int **active_l_ptr, HYPRE_Real **relax_weights_ptr,
+                              HYPRE_Int *num_levels );
+
 /* pfmg_relax.c */
 void *hypre_PFMGRelaxCreate ( MPI_Comm comm );
 HYPRE_Int hypre_PFMGRelaxDestroy ( void *pfmg_relax_vdata );

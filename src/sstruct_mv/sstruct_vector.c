@@ -373,6 +373,7 @@ hypre_SStructPVectorAccumulate( hypre_SStructPVector *pvector )
                              hypre_StructVectorDataSpace(svectors[var]),
                              hypre_StructVectorDataSpace(svectors[var]),
                              1, NULL, 0, hypre_StructVectorComm(svectors[var]),
+                             hypre_StructVectorMemoryLocation(svectors[var]),
                              &comm_pkgs[var]);
 
          /* accumulate values from AddTo */
@@ -380,10 +381,11 @@ hypre_SStructPVectorAccumulate( hypre_SStructPVector *pvector )
                              hypre_StructVectorDataSpace(svectors[var]),
                              hypre_StructVectorDataSpace(svectors[var]),
                              1, NULL, 1, hypre_StructVectorComm(svectors[var]),
+                             hypre_StructVectorMemoryLocation(svectors[var]),
                              &comm_pkg);
          data = hypre_StructVectorData(svectors[var]);
-         hypre_InitializeCommunication(comm_pkg, &data, &data, 1, 0, &comm_handle);
-         hypre_FinalizeCommunication(comm_handle);
+         hypre_StructCommunicationInitialize(comm_pkg, &data, &data, 1, 0, &comm_handle);
+         hypre_StructCommunicationFinalize(comm_handle);
 
          hypre_CommInfoDestroy(comm_info);
          hypre_CommPkgDestroy(comm_pkg);
@@ -434,9 +436,8 @@ hypre_SStructPVectorGather( hypre_SStructPVector *pvector )
       if (comm_pkgs[var] != NULL)
       {
          data = hypre_StructVectorData(svectors[var]);
-         hypre_InitializeCommunication(comm_pkgs[var], &data, &data, 0, 0,
-                                       &comm_handle);
-         hypre_FinalizeCommunication(comm_handle);
+         hypre_StructCommunicationInitialize(comm_pkgs[var], &data, &data, 0, 0, &comm_handle);
+         hypre_StructCommunicationFinalize(comm_handle);
       }
    }
 
