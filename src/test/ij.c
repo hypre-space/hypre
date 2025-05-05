@@ -72,6 +72,8 @@ HYPRE_Int BuildFuncsFromOneFile (HYPRE_Int argc, char *argv [], HYPRE_Int arg_in
                                  HYPRE_ParCSRMatrix A, HYPRE_Int **dof_func_ptr );
 HYPRE_Int BuildRhsParFromOneFile (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                   HYPRE_ParCSRMatrix A, HYPRE_ParVector *b_ptr );
+HYPRE_Int BuildSolParFromOneFile (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                                  HYPRE_ParCSRMatrix A, HYPRE_ParVector *x_ptr );
 HYPRE_Int BuildBigArrayFromOneFile (HYPRE_Int argc, char *argv [], const char *array_name,
                                     HYPRE_Int arg_index, HYPRE_BigInt *partitioning, HYPRE_Int *size, HYPRE_BigInt **array_ptr);
 HYPRE_Int BuildParLaplacian9pt (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
@@ -370,6 +372,7 @@ main( hypre_int argc,
 
    HYPRE_Int    print_system = 0;
    HYPRE_Int    print_system_binary = 0;
+   HYPRE_Int    print_system_csr = 0;
    HYPRE_Int    rel_change = 0;
    HYPRE_Int    second_time = 0;
    HYPRE_Int    benchmark = 0;
@@ -958,6 +961,12 @@ main( hypre_int argc,
          build_src_type      = 4;
          build_rhs_type      = -1;
          build_src_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-x0fromonefile") == 0 )
+      {
+         arg_index++;
+         build_x0_type       = -3;
+         build_x0_arg_index  = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-x0frombinfile") == 0 )
       {
@@ -2195,6 +2204,11 @@ main( hypre_int argc,
       {
          arg_index++;
          print_system_binary = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-printcsr") == 0 )
+      {
+         arg_index++;
+         print_system_csr = 1;
       }
       /* BM Oct 23, 2006 */
       else if ( strcmp(argv[arg_index], "-plot_grids") == 0 )
@@ -3922,6 +3936,21 @@ main( hypre_int argc,
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
    }
+   else if (build_x0_type == -3)
+   {
+      if (myid == 0)
+      {
+         hypre_printf("  Initial guess vector read from file %s\n", argv[build_rhs_arg_index]);
+      }
+
+      if (ij_x)
+      {
+         HYPRE_IJVectorDestroy(ij_x);
+      }
+      ij_x = NULL;
+
+      BuildSolParFromOneFile(argc, argv, build_x0_arg_index, parcsr_A, &x);
+   }
    else if (build_x0_type == 7)
    {
       /* from file */
@@ -4087,6 +4116,31 @@ main( hypre_int argc,
       else if (x)
       {
          HYPRE_ParVectorPrintBinaryIJ(x, "IJ.out.x0");
+      }
+   }
+
+   if (print_system_csr)
+   {
+      if (parcsr_A)
+      {
+         hypre_ParCSRMatrixPrint(parcsr_A, "csr.out.A");
+      }
+      else
+      {
+         if (!myid)
+         {
+            hypre_printf(" Matrix A in parcsr format not found!\n");
+         }
+      }
+
+      if (b)
+      {
+         HYPRE_ParVectorPrint(b, "csr.out.b");
+      }
+
+      if (x)
+      {
+         HYPRE_ParVectorPrint(x, "csr.out.x0");
       }
    }
 
@@ -9341,7 +9395,14 @@ final:
       if (ij_b) { HYPRE_IJVectorDestroy(ij_b); }
    }
 
-   if (ij_x) { HYPRE_IJVectorDestroy(ij_x); }
+   if (build_x0_type == -3)
+   {
+      HYPRE_ParVectorDestroy(x);
+   }
+   else
+   {
+      if (ij_x) { HYPRE_IJVectorDestroy(ij_x); }
+   }
 
    if (build_rbm)
    {
@@ -10414,6 +10475,70 @@ BuildParFromOneFile( HYPRE_Int                  argc,
 
    return (0);
 }
+
+/*----------------------------------------------------------------------
+ * Build x0 from one file on Proc. 0. Distributes vector across processors
+ * giving each about using the distribution of the matrix A.
+ *----------------------------------------------------------------------*/
+
+HYPRE_Int
+BuildSolParFromOneFile( HYPRE_Int                  argc,
+                        char                *argv[],
+                        HYPRE_Int                  arg_index,
+                        HYPRE_ParCSRMatrix   parcsr_A,
+                        HYPRE_ParVector     *x_ptr     )
+{
+   char           *filename;
+   HYPRE_Int       myid;
+   HYPRE_BigInt   *partitioning;
+   HYPRE_ParVector x;
+   HYPRE_Vector    x_CSR = NULL;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+   partitioning = hypre_ParCSRMatrixColStarts(parcsr_A);
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+
+   if (arg_index < argc)
+   {
+      filename = argv[arg_index];
+   }
+   else
+   {
+      hypre_printf("Error: No filename specified \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+
+   if (myid == 0)
+   {
+      hypre_printf("  x0 FromFile: %s\n", filename);
+
+      /*-----------------------------------------------------------
+       * Generate the matrix
+       *-----------------------------------------------------------*/
+
+      x_CSR = HYPRE_VectorRead(filename);
+   }
+   HYPRE_VectorToParVector(hypre_MPI_COMM_WORLD, x_CSR, partitioning, &x);
+
+   *x_ptr = x;
+
+   HYPRE_VectorDestroy(x_CSR);
+
+   return (0);
+}
+
+
 
 /*----------------------------------------------------------------------
  * Build Function array from files on different processors
