@@ -420,7 +420,7 @@ HYPRE_Int HYPRE_StructVectorInitialize(HYPRE_StructVector vector);
  **/
 HYPRE_Int HYPRE_StructVectorSetValues(HYPRE_StructVector  vector,
                                       HYPRE_Int          *index,
-                                      HYPRE_Complex       value);
+                                      HYPRE_Complex      *values);
 
 /**
  * Add to vector coefficients index by index.

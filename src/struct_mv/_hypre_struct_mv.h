@@ -1553,7 +1553,7 @@ HYPRE_Int HYPRE_StructVectorCreate ( MPI_Comm comm, HYPRE_StructGrid grid,
 HYPRE_Int HYPRE_StructVectorDestroy ( HYPRE_StructVector struct_vector );
 HYPRE_Int HYPRE_StructVectorInitialize ( HYPRE_StructVector vector );
 HYPRE_Int HYPRE_StructVectorSetValues ( HYPRE_StructVector vector, HYPRE_Int *grid_index,
-                                        HYPRE_Complex values );
+                                        HYPRE_Complex *values );
 HYPRE_Int HYPRE_StructVectorSetBoxValues ( HYPRE_StructVector vector, HYPRE_Int *ilower,
                                            HYPRE_Int *iupper, HYPRE_Complex *values );
 HYPRE_Int HYPRE_StructVectorAddToValues ( HYPRE_StructVector vector, HYPRE_Int *grid_index,
