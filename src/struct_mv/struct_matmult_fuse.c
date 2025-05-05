@@ -1077,7 +1077,7 @@ hypre_StructMatmultCompute_fuse_fcc_m1m( HYPRE_Int        nprod,
       depth = hypre_min(HYPRE_FUSE_MAXDEPTH, (nprod - k));
       depth = hypre_min(depth, repeat_depth);
 
-      //hypre_ParPrintf(MPI_COMM_WORLD, "depth = %d\n", depth);
+      //hypre_ParPrintf(hypre_MPI_COMM_WORLD, "depth = %d\n", depth);
 
       switch (depth)
       {
@@ -1475,10 +1475,10 @@ hypre_fuse_sort( HYPRE_Int        nprod,
    /* Print distances */
    for (k = 0; k < nprod; k++)
    {
-      hypre_ParPrintf(MPI_COMM_WORLD, "distances[%2d]   %16d %16d %16d   %16d\n",
+      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "distances[%2d]   %16d %16d %16d   %16d\n",
                       k, distances[0][k], distances[1][k], distances[2][k], distances[3][k]);
    }
-   hypre_ParPrintf(MPI_COMM_WORLD, "\n");
+   hypre_ParPrintf(hypre_MPI_COMM_WORLD, "\n");
 
    /* Sort according to middle column (index 1) */
    hypre_BigQsortbi(distances[1], order, 0, nprod - 1);
@@ -1492,17 +1492,17 @@ hypre_fuse_sort( HYPRE_Int        nprod,
       /* Print order array */
       for (k = 0; k < nprod; k++)
       {
-         hypre_ParPrintf(MPI_COMM_WORLD, " %d", order[k]);
+         hypre_ParPrintf(hypre_MPI_COMM_WORLD, " %d", order[k]);
       }
-      hypre_ParPrintf(MPI_COMM_WORLD, "\n\n");
+      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "\n\n");
 
       /* Print distances */
       for (k = 0; k < nprod; k++)
       {
-         hypre_ParPrintf(MPI_COMM_WORLD, "distances[%2d]   %16b %16b %16b   %16b\n",
+         hypre_ParPrintf(hypre_MPI_COMM_WORLD, "distances[%2d]   %16b %16b %16b   %16b\n",
                          k, distances[0][k], distances[1][k], distances[2][k], distances[3][k]);
       }
-      hypre_ParPrintf(MPI_COMM_WORLD, "\n");
+      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "\n");
    }
 
    /* Reorder data pointers */
@@ -1601,7 +1601,7 @@ hypre_StructMatmultCompute_fuse_triple( hypre_StructMatmultDataMH *a,
 
    } /* loop i < na*/
 
-   //hypre_ParPrintf(MPI_COMM_WORLD, "nprod = %d, %d, %d\n", nprod[0], nprod[1], nprod[2]);
+   //hypre_ParPrintf(hypre_MPI_COMM_WORLD, "nprod = %d, %d, %d\n", nprod[0], nprod[1], nprod[2]);
 
    hypre_fuse_sort(nprod[0], tptrs[0], mptrs[0]);
    hypre_fuse_sort(nprod[1], tptrs[1], mptrs[1]);

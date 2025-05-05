@@ -1456,7 +1456,7 @@ hypre_StructMatmultCompute_core( HYPRE_Int                  nterms,
          nprod[ptype]++;
       }
 
-      //hypre_ParPrintf(MPI_COMM_WORLD, "%d %d %d %d %d %d %d %d\n",
+      //hypre_ParPrintf(hypre_MPI_COMM_WORLD, "%d %d %d %d %d %d %d %d\n",
       //                nprod[0], nprod[1], nprod[2], nprod[3], nprod[4],
       //                nprod[5], nprod[6], nprod[7]);
 
