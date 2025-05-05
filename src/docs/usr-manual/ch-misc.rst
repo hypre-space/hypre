@@ -210,6 +210,10 @@ For GPU-specific options, see the :ref:`gpu_build` section below.
        | (default is off)
      - ``--enable-debug``
      - ``-DCMAKE_BUILD_TYPE=Debug``
+   * - | Memory tracker
+       | (default is off)
+     - ``--with-memory-tracker``
+     - ``-DHYPRE_ENABLE_MEMORY_TRACKER=ON``
    * - | Print Errors
        | (default is off)
      - ``--with-print-errors``

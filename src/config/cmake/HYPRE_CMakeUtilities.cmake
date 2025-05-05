@@ -74,17 +74,17 @@ endfunction()
 
 # Function to check if two options have different values
 function(ensure_options_differ option1 option2)
-  if(DEFINED ${option1} AND DEFINED ${option2})
-    if(${option1} AND ${${option2}})
+  if(DEFINED HYPRE_ENABLE_${option1} AND DEFINED HYPRE_ENABLE_${option2})
+    if(HYPRE_ENABLE_${option1} AND ${HYPRE_ENABLE_${option2}})
       # Save the value of the conflicting options
-      set(saved_value1 "${${option1}}")
-      set(saved_value2 "${${option2}}")
+      set(saved_value1 "${HYPRE_ENABLE_${option1}}")
+      set(saved_value2 "${HYPRE_ENABLE_${option2}}")
 
       # Unset conflicting options
-      unset(${option1} CACHE)
-      unset(${option2} CACHE)
+      unset(HYPRE_ENABLE_${option1} CACHE)
+      unset(HYPRE_ENABLE_${option2} CACHE)
 
-      message(FATAL_ERROR "Error: ${option1} (${saved_value1}) and ${option2} (${saved_value2}) are mutually exclusive. Only one can be set to ON. Unsetting both options.")
+      message(FATAL_ERROR "Error: HYPRE_ENABLE_${option1} (${saved_value1}) and HYPRE_ENABLE_${option2} (${saved_value2}) are mutually exclusive. Only one can be set to ON. Unsetting both options.")
     endif()
   endif()
 endfunction()
