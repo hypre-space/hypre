@@ -875,8 +875,8 @@ hypre_ParCSRMatrixPrint( hypre_ParCSRMatrix *matrix,
    hypre_fprintf(fp, "%d\n", num_cols_offd);
    row_s = hypre_ParCSRMatrixFirstRowIndex(matrix);
    row_e = hypre_ParCSRMatrixLastRowIndex(matrix);
-   col_s =  hypre_ParCSRMatrixFirstColDiag(matrix);
-   col_e =  hypre_ParCSRMatrixLastColDiag(matrix);
+   col_s = hypre_ParCSRMatrixFirstColDiag(matrix);
+   col_e = hypre_ParCSRMatrixLastColDiag(matrix);
 
    /* add 1 to the ends because this is a starts partition */
    hypre_fprintf(fp, "%b %b %b %b\n", row_s, row_e + 1, col_s, col_e + 1);
