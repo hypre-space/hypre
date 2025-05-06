@@ -5,6 +5,10 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "distributed_matrix_mup_func.h"
+#endif
+
 /* HYPRE_distributed_matrix.c */
 HYPRE_Int HYPRE_DistributedMatrixCreate (MPI_Comm context, HYPRE_DistributedMatrix *matrix );
 HYPRE_Int HYPRE_DistributedMatrixDestroy (HYPRE_DistributedMatrix matrix );

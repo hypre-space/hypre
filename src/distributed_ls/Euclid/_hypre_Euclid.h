@@ -15,6 +15,10 @@
 #include "HYPRE_distributed_matrix_mv.h"
 #include "_hypre_utilities.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "Euclid_mup_func.h"
+#endif
+
 #elif defined(PETSC_MODE)
 #include "petsc_config.h"
 #endif
