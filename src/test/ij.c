@@ -3422,7 +3422,10 @@ main( hypre_int argc,
       if (myid == 0)
       {
          hypre_printf("  RHS vector read from file %s\n", argv[build_rhs_arg_index]);
-         hypre_printf("  Initial guess is 0\n");
+         if (build_x0_type == -1)
+         {
+            hypre_printf("  Initial guess is 0\n");
+         }
       }
 
       /* RHS */
@@ -3461,7 +3464,10 @@ main( hypre_int argc,
       if (myid == 0)
       {
          hypre_printf("  RHS vector read from file %s\n", argv[build_rhs_arg_index]);
-         hypre_printf("  Initial guess is 0\n");
+         if (build_x0_type == -1)
+         {
+            hypre_printf("  Initial guess is 0\n");
+         }
       }
 
       ij_b = NULL;
@@ -3481,7 +3487,10 @@ main( hypre_int argc,
       if (myid == 0)
       {
          hypre_printf("  RHS vector has unit coefficients\n");
-         hypre_printf("  Initial guess is 0\n");
+         if (build_x0_type == -1)
+         {
+            hypre_printf("  Initial guess is 0\n");
+         }
       }
 
       HYPRE_Complex *values_h = hypre_CTAlloc(HYPRE_Real, local_num_rows, HYPRE_MEMORY_HOST);
@@ -3530,7 +3539,10 @@ main( hypre_int argc,
       if (myid == 0)
       {
          hypre_printf("  RHS vector has random coefficients and unit 2-norm\n");
-         hypre_printf("  Initial guess is 0\n");
+         if (build_x0_type == -1)
+         {
+            hypre_printf("  Initial guess is 0\n");
+         }
       }
 
       /* RHS */
@@ -3566,7 +3578,10 @@ main( hypre_int argc,
       if (myid == 0)
       {
          hypre_printf("  RHS vector set for solution with unit coefficients\n");
-         hypre_printf("  Initial guess is 0\n");
+         if (build_x0_type == -1)
+         {
+            hypre_printf("  Initial guess is 0\n");
+         }
       }
 
       HYPRE_Real *values_h = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_HOST);
@@ -3661,7 +3676,10 @@ main( hypre_int argc,
       if (myid == 0)
       {
          hypre_printf("  RHS vector read from file %s\n", argv[build_rhs_arg_index]);
-         hypre_printf("  Initial guess is 0\n");
+         if (build_x0_type == -1)
+         {
+            hypre_printf("  Initial guess is 0\n");
+         }
       }
 
       ij_b = NULL;
@@ -3940,7 +3958,7 @@ main( hypre_int argc,
    {
       if (myid == 0)
       {
-         hypre_printf("  Initial guess vector read from file %s\n", argv[build_rhs_arg_index]);
+         hypre_printf("  Initial guess vector read from file %s\n", argv[build_x0_arg_index]);
       }
 
       if (ij_x)
@@ -10516,17 +10534,11 @@ BuildSolParFromOneFile( HYPRE_Int                  argc,
    }
 
    /*-----------------------------------------------------------
-    * Print driver parameters
+    * Read the initial guess from file and create parallel vector
     *-----------------------------------------------------------*/
 
    if (myid == 0)
    {
-      hypre_printf("  x0 FromFile: %s\n", filename);
-
-      /*-----------------------------------------------------------
-       * Generate the matrix
-       *-----------------------------------------------------------*/
-
       x_CSR = HYPRE_VectorRead(filename);
    }
    HYPRE_VectorToParVector(hypre_MPI_COMM_WORLD, x_CSR, partitioning, &x);
@@ -10537,8 +10549,6 @@ BuildSolParFromOneFile( HYPRE_Int                  argc,
 
    return (0);
 }
-
-
 
 /*----------------------------------------------------------------------
  * Build Function array from files on different processors
@@ -10715,17 +10725,11 @@ BuildRhsParFromOneFile( HYPRE_Int                  argc,
    }
 
    /*-----------------------------------------------------------
-    * Print driver parameters
+    * Read the vector from file and create parallel vector
     *-----------------------------------------------------------*/
 
    if (myid == 0)
    {
-      hypre_printf("  Rhs FromFile: %s\n", filename);
-
-      /*-----------------------------------------------------------
-       * Generate the matrix
-       *-----------------------------------------------------------*/
-
       b_CSR = HYPRE_VectorRead(filename);
    }
    HYPRE_VectorToParVector(hypre_MPI_COMM_WORLD, b_CSR, partitioning, &b);
