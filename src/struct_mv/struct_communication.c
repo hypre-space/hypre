@@ -1068,8 +1068,10 @@ hypre_CommPkgAgglomerate( HYPRE_Int        num_comm_pkgs,
             {
                comm_type = &comm_types[0];
             }
+
             hypre_CommTypeFirstComm(comm_type) = 1;
             hypre_CommTypeProc(comm_type)      = p;
+            hypre_CommTypeBufsize(comm_type)   = 0;
             hypre_CommTypeNDim(comm_type)      = ndim;
             hypre_CommTypeNumBlocks(comm_type) = num_blocks;
             hypre_CommTypeBlocks(comm_type)    = hypre_CTAlloc(hypre_CommBlock, num_blocks,
@@ -1428,6 +1430,7 @@ hypre_StructCommunicationInitialize( hypre_CommPkg     *comm_pkg,
 
    HYPRE_Int           *length_array;
    HYPRE_Int           *stride_array;
+   HYPRE_Int            unitst_array[HYPRE_MAXDIM + 1];
    HYPRE_Int           *imap;
 
    HYPRE_Complex       *dptr, *kptr, *lptr;
@@ -1549,6 +1552,7 @@ hypre_StructCommunicationInitialize( hypre_CommPkg     *comm_pkg,
             num_values  = hypre_CommBlockNumValues(comm_block);
             num_entries = hypre_CommBlockNumEntries(comm_block);
 
+            /* Shift dptr to the next block */
             dptr += hypre_CommPrefixSize(num_entries, num_values);
          }
       }
@@ -1568,6 +1572,12 @@ hypre_StructCommunicationInitialize( hypre_CommPkg     *comm_pkg,
             imap         = hypre_CommEntryIMap(comm_entry);
             offset       = hypre_CommEntryOffset(comm_entry);
 
+            unitst_array[0] = 1;
+            for (d = 0; d < ndim; d++)
+            {
+               unitst_array[d + 1] = unitst_array[d] * length_array[d];
+            }
+
             lptr = send_data[b] + offset;
             for (ll = 0; ll < length_array[ndim]; ll++)
             {
@@ -1575,50 +1585,17 @@ hypre_StructCommunicationInitialize( hypre_CommPkg     *comm_pkg,
                {
                   kptr = lptr + imap[ll] * stride_array[ndim];
 
-                  /* This is based on "Idea 2" in box.h */
+#define DEVICE_VAR is_device_ptr(dptr, kptr)
+                  hypre_BasicBoxLoop2Begin(ndim, length_array,
+                                           stride_array, ki,
+                                           unitst_array, di);
                   {
-                     HYPRE_Int      i[HYPRE_MAXDIM + 1];
-                     HYPRE_Int      n[HYPRE_MAXDIM + 1];
-                     HYPRE_Int      s[HYPRE_MAXDIM + 1];
-                     HYPRE_Complex *p[HYPRE_MAXDIM + 1];
-                     HYPRE_Int      I, N;
-
-                     /* Initialize */
-                     N = 1;
-                     for (d = 0; d < ndim; d++)
-                     {
-                        i[d] = 0;
-                        n[d] = length_array[d];
-                        s[d] = stride_array[d];
-                        p[d] = kptr;
-                        N *= n[d];
-                     }
-                     i[ndim] = 0;
-                     n[ndim] = 2;
-                     s[ndim] = 0;
-                     p[ndim] = kptr;
-
-                     /* Emulate dim nested for loops */
-                     d = 0;
-                     for (I = 0; I < N; I++)
-                     {
-                        dptr[I] = *p[0];
-
-                        while ( (i[d] + 2) > n[d] )
-                        {
-                           d++;
-                        }
-                        i[d]++;
-                        p[d] += s[d];
-                        while ( d > 0 )
-                        {
-                           d--;
-                           i[d] = 0;
-                           p[d] = p[d + 1];
-                        }
-                     }
-                     dptr += N;
+                     dptr[di] = kptr[ki];
                   }
+                  hypre_BoxLoop2End(ki, di);
+#undef DEVICE_VAR
+
+                  dptr += unitst_array[ndim];
                }
                else
                {
@@ -1680,11 +1657,12 @@ hypre_StructCommunicationInitialize( hypre_CommPkg     *comm_pkg,
       recv_buffers_mpi = recv_buffers;
    }
 
-   /* Send prefix data */
+   /* Pack prefix data */
    for (i = 0; i < num_sends; i++)
    {
       comm_type = hypre_CommPkgSendType(comm_pkg, i);
 
+      dptr = (HYPRE_Complex *) send_buffers_mpi[i];
       if (hypre_CommTypeFirstComm(comm_type))
       {
          for (b = 0; b < num_blocks; b++)
@@ -1693,7 +1671,7 @@ hypre_StructCommunicationInitialize( hypre_CommPkg     *comm_pkg,
             num_values  = hypre_CommBlockNumValues(comm_block);
             num_entries = hypre_CommBlockNumEntries(comm_block);
 
-            qptr = (HYPRE_Int *) send_buffers_mpi[i];
+            qptr = (HYPRE_Int *) dptr;
             hypre_TMemcpy(qptr, &num_entries, HYPRE_Int, 1,
                           memory_location_mpi, HYPRE_MEMORY_HOST);
             qptr ++;
@@ -1709,6 +1687,9 @@ hypre_StructCommunicationInitialize( hypre_CommPkg     *comm_pkg,
                           hypre_Box, num_entries,
                           memory_location_mpi, HYPRE_MEMORY_HOST);
 
+            /* Shift dptr to the next block */
+            dptr += hypre_CommPrefixSize(num_entries, num_values);
+
             hypre_TFree(hypre_CommBlockRemBoxnums(comm_block), HYPRE_MEMORY_HOST);
             hypre_TFree(hypre_CommBlockRemBoxes(comm_block), HYPRE_MEMORY_HOST);
             hypre_TFree(hypre_CommBlockRemOrders(comm_block), HYPRE_MEMORY_HOST);
@@ -1720,7 +1701,8 @@ hypre_StructCommunicationInitialize( hypre_CommPkg     *comm_pkg,
     * post receives and initiate sends
     *--------------------------------------------------------------------*/
 
-   for (i = 0, j = 0; i < num_recvs; i++)
+   j = 0;
+   for (i = 0 ; i < num_recvs; i++)
    {
       comm_type = hypre_CommPkgRecvType(comm_pkg, i);
       hypre_MPI_Irecv(recv_buffers_mpi[i],
@@ -1814,7 +1796,7 @@ hypre_StructCommunicationFinalize( hypre_CommHandle *comm_handle )
    HYPRE_Int             num_values, num_entries, offset;
 
    HYPRE_Int            *length_array;
-   HYPRE_Int            *stride_array;
+   HYPRE_Int            *stride_array, unitst_array[HYPRE_MAXDIM + 1];
    HYPRE_Int            *imap;
 
    HYPRE_Complex        *kptr, *lptr;
@@ -1932,18 +1914,26 @@ hypre_StructCommunicationFinalize( hypre_CommHandle *comm_handle )
       comm_type = hypre_CommPkgRecvType(comm_pkg, i);
 
       dptr = (HYPRE_Complex *) recv_buffers[i];
+      if (hypre_CommTypeFirstComm(comm_type))
+      {
+         for (b = 0; b < num_blocks; b++)
+         {
+            comm_block  = hypre_CommTypeBlock(comm_type, b);
+            num_values  = hypre_CommBlockNumValues(comm_block);
+            num_entries = hypre_CommBlockNumEntries(comm_block);
+
+            /* Shift dptr to the next block */
+            dptr += hypre_CommPrefixSize(num_entries, num_values);
+         }
+
+         /* Reset first communication flag (recv type) */
+         hypre_CommTypeFirstComm(comm_type) = 0;
+      }
 
       for (b = 0; b < num_blocks; b++)
       {
          comm_block  = hypre_CommTypeBlock(comm_type, b);
-         num_values  = hypre_CommBlockNumValues(comm_block);
          num_entries = hypre_CommBlockNumEntries(comm_block);
-
-         /* Shift dptr to the next block */
-         if (hypre_CommTypeFirstComm(comm_type))
-         {
-            dptr += hypre_CommPrefixSize(num_entries, num_values);
-         }
 
          for (j = 0; j < num_entries; j++)
          {
@@ -1954,70 +1944,31 @@ hypre_StructCommunicationFinalize( hypre_CommHandle *comm_handle )
             imap         = hypre_CommEntryIMap(comm_entry);
             offset       = hypre_CommEntryOffset(comm_entry);
 
+            unitst_array[0] = 1;
+            for (d = 0; d < ndim; d++)
+            {
+               unitst_array[d + 1] = unitst_array[d] * length_array[d];
+            }
+
             lptr = recv_data[b] + offset;
             for (ll = 0; ll < length_array[ndim]; ll++)
             {
                kptr = lptr + imap[ll] * stride_array[ndim];
 
-               /* This is based on "Idea 2" in box.h */
+#define DEVICE_VAR is_device_ptr(kptr,dptr)
+               hypre_BasicBoxLoop2Begin(ndim, length_array,
+                                        stride_array, ki,
+                                        unitst_array, di);
                {
-                  HYPRE_Int      i[HYPRE_MAXDIM + 1];
-                  HYPRE_Int      n[HYPRE_MAXDIM + 1];
-                  HYPRE_Int      s[HYPRE_MAXDIM + 1];
-                  HYPRE_Complex *p[HYPRE_MAXDIM + 1];
-                  HYPRE_Int      I, N;
-
-                  /* Initialize */
-                  N = 1;
-                  for (d = 0; d < ndim; d++)
-                  {
-                     i[d] = 0;
-                     n[d] = length_array[d];
-                     s[d] = stride_array[d];
-                     p[d] = kptr;
-                     N *= n[d];
-                  }
-                  i[ndim] = 0;
-                  n[ndim] = 2;
-                  s[ndim] = 0;
-                  p[ndim] = kptr;
-
-                  /* Emulate dim nested for loops */
-                  d = 0;
-                  for (I = 0; I < N; I++)
-                  {
-                     if (action > 0)
-                     {
-                        /* add the data to existing values in memory */
-                        *p[0] += dptr[I];
-                     }
-                     else
-                     {
-                        /* copy the data over existing values in memory */
-                        *p[0] = dptr[I];
-                     }
-
-                     while ( (i[d] + 2) > n[d] )
-                     {
-                        d++;
-                     }
-                     i[d]++;
-                     p[d] += s[d];
-                     while ( d > 0 )
-                     {
-                        d--;
-                        i[d] = 0;
-                        p[d] = p[d + 1];
-                     }
-                  }
-                  dptr += N;
+                  kptr[ki] = (action > 0) ? kptr[ki] + dptr[di] : dptr[di];
                }
+               hypre_BoxLoop2End(ki, di);
+#undef DEVICE_VAR
+
+               dptr += unitst_array[ndim];
             }
          }
       }
-
-      /* Reset first communication flag (recv type) */
-      hypre_CommTypeFirstComm(comm_type) = 0;
    }
 
    /*--------------------------------------------------------------------
@@ -2072,15 +2023,15 @@ hypre_ExchangeLocalData( hypre_CommPkg   *comm_pkg,
    hypre_CommEntry *copy_fr_entry;
    hypre_CommEntry *copy_to_entry;
 
-   HYPRE_Complex   *fr_dp;
+   HYPRE_Complex   *fr_dp, *fr_dpl;
    HYPRE_Int       *fr_stride_array;
    HYPRE_Int       *fr_imap;
-   HYPRE_Complex   *to_dp;
+   HYPRE_Complex   *to_dp, *to_dpl;
    HYPRE_Int       *to_stride_array;
    HYPRE_Int       *to_imap;
 
    HYPRE_Int       *length_array;
-   HYPRE_Int        i, b, d, ll, ndim;
+   HYPRE_Int        i, b, ll, ndim;
 
    /*--------------------------------------------------------------------
     * copy local data
@@ -2117,64 +2068,27 @@ hypre_ExchangeLocalData( hypre_CommPkg   *comm_pkg,
             {
                if (fr_imap[ll] > -1)
                {
-                  /* This is based on "Idea 2" in box.h */
+                  fr_dpl = fr_dp + (fr_imap[ll]) * fr_stride_array[ndim];
+                  to_dpl = to_dp + (to_imap[ll]) * to_stride_array[ndim];
+
+#define DEVICE_VAR is_device_ptr(to_dpl,fr_dpl)
+                  hypre_BasicBoxLoop2Begin(ndim, length_array,
+                                           fr_stride_array, fi,
+                                           to_stride_array, ti);
                   {
-                     HYPRE_Int      i[HYPRE_MAXDIM + 1];
-                     HYPRE_Int      n[HYPRE_MAXDIM + 1];
-                     HYPRE_Int      fs[HYPRE_MAXDIM + 1],  ts[HYPRE_MAXDIM + 1];
-                     HYPRE_Complex *fp[HYPRE_MAXDIM + 1], *tp[HYPRE_MAXDIM + 1];
-                     HYPRE_Int      I, N;
-
-                     /* Initialize */
-                     N = 1;
-                     i[ndim]  = 0;
-                     n[ndim]  = 2;
-                     fs[ndim] = 0;
-                     ts[ndim] = 0;
-                     fp[ndim] = fr_dp + (fr_imap[ll]) * fr_stride_array[ndim];
-                     tp[ndim] = to_dp + (to_imap[ll]) * to_stride_array[ndim];
-                     for (d = 0; d < ndim; d++)
+                     if (action > 0)
                      {
-                        i[d]  = 0;
-                        n[d]  = length_array[d];
-                        fs[d] = fr_stride_array[d];
-                        ts[d] = to_stride_array[d];
-                        fp[d] = fp[ndim];
-                        tp[d] = tp[ndim];
-                        N *= n[d];
+                        /* add the data to existing values in memory */
+                        to_dpl[ti] += fr_dpl[fi];
                      }
-
-                     /* Emulate dim nested for loops */
-                     d = 0;
-                     for (I = 0; I < N; I++)
+                     else
                      {
-                        if (action > 0)
-                        {
-                           /* add the data to existing values in memory */
-                           *tp[0] += *fp[0];
-                        }
-                        else
-                        {
-                           /* copy the data over existing values in memory */
-                           *tp[0] = *fp[0];
-                        }
-
-                        while ( (i[d] + 2) > n[d] )
-                        {
-                           d++;
-                        }
-                        i[d]++;
-                        fp[d] += fs[d];
-                        tp[d] += ts[d];
-                        while ( d > 0 )
-                        {
-                           d--;
-                           i[d] = 0;
-                           fp[d] = fp[d + 1];
-                           tp[d] = tp[d + 1];
-                        }
+                        /* copy the data over existing values in memory */
+                        to_dpl[ti] = fr_dpl[fi];
                      }
                   }
+                  hypre_BoxLoop2End(fi, ti);
+#undef DEVICE_VAR
                }
             }
          }

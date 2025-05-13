@@ -92,7 +92,8 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
 {
    hypre_StructMatrix      *A        = (matvec_data -> A);
    hypre_IndexRef           xfstride = (matvec_data -> xfstride);
-   HYPRE_Int                ndim = hypre_StructMatrixNDim(A);
+   HYPRE_Int                ndim     = hypre_StructMatrixNDim(A);
+   HYPRE_MemoryLocation     memloc   = hypre_StructVectorMemoryLocation(x);
 
    hypre_StructGrid        *grid, *xgrid;
    hypre_StructStencil     *stencil;
@@ -181,11 +182,13 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
 
       /* This computes the communication pattern for the new x data_space */
       hypre_CreateComputeInfo(xgrid, xfstride, stencil, &compute_info);
+
       /* First refine commm_info to put it on the index space of xgrid, then map */
       /* NOTE: Compute boxes will be appropriately projected in MatvecCompute */
       hypre_CommInfoRefine(hypre_ComputeInfoCommInfo(compute_info), NULL, xfstride);
       hypre_StructVectorMapCommInfo(x, hypre_ComputeInfoCommInfo(compute_info));
       hypre_ComputePkgCreate(compute_info, data_space, 1, grid, &compute_pkg);
+      hypre_ComputePkgSetMemoryLocation(compute_pkg, memloc);
 
       /* Save compute_pkg */
       if ((matvec_data -> compute_pkg) != NULL)

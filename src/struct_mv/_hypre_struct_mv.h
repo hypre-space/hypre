@@ -1274,14 +1274,15 @@ typedef struct hypre_ComputePkg_struct
  * Accessor macros: hypre_ComputePkg
  *--------------------------------------------------------------------------*/
 
-#define hypre_ComputePkgCommPkg(compute_pkg)      (compute_pkg -> comm_pkg)
+#define hypre_ComputePkgCommPkg(compute_pkg)        (compute_pkg -> comm_pkg)
+#define hypre_ComputePkgMemoryLocation(compute_pkg) (compute_pkg -> comm_pkg -> memory_location)
 
-#define hypre_ComputePkgIndtBoxes(compute_pkg)    (compute_pkg -> indt_boxes)
-#define hypre_ComputePkgDeptBoxes(compute_pkg)    (compute_pkg -> dept_boxes)
-#define hypre_ComputePkgStride(compute_pkg)       (compute_pkg -> stride)
+#define hypre_ComputePkgIndtBoxes(compute_pkg)      (compute_pkg -> indt_boxes)
+#define hypre_ComputePkgDeptBoxes(compute_pkg)      (compute_pkg -> dept_boxes)
+#define hypre_ComputePkgStride(compute_pkg)         (compute_pkg -> stride)
 
-#define hypre_ComputePkgGrid(compute_pkg)         (compute_pkg -> grid)
-#define hypre_ComputePkgNumValues(compute_pkg)    (compute_pkg -> num_values)
+#define hypre_ComputePkgGrid(compute_pkg)           (compute_pkg -> grid)
+#define hypre_ComputePkgNumValues(compute_pkg)      (compute_pkg -> num_values)
 
 #endif
 /******************************************************************************
@@ -2152,6 +2153,8 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
                          hypre_ComputeInfo    **compute_info_ptr );
 HYPRE_Int hypre_ComputePkgCreate ( hypre_ComputeInfo *compute_info, hypre_BoxArray *data_space,
                                    HYPRE_Int num_values, hypre_StructGrid *grid, hypre_ComputePkg **compute_pkg_ptr );
+HYPRE_Int hypre_ComputePkgSetMemoryLocation( hypre_ComputePkg *compute_pkg,
+                                             HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_ComputePkgDestroy ( hypre_ComputePkg *compute_pkg );
 HYPRE_Int hypre_InitializeIndtComputations ( hypre_ComputePkg *compute_pkg, HYPRE_Complex *data,
                                              hypre_CommHandle **comm_handle_ptr );

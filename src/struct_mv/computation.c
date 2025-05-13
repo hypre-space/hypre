@@ -310,6 +310,19 @@ hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
 }
 
 /*--------------------------------------------------------------------------
+ * Set the memory location of the underlying communication package
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ComputePkgSetMemoryLocation( hypre_ComputePkg     *compute_pkg,
+                                   HYPRE_MemoryLocation  memory_location )
+{
+   hypre_ComputePkgMemoryLocation(compute_pkg) = memory_location;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * Destroy a computation package.
  *--------------------------------------------------------------------------*/
 

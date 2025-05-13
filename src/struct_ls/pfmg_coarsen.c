@@ -17,8 +17,7 @@
 /*--------------------------------------------------------------------------
  * hypre_PFMGComputeCxyz_core_VC
  *
- * Core function for computing stencil collapsing (cxyz and sqcxyz) for the
- * case of variable coefficients (VC)
+ * Core function for computing stencil collapsing for variable coefficients
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -31,9 +30,8 @@ hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A,
                               hypre_IndexRef      start,
                               hypre_Index         loop_size,
                               hypre_Box          *A_dbox,
-                              HYPRE_Complex      *A_const,
-                              HYPRE_Real         *cxyz,
-                              HYPRE_Real         *sqcxyz)
+                              hypre_Box          *w_dbox,
+                              HYPRE_Complex     **w_data)
 {
 #define DEVICE_VAR is_device_ptr(A_diag,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,Ap6,Ap7,Ap8)
 
@@ -41,7 +39,7 @@ hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A,
    hypre_Index           ustride;
    HYPRE_Int             d;
 
-   HYPRE_Complex         A_diag_const;
+   HYPRE_Complex        *w_datad;
    HYPRE_Complex        *A_diag = NULL;
    HYPRE_Complex        *Ap0 = NULL, *Ap1 = NULL, *Ap2 = NULL;
    HYPRE_Complex        *Ap3 = NULL, *Ap4 = NULL, *Ap5 = NULL;
@@ -49,18 +47,14 @@ hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   if (diag_is_constant)
-   {
-      A_diag_const = A_const[diag_entry];
-   }
-   else
-   {
-      A_diag = hypre_StructMatrixBoxData(A, Ab, diag_entry);
-   }
+   A_diag = (diag_is_constant) ?
+     hypre_StructMatrixConstData(A, diag_entry) :
+     hypre_StructMatrixBoxData(A, Ab, diag_entry);
 
    hypre_SetIndex(ustride, 1);
    for (d = 0; d < ndim; d++)
    {
+      w_datad = w_data[d];
       switch (nentries[d])
       {
          case 9:
@@ -103,522 +97,170 @@ hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A,
             break;
       }
 
-#if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
-      HYPRE_Real cdb   = cxyz[d];
-      HYPRE_Real sqcdb = sqcxyz[d];
-
+      /* Compute row sums */
       switch (nentries[d])
       {
          case 9:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, cdb)
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                A_dbox, start, ustride, Ai,
+                                w_dbox, start, ustride, wi);
             {
                HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
+                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
+                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
 
                HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
                                          Ap3[Ai] + Ap4[Ai] + Ap5[Ai] +
                                          Ap6[Ai] + Ap7[Ai] + Ap8[Ai]);
 
-               cdb += temp;
+               w_datad[wi] += temp;
             }
-            hypre_BoxLoop1ReductionEnd(Ai, cdb)
-
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sqcdb)
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
-                                         Ap3[Ai] + Ap4[Ai] + Ap5[Ai] +
-                                         Ap6[Ai] + Ap7[Ai] + Ap8[Ai]);
-
-               sqcdb += hypre_squared(temp);
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sqcdb)
+            hypre_BoxLoop2End(Ai, wi);
             break;
 
          case 8:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, cdb)
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                A_dbox, start, ustride, Ai,
+                                w_dbox, start, ustride, wi);
             {
                HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
+                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
+                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
 
                HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
                                          Ap3[Ai] + Ap4[Ai] + Ap5[Ai] +
                                          Ap6[Ai] + Ap7[Ai]);
 
-               cdb += temp;
+               w_datad[wi] += temp;
             }
-            hypre_BoxLoop1ReductionEnd(Ai, cdb)
-
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sqcdb)
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
-                                         Ap3[Ai] + Ap4[Ai] + Ap5[Ai] +
-                                         Ap6[Ai] + Ap7[Ai]);
-
-               sqcdb += hypre_squared(temp);
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sqcdb)
+            hypre_BoxLoop2End(Ai, wi);
             break;
 
          case 7:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, cdb)
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                A_dbox, start, ustride, Ai,
+                                w_dbox, start, ustride, wi);
             {
                HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
+                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
+                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
 
                HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
                                          Ap3[Ai] + Ap4[Ai] + Ap5[Ai] +
                                          Ap6[Ai]);
 
-               cdb += temp;
+               w_datad[wi] += temp;
             }
-            hypre_BoxLoop1ReductionEnd(Ai, cdb)
-
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sqcdb)
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
-                                         Ap3[Ai] + Ap4[Ai] + Ap5[Ai] +
-                                         Ap6[Ai]);
-
-               sqcdb += hypre_squared(temp);
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sqcdb)
+            hypre_BoxLoop2End(Ai, wi);
             break;
 
          case 6:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, cdb)
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                A_dbox, start, ustride, Ai,
+                                w_dbox, start, ustride, wi);
             {
                HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
+                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
+                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
 
                HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
                                          Ap3[Ai] + Ap4[Ai] + Ap5[Ai]);
 
-               cdb += temp;
+               w_datad[wi] += temp;
             }
-            hypre_BoxLoop1ReductionEnd(Ai, cdb)
-
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sqcdb)
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
-                                         Ap3[Ai] + Ap4[Ai] + Ap5[Ai]);
-
-               sqcdb += hypre_squared(temp);
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sqcdb)
+            hypre_BoxLoop2End(Ai, wi);
             break;
 
          case 5:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, cdb)
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                A_dbox, start, ustride, Ai,
+                                w_dbox, start, ustride, wi);
             {
                HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
+                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
+                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
 
                HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
                                          Ap3[Ai] + Ap4[Ai]);
 
-               cdb += temp;
+               w_datad[wi] += temp;
             }
-            hypre_BoxLoop1ReductionEnd(Ai, cdb)
-
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sqcdb)
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
-                                         Ap3[Ai] + Ap4[Ai]);
-
-               sqcdb += hypre_squared(temp);
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sqcdb)
+            hypre_BoxLoop2End(Ai, wi);
             break;
 
          case 4:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, cdb)
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                A_dbox, start, ustride, Ai,
+                                w_dbox, start, ustride, wi);
             {
                HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
+                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
+                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
 
                HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
                                          Ap3[Ai]);
 
-               cdb += temp;
+               w_datad[wi] += temp;
             }
-            hypre_BoxLoop1ReductionEnd(Ai, cdb)
-
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sqcdb)
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
-                                         Ap3[Ai]);
-
-               sqcdb += hypre_squared(temp);
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sqcdb)
+            hypre_BoxLoop2End(Ai, wi);
             break;
 
          case 3:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, cdb)
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                A_dbox, start, ustride, Ai,
+                                w_dbox, start, ustride, wi);
             {
                HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
+                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
+                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
 
                HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai]);
 
-               cdb += temp;
+               w_datad[wi] += temp;
             }
-            hypre_BoxLoop1ReductionEnd(Ai, cdb)
-
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sqcdb)
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai]);
-
-               sqcdb += hypre_squared(temp);
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sqcdb)
+            hypre_BoxLoop2End(Ai, wi);
             break;
 
          case 2:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, cdb)
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                A_dbox, start, ustride, Ai,
+                                w_dbox, start, ustride, wi);
             {
                HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
+                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
+                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
 
                HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai]);
 
-               cdb += temp;
+               w_datad[wi] += temp;
             }
-            hypre_BoxLoop1ReductionEnd(Ai, cdb)
-
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sqcdb)
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai]);
-
-               sqcdb += hypre_squared(temp);
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sqcdb)
+            hypre_BoxLoop2End(Ai, wi);
             break;
 
          case 1:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, cdb)
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                A_dbox, start, ustride, Ai,
+                                w_dbox, start, ustride, wi);
             {
                HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
+                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
+                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
 
                HYPRE_Real temp = sign * Ap0[Ai];
 
-               cdb += temp;
+               w_datad[wi] += temp;
             }
-            hypre_BoxLoop1ReductionEnd(Ai, cdb)
-
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sqcdb)
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * Ap0[Ai];
-
-               sqcdb += hypre_squared(temp);
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sqcdb)
+            hypre_BoxLoop2End(Ai, wi);
             break;
 
          case 0:
             break;
-      }
-#else
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_Real2 d2(cxyz[d], sqcxyz[d]);
-   ReduceSum<HYPRE_Real2> sum2(d2);
-#else
-   HYPRE_Real cdb   = cxyz[d];
-   HYPRE_Real sqcdb = sqcxyz[d];
+      } /* switch (nentries) */
 
-#if defined(HYPRE_BOX_REDUCTION)
-#undef HYPRE_BOX_REDUCTION
+#if defined(HYPRE_USING_GPU)
+      hypre_SyncComputeStream();
 #endif
-
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-#define HYPRE_BOX_REDUCTION map(tofrom:cdb,sqcdb) reduction(+:cdb,sqcdb)
-#else
-#define HYPRE_BOX_REDUCTION reduction(+:cdb,sqcdb)
-#endif
-
-#endif
-      switch (nentries[d])
-      {
-         case 9:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sum2)
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
-                                         Ap3[Ai] + Ap4[Ai] + Ap5[Ai] +
-                                         Ap6[Ai] + Ap7[Ai] + Ap8[Ai]);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               HYPRE_Real2 temp2(temp, hypre_squared(temp));
-               sum2  += temp2;
-#else
-               cdb   += temp;
-               sqcdb += hypre_squared(temp);
-#endif
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sum2)
-            break;
-
-         case 8:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sum2)
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
-                                         Ap3[Ai] + Ap4[Ai] + Ap5[Ai] +
-                                         Ap6[Ai] + Ap7[Ai]);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               HYPRE_Real2 temp2(temp, hypre_squared(temp));
-               sum2  += temp2;
-#else
-               cdb   += temp;
-               sqcdb += hypre_squared(temp);
-#endif
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sum2)
-            break;
-
-         case 7:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sum2)
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
-                                         Ap3[Ai] + Ap4[Ai] + Ap5[Ai] +
-                                         Ap6[Ai]);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               HYPRE_Real2 temp2(temp, hypre_squared(temp));
-               sum2  += temp2;
-#else
-               cdb   += temp;
-               sqcdb += hypre_squared(temp);
-#endif
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sum2)
-            break;
-
-         case 6:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sum2)
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
-                                         Ap3[Ai] + Ap4[Ai] + Ap5[Ai]);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               HYPRE_Real2 temp2(temp, hypre_squared(temp));
-               sum2  += temp2;
-#else
-               cdb   += temp;
-               sqcdb += hypre_squared(temp);
-#endif
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sum2)
-            break;
-
-         case 5:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sum2)
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
-                                         Ap3[Ai] + Ap4[Ai]);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               HYPRE_Real2 temp2(temp, hypre_squared(temp));
-               sum2  += temp2;
-#else
-               cdb   += temp;
-               sqcdb += hypre_squared(temp);
-#endif
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sum2)
-            break;
-
-         case 4:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sum2)
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai] +
-                                         Ap3[Ai]);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               HYPRE_Real2 temp2(temp, hypre_squared(temp));
-               sum2  += temp2;
-#else
-               cdb   += temp;
-               sqcdb += hypre_squared(temp);
-#endif
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sum2)
-            break;
-
-         case 3:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sum2)
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai] + Ap2[Ai]);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               HYPRE_Real2 temp2(temp, hypre_squared(temp));
-               sum2  += temp2;
-#else
-               cdb   += temp;
-               sqcdb += hypre_squared(temp);
-#endif
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sum2)
-            break;
-
-         case 2:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sum2)
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * (Ap0[Ai] + Ap1[Ai]);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               HYPRE_Real2 temp2(temp, hypre_squared(temp));
-               sum2  += temp2;
-#else
-               cdb   += temp;
-               sqcdb += hypre_squared(temp);
-#endif
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sum2)
-            break;
-
-         case 1:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sum2)
-            {
-               HYPRE_Real sign = diag_is_constant ?
-                                 (A_diag_const < 0.0 ? 1.0 : -1.0) :
-                                 (A_diag[Ai]   < 0.0 ? 1.0 : -1.0);
-
-               HYPRE_Real temp = sign * Ap0[Ai];
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               HYPRE_Real2 temp2(temp, hypre_squared(temp));
-               sum2  += temp2;
-#else
-               cdb   += temp;
-               sqcdb += hypre_squared(temp);
-#endif
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sum2)
-            break;
-
-         case 0:
-            break;
-      }
-#endif
-
-      if (nentries[d] > 0)
-      {
-#if !defined(HYPRE_USING_KOKKOS) &&\
-  (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
-         HYPRE_Real2 temp2 = (HYPRE_Real2) sum2;
-         cxyz[d]   = temp2.x;
-         sqcxyz[d] = temp2.y;
-#else
-         cxyz[d]   = (HYPRE_Real) cdb;
-         sqcxyz[d] = (HYPRE_Real) sqcdb;
-#endif
-      }
-   }
+   } /* for (d = 0; d < ndim; d++) */
 #undef DEVICE_VAR
 
    HYPRE_ANNOTATE_FUNC_END;
@@ -629,8 +271,7 @@ hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A,
 /*--------------------------------------------------------------------------
  * hypre_PFMGComputeCxyz_core_CC
  *
- * Core function for computing stencil collapsing (cxyz and sqcxyz) for the
- * case of constant coefficients (CC)
+ * Core function for computing stencil collapsing for constant coefficients.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -643,23 +284,20 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
                               hypre_IndexRef      start,
                               hypre_Index         loop_size,
                               hypre_Box          *A_dbox,
-                              HYPRE_Complex      *A_const,
-                              HYPRE_Real         *cxyz,
-                              HYPRE_Real         *sqcxyz)
+                              hypre_Box          *w_dbox,
+                              HYPRE_Complex     **w_data)
 {
-#define DEVICE_VAR is_device_ptr(A_diag)
+#define DEVICE_VAR is_device_ptr(A_diag,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,Ap6,Ap7,Ap8)
 
-   HYPRE_Int             ndim   = hypre_StructMatrixNDim(A);
-   HYPRE_Int             volume = hypre_IndexElementMult(loop_size, ndim);
+   HYPRE_Int             ndim = hypre_StructMatrixNDim(A);
    hypre_Index           ustride;
    HYPRE_Int             d, all_zero;
-   HYPRE_Complex         factor;
-   HYPRE_Complex         A_diag_const;
 
-   HYPRE_Complex        *A_diag;
-   HYPRE_Complex         Ap0 = 0.0, Ap1 = 0.0, Ap2 = 0.0;
-   HYPRE_Complex         Ap3 = 0.0, Ap4 = 0.0, Ap5 = 0.0;
-   HYPRE_Complex         Ap6 = 0.0, Ap7 = 0.0, Ap8 = 0.0;
+   HYPRE_Complex        *w_datad;
+   HYPRE_Complex        *A_diag = NULL;
+   HYPRE_Complex        *Ap0 = NULL, *Ap1 = NULL, *Ap2 = NULL;
+   HYPRE_Complex        *Ap3 = NULL, *Ap4 = NULL, *Ap5 = NULL;
+   HYPRE_Complex        *Ap6 = NULL, *Ap7 = NULL, *Ap8 = NULL;
 
    /* Exit if there are no constant coefficients */
    all_zero = 1;
@@ -678,553 +316,220 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   if (diag_is_constant)
-   {
-      A_diag_const = A_const[diag_entry];
-   }
-   else
-   {
-      A_diag = hypre_StructMatrixBoxData(A, Ab, diag_entry);
-   }
+   A_diag = (diag_is_constant) ?
+     hypre_StructMatrixConstData(A, diag_entry) :
+     hypre_StructMatrixBoxData(A, Ab, diag_entry);
 
    hypre_SetIndex(ustride, 1);
    for (d = 0; d < ndim; d++)
    {
+      w_datad = w_data[d];
       switch (nentries[d])
       {
          case 9:
-            Ap8 = A_const[entries[d][8]];
+            Ap8 = hypre_StructMatrixConstData(A, entries[d][8]);
             HYPRE_FALLTHROUGH;
 
          case 8:
-            Ap7 = A_const[entries[d][7]];
+            Ap7 = hypre_StructMatrixConstData(A, entries[d][7]);
             HYPRE_FALLTHROUGH;
 
          case 7:
-            Ap6 = A_const[entries[d][6]];
+            Ap6 = hypre_StructMatrixConstData(A, entries[d][6]);
             HYPRE_FALLTHROUGH;
 
          case 6:
-            Ap5 = A_const[entries[d][5]];
+            Ap5 = hypre_StructMatrixConstData(A, entries[d][5]);
             HYPRE_FALLTHROUGH;
 
          case 5:
-            Ap4 = A_const[entries[d][4]];
+            Ap4 = hypre_StructMatrixConstData(A, entries[d][4]);
             HYPRE_FALLTHROUGH;
 
          case 4:
-            Ap3 = A_const[entries[d][3]];
+            Ap3 = hypre_StructMatrixConstData(A, entries[d][3]);
             HYPRE_FALLTHROUGH;
 
          case 3:
-            Ap2 = A_const[entries[d][2]];
+            Ap2 = hypre_StructMatrixConstData(A, entries[d][2]);
             HYPRE_FALLTHROUGH;
 
          case 2:
-            Ap1 = A_const[entries[d][1]];
+            Ap1 = hypre_StructMatrixConstData(A, entries[d][1]);
             HYPRE_FALLTHROUGH;
 
          case 1:
-            Ap0 = A_const[entries[d][0]];
+            Ap0 = hypre_StructMatrixConstData(A, entries[d][0]);
             HYPRE_FALLTHROUGH;
 
          case 0:
             break;
       }
 
-      /* Constant diagonal case */
-      if (diag_is_constant)
-      {
-         factor = (A_diag_const < 0.0) ?
-                  (HYPRE_Complex) volume : (HYPRE_Complex) -volume;
-
-         switch (nentries[d])
-         {
-            case 9:
-               cxyz[d]   += factor * Ap8;
-               sqcxyz[d] += hypre_squared(factor * Ap8);
-               HYPRE_FALLTHROUGH;
-
-            case 8:
-               cxyz[d]   += factor * Ap7;
-               sqcxyz[d] += hypre_squared(factor * Ap7);
-               HYPRE_FALLTHROUGH;
-
-            case 7:
-               cxyz[d]   += factor * Ap6;
-               sqcxyz[d] += hypre_squared(factor * Ap6);
-               HYPRE_FALLTHROUGH;
-
-            case 6:
-               cxyz[d]   += factor * Ap5;
-               sqcxyz[d] += hypre_squared(factor * Ap5);
-               HYPRE_FALLTHROUGH;
-
-            case 5:
-               cxyz[d]   += factor * Ap4;
-               sqcxyz[d] += hypre_squared(factor * Ap4);
-               HYPRE_FALLTHROUGH;
-
-            case 4:
-               cxyz[d]   += factor * Ap3;
-               sqcxyz[d] += hypre_squared(factor * Ap3);
-               HYPRE_FALLTHROUGH;
-
-            case 3:
-               cxyz[d]   += factor * Ap2;
-               sqcxyz[d] += hypre_squared(factor * Ap2);
-               HYPRE_FALLTHROUGH;
-
-            case 2:
-               cxyz[d]   += factor * Ap1;
-               sqcxyz[d] += hypre_squared(factor * Ap1);
-               HYPRE_FALLTHROUGH;
-
-            case 1:
-               cxyz[d]   += factor * Ap0;
-               sqcxyz[d] += hypre_squared(factor * Ap0);
-               HYPRE_FALLTHROUGH;
-
-            case 0:
-               break;
-         }
-
-         /* Jump to next dimension */
-         continue;
-      }
-
-#if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
-      HYPRE_Real cdb   = cxyz[d];
-      HYPRE_Real sqcdb = sqcxyz[d];
-
+      /* Compute row sums */
       switch (nentries[d])
       {
          case 9:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, cdb)
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                A_dbox, start, ustride, Ai,
+                                w_dbox, start, ustride, wi);
             {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2 +
-                                         Ap3 + Ap4 + Ap5 +
-                                         Ap6 + Ap7 + Ap8);
+               HYPRE_Real sign = diag_is_constant ?
+                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
+                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
 
-               cdb += temp;
+               HYPRE_Real temp = sign * (Ap0[0] + Ap1[0] + Ap2[0] +
+                                         Ap3[0] + Ap4[0] + Ap5[0] +
+                                         Ap6[0] + Ap7[0] + Ap8[0]);
+
+               w_datad[wi] += temp;
             }
-            hypre_BoxLoop1ReductionEnd(Ai, cdb)
-
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sqcdb)
-            {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2 +
-                                         Ap3 + Ap4 + Ap5 +
-                                         Ap6 + Ap7 + Ap8);
-
-               sqcdb += hypre_squared(temp);
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sqcdb)
+            hypre_BoxLoop2End(Ai, wi);
             break;
 
          case 8:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, cdb)
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                A_dbox, start, ustride, Ai,
+                                w_dbox, start, ustride, wi);
             {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2 +
-                                         Ap3 + Ap4 + Ap5 +
-                                         Ap6 + Ap7);
+               HYPRE_Real sign = diag_is_constant ?
+                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
+                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
 
-               cdb += temp;
+               HYPRE_Real temp = sign * (Ap0[0] + Ap1[0] + Ap2[0] +
+                                         Ap3[0] + Ap4[0] + Ap5[0] +
+                                         Ap6[0] + Ap7[0]);
+
+               w_datad[wi] += temp;
             }
-            hypre_BoxLoop1ReductionEnd(Ai, cdb)
-
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sqcdb)
-            {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2 +
-                                         Ap3 + Ap4 + Ap5 +
-                                         Ap6 + Ap7);
-
-               sqcdb += hypre_squared(temp);
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sqcdb)
+            hypre_BoxLoop2End(Ai, wi);
             break;
 
          case 7:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, cdb)
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                A_dbox, start, ustride, Ai,
+                                w_dbox, start, ustride, wi);
             {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2 +
-                                         Ap3 + Ap4 + Ap5 +
-                                         Ap6);
+               HYPRE_Real sign = diag_is_constant ?
+                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
+                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
 
-               cdb += temp;
+               HYPRE_Real temp = sign * (Ap0[0] + Ap1[0] + Ap2[0] +
+                                         Ap3[0] + Ap4[0] + Ap5[0] +
+                                         Ap6[0]);
+
+               w_datad[wi] += temp;
             }
-            hypre_BoxLoop1ReductionEnd(Ai, cdb)
-
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sqcdb)
-            {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2 +
-                                         Ap3 + Ap4 + Ap5 +
-                                         Ap6);
-
-               sqcdb += hypre_squared(temp);
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sqcdb)
+            hypre_BoxLoop2End(Ai, wi);
             break;
 
          case 6:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, cdb)
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                A_dbox, start, ustride, Ai,
+                                w_dbox, start, ustride, wi);
             {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2 +
-                                         Ap3 + Ap4 + Ap5);
+               HYPRE_Real sign = diag_is_constant ?
+                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
+                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
 
-               cdb += temp;
+               HYPRE_Real temp = sign * (Ap0[0] + Ap1[0] + Ap2[0] +
+                                         Ap3[0] + Ap4[0] + Ap5[0]);
+
+               w_datad[wi] += temp;
             }
-            hypre_BoxLoop1ReductionEnd(Ai, cdb)
-
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sqcdb)
-            {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2 +
-                                         Ap3 + Ap4 + Ap5);
-
-               sqcdb += hypre_squared(temp);
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sqcdb)
+            hypre_BoxLoop2End(Ai, wi);
             break;
 
          case 5:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, cdb)
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                A_dbox, start, ustride, Ai,
+                                w_dbox, start, ustride, wi);
             {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2 +
-                                         Ap3 + Ap4);
+               HYPRE_Real sign = diag_is_constant ?
+                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
+                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
 
-               cdb += temp;
+               HYPRE_Real temp = sign * (Ap0[0] + Ap1[0] + Ap2[0] +
+                                         Ap3[0] + Ap4[0]);
+
+               w_datad[wi] += temp;
             }
-            hypre_BoxLoop1ReductionEnd(Ai, cdb)
-
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sqcdb)
-            {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2 +
-                                         Ap3 + Ap4);
-
-               sqcdb += hypre_squared(temp);
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sqcdb)
+            hypre_BoxLoop2End(Ai, wi);
             break;
 
          case 4:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, cdb)
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                A_dbox, start, ustride, Ai,
+                                w_dbox, start, ustride, wi);
             {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2 + Ap3);
+               HYPRE_Real sign = diag_is_constant ?
+                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
+                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
 
-               cdb += temp;
+               HYPRE_Real temp = sign * (Ap0[0] + Ap1[0] + Ap2[0] +
+                                         Ap3[0]);
+
+               w_datad[wi] += temp;
             }
-            hypre_BoxLoop1ReductionEnd(Ai, cdb)
-
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sqcdb)
-            {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2 + Ap3);
-
-               sqcdb += hypre_squared(temp);
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sqcdb)
+            hypre_BoxLoop2End(Ai, wi);
             break;
 
          case 3:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, cdb)
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                A_dbox, start, ustride, Ai,
+                                w_dbox, start, ustride, wi);
             {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2);
+               HYPRE_Real sign = diag_is_constant ?
+                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
+                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
 
-               cdb += temp;
+               HYPRE_Real temp = sign * (Ap0[0] + Ap1[0] + Ap2[0]);
+
+               w_datad[wi] += temp;
             }
-            hypre_BoxLoop1ReductionEnd(Ai, cdb)
-
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sqcdb)
-            {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2);
-
-               sqcdb += hypre_squared(temp);
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sqcdb)
+            hypre_BoxLoop2End(Ai, wi);
             break;
 
          case 2:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, cdb)
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                A_dbox, start, ustride, Ai,
+                                w_dbox, start, ustride, wi);
             {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1);
+               HYPRE_Real sign = diag_is_constant ?
+                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
+                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
 
-               cdb += temp;
+               HYPRE_Real temp = sign * (Ap0[0] + Ap1[0]);
+
+               w_datad[wi] += temp;
             }
-            hypre_BoxLoop1ReductionEnd(Ai, cdb)
-
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sqcdb)
-            {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1);
-
-               sqcdb += hypre_squared(temp);
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sqcdb)
+            hypre_BoxLoop2End(Ai, wi);
             break;
 
          case 1:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, cdb)
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                A_dbox, start, ustride, Ai,
+                                w_dbox, start, ustride, wi);
             {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * Ap0;
+               HYPRE_Real sign = diag_is_constant ?
+                                 (A_diag[0]  < 0.0 ? 1.0 : -1.0) :
+                                 (A_diag[Ai] < 0.0 ? 1.0 : -1.0);
 
-               cdb += temp;
+               HYPRE_Real temp = sign * Ap0[0];
+
+               w_datad[wi] += temp;
             }
-            hypre_BoxLoop1ReductionEnd(Ai, cdb)
-
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sqcdb)
-            {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * Ap0;
-
-               sqcdb += hypre_squared(temp);
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sqcdb)
+            hypre_BoxLoop2End(Ai, wi);
             break;
 
          case 0:
             break;
-      }
-#else
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-   HYPRE_Real2 d2(cxyz[d], sqcxyz[d]);
-   ReduceSum<HYPRE_Real2> sum2(d2);
-#else
-   HYPRE_Real cdb   = cxyz[d];
-   HYPRE_Real sqcdb = sqcxyz[d];
+      } /* switch (nentries) */
 
-#if defined(HYPRE_BOX_REDUCTION)
-#undef HYPRE_BOX_REDUCTION
+#if defined(HYPRE_USING_GPU)
+      hypre_SyncComputeStream();
 #endif
-
-#if defined(HYPRE_USING_DEVICE_OPENMP)
-#define HYPRE_BOX_REDUCTION map(tofrom:cdb,sqcdb) reduction(+:cdb,sqcdb)
-#else
-#define HYPRE_BOX_REDUCTION reduction(+:cdb,sqcdb)
-#endif
-
-#endif
-      switch (nentries[d])
-      {
-         case 9:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sum2)
-            {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2 +
-                                         Ap3 + Ap4 + Ap5 +
-                                         Ap6 + Ap7 + Ap8);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               HYPRE_Real2 temp2(temp, hypre_squared(temp));
-               sum2  += temp2;
-#else
-               cdb   += temp;
-               sqcdb += hypre_squared(temp);
-#endif
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sum2)
-            break;
-
-         case 8:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sum2)
-            {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2 +
-                                         Ap3 + Ap4 + Ap5 +
-                                         Ap6 + Ap7);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               HYPRE_Real2 temp2(temp, hypre_squared(temp));
-               sum2  += temp2;
-#else
-               cdb   += temp;
-               sqcdb += hypre_squared(temp);
-#endif
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sum2)
-            break;
-
-         case 7:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sum2)
-            {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2 +
-                                         Ap3 + Ap4 + Ap5 +
-                                         Ap6);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               HYPRE_Real2 temp2(temp, hypre_squared(temp));
-               sum2  += temp2;
-#else
-               cdb   += temp;
-               sqcdb += hypre_squared(temp);
-#endif
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sum2)
-            break;
-
-         case 6:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sum2)
-            {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2 +
-                                         Ap3 + Ap4 + Ap5);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               HYPRE_Real2 temp2(temp, hypre_squared(temp));
-               sum2  += temp2;
-#else
-               cdb   += temp;
-               sqcdb += hypre_squared(temp);
-#endif
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sum2)
-            break;
-
-         case 5:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sum2)
-            {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2 + Ap3 + Ap4);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               HYPRE_Real2 temp2(temp, hypre_squared(temp));
-               sum2  += temp2;
-#else
-               cdb   += temp;
-               sqcdb += hypre_squared(temp);
-#endif
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sum2)
-            break;
-
-         case 4:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sum2)
-            {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2 + Ap3);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               HYPRE_Real2 temp2(temp, hypre_squared(temp));
-               sum2  += temp2;
-#else
-               cdb   += temp;
-               sqcdb += hypre_squared(temp);
-#endif
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sum2)
-            break;
-
-         case 3:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sum2)
-            {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1 + Ap2);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               HYPRE_Real2 temp2(temp, hypre_squared(temp));
-               sum2  += temp2;
-#else
-               cdb   += temp;
-               sqcdb += hypre_squared(temp);
-#endif
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sum2)
-            break;
-
-         case 2:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sum2)
-            {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * (Ap0 + Ap1);
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               HYPRE_Real2 temp2(temp, hypre_squared(temp));
-               sum2  += temp2;
-#else
-               cdb   += temp;
-               sqcdb += hypre_squared(temp);
-#endif
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sum2)
-            break;
-
-         case 1:
-            hypre_BoxLoop1ReductionBegin(ndim, loop_size, A_dbox,
-                                         start, ustride, Ai, sum2)
-            {
-               HYPRE_Real sign = A_diag[Ai] < 0.0 ? 1.0 : -1.0;
-               HYPRE_Real temp = sign * Ap0;
-
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
-               HYPRE_Real2 temp2(temp, hypre_squared(temp));
-               sum2  += temp2;
-#else
-               cdb   += temp;
-               sqcdb += hypre_squared(temp);
-#endif
-            }
-            hypre_BoxLoop1ReductionEnd(Ai, sum2)
-            break;
-
-         case 0:
-            break;
-      }
-#endif
-
-      if (nentries[d] > 0)
-      {
-#if !defined(HYPRE_USING_KOKKOS) &&\
-  (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
-         HYPRE_Real2 temp2 = (HYPRE_Real2) sum2;
-         cxyz[d]   = temp2.x;
-         sqcxyz[d] = temp2.y;
-#else
-         cxyz[d]   = (HYPRE_Real) cdb;
-         sqcxyz[d] = (HYPRE_Real) sqcdb;
-#endif
-      }
-   }
-#undef DEVICE_VAR
+   } /* for (d = 0; d < ndim; d++) */
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -1240,6 +545,7 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
                        HYPRE_Real         *cxyz,
                        HYPRE_Real         *sqcxyz)
 {
+   MPI_Comm               comm          = hypre_StructMatrixComm(A);
    HYPRE_Int              ndim          = hypre_StructMatrixNDim(A);
    hypre_StructGrid      *grid          = hypre_StructMatrixGrid(A);
    hypre_StructStencil   *stencil       = hypre_StructMatrixStencil(A);
@@ -1250,11 +556,14 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
    HYPRE_Int              diag_entry    = hypre_StructStencilDiagEntry(stencil);
    hypre_BoxArray        *compute_boxes = hypre_StructGridBoxes(grid);
 
-   HYPRE_Complex         *A_const;
    hypre_Box             *A_dbox;
    hypre_Box             *compute_box;
-   hypre_Index            loop_size;
+   hypre_Index            loop_size, ustride;
    hypre_IndexRef         start;
+
+   hypre_StructVector    *work[HYPRE_MAXDIM];
+   HYPRE_Complex         *w_data[HYPRE_MAXDIM];
+   hypre_Box             *w_dbox;
 
    HYPRE_Int              d, i, k, si;
    HYPRE_Int              depth;
@@ -1276,32 +585,26 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
     * Initialize data
     *----------------------------------------------------------*/
 
+   hypre_SetIndex(ustride, 1);
    for (d = 0; d < ndim; d++)
    {
       cxyz[d] = 0.0;
       sqcxyz[d] = 0.0;
    }
 
-#if defined(HYPRE_USING_GPU)
-   if (exec_policy == HYPRE_EXEC_DEVICE)
-   {
-      /* Copy constant coefficients to host memory */
-      A_const = hypre_TAlloc(HYPRE_Complex,
-                             hypre_StructMatrixVDataOffset(A),
-                             HYPRE_MEMORY_HOST);
-
-      hypre_TMemcpy(A_const, hypre_StructMatrixData(A),
-                    HYPRE_Complex, hypre_StructMatrixVDataOffset(A),
-                    HYPRE_MEMORY_HOST, memory_location);
-   }
-   else
-#endif
-   {
-      A_const = hypre_StructMatrixData(A);
-   }
-
    /* Check if diagonal entry is constant (1) or variable (0) */
    diag_is_constant = constant[diag_entry] ? 1 : 0;
+
+   /* Create work arrays */
+   for (d = 0; d < ndim; d++)
+   {
+      work[d] = hypre_StructVectorCreate(comm, grid);
+      for (i = 0; i < 2 * ndim; i++)
+      {
+         hypre_StructVectorNumGhost(work[d])[i] = hypre_StructMatrixNumGhost(A)[i];
+      }
+      hypre_StructVectorInitialize(work[d]);
+   }
 
    /*----------------------------------------------------------
     * Compute cxyz (use arithmetic mean)
@@ -1310,17 +613,26 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
    hypre_ForBoxI(i, compute_boxes)
    {
       compute_box = hypre_BoxArrayBox(compute_boxes, i);
-      A_dbox  = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-      start   = hypre_BoxIMin(compute_box);
+      start = hypre_BoxIMin(compute_box);
       hypre_BoxGetSize(compute_box, loop_size);
 
-      /* Operate on variable coefficients */
+      A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+      w_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(work[0]), i);
+      for (d = 0; d < ndim; d++)
+      {
+         w_data[d] = hypre_StructVectorBoxData(work[d], i);
+      }
+
       for (si = 0; si < stencil_size; si += HYPRE_UNROLL_MAXDEPTH)
       {
          depth = hypre_min(HYPRE_UNROLL_MAXDEPTH, (stencil_size - si));
          for (d = 0; d < ndim; d++)
          {
             cdepth[d] = vdepth[d] = 0;
+            for (k = 0; k < depth; k++)
+            {
+               csi[d][k] = vsi[d][k] = 0;
+            }
          }
 
          for (k = 0; k < depth; k++)
@@ -1331,11 +643,11 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
                {
                   csi[0][cdepth[0]++] = const_indices[si + k];
                }
-               else if (hypre_IndexD(stencil_shape[si + k], 1) != 0)
+               if (hypre_IndexD(stencil_shape[si + k], 1) != 0)
                {
                   csi[1][cdepth[1]++] = const_indices[si + k];
                }
-               else if (hypre_IndexD(stencil_shape[si + k], 2) != 0)
+               if (hypre_IndexD(stencil_shape[si + k], 2) != 0)
                {
                   csi[2][cdepth[2]++] = const_indices[si + k];
                }
@@ -1346,11 +658,11 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
                {
                   vsi[0][vdepth[0]++] = si + k;
                }
-               else if (hypre_IndexD(stencil_shape[si + k], 1) != 0)
+               if (hypre_IndexD(stencil_shape[si + k], 1) != 0)
                {
                   vsi[1][vdepth[1]++] = si + k;
                }
-               else if (hypre_IndexD(stencil_shape[si + k], 2) != 0)
+               if (hypre_IndexD(stencil_shape[si + k], 2) != 0)
                {
                   vsi[2][vdepth[2]++] = si + k;
                }
@@ -1364,9 +676,12 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
          }
 
          /* Compute variable coefficient contributions */
-         hypre_PFMGComputeCxyz_core_VC(A, i, diag_entry, diag_is_constant,
+         hypre_GetDeviceLastError();
+         hypre_GetDeviceLastError();
+         hypre_PFMGComputeCxyz_core_VC(A, i, diag_is_constant, diag_entry,
                                        vdepth, entries, start, loop_size,
-                                       A_dbox, A_const, cxyz, sqcxyz);
+                                       A_dbox, w_dbox, w_data);
+         hypre_GetDeviceLastError();
 
          /* Collect pointers to constant stencil entries */
          for (d = 0; d < ndim; d++)
@@ -1375,16 +690,79 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
          }
 
          /* Compute constant coefficient contributions */
-         hypre_PFMGComputeCxyz_core_CC(A, i, diag_entry, diag_is_constant,
+         hypre_PFMGComputeCxyz_core_CC(A, i, diag_is_constant, diag_entry,
                                        cdepth, entries, start, loop_size,
-                                       A_dbox, A_const, cxyz, sqcxyz);
+                                       A_dbox, w_dbox, w_data);
       }
-   }
 
-   /* Free memory */
-   if (A_const != hypre_StructMatrixData(A))
+      /* Compute cxyz/sqcxyz */
+      for (d = 0; d < ndim; d++)
+      {
+#if defined(HYPRE_USING_KOKKOS) || defined(HYPRE_USING_SYCL)
+         HYPRE_Real cdb   = cxyz[d];
+         HYPRE_Real sqcdb = sqcxyz[d];
+
+         hypre_BoxLoop1ReductionBegin(ndim, loop_size, w_dbox,
+                                      start, ustride, wi, cdb)
+         {
+            cdb += w_data[d][wi];
+         }
+         hypre_BoxLoop1ReductionEnd(wi, cdb)
+
+         hypre_BoxLoop1ReductionBegin(ndim, loop_size, w_dbox,
+                                      start, ustride, wi, sqcdb)
+         {
+            sqcdb += hypre_squared(w_data[d][wi]);
+         }
+         hypre_BoxLoop1ReductionEnd(wi, sqcdb)
+#else
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+         HYPRE_Real2 d2(cxyz[d], sqcxyz[d]);
+         ReduceSum<HYPRE_Real2> sum2(d2);
+#else
+         HYPRE_Real cdb   = cxyz[d];
+         HYPRE_Real sqcdb = sqcxyz[d];
+
+#if defined(HYPRE_BOX_REDUCTION)
+#undef HYPRE_BOX_REDUCTION
+#endif
+
+#if defined(HYPRE_USING_DEVICE_OPENMP)
+#define HYPRE_BOX_REDUCTION map(tofrom:cdb,sqcdb) reduction(+:cdb,sqcdb)
+#else
+#define HYPRE_BOX_REDUCTION reduction(+:cdb,sqcdb)
+#endif
+
+#endif
+         hypre_BoxLoop1ReductionBegin(ndim, loop_size, w_dbox,
+                                      start, ustride, wi, sum2)
+         {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+            HYPRE_Real2 temp2(w_data[d][wi], hypre_squared(w_data[d][wi]));
+            sum2  += temp2;
+#else
+            cdb   += w_data[d][wi];
+            sqcdb += hypre_squared(w_data[d][wi]);
+#endif
+         }
+         hypre_BoxLoop1ReductionEnd(wi, sum2)
+#endif
+
+#if !defined(HYPRE_USING_KOKKOS) && (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP))
+         HYPRE_Real2 temp2 = (HYPRE_Real2) sum2;
+         cxyz[d]   = temp2.x;
+         sqcxyz[d] = temp2.y;
+#else
+         cxyz[d]   = (HYPRE_Real) cdb;
+         sqcxyz[d] = (HYPRE_Real) sqcdb;
+#endif
+      } /* for (d = 0; d < ndim; d++) */
+   } /* hypre_ForBoxI(i, compute_boxes) */
+
+   /* Free work arrays */
+   for (d = 0; d < ndim; d++)
    {
-      hypre_TFree(A_const, HYPRE_MEMORY_HOST);
+      hypre_StructVectorDestroy(work[d]);
    }
 
    HYPRE_ANNOTATE_FUNC_END;

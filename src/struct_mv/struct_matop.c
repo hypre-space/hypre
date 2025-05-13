@@ -32,7 +32,7 @@ hypre_StructMatrixZeroDiagonal( hypre_StructMatrix *A )
    HYPRE_Real            *Ap;
    hypre_Box             *A_dbox;
    HYPRE_Int              i;
-   HYPRE_Real             diag_product = 1.0;
+   HYPRE_Real             diag_product = 0.0;
    HYPRE_Int              zero_diag = 0;
 
    /*----------------------------------------------------------
@@ -54,6 +54,7 @@ hypre_StructMatrixZeroDiagonal( hypre_StructMatrix *A )
       {
          hypre_TMemcpy(&diag_product, Ap, HYPRE_Complex, 1,
                        HYPRE_MEMORY_HOST, memory_location);
+         diag_product = diag_product == 0 ? 1 : 0;
       }
       else
       {
@@ -99,7 +100,7 @@ hypre_StructMatrixZeroDiagonal( hypre_StructMatrix *A )
       }
    }
 
-   if (diag_product == 0)
+   if (diag_product > 0)
    {
       zero_diag = 1;
    }
