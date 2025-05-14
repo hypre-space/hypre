@@ -14,6 +14,10 @@
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE_lobpcg.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "parcsr_ls_mup_func.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
