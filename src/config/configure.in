@@ -586,7 +586,7 @@ fi
 
 AC_ARG_WITH(cxxstandard,
 AS_HELP_STRING([--with-cxxstandard=val],
-               [User specifies c++ starndard in val.]),
+               [User specifies c++ standard in val.]),
 [hypre_cxxstd=$withval]
 )
 
