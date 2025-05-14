@@ -53,12 +53,20 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
    hypre_IntArray     **dof_func_array = NULL;
    hypre_IntArray      *dof_func = NULL;
    HYPRE_Int           *dof_func_data = NULL;
-   hypre_double         strong_threshold;
    HYPRE_Int            coarsen_cut_factor;
    HYPRE_Int            useSabs;
-   hypre_double         max_row_sum;
-   hypre_double         trunc_factor;
-   hypre_double         agg_trunc_factor, agg_P12_trunc_factor;
+   hypre_double         strong_threshold_dbl;
+   hypre_double         max_row_sum_dbl;
+   hypre_double         trunc_factor_dbl;
+   hypre_double         agg_trunc_factor_dbl, agg_P12_trunc_factor_dbl;
+   hypre_float          strong_threshold_flt;
+   hypre_float          max_row_sum_flt;
+   hypre_float          trunc_factor_flt;
+   hypre_float          agg_trunc_factor_flt, agg_P12_trunc_factor_flt;
+   hypre_long_double    strong_threshold_ldbl;
+   hypre_long_double    max_row_sum_ldbl;
+   hypre_long_double    trunc_factor_ldbl;
+   hypre_long_double    agg_trunc_factor_ldbl, agg_P12_trunc_factor_ldbl;
    HYPRE_Int            relax_order;
    HYPRE_Int            max_levels;
    HYPRE_Int            amg_logging;
@@ -125,10 +133,10 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
    HYPRE_Int       num_cg_sweeps;
    HYPRE_Int       three = 3;
 
-   HYPRE_Int     nlevel;
-   HYPRE_Int     max_nz_per_row;
+   HYPRE_Int       nlevel;
+   HYPRE_Int       max_nz_per_row;
 
-   HYPRE_Int interp_type, restri_type;
+   HYPRE_Int       interp_type, restri_type;
 
    HYPRE_Int       rap2 = hypre_ParAMGDataRAP2(amg_data);
    HYPRE_Int       keepTranspose = hypre_ParAMGDataKeepTranspose(amg_data);
@@ -263,16 +271,26 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
    hypre_ParAMGDataAArray(amg_data) = A_array;
    hypre_ParAMGDataPArray(amg_data) = P_array;
 
-   strong_threshold = hypre_ParAMGDataStrongThreshold(amg_data);
    coarsen_cut_factor = hypre_ParAMGDataCoarsenCutFactor(amg_data);
    useSabs = hypre_ParAMGDataSabs(amg_data);
-   max_row_sum = hypre_ParAMGDataMaxRowSum(amg_data);
-   trunc_factor = hypre_ParAMGDataTruncFactor(amg_data);
-   agg_trunc_factor = hypre_ParAMGDataAggTruncFactor(amg_data);
-   agg_P12_trunc_factor = hypre_ParAMGDataAggP12TruncFactor(amg_data);
    P_max_elmts = hypre_ParAMGDataPMaxElmts(amg_data);
    agg_P_max_elmts = hypre_ParAMGDataAggPMaxElmts(amg_data);
    agg_P12_max_elmts = hypre_ParAMGDataAggP12MaxElmts(amg_data);
+   strong_threshold_dbl = ((amg_data) -> strong_threshold_dbl);
+   max_row_sum_dbl = ((amg_data) -> max_row_sum_dbl);
+   trunc_factor_dbl = ((amg_data) -> trunc_factor_dbl);
+   agg_trunc_factor_dbl = ((amg_data) -> agg_trunc_factor_dbl);
+   agg_P12_trunc_factor_dbl = ((amg_data) -> agg_P12_trunc_factor_dbl);
+   strong_threshold_flt = ((amg_data) -> strong_threshold_flt);
+   max_row_sum_flt = ((amg_data) -> max_row_sum_flt);
+   trunc_factor_flt = ((amg_data) -> trunc_factor_flt);
+   agg_trunc_factor_flt = ((amg_data) -> agg_trunc_factor_flt);
+   agg_P12_trunc_factor_flt = ((amg_data) -> agg_P12_trunc_factor_flt);
+   strong_threshold_ldbl = ((amg_data) -> strong_threshold_ldbl);
+   max_row_sum_ldbl = ((amg_data) -> max_row_sum_ldbl);
+   trunc_factor_ldbl = ((amg_data) -> trunc_factor_ldbl);
+   agg_trunc_factor_ldbl = ((amg_data) -> agg_trunc_factor_ldbl);
+   agg_P12_trunc_factor_ldbl = ((amg_data) -> agg_P12_trunc_factor_ldbl);
 
    F_array = hypre_ParAMGDataFArray(amg_data);
    U_array = hypre_ParAMGDataUArray(amg_data);
@@ -484,19 +502,19 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
       {
          if (level_precision == HYPRE_REAL_DOUBLE)
 	 {
-	    hypre_Strength_Options_dbl(A_array[level], (hypre_double) strong_threshold, (hypre_double) max_row_sum,
+	    hypre_Strength_Options_dbl(A_array[level], strong_threshold_dbl, max_row_sum_dbl,
 	          	               num_functions, nodal, nodal_diag, 
 			  	       useSabs, dof_func_data, &S);
 	 }
 	 else if (level_precision == HYPRE_REAL_SINGLE)
 	 {
-	    hypre_Strength_Options_flt(A_array[level], (hypre_float) strong_threshold, (hypre_float) max_row_sum,
+	    hypre_Strength_Options_flt(A_array[level], strong_threshold_flt, max_row_sum_flt,
 	          	               num_functions, nodal, nodal_diag, 
 			  	       useSabs, dof_func_data, &S);
 	 }
 	 else if (level_precision == HYPRE_REAL_LONGDOUBLE)
 	 {
-	    hypre_Strength_Options_long_dbl(A_array[level], (hypre_long_double) strong_threshold, (hypre_long_double) max_row_sum,
+	    hypre_Strength_Options_long_dbl(A_array[level], strong_threshold_ldbl, max_row_sum_ldbl,
 	          	                    num_functions, nodal, nodal_diag, 
 			  	            useSabs, dof_func_data, &S);
 	 }
@@ -818,7 +836,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
                      hypre_MPassInterp_Options_dbl(A_array[level], S, CF_marker, 
          		                        dof_func_array[level], coarse_pnts_global, 
          	                                agg_interp_type, num_functions, 
-      				                debug_flag, agg_P_max_elmts, (hypre_double) agg_trunc_factor, 
+      				                debug_flag, agg_P_max_elmts, agg_trunc_factor_dbl, 
       				                sep_weight, &P);
          	  }
       	          else
@@ -827,7 +845,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
          		                           coarse_pnts_global1,
          	                                   dof_func_data, agg_interp_type, num_functions, 
       				                   debug_flag, agg_P12_max_elmts, 
-      				                   (hypre_double) agg_P12_trunc_factor, &P1);
+      				                   agg_P12_trunc_factor_dbl, &P1);
       	             hypre_BoomerAMGCorrectCFMarker2_dbl (CF_marker, CF2_marker);
                      hypre_IntArrayDestroy_dbl(CF2_marker);
                      hypre_BoomerAMGCoarseParms_dbl(comm, local_num_vars, num_functions, 
@@ -838,8 +856,8 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
       					           coarse_pnts_global1, dof_func_data, 
       					           agg_interp_type, num_functions, 
       				                   debug_flag, sep_weight, agg_P_max_elmts, 
-      				                   agg_P12_max_elmts, (hypre_double) agg_trunc_factor, 
-      				                   (hypre_double) agg_P12_trunc_factor, &P);
+      				                   agg_P12_max_elmts, agg_trunc_factor_dbl, 
+      				                   agg_P12_trunc_factor_dbl, &P);
       	          }
       	          CF_marker_array[level] = CF_marker; /*done aggressive coarsening scalar */
                }
@@ -857,7 +875,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
                      hypre_MPassInterp_Options_dbl(A_array[level], SN, CF_marker_array[level], 
          		                        dof_func_array[level], coarse_pnts_global, 
          	                                agg_interp_type, num_functions, 
-      				                debug_flag, agg_P_max_elmts, (hypre_double) agg_trunc_factor, 
+      				                debug_flag, agg_P_max_elmts, agg_trunc_factor_dbl, 
       				                sep_weight, &P);
          	  }
                   else 
@@ -872,7 +890,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
                      hypre_StageOneInterp_Options_dbl(A_array[level], S, CF_marker, 
          		                           coarse_pnts_global1, dof_func_data, 
       					           agg_interp_type, num_functions, debug_flag, 
-         		                           agg_P12_max_elmts, (hypre_double) agg_P12_trunc_factor, 
+         		                           agg_P12_max_elmts, agg_P12_trunc_factor_dbl, 
       					           &P1);
       
                      hypre_BoomerAMGCorrectCFMarker2_dbl (CFN_marker, CFN2_marker);
@@ -894,7 +912,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
          	                                   dof_func_data, agg_interp_type, num_functions, 
       				                   debug_flag, sep_weight,
          		                           agg_P_max_elmts, agg_P12_max_elmts,
-         		                           (hypre_double) agg_trunc_factor, (hypre_double) agg_P12_trunc_factor, &P);
+         		                           agg_trunc_factor_dbl, agg_P12_trunc_factor_dbl, &P);
       
                      hypre_ParCSRMatrixDestroy_dbl(SN);
                      hypre_ParCSRMatrixDestroy_dbl(AN);
@@ -911,7 +929,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
             {
                hypre_Interp_Options_dbl(A_array[level], S, CF_marker_array[level], coarse_pnts_global, 
       			                dof_func_data, interp_type, num_functions, debug_flag,
-      				        P_max_elmts, (hypre_double) trunc_factor, sep_weight, &P);
+      				        P_max_elmts, trunc_factor_dbl, sep_weight, &P);
             } /* end of no aggressive coarsening */
          } 
          else if (level_precision == HYPRE_REAL_SINGLE)
@@ -927,7 +945,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
                      hypre_MPassInterp_Options_flt(A_array[level], S, CF_marker, 
          		                        dof_func_array[level], coarse_pnts_global, 
          	                                agg_interp_type, num_functions, 
-      				                debug_flag, agg_P_max_elmts, (hypre_float) agg_trunc_factor, 
+      				                debug_flag, agg_P_max_elmts, agg_trunc_factor_flt, 
       				                sep_weight, &P);
          	  }
       	          else
@@ -936,7 +954,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
          		                           coarse_pnts_global1,
          	                                   dof_func_data, agg_interp_type, num_functions, 
       				                   debug_flag, agg_P12_max_elmts, 
-      				                   (hypre_float) agg_P12_trunc_factor, &P1);
+      				                   agg_P12_trunc_factor_flt, &P1);
       	             hypre_BoomerAMGCorrectCFMarker2_flt (CF_marker, CF2_marker);
                      hypre_IntArrayDestroy_flt(CFN_marker);
                      hypre_BoomerAMGCoarseParms_flt(comm, local_num_vars, num_functions, 
@@ -947,8 +965,8 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
       					           coarse_pnts_global1, dof_func_data, 
       					           agg_interp_type, num_functions, 
       				                   debug_flag, sep_weight, agg_P_max_elmts, 
-      				                   agg_P12_max_elmts, (hypre_float) agg_trunc_factor, 
-      				                   (hypre_float) agg_P12_trunc_factor, &P);
+      				                   agg_P12_max_elmts, agg_trunc_factor_flt, 
+      				                   agg_P12_trunc_factor_flt, &P);
       	          }
       	          CF_marker_array[level] = CF_marker; /*done aggressive coarsening scalar */
                }
@@ -966,7 +984,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
                      hypre_MPassInterp_Options_flt(A_array[level], SN, CF_marker_array[level], 
          		                        dof_func_array[level], coarse_pnts_global, 
          	                                agg_interp_type, num_functions, 
-      				                debug_flag, agg_P_max_elmts, (hypre_float) agg_trunc_factor, 
+      				                debug_flag, agg_P_max_elmts, agg_trunc_factor_flt, 
       				                sep_weight, &P);
          	  }
                   else 
@@ -981,7 +999,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
                      hypre_StageOneInterp_Options_flt(A_array[level], S, CF_marker, 
          		                           coarse_pnts_global1, dof_func_data, 
       					           agg_interp_type, num_functions, debug_flag, 
-         		                           agg_P12_max_elmts, (hypre_float) agg_P12_trunc_factor, 
+         		                           agg_P12_max_elmts, agg_P12_trunc_factor_flt, 
       					           &P1);
       
                      hypre_BoomerAMGCorrectCFMarker2_flt (CFN_marker, CFN2_marker);
@@ -1004,7 +1022,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
          	                                   dof_func_data, agg_interp_type, num_functions, 
       				                   debug_flag, sep_weight,
          		                           agg_P_max_elmts, agg_P12_max_elmts,
-         		                           (hypre_float) agg_trunc_factor, (hypre_float) agg_P12_trunc_factor, &P);
+         		                           agg_trunc_factor_flt, agg_P12_trunc_factor_flt, &P);
       
                      hypre_ParCSRMatrixDestroy_flt(SN);
                      hypre_ParCSRMatrixDestroy_flt(AN);
@@ -1020,7 +1038,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
             {
                hypre_Interp_Options_flt(A_array[level], S, CF_marker_array[level], coarse_pnts_global, 
       			                dof_func_data, interp_type, num_functions, debug_flag,
-      				        P_max_elmts, (hypre_float) trunc_factor, sep_weight, &P);
+      				        P_max_elmts, trunc_factor_flt, sep_weight, &P);
             } /* end of no aggressive coarsening */
          } 
          else if (level_precision == HYPRE_REAL_LONGDOUBLE)
@@ -1036,7 +1054,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
                      hypre_MPassInterp_Options_long_dbl(A_array[level], S, CF_marker, 
          			                        dof_func_array[level], coarse_pnts_global, 
          	  	                                agg_interp_type, num_functions, 
-      				                debug_flag, agg_P_max_elmts, (hypre_long_double) agg_trunc_factor, 
+      				                debug_flag, agg_P_max_elmts, agg_trunc_factor_ldbl, 
       				                sep_weight, &P);
                   }
       	          else
@@ -1045,7 +1063,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
          			                           coarse_pnts_global1,
          	  	                                   dof_func_data, agg_interp_type, num_functions, 
       				                           debug_flag, agg_P12_max_elmts, 
-      				                           (hypre_long_double) agg_P12_trunc_factor, &P1);
+      				                           agg_P12_trunc_factor_ldbl, &P1);
       	             hypre_BoomerAMGCorrectCFMarker2_long_dbl (CF_marker, CF2_marker);
                      hypre_IntArrayDestroy_long_dbl(CF2_marker);
                      hypre_BoomerAMGCoarseParms_long_dbl(comm, local_num_vars, num_functions, 
@@ -1056,8 +1074,8 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
       					           coarse_pnts_global1, dof_func_data, 
       					           agg_interp_type, num_functions, 
       				                   debug_flag, sep_weight, agg_P_max_elmts, 
-      				                   agg_P12_max_elmts, (hypre_long_double) agg_trunc_factor, 
-      				                   (hypre_long_double) agg_P12_trunc_factor, &P);
+      				                   agg_P12_max_elmts, agg_trunc_factor_ldbl, 
+      				                   agg_P12_trunc_factor_ldbl, &P);
       	          }
       	          CF_marker_array[level] = CF_marker; /*done aggressive coarsening scalar */
                }
@@ -1075,7 +1093,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
                      hypre_MPassInterp_Options_long_dbl(A_array[level], SN, CF_marker_array[level], 
          			                             dof_func_array[level], coarse_pnts_global, 
          	  	                                     agg_interp_type, num_functions, 
-      				                             debug_flag, agg_P_max_elmts, (hypre_long_double) agg_trunc_factor, 
+      				                             debug_flag, agg_P_max_elmts, agg_trunc_factor_ldbl, 
       				                             sep_weight, &P);
          	  }
                   else 
@@ -1090,7 +1108,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
                      hypre_StageOneInterp_Options_long_dbl(A_array[level], S, CF_marker, 
          		                                coarse_pnts_global1, dof_func_data, 
       					                agg_interp_type, num_functions, debug_flag, 
-         		                                agg_P12_max_elmts, (hypre_long_double) agg_P12_trunc_factor, 
+         		                                agg_P12_max_elmts, agg_P12_trunc_factor_ldbl, 
       					                &P1);
       
                      hypre_BoomerAMGCorrectCFMarker2_long_dbl (CFN_marker, CFN2_marker);
@@ -1113,8 +1131,8 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
          	                                        dof_func_data, agg_interp_type, num_functions, 
       				                        debug_flag, sep_weight,
          		                                agg_P_max_elmts, agg_P12_max_elmts,
-         		                                (hypre_long_double) agg_trunc_factor, 
-							(hypre_long_double) agg_P12_trunc_factor, &P);
+         		                                agg_trunc_factor_ldbl, 
+							agg_P12_trunc_factor_ldbl, &P);
       
                      hypre_ParCSRMatrixDestroy_long_dbl(SN);
                      hypre_ParCSRMatrixDestroy_long_dbl(AN);
@@ -1130,7 +1148,7 @@ hypre_MPAMGSetup_mp( void               *amg_vdata,
             {
                hypre_Interp_Options_long_dbl(A_array[level], S, CF_marker_array[level], coarse_pnts_global, 
       		                     dof_func_data, interp_type, num_functions, debug_flag,
-      			             P_max_elmts, (hypre_long_double) trunc_factor, sep_weight, &P);
+      			             P_max_elmts, trunc_factor_ldbl, sep_weight, &P);
             } /* end of no aggressive coarsening */
          } 
          /*else 

@@ -36,12 +36,7 @@ hypre_MPAMGCreate_mp( void )
    HYPRE_Int    max_coarse_size;
    HYPRE_Int    min_coarse_size;
    HYPRE_Int    coarsen_cut_factor;
-   HYPRE_Real   strong_threshold;
    HYPRE_Int    Sabs;
-   HYPRE_Real   max_row_sum;
-   HYPRE_Real   trunc_factor;
-   HYPRE_Real   agg_trunc_factor;
-   HYPRE_Real   agg_P12_trunc_factor;
    HYPRE_Int    interp_type;
    HYPRE_Int    sep_weight;
    HYPRE_Int    coarsen_type;
@@ -71,8 +66,6 @@ hypre_MPAMGCreate_mp( void )
    HYPRE_Int    relax_up;
    HYPRE_Int    relax_coarse;
    HYPRE_Int    relax_order;
-   HYPRE_Real   relax_wt;
-   HYPRE_Real   outer_wt;
 
    /* log info */
    HYPRE_Int    num_iterations;
@@ -89,7 +82,7 @@ hypre_MPAMGCreate_mp( void )
 
    char     plot_file_name[251] = {0};
 
-  // HYPRE_MemoryLocation memory_location = hypre_HandleMemoryLocation_dbl(hypre_handle());
+   // HYPRE_MemoryLocation memory_location = hypre_HandleMemoryLocation_dbl(hypre_handle());
 
    /*-----------------------------------------------------------------------
     * Setup default values for parameters
@@ -100,11 +93,6 @@ hypre_MPAMGCreate_mp( void )
    max_coarse_size = 9;
    min_coarse_size = 0;
    coarsen_cut_factor = 0;
-   strong_threshold = 0.25;
-   max_row_sum = 0.9;
-   trunc_factor = 0.0;
-   agg_trunc_factor = 0.0;
-   agg_P12_trunc_factor = 0.0;
    sep_weight = 0;
    coarsen_type = 10;
    interp_type = 6;
@@ -133,8 +121,6 @@ hypre_MPAMGCreate_mp( void )
    relax_up = 14;
    relax_coarse = 9;
    relax_order = 0;
-   relax_wt = 1.0;
-   outer_wt = 1.0;
 
    /* log info */
    num_iterations = 0;
@@ -150,7 +136,28 @@ hypre_MPAMGCreate_mp( void )
 
    rap2 = 0;
    keepT = 0;
-
+   /* mixed precision paramters */
+   ((amg_data) -> strong_threshold_dbl) = 0.25;
+   ((amg_data) -> max_row_sum_dbl) = 0.9;
+   ((amg_data) -> trunc_factor_dbl) = 0.0;
+   ((amg_data) -> agg_trunc_factor_dbl) = 0.0;
+   ((amg_data) -> agg_P12_trunc_factor_dbl) = 0.0;
+   ((amg_data) -> user_relax_weight_dbl) = 1.0;
+   ((amg_data) -> outer_wt_dbl) = 1.0;
+   ((amg_data) -> strong_threshold_flt) = 0.25;
+   ((amg_data) -> max_row_sum_flt) = 0.9;
+   ((amg_data) -> trunc_factor_flt) = 0.0;
+   ((amg_data) -> agg_trunc_factor_flt) = 0.0;
+   ((amg_data) -> agg_P12_trunc_factor_flt) = 0.0;
+   ((amg_data) -> user_relax_weight_flt) = 1.0;
+   ((amg_data) -> outer_wt_flt) = 1.0;
+   ((amg_data) -> strong_threshold_ldbl) = 0.25;
+   ((amg_data) -> max_row_sum_ldbl) = 0.9;
+   ((amg_data) -> trunc_factor_ldbl) = 0.0;
+   ((amg_data) -> agg_trunc_factor_ldbl) = 0.0;
+   ((amg_data) -> agg_P12_trunc_factor_ldbl) = 0.0;
+   ((amg_data) -> user_relax_weight_ldbl) = 1.0;
+   ((amg_data) -> outer_wt_ldbl) = 1.0;
    /*-----------------------------------------------------------------------
     * Create the hypre_ParAMGData structure and return
     *-----------------------------------------------------------------------*/
@@ -164,16 +171,9 @@ hypre_MPAMGCreate_mp( void )
    hypre_ParAMGDataMaxLevels(amg_data) =  max_levels;
    hypre_ParAMGDataUserRelaxType(amg_data) = -1;
    hypre_ParAMGDataUserNumSweeps(amg_data) = -1;
-   hypre_ParAMGDataUserRelaxWeight(amg_data) = relax_wt;
-   hypre_ParAMGDataOuterWt(amg_data) = outer_wt;
    hypre_MPAMGSetMaxCoarseSize_mp(amg_data, max_coarse_size);
    hypre_MPAMGSetMinCoarseSize_mp(amg_data, min_coarse_size);
    hypre_MPAMGSetCoarsenCutFactor_mp(amg_data, coarsen_cut_factor);
-   hypre_MPAMGSetStrongThreshold_mp(amg_data, strong_threshold);
-   hypre_MPAMGSetMaxRowSum_mp(amg_data, max_row_sum);
-   hypre_MPAMGSetTruncFactor_mp(amg_data, trunc_factor);
-   hypre_MPAMGSetAggTruncFactor_mp(amg_data, agg_trunc_factor);
-   hypre_MPAMGSetAggP12TruncFactor_mp(amg_data, agg_P12_trunc_factor);
    hypre_MPAMGSetSepWeight_mp(amg_data, sep_weight);
    hypre_MPAMGSetMeasureType_mp(amg_data, measure_type);
    hypre_MPAMGSetCoarsenType_mp(amg_data, coarsen_type);
@@ -200,9 +200,6 @@ hypre_MPAMGCreate_mp( void )
    hypre_MPAMGSetCycleRelaxType_mp(amg_data, relax_up, 2);
    hypre_MPAMGSetCycleRelaxType_mp(amg_data, relax_coarse, 3);
    hypre_MPAMGSetRelaxOrder_mp(amg_data, relax_order);
-   hypre_MPAMGSetRelaxWt_mp(amg_data, relax_wt);
-   hypre_MPAMGSetOuterWt_mp(amg_data, outer_wt);
-
    hypre_MPAMGSetNumIterations_mp(amg_data, num_iterations);
 
 
@@ -399,10 +396,10 @@ hypre_MPAMGDestroy_mp( void *data )
 
 HYPRE_Int
 hypre_MPAMGSetMaxLevels_mp( void *data,
-                             HYPRE_Int   max_levels )
+                            HYPRE_Int   max_levels )
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-   HYPRE_Int old_max_levels;
+   //HYPRE_Int old_max_levels;
    if (!amg_data)
    {
       //hypre_error_in_arg(1);
@@ -415,7 +412,7 @@ hypre_MPAMGSetMaxLevels_mp( void *data,
       return hypre_error_flag;
    }
 
-   old_max_levels = hypre_ParAMGDataMaxLevels(amg_data);
+   /*old_max_levels = hypre_ParAMGDataMaxLevels(amg_data);
    if (old_max_levels < max_levels)
    {
       HYPRE_Real *relax_weight, *omega, *nongal_tol_array;
@@ -454,7 +451,7 @@ hypre_MPAMGSetMaxLevels_mp( void *data,
          }
          hypre_ParAMGDataNonGalTolArray(amg_data) = nongal_tol_array;
       }
-   }
+   }*/
    hypre_ParAMGDataMaxLevels(amg_data) = max_levels;
 
    return hypre_error_flag;
@@ -582,7 +579,7 @@ hypre_MPAMGSetCoarsenCutFactor_mp( void       *data,
 
 HYPRE_Int
 hypre_MPAMGGetCoarsenCutFactor_mp( void       *data,
-                                    HYPRE_Int  *coarsen_cut_factor )
+                                   HYPRE_Int  *coarsen_cut_factor )
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
@@ -599,7 +596,7 @@ hypre_MPAMGGetCoarsenCutFactor_mp( void       *data,
 
 HYPRE_Int
 hypre_MPAMGSetStrongThreshold_mp( void     *data,
-                                   HYPRE_Real    strong_threshold )
+                                  hypre_double strong_threshold )
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
@@ -615,31 +612,16 @@ hypre_MPAMGSetStrongThreshold_mp( void     *data,
       return hypre_error_flag;
    }
 
-   hypre_ParAMGDataStrongThreshold(amg_data) = strong_threshold;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_MPAMGGetStrongThreshold_mp( void     *data,
-                                   HYPRE_Real *  strong_threshold )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      //hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   *strong_threshold = hypre_ParAMGDataStrongThreshold(amg_data);
+   ((amg_data) -> strong_threshold_dbl) = strong_threshold;
+   ((amg_data) -> strong_threshold_flt) = (hypre_float) strong_threshold;
+   ((amg_data) -> strong_threshold_ldbl) = (hypre_long_double) strong_threshold;
 
    return hypre_error_flag;
 }
 
 HYPRE_Int
 hypre_MPAMGSetMaxRowSum_mp( void     *data,
-                             HYPRE_Real    max_row_sum )
+                            hypre_double  max_row_sum )
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
@@ -655,31 +637,16 @@ hypre_MPAMGSetMaxRowSum_mp( void     *data,
       return hypre_error_flag;
    }
 
-   hypre_ParAMGDataMaxRowSum(amg_data) = max_row_sum;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_MPAMGGetMaxRowSum_mp( void     *data,
-                             HYPRE_Real *  max_row_sum )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      //hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   *max_row_sum = hypre_ParAMGDataMaxRowSum(amg_data);
+   ((amg_data) -> max_row_sum_dbl) = max_row_sum;
+   ((amg_data) -> max_row_sum_flt) = (hypre_float) max_row_sum;
+   ((amg_data) -> max_row_sum_ldbl) = (hypre_long_double) max_row_sum;
 
    return hypre_error_flag;
 }
 
 HYPRE_Int
 hypre_MPAMGSetTruncFactor_mp( void     *data,
-                               HYPRE_Real    trunc_factor )
+                              hypre_double    trunc_factor )
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
@@ -695,24 +662,9 @@ hypre_MPAMGSetTruncFactor_mp( void     *data,
       return hypre_error_flag;
    }
 
-   hypre_ParAMGDataTruncFactor(amg_data) = trunc_factor;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_MPAMGGetTruncFactor_mp( void     *data,
-                               HYPRE_Real *  trunc_factor )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      //hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   *trunc_factor = hypre_ParAMGDataTruncFactor(amg_data);
+   ((amg_data) -> trunc_factor_dbl) = trunc_factor;
+   ((amg_data) -> trunc_factor_flt) = (hypre_float) trunc_factor;
+   ((amg_data) -> trunc_factor_ldbl) = (hypre_long_double) trunc_factor;
 
    return hypre_error_flag;
 }
@@ -1034,7 +986,7 @@ hypre_MPAMGGetFCycle_mp( void      *data,
 
 HYPRE_Int
 hypre_MPAMGSetTol_mp( void     *data,
-                       HYPRE_Real    tol  )
+                      hypre_double    tol  )
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
@@ -1050,24 +1002,9 @@ hypre_MPAMGSetTol_mp( void     *data,
       return hypre_error_flag;
    }
 
-   hypre_ParAMGDataTol(amg_data) = tol;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_MPAMGGetTol_mp( void     *data,
-                       HYPRE_Real *  tol  )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      //hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   *tol = hypre_ParAMGDataTol(amg_data);
+   ((amg_data) -> tol_dbl) = tol;
+   ((amg_data) -> tol_flt) = (hypre_float) tol;
+   ((amg_data) -> tol_ldbl) = (hypre_long_double) tol;
 
    return hypre_error_flag;
 }
@@ -1458,50 +1395,8 @@ hypre_MPAMGGetGridRelaxPoints_mp( void     *data,
 }
 
 HYPRE_Int
-hypre_MPAMGSetRelaxWeight_mp( void     *data,
-                               HYPRE_Real   *relax_weight )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      //hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-   if (!relax_weight)
-   {
-      //hypre_error_in_arg(2);
-      return hypre_error_flag;
-   }
-
-   if (hypre_ParAMGDataRelaxWeight(amg_data))
-   {
-      hypre_Free_dbl(hypre_ParAMGDataRelaxWeight(amg_data), HYPRE_MEMORY_HOST);
-   }
-   hypre_ParAMGDataRelaxWeight(amg_data) = relax_weight;
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_MPAMGGetRelaxWeight_mp( void     *data,
-                               HYPRE_Real ** relax_weight )
-{
-   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
-
-   if (!amg_data)
-   {
-      //hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-   *relax_weight = hypre_ParAMGDataRelaxWeight(amg_data);
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
 hypre_MPAMGSetRelaxWt_mp( void     *data,
-                           HYPRE_Real    relax_weight )
+                          hypre_double    relax_weight )
 {
    HYPRE_Int i, num_levels;
    HYPRE_Real *relax_weight_array;
@@ -1512,24 +1407,16 @@ hypre_MPAMGSetRelaxWt_mp( void     *data,
       //hypre_error_in_arg(1);
       return hypre_error_flag;
    }
-   num_levels = hypre_ParAMGDataMaxLevels(amg_data);
-   if (hypre_ParAMGDataRelaxWeight(amg_data) == NULL)
-   {
-      hypre_ParAMGDataRelaxWeight(amg_data) = (HYPRE_Real *) (hypre_CAlloc_dbl ((size_t)num_levels, (size_t)sizeof(HYPRE_Real), HYPRE_MEMORY_HOST));
-   }
-
-   relax_weight_array = hypre_ParAMGDataRelaxWeight(amg_data);
-   for (i = 0; i < num_levels; i++)
-   {
-      relax_weight_array[i] = relax_weight;
-   }
 
    hypre_ParAMGDataUserRelaxWeight(amg_data) = relax_weight;
+   ((amg_data) -> user_relax_weight_dbl) = relax_weight;
+   ((amg_data) -> user_relax_weight_flt) = (hypre_float) relax_weight;
+   ((amg_data) -> user_relax_weight_ldbl) = (hypre_long_double) relax_weight;
 
    return hypre_error_flag;
 }
 
-HYPRE_Int
+/*HYPRE_Int
 hypre_MPAMGSetLevelRelaxWt_mp( void    *data,
                                 HYPRE_Real   relax_weight,
                                 HYPRE_Int      level )
@@ -1592,7 +1479,7 @@ hypre_MPAMGGetLevelRelaxWt_mp( void    *data,
 
 HYPRE_Int
 hypre_MPAMGSetOmega_mp( void     *data,
-                         HYPRE_Real   *omega )
+                        HYPRE_Real   *omega )
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
@@ -1629,11 +1516,11 @@ hypre_MPAMGGetOmega_mp( void     *data,
    *omega = hypre_ParAMGDataOmega(amg_data);
 
    return hypre_error_flag;
-}
+}*/
 
 HYPRE_Int
 hypre_MPAMGSetOuterWt_mp( void     *data,
-                           HYPRE_Real    omega )
+                          hypre_double    omega )
 {
    HYPRE_Int i, num_levels;
    HYPRE_Real *omega_array;
@@ -1644,7 +1531,7 @@ hypre_MPAMGSetOuterWt_mp( void     *data,
       //hypre_error_in_arg(1);
       return hypre_error_flag;
    }
-   num_levels = hypre_ParAMGDataMaxLevels(amg_data);
+   /*num_levels = hypre_ParAMGDataMaxLevels(amg_data);
    if (hypre_ParAMGDataOmega(amg_data) == NULL)
    {
       hypre_ParAMGDataOmega(amg_data) = (HYPRE_Real *) (hypre_CAlloc_dbl ((size_t)num_levels, (size_t)sizeof(HYPRE_Real), HYPRE_MEMORY_HOST));
@@ -1654,13 +1541,16 @@ hypre_MPAMGSetOuterWt_mp( void     *data,
    for (i = 0; i < num_levels; i++)
    {
       omega_array[i] = omega;
-   }
-   hypre_ParAMGDataOuterWt(amg_data) = omega;
+   }*/
+   
+   ((amg_data) -> outer_wt_dbl) = omega;
+   ((amg_data) -> outer_wt_flt) = (hypre_float) omega;
+   ((amg_data) -> outer_wt_ldbl) = (hypre_long_double) omega;
 
    return hypre_error_flag;
 }
 
-HYPRE_Int
+/*HYPRE_Int
 hypre_MPAMGSetLevelOuterWt_mp( void    *data,
                                 HYPRE_Real   omega,
                                 HYPRE_Int      level )
@@ -1719,7 +1609,7 @@ hypre_MPAMGGetLevelOuterWt_mp( void    *data,
    *omega = hypre_ParAMGDataOmega(amg_data)[level];
 
    return hypre_error_flag;
-}
+}*/
 
 HYPRE_Int
 hypre_MPAMGSetLogging_mp( void     *data,
@@ -2128,7 +2018,7 @@ hypre_MPAMGSetAggP12MaxElmts_mp( void     *data,
 
 HYPRE_Int
 hypre_MPAMGSetAggTruncFactor_mp( void     *data,
-                                  HYPRE_Real  agg_trunc_factor )
+                                 hypre_double  agg_trunc_factor )
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
@@ -2142,8 +2032,10 @@ hypre_MPAMGSetAggTruncFactor_mp( void     *data,
       //hypre_error_in_arg(2);
       return hypre_error_flag;
    }
-   hypre_ParAMGDataAggTruncFactor(amg_data) = agg_trunc_factor;
-
+   ((amg_data) -> agg_trunc_factor_dbl) = agg_trunc_factor;
+   ((amg_data) -> agg_trunc_factor_flt) = (hypre_float) agg_trunc_factor;
+   ((amg_data) -> agg_trunc_factor_ldbl) = (hypre_long_double) agg_trunc_factor;
+   
    return hypre_error_flag;
 }
 
@@ -2154,7 +2046,7 @@ hypre_MPAMGSetAggTruncFactor_mp( void     *data,
 
 HYPRE_Int
 hypre_MPAMGSetAggP12TruncFactor_mp( void     *data,
-                                     HYPRE_Real  agg_P12_trunc_factor )
+                                    hypre_double  agg_P12_trunc_factor )
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
@@ -2168,7 +2060,9 @@ hypre_MPAMGSetAggP12TruncFactor_mp( void     *data,
       //hypre_error_in_arg(2);
       return hypre_error_flag;
    }
-   hypre_ParAMGDataAggP12TruncFactor(amg_data) = agg_P12_trunc_factor;
+   ((amg_data) -> agg_P12_trunc_factor_dbl) = agg_P12_trunc_factor;
+   ((amg_data) -> agg_P12_trunc_factor_flt) = (hypre_float) agg_P12_trunc_factor;
+   ((amg_data) -> agg_P12_trunc_factor_ldbl) = (hypre_long_double) agg_P12_trunc_factor;
 
    return hypre_error_flag;
 }

@@ -233,6 +233,9 @@ typedef struct
    HYPRE_Int      num_F_points;
    HYPRE_BigInt  *F_points_marker;
    
+   hypre_ParVector *Btemp;
+   hypre_ParVector *Xtemp;
+
 #ifdef HYPRE_USING_DSUPERLU
    /* Parameters and data for SuperLU_Dist */
    HYPRE_Int dslu_threshold;
@@ -248,62 +251,244 @@ typedef struct
    hypre_ParVector *Ztemp_dbl;
    hypre_ParVector *Ztemp_flt;
    hypre_ParVector *Ztemp_long_dbl;
-#endif
-   hypre_ParVector *Btemp;
-   hypre_ParVector *Xtemp;
 
    /* HYPRE_Real parameters */
    
    /* setup params */
-   hypre_double   strong_threshold;
-   hypre_double   max_row_sum;
-   hypre_double   trunc_factor;
-   hypre_double   agg_trunc_factor;
-   hypre_double   agg_P12_trunc_factor;
-   hypre_double   tol;
-   hypre_double   cycle_op_count;
-   HYPRE_Real    *relax_weight;
-   HYPRE_Real    *omega;
-   HYPRE_Real     jacobi_trunc_threshold;
-   HYPRE_Real     S_commpkg_switch;
-   HYPRE_Real     CR_rate;
-   HYPRE_Real     CR_strong_th;
-   HYPRE_Real     A_drop_tol;
-   HYPRE_Real     strong_thresholdR; /* theta for build R: defines strong F neighbors */
-   HYPRE_Real     filter_thresholdR; /* theta for filtering R  */
+   hypre_double   strong_threshold_dbl;
+   hypre_double   max_row_sum_dbl;
+   hypre_double   trunc_factor_dbl;
+   hypre_double   agg_trunc_factor_dbl;
+   hypre_double   agg_P12_trunc_factor_dbl;
+   hypre_double   tol_dbl;
+   hypre_double   cycle_op_count_dbl;
+   hypre_double  *relax_weight_dbl;
+   hypre_double  *omega_dbl;
+   hypre_double   jacobi_trunc_threshold_dbl;
+   hypre_double   S_commpkg_switch_dbl;
+   hypre_double   CR_rate_dbl;
+   hypre_double   CR_strong_th_dbl;
+   hypre_double   A_drop_tol_dbl;
+   hypre_double   strong_thresholdR_dbl; /* theta for build R: defines strong F neighbors */
+   hypre_double   filter_thresholdR_dbl; /* theta for filtering R  */
 
    /* solve params */
-   HYPRE_Real     user_relax_weight;
-   HYPRE_Real     outer_wt;
+   hypre_double   user_relax_weight_dbl;
+   hypre_double   outer_wt_dbl;
 
    /* data for more complex smoothers */
-   HYPRE_Real           schwarz_rlx_weight;
-   HYPRE_Real           ps_threshold;
-   HYPRE_Real           ps_filter;
-   HYPRE_Real           pi_drop_tol;
-   HYPRE_Real           eu_sparse_A;
-   HYPRE_Real           ilu_droptol;
-   HYPRE_Real           fsai_threshold;
-   HYPRE_Real           fsai_kap_tolerance;
-   HYPRE_Real          *max_eig_est;
-   HYPRE_Real          *min_eig_est;
-   HYPRE_Real           cheby_fraction;
-   HYPRE_Real         **cheby_coefs;
+   hypre_double   schwarz_rlx_weight_dbl;
+   hypre_double   ps_threshold_dbl;
+   hypre_double   ps_filter_dbl;
+   hypre_double   pi_drop_tol_dbl;
+   hypre_double   eu_sparse_A_dbl;
+   hypre_double   ilu_droptol_dbl;
+   hypre_double   fsai_threshold_dbl;
+   hypre_double   fsai_kap_tolerance_dbl;
+   hypre_double  *max_eig_est_dbl;
+   hypre_double  *min_eig_est_dbl;
+   hypre_double   cheby_fraction_dbl;
+   hypre_double **cheby_coefs_dbl;
 
    /* data needed for non-Galerkin option */
-   HYPRE_Real         *nongalerk_tol;
-   HYPRE_Real          nongalerkin_tol;
-   HYPRE_Real         *nongal_tol_array;
+   hypre_double  *nongalerk_tol_dbl;
+   hypre_double   nongalerkin_tol_dbl;
+   hypre_double  *nongal_tol_array_dbl;
 
    /* data generated in the solve phase */
-   HYPRE_Real        *Vtemp_local_data;
+   hypre_double *Vtemp_local_data_dbl;
 
    /* log info */
-   HYPRE_Real       rel_resid_norm;
+   hypre_double  rel_resid_norm_dbl;
 
    /* data for fitting vectors in interpolation */
-   HYPRE_Real         interp_vectors_abs_q_trunc;
-   HYPRE_Real       *expandp_weights; /* currently not set by user */
+   hypre_double  interp_vectors_abs_q_trunc_dbl;
+   hypre_double *expandp_weights_dbl; /* currently not set by user */
+
+   /* store matrix, vector and communication info for Gaussian elimination */
+   hypre_double *A_mat_dbl;
+   hypre_double *A_work_dbl;
+   hypre_double *b_vec_dbl;
+   hypre_double *u_vec_dbl;
+
+   /* information for multiplication with Lambda - additive AMG */
+   hypre_double  add_trunc_factor_dbl;
+   hypre_double  add_rlx_wt_dbl;
+   hypre_double *D_inv_dbl;
+   /* setup params */
+   hypre_float   strong_threshold_flt;
+   hypre_float   max_row_sum_flt;
+   hypre_float   trunc_factor_flt;
+   hypre_float   agg_trunc_factor_flt;
+   hypre_float   agg_P12_trunc_factor_flt;
+   hypre_float   tol_flt;
+   hypre_float   cycle_op_count_flt;
+   hypre_float  *relax_weight_flt;
+   hypre_float  *omega_flt;
+   hypre_float   jacobi_trunc_threshold_flt;
+   hypre_float   S_commpkg_switch_flt;
+   hypre_float   CR_rate_flt;
+   hypre_float   CR_strong_th_flt;
+   hypre_float   A_drop_tol_flt;
+   hypre_float   strong_thresholdR_flt; /* theta for build R: defines strong F neighbors */
+   hypre_float   filter_thresholdR_flt; /* theta for filtering R  */
+
+   /* solve params */
+   hypre_float   user_relax_weight_flt;
+   hypre_float   outer_wt_flt;
+
+   /* data for more complex smoothers */
+   hypre_float   schwarz_rlx_weight_flt;
+   hypre_float   ps_threshold_flt;
+   hypre_float   ps_filter_flt;
+   hypre_float   pi_drop_tol_flt;
+   hypre_float   eu_sparse_A_flt;
+   hypre_float   ilu_droptol_flt;
+   hypre_float   fsai_threshold_flt;
+   hypre_float   fsai_kap_tolerance_flt;
+   hypre_float  *max_eig_est_flt;
+   hypre_float  *min_eig_est_flt;
+   hypre_float   cheby_fraction_flt;
+   hypre_float **cheby_coefs_flt;
+
+   /* data needed for non-Galerkin option */
+   hypre_float  *nongalerk_tol_flt;
+   hypre_float   nongalerkin_tol_flt;
+   hypre_float  *nongal_tol_array_flt;
+
+   /* data generated in the solve phase */
+   hypre_float  *Vtemp_local_data_flt;
+
+   /* log info */
+   hypre_float   rel_resid_norm_flt;
+
+   /* data for fitting vectors in interpolation */
+   hypre_float   interp_vectors_abs_q_trunc_flt;
+   hypre_float  *expandp_weights_flt; /* currently not set by user */
+
+   /* store matrix, vector and communication info for Gaussian elimination */
+   hypre_float *A_mat_flt;
+   hypre_float *A_work_flt;
+   hypre_float *b_vec_flt;
+   hypre_float *u_vec_flt;
+
+   /* information for multiplication with Lambda - additive AMG */
+   hypre_float  add_trunc_factor_flt;
+   hypre_float  add_rlx_wt_flt;
+   hypre_float *D_inv_flt;
+   /* setup params */
+   hypre_long_double   strong_threshold_ldbl;
+   hypre_long_double   max_row_sum_ldbl;
+   hypre_long_double   trunc_factor_ldbl;
+   hypre_long_double   agg_trunc_factor_ldbl;
+   hypre_long_double   agg_P12_trunc_factor_ldbl;
+   hypre_long_double   tol_ldbl;
+   hypre_long_double   cycle_op_count_ldbl;
+   hypre_long_double  *relax_weight_ldbl;
+   hypre_long_double  *omega_ldbl;
+   hypre_long_double   jacobi_trunc_threshold_ldbl;
+   hypre_long_double   S_commpkg_switch_ldbl;
+   hypre_long_double   CR_rate_ldbl;
+   hypre_long_double   CR_strong_th_ldbl;
+   hypre_long_double   A_drop_tol_ldbl;
+   hypre_long_double   strong_thresholdR_ldbl; /* theta for build R: defines strong F neighbors */
+   hypre_long_double   filter_thresholdR_ldbl; /* theta for filtering R  */
+
+   /* solve params */
+   hypre_long_double   user_relax_weight_ldbl;
+   hypre_long_double   outer_wt_ldbl;
+
+   /* data for more complex smoothers */
+   hypre_long_double   schwarz_rlx_weight_ldbl;
+   hypre_long_double   ps_threshold_ldbl;
+   hypre_long_double   ps_filter_ldbl;
+   hypre_long_double   pi_drop_tol_ldbl;
+   hypre_long_double   eu_sparse_A_ldbl;
+   hypre_long_double   ilu_droptol_ldbl;
+   hypre_long_double   fsai_threshold_ldbl;
+   hypre_long_double   fsai_kap_tolerance_ldbl;
+   hypre_long_double  *max_eig_est_ldbl;
+   hypre_long_double  *min_eig_est_ldbl;
+   hypre_long_double   cheby_fraction_ldbl;
+   hypre_long_double **cheby_coefs_ldbl;
+
+   /* data needed for non-Galerkin option */
+   hypre_long_double  *nongalerk_tol_ldbl;
+   hypre_long_double   nongalerkin_tol_ldbl;
+   hypre_long_double  *nongal_tol_array_ldbl;
+
+   /* data generated in the solve phase */
+   hypre_long_double  *Vtemp_local_data_ldbl;
+
+   /* log info */
+   hypre_long_double  rel_resid_norm_ldbl;
+
+   /* data for fitting vectors in interpolation */
+   hypre_long_double  interp_vectors_abs_q_trunc_ldbl;
+   hypre_long_double *expandp_weights_ldbl; /* currently not set by user */
+
+   /* store matrix, vector and communication info for Gaussian elimination */
+   hypre_long_double *A_mat_ldbl;
+   hypre_long_double *A_work_ldbl;
+   hypre_long_double *b_vec_ldbl;
+   hypre_long_double *u_vec_ldbl;
+
+   /* information for multiplication with Lambda - additive AMG */
+   hypre_long_double  add_trunc_factor_ldbl;
+   hypre_long_double  add_rlx_wt_ldbl;
+   hypre_long_double *D_inv_ldbl;
+#endif
+   /* setup params */
+   HYPRE_Real    strong_threshold;
+   HYPRE_Real    max_row_sum;
+   HYPRE_Real    trunc_factor;
+   HYPRE_Real    agg_trunc_factor;
+   HYPRE_Real    agg_P12_trunc_factor;
+   HYPRE_Real    jacobi_trunc_threshold;
+   HYPRE_Real    S_commpkg_switch;
+   HYPRE_Real    CR_rate;
+   HYPRE_Real    CR_strong_th;
+   HYPRE_Real    A_drop_tol;
+   HYPRE_Real    strong_thresholdR; /* theta for build R: defines strong F neighbors */
+   HYPRE_Real    filter_thresholdR; /* theta for filtering R  */
+
+   /* solve params */
+   HYPRE_Real    user_relax_weight;
+   HYPRE_Real    outer_wt;
+   HYPRE_Real   *relax_weight;
+   HYPRE_Real   *omega;
+   HYPRE_Real    tol;
+
+   /* data for more complex smoothers */
+   HYPRE_Real    schwarz_rlx_weight;
+   HYPRE_Real    ps_threshold;
+   HYPRE_Real    ps_filter;
+   HYPRE_Real    pi_drop_tol;
+   HYPRE_Real    eu_sparse_A;
+   HYPRE_Real    ilu_droptol;
+   HYPRE_Real    ilu_iter_setup_tolerance;
+   HYPRE_Real    fsai_threshold;
+   HYPRE_Real    fsai_kap_tolerance;
+   HYPRE_Real   *max_eig_est;
+   HYPRE_Real   *min_eig_est;
+   HYPRE_Real    cheby_fraction;
+   HYPRE_Real  **cheby_coefs;
+
+   /* data needed for non-Galerkin option */
+   HYPRE_Real   *nongalerk_tol;
+   HYPRE_Real    nongalerkin_tol;
+   HYPRE_Real   *nongal_tol_array;
+
+   /* data generated in the solve phase */
+   HYPRE_Real   *Vtemp_local_data;
+   HYPRE_Real    cycle_op_count;
+
+   /* log info */
+   HYPRE_Real    rel_resid_norm;
+
+   /* data for fitting vectors in interpolation */
+   HYPRE_Real    interp_vectors_abs_q_trunc;
+   HYPRE_Real   *expandp_weights; /* currently not set by user */
 
    /* store matrix, vector and communication info for Gaussian elimination */
    HYPRE_Real *A_mat;
@@ -312,8 +497,8 @@ typedef struct
    HYPRE_Real *u_vec;
 
    /* information for multiplication with Lambda - additive AMG */
-   HYPRE_Real     add_trunc_factor;
-   HYPRE_Real     add_rlx_wt;
+   HYPRE_Real  add_trunc_factor;
+   HYPRE_Real  add_rlx_wt;
    HYPRE_Real *D_inv;
 
 } hypre_ParAMGData;
@@ -328,17 +513,8 @@ typedef struct
 #define hypre_ParAMGDataIsTriangular(amg_data)         ((amg_data) -> is_triangular)
 #define hypre_ParAMGDataGMRESSwitchR(amg_data)         ((amg_data) -> gmres_switch)
 #define hypre_ParAMGDataMaxLevels(amg_data)            ((amg_data) -> max_levels)
-#define hypre_ParAMGDataCoarsenCutFactor(amg_data)     ((amg_data) -> coarsen_cut_factor)
-#define hypre_ParAMGDataStrongThreshold(amg_data)      ((amg_data) -> strong_threshold)
-#define hypre_ParAMGDataStrongThresholdR(amg_data)     ((amg_data) -> strong_thresholdR)
-#define hypre_ParAMGDataFilterThresholdR(amg_data)     ((amg_data) -> filter_thresholdR)
 #define hypre_ParAMGDataSabs(amg_data)                 ((amg_data) -> Sabs)
-#define hypre_ParAMGDataMaxRowSum(amg_data)            ((amg_data) -> max_row_sum)
-#define hypre_ParAMGDataTruncFactor(amg_data)          ((amg_data) -> trunc_factor)
-#define hypre_ParAMGDataAggTruncFactor(amg_data)       ((amg_data) -> agg_trunc_factor)
-#define hypre_ParAMGDataAggP12TruncFactor(amg_data)    ((amg_data) -> agg_P12_trunc_factor)
-#define hypre_ParAMGDataJacobiTruncThreshold(amg_data) ((amg_data) -> jacobi_trunc_threshold)
-#define hypre_ParAMGDataSCommPkgSwitch(amg_data)       ((amg_data) -> S_commpkg_switch)
+#define hypre_ParAMGDataCoarsenCutFactor(amg_data)     ((amg_data) -> coarsen_cut_factor)
 #define hypre_ParAMGDataInterpType(amg_data)           ((amg_data) -> interp_type)
 #define hypre_ParAMGDataSepWeight(amg_data)            ((amg_data) -> sep_weight)
 #define hypre_ParAMGDataAggInterpType(amg_data)        ((amg_data) -> agg_interp_type)
@@ -352,9 +528,6 @@ typedef struct
 #define hypre_ParAMGDataAggNumLevels(amg_data)         ((amg_data) -> agg_num_levels)
 #define hypre_ParAMGDataPostInterpType(amg_data)       ((amg_data) -> post_interp_type)
 #define hypre_ParAMGDataNumCRRelaxSteps(amg_data)      ((amg_data) -> num_CR_relax_steps)
-#define hypre_ParAMGDataCRRate(amg_data)               ((amg_data) -> CR_rate)
-#define hypre_ParAMGDataCRStrongTh(amg_data)           ((amg_data) -> CR_strong_th)
-#define hypre_ParAMGDataADropTol(amg_data)             ((amg_data) -> A_drop_tol)
 #define hypre_ParAMGDataADropType(amg_data)            ((amg_data) -> A_drop_type)
 #define hypre_ParAMGDataISType(amg_data)               ((amg_data) -> IS_type)
 #define hypre_ParAMGDataCRUseCG(amg_data)              ((amg_data) -> CR_use_CG)
@@ -371,20 +544,15 @@ typedef struct
 #define hypre_ParAMGDataFCycle(amg_data) ((amg_data)->fcycle)
 #define hypre_ParAMGDataCycleType(amg_data) ((amg_data)->cycle_type)
 #define hypre_ParAMGDataConvergeType(amg_data) ((amg_data)->converge_type)
-#define hypre_ParAMGDataTol(amg_data) ((amg_data)->tol)
 #define hypre_ParAMGDataPartialCycleCoarsestLevel(amg_data) ((amg_data)->partial_cycle_coarsest_level)
 #define hypre_ParAMGDataPartialCycleControl(amg_data) ((amg_data)->partial_cycle_control)
 #define hypre_ParAMGDataNumGridSweeps(amg_data) ((amg_data)->num_grid_sweeps)
 #define hypre_ParAMGDataUserCoarseRelaxType(amg_data) ((amg_data)->user_coarse_relax_type)
 #define hypre_ParAMGDataUserRelaxType(amg_data) ((amg_data)->user_relax_type)
-#define hypre_ParAMGDataUserRelaxWeight(amg_data) ((amg_data)->user_relax_weight)
 #define hypre_ParAMGDataUserNumSweeps(amg_data) ((amg_data)->user_num_sweeps)
 #define hypre_ParAMGDataGridRelaxType(amg_data) ((amg_data)->grid_relax_type)
 #define hypre_ParAMGDataGridRelaxPoints(amg_data) ((amg_data)->grid_relax_points)
 #define hypre_ParAMGDataRelaxOrder(amg_data) ((amg_data)->relax_order)
-#define hypre_ParAMGDataRelaxWeight(amg_data) ((amg_data)->relax_weight)
-#define hypre_ParAMGDataOmega(amg_data) ((amg_data)->omega)
-#define hypre_ParAMGDataOuterWt(amg_data) ((amg_data)->outer_wt)
 
 /* problem data parameters */
 #define  hypre_ParAMGDataNumVariables(amg_data)  ((amg_data)->num_variables)
@@ -416,27 +584,21 @@ typedef struct
 #define hypre_ParAMGDataSmoothNumSweeps(amg_data) \
 ((amg_data)->smooth_num_sweeps)
 #define hypre_ParAMGDataSmoother(amg_data) ((amg_data)->smoother)
+
 #define hypre_ParAMGDataVariant(amg_data) ((amg_data)->schw_variant)
 #define hypre_ParAMGDataOverlap(amg_data) ((amg_data)->schw_overlap)
 #define hypre_ParAMGDataDomainType(amg_data) ((amg_data)->schw_domain_type)
-#define hypre_ParAMGDataSchwarzRlxWeight(amg_data) \
-((amg_data)->schwarz_rlx_weight)
 #define hypre_ParAMGDataSchwarzUseNonSymm(amg_data) \
 ((amg_data)->schwarz_use_nonsymm)
 #define hypre_ParAMGDataSym(amg_data) ((amg_data)->ps_sym)
 #define hypre_ParAMGDataLevel(amg_data) ((amg_data)->ps_level)
 #define hypre_ParAMGDataMaxNzPerRow(amg_data) ((amg_data)->pi_max_nz_per_row)
-#define hypre_ParAMGDataThreshold(amg_data) ((amg_data)->ps_threshold)
-#define hypre_ParAMGDataFilter(amg_data) ((amg_data)->ps_filter)
-#define hypre_ParAMGDataDropTol(amg_data) ((amg_data)->pi_drop_tol)
 #define hypre_ParAMGDataEuclidFile(amg_data) ((amg_data)->euclidfile)
 #define hypre_ParAMGDataEuLevel(amg_data) ((amg_data)->eu_level)
-#define hypre_ParAMGDataEuSparseA(amg_data) ((amg_data)->eu_sparse_A)
 #define hypre_ParAMGDataEuBJ(amg_data) ((amg_data)->eu_bj)
 #define hypre_ParAMGDataILUType(amg_data) ((amg_data)->ilu_type)
 #define hypre_ParAMGDataILULevel(amg_data) ((amg_data)->ilu_lfil)
 #define hypre_ParAMGDataILUMaxRowNnz(amg_data) ((amg_data)->ilu_max_row_nnz)
-#define hypre_ParAMGDataILUDroptol(amg_data) ((amg_data)->ilu_droptol)
 #define hypre_ParAMGDataILUTriSolve(amg_data) ((amg_data)->ilu_tri_solve)
 #define hypre_ParAMGDataILULowerJacobiIters(amg_data) ((amg_data)->ilu_lower_jacobi_iters)
 #define hypre_ParAMGDataILUUpperJacobiIters(amg_data) ((amg_data)->ilu_upper_jacobi_iters)
@@ -448,21 +610,13 @@ typedef struct
 #define hypre_ParAMGDataFSAIMaxStepSize(amg_data) ((amg_data)->fsai_max_step_size)
 #define hypre_ParAMGDataFSAIMaxNnzRow(amg_data) ((amg_data)->fsai_max_nnz_row)
 #define hypre_ParAMGDataFSAINumLevels(amg_data) ((amg_data)->fsai_num_levels)
-#define hypre_ParAMGDataFSAIThreshold(amg_data) ((amg_data)->fsai_threshold)
 #define hypre_ParAMGDataFSAIEigMaxIters(amg_data) ((amg_data)->fsai_eig_max_iters)
-#define hypre_ParAMGDataFSAIKapTolerance(amg_data) ((amg_data)->fsai_kap_tolerance)
-
-#define hypre_ParAMGDataMaxEigEst(amg_data) ((amg_data)->max_eig_est)
-#define hypre_ParAMGDataMinEigEst(amg_data) ((amg_data)->min_eig_est)
 #define hypre_ParAMGDataChebyOrder(amg_data) ((amg_data)->cheby_order)
-#define hypre_ParAMGDataChebyFraction(amg_data) ((amg_data)->cheby_fraction)
 #define hypre_ParAMGDataChebyEigEst(amg_data) ((amg_data)->cheby_eig_est)
 #define hypre_ParAMGDataChebyVariant(amg_data) ((amg_data)->cheby_variant)
 #define hypre_ParAMGDataChebyScale(amg_data) ((amg_data)->cheby_scale)
 #define hypre_ParAMGDataChebyDS(amg_data) ((amg_data)->cheby_ds)
-#define hypre_ParAMGDataChebyCoefs(amg_data) ((amg_data)->cheby_coefs)
 
-#define hypre_ParAMGDataCumNnzAP(amg_data)   ((amg_data)->cum_nnz_AP)
 
 /* block */
 #define hypre_ParAMGDataABlockArray(amg_data) ((amg_data)->A_block_array)
@@ -475,8 +629,6 @@ typedef struct
 /* data generated in the solve phase */
 #define hypre_ParAMGDataVtemp(amg_data) ((amg_data)->Vtemp)
 #define hypre_ParAMGDataVtempLocal(amg_data) ((amg_data)->Vtemp_local)
-#define hypre_ParAMGDataVtemplocalData(amg_data) ((amg_data)->Vtemp_local_data)
-#define hypre_ParAMGDataCycleOpCount(amg_data) ((amg_data)->cycle_op_count)
 #define hypre_ParAMGDataRtemp(amg_data) ((amg_data)->Rtemp)
 #define hypre_ParAMGDataPtemp(amg_data) ((amg_data)->Ptemp)
 #define hypre_ParAMGDataZtemp(amg_data) ((amg_data)->Ztemp)
@@ -491,7 +643,6 @@ typedef struct
 #ifdef CUMNUMIT
 #define hypre_ParAMGDataCumNumIterations(amg_data) ((amg_data)->cum_num_iterations)
 #endif
-#define hypre_ParAMGDataRelativeResidualNorm(amg_data) ((amg_data)->rel_resid_norm)
 #define hypre_ParAMGDataResidual(amg_data) ((amg_data)->residual)
 
 /* output parameters */
@@ -514,11 +665,9 @@ typedef struct
 #define hypre_ParAMGInterpVectorsArray(amg_data) ((amg_data)->interp_vectors_array)
 #define hypre_ParAMGInterpVecVariant(amg_data) ((amg_data)->interp_vec_variant)
 #define hypre_ParAMGInterpVecFirstLevel(amg_data) ((amg_data)->interp_vec_first_level)
-#define hypre_ParAMGInterpVecAbsQTrunc(amg_data) ((amg_data)->interp_vectors_abs_q_trunc)
 #define hypre_ParAMGInterpVecQMax(amg_data) ((amg_data)->interp_vectors_q_max)
 #define hypre_ParAMGInterpRefine(amg_data) ((amg_data)->interp_refine)
 #define hypre_ParAMGSmoothInterpVectors(amg_data) ((amg_data)->smooth_interp_vectors)
-#define hypre_ParAMGDataExpandPWeights(amg_data) ((amg_data)->expandp_weights)
 
 #define hypre_ParAMGDataCoarseSolver(amg_data) ((amg_data)->coarse_solver)
 #define hypre_ParAMGDataACoarse(amg_data) ((amg_data)->A_coarse)
@@ -530,11 +679,7 @@ typedef struct
 
 #define hypre_ParAMGDataGSSetup(amg_data) ((amg_data)->gs_setup)
 #define hypre_ParAMGDataGEMemoryLocation(amg_data) ((amg_data)->ge_memory_location)
-#define hypre_ParAMGDataAMat(amg_data) ((amg_data)->A_mat)
-#define hypre_ParAMGDataAWork(amg_data) ((amg_data)->A_work)
 #define hypre_ParAMGDataAPiv(amg_data) ((amg_data)->A_piv)
-#define hypre_ParAMGDataBVec(amg_data) ((amg_data)->b_vec)
-#define hypre_ParAMGDataUVec(amg_data) ((amg_data)->u_vec)
 #define hypre_ParAMGDataCommInfo(amg_data) ((amg_data)->comm_info)
 
 /* additive AMG parameters */
@@ -543,20 +688,14 @@ typedef struct
 #define hypre_ParAMGDataSimple(amg_data) ((amg_data)->simple)
 #define hypre_ParAMGDataAddLastLvl(amg_data) ((amg_data)->add_last_lvl)
 #define hypre_ParAMGDataMultAddPMaxElmts(amg_data) ((amg_data)->add_P_max_elmts)
-#define hypre_ParAMGDataMultAddTruncFactor(amg_data) ((amg_data)->add_trunc_factor)
 #define hypre_ParAMGDataAddRelaxType(amg_data) ((amg_data)->add_rlx_type)
-#define hypre_ParAMGDataAddRelaxWt(amg_data) ((amg_data)->add_rlx_wt)
 #define hypre_ParAMGDataLambda(amg_data) ((amg_data)->Lambda)
 #define hypre_ParAMGDataAtilde(amg_data) ((amg_data)->Atilde)
 #define hypre_ParAMGDataRtilde(amg_data) ((amg_data)->Rtilde)
 #define hypre_ParAMGDataXtilde(amg_data) ((amg_data)->Xtilde)
-#define hypre_ParAMGDataDinv(amg_data) ((amg_data)->D_inv)
 
 /* non-Galerkin parameters */
 #define hypre_ParAMGDataNonGalerkNumTol(amg_data) ((amg_data)->nongalerk_num_tol)
-#define hypre_ParAMGDataNonGalerkTol(amg_data) ((amg_data)->nongalerk_tol)
-#define hypre_ParAMGDataNonGalerkinTol(amg_data) ((amg_data)->nongalerkin_tol)
-#define hypre_ParAMGDataNonGalTolArray(amg_data) ((amg_data)->nongal_tol_array)
 
 #define hypre_ParAMGDataRAP2(amg_data) ((amg_data)->rap2)
 #define hypre_ParAMGDataKeepTranspose(amg_data) ((amg_data)->keepTranspose)
@@ -592,7 +731,62 @@ typedef struct
 #define hypre_ParAMGDataZtempFLT(amg_data) ((amg_data)->Ztemp_flt)
 #define hypre_ParAMGDataZtempLONGDBL(amg_data) ((amg_data)->Ztemp_long_dbl)
 #endif
+
 #define hypre_ParAMGDataBTemp(amg_data) ((amg_data)->Btemp)
 #define hypre_ParAMGDataXTemp(amg_data) ((amg_data)->Xtemp)
+
+/* HYPRE_Real definitions */
+#define hypre_ParAMGDataStrongThreshold(amg_data)      ((amg_data) -> strong_threshold)
+#define hypre_ParAMGDataStrongThresholdR(amg_data)     ((amg_data) -> strong_thresholdR)
+#define hypre_ParAMGDataFilterThresholdR(amg_data)     ((amg_data) -> filter_thresholdR)
+#define hypre_ParAMGDataMaxRowSum(amg_data)            ((amg_data) -> max_row_sum)
+#define hypre_ParAMGDataTruncFactor(amg_data)          ((amg_data) -> trunc_factor)
+#define hypre_ParAMGDataAggTruncFactor(amg_data)       ((amg_data) -> agg_trunc_factor)
+#define hypre_ParAMGDataAggP12TruncFactor(amg_data)    ((amg_data) -> agg_P12_trunc_factor)
+#define hypre_ParAMGDataJacobiTruncThreshold(amg_data) ((amg_data) -> jacobi_trunc_threshold)
+#define hypre_ParAMGDataSCommPkgSwitch(amg_data)       ((amg_data) -> S_commpkg_switch)
+#define hypre_ParAMGDataCRRate(amg_data)               ((amg_data) -> CR_rate)
+#define hypre_ParAMGDataCRStrongTh(amg_data)           ((amg_data) -> CR_strong_th)
+#define hypre_ParAMGDataADropTol(amg_data)             ((amg_data) -> A_drop_tol)
+
+#define hypre_ParAMGDataTol(amg_data) ((amg_data)->tol)
+#define hypre_ParAMGDataUserRelaxWeight(amg_data) ((amg_data)->user_relax_weight)
+#define hypre_ParAMGDataRelaxWeight(amg_data) ((amg_data)->relax_weight)
+#define hypre_ParAMGDataOmega(amg_data) ((amg_data)->omega)
+#define hypre_ParAMGDataOuterWt(amg_data) ((amg_data)->outer_wt)
+
+#define hypre_ParAMGDataSchwarzRlxWeight(amg_data) ((amg_data)->schwarz_rlx_weight)
+#define hypre_ParAMGDataThreshold(amg_data) ((amg_data)->ps_threshold)
+#define hypre_ParAMGDataFilter(amg_data) ((amg_data)->ps_filter)
+#define hypre_ParAMGDataDropTol(amg_data) ((amg_data)->pi_drop_tol)
+#define hypre_ParAMGDataEuSparseA(amg_data) ((amg_data)->eu_sparse_A)
+
+#define hypre_ParAMGDataILUDroptol(amg_data) ((amg_data)->ilu_droptol)
+#define hypre_ParAMGDataFSAIThreshold(amg_data) ((amg_data)->fsai_threshold)
+#define hypre_ParAMGDataFSAIKapTolerance(amg_data) ((amg_data)->fsai_kap_tolerance)
+#define hypre_ParAMGDataMaxEigEst(amg_data) ((amg_data)->max_eig_est)
+#define hypre_ParAMGDataMinEigEst(amg_data) ((amg_data)->min_eig_est)
+#define hypre_ParAMGDataChebyFraction(amg_data) ((amg_data)->cheby_fraction)
+#define hypre_ParAMGDataChebyCoefs(amg_data) ((amg_data)->cheby_coefs)
+
+#define hypre_ParAMGDataCumNnzAP(amg_data)   ((amg_data)->cum_nnz_AP)
+#define hypre_ParAMGDataVtemplocalData(amg_data) ((amg_data)->Vtemp_local_data)
+#define hypre_ParAMGDataCycleOpCount(amg_data) ((amg_data)->cycle_op_count)
+
+#define hypre_ParAMGDataRelativeResidualNorm(amg_data) ((amg_data)->rel_resid_norm)
+#define hypre_ParAMGInterpVecAbsQTrunc(amg_data) ((amg_data)->interp_vectors_abs_q_trunc)
+#define hypre_ParAMGDataExpandPWeights(amg_data) ((amg_data)->expandp_weights)
+#define hypre_ParAMGDataAMat(amg_data) ((amg_data)->A_mat)
+#define hypre_ParAMGDataAWork(amg_data) ((amg_data)->A_work)
+#define hypre_ParAMGDataBVec(amg_data) ((amg_data)->b_vec)
+#define hypre_ParAMGDataUVec(amg_data) ((amg_data)->u_vec)
+
+#define hypre_ParAMGDataNonGalerkTol(amg_data) ((amg_data)->nongalerk_tol)
+#define hypre_ParAMGDataNonGalerkinTol(amg_data) ((amg_data)->nongalerkin_tol)
+#define hypre_ParAMGDataNonGalTolArray(amg_data) ((amg_data)->nongal_tol_array)
+
+#define hypre_ParAMGDataMultAddTruncFactor(amg_data) ((amg_data)->add_trunc_factor)
+#define hypre_ParAMGDataAddRelaxWt(amg_data) ((amg_data)->add_rlx_wt)
+#define hypre_ParAMGDataDinv(amg_data) ((amg_data)->D_inv)
 
 #endif

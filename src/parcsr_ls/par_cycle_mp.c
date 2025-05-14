@@ -82,8 +82,13 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
    hypre_Vector  **l1_norms = NULL;
    hypre_Vector   *l1_norms_level;
    MPI_Comm        comm;
-   hypre_double   *relax_weight;
-   hypre_double   *omega;
+
+   hypre_double user_relax_weight_dbl = ((amg_data) -> user_relax_weight_dbl);
+   hypre_double outer_wt_dbl = ((amg_data) -> outer_wt_dbl);
+   hypre_float user_relax_weight_flt = ((amg_data) -> user_relax_weight_flt);
+   hypre_float outer_wt_flt = ((amg_data) -> outer_wt_flt);
+   hypre_long_double user_relax_weight_ldbl = ((amg_data) -> user_relax_weight_ldbl);
+   hypre_long_double outer_wt_ldbl = ((amg_data) -> outer_wt_ldbl);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -108,11 +113,9 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
    grid_relax_type     = hypre_ParAMGDataGridRelaxType(amg_data);
    grid_relax_points   = hypre_ParAMGDataGridRelaxPoints(amg_data);
    relax_order         = hypre_ParAMGDataRelaxOrder(amg_data);
-   relax_weight        = hypre_ParAMGDataRelaxWeight(amg_data);
-   omega               = hypre_ParAMGDataOmega(amg_data);
    l1_norms            = hypre_ParAMGDataL1Norms(amg_data);
 
-   cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
+   cycle_op_count = ((amg_data) -> cycle_op_count_dbl);
 
    lev_counter = (HYPRE_Int *) (hypre_CAlloc_dbl((size_t)(num_levels), (size_t)sizeof(HYPRE_Int), HYPRE_MEMORY_HOST));
 
@@ -299,8 +302,8 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
                                                            relax_type,
                                                            relax_order,
                                                            cycle_param,
-                                                           (hypre_double) relax_weight[level],
-                                                           (hypre_double) omega[level],
+                                                           user_relax_weight_dbl,
+                                                           outer_wt_dbl,
                                                            l1_norms_level ? (hypre_double *)hypre_VectorData(l1_norms_level) : NULL,
                                                            Aux_U,
                                                            Vtemp_dbl,
@@ -313,8 +316,8 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
                                                          CF_marker,
                                                          relax_type,
                                                          relax_points,
-                                                         (hypre_double) relax_weight[level],
-                                                         (hypre_double) omega[level],
+                                                         user_relax_weight_dbl,
+                                                         outer_wt_dbl,
                                                          l1_norms_level ? (hypre_double *)hypre_VectorData(l1_norms_level) : NULL,
                                                          Aux_U,
                                                          Vtemp_dbl,
@@ -329,8 +332,8 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
                                                            relax_type,
                                                            relax_local,
                                                            cycle_param,
-                                                           (hypre_double) relax_weight[level],
-                                                           (hypre_double) omega[level],
+                                                           user_relax_weight_dbl,
+                                                           outer_wt_dbl,
                                                            l1_norms_level ? (hypre_double *)hypre_VectorData(l1_norms_level) : NULL,
                                                            Aux_U,
                                                            Vtemp_dbl,
@@ -355,8 +358,8 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
                                                            relax_type,
                                                            relax_order,
                                                            cycle_param,
-                                                           (hypre_float) relax_weight[level],
-                                                           (hypre_float) omega[level],
+                                                           user_relax_weight_flt,
+                                                           outer_wt_flt,
                                                            l1_norms_level ? (hypre_float *)hypre_VectorData(l1_norms_level) : NULL,
                                                            Aux_U,
                                                            Vtemp_flt,
@@ -369,8 +372,8 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
                                                          CF_marker,
                                                          relax_type,
                                                          relax_points,
-                                                         (hypre_float) relax_weight[level],
-                                                         (hypre_float) omega[level],
+                                                         user_relax_weight_flt,
+                                                         outer_wt_flt,
                                                          l1_norms_level ? (hypre_float *)hypre_VectorData(l1_norms_level) : NULL,
                                                          Aux_U,
                                                          Vtemp_flt,
@@ -385,8 +388,8 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
                                                            relax_type,
                                                            relax_local,
                                                            cycle_param,
-                                                           (hypre_float) relax_weight[level],
-                                                           (hypre_float) omega[level],
+                                                           user_relax_weight_flt,
+                                                           outer_wt_flt,
                                                            l1_norms_level ? (hypre_float *)hypre_VectorData(l1_norms_level) : NULL,
                                                            Aux_U,
                                                            Vtemp_flt,
@@ -411,8 +414,8 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
                                                            relax_type,
                                                            relax_order,
                                                            cycle_param,
-                                                           (hypre_long_double) relax_weight[level],
-                                                           (hypre_long_double) omega[level],
+                                                           user_relax_weight_ldbl,
+                                                           outer_wt_ldbl,
                                                            l1_norms_level ? (hypre_long_double *)hypre_VectorData(l1_norms_level) : NULL,
                                                            Aux_U,
                                                            Vtemp_long_dbl,
@@ -425,8 +428,8 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
                                                          CF_marker,
                                                          relax_type,
                                                          relax_points,
-                                                         (hypre_long_double) relax_weight[level],
-                                                         (hypre_long_double) omega[level],
+                                                         user_relax_weight_ldbl,
+                                                         outer_wt_ldbl,
                                                          l1_norms_level ? (hypre_long_double *)hypre_VectorData(l1_norms_level) : NULL,
                                                          Aux_U,
                                                          Vtemp_long_dbl,
@@ -441,8 +444,8 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
                                                            relax_type,
                                                            relax_local,
                                                            cycle_param,
-                                                           (hypre_long_double) relax_weight[level],
-                                                           (hypre_long_double) omega[level],
+                                                           user_relax_weight_ldbl,
+                                                           outer_wt_ldbl,
                                                            l1_norms_level ? (hypre_long_double *) hypre_VectorData(l1_norms_level) : NULL,
                                                            Aux_U,
                                                            Vtemp_long_dbl,
@@ -626,7 +629,9 @@ hypre_MPAMGCycle_mp( void              *amg_vdata,
       }
    } /* main loop: while (Not_Finished) */
 
-   hypre_ParAMGDataCycleOpCount(amg_data) = cycle_op_count;
+   ((amg_data) -> cycle_op_count_dbl) = cycle_op_count;
+   ((amg_data) -> cycle_op_count_flt) = (hypre_float) cycle_op_count;
+   ((amg_data) -> cycle_op_count_ldbl) = (hypre_long_double) cycle_op_count;
 
    hypre_Free_dbl(lev_counter, HYPRE_MEMORY_HOST);
    hypre_Free_dbl(num_coeffs, HYPRE_MEMORY_HOST);

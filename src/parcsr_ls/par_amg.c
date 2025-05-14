@@ -28,18 +28,7 @@ hypre_BoomerAMGCreate( void )
    HYPRE_Int    max_coarse_size;
    HYPRE_Int    min_coarse_size;
    HYPRE_Int    coarsen_cut_factor;
-   HYPRE_Real   strong_threshold;
-   HYPRE_Real   strong_threshold_R;
-   HYPRE_Real   filter_threshold_R;
    HYPRE_Int    Sabs;
-   HYPRE_Real   max_row_sum;
-   HYPRE_Real   trunc_factor;
-   HYPRE_Real   agg_trunc_factor;
-   HYPRE_Real   agg_P12_trunc_factor;
-   HYPRE_Real   jacobi_trunc_threshold;
-   HYPRE_Real   CR_rate;
-   HYPRE_Real   CR_strong_th;
-   HYPRE_Real   A_drop_tol;
    HYPRE_Int    A_drop_type;
    HYPRE_Int    interp_type;
    HYPRE_Int    sep_weight;
@@ -73,34 +62,25 @@ hypre_BoomerAMGCreate( void )
    HYPRE_Int    cycle_type;
 
    HYPRE_Int    converge_type;
-   HYPRE_Real   tol;
 
    HYPRE_Int    num_sweeps;
    HYPRE_Int    relax_down;
    HYPRE_Int    relax_up;
    HYPRE_Int    relax_coarse;
    HYPRE_Int    relax_order;
-   HYPRE_Real   relax_wt;
-   HYPRE_Real   outer_wt;
-   HYPRE_Real   nongalerkin_tol;
    HYPRE_Int    smooth_type;
    HYPRE_Int    smooth_num_levels;
    HYPRE_Int    smooth_num_sweeps;
 
    HYPRE_Int    variant, overlap, domain_type, schwarz_use_nonsymm;
-   HYPRE_Real   schwarz_rlx_weight;
    HYPRE_Int    level, sym;
    HYPRE_Int    eu_level, eu_bj;
    HYPRE_Int    max_nz_per_row;
-   HYPRE_Real   thresh, filter;
-   HYPRE_Real   drop_tol;
-   HYPRE_Real   eu_sparse_A;
    char    *euclidfile;
    HYPRE_Int    ilu_lfil;
    HYPRE_Int    ilu_type;
    HYPRE_Int    ilu_max_row_nnz;
    HYPRE_Int    ilu_max_iter;
-   HYPRE_Real   ilu_droptol;
    HYPRE_Int    ilu_tri_solve;
    HYPRE_Int    ilu_lower_jacobi_iters;
    HYPRE_Int    ilu_upper_jacobi_iters;
@@ -112,15 +92,12 @@ hypre_BoomerAMGCreate( void )
    HYPRE_Int    fsai_max_step_size;
    HYPRE_Int    fsai_max_nnz_row;
    HYPRE_Int    fsai_num_levels;
-   HYPRE_Real   fsai_threshold;
    HYPRE_Int    fsai_eig_maxiter;
-   HYPRE_Real   fsai_kap_tolerance;
 
    HYPRE_Int cheby_order;
    HYPRE_Int cheby_eig_est;
    HYPRE_Int cheby_variant;
    HYPRE_Int cheby_scale;
-   HYPRE_Real cheby_eig_ratio;
 
    HYPRE_Int block_mode;
 
@@ -128,10 +105,8 @@ hypre_BoomerAMGCreate( void )
    HYPRE_Int    mult_additive;
    HYPRE_Int    simple;
    HYPRE_Int    add_last_lvl;
-   HYPRE_Real   add_trunc_factor;
    HYPRE_Int    add_P_max_elmts;
    HYPRE_Int    add_rlx_type;
-   HYPRE_Real   add_rlx_wt;
 
    /* log info */
    HYPRE_Int    num_iterations;
@@ -149,6 +124,31 @@ hypre_BoomerAMGCreate( void )
 
    HYPRE_MemoryLocation memory_location = hypre_HandleMemoryLocation(hypre_handle());
 
+   HYPRE_Real   strong_threshold;
+   HYPRE_Real   strong_threshold_R;
+   HYPRE_Real   filter_threshold_R;
+   HYPRE_Real   max_row_sum;
+   HYPRE_Real   trunc_factor;
+   HYPRE_Real   agg_trunc_factor;
+   HYPRE_Real   agg_P12_trunc_factor;
+   HYPRE_Real   jacobi_trunc_threshold;
+   HYPRE_Real   CR_rate;
+   HYPRE_Real   CR_strong_th;
+   HYPRE_Real   A_drop_tol;
+   HYPRE_Real   tol;
+   HYPRE_Real   relax_wt;
+   HYPRE_Real   outer_wt;
+   HYPRE_Real   nongalerkin_tol;
+   HYPRE_Real   schwarz_rlx_weight;
+   HYPRE_Real   thresh, filter;
+   HYPRE_Real   drop_tol;
+   HYPRE_Real   eu_sparse_A;
+   HYPRE_Real   ilu_droptol;
+   HYPRE_Real   fsai_threshold;
+   HYPRE_Real   fsai_kap_tolerance;
+   HYPRE_Real   cheby_eig_ratio;
+   HYPRE_Real   add_trunc_factor;
+   HYPRE_Real   add_rlx_wt;
    /*-----------------------------------------------------------------------
     * Setup default values for parameters
     *-----------------------------------------------------------------------*/
@@ -160,15 +160,7 @@ hypre_BoomerAMGCreate( void )
    seq_threshold = 0;
    redundant = 0;
    coarsen_cut_factor = 0;
-   strong_threshold = 0.25;
-   strong_threshold_R = 0.25;
-   filter_threshold_R = 0.0;
    Sabs = 0;
-   max_row_sum = 0.9;
-   trunc_factor = 0.0;
-   agg_trunc_factor = 0.0;
-   agg_P12_trunc_factor = 0.0;
-   jacobi_trunc_threshold = 0.01;
    sep_weight = 0;
    coarsen_type = 10;
    interp_type = 6;
@@ -187,9 +179,6 @@ hypre_BoomerAMGCreate( void )
    post_interp_type = 0;
    agg_interp_type = 4;
    num_CR_relax_steps = 2;
-   CR_rate = 0.7;
-   CR_strong_th = 0;
-   A_drop_tol = 0.0;
    A_drop_type = -1;
    IS_type = 1;
    CR_use_CG = 0;
@@ -198,7 +187,6 @@ hypre_BoomerAMGCreate( void )
    variant = 0;
    overlap = 1;
    domain_type = 2;
-   schwarz_rlx_weight = 1.0;
    smooth_num_sweeps = 1;
    smooth_num_levels = 0;
    smooth_type = 6;
@@ -206,19 +194,14 @@ hypre_BoomerAMGCreate( void )
 
    level = 1;
    sym = 0;
-   thresh = 0.1;
-   filter = 0.05;
-   drop_tol = 0.0001;
    max_nz_per_row = 20;
    euclidfile = NULL;
    eu_level = 0;
-   eu_sparse_A = 0.0;
    eu_bj = 0;
    ilu_lfil = 0;
    ilu_type = 0;
    ilu_max_row_nnz = 20;
    ilu_max_iter = 1;
-   ilu_droptol = 0.01;
    ilu_tri_solve = 1;
    ilu_lower_jacobi_iters = 5;
    ilu_upper_jacobi_iters = 5;
@@ -240,9 +223,7 @@ hypre_BoomerAMGCreate( void )
    fsai_max_step_size = 2;
    fsai_max_nnz_row = 8;
    fsai_num_levels = 0;
-   fsai_threshold = 0.01;
    fsai_eig_maxiter = 5;
-   fsai_kap_tolerance = 0.001;
 
    /* solve params */
    min_iter  = 0;
@@ -250,21 +231,17 @@ hypre_BoomerAMGCreate( void )
    fcycle = 0;
    cycle_type = 1;
    converge_type = 0;
-   tol = 1.0e-6;
 
    num_sweeps = 1;
    relax_down = 13;
    relax_up = 14;
    relax_coarse = 9;
    relax_order = 0;
-   relax_wt = 1.0;
-   outer_wt = 1.0;
 
    cheby_order = 2;
    cheby_variant = 0;
    cheby_scale = 1;
    cheby_eig_est = 10;
-   cheby_eig_ratio = .3;
 
    block_mode = 0;
 
@@ -272,15 +249,12 @@ hypre_BoomerAMGCreate( void )
    mult_additive = -1;
    simple = -1;
    add_last_lvl = -1;
-   add_trunc_factor = 0.0;
    add_P_max_elmts = 0;
    add_rlx_type = 18;
-   add_rlx_wt = 1.0;
 
    /* log info */
    num_iterations = 0;
    cum_num_iterations = 0;
-   cum_nnz_AP = -1.0;
 
    /* output params */
    print_level = 0;
@@ -289,7 +263,6 @@ hypre_BoomerAMGCreate( void )
    /* cycle_op_count = 0; */
    debug_flag = 0;
 
-   nongalerkin_tol = 0.0;
 
    rap2 = 0;
    keepT = 0;
@@ -304,6 +277,34 @@ hypre_BoomerAMGCreate( void )
       relax_up        = 18;
       agg_interp_type =  7;
    }
+
+   strong_threshold = 0.25;
+   strong_threshold_R = 0.25;
+   filter_threshold_R = 0.0;
+   max_row_sum = 0.9;
+   trunc_factor = 0.0;
+   agg_trunc_factor = 0.0;
+   agg_P12_trunc_factor = 0.0;
+   jacobi_trunc_threshold = 0.01;
+   CR_rate = 0.7;
+   CR_strong_th = 0;
+   A_drop_tol = 0.0;
+   schwarz_rlx_weight = 1.0;
+   thresh = 0.1;
+   filter = 0.05;
+   drop_tol = 0.0001;
+   eu_sparse_A = 0.0;
+   ilu_droptol = 0.01;
+   fsai_threshold = 0.01;
+   fsai_kap_tolerance = 0.001;
+   tol = 1.0e-6;
+   relax_wt = 1.0;
+   outer_wt = 1.0;
+   cheby_eig_ratio = .3;
+   add_trunc_factor = 0.0;
+   add_rlx_wt = 1.0;
+   cum_nnz_AP = -1.0;
+   nongalerkin_tol = 0.0;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 

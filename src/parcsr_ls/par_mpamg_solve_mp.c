@@ -40,7 +40,6 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
    HYPRE_Int            num_levels;
    HYPRE_Int            min_iter;
    HYPRE_Int            max_iter;
-   hypre_double         tol;
 
    hypre_ParCSRMatrix **A_array;
    hypre_ParVector    **F_array;
@@ -51,6 +50,7 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
    HYPRE_Int           Solve_err_flag;
    HYPRE_Int           num_procs, my_id;
    HYPRE_Int           num_vectors;
+   hypre_double        tol;
    hypre_double        alpha = 1.0;
    hypre_double        beta = -1.0;
    hypre_double        cycle_op_count;
@@ -93,7 +93,7 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
    F_array          = hypre_ParAMGDataFArray(amg_data);
    U_array          = hypre_ParAMGDataUArray(amg_data);
 
-   tol              = (hypre_double) hypre_ParAMGDataTol(amg_data);
+   tol              = ((amg_data) -> tol_dbl);
    min_iter         = hypre_ParAMGDataMinIter(amg_data);
    max_iter         = hypre_ParAMGDataMaxIter(amg_data);
    Vtemp_dbl        = hypre_ParAMGDataVtempDBL(amg_data);
@@ -176,10 +176,10 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
             }
             resid_nrm = (hypre_double) sqrtl(hypre_ParVectorInnerProd_long_dbl( Residual, Residual ));
          }
-         /*else
+         else
          {
             hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }*/
+         }
       }
       else
       {
@@ -210,10 +210,10 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
             }
             resid_nrm = (hypre_double) sqrtl(hypre_ParVectorInnerProd_long_dbl( Vtemp_long_dbl, Vtemp_long_dbl ));
          }
-         /*else
+         else
          {
             hypre_error_w_msg_mp(HYPRE_ERROR_GENERIC, "Error: Undefined precision type!\n");
-         }*/
+         }
       }
 
       /* Since it does not diminish performance, attempt to return an error flag
@@ -366,7 +366,9 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
             relative_resid = resid_nrm;
          }
 
-         hypre_ParAMGDataRelativeResidualNorm(amg_data) = relative_resid;
+         ((amg_data) -> rel_resid_norm_dbl) = relative_resid;
+         ((amg_data) -> rel_resid_norm_flt) = (hypre_float) relative_resid;
+         ((amg_data) -> rel_resid_norm_ldbl) = (hypre_long_double) relative_resid;
       }
 
       ++cycle_count;
@@ -404,8 +406,8 @@ hypre_MPAMGSolve_mp( void               *amg_vdata,
 
    if (amg_print_level > 1)
    {
-      num_coeffs       = (HYPRE_Real *) hypre_CAlloc_dbl((size_t)(num_levels), (size_t)sizeof(hypre_double), HYPRE_MEMORY_HOST);
-      num_variables    = (HYPRE_Real *) hypre_CAlloc_dbl((size_t)(num_levels), (size_t)sizeof(hypre_double), HYPRE_MEMORY_HOST);
+      num_coeffs       = (hypre_double *) hypre_CAlloc_dbl((size_t)(num_levels), (size_t)sizeof(hypre_double), HYPRE_MEMORY_HOST);
+      num_variables    = (hypre_double *) hypre_CAlloc_dbl((size_t)(num_levels), (size_t)sizeof(hypre_double), HYPRE_MEMORY_HOST);
       num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A);
       num_variables[0] = hypre_ParCSRMatrixGlobalNumRows(A);
 

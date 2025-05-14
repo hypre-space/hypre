@@ -337,62 +337,38 @@ HYPRE_MPAMGGetCoarsenCutFactor_mp( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_MPAMGSetStrongThreshold, HYPRE_BoomerAMGGetStrongThreshold
+ * HYPRE_MPAMGSetStrongThreshold
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_MPAMGSetStrongThreshold_mp( HYPRE_Solver solver,
-                                   HYPRE_Real   strong_threshold  )
+                                  hypre_double   strong_threshold  )
 {
    return( hypre_MPAMGSetStrongThreshold_mp( (void *) solver,
                                                strong_threshold ) );
 }
 
-HYPRE_Int
-HYPRE_MPAMGGetStrongThreshold_mp( HYPRE_Solver solver,
-                                   HYPRE_Real * strong_threshold  )
-{
-   return( hypre_MPAMGGetStrongThreshold_mp( (void *) solver,
-                                               strong_threshold ) );
-}
-
 /*--------------------------------------------------------------------------
- * HYPRE_MPAMGSetMaxRowSum, HYPRE_BoomerAMGGetMaxRowSum
+ * HYPRE_MPAMGSetMaxRowSum
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_MPAMGSetMaxRowSum_mp( HYPRE_Solver solver,
-                             HYPRE_Real   max_row_sum  )
+                             hypre_double   max_row_sum  )
 {
    return( hypre_MPAMGSetMaxRowSum_mp( (void *) solver,
                                          max_row_sum ) );
 }
 
-HYPRE_Int
-HYPRE_MPAMGGetMaxRowSum_mp( HYPRE_Solver solver,
-                             HYPRE_Real * max_row_sum  )
-{
-   return( hypre_MPAMGGetMaxRowSum_mp( (void *) solver,
-                                         max_row_sum ) );
-}
-
 /*--------------------------------------------------------------------------
- * HYPRE_MPAMGSetTruncFactor, HYPRE_BoomerAMGGetTruncFactor
+ * HYPRE_MPAMGSetTruncFactor
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_MPAMGSetTruncFactor_mp( HYPRE_Solver solver,
-                               HYPRE_Real   trunc_factor  )
+                               hypre_double   trunc_factor  )
 {
    return( hypre_MPAMGSetTruncFactor_mp( (void *) solver,
-                                           trunc_factor ) );
-}
-
-HYPRE_Int
-HYPRE_MPAMGGetTruncFactor_mp( HYPRE_Solver solver,
-                               HYPRE_Real * trunc_factor  )
-{
-   return( hypre_MPAMGGetTruncFactor_mp( (void *) solver,
                                            trunc_factor ) );
 }
 
@@ -540,21 +516,14 @@ HYPRE_MPAMGGetFCycle_mp( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_MPAMGSetTol, HYPRE_BoomerAMGGetTol
+ * HYPRE_MPAMGSetTol
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_MPAMGSetTol_mp( HYPRE_Solver solver,
-                       HYPRE_Real   tol    )
+                      hypre_double   tol    )
 {
    return( hypre_MPAMGSetTol_mp( (void *) solver, tol ) );
-}
-
-HYPRE_Int
-HYPRE_MPAMGGetTol_mp( HYPRE_Solver solver,
-                       HYPRE_Real * tol    )
-{
-   return( hypre_MPAMGGetTol_mp( (void *) solver, tol ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -670,51 +639,14 @@ HYPRE_MPAMGSetGridRelaxPoints_mp( HYPRE_Solver   solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_MPAMGSetRelaxWeight
- * DEPRECATED.  There are memory management problems associated with the
- * use of a user-supplied array _mp(who releases it?).
- * Use SetRelaxWt and SetLevelRelaxWt instead.
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_MPAMGSetRelaxWeight_mp( HYPRE_Solver  solver,
-                               HYPRE_Real   *relax_weight  )
-{
-   return( hypre_MPAMGSetRelaxWeight_mp( (void *) solver, relax_weight ) );
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_MPAMGSetRelaxWt
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_MPAMGSetRelaxWt_mp( HYPRE_Solver  solver,
-                           HYPRE_Real    relax_wt  )
+                          hypre_double    relax_wt  )
 {
    return( hypre_MPAMGSetRelaxWt_mp( (void *) solver, relax_wt ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_MPAMGSetLevelRelaxWt
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_MPAMGSetLevelRelaxWt_mp( HYPRE_Solver  solver,
-                                HYPRE_Real    relax_wt,
-                                HYPRE_Int         level  )
-{
-   return( hypre_MPAMGSetLevelRelaxWt_mp( (void *) solver, relax_wt, level ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_MPAMGSetOmega
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_MPAMGSetOmega_mp( HYPRE_Solver  solver,
-                         HYPRE_Real   *omega  )
-{
-   return( hypre_MPAMGSetOmega_mp( (void *) solver, omega ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -723,21 +655,9 @@ HYPRE_MPAMGSetOmega_mp( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_MPAMGSetOuterWt_mp( HYPRE_Solver  solver,
-                           HYPRE_Real    outer_wt  )
+                          hypre_double    outer_wt  )
 {
    return( hypre_MPAMGSetOuterWt_mp( (void *) solver, outer_wt ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_MPAMGSetLevelOuterWt
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_MPAMGSetLevelOuterWt_mp( HYPRE_Solver  solver,
-                                HYPRE_Real    outer_wt,
-                                HYPRE_Int         level  )
-{
-   return( hypre_MPAMGSetLevelOuterWt_mp( (void *) solver, outer_wt, level ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -840,7 +760,7 @@ HYPRE_MPAMGGetResidual_mp( HYPRE_Solver solver, HYPRE_ParVector * residual )
 
 HYPRE_Int
 HYPRE_MPAMGGetFinalRelativeResidualNorm_mp( HYPRE_Solver  solver,
-                                             HYPRE_Real   *rel_resid_norm  )
+                                            hypre_double   *rel_resid_norm  )
 {
    return( hypre_MPAMGGetRelResidualNorm_mp( (void *) solver, rel_resid_norm ) );
 }
@@ -961,7 +881,7 @@ HYPRE_MPAMGSetAggInterpType_mp( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_MPAMGSetAggTruncFactor_mp( HYPRE_Solver  solver,
-                                  HYPRE_Real    agg_trunc_factor  )
+                                 hypre_double   agg_trunc_factor  )
 {
    return( hypre_MPAMGSetAggTruncFactor_mp( (void *) solver, agg_trunc_factor ) );
 }
@@ -972,7 +892,7 @@ HYPRE_MPAMGSetAggTruncFactor_mp( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_MPAMGSetAggP12TruncFactor_mp( HYPRE_Solver  solver,
-                                     HYPRE_Real    agg_P12_trunc_factor  )
+                                    hypre_double  agg_P12_trunc_factor  )
 {
    return( hypre_MPAMGSetAggP12TruncFactor_mp( (void *) solver, agg_P12_trunc_factor ) );
 }
