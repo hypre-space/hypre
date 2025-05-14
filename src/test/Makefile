@@ -71,6 +71,7 @@ HYPRE_DRIVERS =\
  sstruct_fac.c\
  ij_mm.c\
  zboxloop.c
+# cogent_proxy_2d_RIPS.c\
 
 HYPRE_DRIVERS_CXX =\
  cxx_ij.cxx\
@@ -129,6 +130,10 @@ distclean: clean
 ##################################################################
 
 # C
+#
+cogent_proxy_2d_RIPS: cogent_proxy_2d_RIPS.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
 
 ij: ij.o
 	@echo  "Building" $@ "... "
