@@ -273,6 +273,9 @@ typedef struct hypre_ParVector_struct
 #define hypre_ParVectorLocalData(vector)        ((vector) -> local_vector -> data)
 #define hypre_ParVectorLocalStorage(vector)     ((vector) -> local_vector -> multivec_storage_method)
 #define hypre_ParVectorNumVectors(vector)       ((vector) -> local_vector -> num_vectors)
+#define hypre_ParVectorNumTags(vector)          ((vector) -> local_vector -> num_tags)
+#define hypre_ParVectorOwnsTags(vector)         ((vector) -> local_vector -> owns_tags)
+#define hypre_ParVectorTags(vector)             ((vector) -> local_vector -> tags)
 #define hypre_ParVectorEntryI(vector, i)        (hypre_VectorEntryI((vector) -> local_vector, i))
 #define hypre_ParVectorEntryIJ(vector, i, j)    (hypre_VectorEntryIJ((vector) -> local_vector, i, j))
 
@@ -1261,6 +1264,11 @@ hypre_ParVector *hypre_ParMultiVectorCreate ( MPI_Comm comm, HYPRE_BigInt global
 HYPRE_Int hypre_ParVectorDestroy ( hypre_ParVector *vector );
 HYPRE_Int hypre_ParVectorInitializeShell( hypre_ParVector *vector );
 HYPRE_Int hypre_ParVectorSetData( hypre_ParVector *vector, HYPRE_Complex *data );
+HYPRE_Int hypre_ParVectorSetOwnsTags( hypre_ParVector *vector, HYPRE_Int owns_tags );
+HYPRE_Int hypre_ParVectorSetNumTags( hypre_ParVector *vector, HYPRE_Int num_tags );
+HYPRE_Int hypre_ParVectorSetTags( hypre_ParVector *vector,
+                                  HYPRE_MemoryLocation memory_location,
+                                  HYPRE_Int *tags );
 HYPRE_Int hypre_ParVectorInitialize ( hypre_ParVector *vector );
 HYPRE_Int hypre_ParVectorInitialize_v2( hypre_ParVector *vector,
                                         HYPRE_MemoryLocation memory_location );
@@ -1286,6 +1294,8 @@ HYPRE_Int hypre_ParVectorAxpyz ( HYPRE_Complex alpha, hypre_ParVector *x,
 HYPRE_Int hypre_ParVectorMassAxpy ( HYPRE_Complex *alpha, hypre_ParVector **x, hypre_ParVector *y,
                                     HYPRE_Int k, HYPRE_Int unroll);
 HYPRE_Real hypre_ParVectorInnerProd ( hypre_ParVector *x, hypre_ParVector *y );
+HYPRE_Int hypre_ParVectorInnerProdTagged ( hypre_ParVector *x, hypre_ParVector *y,
+                                           HYPRE_Int *num_tags_ptr, HYPRE_Complex **iprod_ptr );
 HYPRE_Int hypre_ParVectorMassInnerProd ( hypre_ParVector *x, hypre_ParVector **y, HYPRE_Int k,
                                          HYPRE_Int unroll, HYPRE_Real *prod );
 HYPRE_Int hypre_ParVectorMassDotpTwo ( hypre_ParVector *x, hypre_ParVector *y, hypre_ParVector **z,

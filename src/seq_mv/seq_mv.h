@@ -242,9 +242,11 @@ typedef struct
 typedef struct
 {
    HYPRE_Complex        *data;
-   HYPRE_Int             size;      /* Number of elements of a single vector component */
-   HYPRE_Int             component; /* Index of a multivector component
-                                    (used for set/get routines )*/
+   HYPRE_Int             size;       /* Number of elements of a single vector component */
+   HYPRE_Int             component;  /* Index of a multivector component (used for set/get) */
+   HYPRE_Int             owns_tags;  /* Whether the vector owns the array of tags or not */
+   HYPRE_Int             num_tags;   /* Number of unique tags */
+   HYPRE_Int            *tags;       /* Array of tags with same size as vector */
    HYPRE_Int             owns_data;  /* Does the Vector create/destroy `data'? */
    HYPRE_MemoryLocation  memory_location; /* memory location of data array */
 
@@ -268,6 +270,9 @@ typedef struct
 #define hypre_VectorComponent(vector)             ((vector) -> component)
 #define hypre_VectorOwnsData(vector)              ((vector) -> owns_data)
 #define hypre_VectorMemoryLocation(vector)        ((vector) -> memory_location)
+#define hypre_VectorOwnsTags(vector)              ((vector) -> owns_tags)
+#define hypre_VectorNumTags(vector)               ((vector) -> num_tags)
+#define hypre_VectorTags(vector)                  ((vector) -> tags)
 #define hypre_VectorNumVectors(vector)            ((vector) -> num_vectors)
 #define hypre_VectorMultiVecStorageMethod(vector) ((vector) -> multivec_storage_method)
 #define hypre_VectorVectorStride(vector)          ((vector) -> vecstride)
@@ -541,6 +546,11 @@ hypre_Vector *hypre_SeqMultiVectorCreate ( HYPRE_Int size, HYPRE_Int num_vectors
 HYPRE_Int hypre_SeqVectorDestroy ( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorInitializeShell( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorSetData( hypre_Vector *vector, HYPRE_Complex *data );
+HYPRE_Int hypre_SeqVectorSetOwnsTags( hypre_Vector *vector, HYPRE_Int owns_tags );
+HYPRE_Int hypre_SeqVectorSetNumTags( hypre_Vector *vector, HYPRE_Int num_tags );
+HYPRE_Int hypre_SeqVectorSetTags( hypre_Vector *vector,
+                                  HYPRE_MemoryLocation memory_location,
+                                  HYPRE_Int *tags );
 HYPRE_Int hypre_SeqVectorInitialize_v2( hypre_Vector *vector,
                                         HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_SeqVectorInitialize ( hypre_Vector *vector );
@@ -553,6 +563,7 @@ HYPRE_Int hypre_SeqVectorSetConstantValues ( hypre_Vector *v, HYPRE_Complex valu
 HYPRE_Int hypre_SeqVectorSetConstantValuesHost ( hypre_Vector *v, HYPRE_Complex value );
 HYPRE_Int hypre_SeqVectorSetRandomValues ( hypre_Vector *v, HYPRE_Int seed );
 HYPRE_Int hypre_SeqVectorCopy ( hypre_Vector *x, hypre_Vector *y );
+HYPRE_Int hypre_SeqVectorCopyTags ( hypre_Vector *x, hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorStridedCopy( hypre_Vector *x, HYPRE_Int istride, HYPRE_Int ostride,
                                       HYPRE_Int size, HYPRE_Complex *data);
 hypre_Vector *hypre_SeqVectorCloneDeep ( hypre_Vector *x );
@@ -586,6 +597,7 @@ HYPRE_Int hypre_SeqVectorMassAxpy4(HYPRE_Complex *alpha, hypre_Vector **x, hypre
                                    HYPRE_Int k);
 HYPRE_Int hypre_SeqVectorMassAxpy8(HYPRE_Complex *alpha, hypre_Vector **x, hypre_Vector *y,
                                    HYPRE_Int k);
+HYPRE_Int hypre_SeqVectorInnerProdTagged( hypre_Vector *x, hypre_Vector *y, HYPRE_Complex *iprod );
 HYPRE_Complex hypre_SeqVectorSumElts ( hypre_Vector *vector );
 HYPRE_Complex hypre_SeqVectorSumEltsHost ( hypre_Vector *vector );
 //HYPRE_Int hypre_SeqVectorMax( HYPRE_Complex alpha, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y );
