@@ -21,6 +21,11 @@ FILES="\
  ${TNAME}.out.103\
  ${TNAME}.out.150\
  ${TNAME}.out.151\
+ ${TNAME}.out.200\
+ ${TNAME}.out.201\
+ ${TNAME}.out.202\
+ ${TNAME}.out.203\
+ ${TNAME}.out.204\
 "
 
 for i in $FILES
@@ -41,3 +46,4 @@ fi
 #=============================================================================
 
 rm -rf IJ.out.A.0000?.bin IJ.out.b.0000?.bin IJ.out.x0.0000?.bin IJ.out.x.0000?.bin
+rm -rf csr.out.*.0
