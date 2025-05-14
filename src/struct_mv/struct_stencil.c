@@ -14,7 +14,6 @@
 #include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
- * hypre_StructStencilCreate
  *--------------------------------------------------------------------------*/
 
 hypre_StructStencil *
@@ -42,7 +41,6 @@ hypre_StructStencilCreate( HYPRE_Int     dim,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructStencilRef
  *--------------------------------------------------------------------------*/
 
 hypre_StructStencil *
@@ -54,7 +52,6 @@ hypre_StructStencilRef( hypre_StructStencil *stencil )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructStencilDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -74,7 +71,6 @@ hypre_StructStencilDestroy( hypre_StructStencil *stencil )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructStencilPrint
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -99,7 +95,6 @@ hypre_StructStencilPrint( FILE                *file,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructStencilRead
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -130,8 +125,6 @@ hypre_StructStencilRead( FILE                 *file,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructStencilOffsetEntry
- *
  * Returns the entry number of the 'stencil_offset' in 'stencil'.  If the offset
  * is not found, a -1 is returned.
  *--------------------------------------------------------------------------*/
@@ -160,8 +153,6 @@ hypre_StructStencilOffsetEntry( hypre_StructStencil *stencil,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructStencilSymmetrize:
- *
  * Computes a new "symmetrized" stencil.  An integer array called 'symm_entries'
  * is also set up.  A non-negative value j = symm_entries[i] indicates that the
  * ith stencil entry is a "symmetric entry" of the jth stencil entry, that is,

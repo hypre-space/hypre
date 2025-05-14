@@ -59,13 +59,14 @@ typedef struct hypre_ComputePkg_struct
  * Accessor macros: hypre_ComputePkg
  *--------------------------------------------------------------------------*/
 
-#define hypre_ComputePkgCommPkg(compute_pkg)      (compute_pkg -> comm_pkg)
+#define hypre_ComputePkgCommPkg(compute_pkg)        (compute_pkg -> comm_pkg)
+#define hypre_ComputePkgMemoryLocation(compute_pkg) (compute_pkg -> comm_pkg -> memory_location)
 
-#define hypre_ComputePkgIndtBoxes(compute_pkg)    (compute_pkg -> indt_boxes)
-#define hypre_ComputePkgDeptBoxes(compute_pkg)    (compute_pkg -> dept_boxes)
-#define hypre_ComputePkgStride(compute_pkg)       (compute_pkg -> stride)
+#define hypre_ComputePkgIndtBoxes(compute_pkg)      (compute_pkg -> indt_boxes)
+#define hypre_ComputePkgDeptBoxes(compute_pkg)      (compute_pkg -> dept_boxes)
+#define hypre_ComputePkgStride(compute_pkg)         (compute_pkg -> stride)
 
-#define hypre_ComputePkgGrid(compute_pkg)         (compute_pkg -> grid)
-#define hypre_ComputePkgNumValues(compute_pkg)    (compute_pkg -> num_values)
+#define hypre_ComputePkgGrid(compute_pkg)           (compute_pkg -> grid)
+#define hypre_ComputePkgNumValues(compute_pkg)      (compute_pkg -> num_values)
 
 #endif

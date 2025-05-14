@@ -52,8 +52,8 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
    HYPRE_Int             i, l;
    HYPRE_Int             constant_coefficient;
-   HYPRE_Real            b_dot_b = 0, eps = 0;
-   HYPRE_Real            r_dot_r, e_dot_e, x_dot_x;
+   HYPRE_Real            e_dot_e = 0.0, b_dot_b = 0.0, eps = 0.0;
+   HYPRE_Real            r_dot_r = 0.0, x_dot_x = 0.0;
 
 #ifdef DEBUG_SOLVE
    char                  filename[255];

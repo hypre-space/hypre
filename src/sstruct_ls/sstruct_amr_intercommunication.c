@@ -91,6 +91,7 @@ hypre_SStructAMRInterCommunication( hypre_SStructSendInfoData *sendinfo,
                        send_data_space,
                        recv_data_space,
                        num_values, NULL, 0, comm,
+                       HYPRE_MEMORY_HOST,
                        &comm_pkg);
    hypre_CommInfoDestroy(comm_info);
 

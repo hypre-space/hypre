@@ -12,7 +12,6 @@
  *==========================================================================*/
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatrixComputeRowSum
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -44,7 +43,6 @@ hypre_SStructPMatrixComputeRowSum( hypre_SStructPMatrix  *pA,
  *==========================================================================*/
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatrixComputeRowSum
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -108,8 +106,6 @@ hypre_SStructMatrixComputeRowSum( hypre_SStructMatrix  *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatrixComputeL1Norms
- *
  * Compute the l1 norms of the rows of a given matrix, depending on
  * the option parameter:
  *
@@ -119,6 +115,8 @@ hypre_SStructMatrixComputeRowSum( hypre_SStructMatrix  *A,
  * option 3 = Compute the l2 norm^2 of the rows
  * option 4 = Truncated version of option 2 based on Remark 6.2 in "Multigrid
  *            Smoothers for Ultra-Parallel Computing"
+ *
+ * TODO: implement options 2-4.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
