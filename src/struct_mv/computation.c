@@ -290,7 +290,8 @@ hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
 
    hypre_CommPkgCreate(hypre_ComputeInfoCommInfo(compute_info),
                        data_space, data_space, num_values, NULL, 0,
-                       hypre_StructGridComm(grid), &comm_pkg);
+                       hypre_StructGridComm(grid),
+                       HYPRE_MEMORY_HOST, &comm_pkg);
    hypre_CommInfoDestroy(hypre_ComputeInfoCommInfo(compute_info));
    hypre_ComputePkgCommPkg(compute_pkg) = comm_pkg;
 
@@ -304,6 +305,19 @@ hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
    hypre_ComputeInfoDestroy(compute_info);
 
    *compute_pkg_ptr = compute_pkg;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Set the memory location of the underlying communication package
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ComputePkgSetMemoryLocation( hypre_ComputePkg     *compute_pkg,
+                                   HYPRE_MemoryLocation  memory_location )
+{
+   hypre_ComputePkgMemoryLocation(compute_pkg) = memory_location;
 
    return hypre_error_flag;
 }
@@ -343,7 +357,7 @@ hypre_InitializeIndtComputations( hypre_ComputePkg  *compute_pkg,
 {
    hypre_CommPkg *comm_pkg = hypre_ComputePkgCommPkg(compute_pkg);
 
-   hypre_InitializeCommunication(comm_pkg, &data, &data, 0, 0, comm_handle_ptr);
+   hypre_StructCommunicationInitialize(comm_pkg, &data, &data, 0, 0, comm_handle_ptr);
 
    return hypre_error_flag;
 }
@@ -356,7 +370,7 @@ hypre_InitializeIndtComputations( hypre_ComputePkg  *compute_pkg,
 HYPRE_Int
 hypre_FinalizeIndtComputations( hypre_CommHandle *comm_handle )
 {
-   hypre_FinalizeCommunication(comm_handle );
+   hypre_StructCommunicationFinalize(comm_handle );
 
    return hypre_error_flag;
 }

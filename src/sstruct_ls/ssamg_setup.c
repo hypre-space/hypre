@@ -761,7 +761,7 @@ hypre_SSAMGCoarsen( void               *ssamg_vdata,
 
    hypre_Index           cindex;
    hypre_Index           zero;
-   HYPRE_Int             num_levels;
+   HYPRE_Int             num_levels = 0;
    HYPRE_Int             part;
    HYPRE_Int             l, d, cdir;
    HYPRE_Int             coarse_flag;

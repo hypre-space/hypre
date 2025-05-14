@@ -92,7 +92,8 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
 {
    hypre_StructMatrix      *A        = (matvec_data -> A);
    hypre_IndexRef           xfstride = (matvec_data -> xfstride);
-   HYPRE_Int                ndim = hypre_StructMatrixNDim(A);
+   HYPRE_Int                ndim     = hypre_StructMatrixNDim(A);
+   HYPRE_MemoryLocation     memloc   = hypre_StructVectorMemoryLocation(x);
 
    hypre_StructGrid        *grid, *xgrid;
    hypre_StructStencil     *stencil;
@@ -181,11 +182,13 @@ hypre_StructMatvecResize( hypre_StructMatvecData  *matvec_data,
 
       /* This computes the communication pattern for the new x data_space */
       hypre_CreateComputeInfo(xgrid, xfstride, stencil, &compute_info);
+
       /* First refine commm_info to put it on the index space of xgrid, then map */
       /* NOTE: Compute boxes will be appropriately projected in MatvecCompute */
       hypre_CommInfoRefine(hypre_ComputeInfoCommInfo(compute_info), NULL, xfstride);
       hypre_StructVectorMapCommInfo(x, hypre_ComputeInfoCommInfo(compute_info));
       hypre_ComputePkgCreate(compute_info, data_space, 1, grid, &compute_pkg);
+      hypre_ComputePkgSetMemoryLocation(compute_pkg, memloc);
 
       /* Save compute_pkg */
       if ((matvec_data -> compute_pkg) != NULL)
@@ -704,8 +707,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatvecCompute_core_CC
- *
  * StructMatrix/Vector multiplication core function for constant coeficients.
  *
  * Note: This function computes -A*x.
@@ -731,13 +732,13 @@ hypre_StructMatvecCompute_core_CC( hypre_StructMatrix *A,
    hypre_Index           loop_size, ustride;
    hypre_IndexRef        start;
 
-   HYPRE_Complex        *Ap0, *Ap1, *Ap2;
-   HYPRE_Complex        *Ap3, *Ap4, *Ap5;
-   HYPRE_Complex        *Ap6, *Ap7, *Ap8;
-   HYPRE_Complex        *xp,  *yp;
-   HYPRE_Int             xoff0, xoff1, xoff2;
-   HYPRE_Int             xoff3, xoff4, xoff5;
-   HYPRE_Int             xoff6, xoff7, xoff8;
+   HYPRE_Complex        *Ap0 = NULL, *Ap1 = NULL, *Ap2 = NULL;
+   HYPRE_Complex        *Ap3 = NULL, *Ap4 = NULL, *Ap5 = NULL;
+   HYPRE_Complex        *Ap6 = NULL, *Ap7 = NULL, *Ap8 = NULL;
+   HYPRE_Complex        *xp  = NULL, *yp  = NULL;
+   HYPRE_Int             xoff0 = 0, xoff1 = 0, xoff2 = 0;
+   HYPRE_Int             xoff3 = 0, xoff4 = 0, xoff5 = 0;
+   HYPRE_Int             xoff6 = 0, xoff7 = 0, xoff8 = 0;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
@@ -751,40 +752,49 @@ hypre_StructMatvecCompute_core_CC( hypre_StructMatrix *A,
    switch (nentries)
    {
       case 9:
-         Ap8 = hypre_StructMatrixBoxData(A, Ab, entries[8]);
+         Ap8   = hypre_StructMatrixBoxData(A, Ab, entries[8]);
          xoff8 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[8]]);
+         HYPRE_FALLTHROUGH;
 
       case 8:
-         Ap7 = hypre_StructMatrixBoxData(A, Ab, entries[7]);
+         Ap7   = hypre_StructMatrixBoxData(A, Ab, entries[7]);
          xoff7 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[7]]);
+         HYPRE_FALLTHROUGH;
 
       case 7:
-         Ap6 = hypre_StructMatrixBoxData(A, Ab, entries[6]);
+         Ap6   = hypre_StructMatrixBoxData(A, Ab, entries[6]);
          xoff6 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[6]]);
+         HYPRE_FALLTHROUGH;
 
       case 6:
-         Ap5 = hypre_StructMatrixBoxData(A, Ab, entries[5]);
+         Ap5   = hypre_StructMatrixBoxData(A, Ab, entries[5]);
          xoff5 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[5]]);
+         HYPRE_FALLTHROUGH;
 
       case 5:
-         Ap4 = hypre_StructMatrixBoxData(A, Ab, entries[4]);
+         Ap4   = hypre_StructMatrixBoxData(A, Ab, entries[4]);
          xoff4 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[4]]);
+         HYPRE_FALLTHROUGH;
 
       case 4:
-         Ap3 = hypre_StructMatrixBoxData(A, Ab, entries[3]);
+         Ap3   = hypre_StructMatrixBoxData(A, Ab, entries[3]);
          xoff3 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[3]]);
+         HYPRE_FALLTHROUGH;
 
       case 3:
-         Ap2 = hypre_StructMatrixBoxData(A, Ab, entries[2]);
+         Ap2   = hypre_StructMatrixBoxData(A, Ab, entries[2]);
          xoff2 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[2]]);
+         HYPRE_FALLTHROUGH;
 
       case 2:
-         Ap1 = hypre_StructMatrixBoxData(A, Ab, entries[1]);
+         Ap1   = hypre_StructMatrixBoxData(A, Ab, entries[1]);
          xoff1 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[1]]);
+         HYPRE_FALLTHROUGH;
 
       case 1:
-         Ap0 = hypre_StructMatrixBoxData(A, Ab, entries[0]);
+         Ap0   = hypre_StructMatrixBoxData(A, Ab, entries[0]);
          xoff0 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[0]]);
+         HYPRE_FALLTHROUGH;
 
       case 0:
          break;
@@ -930,8 +940,6 @@ hypre_StructMatvecCompute_core_CC( hypre_StructMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatvecCompute_core_VC
- *
  * StructMatrix/Vector multiplication core routine for variable coeficients.
  *
  * Note: This function computes -A*x.
@@ -957,10 +965,10 @@ hypre_StructMatvecCompute_core_VC( hypre_StructMatrix *A,
    hypre_Index           loop_size, ustride;
    hypre_IndexRef        start;
 
-   HYPRE_Complex        *Ap0, *Ap1, *Ap2;
-   HYPRE_Complex        *Ap3, *Ap4, *Ap5;
-   HYPRE_Complex        *Ap6, *Ap7, *Ap8;
-   HYPRE_Complex        *xp,  *yp;
+   HYPRE_Complex        *Ap0 = NULL, *Ap1 = NULL, *Ap2 = NULL;
+   HYPRE_Complex        *Ap3 = NULL, *Ap4 = NULL, *Ap5 = NULL;
+   HYPRE_Complex        *Ap6 = NULL, *Ap7 = NULL, *Ap8 = NULL;
+   HYPRE_Complex        *xp  = NULL, *yp  = NULL;
    HYPRE_Int             xoff0, xoff1, xoff2;
    HYPRE_Int             xoff3, xoff4, xoff5;
    HYPRE_Int             xoff6, xoff7, xoff8;
@@ -977,40 +985,49 @@ hypre_StructMatvecCompute_core_VC( hypre_StructMatrix *A,
    switch (nentries)
    {
       case 9:
-         Ap8 = hypre_StructMatrixBoxData(A, Ab, entries[8]);
+         Ap8   = hypre_StructMatrixBoxData(A, Ab, entries[8]);
          xoff8 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[8]]);
+         HYPRE_FALLTHROUGH;
 
       case 8:
-         Ap7 = hypre_StructMatrixBoxData(A, Ab, entries[7]);
+         Ap7   = hypre_StructMatrixBoxData(A, Ab, entries[7]);
          xoff7 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[7]]);
+         HYPRE_FALLTHROUGH;
 
       case 7:
-         Ap6 = hypre_StructMatrixBoxData(A, Ab, entries[6]);
+         Ap6   = hypre_StructMatrixBoxData(A, Ab, entries[6]);
          xoff6 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[6]]);
+         HYPRE_FALLTHROUGH;
 
       case 6:
-         Ap5 = hypre_StructMatrixBoxData(A, Ab, entries[5]);
+         Ap5   = hypre_StructMatrixBoxData(A, Ab, entries[5]);
          xoff5 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[5]]);
+         HYPRE_FALLTHROUGH;
 
       case 5:
-         Ap4 = hypre_StructMatrixBoxData(A, Ab, entries[4]);
+         Ap4   = hypre_StructMatrixBoxData(A, Ab, entries[4]);
          xoff4 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[4]]);
+         HYPRE_FALLTHROUGH;
 
       case 4:
-         Ap3 = hypre_StructMatrixBoxData(A, Ab, entries[3]);
+         Ap3   = hypre_StructMatrixBoxData(A, Ab, entries[3]);
          xoff3 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[3]]);
+         HYPRE_FALLTHROUGH;
 
       case 3:
-         Ap2 = hypre_StructMatrixBoxData(A, Ab, entries[2]);
+         Ap2   = hypre_StructMatrixBoxData(A, Ab, entries[2]);
          xoff2 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[2]]);
+         HYPRE_FALLTHROUGH;
 
       case 2:
-         Ap1 = hypre_StructMatrixBoxData(A, Ab, entries[1]);
+         Ap1   = hypre_StructMatrixBoxData(A, Ab, entries[1]);
          xoff1 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[1]]);
+         HYPRE_FALLTHROUGH;
 
       case 1:
-         Ap0 = hypre_StructMatrixBoxData(A, Ab, entries[0]);
+         Ap0   = hypre_StructMatrixBoxData(A, Ab, entries[0]);
          xoff0 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[0]]);
+         HYPRE_FALLTHROUGH;
 
       case 0:
          break;
@@ -1184,7 +1201,6 @@ hypre_StructMatvec( HYPRE_Complex       alpha,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructMatvec
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

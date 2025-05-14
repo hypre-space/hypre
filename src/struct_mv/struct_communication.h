@@ -107,18 +107,14 @@ typedef struct hypre_CommType_struct
 typedef struct hypre_CommPkg_struct
 {
    MPI_Comm             comm;
+   HYPRE_MemoryLocation memory_location;
 
    HYPRE_Int            ndim;
    HYPRE_Int            num_values;
    hypre_Index          send_stride;
    hypre_Index          recv_stride;
-
-   HYPRE_Int            first_comm;   /* is this the first communication? */
-   HYPRE_Int            send_bufsize; /* total send buffer size (in doubles) */
-   HYPRE_Int            recv_bufsize; /* total recv buffer size (in doubles) */
-   HYPRE_Int            send_bufsize_first_comm; /* total send buffer size at the first comm. */
-   HYPRE_Int            recv_bufsize_first_comm; /* total recv buffer size at the first comm. */
-
+   HYPRE_Int            send_bufsize; /* total send buffer counts */
+   HYPRE_Int            recv_bufsize; /* total recv buffer counts */
    HYPRE_Int            num_sends;
    HYPRE_Int            num_recvs;
    hypre_CommType      *send_types;
@@ -152,10 +148,10 @@ typedef struct hypre_CommHandle_struct
    hypre_MPI_Request  *requests;
    hypre_MPI_Status   *status;
 
-   HYPRE_Complex     **send_buffers;
-   HYPRE_Complex     **recv_buffers;
-   HYPRE_Complex     **send_buffers_data;
-   HYPRE_Complex     **recv_buffers_data;
+   HYPRE_Complex     **send_buffers; /* send buffer used for data packing */
+   HYPRE_Complex     **recv_buffers; /* recv buffer used for data unpacking */
+   HYPRE_Complex     **send_buffers_mpi; /* send buffer used in the actual MPI calls */
+   HYPRE_Complex     **recv_buffers_mpi; /* recv buffer used in the actual MPI calls */
 
    HYPRE_Int           action; /* set = 0, add = 1 */
 
@@ -245,18 +241,14 @@ typedef struct hypre_CommHandle_struct
  *--------------------------------------------------------------------------*/
 
 #define hypre_CommPkgComm(comm_pkg)            (comm_pkg -> comm)
+#define hypre_CommPkgMemoryLocation(comm_pkg)  (comm_pkg -> memory_location)
 
 #define hypre_CommPkgNDim(comm_pkg)            (comm_pkg -> ndim)
 #define hypre_CommPkgNumValues(comm_pkg)       (comm_pkg -> num_values)
 #define hypre_CommPkgSendStride(comm_pkg)      (comm_pkg -> send_stride)
 #define hypre_CommPkgRecvStride(comm_pkg)      (comm_pkg -> recv_stride)
-
-#define hypre_CommPkgFirstComm(comm_pkg)       (comm_pkg -> first_comm)
-#define hypre_CommPkgSendBufSize(comm_pkg)     (comm_pkg -> send_bufsize)
-#define hypre_CommPkgRecvBufSize(comm_pkg)     (comm_pkg -> recv_bufsize)
-#define hypre_CommPkgSendBufSizeFC(comm_pkg)   (comm_pkg -> send_bufsize_first_comm)
-#define hypre_CommPkgRecvBufSizeFC(comm_pkg)   (comm_pkg -> recv_bufsize_first_comm)
-
+#define hypre_CommPkgSendBufsize(comm_pkg)     (comm_pkg -> send_bufsize)
+#define hypre_CommPkgRecvBufsize(comm_pkg)     (comm_pkg -> recv_bufsize)
 #define hypre_CommPkgNumSends(comm_pkg)        (comm_pkg -> num_sends)
 #define hypre_CommPkgNumRecvs(comm_pkg)        (comm_pkg -> num_recvs)
 #define hypre_CommPkgSendTypes(comm_pkg)       (comm_pkg -> send_types)
@@ -288,8 +280,8 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommHandleStatus(comm_handle)               (comm_handle -> status)
 #define hypre_CommHandleSendBuffers(comm_handle)          (comm_handle -> send_buffers)
 #define hypre_CommHandleRecvBuffers(comm_handle)          (comm_handle -> recv_buffers)
-#define hypre_CommHandleSendBuffersDevice(comm_handle)    (comm_handle -> send_buffers_data)
-#define hypre_CommHandleRecvBuffersDevice(comm_handle)    (comm_handle -> recv_buffers_data)
+#define hypre_CommHandleSendBuffersMPI(comm_handle)       (comm_handle -> send_buffers_mpi)
+#define hypre_CommHandleRecvBuffersMPI(comm_handle)       (comm_handle -> recv_buffers_mpi)
 #define hypre_CommHandleAction(comm_handle)               (comm_handle -> action)
 
 #endif

@@ -124,7 +124,7 @@ main( hypre_int argc,
    HYPRE_Int           stencil_diag_entry;
 
    HYPRE_StructGrid    grid = NULL;
-   HYPRE_StructGrid    readgrid;
+   HYPRE_StructGrid    readgrid = NULL;
    HYPRE_StructStencil stencil;
 
    HYPRE_Int           i, s;

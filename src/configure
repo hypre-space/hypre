@@ -1592,7 +1592,7 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --with-cxxstandard=val  User specifies c++ starndard in val.
+  --with-cxxstandard=val  User specifies c++ standard in val.
   --with-LD=ARG           Set linker to ARG. The environment variable 'LD'
                           will be overridden.
   --with-LDFLAGS=ARG      User can manually set linker flags. The 'LDFLAGS'
@@ -10906,7 +10906,7 @@ fi
 
                                 if test "$hypre_using_shared" = "yes"
         then
-           HIPCXXFLAGS="${SHARED_COMPILE_FLAG} ${HIPCXXFLAGS}"
+           HIPCXXFLAGS="${HIPCXXFLAGS} ${SHARED_COMPILE_FLAG}"
         fi
 
                         if test "$hypre_user_chose_cuflags" = "no"
@@ -12690,4 +12690,3 @@ fi
 mv HYPRE_config.h HYPRE_config.h.tmp
 sed 's/FC_FUNC/HYPRE_FC_FUNC/g' < HYPRE_config.h.tmp > HYPRE_config.h
 rm -f HYPRE_config.h.tmp
-

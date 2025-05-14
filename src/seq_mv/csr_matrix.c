@@ -531,29 +531,33 @@ HYPRE_Int
 hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
                       const char      *file_name )
 {
-   FILE    *fp;
+   HYPRE_Int             num_rows        = hypre_CSRMatrixNumRows(matrix);
+   HYPRE_MemoryLocation  memory_location = hypre_CSRMatrixMemoryLocation(matrix);
+   hypre_CSRMatrix      *h_matrix;
 
-   HYPRE_Complex *matrix_data;
-   HYPRE_Int     *matrix_i;
-   HYPRE_Int     *matrix_j;
-   HYPRE_BigInt  *matrix_bigj;
-   HYPRE_Int      num_rows;
+   HYPRE_Complex        *matrix_data;
+   HYPRE_Int            *matrix_i;
+   HYPRE_Int            *matrix_j;
+   HYPRE_BigInt         *matrix_bigj;
 
-   HYPRE_Int      file_base = 1;
+   HYPRE_Int             file_base = 1;
 
-   HYPRE_Int      j;
-
-   HYPRE_Int      ierr = 0;
+   HYPRE_Int             j;
+   FILE                 *fp;
 
    /*----------------------------------------------------------
     * Print the matrix data
     *----------------------------------------------------------*/
 
-   matrix_data = hypre_CSRMatrixData(matrix);
-   matrix_i    = hypre_CSRMatrixI(matrix);
-   matrix_j    = hypre_CSRMatrixJ(matrix);
-   matrix_bigj = hypre_CSRMatrixBigJ(matrix);
-   num_rows    = hypre_CSRMatrixNumRows(matrix);
+   /* Create temporary matrix on host memory if needed */
+   h_matrix = (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE) ?
+              hypre_CSRMatrixClone_v2(matrix, 1, HYPRE_MEMORY_HOST) : matrix;
+
+   /* Set matrix pointers */
+   matrix_data = hypre_CSRMatrixData(h_matrix);
+   matrix_i    = hypre_CSRMatrixI(h_matrix);
+   matrix_j    = hypre_CSRMatrixJ(h_matrix);
+   matrix_bigj = hypre_CSRMatrixBigJ(h_matrix);
 
    fp = fopen(file_name, "w");
 
@@ -571,13 +575,16 @@ hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
          hypre_fprintf(fp, "%d\n", matrix_j[j] + file_base);
       }
    }
-
-   if (matrix_bigj)
+   else if (matrix_bigj)
    {
       for (j = 0; j < matrix_i[num_rows]; j++)
       {
          hypre_fprintf(fp, "%d\n", matrix_bigj[j] + file_base);
       }
+   }
+   else
+   {
+      hypre_fprintf(fp, "Warning: No matrix columns!\n");
    }
 
    if (matrix_data)
@@ -599,7 +606,13 @@ hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
 
    fclose(fp);
 
-   return ierr;
+   /* Free temporary matrix */
+   if (h_matrix != matrix)
+   {
+      hypre_CSRMatrixDestroy(h_matrix);
+   }
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
