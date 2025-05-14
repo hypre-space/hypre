@@ -603,8 +603,6 @@ hypre_ParVectorElmdivpyMarked( hypre_ParVector *x,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_VectorToParVector
- *
  * Generates a ParVector from a Vector on proc 0 and distributes the pieces
  * to the other procs in comm
  *--------------------------------------------------------------------------*/
@@ -614,21 +612,22 @@ hypre_VectorToParVector ( MPI_Comm      comm,
                           hypre_Vector *v,
                           HYPRE_BigInt *vec_starts )
 {
-   HYPRE_BigInt        global_size;
-   HYPRE_BigInt       *global_vec_starts = NULL;
-   HYPRE_BigInt        first_index;
-   HYPRE_BigInt        last_index;
-   HYPRE_Int           local_size;
-   HYPRE_Int           num_vectors;
-   HYPRE_Int           num_procs, my_id;
-   HYPRE_Int           global_vecstride, vecstride, idxstride;
-   hypre_ParVector    *par_vector;
-   hypre_Vector       *local_vector;
-   HYPRE_Complex      *v_data = NULL;
-   HYPRE_Complex      *local_data;
-   hypre_MPI_Request  *requests;
-   hypre_MPI_Status   *status, status0;
-   HYPRE_Int           i, j, k, p;
+   HYPRE_MemoryLocation memory_location;
+   HYPRE_BigInt         global_size;
+   HYPRE_BigInt        *global_vec_starts = NULL;
+   HYPRE_BigInt         first_index;
+   HYPRE_BigInt         last_index;
+   HYPRE_Int            local_size;
+   HYPRE_Int            num_vectors;
+   HYPRE_Int            num_procs, my_id;
+   HYPRE_Int            global_vecstride, vecstride, idxstride;
+   hypre_ParVector     *par_vector;
+   hypre_Vector        *local_vector;
+   HYPRE_Complex       *v_data = NULL;
+   HYPRE_Complex       *local_data;
+   hypre_MPI_Request   *requests;
+   hypre_MPI_Status    *status, status0;
+   HYPRE_Int            i, j, k, p;
 
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -639,8 +638,10 @@ hypre_VectorToParVector ( MPI_Comm      comm,
       v_data = hypre_VectorData(v);
       num_vectors = hypre_VectorNumVectors(v); /* for multivectors */
       global_vecstride = hypre_VectorVectorStride(v);
+      memory_location = hypre_VectorMemoryLocation(v);
    }
 
+   hypre_MPI_Bcast(&memory_location, 1, HYPRE_MPI_INT, 0, comm);
    hypre_MPI_Bcast(&global_size, 1, HYPRE_MPI_BIG_INT, 0, comm);
    hypre_MPI_Bcast(&num_vectors, 1, HYPRE_MPI_INT, 0, comm);
    hypre_MPI_Bcast(&global_vecstride, 1, HYPRE_MPI_INT, 0, comm);
@@ -670,7 +671,7 @@ hypre_VectorToParVector ( MPI_Comm      comm,
       global_vec_starts[num_procs] = hypre_ParVectorGlobalSize(par_vector);
    }
 
-   hypre_ParVectorInitialize(par_vector);
+   hypre_ParVectorInitialize_v2(par_vector, memory_location);
    local_vector = hypre_ParVectorLocalVector(par_vector);
    local_data = hypre_VectorData(local_vector);
    vecstride = hypre_VectorVectorStride(local_vector);
@@ -684,12 +685,15 @@ hypre_VectorToParVector ( MPI_Comm      comm,
       status = hypre_CTAlloc(hypre_MPI_Status, num_vectors * (num_procs - 1), HYPRE_MEMORY_HOST);
       k = 0;
       for (p = 1; p < num_procs; p++)
+      {
          for (j = 0; j < num_vectors; ++j)
          {
             hypre_MPI_Isend( &v_data[(HYPRE_Int) global_vec_starts[p]] + j * global_vecstride,
                              (HYPRE_Int)(global_vec_starts[p + 1] - global_vec_starts[p]),
                              HYPRE_MPI_COMPLEX, p, 0, comm, &requests[k++] );
          }
+      }
+
       if (num_vectors == 1)
       {
          for (i = 0; i < local_size; i++)
@@ -714,8 +718,10 @@ hypre_VectorToParVector ( MPI_Comm      comm,
    else
    {
       for ( j = 0; j < num_vectors; ++j )
+      {
          hypre_MPI_Recv( local_data + j * vecstride, local_size, HYPRE_MPI_COMPLEX,
                          0, 0, comm, &status0 );
+      }
    }
 
    if (global_vec_starts)

@@ -294,28 +294,32 @@ HYPRE_Int
 hypre_SeqVectorPrint( hypre_Vector *vector,
                       char         *file_name )
 {
-   FILE          *fp;
+   HYPRE_Int             num_vectors     = hypre_VectorNumVectors(vector);
+   HYPRE_Int             vecstride       = hypre_VectorVectorStride(vector);
+   HYPRE_Int             idxstride       = hypre_VectorIndexStride(vector);
+   HYPRE_Int             size            = hypre_VectorSize(vector);
+   HYPRE_MemoryLocation  memory_location = hypre_VectorMemoryLocation(vector);
 
-   HYPRE_Complex *data;
-   HYPRE_Int      size, num_vectors, vecstride, idxstride;
+   FILE                 *fp;
 
-   HYPRE_Int      i, j;
-   HYPRE_Complex  value;
-
-   num_vectors = hypre_VectorNumVectors(vector);
-   vecstride = hypre_VectorVectorStride(vector);
-   idxstride = hypre_VectorIndexStride(vector);
+   hypre_Vector         *h_vector;
+   HYPRE_Complex        *data;
+   HYPRE_Int             i, j;
+   HYPRE_Complex         value;
 
    /*----------------------------------------------------------
     * Print in the data
     *----------------------------------------------------------*/
 
-   data = hypre_VectorData(vector);
-   size = hypre_VectorSize(vector);
+   /* Create temporary vector on host memory if needed */
+   h_vector = (hypre_GetActualMemLocation(memory_location) == hypre_MEMORY_DEVICE) ?
+              hypre_SeqVectorCloneDeep_v2(vector, HYPRE_MEMORY_HOST) : vector;
+
+   data = hypre_VectorData(h_vector);
 
    fp = fopen(file_name, "w");
 
-   if ( hypre_VectorNumVectors(vector) == 1 )
+   if (num_vectors == 1)
    {
       hypre_fprintf(fp, "%d\n", size);
    }
@@ -324,14 +328,14 @@ hypre_SeqVectorPrint( hypre_Vector *vector,
       hypre_fprintf(fp, "%d vectors of size %d\n", num_vectors, size );
    }
 
-   if ( num_vectors > 1 )
+   if (num_vectors > 1)
    {
       for ( j = 0; j < num_vectors; ++j )
       {
          hypre_fprintf(fp, "vector %d\n", j );
          for (i = 0; i < size; i++)
          {
-            value = data[ j * vecstride + i * idxstride ];
+            value = data[j * vecstride + i * idxstride];
 #ifdef HYPRE_COMPLEX
             hypre_fprintf(fp, "%.14e , %.14e\n",
                           hypre_creal(value), hypre_cimag(value));
@@ -355,6 +359,12 @@ hypre_SeqVectorPrint( hypre_Vector *vector,
    }
 
    fclose(fp);
+
+   /* Free temporary vector */
+   if (h_vector != vector)
+   {
+      hypre_SeqVectorDestroy(h_vector);
+   }
 
    return hypre_error_flag;
 }
