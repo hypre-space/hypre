@@ -1133,6 +1133,11 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
    HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uP);
    num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
+   if (num_nonzeros_uP < 0)
+   {
+      hypre_ParCSRMatrixSetNumNonzeros(parcsr_uP);
+      num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
+   }
    if (nterms == 3 && (num_nonzeros_uP == 0))
    {
       /* Specialization for RAP when P has only the structured component */
