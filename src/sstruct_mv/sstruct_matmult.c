@@ -1066,11 +1066,22 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
    HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uP);
    num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
+#if 0
+   // RDF Investigate: This produces faster code that isn't always correct.
+   //
+   // Comments from Wayne: In ssamg_setup.c, if you turn on the DEBUG_SETUP and
+   // DEBUG_MATMULT macros, there is code in place to check correctness of the
+   // RAPs on each level. If you turn this on and run the miller.sh tests, there
+   // are some non-trivial errors in RAP for some problems. If you then change
+   // the code to always take the slow/correct matmult branch, then the errors
+   // go away. So the specialized RAP code is producing some numerically
+   // incorrect results here for some reason.
    if (num_nonzeros_uP < 0)
    {
       hypre_ParCSRMatrixSetNumNonzeros(parcsr_uP);
       num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
    }
+#endif
    if (nterms == 3 && (num_nonzeros_uP == 0))
    {
       /* Specialization for RAP when P has only the structured component */
