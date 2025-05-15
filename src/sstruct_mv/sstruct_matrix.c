@@ -1353,7 +1353,7 @@ hypre_SStructUMatrixSetBoxValuesHelper( hypre_SStructMatrix *matrix,
                                thrust::counting_iterator<HYPRE_Int>(0),
                                thrust::counting_iterator<HYPRE_Int>(nrows),
                                row_indexes,
-                                _1 * nentries );
+                               _1 * nentries );
          }
          else
 #endif
