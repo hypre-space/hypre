@@ -17,6 +17,18 @@
 //#define DEBUG_SETUP
 //#define DEBUG_SOLVE
 
+#define hypre_PFMGSetCIndex(cdir, cindex)       \
+   {                                            \
+      hypre_SetIndex(cindex, 0);                \
+      hypre_IndexD(cindex, cdir) = 0;           \
+   }
+
+#define hypre_PFMGSetStride(cdir, stride)       \
+   {                                            \
+      hypre_SetIndex(stride, 1);                \
+      hypre_IndexD(stride, cdir) = 2;           \
+   }
+
 /*--------------------------------------------------------------------------
  * hypre_PFMGData
  *--------------------------------------------------------------------------*/

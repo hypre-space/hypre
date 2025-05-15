@@ -1011,7 +1011,16 @@ HYPRE_IJMatrixGetValuesAndZeroOut( HYPRE_IJMatrix matrix,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "HYPRE_IJMatrixGetValues not implemented for GPUs!");
+      /* TODO: add device implementation */
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "HYPRE_IJMatrixGetValuesAndZeroOut not implemented for GPUs!");
+
+      if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+      {
+         hypre_IJMatrixMigrateParCSR(ijmatrix, HYPRE_MEMORY_HOST);
+         hypre_IJMatrixGetValuesParCSR(ijmatrix, nrows, ncols,
+                                       rows, row_indexes, cols, values, 1);
+         hypre_IJMatrixMigrateParCSR(ijmatrix, HYPRE_MEMORY_DEVICE);
+      }
    }
    else
 #endif
@@ -1028,7 +1037,6 @@ HYPRE_IJMatrixGetValuesAndZeroOut( HYPRE_IJMatrix matrix,
    }
 
    return hypre_error_flag;
-
 }
 
 /*--------------------------------------------------------------------------
@@ -1248,6 +1256,90 @@ HYPRE_IJMatrixSetMaxOffProcElmts( HYPRE_IJMatrix matrix,
    {
       return ( hypre_IJMatrixSetMaxOffProcElmtsParCSR(ijmatrix,
                                                       max_off_proc_elmts) );
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJMatrixSetInitAllocation(hypre_IJMatrix *matrix,
+                                HYPRE_Int       factor)
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+   {
+      return ( hypre_IJMatrixSetInitAllocationParCSR(ijmatrix,
+                                                     factor) );
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJMatrixSetEarlyAssemble(hypre_IJMatrix *matrix,
+                               HYPRE_Int       early_assemble)
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+   {
+      return ( hypre_IJMatrixSetEarlyAssembleParCSR(ijmatrix,
+                                                    early_assemble) );
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJMatrixSetGrowFactor(hypre_IJMatrix *matrix,
+                            HYPRE_Real      factor)
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+   {
+      return ( hypre_IJMatrixSetGrowFactorParCSR(ijmatrix,
+                                                 factor) );
    }
    else
    {

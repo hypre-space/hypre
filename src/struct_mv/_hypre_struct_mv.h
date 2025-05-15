@@ -1035,18 +1035,14 @@ typedef struct hypre_CommType_struct
 typedef struct hypre_CommPkg_struct
 {
    MPI_Comm             comm;
+   HYPRE_MemoryLocation memory_location;
 
    HYPRE_Int            ndim;
    HYPRE_Int            num_values;
    hypre_Index          send_stride;
    hypre_Index          recv_stride;
-
-   HYPRE_Int            first_comm;   /* is this the first communication? */
-   HYPRE_Int            send_bufsize; /* total send buffer size (in doubles) */
-   HYPRE_Int            recv_bufsize; /* total recv buffer size (in doubles) */
-   HYPRE_Int            send_bufsize_first_comm; /* total send buffer size at the first comm. */
-   HYPRE_Int            recv_bufsize_first_comm; /* total recv buffer size at the first comm. */
-
+   HYPRE_Int            send_bufsize; /* total send buffer counts */
+   HYPRE_Int            recv_bufsize; /* total recv buffer counts */
    HYPRE_Int            num_sends;
    HYPRE_Int            num_recvs;
    hypre_CommType      *send_types;
@@ -1080,10 +1076,10 @@ typedef struct hypre_CommHandle_struct
    hypre_MPI_Request  *requests;
    hypre_MPI_Status   *status;
 
-   HYPRE_Complex     **send_buffers;
-   HYPRE_Complex     **recv_buffers;
-   HYPRE_Complex     **send_buffers_data;
-   HYPRE_Complex     **recv_buffers_data;
+   HYPRE_Complex     **send_buffers; /* send buffer used for data packing */
+   HYPRE_Complex     **recv_buffers; /* recv buffer used for data unpacking */
+   HYPRE_Complex     **send_buffers_mpi; /* send buffer used in the actual MPI calls */
+   HYPRE_Complex     **recv_buffers_mpi; /* recv buffer used in the actual MPI calls */
 
    HYPRE_Int           action; /* set = 0, add = 1 */
 
@@ -1173,18 +1169,14 @@ typedef struct hypre_CommHandle_struct
  *--------------------------------------------------------------------------*/
 
 #define hypre_CommPkgComm(comm_pkg)            (comm_pkg -> comm)
+#define hypre_CommPkgMemoryLocation(comm_pkg)  (comm_pkg -> memory_location)
 
 #define hypre_CommPkgNDim(comm_pkg)            (comm_pkg -> ndim)
 #define hypre_CommPkgNumValues(comm_pkg)       (comm_pkg -> num_values)
 #define hypre_CommPkgSendStride(comm_pkg)      (comm_pkg -> send_stride)
 #define hypre_CommPkgRecvStride(comm_pkg)      (comm_pkg -> recv_stride)
-
-#define hypre_CommPkgFirstComm(comm_pkg)       (comm_pkg -> first_comm)
-#define hypre_CommPkgSendBufSize(comm_pkg)     (comm_pkg -> send_bufsize)
-#define hypre_CommPkgRecvBufSize(comm_pkg)     (comm_pkg -> recv_bufsize)
-#define hypre_CommPkgSendBufSizeFC(comm_pkg)   (comm_pkg -> send_bufsize_first_comm)
-#define hypre_CommPkgRecvBufSizeFC(comm_pkg)   (comm_pkg -> recv_bufsize_first_comm)
-
+#define hypre_CommPkgSendBufsize(comm_pkg)     (comm_pkg -> send_bufsize)
+#define hypre_CommPkgRecvBufsize(comm_pkg)     (comm_pkg -> recv_bufsize)
 #define hypre_CommPkgNumSends(comm_pkg)        (comm_pkg -> num_sends)
 #define hypre_CommPkgNumRecvs(comm_pkg)        (comm_pkg -> num_recvs)
 #define hypre_CommPkgSendTypes(comm_pkg)       (comm_pkg -> send_types)
@@ -1216,8 +1208,8 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommHandleStatus(comm_handle)               (comm_handle -> status)
 #define hypre_CommHandleSendBuffers(comm_handle)          (comm_handle -> send_buffers)
 #define hypre_CommHandleRecvBuffers(comm_handle)          (comm_handle -> recv_buffers)
-#define hypre_CommHandleSendBuffersDevice(comm_handle)    (comm_handle -> send_buffers_data)
-#define hypre_CommHandleRecvBuffersDevice(comm_handle)    (comm_handle -> recv_buffers_data)
+#define hypre_CommHandleSendBuffersMPI(comm_handle)       (comm_handle -> send_buffers_mpi)
+#define hypre_CommHandleRecvBuffersMPI(comm_handle)       (comm_handle -> recv_buffers_mpi)
 #define hypre_CommHandleAction(comm_handle)               (comm_handle -> action)
 
 #endif
@@ -1282,14 +1274,15 @@ typedef struct hypre_ComputePkg_struct
  * Accessor macros: hypre_ComputePkg
  *--------------------------------------------------------------------------*/
 
-#define hypre_ComputePkgCommPkg(compute_pkg)      (compute_pkg -> comm_pkg)
+#define hypre_ComputePkgCommPkg(compute_pkg)        (compute_pkg -> comm_pkg)
+#define hypre_ComputePkgMemoryLocation(compute_pkg) (compute_pkg -> comm_pkg -> memory_location)
 
-#define hypre_ComputePkgIndtBoxes(compute_pkg)    (compute_pkg -> indt_boxes)
-#define hypre_ComputePkgDeptBoxes(compute_pkg)    (compute_pkg -> dept_boxes)
-#define hypre_ComputePkgStride(compute_pkg)       (compute_pkg -> stride)
+#define hypre_ComputePkgIndtBoxes(compute_pkg)      (compute_pkg -> indt_boxes)
+#define hypre_ComputePkgDeptBoxes(compute_pkg)      (compute_pkg -> dept_boxes)
+#define hypre_ComputePkgStride(compute_pkg)         (compute_pkg -> stride)
 
-#define hypre_ComputePkgGrid(compute_pkg)         (compute_pkg -> grid)
-#define hypre_ComputePkgNumValues(compute_pkg)    (compute_pkg -> num_values)
+#define hypre_ComputePkgGrid(compute_pkg)           (compute_pkg -> grid)
+#define hypre_ComputePkgNumValues(compute_pkg)      (compute_pkg -> num_values)
 
 #endif
 /******************************************************************************
@@ -1896,6 +1889,7 @@ HYPRE_Int hypre_CopyToCleanIndex ( hypre_Index in_index, HYPRE_Int ndim, hypre_I
 HYPRE_Int hypre_IndexEqual ( hypre_Index index, HYPRE_Int val, HYPRE_Int ndim );
 HYPRE_Int hypre_IndexMin ( hypre_Index index, HYPRE_Int ndim );
 HYPRE_Int hypre_IndexMax ( hypre_Index index, HYPRE_Int ndim );
+HYPRE_Int hypre_IndexElementMult ( hypre_Index index, HYPRE_Int ndim );
 HYPRE_Int hypre_AddIndexes ( hypre_Index index1, hypre_Index index2, HYPRE_Int ndim,
                              hypre_Index result );
 HYPRE_Int hypre_SubtractIndexes ( hypre_Index index1, hypre_Index index2, HYPRE_Int ndim,
@@ -2147,6 +2141,8 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
                          hypre_ComputeInfo    **compute_info_ptr );
 HYPRE_Int hypre_ComputePkgCreate ( hypre_ComputeInfo *compute_info, hypre_BoxArray *data_space,
                                    HYPRE_Int num_values, hypre_StructGrid *grid, hypre_ComputePkg **compute_pkg_ptr );
+HYPRE_Int hypre_ComputePkgSetMemoryLocation( hypre_ComputePkg *compute_pkg,
+                                             HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_ComputePkgDestroy ( hypre_ComputePkg *compute_pkg );
 HYPRE_Int hypre_InitializeIndtComputations ( hypre_ComputePkg *compute_pkg, HYPRE_Complex *data,
                                              hypre_CommHandle **comm_handle_ptr );
@@ -2173,7 +2169,8 @@ HYPRE_Int hypre_StructVectorElmdivpy ( HYPRE_Complex alpha, hypre_StructVector *
 HYPRE_Int hypre_CommPkgCreate ( hypre_CommInfo *comm_info, hypre_BoxArray *send_data_space,
                                 hypre_BoxArray *recv_data_space, HYPRE_Int num_values,
                                 HYPRE_Int **orders, HYPRE_Int reverse,
-                                MPI_Comm comm, hypre_CommPkg **comm_pkg_ptr );
+                                MPI_Comm comm, HYPRE_MemoryLocation memory_location,
+                                hypre_CommPkg **comm_pkg_ptr );
 HYPRE_Int hypre_CommBlockSetEntries ( hypre_CommBlock *comm_block, HYPRE_Int *boxnums,
                                       hypre_Box *boxes, HYPRE_Int *orders, hypre_Index stride,
                                       hypre_BoxArray *data_space,
@@ -2190,9 +2187,12 @@ HYPRE_Int hypre_CommPkgAgglomData( HYPRE_Int num_comm_pkgs, hypre_CommPkg **comm
                                    HYPRE_Complex ***agg_comm_data_ptr );
 HYPRE_Int hypre_CommPkgAgglomDestroy( HYPRE_Int num_comm_pkgs, hypre_CommPkg **comm_pkg_a,
                                       HYPRE_Complex ***comm_data_a );
-HYPRE_Int hypre_InitializeCommunication ( hypre_CommPkg *comm_pkg, HYPRE_Complex **send_data,
-                                          HYPRE_Complex **recv_data, HYPRE_Int action, HYPRE_Int tag, hypre_CommHandle **comm_handle_ptr );
-HYPRE_Int hypre_FinalizeCommunication ( hypre_CommHandle *comm_handle );
+HYPRE_Int hypre_StructCommunicationInitialize ( hypre_CommPkg *comm_pkg,
+                                                HYPRE_Complex **send_data,
+                                                HYPRE_Complex **recv_data,
+                                                HYPRE_Int action, HYPRE_Int tag,
+                                                hypre_CommHandle **comm_handle_ptr );
+HYPRE_Int hypre_StructCommunicationFinalize ( hypre_CommHandle *comm_handle );
 HYPRE_Int hypre_ExchangeLocalData ( hypre_CommPkg *comm_pkg, HYPRE_Complex **send_data,
                                     HYPRE_Complex **recv_data, HYPRE_Int action );
 HYPRE_Int hypre_CommPkgDestroy ( hypre_CommPkg *comm_pkg );
@@ -2394,14 +2394,9 @@ hypre_StructMatmultCompute_fuse_triple( hypre_StructMatmultDataMH *a,
                                         hypre_Index  Mdstride );
 
 /* struct_matop.c */
+HYPRE_Int hypre_StructMatrixZeroDiagonal( hypre_StructMatrix *A );
 HYPRE_Int hypre_StructMatrixComputeRowSum ( hypre_StructMatrix *A, HYPRE_Int type,
                                             hypre_StructVector *rowsum );
-HYPRE_Int hypre_StructMatrixComputeRowSum_core_CC ( hypre_StructMatrix *A,
-                                                    hypre_StructVector *rowsum, HYPRE_Int box_id, HYPRE_Int nentries, HYPRE_Int *entries,
-                                                    hypre_Box *box, hypre_Box *Adbox, hypre_Box *rdbox, HYPRE_Int type );
-HYPRE_Int hypre_StructMatrixComputeRowSum_core_VC ( hypre_StructMatrix *A,
-                                                    hypre_StructVector *rowsum, HYPRE_Int box_id, HYPRE_Int nentries, HYPRE_Int *entries,
-                                                    hypre_Box *box, hypre_Box *Adbox, hypre_Box *rdbox, HYPRE_Int type );
 
 /* struct_matrix.c */
 HYPRE_Int
@@ -2448,6 +2443,8 @@ hypre_StructMatrix *hypre_StructMatrixCreate ( MPI_Comm comm, hypre_StructGrid *
                                                hypre_StructStencil *user_stencil );
 hypre_StructMatrix *hypre_StructMatrixRef ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixDestroy ( hypre_StructMatrix *matrix );
+HYPRE_Int hypre_StructMatrixSetMemoryLocation( hypre_StructMatrix *matrix,
+                                               HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_StructMatrixSetRangeStride ( hypre_StructMatrix *matrix,
                                              hypre_IndexRef range_stride );
 HYPRE_Int hypre_StructMatrixSetDomainStride ( hypre_StructMatrix *matrix,

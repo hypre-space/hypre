@@ -8,8 +8,6 @@
 #include "_hypre_sstruct_mv.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SStructStencilRef
- *
  * TODO: the struct function hypre_StructStencilRef has a different
  *       prototype than this one.
  *--------------------------------------------------------------------------*/

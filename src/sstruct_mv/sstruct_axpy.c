@@ -14,7 +14,6 @@
 #include "_hypre_sstruct_mv.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPAxpy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -35,15 +34,9 @@ hypre_SStructPAxpy( HYPRE_Complex         alpha,
    return hypre_error_flag;
 }
 
-/*------------------------------------------------------------------
- * hypre_SStructPVectorElmdivpy
- *
- * This function computes
- *
- *   y = alpha*x./z + beta*y
- *
- * for a part if it is active.
- *----------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+ * Computes y = alpha*x./z + beta*y for a part if it is active.
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SStructPVectorElmdivpy( HYPRE_Complex         alpha,
@@ -79,7 +72,6 @@ hypre_SStructPVectorElmdivpy( HYPRE_Complex         alpha,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructAxpy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -125,8 +117,6 @@ hypre_SStructAxpy( HYPRE_Complex        alpha,
 }
 
 /*------------------------------------------------------------------
- * hypre_SStructVectorElmdivpy
- *
  * y = alpha[part]*x./z + beta[part]*y
  *----------------------------------------------------------------*/
 

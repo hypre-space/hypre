@@ -1138,7 +1138,9 @@ hypre_StructMatmultCommSetup( hypre_StructMatmultData  *mmdata )
          hypre_CommPkgCreate(comm_info,
                              hypre_StructVectorDataSpace(mask),
                              hypre_StructVectorDataSpace(mask), 1, NULL, 0,
-                             hypre_StructVectorComm(mask), &comm_pkg_a[num_comm_pkgs]);
+                             hypre_StructVectorComm(mask),
+                             hypre_StructVectorMemoryLocation(mask),
+                             &comm_pkg_a[num_comm_pkgs]);
          hypre_CommInfoDestroy(comm_info);
          comm_data_a[num_comm_pkgs] = hypre_TAlloc(HYPRE_Complex *, 1, HYPRE_MEMORY_HOST);
          comm_data_a[num_comm_pkgs][0] = hypre_StructVectorData(mask);
@@ -1176,8 +1178,9 @@ hypre_StructMatmultCommunicate( hypre_StructMatmultData  *mmdata )
    comm_data = (mmdata -> comm_data);
    if (comm_pkg)
    {
-      hypre_InitializeCommunication(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
-      hypre_FinalizeCommunication(comm_handle);
+      hypre_StructCommunicationInitialize(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
+      hypre_StructCommunicationFinalize(comm_handle);
+
    }
 
    HYPRE_ANNOTATE_FUNC_END;

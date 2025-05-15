@@ -75,9 +75,9 @@ main( hypre_int  argc,
    Index                  *distribute;
    Index                  *block;
    HYPRE_Int               print;
-   HYPRE_Int               nterms;
-   HYPRE_Int              *terms = NULL;
-   HYPRE_Int              *trans = NULL;
+   HYPRE_Int               nterms = 0;
+   HYPRE_Int              *terms  = NULL;
+   HYPRE_Int              *trans  = NULL;
 
    /* Local variables */
    HYPRE_Int               myid, nprocs;
@@ -104,7 +104,8 @@ main( hypre_int  argc,
    hypre_bind_device(myid, nprocs, comm);
 
    /* Initialize hypre */
-   HYPRE_Init();
+   HYPRE_Initialize();
+   HYPRE_DeviceInitialize();
 
    /* Initialize some input parameters */
    nmatrices = 1;
@@ -293,9 +294,9 @@ main( hypre_int  argc,
       hypre_BeginTiming(time_index);
 
       BuildGrid(comm, data[i], &grid[i]);
-      BuildStencils(data[i], grid[i], &stencils[i]);
+      BuildStencils(data[i], &stencils[i]);
       BuildGraph(comm, data[i], grid[i], HYPRE_SSTRUCT, stencils[i], &graph[i]);
-      BuildMatrix(comm, data[i], grid[i], HYPRE_SSTRUCT, stencils[i], graph[i], &ss_A[i]);
+      BuildMatrix(comm, data[i], grid[i], HYPRE_SSTRUCT, graph[i], &ss_A[i]);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming(heading, hypre_MPI_COMM_WORLD);

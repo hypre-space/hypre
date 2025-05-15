@@ -38,6 +38,7 @@ set(SRCS
   pfmg2_setup_rap.c
   pfmg3_setup_rap.c
   pfmg.c
+  pfmg_coarsen.c
   pfmg_relax.c
   pfmg_setup.c
   pfmg_setup_interp.c
@@ -71,10 +72,12 @@ target_sources(${PROJECT_NAME}
 if (HYPRE_USING_GPU)
   set(GPU_SRCS
     cyclic_reduction.c
+    jacobi.c
     HYPRE_struct_int.c
     HYPRE_struct_pcg.c
     pfmg2_setup_rap.c
     pfmg3_setup_rap.c
+    pfmg_coarsen.c
     pfmg_setup.c
     pfmg_setup_interp.c
     pfmg_setup_rap5.c

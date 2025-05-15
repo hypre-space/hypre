@@ -425,7 +425,24 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
    iupper--; jupper--;
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper,
                         &hypre_SStructMatrixIJMatrix(matrix));
-   hypre_SStructUMatrixInitialize(matrix);
+   hypre_SStructUMatrixInitialize(matrix, HYPRE_MEMORY_DEVICE);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructMatrixSetEarlyAssemble( HYPRE_SStructMatrix matrix,
+                                     HYPRE_Int           early_assemble )
+{
+   HYPRE_IJMatrix ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
+
+   if (ijmatrix)
+   {
+      HYPRE_IJMatrixSetEarlyAssemble(ijmatrix, early_assemble);
+   }
 
    return hypre_error_flag;
 }
@@ -937,6 +954,7 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
                              hypre_StructMatrixDataSpace(recv_matrix),
                              num_values, orders, 1,
                              hypre_StructMatrixComm(send_matrix),
+                             hypre_StructMatrixMemoryLocation(send_matrix),
                              &comm_pkgs[num_comm_pkgs]);
          send_data[num_comm_pkgs] = hypre_StructMatrixVData(send_matrix);
          recv_data[num_comm_pkgs] = hypre_StructMatrixVData(recv_matrix);
@@ -969,9 +987,8 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
       }
 
       /* Note reversal of send/recv data */
-      hypre_InitializeCommunication(comm_pkg, recv_data, send_data, 1, 0,
-                                    &comm_handle);
-      hypre_FinalizeCommunication(comm_handle);
+      hypre_StructCommunicationInitialize(comm_pkg, recv_data, send_data, 1, 0, &comm_handle);
+      hypre_StructCommunicationFinalize(comm_handle);
       hypre_CommPkgDestroy(comm_pkg);
    }
 
@@ -1268,7 +1285,6 @@ HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix   matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructMatrixGetGrid
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1283,14 +1299,10 @@ HYPRE_SStructMatrixGetGrid( HYPRE_SStructMatrix   matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructMatrixPrint
- *
  * This function prints a SStructMatrix to file. Assumptions:
  *
  *   1) All StructMatrices have the same number of ghost layers.
  *   2) Range and domain num_ghosts are equal.
- *
- * TODO: Add GPU support
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1423,7 +1435,6 @@ HYPRE_SStructMatrixPrint( const char          *filename,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructMatrixRead
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

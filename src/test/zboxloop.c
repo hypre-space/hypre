@@ -32,13 +32,11 @@ main( hypre_int argc,
    HYPRE_Int         num_procs, myid;
    HYPRE_Int         dim;
    HYPRE_Int         rep, reps, fail, sum;
-   HYPRE_Int         size;
+   HYPRE_Int         size, xi1;
    hypre_Box        *x1_data_box, *x2_data_box, *x3_data_box, *x4_data_box;
-   //HYPRE_Int         xi1, xi2, xi3, xi4;
-   HYPRE_Int         xi1;
    HYPRE_Real       *xp1, *xp2, *xp3, *xp4;
    HYPRE_Real       *d_xp1, *d_xp2, *d_xp3, *d_xp4;
-   hypre_Index       loop_size, start, ustride, index;
+   hypre_Index       loop_size, start, ustride, index, idx;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -257,12 +255,11 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
    for (rep = 0; rep < reps; rep++)
    {
-      xi1 = 0;
 #define DEVICE_VAR is_device_ptr(d_xp1)
       hypre_BoxLoop0Begin(3, loop_size);
       {
-         d_xp1[xi1] += d_xp1[xi1];
-         //xi1++;
+         (void) idx;
+         d_xp1[0] += 1.0;
       }
       hypre_BoxLoop0End();
 #undef DEVICE_VAR

@@ -15,8 +15,6 @@
 #include "_hypre_struct_mv.hpp"
 
 /*--------------------------------------------------------------------------
- * hypre_StructAxpy
- *
  * The vectors x and y may have different base grids, but the grid boxes for
  * each vector (defined by grid, stride, nboxes, boxnums) must be the same.
  * Only nboxes is checked, the rest is assumed to be true.
@@ -105,8 +103,6 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructVectorElmdivpy
- *
  * y = alpha*x./z + beta*y
  *--------------------------------------------------------------------------*/
 
@@ -164,4 +160,3 @@ hypre_StructVectorElmdivpy( HYPRE_Complex       alpha,
 
    return hypre_error_flag;
 }
-

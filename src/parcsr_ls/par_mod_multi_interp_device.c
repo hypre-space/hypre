@@ -86,7 +86,11 @@ struct local_equal_plus_constant : public
 };
 
 /* transform from local C index to global C index */
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct globalC_functor : public thrust::unary_function<HYPRE_Int, HYPRE_BigInt>
+#else
+struct globalC_functor
+#endif
 {
    HYPRE_BigInt C_first;
 
@@ -330,7 +334,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                               thrust::make_counting_iterator(n_fine),
                                               CF_marker,
                                               points_left,
-                                              thrust::not1(equal<HYPRE_Int>(1)) );
+                                              HYPRE_THRUST_NOT(equal<HYPRE_Int>(1)) );
    remaining = points_end - points_left;
 
    /* Cpts; number of C pts */
@@ -544,7 +548,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                       points_left_old + remaining,
                                       diag_shifts,
                                       points_left,
-                                      thrust::not1(thrust::identity<HYPRE_Int>()) );
+                                      HYPRE_THRUST_NOT(thrust::identity<HYPRE_Int>()) );
 #endif
 
          hypre_assert(new_end - points_left == cnt_rem);
@@ -1613,7 +1617,7 @@ void hypre_modmp_init_fine_to_coarse( HYPRE_Int  n_fine,
                       fine_to_coarse,
                       fine_to_coarse + n_fine,
                       pass_marker,
-                      thrust::not1(equal<HYPRE_Int>(color)),
+                      HYPRE_THRUST_NOT(equal<HYPRE_Int>(color)),
                       -1 );
 #endif
 }

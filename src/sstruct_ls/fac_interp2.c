@@ -207,6 +207,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
                           hypre_StructVectorDataSpace(e_var),
                           hypre_StructVectorDataSpace(e_var),
                           1, NULL, 0, hypre_StructVectorComm(e_var),
+                          hypre_StructVectorMemoryLocation(e_var),
                           &gnodes_comm_pkg[vars]);
       hypre_CommInfoDestroy(comm_info);
    }
@@ -621,6 +622,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
                           hypre_StructVectorDataSpace(s_cvector),
                           num_values, NULL, 0,
                           hypre_StructVectorComm(s_rc),
+                          hypre_StructVectorMemoryLocation(s_rc),
                           &interlevel_comm[vars]);
       hypre_CommInfoDestroy(comm_info);
    }
@@ -797,17 +799,16 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    {
       xc_var = hypre_SStructPVectorSVector(xc, var);
       sdata = hypre_StructVectorData(xc_var);
-      hypre_InitializeCommunication(comm_pkg[var], &sdata, &sdata, 0, 0,
-                                    &comm_handle);
-      hypre_FinalizeCommunication(comm_handle);
+      hypre_StructCommunicationInitialize(comm_pkg[var], &sdata, &sdata, 0, 0, &comm_handle);
+      hypre_StructCommunicationFinalize(comm_handle);
 
       if (recv_cvectors != NULL)
       {
          recv_var = hypre_SStructPVectorSVector(recv_cvectors, var);
          rdata = hypre_StructVectorData(recv_var);
-         hypre_InitializeCommunication(interlevel_comm[var], &sdata, &rdata, 0, 0,
-                                       &comm_handle);
-         hypre_FinalizeCommunication(comm_handle);
+         hypre_StructCommunicationInitialize(interlevel_comm[var], &sdata, &rdata,
+                                             0, 0, &comm_handle);
+         hypre_StructCommunicationFinalize(comm_handle);
       }
    }
 

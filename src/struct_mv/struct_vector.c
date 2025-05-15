@@ -1460,7 +1460,9 @@ hypre_StructVectorGetMigrateCommPkg( hypre_StructVector *from_vector,
    hypre_CommPkgCreate(comm_info,
                        hypre_StructVectorDataSpace(from_vector),
                        hypre_StructVectorDataSpace(to_vector), 1, NULL, 0,
-                       hypre_StructVectorComm(from_vector), &comm_pkg);
+                       hypre_StructVectorComm(from_vector),
+                       hypre_StructVectorMemoryLocation(from_vector),
+                       &comm_pkg);
    hypre_CommInfoDestroy(comm_info);
    /* is this correct for periodic? */
 
@@ -1476,16 +1478,15 @@ hypre_StructVectorMigrate( hypre_CommPkg      *comm_pkg,
                            hypre_StructVector *to_vector )
 {
    hypre_CommHandle  *comm_handle;
-   HYPRE_Complex     *fr_data, *to_data;
+   HYPRE_Complex     *fr_data = hypre_StructVectorData(fr_vector);
+   HYPRE_Complex     *to_data = hypre_StructVectorData(to_vector);
 
    /*-----------------------------------------------------------------------
     * Migrate the vector data
     *-----------------------------------------------------------------------*/
 
-   fr_data = hypre_StructVectorData(fr_vector);
-   to_data = hypre_StructVectorData(to_vector);
-   hypre_InitializeCommunication(comm_pkg, &fr_data, &to_data, 0, 0, &comm_handle);
-   hypre_FinalizeCommunication(comm_handle);
+   hypre_StructCommunicationInitialize(comm_pkg, &fr_data, &to_data, 0, 0, &comm_handle);
+   hypre_StructCommunicationFinalize(comm_handle);
 
    return hypre_error_flag;
 }

@@ -29,7 +29,6 @@ typedef struct hypre_SStructPMatvecData_struct
 } hypre_SStructPMatvecData;
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatvecCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -47,7 +46,6 @@ hypre_SStructPMatvecCreate( void **pmatvec_vdata_ptr )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatvecSetTranspose
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -62,7 +60,6 @@ hypre_SStructPMatvecSetTranspose( void      *pmatvec_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatvecDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -96,7 +93,6 @@ hypre_SStructPMatvecDestroy( void *pmatvec_vdata )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatvecSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -138,7 +134,6 @@ hypre_SStructPMatvecSetup( void                 *pmatvec_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatvecCompute
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -211,8 +206,6 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPMatvec
- *
  * NOTE: This does not seem to be used anywhere.
  *--------------------------------------------------------------------------*/
 
@@ -249,7 +242,6 @@ typedef struct hypre_SStructMatvecData_struct
 } hypre_SStructMatvecData;
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatvecCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -267,8 +259,8 @@ hypre_SStructMatvecCreate( void **matvec_vdata_ptr )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatvecSetTranspose
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SStructMatvecSetTranspose( void      *matvec_vdata,
                                  HYPRE_Int  transpose )
@@ -281,7 +273,6 @@ hypre_SStructMatvecSetTranspose( void      *matvec_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatvecSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -320,8 +311,6 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatvecCompute
- *
  * Compute y = alpha*A*x + beta*b
  *--------------------------------------------------------------------------*/
 
@@ -428,7 +417,6 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatvecDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -455,7 +443,6 @@ hypre_SStructMatvecDestroy( void *matvec_vdata )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructMatvec
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

@@ -1160,7 +1160,8 @@ HYPRE_Int hypre_SStructPMatrixPrint ( const char *filename, hypre_SStructPMatrix
                                       HYPRE_Int all );
 HYPRE_Int hypre_SStructPMatrixGetDiagonal ( hypre_SStructPMatrix *pmatrix,
                                             hypre_SStructPVector *pdiag );
-HYPRE_Int hypre_SStructUMatrixInitialize ( hypre_SStructMatrix *matrix );
+HYPRE_Int hypre_SStructUMatrixInitialize ( hypre_SStructMatrix *matrix,
+                                           HYPRE_MemoryLocation  memory_location );
 HYPRE_Int hypre_SStructUMatrixSetValues ( hypre_SStructMatrix *matrix, HYPRE_Int part,
                                           hypre_Index index, HYPRE_Int var, HYPRE_Int nentries, HYPRE_Int *entries, HYPRE_Complex *values,
                                           HYPRE_Int action );

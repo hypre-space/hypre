@@ -1,47 +1,68 @@
-# Output file: solvers.out.0
+# Output file: io.out.0
 Iterations = 11
 Final Relative Residual Norm = 6.733697e-03
 
-# Output file: solvers.out.1
+# Output file: io.out.1
 Iterations = 11
 Final Relative Residual Norm = 6.733697e-03
 
-# Output file: solvers.out.2
+# Output file: io.out.2
 Iterations = 11
 Final Relative Residual Norm = 6.733697e-03
 
-# Output file: solvers.out.3
+# Output file: io.out.3
 Iterations = 11
 Final Relative Residual Norm = 6.733697e-03
 
-# Output file: solvers.out.50
+# Output file: io.out.50
 Iterations = 11
 Final Relative Residual Norm = 6.733697e-03
 
-# Output file: solvers.out.51
+# Output file: io.out.51
 Iterations = 11
 Final Relative Residual Norm = 6.733697e-03
 
-# Output file: solvers.out.100
+# Output file: io.out.100
 Iterations = 11
 Final Relative Residual Norm = 6.733697e-03
 
-# Output file: solvers.out.101
+# Output file: io.out.101
 Iterations = 11
 Final Relative Residual Norm = 6.733697e-03
 
-# Output file: solvers.out.102
+# Output file: io.out.102
 Iterations = 11
 Final Relative Residual Norm = 6.733697e-03
 
-# Output file: solvers.out.103
+# Output file: io.out.103
 Iterations = 11
 Final Relative Residual Norm = 6.733697e-03
 
-# Output file: solvers.out.150
+# Output file: io.out.150
 Iterations = 11
 Final Relative Residual Norm = 6.733697e-03
 
-# Output file: solvers.out.151
+# Output file: io.out.151
 Iterations = 11
 Final Relative Residual Norm = 6.733697e-03
+
+# Output file: io.out.200
+BoomerAMG Iterations = 11
+Final Relative Residual Norm = 1.847551e-09
+
+# Output file: io.out.201
+BoomerAMG Iterations = 11
+Final Relative Residual Norm = 1.847551e-09
+
+# Output file: io.out.202
+BoomerAMG Iterations = 13
+Final Relative Residual Norm = 5.034591e-09
+
+# Output file: io.out.203
+BoomerAMG Iterations = 14
+Final Relative Residual Norm = 4.427419e-09
+
+# Output file: io.out.204
+BoomerAMG Iterations = 14
+Final Relative Residual Norm = 9.190818e-09
+
