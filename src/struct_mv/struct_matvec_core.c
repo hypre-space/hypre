@@ -119,30 +119,39 @@ hypre_StructMatvecCompute_core_CC( hypre_StructMatrix *A,
          {
             case 9:
                HYPRE_SET_CAX(Ap8, xoff8, entries[si + 8]);
+               HYPRE_FALLTHROUGH;
 
             case 8:
                HYPRE_SET_CAX(Ap7, xoff7, entries[si + 7]);
+               HYPRE_FALLTHROUGH;
 
             case 7:
                HYPRE_SET_CAX(Ap6, xoff6, entries[si + 6]);
+               HYPRE_FALLTHROUGH;
 
             case 6:
                HYPRE_SET_CAX(Ap5, xoff5, entries[si + 5]);
+               HYPRE_FALLTHROUGH;
 
             case 5:
                HYPRE_SET_CAX(Ap4, xoff4, entries[si + 4]);
+               HYPRE_FALLTHROUGH;
 
             case 4:
                HYPRE_SET_CAX(Ap3, xoff3, entries[si + 3]);
+               HYPRE_FALLTHROUGH;
 
             case 3:
                HYPRE_SET_CAX(Ap2, xoff2, entries[si + 2]);
+               HYPRE_FALLTHROUGH;
 
             case 2:
                HYPRE_SET_CAX(Ap1, xoff1, entries[si + 1]);
+               HYPRE_FALLTHROUGH;
 
             case 1:
                HYPRE_SET_CAX(Ap0, xoff0, entries[si + 0]);
+               HYPRE_FALLTHROUGH;
 
             case 0:
                break;
@@ -154,30 +163,39 @@ hypre_StructMatvecCompute_core_CC( hypre_StructMatrix *A,
          {
             case 9:
                HYPRE_SET_CAX_TRANS(Ap8, xoff8, entries[si + 8]);
+               HYPRE_FALLTHROUGH;
 
             case 8:
                HYPRE_SET_CAX_TRANS(Ap7, xoff7, entries[si + 7]);
+               HYPRE_FALLTHROUGH;
 
             case 7:
                HYPRE_SET_CAX_TRANS(Ap6, xoff6, entries[si + 6]);
+               HYPRE_FALLTHROUGH;
 
             case 6:
                HYPRE_SET_CAX_TRANS(Ap5, xoff5, entries[si + 5]);
+               HYPRE_FALLTHROUGH;
 
             case 5:
                HYPRE_SET_CAX_TRANS(Ap4, xoff4, entries[si + 4]);
+               HYPRE_FALLTHROUGH;
 
             case 4:
                HYPRE_SET_CAX_TRANS(Ap3, xoff3, entries[si + 3]);
+               HYPRE_FALLTHROUGH;
 
             case 3:
                HYPRE_SET_CAX_TRANS(Ap2, xoff2, entries[si + 2]);
+               HYPRE_FALLTHROUGH;
 
             case 2:
                HYPRE_SET_CAX_TRANS(Ap1, xoff1, entries[si + 1]);
+               HYPRE_FALLTHROUGH;
 
             case 1:
                HYPRE_SET_CAX_TRANS(Ap0, xoff0, entries[si + 0]);
+               HYPRE_FALLTHROUGH;
 
             case 0:
                break;
@@ -410,30 +428,39 @@ hypre_StructMatvecCompute_core_VC( hypre_StructMatrix *A,
          {
             case 9:
                HYPRE_SET_AX(Ap8, xoff8, entries[si + 8]);
+               HYPRE_FALLTHROUGH;
 
             case 8:
                HYPRE_SET_AX(Ap7, xoff7, entries[si + 7]);
+               HYPRE_FALLTHROUGH;
 
             case 7:
                HYPRE_SET_AX(Ap6, xoff6, entries[si + 6]);
+               HYPRE_FALLTHROUGH;
 
             case 6:
                HYPRE_SET_AX(Ap5, xoff5, entries[si + 5]);
+               HYPRE_FALLTHROUGH;
 
             case 5:
                HYPRE_SET_AX(Ap4, xoff4, entries[si + 4]);
+               HYPRE_FALLTHROUGH;
 
             case 4:
                HYPRE_SET_AX(Ap3, xoff3, entries[si + 3]);
+               HYPRE_FALLTHROUGH;
 
             case 3:
                HYPRE_SET_AX(Ap2, xoff2, entries[si + 2]);
+               HYPRE_FALLTHROUGH;
 
             case 2:
                HYPRE_SET_AX(Ap1, xoff1, entries[si + 1]);
+               HYPRE_FALLTHROUGH;
 
             case 1:
                HYPRE_SET_AX(Ap0, xoff0, entries[si + 0]);
+               HYPRE_FALLTHROUGH;
 
             case 0:
                break;
@@ -445,30 +472,39 @@ hypre_StructMatvecCompute_core_VC( hypre_StructMatrix *A,
          {
             case 9:
                HYPRE_SET_AX_TRANS(Ap8, xoff8, entries[si + 8]);
+               HYPRE_FALLTHROUGH;
 
             case 8:
                HYPRE_SET_AX_TRANS(Ap7, xoff7, entries[si + 7]);
+               HYPRE_FALLTHROUGH;
 
             case 7:
                HYPRE_SET_AX_TRANS(Ap6, xoff6, entries[si + 6]);
+               HYPRE_FALLTHROUGH;
 
             case 6:
                HYPRE_SET_AX_TRANS(Ap5, xoff5, entries[si + 5]);
+               HYPRE_FALLTHROUGH;
 
             case 5:
                HYPRE_SET_AX_TRANS(Ap4, xoff4, entries[si + 4]);
+               HYPRE_FALLTHROUGH;
 
             case 4:
                HYPRE_SET_AX_TRANS(Ap3, xoff3, entries[si + 3]);
+               HYPRE_FALLTHROUGH;
 
             case 3:
                HYPRE_SET_AX_TRANS(Ap2, xoff2, entries[si + 2]);
+               HYPRE_FALLTHROUGH;
 
             case 2:
                HYPRE_SET_AX_TRANS(Ap1, xoff1, entries[si + 1]);
+               HYPRE_FALLTHROUGH;
 
             case 1:
                HYPRE_SET_AX_TRANS(Ap0, xoff0, entries[si + 0]);
+               HYPRE_FALLTHROUGH;
 
             case 0:
                break;
