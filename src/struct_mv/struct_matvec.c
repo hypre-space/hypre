@@ -14,8 +14,6 @@
 #include "_hypre_struct_mv.h"
 #include "_hypre_struct_mv.hpp"
 
-#define UNROLL_MAXDEPTH 4
-
 /*--------------------------------------------------------------------------
  * Matvec data structure
  *--------------------------------------------------------------------------*/
@@ -339,24 +337,18 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    hypre_IndexRef           start;
 
    HYPRE_Complex            temp;
-   HYPRE_Int                compute_i, i, j, k, si, ssi;
-   HYPRE_Int                csi[UNROLL_MAXDEPTH], vsi[UNROLL_MAXDEPTH];
+   HYPRE_Int                compute_i, i, j, si, se;
+   HYPRE_Int                cnentries, vnentries;
+   HYPRE_Int                centries[nentries], ventries[nentries];
 
    hypre_Box               *A_data_box, *x_data_box, *y_data_box;
-   HYPRE_Complex           *Ap, *xp, *yp;
+   HYPRE_Complex           *xp, *yp;
    HYPRE_Int                Ab, xb, yb;
    hypre_Index              Adstride, xdstride, ydstride, ustride;
-
-   hypre_StructStencil     *stencil;
-   hypre_Index             *stencil_shape;
-   HYPRE_Int                stencil_size;
 
    HYPRE_Int                ran_nboxes;
    HYPRE_Int               *ran_boxnums;
    hypre_IndexRef           ran_stride;
-   HYPRE_Int                dom_is_coarse;
-   HYPRE_Int                ran_is_coarse;
-   HYPRE_Int                depth, cdepth, vdepth;
 
    hypre_StructVector      *x_tmp = NULL;
 
@@ -377,16 +369,12 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       ran_stride    = hypre_StructMatrixDomStride(A);
       ran_nboxes    = hypre_StructMatrixDomNBoxes(A);
       ran_boxnums   = hypre_StructMatrixDomBoxnums(A);
-      dom_is_coarse = hypre_StructMatrixRangeIsCoarse(A);
-      ran_is_coarse = hypre_StructMatrixDomainIsCoarse(A);
    }
    else
    {
       ran_stride    = hypre_StructMatrixRanStride(A);
       ran_nboxes    = hypre_StructMatrixRanNBoxes(A);
       ran_boxnums   = hypre_StructMatrixRanBoxnums(A);
-      dom_is_coarse = hypre_StructMatrixDomainIsCoarse(A);
-      ran_is_coarse = hypre_StructMatrixRangeIsCoarse(A);
    }
 
    compute_box = hypre_BoxCreate(ndim);
@@ -438,9 +426,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    hypre_StructMatvecResize(matvec_data, x);
    compute_pkg = (matvec_data -> compute_pkg);
 
-   stencil       = hypre_StructMatrixStencil(A);
-   stencil_shape = hypre_StructStencilShape(stencil);
-   stencil_size  = hypre_StructStencilSize(stencil);
    for (compute_i = 0; compute_i < 2; compute_i++)
    {
       switch (compute_i)
@@ -524,9 +509,10 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       {
          HYPRE_Int   *Aids = hypre_StructMatrixBoxIDs(A);
          HYPRE_Int   *xids = hypre_StructVectorBoxIDs(x);
-         hypre_Index  Adstart;
-         hypre_Index  xdstart;
-         hypre_Index  ydstart;
+         HYPRE_Int    num_ss;
+         HYPRE_Int   *se_sspaces;
+         hypre_Index *ss_origins;
+         HYPRE_Int    s;
 
          /* The corresponding box IDs for the following boxnums should match */
          Ab = ran_boxnums[i];
@@ -543,122 +529,55 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
          x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), xb);
          y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), yb);
 
-         xp = hypre_StructVectorBoxData(x, xb);
-         yp = hypre_StructVectorBoxData(y, yb);
+         /* Get stencil spaces - then do unrolling for entries in each */
+         hypre_StructMatrixGetStSpaces(A, transpose, &num_ss, &se_sspaces, &ss_origins, stride);
 
-         if (transpose || dom_is_coarse || ran_is_coarse)
+         for (s = 0; s < num_ss; s++)
          {
-            hypre_ForBoxI(j, compute_box_a)
+            /* Only compute with entries in stencil space s */
+            cnentries = vnentries = 0;
+            for (si = 0; si < nentries; si++)
             {
-               /* TODO optimization: Unroll these loops in a separate kernel */
-               for (si = 0; si < nentries; si++)
+               se = stentries[si];
+               if (se_sspaces[se] == s)
                {
-                  /* If the domain grid is coarse, the compute box will change
-                   * based on the stencil entry.  Otherwise, the next code block
-                   * needs to be called only on the first stencil iteration.
-                   *
-                   * Note that the Adstart and xdstart values are set in different
-                   * places depending on the value of transpose. */
-
-                  ssi = stentries[si];
-                  if ((si == 0) || dom_is_coarse)
+                  if (hypre_StructMatrixConstEntry(A, se))
                   {
-                     hypre_CopyBox(hypre_BoxArrayBox(compute_box_a, j), compute_box);
-                     hypre_StructMatrixGetStencilSpace(A, ssi, transpose, origin, stride);
-                     hypre_ProjectBox(compute_box, origin, stride);
-                     start = hypre_BoxIMin(compute_box);
-
-                     if (!transpose) /* Set Adstart here and xdstart below */
-                     {
-                        hypre_CopyToIndex(start, ndim, Adstart);
-                        hypre_StructMatrixMapDataIndex(A, Adstart);
-                     }
-
-                     hypre_CopyToIndex(start, ndim, ydstart);
-                     hypre_MapToCoarseIndex(ydstart, NULL, ran_stride, ndim);
-
-                     hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-                  }
-
-                  if (transpose)
-                  {
-                     hypre_SubtractIndexes(start, stencil_shape[ssi], ndim, Adstart);
-                     hypre_StructMatrixMapDataIndex(A, Adstart);
-                     hypre_SubtractIndexes(start, stencil_shape[ssi], ndim, xdstart);
-                     hypre_MapToFineIndex(xdstart, NULL, xfstride, ndim);
-                     hypre_StructVectorMapDataIndex(x, xdstart);
-                  }
-                  else /* Set Adstart above and xdstart here */
-                  {
-                     hypre_AddIndexes(start, stencil_shape[ssi], ndim, xdstart);
-                     hypre_MapToFineIndex(xdstart, NULL, xfstride, ndim);
-                     hypre_StructVectorMapDataIndex(x, xdstart);
-                  }
-
-                  Ap = hypre_StructMatrixBoxData(A, Ab, ssi);
-#define DEVICE_VAR is_device_ptr(yp,xp,Ap)
-                  if (hypre_StructMatrixConstEntry(A, ssi))
-                  {
-                     /* Constant coefficient case */
-                     hypre_BoxLoop2Begin(ndim, loop_size,
-                                         x_data_box, xdstart, xdstride, xi,
-                                         y_data_box, ydstart, ydstride, yi);
-                     {
-                        yp[yi] -= Ap[0] * xp[xi];
-                     }
-                     hypre_BoxLoop2End(xi, yi);
+                     centries[cnentries++] = se;
                   }
                   else
                   {
-                     /* Variable coefficient case */
-                     hypre_BoxLoop3Begin(ndim, loop_size,
-                                         A_data_box, Adstart, Adstride, Ai,
-                                         x_data_box, xdstart, xdstride, xi,
-                                         y_data_box, ydstart, ydstride, yi);
-                     {
-                        yp[yi] -= Ap[Ai] * xp[xi];
-                     }
-                     hypre_BoxLoop3End(Ai, xi, yi);
+                     ventries[vnentries++] = se;
                   }
-#undef DEVICE_VAR
-               } /* loop on stencil vars */
-            } /* hypre_ForBoxI */
-         }
-         else
-         {
+               }
+            }
+
             hypre_ForBoxI(j, compute_box_a)
             {
                hypre_CopyBox(hypre_BoxArrayBox(compute_box_a, j), compute_box);
+               hypre_CopyToIndex(ss_origins[s], ndim, origin);
+               hypre_ProjectBox(compute_box, origin, stride);
+               start = hypre_BoxIMin(compute_box);
+               hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-               /* unroll up to depth UNROLL_MAXDEPTH */
-               for (si = 0; si < nentries; si += UNROLL_MAXDEPTH)
-               {
-                  depth = hypre_min(UNROLL_MAXDEPTH, (stencil_size - si));
+               /* Operate on constant coefficients */
+               hypre_StructMatvecCompute_core_CC(A, x, y, Ab, xb, yb, transpose, cnentries, centries,
+                                                 start, stride, loop_size, xfstride, ran_stride,
+                                                 xdstride, ydstride,
+                                                 x_data_box, y_data_box);
 
-                  cdepth = vdepth = 0;
-                  for (k = 0; k < depth; k++)
-                  {
-                     if (hypre_StructMatrixConstEntry(A, stentries[si + k]))
-                     {
-                        csi[cdepth++] = stentries[si + k];
-                     }
-                     else
-                     {
-                        vsi[vdepth++] = stentries[si + k];
-                     }
-                  }
+               /* Operate on variable coefficients */
+               hypre_StructMatvecCompute_core_VC(A, x, y, Ab, xb, yb, transpose, vnentries, ventries,
+                                                 start, stride, loop_size, xfstride, ran_stride,
+                                                 Adstride, xdstride, ydstride,
+                                                 A_data_box, x_data_box, y_data_box);
 
-                  /* Operate on constant coefficients */
-                  hypre_StructMatvecCompute_core_CC(A, x, y, Ab, xb, yb, cdepth, csi, compute_box,
-                                                    x_data_box, y_data_box);
-
-                  /* Operate on variable coefficients */
-                  hypre_StructMatvecCompute_core_VC(A, x, y, Ab, xb, yb, vdepth, vsi, compute_box,
-                                                    A_data_box, x_data_box, y_data_box);
-               } /* loop on stencil entries */
             } /* hypre_ForBoxI */
-         } /* rectangular/square matrix branch */
-      } /* loop on ran_nboxes */
+         } /* for stencil space s */
+
+         hypre_TFree(se_sspaces, HYPRE_MEMORY_HOST);
+         hypre_TFree(ss_origins, HYPRE_MEMORY_HOST);
+      }
       HYPRE_ANNOTATE_REGION_END("%s", "Computation-Ax");
    }
 
@@ -700,480 +619,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       hypre_StructVectorRestore(x);
    }
    hypre_BoxDestroy(compute_box);
-
-   HYPRE_ANNOTATE_FUNC_END;
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * StructMatrix/Vector multiplication core function for constant coeficients.
- *
- * Note: This function computes -A*x.
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructMatvecCompute_core_CC( hypre_StructMatrix *A,
-                                   hypre_StructVector *x,
-                                   hypre_StructVector *y,
-                                   HYPRE_Int           Ab,
-                                   HYPRE_Int           xb,
-                                   HYPRE_Int           yb,
-                                   HYPRE_Int           nentries,
-                                   HYPRE_Int          *entries,
-                                   hypre_Box          *compute_box,
-                                   hypre_Box          *x_data_box,
-                                   hypre_Box          *y_data_box )
-{
-   HYPRE_Int             ndim = hypre_StructMatrixNDim(A);
-   hypre_StructStencil  *stencil = hypre_StructMatrixStencil(A);
-   hypre_Index          *stencil_shape = hypre_StructStencilShape(stencil);
-
-   hypre_Index           loop_size, ustride;
-   hypre_IndexRef        start;
-
-   HYPRE_Complex        *Ap0 = NULL, *Ap1 = NULL, *Ap2 = NULL;
-   HYPRE_Complex        *Ap3 = NULL, *Ap4 = NULL, *Ap5 = NULL;
-   HYPRE_Complex        *Ap6 = NULL, *Ap7 = NULL, *Ap8 = NULL;
-   HYPRE_Complex        *xp  = NULL, *yp  = NULL;
-   HYPRE_Int             xoff0 = 0, xoff1 = 0, xoff2 = 0;
-   HYPRE_Int             xoff3 = 0, xoff4 = 0, xoff5 = 0;
-   HYPRE_Int             xoff6 = 0, xoff7 = 0, xoff8 = 0;
-
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-
-   start = hypre_BoxIMin(compute_box);
-   hypre_BoxGetSize(compute_box, loop_size);
-   hypre_SetIndex(ustride, 1);
-   xp = hypre_StructVectorBoxData(x, xb);
-   yp = hypre_StructVectorBoxData(y, yb);
-
-#define DEVICE_VAR is_device_ptr(yp,xp)
-   switch (nentries)
-   {
-      case 9:
-         Ap8   = hypre_StructMatrixBoxData(A, Ab, entries[8]);
-         xoff8 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[8]]);
-         HYPRE_FALLTHROUGH;
-
-      case 8:
-         Ap7   = hypre_StructMatrixBoxData(A, Ab, entries[7]);
-         xoff7 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[7]]);
-         HYPRE_FALLTHROUGH;
-
-      case 7:
-         Ap6   = hypre_StructMatrixBoxData(A, Ab, entries[6]);
-         xoff6 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[6]]);
-         HYPRE_FALLTHROUGH;
-
-      case 6:
-         Ap5   = hypre_StructMatrixBoxData(A, Ab, entries[5]);
-         xoff5 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[5]]);
-         HYPRE_FALLTHROUGH;
-
-      case 5:
-         Ap4   = hypre_StructMatrixBoxData(A, Ab, entries[4]);
-         xoff4 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[4]]);
-         HYPRE_FALLTHROUGH;
-
-      case 4:
-         Ap3   = hypre_StructMatrixBoxData(A, Ab, entries[3]);
-         xoff3 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[3]]);
-         HYPRE_FALLTHROUGH;
-
-      case 3:
-         Ap2   = hypre_StructMatrixBoxData(A, Ab, entries[2]);
-         xoff2 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[2]]);
-         HYPRE_FALLTHROUGH;
-
-      case 2:
-         Ap1   = hypre_StructMatrixBoxData(A, Ab, entries[1]);
-         xoff1 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[1]]);
-         HYPRE_FALLTHROUGH;
-
-      case 1:
-         Ap0   = hypre_StructMatrixBoxData(A, Ab, entries[0]);
-         xoff0 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[0]]);
-         HYPRE_FALLTHROUGH;
-
-      case 0:
-         break;
-   }
-
-   switch (nentries)
-   {
-      case 9:
-         hypre_BoxLoop2Begin(ndim, loop_size,
-                             x_data_box, start, ustride, xi,
-                             y_data_box, start, ustride, yi);
-         {
-            yp[yi] -= Ap0[0] * xp[xi + xoff0] +
-                      Ap1[0] * xp[xi + xoff1] +
-                      Ap2[0] * xp[xi + xoff2] +
-                      Ap3[0] * xp[xi + xoff3] +
-                      Ap4[0] * xp[xi + xoff4] +
-                      Ap5[0] * xp[xi + xoff5] +
-                      Ap6[0] * xp[xi + xoff6] +
-                      Ap7[0] * xp[xi + xoff7] +
-                      Ap8[0] * xp[xi + xoff8];
-         }
-         hypre_BoxLoop2End(xi, yi);
-         break;
-
-      case 8:
-         hypre_BoxLoop2Begin(ndim, loop_size,
-                             x_data_box, start, ustride, xi,
-                             y_data_box, start, ustride, yi);
-
-         {
-            yp[yi] -= Ap0[0] * xp[xi + xoff0] +
-                      Ap1[0] * xp[xi + xoff1] +
-                      Ap2[0] * xp[xi + xoff2] +
-                      Ap3[0] * xp[xi + xoff3] +
-                      Ap4[0] * xp[xi + xoff4] +
-                      Ap5[0] * xp[xi + xoff5] +
-                      Ap6[0] * xp[xi + xoff6] +
-                      Ap7[0] * xp[xi + xoff7];
-         }
-         hypre_BoxLoop2End(xi, yi);
-         break;
-
-      case 7:
-         hypre_BoxLoop2Begin(ndim, loop_size,
-                             x_data_box, start, ustride, xi,
-                             y_data_box, start, ustride, yi);
-         {
-            yp[yi] -= Ap0[0] * xp[xi + xoff0] +
-                      Ap1[0] * xp[xi + xoff1] +
-                      Ap2[0] * xp[xi + xoff2] +
-                      Ap3[0] * xp[xi + xoff3] +
-                      Ap4[0] * xp[xi + xoff4] +
-                      Ap5[0] * xp[xi + xoff5] +
-                      Ap6[0] * xp[xi + xoff6];
-         }
-         hypre_BoxLoop2End(xi, yi);
-         break;
-
-      case 6:
-         hypre_BoxLoop2Begin(ndim, loop_size,
-                             x_data_box, start, ustride, xi,
-                             y_data_box, start, ustride, yi);
-         {
-            yp[yi] -= Ap0[0] * xp[xi + xoff0] +
-                      Ap1[0] * xp[xi + xoff1] +
-                      Ap2[0] * xp[xi + xoff2] +
-                      Ap3[0] * xp[xi + xoff3] +
-                      Ap4[0] * xp[xi + xoff4] +
-                      Ap5[0] * xp[xi + xoff5];
-         }
-         hypre_BoxLoop2End(xi, yi);
-         break;
-
-      case 5:
-         hypre_BoxLoop2Begin(ndim, loop_size,
-                             x_data_box, start, ustride, xi,
-                             y_data_box, start, ustride, yi);
-         {
-            yp[yi] -= Ap0[0] * xp[xi + xoff0] +
-                      Ap1[0] * xp[xi + xoff1] +
-                      Ap2[0] * xp[xi + xoff2] +
-                      Ap3[0] * xp[xi + xoff3] +
-                      Ap4[0] * xp[xi + xoff4];
-         }
-         hypre_BoxLoop2End(xi, yi);
-         break;
-
-      case 4:
-         hypre_BoxLoop2Begin(ndim, loop_size,
-                             x_data_box, start, ustride, xi,
-                             y_data_box, start, ustride, yi);
-         {
-            yp[yi] -= Ap0[0] * xp[xi + xoff0] +
-                      Ap1[0] * xp[xi + xoff1] +
-                      Ap2[0] * xp[xi + xoff2] +
-                      Ap3[0] * xp[xi + xoff3];
-         }
-         hypre_BoxLoop2End(xi, yi);
-         break;
-
-      case 3:
-         hypre_BoxLoop2Begin(ndim, loop_size,
-                             x_data_box, start, ustride, xi,
-                             y_data_box, start, ustride, yi);
-         {
-            yp[yi] -= Ap0[0] * xp[xi + xoff0] +
-                      Ap1[0] * xp[xi + xoff1] +
-                      Ap2[0] * xp[xi + xoff2];
-         }
-         hypre_BoxLoop2End(xi, yi);
-         break;
-
-      case 2:
-         hypre_BoxLoop2Begin(ndim, loop_size,
-                             x_data_box, start, ustride, xi,
-                             y_data_box, start, ustride, yi);
-         {
-            yp[yi] -= Ap0[0] * xp[xi + xoff0] +
-                      Ap1[0] * xp[xi + xoff1];
-         }
-         hypre_BoxLoop2End(xi, yi);
-         break;
-
-      case 1:
-         hypre_BoxLoop2Begin(ndim, loop_size,
-                             x_data_box, start, ustride, xi,
-                             y_data_box, start, ustride, yi);
-         {
-            yp[yi] -= Ap0[0] * xp[xi + xoff0];
-         }
-         hypre_BoxLoop2End(xi, yi);
-         break;
-
-      case 0:
-         break;
-   } /* switch (nentries) */
-#undef DEVICE_VAR
-
-   HYPRE_ANNOTATE_FUNC_END;
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * StructMatrix/Vector multiplication core routine for variable coeficients.
- *
- * Note: This function computes -A*x.
- *--------------------------------------------------------------------------*/
-HYPRE_Int
-hypre_StructMatvecCompute_core_VC( hypre_StructMatrix *A,
-                                   hypre_StructVector *x,
-                                   hypre_StructVector *y,
-                                   HYPRE_Int           Ab,
-                                   HYPRE_Int           xb,
-                                   HYPRE_Int           yb,
-                                   HYPRE_Int           nentries,
-                                   HYPRE_Int          *entries,
-                                   hypre_Box          *compute_box,
-                                   hypre_Box          *A_data_box,
-                                   hypre_Box          *x_data_box,
-                                   hypre_Box          *y_data_box )
-{
-   HYPRE_Int             ndim = hypre_StructMatrixNDim(A);
-   hypre_StructStencil  *stencil = hypre_StructMatrixStencil(A);
-   hypre_Index          *stencil_shape = hypre_StructStencilShape(stencil);
-
-   hypre_Index           loop_size, ustride;
-   hypre_IndexRef        start;
-
-   HYPRE_Complex        *Ap0 = NULL, *Ap1 = NULL, *Ap2 = NULL;
-   HYPRE_Complex        *Ap3 = NULL, *Ap4 = NULL, *Ap5 = NULL;
-   HYPRE_Complex        *Ap6 = NULL, *Ap7 = NULL, *Ap8 = NULL;
-   HYPRE_Complex        *xp  = NULL, *yp  = NULL;
-   HYPRE_Int             xoff0, xoff1, xoff2;
-   HYPRE_Int             xoff3, xoff4, xoff5;
-   HYPRE_Int             xoff6, xoff7, xoff8;
-
-   HYPRE_ANNOTATE_FUNC_BEGIN;
-
-   start = hypre_BoxIMin(compute_box);
-   hypre_BoxGetSize(compute_box, loop_size);
-   hypre_SetIndex(ustride, 1);
-   xp = hypre_StructVectorBoxData(x, xb);
-   yp = hypre_StructVectorBoxData(y, yb);
-
-#define DEVICE_VAR is_device_ptr(yp,xp,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,Ap6,Ap7,Ap8)
-   switch (nentries)
-   {
-      case 9:
-         Ap8   = hypre_StructMatrixBoxData(A, Ab, entries[8]);
-         xoff8 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[8]]);
-         HYPRE_FALLTHROUGH;
-
-      case 8:
-         Ap7   = hypre_StructMatrixBoxData(A, Ab, entries[7]);
-         xoff7 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[7]]);
-         HYPRE_FALLTHROUGH;
-
-      case 7:
-         Ap6   = hypre_StructMatrixBoxData(A, Ab, entries[6]);
-         xoff6 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[6]]);
-         HYPRE_FALLTHROUGH;
-
-      case 6:
-         Ap5   = hypre_StructMatrixBoxData(A, Ab, entries[5]);
-         xoff5 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[5]]);
-         HYPRE_FALLTHROUGH;
-
-      case 5:
-         Ap4   = hypre_StructMatrixBoxData(A, Ab, entries[4]);
-         xoff4 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[4]]);
-         HYPRE_FALLTHROUGH;
-
-      case 4:
-         Ap3   = hypre_StructMatrixBoxData(A, Ab, entries[3]);
-         xoff3 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[3]]);
-         HYPRE_FALLTHROUGH;
-
-      case 3:
-         Ap2   = hypre_StructMatrixBoxData(A, Ab, entries[2]);
-         xoff2 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[2]]);
-         HYPRE_FALLTHROUGH;
-
-      case 2:
-         Ap1   = hypre_StructMatrixBoxData(A, Ab, entries[1]);
-         xoff1 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[1]]);
-         HYPRE_FALLTHROUGH;
-
-      case 1:
-         Ap0   = hypre_StructMatrixBoxData(A, Ab, entries[0]);
-         xoff0 = hypre_BoxOffsetDistance(x_data_box, stencil_shape[entries[0]]);
-         HYPRE_FALLTHROUGH;
-
-      case 0:
-         break;
-   }
-
-   switch (nentries)
-   {
-      case 9:
-         hypre_BoxLoop3Begin(ndim, loop_size,
-                             A_data_box, start, ustride, Ai,
-                             x_data_box, start, ustride, xi,
-                             y_data_box, start, ustride, yi);
-         {
-            yp[yi] -= Ap0[Ai] * xp[xi + xoff0] +
-                      Ap1[Ai] * xp[xi + xoff1] +
-                      Ap2[Ai] * xp[xi + xoff2] +
-                      Ap3[Ai] * xp[xi + xoff3] +
-                      Ap4[Ai] * xp[xi + xoff4] +
-                      Ap5[Ai] * xp[xi + xoff5] +
-                      Ap6[Ai] * xp[xi + xoff6] +
-                      Ap7[Ai] * xp[xi + xoff7] +
-                      Ap8[Ai] * xp[xi + xoff8];
-         }
-         hypre_BoxLoop3End(Ai, xi, yi);
-         break;
-
-      case 8:
-         hypre_BoxLoop3Begin(ndim, loop_size,
-                             A_data_box, start, ustride, Ai,
-                             x_data_box, start, ustride, xi,
-                             y_data_box, start, ustride, yi);
-         {
-            yp[yi] -= Ap0[Ai] * xp[xi + xoff0] +
-                      Ap1[Ai] * xp[xi + xoff1] +
-                      Ap2[Ai] * xp[xi + xoff2] +
-                      Ap3[Ai] * xp[xi + xoff3] +
-                      Ap4[Ai] * xp[xi + xoff4] +
-                      Ap5[Ai] * xp[xi + xoff5] +
-                      Ap6[Ai] * xp[xi + xoff6] +
-                      Ap7[Ai] * xp[xi + xoff7];
-         }
-         hypre_BoxLoop3End(Ai, xi, yi);
-         break;
-
-      case 7:
-         hypre_BoxLoop3Begin(ndim, loop_size,
-                             A_data_box, start, ustride, Ai,
-                             x_data_box, start, ustride, xi,
-                             y_data_box, start, ustride, yi);
-         {
-            yp[yi] -= Ap0[Ai] * xp[xi + xoff0] +
-                      Ap1[Ai] * xp[xi + xoff1] +
-                      Ap2[Ai] * xp[xi + xoff2] +
-                      Ap3[Ai] * xp[xi + xoff3] +
-                      Ap4[Ai] * xp[xi + xoff4] +
-                      Ap5[Ai] * xp[xi + xoff5] +
-                      Ap6[Ai] * xp[xi + xoff6];
-         }
-         hypre_BoxLoop3End(Ai, xi, yi);
-         break;
-
-      case 6:
-         hypre_BoxLoop3Begin(ndim, loop_size,
-                             A_data_box, start, ustride, Ai,
-                             x_data_box, start, ustride, xi,
-                             y_data_box, start, ustride, yi);
-         {
-            yp[yi] -= Ap0[Ai] * xp[xi + xoff0] +
-                      Ap1[Ai] * xp[xi + xoff1] +
-                      Ap2[Ai] * xp[xi + xoff2] +
-                      Ap3[Ai] * xp[xi + xoff3] +
-                      Ap4[Ai] * xp[xi + xoff4] +
-                      Ap5[Ai] * xp[xi + xoff5];
-         }
-         hypre_BoxLoop3End(Ai, xi, yi);
-         break;
-
-      case 5:
-         hypre_BoxLoop3Begin(ndim, loop_size,
-                             A_data_box, start, ustride, Ai,
-                             x_data_box, start, ustride, xi,
-                             y_data_box, start, ustride, yi);
-         {
-            yp[yi] -= Ap0[Ai] * xp[xi + xoff0] +
-                      Ap1[Ai] * xp[xi + xoff1] +
-                      Ap2[Ai] * xp[xi + xoff2] +
-                      Ap3[Ai] * xp[xi + xoff3] +
-                      Ap4[Ai] * xp[xi + xoff4];
-         }
-         hypre_BoxLoop3End(Ai, xi, yi);
-         break;
-
-      case 4:
-         hypre_BoxLoop3Begin(ndim, loop_size,
-                             A_data_box, start, ustride, Ai,
-                             x_data_box, start, ustride, xi,
-                             y_data_box, start, ustride, yi);
-         {
-            yp[yi] -= Ap0[Ai] * xp[xi + xoff0] +
-                      Ap1[Ai] * xp[xi + xoff1] +
-                      Ap2[Ai] * xp[xi + xoff2] +
-                      Ap3[Ai] * xp[xi + xoff3];
-         }
-         hypre_BoxLoop3End(Ai, xi, yi);
-         break;
-
-      case 3:
-         hypre_BoxLoop3Begin(ndim, loop_size,
-                             A_data_box, start, ustride, Ai,
-                             x_data_box, start, ustride, xi,
-                             y_data_box, start, ustride, yi);
-         {
-            yp[yi] -= Ap0[Ai] * xp[xi + xoff0] +
-                      Ap1[Ai] * xp[xi + xoff1] +
-                      Ap2[Ai] * xp[xi + xoff2];
-         }
-         hypre_BoxLoop3End(Ai, xi, yi);
-         break;
-
-      case 2:
-         hypre_BoxLoop3Begin(ndim, loop_size,
-                             A_data_box, start, ustride, Ai,
-                             x_data_box, start, ustride, xi,
-                             y_data_box, start, ustride, yi);
-         {
-            yp[yi] -= Ap0[Ai] * xp[xi + xoff0] +
-                      Ap1[Ai] * xp[xi + xoff1];
-         }
-         hypre_BoxLoop3End(Ai, xi, yi);
-         break;
-
-      case 1:
-         hypre_BoxLoop3Begin(ndim, loop_size,
-                             A_data_box, start, ustride, Ai,
-                             x_data_box, start, ustride, xi,
-                             y_data_box, start, ustride, yi);
-         {
-            yp[yi] -= Ap0[Ai] * xp[xi + xoff0];
-         }
-         hypre_BoxLoop3End(Ai, xi, yi);
-         break;
-
-      case 0:
-         break;
-   } /* switch (nentries) */
-#undef DEVICE_VAR
 
    HYPRE_ANNOTATE_FUNC_END;
 

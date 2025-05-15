@@ -1012,7 +1012,8 @@ HYPRE_IJMatrixGetValuesAndZeroOut( HYPRE_IJMatrix matrix,
    if (exec == HYPRE_EXEC_DEVICE)
    {
       /* TODO: add device implementation */
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "HYPRE_IJMatrixGetValuesAndZeroOut not implemented for GPUs!");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "HYPRE_IJMatrixGetValuesAndZeroOut not implemented for GPUs!");
 
       if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
       {

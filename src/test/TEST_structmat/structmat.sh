@@ -33,6 +33,16 @@ FILESmatmat="\
  ${TNAME}.out.2D3.x.RA\
  ${TNAME}.out.2D3.x.AP\
 "
+FILESmatmatsym="\
+ ${TNAME}.out.2D0.sym.x\
+ ${TNAME}.out.2D1.sym.x\
+ ${TNAME}.out.2D2.sym.x\
+ ${TNAME}.out.2D3.sym.x\
+ ${TNAME}.out.2D0.sym.x.4\
+ ${TNAME}.out.2D1.sym.x.4\
+ ${TNAME}.out.2D2.sym.x.4\
+ ${TNAME}.out.2D3.sym.x.4\
+"
 FILESmatvec="\
  ${TNAME}.out.2D0.mv0\
  ${TNAME}.out.2D0.mv1\
@@ -55,6 +65,11 @@ FILESmatvec="\
  ${TNAME}.out.2D1.mv2.4\
  ${TNAME}.out.2D1.mv3.4\
  ${TNAME}.out.2D1.mv4.4\
+ ${TNAME}.out.2D3.mv0.4\
+"
+FILESmatvecsym="\
+ ${TNAME}.out.2D0.mv0.4\
+ ${TNAME}.out.2D1.mv0.4\
  ${TNAME}.out.2D3.mv0.4\
 "
 FILESab="\
@@ -118,6 +133,37 @@ do
    do
       saved=`echo $j | sed 's/.out/.saved/'`
       diff -U3 -bI"time" $j $saved >&2
+   done
+done
+
+# Symmetric Matmat tests
+for i in $FILESmatmatsym
+do
+   for j in ${i}.matmat.*
+   do
+      saved=`echo $j | sed 's/.out/.saved/'`
+      diff -U3 -bI"time" $j $saved >&2
+   done
+done
+
+# Symmetric Matvec tests
+for i in $FILESmatvec
+do
+   for j in ${i}.matvec.*
+   do
+      saved=`echo $j | sed 's/.out/.saved/' | sed 's/.sym//'`
+      diff -U3 -bI"time" $j $saved >&2
+   done
+done
+
+# Symmetric MatvecT tests
+for i in $FILESmatvec
+do
+   for j in ${i}.matvec.*
+   do
+      matvecT=`echo $j | sed 's/mv/mvT/' | sed 's/matvec/matvecT/'`
+      saved=`echo $j | sed 's/.out/.saved/' | sed 's/.sym//'`
+      diff -U3 -bI"time" $matvecT $saved >&2
    done
 done
 

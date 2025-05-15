@@ -47,6 +47,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_StructVector  **b_l;
    hypre_StructVector  **x_l;
 
+   hypre_StructMatmultData **Ammdata_l;
+
    /* temp vectors */
    hypre_StructVector  **tx_l;
    hypre_StructVector  **r_l;
@@ -123,6 +125,9 @@ hypre_PFMGSetup( void               *pfmg_vdata,
     * Set up matrix and vector structures
     *-----------------------------------------------------*/
 
+   /* RDF: Rework this for vectors to avoid data copies in Resize(), similar to
+    * what is being done for matrices. */
+
    /* Modify the rap_type if red-black Gauss-Seidel is used.  Red-black gs is
     * used only in the non-Galerkin case. */
    if (relax_type == 2 || relax_type == 3)   /* red-black gs */
@@ -141,6 +146,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    r_l    = tx_l;
    e_l    = tx_l;
 
+   Ammdata_l = hypre_TAlloc(hypre_StructMatmultData *, num_levels, HYPRE_MEMORY_HOST);
+
    hypre_StructGridRef(grid, &grid_l[0]);
    A_l[0] = hypre_StructMatrixRef(A);
    b_l[0] = hypre_StructVectorRef(b);
@@ -157,6 +164,13 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    //   hypre_StructAssumedPartitionPrint("zAP", hypre_BoxManAssumedPartition(
    //                                        hypre_StructGridBoxMan(grid_l[0])));
 
+   /* Use hypre_StructMatrixInitializeShell() and InitializeData() below to do
+    * PtAPSetup() (and RTtAPSetup) first, then use MatmulMultiply() to allocate
+    * data and complete the multiply.  This will avoid copies. */
+
+   /* First set up the matrix shells (no data allocated) to adjust data spaces
+    * without requiring memory copies */
+
    for (l = 0; l < (num_levels - 1); l++)
    {
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
@@ -166,7 +180,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_PFMGSetStride(cdir, stride);
 
       /* set up interpolation and restriction operators */
-      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Interpolation");
       P_l[l] = hypre_zPFMGCreateInterpOp(A_l[l], cdir, stride, rap_type);
       RT_l[l] = P_l[l];
 #if 0 /* TODO: Allow RT != P */
@@ -176,33 +189,39 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       }
 #endif
       HYPRE_StructMatrixSetTranspose(RT_l[l], 1);
-      hypre_StructMatrixInitialize(P_l[l]);
-      hypre_zPFMGSetupInterpOp(P_l[l], A_l[l], cdir);
-#if 0 /* TODO: Allow RT != P */
-      if (nonsymmetric_cycle)
-      {
-         hypre_StructMatrixInitialize(RT_l[l]);
-         hypre_zPFMGSetupRestrictOp(RT_l[l], A_l[l], cdir);
-      }
-#endif
-      HYPRE_ANNOTATE_REGION_END("%s", "Interpolation");
 
-      HYPRE_ANNOTATE_REGION_BEGIN("%s", "RAP");
       if (rap_type == 0)
       {
+         hypre_StructMatrixInitializeShell(P_l[l]);
+#if 0 /* TODO: Allow RT != P */
+         if (nonsymmetric_cycle)
+         {
+            hypre_StructMatrixInitializeShell(RT_l[l]);
+         }
+#endif
          if (RT_l[l] != P_l[l])
          {
             /* If restriction is not the same as interpolation, compute RAP */
-            hypre_StructMatrixRTtAP(RT_l[l], A_l[l], P_l[l], &A_l[l + 1]);
+            hypre_StructMatrixRTtAPSetup(RT_l[l], A_l[l], P_l[l], &Ammdata_l[l + 1], &A_l[l + 1]);
          }
          else
          {
-            hypre_StructMatrixPtAP(A_l[l], P_l[l], &A_l[l + 1]);
+            hypre_StructMatrixPtAPSetup(A_l[l], P_l[l], &Ammdata_l[l + 1], &A_l[l + 1]);
          }
          hypre_StructGridRef(hypre_StructMatrixGrid(A_l[l + 1]), &grid_l[l + 1]);
       }
       else
       {
+         hypre_StructMatrixInitialize(P_l[l]);
+         hypre_zPFMGSetupInterpOp(P_l[l], A_l[l], cdir);
+#if 0 /* TODO: Allow RT != P */
+         if (nonsymmetric_cycle)
+         {
+            hypre_StructMatrixInitialize(RT_l[l]);
+            hypre_zPFMGSetupRestrictOp(RT_l[l], A_l[l], cdir);
+         }
+#endif
+
          /* RDF: The coarse grid should be computed in CreateRAPOp() */
          hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l + 1]);
          hypre_StructGridAssemble(grid_l[l + 1]);
@@ -211,7 +230,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          hypre_StructMatrixInitialize(A_l[l + 1]);
          hypre_PFMGSetupRAPOp(RT_l[l], A_l[l], P_l[l], cdir, cindex, stride, rap_type, A_l[l + 1]);
       }
-      HYPRE_ANNOTATE_REGION_END("%s", "RAP");
 
       //      /* RDF AP Debug */
       //      hypre_StructAssumedPartitionPrint("zAP", hypre_BoxManAssumedPartition(
@@ -236,6 +254,32 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
       HYPRE_ANNOTATE_MGLEVEL_END(l);
    }
+
+   /* Now finish up the matrices */
+
+   for (l = 0; l < (num_levels - 1); l++)
+   {
+      HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
+      cdir = cdir_l[l];
+
+      if (rap_type == 0)
+      {
+         hypre_StructMatrixInitializeData(P_l[l], NULL);
+         hypre_zPFMGSetupInterpOp(P_l[l], A_l[l], cdir);
+#if 0 /* TODO: Allow RT != P */
+         if (nonsymmetric_cycle)
+         {
+            hypre_StructMatrixInitializeData(RT_l[l], NULL);
+            hypre_zPFMGSetupRestrictOp(RT_l[l], A_l[l], cdir);
+         }
+#endif
+         hypre_StructMatmultMultiply(Ammdata_l[l + 1]);
+      }
+
+      HYPRE_ANNOTATE_MGLEVEL_END(l);
+   }
+
+   hypre_TFree(Ammdata_l, HYPRE_MEMORY_HOST);
 
    (pfmg_data -> grid_l) = grid_l;
    (pfmg_data -> A_l)    = A_l;

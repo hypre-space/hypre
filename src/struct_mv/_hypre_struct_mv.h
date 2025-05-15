@@ -1495,11 +1495,9 @@ typedef struct hypre_StructMatrix_struct
    MPI_Comm              comm;
 
    hypre_StructGrid     *grid;             /* Base grid */
-   HYPRE_Int             ran_ghsize;       /* Number of vars in range grid including ghosts */
    HYPRE_Int             ran_nboxes;       /* Range grid number of boxes */
    HYPRE_Int            *ran_boxnums;      /* Range grid boxnums in base grid */
    hypre_Index           ran_stride;       /* Range grid coarsening stride */
-   HYPRE_Int             dom_ghsize;       /* Number of vars in domain grid including ghosts */
    HYPRE_Int             dom_nboxes;       /* Domain grid number of boxes */
    HYPRE_Int            *dom_boxnums;      /* Domain grid boxnums in base grid */
    hypre_Index           dom_stride;       /* Domain grid coarsening stride */
@@ -1553,12 +1551,10 @@ typedef struct hypre_StructMatrix_struct
 
 #define hypre_StructMatrixComm(matrix)                ((matrix) -> comm)
 #define hypre_StructMatrixGrid(matrix)                ((matrix) -> grid)
-#define hypre_StructMatrixRanGhsize(matrix)           ((matrix) -> ran_ghsize)
 #define hypre_StructMatrixRanNBoxes(matrix)           ((matrix) -> ran_nboxes)
 #define hypre_StructMatrixRanBoxnums(matrix)          ((matrix) -> ran_boxnums)
 #define hypre_StructMatrixRanBoxnum(matrix, i)        ((matrix) -> ran_boxnums[i])
 #define hypre_StructMatrixRanStride(matrix)           ((matrix) -> ran_stride)
-#define hypre_StructMatrixDomGhsize(matrix)           ((matrix) -> dom_ghsize)
 #define hypre_StructMatrixDomNBoxes(matrix)           ((matrix) -> dom_nboxes)
 #define hypre_StructMatrixDomBoxnums(matrix)          ((matrix) -> dom_boxnums)
 #define hypre_StructMatrixDomBoxnum(matrix, i)        ((matrix) -> dom_boxnums[i])
@@ -1757,25 +1753,22 @@ hypre_StructVectorBoxDataValue(vector, hypre_StructVectorGridDataBox(vector, i),
 #ifndef hypre_STRUCT_MATMULT_HEADER
 #define hypre_STRUCT_MATMULT_HEADER
 
-#ifdef MAXTERMS
-#undef MAXTERMS
-#endif
-#define MAXTERMS 3
-
 /*--------------------------------------------------------------------------
  * StructMatmultDataMH data structure
+ *
+ * Note: Only up to 3 matrix terms are currently allowed in the product.
  *--------------------------------------------------------------------------*/
 
 /* product term used to compute the variable stencil entries in M */
 typedef struct hypre_StructMatmultDataMH_struct
 {
-   hypre_StTerm    terms[MAXTERMS];   /* stencil info for each term */
-   HYPRE_Int       mentry;            /* stencil entry for M */
-   HYPRE_Complex   cprod;             /* product of the constant terms */
-   HYPRE_Int       types[MAXTERMS];   /* types of computations to do for each term */
-   HYPRE_Complex  *tptrs[MAXTERMS];   /* pointers to matrix data for each term */
-   //HYPRE_Int       offsets[MAXTERMS]; /* (RDF: Needed? Similar to tptrs and not used.) */
-   HYPRE_Complex  *mptr;              /* pointer to matrix data for M */
+   hypre_StTerm    terms[3];     /* stencil info for each term */
+   HYPRE_Int       mentry;       /* stencil entry for M */
+   HYPRE_Complex   cprod;        /* product of the constant terms */
+   HYPRE_Int       types[3];     /* types of computations to do for each term */
+   HYPRE_Complex  *tptrs[3];     /* pointers to matrix data for each term */
+   //HYPRE_Int       offsets[3];   /* RDF: Not needed - keep for now */
+   HYPRE_Complex  *mptr;         /* pointer to matrix data for M */
 
 } hypre_StructMatmultDataMH;
 
@@ -1792,12 +1785,10 @@ typedef struct hypre_StructMatmultDataM_struct
    hypre_StructMatrix         *M;              /* matmult matrix being computed */
    hypre_StMatrix             *st_M;           /* stencil matrix for M */
 
-   HYPRE_Int                   nconst;         /* number of constant entries in M */
-   HYPRE_Int                  *const_entries;  /* constant entries in M */
-   HYPRE_Complex              *const_values;   /* constant values in M */
-
-   HYPRE_Int                   na;             /* size of the matmult helper */
-   hypre_StructMatmultDataMH  *a;              /* helper for computing the matmult */
+   HYPRE_Int                   nc;             /* size of array c */
+   hypre_StructMatmultDataMH  *c;              /* helper for computing constant entries */
+   HYPRE_Int                   na;             /* size of array a */
+   hypre_StructMatmultDataMH  *a;              /* helper for computing variable entries */
 
 } hypre_StructMatmultDataM;
 
@@ -1823,11 +1814,8 @@ typedef struct hypre_StructMatmultData_struct
 
    hypre_StructVector   *mask;            /* bit mask for mixed constant-variable coeff multiplies */
    hypre_CommPkg        *comm_pkg;        /* pointer to agglomerated communication package */
-   hypre_CommPkg       **comm_pkg_a;      /* pointer to communication packages */
    HYPRE_Complex       **comm_data;       /* pointer to agglomerated communication data */
-   HYPRE_Complex      ***comm_data_a;     /* pointer to communication data */
-   HYPRE_Int             num_comm_pkgs;   /* number of communication packages to be agglomerated */
-   HYPRE_Int             num_comm_blocks; /* total number of communication blocks */
+   hypre_CommStencil   **comm_stencils;   /* comm stencils used to define communication */
 
 } hypre_StructMatmultData;
 
@@ -2272,106 +2260,95 @@ hypre_StructMatmultCreate( HYPRE_Int                  max_matmults,
 HYPRE_Int
 hypre_StructMatmultDestroy( hypre_StructMatmultData *mmdata );
 HYPRE_Int
-hypre_StructMatmultSetup( hypre_StructMatmultData  *mmdata,
-                          HYPRE_Int                 nmatrices_in,
-                          hypre_StructMatrix      **matrices_in,
-                          HYPRE_Int                 nterms,
-                          HYPRE_Int                *terms_in,
-                          HYPRE_Int                *transposes_in,
-                          HYPRE_Int                *iM_ptr );
+hypre_StructMatmultSetProduct( hypre_StructMatmultData  *mmdata,
+                               HYPRE_Int                 nmatrices_in,
+                               hypre_StructMatrix      **matrices_in,
+                               HYPRE_Int                 nterms,
+                               HYPRE_Int                *terms_in,
+                               HYPRE_Int                *transposes_in,
+                               HYPRE_Int                *iM_ptr );
 HYPRE_Int
-hypre_StructMatmultInit( hypre_StructMatmultData  *mmdata,
-                         HYPRE_Int                 assemble_grid );
+hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
+                               HYPRE_Int                 assemble_grid );
+HYPRE_Int
+hypre_StructMatmultCommSetup( hypre_StructMatmultData  *mmdata );
 HYPRE_Int
 hypre_StructMatmultCommunicate( hypre_StructMatmultData  *mmdata );
 HYPRE_Int
 hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
                             HYPRE_Int                 iM );
-HYPRE_Int hypre_StructMatmultCompute_core_double ( hypre_StructMatmultDataMH *a, HYPRE_Int na,
-                                                   HYPRE_Int ndim, hypre_Index loop_size, HYPRE_Int stencil_size, hypre_Box *fdbox,
-                                                   hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart,
-                                                   hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_triple ( hypre_StructMatmultDataMH *a, HYPRE_Int na,
-                                                   HYPRE_Int ndim, hypre_Index loop_size, HYPRE_Int stencil_size, hypre_Box *fdbox,
-                                                   hypre_Index fdstart, hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart,
-                                                   hypre_Index cdstride, hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_generic ( hypre_StructMatmultDataMH *a, HYPRE_Int na,
-                                                    HYPRE_Int nterms, HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *fdbox, hypre_Index fdstart,
-                                                    hypre_Index fdstride, hypre_Box *cdbox, hypre_Index cdstart, hypre_Index cdstride, hypre_Box *Mdbox,
-                                                    hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_1d ( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
-                                               HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr, HYPRE_Int ndim,
-                                               hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
-                                               hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_1db ( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
-                                                HYPRE_Int **order, HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr,
-                                                HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
-                                                hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_1dbb( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
-                                                HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr, HYPRE_Int ndim,
-                                                hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
-                                                hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_2d( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
-                                              HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr, HYPRE_Int ndim,
-                                              hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
-                                              hypre_Box *hdbox, hypre_Index hdstart, hypre_Index hdstride, hypre_Box *Mdbox, hypre_Index Mdstart,
-                                              hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_2db ( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
-                                                HYPRE_Int **order, HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr,
-                                                HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
-                                                hypre_Box *hdbox, hypre_Index hdstart, hypre_Index hdstride, hypre_Box *Mdbox, hypre_Index Mdstart,
-                                                hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_1t ( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
-                                               HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr, HYPRE_Int ndim,
-                                               hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
-                                               hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_1tb ( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
-                                                HYPRE_Int **order, HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr,
-                                                HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
-                                                hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_1tbb( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
-                                                HYPRE_Int **order, HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr,
-                                                HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
-                                                hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_1tbbb( hypre_StructMatmultDataMH *a,
-                                                 HYPRE_Int ncomponents, HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr,
-                                                 HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
-                                                 hypre_Box *Mdbox, hypre_Index Mdstart, hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_2t( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
-                                              HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr, HYPRE_Int ndim,
-                                              hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
-                                              hypre_Box *hdbox, hypre_Index hdstart, hypre_Index hdstride, hypre_Box *Mdbox, hypre_Index Mdstart,
-                                              hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_2tb( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
-                                               HYPRE_Int **order, HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr,
-                                               HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
-                                               hypre_Box *hdbox, hypre_Index hdstart, hypre_Index hdstride, hypre_Box *Mdbox, hypre_Index Mdstart,
-                                               hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_2etb( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
-                                                HYPRE_Int **order, HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr,
-                                                HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
-                                                hypre_Box *hdbox, hypre_Index hdstart, hypre_Index hdstride, hypre_Box *Mdbox, hypre_Index Mdstart,
-                                                hypre_Index Mdstride );
-HYPRE_Int hypre_StructMatmultCompute_core_2tbb( hypre_StructMatmultDataMH *a, HYPRE_Int ncomponents,
-                                                HYPRE_Int **order, HYPRE_Complex *cprod, const HYPRE_Complex ***tptrs, HYPRE_Complex *mptr,
-                                                HYPRE_Int ndim, hypre_Index loop_size, hypre_Box *gdbox, hypre_Index gdstart, hypre_Index gdstride,
-                                                hypre_Box *hdbox, hypre_Index hdstart, hypre_Index hdstride, hypre_Box *Mdbox, hypre_Index Mdstart,
-                                                hypre_Index Mdstride );
+HYPRE_Int
+hypre_StructMatmultCompute_core_generic( hypre_StructMatmultDataMH *a,
+                                         HYPRE_Int    na,
+                                         HYPRE_Int    nterms,
+                                         HYPRE_Int    ndim,
+                                         hypre_Index  loop_size,
+                                         hypre_Box   *fdbox,
+                                         hypre_Index  fdstart,
+                                         hypre_Index  fdstride,
+                                         hypre_Box   *cdbox,
+                                         hypre_Index  cdstart,
+                                         hypre_Index  cdstride,
+                                         hypre_Box   *Mdbox,
+                                         hypre_Index  Mdstart,
+                                         hypre_Index  Mdstride );
 HYPRE_Int
 hypre_StructMatmultGetMatrix( hypre_StructMatmultData  *mmdata,
                               HYPRE_Int                 iM,
                               hypre_StructMatrix      **M_ptr );
+HYPRE_Int
+hypre_StructMatmultSetup( HYPRE_Int                  nmatrices,
+                          hypre_StructMatrix       **matrices,
+                          HYPRE_Int                  nterms,
+                          HYPRE_Int                 *terms,
+                          HYPRE_Int                 *trans,
+                          hypre_StructMatmultData  **mmdata_ptr,
+                          hypre_StructMatrix       **M_ptr );
+HYPRE_Int
+hypre_StructMatmultMultiply( hypre_StructMatmultData  *mmdata );
 HYPRE_Int hypre_StructMatmult ( HYPRE_Int nmatrices, hypre_StructMatrix **matrices,
                                 HYPRE_Int nterms, HYPRE_Int *terms, HYPRE_Int *trans,
                                 hypre_StructMatrix **M_ptr );
-HYPRE_Int hypre_StructMatmat ( hypre_StructMatrix *A, hypre_StructMatrix *B,
-                               hypre_StructMatrix **M_ptr );
-HYPRE_Int hypre_StructMatrixPtAP ( hypre_StructMatrix *A, hypre_StructMatrix *P,
-                                   hypre_StructMatrix **M_ptr );
-HYPRE_Int hypre_StructMatrixRAP ( hypre_StructMatrix *R, hypre_StructMatrix *A,
-                                  hypre_StructMatrix *P, hypre_StructMatrix **M_ptr );
-HYPRE_Int hypre_StructMatrixRTtAP ( hypre_StructMatrix *RT, hypre_StructMatrix *A,
-                                    hypre_StructMatrix *P, hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatmatSetup( hypre_StructMatrix        *A,
+                         hypre_StructMatrix        *B,
+                         hypre_StructMatmultData  **mmdata_ptr,
+                         hypre_StructMatrix       **M_ptr );
+HYPRE_Int
+hypre_StructMatmat( hypre_StructMatrix  *A,
+                    hypre_StructMatrix  *B,
+                    hypre_StructMatrix **M_ptr );
+HYPRE_Int
+hypre_StructMatrixPtAPSetup( hypre_StructMatrix        *A,
+                             hypre_StructMatrix        *P,
+                             hypre_StructMatmultData  **mmdata_ptr,
+                             hypre_StructMatrix       **M_ptr);
+HYPRE_Int
+hypre_StructMatrixPtAP( hypre_StructMatrix  *A,
+                        hypre_StructMatrix  *P,
+                        hypre_StructMatrix **M_ptr);
+HYPRE_Int
+hypre_StructMatrixRAPSetup( hypre_StructMatrix        *R,
+                            hypre_StructMatrix        *A,
+                            hypre_StructMatrix        *P,
+                            hypre_StructMatmultData  **mmdata_ptr,
+                            hypre_StructMatrix       **M_ptr);
+HYPRE_Int
+hypre_StructMatrixRAP( hypre_StructMatrix  *R,
+                       hypre_StructMatrix  *A,
+                       hypre_StructMatrix  *P,
+                       hypre_StructMatrix **M_ptr);
+HYPRE_Int
+hypre_StructMatrixRTtAPSetup( hypre_StructMatrix        *RT,
+                              hypre_StructMatrix        *A,
+                              hypre_StructMatrix        *P,
+                              hypre_StructMatmultData  **mmdata_ptr,
+                              hypre_StructMatrix       **M_ptr);
+HYPRE_Int
+hypre_StructMatrixRTtAP( hypre_StructMatrix  *RT,
+                         hypre_StructMatrix  *A,
+                         hypre_StructMatrix  *P,
+                         hypre_StructMatrix **M_ptr);
 HYPRE_Int
 hypre_StructMatrixAddInit( HYPRE_Int                  nmatrices,
                            hypre_StructMatrix       **matrices,
@@ -2380,6 +2357,41 @@ HYPRE_Int
 hypre_StructMatrixAddMat( hypre_StructMatrix       *A,
                           HYPRE_Complex             alpha,
                           hypre_StructMatrix       *B );
+
+/* struct_matmult_core.c */
+HYPRE_Int
+hypre_StructMatmultCompute_core( HYPRE_Int                  nterms,
+                                 hypre_StructMatmultDataMH *a,
+                                 HYPRE_Int                  na,
+                                 HYPRE_Int                  ndim,
+                                 hypre_Index                loop_size,
+                                 HYPRE_Int                  stencil_size,
+                                 hypre_Box                 *fdbox,
+                                 hypre_Index                fdstart,
+                                 hypre_Index                fdstride,
+                                 hypre_Box                 *cdbox,
+                                 hypre_Index                cdstart,
+                                 hypre_Index                cdstride,
+                                 hypre_Box                 *Mdbox,
+                                 hypre_Index                Mdstart,
+                                 hypre_Index                Mdstride );
+
+/* struct_matmult_fuse.c */
+HYPRE_Int
+hypre_StructMatmultCompute_fuse_triple( hypre_StructMatmultDataMH *a,
+                                        HYPRE_Int    na,
+                                        HYPRE_Int    ndim,
+                                        hypre_Index  loop_size,
+                                        HYPRE_Int    stencil_size,
+                                        hypre_Box   *fdbox,
+                                        hypre_Index  fdstart,
+                                        hypre_Index  fdstride,
+                                        hypre_Box   *cdbox,
+                                        hypre_Index  cdstart,
+                                        hypre_Index  cdstride,
+                                        hypre_Box   *Mdbox,
+                                        hypre_Index  Mdstart,
+                                        hypre_Index  Mdstride );
 
 /* struct_matop.c */
 HYPRE_Int hypre_StructMatrixZeroDiagonal( hypre_StructMatrix *A );
@@ -2414,6 +2426,13 @@ HYPRE_Int hypre_StructMatrixPlaceStencil ( hypre_StructMatrix *matrix, HYPRE_Int
 HYPRE_Int hypre_StructMatrixGetStencilStride ( hypre_StructMatrix *matrix, hypre_Index stride );
 HYPRE_Int hypre_StructMatrixGetStencilSpace ( hypre_StructMatrix *matrix, HYPRE_Int entry,
                                               HYPRE_Int transpose, hypre_Index origin, hypre_Index stride );
+HYPRE_Int
+hypre_StructMatrixGetStSpaces( hypre_StructMatrix *matrix,
+                               HYPRE_Int           transpose,
+                               HYPRE_Int          *num_sspaces_ptr,
+                               HYPRE_Int         **sentry_sspaces_ptr,
+                               hypre_Index       **sspace_origins_ptr,
+                               hypre_Index         stride );
 HYPRE_Int hypre_StructMatrixMapCommInfo ( hypre_StructMatrix *matrix, hypre_IndexRef origin,
                                           hypre_Index stride, hypre_CommInfo *comm_info );
 HYPRE_Int hypre_StructMatrixCreateCommPkg ( hypre_StructMatrix *matrix, hypre_CommInfo *comm_info,
@@ -2434,6 +2453,13 @@ HYPRE_Int
 hypre_StructMatrixComputeDataSpace( hypre_StructMatrix *matrix,
                                     HYPRE_Int          *num_ghost,
                                     hypre_BoxArray    **data_space_ptr );
+HYPRE_Int
+hypre_StructMatrixGrowDataSpace( hypre_StructMatrix *matrix,
+                                 HYPRE_Int          *num_ghost,
+                                 hypre_BoxArray    **data_space_ptr );
+HYPRE_Int
+hypre_StructMatrixNeedResize( hypre_StructMatrix *matrix,
+                              hypre_BoxArray     *data_space );
 HYPRE_Int hypre_StructMatrixResize ( hypre_StructMatrix *matrix, hypre_BoxArray *data_space );
 HYPRE_Int hypre_StructMatrixRestore ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixForget ( hypre_StructMatrix *matrix );
@@ -2491,6 +2517,13 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                            hypre_StructVector *x,
                            HYPRE_Complex       beta,
                            hypre_StructVector *y );
+HYPRE_Int hypre_StructMatvecDestroy ( void *matvec_vdata );
+HYPRE_Int hypre_StructMatvec ( HYPRE_Complex alpha, hypre_StructMatrix *A, hypre_StructVector *x,
+                               HYPRE_Complex beta, hypre_StructVector *y );
+HYPRE_Int hypre_StructMatvecT ( HYPRE_Complex alpha, hypre_StructMatrix *A, hypre_StructVector *x,
+                                HYPRE_Complex beta, hypre_StructVector *y );
+
+/* struct_matvec_core.c */
 HYPRE_Int
 hypre_StructMatvecCompute_core_CC( hypre_StructMatrix *A,
                                    hypre_StructVector *x,
@@ -2498,9 +2531,16 @@ hypre_StructMatvecCompute_core_CC( hypre_StructMatrix *A,
                                    HYPRE_Int           Ab,
                                    HYPRE_Int           xb,
                                    HYPRE_Int           yb,
+                                   HYPRE_Int           transpose,
                                    HYPRE_Int           nentries,
                                    HYPRE_Int          *entries,
-                                   hypre_Box          *compute_box,
+                                   hypre_IndexRef      start,
+                                   hypre_IndexRef      stride,
+                                   hypre_IndexRef      loop_size,
+                                   hypre_IndexRef      xfstride,
+                                   hypre_IndexRef      ran_stride,
+                                   hypre_IndexRef      xdstride,
+                                   hypre_IndexRef      ydstride,
                                    hypre_Box          *x_data_box,
                                    hypre_Box          *y_data_box );
 HYPRE_Int
@@ -2510,18 +2550,20 @@ hypre_StructMatvecCompute_core_VC( hypre_StructMatrix *A,
                                    HYPRE_Int           Ab,
                                    HYPRE_Int           xb,
                                    HYPRE_Int           yb,
+                                   HYPRE_Int           transpose,
                                    HYPRE_Int           nentries,
                                    HYPRE_Int          *entries,
-                                   hypre_Box          *compute_box,
+                                   hypre_IndexRef      start,
+                                   hypre_IndexRef      stride,
+                                   hypre_IndexRef      loop_size,
+                                   hypre_IndexRef      xfstride,
+                                   hypre_IndexRef      ran_stride,
+                                   hypre_IndexRef      Adstride,
+                                   hypre_IndexRef      xdstride,
+                                   hypre_IndexRef      ydstride,
                                    hypre_Box          *A_data_box,
                                    hypre_Box          *x_data_box,
                                    hypre_Box          *y_data_box );
-HYPRE_Int hypre_StructMatvecDestroy ( void *matvec_vdata );
-HYPRE_Int hypre_StructMatvec ( HYPRE_Complex alpha, hypre_StructMatrix *A, hypre_StructVector *x,
-                               HYPRE_Complex beta, hypre_StructVector *y );
-HYPRE_Int hypre_StructMatvecT ( HYPRE_Complex alpha, hypre_StructMatrix *A, hypre_StructVector *x,
-                                HYPRE_Complex beta, hypre_StructVector *y );
-
 /* struct_scale.c */
 HYPRE_Int hypre_StructScale ( HYPRE_Complex alpha, hypre_StructVector *y );
 

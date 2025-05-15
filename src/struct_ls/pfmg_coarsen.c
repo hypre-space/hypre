@@ -48,8 +48,8 @@ hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A,
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    A_diag = (diag_is_constant) ?
-     hypre_StructMatrixConstData(A, diag_entry) :
-     hypre_StructMatrixBoxData(A, Ab, diag_entry);
+            hypre_StructMatrixConstData(A, diag_entry) :
+            hypre_StructMatrixBoxData(A, Ab, diag_entry);
 
    hypre_SetIndex(ustride, 1);
    for (d = 0; d < ndim; d++)
@@ -317,8 +317,8 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
    A_diag = (diag_is_constant) ?
-     hypre_StructMatrixConstData(A, diag_entry) :
-     hypre_StructMatrixBoxData(A, Ab, diag_entry);
+            hypre_StructMatrixConstData(A, diag_entry) :
+            hypre_StructMatrixBoxData(A, Ab, diag_entry);
 
    hypre_SetIndex(ustride, 1);
    for (d = 0; d < ndim; d++)

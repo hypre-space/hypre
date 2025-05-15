@@ -175,8 +175,8 @@ hypre_SStructPMatmultCreate(HYPRE_Int                   nmatrices_input,
             }
             if (!zero_product)
             {
-               hypre_StructMatmultSetup(smmdata, nterms, smatrices, nterms, sterms, trans,
-                                        &smmid[vi][vj][smmsz[vi][vj]]);
+               hypre_StructMatmultSetProduct(smmdata, nterms, smatrices, nterms, sterms, trans,
+                                             &smmid[vi][vj][smmsz[vi][vj]]);
                smmsz[vi][vj]++;
             }
 
@@ -204,11 +204,7 @@ hypre_SStructPMatmultCreate(HYPRE_Int                   nmatrices_input,
    (pmmdata -> terms)      = terms;
    (pmmdata -> transposes) = trans;
    (pmmdata -> comm_pkg)   = NULL;
-   (pmmdata -> comm_pkg_a) = NULL;
    (pmmdata -> comm_data)  = NULL;
-   (pmmdata -> comm_data_a) = NULL;
-   (pmmdata -> num_comm_pkgs)   = 0;
-   (pmmdata -> num_comm_blocks) = 0;
 
    *pmmdata_ptr = pmmdata;
 
@@ -244,9 +240,6 @@ hypre_SStructPMatmultDestroy( hypre_SStructPMatmultData *pmmdata )
       hypre_TFree(pmmdata -> transposes, HYPRE_MEMORY_HOST);
       hypre_TFree(pmmdata -> terms, HYPRE_MEMORY_HOST);
 
-      hypre_CommPkgDestroy(pmmdata -> comm_pkg);
-      hypre_TFree(pmmdata -> comm_data, HYPRE_MEMORY_HOST);
-
       hypre_TFree(pmmdata, HYPRE_MEMORY_HOST);
    }
 
@@ -257,9 +250,9 @@ hypre_SStructPMatmultDestroy( hypre_SStructPMatmultData *pmmdata )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
-                            HYPRE_Int                   assemble_grid,
-                            hypre_SStructPMatrix      **pM_ptr )
+hypre_SStructPMatmultInitialize( hypre_SStructPMatmultData  *pmmdata,
+                                 HYPRE_Int                   assemble_grid,
+                                 hypre_SStructPMatrix      **pM_ptr )
 {
    hypre_StructMatmultData     *smmdata = (pmmdata -> smmdata);
    HYPRE_Int                 ***smmid   = (pmmdata -> smmid);
@@ -334,7 +327,7 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
    /* RDF NOTE: This does not assemble the struct grids.  They are assembled
     * below or in HYPRE_SStructGridAssemble() to reduce box manager overhead.
     * Check: The struct 'assemble_grid' feature may not be needed anymore. */
-   hypre_StructMatmultInit(smmdata, 0);
+   hypre_StructMatmultInitialize(smmdata, 0);
 
    /* Setup part matrix data structure */
    max_stencil_size = 0;
@@ -453,12 +446,6 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
    }
    hypre_SStructPGridDestroy(pgrid);  /* The grid will remain in the pM matrix */
 
-   /* Point to the smmdata communication fields (RDF: Remove later, it's redundant ) */
-   (pmmdata -> comm_pkg_a)      = (smmdata -> comm_pkg_a);
-   (pmmdata -> comm_data_a)     = (smmdata -> comm_data_a);
-   (pmmdata -> num_comm_pkgs)   = (smmdata -> num_comm_pkgs);
-   (pmmdata -> num_comm_blocks) = (smmdata -> num_comm_blocks);
-
    /* Point to resulting matrix */
    *pM_ptr = pM;
 
@@ -469,38 +456,30 @@ hypre_SStructPMatmultSetup( hypre_SStructPMatmultData  *pmmdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructPMatmultCommunicate( hypre_SStructPMatmultData *pmmdata )
+hypre_SStructPMatmultCommSetup( hypre_SStructPMatmultData *pmmdata )
 {
-   hypre_CommPkg           *comm_pkg      = (pmmdata -> comm_pkg);
-   HYPRE_Complex          **comm_data     = (pmmdata -> comm_data);
-   hypre_CommPkg          **comm_pkg_a    = (pmmdata -> comm_pkg_a);
-   HYPRE_Complex         ***comm_data_a   = (pmmdata -> comm_data_a);
-   HYPRE_Int                num_comm_pkgs = (pmmdata -> num_comm_pkgs);
-   hypre_CommHandle        *comm_handle;
+   hypre_StructMatmultData *smmdata = (pmmdata -> smmdata);
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
 
-   /* RDF: We could just call hypre_StructMatmultCommunicate() here */
+   hypre_StructMatmultCommSetup(smmdata);
+   (pmmdata -> comm_pkg)  = (smmdata -> comm_pkg);
+   (pmmdata -> comm_data) = (smmdata -> comm_data);
 
-   if (num_comm_pkgs > 0)
-   {
-      /* Agglomerate communication packages if needed */
-      HYPRE_ANNOTATE_REGION_BEGIN("%s", "CommSetup");
-      if (!comm_pkg)
-      {
-         hypre_CommPkgAgglomerate(num_comm_pkgs, comm_pkg_a, &comm_pkg);
-         hypre_CommPkgAgglomData(num_comm_pkgs, comm_pkg_a, comm_data_a, comm_pkg, &comm_data);
-         hypre_CommPkgAgglomDestroy(num_comm_pkgs, comm_pkg_a, comm_data_a);
-         (pmmdata -> comm_pkg_a)  = NULL;
-         (pmmdata -> comm_data_a) = NULL;
-         (pmmdata -> comm_pkg)    = comm_pkg;
-         (pmmdata -> comm_data)   = comm_data;
-      }
-      HYPRE_ANNOTATE_REGION_END("%s", "CommSetup");
+   HYPRE_ANNOTATE_FUNC_END;
 
-      hypre_StructCommunicationInitialize(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
-      hypre_StructCommunicationFinalize(comm_handle);
-   }
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_SStructPMatmultCommunicate( hypre_SStructPMatmultData *pmmdata )
+{
+   hypre_StructMatmultData *smmdata = (pmmdata -> smmdata);
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   hypre_SStructPMatmultCommSetup(pmmdata);
+   hypre_StructMatmultCommunicate(smmdata);
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -556,7 +535,7 @@ hypre_SStructPMatmult(HYPRE_Int               nmatrices,
    hypre_SStructPMatmultData *mmdata;
 
    hypre_SStructPMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
-   hypre_SStructPMatmultSetup(mmdata, 1, M_ptr); /* Make sure to assemble the grid */
+   hypre_SStructPMatmultInitialize(mmdata, 1, M_ptr); /* Make sure to assemble the grid */
    hypre_SStructPMatmultCommunicate(mmdata);
    hypre_SStructPMatmultCompute(mmdata, *M_ptr);
    hypre_SStructPMatmultDestroy(mmdata);
@@ -732,11 +711,7 @@ hypre_SStructMatmultCreate(HYPRE_Int                  nmatrices_input,
    (mmdata -> terms)       = terms;
    (mmdata -> transposes)  = trans;
    (mmdata -> comm_pkg)    = NULL;
-   (mmdata -> comm_pkg_a)  = NULL;
    (mmdata -> comm_data)   = NULL;
-   (mmdata -> comm_data_a) = NULL;
-   (mmdata -> num_comm_pkgs)   = 0;
-   (mmdata -> num_comm_blocks) = 0;
 
    *mmdata_ptr = mmdata;
 
@@ -775,11 +750,12 @@ hypre_SStructMatmultDestroy( hypre_SStructMatmultData *mmdata )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SStructMatmultInitialize
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructMatmultSetup( hypre_SStructMatmultData   *mmdata,
-                           hypre_SStructMatrix       **M_ptr )
+hypre_SStructMatmultInitialize( hypre_SStructMatmultData   *mmdata,
+                                hypre_SStructMatrix       **M_ptr )
 {
    HYPRE_Int                   nparts   = (mmdata -> nparts);
    HYPRE_Int                   nterms   = (mmdata -> nterms);
@@ -812,11 +788,6 @@ hypre_SStructMatmultSetup( hypre_SStructMatmultData   *mmdata,
    HYPRE_SStructVariable      *vartypes;
    hypre_SStructPGrid         *pgrid;
 
-   /* Communication variables */
-   HYPRE_Int                   np, num_comm_pkgs, num_comm_blocks;
-   hypre_CommPkg             **comm_pkg_a;
-   HYPRE_Complex            ***comm_data_a;
-
    /* Local variables */
    MPI_Comm                    comm;
    HYPRE_Int                   ndim;
@@ -828,7 +799,6 @@ hypre_SStructMatmultSetup( hypre_SStructMatmultData   *mmdata,
    /* Initialize variables */
    comm   = hypre_SStructMatrixComm(matrices[0]);
    ndim   = hypre_SStructMatrixNDim(matrices[0]);
-   nparts = hypre_SStructMatrixNParts(matrices[0]);
 
    /* Create the grid for M */
    HYPRE_SStructGridCreate(comm, ndim, nparts, &Mgrid);
@@ -875,7 +845,7 @@ hypre_SStructMatmultSetup( hypre_SStructMatmultData   *mmdata,
       nvars = hypre_SStructPGridNVars(pgrid);
 
       /* Create resulting part matrix */
-      hypre_SStructPMatmultSetup(pmmdata[part], 0, &pM); /* Don't assemble the grid */
+      hypre_SStructPMatmultInitialize(pmmdata[part], 0, &pM); /* Don't assemble the grid */
 
       /* Update part matrix of M */
       hypre_SStructMatrixPMatrix(M, part) = pM;
@@ -924,43 +894,6 @@ hypre_SStructMatmultSetup( hypre_SStructMatmultData   *mmdata,
    hypre_SStructMatrixSEntries(M) = sentries;
    hypre_SStructMatrixUEntries(M) = uentries;
 
-   /* Find total number of communication packages and blocks */
-   num_comm_pkgs = num_comm_blocks = 0;
-   for (part = 0; part < nparts; part++)
-   {
-      if (pmmdata[part])
-      {
-         num_comm_pkgs   += (pmmdata[part] -> num_comm_pkgs);
-         num_comm_blocks += (pmmdata[part] -> num_comm_blocks);
-      }
-   }
-   (mmdata -> num_comm_pkgs)   = num_comm_pkgs;
-   (mmdata -> num_comm_blocks) = num_comm_blocks;
-
-   /* Allocate communication packages and data */
-   comm_pkg_a  = hypre_TAlloc(hypre_CommPkg *, num_comm_pkgs, HYPRE_MEMORY_HOST);
-   comm_data_a = hypre_TAlloc(HYPRE_Complex **, num_comm_pkgs, HYPRE_MEMORY_HOST);
-   (mmdata -> comm_pkg_a)  = comm_pkg_a;
-   (mmdata -> comm_data_a) = comm_data_a;
-
-   /* Update pointers to communication packages and data */
-   num_comm_pkgs = num_comm_blocks = 0;
-   for (part = 0; part < nparts; part++)
-   {
-      if (pmmdata[part])
-      {
-         for (np = 0; np < (pmmdata[part] -> num_comm_pkgs); np++)
-         {
-            comm_pkg_a[num_comm_pkgs]  = (pmmdata[part] -> comm_pkg_a[np]);
-            comm_data_a[num_comm_pkgs] = (pmmdata[part] -> comm_data_a[np]);
-            num_comm_pkgs++;
-         }
-
-         hypre_TFree(pmmdata[part] -> comm_pkg_a, HYPRE_MEMORY_HOST);
-         hypre_TFree(pmmdata[part] -> comm_data_a, HYPRE_MEMORY_HOST);
-      }
-   }
-
    /* Assemble semi-struct grid */
    HYPRE_SStructGridAssemble(Mgrid);
 
@@ -1007,15 +940,40 @@ hypre_SStructMatmultSetup( hypre_SStructMatmultData   *mmdata,
 HYPRE_Int
 hypre_SStructMatmultCommunicate( hypre_SStructMatmultData *mmdata )
 {
-   hypre_CommPkg           *comm_pkg      = (mmdata -> comm_pkg);
-   HYPRE_Complex          **comm_data     = (mmdata -> comm_data);
-   hypre_CommPkg          **comm_pkg_a    = (mmdata -> comm_pkg_a);
-   HYPRE_Complex         ***comm_data_a   = (mmdata -> comm_data_a);
-   HYPRE_Int                num_comm_pkgs = (mmdata -> num_comm_pkgs);
+   HYPRE_Int                   nparts     = (mmdata -> nparts);
+   hypre_SStructPMatmultData **pmmdata    = (mmdata -> pmmdata);
+   hypre_CommPkg              *comm_pkg   = (mmdata -> comm_pkg);
+   HYPRE_Complex             **comm_data  = (mmdata -> comm_data);
 
-   hypre_CommHandle        *comm_handle;
+   hypre_CommPkg             **comm_pkg_a;
+   HYPRE_Complex            ***comm_data_a;
+   HYPRE_Int                   num_comm_pkgs;
+
+   HYPRE_Int                   part;
+   hypre_CommHandle           *comm_handle;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+
+   for (part = 0; part < nparts; part++)
+   {
+      hypre_SStructPMatmultCommSetup(pmmdata[part]);
+   }
+
+   /* Allocate communication package and data arrays */
+   comm_pkg_a  = hypre_TAlloc(hypre_CommPkg *, nparts, HYPRE_MEMORY_HOST);
+   comm_data_a = hypre_TAlloc(HYPRE_Complex **, nparts, HYPRE_MEMORY_HOST);
+
+   /* Update pointers to communication packages and data */
+   num_comm_pkgs = 0;
+   for (part = 0; part < nparts; part++)
+   {
+      if (pmmdata[part] && (pmmdata[part] -> comm_pkg))
+      {
+         comm_pkg_a[num_comm_pkgs]  = (pmmdata[part] -> comm_pkg);
+         comm_data_a[num_comm_pkgs] = (pmmdata[part] -> comm_data);
+         num_comm_pkgs++;
+      }
+   }
 
    if (num_comm_pkgs > 0)
    {
@@ -1025,17 +983,18 @@ hypre_SStructMatmultCommunicate( hypre_SStructMatmultData *mmdata )
       {
          hypre_CommPkgAgglomerate(num_comm_pkgs, comm_pkg_a, &comm_pkg);
          hypre_CommPkgAgglomData(num_comm_pkgs, comm_pkg_a, comm_data_a, comm_pkg, &comm_data);
-         hypre_CommPkgAgglomDestroy(num_comm_pkgs, comm_pkg_a, comm_data_a);
-         (mmdata -> comm_pkg_a)  = NULL;
-         (mmdata -> comm_data_a) = NULL;
-         (mmdata -> comm_pkg)    = comm_pkg;
-         (mmdata -> comm_data)   = comm_data;
+         (mmdata -> comm_pkg)  = comm_pkg;
+         (mmdata -> comm_data) = comm_data;
       }
       HYPRE_ANNOTATE_REGION_END("%s", "CommSetup");
 
       hypre_StructCommunicationInitialize(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
       hypre_StructCommunicationFinalize(comm_handle);
    }
+
+   /* Free up communication package and data arrays */
+   hypre_TFree(comm_pkg_a, HYPRE_MEMORY_HOST);
+   hypre_TFree(comm_data_a, HYPRE_MEMORY_HOST);
 
    HYPRE_ANNOTATE_FUNC_END;
 
@@ -1107,11 +1066,22 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
    HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uP);
    num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
+#if 0
+   // RDF Investigate: This produces faster code that isn't always correct.
+   //
+   // Comments from Wayne: In ssamg_setup.c, if you turn on the DEBUG_SETUP and
+   // DEBUG_MATMULT macros, there is code in place to check correctness of the
+   // RAPs on each level. If you turn this on and run the miller.sh tests, there
+   // are some non-trivial errors in RAP for some problems. If you then change
+   // the code to always take the slow/correct matmult branch, then the errors
+   // go away. So the specialized RAP code is producing some numerically
+   // incorrect results here for some reason.
    if (num_nonzeros_uP < 0)
    {
       hypre_ParCSRMatrixSetNumNonzeros(parcsr_uP);
       num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
    }
+#endif
    if (nterms == 3 && (num_nonzeros_uP == 0))
    {
       /* Specialization for RAP when P has only the structured component */
@@ -1403,7 +1373,7 @@ hypre_SStructMatmult(HYPRE_Int             nmatrices,
    hypre_SStructMatmultData *mmdata;
 
    hypre_SStructMatmultCreate(nmatrices, matrices, nterms, terms, trans, &mmdata);
-   hypre_SStructMatmultSetup(mmdata, M_ptr);
+   hypre_SStructMatmultInitialize(mmdata, M_ptr);
    hypre_SStructMatmultCommunicate(mmdata);
    hypre_SStructMatmultCompute(mmdata, *M_ptr);
    hypre_SStructMatmultDestroy(mmdata);
@@ -1434,6 +1404,7 @@ hypre_SStructMatmat( hypre_SStructMatrix  *A,
 }
 
 /*--------------------------------------------------------------------------
+ * Computes M = P^T*A*P
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

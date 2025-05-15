@@ -1330,8 +1330,8 @@ hypre_StructCommunicationGetBuffer(HYPRE_MemoryLocation memory_location,
    if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
       buffer_size = is_send ?
-        hypre_HandleStructCommSendBufferSize(hypre_handle()) :
-        hypre_HandleStructCommRecvBufferSize(hypre_handle());
+                    hypre_HandleStructCommSendBufferSize(hypre_handle()) :
+                    hypre_HandleStructCommRecvBufferSize(hypre_handle());
 
       if (size > buffer_size)
       {
@@ -1342,20 +1342,20 @@ hypre_StructCommunicationGetBuffer(HYPRE_MemoryLocation memory_location,
             hypre_HandleStructCommSendBufferSize(hypre_handle()) = new_size;
             hypre_TFree(hypre_HandleStructCommSendBuffer(hypre_handle()), memory_location);
             hypre_HandleStructCommSendBuffer(hypre_handle()) =
-              hypre_CTAlloc(HYPRE_Complex, new_size, memory_location);
+               hypre_CTAlloc(HYPRE_Complex, new_size, memory_location);
          }
          else
          {
             hypre_HandleStructCommRecvBufferSize(hypre_handle()) = new_size;
             hypre_TFree(hypre_HandleStructCommRecvBuffer(hypre_handle()), memory_location);
             hypre_HandleStructCommRecvBuffer(hypre_handle()) =
-              hypre_CTAlloc(HYPRE_Complex, new_size, memory_location);
+               hypre_CTAlloc(HYPRE_Complex, new_size, memory_location);
          }
       }
 
       ptr = is_send ?
-        hypre_HandleStructCommSendBuffer(hypre_handle()) :
-        hypre_HandleStructCommRecvBuffer(hypre_handle());
+            hypre_HandleStructCommSendBuffer(hypre_handle()) :
+            hypre_HandleStructCommRecvBuffer(hypre_handle());
    }
    else
 #else
