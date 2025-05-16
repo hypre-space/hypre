@@ -61,9 +61,12 @@ if (HYPRE_USING_GPU)
     struct_data.c
     struct_innerprod.c
     struct_matmult.c
+    struct_matmult_core.c
+    struct_matmult_fuse.c
     struct_matop.c
     struct_matrix.c
     struct_matvec.c
+    struct_matvec_core.c
     struct_scale.c
     struct_vector.c
   )
