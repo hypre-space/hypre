@@ -210,6 +210,7 @@ HYPRE_Int hypre_PFMGGetFinalRelativeResidualNorm ( void *pfmg_vdata,
                                                    HYPRE_Real *relative_residual_norm );
 
 /* pfmg_coarsen.c */
+HYPRE_Int hypre_PFMGComputeMaxLevels ( hypre_StructGrid *grid, HYPRE_Int *max_levels_ptr );
 HYPRE_Int hypre_PFMGComputeCxyz ( hypre_StructMatrix *A, HYPRE_Real *cxyz, HYPRE_Real *sqcxyz );
 HYPRE_Int hypre_PFMGComputeDxyz ( hypre_StructMatrix *A, HYPRE_Real *dxyz, HYPRE_Int *dxyz_flag );
 HYPRE_Int hypre_PFMGCoarsen ( hypre_Box *cbox, hypre_Index periodic, HYPRE_Int max_levels,
@@ -234,43 +235,19 @@ HYPRE_Int hypre_PFMGRelaxSetZeroGuess ( void *pfmg_relax_vdata, HYPRE_Int zero_g
 HYPRE_Int hypre_PFMGRelaxSetTempVec ( void *pfmg_relax_vdata, hypre_StructVector *t );
 
 /* pfmg_setup.c */
-HYPRE_Int hypre_PFMGSetup ( void *pfmg_vdata, hypre_StructMatrix *A, hypre_StructVector *b,
-                            hypre_StructVector *x );
-HYPRE_Int hypre_PFMGComputeMaxLevels ( hypre_StructGrid *grid, HYPRE_Int *max_levels_ptr );
-HYPRE_Int hypre_PFMGComputeCxyz ( hypre_StructMatrix *A, HYPRE_Real *cxyz, HYPRE_Real *sqcxyz );
-HYPRE_Int hypre_PFMGComputeDxyz ( hypre_StructMatrix *A, HYPRE_Real *dxyz, HYPRE_Int *dxyz_flag );
-HYPRE_Int hypre_PFMGZeroDiagonal ( hypre_StructMatrix *A );
-HYPRE_Int hypre_PFMGCoarsen ( hypre_Box *cbox, hypre_Index periodic, HYPRE_Int max_levels,
-                              HYPRE_Int dxyz_flag, HYPRE_Real *dxyz, HYPRE_Int **cdir_l_ptr,
-                              HYPRE_Int **active_l_ptr, HYPRE_Real **relax_weights_ptr,
-                              HYPRE_Int *num_levels );
+HYPRE_Int hypre_PFMGSetup ( void *pfmg_vdata, hypre_StructMatrix *A,
+                            hypre_StructVector *b, hypre_StructVector *x );
 
 /* pfmg_setup_interp.c */
-hypre_StructMatrix *hypre_zPFMGCreateInterpOp ( hypre_StructMatrix *A, HYPRE_Int cdir,
-                                                hypre_Index stride, HYPRE_Int rap_type );
+hypre_StructMatrix *hypre_PFMGCreateInterpOp ( hypre_StructMatrix *A, HYPRE_Int cdir,
+                                               hypre_Index stride, HYPRE_Int rap_type );
+HYPRE_Int hypre_PFMGSetupInterpOp ( hypre_StructMatrix *P, hypre_StructMatrix *A, HYPRE_Int cdir );
 HYPRE_Int hypre_PFMGSetupInterpOp_core_CC( hypre_StructMatrix *P, hypre_StructMatrix *A,
                                            HYPRE_Int cdir, HYPRE_Complex *Pconst0_ptr,
                                            HYPRE_Complex *Pconst1_ptr, HYPRE_Complex *Pconst2_ptr );
 HYPRE_Int hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P, hypre_StructMatrix *A,
                                            HYPRE_Int cdir, HYPRE_Complex Pconst0,
                                            HYPRE_Complex Pconst1, HYPRE_Complex Pconst2 );
-HYPRE_Int hypre_zPFMGSetupInterpOp ( hypre_StructMatrix *P, hypre_StructMatrix *A, HYPRE_Int cdir );
-hypre_StructMatrix *hypre_PFMGCreateInterpOp ( hypre_StructMatrix *A, hypre_StructGrid *cgrid,
-                                               HYPRE_Int cdir, HYPRE_Int rap_type );
-HYPRE_Int hypre_PFMGSetupInterpOp ( hypre_StructMatrix *A, HYPRE_Int cdir, hypre_Index findex,
-                                    hypre_Index stride, hypre_StructMatrix *P, HYPRE_Int rap_type );
-HYPRE_Int hypre_PFMGSetupInterpOp_CC0 ( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox,
-                                        HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc,
-                                        hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, HYPRE_Real *Pp0,
-                                        HYPRE_Real *Pp1, HYPRE_Int rap_type, HYPRE_Int si0, HYPRE_Int si1 );
-HYPRE_Int hypre_PFMGSetupInterpOp_CC1 ( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox,
-                                        HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc,
-                                        hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, HYPRE_Real *Pp0,
-                                        HYPRE_Real *Pp1, HYPRE_Int rap_type, HYPRE_Int si0, HYPRE_Int si1 );
-HYPRE_Int hypre_PFMGSetupInterpOp_CC2 ( HYPRE_Int i, hypre_StructMatrix *A, hypre_Box *A_dbox,
-                                        HYPRE_Int cdir, hypre_Index stride, hypre_Index stridec, hypre_Index start, hypre_IndexRef startc,
-                                        hypre_Index loop_size, hypre_Box *P_dbox, HYPRE_Int Pstenc0, HYPRE_Int Pstenc1, HYPRE_Real *Pp0,
-                                        HYPRE_Real *Pp1, HYPRE_Int rap_type, HYPRE_Int si0, HYPRE_Int si1 );
 
 /* pfmg_setup_rap5.c */
 hypre_StructMatrix *hypre_PFMGCreateCoarseOp5 ( hypre_StructMatrix *R, hypre_StructMatrix *A,

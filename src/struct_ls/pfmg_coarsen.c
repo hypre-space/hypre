@@ -15,6 +15,28 @@
 #define HYPRE_UNROLL_MAXDEPTH 9
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_PFMGComputeMaxLevels( hypre_StructGrid   *grid,
+                            HYPRE_Int          *max_levels_ptr )
+{
+   HYPRE_Int        ndim = hypre_StructGridNDim(grid);
+   hypre_Box       *bbox = hypre_StructGridBoundingBox(grid);
+   HYPRE_Int        max_levels, d;
+
+   max_levels = 1;
+   for (d = 0; d < ndim; d++)
+   {
+      max_levels += hypre_Log2(hypre_BoxSizeD(bbox, d)) + 2;
+   }
+
+   *max_levels_ptr = max_levels;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_PFMGComputeCxyz_core_VC
  *
  * Core function for computing stencil collapsing for variable coefficients

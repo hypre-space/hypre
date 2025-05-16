@@ -13,10 +13,10 @@
  *--------------------------------------------------------------------------*/
 
 hypre_StructMatrix *
-hypre_zPFMGCreateInterpOp( hypre_StructMatrix *A,
-                           HYPRE_Int           cdir,
-                           hypre_Index         stride,
-                           HYPRE_Int           rap_type )
+hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
+                          HYPRE_Int           cdir,
+                          hypre_Index         stride,
+                          HYPRE_Int           rap_type )
 {
    MPI_Comm              comm            = hypre_StructMatrixComm(A);
    HYPRE_Int             ndim            = hypre_StructMatrixNDim(A);
@@ -439,9 +439,9 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
-                          hypre_StructMatrix *A,
-                          HYPRE_Int           cdir )
+hypre_PFMGSetupInterpOp( hypre_StructMatrix *P,
+                         hypre_StructMatrix *A,
+                         HYPRE_Int           cdir )
 {
    HYPRE_MemoryLocation   memory_location = hypre_StructMatrixMemoryLocation(P);
    HYPRE_Int              constant;

@@ -71,11 +71,15 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
    HYPRE_Int             v_memory_mode  = 2;
 
+   char                  region_name[1024];
 #if DEBUG
    char                  filename[255];
 #endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_sprintf(region_name, "%s", "PFMG-Init");
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
+   hypre_GpuProfilingPushRange(region_name);
 
    /* RDF: For now, set memory mode to 0 if using R/B GS relaxation */
    if (relax_type > 1)
@@ -173,19 +177,20 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    for (l = 0; l < (num_levels - 1); l++)
    {
-      HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
+      //HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
+
       cdir = cdir_l[l];
 
       hypre_PFMGSetCIndex(cdir, cindex);
       hypre_PFMGSetStride(cdir, stride);
 
       /* set up interpolation and restriction operators */
-      P_l[l] = hypre_zPFMGCreateInterpOp(A_l[l], cdir, stride, rap_type);
+      P_l[l] = hypre_PFMGCreateInterpOp(A_l[l], cdir, stride, rap_type);
       RT_l[l] = P_l[l];
 #if 0 /* TODO: Allow RT != P */
       if (nonsymmetric_cycle)
       {
-         RT_l[l] = hypre_zPFMGCreateRestrictOp(A_l[l], cdir, stride);
+         RT_l[l] = hypre_PFMGCreateRestrictOp(A_l[l], cdir, stride);
       }
 #endif
       HYPRE_StructMatrixSetTranspose(RT_l[l], 1);
@@ -213,12 +218,12 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       else
       {
          hypre_StructMatrixInitialize(P_l[l]);
-         hypre_zPFMGSetupInterpOp(P_l[l], A_l[l], cdir);
+         hypre_PFMGSetupInterpOp(P_l[l], A_l[l], cdir);
 #if 0 /* TODO: Allow RT != P */
          if (nonsymmetric_cycle)
          {
             hypre_StructMatrixInitialize(RT_l[l]);
-            hypre_zPFMGSetupRestrictOp(RT_l[l], A_l[l], cdir);
+            hypre_PFMGSetupRestrictOp(RT_l[l], A_l[l], cdir);
          }
 #endif
 
@@ -252,30 +257,35 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_StructVectorInitialize(tx_l[l + 1]);
       hypre_StructVectorAssemble(tx_l[l + 1]);
 
-      HYPRE_ANNOTATE_MGLEVEL_END(l);
+      //HYPRE_ANNOTATE_MGLEVEL_END(l);
    }
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_REGION_END("%s", region_name);
 
    /* Now finish up the matrices */
-
    for (l = 0; l < (num_levels - 1); l++)
    {
       HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
+      hypre_sprintf(region_name, "%s-%d", "PFMG-Level", l);
+      hypre_GpuProfilingPushRange(region_name);
+
       cdir = cdir_l[l];
 
       if (rap_type == 0)
       {
          hypre_StructMatrixInitializeData(P_l[l], NULL);
-         hypre_zPFMGSetupInterpOp(P_l[l], A_l[l], cdir);
+         hypre_PFMGSetupInterpOp(P_l[l], A_l[l], cdir);
 #if 0 /* TODO: Allow RT != P */
          if (nonsymmetric_cycle)
          {
             hypre_StructMatrixInitializeData(RT_l[l], NULL);
-            hypre_zPFMGSetupRestrictOp(RT_l[l], A_l[l], cdir);
+            hypre_PFMGSetupRestrictOp(RT_l[l], A_l[l], cdir);
          }
 #endif
          hypre_StructMatmultMultiply(Ammdata_l[l + 1]);
       }
 
+      hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_MGLEVEL_END(l);
    }
 
@@ -455,28 +465,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       }
    }
 #endif
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_PFMGComputeMaxLevels( hypre_StructGrid   *grid,
-                            HYPRE_Int          *max_levels_ptr )
-{
-   HYPRE_Int        ndim = hypre_StructGridNDim(grid);
-   hypre_Box       *bbox = hypre_StructGridBoundingBox(grid);
-   HYPRE_Int        max_levels, d;
-
-   max_levels = 1;
-   for (d = 0; d < ndim; d++)
-   {
-      max_levels += hypre_Log2(hypre_BoxSizeD(bbox, d)) + 2;
-   }
-
-   *max_levels_ptr = max_levels;
 
    return hypre_error_flag;
 }
