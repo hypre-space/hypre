@@ -1065,6 +1065,10 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    m = terms[2];
    ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
    HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uP);
+   if (hypre_ParCSRMatrixNumNonzeros(parcsr_uP) < 0)
+   {
+      hypre_ParCSRMatrixSetNumNonzeros(parcsr_uP);
+   }
    num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
 #if 0
    // RDF Investigate: This produces faster code that isn't always correct.
