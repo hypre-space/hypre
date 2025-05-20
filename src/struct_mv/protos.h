@@ -556,20 +556,21 @@ hypre_StructMatmultCompute_core( HYPRE_Int                  nterms,
 
 /* struct_matmult_fuse.c */
 HYPRE_Int
-hypre_StructMatmultCompute_fuse_triple( hypre_StructMatmultDataMH *a,
-                                        HYPRE_Int    na,
-                                        HYPRE_Int    ndim,
-                                        hypre_Index  loop_size,
-                                        HYPRE_Int    stencil_size,
-                                        hypre_Box   *fdbox,
-                                        hypre_Index  fdstart,
-                                        hypre_Index  fdstride,
-                                        hypre_Box   *cdbox,
-                                        hypre_Index  cdstart,
-                                        hypre_Index  cdstride,
-                                        hypre_Box   *Mdbox,
-                                        hypre_Index  Mdstart,
-                                        hypre_Index  Mdstride );
+hypre_StructMatmultCompute_fuse( HYPRE_Int                  nterms,
+                                 hypre_StructMatmultDataMH *a,
+                                 HYPRE_Int    na,
+                                 HYPRE_Int    ndim,
+                                 hypre_Index  loop_size,
+                                 HYPRE_Int    stencil_size,
+                                 hypre_Box   *fdbox,
+                                 hypre_Index  fdstart,
+                                 hypre_Index  fdstride,
+                                 hypre_Box   *cdbox,
+                                 hypre_Index  cdstart,
+                                 hypre_Index  cdstride,
+                                 hypre_Box   *Mdbox,
+                                 hypre_Index  Mdstart,
+                                 hypre_Index  Mdstride );
 
 /* struct_matop.c */
 HYPRE_Int hypre_StructMatrixZeroDiagonal( hypre_StructMatrix *A );
