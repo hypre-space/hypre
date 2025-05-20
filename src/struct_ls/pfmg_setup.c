@@ -80,6 +80,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_sprintf(region_name, "%s", "PFMG-Init");
    HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
    hypre_GpuProfilingPushRange(region_name);
+   hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "PFMG setup begin", 0);
 
    /* RDF: For now, set memory mode to 0 if using R/B GS relaxation */
    if (relax_type > 1)
@@ -262,6 +263,10 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_REGION_END("%s", region_name);
 
+   hypre_sprintf(region_name, "%s", "PFMG-Setup");
+   HYPRE_ANNOTATE_REGION_BEGIN("%s", region_name);
+   hypre_GpuProfilingPushRange(region_name);
+
    /* Now finish up the matrices */
    for (l = 0; l < (num_levels - 1); l++)
    {
@@ -423,6 +428,9 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       (pfmg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter + 1, HYPRE_MEMORY_HOST);
    }
 
+   hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "PFMG setup end", 0);
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_REGION_END("%s", region_name);
    HYPRE_ANNOTATE_FUNC_END;
 
 #ifdef DEBUG_SETUP

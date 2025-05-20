@@ -112,6 +112,9 @@ hypre_PFMGSetupInterpOp_core_CC( hypre_StructMatrix   *P,
    HYPRE_Complex          Pconst2;
    HYPRE_Int              Astenc, si;
 
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("CC");
+
    /* Set host pointer to constant data entries in A */
    if (exec == HYPRE_EXEC_DEVICE)
    {
@@ -159,6 +162,9 @@ hypre_PFMGSetupInterpOp_core_CC( hypre_StructMatrix   *P,
    *Pconst0_ptr = Pconst0;
    *Pconst1_ptr = Pconst1;
    *Pconst2_ptr = Pconst2;
+
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
@@ -211,6 +217,9 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
    HYPRE_Int              vdepth, depth, vsi[HYPRE_UNROLL_MAXDEPTH];
    hypre_Index            Astart, Astride, Pstart, Pstride;
    hypre_Index            origin, stride, loop_size;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("VC");
 
    /* Off-diagonal entries are variable */
    compute_box = hypre_BoxCreate(ndim);
@@ -432,6 +441,9 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
 #undef HYPRE_UPDATE_VALUES
 #undef HYPRE_UNROLL_MAXDEPTH
 
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_FUNC_END;
+
    return hypre_error_flag;
 }
 
@@ -449,6 +461,9 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *P,
    HYPRE_Complex          Pconst0, Pconst1, Pconst2;
    HYPRE_Complex          one  = 1.0;
    HYPRE_Complex          half = 0.5;
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("PFMGSetupInterp");
 
    /* 0: Only the diagonal is constant
       1: All entries are constant */
@@ -485,6 +500,9 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *P,
    /* The following call is needed to prevent cases where interpolation reaches
     * outside the boundary with nonzero coefficient */
    hypre_StructMatrixClearBoundary(P);
+
+   hypre_GpuProfilingPopRange();
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }
