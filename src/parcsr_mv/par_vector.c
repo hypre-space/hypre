@@ -636,7 +636,6 @@ hypre_ParVectorInnerProdTagged( hypre_ParVector  *x,
 
    HYPRE_Complex *iprod;
    HYPRE_Complex *iprod_local;
-   HYPRE_Int      i;
 
    /* Allocate output inner product array if needed */
    if (*iprod_ptr == NULL)
@@ -672,15 +671,8 @@ hypre_ParVectorInnerProdTagged( hypre_ParVector  *x,
    }
 
    /* Global inner products */
-   hypre_MPI_Allreduce(iprod_local, &iprod[1], num_tags,
+   hypre_MPI_Allreduce(iprod_local, iprod, num_tags + 1,
                        HYPRE_MPI_COMPLEX, hypre_MPI_SUM, comm);
-
-   /* Compute total inner product */
-   iprod[0] = 0.0;
-   for (i = 0; i < num_tags; i++)
-   {
-      iprod[0] += iprod[i + 1];
-   }
 
    /* Return results */
    *num_tags_ptr = num_tags;

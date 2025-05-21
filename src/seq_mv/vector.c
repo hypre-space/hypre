@@ -1271,7 +1271,10 @@ hypre_SeqVectorInnerProd( hypre_Vector *x,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SeqVectorInnerProdTaggedHost
+ * Computes the "marked" inner product of two vectors x and y.
+ *
+ *  - iprod[0]: inner product of full vector
+ *  - iprod[i + 1]: inner product computed from entries marked with "i" tag
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1296,7 +1299,7 @@ hypre_SeqVectorInnerProdTaggedHost( hypre_Vector  *x,
 #endif
 
    /* Initialize result */
-   for (i = 0; i < num_tags; i++)
+   for (i = 0; i < num_tags + 1; i++)
    {
       iprod[i] = 0.0;
    }
@@ -1310,23 +1313,29 @@ hypre_SeqVectorInnerProdTaggedHost( hypre_Vector  *x,
       #pragma omp for HYPRE_SMP_SCHEDULE
       for (i = 0; i < total_size; i++)
       {
-         sum[tags[i]] += hypre_conj(y_data[i]) * x_data[i];
+         sum[tags[i] + 1] += hypre_conj(y_data[i]) * x_data[i];
       }
 
       #pragma omp critical
       {
          for (j = 0; j < num_tags; j++)
          {
-            iprod[j] += sum[j];
+            iprod[j + 1] += sum[j + 1];
          }
       }
    }
 #else
    for (i = 0; i < total_size; i++)
    {
-      iprod[tags[i]] += hypre_conj(y_data[i]) * x_data[i];
+      iprod[tags[i] + 1] += hypre_conj(y_data[i]) * x_data[i];
    }
 #endif
+
+   /* Compute inner product of the full vectors */
+   for (i = 0; i < num_tags; i++)
+   {
+      iprod[0] += iprod[i + 1];
+   }
 
    return hypre_error_flag;
 }
