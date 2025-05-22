@@ -67,9 +67,9 @@ HYPRE_Int BuildParDifConv (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
 HYPRE_Int BuildParFromOneFile (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                HYPRE_Int num_functions, HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildFuncTagsFromFiles (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
-                                   HYPRE_ParCSRMatrix A, HYPRE_Int **dof_func_ptr );
+                                  HYPRE_ParCSRMatrix A, HYPRE_Int **dof_func_ptr );
 HYPRE_Int BuildFuncTagsFromOneFile (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
-                                     HYPRE_ParCSRMatrix A, HYPRE_Int **dof_func_ptr );
+                                    HYPRE_ParCSRMatrix A, HYPRE_Int **dof_func_ptr );
 HYPRE_Int BuildFuncTagsInterleaved (HYPRE_Int local_size, HYPRE_Int num_functions,
                                     HYPRE_MemoryLocation memory_location,
                                     HYPRE_Int **dof_func_ptr );
