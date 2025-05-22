@@ -1580,7 +1580,7 @@ hypre_StructMatmultCompute_core( HYPRE_Int                  nterms,
    hypre_3Cptrs    tptrs[8][na];
    hypre_1Cptr     mptrs[8][na];
 
-   HYPRE_Int       mentry, ptype, nf, nc, nt;
+   HYPRE_Int       mentry, ptype = 0, nf, nc, nt;
    HYPRE_Int       e, p, i, k, t;
 
 #if defined(DEBUG_MATMULT)

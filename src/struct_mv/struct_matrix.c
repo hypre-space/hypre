@@ -929,7 +929,8 @@ hypre_StructMatrixResize( hypre_StructMatrix *matrix,
    {
       HYPRE_Int   nval = hypre_StructMatrixNumValues(matrix);
 
-      data = hypre_TAlloc(HYPRE_Complex, data_size, memory_location);
+      /* TODO (VPM): We should be able to just do hypre_TAlloc */
+      data = hypre_CTAlloc(HYPRE_Complex, data_size, memory_location);
 
       /* Copy constant data values */
       hypre_TMemcpy(data, old_data, HYPRE_Complex, stencil_size,
@@ -999,6 +1000,7 @@ hypre_StructMatrixRestore( hypre_StructMatrix *matrix )
       {
          data = hypre_TAlloc(HYPRE_Complex, data_size, memory_location);
       }
+
       /* Copy constant data values */
       for (i = 0; i < stencil_size; i++)
       {

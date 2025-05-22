@@ -207,9 +207,12 @@ hypre_PFMGSetupInterpOp_core_VC( hypre_StructMatrix *P,
    hypre_Box             *A_dbox;
    hypre_Box             *P_dbox;
 
-   HYPRE_Complex         *Ap0, *Ap1, *Ap2, *Ap3, *Ap4, *Ap5, *Ap6;
-   HYPRE_Complex         *Pp1, *Pp2;
-   HYPRE_Int              As0, As1, As2, As3, As4, As5, As6;
+   HYPRE_Complex         *Ap0 = NULL, *Ap1 = NULL;
+   HYPRE_Complex         *Ap2 = NULL, *Ap3 = NULL;
+   HYPRE_Complex         *Ap4 = NULL, *Ap5 = NULL, *Ap6 = NULL;
+   HYPRE_Complex         *Pp1 = NULL, *Pp2 = NULL;
+   HYPRE_Int              As0 = 0, As1 = 0, As2 = 0, As3 = 0;
+   HYPRE_Int              As4 = 0, As5 = 0, As6 = 0;
    HYPRE_Int              P_dbox_volume;
    HYPRE_Complex         *mid;
 

@@ -96,7 +96,7 @@ main( hypre_int argc,
    HYPRE_Int           device_id = -1;
    HYPRE_Int           lazy_device_init = 0;
 
-   HYPRE_Int           p, q, r;
+   HYPRE_Int           p = 0, q = 0, r = 0;
    HYPRE_Int           dim;
    HYPRE_Int           n_pre, n_post;
    HYPRE_Int           nblocks = 0;

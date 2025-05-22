@@ -113,7 +113,7 @@ hypre_SSAMGRelaxDestroy( void *relax_vdata )
 {
    hypre_SSAMGRelaxData  *relax_data = (hypre_SSAMGRelaxData *) relax_vdata;
    hypre_SStructPMatrix  *pmatrix;
-   HYPRE_Int              part, nparts, nvars, vi, i;
+   HYPRE_Int              part, nparts, vi, i, nvars = 0;
 
    if (relax_data)
    {

@@ -1056,6 +1056,8 @@ hypre_StructMatmultCompute_fuse_fff( HYPRE_Int            nprod,
                       k, (void*)tptrs[k][2]);
    }
    hypre_ParPrintf(hypre_MPI_COMM_WORLD, "========================\n");
+#else
+   HYPRE_UNUSED_VAR(mentries);
 #endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -1304,6 +1306,7 @@ hypre_StructMatmultCompute_fuse_ffc( HYPRE_Int            nprod,
                                      HYPRE_Complex       *cprod,
                                      hypre_3Cptrs        *tptrs,
                                      hypre_1Cptr         *mptrs,
+                                     HYPRE_Int           *mentries,
                                      HYPRE_Int            ndim,
                                      hypre_Index          loop_size,
                                      hypre_Box           *fdbox,
@@ -1334,8 +1337,8 @@ hypre_StructMatmultCompute_fuse_ffc( HYPRE_Int            nprod,
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "Product %d:\n", k);
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  cprod[%d] = %p (value: %e)\n",
                       k, (void*)&cprod[k], cprod[k]);
-      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  mptrs[%d] = %p\n",
-                      k, (void*)mptrs[k]);
+      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  mptrs[%d] = %p (entry: %d)\n",
+                      k, (void*)mptrs[k], mentries[k]);
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  tptrs[%d][0] = %p\n",
                       k, (void*)tptrs[k][0]);
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  tptrs[%d][1] = %p\n",
@@ -1344,6 +1347,8 @@ hypre_StructMatmultCompute_fuse_ffc( HYPRE_Int            nprod,
                       k, (void*)tptrs[k][2]);
    }
    hypre_ParPrintf(hypre_MPI_COMM_WORLD, "========================\n");
+#else
+   HYPRE_UNUSED_VAR(mentries);
 #endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -1611,6 +1616,7 @@ hypre_StructMatmultCompute_fuse_fcc( HYPRE_Int            nprod,
                                      HYPRE_Complex       *cprod,
                                      hypre_3Cptrs        *tptrs,
                                      hypre_1Cptr         *mptrs,
+                                     HYPRE_Int           *mentries,
                                      HYPRE_Int            ndim,
                                      hypre_Index          loop_size,
                                      hypre_Box           *fdbox,
@@ -1641,8 +1647,8 @@ hypre_StructMatmultCompute_fuse_fcc( HYPRE_Int            nprod,
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "Product %d:\n", k);
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  cprod[%d] = %p (value: %e)\n",
                       k, (void*)&cprod[k], cprod[k]);
-      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  mptrs[%d] = %p\n",
-                      k, (void*)mptrs[k]);
+      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  mptrs[%d] = %p (entry: %d)\n",
+                      k, (void*)mptrs[k], mentries[k]);
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  tptrs[%d][0] = %p\n",
                       k, (void*)tptrs[k][0]);
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  tptrs[%d][1] = %p\n",
@@ -1651,6 +1657,8 @@ hypre_StructMatmultCompute_fuse_fcc( HYPRE_Int            nprod,
                       k, (void*)tptrs[k][2]);
    }
    hypre_ParPrintf(hypre_MPI_COMM_WORLD, "========================\n");
+#else
+   HYPRE_UNUSED_VAR(mentries);
 #endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -1918,6 +1926,7 @@ hypre_StructMatmultCompute_fuse_ff( HYPRE_Int            nprod,
                                     HYPRE_Complex       *cprod,
                                     hypre_3Cptrs        *tptrs,
                                     hypre_1Cptr         *mptrs,
+                                    HYPRE_Int           *mentries,
                                     HYPRE_Int            ndim,
                                     hypre_Index          loop_size,
                                     hypre_Box           *fdbox,
@@ -1945,14 +1954,16 @@ hypre_StructMatmultCompute_fuse_ff( HYPRE_Int            nprod,
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "Product %d:\n", k);
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  cprod[%d] = %p (value: %e)\n",
                       k, (void*)&cprod[k], cprod[k]);
-      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  mptrs[%d] = %p\n",
-                      k, (void*)mptrs[k]);
+      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  mptrs[%d] = %p (entry: %d)\n",
+                      k, (void*)mptrs[k], mentries[k]);
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  tptrs[%d][0] = %p\n",
                       k, (void*)tptrs[k][0]);
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  tptrs[%d][1] = %p\n",
                       k, (void*)tptrs[k][1]);
    }
    hypre_ParPrintf(hypre_MPI_COMM_WORLD, "=====================\n");
+#else
+   HYPRE_UNUSED_VAR(mentries);
 #endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -2201,6 +2212,7 @@ hypre_StructMatmultCompute_fuse_fc( HYPRE_Int            nprod,
                                     HYPRE_Complex       *cprod,
                                     hypre_3Cptrs        *tptrs,
                                     hypre_1Cptr         *mptrs,
+                                    HYPRE_Int           *mentries,
                                     HYPRE_Int            ndim,
                                     hypre_Index          loop_size,
                                     hypre_Box           *fdbox,
@@ -2231,14 +2243,16 @@ hypre_StructMatmultCompute_fuse_fc( HYPRE_Int            nprod,
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "Product %d:\n", k);
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  cprod[%d] = %p (value: %e)\n",
                       k, (void*)&cprod[k], cprod[k]);
-      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  mptrs[%d] = %p\n",
-                      k, (void*)mptrs[k]);
+      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  mptrs[%d] = %p (entry: %d)\n",
+                      k, (void*)mptrs[k], mentries[k]);
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  tptrs[%d][0] = %p\n",
                       k, (void*)tptrs[k][0]);
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  tptrs[%d][1] = %p\n",
                       k, (void*)tptrs[k][1]);
    }
    hypre_ParPrintf(hypre_MPI_COMM_WORLD, "========================\n");
+#else
+   HYPRE_UNUSED_VAR(mentries);
 #endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -2506,6 +2520,7 @@ hypre_StructMatmultCompute_fuse_cc( HYPRE_Int            nprod,
                                     HYPRE_Complex       *cprod,
                                     hypre_3Cptrs        *tptrs,
                                     hypre_1Cptr         *mptrs,
+                                    HYPRE_Int           *mentries,
                                     HYPRE_Int            ndim,
                                     hypre_Index          loop_size,
                                     hypre_Box           *cdbox,
@@ -2533,14 +2548,16 @@ hypre_StructMatmultCompute_fuse_cc( HYPRE_Int            nprod,
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "Product %d:\n", k);
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  cprod[%d] = %p (value: %e)\n",
                       k, (void*)&cprod[k], cprod[k]);
-      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  mptrs[%d] = %p\n",
-                      k, (void*)mptrs[k]);
+      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  mptrs[%d] = %p (entry: %d)\n",
+                      k, (void*)mptrs[k], mentries[k]);
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  tptrs[%d][0] = %p\n",
                       k, (void*)tptrs[k][0]);
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  tptrs[%d][1] = %p\n",
                       k, (void*)tptrs[k][1]);
    }
    hypre_ParPrintf(hypre_MPI_COMM_WORLD, "=====================\n");
+#else
+   HYPRE_UNUSED_VAR(mentries);
 #endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -2789,6 +2806,7 @@ hypre_StructMatmultCompute_fuse_f( HYPRE_Int            nprod,
                                    HYPRE_Complex       *cprod,
                                    hypre_3Cptrs        *tptrs,
                                    hypre_1Cptr         *mptrs,
+                                   HYPRE_Int           *mentries,
                                    HYPRE_Int            ndim,
                                    hypre_Index          loop_size,
                                    hypre_Box           *fdbox,
@@ -2816,12 +2834,14 @@ hypre_StructMatmultCompute_fuse_f( HYPRE_Int            nprod,
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "Product %d:\n", k);
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  cprod[%d] = %p (value: %e)\n",
                       k, (void*)&cprod[k], cprod[k]);
-      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  mptrs[%d] = %p\n",
-                      k, (void*)mptrs[k]);
+      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  mptrs[%d] = %p (entry: %d)\n",
+                      k, (void*)mptrs[k], mentries[k]);
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  tptrs[%d][0] = %p\n",
                       k, (void*)tptrs[k]);
    }
    hypre_ParPrintf(hypre_MPI_COMM_WORLD, "=====================\n");
+#else
+   HYPRE_UNUSED_VAR(mentries);
 #endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -3070,6 +3090,7 @@ hypre_StructMatmultCompute_fuse_c( HYPRE_Int            nprod,
                                    HYPRE_Complex       *cprod,
                                    hypre_3Cptrs        *tptrs,
                                    hypre_1Cptr         *mptrs,
+                                   HYPRE_Int           *mentries,
                                    HYPRE_Int            ndim,
                                    hypre_Index          loop_size,
                                    hypre_Box           *cdbox,
@@ -3097,12 +3118,14 @@ hypre_StructMatmultCompute_fuse_c( HYPRE_Int            nprod,
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "Product %d:\n", k);
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  cprod[%d] = %p (value: %e)\n",
                       k, (void*)&cprod[k], cprod[k]);
-      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  mptrs[%d] = %p\n",
-                      k, (void*)mptrs[k]);
+      hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  mptrs[%d] = %p (entry: %d)\n",
+                      k, (void*)mptrs[k], mentries[k]);
       hypre_ParPrintf(hypre_MPI_COMM_WORLD, "  tptrs[%d][0] = %p\n",
                       k, (void*)tptrs[k][0]);
    }
    hypre_ParPrintf(hypre_MPI_COMM_WORLD, "=====================\n");
+#else
+   HYPRE_UNUSED_VAR(mentries);
 #endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
@@ -3499,7 +3522,6 @@ hypre_StructMatmultCompute_fuse( HYPRE_Int nterms,
                                  HYPRE_Int    na,
                                  HYPRE_Int    ndim,
                                  hypre_Index  loop_size,
-                                 HYPRE_Int    stencil_size,
                                  hypre_Box   *fdbox,
                                  hypre_Index  fdstart,
                                  hypre_Index  fdstride,
@@ -3516,11 +3538,8 @@ hypre_StructMatmultCompute_fuse( HYPRE_Int nterms,
    hypre_1Cptr     mptrs[8][na];
    HYPRE_Int       mentries[8][na];
 
-   HYPRE_Int       ptype, nf, nc, nt;
+   HYPRE_Int       ptype = 0, nf, nc, nt;
    HYPRE_Int       i, k, t;
-#if defined(DEBUG_MATMULT)
-   const char     *type_names[8] = {"FFF", "FFC", "FCC", "FF", "FC", "CC", "F", "C"};
-#endif
 
    /* Sanity check */
    if (nterms > 3)
@@ -3647,12 +3666,14 @@ hypre_StructMatmultCompute_fuse( HYPRE_Int nterms,
 #endif
 
 #if defined(DEBUG_MATMULT)
+   const char *cases[8] = {"FFF", "FFC", "FCC", "FF", "FC", "CC", "F", "C"};
+
    hypre_ParPrintf(hypre_MPI_COMM_WORLD, "Number of products - ");
    for (t = 0, k = 0, i = 0; i < 8; i++)
    {
       if (nprod[i] > 0)
       {
-         hypre_ParPrintf(hypre_MPI_COMM_WORLD, "%s: %d | ", type_names[i], nprod[i]);
+         hypre_ParPrintf(hypre_MPI_COMM_WORLD, "%s: %d | ", cases[i], nprod[i]);
       }
       t += nprod[i];
       k += hypre_ceildiv(nprod[i], HYPRE_FUSE_MAXDEPTH);
@@ -3661,45 +3682,53 @@ hypre_StructMatmultCompute_fuse( HYPRE_Int nterms,
 #endif
 
    /* Call fuse functions */
-   hypre_StructMatmultCompute_fuse_fff(nprod[0], cprod[0], tptrs[0], mptrs[0], mentries[0],
+   hypre_StructMatmultCompute_fuse_fff(nprod[0], cprod[0], tptrs[0],
+                                       mptrs[0], mentries[0],
                                        ndim, loop_size,
                                        fdbox, fdstart, fdstride,
                                        Mdbox, Mdstart, Mdstride);
 
-   hypre_StructMatmultCompute_fuse_ffc(nprod[1], cprod[1], tptrs[1], mptrs[1], /*mentries[1],*/
-                                       ndim, loop_size,
-                                       fdbox, fdstart, fdstride,
-                                       cdbox, cdstart, cdstride,
-                                       Mdbox, Mdstart, Mdstride);
-
-   hypre_StructMatmultCompute_fuse_fcc(nprod[2], cprod[2], tptrs[2], mptrs[2], /*mentries[2],*/
+   hypre_StructMatmultCompute_fuse_ffc(nprod[1], cprod[1], tptrs[1],
+                                       mptrs[1], mentries[1],
                                        ndim, loop_size,
                                        fdbox, fdstart, fdstride,
                                        cdbox, cdstart, cdstride,
                                        Mdbox, Mdstart, Mdstride);
 
-   hypre_StructMatmultCompute_fuse_ff(nprod[3], cprod[3], tptrs[3], mptrs[3],
+   hypre_StructMatmultCompute_fuse_fcc(nprod[2], cprod[2], tptrs[2],
+                                       mptrs[2], mentries[2],
+                                       ndim, loop_size,
+                                       fdbox, fdstart, fdstride,
+                                       cdbox, cdstart, cdstride,
+                                       Mdbox, Mdstart, Mdstride);
+
+   hypre_StructMatmultCompute_fuse_ff(nprod[3], cprod[3], tptrs[3],
+                                      mptrs[3], mentries[3],
                                       ndim, loop_size,
                                       fdbox, fdstart, fdstride,
                                       Mdbox, Mdstart, Mdstride);
 
-   hypre_StructMatmultCompute_fuse_fc(nprod[4], cprod[4], tptrs[4], mptrs[4],
+   hypre_StructMatmultCompute_fuse_fc(nprod[4], cprod[4], tptrs[4],
+                                      mptrs[4], mentries[4],
                                       ndim, loop_size,
                                       fdbox, fdstart, fdstride,
                                       cdbox, cdstart, cdstride,
                                       Mdbox, Mdstart, Mdstride);
 
-   hypre_StructMatmultCompute_fuse_cc(nprod[5], cprod[5], tptrs[5], mptrs[5],
+   hypre_StructMatmultCompute_fuse_cc(nprod[5], cprod[5], tptrs[5],
+                                      mptrs[5], mentries[5],
                                       ndim, loop_size,
                                       cdbox, cdstart, cdstride,
                                       Mdbox, Mdstart, Mdstride);
 
-   hypre_StructMatmultCompute_fuse_f(nprod[6], cprod[6], tptrs[6], mptrs[6],
+   hypre_StructMatmultCompute_fuse_f(nprod[6], cprod[6], tptrs[6],
+                                     mptrs[6], mentries[6],
                                      ndim, loop_size,
                                      fdbox, fdstart, fdstride,
                                      Mdbox, Mdstart, Mdstride);
 
-   hypre_StructMatmultCompute_fuse_c(nprod[7], cprod[7], tptrs[7], mptrs[7],
+   hypre_StructMatmultCompute_fuse_c(nprod[7], cprod[7], tptrs[7],
+                                     mptrs[7], mentries[7],
                                      ndim, loop_size,
                                      cdbox, cdstart, cdstride,
                                      Mdbox, Mdstart, Mdstride);
