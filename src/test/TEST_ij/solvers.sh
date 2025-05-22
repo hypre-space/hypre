@@ -188,6 +188,58 @@ if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
    echo "Incorrect number of runs in ${TNAME}.out" >&2
 fi
 
+FILES="\
+ ${TNAME}.out.501\
+ ${TNAME}.out.502\
+ ${TNAME}.out.503\
+ ${TNAME}.out.504\
+ ${TNAME}.out.505\
+ ${TNAME}.out.506\
+ ${TNAME}.out.507\
+ ${TNAME}.out.508\
+ ${TNAME}.out.509\
+ ${TNAME}.out.511\
+ ${TNAME}.out.512\
+ ${TNAME}.out.513\
+ ${TNAME}.out.514\
+ ${TNAME}.out.515\
+ ${TNAME}.out.516\
+ ${TNAME}.out.517\
+ ${TNAME}.out.518\
+ ${TNAME}.out.519\
+"
+
+# Process each output file to extract the solver convergence history
+# We capture all lines between the first and last occurrence of "L2 norm of"
+# This includes initial norms, iteration history, and final convergence results
+for i in $FILES
+do
+  echo "# Output file: $i"
+  awk '
+    BEGIN { found=0; last=0 }
+    /L2 norm of/ {
+      if (!found) { found=1; start=NR }
+      last=NR
+    }
+    END {
+      if (found) {
+        for (i=start; i<=last; i++) {
+          print lines[i]
+        }
+      }
+    }
+    { lines[NR]=$0 }
+  ' $i
+  echo ""  # Add a newline after each file
+done > ${TNAME}.out.f
+
+# Make sure that the output file is reasonable
+RUNCOUNT=`echo $FILES | wc -w`
+OUTCOUNT=`grep "L2 norm of b:" ${TNAME}.out.f | wc -l`
+if [ "$OUTCOUNT" != "$RUNCOUNT" ]; then
+   echo "Incorrect number of runs in ${TNAME}.out" >&2
+fi
+
 # put all of the output files together
 cat ${TNAME}.out.[a-z] > ${TNAME}.out
 

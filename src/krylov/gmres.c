@@ -519,7 +519,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    if (print_level > 1 && my_id == 0)
    {
       hypre_printf("=============================================\n\n");
-      if (num_tags <= 1 || print_level == 2 || print_level > 9)
+      if (num_tags <= 1 || print_level == 2 || print_level > 9 || (!xref && print_level > 5))
       {
          if (b_norm > 0.0)
          {
@@ -532,7 +532,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
             hypre_printf("-----    ------------    ----------\n");
          }
       }
-      else if (num_tags <= 1 || print_level == 6)
+      else if (xref && (num_tags <= 1 || print_level == 6))
       {
          if (e_norm > 0.0)
          {
@@ -711,7 +711,8 @@ hypre_GMRESSolve(void  *gmres_vdata,
          if (print_level > 0)
          {
             norms[iter] = r_norm;
-            if ((num_tags <= 1 && print_level > 1) || (print_level == 2) || (print_level > 9))
+            if ((num_tags <= 1 && print_level > 1) || (print_level == 2) ||
+                (print_level > 9) || (!xref && print_level > 5))
             {
                if (!my_id)
                {
@@ -766,7 +767,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
                (*(gmres_functions->CopyVector))(x, w_3);
                (*(gmres_functions->Axpy))(1.0, w, w_3);
 
-               if (print_level == 3 || print_level == 4 || print_level == 5)
+               if (xref == NULL || print_level == 3 || print_level == 4 || print_level == 5)
                {
                   /* Now compute real residual r = b - A*x_i */
                   (*(gmres_functions->CopyVector))(b, r);
@@ -1097,20 +1098,20 @@ hypre_GMRESSolve(void  *gmres_vdata,
       hypre_printf("\n\n");
    }
 
-   if (!my_id && print_level > 1)
+   if (!my_id && print_level > 0)
    {
       hypre_printf("Final L2 norm of residual: %e\n", r_norm);
       if (num_tags > 1)
       {
          for (tag = 0; tag < num_tags; tag++)
          {
-            hypre_printf("L2 norm of r%*d: %e\n", hypre_ndigits(num_tags),
+            hypre_printf("Final L2 norm of r%*d: %e\n", hypre_ndigits(num_tags),
                          tag, hypre_sqrt(iprod[tag + 1]));
          }
       }
    }
 
-   if (xref && print_level > 1)
+   if (xref && print_level > 0)
    {
       (*(gmres_functions->CopyVector))(x, w_3);
       (*(gmres_functions->Axpy))(-1.0, xref, w_3);
@@ -1130,7 +1131,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
       }
    }
 
-   if (!my_id && print_level > 1)
+   if (!my_id && print_level > 0)
    {
       hypre_printf("\n");
    }
