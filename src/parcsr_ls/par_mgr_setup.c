@@ -74,8 +74,8 @@ hypre_MGRSetup( void               *mgr_vdata,
 #if defined(HYPRE_USING_GPU)
    hypre_ParCSRMatrix  **P_FF_array = (mgr_data -> P_FF_array);
 #endif
-   hypre_ParCSRMatrix  **P_array = (mgr_data -> P_array);
-   hypre_ParCSRMatrix  **R_array = (mgr_data -> RT_array);
+   hypre_ParCSRMatrix  **P_array  = (mgr_data -> P_array);
+   hypre_ParCSRMatrix  **R_array  = (mgr_data -> R_array);
    hypre_ParCSRMatrix  **RT_array = (mgr_data -> RT_array);
 
    hypre_ParCSRMatrix  *A_FF = NULL;
