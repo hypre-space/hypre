@@ -241,9 +241,9 @@ typedef double                 hypre_double;
 /* Macro for marking fallthrough in switch statements */
 #if (defined(__GNUC__) && __GNUC__ >= 7) ||\
     (defined(__clang__) && __clang_major__ >= 10)
- #define HYPRE_FALLTHROUGH __attribute__ ((fallthrough))
+#define HYPRE_FALLTHROUGH __attribute__ ((fallthrough))
 #else
- #define HYPRE_FALLTHROUGH ((void)0)
+#define HYPRE_FALLTHROUGH ((void)0)
 #endif
 
 /* Macro for silencing unused variable warning */
