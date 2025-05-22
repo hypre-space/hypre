@@ -312,7 +312,6 @@ hypre_BoomerAMGCreate( void )
       coarsen_type    =  8;
       relax_down      = 18;
       relax_up        = 18;
-      agg_interp_type =  7;
    }
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
