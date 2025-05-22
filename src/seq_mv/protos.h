@@ -262,6 +262,11 @@ hypre_Vector *hypre_SeqMultiVectorCreate ( HYPRE_Int size, HYPRE_Int num_vectors
 HYPRE_Int hypre_SeqVectorDestroy ( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorInitializeShell( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorSetData( hypre_Vector *vector, HYPRE_Complex *data );
+HYPRE_Int hypre_SeqVectorSetOwnsTags( hypre_Vector *vector, HYPRE_Int owns_tags );
+HYPRE_Int hypre_SeqVectorSetNumTags( hypre_Vector *vector, HYPRE_Int num_tags );
+HYPRE_Int hypre_SeqVectorSetTags( hypre_Vector *vector,
+                                  HYPRE_MemoryLocation memory_location,
+                                  HYPRE_Int *tags );
 HYPRE_Int hypre_SeqVectorInitialize_v2( hypre_Vector *vector,
                                         HYPRE_MemoryLocation memory_location );
 HYPRE_Int hypre_SeqVectorInitialize ( hypre_Vector *vector );
@@ -274,6 +279,7 @@ HYPRE_Int hypre_SeqVectorSetConstantValues ( hypre_Vector *v, HYPRE_Complex valu
 HYPRE_Int hypre_SeqVectorSetConstantValuesHost ( hypre_Vector *v, HYPRE_Complex value );
 HYPRE_Int hypre_SeqVectorSetRandomValues ( hypre_Vector *v, HYPRE_Int seed );
 HYPRE_Int hypre_SeqVectorCopy ( hypre_Vector *x, hypre_Vector *y );
+HYPRE_Int hypre_SeqVectorCopyTags ( hypre_Vector *x, hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorStridedCopy( hypre_Vector *x, HYPRE_Int istride, HYPRE_Int ostride,
                                       HYPRE_Int size, HYPRE_Complex *data);
 hypre_Vector *hypre_SeqVectorCloneDeep ( hypre_Vector *x );
@@ -307,6 +313,7 @@ HYPRE_Int hypre_SeqVectorMassAxpy4(HYPRE_Complex *alpha, hypre_Vector **x, hypre
                                    HYPRE_Int k);
 HYPRE_Int hypre_SeqVectorMassAxpy8(HYPRE_Complex *alpha, hypre_Vector **x, hypre_Vector *y,
                                    HYPRE_Int k);
+HYPRE_Int hypre_SeqVectorInnerProdTagged( hypre_Vector *x, hypre_Vector *y, HYPRE_Complex *iprod );
 HYPRE_Complex hypre_SeqVectorSumElts ( hypre_Vector *vector );
 HYPRE_Complex hypre_SeqVectorSumEltsHost ( hypre_Vector *vector );
 //HYPRE_Int hypre_SeqVectorMax( HYPRE_Complex alpha, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y );
