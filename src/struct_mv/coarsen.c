@@ -336,10 +336,17 @@ hypre_CoarsenBoxArrayArrayNeg( hypre_BoxArrayArray   *boxaa,
    hypre_BoxArray        *new_boxa;
    hypre_BoxArrayArray   *new_boxaa;
 
+   hypre_Index            unit_index;
+   hypre_Index            grow_index;
+
    HYPRE_Int              count_box;
    HYPRE_Int              count_boxa;
    HYPRE_Int              box_id;
    HYPRE_Int              i, ii, j;
+
+   /* Set grow_index = stride - unit_index */
+   hypre_SetIndex(unit_index, 1);
+   hypre_SubtractIndexes(stride, unit_index, ndim, grow_index);
 
    /* Allocate box */
    box = hypre_BoxCreate(ndim);
@@ -358,7 +365,10 @@ hypre_CoarsenBoxArrayArrayNeg( hypre_BoxArrayArray   *boxaa,
       hypre_ForBoxI(j, boxa)
       {
          hypre_CopyBox(hypre_BoxArrayBox(boxa, j), box);
-         hypre_CoarsenBoxNeg(box, refbox, origin, stride);
+         //hypre_CoarsenBoxNeg(box, refbox, origin, stride);
+         hypre_BoxGrowByIndex(box, grow_index);
+         hypre_CoarsenBox(box, origin, stride);
+         hypre_IntersectBoxes(box, refbox, box);
          if (hypre_BoxVolume(box))
          {
             count_boxa++;
@@ -384,7 +394,10 @@ hypre_CoarsenBoxArrayArrayNeg( hypre_BoxArrayArray   *boxaa,
       hypre_ForBoxI(j, boxa)
       {
          hypre_CopyBox(hypre_BoxArrayBox(boxa, j), box);
-         hypre_CoarsenBoxNeg(box, refbox, origin, stride);
+         //hypre_CoarsenBoxNeg(box, refbox, origin, stride);
+         hypre_BoxGrowByIndex(box, grow_index);
+         hypre_CoarsenBox(box, origin, stride);
+         hypre_IntersectBoxes(box, refbox, box);
          if (hypre_BoxVolume(box))
          {
             count_box++;
@@ -400,7 +413,10 @@ hypre_CoarsenBoxArrayArrayNeg( hypre_BoxArrayArray   *boxaa,
          hypre_ForBoxI(j, boxa)
          {
             hypre_CopyBox(hypre_BoxArrayBox(boxa, j), box);
-            hypre_CoarsenBoxNeg(box, refbox, origin, stride);
+            //hypre_CoarsenBoxNeg(box, refbox, origin, stride);
+            hypre_BoxGrowByIndex(box, grow_index);
+            hypre_CoarsenBox(box, origin, stride);
+            hypre_IntersectBoxes(box, refbox, box);
             if (hypre_BoxVolume(box))
             {
                hypre_CopyBox(box, hypre_BoxArrayBox(new_boxa, count_box));

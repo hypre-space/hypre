@@ -1066,7 +1066,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
    ijmatrix = hypre_SStructMatrixIJMatrix(matrices[m]);
    HYPRE_IJMatrixGetObject(ijmatrix, (void **) &parcsr_uP);
    num_nonzeros_uP = hypre_ParCSRMatrixNumNonzeros(parcsr_uP);
-#if 0
+#if 1
    // RDF Investigate: This produces faster code that isn't always correct.
    //
    // Comments from Wayne: In ssamg_setup.c, if you turn on the DEBUG_SETUP and
@@ -1093,6 +1093,7 @@ hypre_SStructMatmultComputeU( hypre_SStructMatmultData *mmdata,
 
       m = terms[2];
       hypre_SStructMatrixHaloToUMatrix(matrices[m], grid, &ij_tmp, 2);
+      //ij_tmp = hypre_SStructMatrixToUMatrix(matrices[m], 0);
       HYPRE_IJMatrixGetObject(ij_tmp, (void **) &parcsr_sP);
 
       if (!hypre_ParCSRMatrixCommPkg(parcsr_sP))
