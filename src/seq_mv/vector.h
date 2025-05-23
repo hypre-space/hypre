@@ -21,9 +21,11 @@
 typedef struct
 {
    HYPRE_Complex        *data;
-   HYPRE_Int             size;      /* Number of elements of a single vector component */
-   HYPRE_Int             component; /* Index of a multivector component
-                                    (used for set/get routines )*/
+   HYPRE_Int             size;       /* Number of elements of a single vector component */
+   HYPRE_Int             component;  /* Index of a multivector component (used for set/get) */
+   HYPRE_Int             owns_tags;  /* Whether the vector owns the array of tags or not */
+   HYPRE_Int             num_tags;   /* Number of unique tags */
+   HYPRE_Int            *tags;       /* Array of tags with same size as vector */
    HYPRE_Int             owns_data;  /* Does the Vector create/destroy `data'? */
    HYPRE_MemoryLocation  memory_location; /* memory location of data array */
 
@@ -47,6 +49,9 @@ typedef struct
 #define hypre_VectorComponent(vector)             ((vector) -> component)
 #define hypre_VectorOwnsData(vector)              ((vector) -> owns_data)
 #define hypre_VectorMemoryLocation(vector)        ((vector) -> memory_location)
+#define hypre_VectorOwnsTags(vector)              ((vector) -> owns_tags)
+#define hypre_VectorNumTags(vector)               ((vector) -> num_tags)
+#define hypre_VectorTags(vector)                  ((vector) -> tags)
 #define hypre_VectorNumVectors(vector)            ((vector) -> num_vectors)
 #define hypre_VectorMultiVecStorageMethod(vector) ((vector) -> multivec_storage_method)
 #define hypre_VectorVectorStride(vector)          ((vector) -> vecstride)

@@ -30,6 +30,7 @@
 #include <cuda_profiler_api.h>
 #endif
 #if defined(HYPRE_USING_CUSPARSE)
+#define DISABLE_CUSPARSE_DEPRECATED
 #include <cusparse.h>
 #endif
 
@@ -65,12 +66,20 @@ HYPRE_Int BuildParDifConv (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                            HYPRE_ParCSRMatrix *A_ptr);
 HYPRE_Int BuildParFromOneFile (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                HYPRE_Int num_functions, HYPRE_ParCSRMatrix *A_ptr );
-HYPRE_Int BuildFuncsFromFiles (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
-                               HYPRE_ParCSRMatrix A, HYPRE_Int **dof_func_ptr );
-HYPRE_Int BuildFuncsFromOneFile (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
-                                 HYPRE_ParCSRMatrix A, HYPRE_Int **dof_func_ptr );
+HYPRE_Int BuildFuncTagsFromFiles (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                                  HYPRE_ParCSRMatrix A, HYPRE_Int **dof_func_ptr );
+HYPRE_Int BuildFuncTagsFromOneFile (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                                    HYPRE_ParCSRMatrix A, HYPRE_Int **dof_func_ptr );
+HYPRE_Int BuildFuncTagsInterleaved (HYPRE_Int local_size, HYPRE_Int num_functions,
+                                    HYPRE_MemoryLocation memory_location,
+                                    HYPRE_Int **dof_func_ptr );
+HYPRE_Int BuildFuncTagsContiguous (HYPRE_Int local_size, HYPRE_Int num_functions,
+                                   HYPRE_MemoryLocation memory_location,
+                                   HYPRE_Int **dof_func_ptr );
 HYPRE_Int BuildRhsParFromOneFile (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                   HYPRE_ParCSRMatrix A, HYPRE_ParVector *b_ptr );
+HYPRE_Int BuildSolParFromOneFile (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+                                  HYPRE_ParCSRMatrix A, HYPRE_ParVector *x_ptr );
 HYPRE_Int BuildBigArrayFromOneFile (HYPRE_Int argc, char *argv [], const char *array_name,
                                     HYPRE_Int arg_index, HYPRE_BigInt *partitioning, HYPRE_Int *size, HYPRE_BigInt **array_ptr);
 HYPRE_Int BuildParLaplacian9pt (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
@@ -141,6 +150,7 @@ main( hypre_int argc,
    HYPRE_Int           ioutdat;
    HYPRE_Int           poutdat;
    HYPRE_Int           poutusr = 0; /* if user selects pout */
+   HYPRE_Int           print_matrix_info = 0;
    HYPRE_Int           debug_flag;
    HYPRE_Int           ierr = 0;
    HYPRE_Int           i, j, c;
@@ -368,6 +378,7 @@ main( hypre_int argc,
 
    HYPRE_Int    print_system = 0;
    HYPRE_Int    print_system_binary = 0;
+   HYPRE_Int    print_system_csr = 0;
    HYPRE_Int    rel_change = 0;
    HYPRE_Int    second_time = 0;
    HYPRE_Int    benchmark = 0;
@@ -660,8 +671,6 @@ main( hypre_int argc,
    size_t umpire_host_pool_size   = 4294967296; // 4 GiB
 #endif
 
-   HYPRE_SetPrintErrorMode(1);
-
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
@@ -683,7 +692,7 @@ main( hypre_int argc,
    IS_type = 1;
    debug_flag = 0;
    solver_id = 0;
-   ioutdat = 3;
+   ioutdat = 2;
    poutdat = 1;
    hypre_sprintf (plot_file_name, "AMGgrids.CF.dat");
 
@@ -804,6 +813,21 @@ main( hypre_int argc,
          arg_index++;
          build_funcs_type      = 2;
          build_funcs_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-funcsinterleaved") == 0 )
+      {
+         arg_index++;
+         build_funcs_type = 3;
+      }
+      else if ( strcmp(argv[arg_index], "-funcscontiguous") == 0 )
+      {
+         arg_index++;
+         build_funcs_type = 4;
+      }
+      else if ( strcmp(argv[arg_index], "-mat-info") == 0 )
+      {
+         arg_index++;
+         print_matrix_info = 1;
       }
       else if ( strcmp(argv[arg_index], "-exact_size") == 0 )
       {
@@ -953,6 +977,12 @@ main( hypre_int argc,
          build_src_type      = 4;
          build_rhs_type      = -1;
          build_src_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-x0fromonefile") == 0 )
+      {
+         arg_index++;
+         build_x0_type       = -3;
+         build_x0_arg_index  = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-x0frombinfile") == 0 )
       {
@@ -2191,6 +2221,11 @@ main( hypre_int argc,
          arg_index++;
          print_system_binary = 1;
       }
+      else if ( strcmp(argv[arg_index], "-printcsr") == 0 )
+      {
+         arg_index++;
+         print_system_csr = 1;
+      }
       /* BM Oct 23, 2006 */
       else if ( strcmp(argv[arg_index], "-plot_grids") == 0 )
       {
@@ -2546,8 +2581,11 @@ main( hypre_int argc,
          hypre_printf("  -nonzeros_to_keep <val>: number of nonzeros in each row to keep\n");
          hypre_printf("\n");
          hypre_printf("  -iout <val>            : set output flag\n");
-         hypre_printf("       0=no output    1=matrix stats\n");
-         hypre_printf("       2=cycle stats  3=matrix & cycle stats\n");
+         hypre_printf("       0 = no output\n");
+         hypre_printf("       1 = matrix stats\n");
+         hypre_printf("       2 = cycle/solver stats\n");
+         hypre_printf("       3 = abs. residual norms for multi-tag vectors (GMRES only)\n");
+         hypre_printf("       4 = rel. residual norms for multi-tag vectors (GMRES only)\n");
          hypre_printf("\n");
          hypre_printf("  -dbg <val>             : set debug flag\n");
          hypre_printf("       0=no debugging\n       1=internal timing\n       2=interpolation truncation\n       3=more detailed timing in coarsening routine\n");
@@ -2735,6 +2773,17 @@ main( hypre_int argc,
 
       hypre_printf("Running with these driver parameters:\n");
       hypre_printf("  solver ID    = %d\n\n", solver_id);
+   }
+
+   /*-----------------------------------------------------------
+    * Set various things
+    *-----------------------------------------------------------*/
+
+   HYPRE_SetPrintErrorMode(1);
+   if (test_error == 1)
+   {
+      HYPRE_SetPrintErrorVerbosity(-1, 0);                   /* turn all errors off */
+      HYPRE_SetPrintErrorVerbosity(HYPRE_ERROR_GENERIC, 1);  /* turn generic errors on */
    }
 
 #if defined(HYPRE_USING_DEVICE_POOL)
@@ -3334,6 +3383,42 @@ main( hypre_int argc,
       }
    }
 
+   /* Print matrix information */
+   if (print_matrix_info)
+   {
+      HYPRE_BigInt global_num_rows, global_num_cols, global_num_nonzeros;
+
+      if (parcsr_A)
+      {
+         HYPRE_BigInt ilower, iupper, jlower, jupper;
+
+         HYPRE_ParCSRMatrixGetLocalRange(parcsr_A, &ilower, &iupper, &jlower, &jupper);
+         HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &ij_A);
+         HYPRE_IJMatrixSetObjectType(ij_A, HYPRE_PARCSR);
+         hypre_IJMatrixObject(ij_A) = parcsr_A;
+         hypre_IJMatrixAssembleFlag(ij_A) = 1;
+      }
+
+      HYPRE_IJMatrixGetGlobalInfo(ij_A,
+                                  &global_num_rows,
+                                  &global_num_cols,
+                                  &global_num_nonzeros);
+
+      if (parcsr_A)
+      {
+         hypre_IJMatrixObject(ij_A) = NULL;
+         HYPRE_IJMatrixDestroy(ij_A);
+      }
+
+      if (myid == 0)
+      {
+         hypre_printf("  Matrix Information:\n");
+         hypre_printf("    Global number of rows:     %b\n", global_num_rows);
+         hypre_printf("    Global number of columns:  %b\n", global_num_cols);
+         hypre_printf("    Global number of nonzeros: %b\n", global_num_nonzeros);
+      }
+   }
+
    /*-----------------------------------------------------------
     * Set up the RHS and initial guess
     *-----------------------------------------------------------*/
@@ -3356,7 +3441,10 @@ main( hypre_int argc,
       if (myid == 0)
       {
          hypre_printf("  RHS vector read from file %s\n", argv[build_rhs_arg_index]);
-         hypre_printf("  Initial guess is 0\n");
+         if (build_x0_type == -1)
+         {
+            hypre_printf("  Initial guess is 0\n");
+         }
       }
 
       /* RHS */
@@ -3395,7 +3483,10 @@ main( hypre_int argc,
       if (myid == 0)
       {
          hypre_printf("  RHS vector read from file %s\n", argv[build_rhs_arg_index]);
-         hypre_printf("  Initial guess is 0\n");
+         if (build_x0_type == -1)
+         {
+            hypre_printf("  Initial guess is 0\n");
+         }
       }
 
       ij_b = NULL;
@@ -3415,7 +3506,10 @@ main( hypre_int argc,
       if (myid == 0)
       {
          hypre_printf("  RHS vector has unit coefficients\n");
-         hypre_printf("  Initial guess is 0\n");
+         if (build_x0_type == -1)
+         {
+            hypre_printf("  Initial guess is 0\n");
+         }
       }
 
       HYPRE_Complex *values_h = hypre_CTAlloc(HYPRE_Real, local_num_rows, HYPRE_MEMORY_HOST);
@@ -3464,7 +3558,10 @@ main( hypre_int argc,
       if (myid == 0)
       {
          hypre_printf("  RHS vector has random coefficients and unit 2-norm\n");
-         hypre_printf("  Initial guess is 0\n");
+         if (build_x0_type == -1)
+         {
+            hypre_printf("  Initial guess is 0\n");
+         }
       }
 
       /* RHS */
@@ -3500,7 +3597,10 @@ main( hypre_int argc,
       if (myid == 0)
       {
          hypre_printf("  RHS vector set for solution with unit coefficients\n");
-         hypre_printf("  Initial guess is 0\n");
+         if (build_x0_type == -1)
+         {
+            hypre_printf("  Initial guess is 0\n");
+         }
       }
 
       HYPRE_Real *values_h = hypre_CTAlloc(HYPRE_Real, local_num_cols, HYPRE_MEMORY_HOST);
@@ -3595,7 +3695,10 @@ main( hypre_int argc,
       if (myid == 0)
       {
          hypre_printf("  RHS vector read from file %s\n", argv[build_rhs_arg_index]);
-         hypre_printf("  Initial guess is 0\n");
+         if (build_x0_type == -1)
+         {
+            hypre_printf("  Initial guess is 0\n");
+         }
       }
 
       ij_b = NULL;
@@ -3870,6 +3973,21 @@ main( hypre_int argc,
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
    }
+   else if (build_x0_type == -3)
+   {
+      if (myid == 0)
+      {
+         hypre_printf("  Initial guess vector read from file %s\n", argv[build_x0_arg_index]);
+      }
+
+      if (ij_x)
+      {
+         HYPRE_IJVectorDestroy(ij_x);
+      }
+      ij_x = NULL;
+
+      BuildSolParFromOneFile(argc, argv, build_x0_arg_index, parcsr_A, &x);
+   }
    else if (build_x0_type == 7)
    {
       /* from file */
@@ -3918,6 +4036,54 @@ main( hypre_int argc,
       x = (HYPRE_ParVector) object;
    }
 
+   /* Setup dof_func array if needed */
+   if (num_functions > 1)
+   {
+      dof_func = NULL;
+      if (build_funcs_type == 1)
+      {
+         if (myid == 0)
+         {
+            hypre_printf("  Calling BuildFuncTagsFromOneFile\n");
+         }
+         BuildFuncTagsFromOneFile(argc, argv, build_funcs_arg_index, parcsr_A, &dof_func);
+      }
+      else if (build_funcs_type == 2)
+      {
+         if (myid == 0)
+         {
+            hypre_printf("  Calling BuildFuncTagsFromFiles\n");
+         }
+         BuildFuncTagsFromFiles(argc, argv, build_funcs_arg_index, parcsr_A, &dof_func);
+      }
+      else if (build_funcs_type == 3)
+      {
+         if (myid == 0)
+         {
+            hypre_printf("  Calling BuildFuncTagsInterleaved with num_functions = %d\n", num_functions);
+         }
+         BuildFuncTagsInterleaved(local_num_rows, num_functions, memory_location, &dof_func);
+      }
+      else if (build_funcs_type == 4)
+      {
+         if (myid == 0)
+         {
+            hypre_printf("  Calling BuildFuncTagsContiguous with num_functions = %d\n", num_functions);
+         }
+         BuildFuncTagsContiguous(local_num_rows, num_functions, memory_location, &dof_func);
+      }
+      else
+      {
+         hypre_printf ("  Number of functions = %d \n", num_functions);
+      }
+
+      if (dof_func)
+      {
+         HYPRE_IJVectorSetTags(ij_x, 0, num_functions, dof_func);
+         HYPRE_IJVectorSetTags(ij_b, 0, num_functions, dof_func);
+      }
+   }
+
    /*-----------------------------------------------------------
     * Finalize IJVector Setup timings
     *-----------------------------------------------------------*/
@@ -3926,34 +4092,6 @@ main( hypre_int argc,
    hypre_PrintTiming("IJ Vector Setup", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
-
-   if (num_functions > 1)
-   {
-      dof_func = NULL;
-      if (build_funcs_type == 1)
-      {
-         if (myid == 0)
-         {
-            hypre_printf(" Calling BuildFuncsFromOneFile\n");
-         }
-         BuildFuncsFromOneFile(argc, argv, build_funcs_arg_index, parcsr_A, &dof_func);
-      }
-      else if (build_funcs_type == 2)
-      {
-         if (myid == 0)
-         {
-            hypre_printf(" Calling BuildFuncsFromFiles\n");
-         }
-         BuildFuncsFromFiles(argc, argv, build_funcs_arg_index, parcsr_A, &dof_func);
-      }
-      else
-      {
-         if (myid == 0)
-         {
-            hypre_printf (" Number of functions = %d \n", num_functions);
-         }
-      }
-   }
 
    /*-----------------------------------------------------------
     * Print out the system and initial guess
@@ -4035,6 +4173,31 @@ main( hypre_int argc,
       else if (x)
       {
          HYPRE_ParVectorPrintBinaryIJ(x, "IJ.out.x0");
+      }
+   }
+
+   if (print_system_csr)
+   {
+      if (parcsr_A)
+      {
+         hypre_ParCSRMatrixPrint(parcsr_A, "csr.out.A");
+      }
+      else
+      {
+         if (!myid)
+         {
+            hypre_printf(" Matrix A in parcsr format not found!\n");
+         }
+      }
+
+      if (b)
+      {
+         HYPRE_ParVectorPrint(b, "csr.out.b");
+      }
+
+      if (x)
+      {
+         HYPRE_ParVectorPrint(x, "csr.out.x0");
       }
    }
 
@@ -4387,6 +4550,8 @@ main( hypre_int argc,
 
    if (solver_id == 0 || solver_id == 90)
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
+
       if (solver_id == 0)
       {
          if (myid == 0) { hypre_printf("Solver:  AMG\n"); }
@@ -4640,9 +4805,11 @@ main( hypre_int argc,
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
 
       if (second_time)
       {
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-2");
          HYPRE_SetExecutionPolicy(exec2_policy);
 
          /* run a second time [for timings, to check for memory leaks] */
@@ -4698,6 +4865,7 @@ main( hypre_int argc,
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
 
+         HYPRE_ANNOTATE_REGION_END("%s", "Run-2");
 #if defined(HYPRE_USING_CUDA)
          cudaProfilerStop();
 #endif
@@ -4952,6 +5120,7 @@ main( hypre_int argc,
                        solver_id == 43 || solver_id == 71))
       /*end lobpcg */
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
 
@@ -5505,9 +5674,11 @@ main( hypre_int argc,
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
 
       if (second_time)
       {
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-2");
          HYPRE_SetExecutionPolicy(exec2_policy);
 
          /* run a second time [for timings, to check for memory leaks] */
@@ -5551,6 +5722,7 @@ main( hypre_int argc,
          hypre_FinalizeTiming(time_index);
          hypre_ClearTiming();
 
+         HYPRE_ANNOTATE_REGION_END("%s", "Run-2");
 #if defined(HYPRE_USING_CUDA)
          cudaProfilerStop();
 #endif
@@ -6650,6 +6822,7 @@ main( hypre_int argc,
        solver_id == 15 || solver_id == 18 || solver_id == 44 ||
        solver_id == 81 || solver_id == 91)
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
 
@@ -7204,9 +7377,11 @@ main( hypre_int argc,
          hypre_TFree(indices_d, memory_location);
          hypre_TFree(values_d, memory_location);
       }
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
 
       if (second_time)
       {
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-2");
          /* run a second time [for timings, to check for memory leaks] */
          HYPRE_ParVectorSetRandomValues(x, 775);
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
@@ -7214,10 +7389,15 @@ main( hypre_int argc,
 #endif
          hypre_ParVectorCopy(x0_save, x);
 
-         HYPRE_GMRESSetup(pcg_solver, (HYPRE_Matrix)parcsr_M, (HYPRE_Vector)b,
-                          (HYPRE_Vector)x);
-         HYPRE_GMRESSolve(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b,
-                          (HYPRE_Vector)x);
+         HYPRE_GMRESSetup(pcg_solver,
+                          (HYPRE_Matrix) parcsr_M,
+                          (HYPRE_Vector) b,
+                          (HYPRE_Vector) x);
+         HYPRE_GMRESSolve(pcg_solver,
+                          (HYPRE_Matrix) parcsr_A,
+                          (HYPRE_Vector) b,
+                          (HYPRE_Vector) x);
+         HYPRE_ANNOTATE_REGION_END("%s", "Run-2");
       }
 
       HYPRE_GMRESGetNumIterations(pcg_solver, &num_iterations);
@@ -7268,6 +7448,7 @@ main( hypre_int argc,
 
    if (solver_id == 50 || solver_id == 51 )
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("LGMRES Setup");
       hypre_BeginTiming(time_index);
 
@@ -7485,6 +7666,7 @@ main( hypre_int argc,
          hypre_printf("Final LGMRES Relative Residual Norm = %e\n", final_res_norm);
          hypre_printf("\n");
       }
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
    }
 
    /*-----------------------------------------------------------
@@ -7493,6 +7675,7 @@ main( hypre_int argc,
 
    if (solver_id == 60 || solver_id == 61 || solver_id == 72 || solver_id == 82 || solver_id == 47)
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("FlexGMRES Setup");
       hypre_BeginTiming(time_index);
 
@@ -7920,6 +8103,7 @@ main( hypre_int argc,
          hypre_printf("Final FlexGMRES Relative Residual Norm = %e\n", final_res_norm);
          hypre_printf("\n");
       }
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
    }
 
    /*-----------------------------------------------------------
@@ -7928,6 +8112,7 @@ main( hypre_int argc,
 
    if (solver_id == 9 || solver_id == 10 || solver_id == 11 || solver_id == 45 || solver_id == 73)
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("BiCGSTAB Setup");
       hypre_BeginTiming(time_index);
 
@@ -8265,20 +8450,27 @@ main( hypre_int argc,
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
 
       if (second_time)
       {
          /* run a second time [for timings, to check for memory leaks] */
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-2");
          HYPRE_ParVectorSetRandomValues(x, 775);
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
 #endif
          hypre_ParVectorCopy(x0_save, x);
 
-         HYPRE_BiCGSTABSetup(pcg_solver, (HYPRE_Matrix) parcsr_M,
-                             (HYPRE_Vector) b, (HYPRE_Vector) x);
-         HYPRE_BiCGSTABSolve(pcg_solver, (HYPRE_Matrix) parcsr_A,
-                             (HYPRE_Vector) b, (HYPRE_Vector) x);
+         HYPRE_BiCGSTABSetup(pcg_solver,
+                             (HYPRE_Matrix) parcsr_M,
+                             (HYPRE_Vector) b,
+                             (HYPRE_Vector) x);
+         HYPRE_BiCGSTABSolve(pcg_solver,
+                             (HYPRE_Matrix) parcsr_A,
+                             (HYPRE_Vector) b,
+                             (HYPRE_Vector) x);
+         HYPRE_ANNOTATE_REGION_END("%s", "Run-2");
       }
 
       HYPRE_BiCGSTABGetNumIterations(pcg_solver, &num_iterations);
@@ -8344,6 +8536,7 @@ main( hypre_int argc,
 
    if (solver_id == 16 || solver_id == 17 || solver_id == 46 || solver_id == 74)
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("COGMRES Setup");
       hypre_BeginTiming(time_index);
 
@@ -8643,20 +8836,27 @@ main( hypre_int argc,
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
 
       if (second_time)
       {
          /* run a second time [for timings, to check for memory leaks] */
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-2");
          HYPRE_ParVectorSetRandomValues(x, 775);
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
 #endif
          hypre_ParVectorCopy(x0_save, x);
 
-         HYPRE_COGMRESSetup(pcg_solver, (HYPRE_Matrix) parcsr_M,
-                            (HYPRE_Vector) b, (HYPRE_Vector) x);
-         HYPRE_COGMRESSolve(pcg_solver, (HYPRE_Matrix) parcsr_A,
-                            (HYPRE_Vector) b, (HYPRE_Vector) x);
+         HYPRE_COGMRESSetup(pcg_solver,
+                            (HYPRE_Matrix) parcsr_M,
+                            (HYPRE_Vector) b,
+                            (HYPRE_Vector) x);
+         HYPRE_COGMRESSolve(pcg_solver,
+                            (HYPRE_Matrix) parcsr_A,
+                            (HYPRE_Vector) b,
+                            (HYPRE_Vector) x);
+         HYPRE_ANNOTATE_REGION_END("%s", "Run-2");
       }
 
       HYPRE_COGMRESGetNumIterations(pcg_solver, &num_iterations);
@@ -8717,6 +8917,7 @@ main( hypre_int argc,
 
    if (solver_id == 5 || solver_id == 6)
    {
+      HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-1");
       time_index = hypre_InitializeTiming("CGNR Setup");
       hypre_BeginTiming(time_index);
 
@@ -8879,20 +9080,27 @@ main( hypre_int argc,
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+      HYPRE_ANNOTATE_REGION_END("%s", "Run-1");
 
       if (second_time)
       {
          /* run a second time [for timings, to check for memory leaks] */
+         HYPRE_ANNOTATE_REGION_BEGIN("%s", "Run-2");
          HYPRE_ParVectorSetRandomValues(x, 775);
 #if defined(HYPRE_USING_CURAND) || defined(HYPRE_USING_ROCRAND)
          hypre_ResetDeviceRandGenerator(1234ULL, 0ULL);
 #endif
          hypre_ParVectorCopy(x0_save, x);
 
-         HYPRE_CGNRSetup(pcg_solver, (HYPRE_Matrix) parcsr_M,
-                         (HYPRE_Vector) b, (HYPRE_Vector) x);
-         HYPRE_CGNRSolve(pcg_solver, (HYPRE_Matrix) parcsr_A,
-                         (HYPRE_Vector) b, (HYPRE_Vector) x);
+         HYPRE_CGNRSetup(pcg_solver,
+                         (HYPRE_Matrix) parcsr_M,
+                         (HYPRE_Vector) b,
+                         (HYPRE_Vector) x);
+         HYPRE_CGNRSolve(pcg_solver,
+                         (HYPRE_Matrix) parcsr_A,
+                         (HYPRE_Vector) b,
+                         (HYPRE_Vector) x);
+         HYPRE_ANNOTATE_REGION_END("%s", "Run-2");
       }
 
       HYPRE_CGNRGetNumIterations(pcg_solver, &num_iterations);
@@ -9244,7 +9452,14 @@ final:
       if (ij_b) { HYPRE_IJVectorDestroy(ij_b); }
    }
 
-   if (ij_x) { HYPRE_IJVectorDestroy(ij_x); }
+   if (build_x0_type == -3)
+   {
+      HYPRE_ParVectorDestroy(x);
+   }
+   else
+   {
+      if (ij_x) { HYPRE_IJVectorDestroy(ij_x); }
+   }
 
    if (build_rbm)
    {
@@ -9295,8 +9510,15 @@ final:
    }
    else
    {
-      HYPRE_PrintErrorMessages(comm);
+      if (myid == 0)
+      {
+         HYPRE_PrintErrorMessages(comm);
+      }
    }
+
+   /* Free the memory buffer allocated for storing error messages when using mode 1 for printing errors
+      Note: This call is redundant since the cleanup is already handled in HYPRE_Finalize. */
+   HYPRE_ClearErrorMessages();
 
    /* Finalize Hypre */
    HYPRE_Finalize();
@@ -9317,7 +9539,7 @@ final:
 
    /* when using cuda-memcheck --leak-check full, uncomment this */
 #if defined(HYPRE_USING_GPU)
-   hypre_ResetCudaDevice(NULL);
+   hypre_ResetDevice();
 #endif
 
    return (0);
@@ -10312,15 +10534,71 @@ BuildParFromOneFile( HYPRE_Int                  argc,
 }
 
 /*----------------------------------------------------------------------
+ * Build x0 from one file on Proc. 0. Distributes vector across processors
+ * giving each about using the distribution of the matrix A.
+ *----------------------------------------------------------------------*/
+
+HYPRE_Int
+BuildSolParFromOneFile( HYPRE_Int                  argc,
+                        char                *argv[],
+                        HYPRE_Int                  arg_index,
+                        HYPRE_ParCSRMatrix   parcsr_A,
+                        HYPRE_ParVector     *x_ptr     )
+{
+   char           *filename;
+   HYPRE_Int       myid;
+   HYPRE_BigInt   *partitioning;
+   HYPRE_ParVector x;
+   HYPRE_Vector    x_CSR = NULL;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+   partitioning = hypre_ParCSRMatrixColStarts(parcsr_A);
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+
+   if (arg_index < argc)
+   {
+      filename = argv[arg_index];
+   }
+   else
+   {
+      hypre_printf("Error: No filename specified \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Read the initial guess from file and create parallel vector
+    *-----------------------------------------------------------*/
+
+   if (myid == 0)
+   {
+      x_CSR = HYPRE_VectorRead(filename);
+   }
+   HYPRE_VectorToParVector(hypre_MPI_COMM_WORLD, x_CSR, partitioning, &x);
+
+   *x_ptr = x;
+
+   HYPRE_VectorDestroy(x_CSR);
+
+   return (0);
+}
+
+/*----------------------------------------------------------------------
  * Build Function array from files on different processors
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildFuncsFromFiles( HYPRE_Int            argc,
-                     char                *argv[],
-                     HYPRE_Int            arg_index,
-                     HYPRE_ParCSRMatrix   parcsr_A,
-                     HYPRE_Int          **dof_func_ptr )
+BuildFuncTagsFromFiles( HYPRE_Int            argc,
+                        char                *argv[],
+                        HYPRE_Int            arg_index,
+                        HYPRE_ParCSRMatrix   parcsr_A,
+                        HYPRE_Int          **dof_func_ptr )
 {
    HYPRE_UNUSED_VAR(argc);
    HYPRE_UNUSED_VAR(argv);
@@ -10341,11 +10619,11 @@ BuildFuncsFromFiles( HYPRE_Int            argc,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildFuncsFromOneFile( HYPRE_Int            argc,
-                       char                *argv[],
-                       HYPRE_Int            arg_index,
-                       HYPRE_ParCSRMatrix   parcsr_A,
-                       HYPRE_Int          **dof_func_ptr )
+BuildFuncTagsFromOneFile( HYPRE_Int            argc,
+                          char                *argv[],
+                          HYPRE_Int            arg_index,
+                          HYPRE_ParCSRMatrix   parcsr_A,
+                          HYPRE_Int          **dof_func_ptr )
 {
    char                 *filename;
 
@@ -10447,6 +10725,119 @@ BuildFuncsFromOneFile( HYPRE_Int            argc,
 }
 
 /*----------------------------------------------------------------------
+ * Build interleaved function array (0,1,2,0,1,2,...) for local data
+ *----------------------------------------------------------------------*/
+
+HYPRE_Int
+BuildFuncTagsInterleaved( HYPRE_Int              local_size,
+                          HYPRE_Int              num_functions,
+                          HYPRE_MemoryLocation   memory_location,
+                          HYPRE_Int            **dof_func_ptr )
+{
+   HYPRE_Int *dof_func_h, *dof_func;
+   HYPRE_Int  i;
+
+   /* Allocate array */
+   dof_func_h = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
+
+   /* Fill array with interleaved function numbers (0,1,2,...,0,1,2,...) */
+   for (i = 0; i < local_size; i++)
+   {
+      dof_func_h[i] = i % num_functions;
+   }
+
+   /* Copy to device */
+   if (memory_location == HYPRE_MEMORY_DEVICE)
+   {
+      dof_func = hypre_CTAlloc(HYPRE_Int, local_size, memory_location);
+      hypre_TMemcpy(dof_func, dof_func_h, HYPRE_Int, local_size,
+                    memory_location, HYPRE_MEMORY_HOST);
+
+      /* Free host memory */
+      hypre_TFree(dof_func_h, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      dof_func = dof_func_h;
+   }
+
+   *dof_func_ptr = dof_func;
+
+   return (0);
+}
+
+/*----------------------------------------------------------------------
+ * Build contiguous function array (0,0,0,...,1,1,1,...) for local data
+ *----------------------------------------------------------------------*/
+
+HYPRE_Int
+BuildFuncTagsContiguous( HYPRE_Int              local_size,
+                         HYPRE_Int              num_functions,
+                         HYPRE_MemoryLocation   memory_location,
+                         HYPRE_Int            **dof_func_ptr )
+{
+   HYPRE_Int *dof_func_h, *dof_func;
+   HYPRE_Int  i;
+   HYPRE_Int  block_size, remainder;
+   HYPRE_Int  current_func, count;
+
+   /* Allocate array on host initially */
+   dof_func_h = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
+
+   /* Calculate block size for each function */
+   block_size = local_size / num_functions;
+   remainder  = local_size % num_functions;
+
+   /* Fill array with contiguous function numbers (0,0,0,...,1,1,1,...) */
+   current_func = 0;
+   count = 0;
+
+   for (i = 0; i < local_size; i++)
+   {
+      dof_func_h[i] = current_func;
+      count++;
+
+      /* Move to next function when we've filled the current block */
+      if (current_func < remainder)
+      {
+         /* First 'remainder' functions get one extra element */
+         if (count >= block_size + 1)
+         {
+            current_func++;
+            count = 0;
+         }
+      }
+      else
+      {
+         if (count >= block_size)
+         {
+            current_func++;
+            count = 0;
+         }
+      }
+   }
+
+   /* Copy to device if needed */
+   if (memory_location == HYPRE_MEMORY_DEVICE)
+   {
+      dof_func = hypre_CTAlloc(HYPRE_Int, local_size, memory_location);
+      hypre_TMemcpy(dof_func, dof_func_h, HYPRE_Int, local_size,
+                    memory_location, HYPRE_MEMORY_HOST);
+
+      /* Free host memory */
+      hypre_TFree(dof_func_h, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      dof_func = dof_func_h;
+   }
+
+   *dof_func_ptr = dof_func;
+
+   return (0);
+}
+
+/*----------------------------------------------------------------------
  * Build Rhs from one file on Proc. 0. Distributes vector across processors
  * giving each about using the distribution of the matrix A.
  *----------------------------------------------------------------------*/
@@ -10486,17 +10877,11 @@ BuildRhsParFromOneFile( HYPRE_Int                  argc,
    }
 
    /*-----------------------------------------------------------
-    * Print driver parameters
+    * Read the vector from file and create parallel vector
     *-----------------------------------------------------------*/
 
    if (myid == 0)
    {
-      hypre_printf("  Rhs FromFile: %s\n", filename);
-
-      /*-----------------------------------------------------------
-       * Generate the matrix
-       *-----------------------------------------------------------*/
-
       b_CSR = HYPRE_VectorRead(filename);
    }
    HYPRE_VectorToParVector(hypre_MPI_COMM_WORLD, b_CSR, partitioning, &b);

@@ -62,7 +62,6 @@ cat > check-license.remove <<EOF
 ./LICENSE-MIT
 ./NOTICE
 ./src/blas/COPYING
-./src/cmbuild/README.txt
 ./src/config/cmake/hypre_CMakeUtilities.cmake
 ./src/config/compile
 ./src/config/config.guess

@@ -228,6 +228,20 @@ struct ReduceSum
       *this = other;
    }
 
+   /* copy assignment operator */
+   __host__ __device__
+   ReduceSum<T>& operator=(const ReduceSum<T>& other)
+   {
+      if (this != &other)
+      {
+         init = other.init;
+         __thread_sum = other.__thread_sum;
+         d_buf = other.d_buf;
+         nblocks = other.nblocks;
+      }
+      return *this;
+   }
+
    __host__ void
    Allocate2ndPhaseBuffer()
    {

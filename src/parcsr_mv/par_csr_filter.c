@@ -48,14 +48,16 @@ hypre_ParCSRMatrixBlkFilterHost( hypre_ParCSRMatrix  *A,
    HYPRE_Int           *B_diag_i, *B_offd_i;
    HYPRE_Int           *B_diag_j, *B_offd_j;
    HYPRE_Complex       *B_diag_a, *B_offd_a;
+   HYPRE_BigInt        *B_offd_bj;
    HYPRE_BigInt        *col_map_offd_B;
    HYPRE_Int            num_cols_offd_B;
    HYPRE_Int            B_diag_nnz, B_offd_nnz;
 
    /* Local variables */
    HYPRE_BigInt         big_block_size    = (HYPRE_BigInt) block_size;
+   HYPRE_BigInt         big_col;
+   HYPRE_BigInt        *work;
    HYPRE_Int            i, j, c;
-   HYPRE_Int           *marker;
 
    /*-----------------------------------------------------------------------
     *  Sanity checks
@@ -102,11 +104,14 @@ hypre_ParCSRMatrixBlkFilterHost( hypre_ParCSRMatrix  *A,
          }
       }
 
-      for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
+      if (A_offd_i[num_rows] - A_offd_i[0] > 0)
       {
-         if (c == (HYPRE_Int) (col_map_offd_A[A_offd_j[j]] % big_block_size))
+         for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
          {
-            B_offd_nnz++;
+            if (c == (HYPRE_Int) (col_map_offd_A[A_offd_j[j]] % big_block_size))
+            {
+               B_offd_nnz++;
+            }
          }
       }
    }
@@ -137,7 +142,7 @@ hypre_ParCSRMatrixBlkFilterHost( hypre_ParCSRMatrix  *A,
     *  Second pass: Fill entries of B
     *-----------------------------------------------------------------------*/
 
-   marker = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST);
+   B_offd_bj = hypre_CTAlloc(HYPRE_BigInt, B_offd_nnz, HYPRE_MEMORY_HOST);
 
    for (i = 0; i < num_rows; i++)
    {
@@ -157,27 +162,48 @@ hypre_ParCSRMatrixBlkFilterHost( hypre_ParCSRMatrix  *A,
       B_offd_i[i + 1] = B_offd_i[i];
       for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
       {
-         if (c == (HYPRE_Int) (col_map_offd_A[A_offd_j[j]] % big_block_size))
+         big_col = col_map_offd_A[A_offd_j[j]];
+         if (c == (HYPRE_Int) (big_col % big_block_size))
          {
-            B_offd_j[B_offd_i[i + 1]] = A_offd_j[j];
-            B_offd_a[B_offd_i[i + 1]] = A_offd_a[j];
+            B_offd_bj[B_offd_i[i + 1]] = big_col;
+            B_offd_a[B_offd_i[i + 1]]  = A_offd_a[j];
             B_offd_i[i + 1]++;
-            marker[A_offd_j[j]] = 1;
          }
       }
    }
 
-   /* Update col_map array */
-   num_cols_offd_B = 0;
-   for (i = 0; i < num_cols_offd_A; i++)
+   /* Allocate work array */
+   work = hypre_TAlloc(HYPRE_BigInt, B_offd_nnz, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(work, B_offd_bj, HYPRE_BigInt, B_offd_nnz,
+                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+
+   /* Remove duplicate columns */
+   hypre_BigQsort0(work, 0, B_offd_nnz - 1);
+   num_cols_offd_B = (B_offd_nnz == 0) ? 0 : 1;
+   for (i = 0; i < B_offd_nnz - 1; i++)
    {
-      if (marker[i])
+      if (work[i + 1] > work[i])
       {
-         col_map_offd_B[num_cols_offd_B++] = col_map_offd_A[i];
+         work[num_cols_offd_B++] = work[i + 1];
       }
    }
+
+   /* Build B's col_map array */
+   for (i = 0; i < num_cols_offd_B; i++)
+   {
+      col_map_offd_B[i] = work[i];
+   }
    hypre_CSRMatrixNumCols(B_offd) = num_cols_offd_B;
-   hypre_TFree(marker, HYPRE_MEMORY_HOST);
+
+   /* Update B_offd columns */
+   for (i = 0; i < B_offd_nnz; i++)
+   {
+      B_offd_j[i] = hypre_BigBinarySearch(col_map_offd_B, B_offd_bj[i], num_cols_offd_B);
+   }
+
+   /* Free memory */
+   hypre_TFree(B_offd_bj, HYPRE_MEMORY_HOST);
+   hypre_TFree(work, HYPRE_MEMORY_HOST);
 
    /* Update global nonzeros */
    hypre_ParCSRMatrixSetDNumNonzeros(B);
@@ -199,24 +225,20 @@ hypre_ParCSRMatrixBlkFilter( hypre_ParCSRMatrix  *A,
                              HYPRE_Int            block_size,
                              hypre_ParCSRMatrix **B_ptr )
 {
+   HYPRE_ANNOTATE_FUNC_BEGIN;
+
 #if defined(HYPRE_USING_GPU)
-   hypre_ParCSRMatrix     *h_A;
-   HYPRE_ExecutionPolicy   exec = hypre_GetExecPolicy1( hypre_ParCSRMatrixMemoryLocation(A) );
-
-   if (exec == HYPRE_EXEC_DEVICE)
+   if (hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A)) == HYPRE_EXEC_DEVICE)
    {
-      /* TODO (VPM): device implementation */
-      h_A = hypre_ParCSRMatrixClone_v2(A, 1, HYPRE_MEMORY_HOST);
-      hypre_ParCSRMatrixBlkFilterHost(h_A, block_size, B_ptr);
-
-      hypre_ParCSRMatrixDestroy(h_A);
-      hypre_ParCSRMatrixMigrate(*B_ptr, HYPRE_MEMORY_DEVICE);
+      hypre_ParCSRMatrixBlkFilterDevice(A, block_size, B_ptr);
    }
    else
 #endif
    {
       hypre_ParCSRMatrixBlkFilterHost(A, block_size, B_ptr);
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

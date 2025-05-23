@@ -86,7 +86,11 @@ struct local_equal_plus_constant : public
 };
 
 /* transform from local C index to global C index */
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct globalC_functor : public thrust::unary_function<HYPRE_Int, HYPRE_BigInt>
+#else
+struct globalC_functor
+#endif
 {
    HYPRE_BigInt C_first;
 
@@ -330,7 +334,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                               thrust::make_counting_iterator(n_fine),
                                               CF_marker,
                                               points_left,
-                                              thrust::not1(equal<HYPRE_Int>(1)) );
+                                              HYPRE_THRUST_NOT(equal<HYPRE_Int>(1)) );
    remaining = points_end - points_left;
 
    /* Cpts; number of C pts */
@@ -387,7 +391,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
       if (hypre_GetGpuAwareMPI())
       {
-         hypre_ForceSyncComputeStream(hypre_handle());
+         hypre_ForceSyncComputeStream();
       }
 #endif
 
@@ -425,7 +429,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
       /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
       if (hypre_GetGpuAwareMPI())
       {
-         hypre_ForceSyncComputeStream(hypre_handle());
+         hypre_ForceSyncComputeStream();
       }
 #endif
 
@@ -544,7 +548,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
                                       points_left_old + remaining,
                                       diag_shifts,
                                       points_left,
-                                      thrust::not1(thrust::identity<HYPRE_Int>()) );
+                                      HYPRE_THRUST_NOT(thrust::identity<HYPRE_Int>()) );
 #endif
 
          hypre_assert(new_end - points_left == cnt_rem);
@@ -582,7 +586,7 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
          /* RL: make sure int_buf_data is ready before issuing GPU-GPU MPI */
          if (hypre_GetGpuAwareMPI())
          {
-            hypre_ForceSyncComputeStream(hypre_handle());
+            hypre_ForceSyncComputeStream();
          }
 #endif
 
@@ -720,22 +724,13 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    }
 
 #if defined(HYPRE_USING_SYCL)
-   /* WM: todo - this is a workaround since oneDPL's exclusive_scan gives incorrect results when doing the scan in place */
    auto zip2 = oneapi::dpl::make_zip_iterator( P_diag_i, P_offd_i );
-   HYPRE_Int *P_diag_i_tmp = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
-   HYPRE_Int *P_offd_i_tmp = hypre_CTAlloc(HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE);
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
                       zip2,
                       zip2 + n_fine + 1,
-                      oneapi::dpl::make_zip_iterator(P_diag_i_tmp, P_offd_i_tmp),
+                      oneapi::dpl::make_zip_iterator(P_diag_i, P_offd_i),
                       std::make_tuple(HYPRE_Int(0), HYPRE_Int(0)),
                       tuple_plus<HYPRE_Int>() );
-   hypre_TMemcpy(P_diag_i, P_diag_i_tmp, HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE,
-                 HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(P_offd_i, P_offd_i_tmp, HYPRE_Int, n_fine + 1, HYPRE_MEMORY_DEVICE,
-                 HYPRE_MEMORY_DEVICE);
-   hypre_TFree(P_diag_i_tmp, HYPRE_MEMORY_DEVICE);
-   hypre_TFree(P_offd_i_tmp, HYPRE_MEMORY_DEVICE);
 #else
    HYPRE_THRUST_CALL( exclusive_scan,
                       thrust::make_zip_iterator( thrust::make_tuple(P_diag_i, P_offd_i) ),
@@ -1109,7 +1104,7 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
       /* RL: make sure big_buf_data is ready before issuing GPU-GPU MPI */
       if (hypre_GetGpuAwareMPI())
       {
-         hypre_ForceSyncComputeStream(hypre_handle());
+         hypre_ForceSyncComputeStream();
       }
 #endif
 
@@ -1168,22 +1163,13 @@ hypre_GenerateMultipassPiDevice( hypre_ParCSRMatrix  *A,
       hypre_Memset(P_offd_i + num_points, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-      /* WM: todo - this is a workaround since oneDPL's exclusive_scan gives incorrect results when doing the scan in place */
       auto zip3 = oneapi::dpl::make_zip_iterator( P_diag_i, P_offd_i );
-      HYPRE_Int *P_diag_i_tmp = hypre_CTAlloc(HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE);
-      HYPRE_Int *P_offd_i_tmp = hypre_CTAlloc(HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE);
       HYPRE_ONEDPL_CALL( std::exclusive_scan,
                          zip3,
                          zip3 + num_points + 1,
-                         oneapi::dpl::make_zip_iterator( P_diag_i_tmp, P_offd_i_tmp ),
+                         oneapi::dpl::make_zip_iterator( P_diag_i, P_offd_i ),
                          std::make_tuple(HYPRE_Int(0), HYPRE_Int(0)),
                          tuple_plus<HYPRE_Int>() );
-      hypre_TMemcpy(P_diag_i, P_diag_i_tmp, HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE,
-                    HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(P_offd_i, P_offd_i_tmp, HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE,
-                    HYPRE_MEMORY_DEVICE);
-      hypre_TFree(P_diag_i_tmp, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(P_offd_i_tmp, HYPRE_MEMORY_DEVICE);
 #else
       HYPRE_THRUST_CALL( exclusive_scan,
                          thrust::make_zip_iterator( thrust::make_tuple(P_diag_i, P_offd_i) ),
@@ -1408,7 +1394,7 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
       /* RL: make sure big_buf_data is ready before issuing GPU-GPU MPI */
       if (hypre_GetGpuAwareMPI())
       {
-         hypre_ForceSyncComputeStream(hypre_handle());
+         hypre_ForceSyncComputeStream();
       }
 #endif
 
@@ -1467,22 +1453,13 @@ hypre_GenerateMultiPiDevice( hypre_ParCSRMatrix  *A,
       hypre_Memset(Q_offd_i + num_points, 0, sizeof(HYPRE_Int), HYPRE_MEMORY_DEVICE);
 
 #if defined(HYPRE_USING_SYCL)
-      /* WM: todo - this is a workaround since oneDPL's exclusive_scan gives incorrect results when doing the scan in place */
       auto zip4 = oneapi::dpl::make_zip_iterator( Q_diag_i, Q_offd_i );
-      HYPRE_Int *Q_diag_i_tmp = hypre_CTAlloc(HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE);
-      HYPRE_Int *Q_offd_i_tmp = hypre_CTAlloc(HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE);
       HYPRE_ONEDPL_CALL( std::exclusive_scan,
                          zip4,
                          zip4 + num_points + 1,
-                         oneapi::dpl::make_zip_iterator( Q_diag_i_tmp, Q_offd_i_tmp ),
+                         oneapi::dpl::make_zip_iterator( Q_diag_i, Q_offd_i ),
                          std::make_tuple(HYPRE_Int(0), HYPRE_Int(0)),
                          tuple_plus<HYPRE_Int>() );
-      hypre_TMemcpy(Q_diag_i, Q_diag_i_tmp, HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE,
-                    HYPRE_MEMORY_DEVICE);
-      hypre_TMemcpy(Q_offd_i, Q_offd_i_tmp, HYPRE_Int, num_points + 1, HYPRE_MEMORY_DEVICE,
-                    HYPRE_MEMORY_DEVICE);
-      hypre_TFree(Q_diag_i_tmp, HYPRE_MEMORY_DEVICE);
-      hypre_TFree(Q_offd_i_tmp, HYPRE_MEMORY_DEVICE);
 #else
       HYPRE_THRUST_CALL( exclusive_scan,
                          thrust::make_zip_iterator( thrust::make_tuple(Q_diag_i, Q_offd_i) ),
@@ -1640,7 +1617,7 @@ void hypre_modmp_init_fine_to_coarse( HYPRE_Int  n_fine,
                       fine_to_coarse,
                       fine_to_coarse + n_fine,
                       pass_marker,
-                      thrust::not1(equal<HYPRE_Int>(color)),
+                      HYPRE_THRUST_NOT(equal<HYPRE_Int>(color)),
                       -1 );
 #endif
 }

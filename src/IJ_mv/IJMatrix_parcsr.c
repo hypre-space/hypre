@@ -244,6 +244,99 @@ hypre_IJMatrixSetMaxOffProcElmtsParCSR(hypre_IJMatrix *matrix,
 
 /******************************************************************************
  *
+ * hypre_IJMatrixSetInitAllocationParCSR
+ *
+ *****************************************************************************/
+
+HYPRE_Int
+hypre_IJMatrixSetInitAllocationParCSR(hypre_IJMatrix *matrix,
+                                      HYPRE_Int       factor)
+{
+#if defined(HYPRE_USING_GPU)
+   hypre_AuxParCSRMatrix *aux_matrix = (hypre_AuxParCSRMatrix *) hypre_IJMatrixTranslator(matrix);
+   HYPRE_BigInt *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
+   HYPRE_BigInt *col_partitioning = hypre_IJMatrixColPartitioning(matrix);
+
+   if (!aux_matrix)
+   {
+      HYPRE_Int local_num_rows = (HYPRE_Int)(row_partitioning[1] - row_partitioning[0]);
+      HYPRE_Int local_num_cols = (HYPRE_Int)(col_partitioning[1] - col_partitioning[0]);
+      hypre_AuxParCSRMatrixCreate(&aux_matrix, local_num_rows, local_num_cols, NULL);
+      hypre_IJMatrixTranslator(matrix) = aux_matrix;
+   }
+   hypre_AuxParCSRMatrixInitAllocFactor(aux_matrix) = factor;
+#else
+   HYPRE_UNUSED_VAR(matrix);
+   HYPRE_UNUSED_VAR(factor);
+#endif
+
+   return hypre_error_flag;
+}
+
+/******************************************************************************
+ *
+ * hypre_IJMatrixSetEarlyAssembleParCSR
+ *
+ *****************************************************************************/
+
+HYPRE_Int
+hypre_IJMatrixSetEarlyAssembleParCSR(hypre_IJMatrix *matrix,
+                                     HYPRE_Int       early_assemble)
+{
+#if defined(HYPRE_USING_GPU)
+   hypre_AuxParCSRMatrix *aux_matrix = (hypre_AuxParCSRMatrix *) hypre_IJMatrixTranslator(matrix);
+   HYPRE_BigInt *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
+   HYPRE_BigInt *col_partitioning = hypre_IJMatrixColPartitioning(matrix);
+
+   if (!aux_matrix)
+   {
+      HYPRE_Int local_num_rows = (HYPRE_Int)(row_partitioning[1] - row_partitioning[0]);
+      HYPRE_Int local_num_cols = (HYPRE_Int)(col_partitioning[1] - col_partitioning[0]);
+      hypre_AuxParCSRMatrixCreate(&aux_matrix, local_num_rows, local_num_cols, NULL);
+      hypre_IJMatrixTranslator(matrix) = aux_matrix;
+   }
+   hypre_AuxParCSRMatrixEarlyAssemble(aux_matrix) = early_assemble;
+#else
+   HYPRE_UNUSED_VAR(matrix);
+   HYPRE_UNUSED_VAR(early_assemble);
+#endif
+
+   return hypre_error_flag;
+}
+
+/******************************************************************************
+ *
+ * hypre_IJMatrixSetGrowFactorParCSR
+ *
+ *****************************************************************************/
+
+HYPRE_Int
+hypre_IJMatrixSetGrowFactorParCSR(hypre_IJMatrix *matrix,
+                                  HYPRE_Real      factor)
+{
+#if defined(HYPRE_USING_GPU)
+   hypre_AuxParCSRMatrix *aux_matrix = (hypre_AuxParCSRMatrix *) hypre_IJMatrixTranslator(matrix);
+   HYPRE_BigInt *row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
+   HYPRE_BigInt *col_partitioning = hypre_IJMatrixColPartitioning(matrix);
+
+   if (!aux_matrix)
+   {
+      HYPRE_Int local_num_rows = (HYPRE_Int)(row_partitioning[1] - row_partitioning[0]);
+      HYPRE_Int local_num_cols = (HYPRE_Int)(col_partitioning[1] - col_partitioning[0]);
+      hypre_AuxParCSRMatrixCreate(&aux_matrix, local_num_rows, local_num_cols, NULL);
+      hypre_IJMatrixTranslator(matrix) = aux_matrix;
+   }
+   hypre_AuxParCSRMatrixGrowFactor(aux_matrix) = factor;
+#else
+   HYPRE_UNUSED_VAR(matrix);
+   HYPRE_UNUSED_VAR(factor);
+#endif
+
+   return hypre_error_flag;
+}
+
+/******************************************************************************
+ *
  * hypre_IJMatrixInitializeParCSR
  *
  * initializes AuxParCSRMatrix and ParCSRMatrix as necessary
@@ -279,7 +372,8 @@ hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix, HYPRE_MemoryLocation m
 
       if (!aux_matrix)
       {
-         hypre_AuxParCSRMatrixCreate(&aux_matrix, local_num_rows, hypre_ParCSRMatrixNumCols(par_matrix),
+         hypre_AuxParCSRMatrixCreate(&aux_matrix, local_num_rows,
+                                     hypre_ParCSRMatrixNumCols(par_matrix),
                                      NULL);
          hypre_IJMatrixTranslator(matrix) = aux_matrix;
       }
@@ -299,7 +393,7 @@ hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix, HYPRE_MemoryLocation m
                                                hypre_AuxParCSRMatrixDiagSizes(aux_matrix)[i];
             }
             hypre_CSRMatrixNumNonzeros(diag) = hypre_CSRMatrixI(diag)[local_num_rows];
-            hypre_CSRMatrixInitialize(diag);
+            hypre_CSRMatrixInitialize_v2(diag, 0, memory_location);
          }
 
          if (hypre_AuxParCSRMatrixOffdSizes(aux_matrix))
@@ -310,7 +404,7 @@ hypre_IJMatrixInitializeParCSR_v2(hypre_IJMatrix *matrix, HYPRE_MemoryLocation m
                                                hypre_AuxParCSRMatrixOffdSizes(aux_matrix)[i];
             }
             hypre_CSRMatrixNumNonzeros(offd) = hypre_CSRMatrixI(offd)[local_num_rows];
-            hypre_CSRMatrixInitialize(offd);
+            hypre_CSRMatrixInitialize_v2(offd, 0, memory_location);
          }
       }
 
@@ -550,6 +644,7 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
    }
    else
    {
+      indx = 0;
       for (ii = 0; ii < nrows; ii++)
       {
          row = rows[ii];
@@ -558,7 +653,7 @@ hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix,
          {
             continue;
          }
-         indx = row_indexes[ii];
+         indx = (row_indexes) ? row_indexes[ii] : indx;
          if (row >= row_partitioning[0] && row < row_partitioning[1])
          {
             row_local = (HYPRE_Int)(row - row_partitioning[0]);
@@ -4282,6 +4377,22 @@ hypre_IJMatrixAddToValuesOMPParCSR( hypre_IJMatrix       *matrix,
       }
    }
    hypre_TFree(offproc_cnt, HYPRE_MEMORY_HOST);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_IJMatrixMigrateParCSR
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_IJMatrixMigrateParCSR(hypre_IJMatrix       *matrix,
+                            HYPRE_MemoryLocation  memory_location)
+{
+   hypre_ParCSRMatrix *par_matrix = (hypre_ParCSRMatrix *) hypre_IJMatrixObject(matrix);
+
+   /* Migrate the ParCSR matrix */
+   hypre_ParCSRMatrixMigrate(par_matrix, memory_location);
 
    return hypre_error_flag;
 }

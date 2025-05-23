@@ -208,7 +208,7 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
                A_col = -1;
             }
 
-            bitmask = hypre_ballot_sync(HYPRE_WARP_FULL_MASK, A_col == P_col);
+            bitmask = hypre_ballot_sync(item, HYPRE_WARP_FULL_MASK, A_col == P_col);
             if (bitmask > 0)
             {
                if (lane == (hypre_ffs(bitmask) - 1))
@@ -252,7 +252,7 @@ hypreGPUKernel_FSAIExtractSubSystems( hypre_DeviceItem &item,
                   A_col = -1;
                }
 
-               bitmask = hypre_ballot_sync(HYPRE_WARP_FULL_MASK, A_col == P_col);
+               bitmask = hypre_ballot_sync(item, HYPRE_WARP_FULL_MASK, A_col == P_col);
                if (bitmask > 0)
                {
                   if (lane == (hypre_ffs(bitmask) - 1))
@@ -456,7 +456,7 @@ hypreGPUKernel_FSAITruncateCandidateOrdered( hypre_DeviceItem &item,
          warp_max_val = warp_allreduce_max(item, max_val);
 
          /* Reorder col/val entries associated with warp_max_val */
-         bitmask = hypre_ballot_sync(HYPRE_WARP_FULL_MASK, warp_max_val == max_val);
+         bitmask = hypre_ballot_sync(item, HYPRE_WARP_FULL_MASK, warp_max_val == max_val);
          if (warp_max_val > 0.0)
          {
             cnt = min(hypre_popc(bitmask), max_nonzeros_row - k);
@@ -582,7 +582,7 @@ hypreGPUKernel_FSAITruncateCandidateUnordered( hypre_DeviceItem &item,
          warp_max_val = warp_allreduce_max(item, max_val);
 
          /* Reorder col/val entries associated with warp_max_val */
-         bitmask = hypre_ballot_sync(HYPRE_WARP_FULL_MASK, warp_max_val == max_val);
+         bitmask = hypre_ballot_sync(item, HYPRE_WARP_FULL_MASK, warp_max_val == max_val);
          if (warp_max_val > 0.0)
          {
             cnt = min(hypre_popc(bitmask), max_nonzeros_row - k);
@@ -725,7 +725,6 @@ hypre_BatchedGaussJordanSolveDevice( HYPRE_Int       batch_num_items,
 
 HYPRE_Int
 hypre_FSAIExtractSubSystemsDevice( HYPRE_Int       num_rows,
-                                   HYPRE_Int       num_nonzeros,
                                    HYPRE_Int      *A_i,
                                    HYPRE_Int      *A_j,
                                    HYPRE_Complex  *A_a,
@@ -866,6 +865,9 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
                                   hypre_ParVector    *f,
                                   hypre_ParVector    *u )
 {
+   HYPRE_UNUSED_VAR(f);
+   HYPRE_UNUSED_VAR(u);
+
    hypre_ParFSAIData      *fsai_data        = (hypre_ParFSAIData*) fsai_vdata;
    hypre_ParCSRMatrix     *G                = hypre_ParFSAIDataGmat(fsai_data);
    hypre_CSRMatrix        *G_diag           = hypre_ParCSRMatrixDiag(G);
@@ -1058,7 +1060,6 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
    /* Gather dense linear subsystems */
    hypre_GpuProfilingPushRange("ExtractLS");
    hypre_FSAIExtractSubSystemsDevice(num_rows,
-                                     hypre_CSRMatrixNumNonzeros(A_diag),
                                      hypre_CSRMatrixI(A_diag),
                                      hypre_CSRMatrixJ(A_diag),
                                      hypre_CSRMatrixData(A_diag),
@@ -1103,22 +1104,22 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
       if (local_solve_type == 1)
       {
 #if defined (HYPRE_USING_CUSOLVER)
-         HYPRE_CUSOLVER_CALL(cusolverDnDpotrfBatched(vs_handle,
-                                                     CUBLAS_FILL_MODE_LOWER,
-                                                     max_nnz_row,
-                                                     mat_aop,
-                                                     max_nnz_row,
-                                                     info,
-                                                     num_rows));
+         HYPRE_CUSOLVER_CALL(hypre_cusolver_dnpotrf_batched(vs_handle,
+                                                            CUBLAS_FILL_MODE_LOWER,
+                                                            max_nnz_row,
+                                                            mat_aop,
+                                                            max_nnz_row,
+                                                            info,
+                                                            num_rows));
 
 #elif defined (HYPRE_USING_ROCSOLVER)
-         HYPRE_ROCSOLVER_CALL(rocsolver_dpotrf_batched(vs_handle,
-                                                       rocblas_fill_lower,
-                                                       max_nnz_row,
-                                                       mat_aop,
-                                                       max_nnz_row,
-                                                       info,
-                                                       num_rows));
+         HYPRE_ROCSOLVER_CALL(hypre_rocsolver_potrf_batched(vs_handle,
+                                                            rocblas_fill_lower,
+                                                            max_nnz_row,
+                                                            mat_aop,
+                                                            max_nnz_row,
+                                                            info,
+                                                            num_rows));
 #endif
       }
       else if (local_solve_type == 2)
@@ -1157,26 +1158,26 @@ hypre_FSAISetupStaticPowerDevice( void               *fsai_vdata,
       else if (local_solve_type == 1)
       {
 #if defined (HYPRE_USING_CUSOLVER)
-         HYPRE_CUSOLVER_CALL(cusolverDnDpotrsBatched(vs_handle,
-                                                     CUBLAS_FILL_MODE_LOWER,
-                                                     max_nnz_row,
-                                                     1,
-                                                     mat_aop,
-                                                     max_nnz_row,
-                                                     sol_aop,
-                                                     max_nnz_row,
-                                                     info,
-                                                     num_rows));
+         HYPRE_CUSOLVER_CALL(hypre_cusolver_dnpotrs_batched(vs_handle,
+                                                            CUBLAS_FILL_MODE_LOWER,
+                                                            max_nnz_row,
+                                                            1,
+                                                            mat_aop,
+                                                            max_nnz_row,
+                                                            sol_aop,
+                                                            max_nnz_row,
+                                                            info,
+                                                            num_rows));
 #elif defined (HYPRE_USING_ROCSOLVER)
-         HYPRE_ROCSOLVER_CALL(rocsolver_dpotrs_batched(vs_handle,
-                                                       rocblas_fill_lower,
-                                                       max_nnz_row,
-                                                       1,
-                                                       mat_aop,
-                                                       max_nnz_row,
-                                                       sol_aop,
-                                                       max_nnz_row,
-                                                       num_rows));
+         HYPRE_ROCSOLVER_CALL(hypre_rocsolver_potrs_batched(vs_handle,
+                                                            rocblas_fill_lower,
+                                                            max_nnz_row,
+                                                            1,
+                                                            mat_aop,
+                                                            max_nnz_row,
+                                                            sol_aop,
+                                                            max_nnz_row,
+                                                            num_rows));
 #endif
       }
       else if (local_solve_type == 2)

@@ -58,31 +58,6 @@ hypre_ParVectorGetValuesDevice(hypre_ParVector *vector,
          hypre_printf(" error: %d indices out of range! -- hypre_ParVectorGetValues\n", ierr);
 
 #if defined(HYPRE_USING_SYCL)
-         /* /1* WM: todo - why can't I combine transform iterator and gather? *1/ */
-         /* HYPRE_ONEDPL_CALL( std::transform, */
-         /*                    indices, */
-         /*                    indices + num_values, */
-         /*                    indices, */
-         /*                    [base, first_index] (const auto & x) {return x - base - first_index;} ); */
-         /* hypreSycl_gather_if( indices, */
-         /*                      indices+ num_values, */
-         /*                      indices, */
-         /*                      data + vecoffset, */
-         /*                      values, */
-         /*                      in_range<HYPRE_BigInt>(first_index + base, last_index + base) ); */
-         /* } */
-         /* else */
-         /* { */
-         /* /1* WM: todo - why can't I combine transform iterator and gather? *1/ */
-         /* HYPRE_ONEDPL_CALL( std::transform, */
-         /*                    indices, */
-         /*                    indices + num_values, */
-         /*                    indices, */
-         /*                    [base, first_index] (const auto & x) {return x - base - first_index;} ); */
-         /* hypreSycl_gather( indices, */
-         /*                   indices+ num_values, */
-         /*                   data + vecoffset, */
-         /*                   values); */
          auto trans_it = oneapi::dpl::make_transform_iterator(indices, [base,
          first_index] (const auto & x) {return x - base - first_index;} );
          hypreSycl_gather_if( trans_it,

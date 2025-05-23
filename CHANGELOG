@@ -7,6 +7,26 @@
 # This file chronicles user-level changes, beginning with the most recent.
 # =============================================================================
 
+Version 2.33.0 released 2025/04/03
+
+- Added verbosity control to error printing
+- Updated cmake to provide full build support (matches autotools)
+- Added early assembly feature to IJ to minimize memory use
+- Added new IJ matrix and vector APIs
+- Various bug fixes
+
+#====================================
+
+Version 2.32.0 released 2024/10/08
+
+- New MGR features and updates
+- New filtering option to AMG for block-diagonal preconditioning
+- New memory usage monitoring functions
+- Added non-UVM support for ILUT and HMIS coarsening
+- Various bug fixes
+
+#====================================
+
 Version 2.31.0 released 2024/02/14
 
 - Added iterative ILU0 option

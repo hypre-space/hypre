@@ -2710,7 +2710,7 @@ hypre_MGRSetFSolverAtLevel( void       *mgr_vdata,
    }
 
    aff_solver[level] = (HYPRE_Solver *) fsolver;
-   (mgr_data -> fsolver_mode)  = 0;
+   (mgr_data -> fsolver_mode) = 1;
 
    return hypre_error_flag;
 }

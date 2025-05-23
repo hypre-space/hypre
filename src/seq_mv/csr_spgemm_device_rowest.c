@@ -374,7 +374,7 @@ void hypre_spgemm_rownnz_cohen( HYPRE_Int  M,
    hypre_CurandUniformSingle(nsamples * N, d_V1, 0, 0, 0, 0);
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_ForceSyncComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream();
    t2 = hypre_MPI_Wtime() - t1;
    HYPRE_SPGEMM_PRINT("Curand time %f\n", t2);
 #endif
@@ -440,8 +440,8 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
    HYPRE_Real t1 = hypre_MPI_Wtime();
 #endif
 
+   static constexpr HYPRE_Int shmem_size_per_warp = 128;
    const HYPRE_Int num_warps_per_block =  16;
-   const HYPRE_Int shmem_size_per_warp = 128;
    const HYPRE_Int BDIMX               =   2;
    const HYPRE_Int BDIMY               = HYPRE_WARP_SIZE / BDIMX;
 
@@ -511,7 +511,7 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
    }
 
 #ifdef HYPRE_SPGEMM_TIMING
-   hypre_ForceSyncComputeStream(hypre_handle());
+   hypre_ForceSyncComputeStream();
    HYPRE_Real t2 = hypre_MPI_Wtime() - t1;
    HYPRE_SPGEMM_PRINT("RownnzEst time %f\n", t2);
 #endif
@@ -528,4 +528,3 @@ hypreDevice_CSRSpGemmRownnzEstimate( HYPRE_Int  m,
 }
 
 #endif /* defined(HYPRE_USING_GPU) */
-

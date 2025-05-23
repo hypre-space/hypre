@@ -124,7 +124,7 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixNumRows(matrix) hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixNumCols(matrix) hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 
-static inline HYPRE_MemoryLocation
+static inline HYPRE_MAYBE_UNUSED_FUNC HYPRE_MemoryLocation
 hypre_ParCSRMatrixMemoryLocation(hypre_ParCSRMatrix *matrix)
 {
    if (!matrix) { return HYPRE_MEMORY_UNDEFINED; }

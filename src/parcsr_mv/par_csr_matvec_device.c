@@ -211,7 +211,7 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
    /* RL: make sure x_buf_data is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 #endif
 
@@ -253,7 +253,7 @@ hypre_ParCSRMatrixMatvecOutOfPlaceDevice( HYPRE_Complex       alpha,
     * Synchronize calls
     *--------------------------------------------------------------------*/
    hypre_SetSyncCudaCompute(sync_stream);
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 
    /*---------------------------------------------------------------------
     * Performance profiling
@@ -436,7 +436,7 @@ hypre_ParCSRMatrixMatvecTDevice( HYPRE_Complex       alpha,
    /* RL: make sure y_tmp is ready before issuing GPU-GPU MPI */
    if (hypre_GetGpuAwareMPI())
    {
-      hypre_ForceSyncComputeStream(hypre_handle());
+      hypre_ForceSyncComputeStream();
    }
 
    /* when using GPUs, start local matvec first in order to overlap with communication */
@@ -506,7 +506,7 @@ hypre_ParCSRMatrixMatvecTDevice( HYPRE_Complex       alpha,
 
 #if defined(HYPRE_USING_GPU)
    hypre_SetSyncCudaCompute(sync_stream);
-   hypre_SyncComputeStream(hypre_handle());
+   hypre_SyncComputeStream();
 #endif
 
    /*---------------------------------------------------------------------
@@ -584,19 +584,8 @@ hypre_ParCSRMatrixMatvecT_unpack( hypre_ParCSRCommPkg *comm_pkg,
    hypre_VectorNumVectors(&vec_y)            = num_components;
    hypre_VectorMultiVecStorageMethod(&vec_y) = 0;
 
-   /* WM: todo - port hypre_CSRMatrixSpMVDevice() to sycl */
-#if defined(HYPRE_USING_SYCL)
-   HYPRE_Complex *data = hypre_TAlloc(HYPRE_Complex,
-                                      hypre_CSRMatrixNumNonzeros(matrix_E),
-                                      HYPRE_MEMORY_DEVICE);
-   hypreDevice_ComplexFilln(data, hypre_CSRMatrixNumNonzeros(matrix_E), 1.0);
-   hypre_CSRMatrixData(matrix_E) = data;
-
-   hypre_CSRMatrixMatvecDevice(trans, alpha, matrix_E, &vec_x, beta, &vec_y, &vec_y, 0);
-#else
    /* Compute y += E*x */
    hypre_CSRMatrixSpMVDevice(trans, alpha, matrix_E, &vec_x, beta, &vec_y, fill);
-#endif
 
    return hypre_error_flag;
 }

@@ -183,6 +183,96 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJVectorInitializeShell
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorInitializeShell(HYPRE_IJVector vector)
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (!vec)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+   {
+      if (!hypre_IJVectorObject(vec))
+      {
+         hypre_IJVectorCreatePar(vec, hypre_IJVectorPartitioning(vec));
+      }
+
+      hypre_IJVectorInitializeParShell(vec);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorSetData
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorSetData(HYPRE_IJVector  vector,
+                      HYPRE_Complex  *data)
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (!vec)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+   {
+      hypre_IJVectorSetParData(vec, data);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorSetTags
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorSetTags(HYPRE_IJVector  vector,
+                      HYPRE_Int       owns_tags,
+                      HYPRE_Int       num_tags,
+                      HYPRE_Int      *tags)
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (!vec)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+   {
+      hypre_IJVectorSetTagsPar(vec, owns_tags, num_tags, tags);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJVectorInitialize
  *--------------------------------------------------------------------------*/
 
@@ -214,8 +304,13 @@ HYPRE_IJVectorInitialize( HYPRE_IJVector vector )
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorInitialize_v2
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-HYPRE_IJVectorInitialize_v2( HYPRE_IJVector vector, HYPRE_MemoryLocation memory_location )
+HYPRE_IJVectorInitialize_v2( HYPRE_IJVector       vector,
+                             HYPRE_MemoryLocation memory_location )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
@@ -309,6 +404,34 @@ HYPRE_IJVectorSetValues( HYPRE_IJVector        vector,
       {
          return ( hypre_IJVectorSetValuesPar(vec, nvalues, indices, values) );
       }
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorSetConstantValues
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorSetConstantValues( HYPRE_IJVector  vector,
+                                 HYPRE_Complex   value )
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (!vec)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+   {
+      return ( hypre_IJVectorSetConstantValuesPar(vec, value) );
    }
    else
    {
@@ -849,6 +972,37 @@ HYPRE_IJVectorInnerProd( HYPRE_IJVector  x,
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorMigrate
+ *
+ * Migrates an IJVector to the specified memory location
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJVectorMigrate(HYPRE_IJVector       vector,
+                      HYPRE_MemoryLocation memory_location)
+{
+   hypre_IJVector *ijvector = (hypre_IJVector *) vector;
+
+   if (!ijvector)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   /* Only implemented for ParVector */
+   if (hypre_IJVectorObjectType(ijvector) == HYPRE_PARCSR)
+   {
+      hypre_IJVectorMigrateParCSR(ijvector, memory_location);
+   }
+   else
+   {
+      hypre_error_in_arg(1);
    }
 
    return hypre_error_flag;

@@ -9,24 +9,6 @@
 #define hypre_ParMGR_DATA_HEADER
 
 /*--------------------------------------------------------------------------
- * MGR print level codes
- *--------------------------------------------------------------------------*/
-
-#define HYPRE_MGR_PRINT_INFO_SETUP  0x01       /*   1 (1st bit) */
-#define HYPRE_MGR_PRINT_INFO_SOLVE  0x02       /*   2 (2nd bit) */
-#define HYPRE_MGR_PRINT_INFO_PARAMS 0x04       /*   4 (3rd bit) */
-#define HYPRE_MGR_PRINT_MODE_ASCII  0x08       /*   8 (4th bit) */
-#define HYPRE_MGR_PRINT_FINE_MATRIX 0x10       /*  16 (5th bit) */
-#define HYPRE_MGR_PRINT_FINE_RHS    0x20       /*  32 (6th bit) */
-#define HYPRE_MGR_PRINT_CRSE_MATRIX 0x40       /*  64 (7th bit) */
-#define HYPRE_MGR_PRINT_LVLS_MATRIX 0x80       /* 128 (8th bit) */
-/* ... */
-/* Reserved codes */
-#define HYPRE_MGR_PRINT_RESERVED_C  0x10000000 /*  268435456 (29th bit) */
-#define HYPRE_MGR_PRINT_RESERVED_B  0x20000000 /*  536870912 (30th bit) */
-#define HYPRE_MGR_PRINT_RESERVED_A  0x40000000 /* 1073741824 (31th bit) */
-
-/*--------------------------------------------------------------------------
  * hypre_ParMGRData
  *--------------------------------------------------------------------------*/
 
@@ -208,10 +190,33 @@ typedef struct
 #define CPT(i, bsize) (((i) % (bsize)) == CMRK)
 
 /*--------------------------------------------------------------------------
+ * MGR print level codes
+ *--------------------------------------------------------------------------*/
+
+#define HYPRE_MGR_PRINT_INFO_SETUP  0x01       /*   1 (1st bit) */
+#define HYPRE_MGR_PRINT_INFO_SOLVE  0x02       /*   2 (2nd bit) */
+#define HYPRE_MGR_PRINT_INFO_PARAMS 0x04       /*   4 (3rd bit) */
+#define HYPRE_MGR_PRINT_MODE_ASCII  0x08       /*   8 (4th bit) */
+#define HYPRE_MGR_PRINT_FINE_MATRIX 0x10       /*  16 (5th bit) */
+#define HYPRE_MGR_PRINT_FINE_RHS    0x20       /*  32 (6th bit) */
+#define HYPRE_MGR_PRINT_CRSE_MATRIX 0x40       /*  64 (7th bit) */
+#define HYPRE_MGR_PRINT_LVLS_MATRIX 0x80       /* 128 (8th bit) */
+/* ... */
+/* Reserved codes */
+#define HYPRE_MGR_PRINT_RESERVED_C  0x10000000 /*  268435456 (29th bit) */
+#define HYPRE_MGR_PRINT_RESERVED_B  0x20000000 /*  536870912 (30th bit) */
+#define HYPRE_MGR_PRINT_RESERVED_A  0x40000000 /* 1073741824 (31th bit) */
+
+/*--------------------------------------------------------------------------
  * Acessor macros
  *--------------------------------------------------------------------------*/
 
 /* TODO (VPM): add remaining acessor macros */
+#define hypre_ParMGRDataBlockSize(data)             ((data) -> block_size)     /* TODO (VPM): block_dim? 3x3=9 is the block_size */
+#define hypre_ParMGRDataBlockNumCoarseIndexes(data) ((data) -> block_num_coarse_indexes)
+#define hypre_ParMGRDataBlockCFMarker(data)         ((data) -> block_cf_marker)
+#define hypre_ParMGRDataPointMarker(data)           ((data) -> point_marker_array)
+
 #define hypre_ParMGRDataNumCoarseLevels(data)       ((data) -> num_coarse_levels)     /* TODO (VPM): change to num_levels ? */
 #define hypre_ParMGRDataMaxCoarseLevels(data)       ((data) -> max_num_coarse_levels) /* TODO (VPM): change to max_levels ? */
 

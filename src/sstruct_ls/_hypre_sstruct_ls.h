@@ -484,7 +484,7 @@ HYPRE_Int HYPRE_SStructMaxwellSolve2 ( HYPRE_SStructSolver solver, HYPRE_SStruct
 HYPRE_Int HYPRE_MaxwellGrad ( HYPRE_SStructGrid grid, HYPRE_ParCSRMatrix *T );
 HYPRE_Int HYPRE_SStructMaxwellSetGrad ( HYPRE_SStructSolver solver, HYPRE_ParCSRMatrix T );
 HYPRE_Int HYPRE_SStructMaxwellSetRfactors ( HYPRE_SStructSolver solver,
-                                            HYPRE_Int rfactors [HYPRE_MAXDIM]);
+                                            HYPRE_Int *rfactors);
 HYPRE_Int HYPRE_SStructMaxwellSetTol ( HYPRE_SStructSolver solver, HYPRE_Real tol );
 HYPRE_Int HYPRE_SStructMaxwellSetConstantCoef ( HYPRE_SStructSolver solver,
                                                 HYPRE_Int constant_coef );
@@ -502,7 +502,7 @@ HYPRE_Int HYPRE_SStructMaxwellGetNumIterations ( HYPRE_SStructSolver solver,
 HYPRE_Int HYPRE_SStructMaxwellGetFinalRelativeResidualNorm ( HYPRE_SStructSolver solver,
                                                              HYPRE_Real *norm );
 HYPRE_Int HYPRE_SStructMaxwellPhysBdy ( HYPRE_SStructGrid *grid_l, HYPRE_Int num_levels,
-                                        HYPRE_Int rfactors [HYPRE_MAXDIM], HYPRE_Int ***BdryRanks_ptr, HYPRE_Int **BdryRanksCnt_ptr );
+                                        HYPRE_Int *rfactors, HYPRE_Int ***BdryRanks_ptr, HYPRE_Int **BdryRanksCnt_ptr );
 HYPRE_Int HYPRE_SStructMaxwellEliminateRowsCols ( HYPRE_ParCSRMatrix parA, HYPRE_Int nrows,
                                                   HYPRE_Int *rows );
 HYPRE_Int HYPRE_SStructMaxwellZeroVector ( HYPRE_ParVector v, HYPRE_Int *rows, HYPRE_Int nrows );
@@ -593,6 +593,8 @@ HYPRE_Int hypre_SStructKrylovMatvec ( void *matvec_data, HYPRE_Complex alpha, vo
                                       HYPRE_Complex beta, void *y );
 HYPRE_Int hypre_SStructKrylovMatvecDestroy ( void *matvec_data );
 HYPRE_Real hypre_SStructKrylovInnerProd ( void *x, void *y );
+HYPRE_Int hypre_SStructKrylovInnerProdTagged ( void *x, void *y, HYPRE_Int *num_tags_ptr,
+                                               HYPRE_Complex **iprod_ptr );
 HYPRE_Int hypre_SStructKrylovCopyVector ( void *x, void *y );
 HYPRE_Int hypre_SStructKrylovClearVector ( void *x );
 HYPRE_Int hypre_SStructKrylovScaleVector ( HYPRE_Complex alpha, void *x );
@@ -796,4 +798,3 @@ HYPRE_Int hypre_SysSemiRestrictDestroy ( void *sys_restrict_vdata );
 #endif
 
 #endif
-
