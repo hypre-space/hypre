@@ -1005,6 +1005,12 @@ main( hypre_int argc,
          build_xstar_type       = 0;
          build_xstar_arg_index  = arg_index;
       }
+      else if ( strcmp(argv[arg_index], "-xstarfrombinfile") == 0 )
+      {
+         arg_index++;
+         build_xstar_type       = -2;
+         build_xstar_arg_index  = arg_index;
+      }
       else if ( strcmp(argv[arg_index], "-x0parcsrfile") == 0 )
       {
          arg_index++;
@@ -2423,8 +2429,12 @@ main( hypre_int argc,
          hypre_printf("backward Euler source is vector with unit coefficients (default)\n");
          hypre_printf("  -srczero               : ");
          hypre_printf("backward Euler source is zero-vector\n");
-         hypre_printf("  -x0fromfile           : ");
+         hypre_printf("  -x0fromfile            : ");
          hypre_printf("initial guess x0 read from multiple files (IJ format)\n");
+         hypre_printf("  -xstarfromfile         : ");
+         hypre_printf("reference solution xstar read from multiple files (IJ format)\n");
+         hypre_printf("  -xstarfrombinfile         : ");
+         hypre_printf("reference solution xstar read from multiple binary files (IJ format)\n");
          hypre_printf("\n");
          hypre_printf("  -solver <ID>           : solver ID\n");
          hypre_printf("       0=AMG               1=AMG-PCG        \n");
@@ -2591,10 +2601,15 @@ main( hypre_int argc,
          hypre_printf("\n");
          hypre_printf("  -iout <val>            : set output flag\n");
          hypre_printf("       0 = no output\n");
-         hypre_printf("       1 = matrix stats\n");
-         hypre_printf("       2 = cycle/solver stats\n");
+         hypre_printf("       1 = matrix and basic solver stats\n");
+         hypre_printf("       2 = abs. and rel. residual norms\n");
          hypre_printf("       3 = abs. residual norms for multi-tag vectors (GMRES only)\n");
-         hypre_printf("       4 = rel. residual norms for multi-tag vectors (GMRES only)\n");
+         hypre_printf("       4 = tagged rel. residual norms for multi-tag vectors (GMRES only)\n");
+         hypre_printf("       5 = rel. residual norms for multi-tag vectors (GMRES only)\n");
+         hypre_printf("       6 = abs. and rel. error norms (GMRES only)\n");
+         hypre_printf("       7 = abs. error norms for multi-tag vectors (GMRES only)\n");
+         hypre_printf("       8 = tagged rel. error norms for multi-tag vectors (GMRES only)\n");
+         hypre_printf("       9 = rel. error norms for multi-tag vectors (GMRES only)\n");
          hypre_printf("\n");
          hypre_printf("  -dbg <val>             : set debug flag\n");
          hypre_printf("       0=no debugging\n       1=internal timing\n       2=interpolation truncation\n       3=more detailed timing in coarsening routine\n");
@@ -4224,9 +4239,9 @@ main( hypre_int argc,
       {
          HYPRE_IJVectorPrintBinary(ij_xstar, "IJ.out.xstar");
       }
-      else if (x)
+      else if (xstar)
       {
-         HYPRE_ParVectorPrintBinaryIJ(xstar, "IJ.out.x0");
+         HYPRE_ParVectorPrintBinaryIJ(xstar, "IJ.out.xstar");
       }
    }
 
