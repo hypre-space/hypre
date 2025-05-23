@@ -59,7 +59,6 @@ hypre_MGRSetup( void               *mgr_vdata,
    HYPRE_Int num_interp_sweeps = (mgr_data -> num_interp_sweeps);
    //HYPRE_Int num_restrict_sweeps = (mgr_data -> num_interp_sweeps);
    HYPRE_Int *P_max_elmts = (mgr_data -> P_max_elmts);
-   HYPRE_Int *S_max_elmts = (mgr_data -> S_max_elmts);
    HYPRE_Real   max_row_sum = (mgr_data -> max_row_sum);
    HYPRE_Real   strong_threshold = (mgr_data -> strong_threshold);
    HYPRE_Real   trunc_factor = (mgr_data -> trunc_factor);
@@ -76,7 +75,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    hypre_ParCSRMatrix  **P_FF_array = (mgr_data -> P_FF_array);
 #endif
    hypre_ParCSRMatrix  **P_array = (mgr_data -> P_array);
-   hypre_ParCSRMatrix  **R_array = (mgr_data -> R_array);
+   hypre_ParCSRMatrix  **R_array = (mgr_data -> RT_array);
    hypre_ParCSRMatrix  **RT_array = (mgr_data -> RT_array);
 
    hypre_ParCSRMatrix  *A_FF = NULL;
@@ -650,10 +649,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    {
       P_max_elmts = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
    }
-   if (S_max_elmts == NULL)
-   {
-      S_max_elmts = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
-   }
+
    /* Set default for Frelax_method if not set already -- Supports deprecated function */
    /*
       if (Frelax_method == NULL)
@@ -812,8 +808,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    (mgr_data -> CF_marker_array) = CF_marker_array;
    (mgr_data -> l1_norms)        = l1_norms;
    (mgr_data -> P_max_elmts)     = P_max_elmts;
-   (mgr_data -> S_max_elmts)     = S_max_elmts;
-   #if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_GPU)
    (mgr_data -> P_FF_array)      = P_FF_array;
 #endif
 
@@ -1103,20 +1098,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       {
          if (interp_type[lev] == 8)
          {
-//            if(hypre_ParCSRMatrixNumRows(A_array[lev]) <= 10000)
-//            {
-//               hypre_BoomerAMGCreateSDualThresholdHost(A_array[lev], 0.001, 1, 1, NULL, &S);
-//            }
-//            else
-//            {
-               hypre_BoomerAMGCreateSDualThresholdHost(A_array[lev], strong_threshold, S_max_elmts[lev], 1, NULL, &S);
-//            }
-char fname[100];
-hypre_sprintf(fname, "%s-%d", "S", lev);
-hypre_ParCSRMatrixPrintIJ(S, 0, 0, fname);
-
-hypre_sprintf(fname, "%s-%d", "A", lev);
-hypre_ParCSRMatrixPrintIJ(A_array[lev], 0, 0, fname);
+            hypre_BoomerAMGCreateSDualThresholdHost(A_array[lev], strong_threshold, 2, 1, NULL, &S);
          }
          else
          {
@@ -1163,29 +1145,23 @@ hypre_ParCSRMatrixPrintIJ(A_array[lev], 0, 0, fname);
                            block_jacobi_bsize, interp_type[lev], num_interp_sweeps,
                            &Wp, &P);
       P_array[lev] = P;
-char fname[100];
-hypre_sprintf(fname, "%s-%d", "P", lev);
-hypre_ParCSRMatrixPrintIJ(P, 0, 0, fname);
-
 
       /* Build Restriction operator */
-      if (restrict_type[lev] == 6)
+      if (block_jacobi_bsize == 1 && restrict_type[lev] == 12)
       {
-         /* Set Restrict to Prolongation */
+         restrict_type[lev] = 2;
+      }
+      if (interp_type[lev] == 8)
+      {
          RT = P;
       }
       else
-      {
-         if (block_jacobi_bsize == 1 && restrict_type[lev] == 12)
-         {
-            restrict_type[lev] = 2;
-         }      
-    
-         hypre_MGRBuildRestrict(A_array[lev], A_FF, A_FC, A_CF, CF_marker_array[lev],
-                              coarse_pnts_global, trunc_factor, P_max_elmts[lev],
-                              strong_threshold, max_row_sum, block_jacobi_bsize,
-                              restrict_type[lev], &Wr, &R, &RT);      
-      }   
+      {      
+      hypre_MGRBuildRestrict(A_array[lev], A_FF, A_FC, A_CF, CF_marker_array[lev],
+                             coarse_pnts_global, trunc_factor, P_max_elmts[lev],
+                             strong_threshold, max_row_sum, block_jacobi_bsize,
+                             restrict_type[lev], &Wr, &R, &RT);      
+      }
       R_array[lev]  = R;
       RT_array[lev] = RT;
 

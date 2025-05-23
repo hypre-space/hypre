@@ -170,6 +170,9 @@ typedef struct
 
    /* offets to coarse interpolatory points for 2-point interpolation */
    HYPRE_BigInt          interp_offsets[2];
+   
+   /* Max elements per row of Strength matrix at each level */
+   HYPRE_Int            *S_max_elmts;
 
 } hypre_ParMGRData;
 

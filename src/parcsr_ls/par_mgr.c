@@ -82,6 +82,7 @@ hypre_MGRCreate(void)
    (mgr_data -> trunc_factor) = 0.0;
    (mgr_data -> max_row_sum) = 0.9;
    (mgr_data -> strong_threshold) = 0.25;
+   (mgr_data -> S_max_elmts) = NULL;
    (mgr_data -> P_max_elmts) = NULL;
 
    (mgr_data -> coarse_grid_solver) = NULL;
@@ -260,7 +261,7 @@ hypre_MGRDestroy( void *data )
             hypre_ParCSRMatrixDestroy((mgr_data -> R_array)[i - 1]);
          }
 
-         if (((mgr_data -> restrict_type)[i-1] != 999) && (mgr_data -> RT_array)[i - 1])
+         if (((mgr_data -> restrict_type)[i-1] != 6) && (mgr_data -> RT_array)[i - 1])
          //if ((mgr_data -> RT_array)[i - 1])
          {
             hypre_ParCSRMatrixDestroy((mgr_data -> RT_array)[i - 1]);
@@ -394,6 +395,7 @@ hypre_MGRDestroy( void *data )
    hypre_TFree((mgr_data -> restrict_type), HYPRE_MEMORY_HOST);
    hypre_TFree((mgr_data -> interp_type), HYPRE_MEMORY_HOST);
    hypre_TFree((mgr_data -> P_max_elmts), HYPRE_MEMORY_HOST);
+   hypre_TFree((mgr_data -> S_max_elmts), HYPRE_MEMORY_HOST);
    /* Frelax_type */
    hypre_TFree(mgr_data -> Frelax_type, HYPRE_MEMORY_HOST);
    /* Frelax_method */
@@ -3470,6 +3472,52 @@ hypre_MGRSetLevelPMaxElmts(void *mgr_vdata, HYPRE_Int *P_max_elmts)
    for (i = 0; i < max_num_coarse_levels; i++)
    {
       (mgr_data -> P_max_elmts)[i] = (P_max_elmts) ? P_max_elmts[i] : 0;
+   }
+
+   return hypre_error_flag;
+}
+
+/* Set the maximum number of non-zero entries per row for strength matrix */
+HYPRE_Int
+hypre_MGRSetStrengthMatrixMaxRowNnz(void *mgr_vdata, HYPRE_Int S_max_elmts)
+{
+   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+   HYPRE_Int           max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+   HYPRE_Int           i;
+
+   /* Allocate internal S_max_elmts if needed */
+   if (!(mgr_data -> S_max_elmts))
+   {
+      (mgr_data -> S_max_elmts) = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   }
+
+   /* Set all S_max_elmts entries to the value passed as input */
+   for (i = 0; i < max_num_coarse_levels; i++)
+   {
+      (mgr_data -> S_max_elmts)[i] = S_max_elmts;
+   }
+
+   return hypre_error_flag;
+}
+
+/* Set the maximum number of non-zero entries for interpolation operators per level */
+HYPRE_Int
+hypre_MGRSetLevelStrengthMatrixMaxRowNnz(void *mgr_vdata, HYPRE_Int *S_max_elmts)
+{
+   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+   HYPRE_Int           max_num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+   HYPRE_Int           i;
+
+   /* Allocate internal S_max_elmts if needed */
+   if (!(mgr_data -> S_max_elmts))
+   {
+      (mgr_data -> S_max_elmts) = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   }
+
+   /* Set all S_max_elmts entries to the value passed as input */
+   for (i = 0; i < max_num_coarse_levels; i++)
+   {
+      (mgr_data -> S_max_elmts)[i] = (S_max_elmts) ? S_max_elmts[i] : 3;
    }
 
    return hypre_error_flag;

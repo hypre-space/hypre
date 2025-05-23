@@ -133,13 +133,6 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
       /* Classical modified interpolation */
       hypre_BoomerAMGBuildInterp(A, CF_marker_data, S, num_cpts_global, 1, NULL, 0,
                                  trunc_factor, max_elmts, &P);
-
-// direct interp
-//               hypre_BoomerAMGBuildDirInterp(A, CF_marker_data, S, num_cpts_global, 1, NULL,
-//                                             0, trunc_factor, max_elmts,  interp_type, &P);
-// standard interp
-//               hypre_BoomerAMGBuildStdInterp(A, CF_marker_data, S, num_cpts_global, 1, NULL,
-//                                             0, trunc_factor, max_elmts, 1, &P);                                 
    }
 
    /* set pointer to Wp and P */
@@ -339,11 +332,9 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
    else if (restrict_type == 8)
    {
       /* Build strength matrix */
-      /* To Do (DOK): Might need to pass S_max_elmts to function argument and use that in place of
-       * hard-coded 3 */
-      hypre_BoomerAMGCreateSDualThresholdHost(A, strong_threshold, 3, 1, NULL, &ST);
+      hypre_BoomerAMGCreateSDualThresholdHost(AT, strong_threshold, 2, 1, NULL, &ST);
       /* Classical modified interpolation */
-      hypre_BoomerAMGBuildInterp(A, CF_marker_data, ST, num_cpts_global, 1, NULL, 0,
+      hypre_BoomerAMGBuildInterp(AT, CF_marker_data, ST, num_cpts_global, 1, NULL, 0,
                                  trunc_factor, max_elmts, &RT);
    }
    else

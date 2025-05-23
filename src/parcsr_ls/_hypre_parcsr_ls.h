@@ -3712,6 +3712,8 @@ HYPRE_Int hypre_MGRSetLogging( void *mgr_vdata, HYPRE_Int logging );
 HYPRE_Int hypre_MGRSetMaxIter( void *mgr_vdata, HYPRE_Int max_iter );
 HYPRE_Int hypre_MGRSetPMaxElmts( void *mgr_vdata, HYPRE_Int P_max_elmts );
 HYPRE_Int hypre_MGRSetLevelPMaxElmts( void *mgr_vdata, HYPRE_Int *P_max_elmts );
+HYPRE_Int hypre_MGRSetStrengthMatrixMaxRowNnz( void *mgr_vdata, HYPRE_Int S_max_elmts );
+HYPRE_Int hypre_MGRSetLevelStrengthMatrixMaxRowNnz( void *mgr_vdata, HYPRE_Int *S_max_elmts );
 HYPRE_Int hypre_MGRSetTol( void *mgr_vdata, HYPRE_Real tol );
 HYPRE_Int hypre_MGRSetTwoPointInterpOffsets(void *mgr_vdata, HYPRE_Int cpt_lower, HYPRE_Int cpt_upper);
 HYPRE_Int hypre_MGRDataPrint(void *mgr_vdata);

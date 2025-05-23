@@ -3157,15 +3157,16 @@ hypre_BoomerAMGCorrectCFMarker2(hypre_IntArray *CF_marker, hypre_IntArray *new_C
 
    return hypre_error_flag;
 }
-/// Create S matrix with dual thresholding
-/// @brief 
-/// @param A 
-/// @param strength_threshold 
-/// @param max_row_nnz 
-/// @param num_functions 
-/// @param dof_func 
-/// @param S_ptr 
-/// @return 
+
+/** 
+ * @brief Create Strength matrix S using dual thresholding
+ * @param[in] A Matrix to build S
+ * @param[in] strength_threshold 
+ * @param[in] max_row_nnz Maximum number of entries per row in S 
+ * @param[in] num_functions Number of functions or unknowns (for block A)
+ * @param[in] dof_func 
+ * @param[out] S_ptr Pointer to S matrix 
+*/ 
 HYPRE_Int
 hypre_BoomerAMGCreateSDualThresholdHost(hypre_ParCSRMatrix    *A,
                            HYPRE_Real             strength_threshold,
@@ -3222,7 +3223,7 @@ hypre_BoomerAMGCreateSDualThresholdHost(hypre_ParCSRMatrix    *A,
 
    HYPRE_Int          *col_pos_buffer;
    HYPRE_Real         *row_data_buffer;
-   HYPRE_Int          max_row_nnzS = max_row_nnz;
+   HYPRE_Int          max_row_nnzS = 0;
 
    HYPRE_Int *prefix_sum_workspace;
 
@@ -3525,7 +3526,7 @@ hypre_BoomerAMGCreateSDualThresholdHost(hypre_ParCSRMatrix    *A,
             } /* diag >= 0 */
          } /* num_functions <= 1 */
 
-         max_row_nnzS = jcount > max_row_nnz ? max_row_nnz : jcount;
+         max_row_nnzS = ((max_row_nnz > 0)&&(jcount > max_row_nnz)) ? max_row_nnz : jcount;
          /* second filtering */
          if (jcount > max_row_nnzS)
          {

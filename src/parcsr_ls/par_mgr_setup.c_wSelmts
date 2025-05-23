@@ -1109,7 +1109,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 //            }
 //            else
 //            {
-               hypre_BoomerAMGCreateSDualThresholdHost(A_array[lev], strong_threshold, S_max_elmts[lev], 1, NULL, &S);
+               hypre_BoomerAMGCreateSDualThresholdHost(A_array[lev], strong_threshold, 3, 1, NULL, &S);
 //            }
 char fname[100];
 hypre_sprintf(fname, "%s-%d", "S", lev);

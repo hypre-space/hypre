@@ -934,6 +934,40 @@ HYPRE_MGRSetLevelPMaxElmts( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_MGRSetStrengthMatrixMaxRowNnz
+ *--------------------------------------------------------------------------*/
+
+ HYPRE_Int
+ HYPRE_MGRSetStrengthMatrixMaxRowNnz( HYPRE_Solver solver,
+                        HYPRE_Int    S_max_elmts )
+ {
+    if (!solver)
+    {
+       hypre_error_in_arg(1);
+       return hypre_error_flag;
+    }
+ 
+    return hypre_MGRSetStrengthMatrixMaxRowNnz(solver, S_max_elmts);
+ }
+ 
+ /*--------------------------------------------------------------------------
+  * HYPRE_MGRSetLevelStrengthMatrixMaxRowNnz
+  *--------------------------------------------------------------------------*/
+ 
+ HYPRE_Int
+ HYPRE_MGRSetLevelStrengthMatrixMaxRowNnz( HYPRE_Solver  solver,
+                             HYPRE_Int    *S_max_elmts )
+ {
+    if (!solver)
+    {
+       hypre_error_in_arg(1);
+       return hypre_error_flag;
+    }
+ 
+    return hypre_MGRSetLevelStrengthMatrixMaxRowNnz(solver, S_max_elmts);
+ }
+
+/*--------------------------------------------------------------------------
  * HYPRE_MGRGetCoarseGridConvergenceFactor
  *--------------------------------------------------------------------------*/
 

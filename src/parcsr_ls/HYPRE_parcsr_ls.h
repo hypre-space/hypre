@@ -4566,6 +4566,20 @@ HYPRE_MGRSetLevelPMaxElmts( HYPRE_Solver solver,
                             HYPRE_Int *P_max_elmts );
 
 /**
+ * (Optional) Set the maximum number of nonzeros per row for Strength matrix.
+ **/
+HYPRE_Int
+HYPRE_MGRSetStrengthMatrixMaxRowNnz( HYPRE_Solver solver,
+                       HYPRE_Int S_max_elmts );
+
+/**
+ * (Optional) Set the maximum number of nonzeros per row for for Strength matrix at each level.
+ **/
+HYPRE_Int
+HYPRE_MGRSetLevelStrengthMatrixMaxRowNnz( HYPRE_Solver solver,
+                            HYPRE_Int *S_max_elmts );
+
+/**
  * (Optional) Return the norm of the final relative residual.
  **/
 HYPRE_Int
