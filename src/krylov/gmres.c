@@ -452,7 +452,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    if (logging > 0 || print_level > 0)
    {
       norms[0] = r_norm;
-      if (!my_id && print_level > 1)
+      if (!my_id && print_level > 0)
       {
          hypre_printf("L2 norm of b: %e\n", b_norm);
          if (num_tags > 1)
