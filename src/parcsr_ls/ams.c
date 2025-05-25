@@ -1260,8 +1260,9 @@ HYPRE_Int hypre_AMSSetAlphaPoissonMatrix(void *solver,
    hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    ams_data -> A_Pi = A_Pi;
 
-   /* Penalize the eliminated degrees of freedom */
-   hypre_ParCSRMatrixSetDiagRows(A_Pi, HYPRE_REAL_MAX);
+   /* Penalize the eliminated degrees of freedom.
+      We divide HYPRE_REAL_MAX by 1000 to avoid FPE errors. */
+   hypre_ParCSRMatrixSetDiagRows(A_Pi, HYPRE_REAL_MAX / 1000);
 
    /* Make sure that the first entry in each row is the diagonal one. */
    /* hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(A_Pi)); */
@@ -1291,8 +1292,9 @@ HYPRE_Int hypre_AMSSetBetaPoissonMatrix(void *solver,
    }
    else
    {
-      /* Penalize the eliminated degrees of freedom */
-      hypre_ParCSRMatrixSetDiagRows(A_G, HYPRE_REAL_MAX);
+      /* Penalize the eliminated degrees of freedom.
+         We divide HYPRE_REAL_MAX by 1000 to avoid FPE errors. */
+      hypre_ParCSRMatrixSetDiagRows(A_G, HYPRE_REAL_MAX / 1000);
 
       /* Make sure that the first entry in each row is the diagonal one. */
       /* hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(A_G)); */

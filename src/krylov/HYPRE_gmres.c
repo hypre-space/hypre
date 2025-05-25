@@ -51,6 +51,24 @@ HYPRE_GMRESSolve( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_GMRESSetRefSolution, HYPRE_GMRESSetRefSolution
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_GMRESSetRefSolution( HYPRE_Solver solver,
+                           HYPRE_Vector xref )
+{
+   return ( hypre_GMRESSetRefSolution( (void *) solver, (void *) xref ) );
+}
+
+HYPRE_Int
+HYPRE_GMRESGetRefSolution( HYPRE_Solver  solver,
+                           HYPRE_Vector *xref )
+{
+   return ( hypre_GMRESGetRefSolution( (void *) solver, (void **) xref ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_GMRESSetKDim, HYPRE_GMRESGetKDim
  *--------------------------------------------------------------------------*/
 
@@ -317,4 +335,3 @@ HYPRE_Int HYPRE_GMRESGetResidual( HYPRE_Solver solver, void *residual )
    /* returns a pointer to the residual vector */
    return hypre_GMRESGetResidual( (void *) solver, (void **) residual );
 }
-

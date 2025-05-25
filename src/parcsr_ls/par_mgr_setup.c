@@ -74,8 +74,8 @@ hypre_MGRSetup( void               *mgr_vdata,
 #if defined(HYPRE_USING_GPU)
    hypre_ParCSRMatrix  **P_FF_array = (mgr_data -> P_FF_array);
 #endif
-   hypre_ParCSRMatrix  **P_array = (mgr_data -> P_array);
-   hypre_ParCSRMatrix  **R_array = (mgr_data -> RT_array);
+   hypre_ParCSRMatrix  **P_array  = (mgr_data -> P_array);
+   hypre_ParCSRMatrix  **R_array  = (mgr_data -> R_array);
    hypre_ParCSRMatrix  **RT_array = (mgr_data -> RT_array);
 
    hypre_ParCSRMatrix  *A_FF = NULL;
@@ -404,6 +404,20 @@ hypre_MGRSetup( void               *mgr_vdata,
             B_FF_array[j] = NULL;
          }
 
+         if (R_array[j] && RT_array[j] && (R_array[j] == RT_array[j]))
+         {
+            hypre_ParCSRMatrixDestroy(R_array[j]);
+            R_array[j]  = NULL;
+            RT_array[j] = NULL;
+         }
+
+         if (P_array[j] && RT_array[j] && (P_array[j] == RT_array[j]))
+         {
+            hypre_ParCSRMatrixDestroy(P_array[j]);
+            P_array[j]  = NULL;
+            RT_array[j] = NULL;
+         }
+
          if (P_array[j])
          {
             hypre_ParCSRMatrixDestroy(P_array[j]);
@@ -530,6 +544,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
       }
       hypre_TFree((mgr_data -> l1_norms), HYPRE_MEMORY_HOST);
+      (mgr_data -> l1_norms) = l1_norms = NULL;
    }
 
    if ((mgr_data -> frelax_diaginv))
@@ -543,6 +558,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
       }
       hypre_TFree((mgr_data -> frelax_diaginv), HYPRE_MEMORY_HOST);
+      (mgr_data -> frelax_diaginv) = frelax_diaginv = NULL;
    }
 
    if ((mgr_data -> level_diaginv))
@@ -556,6 +572,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
       }
       hypre_TFree((mgr_data -> level_diaginv), HYPRE_MEMORY_HOST);
+      (mgr_data -> level_diaginv) = level_diaginv = NULL;
    }
 
    /* setup temporary storage */
@@ -586,6 +603,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    }
    hypre_TFree((mgr_data -> rel_res_norms), HYPRE_MEMORY_HOST);
    hypre_TFree((mgr_data -> blk_size), HYPRE_MEMORY_HOST);
+   blk_size = NULL;
 
    Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                                  hypre_ParCSRMatrixGlobalNumRows(A),
