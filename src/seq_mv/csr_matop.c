@@ -2211,3 +2211,96 @@ hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * Computes the Frobenius norm for each tag in a CSR matrix.
+ * Each row is assigned a tag (block identifier) via the tags array (local rows only).
+ * The result is stored in the output pointer tnorms_ptr (length num_tags * num_tags).
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixTaggedFnormHost(hypre_CSRMatrix  *A,
+                               HYPRE_Int         num_tags,
+                               HYPRE_Int        *tags,
+                               HYPRE_Real      **tnorms_ptr)
+{
+   HYPRE_Int       *A_i         = hypre_CSRMatrixI(A);
+   HYPRE_Int       *A_j         = hypre_CSRMatrixJ(A);
+   HYPRE_Complex   *A_a         = hypre_CSRMatrixData(A);
+   HYPRE_Int        num_rows    = hypre_CSRMatrixNumRows(A);
+
+   HYPRE_Int        tnorms_size = num_tags * num_tags;
+   HYPRE_Int        i, j, itag, jtag;
+
+   /* Create tnorms array */
+   if (!*tnorms_ptr)
+   {
+      *tnorms_ptr = hypre_CTAlloc(HYPRE_Real, tnorms_size, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      /* Initialize tnorms array */
+      for (i = 0; i < tnorms_size; i++)
+      {
+         (*tnorms_ptr)[i] = 0.0;
+      }
+   }
+
+   /* Call regular Frobenius norm if no tags or only one tag */
+   if (num_tags <= 1 || !tags)
+   {
+      (*tnorms_ptr)[0] = hypre_CSRMatrixFnorm(A);
+      return hypre_error_flag;
+   }
+
+   /* Accumulate sums */
+   for (i = 0; i < num_rows; i++)
+   {
+      itag = tags[i];
+      hypre_assert(itag >= 0 && itag < num_tags);
+
+      for (j = A_i[i]; j < A_i[i + 1]; j++)
+      {
+         jtag = tags[A_j[j]];
+         hypre_assert(jtag >= 0 && jtag < num_tags);
+         (*tnorms_ptr)[itag * num_tags + jtag] += hypre_squared(A_a[j]);
+      }
+   }
+
+   /* Take square root for each block */
+   for (i = 0; i < tnorms_size; i++)
+   {
+      (*tnorms_ptr)[i] = hypre_sqrt((*tnorms_ptr)[i]);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixTaggedFnorm
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixTaggedFnorm(hypre_CSRMatrix *A,
+                          HYPRE_Int        num_tags,
+                          HYPRE_Int       *tags,
+                          HYPRE_Real      **tnorms_ptr)
+{
+#if defined(HYPRE_USING_GPU)
+   HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A);
+
+   if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
+   {
+      /* TODO (VPM): hypre_ParCSRMatrixTaggedFnormDevice */
+      hypre_CSRMatrixMigrate(A, HYPRE_MEMORY_HOST);
+      hypre_CSRMatrixTaggedFnormHost(A, num_tags, tags, tnorms_ptr);
+      hypre_CSRMatrixMigrate(A, HYPRE_MEMORY_DEVICE);
+   }
+   else
+#endif
+   {
+      hypre_CSRMatrixTaggedFnormHost(A, num_tags, tags, tnorms_ptr);
+   }
+
+   return hypre_error_flag;
+}

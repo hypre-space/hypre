@@ -213,6 +213,73 @@ HYPRE_ParVectorInnerProd( HYPRE_ParVector x,
 }
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParVectorElmDivision( HYPRE_ParVector  x,
+                            HYPRE_ParVector  y,
+                            HYPRE_ParVector *z_ptr )
+{
+   if (!x)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (!y)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   return hypre_ParVectorElmDivision( (hypre_ParVector *) x,
+                                      (hypre_ParVector *) y,
+                                      (hypre_ParVector **) z_ptr );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParVectorElmProduct( HYPRE_ParVector  x,
+                           HYPRE_ParVector  y,
+                           HYPRE_ParVector *z_ptr )
+{
+   if (!x)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (!y)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   return hypre_ParVectorElmProduct( (hypre_ParVector *) x,
+                                     (hypre_ParVector *) y,
+                                     (hypre_ParVector **) z_ptr );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParVectorElmInverse( HYPRE_ParVector  x,
+                           HYPRE_ParVector *y_ptr )
+{
+   if (!x)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   return hypre_ParVectorElmInverse( (hypre_ParVector *) x,
+                                     (hypre_ParVector **) y_ptr );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_VectorToParVector
  *--------------------------------------------------------------------------*/
 

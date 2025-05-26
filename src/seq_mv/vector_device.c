@@ -400,4 +400,113 @@ hypre_SeqVectorPrefetch( hypre_Vector        *x,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * See hypre_SeqVectorElmProduct
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorElmProductDevice( hypre_Vector *x,
+                                 hypre_Vector *y,
+                                 hypre_Vector *z )
+{
+   HYPRE_Complex *x_data      = hypre_VectorData(x);
+   HYPRE_Complex *y_data      = hypre_VectorData(y);
+   HYPRE_Complex *z_data      = hypre_VectorData(z);
+   HYPRE_Int      size        = hypre_VectorSize(x);
+
+#if defined(HYPRE_USING_GPU)
+   hypre_GpuProfilingPushRange("SeqVectorElmProduct");
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_THRUST_CALL(transform,
+                     x_data, x_data + size, y_data, z_data,
+                     thrust::multiplies<HYPRE_Complex>());
+
+#elif defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL(std::transform,
+                     x_data, x_data + size, y_data, z_data,
+                     std::multiplies<HYPRE_Complex>());
+#endif
+
+   hypre_SyncComputeStream();
+   hypre_GpuProfilingPopRange();
+#else
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented!");
+#endif
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * See hypre_SeqVectorElmDivision
+ *--------------------------------------------------------------------------*/   
+
+HYPRE_Int
+hypre_SeqVectorElmDivisionDevice( hypre_Vector *x,
+                                  hypre_Vector *y,
+                                  hypre_Vector *z )
+{
+   HYPRE_Complex *x_data      = hypre_VectorData(x);
+   HYPRE_Complex *y_data      = hypre_VectorData(y);
+   HYPRE_Complex *z_data      = hypre_VectorData(z);
+   HYPRE_Int      size        = hypre_VectorSize(x);
+
+#if defined(HYPRE_USING_GPU)
+   hypre_GpuProfilingPushRange("SeqVectorElmDivision");
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_THRUST_CALL(transform,
+                     x_data, x_data + size, y_data, z_data,
+                     thrust::divides<HYPRE_Complex>());
+
+#elif defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL(std::transform,
+                     x_data, x_data + size, y_data, z_data,
+                     std::divides<HYPRE_Complex>());
+#endif
+
+   hypre_SyncComputeStream();
+   hypre_GpuProfilingPopRange();
+#else
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented!");
+#endif
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * See hypre_SeqVectorElmInverse
+ *--------------------------------------------------------------------------*/   
+
+HYPRE_Int
+hypre_SeqVectorElmInverseDevice( hypre_Vector *x,
+                                 hypre_Vector *y )
+{
+   HYPRE_Complex *x_data = hypre_VectorData(x);
+   HYPRE_Complex *y_data = hypre_VectorData(y);
+   HYPRE_Int      size   = hypre_VectorSize(x);
+
+#if defined(HYPRE_USING_GPU)
+   hypre_GpuProfilingPushRange("SeqVectorElmInverse");
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_THRUST_CALL(transform,
+                     x_data, x_data + size, y_data,
+                     [] __host__ __device__ (const HYPRE_Complex &val) { return 1.0 / val; });
+
+#elif defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL(std::transform,
+                     x_data, x_data + size, y_data,
+                     [](const HYPRE_Complex &val) { return 1.0 / val; });
+#endif
+
+   hypre_SyncComputeStream();
+   hypre_GpuProfilingPopRange();
+#else
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented!");
+#endif
+
+   return hypre_error_flag;
+}
+
 #endif

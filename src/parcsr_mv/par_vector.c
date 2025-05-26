@@ -292,11 +292,12 @@ hypre_ParVectorSetNumVectors( hypre_ParVector *vector,
 
 HYPRE_Int
 hypre_ParVectorResize( hypre_ParVector *vector,
+                       HYPRE_Int        size,
                        HYPRE_Int        num_vectors )
 {
    if (vector)
    {
-      hypre_SeqVectorResize(hypre_ParVectorLocalVector(vector), num_vectors);
+      hypre_SeqVectorResize(hypre_ParVectorLocalVector(vector), size, num_vectors);
    }
 
    return hypre_error_flag;
@@ -720,6 +721,103 @@ hypre_ParVectorElmdivpyMarked( hypre_ParVector *x,
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
 
    return hypre_SeqVectorElmdivpyMarked(x_local, b_local, y_local, marker, marker_val);
+}
+
+/*--------------------------------------------------------------------------
+ * Computes the element-wise division of two vectors: z[i] = y[i] / x[i]
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorElmDivision( hypre_ParVector  *x,
+                            hypre_ParVector  *y,
+                            hypre_ParVector **z_ptr )
+{
+   hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
+   hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
+
+   /* Create and initialize z if it doesn't exist, or resize it */
+   if (!*z_ptr)
+   {
+      *z_ptr = hypre_ParVectorCreate(hypre_ParVectorComm(x),
+                                     hypre_ParVectorGlobalSize(x),
+                                     hypre_ParVectorPartitioning(x));
+      hypre_ParVectorInitialize_v2(*z_ptr, hypre_ParVectorMemoryLocation(x));
+   }
+   else
+   {
+      /* Resize z to match the number of vectors and size of x */
+      hypre_ParVectorResize(*z_ptr, hypre_ParVectorLocalSize(x), hypre_ParVectorNumVectors(x));
+   }
+
+   /* Get local vector */
+   hypre_Vector *z_local = hypre_ParVectorLocalVector(*z_ptr);
+
+   /* Compute local element-wise division */
+   return hypre_SeqVectorElmDivision(x_local, y_local, &z_local);
+}
+
+/*--------------------------------------------------------------------------
+ * Computes the element-wise product of two vectors: z[i] = x[i] * y[i]
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorElmProduct( hypre_ParVector  *x,
+                           hypre_ParVector  *y,
+                           hypre_ParVector **z_ptr )
+{
+   hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
+   hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
+
+   /* Create and initialize z if it doesn't exist, or resize it */
+   if (!*z_ptr)
+   {
+      *z_ptr = hypre_ParVectorCreate(hypre_ParVectorComm(x),
+                                     hypre_ParVectorGlobalSize(x),
+                                     hypre_ParVectorPartitioning(x));
+      hypre_ParVectorInitialize_v2(*z_ptr, hypre_ParVectorMemoryLocation(x));
+   }
+   else
+   {
+      /* Resize z to match the number of vectors and size of x */
+      hypre_ParVectorResize(*z_ptr, hypre_ParVectorLocalSize(x), hypre_ParVectorNumVectors(x));
+   }
+
+   /* Get local vector */
+   hypre_Vector *z_local = hypre_ParVectorLocalVector(*z_ptr);
+
+   /* Compute local element-wise product */
+   return hypre_SeqVectorElmProduct(x_local, y_local, &z_local);
+}
+
+/*--------------------------------------------------------------------------
+ * Computes the element-wise inverse of a vector: y[i] = 1.0 / x[i]
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorElmInverse( hypre_ParVector   *x,
+                           hypre_ParVector  **y_ptr )
+{
+   hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
+
+   /* Create and initialize y if it doesn't exist, or resize it */
+   if (!*y_ptr)
+   {
+      *y_ptr = hypre_ParVectorCreate(hypre_ParVectorComm(x),
+                                     hypre_ParVectorGlobalSize(x),
+                                     hypre_ParVectorPartitioning(x));
+      hypre_ParVectorInitialize_v2(*y_ptr, hypre_ParVectorMemoryLocation(x));
+   }
+   else
+   {
+      /* Resize y to match the number of vectors and size of x */
+      hypre_ParVectorResize(*y_ptr, hypre_ParVectorLocalSize(x), hypre_ParVectorNumVectors(x));
+   }
+
+   /* Get local vector */
+   hypre_Vector *y_local = hypre_ParVectorLocalVector(*y_ptr);
+
+   /* Compute local element-wise inverse */
+   return hypre_SeqVectorElmInverse(x_local, &y_local);
 }
 
 /*--------------------------------------------------------------------------

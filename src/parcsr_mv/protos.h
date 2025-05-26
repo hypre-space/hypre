@@ -69,6 +69,9 @@ HYPRE_Int HYPRE_ParCSRMatrixMatvec ( HYPRE_Complex alpha, HYPRE_ParCSRMatrix A, 
                                      HYPRE_Complex beta, HYPRE_ParVector y );
 HYPRE_Int HYPRE_ParCSRMatrixMatvecT ( HYPRE_Complex alpha, HYPRE_ParCSRMatrix A, HYPRE_ParVector x,
                                       HYPRE_Complex beta, HYPRE_ParVector y );
+HYPRE_Int HYPRE_ParCSRMatrixDiagScale ( HYPRE_ParCSRMatrix A, HYPRE_ParVector left, HYPRE_ParVector right );
+HYPRE_Int HYPRE_ParCSRMatrixCompScalingTagged ( HYPRE_ParCSRMatrix A, HYPRE_Int type, HYPRE_Int num_tags,
+                                                HYPRE_Int *tags, HYPRE_ParVector *scaling_ptr );
 
 /* HYPRE_parcsr_vector.c */
 HYPRE_Int HYPRE_ParVectorCreate ( MPI_Comm comm, HYPRE_BigInt global_size,
@@ -89,6 +92,9 @@ HYPRE_ParVector HYPRE_ParVectorCloneShallow ( HYPRE_ParVector x );
 HYPRE_Int HYPRE_ParVectorScale ( HYPRE_Complex value, HYPRE_ParVector x );
 HYPRE_Int HYPRE_ParVectorAxpy ( HYPRE_Complex alpha, HYPRE_ParVector x, HYPRE_ParVector y );
 HYPRE_Int HYPRE_ParVectorInnerProd ( HYPRE_ParVector x, HYPRE_ParVector y, HYPRE_Real *prod );
+HYPRE_Int HYPRE_ParVectorElmDivision ( HYPRE_ParVector x, HYPRE_ParVector y, HYPRE_ParVector *z_ptr );
+HYPRE_Int HYPRE_ParVectorElmProduct ( HYPRE_ParVector x, HYPRE_ParVector y, HYPRE_ParVector *z_ptr );
+HYPRE_Int HYPRE_ParVectorElmInverse ( HYPRE_ParVector x, HYPRE_ParVector *y_ptr );
 HYPRE_Int HYPRE_VectorToParVector ( MPI_Comm comm, HYPRE_Vector b, HYPRE_BigInt *partitioning,
                                     HYPRE_ParVector *vector );
 HYPRE_Int HYPRE_ParVectorGetValues ( HYPRE_ParVector vector, HYPRE_Int num_values,
@@ -416,6 +422,9 @@ HYPRE_Int hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix *A, HYPRE_Int row_ma
                                          HYPRE_Int num_rows_block, HYPRE_Int num_cols_block,
                                          hypre_DenseBlockMatrix **B_ptr );
 HYPRE_Int hypre_ParCSRMatrixColSum( hypre_ParCSRMatrix *A, hypre_ParVector **B_ptr );
+HYPRE_Int hypre_ParCSRMatrixCompScalingTagged( hypre_ParCSRMatrix *A, HYPRE_Int type,
+                                               HYPRE_Int num_tags, HYPRE_Int *tags,
+                                               hypre_ParVector **scaling_ptr );
 
 /* par_csr_filter_device.c */
 HYPRE_Int hypre_ParCSRMatrixBlkFilterDevice(hypre_ParCSRMatrix *A, HYPRE_Int block_size,
@@ -612,7 +621,7 @@ HYPRE_Int hypre_ParVectorSetDataOwner ( hypre_ParVector *vector, HYPRE_Int owns_
 HYPRE_Int hypre_ParVectorSetLocalSize ( hypre_ParVector *vector, HYPRE_Int local_size );
 HYPRE_Int hypre_ParVectorSetNumVectors ( hypre_ParVector *vector, HYPRE_Int num_vectors );
 HYPRE_Int hypre_ParVectorSetComponent ( hypre_ParVector *vector, HYPRE_Int component );
-HYPRE_Int hypre_ParVectorResize ( hypre_ParVector *vector, HYPRE_Int num_vectors );
+HYPRE_Int hypre_ParVectorResize ( hypre_ParVector *vector, HYPRE_Int size, HYPRE_Int num_vectors );
 hypre_ParVector *hypre_ParVectorRead ( MPI_Comm comm, const char *file_name );
 HYPRE_Int hypre_ParVectorSetConstantValues ( hypre_ParVector *v, HYPRE_Complex value );
 HYPRE_Int hypre_ParVectorSetZeros( hypre_ParVector *v );
@@ -661,6 +670,10 @@ HYPRE_Int hypre_ParVectorElmdivpy( hypre_ParVector *x, hypre_ParVector *b, hypre
 HYPRE_Int hypre_ParVectorElmdivpyMarked( hypre_ParVector *x, hypre_ParVector *b,
                                          hypre_ParVector *y, HYPRE_Int *marker,
                                          HYPRE_Int marker_val );
+HYPRE_Int hypre_ParVectorElmDivision( hypre_ParVector *x, hypre_ParVector *y, hypre_ParVector **z_ptr );
+HYPRE_Int hypre_ParVectorElmProduct( hypre_ParVector *x, hypre_ParVector *y, hypre_ParVector **z_ptr );
+HYPRE_Int hypre_ParVectorElmInverse( hypre_ParVector *x, hypre_ParVector **y_ptr );
+
 /* par_vector_device.c */
 HYPRE_Int hypre_ParVectorGetValuesDevice(hypre_ParVector *vector, HYPRE_Int num_values,
                                          HYPRE_BigInt *indices, HYPRE_BigInt base,
