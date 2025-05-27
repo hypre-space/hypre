@@ -390,9 +390,9 @@ HYPRE_Int hypre_SeqVectorAxpyzDevice ( HYPRE_Complex alpha, hypre_Vector *x,
                                        hypre_Vector *z );
 HYPRE_Int hypre_SeqVectorElmdivpyDevice( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y,
                                          HYPRE_Int *marker, HYPRE_Int marker_val );
-HYPRE_Int hypre_SeqVectorElmProductDevice( hypre_Vector *x, hypre_Vector *y, hypre_Vector **z_ptr );
-HYPRE_Int hypre_SeqVectorElmDivisionDevice( hypre_Vector *x, hypre_Vector *y, hypre_Vector **z_ptr );
-HYPRE_Int hypre_SeqVectorElmInverseDevice( hypre_Vector *x, hypre_Vector **y_ptr );
+HYPRE_Int hypre_SeqVectorElmProductDevice( hypre_Vector *x, hypre_Vector *y, hypre_Vector *z );
+HYPRE_Int hypre_SeqVectorElmDivisionDevice( hypre_Vector *x, hypre_Vector *y, hypre_Vector *z );
+HYPRE_Int hypre_SeqVectorElmInverseDevice( hypre_Vector *x, hypre_Vector *y );
 HYPRE_Real hypre_SeqVectorInnerProdDevice ( hypre_Vector *x, hypre_Vector *y );
 HYPRE_Complex hypre_SeqVectorSumEltsDevice ( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorStridedCopyDevice( hypre_Vector *vector,

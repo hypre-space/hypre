@@ -77,7 +77,7 @@ HYPRE_Int BuildRhsParFromOneFile (MPI_Comm comm, HYPRE_Int argc, char *argv [], 
                                   HYPRE_ParCSRMatrix A, HYPRE_ParVector *b_ptr );
 HYPRE_Int BuildSolParFromOneFile (MPI_Comm comm, HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                   HYPRE_ParCSRMatrix A, HYPRE_ParVector *x_ptr );
-HYPRE_Int BuildBigArrayFromOneFile (HYPRE_Int argc, char *argv [], const char *array_name,
+HYPRE_Int BuildBigArrayFromOneFile (MPI_Comm comm, HYPRE_Int argc, char *argv [], const char *array_name,
                                     HYPRE_Int arg_index, HYPRE_BigInt *partitioning, HYPRE_Int *size, HYPRE_BigInt **array_ptr);
 HYPRE_Int BuildParLaplacian9pt (MPI_Comm comm, HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                 HYPRE_ParCSRMatrix *A_ptr );
@@ -3385,19 +3385,19 @@ main( hypre_int argc,
 
       if (build_fpt_arg_index)
       {
-         BuildBigArrayFromOneFile(argc, argv, "Fine points", build_fpt_arg_index,
+         BuildBigArrayFromOneFile(comm, argc, argv, "Fine points", build_fpt_arg_index,
                                   partitioning, &num_fpt, &fpt_index);
       }
 
       if (build_sfpt_arg_index)
       {
-         BuildBigArrayFromOneFile(argc, argv, "Isolated Fine points", build_sfpt_arg_index,
+         BuildBigArrayFromOneFile(comm, argc, argv, "Isolated Fine points", build_sfpt_arg_index,
                                   partitioning, &num_isolated_fpt, &isolated_fpt_index);
       }
 
       if (build_cpt_arg_index)
       {
-         BuildBigArrayFromOneFile(argc, argv, "Coarse points", build_cpt_arg_index,
+         BuildBigArrayFromOneFile(comm, argc, argv, "Coarse points", build_cpt_arg_index,
                                   partitioning, &num_cpt, &cpt_index);
       }
 
@@ -10974,7 +10974,8 @@ BuildRhsParFromOneFile( MPI_Comm             comm,
  *----------------------------------------------------------------------*/
 
 HYPRE_Int
-BuildBigArrayFromOneFile( HYPRE_Int            argc,
+BuildBigArrayFromOneFile( MPI_Comm             comm,
+                          HYPRE_Int            argc,
                           char                *argv[],
                           const char          *array_name,
                           HYPRE_Int            arg_index,
@@ -10982,7 +10983,6 @@ BuildBigArrayFromOneFile( HYPRE_Int            argc,
                           HYPRE_Int           *size,
                           HYPRE_BigInt       **array_ptr )
 {
-   MPI_Comm        comm = comm;
    char           *filename = NULL;
    FILE           *fp;
    HYPRE_Int       myid;
