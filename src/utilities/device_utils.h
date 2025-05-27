@@ -179,6 +179,15 @@ using hypre_DeviceItem = void*;
 #include <thrust/sequence.h>
 #include <thrust/for_each.h>
 #include <thrust/remove.h>
+#include <thrust/version.h>
+
+/* VPM: this is needed to support cuda 10. not_fn is the correct replacement going forward. */
+#define THRUST_VERSION_NOTFN 200700
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
+#define HYPRE_THRUST_NOT(pred) thrust::not1(pred)
+#else
+#define HYPRE_THRUST_NOT(pred) thrust::not_fn(pred)
+#endif
 
 using namespace thrust::placeholders;
 #endif /* defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
@@ -217,24 +226,24 @@ using hypre_DeviceItem = sycl::nd_item<3>;
  *      device defined values
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-#define HYPRE_MAX_NTHREADS_BLOCK 1024
+#if HYPRE_WARP_SIZE == 32
+#define HYPRE_WARP_BITSHIFT      5
+#define HYPRE_WARP_FULL_MASK     0xFFFFFFFF
 
-// HYPRE_WARP_BITSHIFT is just log2 of HYPRE_WARP_SIZE
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_SYCL)
-#define HYPRE_WARP_SIZE       32
-#define HYPRE_WARP_BITSHIFT   5
-#define HYPRE_WARP_FULL_MASK  0xFFFFFFFF
-#elif defined(HYPRE_USING_HIP)
-#define HYPRE_WARP_SIZE       64
-#define HYPRE_WARP_BITSHIFT   6
-#define HYPRE_WARP_FULL_MASK  0xFFFFFFFFFFFFFFFF
+#elif HYPRE_WARP_SIZE == 64
+#define HYPRE_WARP_BITSHIFT      6
+#define HYPRE_WARP_FULL_MASK     0xFFFFFFFFFFFFFFFF
+
+#else
+#error "Unsupported value for HYPRE_WARP_SIZE"
 #endif
 
-#define HYPRE_MAX_NUM_WARPS   (64 * 64 * 32)
-#define HYPRE_FLT_LARGE       1e30
-#define HYPRE_1D_BLOCK_SIZE   512
-#define HYPRE_MAX_NUM_STREAMS 10
-#define HYPRE_SPGEMM_MAX_NBIN 10
+#define HYPRE_MAX_NTHREADS_BLOCK 1024
+#define HYPRE_MAX_NUM_WARPS      (64 * 64 * 32)
+#define HYPRE_FLT_LARGE          1e30
+#define HYPRE_1D_BLOCK_SIZE      512
+#define HYPRE_MAX_NUM_STREAMS    10
+#define HYPRE_SPGEMM_MAX_NBIN    10
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  *       macro for launching GPU kernels
@@ -329,8 +338,8 @@ using hypre_DeviceItem = sycl::nd_item<3>;
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
             [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
                { (kernel_name)(item,                                                         \
-                  shmem_accessor.get_multi_ptr<sycl::access::decorated::yes>(), __VA_ARGS__);\
-         });                                                                                 \
+                  shmem_accessor.get_multi_ptr<sycl::access::decorated::yes>().get(),        \
+                  __VA_ARGS__); });                                                          \
       }).wait_and_throw();                                                                   \
    }                                                                                         \
 }
@@ -372,9 +381,9 @@ using hypre_DeviceItem = sycl::nd_item<3>;
             sycl::target::local> shmem_accessor(shmem_range, cgh);                           \
          cgh.parallel_for(sycl::nd_range<3>(gridsize*blocksize, blocksize),                  \
             [=] (hypre_DeviceItem item) [[intel::reqd_sub_group_size(HYPRE_WARP_SIZE)]]      \
-               { (kernel_name)(item, debug_stream,                                           \
-                  shmem_accessor.get_multi_ptr<sycl::access::decorated::yes>(), __VA_ARGS__);\
-         });                                                                                 \
+               { (kernel_name)(item,                                                         \
+                  shmem_accessor.get_multi_ptr<sycl::access::decorated::yes>().get(),        \
+                  __VA_ARGS__); });                                                          \
       }).wait_and_throw();                                                                   \
    }                                                                                         \
 }
@@ -459,6 +468,8 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_cusolver_dngetrf                 cusolverDnSgetrf
 #define hypre_cusolver_dngetrf_bs              cusolverDnSgetrf_bufferSize
 #define hypre_cusolver_dngetrs                 cusolverDnSgetrs
+#define hypre_cusolver_dnpotrf_batched         cusolverDnSpotrfBatched
+#define hypre_cusolver_dnpotrs_batched         cusolverDnSpotrsBatched
 
 #elif defined(HYPRE_USING_HIP)
 /* rocSPARSE */
@@ -478,10 +489,10 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csritilu0_history      rocsparse_scsritilu0_history
 
 /* rocSOLVER */
-
-/**************
- * TODO (VPM) *
- **************/
+#define hypre_rocsolver_getrf_batched          rocsolver_sgetrf_batched
+#define hypre_rocsolver_getri_batched          rocsolver_sgetri_batched
+#define hypre_rocsolver_potrf_batched          rocsolver_spotrf_batched
+#define hypre_rocsolver_potrs_batched          rocsolver_spotrs_batched
 
 #endif /* if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP) */
 
@@ -518,6 +529,8 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_cusolver_dngetrf                 cusolverDnDgetrf
 #define hypre_cusolver_dngetrf_bs              cusolverDnDgetrf_bufferSize
 #define hypre_cusolver_dngetrs                 cusolverDnDgetrs
+#define hypre_cusolver_dnpotrf_batched         cusolverDnDpotrfBatched
+#define hypre_cusolver_dnpotrs_batched         cusolverDnDpotrsBatched
 
 #elif defined(HYPRE_USING_HIP)
 /* rocSPARSE */
@@ -537,10 +550,10 @@ using hypre_DeviceItem = sycl::nd_item<3>;
 #define hypre_rocsparse_csritilu0_history      rocsparse_dcsritilu0_history
 
 /* rocSOLVER */
-
-/**************
- * TODO (VPM) *
- **************/
+#define hypre_rocsolver_getrf_batched          rocsolver_dgetrf_batched
+#define hypre_rocsolver_getri_batched          rocsolver_dgetri_batched
+#define hypre_rocsolver_potrf_batched          rocsolver_dpotrf_batched
+#define hypre_rocsolver_potrs_batched          rocsolver_dpotrs_batched
 
 #endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)*/
 #endif /* #if defined(HYPRE_COMPLEX) || defined(HYPRE_SINGLE) || defined(HYPRE_LONG_DOUBLE) */
@@ -1337,7 +1350,11 @@ T warp_allreduce_min(hypre_DeviceItem &item, T in)
 }
 
 template<typename T1, typename T2>
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct type_cast : public thrust::unary_function<T1, T2>
+#else
+struct type_cast
+#endif
 {
    __host__ __device__ T2 operator()(const T1 &x) const
    {
@@ -1346,7 +1363,11 @@ struct type_cast : public thrust::unary_function<T1, T2>
 };
 
 template<typename T>
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct absolute_value : public thrust::unary_function<T, T>
+#else
+struct absolute_value
+#endif
 {
    __host__ __device__ T operator()(const T &x) const
    {
@@ -1397,7 +1418,11 @@ struct TupleComp3
 };
 
 template<typename T>
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct is_negative : public thrust::unary_function<T, bool>
+#else
+struct is_negative
+#endif
 {
    __host__ __device__ bool operator()(const T &x)
    {
@@ -1406,7 +1431,11 @@ struct is_negative : public thrust::unary_function<T, bool>
 };
 
 template<typename T>
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct is_positive : public thrust::unary_function<T, bool>
+#else
+struct is_positive
+#endif
 {
    __host__ __device__ bool operator()(const T &x)
    {
@@ -1415,7 +1444,11 @@ struct is_positive : public thrust::unary_function<T, bool>
 };
 
 template<typename T>
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct is_nonnegative : public thrust::unary_function<T, bool>
+#else
+struct is_nonnegative
+#endif
 {
    __host__ __device__ bool operator()(const T &x)
    {
@@ -1424,7 +1457,11 @@ struct is_nonnegative : public thrust::unary_function<T, bool>
 };
 
 template<typename T>
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct in_range : public thrust::unary_function<T, bool>
+#else
+struct in_range
+#endif
 {
    T low, up;
 
@@ -1437,7 +1474,11 @@ struct in_range : public thrust::unary_function<T, bool>
 };
 
 template<typename T>
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct out_of_range : public thrust::unary_function<T, bool>
+#else
+struct out_of_range
+#endif
 {
    T low, up;
 
@@ -1450,7 +1491,11 @@ struct out_of_range : public thrust::unary_function<T, bool>
 };
 
 template<typename T>
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct less_than : public thrust::unary_function<T, bool>
+#else
+struct less_than
+#endif
 {
    T val;
 
@@ -1463,7 +1508,11 @@ struct less_than : public thrust::unary_function<T, bool>
 };
 
 template<typename T>
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct modulo : public thrust::unary_function<T, T>
+#else
+struct modulo
+#endif
 {
    T val;
 
@@ -1476,7 +1525,11 @@ struct modulo : public thrust::unary_function<T, T>
 };
 
 template<typename T>
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct equal : public thrust::unary_function<T, bool>
+#else
+struct equal
+#endif
 {
    T val;
 

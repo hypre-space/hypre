@@ -6684,6 +6684,7 @@ hypre_ParCSRMatrixBlockColSumHost( hypre_ParCSRMatrix     *A,
    HYPRE_Int               num_cols_offd_A   = hypre_CSRMatrixNumCols(A_offd);
 
    /* Output vector variables */
+   HYPRE_Int               num_rows_block_B  = hypre_DenseBlockMatrixNumRowsBlock(B);
    HYPRE_Int               num_cols_block_B  = hypre_DenseBlockMatrixNumColsBlock(B);
 
    /* Local variables */
@@ -6722,12 +6723,15 @@ hypre_ParCSRMatrixBlockColSumHost( hypre_ParCSRMatrix     *A,
 #endif
 
    /* Pack send data */
-   for (i = 0; i < num_rows_offd_A; i++)
+   if (A_offd_i[num_rows_offd_A] - A_offd_i[0] > 0)
    {
-      for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
+      for (i = 0; i < num_rows_offd_A; i++)
       {
-         col = A_offd_j[j];
-         send_data[col] += A_offd_data[j];
+         for (j = A_offd_i[i]; j < A_offd_i[i + 1]; j++)
+         {
+            col = A_offd_j[j];
+            send_data[col] += A_offd_data[j];
+         }
       }
    }
 
@@ -6744,12 +6748,17 @@ hypre_ParCSRMatrixBlockColSumHost( hypre_ParCSRMatrix     *A,
    /* Overlapped local computation. */
    for (i = 0; i < num_rows_diag_A; i++)
    {
-      ir = i % num_cols_block_B;
+      ir = i % num_rows_block_B;
       for (j = A_diag_i[i]; j < A_diag_i[i + 1]; j++)
       {
          col = A_diag_j[j];
          ib  = col / num_cols_block_B;
          jr  = col % num_cols_block_B;
+
+         hypre_assert(hypre_DenseBlockMatrixNumNonzerosBlock(B) * ib +
+                      hypre_DenseBlockMatrixRowStride(B) * ir +
+                      hypre_DenseBlockMatrixColStride(B) * jr <
+                      hypre_DenseBlockMatrixNumNonzeros(B));
 
          hypre_DenseBlockMatrixDataBIJ(B, ib, ir, jr) += A_diag_data[j];
       }
@@ -6767,8 +6776,13 @@ hypre_ParCSRMatrixBlockColSumHost( hypre_ParCSRMatrix     *A,
    {
       col = send_map_elmts[i];
       ib  = col / num_cols_block_B;
-      ir  = col % num_cols_block_B;
-      jr  = i % num_cols_block_B;
+      ir  = col % num_rows_block_B;
+      jr  = col % num_cols_block_B;
+
+      hypre_assert(hypre_DenseBlockMatrixNumNonzerosBlock(B) * ib +
+                   hypre_DenseBlockMatrixRowStride(B) * ir +
+                   hypre_DenseBlockMatrixColStride(B) * jr <
+                   hypre_DenseBlockMatrixNumNonzeros(B));
 
       hypre_DenseBlockMatrixDataBIJ(B, ib, ir, jr) += recv_data[i];
    }

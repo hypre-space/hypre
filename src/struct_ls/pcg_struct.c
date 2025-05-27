@@ -138,6 +138,29 @@ hypre_StructKrylovInnerProd( void *x,
                                    (hypre_StructVector *) y ) );
 }
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructKrylovInnerProdTagged( void           *x,
+                                   void           *y,
+                                   HYPRE_Int      *num_tags_ptr,
+                                   HYPRE_Complex **iprod_ptr )
+{
+   HYPRE_Complex iprod = hypre_StructInnerProd( (hypre_StructVector *) x,
+                                                (hypre_StructVector *) y );
+
+   if (*iprod_ptr == NULL)
+   {
+      *iprod_ptr = hypre_CTAlloc(HYPRE_Complex, 1, HYPRE_MEMORY_HOST);
+   }
+
+   // TODO (VPM): Add support to multiple tags
+   *num_tags_ptr = 1;
+   *iprod_ptr[0] = iprod;
+
+   return hypre_error_flag;
+}
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
