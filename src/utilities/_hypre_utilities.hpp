@@ -1305,8 +1305,8 @@ hypre_double atomicAdd(hypre_double* address, hypre_double val)
 }
 #endif
 
-// There are no *_sync functions in HIP < 6.5
-#if (defined(HYPRE_USING_HIP) && HIP_VERSION < 60500000)
+// There are no *_sync functions in HIP < 7.0
+#if (defined(HYPRE_USING_HIP) && HIP_VERSION < 70000000)
 
 template <typename T>
 static __device__ __forceinline__
@@ -1347,12 +1347,12 @@ hypre_int __any_sync(unsigned mask, hypre_int predicate)
    return __any(predicate);
 }
 
-#endif // if (defined(HYPRE_USING_HIP) && HIP_VERSION < 60500000)
+#endif // if (defined(HYPRE_USING_HIP) && HIP_VERSION < 70000000)
 
 static __device__ __forceinline__
 hypre_mask hypre_ballot_sync(hypre_DeviceItem &item, hypre_mask mask, hypre_int predicate)
 {
-#if defined(HYPRE_USING_CUDA) || (defined(HYPRE_USING_HIP) && HIP_VERSION >= 60500000)
+#if defined(HYPRE_USING_CUDA) || (defined(HYPRE_USING_HIP) && HIP_VERSION >= 70000000)
    return __ballot_sync(mask, predicate);
 #else
    return __ballot(predicate);
