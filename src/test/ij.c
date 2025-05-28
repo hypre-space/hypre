@@ -226,6 +226,14 @@ main( hypre_int argc,
    HYPRE_Int           Q_max = 0;
    HYPRE_Real          Q_trunc = 0;
 
+   /* Linear system scaling data */
+   HYPRE_IJVector      ij_ld  = NULL;
+   HYPRE_IJVector      ij_rd  = NULL;
+   HYPRE_ParVector     par_ld = NULL;
+   HYPRE_ParVector     par_rd = NULL;
+   HYPRE_Complex      *d_data = NULL;
+   HYPRE_Int           scaling_type;
+
    /* Specific tests */
    HYPRE_Int           test_init = 0;
    HYPRE_Int           lazy_device_init = 0;
@@ -2393,6 +2401,13 @@ main( hypre_int argc,
          hypre_printf("           0=Forward (default)       1=Backward\n");
          hypre_printf("           2=Centered                3=Upwind\n");
          hypre_printf("\n");
+         hypre_printf("  -test_scaling          : scale the system matrix (A = D_left * A * D_right) \n");
+         hypre_printf("           0 = No scaling  (default)\n");
+         hypre_printf("           1 = Left scaling using inv(diag(A))\n");
+         hypre_printf("           2 = Right scaling using inv(diag(A))\n");
+         hypre_printf("           3 = Left and right scaling using sqrt(inv(diag(A)))\n");
+         hypre_printf("           4 = Block/tagged scaling using block Frobenius norms (see dof_func)\n");
+         hypre_printf("\n");
          hypre_printf("  -exact_size            : inserts immediately into ParCSR structure\n");
          hypre_printf("  -storage_low           : allocates not enough storage for aux struct\n");
          hypre_printf("  -concrete_parcsr       : use parcsr matrix type as concrete type\n");
@@ -3488,7 +3503,7 @@ main( hypre_int argc,
          hypre_printf("ERROR: Problem reading in the right-hand-side!\n");
          exit(1);
       }
-      ierr = HYPRE_IJVectorGetObject( ij_b, &object );
+      HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
 
       /* Initial guess */
@@ -3496,8 +3511,7 @@ main( hypre_int argc,
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
       HYPRE_IJVectorAssemble(ij_x);
-
-      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
+      HYPRE_IJVectorGetObject(ij_x, &object);
       x = (HYPRE_ParVector) object;
    }
    else if (build_rhs_type == 1)
@@ -4358,77 +4372,93 @@ main( hypre_int argc,
    }
 
    /*-----------------------------------------------------------
-    * Test matrix scaling: B = diag(ld) * A * diag(rd)
+    * Test linear system scaling:
+    *
+    * Solve B * y = z
+    *
+    *   B = diag(ld) * A * diag(rd)
+    *   x = diag(rd) * y
+    *   z = diag(ld) * b
     *-----------------------------------------------------------*/
 
    if (test_scaling)
    {
-      HYPRE_IJVector   ij_ld  = NULL;
-      HYPRE_IJVector   ij_rd  = NULL;
-      HYPRE_ParVector  par_ld = NULL;
-      HYPRE_ParVector  par_rd = NULL;
-      HYPRE_Complex   *d_data;
-      HYPRE_Int        scaling_type;
-
       time_index = hypre_InitializeTiming("ParCSR scaling");
       hypre_BeginTiming(time_index);
 
-      /* Allocate memory */
-      d_data = hypre_TAlloc(HYPRE_Complex, local_num_rows, memory_location);
-
-      /* Select scaling type:
-           left  OR right scaling: diag inverse (2)
-           left AND right scaling: diag inverse sqrt (3) */
-      scaling_type = (test_scaling == 1 || test_scaling == 2) ? 2 : 3;
-
-      /* Compute scaling vector */
-      hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(parcsr_A), d_data, scaling_type);
-
-      /* Create diagonal scaling matrix diag(ld) */
-      if (test_scaling != 2)
+      if (test_scaling < 4)
       {
-         HYPRE_IJVectorCreate(comm, first_local_row, last_local_row, &ij_ld);
-         HYPRE_IJVectorSetObjectType(ij_ld, HYPRE_PARCSR);
-         HYPRE_IJVectorInitialize(ij_ld);
-         HYPRE_IJVectorSetValues(ij_ld, local_num_rows, NULL, d_data);
-         HYPRE_IJVectorAssemble(ij_ld);
-         HYPRE_IJVectorGetObject(ij_ld, &object);
-         par_ld = (HYPRE_ParVector) object;
+         /* Allocate memory */
+         d_data = hypre_TAlloc(HYPRE_Complex, local_num_rows, memory_location);
+
+         /* Select scaling type:
+              left  OR right scaling: diag inverse (1 or 2)
+              left AND right scaling: diag inverse sqrt (3) */
+         scaling_type = (test_scaling == 1 || test_scaling == 2) ? 2 : 3;
+
+         /* Compute scaling vector */
+         hypre_CSRMatrixExtractDiagonal(hypre_ParCSRMatrixDiag(parcsr_A), d_data, scaling_type);
+
+         /* Create diagonal scaling matrix diag(ld) */
+         if (test_scaling != 2)
+         {
+            HYPRE_IJVectorCreate(comm, first_local_row, last_local_row, &ij_ld);
+            HYPRE_IJVectorSetObjectType(ij_ld, HYPRE_PARCSR);
+            HYPRE_IJVectorInitialize(ij_ld);
+            HYPRE_IJVectorSetValues(ij_ld, local_num_rows, NULL, d_data);
+            HYPRE_IJVectorAssemble(ij_ld);
+            HYPRE_IJVectorGetObject(ij_ld, &object);
+            par_ld = (HYPRE_ParVector) object;
+         }
+
+         /* Create diagonal scaling matrix diag(rd) */
+         if (test_scaling != 1)
+         {
+            HYPRE_IJVectorCreate(comm, first_local_row, last_local_row, &ij_rd);
+            HYPRE_IJVectorSetObjectType(ij_rd, HYPRE_PARCSR);
+            HYPRE_IJVectorInitialize(ij_rd);
+            HYPRE_IJVectorSetValues(ij_rd, local_num_rows, NULL, d_data);
+            HYPRE_IJVectorAssemble(ij_rd);
+            HYPRE_IJVectorGetObject(ij_rd, &object);
+            par_rd = (HYPRE_ParVector) object;
+         }
       }
-
-      /* Create diagonal scaling matrix diag(rd) */
-      if (test_scaling != 1)
+      else if (test_scaling == 4 && dof_func)
       {
-         HYPRE_IJVectorCreate(comm, first_local_row, last_local_row, &ij_rd);
-         HYPRE_IJVectorSetObjectType(ij_rd, HYPRE_PARCSR);
-         HYPRE_IJVectorInitialize(ij_rd);
-         HYPRE_IJVectorSetValues(ij_rd, local_num_rows, NULL, d_data);
-         HYPRE_IJVectorAssemble(ij_rd);
-         HYPRE_IJVectorGetObject(ij_rd, &object);
-         par_rd = (HYPRE_ParVector) object;
+         /* Compute scaling based on block matrix norms */
+         HYPRE_ParCSRMatrixCompScalingTagged(parcsr_A, 1, num_functions, dof_func, &par_ld);
+         par_rd = par_ld;
+      }
+      else
+      {
+         if (myid == 0)
+         {
+            hypre_printf("Error: invalid test_scaling option or missing dof_func array\n");
+         }
+         hypre_MPI_Abort(comm, 1);
       }
 
       /* Compute A = diag(ld) * A * diag(rd) */
-      hypre_ParCSRMatrixDiagScale(parcsr_A, par_ld, par_rd);
+      HYPRE_ParCSRMatrixDiagScale(parcsr_A, par_ld, par_rd);
 
-      /* Print scaled matrix */
+      /* Print scaled system */
       if (print_system)
       {
-         hypre_ParCSRMatrixPrintIJ(parcsr_A, 0, 0, "IJ.out.Ascal");
+         hypre_ParCSRMatrixPrintIJ(parcsr_A, 0, 0, "IJ.out.A_scal");
+         HYPRE_ParVectorPrint(b, "IJ.out.b_scal");
          HYPRE_IJVectorPrint(ij_ld, "IJ.out.ld");
          HYPRE_IJVectorPrint(ij_rd, "IJ.out.rd");
+      }
+      else if (print_system_binary)
+      {
+         hypre_ParCSRMatrixPrintBinaryIJ(parcsr_A, 0, 0, "IJ.out.A_scal");
+         HYPRE_ParVectorPrintBinaryIJ(b, "IJ.out.b_scal");
+         HYPRE_IJVectorPrintBinary(ij_ld, "IJ.out.ld");
+         HYPRE_IJVectorPrintBinary(ij_rd, "IJ.out.rd");
       }
 
       /* Free memory */
       hypre_TFree(d_data, memory_location);
-      if (ij_rd)
-      {
-         HYPRE_IJVectorDestroy(ij_rd);
-      }
-      if (ij_ld)
-      {
-         HYPRE_IJVectorDestroy(ij_ld);
-      }
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("ParCSR scaling", comm);
@@ -9514,6 +9544,31 @@ final:
    if (build_matrix_M == 1)
    {
       HYPRE_IJMatrixDestroy(ij_M);
+   }
+
+   /* Free right scaling vector */
+   if (ij_rd)
+   {
+      HYPRE_IJVectorDestroy(ij_rd);
+   }
+   else if (par_rd)
+   {
+      if (par_ld && par_ld == par_rd)
+      {
+         par_ld = NULL;
+      }
+      HYPRE_ParVectorDestroy(par_rd);
+   }
+
+   /* Free left scaling vector */
+   if (ij_ld)
+   {
+      HYPRE_IJVectorDestroy(ij_ld);
+      par_ld = NULL;
+   }
+   else if (par_ld)
+   {
+      HYPRE_ParVectorDestroy(par_ld);
    }
 
    /* for build_rhs_type = 1, 6 or 7, we did not create ij_b  - just b*/
