@@ -7055,9 +7055,36 @@ hypre_ParCSRMatrixColSum( hypre_ParCSRMatrix   *A,
 }
 
 /*--------------------------------------------------------------------------
- * Compute a scaling vector based on matrix coefficients
+ * Compute a scaling vector based on matrix coefficients and tags.
  *
- * type = 0: Frobenius norms of the matrix diagonal blocks informed by tags array
+ * This function computes a scaling vector for a ParCSR matrix, where each
+ * entry in the scaling vector corresponds to a row of the matrix. The
+ * scaling is determined by the `type` parameter and, for type 1, by a
+ * user-provided tags array.
+ *
+ * Parameters:
+ *   - A:           The ParCSR matrix to analyze.
+ *   - type:        The scaling type:
+ *                    0: No scaling (returns NULL scaling vector)
+ *                    1: For each tag, compute the Frobenius norm of the diagonal block
+ *                       (rows and columns with the same tag) and take the inverse
+ *                       square root of its magnitude.
+ *   - num_tags:    Number of unique tags (blocks/components).
+ *   - tags:        Array of length num_rows, assigning a tag to each row.
+ *   - scaling_ptr: Output pointer to the resulting scaling vector.
+ *
+ * Typical usage:
+ *   - For multiphysics problems, call this function with type=1
+ *     and a tags array indicating the block/component of each row.
+ *   - The resulting scaling vector can be used to scale the matrix and/or
+ *     right-hand side to improve conditioning or solver performance.
+ *
+ * Example usage:
+ *   hypre_ParCSRMatrixCompScalingTagged(A, 1, num_blocks, block_tags, &scaling);
+ *   hypre_ParCSRMatrixDiagScale(A, scaling, scaling);
+ *
+ * Notes:
+ *   - If type=0 or tags=NULL, the function returns without scaling.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -7079,8 +7106,8 @@ hypre_ParCSRMatrixCompScalingTagged(hypre_ParCSRMatrix  *A,
    HYPRE_Real              *g_weights       = NULL;
    HYPRE_Int                i;
 
-   /* Sanity check - Return an empty scaling if tags is a null pointer */
-   if (!tags)
+   /* Sanity check - Return an empty scaling if tags is a null pointer or type = 0 */
+   if (!tags || (type == 0))
    {
       hypre_ParVectorDestroy(*scaling_ptr);
       *scaling_ptr = NULL;
@@ -7099,7 +7126,7 @@ hypre_ParCSRMatrixCompScalingTagged(hypre_ParCSRMatrix  *A,
       hypre_ParVectorResize(*scaling_ptr, num_rows, 1);
    }
 
-   if (type == 0)
+   if (type == 1)
    {
       /* Move scaling vector to host memory if needed */
       hypre_ParVectorMigrate(*scaling_ptr, HYPRE_MEMORY_HOST);
