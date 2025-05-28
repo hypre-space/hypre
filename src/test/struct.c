@@ -805,7 +805,7 @@ main( hypre_int argc,
 
    if ( print_usage )
    {
-      exit(1);
+      exit(0);
    }
 
    /*-----------------------------------------------------------
@@ -818,7 +818,7 @@ main( hypre_int argc,
       {
          hypre_printf("Error: PxQxR is more than the number of processors\n");
       }
-      exit(1);
+      hypre_MPI_Abort(comm, 1);
    }
    else if ((P * Q * R) < num_procs)
    {

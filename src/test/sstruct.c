@@ -2716,7 +2716,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
          PrintUsage(argv[0], myid);
-         hypre_MPI_Abort(comm, 1);
+         exit(0);
       }
       else if ( strcmp(argv[arg_index], "-version") == 0 )
       {
@@ -2724,7 +2724,7 @@ main( hypre_int argc,
          HYPRE_Version(&version_string);
          hypre_printf("%s\n", version_string);
          hypre_TFree(version_string, HYPRE_MEMORY_HOST);
-         hypre_MPI_Abort(comm, 1);
+         exit(0);
       }
       else if ( strcmp(argv[arg_index], "-vernum") == 0 )
       {
@@ -2732,7 +2732,7 @@ main( hypre_int argc,
          HYPRE_VersionNumber(&major, &minor, &patch, &single);
          hypre_printf("HYPRE Version %d.%d.%d\n", major, minor, patch);
          hypre_printf("HYPRE Single = %d\n", single);
-         hypre_MPI_Abort(comm, 1);
+         exit(0);
       }
       else
       {
