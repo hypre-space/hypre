@@ -9,7 +9,9 @@
 #include "_hypre_utilities.hpp"
 
 #if defined(__linux__) && defined(HYPRE_DEBUG)
+#ifndef __USE_GNU
 #define __USE_GNU
+#endif
 #include <fenv.h>
 #endif
 

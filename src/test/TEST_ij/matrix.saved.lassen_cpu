@@ -62,6 +62,10 @@ Final GMRES Relative Residual Norm = 7.176706e-03
 GMRES Iterations = 74
 Final GMRES Relative Residual Norm = 7.155117e-03
 
+# Output file: matrix.out.103
+GMRES Iterations = 79
+Final GMRES Relative Residual Norm = 7.176706e-03
+
 # Output file: matrix.out.110
 GMRES Iterations = 13
 Final GMRES Relative Residual Norm = 8.997992e-01
@@ -73,3 +77,7 @@ Final GMRES Relative Residual Norm = 8.909955e-01
 # Output file: matrix.out.112
 GMRES Iterations = 6
 Final GMRES Relative Residual Norm = 8.963555e-01
+
+# Output file: matrix.out.113
+GMRES Iterations = 35
+Final GMRES Relative Residual Norm = 8.909955e-01

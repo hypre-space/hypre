@@ -7053,3 +7053,122 @@ hypre_ParCSRMatrixColSum( hypre_ParCSRMatrix   *A,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * Compute a scaling vector based on matrix coefficients and tags.
+ *
+ * This function computes a scaling vector for a ParCSR matrix, where each
+ * entry in the scaling vector corresponds to a row of the matrix. The
+ * scaling is determined by the `type` parameter and, for type 1, by a
+ * user-provided tags array.
+ *
+ * Parameters:
+ *   - A:           The ParCSR matrix to analyze.
+ *   - type:        The scaling type:
+ *                    0: No scaling (returns NULL scaling vector)
+ *                    1: For each tag, compute the Frobenius norm of the diagonal block
+ *                       (rows and columns with the same tag) and take the inverse
+ *                       square root of its magnitude.
+ *   - num_tags:    Number of unique tags (blocks/components).
+ *   - tags:        Array of length num_rows, assigning a tag to each row.
+ *   - scaling_ptr: Output pointer to the resulting scaling vector.
+ *
+ * Typical usage:
+ *   - For multiphysics problems, call this function with type=1
+ *     and a tags array indicating the block/component of each row.
+ *   - The resulting scaling vector can be used to scale the matrix and/or
+ *     right-hand side to improve conditioning or solver performance.
+ *
+ * Example usage:
+ *   hypre_ParCSRMatrixCompScalingTagged(A, 1, num_blocks, block_tags, &scaling);
+ *   hypre_ParCSRMatrixDiagScale(A, scaling, scaling);
+ *
+ * Notes:
+ *   - If type=0 or tags=NULL, the function returns without scaling.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixCompScalingTagged(hypre_ParCSRMatrix  *A,
+                                    HYPRE_Int            type,
+                                    HYPRE_Int            num_tags,
+                                    HYPRE_Int           *tags,
+                                    hypre_ParVector    **scaling_ptr)
+{
+   MPI_Comm                 comm            = hypre_ParCSRMatrixComm(A);
+   HYPRE_BigInt             global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_BigInt            *row_starts      = hypre_ParCSRMatrixRowStarts(A);
+   HYPRE_Int                num_rows        = hypre_ParCSRMatrixNumRows(A);
+   HYPRE_MemoryLocation     memory_location = hypre_ParCSRMatrixMemoryLocation(A);
+
+   hypre_CSRMatrix         *A_diag          = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Real              *tnorms          = NULL;
+   HYPRE_Real              *weights         = NULL;
+   HYPRE_Real              *g_weights       = NULL;
+   HYPRE_Int                i;
+
+   /* Sanity check - Return an empty scaling if tags is a null pointer or type = 0 */
+   if (!tags || (type == 0))
+   {
+      hypre_ParVectorDestroy(*scaling_ptr);
+      *scaling_ptr = NULL;
+      return hypre_error_flag;
+   }
+
+   /* Create and initialize scaling vector if it does not exist yet */
+   if (!*scaling_ptr)
+   {
+      *scaling_ptr = hypre_ParVectorCreate(comm, global_num_rows, row_starts);
+      hypre_ParVectorInitialize_v2(*scaling_ptr, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      /* No-op if scaling has the same size as the number of local rows in A */
+      hypre_ParVectorResize(*scaling_ptr, num_rows, 1);
+   }
+
+   if (type == 1)
+   {
+      /* Move scaling vector to host memory if needed */
+      hypre_ParVectorMigrate(*scaling_ptr, HYPRE_MEMORY_HOST);
+
+      /* Compute Frobenius norms */
+      hypre_CSRMatrixTaggedFnorm(A_diag, num_tags, tags, &tnorms);
+
+      /* Compute local scaling weights */
+      weights = hypre_TAlloc(HYPRE_Real, num_tags, HYPRE_MEMORY_HOST);
+      for (i = 0; i < num_tags; i++)
+      {
+         weights[i] = hypre_squared(tnorms[i * num_tags + i]);
+      }
+
+      /* Compute global scaling weights */
+      g_weights = hypre_TAlloc(HYPRE_Real, num_tags, HYPRE_MEMORY_HOST);
+      hypre_MPI_Allreduce(weights, g_weights, num_tags, MPI_DOUBLE, MPI_SUM, comm);
+      for (i = 0; i < num_tags; i++)
+      {
+         g_weights[i] = pow(10.0, round(log10(hypre_sqrt(1.0 / g_weights[i]))));
+      }
+
+      /* Setup scaling vector */
+      for (i = 0; i < num_rows; i++)
+      {
+         hypre_ParVectorEntryI(*scaling_ptr, i) = hypre_sqrt(g_weights[tags[i]]);
+      }
+
+      /* Migrate scaling vector to destination memory location */
+      hypre_ParVectorMigrate(*scaling_ptr, memory_location);
+
+      /* Free memory */
+      hypre_TFree(tnorms, HYPRE_MEMORY_HOST);
+      hypre_TFree(weights, HYPRE_MEMORY_HOST);
+      hypre_TFree(g_weights, HYPRE_MEMORY_HOST);
+   }
+   else
+   {
+      *scaling_ptr = NULL;
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid scaling type");
+      return hypre_error_flag;
+   }
+
+   return hypre_error_flag;
+}

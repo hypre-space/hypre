@@ -213,6 +213,73 @@ HYPRE_ParVectorInnerProd( HYPRE_ParVector x,
 }
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParVectorPointwiseDivision( HYPRE_ParVector  x,
+                                  HYPRE_ParVector  y,
+                                  HYPRE_ParVector *z_ptr )
+{
+   if (!x)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (!y)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   return hypre_ParVectorPointwiseDivision( (hypre_ParVector *) x,
+                                            (hypre_ParVector *) y,
+                                            (hypre_ParVector **) z_ptr );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParVectorPointwiseProduct( HYPRE_ParVector  x,
+                                 HYPRE_ParVector  y,
+                                 HYPRE_ParVector *z_ptr )
+{
+   if (!x)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (!y)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   return hypre_ParVectorPointwiseProduct( (hypre_ParVector *) x,
+                                           (hypre_ParVector *) y,
+                                           (hypre_ParVector **) z_ptr );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParVectorPointwiseInverse( HYPRE_ParVector  x,
+                                 HYPRE_ParVector *y_ptr )
+{
+   if (!x)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   return hypre_ParVectorPointwiseInverse( (hypre_ParVector *) x,
+                                           (hypre_ParVector **) y_ptr );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_VectorToParVector
  *--------------------------------------------------------------------------*/
 

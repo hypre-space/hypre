@@ -408,3 +408,43 @@ HYPRE_ParCSRMatrixMatvecT( HYPRE_Complex      alpha,
                alpha, (hypre_ParCSRMatrix *) A,
                (hypre_ParVector *) x, beta, (hypre_ParVector *) y) );
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRMatrixDiagScale( HYPRE_ParCSRMatrix A,
+                             HYPRE_ParVector    left,
+                             HYPRE_ParVector    right )
+{
+   if (!A)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   return ( hypre_ParCSRMatrixDiagScale((hypre_ParCSRMatrix *) A,
+                                        (hypre_ParVector *) left,
+                                        (hypre_ParVector *) right) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRMatrixCompScalingTagged(HYPRE_ParCSRMatrix   A,
+                                    HYPRE_Int            type,
+                                    HYPRE_Int            num_tags,
+                                    HYPRE_Int           *tags,
+                                    HYPRE_ParVector     *scaling_ptr)
+{
+   if (!A)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   return ( hypre_ParCSRMatrixCompScalingTagged((hypre_ParCSRMatrix *) A,
+                                                type, num_tags, tags,
+                                                (hypre_ParVector **) scaling_ptr) );
+}

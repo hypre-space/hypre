@@ -2478,7 +2478,7 @@ hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix  *A,
                                 hypre_ParCSRMatrixGlobalNumRows(A_CF),
                                 hypre_ParCSRMatrixRowStarts(A_CF));
    hypre_ParVectorInitialize_v2(r_CF, hypre_ParCSRMatrixMemoryLocation(A_CF));
-   hypre_ParVectorElmdivpy(b_CF, b_FF, r_CF);
+   hypre_ParVectorPointwiseDivpy(b_CF, b_FF, r_CF);
    hypre_ParVectorScale(-1.0, r_CF);
    Wr = hypre_ParCSRMatrixCreateFromParVector(r_CF,
                                               hypre_ParCSRMatrixGlobalNumRows(A_CF),
