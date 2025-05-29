@@ -558,7 +558,8 @@ HYPRE_Int hypre_SeqVectorInitialize_v2( hypre_Vector *vector,
 HYPRE_Int hypre_SeqVectorInitialize ( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorSetDataOwner ( hypre_Vector *vector, HYPRE_Int owns_data );
 HYPRE_Int hypre_SeqVectorSetSize ( hypre_Vector *vector, HYPRE_Int size );
-HYPRE_Int hypre_SeqVectorResize ( hypre_Vector *vector, HYPRE_Int size_in, HYPRE_Int num_vectors_in );
+HYPRE_Int hypre_SeqVectorResize ( hypre_Vector *vector, HYPRE_Int size_in,
+                                  HYPRE_Int num_vectors_in );
 hypre_Vector *hypre_SeqVectorRead ( char *file_name );
 HYPRE_Int hypre_SeqVectorPrint ( hypre_Vector *vector, char *file_name );
 HYPRE_Int hypre_SeqVectorSetConstantValues ( hypre_Vector *v, HYPRE_Complex value );
@@ -606,7 +607,8 @@ HYPRE_Int hypre_SeqVectorPointwiseDivpy( hypre_Vector *x, hypre_Vector *b, hypre
 HYPRE_Int hypre_SeqVectorPointwiseDivpyMarked( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y,
                                                HYPRE_Int *marker, HYPRE_Int marker_val );
 HYPRE_Int hypre_SeqVectorPointwiseProduct( hypre_Vector *x, hypre_Vector *y, hypre_Vector **z_ptr );
-HYPRE_Int hypre_SeqVectorPointwiseDivision( hypre_Vector *x, hypre_Vector *y, hypre_Vector **z_ptr );
+HYPRE_Int hypre_SeqVectorPointwiseDivision( hypre_Vector *x, hypre_Vector *y,
+                                            hypre_Vector **z_ptr );
 HYPRE_Int hypre_SeqVectorPointwiseInverse( hypre_Vector *x, hypre_Vector **y_ptr );
 //HYPRE_Int hypre_SeqVectorMax( HYPRE_Complex alpha, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y );
 
@@ -674,8 +676,10 @@ HYPRE_Int hypre_SeqVectorAxpyzDevice ( HYPRE_Complex alpha, hypre_Vector *x,
                                        hypre_Vector *z );
 HYPRE_Int hypre_SeqVectorPointwiseDivpyDevice( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y,
                                                HYPRE_Int *marker, HYPRE_Int marker_val );
-HYPRE_Int hypre_SeqVectorPointwiseProductDevice( hypre_Vector *x, hypre_Vector *y, hypre_Vector *z );
-HYPRE_Int hypre_SeqVectorPointwiseDivisionDevice( hypre_Vector *x, hypre_Vector *y, hypre_Vector *z );
+HYPRE_Int hypre_SeqVectorPointwiseProductDevice( hypre_Vector *x, hypre_Vector *y,
+                                                 hypre_Vector *z );
+HYPRE_Int hypre_SeqVectorPointwiseDivisionDevice( hypre_Vector *x, hypre_Vector *y,
+                                                  hypre_Vector *z );
 HYPRE_Int hypre_SeqVectorPointwiseInverseDevice( hypre_Vector *x, hypre_Vector *y );
 HYPRE_Real hypre_SeqVectorInnerProdDevice ( hypre_Vector *x, hypre_Vector *y );
 HYPRE_Complex hypre_SeqVectorSumEltsDevice ( hypre_Vector *vector );

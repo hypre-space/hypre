@@ -1107,7 +1107,8 @@ HYPRE_Int hypre_SStructVectorPointwiseDivision ( hypre_SStructVector *x, hypre_S
                                                  hypre_SStructVector **z_ptr );
 HYPRE_Int hypre_SStructVectorPointwiseProduct ( hypre_SStructVector *x, hypre_SStructVector *y,
                                                 hypre_SStructVector **z_ptr );
-HYPRE_Int hypre_SStructVectorPointwiseInverse ( hypre_SStructVector *x, hypre_SStructVector **y_ptr );
+HYPRE_Int hypre_SStructVectorPointwiseInverse ( hypre_SStructVector *x,
+                                                hypre_SStructVector **y_ptr );
 
 #ifdef __cplusplus
 }

@@ -2282,9 +2282,9 @@ hypre_CSRMatrixTaggedFnormHost(hypre_CSRMatrix  *A,
 
 HYPRE_Int
 hypre_CSRMatrixTaggedFnorm(hypre_CSRMatrix *A,
-                          HYPRE_Int        num_tags,
-                          HYPRE_Int       *tags,
-                          HYPRE_Real      **tnorms_ptr)
+                           HYPRE_Int        num_tags,
+                           HYPRE_Int       *tags,
+                           HYPRE_Real      **tnorms_ptr)
 {
 #if defined(HYPRE_USING_GPU)
    HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A);

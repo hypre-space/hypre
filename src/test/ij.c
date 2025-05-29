@@ -65,7 +65,8 @@ HYPRE_Int BuildParFromOneFile (MPI_Comm comm, HYPRE_Int argc, char *argv [], HYP
                                HYPRE_Int num_functions, HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildFuncTagsFromFiles (HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                   HYPRE_ParCSRMatrix A, HYPRE_Int **dof_func_ptr );
-HYPRE_Int BuildFuncTagsFromOneFile (MPI_Comm comm, HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
+HYPRE_Int BuildFuncTagsFromOneFile (MPI_Comm comm, HYPRE_Int argc, char *argv [],
+                                    HYPRE_Int arg_index,
                                     HYPRE_ParCSRMatrix A, HYPRE_Int **dof_func_ptr );
 HYPRE_Int BuildFuncTagsInterleaved (HYPRE_Int local_size, HYPRE_Int num_functions,
                                     HYPRE_MemoryLocation memory_location,
@@ -77,7 +78,8 @@ HYPRE_Int BuildRhsParFromOneFile (MPI_Comm comm, HYPRE_Int argc, char *argv [], 
                                   HYPRE_ParCSRMatrix A, HYPRE_ParVector *b_ptr );
 HYPRE_Int BuildSolParFromOneFile (MPI_Comm comm, HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                   HYPRE_ParCSRMatrix A, HYPRE_ParVector *x_ptr );
-HYPRE_Int BuildBigArrayFromOneFile (MPI_Comm comm, HYPRE_Int argc, char *argv [], const char *array_name,
+HYPRE_Int BuildBigArrayFromOneFile (MPI_Comm comm, HYPRE_Int argc, char *argv [],
+                                    const char *array_name,
                                     HYPRE_Int arg_index, HYPRE_BigInt *partitioning, HYPRE_Int *size, HYPRE_BigInt **array_ptr);
 HYPRE_Int BuildParLaplacian9pt (MPI_Comm comm, HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                 HYPRE_ParCSRMatrix *A_ptr );
@@ -4074,7 +4076,8 @@ main( hypre_int argc,
    if (build_xstar_type == 0 || build_xstar_type == -2)
    {
       /* from file */
-      hypre_ParPrintf(comm, "  Reference solution vector read from file %s\n", argv[build_xstar_arg_index]);
+      hypre_ParPrintf(comm, "  Reference solution vector read from file %s\n",
+                      argv[build_xstar_arg_index]);
 
       if (ij_xstar)
       {

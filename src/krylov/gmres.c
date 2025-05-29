@@ -776,7 +776,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
                else if (xref != NULL && (print_level == 6 || print_level == 7 || print_level == 8))
                {
                   /* Compute error e = x_ref - x_i */
-                 (*(gmres_functions->CopyVector))(xref, r);
+                  (*(gmres_functions->CopyVector))(xref, r);
                   (*(gmres_functions->Axpy))(-1.0, w_3, r);
                }
 

@@ -492,12 +492,12 @@ hypre_SeqVectorPointwiseInverseDevice( hypre_Vector *x,
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_THRUST_CALL(transform,
                      x_data, x_data + size, y_data,
-                     [] __host__ __device__ (const HYPRE_Complex &val) { return 1.0 / val; });
+   [] __host__ __device__ (const HYPRE_Complex & val) { return 1.0 / val; });
 
 #elif defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL(std::transform,
                      x_data, x_data + size, y_data,
-                     [](const HYPRE_Complex &val) { return 1.0 / val; });
+   [](const HYPRE_Complex & val) { return 1.0 / val; });
 #endif
 
    hypre_SyncComputeStream();
