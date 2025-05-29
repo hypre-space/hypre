@@ -996,21 +996,21 @@ hypre_SeqVectorAxpyz( HYPRE_Complex alpha,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SeqVectorElmdivpyHost
+ * hypre_SeqVectorPointwiseDivpyHost
  *
  * if marker != NULL: only for marker[i] == marker_val
  *
  * TODO:
- *        1) Change to hypre_SeqVectorElmdivpyMarkedHost?
+ *        1) Change to hypre_SeqVectorPointwiseDivpyMarkedHost?
  *        2) Add vecstride/idxstride variables
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorElmdivpyHost( hypre_Vector *x,
-                             hypre_Vector *b,
-                             hypre_Vector *y,
-                             HYPRE_Int    *marker,
-                             HYPRE_Int     marker_val )
+hypre_SeqVectorPointwiseDivpyHost( hypre_Vector *x,
+                                   hypre_Vector *b,
+                                   hypre_Vector *y,
+                                   HYPRE_Int    *marker,
+                                   HYPRE_Int     marker_val )
 {
    HYPRE_Complex   *x_data        = hypre_VectorData(x);
    HYPRE_Complex   *b_data        = hypre_VectorData(b);
@@ -1131,17 +1131,17 @@ hypre_SeqVectorElmdivpyHost( hypre_Vector *x,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SeqVectorElmdivpyMarked
+ * hypre_SeqVectorPointwiseDivpyMarked
  *
  * Computes: y[i] = y[i] + x[i] / b[i] for marker[i] = marker_val
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
-                               hypre_Vector *b,
-                               hypre_Vector *y,
-                               HYPRE_Int    *marker,
-                               HYPRE_Int     marker_val)
+hypre_SeqVectorPointwiseDivpyMarked( hypre_Vector *x,
+                                     hypre_Vector *b,
+                                     hypre_Vector *y,
+                                     HYPRE_Int    *marker,
+                                     HYPRE_Int     marker_val)
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
@@ -1188,12 +1188,12 @@ hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
                                                       hypre_VectorMemoryLocation(b) );
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      hypre_SeqVectorElmdivpyDevice(x, b, y, marker, marker_val);
+      hypre_SeqVectorPointwiseDivpyDevice(x, b, y, marker, marker_val);
    }
    else
 #endif
    {
-      hypre_SeqVectorElmdivpyHost(x, b, y, marker, marker_val);
+      hypre_SeqVectorPointwiseDivpyHost(x, b, y, marker, marker_val);
    }
 
 #ifdef HYPRE_PROFILE
@@ -1204,7 +1204,7 @@ hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SeqVectorElmdivpy
+ * hypre_SeqVectorPointwiseDivpy
  *
  * Computes: y = y + x ./ b
  *
@@ -1214,11 +1214,11 @@ hypre_SeqVectorElmdivpyMarked( hypre_Vector *x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorElmdivpy( hypre_Vector *x,
-                         hypre_Vector *b,
-                         hypre_Vector *y )
+hypre_SeqVectorPointwiseDivpy( hypre_Vector *x,
+                               hypre_Vector *b,
+                               hypre_Vector *y )
 {
-   return hypre_SeqVectorElmdivpyMarked(x, b, y, NULL, -1);
+   return hypre_SeqVectorPointwiseDivpyMarked(x, b, y, NULL, -1);
 }
 
 /*--------------------------------------------------------------------------
@@ -1470,13 +1470,13 @@ hypre_SeqVectorSumElts( hypre_Vector *v )
 }
 
 /*--------------------------------------------------------------------------
- * See hypre_SeqVectorElmProduct
+ * See hypre_SeqVectorPointwiseProduct
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorElmProductHost( hypre_Vector *x,
-                               hypre_Vector *y,
-                               hypre_Vector *z )
+hypre_SeqVectorPointwiseProductHost( hypre_Vector *x,
+                                     hypre_Vector *y,
+                                     hypre_Vector *z )
 {
    HYPRE_Int      size   = hypre_VectorSize(x);
    HYPRE_Complex *x_data = hypre_VectorData(x);
@@ -1497,13 +1497,13 @@ hypre_SeqVectorElmProductHost( hypre_Vector *x,
 }
 
 /*--------------------------------------------------------------------------
- * See hypre_SeqVectorElmDivision
+ * See hypre_SeqVectorPointwiseDivision
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorElmDivisionHost( hypre_Vector *x,
-                                hypre_Vector *y,
-                                hypre_Vector *z )
+hypre_SeqVectorPointwiseDivisionHost( hypre_Vector *x,
+                                      hypre_Vector *y,
+                                      hypre_Vector *z )
 {
    HYPRE_Int      size   = hypre_VectorSize(x);
    HYPRE_Complex *x_data = hypre_VectorData(x);
@@ -1526,12 +1526,12 @@ hypre_SeqVectorElmDivisionHost( hypre_Vector *x,
 }
 
 /*--------------------------------------------------------------------------
- * See hypre_SeqVectorElmInverse
+ * See hypre_SeqVectorPointwiseInverse
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorElmInverseHost( hypre_Vector *x,
-                               hypre_Vector *y )
+hypre_SeqVectorPointwiseInverseHost( hypre_Vector *x,
+                                     hypre_Vector *y )
 {
    HYPRE_Int      size   = hypre_VectorSize(x);
    HYPRE_Complex *x_data = hypre_VectorData(x);
@@ -1555,9 +1555,9 @@ hypre_SeqVectorElmInverseHost( hypre_Vector *x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorElmProduct( hypre_Vector  *x,
-                           hypre_Vector  *y,
-                           hypre_Vector **z_ptr )
+hypre_SeqVectorPointwiseProduct( hypre_Vector  *x,
+                                 hypre_Vector  *y,
+                                 hypre_Vector **z_ptr )
 {
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y);
@@ -1595,12 +1595,12 @@ hypre_SeqVectorElmProduct( hypre_Vector  *x,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      return hypre_SeqVectorElmProductDevice(x, y, *z_ptr);
+      return hypre_SeqVectorPointwiseProductDevice(x, y, *z_ptr);
    }
    else
 #endif
    {
-      return hypre_SeqVectorElmProductHost(x, y, *z_ptr);
+      return hypre_SeqVectorPointwiseProductHost(x, y, *z_ptr);
    }
 }
 
@@ -1609,9 +1609,9 @@ hypre_SeqVectorElmProduct( hypre_Vector  *x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorElmDivision( hypre_Vector  *x,
-                            hypre_Vector  *y,
-                            hypre_Vector **z_ptr )
+hypre_SeqVectorPointwiseDivision( hypre_Vector  *x,
+                                  hypre_Vector  *y,
+                                  hypre_Vector **z_ptr )
 {
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y);
@@ -1649,12 +1649,12 @@ hypre_SeqVectorElmDivision( hypre_Vector  *x,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      return hypre_SeqVectorElmDivisionDevice(x, y, *z_ptr);
+      return hypre_SeqVectorPointwiseDivisionDevice(x, y, *z_ptr);
    }
    else
 #endif
    {
-      return hypre_SeqVectorElmDivisionHost(x, y, *z_ptr);
+      return hypre_SeqVectorPointwiseDivisionHost(x, y, *z_ptr);
    }
 }
 
@@ -1663,8 +1663,8 @@ hypre_SeqVectorElmDivision( hypre_Vector  *x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorElmInverse( hypre_Vector  *x,
-                           hypre_Vector **y_ptr )
+hypre_SeqVectorPointwiseInverse( hypre_Vector  *x,
+                                 hypre_Vector **y_ptr )
 {
    HYPRE_Complex *x_data = hypre_VectorData(x);
 
@@ -1691,11 +1691,11 @@ hypre_SeqVectorElmInverse( hypre_Vector  *x,
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_VectorMemoryLocation(x));
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      return hypre_SeqVectorElmInverseDevice(x, *y_ptr);
+      return hypre_SeqVectorPointwiseInverseDevice(x, *y_ptr);
    }
    else
 #endif
    {
-      return hypre_SeqVectorElmInverseHost(x, *y_ptr);
+      return hypre_SeqVectorPointwiseInverseHost(x, *y_ptr);
    }
 }

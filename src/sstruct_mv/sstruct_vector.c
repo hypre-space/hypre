@@ -884,9 +884,9 @@ hypre_SStructVectorMemoryLocation(hypre_SStructVector *vector)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructVectorElmDivision( hypre_SStructVector  *x,
-                                hypre_SStructVector  *y,
-                                hypre_SStructVector **z_ptr )
+hypre_SStructVectorPointwiseDivision( hypre_SStructVector  *x,
+                                      hypre_SStructVector  *y,
+                                      hypre_SStructVector **z_ptr )
 {
    HYPRE_UNUSED_VAR(x);
    HYPRE_UNUSED_VAR(y);
@@ -901,9 +901,9 @@ hypre_SStructVectorElmDivision( hypre_SStructVector  *x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructVectorElmProduct( hypre_SStructVector  *x,
-                               hypre_SStructVector  *y,
-                               hypre_SStructVector **z_ptr )
+hypre_SStructVectorPointwiseProduct( hypre_SStructVector  *x,
+                                     hypre_SStructVector  *y,
+                                     hypre_SStructVector **z_ptr )
 {
    HYPRE_UNUSED_VAR(x);
    HYPRE_UNUSED_VAR(y);
@@ -918,8 +918,8 @@ hypre_SStructVectorElmProduct( hypre_SStructVector  *x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructVectorElmInverse( hypre_SStructVector  *x,
-                               hypre_SStructVector **y_ptr )
+hypre_SStructVectorPointwiseInverse( hypre_SStructVector  *x,
+                                     hypre_SStructVector **y_ptr )
 {
    HYPRE_UNUSED_VAR(x);
    HYPRE_UNUSED_VAR(y_ptr);

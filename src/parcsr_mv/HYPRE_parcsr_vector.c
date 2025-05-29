@@ -216,9 +216,9 @@ HYPRE_ParVectorInnerProd( HYPRE_ParVector x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_ParVectorElmDivision( HYPRE_ParVector  x,
-                            HYPRE_ParVector  y,
-                            HYPRE_ParVector *z_ptr )
+HYPRE_ParVectorPointwiseDivision( HYPRE_ParVector  x,
+                                  HYPRE_ParVector  y,
+                                  HYPRE_ParVector *z_ptr )
 {
    if (!x)
    {
@@ -232,18 +232,18 @@ HYPRE_ParVectorElmDivision( HYPRE_ParVector  x,
       return hypre_error_flag;
    }
 
-   return hypre_ParVectorElmDivision( (hypre_ParVector *) x,
-                                      (hypre_ParVector *) y,
-                                      (hypre_ParVector **) z_ptr );
+   return hypre_ParVectorPointwiseDivision( (hypre_ParVector *) x,
+                                            (hypre_ParVector *) y,
+                                            (hypre_ParVector **) z_ptr );
 }
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_ParVectorElmProduct( HYPRE_ParVector  x,
-                           HYPRE_ParVector  y,
-                           HYPRE_ParVector *z_ptr )
+HYPRE_ParVectorPointwiseProduct( HYPRE_ParVector  x,
+                                 HYPRE_ParVector  y,
+                                 HYPRE_ParVector *z_ptr )
 {
    if (!x)
    {
@@ -257,17 +257,17 @@ HYPRE_ParVectorElmProduct( HYPRE_ParVector  x,
       return hypre_error_flag;
    }
 
-   return hypre_ParVectorElmProduct( (hypre_ParVector *) x,
-                                     (hypre_ParVector *) y,
-                                     (hypre_ParVector **) z_ptr );
+   return hypre_ParVectorPointwiseProduct( (hypre_ParVector *) x,
+                                           (hypre_ParVector *) y,
+                                           (hypre_ParVector **) z_ptr );
 }
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_ParVectorElmInverse( HYPRE_ParVector  x,
-                           HYPRE_ParVector *y_ptr )
+HYPRE_ParVectorPointwiseInverse( HYPRE_ParVector  x,
+                                 HYPRE_ParVector *y_ptr )
 {
    if (!x)
    {
@@ -275,8 +275,8 @@ HYPRE_ParVectorElmInverse( HYPRE_ParVector  x,
       return hypre_error_flag;
    }
 
-   return hypre_ParVectorElmInverse( (hypre_ParVector *) x,
-                                     (hypre_ParVector **) y_ptr );
+   return hypre_ParVectorPointwiseInverse( (hypre_ParVector *) x,
+                                           (hypre_ParVector **) y_ptr );
 }
 
 /*--------------------------------------------------------------------------

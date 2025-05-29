@@ -686,41 +686,41 @@ hypre_ParVectorInnerProdTagged( hypre_ParVector  *x,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParVectorElmdivpy
+ * hypre_ParVectorPointwiseDivpy
  *
  * y = y + x ./ b [MATLAB Notation]
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParVectorElmdivpy( hypre_ParVector *x,
-                         hypre_ParVector *b,
-                         hypre_ParVector *y )
+hypre_ParVectorPointwiseDivpy( hypre_ParVector *x,
+                               hypre_ParVector *b,
+                               hypre_ParVector *y )
 {
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
    hypre_Vector *b_local = hypre_ParVectorLocalVector(b);
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
 
-   return hypre_SeqVectorElmdivpy(x_local, b_local, y_local);
+   return hypre_SeqVectorPointwiseDivpy(x_local, b_local, y_local);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParVectorElmdivpyMarked
+ * hypre_ParVectorPointwiseDivpyMarked
  *
  * y[i] += x[i] / b[i] where marker[i] == marker_val
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParVectorElmdivpyMarked( hypre_ParVector *x,
-                               hypre_ParVector *b,
-                               hypre_ParVector *y,
-                               HYPRE_Int       *marker,
-                               HYPRE_Int        marker_val )
+hypre_ParVectorPointwiseDivpyMarked( hypre_ParVector *x,
+                                     hypre_ParVector *b,
+                                     hypre_ParVector *y,
+                                     HYPRE_Int       *marker,
+                                     HYPRE_Int        marker_val )
 {
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
    hypre_Vector *b_local = hypre_ParVectorLocalVector(b);
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
 
-   return hypre_SeqVectorElmdivpyMarked(x_local, b_local, y_local, marker, marker_val);
+   return hypre_SeqVectorPointwiseDivpyMarked(x_local, b_local, y_local, marker, marker_val);
 }
 
 /*--------------------------------------------------------------------------
@@ -728,9 +728,9 @@ hypre_ParVectorElmdivpyMarked( hypre_ParVector *x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParVectorElmDivision( hypre_ParVector  *x,
-                            hypre_ParVector  *y,
-                            hypre_ParVector **z_ptr )
+hypre_ParVectorPointwiseDivision( hypre_ParVector  *x,
+                                  hypre_ParVector  *y,
+                                  hypre_ParVector **z_ptr )
 {
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
@@ -753,7 +753,7 @@ hypre_ParVectorElmDivision( hypre_ParVector  *x,
    hypre_Vector *z_local = hypre_ParVectorLocalVector(*z_ptr);
 
    /* Compute local element-wise division */
-   return hypre_SeqVectorElmDivision(x_local, y_local, &z_local);
+   return hypre_SeqVectorPointwiseDivision(x_local, y_local, &z_local);
 }
 
 /*--------------------------------------------------------------------------
@@ -761,9 +761,9 @@ hypre_ParVectorElmDivision( hypre_ParVector  *x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParVectorElmProduct( hypre_ParVector  *x,
-                           hypre_ParVector  *y,
-                           hypre_ParVector **z_ptr )
+hypre_ParVectorPointwiseProduct( hypre_ParVector  *x,
+                                 hypre_ParVector  *y,
+                                 hypre_ParVector **z_ptr )
 {
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
@@ -786,7 +786,7 @@ hypre_ParVectorElmProduct( hypre_ParVector  *x,
    hypre_Vector *z_local = hypre_ParVectorLocalVector(*z_ptr);
 
    /* Compute local element-wise product */
-   return hypre_SeqVectorElmProduct(x_local, y_local, &z_local);
+   return hypre_SeqVectorPointwiseProduct(x_local, y_local, &z_local);
 }
 
 /*--------------------------------------------------------------------------
@@ -794,8 +794,8 @@ hypre_ParVectorElmProduct( hypre_ParVector  *x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParVectorElmInverse( hypre_ParVector   *x,
-                           hypre_ParVector  **y_ptr )
+hypre_ParVectorPointwiseInverse( hypre_ParVector   *x,
+                                 hypre_ParVector  **y_ptr )
 {
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
 
@@ -817,7 +817,7 @@ hypre_ParVectorElmInverse( hypre_ParVector   *x,
    hypre_Vector *y_local = hypre_ParVectorLocalVector(*y_ptr);
 
    /* Compute local element-wise inverse */
-   return hypre_SeqVectorElmInverse(x_local, &y_local);
+   return hypre_SeqVectorPointwiseInverse(x_local, &y_local);
 }
 
 /*--------------------------------------------------------------------------

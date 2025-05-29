@@ -179,15 +179,15 @@ hypre_SeqVectorAxpyzDevice( HYPRE_Complex  alpha,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SeqVectorElmdivpyDevice
+ * See hypre_SeqVectorPointwiseDivpy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorElmdivpyDevice( hypre_Vector *x,
-                               hypre_Vector *b,
-                               hypre_Vector *y,
-                               HYPRE_Int    *marker,
-                               HYPRE_Int     marker_val )
+hypre_SeqVectorPointwiseDivpyDevice( hypre_Vector *x,
+                                     hypre_Vector *b,
+                                     hypre_Vector *y,
+                                     HYPRE_Int    *marker,
+                                     HYPRE_Int     marker_val )
 {
 #if defined(HYPRE_USING_GPU)
    HYPRE_Complex  *x_data        = hypre_VectorData(x);
@@ -198,7 +198,7 @@ hypre_SeqVectorElmdivpyDevice( hypre_Vector *x,
    HYPRE_Int       num_vectors_b = hypre_VectorNumVectors(b);
    HYPRE_Int       size          = hypre_VectorSize(b);
 
-   hypre_GpuProfilingPushRange("SeqVectorElmdivpyDevice");
+   hypre_GpuProfilingPushRange("SeqVectorPtwiseDivpy");
    if (num_vectors_b == 1)
    {
       if (num_vectors_x == 1)
@@ -244,7 +244,7 @@ hypre_SeqVectorElmdivpyDevice( hypre_Vector *x,
    hypre_SyncComputeStream();
    hypre_GpuProfilingPopRange();
 
-#elif defined(HYPRE_USING_OPENMP)
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented for device OpenMP!\n");
 #endif
 
@@ -401,13 +401,13 @@ hypre_SeqVectorPrefetch( hypre_Vector        *x,
 }
 
 /*--------------------------------------------------------------------------
- * See hypre_SeqVectorElmProduct
+ * See hypre_SeqVectorPointwiseProductDevice
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorElmProductDevice( hypre_Vector *x,
-                                 hypre_Vector *y,
-                                 hypre_Vector *z )
+hypre_SeqVectorPointwiseProductDevice( hypre_Vector *x,
+                                       hypre_Vector *y,
+                                       hypre_Vector *z )
 {
    HYPRE_Complex *x_data      = hypre_VectorData(x);
    HYPRE_Complex *y_data      = hypre_VectorData(y);
@@ -415,7 +415,7 @@ hypre_SeqVectorElmProductDevice( hypre_Vector *x,
    HYPRE_Int      size        = hypre_VectorSize(x);
 
 #if defined(HYPRE_USING_GPU)
-   hypre_GpuProfilingPushRange("SeqVectorElmProduct");
+   hypre_GpuProfilingPushRange("SeqVectorPointwiseProduct");
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_THRUST_CALL(transform,
@@ -438,13 +438,13 @@ hypre_SeqVectorElmProductDevice( hypre_Vector *x,
 }
 
 /*--------------------------------------------------------------------------
- * See hypre_SeqVectorElmDivision
- *--------------------------------------------------------------------------*/   
+ * See SeqVectorPointwiseDivision
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorElmDivisionDevice( hypre_Vector *x,
-                                  hypre_Vector *y,
-                                  hypre_Vector *z )
+hypre_SeqVectorPointwiseDivisionDevice( hypre_Vector *x,
+                                        hypre_Vector *y,
+                                        hypre_Vector *z )
 {
    HYPRE_Complex *x_data      = hypre_VectorData(x);
    HYPRE_Complex *y_data      = hypre_VectorData(y);
@@ -452,7 +452,7 @@ hypre_SeqVectorElmDivisionDevice( hypre_Vector *x,
    HYPRE_Int      size        = hypre_VectorSize(x);
 
 #if defined(HYPRE_USING_GPU)
-   hypre_GpuProfilingPushRange("SeqVectorElmDivision");
+   hypre_GpuProfilingPushRange("SeqVectorPointwiseDivision");
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_THRUST_CALL(transform,
@@ -475,19 +475,19 @@ hypre_SeqVectorElmDivisionDevice( hypre_Vector *x,
 }
 
 /*--------------------------------------------------------------------------
- * See hypre_SeqVectorElmInverse
- *--------------------------------------------------------------------------*/   
+ * See hypre_SeqVectorPointwiseInverse
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorElmInverseDevice( hypre_Vector *x,
-                                 hypre_Vector *y )
+hypre_SeqVectorPointwiseInverseDevice( hypre_Vector *x,
+                                       hypre_Vector *y )
 {
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(x);
 
 #if defined(HYPRE_USING_GPU)
-   hypre_GpuProfilingPushRange("SeqVectorElmInverse");
+   hypre_GpuProfilingPushRange("SeqVectorPointwiseInverse");
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_THRUST_CALL(transform,

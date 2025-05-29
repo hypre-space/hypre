@@ -1325,9 +1325,9 @@ hypre_StructVectorClone(hypre_StructVector *x)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructVectorElmdivpy( hypre_StructVector *x,
-                            hypre_StructVector *b,
-                            hypre_StructVector *y )
+hypre_StructVectorPointwiseDivpy( hypre_StructVector *x,
+                                  hypre_StructVector *b,
+                                  hypre_StructVector *y )
 {
    HYPRE_UNUSED_VAR(x);
    HYPRE_UNUSED_VAR(b);
@@ -1342,9 +1342,9 @@ hypre_StructVectorElmdivpy( hypre_StructVector *x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructVectorElmDivision( hypre_StructVector  *x,
-                               hypre_StructVector  *y,
-                               hypre_StructVector **z_ptr )
+hypre_StructVectorPointwiseDivision( hypre_StructVector  *x,
+                                     hypre_StructVector  *y,
+                                     hypre_StructVector **z_ptr )
 {
    HYPRE_UNUSED_VAR(x);
    HYPRE_UNUSED_VAR(y);
@@ -1359,9 +1359,9 @@ hypre_StructVectorElmDivision( hypre_StructVector  *x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructVectorElmProduct( hypre_StructVector  *x,
-                              hypre_StructVector  *y,
-                              hypre_StructVector **z_ptr )
+hypre_StructVectorPointwiseProduct( hypre_StructVector  *x,
+                                    hypre_StructVector  *y,
+                                    hypre_StructVector **z_ptr )
 {
    HYPRE_UNUSED_VAR(x);
    HYPRE_UNUSED_VAR(y);
@@ -1376,8 +1376,8 @@ hypre_StructVectorElmProduct( hypre_StructVector  *x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructVectorElmInverse( hypre_StructVector  *x,
-                              hypre_StructVector **y_ptr )
+hypre_StructVectorPointwiseInverse( hypre_StructVector  *x,
+                                    hypre_StructVector **y_ptr )
 {
    HYPRE_UNUSED_VAR(x);
    HYPRE_UNUSED_VAR(y_ptr);

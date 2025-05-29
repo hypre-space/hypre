@@ -318,12 +318,12 @@ HYPRE_Int hypre_SeqVectorMassAxpy8(HYPRE_Complex *alpha, hypre_Vector **x, hypre
 HYPRE_Int hypre_SeqVectorInnerProdTagged( hypre_Vector *x, hypre_Vector *y, HYPRE_Complex *iprod );
 HYPRE_Complex hypre_SeqVectorSumElts ( hypre_Vector *vector );
 HYPRE_Complex hypre_SeqVectorSumEltsHost ( hypre_Vector *vector );
-HYPRE_Int hypre_SeqVectorElmdivpy( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y );
-HYPRE_Int hypre_SeqVectorElmdivpyMarked( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y,
-                                         HYPRE_Int *marker, HYPRE_Int marker_val );
-HYPRE_Int hypre_SeqVectorElmProduct( hypre_Vector *x, hypre_Vector *y, hypre_Vector **z_ptr );
-HYPRE_Int hypre_SeqVectorElmDivision( hypre_Vector *x, hypre_Vector *y, hypre_Vector **z_ptr );
-HYPRE_Int hypre_SeqVectorElmInverse( hypre_Vector *x, hypre_Vector **y_ptr );
+HYPRE_Int hypre_SeqVectorPointwiseDivpy( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y );
+HYPRE_Int hypre_SeqVectorPointwiseDivpyMarked( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y,
+                                               HYPRE_Int *marker, HYPRE_Int marker_val );
+HYPRE_Int hypre_SeqVectorPointwiseProduct( hypre_Vector *x, hypre_Vector *y, hypre_Vector **z_ptr );
+HYPRE_Int hypre_SeqVectorPointwiseDivision( hypre_Vector *x, hypre_Vector *y, hypre_Vector **z_ptr );
+HYPRE_Int hypre_SeqVectorPointwiseInverse( hypre_Vector *x, hypre_Vector **y_ptr );
 //HYPRE_Int hypre_SeqVectorMax( HYPRE_Complex alpha, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y );
 
 /* csr_spadd_device.c */
@@ -388,11 +388,11 @@ HYPRE_Int hypre_SeqVectorAxpyDevice ( HYPRE_Complex alpha, hypre_Vector *x, hypr
 HYPRE_Int hypre_SeqVectorAxpyzDevice ( HYPRE_Complex alpha, hypre_Vector *x,
                                        HYPRE_Complex beta, hypre_Vector *y,
                                        hypre_Vector *z );
-HYPRE_Int hypre_SeqVectorElmdivpyDevice( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y,
-                                         HYPRE_Int *marker, HYPRE_Int marker_val );
-HYPRE_Int hypre_SeqVectorElmProductDevice( hypre_Vector *x, hypre_Vector *y, hypre_Vector *z );
-HYPRE_Int hypre_SeqVectorElmDivisionDevice( hypre_Vector *x, hypre_Vector *y, hypre_Vector *z );
-HYPRE_Int hypre_SeqVectorElmInverseDevice( hypre_Vector *x, hypre_Vector *y );
+HYPRE_Int hypre_SeqVectorPointwiseDivpyDevice( hypre_Vector *x, hypre_Vector *b, hypre_Vector *y,
+                                               HYPRE_Int *marker, HYPRE_Int marker_val );
+HYPRE_Int hypre_SeqVectorPointwiseProductDevice( hypre_Vector *x, hypre_Vector *y, hypre_Vector *z );
+HYPRE_Int hypre_SeqVectorPointwiseDivisionDevice( hypre_Vector *x, hypre_Vector *y, hypre_Vector *z );
+HYPRE_Int hypre_SeqVectorPointwiseInverseDevice( hypre_Vector *x, hypre_Vector *y );
 HYPRE_Real hypre_SeqVectorInnerProdDevice ( hypre_Vector *x, hypre_Vector *y );
 HYPRE_Complex hypre_SeqVectorSumEltsDevice ( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorStridedCopyDevice( hypre_Vector *vector,

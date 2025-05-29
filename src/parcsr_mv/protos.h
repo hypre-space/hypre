@@ -92,9 +92,9 @@ HYPRE_ParVector HYPRE_ParVectorCloneShallow ( HYPRE_ParVector x );
 HYPRE_Int HYPRE_ParVectorScale ( HYPRE_Complex value, HYPRE_ParVector x );
 HYPRE_Int HYPRE_ParVectorAxpy ( HYPRE_Complex alpha, HYPRE_ParVector x, HYPRE_ParVector y );
 HYPRE_Int HYPRE_ParVectorInnerProd ( HYPRE_ParVector x, HYPRE_ParVector y, HYPRE_Real *prod );
-HYPRE_Int HYPRE_ParVectorElmDivision ( HYPRE_ParVector x, HYPRE_ParVector y, HYPRE_ParVector *z_ptr );
-HYPRE_Int HYPRE_ParVectorElmProduct ( HYPRE_ParVector x, HYPRE_ParVector y, HYPRE_ParVector *z_ptr );
-HYPRE_Int HYPRE_ParVectorElmInverse ( HYPRE_ParVector x, HYPRE_ParVector *y_ptr );
+HYPRE_Int HYPRE_ParVectorPointwiseDivision ( HYPRE_ParVector x, HYPRE_ParVector y, HYPRE_ParVector *z_ptr );
+HYPRE_Int HYPRE_ParVectorPointwiseProduct ( HYPRE_ParVector x, HYPRE_ParVector y, HYPRE_ParVector *z_ptr );
+HYPRE_Int HYPRE_ParVectorPointwiseInverse ( HYPRE_ParVector x, HYPRE_ParVector *y_ptr );
 HYPRE_Int HYPRE_VectorToParVector ( MPI_Comm comm, HYPRE_Vector b, HYPRE_BigInt *partitioning,
                                     HYPRE_ParVector *vector );
 HYPRE_Int HYPRE_ParVectorGetValues ( HYPRE_ParVector vector, HYPRE_Int num_values,
@@ -666,13 +666,13 @@ HYPRE_Int hypre_ParVectorGetValues2( hypre_ParVector *vector, HYPRE_Int num_valu
                                      HYPRE_BigInt *indices, HYPRE_BigInt base, HYPRE_Complex *values );
 HYPRE_Int hypre_ParVectorGetValuesHost(hypre_ParVector *vector, HYPRE_Int num_values,
                                        HYPRE_BigInt *indices, HYPRE_BigInt base, HYPRE_Complex *values);
-HYPRE_Int hypre_ParVectorElmdivpy( hypre_ParVector *x, hypre_ParVector *b, hypre_ParVector *y );
-HYPRE_Int hypre_ParVectorElmdivpyMarked( hypre_ParVector *x, hypre_ParVector *b,
-                                         hypre_ParVector *y, HYPRE_Int *marker,
-                                         HYPRE_Int marker_val );
-HYPRE_Int hypre_ParVectorElmDivision( hypre_ParVector *x, hypre_ParVector *y, hypre_ParVector **z_ptr );
-HYPRE_Int hypre_ParVectorElmProduct( hypre_ParVector *x, hypre_ParVector *y, hypre_ParVector **z_ptr );
-HYPRE_Int hypre_ParVectorElmInverse( hypre_ParVector *x, hypre_ParVector **y_ptr );
+HYPRE_Int hypre_ParVectorPointwiseDivpy( hypre_ParVector *x, hypre_ParVector *b, hypre_ParVector *y );
+HYPRE_Int hypre_ParVectorPointwiseDivpyMarked( hypre_ParVector *x, hypre_ParVector *b,
+                                               hypre_ParVector *y, HYPRE_Int *marker,
+                                               HYPRE_Int marker_val );
+HYPRE_Int hypre_ParVectorPointwiseDivision( hypre_ParVector *x, hypre_ParVector *y, hypre_ParVector **z_ptr );
+HYPRE_Int hypre_ParVectorPointwiseProduct( hypre_ParVector *x, hypre_ParVector *y, hypre_ParVector **z_ptr );
+HYPRE_Int hypre_ParVectorPointwiseInverse( hypre_ParVector *x, hypre_ParVector **y_ptr );
 
 /* par_vector_device.c */
 HYPRE_Int hypre_ParVectorGetValuesDevice(hypre_ParVector *vector, HYPRE_Int num_values,
