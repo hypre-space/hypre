@@ -166,69 +166,6 @@ hypre_RefineBox( hypre_Box      *box,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CoarsenBoxNeg
- *
- * This functions snaps in place the box extents of 'box' in the negative
- * direction to the nearest point in the index space given by (origin, stride).
- * Then, it coarsens 'box' to such index space. Lastly, it intersects the
- * resulting box with a reference box living in the strided index space and
- * checks if the volume of the intersected region is positive. If it isn't,
- * the output box is set to have zero volume.
- *
- * 2D Example:
- *
- *       *-------*-------*-------*-------*             *-------*-------*
- *       |       |       |       |       |             |       |       |
- *       |   *   |   *   |   *   |   X   |             |   *   |   +   |
- *       |       |       |       |       |             |       |       |
- *       *-------*-------*-------*-------*     -->     *-------*-------*
- *       |       |       |       |       |             |       |       |
- *       | (0,0) |   *   |   *   |   X   |             | (0,0) |   +   |
- *       |       |       |       |       |             |       |       |
- *       *-------*-------*-------*-------*             *-------*-------*
- *
- *    input box: (3,0) x (3,1) (denoted by X)
- *    refbox: (0,0) x (1,1)
- *    origin: (0,0)
- *    stride: (2,1)
- *    output box: (1,0) x (1,1) (denoted by +)
- *
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_CoarsenBoxNeg( hypre_Box      *box,
-                     hypre_Box      *refbox,
-                     hypre_IndexRef  origin,
-                     hypre_Index     stride )
-{
-   HYPRE_Int   ndim = hypre_BoxNDim(box);
-   hypre_Box  *int_box;
-
-   /* Snap indices in negative direction */
-   hypre_SnapIndexNeg(hypre_BoxIMin(box), origin, stride, ndim);
-   hypre_SnapIndexNeg(hypre_BoxIMax(box), origin, stride, ndim);
-
-   /* Map to coarse index space */
-   hypre_MapToCoarseIndex(hypre_BoxIMin(box), origin, stride, ndim);
-   hypre_MapToCoarseIndex(hypre_BoxIMax(box), origin, stride, ndim);
-
-   /* Find box intersection */
-   int_box = hypre_BoxCreate(ndim);
-   hypre_IntersectBoxes(box, refbox, int_box);
-
-   /* If the intersection has zero volume, then box will have zero volume also */
-   if (!hypre_BoxVolume(int_box))
-   {
-      hypre_BoxIMinD(box, 0) = 1;
-      hypre_BoxIMaxD(box, 0) = 0;
-   }
-
-   hypre_BoxDestroy(int_box);
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
  * The dimensions of the modified box array are not changed.
  * It is possible to have boxes with volume 0.
  * If 'origin' is NULL, a zero origin is used.
@@ -311,8 +248,14 @@ hypre_RefineBoxArrayArray( hypre_BoxArrayArray  *box_array_array,
 }
 
 /*--------------------------------------------------------------------------
- * The dimensions of the new BoxArrayArray can be changed.
- * hypre_CoarsenBoxNeg is used to coarsen the boxes.
+ * RDF: This routine is currently only used to coarsen the part boundary boxes
+ * in the SStruct code.  Consider renaming and moving it in the future.
+ *
+ * Each box is: grown by stride-1, coarsened, and intersected with a refbox.
+ * This has the effect of coarsening each box "outward" while ensuring that it
+ * is contained within a refbox.
+ *
+ * The dimensions of the new BoxArrayArray may change.
  * It is not possible to have boxes with volume 0.
  * If 'origin' is NULL, a zero origin is used.
  *
@@ -320,11 +263,11 @@ hypre_RefineBoxArrayArray( hypre_BoxArrayArray  *box_array_array,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CoarsenBoxArrayArrayNeg( hypre_BoxArrayArray   *boxaa,
-                               hypre_BoxArray        *refboxa,
-                               hypre_IndexRef         origin,
-                               hypre_Index            stride,
-                               hypre_BoxArrayArray  **new_boxaa_ptr )
+hypre_CoarsenBoxArrayArrayOutward( hypre_BoxArrayArray   *boxaa,
+                                   hypre_BoxArray        *refboxa,
+                                   hypre_IndexRef         origin,
+                                   hypre_Index            stride,
+                                   hypre_BoxArrayArray  **new_boxaa_ptr )
 {
    HYPRE_Int              ndim         = hypre_BoxArrayArrayNDim(boxaa);
    HYPRE_Int              num_refboxes = hypre_BoxArraySize(refboxa);
