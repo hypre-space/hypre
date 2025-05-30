@@ -64,6 +64,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
     *-----------------------------------------------------*/
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("PFMGSolve");
 
    hypre_BeginTiming(pfmg_data -> time_index);
 
@@ -89,6 +90,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
       hypre_EndTiming(pfmg_data -> time_index);
 
+      hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_FUNC_END;
 
       return hypre_error_flag;
@@ -112,6 +114,8 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          }
 
          hypre_EndTiming(pfmg_data -> time_index);
+
+         hypre_GpuProfilingPopRange();
          return hypre_error_flag;
       }
    }
@@ -377,6 +381,8 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
    hypre_EndTiming(pfmg_data -> time_index);
    hypre_PFMGPrintLogging((void *) pfmg_data);
+
+   hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
