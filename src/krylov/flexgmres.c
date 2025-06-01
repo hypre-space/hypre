@@ -13,6 +13,7 @@
 
 #include "krylov.h"
 #include "_hypre_utilities.h"
+#include "krylov_utils.h"
 
 /*--------------------------------------------------------------------------
  * hypre_FlexGMRESFunctionsCreate
@@ -122,7 +123,7 @@ hypre_FlexGMRESDestroy( void *fgmres_vdata )
    if (fgmres_data)
    {
       hypre_FlexGMRESFunctions *fgmres_functions = fgmres_data->functions;
-      if ( (fgmres_data->logging > 0) || (fgmres_data->print_level) > 0 )
+      if ( (fgmres_data -> logging > 0) || (fgmres_data->print_level) > 0 )
       {
          if ( (fgmres_data -> norms) != NULL )
          {
@@ -388,11 +389,9 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
          found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
       if (logging > 0 || print_level > 0)
       {
-         hypre_printf("\n\nERROR detected by Hypre ... BEGIN\n");
-         hypre_printf("ERROR -- hypre_FlexGMRESSolve: INFs and/or NaNs detected in input.\n");
-         hypre_printf("User probably placed non-numerics in supplied b.\n");
-         hypre_printf("Returning error flag += 101.  Program not terminated.\n");
-         hypre_printf("ERROR detected by Hypre ... END\n\n\n");
+         hypre_KrylovPrintErrorNaN("FlexGMRES", "ERROR -- hypre_FlexGMRESSolve: INFs and/or NaNs detected in input.\n");
+         hypre_KrylovPrintErrorNaN("FlexGMRES", "User probably placed non-numerics in supplied b.\n");
+         hypre_KrylovPrintErrorNaN("FlexGMRES", "Returning error flag += 101.  Program not terminated.\n");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
       HYPRE_ANNOTATE_FUNC_END;
@@ -415,11 +414,7 @@ hypre_FlexGMRESSolve(void  *fgmres_vdata,
          found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
       if (logging > 0 || print_level > 0)
       {
-         hypre_printf("\n\nERROR detected by Hypre ... BEGIN\n");
-         hypre_printf("ERROR -- hypre_FlexGMRESSolve: INFs and/or NaNs detected in input.\n");
-         hypre_printf("User probably placed non-numerics in supplied A or x_0.\n");
-         hypre_printf("Returning error flag += 101.  Program not terminated.\n");
-         hypre_printf("ERROR detected by Hypre ... END\n\n\n");
+         hypre_KrylovPrintErrorNaN("FlexGMRES", "A or x_0");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
       HYPRE_ANNOTATE_FUNC_END;

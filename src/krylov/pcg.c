@@ -22,6 +22,7 @@
 
 #include "krylov.h"
 #include "_hypre_utilities.h"
+#include "krylov_utils.h"
 
 /*--------------------------------------------------------------------------
  * hypre_PCGFunctionsCreate
@@ -432,11 +433,7 @@ hypre_PCGSolve( void *pcg_vdata,
          found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
       if (print_level > 0 || logging > 0)
       {
-         hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
-         hypre_printf("ERROR -- hypre_PCGSolve: INFs and/or NaNs detected in input.\n");
-         hypre_printf("User probably placed non-numerics in supplied b.\n");
-         hypre_printf("Returning error flag += 101.  Program not terminated.\n");
-         hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
+         hypre_KrylovPrintErrorNaN("PCG", "b");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
       HYPRE_ANNOTATE_FUNC_END;
@@ -510,11 +507,7 @@ hypre_PCGSolve( void *pcg_vdata,
          found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
       if (print_level > 0 || logging > 0)
       {
-         hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
-         hypre_printf("ERROR -- hypre_PCGSolve: INFs and/or NaNs detected in input.\n");
-         hypre_printf("User probably placed non-numerics in supplied A or x_0.\n");
-         hypre_printf("Returning error flag += 101.  Program not terminated.\n");
-         hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
+         hypre_KrylovPrintErrorNaN("PCG", "A or x_0");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
       HYPRE_ANNOTATE_FUNC_END;

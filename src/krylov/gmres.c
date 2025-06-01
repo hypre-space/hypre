@@ -13,6 +13,7 @@
 
 #include "krylov.h"
 #include "_hypre_utilities.h"
+#include "krylov_utils.h"
 
 /*--------------------------------------------------------------------------
  * hypre_GMRESFunctionsCreate
@@ -399,19 +400,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    }
    if (ieee_check != ieee_check)
    {
-      /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
-         for ieee_check self-equality works on all IEEE-compliant compilers/
-         machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
-         by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
-         found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
-      if (logging > 0 || print_level > 0)
-      {
-         hypre_printf("\n\nERROR detected by Hypre ... BEGIN\n");
-         hypre_printf("ERROR -- hypre_GMRESSolve: INFs and/or NaNs detected in input.\n");
-         hypre_printf("User probably placed non-numerics in supplied b.\n");
-         hypre_printf("Returning error flag += 101.  Program not terminated.\n");
-         hypre_printf("ERROR detected by Hypre ... END\n\n\n");
-      }
+      hypre_KrylovPrintErrorNaN("GMRES", "b");
       hypre_error(HYPRE_ERROR_GENERIC);
       HYPRE_ANNOTATE_FUNC_END;
 
@@ -430,19 +419,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    }
    if (ieee_check != ieee_check)
    {
-      /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
-         for ieee_check self-equality works on all IEEE-compliant compilers/
-         machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
-         by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
-         found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
-      if (logging > 0 || print_level > 0)
-      {
-         hypre_printf("\n\nERROR detected by Hypre ... BEGIN\n");
-         hypre_printf("ERROR -- hypre_GMRESSolve: INFs and/or NaNs detected in input.\n");
-         hypre_printf("User probably placed non-numerics in supplied A or x_0.\n");
-         hypre_printf("Returning error flag += 101.  Program not terminated.\n");
-         hypre_printf("ERROR detected by Hypre ... END\n\n\n");
-      }
+      hypre_KrylovPrintErrorNaN("GMRES", "A or x_0");
       hypre_error(HYPRE_ERROR_GENERIC);
       HYPRE_ANNOTATE_FUNC_END;
 
@@ -512,97 +489,11 @@ hypre_GMRESSolve(void  *gmres_vdata,
             tol only is checked  */
 
    epsilon = hypre_max(a_tol, r_tol * den_norm);
-
    /* so now our stop criteria is |r_i| <= epsilon */
 
-   /* Print header for tag-wise residuals if this is the first iteration */
-   if (print_level > 1 && my_id == 0)
+   if (!my_id)
    {
-      hypre_printf("=============================================\n\n");
-      if (num_tags <= 1 || print_level == 2 || print_level > 9 || (!xref && print_level > 5))
-      {
-         if (b_norm > 0.0)
-         {
-            hypre_printf("Iters      resid.norm     conv.rate   rel.res.norm\n");
-            hypre_printf("-----    ------------    ----------   ------------\n");
-         }
-         else
-         {
-            hypre_printf("Iters      resid.norm     conv.rate\n");
-            hypre_printf("-----    ------------    ----------\n");
-         }
-      }
-      else if (xref && (num_tags <= 1 || print_level == 6))
-      {
-         if (e_norm > 0.0)
-         {
-            hypre_printf("Iters      error.norm     conv.rate   rel.err.norm\n");
-            hypre_printf("-----    ------------    ----------   ------------\n");
-         }
-         else
-         {
-            hypre_printf("Iters      error.norm     conv.rate\n");
-            hypre_printf("-----    ------------    ----------\n");
-         }
-      }
-      else if (num_tags > 1)
-      {
-         hypre_printf("  Iters ");
-         if (print_level == 3)
-         {
-            hypre_printf("            |r|_2");
-            for (tag = 0; tag < num_tags; tag++)
-            {
-               hypre_printf("           |r%d|_2", tag);
-            }
-         }
-         else if (print_level == 4)
-         {
-            hypre_printf("      |r|_2/|b|_2");
-            for (tag = 0; tag < num_tags; tag++)
-            {
-               hypre_printf("    |r%d|_2/|b%d|_2", tag, tag);
-            }
-         }
-         else if (print_level == 5)
-         {
-            hypre_printf("      |r|_2/|b|_2");
-            for (tag = 0; tag < num_tags; tag++)
-            {
-               hypre_printf("     |r%d|_2/|b|_2", tag);
-            }
-         }
-         else if (print_level == 7)
-         {
-            hypre_printf("            |e|_2");
-            for (tag = 0; tag < num_tags; tag++)
-            {
-               hypre_printf("           |e%d|_2", tag);
-            }
-         }
-         else if (print_level == 8)
-         {
-            hypre_printf("     |e|_2/|eI|_2");
-            for (tag = 0; tag < num_tags; tag++)
-            {
-               hypre_printf("   |e%d|_2/|eI%d|_2", tag, tag);
-            }
-         }
-         else if (print_level == 9)
-         {
-            hypre_printf("     |e|_2/|eI|_2");
-            for (tag = 0; tag < num_tags; tag++)
-            {
-               hypre_printf("    |e%d|_2/|eI|_2", tag);
-            }
-         }
-         hypre_printf("\n ------  ");
-         for (tag = 0; tag < num_tags + 1; tag++)
-         {
-            hypre_printf("   ------------- ");
-         }
-         hypre_printf("\n");
-      }
+      hypre_KrylovPrintHeader(print_level, num_tags, b_norm, e_norm, xref, "GMRES");
    }
 
    /* once the rel. change check has passed, we do not want to check it again */
@@ -716,17 +607,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
             {
                if (!my_id)
                {
-                  if (b_norm > 0.0)
-                  {
-                     hypre_printf("%5d    %e      %f   %e\n", iter,
-                                  norms[iter], norms[iter] / norms[iter - 1],
-                                  norms[iter] / b_norm);
-                  }
-                  else
-                  {
-                     hypre_printf("%5d    %e      %f\n", iter, norms[iter],
-                                  norms[iter] / norms[iter - 1]);
-                  }
+                  hypre_KrylovPrintIterSimple(iter, norms, b_norm, print_level);
                }
             }
             else if (num_tags > 1 && print_level > 2)
@@ -784,40 +665,9 @@ hypre_GMRESSolve(void  *gmres_vdata,
                (*(gmres_functions->InnerProd))(r, r, &num_tags, &iprod);
 
                /* Print tag-specific residual/error norms */
-               if (!my_id && print_level != 6)
+               if (!my_id)
                {
-                  hypre_printf(" %6d  ", iter);
-                  for (tag = 0; tag < num_tags + 1; tag++)
-                  {
-                     hypre_printf("  %14.6e ",
-                                  print_level == 3 || print_level == 7 ?
-                                  hypre_sqrt(iprod[tag]) :
-                                  print_level == 4 ?
-                                  hypre_sqrt(iprod[tag]) / hypre_sqrt(biprod[tag]) :
-                                  print_level == 5 ?
-                                  hypre_sqrt(iprod[tag]) / hypre_sqrt(biprod[0]) :
-                                  print_level == 8 ?
-                                  hypre_sqrt(iprod[tag]) / hypre_sqrt(xiprod[tag]) :
-                                  print_level == 9 ?
-                                  hypre_sqrt(iprod[tag]) / hypre_sqrt(xiprod[0]) :
-                                  hypre_sqrt(iprod[tag]));
-                  }
-                  hypre_printf("\n");
-               }
-               else if (!my_id && print_level == 6)
-               {
-                  norms[iter] = hypre_sqrt(iprod[0]);
-                  if (e_norm > 0.0)
-                  {
-                     hypre_printf("%5d    %e      %f   %e\n", iter,
-                                  norms[iter], norms[iter] / norms[iter - 1],
-                                  norms[iter] / e_norm);
-                  }
-                  else
-                  {
-                     hypre_printf("%5d    %e    %f\n", iter, norms[iter],
-                                  norms[iter] / norms[iter - 1]);
-                  }
+                  hypre_KrylovPrintIterTags(iter, num_tags, iprod, biprod, xiprod, print_level);
                }
             }
          }
@@ -1062,10 +912,10 @@ hypre_GMRESSolve(void  *gmres_vdata,
                break;
             }
 
-            /* report discrepancy between real/GMRES residuals and restart */
+            /* Report discrepancy between real/GMRES residuals and restart */
             if (!my_id && print_level > 0)
             {
-               hypre_printf("false convergence 2, L2 norm of residual: %e\n", r_norm);
+               hypre_printf("False convergence 2, L2 norm of residual: %e\n", r_norm);
             }
             (*(gmres_functions->CopyVector))(r, p[0]);
             i = 0;
@@ -1093,47 +943,16 @@ hypre_GMRESSolve(void  *gmres_vdata,
       }
    } /* END of iteration while loop */
 
-   if (!my_id && print_level > 1)
+   if (!my_id)
    {
-      hypre_printf("\n\n");
-   }
-
-   if (!my_id && print_level > 0)
-   {
-      hypre_printf("Final L2 norm of residual: %e\n", r_norm);
-      if (num_tags > 1)
+      if (print_level > 1)
       {
-         for (tag = 0; tag < num_tags; tag++)
-         {
-            hypre_printf("Final L2 norm of r%*d: %e\n", hypre_ndigits(num_tags),
-                         tag, hypre_sqrt(iprod[tag + 1]));
-         }
+         hypre_printf("\n\n");
       }
-   }
-
-   if (xref && print_level > 0)
-   {
-      (*(gmres_functions->CopyVector))(x, w_3);
-      (*(gmres_functions->Axpy))(-1.0, xref, w_3);
-      (*(gmres_functions->InnerProd))(w_3, w_3, &num_tags, &iprod);
-
-      if (!my_id)
+      if (print_level > 0)
       {
-         hypre_printf("Final L2 norm of error: %e\n", hypre_sqrt(iprod[0]));
-         if (num_tags > 1)
-         {
-            for (tag = 0; tag < num_tags; tag++)
-            {
-               hypre_printf("Final L2 norm of e%*d: %e\n", hypre_ndigits(num_tags),
-                            tag, hypre_sqrt(iprod[tag + 1]));
-            }
-         }
+         hypre_KrylovPrintFinalSummary(num_tags, iprod, xiprod);
       }
-   }
-
-   if (!my_id && print_level > 0)
-   {
-      hypre_printf("\n");
    }
 
    (gmres_data -> num_iterations) = iter;

@@ -1665,6 +1665,16 @@ HYPRE_Int hypre_PCGPrintLogging ( void *pcg_vdata, HYPRE_Int myid );
 HYPRE_Int hypre_PCGGetFinalRelativeResidualNorm ( void *pcg_vdata,
                                                   HYPRE_Real *relative_residual_norm );
 
+/* krylov_utils.c */
+HYPRE_Int hypre_KrylovPrintErrorNaN(const char *solver_name, const char *context);
+HYPRE_Int hypre_KrylovPrintHeader(HYPRE_Int print_level, HYPRE_Int num_tags,
+                                  HYPRE_Real b_norm, HYPRE_Real e_norm);
+HYPRE_Int hypre_KrylovPrintIterSimple(HYPRE_Int iter, HYPRE_Real *norms, HYPRE_Real ref_norm);
+HYPRE_Int hypre_KrylovPrintIterTags(HYPRE_Int iter, HYPRE_Int num_tags, HYPRE_Complex *iprod,
+                                    HYPRE_Complex *biprod, HYPRE_Complex *xiprod,
+                                    HYPRE_Int print_level, HYPRE_Int my_id);
+HYPRE_Int hypre_KrylovPrintFinalSummary(HYPRE_Int num_tags, HYPRE_Complex *riprod, HYPRE_Complex *xiprod);
+
 #ifdef __cplusplus
 }
 #endif
