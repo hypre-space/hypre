@@ -298,15 +298,13 @@ hypre_IJMatrixSetAddValuesParCSRDevice( hypre_IJMatrix       *matrix,
 }
 
 #if defined(HYPRE_USING_SYCL)
-template<typename T1, typename T2>
 struct hypre_IJMatrixAssembleFunctor
 {
-   typedef std::tuple<T1, T2> Tuple;
-
-   Tuple operator()(const Tuple& x, const Tuple& y ) const
+   template<typename Tuple1, typename Tuple2>
+   auto operator()(const Tuple1& x, const Tuple2& y ) const
    {
-      return std::make_tuple( hypre_max(std::get<0>(x), std::get<0>(y)),
-                              std::get<1>(x) + std::get<1>(y) );
+       return Tuple1( hypre_max(std::get<0>(x), std::get<0>(y)),
+                                std::get<1>(x) + std::get<1>(y) );
    }
 };
 #else
@@ -394,7 +392,7 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int      *Nptr,
                                      oneapi::dpl::make_zip_iterator(I, J),                         /* keys_output */
                                      oneapi::dpl::make_zip_iterator(X, A),                         /* values_output */
                                      std::equal_to< std::tuple<HYPRE_BigInt, HYPRE_BigInt> >(),    /* binary_pred */
-                                     hypre_IJMatrixAssembleFunctor<char, HYPRE_Complex>()          /* binary_op */);
+                                     hypre_IJMatrixAssembleFunctor()                               /* binary_op */);
 
    *Nptr = std::get<0>(new_end.first.base()) - I;
 #else
@@ -437,19 +435,17 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int      *Nptr,
 }
 
 #if defined(HYPRE_USING_SYCL)
-template<typename T1, typename T2>
 struct hypre_IJMatrixAssembleFunctor2
 {
-   typedef std::tuple<T1, T2> Tuple;
-
-   __device__ Tuple operator()(const Tuple& x, const Tuple& y) const
+    template<typename Tuple1, typename Tuple2>
+   __device__ auto operator()(const Tuple1& x, const Tuple2& y) const
    {
       const char          tx = std::get<0>(x);
       const char          ty = std::get<0>(y);
       const HYPRE_Complex vx = std::get<1>(x);
       const HYPRE_Complex vy = std::get<1>(y);
       const HYPRE_Complex vz = tx == 0 && ty == 0 ? vx + vy : tx ? vx : vy;
-      return std::make_tuple(0, vz);
+      return Tuple1(char(0), vz);
    }
 };
 #else
@@ -504,7 +500,7 @@ hypre_IJMatrixAssembleSortAndReduce2(HYPRE_Int      *Nptr,
                                      oneapi::dpl::make_zip_iterator(I, J),                   /* keys_output */
                                      oneapi::dpl::make_zip_iterator(X, A),                   /* values_output */
                                      std::equal_to< std::tuple<HYPRE_Int, HYPRE_Int> >(),    /* binary_pred */
-                                     hypre_IJMatrixAssembleFunctor2<char, HYPRE_Complex>()   /* binary_op */);
+                                     hypre_IJMatrixAssembleFunctor2()                        /* binary_op */);
 
    HYPRE_Int N = std::get<0>(new_end.first.base()) - I;
 #else

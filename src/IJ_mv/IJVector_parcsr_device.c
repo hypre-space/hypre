@@ -22,15 +22,13 @@
  *--------------------------------------------------------------------*/
 
 #if defined(HYPRE_USING_SYCL)
-template<typename T1, typename T2>
 struct hypre_IJVectorAssembleFunctor
 {
-   typedef std::tuple<T1, T2> Tuple;
-
-   __device__ Tuple operator() (const Tuple& x, const Tuple& y ) const
+   template<typename Tuple1, typename Tuple2>
+   auto operator()(const Tuple1& x, const Tuple2& y ) const
    {
-      return std::make_tuple( hypre_max(std::get<0>(x), std::get<0>(y)),
-                              std::get<1>(x) + std::get<1>(y) );
+       return Tuple1( hypre_max(std::get<0>(x), std::get<0>(y)),
+                                std::get<1>(x) + std::get<1>(y) );
    }
 };
 #else
@@ -111,7 +109,7 @@ hypre_IJVectorAssembleSortAndReduce1( HYPRE_Int       N0,
                                      I,                                                          /* keys_output */
                                      oneapi::dpl::make_zip_iterator(X, A),                       /* values_output */
                                      std::equal_to<HYPRE_BigInt>(),                              /* binary_pred */
-                                     hypre_IJVectorAssembleFunctor<char, HYPRE_Complex>()        /* binary_op */);
+                                     hypre_IJVectorAssembleFunctor()                             /* binary_op */);
 #else
    HYPRE_THRUST_CALL(
       exclusive_scan_by_key,
