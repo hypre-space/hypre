@@ -1881,6 +1881,14 @@ struct is_negative
 };
 
 template<typename T>
+struct is_negative_T
+{
+   is_negative_T() {}
+
+   constexpr T operator()(const T &x = T()) const { return (T) (x < 0); }
+};
+
+template<typename T>
 struct is_positive
 {
    is_positive() {}
@@ -1894,6 +1902,14 @@ struct is_nonnegative
    is_nonnegative() {}
 
    constexpr bool operator()(const T &x = T()) const { return (x >= 0); }
+};
+
+template<typename T>
+struct is_nonnegative_T
+{
+   is_nonnegative_T() {}
+
+   constexpr T operator()(const T &x = T()) const { return (T) (x >= 0); }
 };
 
 template<typename T>
@@ -1939,6 +1955,15 @@ struct equal
    equal(T val_ = T()) { val = val_; }
 
    constexpr bool operator()(const T &x) const { return (x == val); }
+};
+
+template<typename T>
+struct equal_T
+{
+   T val;
+   equal_T(T val_ = T()) { val = val_; }
+
+   constexpr T operator()(const T &x) const { return (T) (x == val); }
 };
 
 template<typename T1, typename T2>
