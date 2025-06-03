@@ -303,8 +303,8 @@ struct hypre_IJMatrixAssembleFunctor
    template<typename Tuple1, typename Tuple2>
    auto operator()(const Tuple1& x, const Tuple2& y ) const
    {
-       return Tuple1( hypre_max(std::get<0>(x), std::get<0>(y)),
-                                std::get<1>(x) + std::get<1>(y) );
+      return Tuple1( hypre_max(std::get<0>(x), std::get<0>(y)),
+                     std::get<1>(x) + std::get<1>(y) );
    }
 };
 #else
@@ -437,7 +437,7 @@ hypre_IJMatrixAssembleSortAndReduce1(HYPRE_Int      *Nptr,
 #if defined(HYPRE_USING_SYCL)
 struct hypre_IJMatrixAssembleFunctor2
 {
-    template<typename Tuple1, typename Tuple2>
+   template<typename Tuple1, typename Tuple2>
    __device__ auto operator()(const Tuple1& x, const Tuple2& y) const
    {
       const char          tx = std::get<0>(x);

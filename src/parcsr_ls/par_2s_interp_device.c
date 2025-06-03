@@ -165,8 +165,10 @@ hypre_BoomerAMGBuildModPartialExtInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int *map_to_F = hypre_TAlloc(HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(CF_marker,              make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
-                      oneapi::dpl::make_transform_iterator(CF_marker + A_nr_local, make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
+                      oneapi::dpl::make_transform_iterator(CF_marker,
+                                                           make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
+                      oneapi::dpl::make_transform_iterator(CF_marker + A_nr_local,
+                                                           make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
                       map_to_F,
                       HYPRE_Int(0) );/* *MUST* pass init value since input and output types diff. */
 #else
@@ -513,8 +515,10 @@ hypre_BoomerAMGBuildModPartialExtPEInterpDevice( hypre_ParCSRMatrix  *A,
    HYPRE_Int *map_to_F = hypre_TAlloc(HYPRE_Int, A_nr_local, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(CF_marker,              make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
-                      oneapi::dpl::make_transform_iterator(CF_marker + A_nr_local, make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
+                      oneapi::dpl::make_transform_iterator(CF_marker,
+                                                           make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
+                      oneapi::dpl::make_transform_iterator(CF_marker + A_nr_local,
+                                                           make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
                       map_to_F,
                       HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 #else

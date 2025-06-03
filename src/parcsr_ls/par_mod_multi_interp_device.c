@@ -323,8 +323,10 @@ hypre_BoomerAMGBuildModMultipassDevice( hypre_ParCSRMatrix  *A,
    equal<HYPRE_Int>(1) );
 
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(CF_marker,          make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(1))),
-                      oneapi::dpl::make_transform_iterator(CF_marker + n_fine, make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(1))),
+                      oneapi::dpl::make_transform_iterator(CF_marker,
+                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(1))),
+                      oneapi::dpl::make_transform_iterator(CF_marker + n_fine,
+                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(1))),
                       fine_to_coarse,
                       HYPRE_Int(0) );
 #else
@@ -1595,8 +1597,10 @@ void hypre_modmp_init_fine_to_coarse( HYPRE_Int  n_fine,
 
 #if defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(pass_marker,          make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(color))),
-                      oneapi::dpl::make_transform_iterator(pass_marker + n_fine, make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(color))),
+                      oneapi::dpl::make_transform_iterator(pass_marker,
+                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(color))),
+                      oneapi::dpl::make_transform_iterator(pass_marker + n_fine,
+                                                           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(color))),
                       fine_to_coarse,
                       HYPRE_Int(0) );
 

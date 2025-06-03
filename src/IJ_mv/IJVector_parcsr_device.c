@@ -27,8 +27,8 @@ struct hypre_IJVectorAssembleFunctor
    template<typename Tuple1, typename Tuple2>
    auto operator()(const Tuple1& x, const Tuple2& y ) const
    {
-       return Tuple1( hypre_max(std::get<0>(x), std::get<0>(y)),
-                                std::get<1>(x) + std::get<1>(y) );
+      return Tuple1( hypre_max(std::get<0>(x), std::get<0>(y)),
+                     std::get<1>(x) + std::get<1>(y) );
    }
 };
 #else

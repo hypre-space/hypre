@@ -332,14 +332,18 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
    /* map from all points (i.e, F+C) to F/C indices */
 #if defined(HYPRE_USING_SYCL)
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(CF_marker,           make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
-                      oneapi::dpl::make_transform_iterator(CF_marker + n_local, make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
+                      oneapi::dpl::make_transform_iterator(CF_marker,
+                                                           make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
+                      oneapi::dpl::make_transform_iterator(CF_marker + n_local,
+                                                           make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
                       map2FC, /* F */
                       HYPRE_Int(0) );
 
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(CF_marker,           make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
-                      oneapi::dpl::make_transform_iterator(CF_marker + n_local, make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
+                      oneapi::dpl::make_transform_iterator(CF_marker,
+                                                           make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
+                      oneapi::dpl::make_transform_iterator(CF_marker + n_local,
+                                                           make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
                       itmp, /* C */
                       HYPRE_Int(0) );
 
@@ -357,8 +361,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
                       HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 
    HYPRE_THRUST_CALL( exclusive_scan,
-                      thrust::make_transform_iterator(CF_marker,           make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
-                      thrust::make_transform_iterator(CF_marker + n_local, make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
+                      thrust::make_transform_iterator(CF_marker,
+                                                      make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
+                      thrust::make_transform_iterator(CF_marker + n_local,
+                                                      make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
                       itmp, /* C */
                       HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 
@@ -377,8 +383,10 @@ hypre_ParCSRMatrixGenerateFFFCDevice_core( hypre_ParCSRMatrix  *A,
       map2F2 = hypre_TAlloc(HYPRE_Int, n_local, HYPRE_MEMORY_DEVICE);
 #if defined(HYPRE_USING_SYCL)
       HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                         oneapi::dpl::make_transform_iterator(CF_marker,           make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(-2))),
-                         oneapi::dpl::make_transform_iterator(CF_marker + n_local, make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(-2))),
+                         oneapi::dpl::make_transform_iterator(CF_marker,
+                                                              make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(-2))),
+                         oneapi::dpl::make_transform_iterator(CF_marker + n_local,
+                                                              make_func_converter<HYPRE_Int>(equal<HYPRE_Int>(-2))),
                          map2F2, /* F2 */
                          HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 #else
@@ -1534,14 +1542,18 @@ hypre_ParCSRMatrixGenerate1DCFDevice( hypre_ParCSRMatrix  *A,
 #if defined(HYPRE_USING_SYCL)
    /* map from all points (i.e, F+C) to F/C indices */
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(CF_marker,           make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
-                      oneapi::dpl::make_transform_iterator(CF_marker + n_local, make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
+                      oneapi::dpl::make_transform_iterator(CF_marker,
+                                                           make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
+                      oneapi::dpl::make_transform_iterator(CF_marker + n_local,
+                                                           make_func_converter<HYPRE_Int>(is_negative<HYPRE_Int>())),
                       map2FC, /* F */
                       HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 
    HYPRE_ONEDPL_CALL( std::exclusive_scan,
-                      oneapi::dpl::make_transform_iterator(CF_marker,           make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
-                      oneapi::dpl::make_transform_iterator(CF_marker + n_local, make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
+                      oneapi::dpl::make_transform_iterator(CF_marker,
+                                                           make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
+                      oneapi::dpl::make_transform_iterator(CF_marker + n_local,
+                                                           make_func_converter<HYPRE_Int>(is_nonnegative<HYPRE_Int>())),
                       itmp, /* C */
                       HYPRE_Int(0) ); /* *MUST* pass init value since input and output types diff. */
 
