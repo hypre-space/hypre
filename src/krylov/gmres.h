@@ -99,6 +99,7 @@ typedef struct
 
    void    *matvec_data;
    void    *precond_data;
+   void    *precond_Mat;
 
    hypre_GMRESFunctions * functions;
 

@@ -33,6 +33,9 @@
 #include "struct.h"
 #include "const.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "pilut_mup_func.h"
+#endif
 
 
 #endif

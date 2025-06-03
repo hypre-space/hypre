@@ -10,6 +10,10 @@
 #include <omp.h>
 #endif
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "utilities_mup_func.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -161,6 +165,7 @@ typedef struct
 
 #define hypre_HandleMagmaQueue(hypre_handle)                     ((hypre_handle) -> magma_queue)
 
+extern hypre_Handle *_hypre_handle;
 #endif
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
@@ -703,9 +708,12 @@ void hypre_error_handler_clear_messages(void);
 void hypre_error_code_save(void);
 void hypre_error_code_restore(void);
 
-#define hypre_error(IERR) hypre_error_handler(__FILE__, __LINE__, IERR, NULL)
-#define hypre_error_w_msg(IERR, msg) hypre_error_handler(__FILE__, __LINE__, IERR, msg)
-#define hypre_error_in_arg(IARG) hypre_error(HYPRE_ERROR_ARG | IARG<<3)
+#if defined(HYPRE_MIXED_PRECISION)
+#define hypre_error_w_msg_mp(IERR, msg)  hypre_error_handler_dbl(__FILE__, __LINE__, IERR, msg)
+#endif
+#define hypre_error(IERR)  hypre_error_handler(__FILE__, __LINE__, IERR, NULL)
+#define hypre_error_w_msg(IERR, msg)  hypre_error_handler(__FILE__, __LINE__, IERR, msg)
+#define hypre_error_in_arg(IARG)  hypre_error(HYPRE_ERROR_ARG | IARG<<3)
 
 #if defined(HYPRE_DEBUG)
 /* host assert */
@@ -987,8 +995,8 @@ typedef MPI_User_function    hypre_MPI_User_function;
 HYPRE_Int hypre_MPI_Init( hypre_int *argc, char ***argv );
 HYPRE_Int hypre_MPI_Finalize( void );
 HYPRE_Int hypre_MPI_Abort( hypre_MPI_Comm comm, HYPRE_Int errorcode );
-HYPRE_Real hypre_MPI_Wtime( void );
-HYPRE_Real hypre_MPI_Wtick( void );
+hypre_double hypre_MPI_Wtime( void );
+hypre_double hypre_MPI_Wtick( void );
 HYPRE_Int hypre_MPI_Barrier( hypre_MPI_Comm comm );
 HYPRE_Int hypre_MPI_Comm_create( hypre_MPI_Comm comm, hypre_MPI_Group group,
                                  hypre_MPI_Comm *newcomm );
@@ -1667,10 +1675,11 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /* timer.c */
-HYPRE_Real time_getWallclockSeconds( void );
-HYPRE_Real time_getCPUSeconds( void );
-HYPRE_Real time_get_wallclock_seconds_( void );
-HYPRE_Real time_get_cpu_seconds_( void );
+hypre_double time_getWallclockSeconds( void );
+hypre_double time_getCPUSeconds( void );
+/* These functions are not called anywhere else. Should we be ending with underscore?? - DOK */
+//hypre_double time_get_wallclock_seconds_( void );
+//hypre_double time_get_cpu_seconds_( void );
 
 /*--------------------------------------------------------------------------
  * With timing off
@@ -1700,9 +1709,9 @@ HYPRE_Real time_get_cpu_seconds_( void );
 
 typedef struct
 {
-   HYPRE_Real  *wall_time;
-   HYPRE_Real  *cpu_time;
-   HYPRE_Real  *flops;
+   hypre_double  *wall_time;
+   hypre_double  *cpu_time;
+   hypre_double  *flops;
    char   **name;
    HYPRE_Int     *state;     /* boolean flag to allow for recursive timing */
    HYPRE_Int     *num_regs;  /* count of how many times a name is registered */
@@ -1710,17 +1719,17 @@ typedef struct
    HYPRE_Int      num_names;
    HYPRE_Int      size;
 
-   HYPRE_Real   wall_count;
-   HYPRE_Real   CPU_count;
-   HYPRE_Real   FLOP_count;
+   hypre_double   wall_count;
+   hypre_double   CPU_count;
+   hypre_double   FLOP_count;
 
 } hypre_TimingType;
 
-#ifdef HYPRE_TIMING_GLOBALS
-hypre_TimingType *hypre_global_timing = NULL;
-#else
+//#ifdef HYPRE_TIMING_GLOBALS
+//hypre_TimingType *hypre_global_timing = NULL;
+//#else
 extern hypre_TimingType *hypre_global_timing;
-#endif
+//#endif
 
 /*-------------------------------------------------------
  * Accessor functions
@@ -1749,7 +1758,7 @@ HYPRE_Int hypre_BeginTiming( HYPRE_Int time_index );
 HYPRE_Int hypre_EndTiming( HYPRE_Int time_index );
 HYPRE_Int hypre_ClearTiming( void );
 HYPRE_Int hypre_PrintTiming( const char *heading, MPI_Comm comm );
-HYPRE_Int hypre_GetTiming( const char *heading, HYPRE_Real *wall_time_ptr, MPI_Comm comm );
+HYPRE_Int hypre_GetTiming( const char *heading, hypre_double *wall_time_ptr, MPI_Comm comm );
 
 #endif
 
@@ -2459,7 +2468,7 @@ HYPRE_Int hypre_SetSpGemmAlgorithm( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmBinned( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmRownnzEstimateMethod( HYPRE_Int value );
 HYPRE_Int hypre_SetSpGemmRownnzEstimateNSamples( HYPRE_Int value );
-HYPRE_Int hypre_SetSpGemmRownnzEstimateMultFactor( HYPRE_Real value );
+HYPRE_Int hypre_SetSpGemmRownnzEstimateMultFactor( hypre_float value );
 HYPRE_Int hypre_SetSpGemmHashType( char value );
 HYPRE_Int hypre_SetUseGpuRand( HYPRE_Int use_gpurand );
 HYPRE_Int hypre_SetGaussSeidelMethod( HYPRE_Int gs_method );

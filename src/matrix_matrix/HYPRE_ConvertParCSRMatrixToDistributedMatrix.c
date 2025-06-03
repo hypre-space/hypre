@@ -27,6 +27,9 @@
 /* Matrix prototypes for ParCSR */
 #include "HYPRE_parcsr_mv.h"
 
+/* matrix_matrix protos */
+#include "HYPRE_matrix_matrix_protos.h"
+
 /*--------------------------------------------------------------------------
  * HYPRE_ConvertParCSRMatrixToDistributedMatrix
  *--------------------------------------------------------------------------*/

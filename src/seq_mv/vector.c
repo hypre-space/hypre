@@ -34,6 +34,10 @@ hypre_SeqVectorCreate( HYPRE_Int size )
    hypre_VectorOwnsData(vector)              = 1;
    hypre_VectorMemoryLocation(vector)        = hypre_HandleMemoryLocation(hypre_handle());
 
+#if defined(HYPRE_MIXED_PRECISION)   
+   hypre_VectorPrecision(vector) = HYPRE_OBJECT_PRECISION;
+#endif
+
    return vector;
 }
 

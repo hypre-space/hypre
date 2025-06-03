@@ -11,6 +11,11 @@
  * This header renames the functions in BLAS to avoid conflicts
  *--------------------------------------------------------------------------*/
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "blas_mup_func.h"
+#endif
+
+
 /* blas */
 #define dasum_   hypre_dasum
 #define daxpy_   hypre_daxpy

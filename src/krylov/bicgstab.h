@@ -98,10 +98,10 @@ typedef struct
    HYPRE_Int      stop_crit;
    HYPRE_Int      converged;
    HYPRE_Int      hybrid;
-   HYPRE_Real   tol;
-   HYPRE_Real   cf_tol;
-   HYPRE_Real   rel_residual_norm;
-   HYPRE_Real   a_tol;
+   HYPRE_Real     tol;
+   HYPRE_Real     cf_tol;
+   HYPRE_Real     rel_residual_norm;
+   HYPRE_Real     a_tol;
 
 
    void  *A;
@@ -112,8 +112,10 @@ typedef struct
    void  *p;
    void  *q;
 
-   void  *matvec_data;
+   void    *matvec_data;
    void    *precond_data;
+   void    *precond_data;
+   void    *precond_Mat;
 
    hypre_BiCGSTABFunctions * functions;
 

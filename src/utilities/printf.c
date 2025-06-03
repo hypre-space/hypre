@@ -10,7 +10,8 @@
 #include <stdio.h>
 
 #define hypre_printf_buffer_len 4096
-char hypre_printf_buffer[hypre_printf_buffer_len];
+/* OK to make hypre_printf_buffer a static variable since it is only declared and accessed here */
+static char hypre_printf_buffer[hypre_printf_buffer_len];
 
 // #ifdef HYPRE_BIGINT
 
