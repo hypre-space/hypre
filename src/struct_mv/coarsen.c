@@ -308,7 +308,6 @@ hypre_CoarsenBoxArrayArrayOutward( hypre_BoxArrayArray   *boxaa,
       hypre_ForBoxI(j, boxa)
       {
          hypre_CopyBox(hypre_BoxArrayBox(boxa, j), box);
-         //hypre_CoarsenBoxNeg(box, refbox, origin, stride);
          hypre_BoxGrowByIndex(box, grow_index);
          hypre_CoarsenBox(box, origin, stride);
          hypre_IntersectBoxes(box, refbox, box);
@@ -337,7 +336,6 @@ hypre_CoarsenBoxArrayArrayOutward( hypre_BoxArrayArray   *boxaa,
       hypre_ForBoxI(j, boxa)
       {
          hypre_CopyBox(hypre_BoxArrayBox(boxa, j), box);
-         //hypre_CoarsenBoxNeg(box, refbox, origin, stride);
          hypre_BoxGrowByIndex(box, grow_index);
          hypre_CoarsenBox(box, origin, stride);
          hypre_IntersectBoxes(box, refbox, box);
@@ -356,7 +354,6 @@ hypre_CoarsenBoxArrayArrayOutward( hypre_BoxArrayArray   *boxaa,
          hypre_ForBoxI(j, boxa)
          {
             hypre_CopyBox(hypre_BoxArrayBox(boxa, j), box);
-            //hypre_CoarsenBoxNeg(box, refbox, origin, stride);
             hypre_BoxGrowByIndex(box, grow_index);
             hypre_CoarsenBox(box, origin, stride);
             hypre_IntersectBoxes(box, refbox, box);
