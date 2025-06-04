@@ -119,7 +119,6 @@ hypre_StructMatrixComputeRowSum_core_CC(hypre_StructMatrix  *A,
                                         HYPRE_Int            nentries,
                                         HYPRE_Int           *entries,
                                         hypre_Box           *box,
-                                        hypre_Box           *Adbox,
                                         hypre_Box           *rdbox,
                                         HYPRE_Int            type)
 {
@@ -128,9 +127,9 @@ hypre_StructMatrixComputeRowSum_core_CC(hypre_StructMatrix  *A,
    hypre_Index           loop_size, ustride;
    hypre_IndexRef        start;
 
-   HYPRE_Complex        *Ap0, *Ap1, *Ap2;
-   HYPRE_Complex        *Ap3, *Ap4, *Ap5;
-   HYPRE_Complex        *Ap6, *Ap7, *Ap8;
+   HYPRE_Complex        *Ap0 = NULL, *Ap1 = NULL, *Ap2 = NULL;
+   HYPRE_Complex        *Ap3 = NULL, *Ap4 = NULL, *Ap5 = NULL;
+   HYPRE_Complex        *Ap6 = NULL, *Ap7 = NULL, *Ap8 = NULL;
    HYPRE_Complex        *rp;
 
    start = hypre_BoxIMin(box);
@@ -939,7 +938,7 @@ hypre_StructMatrixComputeRowSum( hypre_StructMatrix  *A,
 
          /* Operate on constant coefficients */
          hypre_StructMatrixComputeRowSum_core_CC(A, rowsum, i, cdepth, csi,
-                                                 box, Adbox, rdbox, type);
+                                                 box, rdbox, type);
 
          /* Operate on variable coefficients */
          hypre_StructMatrixComputeRowSum_core_VC(A, rowsum, i, vdepth, vsi,

@@ -585,7 +585,7 @@ main( hypre_int  argc,
    HYPRE_Int             arg_index, box, mi, vi, ei, d, i, k;
    HYPRE_Int             do_matvec, do_matvecT, do_matmat;
    HYPRE_Int             mv_A, mv_x, mv_y;
-   HYPRE_Int             nterms, *terms, *trans;
+   HYPRE_Int             nterms = 0, *terms = NULL, *trans = NULL;
    char                  transposechar;
 
    /*-----------------------------------------------------------
@@ -1023,7 +1023,7 @@ main( hypre_int  argc,
     * Matrix-matrix multiply
     *-----------------------------------------------------------*/
 
-   if (do_matmat)
+   if (do_matmat && nterms > 0)
    {
       hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
       time_index = hypre_InitializeTiming("Matrix-matrix multiply");
