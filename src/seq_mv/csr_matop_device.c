@@ -436,23 +436,17 @@ hypre_CSRMatrixMergeColMapOffd( HYPRE_Int      num_cols_offd_B,
                                 HYPRE_BigInt **col_map_offd_C_ptr,
                                 HYPRE_Int    **map_B_to_C_ptr )
 {
+   HYPRE_Int      num_cols_offd_C;
+   HYPRE_BigInt  *col_map_offd_C;
+   HYPRE_Int     *map_B_to_C = NULL;
+   HYPRE_BigInt  *work;
+
    /* Trivial cases */
    if ((B_ext_offd_nnz + num_cols_offd_B) == 0)
    {
       *num_cols_offd_C_ptr = 0;
       *col_map_offd_C_ptr  = NULL;
       *map_B_to_C_ptr      = NULL;
-
-      return hypre_error_flag;
-   }
-   else if (!col_map_offd_B && B_ext_offd_bigj)
-   {
-      *num_cols_offd_C_ptr = B_ext_offd_nnz;
-      *col_map_offd_C_ptr  = hypre_TAlloc(HYPRE_BigInt, B_ext_offd_nnz, HYPRE_MEMORY_DEVICE);
-      *map_B_to_C_ptr      = NULL;
-
-      hypre_TMemcpy(*col_map_offd_C_ptr, B_ext_offd_bigj, HYPRE_BigInt, B_ext_offd_nnz,
-                    HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
 
       return hypre_error_flag;
    }
@@ -477,8 +471,8 @@ hypre_CSRMatrixMergeColMapOffd( HYPRE_Int      num_cols_offd_B,
    }
 
    /* offd map of B_ext_offd Union col_map_offd_B */
-   HYPRE_BigInt *col_map_offd_C = hypre_TAlloc(HYPRE_BigInt, B_ext_offd_nnz + num_cols_offd_B,
-                                               HYPRE_MEMORY_DEVICE);
+   col_map_offd_C = hypre_TAlloc(HYPRE_BigInt, B_ext_offd_nnz + num_cols_offd_B,
+                                 HYPRE_MEMORY_DEVICE);
 
    hypre_TMemcpy(col_map_offd_C, B_ext_offd_bigj, HYPRE_BigInt, B_ext_offd_nnz,
                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_DEVICE);
@@ -503,25 +497,24 @@ hypre_CSRMatrixMergeColMapOffd( HYPRE_Int      num_cols_offd_B,
                                               col_map_offd_C,
                                               col_map_offd_C + B_ext_offd_nnz + num_cols_offd_B );
 #endif
-
-   HYPRE_Int num_cols_offd_C = new_end - col_map_offd_C;
+   num_cols_offd_C = new_end - col_map_offd_C;
 
 #if 1
-   HYPRE_BigInt *tmp = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
-   hypre_TMemcpy(tmp, col_map_offd_C, HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE,
+   work = hypre_TAlloc(HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(work, col_map_offd_C, HYPRE_BigInt, num_cols_offd_C, HYPRE_MEMORY_DEVICE,
                  HYPRE_MEMORY_DEVICE);
    hypre_TFree(col_map_offd_C, HYPRE_MEMORY_DEVICE);
-   col_map_offd_C = tmp;
+   col_map_offd_C = work;
 #else
    col_map_offd_C = hypre_TReAlloc_v2(col_map_offd_C, HYPRE_BigInt, B_ext_offd_nnz + num_cols_offd_B,
                                       HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_DEVICE);
 #endif
 
-   /* create map from col_map_offd_B */
-   HYPRE_Int *map_B_to_C = hypre_TAlloc(HYPRE_Int, num_cols_offd_B, HYPRE_MEMORY_DEVICE);
-
+   /* Create map from col_map_offd_B */
    if (num_cols_offd_B)
    {
+      map_B_to_C = hypre_TAlloc(HYPRE_Int, num_cols_offd_B, HYPRE_MEMORY_DEVICE);
+
 #if defined(HYPRE_USING_SYCL)
       HYPRE_ONEDPL_CALL( oneapi::dpl::lower_bound,
                          col_map_offd_C,
@@ -539,7 +532,8 @@ hypre_CSRMatrixMergeColMapOffd( HYPRE_Int      num_cols_offd_B,
 #endif
    }
 
-   *map_B_to_C_ptr = map_B_to_C;
+   /* Set output pointers */
+   *map_B_to_C_ptr      = map_B_to_C;
    *num_cols_offd_C_ptr = num_cols_offd_C;
    *col_map_offd_C_ptr  = col_map_offd_C;
 
