@@ -1614,11 +1614,11 @@ HYPRE_Int HYPRE_PCGGetFlex ( HYPRE_Solver solver, HYPRE_Int *flex );
 HYPRE_Int HYPRE_PCGSetPrecond ( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond,
                                 HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver );
 HYPRE_Int HYPRE_PCGSetPrecondMatrix ( HYPRE_Solver solver , HYPRE_Matrix precond_matrix );
-HYPRE_Int HYPRE_PCGSetPreconditioner ( HYPRE_Solver solver, HYPRE_Solver precond_solver );
+HYPRE_Int HYPRE_PCGSetPreconditioner ( HYPRE_Solver solver, HYPRE_Solver precond );
 HYPRE_Int HYPRE_PCGGetPrecond ( HYPRE_Solver solver, HYPRE_Solver *precond_data_ptr );
 HYPRE_Int HYPRE_PCGGetPrecondMatrix ( HYPRE_Solver solver , HYPRE_Matrix *precond_matrix_ptr );
-HYPRE_Int HYPRE_PCGSetLogging ( HYPRE_Solver solver, HYPRE_Int level );
-HYPRE_Int HYPRE_PCGGetLogging ( HYPRE_Solver solver, HYPRE_Int *level );
+HYPRE_Int HYPRE_PCGSetLogging ( HYPRE_Solver solver, HYPRE_Int logging );
+HYPRE_Int HYPRE_PCGGetLogging ( HYPRE_Solver solver, HYPRE_Int *logging );
 HYPRE_Int HYPRE_PCGSetPrintLevel ( HYPRE_Solver solver, HYPRE_Int level );
 HYPRE_Int HYPRE_PCGGetPrintLevel ( HYPRE_Solver solver, HYPRE_Int *level );
 HYPRE_Int HYPRE_PCGGetNumIterations ( HYPRE_Solver solver, HYPRE_Int *num_iterations );

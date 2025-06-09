@@ -275,7 +275,7 @@ HYPRE_Int HYPRE_PCGGetPrecond(HYPRE_Solver  solver,
 /**
  **/
 HYPRE_Int HYPRE_PCGGetLogging(HYPRE_Solver  solver,
-                              HYPRE_Int    *level);
+                              HYPRE_Int    *logging);
 
 /**
  **/
