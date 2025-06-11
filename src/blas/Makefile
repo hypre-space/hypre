@@ -102,7 +102,7 @@ ${MuP_OBJDIR_longdouble}/%.o: %.c ${BLAS_HEADERS}
 	${CC} ${CFLAGS} -c -o $@ $<
 #
 # multiprecision object files
-blas_OBJS: ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
+blas_OBJS: ${OBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
 #
 else
 ${OBJS}: ${BLAS_HEADERS}

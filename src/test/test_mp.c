@@ -58,21 +58,21 @@ int main (int argc, char *argv[])
    int N, n;
    int ilower, iupper;
    int local_size, extra;
-   int solver_id;
+   //int solver_id;
    float h, h2;
    double dh, dh2;
    double d_one = 1.0;
    float d_zero = 0.;
 
    int	       time_index;   
-   float   wall_time;   
+   //float   wall_time;   
    /*! Matrix and preconditioner declarations. Here, we declare IJMatrices and parcsr matrices
        for the solver (A, parcsr_A) and the preconditioner (B, parcsr_B). I have included two suggestions 
        below on how we would utilize both of these matrices. 
    */
 
-   HYPRE_IJMatrix C;
-   HYPRE_ParCSRMatrix parcsr_C;   
+   //HYPRE_IJMatrix C;
+   //HYPRE_ParCSRMatrix parcsr_C;   
    
    HYPRE_IJMatrix A;
    HYPRE_ParCSRMatrix parcsr_A;
@@ -95,7 +95,7 @@ int main (int argc, char *argv[])
    /*! Solver and preconditioner and declarations and solver_precision variable. Internally, HYPRE_SolverPrecision 
        is an enum struct containing HYPRE_REAL_float, HYPRE_REAL_SINGLE and HYPRE_REAL_LONG.
    */
-   HYPRE_Solver solver, precond;
+   //HYPRE_Solver solver, precond;
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
@@ -104,7 +104,7 @@ int main (int argc, char *argv[])
    /*! We set up the linear system following ex5. */
    /* Some problem parameters */
    n = 2;
-   solver_id = 0;
+   //solver_id = 0;
    /* Preliminaries: want at least one processor per row */
    if (n*n < num_procs) n = sqrt(num_procs) + 1;
    N = n*n; /* global number of rows */
@@ -296,7 +296,7 @@ int main (int argc, char *argv[])
 
    /*! Done with linear system setup. Now proceed to solve the system. */
    {
-      int num_iterations;
+      //int num_iterations;
       HYPRE_ParVector res = NULL;
       HYPRE_ParVector hres = NULL;      
       HYPRE_ParVector e = NULL;

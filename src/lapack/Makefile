@@ -159,8 +159,14 @@ ${dlamch_longdouble}: dlamch.c ${LAPACK_HEADERS}
 	@mkdir -p ${@D}
 	${CC} ${CFLAGS} -DMP_BUILD_LONGDOUBLE=1 -c -o $@ dlamch.c
 #
+# compile without optimization
+dlamch.o : dlamch.c ${LAPACK_HEADERS}
+	${CC} ${CFLAGS} -c dlamch.c
+
+dlamch_obj: dlamch.o
+#
 # multiprecision object files
-lapack_OBJS: ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
+lapack_OBJS: ${OBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
 
 # compile without optimization
 dlamch_obj: ${dlamch_single} ${dlamch_double} ${dlamch_longdouble}

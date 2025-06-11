@@ -6,23 +6,27 @@
 
 # Generate C code for multiprecision _pre functions
 #
-# The script uses a file containing pre-processed function prototype information
-# and a file containing header source code (e.g., include lines).  The script
-# genMuPMethods.sh is used to generate the prototype file.
+# The script takes a file containing a list of functions, a file containing
+# header source code (e.g., include lines), and one or more header files, then
+# generates a C file with the implementations of each of the functions.
 #
-# Usage:   <this-script> <header-code> <function-list> <header-1> <header-2> ...
-# Example: <this-script> mup_pre.header mup_pre.functions HYPRE_krylov.h krylov.h > mup_pre.c
+# Usage:   <this-script> <function-list> <header-code> <header-1> <header-2> ...
+# Example: <this-script> mup_pre.functions mup_pre.header HYPRE_krylov.h krylov.h > mup_pre.c
 
 scriptdir=`dirname $0`
 
-HEADER=$1
-shift
 FFILE=$1
-shift
+HEADER=$2
+shift; shift
 HFILES="$*"
 
-# Create function prototype information file
-./$scriptdir/gen_proto_info.sh $FFILE $HFILES > $FFILE.proto
+# Create a function prototype information file.  To protect against duplicate
+# prototypes, the output is sorted and duplicate lines are deleted.
+for HFILE in $HFILES
+do
+   ./$scriptdir/gen_proto_info.sh $FFILE $HFILE
+
+done | (export LC_COLLATE=C; sort) | uniq > $FFILE.proto
 
 # Write warning
 cat <<@

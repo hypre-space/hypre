@@ -30,7 +30,7 @@ MuP_FILES = \
  dense_block_matmult.c
 
 ifeq (${MP_BUILD}, 1) 
-   COBJS = ${FILES:.c=.o}
+   COBJS = ${FILES:.c=.o} ${MuP_FILES:.c=.o}
    CUOBJS = ${CUFILES:.c=.obj}
    MuP_COBJS = ${MuP_FILES:.c=.o}
 else
@@ -52,11 +52,11 @@ all:
 lib: libHYPRE_seq_block_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/_hypre_seq_block_mv.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/seq_block_mv_mup_func.h $(HYPRE_BUILD_DIR)/include
-	
+
 install: libHYPRE_seq_block_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/_hypre_seq_block_mv.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/seq_block_mv_mup_func.h $(HYPRE_INC_INSTALL)
-	
+
 clean: clean_mup
 	rm -f *.o *.obj libHYPRE*
 
@@ -101,7 +101,7 @@ ${MuP_OBJDIR_longdouble}/%.o ${MuP_OBJDIR_longdouble}/%.obj: %.c
 	@mkdir -p ${@D}
 	${CC} ${CFLAGS} -c -o $@ $<
 
-OBJS = ${COBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
+OBJS = ${COBJS} ${CUOBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
 
 else
 OBJS = ${COBJS} ${CUOBJS}

@@ -43,10 +43,10 @@ hypre_SeqVectorCopy_mp( hypre_Vector_mp *x,
    HYPRE_Precision precision = hypre_VectorPrecision (y);
 
    HYPRE_Int      i; 
-   HYPRE_Int      ierr = 0;             
 
    size_t size = hypre_min(hypre_VectorSize(x), hypre_VectorSize(y)) * hypre_VectorNumVectors(x);
 /*
+  HYPRE_Int      ierr = 0;             
   if(precision == HYPRE_REAL_SINGLE)
    {
       hypre_double *x_data = hypre_VectorData(x);

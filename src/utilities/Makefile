@@ -86,7 +86,7 @@ CUFILES=\
  stl_ops.c
 
 ifeq (${MP_BUILD}, 1) 
-   COBJS = ${FILES:.c=.o}
+   COBJS = ${FILES:.c=.o} ${MuP_FILES:.c=.o}
    CUOBJS = ${CUFILES:.c=.obj}
    MuP_COBJS = ${MuP_FILES:.c=.o}
 else
@@ -201,7 +201,7 @@ ${MuP_OBJDIR_longdouble}/%.o ${MuP_OBJDIR_longdouble}/%.obj: %.c ${HEADERS}
 
 #UTILITIESLIBS = ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
 
-OBJS = ${COBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
+OBJS = ${COBJS} ${CUOBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
 
 else
 OBJS = ${COBJS} ${CUOBJS}

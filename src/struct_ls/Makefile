@@ -105,7 +105,7 @@ MuP_FILES = \
  HYPRE_struct_sparse_msg.c
 
 ifeq (${MP_BUILD}, 1) 
-   COBJS = ${FILES:.c=.o}
+   COBJS = ${FILES:.c=.o} ${MuP_FILES:.c=.o}
    CUOBJS = ${CUFILES:.c=.obj}
    MuP_COBJS = ${MuP_FILES:.c=.o}
 else
@@ -178,7 +178,7 @@ ${MuP_OBJDIR_longdouble}/%.o ${MuP_OBJDIR_longdouble}/%.obj: %.c
 	@mkdir -p ${@D}
 	${CC} ${CFLAGS} -c -o $@ $<
 
-OBJS = ${COBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
+OBJS = ${COBJS} ${CUOBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
 
 else
 OBJS = ${COBJS} ${CUOBJS}

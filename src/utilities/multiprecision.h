@@ -56,11 +56,11 @@ typedef enum
 #define BUILD_MP_FUNC 1
 #undef HYPRE_SINGLE
 #undef HYPRE_LONG_DOUBLE
-/* allow definition of global variables when building in DP 
-*  to avoid multiple definition errors 
-*/
-#define DEFINE_GLOBAL_VARIABLE 1
 #else
+/* Set a default precision */
+#define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE
+/* Define globals only once during default build */
+#define DEFINE_GLOBAL_VARIABLE 1
 #ifdef BUILD_MP_FUNC
 #undef BUILD_MP_FUNC
 #endif

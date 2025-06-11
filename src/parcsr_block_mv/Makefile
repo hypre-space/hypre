@@ -141,7 +141,7 @@ ${MuP_OBJDIR_longdouble}/%.o: %.c
 	@mkdir -p ${@D}
 	${CC} ${CFLAGS} -c -o $@ $<
 
-OBJS = ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
+OBJS = ${COBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
 
 else
 OBJS = ${COBJS}

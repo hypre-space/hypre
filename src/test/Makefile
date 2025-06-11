@@ -61,21 +61,38 @@ LFLAGS =\
 ##################################################################
 
 HYPRE_DRIVERS =\
- ij_mp.c\
- test_mp.c\
- test_mp_pcg.c\
- test_mp_pcg_3d.c\
  ij.c\
  ij_assembly.c\
  sstruct.c\
  struct.c\
- struct_mp.c\
  ams_driver.c\
  maxwell_unscaled.c\
  struct_migrate.c\
  sstruct_fac.c\
  ij_mm.c\
- zboxloop.c
+ zboxloop.c\
+ ij_mp.c\
+ test_mp.c\
+ test_mp_pcg.c\
+ test_mp_pcg_3d.c\
+# struct_mp.c\
+
+#HYPRE_DRIVERS =\
+# ij_mp.c\
+# test_mp.c\
+# test_mp_pcg.c\
+# test_mp_pcg_3d.c\
+# ij.c\
+# ij_assembly.c\
+# sstruct.c\
+# struct.c\
+# struct_mp.c\
+# ams_driver.c\
+# maxwell_unscaled.c\
+# struct_migrate.c\
+# sstruct_fac.c\
+# ij_mm.c\
+# zboxloop.c
 
 HYPRE_DRIVERS_CXX =\
  cxx_ij.cxx\

@@ -73,18 +73,18 @@ int main (int argc, char *argv[])
    int ilower, iupper;
    int jlower, jupper;
    int solver_id = 0;
-   double one = 1.0;
+   //double one = 1.0;
    double zero = 0.;
    int num_iterations;
    double dfinal_res_norm;
    float  final_res_norm;
    int	  time_index;   
-   float  wall_time;   
+   //float  wall_time;   
    double max_row_sum = 1.0;
    int build_matrix_type = 2;
    int build_rhs_type = 2;
    int build_matrix_arg_index;
-   int build_rhs_arg_index;
+   //int build_rhs_arg_index;
    int mg_max_iter = 50;
    int max_iter = 1000;
    int coarsen_type = 10;
@@ -120,7 +120,7 @@ int main (int argc, char *argv[])
    int nodal = 0;
    int nodal_diag = 0;
    int keep_same_sign = 0;
-   int cycle_type = 1;
+   //int cycle_type = 1;
    int relax_order = 0;
    double relax_wt = 1.0;
    double outer_wt = 1.0;
@@ -132,7 +132,7 @@ int main (int argc, char *argv[])
        below on how we would utilize both of these matrices. 
    */
 
-   HYPRE_ParCSRMatrix A_flt;
+   HYPRE_ParCSRMatrix A_flt = NULL;
    HYPRE_IJVector ij_b_flt;
    HYPRE_ParVector b_flt;
    HYPRE_IJVector ij_x_flt;
@@ -147,7 +147,7 @@ int main (int argc, char *argv[])
    /*! Solver and preconditioner and declarations and solver_precision variable. Internally, HYPRE_SolverPrecision 
        is an enum struct containing HYPRE_REAL_float, HYPRE_REAL_SINGLE and HYPRE_REAL_LONG.
    */
-   HYPRE_Solver solver, precond;
+   //HYPRE_Solver solver, precond;
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
@@ -159,7 +159,7 @@ int main (int argc, char *argv[])
    build_matrix_type = 2;
    build_matrix_arg_index = argc;
    build_rhs_type = 2;
-   build_rhs_arg_index = argc;
+   //build_rhs_arg_index = argc;
 
    /*--------------------------
     * Parse command line
@@ -218,19 +218,19 @@ int main (int argc, char *argv[])
       {
          arg_index++;
          build_rhs_type      = 2;
-         build_rhs_arg_index = arg_index;
+         //build_rhs_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-rhsrand") == 0 )
       {
          arg_index++;
          build_rhs_type      = 3;
-         build_rhs_arg_index = arg_index;
+         //build_rhs_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-rhszero") == 0 )
       {
          arg_index++;
          build_rhs_type      = 4;
-         build_rhs_arg_index = arg_index;
+         //build_rhs_arg_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-cljp") == 0 )
       {
@@ -402,11 +402,11 @@ int main (int argc, char *argv[])
          arg_index++;
          keep_same_sign  = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-mu") == 0 )
-      {
-         arg_index++;
-         cycle_type  = atoi(argv[arg_index++]);
-      }
+      //else if ( strcmp(argv[arg_index], "-mu") == 0 )
+      //{
+      //   arg_index++;
+      //   cycle_type  = atoi(argv[arg_index++]);
+      //}
       else if ( strcmp(argv[arg_index], "-iout") == 0 )
       {
          arg_index++;
@@ -517,7 +517,7 @@ int main (int argc, char *argv[])
    }
    else if (build_rhs_type == 3)
    {
-      double one = 1.0;
+      //double one = 1.0;
       if (myid == 0)
       {
          hypre_printf_dbl("  RHS vector has random coefficients\n");

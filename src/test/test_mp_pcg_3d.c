@@ -61,21 +61,21 @@ int main (int argc, char *argv[])
    int solver_id;
    float h, h2;
    double dh, dh2;
-   double d_one = 1.0;
+   //double d_one = 1.0;
    double d_zero = 0.;
    float zero = 0.;
    int num_iterations;
    double dfinal_res_norm;
    float     final_res_norm;
    int	       time_index;   
-   float   wall_time;   
+   //float   wall_time;   
    /*! Matrix and preconditioner declarations. Here, we declare IJMatrices and parcsr matrices
        for the solver (A, parcsr_A) and the preconditioner (B, parcsr_B). I have included two suggestions 
        below on how we would utilize both of these matrices. 
    */
 
-   HYPRE_IJMatrix C;
-   HYPRE_ParCSRMatrix parcsr_C;   
+   //HYPRE_IJMatrix C;
+   //HYPRE_ParCSRMatrix parcsr_C;   
    
    HYPRE_IJMatrix A;
    HYPRE_ParCSRMatrix parcsr_A;
@@ -98,7 +98,7 @@ int main (int argc, char *argv[])
    /*! Solver and preconditioner and declarations and solver_precision variable. Internally, HYPRE_SolverPrecision 
        is an enum struct containing HYPRE_REAL_float, HYPRE_REAL_SINGLE and HYPRE_REAL_LONG.
    */
-   HYPRE_Solver solver, precond;
+   //HYPRE_Solver solver, precond;
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
