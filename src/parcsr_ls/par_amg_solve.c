@@ -201,7 +201,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
             for ieee_check self-equality works on all IEEE-compliant compilers/
             machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
             by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
-            found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+            found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
          if (amg_print_level > 0)
          {
             hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
