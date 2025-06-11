@@ -1006,7 +1006,7 @@ hypre_StructMatmultInitialize( hypre_StructMatmultData  *mmdata,
       if ( hypre_StructMatrixNeedResize(matrices[m], data_spaces[m]) )
       {
          hypre_StructMatrixResize(matrices[m], data_spaces[m]);
-         hypre_StructMatrixForget(matrix); // RDF: Add MemoryMode() to Resize() then remove this
+         hypre_StructMatrixForget(matrices[m]); // RDF: Add MemoryMode() to Resize() then remove this
       }
       else
       {
@@ -1274,8 +1274,8 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
    hypre_StructMatrixInitializeData(M, NULL);
 
    /* Create work arrays on host memory for storing constant coefficients */
-   A_const = hypre_TAlloc(HYPRE_Complex*, nmatrices + 1, HYPRE_MEMORY_HOST);
 #if defined(HYPRE_USING_GPU)
+   A_const = hypre_TAlloc(HYPRE_Complex*, nmatrices + 1, HYPRE_MEMORY_HOST);
    if (exec_policy == HYPRE_EXEC_DEVICE)
    {
       for (m = 0; m < nmatrices; m++)
@@ -1490,6 +1490,7 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
                     HYPRE_Complex, hypre_StructMatrixVDataOffset(M),
                     memory_location, HYPRE_MEMORY_HOST);
    }
+   hypre_TFree(A_const, HYPRE_MEMORY_HOST);
 #endif
 
    /* Free memory */
