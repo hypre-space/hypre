@@ -23,67 +23,114 @@
 #define LDBL_SUFFIX long_dbl
 
 /*--------------------------------------------------------------------------
-* For Multi-precision build. Only set when hypre 
-* is built with mixed-precision
+* For mixed-precision build only
 *---------------------------------------------------------------------------*/
+
 #if defined(HYPRE_MIXED_PRECISION)
-/* matrix/ solver precision options */
+
+/* object precision options */
 typedef enum 
 {
    HYPRE_REAL_SINGLE,
    HYPRE_REAL_DOUBLE,
    HYPRE_REAL_LONGDOUBLE
+
 } HYPRE_Precision;
-/*--------------------------------------------------------------------------
-* Reset build types for Multi-precision build
-*---------------------------------------------------------------------------*/
+
+/* Set build options */
 #if defined(MP_BUILD_SINGLE)
+
+#define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, FLT_SUFFIX)
 #define HYPRE_OBJECT_PRECISION HYPRE_REAL_SINGLE
 #define BUILD_MP_FUNC 1
-#undef HYPRE_LONG_DOUBLE
 #ifndef HYPRE_SINGLE
 #define HYPRE_SINGLE 1
 #endif
+#undef  HYPRE_LONG_DOUBLE
+
 #elif defined(MP_BUILD_LONGDOUBLE)
+
+#define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, LDBL_SUFFIX)
 #define HYPRE_OBJECT_PRECISION HYPRE_REAL_LONGDOUBLE
 #define BUILD_MP_FUNC 1
-#undef HYPRE_SINGLE
+#undef  HYPRE_SINGLE
 #ifndef HYPRE_LONG_DOUBLE
 #define HYPRE_LONG_DOUBLE 1
 #endif
+
 #elif defined(MP_BUILD_DOUBLE)
+
+#define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, DBL_SUFFIX)
 #define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE
 #define BUILD_MP_FUNC 1
-#undef HYPRE_SINGLE
-#undef HYPRE_LONG_DOUBLE
-#else
-/* Set a default precision */
-#define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE
-/* Define globals only once during default build */
-#define DEFINE_GLOBAL_VARIABLE 1
-#ifdef BUILD_MP_FUNC
-#undef BUILD_MP_FUNC
-#endif
-#define BUILD_NON_MP_FUNC 1
-#endif
-/*--------------------------------------------------------------------------
- * HYPRE multiprecision extensions
- *--------------------------------------------------------------------------*/
-/* Macro to generate typed functions */
-#if defined(BUILD_MP_FUNC)
-#if defined(HYPRE_SINGLE)
-//#define FUNC_SUFFIX flt
-#define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, FLT_SUFFIX)
-#elif defined(HYPRE_LONG_DOUBLE)
-//#define FUNC_SUFFIX long_dbl
-#define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, LDBL_SUFFIX)
-#else /* HYPRE_DOUBLE */
-//#define FUNC_SUFFIX dbl
-#define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, DBL_SUFFIX)
-#endif
-#else
+#undef  HYPRE_SINGLE
+#undef  HYPRE_LONG_DOUBLE
+
+#elif defined(MP_BUILD_DEFAULT)
+
 #define HYPRE_MULTIPRECISION_FUNC(a) a
+#define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE
+#define BUILD_MP_FUNC 1
+#define DEFINE_GLOBAL_VARIABLE 1  /* Define globals only once during default build */
+
+#else
+
+#define HYPRE_MULTIPRECISION_FUNC(a) a
+#define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE
+#define DEFINE_GLOBAL_VARIABLE 1  // RDF: Delete this later
+
 #endif
+
+// /*--------------------------------------------------------------------------
+// * Reset build types for Multi-precision build
+// *---------------------------------------------------------------------------*/
+// #if defined(MP_BUILD_SINGLE)
+// #define HYPRE_OBJECT_PRECISION HYPRE_REAL_SINGLE
+// #define BUILD_MP_FUNC 1
+// #undef HYPRE_LONG_DOUBLE
+// #ifndef HYPRE_SINGLE
+// #define HYPRE_SINGLE 1
+// #endif
+// #elif defined(MP_BUILD_LONGDOUBLE)
+// #define HYPRE_OBJECT_PRECISION HYPRE_REAL_LONGDOUBLE
+// #define BUILD_MP_FUNC 1
+// #undef HYPRE_SINGLE
+// #ifndef HYPRE_LONG_DOUBLE
+// #define HYPRE_LONG_DOUBLE 1
+// #endif
+// #elif defined(MP_BUILD_DOUBLE)
+// #define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE
+// #define BUILD_MP_FUNC 1
+// #undef HYPRE_SINGLE
+// #undef HYPRE_LONG_DOUBLE
+// #else
+// /* Set a default precision */
+// #define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE
+// /* Define globals only once during default build */
+// #define DEFINE_GLOBAL_VARIABLE 1
+// #ifdef BUILD_MP_FUNC
+// #undef BUILD_MP_FUNC
+// #endif
+// #define BUILD_NON_MP_FUNC 1
+// #endif
+// /*--------------------------------------------------------------------------
+//  * HYPRE multiprecision extensions
+//  *--------------------------------------------------------------------------*/
+// /* Macro to generate typed functions */
+// #if defined(BUILD_MP_FUNC)
+// #if defined(HYPRE_SINGLE)
+// //#define FUNC_SUFFIX flt
+// #define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, FLT_SUFFIX)
+// #elif defined(HYPRE_LONG_DOUBLE)
+// //#define FUNC_SUFFIX long_dbl
+// #define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, LDBL_SUFFIX)
+// #else /* HYPRE_DOUBLE */
+// //#define FUNC_SUFFIX dbl
+// #define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, DBL_SUFFIX)
+// #endif
+// #else
+// #define HYPRE_MULTIPRECISION_FUNC(a) a
+// #endif
 
 /* Apply suffix to define typed function */
 //#define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, FUNC_SUFFIX)

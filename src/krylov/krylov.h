@@ -17,7 +17,7 @@
 #include "_hypre_utilities.h"
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "krylov_mup_func.h"
+#include "_hypre_krylov_mup_def.h"
 #endif
 
 #define hypre_CTAllocF(type, count, funcs, location) \

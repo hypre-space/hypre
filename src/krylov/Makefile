@@ -70,7 +70,8 @@ all: libHYPRE_krylov${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/krylov.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/lobpcg.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/krylov_mup_func.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_krylov_mup_def.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_krylov_mup_undef.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/hypre_krylov_mup.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
@@ -78,7 +79,8 @@ install: all
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/krylov.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/lobpcg.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/krylov_mup_func.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_krylov_mup_def.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_krylov_mup_undef.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/hypre_krylov_mup.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
@@ -126,6 +128,8 @@ ${MuP_OBJDIR_longdouble}/%.o: %.c
 	@echo  "processing C object $@ ..."
 	@mkdir -p ${@D}
 	${CC} ${CFLAGS} -c -o $@ $<
+#
+${COBJS}: CFLAGS += -DMP_BUILD_DEFAULT=1
 
 OBJS = ${COBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
 

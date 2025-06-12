@@ -11,8 +11,8 @@
  * Header file for transforming multiprecision functions names
  *****************************************************************************/
 
-#ifndef KRYLOV_MUP_FUNC_HEADER
-#define KRYLOV_MUP_FUNC_HEADER
+#ifndef hypre_KRYLOV_MUP_DEF_HEADER
+#define hypre_KRYLOV_MUP_DEF_HEADER
 
 #include "multiprecision.h"
 

@@ -11,7 +11,7 @@
 #include "HYPRE_utilities.h"
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "krylov_mup_func.h"
+#include "_hypre_krylov_mup_def.h"
 #endif
 
 #ifdef __cplusplus
@@ -1251,6 +1251,13 @@ HYPRE_Int HYPRE_CGNRGetPrecond(HYPRE_Solver  solver,
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_krylov_mup_undef.h"
+#ifdef BUILD_MP_FUNC
+#include "_hypre_krylov_mup_def.h"
+#endif
 #endif
 
 #endif

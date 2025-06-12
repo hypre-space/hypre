@@ -12,7 +12,7 @@
 #include "HYPRE_krylov.h"
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "krylov_mup_func.h"
+#include "_hypre_krylov_mup_def.h"
 #endif
 
 #ifndef LOCALLY_OPTIMAL_BLOCK_PRECONDITIONED_CONJUGATE_GRADIENTS
