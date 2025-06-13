@@ -21,7 +21,7 @@
  */
 
 #include <stdlib.h>			/* only for type declarations */
-#include "_hypre_utilities.h"
+#include "DistributedMatrixPilutSolver.h"
 
 #define		THRESH		4	/* threshold for insertion */
 #define		MTHRESH		6	/* threshold for median */

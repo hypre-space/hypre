@@ -130,6 +130,10 @@ hypre_ParCSRMatrixCreate( MPI_Comm      comm,
    hypre_ParCSRMatrixSocOffdJ(matrix) = NULL;
 #endif
 
+#if defined(HYPRE_MIXED_PRECISION)   
+   hypre_ParCSRMatrixPrecision(matrix) = HYPRE_OBJECT_PRECISION;
+#endif
+
    return matrix;
 }
 
