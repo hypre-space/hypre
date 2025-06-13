@@ -48,7 +48,7 @@
 
 typedef struct
 {
-   void *       (*CAlloc)        ( size_t count, size_t elt_size );
+   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location );
    HYPRE_Int    (*Free)          ( void *ptr );
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs );
@@ -65,8 +65,8 @@ typedef struct
    HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x );
    HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y );
 
-   HYPRE_Int    (*precond)       ();
-   HYPRE_Int    (*precond_setup) ();
+   HYPRE_Int    (*precond)       (void *vdata, void *A, void *b, void *x);
+   HYPRE_Int    (*precond_setup) (void *vdata, void *A, void *b, void *x);
 
 } hypre_GMRESFunctions;
 
@@ -111,6 +111,8 @@ typedef struct
 
 } hypre_GMRESData;
 
+#define hypre_GMRESDataHybrid(pcgdata)  ((pcgdata) -> hybrid)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -130,7 +132,7 @@ extern "C" {
 
 hypre_GMRESFunctions *
 hypre_GMRESFunctionsCreate(
-   void *       (*CAlloc)        ( size_t count, size_t elt_size ),
+   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location ),
    HYPRE_Int    (*Free)          ( void *ptr ),
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs ),

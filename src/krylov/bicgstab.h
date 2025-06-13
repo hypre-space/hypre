@@ -46,28 +46,6 @@
  * The {\tt hypre\_BiCGSTABSFunctions} object ...
  **/
 
-/* functions in pcg_struct.c which aren't used here:
-char *hypre_ParKrylovCAlloc( HYPRE_Int count , HYPRE_Int elt_size );
-HYPRE_Int hypre_ParKrylovFree( char *ptr );
-void *hypre_ParKrylovCreateVectorArray( HYPRE_Int n , void *vvector );
-HYPRE_Int hypre_ParKrylovMatvecT( void *matvec_data , HYPRE_Real alpha , void *A , void *x , HYPRE_Real beta , void *y );
-*/
-/* functions in pcg_struct.c which are used here:
-  void *hypre_ParKrylovCreateVector( void *vvector );
-  HYPRE_Int hypre_ParKrylovDestroyVector( void *vvector );
-  void *hypre_ParKrylovMatvecCreate( void *A , void *x );
-  HYPRE_Int hypre_ParKrylovMatvec( void *matvec_data , HYPRE_Real alpha , void *A , void *x , HYPRE_Real beta , void *y );
-  HYPRE_Int hypre_ParKrylovMatvecDestroy( void *matvec_data );
-  HYPRE_Real hypre_ParKrylovInnerProd( void *x , void *y );
-  HYPRE_Int hypre_ParKrylovCopyVector( void *x , void *y );
-  HYPRE_Int hypre_ParKrylovClearVector( void *x );
-  HYPRE_Int hypre_ParKrylovScaleVector( HYPRE_Real alpha , void *x );
-  HYPRE_Int hypre_ParKrylovAxpy( HYPRE_Real alpha , void *x , void *y );
-  HYPRE_Int hypre_ParKrylovCommInfo( void *A , HYPRE_Int *my_id , HYPRE_Int *num_procs );
-  HYPRE_Int hypre_ParKrylovIdentitySetup( void *vdata , void *A , void *b , void *x );
-  HYPRE_Int hypre_ParKrylovIdentity( void *vdata , void *A , void *b , void *x );
-*/
-
 typedef struct
 {
    void *     (*CreateVector)  ( void *vvector );
@@ -112,10 +90,9 @@ typedef struct
    void  *p;
    void  *q;
 
-   void    *matvec_data;
-   void    *precond_data;
-   void    *precond_data;
-   void    *precond_Mat;
+   void  *matvec_data;
+   void  *precond_data;
+   void  *precond_Mat;
 
    hypre_BiCGSTABFunctions * functions;
 
@@ -129,6 +106,8 @@ typedef struct
    char    *log_file_name;
 
 } hypre_BiCGSTABData;
+
+#define hypre_BiCGSTABDataHybrid(pcgdata)  ((pcgdata) -> hybrid)
 
 #ifdef __cplusplus
 extern "C" {
@@ -162,7 +141,7 @@ hypre_BiCGSTABFunctionsCreate(
    HYPRE_Int  (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y ),
    HYPRE_Int  (*CommInfo)      ( void *A, HYPRE_Int *my_id,
                                  HYPRE_Int *num_procs ),
-   HYPRE_Int  (*PrecondSetup)  (void *vdata, void *A, void *b, void *x ),
+   HYPRE_Int  (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
    HYPRE_Int  (*Precond)       ( void *vdata, void *A, void *b, void *x )
 );
 
@@ -174,7 +153,6 @@ hypre_BiCGSTABFunctionsCreate(
 
 void *
 hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions );
-
 
 #ifdef __cplusplus
 }

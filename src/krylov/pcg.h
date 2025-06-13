@@ -48,7 +48,7 @@
 
 typedef struct
 {
-   void *       (*CAlloc)        ( size_t count, size_t elt_size );
+   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location );
    HYPRE_Int    (*Free)          ( void *ptr );
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs );
@@ -64,8 +64,8 @@ typedef struct
    HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x );
    HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y );
 
-   HYPRE_Int    (*precond)();
-   HYPRE_Int    (*precond_setup)();
+   HYPRE_Int    (*precond)(void *vdata, void *A, void *b, void *x);
+   HYPRE_Int    (*precond_setup)(void *vdata, void *A, void *b, void *x);
 
 } hypre_PCGFunctions;
 
@@ -74,36 +74,35 @@ typedef struct
  **/
 
 /*
- Summary of Parameters to Control Stopping Test:
- - Standard (default) error tolerance: |delta-residual|/|right-hand-side|<tol
- where the norm is an energy norm wrt preconditioner, |r|=sqrt(<Cr,r>).
- - two_norm!=0 means: the norm is the L2 norm, |r|=sqrt(<r,r>)
- - rel_change!=0 means: if pass the other stopping criteria, also check the
- relative change in the solution x.  Pass iff this relative change is small.
- - tol = relative error tolerance, as above
- -a_tol = absolute convergence tolerance (default is 0.0)
+   Summary of Parameters to Control Stopping Test:
+   - Standard (default) error tolerance: |delta-residual|/|right-hand-side|<tol
+   where the norm is an energy norm wrt preconditioner, |r|=sqrt(<Cr,r>).
+   - two_norm!=0 means: the norm is the L2 norm, |r|=sqrt(<r,r>)
+   - rel_change!=0 means: if pass the other stopping criteria, also check the
+   relative change in the solution x.  Pass iff this relative change is small.
+   - tol = relative error tolerance, as above
+   -a_tol = absolute convergence tolerance (default is 0.0)
    If one desires the convergence test to check the absolute
    convergence tolerance *only*, then set the relative convergence
    tolerance to 0.0.  (The default convergence test is  <C*r,r> <=
    max(relative_tolerance^2 * <C*b, b>, absolute_tolerance^2)
-- cf_tol = convergence factor tolerance; if >0 used for special test
-  for slow convergence
-- stop_crit!=0 means (TO BE PHASED OUT):
-  pure absolute error tolerance rather than a pure relative
-  error tolerance on the residual.  Never applies if rel_change!=0 or atolf!=0.
- - atolf = absolute error tolerance factor to be used _together_ with the
- relative error tolerance, |delta-residual| / ( atolf + |right-hand-side| ) < tol
-  (To BE PHASED OUT)
- - recompute_residual means: when the iteration seems to be converged, recompute the
- residual from scratch (r=b-Ax) and use this new residual to repeat the convergence test.
- This can be expensive, use this only if you have seen a problem with the regular
- residual computation.
- - recompute_residual_p means: recompute the residual from scratch (r=b-Ax)
- every "recompute_residual_p" iterations.  This can be expensive and degrade the
- convergence. Use it only if you have seen a problem with the regular residual
- computation.
- - skip_break means that cg will not stop for very small alpha and gamma. default: 0
-*/
+   - cf_tol = convergence factor tolerance; if >0 used for special test
+   for slow convergence
+   - stop_crit!=0 means (TO BE PHASED OUT):
+   pure absolute error tolerance rather than a pure relative
+   error tolerance on the residual.  Never applies if rel_change!=0 or atolf!=0.
+   - atolf = absolute error tolerance factor to be used _together_ with the
+   relative error tolerance, |delta-residual| / ( atolf + |right-hand-side| ) < tol
+   (To BE PHASED OUT)
+   - recompute_residual means: when the iteration seems to be converged, recompute the
+   residual from scratch (r=b-Ax) and use this new residual to repeat the convergence test.
+   This can be expensive, use this only if you have seen a problem with the regular
+   residual computation.
+   - recompute_residual_p means: recompute the residual from scratch (r=b-Ax)
+   every "recompute_residual_p" iterations.  This can be expensive and degrade the
+   convergence. Use it only if you have seen a problem with the regular residual
+   computation.
+   */
 
 typedef struct
 {
@@ -128,8 +127,8 @@ typedef struct
    void    *s;
    void    *r; /* ...contains the residual.  This is currently kept permanently.
                   If that is ever changed, it still must be kept if logging>1 */
-   void    *r_old; /* old residual needed for flexible CG, PR method */
-   void    *v; /* work vector only needed if recompute_residual_p uis used */
+   void    *r_old; /* only needed for flexible CG */
+   void    *v; /* work vector; only needed if recompute_residual_p is set */
 
    HYPRE_Int  owns_matvec_data;  /* normally 1; if 0, don't delete it */
    void      *matvec_data;
@@ -150,6 +149,7 @@ typedef struct
 } hypre_PCGData;
 
 #define hypre_PCGDataOwnsMatvecData(pcgdata)  ((pcgdata) -> owns_matvec_data)
+#define hypre_PCGDataHybrid(pcgdata)  ((pcgdata) -> hybrid)
 
 #ifdef __cplusplus
 extern "C" {
@@ -170,7 +170,7 @@ extern "C" {
 
 hypre_PCGFunctions *
 hypre_PCGFunctionsCreate(
-   void *       (*CAlloc)        ( size_t count, size_t elt_size ),
+   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_MemoryLocation location ),
    HYPRE_Int    (*Free)          ( void *ptr ),
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs ),
