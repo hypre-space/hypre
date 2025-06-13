@@ -6,6 +6,10 @@
 
 # generate header file for transforming multiprecision function names
 
+#===========================================================================
+# Create def header file
+#===========================================================================
+
 MUP_HEADER=_hypre_krylov_mup_def.h
 
 cat > $MUP_HEADER <<@
@@ -18,7 +22,6 @@ cat > $MUP_HEADER <<@
 ../config/write_header.sh >> $MUP_HEADER
 
 cat >> $MUP_HEADER <<@
-
 /******************************************************************************
  * Header file for transforming multiprecision functions names
  *****************************************************************************/
@@ -32,7 +35,7 @@ cat >> $MUP_HEADER <<@
 
 cat>> $MUP_HEADER <<@
 $(
-cat mup_functions mup_methods | while read -r func_name
+cat mup_functions mup_methods mup_none | while read -r func_name
 do
 # print dressed-up function 
 echo "#define $func_name HYPRE_MULTIPRECISION_FUNC ( $func_name )"
@@ -42,6 +45,9 @@ done
 #endif
 @
 
+#===========================================================================
+# Create undef header file
+#===========================================================================
 
 MUP_HEADER=_hypre_krylov_mup_undef.h
 
@@ -55,7 +61,6 @@ cat > $MUP_HEADER <<@
 ../config/write_header.sh >> $MUP_HEADER
 
 cat >> $MUP_HEADER <<@
-
 /******************************************************************************
  * Header file for transforming multiprecision functions names
  *****************************************************************************/
@@ -68,11 +73,9 @@ cat >> $MUP_HEADER <<@
 
 cat>> $MUP_HEADER <<@
 $(
-cat mup_functions mup_methods | while read -r func_name
+cat mup_functions mup_methods mup_none | while read -r func_name
 do
 echo "#undef $func_name"
 done
 )
-
-#endif
 @

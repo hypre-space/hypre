@@ -1,6 +1,5 @@
 hypre_BiCGSTABCreate
 hypre_BiCGSTABDestroy
-hypre_BiCGSTABFunctionsCreate
 hypre_BiCGSTABGetConverged
 hypre_BiCGSTABGetFinalRelativeResidualNorm
 hypre_BiCGSTABGetNumIterations
@@ -22,7 +21,6 @@ hypre_BiCGSTABSetup
 hypre_BiCGSTABSolve
 hypre_CGNRCreate
 hypre_CGNRDestroy
-hypre_CGNRFunctionsCreate
 hypre_CGNRGetFinalRelativeResidualNorm
 hypre_CGNRGetNumIterations
 hypre_CGNRGetPrecond
@@ -36,7 +34,6 @@ hypre_CGNRSetup
 hypre_CGNRSolve
 hypre_COGMRESCreate
 hypre_COGMRESDestroy
-hypre_COGMRESFunctionsCreate
 hypre_COGMRESGetAbsoluteTol
 hypre_COGMRESGetCGS
 hypre_COGMRESGetConverged
@@ -72,7 +69,6 @@ hypre_COGMRESSetup
 hypre_COGMRESSolve
 hypre_FlexGMRESCreate
 hypre_FlexGMRESDestroy
-hypre_FlexGMRESFunctionsCreate
 hypre_FlexGMRESGetAbsoluteTol
 hypre_FlexGMRESGetConverged
 hypre_FlexGMRESGetConvergenceFactorTol
@@ -103,7 +99,6 @@ hypre_FlexGMRESSetup
 hypre_FlexGMRESSolve
 hypre_GMRESCreate
 hypre_GMRESDestroy
-hypre_GMRESFunctionsCreate
 hypre_GMRESGetAbsoluteTol
 hypre_GMRESGetConverged
 hypre_GMRESGetConvergenceFactorTol
@@ -339,7 +334,6 @@ HYPRE_PCGSetup
 HYPRE_PCGSolve
 hypre_LGMRESCreate
 hypre_LGMRESDestroy
-hypre_LGMRESFunctionsCreate
 hypre_LGMRESGetAbsoluteTol
 hypre_LGMRESGetAugDim
 hypre_LGMRESGetConverged
@@ -396,7 +390,6 @@ lobpcg_MultiVectorByMultiVector
 lobpcg_solve
 hypre_PCGCreate
 hypre_PCGDestroy
-hypre_PCGFunctionsCreate
 hypre_PCGGetAbsoluteTol
 hypre_PCGGetAbsoluteTolFactor
 hypre_PCGGetConverged

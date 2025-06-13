@@ -10,7 +10,7 @@
 # header file to generate the prototype information.
 #
 # Usage:   <this-script> <function-list> <header>
-# Example: <this-script> mup_pre.functions HYPRE_krylov.h > mup_pre.functions.proto
+# Example: <this-script> mup_pre HYPRE_krylov.h > mup_pre.proto
 
 scriptdir=`dirname $0`
 
@@ -27,7 +27,7 @@ sed 's/\;/\;\n/g' $HFILE | awk '{if ($0 ~ /\;/) {print} else {printf "%s", $0}}'
 cat $FFILE | while read -r FNAME
 do
    awk -v fname=$FNAME '
-   BEGIN { pattern = ("[a-zA-Z0-9_]+[[:blank:]]+" fname "[[:blank:]]*[\(][^\)]*[\)]") }
+   BEGIN { pattern = ("[a-zA-Z0-9_]+[[:blank:]\*]+" fname "[[:blank:]]*[\(][^\)]*[\)]") }
    {
       if ( match($0, pattern) ) { print substr($0, RSTART, RLENGTH) }
    }
