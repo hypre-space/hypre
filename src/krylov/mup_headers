@@ -35,10 +35,13 @@ cat >> $MUP_HEADER <<@
 
 cat>> $MUP_HEADER <<@
 $(
-cat mup_functions mup_methods mup_none | while read -r func_name
+cat mup_functions mup_methods | while read -r func_name
 do
-# print dressed-up function 
-echo "#define $func_name HYPRE_MULTIPRECISION_FUNC ( $func_name )"
+   echo "#define $func_name HYPRE_MULTIPRECISION_FUNC ( $func_name )"
+done
+cat mup_none | while read -r func_name
+do
+   echo "#define $func_name HYPRE_FIXEDPRECISION_FUNC ( $func_name )"
 done
 )
 
@@ -75,7 +78,7 @@ cat>> $MUP_HEADER <<@
 $(
 cat mup_functions mup_methods mup_none | while read -r func_name
 do
-echo "#undef $func_name"
+   echo "#undef $func_name"
 done
 )
 @
