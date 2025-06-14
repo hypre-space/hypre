@@ -55,10 +55,17 @@ awk -v filename="$FFILE.proto" 'BEGIN {
             s_str = sprintf("%s,", s_str)
          }
       }
-      p_str=sprintf(" HYPRE_Precision precision,%s ",p_str)
+      p_str=sprintf("%s ",p_str)
       s_str=sprintf("%s ",s_str)
+
+      arg_pre = sprintf(" HYPRE_Precision precision,%s",p_str)
+
+      # First replace HYPRE_Real* and HYPRE_Complex* with void*
+      gsub(/(HYPRE_Real|HYPRE_Complex)[[:blank:]]*\*/, "void \*", arg_pre)
+      gsub(/(HYPRE_Real|HYPRE_Complex)/, "hypre_long_double", arg_pre)
+
       print "/*--------------------------------------------------------------------------*/\n"
-      print fret" \n"fdef"_pre("p_str")"
+      print fret" \n"fdef"_pre("arg_pre")"
       print "{"
       print tab "switch (precision)"
       print tab "{"
@@ -69,7 +76,7 @@ awk -v filename="$FFILE.proto" 'BEGIN {
       print tab tab tab fdef"_dbl("s_str");"
       print tab tab tab "break;"
       print tab tab "case HYPRE_REAL_LONGDOUBLE:"
-      print tab tab tab fdef"_ldbl("s_str");"
+      print tab tab tab fdef"_long_dbl("s_str");"
       print tab tab tab "break;"
       print tab tab "default:"
       print tab tab tab "hypre_printf(\"Unknown solver precision\");"

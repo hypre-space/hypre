@@ -65,6 +65,14 @@ cat >> $INTERNAL_HEADER <<@
 }
 #endif
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_krylov_mup_undef.h"
+#include "_hypre_krylov_mup.h"
+#ifdef BUILD_MP_FUNC
+#include "_hypre_krylov_mup_def.h"
+#endif
+#endif
+
 #endif
 
 @

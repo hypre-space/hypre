@@ -8,9 +8,7 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-/******************************************************************************
- * Header file for transforming multiprecision functions names
- *****************************************************************************/
+/* Header file for transforming multiprecision functions names */
 
 #ifndef hypre_KRYLOV_MUP_DEF_HEADER
 #define hypre_KRYLOV_MUP_DEF_HEADER

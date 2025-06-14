@@ -176,6 +176,10 @@ HYPRE_Int HYPRE_PCGSetPrecond(HYPRE_Solver         solver,
                               HYPRE_Solver         precond_solver);
 
 /**
+ **/
+HYPRE_Int HYPRE_PCGSetPrecondMatrix ( HYPRE_Solver solver , HYPRE_Matrix precond_matrix );
+
+/**
  * (Optional) Set the preconditioner to use in a generic fashion.
  * This function does not require explicit input of the setup and solve pointers
  * of the preconditioner object. Instead, it automatically extracts this information
@@ -271,6 +275,10 @@ HYPRE_Int HYPRE_PCGGetFlex(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_PCGGetPrecond(HYPRE_Solver  solver,
                               HYPRE_Solver *precond_data_ptr);
+
+/**
+ **/
+HYPRE_Int HYPRE_PCGGetPrecondMatrix ( HYPRE_Solver solver , HYPRE_Matrix *precond_matrix_ptr );
 
 /**
  **/
@@ -388,6 +396,10 @@ HYPRE_Int HYPRE_GMRESSetPrecond(HYPRE_Solver         solver,
                                 HYPRE_Solver         precond_solver);
 
 /**
+ **/
+HYPRE_Int HYPRE_GMRESSetPrecondMatrix ( HYPRE_Solver solver , HYPRE_Matrix precond_matrix );
+
+/**
  * (Optional) Set the amount of logging to do.
  **/
 HYPRE_Int HYPRE_GMRESSetLogging(HYPRE_Solver solver,
@@ -469,6 +481,10 @@ HYPRE_Int HYPRE_GMRESGetRelChange(HYPRE_Solver  solver,
  **/
 HYPRE_Int HYPRE_GMRESGetPrecond(HYPRE_Solver  solver,
                                 HYPRE_Solver *precond_data_ptr);
+
+/**
+ **/
+HYPRE_Int HYPRE_GMRESGetPrecondMatrix ( HYPRE_Solver solver , HYPRE_Matrix *precond_matrix_ptr );
 
 /**
  **/
@@ -1097,6 +1113,10 @@ HYPRE_Int HYPRE_BiCGSTABSetPrecond(HYPRE_Solver         solver,
                                    HYPRE_Solver         precond_solver);
 
 /**
+ **/
+HYPRE_Int HYPRE_BiCGSTABSetPrecondMatrix ( HYPRE_Solver solver , HYPRE_Matrix precond_matrix );
+
+/**
  * (Optional) Set the amount of logging to do.
  **/
 HYPRE_Int HYPRE_BiCGSTABSetLogging(HYPRE_Solver solver,
@@ -1130,6 +1150,10 @@ HYPRE_Int HYPRE_BiCGSTABGetResidual(HYPRE_Solver   solver,
  **/
 HYPRE_Int HYPRE_BiCGSTABGetPrecond(HYPRE_Solver  solver,
                                    HYPRE_Solver *precond_data_ptr);
+
+/**
+ **/
+HYPRE_Int HYPRE_BiCGSTABGetPrecondMatrix ( HYPRE_Solver solver , HYPRE_Matrix *precond_matrix_ptr );
 
 /**@}*/
 
@@ -1255,6 +1279,7 @@ HYPRE_Int HYPRE_CGNRGetPrecond(HYPRE_Solver  solver,
 
 #ifdef HYPRE_MIXED_PRECISION
 #include "_hypre_krylov_mup_undef.h"
+#include "HYPRE_krylov_mup.h"
 #ifdef BUILD_MP_FUNC
 #include "_hypre_krylov_mup_def.h"
 #endif

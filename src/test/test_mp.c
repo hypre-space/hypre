@@ -33,7 +33,7 @@
 #include "hypre_parcsr_ls_mup.h"
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
-#include "hypre_krylov_mup.h"
+//#include "hypre_krylov_mup.h"
 //#include "HYPRE_krylov_mp.h"
 //#include "hypre_utilities_mp.h"
 

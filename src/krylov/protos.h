@@ -136,10 +136,7 @@ HYPRE_Int hypre_COGMRESGetNumIterations ( void *gmres_vdata, HYPRE_Int *num_iter
 HYPRE_Int hypre_COGMRESGetConverged ( void *gmres_vdata, HYPRE_Int *converged );
 HYPRE_Int hypre_COGMRESGetFinalRelativeResidualNorm ( void *gmres_vdata,
                                                       HYPRE_Real *relative_residual_norm );
-HYPRE_Int hypre_COGMRESSetModifyPC ( void *fgmres_vdata, HYPRE_Int (*modify_pc )(void *precond_data,
-                                                                                 HYPRE_Int iteration, HYPRE_Real rel_residual_norm));
-
-
+HYPRE_Int hypre_COGMRESSetModifyPC ( void *cogmres_vdata, hypre_KrylovPtrToModifyPC modify_pc );
 
 /* flexgmres.c */
 void *hypre_FlexGMRESCreate ( hypre_FlexGMRESFunctions *fgmres_functions );
@@ -175,8 +172,7 @@ HYPRE_Int hypre_FlexGMRESGetNumIterations ( void *fgmres_vdata, HYPRE_Int *num_i
 HYPRE_Int hypre_FlexGMRESGetConverged ( void *fgmres_vdata, HYPRE_Int *converged );
 HYPRE_Int hypre_FlexGMRESGetFinalRelativeResidualNorm ( void *fgmres_vdata,
                                                         HYPRE_Real *relative_residual_norm );
-HYPRE_Int hypre_FlexGMRESSetModifyPC ( void *fgmres_vdata,
-                                       HYPRE_Int (*modify_pc )(void *precond_data, HYPRE_Int iteration, HYPRE_Real rel_residual_norm));
+HYPRE_Int hypre_FlexGMRESSetModifyPC ( void *fgmres_vdata, hypre_KrylovPtrToModifyPC modify_pc );
 HYPRE_Int hypre_FlexGMRESModifyPCDefault ( void *precond_data, HYPRE_Int iteration,
                                            HYPRE_Real rel_residual_norm );
 
