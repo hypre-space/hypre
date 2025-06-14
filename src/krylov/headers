@@ -43,14 +43,15 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
-cat bicgstab.h    >> $INTERNAL_HEADER
-cat cgnr.h        >> $INTERNAL_HEADER
-cat gmres.h       >> $INTERNAL_HEADER
-cat cogmres.h     >> $INTERNAL_HEADER
-cat lgmres.h      >> $INTERNAL_HEADER
-cat flexgmres.h   >> $INTERNAL_HEADER
-cat pcg.h         >> $INTERNAL_HEADER
-cat protos.h      >> $INTERNAL_HEADER
+cat krylov_solver_ptrs.h  >> $INTERNAL_HEADER
+cat bicgstab.h            >> $INTERNAL_HEADER
+cat cgnr.h                >> $INTERNAL_HEADER
+cat gmres.h               >> $INTERNAL_HEADER
+cat cogmres.h             >> $INTERNAL_HEADER
+cat lgmres.h              >> $INTERNAL_HEADER
+cat flexgmres.h           >> $INTERNAL_HEADER
+cat pcg.h                 >> $INTERNAL_HEADER
+cat protos.h              >> $INTERNAL_HEADER
 
 #../utilities/protos [!F]*.c               >> $INTERNAL_HEADER
 
@@ -67,3 +68,6 @@ cat >> $INTERNAL_HEADER <<@
 #endif
 
 @
+
+# RDF TODO: Migrate away from krylov.h and delete the next line
+cp _hypre_krylov.h krylov.h

@@ -11,7 +11,7 @@
 # generates a C file with the implementations of each of the functions.
 #
 # Usage:   <this-script> <function-list> <header-code> <header-1> <header-2> ...
-# Example: <this-script> mup_pre HYPRE_krylov.h _hypre_krylov.h > mup_pre.c
+# Example: <this-script> mup_pre mup_pre HYPRE_krylov.h _hypre_krylov.h > mup_pre.h
 
 scriptdir=`dirname $0`
 
@@ -31,68 +31,46 @@ done | (export LC_COLLATE=C; sort) | uniq > $FFILE.proto
 cat <<@
 $(
 awk -v filename="$FFILE.proto" 'BEGIN {
-   FS=" ";
-   key = 0;
-   # Read saved file data into array
+   FS=" , "
+   # Read the prototype info file
    while (getline < filename)
    {
-      structobj = tolower(base)"_data";
-      struct = substr($4, 1);
-      d = split($2,def,"*");
-      fdef = def[d];
-      tab  = "   ";
-      p_str="";      
-      s_str="";
-### special case for hypre_SetPrecond function
-      if($2~/SetPrecond/)
+      fret = $1
+      fdef = $2
+      tab  = "   "
+      p_str=""
+      s_str=""
+      for(i=3; i<=NF; i++)
       {
-         fopts="(void*,void*,void*,void*)";
-         f1="precond";
-         f2="precond_setup";
-         data="precond_data";
-         n = split($4, si, "*");
-         str1="void *"si[n];         
-         str2="HYPRE_Int (*"f1")"fopts;
-         str3="HYPRE_Int (*"f2")"fopts;
-         str4="void *"data;
-         p_str=sprintf("%s,\n \t\t%s,\n \t\t%s,\n \t\t%s",str1,str2,str3,str4);
-         s_str=sprintf("%s, %s, %s, %s",si[n],f1,f2,data);
-      }
-      else
-      { 
-         for(i=3; i<=NF; i+=2)
+         match($i, /[a-zA-Z0-9_]+[[:blank:]]*$/)
+         argtype = substr($i, 0, RSTART-1)
+         argname = substr($i, RSTART, RLENGTH)
+         sub(/^[[:blank:]]*/, "", argtype); sub(/[[:blank:]]*$/, "", argtype)
+         sub(/^[[:blank:]]*/, "", argname); sub(/[[:blank:]]*$/, "", argname)
+         p_str = sprintf("%s %s %s", p_str, argtype, argname)
+         s_str = sprintf("%s %s", s_str, argname)
+         if(i<NF)
          {
-            j = i+1;
-            if(j<NF)
-            {
-               p_str=sprintf("%s %s %s,",p_str,$i,$j);
-               n = split($j, si, "*");
-               n = s_str=sprintf("%s %s,",s_str,si[n]);
-            }
-            else 
-            {
-               p_str=sprintf("%s %s %s",p_str,$i,$j);
-               n = split($j, si, "*");
-               s_str=sprintf("%s %s",s_str,si[n]);
-            }
+            p_str = sprintf("%s,", p_str)
+            s_str = sprintf("%s,", s_str)
          }
-         p_str=sprintf(" HYPRE_Precision precision,%s ",p_str);
-         s_str=sprintf("%s ",s_str);
       }
+      p_str=sprintf(" HYPRE_Precision precision,%s ",p_str)
+      s_str=sprintf("%s ",s_str)
       print "/*--------------------------------------------------------------------------*/\n"
-      print $1" \n"$2"_pre("p_str")";
+      print fret" \n"fdef"_pre("p_str")"
       print "{"
       print tab "switch (precision)"
       print tab "{"
       print tab tab "case HYPRE_REAL_SINGLE:"
-      print tab tab tab fdef"_flt ("s_str");"
+      print tab tab tab fdef"_flt("s_str");"
       print tab tab tab "break;"
       print tab tab "case HYPRE_REAL_DOUBLE:"
-      print tab tab tab fdef"_dbl ("s_str");"
+      print tab tab tab fdef"_dbl("s_str");"
       print tab tab tab "break;"
       print tab tab "case HYPRE_REAL_LONGDOUBLE:"
-      print tab tab tab fdef"_ldbl ("s_str");"
-      print tab tab tab "break;"      
+      print tab tab tab fdef"_ldbl("s_str");"
+      print tab tab tab "break;"
       print tab tab "default:"
       print tab tab tab "hypre_printf(\"Unknown solver precision\");"
       print tab "}"
@@ -100,8 +78,8 @@ awk -v filename="$FFILE.proto" 'BEGIN {
       {
          print tab "return hypre_error_flag;"
       }
-      print "}\n" 
+      print "}\n"
    }
-   close(filename);
+   close(filename)
 }')
 @
