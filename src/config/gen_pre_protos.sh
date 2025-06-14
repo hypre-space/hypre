@@ -35,10 +35,10 @@ awk -v filename="$FFILE.proto" 'BEGIN {
    # Read the prototype info file
    while (getline < filename)
    {
-      fret = $1
-      fdef = $2
-      tab  = "   "
-      p_str=""
+      fret  = $1
+      fdef  = $2
+      tab   = "   "
+      p_str = ""
       for(i=3; i<=NF; i++)
       {
          match($i, /[a-zA-Z0-9_]+[[:blank:]]*$/)

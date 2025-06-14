@@ -35,11 +35,11 @@ awk -v filename="$FFILE.proto" 'BEGIN {
    # Read the prototype info file
    while (getline < filename)
    {
-      fret = $1
-      fdef = $2
-      tab  = "   "
-      p_str=""
-      s_str=""
+      fret  = $1
+      fdef  = $2
+      tab   = "   "
+      p_str = ""
+      s_str = ""
       for(i=3; i<=NF; i++)
       {
          match($i, /[a-zA-Z0-9_]+[[:blank:]]*$/)
@@ -70,21 +70,17 @@ awk -v filename="$FFILE.proto" 'BEGIN {
       print tab "switch (precision)"
       print tab "{"
       print tab tab "case HYPRE_REAL_SINGLE:"
-      print tab tab tab fdef"_flt("s_str");"
+      print tab tab tab "return "fdef"_flt("s_str");"
       print tab tab tab "break;"
       print tab tab "case HYPRE_REAL_DOUBLE:"
-      print tab tab tab fdef"_dbl("s_str");"
+      print tab tab tab "return "fdef"_dbl("s_str");"
       print tab tab tab "break;"
       print tab tab "case HYPRE_REAL_LONGDOUBLE:"
-      print tab tab tab fdef"_long_dbl("s_str");"
+      print tab tab tab "return "fdef"_long_dbl("s_str");"
       print tab tab tab "break;"
       print tab tab "default:"
       print tab tab tab "hypre_printf(\"Unknown solver precision\");"
       print tab "}"
-      if($1~/HYPRE_Int/)  # assume we only have HYPRE_Int or void function types for now
-      {
-         print tab "return hypre_error_flag;"
-      }
       print "}\n"
    }
    close(filename)
