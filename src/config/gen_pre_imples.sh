@@ -70,15 +70,19 @@ awk -v filename="$FFILE.proto" 'BEGIN {
       print tab "{"
       print tab tab "case HYPRE_REAL_SINGLE:"
       print tab tab tab "return "fdef"_flt("s_str");"
-      print tab tab tab "break;"
       print tab tab "case HYPRE_REAL_DOUBLE:"
       print tab tab tab "return "fdef"_dbl("s_str");"
-      print tab tab tab "break;"
       print tab tab "case HYPRE_REAL_LONGDOUBLE:"
       print tab tab tab "return "fdef"_long_dbl("s_str");"
-      print tab tab tab "break;"
       print tab tab "default:"
-      print tab tab tab "hypre_printf(\"Unknown solver precision\");"
+      if(fret~/void/)
+      {
+         print tab tab tab "hypre_printf(\"Unknown solver precision\");"
+      }
+      else
+      {
+         print tab tab tab "{ "fret" value = 0; hypre_printf(\"Unknown solver precision\"); return value; }"
+      }
       print tab "}"
       print "}\n"
    }
