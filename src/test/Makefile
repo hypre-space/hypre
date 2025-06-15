@@ -71,28 +71,13 @@ HYPRE_DRIVERS =\
  sstruct_fac.c\
  ij_mm.c\
  zboxloop.c\
+
+HYPRE_MP_DRIVERS =\
  ij_mp.c\
  test_mp.c\
  test_mp_pcg.c\
  test_mp_pcg_3d.c\
 # struct_mp.c\
-
-#HYPRE_DRIVERS =\
-# ij_mp.c\
-# test_mp.c\
-# test_mp_pcg.c\
-# test_mp_pcg_3d.c\
-# ij.c\
-# ij_assembly.c\
-# sstruct.c\
-# struct.c\
-# struct_mp.c\
-# ams_driver.c\
-# maxwell_unscaled.c\
-# struct_migrate.c\
-# sstruct_fac.c\
-# ij_mm.c\
-# zboxloop.c
 
 HYPRE_DRIVERS_CXX =\
  cxx_ij.cxx\
@@ -111,6 +96,9 @@ HYPRE_DRIVERS_F77 =\
  f77_struct.f
 
 HYPRE_DRIVER_EXECS=${HYPRE_DRIVERS:.c=}
+ifdef MP_BUILD
+   HYPRE_DRIVER_EXECS+=${HYPRE_MP_DRIVERS:.c=}
+endif
 HYPRE_F77_EXAMPLES_DRIVER_EXECS=${HYPRE_F77_EXAMPLES_DRIVERS:.c=}
 HYPRE_DRIVER_F77_EXECS=${HYPRE_DRIVERS_F77:.f=}
 HYPRE_DRIVER_CXX_EXECS=${HYPRE_DRIVERS_CXX:.cxx=}
@@ -151,42 +139,6 @@ distclean: clean
 ##################################################################
 
 # C
-ifeq (${MP_BUILD}, 1) 
-ij_mp: ij_mp.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-else
-ij_mp:
-endif
-ifeq (${MP_BUILD}, 1) 
-struct_mp: struct_mp.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-else
-struct_mp:
-endif
-ifeq (${MP_BUILD}, 1) 
-test_mp: test_mp.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-else
-test_mp:
-endif
-ifeq (${MP_BUILD}, 1) 
-test_mp_pcg: test_mp_pcg.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-else
-test_mp_pcg:
-endif
-ifeq (${MP_BUILD}, 1) 
-test_mp_pcg_3d: test_mp_pcg_3d.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-else
-test_mp_pcg_3d:
-endif
-
 ij: ij.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
@@ -232,6 +184,26 @@ zboxloop: zboxloop.obj
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
 struct_newboxloop: struct_newboxloop.o $(KOKKOS_LINK_DEPENDS)
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+ij_mp: ij_mp.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+struct_mp: struct_mp.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+test_mp: test_mp.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+test_mp_pcg: test_mp_pcg.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $< ${LFLAGS}
+
+test_mp_pcg_3d: test_mp_pcg_3d.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
