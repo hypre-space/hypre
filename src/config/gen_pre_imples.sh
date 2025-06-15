@@ -75,7 +75,7 @@ awk -v filename="$FFILE.proto" 'BEGIN {
       print tab tab "case HYPRE_REAL_LONGDOUBLE:"
       print tab tab tab "return "fdef"_long_dbl("s_str");"
       print tab tab "default:"
-      if(fret~/void/)
+      if(fret == "void")
       {
          print tab tab tab "hypre_printf(\"Unknown solver precision\");"
       }
