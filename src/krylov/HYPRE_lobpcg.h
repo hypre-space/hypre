@@ -5,8 +5,8 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
-#ifndef hypre_LOBPCG_SOLVER
-#define hypre_LOBPCG_SOLVER
+#ifndef HYPRE_LOBPCG_HEADER
+#define HYPRE_LOBPCG_HEADER
 
 #include "HYPRE_krylov.h"
 
@@ -15,6 +15,10 @@
 #include "interpreter.h"
 #include "temp_multivector.h"
 #include "HYPRE_MatvecFunctions.h"
+
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_krylov_mup_def.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -164,6 +168,14 @@ HYPRE_Int HYPRE_LOBPCGIterations(HYPRE_Solver solver);
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_krylov_mup_undef.h"
+#include "HYPRE_lobpcg_mup.h"
+#ifdef BUILD_MP_FUNC
+#include "_hypre_krylov_mup_def.h"
+#endif
 #endif
 
 #endif

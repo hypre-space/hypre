@@ -5,18 +5,20 @@
  * SPDX-License-Identifier: (Apache-2.0 OR MIT)
  ******************************************************************************/
 
+#ifndef hypre_LOBPCG_HEADER
+#define hypre_LOBPCG_HEADER
+
 #include "multivector.h"
-#include "_hypre_utilities.h"
 #include "fortran_matrix.h"
 #include "HYPRE_MatvecFunctions.h"
 #include "HYPRE_krylov.h"
+#include "HYPRE_lobpcg.h"
+#include "_hypre_krylov.h"
+#include "_hypre_utilities.h"
 
 #ifdef HYPRE_MIXED_PRECISION
 #include "_hypre_krylov_mup_def.h"
 #endif
-
-#ifndef LOCALLY_OPTIMAL_BLOCK_PRECONDITIONED_CONJUGATE_GRADIENTS
-#define LOCALLY_OPTIMAL_BLOCK_PRECONDITIONED_CONJUGATE_GRADIENTS
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,6 +28,8 @@ extern "C" {
 #define WRONG_BLOCK_SIZE                 2
 #define WRONG_CONSTRAINTS                3
 #define REQUESTED_ACCURACY_NOT_ACHIEVED -1
+
+typedef void (*lobpcg_operator) (void *ptr1, void *ptr2, void *ptr3);
 
 typedef struct
 {
@@ -103,44 +107,23 @@ typedef struct
 HYPRE_Int
 lobpcg_solve( mv_MultiVectorPtr blockVectorX,
               void* operatorAData,
-              void (*operatorA)( void*, void*, void* ),
+              lobpcg_operator operatorA,
               void* operatorBData,
-              void (*operatorB)( void*, void*, void* ),
+              lobpcg_operator operatorB,
               void* operatorTData,
-              void (*operatorT)( void*, void*, void* ),
+              lobpcg_operator operatorT,
               mv_MultiVectorPtr blockVectorY,
               lobpcg_BLASLAPACKFunctions blap_fn,
               lobpcg_Tolerance tolerance,
               HYPRE_Int maxIterations,
               HYPRE_Int verbosityLevel,
               HYPRE_Int* iterationNumber,
-
-              /* eigenvalues; "lambda_values" should point to array  containing <blocksize> doubles where <blocksi
-              ze> is the width of multivector "blockVectorX" */
               HYPRE_Real * lambda_values,
-
-              /* eigenvalues history; a pointer to the entries of the  <blocksize>-by-(<maxIterations>+1) matrix s
-              tored
-              in  fortran-style. (i.e. column-wise) The matrix may be  a submatrix of a larger matrix, see next
-              argument; If you don't need eigenvalues history, provide NULL in this entry */
               HYPRE_Real * lambdaHistory_values,
-
-              /* global height of the matrix (stored in fotran-style)  specified by previous argument */
               HYPRE_BigInt lambdaHistory_gh,
-
-              /* residual norms; argument should point to array of <blocksize> doubles */
               HYPRE_Real * residualNorms_values,
-
-              /* residual norms history; a pointer to the entries of the  <blocksize>-by-(<maxIterations>+1) matri
-              x
-              stored in  fortran-style. (i.e. column-wise) The matrix may be  a submatrix of a larger matrix, see
-              next
-              argument If you don't need residual norms history, provide NULL in this entry */
               HYPRE_Real * residualNormsHistory_values,
-
-              /* global height of the matrix (stored in fotran-style)  specified by previous argument */
               HYPRE_BigInt residualNormsHistory_gh
-
             );
 
 HYPRE_Int
@@ -168,8 +151,8 @@ hypre_LOBPCGGetPrecond( void         *pcg_vdata,
                         HYPRE_Solver *precond_data_ptr );
 HYPRE_Int
 hypre_LOBPCGSetPrecond( void  *pcg_vdata,
-                        HYPRE_Int  (*precond)(void*, void*, void*, void*),
-                        HYPRE_Int  (*precond_setup)(void*, void*, void*, void*),
+                        hypre_KrylovPtrToPrecond precond,
+                        hypre_KrylovPtrToPrecondSetup precond_setup,
                         void  *precond_data );
 HYPRE_Int
 hypre_LOBPCGSetPrintLevel( void *pcg_vdata, HYPRE_Int level );
@@ -198,10 +181,6 @@ utilities_FortranMatrix*
 hypre_LOBPCGEigenvaluesHistory( void *vdata );
 HYPRE_Int
 hypre_LOBPCGIterations( void* vdata );
-void hypre_LOBPCGMultiOperatorB(void *data,
-                                void *x,
-                                void *y);
-
 void lobpcg_MultiVectorByMultiVector(mv_MultiVectorPtr        x,
                                      mv_MultiVectorPtr        y,
                                      utilities_FortranMatrix *xy);
@@ -210,4 +189,12 @@ void lobpcg_MultiVectorByMultiVector(mv_MultiVectorPtr        x,
 }
 #endif
 
-#endif /* LOCALLY_OPTIMAL_BLOCK_PRECONDITIONED_CONJUGATE_GRADIENTS */
+#ifdef HYPRE_MIXED_PRECISION
+#include "_hypre_krylov_mup_undef.h"
+#include "_hypre_lobpcg_mup.h"
+#ifdef BUILD_MP_FUNC
+#include "_hypre_krylov_mup_def.h"
+#endif
+#endif
+
+#endif

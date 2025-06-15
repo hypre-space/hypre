@@ -31,7 +31,8 @@ HEADERS =\
  lobpcg.h
 
 FILES =\
- mup_pre.c
+ mup_pre.c\
+ mup_functions.c
 
 #######################
 # Multiprecision files

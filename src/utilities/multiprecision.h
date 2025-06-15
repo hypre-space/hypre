@@ -41,6 +41,7 @@ typedef enum
 #if defined(MP_BUILD_SINGLE)
 
 #define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, FLT_SUFFIX)
+#define HYPRE_ZZZZZPRECISION_FUNC(a) CONCAT_(a, FLT_SUFFIX)  /* RDF: Temporary */
 #define HYPRE_FIXEDPRECISION_FUNC(a) CONCAT_(a, FLT_SUFFIX)
 #define HYPRE_OBJECT_PRECISION HYPRE_REAL_SINGLE
 #define BUILD_MP_FUNC 1
@@ -52,6 +53,7 @@ typedef enum
 #elif defined(MP_BUILD_LONGDOUBLE)
 
 #define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, LDBL_SUFFIX)
+#define HYPRE_ZZZZZPRECISION_FUNC(a) CONCAT_(a, LDBL_SUFFIX)  /* RDF: Temporary */
 #define HYPRE_FIXEDPRECISION_FUNC(a) CONCAT_(a, LDBL_SUFFIX)
 #define HYPRE_OBJECT_PRECISION HYPRE_REAL_LONGDOUBLE
 #define BUILD_MP_FUNC 1
@@ -63,6 +65,7 @@ typedef enum
 #elif defined(MP_BUILD_DOUBLE)
 
 #define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, DBL_SUFFIX)
+#define HYPRE_ZZZZZPRECISION_FUNC(a) CONCAT_(a, DBL_SUFFIX)  /* RDF: Temporary */
 #define HYPRE_FIXEDPRECISION_FUNC(a) CONCAT_(a, DBL_SUFFIX)
 #define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE
 #define BUILD_MP_FUNC 1
@@ -72,6 +75,7 @@ typedef enum
 #elif defined(MP_BUILD_FIXED)
 
 #define HYPRE_MULTIPRECISION_FUNC(a) a
+#define HYPRE_ZZZZZPRECISION_FUNC(a) CONCAT_(a, fixed)  /* RDF: Temporary */
 #define HYPRE_FIXEDPRECISION_FUNC(a) a
 #define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE  /* RDF: Set this to default precision */
 #define BUILD_MP_FUNC 1
@@ -80,9 +84,10 @@ typedef enum
 #else
 
 #define HYPRE_MULTIPRECISION_FUNC(a) a
+#define HYPRE_ZZZZZPRECISION_FUNC(a) a  /* RDF: Temporary */
 #define HYPRE_FIXEDPRECISION_FUNC(a) a
 #define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE  /* RDF: Set this to default precision */
-#define DEFINE_GLOBAL_VARIABLE 1  // RDF: Delete this later
+#define DEFINE_GLOBAL_VARIABLE 1  /* RDF: Delete this later */
 
 #endif
 

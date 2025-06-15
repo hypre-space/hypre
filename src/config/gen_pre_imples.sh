@@ -4,14 +4,13 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-# Generate C code for multiprecision _pre functions
+# Generate C implementations for multiprecision _pre functions
 #
-# The script takes a file containing a list of functions, a file containing
-# header source code (e.g., include lines), and one or more header files, then
-# generates a C file with the implementations of each of the functions.
+# The script takes a file containing a list of functions and one or more header
+# files, then generates a C file with the function implementations.
 #
-# Usage:   <this-script> <function-list> <header-code> <header-1> <header-2> ...
-# Example: <this-script> mup_pre mup_pre HYPRE_krylov.h _hypre_krylov.h > mup_pre.h
+# Usage:   <this-script> <function-list> <header-1> <header-2> ...
+# Example: <this-script> mup.pre HYPRE_krylov.h _hypre_krylov.h > mup_pre.c
 
 scriptdir=`dirname $0`
 
@@ -65,7 +64,7 @@ awk -v filename="$FFILE.proto" 'BEGIN {
       gsub(/(HYPRE_Real|HYPRE_Complex)/, "hypre_long_double", arg_pre)
 
       print "/*--------------------------------------------------------------------------*/\n"
-      print fret" \n"fdef"_pre("arg_pre")"
+      print fret"\n"fdef"_pre("arg_pre")"
       print "{"
       print tab "switch (precision)"
       print tab "{"
