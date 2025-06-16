@@ -166,6 +166,7 @@ dlamch.o : dlamch.c ${LAPACK_HEADERS}
 dlamch_obj: dlamch.o
 #
 # multiprecision object files
+${OBJS}: CFLAGS += -DMP_BUILD_DEFAULT=1
 lapack_OBJS: ${OBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
 
 # compile without optimization

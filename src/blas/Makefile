@@ -102,6 +102,7 @@ ${MuP_OBJDIR_longdouble}/%.o: %.c ${BLAS_HEADERS}
 	${CC} ${CFLAGS} -c -o $@ $<
 #
 # multiprecision object files
+${OBJS}: CFLAGS += -DMP_BUILD_DEFAULT=1
 blas_OBJS: ${OBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
 #
 else

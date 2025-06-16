@@ -201,6 +201,8 @@ ${MuP_OBJDIR_longdouble}/%.o ${MuP_OBJDIR_longdouble}/%.obj: %.c ${HEADERS}
 
 #UTILITIESLIBS = ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
 
+${COBJS}: CFLAGS += -DMP_BUILD_DEFAULT=1
+${CUOBJS}: CFLAGS += -DMP_BUILD_DEFAULT=1
 OBJS = ${COBJS} ${CUOBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
 
 else

@@ -86,6 +86,8 @@ ${MuP_OBJDIR_longdouble}/%.o: %.c
 	@mkdir -p ${@D}
 	${CC} ${CFLAGS} -c -o $@ $<
 #
+${OBJS}: CFLAGS += -DMP_BUILD_DEFAULT=1
+#
 # multiprecision object libraries
 MULTIVECTORLIBS = ${OBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
 

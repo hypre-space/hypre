@@ -72,18 +72,19 @@ typedef enum
 #undef  HYPRE_SINGLE
 #undef  HYPRE_LONG_DOUBLE
 
-#elif defined(MP_BUILD_FIXED)
+#elif defined(MP_BUILD_DEFAULT)
 
 #define HYPRE_MULTIPRECISION_FUNC(a) a
-#define HYPRE_ZZZZZPRECISION_FUNC(a) CONCAT_(a, fixed)  /* RDF: Temporary */
+#define HYPRE_ZZZZZPRECISION_FUNC(a) CONCAT_(a, def)  /* RDF: Temporary */
 #define HYPRE_FIXEDPRECISION_FUNC(a) a
 #define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE  /* RDF: Set this to default precision */
 #define BUILD_MP_FUNC 1
-#define DEFINE_GLOBAL_VARIABLE 1  /* Define globals only once during fixed precision build */
+#define DEFINE_GLOBAL_VARIABLE 1  /* Define globals only once during default precision build */
 
 #else
 
 #define HYPRE_MULTIPRECISION_FUNC(a) a
+//#define HYPRE_ZZZZZPRECISION_FUNC(a) CONCAT_(a, def)  /* RDF: Temporary */
 #define HYPRE_ZZZZZPRECISION_FUNC(a) a  /* RDF: Temporary */
 #define HYPRE_FIXEDPRECISION_FUNC(a) a
 #define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE  /* RDF: Set this to default precision */
