@@ -46,8 +46,9 @@ typedef struct
   HYPRE_Int * constraint_mask;
   HYPRE_Int set_mask;
 
-  HYPRE_Int relax_type;
-  HYPRE_Int setup;
 } hypre_ParAMGFData;
+
+void * hypre_AMGFCreate();
+
 
 #endif

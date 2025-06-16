@@ -67,6 +67,7 @@ FILES =\
  gen_redcs_mat.c\
  HYPRE_parcsr_amg.c\
  HYPRE_parcsr_amgdd.c\
+ HYPRE_parcsr_amgf.c\
  HYPRE_parcsr_bicgstab.c\
  HYPRE_parcsr_block.c\
  HYPRE_parcsr_cgnr.c\
@@ -89,6 +90,7 @@ FILES =\
  HYPRE_ame.c\
  par_2s_interp.c\
  par_amg.c\
+ par_amgf.c\
  par_amgdd.c\
  par_amgdd_comp_grid.c\
  par_amgdd_setup.c\

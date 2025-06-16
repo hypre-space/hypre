@@ -12,7 +12,7 @@
  *****************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
-
+#include "par_amgf.h" // can this be removed by updating the _hypre_parcsr_ls.h file??
 /*--------------------------------------------------------------------------
  * hypre_AMGFCreate
  *--------------------------------------------------------------------------*/
@@ -22,6 +22,7 @@ void *
 hypre_AMGFCreate()//MPI_Comm comm, HYPRE_Solver * solver)
 {
    hypre_ParAMGFData * amgf_data;
+   hypre_Solver      *base;
 
    /*-----------------------------------------------------------------------
     * Create the hypre_ParAMGData structure and return
@@ -34,7 +35,7 @@ hypre_AMGFCreate()//MPI_Comm comm, HYPRE_Solver * solver)
    amgf_data->set_amg_solver = 0;
    
    
-   base     = (hypre_Solver*) amfg_data;
+   base     = (hypre_Solver*) amgf_data;
 
    /* Set base solver function pointers */
    //hypre_SolverSetup(base)   = (HYPRE_PtrToSolverFcn)  HYPRE_BoomerAMGSetup;
