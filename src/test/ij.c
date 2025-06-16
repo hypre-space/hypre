@@ -102,8 +102,8 @@ HYPRE_Int BuildParCoordinates (HYPRE_Int argc, char *argv [], HYPRE_Int arg_inde
 extern HYPRE_Int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, HYPRE_Int iterations,
                                                    HYPRE_Real rel_residual_norm);
 
-extern HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int iteration,
-                                                HYPRE_Real rel_residual_norm);
+//extern HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int iteration,
+//                                                HYPRE_Real rel_residual_norm);
 #ifdef __cplusplus
 }
 #endif

@@ -31,6 +31,8 @@ HEADERS =\
  lobpcg.h
 
 FILES =\
+ mup_pre.c\
+ mup_functions.c
 
 #######################
 # Multiprecision files
@@ -54,7 +56,7 @@ MuP_FILES = \
  HYPRE_lobpcg.c
 
 ifeq (${MP_BUILD}, 1) 
-   COBJS = ${FILES:.c=.o}
+   COBJS = ${FILES:.c=.o} ${MuP_FILES:.c=.o}
    MuP_COBJS = ${MuP_FILES:.c=.o}
 else
    COBJS = ${FILES:.c=.o} ${MuP_FILES:.c=.o}
@@ -68,18 +70,16 @@ SONAME = libHYPRE_krylov-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 all: libHYPRE_krylov${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/krylov.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/lobpcg.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/krylov_mup_func.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/hypre_krylov_mup.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: all
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/krylov.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/lobpcg.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/krylov_mup_func.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/hypre_krylov_mup.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean: clean_mup
@@ -126,6 +126,8 @@ ${MuP_OBJDIR_longdouble}/%.o: %.c
 	@echo  "processing C object $@ ..."
 	@mkdir -p ${@D}
 	${CC} ${CFLAGS} -c -o $@ $<
+#
+${COBJS}: CFLAGS += -DMP_BUILD_DEFAULT=1
 
 OBJS = ${COBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
 

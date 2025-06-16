@@ -97,9 +97,6 @@
 /* Define to 1 if the routine MPI_Comm_f2c is found */
 #undef HYPRE_HAVE_MPI_COMM_F2C
 
-/* Define to 1 if using hopscotch hashing */
-#undef HYPRE_USING_HOPSCOTCH
-
 /* Define to 1 for HP platforms */
 #undef HYPRE_HPPA
 
@@ -208,8 +205,14 @@
 /* Define to 1 if executing on GPU device */
 #undef HYPRE_USING_GPU
 
+/* Define to 1 if using GPU aware MPI */
+#undef HYPRE_USING_GPU_AWARE_MPI
+
 /* HIP being used */
 #undef HYPRE_USING_HIP
+
+/* Define to 1 if using hopscotch hashing */
+#undef HYPRE_USING_HOPSCOTCH
 
 /* Define to 1 if using host memory only */
 #undef HYPRE_USING_HOST_MEMORY
@@ -291,9 +294,6 @@
 
 /* Define to 1 if using unified memory */
 #undef HYPRE_USING_UNIFIED_MEMORY
-
-/* Define to 1 if using GPU aware MPI */
-#undef HYPRE_USING_GPU_AWARE_MPI
 
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT

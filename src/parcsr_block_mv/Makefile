@@ -140,8 +140,10 @@ ${MuP_OBJDIR_longdouble}/%.o: %.c
 	@echo  "processing C object $@ ..."
 	@mkdir -p ${@D}
 	${CC} ${CFLAGS} -c -o $@ $<
+#
+${COBJS}: CFLAGS += -DMP_BUILD_DEFAULT=1
 
-OBJS = ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
+OBJS = ${COBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
 
 else
 OBJS = ${COBJS}

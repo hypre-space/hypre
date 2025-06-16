@@ -86,8 +86,10 @@ ${MuP_OBJDIR_longdouble}/%.o: %.c
 	@mkdir -p ${@D}
 	${CC} ${CFLAGS} -c -o $@ $<
 #
+${OBJS}: CFLAGS += -DMP_BUILD_DEFAULT=1
+#
 # multiprecision object libraries
-MULTIVECTORLIBS = ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
+MULTIVECTORLIBS = ${OBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
 
 libHYPRE_multivector.a: ${MULTIVECTORLIBS}
 	@echo  "Building $@ ... "

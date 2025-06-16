@@ -1220,6 +1220,7 @@ hypre_GMRESSetPrecond( void  *gmres_vdata,
 
    return hypre_error_flag;
 }
+*/
 
 /*--------------------------------------------------------------------------
  * hypre_GMRESGetPrecond
