@@ -325,32 +325,6 @@ hypre_LGMRESSetup( void * lgmres_vdata, void * A, void * b, void * x );
 HYPRE_Int
 hypre_LGMRESSolve( void * lgmres_vdata, void * A, void * b, void * x );
 HYPRE_Int
-hypre_LOBPCGDestroy( void * pcg_vdata );
-HYPRE_Int
-hypre_LOBPCGGetPrecond( void * pcg_vdata, HYPRE_Solver * precond_data_ptr );
-HYPRE_Int
-hypre_LOBPCGIterations( void* vdata );
-HYPRE_Int
-hypre_LOBPCGSetMaxIter( void* pcg_vdata, HYPRE_Int max_iter );
-HYPRE_Int
-hypre_LOBPCGSetPrecond( void * pcg_vdata, hypre_KrylovPtrToPrecond precond, hypre_KrylovPtrToPrecondSetup precond_setup, void * precond_data );
-HYPRE_Int
-hypre_LOBPCGSetPrecondUsageMode( void* pcg_vdata, HYPRE_Int mode );
-HYPRE_Int
-hypre_LOBPCGSetPrintLevel( void * pcg_vdata, HYPRE_Int level );
-HYPRE_Int
-hypre_LOBPCGSetRTol( void* pcg_vdata, hypre_long_double tol );
-HYPRE_Int
-hypre_LOBPCGSetTol( void* pcg_vdata, hypre_long_double tol );
-HYPRE_Int
-hypre_LOBPCGSetup( void * pcg_vdata, void * A, void * b, void * x );
-HYPRE_Int
-hypre_LOBPCGSetupB( void * pcg_vdata, void * B, void * x );
-HYPRE_Int
-hypre_LOBPCGSetupT( void * pcg_vdata, void * T, void * x );
-HYPRE_Int
-hypre_LOBPCGSolve( void * vdata, mv_MultiVectorPtr con, mv_MultiVectorPtr vec, void * val );
-HYPRE_Int
 hypre_PCGDestroy( void * pcg_vdata );
 HYPRE_Int
 hypre_PCGGetAbsoluteTol( void * pcg_vdata, void * a_tol );
@@ -438,18 +412,6 @@ HYPRE_Int
 hypre_PCGSetup( void * pcg_vdata, void * A, void * b, void * x );
 HYPRE_Int
 hypre_PCGSolve( void * pcg_vdata, void * A, void * b, void * x );
-HYPRE_Int
-lobpcg_clean( lobpcg_Data* data );
-HYPRE_Int
-lobpcg_initialize( lobpcg_Data* data );
-HYPRE_Int
-lobpcg_solve( mv_MultiVectorPtr blockVectorX, void* operatorAData, lobpcg_operator operatorA, void* operatorBData, lobpcg_operator operatorB, void* operatorTData, lobpcg_operator operatorT, mv_MultiVectorPtr blockVectorY, lobpcg_BLASLAPACKFunctions blap_fn, lobpcg_Tolerance tolerance, HYPRE_Int maxIterations, HYPRE_Int verbosityLevel, HYPRE_Int* iterationNumber, void * lambda_values, void * lambdaHistory_values, HYPRE_BigInt lambdaHistory_gh, void * residualNorms_values, void * residualNormsHistory_values, HYPRE_BigInt residualNormsHistory_gh );
-utilities_FortranMatrix*
-hypre_LOBPCGEigenvaluesHistory( void * vdata );
-utilities_FortranMatrix*
-hypre_LOBPCGResidualNorms( void * vdata );
-utilities_FortranMatrix*
-hypre_LOBPCGResidualNormsHistory( void * vdata );
 void *
 hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions );
 void *
@@ -464,17 +426,3 @@ void *
 hypre_LGMRESCreate( hypre_LGMRESFunctions * lgmres_functions );
 void *
 hypre_PCGCreate( hypre_PCGFunctions * pcg_functions );
-void
-hypre_LOBPCGMultiOperatorA( void * data, void * x, void* y );
-void
-hypre_LOBPCGMultiOperatorB( void * data, void * x, void* y );
-void
-hypre_LOBPCGMultiPreconditioner( void * data, void * x, void* y );
-void
-hypre_LOBPCGOperatorA( void * pcg_vdata, void* x, void* y );
-void
-hypre_LOBPCGOperatorB( void * pcg_vdata, void* x, void* y );
-void
-hypre_LOBPCGPreconditioner( void * vdata, void* x, void* y );
-void
-lobpcg_MultiVectorByMultiVector( mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix * xy );

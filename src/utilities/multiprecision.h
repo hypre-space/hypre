@@ -84,8 +84,8 @@ typedef enum
 #else
 
 #define HYPRE_MULTIPRECISION_FUNC(a) a
-//#define HYPRE_ZZZZZPRECISION_FUNC(a) CONCAT_(a, def)  /* RDF: Temporary */
-#define HYPRE_ZZZZZPRECISION_FUNC(a) a  /* RDF: Temporary */
+#define HYPRE_ZZZZZPRECISION_FUNC(a) CONCAT_(a, def)  /* RDF: Temporary */
+//#define HYPRE_ZZZZZPRECISION_FUNC(a) a  /* RDF: Temporary */
 #define HYPRE_FIXEDPRECISION_FUNC(a) a
 #define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE  /* RDF: Set this to default precision */
 #define DEFINE_GLOBAL_VARIABLE 1  /* RDF: Delete this later */

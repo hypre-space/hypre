@@ -26,7 +26,8 @@ extern "C" {
 #if defined (HYPRE_MIXED_PRECISION)
 @
 
-cat mup_pre_ext.h  >> $MUP_HEADER
+cat mup_pre_ext.h        >> $MUP_HEADER
+cat mup_functions_ext.h  >> $MUP_HEADER
 
 cat >> $MUP_HEADER <<@
 
@@ -60,7 +61,8 @@ extern "C" {
 #if defined (HYPRE_MIXED_PRECISION)
 @
 
-cat mup_pre_int.h  >> $MUP_HEADER
+cat mup_pre_int.h        >> $MUP_HEADER
+cat mup_functions_int.h  >> $MUP_HEADER
 
 cat >> $MUP_HEADER <<@
 
@@ -94,7 +96,8 @@ extern "C" {
 #if defined (HYPRE_MIXED_PRECISION)
 @
 
-cat mup_pre_lobpcg_ext.h  >> $MUP_HEADER
+cat mup_pre_lobpcg_ext.h        >> $MUP_HEADER
+cat mup_functions_lobpcg_ext.h  >> $MUP_HEADER
 
 cat >> $MUP_HEADER <<@
 
@@ -128,7 +131,8 @@ extern "C" {
 #if defined (HYPRE_MIXED_PRECISION)
 @
 
-cat mup_pre_lobpcg_int.h  >> $MUP_HEADER
+cat mup_pre_lobpcg_int.h        >> $MUP_HEADER
+cat mup_functions_lobpcg_int.h  >> $MUP_HEADER
 
 cat >> $MUP_HEADER <<@
 
