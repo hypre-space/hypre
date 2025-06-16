@@ -36,6 +36,7 @@ HEADERS =\
  block_tridiag.h\
  Common.h\
  par_amg.h\
+ par_amgf.h\
  par_amgdd.h\
  par_amgdd_comp_grid.h\
  par_fsai.h\
