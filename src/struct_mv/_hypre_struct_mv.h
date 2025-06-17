@@ -2045,8 +2045,6 @@ hypre_ComputeCoarseOriginStride ( hypre_Index coarse_origin, hypre_Index coarse_
                                   hypre_IndexRef origin, hypre_Index stride, HYPRE_Int ndim );
 HYPRE_Int hypre_CoarsenBox ( hypre_Box *box, hypre_IndexRef origin, hypre_Index stride );
 HYPRE_Int hypre_RefineBox ( hypre_Box *box, hypre_IndexRef origin, hypre_Index stride );
-HYPRE_Int hypre_CoarsenBoxNeg ( hypre_Box *box, hypre_Box *refbox, hypre_IndexRef origin,
-                                hypre_Index stride );
 HYPRE_Int hypre_CoarsenBoxArray ( hypre_BoxArray *box_array, hypre_IndexRef origin,
                                   hypre_Index stride );
 HYPRE_Int hypre_RefineBoxArray ( hypre_BoxArray *box_array, hypre_IndexRef origin,
@@ -2055,8 +2053,12 @@ HYPRE_Int hypre_CoarsenBoxArrayArray ( hypre_BoxArrayArray *box_array_array, hyp
                                        hypre_Index stride );
 HYPRE_Int hypre_RefineBoxArrayArray ( hypre_BoxArrayArray *box_array_array, hypre_IndexRef origin,
                                       hypre_Index stride );
-HYPRE_Int hypre_CoarsenBoxArrayArrayNeg ( hypre_BoxArrayArray *boxaa, hypre_BoxArray *refboxa,
-                                          hypre_IndexRef origin, hypre_Index stride, hypre_BoxArrayArray **new_boxaa_ptr );
+HYPRE_Int
+hypre_CoarsenBoxArrayArrayOutward( hypre_BoxArrayArray   *boxaa,
+                                   hypre_BoxArray        *refboxa,
+                                   hypre_IndexRef         origin,
+                                   hypre_Index            stride,
+                                   hypre_BoxArrayArray  **new_boxaa_ptr );
 HYPRE_Int hypre_StructCoarsen ( hypre_StructGrid *fgrid, hypre_IndexRef origin, hypre_Index stride,
                                 HYPRE_Int prune, hypre_StructGrid **cgrid_ptr );
 
