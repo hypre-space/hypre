@@ -1274,8 +1274,8 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
    hypre_StructMatrixInitializeData(M, NULL);
 
    /* Create work arrays on host memory for storing constant coefficients */
-#if defined(HYPRE_USING_GPU)
    A_const = hypre_TAlloc(HYPRE_Complex*, nmatrices + 1, HYPRE_MEMORY_HOST);
+#if defined(HYPRE_USING_GPU)
    if (exec_policy == HYPRE_EXEC_DEVICE)
    {
       for (m = 0; m < nmatrices; m++)
@@ -1325,11 +1325,22 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
       constp[0] += c[i].cprod;
    }
 
+   /* Copy constant coefficients portion of M to the right memory location */
+#if defined(HYPRE_USING_GPU)
+   if (exec_policy == HYPRE_EXEC_DEVICE)
+   {
+      hypre_TMemcpy(hypre_StructMatrixData(M), A_const[nmatrices],
+                    HYPRE_Complex, hypre_StructMatrixVDataOffset(M),
+                    memory_location, HYPRE_MEMORY_HOST);
+   }
+#endif
+
    /* If all constant coefficients or no boxes in grid, return */
    if (na == 0)
    {
-      hypre_GpuProfilingPopRange();
       HYPRE_ANNOTATE_FUNC_END;
+      hypre_GpuProfilingPopRange();
+      hypre_TFree(A_const, HYPRE_MEMORY_HOST);
 
       return hypre_error_flag;
    }
@@ -1482,19 +1493,9 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
       }
    } /* end loop over matrix M range boxes */
 
-   /* Copy constant coefficients portion of M to the right memory location */
-#if defined(HYPRE_USING_GPU)
-   if (exec_policy == HYPRE_EXEC_DEVICE)
-   {
-      hypre_TMemcpy(hypre_StructMatrixData(M), A_const[nmatrices],
-                    HYPRE_Complex, hypre_StructMatrixVDataOffset(M),
-                    memory_location, HYPRE_MEMORY_HOST);
-   }
-   hypre_TFree(A_const, HYPRE_MEMORY_HOST);
-#endif
-
    /* Free memory */
    hypre_BoxDestroy(loop_box);
+   hypre_TFree(A_const, HYPRE_MEMORY_HOST);
 
    hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
