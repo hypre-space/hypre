@@ -171,7 +171,7 @@ Special AMG Cycles
 ------------------------------------------------------------------------------
 
 The default cycle is a V(1,1)-cycle, however it is possible to change the number
-of sweeps of the up- and down-cycle as well as the coare grid. One can also
+of sweeps of the up- and down-cycle as well as the coarse grid. One can also
 choose a W-cycle, however for parallel processing this is not recommended, since
 it is not scalable.
 
