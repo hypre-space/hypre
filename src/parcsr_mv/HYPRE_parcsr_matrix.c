@@ -434,6 +434,7 @@ HYPRE_ParCSRMatrixDiagScale( HYPRE_ParCSRMatrix A,
 HYPRE_Int
 HYPRE_ParCSRMatrixCompScalingTagged(HYPRE_ParCSRMatrix   A,
                                     HYPRE_Int            type,
+                                    HYPRE_MemoryLocation memloc_tags,
                                     HYPRE_Int            num_tags,
                                     HYPRE_Int           *tags,
                                     HYPRE_ParVector     *scaling_ptr)
@@ -445,6 +446,6 @@ HYPRE_ParCSRMatrixCompScalingTagged(HYPRE_ParCSRMatrix   A,
    }
 
    return ( hypre_ParCSRMatrixCompScalingTagged((hypre_ParCSRMatrix *) A,
-                                                type, num_tags, tags,
+                                                type, memloc_tags, num_tags, tags,
                                                 (hypre_ParVector **) scaling_ptr) );
 }

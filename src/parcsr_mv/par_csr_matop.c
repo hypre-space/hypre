@@ -7065,17 +7065,21 @@ hypre_ParCSRMatrixColSum( hypre_ParCSRMatrix   *A,
  *                       (rows and columns with the same tag) and take the inverse
  *                       square root of its magnitude.
  *   - num_tags:    Number of unique tags (blocks/components).
+ *   - memloc_tags: Memory location of the tags array.
  *   - tags:        Array of length num_rows, assigning a tag to each row.
- *   - scaling_ptr: Output pointer to the resulting scaling vector.
+ *   - scaling_ptr: Output pointer to the resulting scaling vector (host or device).
  *
- * Typical usage:
+ * Notes:
  *   - For multiphysics problems, call this function with type=1
  *     and a tags array indicating the block/component of each row.
  *   - The resulting scaling vector can be used to scale the matrix and/or
  *     right-hand side to improve conditioning or solver performance.
+ *   - This function stores a copy of the input tags array in the output scaling vector
+ *     (scaling_ptr) for use in subsequent scaling operations. The internal copy of the tags
+ *     array is updated only if the number of unique tags differs from the previous call.
  *
  * Example usage:
- *   hypre_ParCSRMatrixCompScalingTagged(A, 1, num_blocks, block_tags, &scaling);
+ *   hypre_ParCSRMatrixCompScalingTagged(A, 1, HYPRE_MEMORY_HOST, num_tags, tags, &scaling);
  *   hypre_ParCSRMatrixDiagScale(A, scaling, scaling);
  *
  * Notes:
@@ -7085,6 +7089,7 @@ hypre_ParCSRMatrixColSum( hypre_ParCSRMatrix   *A,
 HYPRE_Int
 hypre_ParCSRMatrixCompScalingTagged(hypre_ParCSRMatrix  *A,
                                     HYPRE_Int            type,
+                                    HYPRE_MemoryLocation memloc_tags,
                                     HYPRE_Int            num_tags,
                                     HYPRE_Int           *tags,
                                     hypre_ParVector    **scaling_ptr)
@@ -7117,7 +7122,7 @@ hypre_ParCSRMatrixCompScalingTagged(hypre_ParCSRMatrix  *A,
    if (!*scaling_ptr)
    {
       *scaling_ptr = hypre_ParVectorCreate(comm, global_num_rows, row_starts);
-      hypre_ParVectorInitialize_v2(*scaling_ptr, HYPRE_MEMORY_HOST);
+      hypre_ParVectorInitialize_v2(*scaling_ptr, memory_location);
    }
    else
    {
@@ -7125,13 +7130,14 @@ hypre_ParCSRMatrixCompScalingTagged(hypre_ParCSRMatrix  *A,
       hypre_ParVectorResize(*scaling_ptr, num_rows, 1);
    }
 
-   /* Set tags array if needed */
+   /* Set tags array if not present in the output array or
+      if the number of unique tags has changed since the last call of this function */
    if (!hypre_ParVectorTags(*scaling_ptr) ||
        num_tags != hypre_ParVectorNumTags(*scaling_ptr))
    {
       hypre_ParVectorSetOwnsTags(*scaling_ptr, 1);
       hypre_ParVectorSetNumTags(*scaling_ptr, num_tags);
-      hypre_ParVectorSetTags(*scaling_ptr, HYPRE_MEMORY_HOST, tags);
+      hypre_ParVectorSetTags(*scaling_ptr, memloc_tags, tags);
    }
 
    if (type == 1)

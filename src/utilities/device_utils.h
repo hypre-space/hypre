@@ -960,9 +960,9 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_threadIdx(hypre_DeviceItem &item)
 {
-   if constexpr (dim == 0) { return threadIdx.x; }
-   if constexpr (dim == 1) { return threadIdx.y; }
-   if constexpr (dim == 2) { return threadIdx.z; }
+   if (dim == 0) { return threadIdx.x; }
+   if (dim == 1) { return threadIdx.y; }
+   if (dim == 2) { return threadIdx.z; }
 
    return -1;
 }
@@ -972,9 +972,9 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_blockIdx(hypre_DeviceItem &item)
 {
-   if constexpr (dim == 0) { return blockIdx.x; }
-   if constexpr (dim == 1) { return blockIdx.y; }
-   if constexpr (dim == 2) { return blockIdx.z; }
+   if (dim == 0) { return blockIdx.x; }
+   if (dim == 1) { return blockIdx.y; }
+   if (dim == 2) { return blockIdx.z; }
 
    return -1;
 }
@@ -984,9 +984,9 @@ template <hypre_int dim>
 static __device__ __forceinline__
 hypre_int hypre_gpu_get_blockDim(hypre_DeviceItem &item)
 {
-   if constexpr (dim == 0) { return blockDim.x; }
-   if constexpr (dim == 1) { return blockDim.y; }
-   if constexpr (dim == 2) { return blockDim.z; }
+   if (dim == 0) { return blockDim.x; }
+   if (dim == 1) { return blockDim.y; }
+   if (dim == 2) { return blockDim.z; }
 
    return -1;
 }

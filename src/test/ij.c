@@ -4429,7 +4429,8 @@ main( hypre_int argc,
       else if (test_scaling == 4 && dof_func)
       {
          /* Compute scaling based on block matrix norms */
-         HYPRE_ParCSRMatrixCompScalingTagged(parcsr_A, 1, num_functions, dof_func, &par_ld);
+         HYPRE_ParCSRMatrixCompScalingTagged(parcsr_A, 1, memory_location,
+                                             num_functions, dof_func, &par_ld);
          par_rd = par_ld;
       }
       else
