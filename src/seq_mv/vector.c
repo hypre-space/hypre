@@ -220,6 +220,65 @@ hypre_SeqVectorSetTags( hypre_Vector          *vector,
 }
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorSetValuesTaggedHost( hypre_Vector  *vector,
+                                    HYPRE_Complex *values )
+{
+   HYPRE_Int   size = hypre_VectorSize(vector);
+   HYPRE_Int  *tags = hypre_VectorTags(vector);
+   HYPRE_Int   i;
+
+   /* Setup scaling vector */
+#if defined(HYPRE_USING_OPENMP)
+   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+   for (i = 0; i < size; i++)
+   {
+      hypre_VectorEntryI(vector, i) = values[tags[i]];
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorSetValuesTagged( hypre_Vector  *vector,
+                                HYPRE_Complex *values )
+{
+   /* Sanity checks */
+   if (hypre_VectorNumVectors(vector) > 1)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "num_vectors > 1 not implemented!");
+      return hypre_error_flag;
+   }
+
+   if (!hypre_VectorTags(vector) || hypre_VectorNumTags(vector) < 2)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "This function is valid only for multi-tagged vectors");
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_VectorMemoryLocation(vector));
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_SeqVectorSetValuesTaggedDevice(vector, values);
+   }
+   else
+#endif
+   {
+      hypre_SeqVectorSetValuesTaggedHost(vector, values);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SeqVectorInitialize_v2
  *
  * Initialize a vector at a given memory location

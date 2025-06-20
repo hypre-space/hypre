@@ -7033,12 +7033,7 @@ hypre_ParCSRMatrixColSum( hypre_ParCSRMatrix   *A,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      /* TODO (VPM): hypre_ParCSRMatrixColSumDevice */
-      hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_HOST);
-      hypre_ParVectorMigrate(b, HYPRE_MEMORY_HOST);
-      hypre_ParCSRMatrixColSumHost(A, b);
-      hypre_ParCSRMatrixMigrate(A, HYPRE_MEMORY_DEVICE);
-      hypre_ParVectorMigrate(b, HYPRE_MEMORY_DEVICE);
+      hypre_ParCSRMatrixColSumDevice(A, b);
    }
    else
 #endif
@@ -7102,8 +7097,10 @@ hypre_ParCSRMatrixCompScalingTagged(hypre_ParCSRMatrix  *A,
 
    hypre_CSRMatrix         *A_diag          = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real              *tnorms          = NULL;
-   HYPRE_Real              *weights         = NULL;
+   HYPRE_Real              *local_weights   = NULL;
    HYPRE_Real              *g_weights       = NULL;
+   HYPRE_Real              *weights         = NULL;
+   HYPRE_Real               tnorm;
    HYPRE_Int                i;
 
    /* Sanity check - Return an empty scaling if tags is a null pointer or type = 0 */
@@ -7113,6 +7110,8 @@ hypre_ParCSRMatrixCompScalingTagged(hypre_ParCSRMatrix  *A,
       *scaling_ptr = NULL;
       return hypre_error_flag;
    }
+
+   HYPRE_ANNOTATE_FUNC_BEGIN;
 
    /* Create and initialize scaling vector if it does not exist yet */
    if (!*scaling_ptr)
@@ -7126,49 +7125,88 @@ hypre_ParCSRMatrixCompScalingTagged(hypre_ParCSRMatrix  *A,
       hypre_ParVectorResize(*scaling_ptr, num_rows, 1);
    }
 
+   /* Set tags array if needed */
+   if (!hypre_ParVectorTags(*scaling_ptr) ||
+       num_tags != hypre_ParVectorNumTags(*scaling_ptr))
+   {
+      hypre_ParVectorSetOwnsTags(*scaling_ptr, 1);
+      hypre_ParVectorSetNumTags(*scaling_ptr, num_tags);
+      hypre_ParVectorSetTags(*scaling_ptr, HYPRE_MEMORY_HOST, tags);
+   }
+
    if (type == 1)
    {
-      /* Move scaling vector to host memory if needed */
-      hypre_ParVectorMigrate(*scaling_ptr, HYPRE_MEMORY_HOST);
-
       /* Compute Frobenius norms */
-      hypre_CSRMatrixTaggedFnorm(A_diag, num_tags, tags, &tnorms);
+      hypre_CSRMatrixTaggedFnorm(A_diag, num_tags, hypre_ParVectorTags(*scaling_ptr), &tnorms);
 
       /* Compute local scaling weights */
-      weights = hypre_TAlloc(HYPRE_Real, num_tags, HYPRE_MEMORY_HOST);
+      local_weights = hypre_TAlloc(HYPRE_Real, num_tags, HYPRE_MEMORY_HOST);
       for (i = 0; i < num_tags; i++)
       {
-         weights[i] = hypre_squared(tnorms[i * num_tags + i]);
+         tnorm = tnorms[i * num_tags + i];
+         local_weights[i] = (tnorm > 0.0) ? hypre_squared(tnorm) : 1.0;
       }
 
       /* Compute global scaling weights */
       g_weights = hypre_TAlloc(HYPRE_Real, num_tags, HYPRE_MEMORY_HOST);
-      hypre_MPI_Allreduce(weights, g_weights, num_tags, MPI_DOUBLE, MPI_SUM, comm);
+#if defined(HYPRE_USING_GPU)
+      HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location);
+
+      if (exec == HYPRE_EXEC_DEVICE)
+      {
+         weights = hypre_TAlloc(HYPRE_Real, num_tags, HYPRE_MEMORY_DEVICE);
+      }
+      else
+#endif
+      {
+         weights = g_weights;
+      }
+
+      hypre_MPI_Allreduce(local_weights, g_weights, num_tags, MPI_DOUBLE, MPI_SUM, comm);
       for (i = 0; i < num_tags; i++)
       {
-         g_weights[i] = pow(10.0, round(log10(hypre_sqrt(1.0 / g_weights[i]))));
+         g_weights[i] = hypre_sqrt(pow(10.0,
+                                       2 * round( log10(hypre_sqrt(1.0 / g_weights[i])) / 2.0 )));
       }
+
+      if (weights != g_weights)
+      {
+         hypre_TMemcpy(weights, g_weights, HYPRE_Real, num_tags,
+                       HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+      }
+
+#if 0
+      /* Debug weights */
+      hypre_ParPrintf(comm, "%s - Scaling weights: [ ", __func__);
+      for (i = 0; i < num_tags; i++)
+      {
+         hypre_ParPrintf(comm, "%.0e ", g_weights[i]);
+      }
+      hypre_ParPrintf(comm, "]\n");
+      hypre_MPI_Barrier(comm);
+#endif
 
       /* Setup scaling vector */
-      for (i = 0; i < num_rows; i++)
-      {
-         hypre_ParVectorEntryI(*scaling_ptr, i) = hypre_sqrt(g_weights[tags[i]]);
-      }
-
-      /* Migrate scaling vector to destination memory location */
-      hypre_ParVectorMigrate(*scaling_ptr, memory_location);
+      hypre_ParVectorSetValuesTagged(*scaling_ptr, weights);
 
       /* Free memory */
       hypre_TFree(tnorms, HYPRE_MEMORY_HOST);
-      hypre_TFree(weights, HYPRE_MEMORY_HOST);
+      hypre_TFree(local_weights, HYPRE_MEMORY_HOST);
       hypre_TFree(g_weights, HYPRE_MEMORY_HOST);
+      if (weights != g_weights)
+      {
+         hypre_TFree(weights, HYPRE_MEMORY_DEVICE);
+      }
    }
    else
    {
-      *scaling_ptr = NULL;
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid scaling type");
+      HYPRE_ANNOTATE_FUNC_END;
+
       return hypre_error_flag;
    }
+
+   HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
 }

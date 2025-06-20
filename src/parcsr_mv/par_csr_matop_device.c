@@ -2025,4 +2025,88 @@ hypre_ParCSRDiagScaleVectorDevice( hypre_ParCSRMatrix *par_A,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParCSRMatrixColSumDevice( hypre_ParCSRMatrix *A,
+                                hypre_ParVector    *b )
+{
+   hypre_ParCSRCommPkg    *comm_pkg       = hypre_ParCSRMatrixCommPkg(A);
+   hypre_CSRMatrix        *A_diag         = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix        *A_offd         = hypre_ParCSRMatrixOffd(A);
+   HYPRE_Int               num_cols_diag  = hypre_CSRMatrixNumCols(A_diag);
+   HYPRE_Int               num_cols_offd  = hypre_CSRMatrixNumCols(A_offd);
+   HYPRE_Complex          *b_data         = hypre_ParVectorLocalData(b);
+   HYPRE_Int               num_sends      = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   HYPRE_Int               send_map_num_elmts = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+
+   hypre_ParCSRCommHandle *comm_handle;
+   HYPRE_Complex          *d_send_buf;
+   HYPRE_Complex          *d_recv_buf;
+
+   /*---------------------------------------------------------------------
+    * Allocate/reuse data buffers
+    *--------------------------------------------------------------------*/
+
+   if (!hypre_ParCSRCommPkgTmpData(comm_pkg))
+   {
+      hypre_ParCSRCommPkgTmpData(comm_pkg) = hypre_TAlloc(HYPRE_Complex,
+                                                          num_cols_offd,
+                                                          HYPRE_MEMORY_DEVICE);
+   }
+   d_send_buf = hypre_ParCSRCommPkgTmpData(comm_pkg);
+   hypreDevice_ComplexFilln(d_send_buf, num_cols_offd, 0.0);
+
+   /* send_map_elmts on device */
+   hypre_ParCSRCommPkgCopySendMapElmtsToDevice(comm_pkg);
+
+   /* Allocate receive data buffer */
+   if (!hypre_ParCSRCommPkgBufData(comm_pkg))
+   {
+      hypre_ParCSRCommPkgBufData(comm_pkg) = hypre_TAlloc(HYPRE_Complex,
+                                                          send_map_num_elmts,
+                                                          HYPRE_MEMORY_DEVICE);
+   }
+   d_recv_buf = hypre_ParCSRCommPkgBufData(comm_pkg);
+
+   /*---------------------------------------------------------------------
+    * Overlap communication and computation
+    *--------------------------------------------------------------------*/
+
+   /* Compute off-diagonal contribution to be sent to neighboring ranks */
+   hypre_CSRMatrixComputeColSum(A_offd, d_send_buf, 0, 1.0);
+
+   /* Make sure d_send_buf is ready before communicating it */
+   if (hypre_GetGpuAwareMPI())
+   {
+      hypre_ForceSyncComputeStream();
+   }
+
+   /* Non-blocking communication starts */
+   comm_handle = hypre_ParCSRCommHandleCreate_v2(2, comm_pkg,
+                                                 HYPRE_MEMORY_DEVICE, d_send_buf,
+                                                 HYPRE_MEMORY_DEVICE, d_recv_buf );
+
+   /* Compute diagonal contribution */
+   hypre_CSRMatrixComputeColSum(A_diag, b_data, 0, 1.0);
+
+   /* Non-blocking communication ends */
+   hypre_ParCSRCommHandleDestroy(comm_handle);
+
+   /* Make sure b_data is ready before updating it below */
+   if (hypre_GetGpuAwareMPI())
+   {
+      hypre_ForceSyncComputeStream();
+   }
+
+   /* Compute off-diagonal contribution by unpacking data via SpMV */
+   hypre_ParCSRMatrixMatvecT_unpack(comm_pkg, num_cols_diag, d_recv_buf, b_data);
+
+   /* Final sync to ensure all updates are complete before returning */
+   hypre_SyncComputeStream();
+
+   return hypre_error_flag;
+}
+
 #endif // #if defined(HYPRE_USING_GPU) || defined(HYPRE_USING_DEVICE_OPENMP)

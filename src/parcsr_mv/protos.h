@@ -373,6 +373,7 @@ HYPRE_Int hypre_ParCSRDiagScaleVectorHost( hypre_ParCSRMatrix *par_A, hypre_ParV
                                            hypre_ParVector *par_x );
 HYPRE_Int hypre_ParCSRDiagScaleVectorDevice( hypre_ParCSRMatrix *par_A, hypre_ParVector *par_y,
                                              hypre_ParVector *par_x );
+HYPRE_Int hypre_ParCSRMatrixColSumDevice( hypre_ParCSRMatrix *A, hypre_ParVector *b );
 HYPRE_Int hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A, HYPRE_Real tol,
                                               HYPRE_Int type);
 HYPRE_Int hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A, HYPRE_Real tol,
@@ -618,6 +619,7 @@ HYPRE_Int hypre_ParVectorSetNumTags( hypre_ParVector *vector, HYPRE_Int num_tags
 HYPRE_Int hypre_ParVectorSetTags( hypre_ParVector *vector,
                                   HYPRE_MemoryLocation memory_location,
                                   HYPRE_Int *tags );
+HYPRE_Int hypre_ParVectorSetValuesTagged(hypre_ParVector *vector, HYPRE_Complex *values);
 HYPRE_Int hypre_ParVectorInitialize ( hypre_ParVector *vector );
 HYPRE_Int hypre_ParVectorInitialize_v2( hypre_ParVector *vector,
                                         HYPRE_MemoryLocation memory_location );

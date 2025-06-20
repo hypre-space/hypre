@@ -189,6 +189,18 @@ hypre_ParVectorSetTags(hypre_ParVector      *vector,
 }
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParVectorSetValuesTagged(hypre_ParVector  *vector,
+                               HYPRE_Complex    *values)
+{
+   hypre_SeqVectorSetValuesTagged(hypre_ParVectorLocalVector(vector), values);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ParVectorInitialize_v2
  *
  * Initialize a hypre_ParVector at a given memory location

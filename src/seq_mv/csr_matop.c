@@ -1832,7 +1832,7 @@ hypre_CSRMatrixFnorm( hypre_CSRMatrix *A )
  *         2, square sum
  *--------------------------------------------------------------------------*/
 
-void
+HYPRE_Int
 hypre_CSRMatrixComputeRowSumHost( hypre_CSRMatrix *A,
                                   HYPRE_Int       *CF_i,
                                   HYPRE_Int       *CF_j,
@@ -1875,13 +1875,15 @@ hypre_CSRMatrixComputeRowSumHost( hypre_CSRMatrix *A,
 
       row_sum[i] = row_sum_i;
    }
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixComputeRowSum
  *--------------------------------------------------------------------------*/
 
-void
+HYPRE_Int
 hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A,
                               HYPRE_Int       *CF_i,
                               HYPRE_Int       *CF_j,
@@ -1904,6 +1906,152 @@ hypre_CSRMatrixComputeRowSum( hypre_CSRMatrix *A,
    {
       hypre_CSRMatrixComputeRowSumHost(A, CF_i, CF_j, row_sum, type, scal, set_or_add);
    }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Computes the column sums of a matrix.
+ * Assumes the input vector col_sum has size num_cols and equal to zeroes.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixComputeColSumHost( hypre_CSRMatrix *A,
+                                  HYPRE_Complex   *col_sum,
+                                  HYPRE_Int        type,
+                                  HYPRE_Complex    scal)
+{
+   HYPRE_Int      num_rows = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int      num_cols = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int     *rownnz   = hypre_CSRMatrixRownnz(A);
+   HYPRE_Complex *A_data   = hypre_CSRMatrixData(A);
+   HYPRE_Int     *A_i      = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j      = hypre_CSRMatrixJ(A);
+
+#ifdef HYPRE_USING_OPENMP
+   #pragma omp parallel
+#endif
+   {
+      HYPRE_Int      tid = hypre_GetThreadNum();
+      HYPRE_Int      num_threads = hypre_NumActiveThreads();
+      HYPRE_Int      i, ii, j, col, ns, ne;
+      HYPRE_Complex *work;
+
+      /* Compute rows partitioning */
+      hypre_partition1D(num_rows, num_threads, tid, &ns, &ne);
+
+      /* Allocate work data */
+      work = (num_threads == 1) ?
+             col_sum : hypre_CTAlloc(HYPRE_Complex, num_cols, HYPRE_MEMORY_HOST);
+
+      switch (type)
+      {
+         case 0:
+         {
+            for (i = ns; i < ne; i++)
+            {
+               ii = rownnz ? rownnz[i] : i;
+
+               for (j = A_i[ii]; j < A_i[ii + 1]; j++)
+               {
+                  hypre_assert(A_j[j] < num_cols);
+                  col = A_j[j];
+
+                  work[col] += scal * A_data[j];
+               }
+            }
+            break;
+         }
+
+         case 1:
+         {
+            for (i = ns; i < ne; i++)
+            {
+               ii = rownnz ? rownnz[i] : i;
+
+               for (j = A_i[ii]; j < A_i[ii + 1]; j++)
+               {
+                  hypre_assert(A_j[j] < num_cols);
+                  col = A_j[j];
+
+                  work[col] += scal * hypre_cabs(A_data[j]);
+               }
+            }
+            break;
+         }
+
+         case 2:
+         {
+            for (i = ns; i < ne; i++)
+            {
+               ii = rownnz ? rownnz[i] : i;
+
+               for (j = A_i[ii]; j < A_i[ii + 1]; j++)
+               {
+                  hypre_assert(A_j[j] < num_cols);
+                  col = A_j[j];
+
+                  work[col] += scal * A_data[j] * A_data[j];
+               }
+            }
+            break;
+         }
+      }
+
+      /* Reduce results */
+      if (num_threads > 1)
+      {
+         for (i = 0; i < num_threads; i++)
+         {
+            if (i == tid)
+            {
+               for (j = 0; j < num_cols; j++)
+               {
+                  col_sum[j] = work[j];
+               }
+            }
+#ifdef HYPRE_USING_OPENMP
+            #pragma omp barrier
+#endif
+         }
+
+         hypre_TFree(work, HYPRE_MEMORY_HOST);
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixComputeColSum( hypre_CSRMatrix *A,
+                              HYPRE_Complex   *col_sum,
+                              HYPRE_Int        type,
+                              HYPRE_Complex    scal)
+
+{
+   /* Trivial case */
+   if (!hypre_CSRMatrixNumCols(A))
+   {
+      return hypre_error_flag;
+   }
+
+#if defined(HYPRE_USING_GPU)
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
+
+   if (exec == HYPRE_EXEC_DEVICE)
+   {
+      hypre_CSRMatrixComputeColSumDevice(A, col_sum, type, scal);
+   }
+   else
+#endif
+   {
+      hypre_CSRMatrixComputeColSumHost(A, col_sum, type, scal);
+   }
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -2214,6 +2362,7 @@ hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A,
 
 /*--------------------------------------------------------------------------
  * Computes the Frobenius norm for each tag in a CSR matrix.
+ *
  * Each row is assigned a tag (block identifier) via the tags array (local rows only).
  * The result is stored in the output pointer tnorms_ptr (length num_tags * num_tags).
  *--------------------------------------------------------------------------*/
@@ -2222,7 +2371,7 @@ HYPRE_Int
 hypre_CSRMatrixTaggedFnormHost(hypre_CSRMatrix  *A,
                                HYPRE_Int         num_tags,
                                HYPRE_Int        *tags,
-                               HYPRE_Real      **tnorms_ptr)
+                               HYPRE_Real       *tnorms)
 {
    HYPRE_Int       *A_i         = hypre_CSRMatrixI(A);
    HYPRE_Int       *A_j         = hypre_CSRMatrixJ(A);
@@ -2231,6 +2380,42 @@ hypre_CSRMatrixTaggedFnormHost(hypre_CSRMatrix  *A,
 
    HYPRE_Int        tnorms_size = num_tags * num_tags;
    HYPRE_Int        i, j, itag, jtag;
+
+   /* Accumulate sums */
+   for (i = 0; i < num_rows; i++)
+   {
+      itag = tags[i];
+      hypre_assert(itag >= 0 && itag < num_tags);
+
+      for (j = A_i[i]; j < A_i[i + 1]; j++)
+      {
+         jtag = tags[A_j[j]];
+         hypre_assert(jtag >= 0 && jtag < num_tags);
+         tnorms[itag * num_tags + jtag] += hypre_squared(A_a[j]);
+      }
+   }
+
+   /* Take square root for each block */
+   for (i = 0; i < tnorms_size; i++)
+   {
+      tnorms[i] = hypre_sqrt(tnorms[i]);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Compute tagged Frobenius norms of an input matrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixTaggedFnorm(hypre_CSRMatrix  *A,
+                           HYPRE_Int         num_tags,
+                           HYPRE_Int        *tags,
+                           HYPRE_Real      **tnorms_ptr)
+{
+   HYPRE_Int     tnorms_size = num_tags * num_tags;
+   HYPRE_Int     i;
 
    /* Create tnorms array */
    if (!*tnorms_ptr)
@@ -2253,53 +2438,17 @@ hypre_CSRMatrixTaggedFnormHost(hypre_CSRMatrix  *A,
       return hypre_error_flag;
    }
 
-   /* Accumulate sums */
-   for (i = 0; i < num_rows; i++)
-   {
-      itag = tags[i];
-      hypre_assert(itag >= 0 && itag < num_tags);
-
-      for (j = A_i[i]; j < A_i[i + 1]; j++)
-      {
-         jtag = tags[A_j[j]];
-         hypre_assert(jtag >= 0 && jtag < num_tags);
-         (*tnorms_ptr)[itag * num_tags + jtag] += hypre_squared(A_a[j]);
-      }
-   }
-
-   /* Take square root for each block */
-   for (i = 0; i < tnorms_size; i++)
-   {
-      (*tnorms_ptr)[i] = hypre_sqrt((*tnorms_ptr)[i]);
-   }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_CSRMatrixTaggedFnorm
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_CSRMatrixTaggedFnorm(hypre_CSRMatrix *A,
-                           HYPRE_Int        num_tags,
-                           HYPRE_Int       *tags,
-                           HYPRE_Real      **tnorms_ptr)
-{
 #if defined(HYPRE_USING_GPU)
    HYPRE_MemoryLocation memory_location = hypre_CSRMatrixMemoryLocation(A);
 
    if (hypre_GetExecPolicy1(memory_location) == HYPRE_EXEC_DEVICE)
    {
-      /* TODO (VPM): hypre_ParCSRMatrixTaggedFnormDevice */
-      hypre_CSRMatrixMigrate(A, HYPRE_MEMORY_HOST);
-      hypre_CSRMatrixTaggedFnormHost(A, num_tags, tags, tnorms_ptr);
-      hypre_CSRMatrixMigrate(A, HYPRE_MEMORY_DEVICE);
+      hypre_CSRMatrixTaggedFnormDevice(A, num_tags, tags, *tnorms_ptr);
    }
    else
 #endif
    {
-      hypre_CSRMatrixTaggedFnormHost(A, num_tags, tags, tnorms_ptr);
+      hypre_CSRMatrixTaggedFnormHost(A, num_tags, tags, *tnorms_ptr);
    }
 
    return hypre_error_flag;
