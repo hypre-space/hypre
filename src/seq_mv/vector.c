@@ -1570,7 +1570,7 @@ hypre_SeqVectorPointwiseDivisionHost( hypre_Vector *x,
    HYPRE_Complex *z_data = hypre_VectorData(z);
    HYPRE_Int      i;
 
-   /* Element-wise division y[i] = y[i] / x[i] */
+   /* Element-wise division z[i] = y[i] / x[i] */
 #if defined (HYPRE_USING_OPENMP)
    #pragma omp parallel for private(i)
 #endif
