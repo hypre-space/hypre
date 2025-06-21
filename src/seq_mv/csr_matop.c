@@ -2007,7 +2007,7 @@ hypre_CSRMatrixComputeColSumHost( hypre_CSRMatrix *A,
             {
                for (j = 0; j < num_cols; j++)
                {
-                  col_sum[j] = work[j];
+                  col_sum[j] += work[j];
                }
             }
 #ifdef HYPRE_USING_OPENMP

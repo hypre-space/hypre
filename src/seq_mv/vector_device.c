@@ -62,17 +62,19 @@ hypre_SeqVectorSetValuesTaggedDevice( hypre_Vector  *vector,
    HYPRE_Int     *tags = hypre_VectorTags(vector);
    HYPRE_Complex *data = hypre_VectorData(vector);
 
+#if defined(HYPRE_USING_GPU)
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
    HYPRE_THRUST_CALL(gather, tags, tags + size, values, data);
 
 #elif defined(HYPRE_USING_SYCL)
    hypreSycl_gather(tags, tags + size, values, data);
 
+#endif
+   hypre_SyncComputeStream();
+
 #elif defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Device OpenMP not implemented!");
 #endif
-
-   hypre_SyncComputeStream();
 
    return hypre_error_flag;
 }

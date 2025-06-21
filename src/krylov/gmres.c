@@ -324,7 +324,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    HYPRE_Int             iter;
    HYPRE_Int             my_id, num_procs;
    HYPRE_Real            epsilon, gamma, t;
-   HYPRE_Real            r_norm, b_norm, den_norm, x_norm, e_norm, w_norm;
+   HYPRE_Real            r_norm, b_norm, den_norm, x_norm, w_norm, e_norm = 1.0;
 
    HYPRE_Real            epsmac = 1.e-16;
    HYPRE_Real            ieee_check = 0.;

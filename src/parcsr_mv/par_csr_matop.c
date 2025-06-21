@@ -7168,7 +7168,7 @@ hypre_ParCSRMatrixCompScalingTagged(hypre_ParCSRMatrix  *A,
          weights = g_weights;
       }
 
-      hypre_MPI_Allreduce(local_weights, g_weights, num_tags, MPI_DOUBLE, MPI_SUM, comm);
+      hypre_MPI_Allreduce(local_weights, g_weights, num_tags, HYPRE_MPI_REAL, MPI_SUM, comm);
       for (i = 0; i < num_tags; i++)
       {
          g_weights[i] = hypre_sqrt(pow(10.0,
@@ -7198,10 +7198,14 @@ hypre_ParCSRMatrixCompScalingTagged(hypre_ParCSRMatrix  *A,
       /* Free memory */
       hypre_TFree(tnorms, HYPRE_MEMORY_HOST);
       hypre_TFree(local_weights, HYPRE_MEMORY_HOST);
-      hypre_TFree(g_weights, HYPRE_MEMORY_HOST);
       if (weights != g_weights)
       {
          hypre_TFree(weights, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(g_weights, HYPRE_MEMORY_HOST);
+      }
+      else
+      {
+         hypre_TFree(weights, HYPRE_MEMORY_HOST);
       }
    }
    else
