@@ -7079,7 +7079,7 @@ hypre_ParCSRMatrixColSum( hypre_ParCSRMatrix   *A,
  *     array is updated only if the number of unique tags differs from the previous call.
  *
  * Example usage:
- *   hypre_ParCSRMatrixCompScalingTagged(A, 1, HYPRE_MEMORY_HOST, num_tags, tags, &scaling);
+ *   hypre_ParCSRMatrixComputeScalingTagged(A, 1, HYPRE_MEMORY_HOST, num_tags, tags, &scaling);
  *   hypre_ParCSRMatrixDiagScale(A, scaling, scaling);
  *
  * Notes:
@@ -7087,12 +7087,12 @@ hypre_ParCSRMatrixColSum( hypre_ParCSRMatrix   *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixCompScalingTagged(hypre_ParCSRMatrix  *A,
-                                    HYPRE_Int            type,
-                                    HYPRE_MemoryLocation memloc_tags,
-                                    HYPRE_Int            num_tags,
-                                    HYPRE_Int           *tags,
-                                    hypre_ParVector    **scaling_ptr)
+hypre_ParCSRMatrixComputeScalingTagged(hypre_ParCSRMatrix  *A,
+                                       HYPRE_Int            type,
+                                       HYPRE_MemoryLocation memloc_tags,
+                                       HYPRE_Int            num_tags,
+                                       HYPRE_Int           *tags,
+                                       hypre_ParVector    **scaling_ptr)
 {
    MPI_Comm                 comm            = hypre_ParCSRMatrixComm(A);
    HYPRE_BigInt             global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);

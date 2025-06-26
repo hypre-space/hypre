@@ -71,9 +71,9 @@ HYPRE_Int HYPRE_ParCSRMatrixMatvecT ( HYPRE_Complex alpha, HYPRE_ParCSRMatrix A,
                                       HYPRE_Complex beta, HYPRE_ParVector y );
 HYPRE_Int HYPRE_ParCSRMatrixDiagScale ( HYPRE_ParCSRMatrix A, HYPRE_ParVector left,
                                         HYPRE_ParVector right );
-HYPRE_Int HYPRE_ParCSRMatrixCompScalingTagged ( HYPRE_ParCSRMatrix A, HYPRE_Int type,
-                                                HYPRE_MemoryLocation memloc_tags, HYPRE_Int num_tags,
-                                                HYPRE_Int *tags, HYPRE_ParVector *scaling_ptr );
+HYPRE_Int HYPRE_ParCSRMatrixComputeScalingTagged ( HYPRE_ParCSRMatrix A, HYPRE_Int type,
+                                                   HYPRE_MemoryLocation memloc_tags, HYPRE_Int num_tags,
+                                                   HYPRE_Int *tags, HYPRE_ParVector *scaling_ptr );
 
 /* HYPRE_parcsr_vector.c */
 HYPRE_Int HYPRE_ParVectorCreate ( MPI_Comm comm, HYPRE_BigInt global_size,
@@ -427,10 +427,10 @@ HYPRE_Int hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix *A, HYPRE_Int row_ma
                                          HYPRE_Int num_rows_block, HYPRE_Int num_cols_block,
                                          hypre_DenseBlockMatrix **B_ptr );
 HYPRE_Int hypre_ParCSRMatrixColSum( hypre_ParCSRMatrix *A, hypre_ParVector **B_ptr );
-HYPRE_Int hypre_ParCSRMatrixCompScalingTagged( hypre_ParCSRMatrix *A, HYPRE_Int type,
-                                               HYPRE_MemoryLocation memloc_tags,
-                                               HYPRE_Int num_tags, HYPRE_Int *tags,
-                                               hypre_ParVector **scaling_ptr );
+HYPRE_Int hypre_ParCSRMatrixComputeScalingTagged( hypre_ParCSRMatrix *A, HYPRE_Int type,
+                                                  HYPRE_MemoryLocation memloc_tags,
+                                                  HYPRE_Int num_tags, HYPRE_Int *tags,
+                                                  hypre_ParVector **scaling_ptr );
 
 /* par_csr_filter_device.c */
 HYPRE_Int hypre_ParCSRMatrixBlkFilterDevice(hypre_ParCSRMatrix *A, HYPRE_Int block_size,

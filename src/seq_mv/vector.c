@@ -131,7 +131,11 @@ hypre_SeqVectorSetData( hypre_Vector  *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SeqVectorSetOwnsTags
+ * Set an ownership flag about the tags array.
+ *
+ *  0: vector tags point to the user-input tags, vector does not own tags
+ *  1: vector tags is created and user-input tags copied into it, vector owns the tags
+ *  2: vector tags point to the user-input tags, vector owns the tags
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -145,7 +149,6 @@ hypre_SeqVectorSetOwnsTags( hypre_Vector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SeqVectorSetNumTags
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -159,11 +162,8 @@ hypre_SeqVectorSetNumTags( hypre_Vector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SeqVectorSetTags
- *
- * Sets tags array to a SeqVector.
- * If owns_tags is true, allocates and copies tags.
- * Otherwise, just points to the input tags array.
+ * Set tags array to a SeqVector. See hypre_SeqVectorSetOwnsTags for
+ * ownership logic.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -172,6 +172,7 @@ hypre_SeqVectorSetTags( hypre_Vector          *vector,
                         HYPRE_Int             *tags )
 {
    HYPRE_Int  size = hypre_VectorSize(vector);
+   HYPRE_Int  owns_tags = hypre_VectorOwnsTags(vector);
    HYPRE_Int *new_tags;
 
    /* Return if tags array does not exist */
@@ -183,7 +184,7 @@ hypre_SeqVectorSetTags( hypre_Vector          *vector,
       return hypre_error_flag;
    }
 
-   if (hypre_VectorOwnsTags(vector))
+   if (owns_tags == 1)
    {
       /* Deallocate existing tags if present */
       if (hypre_VectorTags(vector))
@@ -204,6 +205,12 @@ hypre_SeqVectorSetTags( hypre_Vector          *vector,
    }
    else
    {
+      /* Deallocate existing tags if present */
+      if (hypre_VectorTags(vector) && owns_tags == 2)
+      {
+         hypre_TFree(hypre_VectorTags(vector), hypre_VectorMemoryLocation(vector));
+      }
+
       /* Just point to the input tags array */
       hypre_VectorTags(vector) = tags;
 

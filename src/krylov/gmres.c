@@ -616,12 +616,17 @@ hypre_GMRESSolve(void  *gmres_vdata,
       rs[0] = r_norm;
       if (r_norm == 0.0)
       {
+         hypre_TFree(iprod, HYPRE_MEMORY_HOST);
+         hypre_TFree(xiprod, HYPRE_MEMORY_HOST);
+         hypre_TFree(biprod, HYPRE_MEMORY_HOST);
          hypre_TFreeF(c, gmres_functions);
          hypre_TFreeF(s, gmres_functions);
          hypre_TFreeF(rs, gmres_functions);
          if (rel_change) { hypre_TFreeF(rs_2, gmres_functions); }
+         if (print_level > 2) { hypre_TFreeF(rs_3, gmres_functions); }
          for (i = 0; i < k_dim + 1; i++) { hypre_TFreeF(hh[i], gmres_functions); }
          hypre_TFreeF(hh, gmres_functions);
+
          (gmres_data -> num_iterations) = iter;
          HYPRE_ANNOTATE_FUNC_END;
 
@@ -1155,6 +1160,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
    /* free up memory */
    hypre_TFree(iprod, HYPRE_MEMORY_HOST);
+   hypre_TFree(xiprod, HYPRE_MEMORY_HOST);
    hypre_TFree(biprod, HYPRE_MEMORY_HOST);
    hypre_TFreeF(c, gmres_functions);
    hypre_TFreeF(s, gmres_functions);

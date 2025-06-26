@@ -203,7 +203,8 @@ main( hypre_int argc,
    HYPRE_Int           size;
    HYPRE_Int          *ncols;
    HYPRE_BigInt       *col_inds;
-   HYPRE_Int          *dof_func;
+   HYPRE_Int          *dof_func = NULL;
+   HYPRE_Int           free_dof_func = 1;
    HYPRE_Int           filter_functions = 0;
    HYPRE_Int           num_functions = 1;
    HYPRE_Int           num_paths = 1;
@@ -4107,7 +4108,6 @@ main( hypre_int argc,
    /* Setup dof_func array if needed */
    if (num_functions > 1)
    {
-      dof_func = NULL;
       if (build_funcs_type == 1)
       {
          if (myid == 0)
@@ -4429,8 +4429,8 @@ main( hypre_int argc,
       else if (test_scaling == 4 && dof_func)
       {
          /* Compute scaling based on block matrix norms */
-         HYPRE_ParCSRMatrixCompScalingTagged(parcsr_A, 1, memory_location,
-                                             num_functions, dof_func, &par_ld);
+         HYPRE_ParCSRMatrixComputeScalingTagged(parcsr_A, 1, memory_location,
+                                                num_functions, dof_func, &par_ld);
          par_rd = par_ld;
       }
       else
@@ -4824,6 +4824,7 @@ main( hypre_int argc,
       if (num_functions > 1)
       {
          HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
+				 free_dof_func = 0;
       }
       HYPRE_BoomerAMGSetAdditive(amg_solver, additive);
       HYPRE_BoomerAMGSetMultAdditive(amg_solver, mult_add);
@@ -5137,6 +5138,7 @@ main( hypre_int argc,
       if (num_functions > 1)
       {
          HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
+				 free_dof_func = 0;
       }
       HYPRE_BoomerAMGSetAdditive(amg_solver, additive);
       HYPRE_BoomerAMGSetMultAdditive(amg_solver, mult_add);
@@ -5360,6 +5362,7 @@ main( hypre_int argc,
          if (num_functions > 1)
          {
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+   				  free_dof_func = 0;
          }
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
@@ -5560,6 +5563,7 @@ main( hypre_int argc,
          if (num_functions > 1)
          {
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+   				  free_dof_func = 0;
          }
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
@@ -6124,6 +6128,7 @@ main( hypre_int argc,
             if (num_functions > 1)
             {
                HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+               free_dof_func = 0;
             }
             HYPRE_PCGSetPrecond(pcg_solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -6230,6 +6235,7 @@ main( hypre_int argc,
             if (num_functions > 1)
             {
                HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+               free_dof_func = 0;
             }
             HYPRE_PCGSetPrecond(pcg_solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -6552,6 +6558,7 @@ main( hypre_int argc,
             if (num_functions > 1)
             {
                HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+               free_dof_func = 0;
             }
             HYPRE_LOBPCGSetPrecond(pcg_solver,
                                    (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -6669,6 +6676,7 @@ main( hypre_int argc,
             if (num_functions > 1)
             {
                HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+               free_dof_func = 0;
             }
 
             HYPRE_LOBPCGSetPrecond(pcg_solver,
@@ -7102,6 +7110,7 @@ main( hypre_int argc,
          if (num_functions > 1)
          {
             HYPRE_BoomerAMGSetDofFunc(amg_precond, dof_func);
+            free_dof_func = 0;
          }
          HYPRE_BoomerAMGSetAdditive(amg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(amg_precond, mult_add);
@@ -7308,6 +7317,7 @@ main( hypre_int argc,
          if (num_functions > 1)
          {
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+            free_dof_func = 0;
          }
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
@@ -7689,6 +7699,7 @@ main( hypre_int argc,
          if (num_functions > 1)
          {
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+            free_dof_func = 0;
          }
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
@@ -7915,6 +7926,7 @@ main( hypre_int argc,
          if (num_functions > 1)
          {
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+            free_dof_func = 0;
          }
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
@@ -8351,6 +8363,7 @@ main( hypre_int argc,
          if (num_functions > 1)
          {
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+            free_dof_func = 0;
          }
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
@@ -8778,6 +8791,7 @@ main( hypre_int argc,
          if (num_functions > 1)
          {
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+            free_dof_func = 0;
          }
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
@@ -9119,6 +9133,7 @@ main( hypre_int argc,
          if (num_functions > 1)
          {
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+            free_dof_func = 0;
          }
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
@@ -9622,6 +9637,16 @@ final:
    if (isolated_fpt_index)
    {
       hypre_TFree(isolated_fpt_index, HYPRE_MEMORY_HOST);
+   }
+   /* AMG takes ownership of dof_func, so we free it explicitly only when not using AMG */
+	 if (free_dof_func)
+   {
+      hypre_TFree(dof_func, memory_location);
+   }
+
+   if (ij_xstar)
+   {
+      HYPRE_IJVectorDestroy(ij_xstar);
    }
 
    /*
