@@ -126,6 +126,7 @@ hypre_SeqVectorCloneDeep
 hypre_SeqVectorCloneDeep_v2
 hypre_SeqVectorCloneShallow
 hypre_SeqVectorCopy
+hypre_SeqVectorCopyTags
 hypre_SeqVectorCreate
 hypre_SeqVectorDestroy
 hypre_SeqVectorElmdivpy
@@ -136,6 +137,8 @@ hypre_SeqVectorInitializeShell
 hypre_SeqVectorInitialize_v2
 hypre_SeqVectorInnerProd
 hypre_SeqVectorInnerProdHost
+hypre_SeqVectorInnerProdTagged
+hypre_SeqVectorInnerProdTaggedHost
 hypre_SeqVectorMigrate
 hypre_SeqVectorPrint
 hypre_SeqVectorRead
@@ -146,8 +149,11 @@ hypre_SeqVectorSetConstantValues
 hypre_SeqVectorSetConstantValuesHost
 hypre_SeqVectorSetData
 hypre_SeqVectorSetDataOwner
+hypre_SeqVectorSetNumTags
+hypre_SeqVectorSetOwnsTags
 hypre_SeqVectorSetRandomValues
 hypre_SeqVectorSetSize
+hypre_SeqVectorSetTags
 hypre_SeqVectorStridedCopy
 hypre_SeqVectorSumElts
 hypre_SeqVectorSumEltsHost

@@ -1817,6 +1817,7 @@ hypre_ParKrylovFree
 hypre_ParKrylovIdentity
 hypre_ParKrylovIdentitySetup
 hypre_ParKrylovInnerProd
+hypre_ParKrylovInnerProdTagged
 hypre_ParKrylovMassAxpy
 hypre_ParKrylovMassDotpTwo
 hypre_ParKrylovMassInnerProd
@@ -1856,8 +1857,8 @@ hypre_MGRBuildPFromWp
 hypre_MGRBuildPFromWpHost
 hypre_MGRBuildPHost
 hypre_MGRBuildRestrict
-hypre_MGRBuildRFromW
-hypre_MGRBuildRFromWHost
+hypre_MGRBuildRFromWr
+hypre_MGRBuildRFromWrHost
 hypre_MGRColLumpedRestrict
 hypre_MGRTruncateAcfCPR
 hypre_MGRTruncateAcfCPRDevice

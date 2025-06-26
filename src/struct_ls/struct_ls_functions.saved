@@ -448,6 +448,7 @@ hypre_StructKrylovFree
 hypre_StructKrylovIdentity
 hypre_StructKrylovIdentitySetup
 hypre_StructKrylovInnerProd
+hypre_StructKrylovInnerProdTagged
 hypre_StructKrylovMatvec
 hypre_StructKrylovMatvecCreate
 hypre_StructKrylovMatvecDestroy
