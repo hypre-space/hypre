@@ -14,6 +14,10 @@
 #ifndef HYPRE_STRUCT_MV_MUP_HEADER
 #define HYPRE_STRUCT_MV_MUP_HEADER
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined (HYPRE_MIXED_PRECISION)
 
 HYPRE_Int hypre_APFillResponseStructAssumedPart_flt  ( void *p_recv_contact_buf, HYPRE_Int contact_size,
@@ -1208,6 +1212,10 @@ HYPRE_Int hypre_StructVectorSetValues_dbl  ( hypre_StructVector *vector, hypre_I
 HYPRE_Int hypre_StructVectorSetValues_long_dbl  ( hypre_StructVector *vector, hypre_Index grid_index,
                                         hypre_long_double *values, HYPRE_Int action, HYPRE_Int boxnum, HYPRE_Int outside );
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

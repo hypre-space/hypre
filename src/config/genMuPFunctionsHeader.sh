@@ -35,6 +35,10 @@ cat >> $MUP_HEADER <<@
 #ifndef $HEADER_GUARD
 #define $HEADER_GUARD
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined (HYPRE_MIXED_PRECISION)
 
 @
@@ -88,6 +92,10 @@ awk -v filename="$FIN" 'BEGIN{
    close(filename);
 }')
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif
