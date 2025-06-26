@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include "_hypre_utilities.h"
+#include "_hypre_utilities.hpp"
 
 #if defined(HYPRE_USING_ROCTX)
 #include "hip/hip_runtime_api.h"
@@ -118,13 +119,13 @@ void hypre_GpuProfilingPopRange(void)
 {
 #if defined (HYPRE_USING_NVTX)
    hypre_GpuProfilingPushRangeColor("StreamSync0", Red);
-   cudaStreamSynchronize(0);
+   HYPRE_CUDA_CALL( cudaStreamSynchronize(0) );
    nvtxRangePop();
    nvtxRangePop();
 
 #elif defined (HYPRE_USING_ROCTX)
    roctxRangePush("StreamSync0");
-   hipStreamSynchronize(0);
+   HYPRE_HIP_CALL( hipStreamSynchronize(0) );
    roctxRangePop();
    roctxRangePop();
 #endif

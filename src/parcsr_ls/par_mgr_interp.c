@@ -786,10 +786,10 @@ hypre_MGRBuildPHost( hypre_ParCSRMatrix   *A,
          // L1-Jacobi-type interpolation
          diag_FF = hypre_CTAlloc(HYPRE_Complex, num_rows_AFF, memory_location_P);
          hypre_CSRMatrixExtractDiagonalHost(hypre_ParCSRMatrixDiag(A_FF), diag, 0);
-         hypre_CSRMatrixComputeRowSumHost(A_FF_diag, NULL, NULL, diag_FF, 1, 1.0, "set");
-         hypre_CSRMatrixComputeRowSumHost(A_FC_diag, NULL, NULL, diag_FF, 1, 1.0, "add");
-         hypre_CSRMatrixComputeRowSumHost(A_FF_offd, NULL, NULL, diag_FF, 1, 1.0, "add");
-         hypre_CSRMatrixComputeRowSumHost(A_FC_offd, NULL, NULL, diag_FF, 1, 1.0, "add");
+         hypre_CSRMatrixComputeRowSum(A_FF_diag, NULL, NULL, diag_FF, 1, 1.0, "set");
+         hypre_CSRMatrixComputeRowSum(A_FC_diag, NULL, NULL, diag_FF, 1, 1.0, "add");
+         hypre_CSRMatrixComputeRowSum(A_FF_offd, NULL, NULL, diag_FF, 1, 1.0, "add");
+         hypre_CSRMatrixComputeRowSum(A_FC_offd, NULL, NULL, diag_FF, 1, 1.0, "add");
 
          for (i = 0; i < num_rows_AFF; i++)
          {
@@ -2405,14 +2405,7 @@ hypre_MGRBuildRFromWr(hypre_IntArray       *C_map,
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      /* TODO (VPM): Implement hypre_MGRBuildRFromWrDevice */
-      hypre_ParCSRMatrixMigrate(Wr, HYPRE_MEMORY_HOST);
-      hypre_ParCSRMatrixMigrate(R, HYPRE_MEMORY_HOST);
-      hypre_IntArrayMigrate(C_map, HYPRE_MEMORY_HOST);
-      hypre_IntArrayMigrate(F_map, HYPRE_MEMORY_HOST);
-      hypre_MGRBuildRFromWrHost(C_map, F_map, Wr, R);
-      hypre_ParCSRMatrixMigrate(Wr, HYPRE_MEMORY_DEVICE);
-      hypre_ParCSRMatrixMigrate(R, HYPRE_MEMORY_DEVICE);
+      hypre_MGRBuildRFromWrDevice(C_map, F_map, Wr, R);
    }
    else
 #endif
@@ -2478,7 +2471,7 @@ hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix  *A,
                                 hypre_ParCSRMatrixGlobalNumRows(A_CF),
                                 hypre_ParCSRMatrixRowStarts(A_CF));
    hypre_ParVectorInitialize_v2(r_CF, hypre_ParCSRMatrixMemoryLocation(A_CF));
-   hypre_ParVectorElmdivpy(b_CF, b_FF, r_CF);
+   hypre_ParVectorPointwiseDivpy(b_CF, b_FF, r_CF);
    hypre_ParVectorScale(-1.0, r_CF);
    Wr = hypre_ParCSRMatrixCreateFromParVector(r_CF,
                                               hypre_ParCSRMatrixGlobalNumRows(A_CF),

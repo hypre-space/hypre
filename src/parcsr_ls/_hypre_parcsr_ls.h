@@ -3789,6 +3789,8 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix *A, HYPRE_
                                                    HYPRE_Int point_type, HYPRE_Int *CF_marker,
                                                    HYPRE_Int diag_type,
                                                    hypre_ParCSRMatrix **B_ptr );
+HYPRE_Int hypre_MGRBuildRFromWrDevice(hypre_IntArray *C_map, hypre_IntArray *F_map,
+                                      hypre_ParCSRMatrix *Wr, hypre_ParCSRMatrix *R);
 
 /* par_mgr_stats.c */
 HYPRE_Int hypre_MGRSetupStats( void *mgr_vdata );
