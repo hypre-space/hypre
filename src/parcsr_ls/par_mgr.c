@@ -247,6 +247,20 @@ hypre_MGRDestroy( void *data )
          hypre_ParVectorDestroy((mgr_data -> F_array)[i]);
          hypre_ParVectorDestroy((mgr_data -> U_array)[i]);
 
+         if ((mgr_data -> R_array)[i - 1] && (mgr_data -> RT_array)[i - 1] &&
+             ((mgr_data -> R_array)[i - 1] == (mgr_data -> RT_array)[i - 1]))
+         {
+            hypre_ParCSRMatrixDestroy((mgr_data -> R_array)[i - 1]);
+            (mgr_data -> R_array)[i - 1] = NULL;
+         }
+
+         if ((mgr_data -> P_array)[i - 1] && (mgr_data -> RT_array)[i - 1] &&
+             ((mgr_data -> P_array)[i - 1] == (mgr_data -> RT_array)[i - 1]))
+         {
+            hypre_ParCSRMatrixDestroy((mgr_data -> P_array)[i - 1]);
+            (mgr_data -> P_array)[i - 1] = NULL;
+         }
+
          if ((mgr_data -> P_array)[i - 1])
          {
             hypre_ParCSRMatrixDestroy((mgr_data -> P_array)[i - 1]);
@@ -367,6 +381,7 @@ hypre_MGRDestroy( void *data )
          hypre_TFree((mgr_data -> level_diaginv)[i], HYPRE_MEMORY_HOST);
       }
       hypre_TFree(mgr_data -> level_diaginv, HYPRE_MEMORY_HOST);
+      (mgr_data -> level_diaginv) = NULL;
    }
 
    if (mgr_data -> frelax_diaginv)
@@ -376,6 +391,7 @@ hypre_MGRDestroy( void *data )
          hypre_TFree((mgr_data -> frelax_diaginv)[i], HYPRE_MEMORY_HOST);
       }
       hypre_TFree(mgr_data -> frelax_diaginv, HYPRE_MEMORY_HOST);
+      (mgr_data -> frelax_diaginv) = NULL;
    }
    hypre_TFree((mgr_data -> F_array), HYPRE_MEMORY_HOST);
    hypre_TFree((mgr_data -> U_array), HYPRE_MEMORY_HOST);
