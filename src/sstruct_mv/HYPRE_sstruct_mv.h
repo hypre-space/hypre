@@ -516,6 +516,17 @@ HYPRE_Int
 HYPRE_SStructMatrixInitialize(HYPRE_SStructMatrix matrix);
 
 /**
+ * (Optional, GPU only) Sets if the matrix assemble routine does reductions
+ * of the IJ part before calling HYPRE_SStructMatrixAssemble.
+ * See also the comments of HYPRE_IJMatrixSetEarlyAssemble.
+ * This early assemble feature may save the peak memory usage but requires
+ * extra work.
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixSetEarlyAssemble( HYPRE_SStructMatrix matrix,
+                                     HYPRE_Int           early_assemble );
+
+/**
  * Set matrix coefficients index by index.  The \e values array is of length
  * \e nentries.
  *
