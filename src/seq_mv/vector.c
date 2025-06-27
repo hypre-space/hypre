@@ -263,9 +263,9 @@ hypre_SeqVectorSetValuesTagged( hypre_Vector  *vector,
       return hypre_error_flag;
    }
 
-   if (!hypre_VectorTags(vector) || hypre_VectorNumTags(vector) < 2)
+   if (!hypre_VectorTags(vector) || hypre_VectorNumTags(vector) < 1)
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "This function is valid only for multi-tagged vectors");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "This function is valid only for tagged vectors");
       return hypre_error_flag;
    }
 
