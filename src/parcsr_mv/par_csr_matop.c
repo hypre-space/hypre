@@ -7109,7 +7109,7 @@ hypre_ParCSRMatrixComputeScalingTagged(hypre_ParCSRMatrix  *A,
    HYPRE_Int                i;
 
    /* Sanity check - Return an empty scaling if tags is a null pointer or type = 0 */
-   if (!tags || (type == 0))
+   if ((!tags && num_rows > 0) || (type == 0))
    {
       hypre_ParVectorDestroy(*scaling_ptr);
       *scaling_ptr = NULL;
@@ -7168,7 +7168,7 @@ hypre_ParCSRMatrixComputeScalingTagged(hypre_ParCSRMatrix  *A,
          weights = g_weights;
       }
 
-      hypre_MPI_Allreduce(local_weights, g_weights, num_tags, HYPRE_MPI_REAL, MPI_SUM, comm);
+      hypre_MPI_Allreduce(local_weights, g_weights, num_tags, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
       for (i = 0; i < num_tags; i++)
       {
          g_weights[i] = hypre_sqrt(pow(10.0,

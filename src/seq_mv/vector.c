@@ -263,7 +263,7 @@ hypre_SeqVectorSetValuesTagged( hypre_Vector  *vector,
       return hypre_error_flag;
    }
 
-   if (!hypre_VectorTags(vector) || hypre_VectorNumTags(vector) < 1)
+   if ((!hypre_VectorTags(vector) && hypre_VectorSize(vector) > 0) || hypre_VectorNumTags(vector) < 1)
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "This function is valid only for tagged vectors");
       return hypre_error_flag;
@@ -1627,17 +1627,25 @@ hypre_SeqVectorPointwiseProduct( hypre_Vector  *x,
 {
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y);
+   HYPRE_Complex  x_size = hypre_VectorSize(x);
+   HYPRE_Complex  y_size = hypre_VectorSize(y);
+   HYPRE_Complex  z_size = hypre_VectorSize(*z_ptr);
 
    /* Check if vectors are initialized */
-   if (!x_data || !y_data)
+   if ((!x_data && !x_size) || (!y_data && !y_size))
    {
-      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Vectors are not initialized!");
+      return hypre_error_flag;
+   }
+
+   /* Check if vectors are initialized */
+   if ((!x_data && x_size) || (!y_data && y_size))
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Vectors have different sizes!");
       return hypre_error_flag;
    }
 
    /* Check if vectors have same size */
-   if (hypre_VectorSize(y) != hypre_VectorSize(x) ||
-       (*z_ptr && hypre_VectorSize(y) != hypre_VectorSize(*z_ptr)))
+   if (y_size != x_size || (*z_ptr && y_size != z_size))
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Vectors have different sizes!");
       return hypre_error_flag;
