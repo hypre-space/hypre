@@ -7,6 +7,9 @@
 
 #include "_hypre_utilities.h"
 #include "_hypre_utilities.hpp"
+#if defined(HYPRE_DEBUG) && defined (__USE_GNU)
+#include <fenv.h>
+#endif
 
 /* global variable _hypre_handle:
  * Outside this file, do NOT access it directly,
@@ -403,6 +406,10 @@ HYPRE_Initialize(void)
 
 #if defined(HYPRE_USING_MAGMA)
    hypre_MagmaInitialize();
+#endif
+
+#if defined(HYPRE_DEBUG) && defined(__USE_GNU)
+   feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW);
 #endif
 
    /* Update library state */

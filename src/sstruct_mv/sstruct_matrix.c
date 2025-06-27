@@ -978,7 +978,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix  *matrix,
                                                                  HYPRE_MEMORY_DEVICE);
 #endif
 
-   HYPRE_IJMatrixInitialize(ijmatrix);
+   HYPRE_IJMatrixInitialize_v2(ijmatrix, memory_location);
    HYPRE_IJMatrixGetObject(ijmatrix,
                            (void **) &hypre_SStructMatrixParCSRMatrix(matrix));
 
@@ -1908,16 +1908,17 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
    hypre_BoxArray          *pbnd_boxa;
    hypre_BoxArray          *grid_boxes;
    hypre_Box               *grid_box, *box, *ibox0, *ibox1, *ibox2, *tobox, *frbox;
-   hypre_Index              unit_stride, loop_size;
+   hypre_Index              ustride, loop_size;
    hypre_IndexRef           offset, start;
    hypre_BoxManEntry      **frentries, **toentries;
    hypre_SStructBoxManInfo *frinfo, *toinfo;
-   HYPRE_Complex           *tvalues = NULL;
+   HYPRE_Complex           *tvalues;
    HYPRE_Int                box_id;
    HYPRE_Int                nfrentries, ntoentries, frpart, topart;
    HYPRE_Int                entry, sentry, ei, fri, toi, i;
-   HYPRE_Int                tvalues_size = 0, tvalues_new_size;
+   HYPRE_Int                volume, tvalues_size = 16384;
 
+   hypre_SetIndex(ustride, 1);
    box   = hypre_BoxCreate(ndim);
    ibox0 = hypre_BoxCreate(ndim);
    ibox1 = hypre_BoxCreate(ndim);
@@ -1925,7 +1926,9 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
    tobox = hypre_BoxCreate(ndim);
    frbox = hypre_BoxCreate(ndim);
 
-   hypre_SetIndex(unit_stride, 1);
+   /* Allocate memory */
+   tvalues = hypre_TAlloc(HYPRE_Complex, tvalues_size, memloc);
+
    for (ei = 0; ei < nentries; ei++)
    {
       entry  = entries[ei];
@@ -1993,10 +1996,14 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                hypre_IntersectBoxes(ibox0, frbox, ibox1);
                if (hypre_BoxVolume(ibox1))
                {
-                  tvalues_new_size = hypre_BoxVolume(ibox1);
-                  tvalues = hypre_TReAlloc_v2(tvalues, HYPRE_Complex, tvalues_size,
-                                              HYPRE_Complex, tvalues_new_size, memloc);
-                  tvalues_size = tvalues_new_size;
+                  volume = hypre_BoxVolume(ibox1);
+                  if (tvalues_size < volume)
+                  {
+                     tvalues = hypre_TReAlloc_v2(tvalues, HYPRE_Complex,
+                                                 tvalues_size, HYPRE_Complex,
+                                                 volume, memloc);
+                     tvalues_size = volume;
+                  }
 
                   if (action >= 0)
                   {
@@ -2016,8 +2023,8 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                      start = hypre_BoxIMin(ibox1);
                      hypre_BoxGetSize(ibox1, loop_size);
                      hypre_BoxLoop2Begin(ndim, loop_size,
-                                         ibox1, start, unit_stride, mi,
-                                         value_box, start, unit_stride, vi);
+                                         ibox1, start, ustride, mi,
+                                         value_box, start, ustride, vi);
                      {
                         tvalues[mi] = values[ei + vi * nentries];
                      }
@@ -2040,8 +2047,8 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                      start = hypre_BoxIMin(ibox1);
                      hypre_BoxGetSize(ibox1, loop_size);
                      hypre_BoxLoop2Begin(ndim, loop_size,
-                                         ibox1, start, unit_stride, mi,
-                                         value_box, start, unit_stride, vi);
+                                         ibox1, start, ustride, mi,
+                                         value_box, start, ustride, vi);
                      {
                         values[ei + vi * nentries] = tvalues[mi];
                      }
@@ -2058,6 +2065,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
       hypre_TFree(toentries, HYPRE_MEMORY_HOST);
    } /* end of entries loop */
 
+   /* Free memory */
    hypre_BoxDestroy(box);
    hypre_BoxDestroy(ibox0);
    hypre_BoxDestroy(ibox1);

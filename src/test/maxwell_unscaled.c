@@ -149,7 +149,7 @@ SScanProblemIndex( char          *sdata_ptr,
                    ProblemIndex   index )
 {
    HYPRE_Int  i;
-   char sign[3];
+   char sign[3] = "";
 
    /* initialize index array */
    for (i = 0; i < 9; i++)

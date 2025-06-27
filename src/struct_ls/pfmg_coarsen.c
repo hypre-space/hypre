@@ -15,6 +15,28 @@
 #define HYPRE_UNROLL_MAXDEPTH 9
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_PFMGComputeMaxLevels( hypre_StructGrid   *grid,
+                            HYPRE_Int          *max_levels_ptr )
+{
+   HYPRE_Int        ndim = hypre_StructGridNDim(grid);
+   hypre_Box       *bbox = hypre_StructGridBoundingBox(grid);
+   HYPRE_Int        max_levels, d;
+
+   max_levels = 1;
+   for (d = 0; d < ndim; d++)
+   {
+      max_levels += hypre_Log2(hypre_BoxSizeD(bbox, d)) + 2;
+   }
+
+   *max_levels_ptr = max_levels;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_PFMGComputeCxyz_core_VC
  *
  * Core function for computing stencil collapsing for variable coefficients
@@ -46,6 +68,7 @@ hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A,
    HYPRE_Complex        *Ap6 = NULL, *Ap7 = NULL, *Ap8 = NULL;
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("VC");
 
    A_diag = (diag_is_constant) ?
             hypre_StructMatrixConstData(A, diag_entry) :
@@ -263,6 +286,7 @@ hypre_PFMGComputeCxyz_core_VC(hypre_StructMatrix *A,
    } /* for (d = 0; d < ndim; d++) */
 #undef DEVICE_VAR
 
+   hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
@@ -315,6 +339,7 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
    }
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("CC");
 
    A_diag = (diag_is_constant) ?
             hypre_StructMatrixConstData(A, diag_entry) :
@@ -531,6 +556,7 @@ hypre_PFMGComputeCxyz_core_CC(hypre_StructMatrix *A,
 #endif
    } /* for (d = 0; d < ndim; d++) */
 
+   hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
@@ -580,6 +606,7 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
 #endif
 
    HYPRE_ANNOTATE_FUNC_BEGIN;
+   hypre_GpuProfilingPushRange("PFMGComputeCxyz");
 
    /*----------------------------------------------------------
     * Initialize data
@@ -676,12 +703,9 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
          }
 
          /* Compute variable coefficient contributions */
-         hypre_GetDeviceLastError();
-         hypre_GetDeviceLastError();
          hypre_PFMGComputeCxyz_core_VC(A, i, diag_is_constant, diag_entry,
                                        vdepth, entries, start, loop_size,
                                        A_dbox, w_dbox, w_data);
-         hypre_GetDeviceLastError();
 
          /* Collect pointers to constant stencil entries */
          for (d = 0; d < ndim; d++)
@@ -765,6 +789,7 @@ hypre_PFMGComputeCxyz( hypre_StructMatrix *A,
       hypre_StructVectorDestroy(work[d]);
    }
 
+   hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_FUNC_END;
 
    return hypre_error_flag;
