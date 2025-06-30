@@ -13,7 +13,6 @@
 
 #include "_hypre_struct_mv.h"
 #include "_hypre_struct_mv.hpp"
-//#define USE_FUSED_MATMULT 1
 
 /*--------------------------------------------------------------------------
  * StructMatmult functions
@@ -21,6 +20,8 @@
  * These functions compute a collection of matrix products (only up to 3 matrix
  * terms are currently allowed in the product).
  *
+ * The function SetAlgoType() allows for choosing the algorithm used for
+ * computing matrix-matrix multiplication (standard or fused).
  * Each matrix product is specified by a call to the SetProduct() function.
  * This provides additional context for optimizations (e.g., reducing
  * communication overhead) in the subsequent functions, Initialize(),
@@ -28,6 +29,7 @@
  * function is called only once, except for SetProduct() and Compute():
  *
  *    MatmultCreate()
+ *    MatmultSetAlgoType() // (Optional) set matmult implementation
  *    MatmultSetProduct()  // call to specify each matrix product
  *    MatmultInitialize()  // compute all matrix product shells (no data required)
  *    MatmultCommSetup()   // setup all communication (optional, requires data)
@@ -177,21 +179,30 @@ hypre_StructMatmultCreate( HYPRE_Int                  max_matmults,
    mmdata = hypre_CTAlloc(hypre_StructMatmultData, 1, HYPRE_MEMORY_HOST);
 
    /* Initialize data members */
-   (mmdata -> nmatmults) = 0;
-   (mmdata -> matmults)  = hypre_CTAlloc(hypre_StructMatmultDataM, max_matmults, HYPRE_MEMORY_HOST);
-   (mmdata -> nmatrices) = 0;
-   (mmdata -> matrices)  = hypre_CTAlloc(hypre_StructMatrix *, max_matrices, HYPRE_MEMORY_HOST);
-   (mmdata -> mtypes)          = NULL;
-   (mmdata -> fstride)         = NULL;
-   (mmdata -> cstride)         = NULL;
-   (mmdata -> coarsen_stride)  = NULL;
-   (mmdata -> coarsen)         = 0;
-   (mmdata -> fdata_space)     = NULL;
-   (mmdata -> cdata_space)     = NULL;
-   (mmdata -> mask)            = NULL;
-   (mmdata -> comm_pkg)        = NULL;
-   (mmdata -> comm_data)       = NULL;
-   (mmdata -> comm_stencils)   = NULL;
+   (mmdata -> matmults)       = hypre_CTAlloc(hypre_StructMatmultDataM,
+                                              max_matmults,
+                                              HYPRE_MEMORY_HOST);
+   (mmdata -> matrices)       = hypre_CTAlloc(hypre_StructMatrix *,
+                                              max_matrices,
+                                              HYPRE_MEMORY_HOST);
+   (mmdata -> nmatmults)      = 0;
+   (mmdata -> nmatrices)      = 0;
+   (mmdata -> mtypes)         = NULL;
+   (mmdata -> fstride)        = NULL;
+   (mmdata -> cstride)        = NULL;
+   (mmdata -> coarsen_stride) = NULL;
+   (mmdata -> coarsen)        = 0;
+   (mmdata -> fdata_space)    = NULL;
+   (mmdata -> cdata_space)    = NULL;
+   (mmdata -> mask)           = NULL;
+   (mmdata -> comm_pkg)       = NULL;
+   (mmdata -> comm_data)      = NULL;
+   (mmdata -> comm_stencils)  = NULL;
+#if defined (HYPRE_USING_GPU)
+   (mmdata -> matmat_type)    = 1;
+#else
+   (mmdata -> matmat_type)    = 0;
+#endif
 
    *mmdata_ptr = mmdata;
 
@@ -244,6 +255,38 @@ hypre_StructMatmultDestroy( hypre_StructMatmultData *mmdata )
       hypre_TFree(mmdata -> comm_data, HYPRE_MEMORY_HOST);
 
       hypre_TFree(mmdata, HYPRE_MEMORY_HOST);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Sets the algorithm type used for computing matrix-matrix multiplications
+ *
+ * type = -1: proxy to the default depending on hypre's build type (CPU or GPU)
+ * type =  0: standard (core) implementation (default for CPUs)
+ * type =  1: fused implementation (default for GPUs) involving less BoxLoops.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatmultSetAlgoType( hypre_StructMatmultData  *mmdata,
+                                HYPRE_Int                 matmat_type )
+{
+   if (matmat_type != -1)
+   {
+#if defined (HYPRE_USING_GPU)
+      (mmdata -> matmat_type) = 1;
+#else
+      (mmdata -> matmat_type) = 0;
+#endif
+   }
+   else if (matmat_type == 0 || matmat_type == 1)
+   {
+      (mmdata -> matmat_type) = matmat_type;
+   }
+   else
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unsupported algorithm type!");
    }
 
    return hypre_error_flag;
@@ -1205,6 +1248,7 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
    hypre_StructMatmultDataM  *Mdata          = &(mmdata -> matmults[iM]);
    hypre_StructMatrix       **matrices       = (mmdata -> matrices);
    HYPRE_Int                  nmatrices      = (mmdata -> nmatrices);
+   HYPRE_Int                  mmtype         = (mmdata -> matmat_type);
    hypre_IndexRef             coarsen_stride = (mmdata -> coarsen_stride);
    hypre_IndexRef             fstride        = (mmdata -> fstride);
    hypre_IndexRef             cstride        = (mmdata -> cstride);
@@ -1235,10 +1279,8 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
    hypre_StructGrid          *Mgrid          = hypre_StructMatrixGrid(M);
    HYPRE_Int                 *Mgrid_ids      = hypre_StructGridIDs(Mgrid);
    hypre_BoxArray            *Mdata_space    = hypre_StructMatrixDataSpace(M);
-#if !defined(USE_FUSED_MATMULT)
    hypre_StructStencil       *Mstencil       = hypre_StructMatrixStencil(M);
    HYPRE_Int                  stencil_size   = hypre_StructStencilSize(Mstencil);
-#endif
 
    /* Local variables */
    hypre_Index                Mstart;      /* M's stencil location on the base index space */
@@ -1470,18 +1512,21 @@ hypre_StructMatmultCompute( hypre_StructMatmultData  *mmdata,
       {
          case 2:
          case 3:
-#if defined(USE_FUSED_MATMULT)
-            hypre_StructMatmultCompute_fuse(nterms, a, na, ndim, loop_size,
-                                            fdbox, fdstart, fdstride,
-                                            cdbox, cdstart, cdstride,
-                                            Mdbox, Mdstart, Mdstride);
-#else
-            hypre_StructMatmultCompute_core(nterms, a, na, ndim,
-                                            loop_size, stencil_size,
-                                            fdbox, fdstart, fdstride,
-                                            cdbox, cdstart, cdstride,
-                                            Mdbox, Mdstart, Mdstride);
-#endif
+            if (mmtype == 1)
+            {
+               hypre_StructMatmultCompute_fuse(nterms, a, na, ndim, loop_size,
+                                               fdbox, fdstart, fdstride,
+                                               cdbox, cdstart, cdstride,
+                                               Mdbox, Mdstart, Mdstride);
+            }
+            else
+            {
+               hypre_StructMatmultCompute_core(nterms, a, na, ndim,
+                                               loop_size, stencil_size,
+                                               fdbox, fdstart, fdstride,
+                                               cdbox, cdstart, cdstride,
+                                               Mdbox, Mdstart, Mdstride);
+            }
             break;
 
          default:
@@ -1591,7 +1636,8 @@ hypre_StructMatmultGetMatrix( hypre_StructMatmultData  *mmdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmultSetup( HYPRE_Int                  nmatrices,
+hypre_StructMatmultSetup( HYPRE_Int                  matmat_type,
+                          HYPRE_Int                  nmatrices,
                           hypre_StructMatrix       **matrices,
                           HYPRE_Int                  nterms,
                           HYPRE_Int                 *terms,
@@ -1604,6 +1650,7 @@ hypre_StructMatmultSetup( HYPRE_Int                  nmatrices,
    HYPRE_Int                 iM;
 
    hypre_StructMatmultCreate(1, nmatrices, &mmdata);
+   hypre_StructMatmultSetAlgoType(mmdata, matmat_type);
    hypre_StructMatmultSetProduct(mmdata, nmatrices, matrices, nterms, terms, trans, &iM);
    hypre_StructMatmultInitialize(mmdata, 1);
    hypre_StructMatmultGetMatrix(mmdata, iM, &M);
@@ -1613,6 +1660,9 @@ hypre_StructMatmultSetup( HYPRE_Int                  nmatrices,
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_StructMatmultMultiply( hypre_StructMatmultData  *mmdata )
@@ -1630,8 +1680,12 @@ hypre_StructMatmultMultiply( hypre_StructMatmultData  *mmdata )
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_StructMatmult( HYPRE_Int            nmatrices,
+hypre_StructMatmult( HYPRE_Int            matmat_type,
+                     HYPRE_Int            nmatrices,
                      hypre_StructMatrix **matrices,
                      HYPRE_Int            nterms,
                      HYPRE_Int           *terms,
@@ -1640,7 +1694,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
 {
    hypre_StructMatmultData *mmdata;
 
-   hypre_StructMatmultSetup(nmatrices, matrices, nterms, terms, trans, &mmdata, M_ptr);
+   hypre_StructMatmultSetup(matmat_type, nmatrices, matrices, nterms, terms, trans, &mmdata, M_ptr);
    hypre_StructMatmultMultiply(mmdata);
 
    return hypre_error_flag;
@@ -1661,11 +1715,19 @@ hypre_StructMatmatSetup( hypre_StructMatrix        *A,
    HYPRE_Int           nterms      = 2;
    HYPRE_Int           terms[3]    = {0, 1};
    HYPRE_Int           trans[2]    = {0, 0};
+#if defined (HYPRE_USING_GPU)
+   HYPRE_Int           matmat_type = 1;
+#else
+   HYPRE_Int           matmat_type = 0;
+#endif
 
-   hypre_StructMatmultSetup(nmatrices, matrices, nterms, terms, trans, mmdata_ptr, M_ptr);
+   hypre_StructMatmultSetup(matmat_type, nmatrices, matrices, nterms, terms, trans, mmdata_ptr, M_ptr);
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_StructMatmat( hypre_StructMatrix  *A,
@@ -1685,7 +1747,8 @@ hypre_StructMatmat( hypre_StructMatrix  *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatrixPtAPSetup( hypre_StructMatrix        *A,
+hypre_StructMatrixPtAPSetup( HYPRE_Int                  matmat_type,
+                             hypre_StructMatrix        *A,
                              hypre_StructMatrix        *P,
                              hypre_StructMatmultData  **mmdata_ptr,
                              hypre_StructMatrix       **M_ptr)
@@ -1696,10 +1759,13 @@ hypre_StructMatrixPtAPSetup( hypre_StructMatrix        *A,
    HYPRE_Int                terms[3]    = {1, 0, 1};
    HYPRE_Int                trans[3]    = {1, 0, 0};
 
-   hypre_StructMatmultSetup(nmatrices, matrices, nterms, terms, trans, mmdata_ptr, M_ptr);
+   hypre_StructMatmultSetup(matmat_type, nmatrices, matrices, nterms, terms, trans, mmdata_ptr, M_ptr);
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_StructMatrixPtAP( hypre_StructMatrix  *A,
@@ -1707,8 +1773,13 @@ hypre_StructMatrixPtAP( hypre_StructMatrix  *A,
                         hypre_StructMatrix **M_ptr)
 {
    hypre_StructMatmultData *mmdata;
+#if defined (HYPRE_USING_GPU)
+   HYPRE_Int                matmat_type = 1;
+#else
+   HYPRE_Int                matmat_type = 0;
+#endif
 
-   hypre_StructMatrixPtAPSetup(A, P, &mmdata, M_ptr);
+   hypre_StructMatrixPtAPSetup(matmat_type, A, P, &mmdata, M_ptr);
    hypre_StructMatmultMultiply(mmdata);
 
    return hypre_error_flag;
@@ -1719,7 +1790,8 @@ hypre_StructMatrixPtAP( hypre_StructMatrix  *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatrixRAPSetup( hypre_StructMatrix        *R,
+hypre_StructMatrixRAPSetup( HYPRE_Int                  matmat_type,
+                            hypre_StructMatrix        *R,
                             hypre_StructMatrix        *A,
                             hypre_StructMatrix        *P,
                             hypre_StructMatmultData  **mmdata_ptr,
@@ -1731,10 +1803,13 @@ hypre_StructMatrixRAPSetup( hypre_StructMatrix        *R,
    HYPRE_Int           terms[3]    = {2, 0, 1};
    HYPRE_Int           trans[3]    = {0, 0, 0};
 
-   hypre_StructMatmultSetup(nmatrices, matrices, nterms, terms, trans, mmdata_ptr, M_ptr);
+   hypre_StructMatmultSetup(matmat_type, nmatrices, matrices, nterms, terms, trans, mmdata_ptr, M_ptr);
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_StructMatrixRAP( hypre_StructMatrix  *R,
@@ -1743,8 +1818,13 @@ hypre_StructMatrixRAP( hypre_StructMatrix  *R,
                        hypre_StructMatrix **M_ptr)
 {
    hypre_StructMatmultData *mmdata;
+#if defined (HYPRE_USING_GPU)
+   HYPRE_Int                matmat_type = 1;
+#else
+   HYPRE_Int                matmat_type = 0;
+#endif
 
-   hypre_StructMatrixRAPSetup(R, A, P, &mmdata, M_ptr);
+   hypre_StructMatrixRAPSetup(matmat_type, R, A, P, &mmdata, M_ptr);
    hypre_StructMatmultMultiply(mmdata);
 
    return hypre_error_flag;
@@ -1755,7 +1835,8 @@ hypre_StructMatrixRAP( hypre_StructMatrix  *R,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatrixRTtAPSetup( hypre_StructMatrix        *RT,
+hypre_StructMatrixRTtAPSetup( HYPRE_Int                  matmat_type,
+                              hypre_StructMatrix        *RT,
                               hypre_StructMatrix        *A,
                               hypre_StructMatrix        *P,
                               hypre_StructMatmultData  **mmdata_ptr,
@@ -1767,10 +1848,13 @@ hypre_StructMatrixRTtAPSetup( hypre_StructMatrix        *RT,
    HYPRE_Int           terms[3]    = {2, 0, 1};
    HYPRE_Int           trans[3]    = {1, 0, 0};
 
-   hypre_StructMatmultSetup(nmatrices, matrices, nterms, terms, trans, mmdata_ptr, M_ptr);
+   hypre_StructMatmultSetup(matmat_type, nmatrices, matrices, nterms, terms, trans, mmdata_ptr, M_ptr);
 
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_StructMatrixRTtAP( hypre_StructMatrix  *RT,
@@ -1779,8 +1863,13 @@ hypre_StructMatrixRTtAP( hypre_StructMatrix  *RT,
                          hypre_StructMatrix **M_ptr)
 {
    hypre_StructMatmultData *mmdata;
+#if defined (HYPRE_USING_GPU)
+   HYPRE_Int                matmat_type = 1;
+#else
+   HYPRE_Int                matmat_type = 0;
+#endif
 
-   hypre_StructMatrixRTtAPSetup(RT, A, P, &mmdata, M_ptr);
+   hypre_StructMatrixRTtAPSetup(matmat_type, RT, A, P, &mmdata, M_ptr);
    hypre_StructMatmultMultiply(mmdata);
 
    return hypre_error_flag;

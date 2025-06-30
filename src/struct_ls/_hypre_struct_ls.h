@@ -213,6 +213,8 @@ HYPRE_Int hypre_PFMGSetJacobiWeight ( void *pfmg_vdata, HYPRE_Real weight );
 HYPRE_Int hypre_PFMGGetJacobiWeight ( void *pfmg_vdata, HYPRE_Real *weight );
 HYPRE_Int hypre_PFMGSetRAPType ( void *pfmg_vdata, HYPRE_Int rap_type );
 HYPRE_Int hypre_PFMGGetRAPType ( void *pfmg_vdata, HYPRE_Int *rap_type );
+HYPRE_Int hypre_PFMGSetMatMatType ( void *pfmg_vdata, HYPRE_Int matmat_type );
+HYPRE_Int hypre_PFMGGetMatMatType ( void *pfmg_vdata, HYPRE_Int *matmat_type );
 HYPRE_Int hypre_PFMGSetNumPreRelax ( void *pfmg_vdata, HYPRE_Int num_pre_relax );
 HYPRE_Int hypre_PFMGGetNumPreRelax ( void *pfmg_vdata, HYPRE_Int *num_pre_relax );
 HYPRE_Int hypre_PFMGSetNumPostRelax ( void *pfmg_vdata, HYPRE_Int num_post_relax );

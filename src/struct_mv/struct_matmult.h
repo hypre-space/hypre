@@ -59,8 +59,9 @@ typedef struct hypre_StructMatmultDataM_struct
 
 typedef struct hypre_StructMatmultData_struct
 {
-   HYPRE_Int                  nmatmults;  /* number of matmults */
-   hypre_StructMatmultDataM  *matmults;   /* data for each matmult */
+   HYPRE_Int                 matmat_type; /* algorithm type for computing matmult */
+   HYPRE_Int                 nmatmults;   /* number of matmults */
+   hypre_StructMatmultDataM *matmults;    /* data for each matmult */
 
    HYPRE_Int             nmatrices;       /* number of matrices */
    hypre_StructMatrix  **matrices;        /* matrices we are multiplying */

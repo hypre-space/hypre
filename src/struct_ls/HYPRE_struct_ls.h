@@ -292,6 +292,20 @@ HYPRE_Int HYPRE_StructPFMGGetRAPType(HYPRE_StructSolver solver,
                                      HYPRE_Int *rap_type );
 
 /**
+ * (Optional) Set type of algorithm used for computing struct matrix-matrix multiplication.
+ *
+ * Current values set by \e matmat_type are:
+ *
+ *    - 0 : standard (core) algorithm (default for CPUs)
+ *    - 1 : fused algorithm with less, but more computationally intensive BoxLoops (default for GPUs)
+ **/
+HYPRE_Int HYPRE_StructPFMGSetMatMatType(HYPRE_StructSolver solver,
+                                        HYPRE_Int          matmat_type);
+
+HYPRE_Int HYPRE_StructPFMGGetMatMatType(HYPRE_StructSolver solver,
+                                        HYPRE_Int *matmat_type );
+
+/**
  * (Optional) Set number of relaxation sweeps before coarse-grid correction.
  **/
 HYPRE_Int HYPRE_StructPFMGSetNumPreRelax(HYPRE_StructSolver solver,
