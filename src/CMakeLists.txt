@@ -82,6 +82,7 @@ set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeR
 
 # Set debug flags based on compiler
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  set(HYPRE_DEBUG ON CACHE INTERNAL "")
   if(CMAKE_C_COMPILER_ID MATCHES "Intel")
     target_compile_options(${PROJECT_NAME} PRIVATE
       $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wremarks>
@@ -148,6 +149,7 @@ set_hypre_option(BASE HYPRE_ENABLE_LTO                  "Use Link-Time Optimizat
 set_hypre_option(BASE HYPRE_ENABLE_PRINT_ERRORS         "Print HYPRE errors" OFF)
 set_hypre_option(SKIP HYPRE_ENABLE_TIMING               "Use HYPRE timing routines" OFF)
 set_hypre_option(SKIP HYPRE_ENABLE_STRICT_CHECKING      "Use strict error checking (Sequential only)" OFF)
+set_hypre_option(SKIP HYPRE_ENABLE_MEMORY_TRACKER       "Use internal memory tracker (Debug only)" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_TEST_USING_HOST      "Execute tests on host (CPU)" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_HOST_MEMORY          "Use host memory" ON)
 set_hypre_option(BASE HYPRE_BUILD_EXAMPLES              "Build examples" OFF)
@@ -231,6 +233,7 @@ set_internal_hypre_option("" TEST_USING_HOST)
 set_internal_hypre_option("" PRINT_ERRORS)
 set_internal_hypre_option(USING HYPRE_BLAS)
 set_internal_hypre_option(USING HYPRE_LAPACK)
+set_internal_hypre_option(USING MEMORY_TRACKER)
 set_internal_hypre_option(USING HOPSCOTCH)
 set_internal_hypre_option(USING GPU_AWARE_MPI)
 set_internal_hypre_option(USING GPU_STREAMS)

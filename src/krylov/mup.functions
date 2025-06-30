@@ -111,6 +111,7 @@ hypre_GMRESGetNumIterations
 hypre_GMRESGetPrecond
 hypre_GMRESGetPrecondMatrix
 hypre_GMRESGetPrintLevel
+hypre_GMRESGetRefSolution
 hypre_GMRESGetRelChange
 hypre_GMRESGetResidual
 hypre_GMRESGetSkipRealResidualCheck
@@ -126,6 +127,7 @@ hypre_GMRESSetMinIter
 hypre_GMRESSetPrecond
 hypre_GMRESSetPrecondMatrix
 hypre_GMRESSetPrintLevel
+hypre_GMRESSetRefSolution
 hypre_GMRESSetRelChange
 hypre_GMRESSetSkipRealResidualCheck
 hypre_GMRESSetStopCrit
@@ -228,6 +230,7 @@ HYPRE_GMRESGetNumIterations
 HYPRE_GMRESGetPrecond
 HYPRE_GMRESGetPrecondMatrix
 HYPRE_GMRESGetPrintLevel
+HYPRE_GMRESGetRefSolution
 HYPRE_GMRESGetRelChange
 HYPRE_GMRESGetResidual
 HYPRE_GMRESGetSkipRealResidualCheck
@@ -242,6 +245,7 @@ HYPRE_GMRESSetMinIter
 HYPRE_GMRESSetPrecond
 HYPRE_GMRESSetPrecondMatrix
 HYPRE_GMRESSetPrintLevel
+HYPRE_GMRESSetRefSolution
 HYPRE_GMRESSetRelChange
 HYPRE_GMRESSetSkipRealResidualCheck
 HYPRE_GMRESSetStopCrit

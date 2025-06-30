@@ -992,6 +992,15 @@ HYPRE_Int
 hypre_GMRESGetPrintLevel_pre( HYPRE_Precision precision, void * gmres_vdata, HYPRE_Int * level );
 
 HYPRE_Int
+hypre_GMRESGetRefSolution_flt( void * gmres_vdata, void ** xref );
+HYPRE_Int
+hypre_GMRESGetRefSolution_dbl( void * gmres_vdata, void ** xref );
+HYPRE_Int
+hypre_GMRESGetRefSolution_long_dbl( void * gmres_vdata, void ** xref );
+HYPRE_Int
+hypre_GMRESGetRefSolution_pre( HYPRE_Precision precision, void * gmres_vdata, void ** xref );
+
+HYPRE_Int
 hypre_GMRESGetRelChange_flt( void * gmres_vdata, HYPRE_Int * rel_change );
 HYPRE_Int
 hypre_GMRESGetRelChange_dbl( void * gmres_vdata, HYPRE_Int * rel_change );
@@ -1125,6 +1134,15 @@ HYPRE_Int
 hypre_GMRESSetPrintLevel_long_dbl( void * gmres_vdata, HYPRE_Int level );
 HYPRE_Int
 hypre_GMRESSetPrintLevel_pre( HYPRE_Precision precision, void * gmres_vdata, HYPRE_Int level );
+
+HYPRE_Int
+hypre_GMRESSetRefSolution_flt( void * gmres_vdata, void * xref );
+HYPRE_Int
+hypre_GMRESSetRefSolution_dbl( void * gmres_vdata, void * xref );
+HYPRE_Int
+hypre_GMRESSetRefSolution_long_dbl( void * gmres_vdata, void * xref );
+HYPRE_Int
+hypre_GMRESSetRefSolution_pre( HYPRE_Precision precision, void * gmres_vdata, void * xref );
 
 HYPRE_Int
 hypre_GMRESSetRelChange_flt( void * gmres_vdata, HYPRE_Int rel_change );
@@ -2126,6 +2144,8 @@ hypre_GMRESGetPrecondMatrix( void * gmres_vdata, HYPRE_Matrix * precond_matrix_p
 HYPRE_Int
 hypre_GMRESGetPrintLevel( void * gmres_vdata, HYPRE_Int * level );
 HYPRE_Int
+hypre_GMRESGetRefSolution( void * gmres_vdata, void ** xref );
+HYPRE_Int
 hypre_GMRESGetRelChange( void * gmres_vdata, HYPRE_Int * rel_change );
 HYPRE_Int
 hypre_GMRESGetResidual( void * gmres_vdata, void ** residual );
@@ -2155,6 +2175,8 @@ HYPRE_Int
 hypre_GMRESSetPrecondMatrix( void * gmres_vdata, void * precond_matrix );
 HYPRE_Int
 hypre_GMRESSetPrintLevel( void * gmres_vdata, HYPRE_Int level );
+HYPRE_Int
+hypre_GMRESSetRefSolution( void * gmres_vdata, void * xref );
 HYPRE_Int
 hypre_GMRESSetRelChange( void * gmres_vdata, HYPRE_Int rel_change );
 HYPRE_Int

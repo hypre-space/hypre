@@ -1324,3 +1324,69 @@ hypre_StructVectorClone(hypre_StructVector *x)
 
    return y;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorPointwiseDivpy( hypre_StructVector *x,
+                                  hypre_StructVector *b,
+                                  hypre_StructVector *y )
+{
+   HYPRE_UNUSED_VAR(x);
+   HYPRE_UNUSED_VAR(b);
+   HYPRE_UNUSED_VAR(y);
+
+   /* Not implemented yet */
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorPointwiseDivision( hypre_StructVector  *x,
+                                     hypre_StructVector  *y,
+                                     hypre_StructVector **z_ptr )
+{
+   HYPRE_UNUSED_VAR(x);
+   HYPRE_UNUSED_VAR(y);
+   HYPRE_UNUSED_VAR(z_ptr);
+
+   /* Not implemented yet */
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorPointwiseProduct( hypre_StructVector  *x,
+                                    hypre_StructVector  *y,
+                                    hypre_StructVector **z_ptr )
+{
+   HYPRE_UNUSED_VAR(x);
+   HYPRE_UNUSED_VAR(y);
+   HYPRE_UNUSED_VAR(z_ptr);
+
+   /* Not implemented yet */
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorPointwiseInverse( hypre_StructVector  *x,
+                                    hypre_StructVector **y_ptr )
+{
+   HYPRE_UNUSED_VAR(x);
+   HYPRE_UNUSED_VAR(y_ptr);
+
+   /* Not implemented yet */
+
+   return hypre_error_flag;
+}

@@ -866,6 +866,15 @@ HYPRE_GMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_GMRESGetRefSolution( HYPRE_Solver solver, HYPRE_Vector * xref )
+{
+   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   return HYPRE_GMRESGetRefSolution_pre( precision, solver, xref );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_GMRESGetRelChange( HYPRE_Solver solver, HYPRE_Int * rel_change )
 {
    HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
@@ -987,6 +996,15 @@ HYPRE_GMRESSetPrintLevel( HYPRE_Solver solver, HYPRE_Int level )
 {
    HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
    return HYPRE_GMRESSetPrintLevel_pre( precision, solver, level );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_GMRESSetRefSolution( HYPRE_Solver solver, HYPRE_Vector xref )
+{
+   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   return HYPRE_GMRESSetRefSolution_pre( precision, solver, xref );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -2711,6 +2729,15 @@ hypre_GMRESGetPrintLevel( void * gmres_vdata, HYPRE_Int * level )
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_GMRESGetRefSolution( void * gmres_vdata, void ** xref )
+{
+   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   return hypre_GMRESGetRefSolution_pre( precision, gmres_vdata, xref );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_GMRESGetRelChange( void * gmres_vdata, HYPRE_Int * rel_change )
 {
    HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
@@ -2841,6 +2868,15 @@ hypre_GMRESSetPrintLevel( void * gmres_vdata, HYPRE_Int level )
 {
    HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
    return hypre_GMRESSetPrintLevel_pre( precision, gmres_vdata, level );
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GMRESSetRefSolution( void * gmres_vdata, void * xref )
+{
+   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   return hypre_GMRESSetRefSolution_pre( precision, gmres_vdata, xref );
 }
 
 /*--------------------------------------------------------------------------*/

@@ -855,6 +855,15 @@ HYPRE_Int
 HYPRE_GMRESGetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int * level );
 
 HYPRE_Int
+HYPRE_GMRESGetRefSolution_flt( HYPRE_Solver solver, HYPRE_Vector * xref );
+HYPRE_Int
+HYPRE_GMRESGetRefSolution_dbl( HYPRE_Solver solver, HYPRE_Vector * xref );
+HYPRE_Int
+HYPRE_GMRESGetRefSolution_long_dbl( HYPRE_Solver solver, HYPRE_Vector * xref );
+HYPRE_Int
+HYPRE_GMRESGetRefSolution_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Vector * xref );
+
+HYPRE_Int
 HYPRE_GMRESGetRelChange_flt( HYPRE_Solver solver, HYPRE_Int * rel_change );
 HYPRE_Int
 HYPRE_GMRESGetRelChange_dbl( HYPRE_Solver solver, HYPRE_Int * rel_change );
@@ -979,6 +988,15 @@ HYPRE_Int
 HYPRE_GMRESSetPrintLevel_long_dbl( HYPRE_Solver solver, HYPRE_Int level );
 HYPRE_Int
 HYPRE_GMRESSetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int level );
+
+HYPRE_Int
+HYPRE_GMRESSetRefSolution_flt( HYPRE_Solver solver, HYPRE_Vector xref );
+HYPRE_Int
+HYPRE_GMRESSetRefSolution_dbl( HYPRE_Solver solver, HYPRE_Vector xref );
+HYPRE_Int
+HYPRE_GMRESSetRefSolution_long_dbl( HYPRE_Solver solver, HYPRE_Vector xref );
+HYPRE_Int
+HYPRE_GMRESSetRefSolution_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Vector xref );
 
 HYPRE_Int
 HYPRE_GMRESSetRelChange_flt( HYPRE_Solver solver, HYPRE_Int rel_change );

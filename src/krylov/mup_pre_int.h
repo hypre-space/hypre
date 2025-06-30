@@ -981,6 +981,15 @@ HYPRE_Int
 hypre_GMRESGetPrintLevel_pre( HYPRE_Precision precision, void * gmres_vdata, HYPRE_Int * level );
 
 HYPRE_Int
+hypre_GMRESGetRefSolution_flt( void * gmres_vdata, void ** xref );
+HYPRE_Int
+hypre_GMRESGetRefSolution_dbl( void * gmres_vdata, void ** xref );
+HYPRE_Int
+hypre_GMRESGetRefSolution_long_dbl( void * gmres_vdata, void ** xref );
+HYPRE_Int
+hypre_GMRESGetRefSolution_pre( HYPRE_Precision precision, void * gmres_vdata, void ** xref );
+
+HYPRE_Int
 hypre_GMRESGetRelChange_flt( void * gmres_vdata, HYPRE_Int * rel_change );
 HYPRE_Int
 hypre_GMRESGetRelChange_dbl( void * gmres_vdata, HYPRE_Int * rel_change );
@@ -1114,6 +1123,15 @@ HYPRE_Int
 hypre_GMRESSetPrintLevel_long_dbl( void * gmres_vdata, HYPRE_Int level );
 HYPRE_Int
 hypre_GMRESSetPrintLevel_pre( HYPRE_Precision precision, void * gmres_vdata, HYPRE_Int level );
+
+HYPRE_Int
+hypre_GMRESSetRefSolution_flt( void * gmres_vdata, void * xref );
+HYPRE_Int
+hypre_GMRESSetRefSolution_dbl( void * gmres_vdata, void * xref );
+HYPRE_Int
+hypre_GMRESSetRefSolution_long_dbl( void * gmres_vdata, void * xref );
+HYPRE_Int
+hypre_GMRESSetRefSolution_pre( HYPRE_Precision precision, void * gmres_vdata, void * xref );
 
 HYPRE_Int
 hypre_GMRESSetRelChange_flt( void * gmres_vdata, HYPRE_Int rel_change );

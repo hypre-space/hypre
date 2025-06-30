@@ -197,6 +197,8 @@ HYPRE_GMRESGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_
 HYPRE_Int
 HYPRE_GMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level );
 HYPRE_Int
+HYPRE_GMRESGetRefSolution( HYPRE_Solver solver, HYPRE_Vector * xref );
+HYPRE_Int
 HYPRE_GMRESGetRelChange( HYPRE_Solver solver, HYPRE_Int * rel_change );
 HYPRE_Int
 HYPRE_GMRESGetResidual( HYPRE_Solver solver, void * residual );
@@ -224,6 +226,8 @@ HYPRE_Int
 HYPRE_GMRESSetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix precond_matrix );
 HYPRE_Int
 HYPRE_GMRESSetPrintLevel( HYPRE_Solver solver, HYPRE_Int level );
+HYPRE_Int
+HYPRE_GMRESSetRefSolution( HYPRE_Solver solver, HYPRE_Vector xref );
 HYPRE_Int
 HYPRE_GMRESSetRelChange( HYPRE_Solver solver, HYPRE_Int rel_change );
 HYPRE_Int

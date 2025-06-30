@@ -51,7 +51,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    HYPRE_Int           j;
    HYPRE_Int           Solve_err_flag;
    HYPRE_Int           num_procs, my_id;
-   HYPRE_Int           num_vectors;
+   HYPRE_Int           num_vectors, num_rows_fine;
    HYPRE_Real          alpha = 1.0;
    HYPRE_Real          beta = -1.0;
    HYPRE_Real          cycle_op_count;
@@ -105,6 +105,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    Ptemp            = hypre_ParAMGDataPtemp(amg_data);
    Ztemp            = hypre_ParAMGDataZtemp(amg_data);
    num_vectors      = hypre_ParVectorNumVectors(f);
+   num_rows_fine    = hypre_ParCSRMatrixNumRows(A);
 
    A_array[0] = A;
    F_array[0] = f;
@@ -119,18 +120,18 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    }
 
    /* Update work vectors */
-   hypre_ParVectorResize(Vtemp, num_vectors);
-   hypre_ParVectorResize(Rtemp, num_vectors);
-   hypre_ParVectorResize(Ptemp, num_vectors);
-   hypre_ParVectorResize(Ztemp, num_vectors);
+   hypre_ParVectorResize(Vtemp, num_rows_fine, num_vectors);
+   hypre_ParVectorResize(Rtemp, num_rows_fine, num_vectors);
+   hypre_ParVectorResize(Ptemp, num_rows_fine, num_vectors);
+   hypre_ParVectorResize(Ztemp, num_rows_fine, num_vectors);
    if (amg_logging > 1)
    {
-      hypre_ParVectorResize(Residual, num_vectors);
+      hypre_ParVectorResize(Residual, num_rows_fine, num_vectors);
    }
    for (j = 1; j < num_levels; j++)
    {
-      hypre_ParVectorResize(F_array[j], num_vectors);
-      hypre_ParVectorResize(U_array[j], num_vectors);
+      hypre_ParVectorResize(F_array[j], hypre_ParVectorLocalSize(F_array[j]), num_vectors);
+      hypre_ParVectorResize(U_array[j], hypre_ParVectorLocalSize(U_array[j]), num_vectors);
    }
 
    /*-----------------------------------------------------------------------
@@ -201,7 +202,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
             for ieee_check self-equality works on all IEEE-compliant compilers/
             machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
             by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
-            found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+            found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
          if (amg_print_level > 0)
          {
             hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");

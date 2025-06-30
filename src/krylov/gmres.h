@@ -92,6 +92,7 @@ typedef struct
    void  *w_2;
    void  *w_3;
    void  **p;
+   void  *xref;   /* reference solution for error computation */
 
    void    *matvec_data;
    void    *precond_data;

@@ -225,6 +225,8 @@ hypre_GMRESGetPrecondMatrix( void * gmres_vdata, HYPRE_Matrix * precond_matrix_p
 HYPRE_Int
 hypre_GMRESGetPrintLevel( void * gmres_vdata, HYPRE_Int * level );
 HYPRE_Int
+hypre_GMRESGetRefSolution( void * gmres_vdata, void ** xref );
+HYPRE_Int
 hypre_GMRESGetRelChange( void * gmres_vdata, HYPRE_Int * rel_change );
 HYPRE_Int
 hypre_GMRESGetResidual( void * gmres_vdata, void ** residual );
@@ -254,6 +256,8 @@ HYPRE_Int
 hypre_GMRESSetPrecondMatrix( void * gmres_vdata, void * precond_matrix );
 HYPRE_Int
 hypre_GMRESSetPrintLevel( void * gmres_vdata, HYPRE_Int level );
+HYPRE_Int
+hypre_GMRESSetRefSolution( void * gmres_vdata, void * xref );
 HYPRE_Int
 hypre_GMRESSetRelChange( void * gmres_vdata, HYPRE_Int rel_change );
 HYPRE_Int

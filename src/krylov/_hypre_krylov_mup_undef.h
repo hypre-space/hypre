@@ -127,6 +127,7 @@
 #undef hypre_GMRESGetPrecond
 #undef hypre_GMRESGetPrecondMatrix
 #undef hypre_GMRESGetPrintLevel
+#undef hypre_GMRESGetRefSolution
 #undef hypre_GMRESGetRelChange
 #undef hypre_GMRESGetResidual
 #undef hypre_GMRESGetSkipRealResidualCheck
@@ -142,6 +143,7 @@
 #undef hypre_GMRESSetPrecond
 #undef hypre_GMRESSetPrecondMatrix
 #undef hypre_GMRESSetPrintLevel
+#undef hypre_GMRESSetRefSolution
 #undef hypre_GMRESSetRelChange
 #undef hypre_GMRESSetSkipRealResidualCheck
 #undef hypre_GMRESSetStopCrit
@@ -244,6 +246,7 @@
 #undef HYPRE_GMRESGetPrecond
 #undef HYPRE_GMRESGetPrecondMatrix
 #undef HYPRE_GMRESGetPrintLevel
+#undef HYPRE_GMRESGetRefSolution
 #undef HYPRE_GMRESGetRelChange
 #undef HYPRE_GMRESGetResidual
 #undef HYPRE_GMRESGetSkipRealResidualCheck
@@ -258,6 +261,7 @@
 #undef HYPRE_GMRESSetPrecond
 #undef HYPRE_GMRESSetPrecondMatrix
 #undef HYPRE_GMRESSetPrintLevel
+#undef HYPRE_GMRESSetRefSolution
 #undef HYPRE_GMRESSetRelChange
 #undef HYPRE_GMRESSetSkipRealResidualCheck
 #undef HYPRE_GMRESSetStopCrit
