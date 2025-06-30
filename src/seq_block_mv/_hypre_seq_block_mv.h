@@ -13,6 +13,10 @@
 #include <HYPRE_config.h>
 #include "seq_mv.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "seq_block_mv_mup_func.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -50,6 +54,10 @@ typedef struct hypre_DenseBlockMatrix_struct
    HYPRE_Complex        *data;               /* Matrix coefficients */
    HYPRE_Complex       **data_aop;           /* Array of pointers to data */
    HYPRE_MemoryLocation  memory_location;    /* Memory location of data array */
+
+#if defined(HYPRE_MIXED_PRECISION)   
+   HYPRE_Precision matrix_precision;
+#endif
 } hypre_DenseBlockMatrix;
 
 /*--------------------------------------------------------------------------
@@ -79,6 +87,10 @@ typedef struct hypre_DenseBlockMatrix_struct
    ((matrix) -> data[(matrix) -> num_nonzeros_block * b + \
                      (matrix) -> row_stride * i + \
                      (matrix) -> col_stride * j])
+
+#ifdef HYPRE_MIXED_PRECISION
+#define hypre_DenseBlockMatrixPrecision(matrix)          ((matrix) -> matrix_precision)
+#endif
 
 #endif
 /******************************************************************************

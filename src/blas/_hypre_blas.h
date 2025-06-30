@@ -19,6 +19,10 @@
 
 #include <HYPRE_config.h>
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "blas_mup_func.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

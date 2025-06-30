@@ -10,6 +10,10 @@
 
 #include "HYPRE_utilities.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+#include "krylov_mup_func.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
