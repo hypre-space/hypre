@@ -295,6 +295,9 @@
 /* Define to 1 if using unified memory */
 #undef HYPRE_USING_UNIFIED_MEMORY
 
+/* GPU warp size */
+#undef HYPRE_WARP_SIZE
+
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 

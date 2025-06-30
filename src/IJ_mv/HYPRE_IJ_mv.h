@@ -349,6 +349,32 @@ HYPRE_Int HYPRE_IJMatrixSetMaxOffProcElmts(HYPRE_IJMatrix matrix,
                                            HYPRE_Int      max_off_proc_elmts);
 
 /**
+ * (Optional, GPU only) Sets the initial memory allocation for matrix
+ * assemble, which factor * local number of rows
+ * Not collective.
+ **/
+HYPRE_Int HYPRE_IJMatrixSetInitAllocation(HYPRE_IJMatrix matrix,
+                                          HYPRE_Int      factor);
+
+/**
+ * (Optional, GPU only) Sets if matrix assemble routine does reductions
+ * during the accumulation of the entries before calling HYPRE_IJMatrixAssemble.
+ * This early assemble feature may save the peak memory usage but requires
+ * extra work.
+ * Not collective.
+ **/
+HYPRE_Int HYPRE_IJMatrixSetEarlyAssemble(HYPRE_IJMatrix matrix,
+                                         HYPRE_Int      early_assemble);
+
+/**
+ * (Optional, GPU only) Sets the grow factor of memory in matrix assemble when
+ * running out of memory.
+ * Not collective.
+ **/
+HYPRE_Int HYPRE_IJMatrixSetGrowFactor(HYPRE_IJMatrix matrix,
+                                      HYPRE_Real     factor);
+
+/**
  * (Optional) Sets the print level, if the user wants to print
  * error messages. The default is 0, i.e. no error messages are printed.
  *
@@ -506,6 +532,24 @@ HYPRE_Int HYPRE_IJVectorInitializeShell(HYPRE_IJVector vector);
  **/
 HYPRE_Int HYPRE_IJVectorSetData(HYPRE_IJVector  vector,
                                 HYPRE_Complex  *data);
+
+/**
+ * (Optional) Set an array of tags for the vector.
+ *
+ * @param vector The vector object.
+ * @param owns_tags Whether the vector owns the tags.
+ *         If true, vector will allocate and copy tags.
+ *         If false, vector will just point to the input tags array.
+ * @param num_tags The number of tags.
+ * @param tags The tags array. Must reside in the same memory location as the
+ *         vector data (e.g., if vector is on GPU, tags must also be on GPU).
+ *
+ * Not collective.
+ **/
+HYPRE_Int HYPRE_IJVectorSetTags(HYPRE_IJVector  vector,
+                                HYPRE_Int       owns_tags,
+                                HYPRE_Int       num_tags,
+                                HYPRE_Int      *tags);
 
 /**
  * Prepare a vector object for setting coefficient values. This

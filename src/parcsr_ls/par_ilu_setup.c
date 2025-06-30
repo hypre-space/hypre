@@ -39,7 +39,9 @@ hypre_ILUSetup( void               *ilu_vdata,
 
    /* Pointers to device data, note that they are not NULL only when needed */
 #if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_UNIFIED_MEMORY)
    HYPRE_Int             test_opt            = hypre_ParILUDataTestOption(ilu_data);
+#endif
    hypre_ParCSRMatrix   *Aperm               = hypre_ParILUDataAperm(ilu_data);
    hypre_ParCSRMatrix   *R                   = hypre_ParILUDataR(ilu_data);
    hypre_ParCSRMatrix   *P                   = hypre_ParILUDataP(ilu_data);
@@ -427,11 +429,11 @@ hypre_ILUSetup( void               *ilu_vdata,
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,
                               "GMRES+ILU0-RAP setup on device runs requires unified memory!");
             return hypre_error_flag;
-#endif
-
+#else
             hypre_ILUSetupRAPILU0Device(matA, perm, n, nLU,
                                         &Aperm, &matS, &matALU_d, &matBLU_d,
                                         &matSLU_d, &matE_d, &matF_d, test_opt);
+#endif
          }
          else
 #endif
@@ -520,7 +522,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                       hypre_ParILUSchurGMRESMatvecDevice :
                       hypre_ParILUSchurGMRESMatvecJacIterDevice), //parCSR A -> ilu_data
                      hypre_ParKrylovMatvecDestroy, //parCSR A -- inactive
-                     hypre_ParKrylovInnerProd,
+                     hypre_ParKrylovInnerProdTagged,
                      hypre_ParKrylovCopyVector,
                      hypre_ParKrylovClearVector,
                      hypre_ParKrylovScaleVector,
@@ -837,7 +839,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                   hypre_ParKrylovMatvecCreate, //parCSR A -- inactive
                   hypre_ParILURAPSchurGMRESMatvecDevice, //parCSR A -> ilu_data
                   hypre_ParKrylovMatvecDestroy, //parCSR A -- inactive
-                  hypre_ParKrylovInnerProd,
+                  hypre_ParKrylovInnerProdTagged,
                   hypre_ParKrylovCopyVector,
                   hypre_ParKrylovClearVector,
                   hypre_ParKrylovScaleVector,
@@ -961,7 +963,7 @@ hypre_ILUSetup( void               *ilu_vdata,
                      hypre_ParKrylovMatvecCreate, //parCSR A -- inactive
                      hypre_ParILURAPSchurGMRESMatvecHost, //parCSR A -> ilu_data
                      hypre_ParKrylovMatvecDestroy, //parCSR A -- inactive
-                     hypre_ParKrylovInnerProd,
+                     hypre_ParKrylovInnerProdTagged,
                      hypre_ParKrylovCopyVector,
                      hypre_ParKrylovClearVector,
                      hypre_ParKrylovScaleVector,

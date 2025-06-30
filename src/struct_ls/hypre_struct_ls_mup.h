@@ -14,6 +14,10 @@
 #ifndef HYPRE_STRUCT_LS_MUP_HEADER
 #define HYPRE_STRUCT_LS_MUP_HEADER
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined (HYPRE_MIXED_PRECISION)
 
 HYPRE_Int hypre_StructCoarsen_flt  ( hypre_StructGrid *fgrid, hypre_Index index, hypre_Index stride,
@@ -2861,6 +2865,10 @@ HYPRE_Int hypre_SparseMSGSolve_dbl  ( void *smsg_vdata, hypre_StructMatrix *A, h
 HYPRE_Int hypre_SparseMSGSolve_long_dbl  ( void *smsg_vdata, hypre_StructMatrix *A, hypre_StructVector *b,
                                  hypre_StructVector *x );
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

@@ -191,9 +191,9 @@ hypre_ParMatmul
 hypre_ParMatmul_RowSizes
 hypre_ParTMatmul
 hypre_ParvecBdiagInvScal
-GenerateDiagAndOffd
 hypre_CSRMatrixToParCSRMatrix
 hypre_FillResponseParToCSRMatrix
+hypre_GenerateDiagAndOffd
 hypre_MergeDiagAndOffd
 hypre_MergeDiagAndOffdHost
 hypre_ParCSRMatrixClone
@@ -270,6 +270,7 @@ hypre_ParVectorInitialize
 hypre_ParVectorInitializeShell
 hypre_ParVectorInitialize_v2
 hypre_ParVectorInnerProd
+hypre_ParVectorInnerProdTagged
 hypre_ParVectorLocalSumElts
 hypre_ParVectorMigrate
 hypre_ParVectorPrint
@@ -284,7 +285,10 @@ hypre_ParVectorSetConstantValues
 hypre_ParVectorSetData
 hypre_ParVectorSetDataOwner
 hypre_ParVectorSetLocalSize
+hypre_ParVectorSetNumTags
+hypre_ParVectorSetOwnsTags
 hypre_ParVectorSetRandomValues
+hypre_ParVectorSetTags
 hypre_ParVectorSetZeros
 hypre_ParVectorStridedCopy
 hypre_ParVectorToVectorAll

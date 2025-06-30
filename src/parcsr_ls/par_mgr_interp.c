@@ -11,7 +11,9 @@
 /*--------------------------------------------------------------------------
  * hypre_MGRBuildInterp
  *
- * Build MGR's prolongation matrix
+ * Build MGR's prolongation matrix P = [Wp I]^T where Wp might be computed
+ * explicitly and returned as an output of this function.
+ * Wp approximates [- inv(A_FF) * A_FC]. Note the negative sign.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -149,7 +151,9 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix   *A,
 /*--------------------------------------------------------------------------
  * hypre_MGRBuildRestrict
  *
- * Setup restriction operator.
+ * Build MGR's restriction matrix R = [Wr I] where Wr might be computed
+ * explicitly and returned as an output of this function.
+ * Wr approximates [- A_CF * inv(A_FF)]. Note the negative sign.
  *
  * TODOs (VPM):
  *   1) Add post-smoothing
@@ -168,7 +172,7 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
                         HYPRE_Real             max_row_sum,
                         HYPRE_Int              blk_size,
                         HYPRE_Int              restrict_type,
-                        hypre_ParCSRMatrix   **W_ptr,
+                        hypre_ParCSRMatrix   **Wr_ptr,
                         hypre_ParCSRMatrix   **R_ptr,
                         hypre_ParCSRMatrix   **RT_ptr)
 {
@@ -176,7 +180,7 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
    HYPRE_Int             *CF_marker_data = hypre_IntArrayData(CF_marker);
 
    /* Output variables */
-   hypre_ParCSRMatrix    *W     = NULL;
+   hypre_ParCSRMatrix    *Wr    = NULL;
    hypre_ParCSRMatrix    *R     = NULL;
    hypre_ParCSRMatrix    *RT    = NULL;
 
@@ -304,10 +308,11 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
          hypre_ParCSRMatrixBlockDiagMatrix(AT, blk_size, -1, CF_marker_data, 1,
                                            &A_FF_blkinv);
 
-         /* Compute WrT = A_FF_blk^{-T} * A_CF^{T}  */
+         /* Compute WrT = -A_FF_blk^{-T} * A_CF^{T}  */
          WrT = hypre_ParCSRMatMat(A_FF_blkinv, A_CFT_blk);
+         hypre_ParCSRMatrixScale(WrT, -1.0);
 
-         /* compute restriction operator RT = [-WrT  I] (transposed for use with RAP) */
+         /* compute restriction operator RT = [WrT  I] (transposed for use with RAP) */
          hypre_MGRBuildPFromWp(AT, WrT, CF_marker_data, &RT);
       }
 
@@ -322,12 +327,12 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
       if (blk_size > 1)
       {
          /* Block column-lumped restriction */
-         hypre_MGRBlockColLumpedRestrict(A, A_FF, A_CF, CF_marker, blk_size, &W, &R);
+         hypre_MGRBlockColLumpedRestrict(A, A_FF, A_CF, CF_marker, blk_size, &Wr, &R);
       }
       else
       {
          /* Column-lumped restriction */
-         hypre_MGRColLumpedRestrict(A, A_FF, A_CF, CF_marker, &W, &R);
+         hypre_MGRColLumpedRestrict(A, A_FF, A_CF, CF_marker, &Wr, &R);
       }
    }
    else
@@ -349,7 +354,7 @@ hypre_MGRBuildRestrict( hypre_ParCSRMatrix    *A,
    /* Set output pointers */
    *RT_ptr = RT;
    *R_ptr  = R;
-   *W_ptr  = W;
+   *Wr_ptr = Wr;
 
    /* Free memory */
    hypre_ParCSRMatrixDestroy(AT);
@@ -496,7 +501,7 @@ hypre_MGRBuildPFromWpHost( hypre_ParCSRMatrix    *A,
          for (jj = Wp_diag_i[row_Wp]; jj < Wp_diag_i[row_Wp + 1]; jj++)
          {
             P_diag_j[jj_counter]    = Wp_diag_j[jj];
-            P_diag_data[jj_counter] = - Wp_diag_data[jj];
+            P_diag_data[jj_counter] = Wp_diag_data[jj];
             jj_counter++;
          }
 
@@ -507,7 +512,7 @@ hypre_MGRBuildPFromWpHost( hypre_ParCSRMatrix    *A,
             for (jj = Wp_offd_i[row_Wp]; jj < Wp_offd_i[row_Wp + 1]; jj++)
             {
                P_offd_j[jj_counter_offd]    = Wp_offd_j[jj];
-               P_offd_data[jj_counter_offd] = - Wp_offd_data[jj];
+               P_offd_data[jj_counter_offd] = Wp_offd_data[jj];
                jj_counter_offd++;
             }
          }
@@ -572,8 +577,9 @@ hypre_MGRBuildBlockJacobiWp( hypre_ParCSRMatrix   *A_FF,
    /* Build A_FF_inv */
    hypre_ParCSRMatrixBlockDiagMatrix(A_FF, blk_size, -1, NULL, 1, &A_FF_inv);
 
-   /* Compute Wp = A_FF_inv * A_FC */
+   /* Compute Wp = -A_FF_inv * A_FC */
    Wp = hypre_ParCSRMatMat(A_FF_inv, A_FC);
+   hypre_ParCSRMatrixScale(Wp, -1.0);
 
    /* Free memory */
    hypre_ParCSRMatrixDestroy(A_FF_inv);
@@ -2284,51 +2290,51 @@ hypre_MGRTruncateAcfCPR(hypre_ParCSRMatrix  *A_CF,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MGRBuildRFromWHost
+ * hypre_MGRBuildRFromWrHost
  *
- * Constructs a classical restriction operator as R = [-W I].
+ * Constructs a classical restriction operator as R = [Wr I].
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRBuildRFromWHost(hypre_IntArray      *C_map,
-                         hypre_IntArray      *F_map,
-                         hypre_ParCSRMatrix  *W,
-                         hypre_ParCSRMatrix  *R)
+hypre_MGRBuildRFromWrHost(hypre_IntArray      *C_map,
+                          hypre_IntArray      *F_map,
+                          hypre_ParCSRMatrix  *Wr,
+                          hypre_ParCSRMatrix  *R)
 {
    /* Input matrix variables */
-   hypre_CSRMatrix       *W_diag          = hypre_ParCSRMatrixDiag(W);
-   HYPRE_Int             *W_diag_i        = hypre_CSRMatrixI(W_diag);
-   HYPRE_Int             *W_diag_j        = hypre_CSRMatrixJ(W_diag);
-   HYPRE_Complex         *W_diag_a        = hypre_CSRMatrixData(W_diag);
-   HYPRE_Int              W_diag_num_rows = hypre_CSRMatrixNumRows(W_diag);
-   HYPRE_Int             *C_map_data      = hypre_IntArrayData(C_map);
-   HYPRE_Int             *F_map_data      = hypre_IntArrayData(F_map);
+   hypre_CSRMatrix       *Wr_diag          = hypre_ParCSRMatrixDiag(Wr);
+   HYPRE_Int             *Wr_diag_i        = hypre_CSRMatrixI(Wr_diag);
+   HYPRE_Int             *Wr_diag_j        = hypre_CSRMatrixJ(Wr_diag);
+   HYPRE_Complex         *Wr_diag_a        = hypre_CSRMatrixData(Wr_diag);
+   HYPRE_Int              Wr_diag_num_rows = hypre_CSRMatrixNumRows(Wr_diag);
+   HYPRE_Int             *C_map_data       = hypre_IntArrayData(C_map);
+   HYPRE_Int             *F_map_data       = hypre_IntArrayData(F_map);
 
    /* Output matrix */
-   hypre_CSRMatrix       *R_diag          = hypre_ParCSRMatrixDiag(R);
-   HYPRE_Int             *R_diag_i        = hypre_CSRMatrixI(R_diag);
-   HYPRE_Int             *R_diag_j        = hypre_CSRMatrixJ(R_diag);
-   HYPRE_Complex         *R_diag_a        = hypre_CSRMatrixData(R_diag);
+   hypre_CSRMatrix       *R_diag           = hypre_ParCSRMatrixDiag(R);
+   HYPRE_Int             *R_diag_i         = hypre_CSRMatrixI(R_diag);
+   HYPRE_Int             *R_diag_j         = hypre_CSRMatrixJ(R_diag);
+   HYPRE_Complex         *R_diag_a         = hypre_CSRMatrixData(R_diag);
 
    /* Local variables */
    HYPRE_Int              i, j, nnz_diag;
    HYPRE_Real             one  = 1.0;
 
    R_diag_i[0] = nnz_diag = 0;
-   for (i = 0; i < W_diag_num_rows; i++)
+   for (i = 0; i < Wr_diag_num_rows; i++)
    {
-      /* Set CF connections */
-      for (j = W_diag_i[i]; j < W_diag_i[i + 1]; j++)
-      {
-         R_diag_j[nnz_diag] = F_map_data[W_diag_j[j]];
-         R_diag_a[nnz_diag] = - W_diag_a[j];
-         nnz_diag++;
-      }
-
       /* Set CC connection */
       R_diag_j[nnz_diag] = C_map_data[i];
       R_diag_a[nnz_diag] = one;
       nnz_diag++;
+
+      /* Set CF connections */
+      for (j = Wr_diag_i[i]; j < Wr_diag_i[i + 1]; j++)
+      {
+         R_diag_j[nnz_diag] = F_map_data[Wr_diag_j[j]];
+         R_diag_a[nnz_diag] = Wr_diag_a[j];
+         nnz_diag++;
+      }
 
       /* Update row pointer */
       R_diag_i[i + 1] = nnz_diag;
@@ -2338,40 +2344,40 @@ hypre_MGRBuildRFromWHost(hypre_IntArray      *C_map,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_MGRBuildRFromW
+ * hypre_MGRBuildRFromWr
  *
- * Constructs a classical restriction operator as R = [-W I].
+ * Constructs a classical restriction operator as R = [Wr I].
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_MGRBuildRFromW(hypre_IntArray       *C_map,
-                     hypre_IntArray       *F_map,
-                     HYPRE_BigInt          global_num_rows_R,
-                     HYPRE_BigInt          global_num_cols_R,
-                     HYPRE_BigInt         *row_starts_R,
-                     HYPRE_BigInt         *col_starts_R,
-                     hypre_ParCSRMatrix   *W,
-                     hypre_ParCSRMatrix  **R_ptr)
+hypre_MGRBuildRFromWr(hypre_IntArray       *C_map,
+                      hypre_IntArray       *F_map,
+                      HYPRE_BigInt          global_num_rows_R,
+                      HYPRE_BigInt          global_num_cols_R,
+                      HYPRE_BigInt         *row_starts_R,
+                      HYPRE_BigInt         *col_starts_R,
+                      hypre_ParCSRMatrix   *Wr,
+                      hypre_ParCSRMatrix  **R_ptr)
 {
    /* Input matrix variables */
-   MPI_Comm               comm              = hypre_ParCSRMatrixComm(W);
-   HYPRE_MemoryLocation   memory_location_W = hypre_ParCSRMatrixMemoryLocation(W);
+   MPI_Comm               comm               = hypre_ParCSRMatrixComm(Wr);
+   HYPRE_MemoryLocation   memory_location_Wr = hypre_ParCSRMatrixMemoryLocation(Wr);
 
-   hypre_CSRMatrix       *W_diag            = hypre_ParCSRMatrixDiag(W);
-   HYPRE_Int              W_diag_num_rows   = hypre_CSRMatrixNumRows(W_diag);
-   HYPRE_Int              W_diag_nnz        = hypre_CSRMatrixNumNonzeros(W_diag);
+   hypre_CSRMatrix       *Wr_diag            = hypre_ParCSRMatrixDiag(Wr);
+   HYPRE_Int              Wr_diag_num_rows   = hypre_CSRMatrixNumRows(Wr_diag);
+   HYPRE_Int              Wr_diag_nnz        = hypre_CSRMatrixNumNonzeros(Wr_diag);
 
-   hypre_CSRMatrix       *W_offd            = hypre_ParCSRMatrixOffd(W);
-   HYPRE_Int              W_offd_num_cols   = hypre_CSRMatrixNumCols(W_offd);
-   HYPRE_Int              W_offd_nnz        = hypre_CSRMatrixNumNonzeros(W_offd);
+   hypre_CSRMatrix       *Wr_offd            = hypre_ParCSRMatrixOffd(Wr);
+   HYPRE_Int              Wr_offd_num_cols   = hypre_CSRMatrixNumCols(Wr_offd);
+   HYPRE_Int              Wr_offd_nnz        = hypre_CSRMatrixNumNonzeros(Wr_offd);
 
    /* Output matrix */
    hypre_ParCSRMatrix    *R;
-   HYPRE_Int              num_nonzeros_diag = W_diag_nnz + W_diag_num_rows;
-   HYPRE_Int              num_nonzeros_offd = W_offd_nnz;
+   HYPRE_Int              num_nonzeros_diag  = Wr_diag_nnz + Wr_diag_num_rows;
+   HYPRE_Int              num_nonzeros_offd  = Wr_offd_nnz;
 
    /* Sanity checks */
-   if (W_offd_nnz > 0 || W_offd_num_cols > 0)
+   if (Wr_offd_nnz > 0 || Wr_offd_num_cols > 0)
    {
       *R_ptr = NULL;
 
@@ -2386,32 +2392,32 @@ hypre_MGRBuildRFromW(hypre_IntArray       *C_map,
     *-----------------------------------------------------------------------*/
 
    R = hypre_ParCSRMatrixCreate(comm, global_num_rows_R, global_num_cols_R,
-                                row_starts_R, col_starts_R, W_offd_num_cols,
+                                row_starts_R, col_starts_R, Wr_offd_num_cols,
                                 num_nonzeros_diag, num_nonzeros_offd);
-   hypre_ParCSRMatrixInitialize_v2(R, memory_location_W);
+   hypre_ParCSRMatrixInitialize_v2(R, memory_location_Wr);
 
    /*-----------------------------------------------------------------------
     * Fill matrix entries
     *-----------------------------------------------------------------------*/
 
 #if defined (HYPRE_USING_GPU)
-   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location_W);
+   HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(memory_location_Wr);
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      /* TODO (VPM): Implement hypre_MGRBuildRFromWDevice */
-      hypre_ParCSRMatrixMigrate(W, HYPRE_MEMORY_HOST);
+      /* TODO (VPM): Implement hypre_MGRBuildRFromWrDevice */
+      hypre_ParCSRMatrixMigrate(Wr, HYPRE_MEMORY_HOST);
       hypre_ParCSRMatrixMigrate(R, HYPRE_MEMORY_HOST);
       hypre_IntArrayMigrate(C_map, HYPRE_MEMORY_HOST);
       hypre_IntArrayMigrate(F_map, HYPRE_MEMORY_HOST);
-      hypre_MGRBuildRFromWHost(C_map, F_map, W, R);
-      hypre_ParCSRMatrixMigrate(W, HYPRE_MEMORY_DEVICE);
+      hypre_MGRBuildRFromWrHost(C_map, F_map, Wr, R);
+      hypre_ParCSRMatrixMigrate(Wr, HYPRE_MEMORY_DEVICE);
       hypre_ParCSRMatrixMigrate(R, HYPRE_MEMORY_DEVICE);
    }
    else
 #endif
    {
-      hypre_MGRBuildRFromWHost(C_map, F_map, W, R);
+      hypre_MGRBuildRFromWrHost(C_map, F_map, Wr, R);
    }
 
    /* Setup communication package */
@@ -2434,13 +2440,13 @@ hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix  *A,
                            hypre_ParCSRMatrix  *A_FF,
                            hypre_ParCSRMatrix  *A_CF,
                            hypre_IntArray      *CF_marker,
-                           hypre_ParCSRMatrix **W_ptr,
+                           hypre_ParCSRMatrix **Wr_ptr,
                            hypre_ParCSRMatrix **R_ptr)
 {
    hypre_ParVector         *b_FF       = NULL;
    hypre_ParVector         *b_CF       = NULL;
    hypre_ParVector         *r_CF       = NULL;
-   hypre_ParCSRMatrix      *W          = NULL;
+   hypre_ParCSRMatrix      *Wr         = NULL;
    hypre_ParCSRMatrix      *R          = NULL;
 
    HYPRE_Int                num_points = 2;
@@ -2465,7 +2471,7 @@ hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix  *A,
    hypre_ParCSRMatrixColSum(A_CF, &b_CF);
 
    /*-------------------------------------------------------
-    * 3) W = approx(A_CF) * inv(approx(A_FF))
+    * 3) Wr = - approx(A_CF) * inv(approx(A_FF))
     *-------------------------------------------------------*/
 
    r_CF = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_CF),
@@ -2473,11 +2479,12 @@ hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix  *A,
                                 hypre_ParCSRMatrixRowStarts(A_CF));
    hypre_ParVectorInitialize_v2(r_CF, hypre_ParCSRMatrixMemoryLocation(A_CF));
    hypre_ParVectorElmdivpy(b_CF, b_FF, r_CF);
-   W = hypre_ParCSRMatrixCreateFromParVector(r_CF,
-                                             hypre_ParCSRMatrixGlobalNumRows(A_CF),
-                                             hypre_ParCSRMatrixGlobalNumCols(A_CF),
-                                             hypre_ParCSRMatrixRowStarts(A_CF),
-                                             hypre_ParCSRMatrixColStarts(A_CF));
+   hypre_ParVectorScale(-1.0, r_CF);
+   Wr = hypre_ParCSRMatrixCreateFromParVector(r_CF,
+                                              hypre_ParCSRMatrixGlobalNumRows(A_CF),
+                                              hypre_ParCSRMatrixGlobalNumCols(A_CF),
+                                              hypre_ParCSRMatrixRowStarts(A_CF),
+                                              hypre_ParCSRMatrixColStarts(A_CF));
 
    /* Free memory */
    hypre_ParVectorDestroy(b_FF);
@@ -2491,18 +2498,18 @@ hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix  *A,
    /* Compute C/F local mappings */
    hypre_IntArraySeparateByValue(num_points, points, sizes, CF_marker, &CF_maps);
 
-   /* Build restriction from W (R = [-W  I]) */
-   hypre_MGRBuildRFromW(hypre_IntArrayArrayEntryI(CF_maps, 0),
-                        hypre_IntArrayArrayEntryI(CF_maps, 1),
-                        hypre_ParCSRMatrixGlobalNumRows(A_CF),
-                        hypre_ParCSRMatrixGlobalNumCols(A),
-                        hypre_ParCSRMatrixRowStarts(A_CF),
-                        hypre_ParCSRMatrixColStarts(A),
-                        W, &R);
+   /* Build restriction from Wr (R = [Wr  I]) */
+   hypre_MGRBuildRFromWr(hypre_IntArrayArrayEntryI(CF_maps, 0),
+                         hypre_IntArrayArrayEntryI(CF_maps, 1),
+                         hypre_ParCSRMatrixGlobalNumRows(A_CF),
+                         hypre_ParCSRMatrixGlobalNumCols(A),
+                         hypre_ParCSRMatrixRowStarts(A_CF),
+                         hypre_ParCSRMatrixColStarts(A),
+                         Wr, &R);
 
    /* Set output pointers */
-   *W_ptr = W;
-   *R_ptr = R;
+   *Wr_ptr = Wr;
+   *R_ptr  = R;
 
    /* Free memory */
    hypre_IntArrayArrayDestroy(CF_maps);
@@ -2522,13 +2529,13 @@ hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
                                 hypre_ParCSRMatrix  *A_CF,
                                 hypre_IntArray      *CF_marker,
                                 HYPRE_Int            block_dim,
-                                hypre_ParCSRMatrix **W_ptr,
+                                hypre_ParCSRMatrix **Wr_ptr,
                                 hypre_ParCSRMatrix **R_ptr)
 {
    hypre_DenseBlockMatrix  *b_FF       = NULL;
    hypre_DenseBlockMatrix  *b_CF       = NULL;
    hypre_DenseBlockMatrix  *r_CF       = NULL;
-   hypre_ParCSRMatrix      *W          = NULL;
+   hypre_ParCSRMatrix      *Wr         = NULL;
    hypre_ParCSRMatrix      *R          = NULL;
 
    HYPRE_Int                row_major  = 0;
@@ -2570,7 +2577,7 @@ hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
       /* TODO (VPM): GPU version */
       hypre_DenseBlockMatrixMigrate(b_FF, HYPRE_MEMORY_HOST);
       hypre_BlockDiagInvLapack(hypre_DenseBlockMatrixData(b_FF),
-                               hypre_DenseBlockMatrixNumBlocks(b_FF),
+                               hypre_DenseBlockMatrixNumRows(b_FF),
                                hypre_DenseBlockMatrixNumRowsBlock(b_FF));
       hypre_DenseBlockMatrixMigrate(b_FF, HYPRE_MEMORY_DEVICE);
    }
@@ -2578,21 +2585,23 @@ hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
 #endif
    {
       hypre_BlockDiagInvLapack(hypre_DenseBlockMatrixData(b_FF),
-                               hypre_DenseBlockMatrixNumBlocks(b_FF),
+                               hypre_DenseBlockMatrixNumRows(b_FF),
                                hypre_DenseBlockMatrixNumRowsBlock(b_FF));
    }
 
    /*-------------------------------------------------------
-    * 4) W = approx(A_CF) * inv(approx(A_FF))
+    * 4) Wr = - approx(A_CF) * inv(approx(A_FF))
     *-------------------------------------------------------*/
 
    hypre_DenseBlockMatrixMultiply(b_CF, b_FF, &r_CF);
-   W = hypre_ParCSRMatrixCreateFromDenseBlockMatrix(hypre_ParCSRMatrixComm(A_CF),
-                                                    hypre_ParCSRMatrixGlobalNumRows(A_CF),
-                                                    hypre_ParCSRMatrixGlobalNumCols(A_CF),
-                                                    hypre_ParCSRMatrixRowStarts(A_CF),
-                                                    hypre_ParCSRMatrixColStarts(A_CF),
-                                                    r_CF);
+   hypre_DenseBlockMatrixPrint(hypre_ParCSRMatrixComm(A), r_CF, "r_CF");
+   Wr = hypre_ParCSRMatrixCreateFromDenseBlockMatrix(hypre_ParCSRMatrixComm(A_CF),
+                                                     hypre_ParCSRMatrixGlobalNumRows(A_CF),
+                                                     hypre_ParCSRMatrixGlobalNumCols(A_CF),
+                                                     hypre_ParCSRMatrixRowStarts(A_CF),
+                                                     hypre_ParCSRMatrixColStarts(A_CF),
+                                                     r_CF);
+   hypre_ParCSRMatrixScale(Wr, -1.0);
 
    /* Free memory */
    hypre_DenseBlockMatrixDestroy(b_FF);
@@ -2606,18 +2615,18 @@ hypre_MGRBlockColLumpedRestrict(hypre_ParCSRMatrix  *A,
    /* Compute C/F local mappings */
    hypre_IntArraySeparateByValue(num_points, points, sizes, CF_marker, &CF_maps);
 
-   /* Build restriction from W (R = [-W  I]) */
-   hypre_MGRBuildRFromW(hypre_IntArrayArrayEntryI(CF_maps, 0),
-                        hypre_IntArrayArrayEntryI(CF_maps, 1),
-                        hypre_ParCSRMatrixGlobalNumRows(A_CF),
-                        hypre_ParCSRMatrixGlobalNumCols(A),
-                        hypre_ParCSRMatrixRowStarts(A_CF),
-                        hypre_ParCSRMatrixColStarts(A),
-                        W, &R);
+   /* Build restriction from W (R = [Wr  I]) */
+   hypre_MGRBuildRFromWr(hypre_IntArrayArrayEntryI(CF_maps, 0),
+                         hypre_IntArrayArrayEntryI(CF_maps, 1),
+                         hypre_ParCSRMatrixGlobalNumRows(A_CF),
+                         hypre_ParCSRMatrixGlobalNumCols(A),
+                         hypre_ParCSRMatrixRowStarts(A_CF),
+                         hypre_ParCSRMatrixColStarts(A),
+                         Wr, &R);
 
    /* Set output pointers */
-   *W_ptr = W;
-   *R_ptr = R;
+   *Wr_ptr = Wr;
+   *R_ptr  = R;
 
    /* Free memory */
    hypre_IntArrayArrayDestroy(CF_maps);

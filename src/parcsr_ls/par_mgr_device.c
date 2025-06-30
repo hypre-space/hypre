@@ -733,15 +733,15 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                   info,
                                                   num_blocks));
 #elif defined(HYPRE_USING_ROCSOLVER)
-      HYPRE_ROCSOLVER_CALL(rocsolver_dgetrf_batched(hypre_HandleVendorSolverHandle(hypre_handle()),
-                                                    blk_size,
-                                                    blk_size,
-                                                    tmpdiag_aop,
-                                                    blk_size,
-                                                    pivots,
-                                                    blk_size,
-                                                    info,
-                                                    num_blocks));
+      HYPRE_ROCSOLVER_CALL(hypre_rocsolver_getrf_batched(hypre_HandleVendorSolverHandle(hypre_handle()),
+                                                         blk_size,
+                                                         blk_size,
+                                                         tmpdiag_aop,
+                                                         blk_size,
+                                                         pivots,
+                                                         blk_size,
+                                                         info,
+                                                         num_blocks));
 
 #elif defined(HYPRE_USING_ONEMKLBLAS)
       HYPRE_ONEMKL_CALL( work_sizes[0] =
@@ -815,14 +815,14 @@ hypre_ParCSRMatrixExtractBlockDiagDevice( hypre_ParCSRMatrix   *A,
                                                   info,
                                                   num_blocks));
 #elif defined(HYPRE_USING_ROCSOLVER)
-      HYPRE_ROCSOLVER_CALL(rocsolver_dgetri_batched(hypre_HandleVendorSolverHandle(hypre_handle()),
-                                                    blk_size,
-                                                    tmpdiag_aop,
-                                                    blk_size,
-                                                    pivots,
-                                                    blk_size,
-                                                    info,
-                                                    num_blocks));
+      HYPRE_ROCSOLVER_CALL(hypre_rocsolver_getri_batched(hypre_HandleVendorSolverHandle(hypre_handle()),
+                                                         blk_size,
+                                                         tmpdiag_aop,
+                                                         blk_size,
+                                                         pivots,
+                                                         blk_size,
+                                                         info,
+                                                         num_blocks));
 #elif defined(HYPRE_USING_ONEMKLBLAS)
       HYPRE_ONEMKL_CALL( oneapi::mkl::lapack::getri_batch( *hypre_HandleComputeStream(hypre_handle()),
                                                            (std::int64_t) blk_size, // std::int64_t n,

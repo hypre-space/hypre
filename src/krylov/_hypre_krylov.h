@@ -51,6 +51,8 @@ typedef HYPRE_Int  (*hypre_KrylovPtrToMatvecT)           (void *matvec_data, HYP
                                                           HYPRE_Complex beta, void *y);
 typedef HYPRE_Int  (*hypre_KrylovPtrToMatvecDestroy)     (void *matvec_data);
 typedef HYPRE_Real (*hypre_KrylovPtrToInnerProd)         (void *x, void *y);
+typedef HYPRE_Int  (*hypre_KrylovPtrToInnerProdTagged)   (void *x, void *y, HYPRE_Int *num_tags_ptr,
+                                                          HYPRE_Complex **iprod_ptr );
 typedef HYPRE_Int  (*hypre_KrylovPtrToCopyVector)        (void *x, void *y);
 typedef HYPRE_Int  (*hypre_KrylovPtrToClearVector)       (void *x);
 typedef HYPRE_Int  (*hypre_KrylovPtrToScaleVector)       (HYPRE_Complex alpha, void *x);
@@ -430,7 +432,7 @@ typedef struct
    hypre_KrylovPtrToMatvecCreate       MatvecCreate;
    hypre_KrylovPtrToMatvec             Matvec;
    hypre_KrylovPtrToMatvecDestroy      MatvecDestroy;
-   hypre_KrylovPtrToInnerProd          InnerProd;
+   hypre_KrylovPtrToInnerProdTagged    InnerProd;
    hypre_KrylovPtrToCopyVector         CopyVector;
    hypre_KrylovPtrToClearVector        ClearVector;
    hypre_KrylovPtrToScaleVector        ScaleVector;
@@ -463,6 +465,7 @@ typedef struct
    void  *r;
    void  *w;
    void  *w_2;
+   void  *w_3;
    void  **p;
 
    void    *matvec_data;
@@ -480,8 +483,6 @@ typedef struct
    char    *log_file_name;
 
 } hypre_GMRESData;
-
-#define hypre_GMRESDataHybrid(pcgdata)  ((pcgdata) -> hybrid)
 
 #ifdef __cplusplus
 extern "C" {
@@ -511,7 +512,7 @@ hypre_GMRESFunctionsCreate(
    hypre_KrylovPtrToMatvecCreate       MatvecCreate,
    hypre_KrylovPtrToMatvec             Matvec,
    hypre_KrylovPtrToMatvecDestroy      MatvecDestroy,
-   hypre_KrylovPtrToInnerProd          InnerProd,
+   hypre_KrylovPtrToInnerProdTagged    InnerProd,
    hypre_KrylovPtrToCopyVector         CopyVector,
    hypre_KrylovPtrToClearVector        ClearVector,
    hypre_KrylovPtrToScaleVector        ScaleVector,

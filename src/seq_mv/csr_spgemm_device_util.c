@@ -11,10 +11,10 @@
 
 #if defined(HYPRE_USING_GPU)
 
-#if defined(HYPRE_USING_SYCL)
-struct row_size
-#else
+#if (defined(THRUST_VERSION) && THRUST_VERSION < THRUST_VERSION_NOTFN)
 struct row_size : public thrust::unary_function<HYPRE_Int, HYPRE_Int>
+#else
+struct row_size
 #endif
 {
    HYPRE_Int SHMEM_HASH_SIZE;
@@ -338,4 +338,3 @@ HYPRE_Int hypre_SpGemmCreateBins( HYPRE_Int  m,
 }
 
 #endif // #if defined(HYPRE_USING_GPU)
-

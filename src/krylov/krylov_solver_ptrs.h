@@ -25,6 +25,8 @@ typedef HYPRE_Int  (*hypre_KrylovPtrToMatvecT)           (void *matvec_data, HYP
                                                           HYPRE_Complex beta, void *y);
 typedef HYPRE_Int  (*hypre_KrylovPtrToMatvecDestroy)     (void *matvec_data);
 typedef HYPRE_Real (*hypre_KrylovPtrToInnerProd)         (void *x, void *y);
+typedef HYPRE_Int  (*hypre_KrylovPtrToInnerProdTagged)   (void *x, void *y, HYPRE_Int *num_tags_ptr,
+                                                          HYPRE_Complex **iprod_ptr );
 typedef HYPRE_Int  (*hypre_KrylovPtrToCopyVector)        (void *x, void *y);
 typedef HYPRE_Int  (*hypre_KrylovPtrToClearVector)       (void *x);
 typedef HYPRE_Int  (*hypre_KrylovPtrToScaleVector)       (HYPRE_Complex alpha, void *x);
