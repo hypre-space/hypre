@@ -1154,6 +1154,42 @@ hypre_mask hypre_mask_flip_at(hypre_mask bitmask, hypre_int n)
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
 
+/* return the thread identifier in direction dim */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_gpu_get_threadIdx(hypre_DeviceItem &item)
+{
+   if (dim == 0) { return threadIdx.x; }
+   if (dim == 1) { return threadIdx.y; }
+   if (dim == 2) { return threadIdx.z; }
+
+   return -1;
+}
+
+/* return the block identifier in direction dim */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_gpu_get_blockIdx(hypre_DeviceItem &item)
+{
+   if (dim == 0) { return blockIdx.x; }
+   if (dim == 1) { return blockIdx.y; }
+   if (dim == 2) { return blockIdx.z; }
+
+   return -1;
+}
+
+/* return the block dimension in direction dim */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_gpu_get_blockDim(hypre_DeviceItem &item)
+{
+   if (dim == 0) { return blockDim.x; }
+   if (dim == 1) { return blockDim.y; }
+   if (dim == 2) { return blockDim.z; }
+
+   return -1;
+}
+
 /* return the number of threads in block */
 template <hypre_int dim>
 static __device__ __forceinline__
@@ -1307,6 +1343,14 @@ hypre_double atomicAdd(hypre_double* address, hypre_double val)
    return __longlong_as_double(old);
 }
 #endif
+
+/* Perform atomic add operation */
+template <typename T>
+static __device__ __forceinline__
+void hypre_gpu_atomicAdd(hypre_int pos, T* address, T val)
+{
+   atomicAdd((T*)(address + pos), val);
+}
 
 // There are no *_sync functions in HIP
 #if defined(HYPRE_USING_HIP) || (CUDA_VERSION < 9000)
@@ -1758,6 +1802,42 @@ struct print_functor
 
 #if defined(HYPRE_USING_SYCL)
 
+/* return the thread identifier in direction dim */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_gpu_get_threadIdx(hypre_DeviceItem &item)
+{
+   if constexpr (dim == 0) { return item.get_local_id(2); }
+   if constexpr (dim == 1) { return item.get_local_id(1); }
+   if constexpr (dim == 2) { return item.get_local_id(0); }
+
+   return -1;
+}
+
+/* return the block identifier in direction dim */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_gpu_get_blockIdx(hypre_DeviceItem &item)
+{
+   if constexpr (dim == 0) { return item.get_group(2); }
+   if constexpr (dim == 1) { return item.get_group(1); }
+   if constexpr (dim == 2) { return item.get_group(0); }
+
+   return -1;
+}
+
+/* return the block dimension in direction dim */
+template <hypre_int dim>
+static __device__ __forceinline__
+hypre_int hypre_gpu_get_blockDim(hypre_DeviceItem &item)
+{
+   if constexpr (dim == 0) { return item.get_local_range(2); }
+   if constexpr (dim == 1) { return item.get_local_range(1); }
+   if constexpr (dim == 2) { return item.get_local_range(0); }
+
+   return -1;
+}
+
 /* return the number of threads in block */
 template <hypre_int dim>
 static __device__ __forceinline__
@@ -1846,6 +1926,19 @@ hypre_int hypre_gpu_get_grid_warp_id(hypre_DeviceItem &item)
 {
    return hypre_gpu_get_block_id<gdim>(item) * hypre_gpu_get_num_warps<bdim>(item) +
           hypre_gpu_get_warp_id<bdim>(item);
+}
+
+/* Perform atomic add operation */
+template <typename T>
+static __device__ __forceinline__
+void hypre_gpu_atomicAdd(hypre_int pos, T* address, T val)
+{
+   auto atomic_val =
+      sycl::atomic_ref<T, sycl::memory_order::relaxed,
+      sycl::memory_scope::device, sycl::access::address_space::local_space>
+      (address[pos]);
+   auto curr = atomic_val.load(sycl::memory_order::relaxed);
+   while (!atomic_val.compare_exchange_strong(curr, curr + val, sycl::memory_order::relaxed)) {}
 }
 
 /* sync the thread block */

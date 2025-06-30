@@ -112,15 +112,28 @@ hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A,         /* matrix to relax 
                                one less that  resid poly: r(t) = 1 - t*s(t) */
       {
          case 0:
-            coefs[0] = 1.0 / theta;
-
+            if (hypre_cabs(theta) > 0.0)
+            {
+               coefs[0] = 1.0 / theta;
+            }
+            else
+            {
+               coefs[0] = 0.0;
+            }
             break;
 
          case 1:  /* (del - t + 2*th)/(th^2 + del*th) */
             den = (theta * theta + delta * theta);
 
-            coefs[0] = (delta + 2 * theta) / den;
-            coefs[1] = -1.0 / den;
+            if (hypre_cabs(den) > 0.0)
+            {
+               coefs[0] = (delta + 2 * theta) / den;
+               coefs[1] = -1.0 / den;
+            }
+            else
+            {
+               coefs[0] = coefs[1] = 0.0;
+            }
 
             break;
 
@@ -128,10 +141,16 @@ hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A,         /* matrix to relax 
             den = 2 * delta * theta * theta - delta * delta * theta -
                   hypre_pow(delta, 3) + 2 * hypre_pow(theta, 3);
 
-            coefs[0] = (4 * delta * theta - hypre_pow(delta, 2) + 6 * hypre_pow(theta, 2)) / den;
-            coefs[1] = -(2 * delta + 6 * theta) / den;
-            coefs[2] =  2 / den;
-
+            if (hypre_cabs(den) > 0.0)
+            {
+               coefs[0] = (4 * delta * theta - hypre_pow(delta, 2) + 6 * hypre_pow(theta, 2)) / den;
+               coefs[1] = -(2 * delta + 6 * theta) / den;
+               coefs[2] =  2 / den;
+            }
+            else
+            {
+               coefs[0] = coefs[1] = coefs[2] = 0.0;
+            }
             break;
 
          case 3: /* -(6*del^2*th - 12*del*th^2 - t^2*(4*del + 16*th) + t*(12*del*th - 3*del^2 + 24*th^2) + 3*del^3 + 4*t^3 - 16*th^3)/(4*del*th^3 - 3*del^2*th^2 - 3*del^3*th + 4*th^4)*/
@@ -140,16 +159,22 @@ hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A,         /* matrix to relax 
                   3 * hypre_pow(delta, 3) * theta -
                   4 * hypre_pow(theta, 4);
 
-            coefs[0] = (6 * hypre_pow(delta, 2) * theta -
-                        12 * delta * hypre_pow(theta, 2) +
-                        3 * hypre_pow(delta, 3) -
-                        16 * hypre_pow(theta, 3) ) / den;
-            coefs[1] = (12 * delta * theta -
-                        3 * hypre_pow(delta, 2) +
-                        24 * hypre_pow(theta, 2)) / den;
-            coefs[2] =  -( 4 * delta + 16 * theta) / den;
-            coefs[3] = 4 / den;
-
+            if (hypre_cabs(den) > 0.0)
+            {
+               coefs[0] = (6 * hypre_pow(delta, 2) * theta -
+                           12 * delta * hypre_pow(theta, 2) +
+                           3 * hypre_pow(delta, 3) -
+                           16 * hypre_pow(theta, 3) ) / den;
+               coefs[1] = (12 * delta * theta -
+                           3 * hypre_pow(delta, 2) +
+                           24 * hypre_pow(theta, 2)) / den;
+               coefs[2] = -(4 * delta + 16 * theta) / den;
+               coefs[3] = 4 / den;
+            }
+            else
+            {
+               coefs[0] = coefs[1] = coefs[2] = coefs[3] = 0.0;
+            }
             break;
       }
    }
@@ -161,33 +186,61 @@ hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A,         /* matrix to relax 
                               one less thatn resid poly: r(t) = 1 - t*s(t) */
       {
          case 0:
-            coefs[0] = 1.0 / theta;
+            if (hypre_cabs(theta) > 0.0)
+            {
+               coefs[0] = 1.0 / theta;
+            }
+            else
+            {
+               coefs[0] = 0.0;
+            }
             break;
 
          case 1:  /* (  2*t - 4*th)/(del^2 - 2*th^2) */
             den = delta * delta - 2 * theta * theta;
 
-            coefs[0] = -4 * theta / den;
-            coefs[1] = 2 / den;
+            if (hypre_cabs(den) > 0.0)
+            {
+               coefs[0] = -4 * theta / den;
+               coefs[1] = 2 / den;
+            }
+            else
+            {
+               coefs[0] = coefs[1] = 0.0;
+            }
 
             break;
 
          case 2: /* (3*del^2 - 4*t^2 + 12*t*th - 12*th^2)/(3*del^2*th - 4*th^3)*/
             den = 3 * (delta * delta) * theta - 4 * (theta * theta * theta);
 
-            coefs[0] = (3 * delta * delta - 12 * theta * theta) / den;
-            coefs[1] = 12 * theta / den;
-            coefs[2] = -4 / den;
+            if (hypre_cabs(den) > 0.0)
+            {
+               coefs[0] = (3 * delta * delta - 12 * theta * theta) / den;
+               coefs[1] = 12 * theta / den;
+               coefs[2] = -4 / den;
+            }
+            else
+            {
+               coefs[0] = coefs[1] = coefs[2] = 0.0;
+            }
 
             break;
 
          case 3: /*(t*(8*del^2 - 48*th^2) - 16*del^2*th + 32*t^2*th - 8*t^3 + 32*th^3)/(del^4 - 8*del^2*th^2 + 8*th^4)*/
             den = hypre_pow(delta, 4) - 8 * delta * delta * theta * theta + 8 * hypre_pow(theta, 4);
 
-            coefs[0] = (32 * hypre_pow(theta, 3) - 16 * delta * delta * theta) / den;
-            coefs[1] = (8 * delta * delta - 48 * theta * theta) / den;
-            coefs[2] = 32 * theta / den;
-            coefs[3] = -8 / den;
+            if (hypre_cabs(den) > 0.0)
+            {
+               coefs[0] = (32 * hypre_pow(theta, 3) - 16 * delta * delta * theta) / den;
+               coefs[1] = (8 * delta * delta - 48 * theta * theta) / den;
+               coefs[2] = 32 * theta / den;
+               coefs[3] = -8 / den;
+            }
+            else
+            {
+               coefs[0] = coefs[1] = coefs[2] = coefs[3] = 0.0;
+            }
 
             break;
       }

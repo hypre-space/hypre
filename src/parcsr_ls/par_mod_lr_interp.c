@@ -979,7 +979,10 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
                   break;
                }
             }
-            As_FF_diag_data[j] /= value;
+            if (value != 0.0)
+            {
+               As_FF_diag_data[j] /= value;
+            }
          }
          for (j = As_FF_offd_i[i]; j < As_FF_offd_i[i + 1]; j++)
          {
@@ -996,7 +999,10 @@ hypre_BoomerAMGBuildModExtPIInterpHost(hypre_ParCSRMatrix  *A,
                   break;
                }
             }
-            As_FF_offd_data[j] /= value;
+            if (value != 0.0)
+            {
+               As_FF_offd_data[j] /= value;
+            }
          }
          As_FF_diag_data[As_FF_diag_i[i]] = 1.0;
       }

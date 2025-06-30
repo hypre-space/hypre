@@ -1861,6 +1861,11 @@ HYPRE_Int hypre_StructVectorPrint ( const char *filename, hypre_StructVector *ve
 hypre_StructVector *hypre_StructVectorRead ( MPI_Comm comm, const char *filename,
                                              HYPRE_Int *num_ghost );
 hypre_StructVector *hypre_StructVectorClone ( hypre_StructVector *vector );
+HYPRE_Int hypre_StructVectorPointwiseDivision ( hypre_StructVector *x, hypre_StructVector *y,
+                                                hypre_StructVector **z_ptr );
+HYPRE_Int hypre_StructVectorPointwiseProduct ( hypre_StructVector *x, hypre_StructVector *y,
+                                               hypre_StructVector **z_ptr );
+HYPRE_Int hypre_StructVectorPointwiseInverse ( hypre_StructVector *x, hypre_StructVector **y_ptr );
 /******************************************************************************
  * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
  * HYPRE Project Developers. See the top-level COPYRIGHT file for details.

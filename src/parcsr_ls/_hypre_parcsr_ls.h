@@ -2193,6 +2193,8 @@ HYPRE_Int HYPRE_ParCSRGMRESSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HY
                                    HYPRE_ParVector x );
 HYPRE_Int HYPRE_ParCSRGMRESSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
                                    HYPRE_ParVector x );
+HYPRE_Int HYPRE_ParCSRGMRESSetRefSolution(HYPRE_Solver solver, HYPRE_ParVector ref_solution);
+HYPRE_Int HYPRE_ParCSRGMRESGetRefSolution(HYPRE_Solver solver, HYPRE_ParVector *ref_solution);
 HYPRE_Int HYPRE_ParCSRGMRESSetKDim ( HYPRE_Solver solver, HYPRE_Int k_dim );
 HYPRE_Int HYPRE_ParCSRGMRESSetTol ( HYPRE_Solver solver, HYPRE_Real tol );
 HYPRE_Int HYPRE_ParCSRGMRESSetAbsoluteTol ( HYPRE_Solver solver, HYPRE_Real a_tol );
@@ -3792,6 +3794,8 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix *A, HYPRE_
                                                    HYPRE_Int point_type, HYPRE_Int *CF_marker,
                                                    HYPRE_Int diag_type,
                                                    hypre_ParCSRMatrix **B_ptr );
+HYPRE_Int hypre_MGRBuildRFromWrDevice(hypre_IntArray *C_map, hypre_IntArray *F_map,
+                                      hypre_ParCSRMatrix *Wr, hypre_ParCSRMatrix *R);
 
 /* par_mgr_stats.c */
 HYPRE_Int hypre_MGRSetupStats( void *mgr_vdata );
