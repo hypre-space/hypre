@@ -110,7 +110,7 @@ hypre_MemoryTrackerQueueCompSearch(const void *e1,
 hypre_MemoryTrackerEvent
 hypre_MemoryTrackerGetNext(hypre_MemoryTracker *tracker)
 {
-   hypre_MemoryTrackerEvent i, k = HYPRE_MEMORY_NUM_EVENTS;
+   HYPRE_Int                 i, k = HYPRE_MEMORY_NUM_EVENTS;
    hypre_MemoryTrackerQueue *q = tracker->queue;
 
    for (i = HYPRE_MEMORY_EVENT_ALLOC; i < HYPRE_MEMORY_NUM_EVENTS; i++)
@@ -126,7 +126,7 @@ hypre_MemoryTrackerGetNext(hypre_MemoryTracker *tracker)
       }
    }
 
-   return k;
+   return (hypre_MemoryTrackerEvent) k;
 }
 
 HYPRE_Int
@@ -330,7 +330,7 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
    size_t curr_bytes[hypre_NUM_MEMORY_LOCATION] = {0};
    size_t copy_bytes[hypre_MEMCPY_NUM_TYPES] = {0};
    size_t j;
-   hypre_MemoryTrackerEvent i;
+   HYPRE_Int i;
    //HYPRE_Real t0 = hypre_MPI_Wtime();
 
    HYPRE_Int leakcheck = 1;
@@ -404,7 +404,8 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
             hypre_MemoryTrackerEntry key = { .ptr = entry->ptr };
             hypre_MemoryTrackerEntry *key_ptr = &key;
 
-            hypre_MemoryTrackerEntry **result = bsearch(&key_ptr,
+            hypre_MemoryTrackerEntry **result = (hypre_MemoryTrackerEntry **)
+                                                bsearch(&key_ptr,
                                                         qf->sorted_data_compressed,
                                                         qf->sorted_data_compressed_len,
                                                         sizeof(hypre_MemoryTrackerEntry *),
@@ -608,14 +609,14 @@ hypre_PrintMemoryTracker( size_t     *totl_bytes_o,
 
    if (leakcheck)
    {
-      hypre_MemoryLocation t;
+      HYPRE_Int t;
 
       for (t = hypre_MEMORY_HOST; t <= hypre_MEMORY_UNIFIED; t++)
       {
          if (curr_bytes[t])
          {
             char memory_location[256];
-            hypre_GetMemoryLocationName(t, memory_location);
+            hypre_GetMemoryLocationName((hypre_MemoryLocation) t, memory_location);
             fprintf(stderr, "%zu bytes of %s memory may not be freed\n", curr_bytes[t], memory_location);
          }
 

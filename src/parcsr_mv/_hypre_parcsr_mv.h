@@ -733,6 +733,11 @@ HYPRE_Int HYPRE_ParCSRMatrixMatvec ( HYPRE_Complex alpha, HYPRE_ParCSRMatrix A, 
                                      HYPRE_Complex beta, HYPRE_ParVector y );
 HYPRE_Int HYPRE_ParCSRMatrixMatvecT ( HYPRE_Complex alpha, HYPRE_ParCSRMatrix A, HYPRE_ParVector x,
                                       HYPRE_Complex beta, HYPRE_ParVector y );
+HYPRE_Int HYPRE_ParCSRMatrixDiagScale ( HYPRE_ParCSRMatrix A, HYPRE_ParVector left,
+                                        HYPRE_ParVector right );
+HYPRE_Int HYPRE_ParCSRMatrixComputeScalingTagged ( HYPRE_ParCSRMatrix A, HYPRE_Int type,
+                                                   HYPRE_MemoryLocation memloc_tags, HYPRE_Int num_tags,
+                                                   HYPRE_Int *tags, HYPRE_ParVector *scaling_ptr );
 
 /* HYPRE_parcsr_vector.c */
 HYPRE_Int HYPRE_ParVectorCreate ( MPI_Comm comm, HYPRE_BigInt global_size,
@@ -753,6 +758,11 @@ HYPRE_ParVector HYPRE_ParVectorCloneShallow ( HYPRE_ParVector x );
 HYPRE_Int HYPRE_ParVectorScale ( HYPRE_Complex value, HYPRE_ParVector x );
 HYPRE_Int HYPRE_ParVectorAxpy ( HYPRE_Complex alpha, HYPRE_ParVector x, HYPRE_ParVector y );
 HYPRE_Int HYPRE_ParVectorInnerProd ( HYPRE_ParVector x, HYPRE_ParVector y, HYPRE_Real *prod );
+HYPRE_Int HYPRE_ParVectorPointwiseDivision ( HYPRE_ParVector x, HYPRE_ParVector y,
+                                             HYPRE_ParVector *z_ptr );
+HYPRE_Int HYPRE_ParVectorPointwiseProduct ( HYPRE_ParVector x, HYPRE_ParVector y,
+                                            HYPRE_ParVector *z_ptr );
+HYPRE_Int HYPRE_ParVectorPointwiseInverse ( HYPRE_ParVector x, HYPRE_ParVector *y_ptr );
 HYPRE_Int HYPRE_VectorToParVector ( MPI_Comm comm, HYPRE_Vector b, HYPRE_BigInt *partitioning,
                                     HYPRE_ParVector *vector );
 HYPRE_Int HYPRE_ParVectorGetValues ( HYPRE_ParVector vector, HYPRE_Int num_values,
@@ -1027,6 +1037,7 @@ HYPRE_Int hypre_ParCSRDiagScaleVectorHost( hypre_ParCSRMatrix *par_A, hypre_ParV
                                            hypre_ParVector *par_x );
 HYPRE_Int hypre_ParCSRDiagScaleVectorDevice( hypre_ParCSRMatrix *par_A, hypre_ParVector *par_y,
                                              hypre_ParVector *par_x );
+HYPRE_Int hypre_ParCSRMatrixColSumDevice( hypre_ParCSRMatrix *A, hypre_ParVector *b );
 HYPRE_Int hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A, HYPRE_Real tol,
                                               HYPRE_Int type);
 HYPRE_Int hypre_ParCSRMatrixDropSmallEntriesHost( hypre_ParCSRMatrix *A, HYPRE_Real tol,
@@ -1080,6 +1091,10 @@ HYPRE_Int hypre_ParCSRMatrixBlockColSum( hypre_ParCSRMatrix *A, HYPRE_Int row_ma
                                          HYPRE_Int num_rows_block, HYPRE_Int num_cols_block,
                                          hypre_DenseBlockMatrix **B_ptr );
 HYPRE_Int hypre_ParCSRMatrixColSum( hypre_ParCSRMatrix *A, hypre_ParVector **B_ptr );
+HYPRE_Int hypre_ParCSRMatrixComputeScalingTagged( hypre_ParCSRMatrix *A, HYPRE_Int type,
+                                                  HYPRE_MemoryLocation memloc_tags,
+                                                  HYPRE_Int num_tags, HYPRE_Int *tags,
+                                                  hypre_ParVector **scaling_ptr );
 
 /* par_csr_filter_device.c */
 HYPRE_Int hypre_ParCSRMatrixBlkFilterDevice(hypre_ParCSRMatrix *A, HYPRE_Int block_size,
@@ -1269,6 +1284,7 @@ HYPRE_Int hypre_ParVectorSetNumTags( hypre_ParVector *vector, HYPRE_Int num_tags
 HYPRE_Int hypre_ParVectorSetTags( hypre_ParVector *vector,
                                   HYPRE_MemoryLocation memory_location,
                                   HYPRE_Int *tags );
+HYPRE_Int hypre_ParVectorSetValuesTagged(hypre_ParVector *vector, HYPRE_Complex *values);
 HYPRE_Int hypre_ParVectorInitialize ( hypre_ParVector *vector );
 HYPRE_Int hypre_ParVectorInitialize_v2( hypre_ParVector *vector,
                                         HYPRE_MemoryLocation memory_location );
@@ -1276,7 +1292,7 @@ HYPRE_Int hypre_ParVectorSetDataOwner ( hypre_ParVector *vector, HYPRE_Int owns_
 HYPRE_Int hypre_ParVectorSetLocalSize ( hypre_ParVector *vector, HYPRE_Int local_size );
 HYPRE_Int hypre_ParVectorSetNumVectors ( hypre_ParVector *vector, HYPRE_Int num_vectors );
 HYPRE_Int hypre_ParVectorSetComponent ( hypre_ParVector *vector, HYPRE_Int component );
-HYPRE_Int hypre_ParVectorResize ( hypre_ParVector *vector, HYPRE_Int num_vectors );
+HYPRE_Int hypre_ParVectorResize ( hypre_ParVector *vector, HYPRE_Int size, HYPRE_Int num_vectors );
 hypre_ParVector *hypre_ParVectorRead ( MPI_Comm comm, const char *file_name );
 HYPRE_Int hypre_ParVectorSetConstantValues ( hypre_ParVector *v, HYPRE_Complex value );
 HYPRE_Int hypre_ParVectorSetZeros( hypre_ParVector *v );
@@ -1321,10 +1337,17 @@ HYPRE_Int hypre_ParVectorGetValues2( hypre_ParVector *vector, HYPRE_Int num_valu
                                      HYPRE_BigInt *indices, HYPRE_BigInt base, HYPRE_Complex *values );
 HYPRE_Int hypre_ParVectorGetValuesHost(hypre_ParVector *vector, HYPRE_Int num_values,
                                        HYPRE_BigInt *indices, HYPRE_BigInt base, HYPRE_Complex *values);
-HYPRE_Int hypre_ParVectorElmdivpy( hypre_ParVector *x, hypre_ParVector *b, hypre_ParVector *y );
-HYPRE_Int hypre_ParVectorElmdivpyMarked( hypre_ParVector *x, hypre_ParVector *b,
-                                         hypre_ParVector *y, HYPRE_Int *marker,
-                                         HYPRE_Int marker_val );
+HYPRE_Int hypre_ParVectorPointwiseDivpy( hypre_ParVector *x, hypre_ParVector *b,
+                                         hypre_ParVector *y );
+HYPRE_Int hypre_ParVectorPointwiseDivpyMarked( hypre_ParVector *x, hypre_ParVector *b,
+                                               hypre_ParVector *y, HYPRE_Int *marker,
+                                               HYPRE_Int marker_val );
+HYPRE_Int hypre_ParVectorPointwiseDivision( hypre_ParVector *x, hypre_ParVector *y,
+                                            hypre_ParVector **z_ptr );
+HYPRE_Int hypre_ParVectorPointwiseProduct( hypre_ParVector *x, hypre_ParVector *y,
+                                           hypre_ParVector **z_ptr );
+HYPRE_Int hypre_ParVectorPointwiseInverse( hypre_ParVector *x, hypre_ParVector **y_ptr );
+
 /* par_vector_device.c */
 HYPRE_Int hypre_ParVectorGetValuesDevice(hypre_ParVector *vector, HYPRE_Int num_values,
                                          HYPRE_BigInt *indices, HYPRE_BigInt base,
