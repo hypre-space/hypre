@@ -1822,14 +1822,14 @@ hypre_StructMatmultCompute_core( HYPRE_Int                  nterms,
 
 #if defined(DEBUG_MATMULT)
    hypre_ParPrintf(hypre_MPI_COMM_WORLD, "Number of box loops: ");
-   if (nprodsum[0] > 0) hypre_ParPrintf(hypre_MPI_COMM_WORLD, "FFF: %d | ", nprodsum[0]);
-   if (nprodsum[1] > 0) hypre_ParPrintf(hypre_MPI_COMM_WORLD, "CFF: %d | ", nprodsum[1]);
-   if (nprodsum[2] > 0) hypre_ParPrintf(hypre_MPI_COMM_WORLD, "CCF: %d | ", nprodsum[2]);
-   if (nprodsum[3] > 0) hypre_ParPrintf(hypre_MPI_COMM_WORLD, "FF: %d | ", nprodsum[3]);
-   if (nprodsum[4] > 0) hypre_ParPrintf(hypre_MPI_COMM_WORLD, "CF: %d | ", nprodsum[4]);
-   if (nprodsum[5] > 0) hypre_ParPrintf(hypre_MPI_COMM_WORLD, "CC: %d | ", nprodsum[5]);
-   if (nprodsum[6] > 0) hypre_ParPrintf(hypre_MPI_COMM_WORLD, "F: %d | ", nprodsum[6]);
-   if (nprodsum[7] > 0) hypre_ParPrintf(hypre_MPI_COMM_WORLD, "C: %d | ", nprodsum[7]);
+   if (nprodsum[0] > 0) { hypre_ParPrintf(hypre_MPI_COMM_WORLD, "FFF: %d | ", nprodsum[0]); }
+   if (nprodsum[1] > 0) { hypre_ParPrintf(hypre_MPI_COMM_WORLD, "CFF: %d | ", nprodsum[1]); }
+   if (nprodsum[2] > 0) { hypre_ParPrintf(hypre_MPI_COMM_WORLD, "CCF: %d | ", nprodsum[2]); }
+   if (nprodsum[3] > 0) { hypre_ParPrintf(hypre_MPI_COMM_WORLD, "FF: %d | ", nprodsum[3]); }
+   if (nprodsum[4] > 0) { hypre_ParPrintf(hypre_MPI_COMM_WORLD, "CF: %d | ", nprodsum[4]); }
+   if (nprodsum[5] > 0) { hypre_ParPrintf(hypre_MPI_COMM_WORLD, "CC: %d | ", nprodsum[5]); }
+   if (nprodsum[6] > 0) { hypre_ParPrintf(hypre_MPI_COMM_WORLD, "F: %d | ", nprodsum[6]); }
+   if (nprodsum[7] > 0) { hypre_ParPrintf(hypre_MPI_COMM_WORLD, "C: %d | ", nprodsum[7]); }
    hypre_ParPrintf(hypre_MPI_COMM_WORLD, "Total: %d\n\n", nboxloops);
 #endif
 

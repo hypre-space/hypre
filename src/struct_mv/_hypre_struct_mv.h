@@ -2263,8 +2263,8 @@ hypre_StructMatmultCreate( HYPRE_Int                  max_matmults,
 HYPRE_Int
 hypre_StructMatmultDestroy( hypre_StructMatmultData *mmdata );
 HYPRE_Int
-hypre_StructMatmultSetAlgoType( hypre_StructMatmultData  *mmdata,
-                                HYPRE_Int                 type );
+hypre_StructMatmultSetKernelType( hypre_StructMatmultData  *mmdata,
+                                  HYPRE_Int                 kernel_type );
 HYPRE_Int
 hypre_StructMatmultSetProduct( hypre_StructMatmultData  *mmdata,
                                HYPRE_Int                 nmatrices_in,

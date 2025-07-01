@@ -483,7 +483,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       HYPRE_IJMatrixGetObject(ij_A[0], (void **) &par_A[0]);
       for (l = min_level; l < num_levels - 1; l++)
       {
-         hypre_ParPrintf(comm,"Converting A[%02d]\n", l);
+         hypre_ParPrintf(comm, "Converting A[%02d]\n", l);
          HYPRE_SStructMatrixToIJMatrix(A_l[l + 1], 0, &ij_A[1]);
          hypre_ParPrintf(comm, "Converting P[%02d]\n", l);
          HYPRE_SStructMatrixToIJMatrix(P_l[l], 0, &ij_P);

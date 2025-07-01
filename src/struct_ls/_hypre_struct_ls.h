@@ -71,9 +71,6 @@ HYPRE_Int hypre_HybridSetup ( void *hybrid_vdata, hypre_StructMatrix *A, hypre_S
 HYPRE_Int hypre_HybridSolve ( void *hybrid_vdata, hypre_StructMatrix *A, hypre_StructVector *b,
                               hypre_StructVector *x );
 
-/* HYPRE_struct_pfmg.c */
-HYPRE_Int hypre_PFMGSetDeviceLevel( void *pfmg_vdata, HYPRE_Int   device_level  );
-
 /* jacobi.c */
 void *hypre_StructJacobiCreate ( MPI_Comm comm );
 HYPRE_Int hypre_StructJacobiDestroy ( void *jacobi_vdata );
