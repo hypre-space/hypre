@@ -886,8 +886,8 @@ hypre_SStructVectorInitializeShell( hypre_SStructVector *vector)
    return hypre_error_flag;
 }
 
-/*------------------------------------------------------------------
- *----------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SStructVectorClearGhostValues(hypre_SStructVector *vector)
@@ -1107,4 +1107,53 @@ hypre_SStructVectorMemoryLocation(hypre_SStructVector *vector)
    }
 
    return HYPRE_MEMORY_UNDEFINED;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructVectorPointwiseDivision( hypre_SStructVector  *x,
+                                      hypre_SStructVector  *y,
+                                      hypre_SStructVector **z_ptr )
+{
+   HYPRE_UNUSED_VAR(x);
+   HYPRE_UNUSED_VAR(y);
+   HYPRE_UNUSED_VAR(z_ptr);
+
+   /* Not implemented yet */
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructVectorPointwiseProduct( hypre_SStructVector  *x,
+                                     hypre_SStructVector  *y,
+                                     hypre_SStructVector **z_ptr )
+{
+   HYPRE_UNUSED_VAR(x);
+   HYPRE_UNUSED_VAR(y);
+   HYPRE_UNUSED_VAR(z_ptr);
+
+   /* Not implemented yet */
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SStructVectorPointwiseInverse( hypre_SStructVector  *x,
+                                     hypre_SStructVector **y_ptr )
+{
+   HYPRE_UNUSED_VAR(x);
+   HYPRE_UNUSED_VAR(y_ptr);
+
+   /* Not implemented yet */
+
+   return hypre_error_flag;
 }

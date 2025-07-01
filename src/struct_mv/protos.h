@@ -831,3 +831,8 @@ hypre_StructVector *hypre_StructVectorRead ( MPI_Comm comm, const char *filename
 HYPRE_Int hypre_StructVectorMaxValue ( hypre_StructVector *vector, HYPRE_Real *max_value,
                                        HYPRE_Int *max_index, hypre_Index max_xyz_index );
 hypre_StructVector *hypre_StructVectorClone ( hypre_StructVector *vector );
+HYPRE_Int hypre_StructVectorPointwiseDivision ( hypre_StructVector *x, hypre_StructVector *y,
+                                                hypre_StructVector **z_ptr );
+HYPRE_Int hypre_StructVectorPointwiseProduct ( hypre_StructVector *x, hypre_StructVector *y,
+                                               hypre_StructVector **z_ptr );
+HYPRE_Int hypre_StructVectorPointwiseInverse ( hypre_StructVector *x, hypre_StructVector **y_ptr );

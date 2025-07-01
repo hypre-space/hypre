@@ -100,6 +100,7 @@ hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions )
    (gmres_data -> w)              = NULL;
    (gmres_data -> w_2)            = NULL;
    (gmres_data -> w_3)            = NULL;
+   (gmres_data -> xref)           = NULL;
    (gmres_data -> matvec_data)    = NULL;
    (gmres_data -> norms)          = NULL;
    (gmres_data -> log_file_name)  = NULL;
@@ -228,7 +229,7 @@ hypre_GMRESSetup( void *gmres_vdata,
    }
 
    /* Additional work vector for computing individual function (DOF) residuals */
-   if ((gmres_data -> print_level) > 2)
+   if ((gmres_data -> print_level) > 2 || (gmres_data -> xref))
    {
       if ((gmres_data -> w_3) == NULL)
       {
@@ -294,10 +295,11 @@ hypre_GMRESSolve(void  *gmres_vdata,
    void                 *matvec_data        = (gmres_data -> matvec_data);
    void                 *r                  = (gmres_data -> r);
    void                 *w                  = (gmres_data -> w);
+   void                 *xref               = (gmres_data -> xref);
 
    /* note:
     *   - w_2 is only allocated if rel_change = 1
-    *   - w_3 is only allocated if print_level > 2
+    *   - w_3 is only allocated if print_level > 2 or when xref is provided
     */
    void                 *w_2                = (gmres_data -> w_2);
    void                 *w_3                = (gmres_data -> w_3);
@@ -318,10 +320,11 @@ hypre_GMRESSolve(void  *gmres_vdata,
    HYPRE_Int             tag, num_tags;
    HYPRE_Complex        *iprod = NULL;
    HYPRE_Complex        *biprod = NULL;
+   HYPRE_Complex        *xiprod = NULL;
    HYPRE_Int             iter;
    HYPRE_Int             my_id, num_procs;
-   HYPRE_Real            epsilon, gamma, t, r_norm, b_norm, den_norm, x_norm;
-   HYPRE_Real            w_norm;
+   HYPRE_Real            epsilon, gamma, t;
+   HYPRE_Real            r_norm, b_norm, den_norm, x_norm, w_norm, e_norm = 1.0;
 
    HYPRE_Real            epsmac = 1.e-16;
    HYPRE_Real            ieee_check = 0.;
@@ -362,7 +365,6 @@ hypre_GMRESSolve(void  *gmres_vdata,
    }
    if (print_level > 2)
    {
-      /* For tag-specific residual calculation */
       rs_3 = hypre_CTAllocF(HYPRE_Real, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
    }
    hh = hypre_CTAllocF(HYPRE_Real*, k_dim + 1, gmres_functions, HYPRE_MEMORY_HOST);
@@ -373,12 +375,21 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
    (*(gmres_functions->CopyVector))(b, p[0]);
 
-   /* compute initial residual */
+   /* Compute initial residual */
    (*(gmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, p[0]);
 
    (*(gmres_functions->InnerProd))(b, b, &num_tags, &biprod);
    b_norm = hypre_sqrt(biprod[0]);
    real_r_norm_old = b_norm;
+
+   /* Compute initial error when a reference solution is provided */
+   if (xref)
+   {
+      (*(gmres_functions->CopyVector))(x, w_3);
+      (*(gmres_functions->Axpy))(-1.0, xref, w_3);
+      (*(gmres_functions->InnerProd))(w_3, w_3, &num_tags, &xiprod);
+      e_norm = hypre_sqrt(xiprod[0]);
+   }
 
    /* Since it does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
@@ -392,7 +403,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
          for ieee_check self-equality works on all IEEE-compliant compilers/
          machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
          by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
-         found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+         found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
       if (logging > 0 || print_level > 0)
       {
          hypre_printf("\n\nERROR detected by Hypre ... BEGIN\n");
@@ -423,7 +434,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
          for ieee_check self-equality works on all IEEE-compliant compilers/
          machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
          by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
-         found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+         found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
       if (logging > 0 || print_level > 0)
       {
          hypre_printf("\n\nERROR detected by Hypre ... BEGIN\n");
@@ -441,14 +452,44 @@ hypre_GMRESSolve(void  *gmres_vdata,
    if (logging > 0 || print_level > 0)
    {
       norms[0] = r_norm;
-      if (!my_id)
+      if (!my_id && print_level > 0)
       {
          hypre_printf("L2 norm of b: %e\n", b_norm);
+         if (num_tags > 1)
+         {
+            for (tag = 0; tag < num_tags; tag++)
+            {
+               hypre_printf("L2 norm of b%*d: %e\n", hypre_ndigits(num_tags),
+                            tag, hypre_sqrt(biprod[tag + 1]));
+            }
+         }
          if (b_norm == 0.0)
          {
             hypre_printf("Rel_resid_norm actually contains the residual norm\n");
          }
+
          hypre_printf("Initial L2 norm of residual: %e\n", r_norm);
+         if (num_tags > 1)
+         {
+            for (tag = 0; tag < num_tags; tag++)
+            {
+               hypre_printf("Initial L2 norm of r%*d: %e\n", hypre_ndigits(num_tags),
+                            tag, hypre_sqrt(iprod[tag + 1]));
+            }
+         }
+
+         if (xref)
+         {
+            hypre_printf("Initial L2 norm of error: %e\n", e_norm);
+            if (num_tags > 1)
+            {
+               for (tag = 0; tag < num_tags; tag++)
+               {
+                  hypre_printf("Initial L2 norm of e%*d: %e\n", hypre_ndigits(num_tags),
+                               tag, hypre_sqrt(xiprod[tag + 1]));
+               }
+            }
+         }
       }
    }
    iter = 0;
@@ -464,7 +505,6 @@ hypre_GMRESSolve(void  *gmres_vdata,
       den_norm = r_norm;
    }
 
-
    /* convergence criteria: |r_i| <= max( a_tol, r_tol * den_norm)
       den_norm = |r_0| or |b|
       note: default for a_tol is 0.0, so relative residual criteria is used unless
@@ -479,16 +519,29 @@ hypre_GMRESSolve(void  *gmres_vdata,
    if (print_level > 1 && my_id == 0)
    {
       hypre_printf("=============================================\n\n");
-      if (num_tags <= 1 || print_level == 2)
+      if (num_tags <= 1 || print_level == 2 || print_level > 9 || (!xref && print_level > 5))
       {
          if (b_norm > 0.0)
          {
-            hypre_printf("Iters     resid.norm     conv.rate  rel.res.norm\n");
-            hypre_printf("-----    ------------    ---------- ------------\n");
+            hypre_printf("Iters      resid.norm     conv.rate   rel.res.norm\n");
+            hypre_printf("-----    ------------    ----------   ------------\n");
          }
          else
          {
-            hypre_printf("Iters     resid.norm     conv.rate\n");
+            hypre_printf("Iters      resid.norm     conv.rate\n");
+            hypre_printf("-----    ------------    ----------\n");
+         }
+      }
+      else if (xref && (num_tags <= 1 || print_level == 6))
+      {
+         if (e_norm > 0.0)
+         {
+            hypre_printf("Iters      error.norm     conv.rate   rel.err.norm\n");
+            hypre_printf("-----    ------------    ----------   ------------\n");
+         }
+         else
+         {
+            hypre_printf("Iters      error.norm     conv.rate\n");
             hypre_printf("-----    ------------    ----------\n");
          }
       }
@@ -497,18 +550,50 @@ hypre_GMRESSolve(void  *gmres_vdata,
          hypre_printf("  Iters ");
          if (print_level == 3)
          {
-            hypre_printf("          ||r||_2");
+            hypre_printf("            |r|_2");
             for (tag = 0; tag < num_tags; tag++)
             {
-               hypre_printf("         ||r%d||_2", tag);
+               hypre_printf("           |r%d|_2", tag);
             }
          }
          else if (print_level == 4)
          {
-            hypre_printf("  ||r||_2/||b||_2");
+            hypre_printf("      |r|_2/|b|_2");
             for (tag = 0; tag < num_tags; tag++)
             {
-               hypre_printf(" ||r%d||_2/||b||_2", tag);
+               hypre_printf("    |r%d|_2/|b%d|_2", tag, tag);
+            }
+         }
+         else if (print_level == 5)
+         {
+            hypre_printf("      |r|_2/|b|_2");
+            for (tag = 0; tag < num_tags; tag++)
+            {
+               hypre_printf("     |r%d|_2/|b|_2", tag);
+            }
+         }
+         else if (print_level == 7)
+         {
+            hypre_printf("            |e|_2");
+            for (tag = 0; tag < num_tags; tag++)
+            {
+               hypre_printf("           |e%d|_2", tag);
+            }
+         }
+         else if (print_level == 8)
+         {
+            hypre_printf("     |e|_2/|eI|_2");
+            for (tag = 0; tag < num_tags; tag++)
+            {
+               hypre_printf("   |e%d|_2/|eI%d|_2", tag, tag);
+            }
+         }
+         else if (print_level == 9)
+         {
+            hypre_printf("     |e|_2/|eI|_2");
+            for (tag = 0; tag < num_tags; tag++)
+            {
+               hypre_printf("    |e%d|_2/|eI|_2", tag);
             }
          }
          hypre_printf("\n ------  ");
@@ -531,12 +616,17 @@ hypre_GMRESSolve(void  *gmres_vdata,
       rs[0] = r_norm;
       if (r_norm == 0.0)
       {
+         hypre_TFree(iprod, HYPRE_MEMORY_HOST);
+         hypre_TFree(xiprod, HYPRE_MEMORY_HOST);
+         hypre_TFree(biprod, HYPRE_MEMORY_HOST);
          hypre_TFreeF(c, gmres_functions);
          hypre_TFreeF(s, gmres_functions);
          hypre_TFreeF(rs, gmres_functions);
          if (rel_change) { hypre_TFreeF(rs_2, gmres_functions); }
+         if (print_level > 2) { hypre_TFreeF(rs_3, gmres_functions); }
          for (i = 0; i < k_dim + 1; i++) { hypre_TFreeF(hh[i], gmres_functions); }
          hypre_TFreeF(hh, gmres_functions);
+
          (gmres_data -> num_iterations) = iter;
          HYPRE_ANNOTATE_FUNC_END;
 
@@ -554,18 +644,13 @@ hypre_GMRESSolve(void  *gmres_vdata,
             (*(gmres_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
             (*(gmres_functions->InnerProd))(r, r, &num_tags, &iprod);
             r_norm = hypre_sqrt(iprod[0]);
-            if (r_norm  <= epsilon)
+            if (r_norm <= epsilon)
             {
-               if (print_level > 1 && my_id == 0)
-               {
-                  hypre_printf("\n\n");
-                  hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
-               }
                break;
             }
             else
             {
-               if (print_level > 0 && my_id == 0)
+               if (!my_id && print_level > 0)
                {
                   hypre_printf("false convergence 1\n");
                }
@@ -627,23 +712,24 @@ hypre_GMRESSolve(void  *gmres_vdata,
          hh[i - 1][i - 1] = s[i - 1] * hh[i][i - 1] + c[i - 1] * hh[i - 1][i - 1];
          r_norm = hypre_abs(rs[i]);
 
-         /* Print residual norms? */
+         /* Print residual/error norms? */
          if (print_level > 0)
          {
             norms[iter] = r_norm;
-            if ((num_tags <= 1 && print_level > 1) || (print_level == 2))
+            if ((num_tags <= 1 && print_level > 1) || (print_level == 2) ||
+                (print_level > 9) || (!xref && print_level > 5))
             {
                if (!my_id)
                {
                   if (b_norm > 0.0)
                   {
-                     hypre_printf("% 5d    %e    %f   %e\n", iter,
+                     hypre_printf("%5d    %e      %f   %e\n", iter,
                                   norms[iter], norms[iter] / norms[iter - 1],
                                   norms[iter] / b_norm);
                   }
                   else
                   {
-                     hypre_printf("% 5d    %e    %f\n", iter, norms[iter],
+                     hypre_printf("%5d    %e      %f\n", iter, norms[iter],
                                   norms[iter] / norms[iter - 1]);
                   }
                }
@@ -686,25 +772,57 @@ hypre_GMRESSolve(void  *gmres_vdata,
                (*(gmres_functions->CopyVector))(x, w_3);
                (*(gmres_functions->Axpy))(1.0, w, w_3);
 
-               /* Now compute real residual r = b - A*x_i */
-               (*(gmres_functions->CopyVector))(b, r);
-               (*(gmres_functions->Matvec))(matvec_data, -1.0, A, w_3, 1.0, r);
+               if (xref == NULL || print_level == 3 || print_level == 4 || print_level == 5)
+               {
+                  /* Now compute real residual r = b - A*x_i */
+                  (*(gmres_functions->CopyVector))(b, r);
+                  (*(gmres_functions->Matvec))(matvec_data, -1.0, A, w_3, 1.0, r);
+               }
+               else if (xref != NULL && (print_level == 6 || print_level == 7 || print_level == 8))
+               {
+                  /* Compute error e = x_ref - x_i */
+                  (*(gmres_functions->CopyVector))(xref, r);
+                  (*(gmres_functions->Axpy))(-1.0, w_3, r);
+               }
 
-               /* Now compute tag-specific residual norms */
+               /* Compute tag-specific residual/error norms */
                (*(gmres_functions->InnerProd))(r, r, &num_tags, &iprod);
 
-               /* Print tag-specific residual norms */
-               if (!my_id)
+               /* Print tag-specific residual/error norms */
+               if (!my_id && print_level != 6)
                {
                   hypre_printf(" %6d  ", iter);
                   for (tag = 0; tag < num_tags + 1; tag++)
                   {
                      hypre_printf("  %14.6e ",
-                                  print_level == 3 ?
+                                  print_level == 3 || print_level == 7 ?
                                   hypre_sqrt(iprod[tag]) :
-                                  hypre_sqrt(iprod[tag]) / hypre_sqrt(biprod[tag]));
+                                  print_level == 4 ?
+                                  hypre_sqrt(iprod[tag]) / hypre_sqrt(biprod[tag]) :
+                                  print_level == 5 ?
+                                  hypre_sqrt(iprod[tag]) / hypre_sqrt(biprod[0]) :
+                                  print_level == 8 ?
+                                  hypre_sqrt(iprod[tag]) / hypre_sqrt(xiprod[tag]) :
+                                  print_level == 9 ?
+                                  hypre_sqrt(iprod[tag]) / hypre_sqrt(xiprod[0]) :
+                                  hypre_sqrt(iprod[tag]));
                   }
                   hypre_printf("\n");
+               }
+               else if (!my_id && print_level == 6)
+               {
+                  norms[iter] = hypre_sqrt(iprod[0]);
+                  if (e_norm > 0.0)
+                  {
+                     hypre_printf("%5d    %e      %f   %e\n", iter,
+                                  norms[iter], norms[iter] / norms[iter - 1],
+                                  norms[iter] / e_norm);
+                  }
+                  else
+                  {
+                     hypre_printf("%5d    %e    %f\n", iter, norms[iter],
+                                  norms[iter] / norms[iter - 1]);
+                  }
                }
             }
          }
@@ -922,36 +1040,20 @@ hypre_GMRESSolve(void  *gmres_vdata,
                   w_norm = hypre_sqrt(iprod[0]);
 
                   relative_error = w_norm / x_norm;
-                  if ( relative_error < r_tol )
+                  if (relative_error < r_tol)
                   {
                      (gmres_data -> converged) = 1;
-                     if (print_level > 1 && my_id == 0)
-                     {
-                        hypre_printf("\n\n");
-                        hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
-                     }
                      break;
                   }
                }
                else
                {
                   (gmres_data -> converged) = 1;
-                  if (print_level > 1 && my_id == 0)
-                  {
-                     hypre_printf("\n\n");
-                     hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
-                  }
                   break;
                }
-
             }
             else /* don't need to check rel. change */
             {
-               if (print_level > 1 && my_id == 0)
-               {
-                  hypre_printf("\n\n");
-                  hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
-               }
                (gmres_data -> converged) = 1;
                break;
             }
@@ -961,17 +1063,12 @@ hypre_GMRESSolve(void  *gmres_vdata,
             /* exit if the real residual norm has not decreased */
             if (real_r_norm_new >= real_r_norm_old)
             {
-               if (print_level > 1 && my_id == 0)
-               {
-                  hypre_printf("\n\n");
-                  hypre_printf("Final L2 norm of residual: %e\n\n", r_norm);
-               }
                (gmres_data -> converged) = 1;
                break;
             }
 
             /* report discrepancy between real/GMRES residuals and restart */
-            if (print_level > 0 && my_id == 0)
+            if (!my_id && print_level > 0)
             {
                hypre_printf("false convergence 2, L2 norm of residual: %e\n", r_norm);
             }
@@ -1001,10 +1098,47 @@ hypre_GMRESSolve(void  *gmres_vdata,
       }
    } /* END of iteration while loop */
 
-
-   if (print_level > 1 && my_id == 0)
+   if (!my_id && print_level > 1)
    {
       hypre_printf("\n\n");
+   }
+
+   if (!my_id && print_level > 0)
+   {
+      hypre_printf("Final L2 norm of residual: %e\n", r_norm);
+      if (num_tags > 1)
+      {
+         for (tag = 0; tag < num_tags; tag++)
+         {
+            hypre_printf("Final L2 norm of r%*d: %e\n", hypre_ndigits(num_tags),
+                         tag, hypre_sqrt(iprod[tag + 1]));
+         }
+      }
+   }
+
+   if (xref && print_level > 0)
+   {
+      (*(gmres_functions->CopyVector))(x, w_3);
+      (*(gmres_functions->Axpy))(-1.0, xref, w_3);
+      (*(gmres_functions->InnerProd))(w_3, w_3, &num_tags, &iprod);
+
+      if (!my_id)
+      {
+         hypre_printf("Final L2 norm of error: %e\n", hypre_sqrt(iprod[0]));
+         if (num_tags > 1)
+         {
+            for (tag = 0; tag < num_tags; tag++)
+            {
+               hypre_printf("Final L2 norm of e%*d: %e\n", hypre_ndigits(num_tags),
+                            tag, hypre_sqrt(iprod[tag + 1]));
+            }
+         }
+      }
+   }
+
+   if (!my_id && print_level > 0)
+   {
+      hypre_printf("\n");
    }
 
    (gmres_data -> num_iterations) = iter;
@@ -1026,6 +1160,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
    /* free up memory */
    hypre_TFree(iprod, HYPRE_MEMORY_HOST);
+   hypre_TFree(xiprod, HYPRE_MEMORY_HOST);
    hypre_TFree(biprod, HYPRE_MEMORY_HOST);
    hypre_TFreeF(c, gmres_functions);
    hypre_TFreeF(s, gmres_functions);
@@ -1450,6 +1585,36 @@ hypre_GMRESGetFinalRelativeResidualNorm( void       *gmres_vdata,
 
 
    *relative_residual_norm = (gmres_data -> rel_residual_norm);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GMRESSetRefSolution
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GMRESSetRefSolution( void  *gmres_vdata,
+                           void  *xref )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+   (gmres_data -> xref) = xref;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GMRESGetRefSolution
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_GMRESGetRefSolution( void   *gmres_vdata,
+                           void  **xref )
+{
+   hypre_GMRESData *gmres_data = (hypre_GMRESData *)gmres_vdata;
+
+   *xref = (gmres_data -> xref);
 
    return hypre_error_flag;
 }
