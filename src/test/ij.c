@@ -105,8 +105,8 @@ HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_BigInt nx, HYPRE_BigInt ny,
 HYPRE_Int BuildParCoordinates (MPI_Comm comm, HYPRE_Int argc, char *argv [], HYPRE_Int arg_index,
                                HYPRE_Int *coorddim_ptr, float **coord_ptr );
 
-extern HYPRE_Int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, HYPRE_Int iterations,
-                                                   HYPRE_Real rel_residual_norm);
+//extern HYPRE_Int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, HYPRE_Int iterations,
+//                                                   HYPRE_Real rel_residual_norm);
 
 //extern HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int iteration,
 //                                                HYPRE_Real rel_residual_norm);
@@ -8144,11 +8144,12 @@ main( hypre_int argc,
          hypre_printf("HYPRE_FlexGMRESGetPrecond got good precond\n");
       }
 
-
-      /* this is optional - could be a user defined one instead (see ex5.c)*/
-      HYPRE_FlexGMRESSetModifyPC( pcg_solver,
-                                  (HYPRE_PtrToModifyPCFcn) hypre_FlexGMRESModifyPCDefault);
-
+      // RDF: This is problematic right now with the multiprecision code because
+      // of the Real argument in the ModifyPCFcn.  Need to find a solution.
+      //
+      // /* this is optional - could be a user defined one instead (see ex5.c)*/
+      // HYPRE_FlexGMRESSetModifyPC( pcg_solver,
+      //                             (HYPRE_PtrToModifyPCFcn) hypre_FlexGMRESModifyPCDefault);
 
       HYPRE_FlexGMRESSetup
       (pcg_solver, (HYPRE_Matrix)parcsr_M, (HYPRE_Vector)b, (HYPRE_Vector)x);
