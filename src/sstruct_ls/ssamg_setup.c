@@ -413,10 +413,7 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
          HYPRE_IJMatrixTranspose(ij_A, &ij_AT);
          HYPRE_IJMatrixAdd(1.0, ij_A, -1.0, ij_AT, &ij_B);
          HYPRE_IJMatrixNorm(ij_B, &B_norm);
-         if (!mypid)
-         {
-            hypre_printf("Frobenius norm (A[%02d] - A[%02d]^T) = %20.15e\n", l, l, B_norm);
-         }
+         hypre_ParPrintf(comm, "Frobenius norm (A[%02d] - A[%02d]^T) = %20.15e\n", l, l, B_norm);
 
          /* Print matrices */
          hypre_sprintf(filename, "ssamg_ijA.l%02d", l);
@@ -486,9 +483,9 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
       HYPRE_IJMatrixGetObject(ij_A[0], (void **) &par_A[0]);
       for (l = min_level; l < num_levels - 1; l++)
       {
-         if (!mypid) { hypre_printf("Converting A[%02d]\n", l); }
+         hypre_ParPrintf(comm, "Converting A[%02d]\n", l);
          HYPRE_SStructMatrixToIJMatrix(A_l[l + 1], 0, &ij_A[1]);
-         if (!mypid) { hypre_printf("Converting P[%02d]\n", l); }
+         hypre_ParPrintf(comm, "Converting P[%02d]\n", l);
          HYPRE_SStructMatrixToIJMatrix(P_l[l], 0, &ij_P);
 
          HYPRE_IJMatrixGetObject(ij_A[1], (void **) &par_A[1]);
@@ -499,18 +496,15 @@ hypre_SSAMGSetup( void                 *ssamg_vdata,
 
          hypre_ParCSRMatrixAdd(1.0, par_RAP, -1.0, par_A[1], &par_B);
          norm = hypre_ParCSRMatrixFnorm(par_B);
-         if (!mypid)
-         {
-            hypre_printf("Frobenius norm (RAP_par[%02d] - RAP_ss[%02d]^T) = %20.15e\n", l, l, norm);
-         }
+         hypre_ParPrintf(comm, "Frobenius norm (RAP_par[%02d] - RAP_ss[%02d]^T) = %20.15e\n", l, l, norm);
 
          /* Print matrices */
          hypre_sprintf(filename, "ssamg_ijP.l%02d", l);
-         if (!mypid) { hypre_printf("Printing %s\n", filename); }
+         hypre_ParPrintf(comm, "Printing %s\n", filename);
          HYPRE_IJMatrixPrint(ij_P, filename);
 
          hypre_sprintf(filename, "ssamg_ijRAPdiff.l%02d", l + 1);
-         if (!mypid) { hypre_printf("Printing %s\n", filename); }
+         hypre_ParPrintf(comm, "Printing %s\n", filename);
          hypre_ParCSRMatrixPrintIJ(par_B, 0, 0, filename);
 
          HYPRE_IJMatrixDestroy(ij_A[0]);

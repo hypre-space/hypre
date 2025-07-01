@@ -134,12 +134,13 @@ hypre_RedBlackGS( void               *relax_vdata,
    HYPRE_Int              Astart, Ani, Anj;
    HYPRE_Int              bstart, bni, bnj;
    HYPRE_Int              xstart, xni, xnj;
-   HYPRE_Int              xoff0, xoff1, xoff2, xoff3, xoff4, xoff5;
+   HYPRE_Int              xoff0 = 0, xoff1 = 0, xoff2 = 0;
+   HYPRE_Int              xoff3 = 0, xoff4 = 0, xoff5 = 0;
 
-   HYPRE_Real            *Ap;
-   HYPRE_Real            *Ap0, *Ap1, *Ap2, *Ap3, *Ap4, *Ap5;
-   HYPRE_Real            *bp;
-   HYPRE_Real            *xp;
+   HYPRE_Real            *Ap  = NULL;
+   HYPRE_Real            *Ap0 = NULL, *Ap1 = NULL, *Ap2 = NULL;
+   HYPRE_Real            *Ap3 = NULL, *Ap4 = NULL, *Ap5 = NULL;
+   HYPRE_Real            *bp, *xp;
 
    hypre_IndexRef         start;
    hypre_Index            loop_size;

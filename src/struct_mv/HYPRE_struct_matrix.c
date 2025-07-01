@@ -482,13 +482,18 @@ HYPRE_StructMatrixMatmat( HYPRE_StructMatrix  A,
    HYPRE_Int           nterms        = 2;
    HYPRE_Int           terms[2]      = {0, 1};
    HYPRE_Int           transposes[2] = {Atranspose, Btranspose};
+#if defined (HYPRE_USING_GPU)
+   HYPRE_Int           kernel_type   = 1;
+#else
+   HYPRE_Int           kernel_type   = 0;
+#endif
 
    if (A == B)
    {
       nmatrices = 1;
       terms[1] = 0;
    }
-   hypre_StructMatmult(nmatrices, matrices, nterms, terms, transposes, C);
+   hypre_StructMatmult(kernel_type, nmatrices, matrices, nterms, terms, transposes, C);
 
    return hypre_error_flag;
 }

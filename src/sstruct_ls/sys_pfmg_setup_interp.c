@@ -30,7 +30,7 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
 
    /* Create struct interpolation matrix sP first */
    sA = hypre_SStructPMatrixSMatrix(A, 0, 0);
-   sP = hypre_zPFMGCreateInterpOp(sA, cdir, stride, rap_type);
+   sP = hypre_PFMGCreateInterpOp(sA, cdir, stride, rap_type);
    hypre_StructMatrixInitializeShell(sP);  /* Don't allocate data */
 
    stencil_size  = hypre_StructStencilSize(hypre_StructMatrixStencil(sP));
@@ -78,8 +78,8 @@ hypre_SysPFMGSetupInterpOp( hypre_SStructPMatrix *P,
 
    for (vi = 0; vi < nvars; vi++)
    {
-      hypre_zPFMGSetupInterpOp(hypre_SStructPMatrixSMatrix(P, vi, vi),
-                               hypre_SStructPMatrixSMatrix(A, vi, vi), cdir);
+      hypre_PFMGSetupInterpOp(hypre_SStructPMatrixSMatrix(P, vi, vi),
+                              hypre_SStructPMatrixSMatrix(A, vi, vi), cdir);
    }
 
    return hypre_error_flag;

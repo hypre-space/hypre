@@ -82,13 +82,13 @@ hypre_StructMatvecCompute_core_CC( hypre_StructMatrix *A,
    hypre_Index           xdstart, ydstart;
    hypre_Index           offset;
 
-   HYPRE_Complex        *Ap0, *Ap1, *Ap2;
-   HYPRE_Complex        *Ap3, *Ap4, *Ap5;
-   HYPRE_Complex        *Ap6, *Ap7, *Ap8;
-   HYPRE_Complex        *xp,  *yp;
-   HYPRE_Int             xoff0, xoff1, xoff2;
-   HYPRE_Int             xoff3, xoff4, xoff5;
-   HYPRE_Int             xoff6, xoff7, xoff8;
+   HYPRE_Complex        *Ap0 = NULL, *Ap1 = NULL, *Ap2 = NULL;
+   HYPRE_Complex        *Ap3 = NULL, *Ap4 = NULL, *Ap5 = NULL;
+   HYPRE_Complex        *Ap6 = NULL, *Ap7 = NULL, *Ap8 = NULL;
+   HYPRE_Complex        *xp = NULL,  *yp = NULL;
+   HYPRE_Int             xoff0 = 0, xoff1 = 0, xoff2 = 0;
+   HYPRE_Int             xoff3 = 0, xoff4 = 0, xoff5 = 0;
+   HYPRE_Int             xoff6 = 0, xoff7 = 0, xoff8 = 0;
 
    HYPRE_Int             si, depth;
 
@@ -384,13 +384,13 @@ hypre_StructMatvecCompute_core_VC( hypre_StructMatrix *A,
    hypre_Index           Adstart, xdstart, ydstart;
    hypre_Index           offset;
 
-   HYPRE_Complex        *Ap0, *Ap1, *Ap2;
-   HYPRE_Complex        *Ap3, *Ap4, *Ap5;
-   HYPRE_Complex        *Ap6, *Ap7, *Ap8;
    HYPRE_Complex        *xp,  *yp;
-   HYPRE_Int             xoff0, xoff1, xoff2;
-   HYPRE_Int             xoff3, xoff4, xoff5;
-   HYPRE_Int             xoff6, xoff7, xoff8;
+   HYPRE_Complex        *Ap0 = NULL, *Ap1 = NULL, *Ap2 = NULL;
+   HYPRE_Complex        *Ap3 = NULL, *Ap4 = NULL, *Ap5 = NULL;
+   HYPRE_Complex        *Ap6 = NULL, *Ap7 = NULL, *Ap8 = NULL;
+   HYPRE_Int             xoff0 = 0, xoff1 = 0, xoff2 = 0;
+   HYPRE_Int             xoff3 = 0, xoff4 = 0, xoff5 = 0;
+   HYPRE_Int             xoff6 = 0, xoff7 = 0, xoff8 = 0;
 
    HYPRE_Int             si, depth;
 
@@ -667,4 +667,3 @@ hypre_StructMatvecCompute_core_VC( hypre_StructMatrix *A,
 
    return hypre_error_flag;
 }
-

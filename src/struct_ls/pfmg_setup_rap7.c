@@ -167,6 +167,8 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
                           hypre_Index         cstride,
                           hypre_StructMatrix *RAP     )
 {
+   HYPRE_UNUSED_VAR(R);
+
    HYPRE_Int             ndim = hypre_StructMatrixNDim(A);
    hypre_Index           index;
    hypre_Index           index_temp;

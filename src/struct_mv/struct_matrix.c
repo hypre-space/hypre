@@ -929,6 +929,7 @@ hypre_StructMatrixResize( hypre_StructMatrix *matrix,
    {
       HYPRE_Int   nval = hypre_StructMatrixNumValues(matrix);
 
+      /* TODO (VPM): We should be able to just do hypre_TAlloc */
       data = hypre_CTAlloc(HYPRE_Complex, data_size, memory_location);
 
       /* Copy constant data values */
@@ -997,8 +998,9 @@ hypre_StructMatrixRestore( hypre_StructMatrix *matrix )
       /* Move the data */
       if (hypre_StructMatrixDataAlloced(matrix))
       {
-         data = hypre_CTAlloc(HYPRE_Complex, data_size, memory_location);
+         data = hypre_TAlloc(HYPRE_Complex, data_size, memory_location);
       }
+
       /* Copy constant data values */
       for (i = 0; i < stencil_size; i++)
       {
@@ -1285,7 +1287,9 @@ hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix,
 {
    if (data == NULL)
    {
-      data = hypre_CTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix),
+      /* TODO (VPM): we should be able to just do hypre_TAlloc, but that worsens PFMG convergence */
+      data = hypre_CTAlloc(HYPRE_Complex,
+                           hypre_StructMatrixDataSize(matrix),
                            hypre_StructMatrixMemoryLocation(matrix));
       hypre_StructMatrixDataAlloced(matrix) = 1;
    }
@@ -2204,7 +2208,7 @@ hypre_StructMatrixPrintData( FILE               *file,
    /* Allocate/Point to data on the host memory */
    if (hypre_GetActualMemLocation(memory_location) != hypre_MEMORY_HOST)
    {
-      h_data = hypre_CTAlloc(HYPRE_Complex, data_size, HYPRE_MEMORY_HOST);
+      h_data = hypre_TAlloc(HYPRE_Complex, data_size, HYPRE_MEMORY_HOST);
       hypre_TMemcpy(h_data, data, HYPRE_Complex, data_size,
                     HYPRE_MEMORY_HOST, memory_location);
    }
