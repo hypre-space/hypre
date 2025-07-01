@@ -41,9 +41,9 @@ hypre_PFMGCreate( MPI_Comm  comm )
    (pfmg_data -> print_level)       = 0;
    (pfmg_data -> print_freq)        = 1;
 #if defined (HYPRE_USING_GPU)
-   (pfmg_data -> matmat_type)       = 1;
+   (pfmg_data -> matmult_type)      = 1;
 #else
-   (pfmg_data -> matmat_type)       = 0;
+   (pfmg_data -> matmult_type)      = 0;
 #endif
 
    /* initialize */
@@ -330,23 +330,23 @@ hypre_PFMGGetRAPType( void      *pfmg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PFMGSetMatMatType( void      *pfmg_vdata,
-                         HYPRE_Int  matmat_type )
+hypre_PFMGSetMatmultType( void      *pfmg_vdata,
+                          HYPRE_Int  matmult_type )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
-   (pfmg_data -> matmat_type) = matmat_type;
+   (pfmg_data -> matmult_type) = matmult_type;
 
    return hypre_error_flag;
 }
 
 HYPRE_Int
-hypre_PFMGGetMatMatType( void      *pfmg_vdata,
-                         HYPRE_Int *matmat_type )
+hypre_PFMGGetMatmultType( void      *pfmg_vdata,
+                          HYPRE_Int *matmult_type )
 {
    hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
-   *matmat_type = (pfmg_data -> matmat_type);
+   *matmult_type = (pfmg_data -> matmult_type);
 
    return hypre_error_flag;
 }

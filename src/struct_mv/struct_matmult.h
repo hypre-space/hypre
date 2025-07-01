@@ -59,7 +59,7 @@ typedef struct hypre_StructMatmultDataM_struct
 
 typedef struct hypre_StructMatmultData_struct
 {
-   HYPRE_Int                 matmat_type; /* algorithm type for computing matmult */
+   HYPRE_Int                 kernel_type; /* kernel type for computing matmult */
    HYPRE_Int                 nmatmults;   /* number of matmults */
    hypre_StructMatmultDataM *matmults;    /* data for each matmult */
 

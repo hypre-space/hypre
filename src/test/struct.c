@@ -104,6 +104,7 @@ main( hypre_int argc,
    HYPRE_Int           skip;
    HYPRE_Int           sym;
    HYPRE_Int           rap;
+   HYPRE_Int           matmult;
    HYPRE_Int           relax;
    HYPRE_Real          jacobi_weight;
    HYPRE_Int           usr_jacobi_weight;
@@ -249,6 +250,7 @@ main( hypre_int argc,
    skip  = 0;
    sym  = 1;
    rap = 0;
+   matmult = -1;
    relax = 1;
    jacobi_weight = 1.0;
    usr_jacobi_weight = 0;
@@ -459,11 +461,15 @@ main( hypre_int argc,
          n_pre = atoi(argv[arg_index++]);
          n_post = atoi(argv[arg_index++]);
       }
-
       else if ( strcmp(argv[arg_index], "-rap") == 0 )
       {
          arg_index++;
          rap = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-matmult") == 0 )
+      {
+         arg_index++;
+         matmult = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-relax") == 0 )
       {
@@ -736,6 +742,10 @@ main( hypre_int argc,
       hypre_printf("                        0 - Galerkin (default)\n");
       hypre_printf("                        1 - non-Galerkin ParFlow operators\n");
       hypre_printf("                        2 - Galerkin, general operators\n");
+      hypre_printf("  -matmult <s>        : kernel type for structured matrix/matrix multiplication\n");
+      hypre_printf("                       -1 - automatic selection (0 for CPUs, 1 for GPUs)\n");
+      hypre_printf("                        0 - standard algorithm\n");
+      hypre_printf("                        1 - fused algorithm\n");
       hypre_printf("  -relax <r>          : relaxation type\n");
       hypre_printf("                        0 - Jacobi\n");
       hypre_printf("                        1 - Weighted Jacobi (default)\n");
@@ -877,6 +887,7 @@ main( hypre_int argc,
          hypre_printf("  skip             = %d\n", skip);
          hypre_printf("  sym              = %d\n", sym);
          hypre_printf("  rap              = %d\n", rap);
+         hypre_printf("  matmult          = %d\n", matmult);
          hypre_printf("  relax            = %d\n", relax);
          hypre_printf("  solver ID        = %d\n", solver_id);
          hypre_printf("  Repetitions      = %d\n", reps);
@@ -1615,6 +1626,7 @@ main( hypre_int argc,
          HYPRE_StructPFMGSetTol(solver, tol);
          HYPRE_StructPFMGSetRelChange(solver, 0);
          HYPRE_StructPFMGSetRAPType(solver, rap);
+         HYPRE_StructPFMGSetMatmultType(solver, matmult);
          HYPRE_StructPFMGSetRelaxType(solver, relax);
          if (usr_jacobi_weight)
          {
@@ -1751,6 +1763,7 @@ main( hypre_int argc,
             HYPRE_StructPFMGSetTol(precond, 0.0);
             HYPRE_StructPFMGSetZeroGuess(precond);
             HYPRE_StructPFMGSetRAPType(precond, rap);
+            HYPRE_StructPFMGSetMatmultType(precond, matmult);
             HYPRE_StructPFMGSetRelaxType(precond, relax);
             if (usr_jacobi_weight)
             {
@@ -1894,6 +1907,7 @@ main( hypre_int argc,
                HYPRE_StructPFMGSetTol(precond, 0.0);
                HYPRE_StructPFMGSetZeroGuess(precond);
                HYPRE_StructPFMGSetRAPType(precond, rap);
+               HYPRE_StructPFMGSetMatmultType(precond, matmult);
                HYPRE_StructPFMGSetRelaxType(precond, relax);
                if (usr_jacobi_weight)
                {
@@ -2116,6 +2130,7 @@ main( hypre_int argc,
                HYPRE_StructPFMGSetTol(precond, 0.0);
                HYPRE_StructPFMGSetZeroGuess(precond);
                HYPRE_StructPFMGSetRAPType(precond, rap);
+               HYPRE_StructPFMGSetMatmultType(precond, matmult);
                HYPRE_StructPFMGSetRelaxType(precond, relax);
                if (usr_jacobi_weight)
                {
@@ -2348,6 +2363,7 @@ main( hypre_int argc,
             HYPRE_StructPFMGSetTol(precond, 0.0);
             HYPRE_StructPFMGSetZeroGuess(precond);
             HYPRE_StructPFMGSetRAPType(precond, rap);
+            HYPRE_StructPFMGSetMatmultType(precond, matmult);
             HYPRE_StructPFMGSetRelaxType(precond, relax);
             if (usr_jacobi_weight)
             {
@@ -2446,6 +2462,7 @@ main( hypre_int argc,
             HYPRE_StructPFMGSetTol(precond, 0.0);
             HYPRE_StructPFMGSetZeroGuess(precond);
             HYPRE_StructPFMGSetRAPType(precond, rap);
+            HYPRE_StructPFMGSetMatmultType(precond, matmult);
             HYPRE_StructPFMGSetRelaxType(precond, relax);
             if (usr_jacobi_weight)
             {
@@ -2571,6 +2588,7 @@ main( hypre_int argc,
             HYPRE_StructPFMGSetTol(precond, 0.0);
             HYPRE_StructPFMGSetZeroGuess(precond);
             HYPRE_StructPFMGSetRAPType(precond, rap);
+            HYPRE_StructPFMGSetMatmultType(precond, matmult);
             HYPRE_StructPFMGSetRelaxType(precond, relax);
             if (usr_jacobi_weight)
             {
@@ -2696,6 +2714,7 @@ main( hypre_int argc,
             HYPRE_StructPFMGSetTol(precond, 0.0);
             HYPRE_StructPFMGSetZeroGuess(precond);
             HYPRE_StructPFMGSetRAPType(precond, rap);
+            HYPRE_StructPFMGSetMatmultType(precond, matmult);
             HYPRE_StructPFMGSetRelaxType(precond, relax);
             if (usr_jacobi_weight)
             {
@@ -2795,6 +2814,7 @@ main( hypre_int argc,
             HYPRE_StructPFMGSetTol(precond, 0.0);
             HYPRE_StructPFMGSetZeroGuess(precond);
             HYPRE_StructPFMGSetRAPType(precond, rap);
+            HYPRE_StructPFMGSetMatmultType(precond, matmult);
             HYPRE_StructPFMGSetRelaxType(precond, relax);
             if (usr_jacobi_weight)
             {

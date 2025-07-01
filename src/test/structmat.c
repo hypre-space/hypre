@@ -550,7 +550,7 @@ PrintUsage( char      *progname,
       hypre_printf("  -mat-mat <n> <A>[T] <B>[T] ... : compute A*B*... or A^T*B*..., etc. \n");
       hypre_printf("                                 : for n possibly transposed matrices \n");
       hypre_printf("                                 : example P^T*A*P: -mat-mat 3 1T 0 1 \n");
-      hypre_printf("  -mat-mat-type <n>    : algorithm type for mat-mat \n");
+      hypre_printf("  -matmult-type <n>    : kernel type for structured matrix/matrix multiplication \n");
       hypre_printf("\n");
    }
 
@@ -585,7 +585,7 @@ main( hypre_int  argc,
    HYPRE_Int             time_index;
    HYPRE_Int             arg_index, box, mi, vi, ei, d, i, k;
    HYPRE_Int             do_matvec, do_matvecT, do_matmat;
-   HYPRE_Int             matmat_type = 0;
+   HYPRE_Int             matmult_type = 0;
    HYPRE_Int             mv_A, mv_x, mv_y;
    HYPRE_Int             nterms = 0, *terms = NULL, *trans = NULL;
    char                  transposechar;
@@ -743,9 +743,9 @@ main( hypre_int  argc,
             }
          }
       }
-      else if ( strcmp(argv[arg_index], "-mat-mat-type") == 0 )
+      else if ( strcmp(argv[arg_index], "-matmult-type") == 0 )
       {
-         matmat_type = atoi(argv[arg_index++]);
+         matmult_type = atoi(argv[arg_index++]);
       }
       else
       {
@@ -1035,7 +1035,7 @@ main( hypre_int  argc,
       time_index = hypre_InitializeTiming("Matrix-matrix multiply");
       hypre_BeginTiming(time_index);
 
-      hypre_StructMatmult(matmat_type, data.nmatrices, matrices, nterms, terms, trans, &M);
+      hypre_StructMatmult(matmult_type, data.nmatrices, matrices, nterms, terms, trans, &M);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Matrix-matrix multiply", hypre_MPI_COMM_WORLD);

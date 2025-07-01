@@ -1798,7 +1798,7 @@ typedef struct hypre_StructMatmultDataM_struct
 
 typedef struct hypre_StructMatmultData_struct
 {
-   HYPRE_Int                 matmat_type; /* algorithm type for computing matmult */
+   HYPRE_Int                 kernel_type; /* kernel type for computing matmult */
    HYPRE_Int                 nmatmults;   /* number of matmults */
    hypre_StructMatmultDataM *matmults;    /* data for each matmult */
 
@@ -2326,7 +2326,7 @@ hypre_StructMatmat( hypre_StructMatrix  *A,
                     hypre_StructMatrix  *B,
                     hypre_StructMatrix **M_ptr );
 HYPRE_Int
-hypre_StructMatrixPtAPSetup( HYPRE_Int                  type,
+hypre_StructMatrixPtAPSetup( HYPRE_Int                  kernel_type,
                              hypre_StructMatrix        *A,
                              hypre_StructMatrix        *P,
                              hypre_StructMatmultData  **mmdata_ptr,
@@ -2336,7 +2336,7 @@ hypre_StructMatrixPtAP( hypre_StructMatrix  *A,
                         hypre_StructMatrix  *P,
                         hypre_StructMatrix **M_ptr);
 HYPRE_Int
-hypre_StructMatrixRAPSetup( HYPRE_Int                  type,
+hypre_StructMatrixRAPSetup( HYPRE_Int                  kernel_type,
                             hypre_StructMatrix        *R,
                             hypre_StructMatrix        *A,
                             hypre_StructMatrix        *P,
@@ -2348,7 +2348,7 @@ hypre_StructMatrixRAP( hypre_StructMatrix  *R,
                        hypre_StructMatrix  *P,
                        hypre_StructMatrix **M_ptr);
 HYPRE_Int
-hypre_StructMatrixRTtAPSetup( HYPRE_Int                  type,
+hypre_StructMatrixRTtAPSetup( HYPRE_Int                  kernel_type,
                               hypre_StructMatrix        *RT,
                               hypre_StructMatrix        *A,
                               hypre_StructMatrix        *P,

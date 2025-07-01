@@ -48,7 +48,7 @@ typedef struct
    HYPRE_Int             usr_jacobi_weight; /* indicator flag for user weight */
 
    HYPRE_Int             rap_type;       /* controls choice of RAP codes */
-   HYPRE_Int             matmat_type;    /* controls choice of matrix-matrix mult. algorithm */
+   HYPRE_Int             matmult_type;   /* controls choice of matrix-matrix mult. algorithm */
    HYPRE_Int             num_pre_relax;  /* number of pre relaxation sweeps */
    HYPRE_Int             num_post_relax; /* number of post relaxation sweeps */
    HYPRE_Int             skip_relax;     /* flag to allow skipping relaxation */

@@ -51,9 +51,6 @@ HYPRE_Int hypre_HybridSetup ( void *hybrid_vdata, hypre_StructMatrix *A, hypre_S
 HYPRE_Int hypre_HybridSolve ( void *hybrid_vdata, hypre_StructMatrix *A, hypre_StructVector *b,
                               hypre_StructVector *x );
 
-/* HYPRE_struct_pfmg.c */
-HYPRE_Int hypre_PFMGSetDeviceLevel( void *pfmg_vdata, HYPRE_Int   device_level  );
-
 /* jacobi.c */
 void *hypre_StructJacobiCreate ( MPI_Comm comm );
 HYPRE_Int hypre_StructJacobiDestroy ( void *jacobi_vdata );
@@ -193,8 +190,8 @@ HYPRE_Int hypre_PFMGSetJacobiWeight ( void *pfmg_vdata, HYPRE_Real weight );
 HYPRE_Int hypre_PFMGGetJacobiWeight ( void *pfmg_vdata, HYPRE_Real *weight );
 HYPRE_Int hypre_PFMGSetRAPType ( void *pfmg_vdata, HYPRE_Int rap_type );
 HYPRE_Int hypre_PFMGGetRAPType ( void *pfmg_vdata, HYPRE_Int *rap_type );
-HYPRE_Int hypre_PFMGSetMatMatType ( void *pfmg_vdata, HYPRE_Int matmat_type );
-HYPRE_Int hypre_PFMGGetMatMatType ( void *pfmg_vdata, HYPRE_Int *matmat_type );
+HYPRE_Int hypre_PFMGSetMatmultType ( void *pfmg_vdata, HYPRE_Int matmult_type );
+HYPRE_Int hypre_PFMGGetMatmultType ( void *pfmg_vdata, HYPRE_Int *matmult_type );
 HYPRE_Int hypre_PFMGSetNumPreRelax ( void *pfmg_vdata, HYPRE_Int num_pre_relax );
 HYPRE_Int hypre_PFMGGetNumPreRelax ( void *pfmg_vdata, HYPRE_Int *num_pre_relax );
 HYPRE_Int hypre_PFMGSetNumPostRelax ( void *pfmg_vdata, HYPRE_Int num_post_relax );

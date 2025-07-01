@@ -27,7 +27,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             skip_relax        = (pfmg_data -> skip_relax);
    HYPRE_Real           *dxyz              = (pfmg_data -> dxyz);
    HYPRE_Int             max_iter          = (pfmg_data -> max_iter);
-   HYPRE_Int             matmat_type       = (pfmg_data -> matmat_type);
+   HYPRE_Int             matmult_type      = (pfmg_data -> matmult_type);
    HYPRE_Int             rap_type;
    HYPRE_Int             max_levels;
    HYPRE_Int             num_levels;
@@ -209,11 +209,11 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          if (RT_l[l] != P_l[l])
          {
             /* If restriction is not the same as interpolation, compute RAP */
-            hypre_StructMatrixRTtAPSetup(matmat_type, RT_l[l], A_l[l], P_l[l], &Ammdata_l[l + 1], &A_l[l + 1]);
+            hypre_StructMatrixRTtAPSetup(matmult_type, RT_l[l], A_l[l], P_l[l], &Ammdata_l[l + 1], &A_l[l + 1]);
          }
          else
          {
-            hypre_StructMatrixPtAPSetup(matmat_type, A_l[l], P_l[l], &Ammdata_l[l + 1], &A_l[l + 1]);
+            hypre_StructMatrixPtAPSetup(matmult_type, A_l[l], P_l[l], &Ammdata_l[l + 1], &A_l[l + 1]);
          }
          hypre_StructGridRef(hypre_StructMatrixGrid(A_l[l + 1]), &grid_l[l + 1]);
       }

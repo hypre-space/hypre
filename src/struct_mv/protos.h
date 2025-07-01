@@ -503,7 +503,7 @@ hypre_StructMatmat( hypre_StructMatrix  *A,
                     hypre_StructMatrix  *B,
                     hypre_StructMatrix **M_ptr );
 HYPRE_Int
-hypre_StructMatrixPtAPSetup( HYPRE_Int                  type,
+hypre_StructMatrixPtAPSetup( HYPRE_Int                  kernel_type,
                              hypre_StructMatrix        *A,
                              hypre_StructMatrix        *P,
                              hypre_StructMatmultData  **mmdata_ptr,
@@ -513,7 +513,7 @@ hypre_StructMatrixPtAP( hypre_StructMatrix  *A,
                         hypre_StructMatrix  *P,
                         hypre_StructMatrix **M_ptr);
 HYPRE_Int
-hypre_StructMatrixRAPSetup( HYPRE_Int                  type,
+hypre_StructMatrixRAPSetup( HYPRE_Int                  kernel_type,
                             hypre_StructMatrix        *R,
                             hypre_StructMatrix        *A,
                             hypre_StructMatrix        *P,
@@ -525,7 +525,7 @@ hypre_StructMatrixRAP( hypre_StructMatrix  *R,
                        hypre_StructMatrix  *P,
                        hypre_StructMatrix **M_ptr);
 HYPRE_Int
-hypre_StructMatrixRTtAPSetup( HYPRE_Int                  type,
+hypre_StructMatrixRTtAPSetup( HYPRE_Int                  kernel_type,
                               hypre_StructMatrix        *RT,
                               hypre_StructMatrix        *A,
                               hypre_StructMatrix        *P,
