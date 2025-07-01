@@ -142,10 +142,12 @@ typedef HYPRE_Real HYPRE_Complex;
 #define HYPRE_MPI_COMPLEX HYPRE_MPI_REAL
 #endif
 
-/* This allows us to consistently avoid 'float, double and longdouble' throughout hypre */
-typedef double            hypre_double;
-typedef float            hypre_float;
-typedef long double            hypre_long_double;
+/* This allows us to avoid using 'float', 'double', and 'longdouble' in hypre.
+ * NOTE: This must be defined here in the external header file for use in the
+ * mixed precision code. */
+typedef double       hypre_double;
+typedef float        hypre_float;
+typedef long double  hypre_long_double;
 
 /*--------------------------------------------------------------------------
  * Sequential MPI stuff
