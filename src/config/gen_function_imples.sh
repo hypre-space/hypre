@@ -60,7 +60,7 @@ awk -v filename="$FFILE.proto" 'BEGIN {
       arg_mup = sprintf("%s",p_str)
 
       # First replace HYPRE_Real* and HYPRE_Complex* with void*
-      gsub(/(HYPRE_Real|HYPRE_Complex)[[:blank:]]*\*/, "void \*", arg_mup)
+      gsub(/(HYPRE_Real|HYPRE_Complex)[[:blank:]]*[*]/, "void *", arg_mup)
       gsub(/(HYPRE_Real|HYPRE_Complex)/, "hypre_long_double", arg_mup)
 
       print "/*--------------------------------------------------------------------------*/\n"

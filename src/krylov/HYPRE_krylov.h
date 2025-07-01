@@ -41,13 +41,10 @@ extern "C" {
  * @{
  **/
 
-#ifndef HYPRE_MODIFYPC
-#define HYPRE_MODIFYPC
 typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
                                             HYPRE_Int,
                                             HYPRE_Real);
 
-#endif
 /**@}*/
 
 /*--------------------------------------------------------------------------

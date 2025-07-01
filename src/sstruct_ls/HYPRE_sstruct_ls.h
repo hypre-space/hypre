@@ -56,15 +56,6 @@ typedef HYPRE_Int (*HYPRE_PtrToSStructSolverFcn)(HYPRE_SStructSolver,
                                                  HYPRE_SStructVector,
                                                  HYPRE_SStructVector);
 
-#ifndef HYPRE_MODIFYPC
-#define HYPRE_MODIFYPC
-/* if pc not defined, then may need HYPRE_SOLVER also */
-
-typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
-                                            HYPRE_Int,
-                                            HYPRE_Real);
-#endif
-
 /**@}*/
 
 /*--------------------------------------------------------------------------

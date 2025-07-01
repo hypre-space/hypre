@@ -30,14 +30,14 @@ HFILE=$2
 # Create a temp header file where each line ends in a semicolon to ensure
 # that function prototypes appear on a single line.  First insert EOL after
 # every semicolon, then remove EOL on all lines without a semicolon.
-sed 's/\;/\;\n/g' $HFILE | awk '{if ($0 ~ /\;/) {print} else {printf "%s ", $0}}' > $HFILE.tmp
+sed 's/\;/\;\n/g' $HFILE | awk '{if ($0 ~ /[;]/) {print} else {printf "%s ", $0}}' > $HFILE.tmp
 
 # Match and print the prototype for each function, then strip away extra
 # space, parentheses, and commas.
 cat $FFILE | while read -r FNAME
 do
    awk -v fname=$FNAME '
-   BEGIN { pattern = ("[a-zA-Z0-9_]+[[:blank:]\*]+" fname "[[:blank:]]*[\(][^\)]*[\)]") }
+   BEGIN { pattern = ("[a-zA-Z0-9_]+[[:blank:]*]+" fname "[[:blank:]]*[(][^)]*[)]") }
    {
       if ( match($0, pattern) )
       {

@@ -22,7 +22,7 @@ HFILES="$*"
 # prototypes, the output is sorted and duplicate lines are deleted.
 for HFILE in $HFILES
 do
-   ./$scriptdir/zgen_proto_info.sh $FFILE $HFILE
+   ./$scriptdir/gen_proto_info.sh $FFILE $HFILE
 
 done | (export LC_COLLATE=C; sort) | uniq > $FFILE.proto
 
@@ -56,7 +56,7 @@ awk -v filename="$FFILE.proto" 'BEGIN {
       arg_mup = sprintf("%s",p_str)
 
       # First replace HYPRE_Real* and HYPRE_Complex* with void*
-      gsub(/(HYPRE_Real|HYPRE_Complex)[[:blank:]]*\*/, "void \*", arg_mup)
+      gsub(/(HYPRE_Real|HYPRE_Complex)[[:blank:]]*[*]/, "void *", arg_mup)
       gsub(/(HYPRE_Real|HYPRE_Complex)/, "hypre_long_double", arg_mup)
 
       print fret"\n"fdef"("arg_mup");"
