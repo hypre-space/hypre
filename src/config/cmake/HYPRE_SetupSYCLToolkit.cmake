@@ -42,6 +42,22 @@ if(IntelSYCL_FOUND)
   endif()
 endif()
 
+# Find Intel oneDPL
+if(NOT DEFINED DPLROOT)
+  if(DEFINED ENV{DPLROOT})
+    set(DPLROOT $ENV{DPLROOT})
+  elseif(DEFINED ENV{ONEAPI_ROOT} AND EXISTS "$ENV{ONEAPI_ROOT}/dpl/latest")
+    set(DPLROOT "$ENV{ONEAPI_ROOT}/dpcpp-ct/latest")
+  endif()
+endif()
+find_package(oneDPL REQUIRED HINTS "$ENV{DPLROOT}/lib/cmake/oneDPL")
+target_include_directories(${PROJECT_NAME} PUBLIC $ENV{DPLROOT}/include)
+
+# Check if DPL is found
+if(NOT oneDPL_FOUND)
+  message(FATAL_ERROR "Could not find oneDPL installation. Please set DPLROOT")
+endif()
+
 # Find Intel DPCT
 if(NOT DEFINED DPCTROOT)
   if(DEFINED ENV{DPCTROOT})
