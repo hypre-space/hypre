@@ -177,7 +177,7 @@ cat mup.functions mup.methods | while read -r func_name
 do
    echo "#define $func_name HYPRE_ZZZZZPRECISION_FUNC ( $func_name )"
 done
-cat mup.none | while read -r func_name
+cat mup.fixed | while read -r func_name
 do
    echo "#define $func_name HYPRE_FIXEDPRECISION_FUNC ( $func_name )"
 done
@@ -212,7 +212,7 @@ cat >> $MUP_HEADER <<@
 
 cat>> $MUP_HEADER <<@
 $(
-cat mup.functions mup.methods mup.none | while read -r func_name
+cat mup.functions mup.methods mup.fixed | while read -r func_name
 do
    echo "#undef $func_name"
 done
