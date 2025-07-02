@@ -31,13 +31,6 @@ HEADERS =\
  lobpcg.h
 
 FILES =\
- mup_pre.c\
- mup_functions.c
-
-#######################
-# Multiprecision files
-#######################
-MuP_FILES = \
  bicgstab.c\
  cgnr.c\
  gmres.c\
@@ -55,11 +48,16 @@ MuP_FILES = \
  HYPRE_pcg.c\
  HYPRE_lobpcg.c
 
+# Mixed precision files
+MP_FILES = \
+ mup_pre.c\
+ mup_functions.c
+
 ifeq (${MP_BUILD}, 1) 
-   COBJS = ${FILES:.c=.o} ${MuP_FILES:.c=.o}
-   MuP_COBJS = ${MuP_FILES:.c=.o}
+   COBJS = ${FILES:.c=.o} ${MP_FILES:.c=.o}
+   MP_COBJS = ${MP_FILES:.c=.o}
 else
-   COBJS = ${FILES:.c=.o} ${MuP_FILES:.c=.o}
+   COBJS = ${FILES:.c=.o}
 endif
 
 SONAME = libHYPRE_krylov-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
@@ -90,7 +88,7 @@ distclean: clean
 
 ifeq (${MP_BUILD}, 1) 
 clean_mup:
-	rm -rf ${MuP_OBJDIR}	
+	rm -rf ${MP_OBJDIR}	
 else
 clean_mup:
 endif
@@ -101,28 +99,28 @@ endif
 
 ifeq (${MP_BUILD}, 1) 
 
-MuP_OBJDIR = MuP_obj.dir
-MuP_OBJDIR_single = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_flt}
-MuP_OBJDIR_double = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_dbl}
-MuP_OBJDIR_longdouble = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_ldbl}
+MP_OBJDIR = MP_obj.dir
+MP_OBJDIR_single = ${MP_OBJDIR}/${join ${shell basename ${CURDIR}},_flt}
+MP_OBJDIR_double = ${MP_OBJDIR}/${join ${shell basename ${CURDIR}},_dbl}
+MP_OBJDIR_longdouble = ${MP_OBJDIR}/${join ${shell basename ${CURDIR}},_ldbl}
 #
-ADD_OBJS_single = ${addprefix ${MuP_OBJDIR_single}/, ${notdir ${MuP_COBJS}}}
+ADD_OBJS_single = ${addprefix ${MP_OBJDIR_single}/, ${notdir ${COBJS}}}
 ${ADD_OBJS_single}: CFLAGS += -DMP_BUILD_SINGLE=1
-${MuP_OBJDIR_single}/%.o: %.c
+${MP_OBJDIR_single}/%.o: %.c
 	@echo  "processing C object $@ ..."
 	@mkdir -p ${@D}
 	${CC} ${CFLAGS} -c -o $@ $<
 #
-ADD_OBJS_double = ${addprefix ${MuP_OBJDIR_double}/, ${notdir ${MuP_COBJS}}}
+ADD_OBJS_double = ${addprefix ${MP_OBJDIR_double}/, ${notdir ${COBJS}}}
 ${ADD_OBJS_double}: CFLAGS += -DMP_BUILD_DOUBLE=1
-${MuP_OBJDIR_double}/%.o: %.c
+${MP_OBJDIR_double}/%.o: %.c
 	@echo  "processing C object $@ ..."
 	@mkdir -p ${@D}
 	${CC} ${CFLAGS} -c -o $@ $<
 #
-ADD_OBJS_longdouble = ${addprefix ${MuP_OBJDIR_longdouble}/, ${notdir ${MuP_COBJS}}}
+ADD_OBJS_longdouble = ${addprefix ${MP_OBJDIR_longdouble}/, ${notdir ${COBJS}}}
 ${ADD_OBJS_longdouble}: CFLAGS += -DMP_BUILD_LONGDOUBLE=1
-${MuP_OBJDIR_longdouble}/%.o: %.c
+${MP_OBJDIR_longdouble}/%.o: %.c
 	@echo  "processing C object $@ ..."
 	@mkdir -p ${@D}
 	${CC} ${CFLAGS} -c -o $@ $<
