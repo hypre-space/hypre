@@ -1671,11 +1671,10 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /* timer.c */
-hypre_double time_getWallclockSeconds( void );
-hypre_double time_getCPUSeconds( void );
-/* These functions are not called anywhere else. Should we be ending with underscore?? - DOK */
-//hypre_double time_get_wallclock_seconds_( void );
-//hypre_double time_get_cpu_seconds_( void );
+HYPRE_Real time_getWallclockSeconds( void );
+HYPRE_Real time_getCPUSeconds( void );
+HYPRE_Real time_get_wallclock_seconds_( void );
+HYPRE_Real time_get_cpu_seconds_( void );
 
 /*--------------------------------------------------------------------------
  * With timing off
@@ -1705,9 +1704,9 @@ hypre_double time_getCPUSeconds( void );
 
 typedef struct
 {
-   hypre_double  *wall_time;
-   hypre_double  *cpu_time;
-   hypre_double  *flops;
+   HYPRE_Real  *wall_time;
+   HYPRE_Real  *cpu_time;
+   HYPRE_Real  *flops;
    char   **name;
    HYPRE_Int     *state;     /* boolean flag to allow for recursive timing */
    HYPRE_Int     *num_regs;  /* count of how many times a name is registered */
@@ -1715,17 +1714,17 @@ typedef struct
    HYPRE_Int      num_names;
    HYPRE_Int      size;
 
-   hypre_double   wall_count;
-   hypre_double   CPU_count;
-   hypre_double   FLOP_count;
+   HYPRE_Real   wall_count;
+   HYPRE_Real   CPU_count;
+   HYPRE_Real   FLOP_count;
 
 } hypre_TimingType;
 
-//#ifdef HYPRE_TIMING_GLOBALS
-//hypre_TimingType *hypre_global_timing = NULL;
-//#else
+#ifdef HYPRE_TIMING_GLOBALS
+hypre_TimingType *hypre_global_timing = NULL;
+#else
 extern hypre_TimingType *hypre_global_timing;
-//#endif
+#endif
 
 /*-------------------------------------------------------
  * Accessor functions
@@ -1754,7 +1753,7 @@ HYPRE_Int hypre_BeginTiming( HYPRE_Int time_index );
 HYPRE_Int hypre_EndTiming( HYPRE_Int time_index );
 HYPRE_Int hypre_ClearTiming( void );
 HYPRE_Int hypre_PrintTiming( const char *heading, MPI_Comm comm );
-HYPRE_Int hypre_GetTiming( const char *heading, hypre_double *wall_time_ptr, MPI_Comm comm );
+HYPRE_Int hypre_GetTiming( const char *heading, HYPRE_Real *wall_time_ptr, MPI_Comm comm );
 
 #endif
 
