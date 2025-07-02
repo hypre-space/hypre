@@ -39,11 +39,11 @@ hypre_SStructPAxpy( HYPRE_Complex         alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructPVectorElmdivpy( HYPRE_Complex         alpha,
-                              hypre_SStructPVector *px,
-                              hypre_SStructPVector *pz,
-                              HYPRE_Complex         beta,
-                              hypre_SStructPVector *py )
+hypre_SStructPVectorPointwiseDivpy( HYPRE_Complex         alpha,
+                                    hypre_SStructPVector *px,
+                                    hypre_SStructPVector *pz,
+                                    HYPRE_Complex         beta,
+                                    hypre_SStructPVector *py )
 {
    HYPRE_Int   nvars = hypre_SStructPVectorNVars(px);
    HYPRE_Int   var, active;
@@ -64,7 +64,7 @@ hypre_SStructPVectorElmdivpy( HYPRE_Complex         alpha,
          sy = hypre_SStructPVectorSVector(py, var);
          sz = hypre_SStructPVectorSVector(pz, var);
 
-         hypre_StructVectorElmdivpy(alpha, sx, sz, beta, sy);
+         hypre_StructVectorPointwiseDivpy(alpha, sx, sz, beta, sy);
       }
    }
 
@@ -121,11 +121,11 @@ hypre_SStructAxpy( HYPRE_Complex        alpha,
  *----------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructVectorElmdivpy( HYPRE_Complex       *alpha,
-                             hypre_SStructVector *x,
-                             hypre_SStructVector *z,
-                             HYPRE_Complex       *beta,
-                             hypre_SStructVector *y )
+hypre_SStructVectorPointwiseDivpy( HYPRE_Complex       *alpha,
+                                   hypre_SStructVector *x,
+                                   hypre_SStructVector *z,
+                                   HYPRE_Complex       *beta,
+                                   hypre_SStructVector *y )
 {
    HYPRE_Int  nparts = hypre_SStructVectorNParts(x);
    HYPRE_Int  part;
@@ -159,7 +159,7 @@ hypre_SStructVectorElmdivpy( HYPRE_Complex       *alpha,
          py = hypre_SStructVectorPVector(y, part);
          pz = hypre_SStructVectorPVector(z, part);
 
-         hypre_SStructPVectorElmdivpy(alpha[part], px, pz, beta[part], py);
+         hypre_SStructPVectorPointwiseDivpy(alpha[part], px, pz, beta[part], py);
       }
    }
    else if (x_object_type == HYPRE_PARCSR)
@@ -174,7 +174,7 @@ hypre_SStructVectorElmdivpy( HYPRE_Complex       *alpha,
          return hypre_error_flag;
       }
 
-      hypre_ParVectorElmdivpy(x_par, z_par, y_par);
+      hypre_ParVectorPointwiseDivpy(x_par, z_par, y_par);
    }
 
    return hypre_error_flag;

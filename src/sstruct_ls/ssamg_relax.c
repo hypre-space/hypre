@@ -1320,7 +1320,7 @@ hypre_SSAMGRelaxJacobi( void                *relax_vdata,
    if (zero_guess)
    {
       /* x = (w/z)*b */
-      hypre_SStructVectorElmdivpy(weights, b, z, zeros, x);
+      hypre_SStructVectorPointwiseDivpy(weights, b, z, zeros, x);
 
       /* Set x = 0 on inactive parts */
       for (part = 0; part < nparts; part++)
@@ -1346,7 +1346,7 @@ hypre_SSAMGRelaxJacobi( void                *relax_vdata,
       hypre_SStructMatvecCompute(matvec_vdata, mone, A, x, one, b, t);
 
       /* x = x + (w/z)*t */
-      hypre_SStructVectorElmdivpy(weights, t, z, ones, x);
+      hypre_SStructVectorPointwiseDivpy(weights, t, z, ones, x);
    }
 
    (relax_data -> num_iterations) = iter;
