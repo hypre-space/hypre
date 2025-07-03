@@ -1,5 +1,9 @@
 *.o
 *.obj
+*.o_flt
+*.o_dbl
+*.o_ldbl
+*.o_def
 *.a
 *.so
 *.out.*
