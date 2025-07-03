@@ -272,7 +272,7 @@ HYPRE_Int
 hypre_StructMatmultSetKernelType( hypre_StructMatmultData  *mmdata,
                                   HYPRE_Int                 kernel_type )
 {
-   if (kernel_type != -1)
+   if (kernel_type == -1)
    {
 #if defined (HYPRE_USING_GPU)
       (mmdata -> kernel_type) = 1;
