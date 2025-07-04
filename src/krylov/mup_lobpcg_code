@@ -4,9 +4,9 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-EXTH="HYPRE_krylov.h"
-INTH="_hypre_krylov.h"
-OUTP="mup"
+EXTH="HYPRE_lobpcg.h"
+INTH="lobpcg.h"
+OUTP="mup_lobpcg"
 
 #### NOTE: Add mup.methods to this later.
 ####
