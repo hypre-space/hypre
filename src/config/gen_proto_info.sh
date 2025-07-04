@@ -37,18 +37,20 @@ sed 's/\;/\;\n/g' $HFILE | awk '{if ($0 ~ /[;]/) {print} else {printf "%s ", $0}
 cat $FFILE | while read -r FNAME
 do
    awk -v fname=$FNAME '
-   BEGIN { pattern = ("[a-zA-Z0-9_]+[[:blank:]*]+" fname "[[:blank:]]*[(][^)]*[)]") }
+   BEGIN { pattern = ("[a-zA-Z0-9_]+[[:blank:]*]+" fname "[[:blank:]]*[(][^)]*[)][[:blank:]]*[;]$") }
    {
+      # The first call to match speeds things up a bit
+      if ( match($0, fname) ){
       if ( match($0, pattern) )
       {
          proto = substr($0, RSTART, RLENGTH)
          match(proto, /[a-zA-Z0-9_]+[[:blank:]\*]+/)
          print substr(proto, RSTART, RLENGTH) , "," , substr(proto, RSTART+RLENGTH)
-      }
+      }}
 
    }' $HFILE.tmp |
-   sed -e 's/(/,/g' -e 's/)/ /g' -e 's/,/ , /g' -e 's/[[:blank:]][[:blank:]]*/ /g'
+   sed -e 's/;//g' -e 's/(/,/g' -e 's/)/ /g' -e 's/,/ , /g' -e 's/[[:blank:]][[:blank:]]*/ /g'
 done
 
 # Clean up temporary files
-#rm -f $HFILE.tmp
+rm -f $HFILE.tmp

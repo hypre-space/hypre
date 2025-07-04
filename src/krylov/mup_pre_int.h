@@ -604,10 +604,10 @@ HYPRE_Int
 hypre_PCGSetPrecond_pre( HYPRE_Precision precision, void * pcg_vdata, hypre_KrylovPtrToPrecond precond, hypre_KrylovPtrToPrecondSetup precond_setup, void * precond_data );
 
 HYPRE_Int
-hypre_PCGSetPreconditioner_pre( HYPRE_Precision precision, void * pcg_vdata, void * precond_data );
+hypre_PCGSetPrecondMatrix_pre( HYPRE_Precision precision, void * pcg_vdata, void * precond_matrix );
 
 HYPRE_Int
-hypre_PCGSetPrecondMatrix_pre( HYPRE_Precision precision, void * pcg_vdata, void * precond_matrix );
+hypre_PCGSetPreconditioner_pre( HYPRE_Precision precision, void * pcg_vdata, void * precond_data );
 
 HYPRE_Int
 hypre_PCGSetPrintLevel_pre( HYPRE_Precision precision, void * pcg_vdata, HYPRE_Int level );

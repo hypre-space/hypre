@@ -1792,15 +1792,6 @@ HYPRE_Int
 hypre_PCGSetPrecond( void * pcg_vdata, hypre_KrylovPtrToPrecond precond, hypre_KrylovPtrToPrecondSetup precond_setup, void * precond_data );
 
 HYPRE_Int
-hypre_PCGSetPreconditioner_flt( void * pcg_vdata, void * precond_data );
-HYPRE_Int
-hypre_PCGSetPreconditioner_dbl( void * pcg_vdata, void * precond_data );
-HYPRE_Int
-hypre_PCGSetPreconditioner_long_dbl( void * pcg_vdata, void * precond_data );
-HYPRE_Int
-hypre_PCGSetPreconditioner( void * pcg_vdata, void * precond_data );
-
-HYPRE_Int
 hypre_PCGSetPrecondMatrix_flt( void * pcg_vdata, void * precond_matrix );
 HYPRE_Int
 hypre_PCGSetPrecondMatrix_dbl( void * pcg_vdata, void * precond_matrix );
@@ -1808,6 +1799,15 @@ HYPRE_Int
 hypre_PCGSetPrecondMatrix_long_dbl( void * pcg_vdata, void * precond_matrix );
 HYPRE_Int
 hypre_PCGSetPrecondMatrix( void * pcg_vdata, void * precond_matrix );
+
+HYPRE_Int
+hypre_PCGSetPreconditioner_flt( void * pcg_vdata, void * precond_data );
+HYPRE_Int
+hypre_PCGSetPreconditioner_dbl( void * pcg_vdata, void * precond_data );
+HYPRE_Int
+hypre_PCGSetPreconditioner_long_dbl( void * pcg_vdata, void * precond_data );
+HYPRE_Int
+hypre_PCGSetPreconditioner( void * pcg_vdata, void * precond_data );
 
 HYPRE_Int
 hypre_PCGSetPrintLevel_flt( void * pcg_vdata, HYPRE_Int level );

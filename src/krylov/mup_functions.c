@@ -1510,19 +1510,19 @@ HYPRE_PCGSetPrecond( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HYPRE_Pt
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGSetPreconditioner( HYPRE_Solver solver, HYPRE_Solver precond )
+HYPRE_PCGSetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix precond_matrix )
 {
    HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
-   return HYPRE_PCGSetPreconditioner_pre( precision, solver, precond );
+   return HYPRE_PCGSetPrecondMatrix_pre( precision, solver, precond_matrix );
 }
 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGSetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix precond_matrix )
+HYPRE_PCGSetPreconditioner( HYPRE_Solver solver, HYPRE_Solver precond )
 {
    HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
-   return HYPRE_PCGSetPrecondMatrix_pre( precision, solver, precond_matrix );
+   return HYPRE_PCGSetPreconditioner_pre( precision, solver, precond );
 }
 
 /*--------------------------------------------------------------------------*/
@@ -3410,19 +3410,19 @@ hypre_PCGSetPrecond( void * pcg_vdata, hypre_KrylovPtrToPrecond precond, hypre_K
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PCGSetPreconditioner( void * pcg_vdata, void * precond_data )
+hypre_PCGSetPrecondMatrix( void * pcg_vdata, void * precond_matrix )
 {
    HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
-   return hypre_PCGSetPreconditioner_pre( precision, pcg_vdata, precond_data );
+   return hypre_PCGSetPrecondMatrix_pre( precision, pcg_vdata, precond_matrix );
 }
 
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PCGSetPrecondMatrix( void * pcg_vdata, void * precond_matrix )
+hypre_PCGSetPreconditioner( void * pcg_vdata, void * precond_data )
 {
    HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
-   return hypre_PCGSetPrecondMatrix_pre( precision, pcg_vdata, precond_matrix );
+   return hypre_PCGSetPreconditioner_pre( precision, pcg_vdata, precond_data );
 }
 
 /*--------------------------------------------------------------------------*/

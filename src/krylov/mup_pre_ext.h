@@ -508,10 +508,10 @@ HYPRE_Int
 HYPRE_PCGSetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver );
 
 HYPRE_Int
-HYPRE_PCGSetPreconditioner_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver precond );
+HYPRE_PCGSetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix precond_matrix );
 
 HYPRE_Int
-HYPRE_PCGSetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix precond_matrix );
+HYPRE_PCGSetPreconditioner_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver precond );
 
 HYPRE_Int
 HYPRE_PCGSetPrintLevel_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Int level );

@@ -1504,15 +1504,6 @@ HYPRE_Int
 HYPRE_PCGSetPrecond( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver );
 
 HYPRE_Int
-HYPRE_PCGSetPreconditioner_flt( HYPRE_Solver solver, HYPRE_Solver precond );
-HYPRE_Int
-HYPRE_PCGSetPreconditioner_dbl( HYPRE_Solver solver, HYPRE_Solver precond );
-HYPRE_Int
-HYPRE_PCGSetPreconditioner_long_dbl( HYPRE_Solver solver, HYPRE_Solver precond );
-HYPRE_Int
-HYPRE_PCGSetPreconditioner( HYPRE_Solver solver, HYPRE_Solver precond );
-
-HYPRE_Int
 HYPRE_PCGSetPrecondMatrix_flt( HYPRE_Solver solver, HYPRE_Matrix precond_matrix );
 HYPRE_Int
 HYPRE_PCGSetPrecondMatrix_dbl( HYPRE_Solver solver, HYPRE_Matrix precond_matrix );
@@ -1520,6 +1511,15 @@ HYPRE_Int
 HYPRE_PCGSetPrecondMatrix_long_dbl( HYPRE_Solver solver, HYPRE_Matrix precond_matrix );
 HYPRE_Int
 HYPRE_PCGSetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix precond_matrix );
+
+HYPRE_Int
+HYPRE_PCGSetPreconditioner_flt( HYPRE_Solver solver, HYPRE_Solver precond );
+HYPRE_Int
+HYPRE_PCGSetPreconditioner_dbl( HYPRE_Solver solver, HYPRE_Solver precond );
+HYPRE_Int
+HYPRE_PCGSetPreconditioner_long_dbl( HYPRE_Solver solver, HYPRE_Solver precond );
+HYPRE_Int
+HYPRE_PCGSetPreconditioner( HYPRE_Solver solver, HYPRE_Solver precond );
 
 HYPRE_Int
 HYPRE_PCGSetPrintLevel_flt( HYPRE_Solver solver, HYPRE_Int level );

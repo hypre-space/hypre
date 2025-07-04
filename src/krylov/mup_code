@@ -17,7 +17,17 @@ OUTP="mup"
 #### automatically as below.
 
 ############################################################################
-# Create temporary files
+# Make sure the function list files are sorted (list capital letters first)
+############################################################################
+
+for i in fixed functions methods
+do
+    (export LC_COLLATE=C; sort mup.${i}) > mup.${i}.tmp
+    mv mup.${i}.tmp mup.${i}
+done
+
+############################################################################
+# Create temporary files and initial code
 ############################################################################
 
 # Create file with list of MUP functions and methods
@@ -40,7 +50,7 @@ do
 done
 
 ############################################################################
-# Generate code
+# Finalize code
 ############################################################################
 
 for i in fixed functions pre

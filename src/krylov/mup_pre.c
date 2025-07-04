@@ -3004,24 +3004,6 @@ HYPRE_PCGSetPrecond_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_P
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_PCGSetPreconditioner_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver precond )
-{
-   switch (precision)
-   {
-      case HYPRE_REAL_SINGLE:
-         return HYPRE_PCGSetPreconditioner_flt( solver, precond );
-      case HYPRE_REAL_DOUBLE:
-         return HYPRE_PCGSetPreconditioner_dbl( solver, precond );
-      case HYPRE_REAL_LONGDOUBLE:
-         return HYPRE_PCGSetPreconditioner_long_dbl( solver, precond );
-      default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
-   }
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 HYPRE_PCGSetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Matrix precond_matrix )
 {
    switch (precision)
@@ -3032,6 +3014,24 @@ HYPRE_PCGSetPrecondMatrix_pre( HYPRE_Precision precision, HYPRE_Solver solver, H
          return HYPRE_PCGSetPrecondMatrix_dbl( solver, precond_matrix );
       case HYPRE_REAL_LONGDOUBLE:
          return HYPRE_PCGSetPrecondMatrix_long_dbl( solver, precond_matrix );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_PCGSetPreconditioner_pre( HYPRE_Precision precision, HYPRE_Solver solver, HYPRE_Solver precond )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return HYPRE_PCGSetPreconditioner_flt( solver, precond );
+      case HYPRE_REAL_DOUBLE:
+         return HYPRE_PCGSetPreconditioner_dbl( solver, precond );
+      case HYPRE_REAL_LONGDOUBLE:
+         return HYPRE_PCGSetPreconditioner_long_dbl( solver, precond );
       default:
          { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
    }
@@ -6803,24 +6803,6 @@ hypre_PCGSetPrecond_pre( HYPRE_Precision precision, void * pcg_vdata, hypre_Kryl
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PCGSetPreconditioner_pre( HYPRE_Precision precision, void * pcg_vdata, void * precond_data )
-{
-   switch (precision)
-   {
-      case HYPRE_REAL_SINGLE:
-         return hypre_PCGSetPreconditioner_flt( pcg_vdata, precond_data );
-      case HYPRE_REAL_DOUBLE:
-         return hypre_PCGSetPreconditioner_dbl( pcg_vdata, precond_data );
-      case HYPRE_REAL_LONGDOUBLE:
-         return hypre_PCGSetPreconditioner_long_dbl( pcg_vdata, precond_data );
-      default:
-         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
-   }
-}
-
-/*--------------------------------------------------------------------------*/
-
-HYPRE_Int
 hypre_PCGSetPrecondMatrix_pre( HYPRE_Precision precision, void * pcg_vdata, void * precond_matrix )
 {
    switch (precision)
@@ -6831,6 +6813,24 @@ hypre_PCGSetPrecondMatrix_pre( HYPRE_Precision precision, void * pcg_vdata, void
          return hypre_PCGSetPrecondMatrix_dbl( pcg_vdata, precond_matrix );
       case HYPRE_REAL_LONGDOUBLE:
          return hypre_PCGSetPrecondMatrix_long_dbl( pcg_vdata, precond_matrix );
+      default:
+         { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_PCGSetPreconditioner_pre( HYPRE_Precision precision, void * pcg_vdata, void * precond_data )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return hypre_PCGSetPreconditioner_flt( pcg_vdata, precond_data );
+      case HYPRE_REAL_DOUBLE:
+         return hypre_PCGSetPreconditioner_dbl( pcg_vdata, precond_data );
+      case HYPRE_REAL_LONGDOUBLE:
+         return hypre_PCGSetPreconditioner_long_dbl( pcg_vdata, precond_data );
       default:
          { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
    }
