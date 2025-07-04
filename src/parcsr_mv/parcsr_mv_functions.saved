@@ -49,7 +49,9 @@ hypre_ParCSRMatrixGenerateFFFCHost
 HYPRE_CSRMatrixToParCSRMatrix
 HYPRE_CSRMatrixToParCSRMatrix_WithNewPartitioning
 HYPRE_ParCSRMatrixCreate
+HYPRE_ParCSRMatrixComputeScalingTagged
 HYPRE_ParCSRMatrixDestroy
+HYPRE_ParCSRMatrixDiagScale
 HYPRE_ParCSRMatrixGetColPartitioning
 HYPRE_ParCSRMatrixGetComm
 HYPRE_ParCSRMatrixGetDims
@@ -72,6 +74,9 @@ HYPRE_ParVectorDestroy
 HYPRE_ParVectorGetValues
 HYPRE_ParVectorInitialize
 HYPRE_ParVectorInnerProd
+HYPRE_ParVectorPointwiseDivision
+HYPRE_ParVectorPointwiseInverse
+HYPRE_ParVectorPointwiseProduct
 HYPRE_ParVectorPrint
 HYPRE_ParVectorPrintBinaryIJ
 HYPRE_ParVectorRead
@@ -167,6 +172,7 @@ hypre_ParCSRMatrixBlockColSumHost
 hypre_ParCSRMatrixColSum
 hypre_ParCSRMatrixColSumHost
 hypre_ParCSRMatrixCompressOffdMap
+hypre_ParCSRMatrixComputeScalingTagged
 hypre_ParCSRMatrixDiagScale
 hypre_ParCSRMatrixDiagScaleHost
 hypre_ParCSRMatrixDropSmallEntries
@@ -191,7 +197,6 @@ hypre_ParMatmul
 hypre_ParMatmul_RowSizes
 hypre_ParTMatmul
 hypre_ParvecBdiagInvScal
-hypre_CSRMatrixToParCSRMatrix
 hypre_FillResponseParToCSRMatrix
 hypre_GenerateDiagAndOffd
 hypre_MergeDiagAndOffd
@@ -273,6 +278,11 @@ hypre_ParVectorInnerProd
 hypre_ParVectorInnerProdTagged
 hypre_ParVectorLocalSumElts
 hypre_ParVectorMigrate
+hypre_ParVectorPointwiseDivision
+hypre_ParVectorPointwiseDivpy
+hypre_ParVectorPointwiseDivpyMarked
+hypre_ParVectorPointwiseInverse
+hypre_ParVectorPointwiseProduct
 hypre_ParVectorPrint
 hypre_ParVectorPrintBinaryIJ
 hypre_ParVectorPrintIJ
@@ -288,6 +298,7 @@ hypre_ParVectorSetLocalSize
 hypre_ParVectorSetNumTags
 hypre_ParVectorSetOwnsTags
 hypre_ParVectorSetRandomValues
+hypre_ParVectorSetValuesTagged
 hypre_ParVectorSetTags
 hypre_ParVectorSetZeros
 hypre_ParVectorStridedCopy

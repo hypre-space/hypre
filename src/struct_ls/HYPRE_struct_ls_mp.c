@@ -43,14 +43,14 @@ HYPRE_StructSMGSetup_mp( HYPRE_StructSolver solver,
                                 &xtemp);
    HYPRE_StructVectorInitialize_flt( xtemp );   
 
-/* copy from double precision {b,x} to single precision {btemp,xtemp} */
+/* copy from double-precision {b,x} to single precision {btemp,xtemp} */
    HYPRE_StructVectorCopy_mp(b, btemp);
    HYPRE_StructVectorCopy_mp(x, xtemp);
 
 /* call setup */        
    HYPRE_StructSMGSetup_flt( solver, A, btemp, xtemp );
 
-/* copy from single precision {btemp,xtemp} to double precision {b,x} */
+/* copy from single precision {btemp,xtemp} to double-precision {b,x} */
    HYPRE_StructVectorCopy_mp(btemp, b);
    HYPRE_StructVectorCopy_mp(xtemp, x);
 
@@ -83,14 +83,14 @@ HYPRE_StructSMGSolve_mp( HYPRE_StructSolver solver,
                                 &xtemp);
    HYPRE_StructVectorInitialize_flt( xtemp );   
 
-/* copy from double precision {b,x} to single precision {btemp,xtemp} */
+/* copy from double-precision {b,x} to single precision {btemp,xtemp} */
    HYPRE_StructVectorCopy_mp(b, btemp);
    HYPRE_StructVectorCopy_mp(x, xtemp);
 
 /* call solve */        
    HYPRE_StructSMGSolve_flt( solver, A, btemp, xtemp );
 
-/* copy from single precision {btemp,xtemp} to double precision {b,x} */
+/* copy from single precision {btemp,xtemp} to double-precision {b,x} */
    HYPRE_StructVectorCopy_mp(btemp, b);
    HYPRE_StructVectorCopy_mp(xtemp, x);
 
@@ -123,14 +123,14 @@ HYPRE_StructPFMGSetup_mp( HYPRE_StructSolver solver,
                                 &xtemp);
    HYPRE_StructVectorInitialize_flt( xtemp );   
 
-/* copy from double precision {b,x} to single precision {btemp,xtemp} */
+/* copy from double-precision {b,x} to single precision {btemp,xtemp} */
    HYPRE_StructVectorCopy_mp(b, btemp);
    HYPRE_StructVectorCopy_mp(x, xtemp);
 
 /* call setup */        
    HYPRE_StructPFMGSetup_flt( solver, A, btemp, xtemp );
 
-/* copy from single precision {btemp,xtemp} to double precision {b,x} */
+/* copy from single precision {btemp,xtemp} to double-precision {b,x} */
    HYPRE_StructVectorCopy_mp(btemp, b);
    HYPRE_StructVectorCopy_mp(xtemp, x);
 
@@ -163,14 +163,14 @@ HYPRE_StructPFMGSolve_mp( HYPRE_StructSolver solver,
                                 &xtemp);
    HYPRE_StructVectorInitialize_flt( xtemp );   
 
-/* copy from double precision {b,x} to single precision {btemp,xtemp} */
+/* copy from double-precision {b,x} to single precision {btemp,xtemp} */
    HYPRE_StructVectorCopy_mp(b, btemp);
    HYPRE_StructVectorCopy_mp(x, xtemp);
 
 /* call setup */        
    HYPRE_StructPFMGSolve_flt( solver, A, btemp, xtemp );
 
-/* copy from single precision {btemp,xtemp} to double precision {b,x} */
+/* copy from single precision {btemp,xtemp} to double-precision {b,x} */
    HYPRE_StructVectorCopy_mp(btemp, b);
    HYPRE_StructVectorCopy_mp(xtemp, x);
 

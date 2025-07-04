@@ -654,7 +654,6 @@ ac_header_c_list=
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
 AR
-MP_BUILD
 DSUPERLU_LIBS
 DSUPERLU_INCLUDE
 SUPERLU_LIBS
@@ -745,6 +744,7 @@ CUFLAGS
 CUCC
 HYPRE_CUDA_SM
 CUDA_HOME
+MP_BUILD
 host_os
 host_vendor
 host_cpu
@@ -3645,13 +3645,13 @@ else $as_nop
 
 fi
 
-MP_BUILD=0
 if test "$hypre_using_mixed_precision" = "yes"
 then
 
 printf "%s\n" "#define HYPRE_MIXED_PRECISION 1" >>confdefs.h
 
    MP_BUILD=1
+
 fi
 
 # Check whether --enable-maxdim was given.
@@ -11334,6 +11334,9 @@ printf "%s\n" "#define HYPRE_LINUX 1" >>confdefs.h
          fi
          ;;
    esac
+
+
+
 
 
 

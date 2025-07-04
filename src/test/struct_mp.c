@@ -20,7 +20,7 @@
 #include "_hypre_struct_ls.h"
 #include "hypre_struct_ls_mup.h"
 #include "HYPRE_krylov.h"
-#include "hypre_krylov_mup.h"
+//#include "hypre_krylov_mup.h"
 
 #define HYPRE_MFLOPS 0
 #if HYPRE_MFLOPS

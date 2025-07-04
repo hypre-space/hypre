@@ -1,0 +1,7 @@
+hypre_BiCGSTABFunctionsCreate
+hypre_CGNRFunctionsCreate
+hypre_COGMRESFunctionsCreate
+hypre_FlexGMRESFunctionsCreate
+hypre_GMRESFunctionsCreate
+hypre_LGMRESFunctionsCreate
+hypre_PCGFunctionsCreate

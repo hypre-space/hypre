@@ -33,10 +33,6 @@ typedef unsigned long long int hypre_ulonglongint;
 typedef uint32_t               hypre_uint32;
 typedef uint64_t               hypre_uint64;
 
-/* This allows us to consistently avoid 'float' and 'double' throughout hypre */
-typedef float                  hypre_float;
-typedef double                 hypre_double;
-
 /*--------------------------------------------------------------------------
  * Define macros
  *--------------------------------------------------------------------------*/

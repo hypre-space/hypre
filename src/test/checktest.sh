@@ -4,6 +4,8 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+summary=0
+
 # Echo usage information
 case $1 in
    -h|-help)
@@ -25,6 +27,10 @@ cat <<EOF
 
 EOF
    exit
+   ;;
+   -summary)
+      summary=1
+      shift
    ;;
 esac
 
@@ -52,9 +58,13 @@ do
          relative_path=$(echo "$file" | sed 's|.*test/||')
          if [ $SZ != 0 ]
          then
-            echo -e "FAILED : $relative_path  ($SZ)\n"
-            cat $file
-            error_code=1
+            echo "FAILED : $relative_path  ($SZ)"
+            if [ $summary != 1 ]
+            then
+               echo ""
+               cat $file
+               error_code=1
+            fi
          else
             echo "    OK : $relative_path"
          fi

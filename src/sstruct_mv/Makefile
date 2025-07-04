@@ -58,7 +58,7 @@ MuP_FILES = \
  HYPRE_sstruct_vector.c
 
 ifeq (${MP_BUILD}, 1) 
-   COBJS = ${FILES:.c=.o}
+   COBJS = ${FILES:.c=.o} ${MuP_FILES:.c=.o}
    CUOBJS = ${CUFILES:.c=.obj}
    MuP_COBJS = ${MuP_FILES:.c=.o}
 else
@@ -128,8 +128,11 @@ ${MuP_OBJDIR_longdouble}/%.o ${MuP_OBJDIR_longdouble}/%.obj: %.c
 	@echo  "processing C object $@ ..."
 	@mkdir -p ${@D}
 	${CC} ${CFLAGS} -c -o $@ $<
+#
+${COBJS}: CFLAGS += -DMP_BUILD_DEFAULT=1
+${CUOBJS}: CFLAGS += -DMP_BUILD_DEFAULT=1
 
-OBJS = ${COBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
+OBJS = ${COBJS} ${CUOBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
 
 else
 OBJS = ${COBJS} ${CUOBJS}
