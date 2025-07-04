@@ -75,14 +75,14 @@ hypre_LOBPCGSetupT_pre( HYPRE_Precision precision, void * pcg_vdata, void * T, v
 HYPRE_Int
 hypre_LOBPCGSolve_pre( HYPRE_Precision precision, void * vdata, mv_MultiVectorPtr con, mv_MultiVectorPtr vec, void * val );
 
+void
+lobpcg_MultiVectorByMultiVector_pre( HYPRE_Precision precision, mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix * xy );
+
 HYPRE_Int
 lobpcg_clean_pre( HYPRE_Precision precision, lobpcg_Data* data );
 
 HYPRE_Int
 lobpcg_initialize_pre( HYPRE_Precision precision, lobpcg_Data* data );
-
-void
-lobpcg_MultiVectorByMultiVector_pre( HYPRE_Precision precision, mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix * xy );
 
 HYPRE_Int
 lobpcg_solve_pre( HYPRE_Precision precision, mv_MultiVectorPtr blockVectorX, void* operatorAData, lobpcg_operator operatorA, void* operatorBData, lobpcg_operator operatorB, void* operatorTData, lobpcg_operator operatorT, mv_MultiVectorPtr blockVectorY, lobpcg_BLASLAPACKFunctions blap_fn, lobpcg_Tolerance tolerance, HYPRE_Int maxIterations, HYPRE_Int verbosityLevel, HYPRE_Int* iterationNumber, void * lambda_values, void * lambdaHistory_values, HYPRE_BigInt lambdaHistory_gh, void * residualNorms_values, void * residualNormsHistory_values, HYPRE_BigInt residualNormsHistory_gh );

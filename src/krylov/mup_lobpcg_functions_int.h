@@ -207,6 +207,15 @@ hypre_LOBPCGSolve_long_dbl( void * vdata, mv_MultiVectorPtr con, mv_MultiVectorP
 HYPRE_Int
 hypre_LOBPCGSolve( void * vdata, mv_MultiVectorPtr con, mv_MultiVectorPtr vec, void * val );
 
+void
+lobpcg_MultiVectorByMultiVector_flt( mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix * xy );
+void
+lobpcg_MultiVectorByMultiVector_dbl( mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix * xy );
+void
+lobpcg_MultiVectorByMultiVector_long_dbl( mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix * xy );
+void
+lobpcg_MultiVectorByMultiVector( mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix * xy );
+
 HYPRE_Int
 lobpcg_clean_flt( lobpcg_Data* data );
 HYPRE_Int
@@ -224,15 +233,6 @@ HYPRE_Int
 lobpcg_initialize_long_dbl( lobpcg_Data* data );
 HYPRE_Int
 lobpcg_initialize( lobpcg_Data* data );
-
-void
-lobpcg_MultiVectorByMultiVector_flt( mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix * xy );
-void
-lobpcg_MultiVectorByMultiVector_dbl( mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix * xy );
-void
-lobpcg_MultiVectorByMultiVector_long_dbl( mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix * xy );
-void
-lobpcg_MultiVectorByMultiVector( mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix * xy );
 
 HYPRE_Int
 lobpcg_solve_flt( mv_MultiVectorPtr blockVectorX, void* operatorAData, lobpcg_operator operatorA, void* operatorBData, lobpcg_operator operatorB, void* operatorTData, lobpcg_operator operatorT, mv_MultiVectorPtr blockVectorY, lobpcg_BLASLAPACKFunctions blap_fn, lobpcg_Tolerance tolerance, HYPRE_Int maxIterations, HYPRE_Int verbosityLevel, HYPRE_Int* iterationNumber, hypre_float * lambda_values, hypre_float * lambdaHistory_values, HYPRE_BigInt lambdaHistory_gh, hypre_float * residualNorms_values, hypre_float * residualNormsHistory_values, HYPRE_BigInt residualNormsHistory_gh );

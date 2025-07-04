@@ -718,6 +718,24 @@ hypre_LOBPCGSolve_pre( HYPRE_Precision precision, void * vdata, mv_MultiVectorPt
 
 /*--------------------------------------------------------------------------*/
 
+void
+lobpcg_MultiVectorByMultiVector_pre( HYPRE_Precision precision, mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix * xy )
+{
+   switch (precision)
+   {
+      case HYPRE_REAL_SINGLE:
+         return lobpcg_MultiVectorByMultiVector_flt( x, y, xy );
+      case HYPRE_REAL_DOUBLE:
+         return lobpcg_MultiVectorByMultiVector_dbl( x, y, xy );
+      case HYPRE_REAL_LONGDOUBLE:
+         return lobpcg_MultiVectorByMultiVector_long_dbl( x, y, xy );
+      default:
+         hypre_printf("Unknown solver precision");
+   }
+}
+
+/*--------------------------------------------------------------------------*/
+
 HYPRE_Int
 lobpcg_clean_pre( HYPRE_Precision precision, lobpcg_Data* data )
 {
@@ -749,24 +767,6 @@ lobpcg_initialize_pre( HYPRE_Precision precision, lobpcg_Data* data )
          return lobpcg_initialize_long_dbl( data );
       default:
          { HYPRE_Int value = 0; hypre_printf("Unknown solver precision"); return value; }
-   }
-}
-
-/*--------------------------------------------------------------------------*/
-
-void
-lobpcg_MultiVectorByMultiVector_pre( HYPRE_Precision precision, mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix * xy )
-{
-   switch (precision)
-   {
-      case HYPRE_REAL_SINGLE:
-         return lobpcg_MultiVectorByMultiVector_flt( x, y, xy );
-      case HYPRE_REAL_DOUBLE:
-         return lobpcg_MultiVectorByMultiVector_dbl( x, y, xy );
-      case HYPRE_REAL_LONGDOUBLE:
-         return lobpcg_MultiVectorByMultiVector_long_dbl( x, y, xy );
-      default:
-         hypre_printf("Unknown solver precision");
    }
 }
 

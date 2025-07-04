@@ -367,6 +367,15 @@ hypre_LOBPCGSolve( void * vdata, mv_MultiVectorPtr con, mv_MultiVectorPtr vec, v
 
 /*--------------------------------------------------------------------------*/
 
+void
+lobpcg_MultiVectorByMultiVector( mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix * xy )
+{
+   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   return lobpcg_MultiVectorByMultiVector_pre( precision, x, y, xy );
+}
+
+/*--------------------------------------------------------------------------*/
+
 HYPRE_Int
 lobpcg_clean( lobpcg_Data* data )
 {
@@ -381,15 +390,6 @@ lobpcg_initialize( lobpcg_Data* data )
 {
    HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
    return lobpcg_initialize_pre( precision, data );
-}
-
-/*--------------------------------------------------------------------------*/
-
-void
-lobpcg_MultiVectorByMultiVector( mv_MultiVectorPtr x, mv_MultiVectorPtr y, utilities_FortranMatrix * xy )
-{
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
-   return lobpcg_MultiVectorByMultiVector_pre( precision, x, y, xy );
 }
 
 /*--------------------------------------------------------------------------*/
