@@ -101,8 +101,8 @@ done
 # Remove temporary files
 ############################################################################
 
-# rm -f mup.pre
-# rm -f ${OUTP}.*.proto
-# rm -f ${OUTP}_*_ext.c
-# rm -f ${OUTP}_*_int.c
+rm -f mup.pre
+rm -f ${OUTP}.*.proto
+rm -f ${OUTP}_*_ext.c
+rm -f ${OUTP}_*_int.c
 
