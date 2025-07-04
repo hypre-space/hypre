@@ -4,6 +4,18 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+# Generate multiprecision code
+#
+# The script takes an external header file, an internal header file, and an
+# output file prefix, then generates various C files and header files.
+#
+# The generated files begin with the prefix name and contain code corresponding
+# to the functions listed in mup.fixed, mup.functions, and mup.methods (methods
+# are not fully implemented yet - see NOTE below).
+#
+# Usage:   <this-script> <external-header> <internal-header> <prefix>
+# Example: <this-script> HYPRE_krylov.h _hypre_krylov.h mup
+
 scriptdir=`dirname $0`
 
 EXTH=$1
