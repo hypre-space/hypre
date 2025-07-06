@@ -1213,7 +1213,7 @@ hypre_ADSSetup(void *solver,
          {
             ads_data -> A_C = hypre_ParCSRMatrixRAPKT(ads_data -> C,
                                                       ads_data -> A,
-                                                      ads_data -> C, 1);
+                                                      ads_data -> C, 1, 1);
          }
          else
 #endif
@@ -1326,7 +1326,7 @@ hypre_ADSSetup(void *solver,
       {
          ads_data -> A_Pix = hypre_ParCSRMatrixRAPKT(ads_data -> Pix,
                                                      ads_data -> A,
-                                                     ads_data -> Pix, 1);
+                                                     ads_data -> Pix, 1, 1);
       }
       else
 #endif
@@ -1351,7 +1351,7 @@ hypre_ADSSetup(void *solver,
       {
          ads_data -> A_Piy = hypre_ParCSRMatrixRAPKT(ads_data -> Piy,
                                                      ads_data -> A,
-                                                     ads_data -> Piy, 1);
+                                                     ads_data -> Piy, 1, 1);
       }
       else
 #endif
@@ -1376,7 +1376,7 @@ hypre_ADSSetup(void *solver,
       {
          ads_data -> A_Piz = hypre_ParCSRMatrixRAPKT(ads_data -> Piz,
                                                      ads_data -> A,
-                                                     ads_data -> Piz, 1);
+                                                     ads_data -> Piz, 1, 1);
       }
       else
 #endif
@@ -1430,7 +1430,7 @@ hypre_ADSSetup(void *solver,
          {
             ads_data -> A_Pi = hypre_ParCSRMatrixRAPKT(ads_data -> Pi,
                                                        ads_data -> A,
-                                                       ads_data -> Pi, 1);
+                                                       ads_data -> Pi, 1, 1);
          }
          else
 #endif

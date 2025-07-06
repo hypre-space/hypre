@@ -43,9 +43,13 @@ hypre_SSAMGCoarseSolverSetup( void *ssamg_vdata )
    hypre_ParVector       *par_x;
 
    HYPRE_Int              l, part, cmax_size, max_work;
+   char                   marker_name[32];
 
    l = (num_levels - 1);
+   hypre_sprintf(marker_name, "%s-%d", "MG Level", l);
+   hypre_GpuProfilingPushRange(marker_name);
    HYPRE_ANNOTATE_MGLEVEL_BEGIN(l);
+
    if (csolver_type == 0)
    {
       /* Compute maximum number of relaxation sweeps in the coarse grid if requested */
@@ -90,6 +94,7 @@ hypre_SSAMGCoarseSolverSetup( void *ssamg_vdata )
       par_b = hypre_SStructVectorParVector(b_l[l]);
 
       /* Use BoomerAMG */
+      hypre_RestoreLogLevel();
       HYPRE_BoomerAMGCreate(&csolver);
       HYPRE_BoomerAMGSetStrongThreshold(csolver, 0.5);
       HYPRE_BoomerAMGSetPMaxElmts(csolver, 4);
@@ -104,6 +109,7 @@ hypre_SSAMGCoarseSolverSetup( void *ssamg_vdata )
       HYPRE_BoomerAMGSetLogging(csolver, 1);
       //HYPRE_BoomerAMGSetAggNumLevels(csolver, 1);
       HYPRE_BoomerAMGSetup(csolver, par_Ac, par_b, par_x);
+      hypre_SetLogLevel(0);
 
       (ssamg_data -> csolver) = csolver;
       (ssamg_data -> ij_Ac)   = ij_Ac;
@@ -114,6 +120,8 @@ hypre_SSAMGCoarseSolverSetup( void *ssamg_vdata )
    {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Unknown coarse solve!\n");
    }
+
+   hypre_GpuProfilingPopRange();
    HYPRE_ANNOTATE_MGLEVEL_END(l);
 
    return hypre_error_flag;

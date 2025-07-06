@@ -112,6 +112,7 @@ HYPRE_Int hypre_BoxGrowByValue ( hypre_Box *box, HYPRE_Int val );
 HYPRE_Int hypre_BoxGrowByBox ( hypre_Box *box, hypre_Box *gbox );
 HYPRE_Int hypre_BoxGrowByArray ( hypre_Box *box, HYPRE_Int *array );
 HYPRE_Int hypre_BoxPrint ( FILE *file, hypre_Box *box );
+HYPRE_Int hypre_BoxPrintDebug( const char *prefix, hypre_Box *box );
 HYPRE_Int hypre_BoxRead ( FILE *file, HYPRE_Int ndim, hypre_Box **box_ptr );
 hypre_BoxArray *hypre_BoxArrayCreate ( HYPRE_Int size, HYPRE_Int ndim );
 HYPRE_Int hypre_BoxArrayCreateFromIndices ( HYPRE_Int ndim, HYPRE_Int num_indices_in,

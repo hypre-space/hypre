@@ -883,6 +883,32 @@ hypre_BoxPrint( FILE      *file,
 }
 
 /*--------------------------------------------------------------------------
+ * Print box info to stdout for debugging purposes
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoxPrintDebug( const char *prefix,
+                     hypre_Box  *box )
+{
+   HYPRE_Int   d, ndim = hypre_BoxNDim(box);
+
+   hypre_ParPrintf(hypre_MPI_COMM_WORLD, "%s", prefix);
+   hypre_ParPrintf(hypre_MPI_COMM_WORLD, "(%d", hypre_BoxIMinD(box, 0));
+   for (d = 1; d < ndim; d++)
+   {
+      hypre_ParPrintf(hypre_MPI_COMM_WORLD, ", %d", hypre_BoxIMinD(box, d));
+   }
+   hypre_ParPrintf(hypre_MPI_COMM_WORLD, ") x (%d", hypre_BoxIMaxD(box, 0));
+   for (d = 1; d < ndim; d++)
+   {
+      hypre_ParPrintf(hypre_MPI_COMM_WORLD, ", %d", hypre_BoxIMaxD(box, d));
+   }
+   hypre_ParPrintf(hypre_MPI_COMM_WORLD, ") - volume: %d\n", hypre_BoxVolume(box));
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * Read a box from file
  *--------------------------------------------------------------------------*/
 

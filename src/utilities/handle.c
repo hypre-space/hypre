@@ -15,13 +15,38 @@
 #include "_hypre_utilities.hpp"
 
 /*--------------------------------------------------------------------------
- * hypre_SetLogLevel
+ * Set log level and update temporary log level with previous state
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SetLogLevel(HYPRE_Int log_level)
 {
+   hypre_HandleLogLevelSaved(hypre_handle()) = hypre_HandleLogLevel(hypre_handle());
    hypre_HandleLogLevel(hypre_handle()) = log_level;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Set temporary variable for the log level
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SetLogLevelSaved(HYPRE_Int log_level_saved)
+{
+   hypre_HandleLogLevelSaved(hypre_handle()) = log_level_saved;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Restore log level value from the saved variable
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_RestoreLogLevel(void)
+{
+   hypre_HandleLogLevel(hypre_handle()) = hypre_HandleLogLevelSaved(hypre_handle());
 
    return hypre_error_flag;
 }

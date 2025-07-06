@@ -406,13 +406,12 @@ hypre_CSRMatrixSetRownnzHost( hypre_CSRMatrix *matrix )
 HYPRE_Int
 hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
 {
-#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+#if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(matrix) );
 
    if (exec == HYPRE_EXEC_DEVICE)
    {
-      // TODO (VPM): Implement hypre_CSRMatrixSetRownnzDevice
-      hypre_CSRMatrixSetRownnzHost(matrix);
+      hypre_CSRMatrixSetRownnzDevice(matrix);
    }
    else
 #endif
@@ -926,8 +925,6 @@ hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data
  *
  * Migrates matrix row pointer, column indices and data to memory_location
  * if it is different to the current one.
- *
- * Note: Does not move rownnz array.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

@@ -2176,6 +2176,9 @@ hypre_CSRMatrixScale( hypre_CSRMatrix *A,
    else
 #endif
    {
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel
+#endif
       for (i = 0; i < k; i++)
       {
          data[i] *= scalar;
@@ -2353,6 +2356,9 @@ hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A,
    else
 #endif
    {
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel
+#endif
       for (i = 0; i < nnz; i++)
       {
          hypre_CSRMatrixData(A)[i] = value;
