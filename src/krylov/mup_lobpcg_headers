@@ -42,6 +42,8 @@ cat >> $MUP_HEADER <<@
 
 @
 
+rm -f mup_lobpcg_fixed_ext.h mup_lobpcg_functions_ext.h mup_lobpcg_pre_ext.h
+
 #===========================================================================
 # Create internal header file
 #===========================================================================
@@ -77,4 +79,6 @@ cat >> $MUP_HEADER <<@
 #endif
 
 @
+
+rm -f mup_lobpcg_fixed_int.h mup_lobpcg_functions_int.h mup_lobpcg_pre_int.h
 
