@@ -144,16 +144,27 @@ find_and_add_rocm_library(rocrand)
 find_and_add_rocm_library(rocsolver)
 
 if(HYPRE_ENABLE_GPU_PROFILING)
-  set(HYPRE_USING_ROCTRACER ON CACHE BOOL "" FORCE)
+  set(HYPRE_USING_ROCTX ON CACHE BOOL "" FORCE)
   find_library(ROCTRACER_LIBRARY
      NAMES libroctracer64.so
      PATHS ${HIP_PATH}/lib ${HIP_PATH}/lib64
      NO_DEFAULT_PATH)
   if(ROCTRACER_LIBRARY)
-    message(STATUS "ROCm tracer library found in ${ROCTRACER_LIBRARY}")
+    message(STATUS "ROCTracer library found in ${ROCTRACER_LIBRARY}")
     list(APPEND ROCM_LIBS ${ROCTRACER_LIBRARY})
   else()
-    message(WARNING "ROCm tracer library not found. GPU profiling may not work correctly.")
+    message(WARNING "ROCTracer library not found. GPU profiling may not work correctly.")
+  endif()
+
+  find_library(ROCTX_LIBRARY
+     NAMES libroctx64.so
+     PATHS ${HIP_PATH}/lib ${HIP_PATH}/lib64
+     NO_DEFAULT_PATH)
+  if(ROCTX_LIBRARY)
+    message(STATUS "ROC-TX library found in ${ROCTX_LIBRARY}")
+    list(APPEND ROCM_LIBS ${ROCTX_LIBRARY})
+  else()
+    message(WARNING "ROC-TX library not found. GPU profiling may not work correctly.")
   endif()
 endif()
 
@@ -199,6 +210,43 @@ if (HYPRE_ENABLE_LTO AND NOT MSVC)
       -foffload-lto
   )
 endif ()
+
+# Check if user specified either WARP_SIZE or WAVEFRONT_SIZE
+if(DEFINED HYPRE_WAVEFRONT_SIZE)
+  set(HYPRE_WARP_SIZE ${HYPRE_WAVEFRONT_SIZE} CACHE STRING "GPU warp size")
+  message(STATUS "Using user-specified wavefront size: ${HYPRE_WAVEFRONT_SIZE}")
+
+elseif(NOT DEFINED HYPRE_WARP_SIZE)
+  # Auto-detect if neither is specified
+  execute_process(
+    COMMAND rocm-smi --showproductname
+    OUTPUT_VARIABLE GPU_PRODUCT_NAME
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+    RESULT_VARIABLE ROCM_SMI_RESULT
+  )
+
+  if(ROCM_SMI_RESULT EQUAL 0)
+    string(TOUPPER "${GPU_PRODUCT_NAME}" GPU_PRODUCT_NAME)
+
+    if(GPU_PRODUCT_NAME MATCHES "MI[0-9]")
+      set(HYPRE_WARP_SIZE 64 CACHE STRING "GPU wavefront size (CDNA architecture)")
+      message(STATUS "Detected CDNA architecture, setting wavefront size to 64")
+    else()
+      set(HYPRE_WARP_SIZE 32 CACHE STRING "GPU wavefront size (RDNA/default architecture)")
+      message(STATUS "Detected RDNA architecture, setting wavefront size to 32")
+    endif()
+  else()
+    set(HYPRE_WARP_SIZE 64 CACHE STRING "GPU warp size (default)")
+    message(STATUS "Could not detect GPU architecture, defaulting to wavefront size 64")
+  endif()
+else()
+  message(STATUS "Using user-specified wavefront size: ${HYPRE_WARP_SIZE}")
+endif()
+
+# Set WAVEFRONT_SIZE to match WARP_SIZE for consistency
+set(HYPRE_WAVEFRONT_SIZE ${HYPRE_WARP_SIZE} CACHE STRING "GPU wavefront size (alias for WARP_SIZE)")
+mark_as_advanced(HYPRE_WAVEFRONT_SIZE)
 
 # Print HIP info
 if (DEFINED hip_VERSION)

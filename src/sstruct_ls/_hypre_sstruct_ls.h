@@ -593,6 +593,8 @@ HYPRE_Int hypre_SStructKrylovMatvec ( void *matvec_data, HYPRE_Complex alpha, vo
                                       HYPRE_Complex beta, void *y );
 HYPRE_Int hypre_SStructKrylovMatvecDestroy ( void *matvec_data );
 HYPRE_Real hypre_SStructKrylovInnerProd ( void *x, void *y );
+HYPRE_Int hypre_SStructKrylovInnerProdTagged ( void *x, void *y, HYPRE_Int *num_tags_ptr,
+                                               HYPRE_Complex **iprod_ptr );
 HYPRE_Int hypre_SStructKrylovCopyVector ( void *x, void *y );
 HYPRE_Int hypre_SStructKrylovClearVector ( void *x );
 HYPRE_Int hypre_SStructKrylovScaleVector ( HYPRE_Complex alpha, void *x );
@@ -796,4 +798,3 @@ HYPRE_Int hypre_SysSemiRestrictDestroy ( void *sys_restrict_vdata );
 #endif
 
 #endif
-

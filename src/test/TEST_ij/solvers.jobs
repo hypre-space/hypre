@@ -135,3 +135,71 @@ mpirun -np 2 ./ij -solver 71 -mgr_nlevels 1 -mgr_bsize 2 -mgr_non_c_to_f 0 -mgr_
 ## Test relaxation methods 88 (L1 hybrid Symm. Gauss-Seidel with a convergent l1 term) and 89 (L1 Symm. hybrid Gauss-Seidel)
 mpirun -np 4 ./ij -fromfile data/tucker21935/IJ.A -solver 1 -rlx 88 > solvers.out.404
 mpirun -np 4 ./ij -fromfile data/tucker21935/IJ.A -solver 1 -rlx 89 > solvers.out.405
+
+## Test residual and error norms computation for multi-tag vectors (Sequential)
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ \
+                  -fromrhsfile data/beam_tet_dof459_np1/b.IJ \
+                  -xstarfromfile data/beam_tet_dof459_np1/xstar.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 1 > solvers.out.501
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ \
+                  -fromrhsfile data/beam_tet_dof459_np1/b.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 2 > solvers.out.502
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ \
+                  -fromrhsfile data/beam_tet_dof459_np1/b.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 3 > solvers.out.503
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ \
+                  -fromrhsfile data/beam_tet_dof459_np1/b.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 4 > solvers.out.504
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ \
+                  -fromrhsfile data/beam_tet_dof459_np1/b.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 5 > solvers.out.505
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ \
+                  -fromrhsfile data/beam_tet_dof459_np1/b.IJ \
+                  -xstarfromfile data/beam_tet_dof459_np1/xstar.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 6 > solvers.out.506
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ \
+                  -fromrhsfile data/beam_tet_dof459_np1/b.IJ \
+                  -xstarfromfile data/beam_tet_dof459_np1/xstar.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 7 > solvers.out.507
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ \
+                  -fromrhsfile data/beam_tet_dof459_np1/b.IJ \
+                  -xstarfromfile data/beam_tet_dof459_np1/xstar.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 8 > solvers.out.508
+mpirun -np 1 ./ij -fromfile data/beam_tet_dof459_np1/A.IJ \
+                  -fromrhsfile data/beam_tet_dof459_np1/b.IJ \
+                  -xstarfromfile data/beam_tet_dof459_np1/xstar.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 9 > solvers.out.509
+
+## Test residual and error norms computation for multi-tag vectors (Parallel)
+mpirun -np 2 ./ij -fromfile data/beam_hex_dof459_np2/A.IJ \
+                  -fromrhsfile data/beam_hex_dof459_np2/b.IJ \
+                  -xstarfromfile data/beam_hex_dof459_np2/xstar.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 1 > solvers.out.511
+mpirun -np 2 ./ij -fromfile data/beam_hex_dof459_np2/A.IJ \
+                  -fromrhsfile data/beam_hex_dof459_np2/b.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 2 > solvers.out.512
+mpirun -np 2 ./ij -fromfile data/beam_hex_dof459_np2/A.IJ \
+                  -fromrhsfile data/beam_hex_dof459_np2/b.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 3 > solvers.out.513
+mpirun -np 2 ./ij -fromfile data/beam_hex_dof459_np2/A.IJ \
+                  -fromrhsfile data/beam_hex_dof459_np2/b.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 4 > solvers.out.514
+mpirun -np 2 ./ij -fromfile data/beam_hex_dof459_np2/A.IJ \
+                  -fromrhsfile data/beam_hex_dof459_np2/b.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 5 > solvers.out.515
+mpirun -np 2 ./ij -fromfile data/beam_hex_dof459_np2/A.IJ \
+                  -fromrhsfile data/beam_hex_dof459_np2/b.IJ \
+                  -xstarfromfile data/beam_hex_dof459_np2/xstar.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 6 > solvers.out.516
+mpirun -np 2 ./ij -fromfile data/beam_hex_dof459_np2/A.IJ \
+                  -fromrhsfile data/beam_hex_dof459_np2/b.IJ \
+                  -xstarfromfile data/beam_hex_dof459_np2/xstar.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 7 > solvers.out.517
+mpirun -np 2 ./ij -fromfile data/beam_hex_dof459_np2/A.IJ \
+                  -fromrhsfile data/beam_hex_dof459_np2/b.IJ \
+                  -xstarfromfile data/beam_hex_dof459_np2/xstar.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 8 > solvers.out.518
+mpirun -np 2 ./ij -fromfile data/beam_hex_dof459_np2/A.IJ \
+                  -fromrhsfile data/beam_hex_dof459_np2/b.IJ \
+                  -xstarfromfile data/beam_hex_dof459_np2/xstar.IJ \
+                  -tol 1e-3 -solver 3 -k 100 -funcsinterleaved -nf 3 -iout 9 > solvers.out.519

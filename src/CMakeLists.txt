@@ -19,9 +19,9 @@ if(POLICY CMP0104)
 endif()
 
 # The version number.
-set(HYPRE_VERSION 2.32.0)
-set(HYPRE_NUMBER  23200)
-set(HYPRE_DATE    2024/10/08)
+set(HYPRE_VERSION 2.33.0)
+set(HYPRE_NUMBER  23300)
+set(HYPRE_DATE    2025/04/03)
 set(HYPRE_TIME    00:00:00)
 set(HYPRE_BUGS    https://github.com/hypre-space/hypre/issues)
 set(HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -82,6 +82,7 @@ set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeR
 
 # Set debug flags based on compiler
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  set(HYPRE_DEBUG ON CACHE INTERNAL "")
   if(CMAKE_C_COMPILER_ID MATCHES "Intel")
     target_compile_options(${PROJECT_NAME} PRIVATE
       $<$<COMPILE_LANGUAGE:C>:-O0 -Wall -Wremarks>
@@ -148,6 +149,7 @@ set_hypre_option(BASE HYPRE_ENABLE_LTO                  "Use Link-Time Optimizat
 set_hypre_option(BASE HYPRE_ENABLE_PRINT_ERRORS         "Print HYPRE errors" OFF)
 set_hypre_option(SKIP HYPRE_ENABLE_TIMING               "Use HYPRE timing routines" OFF)
 set_hypre_option(SKIP HYPRE_ENABLE_STRICT_CHECKING      "Use strict error checking (Sequential only)" OFF)
+set_hypre_option(SKIP HYPRE_ENABLE_MEMORY_TRACKER       "Use internal memory tracker (Debug only)" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_TEST_USING_HOST      "Execute tests on host (CPU)" OFF)
 set_hypre_option(BASE HYPRE_ENABLE_HOST_MEMORY          "Use host memory" ON)
 set_hypre_option(BASE HYPRE_BUILD_EXAMPLES              "Build examples" OFF)
@@ -228,8 +230,10 @@ set_internal_hypre_option("" SINGLE)
 set_internal_hypre_option("" LONG_DOUBLE)
 set_internal_hypre_option("" COMPLEX)
 set_internal_hypre_option("" TEST_USING_HOST)
+set_internal_hypre_option("" PRINT_ERRORS)
 set_internal_hypre_option(USING HYPRE_BLAS)
 set_internal_hypre_option(USING HYPRE_LAPACK)
+set_internal_hypre_option(USING MEMORY_TRACKER)
 set_internal_hypre_option(USING HOPSCOTCH)
 set_internal_hypre_option(USING GPU_AWARE_MPI)
 set_internal_hypre_option(USING GPU_STREAMS)

@@ -406,7 +406,8 @@ typedef struct
    HYPRE_Int    (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
                                    void *x, HYPRE_Complex beta, void *y );
    HYPRE_Int    (*MatvecDestroy) ( void *matvec_data );
-   HYPRE_Real   (*InnerProd)     ( void *x, void *y );
+   HYPRE_Int    (*InnerProd)     ( void *x, void *y, HYPRE_Int *num_tags_ptr,
+                                   HYPRE_Complex **iprod_ptr );
    HYPRE_Int    (*CopyVector)    ( void *x, void *y );
    HYPRE_Int    (*ClearVector)   ( void *x );
    HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x );
@@ -440,7 +441,9 @@ typedef struct
    void  *r;
    void  *w;
    void  *w_2;
+   void  *w_3;
    void  **p;
+   void  *xref;   /* reference solution for error computation */
 
    void    *matvec_data;
    void    *precond_data;
@@ -489,7 +492,8 @@ extern "C" {
       HYPRE_Int    (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
                                       void *x, HYPRE_Complex beta, void *y ),
       HYPRE_Int    (*MatvecDestroy) ( void *matvec_data ),
-      HYPRE_Real   (*InnerProd)     ( void *x, void *y ),
+      HYPRE_Int    (*InnerProd)     ( void *x, void *y, HYPRE_Int *num_tags_ptr,
+                                      HYPRE_Complex **iprod_ptr ),
       HYPRE_Int    (*CopyVector)    ( void *x, void *y ),
       HYPRE_Int    (*ClearVector)   ( void *x ),
       HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x ),
@@ -1273,10 +1277,13 @@ HYPRE_Int hypre_GMRESSetSkipRealResidualCheck ( void *gmres_vdata, HYPRE_Int ski
 HYPRE_Int hypre_GMRESGetSkipRealResidualCheck ( void *gmres_vdata, HYPRE_Int *skip_real_r_check );
 HYPRE_Int hypre_GMRESSetStopCrit ( void *gmres_vdata, HYPRE_Int stop_crit );
 HYPRE_Int hypre_GMRESGetStopCrit ( void *gmres_vdata, HYPRE_Int *stop_crit );
-HYPRE_Int hypre_GMRESSetPrecond ( void *gmres_vdata, HYPRE_Int (*precond )(void*, void*, void*,
-                                                                           void*),
-                                  HYPRE_Int (*precond_setup )(void*, void*, void*, void*), void *precond_data );
+HYPRE_Int hypre_GMRESSetPrecond ( void *gmres_vdata,
+                                  HYPRE_Int (*precond )(void*, void*, void*, void*),
+                                  HYPRE_Int (*precond_setup )(void*, void*, void*, void*),
+                                  void *precond_data );
 HYPRE_Int hypre_GMRESGetPrecond ( void *gmres_vdata, HYPRE_Solver *precond_data_ptr );
+HYPRE_Int hypre_GMRESSetRefSolution ( void *gmres_vdata, void *xref );
+HYPRE_Int hypre_GMRESGetRefSolution ( void *gmres_vdata, void **xref );
 HYPRE_Int hypre_GMRESSetPrintLevel ( void *gmres_vdata, HYPRE_Int level );
 HYPRE_Int hypre_GMRESGetPrintLevel ( void *gmres_vdata, HYPRE_Int *level );
 HYPRE_Int hypre_GMRESSetLogging ( void *gmres_vdata, HYPRE_Int level );

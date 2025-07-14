@@ -733,6 +733,8 @@ HYPRE_Int HYPRE_ParCSRGMRESSetup ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HY
                                    HYPRE_ParVector x );
 HYPRE_Int HYPRE_ParCSRGMRESSolve ( HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b,
                                    HYPRE_ParVector x );
+HYPRE_Int HYPRE_ParCSRGMRESSetRefSolution(HYPRE_Solver solver, HYPRE_ParVector ref_solution);
+HYPRE_Int HYPRE_ParCSRGMRESGetRefSolution(HYPRE_Solver solver, HYPRE_ParVector *ref_solution);
 HYPRE_Int HYPRE_ParCSRGMRESSetKDim ( HYPRE_Solver solver, HYPRE_Int k_dim );
 HYPRE_Int HYPRE_ParCSRGMRESSetTol ( HYPRE_Solver solver, HYPRE_Real tol );
 HYPRE_Int HYPRE_ParCSRGMRESSetAbsoluteTol ( HYPRE_Solver solver, HYPRE_Real a_tol );
@@ -1995,6 +1997,8 @@ HYPRE_Int hypre_ParKrylovMatvecT ( void *matvec_data, HYPRE_Complex alpha, void 
                                    HYPRE_Complex beta, void *y );
 HYPRE_Int hypre_ParKrylovMatvecDestroy ( void *matvec_data );
 HYPRE_Real hypre_ParKrylovInnerProd ( void *x, void *y );
+HYPRE_Int hypre_ParKrylovInnerProdTagged( void *x, void *y, HYPRE_Int *num_tags_ptr,
+                                          HYPRE_Complex **iprod_ptr );
 HYPRE_Int hypre_ParKrylovMassInnerProd ( void *x, void **y, HYPRE_Int k, HYPRE_Int unroll,
                                          void *result );
 HYPRE_Int hypre_ParKrylovMassDotpTwo ( void *x, void *y, void **z, HYPRE_Int k, HYPRE_Int unroll,
@@ -2288,17 +2292,17 @@ HYPRE_Int hypre_MGRBuildInterpApproximateInverse( hypre_ParCSRMatrix *A, HYPRE_I
                                                   HYPRE_BigInt *num_cpts_global,
                                                   hypre_ParCSRMatrix **P_ptr );
 HYPRE_Int hypre_MGRTruncateAcfCPR( hypre_ParCSRMatrix *A_CF, hypre_ParCSRMatrix **A_CF_new_ptr );
-HYPRE_Int hypre_MGRBuildRFromW( hypre_IntArray *C_map, hypre_IntArray *F_map,
-                                HYPRE_BigInt global_num_rows_R, HYPRE_BigInt global_num_cols_R,
-                                HYPRE_BigInt *row_starts_R, HYPRE_BigInt *col_starts_R,
-                                hypre_ParCSRMatrix *W, hypre_ParCSRMatrix **R_ptr );
+HYPRE_Int hypre_MGRBuildRFromWr( hypre_IntArray *C_map, hypre_IntArray *F_map,
+                                 HYPRE_BigInt global_num_rows_R, HYPRE_BigInt global_num_cols_R,
+                                 HYPRE_BigInt *row_starts_R, HYPRE_BigInt *col_starts_R,
+                                 hypre_ParCSRMatrix *Wr, hypre_ParCSRMatrix **R_ptr );
 HYPRE_Int hypre_MGRBlockColLumpedRestrict( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
                                            hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker,
-                                           HYPRE_Int blk_dim, hypre_ParCSRMatrix **W_ptr,
+                                           HYPRE_Int blk_dim, hypre_ParCSRMatrix **Wr_ptr,
                                            hypre_ParCSRMatrix **R_ptr);
 HYPRE_Int hypre_MGRColLumpedRestrict(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *A_FF,
                                      hypre_ParCSRMatrix *A_CF, hypre_IntArray *CF_marker,
-                                     hypre_ParCSRMatrix **W_ptr, hypre_ParCSRMatrix **R_ptr);
+                                     hypre_ParCSRMatrix **Wr_ptr, hypre_ParCSRMatrix **R_ptr);
 
 /* par_mgr_rap.c */
 HYPRE_Int hypre_MGRBuildCoarseOperator(void *mgr_data, hypre_ParCSRMatrix *A_FF,
@@ -2330,6 +2334,8 @@ HYPRE_Int hypre_ParCSRMatrixBlockDiagMatrixDevice( hypre_ParCSRMatrix *A, HYPRE_
                                                    HYPRE_Int point_type, HYPRE_Int *CF_marker,
                                                    HYPRE_Int diag_type,
                                                    hypre_ParCSRMatrix **B_ptr );
+HYPRE_Int hypre_MGRBuildRFromWrDevice(hypre_IntArray *C_map, hypre_IntArray *F_map,
+                                      hypre_ParCSRMatrix *Wr, hypre_ParCSRMatrix *R);
 
 /* par_mgr_stats.c */
 HYPRE_Int hypre_MGRSetupStats( void *mgr_vdata );

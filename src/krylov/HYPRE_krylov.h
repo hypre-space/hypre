@@ -391,6 +391,30 @@ HYPRE_Int HYPRE_GMRESSetLogging(HYPRE_Solver solver,
 
 /**
  * (Optional) Set the amount of printing to do to the screen.
+ *
+ * @param solver The solver object
+ * @param level The print level:
+ *        - 0: no output
+ *        - 1: print warnings
+ *        - 2: print convergence history for the absolute and relative residual norms
+ *        - 3: print absolute residual norms for each tag in multi-tag vectors
+ *        - 4: print relative residual norms for each tag in multi-tag vectors,
+ *             where each residual norm is divided by the norm of its corresponding
+ *             tagged component of the right-hand side vector (RHS).
+ *        - 5: print relative residual norms for each tag in multi-tag vectors,
+ *             where the residual norm is divided by the norm of the original
+ *             right-hand side vector (RHS).
+ *        - 6: print convergence history for the absolute and relative error norms
+ *        - 7: print absolute error norms for each tag in multi-tag vectors.
+ *        - 8: print relative error norms for each tag in multi-tag vectors,
+ *             where each residual norm is divided by the norm of its corresponding
+ *             tagged component of the initial error vector.
+ *        - 9: print relative error norms for each tag in multi-tag vectors,
+ *             where the error norms are divided by the norm of the initial
+ *             error vector.
+ *
+ *        Options 6-9 are mainly for debugging purposes as they require setting up
+ *        a reference solution vector via \e HYPRE_GMRESSetRefSolution
  **/
 HYPRE_Int HYPRE_GMRESSetPrintLevel(HYPRE_Solver solver,
                                    HYPRE_Int    level);
@@ -480,6 +504,18 @@ HYPRE_Int HYPRE_GMRESGetPrintLevel(HYPRE_Solver  solver,
  **/
 HYPRE_Int HYPRE_GMRESGetConverged(HYPRE_Solver  solver,
                                   HYPRE_Int    *converged);
+
+/**
+ * (Optional) Set a reference solution vector for error computation.
+ **/
+HYPRE_Int HYPRE_GMRESSetRefSolution(HYPRE_Solver solver,
+                                    HYPRE_Vector xref);
+
+/**
+ * Get the reference solution vector.
+ **/
+HYPRE_Int HYPRE_GMRESGetRefSolution(HYPRE_Solver  solver,
+                                    HYPRE_Vector *xref);
 
 /**@}*/
 

@@ -705,7 +705,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
          1.0 );
 #else
          thrust::identity<HYPRE_Complex> identity;
-         HYPRE_THRUST_CALL( replace_if, l1_norm, l1_norm + num_rows, thrust::not1(identity), 1.0 );
+         HYPRE_THRUST_CALL( replace_if, l1_norm, l1_norm + num_rows, HYPRE_THRUST_NOT(identity), 1.0 );
 #endif
       }
       else
@@ -776,7 +776,6 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix  *A,
       HYPRE_THRUST_CALL( transform_if, l1_norm, l1_norm + num_rows, diag_tmp, l1_norm,
                          thrust::negate<HYPRE_Real>(),
                          is_negative<HYPRE_Real>() );
-      //bool any_zero = HYPRE_THRUST_CALL( any_of, l1_norm, l1_norm + num_rows, thrust::not1(thrust::identity<HYPRE_Complex>()) );
       bool any_zero = 0.0 == HYPRE_THRUST_CALL( reduce, l1_norm, l1_norm + num_rows, 1.0,
                                                 thrust::minimum<HYPRE_Real>() );
 #endif
@@ -1261,8 +1260,9 @@ HYPRE_Int hypre_AMSSetAlphaPoissonMatrix(void *solver,
    hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    ams_data -> A_Pi = A_Pi;
 
-   /* Penalize the eliminated degrees of freedom */
-   hypre_ParCSRMatrixSetDiagRows(A_Pi, HYPRE_REAL_MAX);
+   /* Penalize the eliminated degrees of freedom.
+      We divide HYPRE_REAL_MAX by 1000 to avoid FPE errors. */
+   hypre_ParCSRMatrixSetDiagRows(A_Pi, HYPRE_REAL_MAX / 1000);
 
    /* Make sure that the first entry in each row is the diagonal one. */
    /* hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(A_Pi)); */
@@ -1292,8 +1292,9 @@ HYPRE_Int hypre_AMSSetBetaPoissonMatrix(void *solver,
    }
    else
    {
-      /* Penalize the eliminated degrees of freedom */
-      hypre_ParCSRMatrixSetDiagRows(A_G, HYPRE_REAL_MAX);
+      /* Penalize the eliminated degrees of freedom.
+         We divide HYPRE_REAL_MAX by 1000 to avoid FPE errors. */
+      hypre_ParCSRMatrixSetDiagRows(A_G, HYPRE_REAL_MAX / 1000);
 
       /* Make sure that the first entry in each row is the diagonal one. */
       /* hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(A_G)); */
@@ -3180,9 +3181,9 @@ hypre_AMSSetup(void *solver,
                                        A_num_cols_offd + B_num_cols_offd,
                                        A_num_nonzeros_diag + B_num_nonzeros_diag,
                                        A_num_nonzeros_offd + B_num_nonzeros_offd);
-         GenerateDiagAndOffd(C_local, C,
-                             hypre_ParCSRMatrixFirstColDiag(A),
-                             hypre_ParCSRMatrixLastColDiag(A));
+         hypre_GenerateDiagAndOffd(C_local, C,
+                                   hypre_ParCSRMatrixFirstColDiag(A),
+                                   hypre_ParCSRMatrixLastColDiag(A));
 
          hypre_CSRMatrixDestroy(A_local);
          hypre_CSRMatrixDestroy(B_local);
@@ -3677,9 +3678,9 @@ hypre_AMSSetup(void *solver,
                                                 A_num_cols_offd + B_num_cols_offd,
                                                 A_num_nonzeros_diag + B_num_nonzeros_diag,
                                                 A_num_nonzeros_offd + B_num_nonzeros_offd);
-                  GenerateDiagAndOffd(C_local, C,
-                                      hypre_ParCSRMatrixFirstColDiag(A),
-                                      hypre_ParCSRMatrixLastColDiag(A));
+                  hypre_GenerateDiagAndOffd(C_local, C,
+                                            hypre_ParCSRMatrixFirstColDiag(A),
+                                            hypre_ParCSRMatrixLastColDiag(A));
 
                   hypre_CSRMatrixDestroy(A_local);
                   hypre_CSRMatrixDestroy(B_local);
@@ -4316,10 +4317,9 @@ HYPRE_Int hypre_AMSConstructDiscreteGradient(hypre_ParCSRMatrix *A,
                                    hypre_ParVectorPartitioning(x_coord),
                                    0, 0, 0);
       hypre_CSRMatrixBigJtoJ(local);
-      GenerateDiagAndOffd(local, G,
-                          hypre_ParVectorFirstIndex(x_coord),
-                          hypre_ParVectorLastIndex(x_coord));
-
+      hypre_GenerateDiagAndOffd(local, G,
+                                hypre_ParVectorFirstIndex(x_coord),
+                                hypre_ParVectorLastIndex(x_coord));
 
       /* Account for empty rows in G. These may appear when A includes only
          the interior (non-Dirichlet b.c.) edges. */
@@ -4467,7 +4467,7 @@ hypre_AMSFEISetup(void *solver,
                                    vert_part,
                                    0, 0, 0);
       hypre_CSRMatrixBigJtoJ(local);
-      GenerateDiagAndOffd(local, G, vert_start, vert_end);
+      hypre_GenerateDiagAndOffd(local, G, vert_start, vert_end);
 
       //hypre_CSRMatrixJ(local) = NULL;
       hypre_CSRMatrixDestroy(local);

@@ -80,7 +80,7 @@ ro="-gpumemcheck -rt -mpibind -cudamemcheck -save ${save}"
 ./renametest.sh basic $output_dir/basic-cuda-um-shared
 
 # CUDA with UM and single precision
-co="--with-cuda --enable-unified-memory --enable-single --enable-debug --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
+co="--with-cuda --enable-unified-memory --enable-single --enable-cusolver --enable-debug --with-gpu-arch=70 --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
 ro="-single -rt -mpibind -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: ${ro}
 ./renametest.sh basic $output_dir/basic-cuda-um-single
@@ -97,8 +97,8 @@ ro="-struct -rt -mpibind -save ${save}"
 ./renametest.sh basic $output_dir/basic-cuda-nonum
 
 # CUDA without UM with umpire [benchmark]
-UMPIRE_DIR=/usr/workspace/hypre/ext-libs/Umpire/2022.03.1-nvcc11.2-sm_70-xl2023.06.28-cuda-11.2.0-gcc-8.3.1
-co="--with-cuda --with-gpu-arch=70 --with-umpire --with-umpire-include=${UMPIRE_DIR}/include --with-umpire-lib-dirs=${UMPIRE_DIR}/lib --with-umpire-libs=umpire --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
+UMPIRE_DIR=/usr/workspace/hypre/ext-libs/Umpire/install_umpire-2025.03.0_nvcc11.2-sm_70-xl2023.06.28-cuda-11.2.0-gcc-8.3.1
+co="--with-cuda --with-gpu-arch=70 --with-umpire --with-umpire-include=${UMPIRE_DIR}/include --with-umpire-lib-dirs=${UMPIRE_DIR}/lib --with-umpire-libs=\\'camp umpire\\' --with-extra-CFLAGS=\\'-qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qsuppress=1500-029\\'"
 ro="-bench -rt -mpibind -save ${save}"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-cuda-bench

@@ -52,6 +52,34 @@ hypre_SeqVectorSetConstantValuesDevice( hypre_Vector *v,
 }
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorSetValuesTaggedDevice( hypre_Vector  *vector,
+                                      HYPRE_Complex *values )
+{
+   HYPRE_Int      size = hypre_VectorSize(vector);
+   HYPRE_Int     *tags = hypre_VectorTags(vector);
+   HYPRE_Complex *data = hypre_VectorData(vector);
+
+#if defined(HYPRE_USING_GPU)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_THRUST_CALL(gather, tags, tags + size, values, data);
+
+#elif defined(HYPRE_USING_SYCL)
+   hypreSycl_gather(tags, tags + size, values, data);
+
+#endif
+   hypre_SyncComputeStream();
+
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Device OpenMP not implemented!");
+#endif
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SeqVectorScaleDevice
  *--------------------------------------------------------------------------*/
 
@@ -179,15 +207,15 @@ hypre_SeqVectorAxpyzDevice( HYPRE_Complex  alpha,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SeqVectorElmdivpyDevice
+ * See hypre_SeqVectorPointwiseDivpy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorElmdivpyDevice( hypre_Vector *x,
-                               hypre_Vector *b,
-                               hypre_Vector *y,
-                               HYPRE_Int    *marker,
-                               HYPRE_Int     marker_val )
+hypre_SeqVectorPointwiseDivpyDevice( hypre_Vector *x,
+                                     hypre_Vector *b,
+                                     hypre_Vector *y,
+                                     HYPRE_Int    *marker,
+                                     HYPRE_Int     marker_val )
 {
 #if defined(HYPRE_USING_GPU)
    HYPRE_Complex  *x_data        = hypre_VectorData(x);
@@ -198,7 +226,7 @@ hypre_SeqVectorElmdivpyDevice( hypre_Vector *x,
    HYPRE_Int       num_vectors_b = hypre_VectorNumVectors(b);
    HYPRE_Int       size          = hypre_VectorSize(b);
 
-   hypre_GpuProfilingPushRange("SeqVectorElmdivpyDevice");
+   hypre_GpuProfilingPushRange("SeqVectorPtwiseDivpy");
    if (num_vectors_b == 1)
    {
       if (num_vectors_x == 1)
@@ -244,7 +272,7 @@ hypre_SeqVectorElmdivpyDevice( hypre_Vector *x,
    hypre_SyncComputeStream();
    hypre_GpuProfilingPopRange();
 
-#elif defined(HYPRE_USING_OPENMP)
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented for device OpenMP!\n");
 #endif
 
@@ -395,6 +423,115 @@ hypre_SeqVectorPrefetch( hypre_Vector        *x,
    }
 
    hypre_MemPrefetch(x_data, sizeof(HYPRE_Complex) * total_size, memory_location);
+#endif
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * See hypre_SeqVectorPointwiseProductDevice
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorPointwiseProductDevice( hypre_Vector *x,
+                                       hypre_Vector *y,
+                                       hypre_Vector *z )
+{
+   HYPRE_Complex *x_data      = hypre_VectorData(x);
+   HYPRE_Complex *y_data      = hypre_VectorData(y);
+   HYPRE_Complex *z_data      = hypre_VectorData(z);
+   HYPRE_Int      size        = hypre_VectorSize(x);
+
+#if defined(HYPRE_USING_GPU)
+   hypre_GpuProfilingPushRange("SeqVectorPointwiseProduct");
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_THRUST_CALL(transform,
+                     x_data, x_data + size, y_data, z_data,
+                     thrust::multiplies<HYPRE_Complex>());
+
+#elif defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL(std::transform,
+                     x_data, x_data + size, y_data, z_data,
+                     std::multiplies<HYPRE_Complex>());
+#endif
+
+   hypre_SyncComputeStream();
+   hypre_GpuProfilingPopRange();
+#else
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented!");
+#endif
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * See SeqVectorPointwiseDivision
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorPointwiseDivisionDevice( hypre_Vector *x,
+                                        hypre_Vector *y,
+                                        hypre_Vector *z )
+{
+   HYPRE_Complex *x_data      = hypre_VectorData(x);
+   HYPRE_Complex *y_data      = hypre_VectorData(y);
+   HYPRE_Complex *z_data      = hypre_VectorData(z);
+   HYPRE_Int      size        = hypre_VectorSize(x);
+
+#if defined(HYPRE_USING_GPU)
+   hypre_GpuProfilingPushRange("SeqVectorPointwiseDivision");
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_THRUST_CALL(transform,
+                     x_data, x_data + size, y_data, z_data,
+                     thrust::divides<HYPRE_Complex>());
+
+#elif defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL(std::transform,
+                     x_data, x_data + size, y_data, z_data,
+                     std::divides<HYPRE_Complex>());
+#endif
+
+   hypre_SyncComputeStream();
+   hypre_GpuProfilingPopRange();
+#else
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented!");
+#endif
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * See hypre_SeqVectorPointwiseInverse
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorPointwiseInverseDevice( hypre_Vector *x,
+                                       hypre_Vector *y )
+{
+   HYPRE_Complex *x_data = hypre_VectorData(x);
+   HYPRE_Complex *y_data = hypre_VectorData(y);
+   HYPRE_Int      size   = hypre_VectorSize(x);
+
+#if defined(HYPRE_USING_GPU)
+   hypre_GpuProfilingPushRange("SeqVectorPointwiseInverse");
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_HIP)
+   HYPRE_THRUST_CALL(transform,
+                     x_data, x_data + size, y_data,
+   [] __host__ __device__ (const HYPRE_Complex & val) { return 1.0 / val; });
+
+#elif defined(HYPRE_USING_SYCL)
+   HYPRE_ONEDPL_CALL(std::transform,
+                     x_data, x_data + size, y_data,
+   [](const HYPRE_Complex & val) { return 1.0 / val; });
+#endif
+
+   hypre_SyncComputeStream();
+   hypre_GpuProfilingPopRange();
+#else
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Not implemented!");
 #endif
 
    return hypre_error_flag;

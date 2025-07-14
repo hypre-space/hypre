@@ -323,4 +323,9 @@ HYPRE_Int hypre_SStructPVectorInitializeShell ( hypre_SStructPVector *pvector );
 HYPRE_Int hypre_SStructVectorInitializeShell ( hypre_SStructVector *vector );
 HYPRE_Int hypre_SStructVectorClearGhostValues ( hypre_SStructVector *vector );
 HYPRE_MemoryLocation hypre_SStructVectorMemoryLocation(hypre_SStructVector *vector);
-
+HYPRE_Int hypre_SStructVectorPointwiseDivision ( hypre_SStructVector *x, hypre_SStructVector *y,
+                                                 hypre_SStructVector **z_ptr );
+HYPRE_Int hypre_SStructVectorPointwiseProduct ( hypre_SStructVector *x, hypre_SStructVector *y,
+                                                hypre_SStructVector **z_ptr );
+HYPRE_Int hypre_SStructVectorPointwiseInverse ( hypre_SStructVector *x,
+                                                hypre_SStructVector **y_ptr );

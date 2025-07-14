@@ -65,6 +65,9 @@
 /* Use internal LAPACK library */
 #cmakedefine HYPRE_USING_HYPRE_LAPACK 1
 
+/* Use internal memory tracker */
+#cmakedefine HYPRE_USING_MEMORY_TRACKER 1
+
 /* Print HYPRE errors */
 #cmakedefine HYPRE_PRINT_ERRORS 1
 
@@ -142,6 +145,9 @@
 
 /* Use if executing on GPU device */
 #cmakedefine HYPRE_USING_GPU 1
+
+/* Define the GPU warp size (default: 32 for CUDA/SYCL, 64 for HIP) */
+#cmakedefine HYPRE_WARP_SIZE @HYPRE_WARP_SIZE@
 
 /* Use if executing hypre tests on host (CPU) */
 #cmakedefine HYPRE_TEST_USING_HOST 1
