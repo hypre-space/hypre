@@ -690,7 +690,7 @@ hypre_PCGSolve( void *pcg_vdata,
                HYPRE_Real r2ob2;
                /* v = C*s = C*(r_old-r_new) */
                (*(pcg_functions->ClearVector))(v);
-               precond(precond_data, A, s, v);      // RDF: Should this use precond_Mat?
+               precond(precond_data, precond_Mat, s, v);
                /* <s,v> */
                r2ob2 = (*(pcg_functions->InnerProd))(s, v) / bi_prod;
                if ( r2ob2 < rtol * rtol )
