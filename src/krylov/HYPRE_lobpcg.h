@@ -171,10 +171,13 @@ HYPRE_Int HYPRE_LOBPCGIterations(HYPRE_Solver solver);
 #endif
 
 #ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef BUILD_MP_FUNC
 #include "_hypre_krylov_mup_undef.h"
 #include "HYPRE_lobpcg_mup.h"
-#ifdef BUILD_MP_FUNC
-#include "_hypre_krylov_mup_def.h"
 #endif
 #endif
 

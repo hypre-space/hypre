@@ -23,8 +23,8 @@
 #define LDBL_SUFFIX long_dbl
 
 /*--------------------------------------------------------------------------
-* For mixed-precision build only
-*---------------------------------------------------------------------------*/
+ * For mixed-precision build only
+ *---------------------------------------------------------------------------*/
 
 #if defined(HYPRE_MIXED_PRECISION)
 
@@ -85,68 +85,19 @@ typedef enum
 
 #define HYPRE_MULTIPRECISION_FUNC(a) a
 #define HYPRE_ZZZZZPRECISION_FUNC(a) CONCAT_(a, def)  /* RDF: Temporary */
-//#define HYPRE_ZZZZZPRECISION_FUNC(a) a  /* RDF: Temporary */
 #define HYPRE_FIXEDPRECISION_FUNC(a) a
 #define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE  /* RDF: Set this to default precision */
 #define DEFINE_GLOBAL_VARIABLE 1  /* RDF: Delete this later */
 
 #endif
 
-// /*--------------------------------------------------------------------------
-// * Reset build types for Multi-precision build
-// *---------------------------------------------------------------------------*/
-// #if defined(MP_BUILD_SINGLE)
-// #define HYPRE_OBJECT_PRECISION HYPRE_REAL_SINGLE
-// #define BUILD_MP_FUNC 1
-// #undef HYPRE_LONG_DOUBLE
-// #ifndef HYPRE_SINGLE
-// #define HYPRE_SINGLE 1
-// #endif
-// #elif defined(MP_BUILD_LONGDOUBLE)
-// #define HYPRE_OBJECT_PRECISION HYPRE_REAL_LONGDOUBLE
-// #define BUILD_MP_FUNC 1
-// #undef HYPRE_SINGLE
-// #ifndef HYPRE_LONG_DOUBLE
-// #define HYPRE_LONG_DOUBLE 1
-// #endif
-// #elif defined(MP_BUILD_DOUBLE)
-// #define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE
-// #define BUILD_MP_FUNC 1
-// #undef HYPRE_SINGLE
-// #undef HYPRE_LONG_DOUBLE
-// #else
-// /* Set a default precision */
-// #define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE
-// /* Define globals only once during default build */
-// #define DEFINE_GLOBAL_VARIABLE 1
-// #ifdef BUILD_MP_FUNC
-// #undef BUILD_MP_FUNC
-// #endif
-// #define BUILD_NON_MP_FUNC 1
-// #endif
-// /*--------------------------------------------------------------------------
-//  * HYPRE multiprecision extensions
-//  *--------------------------------------------------------------------------*/
-// /* Macro to generate typed functions */
-// #if defined(BUILD_MP_FUNC)
-// #if defined(HYPRE_SINGLE)
-// //#define FUNC_SUFFIX flt
-// #define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, FLT_SUFFIX)
-// #elif defined(HYPRE_LONG_DOUBLE)
-// //#define FUNC_SUFFIX long_dbl
-// #define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, LDBL_SUFFIX)
-// #else /* HYPRE_DOUBLE */
-// //#define FUNC_SUFFIX dbl
-// #define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, DBL_SUFFIX)
-// #endif
-// #else
-// #define HYPRE_MULTIPRECISION_FUNC(a) a
-// #endif
-
-/* Apply suffix to define typed function */
-//#define HYPRE_MULTIPRECISION_FUNC(a) CONCAT_(a, FUNC_SUFFIX)
+/*--------------------------------------------------------------------------
+ * For non-mixed-precision build
+ * RDF: Not sure if any of this is needed
+ *---------------------------------------------------------------------------*/
 
 #else
+
 /* define no-op for typed function macro */
 //#define HYPRE_MULTIPRECISION_FUNC(a) a
 #define BUILD_MP_FUNC 1
@@ -211,7 +162,6 @@ typedef enum
 	      hypre_printf("Unknown solver precision" );\
 	      exit(0);\
         }\
-
 
 #endif
 
