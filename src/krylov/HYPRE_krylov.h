@@ -1315,7 +1315,7 @@ HYPRE_Int HYPRE_CGNRGetPrecond(HYPRE_Solver  solver,
  * header ensures that we do not change prototype names in user files or in the
  * second header file.  The second header contains all the prototypes needed by
  * users for mixed precision. */
-#ifndef BUILD_MP_FUNC
+#ifndef hypre_MP_BUILD
 #include "_hypre_krylov_mup_undef.h"
 #include "HYPRE_krylov_mup.h"
 #endif

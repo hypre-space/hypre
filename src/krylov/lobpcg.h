@@ -192,7 +192,7 @@ void lobpcg_MultiVectorByMultiVector(mv_MultiVectorPtr        x,
 #ifdef HYPRE_MIXED_PRECISION
 #include "_hypre_krylov_mup_undef.h"
 #include "_hypre_lobpcg_mup.h"
-#ifdef BUILD_MP_FUNC
+#ifdef hypre_MP_BUILD
 #include "_hypre_krylov_mup_def.h"
 #endif
 #endif

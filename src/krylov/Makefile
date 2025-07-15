@@ -50,8 +50,10 @@ FILES =\
 
 # Mixed precision files
 MP_FILES = \
+ mup_fixed.c\
  mup_functions.c\
  mup_pre.c\
+ mup_lobpcg_fixed.c\
  mup_lobpcg_functions.c\
  mup_lobpcg_pre.c
 

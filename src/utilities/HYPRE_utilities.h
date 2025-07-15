@@ -26,9 +26,11 @@
 
 #ifdef HYPRE_MIXED_PRECISION
 #include "utilities_mup_func.h"
+#ifdef hypre_DEFINE_GLOBAL_MP
+#define hypre_DEFINE_GLOBAL 1
+#endif
 #else
-/* Expose this outside multiprecision.h to allow access to guarded global variables */
-#define DEFINE_GLOBAL_VARIABLE 1
+#define hypre_DEFINE_GLOBAL 1
 #endif
 
 #ifdef __cplusplus
@@ -81,9 +83,6 @@ typedef int HYPRE_Int;
  *--------------------------------------------------------------------------*/
 
 #include <float.h>
-
-/* Include multiprecision header */
-//#include "multiprecision.h"
 
 #if defined(HYPRE_SINGLE)
 typedef float HYPRE_Real;
