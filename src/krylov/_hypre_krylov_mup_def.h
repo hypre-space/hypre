@@ -13,7 +13,7 @@
 #ifndef hypre_KRYLOV_MUP_DEF_HEADER
 #define hypre_KRYLOV_MUP_DEF_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define HYPRE_BiCGSTABDestroy HYPRE_ZZZZZPRECISION_FUNC ( HYPRE_BiCGSTABDestroy )
 #define HYPRE_BiCGSTABGetFinalRelativeResidualNorm HYPRE_ZZZZZPRECISION_FUNC ( HYPRE_BiCGSTABGetFinalRelativeResidualNorm )

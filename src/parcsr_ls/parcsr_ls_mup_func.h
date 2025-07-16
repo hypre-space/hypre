@@ -14,7 +14,7 @@
 #ifndef PARCSR_LS_MUP_FUNC_HEADER
 #define PARCSR_LS_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define hypre_ADSComputePi HYPRE_MULTIPRECISION_FUNC ( hypre_ADSComputePi )
 #define hypre_ADSComputePixyz HYPRE_MULTIPRECISION_FUNC ( hypre_ADSComputePixyz )

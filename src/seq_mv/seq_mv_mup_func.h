@@ -14,7 +14,7 @@
 #ifndef SEQ_MV_MUP_FUNC_HEADER
 #define SEQ_MV_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define hypre_CSRMatrixTruncateDiag HYPRE_MULTIPRECISION_FUNC ( hypre_CSRMatrixTruncateDiag )
 #define hypre_CSRMatrixAdd HYPRE_MULTIPRECISION_FUNC ( hypre_CSRMatrixAdd )

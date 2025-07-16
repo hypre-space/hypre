@@ -14,7 +14,7 @@
 #ifndef DISTRIBUTED_MATRIX_MUP_FUNC_HEADER
 #define DISTRIBUTED_MATRIX_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define hypre_FreeDistributedMatrixISIS HYPRE_MULTIPRECISION_FUNC ( hypre_FreeDistributedMatrixISIS )
 #define hypre_GetDistributedMatrixLocalRangeISIS HYPRE_MULTIPRECISION_FUNC ( hypre_GetDistributedMatrixLocalRangeISIS )

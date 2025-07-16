@@ -14,7 +14,7 @@
 #ifndef PARASAILS_MUP_FUNC_HEADER
 #define PARASAILS_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define PCG_ParaSails HYPRE_MULTIPRECISION_FUNC ( PCG_ParaSails )
 #define DiagScaleCreate HYPRE_MULTIPRECISION_FUNC ( DiagScaleCreate )

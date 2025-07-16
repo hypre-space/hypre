@@ -1,0 +1,46 @@
+/******************************************************************************
+ * Copyright (c) 1998 Lawrence Livermore National Security, LLC and other
+ * HYPRE Project Developers. See the top-level COPYRIGHT file for details.
+ *
+ * SPDX-License-Identifier: (Apache-2.0 OR MIT)
+ ******************************************************************************/
+
+#include "_hypre_utilities.h"
+
+/* Global variable for default runtime precision */
+/* Guard definition to avoid linker errors for multiprecision build */
+#if defined (hypre_DEFINE_GLOBAL)
+HYPRE_Precision hypre__global_precision = HYPRE_REAL_DOUBLE;
+#endif
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Precision
+hypre_GlobalPrecision()
+{
+   return hypre__global_precision;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SetGlobalPrecision(HYPRE_Precision precision)
+{
+   hypre__global_precision = precision;
+
+   return global_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_GetGlobalPrecision(HYPRE_Precision &precision)
+{
+   *precision = hypre_GlobalPrecision();
+
+   return global_error_flag;
+}
+

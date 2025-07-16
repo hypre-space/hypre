@@ -23,7 +23,7 @@ cat >> $MUP_HEADER <<@
 #ifndef PARASAILS_MUP_FUNC_HEADER
 #define PARASAILS_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 @
 

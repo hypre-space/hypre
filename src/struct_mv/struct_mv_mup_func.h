@@ -14,7 +14,7 @@
 #ifndef STRUCT_MV_MUP_FUNC_HEADER
 #define STRUCT_MV_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define hypre_APFillResponseStructAssumedPart HYPRE_MULTIPRECISION_FUNC ( hypre_APFillResponseStructAssumedPart )
 #define hypre_APFindMyBoxesInRegions HYPRE_MULTIPRECISION_FUNC ( hypre_APFindMyBoxesInRegions )

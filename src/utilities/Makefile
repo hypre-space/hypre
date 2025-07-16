@@ -35,7 +35,8 @@ HEADERS =\
  magma.h\
  _hypre_onedpl.hpp\
  _hypre_utilities.h\
- _hypre_utilities.hpp
+ _hypre_utilities.hpp\
+ _hypre_mup_def.h
 
 FILES =\
  
@@ -109,8 +110,8 @@ all: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/_hypre_onedpl.hpp $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_utilities.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_utilities.hpp $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_mup_def.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/multiprecision.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/utilities_mup_func.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/hypre_utilities_mup.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
@@ -118,8 +119,8 @@ all: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 install: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/_hypre_utilities.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_mup_def.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/fortran*.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/multiprecision.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/utilities_mup_func.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/hypre_utilities_mup.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)

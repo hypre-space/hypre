@@ -14,7 +14,7 @@
 #ifndef BLAS_MUP_FUNC_HEADER
 #define BLAS_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define hypre_dasum HYPRE_MULTIPRECISION_FUNC ( hypre_dasum )
 #define hypre_daxpy HYPRE_MULTIPRECISION_FUNC ( hypre_daxpy )

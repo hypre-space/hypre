@@ -14,7 +14,7 @@
 #ifndef STRUCT_LS_MUP_FUNC_HEADER
 #define STRUCT_LS_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define hypre_StructCoarsen HYPRE_MULTIPRECISION_FUNC ( hypre_StructCoarsen )
 #define hypre_StructMapCoarseToFine HYPRE_MULTIPRECISION_FUNC ( hypre_StructMapCoarseToFine )

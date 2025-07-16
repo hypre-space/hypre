@@ -14,7 +14,7 @@
 #ifndef PARCSR_MV_MUP_FUNC_HEADER
 #define PARCSR_MV_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define hypre_MatTCommPkgCreate HYPRE_MULTIPRECISION_FUNC ( hypre_MatTCommPkgCreate )
 #define hypre_MatTCommPkgCreate_core HYPRE_MULTIPRECISION_FUNC ( hypre_MatTCommPkgCreate_core )

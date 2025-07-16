@@ -14,7 +14,7 @@
 #ifndef MULTIVECTOR_MUP_FUNC_HEADER
 #define MULTIVECTOR_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define mv_MultiVectorAxpy HYPRE_MULTIPRECISION_FUNC ( mv_MultiVectorAxpy )
 #define mv_MultiVectorByDiagonal HYPRE_MULTIPRECISION_FUNC ( mv_MultiVectorByDiagonal )

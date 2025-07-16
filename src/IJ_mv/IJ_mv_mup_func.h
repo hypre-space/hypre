@@ -14,7 +14,7 @@
 #ifndef IJ_MV_MUP_FUNC_HEADER
 #define IJ_MV_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define hypre_AuxParCSRMatrixCreate HYPRE_MULTIPRECISION_FUNC ( hypre_AuxParCSRMatrixCreate )
 #define hypre_AuxParCSRMatrixDestroy HYPRE_MULTIPRECISION_FUNC ( hypre_AuxParCSRMatrixDestroy )

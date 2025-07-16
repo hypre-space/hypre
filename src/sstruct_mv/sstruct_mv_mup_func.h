@@ -14,7 +14,7 @@
 #ifndef SSTRUCT_MV_MUP_FUNC_HEADER
 #define SSTRUCT_MV_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define hypre_sstructgraphaddentries HYPRE_MULTIPRECISION_FUNC ( hypre_sstructgraphaddentries )
 #define hypre_sstructgraphassemble HYPRE_MULTIPRECISION_FUNC ( hypre_sstructgraphassemble )

@@ -14,7 +14,7 @@
 #ifndef SSTRUCT_LS_MUP_FUNC_HEADER
 #define SSTRUCT_LS_MUP_FUNC_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 #define hypre_LowerBinarySearch HYPRE_MULTIPRECISION_FUNC ( hypre_LowerBinarySearch )
 #define hypre_UpperBinarySearch HYPRE_MULTIPRECISION_FUNC ( hypre_UpperBinarySearch )

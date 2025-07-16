@@ -103,7 +103,7 @@ cat >> $MUP_HEADER <<@
 #ifndef hypre_KRYLOV_MUP_DEF_HEADER
 #define hypre_KRYLOV_MUP_DEF_HEADER
 
-#include "multiprecision.h"
+#include "_hypre_mup_def.h"
 
 @
 
