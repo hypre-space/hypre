@@ -97,63 +97,65 @@ typedef enum
 
 #endif
 
-// /* Helper macros to generate multiprecision function declarations */
-// #define DECLARE_MP_FUNC(rtype,func,fargs...)\
-// 	rtype CONCAT_(func,FLT_SUFFIX) (fargs);\
-// 	rtype CONCAT_(func,DBL_SUFFIX) (fargs);\
-// 	rtype CONCAT_(func,LDBL_SUFFIX) (fargs);
-//
-// #define DECLARE_DP_FUNC(rtype,func,fargs...)\
-// 	rtype CONCAT_(func,DBL_SUFFIX) (fargs);
-//
-// #define HYPRE_DP_FUNC(a) CONCAT_(a, DBL_SUFFIX)
-//
-// #define DECLARE_SP_FUNC(rtype,func,fargs...)\
-// 	rtype CONCAT_(func,FLT_SUFFIX) (fargs);
-//
-// #define HYPRE_SP_FUNC(a) CONCAT_(a, FLT_SUFFIX)
-//
-// /* code for scalar or void return type */
-// #define MP_METHOD_FUNC(precision,func,args...)\
-// 	switch(precision) {\
-// 	   case HYPRE_REAL_SINGLE: \
-// 	      return CONCAT_(func,FLT_SUFFIX) (args);\
-// 	   case HYPRE_REAL_DOUBLE: \
-// 	      return CONCAT_(func,DBL_SUFFIX) (args);\
-// 	   case HYPRE_REAL_LONGDOUBLE: \
-// 	      return CONCAT_(func,LDBL_SUFFIX) (args);\
-// 	   default:\
-// 	      hypre_printf("Unknown solver precision" );\
-// 	      exit(0);\
-//         }
-//
-// /* code for pointer return type */
-// #define MP_METHOD_FUNCPTR(rval,precision,func,args...)\
-// 	switch(precision) {\
-// 	   case HYPRE_REAL_SINGLE: \
-// 	      rval = CONCAT_(func,FLT_SUFFIX) (args);\
-// 	   case HYPRE_REAL_DOUBLE: \
-// 	      rval = CONCAT_(func,DBL_SUFFIX) (args);\
-// 	   case HYPRE_REAL_LONGDOUBLE: \
-// 	      rval = CONCAT_(func,LDBL_SUFFIX) (args);\
-// 	   default:\
-// 	      hypre_printf("Unknown solver precision" );\
-// 	      exit(0);\
-//         }
-//
-// /* code for pointer return type */
-// #define MP_METHOD_FUNCPTR_NP(rval,func,args...)\
-// 	switch(precision) {\
-// 	   case HYPRE_REAL_SINGLE: \
-// 	      rval = CONCAT_(func,FLT_SUFFIX) (args);\
-// 	   case HYPRE_REAL_DOUBLE: \
-// 	      rval = CONCAT_(func,DBL_SUFFIX) (args);\
-// 	   case HYPRE_REAL_LONGDOUBLE: \
-// 	      rval = CONCAT_(func,LDBL_SUFFIX) (args);\
-// 	   default:\
-// 	      hypre_printf("Unknown solver precision" );\
-// 	      exit(0);\
-//         }
+#if 0
+/* Helper macros to generate multiprecision function declarations */
+#define DECLARE_MP_FUNC(rtype,func,fargs...)\
+	rtype CONCAT_(func,FLT_SUFFIX) (fargs);\
+	rtype CONCAT_(func,DBL_SUFFIX) (fargs);\
+	rtype CONCAT_(func,LDBL_SUFFIX) (fargs);
+
+#define DECLARE_DP_FUNC(rtype,func,fargs...)\
+	rtype CONCAT_(func,DBL_SUFFIX) (fargs);
+
+#define HYPRE_DP_FUNC(a) CONCAT_(a, DBL_SUFFIX)
+
+#define DECLARE_SP_FUNC(rtype,func,fargs...)\
+	rtype CONCAT_(func,FLT_SUFFIX) (fargs);
+
+#define HYPRE_SP_FUNC(a) CONCAT_(a, FLT_SUFFIX)
+
+/* code for scalar or void return type */
+#define MP_METHOD_FUNC(precision,func,args...)\
+	switch(precision) {\
+	   case HYPRE_REAL_SINGLE: \
+	      return CONCAT_(func,FLT_SUFFIX) (args);\
+	   case HYPRE_REAL_DOUBLE: \
+	      return CONCAT_(func,DBL_SUFFIX) (args);\
+	   case HYPRE_REAL_LONGDOUBLE: \
+	      return CONCAT_(func,LDBL_SUFFIX) (args);\
+	   default:\
+	      hypre_printf("Unknown solver precision" );\
+	      exit(0);\
+        }
+
+/* code for pointer return type */
+#define MP_METHOD_FUNCPTR(rval,precision,func,args...)\
+	switch(precision) {\
+	   case HYPRE_REAL_SINGLE: \
+	      rval = CONCAT_(func,FLT_SUFFIX) (args);\
+	   case HYPRE_REAL_DOUBLE: \
+	      rval = CONCAT_(func,DBL_SUFFIX) (args);\
+	   case HYPRE_REAL_LONGDOUBLE: \
+	      rval = CONCAT_(func,LDBL_SUFFIX) (args);\
+	   default:\
+	      hypre_printf("Unknown solver precision" );\
+	      exit(0);\
+        }
+
+/* code for pointer return type */
+#define MP_METHOD_FUNCPTR_NP(rval,func,args...)\
+	switch(precision) {\
+	   case HYPRE_REAL_SINGLE: \
+	      rval = CONCAT_(func,FLT_SUFFIX) (args);\
+	   case HYPRE_REAL_DOUBLE: \
+	      rval = CONCAT_(func,DBL_SUFFIX) (args);\
+	   case HYPRE_REAL_LONGDOUBLE: \
+	      rval = CONCAT_(func,LDBL_SUFFIX) (args);\
+	   default:\
+	      hypre_printf("Unknown solver precision" );\
+	      exit(0);\
+        }
+#endif
 
 #endif
 
