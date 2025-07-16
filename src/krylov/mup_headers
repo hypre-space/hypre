@@ -142,8 +142,6 @@ cat >> $MUP_HEADER <<@
 
 #undef hypre_KRYLOV_MUP_DEF_HEADER
 
-#include "multiprecision.h"
-
 @
 
 cat>> $MUP_HEADER <<@

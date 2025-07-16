@@ -12,8 +12,6 @@
 
 #undef hypre_KRYLOV_MUP_DEF_HEADER
 
-#include "multiprecision.h"
-
 #undef HYPRE_BiCGSTABDestroy
 #undef HYPRE_BiCGSTABGetFinalRelativeResidualNorm
 #undef HYPRE_BiCGSTABGetNumIterations
