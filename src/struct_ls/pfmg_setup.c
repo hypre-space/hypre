@@ -431,6 +431,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    hypre_MemoryPrintUsage(comm, hypre_HandleLogLevel(hypre_handle()), "PFMG setup end", 0);
    hypre_GpuProfilingPopRange();
+   hypre_sprintf(region_name, "%s", "PFMG-Setup");
    HYPRE_ANNOTATE_REGION_END("%s", region_name);
    HYPRE_ANNOTATE_FUNC_END;
 
