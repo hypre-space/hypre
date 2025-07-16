@@ -7,7 +7,7 @@
 #include <HYPRE_config.h>
 #include "HYPRE_parcsr_ls.h"
 #include "_hypre_parcsr_mv.h"
-#include "krylov.h"
+#include "_hypre_krylov.h"
 #include "HYPRE_lobpcg.h"
 
 #include "HYPRE_parcsr_ls_mp.h"

@@ -18,7 +18,6 @@ C_COMPILE_FLAGS = \
 
 HEADERS =\
  HYPRE_krylov.h\
- krylov.h\
  bicgstab.h\
  cgnr.h\
  gmres.h\
@@ -82,13 +81,11 @@ SONAME = libHYPRE_krylov-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 all: libHYPRE_krylov${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/krylov.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: all
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/krylov.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:

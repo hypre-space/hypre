@@ -7,7 +7,7 @@
 #include "_hypre_utilities.h"
 #include "HYPRE_struct_ls.h"
 #include "_hypre_struct_mv.h"
-#include "krylov.h"
+#include "_hypre_krylov.h"
 
 #include "temp_multivector.h"
  /* ... needed to make sense of functions in HYPRE_parcsr_int.c */

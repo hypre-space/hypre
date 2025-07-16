@@ -17,7 +17,7 @@
 #include "HYPRE_sstruct_ls.h"
 
 #include "_hypre_utilities.h"
-#include "krylov.h"
+#include "_hypre_krylov.h"
 #include "_hypre_struct_ls.h"
 #include "_hypre_sstruct_mv.h"
 #include "_hypre_parcsr_ls.h"

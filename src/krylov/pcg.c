@@ -20,7 +20,7 @@
    version iterates with a special stopping criterion
 */
 
-#include "krylov.h"
+#include "_hypre_krylov.h"
 #include "_hypre_utilities.h"
 
 /*--------------------------------------------------------------------------

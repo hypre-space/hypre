@@ -10,7 +10,8 @@
  * HYPRE_BiCGSTAB interface
  *
  *****************************************************************************/
-#include "krylov.h"
+
+#include "_hypre_krylov.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_BiCGSTABCreate does not exist.  Call the appropriate function which

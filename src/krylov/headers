@@ -77,5 +77,3 @@ cat >> $INTERNAL_HEADER <<@
 
 @
 
-# RDF TODO: Migrate away from krylov.h and delete the next line
-cp _hypre_krylov.h krylov.h
