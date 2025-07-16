@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 ../config/gen_code.sh HYPRE_krylov.h _hypre_krylov.h mup
-../config/gen_code.sh HYPRE_lobpcg.h lobpcg.h        mup_lobpcg
+../config/gen_code.sh HYPRE_lobpcg.h _hypre_lobpcg.h mup_lobpcg
 
 mup_headers
 mup_lobpcg_headers

@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "lobpcg.h"
+#include "_hypre_lobpcg.h"
 #include "fortran_matrix.h"
 #include "multivector.h"
 #include "HYPRE_MatvecFunctions.h"

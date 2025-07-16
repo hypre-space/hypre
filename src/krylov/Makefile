@@ -28,7 +28,8 @@ HEADERS =\
  pcg.h\
  HYPRE_lobpcg.h\
  HYPRE_MatvecFunctions.h\
- lobpcg.h
+ _hypre_krylov.h\
+ _hypre_lobpcg.h
 
 FILES =\
  bicgstab.c\
@@ -82,14 +83,12 @@ all: libHYPRE_krylov${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/krylov.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/lobpcg.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: all
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/krylov.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/lobpcg.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:

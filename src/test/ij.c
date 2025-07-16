@@ -41,7 +41,7 @@
 #include <time.h>
 
 #include "HYPRE_lobpcg.h"
-#include "lobpcg.h"
+#include "_hypre_lobpcg.h"
 
 /* max dt */
 #define DT_INF 1.0e30

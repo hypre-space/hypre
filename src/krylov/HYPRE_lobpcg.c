@@ -15,7 +15,7 @@
 #include "HYPRE_config.h"
 
 #include "HYPRE_lobpcg.h"
-#include "lobpcg.h"
+#include "_hypre_lobpcg.h"
 #include "interpreter.h"
 
 HYPRE_Int
