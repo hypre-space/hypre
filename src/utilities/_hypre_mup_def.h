@@ -33,15 +33,6 @@
 
 #if defined(HYPRE_MIXED_PRECISION)
 
-/* object precision options */
-typedef enum 
-{
-   HYPRE_REAL_SINGLE,
-   HYPRE_REAL_DOUBLE,
-   HYPRE_REAL_LONGDOUBLE
-
-} HYPRE_Precision;
-
 /* Set build options */
 #if defined(MP_BUILD_SINGLE)
 
@@ -49,7 +40,6 @@ typedef enum
 #define HYPRE_MULTIPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_FLT_SUFFIX)
 #define HYPRE_ZZZZZPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_FLT_SUFFIX)  /* RDF: Temporary */
 #define HYPRE_FIXEDPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_FLT_SUFFIX)
-#define HYPRE_OBJECT_PRECISION HYPRE_REAL_SINGLE
 #undef  HYPRE_LONG_DOUBLE
 #ifndef HYPRE_SINGLE
 #define HYPRE_SINGLE 1
@@ -61,7 +51,6 @@ typedef enum
 #define HYPRE_MULTIPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_DBL_SUFFIX)
 #define HYPRE_ZZZZZPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_DBL_SUFFIX)  /* RDF: Temporary */
 #define HYPRE_FIXEDPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_DBL_SUFFIX)
-#define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE
 #undef  HYPRE_SINGLE
 #undef  HYPRE_LONG_DOUBLE
 
@@ -71,7 +60,6 @@ typedef enum
 #define HYPRE_MULTIPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_LDBL_SUFFIX)
 #define HYPRE_ZZZZZPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_LDBL_SUFFIX)  /* RDF: Temporary */
 #define HYPRE_FIXEDPRECISION_FUNC(a) hypre_CONCAT_(a, hypre_LDBL_SUFFIX)
-#define HYPRE_OBJECT_PRECISION HYPRE_REAL_LONGDOUBLE
 #undef  HYPRE_SINGLE
 #ifndef HYPRE_LONG_DOUBLE
 #define HYPRE_LONG_DOUBLE 1
@@ -83,7 +71,6 @@ typedef enum
 #define HYPRE_MULTIPRECISION_FUNC(a) a
 #define HYPRE_ZZZZZPRECISION_FUNC(a) hypre_CONCAT_(a, def)  /* RDF: Temporary */
 #define HYPRE_FIXEDPRECISION_FUNC(a) a
-#define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE  /* RDF: Set this to default precision */
 #define hypre_DEFINE_GLOBAL_MP 1  /* Define globals only once during default precision build */
 
 #else
@@ -91,7 +78,6 @@ typedef enum
 #define HYPRE_MULTIPRECISION_FUNC(a) a
 #define HYPRE_ZZZZZPRECISION_FUNC(a) hypre_CONCAT_(a, def)  /* RDF: Temporary */
 #define HYPRE_FIXEDPRECISION_FUNC(a) a
-#define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE  /* RDF: Set this to default precision */
 
 #endif
 

@@ -26,10 +26,34 @@
 
 #ifdef HYPRE_MIXED_PRECISION
 #include "utilities_mup_func.h"
+
 #ifdef hypre_DEFINE_GLOBAL_MP
 #define hypre_DEFINE_GLOBAL 1
 #endif
+
+/* object precision options */
+typedef enum 
+{
+   HYPRE_REAL_SINGLE,
+   HYPRE_REAL_DOUBLE,
+   HYPRE_REAL_LONGDOUBLE
+
+} HYPRE_Precision;
+
+#ifndef HYPRE_OBJECT_PRECISION
+#if defined(HYPRE_SINGLE)
+#define HYPRE_OBJECT_PRECISION HYPRE_REAL_SINGLE
+#elif defined(HYPRE_LONG_DOUBLE)
+#define HYPRE_OBJECT_PRECISION HYPRE_REAL_LONGDOUBLE
 #else
+#define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE
+#endif
+#endif
+
+#endif
+
+/* need to define this when not mixed precision */
+#ifndef HYPRE_MIXED_PRECISION
 #define hypre_DEFINE_GLOBAL 1
 #endif
 

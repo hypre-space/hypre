@@ -7,20 +7,20 @@
 DIRS="\
  krylov\
 "
-# blas
-# distributed_ls/Euclid
-# distributed_ls/ParaSails
-# distributed_ls/pilut
-# distributed_matrix
+# blas                     - no external header
+# distributed_ls/Euclid    - no external header
+# distributed_ls/ParaSails - no external header, no internal header
+# distributed_ls/pilut     - no external header, no internal header
+# distributed_matrix       - no external header, no internal header
 # IJ_mv
-# lapack
-# matrix_matrix
-# multivector
-# parcsr_block_mv
+# lapack                   - no external header
+# matrix_matrix            - no external header, no internal header
+# multivector              - no external header, no internal header
+# parcsr_block_mv          - no external header
 # parcsr_ls
 # parcsr_mv
-# seq_block_mv
-# seq_mv
+# seq_block_mv             - no external header
+# seq_mv                   - renemame seq_mv.h to _hypre_seq_mv.h
 # sstruct_ls
 # sstruct_mv
 # struct_ls
