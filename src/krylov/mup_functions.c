@@ -18,7 +18,7 @@
 HYPRE_Int
 HYPRE_BiCGSTABDestroy( HYPRE_Solver solver )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABDestroy_pre( precision, solver );
 }
 
@@ -27,7 +27,7 @@ HYPRE_BiCGSTABDestroy( HYPRE_Solver solver )
 HYPRE_Int
 HYPRE_BiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABGetFinalRelativeResidualNorm_pre( precision, solver, norm );
 }
 
@@ -36,7 +36,7 @@ HYPRE_BiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 HYPRE_Int
 HYPRE_BiCGSTABGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABGetNumIterations_pre( precision, solver, num_iterations );
 }
 
@@ -45,7 +45,7 @@ HYPRE_BiCGSTABGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations 
 HYPRE_Int
 HYPRE_BiCGSTABGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABGetPrecond_pre( precision, solver, precond_data_ptr );
 }
 
@@ -54,7 +54,7 @@ HYPRE_BiCGSTABGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
 HYPRE_Int
 HYPRE_BiCGSTABGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABGetPrecondMatrix_pre( precision, solver, precond_matrix_ptr );
 }
 
@@ -63,7 +63,7 @@ HYPRE_BiCGSTABGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix * precond_matr
 HYPRE_Int
 HYPRE_BiCGSTABGetResidual( HYPRE_Solver solver, void * residual )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABGetResidual_pre( precision, solver, residual );
 }
 
@@ -72,7 +72,7 @@ HYPRE_BiCGSTABGetResidual( HYPRE_Solver solver, void * residual )
 HYPRE_Int
 HYPRE_BiCGSTABSetAbsoluteTol( HYPRE_Solver solver, hypre_long_double a_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABSetAbsoluteTol_pre( precision, solver, a_tol );
 }
 
@@ -81,7 +81,7 @@ HYPRE_BiCGSTABSetAbsoluteTol( HYPRE_Solver solver, hypre_long_double a_tol )
 HYPRE_Int
 HYPRE_BiCGSTABSetConvergenceFactorTol( HYPRE_Solver solver, hypre_long_double cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABSetConvergenceFactorTol_pre( precision, solver, cf_tol );
 }
 
@@ -90,7 +90,7 @@ HYPRE_BiCGSTABSetConvergenceFactorTol( HYPRE_Solver solver, hypre_long_double cf
 HYPRE_Int
 HYPRE_BiCGSTABSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABSetLogging_pre( precision, solver, logging );
 }
 
@@ -99,7 +99,7 @@ HYPRE_BiCGSTABSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
 HYPRE_Int
 HYPRE_BiCGSTABSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABSetMaxIter_pre( precision, solver, max_iter );
 }
 
@@ -108,7 +108,7 @@ HYPRE_BiCGSTABSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
 HYPRE_Int
 HYPRE_BiCGSTABSetMinIter( HYPRE_Solver solver, HYPRE_Int min_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABSetMinIter_pre( precision, solver, min_iter );
 }
 
@@ -117,7 +117,7 @@ HYPRE_BiCGSTABSetMinIter( HYPRE_Solver solver, HYPRE_Int min_iter )
 HYPRE_Int
 HYPRE_BiCGSTABSetPrecond( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABSetPrecond_pre( precision, solver, precond, precond_setup, precond_solver );
 }
 
@@ -126,7 +126,7 @@ HYPRE_BiCGSTABSetPrecond( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HYP
 HYPRE_Int
 HYPRE_BiCGSTABSetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix precond_matrix )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABSetPrecondMatrix_pre( precision, solver, precond_matrix );
 }
 
@@ -135,7 +135,7 @@ HYPRE_BiCGSTABSetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix precond_matrix
 HYPRE_Int
 HYPRE_BiCGSTABSetPrintLevel( HYPRE_Solver solver, HYPRE_Int level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABSetPrintLevel_pre( precision, solver, level );
 }
 
@@ -144,7 +144,7 @@ HYPRE_BiCGSTABSetPrintLevel( HYPRE_Solver solver, HYPRE_Int level )
 HYPRE_Int
 HYPRE_BiCGSTABSetStopCrit( HYPRE_Solver solver, HYPRE_Int stop_crit )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABSetStopCrit_pre( precision, solver, stop_crit );
 }
 
@@ -153,7 +153,7 @@ HYPRE_BiCGSTABSetStopCrit( HYPRE_Solver solver, HYPRE_Int stop_crit )
 HYPRE_Int
 HYPRE_BiCGSTABSetTol( HYPRE_Solver solver, hypre_long_double tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABSetTol_pre( precision, solver, tol );
 }
 
@@ -162,7 +162,7 @@ HYPRE_BiCGSTABSetTol( HYPRE_Solver solver, hypre_long_double tol )
 HYPRE_Int
 HYPRE_BiCGSTABSetup( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABSetup_pre( precision, solver, A, b, x );
 }
 
@@ -171,7 +171,7 @@ HYPRE_BiCGSTABSetup( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_
 HYPRE_Int
 HYPRE_BiCGSTABSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_BiCGSTABSolve_pre( precision, solver, A, b, x );
 }
 
@@ -180,7 +180,7 @@ HYPRE_BiCGSTABSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_
 HYPRE_Int
 HYPRE_CGNRDestroy( HYPRE_Solver solver )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_CGNRDestroy_pre( precision, solver );
 }
 
@@ -189,7 +189,7 @@ HYPRE_CGNRDestroy( HYPRE_Solver solver )
 HYPRE_Int
 HYPRE_CGNRGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_CGNRGetFinalRelativeResidualNorm_pre( precision, solver, norm );
 }
 
@@ -198,7 +198,7 @@ HYPRE_CGNRGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 HYPRE_Int
 HYPRE_CGNRGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_CGNRGetNumIterations_pre( precision, solver, num_iterations );
 }
 
@@ -207,7 +207,7 @@ HYPRE_CGNRGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
 HYPRE_Int
 HYPRE_CGNRGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_CGNRGetPrecond_pre( precision, solver, precond_data_ptr );
 }
 
@@ -216,7 +216,7 @@ HYPRE_CGNRGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
 HYPRE_Int
 HYPRE_CGNRSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_CGNRSetLogging_pre( precision, solver, logging );
 }
 
@@ -225,7 +225,7 @@ HYPRE_CGNRSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
 HYPRE_Int
 HYPRE_CGNRSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_CGNRSetMaxIter_pre( precision, solver, max_iter );
 }
 
@@ -234,7 +234,7 @@ HYPRE_CGNRSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
 HYPRE_Int
 HYPRE_CGNRSetMinIter( HYPRE_Solver solver, HYPRE_Int min_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_CGNRSetMinIter_pre( precision, solver, min_iter );
 }
 
@@ -243,7 +243,7 @@ HYPRE_CGNRSetMinIter( HYPRE_Solver solver, HYPRE_Int min_iter )
 HYPRE_Int
 HYPRE_CGNRSetPrecond( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HYPRE_PtrToSolverFcn precondT, HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_CGNRSetPrecond_pre( precision, solver, precond, precondT, precond_setup, precond_solver );
 }
 
@@ -252,7 +252,7 @@ HYPRE_CGNRSetPrecond( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HYPRE_P
 HYPRE_Int
 HYPRE_CGNRSetStopCrit( HYPRE_Solver solver, HYPRE_Int stop_crit )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_CGNRSetStopCrit_pre( precision, solver, stop_crit );
 }
 
@@ -261,7 +261,7 @@ HYPRE_CGNRSetStopCrit( HYPRE_Solver solver, HYPRE_Int stop_crit )
 HYPRE_Int
 HYPRE_CGNRSetTol( HYPRE_Solver solver, hypre_long_double tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_CGNRSetTol_pre( precision, solver, tol );
 }
 
@@ -270,7 +270,7 @@ HYPRE_CGNRSetTol( HYPRE_Solver solver, hypre_long_double tol )
 HYPRE_Int
 HYPRE_CGNRSetup( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_CGNRSetup_pre( precision, solver, A, b, x );
 }
 
@@ -279,7 +279,7 @@ HYPRE_CGNRSetup( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vect
 HYPRE_Int
 HYPRE_CGNRSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_CGNRSolve_pre( precision, solver, A, b, x );
 }
 
@@ -288,7 +288,7 @@ HYPRE_CGNRSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vect
 HYPRE_Int
 HYPRE_COGMRESGetCGS( HYPRE_Solver solver, HYPRE_Int * cgs )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetCGS_pre( precision, solver, cgs );
 }
 
@@ -297,7 +297,7 @@ HYPRE_COGMRESGetCGS( HYPRE_Solver solver, HYPRE_Int * cgs )
 HYPRE_Int
 HYPRE_COGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int * converged )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetConverged_pre( precision, solver, converged );
 }
 
@@ -306,7 +306,7 @@ HYPRE_COGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int * converged )
 HYPRE_Int
 HYPRE_COGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetConvergenceFactorTol_pre( precision, solver, cf_tol );
 }
 
@@ -315,7 +315,7 @@ HYPRE_COGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol )
 HYPRE_Int
 HYPRE_COGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetFinalRelativeResidualNorm_pre( precision, solver, norm );
 }
 
@@ -324,7 +324,7 @@ HYPRE_COGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 HYPRE_Int
 HYPRE_COGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int * k_dim )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetKDim_pre( precision, solver, k_dim );
 }
 
@@ -333,7 +333,7 @@ HYPRE_COGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int * k_dim )
 HYPRE_Int
 HYPRE_COGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int * level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetLogging_pre( precision, solver, level );
 }
 
@@ -342,7 +342,7 @@ HYPRE_COGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int * level )
 HYPRE_Int
 HYPRE_COGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetMaxIter_pre( precision, solver, max_iter );
 }
 
@@ -351,7 +351,7 @@ HYPRE_COGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter )
 HYPRE_Int
 HYPRE_COGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int * min_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetMinIter_pre( precision, solver, min_iter );
 }
 
@@ -360,7 +360,7 @@ HYPRE_COGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int * min_iter )
 HYPRE_Int
 HYPRE_COGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetNumIterations_pre( precision, solver, num_iterations );
 }
 
@@ -369,7 +369,7 @@ HYPRE_COGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
 HYPRE_Int
 HYPRE_COGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetPrecond_pre( precision, solver, precond_data_ptr );
 }
 
@@ -378,7 +378,7 @@ HYPRE_COGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
 HYPRE_Int
 HYPRE_COGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetPrintLevel_pre( precision, solver, level );
 }
 
@@ -387,7 +387,7 @@ HYPRE_COGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
 HYPRE_Int
 HYPRE_COGMRESGetResidual( HYPRE_Solver solver, void * residual )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetResidual_pre( precision, solver, residual );
 }
 
@@ -396,7 +396,7 @@ HYPRE_COGMRESGetResidual( HYPRE_Solver solver, void * residual )
 HYPRE_Int
 HYPRE_COGMRESGetTol( HYPRE_Solver solver, void * tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetTol_pre( precision, solver, tol );
 }
 
@@ -405,7 +405,7 @@ HYPRE_COGMRESGetTol( HYPRE_Solver solver, void * tol )
 HYPRE_Int
 HYPRE_COGMRESGetUnroll( HYPRE_Solver solver, HYPRE_Int * unroll )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESGetUnroll_pre( precision, solver, unroll );
 }
 
@@ -414,7 +414,7 @@ HYPRE_COGMRESGetUnroll( HYPRE_Solver solver, HYPRE_Int * unroll )
 HYPRE_Int
 HYPRE_COGMRESSetAbsoluteTol( HYPRE_Solver solver, hypre_long_double a_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESSetAbsoluteTol_pre( precision, solver, a_tol );
 }
 
@@ -423,7 +423,7 @@ HYPRE_COGMRESSetAbsoluteTol( HYPRE_Solver solver, hypre_long_double a_tol )
 HYPRE_Int
 HYPRE_COGMRESSetCGS( HYPRE_Solver solver, HYPRE_Int cgs )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESSetCGS_pre( precision, solver, cgs );
 }
 
@@ -432,7 +432,7 @@ HYPRE_COGMRESSetCGS( HYPRE_Solver solver, HYPRE_Int cgs )
 HYPRE_Int
 HYPRE_COGMRESSetConvergenceFactorTol( HYPRE_Solver solver, hypre_long_double cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESSetConvergenceFactorTol_pre( precision, solver, cf_tol );
 }
 
@@ -441,7 +441,7 @@ HYPRE_COGMRESSetConvergenceFactorTol( HYPRE_Solver solver, hypre_long_double cf_
 HYPRE_Int
 HYPRE_COGMRESSetKDim( HYPRE_Solver solver, HYPRE_Int k_dim )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESSetKDim_pre( precision, solver, k_dim );
 }
 
@@ -450,7 +450,7 @@ HYPRE_COGMRESSetKDim( HYPRE_Solver solver, HYPRE_Int k_dim )
 HYPRE_Int
 HYPRE_COGMRESSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESSetLogging_pre( precision, solver, logging );
 }
 
@@ -459,7 +459,7 @@ HYPRE_COGMRESSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
 HYPRE_Int
 HYPRE_COGMRESSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESSetMaxIter_pre( precision, solver, max_iter );
 }
 
@@ -468,7 +468,7 @@ HYPRE_COGMRESSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
 HYPRE_Int
 HYPRE_COGMRESSetMinIter( HYPRE_Solver solver, HYPRE_Int min_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESSetMinIter_pre( precision, solver, min_iter );
 }
 
@@ -477,7 +477,7 @@ HYPRE_COGMRESSetMinIter( HYPRE_Solver solver, HYPRE_Int min_iter )
 HYPRE_Int
 HYPRE_COGMRESSetModifyPC( HYPRE_Solver solver, HYPRE_PtrToModifyPCFcn modify_pc )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESSetModifyPC_pre( precision, solver, modify_pc );
 }
 
@@ -486,7 +486,7 @@ HYPRE_COGMRESSetModifyPC( HYPRE_Solver solver, HYPRE_PtrToModifyPCFcn modify_pc 
 HYPRE_Int
 HYPRE_COGMRESSetPrecond( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESSetPrecond_pre( precision, solver, precond, precond_setup, precond_solver );
 }
 
@@ -495,7 +495,7 @@ HYPRE_COGMRESSetPrecond( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HYPR
 HYPRE_Int
 HYPRE_COGMRESSetPrintLevel( HYPRE_Solver solver, HYPRE_Int level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESSetPrintLevel_pre( precision, solver, level );
 }
 
@@ -504,7 +504,7 @@ HYPRE_COGMRESSetPrintLevel( HYPRE_Solver solver, HYPRE_Int level )
 HYPRE_Int
 HYPRE_COGMRESSetTol( HYPRE_Solver solver, hypre_long_double tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESSetTol_pre( precision, solver, tol );
 }
 
@@ -513,7 +513,7 @@ HYPRE_COGMRESSetTol( HYPRE_Solver solver, hypre_long_double tol )
 HYPRE_Int
 HYPRE_COGMRESSetUnroll( HYPRE_Solver solver, HYPRE_Int unroll )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESSetUnroll_pre( precision, solver, unroll );
 }
 
@@ -522,7 +522,7 @@ HYPRE_COGMRESSetUnroll( HYPRE_Solver solver, HYPRE_Int unroll )
 HYPRE_Int
 HYPRE_COGMRESSetup( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESSetup_pre( precision, solver, A, b, x );
 }
 
@@ -531,7 +531,7 @@ HYPRE_COGMRESSetup( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_V
 HYPRE_Int
 HYPRE_COGMRESSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_COGMRESSolve_pre( precision, solver, A, b, x );
 }
 
@@ -540,7 +540,7 @@ HYPRE_COGMRESSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_V
 HYPRE_Int
 HYPRE_FlexGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int * converged )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetConverged_pre( precision, solver, converged );
 }
 
@@ -549,7 +549,7 @@ HYPRE_FlexGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int * converged )
 HYPRE_Int
 HYPRE_FlexGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetConvergenceFactorTol_pre( precision, solver, cf_tol );
 }
 
@@ -558,7 +558,7 @@ HYPRE_FlexGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol )
 HYPRE_Int
 HYPRE_FlexGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetFinalRelativeResidualNorm_pre( precision, solver, norm );
 }
 
@@ -567,7 +567,7 @@ HYPRE_FlexGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 HYPRE_Int
 HYPRE_FlexGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int * k_dim )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetKDim_pre( precision, solver, k_dim );
 }
 
@@ -576,7 +576,7 @@ HYPRE_FlexGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int * k_dim )
 HYPRE_Int
 HYPRE_FlexGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int * level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetLogging_pre( precision, solver, level );
 }
 
@@ -585,7 +585,7 @@ HYPRE_FlexGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int * level )
 HYPRE_Int
 HYPRE_FlexGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetMaxIter_pre( precision, solver, max_iter );
 }
 
@@ -594,7 +594,7 @@ HYPRE_FlexGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter )
 HYPRE_Int
 HYPRE_FlexGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int * min_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetMinIter_pre( precision, solver, min_iter );
 }
 
@@ -603,7 +603,7 @@ HYPRE_FlexGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int * min_iter )
 HYPRE_Int
 HYPRE_FlexGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetNumIterations_pre( precision, solver, num_iterations );
 }
 
@@ -612,7 +612,7 @@ HYPRE_FlexGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations
 HYPRE_Int
 HYPRE_FlexGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetPrecond_pre( precision, solver, precond_data_ptr );
 }
 
@@ -621,7 +621,7 @@ HYPRE_FlexGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr 
 HYPRE_Int
 HYPRE_FlexGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetPrintLevel_pre( precision, solver, level );
 }
 
@@ -630,7 +630,7 @@ HYPRE_FlexGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
 HYPRE_Int
 HYPRE_FlexGMRESGetResidual( HYPRE_Solver solver, void * residual )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetResidual_pre( precision, solver, residual );
 }
 
@@ -639,7 +639,7 @@ HYPRE_FlexGMRESGetResidual( HYPRE_Solver solver, void * residual )
 HYPRE_Int
 HYPRE_FlexGMRESGetTol( HYPRE_Solver solver, void * tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESGetTol_pre( precision, solver, tol );
 }
 
@@ -648,7 +648,7 @@ HYPRE_FlexGMRESGetTol( HYPRE_Solver solver, void * tol )
 HYPRE_Int
 HYPRE_FlexGMRESSetAbsoluteTol( HYPRE_Solver solver, hypre_long_double a_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESSetAbsoluteTol_pre( precision, solver, a_tol );
 }
 
@@ -657,7 +657,7 @@ HYPRE_FlexGMRESSetAbsoluteTol( HYPRE_Solver solver, hypre_long_double a_tol )
 HYPRE_Int
 HYPRE_FlexGMRESSetConvergenceFactorTol( HYPRE_Solver solver, hypre_long_double cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESSetConvergenceFactorTol_pre( precision, solver, cf_tol );
 }
 
@@ -666,7 +666,7 @@ HYPRE_FlexGMRESSetConvergenceFactorTol( HYPRE_Solver solver, hypre_long_double c
 HYPRE_Int
 HYPRE_FlexGMRESSetKDim( HYPRE_Solver solver, HYPRE_Int k_dim )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESSetKDim_pre( precision, solver, k_dim );
 }
 
@@ -675,7 +675,7 @@ HYPRE_FlexGMRESSetKDim( HYPRE_Solver solver, HYPRE_Int k_dim )
 HYPRE_Int
 HYPRE_FlexGMRESSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESSetLogging_pre( precision, solver, logging );
 }
 
@@ -684,7 +684,7 @@ HYPRE_FlexGMRESSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
 HYPRE_Int
 HYPRE_FlexGMRESSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESSetMaxIter_pre( precision, solver, max_iter );
 }
 
@@ -693,7 +693,7 @@ HYPRE_FlexGMRESSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
 HYPRE_Int
 HYPRE_FlexGMRESSetMinIter( HYPRE_Solver solver, HYPRE_Int min_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESSetMinIter_pre( precision, solver, min_iter );
 }
 
@@ -702,7 +702,7 @@ HYPRE_FlexGMRESSetMinIter( HYPRE_Solver solver, HYPRE_Int min_iter )
 HYPRE_Int
 HYPRE_FlexGMRESSetModifyPC( HYPRE_Solver solver, HYPRE_PtrToModifyPCFcn modify_pc )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESSetModifyPC_pre( precision, solver, modify_pc );
 }
 
@@ -711,7 +711,7 @@ HYPRE_FlexGMRESSetModifyPC( HYPRE_Solver solver, HYPRE_PtrToModifyPCFcn modify_p
 HYPRE_Int
 HYPRE_FlexGMRESSetPrecond( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESSetPrecond_pre( precision, solver, precond, precond_setup, precond_solver );
 }
 
@@ -720,7 +720,7 @@ HYPRE_FlexGMRESSetPrecond( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HY
 HYPRE_Int
 HYPRE_FlexGMRESSetPrintLevel( HYPRE_Solver solver, HYPRE_Int level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESSetPrintLevel_pre( precision, solver, level );
 }
 
@@ -729,7 +729,7 @@ HYPRE_FlexGMRESSetPrintLevel( HYPRE_Solver solver, HYPRE_Int level )
 HYPRE_Int
 HYPRE_FlexGMRESSetTol( HYPRE_Solver solver, hypre_long_double tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESSetTol_pre( precision, solver, tol );
 }
 
@@ -738,7 +738,7 @@ HYPRE_FlexGMRESSetTol( HYPRE_Solver solver, hypre_long_double tol )
 HYPRE_Int
 HYPRE_FlexGMRESSetup( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESSetup_pre( precision, solver, A, b, x );
 }
 
@@ -747,7 +747,7 @@ HYPRE_FlexGMRESSetup( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE
 HYPRE_Int
 HYPRE_FlexGMRESSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_FlexGMRESSolve_pre( precision, solver, A, b, x );
 }
 
@@ -756,7 +756,7 @@ HYPRE_FlexGMRESSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE
 HYPRE_Int
 HYPRE_GMRESGetAbsoluteTol( HYPRE_Solver solver, void * tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetAbsoluteTol_pre( precision, solver, tol );
 }
 
@@ -765,7 +765,7 @@ HYPRE_GMRESGetAbsoluteTol( HYPRE_Solver solver, void * tol )
 HYPRE_Int
 HYPRE_GMRESGetConverged( HYPRE_Solver solver, HYPRE_Int * converged )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetConverged_pre( precision, solver, converged );
 }
 
@@ -774,7 +774,7 @@ HYPRE_GMRESGetConverged( HYPRE_Solver solver, HYPRE_Int * converged )
 HYPRE_Int
 HYPRE_GMRESGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetConvergenceFactorTol_pre( precision, solver, cf_tol );
 }
 
@@ -783,7 +783,7 @@ HYPRE_GMRESGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol )
 HYPRE_Int
 HYPRE_GMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetFinalRelativeResidualNorm_pre( precision, solver, norm );
 }
 
@@ -792,7 +792,7 @@ HYPRE_GMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 HYPRE_Int
 HYPRE_GMRESGetKDim( HYPRE_Solver solver, HYPRE_Int * k_dim )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetKDim_pre( precision, solver, k_dim );
 }
 
@@ -801,7 +801,7 @@ HYPRE_GMRESGetKDim( HYPRE_Solver solver, HYPRE_Int * k_dim )
 HYPRE_Int
 HYPRE_GMRESGetLogging( HYPRE_Solver solver, HYPRE_Int * level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetLogging_pre( precision, solver, level );
 }
 
@@ -810,7 +810,7 @@ HYPRE_GMRESGetLogging( HYPRE_Solver solver, HYPRE_Int * level )
 HYPRE_Int
 HYPRE_GMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetMaxIter_pre( precision, solver, max_iter );
 }
 
@@ -819,7 +819,7 @@ HYPRE_GMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter )
 HYPRE_Int
 HYPRE_GMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int * min_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetMinIter_pre( precision, solver, min_iter );
 }
 
@@ -828,7 +828,7 @@ HYPRE_GMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int * min_iter )
 HYPRE_Int
 HYPRE_GMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetNumIterations_pre( precision, solver, num_iterations );
 }
 
@@ -837,7 +837,7 @@ HYPRE_GMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
 HYPRE_Int
 HYPRE_GMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetPrecond_pre( precision, solver, precond_data_ptr );
 }
 
@@ -846,7 +846,7 @@ HYPRE_GMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
 HYPRE_Int
 HYPRE_GMRESGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetPrecondMatrix_pre( precision, solver, precond_matrix_ptr );
 }
 
@@ -855,7 +855,7 @@ HYPRE_GMRESGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_
 HYPRE_Int
 HYPRE_GMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetPrintLevel_pre( precision, solver, level );
 }
 
@@ -864,7 +864,7 @@ HYPRE_GMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
 HYPRE_Int
 HYPRE_GMRESGetRefSolution( HYPRE_Solver solver, HYPRE_Vector * xref )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetRefSolution_pre( precision, solver, xref );
 }
 
@@ -873,7 +873,7 @@ HYPRE_GMRESGetRefSolution( HYPRE_Solver solver, HYPRE_Vector * xref )
 HYPRE_Int
 HYPRE_GMRESGetRelChange( HYPRE_Solver solver, HYPRE_Int * rel_change )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetRelChange_pre( precision, solver, rel_change );
 }
 
@@ -882,7 +882,7 @@ HYPRE_GMRESGetRelChange( HYPRE_Solver solver, HYPRE_Int * rel_change )
 HYPRE_Int
 HYPRE_GMRESGetResidual( HYPRE_Solver solver, void * residual )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetResidual_pre( precision, solver, residual );
 }
 
@@ -891,7 +891,7 @@ HYPRE_GMRESGetResidual( HYPRE_Solver solver, void * residual )
 HYPRE_Int
 HYPRE_GMRESGetSkipRealResidualCheck( HYPRE_Solver solver, HYPRE_Int * skip_real_r_check )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetSkipRealResidualCheck_pre( precision, solver, skip_real_r_check );
 }
 
@@ -900,7 +900,7 @@ HYPRE_GMRESGetSkipRealResidualCheck( HYPRE_Solver solver, HYPRE_Int * skip_real_
 HYPRE_Int
 HYPRE_GMRESGetStopCrit( HYPRE_Solver solver, HYPRE_Int * stop_crit )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetStopCrit_pre( precision, solver, stop_crit );
 }
 
@@ -909,7 +909,7 @@ HYPRE_GMRESGetStopCrit( HYPRE_Solver solver, HYPRE_Int * stop_crit )
 HYPRE_Int
 HYPRE_GMRESGetTol( HYPRE_Solver solver, void * tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESGetTol_pre( precision, solver, tol );
 }
 
@@ -918,7 +918,7 @@ HYPRE_GMRESGetTol( HYPRE_Solver solver, void * tol )
 HYPRE_Int
 HYPRE_GMRESSetAbsoluteTol( HYPRE_Solver solver, hypre_long_double a_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESSetAbsoluteTol_pre( precision, solver, a_tol );
 }
 
@@ -927,7 +927,7 @@ HYPRE_GMRESSetAbsoluteTol( HYPRE_Solver solver, hypre_long_double a_tol )
 HYPRE_Int
 HYPRE_GMRESSetConvergenceFactorTol( HYPRE_Solver solver, hypre_long_double cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESSetConvergenceFactorTol_pre( precision, solver, cf_tol );
 }
 
@@ -936,7 +936,7 @@ HYPRE_GMRESSetConvergenceFactorTol( HYPRE_Solver solver, hypre_long_double cf_to
 HYPRE_Int
 HYPRE_GMRESSetKDim( HYPRE_Solver solver, HYPRE_Int k_dim )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESSetKDim_pre( precision, solver, k_dim );
 }
 
@@ -945,7 +945,7 @@ HYPRE_GMRESSetKDim( HYPRE_Solver solver, HYPRE_Int k_dim )
 HYPRE_Int
 HYPRE_GMRESSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESSetLogging_pre( precision, solver, logging );
 }
 
@@ -954,7 +954,7 @@ HYPRE_GMRESSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
 HYPRE_Int
 HYPRE_GMRESSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESSetMaxIter_pre( precision, solver, max_iter );
 }
 
@@ -963,7 +963,7 @@ HYPRE_GMRESSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
 HYPRE_Int
 HYPRE_GMRESSetMinIter( HYPRE_Solver solver, HYPRE_Int min_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESSetMinIter_pre( precision, solver, min_iter );
 }
 
@@ -972,7 +972,7 @@ HYPRE_GMRESSetMinIter( HYPRE_Solver solver, HYPRE_Int min_iter )
 HYPRE_Int
 HYPRE_GMRESSetPrecond( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESSetPrecond_pre( precision, solver, precond, precond_setup, precond_solver );
 }
 
@@ -981,7 +981,7 @@ HYPRE_GMRESSetPrecond( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HYPRE_
 HYPRE_Int
 HYPRE_GMRESSetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix precond_matrix )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESSetPrecondMatrix_pre( precision, solver, precond_matrix );
 }
 
@@ -990,7 +990,7 @@ HYPRE_GMRESSetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix precond_matrix )
 HYPRE_Int
 HYPRE_GMRESSetPrintLevel( HYPRE_Solver solver, HYPRE_Int level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESSetPrintLevel_pre( precision, solver, level );
 }
 
@@ -999,7 +999,7 @@ HYPRE_GMRESSetPrintLevel( HYPRE_Solver solver, HYPRE_Int level )
 HYPRE_Int
 HYPRE_GMRESSetRefSolution( HYPRE_Solver solver, HYPRE_Vector xref )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESSetRefSolution_pre( precision, solver, xref );
 }
 
@@ -1008,7 +1008,7 @@ HYPRE_GMRESSetRefSolution( HYPRE_Solver solver, HYPRE_Vector xref )
 HYPRE_Int
 HYPRE_GMRESSetRelChange( HYPRE_Solver solver, HYPRE_Int rel_change )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESSetRelChange_pre( precision, solver, rel_change );
 }
 
@@ -1017,7 +1017,7 @@ HYPRE_GMRESSetRelChange( HYPRE_Solver solver, HYPRE_Int rel_change )
 HYPRE_Int
 HYPRE_GMRESSetSkipRealResidualCheck( HYPRE_Solver solver, HYPRE_Int skip_real_r_check )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESSetSkipRealResidualCheck_pre( precision, solver, skip_real_r_check );
 }
 
@@ -1026,7 +1026,7 @@ HYPRE_GMRESSetSkipRealResidualCheck( HYPRE_Solver solver, HYPRE_Int skip_real_r_
 HYPRE_Int
 HYPRE_GMRESSetStopCrit( HYPRE_Solver solver, HYPRE_Int stop_crit )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESSetStopCrit_pre( precision, solver, stop_crit );
 }
 
@@ -1035,7 +1035,7 @@ HYPRE_GMRESSetStopCrit( HYPRE_Solver solver, HYPRE_Int stop_crit )
 HYPRE_Int
 HYPRE_GMRESSetTol( HYPRE_Solver solver, hypre_long_double tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESSetTol_pre( precision, solver, tol );
 }
 
@@ -1044,7 +1044,7 @@ HYPRE_GMRESSetTol( HYPRE_Solver solver, hypre_long_double tol )
 HYPRE_Int
 HYPRE_GMRESSetup( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESSetup_pre( precision, solver, A, b, x );
 }
 
@@ -1053,7 +1053,7 @@ HYPRE_GMRESSetup( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vec
 HYPRE_Int
 HYPRE_GMRESSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_GMRESSolve_pre( precision, solver, A, b, x );
 }
 
@@ -1062,7 +1062,7 @@ HYPRE_GMRESSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vec
 HYPRE_Int
 HYPRE_LGMRESGetAugDim( HYPRE_Solver solver, HYPRE_Int * k_dim )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetAugDim_pre( precision, solver, k_dim );
 }
 
@@ -1071,7 +1071,7 @@ HYPRE_LGMRESGetAugDim( HYPRE_Solver solver, HYPRE_Int * k_dim )
 HYPRE_Int
 HYPRE_LGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int * converged )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetConverged_pre( precision, solver, converged );
 }
 
@@ -1080,7 +1080,7 @@ HYPRE_LGMRESGetConverged( HYPRE_Solver solver, HYPRE_Int * converged )
 HYPRE_Int
 HYPRE_LGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetConvergenceFactorTol_pre( precision, solver, cf_tol );
 }
 
@@ -1089,7 +1089,7 @@ HYPRE_LGMRESGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol )
 HYPRE_Int
 HYPRE_LGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetFinalRelativeResidualNorm_pre( precision, solver, norm );
 }
 
@@ -1098,7 +1098,7 @@ HYPRE_LGMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 HYPRE_Int
 HYPRE_LGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int * k_dim )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetKDim_pre( precision, solver, k_dim );
 }
 
@@ -1107,7 +1107,7 @@ HYPRE_LGMRESGetKDim( HYPRE_Solver solver, HYPRE_Int * k_dim )
 HYPRE_Int
 HYPRE_LGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int * level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetLogging_pre( precision, solver, level );
 }
 
@@ -1116,7 +1116,7 @@ HYPRE_LGMRESGetLogging( HYPRE_Solver solver, HYPRE_Int * level )
 HYPRE_Int
 HYPRE_LGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetMaxIter_pre( precision, solver, max_iter );
 }
 
@@ -1125,7 +1125,7 @@ HYPRE_LGMRESGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter )
 HYPRE_Int
 HYPRE_LGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int * min_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetMinIter_pre( precision, solver, min_iter );
 }
 
@@ -1134,7 +1134,7 @@ HYPRE_LGMRESGetMinIter( HYPRE_Solver solver, HYPRE_Int * min_iter )
 HYPRE_Int
 HYPRE_LGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetNumIterations_pre( precision, solver, num_iterations );
 }
 
@@ -1143,7 +1143,7 @@ HYPRE_LGMRESGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
 HYPRE_Int
 HYPRE_LGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetPrecond_pre( precision, solver, precond_data_ptr );
 }
 
@@ -1152,7 +1152,7 @@ HYPRE_LGMRESGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
 HYPRE_Int
 HYPRE_LGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetPrintLevel_pre( precision, solver, level );
 }
 
@@ -1161,7 +1161,7 @@ HYPRE_LGMRESGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
 HYPRE_Int
 HYPRE_LGMRESGetResidual( HYPRE_Solver solver, void * residual )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetResidual_pre( precision, solver, residual );
 }
 
@@ -1170,7 +1170,7 @@ HYPRE_LGMRESGetResidual( HYPRE_Solver solver, void * residual )
 HYPRE_Int
 HYPRE_LGMRESGetTol( HYPRE_Solver solver, void * tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESGetTol_pre( precision, solver, tol );
 }
 
@@ -1179,7 +1179,7 @@ HYPRE_LGMRESGetTol( HYPRE_Solver solver, void * tol )
 HYPRE_Int
 HYPRE_LGMRESSetAbsoluteTol( HYPRE_Solver solver, hypre_long_double a_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESSetAbsoluteTol_pre( precision, solver, a_tol );
 }
 
@@ -1188,7 +1188,7 @@ HYPRE_LGMRESSetAbsoluteTol( HYPRE_Solver solver, hypre_long_double a_tol )
 HYPRE_Int
 HYPRE_LGMRESSetAugDim( HYPRE_Solver solver, HYPRE_Int aug_dim )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESSetAugDim_pre( precision, solver, aug_dim );
 }
 
@@ -1197,7 +1197,7 @@ HYPRE_LGMRESSetAugDim( HYPRE_Solver solver, HYPRE_Int aug_dim )
 HYPRE_Int
 HYPRE_LGMRESSetConvergenceFactorTol( HYPRE_Solver solver, hypre_long_double cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESSetConvergenceFactorTol_pre( precision, solver, cf_tol );
 }
 
@@ -1206,7 +1206,7 @@ HYPRE_LGMRESSetConvergenceFactorTol( HYPRE_Solver solver, hypre_long_double cf_t
 HYPRE_Int
 HYPRE_LGMRESSetKDim( HYPRE_Solver solver, HYPRE_Int k_dim )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESSetKDim_pre( precision, solver, k_dim );
 }
 
@@ -1215,7 +1215,7 @@ HYPRE_LGMRESSetKDim( HYPRE_Solver solver, HYPRE_Int k_dim )
 HYPRE_Int
 HYPRE_LGMRESSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESSetLogging_pre( precision, solver, logging );
 }
 
@@ -1224,7 +1224,7 @@ HYPRE_LGMRESSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
 HYPRE_Int
 HYPRE_LGMRESSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESSetMaxIter_pre( precision, solver, max_iter );
 }
 
@@ -1233,7 +1233,7 @@ HYPRE_LGMRESSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
 HYPRE_Int
 HYPRE_LGMRESSetMinIter( HYPRE_Solver solver, HYPRE_Int min_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESSetMinIter_pre( precision, solver, min_iter );
 }
 
@@ -1242,7 +1242,7 @@ HYPRE_LGMRESSetMinIter( HYPRE_Solver solver, HYPRE_Int min_iter )
 HYPRE_Int
 HYPRE_LGMRESSetPrecond( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESSetPrecond_pre( precision, solver, precond, precond_setup, precond_solver );
 }
 
@@ -1251,7 +1251,7 @@ HYPRE_LGMRESSetPrecond( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HYPRE
 HYPRE_Int
 HYPRE_LGMRESSetPrintLevel( HYPRE_Solver solver, HYPRE_Int level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESSetPrintLevel_pre( precision, solver, level );
 }
 
@@ -1260,7 +1260,7 @@ HYPRE_LGMRESSetPrintLevel( HYPRE_Solver solver, HYPRE_Int level )
 HYPRE_Int
 HYPRE_LGMRESSetTol( HYPRE_Solver solver, hypre_long_double tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESSetTol_pre( precision, solver, tol );
 }
 
@@ -1269,7 +1269,7 @@ HYPRE_LGMRESSetTol( HYPRE_Solver solver, hypre_long_double tol )
 HYPRE_Int
 HYPRE_LGMRESSetup( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESSetup_pre( precision, solver, A, b, x );
 }
 
@@ -1278,7 +1278,7 @@ HYPRE_LGMRESSetup( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Ve
 HYPRE_Int
 HYPRE_LGMRESSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_LGMRESSolve_pre( precision, solver, A, b, x );
 }
 
@@ -1287,7 +1287,7 @@ HYPRE_LGMRESSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Ve
 HYPRE_Int
 HYPRE_PCGGetAbsoluteTolFactor( HYPRE_Solver solver, void * abstolf )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetAbsoluteTolFactor_pre( precision, solver, abstolf );
 }
 
@@ -1296,7 +1296,7 @@ HYPRE_PCGGetAbsoluteTolFactor( HYPRE_Solver solver, void * abstolf )
 HYPRE_Int
 HYPRE_PCGGetConverged( HYPRE_Solver solver, HYPRE_Int * converged )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetConverged_pre( precision, solver, converged );
 }
 
@@ -1305,7 +1305,7 @@ HYPRE_PCGGetConverged( HYPRE_Solver solver, HYPRE_Int * converged )
 HYPRE_Int
 HYPRE_PCGGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetConvergenceFactorTol_pre( precision, solver, cf_tol );
 }
 
@@ -1314,7 +1314,7 @@ HYPRE_PCGGetConvergenceFactorTol( HYPRE_Solver solver, void * cf_tol )
 HYPRE_Int
 HYPRE_PCGGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetFinalRelativeResidualNorm_pre( precision, solver, norm );
 }
 
@@ -1323,7 +1323,7 @@ HYPRE_PCGGetFinalRelativeResidualNorm( HYPRE_Solver solver, void * norm )
 HYPRE_Int
 HYPRE_PCGGetFlex( HYPRE_Solver solver, HYPRE_Int * flex )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetFlex_pre( precision, solver, flex );
 }
 
@@ -1332,7 +1332,7 @@ HYPRE_PCGGetFlex( HYPRE_Solver solver, HYPRE_Int * flex )
 HYPRE_Int
 HYPRE_PCGGetLogging( HYPRE_Solver solver, HYPRE_Int * logging )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetLogging_pre( precision, solver, logging );
 }
 
@@ -1341,7 +1341,7 @@ HYPRE_PCGGetLogging( HYPRE_Solver solver, HYPRE_Int * logging )
 HYPRE_Int
 HYPRE_PCGGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetMaxIter_pre( precision, solver, max_iter );
 }
 
@@ -1350,7 +1350,7 @@ HYPRE_PCGGetMaxIter( HYPRE_Solver solver, HYPRE_Int * max_iter )
 HYPRE_Int
 HYPRE_PCGGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetNumIterations_pre( precision, solver, num_iterations );
 }
 
@@ -1359,7 +1359,7 @@ HYPRE_PCGGetNumIterations( HYPRE_Solver solver, HYPRE_Int * num_iterations )
 HYPRE_Int
 HYPRE_PCGGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetPrecond_pre( precision, solver, precond_data_ptr );
 }
 
@@ -1368,7 +1368,7 @@ HYPRE_PCGGetPrecond( HYPRE_Solver solver, HYPRE_Solver * precond_data_ptr )
 HYPRE_Int
 HYPRE_PCGGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_ptr )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetPrecondMatrix_pre( precision, solver, precond_matrix_ptr );
 }
 
@@ -1377,7 +1377,7 @@ HYPRE_PCGGetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix * precond_matrix_pt
 HYPRE_Int
 HYPRE_PCGGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetPrintLevel_pre( precision, solver, level );
 }
 
@@ -1386,7 +1386,7 @@ HYPRE_PCGGetPrintLevel( HYPRE_Solver solver, HYPRE_Int * level )
 HYPRE_Int
 HYPRE_PCGGetRelChange( HYPRE_Solver solver, HYPRE_Int * rel_change )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetRelChange_pre( precision, solver, rel_change );
 }
 
@@ -1395,7 +1395,7 @@ HYPRE_PCGGetRelChange( HYPRE_Solver solver, HYPRE_Int * rel_change )
 HYPRE_Int
 HYPRE_PCGGetResidual( HYPRE_Solver solver, void * residual )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetResidual_pre( precision, solver, residual );
 }
 
@@ -1404,7 +1404,7 @@ HYPRE_PCGGetResidual( HYPRE_Solver solver, void * residual )
 HYPRE_Int
 HYPRE_PCGGetResidualTol( HYPRE_Solver solver, void * rtol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetResidualTol_pre( precision, solver, rtol );
 }
 
@@ -1413,7 +1413,7 @@ HYPRE_PCGGetResidualTol( HYPRE_Solver solver, void * rtol )
 HYPRE_Int
 HYPRE_PCGGetSkipBreak( HYPRE_Solver solver, HYPRE_Int * skip_break )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetSkipBreak_pre( precision, solver, skip_break );
 }
 
@@ -1422,7 +1422,7 @@ HYPRE_PCGGetSkipBreak( HYPRE_Solver solver, HYPRE_Int * skip_break )
 HYPRE_Int
 HYPRE_PCGGetStopCrit( HYPRE_Solver solver, HYPRE_Int * stop_crit )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetStopCrit_pre( precision, solver, stop_crit );
 }
 
@@ -1431,7 +1431,7 @@ HYPRE_PCGGetStopCrit( HYPRE_Solver solver, HYPRE_Int * stop_crit )
 HYPRE_Int
 HYPRE_PCGGetTol( HYPRE_Solver solver, void * tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetTol_pre( precision, solver, tol );
 }
 
@@ -1440,7 +1440,7 @@ HYPRE_PCGGetTol( HYPRE_Solver solver, void * tol )
 HYPRE_Int
 HYPRE_PCGGetTwoNorm( HYPRE_Solver solver, HYPRE_Int * two_norm )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGGetTwoNorm_pre( precision, solver, two_norm );
 }
 
@@ -1449,7 +1449,7 @@ HYPRE_PCGGetTwoNorm( HYPRE_Solver solver, HYPRE_Int * two_norm )
 HYPRE_Int
 HYPRE_PCGSetAbsoluteTol( HYPRE_Solver solver, hypre_long_double a_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGSetAbsoluteTol_pre( precision, solver, a_tol );
 }
 
@@ -1458,7 +1458,7 @@ HYPRE_PCGSetAbsoluteTol( HYPRE_Solver solver, hypre_long_double a_tol )
 HYPRE_Int
 HYPRE_PCGSetAbsoluteTolFactor( HYPRE_Solver solver, hypre_long_double abstolf )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGSetAbsoluteTolFactor_pre( precision, solver, abstolf );
 }
 
@@ -1467,7 +1467,7 @@ HYPRE_PCGSetAbsoluteTolFactor( HYPRE_Solver solver, hypre_long_double abstolf )
 HYPRE_Int
 HYPRE_PCGSetConvergenceFactorTol( HYPRE_Solver solver, hypre_long_double cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGSetConvergenceFactorTol_pre( precision, solver, cf_tol );
 }
 
@@ -1476,7 +1476,7 @@ HYPRE_PCGSetConvergenceFactorTol( HYPRE_Solver solver, hypre_long_double cf_tol 
 HYPRE_Int
 HYPRE_PCGSetFlex( HYPRE_Solver solver, HYPRE_Int flex )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGSetFlex_pre( precision, solver, flex );
 }
 
@@ -1485,7 +1485,7 @@ HYPRE_PCGSetFlex( HYPRE_Solver solver, HYPRE_Int flex )
 HYPRE_Int
 HYPRE_PCGSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGSetLogging_pre( precision, solver, logging );
 }
 
@@ -1494,7 +1494,7 @@ HYPRE_PCGSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
 HYPRE_Int
 HYPRE_PCGSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGSetMaxIter_pre( precision, solver, max_iter );
 }
 
@@ -1503,7 +1503,7 @@ HYPRE_PCGSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
 HYPRE_Int
 HYPRE_PCGSetPrecond( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HYPRE_PtrToSolverFcn precond_setup, HYPRE_Solver precond_solver )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGSetPrecond_pre( precision, solver, precond, precond_setup, precond_solver );
 }
 
@@ -1512,7 +1512,7 @@ HYPRE_PCGSetPrecond( HYPRE_Solver solver, HYPRE_PtrToSolverFcn precond, HYPRE_Pt
 HYPRE_Int
 HYPRE_PCGSetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix precond_matrix )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGSetPrecondMatrix_pre( precision, solver, precond_matrix );
 }
 
@@ -1521,7 +1521,7 @@ HYPRE_PCGSetPrecondMatrix( HYPRE_Solver solver, HYPRE_Matrix precond_matrix )
 HYPRE_Int
 HYPRE_PCGSetPreconditioner( HYPRE_Solver solver, HYPRE_Solver precond )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGSetPreconditioner_pre( precision, solver, precond );
 }
 
@@ -1530,7 +1530,7 @@ HYPRE_PCGSetPreconditioner( HYPRE_Solver solver, HYPRE_Solver precond )
 HYPRE_Int
 HYPRE_PCGSetPrintLevel( HYPRE_Solver solver, HYPRE_Int level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGSetPrintLevel_pre( precision, solver, level );
 }
 
@@ -1539,7 +1539,7 @@ HYPRE_PCGSetPrintLevel( HYPRE_Solver solver, HYPRE_Int level )
 HYPRE_Int
 HYPRE_PCGSetRecomputeResidual( HYPRE_Solver solver, HYPRE_Int recompute_residual )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGSetRecomputeResidual_pre( precision, solver, recompute_residual );
 }
 
@@ -1548,7 +1548,7 @@ HYPRE_PCGSetRecomputeResidual( HYPRE_Solver solver, HYPRE_Int recompute_residual
 HYPRE_Int
 HYPRE_PCGSetRecomputeResidualP( HYPRE_Solver solver, HYPRE_Int recompute_residual_p )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGSetRecomputeResidualP_pre( precision, solver, recompute_residual_p );
 }
 
@@ -1557,7 +1557,7 @@ HYPRE_PCGSetRecomputeResidualP( HYPRE_Solver solver, HYPRE_Int recompute_residua
 HYPRE_Int
 HYPRE_PCGSetRelChange( HYPRE_Solver solver, HYPRE_Int rel_change )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGSetRelChange_pre( precision, solver, rel_change );
 }
 
@@ -1566,7 +1566,7 @@ HYPRE_PCGSetRelChange( HYPRE_Solver solver, HYPRE_Int rel_change )
 HYPRE_Int
 HYPRE_PCGSetResidualTol( HYPRE_Solver solver, hypre_long_double rtol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGSetResidualTol_pre( precision, solver, rtol );
 }
 
@@ -1575,7 +1575,7 @@ HYPRE_PCGSetResidualTol( HYPRE_Solver solver, hypre_long_double rtol )
 HYPRE_Int
 HYPRE_PCGSetSkipBreak( HYPRE_Solver solver, HYPRE_Int skip_break )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGSetSkipBreak_pre( precision, solver, skip_break );
 }
 
@@ -1584,7 +1584,7 @@ HYPRE_PCGSetSkipBreak( HYPRE_Solver solver, HYPRE_Int skip_break )
 HYPRE_Int
 HYPRE_PCGSetStopCrit( HYPRE_Solver solver, HYPRE_Int stop_crit )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGSetStopCrit_pre( precision, solver, stop_crit );
 }
 
@@ -1593,7 +1593,7 @@ HYPRE_PCGSetStopCrit( HYPRE_Solver solver, HYPRE_Int stop_crit )
 HYPRE_Int
 HYPRE_PCGSetTol( HYPRE_Solver solver, hypre_long_double tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGSetTol_pre( precision, solver, tol );
 }
 
@@ -1602,7 +1602,7 @@ HYPRE_PCGSetTol( HYPRE_Solver solver, hypre_long_double tol )
 HYPRE_Int
 HYPRE_PCGSetTwoNorm( HYPRE_Solver solver, HYPRE_Int two_norm )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGSetTwoNorm_pre( precision, solver, two_norm );
 }
 
@@ -1611,7 +1611,7 @@ HYPRE_PCGSetTwoNorm( HYPRE_Solver solver, HYPRE_Int two_norm )
 HYPRE_Int
 HYPRE_PCGSetup( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGSetup_pre( precision, solver, A, b, x );
 }
 
@@ -1620,7 +1620,7 @@ HYPRE_PCGSetup( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vecto
 HYPRE_Int
 HYPRE_PCGSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vector x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return HYPRE_PCGSolve_pre( precision, solver, A, b, x );
 }
 
@@ -1630,7 +1630,7 @@ HYPRE_PCGSolve( HYPRE_Solver solver, HYPRE_Matrix A, HYPRE_Vector b, HYPRE_Vecto
 void *
 hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABCreate_pre( precision, bicgstab_functions );
 }
 
@@ -1639,7 +1639,7 @@ hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions )
 HYPRE_Int
 hypre_BiCGSTABDestroy( void * bicgstab_vdata )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABDestroy_pre( precision, bicgstab_vdata );
 }
 
@@ -1648,7 +1648,7 @@ hypre_BiCGSTABDestroy( void * bicgstab_vdata )
 HYPRE_Int
 hypre_BiCGSTABGetConverged( void * bicgstab_vdata, HYPRE_Int * converged )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABGetConverged_pre( precision, bicgstab_vdata, converged );
 }
 
@@ -1657,7 +1657,7 @@ hypre_BiCGSTABGetConverged( void * bicgstab_vdata, HYPRE_Int * converged )
 HYPRE_Int
 hypre_BiCGSTABGetFinalRelativeResidualNorm( void * bicgstab_vdata, void * relative_residual_norm )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABGetFinalRelativeResidualNorm_pre( precision, bicgstab_vdata, relative_residual_norm );
 }
 
@@ -1666,7 +1666,7 @@ hypre_BiCGSTABGetFinalRelativeResidualNorm( void * bicgstab_vdata, void * relati
 HYPRE_Int
 hypre_BiCGSTABGetNumIterations( void * bicgstab_vdata, HYPRE_Int * num_iterations )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABGetNumIterations_pre( precision, bicgstab_vdata, num_iterations );
 }
 
@@ -1675,7 +1675,7 @@ hypre_BiCGSTABGetNumIterations( void * bicgstab_vdata, HYPRE_Int * num_iteration
 HYPRE_Int
 hypre_BiCGSTABGetPrecond( void * bicgstab_vdata, HYPRE_Solver * precond_data_ptr )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABGetPrecond_pre( precision, bicgstab_vdata, precond_data_ptr );
 }
 
@@ -1684,7 +1684,7 @@ hypre_BiCGSTABGetPrecond( void * bicgstab_vdata, HYPRE_Solver * precond_data_ptr
 HYPRE_Int
 hypre_BiCGSTABGetPrecondMatrix( void * bicgstab_vdata, HYPRE_Matrix * precond_matrix_ptr )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABGetPrecondMatrix_pre( precision, bicgstab_vdata, precond_matrix_ptr );
 }
 
@@ -1693,7 +1693,7 @@ hypre_BiCGSTABGetPrecondMatrix( void * bicgstab_vdata, HYPRE_Matrix * precond_ma
 HYPRE_Int
 hypre_BiCGSTABGetResidual( void * bicgstab_vdata, void ** residual )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABGetResidual_pre( precision, bicgstab_vdata, residual );
 }
 
@@ -1702,7 +1702,7 @@ hypre_BiCGSTABGetResidual( void * bicgstab_vdata, void ** residual )
 HYPRE_Int
 hypre_BiCGSTABSetAbsoluteTol( void * bicgstab_vdata, hypre_long_double a_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABSetAbsoluteTol_pre( precision, bicgstab_vdata, a_tol );
 }
 
@@ -1711,7 +1711,7 @@ hypre_BiCGSTABSetAbsoluteTol( void * bicgstab_vdata, hypre_long_double a_tol )
 HYPRE_Int
 hypre_BiCGSTABSetConvergenceFactorTol( void * bicgstab_vdata, hypre_long_double cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABSetConvergenceFactorTol_pre( precision, bicgstab_vdata, cf_tol );
 }
 
@@ -1720,7 +1720,7 @@ hypre_BiCGSTABSetConvergenceFactorTol( void * bicgstab_vdata, hypre_long_double 
 HYPRE_Int
 hypre_BiCGSTABSetHybrid( void * bicgstab_vdata, HYPRE_Int logging )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABSetHybrid_pre( precision, bicgstab_vdata, logging );
 }
 
@@ -1729,7 +1729,7 @@ hypre_BiCGSTABSetHybrid( void * bicgstab_vdata, HYPRE_Int logging )
 HYPRE_Int
 hypre_BiCGSTABSetLogging( void * bicgstab_vdata, HYPRE_Int logging )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABSetLogging_pre( precision, bicgstab_vdata, logging );
 }
 
@@ -1738,7 +1738,7 @@ hypre_BiCGSTABSetLogging( void * bicgstab_vdata, HYPRE_Int logging )
 HYPRE_Int
 hypre_BiCGSTABSetMaxIter( void * bicgstab_vdata, HYPRE_Int max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABSetMaxIter_pre( precision, bicgstab_vdata, max_iter );
 }
 
@@ -1747,7 +1747,7 @@ hypre_BiCGSTABSetMaxIter( void * bicgstab_vdata, HYPRE_Int max_iter )
 HYPRE_Int
 hypre_BiCGSTABSetMinIter( void * bicgstab_vdata, HYPRE_Int min_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABSetMinIter_pre( precision, bicgstab_vdata, min_iter );
 }
 
@@ -1756,7 +1756,7 @@ hypre_BiCGSTABSetMinIter( void * bicgstab_vdata, HYPRE_Int min_iter )
 HYPRE_Int
 hypre_BiCGSTABSetPrecond( void * bicgstab_vdata, hypre_KrylovPtrToPrecond precond, hypre_KrylovPtrToPrecondSetup precond_setup, void * precond_data )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABSetPrecond_pre( precision, bicgstab_vdata, precond, precond_setup, precond_data );
 }
 
@@ -1765,7 +1765,7 @@ hypre_BiCGSTABSetPrecond( void * bicgstab_vdata, hypre_KrylovPtrToPrecond precon
 HYPRE_Int
 hypre_BiCGSTABSetPrecondMatrix( void * bicgstab_vdata, void * precond_matrix )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABSetPrecondMatrix_pre( precision, bicgstab_vdata, precond_matrix );
 }
 
@@ -1774,7 +1774,7 @@ hypre_BiCGSTABSetPrecondMatrix( void * bicgstab_vdata, void * precond_matrix )
 HYPRE_Int
 hypre_BiCGSTABSetPrintLevel( void * bicgstab_vdata, HYPRE_Int print_level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABSetPrintLevel_pre( precision, bicgstab_vdata, print_level );
 }
 
@@ -1783,7 +1783,7 @@ hypre_BiCGSTABSetPrintLevel( void * bicgstab_vdata, HYPRE_Int print_level )
 HYPRE_Int
 hypre_BiCGSTABSetStopCrit( void * bicgstab_vdata, HYPRE_Int stop_crit )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABSetStopCrit_pre( precision, bicgstab_vdata, stop_crit );
 }
 
@@ -1792,7 +1792,7 @@ hypre_BiCGSTABSetStopCrit( void * bicgstab_vdata, HYPRE_Int stop_crit )
 HYPRE_Int
 hypre_BiCGSTABSetTol( void * bicgstab_vdata, hypre_long_double tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABSetTol_pre( precision, bicgstab_vdata, tol );
 }
 
@@ -1801,7 +1801,7 @@ hypre_BiCGSTABSetTol( void * bicgstab_vdata, hypre_long_double tol )
 HYPRE_Int
 hypre_BiCGSTABSetup( void * bicgstab_vdata, void * A, void * b, void * x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABSetup_pre( precision, bicgstab_vdata, A, b, x );
 }
 
@@ -1810,7 +1810,7 @@ hypre_BiCGSTABSetup( void * bicgstab_vdata, void * A, void * b, void * x )
 HYPRE_Int
 hypre_BiCGSTABSolve( void * bicgstab_vdata, void * A, void * b, void * x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_BiCGSTABSolve_pre( precision, bicgstab_vdata, A, b, x );
 }
 
@@ -1819,7 +1819,7 @@ hypre_BiCGSTABSolve( void * bicgstab_vdata, void * A, void * b, void * x )
 void *
 hypre_CGNRCreate( hypre_CGNRFunctions * cgnr_functions )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_CGNRCreate_pre( precision, cgnr_functions );
 }
 
@@ -1828,7 +1828,7 @@ hypre_CGNRCreate( hypre_CGNRFunctions * cgnr_functions )
 HYPRE_Int
 hypre_CGNRDestroy( void * cgnr_vdata )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_CGNRDestroy_pre( precision, cgnr_vdata );
 }
 
@@ -1837,7 +1837,7 @@ hypre_CGNRDestroy( void * cgnr_vdata )
 HYPRE_Int
 hypre_CGNRGetFinalRelativeResidualNorm( void * cgnr_vdata, void * relative_residual_norm )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_CGNRGetFinalRelativeResidualNorm_pre( precision, cgnr_vdata, relative_residual_norm );
 }
 
@@ -1846,7 +1846,7 @@ hypre_CGNRGetFinalRelativeResidualNorm( void * cgnr_vdata, void * relative_resid
 HYPRE_Int
 hypre_CGNRGetNumIterations( void * cgnr_vdata, HYPRE_Int * num_iterations )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_CGNRGetNumIterations_pre( precision, cgnr_vdata, num_iterations );
 }
 
@@ -1855,7 +1855,7 @@ hypre_CGNRGetNumIterations( void * cgnr_vdata, HYPRE_Int * num_iterations )
 HYPRE_Int
 hypre_CGNRGetPrecond( void * cgnr_vdata, HYPRE_Solver * precond_data_ptr )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_CGNRGetPrecond_pre( precision, cgnr_vdata, precond_data_ptr );
 }
 
@@ -1864,7 +1864,7 @@ hypre_CGNRGetPrecond( void * cgnr_vdata, HYPRE_Solver * precond_data_ptr )
 HYPRE_Int
 hypre_CGNRSetLogging( void * cgnr_vdata, HYPRE_Int logging )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_CGNRSetLogging_pre( precision, cgnr_vdata, logging );
 }
 
@@ -1873,7 +1873,7 @@ hypre_CGNRSetLogging( void * cgnr_vdata, HYPRE_Int logging )
 HYPRE_Int
 hypre_CGNRSetMaxIter( void * cgnr_vdata, HYPRE_Int max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_CGNRSetMaxIter_pre( precision, cgnr_vdata, max_iter );
 }
 
@@ -1882,7 +1882,7 @@ hypre_CGNRSetMaxIter( void * cgnr_vdata, HYPRE_Int max_iter )
 HYPRE_Int
 hypre_CGNRSetMinIter( void * cgnr_vdata, HYPRE_Int min_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_CGNRSetMinIter_pre( precision, cgnr_vdata, min_iter );
 }
 
@@ -1891,7 +1891,7 @@ hypre_CGNRSetMinIter( void * cgnr_vdata, HYPRE_Int min_iter )
 HYPRE_Int
 hypre_CGNRSetPrecond( void * cgnr_vdata, hypre_KrylovPtrToPrecond precond, hypre_KrylovPtrToPrecondT precondT, hypre_KrylovPtrToPrecondSetup precond_setup, void * precond_data )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_CGNRSetPrecond_pre( precision, cgnr_vdata, precond, precondT, precond_setup, precond_data );
 }
 
@@ -1900,7 +1900,7 @@ hypre_CGNRSetPrecond( void * cgnr_vdata, hypre_KrylovPtrToPrecond precond, hypre
 HYPRE_Int
 hypre_CGNRSetStopCrit( void * cgnr_vdata, HYPRE_Int stop_crit )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_CGNRSetStopCrit_pre( precision, cgnr_vdata, stop_crit );
 }
 
@@ -1909,7 +1909,7 @@ hypre_CGNRSetStopCrit( void * cgnr_vdata, HYPRE_Int stop_crit )
 HYPRE_Int
 hypre_CGNRSetTol( void * cgnr_vdata, hypre_long_double tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_CGNRSetTol_pre( precision, cgnr_vdata, tol );
 }
 
@@ -1918,7 +1918,7 @@ hypre_CGNRSetTol( void * cgnr_vdata, hypre_long_double tol )
 HYPRE_Int
 hypre_CGNRSetup( void * cgnr_vdata, void * A, void * b, void * x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_CGNRSetup_pre( precision, cgnr_vdata, A, b, x );
 }
 
@@ -1927,7 +1927,7 @@ hypre_CGNRSetup( void * cgnr_vdata, void * A, void * b, void * x )
 HYPRE_Int
 hypre_CGNRSolve( void * cgnr_vdata, void * A, void * b, void * x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_CGNRSolve_pre( precision, cgnr_vdata, A, b, x );
 }
 
@@ -1936,7 +1936,7 @@ hypre_CGNRSolve( void * cgnr_vdata, void * A, void * b, void * x )
 void *
 hypre_COGMRESCreate( hypre_COGMRESFunctions * gmres_functions )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESCreate_pre( precision, gmres_functions );
 }
 
@@ -1945,7 +1945,7 @@ hypre_COGMRESCreate( hypre_COGMRESFunctions * gmres_functions )
 HYPRE_Int
 hypre_COGMRESDestroy( void * gmres_vdata )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESDestroy_pre( precision, gmres_vdata );
 }
 
@@ -1954,7 +1954,7 @@ hypre_COGMRESDestroy( void * gmres_vdata )
 HYPRE_Int
 hypre_COGMRESGetAbsoluteTol( void * gmres_vdata, void * a_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESGetAbsoluteTol_pre( precision, gmres_vdata, a_tol );
 }
 
@@ -1963,7 +1963,7 @@ hypre_COGMRESGetAbsoluteTol( void * gmres_vdata, void * a_tol )
 HYPRE_Int
 hypre_COGMRESGetCGS( void * gmres_vdata, HYPRE_Int * cgs )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESGetCGS_pre( precision, gmres_vdata, cgs );
 }
 
@@ -1972,7 +1972,7 @@ hypre_COGMRESGetCGS( void * gmres_vdata, HYPRE_Int * cgs )
 HYPRE_Int
 hypre_COGMRESGetConverged( void * gmres_vdata, HYPRE_Int * converged )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESGetConverged_pre( precision, gmres_vdata, converged );
 }
 
@@ -1981,7 +1981,7 @@ hypre_COGMRESGetConverged( void * gmres_vdata, HYPRE_Int * converged )
 HYPRE_Int
 hypre_COGMRESGetConvergenceFactorTol( void * gmres_vdata, void * cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESGetConvergenceFactorTol_pre( precision, gmres_vdata, cf_tol );
 }
 
@@ -1990,7 +1990,7 @@ hypre_COGMRESGetConvergenceFactorTol( void * gmres_vdata, void * cf_tol )
 HYPRE_Int
 hypre_COGMRESGetFinalRelativeResidualNorm( void * gmres_vdata, void * relative_residual_norm )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESGetFinalRelativeResidualNorm_pre( precision, gmres_vdata, relative_residual_norm );
 }
 
@@ -1999,7 +1999,7 @@ hypre_COGMRESGetFinalRelativeResidualNorm( void * gmres_vdata, void * relative_r
 HYPRE_Int
 hypre_COGMRESGetKDim( void * gmres_vdata, HYPRE_Int * k_dim )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESGetKDim_pre( precision, gmres_vdata, k_dim );
 }
 
@@ -2008,7 +2008,7 @@ hypre_COGMRESGetKDim( void * gmres_vdata, HYPRE_Int * k_dim )
 HYPRE_Int
 hypre_COGMRESGetLogging( void * gmres_vdata, HYPRE_Int * level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESGetLogging_pre( precision, gmres_vdata, level );
 }
 
@@ -2017,7 +2017,7 @@ hypre_COGMRESGetLogging( void * gmres_vdata, HYPRE_Int * level )
 HYPRE_Int
 hypre_COGMRESGetMaxIter( void * gmres_vdata, HYPRE_Int * max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESGetMaxIter_pre( precision, gmres_vdata, max_iter );
 }
 
@@ -2026,7 +2026,7 @@ hypre_COGMRESGetMaxIter( void * gmres_vdata, HYPRE_Int * max_iter )
 HYPRE_Int
 hypre_COGMRESGetMinIter( void * gmres_vdata, HYPRE_Int * min_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESGetMinIter_pre( precision, gmres_vdata, min_iter );
 }
 
@@ -2035,7 +2035,7 @@ hypre_COGMRESGetMinIter( void * gmres_vdata, HYPRE_Int * min_iter )
 HYPRE_Int
 hypre_COGMRESGetNumIterations( void * gmres_vdata, HYPRE_Int * num_iterations )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESGetNumIterations_pre( precision, gmres_vdata, num_iterations );
 }
 
@@ -2044,7 +2044,7 @@ hypre_COGMRESGetNumIterations( void * gmres_vdata, HYPRE_Int * num_iterations )
 HYPRE_Int
 hypre_COGMRESGetPrecond( void * gmres_vdata, HYPRE_Solver * precond_data_ptr )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESGetPrecond_pre( precision, gmres_vdata, precond_data_ptr );
 }
 
@@ -2053,7 +2053,7 @@ hypre_COGMRESGetPrecond( void * gmres_vdata, HYPRE_Solver * precond_data_ptr )
 HYPRE_Int
 hypre_COGMRESGetPrintLevel( void * gmres_vdata, HYPRE_Int * level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESGetPrintLevel_pre( precision, gmres_vdata, level );
 }
 
@@ -2062,7 +2062,7 @@ hypre_COGMRESGetPrintLevel( void * gmres_vdata, HYPRE_Int * level )
 HYPRE_Int
 hypre_COGMRESGetRelChange( void * gmres_vdata, HYPRE_Int * rel_change )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESGetRelChange_pre( precision, gmres_vdata, rel_change );
 }
 
@@ -2071,7 +2071,7 @@ hypre_COGMRESGetRelChange( void * gmres_vdata, HYPRE_Int * rel_change )
 HYPRE_Int
 hypre_COGMRESGetResidual( void * gmres_vdata, void ** residual )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESGetResidual_pre( precision, gmres_vdata, residual );
 }
 
@@ -2080,7 +2080,7 @@ hypre_COGMRESGetResidual( void * gmres_vdata, void ** residual )
 HYPRE_Int
 hypre_COGMRESGetSkipRealResidualCheck( void * gmres_vdata, HYPRE_Int * skip_real_r_check )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESGetSkipRealResidualCheck_pre( precision, gmres_vdata, skip_real_r_check );
 }
 
@@ -2089,7 +2089,7 @@ hypre_COGMRESGetSkipRealResidualCheck( void * gmres_vdata, HYPRE_Int * skip_real
 HYPRE_Int
 hypre_COGMRESGetTol( void * gmres_vdata, void * tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESGetTol_pre( precision, gmres_vdata, tol );
 }
 
@@ -2098,7 +2098,7 @@ hypre_COGMRESGetTol( void * gmres_vdata, void * tol )
 HYPRE_Int
 hypre_COGMRESGetUnroll( void * gmres_vdata, HYPRE_Int * unroll )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESGetUnroll_pre( precision, gmres_vdata, unroll );
 }
 
@@ -2107,7 +2107,7 @@ hypre_COGMRESGetUnroll( void * gmres_vdata, HYPRE_Int * unroll )
 HYPRE_Int
 hypre_COGMRESSetAbsoluteTol( void * gmres_vdata, hypre_long_double a_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESSetAbsoluteTol_pre( precision, gmres_vdata, a_tol );
 }
 
@@ -2116,7 +2116,7 @@ hypre_COGMRESSetAbsoluteTol( void * gmres_vdata, hypre_long_double a_tol )
 HYPRE_Int
 hypre_COGMRESSetCGS( void * gmres_vdata, HYPRE_Int cgs )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESSetCGS_pre( precision, gmres_vdata, cgs );
 }
 
@@ -2125,7 +2125,7 @@ hypre_COGMRESSetCGS( void * gmres_vdata, HYPRE_Int cgs )
 HYPRE_Int
 hypre_COGMRESSetConvergenceFactorTol( void * gmres_vdata, hypre_long_double cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESSetConvergenceFactorTol_pre( precision, gmres_vdata, cf_tol );
 }
 
@@ -2134,7 +2134,7 @@ hypre_COGMRESSetConvergenceFactorTol( void * gmres_vdata, hypre_long_double cf_t
 HYPRE_Int
 hypre_COGMRESSetKDim( void * gmres_vdata, HYPRE_Int k_dim )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESSetKDim_pre( precision, gmres_vdata, k_dim );
 }
 
@@ -2143,7 +2143,7 @@ hypre_COGMRESSetKDim( void * gmres_vdata, HYPRE_Int k_dim )
 HYPRE_Int
 hypre_COGMRESSetLogging( void * gmres_vdata, HYPRE_Int level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESSetLogging_pre( precision, gmres_vdata, level );
 }
 
@@ -2152,7 +2152,7 @@ hypre_COGMRESSetLogging( void * gmres_vdata, HYPRE_Int level )
 HYPRE_Int
 hypre_COGMRESSetMaxIter( void * gmres_vdata, HYPRE_Int max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESSetMaxIter_pre( precision, gmres_vdata, max_iter );
 }
 
@@ -2161,7 +2161,7 @@ hypre_COGMRESSetMaxIter( void * gmres_vdata, HYPRE_Int max_iter )
 HYPRE_Int
 hypre_COGMRESSetMinIter( void * gmres_vdata, HYPRE_Int min_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESSetMinIter_pre( precision, gmres_vdata, min_iter );
 }
 
@@ -2170,7 +2170,7 @@ hypre_COGMRESSetMinIter( void * gmres_vdata, HYPRE_Int min_iter )
 HYPRE_Int
 hypre_COGMRESSetModifyPC( void * cogmres_vdata, hypre_KrylovPtrToModifyPC modify_pc )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESSetModifyPC_pre( precision, cogmres_vdata, modify_pc );
 }
 
@@ -2179,7 +2179,7 @@ hypre_COGMRESSetModifyPC( void * cogmres_vdata, hypre_KrylovPtrToModifyPC modify
 HYPRE_Int
 hypre_COGMRESSetPrecond( void * gmres_vdata, hypre_KrylovPtrToPrecond precond, hypre_KrylovPtrToPrecondSetup precond_setup, void * precond_data )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESSetPrecond_pre( precision, gmres_vdata, precond, precond_setup, precond_data );
 }
 
@@ -2188,7 +2188,7 @@ hypre_COGMRESSetPrecond( void * gmres_vdata, hypre_KrylovPtrToPrecond precond, h
 HYPRE_Int
 hypre_COGMRESSetPrintLevel( void * gmres_vdata, HYPRE_Int level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESSetPrintLevel_pre( precision, gmres_vdata, level );
 }
 
@@ -2197,7 +2197,7 @@ hypre_COGMRESSetPrintLevel( void * gmres_vdata, HYPRE_Int level )
 HYPRE_Int
 hypre_COGMRESSetRelChange( void * gmres_vdata, HYPRE_Int rel_change )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESSetRelChange_pre( precision, gmres_vdata, rel_change );
 }
 
@@ -2206,7 +2206,7 @@ hypre_COGMRESSetRelChange( void * gmres_vdata, HYPRE_Int rel_change )
 HYPRE_Int
 hypre_COGMRESSetSkipRealResidualCheck( void * gmres_vdata, HYPRE_Int skip_real_r_check )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESSetSkipRealResidualCheck_pre( precision, gmres_vdata, skip_real_r_check );
 }
 
@@ -2215,7 +2215,7 @@ hypre_COGMRESSetSkipRealResidualCheck( void * gmres_vdata, HYPRE_Int skip_real_r
 HYPRE_Int
 hypre_COGMRESSetTol( void * gmres_vdata, hypre_long_double tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESSetTol_pre( precision, gmres_vdata, tol );
 }
 
@@ -2224,7 +2224,7 @@ hypre_COGMRESSetTol( void * gmres_vdata, hypre_long_double tol )
 HYPRE_Int
 hypre_COGMRESSetUnroll( void * gmres_vdata, HYPRE_Int unroll )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESSetUnroll_pre( precision, gmres_vdata, unroll );
 }
 
@@ -2233,7 +2233,7 @@ hypre_COGMRESSetUnroll( void * gmres_vdata, HYPRE_Int unroll )
 HYPRE_Int
 hypre_COGMRESSetup( void * gmres_vdata, void * A, void * b, void * x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESSetup_pre( precision, gmres_vdata, A, b, x );
 }
 
@@ -2242,7 +2242,7 @@ hypre_COGMRESSetup( void * gmres_vdata, void * A, void * b, void * x )
 HYPRE_Int
 hypre_COGMRESSolve( void * gmres_vdata, void * A, void * b, void * x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_COGMRESSolve_pre( precision, gmres_vdata, A, b, x );
 }
 
@@ -2251,7 +2251,7 @@ hypre_COGMRESSolve( void * gmres_vdata, void * A, void * b, void * x )
 void *
 hypre_FlexGMRESCreate( hypre_FlexGMRESFunctions * fgmres_functions )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESCreate_pre( precision, fgmres_functions );
 }
 
@@ -2260,7 +2260,7 @@ hypre_FlexGMRESCreate( hypre_FlexGMRESFunctions * fgmres_functions )
 HYPRE_Int
 hypre_FlexGMRESDestroy( void * fgmres_vdata )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESDestroy_pre( precision, fgmres_vdata );
 }
 
@@ -2269,7 +2269,7 @@ hypre_FlexGMRESDestroy( void * fgmres_vdata )
 HYPRE_Int
 hypre_FlexGMRESGetAbsoluteTol( void * fgmres_vdata, void * a_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESGetAbsoluteTol_pre( precision, fgmres_vdata, a_tol );
 }
 
@@ -2278,7 +2278,7 @@ hypre_FlexGMRESGetAbsoluteTol( void * fgmres_vdata, void * a_tol )
 HYPRE_Int
 hypre_FlexGMRESGetConverged( void * fgmres_vdata, HYPRE_Int * converged )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESGetConverged_pre( precision, fgmres_vdata, converged );
 }
 
@@ -2287,7 +2287,7 @@ hypre_FlexGMRESGetConverged( void * fgmres_vdata, HYPRE_Int * converged )
 HYPRE_Int
 hypre_FlexGMRESGetConvergenceFactorTol( void * fgmres_vdata, void * cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESGetConvergenceFactorTol_pre( precision, fgmres_vdata, cf_tol );
 }
 
@@ -2296,7 +2296,7 @@ hypre_FlexGMRESGetConvergenceFactorTol( void * fgmres_vdata, void * cf_tol )
 HYPRE_Int
 hypre_FlexGMRESGetFinalRelativeResidualNorm( void * fgmres_vdata, void * relative_residual_norm )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESGetFinalRelativeResidualNorm_pre( precision, fgmres_vdata, relative_residual_norm );
 }
 
@@ -2305,7 +2305,7 @@ hypre_FlexGMRESGetFinalRelativeResidualNorm( void * fgmres_vdata, void * relativ
 HYPRE_Int
 hypre_FlexGMRESGetKDim( void * fgmres_vdata, HYPRE_Int * k_dim )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESGetKDim_pre( precision, fgmres_vdata, k_dim );
 }
 
@@ -2314,7 +2314,7 @@ hypre_FlexGMRESGetKDim( void * fgmres_vdata, HYPRE_Int * k_dim )
 HYPRE_Int
 hypre_FlexGMRESGetLogging( void * fgmres_vdata, HYPRE_Int * level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESGetLogging_pre( precision, fgmres_vdata, level );
 }
 
@@ -2323,7 +2323,7 @@ hypre_FlexGMRESGetLogging( void * fgmres_vdata, HYPRE_Int * level )
 HYPRE_Int
 hypre_FlexGMRESGetMaxIter( void * fgmres_vdata, HYPRE_Int * max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESGetMaxIter_pre( precision, fgmres_vdata, max_iter );
 }
 
@@ -2332,7 +2332,7 @@ hypre_FlexGMRESGetMaxIter( void * fgmres_vdata, HYPRE_Int * max_iter )
 HYPRE_Int
 hypre_FlexGMRESGetMinIter( void * fgmres_vdata, HYPRE_Int * min_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESGetMinIter_pre( precision, fgmres_vdata, min_iter );
 }
 
@@ -2341,7 +2341,7 @@ hypre_FlexGMRESGetMinIter( void * fgmres_vdata, HYPRE_Int * min_iter )
 HYPRE_Int
 hypre_FlexGMRESGetNumIterations( void * fgmres_vdata, HYPRE_Int * num_iterations )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESGetNumIterations_pre( precision, fgmres_vdata, num_iterations );
 }
 
@@ -2350,7 +2350,7 @@ hypre_FlexGMRESGetNumIterations( void * fgmres_vdata, HYPRE_Int * num_iterations
 HYPRE_Int
 hypre_FlexGMRESGetPrecond( void * fgmres_vdata, HYPRE_Solver * precond_data_ptr )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESGetPrecond_pre( precision, fgmres_vdata, precond_data_ptr );
 }
 
@@ -2359,7 +2359,7 @@ hypre_FlexGMRESGetPrecond( void * fgmres_vdata, HYPRE_Solver * precond_data_ptr 
 HYPRE_Int
 hypre_FlexGMRESGetPrintLevel( void * fgmres_vdata, HYPRE_Int * level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESGetPrintLevel_pre( precision, fgmres_vdata, level );
 }
 
@@ -2368,7 +2368,7 @@ hypre_FlexGMRESGetPrintLevel( void * fgmres_vdata, HYPRE_Int * level )
 HYPRE_Int
 hypre_FlexGMRESGetResidual( void * fgmres_vdata, void ** residual )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESGetResidual_pre( precision, fgmres_vdata, residual );
 }
 
@@ -2377,7 +2377,7 @@ hypre_FlexGMRESGetResidual( void * fgmres_vdata, void ** residual )
 HYPRE_Int
 hypre_FlexGMRESGetStopCrit( void * fgmres_vdata, HYPRE_Int * stop_crit )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESGetStopCrit_pre( precision, fgmres_vdata, stop_crit );
 }
 
@@ -2386,7 +2386,7 @@ hypre_FlexGMRESGetStopCrit( void * fgmres_vdata, HYPRE_Int * stop_crit )
 HYPRE_Int
 hypre_FlexGMRESGetTol( void * fgmres_vdata, void * tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESGetTol_pre( precision, fgmres_vdata, tol );
 }
 
@@ -2395,7 +2395,7 @@ hypre_FlexGMRESGetTol( void * fgmres_vdata, void * tol )
 HYPRE_Int
 hypre_FlexGMRESModifyPCDefault( void * precond_data, HYPRE_Int iteration, hypre_long_double rel_residual_norm )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESModifyPCDefault_pre( precision, precond_data, iteration, rel_residual_norm );
 }
 
@@ -2404,7 +2404,7 @@ hypre_FlexGMRESModifyPCDefault( void * precond_data, HYPRE_Int iteration, hypre_
 HYPRE_Int
 hypre_FlexGMRESSetAbsoluteTol( void * fgmres_vdata, hypre_long_double a_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESSetAbsoluteTol_pre( precision, fgmres_vdata, a_tol );
 }
 
@@ -2413,7 +2413,7 @@ hypre_FlexGMRESSetAbsoluteTol( void * fgmres_vdata, hypre_long_double a_tol )
 HYPRE_Int
 hypre_FlexGMRESSetConvergenceFactorTol( void * fgmres_vdata, hypre_long_double cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESSetConvergenceFactorTol_pre( precision, fgmres_vdata, cf_tol );
 }
 
@@ -2422,7 +2422,7 @@ hypre_FlexGMRESSetConvergenceFactorTol( void * fgmres_vdata, hypre_long_double c
 HYPRE_Int
 hypre_FlexGMRESSetKDim( void * fgmres_vdata, HYPRE_Int k_dim )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESSetKDim_pre( precision, fgmres_vdata, k_dim );
 }
 
@@ -2431,7 +2431,7 @@ hypre_FlexGMRESSetKDim( void * fgmres_vdata, HYPRE_Int k_dim )
 HYPRE_Int
 hypre_FlexGMRESSetLogging( void * fgmres_vdata, HYPRE_Int level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESSetLogging_pre( precision, fgmres_vdata, level );
 }
 
@@ -2440,7 +2440,7 @@ hypre_FlexGMRESSetLogging( void * fgmres_vdata, HYPRE_Int level )
 HYPRE_Int
 hypre_FlexGMRESSetMaxIter( void * fgmres_vdata, HYPRE_Int max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESSetMaxIter_pre( precision, fgmres_vdata, max_iter );
 }
 
@@ -2449,7 +2449,7 @@ hypre_FlexGMRESSetMaxIter( void * fgmres_vdata, HYPRE_Int max_iter )
 HYPRE_Int
 hypre_FlexGMRESSetMinIter( void * fgmres_vdata, HYPRE_Int min_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESSetMinIter_pre( precision, fgmres_vdata, min_iter );
 }
 
@@ -2458,7 +2458,7 @@ hypre_FlexGMRESSetMinIter( void * fgmres_vdata, HYPRE_Int min_iter )
 HYPRE_Int
 hypre_FlexGMRESSetModifyPC( void * fgmres_vdata, hypre_KrylovPtrToModifyPC modify_pc )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESSetModifyPC_pre( precision, fgmres_vdata, modify_pc );
 }
 
@@ -2467,7 +2467,7 @@ hypre_FlexGMRESSetModifyPC( void * fgmres_vdata, hypre_KrylovPtrToModifyPC modif
 HYPRE_Int
 hypre_FlexGMRESSetPrecond( void * fgmres_vdata, hypre_KrylovPtrToPrecond precond, hypre_KrylovPtrToPrecondSetup precond_setup, void * precond_data )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESSetPrecond_pre( precision, fgmres_vdata, precond, precond_setup, precond_data );
 }
 
@@ -2476,7 +2476,7 @@ hypre_FlexGMRESSetPrecond( void * fgmres_vdata, hypre_KrylovPtrToPrecond precond
 HYPRE_Int
 hypre_FlexGMRESSetPrintLevel( void * fgmres_vdata, HYPRE_Int level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESSetPrintLevel_pre( precision, fgmres_vdata, level );
 }
 
@@ -2485,7 +2485,7 @@ hypre_FlexGMRESSetPrintLevel( void * fgmres_vdata, HYPRE_Int level )
 HYPRE_Int
 hypre_FlexGMRESSetStopCrit( void * fgmres_vdata, HYPRE_Int stop_crit )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESSetStopCrit_pre( precision, fgmres_vdata, stop_crit );
 }
 
@@ -2494,7 +2494,7 @@ hypre_FlexGMRESSetStopCrit( void * fgmres_vdata, HYPRE_Int stop_crit )
 HYPRE_Int
 hypre_FlexGMRESSetTol( void * fgmres_vdata, hypre_long_double tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESSetTol_pre( precision, fgmres_vdata, tol );
 }
 
@@ -2503,7 +2503,7 @@ hypre_FlexGMRESSetTol( void * fgmres_vdata, hypre_long_double tol )
 HYPRE_Int
 hypre_FlexGMRESSetup( void * fgmres_vdata, void * A, void * b, void * x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESSetup_pre( precision, fgmres_vdata, A, b, x );
 }
 
@@ -2512,7 +2512,7 @@ hypre_FlexGMRESSetup( void * fgmres_vdata, void * A, void * b, void * x )
 HYPRE_Int
 hypre_FlexGMRESSolve( void * fgmres_vdata, void * A, void * b, void * x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_FlexGMRESSolve_pre( precision, fgmres_vdata, A, b, x );
 }
 
@@ -2521,7 +2521,7 @@ hypre_FlexGMRESSolve( void * fgmres_vdata, void * A, void * b, void * x )
 void *
 hypre_GMRESCreate( hypre_GMRESFunctions * gmres_functions )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESCreate_pre( precision, gmres_functions );
 }
 
@@ -2530,7 +2530,7 @@ hypre_GMRESCreate( hypre_GMRESFunctions * gmres_functions )
 HYPRE_Int
 hypre_GMRESDestroy( void * gmres_vdata )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESDestroy_pre( precision, gmres_vdata );
 }
 
@@ -2539,7 +2539,7 @@ hypre_GMRESDestroy( void * gmres_vdata )
 HYPRE_Int
 hypre_GMRESGetAbsoluteTol( void * gmres_vdata, void * a_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESGetAbsoluteTol_pre( precision, gmres_vdata, a_tol );
 }
 
@@ -2548,7 +2548,7 @@ hypre_GMRESGetAbsoluteTol( void * gmres_vdata, void * a_tol )
 HYPRE_Int
 hypre_GMRESGetConverged( void * gmres_vdata, HYPRE_Int * converged )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESGetConverged_pre( precision, gmres_vdata, converged );
 }
 
@@ -2557,7 +2557,7 @@ hypre_GMRESGetConverged( void * gmres_vdata, HYPRE_Int * converged )
 HYPRE_Int
 hypre_GMRESGetConvergenceFactorTol( void * gmres_vdata, void * cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESGetConvergenceFactorTol_pre( precision, gmres_vdata, cf_tol );
 }
 
@@ -2566,7 +2566,7 @@ hypre_GMRESGetConvergenceFactorTol( void * gmres_vdata, void * cf_tol )
 HYPRE_Int
 hypre_GMRESGetFinalRelativeResidualNorm( void * gmres_vdata, void * relative_residual_norm )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESGetFinalRelativeResidualNorm_pre( precision, gmres_vdata, relative_residual_norm );
 }
 
@@ -2575,7 +2575,7 @@ hypre_GMRESGetFinalRelativeResidualNorm( void * gmres_vdata, void * relative_res
 HYPRE_Int
 hypre_GMRESGetKDim( void * gmres_vdata, HYPRE_Int * k_dim )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESGetKDim_pre( precision, gmres_vdata, k_dim );
 }
 
@@ -2584,7 +2584,7 @@ hypre_GMRESGetKDim( void * gmres_vdata, HYPRE_Int * k_dim )
 HYPRE_Int
 hypre_GMRESGetLogging( void * gmres_vdata, HYPRE_Int * level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESGetLogging_pre( precision, gmres_vdata, level );
 }
 
@@ -2593,7 +2593,7 @@ hypre_GMRESGetLogging( void * gmres_vdata, HYPRE_Int * level )
 HYPRE_Int
 hypre_GMRESGetMaxIter( void * gmres_vdata, HYPRE_Int * max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESGetMaxIter_pre( precision, gmres_vdata, max_iter );
 }
 
@@ -2602,7 +2602,7 @@ hypre_GMRESGetMaxIter( void * gmres_vdata, HYPRE_Int * max_iter )
 HYPRE_Int
 hypre_GMRESGetMinIter( void * gmres_vdata, HYPRE_Int * min_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESGetMinIter_pre( precision, gmres_vdata, min_iter );
 }
 
@@ -2611,7 +2611,7 @@ hypre_GMRESGetMinIter( void * gmres_vdata, HYPRE_Int * min_iter )
 HYPRE_Int
 hypre_GMRESGetNumIterations( void * gmres_vdata, HYPRE_Int * num_iterations )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESGetNumIterations_pre( precision, gmres_vdata, num_iterations );
 }
 
@@ -2620,7 +2620,7 @@ hypre_GMRESGetNumIterations( void * gmres_vdata, HYPRE_Int * num_iterations )
 HYPRE_Int
 hypre_GMRESGetPrecond( void * gmres_vdata, HYPRE_Solver * precond_data_ptr )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESGetPrecond_pre( precision, gmres_vdata, precond_data_ptr );
 }
 
@@ -2629,7 +2629,7 @@ hypre_GMRESGetPrecond( void * gmres_vdata, HYPRE_Solver * precond_data_ptr )
 HYPRE_Int
 hypre_GMRESGetPrecondMatrix( void * gmres_vdata, HYPRE_Matrix * precond_matrix_ptr )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESGetPrecondMatrix_pre( precision, gmres_vdata, precond_matrix_ptr );
 }
 
@@ -2638,7 +2638,7 @@ hypre_GMRESGetPrecondMatrix( void * gmres_vdata, HYPRE_Matrix * precond_matrix_p
 HYPRE_Int
 hypre_GMRESGetPrintLevel( void * gmres_vdata, HYPRE_Int * level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESGetPrintLevel_pre( precision, gmres_vdata, level );
 }
 
@@ -2647,7 +2647,7 @@ hypre_GMRESGetPrintLevel( void * gmres_vdata, HYPRE_Int * level )
 HYPRE_Int
 hypre_GMRESGetRefSolution( void * gmres_vdata, void ** xref )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESGetRefSolution_pre( precision, gmres_vdata, xref );
 }
 
@@ -2656,7 +2656,7 @@ hypre_GMRESGetRefSolution( void * gmres_vdata, void ** xref )
 HYPRE_Int
 hypre_GMRESGetRelChange( void * gmres_vdata, HYPRE_Int * rel_change )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESGetRelChange_pre( precision, gmres_vdata, rel_change );
 }
 
@@ -2665,7 +2665,7 @@ hypre_GMRESGetRelChange( void * gmres_vdata, HYPRE_Int * rel_change )
 HYPRE_Int
 hypre_GMRESGetResidual( void * gmres_vdata, void ** residual )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESGetResidual_pre( precision, gmres_vdata, residual );
 }
 
@@ -2674,7 +2674,7 @@ hypre_GMRESGetResidual( void * gmres_vdata, void ** residual )
 HYPRE_Int
 hypre_GMRESGetSkipRealResidualCheck( void * gmres_vdata, HYPRE_Int * skip_real_r_check )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESGetSkipRealResidualCheck_pre( precision, gmres_vdata, skip_real_r_check );
 }
 
@@ -2683,7 +2683,7 @@ hypre_GMRESGetSkipRealResidualCheck( void * gmres_vdata, HYPRE_Int * skip_real_r
 HYPRE_Int
 hypre_GMRESGetStopCrit( void * gmres_vdata, HYPRE_Int * stop_crit )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESGetStopCrit_pre( precision, gmres_vdata, stop_crit );
 }
 
@@ -2692,7 +2692,7 @@ hypre_GMRESGetStopCrit( void * gmres_vdata, HYPRE_Int * stop_crit )
 HYPRE_Int
 hypre_GMRESGetTol( void * gmres_vdata, void * tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESGetTol_pre( precision, gmres_vdata, tol );
 }
 
@@ -2701,7 +2701,7 @@ hypre_GMRESGetTol( void * gmres_vdata, void * tol )
 HYPRE_Int
 hypre_GMRESSetAbsoluteTol( void * gmres_vdata, hypre_long_double a_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESSetAbsoluteTol_pre( precision, gmres_vdata, a_tol );
 }
 
@@ -2710,7 +2710,7 @@ hypre_GMRESSetAbsoluteTol( void * gmres_vdata, hypre_long_double a_tol )
 HYPRE_Int
 hypre_GMRESSetConvergenceFactorTol( void * gmres_vdata, hypre_long_double cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESSetConvergenceFactorTol_pre( precision, gmres_vdata, cf_tol );
 }
 
@@ -2719,7 +2719,7 @@ hypre_GMRESSetConvergenceFactorTol( void * gmres_vdata, hypre_long_double cf_tol
 HYPRE_Int
 hypre_GMRESSetHybrid( void * gmres_vdata, HYPRE_Int level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESSetHybrid_pre( precision, gmres_vdata, level );
 }
 
@@ -2728,7 +2728,7 @@ hypre_GMRESSetHybrid( void * gmres_vdata, HYPRE_Int level )
 HYPRE_Int
 hypre_GMRESSetKDim( void * gmres_vdata, HYPRE_Int k_dim )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESSetKDim_pre( precision, gmres_vdata, k_dim );
 }
 
@@ -2737,7 +2737,7 @@ hypre_GMRESSetKDim( void * gmres_vdata, HYPRE_Int k_dim )
 HYPRE_Int
 hypre_GMRESSetLogging( void * gmres_vdata, HYPRE_Int level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESSetLogging_pre( precision, gmres_vdata, level );
 }
 
@@ -2746,7 +2746,7 @@ hypre_GMRESSetLogging( void * gmres_vdata, HYPRE_Int level )
 HYPRE_Int
 hypre_GMRESSetMaxIter( void * gmres_vdata, HYPRE_Int max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESSetMaxIter_pre( precision, gmres_vdata, max_iter );
 }
 
@@ -2755,7 +2755,7 @@ hypre_GMRESSetMaxIter( void * gmres_vdata, HYPRE_Int max_iter )
 HYPRE_Int
 hypre_GMRESSetMinIter( void * gmres_vdata, HYPRE_Int min_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESSetMinIter_pre( precision, gmres_vdata, min_iter );
 }
 
@@ -2764,7 +2764,7 @@ hypre_GMRESSetMinIter( void * gmres_vdata, HYPRE_Int min_iter )
 HYPRE_Int
 hypre_GMRESSetPrecond( void * gmres_vdata, hypre_KrylovPtrToPrecond precond, hypre_KrylovPtrToPrecondSetup precond_setup, void * precond_data )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESSetPrecond_pre( precision, gmres_vdata, precond, precond_setup, precond_data );
 }
 
@@ -2773,7 +2773,7 @@ hypre_GMRESSetPrecond( void * gmres_vdata, hypre_KrylovPtrToPrecond precond, hyp
 HYPRE_Int
 hypre_GMRESSetPrecondMatrix( void * gmres_vdata, void * precond_matrix )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESSetPrecondMatrix_pre( precision, gmres_vdata, precond_matrix );
 }
 
@@ -2782,7 +2782,7 @@ hypre_GMRESSetPrecondMatrix( void * gmres_vdata, void * precond_matrix )
 HYPRE_Int
 hypre_GMRESSetPrintLevel( void * gmres_vdata, HYPRE_Int level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESSetPrintLevel_pre( precision, gmres_vdata, level );
 }
 
@@ -2791,7 +2791,7 @@ hypre_GMRESSetPrintLevel( void * gmres_vdata, HYPRE_Int level )
 HYPRE_Int
 hypre_GMRESSetRefSolution( void * gmres_vdata, void * xref )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESSetRefSolution_pre( precision, gmres_vdata, xref );
 }
 
@@ -2800,7 +2800,7 @@ hypre_GMRESSetRefSolution( void * gmres_vdata, void * xref )
 HYPRE_Int
 hypre_GMRESSetRelChange( void * gmres_vdata, HYPRE_Int rel_change )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESSetRelChange_pre( precision, gmres_vdata, rel_change );
 }
 
@@ -2809,7 +2809,7 @@ hypre_GMRESSetRelChange( void * gmres_vdata, HYPRE_Int rel_change )
 HYPRE_Int
 hypre_GMRESSetSkipRealResidualCheck( void * gmres_vdata, HYPRE_Int skip_real_r_check )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESSetSkipRealResidualCheck_pre( precision, gmres_vdata, skip_real_r_check );
 }
 
@@ -2818,7 +2818,7 @@ hypre_GMRESSetSkipRealResidualCheck( void * gmres_vdata, HYPRE_Int skip_real_r_c
 HYPRE_Int
 hypre_GMRESSetStopCrit( void * gmres_vdata, HYPRE_Int stop_crit )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESSetStopCrit_pre( precision, gmres_vdata, stop_crit );
 }
 
@@ -2827,7 +2827,7 @@ hypre_GMRESSetStopCrit( void * gmres_vdata, HYPRE_Int stop_crit )
 HYPRE_Int
 hypre_GMRESSetTol( void * gmres_vdata, hypre_long_double tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESSetTol_pre( precision, gmres_vdata, tol );
 }
 
@@ -2836,7 +2836,7 @@ hypre_GMRESSetTol( void * gmres_vdata, hypre_long_double tol )
 HYPRE_Int
 hypre_GMRESSetup( void * gmres_vdata, void * A, void * b, void * x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESSetup_pre( precision, gmres_vdata, A, b, x );
 }
 
@@ -2845,7 +2845,7 @@ hypre_GMRESSetup( void * gmres_vdata, void * A, void * b, void * x )
 HYPRE_Int
 hypre_GMRESSolve( void * gmres_vdata, void * A, void * b, void * x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_GMRESSolve_pre( precision, gmres_vdata, A, b, x );
 }
 
@@ -2854,7 +2854,7 @@ hypre_GMRESSolve( void * gmres_vdata, void * A, void * b, void * x )
 void *
 hypre_LGMRESCreate( hypre_LGMRESFunctions * lgmres_functions )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESCreate_pre( precision, lgmres_functions );
 }
 
@@ -2863,7 +2863,7 @@ hypre_LGMRESCreate( hypre_LGMRESFunctions * lgmres_functions )
 HYPRE_Int
 hypre_LGMRESDestroy( void * lgmres_vdata )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESDestroy_pre( precision, lgmres_vdata );
 }
 
@@ -2872,7 +2872,7 @@ hypre_LGMRESDestroy( void * lgmres_vdata )
 HYPRE_Int
 hypre_LGMRESGetAbsoluteTol( void * lgmres_vdata, void * a_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESGetAbsoluteTol_pre( precision, lgmres_vdata, a_tol );
 }
 
@@ -2881,7 +2881,7 @@ hypre_LGMRESGetAbsoluteTol( void * lgmres_vdata, void * a_tol )
 HYPRE_Int
 hypre_LGMRESGetAugDim( void * lgmres_vdata, HYPRE_Int * aug_dim )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESGetAugDim_pre( precision, lgmres_vdata, aug_dim );
 }
 
@@ -2890,7 +2890,7 @@ hypre_LGMRESGetAugDim( void * lgmres_vdata, HYPRE_Int * aug_dim )
 HYPRE_Int
 hypre_LGMRESGetConverged( void * lgmres_vdata, HYPRE_Int * converged )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESGetConverged_pre( precision, lgmres_vdata, converged );
 }
 
@@ -2899,7 +2899,7 @@ hypre_LGMRESGetConverged( void * lgmres_vdata, HYPRE_Int * converged )
 HYPRE_Int
 hypre_LGMRESGetConvergenceFactorTol( void * lgmres_vdata, void * cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESGetConvergenceFactorTol_pre( precision, lgmres_vdata, cf_tol );
 }
 
@@ -2908,7 +2908,7 @@ hypre_LGMRESGetConvergenceFactorTol( void * lgmres_vdata, void * cf_tol )
 HYPRE_Int
 hypre_LGMRESGetFinalRelativeResidualNorm( void * lgmres_vdata, void * relative_residual_norm )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESGetFinalRelativeResidualNorm_pre( precision, lgmres_vdata, relative_residual_norm );
 }
 
@@ -2917,7 +2917,7 @@ hypre_LGMRESGetFinalRelativeResidualNorm( void * lgmres_vdata, void * relative_r
 HYPRE_Int
 hypre_LGMRESGetKDim( void * lgmres_vdata, HYPRE_Int * k_dim )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESGetKDim_pre( precision, lgmres_vdata, k_dim );
 }
 
@@ -2926,7 +2926,7 @@ hypre_LGMRESGetKDim( void * lgmres_vdata, HYPRE_Int * k_dim )
 HYPRE_Int
 hypre_LGMRESGetLogging( void * lgmres_vdata, HYPRE_Int * level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESGetLogging_pre( precision, lgmres_vdata, level );
 }
 
@@ -2935,7 +2935,7 @@ hypre_LGMRESGetLogging( void * lgmres_vdata, HYPRE_Int * level )
 HYPRE_Int
 hypre_LGMRESGetMaxIter( void * lgmres_vdata, HYPRE_Int * max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESGetMaxIter_pre( precision, lgmres_vdata, max_iter );
 }
 
@@ -2944,7 +2944,7 @@ hypre_LGMRESGetMaxIter( void * lgmres_vdata, HYPRE_Int * max_iter )
 HYPRE_Int
 hypre_LGMRESGetMinIter( void * lgmres_vdata, HYPRE_Int * min_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESGetMinIter_pre( precision, lgmres_vdata, min_iter );
 }
 
@@ -2953,7 +2953,7 @@ hypre_LGMRESGetMinIter( void * lgmres_vdata, HYPRE_Int * min_iter )
 HYPRE_Int
 hypre_LGMRESGetNumIterations( void * lgmres_vdata, HYPRE_Int * num_iterations )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESGetNumIterations_pre( precision, lgmres_vdata, num_iterations );
 }
 
@@ -2962,7 +2962,7 @@ hypre_LGMRESGetNumIterations( void * lgmres_vdata, HYPRE_Int * num_iterations )
 HYPRE_Int
 hypre_LGMRESGetPrecond( void * lgmres_vdata, HYPRE_Solver * precond_data_ptr )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESGetPrecond_pre( precision, lgmres_vdata, precond_data_ptr );
 }
 
@@ -2971,7 +2971,7 @@ hypre_LGMRESGetPrecond( void * lgmres_vdata, HYPRE_Solver * precond_data_ptr )
 HYPRE_Int
 hypre_LGMRESGetPrintLevel( void * lgmres_vdata, HYPRE_Int * level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESGetPrintLevel_pre( precision, lgmres_vdata, level );
 }
 
@@ -2980,7 +2980,7 @@ hypre_LGMRESGetPrintLevel( void * lgmres_vdata, HYPRE_Int * level )
 HYPRE_Int
 hypre_LGMRESGetResidual( void * lgmres_vdata, void ** residual )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESGetResidual_pre( precision, lgmres_vdata, residual );
 }
 
@@ -2989,7 +2989,7 @@ hypre_LGMRESGetResidual( void * lgmres_vdata, void ** residual )
 HYPRE_Int
 hypre_LGMRESGetStopCrit( void * lgmres_vdata, HYPRE_Int * stop_crit )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESGetStopCrit_pre( precision, lgmres_vdata, stop_crit );
 }
 
@@ -2998,7 +2998,7 @@ hypre_LGMRESGetStopCrit( void * lgmres_vdata, HYPRE_Int * stop_crit )
 HYPRE_Int
 hypre_LGMRESGetTol( void * lgmres_vdata, void * tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESGetTol_pre( precision, lgmres_vdata, tol );
 }
 
@@ -3007,7 +3007,7 @@ hypre_LGMRESGetTol( void * lgmres_vdata, void * tol )
 HYPRE_Int
 hypre_LGMRESSetAbsoluteTol( void * lgmres_vdata, hypre_long_double a_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESSetAbsoluteTol_pre( precision, lgmres_vdata, a_tol );
 }
 
@@ -3016,7 +3016,7 @@ hypre_LGMRESSetAbsoluteTol( void * lgmres_vdata, hypre_long_double a_tol )
 HYPRE_Int
 hypre_LGMRESSetAugDim( void * lgmres_vdata, HYPRE_Int aug_dim )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESSetAugDim_pre( precision, lgmres_vdata, aug_dim );
 }
 
@@ -3025,7 +3025,7 @@ hypre_LGMRESSetAugDim( void * lgmres_vdata, HYPRE_Int aug_dim )
 HYPRE_Int
 hypre_LGMRESSetConvergenceFactorTol( void * lgmres_vdata, hypre_long_double cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESSetConvergenceFactorTol_pre( precision, lgmres_vdata, cf_tol );
 }
 
@@ -3034,7 +3034,7 @@ hypre_LGMRESSetConvergenceFactorTol( void * lgmres_vdata, hypre_long_double cf_t
 HYPRE_Int
 hypre_LGMRESSetKDim( void * lgmres_vdata, HYPRE_Int k_dim )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESSetKDim_pre( precision, lgmres_vdata, k_dim );
 }
 
@@ -3043,7 +3043,7 @@ hypre_LGMRESSetKDim( void * lgmres_vdata, HYPRE_Int k_dim )
 HYPRE_Int
 hypre_LGMRESSetLogging( void * lgmres_vdata, HYPRE_Int level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESSetLogging_pre( precision, lgmres_vdata, level );
 }
 
@@ -3052,7 +3052,7 @@ hypre_LGMRESSetLogging( void * lgmres_vdata, HYPRE_Int level )
 HYPRE_Int
 hypre_LGMRESSetMaxIter( void * lgmres_vdata, HYPRE_Int max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESSetMaxIter_pre( precision, lgmres_vdata, max_iter );
 }
 
@@ -3061,7 +3061,7 @@ hypre_LGMRESSetMaxIter( void * lgmres_vdata, HYPRE_Int max_iter )
 HYPRE_Int
 hypre_LGMRESSetMinIter( void * lgmres_vdata, HYPRE_Int min_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESSetMinIter_pre( precision, lgmres_vdata, min_iter );
 }
 
@@ -3070,7 +3070,7 @@ hypre_LGMRESSetMinIter( void * lgmres_vdata, HYPRE_Int min_iter )
 HYPRE_Int
 hypre_LGMRESSetPrecond( void * lgmres_vdata, hypre_KrylovPtrToPrecond precond, hypre_KrylovPtrToPrecondSetup precond_setup, void * precond_data )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESSetPrecond_pre( precision, lgmres_vdata, precond, precond_setup, precond_data );
 }
 
@@ -3079,7 +3079,7 @@ hypre_LGMRESSetPrecond( void * lgmres_vdata, hypre_KrylovPtrToPrecond precond, h
 HYPRE_Int
 hypre_LGMRESSetPrintLevel( void * lgmres_vdata, HYPRE_Int level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESSetPrintLevel_pre( precision, lgmres_vdata, level );
 }
 
@@ -3088,7 +3088,7 @@ hypre_LGMRESSetPrintLevel( void * lgmres_vdata, HYPRE_Int level )
 HYPRE_Int
 hypre_LGMRESSetStopCrit( void * lgmres_vdata, HYPRE_Int stop_crit )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESSetStopCrit_pre( precision, lgmres_vdata, stop_crit );
 }
 
@@ -3097,7 +3097,7 @@ hypre_LGMRESSetStopCrit( void * lgmres_vdata, HYPRE_Int stop_crit )
 HYPRE_Int
 hypre_LGMRESSetTol( void * lgmres_vdata, hypre_long_double tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESSetTol_pre( precision, lgmres_vdata, tol );
 }
 
@@ -3106,7 +3106,7 @@ hypre_LGMRESSetTol( void * lgmres_vdata, hypre_long_double tol )
 HYPRE_Int
 hypre_LGMRESSetup( void * lgmres_vdata, void * A, void * b, void * x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESSetup_pre( precision, lgmres_vdata, A, b, x );
 }
 
@@ -3115,7 +3115,7 @@ hypre_LGMRESSetup( void * lgmres_vdata, void * A, void * b, void * x )
 HYPRE_Int
 hypre_LGMRESSolve( void * lgmres_vdata, void * A, void * b, void * x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_LGMRESSolve_pre( precision, lgmres_vdata, A, b, x );
 }
 
@@ -3124,7 +3124,7 @@ hypre_LGMRESSolve( void * lgmres_vdata, void * A, void * b, void * x )
 void *
 hypre_PCGCreate( hypre_PCGFunctions * pcg_functions )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGCreate_pre( precision, pcg_functions );
 }
 
@@ -3133,7 +3133,7 @@ hypre_PCGCreate( hypre_PCGFunctions * pcg_functions )
 HYPRE_Int
 hypre_PCGDestroy( void * pcg_vdata )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGDestroy_pre( precision, pcg_vdata );
 }
 
@@ -3142,7 +3142,7 @@ hypre_PCGDestroy( void * pcg_vdata )
 HYPRE_Int
 hypre_PCGGetAbsoluteTol( void * pcg_vdata, void * a_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetAbsoluteTol_pre( precision, pcg_vdata, a_tol );
 }
 
@@ -3151,7 +3151,7 @@ hypre_PCGGetAbsoluteTol( void * pcg_vdata, void * a_tol )
 HYPRE_Int
 hypre_PCGGetAbsoluteTolFactor( void * pcg_vdata, void * atolf )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetAbsoluteTolFactor_pre( precision, pcg_vdata, atolf );
 }
 
@@ -3160,7 +3160,7 @@ hypre_PCGGetAbsoluteTolFactor( void * pcg_vdata, void * atolf )
 HYPRE_Int
 hypre_PCGGetConverged( void * pcg_vdata, HYPRE_Int * converged )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetConverged_pre( precision, pcg_vdata, converged );
 }
 
@@ -3169,7 +3169,7 @@ hypre_PCGGetConverged( void * pcg_vdata, HYPRE_Int * converged )
 HYPRE_Int
 hypre_PCGGetConvergenceFactorTol( void * pcg_vdata, void * cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetConvergenceFactorTol_pre( precision, pcg_vdata, cf_tol );
 }
 
@@ -3178,7 +3178,7 @@ hypre_PCGGetConvergenceFactorTol( void * pcg_vdata, void * cf_tol )
 HYPRE_Int
 hypre_PCGGetFinalRelativeResidualNorm( void * pcg_vdata, void * relative_residual_norm )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetFinalRelativeResidualNorm_pre( precision, pcg_vdata, relative_residual_norm );
 }
 
@@ -3187,7 +3187,7 @@ hypre_PCGGetFinalRelativeResidualNorm( void * pcg_vdata, void * relative_residua
 HYPRE_Int
 hypre_PCGGetFlex( void * pcg_vdata, HYPRE_Int * flex )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetFlex_pre( precision, pcg_vdata, flex );
 }
 
@@ -3196,7 +3196,7 @@ hypre_PCGGetFlex( void * pcg_vdata, HYPRE_Int * flex )
 HYPRE_Int
 hypre_PCGGetLogging( void * pcg_vdata, HYPRE_Int * level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetLogging_pre( precision, pcg_vdata, level );
 }
 
@@ -3205,7 +3205,7 @@ hypre_PCGGetLogging( void * pcg_vdata, HYPRE_Int * level )
 HYPRE_Int
 hypre_PCGGetMaxIter( void * pcg_vdata, HYPRE_Int * max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetMaxIter_pre( precision, pcg_vdata, max_iter );
 }
 
@@ -3214,7 +3214,7 @@ hypre_PCGGetMaxIter( void * pcg_vdata, HYPRE_Int * max_iter )
 HYPRE_Int
 hypre_PCGGetNumIterations( void * pcg_vdata, HYPRE_Int * num_iterations )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetNumIterations_pre( precision, pcg_vdata, num_iterations );
 }
 
@@ -3223,7 +3223,7 @@ hypre_PCGGetNumIterations( void * pcg_vdata, HYPRE_Int * num_iterations )
 HYPRE_Int
 hypre_PCGGetPrecond( void * pcg_vdata, HYPRE_Solver * precond_data_ptr )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetPrecond_pre( precision, pcg_vdata, precond_data_ptr );
 }
 
@@ -3232,7 +3232,7 @@ hypre_PCGGetPrecond( void * pcg_vdata, HYPRE_Solver * precond_data_ptr )
 HYPRE_Int
 hypre_PCGGetPrecondMatrix( void * pcg_vdata, HYPRE_Matrix * precond_matrix_ptr )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetPrecondMatrix_pre( precision, pcg_vdata, precond_matrix_ptr );
 }
 
@@ -3241,7 +3241,7 @@ hypre_PCGGetPrecondMatrix( void * pcg_vdata, HYPRE_Matrix * precond_matrix_ptr )
 HYPRE_Int
 hypre_PCGGetPrintLevel( void * pcg_vdata, HYPRE_Int * level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetPrintLevel_pre( precision, pcg_vdata, level );
 }
 
@@ -3250,7 +3250,7 @@ hypre_PCGGetPrintLevel( void * pcg_vdata, HYPRE_Int * level )
 HYPRE_Int
 hypre_PCGGetRecomputeResidual( void * pcg_vdata, HYPRE_Int * recompute_residual )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetRecomputeResidual_pre( precision, pcg_vdata, recompute_residual );
 }
 
@@ -3259,7 +3259,7 @@ hypre_PCGGetRecomputeResidual( void * pcg_vdata, HYPRE_Int * recompute_residual 
 HYPRE_Int
 hypre_PCGGetRecomputeResidualP( void * pcg_vdata, HYPRE_Int * recompute_residual_p )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetRecomputeResidualP_pre( precision, pcg_vdata, recompute_residual_p );
 }
 
@@ -3268,7 +3268,7 @@ hypre_PCGGetRecomputeResidualP( void * pcg_vdata, HYPRE_Int * recompute_residual
 HYPRE_Int
 hypre_PCGGetRelChange( void * pcg_vdata, HYPRE_Int * rel_change )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetRelChange_pre( precision, pcg_vdata, rel_change );
 }
 
@@ -3277,7 +3277,7 @@ hypre_PCGGetRelChange( void * pcg_vdata, HYPRE_Int * rel_change )
 HYPRE_Int
 hypre_PCGGetResidual( void * pcg_vdata, void ** residual )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetResidual_pre( precision, pcg_vdata, residual );
 }
 
@@ -3286,7 +3286,7 @@ hypre_PCGGetResidual( void * pcg_vdata, void ** residual )
 HYPRE_Int
 hypre_PCGGetResidualTol( void * pcg_vdata, void * rtol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetResidualTol_pre( precision, pcg_vdata, rtol );
 }
 
@@ -3295,7 +3295,7 @@ hypre_PCGGetResidualTol( void * pcg_vdata, void * rtol )
 HYPRE_Int
 hypre_PCGGetSkipBreak( void * pcg_vdata, HYPRE_Int * skip_break )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetSkipBreak_pre( precision, pcg_vdata, skip_break );
 }
 
@@ -3304,7 +3304,7 @@ hypre_PCGGetSkipBreak( void * pcg_vdata, HYPRE_Int * skip_break )
 HYPRE_Int
 hypre_PCGGetStopCrit( void * pcg_vdata, HYPRE_Int * stop_crit )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetStopCrit_pre( precision, pcg_vdata, stop_crit );
 }
 
@@ -3313,7 +3313,7 @@ hypre_PCGGetStopCrit( void * pcg_vdata, HYPRE_Int * stop_crit )
 HYPRE_Int
 hypre_PCGGetTol( void * pcg_vdata, void * tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetTol_pre( precision, pcg_vdata, tol );
 }
 
@@ -3322,7 +3322,7 @@ hypre_PCGGetTol( void * pcg_vdata, void * tol )
 HYPRE_Int
 hypre_PCGGetTwoNorm( void * pcg_vdata, HYPRE_Int * two_norm )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGGetTwoNorm_pre( precision, pcg_vdata, two_norm );
 }
 
@@ -3331,7 +3331,7 @@ hypre_PCGGetTwoNorm( void * pcg_vdata, HYPRE_Int * two_norm )
 HYPRE_Int
 hypre_PCGPrintLogging( void * pcg_vdata, HYPRE_Int myid )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGPrintLogging_pre( precision, pcg_vdata, myid );
 }
 
@@ -3340,7 +3340,7 @@ hypre_PCGPrintLogging( void * pcg_vdata, HYPRE_Int myid )
 HYPRE_Int
 hypre_PCGSetAbsoluteTol( void * pcg_vdata, hypre_long_double a_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSetAbsoluteTol_pre( precision, pcg_vdata, a_tol );
 }
 
@@ -3349,7 +3349,7 @@ hypre_PCGSetAbsoluteTol( void * pcg_vdata, hypre_long_double a_tol )
 HYPRE_Int
 hypre_PCGSetAbsoluteTolFactor( void * pcg_vdata, hypre_long_double atolf )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSetAbsoluteTolFactor_pre( precision, pcg_vdata, atolf );
 }
 
@@ -3358,7 +3358,7 @@ hypre_PCGSetAbsoluteTolFactor( void * pcg_vdata, hypre_long_double atolf )
 HYPRE_Int
 hypre_PCGSetConvergenceFactorTol( void * pcg_vdata, hypre_long_double cf_tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSetConvergenceFactorTol_pre( precision, pcg_vdata, cf_tol );
 }
 
@@ -3367,7 +3367,7 @@ hypre_PCGSetConvergenceFactorTol( void * pcg_vdata, hypre_long_double cf_tol )
 HYPRE_Int
 hypre_PCGSetFlex( void * pcg_vdata, HYPRE_Int flex )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSetFlex_pre( precision, pcg_vdata, flex );
 }
 
@@ -3376,7 +3376,7 @@ hypre_PCGSetFlex( void * pcg_vdata, HYPRE_Int flex )
 HYPRE_Int
 hypre_PCGSetHybrid( void * pcg_vdata, HYPRE_Int level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSetHybrid_pre( precision, pcg_vdata, level );
 }
 
@@ -3385,7 +3385,7 @@ hypre_PCGSetHybrid( void * pcg_vdata, HYPRE_Int level )
 HYPRE_Int
 hypre_PCGSetLogging( void * pcg_vdata, HYPRE_Int level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSetLogging_pre( precision, pcg_vdata, level );
 }
 
@@ -3394,7 +3394,7 @@ hypre_PCGSetLogging( void * pcg_vdata, HYPRE_Int level )
 HYPRE_Int
 hypre_PCGSetMaxIter( void * pcg_vdata, HYPRE_Int max_iter )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSetMaxIter_pre( precision, pcg_vdata, max_iter );
 }
 
@@ -3403,7 +3403,7 @@ hypre_PCGSetMaxIter( void * pcg_vdata, HYPRE_Int max_iter )
 HYPRE_Int
 hypre_PCGSetPrecond( void * pcg_vdata, hypre_KrylovPtrToPrecond precond, hypre_KrylovPtrToPrecondSetup precond_setup, void * precond_data )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSetPrecond_pre( precision, pcg_vdata, precond, precond_setup, precond_data );
 }
 
@@ -3412,7 +3412,7 @@ hypre_PCGSetPrecond( void * pcg_vdata, hypre_KrylovPtrToPrecond precond, hypre_K
 HYPRE_Int
 hypre_PCGSetPrecondMatrix( void * pcg_vdata, void * precond_matrix )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSetPrecondMatrix_pre( precision, pcg_vdata, precond_matrix );
 }
 
@@ -3421,7 +3421,7 @@ hypre_PCGSetPrecondMatrix( void * pcg_vdata, void * precond_matrix )
 HYPRE_Int
 hypre_PCGSetPreconditioner( void * pcg_vdata, void * precond_data )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSetPreconditioner_pre( precision, pcg_vdata, precond_data );
 }
 
@@ -3430,7 +3430,7 @@ hypre_PCGSetPreconditioner( void * pcg_vdata, void * precond_data )
 HYPRE_Int
 hypre_PCGSetPrintLevel( void * pcg_vdata, HYPRE_Int level )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSetPrintLevel_pre( precision, pcg_vdata, level );
 }
 
@@ -3439,7 +3439,7 @@ hypre_PCGSetPrintLevel( void * pcg_vdata, HYPRE_Int level )
 HYPRE_Int
 hypre_PCGSetRecomputeResidual( void * pcg_vdata, HYPRE_Int recompute_residual )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSetRecomputeResidual_pre( precision, pcg_vdata, recompute_residual );
 }
 
@@ -3448,7 +3448,7 @@ hypre_PCGSetRecomputeResidual( void * pcg_vdata, HYPRE_Int recompute_residual )
 HYPRE_Int
 hypre_PCGSetRecomputeResidualP( void * pcg_vdata, HYPRE_Int recompute_residual_p )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSetRecomputeResidualP_pre( precision, pcg_vdata, recompute_residual_p );
 }
 
@@ -3457,7 +3457,7 @@ hypre_PCGSetRecomputeResidualP( void * pcg_vdata, HYPRE_Int recompute_residual_p
 HYPRE_Int
 hypre_PCGSetRelChange( void * pcg_vdata, HYPRE_Int rel_change )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSetRelChange_pre( precision, pcg_vdata, rel_change );
 }
 
@@ -3466,7 +3466,7 @@ hypre_PCGSetRelChange( void * pcg_vdata, HYPRE_Int rel_change )
 HYPRE_Int
 hypre_PCGSetResidualTol( void * pcg_vdata, hypre_long_double rtol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSetResidualTol_pre( precision, pcg_vdata, rtol );
 }
 
@@ -3475,7 +3475,7 @@ hypre_PCGSetResidualTol( void * pcg_vdata, hypre_long_double rtol )
 HYPRE_Int
 hypre_PCGSetSkipBreak( void * pcg_vdata, HYPRE_Int skip_break )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSetSkipBreak_pre( precision, pcg_vdata, skip_break );
 }
 
@@ -3484,7 +3484,7 @@ hypre_PCGSetSkipBreak( void * pcg_vdata, HYPRE_Int skip_break )
 HYPRE_Int
 hypre_PCGSetStopCrit( void * pcg_vdata, HYPRE_Int stop_crit )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSetStopCrit_pre( precision, pcg_vdata, stop_crit );
 }
 
@@ -3493,7 +3493,7 @@ hypre_PCGSetStopCrit( void * pcg_vdata, HYPRE_Int stop_crit )
 HYPRE_Int
 hypre_PCGSetTol( void * pcg_vdata, hypre_long_double tol )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSetTol_pre( precision, pcg_vdata, tol );
 }
 
@@ -3502,7 +3502,7 @@ hypre_PCGSetTol( void * pcg_vdata, hypre_long_double tol )
 HYPRE_Int
 hypre_PCGSetTwoNorm( void * pcg_vdata, HYPRE_Int two_norm )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSetTwoNorm_pre( precision, pcg_vdata, two_norm );
 }
 
@@ -3511,7 +3511,7 @@ hypre_PCGSetTwoNorm( void * pcg_vdata, HYPRE_Int two_norm )
 HYPRE_Int
 hypre_PCGSetup( void * pcg_vdata, void * A, void * b, void * x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSetup_pre( precision, pcg_vdata, A, b, x );
 }
 
@@ -3520,7 +3520,7 @@ hypre_PCGSetup( void * pcg_vdata, void * A, void * b, void * x )
 HYPRE_Int
 hypre_PCGSolve( void * pcg_vdata, void * A, void * b, void * x )
 {
-   HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global
+   HYPRE_Precision precision = hypre_GlobalPrecision();
    return hypre_PCGSolve_pre( precision, pcg_vdata, A, b, x );
 }
 

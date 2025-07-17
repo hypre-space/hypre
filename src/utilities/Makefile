@@ -64,6 +64,7 @@ MuP_FILES = \
  merge_sort.c\
  mmio.c\
  mpi_comm_f2c.c\
+ multiprecision.c\
  prefix_sum.c\
  printf.c\
  qsort.c\

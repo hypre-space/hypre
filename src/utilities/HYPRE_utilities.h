@@ -192,8 +192,6 @@ typedef HYPRE_Int MPI_Comm;
 #define HYPRE_MAX_FILE_NAME_LEN  1024   /* longest filename length used in hypre */
 #define HYPRE_MAX_MSG_LEN        2048   /* longest message length */
 
-
-
 /*--------------------------------------------------------------------------
  * HYPRE init/finalize
  *--------------------------------------------------------------------------*/
@@ -631,6 +629,16 @@ typedef HYPRE_Int (*HYPRE_PtrToSolverFcn)(HYPRE_Solver,
                                           HYPRE_Vector,
                                           HYPRE_Vector);
 typedef HYPRE_Int (*HYPRE_PtrToDestroyFcn)(HYPRE_Solver);
+
+/*--------------------------------------------------------------------------
+ * Multiprecision functions
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SetGlobalPrecision(HYPRE_Precision precision);
+
+HYPRE_Int
+HYPRE_GetGlobalPrecision(HYPRE_Precision *precision);
 
 #ifdef __cplusplus
 }

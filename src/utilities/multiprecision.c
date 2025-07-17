@@ -30,17 +30,17 @@ HYPRE_SetGlobalPrecision(HYPRE_Precision precision)
 {
    hypre__global_precision = precision;
 
-   return global_error_flag;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_GetGlobalPrecision(HYPRE_Precision &precision)
+HYPRE_GetGlobalPrecision(HYPRE_Precision *precision)
 {
    *precision = hypre_GlobalPrecision();
 
-   return global_error_flag;
+   return hypre_error_flag;
 }
 

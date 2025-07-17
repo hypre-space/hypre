@@ -60,6 +60,7 @@ cat int_array.h                >> $INTERNAL_HEADER
 cat protos.h                   >> $INTERNAL_HEADER
 cat hopscotch_hash.h           >> $INTERNAL_HEADER
 cat mmio.h                     >> $INTERNAL_HEADER
+cat multiprecision.h           >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards

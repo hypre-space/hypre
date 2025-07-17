@@ -61,9 +61,9 @@ awk -v filename="$PFILE" -v outc="$OUTC" -v outh="$OUTH" 'BEGIN {
       gsub(/(HYPRE_Real|HYPRE_Complex)/, "hypre_double", arg_dbl)
       gsub(/(HYPRE_Real|HYPRE_Complex)/, "hypre_long_double", arg_long_dbl)
 
-      print fret"\n"fdef"_flt("arg_flt");"           >> outh
-      print fret"\n"fdef"_dbl("arg_dbl");"           >> outh
-      print fret"\n"fdef"_long_dbl("arg_long_dbl");" >> outh
+      print fret"\n"fdef"_flt("arg_flt");"             >> outh
+      print fret"\n"fdef"_dbl("arg_dbl");"             >> outh
+      print fret"\n"fdef"_long_dbl("arg_long_dbl");\n" >> outh
 
       # Put fixed implementation code here if needed
    }

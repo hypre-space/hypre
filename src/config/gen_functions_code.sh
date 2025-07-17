@@ -72,7 +72,7 @@ awk -v filename="$PFILE" -v outc="$OUTC" -v outh="$OUTH" 'BEGIN {
       print "/*--------------------------------------------------------------------------*/\n" >> outc
       print fret"\n"fdef"("arg_mup")"                                                          >> outc
       print "{"                                                                                >> outc
-      print tab "HYPRE_Precision precision = HYPRE_REAL_DOUBLE; // RDF placeholder for global" >> outc
+      print tab "HYPRE_Precision precision = hypre_GlobalPrecision();"                         >> outc
       print tab "return "fdef"_pre( precision,"s_str");"                                       >> outc
       print "}\n"                                                                              >> outc
    }
