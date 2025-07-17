@@ -216,6 +216,7 @@
 #undef HYPRE_PCGSolve
 #undef hypre_BiCGSTABCreate
 #undef hypre_BiCGSTABDestroy
+#undef hypre_BiCGSTABFunctionsCreate
 #undef hypre_BiCGSTABGetConverged
 #undef hypre_BiCGSTABGetFinalRelativeResidualNorm
 #undef hypre_BiCGSTABGetNumIterations
@@ -237,6 +238,7 @@
 #undef hypre_BiCGSTABSolve
 #undef hypre_CGNRCreate
 #undef hypre_CGNRDestroy
+#undef hypre_CGNRFunctionsCreate
 #undef hypre_CGNRGetFinalRelativeResidualNorm
 #undef hypre_CGNRGetNumIterations
 #undef hypre_CGNRGetPrecond
@@ -250,6 +252,7 @@
 #undef hypre_CGNRSolve
 #undef hypre_COGMRESCreate
 #undef hypre_COGMRESDestroy
+#undef hypre_COGMRESFunctionsCreate
 #undef hypre_COGMRESGetAbsoluteTol
 #undef hypre_COGMRESGetCGS
 #undef hypre_COGMRESGetConverged
@@ -285,6 +288,7 @@
 #undef hypre_COGMRESSolve
 #undef hypre_FlexGMRESCreate
 #undef hypre_FlexGMRESDestroy
+#undef hypre_FlexGMRESFunctionsCreate
 #undef hypre_FlexGMRESGetAbsoluteTol
 #undef hypre_FlexGMRESGetConverged
 #undef hypre_FlexGMRESGetConvergenceFactorTol
@@ -315,6 +319,7 @@
 #undef hypre_FlexGMRESSolve
 #undef hypre_GMRESCreate
 #undef hypre_GMRESDestroy
+#undef hypre_GMRESFunctionsCreate
 #undef hypre_GMRESGetAbsoluteTol
 #undef hypre_GMRESGetConverged
 #undef hypre_GMRESGetConvergenceFactorTol
@@ -352,6 +357,7 @@
 #undef hypre_GMRESSolve
 #undef hypre_LGMRESCreate
 #undef hypre_LGMRESDestroy
+#undef hypre_LGMRESFunctionsCreate
 #undef hypre_LGMRESGetAbsoluteTol
 #undef hypre_LGMRESGetAugDim
 #undef hypre_LGMRESGetConverged
@@ -404,6 +410,7 @@
 #undef hypre_LOBPCGSolve
 #undef hypre_PCGCreate
 #undef hypre_PCGDestroy
+#undef hypre_PCGFunctionsCreate
 #undef hypre_PCGGetAbsoluteTol
 #undef hypre_PCGGetAbsoluteTolFactor
 #undef hypre_PCGGetConverged
@@ -451,10 +458,3 @@
 #undef lobpcg_clean
 #undef lobpcg_initialize
 #undef lobpcg_solve
-#undef hypre_BiCGSTABFunctionsCreate
-#undef hypre_CGNRFunctionsCreate
-#undef hypre_COGMRESFunctionsCreate
-#undef hypre_FlexGMRESFunctionsCreate
-#undef hypre_GMRESFunctionsCreate
-#undef hypre_LGMRESFunctionsCreate
-#undef hypre_PCGFunctionsCreate
