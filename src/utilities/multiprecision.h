@@ -12,6 +12,8 @@
 extern "C" {
 #endif
 
+#ifdef HYPRE_MIXED_PRECISION
+
 /*--------------------------------------------------------------------------
  * Global variable
  *--------------------------------------------------------------------------*/
@@ -24,6 +26,8 @@ extern HYPRE_Precision hypre__global_precision;
 
 HYPRE_Precision
 hypre_GlobalPrecision();
+
+#endif
 
 #ifdef __cplusplus
 }

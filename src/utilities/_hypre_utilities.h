@@ -3975,6 +3975,8 @@ HYPRE_Int hypre_mm_read_mtx_crd_size(FILE *f, HYPRE_Int *M, HYPRE_Int *N, HYPRE_
 extern "C" {
 #endif
 
+#ifdef HYPRE_MIXED_PRECISION
+
 /*--------------------------------------------------------------------------
  * Global variable
  *--------------------------------------------------------------------------*/
@@ -3987,6 +3989,8 @@ extern HYPRE_Precision hypre__global_precision;
 
 HYPRE_Precision
 hypre_GlobalPrecision();
+
+#endif
 
 #ifdef __cplusplus
 }

@@ -26,35 +26,6 @@
 
 #ifdef HYPRE_MIXED_PRECISION
 #include "utilities_mup_func.h"
-
-#ifdef hypre_DEFINE_GLOBAL_MP
-#define hypre_DEFINE_GLOBAL 1
-#endif
-
-/* object precision options */
-typedef enum 
-{
-   HYPRE_REAL_SINGLE,
-   HYPRE_REAL_DOUBLE,
-   HYPRE_REAL_LONGDOUBLE
-
-} HYPRE_Precision;
-
-#ifndef HYPRE_OBJECT_PRECISION
-#if defined(HYPRE_SINGLE)
-#define HYPRE_OBJECT_PRECISION HYPRE_REAL_SINGLE
-#elif defined(HYPRE_LONG_DOUBLE)
-#define HYPRE_OBJECT_PRECISION HYPRE_REAL_LONGDOUBLE
-#else
-#define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE
-#endif
-#endif
-
-#endif
-
-/* need to define this when not mixed precision */
-#ifndef HYPRE_MIXED_PRECISION
-#define hypre_DEFINE_GLOBAL 1
 #endif
 
 #ifdef __cplusplus
@@ -171,6 +142,48 @@ typedef HYPRE_Real HYPRE_Complex;
 typedef double       hypre_double;
 typedef float        hypre_float;
 typedef long double  hypre_long_double;
+
+/*--------------------------------------------------------------------------
+ * Multiprecision
+ *--------------------------------------------------------------------------*/
+
+#ifdef HYPRE_MIXED_PRECISION
+
+#ifdef hypre_DEFINE_GLOBAL_MP
+#define hypre_DEFINE_GLOBAL 1
+#endif
+
+/* object precision options */
+typedef enum 
+{
+   HYPRE_REAL_SINGLE,
+   HYPRE_REAL_DOUBLE,
+   HYPRE_REAL_LONGDOUBLE
+
+} HYPRE_Precision;
+
+#ifndef HYPRE_OBJECT_PRECISION
+#if defined(HYPRE_SINGLE)
+#define HYPRE_OBJECT_PRECISION HYPRE_REAL_SINGLE
+#elif defined(HYPRE_LONG_DOUBLE)
+#define HYPRE_OBJECT_PRECISION HYPRE_REAL_LONGDOUBLE
+#else
+#define HYPRE_OBJECT_PRECISION HYPRE_REAL_DOUBLE
+#endif
+#endif
+
+HYPRE_Int
+HYPRE_SetGlobalPrecision(HYPRE_Precision precision);
+
+HYPRE_Int
+HYPRE_GetGlobalPrecision(HYPRE_Precision *precision);
+
+#endif
+
+/* need to define this when not mixed precision */
+#ifndef HYPRE_MIXED_PRECISION
+#define hypre_DEFINE_GLOBAL 1
+#endif
 
 /*--------------------------------------------------------------------------
  * Sequential MPI stuff
@@ -629,16 +642,6 @@ typedef HYPRE_Int (*HYPRE_PtrToSolverFcn)(HYPRE_Solver,
                                           HYPRE_Vector,
                                           HYPRE_Vector);
 typedef HYPRE_Int (*HYPRE_PtrToDestroyFcn)(HYPRE_Solver);
-
-/*--------------------------------------------------------------------------
- * Multiprecision functions
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_SetGlobalPrecision(HYPRE_Precision precision);
-
-HYPRE_Int
-HYPRE_GetGlobalPrecision(HYPRE_Precision *precision);
 
 #ifdef __cplusplus
 }

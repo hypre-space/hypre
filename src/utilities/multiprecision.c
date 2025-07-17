@@ -7,6 +7,8 @@
 
 #include "_hypre_utilities.h"
 
+#ifdef HYPRE_MIXED_PRECISION
+
 /* Global variable for default runtime precision */
 /* Guard definition to avoid linker errors for multiprecision build */
 #if defined (hypre_DEFINE_GLOBAL)
@@ -43,4 +45,6 @@ HYPRE_GetGlobalPrecision(HYPRE_Precision *precision)
 
    return hypre_error_flag;
 }
+
+#endif
 
