@@ -6,6 +6,7 @@
 
 DIRS="\
  krylov\
+ sstruct_ls\
 "
 # blas                     - no external header
 # distributed_ls/Euclid    - no external header
@@ -21,7 +22,6 @@ DIRS="\
 # parcsr_mv
 # seq_block_mv             - no external header
 # seq_mv                   - renemame seq_mv.h to _hypre_seq_mv.h
-# sstruct_ls
 # sstruct_mv
 # struct_ls
 # struct_mv
