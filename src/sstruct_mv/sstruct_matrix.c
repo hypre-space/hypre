@@ -2681,7 +2681,10 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
    nvalues = 0; m = 0;
    hypre_SetIndex(stride, 1);
 #if !defined(HYPRE_USING_GPU)
-   row_sizes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
+   if (!*ij_Ahat_ptr)
+   {
+      row_sizes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
+   }
 #endif
    for (part = 0; part < nparts; part++)
    {
@@ -2710,16 +2713,19 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
                convert_box = hypre_BoxArrayBox(convert_boxa[part][var], j);
 
 #if !defined(HYPRE_USING_GPU)
-               /* WM: do I need to check whether there is a non-trivial
-                      intersection, or is that handled automatically? */
-               hypre_IntersectBoxes(grid_box, convert_box, box);
-               start = hypre_BoxIMin(box);
-               hypre_BoxGetSize(box, loop_size);
-               hypre_BoxLoop1Begin(ndim, loop_size, ghost_box, start, stride, mi);
+               if (!*ij_Ahat_ptr)
                {
-                  row_sizes[m + mi] = nnzrow;
+                  /* WM: do I need to check whether there is a non-trivial
+                         intersection, or is that handled automatically? */
+                  hypre_IntersectBoxes(grid_box, convert_box, box);
+                  start = hypre_BoxIMin(box);
+                  hypre_BoxGetSize(box, loop_size);
+                  hypre_BoxLoop1Begin(ndim, loop_size, ghost_box, start, stride, mi);
+                  {
+                     row_sizes[m + mi] = nnzrow;
+                  }
+                  hypre_BoxLoop1End(mi);
                }
-               hypre_BoxLoop1End(mi);
 #endif
                nvalues = hypre_max(nvalues, nnzrow * hypre_BoxVolume(convert_box));
             } /* Loop over convert_boxa[part][var] */
@@ -2810,6 +2816,8 @@ hypre_SStructMatrixBoxesToUMatrix( hypre_SStructMatrix   *A,
          } /* Loop over convert_boxa */
       } /* Loop over vars */
    } /* Loop over parts */
+
+   /* Free memory */
    hypre_TFree(values, memory_location);
 
    /* Assemble ij_A */
