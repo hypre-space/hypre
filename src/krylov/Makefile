@@ -18,6 +18,8 @@ C_COMPILE_FLAGS = \
 
 HEADERS =\
  HYPRE_krylov.h\
+ _hypre_krylov.h\
+ _hypre_lobpcg.h\
  bicgstab.h\
  cgnr.h\
  gmres.h\
@@ -26,9 +28,7 @@ HEADERS =\
  lgmres.h\
  pcg.h\
  HYPRE_lobpcg.h\
- HYPRE_MatvecFunctions.h\
- _hypre_krylov.h\
- _hypre_lobpcg.h
+ HYPRE_MatvecFunctions.h
 
 FILES =\
  bicgstab.c\
@@ -96,7 +96,7 @@ clean:
 distclean: clean
 
 ##################################################################
-# Build Rules
+# Rules
 ##################################################################
 
 libHYPRE_krylov.a: ${OBJS}

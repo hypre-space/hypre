@@ -36,7 +36,7 @@ OUTP=$3
 
 for i in fixed functions methods
 do
-    (export LC_COLLATE=C; sort mup.${i}) > mup.${i}.tmp
+    (export LC_COLLATE=C; sort mup.${i} | uniq) > mup.${i}.tmp
     mv mup.${i}.tmp mup.${i}
 done
 

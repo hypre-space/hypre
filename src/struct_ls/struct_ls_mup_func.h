@@ -466,6 +466,7 @@
 #define hypre_StructKrylovIdentity HYPRE_MULTIPRECISION_FUNC ( hypre_StructKrylovIdentity )
 #define hypre_StructKrylovIdentitySetup HYPRE_MULTIPRECISION_FUNC ( hypre_StructKrylovIdentitySetup )
 #define hypre_StructKrylovInnerProd HYPRE_MULTIPRECISION_FUNC ( hypre_StructKrylovInnerProd )
+#define hypre_StructKrylovInnerProdTagged HYPRE_MULTIPRECISION_FUNC ( hypre_StructKrylovInnerProdTagged )
 #define hypre_StructKrylovMatvec HYPRE_MULTIPRECISION_FUNC ( hypre_StructKrylovMatvec )
 #define hypre_StructKrylovMatvecCreate HYPRE_MULTIPRECISION_FUNC ( hypre_StructKrylovMatvecCreate )
 #define hypre_StructKrylovMatvecDestroy HYPRE_MULTIPRECISION_FUNC ( hypre_StructKrylovMatvecDestroy )

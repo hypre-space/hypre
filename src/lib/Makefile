@@ -5,8 +5,87 @@
 
 include ../config/Makefile.config
 
+# Redefine AR to allow for files with the same name (but in different directories)
+AR = ar -cq
+
 FEIHYPREFILES = ${HYPRE_FEI_HYPRE_FILES}
 FEMLIFILES = ${HYPRE_FEI_FEMLI_FILES}
+
+# multiprecision build
+ifeq (${MP_BUILD}, 1) 
+
+IJMVFILES           = ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.obj
+IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/MuP_obj.dir/IJ_mv_*/*.o ${HYPRE_SRC_TOP_DIR}/IJ_mv/MuP_obj.dir/IJ_mv_*/*.obj
+
+EUCLIDFILES         = ${HYPRE_EUCLID_FILES}
+EUCLIDFILES        += ${HYPRE_SRC_TOP_DIR}/distributed_ls/Euclid/MuP_obj.dir/Euclid_*/*.o
+
+PARASAILSFILES      = ${HYPRE_PARASAILS_FILES}
+PARASAILSFILES     += ${HYPRE_SRC_TOP_DIR}/distributed_ls/ParaSails/MuP_obj.dir/ParaSails_*/*.o
+
+PILUTFILES          = ${HYPRE_PILUT_FILES}
+PILUTFILES         += ${HYPRE_SRC_TOP_DIR}/distributed_ls/pilut/MuP_obj.dir/pilut_*/*.o
+
+DISTMATRIXFILES     = ${HYPRE_SRC_TOP_DIR}/distributed_matrix/*.o
+DISTMATRIXFILES    += ${HYPRE_SRC_TOP_DIR}/distributed_matrix/MuP_obj.dir/distributed_matrix_*/*.o
+
+KRYLOVFILES         = ${HYPRE_SRC_TOP_DIR}/krylov/*.o
+KRYLOVFILES        += ${HYPRE_SRC_TOP_DIR}/krylov/*.o_flt
+KRYLOVFILES        += ${HYPRE_SRC_TOP_DIR}/krylov/*.o_dbl
+KRYLOVFILES        += ${HYPRE_SRC_TOP_DIR}/krylov/*.o_ldbl
+KRYLOVFILES        += ${HYPRE_SRC_TOP_DIR}/krylov/*.o_def
+
+MATMATFILES         = ${HYPRE_SRC_TOP_DIR}/matrix_matrix/*.o
+MATMATFILES        += ${HYPRE_SRC_TOP_DIR}/matrix_matrix/MuP_obj.dir/matrix_matrix_*/*.o
+
+MULTIVECFILES       = ${HYPRE_SRC_TOP_DIR}/multivector/*.o
+MULTIVECFILES      += ${HYPRE_SRC_TOP_DIR}/multivector/MuP_obj.dir/multivector_*/*.o
+
+PARCSRLSFILES       = ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.o ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.obj
+PARCSRLSFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_ls/MuP_obj.dir/parcsr_ls_*/*.o ${HYPRE_SRC_TOP_DIR}/parcsr_ls/MuP_obj.dir/parcsr_ls_*/*.obj
+
+PARCSRMVFILES       = ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.o ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.obj
+PARCSRMVFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_mv/MuP_obj.dir/parcsr_mv_*/*.o ${HYPRE_SRC_TOP_DIR}/parcsr_mv/MuP_obj.dir/parcsr_mv_*/*.obj
+
+PARCSRBLOCKMVFILES  = ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/*.o
+PARCSRBLOCKMVFILES += ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/MuP_obj.dir/parcsr_block_mv_*/*.o
+
+SEQMVFILES          = ${HYPRE_SRC_TOP_DIR}/seq_mv/*.o ${HYPRE_SRC_TOP_DIR}/seq_mv/*.obj
+SEQMVFILES         += ${HYPRE_SRC_TOP_DIR}/seq_mv/MuP_obj.dir/seq_mv_*/*.o ${HYPRE_SRC_TOP_DIR}/seq_mv/MuP_obj.dir/seq_mv_*/*.obj
+
+SEQBLOCKMVFILES     = ${HYPRE_SRC_TOP_DIR}/seq_block_mv/*.o
+SEQBLOCKMVFILES    += ${HYPRE_SRC_TOP_DIR}/seq_block_mv/MuP_obj.dir/seq_block_mv_*/*.o
+
+SSTRUCTLSFILES      = ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.o
+SSTRUCTLSFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.o_flt
+SSTRUCTLSFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.o_dbl
+SSTRUCTLSFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.o_ldbl
+SSTRUCTLSFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.o_def
+SSTRUCTLSFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.obj_flt
+SSTRUCTLSFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.obj_dbl
+SSTRUCTLSFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.obj_ldbl
+SSTRUCTLSFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.obj_def
+
+SSTRUCTMVFILES      = ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.o ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.obj
+SSTRUCTMVFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_mv/MuP_obj.dir/sstruct_mv_*/*.o ${HYPRE_SRC_TOP_DIR}/sstruct_mv/MuP_obj.dir/sstruct_mv_*/*.obj
+
+STRUCTLSFILES       = ${HYPRE_SRC_TOP_DIR}/struct_ls/*.o ${HYPRE_SRC_TOP_DIR}/struct_ls/*.obj
+STRUCTLSFILES      += ${HYPRE_SRC_TOP_DIR}/struct_ls/MuP_obj.dir/struct_ls_*/*.o ${HYPRE_SRC_TOP_DIR}/struct_ls/MuP_obj.dir/struct_ls_*/*.obj
+
+STRUCTMVFILES       = ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o ${HYPRE_SRC_TOP_DIR}/struct_mv/*.obj
+STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/MuP_obj.dir/struct_mv_*/*.o ${HYPRE_SRC_TOP_DIR}/struct_mv/MuP_obj.dir/struct_mv_*/*.obj
+
+UTILITIESFILES      = ${HYPRE_SRC_TOP_DIR}/utilities/*.o ${HYPRE_SRC_TOP_DIR}/utilities/*.obj
+UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/MuP_obj.dir/utilities_*/*.o ${HYPRE_SRC_TOP_DIR}/utilities/MuP_obj.dir/utilities_*/*.obj
+
+BLASFILES           = ${HYPRE_SRC_TOP_DIR}/blas/*.o
+BLASFILES          += ${HYPRE_SRC_TOP_DIR}/blas/MuP_obj.dir/blas_*/*.o
+
+LAPACKFILES         = ${HYPRE_SRC_TOP_DIR}/lapack/*.o
+LAPACKFILES        += ${HYPRE_SRC_TOP_DIR}/lapack/MuP_obj.dir/lapack_*/*.o
+
+# normal build
+else
 
 IJMVFILES          = ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.obj
 EUCLIDFILES        = ${HYPRE_EUCLID_FILES}
@@ -29,30 +108,6 @@ UTILITIESFILES     = ${HYPRE_SRC_TOP_DIR}/utilities/*.o ${HYPRE_SRC_TOP_DIR}/uti
 BLASFILES          = ${HYPRE_SRC_TOP_DIR}/blas/*.o
 LAPACKFILES        = ${HYPRE_SRC_TOP_DIR}/lapack/*.o
 
-ifeq (${MP_BUILD}, 1) 
-IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/MuP_obj.dir/IJ_mv_*/*.o ${HYPRE_SRC_TOP_DIR}/IJ_mv/MuP_obj.dir/IJ_mv_*/*.obj
-EUCLIDFILES        += ${HYPRE_SRC_TOP_DIR}/distributed_ls/Euclid/MuP_obj.dir/Euclid_*/*.o
-PARASAILSFILES     += ${HYPRE_SRC_TOP_DIR}/distributed_ls/ParaSails/MuP_obj.dir/ParaSails_*/*.o
-PILUTFILES         += ${HYPRE_SRC_TOP_DIR}/distributed_ls/pilut/MuP_obj.dir/pilut_*/*.o
-DISTMATRIXFILES    += ${HYPRE_SRC_TOP_DIR}/distributed_matrix/MuP_obj.dir/distributed_matrix_*/*.o
-KRYLOVFILES        += ${HYPRE_SRC_TOP_DIR}/krylov/*.o_flt
-KRYLOVFILES        += ${HYPRE_SRC_TOP_DIR}/krylov/*.o_dbl
-KRYLOVFILES        += ${HYPRE_SRC_TOP_DIR}/krylov/*.o_ldbl
-KRYLOVFILES        += ${HYPRE_SRC_TOP_DIR}/krylov/*.o_def
-MATMATFILES        += ${HYPRE_SRC_TOP_DIR}/matrix_matrix/MuP_obj.dir/matrix_matrix_*/*.o
-MULTIVECFILES      += ${HYPRE_SRC_TOP_DIR}/multivector/MuP_obj.dir/multivector_*/*.o
-PARCSRLSFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_ls/MuP_obj.dir/parcsr_ls_*/*.o ${HYPRE_SRC_TOP_DIR}/parcsr_ls/MuP_obj.dir/parcsr_ls_*/*.obj
-PARCSRMVFILES      += ${HYPRE_SRC_TOP_DIR}/parcsr_mv/MuP_obj.dir/parcsr_mv_*/*.o ${HYPRE_SRC_TOP_DIR}/parcsr_mv/MuP_obj.dir/parcsr_mv_*/*.obj
-PARCSRBLOCKMVFILES += ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/MuP_obj.dir/parcsr_block_mv_*/*.o
-SEQMVFILES         += ${HYPRE_SRC_TOP_DIR}/seq_mv/MuP_obj.dir/seq_mv_*/*.o ${HYPRE_SRC_TOP_DIR}/seq_mv/MuP_obj.dir/seq_mv_*/*.obj
-SEQBLOCKMVFILES    += ${HYPRE_SRC_TOP_DIR}/seq_block_mv/MuP_obj.dir/seq_block_mv_*/*.o
-SSTRUCTLSFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_ls/MuP_obj.dir/sstruct_ls_*/*.o ${HYPRE_SRC_TOP_DIR}/sstruct_ls/MuP_obj.dir/sstruct_ls_*/*.obj
-SSTRUCTMVFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_mv/MuP_obj.dir/sstruct_mv_*/*.o ${HYPRE_SRC_TOP_DIR}/sstruct_mv/MuP_obj.dir/sstruct_mv_*/*.obj
-STRUCTLSFILES      += ${HYPRE_SRC_TOP_DIR}/struct_ls/MuP_obj.dir/struct_ls_*/*.o ${HYPRE_SRC_TOP_DIR}/struct_ls/MuP_obj.dir/struct_ls_*/*.obj
-STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/MuP_obj.dir/struct_mv_*/*.o ${HYPRE_SRC_TOP_DIR}/struct_mv/MuP_obj.dir/struct_mv_*/*.obj
-UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/MuP_obj.dir/utilities_*/*.o ${HYPRE_SRC_TOP_DIR}/utilities/MuP_obj.dir/utilities_*/*.obj
-BLASFILES          += ${HYPRE_SRC_TOP_DIR}/blas/MuP_obj.dir/blas_*/*.o
-LAPACKFILES        += ${HYPRE_SRC_TOP_DIR}/lapack/MuP_obj.dir/lapack_*/*.o
 endif
 
 FILES_HYPRE = \

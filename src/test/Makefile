@@ -66,9 +66,7 @@ HYPRE_DRIVERS =\
  sstruct.c\
  struct.c\
  ams_driver.c\
- maxwell_unscaled.c\
  struct_migrate.c\
- sstruct_fac.c\
  ij_mm.c\
  zboxloop.c\
 
@@ -122,8 +120,6 @@ distclean: clean
 	rm -f ${HYPRE_DRIVER_CXX_EXECS} cxx_*
 	rm -f TEST_examples/*.out*
 	rm -f TEST_examples/*.err*
-	rm -f TEST_fac/*.out*
-	rm -f TEST_fac/*.err*
 	rm -f TEST_ij/*.out*
 	rm -f TEST_ij/*.err*
 	rm -f TEST_ij/*.txt*
@@ -159,15 +155,7 @@ ams_driver: ams_driver.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
-maxwell_unscaled: maxwell_unscaled.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-
 struct_migrate: struct_migrate.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $< ${LFLAGS}
-
-sstruct_fac: sstruct_fac.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $< ${LFLAGS}
 
@@ -283,10 +271,6 @@ ex6_for: fstruct_mv.o fstruct_ls.o fsstruct_mv.o fsstruct_ls.o ex6_for.o
 ex7_for: fstruct_mv.o fstruct_ls.o fsstruct_mv.o fsstruct_ls.o ex7_for.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o fsstruct_mv.o fsstruct_ls.o $@.o ${LFLAGS}
-
-for_maxwell: fparcsr_mv.o fsstruct_mv.o fsstruct_ls.o for_maxwell.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ fparcsr_mv.o fsstruct_mv.o fsstruct_ls.o $@.o ${LFLAGS}
 
 fij_mv: fij_mv.f
 	@echo  "Building" $@ "... "
