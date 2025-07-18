@@ -14,7 +14,7 @@
 #include "HYPRE_IJ_mv.h"
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "sstruct_mv_mup_func.h"
+#include "_hypre_sstruct_mv_mup_def.h"
 #endif
 
 #ifdef __cplusplus
@@ -371,6 +371,9 @@ HYPRE_SStructStencilSetEntry(HYPRE_SStructStencil  stencil,
                              HYPRE_Int            *offset,
                              HYPRE_Int             var);
 
+HYPRE_Int HYPRE_SStructStencilPrint ( FILE *file, HYPRE_SStructStencil stencil );
+HYPRE_Int HYPRE_SStructStencilRead ( FILE *file, HYPRE_SStructStencil *stencil_ptr );
+
 /**@}*/
 
 /*--------------------------------------------------------------------------
@@ -478,6 +481,11 @@ HYPRE_SStructGraphAssemble(HYPRE_SStructGraph graph);
 HYPRE_Int
 HYPRE_SStructGraphSetObjectType(HYPRE_SStructGraph  graph,
                                 HYPRE_Int           type);
+
+HYPRE_Int HYPRE_SStructGraphPrint ( FILE *file, HYPRE_SStructGraph graph );
+HYPRE_Int HYPRE_SStructGraphRead ( FILE *file, HYPRE_SStructGrid grid,
+                                   HYPRE_SStructStencil **stencils, HYPRE_SStructGraph *graph_ptr );
+
 /**@}*/
 
 /*--------------------------------------------------------------------------
@@ -1094,6 +1102,8 @@ HYPRE_SStructVectorGetFEMBoxValues(HYPRE_SStructVector  vector,
 HYPRE_Int
 HYPRE_SStructVectorGather(HYPRE_SStructVector vector);
 
+HYPRE_Int HYPRE_SStructVectorSetConstantValues ( HYPRE_SStructVector vector, HYPRE_Complex value );
+
 /**
  * Set the storage type of the vector object to be constructed.  Currently, \e
  * type can be either \c HYPRE_SSTRUCT (the default), \c HYPRE_STRUCT,
@@ -1130,14 +1140,37 @@ HYPRE_SStructVectorRead( MPI_Comm             comm,
                          const char          *filename,
                          HYPRE_SStructVector *vector_ptr );
 
+HYPRE_Int HYPRE_SStructVectorCopy ( HYPRE_SStructVector x, HYPRE_SStructVector y );
+HYPRE_Int HYPRE_SStructVectorScale ( HYPRE_Complex alpha, HYPRE_SStructVector y );
+HYPRE_Int HYPRE_SStructInnerProd ( HYPRE_SStructVector x, HYPRE_SStructVector y,
+                                   HYPRE_Real *result );
+HYPRE_Int HYPRE_SStructAxpy ( HYPRE_Complex alpha, HYPRE_SStructVector x, HYPRE_SStructVector y );
+
 /**@}*/
 /**@}*/
+
+/* Need to integrate these better into this header */
+
+HYPRE_Int HYPRE_SStructMatrixMatvec ( HYPRE_Complex alpha, HYPRE_SStructMatrix A,
+                                      HYPRE_SStructVector x, HYPRE_Complex beta,
+                                      HYPRE_SStructVector y );
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_sstruct_mv_mup_undef.h"
+#include "HYPRE_sstruct_mv_mup.h"
+#endif
 #endif
 
 #endif
