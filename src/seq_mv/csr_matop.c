@@ -2055,12 +2055,6 @@ hypre_CSRMatrixComputeColSum( hypre_CSRMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixExtractDiagonalHost
- * type 0: diag
- *      1: abs diag
- *      2: diag inverse
- *      3: diag inverse sqrt
- *      4: abs diag inverse sqrt
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -2078,7 +2072,7 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
 
    for (i = 0; i < nrows; i++)
    {
-      d_i = 0.0;
+      d_i = (type < 10) ? 0.0 : d[i];
       for (j = A_i[i]; j < A_i[i + 1]; j++)
       {
          if (A_j[j] == i)
@@ -2090,6 +2084,14 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
             else if (type == 1)
             {
                d_i = hypre_cabs(A_data[j]);
+            }
+            else if (type == 10)
+            {
+               d_i += A_data[j];
+            }
+            else if (type == 11)
+            {
+               d_i += hypre_cabs(A_data[j]);
             }
             else
             {
@@ -2121,18 +2123,25 @@ hypre_CSRMatrixExtractDiagonalHost( hypre_CSRMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixExtractDiagonal
+ * Extracts values from the diagonal of a CSR matrix based on the specified type.
  *
- * type 0: diag
- *      1: abs diag
- *      2: diag inverse
- *      3: diag inverse sqrt
+ * Parameters:
+ *   A    - Input CSR matrix.
+ *   d    - Array to store the extracted or computed values.
+ *   type - Specifies the operation to perform on the diagonal coefficients:
+ *     0: Extract the diagonal coefficients.
+ *     1: Extract the absolute values of the diagonal coefs..
+ *     2: Compute the inverse of the diagonal coefs. (1 / diag).
+ *     3: Compute the inverse square root of the diagonal coefs. (1 / sqrt(diag)).
+ *    10: Extract diagonal coefs. and adds them to pre-existing values in d
+ *    11: Extract the absolute values of diagonal coefs. and adds them to
+ *        pre-existing values in d.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
-                                HYPRE_Complex   *d,
-                                HYPRE_Int        type)
+hypre_CSRMatrixExtractDiagonal(hypre_CSRMatrix *A,
+                               HYPRE_Complex   *d,
+                               HYPRE_Int        type)
 {
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1( hypre_CSRMatrixMemoryLocation(A) );
@@ -2151,8 +2160,6 @@ hypre_CSRMatrixExtractDiagonal( hypre_CSRMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CSRMatrixScale
- *
  * Scales CSR matrix: A = scalar * A.
  *--------------------------------------------------------------------------*/
 
@@ -2174,6 +2181,9 @@ hypre_CSRMatrixScale( hypre_CSRMatrix *A,
    else
 #endif
    {
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel
+#endif
       for (i = 0; i < k; i++)
       {
          data[i] *= scalar;
@@ -2351,6 +2361,9 @@ hypre_CSRMatrixSetConstantValues( hypre_CSRMatrix *A,
    else
 #endif
    {
+#ifdef HYPRE_USING_OPENMP
+      #pragma omp parallel
+#endif
       for (i = 0; i < nnz; i++)
       {
          hypre_CSRMatrixData(A)[i] = value;

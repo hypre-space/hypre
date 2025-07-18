@@ -3513,4 +3513,3 @@ struct hypre_cub_CachingDeviceAllocator
 #endif
 
 #endif
-

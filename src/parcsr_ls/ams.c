@@ -3345,7 +3345,7 @@ hypre_AMSSetup(void *solver,
          {
             ams_data -> A_G = hypre_ParCSRMatrixRAPKT(ams_data -> G,
                                                       ams_data -> A,
-                                                      ams_data -> G, 1);
+                                                      ams_data -> G, 1, 1);
          }
          else
 #endif
@@ -3430,7 +3430,7 @@ hypre_AMSSetup(void *solver,
 #if defined(HYPRE_USING_GPU)
       if (exec == HYPRE_EXEC_DEVICE)
       {
-         ams_data -> A_Pix = hypre_ParCSRMatrixRAPKT(ams_data -> Pix, ams_data -> A, ams_data -> Pix, 1);
+         ams_data -> A_Pix = hypre_ParCSRMatrixRAPKT(ams_data -> Pix, ams_data -> A, ams_data -> Pix, 1, 1);
       }
       else
 #endif
@@ -3461,7 +3461,7 @@ hypre_AMSSetup(void *solver,
          {
             ams_data -> A_Piy = hypre_ParCSRMatrixRAPKT(ams_data -> Piy,
                                                         ams_data -> A,
-                                                        ams_data -> Piy, 1);
+                                                        ams_data -> Piy, 1, 1);
          }
          else
 #endif
@@ -3493,7 +3493,7 @@ hypre_AMSSetup(void *solver,
          {
             ams_data -> A_Piz = hypre_ParCSRMatrixRAPKT(ams_data -> Piz,
                                                         ams_data -> A,
-                                                        ams_data -> Piz, 1);
+                                                        ams_data -> Piz, 1, 1);
          }
          else
 #endif
@@ -3694,7 +3694,7 @@ hypre_AMSSetup(void *solver,
 #if defined(HYPRE_USING_GPU)
                if (exec == HYPRE_EXEC_DEVICE)
                {
-                  ams_data -> A_Pi = hypre_ParCSRMatrixRAPKT(ams_data -> Pi, ApGGt, ams_data -> Pi, 1);
+                  ams_data -> A_Pi = hypre_ParCSRMatrixRAPKT(ams_data -> Pi, ApGGt, ams_data -> Pi, 1, 1);
                }
                else
 #endif
@@ -3711,7 +3711,7 @@ hypre_AMSSetup(void *solver,
 #if defined(HYPRE_USING_GPU)
             if (exec == HYPRE_EXEC_DEVICE)
             {
-               ams_data -> A_Pi = hypre_ParCSRMatrixRAPKT(ams_data -> Pi, ams_data -> A, ams_data -> Pi, 1);
+               ams_data -> A_Pi = hypre_ParCSRMatrixRAPKT(ams_data -> Pi, ams_data -> A, ams_data -> Pi, 1, 1);
             }
             else
 #endif
