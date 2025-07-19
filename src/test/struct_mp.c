@@ -124,7 +124,6 @@ main( hypre_int argc,
    HYPRE_Int           relax;
    double              jacobi_weight;
    HYPRE_Int           usr_jacobi_weight;
-   HYPRE_Int           jump;
    HYPRE_Int           rep, reps;
 
    HYPRE_Int         **iupper;
@@ -193,7 +192,6 @@ main( hypre_int argc,
    relax = 1;
    jacobi_weight = 1.0;
    usr_jacobi_weight = 0;
-   jump  = 0;
    reps = 1;
 
    nx = 10;
@@ -374,11 +372,6 @@ main( hypre_int argc,
          arg_index++;
          skip = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-jump") == 0 )
-      {
-         arg_index++;
-         jump = atoi(argv[arg_index++]);
-      }
       else if ( strcmp(argv[arg_index], "-solver_type") == 0 )
       {
          arg_index++;
@@ -513,7 +506,6 @@ main( hypre_int argc,
       hypre_printf_dbl("  -w <jacobi weight>  : jacobi weight\n");
       hypre_printf_dbl("  -skip <s>           : skip levels in PFMG (0 or 1)\n");
       hypre_printf_dbl("  -sym <s>            : symmetric storage (1) or not (0)\n");
-      hypre_printf_dbl("  -jump <num>         : num levels to jump in SparseMSG\n");
       hypre_printf_dbl("  -solver_type <ID>   : solver type for Hybrid\n");
       hypre_printf_dbl("                        1 - PCG (default)\n");
       hypre_printf_dbl("                        2 - GMRES\n");
@@ -590,7 +582,6 @@ main( hypre_int argc,
       hypre_printf_dbl("  sym             = %d\n", sym);
       hypre_printf_dbl("  rap             = %d\n", rap);
       hypre_printf_dbl("  relax           = %d\n", relax);
-      hypre_printf_dbl("  jump            = %d\n", jump);
       hypre_printf_dbl("  solver ID       = %d\n", solver_id);
       /* hypre_printf_dbl("  Device level    = %d\n", device_level); */
    }
@@ -606,7 +597,6 @@ main( hypre_int argc,
       hypre_printf_dbl("  sym             = %d\n", sym);
       hypre_printf_dbl("  rap             = %d\n", rap);
       hypre_printf_dbl("  relax           = %d\n", relax);
-      hypre_printf_dbl("  jump            = %d\n", jump);
       hypre_printf_dbl("  solver ID       = %d\n", solver_id);
       hypre_printf_dbl("  the grid is read from  file \n");
 

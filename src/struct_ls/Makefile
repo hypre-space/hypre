@@ -23,8 +23,7 @@ HEADERS =\
  _hypre_struct_ls.h\
  pfmg.h\
  red_black_gs.h\
- smg.h\
- sparse_msg.h
+ smg.h
 
 FILES =\
 # HYPRE_struct_ls_mp.c    # Add this later
@@ -50,12 +49,7 @@ CUFILES =\
  smg.c\
  smg_axpy.c\
  smg_residual.c\
- smg_setup_interp.c\
- sparse_msg2_setup_rap.c\
- sparse_msg3_setup_rap.c\
- sparse_msg_filter.c\
- sparse_msg_interp.c\
- sparse_msg_restrict.c
+ smg_setup_interp.c
 
 #######################
 # Multiprecision files
@@ -73,7 +67,6 @@ MuP_FILES = \
  F90_HYPRE_struct_pcg.c\
  F90_HYPRE_struct_pfmg.c\
  F90_HYPRE_struct_smg.c\
- F90_HYPRE_struct_sparse_msg.c\
  hybrid.c\
  jacobi.c\
  pcg_struct.c\
@@ -87,10 +80,6 @@ MuP_FILES = \
  smg_setup_rap.c\
  smg_setup_restrict.c\
  smg_solve.c\
- sparse_msg.c\
- sparse_msg_setup.c\
- sparse_msg_setup_rap.c\
- sparse_msg_solve.c\
  HYPRE_struct_int.c\
  HYPRE_struct_pcg.c\
  HYPRE_struct_bicgstab.c\
@@ -101,8 +90,7 @@ MuP_FILES = \
  HYPRE_struct_jacobi.c\
  HYPRE_struct_lgmres.c\
  HYPRE_struct_pfmg.c\
- HYPRE_struct_smg.c\
- HYPRE_struct_sparse_msg.c
+ HYPRE_struct_smg.c
 
 ifeq (${MP_BUILD}, 1) 
    COBJS = ${FILES:.c=.o} ${MuP_FILES:.c=.o}
