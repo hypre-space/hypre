@@ -16,6 +16,7 @@ DIRS="\
  krylov\
  sstruct_ls\
  sstruct_mv\
+ struct_mv\
 "
 # blas
 # distributed_ls/Euclid
@@ -32,7 +33,6 @@ DIRS="\
 # seq_block_mv
 # seq_mv
 # struct_ls
-# struct_mv
 # utilities
 
 # RDF: May need to add '--enable-complex --with-timing' options, but this caused

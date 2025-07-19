@@ -27,7 +27,7 @@ HEADERS =\
  sparse_msg.h
 
 FILES =\
- HYPRE_struct_ls_mp.c
+# HYPRE_struct_ls_mp.c    # Add this later
 
 CUFILES =\
  cyclic_reduction.c\

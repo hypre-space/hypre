@@ -11,7 +11,7 @@
 #include "HYPRE_utilities.h"
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "struct_mv_mup_func.h"
+#include "_hypre_struct_mv_mup_def.h"
 #endif
 
 #ifdef __cplusplus
@@ -464,6 +464,8 @@ HYPRE_Int HYPRE_StructVectorAddToBoxValues(HYPRE_StructVector  vector,
                                            HYPRE_Int          *iupper,
                                            HYPRE_Complex      *values);
 
+HYPRE_Int HYPRE_StructVectorScaleValues ( HYPRE_StructVector vector, HYPRE_Complex factor );
+
 /**
  * Set vector coefficients a box at a time.  The \e values array is logically
  * box shaped with value-box extents \e vilower and \e viupper that must
@@ -554,6 +556,8 @@ typedef struct hypre_CommPkg_struct *HYPRE_CommPkg;
 HYPRE_Int HYPRE_StructVectorSetNumGhost(HYPRE_StructVector  vector,
                                         HYPRE_Int          *num_ghost);
 
+HYPRE_Int HYPRE_StructVectorCopy ( HYPRE_StructVector x, HYPRE_StructVector y );
+
 HYPRE_Int HYPRE_StructVectorSetConstantValues(HYPRE_StructVector vector,
                                               HYPRE_Complex      values);
 
@@ -577,6 +581,18 @@ HYPRE_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_MemoryLocation dat
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef HYPRE_MIXED_PRECISION
+/* The following is for user compiles and the order is important.  The first
+ * header ensures that we do not change prototype names in user files or in the
+ * second header file.  The second header contains all the prototypes needed by
+ * users for mixed precision. */
+#ifndef hypre_MP_BUILD
+#include "_hypre_struct_mv_mup_undef.h"
+#include "HYPRE_struct_mv_mup.h"
+#include "HYPRE_struct_mv_mp.h"
+#endif
 #endif
 
 #endif

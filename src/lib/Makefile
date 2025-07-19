@@ -79,8 +79,15 @@ SSTRUCTMVFILES     += ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.obj_def
 STRUCTLSFILES       = ${HYPRE_SRC_TOP_DIR}/struct_ls/*.o ${HYPRE_SRC_TOP_DIR}/struct_ls/*.obj
 STRUCTLSFILES      += ${HYPRE_SRC_TOP_DIR}/struct_ls/MuP_obj.dir/struct_ls_*/*.o ${HYPRE_SRC_TOP_DIR}/struct_ls/MuP_obj.dir/struct_ls_*/*.obj
 
-STRUCTMVFILES       = ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o ${HYPRE_SRC_TOP_DIR}/struct_mv/*.obj
-STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/MuP_obj.dir/struct_mv_*/*.o ${HYPRE_SRC_TOP_DIR}/struct_mv/MuP_obj.dir/struct_mv_*/*.obj
+STRUCTMVFILES       = ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o
+STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o_flt
+STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o_dbl
+STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o_ldbl
+STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o_def
+STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/*.obj_flt
+STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/*.obj_dbl
+STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/*.obj_ldbl
+STRUCTMVFILES      += ${HYPRE_SRC_TOP_DIR}/struct_mv/*.obj_def
 
 UTILITIESFILES      = ${HYPRE_SRC_TOP_DIR}/utilities/*.o ${HYPRE_SRC_TOP_DIR}/utilities/*.obj
 UTILITIESFILES     += ${HYPRE_SRC_TOP_DIR}/utilities/MuP_obj.dir/utilities_*/*.o ${HYPRE_SRC_TOP_DIR}/utilities/MuP_obj.dir/utilities_*/*.obj
