@@ -8,6 +8,7 @@ DIRS="\
  krylov\
  sstruct_ls\
  sstruct_mv\
+ struct_ls\
  struct_mv\
 "
 # blas                     - no external header
@@ -24,7 +25,6 @@ DIRS="\
 # parcsr_mv
 # seq_block_mv             - no external header
 # seq_mv                   - rename seq_mv.h to _hypre_seq_mv.h
-# struct_ls
 # utilities
 
 for i in $DIRS
