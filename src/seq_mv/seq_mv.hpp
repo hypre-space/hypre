@@ -8,7 +8,7 @@
 #define SEQ_MV_HPP
 
 #ifdef HYPRE_MIXED_PRECISION
-#include "seq_mv_mup_func.h"
+#include "_hypre_seq_mv_mup_def.h"
 #endif
 
 #ifdef __cplusplus
