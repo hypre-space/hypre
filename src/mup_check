@@ -5,10 +5,10 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 ## Should be run from src directory
-# Loops over directories with multiprecision files and checks for changes in 
+# Loops over directories with multiprecision files and checks for changes in
 # saved multiprecision function objects.
-# NOTE: It must be run on symbols generated from the 
-# non-multiprecision build of hypre.
+#
+# NOTE: Must be run on non-multiprecision build of hypre.
 
 scriptpath=$PWD
 
@@ -17,6 +17,7 @@ DIRS="\
  krylov\
  parcsr_ls\
  parcsr_mv\
+ seq_mv\
  sstruct_ls\
  sstruct_mv\
  struct_ls\
@@ -32,7 +33,6 @@ DIRS="\
 # multivector
 # parcsr_block_mv
 # seq_block_mv
-# seq_mv
 # utilities
 
 # RDF: May need to add '--enable-complex --with-timing' options, but this caused

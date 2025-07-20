@@ -4,11 +4,15 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+## Should be run from src directory
+# Loops over directories with multiprecision files and generates code.
+
 DIRS="\
  IJ_mv\
  krylov\
  parcsr_ls\
  parcsr_mv\
+ seq_mv\
  sstruct_ls\
  sstruct_mv\
  struct_ls\
@@ -24,7 +28,6 @@ DIRS="\
 # multivector              - no external header, no internal header
 # parcsr_block_mv          - no external header
 # seq_block_mv             - no external header
-# seq_mv                   - rename seq_mv.h to _hypre_seq_mv.h
 # utilities
 
 for i in $DIRS

@@ -58,7 +58,6 @@ hypre_CSRMatrixSplit
 hypre_CSRMatrixSumElts
 hypre_CSRMatrixTaggedFnorm
 hypre_CSRMatrixTaggedFnormHost
-hypre_CSRMatrixToParCSRMatrix
 hypre_CSRMatrixTranspose
 hypre_CSRMatrixTransposeHost
 hypre_CSRMatrixTruncateDiag
@@ -97,9 +96,6 @@ hypre_SeqVectorCopy
 hypre_SeqVectorCopyTags
 hypre_SeqVectorCreate
 hypre_SeqVectorDestroy
-hypre_SeqVectorElmdivpy
-hypre_SeqVectorElmdivpyHost
-hypre_SeqVectorElmdivpyMarked
 hypre_SeqVectorInitialize
 hypre_SeqVectorInitializeShell
 hypre_SeqVectorInitialize_v2

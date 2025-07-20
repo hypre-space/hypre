@@ -100,7 +100,6 @@
 #undef hypre_CSRMatrixSumElts
 #undef hypre_CSRMatrixTaggedFnorm
 #undef hypre_CSRMatrixTaggedFnormHost
-#undef hypre_CSRMatrixToParCSRMatrix
 #undef hypre_CSRMatrixTranspose
 #undef hypre_CSRMatrixTransposeHost
 #undef hypre_CSRMatrixTruncateDiag
@@ -139,9 +138,6 @@
 #undef hypre_SeqVectorCopyTags
 #undef hypre_SeqVectorCreate
 #undef hypre_SeqVectorDestroy
-#undef hypre_SeqVectorElmdivpy
-#undef hypre_SeqVectorElmdivpyHost
-#undef hypre_SeqVectorElmdivpyMarked
 #undef hypre_SeqVectorInitialize
 #undef hypre_SeqVectorInitializeShell
 #undef hypre_SeqVectorInitialize_v2
