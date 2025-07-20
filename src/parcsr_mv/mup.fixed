@@ -14,6 +14,7 @@ hypre_CSRBooleanMatrixPrint
 hypre_CSRBooleanMatrixRead
 hypre_CSRBooleanMatrixSetDataOwner
 hypre_CSRBooleanMatrixToParCSRBooleanMatrix
+hypre_CSRMatrixToParCSRMatrix
 hypre_ExchangeExternalRowsInit
 hypre_ExchangeExternalRowsWait
 hypre_FillResponseIJDetermineSendProcs
@@ -175,8 +176,6 @@ hypre_ParVectorCopy
 hypre_ParVectorCreate
 hypre_ParVectorCreateAssumedPartition
 hypre_ParVectorDestroy
-hypre_ParVectorElmdivpy
-hypre_ParVectorElmdivpyMarked
 hypre_ParVectorGetValues
 hypre_ParVectorGetValues2
 hypre_ParVectorGetValuesHost

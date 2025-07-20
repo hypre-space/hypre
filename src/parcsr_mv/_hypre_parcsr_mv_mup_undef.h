@@ -68,6 +68,7 @@
 #undef hypre_CSRBooleanMatrixRead
 #undef hypre_CSRBooleanMatrixSetDataOwner
 #undef hypre_CSRBooleanMatrixToParCSRBooleanMatrix
+#undef hypre_CSRMatrixToParCSRMatrix
 #undef hypre_ExchangeExternalRowsInit
 #undef hypre_ExchangeExternalRowsWait
 #undef hypre_FillResponseIJDetermineSendProcs
@@ -229,8 +230,6 @@
 #undef hypre_ParVectorCreate
 #undef hypre_ParVectorCreateAssumedPartition
 #undef hypre_ParVectorDestroy
-#undef hypre_ParVectorElmdivpy
-#undef hypre_ParVectorElmdivpyMarked
 #undef hypre_ParVectorGetValues
 #undef hypre_ParVectorGetValues2
 #undef hypre_ParVectorGetValuesHost

@@ -132,6 +132,13 @@ hypre_CSRBooleanMatrixToParCSRBooleanMatrix_dbl( MPI_Comm comm, hypre_CSRBoolean
 hypre_ParCSRBooleanMatrix *
 hypre_CSRBooleanMatrixToParCSRBooleanMatrix_long_dbl( MPI_Comm comm, hypre_CSRBooleanMatrix *A, HYPRE_BigInt *row_starts, HYPRE_BigInt *col_starts );
 
+hypre_ParCSRMatrix *
+hypre_CSRMatrixToParCSRMatrix_flt( MPI_Comm comm, hypre_CSRMatrix *A, HYPRE_BigInt *row_starts, HYPRE_BigInt *col_starts );
+hypre_ParCSRMatrix *
+hypre_CSRMatrixToParCSRMatrix_dbl( MPI_Comm comm, hypre_CSRMatrix *A, HYPRE_BigInt *row_starts, HYPRE_BigInt *col_starts );
+hypre_ParCSRMatrix *
+hypre_CSRMatrixToParCSRMatrix_long_dbl( MPI_Comm comm, hypre_CSRMatrix *A, HYPRE_BigInt *row_starts, HYPRE_BigInt *col_starts );
+
 HYPRE_Int
 hypre_ExchangeExternalRowsInit_flt( hypre_CSRMatrix *B_ext, hypre_ParCSRCommPkg *comm_pkg_A, void **request_ptr );
 HYPRE_Int
