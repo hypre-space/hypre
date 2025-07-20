@@ -14,6 +14,8 @@ scriptpath=$PWD
 
 DIRS="\
  krylov\
+ parcsr_ls\
+ parcsr_mv\
  sstruct_ls\
  sstruct_mv\
  struct_ls\
@@ -29,8 +31,6 @@ DIRS="\
 # matrix_matrix
 # multivector
 # parcsr_block_mv
-# parcsr_ls
-# parcsr_mv
 # seq_block_mv
 # seq_mv
 # utilities

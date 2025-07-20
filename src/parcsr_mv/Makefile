@@ -27,39 +27,9 @@ HEADERS =\
  par_chord_matrix.h\
  par_csr_communication.h\
  par_csr_matrix.h\
- par_vector.h\
- protos_mp.h
+ par_vector.h
 
 FILES =\
- parcsr_mv_mp.c\
- HYPRE_parcsr_mv_mp.c
-
-CUFILES =\
- par_csr_fffc_device.c\
- par_csr_filter_device.c\
- par_csr_matop_device.c\
- par_csr_matmat_device.c\
- par_csr_matvec_device.c\
- par_csr_triplemat_device.c\
- par_vector_device.c
-
-EXTRA_FILES =\
- parchord_to_parcsr.c
-
-DRIVER_FILES =\
- driver_aat.c\
- driver_boolaat.c\
- driver_boolmatmul.c\
- driver.c\
- driver_matmul.c\
- driver_mat_multivec.c\
- driver_matvec.c\
- driver_multivec.c
-
-#######################
-# Multiprecision files
-#######################
-MuP_FILES = \
  communicationT.c\
  F90_HYPRE_parcsr_matrix.c\
  F90_HYPRE_parcsr_vector.c\
@@ -87,16 +57,58 @@ MuP_FILES = \
  par_vector.c\
  par_vector_batched.c
 
-ifeq (${MP_BUILD}, 1) 
-   COBJS = ${FILES:.c=.o} ${MuP_FILES:.c=.o}
-   CUOBJS = ${CUFILES:.c=.obj}
-   MuP_COBJS = ${MuP_FILES:.c=.o}
-else
-   COBJS = ${FILES:.c=.o} ${MuP_FILES:.c=.o}
-   CUOBJS = ${CUFILES:.c=.obj}
-endif
+CUFILES =\
+ par_csr_fffc_device.c\
+ par_csr_filter_device.c\
+ par_csr_matop_device.c\
+ par_csr_matmat_device.c\
+ par_csr_matvec_device.c\
+ par_csr_triplemat_device.c\
+ par_vector_device.c
+
+EXTRA_FILES =\
+ parchord_to_parcsr.c
+
+DRIVER_FILES =\
+ driver_aat.c\
+ driver_boolaat.c\
+ driver_boolmatmul.c\
+ driver.c\
+ driver_matmul.c\
+ driver_mat_multivec.c\
+ driver_matvec.c\
+ driver_multivec.c
+
+# Mixed precision files
+MP_FILES = \
+ mup_fixed.c\
+ mup_functions.c\
+ mup_pre.c\
+ parcsr_mv_mp.c\
+ HYPRE_parcsr_mv_mp.c
+
+COBJS = ${FILES:.c=.o}
+CUOBJS = ${CUFILES:.c=.obj}
+OBJS = ${COBJS} ${CUOBJS}
 
 DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
+
+ifeq (${MP_BUILD}, 1) 
+
+COBJS_single      = ${FILES:.c=.o_flt}
+COBJS_double      = ${FILES:.c=.o_dbl}
+COBJS_longdouble  = ${FILES:.c=.o_ldbl}
+COBJS_default     = ${FILES:.c=.o_def}
+CUOBJS_single     = ${CUFILES:.c=.obj_flt}
+CUOBJS_double     = ${CUFILES:.c=.obj_dbl}
+CUOBJS_longdouble = ${CUFILES:.c=.obj_ldbl}
+CUOBJS_default    = ${CUFILES:.c=.obj_def}
+MP_COBJS          = ${MP_FILES:.c=.o}
+
+OBJS = ${COBJS_single} ${COBJS_double} ${COBJS_longdouble} ${COBJS_default} ${MP_COBJS}
+OBJS += ${CUOBJS_single} ${CUOBJS_double} ${CUOBJS_longdouble} ${CUOBJS_default}
+
+endif
 
 SONAME = libHYPRE_parcsr_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
@@ -106,11 +118,7 @@ SONAME = libHYPRE_parcsr_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 all: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/_hypre_parcsr_mv.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/parcsr_mv_mup_func.h $(HYPRE_BUILD_DIR)/include
-#	cp -fR $(srcdir)/protos_mp.h $(HYPRE_BUILD_DIR)/include
-#	cp -fR $(srcdir)/HYPRE_parcsr_mv_mp.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(srcdir)/hypre_parcsr_mv_mup.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 driver: driver.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
@@ -126,7 +134,7 @@ driver_matmul: driver_matmul.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	${CC} -o driver_matmul driver_matmul.o ${LFLAGS}
 
 driver_boolmatmul: driver_boolmatmul.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
-	@echo  "Linking" $@ "... "s
+	@echo  "Linking" $@ "... "
 	${CC} -o driver_boolmatmul driver_boolmatmul.o ${LFLAGS}
 
 driver_aat: driver_aat.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
@@ -139,68 +147,22 @@ driver_boolaat: driver_boolaat.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 
 install: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/_hypre_parcsr_mv.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/parcsr_mv_mup_func.h $(HYPRE_INC_INSTALL)
-#	cp -fR $(srcdir)/protos_mp.h $(HYPRE_INC_INSTALL)
-#	cp -fR $(srcdir)/HYPRE_parcsr_mv_mp.h $(HYPRE_INC_INSTALL)
-	cp -fR $(srcdir)/hypre_parcsr_mv_mup.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
-clean: clean_mup
+clean:
 	rm -f *.o *.obj libHYPRE*
+	rm -f *.o_flt *.o_dbl *.o_ldbl *.o_def
+	rm -f *.obj_flt *.obj_dbl *.obj_ldbl *.obj_def
 	rm -f driver driver_matvec driver_matmul
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 
-ifeq (${MP_BUILD}, 1) 
-clean_mup:
-	rm -rf ${MuP_OBJDIR}	
-else
-clean_mup:
-endif
-
 ##################################################################
-# Build Rules
+# Rules
 ##################################################################
 
-ifeq (${MP_BUILD}, 1) 
-
-MuP_OBJDIR = MuP_obj.dir
-MuP_OBJDIR_single = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_flt}
-MuP_OBJDIR_double = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_dbl}
-MuP_OBJDIR_longdouble = ${MuP_OBJDIR}/${join ${shell basename ${CURDIR}},_ldbl}
-#
-ADD_OBJS_single = ${addprefix ${MuP_OBJDIR_single}/, ${notdir ${MuP_COBJS} ${CUOBJS}}}
-${ADD_OBJS_single}: CFLAGS += -DMP_BUILD_SINGLE=1
-${MuP_OBJDIR_single}/%.o ${MuP_OBJDIR_single}/%.obj: %.c
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-ADD_OBJS_double = ${addprefix ${MuP_OBJDIR_double}/, ${notdir ${MuP_COBJS} ${CUOBJS}}}
-${ADD_OBJS_double}: CFLAGS += -DMP_BUILD_DOUBLE=1
-${MuP_OBJDIR_double}/%.o ${MuP_OBJDIR_double}/%.obj: %.c
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-ADD_OBJS_longdouble = ${addprefix ${MuP_OBJDIR_longdouble}/, ${notdir ${MuP_COBJS} ${CUOBJS}}}
-${ADD_OBJS_longdouble}: CFLAGS += -DMP_BUILD_LONGDOUBLE=1
-${MuP_OBJDIR_longdouble}/%.o ${MuP_OBJDIR_longdouble}/%.obj: %.c
-	@echo  "processing C object $@ ..."
-	@mkdir -p ${@D}
-	${CC} ${CFLAGS} -c -o $@ $<
-#
-${COBJS}: CFLAGS += -DMP_BUILD_DEFAULT=1
-${CUOBJS}: CFLAGS += -DMP_BUILD_DEFAULT=1
-
-OBJS = ${COBJS} ${CUOBJS} ${ADD_OBJS_single} ${ADD_OBJS_double} ${ADD_OBJS_longdouble}
-
-else
-OBJS = ${COBJS} ${CUOBJS}
-endif
-#
 libHYPRE_parcsr_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}

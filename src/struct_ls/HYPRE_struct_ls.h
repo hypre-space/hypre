@@ -1146,6 +1146,7 @@ HYPRE_StructSetupMatvec(HYPRE_MatvecFunctions *mv);
 #ifndef hypre_MP_BUILD
 #include "_hypre_struct_ls_mup_undef.h"
 #include "HYPRE_struct_ls_mup.h"
+#include "HYPRE_struct_ls_mp.h"
 #endif
 #endif
 

@@ -35,33 +35,41 @@ awk -v filename="$PFILE" -v outc="$OUTC" -v outh="$OUTH" 'BEGIN {
       s_str = ""
       for(i=3; i<=NF; i++)
       {
-         match($i, /[a-zA-Z0-9_]+[[:blank:]]*$/)
-         argtype = substr($i, 0, RSTART-1)
-         argname = substr($i, RSTART, RLENGTH)
-         sub(/^[[:blank:]]*/, "", argtype); sub(/[[:blank:]]*$/, "", argtype)
-         sub(/^[[:blank:]]*/, "", argname); sub(/[[:blank:]]*$/, "", argname)
-         p_str = sprintf("%s %s %s", p_str, argtype, argname)
-         s_str = sprintf("%s %s", s_str, argname)
+         argall = sprintf("%s", $i)
+         # Find the last legal C token in the argument (should not start with numbers)
+         # This helps to address arguments like const double foo[3]
+         laststart  = 1;
+         lastlength = 0;
+         while ( match(substr($i, laststart + lastlength), /[a-zA-Z_][a-zA-Z0-9_]*/) )
+         {
+            laststart  = laststart + lastlength + RSTART - 1
+            lastlength = RLENGTH
+         }
+         argvar = substr($i, laststart, lastlength)
+         sub(/^[[:blank:]]*/, "", argall); sub(/[[:blank:]]*$/, "", argall)
+         sub(/^[[:blank:]]*/, "", argvar); sub(/[[:blank:]]*$/, "", argvar)
+         p_str = sprintf("%s %s", p_str, argall)
+         s_str = sprintf("%s %s", s_str, argvar)
          if(i<NF)
          {
             p_str = sprintf("%s,", p_str)
             s_str = sprintf("%s,", s_str)
          }
       }
-      p_str=sprintf("%s ",p_str)
-      s_str=sprintf("%s ",s_str)
+      p_str=sprintf("%s ", p_str)
+      s_str=sprintf("%s ", s_str)
 
-      arg_flt      = sprintf("%s",p_str)
-      arg_dbl      = sprintf("%s",p_str)
-      arg_long_dbl = sprintf("%s",p_str)
-      arg_mup      = sprintf("%s",p_str)
+      arg_flt      = sprintf("%s", p_str)
+      arg_dbl      = sprintf("%s", p_str)
+      arg_long_dbl = sprintf("%s", p_str)
+      arg_mup      = sprintf("%s", p_str)
 
       gsub(/(HYPRE_Real|HYPRE_Complex)/, "hypre_float", arg_flt)
       gsub(/(HYPRE_Real|HYPRE_Complex)/, "hypre_double", arg_dbl)
       gsub(/(HYPRE_Real|HYPRE_Complex)/, "hypre_long_double", arg_long_dbl)
 
       # First replace HYPRE_Real* and HYPRE_Complex* with void*
-      gsub(/(HYPRE_Real|HYPRE_Complex)[[:blank:]]*[*]/, "void *", arg_mup)
+      gsub(/(HYPRE_Real|HYPRE_Complex)[[:blank:]]*[*]+/, "void *", arg_mup)
       gsub(/(HYPRE_Real|HYPRE_Complex)/, "hypre_long_double", arg_mup)
 
       print fret"\n"fdef"_flt("arg_flt");"           >> outh
