@@ -5,6 +5,7 @@
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
 DIRS="\
+ IJ_mv\
  krylov\
  parcsr_ls\
  parcsr_mv\
@@ -18,7 +19,6 @@ DIRS="\
 # distributed_ls/ParaSails - no external header, no internal header
 # distributed_ls/pilut     - no external header, no internal header
 # distributed_matrix       - no external header, no internal header
-# IJ_mv
 # lapack                   - no external header
 # matrix_matrix            - no external header, no internal header
 # multivector              - no external header, no internal header

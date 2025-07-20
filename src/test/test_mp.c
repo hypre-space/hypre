@@ -25,13 +25,9 @@
 #include "HYPRE_parcsr_mv.h"
 
 #include "HYPRE_IJ_mv.h"
-#include "hypre_IJ_mv_mup.h"
 #include "HYPRE_parcsr_ls.h"
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
-//#include "hypre_krylov_mup.h"
-//#include "HYPRE_krylov_mp.h"
-//#include "hypre_utilities_mp.h"
 
 #include <time.h>
 

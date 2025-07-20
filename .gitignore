@@ -4,6 +4,10 @@
 *.o_dbl
 *.o_ldbl
 *.o_def
+*.obj_flt
+*.obj_dbl
+*.obj_ldbl
+*.obj_def
 *.a
 *.so
 *.out.*
@@ -56,12 +60,8 @@ src/test/ij_mv
 src/test/ij_mv.exe
 src/test/ij_mm
 src/test/ij_mm.exe
-src/test/maxwell_unscaled
-src/test/maxwell_unscaled.exe
 src/test/sstruct
 src/test/sstruct.exe
-src/test/sstruct_fac
-src/test/sstruct_fac.exe
 src/test/struct
 src/test/struct.exe
 src/test/struct_migrate

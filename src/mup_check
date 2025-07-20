@@ -13,6 +13,7 @@
 scriptpath=$PWD
 
 DIRS="\
+ IJ_mv\
  krylov\
  parcsr_ls\
  parcsr_mv\
@@ -26,7 +27,6 @@ DIRS="\
 # distributed_ls/ParaSails
 # distributed_ls/pilut
 # distributed_matrix
-# IJ_mv
 # lapack
 # matrix_matrix
 # multivector

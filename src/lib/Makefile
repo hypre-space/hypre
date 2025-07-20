@@ -14,8 +14,15 @@ FEMLIFILES = ${HYPRE_FEI_FEMLI_FILES}
 # multiprecision build
 ifeq (${MP_BUILD}, 1) 
 
-IJMVFILES           = ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.obj
-IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/MuP_obj.dir/IJ_mv_*/*.o ${HYPRE_SRC_TOP_DIR}/IJ_mv/MuP_obj.dir/IJ_mv_*/*.obj
+IJMVFILES           = ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o
+IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o_flt
+IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o_dbl
+IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o_ldbl
+IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o_def
+IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.obj_flt
+IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.obj_dbl
+IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.obj_ldbl
+IJMVFILES          += ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.obj_def
 
 EUCLIDFILES         = ${HYPRE_EUCLID_FILES}
 EUCLIDFILES        += ${HYPRE_SRC_TOP_DIR}/distributed_ls/Euclid/MuP_obj.dir/Euclid_*/*.o
